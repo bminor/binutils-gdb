@@ -1,3 +1,8 @@
+2005-01-04  Dmitry Diky  <diwil@spec.ru>
+
+	* config/tc-msp430.c (md_apply_fix3): Fix offset calculation for
+	global label.
+
 2005-01-03  David Mosberger  <davidm@hpl.hp.com>
 
 	* config/tc-ia64.c (md): Add member "loc_directive_seen".

@@ -1,6 +1,6 @@
 /* tc-msp430.c -- Assembler code for the Texas Instruments MSP430
 
-  Copyright (C) 2002, 2003, 2004 Free Software Foundation, Inc.
+  Copyright (C) 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
   Contributed by Dmitry Diky <diwil@mail.ru>
 
   This file is part of GAS, the GNU Assembler.
@@ -1851,7 +1851,19 @@ md_apply_fix3 (fixS * fixp, valueT * valuep, segT seg)
 
       if (fixp->fx_addsy && (s == seg || s == absolute_section))
 	{
-	  value = S_GET_VALUE (fixp->fx_addsy) + *valuep;
+	  /* FIXME: We can appear here only in case if we perform a pc
+	     relative jump to the label which is i) global, ii) locally
+	     defined or this is a jump to an absolute symbol.
+	     If this is an absolute symbol -- everything is OK.
+	     If this is a global label, we've got a symbol value defined
+	     twice:
+               1. S_GET_VALUE (fixp->fx_addsy) will contain a symbol offset
+	          from this section start
+               2. *valuep will contain the real offset from jump insn to the
+	          label
+	     So, the result of S_GET_VALUE (fixp->fx_addsy) + (* valuep);
+	     will be incorrect. Therefore remove s_get_value.  */
+	  value = /* S_GET_VALUE (fixp->fx_addsy) + */ * valuep;
 	  fixp->fx_done = 1;
 	}
       else
