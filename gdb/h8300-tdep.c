@@ -40,8 +40,6 @@
 struct frame_extra_info
 {
   CORE_ADDR from_pc;
-  CORE_ADDR args_pointer;
-  CORE_ADDR locals_pointer;
 };
 
 enum
@@ -55,7 +53,8 @@ enum
 enum gdb_regnum
 {
   E_R0_REGNUM, E_ER0_REGNUM = E_R0_REGNUM, E_ARG0_REGNUM = E_R0_REGNUM,
-  E_R1_REGNUM, E_ER1_REGNUM = E_R1_REGNUM,
+					   E_RET0_REGNUM = E_R0_REGNUM,
+  E_R1_REGNUM, E_ER1_REGNUM = E_R1_REGNUM, E_RET1_REGNUM = E_R1_REGNUM,
   E_R2_REGNUM, E_ER2_REGNUM = E_R2_REGNUM, E_ARGLAST_REGNUM = E_R2_REGNUM,
   E_R3_REGNUM, E_ER3_REGNUM = E_R3_REGNUM,
   E_R4_REGNUM, E_ER4_REGNUM = E_R4_REGNUM,
@@ -443,10 +442,6 @@ h8300_examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
       break;
     }
 
-  /* The args are always reffed based from the stack pointer */
-  get_frame_extra_info (fi)->args_pointer = after_prolog_fp;
-  /* Locals are always reffed based from the fp */
-  get_frame_extra_info (fi)->locals_pointer = after_prolog_fp;
   /* The PC is at a known place */
   get_frame_extra_info (fi)->from_pc =
     read_memory_unsigned_integer (after_prolog_fp + BINWORD, BINWORD);
@@ -540,8 +535,6 @@ h8300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     {
       frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
       get_frame_extra_info (fi)->from_pc = 0;
-      get_frame_extra_info (fi)->args_pointer = 0;	/* Unknown */
-      get_frame_extra_info (fi)->locals_pointer = 0;	/* Unknown */
       
       if (!get_frame_pc (fi))
         {
@@ -550,27 +543,6 @@ h8300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	}
       h8300_frame_init_saved_regs (fi);
     }
-}
-
-static CORE_ADDR
-h8300_frame_locals_address (struct frame_info *fi)
-{
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
-    return (CORE_ADDR) 0;	/* Not sure what else to do... */
-  return get_frame_extra_info (fi)->locals_pointer;
-}
-
-/* Return the address of the argument block for the frame
-   described by FI.  Returns 0 if the address is unknown.  */
-
-static CORE_ADDR
-h8300_frame_args_address (struct frame_info *fi)
-{
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
-    return (CORE_ADDR) 0;	/* Not sure what else to do... */
-  return get_frame_extra_info (fi)->args_pointer;
 }
 
 /* Round N up or down to the nearest multiple of UNIT.
@@ -795,69 +767,105 @@ h8300_pop_frame (void)
    Copy that into VALBUF.  Be sure to account for CPU type.   */
 
 static void
-h8300_extract_return_value (struct type *type, char *regbuf, char *valbuf)
+h8300_extract_return_value (struct type *type, struct regcache *regcache,
+			    void *valbuf)
 {
-  int wordsize = BINWORD;
   int len = TYPE_LENGTH (type);
+  ULONGEST c;
 
   switch (len)
     {
-    case 1:			/* (char) */
-    case 2:			/* (short), (int) */
-      memcpy (valbuf, regbuf + REGISTER_BYTE (0) + (wordsize - len), len);
-      break;
-    case 4:			/* (long), (float) */
-      if (wordsize == 4)
-	{
-	  memcpy (valbuf, regbuf + REGISTER_BYTE (0), 4);
-	}
-      else
-	{
-	  memcpy (valbuf, regbuf + REGISTER_BYTE (0), 2);
-	  memcpy (valbuf + 2, regbuf + REGISTER_BYTE (1), 2);
-	}
-      break;
-    case 8:		/* (double) (doesn't seem to happen, which is good,
-			   because this almost certainly isn't right.  
-			   FIXME: it will happen for h8sx...  */
-      error ("I don't know how a double is returned.");
-      break;
+      case 1:
+      case 2:
+	regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &c);
+	store_unsigned_integer (valbuf, len, c);
+	break;
+      case 4:	/* Needs two registers on plain H8/300 */
+	regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &c);
+	store_unsigned_integer (valbuf, 2, c);
+	regcache_cooked_read_unsigned (regcache, E_RET1_REGNUM, &c);
+	store_unsigned_integer ((void*)((char *)valbuf + 2), 2, c);
+	break;
+      case 8:		/* long long, double and long double are all defined
+			   as 4 byte types so far so this shouldn't happen. */
+	error ("I don't know how a 8 byte value is returned.");
+	break;
     }
 }
+
+static void
+h8300h_extract_return_value (struct type *type, struct regcache *regcache,
+			    void *valbuf)
+{
+  int len = TYPE_LENGTH (type);
+  ULONGEST c;
+
+  switch (len)
+    {
+      case 1:
+      case 2:
+      case 4:
+	regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &c);
+	store_unsigned_integer (valbuf, len, c);
+	break;
+      case 8:		/* long long, double and long double are all defined
+			   as 4 byte types so far so this shouldn't happen. */
+	error ("I don't know how a 8 byte value is returned.");
+	break;
+    }
+}
+
 
 /* Function: store_return_value
    Place the appropriate value in the appropriate registers.
    Primarily used by the RETURN command.  */
 
 static void
-h8300_store_return_value (struct type *type, char *valbuf)
+h8300_store_return_value (struct type *type, struct regcache *regcache,
+			  const void *valbuf)
 {
-  int regval;
-  int wordsize = BINWORD;
   int len = TYPE_LENGTH (type);
+  ULONGEST val;
 
   switch (len)
     {
-    case 1:			/* char */
-    case 2:			/* short, int */
-      regval = extract_unsigned_integer (valbuf, len);
-      write_register (0, regval);
-      break;
-    case 4:			/* long, float */
-      regval = extract_unsigned_integer (valbuf, len);
-      if (wordsize == 4)
-	{
-	  write_register (0, regval);
-	}
-      else
-	{
-	  write_register (0, regval >> 16);
-	  write_register (1, regval & 0xffff);
-	}
-      break;
-    case 8:		/* presumeably double, but doesn't seem to happen */
-      error ("I don't know how to return a double.");
-      break;
+      case 1:
+      case 2:
+	val = extract_unsigned_integer (valbuf, len);
+	regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM, val);
+	break;
+      case 4:			/* long, float */
+	val = extract_unsigned_integer (valbuf, len);
+	regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM,
+					(val >> 16) &0xffff);
+	regcache_cooked_write_unsigned (regcache, E_RET1_REGNUM, val & 0xffff);
+	break;
+      case 8:		/* long long, double and long double are all defined
+			     as 4 byte types so far so this shouldn't happen. */
+	error ("I don't know how to return a 8 byte value.");
+	break;
+    }
+}
+
+static void
+h8300h_store_return_value (struct type *type, struct regcache *regcache,
+			   const void *valbuf)
+{
+  int len = TYPE_LENGTH (type);
+  ULONGEST val;
+
+  switch (len)
+    {
+      case 1:
+      case 2:
+      case 4:			/* long, float */
+	val = extract_unsigned_integer (valbuf, len);
+	regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM, val);
+	break;
+      case 8:		/* long long, double and long double are all defined
+			     as 4 byte types so far so this shouldn't happen. */
+	error ("I don't know how to return a 8 byte value.");
+	break;
     }
 }
 
@@ -1032,26 +1040,12 @@ h8300_register_type (struct gdbarch *gdbarch, int regno)
     }
 }
 
-static void
-h8300_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
-{ 
-  write_register (0, addr);
-}
-
 static CORE_ADDR
-h8300_extract_struct_value_address (char *regbuf)
+h8300_extract_struct_value_address (struct regcache *regcache)
 {
-  return 
-    extract_unsigned_integer (regbuf + h8300_reg_size * E_ARG0_REGNUM,
-			      h8300_reg_size);
-}
-
-static CORE_ADDR
-h8300h_extract_struct_value_address (char *regbuf)
-{
-  return 
-    extract_unsigned_integer (regbuf + h8300h_reg_size * E_ARG0_REGNUM,
-			      h8300h_reg_size);
+  ULONGEST addr;
+  regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &addr);
+  return addr;
 }
 
 const static unsigned char *
@@ -1062,6 +1056,22 @@ h8300_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 
   *lenptr = sizeof (breakpoint);
   return breakpoint;
+}
+
+static CORE_ADDR
+h8300_push_dummy_code (struct gdbarch *gdbarch,
+		       CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc,
+		       struct value **args, int nargs,
+		       struct type *value_type,
+		       CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
+{
+  /* Allocate space sufficient for a breakpoint.  */
+  sp = (sp - 2) & ~1;
+  /* Store the address of that breakpoint */
+  *bp_addr = sp;
+  /* h8300 always starts the call at the callee's entry point.  */
+  *real_pc = funaddr;
+  return sp;
 }
 
 static void
@@ -1075,7 +1085,6 @@ No floating-point info available for this processor.\n");
 static struct gdbarch *
 h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  static LONGEST call_dummy_words[1] = { 0 };
   struct gdbarch_tdep *tdep = NULL;
   struct gdbarch *gdbarch;
 
@@ -1102,6 +1111,8 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_name (gdbarch, h8300_register_name);
       set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
       set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+      set_gdbarch_extract_return_value (gdbarch, h8300_extract_return_value);
+      set_gdbarch_store_return_value (gdbarch, h8300_store_return_value);
       break;
     case bfd_mach_h8300h:
     case bfd_mach_h8300hn:
@@ -1112,6 +1123,8 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_name (gdbarch, h8300_register_name);
       set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+      set_gdbarch_extract_return_value (gdbarch, h8300h_extract_return_value);
+      set_gdbarch_store_return_value (gdbarch, h8300h_store_return_value);
       break;
     case bfd_mach_h8300s:
     case bfd_mach_h8300sn:
@@ -1122,6 +1135,8 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_name (gdbarch, h8300s_register_name);
       set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+      set_gdbarch_extract_return_value (gdbarch, h8300h_extract_return_value);
+      set_gdbarch_store_return_value (gdbarch, h8300h_store_return_value);
       break;
     case bfd_mach_h8300sx:
     case bfd_mach_h8300sxn:
@@ -1132,6 +1147,8 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_name (gdbarch, h8300sx_register_name);
       set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+      set_gdbarch_extract_return_value (gdbarch, h8300h_extract_return_value);
+      set_gdbarch_store_return_value (gdbarch, h8300h_store_return_value);
       break;
     }
 
@@ -1154,6 +1171,8 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /*
    * Frame Info
    */
+  set_gdbarch_skip_prologue (gdbarch, h8300_skip_prologue);
+
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, 
 						h8300_frame_init_saved_regs);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, 
@@ -1162,9 +1181,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, 
 					      h8300_saved_pc_after_call);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, h8300_frame_saved_pc);
-  set_gdbarch_skip_prologue (gdbarch, h8300_skip_prologue);
-  set_gdbarch_frame_args_address (gdbarch, h8300_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, h8300_frame_locals_address);
 
   /* 
    * Miscelany
@@ -1181,26 +1197,11 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch,
 					     frameless_look_for_prologue);
 
-  /*
-   * Call Dummies
-   * 
-   * These values and methods are used when gdb calls a target function.  */
-  set_gdbarch_deprecated_push_return_address (gdbarch, 
-					      h8300_push_return_address);
-  set_gdbarch_deprecated_extract_return_value (gdbarch, 
-					       h8300_extract_return_value);
-  set_gdbarch_deprecated_push_arguments (gdbarch, h8300_push_arguments);
-  set_gdbarch_deprecated_pop_frame (gdbarch, h8300_pop_frame);
-  set_gdbarch_deprecated_store_struct_return (gdbarch, 
-					      h8300_store_struct_return);
-  set_gdbarch_deprecated_store_return_value (gdbarch, 
-					     h8300_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address 
-    (gdbarch, h8300_extract_struct_value_address);
+  set_gdbarch_extract_struct_value_address (gdbarch,
+					    h8300_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
-  set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_words);
-  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, h8300_breakpoint_from_pc);
+  set_gdbarch_push_dummy_code (gdbarch, h8300_push_dummy_code);
 
   set_gdbarch_int_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
@@ -1211,8 +1212,17 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* set_gdbarch_stack_align (gdbarch, SOME_stack_align); */
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
-  /* Should be using push_dummy_call.  */
+  /*
+   * Call Dummies
+   * 
+   * These values and methods are used when gdb calls a target function.  */
+  /* Can all be replaced by push_dummy_call */
+  set_gdbarch_deprecated_push_return_address (gdbarch, 
+					      h8300_push_return_address);
+  set_gdbarch_deprecated_push_arguments (gdbarch, h8300_push_arguments);
+  set_gdbarch_deprecated_pop_frame (gdbarch, h8300_pop_frame);
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
+
 
   return gdbarch;
 }
