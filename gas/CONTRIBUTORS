@@ -45,34 +45,46 @@ The Motorola 88k machine description was contributed by Devon Bowen of
 Buffalo University and Torbjorn Granlund of the Swedish Institute of
 Computer Science.
 
-Mark Eichin wrote the original (incomplete) ELF back end.
-
 Keith Knowles at the Open Software Foundation wrote the original MIPS
 back end (tc-mips.c, tc-mips.h), and contributed Rose format support
 that hasn't been merged in yet.  Ralph Campbell worked with the MIPS
 code to support a.out format.
 
-Support for the Zilog Z8k and Hitachi H8/300 and H8/500 processors
-(tc-z8k, tc-h8300, tc-h8500), and IEEE 695 object file format
+Support for the Zilog Z8k and Hitachi H8/300, H8/500 and SH processors
+(tc-z8k, tc-h8300, tc-h8500, tc-sh), and IEEE 695 object file format
 (obj-ieee), was written by Steve Chamberlain of Cygnus Support.  Steve
-also modified the COFF back end to use BFD for some low-level
-operations, for use with the H8/300 and AMD 29k targets.
+also modified the COFF back end (obj-coffbfd) to use BFD for some
+low-level operations, for use with the Hitachi, 29k and Zilog targets.
 
-John Gilmore worked on the AMD 29000 support.  [doing what?  any major
-work on other parts?]
+John Gilmore built the AMD 29000 support, added .include support, and
+simplified the configuration of which versions accept which
+pseudo-ops.  He updated the 68k machine description so that Motorola's
+opcodes always produced fixed-size instructions (e.g. jsr), while
+synthetic instructions remained shrinkable (jbsr).  John fixed many
+bugs, including true tested cross-compilation support, and one bug in
+relaxation that took a week and required the apocryphal one-bit fix.
 
 Ian Lance Taylor of Cygnus Support merged the Motorola and MIT
 syntaxes for the 68k, completed support for some COFF targets (68k,
-i386 SVR3, and SCO Unix), and made a few other minor patches.
+i386 SVR3, and SCO Unix), wrote the ECOFF support based on Michael
+Meissner's mips-tfile program, wrote the PowerPC and RS/6000 support,
+and made a few other minor patches.
 
-Support for generation of listings was added by Steve Chamberlain.
+Steve Chamberlain made gas able to generate listings.
+
+Support for the HP9000/300 was contributed by Glenn Engel of HP.
+
+Support for ELF format files has been worked on by Mark Eichin of
+Cygnus Support (original, incomplete implementation), Pete Hoogenboom
+at the University of Utah (HPPA mainly), Michael Meissner of the Open
+Software Foundation (i386 mainly), and Ken Raeburn of Cygnus Support
+(sparc, initial 64-bit support).
 
 Several engineers at Cygnus Support have also provided many small bug
 fixes and configuration enhancements.
 
 
-Many others have contributed large or small bugfixes and enhancements,
-including: [review ChangeLog and file comments and sort out
-details...]
-
-Allen Wirfs-Brock, of Instantiations Inc [changed app.c, but how much?]
+Many others have contributed large or small bugfixes and enhancements.  If
+you've contributed significant work and are not mentioned on this list, and
+want to be, let us know.  Some of the history has been lost; we aren't
+intentionally leaving anyone out.
