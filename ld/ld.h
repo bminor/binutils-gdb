@@ -156,9 +156,6 @@ typedef struct {
      files.  */
   bfd_boolean warn_mismatch;
 
-  /* Remove unreferenced sections?  */
-  bfd_boolean gc_sections;
-
   /* Name of shared object whose symbol table should be filtered with
      this shared object.  From the --filter option.  */
   char *filter_shlib;

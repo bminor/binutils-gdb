@@ -4718,8 +4718,18 @@ lang_gc_sections (void)
 	}
     }
 
-  if (command_line.gc_sections)
+  if (link_info.gc_sections)
     bfd_gc_sections (output_bfd, &link_info);
+}
+
+static void
+lang_mark_used_section (void)
+{
+  unsigned int gc_sections = link_info.gc_sections;
+
+  link_info.gc_sections = 0;
+  bfd_gc_sections (output_bfd, &link_info);
+  link_info.gc_sections = gc_sections;
 }
 
 void
@@ -4883,7 +4893,7 @@ lang_process (void)
     lang_check_section_addresses ();
 
   /* Final stuffs.  */
-
+  lang_mark_used_section ();
   ldemul_finish ();
   lang_finish ();
 }

@@ -5,7 +5,7 @@
 #readelf: -Ssrl
 #target: i?86-*-*
 
-There are 16 section headers, starting at offset 0x[0-9a-f]+:
+There are 13 section headers, starting at offset 0x[0-9a-f]+:
 
 Section Headers:
   \[Nr\] Name +Type +Addr +Off +Size +ES Flg Lk Inf Al
@@ -16,15 +16,12 @@ Section Headers:
   \[ 4\] \.rel.dyn +.*
   \[ 5\] \.text +PROGBITS +0+1000 .*
   \[ 6\] \.tbss +NOBITS +[0-9a-f]+ [0-9a-f]+ 000024 00 WAT  0   0  1
-  \[ 7\] \.data.rel.ro +PROGBITS +.*
-  \[ 8\] \.dynamic +DYNAMIC +0+2000 .*
-  \[ 9\] \.got +PROGBITS +0+2080 .*
-  \[10\] \.got.plt +PROGBITS +0+2098 .*
-  \[11\] \.data +.*
-  \[12\] \.bss +.*
-  \[13\] \.shstrtab +.*
-  \[14\] \.symtab +.*
-  \[15\] \.strtab +.*
+  \[ 7\] \.dynamic +DYNAMIC +0+2000 .*
+  \[ 8\] \.got +PROGBITS +0+2080 .*
+  \[ 9\] \.got.plt +PROGBITS +0+2098 .*
+  \[10\] \.shstrtab +.*
+  \[11\] \.symtab +.*
+  \[12\] \.strtab +.*
 Key to Flags:
 .*
 .*
@@ -77,9 +74,9 @@ Symbol table '.dynsym' contains 16 entries:
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +5 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +6 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +7 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +11 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +12 *
+ +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
+ +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
+ +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: [0-9a-f]+ +0 OBJECT  GLOBAL DEFAULT  ABS _DYNAMIC
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sg3
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sg4
@@ -91,7 +88,7 @@ Symbol table '.dynsym' contains 16 entries:
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _edata
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _end
 
-Symbol table '.symtab' contains 36 entries:
+Symbol table '.symtab' contains 33 entries:
  +Num: +Value  Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +1 *
@@ -106,9 +103,6 @@ Symbol table '.symtab' contains 36 entries:
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +10 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +11 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +12 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +13 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +14 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +15 *
  +[0-9]+: 0+00 +0 TLS +LOCAL  DEFAULT +6 bl1
  +[0-9]+: 0+04 +0 TLS +LOCAL  DEFAULT +6 bl2
  +[0-9]+: 0+08 +0 TLS +LOCAL  DEFAULT +6 bl3

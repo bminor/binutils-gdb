@@ -22,8 +22,6 @@ Section Headers:
   \[10\] \.tbss +NOBITS +0+413018 [0-9a-f]+ 0+010 00 WAT  0   0  1
 #...
   \[[0-9a-f]+\] \.got +PROGBITS +0+414000 .*
-  \[[0-9a-f]+\] \.sbss +.*
-  \[[0-9a-f]+\] \.bss +.*
 #...
   \[[0-9a-f]+\] \.shstrtab +.*
   \[[0-9a-f]+\] \.symtab +.*

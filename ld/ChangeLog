@@ -1,3 +1,19 @@
+2005-03-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_finish): Remove
+	unused empty output sections for non-relocatable link.
+
+	* ld.h (args_type): Remove gc_sections.
+
+	* ldlang.c (lang_mark_used_section): New.
+	(lang_gc_sections): Use link_info.gc_sections instead of
+	command_line.gc_sections.
+	* ldmain.c (main): Likewise.
+	* lexsup.c (parse_args): Likewise.
+	* ldlang.c (lang_process): Call lang_mark_used_section.
+
+	* ldmain.c (main): Initialize link_info.gc_sections to FALSE.
+
 2005-03-16  Nick Clifton  <nickc@redhat.com>
 	    Ben Elliston  <bje@au.ibm.com>
 

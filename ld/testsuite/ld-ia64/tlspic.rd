@@ -5,7 +5,7 @@
 #readelf: -WSsrl
 #target: ia64-*-*
 
-There are 21 section headers, starting at offset 0x[0-9a-f]+:
+There are 18 section headers, starting at offset 0x[0-9a-f]+:
 
 Section Headers:
   \[Nr\] Name +Type +Address +Off +Size +ES Flg Lk Inf Al
@@ -22,14 +22,11 @@ Section Headers:
   \[10\] .tdata +PROGBITS +0+11[0-9a-f]+ 0+1[0-9a-f]+ 0+60 00 WAT +0 +0 +4
   \[11\] .tbss +NOBITS +0+11[0-9a-f]+ 0+1[0-9a-f]+ 0+20 00 WAT +0 +0 +1
   \[12\] .dynamic +DYNAMIC +0+11[0-9a-f]+ 0+1[0-9a-f]+ 0+140 10 +WA +3 +0 +8
-  \[13\] .data +.*
-  \[14\] .got +PROGBITS +0+12000 0+2000 0+50 00 WAp +0 +0 +8
-  \[15\] .IA_64.pltoff +.*
-  \[16\] .sbss +.*
-  \[17\] .bss +.*
-  \[18\] .shstrtab +.*
-  \[19\] .symtab +.*
-  \[20\] .strtab +.*
+  \[13\] .got +PROGBITS +0+12000 0+2000 0+50 00 WAp +0 +0 +8
+  \[14\] .IA_64.pltoff +.*
+  \[15\] .shstrtab +.*
+  \[16\] .symtab +.*
+  \[17\] .strtab +.*
 Key to Flags:
 #...
 
@@ -67,9 +64,9 @@ Symbol table '.dynsym' contains 23 entries:
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +9 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +10 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +11 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +13 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +15 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +17 *
+ +[0-9]+: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND *
+ +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +14 *
+ +[0-9]+: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND *
  +[0-9]+: 0+1c +0 TLS +GLOBAL DEFAULT +10 sg8
  +[0-9]+: 0+11[0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
  +[0-9]+: 0+8 +0 TLS +GLOBAL DEFAULT +10 sg3
@@ -85,7 +82,7 @@ Symbol table '.dynsym' contains 23 entries:
  +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
  +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _end
 
-Symbol table '.symtab' contains 60 entries:
+Symbol table '.symtab' contains 57 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +1 *
@@ -105,9 +102,6 @@ Symbol table '.symtab' contains 60 entries:
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +15 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +16 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +17 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +18 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +19 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +20 *
  +[0-9]+: 0+20 +0 TLS +LOCAL +DEFAULT +10 sl1
  +[0-9]+: 0+24 +0 TLS +LOCAL +DEFAULT +10 sl2
  +[0-9]+: 0+28 +0 TLS +LOCAL +DEFAULT +10 sl3

@@ -5,7 +5,7 @@
 #readelf: -WSsrl
 #target: sparc*-*-*
 
-There are 17 section headers, starting at offset 0x[0-9a-f]+:
+There are 15 section headers, starting at offset 0x[0-9a-f]+:
 
 Section Headers:
  +\[Nr\] Name +Type +Addr +Off +Size +ES Flg Lk Inf Al
@@ -21,11 +21,9 @@ Section Headers:
  +\[ 9\] .dynamic +DYNAMIC +0+12060 0+2060 0+98 08 +WA +3 +0 +4
  +\[10\] .got +PROGBITS +0+120f8 0+20f8 0+4c 04 +WA +0 +0 +4
  +\[11\] .plt +.*
- +\[12\] .data +PROGBITS +0+13000 0+3000 0+ 0+ +WA +0 +0 4096
- +\[13\] .bss +.*
- +\[14\] .shstrtab +.*
- +\[15\] .symtab +.*
- +\[16\] .strtab +.*
+ +\[12\] .shstrtab +.*
+ +\[13\] .symtab +.*
+ +\[14\] .strtab +.*
 #...
 
 Elf file type is DYN \(Shared object file\)
@@ -35,7 +33,7 @@ There are 4 program headers, starting at offset [0-9]+
 Program Headers:
  +Type +Offset +VirtAddr +PhysAddr +FileSiz MemSiz +Flg Align
  +LOAD +0x0+ 0x0+ 0x0+ 0x0+2000 0x0+2000 R E 0x10000
- +LOAD +0x0+2000 0x0+12000 0x0+12000 0x0+1000 0x0+1000 RWE 0x10000
+ +LOAD +0x0+2000 0x0+12000 0x0+12000 0x0+184 0x0+184 RWE 0x10000
  +DYNAMIC +0x0+2060 0x0+12060 0x0+12060 0x0+98 0x0+98 RW +0x4
  +TLS +0x0+2000 0x0+12000 0x0+12000 0x0+60 0x0+80 R +0x4
 #...
@@ -68,8 +66,8 @@ Symbol table '.dynsym' contains 22 entries:
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +7 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +8 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +10 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +12 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +13 *
+ +[0-9]+: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND *
+ +[0-9]+: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND *
  +[0-9]+: 0+1c +0 TLS +GLOBAL DEFAULT +7 sg8
  +[0-9]+: 0+12060 +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
  +[0-9]+: 0+8 +0 TLS +GLOBAL DEFAULT +7 sg3
@@ -86,7 +84,7 @@ Symbol table '.dynsym' contains 22 entries:
  +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
  +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _end
 
-Symbol table '.symtab' contains 57 entries:
+Symbol table '.symtab' contains 55 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +0: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +1 *
@@ -103,8 +101,6 @@ Symbol table '.symtab' contains 57 entries:
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +12 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +13 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +14 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +15 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +16 *
  +[0-9]+: 0+20 +0 TLS +LOCAL +DEFAULT +7 sl1
  +[0-9]+: 0+24 +0 TLS +LOCAL +DEFAULT +7 sl2
  +[0-9]+: 0+28 +0 TLS +LOCAL +DEFAULT +7 sl3

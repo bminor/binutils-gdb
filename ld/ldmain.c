@@ -312,6 +312,7 @@ main (int argc, char **argv)
   link_info.flags_1 = 0;
   link_info.need_relax_finalize = FALSE;
   link_info.warn_shared_textrel = FALSE;
+  link_info.gc_sections = FALSE;
 
   ldfile_add_arch ("");
 
@@ -335,7 +336,7 @@ main (int argc, char **argv)
 
   if (link_info.relocatable)
     {
-      if (command_line.gc_sections)
+      if (link_info.gc_sections)
 	einfo ("%P%F: --gc-sections and -r may not be used together\n");
       else if (command_line.relax)
 	einfo (_("%P%F: --relax and -r may not be used together\n"));

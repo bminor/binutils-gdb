@@ -1,3 +1,9 @@
+2005-03-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (elf_mark_used_section): New.
+	(bfd_elf_gc_sections): Call elf_gc_mark_section for
+	non-relocatable link if we don't do GC.
+
 2005-03-16  Nick Clifton  <nickc@redhat.com>
 	    Ben Elliston  <bje@au.ibm.com>
 

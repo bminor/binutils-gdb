@@ -1441,6 +1441,36 @@ gld${EMULATION_NAME}_finish (void)
       lang_do_assignments (stat_ptr->head, abs_output_section,
 			   (fill_type *) 0, (bfd_vma) 0);
     }
+
+  if (!link_info.relocatable)
+    {
+      lang_output_section_statement_type *os;
+
+      for (os = &lang_output_section_statement.head->output_section_statement;
+	   os != NULL;
+	   os = os->next)
+	{
+	  asection *s;
+
+	  if (os == abs_output_section || os->constraint == -1)
+	    continue;
+	  s = os->bfd_section;
+	  if (s != NULL && s->size == 0 && (s->flags & SEC_KEEP) == 0)
+	    {
+	      asection **p;
+
+	      os->bfd_section = NULL;
+
+	      for (p = &output_bfd->sections; *p; p = &(*p)->next)
+		if (*p == s)
+		  {
+		    bfd_section_list_remove (output_bfd, p);
+		    output_bfd->section_count--;
+		    break;
+		  }
+	    }
+	}
+    }
 }
 EOF
 fi

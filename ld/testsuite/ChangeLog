@@ -1,3 +1,29 @@
+2005-03-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-alpha/tlsbin.rd: Updated for empty section removal.
+	* ld-alpha/tlsbinr.rd: Likewise.
+	* ld-alpha/tlspic.rd: Likewise.
+	* ld-arm/mixed-lib.sym: Likewise.
+	* ld-i386/tlsbin.rd: Likewise.
+	* ld-i386/tlsnopic.rd: Likewise.
+	* ld-i386/tlspic.rd: Likewise.
+	* ld-ia64/tlsbin.rd: Likewise.
+	* ld-ia64/tlspic.rd: Likewise.
+	* ld-powerpc/apuinfo.rd: Likewise.
+	* ld-powerpc/powerpc.exp: Likewise.
+	* ld-powerpc/tlsexe32.r: Likewise.
+	* ld-s390/tlsbin.rd: Likewise.
+	* ld-s390/tlsbin_64.rd: Likewise.
+	* ld-s390/tlspic.rd: Likewise.
+	* ld-s390/tlspic_64.rd: Likewise.
+	* ld-sh/tlsbin-2.d: Likewise.
+	* ld-sh/tlspic-2.d: Likewise.
+	* ld-sparc/tlssunbin32.rd: Likewise.
+	* ld-sparc/tlssunnopic32.rd: Likewise.
+	* ld-sparc/tlssunpic32.rd: Likewise.
+	* ld-x86-64/tlsbin.rd: Likewise.
+	* ld-x86-64/tlspic.rd: Likewise.
+
 2005-03-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlsexe32.d: Update.

@@ -5,7 +5,7 @@
 #readelf: -Ssrl
 #target: s390x-*-*
 
-There are 18 section headers, starting at offset 0x[0-9a-f]+:
+There are 16 section headers, starting at offset 0x[0-9a-f]+:
 
 Section Headers:
   \[Nr\] Name +Type +Address +Off +Size +ES Flg Lk Inf Al
@@ -18,15 +18,13 @@ Section Headers:
   \[ 6\] .rela.plt +.*
   \[ 7\] .plt +.*
   \[ 8\] .text +PROGBITS +.*
-  \[ 9\] .tdata +PROGBITS +0+80001720 0+720 0+60 00 WAT +0 +0 +32
-  \[10\] .tbss +NOBITS +0+80001780 0+780 0+40 00 WAT +0 +0 +1
-  \[11\] .dynamic +DYNAMIC +0+80001780 0+780 0+140 10 +WA +4 +0 +8
-  \[12\] .got +PROGBITS +0+800018c0 0+8c0 0+78 08 +WA +0 +0 +8
-  \[13\] .data +.*
-  \[14\] .bss +.*
-  \[15\] .shstrtab +.*
-  \[16\] .symtab +.*
-  \[17\] .strtab +.*
+  \[ 9\] .tdata +PROGBITS +0+800016e0 0+6e0 0+60 00 WAT +0 +0 +32
+  \[10\] .tbss +NOBITS +0+80001740 0+740 0+40 00 WAT +0 +0 +1
+  \[11\] .dynamic +DYNAMIC +0+80001740 0+740 0+140 10 +WA +4 +0 +8
+  \[12\] .got +PROGBITS +0+80001880 0+880 0+78 08 +WA +0 +0 +8
+  \[13\] .shstrtab +.*
+  \[14\] .symtab +.*
+  \[15\] .strtab +.*
 Key to Flags:
 .*
 .*
@@ -41,10 +39,10 @@ Program Headers:
   PHDR +0x0+40 0x0+80000040 0x0+80000040 0x0+150 0x0+150 R E 0x8
   INTERP +0x0+190 0x0+80000190 0x0+80000190 0x0+11 0x0+11 R +0x1
 .*Requesting program interpreter.*
-  LOAD +0x0+ 0x0+80000000 0x0+80000000 0x0+720 0x0+720 R E 0x1000
-  LOAD +0x0+720 0x0+80001720 0x0+80001720 0x0+218 0x0+218 RW  0x1000
-  DYNAMIC +0x0+780 0x0+80001780 0x0+80001780 0x0+140 0x0+140 RW  0x8
-  TLS +0x0+720 0x0+80001720 0x0+80001720 0x0+60 0x0+a0 R +0x20
+  LOAD +0x0+ 0x0+80000000 0x0+80000000 0x0+6e0 0x0+6e0 R E 0x1000
+  LOAD +0x0+6e0 0x0+800016e0 0x0+800016e0 0x0+218 0x0+218 RW  0x1000
+  DYNAMIC +0x0+740 0x0+80001740 0x0+80001740 0x0+140 0x0+140 RW  0x8
+  TLS +0x0+6e0 0x0+800016e0 0x0+800016e0 0x0+60 0x0+a0 R +0x20
 
  Section to Segment mapping:
   Segment Sections...
@@ -62,11 +60,11 @@ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 4 entries:
 [0-9a-f]+ +0+60+38 R_390_TLS_TPOFF +0+ sG6 \+ 0
 [0-9a-f]+ +0+70+38 R_390_TLS_TPOFF +0+ sG1 \+ 0
 
-Relocation section '.rela.plt' at offset 0x40+ contains 1 entries:
+Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
-[0-9a-f]+ +0+40+b R_390_JMP_SLOT +0+80+438 __tls_get_offset \+ 0
+[0-9a-f]+ +0+40+b R_390_JMP_SLOT +0+80+408 __tls_get_offset \+ 0
 
-Symbol table '.dynsym' contains 11 entries:
+Symbol table '.dynsym' contains 10 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND 
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT +UND sG3
@@ -77,10 +75,9 @@ Symbol table '.dynsym' contains 11 entries:
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT +UND sG6
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT +UND sG1
  +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
- +[0-9]+: [0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
  +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _end
 
-Symbol table '.symtab' contains 70 entries:
+Symbol table '.symtab' contains 68 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND 
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +1 
@@ -98,8 +95,6 @@ Symbol table '.symtab' contains 70 entries:
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +13 
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +14 
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +15 
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +16 
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +17 
  +[0-9]+: 0+20 +0 TLS +LOCAL +DEFAULT +9 sl1
  +[0-9]+: 0+24 +0 TLS +LOCAL +DEFAULT +9 sl2
  +[0-9]+: 0+28 +0 TLS +LOCAL +DEFAULT +9 sl3
@@ -145,7 +140,7 @@ Symbol table '.symtab' contains 70 entries:
  +[0-9]+: 0+14 +0 TLS +GLOBAL DEFAULT +9 sg6
  +[0-9]+: 0+18 +0 TLS +GLOBAL DEFAULT +9 sg7
  +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
- +[0-9]+: [0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
+ +[0-9]+: [0-9a-f]+ +0 OBJECT +GLOBAL HIDDEN +12 _GLOBAL_OFFSET_TABLE_
  +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _end
  +[0-9]+: 0+44 +0 TLS +GLOBAL HIDDEN +9 sh2
  +[0-9]+: 0+54 +0 TLS +GLOBAL HIDDEN +9 sh6

@@ -21,8 +21,6 @@ Section Headers:
   \[ 9\] \.tbss +NOBITS +0+[0-9a-f]+ [0-9a-f]+ 0+008 00 WAT  0   0  1
 #...
   \[[0-9a-f]+\] \.got +PROGBITS +0+[0-9a-f]+ .*
-  \[[0-9a-f]+\] \.sbss +.*
-  \[[0-9a-f]+\] \.bss +.*
 #...
   \[[0-9a-f]+\] \.shstrtab +.*
   \[[0-9a-f]+\] \.symtab +.*
@@ -74,7 +72,7 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
  +2: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +8 *
  +3: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +9 *
  +4: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +[0-9]+ *
- +5: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +[0-9]+ *
+ +5: 0+ +0 NOTYPE +LOCAL +DEFAULT  UND *
  +6: [0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
  +[0-9a-f]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  UND __tls_get_addr
  +[0-9a-f]+: 0+00 +0 TLS +GLOBAL DEFAULT +8 sg1

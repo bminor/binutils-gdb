@@ -4,7 +4,7 @@
 #readelf: -WSsrl
 #target: powerpc*-*-*
 
-There are 19 section headers.*
+There are 17 section headers.*
 
 Section Headers:
  +\[Nr\] Name +Type +Addr +Off +Size +ES Flg Lk Inf Al
@@ -147,4 +147,4 @@ Symbol table '\.symtab' contains 45 entries:
  +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _end
  +[0-9]+: 0+1c +0 TLS +GLOBAL DEFAULT +8 gd0
  +[0-9]+: 0+2c +0 TLS +GLOBAL DEFAULT +8 ie0
- +[0-9]+: [0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +12 _SDA2_BASE_
+ +[0-9]+: [0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +11 _SDA2_BASE_

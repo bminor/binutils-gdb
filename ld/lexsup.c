@@ -809,7 +809,7 @@ parse_args (unsigned argc, char **argv)
 	  /* Ignore.  */
 	  break;
 	case OPTION_GC_SECTIONS:
-	  command_line.gc_sections = TRUE;
+	  link_info.gc_sections = TRUE;
 	  break;
 	case OPTION_HELP:
 	  help ();
@@ -852,7 +852,7 @@ parse_args (unsigned argc, char **argv)
 	  demangling = FALSE;
 	  break;
 	case OPTION_NO_GC_SECTIONS:
-	  command_line.gc_sections = FALSE;
+	  link_info.gc_sections = FALSE;
 	  break;
 	case OPTION_NO_KEEP_MEMORY:
 	  link_info.keep_memory = FALSE;

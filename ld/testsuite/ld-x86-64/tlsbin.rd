@@ -5,7 +5,7 @@
 #readelf: -WSsrl
 #target: x86_64-*-*
 
-There are 19 section headers, starting at offset 0x[0-9a-f]+:
+There are 17 section headers, starting at offset 0x[0-9a-f]+:
 
 Section Headers:
   \[Nr\] Name +Type +Address +Off +Size +ES Flg Lk Inf Al
@@ -23,11 +23,9 @@ Section Headers:
   \[11\] .dynamic +DYNAMIC +0+501290 0+1290 0+140 10 +WA +4 +0 +8
   \[12\] .got +PROGBITS +0+5013d0 0+13d0 0+20 08 +WA +0 +0 +8
   \[13\] .got.plt +PROGBITS +0+5013f0 0+13f0 0+20 08 +WA +0 +0 +8
-  \[14\] .data +.*
-  \[15\] .bss +.*
-  \[16\] .shstrtab +.*
-  \[17\] .symtab +.*
-  \[18\] .strtab +.*
+  \[14\] .shstrtab +.*
+  \[15\] .symtab +.*
+  \[16\] .strtab +.*
 Key to Flags:
 .*
 .*
@@ -39,11 +37,11 @@ There are 6 program headers, starting at offset [0-9]+
 
 Program Headers:
   Type +Offset +VirtAddr +PhysAddr +FileSiz +MemSiz +Flg Align
-  PHDR +0x0+40 0x0+400040 0x0+400040 0x0+150 0x0+150 R E 0x8
-  INTERP +0x0+190 0x0+400190 0x0+400190 0x0+f 0x0+f R +0x1
+  PHDR.*
+  INTERP.*
 .*Requesting program interpreter.*
   LOAD +0x0+ 0x0+400000 0x0+400000 0x0+122a 0x0+122a R E 0x100000
-  LOAD +0x0+122a 0x0+50122a 0x0+50122a 0x0+dd6 0x0+dd6 RW  0x100000
+  LOAD +0x0+122a 0x0+50122a 0x0+50122a 0x0+1e6 0x0+1e6 RW  0x100000
   DYNAMIC +0x0+1290 0x0+501290 0x0+501290 0x0+140 0x0+140 RW  0x8
   TLS +0x0+122a 0x0+50122a 0x0+50122a 0x0+60 0x0+a0 R +0x1
 
@@ -56,14 +54,14 @@ Program Headers:
    04 +.dynamic *
    05 +.tdata .tbss *
 
-Relocation section '.rela.dyn' at offset 0x328 contains 4 entries:
+Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 4 entries:
  +Offset +Info +Type +Symbol's Value  Symbol's Name \+ Addend
 0+5013d0  0+100000012 R_X86_64_TPOFF64 +0+ sG5 \+ 0
 0+5013d8  0+300000012 R_X86_64_TPOFF64 +0+ sG2 \+ 0
 0+5013e0  0+600000012 R_X86_64_TPOFF64 +0+ sG6 \+ 0
 0+5013e8  0+700000012 R_X86_64_TPOFF64 +0+ sG1 \+ 0
 
-Relocation section '.rela.plt' at offset 0x388 contains 1 entries:
+Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
  +Offset +Info +Type +Symbol's Value  Symbol's Name \+ Addend
 0+[0-9a-f]+  0+400000007 R_X86_64_JUMP_SLOT +0+[0-9a-f]+ __tls_get_addr \+ 0
 
@@ -80,7 +78,7 @@ Symbol table '.dynsym' contains 10 entries:
  +[0-9]+: 0+[0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _edata
  +[0-9]+: 0+[0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _end
 
-Symbol table '.symtab' contains 71 entries:
+Symbol table '.symtab' contains 69 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +1 *
@@ -99,8 +97,6 @@ Symbol table '.symtab' contains 71 entries:
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +14 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +15 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +16 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +17 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +18 *
  +[0-9]+: 0+20 +0 TLS +LOCAL  DEFAULT +9 sl1
  +[0-9]+: 0+24 +0 TLS +LOCAL  DEFAULT +9 sl2
  +[0-9]+: 0+28 +0 TLS +LOCAL  DEFAULT +9 sl3

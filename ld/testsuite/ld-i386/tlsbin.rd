@@ -5,7 +5,7 @@
 #readelf: -Ssrl
 #target: i?86-*-*
 
-There are 19 section headers, starting at offset 0x[0-9a-f]+:
+There are 17 section headers, starting at offset 0x[0-9a-f]+:
 
 Section Headers:
   \[Nr\] Name +Type +Addr +Off +Size +ES Flg Lk Inf Al
@@ -23,11 +23,9 @@ Section Headers:
   \[11\] \.dynamic +DYNAMIC +0+804a060 .*
   \[12\] \.got +PROGBITS +0+804a100 .*
   \[13\] \.got\.plt +PROGBITS +0+804a124 .*
-  \[14\] \.data +.*
-  \[15\] \.bss +.*
-  \[16\] \.shstrtab +.*
-  \[17\] \.symtab +.*
-  \[18\] \.strtab +.*
+  \[14\] \.shstrtab +.*
+  \[15\] \.symtab +.*
+  \[16\] \.strtab +.*
 Key to Flags:
 .*
 .*
@@ -89,7 +87,7 @@ Symbol table '.dynsym' contains 14 entries:
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG8
  +[0-9]+: [0-9a-f]+ +0 FUNC +GLOBAL DEFAULT  UND ___tls_get_addr
 
-Symbol table '.symtab' contains 75 entries:
+Symbol table '.symtab' contains 73 entries:
  +Num: +Value  Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +1 *
@@ -108,8 +106,6 @@ Symbol table '.symtab' contains 75 entries:
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +14 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +15 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +16 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +17 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +18 *
  +[0-9]+: 00000020 +0 TLS +LOCAL  DEFAULT +9 sl1
  +[0-9]+: 00000024 +0 TLS +LOCAL  DEFAULT +9 sl2
  +[0-9]+: 00000028 +0 TLS +LOCAL  DEFAULT +9 sl3

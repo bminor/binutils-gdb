@@ -22,13 +22,10 @@ Section Headers:
  +\[ 9\] .tbss +NOBITS +[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 0+ WAT +0 +0 +1
  +\[10\] .dynamic +DYNAMIC +[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 10 +WA +3 +0 +8
  +\[11\] .plt +.*
- +\[12\] .data +.*
- +\[13\] .got +PROGBITS +[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 0+ +WA +0 +0 +8
- +\[14\] .sbss +.*
- +\[15\] .bss +.*
- +\[16\] .shstrtab +.*
- +\[17\] .symtab +.*
- +\[18\] .strtab +.*
+ +\[12\] .got +PROGBITS +[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 0+ +WA +0 +0 +8
+ +\[13\] .shstrtab +.*
+ +\[14\] .symtab +.*
+ +\[15\] .strtab +.*
 #...
 
 Elf file type is DYN \(Shared object file\)
@@ -64,8 +61,8 @@ Symbol table '.dynsym' contains [0-9]+ entries:
 .* [0-9a-f]+     0 SECTION LOCAL  DEFAULT    7 
 .* [0-9a-f]+     0 SECTION LOCAL  DEFAULT    8 
 .* [0-9a-f]+     0 SECTION LOCAL  DEFAULT    9 
-.* [0-9a-f]+     0 SECTION LOCAL  DEFAULT   12 
-.* [0-9a-f]+     0 SECTION LOCAL  DEFAULT   15 
+.* [0-9a-f]+     0 NOTYPE  LOCAL  DEFAULT  UND 
+.* [0-9a-f]+     0 NOTYPE  LOCAL  DEFAULT  UND 
 .* [0-9a-f]+     0 TLS     GLOBAL DEFAULT    8 sg8
 .* [0-9a-f]+     0 OBJECT  GLOBAL DEFAULT  ABS _DYNAMIC
 .* [0-9a-f]+     0 TLS     GLOBAL DEFAULT    8 sg3
@@ -101,9 +98,6 @@ Symbol table '.symtab' contains [0-9]+ entries:
 .* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +13 
 .* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +14 
 .* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +15 
-.* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +16 
-.* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +17 
-.* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +18 
 .* [0-9a-f]+ +0 TLS +LOCAL +DEFAULT +8 sl1
 .* [0-9a-f]+ +0 TLS +LOCAL +DEFAULT +8 sl2
 .* [0-9a-f]+ +0 TLS +LOCAL +DEFAULT +8 sl3
