@@ -103,11 +103,11 @@ som_symtab_read (abfd, objfile, section_offsets)
   struct symbol_dictionary_record *buf, *bufp, *endbufp;
   char *symname;
   CONST int symsize = sizeof (struct symbol_dictionary_record);
-  CORE_ADDR text_offset;
+  CORE_ADDR text_offset, data_offset;
 
 
-  /* FIXME.  Data stuff needs dynamic relocation too!  */
   text_offset = ANOFFSET (section_offsets, 0);
+  data_offset = ANOFFSET (section_offsets, 1);
 
   number_of_symbols = bfd_get_symcount (abfd);
 
@@ -190,6 +190,7 @@ som_symtab_read (abfd, objfile, section_offsets)
 
 	    case ST_DATA:
 	      symname = bufp->name.n_strx + stringtab;
+	      bufp->symbol_value += data_offset;
 	      ms_type = mst_data;
 	      break;
 	    default:
@@ -270,6 +271,7 @@ som_symtab_read (abfd, objfile, section_offsets)
 
 	    case ST_DATA:
 	      symname = bufp->name.n_strx + stringtab;
+	      bufp->symbol_value += data_offset;
 	      ms_type = mst_file_data;
 	      goto check_strange_names;
 
@@ -411,8 +413,13 @@ som_symfile_offsets (objfile, addr)
 		   sizeof (struct section_offsets)
 		   + sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
 
-  for (i = 0; i < SECT_OFF_MAX; i++)
-    ANOFFSET (section_offsets, i) = addr;
+  /* First see if we're a shared library.  If so, get the section
+     offsets from the library, else get them from addr.  */
+  if (!som_solib_section_offsets (objfile, section_offsets))
+    {
+      for (i = 0; i < SECT_OFF_MAX; i++)
+	ANOFFSET (section_offsets, i) = addr;
+    }
 
   return section_offsets;
 }

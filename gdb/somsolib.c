@@ -338,8 +338,7 @@ som_solib_add (arg_string, from_tty, target)
       addr = (CORE_ADDR)new_so->som_solib.next;
 
       new_so->objfile = symbol_file_add (name, from_tty, text_addr, 0, 0, 0);
-      new_so->abfd = bfd_openr (name, gnutarget);
-      new_so->abfd->cacheable = true;
+      new_so->abfd = new_so->objfile->obfd;
 
       if (!bfd_check_format (new_so->abfd, bfd_object))
 	{
@@ -569,6 +568,43 @@ som_solib_get_got_by_pc (addr)
       so_list = so_list->next;
     }
   return got_value;
+}
+
+int
+som_solib_section_offsets (objfile, offsets)
+     struct objfile *objfile;
+     struct section_offsets *offsets;
+{
+  struct so_list *so_list = so_list_head;
+
+  while (so_list)
+    {
+      /* Oh what a pain!  We need the offsets before so_list->objfile
+	 is valid.  The BFDs will never match.  Make a best guess.  */
+      if (!strcmp (so_list->som_solib.name, objfile->name))
+	{
+	  asection *private_section;
+
+	  /* The text offset is easy.  */
+	  ANOFFSET (offsets, 0) = so_list->som_solib.text_addr;
+
+	  /* We should look at presumed_dp in the SOM header, but
+	     that's not easily available.  This should be OK though.  */
+	  private_section = bfd_get_section_by_name (objfile->obfd,
+						     "$PRIVATE$");
+	  if (!private_section)
+	    {
+	      warning ("Unable to find $PRIVATE$ in shared library!");
+	      ANOFFSET (offsets, 1) = 0;
+	      return 1;
+	    }
+	  ANOFFSET (offsets, 1) = (so_list->som_solib.data_start
+				   - private_section->vma);
+	  return 1;
+	}
+      so_list = so_list->next;
+    }
+  return 0;
 }
 
 /* Dump information about all the currently loaded shared libraries.  */

@@ -1,3 +1,14 @@
+Thu Feb  9 12:09:09 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* somread.c (som_symtab_read): Handle dynamic relocation for both
+	text and data symbols.
+	(som_symfile_offsets): If objfile is a shared library, then get
+	text and data offsets from the shared library structures.
+	* somsolib.c (som_solib_add): Copy the bfd pointer from the
+	objfile rather than reopening the file again.
+	(som_solib_section_offsets): New function.
+	* somsolib.h (som_solib_section_offsets): Declare.
+
 Wed Feb  8 20:32:18 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
 	* config/sparc/tm-sun4sol2.h, dbxread.c: Rename

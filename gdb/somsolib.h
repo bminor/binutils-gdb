@@ -22,6 +22,8 @@ and by Cygnus Support.  */
 
 #ifdef __STDC__		/* Forward decl's for prototypes */
 struct target_ops;
+struct objfile;
+struct section_offsets;
 #endif
 
 /* Called to add symbols from a shared library to gdb's symbol table. */
@@ -34,6 +36,9 @@ som_solib_add PARAMS ((char *, int, struct target_ops *));
 
 extern CORE_ADDR
 som_solib_get_got_by_pc PARAMS ((CORE_ADDR));
+
+extern int
+som_solib_section_offsets PARAMS ((struct objfile *, struct section_offsets *));
 
 /* Function to be called when the inferior starts up, to discover the names
    of shared libraries that are dynamically linked, the base addresses to
