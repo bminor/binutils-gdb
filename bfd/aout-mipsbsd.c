@@ -24,12 +24,11 @@
 #define SET_ARCH_MACH(ABFD, EXEC) \
   MY(set_arch_mach)(ABFD, N_MACHTYPE (EXEC)); \
   MY(choose_reloc_size)(ABFD);
-void DEFUN(MY(set_arch_mach), (abfd, machtype),
-	bfd *abfd AND int machtype);
-static void DEFUN(MY(choose_reloc_size),(abfd),bfd *abfd);
+void MY(set_arch_mach) PARAMS ((bfd *abfd, int machtype));
+static void MY(choose_reloc_size) PARAMS ((bfd *abfd));
 
 #define MY_write_object_contents MY(write_object_contents)
-static boolean DEFUN(MY(write_object_contents), (abfd), bfd *abfd);
+static boolean MY(write_object_contents) PARAMS ((bfd *abfd));
 
 #define MY_reloc_howto_type_lookup MY(reloc_howto_type_lookup)
 #define MY_canonicalize_reloc MY(canonicalize_reloc)
@@ -44,8 +43,9 @@ static boolean DEFUN(MY(write_object_contents), (abfd), bfd *abfd);
  * Also, to reduce space, should ifdef the individual cases if MINIMIZE=1.
  */
 void
-DEFUN(MY(set_arch_mach), (abfd, machtype),
-	bfd *abfd AND int machtype)
+MY(set_arch_mach) (abfd, machtype)
+     bfd *abfd;
+     int machtype;
 {
   enum bfd_architecture arch;
   long machine;
@@ -105,8 +105,8 @@ DEFUN(MY(set_arch_mach), (abfd, machtype),
 
 /* Determine the size of a relocation entry, based on the architecture */
 static void
-DEFUN(MY(choose_reloc_size),(abfd),
-	bfd *abfd)
+MY(choose_reloc_size) (abfd)
+     bfd *abfd;
 {
   switch (bfd_get_arch(abfd)) {
   case bfd_arch_sparc:
@@ -125,8 +125,8 @@ DEFUN(MY(choose_reloc_size),(abfd),
   file header, symbols, and relocation.  */
 
 static boolean
-DEFUN(MY(write_object_contents), (abfd),
-	bfd *abfd)
+MY(write_object_contents) (abfd)
+     bfd *abfd;
 {
   struct external_exec exec_bytes;
   struct internal_exec *execp = exec_hdr (abfd);
@@ -192,13 +192,13 @@ DEFUN(MY(write_object_contents), (abfd),
  * when the low bits are added at run time.
  */
 bfd_reloc_status_type
-DEFUN(mips_fix_hi16_s, (abfd,reloc_entry,symbol,data,input_section,output_bfd),
-	bfd *abfd AND
-	arelent *reloc_entry AND
-	struct symbol_cache_entry *symbol AND
-	PTR data AND
-	asection *input_section AND
-	bfd *output_bfd)
+mips_fix_hi16_s (abfd,reloc_entry,symbol,data,input_section,output_bfd)
+     bfd *abfd;
+     arelent *reloc_entry;
+     struct symbol_cache_entry *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
 {
   bfd_vma relocation;
  
@@ -394,6 +394,7 @@ bfd_target aout_mips_little_vec =
   MY_bfd_debug_info_accumulate,
   bfd_generic_get_relocated_section_contents,
   bfd_generic_relax_section,
+  bfd_generic_seclet_link,
   MY_reloc_howto_type_lookup,
   MY_make_debug_symbol,
   (PTR) MY_backend_data,
@@ -450,6 +451,7 @@ bfd_target aout_mips_big_vec =
   MY_bfd_debug_info_accumulate,
   bfd_generic_get_relocated_section_contents,
   bfd_generic_relax_section,
+  bfd_generic_seclet_link,
   MY_reloc_howto_type_lookup,
   MY_make_debug_symbol,
   (PTR) MY_backend_data,
