@@ -22,6 +22,7 @@ Mon Jun 12 15:24:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	config/i386/cygwin.mh, config/arm/linux.mh, config/alpha/fbsd.mh,
  	config/alpha/alpha-osf3.mh, config/alpha/alpha-linux.mh: Remove
  	ser-tcp.o from XDEPFILES.
+	* config/ia64/linux.mh: Ditto.
 
 	* TODO: Update.
 
