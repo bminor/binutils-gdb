@@ -1,3 +1,8 @@
+2002-05-31  Graeme Peterson  <gp@qnx.com>
+
+	* configure.in: Add i386-*-nto-qnx*.
+	* configure: Regenerate.
+
 2002-05-31  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (mips_ip): Use unsigned long values for
@@ -307,80 +312,6 @@
 	* macro.h: Likewise.
 	* stabs.c: Likewise.
 	* symbols.c: Likewise.
-
-2002-05-17  Alan Modra  <amodra@bigpond.net.au>
-
-	* doc/internals.texi (md_apply_fix3): Expand.
-	(TC_FORCE_RELOCATION, TC_FORCE_RELOCATION_ABS,
-	TC_FORCE_RELOCATION_LOCAL, TC_FORCE_RELOCATION_SUB_SAME,
-	TC_FORCE_RELOCATION_SUB_ABS, TC_FORCE_RELOCATION_SUB_LOCAL,
-	TC_FIX_ADJUSTABLE): Document.
-	* symbols.c (S_FORCE_RELOC): New function.
-	* symbols.h (S_FORCE_RELOC): Declare.  s/CONST/const/.
-	* config/obj-aout.h (S_FORCE_RELOC): Define.
-	* config/obj-bout.h (S_FORCE_RELOC): Define.
-	* config/obj-coff.h (S_FORCE_RELOC): Define.  Formatting fixes.
-	* config/obj-ieee.h (S_FORCE_RELOC): Define.  Formatting fixes.
-	* config/obj-vms.h (S_FORCE_RELOC): Define.
-	* expr.c (clean_up_expression <O_subtract>): Use S_FORCE_RELOC
-	instead of SEG_NORMAL.  Allow diff != 0.
-	(expr <O_subtract>): Use S_FORCE_RELOC instead of SEG_NORMAL.
-	* read.c (pseudo_set): Likewise.
-	* write.c (TC_FORCE_RELOCATION_ABS): Define.
-	(TC_FORCE_RELOCATION_LOCAL): Define, replaces..
-	(TC_RELOC_RTSYM_LOC_FIXUP): ..this. Remove.
-	(TC_FORCE_RELOCATION_SUB_SAME): Define, replaces..
-	(TC_FORCE_RELOCATION_SECTION): ..this.  Remove.
-	(TC_FORCE_RELOCATION_SUB_ABS): Define.
-	(TC_FORCE_RELOCATION_SUB_LOCAL): Define.
-	(RELOC_ENUM): Define.
-	(fix_new_internal): Use RELOC_ENUM.
-	(fix_new): Likewise.
-	(fix_new_exp): Likewise.
-	(adjust_reloc_syms): Split out code setting used_in_reloc to..
-	(mark_reloc_syms): ..here.  New function.  Use S_FORCE_RELOC.
-	(write_object_file): Call mark_reloc_syms.
-	(write_relocs): Formatting.  Avoid symbol loops in
-	RELOC_EXPANSION_POSSIBLE case too.  Report bfd_reloc_outofrange
-	errors, and error number in other cases.
-	(fixup_segment): Rewrite.
-	* config/tc-alpha.h (TC_FORCE_RELOCATION_LOCAL): Define, replaces..
-	(TC_RELOC_RTSYM_LOC_FIXUP): Delete.
-	* config/tc-arm.h: Likewise.
-	* config/tc-cris.h: Likewise.
-	* config/tc-i386.h: Likewise.
-	* config/tc-i960.h: Likewise.
-	* config/tc-ia64.h: Likewise.
-	* config/tc-m68k.h: Likewise.
-	* config/tc-ppc.h: Likewise.
-	* config/tc-s390.h: Likewise.
-	* config/tc-sh.h: Likewise.
-	* config/tc-sh64.h: Likewise.
-	* config/tc-sparc.h: Likewise.
-	* config/tc-hppa.h (TC_FORCE_RELOCATION_SUB_SAME): Define, replaces..
-	(TC_FORCE_RELOCATION_SECTION):  Delete.
-	* config/tc-i386.c (tc_i386_force_relocation): Remove.
-	(BFD_RELOC_8, BFD_RELOC_16): Define for non BFD_ASSEMBLER.
-	(md_apply_fix3): Formatting.  Hack for bfd_install_relocation when
-	fx_pcrel, not when fx_addsy.
-	* config/tc-i386.h (TC_FORCE_RELOCATION): Define using code moved
-	from tc_i386_force_relocation.
-	(TC_FIX_ADJUSTABLE): Remove redundant tc_fix_adjustable condition.
-	* config/tc-s390.h (TC_FIX_ADJUSTABLE): Likewise.
-	* config/tc-sh.h (TC_FIX_ADJUSTABLE): Likewise.
-	* config/tc-i960.c (reloc_callj): Remove declaration.  Return false.
-	* config/tc-i960.h (TC_FORCE_RELOCATION_SUB): Define.
-	(TC_FORCE_RELOCATION_ABS): Define.
-	* config/tc-ppc.c (md_apply_fix3): Rename arg to match comments.
-	Don't undo adjustments done by write.c:fixup_segment.
-	* config/tc-ppc.h (TC_FIX_ADJUSTABLE): Instead arrange for them
-	to not occur in the first place.
-	(TC_FORCE_RELOCATION_SECTION): Delete.
-	* config/tc-s390.c (md_apply_fix3): Use TC_FORCE_RELOCATION_LOCAL
-	instead of TC_RELOC_RTSYM_LOC_FIXUP.
-	* config/tc-sh.c (sh_fix_adjustable): Likewise.
-	* config/tc-sh.h (obj_fix_adjustable): Delete, instead..
-	(tc_fix_adjustable): Define.
 
 2002-05-17  Alan Modra  <amodra@bigpond.net.au>
 

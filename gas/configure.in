@@ -300,6 +300,7 @@ changequote([,])dnl
       i386-*-cygwin*)       fmt=coff em=pe bfd_gas=yes ;;
       i386-*-interix*)	    fmt=coff em=interix bfd_gas=yes ;;
       i386-*-mingw32*)      fmt=coff em=pe bfd_gas=yes ;;
+      i386-*-nto-qnx*)	    fmt=elf ;;
       i386-*-*nt*)          fmt=coff em=pe bfd_gas=yes ;;
       i386-*-vxworks*)      fmt=aout ;;
       i386-*-chaos)         fmt=elf ;;
