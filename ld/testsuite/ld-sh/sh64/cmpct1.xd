@@ -43,7 +43,6 @@ SYMBOL TABLE:
 0+ l    d  \*ABS\*	0+ 
 0+1004 l       \.text	0+ next
 0+100c l       \.rodata	0+ here
-0+ l       \*ABS\*	0+ \*ABS\*
 0+1098 g       \.dtors	0+ ___dtors
 0+1098 g       \*ABS\*	0+ __bss_start
 0+1098 g       \.ctors	0+ ___ctors_end

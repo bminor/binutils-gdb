@@ -13,14 +13,14 @@ Section Headers:
   \[ 8\] \.stack            PROGBITS        00080000 000160 000000 00   W  0   0  1
   \[ 9\] \.cranges          LOUSER\+1        00000000 000160 00003c 00   W  0   0  1
   \[10\] \.shstrtab         STRTAB          00000000 00019c 000056 00      0   0  1
-  \[11\] \.symtab           SYMTAB          00000000 0003fc 0001c0 10     12  11  4
-  \[12\] \.strtab           STRTAB          00000000 0005bc 00007e 00      0   0  1
+  \[11\] \.symtab           SYMTAB          00000000 0003fc 0001b0 10     12  10  4
+  \[12\] \.strtab           STRTAB          00000000 0005ac 000078 00      0   0  1
 Key to Flags:
   W \(write\), A \(alloc\), X \(execute\), M \(merge\), S \(strings\)
   I \(info\), L \(link order\), G \(group\), x \(unknown\)
   O \(extra OS processing required\) o \(OS specific\), p \(processor specific\)
 
-Symbol table '\.symtab' contains 28 entries:
+Symbol table '\.symtab' contains 27 entries:
    Num:    Value  Size Type    Bind   Vis      Ndx Name
      0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND 
      1: 00001000     0 SECTION LOCAL  DEFAULT    1 
@@ -38,18 +38,17 @@ Symbol table '\.symtab' contains 28 entries:
     13: 00001004     0 NOTYPE  LOCAL  DEFAULT    2 sec4
     14: 000010a4     0 NOTYPE  LOCAL  DEFAULT    2 start2
     15: 000010bc     0 NOTYPE  LOCAL  DEFAULT    2 sec3
-    16: 00000000     0 NOTYPE  LOCAL  DEFAULT  ABS \*ABS\*
-    17: 000010c4     0 NOTYPE  GLOBAL DEFAULT    2 diversion
-    18: 00001160     0 NOTYPE  GLOBAL DEFAULT    5 ___dtors
-    19: 00001160     0 NOTYPE  GLOBAL DEFAULT  ABS __bss_start
-    20: 00001160     0 NOTYPE  GLOBAL DEFAULT    4 ___ctors_end
-    21: 000010a4     0 NOTYPE  GLOBAL DEFAULT    2 diversion2
-    22: 00001160     0 NOTYPE  GLOBAL DEFAULT    4 ___ctors
-    23: 00001160     0 NOTYPE  GLOBAL DEFAULT  ABS _edata
-    24: 00001160     0 NOTYPE  GLOBAL DEFAULT  ABS _end
-    25: 00001000     0 NOTYPE  GLOBAL DEFAULT    1 start
-    26: 00080000     0 NOTYPE  GLOBAL DEFAULT    8 _stack
-    27: 00001160     0 NOTYPE  GLOBAL DEFAULT    5 ___dtors_end
+    16: 000010c4     0 NOTYPE  GLOBAL DEFAULT    2 diversion
+    17: 00001160     0 NOTYPE  GLOBAL DEFAULT    5 ___dtors
+    18: 00001160     0 NOTYPE  GLOBAL DEFAULT  ABS __bss_start
+    19: 00001160     0 NOTYPE  GLOBAL DEFAULT    4 ___ctors_end
+    20: 000010a4     0 NOTYPE  GLOBAL DEFAULT    2 diversion2
+    21: 00001160     0 NOTYPE  GLOBAL DEFAULT    4 ___ctors
+    22: 00001160     0 NOTYPE  GLOBAL DEFAULT  ABS _edata
+    23: 00001160     0 NOTYPE  GLOBAL DEFAULT  ABS _end
+    24: 00001000     0 NOTYPE  GLOBAL DEFAULT    1 start
+    25: 00080000     0 NOTYPE  GLOBAL DEFAULT    8 _stack
+    26: 00001160     0 NOTYPE  GLOBAL DEFAULT    5 ___dtors_end
 
 Hex dump of section '\.text':
   0x00001004 6ff0fff0 6ff0fff0 6ff0fff0 6ff0fff0 .*

@@ -1,3 +1,10 @@
+2002-09-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-sh/sh64/cmpct1.xd: Adjust for lack of abs section sym.
+	* ld-sh/sh64/crange3-cmpct.rd: Likewise.
+	* ld-sh/sh64/crange3-media.rd: Likewise.
+	* ld-sh/sh64/crange3.rd: Likewise.
+
 2002-08-31  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/bpo-10.d: Tweak for change in symbols handling.
