@@ -1,5 +1,5 @@
 /* Fork a Unix child process, and set up to debug it, for GDB.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB.
@@ -19,6 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
+#include <string.h>
 #include "frame.h"  /* required by inferior.h */
 #include "inferior.h"
 #include "target.h"

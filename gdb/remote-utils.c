@@ -1,6 +1,6 @@
 /* Generic support for remote debugging interfaces.
 
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -42,6 +42,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <ctype.h>
 
 #include "defs.h"
+#include <string.h>
 #include "gdbcmd.h"
 #include "target.h"
 #include "serial.h"

@@ -25,6 +25,7 @@ domain program.
 */
 
 #include <stdio.h>
+#include <string.h>
 
 #define  PSIZE  sizeof(char *)
 

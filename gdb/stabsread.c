@@ -1,5 +1,5 @@
 /* Support routines for decoding "stabs" debugging information format.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -25,6 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    Avoid placing any object file format specific code in this file. */
 
 #include "defs.h"
+#include <string.h>
 #include "bfd.h"
 #include "obstack.h"
 #include "symtab.h"

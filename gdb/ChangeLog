@@ -1,3 +1,20 @@
+Tue Feb  8 00:32:28 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* README:  Remove note about gcc warnings on alpha, these should be
+	gone now.
+	* c-exp.y, ch-exp.y, core.c, corelow.c, eval.c, fork-child.c, 
+	m2-exp.y, minsyms.c, nlmread.c, parse.c, putenv.c, regex.c
+	remote-utils.c, stabsread.c:  Include <string.h>.
+	* regex.c:  Include "defs.h", change re_comp argument to const char *.
+	* infptrace.c (fetch_register, store_inferior_registers):  Change
+	regaddr to type CORE_ADDR.
+	* config/alpha/alpha-nw.mt, config/alpha/alpha-osf1.mt (MT_CFLAGS):
+	Remove, no longer necessary now that we use bfd_vma for a CORE_ADDR.
+
+Mon Feb  7 09:21:17 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* symtab.h: Always define BYTE_BITFIELD to nothing.
+
 Mon Feb  7 08:44:17 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* config/m68k/{m68k-em.mt,tm-m68k-em.h}: Remove; no longer used.

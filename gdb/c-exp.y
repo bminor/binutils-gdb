@@ -1,5 +1,6 @@
 /* YACC parser for C expressions, for GDB.
-   Copyright (C) 1986, 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1989, 1990, 1991, 1993, 1994
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -37,6 +38,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 %{
 
 #include "defs.h"
+#include <string.h>
 #include "expression.h"
 #include "value.h"
 #include "parser-defs.h"

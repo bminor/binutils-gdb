@@ -1,5 +1,6 @@
 /* YACC grammar for Modula-2 expressions, for GDB.
-   Copyright (C) 1986, 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1989, 1990, 1991, 1993, 1994
+   Free Software Foundation, Inc.
    Generated from expread.y (now c-exp.y) and contributed by the Department
    of Computer Science at the State University of New York at Buffalo, 1991.
 
@@ -39,6 +40,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 %{
 
 #include "defs.h"
+#include <string.h>
 #include "expression.h"
 #include "language.h"
 #include "value.h"

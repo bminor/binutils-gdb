@@ -1,5 +1,5 @@
 /* Read NLM (NetWare Loadable Module) format executable files for GDB.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support (fnf@cygnus.com).
 
 This file is part of GDB.
@@ -19,6 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
+#include <string.h>
 #include "bfd.h"
 #include "symtab.h"
 #include "symfile.h"

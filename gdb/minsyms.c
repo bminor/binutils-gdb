@@ -1,5 +1,5 @@
 /* GDB routines for manipulating the minimal symbol tables.
-   Copyright 1992 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
 This file is part of GDB.
@@ -38,6 +38,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
 #include "defs.h"
+#include <string.h>
 #include "symtab.h"
 #include "bfd.h"
 #include "symfile.h"

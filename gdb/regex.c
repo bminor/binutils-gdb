@@ -32,14 +32,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #else  /* not emacs */
 
-/* Make alloca work the best possible way.  */
-#ifdef __GNUC__
-#define alloca __builtin_alloca
-#else
-#ifdef sparc
-#include <alloca.h>
-#endif
-#endif
+#include "defs.h"
+#include <string.h>
 
 /*
  * Define the syntax stuff, so we can do the \<...\> things.
@@ -1556,7 +1550,7 @@ static struct re_pattern_buffer re_comp_buf;
 
 char *
 re_comp (s)
-     char *s;
+     const char *s;
 {
   if (!s)
     {
