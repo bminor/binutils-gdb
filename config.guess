@@ -186,6 +186,9 @@ EOF
     hp3[0-9][05]:NetBSD:*:*)
 	echo m68k-hp-netbsd${UNAME_RELEASE}
 	exit 0 ;;
+    i[34]86:BSD/386:*:*)
+	echo ${UNAME_MACHINE}-unknown-bsdi${UNAME_RELEASE}
+	exit 0 ;;
     i[34]86:FreeBSD:*:*)
 	echo ${UNAME_MACHINE}-unknown-freebsd${UNAME_RELEASE}
 	exit 0 ;;
@@ -240,6 +243,17 @@ EOF
     rs6000:LynxOS:2.2*:*)
 	echo rs6000-lynx-lynxos${UNAME_RELEASE}
 	exit 0 ;;
+    RM*:SINIX-*:*:*)
+	echo mips-sni-sysv4
+	exit 0 ;;
+    *:SINIX-*:*:*)
+	if uname -p 2>/dev/null >/dev/null ; then
+		UNAME_MACHINE=`(uname -p) 2>/dev/null`
+		echo ${UNAME_MACHINE}-sni-sysv4
+	else
+		echo ns32k-sni-sysv
+	fi
+	exit 0 ;;
 esac
 
 #echo '(No uname command or uname output not recognized.)' 1>&2
@@ -285,12 +299,8 @@ main()
 #endif
 #endif
 
-#if defined(__bsdi__) && defined(__i386__)
-  printf("i386-unknown-bsd386\n"); exit(0);
-#else
 #if defined(__386BSD__)
   printf("i386-unknown-bsd\n"); exit(0);
-#endif
 #endif
 
 #if defined(sequent)

@@ -1,3 +1,12 @@
+Fri Jun  3 17:47:24 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* config.guess (i386-unknown-bsdi):  No longer need to
+	check #if defined(__bsdi__) && defined(__i386__).
+
+Tue May 31 16:36:36 1994  Paul Eggert  (eggert@twinsun.com)
+
+	* config.guess (i386-unknown-bsdi): New system to guess.
+
 Thu Jun  2 18:56:46 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure: Set program_transform_nameoption correctly.
