@@ -1,4 +1,15 @@
+1999-08-08  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* section.c (SEC_SHARED): Define.
+	* coffcode.h (sec_to_styp_flags): Handle SEC_SHARED.
+	(styp_to_sec_flags): Likewise.
+	* peicode.h (coff_swap_scnhdr_out): Likewise.
+	* bfd-in2.h: Rebuild.
+
 1999-08-08  Ian Lance Taylor  <ian@zembu.com>
+
+	* coffcode.h (coff_classify_symbol): Comment out part of
+	1999-08-05 change which breaks cygwin DLLs.
 
 	* acinclude.m4 (BFD_BINARY_FOPEN): Change -windows to -windows*.
 	* aclocal.m4, configure: Rebuild.

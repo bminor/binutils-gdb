@@ -445,6 +445,8 @@ sec_to_styp_flags (sec_name, sec_flags)
 #ifdef COFF_WITH_PE
   if (sec_flags & SEC_LINK_ONCE)
     styp_flags |= IMAGE_SCN_LNK_COMDAT;
+  if (sec_flags & SEC_SHARED)
+    styp_flags |= IMAGE_SCN_MEM_SHARED;
 #endif
 
   return (styp_flags);
@@ -578,6 +580,9 @@ styp_to_sec_flags (abfd, hdr, name)
 #ifdef COFF_WITH_PE
   if (styp_flags & IMAGE_SCN_LNK_REMOVE)
     sec_flags |= SEC_EXCLUDE;
+
+  if (styp_flags & IMAGE_SCN_MEM_SHARED)
+    sec_flags |= SEC_SHARED;
 
   if (styp_flags & IMAGE_SCN_LNK_COMDAT)
     {
@@ -3911,6 +3916,10 @@ coff_classify_symbol (abfd, syment)
 	  return COFF_SYMBOL_LOCAL;
 	}
 
+#if 0
+      /* This is correct for Microsoft generated objects, but it
+         breaks gas generated objects.  */
+
       if (syment->n_value == 0)
 	{
 	  asection *sec;
@@ -3923,6 +3932,7 @@ coff_classify_symbol (abfd, syment)
 		  == 0))
 	    return COFF_SYMBOL_PE_SECTION;
 	}
+#endif
 
       return COFF_SYMBOL_LOCAL;
     }

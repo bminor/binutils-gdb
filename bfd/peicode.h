@@ -1239,6 +1239,8 @@ coff_swap_scnhdr_out (abfd, in, out)
 	flags |= IMAGE_SCN_MEM_READ;
 	if (! (flags & SEC_READONLY))
 	  flags |= IMAGE_SCN_MEM_WRITE;
+	if (flags & SEC_SHARED)
+	  flags |= IMAGE_SCN_MEM_SHARED;
       }
 
     bfd_h_put_32(abfd, flags, (bfd_byte *) scnhdr_ext->s_flags);

@@ -1008,6 +1008,10 @@ typedef struct sec
           "near" the GP.  */
 #define SEC_SHORT 0x2000000
 
+        /* This section contains data which may be shared with other
+          executables or shared objects.  */
+#define SEC_SHARED 0x4000000
+
         /*  End of section flags.  */
 
         /* Some internal packed boolean fields.  */
