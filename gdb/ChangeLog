@@ -1,5 +1,6 @@
 2001-04-26  Michael Snyder  <msnyder@redhat.com>
 
+	* lin-lwp.c: Minor cleanups in comments.
 	* target.c (normal_pid_to_str): Get rid of an ancient hack.
 	* remote.c (remote_pid_to_str): New function for remote target.
 

@@ -63,7 +63,7 @@ extern const char *strsignal (int sig);
      cannot use it since GDB must work on older systems too.
 
    - When a traced, cloned process exits and is waited for by the
-     debugger, the kernel reassigns it to the origional parent and
+     debugger, the kernel reassigns it to the original parent and
      keeps it around as a "zombie".  Somehow, the LinuxThreads library
      doesn't notice this, which leads to the "zombie problem": When
      debugged a multi-threaded process that spawns a lot of threads
@@ -131,16 +131,16 @@ extern struct target_ops child_ops;
 
 /* Since we cannot wait (in lin_lwp_wait) for the initial process and
    any cloned processes with a single call to waitpid, we have to use
-   use the WNOHANG flag and call waitpid in a loop.  To optimize
+   the WNOHANG flag and call waitpid in a loop.  To optimize
    things a bit we use `sigsuspend' to wake us up when a process has
    something to report (it will send us a SIGCHLD if it has).  To make
    this work we have to juggle with the signal mask.  We save the
-   origional signal mask such that we can restore it before creating a
+   original signal mask such that we can restore it before creating a
    new process in order to avoid blocking certain signals in the
    inferior.  We then block SIGCHLD during the waitpid/sigsuspend
    loop.  */
 
-/* Origional signal mask.  */
+/* Original signal mask.  */
 static sigset_t normal_mask;
 
 /* Signal mask for use with sigsuspend in lin_lwp_wait, initialized in
@@ -900,7 +900,7 @@ lin_lwp_mourn_inferior (void)
 
   trap_pid = 0;
 
-  /* Restore the origional signal mask.  */
+  /* Restore the original signal mask.  */
   sigprocmask (SIG_SETMASK, &normal_mask, NULL);
   sigemptyset (&blocked_mask);
 
@@ -1027,7 +1027,7 @@ _initialize_lin_lwp (void)
   add_target (&lin_lwp_ops);
   thread_db_init (&lin_lwp_ops);
 
-  /* Save the origional signal mask.  */
+  /* Save the original signal mask.  */
   sigprocmask (SIG_SETMASK, NULL, &normal_mask);
 
   action.sa_handler = sigchld_handler;
