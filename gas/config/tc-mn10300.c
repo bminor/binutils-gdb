@@ -664,26 +664,26 @@ keep_going:
 
   input_line_pointer = str;
 
-  /* XXX */
-  if (opcode->format == 1)
+  /* Determine the size of the instruction.  */
+  if (opcode->format == FMT_S0)
     size = 1;
 
-  if (opcode->format == 2 || opcode->format == 6)
+  if (opcode->format == FMT_S1 || opcode->format == FMT_D0)
     size = 2;
 
-  if (opcode->format == 3 || opcode->format == 7)
+  if (opcode->format == FMT_S2 || opcode->format == FMT_D1)
     size = 3;
 
-  if (opcode->format == 4)
+  if (opcode->format == FMT_S4)
     size = 5;
 
-  if (opcode->format == 5 || opcode->format == 10)
+  if (opcode->format == FMT_S6 || opcode->format == FMT_D5)
     size = 7;
 
-  if (opcode->format == 8)
+  if (opcode->format == FMT_D2)
     size = 4;
 
-  if (opcode->format == 9)
+  if (opcode->format == FMT_D4)
     size = 6;
 
   /* Write out the instruction.  */

@@ -1,5 +1,8 @@
 Thu Oct 10 12:05:45 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-mn10300.c (md_assemble): Use FMT_* macros for
+	formats rather than hard-coded constants.
+
 	* config/tc-mn10300.c (md_assemble): Format D5 instructions
 	are 7 bytes long.  Write out instructions in big-endian format.
 
