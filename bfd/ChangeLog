@@ -1,3 +1,8 @@
+Wed Jul 10 11:18:21 1996  Richard Henderson  <rth@tamu.edu>
+
+	* coffcode.h (coff_set_section_contents): A/UX does not require
+	special handling of the _LIB section.
+
 Tue Jul  9 15:52:20 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* coff-h8300.c (h8300_reloc16_extra_cases): Use the correct
