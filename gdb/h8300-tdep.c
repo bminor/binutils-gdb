@@ -1120,7 +1120,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					     frameless_look_for_prologue);
 
   /* W/o prototype, coerce float args to double. */
-  //set_gdbarch_coerce_float_to_double (gdbarch, standard_coerce_float_to_double);
+  /* set_gdbarch_coerce_float_to_double (gdbarch, standard_coerce_float_to_double); */
 
   /*
    * Call Dummies
@@ -1156,7 +1156,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_ptr_bit (gdbarch, BINWORD * TARGET_CHAR_BIT);
   set_gdbarch_addr_bit (gdbarch, BINWORD * TARGET_CHAR_BIT);
 
-  //set_gdbarch_stack_align (gdbarch, SOME_stack_align);
+  /* set_gdbarch_stack_align (gdbarch, SOME_stack_align); */
   set_gdbarch_extra_stack_alignment_needed (gdbarch, 0);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
