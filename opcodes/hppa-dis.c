@@ -474,8 +474,14 @@ print_insn_hppa (memaddr, info)
 		  break;
 		case '>':
 		case '~':
-		  (*info->fprintf_func) (info->stream, "%s ",
-				    shift_cond_names[GET_FIELD (insn, 16, 18)]);
+		  (*info->fprintf_func)
+		    (info->stream, "%s",
+		     shift_cond_names[GET_FIELD (insn, 16, 18)]);
+
+		  /* If the next character in args is 'n', it will handle
+		     putting out the space.  */
+		  if (s[1] != 'n')
+		    (*info->fprintf_func) (info->stream, " ");
 		  break;
 		case 'V':
 		  fput_const (extract_5_store (insn), info);
