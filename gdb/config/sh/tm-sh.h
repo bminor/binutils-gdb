@@ -1,5 +1,5 @@
 /* Target-specific definition for a Hitachi Super-H.
-   Copyright (C) 1993 Free Software Foundation, Inc.
+   Copyright (C) 1993, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -44,6 +44,18 @@ struct gdbarch_tdep
     int SPC_REGNUM;   /*         sh3, sh3-dsp, sh3e, sh4 */
     int RS_REGNUM;    /* sh-dsp,      sh3-dsp            */
     int RE_REGNUM;    /* sh-dsp,      sh3-dsp            */
+    int DR0_REGNUM;
+    int DR1_REGNUM;
+    int DR2_REGNUM;
+    int DR3_REGNUM;
+    int DR4_REGNUM;
+    int DR5_REGNUM;
+    int DR6_REGNUM;
+    int DR7_REGNUM;
+    int FV0_REGNUM;
+    int FV1_REGNUM;
+    int FV2_REGNUM;
+    int FV3_REGNUM;
   };
 
 /* Registers common to all the SH variants. */
@@ -60,6 +72,12 @@ enum
     MACL_REGNUM = 21,
     SR_REGNUM = 22
   };
+
+/* Define DO_REGISTERS_INFO() to do machine-specific formatting
+   of register dumps. */
+extern void sh_do_registers_info (int regnum, int fpregs);
+#undef  DO_REGISTERS_INFO
+#define DO_REGISTERS_INFO(REGNUM, FP) sh_do_registers_info(REGNUM, FP)
 
 #define NUM_REALREGS 59 /* used in remote-e7000.c which is not multiarched. */
 

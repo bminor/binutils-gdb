@@ -1,3 +1,33 @@
+2000-07-24  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* config/sh/tm-sh.h (struct gdbarch_tdep): Add sh4 specific
+ 	pseudo registers.
+	(DO_REGISTERS_INFO): Define.
+
+	* sh-tdep.c (sh_sh4_register_name): New function.
+	(sh_generic_show_regs, sh3_show_regs, sh3e_show_regs,
+ 	sh3_dsp_show_regs, sh4_show_regs, sh_dsp_show_regs): Update
+ 	signature.
+	(sh_show_regs_command): New function. Actual function called by
+ 	the 'regs' command.
+	(sh_register_byte): Rename to...
+	(sh_default_register_byte): ...New function.
+	(sh_sh4_register_byte): New function.
+	(sh_register_raw_size): Rename to...
+	(sh_default_register_raw_size): ...New function.
+	(sh_sh4_register_raw_size): New function.
+	(sh_sh4_register_virtual_type): New function.
+	(sh_sh4_build_float_register_type): New function.
+	(sh_fetch_pseudo_register, sh_store_pseudo_register): New
+ 	functions.
+	(fv_reg_base_num, dr_reg_base_num): New functions.
+	(do_fv_register_info, do_dr_register_info, sh_do_pseudo_register,
+ 	sh_do_fp_register, sh_do_register, sh_print_register,
+ 	sh_do_registers_info): New functions.
+	(sh_gdbarch_init): Initialize sh4 pseudo registers to -1. Update
+ 	architecture specific parts.
+	(_initialize_sh_tdep): Use sh_show_regs_command for 'regs' command.
+
 2000-07-24  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2read.c (read_structure_scope): Correct overzealous

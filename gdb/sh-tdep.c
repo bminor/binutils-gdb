@@ -41,25 +41,31 @@
 #undef XMALLOC
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
-static gdbarch_register_raw_size_ftype sh_register_raw_size;
-static gdbarch_register_virtual_size_ftype sh_register_virtual_size;
-static gdbarch_register_virtual_type_ftype sh_register_virtual_type;
-static gdbarch_register_byte_ftype sh_register_byte;
+
+/* Frame interpretation related functions. */
 static gdbarch_breakpoint_from_pc_ftype sh_breakpoint_from_pc;
 static gdbarch_frame_chain_ftype sh_frame_chain;
 static gdbarch_frame_saved_pc_ftype sh_frame_saved_pc;
 static gdbarch_skip_prologue_ftype sh_skip_prologue;
+
 static gdbarch_frame_init_saved_regs_ftype sh_nofp_frame_init_saved_regs;
 static gdbarch_frame_init_saved_regs_ftype sh_fp_frame_init_saved_regs;
+static gdbarch_init_extra_frame_info_ftype sh_init_extra_frame_info;
+static gdbarch_pop_frame_ftype sh_pop_frame;
+static gdbarch_saved_pc_after_call_ftype sh_saved_pc_after_call;
+static gdbarch_frame_args_address_ftype sh_frame_args_address;
+static gdbarch_frame_locals_address_ftype sh_frame_locals_address;
+
+/* Function call related functions. */
 static gdbarch_extract_return_value_ftype sh_extract_return_value;
 static gdbarch_extract_struct_value_address_ftype sh_extract_struct_value_address;
 static gdbarch_use_struct_convention_ftype sh_use_struct_convention;
-static gdbarch_init_extra_frame_info_ftype sh_init_extra_frame_info;
 static gdbarch_store_struct_return_ftype sh_store_struct_return;
 static gdbarch_push_arguments_ftype sh_push_arguments;
 static gdbarch_push_return_address_ftype sh_push_return_address;
-static gdbarch_pop_frame_ftype sh_pop_frame;
-static gdbarch_saved_pc_after_call_ftype sh_saved_pc_after_call;
+static gdbarch_coerce_float_to_double_ftype sh_coerce_float_to_double;
+static gdbarch_store_return_value_ftype	sh_default_store_return_value;
+static gdbarch_store_return_value_ftype	sh3e_sh4_store_return_value;
 
 static gdbarch_register_name_ftype sh_generic_register_name;
 static gdbarch_register_name_ftype sh_sh_register_name;
@@ -68,27 +74,43 @@ static gdbarch_register_name_ftype sh_sh3e_register_name;
 static gdbarch_register_name_ftype sh_sh_dsp_register_name;
 static gdbarch_register_name_ftype sh_sh3_dsp_register_name;
 
-static gdbarch_frame_args_address_ftype sh_frame_args_address;
-static gdbarch_frame_locals_address_ftype sh_frame_locals_address;
-static gdbarch_coerce_float_to_double_ftype sh_coerce_float_to_double;
-static gdbarch_store_return_value_ftype	sh_default_store_return_value;
-static gdbarch_store_return_value_ftype	sh3e_sh4_store_return_value;
+/* Registers display related functions */
+static gdbarch_register_raw_size_ftype sh_default_register_raw_size;
+static gdbarch_register_raw_size_ftype sh_sh4_register_raw_size;
 
-static gdbarch_register_byte_ftype sh_register_byte;
-static gdbarch_register_raw_size_ftypesh_register_raw_size;
 static gdbarch_register_virtual_size_ftype sh_register_virtual_size;
+
+static gdbarch_register_byte_ftype sh_default_register_byte;
+static gdbarch_register_byte_ftype sh_sh4_register_byte;
+
 static gdbarch_register_virtual_type_ftype sh_sh3e_register_virtual_type;
+static gdbarch_register_virtual_type_ftype sh_sh4_register_virtual_type;
 static gdbarch_register_virtual_type_ftype sh_default_register_virtual_type;
 
-static void sh_generic_show_regs (char *, int);
-static void sh3_show_regs (char *, int);
-static void sh3e_show_regs (char *, int);
-static void sh3_dsp_show_regs (char *, int);
-static void sh_dsp_show_regs (char *, int);
-static void sh4_show_regs (char *, int);
+static void sh_generic_show_regs (void);
+static void sh3_show_regs (void);
+static void sh3e_show_regs (void);
+static void sh3_dsp_show_regs (void);
+static void sh_dsp_show_regs (void);
+static void sh4_show_regs (void);
+static void sh_show_regs_command (char *, int);
 
-void (*sh_show_regs) (char *, int);
- 
+static struct type *sh_sh4_build_float_register_type (int high);
+
+static gdbarch_fetch_pseudo_register_ftype sh_fetch_pseudo_register;
+static gdbarch_store_pseudo_register_ftype sh_store_pseudo_register;
+static int fv_reg_base_num (int);
+static int dr_reg_base_num (int);
+static void do_fv_register_info (int fv_regnum);
+static void do_dr_register_info (int dr_regnum);
+static void sh_do_pseudo_register (int regnum);
+static void sh_do_fp_register (int regnum);
+static void sh_do_register (int regnum);
+static void sh_print_register (int regnum);
+
+void (*sh_show_regs) (void);
+
+
 /* Define other aspects of the stack frame.
    we keep a copy of the worked out return pc lying around, since it
    is a useful bit of info */
@@ -241,6 +263,30 @@ sh_sh3_dsp_register_name (int reg_nr)
   return register_names[reg_nr];
 }
 
+static char *
+sh_sh4_register_name (int reg_nr)
+{
+  static char *register_names[] =
+  {
+    "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
+    "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
+    "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
+    "fpul", "fpscr",
+    "fr0",  "fr1",  "fr2",  "fr3",  "fr4",  "fr5",  "fr6",  "fr7",
+    "fr8",  "fr9",  "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
+    "ssr",  "spc",
+    "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
+    "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
+    "dr0",  "dr1",  "dr2",  "dr3",  "dr4",  "dr5",  "dr6",  "dr7",
+    "fv0",  "fv1",  "fv2",  "fv3",
+  };
+  if (reg_nr < 0)
+    return NULL;
+  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
+    return NULL;
+  return register_names[reg_nr];
+}
+
 static unsigned char *
 sh_breakpoint_from_pc (pcptr, lenptr)
      CORE_ADDR *pcptr;
@@ -303,16 +349,12 @@ sh_breakpoint_from_pc (pcptr, lenptr)
 #define IS_ADD_R3SP(x)		((x) == 0x3f3c)
 
 /* FMOV.S FRm,@-Rn  Rn-4-->Rn, FRm-->(Rn)     1111nnnnmmmm1011
-   or
    FMOV DRm,@-Rn    Rn-8-->Rn, DRm-->(Rn)     1111nnnnmmm01011
-   or
    FMOV XDm,@-Rn    Rn-8-->Rn, XDm-->(Rn)     1111nnnnmmm11011 */
 #define IS_FMOV(x)		(((x) & 0xf00f) == 0xf00b)
 
 /* MOV Rm,Rn            Rm-->Rn          0110nnnnmmmm0011 
-   or
    MOV.L Rm,@(disp,Rn)  Rm-->(dispx4+Rn) 0001nnnnmmmmdddd
-   or
    MOV.L Rm,@Rn         Rm-->(Rn)        0010nnnnmmmm0010
    where Rm is one of r4,r5,r6,r7 which are the argument registers. */
 #define IS_ARG_MOV(x) \
@@ -1074,9 +1116,7 @@ sh3e_sh4_store_return_value (struct type *type, char *valbuf)
 /* Print the registers in a form similar to the E7000 */
 
 static void
-sh_generic_show_regs (args, from_tty)
-     char *args;
-     int from_tty;
+sh_generic_show_regs ()
 {
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),
@@ -1110,9 +1150,7 @@ sh_generic_show_regs (args, from_tty)
 }
 
 static void
-sh3_show_regs (args, from_tty)
-     char *args;
-     int from_tty;
+sh3_show_regs ()
 {
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),
@@ -1148,10 +1186,9 @@ sh3_show_regs (args, from_tty)
 		   (long) read_register (15));
 }
 
+
 static void
-sh3e_show_regs (args, from_tty)
-     char *args;
-     int from_tty;
+sh3e_show_regs ()
 {
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),
@@ -1210,9 +1247,7 @@ sh3e_show_regs (args, from_tty)
 }
 
 static void
-sh3_dsp_show_regs (args, from_tty)
-     char *args;
-     int from_tty;
+sh3_dsp_show_regs ()
 {
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),
@@ -1269,9 +1304,7 @@ sh3_dsp_show_regs (args, from_tty)
 }
 
 static void
-sh4_show_regs (args, from_tty)
-     char *args;
-     int from_tty;
+sh4_show_regs ()
 {
   int pr = read_register (gdbarch_tdep (current_gdbarch)->FPSCR_REGNUM) & 0x80000;
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
@@ -1335,9 +1368,7 @@ sh4_show_regs (args, from_tty)
 }
 
 static void
-sh_dsp_show_regs (args, from_tty)
-     char *args;
-     int from_tty;
+sh_dsp_show_regs ()
 {
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),
@@ -1389,22 +1420,56 @@ sh_dsp_show_regs (args, from_tty)
 		   (long) read_register (gdbarch_tdep (current_gdbarch)->RE_REGNUM));
 }
 
+void sh_show_regs_command (char *args, int from_tty)
+{
+  if (sh_show_regs)
+    (*sh_show_regs)();
+}
+
 /* Index within `registers' of the first byte of the space for
    register N.  */
 static int
-sh_register_byte (reg_nr)
+sh_default_register_byte (reg_nr)
      int reg_nr;
 {
   return (reg_nr * 4);
 }
 
+static int
+sh_sh4_register_byte (reg_nr)
+     int reg_nr;
+{
+  if (reg_nr >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
+      && reg_nr <= gdbarch_tdep (current_gdbarch)->DR7_REGNUM)
+    return (dr_reg_base_num (reg_nr) * 4);
+  else if  (reg_nr >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM 
+	    && reg_nr <= gdbarch_tdep (current_gdbarch)->FV3_REGNUM)
+    return (fv_reg_base_num (reg_nr) * 4);
+  else
+    return (reg_nr * 4);
+}
+
 /* Number of bytes of storage in the actual machine representation for
    register REG_NR.  */
 static int
-sh_register_raw_size (reg_nr)
+sh_default_register_raw_size (reg_nr)
      int reg_nr;
 {
   return 4;
+}
+
+static int
+sh_sh4_register_raw_size (reg_nr)
+     int reg_nr;
+{
+  if (reg_nr >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
+      && reg_nr <= gdbarch_tdep (current_gdbarch)->DR7_REGNUM)
+    return 8;
+  else if  (reg_nr >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM 
+	    && reg_nr <= gdbarch_tdep (current_gdbarch)->FV3_REGNUM)
+    return 16;
+  else
+    return 4;
 }
 
 /* Number of bytes of storage in the program's representation
@@ -1432,10 +1497,284 @@ sh_sh3e_register_virtual_type (reg_nr)
 }
 
 static struct type *
+sh_sh4_register_virtual_type (reg_nr)
+     int reg_nr;
+{
+  if ((reg_nr >= FP0_REGNUM
+       && (reg_nr <= gdbarch_tdep (current_gdbarch)->FP15_REGNUM)) 
+      || (reg_nr == gdbarch_tdep (current_gdbarch)->FPUL_REGNUM))
+    return builtin_type_float;
+  else if (reg_nr >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
+	   && reg_nr <= gdbarch_tdep (current_gdbarch)->DR7_REGNUM)
+    return builtin_type_double;
+  else if  (reg_nr >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM 
+	   && reg_nr <= gdbarch_tdep (current_gdbarch)->FV3_REGNUM)
+    return sh_sh4_build_float_register_type (3);
+  else
+    return builtin_type_int;
+}
+
+static struct type *
+sh_sh4_build_float_register_type (int high)
+{
+  struct type *temp;
+
+  temp = create_range_type (NULL, builtin_type_int, 0, high);
+  return create_array_type (NULL, builtin_type_float, temp);
+}
+
+static struct type *
 sh_default_register_virtual_type (reg_nr)
      int reg_nr;
 {
   return builtin_type_int;
+}
+
+void
+sh_fetch_pseudo_register (int reg_nr)
+{
+  int base_regnum, portion;
+
+  if (!register_cached (reg_nr))
+    {
+      if (reg_nr >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
+	  && reg_nr <= gdbarch_tdep (current_gdbarch)->DR7_REGNUM)
+        {
+	  base_regnum = dr_reg_base_num (reg_nr);
+
+          /* Read the real regs for which this one is an alias.  */
+          for (portion = 0; portion < 2; portion++)
+            if (!register_cached (base_regnum + portion))
+              target_fetch_registers (base_regnum + portion);
+        }
+      else if (reg_nr >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM 
+	       && reg_nr <= gdbarch_tdep (current_gdbarch)->FV3_REGNUM)
+        {
+	  base_regnum = fv_reg_base_num (reg_nr);
+
+          /* Read the real regs for which this one is an alias.  */
+          for (portion = 0; portion < 4; portion++)
+            if (!register_cached (base_regnum + portion))
+              target_fetch_registers (base_regnum + portion);
+
+        }
+      register_valid [reg_nr] = 1;
+    }
+}
+
+void
+sh_store_pseudo_register (int reg_nr)
+{
+  int base_regnum, portion;
+
+  if (reg_nr >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM
+      && reg_nr <= gdbarch_tdep (current_gdbarch)->DR7_REGNUM)
+    {
+      base_regnum = dr_reg_base_num (reg_nr);
+
+      /* Write the real regs for which this one is an alias.  */
+      for (portion = 0; portion < 2; portion++)
+	{
+	  register_valid[base_regnum + portion] = 1;
+	  target_store_registers (base_regnum + portion);
+	}
+    }
+  else if (reg_nr >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM
+	   && reg_nr <= gdbarch_tdep (current_gdbarch)->FV3_REGNUM)
+    {
+      base_regnum = fv_reg_base_num (reg_nr);
+
+      /* Write the real regs for which this one is an alias.  */
+      for (portion = 0; portion < 4; portion++)
+	{
+	  register_valid[base_regnum + portion] = 1;
+	  target_store_registers (base_regnum + portion);
+	}
+    }
+}
+
+static int
+fv_reg_base_num (int fv_regnum)
+{
+  int fp_regnum;
+
+  fp_regnum = FP0_REGNUM + 
+    (fv_regnum - gdbarch_tdep (current_gdbarch)->FV0_REGNUM) * 4;
+  return fp_regnum;
+}
+
+static int
+dr_reg_base_num (int dr_regnum)
+{
+  int fp_regnum;
+
+  fp_regnum = FP0_REGNUM + 
+    (dr_regnum - gdbarch_tdep (current_gdbarch)->DR0_REGNUM) * 2;
+  return fp_regnum;
+}
+
+static void
+do_fv_register_info (int fv_regnum)
+{
+  int first_fp_reg_num = fv_reg_base_num (fv_regnum);
+  printf_filtered ("fv%d\t0x%08x\t0x%08x\t0x%08x\t0x%08x\n", 
+		     fv_regnum - gdbarch_tdep (current_gdbarch)->FV0_REGNUM, 
+		     (int) read_register (first_fp_reg_num),
+		     (int) read_register (first_fp_reg_num + 1),
+		     (int) read_register (first_fp_reg_num + 2),
+		     (int) read_register (first_fp_reg_num + 3));
+}
+
+static void
+do_dr_register_info (int dr_regnum)
+{
+  int first_fp_reg_num = dr_reg_base_num (dr_regnum);
+
+  printf_filtered ("dr%d\t0x%08x%08x\n", 
+		    dr_regnum - gdbarch_tdep (current_gdbarch)->DR0_REGNUM, 
+		    (int) read_register (first_fp_reg_num),
+		    (int) read_register (first_fp_reg_num + 1));
+}
+
+static void
+sh_do_pseudo_register (int regnum)
+{
+  if (regnum < NUM_REGS || regnum >= NUM_REGS + NUM_PSEUDO_REGS)
+    internal_error ("Invalid pasudo register number %d\n", regnum);
+  else if (regnum >= NUM_REGS && 
+	   regnum < gdbarch_tdep (current_gdbarch)->FV0_REGNUM)
+    do_dr_register_info (regnum);
+  else if (regnum >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM &&
+	   regnum <= gdbarch_tdep (current_gdbarch)->FV3_REGNUM)
+    do_fv_register_info (regnum);
+}
+
+
+static void
+sh_do_fp_register (int regnum)
+{				/* do values for FP (float) regs */
+  char *raw_buffer;
+  double flt;	/* double extracted from raw hex data */
+  int inv;
+  int j;
+
+  /* Allocate space for the float. */
+  raw_buffer = (char *) alloca (REGISTER_RAW_SIZE (FP0_REGNUM));
+
+  /* Get the data in raw format.  */
+  if (read_relative_register_raw_bytes (regnum, raw_buffer))
+    error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
+
+  /* Get the register as a number */ 
+  flt = unpack_double (builtin_type_float, raw_buffer, &inv);
+
+  /* Print the name and some spaces. */
+  fputs_filtered (REGISTER_NAME (regnum), gdb_stdout);
+  print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), gdb_stdout);
+
+  /* Print the value. */
+  printf_filtered (inv ? "<invalid float>" : "%-10.9g", flt);
+
+  /* Print the fp register as hex. */
+  printf_filtered ("\t(raw 0x");
+  for (j = 0; j < REGISTER_RAW_SIZE (regnum); j++)
+    {
+      register int idx = TARGET_BYTE_ORDER == BIG_ENDIAN ? j
+	: REGISTER_RAW_SIZE (regnum) - 1 - j;
+      printf_filtered ("%02x", (unsigned char) raw_buffer[idx]);
+    }
+  printf_filtered (")");
+  printf_filtered ("\n");
+}
+
+static void
+sh_do_register (int regnum)
+{
+  char raw_buffer[MAX_REGISTER_RAW_SIZE];
+
+  fputs_filtered (REGISTER_NAME (regnum), gdb_stdout);
+  print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), gdb_stdout);
+
+  /* Get the data in raw format.  */
+  if (read_relative_register_raw_bytes (regnum, raw_buffer))
+    printf_filtered ("*value not available*\n");
+      
+  val_print (REGISTER_VIRTUAL_TYPE (regnum), raw_buffer, 0, 0,
+	     gdb_stdout, 'x', 1, 0, Val_pretty_default);
+  printf_filtered ("\t");
+  val_print (REGISTER_VIRTUAL_TYPE (regnum), raw_buffer, 0, 0,
+	     gdb_stdout, 0, 1, 0, Val_pretty_default);
+  printf_filtered ("\n");
+}
+
+static void
+sh_print_register (int regnum)
+{
+  if (regnum < 0 || regnum >= NUM_REGS + NUM_PSEUDO_REGS)
+    internal_error ("Invalid register number %d\n", regnum);
+
+  else if (regnum > 0 && regnum < NUM_REGS)
+    {
+      if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
+	sh_do_fp_register (regnum);	/* FP regs */
+      else
+	sh_do_register (regnum);	/* All other regs */
+    }
+
+  else if (regnum < NUM_REGS + NUM_PSEUDO_REGS)
+    sh_do_pseudo_register (regnum);
+}
+
+void
+sh_do_registers_info (int regnum, int fpregs)
+{
+  if (regnum != -1)		/* do one specified register */
+    {
+      if (*(REGISTER_NAME (regnum)) == '\0')
+	error ("Not a valid register for the current processor type");
+
+      sh_print_register (regnum);
+    }
+  else
+    /* do all (or most) registers */
+    {
+      regnum = 0;
+      while (regnum < NUM_REGS)
+	{
+	  /* If the register name is empty, it is undefined for this
+	     processor, so don't display anything.  */
+	  if (REGISTER_NAME (regnum) == NULL
+	      || *(REGISTER_NAME (regnum)) == '\0')
+	    { 
+	      regnum++;
+	      continue;
+	    }
+
+	  if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
+	    {
+	      if (fpregs)
+		{
+		  /* true for "INFO ALL-REGISTERS" command */
+		  sh_do_fp_register (regnum);	/* FP regs */
+		  regnum ++;
+		}
+	      else
+		regnum += (gdbarch_tdep (current_gdbarch)->FP15_REGNUM - FP0_REGNUM);	/* skip FP regs */
+	    }
+	  else
+	    {
+	      sh_do_register (regnum);	/* All other regs */
+	      regnum++;
+	    }
+	}
+
+      if (fpregs)
+	while (regnum < NUM_REGS + NUM_PSEUDO_REGS)
+	  {
+	    sh_do_pseudo_register (regnum);
+	    regnum++;
+	  }
+    }
 }
 
 static gdbarch_init_ftype sh_gdbarch_init;
@@ -1484,7 +1823,22 @@ sh_gdbarch_init (info, arches)
   tdep->RE_REGNUM = -1;
   tdep->SSR_REGNUM = -1;
   tdep->SPC_REGNUM = -1;
+  tdep->DR0_REGNUM = -1;
+  tdep->DR1_REGNUM = -1;
+  tdep->DR2_REGNUM = -1;
+  tdep->DR3_REGNUM = -1;
+  tdep->DR4_REGNUM = -1;
+  tdep->DR5_REGNUM = -1;
+  tdep->DR6_REGNUM = -1;
+  tdep->DR7_REGNUM = -1;
+  tdep->FV0_REGNUM = -1;
+  tdep->FV1_REGNUM = -1;
+  tdep->FV2_REGNUM = -1;
+  tdep->FV3_REGNUM = -1;
   set_gdbarch_fp0_regnum (gdbarch, -1);
+  set_gdbarch_num_pseudo_regs (gdbarch, 0);
+  set_gdbarch_max_register_raw_size (gdbarch, 4);
+  set_gdbarch_max_register_virtual_size (gdbarch, 4);
 
   switch (info.bfd_arch_info->mach)
     {
@@ -1494,6 +1848,9 @@ sh_gdbarch_init (info, arches)
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
       set_gdbarch_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
+      set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
       break;
     case bfd_mach_sh2:
       sh_register_name = sh_sh_register_name;
@@ -1501,6 +1858,9 @@ sh_gdbarch_init (info, arches)
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
       set_gdbarch_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
+      set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
       break;      
     case bfd_mach_sh_dsp:
       sh_register_name = sh_sh_dsp_register_name;
@@ -1508,6 +1868,9 @@ sh_gdbarch_init (info, arches)
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
       set_gdbarch_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
+      set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
       tdep->DSR_REGNUM = 24;
       tdep->A0G_REGNUM = 25;
       tdep->A0_REGNUM = 26;
@@ -1529,6 +1892,9 @@ sh_gdbarch_init (info, arches)
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
       set_gdbarch_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
+      set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
       tdep->SSR_REGNUM = 41;
       tdep->SPC_REGNUM = 42;
       break;
@@ -1538,6 +1904,9 @@ sh_gdbarch_init (info, arches)
       sh_store_return_value = sh3e_sh4_store_return_value;
       sh_register_virtual_type = sh_sh3e_register_virtual_type;
       set_gdbarch_frame_init_saved_regs (gdbarch, sh_fp_frame_init_saved_regs);
+      set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
       set_gdbarch_fp0_regnum (gdbarch, 25);
       tdep->FPUL_REGNUM = 23;
       tdep->FPSCR_REGNUM = 24;
@@ -1551,6 +1920,9 @@ sh_gdbarch_init (info, arches)
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
       set_gdbarch_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
+      set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
       tdep->DSR_REGNUM = 24;
       tdep->A0G_REGNUM = 25;
       tdep->A0_REGNUM = 26;
@@ -1569,17 +1941,35 @@ sh_gdbarch_init (info, arches)
       tdep->SPC_REGNUM = 42;
       break;
     case bfd_mach_sh4:
-      sh_register_name = sh_generic_register_name;
-      sh_show_regs = sh_generic_show_regs;
+      sh_register_name = sh_sh4_register_name;
+      sh_show_regs = sh4_show_regs;
       sh_store_return_value = sh3e_sh4_store_return_value;
-      sh_register_virtual_type = sh_sh3e_register_virtual_type;
+      sh_register_virtual_type = sh_sh4_register_virtual_type;
       set_gdbarch_frame_init_saved_regs (gdbarch, sh_fp_frame_init_saved_regs);
       set_gdbarch_fp0_regnum (gdbarch, 25);
+      set_gdbarch_register_raw_size (gdbarch, sh_sh4_register_raw_size);
+      set_gdbarch_register_virtual_size (gdbarch, sh_sh4_register_raw_size);
+      set_gdbarch_register_byte (gdbarch, sh_sh4_register_byte);
+      set_gdbarch_num_pseudo_regs (gdbarch, 12);
+      set_gdbarch_max_register_raw_size (gdbarch, 4 * 4);
+      set_gdbarch_max_register_virtual_size (gdbarch, 4 * 4);
       tdep->FPUL_REGNUM = 23;
       tdep->FPSCR_REGNUM = 24;
       tdep->FP15_REGNUM = 40;
       tdep->SSR_REGNUM = 41;
       tdep->SPC_REGNUM = 42;
+      tdep->DR0_REGNUM = 59;
+      tdep->DR1_REGNUM = 60;
+      tdep->DR2_REGNUM = 61;
+      tdep->DR3_REGNUM = 62;
+      tdep->DR4_REGNUM = 63;
+      tdep->DR5_REGNUM = 64;
+      tdep->DR6_REGNUM = 65;
+      tdep->DR7_REGNUM = 66;
+      tdep->FV0_REGNUM = 67;
+      tdep->FV1_REGNUM = 68;
+      tdep->FV2_REGNUM = 69;
+      tdep->FV3_REGNUM = 70;
       break;
     default:
       sh_register_name = sh_generic_register_name;
@@ -1587,6 +1977,9 @@ sh_gdbarch_init (info, arches)
       sh_store_return_value = sh_default_store_return_value;
       sh_register_virtual_type = sh_default_register_virtual_type;
       set_gdbarch_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
+      set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
       break;
     }
 
@@ -1604,11 +1997,6 @@ sh_gdbarch_init (info, arches)
   set_gdbarch_register_name (gdbarch, sh_register_name);
   set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_register_bytes (gdbarch, NUM_REGS * 4);
-  set_gdbarch_register_byte (gdbarch, sh_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, sh_register_raw_size);
-  set_gdbarch_max_register_raw_size (gdbarch, 4);
-  set_gdbarch_register_virtual_size (gdbarch, sh_register_virtual_size);
-  set_gdbarch_max_register_virtual_size (gdbarch, 4);
   set_gdbarch_register_virtual_type (gdbarch, sh_register_virtual_type);
 
   set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
@@ -1654,6 +2042,8 @@ sh_gdbarch_init (info, arches)
   set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
 
+  set_gdbarch_fetch_pseudo_register (gdbarch, sh_fetch_pseudo_register);
+  set_gdbarch_store_pseudo_register (gdbarch, sh_store_pseudo_register);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);
   set_gdbarch_frame_chain (gdbarch, sh_frame_chain);
@@ -1677,5 +2067,5 @@ _initialize_sh_tdep ()
   register_gdbarch_init (bfd_arch_sh, sh_gdbarch_init);
   tm_print_insn = gdb_print_insn_sh;
 
-  add_com ("regs", class_vars, sh_show_regs, "Print all registers");
+  add_com ("regs", class_vars, sh_show_regs_command, "Print all registers");
 }
