@@ -1,3 +1,8 @@
+Thu Jul  3 13:48:11 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* mips-tdep.c (mips_push_arguments): don't left-adjust 32-bit
+	integers in 64-bit register parameters before function calls.
+
 Mon Jun 30 17:54:51 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* mips-tdep.c (mips_push_arguments): special-case handling for

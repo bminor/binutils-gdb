@@ -1375,19 +1375,19 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 		{
 		  CORE_ADDR regval = extract_address (val, partial_len);
 
-		  /* A simple argument being passed in a general register.
-		     If the length is smaller than the register size, we
-		     have to adjust the alignment on big endian targets.  
+		  /* A non-floating-point argument being passed in a 
+		     general register.  If a struct or union, and if
+		     small enough for a single register, we have to 
+		     adjust the alignment.
 
-		     For structs, it appears that we have to 
-		     do the same even in little endian mode.
+		     It does not seem to be necessary to do the
+		     same for integral types.
 
-		     But don't do this adjustment on EABI targets. */
+		     Also don't do this adjustment on EABI targets.  */
 
 		  if (!MIPS_EABI &&
 		      TYPE_LENGTH (arg_type) < MIPS_REGSIZE &&
-		      (TARGET_BYTE_ORDER == BIG_ENDIAN ||
-		       typecode == TYPE_CODE_STRUCT    ||
+		      (typecode == TYPE_CODE_STRUCT ||
 		       typecode == TYPE_CODE_UNION))
 		    regval <<= ((MIPS_REGSIZE - partial_len) * 
 				TARGET_CHAR_BIT);
