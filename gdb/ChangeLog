@@ -1,5 +1,12 @@
 2004-04-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64-linux-nat.c (fetch_inferior_registers): Correctly check
+	whether a register is supplied by PTRACE_GETFPREGS.
+	(store_inferior_registers): Likewise.
+	* amd64bsd-nat.c (fetch_inferior_registers): Correctly check
+	whether a register is supplied by PT_GETFPREGS.
+	(store_inferior_registers): Likewise.
+
 	* config/i386/linux.mt (TDEPFILES): Remove solib-legacy.o.
 	* config/i386/linux64.mt (TDEPFILES): Likewise.
 

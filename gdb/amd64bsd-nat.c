@@ -54,7 +54,7 @@ fetch_inferior_registers (int regnum)
 	return;
     }
 
-  if (regnum == -1 || regnum >= AMD64_ST0_REGNUM)
+  if (regnum == -1 || !amd64_native_gregset_supplies_p (regnum))
     {
       struct fpreg fpregs;
 
@@ -90,7 +90,7 @@ store_inferior_registers (int regnum)
 	return;
     }
 
-  if (regnum == -1 || regnum >= AMD64_ST0_REGNUM)
+  if (regnum == -1 || !amd64_native_gregset_supplies_p (regnum))
     {
       struct fpreg fpregs;
 
