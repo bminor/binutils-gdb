@@ -1,5 +1,40 @@
 2003-03-29  Andrew Cagney  <cagney@redhat.com>
 
+	* infttrace.h: New file.
+	* hpread.c: Include "gdb_assert.h" and "somsolib.h".
+	(hpread_get_textlow): Detect an uninitialized dn_bufp.
+	(hpread_read_doc_function_type): Detect an initialized type1.
+	(hpread_quick_traverse): Initialize mod_name_string.
+	* somsolib.h: Add #ifdef SOMSOLIB_H wrapper.
+	(som_solib_get_solib_by_pc): Declare.
+	(so_lib_thread_start_addr): Declare.
+	(no_shared_libraries): Declare.
+	* somread.c (init_import_symbols): Make static.  Add forward
+	declaration.
+	* config/pa/nm-hppah.h: Include "infttrace.h" for
+	parent_attach_all.
+	(hppa_insert_hw_watchpoint): Declare.
+	(hppa_can_use_hw_watchpoint, hppa_remove_hw_watchpoint): Declare.
+	* hppah-nat.c: Include "gdb_string.h".
+	(parent_attach_all): Delete extern declaration, moved to
+	"infttrace.h".
+	(hppa_can_use_hw_watchpoint): Change type of "type" parameter to
+	int.
+	(hppa_remove_hw_watchpoint, hppa_insert_hw_watchpoint): Ditto.
+	* Makefile.in (infttrace_h): Define.
+	(hpread.o): Update dependencies.
+	(hppah-nat.o, hppa-hpux-tdep.o, hppa-tdep.o): Ditto.
+	* hppa-hpux-tdep.c: Include "gdb_string.h".
+	* hppa-tdep.c (hppa_frame_saved_pc): Initialize "old_pc".
+	* infrun.c (handle_inferior_event): Always initialize
+	stepped_after_stopped_by_watchpoint.  Add default and remove
+	fallthrough in switch statement.
+	* infttrace.c (hppa_can_use_hw_watchpoint): Change type of "type"
+	parameter to int.
+	(hppa_remove_hw_watchpoint): Ditto.
+
+2003-03-29  Andrew Cagney  <cagney@redhat.com>
+
 	* ns32k-tdep.c (ns32k_gdbarch_init): Set the call dummy breakpoint
 	offset.
 

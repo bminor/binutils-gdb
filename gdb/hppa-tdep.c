@@ -33,7 +33,7 @@
 #include "language.h"
 #include "osabi.h"
 #include "gdb_assert.h"
-
+#include "infttrace.h"
 /* For argument passing to the inferior */
 #include "symtab.h"
 
@@ -886,7 +886,7 @@ hppa_frame_saved_pc (struct frame_info *frame)
 {
   CORE_ADDR pc = get_frame_pc (frame);
   struct unwind_table_entry *u;
-  CORE_ADDR old_pc;
+  CORE_ADDR old_pc = 0;
   int spun_around_loop = 0;
   int rp_offset = 0;
 

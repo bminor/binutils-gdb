@@ -5378,8 +5378,7 @@ hppa_insert_hw_watchpoint (int pid, CORE_ADDR start, LONGEST len, int type)
    watchpoints.
  */
 int
-hppa_remove_hw_watchpoint (int pid, CORE_ADDR start, LONGEST len,
-			   enum bptype type)
+hppa_remove_hw_watchpoint (int pid, CORE_ADDR start, LONGEST len, int type)
 {
   CORE_ADDR page_start;
   int dictionary_is_empty;
@@ -5439,7 +5438,7 @@ hppa_remove_hw_watchpoint (int pid, CORE_ADDR start, LONGEST len,
    hardware support.
  */
 int
-hppa_can_use_hw_watchpoint (enum bptype type, int cnt, enum bptype ot)
+hppa_can_use_hw_watchpoint (int type, int cnt, int ot)
 {
   return (type == bp_hardware_watchpoint);
 }
