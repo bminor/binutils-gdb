@@ -551,8 +551,10 @@ avr_operand (opcode, where, op, line)
 	      as_bad (_ ("cannot both predecrement and postincrement"));
 	    op_mask |= 0x1001;
 	  }
+
 	/* avr1 can do "ld r,Z" and "st Z,r" but no other pointer
-	   registers, no predecrement, no postincrement */
+	   registers, no predecrement, no postincrement.  */
+	
 	if ((op_mask & 0x100F) && !(avr_mcu->isa & AVR_ISA_SRAM))
 	  as_bad (_ ("addressing mode not supported"));
       }
