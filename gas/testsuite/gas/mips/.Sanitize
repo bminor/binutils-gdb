@@ -112,6 +112,7 @@ lb-empic.d
 lb-pic.s
 lb-svr4pic.d
 lb-xgot.d
+lb-xgot-ilocks.d
 lb.d
 lb.s
 ld.d
