@@ -5296,7 +5296,7 @@ coff_final_link_postscript (abfd, pfinfo)
 #define coff_SWAP_scnhdr_in coff_swap_scnhdr_in
 #endif
 
-static const bfd_coff_backend_data bfd_coff_std_swap_table =
+static const bfd_coff_backend_data bfd_coff_std_swap_table ATTRIBUTE_UNUSED =
 {
   coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
   coff_SWAP_aux_out, coff_SWAP_sym_out,

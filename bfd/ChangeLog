@@ -29,6 +29,9 @@
 	* coff-tic4x.c (coff_rtype_to_howto): Move definition before
 	inclusion of coffcode.h so that it is actually picked up.
 
+	* coffcode.h (coff_std_swap_table): Add an unused attribute in
+	case it is not used.
+
 2005-02-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (toc_adjusting_stub_needed): Return true for
