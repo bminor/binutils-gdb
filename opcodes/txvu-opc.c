@@ -30,6 +30,22 @@
 #endif
 #define CONCAT2(a,b)	XCONCAT2(a,b)
 
+typedef struct {
+  int value;
+  const char *name;
+} keyword;
+
+static int lookup_keyword_value PARAMS ((const keyword *, const char *, int));
+static const char *lookup_keyword_name PARAMS ((const keyword *table, int));
+
+static char *scan_symbol PARAMS ((char *));
+
+/* Return non-zero if CH is a character that may appear in a symbol.  */
+/* FIXME: This will need revisiting.  */
+#define issymchar(ch) (isalnum (ch) || ch == '_')
+
+#define SKIP_BLANKS(var) while (isspace (*(var))) ++(var)
+
 /* ??? One can argue it's preferable to have the PARSE_FN support in tc-vxvu.c
    and the PRINT_FN support in txvu-dis.c.  For this project I like having
    them all in one place.  */
@@ -1470,12 +1486,15 @@ const struct txvu_operand dma_operands[] =
 
 struct txvu_opcode dma_opcodes[] =
 {
+  /* ??? Some of these may take optional arguments.
+     The way to handle that is to have multiple table entries, those with and
+     those without the optional arguments.  */
   { "dmacnt", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 1 },
   { "dmanext", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 2 },
   { "dmaref", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 3 },
   { "dmarefs", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 4 },
   { "dmacall", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 5 },
-  { "dmareg", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 6 },
+  { "dmaret", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 6 },
   { "dmaend", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 7 }
 };
 const int dma_opcodes_count = sizeof (dma_opcodes) / sizeof (dma_opcodes[0]);
@@ -1505,7 +1524,6 @@ parse_dma_flags (pstr, errmsg)
 	}
     }
 
-  *errmsg = NULL;
   *pstr = str + 1;
   return flags;
 }
@@ -1551,11 +1569,41 @@ print_dma_flags (info, insn, value)
     }
 }
 
+/* Parse a DMA data spec which can be either of '*' or a quad word count.  */
+
 static long
 parse_dma_data (pstr, errmsg)
      char **pstr;
      const char **errmsg;
 {
+  char *str = *pstr;
+  long count;
+
+  if (*str == '*')
+    {
+      ++*pstr;
+      /* -1 is a special marker to caller to tell it the count is to be
+	 computed from the data.  */
+      return -1;
+    }
+
+  if (isdigit (*str))
+    {
+      char *start = str;
+      while (*str && *str != ',')
+	++str;
+      if (*str != ',')
+	{
+	  *errmsg = "invalid dma count";
+	  return 0;
+	}
+      count = atoi (start);
+      *pstr = str;
+      return count;
+    }
+
+  *errmsg = "invalid dma count";
+  return 0;
 }
 
 static void
@@ -1592,6 +1640,17 @@ parse_dma_next (pstr, errmsg)
      char **pstr;
      const char **errmsg;
 {
+  char *start = *pstr;
+  char *end = scan_symbol (start);
+
+  if (end == start)
+    {
+      *errmsg = "invalid dma next tag";
+      return 0;
+    }
+  /* FIXME: unfinished */
+  *pstr = end;
+  return 0;
 }
 
 static void
@@ -1673,9 +1732,26 @@ const struct txvu_operand gpuif_operands[] =
 
 struct txvu_opcode gpuif_opcodes[] =
 {
+  /* Some of these may take optional arguments.
+     The way this is handled is to have multiple table entries, those with and
+     those without the optional arguments.  */
+
   { "gpuifpacked", { SP, GPUIF_PRIM, C, GPUIF_REGS, C, GPUIF_NLOOP, C, GPUIF_EOP }, 0, 1 },
+  { "gpuifpacked", { SP, GPUIF_REGS, C, GPUIF_NLOOP, C, GPUIF_EOP }, 0, 1 },
+  { "gpuifpacked", { SP, GPUIF_PRIM, C, GPUIF_REGS, C, GPUIF_EOP }, 0, 1 },
+  { "gpuifpacked", { SP, GPUIF_PRIM, C, GPUIF_REGS, C, GPUIF_NLOOP }, 0, 1 },
+  { "gpuifpacked", { SP, GPUIF_REGS, C, GPUIF_EOP }, 0, 1 },
+  { "gpuifpacked", { SP, GPUIF_REGS, C, GPUIF_NLOOP }, 0, 1 },
+  { "gpuifpacked", { SP, GPUIF_PRIM, C, GPUIF_REGS }, 0, 1 },
+  { "gpuifpacked", { SP, GPUIF_REGS }, 0, 1 },
+
   { "gpuifreglist", { SP, GPUIF_REGS, C, GPUIF_NLOOP, C, GPUIF_EOP }, 0, 2 },
+  { "gpuifreglist", { SP, GPUIF_REGS, C, GPUIF_EOP }, 0, 2 },
+  { "gpuifreglist", { SP, GPUIF_REGS, C, GPUIF_NLOOP }, 0, 2 },
+  { "gpuifreglist", { SP, GPUIF_REGS }, 0, 2 },
+
   { "gpuifimage", { SP, GPUIF_NLOOP }, 0, 3 },
+  { "gpuifimage", { 0 }, 0, 3 },
 };
 const int gpuif_opcodes_count = sizeof (gpuif_opcodes) / sizeof (gpuif_opcodes[0]);
 
@@ -1686,6 +1762,27 @@ parse_gpuif_prim (pstr, errmsg)
      char **pstr;
      const char **errmsg;
 {
+  char *str = *pstr;
+  char *start;
+  long prim;
+
+  if (strncasecmp (str, "prim=", 5) != 0)
+    {
+      *errmsg = "missing PRIM spec";
+      return 0;
+    }
+  str += 5;
+  for (start = str; isalnum (*str); ++str)
+    continue;
+  if (str == start)
+    {
+      *errmsg = "missing PRIM spec";
+      return 0;
+    }
+  /* FIXME: Yes, atoi doesn't do error checking.  Later.  */
+  prim = atoi (start);
+  *pstr = str;
+  return prim;
 }
 
 static void
@@ -1717,11 +1814,95 @@ print_gpuif_prim (info, insn, value)
   (*info->fprintf_func) (info->stream, "???");
 }
 
+static const keyword gpuif_regs[] = {
+  { GPUIF_REG_PRIM,      "prim" },
+  { GPUIF_REG_RGBAQ,     "rgbaq" },
+  { GPUIF_REG_ST,        "st" },
+  { GPUIF_REG_UV,        "uv" },
+  { GPUIF_REG_XYZF2,     "xyzf2" },
+  { GPUIF_REG_TEXCLUT_1, "texclut_1" },
+  { GPUIF_REG_TEXCLUT_2, "texclut_2" },
+  { GPUIF_REG_TEX0_1,    "tex0_1" },
+  { GPUIF_REG_TEX0_2,    "tex0_2" },
+  { GPUIF_REG_TEX1_1,    "tex1_1" },
+  { GPUIF_REG_TEX1_2,    "tex1_2" },
+  { GPUIF_REG_XYZF3,     "xyzf3" },
+  { GPUIF_REG_PRMODE,    "prmode" },
+  { GPUIF_REG_A_D,       "a_d" },
+  { GPUIF_REG_NOP,       "nop" },
+  { 0, 0 }
+};
+
+/* Parse a REGS= spec.
+   The result is ???.  */
+
 static long
 parse_gpuif_regs (pstr, errmsg)
      char **pstr;
      const char **errmsg;
 {
+  char *str = *pstr;
+  char *start;
+  char c;
+  int reg;
+
+  if (strncasecmp (str, "regs=", 5) != 0)
+    {
+      *errmsg = "missing REGS spec";
+      return 0;
+    }
+  str += 5;
+  SKIP_BLANKS (str);
+  if (*str != '{')
+    {
+      *errmsg = "missing '{' in REGS spec";
+      return 0;
+    }
+  ++str;
+
+  while (*str && *str != '}')
+    {
+      /* Pick out the register name.  */
+
+      SKIP_BLANKS (str);
+      start = str;
+      str = scan_symbol (str);
+      if (str == start)
+	{
+	  *errmsg = "invalid REG";
+	  return 0;
+	}
+
+      /* Look it up in the table.  */
+
+      c = *str;
+      *str = 0;
+      reg = lookup_keyword_value (gpuif_regs, start, 0);
+      *str = c;
+      if (reg == -1)
+	{
+	  *errmsg = "invalid REG";
+	  return 0;
+	}
+
+      /* FIXME: save `reg' away somewhere */
+
+      /* Prepare for the next one.  */
+
+      SKIP_BLANKS (str);
+      if (*str == ',')
+	++str;
+      else if (*str != '}')
+	break;
+    }
+  if (*str != '}')
+    {
+      *errmsg = "missing '{' in REGS spec";
+      return 0;
+    }
+
+  *pstr = str + 1;
+  return 0; /* FIXME */
 }
 
 static void
@@ -1758,6 +1939,29 @@ parse_gpuif_nloop (pstr, errmsg)
      char **pstr;
      const char **errmsg;
 {
+  char *str = *pstr;
+  char *start;
+  char c;
+  int nloop;
+
+  if (strncasecmp (str, "nloop=", 6) != 0)
+    {
+      *errmsg = "missing NLOOP spec";
+      return 0;
+    }
+  str += 6;
+  SKIP_BLANKS (str);
+  start = str;
+  str = scan_symbol (str);
+  if (str == start)
+    {
+      *errmsg = "invalid NOOP spec";
+      return 0;
+    }
+  /* FIXME: error checking */
+  nloop = atoi (start);
+  *pstr = str;
+  return nloop;
 }
 
 static void
@@ -1794,6 +1998,13 @@ parse_gpuif_eop (pstr, errmsg)
      char **pstr;
      const char **errmsg;
 {
+  if (strncasecmp (*pstr, "eop", 3) == 0)
+    {
+      *pstr += 3;
+      return 1;
+    }
+  *errmsg = "missing `EOP'";
+  return 0;
 }
 
 static void
@@ -2026,4 +2237,59 @@ gpuif_opcode_lookup_dis (insn)
      TXVU_INSN insn;
 {
   return &gpuif_opcodes[0];
+}
+
+/* Misc. utilities.  */
+
+/* Scan a symbol and return a pointer to one past the end.  */
+
+static char *
+scan_symbol (sym)
+     char *sym;
+{
+  while (*sym && issymchar (*sym))
+    ++sym;
+  return sym;
+}
+
+/* Given a keyword, look up its value, or -1 if not found.  */
+
+static int
+lookup_keyword_value (table, name, case_sensitive_p)
+     const keyword *table;
+     const char *name;
+     int case_sensitive_p;
+{
+  const keyword *p;
+
+  if (case_sensitive_p)
+    {
+      for (p = table; p->name; ++p)
+	if (strcmp (name, p->name) == 0)
+	  return p->value;
+    }
+  else
+    {
+      for (p = table; p->name; ++p)
+	if (strcasecmp (name, p->name) == 0)
+	  return p->value;
+    }
+
+  return -1;
+}
+
+/* Given a keyword's value, look up its name, or NULL if not found.  */
+
+static const char *
+lookup_keyword_name (table, value)
+     const keyword *table;
+     int value;
+{
+  const keyword *p;
+
+  for (p = table; p->name; ++p)
+    if (value == p->value)
+      return p->name;
+
+  return NULL;
 }

@@ -6,6 +6,9 @@ Mon Jan 26 16:25:51 1998  Doug Evans  <devans@seba.cygnus.com>
 	* txvu-opc.c: insert/extract/print fns take pointer to
 	insn now and not insn itself.  Add initial dma,pke,gpuif support.
 	Parse fn no longer needs to set errmsg = NULL for success.
+	(lookup_keyword_{value,name}): New functions.
+	(scan_symbol): New function.
+	(issymchar,SKIP_BLANKS): New macros.
 
 Fri Jan 23 01:49:24 1998  Doug Evans  <devans@seba.cygnus.com>
 
