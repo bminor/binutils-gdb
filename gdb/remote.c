@@ -1,5 +1,5 @@
 /* Remote target communications for serial-line targets in custom GDB protocol
-   Copyright 1988, 1991, 1992, 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1988, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -275,108 +275,19 @@ static int remote_remove_breakpoint PARAMS ((CORE_ADDR, char *));
 
 static int hexnumlen PARAMS ((ULONGEST num));
 
+static void init_remote_ops PARAMS ((void));
+
+static void init_extended_remote_ops PARAMS ((void));
+
 /* exported functions */
 
 extern int fromhex PARAMS ((int a));
 extern void getpkt PARAMS ((char *buf, int forever));
 extern int putpkt PARAMS ((char *buf));
 
-/* Define the target subroutine names */
-
 static struct target_ops remote_ops ;
 
-static void init_remote_ops(void)
-{
-  remote_ops.to_shortname =   "remote";		
-  remote_ops.to_longname =   "Remote serial target in gdb-specific protocol";
-  remote_ops.to_doc =   "Use a remote computer via a serial line; using a gdb-specific protocol.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya)." ;  
-  remote_ops.to_open =   remote_open;		
-  remote_ops.to_close =   remote_close;		
-  remote_ops.to_attach =   NULL;		
-  remote_ops.to_detach =   remote_detach;	
-  remote_ops.to_resume =   remote_resume;	
-  remote_ops.to_wait  =   remote_wait;		
-  remote_ops.to_fetch_registers  =   remote_fetch_registers;
-  remote_ops.to_store_registers  =   remote_store_registers;
-  remote_ops.to_prepare_to_store =   remote_prepare_to_store;
-  remote_ops.to_xfer_memory  =   remote_xfer_memory;	
-  remote_ops.to_files_info  =   remote_files_info;	
-  remote_ops.to_insert_breakpoint =   remote_insert_breakpoint;
-  remote_ops.to_remove_breakpoint =   remote_remove_breakpoint;
-  remote_ops.to_terminal_init  =   NULL;		
-  remote_ops.to_terminal_inferior =   NULL;		
-  remote_ops.to_terminal_ours_for_output =   NULL;
-  remote_ops.to_terminal_ours  =   NULL;	
-  remote_ops.to_terminal_info  =   NULL;	
-  remote_ops.to_kill  =   remote_kill;		
-  remote_ops.to_load  =   generic_load;		
-  remote_ops.to_lookup_symbol =   NULL;		
-  remote_ops.to_create_inferior =   NULL;	
-  remote_ops.to_mourn_inferior =   remote_mourn;
-  remote_ops.to_can_run  =   0;			
-  remote_ops.to_notice_signals =   0;		
-  remote_ops.to_thread_alive  =   remote_thread_alive;
-  remote_ops.to_stop  =   0;		
-  remote_ops.to_stratum =   process_stratum;
-  remote_ops.DONT_USE =   NULL;		
-  remote_ops.to_has_all_memory =   1;	
-  remote_ops.to_has_memory =   1;	
-  remote_ops.to_has_stack =   1;	
-  remote_ops.to_has_registers =   1;	
-  remote_ops.to_has_execution =   1;	
-  remote_ops.to_sections =   NULL;	
-  remote_ops.to_sections_end =   NULL;	
-  remote_ops.to_magic =   OPS_MAGIC ;	
-} /* init_remote_ops */
-
 static struct target_ops extended_remote_ops ;
-
-static void init_extended_remote_ops(void) 
-{
-  extended_remote_ops.to_shortname =   "extended-remote";	
-  extended_remote_ops.to_longname =   "Extended remote serial target in gdb-specific protocol";
-  extended_remote_ops.to_doc =   "Use a remote computer via a serial line; using a gdb-specific protocol.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya).",
-    extended_remote_ops.to_open =   extended_remote_open;	
-  extended_remote_ops.to_close =   remote_close;	
-  extended_remote_ops.to_attach =   NULL;		
-  extended_remote_ops.to_detach =   remote_detach;	
-  extended_remote_ops.to_resume =   remote_resume;	
-  extended_remote_ops.to_wait  =   remote_wait;		
-  extended_remote_ops.to_fetch_registers  =   remote_fetch_registers;
-  extended_remote_ops.to_store_registers  =   remote_store_registers;	
-  extended_remote_ops.to_prepare_to_store =   remote_prepare_to_store;
-  extended_remote_ops.to_xfer_memory  =   remote_xfer_memory;	
-  extended_remote_ops.to_files_info  =   remote_files_info;	
-  extended_remote_ops.to_insert_breakpoint =   remote_insert_breakpoint;
-  extended_remote_ops.to_remove_breakpoint =   remote_remove_breakpoint;
-  extended_remote_ops.to_terminal_init  =   NULL;		
-  extended_remote_ops.to_terminal_inferior =   NULL;		
-  extended_remote_ops.to_terminal_ours_for_output =   NULL;
-  extended_remote_ops.to_terminal_ours  =   NULL;	
-  extended_remote_ops.to_terminal_info  =   NULL;	
-  extended_remote_ops.to_kill  =   remote_kill;		
-  extended_remote_ops.to_load  =   generic_load;	
-  extended_remote_ops.to_lookup_symbol =   NULL;	
-  extended_remote_ops.to_create_inferior =   extended_remote_create_inferior;
-  extended_remote_ops.to_mourn_inferior =   extended_remote_mourn;
-  extended_remote_ops.to_can_run  =   0;			
-  extended_remote_ops.to_notice_signals =   0;			
-  extended_remote_ops.to_thread_alive  =   remote_thread_alive;
-  extended_remote_ops.to_stop  =   0;			
-  extended_remote_ops.to_stratum =   process_stratum;
-  extended_remote_ops.DONT_USE =   NULL;	
-  extended_remote_ops.to_has_all_memory =   1;	
-  extended_remote_ops.to_has_memory =   1;	
-  extended_remote_ops.to_has_stack =   1;	
-  extended_remote_ops.to_has_registers =   1;	
-  extended_remote_ops.to_has_execution =   1;	
-  extended_remote_ops.to_sections =   NULL;	
-  extended_remote_ops.to_sections_end =   NULL;
-  extended_remote_ops.to_magic =   OPS_MAGIC ;
-} 
-
 
 /* This was 5 seconds, which is a long time to sit and wait.
    Unless this is going though some terminal server or multiplexer or
@@ -2034,8 +1945,6 @@ open_remote_target (name, from_tty, target, extended_p)
   remote_open_1 (name, from_tty, target, extended_p);
 }
 
-
-
 /* Table used by the crc32 function to calcuate the checksum. */
 static unsigned long crc32_table[256] = {0, 0};
 
@@ -2141,7 +2050,6 @@ compare_sections_command (args, from_tty)
     printf_filtered ("No loaded section named '%s'.\n", args);
 }
 
-
 static void
 packet_command (args, from_tty)
      char *args;
@@ -2169,12 +2077,59 @@ packet_command (args, from_tty)
   puts_filtered ("\n");
 }
 
+static void
+init_remote_ops ()
+{
+  remote_ops.to_shortname = "remote";		
+  remote_ops.to_longname = "Remote serial target in gdb-specific protocol";
+  remote_ops.to_doc = "Use a remote computer via a serial line; using a gdb-specific protocol.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).";  
+  remote_ops.to_open = remote_open;		
+  remote_ops.to_close = remote_close;		
+  remote_ops.to_detach = remote_detach;	
+  remote_ops.to_resume = remote_resume;	
+  remote_ops.to_wait = remote_wait;		
+  remote_ops.to_fetch_registers = remote_fetch_registers;
+  remote_ops.to_store_registers = remote_store_registers;
+  remote_ops.to_prepare_to_store = remote_prepare_to_store;
+  remote_ops.to_xfer_memory = remote_xfer_memory;	
+  remote_ops.to_files_info = remote_files_info;	
+  remote_ops.to_insert_breakpoint = remote_insert_breakpoint;
+  remote_ops.to_remove_breakpoint = remote_remove_breakpoint;
+  remote_ops.to_kill = remote_kill;		
+  remote_ops.to_load = generic_load;		
+  remote_ops.to_mourn_inferior = remote_mourn;
+  remote_ops.to_thread_alive = remote_thread_alive;
+  remote_ops.to_stratum = process_stratum;
+  remote_ops.to_has_all_memory = 1;	
+  remote_ops.to_has_memory = 1;	
+  remote_ops.to_has_stack = 1;	
+  remote_ops.to_has_registers = 1;	
+  remote_ops.to_has_execution = 1;	
+  remote_ops.to_magic = OPS_MAGIC;	
+}
+
+static void
+init_extended_remote_ops () 
+{
+  extended_remote_ops = remote_ops;
+
+  extended_remote_ops.to_shortname = "extended-remote";	
+  extended_remote_ops.to_longname = "Extended remote serial target in gdb-specific protocol";
+  extended_remote_ops.to_doc = "Use a remote computer via a serial line; using a gdb-specific protocol.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).",
+  extended_remote_ops.to_open = extended_remote_open;	
+  extended_remote_ops.to_create_inferior = extended_remote_create_inferior;
+  extended_remote_ops.to_mourn_inferior = extended_remote_mourn;
+} 
+
 void
 _initialize_remote ()
 {
-  init_remote_ops() ;
-  init_extended_remote_ops() ;
+  init_remote_ops ();
   add_target (&remote_ops);
+
+  init_extended_remote_ops ();
   add_target (&extended_remote_ops);
 
   add_cmd ("compare-sections", class_obscure, compare_sections_command, 
