@@ -1,3 +1,8 @@
+2002-01-04  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* i386nbsd-nat.c: Update copyright years.
+	Include i386-tdep.h.
+
 2002-01-04  Elena Zannoni  <ezannoni@redhat.com>
 
 	* stabsread.c: Update copyright years.

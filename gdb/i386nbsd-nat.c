@@ -1,5 +1,5 @@
 /* Native-dependent code for NetBSD/i386, for GDB.
-   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001
+   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -27,6 +27,9 @@
 #include "inferior.h"
 #include "gdbcore.h" /* for registers_fetched() */
 #include "regcache.h"
+
+/* Defines for XMM0_REGNUM etc. */
+#include "i386-tdep.h"
 
 #define RF(dst, src) \
 	memcpy(&registers[REGISTER_BYTE(dst)], &src, sizeof(src))
