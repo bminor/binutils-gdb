@@ -3015,7 +3015,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   prologue_cache.saved_regs = (CORE_ADDR *)
     xcalloc (1, (sizeof (CORE_ADDR)
-		 * (gdbarch_num_regs (gdbarch) + NUM_PSEUDO_REGS)));
+		 * (gdbarch_num_regs (gdbarch)
+		    + gdbarch_num_pseudo_regs (gdbarch))));
 
   return gdbarch;
 }
