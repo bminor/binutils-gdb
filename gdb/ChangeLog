@@ -1,3 +1,9 @@
+2003-04-02  Bob Rossi  <bob_rossi@cox.net>
+
+	* Makefile.in (SUBDIR_MI_OBS): Add "mi-cmd-file.o".
+	(SUBDIR_MI_SRCS): Add "mi-cmd-file.c".
+	(mi-cmd-file.o): Update dependencies.
+
 2003-04-01  Kevin Buettner  <kevinb@redhat.com>
 
 	* mips-tdep.c (mips_dwarf_dwarf2_ecoff_reg_to_regnum)
