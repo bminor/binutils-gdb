@@ -9787,12 +9787,16 @@ mips16_extended_frag (fragp, sec, stretch)
 	{
 	  fragS *f;
 
-	  /* Adjust stretch for any alignment frag.  FIXME: This
-             doesn't handle the fr_subtype field, which specifies a
-             maximum number of bytes to skip when doing an alignment.  */
-	  for (f = fragp; f != fragp->fr_symbol->sy_frag; f = f->fr_next)
+	  /* Adjust stretch for any alignment frag.  Note that if have
+             been expanding the earlier code, the symbol may be
+             defined in what appears to be an earlier frag.  FIXME:
+             This doesn't handle the fr_subtype field, which specifies
+             a maximum number of bytes to skip when doing an
+             alignment.  */
+	  for (f = fragp;
+	       f != NULL && f != fragp->fr_symbol->sy_frag;
+	       f = f->fr_next)
 	    {
-	      assert (f != NULL);
 	      if (f->fr_type == rs_align || f->fr_type == rs_align_code)
 		{
 		  if (stretch < 0)
@@ -9804,7 +9808,8 @@ mips16_extended_frag (fragp, sec, stretch)
 		    break;
 		}
 	    }
-	  val += stretch;
+	  if (f != NULL)
+	    val += stretch;
 	}
 
       addr = fragp->fr_address + fragp->fr_fix;

@@ -1,3 +1,9 @@
+Sat Mar  1 01:04:04 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (mips16_extended_frag): Don't assume that we
+	can rely on the frag address to determine whether a frag is
+	earlier or later.
+
 Fri Feb 28 14:40:00 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* write.h (LOCAL_LABEL): Only define if not BFD_ASSEMBLER.
