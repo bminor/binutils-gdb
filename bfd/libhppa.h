@@ -52,6 +52,10 @@ static INLINE unsigned long assemble_17 (unsigned int, unsigned int,
 static INLINE void dis_assemble_17 (unsigned int, unsigned int *,
 				    unsigned int *, unsigned int *)
      __attribute__ ((__unused__));
+static INLINE void dis_assemble_22 (unsigned int, unsigned int *,
+				    unsigned int *, unsigned int *,
+				    unsigned int *)
+     __attribute__ ((__unused__));
 static INLINE unsigned long assemble_21 (unsigned int)
      __attribute ((__unused__));
 static INLINE void dis_assemble_21 (unsigned int, unsigned int *)
@@ -332,6 +336,18 @@ dis_assemble_17 (as17, x, y, z)
   *y = (((as17 & 0x00400) >> 10) | ((as17 & 0x3ff) << 1)) & 0x7ff;
 }
 
+static INLINE void
+dis_assemble_22 (as22, a, b, c, d)
+     unsigned int as22;
+     unsigned int *a, *b, *c, *d;
+{
+
+  *d = (as22 & 0x200000) >> 21;
+  *a = (as22 & 0x1f0000) >> 16;
+  *b = (as22 & 0x0f800) >> 11;
+  *c = (((as22 & 0x00400) >> 10) | ((as22 & 0x3ff) << 1)) & 0x7ff;
+}
+
 static INLINE unsigned long
 assemble_21 (x)
      unsigned int x;
@@ -548,6 +564,15 @@ hppa_field_adjust (value, constant_value, r_field)
 #define BLE	0x39
 #define BE	0x38
 
+#define CMPBDT	0x27
+#define CMPBDF	0x2f
+#define CMPIBD	0x3b
+#define LDD	0x14
+#define STD	0x1c
+#define LDWL	0x17
+#define STWL	0x1f
+#define FDLW    0x16
+#define FSTW    0x1e
   
 /* Given a machine instruction, return its format.
 
@@ -580,6 +605,9 @@ bfd_hppa_insn2fmt (insn)
     case ADDIBF:
     case BVB:
     case BB:
+    case CMPBDT:
+    case CMPBDF:
+    case CMPIBD:
       fmt = 12;
       break;
     case LDO:
@@ -593,9 +621,24 @@ bfd_hppa_insn2fmt (insn)
     case STWM:
       fmt = 14;
       break;
+    case LDWL:
+    case STWL:
+    case FDLW:
+    case FSTW:
+      /* This is a hack.  Unfortunately, format 11 is already taken
+	 and we're using integers rather than an enum, so it's hard
+	 to describe the 10a format.  */
+      fmt = -11;
+      break;
+    case LDD:
+    case STD:
+      fmt = 10;
+      break;
     case BL:
     case BE:
     case BLE:
+      if ((insn & 0x00008000) == 0x00008000)
+	return 22;
       fmt = 17;
       break;
     case LDIL:

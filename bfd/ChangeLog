@@ -1,3 +1,16 @@
+Sun Sep 19 12:16:47 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* som.c (NO_PCREL_MODES): Define if the system does not define
+	R_SHORT_PCREL_MODE.
+	(hppa_som_gen_reloc_type): Handle both short and long pcrel branches.
+	(som_write_fixups): Eliminate redundant pcrel mode relocs.  Handle
+	R_LONG_PCREL_MODE and R_SHORT_PCREL_MODE
+	* libhppa.h (dis_assemble_22): New function.
+	(bfd_hppa_insn2fmt): Handle long branch.
+
+        * libhppa.h (bfd_hppa_insn2fmt): Decode and handle formats found
+        in PA2.0.
+
 1999-09-17  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* coff-i386.c (coff_i386_reloc_type_lookup): Support BFD_RELOC_16,

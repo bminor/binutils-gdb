@@ -751,6 +751,7 @@ static const int comp3_opcodes[] =
 
 /* And these first appeared in hpux10.  */
 #ifndef R_SHORT_PCREL_MODE
+#define NO_PCREL_MODES
 #define R_SHORT_PCREL_MODE 0x3e
 #endif
 
@@ -1684,9 +1685,28 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff, sym)
 
     case R_HPPA_NONE:
     case R_HPPA_ABS_CALL:
-    case R_HPPA_PCREL_CALL:
       /* Right now we can default all these.  */
       break;
+
+    case R_HPPA_PCREL_CALL:
+      {
+#ifndef NO_PCREL_MODES
+	/* If we have short and long pcrel modes, then generate the proper
+	   mode selector, then the pcrel relocation.  Redundant selectors
+	   will be eliminted as the relocs are sized and emitted.  */
+	final_types[0] = (int *) bfd_alloc (abfd, sizeof (int));
+	if (!final_types[0])
+	  return NULL;
+	if (format == 17)
+	  *final_types[0] = R_SHORT_PCREL_MODE;
+	else
+	  *final_types[0] = R_LONG_PCREL_MODE;
+	final_types[1] = final_type;
+	final_types[2] = NULL;
+	*final_type = base_type;
+#endif
+	break;
+      }
     }
   return final_types;
 }
@@ -2665,6 +2685,9 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 	   subsection = subsection->next)
 	{
 	  int reloc_offset, current_rounding_mode;
+#ifndef NO_PCREL_MODES
+ 	  int current_call_mode;
+#endif
 
 	  /* Find a subspace of this space.  */
 	  if (!som_is_subspace (subsection)
@@ -2699,6 +2722,9 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 	  reloc_offset = 0;
 	  som_initialize_reloc_queue (reloc_queue);
 	  current_rounding_mode = R_N_MODE;
+#ifndef NO_PCREL_MODES
+	  current_call_mode = R_SHORT_PCREL_MODE;
+#endif
 
 	  /* Translate each BFD relocation into one or more SOM 
 	     relocations.  */
@@ -2763,6 +2789,10 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		case R_END_TRY:
 		case R_N0SEL:
 		case R_N1SEL:
+#ifndef NO_PCREL_MODES
+		case R_SHORT_PCREL_MODE:
+		case R_LONG_PCREL_MODE:
+#endif
 		  reloc_offset = bfd_reloc->address;
 		  break;
 
@@ -2886,6 +2916,19 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		      current_rounding_mode = bfd_reloc->howto->type;
 		    }
 		  break;
+
+#ifndef NO_PCREL_MODES
+		case R_LONG_PCREL_MODE:
+		case R_SHORT_PCREL_MODE:
+		  if (bfd_reloc->howto->type != current_call_mode)
+		    {
+		      bfd_put_8 (abfd, bfd_reloc->howto->type, p);
+		      subspace_reloc_size += 1;
+		      p += 1;
+		      current_call_mode = bfd_reloc->howto->type;
+		    }
+		  break;
+#endif
 
 		case R_EXIT:
 		case R_ALT_ENTRY:
