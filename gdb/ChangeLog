@@ -1,5 +1,11 @@
 2002-07-26  Kevin Buettner  <kevinb@redhat.com>
 
+	* utils.c (host_pointer_to_address, address_to_host_pointer):
+	Change internal_error() message to indicate function responsible
+	for the error.
+
+2002-07-26  Kevin Buettner  <kevinb@redhat.com>
+
 	* ui-out.c (ui_out_field_core_addr): Remove unnecessary cast in
 	calls to local_hex_string_custom().
 

@@ -2464,7 +2464,7 @@ host_pointer_to_address (void *ptr)
 {
   if (sizeof (ptr) != TYPE_LENGTH (builtin_type_void_data_ptr))
     internal_error (__FILE__, __LINE__,
-		    "core_addr_to_void_ptr: bad cast");
+		    "host_pointer_to_address: bad cast");
   return POINTER_TO_ADDRESS (builtin_type_void_data_ptr, &ptr);
 }
 
@@ -2474,7 +2474,7 @@ address_to_host_pointer (CORE_ADDR addr)
   void *ptr;
   if (sizeof (ptr) != TYPE_LENGTH (builtin_type_void_data_ptr))
     internal_error (__FILE__, __LINE__,
-		    "core_addr_to_void_ptr: bad cast");
+		    "address_to_host_pointer: bad cast");
   ADDRESS_TO_POINTER (builtin_type_void_data_ptr, &ptr, addr);
   return ptr;
 }
