@@ -78,3 +78,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define SIGFRAME_BASE		0x0 
 #define SIGFRAME_PC_OFF		(SIGFRAME_BASE + 2 * 4)
 #define SIGFRAME_REGSAVE_OFF	(SIGFRAME_BASE + 3 * 4)
+#define SIGFRAME_FPREGSAVE_OFF	(SIGFRAME_BASE + 3 * 4 + 32 * 4 + 4)
