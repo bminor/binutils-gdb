@@ -1,3 +1,17 @@
+Fri Mar 10 14:43:48 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlex.l: Return -lFILENAME as the token LNAME.
+	* ldgram.y: Add token LNAME.
+	(input_list): Treat LNAME like NAME, but pass it to
+	lang_add_input_file as lang_input_file_is_l_enum.
+	* ld.texinfo: Document using -lFILENAME in INPUT.
+
+Thu Mar  9 12:21:51 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ldlang.c (lang_check): If the architectures are compatible call
+	bfd_merge_private_bfd_data to let the backend do additional
+	checks.
+
 start-sanitize-arc
 Tue Mar  7 21:10:28 1995  Doug Evans  <dje@chestnut.cygnus.com>
 
