@@ -1,6 +1,6 @@
 /* BFD back-end data structures for ELF files.
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003 Free Software Foundation, Inc.
+   2002, 2003, 2004 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1132,19 +1132,12 @@ struct elf_obj_tdata
   bfd_vma gp;				/* The gp value */
   unsigned int gp_size;			/* The gp size */
 
-  Elf_Internal_Shdr **group_sect_ptr;
-  int num_group;
-
   /* Information grabbed from an elf core file.  */
   int core_signal;
   int core_pid;
   int core_lwpid;
   char* core_program;
   char* core_command;
-
-  /* This is set to TRUE if the object was created by the backend
-     linker.  */
-  bfd_boolean linker;
 
   /* A mapping from external symbols to entries in the linker hash
      table, used when linking.  This is indexed by the symbol index
@@ -1170,21 +1163,6 @@ struct elf_obj_tdata
      name actually used, which will be the DT_SONAME entry if there is
      one.  */
   const char *dt_name;
-
-  /* When a reference in a regular object is resolved by a shared
-     object is loaded into via the DT_NEEDED entries by the linker
-     ELF emulation code, we need to add the shared object to the
-     DT_NEEDED list of the resulting binary to indicate the dependency
-     as if the -l option is passed to the linker. This field holds the
-     name of the loaded shared object.  */
-  const char *dt_soname;
-
-  /* Irix 5 often screws up the symbol table, sorting local symbols
-     after global symbols.  This flag is set if the symbol table in
-     this BFD appears to be screwed up.  If it is, we ignore the
-     sh_info field in the symbol table header, and always read all the
-     symbols.  */
-  bfd_boolean bad_symtab;
 
   /* Records the result of `get_program_header_size'.  */
   bfd_size_type program_header_size;
@@ -1213,8 +1191,8 @@ struct elf_obj_tdata
      created.  */
   asection *eh_frame_hdr;
 
-  /* Used to determine if the e_flags field has been initialized */
-  bfd_boolean flags_init;
+  Elf_Internal_Shdr **group_sect_ptr;
+  int num_group;
 
   /* Number of symbol version definitions we are about to emit.  */
   unsigned int cverdefs;
@@ -1237,6 +1215,25 @@ struct elf_obj_tdata
   asymbol *elf_text_symbol;
   asection *elf_data_section;
   asection *elf_text_section;
+
+  /* Whether a dyanmic object was specified normally on the linker
+     command line, or was specified when --as-needed was in effect,
+     or was found via a DT_NEEDED entry.  */
+  enum dynamic_lib_link_class dyn_lib_class;
+
+  /* This is set to TRUE if the object was created by the backend
+     linker.  */
+  bfd_boolean linker;
+
+  /* Irix 5 often screws up the symbol table, sorting local symbols
+     after global symbols.  This flag is set if the symbol table in
+     this BFD appears to be screwed up.  If it is, we ignore the
+     sh_info field in the symbol table header, and always read all the
+     symbols.  */
+  bfd_boolean bad_symtab;
+
+  /* Used to determine if the e_flags field has been initialized */
+  bfd_boolean flags_init;
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
@@ -1263,7 +1260,7 @@ struct elf_obj_tdata
 #define elf_local_got_offsets(bfd) (elf_tdata(bfd) -> local_got.offsets)
 #define elf_local_got_ents(bfd) (elf_tdata(bfd) -> local_got.ents)
 #define elf_dt_name(bfd)	(elf_tdata(bfd) -> dt_name)
-#define elf_dt_soname(bfd)	(elf_tdata(bfd) -> dt_soname)
+#define elf_dyn_lib_class(bfd)	(elf_tdata(bfd) -> dyn_lib_class)
 #define elf_bad_symtab(bfd)	(elf_tdata(bfd) -> bad_symtab)
 #define elf_flags_init(bfd)	(elf_tdata(bfd) -> flags_init)
 

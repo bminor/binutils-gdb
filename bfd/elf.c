@@ -1479,8 +1479,7 @@ _bfd_elf_link_hash_table_create (bfd *abfd)
 
 /* This is a hook for the ELF emulation code in the generic linker to
    tell the backend linker what file name to use for the DT_NEEDED
-   entry for a dynamic object.  The generic linker passes name as an
-   empty string to indicate that no DT_NEEDED entry should be made.  */
+   entry for a dynamic object.  */
 
 void
 bfd_elf_set_dt_needed_name (bfd *abfd, const char *name)
@@ -1491,11 +1490,11 @@ bfd_elf_set_dt_needed_name (bfd *abfd, const char *name)
 }
 
 void
-bfd_elf_set_dt_needed_soname (bfd *abfd, const char *name)
+bfd_elf_set_dyn_lib_class (bfd *abfd, int lib_class)
 {
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
       && bfd_get_format (abfd) == bfd_object)
-    elf_dt_soname (abfd) = name;
+    elf_dyn_lib_class (abfd) = lib_class;
 }
 
 /* Get the list of DT_NEEDED entries for a link.  This is a hook for

@@ -1,5 +1,23 @@
 2004-03-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf-bfd.h (struct elf_obj_tdata): Delete dt_soname field.  Add
+	dyn_lib_class field.  Rearrange for better packing.
+	(elf_dt_soname): Delete.
+	(elf_dyn_lib_class): Define.
+	* elf.c (bfd_elf_set_dt_needed_name): Update comment.
+	(bfd_elf_set_dt_needed_soname): Delete.
+	(bfd_elf_set_dyn_lib_class): New function.
+	* elflink.h (add_dt_needed_tag): New function.  Split out from..
+	(elf_link_add_object_symbols): ..here.  Rename "name" to "soname".
+	Use elf_dyn_lib_class to set dt_needed and add_needed.  Move fallback
+	initialization of soname.
+	(elf_link_check_versioned_symbol): Test elf_dyn_lib_class instead of
+	elf_dt_soname.
+	* bfd-in.h (enum dynamic_lib_link_class): New.
+	(bfd_elf_set_dt_needed_soname): Delete.
+	(bfd_elf_set_dyn_lib_class): Declare.
+	* bfd-in2.h: Regenerate.
+
 	* elflink.c (_bfd_elf_merge_symbol): Rewrite weak symbol handling.
 	(_bfd_elf_add_default_symbol): Remove indirect BFD_ASSERTs.
 	* elflink.h (elf_link_add_object_symbols): Don't clear dt_needed in

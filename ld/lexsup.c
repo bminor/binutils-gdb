@@ -1,6 +1,6 @@
 /* Parse options for the GNU linker.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003
+   2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -112,6 +112,8 @@ enum option_values
   OPTION_SPLIT_BY_RELOC,
   OPTION_SPLIT_BY_FILE ,
   OPTION_WHOLE_ARCHIVE,
+  OPTION_AS_NEEDED,
+  OPTION_NO_AS_NEEDED,
   OPTION_WRAP,
   OPTION_FORCE_EXE_SUFFIX,
   OPTION_GC_SECTIONS,
@@ -438,6 +440,10 @@ static const struct ld_option ld_options[] =
      TWO_DASHES },
   { {"whole-archive", no_argument, NULL, OPTION_WHOLE_ARCHIVE},
       '\0', NULL, N_("Include all objects from following archives"), TWO_DASHES },
+  { {"as-needed", no_argument, NULL, OPTION_AS_NEEDED},
+      '\0', NULL, N_("Only set DT_NEEDED for following dynamic libs if used"), TWO_DASHES },
+  { {"no-as-needed", no_argument, NULL, OPTION_NO_AS_NEEDED},
+      '\0', NULL, N_("Always set DT_NEEDED for following dynamic libs"), TWO_DASHES },
   { {"wrap", required_argument, NULL, OPTION_WRAP},
       '\0', N_("SYMBOL"), N_("Use wrapper functions for SYMBOL"), TWO_DASHES }
 };
@@ -1155,6 +1161,12 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_WHOLE_ARCHIVE:
 	  whole_archive = TRUE;
+	  break;
+	case OPTION_AS_NEEDED:
+	  as_needed = TRUE;
+	  break;
+	case OPTION_NO_AS_NEEDED:
+	  as_needed = FALSE;
 	  break;
 	case OPTION_WRAP:
 	  add_wrap (optarg);

@@ -1,6 +1,6 @@
 /* Main program of GNU linker.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003
+   2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
@@ -92,6 +92,10 @@ bfd_boolean version_printed;
 
 /* Nonzero means link in every member of an archive.  */
 bfd_boolean whole_archive;
+
+/* Nonzero means create DT_NEEDED entries only if a dynamic library
+   actually satisfies some reference in a regular object.  */
+bfd_boolean as_needed;
 
 /* TRUE if we should demangle symbol names.  */
 bfd_boolean demangling;

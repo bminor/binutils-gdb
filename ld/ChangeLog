@@ -1,3 +1,22 @@
+2004-03-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld.texinfo: Add --as-needed doco.
+	* ldmain.c (as_needed): New global var.
+	* ldmain.h (as_needed): Declare.
+	* lexsup.c (option_values): Add OPTION_AS_NEEDED and
+	OPTION_NO_AS_NEEDED.
+	(ld_options): Likewise.
+	(parse_args): Handle them.
+	* ldlang.h (lang_input_statement_type): Add as_needed field.
+	* ldlang.c (new_afile): Set p->as_needed.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_load_symbols): New function.
+	(gld${EMULATION_NAME}_try_needed): Use bfd_elf_set_dyn_lib_class.
+	(ld_${EMULATION_NAME}_emulation): Set LDEMUL_RECOGNIZED_FILE entry.
+
+	* ldlang.c (open_input_bfds): Remove useless cast.
+	(lang_do_assignments_1): Likewise.
+	(lang_for_each_input_section): Delete.
+
 2004-03-17  Ralf Corsepius <corsepiu@faw.uni-ulm.de>
 
 	* configure.tgt: Switch sh-*-rtems* to ELF.  Add sh-*-rtemscoff*.
