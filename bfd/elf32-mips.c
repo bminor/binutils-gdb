@@ -1794,7 +1794,7 @@ _bfd_mips_elf_section_from_shdr (abfd, hdr, name)
 	return false;
       break;
     case SHT_MIPS_CONTENT:
-      if (strncmp (name, ".MIPS.content", sizeof ".MIPS.contents" - 1) != 0)
+      if (strncmp (name, ".MIPS.content", sizeof ".MIPS.content" - 1) != 0)
 	return false;
       break;
     case SHT_MIPS_OPTIONS:
