@@ -146,6 +146,8 @@ struct m32r_hi_fixup
 
 static struct m32r_hi_fixup *m32r_hi_fixup_list;
 
+static void allow_m32rx PARAMS ((int));
+
 static void
 allow_m32rx (on)
      int on;
@@ -198,7 +200,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 int
 md_parse_option (c, arg)
      int c;
-     char *arg;
+     char *arg ATTRIBUTE_UNUSED;
 {
   switch (c)
     {
@@ -379,7 +381,7 @@ m32r_handle_align (fragp)
 
 static void
 fill_insn (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   frag_align_code (2, 0);
   prev_insn.insn = NULL;
@@ -394,7 +396,7 @@ fill_insn (ignore)
 
 static void
 debug_sym (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   register char *name;
   register char delim;
@@ -568,6 +570,9 @@ md_begin ()
    of instruction 'b'.  If 'check_outputs' is true then b's outputs are
    checked, otherwise its inputs are examined.  */
 
+static int first_writes_to_seconds_operands
+  PARAMS ((m32r_insn *, m32r_insn *, const int));
+
 static int
 first_writes_to_seconds_operands (a, b, check_outputs)
      m32r_insn *a;
@@ -642,6 +647,8 @@ first_writes_to_seconds_operands (a, b, check_outputs)
 
 /* Returns true if the insn can (potentially) alter the program counter.  */
 
+static int writes_to_pc PARAMS ((m32r_insn *));
+
 static int
 writes_to_pc (a)
      m32r_insn *a;
@@ -673,6 +680,8 @@ writes_to_pc (a)
 
 /* Return NULL if the two 16 bit insns can be executed in parallel.
    Otherwise return a pointer to an error message explaining why not.  */
+
+static const char *can_make_parallel PARAMS ((m32r_insn *, m32r_insn *));
 
 static const char *
 can_make_parallel (a, b)
@@ -710,6 +719,8 @@ can_make_parallel (a, b)
 
 /* Force the top bit of the second 16-bit insn to be set.  */
 
+static void make_parallel PARAMS ((CGEN_INSN_BYTES_PTR));
+
 static void
 make_parallel (buffer)
      CGEN_INSN_BYTES_PTR buffer;
@@ -724,6 +735,8 @@ make_parallel (buffer)
 
 /* Same as make_parallel except buffer contains the bytes in target order.  */
 
+static void target_make_parallel PARAMS ((char *));
+
 static void
 target_make_parallel (buffer)
      char *buffer;
@@ -734,6 +747,8 @@ target_make_parallel (buffer)
 
 /* Assemble two instructions with an explicit parallel operation (||) or
    sequential operation (->).  */
+
+static void assemble_two_insns PARAMS ((char *, char *, int));
 
 static void
 assemble_two_insns (str, str2, parallel_p)
@@ -1216,7 +1231,7 @@ md_section_align (segment, size)
 
 symbolS *
 md_undefined_symbol (name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -1230,7 +1245,7 @@ md_undefined_symbol (name)
 
 static void
 m32r_scomm (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   register char *name;
   register char c;
@@ -1450,7 +1465,9 @@ md_estimate_size_before_relax (fragP, segment)
 
   if (S_GET_SEGMENT (fragP->fr_symbol) != segment)
     {
+#if 0
       int old_fr_fix = fragP->fr_fix;
+#endif
 
       /* The symbol is undefined in this segment.
 	 Change the relaxation subtype to the max allowable and leave
@@ -1514,7 +1531,7 @@ md_estimate_size_before_relax (fragP, segment)
 
 void
 md_convert_frag (abfd, sec, fragP)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      segT sec;
      fragS *fragP;
 {
@@ -1626,7 +1643,7 @@ md_pcrel_from_section (fixP, sec)
 
 bfd_reloc_code_real_type
 md_cgen_lookup_reloc (insn, operand, fixP)
-     const CGEN_INSN *insn;
+     const CGEN_INSN *insn ATTRIBUTE_UNUSED;
      const CGEN_OPERAND *operand;
      fixS *fixP;
 {
@@ -1652,11 +1669,13 @@ md_cgen_lookup_reloc (insn, operand, fixP)
 
 /* Record a HI16 reloc for later matching with its LO16 cousin.  */
 
+static void m32r_record_hi16 PARAMS ((int, fixS *, segT));
+
 static void
 m32r_record_hi16 (reloc_type, fixP, seg)
      int reloc_type;
      fixS *fixP;
-     segT seg;
+     segT seg ATTRIBUTE_UNUSED;
 {
   struct m32r_hi_fixup *hi_fixup;
 
@@ -1842,7 +1861,6 @@ md_atof (type, litP, sizeP)
   int prec;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
   char *t;
-  char *atof_ieee ();
 
   switch (type)
     {

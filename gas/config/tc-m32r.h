@@ -74,6 +74,7 @@ extern void m32r_handle_align PARAMS ((fragS *));
 #define md_apply_fix3 gas_cgen_md_apply_fix3
 
 #define tc_fix_adjustable(FIX) m32r_fix_adjustable (FIX)
+bfd_boolean m32r_fix_adjustable PARAMS ((struct fix *));
 
 /* After creating a fixup for an instruction operand, we need to check for
    HI16 relocs and queue them up for later sorting.  */
@@ -90,7 +91,7 @@ extern void m32r_frob_file PARAMS ((void));
 
 /* When relaxing, we need to emit various relocs we otherwise wouldn't.  */
 #define TC_FORCE_RELOCATION(fix) m32r_force_relocation (fix)
-extern int m32r_force_relocation ();
+extern int m32r_force_relocation PARAMS ((struct fix *));
 
 /* Ensure insns at labels are aligned to 32 bit boundaries.  */
 int m32r_fill_insn PARAMS ((int));
@@ -104,4 +105,4 @@ int m32r_fill_insn PARAMS ((int));
 
 #define md_cleanup                 m32r_elf_section_change_hook
 #define md_elf_section_change_hook m32r_elf_section_change_hook
-extern void m32r_elf_section_change_hook ();
+extern void m32r_elf_section_change_hook PARAMS ((void));

@@ -1,5 +1,26 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-m32r.c (md_parse_option <arg>): Add ATTRIBUTE_UNUSED.
+	(fill_insn <ignore>): Likewise.
+	(debug_sym <ignore>): Likewise.
+	(md_undefined_symbol <name>): Likewise.
+	(m32r_scomm <ignore>): Likewise.
+	(md_convert_frag <abfd>): Likewise.
+	(md_cgen_lookup_reloc <insn>): Likewise.
+	(m32r_record_hi16 <seg>): Likewise.
+	(md_estimate_size_before_relax): #if 0 old_fr_fix.
+	(allow_m32rx): Prototype.
+	(first_writes_to_seconds_operands): Prototype.
+	(writes_to_pc): Prototype.
+	(can_make_parallel): Prototype.
+	(make_parallel): Prototype.
+	(target_make_parallel): Prototype.
+	(assemble_two_insns): Prototype.
+	(m32r_record_hi16): Prototype.
+	(md_atof): Remove declaration of atof_ieee.
+	* config/tc-m32r.h (m32r_fix_adjustable): Declare.
+	(m32r_force_relocation): Prototype.
+	(m32r_elf_section_change_hook): Prototype.
 	* config/tc-m68k.c (tc_gen_reloc <section>): Add ATTRIBUTE_UNUSED.
 	(md_show_usage): Fix signed/unsigned warning.
 	* config/tc-m88k.c (get_reg): Make reg_prefix param unsigned.
