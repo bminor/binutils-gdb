@@ -1,3 +1,7 @@
+Fri Dec 13 01:17:06 1991  K. Richard Pixley  (rich at cygnus.com)
+
+	* config.subr: resync from rms.
+
 Wed Dec 11 22:25:20 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
 	* configure, config.sub, config.subr: merge config.sub into

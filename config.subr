@@ -57,8 +57,8 @@ case $os in
 	-dec* | -mips* | -sequent* | -encore* | -pc532* | -sgi* | -sony* | \
 	-att* | -7300* | -3300* | -delta* | -motorola* | -sun[234]* | \
 	-unicom* | -ibm* | -next* | -hp | -isi* | -apollo | -altos* | \
-	-convergent* | -ncr* | -news | -32* | -3600* | -3100* | -c1* | \
-	-c2* | -convex* | -sun | -crds | -omron* | -dg | -ultra | -tti* | \
+	-convergent* | -ncr* | -news | -32* | -3600* | -3100* | -osf* | \
+	-c[123]* | -convex* | -sun | -crds | -omron* | -dg | -ultra | -tti* | \
 	-harris)
 		os=
 		basic_machine=$1
@@ -96,9 +96,10 @@ case $basic_machine in
 		;;
 	# Recognize the basic CPU types with with company name.
 	vax-* | tahoe-* | i386-* | i860-* | m68k-* | m68000-* | m88k-* \
-	      | sparc-* | ns32k-* | alliant-* | arm-* | c1-* | c2-* \
+	      | sparc-* | ns32k-* | alliant-* | arm-* | c[123]* \
 	      | mips-* | pyramid-* | tron-* | a29k-* | romp-* | rs6000-* \
-		| none-* | 580-* | cray2-* | h8300-* | i960-* | xmp-* | ymp-*)
+	      | none-* | 580-* | cray2-* | h8300-* | i960-* | xmp-* | ymp-* \
+	      | hppa-*)
 		;;
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
@@ -164,12 +165,24 @@ case $basic_machine in
 	alliant)
 		basic_machine=alliant-alliant
 		;;
-	c1 | convex-c1)
+	convex-c1)
 		basic_machine=c1-convex
 		os=-sysv
 		;;
-	c2 | convex-c2)
+	convex-c2)
 		basic_machine=c2-convex
+		os=-sysv
+		;;
+	convex-c32)
+		basic_machine=c32-convex
+		os=-sysv
+		;;
+	convex-c34)
+		basic_machine=c34-convex
+		os=-sysv
+		;;
+	convex-c38)
+		basic_machine=c38-convex
 		os=-sysv
 		;;
 	m88k-omron*)
@@ -267,6 +280,9 @@ case $basic_machine in
 	hp9k31[0-9] | hp9k2[0-9][0-9])
 		basic_machine=m68000-hp
 		;;
+	hp9k8[0-9][0-9] | hp9k7[0-9][0-9] | hp8[0-9][0-9] | hp7[0-9][0-9])
+		basic_machine=hp800-hp
+		;;
 	isi68 | isi)
 		basic_machine=m68k-isi
 		os=-sysv
@@ -308,7 +324,7 @@ case $basic_machine in
 		;;
 	amdahl)
 		basic_machine=580-amdahl
-		os=-uts
+		os=-sysv
 		;;
 	amigados)
 		basic_machine=m68k-cbm
@@ -316,7 +332,7 @@ case $basic_machine in
 		;;
 	amigaunix | amix)
 		basic_machine=m68k-cbm
-		os=-svr4
+		os=-sysv4
 		;;
 	cray | ymp)
 		basic_machine=ymp-cray
@@ -366,13 +382,9 @@ case $basic_machine in
 		basic_machine=m68k-hp
 		os=-hpux
 		;;
-	hpux)
-		basic_machine=m68k-hp
-		os=-hpux
-		;;
 	ncr3000)
 		basic_machine=i386-ncr
-		os=-svr4
+		os=-sysv4
 		;;
 	news1000)
 		basic_machine=m68030-sony
@@ -392,7 +404,8 @@ case $basic_machine in
 		;;
 	ultra3)
 		basic_machine=a29k-nyu
-		os=-sym1
+# Is sym1 really a different system, or is it really sysv?
+#		os=-sym1
 		;;
 	vxworks960)
 		basic_machine=i960-wrs
@@ -440,16 +453,32 @@ case $os in
 	# Each alternative must end in a *, to match a version number.
 	-bsd* | -sysv* | -mach* | -minix* | -genix* | -ultrix* \
 	      | -vms* | -sco* | -esix* | -isc* | -aix* | -sunos* | -hpux* \
-	      | -unos* | -osf* | -v88r* | -luna* | -dgux* | -amigados* \
-		| -msdos* | -aout* | -bout* | -elf* | -coff* | -ebmon* | -hds* \
-		| -irix* | -kern* | -m88kbcs | -nindy* | -none | -svr4 \
-		| -unicos* | -uts* | -vxworks* | -sym[1-9]* | -solari* \
-		| -dynix* | -aos* | -ctix* | -newsos* | -osf*)
+	      | -unos* | -osf* | -v88r* | -luna* | -dgux* | -solari* \
+	      | -amigados* | -msdos* \
+	      | -nindy* | -vxworks* | -ebmon* | -hds* | -m88kbcs*)
 		;;
 # start-sanitize-v9
 	-v7 | -v9 | -hal32 | -hal64) ;;
 # end-sanitize-v9
 
+	-newsos*)
+		os=-bsd
+		;;
+	-osfrose*)
+		os=-osf
+		;;
+	-osf*)
+		os=-bsd
+		;;
+	-dynix*)
+		os=-bsd
+		;;
+	-aos*)
+		os=-bsd
+		;;
+	-ctix* | -irix* | -uts*)
+		os=-sysv
+		;;
 	*)
 		# Get rid of the `-' at the beginning of $os.
 		os=`echo $1 | sed 's/[^-]*-//'`
