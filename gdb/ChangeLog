@@ -1,3 +1,8 @@
+2002-02-25  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* config/djgpp/djconfig.sh: Set NM=nm and CFLAGS="-g -O2" in the
+	 list of exported variables.
+
 2002-02-24  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/configure.srv: New file.

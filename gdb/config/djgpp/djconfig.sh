@@ -5,7 +5,7 @@
 # configuring other GNU programs for DJGPP.
 #
 #=====================================================================
-# Copyright 1997, 1999, 2000, 2001 Free Software Foundation, Inc.
+# Copyright 1997, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 #
 # Originally written by Robert Hoehne, revised by Eli Zaretskii.
 #  This file is part of GDB.
@@ -122,7 +122,9 @@ utod $srcdir/ltmain.sh
 
 # Give the configure script some hints:
 export LD=ld
+export NM=nm
 export CC=gcc
+export CFLAGS="-O2 -g"
 export RANLIB=ranlib
 export DEFAULT_YACC="bison -y"
 export YACC="bison -y"
