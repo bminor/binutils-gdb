@@ -1,5 +1,9 @@
 -*- text -*-
 
+Changes since 2.7:
+
+Motorola ColdFire 5200 support added (configure for m68k and use -m5200).
+
 Changes since 2.6:
 
 The PowerPC assembler now allows the use of symbolic register names (r0, etc.)
