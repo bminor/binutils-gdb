@@ -270,7 +270,6 @@ struct gdbarch
   gdbarch_sigtramp_end_ftype *sigtramp_end;
   gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p;
   gdbarch_construct_inferior_arguments_ftype *construct_inferior_arguments;
-  gdbarch_dwarf2_build_frame_info_ftype *dwarf2_build_frame_info;
   gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special;
   gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special;
   const char * name_of_malloc;
@@ -437,7 +436,6 @@ struct gdbarch startup_gdbarch =
   0,  /* sigtramp_end */
   generic_in_function_epilogue_p,  /* in_function_epilogue_p */
   construct_inferior_arguments,  /* construct_inferior_arguments */
-  0,  /* dwarf2_build_frame_info */
   0,  /* elf_make_msymbol_special */
   0,  /* coff_make_msymbol_special */
   "malloc",  /* name_of_malloc */
@@ -747,7 +745,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of sigtramp_end, has predicate */
   /* Skip verify of in_function_epilogue_p, invalid_p == 0 */
   /* Skip verify of construct_inferior_arguments, invalid_p == 0 */
-  /* Skip verify of dwarf2_build_frame_info, has predicate */
   /* Skip verify of elf_make_msymbol_special, invalid_p == 0 */
   /* Skip verify of coff_make_msymbol_special, invalid_p == 0 */
   /* Skip verify of name_of_malloc, invalid_p == 0 */
@@ -1686,29 +1683,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_USE_GENERIC_DUMMY_FRAMES = %d\n",
                       DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
-#endif
-#ifdef DWARF2_BUILD_FRAME_INFO_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DWARF2_BUILD_FRAME_INFO_P()",
-                      XSTRING (DWARF2_BUILD_FRAME_INFO_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DWARF2_BUILD_FRAME_INFO_P() = %d\n",
-                      DWARF2_BUILD_FRAME_INFO_P ());
-#endif
-#ifdef DWARF2_BUILD_FRAME_INFO
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DWARF2_BUILD_FRAME_INFO(objfile)",
-                      XSTRING (DWARF2_BUILD_FRAME_INFO (objfile)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: DWARF2_BUILD_FRAME_INFO = <0x%08lx>\n",
-                        (long) current_gdbarch->dwarf2_build_frame_info
-                        /*DWARF2_BUILD_FRAME_INFO ()*/);
 #endif
 #ifdef DWARF2_REG_TO_REGNUM
   fprintf_unfiltered (file,
@@ -5417,30 +5391,6 @@ set_gdbarch_construct_inferior_arguments (struct gdbarch *gdbarch,
                                           gdbarch_construct_inferior_arguments_ftype construct_inferior_arguments)
 {
   gdbarch->construct_inferior_arguments = construct_inferior_arguments;
-}
-
-int
-gdbarch_dwarf2_build_frame_info_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->dwarf2_build_frame_info != NULL;
-}
-
-void
-gdbarch_dwarf2_build_frame_info (struct gdbarch *gdbarch, struct objfile *objfile)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->dwarf2_build_frame_info != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_dwarf2_build_frame_info called\n");
-  gdbarch->dwarf2_build_frame_info (objfile);
-}
-
-void
-set_gdbarch_dwarf2_build_frame_info (struct gdbarch *gdbarch,
-                                     gdbarch_dwarf2_build_frame_info_ftype dwarf2_build_frame_info)
-{
-  gdbarch->dwarf2_build_frame_info = dwarf2_build_frame_info;
 }
 
 void

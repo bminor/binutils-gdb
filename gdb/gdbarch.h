@@ -2939,41 +2939,6 @@ typedef char * (gdbarch_construct_inferior_arguments_ftype) (struct gdbarch *gdb
 extern char * gdbarch_construct_inferior_arguments (struct gdbarch *gdbarch, int argc, char **argv);
 extern void set_gdbarch_construct_inferior_arguments (struct gdbarch *gdbarch, gdbarch_construct_inferior_arguments_ftype *construct_inferior_arguments);
 
-#if defined (DWARF2_BUILD_FRAME_INFO)
-/* Legacy for systems yet to multi-arch DWARF2_BUILD_FRAME_INFO */
-#if !defined (DWARF2_BUILD_FRAME_INFO_P)
-#define DWARF2_BUILD_FRAME_INFO_P() (1)
-#endif
-#endif
-
-/* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (DWARF2_BUILD_FRAME_INFO_P)
-#define DWARF2_BUILD_FRAME_INFO_P() (0)
-#endif
-
-extern int gdbarch_dwarf2_build_frame_info_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DWARF2_BUILD_FRAME_INFO_P)
-#error "Non multi-arch definition of DWARF2_BUILD_FRAME_INFO"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DWARF2_BUILD_FRAME_INFO_P)
-#define DWARF2_BUILD_FRAME_INFO_P() (gdbarch_dwarf2_build_frame_info_p (current_gdbarch))
-#endif
-
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (DWARF2_BUILD_FRAME_INFO)
-#define DWARF2_BUILD_FRAME_INFO(objfile) (internal_error (__FILE__, __LINE__, "DWARF2_BUILD_FRAME_INFO"), 0)
-#endif
-
-typedef void (gdbarch_dwarf2_build_frame_info_ftype) (struct objfile *objfile);
-extern void gdbarch_dwarf2_build_frame_info (struct gdbarch *gdbarch, struct objfile *objfile);
-extern void set_gdbarch_dwarf2_build_frame_info (struct gdbarch *gdbarch, gdbarch_dwarf2_build_frame_info_ftype *dwarf2_build_frame_info);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DWARF2_BUILD_FRAME_INFO)
-#error "Non multi-arch definition of DWARF2_BUILD_FRAME_INFO"
-#endif
-#if !defined (DWARF2_BUILD_FRAME_INFO)
-#define DWARF2_BUILD_FRAME_INFO(objfile) (gdbarch_dwarf2_build_frame_info (current_gdbarch, objfile))
-#endif
-
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (ELF_MAKE_MSYMBOL_SPECIAL)
 #define ELF_MAKE_MSYMBOL_SPECIAL(sym, msym) (default_elf_make_msymbol_special (sym, msym))

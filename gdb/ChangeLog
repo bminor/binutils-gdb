@@ -1,5 +1,16 @@
 2003-07-18  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DWARF2_BUILD_FRAME_INFO): Delete method.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* i386-tdep.c (i386_gdbarch_init): Do not set
+	DWARF2_BUILD_FRAME_INFO.
+	* elfread.c (elf_symfile_read): Call dwarf2_build_frame_info
+	unconditionally.
+	* alpha-tdep.c (alpha_dwarf2_init_abi): Do not set
+	DWARF2_BUILD_FRAME_INFO.
+
+2003-07-18  Andrew Cagney  <cagney@redhat.com>
+
 	From 2003-07-04 Kei Sakamoto <sakamoto.kei@renesas.com>:
         * disasm.c (gdb_disassemble_info): Initilize di.arch.
 

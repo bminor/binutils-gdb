@@ -1585,7 +1585,6 @@ alpha_dwarf2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
   frame_base_append_sniffer (gdbarch, dwarf2_frame_base_sniffer);
-  set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
 }
 
 extern initialize_file_ftype _initialize_alpha_tdep; /* -Wmissing-prototypes */
