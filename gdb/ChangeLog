@@ -1,3 +1,14 @@
+2001-09-07  Jim Blandy  <jimb@redhat.com>
+
+	Correctly parse register values provided by the monitor.
+	* rom68k-rom.c: #include "value.h".
+	(is_hex_digit, hex_digit_value, is_whitespace,
+	rom68k_supply_one_register): New static functions.
+	(rom68k_supply_register): Call rom68k_supply_one_register, instead
+	of monitor_supply_register; the latter was incorrectly parsing 
+	the values.
+	* Makefile.in (rom68k-rom.o): Note that this now #includes value.h.
+
 2001-09-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/rs6000/xm-rs6000.h (setpgrp): Remove macro.  GDB defaults

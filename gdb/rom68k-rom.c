@@ -25,8 +25,86 @@
 #include "monitor.h"
 #include "serial.h"
 #include "regcache.h"
+#include "value.h"
 
 static void rom68k_open (char *args, int from_tty);
+
+/* Return true if C is a hex digit.
+   We can't use isxdigit here: that is affected by the current locale;
+   ROM68K is not.  */
+static int
+is_hex_digit (int c)
+{
+  return (('0' <= c && c <= '9')
+          || ('a' <= c && c <= 'f')
+          || ('A' <= c && c <= 'F'));
+}
+
+
+/* Convert hex digit A to a number.  */
+static int
+hex_digit_value (int a)
+{
+  if (a >= '0' && a <= '9')
+    return a - '0';
+  else if (a >= 'a' && a <= 'f')
+    return a - 'a' + 10;
+  else if (a >= 'A' && a <= 'F')
+    return a - 'A' + 10;
+  else
+    error ("Invalid hex digit %d", a);
+}
+
+
+/* Return true iff C is a whitespace character.
+   We can't use isspace here: that is affected by the current locale;
+   ROM68K is not.  */
+static int
+is_whitespace (int c)
+{
+  return (c == ' '
+          || c == '\r'
+          || c == '\n'
+          || c == '\t'
+          || c == '\f');
+}
+
+
+/* Parse a string of hex digits starting at HEX, supply them as the
+   value of register REGNO, skip any whitespace, and return a pointer
+   to the next character.
+
+   There is a function in monitor.c, monitor_supply_register, which is
+   supposed to do this job.  However, there is some rather odd stuff
+   in there (whitespace characters don't terminate numbers, for
+   example) that is incorrect for ROM68k.  It's basically impossible
+   to safely tweak monitor_supply_register --- it's used by a zillion
+   other monitors; who knows what behaviors they're depending on.  So
+   instead, we'll just use our own function, which can behave exactly
+   the way we want it to.  */
+static char *
+rom68k_supply_one_register (int regno, unsigned char *hex)
+{
+  ULONGEST value;
+  unsigned char regbuf[MAX_REGISTER_RAW_SIZE];
+
+  value = 0;
+  while (*hex != '\0')
+    if (is_hex_digit (*hex))
+      value = (value * 16) + hex_digit_value (*hex++);
+    else
+      break;
+
+  /* Skip any whitespace.  */
+  while (is_whitespace (*hex))
+    hex++;
+
+  store_unsigned_integer (regbuf, REGISTER_RAW_SIZE (regno), value);
+  supply_register (regno, regbuf);
+
+  return hex;
+}
+
 
 static void
 rom68k_supply_register (char *regname, int regnamelen, char *val, int vallen)
@@ -71,7 +149,7 @@ rom68k_supply_register (char *regname, int regnamelen, char *val, int vallen)
 
   if (regno >= 0)
     while (numregs-- > 0)
-      val = monitor_supply_register (regno++, val);
+      val = rom68k_supply_one_register (regno++, val);
 }
 
 /* This array of registers need to match the indexes used by GDB.
