@@ -1088,6 +1088,9 @@ alpha-tdep.o: alpha-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(symtab_h) $(dis-asm.h)
 
 altos-xdep.o: altos-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
+
+annotate.o: annotate.c $(defs_h) annotate.h $(value_h) target.h $(gdbtypes_h)
+
 arm-pinsn.o: arm-pinsn.c $(OP_INCLUDE)/arm.h $(defs_h) $(symtab_h)
 
 blockframe.o: blockframe.c $(defs_h) $(gdbcore_h) $(inferior_h) \
