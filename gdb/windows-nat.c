@@ -582,16 +582,19 @@ register_loaded_dll (const char *name, DWORD load_addr)
   HANDLE h = FindFirstFile(name, &w32_fd);
   size_t len;
 
-  FindClose (h);
-  strcpy (buf, name);
-  if (GetCurrentDirectory (MAX_PATH + 1, cwd))
+  if (h)
     {
-      p = strrchr (buf, '\\');
-      if (p)
-	p[1] = '\0';
-      SetCurrentDirectory (buf);
-      GetFullPathName (w32_fd.cFileName, MAX_PATH, buf, &p);
-      SetCurrentDirectory (cwd);
+      FindClose (h);
+      strcpy (buf, name);
+      if (GetCurrentDirectory (MAX_PATH + 1, cwd))
+	{
+	  p = strrchr (buf, '\\');
+	  if (p)
+	    p[1] = '\0';
+	  SetCurrentDirectory (buf);
+	  GetFullPathName (w32_fd.cFileName, MAX_PATH, buf, &p);
+	  SetCurrentDirectory (cwd);
+	}
     }
 
   cygwin_conv_to_posix_path (buf, ppath);
