@@ -2449,7 +2449,7 @@ coff_slurp_symbol_table (abfd)
 #if 0
 	      dst->symbol.value = src->u.syment.n_value - dst->symbol.section->vma;
 	      dst->symbol.flags = BSF_EXPORT | BSF_GLOBAL;
-	      dst->symbol.flags |= BSF_NOT_AT_END;
+	      dst->symbol.flags |= BSF_NOT_AT_END | BSF_FUNCTION;
 #endif
 	      /* Fall through to next case */
 
@@ -2491,7 +2491,7 @@ coff_slurp_symbol_table (abfd)
 		      /*
 	      A function ext does not go at the end of a file
 	      */
-		      dst->symbol.flags |= BSF_NOT_AT_END;
+		      dst->symbol.flags |= BSF_NOT_AT_END | BSF_FUNCTION;
 		    }
 		}
 

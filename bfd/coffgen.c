@@ -88,6 +88,7 @@ make_a_section_from_file (abfd, hdr, target_index)
   /* s_paddr is presumed to be = to s_vaddr */
 
   return_section->vma = hdr->s_vaddr;
+  return_section->lma = return_section->vma;
   return_section->_raw_size = hdr->s_size;
   return_section->filepos = hdr->s_scnptr;
   return_section->rel_filepos = hdr->s_relptr;
@@ -127,45 +128,12 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
      struct internal_filehdr *internal_f;
      struct internal_aouthdr *internal_a;
 {
+  flagword oflags = abfd->flags;
+  bfd_vma ostart = bfd_get_start_address (abfd);
   PTR tdata;
   size_t readsize;		/* length of file_info */
   unsigned int scnhsz;
   char *external_sections;
-
-  /* Build a play area */
-  tdata = bfd_coff_mkobject_hook (abfd, (PTR) internal_f, (PTR) internal_a);
-  if (tdata == NULL)
-    return 0;
-
-  scnhsz = bfd_coff_scnhsz (abfd);
-  readsize = nscns * scnhsz;
-  external_sections = (char *) bfd_alloc (abfd, readsize);
-  if (!external_sections)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto fail;
-    }
-
-  if (bfd_read ((PTR) external_sections, 1, readsize, abfd) != readsize)
-    goto fail;
-
-  /* Now copy data as required; construct all asections etc */
-  if (nscns != 0)
-    {
-      unsigned int i;
-      for (i = 0; i < nscns; i++)
-	{
-	  struct internal_scnhdr tmp;
-	  bfd_coff_swap_scnhdr_in (abfd, (PTR) (external_sections + i * scnhsz),
-				   (PTR) & tmp);
-	  make_a_section_from_file (abfd, &tmp, i + 1);
-	}
-    }
-
-  /*  make_abs_section (abfd); */
-
-  if (bfd_coff_set_arch_mach_hook (abfd, (PTR) internal_f) == false)
-    goto fail;
 
   if (!(internal_f->f_flags & F_RELFLG))
     abfd->flags |= HAS_RELOC;
@@ -189,9 +157,49 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
   else
     bfd_get_start_address (abfd) = 0;
 
+  /* Set up the tdata area.  ECOFF uses its own routine, and overrides
+     abfd->flags.  */
+  tdata = bfd_coff_mkobject_hook (abfd, (PTR) internal_f, (PTR) internal_a);
+  if (tdata == NULL)
+    return 0;
+
+  scnhsz = bfd_coff_scnhsz (abfd);
+  readsize = nscns * scnhsz;
+  external_sections = (char *) bfd_alloc (abfd, readsize);
+  if (!external_sections)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto fail;
+    }
+
+  if (bfd_read ((PTR) external_sections, 1, readsize, abfd) != readsize)
+    goto fail;
+
+  /* Now copy data as required; construct all asections etc */
+  if (nscns != 0)
+    {
+      unsigned int i;
+      for (i = 0; i < nscns; i++)
+	{
+	  struct internal_scnhdr tmp;
+	  bfd_coff_swap_scnhdr_in (abfd,
+				   (PTR) (external_sections + i * scnhsz),
+				   (PTR) & tmp);
+	  make_a_section_from_file (abfd, &tmp, i + 1);
+	}
+    }
+
+  /*  make_abs_section (abfd); */
+
+  if (bfd_coff_set_arch_mach_hook (abfd, (PTR) internal_f) == false)
+    goto fail;
+
   return abfd->xvec;
+
  fail:
   bfd_release (abfd, tdata);
+  abfd->flags = oflags;
+  bfd_get_start_address (abfd) = ostart;
   return (const bfd_target *) NULL;
 }
 
@@ -446,8 +454,9 @@ fixup_symbol_value (coff_symbol_ptr, syment)
    do that here too.  */
 
 boolean
-coff_renumber_symbols (bfd_ptr)
+coff_renumber_symbols (bfd_ptr, first_undef)
      bfd *bfd_ptr;
+     int *first_undef;
 {
   unsigned int symbol_count = bfd_get_symcount (bfd_ptr);
   asymbol **symbol_ptr_ptr = bfd_ptr->outsymbols;
@@ -456,9 +465,12 @@ coff_renumber_symbols (bfd_ptr)
   unsigned int symbol_index;
 
   /* COFF demands that undefined symbols come after all other symbols.
-     Since we don't need to impose this extra knowledge on all our client
-     programs, deal with that here.  Sort the symbol table; just move the
-     undefined symbols to the end, leaving the rest alone.  */
+     Since we don't need to impose this extra knowledge on all our
+     client programs, deal with that here.  Sort the symbol table;
+     just move the undefined symbols to the end, leaving the rest
+     alone.  The O'Reilly book says that defined global symbols come
+     at the end before the undefined symbols, so we do that here as
+     well.  */
   /* @@ Do we have some condition we could test for, so we don't always
      have to do this?  I don't think relocatability is quite right, but
      I'm not certain.  [raeburn:19920508.1711EST]  */
@@ -476,8 +488,23 @@ coff_renumber_symbols (bfd_ptr)
       }
     bfd_ptr->outsymbols = newsyms;
     for (i = 0; i < symbol_count; i++)
-      if (!bfd_is_und_section (symbol_ptr_ptr[i]->section))
+      if (!bfd_is_und_section (symbol_ptr_ptr[i]->section)
+	  && ((symbol_ptr_ptr[i]->flags & (BSF_GLOBAL
+					   | BSF_NOT_AT_END
+					   | BSF_FUNCTION))
+	      != BSF_GLOBAL))
 	*newsyms++ = symbol_ptr_ptr[i];
+
+    for (i = 0; i < symbol_count; i++)
+      if (!bfd_is_und_section (symbol_ptr_ptr[i]->section)
+	  && ((symbol_ptr_ptr[i]->flags & (BSF_GLOBAL
+					   | BSF_NOT_AT_END
+					   | BSF_FUNCTION))
+	      == BSF_GLOBAL))
+	*newsyms++ = symbol_ptr_ptr[i];
+
+    *first_undef = newsyms - bfd_ptr->outsymbols;
+
     for (i = 0; i < symbol_count; i++)
       if (bfd_is_und_section (symbol_ptr_ptr[i]->section))
 	*newsyms++ = symbol_ptr_ptr[i];
@@ -488,6 +515,7 @@ coff_renumber_symbols (bfd_ptr)
   for (symbol_index = 0; symbol_index < symbol_count; symbol_index++)
     {
       coff_symbol_type *coff_symbol_ptr = coff_symbol_from (bfd_ptr, symbol_ptr_ptr[symbol_index]);
+      symbol_ptr_ptr[symbol_index]->udata.i = symbol_index; 
       if (coff_symbol_ptr && coff_symbol_ptr->native)
 	{
 	  combined_entry_type *s = coff_symbol_ptr->native;
@@ -516,6 +544,7 @@ coff_renumber_symbols (bfd_ptr)
 	}
     }
   obj_conv_table_size (bfd_ptr) = native_index;
+
   return true;
 }
 

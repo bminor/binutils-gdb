@@ -1,3 +1,11 @@
+Fri Jul  7 17:36:44 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffgen.c (coff_renumber_symbols): Sort defined symbols that are
+	neither BSF_FUNCTION not BSF_NOT_AT_END just before undefined
+	symbols.
+	* coffcode.h (coff_slurp_symbol_table): Set BSF_FUNCTION as well
+	as BSF_NOT_AT_END.
+
 Fri Jul  7 17:16:15 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* Makefile.in (do_mostlyclean): Remove config.log.
@@ -332,7 +340,7 @@ Tue Jun  6 17:29:32 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 Mon Jun  5 09:07:13 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* coff-a29k.c (coff_a29k_adjust_symndx): Completely parenthesize
-	macro. (pr ld/7127)
+	macro.
 
 Mon Jun  5 02:15:20 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
@@ -476,8 +484,6 @@ Thu May 11 16:43:14 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 	(tekhex_write_object_contents): Fix typo in final record.
 
 Thu May 11 16:43:14 1995  Steve Chamberlain  <sac@slash.cygnus.com>
-
-	pr ld/6840
 
 	* coff-i960.c (optcall_callback): don't try and optimize
 	undefined refs. 
