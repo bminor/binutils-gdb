@@ -564,25 +564,24 @@ typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
 
 /* Macros for setting and testing a bit in a minimal symbol that
    marks it as 16-bit function.  The MSB of the minimal symbol's
-   "info" field is used for this purpose.  This field is already
+   "info" field is used for this purpose. This field is already
    being used to store the symbol size, so the assumption is
    that the symbol size cannot exceed 2^31.
 
-   SYMBOL_IS_SPECIAL	tests whether an ELF symbol is "special", i.e. refers
-			to a 16-bit function
-   MAKE_MSYMBOL_SPECIAL	sets a "special" bit in a minimal symbol to mark it
-   			as a 16-bit function
+   MAKE_MSYMBOL_SPECIAL	tests whether an ELF symbol is "special", i.e. refers
+			to a 16-bit function, and sets a "special" bit in a 
+			minimal symbol to mark it as a 16-bit function
    MSYMBOL_IS_SPECIAL	tests the "special" bit in a minimal symbol
    MSYMBOL_SIZE		returns the size of the minimal symbol, i.e.
 			the "info" field with the "special" bit masked out
 */
 
-#define SYMBOL_IS_SPECIAL(sym) \
-  (((elf_symbol_type *) sym) -> internal_elf_sym.st_other == STO_MIPS16)
-#define MAKE_MSYMBOL_SPECIAL(msym) \
+#define MAKE_MSYMBOL_SPECIAL(sym,msym) \
  { \
-  MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym)) | 0x80000000); \
-  SYMBOL_VALUE_ADDRESS (msym) |= 1; \
+  if (((elf_symbol_type *) sym) -> internal_elf_sym.st_other == STO_MIPS16) { \
+    MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym)) | 0x80000000); \
+    SYMBOL_VALUE_ADDRESS (msym) |= 1; \
+  } \
  }
    
 #define MSYMBOL_IS_SPECIAL(msym) \

@@ -1,3 +1,9 @@
+Wed Mar  4 01:39:08 1998  Ron Unrau  <runrau@cygnus.com>
+
+	* elfread.c (elf_symtab_read): merge SYMBOL_IS_SPECIAL into
+	MAKE_MSYMBOL_SPECIAL
+	* config/mips/tm-mips.h: ditto
+
 Tue Mar  3 17:19:08 1998  John Metzler  <jmetzler@cygnus.com>
 
 	* config/mips/tm-vr4xxx.h :  implements vr4111 as saparate from 4300
