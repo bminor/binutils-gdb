@@ -34,14 +34,15 @@ include $(TREE)/release-info
 
 
 TIME 		:= time
-GCC 		:= $(host)-gcc -O
+CONFIG_SHELL	:= 
+GCC 		:= $(host)-gcc -O 
 GNUC		:= CC="$(GCC)"
 CFLAGS		:= -g
 CXXFLAGS	:= -g -O
 GNU_MAKE 	:= /usr/latest/bin/make -w 
 MAKEINFOFLAGS	:=
 
-override MAKE 		:= make
+override MAKE 		:= make -w
 override MFLAGS 	:=
 #override MAKEFLAGS 	:=
 
@@ -66,6 +67,7 @@ AR		:= $(host)-ar
 AR_FOR_TARGET	:= $(target)-ar
 AS		:= $(host)-as
 AS_FOR_TARGET	:= $(target)-as
+BISON		:= byacc
 CC		:= $(host)-gcc
 CC_FOR_BUILD	:= gcc
 CC_FOR_TARGET	:= $(target)-gcc
@@ -76,18 +78,25 @@ GXX		:= $(host)-g++
 GXX_FOR_TARGET	:= $(target)-g++
 HOST_PREFIX	:= $(build)-
 HOST_PREFIX_1	:= $(build)-
+LEX		:= flex
 MAKEINFO	:= makeinfo
 MUNCH_NM	:= $(host)-nm
 NM		:= $(host)-nm
 NM_FOR_TARGET	:= $(target)-nm
 RANLIB		:= $(host)-ranlib
 RANLIB_FOR_TARGET	:= $(target)-ranlib
+YACC		:= $(BISON)
+
+ifeq ($(build),hppa1.1-hp-hpux)
+CC_FOR_BUILD	:= cc
+endif
 
 FLAGS_TO_PASS := \
 	"AR=$(AR)" \
 	"AR_FOR_TARGET=$(AR_FOR_TARGET)" \
 	"AS=$(AS)" \
 	"AS_FOR_TARGET=$(AS_FOR_TARGET)" \
+	"BISON=$(BISON)" \
 	"CC=$(CC)" \
 	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
 	"CC_FOR_TARGET=$(CC_FOR_TARGET)" \
@@ -98,6 +107,7 @@ FLAGS_TO_PASS := \
 	"GCC=$(GCC)" \
 	"HOST_PREFIX=$(HOST_PREFIX)" \
 	"HOST_PREFIX_1=$(HOST_PREFIX_1)" \
+	"LEX=$(LEX)" \
 	"MAKEINFO=$(MAKEINFO)" \
 	"MAKEINFOFLAGS=$(MAKEINFOFLAGS)" \
 	"MF=$(MF)" \
@@ -107,7 +117,9 @@ FLAGS_TO_PASS := \
 	"RANLIB=$(RANLIB)" \
 	"RANLIB_FOR_TARGET=$(RANLIB_FOR_TARGET)" \
 	"RELEASE_TAG=$(RELEASE_TAG)" \
+	"RUNTEST=$(relbindir)/runtest" \
 	"TIME=$(TIME)" \
+	"YACC=$(YACC)" \
 	"build=$(build)" \
 	"host=$(host)"
 
@@ -129,25 +141,47 @@ FLAGS_TO_PASS := \
 	"host=$(host)" \
 	"RELEASE_TAG=$(RELEASE_TAG)"
 
-ifneq  '$(CC)' 'cc'
-FLAGS_TO_PASS := "CC=$(CC)" $(FLAGS_TO_PASS)
-endif
-
 configenv :=
 
+endif
+
+#### we need to change the default C compiler for some hosts
+ifeq ($(host),sparc-sun-solaris2)
+CC := cc -Xs
+endif
+
+ifeq ($(host),mips-sgi-irix4)
+CC := cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh1500
+endif
+
+ifeq ($(host),mips-mips-riscos5)
+CC := cc -non_shared -systype sysv
+endif
+
+ifeq ($(host),mips-dec-ultrix)
+CC := cc -Wf,-XNg1000
+endif
+
+ifeq ($(host),m68k-sun-sunos4.1.1)
+CC := cc -J
+endif
+
+ifneq ($(CC), 'cc')
+FLAGS_TO_PASS := "CC=$(CC)" $(FLAGS_TO_PASS)
 endif
 
 
 # These are the prefixes used for Cygnus builds.
 prefixes	= --prefix=$(release_root) --exec-prefix=$(release_root)/H-$(host)
 
-relbindir	= $(release_root)/H-$(host)/bin
+relbindir	= $(release_root)/H-$(build)/bin
 
 ### general config stuff
 WORKING_DIR 	:= $(host)-objdir
 STAGE1DIR 	:= $(WORKING_DIR).1
 STAGE2DIR 	:= $(WORKING_DIR).2
 STAGE3DIR 	:= $(WORKING_DIR).3
+STAGE4DIR 	:= $(WORKING_DIR).4
 INPLACEDIR 	:= $(host)-in-place
 
 # Arrange to find the needed programs.  If we are building on a
@@ -194,15 +228,6 @@ all:	do-native do-latest
 build-all: build-native build-latest
 endif
 
-ifeq ($(target),mips-idt-ecoff)
-configargs	:= $(configargs) -with-gnu-as -with-stabs
-endif
-
-ifeq ($(host),i386-go32)
-ifeq ($(subst mips-idt-ecoff,sparclite-aout,$(target)),sparclite-aout)
-configargs	:= $(configargs) -with-gnu-ld
-endif
-endif
 
 else
 ##
@@ -217,24 +242,66 @@ all:	$(host)-stamp-3stage-done
 endif
 #all:	in-place do1 do2 do3 comparison
 
-ifeq ($(subst mips-sgi-irix4,mips-dec-ultrix,$(host)),mips-dec-ultrix)
-configargs	:= $(configargs) -with-gnu-as -with-stabs
 endif
-
-endif
-
-ifeq ($(target),m68k-hp-hpux)
-configargs	:= $(configargs) -with-gnu-as
-endif
-
 
 NATIVEDIR	:= $(arch)-native-objdir
 CYGNUSDIR	:= $(arch)-cygnus-objdir
 LATESTDIR	:= $(arch)-latest-objdir
-
+DOSDIR		:= dos-x-$(target)-objdir
 
 everything: 	 do-cross 
 #everything: 	in-place do1 do2 do3 comparison do-cygnus 
+
+.PHONY: dos
+dos:
+	$(MAKE) -f test-build.mk CFLAGS= build=$(host) host=i386-go32 target=$(target) do-dos
+dos-path:
+	$(MAKE) -f test-build.mk CFLAGS= build=$(host) host=i386-go32 target=$(target) path-dos
+
+.PHONY: do-dos
+do-dos: $(HOLESSTAMP) dos-x-$(target)-stamp-done
+build-dos: $(HOLESSTAMP) dos-x-$(target)-stamp-dos-checked
+config-dos: $(HOLESSTAMP) dos-x-$(target)-stamp-dos-configured
+path-dos:
+	@echo "$(SET_CYGNUS_PATH)"
+
+dos-x-$(target)-stamp-done: 
+	[ -f $(relbindir)/$(host)-gcc ] || (echo "must have gcc available"; exit 1)
+	$(SET_CYGNUS_PATH) $(TIME) $(GNU_MAKE) -f test-build.mk dos-x-$(target)-stamp-installed  $(FLAGS_TO_PASS)
+	if [ -f CLEAN_ALL -o -f CLEAN_CROSSES ] ; then rm -rf $(DOSDIR) ; else true ; fi
+	touch $@
+
+dos-x-$(target)-stamp-installed: $(HOLESSTAMP) dos-x-$(target)-stamp-intermediate
+	[ -d dos-x-$(target)-installed ] || mkdir dos-x-$(target)-installed
+	$(SET_CYGNUS_PATH) $(TREE)/release/mkdosrel dos-x-$(target)-intermediate \
+	  dos-x-$(target)-installed $(target)
+#	(cd dos-x-$(target)-installed; find . -print | $(TREE)/release/make8.3)
+	touch $@
+
+dos-x-$(target)-stamp-intermediate:  $(HOLESSTAMP) dos-x-$(target)-stamp-dos-checked
+	[ -d dos-x-$(target)-intermediate ] || mkdir dos-x-$(target)-intermediate
+	dir=`pwd` ; export dir ; \
+	$(SET_CYGNUS_PATH) cd $(DOSDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) \
+	  prefix=$$dir/dos-x-$(target)-intermediate install install-info 
+	touch $@
+
+dos-x-$(target)-stamp-dos-checked: $(HOLESSTAMP) dos-x-$(target)-stamp-dos-built
+#	cd $(DOSDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) check 
+	touch $@
+
+dos-x-$(target)-stamp-dos-built:  $(HOLESSTAMP) dos-x-$(target)-stamp-dos-configured
+	$(SET_CYGNUS_PATH) cd $(DOSDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) all info
+	touch $@
+
+dos-x-$(target)-stamp-dos-configured:  $(HOLESSTAMP)
+	[ -d $(DOSDIR) ] || mkdir $(DOSDIR)
+	$(SET_CYGNUS_PATH) cd $(DOSDIR) ; $(GNUC) $(configenv) $(TIME) $(CONFIG_SHELL) \
+	  ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) --prefix=/cygnus \
+	  --program-transform-name='' $(configargs)
+	touch $@
+
+
+
 
 .PHONY: do-native
 do-native: $(HOLESSTAMP) $(arch)-stamp-native
@@ -244,7 +311,7 @@ config-native: $(HOLESSTAMP) $(arch)-stamp-native-configured
 
 $(arch)-stamp-native: $(HOLESSTAMP)
 	$(SET_NATIVE_HOLES) $(TIME) $(GNU_MAKE) -f test-build.mk  $(arch)-stamp-native-installed $(FLAGS_TO_PASS) 
-	if [ -f CLEAN_ALL ] ; then rm -rf $(NATIVEDIR) ; else true ; fi
+	if [ -f CLEAN_ALL -o -f CLEAN_CROSSES ] ; then rm -rf $(NATIVEDIR) ; else true ; fi
 	touch $(arch)-stamp-native
 
 $(arch)-stamp-native-installed: $(HOLESSTAMP) $(arch)-stamp-native-checked
@@ -263,7 +330,7 @@ $(arch)-stamp-native-built: $(HOLESSTAMP) $(arch)-stamp-native-configured
 
 $(arch)-stamp-native-configured: $(HOLESSTAMP)
 	[ -d $(NATIVEDIR) ] || mkdir $(NATIVEDIR)
-	$(SET_NATIVE_HOLES) cd $(NATIVEDIR) ; $(configenv) $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
+	$(SET_NATIVE_HOLES) cd $(NATIVEDIR) ; $(configenv) CC="$(CC)" $(TIME) $(CONFIG_SHELL) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
 	touch $@
 
 
@@ -271,6 +338,8 @@ $(arch)-stamp-native-configured: $(HOLESSTAMP)
 do-cygnus: $(HOLESSTAMP) $(arch)-stamp-cygnus
 build-cygnus: $(HOLESSTAMP) $(arch)-stamp-cygnus-checked
 config-cygnus: $(HOLESSTAMP) $(arch)-stamp-cygnus-configured
+path-cygnus:
+	$(SET_CYGNUS_PATH) echo $$PATH
 
 vault-cygnus: $(HOLESSTAMP) $(arch)-stamp-cygnus-built
 	$(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) vault-install 
@@ -279,12 +348,15 @@ vault-cygnus: $(HOLESSTAMP) $(arch)-stamp-cygnus-built
 $(arch)-stamp-cygnus: 
 	[ -f $(relbindir)/$(host)-gcc ] || (echo "must have gcc available"; exit 1)
 	$(SET_CYGNUS_PATH) $(TIME) $(GNU_MAKE) -f test-build.mk $(arch)-stamp-cygnus-installed  $(FLAGS_TO_PASS)
-	if [ -f CLEAN_ALL ] ; then rm -rf $(CYGNUSDIR) ; else true ; fi
+	if [ -f CLEAN_ALL -o -f CLEAN_CROSSES ] ; then rm -rf $(CYGNUSDIR) ; else true ; fi
 	touch $(arch)-stamp-cygnus
 
 $(arch)-stamp-cygnus-installed:  $(HOLESSTAMP) $(arch)-stamp-cygnus-checked
 	$(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) install 
 	$(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) install-info
+	if [ -f VAULT-INSTALL ] ; then \
+	  $(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(MAKE) $(FLAGS_TO_PASS) $(GNUC) vault-install ; \
+	fi
 	touch $@
 
 $(arch)-stamp-cygnus-checked: $(HOLESSTAMP) $(arch)-stamp-cygnus-built
@@ -298,7 +370,7 @@ $(arch)-stamp-cygnus-built:  $(HOLESSTAMP) $(arch)-stamp-cygnus-configured
 
 $(arch)-stamp-cygnus-configured:  $(HOLESSTAMP)
 	[ -d $(CYGNUSDIR) ] || mkdir $(CYGNUSDIR)
-	$(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(GNUC) $(configenv) $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
+	$(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(configenv) $(GNUC) $(TIME) $(CONFIG_SHELL) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
 	touch $@
 
 .PHONY: do-latest
@@ -325,7 +397,7 @@ $(arch)-stamp-latest-built: $(arch)-stamp-latest-configured
 
 $(arch)-stamp-latest-configured:
 	[ -d $(LATESTDIR) ] || mkdir $(LATESTDIR)
-	$(SET_LATEST_PATH) cd $(LATESTDIR) ; $(GNUC) $(configenv) $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
+	$(SET_LATEST_PATH) cd $(LATESTDIR) ; $(configenv) $(GNUC) $(TIME) $(CONFIG_SHELL) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
 	touch $@
 
 
@@ -359,7 +431,7 @@ $(host)-stamp-in-place-built: $(host)-stamp-in-place-configured
 	touch $@
 
 $(host)-stamp-in-place-configured: $(host)-stamp-in-place-cp
-	cd $(INPLACEDIR) ; $(configenv) $(TIME) ./configure $(config) -v $(prefixes) $(configargs)
+	cd $(INPLACEDIR) ; $(configenv) CC="$(CC)" $(TIME) $(CONFIG_SHELL) ./configure $(config) -v $(prefixes) $(configargs)
 	touch $@
 
 $(host)-stamp-in-place-cp:
@@ -418,7 +490,7 @@ $(host)-stamp-stage1-built: $(host)-stamp-stage1-configured
 $(host)-stamp-stage1-configured:
 	[ -d $(WORKING_DIR) ] || mkdir $(WORKING_DIR)
 	$(SET_NATIVE_HOLES) cd $(WORKING_DIR) ; \
-	  $(configenv) $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
+	  $(configenv) CC="$(CC)" $(TIME) $(CONFIG_SHELL) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
 	touch $@
 
 .PHONY: do2
@@ -461,7 +533,7 @@ $(host)-stamp-stage2-built: $(host)-stamp-stage2-configured
 $(host)-stamp-stage2-configured:
 	[ -d $(WORKING_DIR) ] || mkdir $(WORKING_DIR)
 	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; \
-	  $(configenv) $(GNUC) $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
+	  $(configenv) $(GNUC) $(TIME) $(CONFIG_SHELL) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
 	touch $@
 
 .PHONY: do3
@@ -480,7 +552,7 @@ $(host)-stamp-stage3:
 	else \
 		true ; \
 	fi
-	$(SET_CYGNUS_PATH) $(TIME) $(GNU_MAKE) $(FLAGS_TO_PASS) -f test-build.mk -w $(host)-stamp-stage3-checked 
+	$(SET_CYGNUS_PATH) $(TIME) $(GNU_MAKE) $(FLAGS_TO_PASS) -f test-build.mk -w $(host)-stamp-stage3-installed
 	mv $(WORKING_DIR) $(STAGE3DIR) 
 	touch $@
 
@@ -488,6 +560,9 @@ $(host)-stamp-stage3:
 $(host)-stamp-stage3-installed: $(host)-stamp-stage3-checked
 	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install host=$(host)
 	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install-info host=$(host)
+	if [ -f VAULT-INSTALL ] ; then \
+	  $(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(MAKE) $(FLAGS_TO_PASS) $(GNUC) vault-install ; \
+	fi
 	touch $@
 
 $(host)-stamp-stage3-checked: $(host)-stamp-stage3-built
@@ -502,7 +577,41 @@ $(host)-stamp-stage3-built: $(host)-stamp-stage3-configured
 $(host)-stamp-stage3-configured:
 	[ -d $(WORKING_DIR) ] || mkdir $(WORKING_DIR)
 	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; \
-	  $(configenv) $(GNUC) $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
+	  $(configenv) $(GNUC) $(TIME) $(CONFIG_SHELL) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
+	touch $@
+
+.PHONY: do4
+do4:	$(HOLESDIR) $(host)-stamp-stage4
+
+$(host)-stamp-stage4:
+	if [ -d $(STAGE4DIR) ] ; then \
+		mv $(STAGE4DIR) $(WORKING_DIR) ; \
+	else \
+		true ; \
+	fi
+	$(SET_CYGNUS_PATH) $(TIME) $(GNU_MAKE) $(FLAGS_TO_PASS) -f test-build.mk -w $(host)-stamp-stage4-checked 
+	mv $(WORKING_DIR) $(STAGE4DIR) 
+	touch $@
+
+
+$(host)-stamp-stage4-installed: $(host)-stamp-stage4-checked
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install-info host=$(host)
+	touch $@
+
+$(host)-stamp-stage4-checked: $(host)-stamp-stage4-built
+#	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" check host=$(host)
+	touch $@
+
+$(host)-stamp-stage4-built: $(host)-stamp-stage4-configured
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" all host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" info host=$(host)
+	touch $@
+
+$(host)-stamp-stage4-configured:
+	[ -d $(WORKING_DIR) ] || mkdir $(WORKING_DIR)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; \
+	  $(configenv) $(GNUC) $(TIME) $(CONFIG_SHELL) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes) $(configargs)
 	touch $@
 
 # These things are needed by a three-stage, but are not included locally.
@@ -576,10 +685,15 @@ CC_HOLE :=
 NUKEM := cc 
 endif
 
+ifeq ($(host),i386-go32)
+DOS_HOLES := aout2exe doschk file
+endif
+
 ### These things are also needed by a three-stage, but in this case, the GNU version of the tool is required.
 PARTIAL_HOLES := \
 	$(MAKE_HOLE) \
 	$(CC_HOLE) \
+	$(DOS_HOLES) \
 	flex \
 	m4
 
@@ -724,10 +838,11 @@ endif
 
 .PHONY: comparison
 comparison: $(host)-stamp-3stage-compared
+comparison-stage3to4: $(host)-stamp-4stage-compared
 
 $(host)-stamp-3stage-compared:
 	rm -f .bad-compare
-ifeq ($(subst i386-sco3.2v4,mips-sgi-irix4,$(subst rs6000-ibm-aix,mips-sgi-irix4,$(subst mips-dec-ultrix,mips-sgi-irix4,$(host)))),mips-sgi-irix4)
+ifeq ($(patsubst %-lynxos,mips-sgi-irix4,$(subst i386-sco3.2v4,mips-sgi-irix4,$(subst rs6000-ibm-aix,mips-sgi-irix4,$(subst mips-dec-ultrix,mips-sgi-irix4,$(host))))),mips-sgi-irix4)
 	for i in `cd $(STAGE3DIR) ; find . -name \*.o -print` ; do \
 		tail +10c $(STAGE2DIR)/$$i > foo1 ; \
 		tail +10c $(STAGE3DIR)/$$i > foo2 ; \
@@ -757,6 +872,38 @@ endif
 	  fi ; \
 	fi
 	touch $@	
+
+$(host)-stamp-4stage-compared:
+	rm -f .bad-compare
+ifeq ($(patsubst %-lynxos,mips-sgi-irix4,$(subst i386-sco3.2v4,mips-sgi-irix4,$(subst rs6000-ibm-aix,mips-sgi-irix4,$(subst mips-dec-ultrix,mips-sgi-irix4,$(host))))),mips-sgi-irix4)
+	for i in `cd $(STAGE4DIR) ; find . -name \*.o -print` ; do \
+		tail +10c $(STAGE3DIR)/$$i > foo1 ; \
+		tail +10c $(STAGE4DIR)/$$i > foo2 ; \
+		if cmp foo1 foo2 ; then \
+			true ; \
+		else \
+			echo $$i ; \
+			touch .bad-compare ; \
+		fi ; \
+	done
+	rm -f foo1 foo2
+else
+	for i in `cd $(STAGE4DIR) ; find . -name \*.o -print` ; do \
+		cmp $(STAGE3DIR)/$$i $(STAGE4DIR)/$$i || touch .bad-compare ; \
+	done
+endif
+	if [ -f CLEAN_ALL ] ; then \
+	  rm -rf $(STAGE2DIR) $(STAGE3DIR) $(STAGE4DIR) ; \
+	else \
+	  if [ -f CLEAN_STAGES ] ; then \
+	    if [ -f .bad-compare ] ; then \
+	      true ; \
+	    else \
+	      rm -rf $(STAGE1DIR) $(STAGE2DIR) $(STAGE3DIR) ; \
+	    fi ; \
+  	  else true ; \
+  	  fi ; \
+  	fi
 
 .PHONY: clean
 clean:
