@@ -381,6 +381,11 @@ sim_cgen_disassemble_insn (SIM_CPU *cpu, const CGEN_INSN *insn,
   length = sim_core_read_buffer (sd, cpu, read_map, &insn_buf, pc,
 				 insn_length);
 
+  if (length != insn_length)
+  {
+    sim_io_error (sd, "unable to read address %x", pc);
+  }
+
   /* If the entire insn will fit into an integer, then do it. Otherwise, just
      use the bits of the base_insn.  */
   if (insn_bit_length <= 32)

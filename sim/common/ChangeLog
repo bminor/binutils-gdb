@@ -1,3 +1,12 @@
+2000-10-08  Ben Elliston  <bje@redhat.com>
+
+	* cgen-utils.c (cgen_rtx_error): New function.
+
+2000-10-07  Ben Elliston  <bje@redhat.com>
+
+	* cgen-trace.c (sim_cgen_disassemble_insn): Handle failure
+	conditions for sim_core_read_buffer().
+
 2000-09-26  Dave Brolley  <brolley@redhat.com>
 
 	* cgen-utils.c (RORQI): New function.

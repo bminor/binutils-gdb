@@ -423,3 +423,16 @@ ROLSI (val, shift)
 
   return val;
 }
+
+/* Emit an error message from CGEN RTL.  */
+
+void
+cgen_rtx_error (SIM_CPU *cpu, const char * msg)
+{
+  SIM_DESC sd = CPU_STATE (cpu);
+
+  sim_io_printf (sd, msg);
+  sim_io_printf (sd, "\n");
+
+  sim_engine_halt (sd, cpu, NULL, CIA_GET (cpu), sim_stopped, SIM_SIGTRAP);
+}
