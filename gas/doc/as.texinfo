@@ -711,7 +711,7 @@ just the basic IP2022 ones.
 
 @ifset M32R
 The following options are available when @value{AS} is configured for the
-Mitsubishi M32R series.
+Renesas M32R (formerly Mitsubishi M32R) series.
 
 @table @gcctabopt
 

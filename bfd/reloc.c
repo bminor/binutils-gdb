@@ -2854,7 +2854,7 @@ ENUMDOC
 ENUM
   BFD_RELOC_M32R_24
 ENUMDOC
-  Mitsubishi M32R relocs.
+  Renesas M32R (formerly Mitsubishi M32R) relocs.
   This is a 24 bit absolute address.
 ENUM
   BFD_RELOC_M32R_10_PCREL

@@ -1788,7 +1788,7 @@ get_machine_name (e_machine)
     case EM_CYGNUS_D30V:
     case EM_D30V:		return "d30v";
     case EM_CYGNUS_M32R:
-    case EM_M32R:		return "Mitsubishi M32r";
+    case EM_M32R:		return "Renesas M32R (formerly Mitsubishi M32r)";
     case EM_CYGNUS_V850:
     case EM_V850:		return "NEC v850";
     case EM_CYGNUS_MN10300:
