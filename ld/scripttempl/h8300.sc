@@ -1,12 +1,12 @@
 TORS=".tors :
-  {
-    ___ctors = . ;
-    *(.ctors)
-    ___ctors_end = . ;
-    ___dtors = . ;
-    *(.dtors)
-    ___dtors_end = . ;
-  } > ram"
+	{
+	  ___ctors = . ;
+	  *(.ctors)
+	  ___ctors_end = . ;
+	  ___dtors = . ;
+	  *(.dtors)
+	  ___dtors_end = . ;
+	} > ram"
 
 cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}")
@@ -29,14 +29,14 @@ MEMORY
 SECTIONS 				
 { 					
 .vectors :
-	 {
+	{
 	  /* Use something like this to place a specific
 	     function's address into the vector table. 
 
 	     SHORT (ABSOLUTE (_foobar)).  */
 
 	  *(.vectors)
-        } ${RELOCATING+ > vectors}
+	} ${RELOCATING+ > vectors}
 
 .text :
 	{ 					
@@ -46,7 +46,7 @@ SECTIONS
    	  ${RELOCATING+ _etext = . ; }
 	} ${RELOCATING+ > ram}
 	
-	${CONSTRUCTING+${TORS}}
+${CONSTRUCTING+${TORS}}
 	
 .data :
 	{

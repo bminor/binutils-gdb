@@ -1,3 +1,9 @@
+2000-11-14  Kazu Hirata  <kazu@hxi.com>
+
+	* scripttempl/h8300.sc: Fix formatting.
+	* scripttempl/h8300h.sc: Likewise.
+	* scripttempl/h8300s.sc: Likewise.
+
 Tue Nov 14 00:59:19 2000  Denis Chertykov  <denisc@overta.ru>
 
 	* scripttempl/elf32avr.sc: Fix bug in .eeprom segment.
