@@ -1,3 +1,16 @@
+1998-11-25  DJ Delorie  <dj@cygnus.com>
+
+	* ldemul.h (ld_emulation_xfer_struct): new hook "recognized_file"
+	* ldemul.c (ldemul_recognized_file): new function, new hook
+	* ldint.texinfo: document new hook.
+	* ldlang.c (load_symbols): call recognized_hook for all objects we
+	do recognize, in case the emulation needs to handle them
+	specially.  PE DLLs use this.
+	* pe-dll.c (pe_dll_generate_def_file): take out hack and debug
+	printfs
+	* emultempl/pe.em (gld_i386_recognized_file): new function
+	(gld_i486_unrecognized_file): take out hack
+
 start-sanitize-vr4xxx
 1998-11-24  Gavin Romig-Koch  <gavin@cygnus.com>
 

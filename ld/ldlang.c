@@ -151,6 +151,7 @@ static void lang_gc_wild
   PARAMS ((lang_wild_statement_type *, const char *, const char *));
 static void lang_gc_sections_1 PARAMS ((lang_statement_union_type *));
 static void lang_gc_sections PARAMS ((void));
+static void lang_do_version_exports_section PARAMS ((void));
 					
 
 /* EXPORTS */
@@ -1253,6 +1254,9 @@ load_symbols (entry, place)
       return;
     }
 
+  if (ldemul_recognized_file (entry))
+    return;
+
   /* We don't call ldlang_add_file for an archive.  Instead, the
      add_symbols entry point will call ldlang_add_file, via the
      add_archive_element callback, for each element of the archive
@@ -2089,7 +2093,10 @@ print_statement (s, os)
     case lang_constructors_statement_enum:
       if (constructor_list.head != NULL)
 	{
-	  minfo (" CONSTRUCTORS\n");
+	  if (constructors_sorted)
+	    minfo (" SORT (CONSTRUCTORS)\n");
+	  else
+	    minfo (" CONSTRUCTORS\n");
 	  print_statement_list (constructor_list.head, os);
 	}
       break;
@@ -3549,6 +3556,8 @@ lang_gc_sections_1 (s)
 	case lang_group_statement_enum:
 	  lang_gc_sections_1 (s->group_statement.children.head);
 	  break;
+	default:
+	  break;
 	}
     }
 }
@@ -3567,7 +3576,7 @@ lang_gc_sections ()
      Handle the entry symbol at the same time.  */
 
   fake_list_start.next = ldlang_undef_chain_list_head;
-  fake_list_start.name = entry_symbol;
+  fake_list_start.name = (char *) entry_symbol;
 
   for (ulist = &fake_list_start; ulist; ulist = ulist->next)
     {
@@ -3612,6 +3621,10 @@ lang_process ()
      link.  */
   lang_check ();
 
+  /* Handle .exports instead of a version script if we're told to do so.  */
+  if (command_line.version_exports_section)
+    lang_do_version_exports_section ();
+
   /* Build all sets based on the information gathered from the input
      files.  */
   ldctor_build_sets ();
@@ -3654,6 +3667,10 @@ lang_process ()
 	  reset_memory_regions ();
 
 	  relax_again = false;
+
+	  /* Note: pe-dll.c does something like this also.  If you find
+	     you need to change this code, you probably need to change
+	     pe-dll.c also.  DJ */
 
 	  /* Do all the assignments with our current guesses as to
 	     section sizes.  */
@@ -3836,7 +3853,7 @@ lang_add_reloc (reloc, howto, section, name, addend)
   p->output_vma = 0;
 }
 
-void
+lang_assignment_statement_type *
 lang_add_assignment (exp)
      etree_type * exp;
 {
@@ -3844,6 +3861,7 @@ lang_add_assignment (exp)
 						  stat_ptr);
 
   new->exp = exp;
+  return new;
 }
 
 void
@@ -4475,4 +4493,41 @@ lang_add_vers_depend (list, name)
   einfo (_("%X%P: unable to find version dependency `%s'\n"), name);
 
   return ret;
+}
+
+static void
+lang_do_version_exports_section ()
+{
+  struct bfd_elf_version_expr *greg = NULL, *lreg;
+
+  LANG_FOR_EACH_INPUT_STATEMENT (is)
+    {
+      asection *sec = bfd_get_section_by_name (is->the_bfd, ".exports");
+      char *contents, *p;
+      bfd_size_type len;
+
+      if (sec == NULL)
+        continue;
+
+      len = bfd_section_size (is->the_bfd, sec);
+      contents = xmalloc (len);
+      if (!bfd_get_section_contents (is->the_bfd, sec, contents, 0, len))
+	einfo (_("%X%P: unable to read .exports section contents"), sec);
+
+      while (p < contents+len)
+	{
+	  greg = lang_new_vers_regex (greg, p);
+	  p = strchr (p, '\0') + 1;
+	}
+
+      free (contents);
+
+      /* Do not include this section in the link.  */
+      bfd_set_section_flags (is->the_bfd, sec,
+	bfd_get_section_flags (is->the_bfd, sec) | SEC_EXCLUDE);
+    }
+
+  lreg = lang_new_vers_regex (NULL, "*");
+  lang_register_vers_node (command_line.version_exports_section,
+			   lang_new_vers_node (greg, lreg), NULL);
 }
