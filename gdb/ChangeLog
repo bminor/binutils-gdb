@@ -1,3 +1,9 @@
+Fri Jan 21 12:47:53 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* dbxread.c (end_psymtab): Only patch psymtab textlow and texthigh
+	if N_SO_ADDRESS_MAYBE_MISSING is defined.
+	* config/sparc/tm-sun4sol2.h: Define it.
+
 Thu Jan 20 15:04:24 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* printcmd.c (print_address_symbolic):  Unconditionally use msymbol

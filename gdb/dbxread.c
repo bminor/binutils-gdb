@@ -453,7 +453,8 @@ record_minimal_symbol (name, address, type, objfile)
   prim_record_minimal_symbol
     (obsavestring (name, strlen (name), &objfile -> symbol_obstack),
      address,
-     ms_type);
+     ms_type,
+     objfile);
 }
 
 /* Scan and build partial symbols for a symbol file.
@@ -1034,6 +1035,7 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
       LDSYMLEN(pst) = capping_symbol_offset - LDSYMOFF(pst);
   pst->texthigh = capping_text;
 
+#ifdef N_SO_ADDRESS_MAYBE_MISSING
   /* Under Solaris, the N_SO symbols always have a value of 0,
      instead of the usual address of the .o file.  Therefore,
      we have to do some tricks to fill in texthigh and textlow.
@@ -1100,6 +1102,9 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
 
   /* this test will be true if the last .o file is only data */
   if (pst->textlow == 0)
+    /* This loses if the text section really starts at address zero
+       (generally true when we are debugging a .o file, for example).
+       That is why this whole thing is inside N_SO_ADDRESS_MIGHT_LIE.  */
     pst->textlow = pst->texthigh;
 
   /* If we know our own starting text address, then walk through all other
@@ -1119,7 +1124,7 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
   }
 
   /* End of kludge for patching Solaris textlow and texthigh.  */
-
+#endif /* NO_SO_ADDRESS_MAYBE_MISSING.  */
 
   pst->n_global_syms =
     objfile->global_psymbols.next - (objfile->global_psymbols.list + pst->globals_offset);
