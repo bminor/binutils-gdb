@@ -529,7 +529,7 @@ AC_ARG_ENABLE(sim-scache,
 [case "${enableval}" in
   yes)	sim_scache="-DWITH_SCACHE=${default_sim_scache}";;
   no)	sim_scache="-DWITH_SCACHE=0" ;;
-  [[0-9]]*) sim_cache=${enableval};;
+  [[0-9]]*) sim_scache="-DWITH_SCACHE=${enableval}";;
   *)	AC_MSG_ERROR("Bad value $enableval passed to --enable-sim-scache");
 	sim_scache="";;
 esac

@@ -1,3 +1,7 @@
+2001-01-12  Frank Ch. Eigler  <fche@redhat.com>
+
+	* configure: Regenerated with sim_scache fix.
+
 2000-11-18  Greg McGary  <greg@mcgary.org>
 
 	* Makefile.in: remove `@true' commands for rules that have

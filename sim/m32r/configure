@@ -3726,7 +3726,7 @@ if test "${enable_sim_scache+set}" = set; then
   case "${enableval}" in
   yes)	sim_scache="-DWITH_SCACHE=${default_sim_scache}";;
   no)	sim_scache="-DWITH_SCACHE=0" ;;
-  [0-9]*) sim_cache=${enableval};;
+  [0-9]*) sim_scache="-DWITH_SCACHE=${enableval}";;
   *)	{ echo "configure: error: "Bad value $enableval passed to --enable-sim-scache"" 1>&2; exit 1; };
 	sim_scache="";;
 esac
