@@ -673,6 +673,7 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 			  || !bfd_set_section_alignment (dynobj, sreloc, 2))
 			return FALSE;
 		    }
+		  elf_section_data (sec)->sreloc = sreloc;
 		}
 
 	      if (sec->flags & SEC_READONLY
@@ -1627,12 +1628,17 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (info->shared
 	      && r_symndx != 0
 	      && (input_section->flags & SEC_ALLOC) != 0
+	      && (h == NULL
+		  || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		  || h->root.type != bfd_link_hash_undefweak)
 	      && ((r_type != R_68K_PC8
 		   && r_type != R_68K_PC16
 		   && r_type != R_68K_PC32)
-		  || (!info->symbolic
-		      || (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_DEF_REGULAR) == 0)))
+		  || (h != NULL
+		      && h->dynindx != -1
+		      && (!info->symbolic
+			  || (h->elf_link_hash_flags
+			      & ELF_LINK_HASH_DEF_REGULAR) == 0))))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_byte *loc;
@@ -1641,26 +1647,6 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	      /* When generating a shared object, these relocations
 		 are copied into the output file to be resolved at run
 		 time.  */
-
-	      if (sreloc == NULL)
-		{
-		  const char *name;
-
-		  name = (bfd_elf_string_from_elf_section
-			  (input_bfd,
-			   elf_elfheader (input_bfd)->e_shstrndx,
-			   elf_section_data (input_section)->rel_hdr.sh_name));
-		  if (name == NULL)
-		    return FALSE;
-
-		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
-			      && strcmp (bfd_get_section_name (input_bfd,
-							       input_section),
-					 name + 5) == 0);
-
-		  sreloc = bfd_get_section_by_name (dynobj, name);
-		  BFD_ASSERT (sreloc != NULL);
-		}
 
 	      skip = FALSE;
 	      relocate = FALSE;
@@ -1677,19 +1663,22 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
-	      /* h->dynindx may be -1 if the symbol was marked to
-                 become local.  */
 	      else if (h != NULL
-		       && ((! info->symbolic && h->dynindx != -1)
+		       && h->dynindx != -1
+		       && (r_type == R_68K_PC8
+			   || r_type == R_68K_PC16
+			   || r_type == R_68K_PC32
+			   || !info->shared
+			   || !info->symbolic
 			   || (h->elf_link_hash_flags
 			       & ELF_LINK_HASH_DEF_REGULAR) == 0))
 		{
-		  BFD_ASSERT (h->dynindx != -1);
 		  outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
-		  outrel.r_addend = relocation + rel->r_addend;
+		  outrel.r_addend = rel->r_addend;
 		}
 	      else
 		{
+		  /* This symbol is local, or marked to become local.  */
 		  if (r_type == R_68K_32)
 		    {
 		      relocate = TRUE;
@@ -1729,6 +1718,10 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 		      outrel.r_addend = relocation + rel->r_addend;
 		    }
 		}
+
+	      sreloc = elf_section_data (input_section)->sreloc;
+	      if (sreloc == NULL)
+		abort ();
 
 	      loc = sreloc->contents;
 	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);

@@ -1,3 +1,12 @@
+2003-05-17  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c (elf_m68k_check_relocs): Cache reloc section in
+	elf_section_data during processing of pc-relative and absolute
+	relocations.
+	(elf_m68k_relocate_section): Use the cached reloc section instead
+	of computing it again.  Fix handling of visibility.  Don't modify
+	addend when copying over a relocation into the output.
+
 2003-05-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Use SYMBOL_CALLS_LOCAL
