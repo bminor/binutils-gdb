@@ -322,11 +322,10 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
 
   for (i = 0; i < NUM_GREGS; i++)
     if ((regno == -1 || regno == i))
-      *(regp + regmap[i]) = *(elf_greg_t *) &registers[REGISTER_BYTE (i)];
+      regcache_collect (i, regp + regmap[i]);
 
   if (regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
-    *(regp + regmap[ORIG_EAX]) =
-      *(elf_greg_t *) &registers[REGISTER_BYTE (I386_LINUX_ORIG_EAX_REGNUM)];
+    regcache_collect (I386_LINUX_ORIG_EAX_REGNUM, regp + regmap[ORIG_EAX]);
 }
 
 #ifdef HAVE_PTRACE_GETREGS

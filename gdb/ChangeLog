@@ -1,5 +1,10 @@
 2001-11-17  Kevin Buettner  <kevinb@redhat.com>
 
+	* i386-linux-nat.c (fill_gregset): Use regcache_collect() instead
+	of accessing registers[] directly.
+
+2001-11-17  Kevin Buettner  <kevinb@redhat.com>
+
 	* i386-linux-nat.c (fill_gregset): Don't invoke read_register_gen()
 	when fetching ORIG_EAX.
 
