@@ -1,3 +1,13 @@
+Mon Jul 22 13:17:06 1996  Richard Henderson  <rth@tamu.edu>
+
+	* alpha-dis.c (print_insn_alpha): No longer the user-visible
+	print routine.  Take new regnames and cpumask arguments.
+	Kill the environment variable nonsense.
+	(print_insn_alpha_osf): New function.  Do OSF/1 style regnames.
+	(print_insn_alpha_vms): New function.  Do VMS style regnames.
+	* disassemble.c (disassembler): Test bfd flavour to pick
+	between OSF and VMS routines.  Default to OSF.
+
 Thu Jul 18 17:19:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Call AC_SUBST (INSTALL_SHLIB).

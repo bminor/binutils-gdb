@@ -64,7 +64,17 @@ disassembler (abfd)
 #endif
 #ifdef ARCH_alpha
     case bfd_arch_alpha:
-      disassemble = print_insn_alpha;
+      switch (bfd_get_flavour (abfd))
+	{
+	case bfd_target_ecoff_flavour:
+	case bfd_target_elf_flavour:
+	default:
+          disassemble = print_insn_alpha_osf;
+	  break;
+	case bfd_target_evax_flavour:
+	  disassemble = print_insn_alpha_vms;
+	  break;
+	}
       break;
 #endif
 /* start-sanitize-arc */
