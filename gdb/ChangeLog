@@ -1,11 +1,18 @@
+Mon Mar 23 13:52:28 1998  Ulrich Drepper  (drepper@cygnus.com) 
+ 
+	* breakpoint.c (breakpoint_re_set_one): Treat bp_shlib_events
+	like bp_breakpoints.
+	* solib.c (solib_create_inferior_hook): Relocate section addresses
+	if the alleged start address doesn't agree with the PC.
+
 start-sanitize-sky
 Mon Mar 23 13:07:22 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* configure.in (sim-gpu2): Added --with-sim-gpu2 as configure
  	option, to allow gdb+sim linking with sky GPU2 library.
 	* configure: Regenerated.
+
 end-sanitize-sky
-	
 Sat Mar 21 19:34:49 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	merged changes from Foundry (list follows by file/author):
