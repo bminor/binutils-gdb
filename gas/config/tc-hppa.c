@@ -3706,28 +3706,11 @@ pa_ip (str)
 			opcode |= (result.l_r_select & 1) << 1;
 		      }
 		    continue;
+		  }
 		default:
 		  abort ();
 		}
 	      break;
-
-	    /* Handle L/R register halves like 'x'.  */
-	    case 'e':
-	      {
-		struct pa_11_fp_reg_struct result;
-
-		/* This should be more strict.  Small steps.  */
-		if (strict && *s != '%')
-		  break;
-		pa_parse_number (&s, &result);
-		CHECK_FIELD (result.number_part, 31, 0, 0);
-		opcode |= (result.number_part & 0x1f) << 16;
-		if (need_pa11_opcode (&the_insn, &result))
-		  {
-		    opcode |= (result.l_r_select & 1) << 1;
-		  }
-		continue;
-	      }
 
 	    default:
 	      abort ();
