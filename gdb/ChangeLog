@@ -1,3 +1,12 @@
+Fri Sep 13 12:02:39 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (INTERNAL_LDFLAGS): Add @HLDFLAGS@ to list.
+	(HLDENV): Set to @HLDENV@.
+	(gdb): Prefix link command line with $(HLDENV).
+	* configure.in: Add support to test for --enable-shared and
+	generate appropriate values for HLDFLAGS and HLDENV.
+	* configure: Regenerated with autoconf.
+
 Sun Sep  8 15:26:27 1996  Fred Fish  <fnf@cygnus.com>
 
 	* alpha-nat.c (fetch_core_registers): Match Sep 4 gdbcore.h prototype
