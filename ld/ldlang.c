@@ -132,7 +132,6 @@ static boolean lang_one_common PARAMS ((struct bfd_link_hash_entry *, PTR));
 static void lang_place_orphans PARAMS ((void));
 static int topower PARAMS ((int));
 static void lang_set_startof PARAMS ((void));
-static void reset_memory_regions PARAMS ((void));
 static void gc_section_callback
   PARAMS ((lang_wild_statement_type *, struct wildcard_list *, asection *,
 	   lang_input_statement_type *, PTR));
@@ -3972,8 +3971,8 @@ lang_final ()
 
 /* Reset the current counters in the regions.  */
 
-static void
-reset_memory_regions ()
+void
+lang_reset_memory_regions ()
 {
   lang_memory_region_type *p = lang_memory_region_list;
   asection *o;
@@ -4160,7 +4159,7 @@ lang_process ()
 
       do
 	{
-	  reset_memory_regions ();
+	  lang_reset_memory_regions ();
 
 	  relax_again = false;
 

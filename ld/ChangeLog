@@ -1,3 +1,11 @@
+2002-02-05  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ldlang.c (lang_reset_memory_regions): Rename from
+	reset_memory_regions.  Change all callers.  Make public.
+	* ldlang.h (lang_reset_memory_regions): Prototype.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_finish): Call
+	lang_reset_memory_regions before lang_size_sections.
+
 2002-02-04  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* emultempl/mmix-elfnmmo.em (mmix_after_allocation): Use signed

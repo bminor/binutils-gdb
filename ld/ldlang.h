@@ -1,13 +1,13 @@
 /* ldlang.h - linker command language support
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001
+   2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
    GLD is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
+   the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    GLD is distributed in the hope that it will be useful,
@@ -402,6 +402,7 @@ extern void lang_for_each_input_file
   PARAMS ((void (*dothis) (lang_input_statement_type *)));
 extern void lang_for_each_file
   PARAMS ((void (*dothis) (lang_input_statement_type *)));
+extern void lang_reset_memory_regions PARAMS ((void));
 extern bfd_vma lang_do_assignments
   PARAMS ((lang_statement_union_type * s,
 	   lang_output_section_statement_type *output_section_statement,
