@@ -2066,7 +2066,8 @@ sh_elf_relax_section (abfd, sec, link_info, again)
 	  shndx = shndx_buf + (shndx_buf ? ELF32_R_SYM (irelfn->r_info) : 0);
 	  bfd_elf32_swap_symbol_in (abfd, esym, shndx, &isym);
 
-	  if (isym.st_shndx != _bfd_elf_section_from_bfd_section (abfd, sec))
+	  if (isym.st_shndx
+	      != (unsigned int) _bfd_elf_section_from_bfd_section (abfd, sec))
 	    {
 	      ((*_bfd_error_handler)
 	       (_("%s: 0x%lx: warning: symbol in unexpected section"),
