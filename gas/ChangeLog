@@ -1,8 +1,69 @@
 Thu Jan 27 18:14:19 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* config/tc-alpha.c, config/tc-alpha.h, config/alpha-opcode.h: New
+	files, based on port of gas-1.38 contributed by CMU, using a.out
+	variant.  Updated for gas-2.x and ECOFF.  Floating-point constants
+	are still broken, bootstrap testing incomplete.
+
+	* literal.c: Comment changes.
+
+	* listing.c (listing_source_file): Check for null listing_tail
+	before indirecting through it.
+
+	* expr.h (struct expressionS): Added struct tag.
+
+	* as.h: If __GNUC__ and inline are both undefined, define inline
+	away.
+
+	* write.c (cvt_frag_to_fill): Don't assume that fr_var for
+	rs_align or rs_org frags will be 1.
+	(relax_segment): For rs_align, if fr_var is not 1, complain if
+	required padding is not a multiple of the size of the pad pattern.
+	(fixup_segment): Leave gp-relative relocations alone.  For pcrel
+	relocations referring to the same segment, clear fx_pcrel when
+	clearing fx_addsy.
+	* as.h: Adjust comments on rs_align.
+
 	* atof-generic.c: Some reformatting.
 	(atof_generic): Be careful when mixing signed/unsigned values of
 	different sizes.
+
+	* write.c, config/obj-{aout,bout,coff*}.c, config/tc-sparc.c:
+	Query the fx_done field instead of fx_addsy to see if the fixup
+	still needs to be applied.  Set fx_done and clear fx_addsy both,
+	for now.  If TC_HANDLES_FX_DONE isn't defined, assume md_apply_fix
+	will only clear fx_addsy, and set fx_done accordingly after
+	returning.
+	* config/tc-sparc.h (TC_HANDLES_FX_DONE): Define.
+	* config/tc-sparc.c (md_apply_fix): Set fx_done for non-pcrel fix
+	with no fx_addsy.
+
+	* symbols.c (dot_text_symbol, dot_data_symbol, dot_bss_symbol):
+	Deleted.
+	(symbol_begin): Moved to end of file, so function inlining can
+	work better.
+	(fb_label_count, fb_label_max): Default C static initializers are
+	sufficient.
+	* symbols.h (dot_text_symbol, dot_data_symbol, dot_bss_symbol):
+	Declarations deleted.
+	* config/obj-coff.c (dot_text_symbol, dot_data_symbol,
+	dot_bss_symbol): Defined here, static.
+
+	* config/obj-aout.c [BFD_ASSEMBLER]: Undef NO_RELOC before
+	including aout/aout64.h.
+
+	* write.c (write_object_file): If EMIT_SECTION_SYMBOLS is false,
+	don't write out a section symbol even if it's used in a
+	relocation; assume relocations will handle section numbers
+	somehow.  Rename "punt_it" label to "punt_it_if_unused" to reflect
+	it's true use.
+	(EMIT_SECTION_SYMBOLS): Default to 1.
+	(adjust_reloc_syms): Don't create a new symbol for an absolute
+	reference; just use the absolute section symbol.
+	(write_relocs): Make printout of reloc values dependent on flag
+	DEBUG3, not DEBUG2.
+	* config/obj-aout.h (EMIT_SECTION_SYMBOLS): Define as 0.
+	* config/obj-ecoff.h (EMIT_SECTION_SYMBOLS): Ditto.
 
 Thu Jan 27 16:43:51 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
