@@ -54,7 +54,7 @@ struct fix {
 	char fx_im_disp;	   /* TRUE: value is a displacement */
 	bit_fixS *fx_bit_fixP;	   /* IF NULL no bitfix's to do */  
 	char fx_bsr;		   /* sequent-hack */
-#if defined(TC_SPARC) || defined(TC_A29K)
+#if defined(TC_SPARC) || defined(TC_A29K) || defined(NEED_FX_R_TYPE)
 	/* Hacks for machines where the type of reloc can't be
 	   worked out by looking at how big it is */
 
@@ -90,8 +90,11 @@ fixS *fix_new(fragS *frag,
 	      symbolS *add_symbol,
 	      symbolS *sub_symbol,
 	      long offset,
-	      int pcrel,
-	      enum reloc_type r_type);
+	      int pcrel
+#if defined(TC_SPARC) || defined(TC_A29K) || defined(NEED_FX_R_TYPE)
+	      , int r_type
+#endif
+);
 
 #else /* not __STDC__ */
 
