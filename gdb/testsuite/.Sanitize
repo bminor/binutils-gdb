@@ -31,6 +31,7 @@ aclocal.m4
 config
 configure
 configure.in
+gdb.asm
 gdb.base
 gdb.c++
 gdb.chill
