@@ -1,3 +1,9 @@
+2002-05-11  Ralf Corsepius  <corsepiu@faw.uni-ulm.de>
+            Daniel Jacobowitz  <drow@mvista.com>
+
+	* coff-sh.c (sh_reloc_map): Map to R_SH_IMM32 for non-PE.  Don't
+	map BFD_RELOC_RVA.
+
 2002-05-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (RA_REGISTER_MASK, RA_REGISTER_SHIFT): Delete.
