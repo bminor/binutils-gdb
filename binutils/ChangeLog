@@ -1,3 +1,8 @@
+2004-08-06  Andreas Schwab  <schwab@suse.de>
+
+	* readelf.c (dump_relocations): Fix typo when calculating
+	sec_index.
+
 2004-08-02  Jakub Bogusz  <qboosh@pld-linux.org>
 
 	* dllwrap.c (deduce_name): Fix typos introduced when program_name

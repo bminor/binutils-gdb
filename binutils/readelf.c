@@ -1225,7 +1225,7 @@ dump_relocations (FILE *file,
 
 		      if (psym->st_shndx < SHN_LORESERVE)
 			sec_index = psym->st_shndx;
-		      else if (psym->st_shndx > SHN_LORESERVE)
+		      else if (psym->st_shndx > SHN_HIRESERVE)
 			sec_index = psym->st_shndx - (SHN_HIRESERVE + 1
 						      - SHN_LORESERVE);
 
