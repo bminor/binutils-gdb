@@ -1,3 +1,19 @@
+Wed Jun 16 10:43:08 1993  Fred Fish  (fnf@cygnus.com)
+
+	* bfd.h:  Note that it has been removed.
+
+Tue Jun  8 12:16:03 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	 Support for H8/300-H
+	* dis-asm.h (print_insn_h8300, print_insn_h8300h): Declare it.
+	* coff/h8300.h: New magic number.
+	* coff/internal.h: New relocations.
+	* opcode/h8300.h: Lots of new opcodes.
+
+Tue Jun  1 07:35:03 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* ansidecl.h (const): Don't define it if it's already defined.
+
 Thu May 27 18:19:51 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* dis-asm.h (print_insn_hppa): Declare it.
