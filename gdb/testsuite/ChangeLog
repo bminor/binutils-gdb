@@ -1,3 +1,9 @@
+2004-08-13  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/classes.exp: Remove unused declarations.  Just let
+	test names default instead of providing special names.  Remove
+	extraneous demangler test.
+
 2004-08-12  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.base/unload.exp: New test for breakpoints in dynamically

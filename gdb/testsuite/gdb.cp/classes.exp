@@ -18,7 +18,6 @@
 # This file was written by Fred Fish. (fnf@cygnus.com)
 # And rewritten by Michael Chastain <mec.gnu@mindspring.com>.
 
-set ws "\[\r\n\t \]+"
 set nl "\[\r\n\]+"
 
 if $tracelevel then {
@@ -40,7 +39,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 # Test ptype of class objects.
 
 proc test_ptype_class_objects {} {
-    global gdb_prompt
 
     # Simple type.
 
@@ -320,77 +318,68 @@ proc test_ptype_class_objects {} {
 }
 
 # Test simple access to class members.
-# TODO: these test names are gross!
-# Just let the test name default.
 
 proc test_non_inherited_member_access {} {
-    global gdb_prompt
     
     # Print non-inherited members of g_A.
-    gdb_test "print g_A.a" ".* = 1" "g_A.a incorrect"
-    gdb_test "print g_A.x" ".* = 2" "g_A.x incorrect"
+    gdb_test "print g_A.a" ".* = 1"
+    gdb_test "print g_A.x" ".* = 2"
 
     # Print non-inherited members of g_B.
-    gdb_test "print g_B.b" ".* = 5" "g_B.b incorrect"
-    gdb_test "print g_B.x" ".* = 6" "g_B.x incorrect"
+    gdb_test "print g_B.b" ".* = 5"
+    gdb_test "print g_B.x" ".* = 6"
 
     # Print non-inherited members of g_C.
-    gdb_test "print g_C.c" ".* = 9" "g_C.c incorrect"
-    gdb_test "print g_C.x" ".* = 10" "g_C.x incorrect"
+    gdb_test "print g_C.c" ".* = 9"
+    gdb_test "print g_C.x" ".* = 10"
 
     # Print non-inherited members of g_D.
-    gdb_test "print g_D.d" ".* = 19" "g_D.d incorrect"
-    gdb_test "print g_D.x" ".* = 20" "g_D.x incorrect"
+    gdb_test "print g_D.d" ".* = 19"
+    gdb_test "print g_D.x" ".* = 20"
 
     # Print non-inherited members of g_E.
-    gdb_test "print g_E.e" ".* = 31" "g_E.e incorrect"
-    gdb_test "print g_E.x" ".* = 32" "g_E.x incorrect"
+    gdb_test "print g_E.e" ".* = 31"
+    gdb_test "print g_E.x" ".* = 32"
 }
 
 # Test access to members of other classes.
 # gdb should refuse to print them.
 # (I feel old -- I remember when this was legal in C -- chastain).
-# TODO: Again, change the silly test names.
 
 proc test_wrong_class_members {} {
-    global gdb_prompt
-
-    gdb_test "print g_A.b" "There is no member( or method|) named b." "print g_A.b should be error"
-    gdb_test "print g_B.c" "There is no member( or method|) named c." "print g_B.c should be error"
-    gdb_test "print g_B.d" "There is no member( or method|) named d." "print g_B.d should be error"
-    gdb_test "print g_C.b" "There is no member( or method|) named b." "print g_C.b should be error"
-    gdb_test "print g_C.d" "There is no member( or method|) named d." "print g_C.d should be error"
-    gdb_test "print g_D.e" "There is no member( or method|) named e." "print g_D.e should be error"
+    gdb_test "print g_A.b" "There is no member( or method|) named b."
+    gdb_test "print g_B.c" "There is no member( or method|) named c."
+    gdb_test "print g_B.d" "There is no member( or method|) named d."
+    gdb_test "print g_C.b" "There is no member( or method|) named b."
+    gdb_test "print g_C.d" "There is no member( or method|) named d."
+    gdb_test "print g_D.e" "There is no member( or method|) named e."
 }
 
 # Test access to names that are not members of any class.
-# TODO: test names again.
 
 proc test_nonexistent_members {} {
-    global gdb_prompt
-
-    gdb_test "print g_A.y" "There is no member( or method|) named y." "print g_A.y should be error"
-    gdb_test "print g_B.z" "There is no member( or method|) named z." "print g_B.z should be error"
-    gdb_test "print g_C.q" "There is no member( or method|) named q." "print g_C.q should be error"
-    gdb_test "print g_D.p" "There is no member( or method|) named p." "print g_D.p should be error"
+    gdb_test "print g_A.y" "There is no member( or method|) named y."
+    gdb_test "print g_B.z" "There is no member( or method|) named z."
+    gdb_test "print g_C.q" "There is no member( or method|) named q."
+    gdb_test "print g_D.p" "There is no member( or method|) named p."
 }
 
 # Call a method that expects a base class parameter with base, inherited,
 # and unrelated class arguments.
 
 proc test_method_param_class {} {
-    gdb_test "call class_param.Aptr_a (&g_A)" ".* = 1" "base class param->a"
-    gdb_test "call class_param.Aptr_x (&g_A)" ".* = 2" "base class param->x"
-    gdb_test "call class_param.Aptr_a (&g_B)" ".* = 3" "inherited class param->a"
-    gdb_test "call class_param.Aptr_x (&g_B)" ".* = 4" "inherited class param->x"
-    gdb_test "call class_param.Aref_a (g_A)" ".* = 1" "base class (&param)->a"
-    gdb_test "call class_param.Aref_x (g_A)" ".* = 2" "base class (&param)->x"
-    gdb_test "call class_param.Aref_a (g_B)" ".* = 3" "inherited class (&param)->a"
-    gdb_test "call class_param.Aref_x (g_B)" ".* = 4" "inherited class (&param)->x"
-    gdb_test "call class_param.Aval_a (g_A)" ".* = 1" "base class param.a"
-    gdb_test "call class_param.Aval_x (g_A)" ".* = 2" "base class param.x"
-    gdb_test "call class_param.Aval_a (g_B)" ".* = 3" "inherited class param.a"
-    gdb_test "call class_param.Aval_x (g_B)" ".* = 4" "inherited class param.x"
+    gdb_test "call class_param.Aptr_a (&g_A)" ".* = 1"
+    gdb_test "call class_param.Aptr_x (&g_A)" ".* = 2"
+    gdb_test "call class_param.Aptr_a (&g_B)" ".* = 3"
+    gdb_test "call class_param.Aptr_x (&g_B)" ".* = 4"
+    gdb_test "call class_param.Aref_a (g_A)" ".* = 1"
+    gdb_test "call class_param.Aref_x (g_A)" ".* = 2"
+    gdb_test "call class_param.Aref_a (g_B)" ".* = 3"
+    gdb_test "call class_param.Aref_x (g_B)" ".* = 4"
+    gdb_test "call class_param.Aval_a (g_A)" ".* = 1"
+    gdb_test "call class_param.Aval_x (g_A)" ".* = 2"
+    gdb_test "call class_param.Aval_a (g_B)" ".* = 3"
+    gdb_test "call class_param.Aval_x (g_B)" ".* = 4"
 
     gdb_test "call class_param.Aptr_a (&foo)" "Cannot resolve .*" "unrelated class *param"
     gdb_test "call class_param.Aref_a (foo)" "Cannot resolve .*" "unrelated class &param"
@@ -402,7 +391,6 @@ proc test_method_param_class {} {
 proc test_enums {} {
     global gdb_prompt
     global nl
-    global ws
 
     # print the object
 
@@ -509,8 +497,6 @@ proc test_enums {} {
 # Pointers to class members
 
 proc test_pointers_to_class_members {} {
-    global gdb_prompt
-
     gdb_test "print Bar::z" "\\$\[0-9\]+ = \\(int ?\\( ?Bar::& ?\\) ?\\) ?Bar::z"
     gdb_test "print &Foo::x" "\\$\[0-9\]+ = \\(int ?\\( ?Foo::\\* ?\\) ?\\) ?&Foo::x"
     gdb_test "print (int)&Foo::x" "\\$\[0-9\]+ = 0"
@@ -527,7 +513,6 @@ proc test_pointers_to_class_members {} {
 # Test static members.
 
 proc test_static_members {} {
-    global gdb_prompt
     global hex
 
     gdb_test "print Foo::st" "\\$\[0-9\]+ = 100"
@@ -634,11 +619,6 @@ proc do_tests {} {
 	    fail "calling method for small class"
 	}
     }
-
-    # This is a random v2 demangling test.
-    # This is redundant with existing tests in demangle.exp.
-    # TODO: Just remove this.
-    gdb_test "maint demangle inheritance1__Fv" "inheritance1\\(void\\)" "demangle"
 }
 
 do_tests
