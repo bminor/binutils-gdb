@@ -1,3 +1,8 @@
+Thu Mar 26 17:06:51 1998  Richard Henderson  <rth@cygnus.com>
+
+	* defparse.y (explist): Allow epsilon.
+	Suggestion from Jonathan-Harris@psion.com.
+
 Thu Mar 26 16:59:09 1998  Richard Henderson  <rth@cygnus.com>
 
 	* coffgrok.c (do_sections_p1): Use the section's lma instead of vma
