@@ -257,6 +257,7 @@ DEFUN(bfd_seek,(abfd, position, direction),
 {
   int result;
   FILE *f;
+  file_ptr file_position;
   /* For the time being, a BFD may not seek to it's end.  The problem
      is that we don't easily have a way to recognize the end of an
      element in an archive. */
@@ -271,18 +272,26 @@ DEFUN(bfd_seek,(abfd, position, direction),
 #endif
 
   f = bfd_cache_lookup (abfd);
+  file_position = position;
   if (direction == SEEK_SET && abfd->my_archive != NULL)
-    {
-      /* This is a set within an archive, so we need to
-	 add the base of the object within the archive */
-      result = fseek (f, position + abfd->origin, direction);
-    }
+    file_position += abfd->origin;
+
+  result = fseek (f, file_position, direction);
+
+  if (result != 0)
+    /* Force redetermination of `where' field.  */
+    bfd_tell (abfd);
   else
     {
-      result = fseek (f, position, direction);
+#ifdef FILE_OFFSET_IS_CHAR_INDEX
+      /* Adjust `where' field.  */
+      if (direction == SEEK_SET)
+	abfd->where = position;
+      else
+	abfd->where += position;
+#endif
     }
-  /* Force redetermination of `where' field.  */
-  bfd_tell (abfd);
+  return result;
 }
 
 /** Make a string table */
