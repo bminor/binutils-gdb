@@ -1720,7 +1720,7 @@ document - Is there already such a doc? >>
 @end example
 
 Here is the stab for the `this' pointer implicit argument.  The name
-of the `this' pointer is always $t.  Type 19, the `this' pointer is
+of the `this' pointer is always `this.'  Type 19, the `this' pointer is
 defined as a pointer to type 20, baseA, but a stab defining baseA has
 not yet been emited.  Since the compiler knows it will be emited
 shortly, here it just outputs a cross reference to the undefined
@@ -1731,7 +1731,7 @@ symbol, by prefixing the symbol name with xs.
         type_desc(ptr to)type_ref(baseA)=
         type_desc(cross-reference to)baseA:",N_RSYM,NIL,NIL,register_number 
 
-.stabs "$t:P19=*20=xsbaseA:",64,0,0,8
+.stabs "this:P19=*20=xsbaseA:",64,0,0,8
 @end example
 
 The stab for the explicit integer argument looks just like a parameter
@@ -2082,11 +2082,11 @@ is $vb25.
 
 Following the name and a semicolon is a type reference describing the
 type of the virtual base class pointer, in this case 24.  Type 24 was
-defined earlier as the type of the B class `this` pointer, $t.  The
+defined earlier as the type of the B class `this` pointer.  The
 `this' pointer for a class is a pointer to the class type.
 
 @example
-.stabs "$t:P24=*25=xsB:",64,0,0,8
+.stabs "this:P24=*25=xsB:",64,0,0,8
 @end example
 
 Finally the field offset part of the vbase pointer field description
