@@ -53,6 +53,20 @@ const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
 
 
+const relax_typeS md_relax_table[] = {
+  /* bCC relaxing */
+  {0x7f, -0x80, 2, 1},
+  {0x7fff, -0x8000, 5, 2},
+  {0x7fffff, -0x8000000, 7, 0},
+  /* bCCx relaxing */
+  {0x7f, -0x80, 3, 4},
+  {0x7fff, -0x8000, 6, 5},
+  {0x7fffff, -0x8000000, 8, 0},
+  /* jmp/jsr relaxing, could have a bra variant too! */
+  {0x7fff, -0x8000, 3, 7},
+  {0x7fffff, -0x8000000, 5, 0},
+
+};
 /* local functions */
 static void mn10200_insert_operand PARAMS ((unsigned long *, unsigned long *,
 					    const struct mn10200_operand *,
@@ -360,8 +374,321 @@ md_convert_frag (abfd, sec, fragP)
   asection *sec;
   fragS *fragP;
 {
-  /* printf ("call to md_convert_frag \n"); */
-  abort ();
+  subseg_change (sec, 0);
+  if (fragP->fr_subtype == 0)
+    {
+      fix_new (fragP, fragP->fr_fix + 1, 1, fragP->fr_symbol,
+	       fragP->fr_offset + 1, 1, BFD_RELOC_8_PCREL);
+      fragP->fr_var = 0;
+      fragP->fr_fix += 2;
+    }
+  else if (fragP->fr_subtype == 1)
+    {
+      /* Reverse the condition of the first branch.  */
+      int offset = fragP->fr_fix;
+      int opcode = fragP->fr_literal[offset] & 0xff;
+
+      switch (opcode)
+	{
+	case 0xe8:
+	  opcode = 0xe9;
+	  break;
+	case 0xe9:
+	  opcode = 0xe8;
+	  break;
+	case 0xe0:
+	  opcode = 0xe2;
+	  break;
+	case 0xe2:
+	  opcode = 0xe0;
+	  break;
+	case 0xe3:
+	  opcode = 0xe1;
+	  break;
+	case 0xe1:
+	  opcode = 0xe3;
+	  break;
+	case 0xe4:
+	  opcode = 0xe6;
+	  break;
+	case 0xe6:
+	  opcode = 0xe4;
+	  break;
+	case 0xe7:
+	  opcode = 0xe5;
+	  break;
+	case 0xe5:
+	  opcode = 0xe7;
+	  break;
+	default:
+	  abort ();
+	}
+      fragP->fr_literal[offset] = opcode;
+
+      /* Set the displacement bits so that we branch around
+	 the unconditional branch.  */
+      fragP->fr_literal[offset + 1] = 0x5;
+
+      /* Now create the unconditional branch + fixup to the
+	 final target.  */
+      fragP->fr_literal[offset + 2] = 0xfc;
+      fix_new (fragP, fragP->fr_fix + 3, 2, fragP->fr_symbol,
+	       fragP->fr_offset + 1, 1, BFD_RELOC_16_PCREL);
+      fragP->fr_var = 0;
+      fragP->fr_fix += 5;
+    }
+  else if (fragP->fr_subtype == 2)
+    {
+      /* Reverse the condition of the first branch.  */
+      int offset = fragP->fr_fix;
+      int opcode = fragP->fr_literal[offset] & 0xff;
+
+      switch (opcode)
+	{
+	case 0xe8:
+	  opcode = 0xe9;
+	  break;
+	case 0xe9:
+	  opcode = 0xe8;
+	  break;
+	case 0xe0:
+	  opcode = 0xe2;
+	  break;
+	case 0xe2:
+	  opcode = 0xe0;
+	  break;
+	case 0xe3:
+	  opcode = 0xe1;
+	  break;
+	case 0xe1:
+	  opcode = 0xe3;
+	  break;
+	case 0xe4:
+	  opcode = 0xe6;
+	  break;
+	case 0xe6:
+	  opcode = 0xe4;
+	  break;
+	case 0xe7:
+	  opcode = 0xe5;
+	  break;
+	case 0xe5:
+	  opcode = 0xe7;
+	  break;
+	default:
+	  abort ();
+	}
+      fragP->fr_literal[offset] = opcode;
+
+      /* Set the displacement bits so that we branch around
+	 the unconditional branch.  */
+      fragP->fr_literal[offset + 1] = 0x7;
+
+      /* Now create the unconditional branch + fixup to the
+	 final target.  */
+      fragP->fr_literal[offset + 2] = 0xf4;
+      fragP->fr_literal[offset + 3] = 0xe0;
+      fix_new (fragP, fragP->fr_fix + 4, 4, fragP->fr_symbol,
+	       fragP->fr_offset + 2, 1, BFD_RELOC_24_PCREL);
+      fragP->fr_var = 0;
+      fragP->fr_fix += 7;
+    }
+  else if (fragP->fr_subtype == 3)
+    {
+      fix_new (fragP, fragP->fr_fix + 2, 1, fragP->fr_symbol,
+	       fragP->fr_offset + 2, 1, BFD_RELOC_8_PCREL);
+      fragP->fr_var = 0;
+      fragP->fr_fix += 3;
+    }
+  else if (fragP->fr_subtype == 4)
+    {
+      /* Reverse the condition of the first branch.  */
+      int offset = fragP->fr_fix;
+      int opcode = fragP->fr_literal[offset + 1] & 0xff;
+
+      switch (opcode)
+	{
+	case 0xfc:
+	  opcode = 0xfd;
+	  break;
+	case 0xfd:
+	  opcode = 0xfc;
+	  break;
+	case 0xfe:
+	  opcode = 0xff;
+	  break;
+	case 0xff:
+	  opcode = 0xfe;
+	case 0xe8:
+	  opcode = 0xe9;
+	  break;
+	case 0xe9:
+	  opcode = 0xe8;
+	  break;
+	case 0xe0:
+	  opcode = 0xe2;
+	  break;
+	case 0xe2:
+	  opcode = 0xe0;
+	  break;
+	case 0xe3:
+	  opcode = 0xe1;
+	  break;
+	case 0xe1:
+	  opcode = 0xe3;
+	  break;
+	case 0xe4:
+	  opcode = 0xe6;
+	  break;
+	case 0xe6:
+	  opcode = 0xe4;
+	  break;
+	case 0xe7:
+	  opcode = 0xe5;
+	  break;
+	case 0xe5:
+	  opcode = 0xe7;
+	  break;
+	case 0xec:
+	  opcode = 0xed;
+	  break;
+	case 0xed:
+	  opcode = 0xec;
+	  break;
+	case 0xee:
+	  opcode = 0xef;
+	  break;
+	case 0xef:
+	  opcode = 0xee;
+	  break;
+	default:
+	  abort ();
+	}
+      fragP->fr_literal[offset + 1] = opcode;
+
+      /* Set the displacement bits so that we branch around
+	 the unconditional branch.  */
+      fragP->fr_literal[offset + 2] = 0x6;
+
+      /* Now create the unconditional branch + fixup to the
+	 final target.  */
+      fragP->fr_literal[offset + 3] = 0xfc;
+      fix_new (fragP, fragP->fr_fix + 4, 2, fragP->fr_symbol,
+	       fragP->fr_offset + 1, 1, BFD_RELOC_16_PCREL);
+      fragP->fr_var = 0;
+      fragP->fr_fix += 6;
+    }
+  else if (fragP->fr_subtype == 5)
+    {
+      /* Reverse the condition of the first branch.  */
+      int offset = fragP->fr_fix;
+      int opcode = fragP->fr_literal[offset + 1] & 0xff;
+
+      switch (opcode)
+	{
+	case 0xfc:
+	  opcode = 0xfd;
+	  break;
+	case 0xfd:
+	  opcode = 0xfc;
+	  break;
+	case 0xfe:
+	  opcode = 0xff;
+	  break;
+	case 0xff:
+	  opcode = 0xfe;
+	case 0xe8:
+	  opcode = 0xe9;
+	  break;
+	case 0xe9:
+	  opcode = 0xe8;
+	  break;
+	case 0xe0:
+	  opcode = 0xe2;
+	  break;
+	case 0xe2:
+	  opcode = 0xe0;
+	  break;
+	case 0xe3:
+	  opcode = 0xe1;
+	  break;
+	case 0xe1:
+	  opcode = 0xe3;
+	  break;
+	case 0xe4:
+	  opcode = 0xe6;
+	  break;
+	case 0xe6:
+	  opcode = 0xe4;
+	  break;
+	case 0xe7:
+	  opcode = 0xe5;
+	  break;
+	case 0xe5:
+	  opcode = 0xe7;
+	  break;
+	case 0xec:
+	  opcode = 0xed;
+	  break;
+	case 0xed:
+	  opcode = 0xec;
+	  break;
+	case 0xee:
+	  opcode = 0xef;
+	  break;
+	case 0xef:
+	  opcode = 0xee;
+	  break;
+	default:
+	  abort ();
+	}
+      fragP->fr_literal[offset + 1] = opcode;
+
+      /* Set the displacement bits so that we branch around
+	 the unconditional branch.  */
+      fragP->fr_literal[offset + 2] = 0x8;
+
+      /* Now create the unconditional branch + fixup to the
+	 final target.  */
+      fragP->fr_literal[offset + 3] = 0xf4;
+      fragP->fr_literal[offset + 4] = 0xe0;
+      fix_new (fragP, fragP->fr_fix + 5, 4, fragP->fr_symbol,
+	       fragP->fr_offset + 2, 1, BFD_RELOC_24_PCREL);
+      fragP->fr_var = 0;
+      fragP->fr_fix += 8;
+    }
+  else if (fragP->fr_subtype == 6)
+    {
+      fix_new (fragP, fragP->fr_fix + 1, 2, fragP->fr_symbol,
+	       fragP->fr_offset + 1, 1, BFD_RELOC_16_PCREL);
+      fragP->fr_var = 0;
+      fragP->fr_fix += 3;
+    }
+  else if (fragP->fr_subtype == 7)
+    {
+      int offset = fragP->fr_fix;
+      int opcode = fragP->fr_literal[offset] & 0xff;
+
+      if (opcode == 0xfc)
+	{
+	  fragP->fr_literal[offset] = 0xf4;
+	  fragP->fr_literal[offset + 1] = 0xe0;
+	}
+      else if (opcode == 0xfd)
+	{
+	  fragP->fr_literal[offset] = 0xf4;
+	  fragP->fr_literal[offset + 1] = 0xe1;
+	}
+      else
+	abort ();
+
+      fix_new (fragP, fragP->fr_fix + 2, 4, fragP->fr_symbol,
+	       fragP->fr_offset + 2, 1, BFD_RELOC_24_PCREL);
+      fragP->fr_var = 0;
+      fragP->fr_fix += 5;
+    }
+  else
+    abort ();
 }
 
 valueT
@@ -411,7 +738,7 @@ md_assemble (str)
   struct mn10200_opcode *opcode;
   struct mn10200_opcode *next_opcode;
   const unsigned char *opindex_ptr;
-  int next_opindex;
+  int next_opindex, relaxable;
   unsigned long insn, extension, size = 0;
   char *f;
   int i;
@@ -444,6 +771,7 @@ md_assemble (str)
       char *hold;
       int extra_shift = 0;
 
+      relaxable = 0;
       fc = 0;
       match = 0;
       next_opindex = 0;
@@ -470,6 +798,9 @@ md_assemble (str)
 
 	  while (*str == ' ' || *str == ',')
 	    ++str;
+
+	  if (operand->flags & MN10200_OPERAND_RELAX)
+	    relaxable = 1;
 
 	  /* Gather the operand. */
 	  hold = input_line_pointer;
@@ -684,114 +1015,143 @@ keep_going:
          
   /* Write out the instruction.  */
 
-  f = frag_more (size);
+  if (relaxable && fc > 0)
+    {
+      int type;
 
-  /* Oh, what a mess.  The instruction is in big endian format, but
-     16 and 24bit immediates are little endian!  */
-  if (opcode->format == FMT_3)
-    {
-      number_to_chars_bigendian (f, (insn >> 16) & 0xff, 1);
-      number_to_chars_littleendian (f + 1, insn & 0xffff, 2);
+      if (size == 2)
+	type = 0;
+      else if (size == 3
+	       && opcode->opcode != 0xfd0000 && opcode->opcode != 0xfc0000)
+	type = 3;
+      else
+	type = 6;
+      f = frag_var (rs_machine_dependent, 8, 8 - size, type,
+		    fixups[0].exp.X_add_symbol,
+		    fixups[0].exp.X_add_number,
+		    (char *)fixups[0].opindex);
+      number_to_chars_bigendian (f, insn, size);
+      if (8 - size > 4)
+	{
+	  number_to_chars_bigendian (f + size, 0, 4);
+	  number_to_chars_bigendian (f + size + 4, 0, 8 - size - 4);
+	}
+      else
+	number_to_chars_bigendian (f + size, 0, 8 - size);
     }
-  else if (opcode->format == FMT_6)
-    {
-      number_to_chars_bigendian (f, (insn >> 16) & 0xffff, 2);
-      number_to_chars_littleendian (f + 2, insn & 0xffff, 2);
-    }
-  else if (opcode->format == FMT_7)
-    {
-      number_to_chars_bigendian (f, (insn >> 16) & 0xffff, 2);
-      number_to_chars_littleendian (f + 2, insn & 0xffff, 2);
-      number_to_chars_littleendian (f + 4, extension & 0xff, 1);
-    }
+
   else
     {
-      number_to_chars_bigendian (f, insn, size > 4 ? 4 : size);
-    }
+      f = frag_more (size);
 
-  /* Create any fixups.  */
-  for (i = 0; i < fc; i++)
-    {
-      const struct mn10200_operand *operand;
-
-      operand = &mn10200_operands[fixups[i].opindex];
-      if (fixups[i].reloc != BFD_RELOC_UNUSED)
+      /* Oh, what a mess.  The instruction is in big endian format, but
+	 16 and 24bit immediates are little endian!  */
+      if (opcode->format == FMT_3)
 	{
-	  reloc_howto_type *reloc_howto;
-	  int size;
-	  int offset;
-	  fixS *fixP;
-
-	  reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
-
-	  if (!reloc_howto)
-	    abort();
-	  
-	  size = bfd_get_reloc_size (reloc_howto);
-
-	  if (size < 1 || size > 4)
-	    abort();
-
-	  offset = 4 - size;
-	  fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset, size,
-			      &fixups[i].exp, 
-			      reloc_howto->pc_relative,
-			      fixups[i].reloc);
+	  number_to_chars_bigendian (f, (insn >> 16) & 0xff, 1);
+	  number_to_chars_littleendian (f + 1, insn & 0xffff, 2);
+	}
+      else if (opcode->format == FMT_6)
+	{
+	  number_to_chars_bigendian (f, (insn >> 16) & 0xffff, 2);
+	  number_to_chars_littleendian (f + 2, insn & 0xffff, 2);
+	}
+      else if (opcode->format == FMT_7)
+	{
+	  number_to_chars_bigendian (f, (insn >> 16) & 0xffff, 2);
+	  number_to_chars_littleendian (f + 2, insn & 0xffff, 2);
+	  number_to_chars_littleendian (f + 4, extension & 0xff, 1);
 	}
       else
 	{
-	  int reloc, pcrel, reloc_size, offset;
-	  fixS *fixP;
+	  number_to_chars_bigendian (f, insn, size > 4 ? 4 : size);
+	}
 
-	  reloc = BFD_RELOC_NONE;
-	  /* How big is the reloc?  Remember SPLIT relocs are
-	     implicitly 32bits.  */
-	  reloc_size = operand->bits;
+      /* Create any fixups.  */
+      for (i = 0; i < fc; i++)
+	{
+	  const struct mn10200_operand *operand;
 
-	  offset = size - reloc_size / 8;
-
-	  /* Is the reloc pc-relative?  */
-	  pcrel = (operand->flags & MN10200_OPERAND_PCREL) != 0;
-
-
-	  /* Choose a proper BFD relocation type.  */
-	  if (pcrel)
+	  operand = &mn10200_operands[fixups[i].opindex];
+	  if (fixups[i].reloc != BFD_RELOC_UNUSED)
 	    {
-	      if (reloc_size == 8)
-		reloc = BFD_RELOC_8_PCREL;
-	      else if (reloc_size == 24)
-		reloc = BFD_RELOC_24_PCREL;
-	      else
-		abort ();
+	      reloc_howto_type *reloc_howto;
+	      int size;
+	      int offset;
+	      fixS *fixP;
+
+	      reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
+
+	      if (!reloc_howto)
+		abort();
+	  
+	      size = bfd_get_reloc_size (reloc_howto);
+
+	      if (size < 1 || size > 4)
+		abort();
+
+	      offset = 4 - size;
+	      fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset,
+				  size,
+				  &fixups[i].exp, 
+				  reloc_howto->pc_relative,
+				  fixups[i].reloc);
 	    }
 	  else
 	    {
-	      if (reloc_size == 32)
-		reloc = BFD_RELOC_32;
-	      else if (reloc_size == 16)
-		reloc = BFD_RELOC_16;
-	      else if (reloc_size == 8)
-		reloc = BFD_RELOC_8;
-	      else if (reloc_size == 24)
-		reloc = BFD_RELOC_24;
+	      int reloc, pcrel, reloc_size, offset;
+	      fixS *fixP;
+
+	      reloc = BFD_RELOC_NONE;
+	      /* How big is the reloc?  Remember SPLIT relocs are
+		 implicitly 32bits.  */
+	      reloc_size = operand->bits;
+
+	      offset = size - reloc_size / 8;
+
+	      /* Is the reloc pc-relative?  */
+	      pcrel = (operand->flags & MN10200_OPERAND_PCREL) != 0;
+
+
+	      /* Choose a proper BFD relocation type.  */
+	      if (pcrel)
+		{
+		  if (reloc_size == 8)
+		    reloc = BFD_RELOC_8_PCREL;
+		  else if (reloc_size == 24)
+		    reloc = BFD_RELOC_24_PCREL;
+		  else
+		    abort ();
+		}
 	      else
-		abort ();
+		{
+		  if (reloc_size == 32)
+		    reloc = BFD_RELOC_32;
+		  else if (reloc_size == 16)
+		    reloc = BFD_RELOC_16;
+		  else if (reloc_size == 8)
+		    reloc = BFD_RELOC_8;
+		  else if (reloc_size == 24)
+		    reloc = BFD_RELOC_24;
+		  else
+		    abort ();
+		}
+
+	      /* Convert the size of the reloc into what fix_new_exp wants.  */
+	      reloc_size = reloc_size / 8;
+	      if (reloc_size == 8)
+		reloc_size = 0;
+	      else if (reloc_size == 16)
+		reloc_size = 1;
+	      else if (reloc_size == 32 || reloc_size == 24)
+		reloc_size = 2;
+
+	      fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset,
+				  reloc_size, &fixups[i].exp, pcrel,
+				  ((bfd_reloc_code_real_type) reloc));
+	      if (pcrel)
+		fixP->fx_offset += offset;
 	    }
-
-	  /* Convert the size of the reloc into what fix_new_exp wants.  */
-	  reloc_size = reloc_size / 8;
-	  if (reloc_size == 8)
-	    reloc_size = 0;
-	  else if (reloc_size == 16)
-	    reloc_size = 1;
-	  else if (reloc_size == 32 || reloc_size == 24)
-	    reloc_size = 2;
-
-	  fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset,
-			      reloc_size, &fixups[i].exp, pcrel,
-			      ((bfd_reloc_code_real_type) reloc));
-	  if (pcrel)
-	    fixP->fx_offset += offset;
 	}
     }
 }
@@ -807,17 +1167,28 @@ tc_gen_reloc (seg, fixp)
 {
   arelent *reloc;
   reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
-  reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
-  reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-                    "reloc %d not supported by object file format", (int)fixp->fx_r_type);
+                    "reloc %d not supported by object file format",
+		    (int)fixp->fx_r_type);
       return NULL;
     }
-  reloc->addend = fixp->fx_offset;
-  /*  printf("tc_gen_reloc: addr=%x  addend=%x\n", reloc->address, reloc->addend); */
+  reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+
+  if (fixp->fx_addsy && fixp->fx_subsy)
+    {
+      reloc->sym_ptr_ptr = &bfd_abs_symbol;
+      reloc->addend = (S_GET_VALUE (fixp->fx_addsy)
+		       - S_GET_VALUE (fixp->fx_subsy) + fixp->fx_offset);
+    }
+  else 
+    {
+      reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+      reloc->addend = fixp->fx_offset;
+    }
   return reloc;
 }
 
@@ -826,7 +1197,19 @@ md_estimate_size_before_relax (fragp, seg)
      fragS *fragp;
      asection *seg;
 {
-  return 0;
+  if (fragp->fr_subtype == 0)
+    return 2;
+  if (fragp->fr_subtype == 3)
+    return 3;
+  if (fragp->fr_subtype == 6)
+    {
+      if (!S_IS_DEFINED (fragp->fr_symbol))
+	{
+	  fragp->fr_subtype = 7;
+	  return 5;
+	}
+    }
+  return 3;
 } 
 
 long

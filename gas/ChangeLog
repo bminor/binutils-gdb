@@ -1,3 +1,11 @@
+Wed Jan 29 09:42:11 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10200.c (md_relax_table): Define.
+	(md_convert_frag): Implement.
+	(md_assemble): Handle relaxable operands/instructions correctly.
+	(md_estimate_size_before_relax): Implement.
+	* config/tc-mn10200.h (TC_GENERIC_RELAX_TABLE): Define.
+
 Tue Jan 28 15:27:28 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (append_insn): Give an error for jumps to a
