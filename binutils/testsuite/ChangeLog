@@ -1,5 +1,8 @@
 Wed Aug 16 16:52:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* binutils-all/nm.exp: Add setup_xfail for mips*-sony-bsd* for
+	tests which fail on ECOFF targets.
+
 	* binutils-all/objcopy.exp: Change i*86-*-linux xfail for simple
 	copy test to check for i*86-*-linuxaout* instead.
 
