@@ -1775,8 +1775,9 @@ alpha_adjust_symtab_relocs (abfd, sec, ptr)
 	  break;
 
 	case BFD_RELOC_ALPHA_ELF_LITERAL:
-	  if (fixp->tc_fix_data.info->saw_tlsgd
-	      || fixp->tc_fix_data.info->saw_tlsldm)
+	  if (fixp->tc_fix_data.info
+	      && (fixp->tc_fix_data.info->saw_tlsgd
+	          || fixp->tc_fix_data.info->saw_tlsldm))
 	    break;
 	  /* FALLTHRU */
 
@@ -1832,7 +1833,8 @@ alpha_adjust_symtab_relocs (abfd, sec, ptr)
 	  /* FALLTHRU */
 
 	case BFD_RELOC_ALPHA_ELF_LITERAL:
-	  if (fixp->tc_fix_data.info->n_master == 1
+	  if (fixp->tc_fix_data.info
+	      && fixp->tc_fix_data.info->n_master == 1
 	      && ! fixp->tc_fix_data.info->multi_section_p)
 	    {
 	      for (slave = fixp->tc_fix_data.info->slaves;
