@@ -1,3 +1,9 @@
+2000-12-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* solib.c (solib_open): If path is relative, look for it
+	literally.  This matches the behaviour of the GNU dynamic linker
+	more closely.
+
 2000-12-22  Fernando Nasser  <fnasser@redhat.com>
 
 	* README: Suggest building in an empty directory.

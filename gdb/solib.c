@@ -85,13 +85,13 @@ static char *solib_search_path = NULL;
 
    Search order:
    * If path is absolute, look in SOLIB_ABSOLUTE_PREFIX.
-   * If path is absolute, look for it literally (unmodified).
+   * If path is absolute or relative, look for it literally (unmodified).
    * Look in SOLIB_SEARCH_PATH.
    * Look in inferior's $PATH.
    * Look in inferior's $LD_LIBRARY_PATH.
 
    RETURNS
-   
+
    file handle for opened solib, or -1 for failure.  */
 
 int
@@ -100,16 +100,17 @@ solib_open (char *in_pathname, char **found_pathname)
   int found_file = -1;
   char *temp_pathname = NULL;
 
-  if (ROOTED_P (in_pathname))
+  if (strchr (in_pathname, SLASH_CHAR))
     {
-      if (solib_absolute_prefix == NULL)
+      if (! ROOTED_P (in_pathname) || solib_absolute_prefix == NULL)
         temp_pathname = in_pathname;
       else
 	{
-	  int  prefix_len = strlen (solib_absolute_prefix);
+	  int prefix_len = strlen (solib_absolute_prefix);
 
 	  /* Remove trailing slashes from absolute prefix.  */
-	  while (prefix_len > 0 && SLASH_P (solib_absolute_prefix[prefix_len - 1]))
+	  while (prefix_len > 0
+		 && SLASH_P (solib_absolute_prefix[prefix_len - 1]))
 	    prefix_len--;
 
 	  /* Cat the prefixed pathname together.  */
@@ -117,8 +118,8 @@ solib_open (char *in_pathname, char **found_pathname)
 	  strncpy (temp_pathname, solib_absolute_prefix, prefix_len);
 	  temp_pathname[prefix_len] = '\0';
 	  strcat (temp_pathname, in_pathname);
-
 	}
+
       /* Now see if we can open it.  */
       found_file = open (temp_pathname, O_RDONLY, 0);
     }
