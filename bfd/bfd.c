@@ -374,7 +374,7 @@ Return cached file modification time (e.g. as read from archive header
 for archive members, or from file system if we have been called
 before); else determine modify time, cache it, and return it.  
 
-*;PROTO(long, bfd_get_mtime, (bfd *));
+*; PROTO(long, bfd_get_mtime, (bfd *));
 
 */
 

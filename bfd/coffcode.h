@@ -255,54 +255,115 @@ $ } coff_symbol_type;
 #define PUTHALF bfd_h_put_16
 
 #ifndef GET_FCN_LNNOPTR
-#define GET_FCN_LNNOPTR(abfd, ext)  bfd_h_get_32(abfd, ext->x_sym.x_fcnary.x_fcn.x_lnnoptr)
+#define GET_FCN_LNNOPTR(abfd, ext)  bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_fcn.x_lnnoptr)
 #endif
 
 #ifndef GET_FCN_ENDNDX
-#define GET_FCN_ENDNDX(abfd, ext)  bfd_h_get_32(abfd, ext->x_sym.x_fcnary.x_fcn.x_endndx)
+#define GET_FCN_ENDNDX(abfd, ext)  bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_fcn.x_endndx)
 #endif
 
 #ifndef PUT_FCN_LNNOPTR
-#define PUT_FCN_LNNOPTR(abfd, in, ext)  PUTWORD(abfd,  in, ext->x_sym.x_fcnary.x_fcn.x_lnnoptr)
+#define PUT_FCN_LNNOPTR(abfd, in, ext)  PUTWORD(abfd,  in, (bfd_byte *) ext->x_sym.x_fcnary.x_fcn.x_lnnoptr)
 #endif
 #ifndef PUT_FCN_ENDNDX
-#define PUT_FCN_ENDNDX(abfd, in, ext) PUTWORD(abfd, in, ext->x_sym.x_fcnary.x_fcn.x_endndx)
+#define PUT_FCN_ENDNDX(abfd, in, ext) PUTWORD(abfd, in, (bfd_byte *) ext->x_sym.x_fcnary.x_fcn.x_endndx)
 #endif
 #ifndef GET_LNSZ_LNNO
-#define GET_LNSZ_LNNO(abfd, ext) bfd_h_get_16(abfd, ext->x_sym.x_misc.x_lnsz.x_lnno)
+#define GET_LNSZ_LNNO(abfd, ext) bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_misc.x_lnsz.x_lnno)
 #endif
 #ifndef GET_LNSZ_SIZE
-#define GET_LNSZ_SIZE(abfd, ext) bfd_h_get_16(abfd, ext->x_sym.x_misc.x_lnsz.x_size)
+#define GET_LNSZ_SIZE(abfd, ext) bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_misc.x_lnsz.x_size)
 #endif
 #ifndef PUT_LNSZ_LNNO
-#define PUT_LNSZ_LNNO(abfd, in, ext) bfd_h_put_16(abfd, in, ext->x_sym.x_misc.x_lnsz.x_lnno)
+#define PUT_LNSZ_LNNO(abfd, in, ext) bfd_h_put_16(abfd, in, (bfd_byte *)ext->x_sym.x_misc.x_lnsz.x_lnno)
 #endif
 #ifndef PUT_LNSZ_SIZE
-#define PUT_LNSZ_SIZE(abfd, in, ext) bfd_h_put_16(abfd, in, ext->x_sym.x_misc.x_lnsz.x_size)
+#define PUT_LNSZ_SIZE(abfd, in, ext) bfd_h_put_16(abfd, in, (bfd_byte*) ext->x_sym.x_misc.x_lnsz.x_size)
 #endif
 #ifndef GET_SCN_SCNLEN 
-#define GET_SCN_SCNLEN(abfd, ext) bfd_h_get_32(abfd, ext->x_scn.x_scnlen)
+#define GET_SCN_SCNLEN(abfd,  ext) bfd_h_get_32(abfd, (bfd_byte *) ext->x_scn.x_scnlen)
 #endif
 #ifndef GET_SCN_NRELOC
-#define GET_SCN_NRELOC(abfd, ext) bfd_h_get_16(abfd, ext->x_scn.x_nreloc)
+#define GET_SCN_NRELOC(abfd,  ext) bfd_h_get_16(abfd, (bfd_byte *)ext->x_scn.x_nreloc)
 #endif
 #ifndef GET_SCN_NLINNO
-#define GET_SCN_NLINNO(abfd, ext)  bfd_h_get_16(abfd, ext->x_scn.x_nlinno)
+#define GET_SCN_NLINNO(abfd, ext)  bfd_h_get_16(abfd, (bfd_byte *)ext->x_scn.x_nlinno)
 #endif
 #ifndef PUT_SCN_SCNLEN 
-#define PUT_SCN_SCNLEN(abfd,in, ext) bfd_h_put_32(abfd, in, ext->x_scn.x_scnlen)
+#define PUT_SCN_SCNLEN(abfd,in, ext) bfd_h_put_32(abfd, in, (bfd_byte *) ext->x_scn.x_scnlen)
 #endif
 #ifndef PUT_SCN_NRELOC
-#define PUT_SCN_NRELOC(abfd,in, ext) bfd_h_put_16(abfd, in,ext->x_scn.x_nreloc)
+#define PUT_SCN_NRELOC(abfd,in, ext) bfd_h_put_16(abfd, in, (bfd_byte *)ext->x_scn.x_nreloc)
 #endif
 #ifndef PUT_SCN_NLINNO
-#define PUT_SCN_NLINNO(abfd,in, ext)  bfd_h_put_16(abfd,in, ext->x_scn.x_nlinno)
+#define PUT_SCN_NLINNO(abfd,in, ext)  bfd_h_put_16(abfd,in, (bfd_byte *) ext->x_scn.x_nlinno)
 #endif
 
 
 
 /* void warning(); */
 
+/* 
+ * Return a word with STYP_* (scnhdr.s_flags) flags set to represent the 
+ * incoming SEC_* flags.  The inverse of this function is styp_to_sec_flags().
+ * NOTE: If you add to/change this routine, you should mirror the changes
+ * 	in styp_to_sec_flags().
+ */
+static long 
+DEFUN(sec_to_styp_flags, (sec_name, sec_flags),
+	CONST char *		sec_name	AND
+	flagword	sec_flags)
+{
+    long styp_flags = 0;
+
+    if (!strcmp(sec_name, _TEXT)) {
+	return((long)STYP_TEXT);
+    } else if (!strcmp(sec_name, _DATA)) {
+	return((long)STYP_DATA);
+    } else if (!strcmp(sec_name, _BSS)) {
+	return((long)STYP_BSS);
+    } 
+
+/* Try and figure out what it should be */
+   if (sec_flags & SEC_CODE) styp_flags = STYP_TEXT; 
+   if (sec_flags & SEC_DATA) styp_flags = STYP_DATA; 
+   else if (sec_flags & SEC_READONLY) 
+#ifdef STYP_LIT	/* 29k readonly text/data section */
+   	styp_flags = STYP_LIT; 
+#else
+   	styp_flags = STYP_TEXT; 
+#endif	/* STYP_LIT */
+   else if (sec_flags & SEC_LOAD) styp_flags = STYP_TEXT;
+
+   if (styp_flags == 0) styp_flags = STYP_BSS;
+
+   return(styp_flags);
+}
+/* 
+ * Return a word with SEC_* flags set to represent the incoming
+ * STYP_* flags (from scnhdr.s_flags).   The inverse of this 
+ * function is sec_to_styp_flags().  
+ * NOTE: If you add to/change this routine, you should mirror the changes
+ *      in sec_to_styp_flags().
+ */
+static flagword 
+DEFUN(styp_to_sec_flags, (styp_flags),
+	long	styp_flags)
+{
+    flagword	sec_flags=0;
+
+    if ((styp_flags & STYP_TEXT) || (styp_flags & STYP_DATA))
+	sec_flags = (SEC_LOAD | SEC_ALLOC);
+    else if (styp_flags & STYP_BSS)
+	sec_flags = SEC_ALLOC;
+
+#ifdef STYP_LIT		/* A29k readonly text/data section type */
+    if ((styp_flags & STYP_LIT) == STYP_LIT)
+	sec_flags = (SEC_LOAD | SEC_ALLOC | SEC_READONLY);
+#endif  /* STYP_LIT */
+
+    return(sec_flags);
+}
 
 static int
 DEFUN(get_index,(symbol),
@@ -332,11 +393,11 @@ DEFUN(bfd_swap_reloc_in,(abfd, reloc_src, reloc_dst),
       RELOC *reloc_src AND
       struct internal_reloc *reloc_dst)
 {
-  reloc_dst->r_vaddr = bfd_h_get_32(abfd, reloc_src->r_vaddr);
-  reloc_dst->r_symndx = bfd_h_get_32(abfd, reloc_src->r_symndx);
-  reloc_dst->r_type = bfd_h_get_16(abfd, reloc_src->r_type);
+  reloc_dst->r_vaddr = bfd_h_get_32(abfd, (bfd_byte *)reloc_src->r_vaddr);
+  reloc_dst->r_symndx = bfd_h_get_32(abfd, (bfd_byte *) reloc_src->r_symndx);
+  reloc_dst->r_type = bfd_h_get_16(abfd, (bfd_byte *) reloc_src->r_type);
 #if M88
-  reloc_dst->r_offset = bfd_h_get_16(abfd, reloc_src->r_offset);
+  reloc_dst->r_offset = bfd_h_get_16(abfd, (bfd_byte *) reloc_src->r_offset);
 #endif
 }
 
@@ -347,11 +408,11 @@ DEFUN(bfd_swap_reloc_out,(abfd, reloc_src, reloc_dst),
       struct internal_reloc *reloc_src AND
       struct external_reloc *reloc_dst)
 {
-  bfd_h_put_32(abfd, reloc_src->r_vaddr, reloc_dst->r_vaddr);
-  bfd_h_put_32(abfd, reloc_src->r_symndx, reloc_dst->r_symndx);
-  bfd_h_put_16(abfd, reloc_src->r_type, reloc_dst->r_type);
+  bfd_h_put_32(abfd, reloc_src->r_vaddr, (bfd_byte *) reloc_dst->r_vaddr);
+  bfd_h_put_32(abfd, reloc_src->r_symndx, (bfd_byte *) reloc_dst->r_symndx);
+  bfd_h_put_16(abfd, reloc_src->r_type, (bfd_byte *) reloc_dst->r_type);
 #if M88
-  bfd_h_put_16(abfd, reloc_src->r_offset, reloc_dst->r_offset);
+  bfd_h_put_16(abfd, reloc_src->r_offset, (bfd_byte *) reloc_dst->r_offset);
 #endif
 
 }
@@ -362,13 +423,13 @@ DEFUN(bfd_swap_filehdr_in,(abfd, filehdr_src, filehdr_dst),
       FILHDR         *filehdr_src AND
       struct internal_filehdr *filehdr_dst)
 {
-  filehdr_dst->f_magic = bfd_h_get_16(abfd, filehdr_src->f_magic);
-  filehdr_dst->f_nscns = bfd_h_get_16(abfd,filehdr_src-> f_nscns);
-  filehdr_dst->f_timdat = bfd_h_get_32(abfd,filehdr_src-> f_timdat);
-  filehdr_dst->f_symptr = bfd_h_get_32(abfd,filehdr_src-> f_symptr);
-  filehdr_dst->f_nsyms = bfd_h_get_32(abfd,filehdr_src-> f_nsyms);
-  filehdr_dst->f_opthdr = bfd_h_get_16(abfd,filehdr_src-> f_opthdr);
-  filehdr_dst->f_flags = bfd_h_get_16(abfd,filehdr_src-> f_flags);
+  filehdr_dst->f_magic = bfd_h_get_16(abfd, (bfd_byte *) filehdr_src->f_magic);
+  filehdr_dst->f_nscns = bfd_h_get_16(abfd, (bfd_byte *)filehdr_src-> f_nscns);
+  filehdr_dst->f_timdat = bfd_h_get_32(abfd, (bfd_byte *)filehdr_src-> f_timdat);
+  filehdr_dst->f_symptr = bfd_h_get_32(abfd, (bfd_byte *)filehdr_src-> f_symptr);
+  filehdr_dst->f_nsyms = bfd_h_get_32(abfd, (bfd_byte *)filehdr_src-> f_nsyms);
+  filehdr_dst->f_opthdr = bfd_h_get_16(abfd, (bfd_byte *)filehdr_src-> f_opthdr);
+  filehdr_dst->f_flags = bfd_h_get_16(abfd, (bfd_byte *)filehdr_src-> f_flags);
 }
 
 static  void 
@@ -377,13 +438,13 @@ DEFUN(bfd_swap_filehdr_out,(abfd, filehdr_in, filehdr_out),
       struct internal_filehdr *filehdr_in AND
       FILHDR         *filehdr_out)
 {
-  bfd_h_put_16(abfd, filehdr_in->f_magic, filehdr_out->f_magic);
-  bfd_h_put_16(abfd, filehdr_in->f_nscns, filehdr_out->f_nscns);
-  bfd_h_put_32(abfd, filehdr_in->f_timdat, filehdr_out->f_timdat);
-  bfd_h_put_32(abfd, filehdr_in->f_symptr, filehdr_out->f_symptr);
-  bfd_h_put_32(abfd, filehdr_in->f_nsyms, filehdr_out->f_nsyms);
-  bfd_h_put_16(abfd, filehdr_in->f_opthdr, filehdr_out->f_opthdr);
-  bfd_h_put_16(abfd, filehdr_in->f_flags, filehdr_out->f_flags);
+  bfd_h_put_16(abfd, filehdr_in->f_magic, (bfd_byte *) filehdr_out->f_magic);
+  bfd_h_put_16(abfd, filehdr_in->f_nscns, (bfd_byte *) filehdr_out->f_nscns);
+  bfd_h_put_32(abfd, filehdr_in->f_timdat, (bfd_byte *) filehdr_out->f_timdat);
+  bfd_h_put_32(abfd, filehdr_in->f_symptr, (bfd_byte *) filehdr_out->f_symptr);
+  bfd_h_put_32(abfd, filehdr_in->f_nsyms, (bfd_byte *) filehdr_out->f_nsyms);
+  bfd_h_put_16(abfd, filehdr_in->f_opthdr, (bfd_byte *) filehdr_out->f_opthdr);
+  bfd_h_put_16(abfd, filehdr_in->f_flags, (bfd_byte *) filehdr_out->f_flags);
 }
 
 
@@ -399,18 +460,18 @@ DEFUN(coff_swap_sym_in,(abfd, ext1, in1),
 
   if( ext->e.e_name[0] == 0) {
     in->_n._n_n._n_zeroes = 0;
-    in->_n._n_n._n_offset = bfd_h_get_32(abfd, ext->e.e.e_offset);
+    in->_n._n_n._n_offset = bfd_h_get_32(abfd, (bfd_byte *) ext->e.e.e_offset);
   }
   else {
     memcpy(in->_n._n_name, ext->e.e_name, SYMNMLEN);
   }
-  in->n_value = bfd_h_get_32(abfd, ext->e_value);
-  in->n_scnum = bfd_h_get_16(abfd, ext->e_scnum);
+  in->n_value = bfd_h_get_32(abfd, (bfd_byte *) ext->e_value);
+  in->n_scnum = bfd_h_get_16(abfd, (bfd_byte *) ext->e_scnum);
   if (sizeof(ext->e_type) == 2){
-    in->n_type = bfd_h_get_16(abfd, ext->e_type);
+    in->n_type = bfd_h_get_16(abfd, (bfd_byte *) ext->e_type);
   }
   else {
-    in->n_type = bfd_h_get_32(abfd, ext->e_type);
+    in->n_type = bfd_h_get_32(abfd, (bfd_byte *) ext->e_type);
   }
   in->n_sclass = bfd_h_get_8(abfd, ext->e_sclass);
   in->n_numaux = bfd_h_get_8(abfd, ext->e_numaux);
@@ -423,21 +484,21 @@ DEFUN(coff_swap_sym_out,(abfd,in,  ext),
       SYMENT *ext)
 {
   if(in->_n._n_name[0] == 0) {
-    bfd_h_put_32(abfd, 0, ext->e.e.e_zeroes);
-    bfd_h_put_32(abfd, in->_n._n_n._n_offset,  ext->e.e.e_offset);
+    bfd_h_put_32(abfd, 0, (bfd_byte *) ext->e.e.e_zeroes);
+    bfd_h_put_32(abfd, in->_n._n_n._n_offset, (bfd_byte *)  ext->e.e.e_offset);
   }
   else {
     memcpy(ext->e.e_name, in->_n._n_name, SYMNMLEN);
   }
-  bfd_h_put_32(abfd,  in->n_value , ext->e_value);
-  bfd_h_put_16(abfd,  in->n_scnum , ext->e_scnum);
+  bfd_h_put_32(abfd,  in->n_value , (bfd_byte *) ext->e_value);
+  bfd_h_put_16(abfd,  in->n_scnum , (bfd_byte *) ext->e_scnum);
   if (sizeof(ext->e_type) == 2) 
       {
-	bfd_h_put_16(abfd,  in->n_type , ext->e_type);
+	bfd_h_put_16(abfd,  in->n_type , (bfd_byte *) ext->e_type);
       }
   else
       {
-	bfd_h_put_32(abfd,  in->n_type , ext->e_type);
+	bfd_h_put_32(abfd,  in->n_type , (bfd_byte *) ext->e_type);
       }
   bfd_h_put_8(abfd,  in->n_sclass , ext->e_sclass);
   bfd_h_put_8(abfd,  in->n_numaux , ext->e_numaux);
@@ -457,7 +518,7 @@ DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in1),
   case C_FILE:
     if (ext->x_file.x_fname[0] == 0) {
       in->x_file.x_n.x_zeroes = 0;
-      in->x_file.x_n.x_offset  = bfd_h_get_32(abfd, ext->x_file.x_n.x_offset);
+      in->x_file.x_n.x_offset  = bfd_h_get_32(abfd, (bfd_byte *) ext->x_file.x_n.x_offset);
     } else {
       memcpy (in->x_file.x_fname, ext->x_file.x_fname,
 	      sizeof (in->x_file.x_fname));
@@ -476,22 +537,22 @@ DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in1),
       break;
     }
   default:
-    in->x_sym.x_tagndx.l = bfd_h_get_32(abfd, ext->x_sym.x_tagndx);
+    in->x_sym.x_tagndx.l = bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_tagndx);
 #ifndef NO_TVNDX
-    in->x_sym.x_tvndx = bfd_h_get_16(abfd, ext->x_sym.x_tvndx);
+    in->x_sym.x_tvndx = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_tvndx);
 #endif
 
     if (ISARY(type) || class == C_BLOCK) {
-      in->x_sym.x_fcnary.x_ary.x_dimen[0] = bfd_h_get_16(abfd, ext->x_sym.x_fcnary.x_ary.x_dimen[0]);
-      in->x_sym.x_fcnary.x_ary.x_dimen[1] = bfd_h_get_16(abfd, ext->x_sym.x_fcnary.x_ary.x_dimen[1]);
-      in->x_sym.x_fcnary.x_ary.x_dimen[2] = bfd_h_get_16(abfd, ext->x_sym.x_fcnary.x_ary.x_dimen[2]);
-      in->x_sym.x_fcnary.x_ary.x_dimen[3] = bfd_h_get_16(abfd, ext->x_sym.x_fcnary.x_ary.x_dimen[3]);
+      in->x_sym.x_fcnary.x_ary.x_dimen[0] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[0]);
+      in->x_sym.x_fcnary.x_ary.x_dimen[1] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[1]);
+      in->x_sym.x_fcnary.x_ary.x_dimen[2] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[2]);
+      in->x_sym.x_fcnary.x_ary.x_dimen[3] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[3]);
     }
       in->x_sym.x_fcnary.x_fcn.x_lnnoptr = GET_FCN_LNNOPTR(abfd, ext);
       in->x_sym.x_fcnary.x_fcn.x_endndx.l = GET_FCN_ENDNDX(abfd, ext);
 
     if (ISFCN(type)) {
-      in->x_sym.x_misc.x_fsize = bfd_h_get_32(abfd, ext->x_sym.x_misc.x_fsize);
+      in->x_sym.x_misc.x_fsize = bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_misc.x_fsize);
     }
     else {
       in->x_sym.x_misc.x_lnsz.x_lnno = GET_LNSZ_LNNO(abfd, ext);
@@ -511,8 +572,8 @@ DEFUN(coff_swap_aux_out,(abfd, in, type, class, ext),
   switch (class) {
   case C_FILE:
     if (in->x_file.x_fname[0] == 0) {
-      PUTWORD(abfd, 0, ext->x_file.x_n.x_zeroes );
-      PUTWORD(abfd, in->x_file.x_n.x_offset, ext->x_file.x_n.x_offset);
+      PUTWORD(abfd, 0, (bfd_byte *) ext->x_file.x_n.x_zeroes );
+      PUTWORD(abfd, in->x_file.x_n.x_offset, (bfd_byte *) ext->x_file.x_n.x_offset);
     }
     else {
       memcpy ( ext->x_file.x_fname,in->x_file.x_fname,
@@ -532,23 +593,23 @@ DEFUN(coff_swap_aux_out,(abfd, in, type, class, ext),
       break;
     }
   default:
-    PUTWORD(abfd, in->x_sym.x_tagndx.l, ext->x_sym.x_tagndx);
+    PUTWORD(abfd, in->x_sym.x_tagndx.l, (bfd_byte *) ext->x_sym.x_tagndx);
 #ifndef NO_TVNDX
-    PUTWORD(abfd, in->x_sym.x_tvndx , ext->x_sym.x_tvndx);
+    PUTWORD(abfd, in->x_sym.x_tvndx , (bfd_byte *) ext->x_sym.x_tvndx);
 #endif
 
     if (ISFCN(type)) {
-      PUTWORD(abfd, in->x_sym.x_misc.x_fsize,  ext->x_sym.x_misc.x_fsize);
+      PUTWORD(abfd, in->x_sym.x_misc.x_fsize, (bfd_byte *)  ext->x_sym.x_misc.x_fsize);
       PUT_FCN_LNNOPTR(abfd,  in->x_sym.x_fcnary.x_fcn.x_lnnoptr, ext);
       PUT_FCN_ENDNDX(abfd,  in->x_sym.x_fcnary.x_fcn.x_endndx.l, ext);
     }
     else {
 
       if (ISARY(type) || class == C_BLOCK) {
-	bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[0],ext->x_sym.x_fcnary.x_ary.x_dimen[0]);
-	bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[1],ext->x_sym.x_fcnary.x_ary.x_dimen[1]);
-	bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[2],ext->x_sym.x_fcnary.x_ary.x_dimen[2]);
-	bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[3],ext->x_sym.x_fcnary.x_ary.x_dimen[3]);
+	bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[0], (bfd_byte *)ext->x_sym.x_fcnary.x_ary.x_dimen[0]);
+	bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[1], (bfd_byte *)ext->x_sym.x_fcnary.x_ary.x_dimen[1]);
+	bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[2], (bfd_byte *)ext->x_sym.x_fcnary.x_ary.x_dimen[2]);
+	bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[3], (bfd_byte *)ext->x_sym.x_fcnary.x_ary.x_dimen[3]);
 
       }
 	PUT_LNSZ_LNNO(abfd, in->x_sym.x_misc.x_lnsz.x_lnno, ext);
@@ -571,11 +632,11 @@ DEFUN(coff_swap_lineno_in,(abfd, ext1, in1),
   LINENO *ext = (LINENO *)ext1;
   struct internal_lineno      *in = (struct internal_lineno *)in1;
 
-  in->l_addr.l_symndx = bfd_h_get_32(abfd, ext->l_addr.l_symndx);
+  in->l_addr.l_symndx = bfd_h_get_32(abfd, (bfd_byte *) ext->l_addr.l_symndx);
 #if defined(M88)
-  in->l_lnno = bfd_h_get_32(abfd, ext->l_lnno);
+  in->l_lnno = bfd_h_get_32(abfd, (bfd_byte *) ext->l_lnno);
 #else
-  in->l_lnno = bfd_h_get_16(abfd, ext->l_lnno);
+  in->l_lnno = bfd_h_get_16(abfd, (bfd_byte *) ext->l_lnno);
 #endif
 }
 
@@ -585,11 +646,11 @@ DEFUN(coff_swap_lineno_out,(abfd, in, ext),
       struct internal_lineno      *in AND
       struct external_lineno *ext)
 {
-  PUTWORD(abfd, in->l_addr.l_symndx, ext->l_addr.l_symndx);
+  PUTWORD(abfd, in->l_addr.l_symndx, (bfd_byte *) ext->l_addr.l_symndx);
 #if defined(M88)
-  PUTWORD(abfd, in->l_lnno, ext->l_lnno);
+  PUTWORD(abfd, in->l_lnno, (bfd_byte *) ext->l_lnno);
 #else
-  PUTHALF(abfd, in->l_lnno, ext->l_lnno);
+  PUTHALF(abfd, in->l_lnno, (bfd_byte *) ext->l_lnno);
 #endif
 }
 
@@ -605,16 +666,16 @@ DEFUN(bfd_swap_aouthdr_in,(abfd, aouthdr_ext1, aouthdr_int1),
   AOUTHDR        *aouthdr_ext = (AOUTHDR *) aouthdr_ext1;
   struct internal_aouthdr *aouthdr_int = (struct internal_aouthdr *)aouthdr_int1;
 
-  aouthdr_int->magic = bfd_h_get_16(abfd, aouthdr_ext->magic);
-  aouthdr_int->vstamp = bfd_h_get_16(abfd, aouthdr_ext->vstamp);
-  aouthdr_int->tsize = bfd_h_get_32(abfd, aouthdr_ext->tsize);
-  aouthdr_int->dsize = bfd_h_get_32(abfd, aouthdr_ext->dsize);
-  aouthdr_int->bsize = bfd_h_get_32(abfd, aouthdr_ext->bsize);
-  aouthdr_int->entry = bfd_h_get_32(abfd, aouthdr_ext->entry);
-  aouthdr_int->text_start = bfd_h_get_32(abfd, aouthdr_ext->text_start);
-  aouthdr_int->data_start = bfd_h_get_32(abfd, aouthdr_ext->data_start);
+  aouthdr_int->magic = bfd_h_get_16(abfd, (bfd_byte *) aouthdr_ext->magic);
+  aouthdr_int->vstamp = bfd_h_get_16(abfd, (bfd_byte *) aouthdr_ext->vstamp);
+  aouthdr_int->tsize = bfd_h_get_32(abfd, (bfd_byte *) aouthdr_ext->tsize);
+  aouthdr_int->dsize = bfd_h_get_32(abfd, (bfd_byte *) aouthdr_ext->dsize);
+  aouthdr_int->bsize = bfd_h_get_32(abfd, (bfd_byte *) aouthdr_ext->bsize);
+  aouthdr_int->entry = bfd_h_get_32(abfd, (bfd_byte *) aouthdr_ext->entry);
+  aouthdr_int->text_start = bfd_h_get_32(abfd, (bfd_byte *) aouthdr_ext->text_start);
+  aouthdr_int->data_start = bfd_h_get_32(abfd, (bfd_byte *) aouthdr_ext->data_start);
 #ifdef I960
-  aouthdr_int->tagentries = bfd_h_get_32(abfd, aouthdr_ext->tagentries);
+  aouthdr_int->tagentries = bfd_h_get_32(abfd, (bfd_byte *) aouthdr_ext->tagentries);
 #endif
 }
 
@@ -624,16 +685,16 @@ DEFUN(bfd_swap_aouthdr_out,(abfd, aouthdr_in, aouthdr_out),
       struct internal_aouthdr *aouthdr_in AND
       AOUTHDR        *aouthdr_out)
 {
-  bfd_h_put_16(abfd, aouthdr_in->magic, aouthdr_out->magic);
-  bfd_h_put_16(abfd, aouthdr_in->vstamp, aouthdr_out->vstamp);
-  bfd_h_put_32(abfd, aouthdr_in->tsize, aouthdr_out->tsize);
-  bfd_h_put_32(abfd, aouthdr_in->dsize, aouthdr_out->dsize);
-  bfd_h_put_32(abfd, aouthdr_in->bsize, aouthdr_out->bsize);
-  bfd_h_put_32(abfd, aouthdr_in->entry, aouthdr_out->entry);
-  bfd_h_put_32(abfd, aouthdr_in->text_start, aouthdr_out->text_start);
-  bfd_h_put_32(abfd, aouthdr_in->data_start, aouthdr_out->data_start);
+  bfd_h_put_16(abfd, aouthdr_in->magic, (bfd_byte *) aouthdr_out->magic);
+  bfd_h_put_16(abfd, aouthdr_in->vstamp, (bfd_byte *) aouthdr_out->vstamp);
+  bfd_h_put_32(abfd, aouthdr_in->tsize, (bfd_byte *) aouthdr_out->tsize);
+  bfd_h_put_32(abfd, aouthdr_in->dsize, (bfd_byte *) aouthdr_out->dsize);
+  bfd_h_put_32(abfd, aouthdr_in->bsize, (bfd_byte *) aouthdr_out->bsize);
+  bfd_h_put_32(abfd, aouthdr_in->entry, (bfd_byte *) aouthdr_out->entry);
+  bfd_h_put_32(abfd, aouthdr_in->text_start, (bfd_byte *) aouthdr_out->text_start);
+  bfd_h_put_32(abfd, aouthdr_in->data_start, (bfd_byte *) aouthdr_out->data_start);
 #ifdef I960
-  bfd_h_put_32(abfd, aouthdr_in->tagentries, aouthdr_out->tagentries);
+  bfd_h_put_32(abfd, aouthdr_in->tagentries, (bfd_byte *) aouthdr_out->tagentries);
 #endif
 }
 
@@ -644,22 +705,22 @@ DEFUN(coff_swap_scnhdr_in,(abfd, scnhdr_ext, scnhdr_int),
       struct internal_scnhdr *scnhdr_int)
 {
   memcpy(scnhdr_int->s_name, scnhdr_ext->s_name, sizeof(scnhdr_int->s_name));
-  scnhdr_int->s_vaddr = bfd_h_get_32(abfd, scnhdr_ext->s_vaddr);
-  scnhdr_int->s_paddr = bfd_h_get_32(abfd, scnhdr_ext->s_paddr);
-  scnhdr_int->s_size = bfd_h_get_32(abfd, scnhdr_ext->s_size);
-  scnhdr_int->s_scnptr = bfd_h_get_32(abfd, scnhdr_ext->s_scnptr);
-  scnhdr_int->s_relptr = bfd_h_get_32(abfd, scnhdr_ext->s_relptr);
-  scnhdr_int->s_lnnoptr = bfd_h_get_32(abfd, scnhdr_ext->s_lnnoptr);
-  scnhdr_int->s_flags = bfd_h_get_32(abfd, scnhdr_ext->s_flags);
+  scnhdr_int->s_vaddr = bfd_h_get_32(abfd, (bfd_byte *) scnhdr_ext->s_vaddr);
+  scnhdr_int->s_paddr = bfd_h_get_32(abfd, (bfd_byte *) scnhdr_ext->s_paddr);
+  scnhdr_int->s_size = bfd_h_get_32(abfd, (bfd_byte *) scnhdr_ext->s_size);
+  scnhdr_int->s_scnptr = bfd_h_get_32(abfd, (bfd_byte *) scnhdr_ext->s_scnptr);
+  scnhdr_int->s_relptr = bfd_h_get_32(abfd, (bfd_byte *) scnhdr_ext->s_relptr);
+  scnhdr_int->s_lnnoptr = bfd_h_get_32(abfd, (bfd_byte *) scnhdr_ext->s_lnnoptr);
+  scnhdr_int->s_flags = bfd_h_get_32(abfd, (bfd_byte *) scnhdr_ext->s_flags);
 #if defined(M88)
-  scnhdr_int->s_nreloc = bfd_h_get_32(abfd, scnhdr_ext->s_nreloc);
-  scnhdr_int->s_nlnno = bfd_h_get_32(abfd, scnhdr_ext->s_nlnno);
+  scnhdr_int->s_nreloc = bfd_h_get_32(abfd, (bfd_byte *) scnhdr_ext->s_nreloc);
+  scnhdr_int->s_nlnno = bfd_h_get_32(abfd, (bfd_byte *) scnhdr_ext->s_nlnno);
 #else
-  scnhdr_int->s_nreloc = bfd_h_get_16(abfd, scnhdr_ext->s_nreloc);
-  scnhdr_int->s_nlnno = bfd_h_get_16(abfd, scnhdr_ext->s_nlnno);
+  scnhdr_int->s_nreloc = bfd_h_get_16(abfd, (bfd_byte *) scnhdr_ext->s_nreloc);
+  scnhdr_int->s_nlnno = bfd_h_get_16(abfd, (bfd_byte *) scnhdr_ext->s_nlnno);
 #endif
 #ifdef I960
-  scnhdr_int->s_align = bfd_h_get_32(abfd, scnhdr_ext->s_align);
+  scnhdr_int->s_align = bfd_h_get_32(abfd, (bfd_byte *) scnhdr_ext->s_align);
 #endif
 }
 
@@ -670,23 +731,25 @@ DEFUN(swap_scnhdr_out,(abfd, scnhdr_int, scnhdr_ext),
       SCNHDR         *scnhdr_ext)
 {
   memcpy(scnhdr_ext->s_name, scnhdr_int->s_name, sizeof(scnhdr_int->s_name));
-  PUTWORD(abfd, scnhdr_int->s_vaddr, scnhdr_ext->s_vaddr);
-  PUTWORD(abfd, scnhdr_int->s_paddr, scnhdr_ext->s_paddr);
-  PUTWORD(abfd, scnhdr_int->s_size, scnhdr_ext->s_size);
-  PUTWORD(abfd, scnhdr_int->s_scnptr, scnhdr_ext->s_scnptr);
-  PUTWORD(abfd, scnhdr_int->s_relptr, scnhdr_ext->s_relptr);
-  PUTWORD(abfd, scnhdr_int->s_lnnoptr, scnhdr_ext->s_lnnoptr);
-  PUTWORD(abfd, scnhdr_int->s_nreloc, scnhdr_ext->s_nreloc);
+  PUTWORD(abfd, scnhdr_int->s_vaddr, (bfd_byte *) scnhdr_ext->s_vaddr);
+  PUTWORD(abfd, scnhdr_int->s_paddr, (bfd_byte *) scnhdr_ext->s_paddr);
+  PUTWORD(abfd, scnhdr_int->s_size, (bfd_byte *) scnhdr_ext->s_size);
+  PUTWORD(abfd, scnhdr_int->s_scnptr, (bfd_byte *) scnhdr_ext->s_scnptr);
+  PUTWORD(abfd, scnhdr_int->s_relptr, (bfd_byte *) scnhdr_ext->s_relptr);
+  PUTWORD(abfd, scnhdr_int->s_lnnoptr, (bfd_byte *) scnhdr_ext->s_lnnoptr);
+
 #if defined(M88)
-  PUTWORD(abfd, scnhdr_int->s_nlnno, scnhdr_ext->s_nlnno);
-  PUTWORD(abfd, scnhdr_int->s_flags, scnhdr_ext->s_flags);
+  PUTWORD(abfd, scnhdr_int->s_nlnno, (bfd_byte *) scnhdr_ext->s_nlnno);
+  PUTWORD(abfd, scnhdr_int->s_flags, (bfd_byte *) scnhdr_ext->s_flags);
+  PUTWORD(abfd, scnhdr_int->s_nreloc, (bfd_byte *) scnhdr_ext->s_nreloc);
 #else
-  PUTHALF(abfd, scnhdr_int->s_nlnno, scnhdr_ext->s_nlnno);
-  PUTHALF(abfd, scnhdr_int->s_flags, scnhdr_ext->s_flags);
+  PUTHALF(abfd, scnhdr_int->s_nlnno, (bfd_byte *) scnhdr_ext->s_nlnno);
+  PUTHALF(abfd, scnhdr_int->s_flags, (bfd_byte *) scnhdr_ext->s_flags);
+  PUTHALF(abfd, scnhdr_int->s_nreloc, (bfd_byte *) scnhdr_ext->s_nreloc);
 #endif
 
 #if defined(I960) 
-  PUTWORD(abfd, scnhdr_int->s_align, scnhdr_ext->s_align);
+  PUTWORD(abfd, scnhdr_int->s_align, (bfd_byte *) scnhdr_ext->s_align);
 #endif
 }
 
@@ -784,18 +847,15 @@ DEFUN(make_a_section_from_file,(abfd, hdr),
        return_section->linesize =   hdr->s_nlnno * sizeof (struct lineno);
     */
 
-#undef assign
     return_section->lineno_count = hdr->s_nlnno;
     return_section->userdata = NULL;
     return_section->next = (asection *) NULL;
-    return_section->flags = 0;
-    if ((hdr->s_flags & STYP_TEXT) || (hdr->s_flags & STYP_DATA))
-	return_section->flags = (SEC_LOAD | SEC_ALLOC);
-    else if (hdr->s_flags & STYP_BSS)
-	return_section->flags = SEC_ALLOC;
+    return_section->flags = styp_to_sec_flags(hdr->s_flags);
+
 
     if (hdr->s_nreloc != 0)
 	return_section->flags |= SEC_RELOC;
+    /* FIXME: should this check 'hdr->s_size > 0' */
     if (hdr->s_scnptr != 0)
 	return_section->flags |= SEC_HAS_CONTENTS;
     return true;
@@ -864,6 +924,15 @@ DEFUN(coff_real_object_p,(abfd, nscns, internal_f, internal_a),
     abfd->obj_machine = 0;
     break;
 #endif
+
+#ifdef A29K_MAGIC_BIG 
+  case  A29K_MAGIC_BIG:
+  case  A29K_MAGIC_LITTLE:
+    abfd->obj_arch = bfd_arch_a29k;
+    abfd->obj_machine = 0;
+    break;
+#endif
+
 #ifdef MIPS
   case  MIPS_MAGIC_1:
   case  MIPS_MAGIC_2:
@@ -1152,7 +1221,7 @@ DEFUN(coff_renumber_symbols,(bfd_ptr),
 }
 
 
-/*doc*
+/*
  Run thorough the symbol table again, and fix it so that all pointers to
  entries are changed to the entries' index in the output symbol table.
 
@@ -1163,7 +1232,7 @@ DEFUN(coff_mangle_symbols,(bfd_ptr),
 {
   unsigned int symbol_count = bfd_get_symcount(bfd_ptr);
   asymbol **symbol_ptr_ptr = bfd_ptr->outsymbols;
-  unsigned int native_index = 0;
+
   unsigned int symbol_index;
 
 
@@ -1371,13 +1440,14 @@ DEFUN(coff_fix_symbol_name,(abfd, symbol, native),
 {
   unsigned int    name_length;
   union internal_auxent *auxent;
-CONST char *  name = symbol->name;
+  char *  name = ( char *)(symbol->name);
 
   if (name == (char *) NULL) {
     /*
       coff symbols always have names, so we'll make one up
       */
-    name =  symbol->name = "strange";
+ symbol->name = "strange";
+    name = (char *)symbol->name;
   }
   name_length = strlen(name);
 	      
@@ -1726,10 +1796,11 @@ bfd            *abfd;
 static void 
 DEFUN(coff_print_symbol,(ignore_abfd, file, symbol, how),
       bfd            *ignore_abfd AND
-      FILE           *file AND
+      PTR           filep AND
       asymbol        *symbol AND
       bfd_print_symbol_enum_type how)
 {
+  FILE *file = (FILE *)filep;
   switch (how) {
   case bfd_print_symbol_name_enum:
     fprintf(file, "%s", symbol->name);
@@ -1838,6 +1909,16 @@ DEFUN(coff_set_flags,(abfd, magicp, flagsp),
     return true;
     break;
 #endif
+
+#ifdef A29K_MAGIC_BIG
+  case bfd_arch_a29k:
+    if (abfd->xvec->byteorder_big_p)
+    	*magicp = A29K_MAGIC_BIG;
+    else
+    	*magicp = A29K_MAGIC_LITTLE;
+    return true;
+    break;
+#endif
 	
   default:			/* Unknown architecture */
     /* return false;  -- fall through to "return false" below, to avoid
@@ -1856,7 +1937,7 @@ DEFUN(coff_set_arch_mach,(abfd, arch, machine),
       unsigned long   machine)
 {
     unsigned        dummy1;
-    unsigned short    dummy2;
+    unsigned     short dummy2;
     abfd->obj_arch = arch;
     abfd->obj_machine = machine;
     if (arch != bfd_arch_unknown &&
@@ -1936,8 +2017,6 @@ DEFUN(coff_write_object_contents,(abfd),
     
     struct internal_filehdr internal_f;
     struct internal_aouthdr internal_a;
-    
-    struct icofdata *coff = obj_icof(abfd);
     
     
     bfd_error = system_call_error;
@@ -2033,19 +2112,15 @@ DEFUN(coff_write_object_contents,(abfd),
 	if (current->lineno_count != 0)
 	  haslinno = true;
 	  
+	section.s_flags = sec_to_styp_flags(current->name,current->flags);
+
 	if (!strcmp(current->name, _TEXT)) {
 	  text_sec = current;
-	  section.s_flags = STYP_TEXT; /* kinda stupid */
-	}
-	else if (!strcmp(current->name, _DATA)) {
+	} else if (!strcmp(current->name, _DATA)) {
 	  data_sec = current;
-	  section.s_flags = STYP_DATA; /* kinda stupid */
-	}
-	else if (!strcmp(current->name, _BSS)) {
+	} else if (!strcmp(current->name, _BSS)) {
 	  bss_sec = current;
-	  section.s_flags = STYP_BSS; /* kinda stupid */
-	}
-	  
+	} 
 	  
 #ifdef I960
 	section.s_align = (current->alignment_power
@@ -2115,17 +2190,44 @@ DEFUN(coff_write_object_contents,(abfd),
 
   /* Set up architecture-dependent stuff */
 
-    { int   magic = 0;
-      int   flags = 0;
-      coff_set_flags(abfd, &magic, &internal_f.f_flags);
+    { unsigned int   magic = 0;
+      unsigned short    flags = 0;
+      coff_set_flags(abfd, &magic, &flags);
       internal_f.f_magic = magic;
+      internal_f.f_flags = flags;
       /* ...and the "opt"hdr... */
 
+#ifdef A29K 
+# ifdef ULTRA3	/* NYU's machine */
+	/* FIXME: This is a bogus check.  I really want to see if there
+	 * is a .shbss or a .shdata section, if so then set the magic
+ 	 * number to indicate a shared data executable.
+	 */ 
+      if (internal_f.f_nscns >= 7)
+      	internal_a.magic = SHMAGIC; 	/* Shared magic */
+      else
+# endif /* ULTRA3 */
+      	internal_a.magic = NMAGIC; 	/* Assume separate i/d */
+#define __A_MAGIC_SET__
+#endif	/* A29K */
 #ifdef I960
       internal_a.magic = (magic == I960ROMAGIC ? NMAGIC : OMAGIC); 
-#endif
+#define __A_MAGIC_SET__
+#endif 	/* I960 */
 #if M88
+#define __A_MAGIC_SET__
       internal_a.magic = PAGEMAGICBCS;
+#endif	/* M88 */
+
+#if M68 || I386 || MIPS
+#define __A_MAGIC_SET__
+     /* Never was anything here for the 68k */ 
+#endif	/* M88 */
+
+#ifndef __A_MAGIC_SET__
+# include "Your aouthdr magic number is not being set!"
+#else
+# undef __A_MAGIC_SET__
 #endif
     }
   /* Now should write relocs, strings, syms */
@@ -2208,7 +2310,7 @@ DEFUN(coff_set_section_contents,(abfd, section, location, offset, count),
       sec_ptr         section AND
       PTR             location AND
       file_ptr        offset AND
-      size_t          count)
+      bfd_size_type   count)
 {
     if (abfd->output_has_begun == false)	/* set by bfd.c handler */
 	coff_compute_section_file_positions(abfd);
@@ -2287,7 +2389,7 @@ bfd *abfd)
     return (NULL);
   }				/* on error */
 	  
-  string_table_size = bfd_h_get_32(abfd, string_table_size_buffer);
+  string_table_size = bfd_h_get_32(abfd, (bfd_byte *) string_table_size_buffer);
 	  
   if ((string_table = (PTR) bfd_alloc(abfd, string_table_size -= 4)) == NULL) {
     bfd_error = no_memory;
@@ -2322,7 +2424,7 @@ bfd            *abfd)
   char           *string_table = NULL;
   unsigned long   size;
 
-  unsigned long   string_table_size = 0;
+
   unsigned int raw_size;
   if (obj_raw_syments(abfd) != (combined_entry_type *)NULL) {
     return obj_raw_syments(abfd);
@@ -2646,6 +2748,11 @@ DEFUN(coff_slurp_symbol_table,(abfd),
 	  
       case C_MOS:		/* member of structure	 */
       case C_EOS:		/* end of structure		 */
+#ifdef NOTDEF	/* C_AUTOARG has the same value */
+#ifdef C_GLBLREG
+      case C_GLBLREG:		/* A29k-specific storage class */
+#endif
+#endif
       case C_REGPARM:		/* register parameter		 */
       case C_REG:		/* register variable		 */
 #ifdef C_AUTOARG
@@ -2673,6 +2780,7 @@ DEFUN(coff_slurp_symbol_table,(abfd),
 	break;
       case C_BLOCK:		/* ".bb" or ".eb"		 */
       case C_FCN:		/* ".bf" or ".ef"		 */
+      case C_EFCN:		/* physical end of function	 */
 	dst->symbol.flags = BSF_LOCAL;
 	/*
 	  Base the value as an index from the base of the section
@@ -2680,7 +2788,6 @@ DEFUN(coff_slurp_symbol_table,(abfd),
 	dst->symbol.value = (src->u.syment.n_value) - dst->symbol.section->vma;
 	  
 	break;
-      case C_EFCN:		/* physical end of function	 */
       case C_NULL:
       case C_EXTDEF:		/* external definition		 */
       case C_ULABEL:		/* undefined label		 */
@@ -2691,6 +2798,8 @@ DEFUN(coff_slurp_symbol_table,(abfd),
 	  
       default:
 	  
+	fprintf(stderr,"Unrecognized storage class %d\n", 
+				src->u.syment.n_sclass);
 	abort();
 	dst->symbol.flags = BSF_DEBUGGING;
 	dst->symbol.value = (src->u.syment.n_value);
@@ -2831,9 +2940,20 @@ DEFUN(coff_slurp_reloc_table,(abfd, asect, symbols),
 	struct internal_reloc dst;
 	asymbol        *ptr;
 	bfd_swap_reloc_in(abfd, src, &dst);
+	
 	dst.r_symndx += obj_symbol_slew(abfd);
 	cache_ptr->sym_ptr_ptr = symbols + obj_convert(abfd)[dst.r_symndx];
-	
+#ifdef A29K 
+	/* AMD has two relocation entries for the 'consth' instruction.
+	 * The first is R_IHIHALF (part 1), the second is R_IHCONST
+	 * (part 2).  The second entry's r_symndx does not contain
+	 * an index to a symbol but rather a value (apparently).
+	 * Also, see the ifdef below for saving the r_symndx value in addend.
+	 */
+	if (dst.r_type == R_IHCONST)  {
+		ptr = NULL;
+	} else
+#endif
 	ptr = *(cache_ptr->sym_ptr_ptr);
 	cache_ptr->address = dst.r_vaddr;
 	/*
@@ -2845,7 +2965,7 @@ DEFUN(coff_slurp_reloc_table,(abfd, asect, symbols),
 	  Note that symbols which used to be common must be left alone
 	  */
 	
-	if (ptr->the_bfd == abfd 
+	if (ptr && ptr->the_bfd == abfd 
 	    && ptr->section != (asection *) NULL 
 	    && ((ptr->flags & BSF_OLD_COMMON)== 0)) 
 	    {
@@ -2864,6 +2984,16 @@ DEFUN(coff_slurp_reloc_table,(abfd, asect, symbols),
 	
 	cache_ptr->section = (asection *) NULL;
 
+#ifdef A29K 
+        if (dst.r_type == R_IHCONST) {
+          /* Add in the value which was stored in the symbol index */
+	  /* See above comment */
+          cache_ptr->addend += dst.r_symndx;
+          /* Throw away the bogus symbol pointer */
+          cache_ptr->sym_ptr_ptr = 0;
+        }
+	cache_ptr->howto = howto_table + dst.r_type;
+#endif
 #if I386
 	cache_ptr->howto = howto_table + dst.r_type;
 #endif
@@ -3070,4 +3200,5 @@ DEFUN(coff_sizeof_headers,(abfd, reloc),
 
 #define coff_bfd_debug_info_start		bfd_void
 #define coff_bfd_debug_info_end		bfd_void
-#define coff_bfd_debug_info_accumulate	bfd_void
+#define coff_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
+

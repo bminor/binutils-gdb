@@ -100,7 +100,7 @@ $  struct sec *section;
 
 Pointer to how to perform the required relocation
 
-$  struct reloc_howto_struct *howto;
+$  CONST struct reloc_howto_struct *howto;
 $} arelent;
 
 *---

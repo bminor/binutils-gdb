@@ -289,7 +289,7 @@ extern bfd_target oasys_vec;
 extern bfd_target m88k_bcs_vec;
 extern bfd_target m68kcoff_vec;
 extern bfd_target i386coff_vec;
-
+extern bfd_target a29kcoff_big_vec;
 #ifdef DEFAULT_VECTOR
 extern bfd_target DEFAULT_VECTOR;
 #endif
@@ -316,6 +316,7 @@ extern bfd_target DEFAULT_VECTOR;
 #define SREC_VEC                srec_vec
 #define M68KCOFF_VEC            m68kcoff_vec
 #define I386COFF_VEC            i386coff_vec
+#define A29KCOFF_BIG_VEC	a29kcoff_big_vec
 #endif
 bfd_target *target_vector[] = {
 
@@ -380,6 +381,10 @@ bfd_target *target_vector[] = {
 #ifdef  M68KCOFF_VEC
         &M68KCOFF_VEC,
 #endif  /* M68KCOFF_VEC */
+
+#ifdef	A29KCOFF_BIG_VEC
+	&A29KCOFF_BIG_VEC,
+#endif	/* A29KCOFF_BIG_VEC */
 
         NULL, /* end of list marker */
 };

@@ -25,16 +25,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <sysdep.h>
 #define MIPS 1
-#if 0
-
-#include <stdio.h>
-#include <string.h>
-#endif
 #include "bfd.h"
 #include "libbfd.h"
 
 
-#include "intel-coff.h"
+#include "ecoff.h"
+#include "internalcoff.h"
 #include "libcoff.h"		/* to allow easier abstraction-breaking */
 
 #define BADMAG(x) ECOFFBADMAG(x)
@@ -53,6 +49,7 @@ bfd_target ecoff_little_vec =
 	(SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* sect flags */
 	'/',			/* ar_pad_char */
 	15,			/* ar_max_namelen */
+	   3,			/* minimum alignment power */
 _do_getl64, _do_putl64,	_do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
 _do_getl64, _do_putl64,	_do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs */
 
@@ -77,6 +74,7 @@ bfd_target ecoff_big_vec =
 	(SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* sect flags */
 	' ',			/* ar_pad_char */
 	16,			/* ar_max_namelen */
+	   3,			/* minimum alignment power */
 _do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
 _do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 	{_bfd_dummy_target, coff_object_p, /* bfd_check_format */

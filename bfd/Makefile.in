@@ -41,7 +41,7 @@ BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 	archures.o core.o section.o format.o syms.o reloc.o
 
 BFD_BACKENDS = oasys.o ieee.o srec.o aout64.o aout32.o sunos.o icoff.o \
-demo64.o \
+demo64.o amdcoff.o \
 m68kcoff.o i386coff.o m88k-bcs.o  ecoff.o newsos3.o # trad-core.o bout.o
 
 BFD_H=$(INCDIR)/bfd.h
@@ -50,7 +50,7 @@ SYSDEP_H=$(INCDIR)/sysdep.h
 # C source files that correspond to .o's.
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
 	 i386coff.c aout64.c aout32.c sunos.c demo64.c icoff.c srec.c \
-oasys.c ieee.c m68kcoff.c \
+oasys.c ieee.c m68kcoff.c amdcoff.c \
 format.c section.c core.c syms.c reloc.c \
 	 m88k-bcs.c ecoff.c trad-core.c newsos3.c #bout.c
 

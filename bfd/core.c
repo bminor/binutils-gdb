@@ -9,7 +9,7 @@ Buff output this facinating topic
 
 /** Some core file info commands */
 
-/*proto*i bfd_core_file_failing_command
+/*proto* bfd_core_file_failing_command
 Returns a read-only string explaining what program was running when
 it failed and produced the core file being read
 
