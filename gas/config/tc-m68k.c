@@ -4224,10 +4224,10 @@ md_number_to_chars (buf, val, n)
 void
 md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     valueT * valP;
+     valueT *valP;
      segT seg ATTRIBUTE_UNUSED;
 {
-  valueT val = * valP;
+  offsetT val = *valP;
   addressT upper_limit;
   offsetT lower_limit;
 

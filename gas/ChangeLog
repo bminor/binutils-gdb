@@ -1,3 +1,7 @@
+2001-11-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-m68k.c (md_apply_fix3): Change val back to a signed type.
+
 2001-11-15  H.J. Lu  <hjl@gnu.org>
 
 	* config/tc-hppa.c (md_apply_fix3): Fix a typo.
