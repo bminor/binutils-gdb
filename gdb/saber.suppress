@@ -394,6 +394,8 @@ suppress 590 on ignore_symbol
 /* Formal param not used */
 suppress 590 on ignore_symbols
 /* Formal param not used */
+suppress 590 on signo
+/* Formal param not used */
 suppress 652 in ../bfd/libaout.h
 /* The declaration has no effect */
 suppress 442 in ../bfd/archive.c

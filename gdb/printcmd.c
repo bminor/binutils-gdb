@@ -22,19 +22,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "frame.h"
 #include "symtab.h"
+#include "gdbtypes.h"
 #include "value.h"
 #include "language.h"
 #include "expression.h"
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "target.h"
+#include "breakpoint.h"
 
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
 extern int addressprint;	/* Whether to print hex addresses in HLL " */
-
-extern struct block *get_current_block ();
-
-static void print_frame_nameless_args ();
 
 struct format_data
 {
@@ -77,10 +75,116 @@ int current_display_number;
 
 int inspect_it = 0;
 
-static void do_one_display ();
+enum display_status {disabled, enabled};
 
-void do_displays ();
-void print_scalar_formatted ();
+struct display
+{
+  /* Chain link to next auto-display item.  */
+  struct display *next;
+  /* Expression to be evaluated and displayed.  */
+  struct expression *exp;
+  /* Item number of this auto-display item.  */
+  int number;
+  /* Display format specified.  */
+  struct format_data format;
+  /* Innermost block required by this expression when evaluated */
+  struct block *block;
+  /* Status of this display (enabled or disabled) */
+  enum display_status status;
+};
+
+/* Chain of expressions whose values should be displayed
+   automatically each time the program stops.  */
+
+static struct display *display_chain;
+
+static int display_number;
+
+/* Prototypes for local functions */
+
+static void
+delete_display PARAMS ((int));
+
+static void
+enable_display PARAMS ((char *));
+
+static void
+disable_display_command PARAMS ((char *, int));
+
+static void
+disassemble_command PARAMS ((char *, int));
+
+static int
+containing_function_bounds PARAMS ((CORE_ADDR, CORE_ADDR *, CORE_ADDR *));
+
+static void
+printf_command PARAMS ((char *, int));
+
+static void
+print_frame_nameless_args PARAMS ((CORE_ADDR, long, int, int, FILE *));
+
+static void
+display_info PARAMS ((void));
+
+static void
+do_one_display PARAMS ((struct display *));
+
+static void
+undisplay_command PARAMS ((char *));
+
+static void
+free_display PARAMS ((struct display *));
+
+static void
+display_command PARAMS ((char *, int));
+
+static void
+ptype_command PARAMS ((char *, int));
+
+static struct type *
+ptype_eval PARAMS ((struct expression *));
+
+static void
+whatis_command PARAMS ((char *, int));
+
+static void
+whatis_exp PARAMS ((char *, int));
+
+static void
+x_command PARAMS ((char *, int));
+
+static void
+address_info PARAMS ((char *, int));
+
+static void
+set_command PARAMS ((char *, int));
+
+static void
+output_command PARAMS ((char *, int));
+
+static void
+call_command PARAMS ((char *, int));
+
+static void
+inspect_command PARAMS ((char *, int));
+
+static void
+print_command PARAMS ((char *, int));
+
+static void
+print_command_1 PARAMS ((char *, int, int));
+
+static void
+validate_format PARAMS ((struct format_data, char *));
+
+static void
+do_examine PARAMS ((struct format_data, CORE_ADDR));
+
+static void
+print_formatted PARAMS ((value, int, int));
+
+static struct format_data
+decode_format PARAMS ((char **, int, int));
 
 
 /* Decode a format specification.  *STRING_PTR should point to it.
@@ -93,11 +197,11 @@ void print_scalar_formatted ();
    found in the specification.  In addition, *STRING_PTR is advanced
    past the specification and past all whitespace following it.  */
 
-struct format_data
+static struct format_data
 decode_format (string_ptr, oformat, osize)
      char **string_ptr;
-     char oformat;
-     char osize;
+     int oformat;
+     int osize;
 {
   struct format_data val;
   register char *p = *string_ptr;
@@ -191,8 +295,8 @@ decode_format (string_ptr, oformat, osize)
 static void
 print_formatted (val, format, size)
      register value val;
-     register char format;
-     char size;
+     register int format;
+     int size;
 {
   int len = TYPE_LENGTH (VALUE_TYPE (val));
 
@@ -236,7 +340,7 @@ void
 print_scalar_formatted (valaddr, type, format, size, stream)
      char *valaddr;
      struct type *type;
-     char format;
+     int format;
      int size;
      FILE *stream;
 {
@@ -467,20 +571,20 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
      char *leadin;
 {
   int name_location;
-  register int i = find_pc_misc_function (addr);
+  register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (addr);
 
   /* If nothing comes out, don't print anything symbolic.  */
   
-  if (i < 0)
+  if (msymbol == NULL)
     return;
 
   fputs_filtered (leadin, stream);
   fputs_filtered ("<", stream);
   if (do_demangle)
-    fputs_demangled (misc_function_vector[i].name, stream, 1);
+    fputs_demangled (msymbol -> name, stream, 1);
   else
-    fputs_filtered (misc_function_vector[i].name, stream);
-  name_location = misc_function_vector[i].address;
+    fputs_filtered (msymbol -> name, stream);
+  name_location = msymbol -> address;
   if (addr - name_location)
     fprintf_filtered (stream, "+%d>", addr - name_location);
   else
@@ -649,9 +753,10 @@ print_command_1 (exp, inspect, voidprint)
       type = VALUE_TYPE (val);
 
       if (objectprint
-	  && (TYPE_CODE (type) == TYPE_CODE_PTR
+	  && (   TYPE_CODE (type) == TYPE_CODE_PTR
 	      || TYPE_CODE (type) == TYPE_CODE_REF)
-	  && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT)
+	  && (   TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT
+	      || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_UNION))
 	{
 	  value v;
 
@@ -768,6 +873,7 @@ address_info (exp, from_tty)
      int from_tty;
 {
   register struct symbol *sym;
+  register struct minimal_symbol *msymbol;
   register long val;
   int is_a_field_of_this;	/* C++: lookup_symbol sets this to nonzero
 				   if exp is a field of `this'. */
@@ -779,21 +885,17 @@ address_info (exp, from_tty)
 		       &is_a_field_of_this, (struct symtab **)NULL);
   if (sym == 0)
     {
-      register int i;
-
       if (is_a_field_of_this)
 	{
 	  printf ("Symbol \"%s\" is a field of the local class variable `this'\n", exp);
 	  return;
 	}
 
-      for (i = 0; i < misc_function_count; i++)
-	if (!strcmp (misc_function_vector[i].name, exp))
-	  break;
+      msymbol = lookup_minimal_symbol (exp, (struct objfile *) NULL);
 
-      if (i < misc_function_count)
+      if (msymbol != NULL)
 	printf ("Symbol \"%s\" is at %s in a file compiled without debugging.\n",
-		exp, local_hex_string(misc_function_vector[i].address));
+		exp, local_hex_string(msymbol -> address));
       else
 	error ("No symbol \"%s\" in current context.", exp);
       return;
@@ -1009,31 +1111,6 @@ ptype_command (typename, from_tty)
      whatis_exp (typename, 1);
 }
 
-enum display_status {disabled, enabled};
-
-struct display
-{
-  /* Chain link to next auto-display item.  */
-  struct display *next;
-  /* Expression to be evaluated and displayed.  */
-  struct expression *exp;
-  /* Item number of this auto-display item.  */
-  int number;
-  /* Display format specified.  */
-  struct format_data format;
-  /* Innermost block required by this expression when evaluated */
-  struct block *block;
-  /* Status of this display (enabled or disabled) */
-  enum display_status status;
-};
-
-/* Chain of expressions whose values should be displayed
-   automatically each time the program stops.  */
-
-static struct display *display_chain;
-
-static int display_number;
-
 /* Add an expression to the auto-display chain.
    Specify the expression.  */
 
@@ -1114,7 +1191,7 @@ clear_displays ()
 
 /* Delete the auto-display number NUM.  */
 
-void
+static void
 delete_display (num)
      int num;
 {
@@ -1310,7 +1387,7 @@ Num Enb Expression\n");
     }
 }
 
-void
+static void
 enable_display (args)
      char *args;
 {
@@ -1350,7 +1427,7 @@ enable_display (args)
 }
 
 /* ARGSUSED */
-void
+static void
 disable_display_command (args, from_tty)
      char *args;
      int from_tty;
@@ -1674,7 +1751,7 @@ printf_command (arg, from_tty)
       {
 	char *s1;
 	if (nargs == allocated_args)
-	  val_args = (value *) xrealloc (val_args,
+	  val_args = (value *) xrealloc ((char *) val_args,
 					 (allocated_args *= 2)
 					 * sizeof (value));
 	s1 = s;

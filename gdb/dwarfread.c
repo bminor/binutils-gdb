@@ -1160,9 +1160,6 @@ read_tag_pointer_type (dip)
 {
   struct type *type;
   struct type *utype;
-  char *sub;
-  char *subend;
-  short temp;
   
   type = decode_die_type (dip);
   if ((utype = lookup_utype (dip -> dieref)) == NULL)

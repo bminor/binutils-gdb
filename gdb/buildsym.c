@@ -969,7 +969,6 @@ scan_file_globals (objfile)
      struct objfile *objfile;
 {
   int hash;
-  int mf;
   struct minimal_symbol *msymbol;
   struct symbol *sym, *prev;
 

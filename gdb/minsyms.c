@@ -404,7 +404,6 @@ install_minimal_symbols (objfile)
   register int mcount;
   register struct msym_bunch *bunch;
   register struct minimal_symbol *msymbols;
-  int nbytes;
   int alloc_count;
 
   if (msym_count > 0)

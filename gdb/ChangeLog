@@ -10,6 +10,10 @@ Sat Feb 22 00:56:39 1992  Stu Grossman  (grossman at cygnus.com)
 
 Sat Feb 22 00:08:50 1992  John Gilmore  (gnu at cygnus.com)
 
+	* buildsym.c, dwarfread.c, gdbtypes.c, inflow.c, main.c,
+	minsyms.c, printcmd.c, remote.c, saber.suppress:  Saberlint.
+	* symmisc.c, xcoffread.c:  Move debug functions to symmisc.c.
+
 	* xm-sun3os4.h, xm-sun4os4.h:  Enable HAVE_MMAP.
 
 	* minsyms.c (install_minimal_symbols):  Add bunches to any
@@ -27,7 +31,8 @@ Sat Feb 22 00:08:50 1992  John Gilmore  (gnu at cygnus.com)
 Fri Feb 21 17:29:54 1992  John Gilmore  (gnu at cygnus.com)
 
 	* Check in Fred Fish's changes in these modules.  Fred
-	will make ChangeLog entries for all of them.
+	will make ChangeLog entries for all of them.  Update VERSION
+	to 4.4.2.
 
 	* Makefile.in
 	* altos-xdep.c
