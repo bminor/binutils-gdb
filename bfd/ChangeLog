@@ -1,5 +1,10 @@
 Fri Apr 22 11:08:38 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* ieee.c (ieee_object_p): Set bfd_error_got_wrong_format if
+	appropriate.
+
+	* targets.c (bfd_target_vector): Add bfd_elf32_powerpc_vec.
+
 	* aout-adobe.c (aout_adobe_set_arch_mach): Check return value of
 	bfd_default_set_arch_mach.  Accept bfd_arch_m68k as well as
 	bfd_arch_unknown.
