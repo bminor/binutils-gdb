@@ -2504,7 +2504,7 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
   if (EF_ARM_EABI_VERSION (in_flags) != EF_ARM_EABI_VERSION (out_flags))
     {
       _bfd_error_handler
-	(_("ERROR: %B is compiled for EABI version %d, whereas %B is compiled for version %d"),
+	(_("ERROR: Source object %B has EABI version %d, but target %B has EABI version %d"),
 	 ibfd, obfd,
 	 (in_flags & EF_ARM_EABIMASK) >> 24,
 	 (out_flags & EF_ARM_EABIMASK) >> 24);

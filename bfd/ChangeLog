@@ -1,5 +1,10 @@
 2004-10-12  Paul Brook  <paul@codesourcery.com>
 
+	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Rephrase error
+	message.
+
+2004-10-12  Paul Brook  <paul@codesourcery.com>
+
 	* elf32-arm.h: Support EABI version 4 objects.
 
 2004-10-12  Alan Modra  <amodra@bigpond.net.au>
