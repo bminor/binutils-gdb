@@ -1,3 +1,8 @@
+2001-02-14  Jim Wilson  <wilson@redhat.com>
+
+	* ia64-ic.tbl: Update from Intel.  Add setf to fr-writers.
+	* ia64-asmtab.c: Regenerate.
+
 Mon Feb 12 17:41:26 CET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* i386-dis.c (prefix_user_t): Add 'Y' to SSE ineger converison
