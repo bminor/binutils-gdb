@@ -1,3 +1,8 @@
+2003-02-04  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/anon-union.exp: Do not call gdb_suppress_entire_file.
+	Call perror and then continue.
+
 2003-02-03  Michael Chastain  <mec@shout.net>
 
 	* gdb.c++/pr-1023.cc: New file.

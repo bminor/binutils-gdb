@@ -1,5 +1,5 @@
 # Tests for anonymous union support.
-# Copyright 1998, 1999 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,7 +40,8 @@ set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+     perror "Testcase compile failed" 0
+     continue
 }
 
 # Start with a fresh gdb
