@@ -1,8 +1,10 @@
+start-sanitize-tic80
 Tue Aug  5 23:56:14 1997  Mark Alexander  <marka@cygnus.com>
 
 	* tic80-tdep.c (tic80_init_extra_frame_info): Allow zero
 	as a valid SP-relative offset of a saved register.
 	
+end-sanitize-tic80
 Wed Aug  6 00:24:08 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* hpread.c (hpread_read_struct_type): Use accessor macros rather
