@@ -160,6 +160,45 @@
 
  */
 
+/* .idata section description
+
+   The .idata section is the import table.  It is a collection of several
+   subsections used to keep the pieces for each dll together: .idata$[234567].
+   IE: Each dll's .idata$2's are catenated together, each .idata$3's, etc.
+
+   .idata$2 = Import Directory Table
+   = array of IMAGE_IMPORT_DESCRIPTOR's.
+   There is one for each dll imported from plus a trailing null copy.
+
+	DWORD   Characteristics;      - pointer to .idata$4
+	DWORD   TimeDateStamp;        - currently always 0
+	DWORD   ForwarderChain;       - currently always 0
+	DWORD   Name;                 - pointer to dll's name
+	PIMAGE_THUNK_DATA FirstThunk; - pointer to .idata$5
+
+   .idata$3 = ppc's way of null terminating .idata$2.  Jeepers creepers,
+   can we have some consistency here???
+
+   .idata$4 = Import Lookup Table
+   = array of array of pointers to hint name table.
+   There is one for each dll being imported from, and each dll's set is
+   terminated by a trailing NULL.
+
+   .idata$5 = Import Address Table
+   = array of array of pointers to hint name table.
+   There is one for each dll being imported from, and each dll's set is
+   terminated by a trailing NULL.
+   Initially, this table is identical to the Import Lookup Table.  However,
+   at load time, the loader overwrites the entries with the address of the
+   function.
+
+   .idata$6 = Hint Name Table
+   = Array of { short, asciz } entries, one for each imported function.
+   The `short' is the function's ordinal number.
+
+   .idata$7 = dll name (eg: "kernel32.dll"). (.idata$6 for ppc)
+*/
+
 #define PAGE_SIZE 4096
 #define PAGE_MASK (-PAGE_SIZE)
 #include "bfd.h"
