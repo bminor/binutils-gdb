@@ -1,5 +1,8 @@
 Thu Jan 26 18:24:41 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
+	* symtab.c (find_pc_line): When subtracting one to get a line
+	number, make sure not to end up with zero.
+
 	* remote-vx.c: Revert all of Kung's changes of 16 Jan.  The
 	problems with those changes were (a) the file didn't compile, (b)
 	they changed memset to bzero--memset is correct, (c) they took out
