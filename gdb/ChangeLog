@@ -1,5 +1,8 @@
 Mon Dec 16 12:31:46 1991  Fred Fish  (fnf at cygnus.com)
 
+	* config/mt-amix, config/mt-i386v4:  Add solib.o to TDEPFILES
+	for these SVR4 systems.
+
 	* symfile.c (symbol_file_add):  When verbose is set, print
 	the names of files from which symbols are being loaded, as
 	when from_tty is true.
