@@ -18,7 +18,7 @@ SYMBOL TABLE:
 0+0000000 l    d  \.foo	0+0000000 
 0+0000004 l       \.foo	0+0000000 l4
 0+0000000 l    d  \.reginfo	0+0000000 
-0+0000000 l    d  \.mdebug	0+0000000 
+0+0000000 l    d  \.(mdebug|pdr)	0+0000000 
 0+0000000         \*UND\*	0+0000000 g1
 0+0000000         \*UND\*	0+0000000 g2
 
@@ -130,7 +130,7 @@ Contents of section \.data:
 Contents of section \.reginfo:
  0000 08000080 00000000 00000000 00000000  .*
  0010 00000000 00000000                    .*
-Contents of section \.mdebug:
+Contents of section \.(mdebug|pdr):
 #...
 Contents of section \.foo:
  0000 00000000 0000033c 040063[26]4 0000033c  .*

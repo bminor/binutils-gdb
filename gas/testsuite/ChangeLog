@@ -1,5 +1,16 @@
 2001-06-06  H.J. Lu  <hjl@gnu.org>
 
+	* gas/mips/empic.d: Support stabs.
+	* gas/mips/mips16-e.d: Likewise.
+	* gas/mips/mips16-f.d: Likewise.
+	* gas/mips/mipsel16-f.d: Likewise.
+	* gas/mips/telempic.d: Likewise.
+	* gas/mips/tempic.d: Likewise.
+	* gas/mips/tmips16-e.d: Likewise.
+	* gas/mips/tmipsel16-e.d: Likewise.
+
+2001-06-06  H.J. Lu  <hjl@gnu.org>
+
 	* gas/mips/elf-rel3.s: New file.
 	* gas/mips/elf-rel3.d: Likewise.
 	* gas/mips/elfel-rel3.s: Likewise.
