@@ -556,22 +556,46 @@ mips_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 
 /* Map the symbol table registers which live in the range [1 *
    NUM_REGS .. 2 * NUM_REGS) back onto the corresponding raw
-   registers.  */
+   registers.  Take care of alignment and size problems.  */
 
 static void
 mips_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			   int cookednum, void *buf)
 {
+  int rawnum = cookednum % NUM_REGS;
   gdb_assert (cookednum >= NUM_REGS && cookednum < 2 * NUM_REGS);
-  return regcache_raw_read (regcache, cookednum % NUM_REGS, buf);
+  if (register_size (gdbarch, rawnum) == register_size (gdbarch, cookednum))
+    return regcache_raw_read (regcache, rawnum, buf);
+  else if (register_size (gdbarch, rawnum) > register_size (gdbarch, cookednum))
+    {
+      if (gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p
+	  || TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+	regcache_raw_read_part (regcache, rawnum, 0, 4, buf);
+      else
+	regcache_raw_read_part (regcache, rawnum, 4, 4, buf);
+    }
+  else
+    internal_error (__FILE__, __LINE__, "bad register size");
 }
 
 static void
 mips_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			    int cookednum, const void *buf)
 {
+  int rawnum = cookednum % NUM_REGS;
   gdb_assert (cookednum >= NUM_REGS && cookednum < 2 * NUM_REGS);
-  return regcache_raw_write (regcache, cookednum % NUM_REGS, buf);
+  if (register_size (gdbarch, rawnum) == register_size (gdbarch, cookednum))
+    return regcache_raw_write (regcache, rawnum, buf);
+  else if (register_size (gdbarch, rawnum) > register_size (gdbarch, cookednum))
+    {
+      if (gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p
+	  || TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+	regcache_raw_write_part (regcache, rawnum, 0, 4, buf);
+      else
+	regcache_raw_write_part (regcache, rawnum, 4, 4, buf);
+    }
+  else
+    internal_error (__FILE__, __LINE__, "bad register size");
 }
 
 /* Table to translate MIPS16 register field to actual register number.  */
@@ -630,46 +654,7 @@ set_mips64_transfers_32bit_regs (char *args, int from_tty,
     }
 }
 
-/* Convert between RAW and VIRTUAL registers.  The RAW register size
-   defines the remote-gdb packet. */
-
-static int
-mips_register_convertible (int reg_nr)
-{
-  if (gdbarch_tdep (current_gdbarch)->mips64_transfers_32bit_regs_p)
-    return 0;
-  else
-    return (register_size (current_gdbarch, reg_nr) > register_size (current_gdbarch, reg_nr));
-}
-
-static void
-mips_register_convert_to_virtual (int n, struct type *virtual_type,
-				  char *raw_buf, char *virt_buf)
-{
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    memcpy (virt_buf,
-	    raw_buf + (register_size (current_gdbarch, n) - TYPE_LENGTH (virtual_type)),
-	    TYPE_LENGTH (virtual_type));
-  else
-    memcpy (virt_buf,
-	    raw_buf,
-	    TYPE_LENGTH (virtual_type));
-}
-
-static void
-mips_register_convert_to_raw (struct type *virtual_type, int n,
-			      const char *virt_buf, char *raw_buf)
-{
-  memset (raw_buf, 0, register_size (current_gdbarch, n));
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    memcpy (raw_buf + (register_size (current_gdbarch, n) - TYPE_LENGTH (virtual_type)),
-	    virt_buf,
-	    TYPE_LENGTH (virtual_type));
-  else
-    memcpy (raw_buf,
-	    virt_buf,
-	    TYPE_LENGTH (virtual_type));
-}
+/* Convert to/from a register and the corresponding memory value.  */
 
 static int
 mips_convert_register_p (int regnum, struct type *type)
@@ -6024,9 +6009,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_pop_frame (gdbarch, mips_pop_frame);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
   set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
-  set_gdbarch_deprecated_register_convertible (gdbarch, mips_register_convertible);
-  set_gdbarch_deprecated_register_convert_to_virtual (gdbarch, mips_register_convert_to_virtual);
-  set_gdbarch_deprecated_register_convert_to_raw (gdbarch, mips_register_convert_to_raw);
 
   set_gdbarch_deprecated_frame_chain (gdbarch, mips_frame_chain);
   set_gdbarch_frameless_function_invocation (gdbarch, 

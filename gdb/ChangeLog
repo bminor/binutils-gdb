@@ -1,5 +1,14 @@
 2003-11-22  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_register_convertible): Delete function.
+	(mips_register_convert_to_virtual): Delete function.
+	(mips_register_convert_to_raw): Delete function.
+	(mips_gdbarch_init): Do not set "deprecated_register_convertible",
+	"deprecated_register_convert_to_virtual", or
+	"deprecated_register_convert_to_raw".
+	(mips_pseudo_register_write, mips_pseudo_register_read): Handle
+	32/64 cooked to raw register conversions.
+
 	* frame.c (deprecated_get_frame_context): Delete function.
 	(deprecated_set_frame_prev_hack): Delete function.
 	(struct frame_info): Delete member "context".
