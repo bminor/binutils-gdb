@@ -1407,7 +1407,8 @@ reloc_needs_lo_p (bfd_reloc_code_real_type reloc)
 {
   return (HAVE_IN_PLACE_ADDENDS
 	  && (reloc == BFD_RELOC_HI16_S
-	      || reloc == BFD_RELOC_MIPS_GOT16));
+	      || reloc == BFD_RELOC_MIPS_GOT16
+	      || reloc == BFD_RELOC_MIPS16_HI16_S));
 }
 
 /* Return true if the given fixup is followed by a matching R_MIPS_LO16
@@ -1417,7 +1418,8 @@ static inline bfd_boolean
 fixup_has_matching_lo_p (fixS *fixp)
 {
   return (fixp->fx_next != NULL
-	  && fixp->fx_next->fx_r_type == BFD_RELOC_LO16
+	  && (fixp->fx_next->fx_r_type == BFD_RELOC_LO16
+	     || fixp->fx_next->fx_r_type == BFD_RELOC_MIPS16_LO16)
 	  && fixp->fx_addsy == fixp->fx_next->fx_addsy
 	  && fixp->fx_offset == fixp->fx_next->fx_offset);
 }
@@ -2194,7 +2196,10 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		  || reloc_type[0] == BFD_RELOC_MIPS_HIGHER
 		  || reloc_type[0] == BFD_RELOC_MIPS_SCN_DISP
 		  || reloc_type[0] == BFD_RELOC_MIPS_REL16
-		  || reloc_type[0] == BFD_RELOC_MIPS_RELGOT))
+		  || reloc_type[0] == BFD_RELOC_MIPS_RELGOT
+		  || reloc_type[0] == BFD_RELOC_MIPS16_GPREL
+		  || reloc_type[0] == BFD_RELOC_MIPS16_HI16_S
+		  || reloc_type[0] == BFD_RELOC_MIPS16_LO16))
 	    fixp[0]->fx_no_overflow = 1;
 
 	  if (mips_relax.sequence)
@@ -9097,6 +9102,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
   unsigned int regno;
   unsigned int lastregno = 0;
   char *s_reset;
+  size_t i;
 
   insn_error = NULL;
 
@@ -9183,8 +9189,34 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		      && *imm_reloc > BFD_RELOC_UNUSED
 		      && insn->pinfo != INSN_MACRO)
 		    {
+		      valueT tmp;
+
+		      switch (*offset_reloc)
+			{
+			  case BFD_RELOC_MIPS16_HI16_S:
+			    tmp = (imm_expr.X_add_number + 0x8000) >> 16;
+			    break;
+
+			  case BFD_RELOC_MIPS16_HI16:
+			    tmp = imm_expr.X_add_number >> 16;
+			    break;
+
+			  case BFD_RELOC_MIPS16_LO16:
+			    tmp = ((imm_expr.X_add_number + 0x8000) & 0xffff)
+				  - 0x8000;
+			    break;
+
+			  case BFD_RELOC_UNUSED:
+			    tmp = imm_expr.X_add_number;
+			    break;
+
+			  default:
+			    internalError ();
+			}
+		      *offset_reloc = BFD_RELOC_UNUSED;
+
 		      mips16_immed (NULL, 0, *imm_reloc - BFD_RELOC_UNUSED,
-				    imm_expr.X_add_number, TRUE, mips16_small,
+				    tmp, TRUE, mips16_small,
 				    mips16_ext, &ip->insn_opcode,
 				    &ip->use_extend, &ip->extend);
 		      imm_expr.X_op = O_absent;
@@ -9395,47 +9427,43 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		}
 	      break;
 
-	    case '<':
-	    case '>':
-	    case '[':
-	    case ']':
-	    case '4':
 	    case '5':
 	    case 'H':
 	    case 'W':
 	    case 'D':
 	    case 'j':
-	    case '8':
 	    case 'V':
 	    case 'C':
 	    case 'U':
 	    case 'k':
 	    case 'K':
-	      if (s[0] == '%'
-		  && strncmp (s + 1, "gprel(", sizeof "gprel(" - 1) == 0)
+	      i = my_getSmallExpression (&imm_expr, imm_reloc, s);
+	      if (i > 0)
 		{
-		  /* This is %gprel(SYMBOL).  We need to read SYMBOL,
-                     and generate the appropriate reloc.  If the text
-                     inside %gprel is not a symbol name with an
-                     optional offset, then we generate a normal reloc
-                     and will probably fail later.  */
-		  my_getExpression (&imm_expr, s + sizeof "%gprel" - 1);
-		  if (imm_expr.X_op == O_symbol)
+		  if (imm_expr.X_op != O_constant)
 		    {
 		      mips16_ext = TRUE;
-		      *imm_reloc = BFD_RELOC_MIPS16_GPREL;
-		      s = expr_end;
 		      ip->use_extend = TRUE;
 		      ip->extend = 0;
-		      continue;
 		    }
+		  else
+		    {
+		      /* We need to relax this instruction.  */
+		      *offset_reloc = *imm_reloc;
+		      *imm_reloc = (int) BFD_RELOC_UNUSED + c;
+		    }
+		  s = expr_end;
+		  continue;
 		}
-	      else
-		{
-		  /* Just pick up a normal expression.  */
-		  my_getExpression (&imm_expr, s);
-		}
-
+	      *imm_reloc = BFD_RELOC_UNUSED;
+	      /* Fall through.  */
+	    case '<':
+	    case '>':
+	    case '[':
+	    case ']':
+	    case '4':
+	    case '8':
+	      my_getExpression (&imm_expr, s);
 	      if (imm_expr.X_op == O_register)
 		{
 		  /* What we thought was an expression turned out to
@@ -9797,11 +9825,13 @@ mips16_immed (char *file, unsigned int line, int type, offsetT val,
     }
 }
 
-static const struct percent_op_match
+struct percent_op_match
 {
   const char *str;
   bfd_reloc_code_real_type reloc;
-} percent_op[] =
+};
+
+static const struct percent_op_match mips_percent_op[] =
 {
   {"%lo", BFD_RELOC_LO16},
 #ifdef OBJ_ELF
@@ -9823,6 +9853,13 @@ static const struct percent_op_match
   {"%hi", BFD_RELOC_HI16_S}
 };
 
+static const struct percent_op_match mips16_percent_op[] =
+{
+  {"%lo", BFD_RELOC_MIPS16_LO16},
+  {"%gprel", BFD_RELOC_MIPS16_GPREL},
+  {"%hi", BFD_RELOC_MIPS16_HI16_S}
+};
+
 
 /* Return true if *STR points to a relocation operator.  When returning true,
    move *STR over the operator and store its relocation code in *RELOC.
@@ -9831,9 +9868,21 @@ static const struct percent_op_match
 static bfd_boolean
 parse_relocation (char **str, bfd_reloc_code_real_type *reloc)
 {
-  size_t i;
+  const struct percent_op_match *percent_op;
+  size_t limit, i;
 
-  for (i = 0; i < ARRAY_SIZE (percent_op); i++)
+  if (mips_opts.mips16)
+    {
+      percent_op = mips16_percent_op;
+      limit = ARRAY_SIZE (mips16_percent_op);
+    }
+  else
+    {
+      percent_op = mips_percent_op;
+      limit = ARRAY_SIZE (mips_percent_op);
+    }
+
+  for (i = 0; i < limit; i++)
     if (strncasecmp (*str, percent_op[i].str, strlen (percent_op[i].str)) == 0)
       {
 	*str += strlen (percent_op[i].str);
@@ -11000,6 +11049,8 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MIPS_CALL_HI16:
     case BFD_RELOC_MIPS_CALL_LO16:
     case BFD_RELOC_MIPS16_GPREL:
+    case BFD_RELOC_MIPS16_HI16:
+    case BFD_RELOC_MIPS16_HI16_S:
       assert (! fixP->fx_pcrel);
       /* Nothing needed to do. The value comes from the reloc entry */
       break;
@@ -11051,6 +11102,7 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       break;
 
     case BFD_RELOC_LO16:
+    case BFD_RELOC_MIPS16_LO16:
       /* FIXME: Now that embedded-PIC is gone, some of this code/comment
 	 may be safe to remove, but if so it's not obvious.  */
       /* When handling an embedded PIC switch statement, we can wind

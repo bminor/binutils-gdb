@@ -1,3 +1,12 @@
+2005-02-15  Nigel Stephens  <nigel@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* gas/mips/mips16-hilo.d: New test for the R_MIPS16_HI16 and
+	R_MIPS16_LO16 relocs.
+	* gas/mips/mips16-hilo-n32.d: Likewise, for the n32 ABI.
+	* gas/mips/mips16-hilo.s: Source for the new tests.
+	* gas/mips/mips.exp: Run the new tests.
+
 2005-02-15  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/ia64/pcrel.[ds]: New.

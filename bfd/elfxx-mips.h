@@ -103,6 +103,10 @@ extern bfd_boolean _bfd_mips_elf_write_section
 
 extern bfd_boolean _bfd_mips_elf_read_ecoff_info
   (bfd *, asection *, struct ecoff_debug_info *);
+extern void _bfd_mips16_elf_reloc_unshuffle
+  (bfd *, int, bfd_boolean, bfd_byte *);
+extern void _bfd_mips16_elf_reloc_shuffle
+  (bfd *, int, bfd_boolean, bfd_byte *);
 extern bfd_reloc_status_type _bfd_mips_elf_gprel16_with_gp
   (bfd *, asymbol *, arelent *, asection *, bfd_boolean, void *, bfd_vma);
 extern bfd_reloc_status_type _bfd_mips_elf32_gprel16_reloc

@@ -2063,6 +2063,22 @@ ENUMDOC
   Low 16 bits.
 
 ENUM
+  BFD_RELOC_MIPS16_HI16
+ENUMDOC
+  MIPS16 high 16 bits of 32-bit value.
+ENUM
+  BFD_RELOC_MIPS16_HI16_S
+ENUMDOC
+  MIPS16 high 16 bits of 32-bit value but the low 16 bits will be sign
+     extended and added to form the final result.  If the low 16
+     bits form a negative number, we need to add one to the high value
+     to compensate for the borrow when the low bits are added.
+ENUM
+  BFD_RELOC_MIPS16_LO16
+ENUMDOC
+  MIPS16 low 16 bits.
+
+ENUM
   BFD_RELOC_MIPS_LITERAL
 ENUMDOC
   Relocation against a MIPS literal section.

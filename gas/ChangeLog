@@ -1,3 +1,22 @@
+2005-02-15  Nigel Stephens  <nigel@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* config/tc-mips.c (reloc_needs_lo_p): Handle
+	BFD_RELOC_MIPS16_HI16_S.
+	(fixup_has_matching_lo_p): Handle BFD_RELOC_MIPS16_LO16.
+	(append_insn): Add BFD_RELOC_MIPS16_GPREL, BFD_RELOC_MIPS16_HI16_S
+	and BFD_RELOC_MIPS16_LO16 to relocs to suppress overflow
+	complaints on.
+	(mips16_ip): Resolve BFD_RELOC_MIPS16_HI16_S,
+	BFD_RELOC_MIPS16_HI16 and BFD_RELOC_MIPS16_LO16 for constants.
+	Call my_getSmallExpression() to parse percent operators.
+	(percent_op_match, mips_percent_op): Separate definitions.
+	(mips16_percent_op): Define percent operators for the MIPS16 mode.
+	(parse_relocation): Handle the MIPS16 mode using
+	mips16_percent_op.
+	(md_apply_fix3): Handle BFD_RELOC_MIPS16_HI16,
+	BFD_RELOC_MIPS16_HI16_S and BFD_RELOC_MIPS16_LO16.
+
 2005-02-15  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-ia64.c (md_apply_fix3): Call ia64_gen_real_reloc_type

@@ -529,6 +529,11 @@ if { [istarget mips*-*-*] } then {
 	# Check jalx handling
 	run_dump_test "mips16-jalx"
 	run_dump_test "mips-jalx"
+	# Check MIPS16 HI16/LO16 relocations
+	run_dump_test "mips16-hilo"
+	if $has_newabi {
+	    run_dump_test "mips16-hilo-n32"
+	}
     }
     run_list_test "mips-no-jalx" "-32"
     run_dump_test "delay"

@@ -2354,6 +2354,18 @@ to compensate for the borrow when the low bits are added.  */
 /* Low 16 bits.  */
   BFD_RELOC_LO16,
 
+/* MIPS16 high 16 bits of 32-bit value.  */
+  BFD_RELOC_MIPS16_HI16,
+
+/* MIPS16 high 16 bits of 32-bit value but the low 16 bits will be sign
+extended and added to form the final result.  If the low 16
+bits form a negative number, we need to add one to the high value
+to compensate for the borrow when the low bits are added.  */
+  BFD_RELOC_MIPS16_HI16_S,
+
+/* MIPS16 low 16 bits.  */
+  BFD_RELOC_MIPS16_LO16,
+
 /* Relocation against a MIPS literal section.  */
   BFD_RELOC_MIPS_LITERAL,
 

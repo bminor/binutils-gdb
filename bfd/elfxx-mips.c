@@ -1061,6 +1061,152 @@ mips_elf_check_mips16_stubs (struct mips_elf_link_hash_entry *h,
   return TRUE;
 }
 
+/* R_MIPS16_26 is used for the mips16 jal and jalx instructions.
+   Most mips16 instructions are 16 bits, but these instructions
+   are 32 bits.
+
+   The format of these instructions is:
+
+   +--------------+--------------------------------+
+   |     JALX     | X|   Imm 20:16  |   Imm 25:21  |
+   +--------------+--------------------------------+
+   |                Immediate  15:0                |
+   +-----------------------------------------------+
+
+   JALX is the 5-bit value 00011.  X is 0 for jal, 1 for jalx.
+   Note that the immediate value in the first word is swapped.
+
+   When producing a relocatable object file, R_MIPS16_26 is
+   handled mostly like R_MIPS_26.  In particular, the addend is
+   stored as a straight 26-bit value in a 32-bit instruction.
+   (gas makes life simpler for itself by never adjusting a
+   R_MIPS16_26 reloc to be against a section, so the addend is
+   always zero).  However, the 32 bit instruction is stored as 2
+   16-bit values, rather than a single 32-bit value.  In a
+   big-endian file, the result is the same; in a little-endian
+   file, the two 16-bit halves of the 32 bit value are swapped.
+   This is so that a disassembler can recognize the jal
+   instruction.
+
+   When doing a final link, R_MIPS16_26 is treated as a 32 bit
+   instruction stored as two 16-bit values.  The addend A is the
+   contents of the targ26 field.  The calculation is the same as
+   R_MIPS_26.  When storing the calculated value, reorder the
+   immediate value as shown above, and don't forget to store the
+   value as two 16-bit values.
+
+   To put it in MIPS ABI terms, the relocation field is T-targ26-16,
+   defined as
+
+   big-endian:
+   +--------+----------------------+
+   |        |                      |
+   |        |    targ26-16         |
+   |31    26|25                   0|
+   +--------+----------------------+
+
+   little-endian:
+   +----------+------+-------------+
+   |          |      |             |
+   |  sub1    |      |     sub2    |
+   |0        9|10  15|16         31|
+   +----------+--------------------+
+   where targ26-16 is sub1 followed by sub2 (i.e., the addend field A is
+   ((sub1 << 16) | sub2)).
+
+   When producing a relocatable object file, the calculation is
+   (((A < 2) | ((P + 4) & 0xf0000000) + S) >> 2)
+   When producing a fully linked file, the calculation is
+   let R = (((A < 2) | ((P + 4) & 0xf0000000) + S) >> 2)
+   ((R & 0x1f0000) << 5) | ((R & 0x3e00000) >> 5) | (R & 0xffff)
+
+   R_MIPS16_GPREL is used for GP-relative addressing in mips16
+   mode.  A typical instruction will have a format like this:
+
+   +--------------+--------------------------------+
+   |    EXTEND    |     Imm 10:5    |   Imm 15:11  |
+   +--------------+--------------------------------+
+   |    Major     |   rx   |   ry   |   Imm  4:0   |
+   +--------------+--------------------------------+
+
+   EXTEND is the five bit value 11110.  Major is the instruction
+   opcode.
+
+   This is handled exactly like R_MIPS_GPREL16, except that the
+   addend is retrieved and stored as shown in this diagram; that
+   is, the Imm fields above replace the V-rel16 field.
+
+   All we need to do here is shuffle the bits appropriately.  As
+   above, the two 16-bit halves must be swapped on a
+   little-endian system.
+
+   R_MIPS16_HI16 and R_MIPS16_LO16 are used in mips16 mode to
+   access data when neither GP-relative nor PC-relative addressing
+   can be used.  They are handled like R_MIPS_HI16 and R_MIPS_LO16,
+   except that the addend is retrieved and stored as shown above
+   for R_MIPS16_GPREL.
+  */
+void
+_bfd_mips16_elf_reloc_unshuffle (bfd *abfd, int r_type,
+				 bfd_boolean jal_shuffle, bfd_byte *data)
+{
+  bfd_vma extend, insn, val;
+
+  if (r_type != R_MIPS16_26 && r_type != R_MIPS16_GPREL
+      && r_type != R_MIPS16_HI16 && r_type != R_MIPS16_LO16)
+    return;
+
+  /* Pick up the mips16 extend instruction and the real instruction.  */
+  extend = bfd_get_16 (abfd, data);
+  insn = bfd_get_16 (abfd, data + 2);
+  if (r_type == R_MIPS16_26)
+    {
+      if (jal_shuffle)
+	val = ((extend & 0xfc00) << 16) | ((extend & 0x3e0) << 11)
+	      | ((extend & 0x1f) << 21) | insn;
+      else
+	val = extend << 16 | insn;
+    }
+  else
+    val = ((extend & 0xf800) << 16) | ((insn & 0xffe0) << 11)
+	  | ((extend & 0x1f) << 11) | (extend & 0x7e0) | (insn & 0x1f);
+  bfd_put_32 (abfd, val, data);
+}
+
+void
+_bfd_mips16_elf_reloc_shuffle (bfd *abfd, int r_type,
+			       bfd_boolean jal_shuffle, bfd_byte *data)
+{
+  bfd_vma extend, insn, val;
+
+  if (r_type != R_MIPS16_26 && r_type != R_MIPS16_GPREL
+      && r_type != R_MIPS16_HI16 && r_type != R_MIPS16_LO16)
+    return;
+
+  val = bfd_get_32 (abfd, data);
+  if (r_type == R_MIPS16_26)
+    {
+      if (jal_shuffle)
+	{
+	  insn = val & 0xffff;
+	  extend = ((val >> 16) & 0xfc00) | ((val >> 11) & 0x3e0)
+		   | ((val >> 21) & 0x1f);
+	}
+      else
+	{
+	  insn = val & 0xffff;
+	  extend = val >> 16;
+	}
+    }
+  else
+    {
+      insn = ((val >> 11) & 0xffe0) | (val & 0x1f);
+      extend = ((val >> 16) & 0xf800) | ((val >> 11) & 0x1f) | (val & 0x7e0);
+    }
+  bfd_put_16 (abfd, insn, data + 2);
+  bfd_put_16 (abfd, extend, data);
+}
+
 bfd_reloc_status_type
 _bfd_mips_elf_gprel16_with_gp (bfd *abfd, asymbol *symbol,
 			       arelent *reloc_entry, asection *input_section,
@@ -1194,11 +1340,17 @@ _bfd_mips_elf_lo16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 			  bfd *output_bfd, char **error_message)
 {
   bfd_vma vallo;
+  bfd_byte *location = (bfd_byte *) data + reloc_entry->address;
 
   if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
-  vallo = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
+  _bfd_mips16_elf_reloc_unshuffle (abfd, reloc_entry->howto->type, FALSE,
+				   location);
+  vallo = bfd_get_32 (abfd, location);
+  _bfd_mips16_elf_reloc_shuffle (abfd, reloc_entry->howto->type, FALSE,
+				 location);
+
   while (mips_hi16_list != NULL)
     {
       bfd_reloc_status_type ret;
@@ -1284,13 +1436,19 @@ _bfd_mips_elf_generic_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
     reloc_entry->addend += val;
   else
     {
+      bfd_byte *location = (bfd_byte *) data + reloc_entry->address;
+
       /* Add in the separate addend, if any.  */
       val += reloc_entry->addend;
 
       /* Add VAL to the relocation field.  */
+      _bfd_mips16_elf_reloc_unshuffle (abfd, reloc_entry->howto->type, FALSE,
+				       location);
       status = _bfd_relocate_contents (reloc_entry->howto, abfd, val,
-				       (bfd_byte *) data
-				       + reloc_entry->address);
+				       location);
+      _bfd_mips16_elf_reloc_shuffle (abfd, reloc_entry->howto->type, FALSE,
+				     location);
+
       if (status != bfd_reloc_ok)
 	return status;
     }
@@ -3078,7 +3236,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	{
 	  /* Relocations against _gp_disp are permitted only with
 	     R_MIPS_HI16 and R_MIPS_LO16 relocations.  */
-	  if (r_type != R_MIPS_HI16 && r_type != R_MIPS_LO16)
+	  if (r_type != R_MIPS_HI16 && r_type != R_MIPS_LO16
+	      && r_type != R_MIPS16_HI16 && r_type != R_MIPS16_LO16)
 	    return bfd_reloc_notsupported;
 
 	  gp_disp_p = TRUE;
@@ -3265,10 +3424,12 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 
     case R_MIPS_HI16:
     case R_MIPS_LO16:
-    case R_MIPS16_GPREL:
     case R_MIPS_GPREL16:
     case R_MIPS_GPREL32:
     case R_MIPS_LITERAL:
+    case R_MIPS16_HI16:
+    case R_MIPS16_LO16:
+    case R_MIPS16_GPREL:
       gp0 = _bfd_get_gp_value (input_bfd);
       gp = _bfd_get_gp_value (abfd);
       if (elf_hash_table (info)->dynobj)
@@ -3360,6 +3521,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       break;
 
     case R_MIPS_HI16:
+    case R_MIPS16_HI16:
       if (!gp_disp_p)
 	{
 	  value = mips_elf_high (addend + symbol);
@@ -3367,17 +3529,35 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	}
       else
 	{
-	  value = mips_elf_high (addend + gp - p);
+	  /* For MIPS16 ABI code we generate this sequence
+	        0: li      $v0,%hi(_gp_disp)
+	        4: addiupc $v1,%lo(_gp_disp)
+	        8: sll     $v0,16
+	       12: addu    $v0,$v1
+	       14: move    $gp,$v0
+	     So the offsets of hi and lo relocs are the same, but the
+	     $pc is four higher than $t9 would be, so reduce
+	     both reloc addends by 4. */
+	  if (r_type == R_MIPS16_HI16)
+	    value = mips_elf_high (addend + gp - p - 4);
+	  else
+	    value = mips_elf_high (addend + gp - p);
 	  overflowed_p = mips_elf_overflow_p (value, 16);
 	}
       break;
 
     case R_MIPS_LO16:
+    case R_MIPS16_LO16:
       if (!gp_disp_p)
 	value = (symbol + addend) & howto->dst_mask;
       else
 	{
-	  value = addend + gp - p + 4;
+	  /* See the comment for R_MIPS16_HI16 above for the reason
+	     for this conditional.  */
+	  if (r_type == R_MIPS16_LO16)
+	    value = addend + gp - p;
+	  else
+	    value = addend + gp - p + 4;
 	  /* The MIPS ABI requires checking the R_MIPS_LO16 relocation
 	     for overflow.  But, on, say, IRIX5, relocations against
 	     _gp_disp are normally generated from the .cpload
@@ -3563,13 +3743,6 @@ mips_elf_obtain_contents (reloc_howto_type *howto,
   /* Obtain the bytes.  */
   x = bfd_get ((8 * bfd_get_reloc_size (howto)), input_bfd, location);
 
-  if ((ELF_R_TYPE (input_bfd, relocation->r_info) == R_MIPS16_26
-       || ELF_R_TYPE (input_bfd, relocation->r_info) == R_MIPS16_GPREL)
-      && bfd_little_endian (input_bfd))
-    /* The two 16-bit words will be reversed on a little-endian system.
-       See mips_elf_perform_relocation for more details.  */
-    x = (((x & 0xffff) << 16) | ((x & 0xffff0000) >> 16));
-
   return x;
 }
 
@@ -3597,106 +3770,13 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
   /* Figure out where the relocation is occurring.  */
   location = contents + relocation->r_offset;
 
+  _bfd_mips16_elf_reloc_unshuffle (input_bfd, r_type, FALSE, location);
+
   /* Obtain the current value.  */
   x = mips_elf_obtain_contents (howto, relocation, input_bfd, contents);
 
   /* Clear the field we are setting.  */
   x &= ~howto->dst_mask;
-
-  /* If this is the R_MIPS16_26 relocation, we must store the
-     value in a funny way.  */
-  if (r_type == R_MIPS16_26)
-    {
-      /* R_MIPS16_26 is used for the mips16 jal and jalx instructions.
-	 Most mips16 instructions are 16 bits, but these instructions
-	 are 32 bits.
-
-	 The format of these instructions is:
-
-	 +--------------+--------------------------------+
-	 !     JALX     ! X!   Imm 20:16  !   Imm 25:21  !
-	 +--------------+--------------------------------+
-	 !	  	  Immediate  15:0		    !
-	 +-----------------------------------------------+
-
-	 JALX is the 5-bit value 00011.  X is 0 for jal, 1 for jalx.
-	 Note that the immediate value in the first word is swapped.
-
-	 When producing a relocatable object file, R_MIPS16_26 is
-	 handled mostly like R_MIPS_26.  In particular, the addend is
-	 stored as a straight 26-bit value in a 32-bit instruction.
-	 (gas makes life simpler for itself by never adjusting a
-	 R_MIPS16_26 reloc to be against a section, so the addend is
-	 always zero).  However, the 32 bit instruction is stored as 2
-	 16-bit values, rather than a single 32-bit value.  In a
-	 big-endian file, the result is the same; in a little-endian
-	 file, the two 16-bit halves of the 32 bit value are swapped.
-	 This is so that a disassembler can recognize the jal
-	 instruction.
-
-	 When doing a final link, R_MIPS16_26 is treated as a 32 bit
-	 instruction stored as two 16-bit values.  The addend A is the
-	 contents of the targ26 field.  The calculation is the same as
-	 R_MIPS_26.  When storing the calculated value, reorder the
-	 immediate value as shown above, and don't forget to store the
-	 value as two 16-bit values.
-
-	 To put it in MIPS ABI terms, the relocation field is T-targ26-16,
-	 defined as
-
-	 big-endian:
-	 +--------+----------------------+
-	 |        |                      |
-	 |        |    targ26-16         |
-	 |31    26|25                   0|
-	 +--------+----------------------+
-
-	 little-endian:
-	 +----------+------+-------------+
-	 |          |      |             |
-	 |  sub1    |      |     sub2    |
-	 |0        9|10  15|16         31|
-	 +----------+--------------------+
-	 where targ26-16 is sub1 followed by sub2 (i.e., the addend field A is
-	 ((sub1 << 16) | sub2)).
-
-	 When producing a relocatable object file, the calculation is
-	 (((A < 2) | ((P + 4) & 0xf0000000) + S) >> 2)
-	 When producing a fully linked file, the calculation is
-	 let R = (((A < 2) | ((P + 4) & 0xf0000000) + S) >> 2)
-	 ((R & 0x1f0000) << 5) | ((R & 0x3e00000) >> 5) | (R & 0xffff)  */
-
-      if (!info->relocatable)
-	/* Shuffle the bits according to the formula above.  */
-	value = (((value & 0x1f0000) << 5)
-		 | ((value & 0x3e00000) >> 5)
-		 | (value & 0xffff));
-    }
-  else if (r_type == R_MIPS16_GPREL)
-    {
-      /* R_MIPS16_GPREL is used for GP-relative addressing in mips16
-	 mode.  A typical instruction will have a format like this:
-
-	 +--------------+--------------------------------+
-	 !    EXTEND    !     Imm 10:5    !   Imm 15:11  !
-	 +--------------+--------------------------------+
-	 !    Major     !   rx   !   ry   !   Imm  4:0   !
-	 +--------------+--------------------------------+
-
-	 EXTEND is the five bit value 11110.  Major is the instruction
-	 opcode.
-
-	 This is handled exactly like R_MIPS_GPREL16, except that the
-	 addend is retrieved and stored as shown in this diagram; that
-	 is, the Imm fields above replace the V-rel16 field.
-
-         All we need to do here is shuffle the bits appropriately.  As
-	 above, the two 16-bit halves must be swapped on a
-	 little-endian system.  */
-      value = (((value & 0x7e0) << 16)
-	       | ((value & 0xf800) << 5)
-	       | (value & 0x1f));
-    }
 
   /* Set the field.  */
   x |= (value & howto->dst_mask);
@@ -3763,14 +3843,12 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
 	x = 0x04110000 | (((bfd_vma) off >> 2) & 0xffff);   /* bal addr */
     }
 
-  /* Swap the high- and low-order 16 bits on little-endian systems
-     when doing a MIPS16 relocation.  */
-  if ((r_type == R_MIPS16_GPREL || r_type == R_MIPS16_26)
-      && bfd_little_endian (input_bfd))
-    x = (((x & 0xffff) << 16) | ((x & 0xffff0000) >> 16));
-
   /* Put the value into the output.  */
   bfd_put (8 * bfd_get_reloc_size (howto), input_bfd, x, location);
+
+  _bfd_mips16_elf_reloc_shuffle(input_bfd, r_type, !info->relocatable,
+				location);
+
   return TRUE;
 }
 
@@ -6290,18 +6368,25 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    rel_hdr = elf_section_data (input_section)->rel_hdr2;
 	  if (rel_hdr->sh_entsize == MIPS_ELF_REL_SIZE (input_bfd))
 	    {
+	      bfd_byte *location = contents + rel->r_offset;
+
 	      /* Note that this is a REL relocation.  */
 	      rela_relocation_p = FALSE;
 
 	      /* Get the addend, which is stored in the input file.  */
+	      _bfd_mips16_elf_reloc_unshuffle (input_bfd, r_type, FALSE,
+					       location);
 	      addend = mips_elf_obtain_contents (howto, rel, input_bfd,
 						 contents);
+	      _bfd_mips16_elf_reloc_shuffle(input_bfd, r_type, FALSE,
+					    location);
+
 	      addend &= howto->src_mask;
 
 	      /* For some kinds of relocations, the ADDEND is a
 		 combination of the addend stored in two different
 		 relocations.   */
-	      if (r_type == R_MIPS_HI16
+	      if (r_type == R_MIPS_HI16 || r_type == R_MIPS16_HI16
 		  || (r_type == R_MIPS_GOT16
 		      && mips_elf_local_relocation_p (input_bfd, rel,
 						      local_sections, FALSE)))
@@ -6309,6 +6394,13 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  bfd_vma l;
 		  const Elf_Internal_Rela *lo16_relocation;
 		  reloc_howto_type *lo16_howto;
+		  bfd_byte *lo16_location;
+		  int lo16_type;
+
+		  if (r_type == R_MIPS16_HI16)
+		    lo16_type = R_MIPS16_LO16;
+		  else
+		    lo16_type = R_MIPS_LO16;
 
 		  /* The combined value is the sum of the HI16 addend,
 		     left-shifted by sixteen bits, and the LO16
@@ -6327,16 +6419,22 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		     as one of these.  We permit a similar extension
 		     in general, as that is useful for GCC.  */
 		  lo16_relocation = mips_elf_next_relocation (input_bfd,
-							      R_MIPS_LO16,
+							      lo16_type,
 							      rel, relend);
 		  if (lo16_relocation == NULL)
 		    return FALSE;
 
+		  lo16_location = contents + lo16_relocation->r_offset;
+
 		  /* Obtain the addend kept there.  */
 		  lo16_howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd,
-							R_MIPS_LO16, FALSE);
+							lo16_type, FALSE);
+		  _bfd_mips16_elf_reloc_unshuffle (input_bfd, lo16_type, FALSE,
+						   lo16_location);
 		  l = mips_elf_obtain_contents (lo16_howto, lo16_relocation,
 						input_bfd, contents);
+		  _bfd_mips16_elf_reloc_shuffle (input_bfd, lo16_type, FALSE,
+						 lo16_location);
 		  l &= lo16_howto->src_mask;
 		  l <<= lo16_howto->rightshift;
 		  l = _bfd_mips_elf_sign_extend (l, 16);
@@ -6345,15 +6443,6 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 		  /* Compute the combined addend.  */
 		  addend += l;
-		}
-	      else if (r_type == R_MIPS16_GPREL)
-		{
-		  /* The addend is scrambled in the object file.  See
-		     mips_elf_perform_relocation for details on the
-		     format.  */
-		  addend = (((addend & 0x1f0000) >> 5)
-			    | ((addend & 0x7e00000) >> 16)
-			    | (addend & 0x1f));
 		}
 	      else
 		addend <<= howto->rightshift;

@@ -1,3 +1,74 @@
+2005-02-15  Nigel Stephens  <nigel@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* elf32-mips.c (elf_mips16_howto_table_rel): New array for MIPS16
+	reloc howtos.  Add R_MIPS16_HI16 and R_MIPS16_LO16 relocs and
+	R_MIPS16_GOT16 and R_MIPS16_CALL16 placeholders.
+	(elf_mips16_jump_howto): Move into elf_mips16_howto_table_rel.
+	(elf_mips16_gprel_howto): Likewise.  Redefine src_mask and
+	dst_mask.
+	(mips16_gprel_reloc): Remove bit shuffling; call
+	_bfd_mips16_elf_reloc_unshuffle(), _bfd_mips_elf_gprel16_with_gp()
+	and _bfd_mips16_elf_reloc_shuffle() instead.
+	(mips16_reloc_map): New reloc map for MIPS16 relocs.
+	(bfd_elf32_bfd_reloc_type_lookup): Use mips16_reloc_map for MIPS16
+	relocs.
+	(mips_elf32_rtype_to_howto): Fetch MIPS16 howtos from
+	elf_mips16_howto_table_rel.
+	* elf64-mips.c (mips16_elf64_howto_table_rel): New array for
+	MIPS16 REL reloc howtos.  Add R_MIPS16_HI16 and R_MIPS16_LO16
+	relocs and R_MIPS16_GOT16 and R_MIPS16_CALL16 placeholders.
+	(elf_mips16_jump_howto): Move into mips16_elf64_howto_table_rel.
+	(elf_mips16_gprel_howto): Likewise.  Redefine src_mask and
+	dst_mask.
+	(mips16_elf64_howto_table_rela): New array for MIPS16 RELA
+	reloc howtos.  Add R_MIPS16_26, R_MIPS16_GPREL, R_MIPS16_HI16 and
+	R_MIPS16_LO16 relocs and R_MIPS16_GOT16 and R_MIPS16_CALL16
+	placeholders.
+	(mips16_gprel_reloc): Remove bit shuffling; call
+	_bfd_mips16_elf_reloc_unshuffle(), _bfd_mips_elf_gprel16_with_gp()
+	and _bfd_mips16_elf_reloc_shuffle() instead.
+	(mips16_reloc_map): New reloc map for MIPS16 relocs.
+	(bfd_elf64_bfd_reloc_type_lookup): Use mips16_reloc_map for MIPS16
+	relocs.
+	(mips_elf64_rtype_to_howto): Fetch MIPS16 howtos from
+	mips16_elf64_howto_table_rela or mips16_elf64_howto_table_rel.
+	* elfn32-mips.c (elf_mips16_howto_table_rel): New array for MIPS16
+	REL reloc howtos.  Add R_MIPS16_HI16 and R_MIPS16_LO16 relocs and
+	R_MIPS16_GOT16 and R_MIPS16_CALL16 placeholders.
+	(elf_mips16_jump_howto): Move into elf_mips16_howto_table_rel.
+	(elf_mips16_gprel_howto): Likewise.  Redefine src_mask and
+	dst_mask.
+	(mips16_gprel_reloc): Remove bit shuffling; call
+	_bfd_mips16_elf_reloc_unshuffle(), _bfd_mips_elf_gprel16_with_gp()
+	and _bfd_mips16_elf_reloc_shuffle() instead.
+	(mips16_reloc_map): New reloc map for MIPS16 relocs.
+	(bfd_elf32_bfd_reloc_type_lookup): Use mips16_reloc_map for MIPS16
+	relocs.
+	(mips_elf_n32_rtype_to_howto): Fetch MIPS16 howtos from
+	elf_mips16_howto_table_rela or elf_mips16_howto_table_rel.
+	* elfxx-mips.c (_bfd_mips16_elf_reloc_unshuffle): New function to
+	handle bit shuffling for MIPS16 relocs.
+	(_bfd_mips16_elf_reloc_shuffle): Likewise.
+	(_bfd_mips_elf_lo16_reloc): Use _bfd_mips16_elf_reloc_unshuffle()
+	and _bfd_mips16_elf_reloc_shuffle().
+	(_bfd_mips_elf_generic_reloc): Likewise.
+	(mips_elf_calculate_relocation): Likewise.  Handle R_MIPS16_HI16
+	and R_MIPS16_LO16.
+	(mips_elf_obtain_contents): Remove bit shuffling.
+	(mips_elf_perform_relocation): Likewise; call
+	_bfd_mips16_elf_reloc_unshuffle() and _bfd_mips16_elf_reloc_shuffle()
+	instead.
+	(_bfd_mips_elf_relocate_section): Likewise.  Handle R_MIPS16_HI16
+	and R_MIPS16_LO16.
+	* elfxx-mips.h (_bfd_mips16_elf_reloc_unshuffle): Declare.
+	(_bfd_mips16_elf_reloc_shuffle): Likewise.
+	* reloc.c (BFD_RELOC_MIPS16_HI16): New reloc.
+	(BFD_RELOC_MIPS16_HI16_S): Likewise.
+	(BFD_RELOC_MIPS16_LO16): Likewise.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2005-02-15  Jan Beulich  <jbeulich@novell.com>
 
 	* elfxx-ia64.c (ia64_howto_table): Correct strings for

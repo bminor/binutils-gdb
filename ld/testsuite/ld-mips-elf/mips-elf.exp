@@ -94,3 +94,8 @@ run_dump_test "jaloverflow-2"
 if {$has_newabi} {
     run_dump_test "jalbal"
 }
+
+run_dump_test "mips16-hilo"
+if {$has_newabi} {
+    run_dump_test "mips16-hilo-n32"
+}
