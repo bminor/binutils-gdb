@@ -1,3 +1,9 @@
+Wed Jul  5 00:12:11 1995  Fred Fish  (fnf@cygnus.com)
+
+	* ldmain.c (HAVE_SBRK):  Define for everything except
+	specific systems that are known to not support sbrk.
+	(main):  Use HAVE_SBRK to decide whether or not to use sbrk.
+
 Tue Jul  4 12:55:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_find_exp_assignment):

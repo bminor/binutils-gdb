@@ -46,6 +46,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <string.h>
 
+/* Use sbrk() except on specific OS types */
+#if !defined(__amigados__) && !defined(WINDOWS_NT)
+#define HAVE_SBRK
+#endif
+
 static char *get_emulation PARAMS ((int, char **));
 static void set_scripts_dir PARAMS ((void));
 
@@ -346,14 +351,14 @@ main (argc, argv)
   if (config.stats)
     {
       extern char **environ;
-#ifndef WINDOWS_NT  /* no sbrk with NT */
+#ifdef HAVE_SBRK
       char *lim = (char *) sbrk (0);
 #endif
       long run_time = get_run_time () - start_time;
 
       fprintf (stderr, "%s: total time in link: %ld.%06ld\n",
 	       program_name, run_time / 1000000, run_time % 1000000);
-#ifndef WINDOWS_NT
+#ifdef HAVE_SBRK
       fprintf (stderr, "%s: data size %ld\n", program_name,
 	       (long) (lim - (char *) &environ));
 #endif
