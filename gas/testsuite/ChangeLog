@@ -1,3 +1,34 @@
+start-sanitize-d30v
+Tue Sep 16 15:27:08 1997  Ken Raeburn  <raeburn@cygnus.com>
+
+	Merge changes from Martin Hunt:
+
+	* gas/d30v/inst.s: Add some new tests. 
+
+ 	* gas/d30v/{inst, opt, reloc}.d: Update results with
+ 	new disassembler changes.
+
+	* gas/d30v/inst.[sd]: Update examples for d*i instructions. 
+
+	* gas/d30v/*.d: Update all test results because
+ 	of new ".s" and ".l" extensions.
+
+	* gas/d30v/inst.[sd]: Correct entry for mulx2h.
+	* gas/d30v/opt.[sd]: Correct st2w instruction. 
+
+	* gas/d30v/align.d: Change expected output.
+
+	* gas/d30v/reloc.[sd]: Add test case. 
+
+	* gas/d30v/array.[sd]: New test case.
+
+	* gas/d30v/opt.[sd]: Added more test cases. 
+
+	* gas/d30v/opt.s: Add test cases.
+	* gas/d30v/reloc.s: Fix a test case.	
+	* gas/d30v/{opt,reloc}.d: Regenerate.
+
+end-sanitize-d30v
 start-sanitize-tx19
 Mon Sep 15 17:29:08 1997  Gavin Koch  <gavin@cygnus.com>
 
