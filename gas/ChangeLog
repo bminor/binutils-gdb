@@ -1,3 +1,9 @@
+2000-02-23  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-i386.c (md_assemble): When swapping operands for
+	intel_syntax, assume everything that's not Imm or Disp is a
+	register.
+
 2000-02-23  Linas Vepstas <linas@linas.org>
 
 	* config/tc-i370.c, config/tc-i370.h: New files.

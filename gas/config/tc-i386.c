@@ -1298,21 +1298,16 @@ md_assemble (line)
 	if (i.operands > 1)
 	  {
 	    temp_type = i.types[xchg2];
-	    if (temp_type & (Reg | FloatReg))
-	      temp_reg = i.regs[xchg2];
-	    else if (temp_type & Imm)
+	    if (temp_type & Imm)
 	      temp_imm = i.imms[xchg2];
 	    else if (temp_type & Disp)
 	      temp_disp = i.disps[xchg2];
+	    else
+	      temp_reg = i.regs[xchg2];
 
 	    i.types[xchg2] = i.types[xchg1];
 
-	    if (i.types[xchg1] & (Reg | FloatReg))
-	      {
-		i.regs[xchg2] = i.regs[xchg1];
-		i.regs[xchg1] = NULL;
-	      }
-	    else if (i.types[xchg2] & Imm)
+	    if (i.types[xchg2] & Imm)
 	      {
 		i.imms[xchg2] = i.imms[xchg1];
 		i.imms[xchg1] = NULL;
@@ -1322,14 +1317,13 @@ md_assemble (line)
 		i.disps[xchg2] = i.disps[xchg1];
 		i.disps[xchg1] = NULL;
 	      }
-
-	    if (temp_type & (Reg | FloatReg))
+	    else
 	      {
-		i.regs[xchg1] = temp_reg;
-		if (! (i.types[xchg1] & (Reg | FloatReg)))
-		  i.regs[xchg2] = NULL;
+		i.regs[xchg2] = i.regs[xchg1];
+		i.regs[xchg1] = NULL;
 	      }
-	    else if (temp_type & Imm)
+
+	    if (temp_type & Imm)
 	      {
 		i.imms[xchg1] = temp_imm;
 		if (! (i.types[xchg1] & Imm))
@@ -1340,6 +1334,12 @@ md_assemble (line)
 		i.disps[xchg1] = temp_disp;
 		if (! (i.types[xchg1] & Disp))
 		  i.disps[xchg2] = NULL;
+	      }
+	    else
+	      {
+		i.regs[xchg1] = temp_reg;
+		if (i.types[xchg1] & (Imm | Disp))
+		  i.regs[xchg2] = NULL;
 	      }
 
 	    i.types[xchg1] = temp_type;
