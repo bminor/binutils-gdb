@@ -1,3 +1,9 @@
+Mon Jan 20 12:48:57 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* m68k-dis.c: Include <libiberty.h>.
+	(print_insn_m68k): Sort the opcode table on the most significant
+	nibble of the opcode.
+
 start-sanitize-tic80
 Sat Jan 18 15:15:05 1997  Fred Fish  <fnf@cygnus.com>
 

@@ -1,5 +1,6 @@
 /* Print Motorola 68k instructions.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 1997
+   Free Software Foundation, Inc.
 
 This file is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,6 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "dis-asm.h"
 #include "floatformat.h"
+#include <libiberty.h>
 
 #include "opcode/m68k.h"
 
@@ -76,13 +78,13 @@ union number {
 };
 
 #define NEXTSINGLE(val, p) \
-  { int i; union number u;\
+  { unsigned int i; union number u;\
     FETCH_DATA (info, p + sizeof (float));\
     for (i = 0; i < sizeof(float); i++) u.c[i] = *p++; \
     val = u.f; }
 
 #define NEXTDOUBLE(val, p) \
-  { int i; union number u;\
+  { unsigned int i; union number u;\
     FETCH_DATA (info, p + sizeof (double));\
     for (i = 0; i < sizeof(double); i++) u.c[i] = *p++; \
     val = u.d; }
@@ -178,6 +180,36 @@ print_insn_m68k (memaddr, info)
   fprintf_ftype save_printer = info->fprintf_func;
   void (*save_print_address) PARAMS((bfd_vma, struct disassemble_info*))
     = info->print_address_func;
+  int major_opcode;
+  static int numopcodes[16];
+  static const struct m68k_opcode **opcodes[16];
+
+  if (!opcodes[0])
+    {
+      /* Speed up the matching by sorting the opcode table on the upper
+	 four bits of the opcode.  */
+      const struct m68k_opcode **opc_pointer[16];
+
+      /* First count how many opcodes are in each of the sixteen buckets.  */
+      for (i = 0; i < m68k_numopcodes; i++)
+	numopcodes[(m68k_opcodes[i].opcode >> 28) & 15]++;
+
+      /* Then create a sorted table of pointers that point into the
+	 unsorted table.  */
+      opc_pointer[0] = ((const struct m68k_opcode **)
+			xmalloc (sizeof (struct m68k_opcode *)
+				 * m68k_numopcodes));
+      opcodes[0] = opc_pointer[0];
+      for (i = 1; i < 16; i++)
+	{
+	  opc_pointer[i] = opc_pointer[i - 1] + numopcodes[i - 1];
+	  opcodes[i] = opc_pointer[i];
+	}
+
+      for (i = 0; i < m68k_numopcodes; i++)
+	*opc_pointer[(m68k_opcodes[i].opcode >> 28) & 15]++ = &m68k_opcodes[i];
+
+    }
 
   info->private_data = (PTR) &priv;
   priv.max_fetched = priv.the_buffer;
@@ -188,9 +220,10 @@ print_insn_m68k (memaddr, info)
 
   bestmask = 0;
   FETCH_DATA (info, buffer + 2);
-  for (i = 0; i < m68k_numopcodes; i++)
+  major_opcode = (buffer[0] >> 4) & 15;
+  for (i = 0; i < numopcodes[major_opcode]; i++)
     {
-      const struct m68k_opcode *opc = &m68k_opcodes[i];
+      const struct m68k_opcode *opc = opcodes[major_opcode][i];
       unsigned long opcode = opc->opcode;
       unsigned long match = opc->match;
 
@@ -214,12 +247,29 @@ print_insn_m68k (memaddr, info)
 	  /* Don't use for printout the variants of most floating
 	     point coprocessor instructions which use the same
 	     register number in two places, as above. */
-	  if (*d == 0)
+	  if (*d == '\0')
 	    for (d = opc->args; *d; d += 2)
 	      if (d[1] == 't')
 		break;
 
-	  if (*d == 0 && match > bestmask)
+	  /* Don't match fmovel with more than one register; wait for
+             fmoveml.  */
+	  if (*d == '\0')
+	    {
+	      for (d = opc->args; *d; d += 2)
+		{
+		  if (d[0] == 's' && d[1] == '8')
+		    {
+		      int val;
+
+		      val = fetch_arg (buffer, d[1], 3, info);
+		      if ((val & (val - 1)) != 0)
+			break;
+		    }
+		}
+	    }
+
+	  if (*d == '\0' && match > bestmask)
 	    {
 	      best = opc;
 	      bestmask = match;
@@ -591,6 +641,8 @@ print_insn_arg (d, buffer, p0, addr, info)
     case '&':
     case '`':
     case '|':
+    case '<':
+    case '>':
 
       if (place == 'd')
 	{
@@ -784,6 +836,13 @@ print_insn_arg (d, buffer, p0, addr, info)
 		  if (regno > first_regno)
 		    (*info->fprintf_func) (info->stream, "-%%fp%d", regno);
 		}
+	  }
+	else if (place == '8')
+	  {
+	    /* fmoveml for FP status registers */
+	    (*info->fprintf_func) (info->stream, "%s",
+				   fpcr_names[fetch_arg (buffer, place, 3,
+							 info)]);
 	  }
 	else
 	  return -2;
