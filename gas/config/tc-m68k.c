@@ -4067,7 +4067,7 @@ md_assemble (char *str)
   shorts_this_frag = 0;
   if (n)
     {
-      toP = frag_more (n * sizeof (short));
+      toP = frag_more (n * 2);
       while (n--)
 	{
 	  md_number_to_chars (toP, (long) (*fromP), 2);

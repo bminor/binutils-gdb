@@ -23,6 +23,7 @@
 	* config/tc-i960.c (md_number_to_field): Warning fix.
 	(md_ri_to_chars): Use host byte order.
 	(get_cdisp, md_apply_fix3): Warning fix.
+	* config/tc-m68k.c (md_assemble): Don't use sizeof host short.
 
 2005-02-28  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
 
