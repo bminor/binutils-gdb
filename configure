@@ -111,7 +111,7 @@ case "${progname}" in
         ;;
 esac
 
-for arg in $*;
+for arg in $*
 do
         # handle things that might have args following as separate words
         if [ -n "${next_prefix}" ] ; then prefix=${arg} ; prefixoption="-prefix=${prefix}" ; next_prefix=
