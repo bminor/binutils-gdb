@@ -1,3 +1,8 @@
+Tue Jun  4 10:55:16 1996  Tom Tromey  <tromey@csk3.cygnus.com>
+
+	* Makefile.in (install): Don't check to see if tooldir exists.
+	Make $(tooldir) and $(tooldir)/bin.
+
 Tue Jun  4 10:14:53 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/ppc-sol.mt (TDEFINES): Don't turn on -mregnames by

@@ -1,3 +1,7 @@
+Tue Jun  4 12:12:25 1996  Tom Tromey  <tromey@csk3.cygnus.com>
+
+	* Makefile.in (install): Make $(tooldir) and $(tooldir)/bin.
+
 Fri May 31 12:40:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/pe.em (sort_sections): Don't assume that a
