@@ -1,3 +1,9 @@
+Wed Apr 26 18:26:21 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* srconv.c (main): Add support for -n option which disables
+	prescan of common symbols.
+	(wr_ob): If reading past the end of a section, fill with zeros.
+
 Tue Apr 25 19:14:37 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* objdump.c (dump_section_header): Display load address after
