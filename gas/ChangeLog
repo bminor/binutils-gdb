@@ -1,3 +1,22 @@
+Sun Dec 26 14:31:47 1993  Torbjorn Granlund  (tege@adder.cygnus.com)
+
+	* tc-hppa.c (pre_defined_registers): Convert to lower case.
+	Delete spurious register names "%r4L", etc.
+	(selector_table): Sort and convert to lower case.
+	(cons_fix_new_hppa): `reloc_type' => `rel_type'.
+	(pa_ip): Always use strcmp for non-text and strcasecmp for text.
+	(reg_name_search): Rewrite to call strcasecmp only once per
+	iteration.
+	(pa_chk_field_selector): Rewrite to use binary search.
+	(pa_parse_neg_add_cmpltr): Use strcasecmp for completer comparisons.
+	(pa_parse_space_stmt): $TEXT$ and $PRIVATE$ are symbols; use case
+	sensitive comparisons.
+	(pa_parse_space_stmt): Canonicalize strncasecmp arg to lower case.
+	(pa_space): "$text$" => "$TEXT$"; "$private$" => "$PRIVATE$".  Use
+	case sensitive comparison for all symbolic names.
+	(pa_subspace): Canonicalize strncasecmp arg to lower case.
+	(pa_subspace_start): Use case sensitive comparison for symbolic names.
+
 Mon Dec 20 10:37:48 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* write.c (adjust_reloc_syms) [RELOC_REQUIRES_SYMBOL]: If no
