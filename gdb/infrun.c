@@ -1005,6 +1005,11 @@ wait_for_inferior ()
 	     if we took it away.  */
 	  else if (printed)
 	    target_terminal_inferior ();
+
+	  /* Note that virtually all the code below does `if !random_signal'.
+	     Perhaps this code should end with a goto or continue.  At least
+	     one (now fixed) bug was caused by this -- a !random_signal was
+	     missing in one of the tests below.  */
 	}
       
       /* Handle cases caused by hitting a breakpoint.  */
@@ -1066,7 +1071,8 @@ wait_for_inferior ()
       
       /* If this is the breakpoint at the end of a stack dummy,
 	 just stop silently.  */
-      if (PC_IN_CALL_DUMMY (stop_pc, stop_sp, stop_frame_address))
+      if (!random_signal 
+	 && PC_IN_CALL_DUMMY (stop_pc, stop_sp, stop_frame_address))
 	  {
 	    stop_print_frame = 0;
 	    stop_stack_dummy = 1;
