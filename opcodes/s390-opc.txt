@@ -452,6 +452,7 @@ e30000000081 og RXE "or 64" esame
 e30000000082 xg RXE "exclusive or 64" esame
 e30000000004 lg RXE "load 64" esame
 e30000000014 lgf RXE "load 64<32" esame
+e30000000015 lgh RXE "load halfword 64" esame
 e30000000020 cg RXE "compare 64" esame
 e30000000030 cgf RXE "compare 64<32" esame
 e30000000008 ag RXE "add 64" esame

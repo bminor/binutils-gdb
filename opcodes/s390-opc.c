@@ -470,6 +470,7 @@ const struct s390_opcode s390_opcodes[] =
   { "agf",   OP48(0xe30000000018LL), MASK_RXE, INSTR_RXE, 2},
   { "llgt",  OP48(0xe30000000017LL), MASK_RXE, INSTR_RXE, 2},
   { "llgf",  OP48(0xe30000000016LL), MASK_RXE, INSTR_RXE, 2},
+  { "lgh",   OP48(0xe30000000015LL), MASK_RXE, INSTR_RXE, 2},
   { "lgf",   OP48(0xe30000000014LL), MASK_RXE, INSTR_RXE, 2},
   { "lrvg",  OP48(0xe3000000000fLL), MASK_RXE, INSTR_RXE, 2},
   { "cvbg",  OP48(0xe3000000000eLL), MASK_RXE, INSTR_RXE, 2},

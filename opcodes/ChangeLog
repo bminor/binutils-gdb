@@ -1,3 +1,8 @@
+2001-06-12  Martin Schwidefsky <schwidefsky@de.ibm.com>
+
+	* s390-opc.c: Add lgh instruction.
+	* s390-opc.txt: Likewise.
+
 2001-06-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* i386-dis.c: Group function prototypes in one place.
