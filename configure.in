@@ -535,6 +535,13 @@ case "${target}" in
     ;;
 esac
 
+# If we aren't building newlib, then don't build libgloss, since libgloss
+# depends upon some newlib header files.
+case "${noconfigdirs}" in
+  *target-libgloss*) ;;
+  *target-newlib*) noconfigdirs="$noconfigdirs target-libgloss" ;;
+esac
+
 # If we are building a Canadian Cross, discard tools that can not be built
 # using a cross compiler.  FIXME: These tools should be fixed.
 if [ "${build}" != "${host}" ]; then
