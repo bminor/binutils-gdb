@@ -1,5 +1,13 @@
 2002-03-02  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips.igen (loadstore_ea): New function to do effective
+	address calculations.
+	(do_load, do_load_left, do_load_right, LL, LDD, PREF, do_store,
+	do_store_left, do_store_right, SC, SCD, PREFX, SWC1, SWXC1,
+	CACHE): Use loadstore_ea to do effective address computations.
+
+2002-03-02  Chris Demetriou  <cgd@broadcom.com>
+
 	* interp.c (load_word): Use EXTEND32 rather than SIGNEXTEND.
 	* mips.igen (LL, CxC1, MxC1): Likewise.
 

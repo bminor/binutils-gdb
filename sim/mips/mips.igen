@@ -109,6 +109,26 @@
   return CIA + 8;
 }
 
+
+// Helper:
+//
+// Calculate an effective address given a base and an offset.
+//
+
+:function:::address_word:loadstore_ea:address_word base, address_word offset
+*mipsI:
+*mipsII:
+*mipsIII:
+*mipsIV:
+*mipsV:
+*vr4100:
+*vr5000:
+*r3900:
+{
+  return base + offset;
+}
+
+
 // Helper:
 // 
 // Check that an access to a HI/LO register meets timing requirements
@@ -1469,7 +1489,7 @@
   unsigned64 memval;
   address_word vaddr;
 
-  vaddr = base + offset;
+  vaddr = loadstore_ea (SD_, base, offset);
   if ((vaddr & access) != 0)
     {
       SIM_CORE_SIGNAL (SD, STATE_CPU (SD, 0), cia, read_map, access+1, vaddr, read_transfer, sim_core_unaligned_signal);
@@ -1497,7 +1517,7 @@
   unsigned_word lhs_mask;
   unsigned_word temp;
 
-  vaddr = base + offset;
+  vaddr = loadstore_ea (SD_, base, offset);
   AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &uncached, isTARGET, isREAL);
   paddr = (paddr ^ (reverseendian & mask));
   if (BigEndianMem == 0)
@@ -1548,7 +1568,7 @@
   unsigned64 memval;
   address_word vaddr;
 
-  vaddr = base + offset;
+  vaddr = loadstore_ea (SD_, base, offset);
   AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &uncached, isTARGET, isREAL);
   /* NOTE: SPEC is wrong, has `BigEndianMem == 0' not `BigEndianMem != 0' */
   paddr = (paddr ^ (reverseendian & mask));
@@ -1695,7 +1715,7 @@
   address_word base = GPR[BASE];
   address_word offset = EXTEND16 (OFFSET);
   {
-    address_word vaddr = ((unsigned64)base + offset);
+    address_word vaddr = loadstore_ea (SD_, base, offset);
     address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
@@ -1736,7 +1756,7 @@
   address_word offset = EXTEND16 (OFFSET);
   check_u64 (SD_, instruction_0);
   {
-    address_word vaddr = ((unsigned64)base + offset);
+    address_word vaddr = loadstore_ea (SD_, base, offset);
     address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
@@ -2103,7 +2123,7 @@
   address_word base = GPR[BASE];
   address_word offset = EXTEND16 (OFFSET);
   {
-    address_word vaddr = ((unsigned64)base + offset);
+    address_word vaddr = loadstore_ea (SD_, base, offset);
     address_word paddr;
     int uncached;
     {
@@ -2125,7 +2145,7 @@
   unsigned64 memval;
   address_word vaddr;
 
-  vaddr = base + offset;
+  vaddr = loadstore_ea (SD_, base, offset);
   if ((vaddr & access) != 0)
     {
       SIM_CORE_SIGNAL (SD, STATE_CPU(SD, 0), cia, read_map, access+1, vaddr, write_transfer, sim_core_unaligned_signal);
@@ -2151,7 +2171,7 @@
   int nr_lhs_bits;
   int nr_rhs_bits;
 
-  vaddr = base + offset;
+  vaddr = loadstore_ea (SD_, base, offset);
   AddressTranslation (vaddr, isDATA, isSTORE, &paddr, &uncached, isTARGET, isREAL);
   paddr = (paddr ^ (reverseendian & mask));
   if (BigEndianMem == 0)
@@ -2193,7 +2213,7 @@
   unsigned64 memval;
   address_word vaddr;
 
-  vaddr = base + offset;
+  vaddr = loadstore_ea (SD_, base, offset);
   AddressTranslation (vaddr, isDATA, isSTORE, &paddr, &uncached, isTARGET, isREAL);
   paddr = (paddr ^ (reverseendian & mask));
   if (BigEndianMem != 0)
@@ -2232,7 +2252,7 @@
   address_word base = GPR[BASE];
   address_word offset = EXTEND16 (OFFSET);
   {
-    address_word vaddr = ((unsigned64)base + offset);
+    address_word vaddr = loadstore_ea (SD_, base, offset);
     address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
@@ -2273,7 +2293,7 @@
   address_word offset = EXTEND16 (OFFSET);
   check_u64 (SD_, instruction_0);
   {
-    address_word vaddr = ((unsigned64)base + offset);
+    address_word vaddr = loadstore_ea (SD_, base, offset);
     address_word paddr;
     int uncached;
     if ((vaddr & 7) != 0)
@@ -3889,7 +3909,7 @@
   address_word base = GPR[BASE];
   address_word index = GPR[INDEX];
   {
-    address_word vaddr = ((unsigned64)base + (unsigned64)index);
+    address_word vaddr = loadstore_ea (SD_, base, index);
     address_word paddr;
     int uncached;
     if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
@@ -4054,10 +4074,11 @@
 *vr5000:
 *r3900:
 {
-  signed_word offset = EXTEND16 (OFFSET);
+  address_word base = GPR[BASE];
+  address_word offset = EXTEND16 (OFFSET);
   check_fpu(SD_);
   {
-    address_word vaddr = ((uword64)GPR[BASE] + offset);
+    address_word vaddr = loadstore_ea (SD_, base, offset);
     address_word paddr;
     int uncached;
     if ((vaddr & 3) != 0)
@@ -4096,7 +4117,7 @@
   check_fpu(SD_);
   check_u64 (SD_, instruction_0);
   {
-   address_word vaddr = ((unsigned64)base + index);
+   address_word vaddr = loadstore_ea (SD_, base, index);
    address_word paddr;
    int uncached;
    if ((vaddr & 3) != 0)
@@ -4234,7 +4255,7 @@
   address_word base = GPR[BASE];
   address_word offset = EXTEND16 (OFFSET);
   {
-    address_word vaddr = (base + offset);
+    address_word vaddr = loadstore_ea (SD_, base, offset);
     address_word paddr;
     int uncached;
     if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
