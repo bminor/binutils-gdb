@@ -1807,7 +1807,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
      as the return register while normal code uses "rp".  */
   if (u->Millicode)
     {
-      if (trad_frame_addr_p (cache->saved_regs, HPPA_RP_REGNUM))
+      if (trad_frame_addr_p (cache->saved_regs, 31))
         cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM] = cache->saved_regs[31];
       else
 	{

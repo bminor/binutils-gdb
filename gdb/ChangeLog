@@ -1,5 +1,10 @@
 2004-05-18  Randolph Chung  <tausq@debian.org>
 
+	* hppa-tdep.c (hppa_frame_cache): Check for validity of r31 for
+	millicode functions.
+
+2004-05-18  Randolph Chung  <tausq@debian.org>
+
 	* somsolib.c (som_solib_remove_inferior_hook): Make all the size
 	references to dld_flags_buffer consistent.
 
