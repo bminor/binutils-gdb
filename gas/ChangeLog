@@ -1,3 +1,8 @@
+2004-12-07  Ben Elliston  <bje@gnu.org>
+
+	* read.c (s_align): Use an align_limit temporary to allay a GCC
+	signed/unsigned comparison warning.
+
 2004-12-01  Mark Mitchell  <mark@codesourcery.com>
 
 	* Makefile.am (TARG_ENV_HFILES): Add te-armlinuxeabi.h.

@@ -1204,6 +1204,7 @@ do_align (int n, char *fill, int len, int max)
 static void
 s_align (int arg, int bytes_p)
 {
+  unsigned int align_limit = ALIGN_LIMIT;
   unsigned int align;
   char *stop = NULL;
   char stopc;
@@ -1243,9 +1244,9 @@ s_align (int arg, int bytes_p)
 	}
     }
 
-  if (align > ALIGN_LIMIT)
+  if (align > align_limit)
     {
-      align = ALIGN_LIMIT;
+      align = align_limit;
       as_warn (_("alignment too large: %u assumed"), align);
     }
 
