@@ -18,17 +18,16 @@
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
-This directory contains the source code to the program PSIM that
-implements a model of a PowerPC platform.  PSIM can either be built
-standalone or as part of the debugger GDB.
+This directory contains the source code to the program PSIM.
 
 
 What is PSIM?
 
-	PSIM is an ANSI C program that can be configured to model
-	various PowerPC platforms.
+	PSIM is an ANSI C program that implements an instruction
+	level model of the PowerPC architecture.
 
-	The platform that is modeled can vary from:
+	It can be configured to model various PowerPC platforms
+	and include:
 
 		o	A user program environment (UEA) complete
 			with emulated system calls
@@ -39,70 +38,9 @@ What is PSIM?
 			interacting with each other and various
 			modeled hardware devices.
 
+	For each of these models PSIM is able perform a detailed
+	analysis of the machines performance.
 
-Is the source code available?
-
-	Yes.
-
-	The source code to PSIM is available under the terms of
-	the GNU Public Licence.  This allows you to distribute
-	the source code for free but with certain conditions.
-
-
-What motivated PSIM?
-
-	As an idea, psim was first discussed seriously during mid
-	1994.  At that time its main objectives were:
-
-
-		o	good performance
-
-			Many simulators loose out by only providing
-			a binary interface to the internals.  This
-			inteface eventually becomming a bottle neck
-			in the simulators performance.
-
-			It was intended that PSIM would avoid this
-			problem by giving the user access to the
-			full source code.
-
-			Further, by exploiting the power of modern
-			compilers it was hoped that PSIM would achieve
-			good performance with out having to compromize
-			its internal design.
-
-
-		o	practical portability
-
-			Rather than try to be portable to every
-			C compiler on every platform, it was decided
-			that PSIM would restrict its self to suporting
-			ANSI compilers that included the extension
-			of a long long type.
-
-			GCC is one such compiler, consequenly PSIM
-			should be portable to any machine running GCC.
-
-
-		o	flexability in its design
-
-			PSIM should allow the user to select the
-			features required and customize the build
-			accordingly.  By having the source code,
-			the compler is able to eliminate any un
-			used features of the simulator.
-
-			After all, let the compiler do the work.
-
-
-		o	SMP
-
-			A model that allowed the simulation of
-			SMP platforms with out the large overhead
-			often encountered with such models.
-
-
-	PSIM achieves each of these objectives.
 
 
 Who would be interested in PSIM?
@@ -201,37 +139,304 @@ What features does PSIM have?
 		of new hardware devices so that they can be
 		included in a custom hardware model.
 
-	Emulation
+	OS-Emulation
 
-		PSIM is able (UEA) to emulate UNIX calls
-		based on NetBSD abi through to (preliminary)
-		the ROM rom calls found in common firmware
-		(OpenBoot and BUGAPI).
+		PSIM's UEA model includes emulation for UNIX system
+		calls.
+
+		PSIM's OEA model includes emulation of either:
+
+			o	OpenBoot client interface
+
+			o	MOTO's BUG interface.
+
 
 	Floating point
 
 		Preliminary suport for floating point is included.
-		Real kernels don't need floating point.
 
 
-Is PSIM CHRP Compliant?
+
+What performance analysis measurements can PSIM perform?
+
+	Below is the output from a recent analysis run
+	(contributed by Michael Meissner):
+
+	For the following program:
+
+	long
+	simple_rand ()
+	{
+	  static unsigned long seed = 47114711;
+	  unsigned long this = seed * 1103515245 + 12345;
+	  seed = this;
+	  return this >> 8;
+	}
+
+	unsigned long int
+	random_bitstring ()
+	{
+	  unsigned long int x;
+	  int ran, n_bits;
+	  int tot_bits = 0;
+
+	  x = 0;
+	  for (;;)
+	    {
+	      ran = simple_rand ();
+	      n_bits = (ran >> 1) % 16;
+	      tot_bits += n_bits;
+
+	      if (n_bits == 0)
+		return x;
+	      else
+		{
+		  x <<= n_bits;
+		  if (ran & 1)
+		    x |= (1 << n_bits) - 1;
+
+		  if (tot_bits > 8 * sizeof (long) + 6)
+		    return x;
+		}
+	    }
+	}
+
+	#define ABS(x) ((x) >= 0 ? (x) : -(x))
+
+	main ()
+	{
+	  int i;
+
+	  for (i = 0; i < 50000; i++)
+	    {
+	      unsigned long x, y;
+	      x = random_bitstring ();
+	      y = random_bitstring ();
+
+	      if (sizeof (int) == sizeof (long))
+		goto save_time;
+
+	      { unsigned long xx = x, yy = y, r1, r2;
+		if (yy == 0) continue;
+		r1 = xx / yy;
+		r2 = xx % yy;
+		if (r2 >= yy || r1 * yy + r2 != xx)
+		  abort ();
+	      }
+	      { signed long xx = x, yy = y, r1, r2;
+		if ((unsigned long) xx << 1 == 0 && yy == -1)
+		  continue;
+		r1 = xx / yy;
+		r2 = xx % yy;
+		if (ABS (r2) >= (unsigned long) ABS (yy) || (signed long) (r1 * yy + r2) != xx)
+		  abort ();
+	      }
+	    save_time:
+	      { unsigned int xx = x, yy = y, r1, r2;
+		if (yy == 0) continue;
+		r1 = xx / yy;
+		r2 = xx % yy;
+		if (r2 >= yy || r1 * yy + r2 != xx)
+		  abort ();
+	      }
+	      { signed int xx = x, yy = y, r1, r2;
+		if ((unsigned int) xx << 1 == 0 && yy == -1)
+		  continue;
+		r1 = xx / yy;
+		r2 = xx % yy;
+		if (ABS (r2) >= (unsigned int) ABS (yy) || (signed int) (r1 * yy + r2) != xx)
+		  abort ();
+	      }
+	      { unsigned short xx = x, yy = y, r1, r2;
+		if (yy == 0) continue;
+		r1 = xx / yy;
+		r2 = xx % yy;
+		if (r2 >= yy || r1 * yy + r2 != xx)
+		  abort ();
+	      }
+	      { signed short xx = x, yy = y, r1, r2;
+		r1 = xx / yy;
+		r2 = xx % yy;
+		if (ABS (r2) >= (unsigned short) ABS (yy) || (signed short) (r1 * yy + r2) != xx)
+		  abort ();
+	      }
+	      { unsigned char xx = x, yy = y, r1, r2;
+		if (yy == 0) continue;
+		r1 = xx / yy;
+		r2 = xx % yy;
+		if (r2 >= yy || r1 * yy + r2 != xx)
+		  abort ();
+	      }
+	      { signed char xx = x, yy = y, r1, r2;
+		r1 = xx / yy;
+		r2 = xx % yy;
+		if (ABS (r2) >= (unsigned char) ABS (yy) || (signed char) (r1 * yy + r2) != xx)
+		  abort ();
+	      }
+	    }
+
+	  exit (0);
+	}
+
+	Here is the current output generated with the -I switch on a 90 Mhz
+	pentium (the compiler used is the devlopment version of GCC with a new
+	scheduler replacing the old one):
+	
+	CPU #1 executed     41,994 AND instructions.
+	CPU #1 executed    519,785 AND Immediate instructions.
+	CPU #1 executed    680,058 Add instructions.
+	CPU #1 executed     41,994 Add Extended instructions.
+	CPU #1 executed    921,916 Add Immediate instructions.
+	CPU #1 executed    221,199 Add Immediate Carrying instructions.
+	CPU #1 executed    943,823 Add Immediate Shifted instructions.
+	CPU #1 executed    471,909 Add to Zero Extended instructions.
+	CPU #1 executed    571,915 Branch instructions.
+	CPU #1 executed  1,992,403 Branch Conditional instructions.
+	CPU #1 executed    571,910 Branch Conditional to Link Register instructions.
+	CPU #1 executed    320,431 Compare instructions.
+	CPU #1 executed    471,911 Compare Immediate instructions.
+	CPU #1 executed    145,867 Compare Logical instructions.
+	CPU #1 executed    442,414 Compare Logical Immediate instructions.
+	CPU #1 executed          1 Condition Register XOR instruction.
+	CPU #1 executed    103,873 Divide Word instructions.
+	CPU #1 executed    104,275 Divide Word Unsigned instructions.
+	CPU #1 executed    132,510 Extend Sign Byte instructions.
+	CPU #1 executed    178,895 Extend Sign Half Word instructions.
+	CPU #1 executed    871,920 Load Word and Zero instructions.
+	CPU #1 executed     41,994 Move From Condition Register instructions.
+	CPU #1 executed    100,005 Move from Special Purpose Register instructions.
+	CPU #1 executed    100,002 Move to Special Purpose Register instructions.
+	CPU #1 executed    804,619 Multiply Low Word instructions.
+	CPU #1 executed    421,201 OR instructions.
+	CPU #1 executed    471,910 OR Immediate instructions.
+	CPU #1 executed  1,292,020 Rotate Left Word Immediate then AND with Mask instructions.
+	CPU #1 executed    663,613 Shift Left Word instructions.
+	CPU #1 executed  1,151,564 Shift Right Algebraic Word Immediate instructions.
+	CPU #1 executed    871,922 Store Word instructions.
+	CPU #1 executed    100,004 Store Word with Update instructions.
+	CPU #1 executed    887,804 Subtract From instructions.
+	CPU #1 executed     83,988 Subtract From Immediate Carrying instructions.
+	CPU #1 executed          1 System Call instruction.
+	CPU #1 executed    207,746 XOR instructions.
+	
+	CPU #1 executed 23,740,856 cycles.
+	CPU #1 executed 10,242,780 stalls waiting for data.
+	CPU #1 executed          1 stall waiting for a function unit.
+	CPU #1 executed          1 stall waiting for serialization.
+	CPU #1 executed  1,757,900 times a writeback slot was unavilable.
+	CPU #1 executed  1,088,135 branches.
+	CPU #1 executed  2,048,093 conditional branches fell through.
+	CPU #1 executed  1,088,135 successful branch predictions.
+	CPU #1 executed    904,268 unsuccessful branch predictions.
+	CPU #1 executed    742,557 branch if the condition is FALSE conditional branches.
+	CPU #1 executed  1,249,846 branch if the condition is TRUE conditional branches.
+	CPU #1 executed    571,910 branch always conditional branches.
+	CPU #1 executed  9,493,653 1st single cycle integer functional unit instructions.
+	CPU #1 executed  1,220,900 2nd single cycle integer functional unit instructions.
+	CPU #1 executed  1,254,768 multiple cycle integer functional unit instructions.
+	CPU #1 executed  1,843,846 load/store functional unit instructions.
+	CPU #1 executed  3,136,229 branch functional unit instructions.
+	CPU #1 executed 16,949,396 instructions that were accounted for in timing info.
+	CPU #1 executed    871,920 data reads.
+	CPU #1 executed    971,926 data writes.
+	CPU #1 executed        221 icache misses.
+	CPU #1 executed 16,949,396 instructions in total.
+	
+	Simulator speed was 250,731 instructions/second
+
+
+
+What motivated PSIM?
+
+	As an idea, psim was first discussed seriously during mid
+	1994.  At that time its main objectives were:
+
+
+		o	good performance
+
+			Many simulators loose out by only providing
+			a binary interface to the internals.  This
+			interface eventually becomes a bottle neck
+			in the simulators performance.
+
+			It was intended that PSIM would avoid this
+			problem by giving the user access to the
+			full source code.
+
+			Further, by exploiting the power of modern
+			compilers it was hoped that PSIM would achieve
+			good performance with out having to compromize
+			its internal design.
+
+
+		o	practical portability
+
+			Rather than try to be portable to every
+			C compiler on every platform, it was decided
+			that PSIM would restrict its self to suporting
+			ANSI compilers that included the extension
+			of a long long type.
+
+			GCC is one such compiler, consequenly PSIM
+			should be portable to any machine running GCC.
+
+
+		o	flexability in its design
+
+			PSIM should allow the user to select the
+			features required and customize the build
+			accordingly.  By having the source code,
+			the compler is able to eliminate any un
+			used features of the simulator.
+
+			After all, let the compiler do the work.
+
+
+		o	SMP
+
+			A model that allowed the simulation of
+			SMP platforms with out the large overhead
+			often encountered with such models.
+
+
+	PSIM achieves each of these objectives.
+
+
+Is PSIM PowerPC Platform (PPCP) (nee CHRP) Compliant?
 
 	No.
 
-	However, PSIM does include all the hooks that are needed to
-	construct a model of a CHRP compliant platform.
+	Among other things it does not have an Apple ROM socket.
 
-	That is:
 
-		o	OpenBoot client software
+Can PSIM be configured so that it models a CHRP machine?
 
-		o	OpenPIC interrupt controller
+	Yes.
 
-		o	Hooks to implement a RTAS interface
+	PSIM has been designed with the CHRP spec in mind. To model
+	a CHRP desktop a user would need to add the following:
 
-		o	the ability to add a model of each of the
-			hardware devices required by a CHRP compliant
-			desktop.
+		o	An apple rom socket :-)
+
+		o	Model of each of the desktop IO devices
+			(some may already be implemented).
+
+		o	An OpenPIC (Open Programmable Interrupt
+			Controller) device. (it may by now be
+			implemented).
+
+		o	RTAS (Run Time Abstraction Services).
+
+		o	A fully populated device tree.
+
+
+Is the source code available?
+
+	Yes.
+
+	The source code to PSIM is available under the terms of
+	the GNU Public Licence.  This allows you to distribute
+	the source code for free but with certain conditions.
 
 
 How do I build PSIM?
@@ -240,7 +445,7 @@ How do I build PSIM?
 
 
 	gdb-4.15.tar.gz		From your favorite GNU ftp site.
-				I've also tested psim-951016 with
+				I've also tested psim with
 				gdb-4.15.1.  If you would prefer
 				a graphical development environment
 				then PSIM can also be built with
@@ -252,20 +457,26 @@ How do I build PSIM?
 				This file.
 
 
-	ftp://ftp.ci.com.au/pub/clayton/gdb-4.15+psim-951016.diff.gz
+	ftp://ftp.ci.com.au/pub/clayton/gdb-4.15+psim.diff.gz
 
-				This contains a few minor patches to
-				gdb-4.15 so that will include psim
-				when it is built.
-
-
-	ftp://ftp.ci.com.au/pub/clayton/psim-test-951016.tar.gz
-
-				(Optional) A scattering of pre-compiled
-				programs that run under the simulator.
+				Firstly this file contains a few
+				minor changes to gdb-4.15 so that it
+				will build PSIM as part of GDB.
 
 
-	ftp://ftp.ci.com.au/pub/clayton/gdb-4.15+psim-951016.tar.gz
+	ftp://ftp.ci.com.au/pub/clayton/gdb-4.15+note.diff.gz
+
+				Add suport for note sections (used
+				by OpenBoot PowerPC programs).
+
+
+	ftp://ftp.ci.com.au/pub/clayton/gdb-4.15+attach.diff.gz
+	
+				Allow the gdb attach command to
+				work with simulators.
+
+
+	ftp://ftp.ci.com.au/pub/clayton/psim-960119.tar.gz
 
 				This contains the psim files proper.
 
@@ -280,36 +491,17 @@ How do I build PSIM?
 				installing gnu's patch.
 
 
-	In addition, I'm slowly building up a set of useful patches
-	to gdb-4.15 that are useful.  You will want to also apply
-	these patches:
-
-
-	ftp://ftp.ci.com.au/pub/clayton/gdb-4.15+attach.diff.gz
-
-				Patch to gdb that allows the `attach'
-				command to be used when connecting to a
-				simulator.
-
-				See that file for more information.
-
-	ftp://ftp.ci.com.au/pub/clayton/gdb-4.15+note.diff.gz
-
-				Patch to gdb's bfd that adds basic support
-				for a .note section. OpenBoot makes
-				use of a .note section when loading a
-				boot image.
-
-
 	Procedure:
 
 	0.	A starting point
 
 		$ ls -1
-		gdb-4.15+psim-951016.diff.gz
-		gdb-4.15+psim-951016.tar.gz
+		gdb-4.15+attach.diff.gz
+		gdb-4.15+note.diff.gz
+		gdb-4.15+psim.diff.gz
+		gdb-4.15+psim.diff.gz
 		gdb-4.15.tar.gz
-		psim-test-951016.tar.gz
+		psim-960119.tar.gz
 
 
 	1.	Unpack gdb
@@ -322,11 +514,11 @@ How do I build PSIM?
 
 		$ cd gdb-4.15
 
-		$ gunzip < ../gdb-4.15+psim-951016.diff.gz | more
-		$ gunzip < ../gdb-4.15+psim-951016.diff.gz | patch -p1
+		$ gunzip < ../gdb-4.15+psim.diff.gz | more
+		$ gunzip < ../gdb-4.15+psim.diff.gz | patch -p1
 
-		$ gunzip < ../gdb-4.15+psim-951016.tar.gz | tar tvf -
-		$ gunzip < ../gdb-4.15+psim-951016.tar.gz | tar xvf -
+		$ gunzip < ../gdb-4.15+psim-960119.tar.gz | tar tvf -
+		$ gunzip < ../gdb-4.15+psim-960119.tar.gz | tar xvf -
 
 		You may also want to consider applying the `attach' and
 		`note' patches that are available vis:
@@ -349,6 +541,12 @@ How do I build PSIM?
 		eabisim is needed as by default (because PSIM needs GCC) the
 		simulator is not built.
 
+		[If building with a more recent gdb snapshot then the
+		 command:
+
+			$CC=gcc ./configure --enable-sim-powerpc
+
+		 is used.]
 
 	4.	Build
 
@@ -378,23 +576,7 @@ Is there a more recent version of PSIM and if so, how would I build it?
 	(that include new features) are made available.  Several of
 	the more recent snapshots are:
 
-	ftp://ftp.ci.com.au/pub/clayton/psim-951219.tar.gz
-
-				Hopefully merges in Michael stuff
-				with mine,  adds multiple emulations
-				(OpenBoot and NetBSD),  revamps
-				inline stuff, rearanges devices so
-				that phandls and ihandles can be
-				implemented.
-
-	ftp://ftp.ci.com.au/pub/clayton/psim-951203.tar.gz
-
-				A good snapshot
-
-				This includes extensions from Michael
-				Meissner that add monitoring of the
-				PowerPC's register and bus architectures.
-
+		<to-be-advised>
 
 	To build/install one of these snapshots, you replace the
 	current gdb/sim/ppc directory with the one in the update,
@@ -430,18 +612,13 @@ Are there any example programs that can be run on PSIM?
 	that fixes do not introduce new bugs.  This test suite
 	like psim is updated:
 
-	ftp://ftp.ci.com.au/pub/clayton/psim-test-951218.tar.gz
+	ftp://ftp.ci.com.au/pub/clayton/psim-test-960118.tar.gz
 
 				Prebuilt test programs for PSIM.
 				Includes examples of UEA, VEA and
 				OEA code.
 				Requires gcc-2.7.2 and binutils-2.6
 				to rebuild.
-
-	ftp://ftp.ci.com.au/pub/clayton/psim-test-951016.tar.gz
-
-				(Optional) A scattering of pre-compiled
-				programs that run under the simulator.
 
 
 How do I use the simulator?
@@ -515,9 +692,9 @@ Does PSIM have any limitations or problems?
 
 Who helped?
 
-	Thanks go to the following who each helped in some way.
+	Thanks go to the following who each helped in their own
+	way:
 
 	Allen Briggs, Bett Koch, David Edelsohn, Gordon Irlam,
-	Michael Meissner, Bob Mercier, Richard Perini,
+	Michael Meissner, Bob Mercier, Richard Perini, Dale Rahn
 	Richard Stallman, Mitchele Walker
-
