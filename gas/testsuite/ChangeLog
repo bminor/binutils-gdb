@@ -1,5 +1,8 @@
 Mon Aug  7 22:39:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* gas/mri/mri.exp: Add setup_xfail for a29k*-*-* for constants
+	test.
+
 	* gasp/crash1.out, gasp/macro.out, gasp/sfunc.out: Complete
 	truncated files, so that the tests pass.
 

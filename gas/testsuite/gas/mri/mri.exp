@@ -5,6 +5,7 @@ run_dump_test label
 setup_xfail "hppa*-*-*"
 run_dump_test equ
 setup_xfail "hppa*-*-*"
+setup_xfail "a29k*-*-*"
 run_dump_test constants
 run_dump_test float
 run_dump_test char
