@@ -1,3 +1,9 @@
+2003-08-22  Michael Chastain  <mec@shout.net>
+
+	* config/djgpp/fnchange.lst: Remove gdb/testsuite/gdb.c++/*.
+	Add lines for files in gdb/testsuite/gdb.cp/* that are
+	still not 8.3 unique.
+
 2003-08-05  David Carlton  <carlton@kealia.com>
 
 	* configure.in (build_warnings): Delete -Wformat-nonliteral.
