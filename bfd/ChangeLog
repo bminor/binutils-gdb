@@ -1,3 +1,8 @@
+Wed Sep 13 17:38:23 1995  Fred Fish  <fnf@rtl.cygnus.com>
+
+	* Makefile.in (clean-info): Remove extraneous tab from line
+	following action.
+
 Wed Sep 13 13:27:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* cofflink.c (coff_link_input_bfd): Fail if a section with no

@@ -305,7 +305,7 @@ info dvi : force
 
 clean-info:
 	@$(MAKE) subdir_do DO=clean-info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
-	
+
 install-info: force
 	@$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
