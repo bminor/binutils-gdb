@@ -23,6 +23,10 @@
 #define INFCALL_H
 
 struct value;
+struct type;
+
+extern CORE_ADDR find_function_addr (struct value *function, 
+				     struct type **retval_type);
 
 /* Perform a function call in the inferior.
 

@@ -157,7 +157,7 @@ value_arg_coerce (struct value *arg, struct type *param_type,
 /* Determine a function's address and its return type from its value.
    Calls error() if the function is not valid for calling.  */
 
-static CORE_ADDR
+CORE_ADDR
 find_function_addr (struct value *function, struct type **retval_type)
 {
   register struct type *ftype = check_typedef (VALUE_TYPE (function));

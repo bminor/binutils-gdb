@@ -33,6 +33,8 @@
 #include "f-lang.h"		/* for array bound stuff */
 #include "cp-abi.h"
 #include "infcall.h"
+#include "objc-lang.h"
+#include "block.h"
 
 /* Defined in symtab.c */
 extern int hp_som_som_object_present;
@@ -472,6 +474,15 @@ evaluate_subexp_standard (struct type *expect_type,
 	goto nosideret;
       return value_string (&exp->elts[pc + 2].string, tem);
 
+    case OP_OBJC_NSSTRING:		/* Objective C Foundation Class NSString constant.  */
+      tem = longest_to_int (exp->elts[pc + 1].longconst);
+      (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
+      if (noside == EVAL_SKIP)
+	{
+	  goto nosideret;
+	}
+      return (struct value *) value_nsstring (&exp->elts[pc + 2].string, tem + 1);
+
     case OP_BITSTRING:
       tem = longest_to_int (exp->elts[pc + 1].longconst);
       (*pos)
@@ -667,6 +678,275 @@ evaluate_subexp_standard (struct type *expect_type,
 	  evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
 	  return arg2;
 	}
+
+    case OP_OBJC_SELECTOR:
+      {				/* Objective C @selector operator.  */
+	char *sel = &exp->elts[pc + 2].string;
+	int len = longest_to_int (exp->elts[pc + 1].longconst);
+
+	(*pos) += 3 + BYTES_TO_EXP_ELEM (len + 1);
+	if (noside == EVAL_SKIP)
+	  goto nosideret;
+
+	if (sel[len] != 0)
+	  sel[len] = 0;		/* Make sure it's terminated.  */
+	return value_from_longest (lookup_pointer_type (builtin_type_void),
+				   lookup_child_selector (sel));
+      }
+
+    case OP_OBJC_MSGCALL:
+      {				/* Objective C message (method) call.  */
+
+	static unsigned long responds_selector = 0;
+	static unsigned long method_selector = 0;
+
+	unsigned long selector = 0;
+
+	int using_gcc = 0;
+	int struct_return = 0;
+	int sub_no_side = 0;
+
+	static struct value *msg_send = NULL;
+	static struct value *msg_send_stret = NULL;
+	static int gnu_runtime = 0;
+
+	struct value *target = NULL;
+	struct value *method = NULL;
+	struct value *called_method = NULL; 
+
+	struct type *selector_type = NULL;
+
+	struct value *ret = NULL;
+	CORE_ADDR addr = 0;
+
+	selector = exp->elts[pc + 1].longconst;
+	nargs = exp->elts[pc + 2].longconst;
+	argvec = (struct value **) alloca (sizeof (struct value *) 
+					   * (nargs + 5));
+
+	(*pos) += 3;
+
+	selector_type = lookup_pointer_type (builtin_type_void);
+	if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	  sub_no_side = EVAL_NORMAL;
+	else
+	  sub_no_side = noside;
+
+	target = evaluate_subexp (selector_type, exp, pos, sub_no_side);
+
+	if (value_as_long (target) == 0)
+ 	  return value_from_longest (builtin_type_long, 0);
+	
+	if (lookup_minimal_symbol ("objc_msg_lookup", 0, 0))
+	  gnu_runtime = 1;
+	
+	/* Find the method dispatch (Apple runtime) or method lookup
+	   (GNU runtime) function for Objective-C.  These will be used
+	   to lookup the symbol information for the method.  If we
+	   can't find any symbol information, then we'll use these to
+	   call the method, otherwise we can call the method
+	   directly. The msg_send_stret function is used in the special
+	   case of a method that returns a structure (Apple runtime 
+	   only).  */
+	if (gnu_runtime)
+	  {
+	    msg_send = find_function_in_inferior ("objc_msg_lookup");
+	    msg_send_stret = find_function_in_inferior ("objc_msg_lookup");
+	  }
+	else
+	  {
+	    msg_send = find_function_in_inferior ("objc_msgSend");
+	    /* Special dispatcher for methods returning structs */
+	    msg_send_stret = find_function_in_inferior ("objc_msgSend_stret");
+	  }
+
+	/* Verify the target object responds to this method. The
+	   standard top-level 'Object' class uses a different name for
+	   the verification method than the non-standard, but more
+	   often used, 'NSObject' class. Make sure we check for both. */
+
+	responds_selector = lookup_child_selector ("respondsToSelector:");
+	if (responds_selector == 0)
+	  responds_selector = lookup_child_selector ("respondsTo:");
+	
+	if (responds_selector == 0)
+	  error ("no 'respondsTo:' or 'respondsToSelector:' method");
+	
+	method_selector = lookup_child_selector ("methodForSelector:");
+	if (method_selector == 0)
+	  method_selector = lookup_child_selector ("methodFor:");
+	
+	if (method_selector == 0)
+	  error ("no 'methodFor:' or 'methodForSelector:' method");
+
+	/* Call the verification method, to make sure that the target
+	 class implements the desired method. */
+
+	argvec[0] = msg_send;
+	argvec[1] = target;
+	argvec[2] = value_from_longest (builtin_type_long, responds_selector);
+	argvec[3] = value_from_longest (builtin_type_long, selector);
+	argvec[4] = 0;
+
+	ret = call_function_by_hand (argvec[0], 3, argvec + 1);
+	if (gnu_runtime)
+	  {
+	    /* Function objc_msg_lookup returns a pointer.  */
+	    argvec[0] = ret;
+	    ret = call_function_by_hand (argvec[0], 3, argvec + 1);
+	  }
+	if (value_as_long (ret) == 0)
+	  error ("Target does not respond to this message selector.");
+
+	/* Call "methodForSelector:" method, to get the address of a
+	   function method that implements this selector for this
+	   class.  If we can find a symbol at that address, then we
+	   know the return type, parameter types etc.  (that's a good
+	   thing). */
+
+	argvec[0] = msg_send;
+	argvec[1] = target;
+	argvec[2] = value_from_longest (builtin_type_long, method_selector);
+	argvec[3] = value_from_longest (builtin_type_long, selector);
+	argvec[4] = 0;
+
+	ret = call_function_by_hand (argvec[0], 3, argvec + 1);
+	if (gnu_runtime)
+	  {
+	    argvec[0] = ret;
+	    ret = call_function_by_hand (argvec[0], 3, argvec + 1);
+	  }
+
+	/* ret should now be the selector.  */
+
+	addr = value_as_long (ret);
+	if (addr)
+	  {
+	    struct symbol *sym = NULL;
+	    /* Is it a high_level symbol?  */
+
+	    sym = find_pc_function (addr);
+	    if (sym != NULL) 
+	      method = value_of_variable (sym, 0);
+	  }
+
+	/* If we found a method with symbol information, check to see
+           if it returns a struct.  Otherwise assume it doesn't.  */
+
+	if (method)
+	  {
+	    struct block *b;
+	    CORE_ADDR funaddr;
+	    struct type *value_type;
+
+	    funaddr = find_function_addr (method, &value_type);
+
+	    b = block_for_pc (funaddr);
+
+	    /* If compiled without -g, assume GCC 2.  */
+	    using_gcc = (b == NULL ? 2 : BLOCK_GCC_COMPILED (b));
+
+	    CHECK_TYPEDEF (value_type);
+	  
+	    if ((value_type == NULL) 
+		|| (TYPE_CODE(value_type) == TYPE_CODE_ERROR))
+	      {
+		if (expect_type != NULL)
+		  value_type = expect_type;
+	      }
+
+	    struct_return = using_struct_return (method, funaddr, value_type, using_gcc);
+	  }
+	else if (expect_type != NULL)
+	  {
+	    struct_return = using_struct_return (NULL, addr, check_typedef (expect_type), using_gcc);
+	  }
+	
+	/* Found a function symbol.  Now we will substitute its
+	   value in place of the message dispatcher (obj_msgSend),
+	   so that we call the method directly instead of thru
+	   the dispatcher.  The main reason for doing this is that
+	   we can now evaluate the return value and parameter values
+	   according to their known data types, in case we need to
+	   do things like promotion, dereferencing, special handling
+	   of structs and doubles, etc.
+	  
+	   We want to use the type signature of 'method', but still
+	   jump to objc_msgSend() or objc_msgSend_stret() to better
+	   mimic the behavior of the runtime.  */
+	
+	if (method)
+	  {
+	    if (TYPE_CODE (VALUE_TYPE (method)) != TYPE_CODE_FUNC)
+	      error ("method address has symbol information with non-function type; skipping");
+	    if (struct_return)
+	      VALUE_ADDRESS (method) = value_as_address (msg_send_stret);
+	    else
+	      VALUE_ADDRESS (method) = value_as_address (msg_send);
+	    called_method = method;
+	  }
+	else
+	  {
+	    if (struct_return)
+	      called_method = msg_send_stret;
+	    else
+	      called_method = msg_send;
+	  }
+
+	if (noside == EVAL_SKIP)
+	  goto nosideret;
+
+	if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	  {
+	    /* If the return type doesn't look like a function type,
+	       call an error.  This can happen if somebody tries to
+	       turn a variable into a function call. This is here
+	       because people often want to call, eg, strcmp, which
+	       gdb doesn't know is a function.  If gdb isn't asked for
+	       it's opinion (ie. through "whatis"), it won't offer
+	       it. */
+
+	    struct type *type = VALUE_TYPE (called_method);
+	    if (type && TYPE_CODE (type) == TYPE_CODE_PTR)
+	      type = TYPE_TARGET_TYPE (type);
+	    type = TYPE_TARGET_TYPE (type);
+
+	    if (type)
+	    {
+	      if ((TYPE_CODE (type) == TYPE_CODE_ERROR) && expect_type)
+		return allocate_value (expect_type);
+	      else
+		return allocate_value (type);
+	    }
+	    else
+	      error ("Expression of type other than \"method returning ...\" used as a method");
+	  }
+
+	/* Now depending on whether we found a symbol for the method,
+	   we will either call the runtime dispatcher or the method
+	   directly.  */
+
+	argvec[0] = called_method;
+	argvec[1] = target;
+	argvec[2] = value_from_longest (builtin_type_long, selector);
+	/* User-supplied arguments.  */
+	for (tem = 0; tem < nargs; tem++)
+	  argvec[tem + 3] = evaluate_subexp_with_coercion (exp, pos, noside);
+	argvec[tem + 3] = 0;
+
+	if (gnu_runtime && (method != NULL))
+	  {
+	    ret = call_function_by_hand (argvec[0], nargs + 2, argvec + 1);
+	    /* Function objc_msg_lookup returns a pointer.  */
+	    argvec[0] = ret;
+	    ret = call_function_by_hand (argvec[0], nargs + 2, argvec + 1);
+	  }
+	else
+	  ret = call_function_by_hand (argvec[0], nargs + 2, argvec + 1);
+
+	return ret;
+      }
+      break;
 
     case OP_FUNCALL:
       (*pos) += 2;
@@ -1749,6 +2029,10 @@ evaluate_subexp_standard (struct type *expect_type,
     case OP_THIS:
       (*pos) += 1;
       return value_of_this (1);
+
+    case OP_OBJC_SELF:
+      (*pos) += 1;
+      return value_of_local ("self", 1);
 
     case OP_TYPE:
       error ("Attempt to use a type name as an expression");
