@@ -1,3 +1,9 @@
+Fri Sep 25 18:18:52 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* tc-m68k.h: if M68KCOFF, define DOT_LABEL_PREFIX (to require
+	local labels to start with a .) and set REGISTER_PREFIX to %.
+	tc-m68k.c (m68k_reg_parse): accept REGISTER_PREFIX if defined.
+
 Tue Sep 22 13:02:07 1992  Sean Eric Fagan  (sef@cygnus.com)
 
 	* obj-coffbfd.c (do_relocs_for,fill_section): now allocate all
