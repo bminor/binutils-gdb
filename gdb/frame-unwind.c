@@ -31,6 +31,7 @@ static struct gdbarch_data *frame_unwind_data;
 struct frame_unwind_table_entry
 {
   frame_unwind_sniffer_ftype *sniffer;
+  const struct frame_unwind *unwinder;
   struct frame_unwind_table_entry *next;
 };
 
@@ -61,8 +62,19 @@ frame_unwind_append_sniffer (struct gdbarch *gdbarch,
   table->tail = &((*table->tail)->next);
 }
 
+void
+frame_unwind_register_unwinder (struct gdbarch *gdbarch,
+				const struct frame_unwind *unwinder)
+{
+  struct frame_unwind_table *table = gdbarch_data (gdbarch, frame_unwind_data);
+  (*table->tail) = GDBARCH_OBSTACK_ZALLOC (gdbarch,
+					   struct frame_unwind_table_entry);
+  (*table->tail)->unwinder = unwinder;
+  table->tail = &((*table->tail)->next);
+}
+
 const struct frame_unwind *
-frame_unwind_find_by_frame (struct frame_info *next_frame)
+frame_unwind_find_by_frame (struct frame_info *next_frame, void **this_cache)
 {
   int i;
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
@@ -76,10 +88,19 @@ frame_unwind_find_by_frame (struct frame_info *next_frame)
     return legacy_saved_regs_unwind;
   for (entry = table->head; entry != NULL; entry = entry->next)
     {
-      const struct frame_unwind *desc;
-      desc = entry->sniffer (next_frame);
-      if (desc != NULL)
-	return desc;
+      if (entry->sniffer != NULL)
+	{
+	  const struct frame_unwind *desc = NULL;
+	  desc = entry->sniffer (next_frame);
+	  if (desc != NULL)
+	    return desc;
+	}
+      if (entry->unwinder != NULL)
+	{
+	  if (entry->unwinder->sniffer (entry->unwinder, next_frame,
+					this_cache))
+	    return entry->unwinder;
+	}
     }
   return legacy_saved_regs_unwind;
 }

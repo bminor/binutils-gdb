@@ -1,3 +1,20 @@
+2004-03-21  Andrew Cagney  <cagney@redhat.com>
+
+	* frame-unwind.h: Update copyright.
+	(struct frame_data): Add opaque declaration.
+	(frame_sniffer_ftype): Declare.
+	(struct frame_unwind): Add "unwind_data" and "sniffer".
+	(frame_unwind_register_unwinder): Declare.
+	(frame_unwind_find_by_frame): Add parameter "this_cache".
+	* frame.c (get_frame_id, create_new_frame, legacy_get_prev_frame)
+	(legacy_get_prev_frame, legacy_get_prev_frame)
+	(get_frame_type): Pass the prologue_cache to
+	frame_unwind_find_by_frame.
+	* frame-unwind.c (struct frame_unwind_table_entry): Add field
+	"unwinder".
+	(frame_unwind_register_unwinder): New function.
+	(frame_unwind_find_by_frame): Handle an unwind sniffer.
+
 2004-03-20  Paul Hilfinger  <hilfingr@nile.gnat.com>
 
 	* bcache.c (print_percentage): Use floating point to avoid
