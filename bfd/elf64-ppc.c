@@ -3286,7 +3286,24 @@ ppc64_elf_copy_indirect_symbol (bed, dir, ind)
       eind->dyn_relocs = NULL;
     }
 
-  /* Do the same for got entries.  */
+  edir->is_func |= eind->is_func;
+  edir->is_func_descriptor |= eind->is_func_descriptor;
+  edir->is_entry |= eind->is_entry;
+
+  /* Copy down any references that we may have already seen to the
+     symbol which just became indirect.  */
+  edir->elf.elf_link_hash_flags |=
+    (eind->elf.elf_link_hash_flags
+     & (ELF_LINK_HASH_REF_DYNAMIC
+	| ELF_LINK_HASH_REF_REGULAR
+	| ELF_LINK_HASH_REF_REGULAR_NONWEAK
+	| ELF_LINK_NON_GOT_REF));
+
+  /* If we were called to copy over info for a weak sym, that's all.  */
+  if (eind->elf.root.type != bfd_link_hash_indirect)
+    return;
+
+  /* Copy over got entries.  */
   if (eind->elf.got.glist != NULL)
     {
       if (edir->elf.got.glist != NULL)
@@ -3344,22 +3361,6 @@ ppc64_elf_copy_indirect_symbol (bed, dir, ind)
       edir->elf.plt.plist = eind->elf.plt.plist;
       eind->elf.plt.plist = NULL;
     }
-
-  edir->is_func |= eind->is_func;
-  edir->is_func_descriptor |= eind->is_func_descriptor;
-  edir->is_entry |= eind->is_entry;
-
-  /* Copy down any references that we may have already seen to the
-     symbol which just became indirect.  */
-  edir->elf.elf_link_hash_flags |=
-    (eind->elf.elf_link_hash_flags
-     & (ELF_LINK_HASH_REF_DYNAMIC
-	| ELF_LINK_HASH_REF_REGULAR
-	| ELF_LINK_HASH_REF_REGULAR_NONWEAK
-	| ELF_LINK_NON_GOT_REF));
-
-  if (eind->elf.root.type != bfd_link_hash_indirect)
-    return;
 
   if (edir->elf.dynindx == -1)
     {

@@ -1,3 +1,8 @@
+2003-02-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Don't copy got and
+	plt info when called to transfer weak sym info.
+
 2003-02-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* reloc.c: Add PPC and PPC64 TLS relocs.
