@@ -1,5 +1,10 @@
 2004-11-13  Andrew Cagney  <cagney@gnu.org>
 
+	* config/tm-sysv4.h: Delete file, inlining contents.
+	* config/ia64/tm-aix.h (SKIP_TRAMPOLINE_CODE): Define.
+	* config/tm-linux.h (SKIP_TRAMPOLINE_CODE): Define.
+	* config/tm-nto.h (SKIP_TRAMPOLINE_CODE): Define.
+
 	* regcache.h (deprecated_register_valid): Delete.
 	(deprecated_registers): Delete.
 	* regcache.c (deprecated_register_valid): Delete.
@@ -10,8 +15,6 @@
 	remote-sds.o.
 	* config/powerpc/ppc-eabi.mt (TDEPFILES): Ditto.
 	* config/mips/embed.mt (TDEPFILES): Remove remote-mips.o.
-
-2004-11-13  Andrew Cagney  <cagney@gnu.org>
 
 	* NEWS: List h8300*-*-*, mcore-*-*, mn10300-*-*, ns32k-*-*, and
 	v850-*-* under removed.

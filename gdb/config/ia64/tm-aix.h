@@ -23,7 +23,11 @@
 #define TM_AIX_H
 
 #include "ia64/tm-ia64.h"
-#include "config/tm-sysv4.h"
+
+/* If PC is in a shared library trampoline code, return the PC
+   where the function itself actually starts.  If not, return 0.  */
+
+#define SKIP_TRAMPOLINE_CODE(pc)  find_solib_trampoline_target (pc)
 
 extern int ia64_aix_in_sigtramp (CORE_ADDR pc, char *func_name);
 #define DEPRECATED_IN_SIGTRAMP(pc,func_name) ia64_aix_in_sigtramp (pc, func_name)

@@ -30,6 +30,9 @@
 
 /* We need this file for the SOLIB_TRAMPOLINE stuff. */
 
-#include "config/tm-sysv4.h"
+/* If PC is in a shared library trampoline code, return the PC
+   where the function itself actually starts.  If not, return 0.  */
+
+#define SKIP_TRAMPOLINE_CODE(pc)  find_solib_trampoline_target (pc)
 
 #include "solib.h"		/* Support for shared libraries. */

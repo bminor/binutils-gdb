@@ -26,7 +26,10 @@
 #ifndef _TM_QNXNTO_H
 #define _TM_QNXNTO_H
 
-#include "tm-sysv4.h"
+/* If PC is in a shared library trampoline code, return the PC
+   where the function itself actually starts.  If not, return 0.  */
+
+#define SKIP_TRAMPOLINE_CODE(pc)  find_solib_trampoline_target (pc)
 
 /* Setup the valid realtime signal range.  */
 #define REALTIME_LO 41
