@@ -26,4 +26,4 @@ Tue Jan 25 19:54:19 1994  Stan Shebs  (shebs@andros.cygnus.com)
 	* ldfile.c (slash): If MPW, set to `:'.
 	* ldlex.l (TRUE_FALSE_ALREADY_DEFINED): If MPW, set this to
 	prevent redefinition errors.
-
+	* mpw-em.c: New file, compressed version of em_mipsidt.c.
