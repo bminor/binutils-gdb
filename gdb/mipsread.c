@@ -2753,6 +2753,13 @@ cross_ref (ax, tpp, type_code, pname, bigend)
       /* Careful, we might be looking at .o files */
       if (sh.iss == 0)
 	*pname = "<undefined>";
+      else if (rn->rfd == 0xfff && rn->index == 0)
+	/* For structs, unions and enums, rn->rfd is 0xfff and the index
+	   is a relative symbol number for the type, but an index of 0
+	   seems to mean that we don't know.  This is said to fix a problem
+	   with "info func opendir" on an SGI showing
+	   "struct BSDopendir.c *BSDopendir();".  */
+	*pname = "<unknown>";
       else
 	*pname = ecoff_data (cur_bfd)->ss + fh->issBase + sh.iss;
 
