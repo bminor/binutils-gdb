@@ -29,6 +29,7 @@ generic.em
 gld960.em
 hppaosf.em
 lnk960.em
+m88kbcs.em
 vanilla.em
 
 Things-to-lose:
