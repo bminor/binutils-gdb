@@ -1,3 +1,8 @@
+2003-05-07  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-xstormy16.c (xstormy16_elf_howto_table): Reset
+	R_XSTORMY16_16 reloc to ignore overflows.
+
 2003-05-06  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Improve
