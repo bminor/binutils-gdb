@@ -868,19 +868,19 @@ pe_find_data_imports (void)
   for (undef = link_info.hash->undefs; undef; undef=undef->u.undef.next)
     {
       if (undef->type == bfd_link_hash_undefined)
-        {
-          /* C++ symbols are *long*.  */
-          char buf[4096];
+	{
+	  /* C++ symbols are *long*.  */
+	  char buf[4096];
 
 	  if (pe_dll_extra_pe_debug)
 	    printf ("%s:%s\n", __FUNCTION__, undef->root.string);
 
-          sprintf (buf, "__imp_%s", undef->root.string);
+	  sprintf (buf, "__imp_%s", undef->root.string);
 
-          sym = bfd_link_hash_lookup (link_info.hash, buf, 0, 0, 1);
+	  sym = bfd_link_hash_lookup (link_info.hash, buf, 0, 0, 1);
 
-          if (sym && sym->type == bfd_link_hash_defined)
-            {
+	  if (sym && sym->type == bfd_link_hash_defined)
+	    {
 	      bfd *b = sym->u.def.section->owner;
 	      asymbol **symbols;
 	      int nsyms, symsize, i;
@@ -918,8 +918,8 @@ pe_find_data_imports (void)
 	      undef->root.string = sym->root.string;
 	      undef->u.def.value = sym->u.def.value;
 	      undef->u.def.section = sym->u.def.section;
-            }
-        }
+	    }
+	}
     }
 }
 
@@ -946,7 +946,7 @@ gld_${EMULATION_NAME}_after_open (void)
       printf ("%s()\n", __FUNCTION__);
 
       for (sym = link_info.hash->undefs; sym; sym=sym->u.undef.next)
-        printf ("-%s\n", sym->root.string);
+	printf ("-%s\n", sym->root.string);
       bfd_hash_traverse (&link_info.hash->table, pr_sym, NULL);
 
       for (a = link_info.input_bfds; a; a = a->link_next)
@@ -1151,7 +1151,7 @@ gld_${EMULATION_NAME}_after_open (void)
 		     is3 && is3->the_bfd->my_archive == arch;
 		     is3 = (lang_input_statement_type *) is3->next)
 		  {
-                    /* A MS dynamic import library can also contain static
+		    /* A MS dynamic import library can also contain static
 		       members, so look for the first element with a .dll
 		       extension, and use that for the remainder of the
 		       comparisons.  */
@@ -1478,8 +1478,8 @@ gld_${EMULATION_NAME}_finish (void)
 
     if (asec)
       {
-        asec->flags &= ~SEC_CODE;
-        asec->flags |= SEC_DATA;
+	asec->flags &= ~SEC_CODE;
+	asec->flags |= SEC_DATA;
       }
   }
 }
@@ -1530,6 +1530,7 @@ struct orphan_save
   lang_output_section_statement_type *os;
   asection **section;
   lang_statement_union_type **stmt;
+  lang_statement_union_type **os_tail;
 };
 
 static bfd_boolean
@@ -1573,10 +1574,14 @@ gld_${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s
       static struct orphan_save hold_rdata;
       static struct orphan_save hold_data;
       static struct orphan_save hold_bss;
+      static int count = 1;
       char *outsecname;
       lang_statement_list_type *old;
       lang_statement_list_type add;
+      lang_statement_union_type **os_tail;
       etree_type *address;
+      etree_type *load_base;
+      asection *sec;
 
       /* Try to put the new output section in a reasonable place based
 	 on the section name and section flags.  */
@@ -1596,41 +1601,42 @@ gld_${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s
 	       && (s->flags & SEC_READONLY) != 0
 	       && HAVE_SECTION (hold_rdata, ".rdata"))
 	place = &hold_rdata;
-      else if ((s->flags & SEC_READONLY) != 0
+      else if ((s->flags & SEC_CODE) != 0
+	       && (s->flags & SEC_READONLY) != 0
 	       && HAVE_SECTION (hold_text, ".text"))
 	place = &hold_text;
 
 #undef HAVE_SECTION
 
-      /* Choose a unique name for the section.  This will be needed if
-	 the same section name appears in the input file with
-	 different loadable or allocatable characteristics.  */
-      outsecname = xstrdup (hold_section_name);
-      if (bfd_get_section_by_name (output_bfd, outsecname) != NULL)
+      /* Choose a unique name for the section.  This will be needed if the
+	 same section name appears in the input file with different
+	 loadable or allocatable characteristics.  But if the section
+	 already exists but does not have any flags set, then it has been
+	 created by the linker, probably as a result of a --section-start
+	 command line switch.  */
+      sec = bfd_get_section_by_name (output_bfd, hold_section_name);
+      if (sec != NULL
+	  && bfd_get_section_flags (output_bfd, sec) != 0)
 	{
-	  unsigned int len;
-	  char *newname;
-	  unsigned int i;
-
-	  len = strlen (outsecname);
-	  newname = xmalloc (len + 5);
-	  strcpy (newname, outsecname);
-	  i = 0;
-	  do
-	    {
-	      sprintf (newname + len, "%d", i);
-	      ++i;
-	    }
-	  while (bfd_get_section_by_name (output_bfd, newname) != NULL);
-
-	  free (outsecname);
-	  outsecname = newname;
+	  outsecname = bfd_get_unique_section_name (output_bfd,
+						    hold_section_name, &count);
+	  if (outsecname == NULL)
+	    einfo ("%F%P: place_orphan failed: %E\n");
 	}
+      else
+	outsecname = xstrdup (hold_section_name);
 
       /* Start building a list of statements for this section.  */
       old = stat_ptr;
-      stat_ptr = &add;
-      lang_list_init (stat_ptr);
+
+      /* If we have found an appropriate place for the output section
+	 statements for this orphan, add them to our own private list,
+	 inserting them later into the global statement list.  */
+      if (place != NULL)
+	{
+	  stat_ptr = &add;
+	  lang_list_init (stat_ptr);
+	}
 
       if (config.build_constructors)
 	{
@@ -1662,10 +1668,21 @@ gld_${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s
 			      exp_nameop (NAME, "__section_alignment__"));
 	}
 
+      load_base = NULL;
+      if (place != NULL && place->os->load_base != NULL)
+	{
+	  etree_type *lma_from_vma;
+	  lma_from_vma = exp_binop ('-', place->os->load_base,
+				    exp_nameop (ADDR, place->os->name));
+	  load_base = exp_binop ('+', lma_from_vma,
+				 exp_nameop (ADDR, secname));
+	}
+
+      os_tail = lang_output_section_statement.tail;
       os = lang_enter_output_section_statement (outsecname, address, 0,
 						(etree_type *) NULL,
 						(etree_type *) NULL,
-						(etree_type *) NULL, 0);
+						load_base, 0);
 
       lang_add_section (&add_child, s, os, file);
 
@@ -1674,7 +1691,7 @@ gld_${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s
 	 (struct lang_output_section_phdr_list *) NULL, NULL);
 
       if (config.build_constructors && *ps == '\0')
-        {
+	{
 	  char *symname;
 
 	  /* lang_leave_ouput_section_statement resets stat_ptr.
@@ -1741,11 +1758,15 @@ gld_${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s
 	     read/write section before or amongst the read-only ones.  */
 	  if (add.head != NULL)
 	    {
+	      lang_statement_union_type *newly_added_os;
+
 	      if (place->stmt == NULL)
 		{
 		  /* Put the new statement list right at the head.  */
 		  *add.tail = place->os->header.next;
 		  place->os->header.next = add.head;
+
+		  place->os_tail = &place->os->next;
 		}
 	      else
 		{
@@ -1761,6 +1782,21 @@ gld_${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s
 
 	      /* Save the end of this list.  */
 	      place->stmt = add.tail;
+
+	      /* Do the same for the list of output section statements.  */
+	      newly_added_os = *os_tail;
+	      *os_tail = NULL;
+	      newly_added_os->output_section_statement.next = *place->os_tail;
+	      *place->os_tail = newly_added_os;
+	      place->os_tail = &newly_added_os->output_section_statement.next;
+
+	      /* Fixing the global list pointer here is a little different.
+		 We added to the list in lang_enter_output_section_statement,
+		 trimmed off the new output_section_statment above when
+		 assigning *os_tail = NULL, but possibly added it back in
+		 the same place when assigning *place->os_tail.  */
+	      if (*os_tail == NULL)
+		lang_output_section_statement.tail = os_tail;
 	    }
 	}
     }
@@ -1826,12 +1862,12 @@ gld_${EMULATION_NAME}_open_dynamic_archive
   filename = entry->filename;
 
   string = (char *) xmalloc (strlen (search->name)
-                             + strlen (filename)
-                             + sizeof "/lib.a.dll"
+			     + strlen (filename)
+			     + sizeof "/lib.a.dll"
 #ifdef DLL_SUPPORT
-                             + (pe_dll_search_prefix ? strlen (pe_dll_search_prefix) : 0)
+			     + (pe_dll_search_prefix ? strlen (pe_dll_search_prefix) : 0)
 #endif
-                             + 1);
+			     + 1);
 
   /* Try "libfoo.dll.a" first (preferred explicit import library for dll's.  */
   sprintf (string, "%s/lib%s.dll.a", search->name, filename);
@@ -1841,7 +1877,7 @@ gld_${EMULATION_NAME}_open_dynamic_archive
       /* Try "foo.dll.a" next (alternate explicit import library for dll's.  */
       sprintf (string, "%s/%s.dll.a", search->name, filename);
       if (! ldfile_try_open_bfd (string, entry))
-        {
+	{
 	  /* Try libfoo.a next. Normally, this would be interpreted as a static
 	     library, but it *could* be an import library. For backwards compatibility,
 	     libfoo.a needs to ==precede== libfoo.dll and foo.dll in the search,
@@ -1851,50 +1887,50 @@ gld_${EMULATION_NAME}_open_dynamic_archive
 	     -lfoo is not found) we will search for libfoo.a twice before
 	     giving up -- once here, and once when searching for a "static" lib.
 	     for a "static" lib.  */
-          /* Try "libfoo.a" (import lib, or static lib, but must
-             take precedence over dll's).  */
-          sprintf (string, "%s/lib%s.a", search->name, filename);
-          if (! ldfile_try_open_bfd (string, entry))
-            {
+	  /* Try "libfoo.a" (import lib, or static lib, but must
+	     take precedence over dll's).  */
+	  sprintf (string, "%s/lib%s.a", search->name, filename);
+	  if (! ldfile_try_open_bfd (string, entry))
+	    {
 #ifdef DLL_SUPPORT
-              if (pe_dll_search_prefix)
-                {
-                  /* Try "<prefix>foo.dll" (preferred dll name, if specified).  */
-                  sprintf (string, "%s/%s%s.dll", search->name, pe_dll_search_prefix, filename);
-                  if (! ldfile_try_open_bfd (string, entry))
-                    {
-                      /* Try "libfoo.dll" (default preferred dll name).  */
-                      sprintf (string, "%s/lib%s.dll", search->name, filename);
-                      if (! ldfile_try_open_bfd (string, entry))
-                        {
-                          /* Finally, try "foo.dll" (alternate dll name).  */
-                          sprintf (string, "%s/%s.dll", search->name, filename);
-                          if (! ldfile_try_open_bfd (string, entry))
-                            {
-                              free (string);
-                              return FALSE;
-                            }
-                        }
-                    }
-                }
-              else /* pe_dll_search_prefix not specified.  */
+	      if (pe_dll_search_prefix)
+		{
+		  /* Try "<prefix>foo.dll" (preferred dll name, if specified).  */
+		  sprintf (string, "%s/%s%s.dll", search->name, pe_dll_search_prefix, filename);
+		  if (! ldfile_try_open_bfd (string, entry))
+		    {
+		      /* Try "libfoo.dll" (default preferred dll name).  */
+		      sprintf (string, "%s/lib%s.dll", search->name, filename);
+		      if (! ldfile_try_open_bfd (string, entry))
+			{
+			  /* Finally, try "foo.dll" (alternate dll name).  */
+			  sprintf (string, "%s/%s.dll", search->name, filename);
+			  if (! ldfile_try_open_bfd (string, entry))
+			    {
+			      free (string);
+			      return FALSE;
+			    }
+			}
+		    }
+		}
+	      else /* pe_dll_search_prefix not specified.  */
 #endif
-                {
-                  /* Try "libfoo.dll" (preferred dll name).  */
-                  sprintf (string, "%s/lib%s.dll", search->name, filename);
-                  if (! ldfile_try_open_bfd (string, entry))
-                    {
-                      /* Finally, try "foo.dll" (alternate dll name).  */
-                      sprintf (string, "%s/%s.dll", search->name, filename);
-                      if (! ldfile_try_open_bfd (string, entry))
-                        {
-                          free (string);
-                          return FALSE;
-                        }
-                    }
-                }
-            }
-        }
+		{
+		  /* Try "libfoo.dll" (preferred dll name).  */
+		  sprintf (string, "%s/lib%s.dll", search->name, filename);
+		  if (! ldfile_try_open_bfd (string, entry))
+		    {
+		      /* Finally, try "foo.dll" (alternate dll name).  */
+		      sprintf (string, "%s/%s.dll", search->name, filename);
+		      if (! ldfile_try_open_bfd (string, entry))
+			{
+			  free (string);
+			  return FALSE;
+			}
+		    }
+		}
+	    }
+	}
     }
 
   entry->filename = string;
@@ -1923,16 +1959,16 @@ cat >>e${EMULATION_NAME}.c <<EOF
   if (link_info.relocatable && config.build_constructors)
     return
 EOF
-sed $sc ldscripts/${EMULATION_NAME}.xu                 >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocatable) return'     >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xr                 >> e${EMULATION_NAME}.c
-echo '  ; else if (!config.text_read_only) return'     >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xbn                >> e${EMULATION_NAME}.c
-echo '  ; else if (!config.magic_demand_paged) return' >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xn                 >> e${EMULATION_NAME}.c
-echo '  ; else return'                                 >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.x                  >> e${EMULATION_NAME}.c
-echo '; }'                                             >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xu			>> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.relocatable) return'	>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xr			>> e${EMULATION_NAME}.c
+echo '  ; else if (!config.text_read_only) return'	>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xbn			>> e${EMULATION_NAME}.c
+echo '  ; else if (!config.magic_demand_paged) return'	>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xn			>> e${EMULATION_NAME}.c
+echo '  ; else return'					>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.x			>> e${EMULATION_NAME}.c
+echo '; }'						>> e${EMULATION_NAME}.c
 
 cat >>e${EMULATION_NAME}.c <<EOF
 

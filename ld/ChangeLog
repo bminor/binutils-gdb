@@ -1,3 +1,9 @@
+2004-10-13  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 44
+	* emultempl/pe.em (struct orphan_save): Add os_tail.
+	(place_orphan): Backport assorted fixes from elf32.em.
+
 2004-10-12  Bob Wilson  <bob.wilson@acm.org>
 
 	* emultempl/xtensaelf.em: Use ISO C90 formatting.
