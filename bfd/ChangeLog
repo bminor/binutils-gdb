@@ -1,3 +1,10 @@
+Wed Jul  8 16:24:33 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* archive.c (bsd_write_armap): write the timestamp of the
+	archive header to be just a little bit later than the timestamp of
+	the file, otherwise the linker will complain that the index is
+	out of date.
+
 Tue Jul  7 00:23:23 1992  Fred Fish  (fnf@cygnus.com)
 
 	* configure.in: Add m68k-ericsson-*.
@@ -710,6 +717,7 @@ Fri Jan 24 14:40:17 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 	* everything: now modified to use smaller reloc type. Self hosts
 	on sun3 & sun4.
 
+>>>>>>> 1.247
 Sat Jan 18 17:00:16 1992  Fred Fish  (fnf at cygnus.com)
 
 	* config/mh-stratus, config/mt-i860-elf, hosts/h-stratus:
