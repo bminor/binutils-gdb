@@ -1,5 +1,5 @@
 /* stabs.c -- Parse stabs debugging information
-   Copyright (C) 1995, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -40,6 +40,10 @@
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"
 
+#ifndef DIR_SEPARATOR
+#define DIR_SEPARATOR '/'
+#endif
+
 /* The number of predefined XCOFF types.  */
 
 #define XCOFF_TYPE_COUNT 34
@@ -75,8 +79,10 @@ struct stab_handle
   boolean n_opt_found;
   /* The main file name.  */
   char *main_filename;
-  /* A stack of N_BINCL files.  */
+  /* A stack of unfinished N_BINCL files.  */
   struct bincl_file *bincl_stack;
+  /* A list of finished N_BINCL files.  */
+  struct bincl_file *bincl_list;
   /* Whether we are inside a function or not.  */
   boolean within_function;
   /* The address of the end of the function, used if we have seen an
@@ -95,6 +101,9 @@ struct stab_handle
   debug_type xcoff_types[XCOFF_TYPE_COUNT];
   /* Undefined tags.  */
   struct stab_tag *tags;
+  /* Set by parse_stab_type if it sees a structure defined as a cross
+     reference to itself.  Reset by parse_stab_type otherwise.  */
+  boolean self_crossref;
 };
 
 /* A list of these structures is used to hold pending variable
@@ -186,8 +195,10 @@ static boolean parse_stab_tilde_field
 	   debug_type *, boolean *));
 static debug_type parse_stab_array_type
   PARAMS ((PTR, struct stab_handle *, const char **, boolean));
-static void push_bincl PARAMS ((struct stab_handle *, const char *));
+static void push_bincl PARAMS ((struct stab_handle *, const char *, bfd_vma));
 static const char *pop_bincl PARAMS ((struct stab_handle *));
+static boolean find_excl
+  PARAMS ((struct stab_handle *, const char *, bfd_vma));
 static boolean stab_record_variable
   PARAMS ((PTR, struct stab_handle *, const char *, debug_type,
 	   enum debug_var_kind, bfd_vma));
@@ -239,7 +250,14 @@ parse_number (pp, poverflow)
   errno = 0;
   ul = strtoul (*pp, (char **) pp, 0);
   if (ul + 1 != 0 || errno == 0)
-    return (bfd_vma) ul;
+    {
+      /* If bfd_vma is larger than unsigned long, and the number is
+         meant to be negative, we have to make sure that we sign
+         extend properly.  */
+      if (*orig == '-')
+	return (bfd_vma) (bfd_signed_vma) (long) ul;
+      return (bfd_vma) ul;
+    }
 
   /* Note that even though strtoul overflowed, it should have set *pp
      to the end of the number, which is where we want it.  */
@@ -324,7 +342,7 @@ parse_number (pp, poverflow)
   if (poverflow != NULL)
     *poverflow = true;
   else
-    warn_stab (orig, "numeric overflow");
+    warn_stab (orig, _("numeric overflow"));
 
   return 0;
 }
@@ -335,7 +353,7 @@ static void
 bad_stab (p)
      const char *p;
 {
-  fprintf (stderr, "Bad stab: %s\n", p);
+  fprintf (stderr, _("Bad stab: %s\n"), p);
 }
 
 /* Warn about something in a stab string.  */
@@ -345,7 +363,7 @@ warn_stab (p, err)
      const char *p;
      const char *err;
 {
-  fprintf (stderr, "Warning: %s: %s\n", err, p);
+  fprintf (stderr, _("Warning: %s: %s\n"), err, p);
 }
 
 /* Create a handle to parse stabs symbols with.  */
@@ -467,7 +485,7 @@ parse_stab (dhandle, handle, type, desc, value, string)
 
       if (! info->within_function)
 	{
-	  fprintf (stderr, "N_LBRAC not within function\n");
+	  fprintf (stderr, _("N_LBRAC not within function\n"));
 	  return false;
 	}
 
@@ -506,7 +524,7 @@ parse_stab (dhandle, handle, type, desc, value, string)
       --info->block_depth;
       if (info->block_depth < 0)
 	{
-	  fprintf (stderr, "Too many N_RBRACs\n");
+	  fprintf (stderr, _("Too many N_RBRACs\n"));
 	  return false;
 	}
       break;
@@ -535,7 +553,8 @@ parse_stab (dhandle, handle, type, desc, value, string)
 	return true;
 
       /* Just accumulate strings until we see a non N_SO symbol.  If
-         the string starts with '/', we discard the previously
+         the string starts with a directory separator or some other
+	 form of absolute path specification, we discard the previously
          accumulated strings.  */
       if (info->so_string == NULL)
 	info->so_string = xstrdup (string);
@@ -544,7 +563,13 @@ parse_stab (dhandle, handle, type, desc, value, string)
 	  char *f;
 
 	  f = info->so_string;
-	  if (*string == '/')
+
+	  if (   (string[0] == '/')
+	      || (string[0] == DIR_SEPARATOR)
+	      || (   (DIR_SEPARATOR == '\\')
+		  && (string[1] == ':')
+		  && (   (string[2] == DIR_SEPARATOR)
+		      || (string[2] == '/'))))
 	    info->so_string = xstrdup (string);
 	  else
 	    info->so_string = concat (info->so_string, string,
@@ -564,7 +589,7 @@ parse_stab (dhandle, handle, type, desc, value, string)
 
     case N_BINCL:
       /* Start an include file which may be replaced.  */
-      push_bincl (info, string);
+      push_bincl (info, string, value);
       if (! debug_start_source (dhandle, string))
 	return false;
       break;
@@ -578,12 +603,8 @@ parse_stab (dhandle, handle, type, desc, value, string)
     case N_EXCL:
       /* This is a duplicate of a header file named by N_BINCL which
          was eliminated by the linker.  */
-      ++info->files;
-      info->file_types = ((struct stab_types **)
-			  xrealloc ((PTR) info->file_types,
-				    (info->files
-				     * sizeof *info->file_types)));
-      info->file_types[info->files - 1] = NULL;
+      if (! find_excl (info, string, value))
+	return false;
       break;
 
     case N_SLINE:
@@ -703,6 +724,7 @@ parse_stab_string (dhandle, info, stabtype, desc, value, string)
   int type;
   debug_type dtype;
   boolean synonym;
+  boolean self_crossref;
   unsigned int lineno;
   debug_type *slot;
 
@@ -751,7 +773,7 @@ parse_stab_string (dhandle, info, stabtype, desc, value, string)
 	  /* SunPRO (3.0 at least) static variable encoding.  */
 	  break;
 	default:
-	  warn_stab (string, "unknown C++ encoded name");
+	  warn_stab (string, _("unknown C++ encoded name"));
 	  break;
 	}
     }
@@ -1035,6 +1057,11 @@ parse_stab_string (dhandle, info, stabtype, desc, value, string)
       if (name == NULL)
 	return true;
 
+      /* INFO->SELF_CROSSREF is set by parse_stab_type if this type is
+         a cross reference to itself.  These are generated by some
+         versions of g++.  */
+      self_crossref = info->self_crossref;
+
       dtype = debug_tag_type (dhandle, name, dtype);
       if (dtype == DEBUG_TYPE_NULL)
 	return false;
@@ -1042,21 +1069,23 @@ parse_stab_string (dhandle, info, stabtype, desc, value, string)
 	*slot = dtype;
 
       /* See if we have a cross reference to this tag which we can now
-         fill in.  */
-      {
-	register struct stab_tag **pst;
+         fill in.  Avoid filling in a cross reference to ourselves,
+         because that would lead to circular debugging information.  */
+      if (! self_crossref)
+	{
+	  register struct stab_tag **pst;
 
-	for (pst = &info->tags; *pst != NULL; pst = &(*pst)->next)
-	  {
-	    if ((*pst)->name[0] == name[0]
-		&& strcmp ((*pst)->name, name) == 0)
-	      {
-		(*pst)->slot = dtype;
-		*pst = (*pst)->next;
-		break;
-	      }
-	  }
-      }
+	  for (pst = &info->tags; *pst != NULL; pst = &(*pst)->next)
+	    {
+	      if ((*pst)->name[0] == name[0]
+		  && strcmp ((*pst)->name, name) == 0)
+		{
+		  (*pst)->slot = dtype;
+		  *pst = (*pst)->next;
+		  break;
+		}
+	    }
+	}
 
       if (synonym)
 	{
@@ -1156,6 +1185,8 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
 
   size = -1;
   stringp = false;
+
+  info->self_crossref = false;
 
   /* Read type number if present.  The type number may be omitted.
      for instance in a two-dimensional array declared with type
@@ -1268,7 +1299,7 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
 	  default:
 	    /* Complain and keep going, so compilers can invent new
 	       cross-reference types.  */
-	    warn_stab (orig, "unrecognized cross reference type");
+	    warn_stab (orig, _("unrecognized cross reference type"));
 	    code = DEBUG_KIND_STRUCT;
 	    break;
 	  }
@@ -1294,6 +1325,15 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
 		return DEBUG_TYPE_NULL;
 	      }
 	  }
+
+	/* Some versions of g++ can emit stabs like
+	       fleep:T20=xsfleep:
+	   which define structures in terms of themselves.  We need to
+	   tell the caller to avoid building a circular structure.  */
+	if (typename != NULL
+	    && strncmp (typename, *pp, p - *pp) == 0
+	    && typename[p - *pp] == '\0')
+	  info->self_crossref = true;
 
 	dtype = stab_find_tagged_type (dhandle, info, *pp, p - *pp, code);
 
@@ -1715,7 +1755,7 @@ parse_stab_range_type (dhandle, info, typename, pp, typenums)
 	    return debug_make_int_type (dhandle, 8, true);
 	}
 
-      warn_stab (orig, "numeric overflow");
+      warn_stab (orig, _("numeric overflow"));
     }
 
   if (index_type == DEBUG_TYPE_NULL)
@@ -1800,7 +1840,7 @@ parse_stab_range_type (dhandle, info, typename, pp, typenums)
     {
       /* Does this actually ever happen?  Is that why we are worrying
          about dealing with it rather than just calling error_type?  */
-      warn_stab (orig, "missing index type");
+      warn_stab (orig, _("missing index type"));
       index_type = debug_make_int_type (dhandle, 4, false);
     }
 
@@ -2127,7 +2167,7 @@ parse_stab_baseclasses (dhandle, info, pp, retp)
 	  virtual = true;
 	  break;
 	default:
-	  warn_stab (orig, "unknown virtual character for baseclass");
+	  warn_stab (orig, _("unknown virtual character for baseclass"));
 	  virtual = false;
 	  break;
 	}
@@ -2145,7 +2185,7 @@ parse_stab_baseclasses (dhandle, info, pp, retp)
 	  visibility = DEBUG_VISIBILITY_PUBLIC;
 	  break;
 	default:
-	  warn_stab (orig, "unknown visibility character for baseclass");
+	  warn_stab (orig, _("unknown visibility character for baseclass"));
 	  visibility = DEBUG_VISIBILITY_PUBLIC;
 	  break;
 	}
@@ -2337,13 +2377,13 @@ parse_stab_cpp_abbrev (dhandle, info, pp, retp)
       typename = debug_get_type_name (dhandle, context);
       if (typename == NULL)
 	{
-	  warn_stab (orig, "unnamed $vb type");
+	  warn_stab (orig, _("unnamed $vb type"));
 	  typename = "FOO";
 	}
       name = concat ("_vb$", typename, (const char *) NULL);
       break;
     default:
-      warn_stab (orig, "unrecognized C++ abbreviation");
+      warn_stab (orig, _("unrecognized C++ abbreviation"));
       name = "INVALID_CPLUSPLUS_ABBREV";
       break;
     }
@@ -2423,7 +2463,7 @@ parse_stab_one_struct_field (dhandle, info, pp, p, retp, staticsp)
 	  visibility = DEBUG_VISIBILITY_PUBLIC;
 	  break;
 	default:
-	  warn_stab (orig, "unknown visibility character for field");
+	  warn_stab (orig, _("unknown visibility character for field"));
 	  visibility = DEBUG_VISIBILITY_PUBLIC;
 	  break;
 	}
@@ -2679,7 +2719,7 @@ parse_stab_members (dhandle, info, tagname, pp, typenums, retp)
 	      /* File compiled with g++ version 1; no information.  */
 	      break;
 	    default:
-	      warn_stab (orig, "const/volatile indicator missing");
+	      warn_stab (orig, _("const/volatile indicator missing"));
 	      break;
 	    }
 
@@ -2919,7 +2959,7 @@ parse_stab_argtypes (dhandle, info, class_type, fieldname, tagname,
 	  opname = cplus_mangle_opname (fieldname + 3, 0);
 	  if (opname == NULL)
 	    {
-	      fprintf (stderr, "No mangling for \"%s\"\n", fieldname);
+	      fprintf (stderr, _("No mangling for \"%s\"\n"), fieldname);
 	      return DEBUG_TYPE_NULL;
 	    }
 	  mangled_name_len += strlen (opname);
@@ -2944,7 +2984,7 @@ parse_stab_argtypes (dhandle, info, class_type, fieldname, tagname,
       *pphysname = physname;
     }
 
-  if (*argtypes == '\0')
+  if (*argtypes == '\0' || is_destructor)
     {
       args = (debug_type *) xmalloc (sizeof *args);
       *args = NULL;
@@ -3143,26 +3183,43 @@ parse_stab_array_type (dhandle, info, pp, stringp)
 				upper, stringp);
 }
 
-/* Keep a stack of N_BINCL include files.  */
+/* This struct holds information about files we have seen using
+   N_BINCL.  */
 
 struct bincl_file
 {
+  /* The next N_BINCL file.  */
   struct bincl_file *next;
+  /* The next N_BINCL on the stack.  */
+  struct bincl_file *next_stack;
+  /* The file name.  */
   const char *name;
+  /* The hash value.  */
+  bfd_vma hash;
+  /* The file index.  */
+  unsigned int file;
+  /* The list of types defined in this file.  */
+  struct stab_types *file_types;
 };
 
 /* Start a new N_BINCL file, pushing it onto the stack.  */
 
 static void
-push_bincl (info, name)
+push_bincl (info, name, hash)
      struct stab_handle *info;
      const char *name;
+     bfd_vma hash;
 {
   struct bincl_file *n;
 
   n = (struct bincl_file *) xmalloc (sizeof *n);
-  n->next = info->bincl_stack;
+  n->next = info->bincl_list;
+  n->next_stack = info->bincl_stack;
   n->name = name;
+  n->hash = hash;
+  n->file = info->files;
+  n->file_types = NULL;
+  info->bincl_list = n;
   info->bincl_stack = n;
 
   ++info->files;
@@ -3170,7 +3227,7 @@ push_bincl (info, name)
 		      xrealloc ((PTR) info->file_types,
 				(info->files
 				 * sizeof *info->file_types)));
-  info->file_types[info->files - 1] = NULL;
+  info->file_types[n->file] = NULL;
 }
 
 /* Finish an N_BINCL file, at an N_EINCL, popping the name off the
@@ -3185,11 +3242,44 @@ pop_bincl (info)
   o = info->bincl_stack;
   if (o == NULL)
     return info->main_filename;
-  info->bincl_stack = o->next;
-  free (o);
+  info->bincl_stack = o->next_stack;
+
+  o->file_types = info->file_types[o->file];
+
   if (info->bincl_stack == NULL)
     return info->main_filename;
   return info->bincl_stack->name;
+}
+
+/* Handle an N_EXCL: get the types from the corresponding N_BINCL.  */
+
+static boolean
+find_excl (info, name, hash)
+     struct stab_handle *info;
+     const char *name;
+     bfd_vma hash;
+{
+  struct bincl_file *l;
+
+  ++info->files;
+  info->file_types = ((struct stab_types **)
+		      xrealloc ((PTR) info->file_types,
+				(info->files
+				 * sizeof *info->file_types)));
+
+  for (l = info->bincl_list; l != NULL; l = l->next)
+    if (l->hash == hash && strcmp (l->name, name) == 0)
+      break;
+  if (l == NULL)
+    {
+      warn_stab (name, _("Undefined N_EXCL"));
+      info->file_types[info->files - 1] = NULL;
+      return true;
+    }
+
+  info->file_types[info->files - 1] = l->file_types;
+
+  return true;
 }
 
 /* Handle a variable definition.  gcc emits variable definitions for a
@@ -3270,12 +3360,12 @@ stab_find_slot (info, typenums)
 
   if (filenum < 0 || (unsigned int) filenum >= info->files)
     {
-      fprintf (stderr, "Type file number %d out of range\n", filenum);
+      fprintf (stderr, _("Type file number %d out of range\n"), filenum);
       return NULL;
     }
   if (index < 0)
     {
-      fprintf (stderr, "Type index number %d out of range\n", index);
+      fprintf (stderr, _("Type index number %d out of range\n"), index);
       return NULL;
     }
 
@@ -3362,7 +3452,7 @@ stab_xcoff_builtin_type (dhandle, info, typenum)
 
   if (typenum >= 0 || typenum < -XCOFF_TYPE_COUNT)
     {
-      fprintf (stderr, "Unrecognized XCOFF type %d\n", typenum);
+      fprintf (stderr, _("Unrecognized XCOFF type %d\n"), typenum);
       return DEBUG_TYPE_NULL;
     }
   if (info->xcoff_types[-typenum] != NULL)
@@ -3661,7 +3751,7 @@ static void
 stab_bad_demangle (s)
      const char *s;
 {
-  fprintf (stderr, "bad mangled name `%s'\n", s);
+  fprintf (stderr, _("bad mangled name `%s'\n"), s);
 }
 
 /* Get a count from a stab string.  */
@@ -3757,7 +3847,7 @@ stab_demangle_argtypes (dhandle, info, physname, pvarargs)
   minfo.typestrings = NULL;
 
   if (minfo.args == NULL)
-    fprintf (stderr, "no argument types in mangled string\n");
+    fprintf (stderr, _("no argument types in mangled string\n"));
 
   *pvarargs = minfo.varargs;
   return minfo.args;
