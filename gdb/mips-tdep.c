@@ -3884,9 +3884,9 @@ mips_gdbarch_init (struct gdbarch_info info,
     {
       /* MIPS needs to be pedantic about which ABI the object is
          using. */
-      if (gdbarch_tdep (current_gdbarch)->elf_flags != elf_flags)
+      if (gdbarch_tdep (arches->gdbarch)->elf_flags != elf_flags)
 	continue;
-      if (gdbarch_tdep (current_gdbarch)->mips_abi != mips_abi)
+      if (gdbarch_tdep (arches->gdbarch)->mips_abi != mips_abi)
 	continue;
       return arches->gdbarch;
     }
