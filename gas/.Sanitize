@@ -37,6 +37,7 @@ README
 README-vms-dbg
 README.coff
 README.rich
+a.out.gnu.h
 app.c
 as.c
 as.h
@@ -89,7 +90,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.3  1991/10/10 11:58:04  rich
+# Revision 1.4  1991/12/09 11:58:44  tiemann
+# Keep a.out.gnu.h.
+#
+# Revision 1.3  1991/10/10  11:58:04  rich
 # updating
 #
 # Revision 1.2  1991/09/02  01:05:04  rich
