@@ -843,8 +843,26 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	 object, we remove the old definition.  */
       if ((*sym_hash)->root.type == bfd_link_hash_indirect)
 	h = *sym_hash;
-      h->root.type = bfd_link_hash_new;
-      h->root.u.undef.abfd = NULL;
+
+      if ((h->root.und_next || info->hash->undefs_tail == &h->root)
+	  && bfd_is_und_section (sec))
+	{
+	  /* If the new symbol is undefined and the old symbol was
+	     also undefined before, we need to make sure
+	     _bfd_generic_link_add_one_symbol doesn't mess
+	     up the linker hash table undefs list. Since the old
+	     definition came from a dynamic object, it is still on the
+	     undefs list.  */
+	  h->root.type = bfd_link_hash_undefined;
+	  /* FIXME: What if the new symbol is weak undefined?  */
+	  h->root.u.undef.abfd = abfd;
+	}
+      else
+	{
+	  h->root.type = bfd_link_hash_new;
+	  h->root.u.undef.abfd = NULL;
+	}
+
       if (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)
 	{
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_DEF_DYNAMIC;
