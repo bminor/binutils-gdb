@@ -1,3 +1,17 @@
+Mon Jul 26 18:02:43 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* Makefile.in (clean): if testsuite does not exist, then skip it.
+
+Fri Jul 23 14:13:25 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (prev_insn_unreordered,
+	prev_prev_insn_unreordered): New static variables.
+	(append_insn): Don't swap branch instruction if
+	prev_prev_insn_unreordered (see comment).
+	(mips_no_prev_insn): Clear the unreordered variables.
+	(s_mipsset): When turning on reordering, set the unreordered
+	variables.
+
 Fri Jul 23 13:09:44 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/obj-elf.c (obj_elf_section): Sections ".init" and ".fini"
