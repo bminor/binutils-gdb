@@ -1,3 +1,15 @@
+2003-05-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* dwarf2expr.c (new_dwarf_expr_context): Set ``stack_len'' to
+	correctly indicate an empty stack and ``stack_allocated'' to the
+	indicate the number of elements initially allocated.
+	(dwarf_expr_grow_stack): Simplify method for computing new
+	stack size.  Don't loop infinitely if ``stack_len'' is zero.
+	(execute_stack_op): Move ``ctx->in_reg'' initialization
+	out of loop.  Allow DW_OP_reg0 ... DW_OP_reg31 and DW_OP_regx to
+	be used in conjuction with DW_OP_piece.  Revise error message
+	accordingly.
+
 2003-05-14  Theodore A. Roth  <troth@openavr.org>
 
 	* MAINTAINERS: Update my email address.

@@ -39,8 +39,9 @@ new_dwarf_expr_context (void)
 {
   struct dwarf_expr_context *retval;
   retval = xcalloc (1, sizeof (struct dwarf_expr_context));
-  retval->stack_len = 10;
-  retval->stack = xmalloc (10 * sizeof (CORE_ADDR));
+  retval->stack_len = 0;
+  retval->stack_allocated = 10;
+  retval->stack = xmalloc (retval->stack_allocated * sizeof (CORE_ADDR));
   return retval;
 }
 
@@ -61,12 +62,10 @@ dwarf_expr_grow_stack (struct dwarf_expr_context *ctx, size_t need)
 {
   if (ctx->stack_len + need > ctx->stack_allocated)
     {
-      size_t templen = ctx->stack_len * 2;
-      while (templen < (ctx->stack_len + need))
-	   templen *= 2;
+      size_t newlen = ctx->stack_len + need + 10;
       ctx->stack = xrealloc (ctx->stack,
-			     templen * sizeof (CORE_ADDR));
-      ctx->stack_allocated = templen;
+			     newlen * sizeof (CORE_ADDR));
+      ctx->stack_allocated = newlen;
     }
 }
 
@@ -228,6 +227,8 @@ static void
 execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 		  unsigned char *op_end)
 {
+  ctx->in_reg = 0;
+
   while (op_ptr < op_end)
     {
       enum dwarf_location_atom op = *op_ptr++;
@@ -235,8 +236,6 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
       ULONGEST uoffset, reg;
       LONGEST offset;
       int bytes_read;
-
-      ctx->in_reg = 0;
 
       switch (op)
 	{
@@ -355,10 +354,9 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	case DW_OP_reg29:
 	case DW_OP_reg30:
 	case DW_OP_reg31:
-	  /* NOTE: in the presence of DW_OP_piece this check is incorrect.  */
-	  if (op_ptr != op_end)
+	  if (op_ptr != op_end && *op_ptr != DW_OP_piece)
 	    error ("DWARF-2 expression error: DW_OP_reg operations must be "
-		   "used alone.");
+		   "used either alone or in conjuction with DW_OP_piece.");
 
 	  result = op - DW_OP_reg0;
 	  ctx->in_reg = 1;
@@ -367,9 +365,9 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 
 	case DW_OP_regx:
 	  op_ptr = read_uleb128 (op_ptr, op_end, &reg);
-	  if (op_ptr != op_end)
+	  if (op_ptr != op_end && *op_ptr != DW_OP_piece)
 	    error ("DWARF-2 expression error: DW_OP_reg operations must be "
-		   "used alone.");
+		   "used either alone or in conjuction with DW_OP_piece.");
 
 	  result = reg;
 	  ctx->in_reg = 1;
