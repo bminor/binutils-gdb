@@ -54,6 +54,32 @@ if [istarget "a29k-*-udi"] then {
     continue
 }
 
+
+# Call FUNC with no arguments, and expect to see the regexp RESULT in
+# the output.  If we get back the error message "Function return value
+# unknown", call that an unsupported test; on some architectures, it's
+# impossible to find structs returned by value reliably.
+proc call_struct_func { func result } {
+    global gdb_prompt
+    
+    set command "p ${func}()"
+    send_gdb "${command}\n"
+    gdb_expect {
+        -re "$result\[\r\n\]+$gdb_prompt $" {
+            pass "$command"
+        }
+        -re "Function return value unknown.\[\r\n\]+$gdb_prompt $" {
+            unsupported "$command"
+        }
+        -re "$gdb_prompt $" {
+            fail "$command"
+        }
+        timeout {
+            fail "$command (timeout)"
+        }
+    }
+}
+
 # FIXME:  Before calling this proc, we should probably verify that
 # we can call inferior functions and get a valid integral value
 # returned.
@@ -67,19 +93,19 @@ proc do_function_calls {} {
     global gdb_prompt
 
     # First, call the "fun" functions and examine the value they return.
-    gdb_test "p fun1()" " = {a = 49 '1'}"
-    gdb_test "p fun2()" " = {a = 97 'a', b = 98 'b'}"
-    gdb_test "p fun3()" " = {a = 65 'A', b = 66 'B', c = 67 'C'}"
-    gdb_test "p fun4()" " = {a = 49 '1', b = 50 '2', c = 51 '3', d = 52 '4'}"
-    gdb_test "p fun5()" " = {a = 97 'a', b = 98 'b', c = 99 'c', d = 100 'd', e = 101 'e'}"
-    gdb_test "p fun6()" " = {a = 65 'A', b = 66 'B', c = 67 'C', d = 68 'D', e = 69 'E', f = 70 'F'}"
-    gdb_test "p fun7()" " = {a = 49 '1', b = 50 '2', c = 51 '3', d = 52 '4', e = 53 '5', f = 54 '6', g = 55 '7'}"
-    gdb_test "p fun8()" " = {a = 49 '1', b = 50 '2', c = 51 '3', d = 52 '4', e = 53 '5', f = 54 '6', g = 55 '7', h = 56 '8'}"
-    gdb_test "p fun9()" " = {a = 97 'a', b = 98 'b', c = 99 'c', d = 100 'd', e = 101 'e', f = 102 'f', g = 103 'g', h = 104 'h', i = 105 'i'}"
-    gdb_test "p fun10()" " = {a = 65 'A', b = 66 'B', c = 67 'C', d = 68 'D', e = 69 'E', f = 70 'F', g = 71 'G', h = 72 'H', i = 73 'I', j = 74 'J'}"
-    gdb_test "p fun11()" " = {a = 49 '1', b = 50 '2', c = 51 '3', d = 52 '4', e = 53 '5', f = 54 '6', g = 55 '7', h = 56 '8', i = 57 '9', j = 65 'A', k = 66 'B'}"
-    gdb_test "p fun12()" " = {a = 65 'A', b = 66 'B', c = 67 'C', d = 68 'D', e = 69 'E', f = 70 'F', g = 71 'G', h = 72 'H', i = 73 'I', j = 74 'J', k = 75 'K', l = 76 'L'}"
-    gdb_test "p fun16()" " = {a = 97 'a', b = 98 'b', c = 99 'c', d = 100 'd', e = 101 'e', f = 102 'f', g = 103 'g', h = 104 'h', i = 105 'i', j = 106 'j', k = 107 'k', l = 108 'l', m = 109 'm', n = 110 'n', o = 111 'o', p = 112 'p'}"
+    call_struct_func "fun1" " = {a = 49 '1'}"
+    call_struct_func "fun2" " = {a = 97 'a', b = 98 'b'}"
+    call_struct_func "fun3" " = {a = 65 'A', b = 66 'B', c = 67 'C'}"
+    call_struct_func "fun4" " = {a = 49 '1', b = 50 '2', c = 51 '3', d = 52 '4'}"
+    call_struct_func "fun5" " = {a = 97 'a', b = 98 'b', c = 99 'c', d = 100 'd', e = 101 'e'}"
+    call_struct_func "fun6" " = {a = 65 'A', b = 66 'B', c = 67 'C', d = 68 'D', e = 69 'E', f = 70 'F'}"
+    call_struct_func "fun7" " = {a = 49 '1', b = 50 '2', c = 51 '3', d = 52 '4', e = 53 '5', f = 54 '6', g = 55 '7'}"
+    call_struct_func "fun8" " = {a = 49 '1', b = 50 '2', c = 51 '3', d = 52 '4', e = 53 '5', f = 54 '6', g = 55 '7', h = 56 '8'}"
+    call_struct_func "fun9" " = {a = 97 'a', b = 98 'b', c = 99 'c', d = 100 'd', e = 101 'e', f = 102 'f', g = 103 'g', h = 104 'h', i = 105 'i'}"
+    call_struct_func "fun10" " = {a = 65 'A', b = 66 'B', c = 67 'C', d = 68 'D', e = 69 'E', f = 70 'F', g = 71 'G', h = 72 'H', i = 73 'I', j = 74 'J'}"
+    call_struct_func "fun11" " = {a = 49 '1', b = 50 '2', c = 51 '3', d = 52 '4', e = 53 '5', f = 54 '6', g = 55 '7', h = 56 '8', i = 57 '9', j = 65 'A', k = 66 'B'}"
+    call_struct_func "fun12" " = {a = 65 'A', b = 66 'B', c = 67 'C', d = 68 'D', e = 69 'E', f = 70 'F', g = 71 'G', h = 72 'H', i = 73 'I', j = 74 'J', k = 75 'K', l = 76 'L'}"
+    call_struct_func "fun16" " = {a = 97 'a', b = 98 'b', c = 99 'c', d = 100 'd', e = 101 'e', f = 102 'f', g = 103 'g', h = 104 'h', i = 105 'i', j = 106 'j', k = 107 'k', l = 108 'l', m = 109 'm', n = 110 'n', o = 111 'o', p = 112 'p'}"
 
     # Now call the Fun functions to set the L* variables.  This
     # tests that gdb properly passes structures to functions.
