@@ -1,3 +1,9 @@
+1998-12-11  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	From J.T. Conklin  <jtc@redbacknetworks.com>:
+	* i386-stub.c (handle_exception): Add support for 'P' command.
+	(NUMREGS): New macro.
+
 start-sanitize-sky
 1998-12-11  Jeff Law (law@cygnus.com)
 
