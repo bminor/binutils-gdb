@@ -167,6 +167,14 @@ the assembler and linker to generate correct code for interworking
 between Arm and Thumb instructions and should be used even if
 interworking is not going to be performed.
 
+@cindex @code{thumb_set} directive, ARM
+@item .thumb_set
+This performs the equivalent of a @code{.set} directive in that it
+creates a symbol which is an alias for another symbol (possibly not yet
+defined).  This directive also has the added property in that it marks
+the aliased symbol as being a thumb function entry point, in the same
+way that the @code{.thumb_func} directive does.
+
 @cindex @code{.ltorg} directive, ARM
 @item .ltorg
 This directive causes the current contents of the literal pool to be

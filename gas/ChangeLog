@@ -1,6 +1,10 @@
+1999-07-08  Nick Clifton  <nickc@cygnus.com>
+
+	* doc/c-arm.texi (ARM Directives): Document .thumb_set directive. 
+
 1999-07-07  Nick Clifton  <nickc@cygnus.com>
 
-	* config/tc-v850.c (v850_comm): Use symbol_get_obj() ratehr than
+	* config/tc-v850.c (v850_comm): Use symbol_get_obj() rather than
 	accessing symbolP directly.
 
 Tue Jul  6 10:41:42 1999  Jeffrey A Law  (law@cygnus.com)
