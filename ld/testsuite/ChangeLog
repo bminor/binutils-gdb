@@ -1,3 +1,9 @@
+2001-04-29  H.J. Lu  <hjl@gnu.org>
+
+	* ld-shared/symbolic.dat: New.
+
+	* ld-shared/shared.exp: Also check -Bsymbolic.
+
 2001-04-28  Andreas Jaeger  <aj@suse.de>
 
 	* ld-scripts/phdrs.exp: x86-64 is a 64 bit ELF platform, handle it
