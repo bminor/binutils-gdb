@@ -5997,7 +5997,7 @@ bfd_get_elf_phdrs (abfd, phdrs)
 
 void
 bfd_elf_sprintf_vma (abfd, buf, value)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      char *buf;
      bfd_vma value;
 {
@@ -6010,12 +6010,14 @@ bfd_elf_sprintf_vma (abfd, buf, value)
   else
     {
       if (i_ehdrp->e_ident[EI_CLASS] == ELFCLASS64)
+	{
 #if BFD_HOST_64BIT_LONG
-	sprintf (buf, "%016lx", value);
+	  sprintf (buf, "%016lx", value);
 #else
-	sprintf (buf, "%08lx%08lx", _bfd_int64_high (value),
-		 _bfd_int64_low (value));
+	  sprintf (buf, "%08lx%08lx", _bfd_int64_high (value),
+		   _bfd_int64_low (value));
 #endif
+	}
       else
 	sprintf (buf, "%08lx", (unsigned long) (value & 0xffffffff));
     }
@@ -6026,7 +6028,7 @@ bfd_elf_sprintf_vma (abfd, buf, value)
 
 void
 bfd_elf_fprintf_vma (abfd, stream, value)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      PTR stream;
      bfd_vma value;
 {
@@ -6039,12 +6041,14 @@ bfd_elf_fprintf_vma (abfd, stream, value)
   else
     {
       if (i_ehdrp->e_ident[EI_CLASS] == ELFCLASS64)
+	{
 #if BFD_HOST_64BIT_LONG
-	fprintf ((FILE *) stream, "%016lx", value);
+	  fprintf ((FILE *) stream, "%016lx", value);
 #else
-	fprintf ((FILE *) stream, "%08lx%08lx",
-		 _bfd_int64_high (value), _bfd_int64_low (value));
+	  fprintf ((FILE *) stream, "%08lx%08lx",
+		   _bfd_int64_high (value), _bfd_int64_low (value));
 #endif
+	}
       else
 	fprintf ((FILE *) stream, "%08lx",
 		 (unsigned long) (value & 0xffffffff));

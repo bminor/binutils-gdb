@@ -1,5 +1,9 @@
 2001-08-10  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf.c (bfd_elf_sprintf_vma): Add ATTRIBUTE_UNUSED to quiet
+	warning if not BFD64.  Add braces so emacs auto format works.
+	(bfd_elf_fprintf_vma): Likewise.
+
 	* libxcoff.h (struct xcoff_backend_data_rec): Constify src param
 	of _xcoff_swap_ld*.
 	* coff-rs6000.c (xcoff_swap_ldhdr_in): Modify type of external
