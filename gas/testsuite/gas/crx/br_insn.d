@@ -32,7 +32,7 @@ Disassembly of section .text:
 0000002c <bhi>:
   2c:	7e 74 7f 00 	bhi	\*\+0xfe
   30:	7e 74 01 80 	bhi	\*\-0xfffe
-  34:	ff 74       	bhi	\*\-0x2
+  34:	01 74       	bhi	\*\+0x2
 
 00000036 <bls>:
   36:	ff 75       	bls	\*\-0x2
