@@ -1,5 +1,17 @@
 Mon Jan 24 12:38:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* bfd/aoutx.h (aout_link_input_section_std,
+	aout_link_input_section_ext): Pass additional arguments to
+	reloc_overflow callback.
+	* coff-alpha.c (alpha_ecoff_get_relocated_section_contents,
+	alpha_relocat_section): Likewise.
+	* coff-h8300.c (h8300_reloc16_extra_cases): Likewise.
+	* coff-h8500.c (extra_case): Likewise.
+	* coff-mips.c (mips_relocate_section): Likewise.
+	* coff-z8k.c (extra_case): Likewise.
+	* elf32-hppa.c (hppa_elf_stub_finish): Likewise.
+	* reloc.c (bfd_generic_get_relocated_section_contents): Likewise.
+
 	* bout.c (calljx_callback, callj_callback): Use get_value to get
 	the symbol value and check for undefined symbols.
 	(get_value): If the symbol is undefined, look it up in the linker

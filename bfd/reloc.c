@@ -1646,7 +1646,9 @@ bfd_generic_get_relocated_section_contents (abfd, link_info, link_order, data,
 	  break;
 	case bfd_reloc_overflow:
 	  if (! ((*link_info->callbacks->reloc_overflow)
-		 (link_info, input_bfd, input_section, (*parent)->address)))
+		 (link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
+		  (*parent)->howto->name, (*parent)->addend,
+		  input_bfd, input_section, (*parent)->address)))
 	    return NULL;
 	  break;
 	case bfd_reloc_outofrange:

@@ -1,5 +1,5 @@
 /* BFD back-end for Zilog Z800n COFF binaries.
-   Copyright 1992 Free Software Foundation, Inc.
+   Copyright 1992, 1993 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
@@ -21,70 +21,35 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
-#include "libbfd.h"
 #include "obstack.h"
+#include "libbfd.h"
+#include "bfdlink.h"
 #include "coff/z8k.h"
 #include "coff/internal.h"
 #include "libcoff.h"
-#include "seclet.h"
-
-extern bfd_error_vector_type bfd_error_vector;
-
-/* Dummy for now */
-static bfd_reloc_status_type
-DEFUN (func_da, (abfd, reloc_entry, symbol, data, input_section, output_bfd),
-       bfd * abfd AND
-       arelent * reloc_entry AND
-       struct symbol_cache_entry *symbol AND
-       PTR data AND
-       asection * input_section AND
-       bfd * output_bfd)
-{
-}
-
-/* Dummy for now */
-static bfd_reloc_status_type
-DEFUN (func_imm8, (abfd, reloc_entry, symbol, data, input_section, output_bfd),
-       bfd * abfd AND
-       arelent * reloc_entry AND
-       struct symbol_cache_entry *symbol AND
-       PTR data AND
-       asection * input_section AND
-       bfd * output_bfd)
-{
-}
-
-/* Dummy for now */
-static bfd_reloc_status_type
-DEFUN (func_jr, (abfd, reloc_entry, symbol, data, input_section, output_bfd),
-       bfd * abfd AND
-       arelent * reloc_entry AND
-       struct symbol_cache_entry *symbol AND
-       PTR data AND
-       asection * input_section AND
-       bfd * output_bfd)
-{
-}
-
 
 static reloc_howto_type r_imm32 =
-HOWTO (R_IMM32, 0, 1, 32, false, 0, true,
-       true, func_jr, "r_imm32", true, 0xffffffff, 0xffffffff, false);
+HOWTO (R_IMM32, 0, 1, 32, false, 0,
+       complain_overflow_bitfield, 0, "r_imm32", true, 0xffffffff,
+       0xffffffff, false);
 
 static reloc_howto_type r_imm4l =
-HOWTO (R_IMM4L, 0, 1, 4, false, 0, true,
-       true, func_jr, "r_imm4l", true, 0xf, 0xf, false);
+HOWTO (R_IMM4L, 0, 1, 4, false, 0,
+       complain_overflow_bitfield, 0, "r_imm4l", true, 0xf, 0xf, false);
 
 static reloc_howto_type r_da =
-HOWTO (R_DA, 0, 1, 16, false, 0, true,
-       true, func_da, "r_da", true, 0x0000ffff, 0x0000ffff, false);
+HOWTO (R_IMM16, 0, 1, 16, false, 0,
+       complain_overflow_bitfield, 0, "r_da", true, 0x0000ffff, 0x0000ffff,
+       false);
 
 static reloc_howto_type r_imm8 =
-HOWTO (R_IMM8, 0, 1, 8, false, 0, true,
-       true, func_imm8, "r_imm8", true, 0x000000ff, 0x000000ff, false);
+HOWTO (R_IMM8, 0, 1, 8, false, 0,
+       complain_overflow_bitfield, 0, "r_imm8", true, 0x000000ff, 0x000000ff,
+       false);
 
 static reloc_howto_type r_jr =
-HOWTO (R_JR, 0, 1, 8, true, 0, true, true, func_jr, "r_jr", true, 0, 0, true);
+HOWTO (R_JR, 0, 1, 8, true, 0, complain_overflow_signed, 0,
+       "r_jr", true, 0, 0, true);
 
 /* Turn a howto into a reloc number */
 
@@ -122,11 +87,11 @@ DEFUN (rtype2howto, (internal, dst),
   switch (dst->r_type)
     {
       default:
-      printf ("BAD %x\n", dst->r_type);
+      fprintf (stderr, "BAD 0x%x\n", dst->r_type);
     case R_IMM8:
       internal->howto = &r_imm8;
       break;
-    case R_DA:
+     case R_IMM16:
       internal->howto = &r_da;
       break;
     case R_JR:
@@ -180,25 +145,30 @@ DEFUN (reloc_processing, (relent, reloc, symbols, abfd, section),
 }
 
 static void
-extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
+extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
      bfd *in_abfd;
-     bfd_seclet_type *seclet;
+     struct bfd_link_info *link_info;
+     struct bfd_link_order *link_order;
      arelent *reloc;
      bfd_byte *data;
      unsigned int *src_ptr;
      unsigned int *dst_ptr;
 {
+  asection *input_section = link_order->u.indirect.section;
+
   switch (reloc->howto->type)
     {
     case R_IMM8:
-      bfd_put_8 (in_abfd, bfd_coff_reloc16_get_value (reloc, seclet),
+      bfd_put_8 (in_abfd,
+		 bfd_coff_reloc16_get_value (reloc, link_info, input_section),
 		 data + *dst_ptr);
       (*dst_ptr) += 1;
       (*src_ptr) += 1;
       break;
 
     case R_IMM32:
-      bfd_put_32 (in_abfd, bfd_coff_reloc16_get_value (reloc, seclet),
+      bfd_put_32 (in_abfd,
+		  bfd_coff_reloc16_get_value (reloc, link_info, input_section),
 		  data + *dst_ptr);
       (*dst_ptr) += 4;
       (*src_ptr) += 4;
@@ -206,15 +176,18 @@ extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
 
     case R_IMM4L:
       bfd_put_8 (in_abfd,
-		 (bfd_get_8 (in_abfd, data + *dst_ptr) & 0xf0) 
-		 | (0x0f & bfd_coff_reloc16_get_value (reloc, seclet)),
+		 ((bfd_get_8 (in_abfd, data + *dst_ptr) & 0xf0) 
+		  | (0x0f
+		     & bfd_coff_reloc16_get_value (reloc, link_info,
+						   input_section))),
 		 data + *dst_ptr);
       (*dst_ptr) += 1;
       (*src_ptr) += 1;
       break;
 
-    case R_DA:
-      bfd_put_16 (in_abfd, bfd_coff_reloc16_get_value (reloc, seclet),
+    case R_IMM16:
+      bfd_put_16 (in_abfd,
+		  bfd_coff_reloc16_get_value (reloc, link_info, input_section),
 		  data + *dst_ptr);
       (*dst_ptr) += 2;
       (*src_ptr) += 2;
@@ -222,10 +195,11 @@ extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
 
     case R_JR:
       {
-	bfd_vma dst = bfd_coff_reloc16_get_value (reloc, seclet);
-	bfd_vma dot = seclet->offset
-	+ *dst_ptr
-	+ seclet->u.indirect.section->output_section->vma;
+	bfd_vma dst = bfd_coff_reloc16_get_value (reloc, link_info,
+						  input_section);
+	bfd_vma dot = (link_order->offset
+		       + *dst_ptr
+		       + input_section->output_section->vma);
 	int gap = dst - dot - 1;/* -1 since were in the odd byte of the
 				    word and the pc's been incremented */
 
@@ -234,7 +208,11 @@ extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
 	gap /= 2;
 	if (gap > 128 || gap < -128)
 	  {
-	    bfd_error_vector.reloc_value_truncated (reloc, seclet);
+	    if (! ((*link_info->callbacks->reloc_overflow)
+		   (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		    reloc->howto->name, reloc->addend, input_section->owner,
+		    input_section, reloc->address)))
+	      abort ();
 	  }
 	bfd_put_8 (in_abfd, gap, data + *dst_ptr);
 	(*dst_ptr)++;
@@ -253,7 +231,8 @@ extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
 
 #undef  coff_bfd_get_relocated_section_contents
 #undef coff_bfd_relax_section
-#define  coff_bfd_get_relocated_section_contents bfd_coff_reloc16_get_relocated_section_contents
+#define coff_bfd_get_relocated_section_contents \
+  bfd_coff_reloc16_get_relocated_section_contents
 #define coff_bfd_relax_section bfd_coff_reloc16_relax_section
 
 bfd_target z8kcoff_vec =
@@ -265,15 +244,19 @@ bfd_target z8kcoff_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC),	/* section flags */
   '_',				/* leading symbol underscore */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
   1,				/* minimum section alignment */
-  _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16,	/* data */
-  _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16,	/* hdrs */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+     bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* data */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+     bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* hdrs */
 
   {_bfd_dummy_target, coff_object_p,	/* bfd_check_format */
    bfd_generic_archive_p, _bfd_dummy_target},
@@ -283,6 +266,5 @@ bfd_target z8kcoff_vec =
    _bfd_write_archive_contents, bfd_false},
 
   JUMP_TABLE (coff),
-  0, 0,
   COFF_SWAP_TABLE,
 };

@@ -1032,7 +1032,9 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 	      break;
 	    case bfd_reloc_overflow:
 	      if (! ((*link_info->callbacks->reloc_overflow)
-		     (link_info, input_bfd, input_section, rel->address)))
+		     (link_info, bfd_asymbol_name (*rel->sym_ptr_ptr),
+		      rel->howto->name, rel->addend, input_bfd,
+		      input_section, rel->address)))
 		return NULL;
 	      break;
 	    case bfd_reloc_outofrange:
@@ -1749,10 +1751,20 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		case bfd_reloc_outofrange:
 		  abort ();
 		case bfd_reloc_overflow:
-		  if (! ((*info->callbacks->reloc_overflow)
-			 (info, input_bfd, input_section,
-			  r_vaddr - input_section->vma)))
-		    return false;
+		  {
+		    const char *name;
+
+		    if (r_extern)
+		      name = sym_hashes[r_symndx]->root.root.string;
+		    else
+		      name = bfd_section_name (input_bfd,
+					       symndx_to_section[r_symndx]);
+		    if (! ((*info->callbacks->reloc_overflow)
+			   (info, name, alpha_howto_table[r_type].name,
+			    (bfd_vma) 0, input_bfd, input_section,
+			    r_vaddr - input_section->vma)))
+		      return false;
+		  }
 		  break;
 		}
 	    }

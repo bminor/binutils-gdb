@@ -1,5 +1,5 @@
 /* BFD back-end for HP PA-RISC ELF files.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 
    Written by
 
@@ -27,6 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "obstack.h"
+#include "bfdlink.h"
 #include "libelf.h"
 
 /* ELF32/HPPA relocation support
@@ -43,7 +44,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* ELF/PA relocation howto entries */
 
-static bfd_reloc_status_type hppa_elf_reloc ();
+static bfd_reloc_status_type hppa_elf_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 
 static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
 {
@@ -1184,13 +1186,15 @@ static asymbol *global_symbol;
 static int global_sym_defined;
 
 static bfd_reloc_status_type
-hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd)
+hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
+		error_message)
      bfd *abfd;
      arelent *reloc_entry;
      asymbol *symbol_in;
      PTR data;
      asection *input_section;
      bfd *output_bfd;
+     char **error_message;
 {
   unsigned long insn;
   long sym_value = 0;
@@ -1698,9 +1702,7 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd)
       break;
       
     default:
-      fprintf (stderr, "Relocation problem : ");
-      fprintf (stderr, "Unrecognized reloc type %d, in module %s\n",
-	       r_type, abfd->filename);
+      *error_message = (char *) "Unrecognized reloc";
       return bfd_reloc_dangerous;
     }
 
@@ -1913,6 +1915,7 @@ typedef struct elf32_hppa_stub_description_struct
     int *stub_secp;		/* pointer to the next available location in the buffer */
     char *stub_contents;	/* contents of the stubs for this bfd */
     elf32_hppa_stub_name_list *stub_listP;
+    struct bfd_link_info *link_info;
   }
 elf32_hppa_stub_description;
 
@@ -1937,9 +1940,10 @@ find_stubs (abfd, stub_sec)
 }
 
 static elf32_hppa_stub_description *
-new_stub (abfd, stub_sec)
+new_stub (abfd, stub_sec, link_info)
      bfd *abfd;
      asection *stub_sec;
+     struct bfd_link_info *link_info;
 {
   elf32_hppa_stub_description *stub = find_stubs (abfd, stub_sec);
 
@@ -1955,6 +1959,7 @@ new_stub (abfd, stub_sec)
       stub->allocated_size = 0;
       stub->stub_contents = NULL;
       stub->stub_secp = NULL;
+      stub->link_info = link_info;
 
       stub->next = elf_hppa_stub_rootP;
       elf_hppa_stub_rootP = stub;
@@ -1993,16 +1998,17 @@ find_stub_by_name (abfd, stub_sec, name)
 
 /* Locate the stub by the given name.  */
 static elf32_hppa_stub_name_list *
-add_stub_by_name(abfd, stub_sec, sym)
+add_stub_by_name(abfd, stub_sec, sym, link_info)
      bfd *abfd;
      asection *stub_sec;
      asymbol *sym;
+     struct bfd_link_info *link_info;
 {
   elf32_hppa_stub_description *stub = find_stubs (abfd, stub_sec);
   elf32_hppa_stub_name_list *stub_entry;
 
   if (!stub)
-    stub = new_stub(abfd, stub_sec);
+    stub = new_stub(abfd, stub_sec, link_info);
 
   if (stub)
     {
@@ -2146,7 +2152,6 @@ void
 hppa_elf_stub_finish (output_bfd)
      bfd *output_bfd;
 {
-  extern bfd_error_vector_type bfd_error_vector;
   elf32_hppa_stub_description *stub_list = elf_hppa_stub_rootP;
   /* All the stubs have been built.  Finish up building	*/
   /* stub section.  Apply relocations to the section.	*/
@@ -2183,27 +2188,46 @@ hppa_elf_stub_finish (output_bfd)
 	      for (parent = reloc_vector; *parent != (arelent *) NULL;
 		   parent++)
 		{
+		  char *err = (char *) NULL;
 		  bfd_reloc_status_type r =
-		  bfd_perform_relocation (stub_bfd,
-					  *parent,
-					  stub_list->stub_contents,
-					  stub_sec, 0);
+		    bfd_perform_relocation (stub_bfd,
+					    *parent,
+					    stub_list->stub_contents,
+					    stub_sec, (bfd *) NULL, &err);
 
 
 		  if (r != bfd_reloc_ok)
 		    {
+		      struct bfd_link_info *link_info = stub_list->link_info;
+
 		      switch (r)
 			{
 			case bfd_reloc_undefined:
-			  bfd_error_vector.undefined_symbol (*parent, NULL);
+			  if (! ((*link_info->callbacks->undefined_symbol)
+				 (link_info,
+				  bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
+				  stub_bfd, stub_sec, (*parent)->address)))
+			    abort ();
 			  break;
 			case bfd_reloc_dangerous:
-			  bfd_error_vector.reloc_dangerous (*parent, NULL);
+			  if (! ((*link_info->callbacks->reloc_dangerous)
+				 (link_info, err, stub_bfd, stub_sec,
+				  (*parent)->address)))
+			    abort ();
+			  break;
+			case bfd_reloc_overflow:
+			  {
+			    if (! ((*link_info->callbacks->reloc_overflow)
+				   (link_info,
+				    bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
+				    (*parent)->howto->name,
+				    (*parent)->addend,
+				    stub_bfd, stub_sec,
+				    (*parent)->address)))
+			      abort ();
+			  }
 			  break;
 			case bfd_reloc_outofrange:
-			case bfd_reloc_overflow:
-			  bfd_error_vector.reloc_value_truncated (*parent, NULL);
-			  break;
 			default:
 			  abort ();
 			  break;
@@ -2325,10 +2349,11 @@ elf32_hppa_reloc_type type;
 }
 
 asymbol *
-hppa_elf_build_arg_reloc_stub (abfd, output_bfd, reloc_entry,
+hppa_elf_build_arg_reloc_stub (abfd, output_bfd, link_info, reloc_entry,
 			       stub_types, rtn_adjust, data)
      bfd *abfd;
      bfd *output_bfd;
+     struct bfd_link_info *link_info;
      arelent *reloc_entry;
      int stub_types[5];
      int rtn_adjust;
@@ -2372,12 +2397,12 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, reloc_entry,
       stub_sec->output_section = output_text_section->output_section;
       stub_sec->output_offset = 0;
       bfd_set_section_alignment (abfd, stub_sec, 2);
-      stub_desc = new_stub (abfd, stub_sec);
+      stub_desc = new_stub (abfd, stub_sec, link_info);
     }
 
   /* Make the stub if we did not find one already.  */
   if (!stub_desc)
-    stub_desc = new_stub (abfd, stub_sec);
+    stub_desc = new_stub (abfd, stub_sec, link_info);
 
   /* Allocate space to write the stub.
      FIXME.  Why using realloc?!?  */
@@ -2429,7 +2454,7 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, reloc_entry,
 	= (int) stub_desc->stub_secp - (int) stub_desc->stub_contents;
       stub_sym->section = stub_sec;
       stub_sym->flags = BSF_LOCAL | BSF_FUNCTION;
-      stub_entry = add_stub_by_name (abfd, stub_sec, stub_sym);
+      stub_entry = add_stub_by_name (abfd, stub_sec, stub_sym, link_info);
 
       /* Redirect the original relocation from the old symbol (a function)
 	 to the stub (the stub calls the function).  Change the type of
@@ -2567,6 +2592,8 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, reloc_entry,
 	{
 	  NEW_INSTRUCTION (stub_entry, ADDI_M4_31_RP);
 	}
+      else
+	NEW_INSTRUCTION (stub_entry, COPY_31_2);
 
       /* Save the return address.  */
       NEW_INSTRUCTION (stub_entry, STW_RP_M8SP);
@@ -2732,9 +2759,11 @@ hppa_elf_arg_reloc_needed_p (abfd, reloc_entry, stub_types, caller_ar)
 }
 
 asymbol *
-hppa_elf_build_long_branch_stub (abfd, output_bfd, reloc_entry, symbol, data)
+hppa_elf_build_long_branch_stub (abfd, output_bfd, link_info, reloc_entry,
+				 symbol, data)
      bfd *abfd;
      bfd *output_bfd;
+     struct bfd_link_info *link_info;
      arelent *reloc_entry;
      asymbol *symbol;
      unsigned *data;
@@ -2817,11 +2846,11 @@ hppa_elf_build_long_branch_stub (abfd, output_bfd, reloc_entry, symbol, data)
       }
       
       bfd_set_section_alignment (abfd, stub_sec, 2);
-      stub_desc = new_stub (abfd, stub_sec);
+      stub_desc = new_stub (abfd, stub_sec, link_info);
     }
   
   if (!stub_desc)
-    stub_desc = new_stub (abfd, stub_sec);
+    stub_desc = new_stub (abfd, stub_sec, link_info);
   
   /* Allocate memory to contain the stub.  FIXME.  Why isn't this using
      the BFD memory allocation routines?  */
@@ -2915,7 +2944,7 @@ hppa_elf_build_long_branch_stub (abfd, output_bfd, reloc_entry, symbol, data)
 	= (int) stub_desc->stub_secp - (int) stub_desc->stub_contents;
       stub_sym->section = stub_sec;
       stub_sym->flags = BSF_LOCAL | BSF_FUNCTION;
-      stub_entry = add_stub_by_name (abfd, stub_sec, stub_sym);
+      stub_entry = add_stub_by_name (abfd, stub_sec, stub_sym, link_info);
       
       /* Change symbol associated with the original relocation to point
 	 to the stub.
@@ -3051,13 +3080,14 @@ hppa_elf_long_branch_needed_p (abfd, asec, reloc_entry, symbol, insn)
 
 asymbol *
 hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
-				syms, new_sym_cnt)
+				syms, new_sym_cnt, link_info)
      bfd *stub_bfd;
      bfd *abfd;
      bfd *output_bfd;
      asection *asec;
      asymbol **syms;
      int *new_sym_cnt;
+     struct bfd_link_info *link_info;
 {
   int i;
   int stub_types[5];
@@ -3145,7 +3175,8 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
 		       R_HPPA_STUB_CALL_17) it will be possible to perform
 		       the code reorientation.  */
 		    r = hppa_elf_build_arg_reloc_stub (stub_bfd, output_bfd,
-						       rle, stub_types,
+						       link_info, rle,
+						       stub_types,
 						       true, insn);
 		    new_syms[new_cnt++] = *r;
 		  }
@@ -3166,7 +3197,7 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
 			  realloc (new_syms, (new_max * sizeof (asymbol)));
 		      }
 		    r = hppa_elf_build_long_branch_stub (stub_bfd, output_bfd,
-							 rle,
+							 link_info, rle,
 							 rle->sym_ptr_ptr[0],
 							 insn);
 		    new_syms[new_cnt++] = *r;
@@ -3225,7 +3256,8 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
 			  }
 		      }
 		    r = hppa_elf_build_arg_reloc_stub (stub_bfd, output_bfd,
-						       rle, stub_types,
+						       link_info, rle,
+						       stub_types,
 						       rtn_adjust, insn);
 		    new_syms[new_cnt++] = *r;
 		  }

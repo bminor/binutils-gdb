@@ -4253,9 +4253,24 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 	    case bfd_reloc_outofrange:
 	      abort ();
 	    case bfd_reloc_overflow:
-	      if (! ((*finfo->info->callbacks->reloc_overflow)
-		     (finfo->info, input_bfd, input_section, r_addr)))
-		return false;
+	      {
+		const char *name;
+
+		if (r_extern)
+		  name = strings + GET_WORD (input_bfd,
+					     syms[r_index].e_strx);
+		else
+		  {
+		    asection *s;
+
+		    s = aout_reloc_index_to_section (input_bfd, r_index);
+		    name = bfd_section_name (input_bfd, s);
+		  }
+		if (! ((*finfo->info->callbacks->reloc_overflow)
+		       (finfo->info, name, howto_table_std[howto_idx].name,
+			(bfd_vma) 0, input_bfd, input_section, r_addr)))
+		  return false;
+	      }
 	      break;
 	    }
 	}
@@ -4539,9 +4554,24 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 		case bfd_reloc_outofrange:
 		  abort ();
 		case bfd_reloc_overflow:
-		  if (! ((*finfo->info->callbacks->reloc_overflow)
-			 (finfo->info, input_bfd, input_section, r_addr)))
-		    return false;
+		  {
+		    const char *name;
+
+		    if (r_extern)
+		      name = strings + GET_WORD (input_bfd,
+						 syms[r_index].e_strx);
+		    else
+		      {
+			asection *s;
+
+			s = aout_reloc_index_to_section (input_bfd, r_index);
+			name = bfd_section_name (input_bfd, s);
+		      }
+		    if (! ((*finfo->info->callbacks->reloc_overflow)
+			   (finfo->info, name, howto_table_ext[r_type].name,
+			    r_addend, input_bfd, input_section, r_addr)))
+		      return false;
+		  }
 		  break;
 		}
 	    }

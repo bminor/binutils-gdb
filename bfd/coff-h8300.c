@@ -20,13 +20,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
-#include "libbfd.h"
 #include "obstack.h"
+#include "libbfd.h"
+#include "bfdlink.h"
 #include "coff/h8300.h"
 #include "coff/internal.h"
-#include "seclet.h"
 #include "libcoff.h"
-extern bfd_error_vector_type bfd_error_vector;
 
 static reloc_howto_type howto_table[] =
 {
@@ -178,11 +177,12 @@ DEFUN (reloc_processing, (relent, reloc, symbols, abfd, section),
 
 
 static int
-h8300_reloc16_estimate(input_section, symbols, reloc, shrink)
+h8300_reloc16_estimate(input_section, symbols, reloc, shrink, link_info)
      asection *input_section;
      asymbol **symbols;
      arelent *reloc;
      unsigned int shrink;
+     struct bfd_link_info *link_info;
 {
   bfd_vma value;  
   bfd_vma dot;
@@ -207,8 +207,8 @@ h8300_reloc16_estimate(input_section, symbols, reloc, shrink)
 
       /* Thing is a move one byte */
     case R_MOVB1:
-      value = bfd_coff_reloc16_get_value(reloc,0);
-	
+      value = bfd_coff_reloc16_get_value(reloc, link_info, input_section);
+
       if (value >= 0xff00)
 	{ 
 
@@ -227,7 +227,7 @@ h8300_reloc16_estimate(input_section, symbols, reloc, shrink)
        actual data */
 
     case R_JMPL1:
-      value = bfd_coff_reloc16_get_value(reloc, 0);
+      value = bfd_coff_reloc16_get_value(reloc, link_info, input_section);
 	
       dot = input_section->output_section->vma +
 	input_section->output_offset + address;
@@ -252,7 +252,7 @@ h8300_reloc16_estimate(input_section, symbols, reloc, shrink)
 
     case R_JMP1:
 
-      value = bfd_coff_reloc16_get_value(reloc, 0);
+      value = bfd_coff_reloc16_get_value(reloc, link_info, input_section);
 	
       dot = input_section->output_section->vma +
 	input_section->output_offset + address;
@@ -296,9 +296,11 @@ h8300_reloc16_estimate(input_section, symbols, reloc, shrink)
 */
 
 static void
-h8300_reloc16_extra_cases (abfd, seclet, reloc, data, src_ptr, dst_ptr)
+h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
+			   dst_ptr)
      bfd *abfd;
-     struct bfd_seclet *seclet;
+     struct bfd_link_info *link_info;
+     struct bfd_link_order *link_order;
      arelent *reloc;
      bfd_byte *data;
      unsigned int *src_ptr;
@@ -306,6 +308,7 @@ h8300_reloc16_extra_cases (abfd, seclet, reloc, data, src_ptr, dst_ptr)
 {
   unsigned int src_address = *src_ptr;
   unsigned int dst_address = *dst_ptr;
+  asection *input_section = link_order->u.indirect.section;
 
   switch (reloc->howto->type)
     {
@@ -313,13 +316,18 @@ h8300_reloc16_extra_cases (abfd, seclet, reloc, data, src_ptr, dst_ptr)
 	 the byte before the 24bit hole, so we can treat it as a 32bit pointer */
     case R_PCRBYTE:
       {
-	bfd_vma dot = seclet->offset 
+	bfd_vma dot = link_order->offset 
 	  + dst_address 
-	    + seclet->u.indirect.section->output_section->vma;
-	int gap = bfd_coff_reloc16_get_value (reloc, seclet) - dot;
+	    + link_order->u.indirect.section->output_section->vma;
+	int gap = (bfd_coff_reloc16_get_value (reloc, link_info, input_section)
+		   - dot);
 	if (gap > 127 || gap < -128)
 	  {
-	    bfd_error_vector.reloc_value_truncated (reloc, seclet);
+	    if (! ((*link_info->callbacks->reloc_overflow)
+		   (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		    reloc->howto->name, reloc->addend, input_section->owner,
+		    input_section, reloc->address)))
+	      abort ();
 	  }
 
 	bfd_put_8 (abfd, gap, data + dst_address);
@@ -331,10 +339,15 @@ h8300_reloc16_extra_cases (abfd, seclet, reloc, data, src_ptr, dst_ptr)
 
     case R_RELBYTE:
       {
-	unsigned int gap = bfd_coff_reloc16_get_value (reloc, seclet);
+	unsigned int gap = bfd_coff_reloc16_get_value (reloc, link_info,
+						       input_section);
 	if (gap > 0xff && gap < ~0xff)
 	  {
-	    bfd_error_vector.reloc_value_truncated (reloc, seclet);
+	    if (! ((*link_info->callbacks->reloc_overflow)
+		   (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		    reloc->howto->name, reloc->addend, input_section->owner,
+		    input_section, reloc->address)))
+	      abort ();
 	  }
 
 	bfd_put_8 (abfd, gap, data + dst_address);
@@ -350,13 +363,15 @@ h8300_reloc16_extra_cases (abfd, seclet, reloc, data, src_ptr, dst_ptr)
       /* A relword which would like to have been modified but
 	     didn't make it */
     case R_RELWORD:
-      bfd_put_16 (abfd, bfd_coff_reloc16_get_value (reloc, seclet),
+      bfd_put_16 (abfd,
+		  bfd_coff_reloc16_get_value (reloc, link_info, input_section),
 		  data + dst_address);
       dst_address += 2;
       src_address += 2;
       break;
     case R_RELLONG:
-      bfd_put_32 (abfd, bfd_coff_reloc16_get_value (reloc, seclet),
+      bfd_put_32 (abfd,
+		  bfd_coff_reloc16_get_value (reloc, link_info, input_section),
 		  data + dst_address);
       dst_address += 4;
       src_address += 4;
@@ -389,7 +404,8 @@ h8300_reloc16_extra_cases (abfd, seclet, reloc, data, src_ptr, dst_ptr)
       /* the offset must fit ! after all, what was all the relaxing
 	     about ? */
 
-      bfd_put_8 (abfd, bfd_coff_reloc16_get_value (reloc, seclet),
+      bfd_put_8 (abfd,
+		 bfd_coff_reloc16_get_value (reloc, link_info, input_section),
 		 data + dst_address);
 
       /* Note the magic - src goes up by two bytes, but dst by only
@@ -403,11 +419,12 @@ h8300_reloc16_extra_cases (abfd, seclet, reloc, data, src_ptr, dst_ptr)
       
       /* Speciial relaxed type */
       {
-	bfd_vma dot = seclet->offset
+	bfd_vma dot = link_order->offset
 	+ dst_address
-	+ seclet->u.indirect.section->output_section->vma;
+	+ link_order->u.indirect.section->output_section->vma;
 
-	int gap = bfd_coff_reloc16_get_value (reloc, seclet) - dot - 1;
+	int gap = (bfd_coff_reloc16_get_value (reloc, link_info, input_section)
+		   - dot - 1);
 
 	if ((gap & ~0xff) != 0 && ((gap & 0xff00) != 0xff00))
 	  abort ();
@@ -439,11 +456,12 @@ h8300_reloc16_extra_cases (abfd, seclet, reloc, data, src_ptr, dst_ptr)
       
       /* Speciial relaxed type */
       {
-	bfd_vma dot = seclet->offset
+	bfd_vma dot = link_order->offset
 	+ dst_address
-	+ seclet->u.indirect.section->output_section->vma;
+	+ link_order->u.indirect.section->output_section->vma;
 
-	int gap = bfd_coff_reloc16_get_value (reloc, seclet) - dot - 2;
+	int gap = (bfd_coff_reloc16_get_value (reloc, link_info, input_section)
+		   - dot - 2);
 
 	if ((gap & ~0xff) != 0 && ((gap & 0xff00) != 0xff00))
 	  abort ();
@@ -473,7 +491,7 @@ h8300_reloc16_extra_cases (abfd, seclet, reloc, data, src_ptr, dst_ptr)
 
     case R_JMPL1:
       {
-	int v = bfd_coff_reloc16_get_value (reloc, seclet);
+	int v = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 	int o = bfd_get_32 (abfd, data + src_address);
 	v = (v & 0x00ffffff) | (o & 0xff000000);
 	bfd_put_32 (abfd, v, data + dst_address);
@@ -488,7 +506,7 @@ h8300_reloc16_extra_cases (abfd, seclet, reloc, data, src_ptr, dst_ptr)
 	 the byte before the 24bit hole, so we can treat it as a 32bit pointer */
     case R_MOVLB1:
       {
-	int v = bfd_coff_reloc16_get_value (reloc, seclet);
+	int v = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 	int o = bfd_get_32 (abfd, data + dst_address);
 	v = (v & 0x00ffffff) | (o & 0xff000000);
 	bfd_put_32 (abfd, v, data + dst_address);
@@ -516,7 +534,8 @@ h8300_reloc16_extra_cases (abfd, seclet, reloc, data, src_ptr, dst_ptr)
 
 #undef coff_bfd_get_relocated_section_contents
 #undef coff_bfd_relax_section
-#define  coff_bfd_get_relocated_section_contents bfd_coff_reloc16_get_relocated_section_contents
+#define coff_bfd_get_relocated_section_contents \
+  bfd_coff_reloc16_get_relocated_section_contents
 #define coff_bfd_relax_section bfd_coff_reloc16_relax_section
 
 
@@ -530,7 +549,7 @@ bfd_target h8300coff_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | BFD_IS_RELAXABLE ),
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC),	/* section flags */
   '_',				/* leading char */
   '/',				/* ar_pad_char */

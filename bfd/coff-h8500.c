@@ -21,50 +21,48 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
-#include "libbfd.h"
 #include "obstack.h"
+#include "libbfd.h"
+#include "bfdlink.h"
 #include "coff/h8500.h"
 #include "coff/internal.h"
 #include "libcoff.h"
-#include "seclet.h"
-
-extern bfd_error_vector_type bfd_error_vector;
 
 static reloc_howto_type r_imm8 =
-HOWTO (R_H8500_IMM8, 0, 1, 8, false, 0, true,
-       true, 0, "r_imm8", true, 0x000000ff, 0x000000ff, false);
+HOWTO (R_H8500_IMM8, 0, 1, 8, false, 0,
+       complain_overflow_bitfield, 0, "r_imm8", true, 0x000000ff, 0x000000ff, false);
 
 static reloc_howto_type r_imm16 =
-HOWTO (R_H8500_IMM16, 0, 1, 16, false, 0, true,
-       true, 0, "r_imm16", true, 0x0000ffff, 0x0000ffff, false);
+HOWTO (R_H8500_IMM16, 0, 1, 16, false, 0,
+       complain_overflow_bitfield, 0, "r_imm16", true, 0x0000ffff, 0x0000ffff, false);
 
 static reloc_howto_type r_imm24 =
-HOWTO (R_H8500_IMM24, 0, 1, 24, false, 0, true,
-       true, 0, "r_imm24", true, 0x00ffffff, 0x00ffffff, false);
+HOWTO (R_H8500_IMM24, 0, 1, 24, false, 0,
+       complain_overflow_bitfield, 0, "r_imm24", true, 0x00ffffff, 0x00ffffff, false);
 
 static reloc_howto_type r_imm32 =
-HOWTO (R_H8500_IMM32, 0, 1, 32, false, 0, true,
-       true, 0, "r_imm32", true, 0xffffffff, 0xffffffff, false);
+HOWTO (R_H8500_IMM32, 0, 1, 32, false, 0,
+       complain_overflow_bitfield, 0, "r_imm32", true, 0xffffffff, 0xffffffff, false);
 
 
 static reloc_howto_type r_high8 =
-HOWTO (R_H8500_HIGH8, 0, 1, 8, false, 0, true,
-       true, 0, "r_high8", true, 0x000000ff, 0x000000ff, false);
+HOWTO (R_H8500_HIGH8, 0, 1, 8, false, 0,
+       complain_overflow_bitfield, 0, "r_high8", true, 0x000000ff, 0x000000ff, false);
 
 static reloc_howto_type r_low16 =
-HOWTO (R_H8500_LOW16, 0, 1, 16, false, 0, true,
-       true, 0, "r_low16", true, 0x0000ffff, 0x0000ffff, false);
+HOWTO (R_H8500_LOW16, 0, 1, 16, false, 0,
+       complain_overflow_bitfield, 0, "r_low16", true, 0x0000ffff, 0x0000ffff, false);
 
 static reloc_howto_type r_pcrel8 =
-HOWTO (R_H8500_PCREL8, 0, 1, 8, true, 0, true, true, 0, "r_pcrel8", true, 0, 0, true);
+HOWTO (R_H8500_PCREL8, 0, 1, 8, true, 0, complain_overflow_signed, 0, "r_pcrel8", true, 0, 0, true);
 
 
 static reloc_howto_type r_pcrel16 =
-HOWTO (R_H8500_PCREL16, 0, 1, 16, true, 0, true, true, 0, "r_pcrel16", true, 0, 0, true);
+HOWTO (R_H8500_PCREL16, 0, 1, 16, true, 0, complain_overflow_signed, 0, "r_pcrel16", true, 0, 0, true);
 
 static reloc_howto_type r_high16 =
-HOWTO (R_H8500_HIGH16, 0, 1, 8, false, 0, true,
-       true, 0, "r_high16", true, 0x000ffff, 0x0000ffff, false);
+HOWTO (R_H8500_HIGH16, 0, 1, 8, false, 0,
+       complain_overflow_bitfield, 0, "r_high16", true, 0x000ffff, 0x0000ffff, false);
 
 
 /* Turn a howto into a reloc number */
@@ -102,7 +100,7 @@ rtype2howto(internal, dst)
   switch (dst->r_type)
     {
     default:
-      printf ("BAD 0x%x\n", dst->r_type);
+      fprintf (stderr, "BAD 0x%x\n", dst->r_type);
     case R_H8500_IMM8:
       internal->howto = &r_imm8;
       break;
@@ -171,20 +169,22 @@ static void reloc_processing (relent, reloc, symbols, abfd, section)
 }
 
 static void
-extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
+extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
      bfd *in_abfd;
-     bfd_seclet_type *seclet;
+     struct bfd_link_info *link_info;
+     struct bfd_link_order *link_order;
      arelent *reloc;
      bfd_byte *data;
      unsigned int *src_ptr;
      unsigned int *dst_ptr;
 {
   bfd_byte *d = data+*dst_ptr;
+  asection *input_section = link_order->u.indirect.section;
   switch (reloc->howto->type)
     {
     case R_H8500_IMM8:
       bfd_put_8 (in_abfd,
-		 bfd_coff_reloc16_get_value (reloc, seclet),
+		 bfd_coff_reloc16_get_value (reloc, link_info, input_section),
 		 d);
       (*dst_ptr) += 1;
       (*src_ptr) += 1;
@@ -192,7 +192,8 @@ extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
 
     case R_H8500_HIGH8:
       bfd_put_8 (in_abfd,
-		 (bfd_coff_reloc16_get_value (reloc, seclet)>>16),
+		 (bfd_coff_reloc16_get_value (reloc, link_info, input_section)
+		  >> 16),
 		 d );
       (*dst_ptr) += 1;
       (*src_ptr) += 1;
@@ -200,7 +201,7 @@ extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
 
     case R_H8500_IMM16:
       bfd_put_16 (in_abfd,
-		  bfd_coff_reloc16_get_value (reloc, seclet) ,
+		  bfd_coff_reloc16_get_value (reloc, link_info, input_section),
 		  d  );
       (*dst_ptr) += 2;
       (*src_ptr) += 2;
@@ -208,7 +209,7 @@ extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
 
     case R_H8500_LOW16:
       bfd_put_16 (in_abfd,
-		  bfd_coff_reloc16_get_value (reloc, seclet) ,
+		  bfd_coff_reloc16_get_value (reloc, link_info, input_section),
 		  d);
 
       (*dst_ptr) += 2;
@@ -217,7 +218,8 @@ extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
       
     case R_H8500_HIGH16:
       bfd_put_16 (in_abfd,
-		  bfd_coff_reloc16_get_value (reloc, seclet)>>16 ,
+		  (bfd_coff_reloc16_get_value (reloc, link_info, input_section)
+		   >>16),
 		  d);
 
       (*dst_ptr) += 2;
@@ -226,7 +228,7 @@ extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
 
     case R_H8500_IMM24:
       {
-	int v = bfd_coff_reloc16_get_value(reloc, seclet);
+	int v = bfd_coff_reloc16_get_value(reloc, link_info, input_section);
 	int o = bfd_get_32(in_abfd, data+ *dst_ptr -1);
 	v = (v & 0x00ffffff) | (o & 0xff00000);
 	bfd_put_32 (in_abfd, v, data  + *dst_ptr -1);
@@ -236,7 +238,7 @@ extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
       break;
     case R_H8500_IMM32:
       {
-	int v = bfd_coff_reloc16_get_value(reloc, seclet);
+	int v = bfd_coff_reloc16_get_value(reloc, link_info, input_section);
 	bfd_put_32 (in_abfd, v, data  + *dst_ptr);
 	(*dst_ptr) +=4;
 	(*src_ptr)+=4;;
@@ -246,16 +248,21 @@ extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
 
     case R_H8500_PCREL8:
       {
-	bfd_vma dst = bfd_coff_reloc16_get_value (reloc, seclet);
-	bfd_vma dot = seclet->offset
+	bfd_vma dst = bfd_coff_reloc16_get_value (reloc, link_info,
+						  input_section);
+	bfd_vma dot = link_order->offset
 	  + *dst_ptr
-	    + seclet->u.indirect.section->output_section->vma;
+	    + link_order->u.indirect.section->output_section->vma;
 	int gap = dst - dot - 1; /* -1 since were in the odd byte of the
 				    word and the pc's been incremented */
 
 	if (gap > 128 || gap < -128)
 	  {
-	    bfd_error_vector.reloc_value_truncated (reloc, seclet);
+	    if (! ((*link_info->callbacks->reloc_overflow)
+		   (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		    reloc->howto->name, reloc->addend, input_section->owner,
+		    input_section, reloc->address)))
+	      abort ();
 	  }
 	bfd_put_8 (in_abfd, gap, data + *dst_ptr);
 	(*dst_ptr)++;
@@ -264,16 +271,21 @@ extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
       }
     case R_H8500_PCREL16:
       {
-	bfd_vma dst = bfd_coff_reloc16_get_value (reloc, seclet);
-	bfd_vma dot = seclet->offset
+	bfd_vma dst = bfd_coff_reloc16_get_value (reloc, link_info,
+						  input_section);
+	bfd_vma dot = link_order->offset
 	  + *dst_ptr
-	    + seclet->u.indirect.section->output_section->vma;
+	    + link_order->u.indirect.section->output_section->vma;
 	int gap = dst - dot - 1; /* -1 since were in the odd byte of the
 				    word and the pc's been incremented */
 
 	if (gap > 32767 || gap < -32768)
 	  {
-	    bfd_error_vector.reloc_value_truncated (reloc, seclet);
+	    if (! ((*link_info->callbacks->reloc_overflow)
+		   (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		    reloc->howto->name, reloc->addend, input_section->owner,
+		    input_section, reloc->address)))
+	      abort ();
 	  }
 	bfd_put_16 (in_abfd, gap, data + *dst_ptr);
 	(*dst_ptr)+=2;
@@ -293,7 +305,8 @@ extra_case (in_abfd, seclet, reloc, data, src_ptr, dst_ptr)
 
 #undef  coff_bfd_get_relocated_section_contents
 #undef coff_bfd_relax_section
-#define  coff_bfd_get_relocated_section_contents bfd_coff_reloc16_get_relocated_section_contents
+#define coff_bfd_get_relocated_section_contents \
+  bfd_coff_reloc16_get_relocated_section_contents
 #define coff_bfd_relax_section bfd_coff_reloc16_relax_section
 
 bfd_target h8500coff_vec =
@@ -305,19 +318,19 @@ bfd_target h8500coff_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC),	/* section flags */
   '_',				/* leading symbol underscore */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
   1,				/* minimum section alignment */
-  _do_getb64, _do_getb_signed_64, _do_putb64,
-     _do_getb32, _do_getb_signed_32, _do_putb32,
-     _do_getb16, _do_getb_signed_16, _do_putb16,	/* data */
-  _do_getb64, _do_getb_signed_64, _do_putb64,
-     _do_getb32, _do_getb_signed_32, _do_putb32,
-     _do_getb16, _do_getb_signed_16, _do_putb16,	/* hdrs */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+     bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* data */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+     bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* hdrs */
 
   {_bfd_dummy_target, coff_object_p,	/* bfd_check_format */
    bfd_generic_archive_p, _bfd_dummy_target},
