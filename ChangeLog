@@ -1,3 +1,23 @@
+Fri Jun  6 21:38:40 1997  Rob Savoye  <rob@chinadoll.cygnus.com>
+
+	* configure: Use '|' instead of ":" as the seperator in
+	sed. Otherwise sed chokes on NT path names with drive
+	designators. Also look for "?:*" as the leading characters in an
+	absolute pathname.
+
+Mon Jun  2 13:05:20 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* config.sub: Support for r3900.
+
+Wed May 21 17:33:31 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Use install-sh, not install.sh.
+
+Wed May 14 16:06:51 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (taz): Improve check for BISON so it doesn't try to
+	apply it twice.
+
 Fri May  9 17:22:05 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (INSTALL_MODULES): Put install-opcodes before

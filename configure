@@ -3,7 +3,8 @@
 ### WARNING: this file contains embedded tabs.  Do not run untabify on this file.
 
 # Configuration script
-# Copyright (C) 1988, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+# Copyright (C) 1988, 90, 91, 92, 93, 94, 95, 96, 1997
+# Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -47,7 +48,7 @@ Makefile=Makefile
 Makefile_in=Makefile.in
 arguments=
 build_alias=
-cache_file=
+cache_file=config.cache
 cache_file_option=
 configdirs=
 exec_prefix=
@@ -734,7 +735,7 @@ if [ "${build}" != "${host}" ]; then
 
   tools="AR AR_FOR_TARGET AS AS_FOR_TARGET BISON CC_FOR_BUILD"
   tools="${tools} CC_FOR_TARGET CXX_FOR_TARGET"
-  tools="${tools} DLLTOOL DLLTOOL_FOR_TARGET HOST_PREFIX"
+  tools="${tools} DLLTOOL DLLTOOL_FOR_TARGET GCC_FOR_TARGET HOST_PREFIX"
   tools="${tools} HOST_PREFIX_1 LD LD_FOR_TARGET LEX MAKEINFO NM"
   tools="${tools} NM_FOR_TARGET RANLIB RANLIB_FOR_TARGET"
 
@@ -759,12 +760,13 @@ t loop
   AS=${AS-${host_alias}-as}
   AS_FOR_TARGET=${AS_FOR_TARGET-${target_alias}-as}
   CC=${CC-${host_alias}-gcc}
-  CXX=${CXX-${host_alias}-gcc}
+  CXX=${CXX-${host_alias}-c++}
   CC_FOR_BUILD=${CC_FOR_BUILD-gcc}
   CC_FOR_TARGET=${CC_FOR_TARGET-${target_alias}-gcc}
-  CXX_FOR_TARGET=${CXX_FOR_TARGET-${target_alias}-gcc}
+  CXX_FOR_TARGET=${CXX_FOR_TARGET-${target_alias}-c++}
   DLLTOOL=${DLLTOOL-${host_alias}-dlltool}
   DLLTOOL_FOR_TARGET=${DLLTOOL_FOR_TARGET-${target_alias}-dlltool}
+  GCC_FOR_TARGET=${GCC_FOR_TARGET-${CC_FOR_TARGET-${target_alias}-gcc}}
   HOST_PREFIX=${build_alias}-
   HOST_PREFIX_1=${build_alias}-
   LD=${LD-${host_alias}-ld}
@@ -836,7 +838,7 @@ else
     CC=${CC-cc}
   fi
 
-  CXX=${CXX-"gcc"}
+  CXX=${CXX-"c++"}
 fi
 
 export CC
@@ -1102,9 +1104,9 @@ EOF
                     ${subdir}/Makefile.tem > ${subdir}/Makefile.tem2
                 rm -f ${subdir}/Makefile.tem
                 mv ${subdir}/Makefile.tem2 ${subdir}/Makefile.tem
-            fi
-            sed -e "s:^prefix[ 	]*=.*$:prefix = ${prefix}:" \
-                    -e "s:^exec_prefix[ 	]*=.*$:exec_prefix = ${exec_prefix}:" \
+	    fi
+	    sed     -e "s|^prefix[ 	]*=.*$|prefix = ${prefix}|" \
+                    -e "s|^exec_prefix[ 	]*=.*$|exec_prefix = ${exec_prefix}|" \
 		    -e "/^CC[ 	]*=/{
 			:loop1
 			/\\\\$/ N
@@ -1121,12 +1123,12 @@ EOF
 			}" \
 		    -e "s:^SHELL[	 ]*=.*$:SHELL = ${config_shell}:" \
 		    -e "s:^GDB_TK[	 ]*=.*$:GDB_TK = ${GDB_TK}:" \
-                    -e "s:^srcdir[ 	]*=.*$:srcdir = ${makesrcdir}:" \
+                    -e "s|^srcdir[ 	]*=.*$|srcdir = ${makesrcdir}|" \
                     -e "s///" \
                     -e "s:^program_prefix[ 	]*=.*$:program_prefix = ${program_prefix}:" \
                     -e "s:^program_suffix[ 	]*=.*$:program_suffix = ${program_suffix}:" \
                     -e "s:^program_transform_name[ 	]*=.*$:program_transform_name = ${program_transform_name}:" \
-                    -e "s:^tooldir[ 	]*=.*$:tooldir = ${tooldir}:" \
+                    -e "s|^tooldir[ 	]*=.*$|tooldir = ${tooldir}|" \
 		    -e "s:^DEFAULT_YACC[	 ]*=.*$:DEFAULT_YACC = ${DEFAULT_YACC}:" \
 		    -e "s:^DEFAULT_LEX[	 ]*=.*$:DEFAULT_LEX = ${DEFAULT_LEX}:" \
                     ${subdir}/Makefile.tem >> ${Makefile}
@@ -1204,14 +1206,14 @@ ${progname}" ${arguments}  "
         if [ -r ${subdir}/config.back ] ; then
                 mv -f ${subdir}/config.back ${subdir}/config.status
         fi
-        ${moveifchange} ${subdir}/config.new ${subdir}/config.status
+	${config_shell} ${moveifchange} ${subdir}/config.new ${subdir}/config.status
         ;;
 
     *)  rm -f ${Makefile} ${subdir}/config.status ${links} ;;
     esac
 done
 
-# If there are subdirectories, then recur. 
+# If there are subdirectories, then recur.
 if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then 
         for configdir in ${configdirs} ; do
 
@@ -1241,6 +1243,10 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
                                 newsrcdir=${srcdir}/${configdir}
                                 srcdiroption="--srcdir=${newsrcdir}"
                                 ;;
+                        ?:*) # absolute path on win32
+                                newsrcdir=${srcdir}/${configdir}
+                                srcdiroption="--srcdir=${newsrcdir}"
+                                ;;
                         *) # otherwise relative
                                 newsrcdir=../${srcdir}/${configdir}
                                 srcdiroption="--srcdir=${newsrcdir}"
@@ -1254,6 +1260,9 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
 			/*) # absolute path
 				cache_file_option="--cache-file=${cache_file}"
 				;;
+			?:*) # absolute path on win32
+				cache_file_option="--cache-file=${cache_file}"
+				;;
 			*) # relative path
 				cache_file_option="--cache-file=../${cache_file}"
 				;;
@@ -1265,6 +1274,7 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
                         elif [ -f ${newsrcdir}/configure.in ] ; then
                                 case "${progname}" in
                                 /*)     recprog=${progname} ;;
+                                ?:*)    recprog=${progname} ;;
                                 *)      recprog=../${progname} ;;
                                 esac
 			else
