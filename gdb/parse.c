@@ -50,7 +50,12 @@ prefixify_subexp PARAMS ((struct expression *, struct expression *, int, int));
 /* Assign machine-independent names to certain registers 
    (unless overridden by the REGISTER_NAMES table) */
 
+#ifdef NO_STD_REGS
+unsigned num_std_regs = 0;
+struct std_regs std_regs[1];
+#else
 struct std_regs std_regs[] = {
+
 #ifdef PC_REGNUM
 	{ "pc", PC_REGNUM },
 #endif
@@ -63,9 +68,12 @@ struct std_regs std_regs[] = {
 #ifdef PS_REGNUM
 	{ "ps", PS_REGNUM },
 #endif
+
 };
 
 unsigned num_std_regs = (sizeof std_regs / sizeof std_regs[0]);
+
+#endif
 
 
 /* Begin counting arguments for a function call,
