@@ -76,7 +76,7 @@ PICFLAG_FOR_TARGET =
 CHILLFLAGS = $(CFLAGS)
 CHILL_LIB = -lchill
 # end-sanitize-chill
-CXX = gcc
+CXX = c++
 
 # Use -O2 to stress test the compiler.
 CXXFLAGS = -g -O2
@@ -223,7 +223,7 @@ CXX_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CXX); \
     else \
-      t='$(program_transform_name)'; echo gcc | sed -e 's/x/x/' $$t; \
+      t='$(program_transform_name)'; echo c++ | sed -e 's/x/x/' $$t; \
     fi; \
   fi`
 

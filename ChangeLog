@@ -1,3 +1,9 @@
+Tue May  6 15:49:52 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Default CXX to c++, not gcc.
+	* Makefile.in (CXX): Set to c++, not gcc.
+	(CXX_FOR_TARGET): When cross, transform c++, not gcc.
+
 start-sanitize-ide
 Tue May  6 11:23:57 1997  Ian Lance Taylor  <ian@cygnus.com>
 
