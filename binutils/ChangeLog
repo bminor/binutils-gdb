@@ -1,3 +1,7 @@
+2004-11-10  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* defparse.y: Remove unnecessary commas from token list.
+
 2004-11-08  Aaron W. LaFramboise <aaron98wiridge9@aaronwl.com>
 
 	* doc/binutils.texi (nm): Update description of weak symbols.
