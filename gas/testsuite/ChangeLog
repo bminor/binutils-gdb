@@ -1,5 +1,8 @@
 Tue Feb 25 13:45:55 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* gas/macros/semi.s: Force the final alignment to use a fill value
+	of 0.
+
 	* gas/all/cond.s, gas/all/cond.d: New test.
 	* gas/all/gas.exp: Run it.
 
