@@ -18,6 +18,7 @@
 
 */
 
+#include <stdio.h>
 #include "bfd.h"
 #include "sysdep.h"
 
@@ -72,10 +73,10 @@ main (ac, av)
 	    }
 
 	  start_address = bfd_get_start_address(abfd);
-	  sim_store_register(9,start_address);
+	  sim_set_pc (start_address);
 	  sim_resume(0,0);
 	  if (verbose)
-	    sim_info (verbose);
+	    sim_info (printf, verbose - 1);
 	  return 0;
 	}
     }

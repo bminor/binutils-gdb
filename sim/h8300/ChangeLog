@@ -1,3 +1,21 @@
+Tue Oct 26 09:43:36 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* Makefile.in (CSEARCH): Add -I$(srcdir)/../../gdb
+	* compile.c: #include "remote-sim.h".
+	(sim_resume): New arg siggnal.
+	(sim_write): Use SIM_ADDR for type of arg addr.
+	Always return a value.
+	(sim_read): Ditto.
+	(sim_store_register): Result is type int.
+	(sim_fetch_register): Ditto.
+	(sim_stop_reason): Renamed from sim_stop_signal.
+	(sim_set_pc): Use SIM_ADDR for type of arg pc.
+	(sim_info): int result, new arg printf_fn.
+	(sim_kill): int result.
+	(sim_open): int result, new arg name.
+	* run.c (main): Use sim_set_pc to set pc.
+	Update call to sim_info.
+
 Sat Oct 23 15:01:18 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* compile.c (sim_stop_signal): Result is now enum sim_stop.

@@ -21,7 +21,7 @@
 #include "sysdep.h"
 #include <sys/times.h>
 #include <sys/param.h>
-
+#include "remote-sim.h"
 
 int debug;
 
@@ -780,7 +780,7 @@ int n,nz;
 }										
 
 int
-sim_resume (step)
+sim_resume (step, siggnal)
 {
   static int init1;
   int cycles = 0;
@@ -1462,7 +1462,7 @@ case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how;
 
 int
 sim_write (addr, buffer, size)
-     long int addr;
+     SIM_ADDR addr;
      unsigned char *buffer;
      int size;
 {
@@ -1470,24 +1470,24 @@ sim_write (addr, buffer, size)
 
   init_pointers ();
   if (addr < 0 || addr + size > MSIZE)
-    return;
+    return 0;
   for (i = 0; i < size; i++)
     {
       cpu.memory[addr + i] = buffer[i];
       cpu.cache_idx[addr + i] = 0;
     }
-return size;
+  return size;
 }
 
 int
 sim_read (addr, buffer, size)
-     long int addr;
-     char *buffer;
+     SIM_ADDR addr;
+     unsigned char *buffer;
      int size;
 {
   init_pointers ();
   if (addr < 0 || addr + size > MSIZE)
-    return;
+    return 0;
   memcpy (buffer, cpu.memory + addr, size);
   return size;
 }
@@ -1515,7 +1515,7 @@ sim_read (addr, buffer, size)
 #define TICK_REGNUM     12
 
 
-void
+int
 sim_store_register (rn, value)
      int rn;
      unsigned char *value;
@@ -1560,12 +1560,13 @@ sim_store_register (rn, value)
       cpu.ticks = longval;
       break;
     }
+  return 0;
 }
 
-void
+int
 sim_fetch_register (rn, buf)
      int rn;
-     char *buf;
+     unsigned char *buf;
 {
   int v;
   int longreg = 0;
@@ -1595,7 +1596,6 @@ sim_fetch_register (rn, buf)
     case 10:
       v = cpu.cycles;
       longreg = 1;
-
       break;
     case 11:
       v = cpu.ticks;
@@ -1605,7 +1605,6 @@ sim_fetch_register (rn, buf)
       v = cpu.insts;
       longreg = 1;
       break;
-
     }
   if (h8300hmode || longreg)
     {
@@ -1619,6 +1618,7 @@ sim_fetch_register (rn, buf)
       buf[0] = v >> 8;
       buf[1] = v;
     }
+  return 0;
 }
 
 int
@@ -1627,17 +1627,22 @@ sim_trace ()
   return 0;
 }
 
-enum sim_stop
-sim_stop_signal (sigrc)
-     int *sigrc
+int
+sim_stop_reason (reason, sigrc)
+     enum sim_stop *reason;
+     int *sigrc;
 {
+  *reason = sim_stopped;
   *sigrc = cpu.exception;
-  return sim_stopped;
+  return 0;
 }
 
+int
 sim_set_pc (n)
+     SIM_ADDR n;
 {
   cpu.pc = n;
+  return 0;
 }
 
 
@@ -1654,8 +1659,9 @@ sim_csize (n)
 
 
 
-void
-sim_info (verbose)
+int
+sim_info (printf_fn, verbose)
+     void (*printf_fn)();
      int verbose;
      
 {
@@ -1684,6 +1690,8 @@ sim_info (verbose)
 	}
     }
 #endif
+
+  return 0;
 }
 
 void
@@ -1692,19 +1700,21 @@ set_h8300h ()
   h8300hmode = 1;
 }
 
-void
+int
 sim_kill()
 {
+  return 0;
 }
 
-sim_open ()
+sim_open (name)
+     char *name;
 {
   return 0;
 }
 
 sim_set_args(argv, env)
-char **argv;
-char **env;
+     char **argv;
+     char **env;
 {
   return 0;
 }
