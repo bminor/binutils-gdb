@@ -1591,8 +1591,9 @@ extract_tbr (unsigned long insn,
 /* The mask for an X form comparison instruction.  */
 #define XCMP_MASK (X_MASK | (((unsigned long)1) << 22))
 
-/* The mask for an X form instruction with the L field fixed.  */
-#define XOPL_MASK (XCMP_MASK | (((unsigned long)1) << 21))
+/* The mask for an X form comparison instruction with the L field
+   fixed.  */
+#define XCMPL_MASK (XCMP_MASK | (((unsigned long)1) << 21))
 
 /* An X form trap instruction with the TO field specified.  */
 #define XTO(op, xop, to) (X ((op), (xop)) | ((((unsigned long)(to)) & 0x1f) << 21))
@@ -3145,10 +3146,10 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "rldcr",   MDS(30,9,0), MDS_MASK,	PPC64,		{ RA, RS, RB, ME6 } },
 { "rldcr.",  MDS(30,9,1), MDS_MASK,	PPC64,		{ RA, RS, RB, ME6 } },
 
-{ "cmpw",    XOPL(31,0,0), XOPL_MASK, PPCCOM,		{ OBF, RA, RB } },
-{ "cmpd",    XOPL(31,0,1), XOPL_MASK, PPC64,		{ OBF, RA, RB } },
+{ "cmpw",    XOPL(31,0,0), XCMPL_MASK, PPCCOM,		{ OBF, RA, RB } },
+{ "cmpd",    XOPL(31,0,1), XCMPL_MASK, PPC64,		{ OBF, RA, RB } },
 { "cmp",     X(31,0),	XCMP_MASK,	PPC,		{ BF, L, RA, RB } },
-{ "cmp",     X(31,0),	XOPL_MASK,	PWRCOM,		{ BF, RA, RB } },
+{ "cmp",     X(31,0),	XCMPL_MASK,	PWRCOM,		{ BF, RA, RB } },
 
 { "twlgt",   XTO(31,4,TOLGT), XTO_MASK, PPCCOM,		{ RA, RB } },
 { "tlgt",    XTO(31,4,TOLGT), XTO_MASK, PWRCOM,		{ RA, RB } },
@@ -3251,10 +3252,10 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "lwzxe",   X(31,31),	X_MASK,		BOOKE64,	{ RT, RA0, RB } },
 
-{ "cmplw",   XOPL(31,32,0), XOPL_MASK, PPCCOM,	{ OBF, RA, RB } },
-{ "cmpld",   XOPL(31,32,1), XOPL_MASK, PPC64,		{ OBF, RA, RB } },
+{ "cmplw",   XOPL(31,32,0), XCMPL_MASK, PPCCOM,	{ OBF, RA, RB } },
+{ "cmpld",   XOPL(31,32,1), XCMPL_MASK, PPC64,		{ OBF, RA, RB } },
 { "cmpl",    X(31,32),	XCMP_MASK,	 PPC,		{ BF, L, RA, RB } },
-{ "cmpl",    X(31,32),	XOPL_MASK,	 PWRCOM,	{ BF, RA, RB } },
+{ "cmpl",    X(31,32),	XCMPL_MASK,	 PWRCOM,	{ BF, RA, RB } },
 
 { "subf",    XO(31,40,0,0), XO_MASK,	PPC,		{ RT, RA, RB } },
 { "sub",     XO(31,40,0,0), XO_MASK,	PPC,		{ RT, RB, RA } },
