@@ -31,7 +31,7 @@
 
 /* Type of function passed to bfd_map_over_sections.  */
 
-typedef void (*section_map_func) PARAMS ((bfd * abfd, asection * sect, PTR obj));
+typedef void (*section_map_func) (bfd * abfd, asection * sect, PTR obj);
 
 /* Packet escape character used by Densan monitor.  */
 
@@ -95,13 +95,13 @@ static void r3900_open (char *args, int from_tty);
    format, and those that can't be modified at all.  In those cases
    we have to use our own functions to fetch and store their values.  */
 
-static void (*orig_monitor_fetch_registers) PARAMS ((int regno));
-static void (*orig_monitor_store_registers) PARAMS ((int regno));
+static void (*orig_monitor_fetch_registers) (int regno);
+static void (*orig_monitor_store_registers) (int regno);
 
 /* Pointer to static function in monitor. for loading programs.
    We use this function for loading S-records via the serial link.  */
 
-static void (*orig_monitor_load) PARAMS ((char *file, int from_tty));
+static void (*orig_monitor_load) (char *file, int from_tty);
 
 /* This flag is set if a fast ethernet download should be used.  */
 

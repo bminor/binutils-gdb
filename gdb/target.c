@@ -2126,7 +2126,7 @@ Use \"info signals\" for a list of symbolic signals.");
 }
 
 /* Returns zero to leave the inferior alone, one to interrupt it.  */
-int (*target_activity_function) PARAMS ((void));
+int (*target_activity_function) (void);
 int target_activity_fd;
 
 /* Convert a normal process ID to a string.  Returns the string in a static

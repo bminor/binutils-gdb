@@ -108,12 +108,11 @@ struct cmd_list_element
     union
       {
 	/* If type is not_set_cmd, call it like this:  */
-	void (*cfunc) PARAMS ((char *args, int from_tty));
+	void (*cfunc) (char *args, int from_tty);
 
 	/* If type is cmd_set or show_cmd, first set the variables, and
 	   then call this.  */
-	void (*sfunc) PARAMS ((char *args, int from_tty,
-			       struct cmd_list_element * c));
+	void (*sfunc) (char *args, int from_tty, struct cmd_list_element * c);
       }
     function;
 #define NO_FUNCTION ((void (*) PARAMS((char *args, int from_tty))) 0)
@@ -186,7 +185,7 @@ struct cmd_list_element
        returned relative to this position.  For example, suppose TEXT is "foo"
        and we want to complete to "foobar".  If WORD is "oo", return
        "oobar"; if WORD is "baz/foo", return "baz/foobar".  */
-    char **(*completer) PARAMS ((char *text, char *word));
+    char **(*completer) (char *text, char *word);
 
     /* Type of "set" or "show" command (or SET_NOT_SET if not "set"
        or "show").  */

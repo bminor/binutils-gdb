@@ -47,7 +47,7 @@ stepBreaks[2];
    inferior under AIX. The initialization code in rs6000-nat.c sets
    this hook to point to find_toc_address.  */
 
-CORE_ADDR (*find_toc_address_hook) PARAMS ((CORE_ADDR)) = NULL;
+CORE_ADDR (*find_toc_address_hook) (CORE_ADDR) = NULL;
 
 /* Static function prototypes */
 

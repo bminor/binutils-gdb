@@ -58,9 +58,9 @@
 
 
 extern int info_verbose;
-extern void (*readline_begin_hook) PARAMS ((char *,...));
-extern char *(*readline_hook) PARAMS ((char *));
-extern void (*readline_end_hook) PARAMS ((void));
+extern void (*readline_begin_hook) (char *, ...);
+extern char *(*readline_hook) (char *);
+extern void (*readline_end_hook) (void);
 extern void x_command (char *, int);
 extern int addressprint;	/* Print machine addresses? */
 

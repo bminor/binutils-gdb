@@ -58,7 +58,7 @@
 /* readline defines this.  */
 #undef savestring
 
-void (*error_begin_hook) PARAMS ((void));
+void (*error_begin_hook) (void);
 
 /* Holds the last error message issued by gdb */
 
@@ -426,7 +426,7 @@ null_cleanup (void *arg)
    cmd_continuation. The new continuation will be added at the front.*/
 void
 add_continuation (continuation_hook, arg_list)
-     void (*continuation_hook) PARAMS ((struct continuation_arg *));
+     void (*continuation_hook) (struct continuation_arg *);
      struct continuation_arg *arg_list;
 {
   struct continuation *continuation_ptr;
@@ -488,7 +488,7 @@ discard_all_continuations ()
    intermediate_continuation. The new continuation will be added at the front.*/
 void
 add_intermediate_continuation (continuation_hook, arg_list)
-     void (*continuation_hook) PARAMS ((struct continuation_arg *));
+     void (*continuation_hook) (struct continuation_arg *);
      struct continuation_arg *arg_list;
 {
   struct continuation *continuation_ptr;
@@ -1421,8 +1421,8 @@ static void printchar (int c, void (*do_fputs) (const char *, struct ui_file*), 
 static void
 printchar (c, do_fputs, do_fprintf, stream, quoter)
      int c;
-     void (*do_fputs) PARAMS ((const char *, struct ui_file*));
-     void (*do_fprintf) PARAMS ((struct ui_file*, const char *, ...));
+     void (*do_fputs) (const char *, struct ui_file *);
+     void (*do_fprintf) (struct ui_file *, const char *, ...);
      struct ui_file *stream;
      int quoter;
 {

@@ -1682,8 +1682,8 @@ d10v_gdbarch_init (info, arches)
 }
 
 
-extern void (*target_resume_hook) PARAMS ((void));
-extern void (*target_wait_loop_hook) PARAMS ((void));
+extern void (*target_resume_hook) (void);
+extern void (*target_wait_loop_hook) (void);
 
 void
 _initialize_d10v_tdep ()

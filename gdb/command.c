@@ -84,7 +84,7 @@ struct cmd_list_element *
 add_cmd (name, class, fun, doc, list)
      char *name;
      enum command_class class;
-     void (*fun) PARAMS ((char *, int));
+     void (*fun) (char *, int);
      char *doc;
      struct cmd_list_element **list;
 {
@@ -168,7 +168,7 @@ struct cmd_list_element *
 add_abbrev_cmd (name, class, fun, doc, list)
      char *name;
      enum command_class class;
-     void (*fun) PARAMS ((char *, int));
+     void (*fun) (char *, int);
      char *doc;
      struct cmd_list_element **list;
 {
@@ -222,7 +222,7 @@ add_prefix_cmd (name, class, fun, doc, prefixlist, prefixname,
 		allow_unknown, list)
      char *name;
      enum command_class class;
-     void (*fun) PARAMS ((char *, int));
+     void (*fun) (char *, int);
      char *doc;
      struct cmd_list_element **prefixlist;
      char *prefixname;
@@ -243,7 +243,7 @@ add_abbrev_prefix_cmd (name, class, fun, doc, prefixlist, prefixname,
 		       allow_unknown, list)
      char *name;
      enum command_class class;
-     void (*fun) PARAMS ((char *, int));
+     void (*fun) (char *, int);
      char *doc;
      struct cmd_list_element **prefixlist;
      char *prefixname;

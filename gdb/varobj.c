@@ -287,28 +287,28 @@ struct language_specific
     enum varobj_languages language;
 
     /* The number of children of PARENT. */
-    int (*number_of_children) PARAMS ((struct varobj * parent));
+    int (*number_of_children) (struct varobj * parent);
 
     /* The name (expression) of a root varobj. */
-    char *(*name_of_variable) PARAMS ((struct varobj * parent));
+    char *(*name_of_variable) (struct varobj * parent);
 
     /* The name of the INDEX'th child of PARENT. */
-    char *(*name_of_child) PARAMS ((struct varobj * parent, int index));
+    char *(*name_of_child) (struct varobj * parent, int index);
 
     /* The value_ptr of the root variable ROOT. */
-      value_ptr (*value_of_root) PARAMS ((struct varobj ** root_handle));
+      value_ptr (*value_of_root) (struct varobj ** root_handle);
 
     /* The value_ptr of the INDEX'th child of PARENT. */
-      value_ptr (*value_of_child) PARAMS ((struct varobj * parent, int index));
+      value_ptr (*value_of_child) (struct varobj * parent, int index);
 
     /* The type of the INDEX'th child of PARENT. */
-    struct type *(*type_of_child) PARAMS ((struct varobj * parent, int index));
+    struct type *(*type_of_child) (struct varobj * parent, int index);
 
     /* Is VAR editable? */
-    int (*variable_editable) PARAMS ((struct varobj * var));
+    int (*variable_editable) (struct varobj * var);
 
     /* The current value of VAR. */
-    char *(*value_of_variable) PARAMS ((struct varobj * var));
+    char *(*value_of_variable) (struct varobj * var);
   };
 
 /* Array of known source language routines. */

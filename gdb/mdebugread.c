@@ -699,8 +699,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets, objfile)
      struct objfile *objfile;
 {
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
-  void (*const swap_sym_in) PARAMS ((bfd *, PTR, SYMR *)) =
-  debug_swap->swap_sym_in;
+  void (*const swap_sym_in) (bfd *, PTR, SYMR *) = debug_swap->swap_sym_in;
   char *name;
   struct symbol *s;
   struct block *b;
@@ -2254,12 +2253,9 @@ parse_partial_symbols (objfile)
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
   const bfd_size_type external_rfd_size = debug_swap->external_rfd_size;
   const bfd_size_type external_ext_size = debug_swap->external_ext_size;
-  void (*const swap_ext_in) PARAMS ((bfd *, PTR, EXTR *))
-  = debug_swap->swap_ext_in;
-  void (*const swap_sym_in) PARAMS ((bfd *, PTR, SYMR *))
-  = debug_swap->swap_sym_in;
-  void (*const swap_rfd_in) PARAMS ((bfd *, PTR, RFDT *))
-  = debug_swap->swap_rfd_in;
+  void (*const swap_ext_in) (bfd *, PTR, EXTR *) = debug_swap->swap_ext_in;
+  void (*const swap_sym_in) (bfd *, PTR, SYMR *) = debug_swap->swap_sym_in;
+  void (*const swap_rfd_in) (bfd *, PTR, RFDT *) = debug_swap->swap_rfd_in;
   int f_idx, s_idx;
   HDRR *hdr = &debug_info->symbolic_header;
   /* Running pointers */
@@ -3167,8 +3163,7 @@ handle_psymbol_enumerators (objfile, fh, stype, svalue)
      CORE_ADDR svalue;
 {
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
-  void (*const swap_sym_in) PARAMS ((bfd *, PTR, SYMR *))
-  = debug_swap->swap_sym_in;
+  void (*const swap_sym_in) (bfd *, PTR, SYMR *) = debug_swap->swap_sym_in;
   char *ext_sym = ((char *) debug_info->external_sym
 		   + ((fh->isymBase + cur_sdx + 1) * external_sym_size));
   SYMR sh;
@@ -3260,8 +3255,8 @@ psymtab_to_symtab_1 (pst, filename)
 {
   bfd_size_type external_sym_size;
   bfd_size_type external_pdr_size;
-  void (*swap_sym_in) PARAMS ((bfd *, PTR, SYMR *));
-  void (*swap_pdr_in) PARAMS ((bfd *, PTR, PDR *));
+  void (*swap_sym_in) (bfd *, PTR, SYMR *);
+  void (*swap_pdr_in) (bfd *, PTR, PDR *);
   int i;
   struct symtab *st;
   FDR *fh;

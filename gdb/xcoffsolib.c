@@ -34,7 +34,7 @@
    hook is initialized in by rs6000-nat.c.  If not, it is currently left
    NULL and never called. */
 
-void (*xcoff_relocate_symtab_hook) PARAMS ((unsigned int)) = NULL;
+void (*xcoff_relocate_symtab_hook) (unsigned int) = NULL;
 
 #ifdef SOLIB_SYMBOLS_MANUAL
 

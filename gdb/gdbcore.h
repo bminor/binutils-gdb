@@ -78,12 +78,12 @@ extern void generic_search (int len, char *data, char *mask,
 
 /* Hook for `exec_file_command' command to call.  */
 
-extern void (*exec_file_display_hook) PARAMS ((char *filename));
+extern void (*exec_file_display_hook) (char *filename);
 
 /* Hook for "file_command", which is more useful than above
    (because it is invoked AFTER symbols are read, not before) */
 
-extern void (*file_changed_hook) PARAMS ((char *filename));
+extern void (*file_changed_hook) (char *filename);
 
 extern void specify_exec_file_hook (void (*hook) (char *filename));
 
@@ -143,13 +143,13 @@ struct core_fns
        another file).  Returns nonzero if the handler recognizes the
        format, zero otherwise. */
 
-    int (*check_format) PARAMS ((bfd *));
+    int (*check_format) (bfd *);
 
     /* Core file handler function to call to ask if it can handle a
        given core file format or not.  Returns zero if it can't,
        nonzero otherwise. */
 
-    int (*core_sniffer) PARAMS ((struct core_fns *, bfd *));
+    int (*core_sniffer) (struct core_fns *, bfd *);
 
     /* Extract the register values out of the core file and store them where
        `read_register' will find them.
@@ -172,9 +172,9 @@ struct core_fns
        registers in a large upage-plus-stack ".reg" section.  Original upage
        address X is at location core_reg_sect+x+reg_addr. */
 
-    void (*core_read_registers) PARAMS ((char *core_reg_sect,
-					 unsigned core_reg_size,
-					 int which, CORE_ADDR reg_addr));
+    void (*core_read_registers) (char *core_reg_sect,
+				 unsigned core_reg_size,
+				 int which, CORE_ADDR reg_addr);
 
     /* Finds the next struct core_fns.  They are allocated and initialized
        in whatever module implements the functions pointed to; an 

@@ -285,7 +285,7 @@ char gdb_dirbuf[1024];
    The function receives two args: an input stream,
    and a prompt string.  */
 
-void (*window_hook) PARAMS ((FILE *, char *));
+void (*window_hook) (FILE *, char *);
 
 int epoch_interface;
 int xgdb_verbose;
@@ -392,31 +392,31 @@ static void stop_sig (int);
 /* Called after most modules have been initialized, but before taking users
    command file.  */
 
-void (*init_ui_hook) PARAMS ((char *argv0));
+void (*init_ui_hook) (char *argv0);
 
 /* This hook is called from within gdb's many mini-event loops which could
    steal control from a real user interface's event loop. It returns
    non-zero if the user is requesting a detach, zero otherwise. */
 
-int (*ui_loop_hook) PARAMS ((int));
+int (*ui_loop_hook) (int);
 
 /* Called instead of command_loop at top level.  Can be invoked via
    return_to_top_level.  */
 
-void (*command_loop_hook) PARAMS ((void));
+void (*command_loop_hook) (void);
 
 
 /* Called from print_frame_info to list the line we stopped in.  */
 
-void (*print_frame_info_listing_hook) PARAMS ((struct symtab * s, int line,
-					       int stopline, int noerror));
+void (*print_frame_info_listing_hook) (struct symtab * s, int line,
+				       int stopline, int noerror);
 /* Replaces most of query.  */
 
-int (*query_hook) PARAMS ((const char *, va_list));
+int (*query_hook) (const char *, va_list);
 
 /* Replaces most of warning.  */
 
-void (*warning_hook) PARAMS ((const char *, va_list));
+void (*warning_hook) (const char *, va_list);
 
 /* These three functions support getting lines of text from the user.  They
    are used in sequence.  First readline_begin_hook is called with a text
@@ -429,51 +429,51 @@ void (*warning_hook) PARAMS ((const char *, va_list));
    to notify the GUI that we are done with the interaction window and it
    can close it. */
 
-void (*readline_begin_hook) PARAMS ((char *,...));
-char *(*readline_hook) PARAMS ((char *));
-void (*readline_end_hook) PARAMS ((void));
+void (*readline_begin_hook) (char *, ...);
+char *(*readline_hook) (char *);
+void (*readline_end_hook) (void);
 
 /* Called as appropriate to notify the interface of the specified breakpoint
    conditions.  */
 
-void (*create_breakpoint_hook) PARAMS ((struct breakpoint * bpt));
-void (*delete_breakpoint_hook) PARAMS ((struct breakpoint * bpt));
-void (*modify_breakpoint_hook) PARAMS ((struct breakpoint * bpt));
+void (*create_breakpoint_hook) (struct breakpoint * bpt);
+void (*delete_breakpoint_hook) (struct breakpoint * bpt);
+void (*modify_breakpoint_hook) (struct breakpoint * bpt);
 
 /* Called as appropriate to notify the interface that we have attached
    to or detached from an already running process. */
 
-void (*attach_hook) PARAMS ((void));
-void (*detach_hook) PARAMS ((void));
+void (*attach_hook) (void);
+void (*detach_hook) (void);
 
 /* Called during long calculations to allow GUI to repair window damage, and to
    check for stop buttons, etc... */
 
-void (*interactive_hook) PARAMS ((void));
+void (*interactive_hook) (void);
 
 /* Called when the registers have changed, as a hint to a GUI
    to minimize window update. */
 
-void (*registers_changed_hook) PARAMS ((void));
+void (*registers_changed_hook) (void);
 
 /* Tell the GUI someone changed the register REGNO. -1 means
    that the caller does not know which register changed or
    that several registers have changed (see value_assign). */
-void (*register_changed_hook) PARAMS ((int regno));
+void (*register_changed_hook) (int regno);
 
 /* Tell the GUI someone changed LEN bytes of memory at ADDR */
-void (*memory_changed_hook) PARAMS ((CORE_ADDR addr, int len));
+void (*memory_changed_hook) (CORE_ADDR addr, int len);
 
 /* Called when going to wait for the target.  Usually allows the GUI to run
    while waiting for target events.  */
 
-int (*target_wait_hook) PARAMS ((int pid, struct target_waitstatus * status));
+int (*target_wait_hook) (int pid, struct target_waitstatus * status);
 
 /* Used by UI as a wrapper around command execution.  May do various things
    like enabling/disabling buttons, etc...  */
 
-void (*call_command_hook) PARAMS ((struct cmd_list_element * c, char *cmd,
-				   int from_tty));
+void (*call_command_hook) (struct cmd_list_element * c, char *cmd,
+			   int from_tty);
 
 /* Called after a `set' command has finished.  Is only run if the
    `set' command succeeded.  */
@@ -482,7 +482,7 @@ void (*set_hook) (struct cmd_list_element * c);
 
 /* Called when the current thread changes.  Argument is thread id.  */
 
-void (*context_hook) PARAMS ((int id));
+void (*context_hook) (int id);
 
 /* Takes control from error ().  Typically used to prevent longjmps out of the
    middle of the GUI.  Usually used in conjunction with a catch routine.  */
@@ -782,7 +782,7 @@ read_command_file (stream)
 
 extern void init_proc (void);
 
-void (*pre_init_ui_hook) PARAMS ((void));
+void (*pre_init_ui_hook) (void);
 
 #ifdef __MSDOS__
 void
@@ -2939,7 +2939,7 @@ make_cleanup_free_command_lines (struct command_line **arg)
 struct cmd_list_element *
 add_info (name, fun, doc)
      char *name;
-     void (*fun) PARAMS ((char *, int));
+     void (*fun) (char *, int);
      char *doc;
 {
   return add_cmd (name, no_class, fun, doc, &infolist);
@@ -3013,7 +3013,7 @@ struct cmd_list_element *
 add_com (name, class, fun, doc)
      char *name;
      enum command_class class;
-     void (*fun) PARAMS ((char *, int));
+     void (*fun) (char *, int);
      char *doc;
 {
   return add_cmd (name, class, fun, doc, &cmdlist);

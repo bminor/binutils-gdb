@@ -2598,7 +2598,7 @@ proc_set_watchpoint (pi, addr, len, wflags)
    every time, I don't need to lseek it.  */
 int
 proc_iterate_over_mappings (func)
-     int (*func) PARAMS ((int, CORE_ADDR));
+     int (*func) (int, CORE_ADDR);
 {
   struct prmap *map;
   procinfo *pi;
@@ -3140,7 +3140,7 @@ proc_update_threads (pi)
 int
 proc_iterate_over_threads (pi, func, ptr)
      procinfo *pi;
-     int     (*func) PARAMS ((procinfo *, procinfo *, void *));
+     int (*func) (procinfo *, procinfo *, void *);
      void     *ptr;
 {
   procinfo *thread, *next;

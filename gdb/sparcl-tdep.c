@@ -560,9 +560,9 @@ download (target_name, args, from_tty, write_routine, start_routine)
      char *target_name;
      char *args;
      int from_tty;
-     void (*write_routine) PARAMS ((bfd * from_bfd, asection * from_sec,
-			     file_ptr from_addr, bfd_vma to_addr, int len));
-     void (*start_routine) PARAMS ((bfd_vma entry));
+     void (*write_routine) (bfd * from_bfd, asection * from_sec,
+			    file_ptr from_addr, bfd_vma to_addr, int len);
+     void (*start_routine) (bfd_vma entry);
 {
   struct cleanup *old_chain;
   asection *section;

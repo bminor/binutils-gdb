@@ -77,10 +77,10 @@ struct gr_settings
     DCACHE *dcache;
     char *prompt;
     struct target_ops *ops;
-    int (*clear_all_breakpoints) PARAMS ((void));
+    int (*clear_all_breakpoints) (void);
     memxferfunc readfunc;
     memxferfunc writefunc;
-    void (*checkin) PARAMS ((void));
+    void (*checkin) (void);
   };
 
 extern struct gr_settings *gr_settings;

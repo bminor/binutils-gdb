@@ -51,7 +51,7 @@ static void call_extra_exec_file_hooks (char *filename);
    old code that assumed that only one hook could be set, and which called
    exec_file_display_hook directly.  */
 
-typedef void (*hook_type) PARAMS ((char *));
+typedef void (*hook_type) (char *);
 
 hook_type exec_file_display_hook;	/* the original hook */
 static hook_type *exec_file_extra_hooks;	/* array of additional hooks */
@@ -124,7 +124,7 @@ call_extra_exec_file_hooks (filename)
 
 void
 specify_exec_file_hook (hook)
-     void (*hook) PARAMS ((char *));
+     void (*hook) (char *);
 {
   hook_type *new_array;
 

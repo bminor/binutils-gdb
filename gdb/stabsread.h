@@ -213,7 +213,7 @@ extern void elfstab_offset_sections (struct objfile *,
 
 extern void process_later
   (struct symbol *, char *,
-   int (*f) PARAMS ((struct objfile *, struct symbol *, char *)));
+   int (*f) (struct objfile *, struct symbol *, char *));
 
 extern int symbol_reference_defined (char **);
 

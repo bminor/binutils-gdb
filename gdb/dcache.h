@@ -23,9 +23,7 @@
 #ifndef DCACHE_H
 #define DCACHE_H
 
-typedef int (*memxferfunc) PARAMS ((CORE_ADDR memaddr,
-				    char *myaddr,
-				    int len));
+typedef int (*memxferfunc) (CORE_ADDR memaddr, char *myaddr, int len);
 
 typedef struct dcache_struct DCACHE;
 

@@ -524,7 +524,7 @@ hpux_thread_create_inferior (exec_file, allargs, env)
  */
 
 /* Saved pointer to previous owner of the new_objfile event. */
-static void (*target_new_objfile_chain) PARAMS ((struct objfile *));
+static void (*target_new_objfile_chain) (struct objfile *);
 
 void
 hpux_thread_new_objfile (objfile)

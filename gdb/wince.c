@@ -58,7 +58,7 @@
 #include <time.h>
 
 /* The ui's event loop. */
-extern int (*ui_loop_hook) PARAMS ((int signo));
+extern int (*ui_loop_hook) (int signo);
 
 /* If we're not using the old Cygwin header file set, define the
    following which never should have been in the generic Win32 API

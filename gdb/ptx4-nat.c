@@ -101,7 +101,7 @@ fill_fpregset (fpregsetp, regno)
 /* this could use elf_interpreter() from elfread.c */
 int
 proc_iterate_over_mappings (func)
-     int (*func) PARAMS ((int, CORE_ADDR));
+     int (*func) (int, CORE_ADDR);
 {
   vaddr_t curseg, memptr;
   pt_vseg_t pv;

@@ -1409,7 +1409,7 @@ bdm_update_flash_command (args, from_tty)
 {
   int status, pktlen;
   struct cleanup *old_chain; 
-  void (*store_registers_tmp) PARAMS ((int));
+  void (*store_registers_tmp) (int);
 
   if (!ocd_desc)
     error ("Not connected to OCD device.");

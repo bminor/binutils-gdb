@@ -54,7 +54,7 @@ extern void nexti_command (char *, int);
 
 extern void continue_command (char *, int);
 
-extern int (*ui_loop_hook) PARAMS ((int));
+extern int (*ui_loop_hook) (int);
 
 /* Prototypes for local functions */
 static int init_hidden_window (void);
@@ -855,7 +855,7 @@ static void
 do_gdb (cmd, str, func, count)
      char *cmd;
      char *str;
-     void (*func) PARAMS ((char *, int));
+     void (*func) (char *, int);
      int count;
 {
   ReplyMessage ((LRESULT) 1);

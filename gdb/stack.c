@@ -46,7 +46,7 @@ void args_info (char *, int);
 
 void locals_info (char *, int);
 
-void (*selected_frame_level_changed_hook) PARAMS ((int));
+void (*selected_frame_level_changed_hook) (int);
 
 void _initialize_stack (void);
 

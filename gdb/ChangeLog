@@ -1,3 +1,18 @@
+2000-06-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* annotate.c, annotate.h, breakpoint.c, command.c, command.h,
+	config/rs6000/tm-rs6000.h, corefile.c, d10v-tdep.c,
+	d30v-tdep.c, dbxread.c, dcache.c, dcache.h, dsrec.c,
+	dve3900-rom.c, exec.c, fork-child.c, gdbcore.h, hpux-thread.c,
+	language.h, linux-thread.c, mdebugread.c, monitor.h, ocd.c,
+	procfs.c, ptx4-nat.c, remote-sim.c, remote-utils.h, remote.c,
+	rs6000-tdep.c, ser-ocd.c, sol-thread.c, sparcl-tdep.c,
+	stabsread.h, stack.c, symfile.c, symfile.h, symtab.h,
+	target.c, target.h, top.c, tracepoint.c, tracepoint.h,
+	tui/tui.h, tui/tuiIO.c, utils.c, v850ice.c, varobj.c,
+	win32-nat.c, wince.c, xcoffsolib.c, xcoffsolib.h: Eliminate
+	PARAMS from function pointer declarations. 
+
 2000-06-03  Christopher Faylor  <cgf@cygnus.com>
 
 	* win32-nat.c (safe_symbol_file_add_cleanup): Ensure that gdb_stderr is

@@ -512,7 +512,7 @@ extern void rs6000_fix_call_dummy (char *, CORE_ADDR, CORE_ADDR,
 /* Hook in rs6000-tdep.c for determining the TOC address when
    calling functions in the inferior.  */
 extern
-CORE_ADDR (*find_toc_address_hook) PARAMS ((CORE_ADDR));
+CORE_ADDR (*find_toc_address_hook) (CORE_ADDR);
 
 /* xcoffread.c provides a function to determine the TOC offset
    for a given object file.

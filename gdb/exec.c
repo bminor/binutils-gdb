@@ -47,7 +47,7 @@
 
 struct vmap *map_vmap (bfd *, bfd *);
 
-void (*file_changed_hook) PARAMS ((char *));
+void (*file_changed_hook) (char *);
 
 /* Prototypes for local functions */
 
@@ -473,7 +473,7 @@ xfer_memory (memaddr, myaddr, len, write, target)
   boolean res;
   struct section_table *p;
   CORE_ADDR nextsectaddr, memend;
-  boolean (*xfer_fn) PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
+  boolean (*xfer_fn) (bfd *, sec_ptr, PTR, file_ptr, bfd_size_type);
   asection *section;
 
   if (len <= 0)

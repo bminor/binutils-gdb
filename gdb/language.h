@@ -141,15 +141,15 @@ struct language_defn
 
     /* Parser function. */
 
-    int (*la_parser) PARAMS ((void));
+    int (*la_parser) (void);
 
     /* Parser error function */
 
-    void (*la_error) PARAMS ((char *));
+    void (*la_error) (char *);
 
     /* Evaluate an expression. */
-    struct value *(*evaluate_exp) PARAMS ((struct type *, struct expression *,
-					   int *, enum noside));
+    struct value *(*evaluate_exp) (struct type *, struct expression *,
+				   int *, enum noside);
 
     void (*la_printchar) (int ch, struct ui_file * stream);
 
@@ -159,7 +159,7 @@ struct language_defn
 
     void (*la_emitchar) (int ch, struct ui_file * stream, int quoter);
 
-    struct type *(*la_fund_type) PARAMS ((struct objfile *, int));
+    struct type *(*la_fund_type) (struct objfile *, int);
 
     /* Print a type using syntax appropriate for this language. */
 

@@ -58,4 +58,4 @@ extern struct vmap *vmap;
 
 /* Hook for symbol table relocation at runtime. */
 
-extern void (*xcoff_relocate_symtab_hook) PARAMS ((unsigned int));
+extern void (*xcoff_relocate_symtab_hook) (unsigned int);

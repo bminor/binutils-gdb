@@ -478,7 +478,7 @@ dcache_xfer_memory (dcache, memaddr, myaddr, len, should_write)
 
   if (dcache_enabled_p)
     {
-      int (*xfunc) PARAMS ((DCACHE * dcache, CORE_ADDR addr, char *ptr));
+      int (*xfunc) (DCACHE * dcache, CORE_ADDR addr, char *ptr);
       xfunc = should_write ? dcache_poke_byte : dcache_peek_byte;
 
       for (i = 0; i < len; i++)

@@ -26,15 +26,15 @@
 /* Opaque data type */
 typedef char *Opaque;
 typedef
-Opaque (*OpaqueFuncPtr) PARAMS ((va_list));
+Opaque (*OpaqueFuncPtr) (va_list);
      typedef char **OpaqueList;
      typedef OpaqueList OpaquePtr;
 
 /* Generic function pointer */
-     typedef void (*TuiVoidFuncPtr) PARAMS ((va_list));
-     typedef int (*TuiIntFuncPtr) PARAMS ((va_list));
+     typedef void (*TuiVoidFuncPtr) (va_list);
+     typedef int (*TuiIntFuncPtr) (va_list);
 /*
-   typedef     Opaque            (*TuiOpaqueFuncPtr) PARAMS ((va_list));
+   typedef Opaque (*TuiOpaqueFuncPtr) (va_list);
  */
      typedef OpaqueFuncPtr TuiOpaqueFuncPtr;
 

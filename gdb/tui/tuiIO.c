@@ -112,7 +112,7 @@ void
 tui_tputs (str, affcnt, putfunc)
      char *str;
      int affcnt;
-     int (*putfunc) PARAMS ((int));
+     int (*putfunc) (int);
 {
   extern char *rl_prompt;	/* the prompt string */
 

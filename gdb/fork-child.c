@@ -103,9 +103,9 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun,
      char *exec_file;
      char *allargs;
      char **env;
-     void (*traceme_fun) PARAMS ((void));
-     void (*init_trace_fun) PARAMS ((int));
-     void (*pre_trace_fun) PARAMS ((void));
+     void (*traceme_fun) (void);
+     void (*init_trace_fun) (int);
+     void (*pre_trace_fun) (void);
      char *shell_file;
 {
   int pid;

@@ -68,9 +68,9 @@ void (*show_load_progress) (const char *section,
 			    unsigned long section_size, 
 			    unsigned long total_sent, 
 			    unsigned long total_size);
-void (*pre_add_symbol_hook) PARAMS ((char *));
-void (*post_add_symbol_hook) PARAMS ((void));
-void (*target_new_objfile_hook) PARAMS ((struct objfile *));
+void (*pre_add_symbol_hook) (char *);
+void (*post_add_symbol_hook) (void);
+void (*target_new_objfile_hook) (struct objfile *);
 
 static void clear_symtab_users_cleanup (void *ignore);
 
@@ -2554,8 +2554,7 @@ int overlay_cache_invalid = 0;	/* True if need to refresh mapped state */
 
 /* Target vector for refreshing overlay mapped state */
 static void simple_overlay_update (struct obj_section *);
-void (*target_overlay_update) PARAMS ((struct obj_section *))
-= simple_overlay_update;
+void (*target_overlay_update) (struct obj_section *) = simple_overlay_update;
 
 /* Function: section_is_overlay (SECTION)
    Returns true if SECTION has VMA not equal to LMA, ie. 

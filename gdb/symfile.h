@@ -88,13 +88,13 @@ struct sym_fns
        called during symbol_file_add, when we begin debugging an entirely new
        program. */
 
-    void (*sym_new_init) PARAMS ((struct objfile *));
+    void (*sym_new_init) (struct objfile *);
 
     /* Reads any initial information from a symbol file, and initializes the
        struct sym_fns SF in preparation for sym_read().  It is called every
        time we read a symbol file for any reason. */
 
-    void (*sym_init) PARAMS ((struct objfile *));
+    void (*sym_init) (struct objfile *);
 
     /* sym_read (objfile, mainline)
        Reads a symbol file into a psymtab (or possibly a symtab).
@@ -104,12 +104,12 @@ struct sym_fns
        symbol file (e.g. shared library or dynamically loaded file)
        is being read.  */
 
-    void (*sym_read) PARAMS ((struct objfile *, int));
+    void (*sym_read) (struct objfile *, int);
 
     /* Called when we are finished with an objfile.  Should do all cleanup
        that is specific to the object file format for the particular objfile. */
 
-    void (*sym_finish) PARAMS ((struct objfile *));
+    void (*sym_finish) (struct objfile *);
 
     /* This function produces a file-dependent section_offsets structure,
        allocated in the objfile's storage, and based on the parameter.
@@ -118,7 +118,7 @@ struct sym_fns
        a string, where NULL means the default, and others are parsed in a file
        dependent way. */
 
-    void (*sym_offsets) PARAMS ((struct objfile *, struct section_addr_info *));
+    void (*sym_offsets) (struct objfile *, struct section_addr_info *);
 
     /* Finds the next struct sym_fns.  They are allocated and initialized
        in whatever module implements the functions pointed to; an 

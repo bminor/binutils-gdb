@@ -809,7 +809,7 @@ struct cont_elem
     int sym_idx;
     int sym_end;
     int symnum;
-    int (*func) PARAMS ((struct objfile *, struct symbol *, char *));
+    int (*func) (struct objfile *, struct symbol *, char *);
     /* other state dependancies include:
        (assumption is that these will not change since process_now FIXME!!)
        stringtab_global
@@ -828,7 +828,7 @@ void
 process_later (sym, p, f)
      struct symbol *sym;
      char *p;
-     int (*f) PARAMS ((struct objfile *, struct symbol *, char *));
+     int (*f) (struct objfile *, struct symbol *, char *);
 {
 
   /* Allocate more space for the deferred list.  */
@@ -867,7 +867,7 @@ process_now (objfile)
   struct symbol *sym;
   char *stabs;
   int err;
-  int (*func) PARAMS ((struct objfile *, struct symbol *, char *));
+  int (*func) (struct objfile *, struct symbol *, char *);
 
   /* Save the state of our caller, we'll want to restore it before
      returning.  */
