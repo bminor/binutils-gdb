@@ -173,3 +173,58 @@ of that target over to use the low-level BFD interface.
 Currently, all COFF targets use one of the two BFD interfaces, so the
 non-BFD code can be removed.  Eventually, all should be converted to
 using one COFF back end, which uses the high-level BFD interface.
+
+@node Foo
+@section Foo
+
+@subsection Warning and Error Messages
+
+@deftypefun  int had_warnings (void)
+@deftypefunx int had_errors (void)
+
+Returns non-zero if any warnings or errors, respectively, have been
+printed during this invocation.
+
+@end deftypefun
+
+@deftypefun  void as_perror (const char *@var{gripe}, const char *@var{filename})
+
+Displays a BFD or system error, then clears the error status.
+
+@end deftypefun
+
+@deftypefun  void as_tsktsk (const char *@var{format}, ...)
+@deftypefunx void as_warn (const char *@var{format}, ...)
+@deftypefunx void as_bad (const char *@var{format}, ...)
+@deftypefunx void as_fatal (const char *@var{format}, ...)
+
+These functions display messages about something amiss with the input
+file, or internal problems in the assembler itself.  The current file
+name and line number are printed, followed by the supplied message,
+formatted using @code{vfprintf}, and a final newline.
+
+@end deftypefun
+
+@deftypefun  void as_warn_where (char *@var{file}, unsigned int @var{line}, const char *@var{format}, ...)
+@deftypefunx void as_bad_where (char *@var{file}, unsigned int @var{line}, const char *@var{format}, ...)
+
+These variants permit specification of the file name and line number,
+and are used when problems are detected when reprocessing information
+saved away when processing some earlier part of the file.  For example,
+fixups are processed after all input has been read, but messages about
+fixups should refer to the original filename and line number that they
+are applicable to.
+
+@end deftypefun
+
+@deftypefun  void fprint_value (FILE *@var{file}, valueT @var{val})
+@deftypefunx void sprint_value (char *@var{buf}, valueT @var{val})
+
+These functions are helpful for converting a @code{valueT} value into
+printable format, in case it's wider than modes that @code{*printf} can
+handle.  If the type is narrow enough, a decimal number will be
+produced; otherwise, it will be in hexadecimal (FIXME: currently without
+`0x' prefix).  The value itself is not examined to make this
+determination.
+
+@end deftypefun
