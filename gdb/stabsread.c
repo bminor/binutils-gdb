@@ -747,6 +747,7 @@ read_cfront_baseclasses(fip, pp, type, objfile)
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
 */
 
+static int
 read_cfront_member_functions(fip, pp, type, objfile)
      struct field_info *fip;
      char **pp;
