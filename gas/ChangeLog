@@ -1,7 +1,13 @@
+Mon Feb 27 13:03:41 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* configure.in: add a29k-*-vxworks configuration.
+
 Fri Feb 24 14:41:15 1995  Ian Lance Taylor  <ian@cygnus.com>
 
-	* config/tc-mips.c (load_register): Correctly handle 32 bit values
-	with the high bit set in 64 bit mode.
+	* config/tc-mips.c (load_register): Take dbl argument to determine
+	handling of signed 32 bit values in 64 bit modes.  Change all
+	callers.
+	(macro): Handle M_DLI and M_DLA_AB.
 
 Wed Feb 22 23:10:56 1995  Jeff Law  (law@snake.cs.utah.edu)
 
