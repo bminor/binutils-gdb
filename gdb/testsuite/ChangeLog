@@ -1,3 +1,7 @@
+2001-11-20  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.c++/namespace.exp: Fix quotes in output messages.
+
 2001-11-14  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/code-exprs.exp: New file.  Tests use of the "@code"

@@ -166,10 +166,10 @@ gdb_expect {
 send_gdb "print 'BBB::Class::xyzq'\n"
 gdb_expect {
    -re "\\$\[0-9\]* = \{char \\((BBB::|)Class \\*, (char|int)\\)\} $hex <BBB::Class::xyzq\\(char\\)>\r\n$gdb_prompt $" {
-       pass "print 'BBB::Class'::xyzq"
+       pass "print 'BBB::Class::xyzq'"
    }
-   -re ".*$gdb_prompt $" { fail "print 'BBB::Class'::xyzq" }
-   timeout { fail "(timeout) print 'BBB::Class'::xyzq" }
+   -re ".*$gdb_prompt $" { fail "print 'BBB::Class::xyzq'" }
+   timeout { fail "(timeout) print 'BBB::Class::xyzq'" }
 }
 
 # Break on a function in a class in a namespace
