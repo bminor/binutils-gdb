@@ -1698,15 +1698,15 @@ error_msg_str (INT32 code)
   return (cbuf);
 }
 /****************************************************************************/
-/* 
- *  Receive a message and expect it to be of type msgcode.
- *  Returns 0/1 on failure/success.
- */
+
+/* Receive a message, placing it in MSG_BUF, and expect it to be of
+   type MSGCODE.  If an error occurs, a non-zero FROM_TTY indicates
+   that the message should be printed.
+   
+   Return 0 for failure, 1 for success.  */
+
 static int
-expect_msg (msgcode, msg_buf, from_tty)
-     INT32 msgcode;		/* Msg code we expect */
-     union msg_t *msg_buf;	/* Where to put  the message received */
-     int from_tty;		/* Print message on error if non-zero */
+expect_msg (INT32 msgcode, union msg_t *msg_buf, int from_tty)
 {
   int retries = 0;
   while (msg_recv_serial (msg_buf) && (retries++ < MAX_RETRIES));

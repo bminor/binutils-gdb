@@ -1,3 +1,10 @@
+2000-10-06  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote-eb.c (eb_xfer_inferior_memory): Protoize.
+	* remote-es.c (es1800_xfer_inferior_memory, es1800_files_info):
+	Protoize.
+	* remote-mm.c (expect_msg): Protoize.
+
 2000-10-04  Kevin Buettner  <kevinb@redhat.com>
 
 	* rs6000-tdep.c (skip_prologue): Add new parameter lim_pc.

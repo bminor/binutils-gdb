@@ -954,15 +954,12 @@ tohex (int nib)
    memaddr - the target's address
    myaddr  - gdb's address
    len     - number of bytes 
-   write   - write if != 0 otherwise read       */
+   write   - write if != 0 otherwise read
+   tops    - unused */
 
 static int
-es1800_xfer_inferior_memory (memaddr, myaddr, len, write, tops)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-     struct target_ops *tops;	/* Unused */
+es1800_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
+			     int write, struct target_ops *tops)
 {
   int origlen = len;
   int xfersize;
@@ -1065,11 +1062,10 @@ es1800_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
     }
 }
 
-/* Information about the current target  */
+/* Display information about the current target.  TOPS is unused.  */
 
 static void
-es1800_files_info (tops)
-     struct target_ops *tops;	/* Unused */
+es1800_files_info (struct target_ops *tops)
 {
   printf ("ES1800 Attached to %s at %d baud in %s mode\n", savename, 19200,
 	  MODE);
