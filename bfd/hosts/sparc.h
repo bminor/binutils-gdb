@@ -11,7 +11,10 @@
 #endif
 #define SEEK_SET 0
 #define SEEK_CUR 1
-
+#ifdef __STDC__
+#include <stdlib.h>
+#include <string.h>
+#else
 extern char *EXFUN(mktemp,(CONST char*));
 extern int   EXFUN(fflush,(FILE *));
 extern int   EXFUN(write,(int, CONST char *, int));
@@ -75,7 +78,7 @@ extern long atol();
 extern char *getenv();
 extern int fputc();
 extern int unlink();
-
+#endif /* __STDC__ */
 
 /* EXACT TYPES */
 typedef char int8e_type;
