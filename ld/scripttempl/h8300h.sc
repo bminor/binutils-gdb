@@ -9,21 +9,24 @@ MEMORY
 {
         /* 0xc4 is a magic entry.  We should have the linker just
            skip over it one day... */
-        vectors : o = 0x0000, l = 196
-        magicvectors : o = 0xc4, l = 60
-	ram    : o = 0x0100, l = 256K - 256 - 4
-	topram : o = 0x3fffc, l = 4
+        vectors : o = 0x0000, l = 0xc4
+        magicvectors : o = 0xc4, l = 0x3c
+	/* We still only use 256k as the main ram size.  */
+	ram    : o = 0x0100, l = 0x3fefc
+	/* The stack starts at the top of main ram.  */
+	topram : o = 0x3fffc, l = 0x4
+	/* At the very top of the address space is the 8-bit area.  */
+	eight : o = 0xffff00, l = 0x100
 }
 
 SECTIONS 				
 { 					
 .vectors : {
-/* Use something like this to place a specific function's address
-   into the vector table.
+	/* Use something like this to place a specific function's address
+	   into the vector table.
 
-	LONG(ABSOLUTE(_foobar))
+	LONG(ABSOLUTE(_foobar)) */
 
-*/
 	*(.vectors)
 	} ${RELOCATING+ > vectors}
 .text :	{ 					
@@ -53,6 +56,9 @@ SECTIONS
 	${RELOCATING+ _stack = . ; }
 	*(.stack)
 	} ${RELOCATING+ > topram}
+.eight : {
+	*(.eight)
+	} ${RELOCATING+ > eight}
 .stab 0 ${RELOCATING+(NOLOAD)} : {
 	[ .stab ]
 	}
