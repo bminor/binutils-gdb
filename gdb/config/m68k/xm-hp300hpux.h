@@ -19,14 +19,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define HOST_BYTE_ORDER BIG_ENDIAN
 
-/* HPUX 8.0, in its infinite wisdom, has chosen to prototype ptrace
-   with five arguments, so programs written for normal ptrace lose.
-
-   Idiots.
-
-   (They should have just made it varadic).  */
-#define FIVE_ARG_PTRACE
-
 /* Define this to indicate problems with traps after continuing.  */
 #define HP_OS_BUG
 

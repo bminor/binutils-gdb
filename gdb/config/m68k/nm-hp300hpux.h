@@ -42,3 +42,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
     addr = (int) (((struct proc_regs *)(blockend))->p_float		\
 		  + (regno) - FPC_REGNUM);				\
 }
+
+/* HPUX 8.0, in its infinite wisdom, has chosen to prototype ptrace
+   with five arguments, so programs written for normal ptrace lose.
+
+   Idiots.
+
+   (They should have just made it varadic).  */
+
+#define FIVE_ARG_PTRACE

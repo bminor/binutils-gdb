@@ -1,3 +1,8 @@
+Tue Mar  5 18:54:04 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config/m68k/nm-hp300hpux.h (FIVE_ARG_PTRACE): Define here
+	instead of in config/m68k/xm-hp300hpux.h.
+
 Tue Mar  5 12:05:35 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* i386b-nat.c, m68knbsd-nat.c (fetch_core_registers): Provide
