@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* Tracing support.  */
 
-#ifdef MAX_CPUS
+#if WITH_SMP
 
 /* Return non-zero if tracing of IDX is enabled for CPU.  */
 #define TRACE_P(cpu,idx) \
@@ -62,13 +62,13 @@ do { \
     trace_printf args; \
 } while (0)
 
-#endif /* MAX_CPUS */
+#endif /* WITH_SMP */
 
 extern void trace_printf PARAMS ((char *, ...));
 
 /* Debug support.  */
 
-#ifdef MAX_CPUS
+#if WITH_SMP
 
 /* Return non-zero if debugging of IDX for CPU is enabled.  */
 #define DEBUG_P(cpu, idx) \
@@ -105,7 +105,7 @@ do { \
     debug_printf args; \
 } while (0)
 
-#endif /* MAX_CPUS */
+#endif /* WITH_SMP */
 
 extern void debug_printf PARAMS ((char *, ...));
 
