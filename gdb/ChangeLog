@@ -1,5 +1,7 @@
 2003-05-13  Ian Lance Taylor  <ian@airs.com>
 
+	* MAINTAINERS (write after approval): Add myself.
+
 	* ser-pipe.c (_initialize_ser_pipe): Correct call to memset--swap
 	second and third arguments.
 	* ser-tcp.c (_initialize_ser_tcp): Likewise.
