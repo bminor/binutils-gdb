@@ -1779,6 +1779,8 @@ tc_gen_reloc (seg, fixp)
 
   if (fixp->fx_addsy && fixp->fx_subsy)
     {
+      reloc->sym_ptr_ptr = NULL;
+
       /* If we got a difference between two symbols, and the
 	 subtracted symbol is in the current section, use a
 	 PC-relative relocation.  If both symbols are in the same
@@ -1856,7 +1858,8 @@ tc_gen_reloc (seg, fixp)
 	    }
 	}
 
-      free (reloc->sym_ptr_ptr);
+      if (reloc->sym_ptr_ptr)
+	free (reloc->sym_ptr_ptr);
       free (reloc);
       return NULL;
     }
