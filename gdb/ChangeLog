@@ -26,6 +26,10 @@
 
 2004-02-28  Andrew Cagney  <cagney@redhat.com>
 
+	GDB 6.1 branch created.
+
+2004-02-28  Andrew Cagney  <cagney@redhat.com>
+
 	* utils.c: Use "", instead of <>, to include readline.
 	tui/tui-win.c, tui/tui.c, tui/tui-hooks.c: Ditto.
 	* tracepoint.c, top.c, symmisc.c, symfile.c: Ditto.
