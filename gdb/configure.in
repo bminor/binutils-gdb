@@ -1134,7 +1134,14 @@ WIN32LDAPP=
 AC_SUBST(WIN32LIBS)
 AC_SUBST(WIN32LDAPP)
 
-configdir="unix"
+case "${host}" in
+*-*-cygwin*)
+    configdir="win"
+    ;;
+*)
+    configdir="unix"
+    ;;
+esac
 
 GDBTKLIBS=
 if test "${enable_gdbtk}" = "yes"; then
@@ -1153,14 +1160,7 @@ if test "${enable_gdbtk}" = "yes"; then
 
 	# now look for Tcl library stuff
 
-	case "${host}" in
-	*-*-cygwin*)
-	    tcldir=../tcl/win/
-	    ;;
-	*)
-	    tcldir=../tcl/unix/
-	    ;;
-	esac
+	tcldir="../tcl/${configdir}/"
 
 	TCL_DEPS="${tcldir}${TCL_LIB_FILE}"
 
@@ -1176,14 +1176,7 @@ if test "${enable_gdbtk}" = "yes"; then
 
 	   # now look for Tk library stuff
 
-	   case "${host}" in
-	   *-*-cygwin*)
-	       tkdir=../tk/win/
-	       ;;
-	   *)
-	       tkdir=../tk/unix/
-	       ;;
-	   esac
+	   tkdir="../tk/${configdir}/"
 
 	   TK_DEPS="${tkdir}${TK_LIB_FILE}"
 

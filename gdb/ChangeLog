@@ -1,3 +1,9 @@
+2004-06-08  Corinna Vinschen  <vinschen@redhat.com>
+
+	* configure.in: Set $configdir to the right OS specific value.
+	Use value when setting $tcldir and $tkdir.
+	* configure: Regenerate.
+
 2004-06-06  Paul Brook  <paul@codesourcery.com>
 
 	* gdb/dwarf2-frame.c (decode_frame_entry_1): Decode version 3 CIE
