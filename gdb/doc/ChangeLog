@@ -1,3 +1,7 @@
+2002-01-20  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdb.texinfo: Beautify copyright years; fix a typo.
+
 2002-01-07  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdb.texinfo (Tracepoints): Clarify that tracepoints need support
