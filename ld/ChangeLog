@@ -1,3 +1,14 @@
+2000-07-10  H.J. Lu  <hjl@gnu.org>
+
+	* emultempl/pe.em (pe_enable_stdcall_fixup): Protect with
+	DLL_SUPPORT.
+	(strhash): Likewise.
+	(compute_dll_image_base): Likewise.
+	(pe_undef_found_sym): Likewise.
+	(pe_undef_cdecl_match): Likewise.
+	(gld_${EMULATION_NAME}_open_dynamic_archive): Mark the
+	argument "arch" with ATTRIBUTE_UNUSED.
+
 2000-07-10  Alan Modra  <alan@linuxcare.com.au>
 
 	* configure.tgt: Remove extraneous hppa*-*-linux-gnu*.
@@ -57,14 +68,14 @@
 
 2000-07-07  Charles Wilson  <cwilson@ece.gatech.edu>
 
-	* ld/emultempl/pe.em: institute the following search order for
+	* emultempl/pe.em: institute the following search order for
 	dynamic libraries on pei386: libfoo.dll.a, foo.dll.a (import
 	libs), libfoo.dll, foo.dll (link direct to dll).  Fall back to
 	static lib (libfoo.a) if none of the above are found.
 
 2000-07-07  Mumit Khan  <khan@xraylith.wisc.edu>
 
-	* ld/emultempl/pe.em (pe_enable_auto_image_base): New variable. 
+	* emultempl/pe.em (pe_enable_auto_image_base): New variable. 
 	(longopts): New --{enable,disable}-auto-image-base options.
 	(gld_${EMULATION_NAME}_list_options): Document. 
 	(gld_${EMULATION_NAME}_parse): Handle.

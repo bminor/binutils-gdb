@@ -114,8 +114,8 @@ static int support_old_code = 0;
 static char * thumb_entry_symbol = NULL;
 static lang_assignment_statement_type *image_base_statement = 0;
 
-static int pe_enable_stdcall_fixup = -1; /* 0=disable 1=enable */
 #ifdef DLL_SUPPORT
+static int pe_enable_stdcall_fixup = -1; /* 0=disable 1=enable */
 static char *pe_out_def_filename = NULL;
 static char *pe_implib_filename = NULL;
 static int pe_enable_auto_image_base = 0;
@@ -560,6 +560,7 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
 }
 
 
+#ifdef DLL_SUPPORT
 static unsigned long 
 strhash (const char *str)
 {
@@ -590,6 +591,7 @@ compute_dll_image_base (const char *ofile)
   unsigned long hash = strhash (ofile);
   return 0x60000000 | ((hash << 16) & 0x0FFC0000);
 }
+#endif
 
 /* Assign values to the special symbols before the linker script is
    read.  */
@@ -607,8 +609,12 @@ gld_${EMULATION_NAME}_set_symbols ()
       if (link_info.relocateable)
 	init[IMAGEBASEOFF].value = 0;
       else if (init[DLLOFF].value || link_info.shared)
+#ifdef DLL_SUPPORT
 	init[IMAGEBASEOFF].value = (pe_enable_auto_image_base) ?
 	  compute_dll_image_base (output_filename) : NT_DLL_IMAGE_BASE;
+#else
+	init[IMAGEBASEOFF].value = NT_DLL_IMAGE_BASE;
+#endif
       else
 	init[IMAGEBASEOFF].value = NT_EXE_IMAGE_BASE;
     }
@@ -673,6 +679,7 @@ gld_${EMULATION_NAME}_after_parse ()
     ldlang_add_undef (entry_symbol);
 }
 
+#ifdef DLL_SUPPORT
 static struct bfd_link_hash_entry *pe_undef_found_sym;
 
 static boolean
@@ -691,7 +698,6 @@ pe_undef_cdecl_match (h, string)
   return true;
 }
 
-#ifdef DLL_SUPPORT
 static void
 pe_fixup_stdcalls ()
 {
@@ -1355,7 +1361,7 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 
 static boolean
 gld_${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
-     const char * arch;
+     const char * arch ATTRIBUTE_UNUSED;
      search_dirs_type * search;
      lang_input_statement_type * entry;
 {
