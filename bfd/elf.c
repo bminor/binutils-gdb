@@ -3077,6 +3077,9 @@ prep_headers (abfd)
     case bfd_arch_i860:
       i_ehdrp->e_machine = EM_860;
       break;
+    case bfd_arch_i960:
+      i_ehdrp->e_machine = EM_960;
+      break;
     case bfd_arch_mips:	/* MIPS Rxxxx */
       i_ehdrp->e_machine = EM_MIPS;	/* only MIPS R3000 */
       break;

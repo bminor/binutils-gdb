@@ -1,3 +1,14 @@
+1999-05-28  Martin Dorey  <mdorey@madge.com>
+
+	* elf32-i960.c: New file.
+	* elf.c (prep_headers): Handle bfd_arch_i960.
+	* targets.c (bfd_target_vector): Add &bfd_elf32_i960_vec.
+	* config.bfd (i960-*-elf*): New target.
+	* configure.in (bfd_elf32_i960_vec): New target vector.
+	* Makefile.am (BFD32_BACKENDS): Add elf32-i960.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-i960.c.
+	* Makefile.in, aclocal.m4, configure: Rebuild.
+
 1999-05-27  Nick Clifton  <nickc@cygnus.com>
 
 	* elfarm-oabi.c (elf32_arm_howto_table): Add entry for
