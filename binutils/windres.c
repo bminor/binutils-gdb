@@ -113,7 +113,9 @@ static struct include_dir *include_dirs;
 #define OPTION_INCLUDE_DIR (OPTION_HELP + 1)
 #define OPTION_LANGUAGE (OPTION_INCLUDE_DIR + 1)
 #define OPTION_PREPROCESSOR (OPTION_LANGUAGE + 1)
-#define OPTION_VERSION (OPTION_PREPROCESSOR + 1)
+#define OPTION_USE_TEMP_FILE (OPTION_PREPROCESSOR + 1)
+#define OPTION_NO_USE_TEMP_FILE (OPTION_USE_TEMP_FILE + 1)
+#define OPTION_VERSION (OPTION_NO_USE_TEMP_FILE + 1)
 #define OPTION_YYDEBUG (OPTION_VERSION + 1)
 
 static const struct option long_options[] =
@@ -126,6 +128,8 @@ static const struct option long_options[] =
   {"output-format", required_argument, 0, 'O'},
   {"preprocessor", required_argument, 0, OPTION_PREPROCESSOR},
   {"target", required_argument, 0, 'F'},
+  {"use-temp-file", no_argument, 0, OPTION_USE_TEMP_FILE},
+  {"no-use-temp-file", no_argument, 0, OPTION_NO_USE_TEMP_FILE},
   {"verbose", no_argument, 0, 'v'},
   {"version", no_argument, 0, OPTION_VERSION},
   {"yydebug", no_argument, 0, OPTION_YYDEBUG},
@@ -713,7 +717,10 @@ Options:\n\
   -DSYM[=VAL], --define SYM[=VAL]\n\
                               Define SYM when preprocessing rc file\n\
   -v                          Verbose - tells you what it's doing\n\
-  --language VAL              Set language when reading rc file\n"));
+  --language VAL              Set language when reading rc file\n\
+  --use-temp-file             Use a temporary file instead of popen to read\n\
+                              the preprocessor output\n\
+  --no-use-temp-file          Use popen (default)\n"));
 #ifdef YYDEBUG
   fprintf (stream, _("\
   --yydebug                   Turn on parser debugging\n"));
@@ -777,6 +784,7 @@ main (argc, argv)
   const char *quotedarg;
   int language;
   struct res_directory *resources;
+  int use_temp_file;
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
@@ -800,6 +808,7 @@ main (argc, argv)
   preprocessor = NULL;
   preprocargs = NULL;
   language = -1;
+  use_temp_file = 0;
 
   while ((c = getopt_long (argc, argv, "i:o:I:O:F:D:v", long_options,
 			   (int *) 0)) != EOF)
@@ -890,6 +899,14 @@ main (argc, argv)
 	  language = strtol (optarg, (char **) NULL, 16);
 	  break;
 
+	case OPTION_USE_TEMP_FILE:
+	  use_temp_file = 1;
+	  break;
+
+	case OPTION_NO_USE_TEMP_FILE:
+	  use_temp_file = 0;
+	  break;
+
 #ifdef YYDEBUG
 	case OPTION_YYDEBUG:
 	  yydebug = 1;
@@ -949,7 +966,7 @@ main (argc, argv)
       abort ();
     case RES_FORMAT_RC:
       resources = read_rc_file (input_filename, preprocessor, preprocargs,
-				language);
+				language, use_temp_file);
       break;
     case RES_FORMAT_RES:
       resources = read_res_file (input_filename);

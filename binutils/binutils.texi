@@ -2140,6 +2140,17 @@ Specify the default language to use when reading an @code{rc} file.
 @var{val} should be a hexadecimal language code.  The low eight bits are
 the language, and the high eight bits are the sublanguage.
 
+@item --use-temp-file
+Use a temporary file to instead of using popen to read the output of
+the preprocessor. Use this option if the popen implementation is buggy 
+on the host (eg., certain non-English language versions of Windows 95 and 
+Windows 98 are known to have buggy popen where the output will instead
+go the console).
+
+@item --no-use-temp-file
+Use popen, not a temporary file, to read the output of the preprocessor.
+This is the default behaviour.
+
 @item --help
 Prints a usage summary.
 

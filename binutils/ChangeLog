@@ -1,3 +1,25 @@
+2000-01-07  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* windres.c (long_options): Add --use-temp-file and 
+	--no-use-temp-file options.
+	(usage): Document.
+	(main): Handle.
+	
+	* windres.h: Update read_rc_file prototype.
+	
+	* resrc.c (cpp_temp_file): New static variable.
+	(istream_type): New static variable.
+	(close_pipe): Delete function.
+	(run_cmd): New static function.
+	(open_input_stream): New static function.
+	(close_input_stream): New static function.
+	(look_for_default): Handle DOS directory separator. Use 
+	open_input_stream instead of popen.
+	(read_rc_file): Likewise.
+	
+	* binutils.texi: Document --use-temp-file, --no-use-temp-file
+	options. 
+
 2000-01-04  Mumit Khan  <khan@xraylith.wisc.edu>
  
 	* dlltool.c (create_compat_implib): New variable.

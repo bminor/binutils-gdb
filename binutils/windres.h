@@ -747,7 +747,7 @@ extern int verbose;
 /* Function declarations.  */
 
 extern struct res_directory *read_rc_file
-  PARAMS ((const char *, const char *, const char *, int));
+  PARAMS ((const char *, const char *, const char *, int, int));
 extern struct res_directory *read_res_file PARAMS ((const char *));
 extern struct res_directory *read_coff_rsrc
   PARAMS ((const char *, const char *));
