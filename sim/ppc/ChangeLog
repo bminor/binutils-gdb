@@ -1,3 +1,11 @@
+Fri Nov  3 11:37:24 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ppc-instructions (data cache instructions): Make all data cache
+	instructions nops instead of invalid instructions.
+
+	* Makefile.in (CONFIG_CFLAGS): Add ALIGNMENT_CFLAGS and
+	TIMEBASE_CFLAGS which weren't included.
+
 Thu Nov  2 08:54:04 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in: Uncomment built file dependencies.

@@ -2297,10 +2297,19 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.31,6./,11.RA,16.RB,21.278,31./:X:::Data Cache Block Touch
+	;	/* nop for now */
+
 0.31,6./,11.RA,16.RB,21.246,31./:X:::Data Cache Block Touch for Store
+	;	/* nop for now */
+
 0.31,6./,11.RA,16.RB,21.1014,31./:X:::Data Cache Block set to Zero
+	;	/* nop for now */
+
 0.31,6./,11.RA,16.RB,21.54,31./:X:::Data Cache Block Store
+	;	/* nop for now */
+
 0.31,6./,11.RA,16.RB,21.86,31./:X:::Data Cache Block Flush
+	;	/* nop for now */
 
 #
 # II.3.3 Envorce In-order Execution of I/O Instruction
