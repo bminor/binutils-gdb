@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# This is intended to run some of the tests that might be relevant to
+# work on carlton_dictionary-branch.  I'm intending to run this
+# frequently after compiling, so I want to pick out relevant tests and
+# sort them by speed.  That way, it's perhaps less of a deal if I get
+# bored in the middle of running tests and interrupt this.
+
+# 5 seconds or so each.
+FASTTESTS="gdb.base/assign.exp \
+  gdb.base/constvars.exp \
+  gdb.base/cvexpr.exp \
+  gdb.base/dump.exp \
+  gdb.base/opaque.exp \
+  gdb.base/ptype.exp \
+  gdb.base/reread.exp \
+  gdb.base/return.exp \
+  gdb.base/return2.exp \
+  gdb.base/sizeof.exp \
+  gdb.base/structs.exp \
+  gdb.base/varargs.exp \
+  gdb.c++/ambiguous.exp \
+  gdb.c++/derivation.exp \
+  gdb.c++/local.exp \
+  gdb.c++/m-data.exp \
+  gdb.c++/m-static.exp \
+  gdb.c++/method.exp"
+
+# 6 seconds or more (usually around 10).
+MEDTESTS="gdb.base/exprs.exp \
+  gdb.base/funcargs.exp \
+  gdb.base/scope.exp \
+  gdb.base/setvar.exp \
+  gdb.c++/classes.exp \
+  gdb.c++/namespace.exp \
+  gdb.c++/overload.exp \
+  gdb.c++/templates.exp \
+  gdb.c++/userdef.exp \
+  gdb.c++/virtfunc.exp"
+
+# 15 seconds or more.
+SLOWTESTS="gdb.base/callfuncs.exp \
+  gdb.base/completion.exp \
+  gdb.base/printcmds.exp \
+  gdb.c++/cplusfuncs.exp \
+  gdb.c++/demangle.exp"
+
+echo "Running fast tests."
+runtest ${FASTTESTS} 2>&1 | grep -v "^Test Run By" > /tmp/fastout
+diff -u {/tmp/,carlton_}fastout
+echo "Running medium tests."
+runtest ${MEDTESTS} 2>&1 | grep -v "^Test Run By" > /tmp/medout
+diff -u {/tmp/,carlton_}medout
+echo "Running slow tests."
+runtest ${SLOWTESTS} 2>&1 | grep -v "^Test Run By" > /tmp/slowout
+diff -u {/tmp/,carlton_}slowout
+
+echo "Done."
