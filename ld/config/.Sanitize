@@ -71,6 +71,7 @@ sa29200.mt
 solaris2.mh
 sparc64-elf.mt
 sparc-ll.mh
+sparc-lynx.mt
 st2000.mt
 sun3.mh
 sun3.mt
