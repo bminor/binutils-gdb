@@ -9596,6 +9596,8 @@ md_parse_option (c, arg)
 		else if (strcmp (p, "4100") == 0)
                     mips_cpu = 4100;
 		/* start-sanitize-vr4xxx */
+		else if (strcmp (p, "4111") == 0)
+                    mips_cpu = 4100;
 		else if (strcmp (p, "4121") == 0)
                     mips_cpu = 4121;
 		/* end-sanitize-vr4xxx */
@@ -9658,6 +9660,7 @@ md_parse_option (c, arg)
 		&& (mips_cpu != 4300
 		    && mips_cpu != 4100
 		    /* start-sanitize-vr4xxx */
+		    && mips_cpu != 4111
 		    && mips_cpu != 4121
 		    /* end-sanitize-vr4xxx */
 		    /* start-sanitize-vr4320 */

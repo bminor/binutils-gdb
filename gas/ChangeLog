@@ -1,4 +1,8 @@
 start-sanitize-vr4xxx
+1998-12-15  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* config/tc-mips.c (md_parse_option): Handle vr4111. 
+
 1998-12-13  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* config/tc-mips.c (mips_4121): New.
