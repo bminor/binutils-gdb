@@ -22,6 +22,13 @@ else
         lose_these_too="${d10v_files} ${lose_these_too}"
 fi
 
+m32r_files="m32r"
+if ( echo $* | grep keep\-m32r > /dev/null ) ; then
+        keep_these_too="${m32r_files} ${keep_these_too}"
+else
+        lose_these_too="${m32r_files} ${lose_these_too}"
+fi
+
 v850_files="v850"
 if ( echo $* | grep keep\-v850 > /dev/null ) ; then
         keep_these_too="${v850_files} ${keep_these_too}"
