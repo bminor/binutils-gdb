@@ -1,3 +1,9 @@
+Tue Aug 10 15:45:25 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* gdb.t06/signals.exp:  Rework code that recognizes known SVR4
+	bug, and expand domain of xfail to all SVR4 systems, since the
+	actual problem is likely to be in generic SVR4 /proc support.
+
 Tue Aug 10 15:49:35 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/unix-gdb.exp (gdb_load): Add eof to expect statement.
