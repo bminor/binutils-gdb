@@ -550,6 +550,13 @@ extern void generic_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 				    int nargs, struct value **args,
 				    struct type *type, int gcc_p);
 
+void generic_unwind_get_saved_register (char *raw_buffer,
+				        int *optimizedp,
+				        CORE_ADDR *addrp,
+				        struct frame_info *frame,
+				        int regnum,
+				        enum lval_type *lvalp);
+
 /* The function generic_get_saved_register() has been made obsolete.
    GET_SAVED_REGISTER now defaults to the recursive equivalent -
    generic_unwind_get_saved_register() - so there is no need to even

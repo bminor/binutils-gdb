@@ -1,3 +1,14 @@
+2003-02-20  Kevin Buettner  <kevinb@redhat.com>
+
+	* frame.c (generic_unwind_get_saved_register): Make non-static.
+	* frame.h (generic_unwind_get_saved_register): Declare.
+	* mips-tdep.c (read_next_frame_reg): Fetch register from
+	current regcache when frame is NULL.
+	(mips_init_extra_frame_info): Pass NULL explicitly for parameter
+	that must be NULL.
+	(mips_get_saved_register): Call generic_unwind_get_saved_register()
+	instead of frame_register_unwind().
+
 2003-02-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* remote-sim.c (gdbsim_insert_breakpoint)

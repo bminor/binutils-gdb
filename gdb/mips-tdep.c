@@ -1590,20 +1590,28 @@ read_next_frame_reg (struct frame_info *fi, int regno)
   int realnum;
   enum lval_type lval;
   void *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
-  frame_register_unwind (fi, regno, &optimized, &lval, &addr, &realnum,
-			 raw_buffer);
-  /* FIXME: cagney/2002-09-13: This is just soooo bad.  The MIPS
-     should have a pseudo register range that correspons to the ABI's,
-     rather than the ISA's, view of registers.  These registers would
-     then implicitly describe their size and hence could be used
-     without the below munging.  */
-  if (lval == lval_memory)
+
+  if (fi == NULL)
     {
-      if (regno < 32)
+      regcache_cooked_read (current_regcache, regno, raw_buffer);
+    }
+  else
+    {
+      frame_register_unwind (fi, regno, &optimized, &lval, &addr, &realnum,
+			     raw_buffer);
+      /* FIXME: cagney/2002-09-13: This is just soooo bad.  The MIPS
+	 should have a pseudo register range that correspons to the ABI's,
+	 rather than the ISA's, view of registers.  These registers would
+	 then implicitly describe their size and hence could be used
+	 without the below munging.  */
+      if (lval == lval_memory)
 	{
-	  /* Only MIPS_SAVED_REGSIZE bytes of GP registers are
-	     saved. */
-	  return read_memory_integer (addr, MIPS_SAVED_REGSIZE);
+	  if (regno < 32)
+	    {
+	      /* Only MIPS_SAVED_REGSIZE bytes of GP registers are
+		 saved. */
+	      return read_memory_integer (addr, MIPS_SAVED_REGSIZE);
+	    }
 	}
     }
 
@@ -2474,11 +2482,16 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
   if (get_frame_type (fci) == DUMMY_FRAME)
     return;
 
-  /* Use proc_desc calculated in frame_chain */
+  /* Use proc_desc calculated in frame_chain.  When there is no
+     next frame, i.e, get_next_frame (fci) == NULL, we call
+     find_proc_desc () to calculate it, passing an explicit
+     NULL as the frame parameter.  */
   proc_desc =
     get_next_frame (fci)
     ? cached_proc_desc
-    : find_proc_desc (get_frame_pc (fci), get_next_frame (fci), 1);
+    : find_proc_desc (get_frame_pc (fci),
+                      NULL /* i.e, get_next_frame (fci) */,
+		      1);
 
   frame_extra_info_zalloc (fci, sizeof (struct frame_extra_info));
 
@@ -5482,7 +5495,6 @@ mips_get_saved_register (char *raw_buffer,
   CORE_ADDR addrx;
   enum lval_type lvalx;
   int optimizedx;
-  int realnum;
 
   if (!target_has_registers)
     error ("No registers.");
@@ -5494,8 +5506,8 @@ mips_get_saved_register (char *raw_buffer,
     lvalp = &lvalx;
   if (optimizedp == NULL)
     optimizedp = &optimizedx;
-  frame_register_unwind (get_next_frame (frame), regnum, optimizedp, lvalp,
-			 addrp, &realnum, raw_buffer);
+  generic_unwind_get_saved_register (raw_buffer, optimizedp, addrp, frame,
+                                     regnum, lvalp);
   /* FIXME: cagney/2002-09-13: This is just so bad.  The MIPS should
      have a pseudo register range that correspons to the ABI's, rather
      than the ISA's, view of registers.  These registers would then
