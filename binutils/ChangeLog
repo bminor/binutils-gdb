@@ -1,3 +1,7 @@
+2002-03-27  Peter Targett  <peter.targett@arc.com>
+
+	* MAINTAINERS: Update my email address.
+
 2002-03-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
