@@ -19,7 +19,6 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-
 /* HP PA-RISC support was contributed by the Center for Software Science
    at the University of Utah.  */
 
@@ -231,7 +230,6 @@ struct pa_it
   };
 
 /* PA-89 floating point registers are arranged like this:
-
 
    +--------------+--------------+
    |   0 or 16L   |  16 or 16R   |
@@ -696,7 +694,7 @@ const pseudo_typeS md_pseudo_table[] =
    first line of the input file.  This is because the compiler outputs
    #NO_APP at the beginning of its output.
 
-   Also note that C style comments will always work. */
+   Also note that C style comments will always work.  */
 const char line_comment_chars[] = "#";
 
 /* This array holds the chars that always start a comment.  If the
@@ -787,7 +785,7 @@ static int print_errors = 1;
    Almost every control register has a synonym; they are not listed
    here for brevity.
 
-   The table is sorted. Suitable for searching by a binary search. */
+   The table is sorted. Suitable for searching by a binary search.  */
 
 static const struct pd_reg pre_defined_registers[] =
 {
@@ -1260,7 +1258,6 @@ pa_undefine_label ()
     }
 }
 
-
 /* An HPPA-specific version of fix_new.  This is required because the HPPA
    code needs to keep track of some extra stuff.  Each call to fix_new_hppa
    results in the creation of an instance of an hppa_fix_struct.  An
@@ -1424,7 +1421,7 @@ md_begin ()
 #ifdef OBJ_SOM
   dummy_symbol = symbol_find_or_make ("L$dummy");
   S_SET_SEGMENT (dummy_symbol, text_section);
-  /* Force the symbol to be converted to a real symbol. */
+  /* Force the symbol to be converted to a real symbol.  */
   (void) symbol_get_bfdsym (dummy_symbol);
 #endif
 }
@@ -1484,7 +1481,7 @@ md_assemble (str)
   /* Get somewhere to put the assembled instrution.  */
   to = frag_more (4);
 
-  /* Output the opcode. */
+  /* Output the opcode.  */
   md_number_to_chars (to, the_insn.opcode, 4);
 
   /* If necessary output more stuff.  */
@@ -1948,7 +1945,7 @@ pa_ip (str)
 		    }
 		  INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 10);
 
-		/* Handle load ordering completer. */
+		/* Handle load ordering completer.  */
 		case 'o':
 		  if (strncmp(s, ",o", 2) != 0)
 		    break;
@@ -2408,7 +2405,7 @@ pa_ip (str)
 		      }
 		    else
 		      {
-			/* Negated condition requires an opcode change. */
+			/* Negated condition requires an opcode change.  */
 			opcode |= (cmpltr & 8) << 24;
 		      }
 		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr & 7, 13);
@@ -2429,7 +2426,7 @@ pa_ip (str)
 			  }
 			else
 			  {
-			    /* Negated condition requires an opcode change. */
+			    /* Negated condition requires an opcode change.  */
 			    opcode |= 1 << 27;
 			  }
 		      }
@@ -2582,7 +2579,7 @@ pa_ip (str)
 			  }
 			else
 			  {
-			    /* Negated condition requires an opcode change. */
+			    /* Negated condition requires an opcode change.  */
 			    opcode |= 1 << 27;
 			  }
 		      }
@@ -2594,11 +2591,11 @@ pa_ip (str)
 		    cmpltr = pa_parse_cmpb_64_cmpltr (&s);
 		    if (cmpltr >= 0)
 		      {
-			/* Negated condition requires an opcode change. */
+			/* Negated condition requires an opcode change.  */
 			opcode |= (cmpltr & 8) << 26;
 		      }
 		    else
-		      /* Not a 64 bit cond.  Give 32 bit a chance. */
+		      /* Not a 64 bit cond.  Give 32 bit a chance.  */
 		      break;
 
 		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr & 7, 13);
@@ -2607,7 +2604,7 @@ pa_ip (str)
 		  case 'Q':
 		    cmpltr = pa_parse_cmpib_64_cmpltr (&s);
 		    if (cmpltr < 0)
-		      /* Not a 64 bit cond.  Give 32 bit a chance. */
+		      /* Not a 64 bit cond.  Give 32 bit a chance.  */
 		      break;
 
 		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
@@ -3192,7 +3189,7 @@ pa_ip (str)
 		      break;
 		    }
 		  CHECK_FIELD (num, 8199, -8184, 0);
-		  
+
 		  opcode |= re_assemble_12 ((num - 8) >> 2);
 		  continue;
 		}
@@ -4226,7 +4223,7 @@ md_convert_frag (abfd, sec, fragP)
     }
 }
 
-/* Round up a section size to the appropriate boundary. */
+/* Round up a section size to the appropriate boundary.  */
 
 valueT
 md_section_align (segment, size)
@@ -4659,7 +4656,7 @@ pa_parse_number (s, is_float)
       c = *p;
       /* Tege hack: Special case for general registers as the general
          code makes a binary search with case translation, and is VERY
-         slow. */
+         slow.  */
       if (c == 'r')
 	{
 	  p++;
@@ -4799,7 +4796,6 @@ reg_name_search (name)
 
   return -1;
 }
-
 
 /* Return nonzero if the given INSN and L/R information will require
    a new PA-1.1 opcode.  */
@@ -5104,7 +5100,7 @@ get_expression (str)
   return 0;
 }
 
-/* Mark (via expr_end) the end of an absolute expression.  FIXME. */
+/* Mark (via expr_end) the end of an absolute expression.  FIXME.  */
 static int
 pa_get_absolute_expression (insn, strp)
      struct pa_it *insn;
@@ -5286,7 +5282,6 @@ pa_parse_nonneg_cmpsub_cmpltr (s, isbranch)
       c = **s;
       **s = 0x00;
 
-
       if (strcmp (name, "=") == 0)
 	{
 	  cmpltr = 1;
@@ -5333,7 +5328,6 @@ pa_parse_nonneg_cmpsub_cmpltr (s, isbranch)
   if (nullify)
     *s = save_s;
 
-
   return cmpltr;
 }
 
@@ -5363,7 +5357,6 @@ pa_parse_neg_cmpsub_cmpltr (s, isbranch)
 	*s += 1;
       c = **s;
       **s = 0x00;
-
 
       if (strcasecmp (name, "tr") == 0)
 	{
@@ -5415,10 +5408,8 @@ pa_parse_neg_cmpsub_cmpltr (s, isbranch)
   if (nullify)
     *s = save_s;
 
-
   return cmpltr;
 }
-
 
 /* Parse a 64 bit compare and branch completer returning the number (for
    encoding in instrutions) of the given completer.
@@ -5514,7 +5505,6 @@ pa_parse_cmpb_64_cmpltr (s)
       **s = c;
     }
 
-
   return cmpltr;
 }
 
@@ -5576,7 +5566,6 @@ pa_parse_cmpib_64_cmpltr (s)
 	}
       **s = c;
     }
-
 
   return cmpltr;
 }
@@ -6063,7 +6052,6 @@ pa_build_unwind_subspace (call_info)
 
   subseg_set (seg, 0);
 
-
   /* Get some space to hold relocation information for the unwind
      descriptor.  */
   p = frag_more (4);
@@ -6091,7 +6079,7 @@ pa_build_unwind_subspace (call_info)
 		(expressionS *) NULL, 0, reloc,
 		e_fsel, 32, 0, NULL);
 
-  /* Dump it. */
+  /* Dump it.  */
   unwind = (char *) &call_info->ci_unwind;
   for (i = 8; i < sizeof (struct unwind_table); i++)
     {
@@ -6561,7 +6549,7 @@ pa_export (unused)
   else
     {
       /* OK.  Set the external bits and process argument relocations.
-         For the HP, weak and global are not mutually exclusive. 
+         For the HP, weak and global are not mutually exclusive.
          S_SET_EXTERNAL will not set BSF_GLOBAL if WEAK is set.
          Call S_SET_EXTERNAL to get the other processing.  Manually
          set BSF_GLOBAL when we get back.  */
@@ -7068,7 +7056,6 @@ pa_procend (unused)
   demand_empty_rest_of_line ();
   pa_undefine_label ();
 }
-
 
 #ifdef OBJ_SOM
 /* If VALUE is an exact power of two between zero and 2^31, then
@@ -7598,7 +7585,6 @@ pa_subspace (create_new)
   SUBSPACE_DEFINED (current_subspace) = 1;
 }
 
-
 /* Create default space and subspace dictionaries.  */
 
 static void
@@ -7641,7 +7627,6 @@ pa_spaces_begin ()
       /* Create the new section.  */
       segment = subseg_new (name, subsegment);
 
-
       /* For SOM we want to replace the standard .text, .data, and .bss
          sections with our own.   We also want to set BFD flags for
 	 all the built-in subspaces.  */
@@ -7663,7 +7648,6 @@ pa_spaces_begin ()
 				 applicable & (SEC_ALLOC | SEC_LOAD
 					       | SEC_RELOC
 					       | SEC_HAS_CONTENTS));
-
 
 	}
       else if (!strcmp (pa_def_subspaces[i].name, "$BSS$"))
@@ -7725,8 +7709,6 @@ pa_spaces_begin ()
       i++;
     }
 }
-
-
 
 /* Create a new space NAME, with the appropriate flags as defined
    by the given parameters.  */
