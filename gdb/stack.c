@@ -1,5 +1,5 @@
 /* Print and select stack frames for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -21,6 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "param.h"
+#include "language.h"
 #include "symtab.h"
 #include "frame.h"
 #include "gdbcmd.h"
@@ -103,7 +104,7 @@ print_frame_info (fi, level, source, args)
 	
       printf_filtered ("#%-2d ", level);
       if (addressprint)
-        printf_filtered ("0x%x in ", fi->pc);
+        printf_filtered ("%s in ", local_hex_string(fi->pc));
 
       fputs_demangled (fname, stdout, -1);
       fputs_filtered (" (...)\n", stdout);
@@ -158,7 +159,7 @@ print_frame_info (fi, level, source, args)
 	printf_filtered ("#%-2d ", level);
       if (addressprint)
 	if (fi->pc != sal.pc || !sal.symtab)
-	  printf_filtered ("0x%x in ", fi->pc);
+	  printf_filtered ("%s in ", local_hex_string(fi->pc));
       fputs_demangled (funname ? funname : "??", stdout, -1);
       wrap_here ("   ");
       fputs_filtered (" (", stdout);
@@ -185,7 +186,7 @@ print_frame_info (fi, level, source, args)
       if (!done)
 	{
 	  if (addressprint && mid_statement)
-	    printf_filtered ("0x%x\t", fi->pc);
+	    printf_filtered ("%s\t", local_hex_string(fi->pc));
 	  print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
 	}
       current_source_line = max (sal.line - lines_to_list/2, 1);
@@ -319,6 +320,7 @@ frame_info (addr_exp)
   struct frame_saved_regs fsr;
   struct symtab_and_line sal;
   struct symbol *func;
+  struct symtab *s;
   FRAME calling_frame;
   int i, count;
   char *funname = 0;
@@ -333,6 +335,7 @@ frame_info (addr_exp)
   fi = get_frame_info (frame);
   sal = find_pc_line (fi->pc, fi->next_frame);
   func = get_frame_function (frame);
+  s = find_pc_symtab(fi->pc);
   if (func)
     funname = SYMBOL_NAME (func);
   else
@@ -343,13 +346,17 @@ frame_info (addr_exp)
     }
   calling_frame = get_prev_frame (frame);
 
-  if (!addr_exp && selected_frame_level >= 0)
-    printf_filtered ("Stack level %d, frame at 0x%x:\n %s = 0x%x",
-	    selected_frame_level, FRAME_FP(frame),
-	    reg_names[PC_REGNUM], fi->pc);
-  else
-    printf_filtered ("Stack frame at 0x%x:\n %s = 0x%x",
-	    FRAME_FP(frame), reg_names[PC_REGNUM], fi->pc);
+  if (!addr_exp && selected_frame_level >= 0) {
+    printf_filtered ("Stack level %d, frame at %s:\n",
+		     selected_frame_level, 
+		     local_hex_string(FRAME_FP(frame)));
+  } else {
+    printf_filtered ("Stack frame at %s:\n",
+		     local_hex_string(FRAME_FP(frame)));
+  }
+  printf_filtered (" %s = %s",
+		   reg_names[PC_REGNUM], 
+		   local_hex_string(fi->pc));
 
   wrap_here ("   ");
   if (funname)
@@ -359,17 +366,20 @@ frame_info (addr_exp)
     printf_filtered (" (%s:%d)", sal.symtab->filename, sal.line);
   puts_filtered ("; ");
   wrap_here ("    ");
-  printf_filtered ("saved %s 0x%x\n", reg_names[PC_REGNUM],
-				      FRAME_SAVED_PC (frame));
+  printf_filtered ("saved %s %s\n", reg_names[PC_REGNUM],
+		   local_hex_string(FRAME_SAVED_PC (frame)));
   if (calling_frame)
-    printf_filtered (" called by frame at 0x%x", FRAME_FP (calling_frame));
+    printf_filtered (" called by frame at %s", 
+		     local_hex_string(FRAME_FP (calling_frame)));
   if (fi->next_frame && calling_frame)
     puts_filtered (",");
   wrap_here ("   ");
   if (fi->next_frame)
-    printf_filtered (" caller of frame at 0x%x", fi->next_frame);
+    printf_filtered (" caller of frame at %s", local_hex_string(fi->next_frame));
   if (fi->next_frame || calling_frame)
     puts_filtered ("\n");
+  if (s)
+     printf_filtered(" source language %s.\n", language_str(s->language));
 
   {
     /* Address of the argument list for this frame, or 0.  */
@@ -381,7 +391,7 @@ frame_info (addr_exp)
 	printf_filtered (" Arglist at unknown address.\n");
     else
       {
-	printf_filtered (" Arglist at 0x%x,", arg_list);
+	printf_filtered (" Arglist at %s,", local_hex_string(arg_list));
 
 	FRAME_NUM_ARGS (numargs, fi);
 	if (numargs < 0)
@@ -401,7 +411,8 @@ frame_info (addr_exp)
   get_frame_saved_regs (fi, &fsr);
   /* The sp is special; what's returned isn't the save address, but
      actually the value of the previous frame's sp.  */
-  printf_filtered (" Previous frame's sp is 0x%x\n", fsr.regs[SP_REGNUM]);
+  printf_filtered (" Previous frame's sp is %s\n", 
+		   local_hex_string(fsr.regs[SP_REGNUM]));
   count = 0;
   for (i = 0; i < NUM_REGS; i++)
     if (fsr.regs[i] && i != SP_REGNUM)
@@ -411,7 +422,8 @@ frame_info (addr_exp)
 	else
 	  puts_filtered (",");
 	wrap_here (" ");
-	printf_filtered (" %s at 0x%x", reg_names[i], fsr.regs[i]);
+	printf_filtered (" %s at %s", reg_names[i], 
+			 local_hex_string(fsr.regs[i]));
 	count++;
       }
   if (count)
@@ -606,7 +618,8 @@ print_block_frame_labels (b, have_default, stream)
 	  values_printed = 1;
 	  fputs_demangled (SYMBOL_NAME (sym), stream, 1);
 	  if (addressprint)
-	    fprintf_filtered (stream, " 0x%x", SYMBOL_VALUE_ADDRESS (sym));
+	    fprintf_filtered (stream, " %s", 
+			      local_hex_string(SYMBOL_VALUE_ADDRESS (sym)));
 	  fprintf_filtered (stream, " in file %s, line %d\n",
 			    sal.symtab->filename, sal.line);
 	  fflush (stream);
@@ -826,11 +839,23 @@ select_frame (frame, level)
      FRAME frame;
      int level;
 {
+  register struct symtab *s;
+
   selected_frame = frame;
   selected_frame_level = level;
-  /* Ensure that symbols for this frame are readin.  */
+
+  /* Ensure that symbols for this frame are read in.  Also, determine the
+     source language of this frame, and switch to it if desired.  */
   if (frame)
-    find_pc_symtab (get_frame_info (frame)->pc);
+  {
+    s = find_pc_symtab (get_frame_info (frame)->pc);
+    if (s 
+	&& working_lang != s->language
+	&& s->language != language_unknown
+	&& language_mode == language_mode_auto) {
+      set_language(s->language);
+    }
+  }
 }
 
 /* Store the selected frame and its level into *FRAMEP and *LEVELP.
@@ -1016,6 +1041,9 @@ down_silently_command (count_exp, from_tty)
     count = - parse_and_eval_address (count_exp);
   count1 = count;
   
+  if (!target_has_stack)
+    error ("No stack.");
+
   frame = find_relative_frame (selected_frame, &count1);
   if (count1 != 0 && count_exp == 0)
     error ("Bottom (i.e., innermost) frame selected; you cannot go down.");
@@ -1086,6 +1114,29 @@ return_command (retval_exp, from_tty)
   if (from_tty)
     frame_command ("0", 1);
 }
+
+/* Gets the language of the current frame. */
+enum language
+get_frame_language()
+{
+   register struct symtab *s;
+   FRAME fr;
+   enum language flang;		/* The language of the current frame */
+   
+   fr = get_frame_info(selected_frame);
+   if(fr)
+   {
+      s = find_pc_symtab(fr->pc);
+      if(s)
+	 flang = s->language;
+      else
+	 flang = language_unknown;
+   }
+   else
+      flang = language_unknown;
+
+   return flang;
+}
 
 void
 _initialize_stack ()
@@ -1151,4 +1202,3 @@ With a negative argument, print outermost -COUNT frames.");
 	    "The maximum number of frames for \"backtrace\" to print by default.");
 #endif
 }
-
