@@ -131,6 +131,14 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00814.html
 
 --
 
+Fix copyright notices.
+
+Turns out that ``1998-2000'' isn't considered valid :-(
+
+http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00467.html
+
+--
+
 		Code Cleanups: General
 		======================
 
@@ -258,9 +266,67 @@ suffer bit rot.
 
 Updated readline
 
-Readline 4.? is out.  A merge wouldn't hurt.
+Readline 4.? is out.  A merge wouldn't hurt.  Patches are in:
+
+http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00436.html
 
 --
+
+Deprecate "fg".  Apparently ``fg'' is actually continue.
+
+http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00417.html
+
+--
+
+Deprecate current use of ``floatformat_unknown''.
+
+Require all targets to explicitly provide their float format instead
+of defaulting to floatformat unknown.  Doing the latter leads to nasty
+bugs.
+
+http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00447.html
+
+--
+
+Rationalize floatformat_to_double() vs floatformat_to_doublest().
+
+Looks like GDB migrated floatformat_to_double() to libiberty but then
+turned around and created a ..._to_doublest() the latter containing
+several bug fixes.
+
+http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00472.html
+
+--
+
+Move floatformat_ia64_ext to libiberty/include floatformat.[ch].
+
+http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00466.html
+
+--
+
+Always build ser-tcp.c.
+
+The patch as submitted was just going to add ser-tcp.c to the Alpha's
+makefile.  A better patch is to instead add ser-tcp.c to SER_HARDWARE
+and make it a standard part of all debuggers.
+
+If problems occure then configure.in can sort them out.
+
+http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00544.html
+
+--
+
+Follow through `make check' with --enable-shared.
+
+When the srcware tree is configured with --enable-shared, the `expect'
+program won't run properly.  Jim Wilson found out gdb has a local hack
+to set LD_LIBRARY_PATH, but, AFAIK, no other project has been hacked
+similarly.
+
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00845.html
+
+--
+
 
 			New Features and Fixes
 			======================
@@ -328,6 +394,28 @@ Can the xdep files be replaced by autoconf?
 --
 
 Document trace machinery
+
+--
+
+Document ui-out and ui-file.
+
+http://sourceware.cygnus.com/ml/gdb/2000-04/msg00121.html
+
+--
+
+Update texinfo.tex to latest?
+
+
+
+--
+
+Incorporate agentexpr.texi into gdb.texinfo
+
+agentexpr.texi mostly describes the details of the byte code used for
+tracepoints, not the internals of the support for this in GDB.  So it
+looks like gdb.texinfo is a better place for this information.
+
+http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00566.html
 
 --
 
