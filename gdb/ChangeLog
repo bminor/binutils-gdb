@@ -1,5 +1,10 @@
 Thu Mar 24 07:12:09 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* valops.c (value_at, value_at_lazy): Give error if we dereference
+	a pointer to void.
+	* gdbtypes.h: Fix comments regarding TYPE_CODE_VOID.
+	* stabsread.c: Use 1, not 0, for TYPE_LENGTH of void types.
+
 	* stabsread.c (patch_block_stabs): Add comment about what happens
 	if the definition is in another compilation unit from the stab.
 

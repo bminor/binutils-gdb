@@ -1487,7 +1487,7 @@ read_type (pp, objfile)
 
 	if (typenums[0] == xtypenums[0] && typenums[1] == xtypenums[1])
 	  /* It's being defined as itself.  That means it is "void".  */
-	  type = init_type (TYPE_CODE_VOID, 0, 0, NULL, objfile);
+	  type = init_type (TYPE_CODE_VOID, 1, 0, NULL, objfile);
 	else
 	  {
 	    struct type *xtype;
@@ -1783,7 +1783,7 @@ rs6000_builtin_type (typenum)
 			   "unsigned long", NULL);
       break;
     case 11:
-      rettype = init_type (TYPE_CODE_VOID, 0, 0, "void", NULL);
+      rettype = init_type (TYPE_CODE_VOID, 1, 0, "void", NULL);
       break;
     case 12:
       /* IEEE single precision (32 bit).  */
@@ -3150,10 +3150,15 @@ read_sun_builtin_type (pp, typenums, objfile)
   if (**pp == ';')
     ++(*pp);
 
-  return init_type (type_bits == 0 ? TYPE_CODE_VOID : TYPE_CODE_INT,
-		    type_bits / TARGET_CHAR_BIT,
-		    signed_type ? 0 : TYPE_FLAG_UNSIGNED, (char *)NULL,
-		    objfile);
+  if (type_bits == 0)
+    return init_type (TYPE_CODE_VOID, 1,
+		      signed_type ? 0 : TYPE_FLAG_UNSIGNED, (char *)NULL,
+		      objfile);
+  else
+    return init_type (TYPE_CODE_INT,
+		      type_bits / TARGET_CHAR_BIT,
+		      signed_type ? 0 : TYPE_FLAG_UNSIGNED, (char *)NULL,
+		      objfile);
 }
 
 static struct type *
@@ -3371,7 +3376,7 @@ read_range_type (pp, typenums, objfile)
 
   /* A type defined as a subrange of itself, with bounds both 0, is void.  */
   if (self_subrange && n2 == 0 && n3 == 0)
-    return init_type (TYPE_CODE_VOID, 0, 0, NULL, objfile);
+    return init_type (TYPE_CODE_VOID, 1, 0, NULL, objfile);
 
   /* If n3 is zero and n2 is not, we want a floating type,
      and n2 is the width in bytes.

@@ -86,7 +86,11 @@ enum type_code
      of GDB which bogusly assume that TYPE_CODE_FLT can mean complex.  */
   TYPE_CODE_FLT,
 
-  /* Void type (values zero length; the length field is ignored).  */
+  /* Void type.  The length field specifies the length (probably always
+     one) which is used in pointer arithmetic involving pointers to
+     this type, but actually dereferencing such a pointer is invalid;
+     a void type has no length and no actual representation in memory
+     or registers.  A pointer to a void type is a generic pointer.  */
   TYPE_CODE_VOID,
 
   TYPE_CODE_SET,		/* Pascal sets */
