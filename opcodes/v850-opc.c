@@ -42,7 +42,7 @@ const struct v850_operand v850_operands[] = {
 
 /* The IMM16 field in a format 6 insn. */
 #define I16	(I5U+1)
-  { 16, 16, 0, 0, 0 }, 
+  { 16, 16, 0, 0, V850_OPERAND_SIGNED }, 
 
 /* The signed DISP7 field in a format 4 insn. */
 #define D7S	(I16+1)
@@ -78,7 +78,11 @@ const struct v850_operand v850_operands[] = {
 
 /* EP Register.  */
 #define EP	(SR1+1)
-  { 0, 0, 0, 0, V850_OPERAND_EP }
+  { 0, 0, 0, 0, V850_OPERAND_EP },
+
+/* The IMM16 field (unsigned0 in a format 6 insn. */
+#define I16U	(EP+1)
+  { 16, 16, 0, 0, 0}, 
 } ; 
 
 
@@ -102,6 +106,9 @@ const struct v850_operand v850_operands[] = {
 
 /* 3 operand instruction (Format VI) */
 #define IF6	{I16, R1, R2}
+
+/* 3 operand instruction (Format VI) */
+#define IF6U	{I16U, R1, R2}
 
 /* 32-bit load/store instruction (Format VII) */
 #define IF7A	{D16, R1, R2}
@@ -172,11 +179,11 @@ const struct v850_opcode v850_opcodes[] = {
 /* logical operation instructions */
 { "tst",	OP(0x0b),		OP_MASK,	IF1, 2 },
 { "or",		OP(0x08),		OP_MASK,	IF1, 2 },
-{ "ori",	OP(0x34),		OP_MASK,	IF6, 4 },
+{ "ori",	OP(0x34),		OP_MASK,	IF6U, 4 },
 { "and",	OP(0x0a),		OP_MASK,	IF1, 2 },
-{ "andi",	OP(0x36),		OP_MASK,	IF6, 4 },
+{ "andi",	OP(0x36),		OP_MASK,	IF6U, 4 },
 { "xor",	OP(0x09),		OP_MASK,	IF1, 2 },
-{ "xori",	OP(0x35),		OP_MASK,	IF6, 4 },
+{ "xori",	OP(0x35),		OP_MASK,	IF6U, 4 },
 { "not",	OP(0x01),		OP_MASK,	IF1, 2 },
 { "sar",	OP(0x15),		OP_MASK,	{I5U, R2}, 2 },
 { "sar",	two(0x07e0,0x00a0),	two(0x07e0,0xffff),	{R1,R2}, 4 },
@@ -230,6 +237,7 @@ const struct v850_opcode v850_opcodes[] = {
 { "ldsr",	two(0x07e0,0x0020),	two(0x07e0,0xffff),	{R2,SR1}, 4 },
 { "stsr",	two(0x07e0,0x0040),	two(0x07e0,0xffff),	{SR1,R2}, 4 },
 { "nop",	one(0x00),		one(0xff),		{0}, 2 },
+{ 0, 0, 0, {0}, 0 },
 
 } ;
 

@@ -1,5 +1,23 @@
 start-sanitize-v850
+Wed Aug 28 15:55:43 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* v850-opc.c (v850_opcodes): Add null opcode to mark the
+	end of the opcode table.
+
+end-sanitize-v850
+start-sanitize-d10v
+Mon Aug 26 13:35:53 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-opc.c (pre_defined_registers): Added register pairs,
+	"r0-r1", "r2-r3", etc.
+
+end-sanitize-d10v	
+start-sanitize-v850
 Fri Aug 23 00:27:01 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* v850-opc.c (v850_operands): Make I16 be a signed operand.
+	Create I16U for an unsigned 16bit mmediate operand.
+	(v850_opcodes): Use I16U for "ori", "andi" and "xori".
 
 	* v850-opc.c (v850_operands): Define EP operand.
 	(IF4A, IF4B, IF4C, IF4D): Use EP.
