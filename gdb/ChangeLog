@@ -1,3 +1,15 @@
+2001-09-13  Jim Blandy  <jimb@redhat.com>
+
+	* monitor.c (monitor_load): Fix indentation.
+
+2001-09-11  Jim Blandy  <jimb@redhat.com>
+
+	* printcmd.c (print_scalar_formatted): Compare the length of the
+	value against the lengths of the target's floating-point types,
+	not the host's.  Add support for `long double'.
+
+	* printcmd.c (print_scalar_formatted): Fix indentation.
+
 2001-09-10  Jim Blandy  <jimb@redhat.com>
 
 	* rom68k-rom.c (init_rom68k_cmds): Set the flag indicating that
