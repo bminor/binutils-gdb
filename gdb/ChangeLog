@@ -1,3 +1,8 @@
+2004-07-23  Andrew Cagney  <cagney@gnu.org>
+
+	* infrun.c (handle_inferior_event): Separate the STEP_OVER_ALL and
+	DEPRECATED_IGNORE_HELPER_CALL cases, only #ifdef the latter.
+
 2004-07-23  Martin Hunt  <hunt@redhat.com>
 	Kevin Buettner <kevinb@redhat.com>
 

@@ -2344,8 +2344,7 @@ process_event_stop_test:
 	 DEPRECATED_IGNORE_HELPER_CALL, SKIP_TRAMPOLINE_CODE,
 	 skip_language_trampoline frame, et.al.) need to be replaced
 	 with generic attributes bound to the frame's function.  */
-      if (step_over_calls == STEP_OVER_ALL
-	  || DEPRECATED_IGNORE_HELPER_CALL (stop_pc))
+      if (DEPRECATED_IGNORE_HELPER_CALL (stop_pc))
 	{
 	  /* We're doing a "next", set a breakpoint at callee's return
 	     address (the address at which the caller will
@@ -2356,6 +2355,16 @@ process_event_stop_test:
 	  return;
 	}
 #endif
+      if (step_over_calls == STEP_OVER_ALL)
+	{
+	  /* We're doing a "next", set a breakpoint at callee's return
+	     address (the address at which the caller will
+	     resume).  */
+	  insert_step_resume_breakpoint (get_prev_frame (get_current_frame ()),
+					 ecs);
+	  keep_going (ecs);
+	  return;
+	}
 
       /* If we are in a function call trampoline (a stub between the
 	 calling routine and the real function), locate the real
