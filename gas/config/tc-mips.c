@@ -393,6 +393,13 @@ static int auto_align = 1;
    variable.  */
 static offsetT mips_cprestore_offset = -1;
 
+/* Similiar for NewABI PIC code, where $gp is callee-saved.  NewABI has some
+   more optimizations, it can use a register value instead of a memory-saved
+   offset and even an other than GP as global pointer.  */
+static offsetT mips_cpreturn_offset = -1;
+static int mips_cpreturn_register = -1;
+static int mips_gp_register = GP;
+
 /* This is the register which holds the stack frame, as set by the
    .frame pseudo-op.  This is needed to implement .cprestore.  */
 static int mips_frame_reg = SP;
@@ -690,7 +697,11 @@ static void s_option PARAMS ((int));
 static void s_mipsset PARAMS ((int));
 static void s_abicalls PARAMS ((int));
 static void s_cpload PARAMS ((int));
+static void s_cpsetup PARAMS ((int));
+static void s_cplocal PARAMS ((int));
 static void s_cprestore PARAMS ((int));
+static void s_cpreturn PARAMS ((int));
+static void s_gpvalue PARAMS ((int));
 static void s_gpword PARAMS ((int));
 static void s_cpadd PARAMS ((int));
 static void s_insn PARAMS ((int));
@@ -779,7 +790,11 @@ static const pseudo_typeS mips_pseudo_table[] =
   {"livereg", s_ignore, 0},
   {"abicalls", s_abicalls, 0},
   {"cpload", s_cpload, 0},
+  {"cpsetup", s_cpsetup, 0},
+  {"cplocal", s_cplocal, 0},
   {"cprestore", s_cprestore, 0},
+  {"cpreturn", s_cpreturn, 0},
+  {"gpvalue", s_gpvalue, 0},
   {"gpword", s_gpword, 0},
   {"cpadd", s_cpadd, 0},
   {"insn", s_insn, 0},
@@ -4967,14 +4982,17 @@ macro (ip)
 
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "jalr",
 		       "d,s", dreg, sreg);
-	  if (mips_cprestore_offset < 0)
-	    as_warn (_("No .cprestore pseudo-op used in PIC code"));
-	  else
+	  if (! HAVE_NEWABI)
 	    {
-	      expr1.X_add_number = mips_cprestore_offset;
-	      macro_build ((char *) NULL, &icnt, &expr1,
-			   HAVE_32BIT_ADDRESSES ? "lw" : "ld",
-			   "t,o(b)", GP, (int) BFD_RELOC_LO16, mips_frame_reg);
+	      if (mips_cprestore_offset < 0)
+		as_warn (_("No .cprestore pseudo-op used in PIC code"));
+	      else
+		{
+		  expr1.X_add_number = mips_cprestore_offset;
+		  macro_build ((char *) NULL, &icnt, &expr1,
+			       HAVE_32BIT_ADDRESSES ? "lw" : "ld", "t,o(b)",
+			       GP, (int) BFD_RELOC_LO16, mips_frame_reg);
+		}
 	    }
 	}
       else
@@ -5067,18 +5085,20 @@ macro (ip)
 		       (int) BFD_RELOC_LO16);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		       "jalr", "s", PIC_CALL_REG);
-	  if (mips_cprestore_offset < 0)
-	    as_warn (_("No .cprestore pseudo-op used in PIC code"));
-	  else
+	  if (! HAVE_NEWABI)
 	    {
-	      if (mips_opts.noreorder)
-		macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+	      if (mips_cprestore_offset < 0)
+		as_warn (_("No .cprestore pseudo-op used in PIC code"));
+	      else
+		{
+		  if (mips_opts.noreorder)
+		    macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 			     "nop", "");
-	      expr1.X_add_number = mips_cprestore_offset;
-	      macro_build ((char *) NULL, &icnt, &expr1,
-			   HAVE_32BIT_ADDRESSES ? "lw" : "ld",
-			   "t,o(b)", GP, (int) BFD_RELOC_LO16,
-			   mips_frame_reg);
+		  expr1.X_add_number = mips_cprestore_offset;
+		  macro_build ((char *) NULL, &icnt, &expr1,
+			       HAVE_32BIT_ADDRESSES ? "lw" : "ld", "t,o(b)",
+			       GP, (int) BFD_RELOC_LO16, mips_frame_reg);
+		}
 	    }
 	}
       else if (mips_pic == EMBEDDED_PIC)
@@ -9930,16 +9950,12 @@ md_pcrel_from (fixP)
       && fixP->fx_addsy != (symbolS *) NULL
       && ! S_IS_DEFINED (fixP->fx_addsy))
     {
+      /* This makes a branch to an undefined symbol be a branch to the
+	 current location.  */
       if (mips_pic == EMBEDDED_PIC)
-	{
-	  /* This makes a branch to an undefined symbol be a branch to the
-	     current location.  */
-	  return 4;
-	}
+	return 4;
       else
-	{
-	  return 1;
-	}
+	return 1;
     }
 
   /* return the address of the delay slot */
@@ -10073,6 +10089,13 @@ mips_force_relocation (fixp)
 {
   if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 1;
+
+  if (HAVE_NEWABI
+      && S_GET_SEGMENT (fixp->fx_addsy) == bfd_abs_section_ptr
+      && (fixp->fx_r_type == BFD_RELOC_MIPS_SUB
+	  || fixp->fx_r_type == BFD_RELOC_HI16_S
+	  || fixp->fx_r_type == BFD_RELOC_LO16))
     return 1;
 
   if (HAVE_NEWABI
@@ -11069,8 +11092,9 @@ s_cpload (ignore)
   expressionS ex;
   int icnt = 0;
 
-  /* If we are not generating SVR4 PIC code, .cpload is ignored.  */
-  if (mips_pic != SVR4_PIC)
+  /* If we are not generating SVR4 PIC code, or if this is NewABI code,
+     .cpload is ignored.  */
+  if (mips_pic != SVR4_PIC || HAVE_NEWABI)
     {
       s_ignore (0);
       return;
@@ -11098,6 +11122,119 @@ s_cpload (ignore)
   demand_empty_rest_of_line ();
 }
 
+/* Handle the .cpsetup pseudo-op defined for NewABI PIC code.  The syntax is:
+     .cpsetup $reg1, offset|$reg2, label
+
+   If offset is given, this results in:
+     sd		$gp, offset($sp)
+     lui	$gp, %gp_rel(%neg(%hi(label)))
+     daddiu	$gp, $gp, %gp_rel(%neg(%lo(label)))
+     addu	$gp, $gp, $reg1
+
+   If $reg2 is given, this results in:
+     daddu	$reg2, $gp, $0
+     lui	$gp, %gp_rel(%neg(%hi(label)))
+     daddiu	$gp, $gp, %gp_rel(%neg(%lo(label)))
+     addu	$gp, $gp, $reg1
+ */
+static void
+s_cpsetup (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  expressionS ex_off;
+  expressionS ex_sym;
+  int reg1;
+  int icnt = 0;
+  char *sym;
+
+  /* If we are not generating SVR4 PIC code, .cpload is ignored.
+     We also need NewABI support.  */
+  if (mips_pic != SVR4_PIC || ! HAVE_NEWABI)
+    {
+      s_ignore (0);
+      return;
+    }
+
+  reg1 = tc_get_register (0);
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+      as_bad (_("missing argument separator ',' for .cpsetup"));
+      return;
+    }
+  else
+    input_line_pointer++;
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer == '$')
+    mips_cpreturn_register = tc_get_register (0);
+  else
+    mips_cpreturn_offset = get_absolute_expression ();
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+      as_bad (_("missing argument separator ',' for .cpsetup"));
+      return;
+    }
+  else
+    input_line_pointer++;
+  SKIP_WHITESPACE ();
+  sym = input_line_pointer;
+  while (ISALNUM (*input_line_pointer))
+    input_line_pointer++;
+  *input_line_pointer = 0;
+
+  ex_sym.X_op = O_symbol;
+  ex_sym.X_add_symbol = symbol_find_or_make (sym);
+  ex_sym.X_op_symbol = NULL;
+  ex_sym.X_add_number = 0;
+
+  if (mips_cpreturn_register == -1)
+    {
+      ex_off.X_op = O_constant;
+      ex_off.X_add_symbol = NULL;
+      ex_off.X_op_symbol = NULL;
+      ex_off.X_add_number = mips_cpreturn_offset;
+
+      macro_build ((char *) NULL, &icnt, &ex_off, "sd", "t,o(b)",
+		   mips_gp_register, (int) BFD_RELOC_LO16, SP);
+    }
+  else
+    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "daddu",
+		 "d,v,t", mips_cpreturn_register, mips_gp_register, 0);
+
+  macro_build ((char *) NULL, &icnt, &ex_sym, "lui", "t,u", mips_gp_register,
+	       (int) BFD_RELOC_GPREL16);
+  fix_new (frag_now, (char *) prev_insn_fixp - 4 - frag_now->fr_literal, 0,
+	   NULL, 0, 0, BFD_RELOC_MIPS_SUB);
+  fix_new (frag_now, (char *) prev_insn_fixp - 4 - frag_now->fr_literal, 0,
+	   NULL, 0, 0, BFD_RELOC_HI16_S);
+  macro_build ((char *) NULL, &icnt, &ex_sym, "addiu", "t,r,j",
+	       mips_gp_register, mips_gp_register, (int) BFD_RELOC_GPREL16);
+  fix_new (frag_now, (char *) prev_insn_fixp - 4 - frag_now->fr_literal, 0,
+	   NULL, 0, 0, BFD_RELOC_MIPS_SUB);
+  fix_new (frag_now, (char *) prev_insn_fixp - 4 - frag_now->fr_literal, 0,
+	   NULL, 0, 0, BFD_RELOC_LO16);
+  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "daddu",
+	       "d,v,t", mips_gp_register, mips_gp_register, reg1);
+
+  demand_empty_rest_of_line ();
+}
+
+static void
+s_cplocal (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  /* If we are not generating SVR4 PIC code, or if this is not NewABI code,
+   .cplocal is ignored.  */
+  if (mips_pic != SVR4_PIC || ! HAVE_NEWABI)
+    {
+      s_ignore (0);
+      return;
+    }
+
+  mips_gp_register = tc_get_register (0);
+}
+
 /* Handle the .cprestore pseudo-op.  This stores $gp into a given
    offset from $sp.  The offset is remembered, and after making a PIC
    call $gp is restored from that location.  */
@@ -11109,8 +11246,9 @@ s_cprestore (ignore)
   expressionS ex;
   int icnt = 0;
 
-  /* If we are not generating SVR4 PIC code, .cprestore is ignored.  */
-  if (mips_pic != SVR4_PIC)
+  /* If we are not generating SVR4 PIC code, or if this is NewABI code,
+   .cprestore is ignored.  */
+  if (mips_pic != SVR4_PIC || HAVE_NEWABI)
     {
       s_ignore (0);
       return;
@@ -11126,6 +11264,65 @@ s_cprestore (ignore)
   macro_build ((char *) NULL, &icnt, &ex,
 	       HAVE_32BIT_ADDRESSES ? "sw" : "sd",
 	       "t,o(b)", GP, (int) BFD_RELOC_LO16, SP);
+
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the .cpreturn pseudo-op defined for NewABI PIC code. If an offset
+   was given in the preceeding .gpsetup, it results in:
+     ld		$gp, offset($sp)
+   
+   If a register $reg2 was given there, it results in:
+     daddiu	$gp, $gp, $reg2
+ */
+static void
+s_cpreturn (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  expressionS ex;
+  int icnt = 0;
+
+  /* If we are not generating SVR4 PIC code, .cpreturn is ignored.
+     We also need NewABI support.  */
+  if (mips_pic != SVR4_PIC || ! HAVE_NEWABI)
+    {
+      s_ignore (0);
+      return;
+    }
+
+  if (mips_cpreturn_register == -1)
+    {
+      ex.X_op = O_constant;
+      ex.X_add_symbol = NULL;
+      ex.X_op_symbol = NULL;
+      ex.X_add_number = mips_cpreturn_offset;
+
+      macro_build ((char *) NULL, &icnt, &ex, "ld", "t,o(b)",
+		   mips_gp_register, (int) BFD_RELOC_LO16, SP);
+    }
+  else
+    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "daddu",
+		 "d,v,t", mips_gp_register, mips_cpreturn_register, 0);
+
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the .gpvalue pseudo-op.  This is used when generating NewABI PIC
+   code.  It sets the offset to use in gp_rel relocations.  */
+
+static void
+s_gpvalue (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  /* If we are not generating SVR4 PIC code, .gpvalue is ignored.
+     We also need NewABI support.  */
+  if (mips_pic != SVR4_PIC || ! HAVE_NEWABI)
+    {
+      s_ignore (0);
+      return;
+    }
+
+  mips_cpreturn_offset = get_absolute_expression ();
 
   demand_empty_rest_of_line ();
 }
@@ -11180,8 +11377,9 @@ s_cpadd (ignore)
   int icnt = 0;
   int reg;
 
-  /* This is ignored when not generating SVR4 PIC code.  */
-  if (mips_pic != SVR4_PIC)
+  /* This is ignored when not generating SVR4 PIC code or if this is NewABI
+     code.  */
+  if (mips_pic != SVR4_PIC || HAVE_NEWABI)
     {
       s_ignore (0);
       return;
@@ -11361,7 +11559,7 @@ nopic_need_relax (sym, before_relaxing)
   if (sym == 0)
     return 0;
 
-  if (USE_GLOBAL_POINTER_OPT)
+  if (USE_GLOBAL_POINTER_OPT && g_switch_value > 0)
     {
       const char *symname;
       int change;
@@ -11832,7 +12030,8 @@ tc_gen_reloc (section, fixp)
 	  || fixp->fx_r_type == BFD_RELOC_MIPS_GOT_HI16
 	  || fixp->fx_r_type == BFD_RELOC_MIPS_GOT_LO16
 	  || fixp->fx_r_type == BFD_RELOC_MIPS_CALL_HI16
-	  || fixp->fx_r_type == BFD_RELOC_MIPS_CALL_LO16))
+	  || fixp->fx_r_type == BFD_RELOC_MIPS_CALL_LO16)
+      && ! HAVE_NEWABI)
     {
       arelent *reloc2;
 

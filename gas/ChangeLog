@@ -1,5 +1,31 @@
 2001-10-10  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* config/tc-mips.c (mips_cpreturn_offset): New variable.
+	(mips_cpreturn_register): Likewise.
+	(mips_gp_register): Likewise.
+	(s_cpsetup): New function prototype.
+	(s_cplocal): Likewise.
+	(s_cpreturn): Likewise.
+	(s_gpvalue): Likewise.
+	(mips_pseudo_table): Add .cpsetup, .cplocal, .cpreturn, .gpvalue
+	pseudo-ops.
+	(macro): Don't warn about .cprestore for NewABI.
+	(md_pcrel_from): Code cleanup.
+	(mips_force_relocation): Force output of some NewABI relocations even
+	without a defined symbol.
+	(s_cpload): Ignore .cpload for NewABI.
+	(s_cpsetup): Handle .cpsetup.
+	(s_cplocal): Handle .cplocal.
+	(s_cprestore): Ignore .cprestore for NewABI.
+	(s_cpreturn): Handle .cpreturn.
+	(s_gpvalue): Handle .gpvalue.
+	(s_cpadd): Ignore .cpadd for NewABI.
+	(nopic_need_relax): Take g_switch_value into account as gp
+	optimization.
+	(tc_gen_reloc): Don't handle BFD_RELOC_MIPS_{CALL,GOT}* for NewABI.
+
+2001-10-10  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c (my_getSmallParser): New function prototype.
 	(small_ex_type): Named this enum, more return values for
 	my_getSmallExpression.
