@@ -1,5 +1,5 @@
-/* MIPS Extended-Coff back-end for BFD.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+/* BFD back-end for MIPS Extended-Coff files.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Written by Per Bothner.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -24,7 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/mips.h"
 #include "coff/internal.h"
 #include "libcoff.h"		/* to allow easier abstraction-breaking */
-#include "trad-core.h"
 
 #define BADMAG(x) ECOFFBADMAG(x)
 

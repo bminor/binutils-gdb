@@ -672,7 +672,7 @@ DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in1),
 	  in->x_sym.x_fcnary.x_ary.x_dimen[3] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[3]);
 #endif
 	}
-      if (class == C_BLOCK || ISFCN(type) || ISTAG(type)) {
+      if (class == C_BLOCK || ISFCN(type) || ISTAG(class)) {
 	in->x_sym.x_fcnary.x_fcn.x_lnnoptr = GET_FCN_LNNOPTR(abfd, ext);
 	in->x_sym.x_fcnary.x_fcn.x_endndx.l = GET_FCN_ENDNDX(abfd, ext);
       }
@@ -749,7 +749,7 @@ DEFUN(coff_swap_aux_out,(abfd, inp, type, class, extp),
     bfd_h_put_16(abfd, in->x_sym.x_tvndx , (bfd_byte *) ext->x_sym.x_tvndx);
 #endif
 
-    if (class == C_BLOCK || ISFCN(type) || ISTAG(type)) {
+    if (class == C_BLOCK || ISFCN(type) || ISTAG(class)) {
       PUT_FCN_LNNOPTR(abfd,  in->x_sym.x_fcnary.x_fcn.x_lnnoptr, ext);
       PUT_FCN_ENDNDX(abfd,  in->x_sym.x_fcnary.x_fcn.x_endndx.l, ext);
     }
@@ -3876,7 +3876,7 @@ DEFUN(get_value,(reloc, seclet),
   
   
   /* Add the value contained in the relocation */
-  value += (short)((reloc->addend) & 0xffff);
+  value += reloc->addend;
   
   return value;
 }
@@ -4234,9 +4234,9 @@ DEFUN(bfd_coff_get_relocated_section_contents,(in_abfd, seclet, data),
 #define	coff_get_section_contents	bfd_generic_get_section_contents
 #define	coff_close_and_cleanup		bfd_generic_close_and_cleanup
 
-#define coff_bfd_debug_info_start		bfd_void
+#define coff_bfd_debug_info_start	bfd_void
 #define coff_bfd_debug_info_end		bfd_void
-#define coff_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
+#define coff_bfd_debug_info_accumulate	\
+			(void (*) PARAMS ((bfd *, struct sec *))) bfd_void
 #define coff_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
-#define coff_bfd_relax_section bfd_generic_relax_section
-
+#define coff_bfd_relax_section		bfd_generic_relax_section

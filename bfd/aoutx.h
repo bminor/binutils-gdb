@@ -1,5 +1,5 @@
-/* BFD semi-generic back-end for a.out binaries
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+/* BFD semi-generic back-end for a.out binaries.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -339,7 +339,7 @@ bfd_target *
 DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
       bfd *abfd AND
       struct internal_exec *execp AND
-      bfd_target *(*callback_to_real_object_p) ())
+      bfd_target *(*callback_to_real_object_p) (bfd *))
 {
   struct aout_data_struct *rawptr, *oldrawptr;
   bfd_target *result;
@@ -484,9 +484,11 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
     abfd->flags |= EXEC_P;
   if (result)
     {
+#if 0 /* These should be set correctly anyways.  */
       abfd->sections = obj_textsec (abfd);
       obj_textsec (abfd)->next = obj_datasec (abfd);
       obj_datasec (abfd)->next = obj_bsssec (abfd);
+#endif
     }
   else
     {

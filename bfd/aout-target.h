@@ -194,6 +194,7 @@ static CONST struct aout_backend_data MY(backend_data) = {
   0,				/* text incl header */
   0,				/* text vma? */
   MY_set_sizes,
+  0,				/* exec header is counted */
 };
 #define MY_backend_data &MY(backend_data)
 #endif
@@ -240,7 +241,8 @@ static CONST struct aout_backend_data MY(backend_data) = {
 #define MY_bfd_debug_info_end		bfd_void
 #endif
 #ifndef MY_bfd_debug_info_accumulate
-#define MY_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
+#define MY_bfd_debug_info_accumulate	\
+			(void (*) PARAMS ((bfd*, struct sec *))) bfd_void
 #endif
 
 #ifndef MY_core_file_failing_command

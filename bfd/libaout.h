@@ -1,5 +1,5 @@
 /* BFD back-end data structures for a.out (and similar) files.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -216,51 +216,98 @@ struct  aout_data_struct {
 
 /* Prototype declarations for functions defined in aoutx.h  */
 
-PROTO (boolean, NAME(aout,squirt_out_relocs),(bfd *abfd, asection *section));
+boolean
+NAME(aout,squirt_out_relocs) PARAMS ((bfd *abfd, asection *section));
 
-PROTO (bfd_target *, NAME(aout,some_aout_object_p), (bfd *abfd,
-					  struct internal_exec *execp,
-					  bfd_target *(*callback)()));
-PROTO (boolean,	NAME(aout,mkobject), (bfd *abfd));
-PROTO (enum machine_type, NAME(aout,machine_type), (enum bfd_architecture arch,
-						unsigned long machine));
-PROTO (boolean,	NAME(aout,set_arch_mach), (bfd *abfd, enum bfd_architecture arch,
-						unsigned long machine));
+bfd_target *
+NAME(aout,some_aout_object_p) PARAMS ((bfd *abfd,
+			struct internal_exec *execp,
+			bfd_target * (*callback)(bfd *)));
 
-PROTO (boolean,	NAME(aout,new_section_hook), (bfd *abfd, asection *newsect));
-PROTO (boolean, NAME(aout,set_section_contents), (bfd *abfd, sec_ptr section,
+boolean
+NAME(aout,mkobject) PARAMS ((bfd *abfd));
+
+enum machine_type
+NAME(aout,machine_type) PARAMS ((enum bfd_architecture arch,
+				 unsigned long machine));
+
+boolean
+NAME(aout,set_arch_mach) PARAMS ((bfd *abfd, enum bfd_architecture arch,
+		 		  unsigned long machine));
+
+boolean
+NAME(aout,new_section_hook) PARAMS ((bfd *abfd, asection *newsect));
+
+boolean
+NAME(aout,set_section_contents) PARAMS ((bfd *abfd, sec_ptr section,
 			 PTR location, file_ptr offset, bfd_size_type count));
 
-PROTO (asymbol *,NAME(aout,make_empty_symbol), (bfd *abfd));
-PROTO (boolean,	NAME(aout,slurp_symbol_table), (bfd *abfd));
-PROTO (void,	NAME(aout,write_syms), (bfd *abfd));
-PROTO (void,	NAME(aout,reclaim_symbol_table), (bfd *abfd));
-PROTO (unsigned int, NAME(aout,get_symtab_upper_bound), (bfd *abfd));
-PROTO (unsigned int, NAME(aout,get_symtab), (bfd *abfd, asymbol **location));
-PROTO (boolean,	NAME(aout,slurp_reloc_table), (bfd *abfd, sec_ptr asect,
-					 asymbol **symbols));
-PROTO (unsigned int, NAME(aout,canonicalize_reloc), (bfd *abfd, sec_ptr section,
-					 arelent **relptr, asymbol **symbols));
-PROTO (unsigned int, NAME(aout,get_reloc_upper_bound), (bfd *abfd, sec_ptr asect));
-PROTO (void,	NAME(aout,reclaim_reloc), (bfd *ignore_abfd, sec_ptr ignore));
-PROTO (alent *,	NAME(aout,get_lineno), (bfd *ignore_abfd, asymbol *ignore_symbol));
-PROTO (void,	NAME(aout,print_symbol), (bfd *ignore_abfd, PTR file,
+asymbol *
+NAME(aout,make_empty_symbol) PARAMS ((bfd *abfd));
+
+boolean
+NAME(aout,slurp_symbol_table) PARAMS ((bfd *abfd));
+
+void
+NAME(aout,write_syms) PARAMS ((bfd *abfd));
+
+void
+NAME(aout,reclaim_symbol_table) PARAMS ((bfd *abfd));
+
+unsigned int
+NAME(aout,get_symtab_upper_bound) PARAMS ((bfd *abfd));
+
+unsigned int
+NAME(aout,get_symtab) PARAMS ((bfd *abfd, asymbol **location));
+
+boolean
+NAME(aout,slurp_reloc_table) PARAMS ((bfd *abfd, sec_ptr asect,
+				      asymbol **symbols));
+
+unsigned int
+NAME(aout,canonicalize_reloc) PARAMS ((bfd *abfd, sec_ptr section,
+				       arelent **relptr, asymbol **symbols));
+
+unsigned int
+NAME(aout,get_reloc_upper_bound) PARAMS ((bfd *abfd, sec_ptr asect));
+
+void
+NAME(aout,reclaim_reloc) PARAMS ((bfd *ignore_abfd, sec_ptr ignore));
+
+alent *
+NAME(aout,get_lineno) PARAMS ((bfd *ignore_abfd, asymbol *ignore_symbol));
+
+void
+NAME(aout,print_symbol) PARAMS ((bfd *ignore_abfd, PTR file,
 			    asymbol *symbol, bfd_print_symbol_type how));
-PROTO (boolean,	NAME(aout,close_and_cleanup), (bfd *abfd));
-PROTO (boolean,	NAME(aout,find_nearest_line), (bfd *abfd, asection *section,
+
+boolean
+NAME(aout,close_and_cleanup) PARAMS ((bfd *abfd));
+
+boolean
+NAME(aout,find_nearest_line) PARAMS ((bfd *abfd, asection *section,
       asymbol **symbols, bfd_vma offset, CONST char **filename_ptr,
       CONST char **functionname_ptr, unsigned int *line_ptr));
-PROTO (int,	NAME(aout,sizeof_headers), (bfd *abfd, boolean exec));
 
-PROTO (void,	NAME(aout,swap_exec_header_in), (bfd *abfd,
-			 struct external_exec *raw_bytes, struct internal_exec *execp));
+int
+NAME(aout,sizeof_headers) PARAMS ((bfd *abfd, boolean exec));
 
-PROTO (void,	NAME(aout,swap_exec_header_out),(bfd *abfd, struct internal_exec *execp,
-			 struct external_exec *raw_bytes));
+boolean
+NAME(aout,adjust_sizes_and_vmas) PARAMS ((bfd *abfd,
+       bfd_size_type *text_size, file_ptr *text_end));
+
+void
+NAME(aout,swap_exec_header_in) PARAMS ((bfd *abfd,
+       struct external_exec *raw_bytes, struct internal_exec *execp));
+
+void
+NAME(aout,swap_exec_header_out) PARAMS ((bfd *abfd,
+       struct internal_exec *execp, struct external_exec *raw_bytes));
 
 /* Prototypes for functions in stab-syms.c. */
 
-PROTO(char *, aout_stab_name, (int code));
+char *
+aout_stab_name PARAMS ((int code));
 
 /* A.out uses the generic versions of these routines... */
 

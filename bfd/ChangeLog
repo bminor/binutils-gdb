@@ -1,7 +1,13 @@
 Sat Nov 28 04:01:21 1992  John Gilmore  (gnu@cygnus.com)
 
-	* libbfd-in.h, bfd-in.h:  Eliminate all PROTO calls, replace with
+	* aout-target.h, aoutf1.h, trad-core.c, coffcode.h, libaout.h,
+	libbfd-in.h, bfd-in.h: Eliminate all PROTO calls, replace with
 	PARAMS for readability.
+
+	* aoutx.h:  Add type to callback parameter.
+	* coff-mips.c:  Don't call trad-core.h, not needed.
+	* trad-core.c:  Incorporate trad-core.h declarations.  Fix comments.
+	* trad-core.h:  Eliminate, unused.
 
 Wed Nov 18 13:16:17 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
