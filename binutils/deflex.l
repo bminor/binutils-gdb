@@ -42,7 +42,7 @@ int linenumber;
 "SECTIONS"	{ return SECTIONS;}
 "EXPORTS"	{ return EXPORTS;}
 "IMPORTS"	{ return IMPORTS;}
-"VERSION"	{ return VERSION;}
+"VERSION"	{ return VERSIONK;}
 "BASE"		{ return BASE;}
 "CONSTANT"	{ return CONSTANT; }
 "NONAME"	{ return NONAME; }
@@ -54,7 +54,7 @@ int linenumber;
 [0-9][x0-9A-Fa-f]* { yylval.number = strtol (yytext,0,0); 
 		return NUMBER; }
 
-[A-Za-z$:\-\_][A-Za-z0-9/$:\-\_@]+ { 	
+[A-Za-z$:\-\_?][A-Za-z0-9/$:\-\_@?]+ { 	
 		yylval.id =  xstrdup (yytext);
 		return ID;
 		}

@@ -1,5 +1,8 @@
 Thu Feb 12 14:13:46 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* deflex.l: Accept '?' in symbol names, for VC++ mangled names.
+	From Mikey <jeffdb@netzone.com>.
+
 	* addr2line.c (usage): Update bug-gnu-utils address.
 	* ar.c (usage): Likewise.
 	* nlmconv.c (show_usage): Likewise.
