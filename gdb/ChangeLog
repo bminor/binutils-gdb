@@ -1,3 +1,7 @@
+Wed Nov 15 17:12:04 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* utils.c: Don't include sys/ioctl.h etc if MPW is host.
+
 Tue Nov 14 17:16:46 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config/arm/tm-arm.h (ADDITIONAL_REGISTER_NAMES): Fix r5.
