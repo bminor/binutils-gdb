@@ -1,3 +1,8 @@
+Sun Apr  9 09:02:36 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/bitfields.exp: Various cleanups (make each test pass or
+	fail, make test names unique, etc.).
+
 Sat Apr  8 02:47:45 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/nodebug.c:  Change return type of top and middle to
