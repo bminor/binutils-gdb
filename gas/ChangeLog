@@ -1,4 +1,68 @@
+Tue Apr 11 01:42:36 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* gdbinit.in: Add breakpoint in as_abort.
+
+	* write.c (cvt_frag_to_fill): If offset is less than zero,
+	complain about it specifically, instead of reporting an assertion
+	failure.
+	(relax_segment): Complain about .org backwards, then ignore it.
+	Do generic rs_machine_dependent relaxation only if
+	TC_GENERIC_RELAX_TABLE is defined, and use its value for the base
+	of the table.
+	* tc.h (md_relax_table): Delete declaration.
+	* config/tc-a29k.c: Deleted md_relax_table.
+	* config/tc-{alpha,arm,h8300,hppa,i860,m88k,mips,ppc,sparc,z8k}.c:
+	Ditto.
+	* config/tc-{h8500,i386,i960,ns32k,sh,tahoe,vax,w65}.h: Declare
+	md_relax_table here, and define TC_GENERIC_RELAX_TABLE to expand
+	to md_relax_table.
+	* config/tc-h8500.c (md_relax_table): No longer const.
+	* config/tc-w65.c (md_relax_table): Ditto.
+	* config/tc-sparc.c (md_short_jump_size, md_long_jump_size):
+	Deleted.
+start-sanitize-arc
+	* config/tc-arc.c (md_relax_table, md_short_jump_size,
+	md_long_jump_size): Deleted.
+end-sanitize-arc
+start-sanitize-rce
+	* config/tc-rce.h: Declare md_relax_table here, and define
+	TC_GENERIC_RELAX_TABLE to expand to it.
+end-sanitize-rce
+
 Mon Apr 10 15:57:42 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-mips.c (nopic_need_relax): New static function, split
+	out from md_estimate_size_before_relax.
+	(md_estimate_size_before_relax): Call it.
+	(load_address, macro): In NO_PIC branches, if nopic_need_relax
+	returns nonzero, don't attempt GP optimization.
+
+	* config/tc-m68k.c (PCINDEX): New macro.
+	(md_relax_table): No longer const.  Add PCINDEX entries.
+	(m68k_ip): For AINDX with simple symbol operand, generate a
+	PCINDEX frag if PC is used, or do normal non-AINDX processing for
+	address register.
+	(m68k_init_after_args): If cpu is 68000 or 68010, fix
+	md_relax_table to prevent relaxation of PCINDEX/BYTE mode to
+	SHORT, since they don't support that mode.
+	(md_convert_frag_1, case PCLEA/LONG): Add 4 to offset, not 2.  Add
+	support for new PCINDEX modes.
+	(md_estimate_size_before_relax): Process PCINDEX/SZ_UNDEF mode.
+
+	* config/tc-m68k.c (md_convert_frag_1, case PCLEA/SHORT): Add 2 to
+	offset.
+	(m68k_ip, case most punctuation/AOFF): If using PC, call add_frag
+	using PCLEA.
+
+	* config/tc-m68k.c: Don't explicitly include config.h.  Deleted a
+	bunch of "#if 0" code and useless comments.
+	(struct m68k_cpu): New type.
+	(archs, n_archs): New variables, with single list of name/enum
+	mapping and aliases.
+	(m68k_ip): Delete the table here.
+	(m68k_init_after_args): Use the new table here instead of
+	open-coding it.
+	(md_parse_option, case 'm'): Ditto.
 
 	* doc/Makefile.in (Makefile): Fix rule for running config.status.
 	(internals.dvi, internals.ps, internals.ps4): New targets, not
