@@ -1,6 +1,27 @@
+Wed Dec  2 20:03:53 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From Brendan Kehoe:
+	* gdb.c++/cplusfuncs.cc, misc.cc, virtfunc.cc: Add now-required
+	int return types.
+
+Sat Oct 24 18:04:22 1998  Felix Lee  <flee@cygnus.com>
+
+	* config/slite.exp (gdb_load): use gdb_file_cmd, so we can do
+ 	remote dos host testing right.
+
+Mon Oct 19 01:31:59 1998  Felix Lee  <flee@cygnus.com>
+
+	* gdb.base/corefile.exp: remove some xfails.
+
+Thu Oct 15 10:04:38 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/reread.exp: Sleep 1 - ensures that the two executables
+ 	have different timestamps.
+
 Thu Oct  1 20:56:14 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* gdb.base/default.exp: Replace "exec" with "executable".
+	* lib/gdb.exp, gdb.base/default.exp, config/monitor.exp,
+ 	gdb.base/default.exp: Replace "exec" with "executable".
 
 1998-09-29  Keith Seitz  <keiths@cygnus.com>
 
