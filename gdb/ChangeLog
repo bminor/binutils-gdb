@@ -1,3 +1,7 @@
+Wed Feb 17 19:24:40 1993  John Gilmore  (gnu@cygnus.com)
+
+	* dbxread.c (process_one_symbol):  Cast to unsigned char, not int.
+
 Wed Feb 17 13:40:29 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	* remote.c (readchar): forward declare alarm which otherwise looks
