@@ -1444,8 +1444,13 @@ gdb_listfuncs (clientData, interp, objc, objv)
 	      char *name = cplus_demangle (SYMBOL_NAME(sym), 0);
 	      if (name)
 		{
-		  funcVals[0] = Tcl_NewStringObj(name, -1);
-		  funcVals[1] = mangled;	  
+		  /* strip out "global constructors" and "global destructors" */
+		  /* because we aren't interested in them. */
+		  if (strncmp (name, "global ", 7))
+		    {
+		      funcVals[0] = Tcl_NewStringObj(name, -1);
+		      funcVals[1] = mangled;	  
+		    }
 		}
 	      else
 		{
