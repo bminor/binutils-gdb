@@ -596,6 +596,15 @@ proc strip_executable_with_saving_a_symbol { prog flags test } {
     }
 
     set exec_output [binutils_run $NM "$NMFLAGS ${copyfile}"]
+    if { [istarget mmix-knuth-mmixware] } {
+	# Whenever there's a symbol in the mmo format, there's the symbol
+	# Main, so remove it manually from the expected output for sake of
+	# this test.
+
+	# Using "" not {} to get the \n and \r translated.
+	regsub "^\[0-9a-fA-F\]+\[ \]+T Main\[\n\r\]+" $exec_output "" exec_output
+    }
+
     if {![regexp {^[0-9a-fA-F]+ T main} $exec_output] \
          && ![regexp {^[0-9a-fA-F]+ T _main} $exec_output]} {
 	fail $test
