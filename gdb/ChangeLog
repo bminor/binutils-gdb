@@ -1,3 +1,7 @@
+2003-02-18  Andrew Cagney  <cagney@redhat.com>
+
+	* symtab.h (struct objfile): Add opaque declaration.
+
 2003-02-18  Elena Zannoni  <ezannoni@redhat.com>
 
 	From Jim Ingham   <jingham@apple.com>:
