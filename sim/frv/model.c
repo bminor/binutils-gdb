@@ -20263,7 +20263,16 @@ model_fr550_calll (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    referenced |= 1 << 0;
+    referenced |= 1 << 1;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
   }
   return cycles;
 #undef FLD
@@ -20302,7 +20311,14 @@ model_fr550_callil (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    referenced |= 1 << 0;
+    referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
   }
   return cycles;
 #undef FLD
@@ -23424,7 +23440,16 @@ model_fr550_ccalll (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
+    INT in_GRi = -1;
+    INT in_GRj = -1;
+    INT in_ICCi_2 = -1;
+    INT in_FCCi_2 = -1;
+    in_GRi = FLD (in_GRi);
+    in_GRj = FLD (in_GRj);
+    if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
+    if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
+    if (insn_referenced & (1 << 6)) referenced |= 1 << 4;
+    cycles += frvbf_model_fr550_u_branch (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_ICCi_2, in_FCCi_2);
   }
   return cycles;
 #undef FLD
@@ -57775,17 +57800,7 @@ model_fr400_nsdiv (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT in_GRi = -1;
-    INT in_GRj = -1;
-    INT out_GRk = -1;
-    INT out_ICCi_1 = -1;
-    in_GRi = FLD (in_GRi);
-    in_GRj = FLD (in_GRj);
-    out_GRk = FLD (out_GRk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    referenced |= 1 << 2;
-    cycles += frvbf_model_fr400_u_idiv (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -57827,17 +57842,7 @@ model_fr400_nudiv (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT in_GRi = -1;
-    INT in_GRj = -1;
-    INT out_GRk = -1;
-    INT out_ICCi_1 = -1;
-    in_GRi = FLD (in_GRi);
-    in_GRj = FLD (in_GRj);
-    out_GRk = FLD (out_GRk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    referenced |= 1 << 2;
-    cycles += frvbf_model_fr400_u_idiv (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -59267,15 +59272,7 @@ model_fr400_nsdivi (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT in_GRi = -1;
-    INT in_GRj = -1;
-    INT out_GRk = -1;
-    INT out_ICCi_1 = -1;
-    in_GRi = FLD (in_GRi);
-    out_GRk = FLD (out_GRk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 2;
-    cycles += frvbf_model_fr400_u_idiv (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -59315,15 +59312,7 @@ model_fr400_nudivi (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    INT in_GRi = -1;
-    INT in_GRj = -1;
-    INT out_GRk = -1;
-    INT out_ICCi_1 = -1;
-    in_GRi = FLD (in_GRi);
-    out_GRk = FLD (out_GRk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 2;
-    cycles += frvbf_model_fr400_u_idiv (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_ICCi_1);
+    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
   }
   return cycles;
 #undef FLD
@@ -86433,9 +86422,9 @@ static const INSN_TIMING fr550_timing[] = {
   { FRVBF_INSN_FCBULR, model_fr550_fcbulr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
   { FRVBF_INSN_FCBOLR, model_fr550_fcbolr, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
   { FRVBF_INSN_JMPL, model_fr550_jmpl, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
-  { FRVBF_INSN_CALLL, model_fr550_calll, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CALLL, model_fr550_calll, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
   { FRVBF_INSN_JMPIL, model_fr550_jmpil, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
-  { FRVBF_INSN_CALLIL, model_fr550_callil, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CALLIL, model_fr550_callil, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
   { FRVBF_INSN_CALL, model_fr550_call, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
   { FRVBF_INSN_RETT, model_fr550_rett, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_REI, model_fr550_rei, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
@@ -86580,7 +86569,7 @@ static const INSN_TIMING fr550_timing[] = {
   { FRVBF_INSN_CFCKU, model_fr550_cfcku, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
   { FRVBF_INSN_CFCKO, model_fr550_cfcko, { { (int) UNIT_FR550_U_CHECK, 1, 1 } } },
   { FRVBF_INSN_CJMPL, model_fr550_cjmpl, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
-  { FRVBF_INSN_CCALLL, model_fr550_ccalll, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_CCALLL, model_fr550_ccalll, { { (int) UNIT_FR550_U_BRANCH, 1, 1 } } },
   { FRVBF_INSN_ICI, model_fr550_ici, { { (int) UNIT_FR550_U_ICI, 1, 1 } } },
   { FRVBF_INSN_DCI, model_fr550_dci, { { (int) UNIT_FR550_U_DCI, 1, 1 } } },
   { FRVBF_INSN_ICEI, model_fr550_icei, { { (int) UNIT_FR550_U_ICI, 1, 1 } } },
@@ -88323,9 +88312,9 @@ static const INSN_TIMING fr400_timing[] = {
   { FRVBF_INSN_XOR, model_fr400_xor, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_NOT, model_fr400_not, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_SDIV, model_fr400_sdiv, { { (int) UNIT_FR400_U_IDIV, 1, 1 } } },
-  { FRVBF_INSN_NSDIV, model_fr400_nsdiv, { { (int) UNIT_FR400_U_IDIV, 1, 1 } } },
+  { FRVBF_INSN_NSDIV, model_fr400_nsdiv, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_UDIV, model_fr400_udiv, { { (int) UNIT_FR400_U_IDIV, 1, 1 } } },
-  { FRVBF_INSN_NUDIV, model_fr400_nudiv, { { (int) UNIT_FR400_U_IDIV, 1, 1 } } },
+  { FRVBF_INSN_NUDIV, model_fr400_nudiv, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SMUL, model_fr400_smul, { { (int) UNIT_FR400_U_IMUL, 1, 1 } } },
   { FRVBF_INSN_UMUL, model_fr400_umul, { { (int) UNIT_FR400_U_IMUL, 1, 1 } } },
   { FRVBF_INSN_SMU, model_fr400_smu, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
@@ -88381,9 +88370,9 @@ static const INSN_TIMING fr400_timing[] = {
   { FRVBF_INSN_ORI, model_fr400_ori, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_XORI, model_fr400_xori, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },
   { FRVBF_INSN_SDIVI, model_fr400_sdivi, { { (int) UNIT_FR400_U_IDIV, 1, 1 } } },
-  { FRVBF_INSN_NSDIVI, model_fr400_nsdivi, { { (int) UNIT_FR400_U_IDIV, 1, 1 } } },
+  { FRVBF_INSN_NSDIVI, model_fr400_nsdivi, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_UDIVI, model_fr400_udivi, { { (int) UNIT_FR400_U_IDIV, 1, 1 } } },
-  { FRVBF_INSN_NUDIVI, model_fr400_nudivi, { { (int) UNIT_FR400_U_IDIV, 1, 1 } } },
+  { FRVBF_INSN_NUDIVI, model_fr400_nudivi, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_SMULI, model_fr400_smuli, { { (int) UNIT_FR400_U_IMUL, 1, 1 } } },
   { FRVBF_INSN_UMULI, model_fr400_umuli, { { (int) UNIT_FR400_U_IMUL, 1, 1 } } },
   { FRVBF_INSN_SLLI, model_fr400_slli, { { (int) UNIT_FR400_U_INTEGER, 1, 1 } } },

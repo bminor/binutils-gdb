@@ -1,5 +1,16 @@
 2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
 
+	* cache.c (frv_cache_init): Change fr400 cache statistics to match
+	the fr405.
+	(non_cache_access): Add missing breaks.
+	* interrupts.c (set_exception_status_registers): Always set EAR15
+	for data_access_errors.
+	* memory.c (fr400_check_write_address): Remove redundant alignment
+	check.
+	* model.c: Regenerate.
+
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
 	* frv.c (frvbf_iacc_cut): Rework, taking rounding into account.
 
 2004-03-01  Richard Sandiford  <rsandifo@redhat.com>

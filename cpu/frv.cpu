@@ -3032,8 +3032,7 @@
 	       (c-call VOID "@cpu@_signed_integer_divide"
 		       GRi GRj (index-of GRk) 1)
 	       (clobber GRk))
-     ((fr400 (unit u-idiv))
-      (fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
+     ((fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
 )
 
 (dni udiv
@@ -3059,8 +3058,7 @@
 	       (c-call VOID "@cpu@_unsigned_integer_divide"
 		       GRi GRj (index-of GRk) 1)
 	       (clobber GRk))
-     ((fr400 (unit u-idiv))
-      (fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
+     ((fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
 )
 
 ; Multiplication
@@ -3158,7 +3156,7 @@
 
 (dni scutss
      "Integer accumulator cut with saturation"
-     ((UNIT IALL) (FR400-MAJOR I-1) (MACH fr400))
+     ((UNIT I0) (FR400-MAJOR I-1) (MACH fr400))
      "scutss$pack $GRj,$GRk"
      (+ pack GRk OP_46 (rs-null) OPE1_04 GRj)
      (set GRk (c-call SI "@cpu@_iacc_cut" (reg h-iacc0 0) GRj))
@@ -3562,8 +3560,7 @@
 	       (c-call VOID "@cpu@_signed_integer_divide"
 		       GRi s12 (index-of GRk) 1)
 	       (clobber GRk))
-     ((fr400 (unit u-idiv))
-      (fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
+     ((fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
 )
 
 (dni udivi
@@ -3589,8 +3586,7 @@
 	       (c-call VOID "@cpu@_unsigned_integer_divide"
 		       GRi s12 (index-of GRk) 1)
 	       (clobber GRk))
-     ((fr400 (unit u-idiv))
-      (fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
+     ((fr500 (unit u-idiv)) (fr550 (unit u-idiv)))
 )
 
 (define-pmacro (multiply-r-simm name signop op comment)
@@ -5537,12 +5533,12 @@
 
 (dni calll
      "call and link"
-     ((UNIT I0) (FR500-MAJOR I-5) (FR400-MAJOR I-5))
+     ((UNIT I0) (FR500-MAJOR I-5) (FR550-MAJOR I-6) (FR400-MAJOR I-5))
      "calll$pack @($GRi,$GRj)"
      (+ pack (misc-null-1) (LI-on) OP_0C GRi (misc-null-2) GRj)
      (jump-and-link-semantics GRi GRj LI)
      ((fr400 (unit u-branch))
-      (fr500 (unit u-branch)))
+      (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (dni jmpil
@@ -5557,12 +5553,12 @@
 
 (dni callil
      "call immediate and link"
-     ((UNIT I0) (FR500-MAJOR I-5) (FR400-MAJOR I-5))
+     ((UNIT I0) (FR500-MAJOR I-5) (FR550-MAJOR I-6) (FR400-MAJOR I-5))
      "callil$pack @($GRi,$s12)"
      (+ pack (misc-null-1) (LI-on) OP_0D GRi s12)
      (jump-and-link-semantics GRi s12 LI)
      ((fr400 (unit u-branch))
-      (fr500 (unit u-branch)))
+      (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (dni call
@@ -6084,7 +6080,8 @@
 
 (dni cjmpl
      "conditional jump and link"
-     ((UNIT I0) (FR500-MAJOR I-5) (FR550-MAJOR I-6) (FR400-MAJOR I-5) CONDITIONAL)
+     ((UNIT I0) (FR500-MAJOR I-5) (FR550-MAJOR I-6)
+      (FR400-MAJOR I-5) CONDITIONAL)
      "cjmpl$pack @($GRi,$GRj),$CCi,$cond"
      (+ pack (misc-null-1) (LI-off) OP_6A GRi CCi cond OPE4_2 GRj)
      (if (eq CCi (or cond 2))
@@ -6095,13 +6092,14 @@
 
 (dni ccalll
      "conditional call and link"
-     ((UNIT I0) (FR500-MAJOR I-5) (FR400-MAJOR I-5) CONDITIONAL)
+     ((UNIT I0) (FR500-MAJOR I-5) (FR550-MAJOR I-6)
+      (FR400-MAJOR I-5) CONDITIONAL)
      "ccalll$pack @($GRi,$GRj),$CCi,$cond"
      (+ pack (misc-null-1) (LI-on) OP_6A GRi CCi cond OPE4_2 GRj)
      (if (eq CCi (or cond 2))
 	 (jump-and-link-semantics GRi GRj LI))
      ((fr400 (unit u-branch))
-      (fr500 (unit u-branch)))
+      (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
 (define-pmacro (cache-invalidate name cache all op ope profile comment)
@@ -7379,7 +7377,7 @@
 
 (dni mqsaths
      "Media quad saturation signed"
-     ((UNIT FMALL) (MACH fr400,fr550) (FR550-MAJOR M-2) (FR400-MAJOR M-1))
+     ((UNIT FMALL) (MACH fr400,fr550) (FR550-MAJOR M-2) (FR400-MAJOR M-2))
      "mqsaths$pack $FRintieven,$FRintjeven,$FRintkeven"
      (+ pack FRintkeven OP_78 FRintieven OPE1_0F FRintjeven)
      (if (orif (register-unaligned FRintieven 2)
@@ -8060,7 +8058,7 @@
 		name mode conv addop rhw res max min op ope comment)
   (dni name
        (comment)
-       ((UNIT MDUALACC) (MACH fr400,fr550) (FR550-MAJOR M-4) (FR400-MAJOR M-2))
+       ((UNIT FMALL) (MACH fr400,fr550) (FR550-MAJOR M-4) (FR400-MAJOR M-2))
        (.str name "$pack $FRintieven,$FRintjeven,$" res)
        (+ pack res op FRintieven ope FRintjeven)
        (media-quad-multiply-cross-acc-semantics 1 mode conv addop rhw res
@@ -8110,7 +8108,7 @@
 		name mode conv addop rhw res max min op ope comment)
   (dni name
        (comment)
-       ((UNIT MDUALACC) (MACH fr400,fr550) (FR550-MAJOR M-4) (FR400-MAJOR M-2))
+       ((UNIT FMALL) (MACH fr400,fr550) (FR550-MAJOR M-4) (FR400-MAJOR M-2))
        (.str name "$pack $FRintieven,$FRintjeven,$" res)
        (+ pack res op FRintieven ope FRintjeven)
        (media-quad-cross-multiply-cross-acc-semantics 1 mode conv addop rhw res
@@ -8160,7 +8158,7 @@
 		name mode conv addop rhw res max min op ope comment)
   (dni name
        (comment)
-       ((UNIT MDUALACC) (MACH fr400,fr550) (FR550-MAJOR M-4) (FR400-MAJOR M-2))
+       ((UNIT FMALL) (MACH fr400,fr550) (FR550-MAJOR M-4) (FR400-MAJOR M-2))
        (.str name "$pack $FRintieven,$FRintjeven,$" res)
        (+ pack res op FRintieven ope FRintjeven)
        (media-quad-cross-multiply-acc-semantics 1 mode conv addop rhw res

@@ -845,8 +845,7 @@ set_exception_status_registers (
 	  break;
 	case FRV_DATA_ACCESS_ERROR:
 	  reg_index = 15; /* Use ESR15, EPCR15.  */
-	  if (STATE_ARCHITECTURE (sd)->mach != bfd_mach_fr400)
-	    set_ear = 1;
+	  set_ear = 1;
 	  break;
 	case FRV_DATA_ACCESS_EXCEPTION:
 	  set_daec = 1;

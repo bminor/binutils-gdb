@@ -499,6 +499,8 @@ fr400_check_insn_major_constraints (
     case FR400_MAJOR_M_2:
       return ! find_major_in_vliw (vliw, FR400_MAJOR_M_1)
 	&&   ! find_major_in_vliw (vliw, FR400_MAJOR_M_2);
+    case FR400_MAJOR_M_1:
+      return !find_major_in_vliw (vliw, FR400_MAJOR_M_2);
     default:
       break;
     }

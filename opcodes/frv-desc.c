@@ -2433,7 +2433,7 @@ static const CGEN_IBASE frv_cgen_insn_table[MAX_INSNS] =
 /* scutss$pack $GRj,$GRk */
   {
     FRV_INSN_SCUTSS, "scutss", "scutss", 32,
-    { 0, { (1<<MACH_FR400), UNIT_IALL, FR400_MAJOR_I_1, FR500_MAJOR_NONE, FR550_MAJOR_NONE } }
+    { 0, { (1<<MACH_FR400), UNIT_I0, FR400_MAJOR_I_1, FR500_MAJOR_NONE, FR550_MAJOR_NONE } }
   },
 /* scan$pack $GRi,$GRj,$GRk */
   {
@@ -4128,7 +4128,7 @@ static const CGEN_IBASE frv_cgen_insn_table[MAX_INSNS] =
 /* calll$pack @($GRi,$GRj) */
   {
     FRV_INSN_CALLL, "calll", "calll", 32,
-    { 0|A(UNCOND_CTI), { (1<<MACH_BASE), UNIT_I0, FR400_MAJOR_I_5, FR500_MAJOR_I_5, FR550_MAJOR_NONE } }
+    { 0|A(UNCOND_CTI), { (1<<MACH_BASE), UNIT_I0, FR400_MAJOR_I_5, FR500_MAJOR_I_5, FR550_MAJOR_I_6 } }
   },
 /* jmpil$pack @($GRi,$s12) */
   {
@@ -4138,7 +4138,7 @@ static const CGEN_IBASE frv_cgen_insn_table[MAX_INSNS] =
 /* callil$pack @($GRi,$s12) */
   {
     FRV_INSN_CALLIL, "callil", "callil", 32,
-    { 0|A(UNCOND_CTI), { (1<<MACH_BASE), UNIT_I0, FR400_MAJOR_I_5, FR500_MAJOR_I_5, FR550_MAJOR_NONE } }
+    { 0|A(UNCOND_CTI), { (1<<MACH_BASE), UNIT_I0, FR400_MAJOR_I_5, FR500_MAJOR_I_5, FR550_MAJOR_I_6 } }
   },
 /* call$pack $label24 */
   {
@@ -4863,7 +4863,7 @@ static const CGEN_IBASE frv_cgen_insn_table[MAX_INSNS] =
 /* ccalll$pack @($GRi,$GRj),$CCi,$cond */
   {
     FRV_INSN_CCALLL, "ccalll", "ccalll", 32,
-    { 0|A(CONDITIONAL)|A(COND_CTI), { (1<<MACH_BASE), UNIT_I0, FR400_MAJOR_I_5, FR500_MAJOR_I_5, FR550_MAJOR_NONE } }
+    { 0|A(CONDITIONAL)|A(COND_CTI), { (1<<MACH_BASE), UNIT_I0, FR400_MAJOR_I_5, FR500_MAJOR_I_5, FR550_MAJOR_I_6 } }
   },
 /* ici$pack @($GRi,$GRj) */
   {
@@ -5578,7 +5578,7 @@ static const CGEN_IBASE frv_cgen_insn_table[MAX_INSNS] =
 /* mqsaths$pack $FRintieven,$FRintjeven,$FRintkeven */
   {
     FRV_INSN_MQSATHS, "mqsaths", "mqsaths", 32,
-    { 0, { (1<<MACH_FR400)|(1<<MACH_FR550), UNIT_FMALL, FR400_MAJOR_M_1, FR500_MAJOR_NONE, FR550_MAJOR_M_2 } }
+    { 0, { (1<<MACH_FR400)|(1<<MACH_FR550), UNIT_FMALL, FR400_MAJOR_M_2, FR500_MAJOR_NONE, FR550_MAJOR_M_2 } }
   },
 /* msathu$pack $FRinti,$FRintj,$FRintk */
   {
@@ -5823,17 +5823,17 @@ static const CGEN_IBASE frv_cgen_insn_table[MAX_INSNS] =
 /* mqxmachs$pack $FRintieven,$FRintjeven,$ACC40Sk */
   {
     FRV_INSN_MQXMACHS, "mqxmachs", "mqxmachs", 32,
-    { 0, { (1<<MACH_FR400)|(1<<MACH_FR550), UNIT_MDUALACC, FR400_MAJOR_M_2, FR500_MAJOR_NONE, FR550_MAJOR_M_4 } }
+    { 0, { (1<<MACH_FR400)|(1<<MACH_FR550), UNIT_FMALL, FR400_MAJOR_M_2, FR500_MAJOR_NONE, FR550_MAJOR_M_4 } }
   },
 /* mqxmacxhs$pack $FRintieven,$FRintjeven,$ACC40Sk */
   {
     FRV_INSN_MQXMACXHS, "mqxmacxhs", "mqxmacxhs", 32,
-    { 0, { (1<<MACH_FR400)|(1<<MACH_FR550), UNIT_MDUALACC, FR400_MAJOR_M_2, FR500_MAJOR_NONE, FR550_MAJOR_M_4 } }
+    { 0, { (1<<MACH_FR400)|(1<<MACH_FR550), UNIT_FMALL, FR400_MAJOR_M_2, FR500_MAJOR_NONE, FR550_MAJOR_M_4 } }
   },
 /* mqmacxhs$pack $FRintieven,$FRintjeven,$ACC40Sk */
   {
     FRV_INSN_MQMACXHS, "mqmacxhs", "mqmacxhs", 32,
-    { 0, { (1<<MACH_FR400)|(1<<MACH_FR550), UNIT_MDUALACC, FR400_MAJOR_M_2, FR500_MAJOR_NONE, FR550_MAJOR_M_4 } }
+    { 0, { (1<<MACH_FR400)|(1<<MACH_FR550), UNIT_FMALL, FR400_MAJOR_M_2, FR500_MAJOR_NONE, FR550_MAJOR_M_4 } }
   },
 /* mcpxrs$pack $FRinti,$FRintj,$ACC40Sk */
   {

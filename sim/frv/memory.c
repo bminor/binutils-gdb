@@ -679,18 +679,6 @@ frvbf_read_imem_USI (SIM_CPU *current_cpu, PCADDR vpc)
 static SI
 fr400_check_write_address (SIM_CPU *current_cpu, SI address, int align_mask)
 {
-  if (address & align_mask)
-    {
-      /* On the fr400, this causes a data_access_error.  */
-      /* Make sure that this exception is not masked.  */
-      USI isr = GET_ISR ();
-      if (! GET_ISR_EMAM (isr))
-	{
-	  /* Bad alignment causes a data_access_error on fr400.  */
-	  frv_queue_data_access_error_interrupt (current_cpu, address);
-	}
-      address &= ~align_mask;
-    }
   if (align_mask == 7
       && address >= 0xfe800000 && address <= 0xfeffffff)
     frv_queue_program_interrupt (current_cpu, FRV_DATA_STORE_ERROR);

@@ -39,7 +39,7 @@ frv_cache_init (SIM_CPU *cpu, FRV_CACHE *cache)
     {
     case bfd_mach_fr400:
       if (cache->configured_sets == 0)
-	cache->configured_sets = 128;
+	cache->configured_sets = 512;
       if (cache->configured_ways == 0)
 	cache->configured_ways = 2;
       if (cache->line_size == 0)
@@ -208,6 +208,7 @@ non_cache_access (FRV_CACHE *cache, USI address)
       if (address >= 0xff000000
 	  || address >= 0xfe000000 && address <= 0xfeffffff)
 	return 1; /* non-cache access */
+      break;
     case bfd_mach_fr550:
       if (address >= 0xff000000
 	  || address >= 0xfeff0000 && address <= 0xfeffffff)
@@ -219,6 +220,7 @@ non_cache_access (FRV_CACHE *cache, USI address)
 	}
       else if (address >= 0xfe400000 && address <= 0xfe407fff)
 	return 1; /* non-cache access */
+      break;
     default:
       if (address >= 0xff000000
 	  || address >= 0xfeff0000 && address <= 0xfeffffff)
@@ -230,6 +232,7 @@ non_cache_access (FRV_CACHE *cache, USI address)
 	}
       else if (address >= 0xfe400000 && address <= 0xfe403fff)
 	return 1; /* non-cache access */
+      break;
     }
 
   hsr0 = GET_HSR0 ();

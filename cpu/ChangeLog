@@ -1,5 +1,16 @@
 2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
 
+	* frv.cpu (nsdiv, nudiv, nsdivi, nudivi): Remove fr400 profiling unit.
+	(scutss): Change unit to I0.
+	(calll, callil, ccalll): Add missing FR550-MAJOR and profile unit.
+	(mqsaths): Fix FR400-MAJOR categorization.
+	(media-quad-multiply-cross-acc, media-quad-cross-multiply-cross-acc)
+	(media-quad-cross-multiply-acc): Change unit from MDUALACC to FMALL.
+	* frv.opc (fr400_check_insn_major_constraints): Check for (M-2,M-1)
+	combinations.
+
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
 	* frv.cpu (r-store, r-store-dual, r-store-quad): Delete.
 	(rstb, rsth, rst, rstd, rstq): Delete.
 	(rstbf, rsthf, rstf, rstdf, rstqf): Delete.
