@@ -1,5 +1,5 @@
 /* BFD support for the NEC V850 processor
-   Copyright 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1996, 1997 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -67,8 +67,12 @@ scan (info, string)
 
   switch (number) 
     {
+/* start-sanitize-v850e */
     case bfd_mach_v850e:  arch = bfd_arch_v850; break;
+/* end-sanitize-v850e */
+/* start-sanitize-v850eq */
     case bfd_mach_v850eq: arch = bfd_arch_v850; break;
+/* end-sanitize-v850eq */
 
     default:  
       return false;
