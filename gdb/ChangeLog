@@ -1,5 +1,10 @@
 2003-07-07  Joel Brobecker  <brobecker@gnat.com>
 
+        * xcoffread.c (xcoff_psymtab_to_symtab_1): Remove call to
+        sort_symtab_syms, no longer necessary.
+
+2003-07-07  Joel Brobecker  <brobecker@gnat.com>
+
 	* mips-tdep.c (mips_register_raw_size): Fix compilation failure.
 	(mips_register_byte): Likewise.
 
