@@ -1,24 +1,26 @@
 /* run front end support for arm
-   Copyright (C) 1995, 1996, 1997, 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996, 1997, 2000, 2001, 2002
+   Free Software Foundation, Inc.
 
-This file is part of ARM SIM.
+   This file is part of ARM SIM.
 
-GNU CC is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   GCC is free software; you can redistribute it and/or modify it
+   under the terms of the GNU General Public License as published
+   by the Free Software Foundation; either version 2, or (at your
+   option) any later version.
 
-GNU CC is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GCC is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.   See
+   the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public
+   License along with this program; if not, write to the Free
+   Software Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
-/* This file provides the interface between the simulator and run.c and gdb
-   (when the simulator is linked with gdb).
+/* This file provides the interface between the simulator and
+   run.c and gdb (when the simulator is linked with gdb).
    All simulator interaction should go through this file.  */
 
 #include <stdio.h>
@@ -32,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "armemu.h"
 #include "dbg_rdi.h"
 #include "ansidecl.h"
+#include "sim-utils.h"
 
 host_callback *sim_callback;
 
@@ -96,7 +99,9 @@ sim_size (size)
 }
 
 void
-ARMul_ConsolePrint (ARMul_State * state, const char *format, ...)
+ARMul_ConsolePrint VPARAMS ((ARMul_State * state,
+			     const char * format,
+			     ...))
 {
   va_list ap;
 
@@ -109,7 +114,10 @@ ARMul_ConsolePrint (ARMul_State * state, const char *format, ...)
 }
 
 ARMword
-ARMul_Debug (ARMul_State * state ATTRIBUTE_UNUSED, ARMword pc ATTRIBUTE_UNUSED, ARMword instr ATTRIBUTE_UNUSED)
+ARMul_Debug (state, pc, instr)
+     ARMul_State * state ATTRIBUTE_UNUSED;
+     ARMword       pc    ATTRIBUTE_UNUSED;
+     ARMword       instr ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -118,7 +126,7 @@ int
 sim_write (sd, addr, buffer, size)
      SIM_DESC sd ATTRIBUTE_UNUSED;
      SIM_ADDR addr;
-     unsigned char *buffer;
+     unsigned char * buffer;
      int size;
 {
   int i;
@@ -135,12 +143,13 @@ int
 sim_read (sd, addr, buffer, size)
      SIM_DESC sd ATTRIBUTE_UNUSED;
      SIM_ADDR addr;
-     unsigned char *buffer;
+     unsigned char * buffer;
      int size;
 {
   int i;
 
   init ();
+
   for (i = 0; i < size; i++)
     buffer[i] = ARMul_SafeReadByte (state, addr + i);
 
@@ -151,8 +160,9 @@ int
 sim_trace (sd)
      SIM_DESC sd ATTRIBUTE_UNUSED;
 {  
-  (*sim_callback->printf_filtered) (sim_callback,
-				    "This simulator does not support tracing\n");
+  (*sim_callback->printf_filtered)
+    (sim_callback,
+     "This simulator does not support tracing\n");
   return 1;
 }
 
@@ -182,9 +192,7 @@ sim_resume (sd, step, siggnal)
     }
   else
     {
-#if 1				/* JGS */
       state->NextInstr = RESUME;	/* treat as PC change */
-#endif
       state->Reg[15] = ARMul_DoProg (state);
     }
 
@@ -194,9 +202,9 @@ sim_resume (sd, step, siggnal)
 SIM_RC
 sim_create_inferior (sd, abfd, argv, env)
      SIM_DESC sd ATTRIBUTE_UNUSED;
-     struct _bfd *abfd;
-     char **argv;
-     char **env;
+     struct _bfd * abfd;
+     char ** argv;
+     char ** env;
 {
   int argvlen = 0;
   int mach;
@@ -212,8 +220,9 @@ sim_create_inferior (sd, abfd, argv, env)
   switch (mach)
     {
     default:
-      (*sim_callback->printf_filtered) (sim_callback,
-					"Unknown machine type; please update sim_create_inferior.\n");
+      (*sim_callback->printf_filtered)
+	(sim_callback,
+	 "Unknown machine type; please update sim_create_inferior.\n");
       /* fall through */
 
     case 0:
@@ -318,24 +327,18 @@ sim_info (sd, verbose)
 {
 }
 
-
 static int
 frommem (state, memory)
      struct ARMul_State *state;
      unsigned char *memory;
 {
   if (state->bigendSig == HIGH)
-    {
-      return (memory[0] << 24)
-	| (memory[1] << 16) | (memory[2] << 8) | (memory[3] << 0);
-    }
+    return (memory[0] << 24) | (memory[1] << 16)
+      | (memory[2] << 8) | (memory[3] << 0);
   else
-    {
-      return (memory[3] << 24)
-	| (memory[2] << 16) | (memory[1] << 8) | (memory[0] << 0);
-    }
+    return (memory[3] << 24) | (memory[2] << 16)
+      | (memory[1] << 8) | (memory[0] << 0);
 }
-
 
 static void
 tomem (state, memory, val)
@@ -391,10 +394,12 @@ sim_fetch_register (sd, rn, memory, length)
 
   if (rn < 16)
     regval = ARMul_GetReg (state, state->Mode, rn);
-  else if (rn == 25)		/* FIXME: use PS_REGNUM from gdb/config/arm/tm-arm.h */
+  else if (rn == 25)
+    /* FIXME: use PS_REGNUM from gdb/config/arm/tm-arm.h.  */
     regval = ARMul_GetCPSR (state);
   else
-    regval = 0;			/* FIXME: should report an error */
+    /* FIXME: should report an error.  */
+    regval = 0;
 
   while (length)
     {
@@ -475,7 +480,8 @@ sim_close (sd, quitting)
      SIM_DESC sd ATTRIBUTE_UNUSED;
      int quitting ATTRIBUTE_UNUSED;
 {
-  if (myname) free (myname);
+  if (myname)
+    free (myname);
   myname = NULL;
 }
 
@@ -486,7 +492,6 @@ sim_load (sd, prog, abfd, from_tty)
      bfd *abfd;
      int from_tty ATTRIBUTE_UNUSED;
 {
-  extern bfd *sim_load_file ();	/* ??? Don't know where this should live.  */
   bfd *prog_bfd;
 
   prog_bfd = sim_load_file (sd, myname, sim_callback, prog, abfd,
@@ -530,10 +535,10 @@ sim_do_command (sd, cmd)
      SIM_DESC sd ATTRIBUTE_UNUSED;
      char *cmd ATTRIBUTE_UNUSED;
 {  
-  (*sim_callback->printf_filtered) (sim_callback,
-				    "This simulator does not accept any commands.\n");
+  (*sim_callback->printf_filtered)
+    (sim_callback,
+     "This simulator does not accept any commands.\n");
 }
-
 
 void
 sim_set_callbacks (ptr)
