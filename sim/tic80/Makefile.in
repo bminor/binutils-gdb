@@ -11,7 +11,7 @@
 
 # List of object files, less common parts.
 SIM_OBJS = sim-endian.o sim-bits.o sim-config.o interp.o \
-	support.o idecode.o semantics.o itable.o \
+	support.o idecode.o semantics.o itable.o misc.o \
 	sim-calls.o \
 	sim-events.o \
 	sim-core.o \
@@ -89,6 +89,7 @@ clean-igen:
 tmp-igen: $(srcdir)/dc $(srcdir)/insns $(srcdir)/ic ../igen/igen
 	cd ../igen && $(MAKE)
 	../igen/igen \
+		-F f \
 		-G direct-access \
 		-G delayed-branch \
 		-F short,emul \
@@ -146,3 +147,4 @@ support.o: $(ENGINE_H)
 interp.o: interp.c $(ENGINE_H)
 sim-calls.o: sim-calls.c $(ENGINE_H)
 cpu.o: cpu.c $(ENGINE_H)
+misc.o: $(ENGINE_H)

@@ -222,6 +222,7 @@ sim_create_inferior (SIM_DESC sd,
   STATE_CPU (sd, 0)->cia.ip = STATE_START_ADDR(sd);
   STATE_CPU (sd, 0)->cia.dp = (STATE_START_ADDR(sd)
 			       + sizeof (instruction_word));
+  STATE_CPU (sd, 0)->cr[IE_CR] |= IE_CR_IE;
   STATE_CPU (sd, 0)->reg[1] = TIC80_MEM_START + TIC80_MEM_SIZE - 16;
   return SIM_RC_OK;
 }

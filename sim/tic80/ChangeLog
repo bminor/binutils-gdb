@@ -1,3 +1,32 @@
+Wed May  7 11:48:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* cpu.h (TRACE_FPU2, TRACE_FPU3, TRACE_FPU2I): Add.
+	* insn: Clean up fpu tracing.
+
+	* sim-calls.c (sim_create_inferior): Start out with interrupts
+ 	enabled.
+
+	* cpu.h (TRACE_SINK3), misc.c (tic80_trace_sink3): Three argument
+ 	sink
+
+	* insns (rdcr, swcr, wrcr, brcr, rmo, lmo): Implement.
+
+	* insns (do_*): Remove MY_INDEX/indx argument from support functions,
+ 	igen now handles this.
+	
+	* cpu.h (CR): New macro - access TIc80 control registers.
+	
+	* misc.c: New file.
+	(tic80_cr2index): New function, map control register opcode index
+ 	into the internal CR enum.
+
+	* interp.c
+ 	(tic80_trace_{alu{2,3},nop,sink{1,2},{,u}cond_br,ldst}): Move from
+ 	here
+	* misc.c: to here.
+	
+	* Makefile.in (SIM_OBJS): Add misc.o.
+
 Tue May  6 15:22:58 1997  Mike Meissner  <meissner@cygnus.com>
 
 	* cpu.h ({,v}{S,D}P_FPR): Delete unused macros that won't work on

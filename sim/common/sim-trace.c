@@ -308,21 +308,27 @@ trace_uninstall (SIM_DESC sd)
 void
 trace_one_insn (SIM_DESC sd, sim_cpu *cpu, address_word pc,
 		int line_p, const char *filename, int linenum,
-		const char *phase_wo_colon, const char *name)
+		const char *phase_wo_colon, const char *fmt,
+		...)
 {
+  va_list ap;
   char phase[SIZE_PHASE+2];
 
   strncpy (phase, phase_wo_colon, SIZE_PHASE);
   strcat (phase, ":");
 
   if (!line_p)
-    trace_printf(sd, cpu, "%-*s %s:%-*d 0x%.*lx %s\n",
-		 SIZE_PHASE+1, phase,
-		 filename,
-		 SIZE_LINE_NUMBER, linenum,
-		 SIZE_PC, (long)pc,
-		 name);
-
+    {
+      trace_printf (sd, cpu, "%-*s %s:%-*d 0x%.*lx ",
+		    SIZE_PHASE+1, phase,
+		    filename,
+		    SIZE_LINE_NUMBER, linenum,
+		    SIZE_PC, (long)pc);
+      va_start (ap, fmt);
+      trace_vprintf (sd, cpu, fmt, ap);
+      va_end (ap);
+      trace_printf (sd, cpu, "\n");
+    }
   else
     {
       char buf[256];
@@ -371,14 +377,26 @@ trace_one_insn (SIM_DESC sd, sim_cpu *cpu, address_word pc,
 	    }
 	}
 
-      trace_printf (sd, cpu, "%-*s 0x%.*x %-*.*s %s\n",
+      trace_printf (sd, cpu, "%-*s 0x%.*x %-*.*s ",
 		    SIZE_PHASE+1, phase,
 		    SIZE_PC, (unsigned) pc,
-		    SIZE_LOCATION, SIZE_LOCATION, buf,
-		    name);
+		    SIZE_LOCATION, SIZE_LOCATION, buf);
+      va_start (ap, fmt);
+      trace_vprintf (sd, cpu, fmt, ap);
+      va_end (ap);
+      trace_printf (sd, cpu, "\n");
     }
 }
 
+void
+trace_vprintf (SIM_DESC sd, sim_cpu *cpu, const char *fmt, va_list ap)
+{
+  if (cpu != NULL && TRACE_FILE (CPU_TRACE_DATA (cpu)) != NULL)
+    vfprintf (TRACE_FILE (CPU_TRACE_DATA (cpu)), fmt, ap);
+  else
+    sim_io_evprintf (sd, fmt, ap);
+}
+
 void
 trace_printf VPARAMS ((SIM_DESC sd, sim_cpu *cpu, const char *fmt, ...))
 {
@@ -396,10 +414,7 @@ trace_printf VPARAMS ((SIM_DESC sd, sim_cpu *cpu, const char *fmt, ...))
   fmt = va_arg (ap, const char *);
 #endif
 
-  if (cpu != NULL && TRACE_FILE (CPU_TRACE_DATA (cpu)) != NULL)
-    vfprintf (TRACE_FILE (CPU_TRACE_DATA (cpu)), fmt, ap);
-  else
-    sim_io_evprintf (sd, fmt, ap);
+  trace_vprintf (sd, cpu, fmt, ap);
 
   va_end (ap);
 }

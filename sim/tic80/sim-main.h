@@ -38,8 +38,8 @@ static const sim_cia null_cia = {0}; /* Dummy */
 
 #include "sim-base.h"
 
-#include "cpu.h"
 #include "alu.h"
+#include "cpu.h"
 
 
 struct sim_state {

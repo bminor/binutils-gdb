@@ -1,3 +1,14 @@
+Wed May  7 12:31:30 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* igen.c (print_itrace): Fix so line-nr is passed to trace
+ 	function.
+
+	* gen-idecode.c (print_idecode_validate): Correct FP code.
+
+	* gen-support.c (gen_support_h): Always pass MY_INDEX to support
+ 	functions.
+	(print_support_function_name): Ditto.
+
 Tue May  6 06:12:04 1997  Mike Meissner  <meissner@cygnus.com>
 
 	* igen.c (print_itrace): Call trace_one_insn to trace

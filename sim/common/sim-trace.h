@@ -121,13 +121,21 @@ struct _sim_cpu;
 #define TRACE_FPU_P(cpu)	TRACE_P (cpu, TRACE_FPU_IDX)
 #define TRACE_BRANCH_P(cpu)	TRACE_P (cpu, TRACE_BRANCH_IDX)
 
-extern void trace_one_insn PARAMS ((SIM_DESC, sim_cpu *,
-				    address_word, int,
-				    const char *, int,
-				    const char *, const char *));
+extern void trace_one_insn PARAMS ((SIM_DESC sd,
+				    sim_cpu * cpu,
+				    address_word cia,
+				    int print_linenum_p,
+				    const char *file_name,
+				    int line_nr,
+				    const char *unit,
+				    const char *fmt,
+				    ...))
+     __attribute__((format (printf, 8, 9)));
 
 extern void trace_printf PARAMS ((SIM_DESC, sim_cpu *, const char *, ...))
      __attribute__((format (printf, 3, 4)));
+
+extern void trace_vprintf PARAMS ((SIM_DESC, sim_cpu *, const char *, va_list));
 
 /* Debug support.
    This is included here because there isn't enough of it to justify

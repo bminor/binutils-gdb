@@ -63,6 +63,8 @@ do { \
 
 /* Floating point support */
 
+#define IS_FP_AVAILABLE ((CPU)->cr[IE_CR] & IE_CR_IE)
+
 #include "sim-fpu.h"
 
 

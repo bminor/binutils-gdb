@@ -258,9 +258,9 @@ print_itrace(lf *file,
   lf_printf(file, "  trace_one_insn (SD, CPU, %s, TRACE_LINENUM_P (CPU),\n",
 	    (code & generate_with_semantic_delayed_branch) ? "cia.ip" : "cia");
 
-  lf_printf(file, "                  itable[MY_INDEX].file, MY_INDEX, \"%s\",\n", phase_lc);
-  lf_printf(file, "                  itable[MY_INDEX].name);\n");
-    
+  lf_printf(file, "                  itable[MY_INDEX].file, itable[MY_INDEX].line_nr,\n");
+  lf_printf(file, "                  \"%s\", itable[MY_INDEX].name);\n", phase_lc);
+
   lf_printf(file, "}\n");
   lf_indent_suppress(file);
   lf_printf(file, "#endif\n");

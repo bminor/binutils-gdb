@@ -34,6 +34,7 @@ dc
 ic
 insns
 interp.c
+misc.c
 sim-calls.c
 sim-main.h
 
