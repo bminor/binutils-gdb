@@ -880,8 +880,11 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/m68k/xm-hp300bsd.h config/m68k/xm-hp300hpux.h \
 	config/m68k/xm-isi.h config/m68k/xm-news.h config/m68k/xm-news1000.h \
 	config/m68k/xm-sun2.h config/m68k/xm-sun3.h config/m68k/xm-sun3os4.h \
-	config/m88k/nm-m88k.h config/m88k/tm-delta88.h config/m88k/tm-m88k.h \
-	config/m88k/xm-delta88.h config/m88k/xm-m88k.h config/mips/nm-irix3.h \
+	config/m88k/nm-delta88v4.h config/m88k/nm-m88k.h \
+	config/m88k/tm-delta88.h \
+	config/m88k/tm-delta88v4.h config/m88k/tm-m88k.h \
+	config/m88k/xm-delta88.h config/m88k/xm-dgux.h config/m88k/xm-m88k.h \
+	config/mips/nm-irix3.h \
 	config/mips/nm-irix4.h config/mips/nm-mips.h config/mips/nm-riscos.h \
 	config/mips/nm-news-mips.h config/mips/tm-bigmips.h \
 	config/mips/tm-irix3.h config/mips/tm-mips.h config/mips/tm-mipsm3.h \
@@ -942,7 +945,8 @@ ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/m68k/sun2os3.mt config/m68k/sun2os4.mh config/m68k/sun2os4.mt \
 	config/m68k/sun3os3.mh config/m68k/sun3os3.mt config/m68k/sun3os4.mh \
 	config/m68k/sun3os4.mt config/m68k/vxworks68.mt config/m88k/delta88.mh \
-	config/m88k/delta88.mt config/m88k/m88k.mh config/m88k/m88k.mt \
+	config/m88k/delta88.mt config/m88k/delta88v4.mh \
+	config/m88k/delta88v4.mt config/m88k/m88k.mh config/m88k/m88k.mt \
 	config/mips/bigmips.mt config/mips/decstation.mh \
 	config/mips/decstation.mt config/mips/idt.mt config/mips/idtl.mt \
 	config/mips/irix3.mh config/mips/irix3.mt config/mips/irix4.mh \
