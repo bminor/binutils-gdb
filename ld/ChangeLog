@@ -1,3 +1,10 @@
+2001-12-19  Andreas Jaeger  <aj@suse.de>,
+	    Susanne Oberhauser <froh@suse.de>
+
+	* configure.host: Add rules for x86_64-*linux-gnu.  Change
+	s390x-linux entry to use gcc to report configuration, replace gcc
+	with $CC in s390-linux
+
 2001-12-19  Andreas Jaeger  <aj@suse.de>
 
 	* ld.texinfo (VERSION): Fix markup.
