@@ -25,7 +25,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-
 #include "bfd.h"
 #include "sysdep.h"
 #include "bfdlink.h"
@@ -46,12 +45,23 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define TARGET_IS_${EMULATION_NAME}
 
+static void gld_${EMULATION_NAME}_set_symbols PARAMS ((void));
+static void gld_${EMULATION_NAME}_after_open PARAMS ((void));
 static void gld_${EMULATION_NAME}_before_parse PARAMS ((void));
-static char *gld_${EMULATION_NAME}_get_script PARAMS ((int *isfile));
+static void gld_${EMULATION_NAME}_before_allocation PARAMS ((void));
 static boolean gld${EMULATION_NAME}_place_orphan
   PARAMS ((lang_input_statement_type *, asection *));
-static void gld${EMULATION_NAME}_place_section
-  PARAMS ((lang_statement_union_type *));
+static char *gld_${EMULATION_NAME}_get_script PARAMS ((int *));
+static int gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
+
+#if 0 /* argument to qsort so don't prototype */
+static int sort_by_file_name PARAMS ((void *, void *));
+static int sort_by_section_name PARAMS ((void *, void *));
+#endif
+static lang_statement_union_type **sort_sections_1
+  PARAMS ((lang_statement_union_type **, lang_statement_union_type *, int,
+	   int (*)()));
+static void sort_sections PARAMS ((lang_statement_union_type *));
 
 static struct internal_extra_pe_aouthdr pe;
 static int dll;
@@ -61,7 +71,8 @@ gld_${EMULATION_NAME}_before_parse()
 {
   ldfile_output_architecture = bfd_arch_${ARCH};
 }
-
+
+/* PE format extra command line options.  */
 
 /* Used for setting flags in the PE header. */
 #define OPTION_BASE_FILE		(300  + 1)
@@ -195,7 +206,7 @@ set_pe_value (name)
      
 {
   char *end;
-  set_pe_name (name,  strtoul (optarg, &end, 16));
+  set_pe_name (name,  strtoul (optarg, &end, 0));
   if (end == optarg)
     {
       einfo ("%P%F: invalid hex number for PE parameter '%s'\n", optarg);
@@ -308,9 +319,9 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
     }
   return 1;
 }
-
+
 static void
-gld_${EMULATION_NAME}_set_symbols() 
+gld_${EMULATION_NAME}_set_symbols()
 {
   /* Run through and invent symbols for all the
      names and insert the defaults. */
@@ -363,11 +374,12 @@ gld_${EMULATION_NAME}_after_open()
 
 }
 
-/* Callback function for qsort in sort_sections. */
+/* Callback functions for qsort in sort_sections. */
 
-static int sfunc (a, b)
-void *a;
-void *b;
+static int
+sort_by_file_name (a, b)
+     void *a;
+     void *b;
 {
   lang_statement_union_type **ra = a;
   lang_statement_union_type **rb = b;
@@ -375,7 +387,63 @@ void *b;
 		 (*rb)->input_section.ifile->filename);
 }
 
-/* Sort the input sections of archives into filename order. */
+static int
+sort_by_section_name (a, b)
+     void *a;
+     void *b;
+{
+  lang_statement_union_type **ra = a;
+  lang_statement_union_type **rb = b;
+  return strcmp ((*ra)->input_section.section->name,
+		 (*rb)->input_section.section->name);
+}
+
+/* Subroutine of sort_sections to a contiguous subset of a list of sections.
+   NEXT_AFTER is the element after the last one to sort.
+   The result is a pointer to the last element's "next" pointer.  */
+
+static lang_statement_union_type **
+sort_sections_1 (startptr, next_after, count, sort_func)
+     lang_statement_union_type **startptr,*next_after;
+     int count;
+     int (*sort_func) ();
+{
+  lang_statement_union_type **vec;
+  lang_statement_union_type *p;
+  int i;
+
+  if (count == 0)
+    return startptr;
+
+  vec = (lang_statement_union_type **)
+    alloca (count * sizeof (lang_statement_union_type *));
+
+  for (p = *startptr, i = 0; i < count; i++, p = p->next)
+    vec[i] = p;
+
+  qsort (vec, count, sizeof (vec[0]), sort_func);
+
+  /* Fill in the next pointers again. */
+  *startptr = vec[0];
+  for (i = 0; i < count - 1; i++)
+    vec[i]->header.next = vec[i + 1];
+  vec[i]->header.next = next_after;
+  return &(vec[i]->header.next);
+}
+
+/* Sort the .idata\$foo input sections of archives into filename order.
+   The reason is so dlltool can arrange to have the pe dll import information
+   generated correctly - the head of the list goes into dh.o, the tail into
+   dt.o, and the guts into ds[nnnn].o.  Note that this is only needed for the
+   .idata section.
+   FIXME: This may no longer be necessary with grouped sections.  Instead of
+   sorting on dh.o, ds[nnnn].o, dt.o, one could, for example, have dh.o use
+   .idata\$4h, have ds[nnnn].o use .idata\$4s[nnnn], and have dt.o use .idata\$4t.
+   This would have to be elaborated upon to handle multiple dll's
+   [assuming such an eloboration is possible of course].
+
+   We also sort sections in '\$' wild statements.  These are created by the
+   place_orphans routine to implement grouped sections.  */
 
 static void
 sort_sections (s)
@@ -391,52 +459,63 @@ sort_sections (s)
 	{
 	  lang_statement_union_type **p = &s->wild_statement.children.head;
 
-	  /* Sort any children in the same archive.  Run through all
-	     the children of this wild statement, when an
-	     input_section in an archive is found, scan forward to
-	     find all input_sections which are in the same archive.
-	     Sort them by their filename and then re-thread the
-	     pointer chain. */
-
-	  while (*p)
+	  /* Is this the .idata section?  */
+	  if (strncmp (s->wild_statement.section_name, ".idata", 6) == 0)
 	    {
-	      lang_statement_union_type *start = *p;
-	      if (start->header.type != lang_input_section_enum
-		  || !start->input_section.ifile->the_bfd->my_archive)
-		p = &(start->header.next);
-	      else
+	      /* Sort any children in the same archive.  Run through all
+		 the children of this wild statement, when an
+		 input_section in an archive is found, scan forward to
+		 find all input_sections which are in the same archive.
+		 Sort them by their filename and then re-thread the
+		 pointer chain. */
+
+	      while (*p)
 		{
-		  lang_statement_union_type **vec;
-		  lang_statement_union_type *end;
-		  lang_statement_union_type *np;
-		  int count;
-		  int i;
+		  lang_statement_union_type *start = *p;
+		  if (start->header.type != lang_input_section_enum
+		      || !start->input_section.ifile->the_bfd->my_archive)
+		    p = &(start->header.next);
+		  else
+		    {
+		      lang_statement_union_type *end;
+		      int count;
 
-		  for (end = start, count = 0;
-		       end && end->header.type == lang_input_section_enum
-		       && (end->input_section.ifile->the_bfd->my_archive
-			   == start->input_section.ifile->the_bfd->my_archive);
-		       end = end->next)
-		    count++;
+		      for (end = start, count = 0;
+			   end && end->header.type == lang_input_section_enum
+			   && (end->input_section.ifile->the_bfd->my_archive
+			       == start->input_section.ifile->the_bfd->my_archive);
+			   end = end->next)
+			count++;
 
-		  np = end;
-
-		  vec = (lang_statement_union_type **)
-		    alloca (count * sizeof (lang_statement_union_type *));
-
-		  for (end = start, i = 0; i < count; i++, end = end->next)
-		    vec[i] = end;
-
-		  qsort (vec, count, sizeof (vec[0]), sfunc);
-
-		  /* Fill in the next pointers again. */
-		  *p = vec[0];
-		  for (i = 0; i < count - 1; i++)
-		    vec[i]->header.next = vec[i + 1];
-		  vec[i]->header.next = np;
-		  p = &(vec[i]->header.next);
+		      p = sort_sections_1 (p, end, count, sort_by_file_name);
+		    }
 		}
+	      break;
 	    }
+
+	  /* If this is a collection of grouped sections, sort them.
+	     The linker script must explicitly mention "*(.foo\$)".
+	     Don't sort them if \$ is not the last character (not sure if
+	     this is really useful, but it allows explicitly mentioning
+	     some \$ sections and letting the linker handle the rest).  */
+	  {
+	    char *q = strchr (s->wild_statement.section_name, '\$');
+
+	    if (q && q[1] == 0)
+	      {
+		lang_statement_union_type *end;
+		int count;
+
+		for (end = *p, count = 0; end; end = end->next)
+		  {
+		    if (end->header.type != lang_input_section_enum)
+		      abort ();
+		    count++;
+		  }
+		(void) sort_sections_1 (p, end, count, sort_by_section_name);
+	      }
+	    break;
+	  }
 	}
 	break;
       default:
@@ -462,19 +541,15 @@ gld_${EMULATION_NAME}_before_allocation()
   ppc_allocate_toc_section (&link_info);
 #endif
 
-  sort_sections (*stat_ptr);
+  sort_sections (stat_ptr->head);
 }
 
-/* Place an orphan section.  We use this to put random sections
-   (e.g. those used to implement linkonce support) into the right place.  */
-
-/* These are used to communicate information from 
-   gld${EMULATION_NAME}_place_section to gld${EMULATION_NAME}_place_orphan.  */
-static asection *hold_section;
-static lang_output_section_statement_type *hold_use;
-static lang_output_section_statement_type *hold_text;
-static lang_output_section_statement_type *hold_rdata;
-static lang_output_section_statement_type *hold_data;
+/* Place an orphan section.  We use this to put sections with a '\$' in them
+   into the right place.  Any section with a '\$' in them (e.g. .text\$foo)
+   gets mapped to the output section with everything from the '\$' on stripped
+   (e.g. .text).
+   See the Microsoft Portable Executable and Common Object File Format
+   Specification 4.1, section 4.2, Grouped Sections.  */
 
 /*ARGSUSED*/
 static boolean
@@ -482,148 +557,77 @@ gld${EMULATION_NAME}_place_orphan (file, s)
      lang_input_statement_type *file;
      asection *s;
 {
-  lang_output_section_statement_type *place;
-  asection *snew, **pps;
-  lang_statement_list_type *old;
-  lang_statement_list_type add;
-  etree_type *address;
-  const char *secname, *ps;
+  const char *secname;
+  char *output_secname, *ps;
   lang_output_section_statement_type *os;
+  lang_statement_list_type *ptr;
+  lang_statement_union_type *l;
 
   if ((s->flags & SEC_ALLOC) == 0)
     return false;
 
-  /* Look through the script to see where to place this section.  */
-  hold_section = s;
-  hold_use = NULL;
-  lang_for_each_statement (gld${EMULATION_NAME}_place_section);
-
-  if (hold_use != NULL)
-    {
-      /* We have already placed a section with this name.  */
-      wild_doit (&hold_use->children, s, hold_use, file);
-      return true;
-    }
+  /* Don't process grouped sections unless doing a final link.
+     If they're marked as COMDAT sections, we don't want .text\$foo to
+     end up in .text and then have .text disappear because it's marked
+     link-once-discard.  */
+  if (link_info.relocateable)
+    return false;
 
   secname = bfd_get_section_name (s->owner, s);
 
-  /* Decide which output section the section should go in.
-     This is here to help implement "one-only" support.  Such functions and
-     variables are prefixed with .text., .rdata., or .data. We must keep all
-     all functions together but the linker doesn't support wildcard section
-     names.  */
-  place = NULL;
-  if (strncmp (secname, ".text.", 6) == 0
-	   && hold_text != NULL)
-    place = hold_text;
-  else if (strncmp (secname, ".rdata.", 7) == 0
-	   && hold_rdata != NULL)
-    place = hold_rdata;
-  else if (strncmp (secname, ".data.", 6) == 0
-	   && hold_data != NULL)
-    place = hold_data;
-  if (place == NULL)
+  /* Everything from the '\$' on gets deleted so don't allow '\$' as the
+     first character.  */
+  if (*secname == '\$')
+    einfo ("%P%F: section %s has '\$' as first character\n", secname);
+  if (strchr (secname + 1, '\$') == NULL)
     return false;
 
-  /* Create the section in the output file, and put it in the right
-     place.  This shuffling is to make the output file look neater.  */
-  snew = bfd_make_section (output_bfd, secname);
-  if (snew == NULL)
-      einfo ("%P%F: output format %s cannot represent section called %s\n",
-	     output_bfd->xvec->name, secname);
-  if (place->bfd_section != NULL)
+  /* Look up the output section.  The Microsoft specs say sections names in
+     image files never contain a '\$'.  Fortunately, lang_..._lookup creates
+     the section if it doesn't exist.  */
+  output_secname = buystring (secname);
+  ps = strchr (output_secname + 1, '\$');
+  *ps = 0;
+  os = lang_output_section_statement_lookup (output_secname);
+
+  /* Find the '\$' wild statement for this section.  We currently require the
+     linker script to explicitly mention "*(.foo\$)".
+     FIXME: ppcpe.sc has .CRT\$foo in the .rdata section.  According to the
+     Microsoft docs this isn't correct so it's not (currently) handled.  */
+
+  ps[0] = '\$';
+  ps[1] = 0;
+  for (l = os->children.head; l; l = l->next)
     {
-      for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
-	;
-      *pps = snew->next;
-      snew->next = place->bfd_section->next;
-      place->bfd_section->next = snew;
+      if (l->header.type == lang_wild_statement_enum
+	  && strcmp (l->wild_statement.section_name, output_secname) == 0)
+	break;
     }
-
-  /* Start building a list of statements for this section.  */
-  old = stat_ptr;
-  stat_ptr = &add;
-  lang_list_init (stat_ptr);
-
-#if 0 /* ??? elf32.em does this, do we need to?  */
-  /* If the name of the section is representable in C, then create
-     symbols to mark the start and the end of the section.  */
-  for (ps = secname; *ps != '\0'; ps++)
-    if (! isalnum (*ps) && *ps != '_')
-      break;
-  if (*ps == '\0' && config.build_constructors)
+  ps[0] = 0;
+  if (l == NULL)
+#if 1
+    einfo ("%P%F: *(%s\$) missing from linker script\n", output_secname);
+#else /* FIXME: This block is untried.  It exists to convey the intent,
+	 should one decide to not require *(.foo\$) to appear in the linker
+	 script.  */
     {
-      char *symname;
-
-      symname = (char *) xmalloc (ps - secname + sizeof "__start_");
-      sprintf (symname, "__start_%s", secname);
-      lang_add_assignment (exp_assop ('=', symname,
-				      exp_nameop (NAME, ".")));
-    }
-#endif
-
-  if (! link_info.relocateable)
-    address = NULL;
-  else
-    address = exp_intop ((bfd_vma) 0);
-
-  lang_enter_output_section_statement (secname, address, 0,
-				       (bfd_vma) 0,
-				       (etree_type *) NULL,
-				       (etree_type *) NULL,
-				       (etree_type *) NULL);
-
-  os = lang_output_section_statement_lookup (secname);
-  wild_doit (&os->children, s, os, file);
-
-  lang_leave_output_section_statement ((bfd_vma) 0, "*default*");
-  stat_ptr = &add;
-
-#if 0 /* ??? elf32.em does this, do we need to?  */
-  if (*ps == '\0' && config.build_constructors)
-    {
-      char *symname;
-
-      symname = (char *) xmalloc (ps - secname + sizeof "__stop_");
-      sprintf (symname, "__stop_%s", secname);
-      lang_add_assignment (exp_assop ('=', symname,
-				      exp_nameop (NAME, ".")));
+      lang_wild_statement_type *new = new_stat (lang_wild_statement,
+						&os->children);
+      new->section_name = xmalloc (strlen (output_secname) + 2);
+      sprintf (new->section_name, "%s\$", output_secname);
+      new->filename = NULL;
+      lang_list_init (&new->children);
+      l = new;
     }
 #endif
 
-  /* Now stick the new statement list right after PLACE.  */
-  *add.tail = place->header.next;
-  place->header.next = add.head;
-
-  stat_ptr = old;
+  /* Link the input section in and we're done for now.
+     The sections still have to be sorted, but that has to wait until
+     all such sections have been processed by us.  The sorting is done by
+     sort_sections.  */
+  wild_doit (&l->wild_statement.children, s, os, file);
 
   return true;
-}
-
-/* Subroutine of gld${EMULATION_NAME}_place_orphan, passed as argument to
-   lang_for_each_statement to see if S has already been output, and to scan
-   for .text,.rdata,.data.  */
-
-static void
-gld${EMULATION_NAME}_place_section (s)
-     lang_statement_union_type *s;
-{
-  lang_output_section_statement_type *os;
-
-  if (s->header.type != lang_output_section_statement_enum)
-    return;
-
-  os = &s->output_section_statement;
-
-  if (strcmp (os->name, hold_section->name) == 0)
-    hold_use = os;
-
-  if (strcmp (os->name, ".text") == 0)
-    hold_text = os;
-  else if (strcmp (os->name, ".rdata") == 0)
-    hold_rdata = os;
-  else if (strcmp (os->name, ".data") == 0)
-    hold_data = os;
 }
 
 static char *
@@ -677,4 +681,3 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld_${EMULATION_NAME}_parse_args
 };
 EOF
-

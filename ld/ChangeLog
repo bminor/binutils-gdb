@@ -1,3 +1,21 @@
+Wed May 22 11:31:30 1996  Doug Evans  <dje@seba.cygnus.com>
+
+	* ldlang.c (wild_doit): Don't copy over SEC_LINK_{ONCE,DUPLICATES}
+	if final link.
+	* emultempl/pe.em (sfunc): Renamed to sort_by_file_name.
+	(sort_by_section_name, sort_sections_1): New functions.
+	(sort_sections): Only sort by file name sections in .idata.
+	Add "Grouped Sections" support.
+	(gld${EMULATION_NAME}_place_orphan): Rewrite to support Grouped
+	Sections.
+	(gld${EMULATION_NAME}_place_section): Delete.
+	* scripttempl/pe.sc (.text,.data,.rdata): Add *(.foo\$).
+	(.CRT,.rsrc): Rewrite to use Grouped Section support.
+
+Tue May 21 14:31:48 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-eppcmac.c: Update to reflect changes to aix.em.
+
 Sun May 19 16:59:44 1996  Doug Evans  <dje@seba.cygnus.com>
 
 	* ldlang.c (dprint_statement): Stop printing at end of list.
