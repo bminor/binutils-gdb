@@ -1,5 +1,12 @@
 Sun Feb 12 13:47:30 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
+	* remote-e7000.c: Comprehensive cleanup; removal of dead code,
+	simplify code, declare things, format to standards.
+	(inferior.h, value.h, command.h, remote-utils.h): Include.
+	(e7000_login): Rename to e7000_login_command.
+	(e7000_ftp): Rename to e7000_ftp_command.
+	(e7000_drain): Rename to e7000_drain_command.
+
 	* irix5-nat.c (string.h): Include near beginning of file.
 
 Sun Feb 12 12:36:38 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
