@@ -3,7 +3,7 @@
    present or not) must be used and set to the appropriate routine by any
    command language that cares about it.  If you are having to include this
    file you are possibly doing things the old way.  This file will disapear.
-   fnasser@redhat.com    */
+   2000-12-01 fnasser@redhat.com    */
 
 /* Header file for command-reading library command.c.
    Copyright (C) 1986, 1989, 1990, 2000 Free Software Foundation, Inc.

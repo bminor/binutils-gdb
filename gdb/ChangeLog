@@ -1,5 +1,10 @@
 2000-12-20  Fernando Nasser  <fnasser@redhat.com>
 
+	* command.h: Register date when it was deprecated.
+	* call-cmds.h: Ditto.
+
+2000-12-20  Fernando Nasser  <fnasser@redhat.com>
+
 	* Makefile.in (UIOUT_CFLAGS): New macro. CFLAGS needed for uiout code
 	to be compiled.  Defines UI_OUT.
 	(SUBDIR_MI_CFLAGS): Defines MI_OUT, not UI_OUT.
