@@ -1,5 +1,9 @@
 Fri Jul  2 09:25:20 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* hosts/std-host.h: Removed declarations of printf, fprintf,
+	fcntl, fread and fwrite.  They are all error prone for one reason
+	or another.  Changed declaration of memchr from char * to PTR.
+
 	* configure.in (mips-*-riscos*): New target; use riscos.
 	* configure.host (mips-*-riscos*): New host; use riscos.
 	* config/riscos.mh (HDEFINES): Add -G 4.

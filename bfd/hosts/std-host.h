@@ -21,14 +21,11 @@
 #include <stdlib.h>
 /*#include <string.h>*/
 #else
-extern int   fprintf PARAMS ((FILE *,char *,...));
-extern int   printf PARAMS((char *,...));
 extern char *mktemp ();
 extern int   fflush ();
 extern int   write ();
 extern void  abort ();
 extern int   close ();
-extern int   fcntl ();
 extern int   qsort ();
 extern void  exit ();
 extern int   fseek ();
@@ -68,12 +65,10 @@ extern int free();
 
 extern char * strchr();
 extern char *getenv();
-extern char *memchr();
+extern PTR memchr();
 extern char *strrchr();
 extern int chmod();
-extern int fread();
 extern int fstat();
-extern int fwrite();
 extern int stat();
 extern int strtol();
 
