@@ -1,3 +1,8 @@
+2001-07-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* lin-lwp.c (lin_lwp_wait): Avoid check for resumed LWPs if there
+	are no registered LWPs yet.
+
 2001-07-12  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/i386/nm-linux.h (CANNOT_FETCH_REGISTER): Call the right

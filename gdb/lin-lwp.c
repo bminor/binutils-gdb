@@ -908,8 +908,9 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
  retry:
 
-  /* Make sure there is at least one thread that has been resumed.  */
-  gdb_assert (iterate_over_lwps (resumed_callback, NULL));
+  /* Make sure there is at least one LWP that has been resumed, at
+     least if there are any LWPs at all.  */
+  gdb_assert (num_lwps == 0 || iterate_over_lwps (resumed_callback, NULL));
 
   /* First check if there is a LWP with a wait status pending.  */
   if (pid == -1)
