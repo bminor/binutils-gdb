@@ -84,8 +84,27 @@ int main (int argc, char **argv)
   int_resultval       = int_func ();		/* short_checkpoint */
   long_resultval      = long_func ();		/* int_checkpoint */
   long_long_resultval = long_long_func ();	/* long_checkpoint */
-  float_resultval     = float_func ();		/* long_long_checkpoint */
-  double_resultval    = double_func ();		/* float_checkpoint */
+
+  /* On machines using IEEE floating point, the test pattern of all
+     1-bits established above turns out to be a floating-point NaN
+     ("Not a Number").  According to the IEEE rules, NaN's aren't even
+     equal to themselves.  This can lead to stupid conversations with
+     GDB like:
+
+       (gdb) p testval.float_testval == testval.float_testval
+       $7 = 0
+       (gdb)
+
+     This is the correct answer, but it's not the sort of thing
+     return2.exp wants to see.  So to make things work the way they
+     ought, we'll set aside the `union' cleverness and initialize the
+     test values explicitly here.  These values have interesting bits
+     throughout the value, so we'll still detect truncated values.  */
+
+  testval.float_testval = 2.7182818284590452354;/* long_long_checkpoint */
+  float_resultval     = float_func ();		
+  testval.double_testval = 3.14159265358979323846; /* float_checkpoint */
+  double_resultval    = double_func ();		
   main_test = 1;				/* double_checkpoint */
   return 0;
 }
