@@ -1,3 +1,7 @@
+Thu May  7 11:47:22 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* cgen.c (cgen_md_apply_fix3): Don't pass newline to as_warn_where.
+
 Thu May  7 13:20:56 1998  Anders Blomdell  <anders.blomdell@control.lth.se>
 
 	* gasp.c (grab_label): Permit a label to be a preprocessor
