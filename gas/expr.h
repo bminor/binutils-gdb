@@ -1,18 +1,18 @@
 /* expr.h -> header file for expr.c
-   Copyright (C) 1987 Free Software Foundation, Inc.
-   
+   Copyright (C) 1987, 1992 Free Software Foundation, Inc.
+
    This file is part of GAS, the GNU Assembler.
-   
+
    GAS is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2, or (at your option)
    any later version.
-   
+
    GAS is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
@@ -44,11 +44,12 @@
 
 typedef struct
 {
-	symbolS *X_add_symbol;		/* foo */
-	symbolS *X_subtract_symbol;	/* bar */
-	long X_add_number;		/* 42.    Must be signed. */
-	segT	X_seg;			/* What segment (expr type)? */
+  symbolS *X_add_symbol;	/* foo */
+  symbolS *X_subtract_symbol;	/* bar */
+  long X_add_number;		/* 42.    Must be signed. */
+  segT X_seg;			/* What segment (expr type)? */
 }
+
 expressionS;
 
 /* result should be type (expressionS *). */
@@ -57,25 +58,25 @@ expressionS;
 /* If an expression is SEG_BIG, look here */
 /* for its value. These common data may */
 /* be clobbered whenever expr() is called. */
-extern FLONUM_TYPE generic_floating_point_number; /* Flonums returned here. */
+extern FLONUM_TYPE generic_floating_point_number;	/* Flonums returned here. */
 /* Enough to hold most precise flonum. */
-extern LITTLENUM_TYPE generic_bignum []; /* Bignums returned here. */
+extern LITTLENUM_TYPE generic_bignum[];	/* Bignums returned here. */
 #define SIZE_OF_LARGE_NUMBER (20)	/* Number of littlenums in above. */
 
 typedef char operator_rankT;
 
-#ifdef __STDC__
+#if __STDC__ == 1
 
-char get_symbol_end(void);
-segT expr(int rank, expressionS *resultP);
-unsigned int get_single_number(void);
+char get_symbol_end (void);
+segT expr (int rank, expressionS * resultP);
+unsigned int get_single_number (void);
 
-#else /* __STDC__ */
+#else /* not __STDC__ */
 
-char get_symbol_end();
-segT expr();
-unsigned int get_single_number();
+char get_symbol_end ();
+segT expr ();
+unsigned int get_single_number ();
 
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 /* end of expr.h */

@@ -1,23 +1,24 @@
 /* read.h - of read.c
-   Copyright (C) 1986, 1990 Free Software Foundation, Inc.
-   
+
+   Copyright (C) 1986, 1990, 1992 Free Software Foundation, Inc.
+
    This file is part of GAS, the GNU Assembler.
-   
+
    GAS is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2, or (at your option)
    any later version.
-   
+
    GAS is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-extern char *input_line_pointer; /* -> char we are parsing now. */
+extern char *input_line_pointer;/* -> char we are parsing now. */
 
 #define PERMIT_WHITESPACE	/* Define to make whitespace be allowed in */
 /* many syntactically unnecessary places. */
@@ -32,8 +33,8 @@ extern char *input_line_pointer; /* -> char we are parsing now. */
 #endif
 
 
-#define	LEX_NAME	(1)	/* may continue a name */		      
-#define LEX_BEGIN_NAME	(2)	/* may begin a name */			      
+#define	LEX_NAME	(1)	/* may continue a name */
+#define LEX_BEGIN_NAME	(2)	/* may begin a name */
 
 #define is_name_beginner(c)     ( lex_type[c] & LEX_BEGIN_NAME )
 #define is_part_of_name(c)      ( lex_type[c] & LEX_NAME       )
@@ -47,83 +48,90 @@ extern char *input_line_pointer; /* -> char we are parsing now. */
 extern const char lex_type[];
 extern char is_end_of_line[];
 
-#ifdef __STDC__
+/* These are initialized by the CPU specific target files (tc-*.c).  */
+extern const char comment_chars[];
+extern const char line_comment_chars[];
+extern const char line_separator_chars[];
 
-char *demand_copy_C_string(int *len_pointer);
-char get_absolute_expression_and_terminator(long *val_pointer);
-long get_absolute_expression(void);
-void add_include_dir(char *path);
-void big_cons(int nbytes);
-void cons(unsigned int nbytes);
-void demand_empty_rest_of_line(void);
-void equals(char *sym_name);
-void float_cons(int float_type);
-void ignore_rest_of_line(void);
-void pseudo_set(symbolS *symbolP);
-void read_a_source_file(char *name);
-void read_begin(void);
-void s_abort(void);
-void s_align_bytes(int arg);
-void s_align_ptwo(void);
-void s_app_file(void);
-void s_comm(void);
-void s_data(void);
-void s_else(int arg);
-void s_end(int arg);
-void s_endif(int arg);
-void s_fill(void);
-void s_globl(void);
-void s_if(int arg);
-void s_ifdef(int arg);
-void s_ifeqs(int arg);
-void s_ignore(int arg);
-void s_include(int arg);
-void s_lcomm(int needs_align);
-void s_lsym(void);
-void s_org(void);
-void s_set(void);
-void s_space(void);
-void s_text(void);
+#if __STDC__ == 1
 
-#else /* __STDC__ */
+char *demand_copy_C_string (int *len_pointer);
+char get_absolute_expression_and_terminator (long *val_pointer);
+long get_absolute_expression (void);
+void add_include_dir (char *path);
+void big_cons (int nbytes);
+void cons (unsigned int nbytes);
+void demand_empty_rest_of_line (void);
+void equals (char *sym_name);
+void float_cons (int float_type);
+void ignore_rest_of_line (void);
+void pseudo_set (symbolS * symbolP);
+void read_a_source_file (char *name);
+void read_begin (void);
+void s_abort (void);
+void s_align_bytes (int arg);
+void s_align_ptwo (void);
+void s_app_file (void);
+/* void s_bss(void); -- unneeded; always static when used */
+void s_comm (void);
+void s_data (void);
+void s_else (int arg);
+void s_end (int arg);
+void s_endif (int arg);
+void s_fill (void);
+void s_globl (void);
+void s_if (int arg);
+void s_ifdef (int arg);
+void s_ifeqs (int arg);
+void s_ignore (int arg);
+void s_include (int arg);
+void s_lcomm (int needs_align);
+void s_lsym (void);
+void s_org (void);
+void s_set (void);
+void s_space (int mult);
+void s_text (void);
 
-char *demand_copy_C_string();
-char get_absolute_expression_and_terminator();
-long get_absolute_expression();
-void add_include_dir();
-void big_cons();
-void cons();
-void demand_empty_rest_of_line();
-void equals();
-void float_cons();
-void ignore_rest_of_line();
-void pseudo_set();
-void read_a_source_file();
-void read_begin();
-void s_abort();
-void s_align_bytes();
-void s_align_ptwo();
-void s_app_file();
-void s_comm();
-void s_data();
-void s_else();
-void s_end();
-void s_endif();
-void s_fill();
-void s_globl();
-void s_if();
-void s_ifdef();
-void s_ifeqs();
-void s_ignore();
-void s_include();
-void s_lcomm();
-void s_lsym();
-void s_org();
-void s_set();
-void s_space();
-void s_text();
+#else /* not __STDC__ */
 
-#endif /* __STDC__ */
+char *demand_copy_C_string ();
+char get_absolute_expression_and_terminator ();
+long get_absolute_expression ();
+void add_include_dir ();
+void big_cons ();
+void cons ();
+void demand_empty_rest_of_line ();
+void equals ();
+void float_cons ();
+void ignore_rest_of_line ();
+void pseudo_set ();
+void read_a_source_file ();
+void read_begin ();
+void s_abort ();
+void s_align_bytes ();
+void s_align_ptwo ();
+void s_app_file ();
+/* void s_bss(); -- unneeded; always static when used */
+void s_comm ();
+void s_data ();
+void s_else ();
+void s_end ();
+void s_endif ();
+void s_fill ();
+void s_globl ();
+void s_if ();
+void s_ifdef ();
+void s_ifeqs ();
+void s_ignore ();
+void s_include ();
+void s_lcomm ();
+void s_lsym ();
+void s_org ();
+void s_set ();
+void s_space ();
+void s_text ();
+
+#endif /* not __STDC__ */
 
 /*
  * Local Variables:

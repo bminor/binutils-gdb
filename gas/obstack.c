@@ -24,12 +24,22 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 /* Determine default alignment.  */
-struct fooalign {char x; double d;};
+struct fooalign
+  {
+    char x;
+    double d;
+  };
+
 #define DEFAULT_ALIGNMENT ((char *)&((struct fooalign *) 0)->d - (char *)0)
 /* If malloc were really smart, it would round addresses to DEFAULT_ALIGNMENT.
    But in fact it might be less smart and round addresses to as much as
    DEFAULT_ROUNDING.  So we prepare for it to do that.  */
-union fooround {long x; double d;};
+union fooround
+  {
+    long x;
+    double d;
+  };
+
 #define DEFAULT_ROUNDING (sizeof (union fooround))
 
 /* When we copy a long block of data, this is the unit to do it with.
@@ -55,10 +65,10 @@ _obstack_begin (h, size, alignment, chunkfun, freefun)
      struct obstack *h;
      int size;
      int alignment;
-     POINTER (*chunkfun) ();
+POINTER (*chunkfun) ();
      void (*freefun) ();
 {
-  register struct _obstack_chunk* chunk; /* points to new chunk */
+  register struct _obstack_chunk *chunk;	/* points to new chunk */
 
   if (alignment == 0)
     alignment = DEFAULT_ALIGNMENT;
@@ -84,7 +94,7 @@ _obstack_begin (h, size, alignment, chunkfun, freefun)
   h->chunk_size = size;
   h->alignment_mask = alignment - 1;
 
-  chunk	= h->chunk = (*h->chunkfun) (h->chunk_size);
+  chunk = h->chunk = (*h->chunkfun) (h->chunk_size);
   h->next_free = h->object_base = chunk->contents;
   h->chunk_limit = chunk->limit
     = (char *) chunk + h->chunk_size;
@@ -104,9 +114,9 @@ _obstack_newchunk (h, length)
      struct obstack *h;
      int length;
 {
-  register struct _obstack_chunk*	old_chunk = h->chunk;
-  register struct _obstack_chunk*	new_chunk;
-  register long	new_size;
+  register struct _obstack_chunk *old_chunk = h->chunk;
+  register struct _obstack_chunk *new_chunk;
+  register long new_size;
   register int obj_size = h->next_free - h->object_base;
   register int i;
   int already;
@@ -128,8 +138,8 @@ _obstack_newchunk (h, length)
     {
       for (i = obj_size / sizeof (COPYING_UNIT) - 1;
 	   i >= 0; i--)
-	((COPYING_UNIT *)new_chunk->contents)[i]
-	  = ((COPYING_UNIT *)h->object_base)[i];
+	((COPYING_UNIT *) new_chunk->contents)[i]
+	  = ((COPYING_UNIT *) h->object_base)[i];
       /* We used to copy the odd few remaining bytes as one extra COPYING_UNIT,
 	 but that can cross a page boundary on a machine
 	 which does not do strict alignment for COPYING_UNITS.  */
@@ -144,7 +154,7 @@ _obstack_newchunk (h, length)
   /* If the object just copied was the only data in OLD_CHUNK,
      free that chunk and remove it from the chain.
      But not if that chunk might contain an empty object.  */
-  if (h->object_base == old_chunk->contents && ! h->maybe_empty_object)
+  if (h->object_base == old_chunk->contents && !h->maybe_empty_object)
     {
       new_chunk->prev = old_chunk->prev;
       (*h->freefun) (old_chunk);
@@ -165,14 +175,14 @@ _obstack_allocated_p (h, obj)
      struct obstack *h;
      POINTER obj;
 {
-  register struct _obstack_chunk*  lp;	/* below addr of any objects in this chunk */
-  register struct _obstack_chunk*  plp;	/* point to previous chunk if any */
+  register struct _obstack_chunk *lp;	/* below addr of any objects in this chunk */
+  register struct _obstack_chunk *plp;	/* point to previous chunk if any */
 
   lp = (h)->chunk;
   /* We use >= rather than > since the object cannot be exactly at
      the beginning of the chunk but might be an empty object exactly
      at the end of an adjacent chunk. */
-  while (lp != 0 && ((POINTER)lp >= obj || (POINTER)(lp)->limit < obj))
+  while (lp != 0 && ((POINTER) lp >= obj || (POINTER) (lp)->limit < obj))
     {
       plp = lp->prev;
       lp = plp;
@@ -193,14 +203,14 @@ _obstack_free (h, obj)
      struct obstack *h;
      POINTER obj;
 {
-  register struct _obstack_chunk*  lp;	/* below addr of any objects in this chunk */
-  register struct _obstack_chunk*  plp;	/* point to previous chunk if any */
+  register struct _obstack_chunk *lp;	/* below addr of any objects in this chunk */
+  register struct _obstack_chunk *plp;	/* point to previous chunk if any */
 
   lp = h->chunk;
   /* We use >= because there cannot be an object at the beginning of a chunk.
      But there can be an empty object at that address
      at the end of another chunk.  */
-  while (lp != 0 && ((POINTER)lp >= obj || (POINTER)(lp)->limit < obj))
+  while (lp != 0 && ((POINTER) lp >= obj || (POINTER) (lp)->limit < obj))
     {
       plp = lp->prev;
       (*h->freefun) (lp);
@@ -211,7 +221,7 @@ _obstack_free (h, obj)
     }
   if (lp)
     {
-      h->object_base = h->next_free = (char *)(obj);
+      h->object_base = h->next_free = (char *) (obj);
       h->chunk_limit = lp->limit;
       h->chunk = lp;
     }
@@ -227,14 +237,14 @@ obstack_free (h, obj)
      struct obstack *h;
      POINTER obj;
 {
-  register struct _obstack_chunk*  lp;	/* below addr of any objects in this chunk */
-  register struct _obstack_chunk*  plp;	/* point to previous chunk if any */
+  register struct _obstack_chunk *lp;	/* below addr of any objects in this chunk */
+  register struct _obstack_chunk *plp;	/* point to previous chunk if any */
 
   lp = h->chunk;
   /* We use >= because there cannot be an object at the beginning of a chunk.
      But there can be an empty object at that address
      at the end of another chunk.  */
-  while (lp != 0 && ((POINTER)lp >= obj || (POINTER)(lp)->limit < obj))
+  while (lp != 0 && ((POINTER) lp >= obj || (POINTER) (lp)->limit < obj))
     {
       plp = lp->prev;
       (*h->freefun) (lp);
@@ -245,7 +255,7 @@ obstack_free (h, obj)
     }
   if (lp)
     {
-      h->object_base = h->next_free = (char *)(obj);
+      h->object_base = h->next_free = (char *) (obj);
       h->chunk_limit = lp->limit;
       h->chunk = lp;
     }

@@ -117,39 +117,39 @@ Summary:
 
 struct _obstack_chunk		/* Lives at front of each chunk. */
 {
-  char  *limit;			/* 1 past end of this chunk */
+  char *limit;			/* 1 past end of this chunk */
   struct _obstack_chunk *prev;	/* address of prior chunk or NULL */
-  char	contents[4];		/* objects begin here */
+  char contents[4];		/* objects begin here */
 };
 
-struct obstack		/* control current object in current chunk */
+struct obstack			/* control current object in current chunk */
 {
-  long	chunk_size;		/* preferred size to allocate chunks in */
-  struct _obstack_chunk* chunk;	/* address of current struct obstack_chunk */
-  char	*object_base;		/* address of object we are building */
-  char	*next_free;		/* where to add next char to current object */
-  char	*chunk_limit;		/* address of char after current chunk */
-  int	temp;			/* Temporary for some macros.  */
-  int   alignment_mask;		/* Mask of alignment for each object. */
-  struct _obstack_chunk *(*chunkfun) (); /* User's fcn to allocate a chunk.  */
+  long chunk_size;		/* preferred size to allocate chunks in */
+  struct _obstack_chunk *chunk;	/* address of current struct obstack_chunk */
+  char *object_base;		/* address of object we are building */
+  char *next_free;		/* where to add next char to current object */
+  char *chunk_limit;		/* address of char after current chunk */
+  int temp;			/* Temporary for some macros.  */
+  int alignment_mask;		/* Mask of alignment for each object. */
+  struct _obstack_chunk *(*chunkfun) ();	/* User's fcn to allocate a chunk.  */
   void (*freefun) ();		/* User's function to free a chunk.  */
   /* Nonzero means there is a possibility the current chunk contains
      a zero-length object.  This prevents freeing the chunk
      if we allocate a bigger chunk to replace it.  */
-  char  maybe_empty_object;
+  char maybe_empty_object;
 };
 
 /* Declare the external functions we use; they are in obstack.c.  */
 
 #ifdef __STDC__
-  extern void _obstack_newchunk (struct obstack *, int);
-  extern void _obstack_free (struct obstack *, void *);
-  extern void _obstack_begin (struct obstack *, int, int,
-			      void *(*) (), void (*) ());
+extern void _obstack_newchunk (struct obstack *, int);
+extern void _obstack_free (struct obstack *, void *);
+extern void _obstack_begin (struct obstack *, int, int,
+			    void *(*)(), void (*)());
 #else
-  extern void _obstack_newchunk ();
-  extern void _obstack_free ();
-  extern void _obstack_begin ();
+extern void _obstack_newchunk ();
+extern void _obstack_free ();
+extern void _obstack_begin ();
 #endif
 
 #ifdef __STDC__
@@ -159,10 +159,10 @@ struct obstack		/* control current object in current chunk */
 
 void obstack_init (struct obstack *obstack);
 
-void * obstack_alloc (struct obstack *obstack, int size);
+void *obstack_alloc (struct obstack *obstack, int size);
 
-void * obstack_copy (struct obstack *obstack, void *address, int size);
-void * obstack_copy0 (struct obstack *obstack, void *address, int size);
+void *obstack_copy (struct obstack *obstack, void *address, int size);
+void *obstack_copy0 (struct obstack *obstack, void *address, int size);
 
 void obstack_free (struct obstack *obstack, void *block);
 
@@ -175,7 +175,7 @@ void obstack_1grow (struct obstack *obstack, int data_char);
 void obstack_ptr_grow (struct obstack *obstack, void *data);
 void obstack_int_grow (struct obstack *obstack, int data);
 
-void * obstack_finish (struct obstack *obstack);
+void *obstack_finish (struct obstack *obstack);
 
 int obstack_object_size (struct obstack *obstack);
 
@@ -185,8 +185,8 @@ void obstack_ptr_grow_fast (struct obstack *obstack, void *data);
 void obstack_int_grow_fast (struct obstack *obstack, int data);
 void obstack_blank_fast (struct obstack *obstack, int size);
 
-void * obstack_base (struct obstack *obstack);
-void * obstack_next_free (struct obstack *obstack);
+void *obstack_base (struct obstack *obstack);
+void *obstack_next_free (struct obstack *obstack);
 int obstack_alignment_mask (struct obstack *obstack);
 int obstack_chunk_size (struct obstack *obstack);
 
@@ -282,7 +282,7 @@ __extension__								\
 /* These assume that the obstack alignment is good enough for pointers or ints,
    and that the data added so far to the current object
    shares that much alignment.  */
-   
+
 #define obstack_ptr_grow(OBSTACK,datum)					\
 __extension__								\
 ({ struct obstack *__o = (OBSTACK);					\

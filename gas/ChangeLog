@@ -1,4 +1,32 @@
+Mon Nov 23 11:00:16 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* all files: Whitespace changes for GNU indentation style, done by
+	GNU `indent'.  Some cleanup still needed.
+
+	* configure.in: No te-386bsd.h file exists; don't try to use it.
+
+Tue Nov 10 09:49:24 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (as.o, obj-format.o): added dependency on subsegs.h.
+
+	* subsegs.h: add extern to segment_info declaration.
+
+	* read.h: added extern declarations for comment_chars,
+	line_comment_chars, and line_separator_chars.
+	read.c, app.c: removed definitions of comment_chars,
+	line_comment_chars, and line_separator_chars.
+
+Wed Oct 28 08:52:34 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* version.c: Put conditional "const" before version_string, not
+	before dummy function for VMS.  Now version 1.91.03.
+
+	* app.c (do_scrub_next_char): Need double-\ before `000' to show
+	printed rep of null character.
+
 Tue Oct 20 12:18:08 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in: i386-sysv and i386-sco use coffbfd.
 
 	* app.c (do_scrub_next_char): discard whitespace after a label.
 
@@ -251,7 +279,6 @@ Tue Jun 30 20:25:54 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
 
 	* Makefile.in: Add program_suffix (parallel to program_prefix)
 
->>>>>>> 1.83
 Wed Jun 24 10:57:54 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* app.c (process_escape): new function to handle escapes the right

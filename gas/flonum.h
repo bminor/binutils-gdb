@@ -1,18 +1,19 @@
 /* flonum.h - Floating point package
-   Copyright (C) 1987, 1990, 1991 Free Software Foundation, Inc.
-   
+
+   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
+
    This file is part of GAS, the GNU Assembler.
-   
+
    GAS is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2, or (at your option)
    any later version.
-   
+
    GAS is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
@@ -29,8 +30,8 @@
  *	please tell me your nomenclature for flonums!			*
  *									*
  \***********************************************************************/
-#if !defined(__STDC__) && !defined(const)
-#define const /* empty */
+#if (__STDC__ != 1) && !defined(const)
+#define const			/* empty */
 #endif
 
 #include "bignum.h"
@@ -52,12 +53,12 @@
    */
 struct FLONUM_STRUCT
 {
-	LITTLENUM_TYPE *	low;	/* low order littlenum of a bignum */
-	LITTLENUM_TYPE *	high;	/* high order littlenum of a bignum */
-	LITTLENUM_TYPE *	leader;	/* -> 1st non-zero littlenum */
-	/* If flonum is 0.0, leader==low-1 */
-	long		exponent; /* base LITTLENUM_RADIX */
-	char			sign;	/* '+' or '-' */
+  LITTLENUM_TYPE *low;		/* low order littlenum of a bignum */
+  LITTLENUM_TYPE *high;		/* high order littlenum of a bignum */
+  LITTLENUM_TYPE *leader;	/* -> 1st non-zero littlenum */
+  /* If flonum is 0.0, leader==low-1 */
+  long exponent;		/* base LITTLENUM_RADIX */
+  char sign;			/* '+' or '-' */
 };
 
 typedef struct FLONUM_STRUCT FLONUM_TYPE;
@@ -91,23 +92,23 @@ extern const int table_size_of_flonum_powers_of_ten;
  *									*
  \***********************************************************************/
 
-#ifdef __STDC__
+#if __STDC__ == 1
 
-int atof_generic(char **address_of_string_pointer,
-		 const char *string_of_decimal_marks,
-		 const char *string_of_decimal_exponent_marks,
-		 FLONUM_TYPE *address_of_generic_floating_point_number);
+int atof_generic (char **address_of_string_pointer,
+		  const char *string_of_decimal_marks,
+		  const char *string_of_decimal_exponent_marks,
+		  FLONUM_TYPE * address_of_generic_floating_point_number);
 
-void flonum_copy(FLONUM_TYPE *in, FLONUM_TYPE *out);
-void flonum_multip(const FLONUM_TYPE *a, const FLONUM_TYPE *b, FLONUM_TYPE *product);
+void flonum_copy (FLONUM_TYPE * in, FLONUM_TYPE * out);
+void flonum_multip (const FLONUM_TYPE * a, const FLONUM_TYPE * b, FLONUM_TYPE * product);
 
-#else /* __STDC__ */
+#else /* not __STDC__ */
 
-int atof_generic();
-void flonum_copy();
-void flonum_multip();
+int atof_generic ();
+void flonum_copy ();
+void flonum_multip ();
 
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 /***********************************************************************\
  *									*

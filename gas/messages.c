@@ -1,23 +1,23 @@
 /* messages.c - error reporter -
    Copyright (C) 1987, 1991, 1992 Free Software Foundation, Inc.
-   
+
    This file is part of GAS, the GNU Assembler.
-   
+
    GAS is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2, or (at your option)
    any later version.
-   
+
    GAS is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#include <stdio.h> /* define stderr */
+#include <stdio.h>		/* define stderr */
 #include <errno.h>
 
 #include "as.h"
@@ -76,10 +76,10 @@
 
 /*
   ERRORS
-  
+
   JF: this is now bogus.  We now print more standard error messages
   that try to look like everyone else's.
-  
+
   We print the error message 1st, beginning in column 1.
   All ancillary info starts in column 2 on lines after the
   key error text.
@@ -87,31 +87,35 @@
   just after the main error text.
   Caller then prints any appendices after that, begining all
   lines with at least 1 space.
-  
+
   Optionally, we may die.
   There is no need for a trailing '\n' in your error text format
   because we supply one.
-  
+
   as_warn(fmt,args)  Like fprintf(stderr,fmt,args) but also call errwhere().
-  
+
   as_fatal(fmt,args) Like as_warn() but exit with a fatal status.
-  
+
   */
 
-static int warning_count; /* Count of number of warnings issued */
+static int warning_count;	/* Count of number of warnings issued */
 
-int had_warnings() {
-	return(warning_count);
-} /* had_err() */
+int 
+had_warnings ()
+{
+  return (warning_count);
+}				/* had_err() */
 
 /* Nonzero if we've hit a 'bad error', and should not write an obj file,
    and exit with a nonzero error code */
 
 static int error_count;
 
-int had_errors() {
-	return(error_count);
-} /* had_errors() */
+int 
+had_errors ()
+{
+  return (error_count);
+}				/* had_errors() */
 
 
 /*
@@ -119,64 +123,70 @@ int had_errors() {
  *
  * Like perror(3), but with more info.
  */
-void as_perror(gripe, filename)
-char *gripe;		/* Unpunctuated error theme. */
-char *filename;
+void 
+as_perror (gripe, filename)
+     char *gripe;		/* Unpunctuated error theme. */
+     char *filename;
 {
 #ifndef HAVE_STRERROR
-	extern char *strerror();
+  extern char *strerror ();
 #endif /* HAVE_STRERROR */
 
-	as_where();
-	fprintf(stderr, gripe, filename);
-	fprintf(stderr, ": %s\n", strerror(errno));
-	errno = 0; /* After reporting, clear it. */
-} /* as_perror() */
+  as_where ();
+  fprintf (stderr, gripe, filename);
+  fprintf (stderr, ": %s\n", strerror (errno));
+  errno = 0;			/* After reporting, clear it. */
+}				/* as_perror() */
 
 /*
  *			a s _ t s k t s k ()
  *
- * Send to stderr a string (with bell) (JF: Bell is obnoxious!) as a warning, and locate warning
+ * Send to stderr a string as a warning, and locate warning
  * in input file(s).
  * Please only use this for when we have some recovery action.
  * Please explain in string (which may have '\n's) what recovery was done.
  */
 
 #ifndef NO_STDARG
-void as_tsktsk(const char *Format, ...)
+void 
+as_tsktsk (const char *Format,...)
 {
-	va_list args;
-	
-	as_where();
-	va_start(args, Format);
-	vfprintf(stderr, Format, args);
-	va_end(args);
-	(void) putc('\n', stderr);
-} /* as_tsktsk() */
+  va_list args;
+
+  as_where ();
+  va_start (args, Format);
+  vfprintf (stderr, Format, args);
+  va_end (args);
+  (void) putc ('\n', stderr);
+}				/* as_tsktsk() */
+
 #else
 #ifndef NO_VARARGS
-void as_tsktsk(Format,va_alist)
-char *Format;
-va_dcl
+void 
+as_tsktsk (Format, va_alist)
+     char *Format;
+     va_dcl
 {
-	va_list args;
-	
-	as_where();
-	va_start(args);
-	vfprintf(stderr, Format, args);
-	va_end(args);
-	(void) putc('\n', stderr);
-} /* as_tsktsk() */
+  va_list args;
+
+  as_where ();
+  va_start (args);
+  vfprintf (stderr, Format, args);
+  va_end (args);
+  (void) putc ('\n', stderr);
+}				/* as_tsktsk() */
+
 #else
 /*VARARGS1 */
-as_tsktsk(Format,args)
-char *Format;
+as_tsktsk (Format, args)
+     char *Format;
 {
-	as_where();
-	_doprnt (Format, &args, stderr);
-	(void)putc ('\n', stderr);
-	/* as_where(); */
-} /* as_tsktsk */
+  as_where ();
+  _doprnt (Format, &args, stderr);
+  (void) putc ('\n', stderr);
+  /* as_where(); */
+}				/* as_tsktsk */
+
 #endif /* not NO_VARARGS */
 #endif /* not NO_STDARG */
 
@@ -190,181 +200,198 @@ char *Format;
  */
 
 #ifndef NO_STDARG
-void as_warn(const char *Format, ...)
+void 
+as_warn (const char *Format,...)
 {
-	va_list args;
-	char buffer[200];
-	
-	if(!flagseen['W']) {
-		++warning_count;
-		as_where();
-		va_start(args, Format);
-		fprintf(stderr,"Warning: ");
-		vsprintf(buffer, Format, args);
-		fputs (buffer, stderr);
+  va_list args;
+  char buffer[200];
+
+  if (!flagseen['W'])
+    {
+      ++warning_count;
+      as_where ();
+      va_start (args, Format);
+      fprintf (stderr, "Warning: ");
+      vsprintf (buffer, Format, args);
+      fputs (buffer, stderr);
 #ifndef NO_LISTING
-		listing_warning(buffer);
+      listing_warning (buffer);
 #endif
-		va_end(args);
-		(void) putc('\n', stderr);
-	}
-} /* as_warn() */
+      va_end (args);
+      (void) putc ('\n', stderr);
+    }
+}				/* as_warn() */
+
 #else
 #ifndef NO_VARARGS
-void as_warn(Format,va_alist)
-char *Format;
-va_dcl
+void 
+as_warn (Format, va_alist)
+     char *Format;
+     va_dcl
 {
-	va_list args;
-	char buffer[200];
-	
-	if(!flagseen['W']) {
-		++warning_count;
-		as_where();
-		va_start(args);
-		fprintf(stderr,"Warning: ");
-		vsprintf(buffer, Format, args);
-		fputs (buffer, stderr);
+  va_list args;
+  char buffer[200];
+
+  if (!flagseen['W'])
+    {
+      ++warning_count;
+      as_where ();
+      va_start (args);
+      fprintf (stderr, "Warning: ");
+      vsprintf (buffer, Format, args);
+      fputs (buffer, stderr);
 #ifndef NO_LISTING
-		listing_warning(buffer);
-#endif		
-		va_end(args);
-		(void) putc('\n', stderr);
-	}
-} /* as_warn() */
+      listing_warning (buffer);
+#endif
+      va_end (args);
+      (void) putc ('\n', stderr);
+    }
+}				/* as_warn() */
+
 #else
 /*VARARGS1 */
-as_warn(Format,args)
-char *Format;
+as_warn (Format, args)
+     char *Format;
 {
-	/* -W supresses warning messages. */
-	if (! flagseen ['W']) {
-		++warning_count;
-		as_where();
-		_doprnt (Format, &args, stderr);
-		(void)putc ('\n', stderr);
-		/* as_where(); */
-	}
-} /* as_warn() */
+  /* -W supresses warning messages. */
+  if (!flagseen['W'])
+    {
+      ++warning_count;
+      as_where ();
+      _doprnt (Format, &args, stderr);
+      (void) putc ('\n', stderr);
+      /* as_where(); */
+    }
+}				/* as_warn() */
+
 #endif /* not NO_VARARGS */
 #endif /* not NO_STDARG */
 
 /*
  *			a s _ b a d ()
  *
- * Send to stderr a string (with bell) (JF: Bell is obnoxious!) as a warning,
- * and locate warning in input file(s).
+ * Send to stderr a string as a warning, and locate warning in input file(s).
  * Please us when there is no recovery, but we want to continue processing
  * but not produce an object file.
  * Please explain in string (which may have '\n's) what recovery was done.
  */
 
 #ifndef NO_STDARG
-void as_bad(const char *Format, ...)
+void 
+as_bad (const char *Format,...)
 {
-	va_list args;
-	char buffer[200];
-	
-	++error_count;
-	as_where();
-	va_start(args, Format);
-	fprintf(stderr,"Error: ");
-	
-	vsprintf(buffer, Format, args);
-	fputs (buffer,stderr);
+  va_list args;
+  char buffer[200];
+
+  ++error_count;
+  as_where ();
+  va_start (args, Format);
+  fprintf (stderr, "Error: ");
+
+  vsprintf (buffer, Format, args);
+  fputs (buffer, stderr);
 #ifndef NO_LISTING
-	listing_error(buffer);
+  listing_error (buffer);
 #endif
-	va_end(args);
-	(void) putc('\n', stderr);
-} /* as_bad() */
+  va_end (args);
+  (void) putc ('\n', stderr);
+}				/* as_bad() */
+
 #else
 #ifndef NO_VARARGS
-void as_bad(Format,va_alist)
-char *Format;
-va_dcl
+void 
+as_bad (Format, va_alist)
+     char *Format;
+     va_dcl
 {
-	va_list args;
-	char buffer[200];
-	
-	++error_count;
-	as_where();
-	va_start(args);
-	vsprintf(buffer, Format, args);
-	fputs (buffer, stderr);
+  va_list args;
+  char buffer[200];
+
+  ++error_count;
+  as_where ();
+  va_start (args);
+  vsprintf (buffer, Format, args);
+  fputs (buffer, stderr);
 #ifndef NO_LISTING
-	listing_error(buffer);
+  listing_error (buffer);
 #endif
-	
-	va_end(args);
-	(void) putc('\n', stderr);
+
+  va_end (args);
+  (void) putc ('\n', stderr);
 }				/* as_bad() */
+
 #else
 /*VARARGS1 */
-as_bad(Format,args)
-char *Format;
+as_bad (Format, args)
+     char *Format;
 {
-	++error_count;
-	
-	as_where();
-	fprintf(stderr,"Error: ");
-	_doprnt (Format, &args, stderr);
-	(void)putc ('\n', stderr);
-	/* as_where(); */
-} /* as_bad() */
+  ++error_count;
+
+  as_where ();
+  fprintf (stderr, "Error: ");
+  _doprnt (Format, &args, stderr);
+  (void) putc ('\n', stderr);
+  /* as_where(); */
+}				/* as_bad() */
+
 #endif /* not NO_VARARGS */
 #endif /* not NO_STDARG */
 
 /*
  *			a s _ f a t a l ()
  *
- * Send to stderr a string (with bell) (JF: Bell is obnoxious!) as a fatal
- * message, and locate stdsource in input file(s).
+ * Send to stderr a string as a fatal message, and print location of error in
+ * input file(s).
  * Please only use this for when we DON'T have some recovery action.
  * It exit()s with a warning status.
  */
 
 #ifndef NO_STDARG
-void as_fatal(const char *Format, ...)
+void 
+as_fatal (const char *Format,...)
 {
-	va_list args;
-	
-	as_where();
-	va_start(args, Format);
-	fprintf (stderr, "FATAL:");
-	vfprintf(stderr, Format, args);
-	(void) putc('\n', stderr);
-	va_end(args);
-	exit(33);
-} /* as_fatal() */
+  va_list args;
+
+  as_where ();
+  va_start (args, Format);
+  fprintf (stderr, "FATAL:");
+  vfprintf (stderr, Format, args);
+  (void) putc ('\n', stderr);
+  va_end (args);
+  exit (33);
+}				/* as_fatal() */
+
 #else
 #ifndef NO_VARARGS
-void as_fatal(Format,va_alist)
-char *Format;
-va_dcl
+void 
+as_fatal (Format, va_alist)
+     char *Format;
+     va_dcl
 {
-	va_list args;
-	
-	as_where();
-	va_start(args);
-	fprintf (stderr, "FATAL:");
-	vfprintf(stderr, Format, args);
-	(void) putc('\n', stderr);
-	va_end(args);
-	exit(33);
-} /* as_fatal() */
+  va_list args;
+
+  as_where ();
+  va_start (args);
+  fprintf (stderr, "FATAL:");
+  vfprintf (stderr, Format, args);
+  (void) putc ('\n', stderr);
+  va_end (args);
+  exit (33);
+}				/* as_fatal() */
+
 #else
 /*VARARGS1 */
-as_fatal(Format, args)
-char *Format;
+as_fatal (Format, args)
+     char *Format;
 {
-	as_where();
-	fprintf(stderr,"FATAL:");
-	_doprnt (Format, &args, stderr);
-	(void)putc ('\n', stderr);
-	/* as_where(); */
-	exit(33);		/* What is a good exit status? */
-} /* as_fatal() */
+  as_where ();
+  fprintf (stderr, "FATAL:");
+  _doprnt (Format, &args, stderr);
+  (void) putc ('\n', stderr);
+  /* as_where(); */
+  exit (33);			/* What is a good exit status? */
+}				/* as_fatal() */
+
 #endif /* not NO_VARARGS */
 #endif /* not NO_STDARG */
 

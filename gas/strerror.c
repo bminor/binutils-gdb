@@ -49,13 +49,13 @@ extern char *sys_errlist[];
 
 char *
 strerror (code)
-  int code;
+     int code;
 {
-  return (((code < 0) || (code >= sys_nerr)) 
+  return (((code < 0) || (code >= sys_nerr))
 	  ? "(unknown error)"
-	  : sys_errlist [code]);
+	  : sys_errlist[code]);
 }
 
 #endif /* HAVE_STRERROR */
 
- /* end of strerror.c */
+/* end of strerror.c */
