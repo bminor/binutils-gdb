@@ -6025,7 +6025,7 @@ do_t_arit (str)
 
       if (Rs != Rd)
 	{
-	  inst.error = _("dest and source1 one must be the same register");
+	  inst.error = _("dest and source1 must be the same register");
 	  return;
 	}
       Rs = Rn;
