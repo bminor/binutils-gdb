@@ -1,5 +1,12 @@
 2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.cp/ctti.exp: Handle unsigned char type.  Expect templates
+	to use unsigned char.
+	* gdb.cp/cttiadd.c, gdb.cp/cttiadd1.c, gdb.cp/cttiadd2.c,
+	gdb.cp/cttiadd3.c: Change type of variable to unsigned char.
+
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
+
 	* config/gdbserver.exp (gdbserver_gdb_load): Wait for a complete
 	line of output.
 
