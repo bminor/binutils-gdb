@@ -1,5 +1,9 @@
 Mon Jan 31 15:40:11 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.t24/demangle.exp: Remove a bunch of tests which differ only
+	in the names.  The main thing these accomplish is to slow things down.
+	Many more such duplicates surely remain.
+
 	* gdb.t00/help.exp: Comment out "help support" test just like
 	(and for same reason as) "help set" test.
 
