@@ -1,3 +1,20 @@
+2000-06-14  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2read.c (dump_die): Use the proper printf format for
+ 	printing DW_UNSND values; they're longs now.
+
+	* dwarf2read.c (dump_die): We can read DW_FORM_data8 now, on
+	at least some platforms, so print it out too.
+
+2000-06-14  James E. Wilson  <wilson@bletchleypark.cygnus.com>
+
+	* dwarf2read.c (struct attribute): Change unsnd and snd field types
+	to long.
+	(read_8_bytes): Change return type to long.
+	(read_unsigned_leb128): Change return type to long.  Change type of
+	local result to long.  Cast argument of left shift to long.
+	(read_signed_leb128): Likewise.
+
 2000-06-14  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Add support for Pascal language. Part 1: new files.
