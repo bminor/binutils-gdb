@@ -32,6 +32,8 @@ sparc-em.mt
 sparclite.mt
 sparclynx.mh
 sparclynx.mt
+sparcnbsd.mh
+sparcnbsd.mt
 sun4os4.mh
 sun4os4.mt
 sun4sol2.mh
