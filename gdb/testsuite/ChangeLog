@@ -1,3 +1,8 @@
+Mon Jan 15 09:33:00 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.stabs/configure (alpha-*-*,mips-*-*): Add missing
+	"test" and enclose string in quotes.
+
 Thu Jan  4 08:17:22 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/corefile.exp: When generating a core, discard any
