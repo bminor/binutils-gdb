@@ -51,6 +51,7 @@ aixrs6.sh
 alpha.sh
 arcelf.sh
 armelf.sh
+armelf_oabi.sh
 armaoutb.sh
 armaoutl.sh
 armcoff.sh
