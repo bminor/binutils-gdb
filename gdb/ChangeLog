@@ -1,3 +1,8 @@
+2002-08-17  Mark Kettenis  <kettenis@elgar.kettenis.dyndns.org>
+
+	* i386-tdep.c (i386_svr4_init_abi, i386_nw_init_abi): Use
+	generic_func_frame_valid instead of func_frame_valid.
+
 2002-08-16  Joel Brobecker  <brobecker@gnat.com>
 
 	* alpha-osf1-tdep.c (alpha_osf1_init_abi): Unfortunately,

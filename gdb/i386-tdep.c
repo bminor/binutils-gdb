@@ -1373,7 +1373,7 @@ i386_svr4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_elf_init_abi (info, gdbarch);
 
   /* FIXME: kettenis/20020511: Why do we override this function here?  */
-  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
 
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_svr4_pc_in_sigtramp);
   tdep->sigcontext_addr = i386_svr4_sigcontext_addr;
@@ -1403,7 +1403,7 @@ i386_nw_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* FIXME: kettenis/20020511: Why do we override this function here?  */
-  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
 
   tdep->jb_pc_offset = 24;
 }
