@@ -35,6 +35,8 @@ ChangeLog
 Makefile.in
 alpha-dis.c
 alpha-opc.h
+arm-dis.c
+arm-opc.h
 a29k-dis.c
 configure.bat
 configure.in
