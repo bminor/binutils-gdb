@@ -558,6 +558,61 @@ changequote([,])dnl
 
 # Other random stuff.
 
+    case ${cpu_type} in
+      mips)
+	# Set mips_cpu to the name of the default CPU.
+	case ${target_cpu} in
+	  mips | mipsbe | mipseb | mipsle | mipsel | mips64 | mips64el)
+	    mips_cpu=from-abi
+	    ;;
+	  mipsisa32 | mipsisa32el)
+	    mips_cpu=mips32
+	    ;;
+	  mipsisa64 | mipsisa64el)
+	    mips_cpu=mips64
+	    ;;
+	  mipstx39 | mipstx39el)
+	    mips_cpu=r3900
+	    ;;
+	  mips64* | mipsisa64* | mipsisa32*)
+changequote(,)dnl
+	    mips_cpu=`echo $target_cpu | sed -e 's/[a-z]*..//' -e 's/el$//'`
+changequote([,])dnl
+	    ;;
+	  *)
+	    AC_ERROR($target_cpu isn't a supported MIPS CPU name)
+	    ;;
+	esac
+	# See whether it's appropriate to set E_MIPS_ABI_O32 for o32
+	# binaries.  It's a GNU extension that some OSes don't understand.
+	# The value only matters on ELF targets.
+	case ${target} in
+	  *-*-irix*)
+	    use_e_mips_abi_o32=0
+	    ;;
+	  *)
+	    use_e_mips_abi_o32=1
+	    ;;
+	esac
+	# Decide whether to generate 32-bit or 64-bit code by default.
+	# Used to resolve -march=from-abi when an embedded ABI is selected.
+	case ${target} in
+	  mips64*-*-* | mipsisa64*-*-*)
+	    mips_default_64bit=1
+	    ;;
+	  *)
+	    mips_default_64bit=0
+	    ;;
+	esac
+	AC_DEFINE_UNQUOTED(MIPS_CPU_STRING_DEFAULT, "$mips_cpu",
+			   [Default CPU for MIPS targets. ])
+	AC_DEFINE_UNQUOTED(USE_E_MIPS_ABI_O32, $use_e_mips_abi_o32,
+			   [Allow use of E_MIPS_ABI_O32 on MIPS targets. ])
+	AC_DEFINE_UNQUOTED(MIPS_DEFAULT_64BIT, $mips_default_64bit,
+			   [Generate 64-bit code by default on MIPS targets. ])
+	;;
+    esac
+
     # Do we need the opcodes library?
     case ${cpu_type} in
       vax | i386 | tic30)

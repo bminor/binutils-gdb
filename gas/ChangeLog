@@ -1,3 +1,48 @@
+2002-07-25  Richard Sandiford  <rsandifo@redhat.com>
+
+	* doc/c-mips.texi: Remove -mcpu.  Document -mabi.
+	* configure.in (MIPS_CPU_STRING_DEFAULT): New configuration macro.
+	(USE_E_MIPS_ABI_O32, MIPS_DEFAULT_64BIT): New configuration macros.
+	* configure, config.in: Regenerate.
+	* config/tc-mips.c (file_mips_abi): Rename to mips_abi.
+	(mips_set_options): Remove "abi" field.
+	(mips_opts): Update accordingly.  Replace all uses of mips_opts.abi
+	with mips_abi.
+	(mips_cpu): Remove.
+	(mips_arch_string, mips_arch_info): New vars.
+	(mips_tune_string, mips_tune_info): New vars.
+	(ABI_NEEDS_32BIT_REGS, ABI_NEEDS_64BIT_REGS): New macros.
+	(HAVE_32BIT_GPRS, HAVE_32BIT_FPRS): Don't check the ABI.
+	(mips_isa_to_str, mips_cpu_to_str): Remove.
+	(mips_ip): If the selected architecture is a generic ISA rather
+	than a processor, only mention the ISA level in error messages.
+	(OPTION_MCPU): Remove.
+	(OPTION_FP64): New.
+	(md_longopts): Add -mfp64, remove -mcpu.
+	(mips_set_option_string): New fn.
+	(md_parse_option): Make -mipsN update file_mips_isa rather than
+	mips_opts.isa.  Use mips_set_option_string to set -march or -mtune.
+	Don't let -mgp32 and -mfp32 change the ABI.
+	(show): Move to end of file.  Constify string argument.
+	(md_show_usage): Move to the end of the file.  Read available
+	architectures from mips_cpu_info_table.
+	(mips_set_architecture): New fn.
+	(mips_after_parse_args): Rework.  Remove -mcpu handling.  -mipsN
+	is an alias for -march=mipsN.  Don't change the ABI based on other
+	flags.  Infer the register size from the ABI as	well as the
+	architecture.  Complain about more conflicting arguments.
+	Unify logic with GCC.
+	(s_mipsset): Don't change the ABI.
+	(mips_elf_final_processing): Check USE_E_MIPS_ABI_O32.
+	(mips_cpu_info_table): Remove Generic-MIPS* entries, keeping just
+	"mipsN"-type entries.  Remove entries that vary only in the
+	manufacturer's prefix, or that have "000" replaced by "k".
+	Remove TARGET_CPU entries.  Make r2000 entry use CPU_R3000.
+	(mips_strict_matching_cpu_name_p, mips_matching_cpu_name_p): New fns.
+	(mips_parse_cpu): New fn.
+	(mips_cpu_info_from_name, mips_cpu_info_from_cpu): Remove.
+	(mips_cpu_info_from_isa): Minor formatting tweak.
+
 2002-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.

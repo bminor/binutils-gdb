@@ -1,5 +1,5 @@
 #objdump: -d -mmips:8000
-#as: -march=8000 -EB -mgp32
+#as: -march=8000 -EB -mgp32 -mfp64
 #name: MIPS -mgp32 -mfp64
 
 .*: +file format.*

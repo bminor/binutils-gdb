@@ -175,12 +175,9 @@ sb1
 Schedule and tune for a particular MIPS cpu.  Valid @var{cpu} values are
 identical to @samp{-march=@var{cpu}}.
 
-@item -mcpu=@var{cpu}
-Generate code and schedule for a particular MIPS cpu.  This is exactly
-equivalent to @samp{-march=@var{cpu}} and @samp{-mtune=@var{cpu}}.  Valid
-@var{cpu} values are identical to @samp{-march=@var{cpu}}.
-Use of this option is discouraged.
-
+@item -mabi=@var{abi}
+Record which ABI the source code uses.  The recognized arguments
+are: @samp{32}, @samp{n32}, @samp{o64}, @samp{64} and @samp{eabi}.
 
 @cindex @code{-nocpp} ignored (MIPS)
 @item -nocpp

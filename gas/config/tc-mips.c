@@ -129,7 +129,7 @@ enum mips_abi_level
 };
 
 /* MIPS ABI we are using for this output file.  */
-static enum mips_abi_level file_mips_abi = NO_ABI;
+static enum mips_abi_level mips_abi = NO_ABI;
 
 /* This is the set of options which may be modified by the .set
    pseudo-op.  We use a struct so that .set push and .set pop are more
@@ -177,9 +177,6 @@ struct mips_set_options
      is passed but can changed if the assembler code uses .set mipsN.  */
   int gp32;
   int fp32;
-  /* The ABI currently in use. This is changed by .set mipsN to loosen
-     restrictions and doesn't affect the whole file.  */
-  enum mips_abi_level abi;
 };
 
 /* True if -mgp32 was passed.  */
@@ -194,7 +191,7 @@ static int file_mips_fp32 = -1;
 
 static struct mips_set_options mips_opts =
 {
-  ISA_UNKNOWN, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, NO_ABI
+  ISA_UNKNOWN, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
 /* These variables are filled in with the masks of registers used.
@@ -218,18 +215,18 @@ static int file_ase_mips3d;
    command line (e.g., by -march).  */
 static int file_ase_mdmx;
 
-/* The argument of the -mcpu= flag.  Historical for code generation.  */
-static int mips_cpu = CPU_UNKNOWN;
-
 /* The argument of the -march= flag.  The architecture we are assembling.  */
 static int mips_arch = CPU_UNKNOWN;
+static const char *mips_arch_string;
+static const struct mips_cpu_info *mips_arch_info;
 
 /* The argument of the -mtune= flag.  The architecture for which we
    are optimizing.  */
 static int mips_tune = CPU_UNKNOWN;
+static const char *mips_tune_string;
+static const struct mips_cpu_info *mips_tune_info;
 
-/* If they asked for mips1 or mips2 and a cpu that is
-   mips3 or greater, then mark the object file 32BITMODE.  */
+/* True when generating 32-bit code for a 64-bit processor.  */
 static int mips_32bitmode = 0;
 
 /* Some ISA's have delay slots for instructions which read or write
@@ -246,6 +243,15 @@ static int mips_32bitmode = 0;
    || (ISA) == ISA_MIPS3                    \
    )
 
+/* True if the given ABI requires 32-bit registers.  */
+#define ABI_NEEDS_32BIT_REGS(ABI) ((ABI) == O32_ABI)
+
+/* Likewise 64-bit registers.  */
+#define ABI_NEEDS_64BIT_REGS(ABI) \
+  ((ABI) == N32_ABI 		  \
+   || (ABI) == N64_ABI		  \
+   || (ABI) == O64_ABI)
+
 /*  Return true if ISA supports 64 bit gp register instructions.  */
 #define ISA_HAS_64BIT_REGS(ISA) (    \
    (ISA) == ISA_MIPS3                \
@@ -255,21 +261,17 @@ static int mips_32bitmode = 0;
    )
 
 #define HAVE_32BIT_GPRS		                   \
-    (mips_opts.gp32                                \
-     || mips_opts.abi == O32_ABI                   \
-     || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
+    (mips_opts.gp32 || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
 
 #define HAVE_32BIT_FPRS                            \
-    (mips_opts.fp32                                \
-     || mips_opts.abi == O32_ABI                   \
-     || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
+    (mips_opts.fp32 || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
 
 #define HAVE_64BIT_GPRS (! HAVE_32BIT_GPRS)
 #define HAVE_64BIT_FPRS (! HAVE_32BIT_FPRS)
 
-#define HAVE_NEWABI (mips_opts.abi == N32_ABI || mips_opts.abi == N64_ABI)
+#define HAVE_NEWABI (mips_abi == N32_ABI || mips_abi == N64_ABI)
 
-#define HAVE_64BIT_OBJECTS (mips_opts.abi == N64_ABI)
+#define HAVE_64BIT_OBJECTS (mips_abi == N64_ABI)
 
 /* We can only have 64bit addresses if the object file format
    supports it.  */
@@ -737,6 +739,7 @@ static void my_getExpression PARAMS ((expressionS *, char *));
 #ifdef OBJ_ELF
 static int support_64bit_objects PARAMS((void));
 #endif
+static void mips_set_option_string PARAMS ((const char **, const char *));
 static symbolS *get_symbol PARAMS ((void));
 static void mips_align PARAMS ((int to, int fill, symbolS *label));
 static void s_align PARAMS ((int));
@@ -768,10 +771,8 @@ static void s_mips_weakext PARAMS ((int));
 static void s_mips_file PARAMS ((int));
 static void s_mips_loc PARAMS ((int));
 static int mips16_extended_frag PARAMS ((fragS *, asection *, long));
-static const char *mips_isa_to_str PARAMS ((int));
-static const char *mips_cpu_to_str PARAMS ((int));
 static int validate_mips_insn PARAMS ((const struct mips_opcode *));
-static void show PARAMS ((FILE *, char *, int *, int *));
+static void show PARAMS ((FILE *, const char *, int *, int *));
 #ifdef OBJ_ELF
 static int mips_need_elf_addend_fixup PARAMS ((fixS *));
 #endif
@@ -813,9 +814,14 @@ struct mips_cpu_info
   int cpu;                    /* CPU number (default CPU if ISA).  */
 };
 
-static const struct mips_cpu_info *mips_cpu_info_from_name PARAMS ((const char *));
+static void mips_set_architecture PARAMS ((const struct mips_cpu_info *));
+static void mips_set_tune PARAMS ((const struct mips_cpu_info *));
+static boolean mips_strict_matching_cpu_name_p PARAMS ((const char *,
+							const char *));
+static boolean mips_matching_cpu_name_p PARAMS ((const char *, const char *));
+static const struct mips_cpu_info *mips_parse_cpu PARAMS ((const char *,
+							   const char *));
 static const struct mips_cpu_info *mips_cpu_info_from_isa PARAMS ((int));
-static const struct mips_cpu_info *mips_cpu_info_from_cpu PARAMS ((int));
 
 /* Pseudo-op table.
 
@@ -967,36 +973,6 @@ static boolean mips16_small, mips16_ext;
    ECOFF debugging.  */
 
 static segT pdr_seg;
-
-static const char *
-mips_isa_to_str (isa)
-     int isa;
-{
-  const struct mips_cpu_info *ci;
-  static char s[20];
-
-  ci = mips_cpu_info_from_isa (isa);
-  if (ci != NULL)
-    return (ci->name);
-
-  sprintf (s, "ISA#%d", isa);
-  return s;
-}
-
-static const char *
-mips_cpu_to_str (cpu)
-     int cpu;
-{
-  const struct mips_cpu_info *ci;
-  static char s[16];
-
-  ci = mips_cpu_info_from_cpu (cpu);
-  if (ci != NULL)
-    return (ci->name);
-
-  sprintf (s, "CPU#%d", cpu);
-  return s;
-}
 
 /* The default target format to use.  */
 
@@ -1173,7 +1149,7 @@ md_begin ()
 	if (strcmp (TARGET_OS, "elf") != 0)
 	  flags |= SEC_ALLOC | SEC_LOAD;
 
-	if (file_mips_abi != N64_ABI)
+	if (mips_abi != N64_ABI)
 	  {
 	    sec = subseg_new (".reginfo", (subsegT) 0);
 
@@ -7759,11 +7735,15 @@ mips_ip (str, ip)
 	      if (!insn_error)
 		{
 		  static char buf[100];
-		  sprintf (buf,
-			   _("opcode not supported on this processor: %s (%s)"),
-			   mips_cpu_to_str (mips_arch),
-			   mips_isa_to_str (mips_opts.isa));
-
+		  if (mips_arch_info->is_isa)
+		    sprintf (buf,
+			     _("opcode not supported at this ISA level (%s)"),
+			     mips_cpu_info_from_isa (mips_opts.isa)->name);
+		  else
+		    sprintf (buf,
+			     _("opcode not supported on this processor: %s (%s)"),
+			     mips_arch_info->name,
+			     mips_cpu_info_from_isa (mips_opts.isa)->name);
 		  insn_error = buf;
 		}
 	      if (save_c)
@@ -9888,8 +9868,8 @@ struct option md_longopts[] =
   {"march", required_argument, NULL, OPTION_MARCH},
 #define OPTION_MTUNE (OPTION_MD_BASE + 22)
   {"mtune", required_argument, NULL, OPTION_MTUNE},
-#define OPTION_MCPU (OPTION_MD_BASE + 23)
-  {"mcpu", required_argument, NULL, OPTION_MCPU},
+#define OPTION_FP64 (OPTION_MD_BASE + 23)
+  {"mfp64", no_argument, NULL, OPTION_FP64},
 #define OPTION_M4650 (OPTION_MD_BASE + 24)
   {"m4650", no_argument, NULL, OPTION_M4650},
 #define OPTION_NO_M4650 (OPTION_MD_BASE + 25)
@@ -9941,6 +9921,24 @@ struct option md_longopts[] =
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
+
+/* Set STRING_PTR (either &mips_arch_string or &mips_tune_string) to
+   NEW_VALUE.  Warn if another value was already specified.  Note:
+   we have to defer parsing the -march and -mtune arguments in order
+   to handle 'from-abi' correctly, since the ABI might be specified
+   in a later argument.  */
+
+static void
+mips_set_option_string (string_ptr, new_value)
+     const char **string_ptr, *new_value;
+{
+  if (*string_ptr != 0 && strcasecmp (*string_ptr, new_value) != 0)
+    as_warn (_("A different %s was already specified, is now %s"),
+	     string_ptr == &mips_arch_string ? "-march" : "-mtune",
+	     new_value);
+
+  *string_ptr = new_value;
+}
 
 int
 md_parse_option (c, arg)
@@ -9997,130 +9995,68 @@ md_parse_option (c, arg)
       break;
 
     case OPTION_MIPS1:
-      mips_opts.isa = ISA_MIPS1;
+      file_mips_isa = ISA_MIPS1;
       break;
 
     case OPTION_MIPS2:
-      mips_opts.isa = ISA_MIPS2;
+      file_mips_isa = ISA_MIPS2;
       break;
 
     case OPTION_MIPS3:
-      mips_opts.isa = ISA_MIPS3;
+      file_mips_isa = ISA_MIPS3;
       break;
 
     case OPTION_MIPS4:
-      mips_opts.isa = ISA_MIPS4;
+      file_mips_isa = ISA_MIPS4;
       break;
 
     case OPTION_MIPS5:
-      mips_opts.isa = ISA_MIPS5;
+      file_mips_isa = ISA_MIPS5;
       break;
 
     case OPTION_MIPS32:
-      mips_opts.isa = ISA_MIPS32;
+      file_mips_isa = ISA_MIPS32;
       break;
 
     case OPTION_MIPS64:
-      mips_opts.isa = ISA_MIPS64;
+      file_mips_isa = ISA_MIPS64;
       break;
 
     case OPTION_MTUNE:
+      mips_set_option_string (&mips_tune_string, arg);
+      break;
+
     case OPTION_MARCH:
-    case OPTION_MCPU:
-      {
-	int cpu = CPU_UNKNOWN;
-
-	/* Identify the processor type.  */
-	if (strcasecmp (arg, "default") != 0)
-	  {
-	    const struct mips_cpu_info *ci;
-
-	    ci = mips_cpu_info_from_name (arg);
-	    if (ci == NULL || ci->is_isa)
-	      {
-		switch (c)
-		  {
-		  case OPTION_MTUNE:
-		    as_fatal (_("invalid architecture -mtune=%s"), arg);
-		    break;
-		  case OPTION_MARCH:
-		    as_fatal (_("invalid architecture -march=%s"), arg);
-		    break;
-		  case OPTION_MCPU:
-		    as_fatal (_("invalid architecture -mcpu=%s"), arg);
-		    break;
-		  }
-	      }
-	    else
-	      cpu = ci->cpu;
-	  }
-
-	switch (c)
-	  {
-	  case OPTION_MTUNE:
-	    if (mips_tune != CPU_UNKNOWN && mips_tune != cpu)
-	      as_warn (_("A different -mtune= was already specified, is now "
-			 "-mtune=%s"), arg);
-	    mips_tune = cpu;
-	    break;
-	  case OPTION_MARCH:
-	    if (mips_arch != CPU_UNKNOWN && mips_arch != cpu)
-	      as_warn (_("A different -march= was already specified, is now "
-			 "-march=%s"), arg);
-	    mips_arch = cpu;
-	    break;
-	  case OPTION_MCPU:
-	    if (mips_cpu != CPU_UNKNOWN && mips_cpu != cpu)
-	      as_warn (_("A different -mcpu= was already specified, is now "
-			 "-mcpu=%s"), arg);
-	    mips_cpu = cpu;
-	  }
-      }
+      mips_set_option_string (&mips_arch_string, arg);
       break;
 
     case OPTION_M4650:
-      if ((mips_arch != CPU_UNKNOWN && mips_arch != CPU_R4650)
-	  || (mips_tune != CPU_UNKNOWN && mips_tune != CPU_R4650))
-	as_warn (_("A different -march= or -mtune= was already specified, "
-		   "is now -m4650"));
-      mips_arch = CPU_R4650;
-      mips_tune = CPU_R4650;
+      mips_set_option_string (&mips_arch_string, "4650");
+      mips_set_option_string (&mips_tune_string, "4650");
       break;
 
     case OPTION_NO_M4650:
       break;
 
     case OPTION_M4010:
-      if ((mips_arch != CPU_UNKNOWN && mips_arch != CPU_R4010)
-	  || (mips_tune != CPU_UNKNOWN && mips_tune != CPU_R4010))
-	as_warn (_("A different -march= or -mtune= was already specified, "
-		   "is now -m4010"));
-      mips_arch = CPU_R4010;
-      mips_tune = CPU_R4010;
+      mips_set_option_string (&mips_arch_string, "4010");
+      mips_set_option_string (&mips_tune_string, "4010");
       break;
 
     case OPTION_NO_M4010:
       break;
 
     case OPTION_M4100:
-      if ((mips_arch != CPU_UNKNOWN && mips_arch != CPU_VR4100)
-	  || (mips_tune != CPU_UNKNOWN && mips_tune != CPU_VR4100))
-	as_warn (_("A different -march= or -mtune= was already specified, "
-		   "is now -m4100"));
-      mips_arch = CPU_VR4100;
-      mips_tune = CPU_VR4100;
+      mips_set_option_string (&mips_arch_string, "4100");
+      mips_set_option_string (&mips_tune_string, "4100");
       break;
 
     case OPTION_NO_M4100:
       break;
 
     case OPTION_M3900:
-      if ((mips_arch != CPU_UNKNOWN && mips_arch != CPU_R3900)
-	  || (mips_tune != CPU_UNKNOWN && mips_tune != CPU_R3900))
-	as_warn (_("A different -march= or -mtune= was already specified, "
-		   "is now -m3900"));
-      mips_arch = CPU_R3900;
-      mips_tune = CPU_R3900;
+      mips_set_option_string (&mips_arch_string, "3900");
+      mips_set_option_string (&mips_tune_string, "3900");
       break;
 
     case OPTION_NO_M3900:
@@ -10223,7 +10159,7 @@ md_parse_option (c, arg)
 	  as_bad (_("-32 is supported for ELF format only"));
 	  return 0;
 	}
-      mips_opts.abi = O32_ABI;
+      mips_abi = O32_ABI;
       break;
 
     case OPTION_N32:
@@ -10232,7 +10168,7 @@ md_parse_option (c, arg)
 	  as_bad (_("-n32 is supported for ELF format only"));
 	  return 0;
 	}
-      mips_opts.abi = N32_ABI;
+      mips_abi = N32_ABI;
       break;
 
     case OPTION_64:
@@ -10241,7 +10177,7 @@ md_parse_option (c, arg)
 	  as_bad (_("-64 is supported for ELF format only"));
 	  return 0;
 	}
-      mips_opts.abi = N64_ABI;
+      mips_abi = N64_ABI;
       if (! support_64bit_objects())
 	as_fatal (_("No compiled in support for 64 bit object file format"));
       break;
@@ -10249,20 +10185,18 @@ md_parse_option (c, arg)
 
     case OPTION_GP32:
       file_mips_gp32 = 1;
-      if (mips_opts.abi != O32_ABI)
-	mips_opts.abi = NO_ABI;
       break;
 
     case OPTION_GP64:
       file_mips_gp32 = 0;
-      if (mips_opts.abi == O32_ABI)
-	mips_opts.abi = NO_ABI;
       break;
 
     case OPTION_FP32:
       file_mips_fp32 = 1;
-      if (mips_opts.abi != O32_ABI)
-	mips_opts.abi = NO_ABI;
+      break;
+
+    case OPTION_FP64:
+      file_mips_fp32 = 0;
       break;
 
 #ifdef OBJ_ELF
@@ -10273,20 +10207,20 @@ md_parse_option (c, arg)
 	  return 0;
 	}
       if (strcmp (arg, "32") == 0)
-	mips_opts.abi = O32_ABI;
+	mips_abi = O32_ABI;
       else if (strcmp (arg, "o64") == 0)
-	mips_opts.abi = O64_ABI;
+	mips_abi = O64_ABI;
       else if (strcmp (arg, "n32") == 0)
-	mips_opts.abi = N32_ABI;
+	mips_abi = N32_ABI;
       else if (strcmp (arg, "64") == 0)
 	{
-	  mips_opts.abi = N64_ABI;
+	  mips_abi = N64_ABI;
 	  if (! support_64bit_objects())
 	    as_fatal (_("No compiled in support for 64 bit object file "
 			"format"));
 	}
       else if (strcmp (arg, "eabi") == 0)
-	mips_opts.abi = EABI_ABI;
+	mips_abi = EABI_ABI;
       else
 	{
 	  as_fatal (_("invalid abi -mabi=%s"), arg);
@@ -10319,144 +10253,40 @@ md_parse_option (c, arg)
 
   return 1;
 }
+
+/* Set up globals to generate code for the ISA or processor
+   described by INFO.  */
 
 static void
-show (stream, string, col_p, first_p)
-     FILE *stream;
-     char *string;
-     int *col_p;
-     int *first_p;
+mips_set_architecture (info)
+     const struct mips_cpu_info *info;
 {
-  if (*first_p)
+  if (info != 0)
     {
-      fprintf (stream, "%24s", "");
-      *col_p = 24;
+      mips_arch_info = info;
+      mips_arch = info->cpu;
+      mips_opts.isa = info->isa;
     }
-  else
-    {
-      fprintf (stream, ", ");
-      *col_p += 2;
-    }
-
-  if (*col_p + strlen (string) > 72)
-    {
-      fprintf (stream, "\n%24s", "");
-      *col_p = 24;
-    }
-
-  fprintf (stream, "%s", string);
-  *col_p += strlen (string);
-
-  *first_p = 0;
 }
 
-void
-md_show_usage (stream)
-     FILE *stream;
+
+/* Likewise for tuning.  */
+
+static void
+mips_set_tune (info)
+     const struct mips_cpu_info *info;
 {
-  int column, first;
-
-  fprintf (stream, _("\
-MIPS options:\n\
--membedded-pic		generate embedded position independent code\n\
--EB			generate big endian output\n\
--EL			generate little endian output\n\
--g, -g2			do not remove unneeded NOPs or swap branches\n\
--G NUM			allow referencing objects up to NUM bytes\n\
-			implicitly with the gp register [default 8]\n"));
-  fprintf (stream, _("\
--mips1			generate MIPS ISA I instructions\n\
--mips2			generate MIPS ISA II instructions\n\
--mips3			generate MIPS ISA III instructions\n\
--mips4			generate MIPS ISA IV instructions\n\
--mips5                  generate MIPS ISA V instructions\n\
--mips32                 generate MIPS32 ISA instructions\n\
--mips64                 generate MIPS64 ISA instructions\n\
--march=CPU/-mtune=CPU	generate code/schedule for CPU, where CPU is one of:\n"));
-
-  first = 1;
-
-  show (stream, "2000", &column, &first);
-  show (stream, "3000", &column, &first);
-  show (stream, "3900", &column, &first);
-  show (stream, "4000", &column, &first);
-  show (stream, "4010", &column, &first);
-  show (stream, "4100", &column, &first);
-  show (stream, "4111", &column, &first);
-  show (stream, "4300", &column, &first);
-  show (stream, "4400", &column, &first);
-  show (stream, "4600", &column, &first);
-  show (stream, "4650", &column, &first);
-  show (stream, "5000", &column, &first);
-  show (stream, "5200", &column, &first);
-  show (stream, "5230", &column, &first);
-  show (stream, "5231", &column, &first);
-  show (stream, "5261", &column, &first);
-  show (stream, "5721", &column, &first);
-  show (stream, "6000", &column, &first);
-  show (stream, "8000", &column, &first);
-  show (stream, "10000", &column, &first);
-  show (stream, "12000", &column, &first);
-  show (stream, "sb1", &column, &first);
-  fputc ('\n', stream);
-
-  fprintf (stream, _("\
--mCPU			equivalent to -march=CPU -mtune=CPU. Deprecated.\n\
--no-mCPU		don't generate code specific to CPU.\n\
-			For -mCPU and -no-mCPU, CPU must be one of:\n"));
-
-  first = 1;
-
-  show (stream, "3900", &column, &first);
-  show (stream, "4010", &column, &first);
-  show (stream, "4100", &column, &first);
-  show (stream, "4650", &column, &first);
-  fputc ('\n', stream);
-
-  fprintf (stream, _("\
--mips16			generate mips16 instructions\n\
--no-mips16		do not generate mips16 instructions\n"));
-  fprintf (stream, _("\
--mgp32			use 32-bit GPRs, regardless of the chosen ISA\n\
--mfp32			use 32-bit FPRs, regardless of the chosen ISA\n\
--O0			remove unneeded NOPs, do not swap branches\n\
--O			remove unneeded NOPs and swap branches\n\
--n			warn about NOPs generated from macros\n\
---[no-]construct-floats [dis]allow floating point values to be constructed\n\
---trap, --no-break	trap exception on div by 0 and mult overflow\n\
---break, --no-trap	break exception on div by 0 and mult overflow\n"));
-#ifdef OBJ_ELF
-  fprintf (stream, _("\
--KPIC, -call_shared	generate SVR4 position independent code\n\
--non_shared		do not generate position independent code\n\
--xgot			assume a 32 bit GOT\n\
--mabi=ABI		create ABI conformant object file for:\n"));
-
-  first = 1;
-
-  show (stream, "32", &column, &first);
-  show (stream, "o64", &column, &first);
-  show (stream, "n32", &column, &first);
-  show (stream, "64", &column, &first);
-  show (stream, "eabi", &column, &first);
-
-  fputc ('\n', stream);
-
-  fprintf (stream, _("\
--32			create o32 ABI object file (default)\n\
--n32			create n32 ABI object file\n\
--64			create 64 ABI object file\n"));
-#endif
+  if (info != 0)
+    {
+      mips_tune_info = info;
+      mips_tune = info->cpu;
+    }
 }
-
+
+
 void
 mips_after_parse_args ()
 {
-  const char *cpu;
-  char *a = NULL;
-  int mips_isa_from_cpu;
-  const struct mips_cpu_info *ci;
-
   /* GP relative stuff not working for PE */
   if (strncmp (TARGET_OS, "pe", 2) == 0
       && g_switch_value != 0)
@@ -10466,183 +10296,87 @@ mips_after_parse_args ()
       g_switch_value = 0;
     }
 
-  cpu = TARGET_CPU;
-  if (strcmp (cpu + (sizeof TARGET_CPU) - 3, "el") == 0)
-    {
-      a = xmalloc (sizeof TARGET_CPU);
-      strcpy (a, TARGET_CPU);
-      a[(sizeof TARGET_CPU) - 3] = '\0';
-      cpu = a;
-    }
+  /* The following code determines the architecture, ABI and register
+     size.  Similar code was added to GCC 3.2 (see override_options()
+     in config/mips/mips.c).  The GAS and GCC code should be kept in
+     sync as much as possible.  */
 
-  /* Backward compatibility for historic -mcpu= option.  Check for
-     incompatible options, warn if -mcpu is used.  */
-  if (mips_cpu != CPU_UNKNOWN
-      && mips_arch != CPU_UNKNOWN
-      && mips_cpu != mips_arch)
-    {
-      as_fatal (_("The -mcpu option can't be used together with -march. "
-		  "Use -mtune instead of -mcpu."));
-    }
+  if (mips_arch_string != 0)
+    mips_set_architecture (mips_parse_cpu ("-march", mips_arch_string));
 
-  if (mips_cpu != CPU_UNKNOWN
-      && mips_tune != CPU_UNKNOWN
-      && mips_cpu != mips_tune)
-    {
-      as_fatal (_("The -mcpu option can't be used together with -mtune. "
-		  "Use -march instead of -mcpu."));
-    }
+  if (mips_tune_string != 0)
+    mips_set_tune (mips_parse_cpu ("-mtune", mips_tune_string));
 
-#if 1
-  /* For backward compatibility, let -mipsN set various defaults.  */
-  /* This code should go away, to be replaced with something rather more
-     draconian.  Until GCC 3.1 has been released for some reasonable
-     amount of time, however, we need to support this.  */
-  if (mips_opts.isa != ISA_UNKNOWN)
+  if (file_mips_isa != ISA_UNKNOWN)
     {
-      /* Translate -mipsN to the appropriate settings of file_mips_gp32
-	 and file_mips_fp32.  Tag binaries as using the mipsN ISA.  */
-      if (file_mips_gp32 < 0)
+      /* Handle -mipsN.  At this point, file_mips_isa contains the
+	 ISA level specified by -mipsN, while mips_opts.isa contains
+	 the -march selection (if any).  */
+      if (mips_arch_info != 0)
 	{
-	  if (ISA_HAS_64BIT_REGS (mips_opts.isa))
-	    file_mips_gp32 = 0;
-	  else
-	    file_mips_gp32 = 1;
+	  /* -march takes precedence over -mipsN, since it is more descriptive.
+	     There's no harm in specifying both as long as the ISA levels
+	     are the same.  */
+	  if (file_mips_isa != mips_opts.isa)
+	    as_bad (_("-%s conflicts with the other architecture options, which imply -%s"),
+		    mips_cpu_info_from_isa (file_mips_isa)->name,
+		    mips_cpu_info_from_isa (mips_opts.isa)->name);
 	}
-      if (file_mips_fp32 < 0)
-	{
-	  if (ISA_HAS_64BIT_REGS (mips_opts.isa))
-	    file_mips_fp32 = 0;
-	  else
-	    file_mips_fp32 = 1;
-	}
-
-      ci = mips_cpu_info_from_isa (mips_opts.isa);
-      assert (ci != NULL);
-      /* -mipsN has higher priority than -mcpu but lower than -march.  */
-      if (mips_arch == CPU_UNKNOWN)
-	mips_arch = ci->cpu;
-
-      /* Default mips_abi.  */
-      if (mips_opts.abi == NO_ABI)
-	{
-	  if (mips_opts.isa == ISA_MIPS1 || mips_opts.isa == ISA_MIPS2)
-	    mips_opts.abi = O32_ABI;
-	  else if (mips_opts.isa == ISA_MIPS3 || mips_opts.isa == ISA_MIPS4)
-	    mips_opts.abi = O64_ABI;
-	}
+      else
+	mips_set_architecture (mips_cpu_info_from_isa (file_mips_isa));
     }
 
-  if (mips_arch == CPU_UNKNOWN && mips_cpu != CPU_UNKNOWN)
-    {
-      ci = mips_cpu_info_from_cpu (mips_cpu);
-      assert (ci != NULL);
-      mips_arch = ci->cpu;
-      as_warn (_("The -mcpu option is deprecated.  Please use -march and "
-		 "-mtune instead."));
-    }
+  if (mips_arch_info == 0)
+    mips_set_architecture (mips_parse_cpu ("default CPU",
+					   MIPS_CPU_STRING_DEFAULT));
 
-  /* Set tune from -mcpu, not from -mipsN.  */
-  if (mips_tune == CPU_UNKNOWN && mips_cpu != CPU_UNKNOWN)
-    {
-      ci = mips_cpu_info_from_cpu (mips_cpu);
-      assert (ci != NULL);
-      mips_tune = ci->cpu;
-    }
+  if (ABI_NEEDS_64BIT_REGS (mips_abi) && !ISA_HAS_64BIT_REGS (mips_opts.isa))
+    as_bad ("-march=%s is not compatible with the selected ABI",
+	    mips_arch_info->name);
 
-  /* At this point, mips_arch will either be CPU_UNKNOWN if no ARCH was
-     specified on the command line, or some other value if one was.
-     Similarly, mips_opts.isa will be ISA_UNKNOWN if not specified on
-     the command line, or will be set otherwise if one was.  */
+  /* Optimize for mips_arch, unless -mtune selects a different processor.  */
+  if (mips_tune_info == 0)
+    mips_set_tune (mips_arch_info);
 
-  if (mips_arch != CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
-    /* Handled above.  */;
-#else
-  if (mips_arch == CPU_UNKNOWN && mips_cpu != CPU_UNKNOWN)
+  if (file_mips_gp32 >= 0)
     {
-      ci = mips_cpu_info_from_cpu (mips_cpu);
-      assert (ci != NULL);
-      mips_arch = ci->cpu;
-      as_warn (_("The -mcpu option is deprecated.  Please use -march and "
-		 "-mtune instead."));
-    }
-
-  /* At this point, mips_arch will either be CPU_UNKNOWN if no ARCH was
-     specified on the command line, or some other value if one was.
-     Similarly, mips_opts.isa will be ISA_UNKNOWN if not specified on
-     the command line, or will be set otherwise if one was.  */
-
-  if (mips_arch != CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
-    {
-      /* We have to check if the isa is the default isa of arch.  Otherwise
-         we'll get invalid object file headers.  */
-      ci = mips_cpu_info_from_cpu (mips_arch);
-      assert (ci != NULL);
-      if (mips_opts.isa != ci->isa)
-	{
-	  /* This really should be an error instead of a warning, but old
-	     compilers only have -mcpu which sets both arch and tune.  For
-	     now, we discard arch and preserve tune.  */
-	  as_warn (_("The -march option is incompatible to -mipsN and "
-		     "therefore ignored."));
-	  if (mips_tune == CPU_UNKNOWN)
-	    mips_tune = mips_arch;
-	  ci = mips_cpu_info_from_isa (mips_opts.isa);
-	  assert (ci != NULL);
-	  mips_arch = ci->cpu;
-	}
-    }
-#endif
-  else if (mips_arch != CPU_UNKNOWN && mips_opts.isa == ISA_UNKNOWN)
-    {
-      /* We have ARCH, we need ISA.  */
-      ci = mips_cpu_info_from_cpu (mips_arch);
-      assert (ci != NULL);
-      mips_opts.isa = ci->isa;
-    }
-  else if (mips_arch == CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
-    {
-      /* We have ISA, we need default ARCH.  */
-      ci = mips_cpu_info_from_isa (mips_opts.isa);
-      assert (ci != NULL);
-      mips_arch = ci->cpu;
+      /* The user specified the size of the integer registers.  Make sure
+	 it agrees with the ABI and ISA.  */
+      if (file_mips_gp32 == 0 && !ISA_HAS_64BIT_REGS (mips_opts.isa))
+	as_bad (_("-mgp64 used with a 32-bit processor"));
+      else if (file_mips_gp32 == 1 && ABI_NEEDS_64BIT_REGS (mips_abi))
+	as_bad (_("-mgp32 used with a 64-bit ABI"));
+      else if (file_mips_gp32 == 0 && ABI_NEEDS_32BIT_REGS (mips_abi))
+	as_bad (_("-mgp64 used with a 32-bit ABI"));
     }
   else
     {
-      /* We need to set both ISA and ARCH from target cpu.  */
-      ci = mips_cpu_info_from_name (cpu);
-      if (ci == NULL)
-	ci = mips_cpu_info_from_cpu (CPU_R3000);
-      assert (ci != NULL);
-      mips_opts.isa = ci->isa;
-      mips_arch = ci->cpu;
+      /* Infer the integer register size from the ABI and processor.
+	 Restrict ourselves to 32-bit registers if that's all the
+	 processor has, or if the ABI cannot handle 64-bit registers.  */
+      file_mips_gp32 = (ABI_NEEDS_32BIT_REGS (mips_abi)
+			|| !ISA_HAS_64BIT_REGS (mips_opts.isa));
     }
 
-  if (mips_tune == CPU_UNKNOWN)
-    mips_tune = mips_arch;
+  /* ??? GAS treats single-float processors as though they had 64-bit
+     float registers (although it complains when double-precision
+     instructions are used).  As things stand, saying they have 32-bit
+     registers would lead to spurious "register must be even" messages.
+     So here we assume float registers are always the same size as
+     integer ones, unless the user says otherwise.  */
+  if (file_mips_fp32 < 0)
+    file_mips_fp32 = file_mips_gp32;
 
-  ci = mips_cpu_info_from_cpu (mips_arch);
-  assert (ci != NULL);
-  mips_isa_from_cpu = ci->isa;
+  /* End of GCC-shared inference code.  */
 
-  /* End of TARGET_CPU processing, get rid of malloced memory
-     if necessary.  */
-  cpu = NULL;
-  if (a != NULL)
-    {
-      free (a);
-      a = NULL;
-    }
+  /* ??? When do we want this flag to be set?   Who uses it?  */
+  if (file_mips_gp32 == 1
+      && mips_abi == NO_ABI
+      && ISA_HAS_64BIT_REGS (mips_opts.isa))
+    mips_32bitmode = 1;
 
   if (mips_opts.isa == ISA_MIPS1 && mips_trap)
     as_bad (_("trap exception not supported at ISA 1"));
-
-  /* If they asked for mips1 or mips2 and a cpu that is
-     mips3 or greater, then mark the object file 32BITMODE.  */
-  if (mips_isa_from_cpu != ISA_UNKNOWN
-      && ! ISA_HAS_64BIT_REGS (mips_opts.isa)
-      && ISA_HAS_64BIT_REGS (mips_isa_from_cpu))
-    mips_32bitmode = 1;
 
   /* If the selected architecture includes support for ASEs, enable
      generation of code for them.  */
@@ -10653,13 +10387,7 @@ mips_after_parse_args ()
   if (mips_opts.ase_mdmx == -1)
     mips_opts.ase_mdmx = (CPU_HAS_MDMX (mips_arch)) ? 1 : 0;
 
-  if (file_mips_gp32 < 0)
-    file_mips_gp32 = 0;
-  if (file_mips_fp32 < 0)
-    file_mips_fp32 = 0;
-
   file_mips_isa = mips_opts.isa;
-  file_mips_abi = mips_opts.abi;
   file_ase_mips16 = mips_opts.mips16;
   file_ase_mips3d = mips_opts.ase_mips3d;
   file_ase_mdmx = mips_opts.ase_mdmx;
@@ -11734,7 +11462,6 @@ s_mipsset (x)
 	case  0:
 	  mips_opts.gp32 = file_mips_gp32;
 	  mips_opts.fp32 = file_mips_fp32;
-	  mips_opts.abi = file_mips_abi;
 	  break;
 	case  1:
 	case  2:
@@ -11746,9 +11473,6 @@ s_mipsset (x)
 	case  4:
 	case  5:
 	case 64:
-	  /* Loosen ABI register width restriction.  */
-	  if (mips_opts.abi == O32_ABI)
-	    mips_opts.abi = NO_ABI;
 	  mips_opts.gp32 = 0;
 	  mips_opts.fp32 = 0;
 	  break;
@@ -13198,7 +12922,7 @@ void
 mips_elf_final_processing ()
 {
   /* Write out the register information.  */
-  if (file_mips_abi != N64_ABI)
+  if (mips_abi != N64_ABI)
     {
       Elf32_RegInfo s;
 
@@ -13248,22 +12972,18 @@ mips_elf_final_processing ()
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ARCH_ASE_MDMX;
 
   /* Set the MIPS ELF ABI flags.  */
-  if (file_mips_abi == NO_ABI)
-    ;
-  else if (file_mips_abi == O32_ABI)
+  if (mips_abi == O32_ABI && USE_E_MIPS_ABI_O32)
     elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_O32;
-  else if (file_mips_abi == O64_ABI)
+  else if (mips_abi == O64_ABI)
     elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_O64;
-  else if (file_mips_abi == EABI_ABI)
+  else if (mips_abi == EABI_ABI)
     {
-      /* Set the EABI kind based on the ISA.  This isn't really
-	 the best, but then neither is basing the abi on the isa.  */
-      if (ISA_HAS_64BIT_REGS (file_mips_isa))
+      if (!file_mips_gp32)
 	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI64;
       else
 	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI32;
     }
-  else if (file_mips_abi == N32_ABI)
+  else if (mips_abi == N32_ABI)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ABI2;
 
   /* Nothing to do for N64_ABI.  */
@@ -13704,175 +13424,177 @@ s_loc (x)
 }
 #endif
 
-/* CPU name/ISA/number mapping table.
+/* A table describing all the processors gas knows about.  Names are
+   matched in the order listed.
 
-   Entries are grouped by type.  The first matching CPU or ISA entry
-   gets chosen by CPU or ISA, so it should be the 'canonical' name
-   for that type.  Entries after that within the type are sorted
-   alphabetically.
-
-   Case is ignored in comparison, so put the canonical entry in the
-   appropriate case but everything else in lower case to ease eye pain.  */
+   To ease comparison, please keep this table in the same order as
+   gcc's mips_cpu_info_table[].  */
 static const struct mips_cpu_info mips_cpu_info_table[] =
 {
-  /* MIPS1 ISA */
-  { "MIPS1",          1,      ISA_MIPS1,      CPU_R3000, },
-  { "mips",           1,      ISA_MIPS1,      CPU_R3000, },
+  /* Entries for generic ISAs */
+  { "mips1",          1,      ISA_MIPS1,      CPU_R3000 },
+  { "mips2",          1,      ISA_MIPS2,      CPU_R6000 },
+  { "mips3",          1,      ISA_MIPS3,      CPU_R4000 },
+  { "mips4",          1,      ISA_MIPS4,      CPU_R8000 },
+  { "mips5",          1,      ISA_MIPS5,      CPU_MIPS5 },
+  { "mips32",         1,      ISA_MIPS32,     CPU_MIPS32 },
+  { "mips64",         1,      ISA_MIPS64,     CPU_MIPS64 },
 
-  /* MIPS2 ISA */
-  { "MIPS2",          1,      ISA_MIPS2,      CPU_R6000, },
+  /* MIPS I */
+  { "r3000",          0,      ISA_MIPS1,      CPU_R3000 },
+  { "r2000",          0,      ISA_MIPS1,      CPU_R3000 },
+  { "r3900",          0,      ISA_MIPS1,      CPU_R3900 },
 
-  /* MIPS3 ISA */
-  { "MIPS3",          1,      ISA_MIPS3,      CPU_R4000, },
+  /* MIPS II */
+  { "r6000",          0,      ISA_MIPS2,      CPU_R6000 },
 
-  /* MIPS4 ISA */
-  { "MIPS4",          1,      ISA_MIPS4,      CPU_R8000, },
+  /* MIPS III */
+  { "r4000",          0,      ISA_MIPS3,      CPU_R4000 },
+  { "r4010",          0,      ISA_MIPS2,      CPU_R4010 },
+  { "vr4100",         0,      ISA_MIPS3,      CPU_VR4100 },
+  { "vr4111",         0,      ISA_MIPS3,      CPU_R4111 },
+  { "vr4300",         0,      ISA_MIPS3,      CPU_R4300 },
+  { "r4400",          0,      ISA_MIPS3,      CPU_R4400 },
+  { "r4600",          0,      ISA_MIPS3,      CPU_R4600 },
+  { "orion",          0,      ISA_MIPS3,      CPU_R4600 },
+  { "r4650",          0,      ISA_MIPS3,      CPU_R4650 },
 
-  /* MIPS5 ISA */
-  { "MIPS5",          1,      ISA_MIPS5,      CPU_MIPS5, },
-  { "Generic-MIPS5",  0,      ISA_MIPS5,      CPU_MIPS5, },
+  /* MIPS IV */
+  { "r8000",          0,      ISA_MIPS4,      CPU_R8000 },
+  { "r10000",         0,      ISA_MIPS4,      CPU_R10000 },
+  { "r12000",         0,      ISA_MIPS4,      CPU_R12000 },
+  { "vr5000",         0,      ISA_MIPS4,      CPU_R5000 },
+  { "rm5200",         0,      ISA_MIPS4,      CPU_R5000 },
+  { "rm5230",         0,      ISA_MIPS4,      CPU_R5000 },
+  { "rm5231",         0,      ISA_MIPS4,      CPU_R5000 },
+  { "rm5261",         0,      ISA_MIPS4,      CPU_R5000 },
+  { "rm5721",         0,      ISA_MIPS4,      CPU_R5000 },
+  { "r7000",          0,      ISA_MIPS4,      CPU_R5000 },
 
-  /* MIPS32 ISA */
-  { "MIPS32",         1,      ISA_MIPS32,     CPU_MIPS32, },
-  { "mipsisa32",      0,      ISA_MIPS32,     CPU_MIPS32, },
-  { "Generic-MIPS32", 0,      ISA_MIPS32,     CPU_MIPS32, },
+  /* MIPS 32 */
   { "4kc",            0,      ISA_MIPS32,     CPU_MIPS32, },
-  { "4km",            0,      ISA_MIPS32,     CPU_MIPS32, },
-  { "4kp",            0,      ISA_MIPS32,     CPU_MIPS32, },
+  { "4km",            0,      ISA_MIPS32,     CPU_MIPS32 },
+  { "4kp",            0,      ISA_MIPS32,     CPU_MIPS32 },
 
-  /* For historical reasons.  */
-  { "MIPS64",         1,      ISA_MIPS3,      CPU_R4000, },
-
-  /* MIPS64 ISA */
-  { "mipsisa64",      1,      ISA_MIPS64,     CPU_MIPS64, },
-  { "Generic-MIPS64", 0,      ISA_MIPS64,     CPU_MIPS64, },
-  { "5kc",            0,      ISA_MIPS64,     CPU_MIPS64, },
-  { "20kc",           0,      ISA_MIPS64,     CPU_MIPS64, },
-
-  /* R2000 CPU */
-  { "R2000",          0,      ISA_MIPS1,      CPU_R2000, },
-  { "2000",           0,      ISA_MIPS1,      CPU_R2000, },
-  { "2k",             0,      ISA_MIPS1,      CPU_R2000, },
-  { "r2k",            0,      ISA_MIPS1,      CPU_R2000, },
-
-  /* R3000 CPU */
-  { "R3000",          0,      ISA_MIPS1,      CPU_R3000, },
-  { "3000",           0,      ISA_MIPS1,      CPU_R3000, },
-  { "3k",             0,      ISA_MIPS1,      CPU_R3000, },
-  { "r3k",            0,      ISA_MIPS1,      CPU_R3000, },
-
-  /* TX3900 CPU */
-  { "R3900",          0,      ISA_MIPS1,      CPU_R3900, },
-  { "3900",           0,      ISA_MIPS1,      CPU_R3900, },
-  { "mipstx39",       0,      ISA_MIPS1,      CPU_R3900, },
-
-  /* R4000 CPU */
-  { "R4000",          0,      ISA_MIPS3,      CPU_R4000, },
-  { "4000",           0,      ISA_MIPS3,      CPU_R4000, },
-  { "4k",             0,      ISA_MIPS3,      CPU_R4000, },   /* beware */
-  { "r4k",            0,      ISA_MIPS3,      CPU_R4000, },
-
-  /* R4010 CPU */
-  { "R4010",          0,      ISA_MIPS2,      CPU_R4010, },
-  { "4010",           0,      ISA_MIPS2,      CPU_R4010, },
-
-  /* R4400 CPU */
-  { "R4400",          0,      ISA_MIPS3,      CPU_R4400, },
-  { "4400",           0,      ISA_MIPS3,      CPU_R4400, },
-
-  /* R4600 CPU */
-  { "R4600",          0,      ISA_MIPS3,      CPU_R4600, },
-  { "4600",           0,      ISA_MIPS3,      CPU_R4600, },
-  { "mips64orion",    0,      ISA_MIPS3,      CPU_R4600, },
-  { "orion",          0,      ISA_MIPS3,      CPU_R4600, },
-
-  /* R4650 CPU */
-  { "R4650",          0,      ISA_MIPS3,      CPU_R4650, },
-  { "4650",           0,      ISA_MIPS3,      CPU_R4650, },
-
-  /* R6000 CPU */
-  { "R6000",          0,      ISA_MIPS2,      CPU_R6000, },
-  { "6000",           0,      ISA_MIPS2,      CPU_R6000, },
-  { "6k",             0,      ISA_MIPS2,      CPU_R6000, },
-  { "r6k",            0,      ISA_MIPS2,      CPU_R6000, },
-
-  /* R8000 CPU */
-  { "R8000",          0,      ISA_MIPS4,      CPU_R8000, },
-  { "8000",           0,      ISA_MIPS4,      CPU_R8000, },
-  { "8k",             0,      ISA_MIPS4,      CPU_R8000, },
-  { "r8k",            0,      ISA_MIPS4,      CPU_R8000, },
-
-  /* R10000 CPU */
-  { "R10000",         0,      ISA_MIPS4,      CPU_R10000, },
-  { "10000",          0,      ISA_MIPS4,      CPU_R10000, },
-  { "10k",            0,      ISA_MIPS4,      CPU_R10000, },
-  { "r10k",           0,      ISA_MIPS4,      CPU_R10000, },
-
-  /* R12000 CPU */
-  { "R12000",         0,      ISA_MIPS4,      CPU_R12000, },
-  { "12000",          0,      ISA_MIPS4,      CPU_R12000, },
-  { "12k",            0,      ISA_MIPS4,      CPU_R12000, },
-  { "r12k",           0,      ISA_MIPS4,      CPU_R12000, },
-
-  /* VR4100 CPU */
-  { "VR4100",         0,      ISA_MIPS3,      CPU_VR4100, },
-  { "4100",           0,      ISA_MIPS3,      CPU_VR4100, },
-  { "mips64vr4100",   0,      ISA_MIPS3,      CPU_VR4100, },
-  { "r4100",          0,      ISA_MIPS3,      CPU_VR4100, },
-
-  /* VR4111 CPU */
-  { "VR4111",         0,      ISA_MIPS3,      CPU_R4111, },
-  { "4111",           0,      ISA_MIPS3,      CPU_R4111, },
-  { "mips64vr4111",   0,      ISA_MIPS3,      CPU_R4111, },
-  { "r4111",          0,      ISA_MIPS3,      CPU_R4111, },
-
-  /* VR4300 CPU */
-  { "VR4300",         0,      ISA_MIPS3,      CPU_R4300, },
-  { "4300",           0,      ISA_MIPS3,      CPU_R4300, },
-  { "mips64vr4300",   0,      ISA_MIPS3,      CPU_R4300, },
-  { "r4300",          0,      ISA_MIPS3,      CPU_R4300, },
-
-  /* VR5000 CPU */
-  { "VR5000",         0,      ISA_MIPS4,      CPU_R5000, },
-  { "5000",           0,      ISA_MIPS4,      CPU_R5000, },
-  { "5k",             0,      ISA_MIPS4,      CPU_R5000, },
-  { "mips64vr5000",   0,      ISA_MIPS4,      CPU_R5000, },
-  { "r5000",          0,      ISA_MIPS4,      CPU_R5000, },
-  { "r5200",          0,      ISA_MIPS4,      CPU_R5000, },
-  { "rm5200",         0,      ISA_MIPS4,      CPU_R5000, },
-  { "r5230",          0,      ISA_MIPS4,      CPU_R5000, },
-  { "rm5230",         0,      ISA_MIPS4,      CPU_R5000, },
-  { "r5231",          0,      ISA_MIPS4,      CPU_R5000, },
-  { "rm5231",         0,      ISA_MIPS4,      CPU_R5000, },
-  { "r5261",          0,      ISA_MIPS4,      CPU_R5000, },
-  { "rm5261",         0,      ISA_MIPS4,      CPU_R5000, },
-  { "r5721",          0,      ISA_MIPS4,      CPU_R5000, },
-  { "rm5721",         0,      ISA_MIPS4,      CPU_R5000, },
-  { "r5k",            0,      ISA_MIPS4,      CPU_R5000, },
-  { "r7000",          0,      ISA_MIPS4,      CPU_R5000, },
+  /* MIPS 64 */
+  { "5kc",            0,      ISA_MIPS64,     CPU_MIPS64 },
+  { "20kc",           0,      ISA_MIPS64,     CPU_MIPS64 },
 
   /* Broadcom SB-1 CPU */
-  { "SB-1",           0,      ISA_MIPS64,     CPU_SB1, },
-  { "sb-1250",        0,      ISA_MIPS64,     CPU_SB1, },
-  { "sb1",            0,      ISA_MIPS64,     CPU_SB1, },
-  { "sb1250",         0,      ISA_MIPS64,     CPU_SB1, },
+  { "SB-1",           0,      ISA_MIPS64,     CPU_SB1 },
+  { "sb-1250",        0,      ISA_MIPS64,     CPU_SB1 },
+  { "sb1",            0,      ISA_MIPS64,     CPU_SB1 },
+  { "sb1250",         0,      ISA_MIPS64,     CPU_SB1 },
 
-  /* End marker.  */
-  { NULL, 0, 0, 0, },
+  /* End marker */
+  { NULL, 0, 0, 0 }
 };
 
-static const struct mips_cpu_info *
-mips_cpu_info_from_name (name)
-     const char *name;
+
+/* Return true if GIVEN is the same as CANONICAL, or if it is CANONICAL
+   with a final "000" replaced by "k".  Ignore case.
+
+   Note: this function is shared between GCC and GAS.  */
+
+static boolean
+mips_strict_matching_cpu_name_p (canonical, given)
+     const char *canonical, *given;
 {
-  int i;
+  while (*given != 0 && TOLOWER (*given) == TOLOWER (*canonical))
+    given++, canonical++;
 
-  for (i = 0; mips_cpu_info_table[i].name != NULL; i++)
-    if (strcasecmp (name, mips_cpu_info_table[i].name) == 0)
-      return (&mips_cpu_info_table[i]);
-
-  return NULL;
+  return ((*given == 0 && *canonical == 0)
+	  || (strcmp (canonical, "000") == 0 && strcasecmp (given, "k") == 0));
 }
+
+
+/* Return true if GIVEN matches CANONICAL, where GIVEN is a user-supplied
+   CPU name.  We've traditionally allowed a lot of variation here.
+
+   Note: this function is shared between GCC and GAS.  */
+
+static boolean
+mips_matching_cpu_name_p (canonical, given)
+     const char *canonical, *given;
+{
+  /* First see if the name matches exactly, or with a final "000"
+     turned into "k".  */
+  if (mips_strict_matching_cpu_name_p (canonical, given))
+    return true;
+
+  /* If not, try comparing based on numerical designation alone.
+     See if GIVEN is an unadorned number, or 'r' followed by a number.  */
+  if (TOLOWER (*given) == 'r')
+    given++;
+  if (!ISDIGIT (*given))
+    return false;
+
+  /* Skip over some well-known prefixes in the canonical name,
+     hoping to find a number there too.  */
+  if (TOLOWER (canonical[0]) == 'v' && TOLOWER (canonical[1]) == 'r')
+    canonical += 2;
+  else if (TOLOWER (canonical[0]) == 'r' && TOLOWER (canonical[1]) == 'm')
+    canonical += 2;
+  else if (TOLOWER (canonical[0]) == 'r')
+    canonical += 1;
+
+  return mips_strict_matching_cpu_name_p (canonical, given);
+}
+
+
+/* Parse an option that takes the name of a processor as its argument.
+   OPTION is the name of the option and CPU_STRING is the argument.
+   Return the corresponding processor enumeration if the CPU_STRING is
+   recognized, otherwise report an error and return null.
+
+   A similar function exists in GCC.  */
+
+static const struct mips_cpu_info *
+mips_parse_cpu (option, cpu_string)
+     const char *option, *cpu_string;
+{
+  const struct mips_cpu_info *p;
+
+  /* 'from-abi' selects the most compatible architecture for the given
+     ABI: MIPS I for 32-bit ABIs and MIPS III for 64-bit ABIs.  For the
+     EABIs, we have to decide whether we're using the 32-bit or 64-bit
+     version.  Look first at the -mgp options, if given, otherwise base
+     the choice on MIPS_DEFAULT_64BIT.
+
+     Treat NO_ABI like the EABIs.  One reason to do this is that the
+     plain 'mips' and 'mips64' configs have 'from-abi' as their default
+     architecture.  This code picks MIPS I for 'mips' and MIPS III for
+     'mips64', just as we did in the days before 'from-abi'.  */
+  if (strcasecmp (cpu_string, "from-abi") == 0)
+    {
+      if (ABI_NEEDS_32BIT_REGS (mips_abi))
+	return mips_cpu_info_from_isa (ISA_MIPS1);
+
+      if (ABI_NEEDS_64BIT_REGS (mips_abi))
+	return mips_cpu_info_from_isa (ISA_MIPS3);
+
+      if (file_mips_gp32 >= 0)
+	return mips_cpu_info_from_isa (file_mips_gp32 ? ISA_MIPS1 : ISA_MIPS3);
+
+      return mips_cpu_info_from_isa (MIPS_DEFAULT_64BIT
+				     ? ISA_MIPS3
+				     : ISA_MIPS1);
+    }
+
+  /* 'default' has traditionally been a no-op.  Probably not very useful.  */
+  if (strcasecmp (cpu_string, "default") == 0)
+    return 0;
+
+  for (p = mips_cpu_info_table; p->name != 0; p++)
+    if (mips_matching_cpu_name_p (p->name, cpu_string))
+      return p;
+
+  as_bad ("Bad value (%s) for %s", cpu_string, option);
+  return 0;
+}
+
+/* Return the canonical processor information for ISA (a member of the
+   ISA_MIPS* enumeration).  */
 
 static const struct mips_cpu_info *
 mips_cpu_info_from_isa (isa)
@@ -13882,22 +13604,119 @@ mips_cpu_info_from_isa (isa)
 
   for (i = 0; mips_cpu_info_table[i].name != NULL; i++)
     if (mips_cpu_info_table[i].is_isa
-      && isa == mips_cpu_info_table[i].isa)
+	&& isa == mips_cpu_info_table[i].isa)
       return (&mips_cpu_info_table[i]);
 
   return NULL;
 }
-
-static const struct mips_cpu_info *
-mips_cpu_info_from_cpu (cpu)
-     int cpu;
+
+static void
+show (stream, string, col_p, first_p)
+     FILE *stream;
+     const char *string;
+     int *col_p;
+     int *first_p;
 {
-  int i;
+  if (*first_p)
+    {
+      fprintf (stream, "%24s", "");
+      *col_p = 24;
+    }
+  else
+    {
+      fprintf (stream, ", ");
+      *col_p += 2;
+    }
+
+  if (*col_p + strlen (string) > 72)
+    {
+      fprintf (stream, "\n%24s", "");
+      *col_p = 24;
+    }
+
+  fprintf (stream, "%s", string);
+  *col_p += strlen (string);
+
+  *first_p = 0;
+}
+
+void
+md_show_usage (stream)
+     FILE *stream;
+{
+  int column, first;
+  size_t i;
+
+  fprintf (stream, _("\
+MIPS options:\n\
+-membedded-pic		generate embedded position independent code\n\
+-EB			generate big endian output\n\
+-EL			generate little endian output\n\
+-g, -g2			do not remove unneeded NOPs or swap branches\n\
+-G NUM			allow referencing objects up to NUM bytes\n\
+			implicitly with the gp register [default 8]\n"));
+  fprintf (stream, _("\
+-mips1			generate MIPS ISA I instructions\n\
+-mips2			generate MIPS ISA II instructions\n\
+-mips3			generate MIPS ISA III instructions\n\
+-mips4			generate MIPS ISA IV instructions\n\
+-mips5                  generate MIPS ISA V instructions\n\
+-mips32                 generate MIPS32 ISA instructions\n\
+-mips64                 generate MIPS64 ISA instructions\n\
+-march=CPU/-mtune=CPU	generate code/schedule for CPU, where CPU is one of:\n"));
+
+  first = 1;
 
   for (i = 0; mips_cpu_info_table[i].name != NULL; i++)
-    if (!mips_cpu_info_table[i].is_isa
-      && cpu == mips_cpu_info_table[i].cpu)
-      return (&mips_cpu_info_table[i]);
+    show (stream, mips_cpu_info_table[i].name, &column, &first);
+  show (stream, "from-abi", &column, &first);
+  fputc ('\n', stream);
 
-  return NULL;
+  fprintf (stream, _("\
+-mCPU			equivalent to -march=CPU -mtune=CPU. Deprecated.\n\
+-no-mCPU		don't generate code specific to CPU.\n\
+			For -mCPU and -no-mCPU, CPU must be one of:\n"));
+
+  first = 1;
+
+  show (stream, "3900", &column, &first);
+  show (stream, "4010", &column, &first);
+  show (stream, "4100", &column, &first);
+  show (stream, "4650", &column, &first);
+  fputc ('\n', stream);
+
+  fprintf (stream, _("\
+-mips16			generate mips16 instructions\n\
+-no-mips16		do not generate mips16 instructions\n"));
+  fprintf (stream, _("\
+-mgp32			use 32-bit GPRs, regardless of the chosen ISA\n\
+-mfp32			use 32-bit FPRs, regardless of the chosen ISA\n\
+-O0			remove unneeded NOPs, do not swap branches\n\
+-O			remove unneeded NOPs and swap branches\n\
+-n			warn about NOPs generated from macros\n\
+--[no-]construct-floats [dis]allow floating point values to be constructed\n\
+--trap, --no-break	trap exception on div by 0 and mult overflow\n\
+--break, --no-trap	break exception on div by 0 and mult overflow\n"));
+#ifdef OBJ_ELF
+  fprintf (stream, _("\
+-KPIC, -call_shared	generate SVR4 position independent code\n\
+-non_shared		do not generate position independent code\n\
+-xgot			assume a 32 bit GOT\n\
+-mabi=ABI		create ABI conformant object file for:\n"));
+
+  first = 1;
+
+  show (stream, "32", &column, &first);
+  show (stream, "o64", &column, &first);
+  show (stream, "n32", &column, &first);
+  show (stream, "64", &column, &first);
+  show (stream, "eabi", &column, &first);
+
+  fputc ('\n', stream);
+
+  fprintf (stream, _("\
+-32			create o32 ABI object file (default)\n\
+-n32			create n32 ABI object file\n\
+-64			create 64 ABI object file\n"));
+#endif
 }
