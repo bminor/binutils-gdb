@@ -1,5 +1,5 @@
 /* Target machine description for EST-300, for GDB, the GNU debugger.
-   Copyright 1994 Free Software Foundation, Inc.
+   Copyright 1994, 1995 Free Software Foundation, Inc.
    Contributed by Steve Chamberlain @ Cygnus Support.
 
 This file is part of GDB.
@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define BELIEVE_PCC_PROMOTION 1
 
 /* We have more complex, useful breakpoints on the target.  */
-#define	DECR_PC_AFTER_BREAK	0
+#define DECR_PC_AFTER_BREAK 0
 
 #define NUM_REGS 18
 
