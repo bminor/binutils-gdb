@@ -545,26 +545,22 @@ typedef struct bfd_target
 
   /* Jumps for coff swapping */
 
-#define AUXENT void*
-#define SYMENT void*
-#define LINENO void*
-
   SDEF(void, _bfd_coff_swap_aux_in,(
        bfd            *abfd ,
-       AUXENT    *ext ,
+       PTR		ext,
        int             type,
        int             class ,
-       union internal_auxent  *in));
+       PTR             in));
 
   SDEF(void, _bfd_coff_swap_sym_in,(
        bfd            *abfd ,
-       SYMENT *ext ,
-       struct internal_syment      *in));
+       PTR 		ext,
+       PTR 		in));
 
-  SDEF(void, _bfd_coff_swap_lineno_in,(
-       bfd            *abfd,
-       LINENO *ext,
-       struct internal_lineno      *in));
+  SDEF(void, _bfd_coff_swap_lineno_in,  (
+	bfd            *abfd,
+	PTR            ext,
+	PTR		in));
 
 } bfd_target;
 

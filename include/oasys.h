@@ -1,9 +1,9 @@
-
+#define OASYS_MAX_SEC_COUNT 16
 /* **** */
 
 
 typedef struct {
-  int32_type  version;
+  uint32_type  version;
   char create_date[12];
   char revision_date[12];
   uint32_type mod_count;
@@ -34,9 +34,10 @@ typedef struct {
   int32_type mod_size;
   int32_type dep_count;
   int32_type depee_count;
-  int32_type sect_count;
   int32_type file_offset;
-  int32_type mod_name_length;
+  int32_type sect_count;
+  char *module_name;
+
 } oasys_module_table_type;
 
 
@@ -48,8 +49,9 @@ typedef struct {
   char depee_count[4];
   char sect_count[4];
   char file_offset[4];
-  char mod_name_length[4];
+  char mod_name[32];
 } oasys_external_module_table_type;
+
 
 
 typedef enum {
@@ -129,7 +131,7 @@ typedef struct {
 } oasys_end_record_type;
 
 
-#define OASYS_MAX_SEC_COUNT 16
+
 typedef union
 {
   oasys_record_header_type header;
