@@ -1,3 +1,11 @@
+2004-10-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-crx/reloc-num8.d: Adjust for changed orphan placement.
+	* ld-crx/reloc-num16.d: Likewise.
+	* ld-crx/reloc-num32.d: Likewise.
+	* ld-scripts/provide-2.t: Start .data at 0x2000.
+	* ld-scripts/provide-2.d: Adjust.
+
 2004-10-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-scripts/sort.exp: Run for ELF targets only.

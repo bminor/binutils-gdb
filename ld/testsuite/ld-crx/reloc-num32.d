@@ -8,6 +8,6 @@
 
 Disassembly of section .text:
 
-11014000 <_start>:
-11014000:	78 56       	orw	r7, r8
-11014002:	34 12       	addcw	\$0x3, r4
+.* <_start>:
+.*:	78 56       	orw	r7, r8
+.*:	34 12       	addcw	\$0x3, r4

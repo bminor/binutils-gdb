@@ -8,5 +8,5 @@
 
 Disassembly of section .text:
 
-11014000 <_start>:
-11014000:	12 00       	addub	\$0x1, r2
+.* <_start>:
+.*:	12 00       	addub	\$0x1, r2
