@@ -227,9 +227,15 @@ som_symtab_read (abfd, objfile, section_offsets)
 		 the nasty habit of placing section symbols from the literal
 		 subspaces in the middle of the program's text.  Filter
 		 those out as best we can.  Check for first and last character
-		 being '$'.  */
+		 being '$'. 
+
+		 And finally, the newer HP compilers emit crud like $PIC_foo$N
+		 in some circumstance (PIC code I guess).  It's also claimed
+		 that they emit D$ symbols too.  What stupidity.  */
 	      if ((symname[0] == 'L' && symname[1] == '$')
-		  || (symname[0] == '$' && symname[strlen(symname) - 1] == '$'))
+		  || (symname[0] == '$' && symname[strlen(symname) - 1] == '$')
+		  || (symname[0] == 'D' && symname[1] == '$')
+		  || (strncmp (symname, "$PIC", 4) == 0))
 		continue;
 	      break;
 
