@@ -1,3 +1,9 @@
+2004-02-17  Petko Manolov  <petkan@nucleusys.com>
+
+	* config/tc-arm.c (do_mav_dspsc_1): Correct offset of CRn.
+	(do_mav_dspsc_2): Likewise.
+	Fix accumulator registers move opcodes.
+
 2004-02-13  Hannes Reinecke  <hare@suse.de>
             Jakub Jelinek  <jakub@redhat.com>
 

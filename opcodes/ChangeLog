@@ -1,3 +1,7 @@
+2004-02-10  Petko Manolov  <petkan@nucleusys.com>
+
+	* arm-opc.h Maverick accumulator register opcode fixes.
+
 2004-02-13  Ben Elliston  <bje@wasabisystems.com>
 
 	* m32r-dis.c: Regenerate.
