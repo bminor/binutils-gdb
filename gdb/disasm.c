@@ -313,12 +313,22 @@ do_assembly_only (struct ui_out *uiout, disassemble_info * di,
 /* Initialize the disassemble info struct ready for the specified
    stream.  */
 
+static int
+fprintf_disasm (void *stream, const char *format, ...)
+{
+  va_list args;
+  va_start (args, format);
+  vfprintf_filtered (stream, format, args);
+  va_end (args);
+  /* Something non -ve.  */
+  return 0;
+}
+
 static disassemble_info
 gdb_disassemble_info (struct gdbarch *gdbarch, struct ui_file *file)
 {
   disassemble_info di;
-  INIT_DISASSEMBLE_INFO_NO_ARCH (di, file,
-				 (fprintf_ftype) fprintf_filtered);
+  init_disassemble_info (&di, file, fprintf_disasm);
   di.flavour = bfd_target_unknown_flavour;
   di.memory_error_func = dis_asm_memory_error;
   di.print_address_func = dis_asm_print_address;
@@ -334,7 +344,6 @@ gdb_disassemble_info (struct gdbarch *gdbarch, struct ui_file *file)
   di.arch = gdbarch_bfd_arch_info (gdbarch)->arch;
   di.mach = gdbarch_bfd_arch_info (gdbarch)->mach;
   di.endian = gdbarch_byte_order (gdbarch);
-  di.insn_sets = 0;
   return di;
 }
 
@@ -395,9 +404,8 @@ extern void _initialize_disasm (void);
 void
 _initialize_disasm (void)
 {
-  
-  INIT_DISASSEMBLE_INFO_NO_ARCH (deprecated_tm_print_insn_info, gdb_stdout,
-				 (fprintf_ftype)fprintf_filtered);
+  init_disassemble_info (&deprecated_tm_print_insn_info, gdb_stdout,
+			 fprintf_disasm);
   deprecated_tm_print_insn_info.flavour = bfd_target_unknown_flavour;
   deprecated_tm_print_insn_info.read_memory_func = dis_asm_read_memory;
   deprecated_tm_print_insn_info.memory_error_func = dis_asm_memory_error;

@@ -1,3 +1,12 @@
+2003-09-03  Andrew Cagney  <cagney@redhat.com>
+
+	* disasm.c (fprintf_disasm): New function.
+	(gdb_disassemble_info): Call "init_disassemble_info", instead of
+	INIT_DISASSEMBLE_INFO_NO_ARCH.  Do not initialize "insn_sets",
+	reverts 2003-08-14 change.
+	(_initialize_disasm): Call "init_disassemble_info", instead of
+	INIT_DISASSEMBLE_INFO_NO_ARCH.
+
 2003-09-03  Michael Snyder  <msnyder@redhat.com>
 
 	* config/djgpp/fnchange.lst: Fix up sim/frv/profile-fr*.[ch].
