@@ -1,6 +1,6 @@
 /* PowerPC-specific support for 32-bit ELF
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004 Free Software Foundation, Inc.
+   2004, 2005 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2820,7 +2820,7 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   htab->dynbss = bfd_get_section_by_name (abfd, ".dynbss");
   htab->dynsbss = s = bfd_make_section (abfd, ".dynsbss");
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, SEC_ALLOC))
+      || ! bfd_set_section_flags (abfd, s, SEC_ALLOC | SEC_LINKER_CREATED))
     return FALSE;
 
   if (! info->shared)
