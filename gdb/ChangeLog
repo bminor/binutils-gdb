@@ -1,3 +1,12 @@
+Tue Jul 11 20:38:36 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c: General cleanup.  Delete all #if 0 code.  Convert
+ 	all old style K&R function definitions to ISO-C.
+	(struct gdbarch_tdep): Add mips_abi_string.
+	(mips_gdbarch_init): Initialize.
+ 	(mips_dump_tdep): Print mips_abi_string and other values.
+	(mips_push_arguments): Add more detailed tracing.
+
 Tue Jul 11 20:16:09 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips-tdep.c (mips32_next_pc, mips16_next_pc,
