@@ -1,3 +1,8 @@
+2000-10-23  Philip Blundell  <pb@futuretv.com>
+
+	* elf32-arm.h (elf32_arm_finish_dynamic_symbol): Undo previous
+	accidental checkin.
+
 2000-10-22  Philip Blundell  <philb@gnu.org>
 
 	* elf32-arm.h (elf32_arm_finish_dynamic_symbol): Don't make 
