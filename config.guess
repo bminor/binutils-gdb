@@ -217,6 +217,9 @@ EOF
     TSUNAMI:LynxOS:2.2*:*)
 	echo sparc-lynx-lynxos${UNAME_RELEASE}
 	exit 0 ;;
+    rs6000:LynxOS:2.2*:*)
+	echo rs6000-lynx-lynxos${UNAME_RELEASE}
+	exit 0 ;;
 esac
 
 #echo '(No uname command or uname output not recognized.)' 1>&2
@@ -277,6 +280,14 @@ main()
 
 #if defined(_SEQUENT_)
   printf("i386-sequent-ptx\n"); exit(0);
+#endif
+
+#if defined(vax)
+#if !defined(ultrix)
+  printf("vax-dec-bsd\n"); exit(0);
+#else
+  printf("vax-dec-ultrix\n"); exit(0);
+#endif
 #endif
 
   exit (1);

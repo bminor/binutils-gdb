@@ -1,3 +1,17 @@
+Fri Feb 11 15:33:33 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* config.guess:  Add Lynx/rs6000 config support.
+
+Tue Feb  8 13:41:09 1994  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* configure.in (alpha-dec-osf1*, alpha*-*-*): Build gas.
+
+Mon Feb  7 15:42:36 1994  Jeffrey A. Law  (law@cygnus.com)
+
+	* configure.in (hppa*-*-osf*): Treat this just like most other
+	PA configurations (eg no binutils or ld).
+	(hppa*-*-*elf*): These configurations have binutils and ld.
+
 Sun Feb  6 16:35:07 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config.sub (hiux): Fix typo.  From m-kasahr@sramhc.sra.co.JP.
