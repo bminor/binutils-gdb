@@ -84,7 +84,13 @@ struct symtoken
    An array should be preceded in the list by the size of the array.  */
 enum type_pieces
   {
-    tp_end = -1, tp_pointer, tp_reference, tp_array, tp_function
+    tp_end = -1, 
+    tp_pointer, 
+    tp_reference, 
+    tp_array, 
+    tp_function, 
+    tp_const, 
+    tp_volatile
   };
 /* The stack can contain either an enum type_pieces or an int.  */
 union type_stack_elt

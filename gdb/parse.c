@@ -1255,6 +1255,8 @@ struct type *
 follow_types (struct type *follow_type)
 {
   int done = 0;
+  int make_const = 0;
+  int make_volatile = 0;
   int array_size;
   struct type *range_type;
 
@@ -1263,12 +1265,40 @@ follow_types (struct type *follow_type)
       {
       case tp_end:
 	done = 1;
+	if (make_const)
+	  follow_type = make_cv_type (make_const, 
+				      TYPE_VOLATILE (follow_type), 
+				      follow_type, 0);
+	if (make_volatile)
+	  follow_type = make_cv_type (TYPE_CONST (follow_type), 
+				      make_volatile, 
+				      follow_type, 0);
+	break;
+      case tp_const:
+	make_const = 1;
+	break;
+      case tp_volatile:
+	make_volatile = 1;
 	break;
       case tp_pointer:
 	follow_type = lookup_pointer_type (follow_type);
+	if (make_const)
+	  follow_type = make_cv_type (make_const, 
+				      TYPE_VOLATILE (follow_type), 
+				      follow_type, 0);
+	if (make_volatile)
+	  follow_type = make_cv_type (TYPE_CONST (follow_type), 
+				      make_volatile, 
+				      follow_type, 0);
+	make_const = make_volatile = 0;
 	break;
       case tp_reference:
 	follow_type = lookup_reference_type (follow_type);
+	if (make_const)
+	  follow_type = make_cv_type (make_const, TYPE_VOLATILE (follow_type), follow_type, 0);
+	if (make_volatile)
+	  follow_type = make_cv_type (TYPE_CONST (follow_type), make_volatile, follow_type, 0);
+	make_const = make_volatile = 0;
 	break;
       case tp_array:
 	array_size = pop_type_int ();
