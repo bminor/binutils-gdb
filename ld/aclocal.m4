@@ -730,33 +730,20 @@ AC_DEFUN(AM_LC_MESSAGES,
     fi
   fi])
 
-# Check to see if we're running under Cygwin32, without using
-# AC_CANONICAL_*.  If so, set output variable CYGWIN32 to "yes".
-# Otherwise set it to "no".
-
-dnl AM_CYGWIN32()
-AC_DEFUN(AM_CYGWIN32,
-[AC_CACHE_CHECK(for Cygwin32 environment, am_cv_cygwin32,
-[AC_TRY_COMPILE(,[return __CYGWIN32__;],
-am_cv_cygwin32=yes, am_cv_cygwin32=no)
-rm -f conftest*])
-CYGWIN32=
-test "$am_cv_cygwin32" = yes && CYGWIN32=yes])
-
 # Check to see if we're running under Win32, without using
 # AC_CANONICAL_*.  If so, set output variable EXEEXT to ".exe".
 # Otherwise set it to "".
 
 dnl AM_EXEEXT()
-dnl This knows we add .exe if we're building in the Cygwin32
+dnl This knows we add .exe if we're building in the Cygwin
 dnl environment. But if we're not, then it compiles a test program
 dnl to see if there is a suffix for executables.
 AC_DEFUN(AM_EXEEXT,
-[AC_REQUIRE([AM_CYGWIN32])
+[AC_REQUIRE([AM_CYGWIN])
 AC_REQUIRE([AM_MINGW32])
 AC_MSG_CHECKING([for executable suffix])
 AC_CACHE_VAL(am_cv_exeext,
-[if test "$CYGWIN32" = yes || test "$MINGW32" = yes; then
+[if test "$CYGWIN" = yes || test "$MINGW32" = yes; then
 am_cv_exeext=.exe
 else
 cat > am_c_test.c << 'EOF'
@@ -780,6 +767,35 @@ EXEEXT=""
 test x"${am_cv_exeext}" != xno && EXEEXT=${am_cv_exeext}
 AC_MSG_RESULT(${am_cv_exeext})
 AC_SUBST(EXEEXT)])
+
+# Check to see if we're running under Cygwin, without using
+# AC_CANONICAL_*.  If so, set output variable CYGWIN to "yes".
+# Otherwise set it to "no".
+
+dnl AM_CYGWIN()
+AC_DEFUN(AM_CYGWIN,
+[AC_CACHE_CHECK(for Cygwin environment, am_cv_cygwin,
+[AC_TRY_COMPILE(,[return __CYGWIN__;],
+am_cv_cygwin=yes, am_cv_cygwin=no)
+rm -f conftest*])
+CYGWIN=
+test "$am_cv_cygwin" = yes && CYGWIN=yes])
+
+# Check to see if we're running under Cygwin32, without using
+# AC_CANONICAL_*.  If so, set output variable CYGWIN32 to "yes".
+# Otherwise set it to "no".
+# Note: Although Cygwin32 has changed names, for now we keep the
+# old macro around...
+
+dnl AM_CYGWIN32()
+AC_DEFUN(AM_CYGWIN32,
+[AC_CACHE_CHECK(for Cygwin32 environment, am_cv_cygwin32,
+[AC_TRY_COMPILE(,[return __CYGWIN32__;],
+am_cv_cygwin32=yes, am_cv_cygwin32=no)
+rm -f conftest*])
+CYGWIN32=
+test "$am_cv_cygwin32" = yes && CYGWIN32=yes])
+
 
 # Check to see if we're running under Mingw, without using
 # AC_CANONICAL_*.  If so, set output variable MINGW32 to "yes".

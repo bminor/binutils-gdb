@@ -3462,9 +3462,9 @@ fi
    fi
   
 
-echo $ac_n "checking for Cygwin32 environment""... $ac_c" 1>&6
-echo "configure:3467: checking for Cygwin32 environment" >&5
-if eval "test \"`echo '$''{'am_cv_cygwin32'+set}'`\" = set"; then
+echo $ac_n "checking for Cygwin environment""... $ac_c" 1>&6
+echo "configure:3467: checking for Cygwin environment" >&5
+if eval "test \"`echo '$''{'am_cv_cygwin'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
@@ -3472,25 +3472,25 @@ else
 #include "confdefs.h"
 
 int main() {
-return __CYGWIN32__;
+return __CYGWIN__;
 ; return 0; }
 EOF
 if { (eval echo configure:3479: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
-  am_cv_cygwin32=yes
+  am_cv_cygwin=yes
 else
   echo "configure: failed program was:" >&5
   cat conftest.$ac_ext >&5
   rm -rf conftest*
-  am_cv_cygwin32=no
+  am_cv_cygwin=no
 fi
 rm -f conftest*
 rm -f conftest*
 fi
 
-echo "$ac_t""$am_cv_cygwin32" 1>&6
-CYGWIN32=
-test "$am_cv_cygwin32" = yes && CYGWIN32=yes
+echo "$ac_t""$am_cv_cygwin" 1>&6
+CYGWIN=
+test "$am_cv_cygwin" = yes && CYGWIN=yes
 echo $ac_n "checking for Mingw32 environment""... $ac_c" 1>&6
 echo "configure:3496: checking for Mingw32 environment" >&5
 if eval "test \"`echo '$''{'am_cv_mingw32'+set}'`\" = set"; then
@@ -3527,7 +3527,7 @@ echo "configure:3527: checking for executable suffix" >&5
 if eval "test \"`echo '$''{'am_cv_exeext'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
-  if test "$CYGWIN32" = yes || test "$MINGW32" = yes; then
+  if test "$CYGWIN" = yes || test "$MINGW32" = yes; then
 am_cv_exeext=.exe
 else
 cat > am_c_test.c << 'EOF'
@@ -4012,7 +4012,7 @@ fi
 
 
 case "${host}" in
-i[345]86-*-msdos* | i[345]86-*-go32* | i[345]86-*-mingw32* | *-*-cygwin32* | *-*-windows)
+i[345]86-*-msdos* | i[345]86-*-go32* | i[345]86-*-mingw32* | *-*-cygwin* | *-*-windows)
   cat >> confdefs.h <<\EOF
 #define USE_BINARY_FOPEN 1
 EOF

@@ -1,6 +1,9 @@
 Wed Nov 18 18:18:43 1998  Geoffrey Noer  <noer@cygnus.com>
 
 	* configure.tgt: change refs from cygwin32* to cygwin*.
+	* aclocal.m4: regenerate
+	* configure.in: don't need to call AM_CYGWIN32.
+	* configure: regenerate
 
 Mon Nov 16 22:14:07 1998  DJ Delorie  <dj@cygnus.com>
 
