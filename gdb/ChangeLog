@@ -1,5 +1,10 @@
 2004-03-08  Corinna Vinschen  <vinschen@redhat.com>
 
+	* sh-tdep.c (sh_print_registers_info): Use for loop.
+	Don't skip multiple registers when a float register is encountered.
+
+2004-03-08  Corinna Vinschen  <vinschen@redhat.com>
+
 	Fix PR tdep/1291.
 	* sh-tdep.c (sh_analyze_prologue): Align PC relative addressing
 	to official SH documentation.

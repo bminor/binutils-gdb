@@ -1792,35 +1792,23 @@ sh_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
   else
     /* do all (or most) registers */
     {
-      regnum = 0;
-      while (regnum < NUM_REGS)
+      for (regnum = 0; regnum < NUM_REGS; ++regnum)
 	{
 	  /* If the register name is empty, it is undefined for this
 	     processor, so don't display anything.  */
 	  if (REGISTER_NAME (regnum) == NULL
 	      || *(REGISTER_NAME (regnum)) == '\0')
-	    {
-	      regnum++;
-	      continue;
-	    }
+	    continue;
 
 	  if (TYPE_CODE (gdbarch_register_type (gdbarch, regnum)) ==
 	      TYPE_CODE_FLT)
 	    {
+	      /* true for "INFO ALL-REGISTERS" command */
 	      if (fpregs)
-		{
-		  /* true for "INFO ALL-REGISTERS" command */
-		  sh_do_fp_register (gdbarch, file, regnum);	/* FP regs */
-		  regnum++;
-		}
-	      else
-		regnum += (FP_LAST_REGNUM - FP0_REGNUM);	/* skip FP regs */
+		sh_do_fp_register (gdbarch, file, regnum);	/* FP regs */
 	    }
 	  else
-	    {
-	      sh_do_register (gdbarch, file, regnum);	/* All other regs */
-	      regnum++;
-	    }
+	    sh_do_register (gdbarch, file, regnum);	/* All other regs */
 	}
 
       if (fpregs)
