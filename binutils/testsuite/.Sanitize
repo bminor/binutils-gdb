@@ -30,7 +30,6 @@ Makefile.in
 binutils.all
 config
 configure.in
-lib
 
 # are executed as a /bin/sh shell script after everything else is
 # done.
