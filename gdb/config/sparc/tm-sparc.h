@@ -568,10 +568,10 @@ extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
 #define	PRINT_REGISTER_HOOK(regno)	\
   if (((regno) >= FP0_REGNUM)		\
    && ((regno) <  FP0_REGNUM + 32)	\
-   && (0 == (regno & 1))) {		\
+   && (0 == ((regno) & 1))) {		\
     char doublereg[8];		/* two float regs */	\
-    if (!read_relative_register_raw_bytes (i  , doublereg  )	\
-     && !read_relative_register_raw_bytes (i+1, doublereg+4)) {	\
+    if (!read_relative_register_raw_bytes ((regno)  , doublereg  )	\
+     && !read_relative_register_raw_bytes ((regno)+1, doublereg+4)) {	\
       printf("\t");			\
       print_floating (doublereg, builtin_type_double, stdout);	\
     }					\
