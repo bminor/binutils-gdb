@@ -4372,6 +4372,10 @@ s_leb128 (int sign)
 {
   expressionS exp;
 
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
   do
     {
       expression (&exp);
