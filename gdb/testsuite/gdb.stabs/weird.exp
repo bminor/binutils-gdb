@@ -170,9 +170,9 @@ field3 = 0x77888877\}" "print struct constant"
 
 	# GDB does not yet support arrays indexed by anything at all unusual
 	setup_xfail "*-*-*"
-	gdb_test "p array0" " = \{42, 43, 44, 45, 46, 47\}" "array0 with strange index"
+	gdb_test "p array0" " = \\{42, 43, 44, 45, 46, 47\\}" "array0 with strange index"
 	setup_xfail "*-*-*"
-	gdb_test "p array1" " = \{42, 43, 44\}" "array1 with strange index"
+	gdb_test "p array1" " = \\{42, 43, 44\\}" "array1 with strange index"
 
 	# GDB does not yet support this feature
 	gdb_test "whatis one_var" "type = inttype_one" \
