@@ -1,5 +1,5 @@
 /* BFD library support routines for architectures.
-   Copyright (C) 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91-95, 1996 Free Software Foundation, Inc.
    Hacked by John Gilmore and Steve Chamberlain of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -17,6 +17,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+#include "bfd.h"
+#include "sysdep.h"
+#include "libbfd.h"
+#include <ctype.h>
 
 /*
 
@@ -87,8 +92,13 @@ DESCRIPTION
 .
 .  bfd_arch_a29k,      {* AMD 29000 *}
 .  bfd_arch_sparc,     {* SPARC *}
-.#define bfd_mach_sparc		1
-.#define bfd_mach_sparc64	2
+.#define bfd_mach_sparc			1
+. {* start-sanitize-v8plus *}
+.#define bfd_mach_sparc_v8plus		2
+.#define bfd_mach_sparc_v8plusa		3
+. {* end-sanitize-v8plus *}
+.#define bfd_mach_sparc_v9		4
+.#define bfd_mach_sparc_v9a		5 {* v9 with ultrasparc add'ns *}
 .  bfd_arch_mips,      {* MIPS Rxxxx *}
 .  bfd_arch_i386,      {* Intel 386 *}
 .  bfd_arch_we32k,     {* AT&T WE32xxx *}
@@ -130,11 +140,6 @@ DESCRIPTION
 
 */
 
-#include "bfd.h"
-#include "sysdep.h"
-#include "libbfd.h"
-#include <ctype.h>
-
 /*
 
 SUBSECTION
@@ -152,37 +157,91 @@ DESCRIPTION
 .  int bits_per_byte;
 .  enum bfd_architecture arch;
 .  unsigned long mach;
-.  char *arch_name;
-.  CONST  char *printable_name;
+.  const char *arch_name;
+.  const char *printable_name;
 .  unsigned int section_align_power;
 . {* true if this is the default machine for the architecture *}
 .  boolean the_default;	
-.  CONST struct bfd_arch_info * (*compatible)
-.	PARAMS ((CONST struct bfd_arch_info *a,
-.	         CONST struct bfd_arch_info *b));
+.  const struct bfd_arch_info * (*compatible)
+.	PARAMS ((const struct bfd_arch_info *a,
+.	         const struct bfd_arch_info *b));
 .
-.  boolean (*scan) PARAMS ((CONST struct bfd_arch_info *, CONST char *));
-.  {* How to disassemble an instruction, producing a printable
-.     representation on a specified stdio stream.  This isn't
-.     defined for most processors at present, because of the size
-.     of the additional tables it would drag in, and because gdb
-.     wants to use a different interface.  *}
-.  unsigned int (*disassemble) PARAMS ((bfd_vma addr, CONST char *data,
-.				        PTR stream));
+.  boolean (*scan) PARAMS ((const struct bfd_arch_info *, const char *));
 .
-.  struct bfd_arch_info *next;
+.  const struct bfd_arch_info *next;
 .} bfd_arch_info_type;
 */
 
-bfd_arch_info_type   *bfd_arch_info_list;
+extern const bfd_arch_info_type bfd_a29k_arch;
+extern const bfd_arch_info_type bfd_alpha_arch;
+/* start-sanitize-arc */
+extern const bfd_arch_info_type bfd_arc_arch;
+/* end-sanitize-arc */
+extern const bfd_arch_info_type bfd_arm_arch;
+extern const bfd_arch_info_type bfd_h8300_arch;
+extern const bfd_arch_info_type bfd_h8500_arch;
+extern const bfd_arch_info_type bfd_hppa_arch;
+extern const bfd_arch_info_type bfd_i386_arch;
+extern const bfd_arch_info_type bfd_i860_arch;
+extern const bfd_arch_info_type bfd_i960_arch;
+extern const bfd_arch_info_type bfd_m68k_arch;
+extern const bfd_arch_info_type bfd_m88k_arch;
+extern const bfd_arch_info_type bfd_mips_arch;
+extern const bfd_arch_info_type bfd_powerpc_arch;
+extern const bfd_arch_info_type bfd_rs6000_arch;
+extern const bfd_arch_info_type bfd_sh_arch;
+/* start-sanitize-rce */
+extern const bfd_arch_info_type bfd_rce_arch;
+/* end-sanitize-rce */
+extern const bfd_arch_info_type bfd_sparc_arch;
+extern const bfd_arch_info_type bfd_vax_arch;
+extern const bfd_arch_info_type bfd_we32k_arch;
+extern const bfd_arch_info_type bfd_z8k_arch;
+extern const bfd_arch_info_type bfd_ns32k_arch;
+extern const bfd_arch_info_type bfd_w65_arch;
 
+static const bfd_arch_info_type * const bfd_archures_list[] =
+{
+#ifdef SELECT_ARCHITECTURES
+  SELECT_ARCHITECTURES,
+#else
+  &bfd_a29k_arch,
+  &bfd_alpha_arch,
+/* start-sanitize-arc */
+  &bfd_arc_arch,
+/* end-sanitize-arc */
+  &bfd_arm_arch,
+  &bfd_h8300_arch,
+  &bfd_h8500_arch,
+  &bfd_hppa_arch,
+  &bfd_i386_arch,
+  &bfd_i860_arch,
+  &bfd_i960_arch,
+  &bfd_m68k_arch,
+  &bfd_m88k_arch,
+  &bfd_mips_arch,
+  &bfd_powerpc_arch,
+  &bfd_rs6000_arch,
+  &bfd_sh_arch,
+/* start-sanitize-rce */
+  &bfd_rce_arch,
+/* end-sanitize-rce */
+  &bfd_sparc_arch,
+  &bfd_vax_arch,
+  &bfd_we32k_arch,
+  &bfd_z8k_arch,
+  &bfd_ns32k_arch,
+  &bfd_w65_arch,
+#endif
+  0
+};
 
 /*
 FUNCTION
 	bfd_printable_name
 
 SYNOPSIS
-	CONST char *bfd_printable_name(bfd *abfd);
+	const char *bfd_printable_name(bfd *abfd);
 
 DESCRIPTION
 	Return a printable string representing the architecture and machine
@@ -190,7 +249,7 @@ DESCRIPTION
 
 */
 
-CONST char *
+const char *
 bfd_printable_name (abfd)
      bfd *abfd;
 {
@@ -204,7 +263,7 @@ FUNCTION
 	bfd_scan_arch
 
 SYNOPSIS
-	bfd_arch_info_type *bfd_scan_arch(CONST char *string);
+	const bfd_arch_info_type *bfd_scan_arch(const char *string);
 
 DESCRIPTION
 	Figure out if BFD supports any cpu which could be described with
@@ -213,21 +272,23 @@ DESCRIPTION
 
 */
 
-bfd_arch_info_type *
+const bfd_arch_info_type *
 bfd_scan_arch (string)
-     CONST char *string;
+     const char *string;
 {
-  struct bfd_arch_info *ap;
+  const bfd_arch_info_type * const *app, *ap;
 
   /* Look through all the installed architectures */
-  for (ap = bfd_arch_info_list;
-       ap != (bfd_arch_info_type *)NULL;
-       ap = ap->next) {
+  for (app = bfd_archures_list; *app != NULL; app++)
+    {
+      for (ap = *app; ap != NULL; ap = ap->next)
+	{
+	  if (ap->scan (ap, string))
+	    return ap;
+	}
+    }
 
-    if (ap->scan(ap, string)) 
-      return ap;
-  }
-  return (bfd_arch_info_type *)NULL;
+  return NULL;
 }
 
 
@@ -237,9 +298,9 @@ FUNCTION
 	bfd_arch_get_compatible
 
 SYNOPSIS
-	CONST bfd_arch_info_type *bfd_arch_get_compatible(
-		CONST bfd *abfd,
-	        CONST bfd *bbfd);
+	const bfd_arch_info_type *bfd_arch_get_compatible(
+		const bfd *abfd,
+	        const bfd *bbfd);
 
 DESCRIPTION
 	Determine whether two BFDs'
@@ -249,10 +310,10 @@ DESCRIPTION
 	an <<arch_info>> structure describing the compatible machine.
 */
 
-CONST bfd_arch_info_type *
+const bfd_arch_info_type *
 bfd_arch_get_compatible (abfd, bbfd)
-     CONST bfd *abfd;
-     CONST bfd *bbfd;
+     const bfd *abfd;
+     const bfd *bbfd;
 {
   /* If either architecture is unknown, then all we can do is assume
      the user knows what he's doing.  */
@@ -262,7 +323,7 @@ bfd_arch_get_compatible (abfd, bbfd)
   	return abfd->arch_info;
 
   /* Otherwise architecture-specific code has to decide.  */
-  return  abfd->arch_info->compatible(abfd->arch_info,bbfd->arch_info);
+  return abfd->arch_info->compatible (abfd->arch_info, bbfd->arch_info);
 }
 
 
@@ -277,11 +338,11 @@ DESCRIPTION
 	structure, until the correct back end has determined the real
 	architecture of the file.
 
-.extern bfd_arch_info_type bfd_default_arch_struct;
+.extern const bfd_arch_info_type bfd_default_arch_struct;
 
 */
 
-bfd_arch_info_type bfd_default_arch_struct =
+const bfd_arch_info_type bfd_default_arch_struct =
 {
     32,32,8,bfd_arch_unknown,0,"unknown","unknown",2,true,
     bfd_default_compatible,
@@ -294,7 +355,7 @@ FUNCTION
 	bfd_set_arch_info
 
 SYNOPSIS
-	void bfd_set_arch_info(bfd *abfd, bfd_arch_info_type *arg);
+	void bfd_set_arch_info(bfd *abfd, const bfd_arch_info_type *arg);
 
 DESCRIPTION
 	Set the architecture info of @var{abfd} to @var{arg}.
@@ -303,7 +364,7 @@ DESCRIPTION
 void
 bfd_set_arch_info (abfd, arg)
      bfd *abfd;
-     bfd_arch_info_type *arg;
+     const bfd_arch_info_type *arg;
 {
   abfd->arch_info = arg;
 }
@@ -328,39 +389,27 @@ boolean
 bfd_default_set_arch_mach (abfd, arch, mach)
      bfd *abfd;
      enum bfd_architecture arch;
-     unsigned    long mach;
+     unsigned long mach;
 {
-  static struct bfd_arch_info *old_ptr = &bfd_default_arch_struct;
-  boolean found = false;
-  /* run through the table to find the one we want, we keep a little
-     cache to speed things up */
-  if (old_ptr == 0 || arch != old_ptr->arch || mach != old_ptr->mach) {
-    bfd_arch_info_type *ptr;
-    old_ptr = (bfd_arch_info_type *)NULL;
-    for (ptr = bfd_arch_info_list;
-	 ptr != (bfd_arch_info_type *)NULL;
-	 ptr= ptr->next) {
-      if (ptr->arch == arch &&
-	  ((ptr->mach == mach) || (ptr->the_default && mach == 0))) {
-	old_ptr = ptr;
-	found = true;
-	break;
-      }
-    }
-    if (found==false) {
-      /*looked for it and it wasn't there, so put in the default */
-      old_ptr = &bfd_default_arch_struct;
-      bfd_set_error (bfd_error_bad_value);
-    }
-  }
-  else {
-    /* it was in the cache */
-    found = true;
-  }
+  const bfd_arch_info_type * const *app, *ap;
 
-  abfd->arch_info = old_ptr;
+  for (app = bfd_archures_list; *app != NULL; app++)
+    {
+      for (ap = *app; ap != NULL; ap = ap->next)
+	{
+	  if (ap->arch == arch
+	      && (ap->mach == mach
+		  || (mach == 0 && ap->the_default)))
+	    {
+	      abfd->arch_info = ap;
+	      return true;
+	    }
+	}
+    }
 
-  return found;
+  abfd->arch_info = &bfd_default_arch_struct;
+  bfd_set_error (bfd_error_bad_value);
+  return false;
 }
 
 
@@ -443,138 +492,33 @@ bfd_arch_bits_per_address (abfd)
 }
 
 
-extern void bfd_a29k_arch PARAMS ((void));
-extern void bfd_alpha_arch PARAMS ((void));
-/* start-sanitize-arc */
-extern void bfd_arc_arch PARAMS ((void));
-/* end-sanitize-arc */
-extern void bfd_arm_arch PARAMS ((void));
-extern void bfd_h8300_arch PARAMS ((void));
-extern void bfd_h8500_arch PARAMS ((void));
-extern void bfd_hppa_arch PARAMS ((void));
-extern void bfd_i386_arch PARAMS ((void));
-extern void bfd_i960_arch PARAMS ((void));
-extern void bfd_m68k_arch PARAMS ((void));
-extern void bfd_m88k_arch PARAMS ((void));
-extern void bfd_mips_arch PARAMS ((void));
-extern void bfd_powerpc_arch PARAMS ((void));
-extern void bfd_rs6000_arch PARAMS ((void));
-extern void bfd_sh_arch PARAMS ((void));
-/* start-sanitize-rce */
-extern void bfd_rce_arch PARAMS ((void));
-/* end-sanitize-rce */
-extern void bfd_sparc_arch PARAMS ((void));
-extern void bfd_vax_arch PARAMS ((void));
-extern void bfd_we32k_arch PARAMS ((void));
-extern void bfd_z8k_arch PARAMS ((void));
-extern void bfd_ns32k_arch PARAMS ((void));
-extern void bfd_w65_arch PARAMS ((void));
-
-static void (*const archures_init_table[]) PARAMS ((void)) = 
-{
-#ifdef SELECT_ARCHITECTURES
-  SELECT_ARCHITECTURES,
-#else
-  bfd_a29k_arch,
-  bfd_alpha_arch,
-/* start-sanitize-arc */
-  bfd_arc_arch,
-/* end-sanitize-arc */
-  bfd_arm_arch,
-  bfd_h8300_arch,
-  bfd_h8500_arch,
-  bfd_hppa_arch,
-  bfd_i386_arch,
-  bfd_i960_arch,
-  bfd_m68k_arch,
-  bfd_m88k_arch,
-  bfd_mips_arch,
-  bfd_powerpc_arch,
-  bfd_rs6000_arch,
-  bfd_sh_arch,
-/* start-sanitize-rce */
-  bfd_rce_arch,
-/* end-sanitize-rce */
-  bfd_sparc_arch,
-  bfd_vax_arch,
-  bfd_we32k_arch,
-  bfd_z8k_arch,
-  bfd_ns32k_arch,
-  bfd_w65_arch,
-#endif
-  0
-  };
-
-
-
-/*
-INTERNAL_FUNCTION 
-	bfd_arch_init
-
-SYNOPSIS
-	void bfd_arch_init(void);
-
-DESCRIPTION
-	Initialize the architecture dispatch table by
-	calling all installed architecture packages and getting them
-	to poke around.
-*/
-
-void
-bfd_arch_init ()
-{
-    void (*const *ptable) PARAMS ((void));
-    for (ptable = archures_init_table; *ptable ; ptable++)
-      (*ptable)();
-}
-
-
-/*
-INTERNAL_FUNCTION
-	bfd_arch_linkin
-
-SYNOPSIS
-	void bfd_arch_linkin(bfd_arch_info_type *ptr);
-
-DESCRIPTION
-	Link the architecture info structure @var{ptr} into the list.
-*/
-
-void
-bfd_arch_linkin (ptr)
-     bfd_arch_info_type *ptr;
-{
-  ptr->next = bfd_arch_info_list;
-  bfd_arch_info_list = ptr;
-}
-
-
 /*
 INTERNAL_FUNCTION 
 	bfd_default_compatible
 
 SYNOPSIS
-	CONST bfd_arch_info_type *bfd_default_compatible
-	(CONST bfd_arch_info_type *a,
-	CONST bfd_arch_info_type *b);
+	const bfd_arch_info_type *bfd_default_compatible
+	(const bfd_arch_info_type *a,
+	const bfd_arch_info_type *b);
 
 DESCRIPTION
 	The default function for testing for compatibility.
 */
 
-CONST bfd_arch_info_type *
+const bfd_arch_info_type *
 bfd_default_compatible (a,b)
-     CONST bfd_arch_info_type *a;
-     CONST bfd_arch_info_type *b;
+     const bfd_arch_info_type *a;
+     const bfd_arch_info_type *b;
 {
-  if(a->arch != b->arch) return NULL;
+  if (a->arch != b->arch)
+    return NULL;
 
-  if (a->mach > b->mach) {
+  if (a->mach > b->mach)
     return a;
-  }
-  if (b->mach > a->mach) {
+
+  if (b->mach > a->mach)
     return b;
-  }
+
   return a;
 }
 
@@ -584,7 +528,7 @@ INTERNAL_FUNCTION
 	bfd_default_scan
 
 SYNOPSIS
-	boolean bfd_default_scan(CONST struct bfd_arch_info *info, CONST char *string);
+	boolean bfd_default_scan(const struct bfd_arch_info *info, const char *string);
 
 DESCRIPTION
 	The default function for working out whether this is an
@@ -593,43 +537,47 @@ DESCRIPTION
 
 boolean 
 bfd_default_scan (info, string)
-     CONST struct bfd_arch_info *info;
-     CONST char *string;
+     const struct bfd_arch_info *info;
+     const char *string;
 {
-  CONST  char *ptr_src;
-  CONST   char *ptr_tst;
+  const char *ptr_src;
+  const char *ptr_tst;
   unsigned long number;
   enum bfd_architecture arch;
+
   /* First test for an exact match */
-  if (strcmp(string, info->printable_name) == 0) return true;
+  if (strcmp (string, info->printable_name) == 0)
+    return true;
 
   /* See how much of the supplied string matches with the
      architecture, eg the string m68k:68020 would match the 68k entry
      up to the :, then we get left with the machine number */
 
-  for (ptr_src = string,
-       ptr_tst = info->arch_name; 
+  for (ptr_src = string, ptr_tst = info->arch_name; 
        *ptr_src && *ptr_tst;
-       ptr_src++,
-       ptr_tst++) 
+       ptr_src++, ptr_tst++) 
     {
       if (*ptr_src != *ptr_tst) break;
     }
 
   /* Chewed up as much of the architecture as will match, skip any
      colons */
-  if (*ptr_src == ':') ptr_src++;
-  
-  if (*ptr_src == 0) {
-    /* nothing more, then only keep this one if it is the default
-       machine for this architecture */
-    return info->the_default;
-  }
-  number = 0;
-  while (isdigit(*ptr_src)) {
-    number = number * 10 + *ptr_src  - '0';
+  if (*ptr_src == ':')
     ptr_src++;
-  }
+  
+  if (*ptr_src == 0)
+    {
+      /* nothing more, then only keep this one if it is the default
+	 machine for this architecture */
+      return info->the_default;
+    }
+
+  number = 0;
+  while (isdigit(*ptr_src))
+    {
+      number = number * 10 + *ptr_src  - '0';
+      ptr_src++;
+    }
 
   switch (number) 
     {
@@ -654,12 +602,14 @@ bfd_default_scan (info, string)
     case 68000: 
       arch = bfd_arch_m68k; 
       break;
+
     case 386: 
     case 80386:
     case 486:
     case 80486:
       arch = bfd_arch_i386;
       break;
+
     case 29000: 
       arch = bfd_arch_a29k;
       break;
@@ -695,6 +645,7 @@ bfd_default_scan (info, string)
     default:  
       return false;
     }
+
   if (arch != info->arch) 
     return false;
 
@@ -710,17 +661,17 @@ FUNCTION
 	bfd_get_arch_info
 
 SYNOPSIS
-	bfd_arch_info_type * bfd_get_arch_info(bfd *abfd);
+	const bfd_arch_info_type * bfd_get_arch_info(bfd *abfd);
 
 DESCRIPTION
 	Return the architecture info struct in @var{abfd}.
 */
 
-bfd_arch_info_type *
+const bfd_arch_info_type *
 bfd_get_arch_info (abfd)
      bfd *abfd;
 {
-  return  abfd->arch_info;
+  return abfd->arch_info;
 }
 
 
@@ -729,7 +680,7 @@ FUNCTION
 	bfd_lookup_arch
 
 SYNOPSIS
-	bfd_arch_info_type *bfd_lookup_arch
+	const bfd_arch_info_type *bfd_lookup_arch
 		(enum bfd_architecture
 		arch,
 		unsigned long machine);
@@ -741,23 +692,25 @@ DESCRIPTION
 	default.
 */
 
-bfd_arch_info_type * 
+const bfd_arch_info_type * 
 bfd_lookup_arch (arch, machine)
      enum bfd_architecture arch;
      unsigned long machine;
 {
-    bfd_arch_info_type *ap;
-    bfd_check_init();  
-    for (ap = bfd_arch_info_list; 
-	 ap !=  (bfd_arch_info_type *)NULL;
-	 ap = ap->next) {
-	    if (ap->arch == arch &&
-		((ap->mach == machine) 
-		 || (ap->the_default && machine == 0))) {
-		    return ap;
-		}
+  const bfd_arch_info_type * const *app, *ap;
+
+  for (app = bfd_archures_list; *app != NULL; app++)
+    {
+      for (ap = *app; ap != NULL; ap = ap->next)
+	{
+	  if (ap->arch == arch
+	      && (ap->mach == machine
+		  || (machine == 0 && ap->the_default)))
+	    return ap;
 	}
-    return (bfd_arch_info_type *)NULL;
+    }
+
+  return NULL;
 }
 
 
@@ -766,7 +719,7 @@ FUNCTION
 	bfd_printable_arch_mach
 
 SYNOPSIS
-	CONST char *bfd_printable_arch_mach
+	const char *bfd_printable_arch_mach
 		(enum bfd_architecture arch, unsigned long machine);
 
 DESCRIPTION
@@ -776,12 +729,14 @@ DESCRIPTION
 	This routine is depreciated.
 */
 
-CONST char *
+const char *
 bfd_printable_arch_mach (arch, machine)
      enum bfd_architecture arch;
      unsigned long machine;
 {
-    bfd_arch_info_type *ap = bfd_lookup_arch(arch, machine);
-    if(ap) return ap->printable_name;
+    const bfd_arch_info_type *ap = bfd_lookup_arch (arch, machine);
+
+    if (ap)
+      return ap->printable_name;
     return "UNKNOWN!";
 }

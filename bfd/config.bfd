@@ -416,14 +416,18 @@ case "${targ}" in
     targ_defvec=bfd_elf32_sparc_vec
     targ_selvecs=sunos_big_vec
     ;;
-  sparc64-*-elf* | sparc64-*-sysv4* | sparc64-*-solaris2*)
-    targ_defvec=bfd_elf64_sparc_vec
-    targ_selvecs=bfd_elf32_sparc_vec
-    ;;    
   sparc64-*-aout*)
     targ_defvec=sunos_big_vec
     targ_underscore=yes
     ;;
+  sparc64-*-elf*)
+    targ_defvec=bfd_elf64_sparc_vec
+    targ_selvecs=bfd_elf32_sparc_vec
+    ;;    
+  sparc64-*-solaris2* | sparc64-*-sysv4*)
+    targ_defvec=bfd_elf32_sparc_vec
+    targ_selvecs=bfd_elf64_sparc_vec
+    ;;    
   sparc-*-netware*)
     targ_defvec=bfd_elf32_sparc_vec
     targ_selvecs="nlm32_sparc_vec sunos_big_vec"

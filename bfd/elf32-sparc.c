@@ -22,6 +22,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
+/* start-sanitize-v8plus */
+#include "elf/sparc.h"
+/* end-sanitize-v8plus */
 
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
@@ -44,6 +47,15 @@ static boolean elf32_sparc_finish_dynamic_symbol
 	   Elf_Internal_Sym *));
 static boolean elf32_sparc_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+/* start-sanitize-v8plus */
+static boolean elf32_sparc_set_private_flags PARAMS ((bfd *, flagword));
+static boolean elf32_sparc_copy_private_bfd_data PARAMS ((bfd *, bfd *));
+static boolean elf32_sparc_merge_private_bfd_data PARAMS ((bfd *, bfd *));
+static boolean elf32_sparc_object_p
+  PARAMS ((bfd *));
+static void elf32_sparc_final_write_processing
+  PARAMS ((bfd *, boolean));
+/* end-sanitize-v8plus */
 
 enum reloc_type
   {
@@ -1479,7 +1491,150 @@ elf32_sparc_finish_dynamic_sections (output_bfd, info)
 
   return true;
 }
+/* start-sanitize-v8plus */
+
+/* Function to set e_flags.  */
 
+static boolean
+elf32_sparc_set_private_flags (abfd, flags)
+     bfd *abfd;
+     flagword flags;
+{
+  /* Once the flags have been set, you (apparently) can't change them.  */
+  BFD_ASSERT (!elf_flags_init (abfd)
+	      || elf_elfheader (abfd)->e_flags == flags);
+
+  elf_elfheader (abfd)->e_flags = flags;
+  elf_flags_init (abfd) = true;
+  return true;
+}
+
+/* Copy backend specific data from one object module to another.  */
+
+static boolean
+elf32_sparc_copy_private_bfd_data (ibfd, obfd)
+     bfd *ibfd;
+     bfd *obfd;
+{
+  /* This function is selected based on the input vector.  We only
+     want to copy information over if the output BFD also uses Elf
+     format.  */
+  if (bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  /* Once the flags have been set, you (apparently) can't change them.  */
+  BFD_ASSERT (!elf_flags_init (obfd)
+	      || elf_elfheader (obfd)->e_flags == elf_elfheader (ibfd)->e_flags);
+
+  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
+  elf_flags_init (obfd) = true;
+  return true;
+}
+
+/* Merge backend specific data from an object file to the output
+   object file when linking.  */
+
+static boolean
+elf32_sparc_merge_private_bfd_data (ibfd, obfd)
+     bfd *ibfd;
+     bfd *obfd;
+{
+  flagword old_flags;
+  flagword new_flags;
+  boolean error;
+
+  /* This function is selected based on the input vector.  We only
+     want to copy information over if the output BFD also uses Elf
+     format.  */
+  if (bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  error = false;
+
+  /* If the output machine is normal sparc, we can't allow v9 input files.  */
+  if (bfd_get_mach (obfd) == bfd_mach_sparc
+      && (bfd_get_mach (ibfd) == bfd_mach_sparc_v8plus
+	  || bfd_get_mach (ibfd) == bfd_mach_sparc_v8plusa))
+    {
+      error = true;
+      (*_bfd_error_handler)
+	("%s: compiled for a v8plus system and target is v8",
+	 bfd_get_filename (ibfd));
+    }
+  /* If the output machine is v9, we can't allow v9+vis input files.  */
+  if (bfd_get_mach (obfd) == bfd_mach_sparc_v8plus
+      && bfd_get_mach (ibfd) == bfd_mach_sparc_v8plusa)
+    {
+      error = true;
+      (*_bfd_error_handler)
+	("%s: compiled for a v8plusa system and target is v8plus",
+	 bfd_get_filename (ibfd));
+    }
+
+  new_flags = elf_elfheader (ibfd)->e_flags;
+  old_flags = elf_elfheader (obfd)->e_flags;
+  if (!elf_flags_init (obfd))	/* First call, no flags set */
+    {
+      elf_flags_init (obfd) = true;
+      elf_elfheader (obfd)->e_flags = new_flags;
+    }
+  else if (new_flags == old_flags)	/* Compatible flags are ok */
+    ;
+  else					/* Potentially incompatible flags */
+    {
+      new_flags &= ~ (EF_SPARC_32PLUS | EF_SPARC_SUN_US1);
+      old_flags &= ~ (EF_SPARC_32PLUS | EF_SPARC_SUN_US1);
+
+      /* Warn about any other mismatches */
+      if (new_flags != old_flags)
+	{
+	  error = true;
+	  (*_bfd_error_handler)
+	    ("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)",
+	     bfd_get_filename (ibfd), (long) new_flags, (long) old_flags);
+	}
+    }
+
+  if (error)
+    {
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
+
+  return true;
+}
+
+/* Set the right machine number.  */
+
+static boolean
+elf32_sparc_object_p (abfd)
+     bfd *abfd;
+{
+  if (elf_elfheader (abfd)->e_machine == EM_SPARC32PLUS)
+    return bfd_default_set_arch_mach (abfd, bfd_arch_sparc, bfd_mach_sparc_v8plus);
+  else
+    return bfd_default_set_arch_mach (abfd, bfd_arch_sparc, bfd_mach_sparc);
+}
+
+/* The final processing done just before writing out the object file.
+   We need to set the e_machine field appropriately.  */
+
+static void
+elf32_sparc_final_write_processing (abfd, linker)
+     bfd *abfd;
+     boolean linker;
+{
+  if (bfd_get_mach (abfd) == bfd_mach_sparc_v8plus)
+    {
+      elf_elfheader (abfd)->e_machine = EM_SPARC32PLUS;
+#if 0 /* FIXME: Not sure how to handle EF_SPARC_32PLUS_US1 */
+      elf_elfheader (abfd)->e_flags &=~ EF_SPARC_32PLUS_MASK;
+#endif
+      elf_elfheader (abfd)->e_flags |= EF_SPARC_32PLUS;
+    }
+}
+/* end-sanitize-v8plus */
+
 #define TARGET_BIG_SYM	bfd_elf32_sparc_vec
 #define TARGET_BIG_NAME	"elf32-sparc"
 #define ELF_ARCH	bfd_arch_sparc
@@ -1500,6 +1655,16 @@ elf32_sparc_finish_dynamic_sections (output_bfd, info)
 					elf32_sparc_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \
 					elf32_sparc_finish_dynamic_sections
+/* start-sanitize-v8plus */
+#define bfd_elf32_bfd_set_private_flags	elf32_sparc_set_private_flags
+#define bfd_elf32_bfd_copy_private_bfd_data \
+					elf32_sparc_copy_private_bfd_data
+#define bfd_elf32_bfd_merge_private_bfd_data \
+					elf32_sparc_merge_private_bfd_data
+#define elf_backend_object_p		elf32_sparc_object_p
+#define elf_backend_final_write_processing \
+					elf32_sparc_final_write_processing
+/* end-sanitize-v8plus */
 #define elf_backend_want_got_plt 0
 #define elf_backend_plt_readonly 0
 #define elf_backend_want_plt_sym 1

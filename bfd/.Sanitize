@@ -356,7 +356,7 @@ else
 	done
 fi
 
-v8plus_files="ChangeLog elf32-sparc.c"
+v8plus_files="ChangeLog archures.c bfd-in2.h cpu-sparc.c elf32-sparc.c"
 if ( echo $* | grep keep\-v8plus > /dev/null ) ; then
 	for i in $v8plus_files ; do
 		if test ! -d $i && (grep sanitize-v8plus $i > /dev/null) ; then

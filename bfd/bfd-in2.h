@@ -1109,8 +1109,13 @@ enum bfd_architecture
 
   bfd_arch_a29k,       /* AMD 29000 */
   bfd_arch_sparc,      /* SPARC */
-#define bfd_mach_sparc		1
-#define bfd_mach_sparc64	2
+#define bfd_mach_sparc			1
+  /* start-sanitize-v8plus */
+#define bfd_mach_sparc_v8plus		2
+#define bfd_mach_sparc_v8plusa		3
+  /* end-sanitize-v8plus */
+#define bfd_mach_sparc_v9		4
+#define bfd_mach_sparc_v9a		5  /* v9 with ultrasparc add'ns */
   bfd_arch_mips,       /* MIPS Rxxxx */
   bfd_arch_i386,       /* Intel 386 */
   bfd_arch_we32k,      /* AT&T WE32xxx */
