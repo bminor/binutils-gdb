@@ -1,3 +1,14 @@
+Fri May 31 13:59:24 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* nm.c (filter_symbols): Check for BSF_WEAK as well as
+	BSF_GLOBAL.
+	* objcopy.c (filter_symbols): Likewise.
+
+Wed May  8 16:57:20 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objcopy.c (copy_object): Make clear that it is only a warning
+	when the output file can not represent the architecture.
+
 Fri May  3 11:30:17 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c (disassemble_data): Don't refer to bytes past the end
