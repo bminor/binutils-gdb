@@ -1,3 +1,10 @@
+Wed Feb  3 14:16:38 1999  Christopher Faylor <cgf@cygnus.com>
+
+	* config/i386/cygwin.mh: Move TERMCAP test code to configure.in.
+	* configure.in: Treat libtermcap.a detection as a special case
+	when hosting on cygwin.
+	* configure: Regenerate.
+
 1999-02-03  Keith Seitz  <keiths@cygnus.com>
  
         * remote.c (remote_binary_download, remote_binary_length): New
