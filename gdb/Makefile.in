@@ -137,11 +137,11 @@ INTL_CFLAGS = -I$(INTL_DIR) -I$(INTL_SRC)
 # CLI sub directory definitons
 #
 SUBDIR_CLI_OBS = \
-	cli-dump.o \
-	cli-decode.o cli-script.o cli-cmds.o cli-setshow.o cli-utils.o
+	cli-dump.o cli-decode.o \
+	cli-interp.o cli-script.o cli-cmds.o cli-setshow.o cli-utils.o
 SUBDIR_CLI_SRCS = \
-	cli/cli-dump.c \
-	cli/cli-decode.c cli/cli-script.c cli/cli-cmds.c cli/cli-setshow.c \
+	cli/cli-dump.c cli/cli-decode.c \
+	cli/cli-interp.c cli/cli-script.c cli/cli-cmds.c cli/cli-setshow.c \
 	cli/cli-utils.c
 SUBDIR_CLI_DEPS =
 SUBDIR_CLI_INITS = \
@@ -159,13 +159,13 @@ SUBDIR_CLI_UNINSTALL=
 SUBDIR_MI_OBS = \
 	mi-out.o mi-console.o \
 	mi-cmds.o mi-cmd-var.o mi-cmd-break.o mi-cmd-stack.o \
-	mi-cmd-disas.o \
+	mi-cmd-disas.o mi-events.o mi-interp.o \
 	mi-main.o mi-parse.o mi-getopt.o
 SUBDIR_MI_SRCS = \
 	mi/mi-out.c mi/mi-console.c \
 	mi/mi-cmds.c \
 	mi/mi-cmd-var.c mi/mi-cmd-break.c mi/mi-cmd-stack.c \
-	mi/mi-cmd-disas.c \
+	mi/mi-cmd-disas.c mi/mi-events.c mi/mi-interp.c \
 	mi/mi-main.c mi/mi-parse.c mi/mi-getopt.c
 SUBDIR_MI_DEPS =
 SUBDIR_MI_INITS = \
@@ -533,7 +533,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	findvar.c regcache.c gdbarch.c arch-utils.c gdbtypes.c osabi.c \
 	inf-loop.c infcmd.c inflow.c infrun.c language.c \
 	kod.c kod-cisco.c \
-	ui-out.c cli-out.c \
+	ui-out.c cli-out.c interps.c \
 	varobj.c wrapper.c \
 	jv-exp.y jv-lang.c jv-valprint.c jv-typeprint.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c main.c maint.c \
@@ -637,6 +637,7 @@ gdbthread_h =	gdbthread.h $(breakpoint_h)
 gdbtypes_h =	gdbtypes.h
 inf_loop_h =  	inf-loop.h
 inferior_h =	inferior.h $(breakpoint_h)
+interps_h =	interps.h
 language_h =	language.h
 linespec_h =	linespec.h
 macroexp_h =	macroexp.h
@@ -736,7 +737,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	dbxread.o coffread.o elfread.o \
 	dwarfread.o dwarf2read.o mipsread.o stabsread.o corefile.o \
 	c-lang.o ch-exp.o ch-lang.o f-lang.o \
-	ui-out.o cli-out.o \
+	ui-out.o cli-out.o interps.o \
 	varobj.o wrapper.o \
 	jv-lang.o jv-valprint.o jv-typeprint.o \
 	m2-lang.o p-lang.o p-typeprint.o p-valprint.o \
@@ -1450,7 +1451,7 @@ event-loop.o: event-loop.c $(defs_h) $(top_h) $(event_loop_h) $(event_top_h)
 
 event-top.o: event-top.c $(top_h) $(readline_headers) \
       $(defs_h) $(inferior_h) $(event_loop_h) $(event_top_h) $(terminal_h) \
-	$(gdbcmd_h) $(target_h) $(cli_decode_h)
+	$(gdbcmd_h) $(target_h) $(cli_decode_h) $(interps_h)
 
 inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(inf_loop_h) $(event_loop_h) \
 	 $(event_top_h)
@@ -2184,7 +2185,7 @@ top.o: top.c $(top_h) $(bfd_h) $(getopt_h) $(readline_headers) $(call_cmds_h) \
 	$(defs_h) $(gdbcmd_h) $(inferior_h) $(language_h) \
 	$(remote_utils_h) $(gdb_string_h) $(event_loop_h) $(event_top_h) \
 	$(completer_h) $(version_h) $(ui_out_h) $(doublest_h) \
-	$(serial_h)
+	$(serial_h) $(interps_h)
 
 typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) $(language_h) $(symtab_h) $(target_h) \
@@ -2279,8 +2280,9 @@ p-exp.tab.o: p-exp.tab.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 gdb-events.o: gdb-events.c $(gdb_events_h) $(defs_h) $(gdbcmd_h)
 
 ui-out.o: ui-out.c $(defs_h) $(ui_out_h) $(expression_h) $(language_h)
-cli-out.o: cli-out.c $(defs_h) $(ui_out_h) $(cli_out_h)
-
+cli-out.o: cli-out.c $(defs_h) $(ui_out_h) $(cli_out_h) $(interps_h)
+inters.o: interps.c $(defs_h) $(gdbcmd_h) $(ui_out_h) $(event_loop_h) \
+		$(event_top_h) $(interps_h) $(gdb_h) $(wrapper_h)
 varobj.o: varobj.c $(defs_h) $(frame_h) $(value_h) \
 	$(language_h) $(valprint_h) $(varobj_h) $(wrapper_h)
 
@@ -2306,6 +2308,10 @@ cli-dump.o: $(srcdir)/cli/cli-dump.c $(defs_h) $(gdb_string_h) $(command_h) \
 	$(value_h) $(gdbcmd_h) $(completer_h) $(cli_dump_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-dump.c
 
+cli-interp.o: $(srcdir)/cli/cli-interp.c $(defs_h) $(interps_h) \
+		$(wrapper_h) $(event_top_h) $(ui_out_h) $(cli_out_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-interp.c
+
 cli-setshow.o: $(srcdir)/cli/cli-setshow.c $(cli_setshow_h) \
 		$(cli_decode_h) $(cli_cmds_h) $(defs_h) \
 		$(value_h) $(ui_out_h)
@@ -2325,6 +2331,7 @@ cli-utils.o: $(srcdir)/cli/cli-utils.c $(cli_utils_h) $(defs_h)
 # Need to explicitly specify the compile rule as make will do nothing
 # or try to compile the object file into the mi directory.
 
+mi_h =		$(srcdir)/mi/mi.h
 mi_cmds_h =	$(srcdir)/mi/mi-cmds.h
 mi_out_h =	$(srcdir)/mi/mi-out.h
 mi_parse_h =	$(srcdir)/mi/mi-parse.h
@@ -2346,6 +2353,13 @@ mi-cmd-break.o: $(srcdir)/mi/mi-cmd-break.c $(defs_h) $(mi_cmds_h) \
 mi-cmd-disas.o: $(srcdir)/mi/mi-cmd-disas.c $(defs_h) $(mi_cmds_h) \
 		$(ui_out_h) $(value_h) $(target_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-disas.c
+mi-events.o: $(srcdir)/mi/mi-events.c $(defs_h) $(ui_out_h) $(interps_h) \
+		$(gdb_h) $(breakpoint_h) $(mi_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-events.c
+mi-interp.o: $(srcdir)/mi/mi-interp.c $(defs_h) $(interps_h) \
+		$(event_top_h) $(event_loop_h) $(inferior_h) $(ui_out_h) \
+		$(top_h) $(mi_h) $(mi_cmds_h) $(mi_out_h) $(mi_console_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-interp.c
 mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(top_h) $(mi_cmds_h) $(ui_out_h) \
 		$(mi_console_h) $(mi_getopt_h) $(event_loop_h) $(event_top_h) \
 		$(mi_getopt_h) $(regcache_h) $(gdb_h) $(target_h) \

@@ -51,7 +51,9 @@ int display_space;
    processes UI events asynchronously. */
 int event_loop_p = 1;
 
-/* Has an interpreter been specified and if so, which. */
+/* Has an interpreter been specified and if so, which.
+   This will be used as a set command variable, so it should
+   always be malloc'ed - since do_setshow_command will free it. */
 char *interpreter_p;
 
 /* Whether this is the command line version or not */
@@ -354,7 +356,7 @@ extern int gdbtk_test (char *);
 	    }
 #endif /* GDBTK */
 	  case 'i':
-	    interpreter_p = optarg;
+	    interpreter_p = xstrdup (optarg);
 	    break;
 	  case 'd':
 	    dirarg[ndir++] = optarg;

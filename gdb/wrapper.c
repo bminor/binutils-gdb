@@ -19,8 +19,9 @@
 #include "defs.h"
 #include "value.h"
 #include "wrapper.h"
+#include "top.h"		/* for execute_command */
 
-/* Use this struct to pass arguments to wrapper routines. We assume
+/* use this struct to pass arguments to wrapper routines. We assume
    (arbitrarily) that no gdb function takes more than ten arguments. */
 struct gdb_wrapper_arguments
   {
@@ -49,6 +50,12 @@ struct captured_value_struct_elt_args
   int *static_memfuncp;
   char *err;
   struct value **result_ptr;
+};
+
+struct captured_execute_command_args
+{
+  char *command;
+  int from_tty;
 };
 
 static int wrap_parse_exp_1 (char *);
@@ -331,3 +338,20 @@ do_captured_value_struct_elt (struct ui_out *uiout, void *data)
   return GDB_RC_OK;
 }
 
+static int
+do_captured_execute_command (struct ui_out *uiout, void *data)
+{
+  struct captured_execute_command_args *args = data;
+  execute_command (args->command, args->from_tty);
+  return GDB_RC_OK;
+}
+
+enum gdb_rc
+gdb_execute_command (struct ui_out *uiout, char *command, int from_tty)
+{
+  struct captured_execute_command_args args;
+  args.command = command;
+  args.from_tty = from_tty;
+  return catch_exceptions (uiout, do_captured_execute_command, &args,
+			   NULL, RETURN_MASK_ALL);
+}

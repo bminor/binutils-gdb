@@ -26,6 +26,7 @@
 #include "terminal.h"		/* for job_control */
 #include "event-loop.h"
 #include "event-top.h"
+#include "interps.h"
 #include <signal.h>
 
 /* For dont_repeat() */
@@ -252,7 +253,7 @@ display_gdb_prompt (char *new_prompt)
 
   /* When an alternative interpreter has been installed, do not
      display the comand prompt. */
-  if (interpreter_p)
+  if (gdb_interpreter_display_prompt (new_prompt))
     return;
 
   if (target_executing && sync_execution)
@@ -1111,14 +1112,31 @@ set_async_prompt (char *args, int from_tty, struct cmd_list_element *c)
   PROMPT (0) = savestring (new_async_prompt, strlen (new_async_prompt));
 }
 
+void
+_initialize_event_loop (void)
+{
+  /* Tell gdb to use the cli_command_loop as the main loop. */
+  if (event_loop_p && command_loop_hook == NULL)
+    command_loop_hook = cli_command_loop;
+}
+
 /* Set things up for readline to be invoked via the alternate
    interface, i.e. via a callback function (rl_callback_read_char),
    and hook up instream to the event loop. */
 void
-_initialize_event_loop (void)
+gdb_setup_readline (void)
 {
+  /* This function is a noop for the async case.  The assumption is that
+     the async setup is ALL done in gdb_init, and we would only mess it up
+     here.  The async stuff should really go away over time. */
+
   if (event_loop_p)
     {
+      gdb_stdout = stdio_fileopen (stdout);
+      gdb_stderr = stdio_fileopen (stderr);
+      gdb_stdlog = gdb_stderr;  /* for moment */
+      gdb_stdtarg = gdb_stderr; /* for moment */
+
       /* If the input stream is connected to a terminal, turn on
          editing.  */
       if (ISATTY (instream))
@@ -1151,9 +1169,6 @@ _initialize_event_loop (void)
          register it with the event loop. */
       input_fd = fileno (instream);
 
-      /* Tell gdb to use the cli_command_loop as the main loop. */
-      command_loop_hook = cli_command_loop;
-
       /* Now we need to create the event sources for the input file
          descriptor. */
       /* At this point in time, this is the only event source that we
@@ -1164,3 +1179,31 @@ _initialize_event_loop (void)
       add_file_handler (input_fd, stdin_event_handler, 0);
     }
 }
+
+/* Disable command input through the standard CLI channels.  Used in
+   the suspend proc for interpreters that use the standard gdb readline
+   interface, like the cli & the mi. */
+
+void
+gdb_disable_readline (void)
+{
+  if (event_loop_p)
+    {
+      /* FIXME - It is too heavyweight to delete and remake these
+         every time you run an interpreter that needs readline.
+         It is probably better to have the interpreters cache these,
+         which in turn means that this needs to be moved into interpreter
+         specific code. */
+
+#if 0
+      ui_file_delete (gdb_stdout);
+      ui_file_delete (gdb_stderr);
+      gdb_stdlog = NULL;
+      gdb_stdtarg = NULL;
+#endif
+
+      rl_callback_handler_remove ();
+      delete_file_handler (input_fd);
+    }
+}
+

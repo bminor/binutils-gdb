@@ -1,3 +1,49 @@
+2002-05-28  Keith Seitz  <keiths@redhat.com>
+
+	* cli/cli-interp.c: New file. Almost entirely from Apple's
+	sources. Collected and moved here.
+	* mi/mi-interp.c: Ditto.
+	* mi/mi-events.c: Ditto.
+	* mi/mi.h: New file.
+	* Makefile.in: Add new files.
+	Update dependencies on interps.h.
+	* defs.h (selected_frame_level_changed_hook): Add declaration.
+	* wrapper.c (captured_execute_command): New function.
+	(do_captured_execute_command): New function.
+	* wrapper.h (captured_execute_command): Declare.
+	* top.c (catcher): If the caught command changes the uiout on us,
+	try to do something sane, like using the current interpreter's
+	uiout.
+	* mi/mi-main.c (captured_execute_command): Use catch_exception
+	instead of catch_errors.
+	(mi_execute_command_wrapper): Remove. Using catch_errors now.
+	(mi_input): Make global.
+	(mi_load_progress): Ditto.
+	Use interpreter functions instead of interpreter_p.
+	(mi_command_loop): Moved to mi-interp.c
+	(mi0_command_loop): Ditto.
+	(mi1_command_loop): Ditto.
+	(mi_init_ui): Remove.
+	(_initialize_mi_main): Remove. No longer needed.
+
+        From Jim Ingham <jingham@apple.com>:
+	* event-loop.c (start_event_loop): Poll the interpreter's event loop
+	as well as gdb...
+	* event-top.c (gdb_setup_readline, gdb_disable_readline): New functions,
+	used by console & mi to grab & relinquish control of the readline input.
+	* event-top.h (gdb_setup_readline, gdb_disable_readline): Declare.
+	* main.c (captured_main): Copy the interpreter name, since we will
+	eventually use it as a set variable.
+	* top.c (gdb_init): Use the interpreter mechanism to startup the stdin
+	handling.
+	* interps.c: New file. (Originally called interpreter.c by Apple)
+	* interps.h: New file. (Originally called interpreter.h by Apple)
+	* mi/mi-cmds.c, mi/mi-cmds.h: Add mi commands -interpreter-set and
+	-interpreter-exec.
+	* mi/mi-main.c: Add the interpreter functions.
+	(mi_execute_command): Don't print the prompt if the command return
+	is MI_CMD_QUIET.
+
 2002-05-28  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* ppcnbsd-nat.c: Rewrite.

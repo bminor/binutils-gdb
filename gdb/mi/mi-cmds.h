@@ -27,7 +27,7 @@
 enum mi_cmd_result
   {
     /* Report the command as ``done''.  Display both the ``NNN^done''
-       message and the completion prompt.  */
+       message and the completion prompt. */
     MI_CMD_DONE = 0,
     /* The command is still running in the forground.  Main loop should
        display the completion prompt. */
@@ -75,6 +75,8 @@ extern mi_cmd_args_ftype mi_cmd_exec_step_instruction;
 extern mi_cmd_args_ftype mi_cmd_exec_until;
 extern mi_cmd_args_ftype mi_cmd_exec_interrupt;
 extern mi_cmd_argv_ftype mi_cmd_gdb_exit;
+extern mi_cmd_argv_ftype mi_cmd_interpreter_set;
+extern mi_cmd_argv_ftype mi_cmd_interpreter_exec;
 extern mi_cmd_argv_ftype mi_cmd_stack_info_depth;
 extern mi_cmd_argv_ftype mi_cmd_stack_list_args;
 extern mi_cmd_argv_ftype mi_cmd_stack_list_frames;
@@ -122,4 +124,6 @@ extern int mi_debug_p;
 /* Raw console output - FIXME: should this be a parameter? */
 extern struct ui_file *raw_stdout;
 
+extern char *mi_error_message;
+void mi_execute_command (char *cmd, int from_tty);
 #endif
