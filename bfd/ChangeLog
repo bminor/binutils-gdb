@@ -1,3 +1,16 @@
+2001-09-30  kaz Kojima  <kkojima@rr.iij4u.or.jp>
+            Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* elf32-sh.c (sh_elf_howto_table, R_SH_REL32): Make
+	partial_inplace, matching assembler output.  Set src_mask to
+	all ones.
+	(sh_elf_relocate_section): Delete misplaced comment.
+	For relocatable linking against section symbol, call
+	_bfd_relocate_contents for partial_inplace relocs and adjust
+	rel->r_addend for others.
+	<case R_SH_DIR32, R_SH_REL32>: Fetch partial_inplace addend with
+	bfd_get_32, not at rel->r_addend.
+
 2001-09-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (_bfd_elf_link_hash_copy_indirect): Set ind refcounts to
