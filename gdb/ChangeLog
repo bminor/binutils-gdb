@@ -1,3 +1,7 @@
+2002-04-25  Theodore A. Roth  <troth@verinet.com>
+
+	* MAINTAINERS: Add myself to write-after-approval.
+
 2002-04-24  Pierre Muller  <ics.u-strasbg.fr>
 
 	* f-lang.c (get_bf_for_fcn): Replace fprintf (stderr,...
