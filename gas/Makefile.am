@@ -391,9 +391,9 @@ TARG_ENV_HFILES = \
 	config/te-macos.h \
 	config/te-nbsd.h \
 	config/te-nbsd532.h \
+	config/te-netware.h \
 	config/te-pc532mach.h \
 	config/te-pe.h \
-	config/te-ppcnw.h \
 	config/te-psos.h \
 	config/te-riscix.h \
 	config/te-sparcaout.h \

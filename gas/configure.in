@@ -190,7 +190,6 @@ changequote([,])dnl
       a29k-*-vxworks*)			fmt=coff ;;
 
       alpha*-*-*vms*)			fmt=evax ;;
-      alpha*-*-netware*)		fmt=ecoff ;;
       alpha*-*-osf*)			fmt=ecoff ;;
       alpha*-*-linuxecoff*)		fmt=ecoff ;;
       alpha*-*-linux-gnu*)		fmt=elf em=linux ;;
@@ -434,7 +433,6 @@ changequote([,])dnl
 	    fi ;;
       ppc-*-rtems*)			fmt=elf ;;
       ppc-*-macos*)			fmt=coff em=macos ;;
-      ppc-*-netware*)			fmt=elf em=ppcnw ;;
       ppc-*-nto*)			fmt=elf ;;
       ppc-*-kaos*)			fmt=elf ;;
       ppc-*-lynxos*)			fmt=elf em=lynx bfd_gas=yes ;;
@@ -523,7 +521,7 @@ changequote([,])dnl
       *-*-elf | *-*-sysv4* | *-*-solaris*) fmt=elf dev=yes ;;
       *-*-aros*)			fmt=elf em=linux bfd_gas=yes ;;
       *-*-vxworks | *-*-windiss)	fmt=elf ;;
-      *-*-netware)			fmt=elf ;;
+      *-*-netware)			fmt=elf em=netware ;;
     esac
 
     if test ${this_target} = $target ; then

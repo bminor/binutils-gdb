@@ -1,3 +1,15 @@
+2004-06-17  Jan Beulich <jbeulich@novell.com>
+
+	* config/tc-i386.c: Deal with LEX_QM the same way as with LEX_AT.
+	* config/te-netware.h: New file.
+	* config/te-ppcnw.h: Delete: Obsolete.
+	* configure.in: Eliminate ill NetWare targets. Make generic
+	NetWare target use proper emulation.
+	* Makefile.am: Eliminate reference to obsolete te-ppcnw.h, add
+	reference to new te-netware.h.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
 2004-06-15  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* config/tc-s390.c (s390_insn): Avoid incorrect signed/unsigned

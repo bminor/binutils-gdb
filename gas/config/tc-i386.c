@@ -182,15 +182,19 @@ typedef struct _i386_insn i386_insn;
 
 /* List of chars besides those in app.c:symbol_chars that can start an
    operand.  Used to prevent the scrubber eating vital white-space.  */
+const char extra_symbol_chars[] = "*%-(["
 #ifdef LEX_AT
-const char extra_symbol_chars[] = "*%-(@[";
-#else
-const char extra_symbol_chars[] = "*%-([";
+	"@"
 #endif
+#ifdef LEX_QM
+	"?"
+#endif
+	;
 
 #if (defined (TE_I386AIX)				\
      || ((defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF))	\
 	 && !defined (TE_LINUX)				\
+ 	 && !defined (TE_NETWARE)			\
 	 && !defined (TE_FreeBSD)			\
 	 && !defined (TE_NetBSD)))
 /* This array holds the chars that always start a comment.  If the
@@ -971,6 +975,10 @@ md_begin ()
 
 #ifdef LEX_AT
     identifier_chars['@'] = '@';
+#endif
+#ifdef LEX_QM
+    identifier_chars['?'] = '?';
+    operand_chars['?'] = '?';
 #endif
     digit_chars['-'] = '-';
     identifier_chars['_'] = '_';
