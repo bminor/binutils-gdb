@@ -1,4 +1,18 @@
+Mon Aug 24 11:50:09 1998  Joyce Janczyn  <janczyn@cygnus.com>
+
+	* sim-main.h (SIM_HANDLES_LMA): Define SIM_HANDLES_LMA.
+
 start-sanitize-am33
+Wed Aug 12 12:36:07 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* am33.igen: Handle case where first DSP operation modifies a 
+	register used in the second DSP operation correctly.
+
+Tue Jul 28 10:10:25 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* am33.igen: Detect cases where two operands must not match for
+	DSP instructions too.
+
 Mon Jul 27 12:04:17 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* am33.igen: Detect cases where two operands must not match in
