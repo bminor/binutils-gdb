@@ -1,3 +1,9 @@
+2003-12-13  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* mmix-opc.c (mmix_opcodes): Use GO_INSN_BYTE, PUSHGO_INSN_BYTE,
+	SETL_INSN_BYTE, INCH_INSN_BYTE, INCMH_INSN_BYTE, INCML_INSN_BYTE
+	and SWYM_INSN_BYTE instead of raw numbers.
+
 2003-12-10  Zack Weinberg  <zack@codesourcery.com>
 
 	* ppc-opc.c (MO): Make optional.
