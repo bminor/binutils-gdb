@@ -1,3 +1,18 @@
+2004-01-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* elf32-arm.h (struct elf32_arm_relocs_copied): Remove pc_count.
+	(elf32_arm_copy_indirect_symbol): Don't copy pc_count.
+	(elf32_arm_final_link_relocate): Handle PLT32 and PC24 relocs
+	identically.  Do not emit PC24 relocations for shared libraries.
+	(elf32_arm_gc_sweep_hook): Handle PLT32 and PC24 relocs
+	identically.  Don't adjust pc_count.
+	(elf32_arm_check_relocs): Handle PLT32 and PC24 relocs identically.
+	Set ELF_LINK_HASH_NEEDS_PLT for both.  Don't adjust pc_count; don't
+	adjust count for branch relocations.
+	(allocate_dynrelocs): Correct typo in call to
+	WILL_CALL_FINISH_DYNAMIC_SYMBOL.  Never allocate space for
+	PC24 or PLT32 relocs when linking.
+
 2004-01-09  Dmitry Semyonov  <Dmitry.Semyonov@oktet.ru>
 
 	* coff-arm.c (aoutarm_std_reloc_howto): [ARM_WINCE] Synchronize ARM_26D
