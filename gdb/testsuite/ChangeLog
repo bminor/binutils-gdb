@@ -1,3 +1,8 @@
+Tue Sep  6 13:16:11 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* lib/gdb.exp (runto):  Replace sub-pattern for hex value
+	by .*, since hex values have different syntax in Chill mode.
+
 Tue Sep  6 02:15:51 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.c++/demangle.exp (test_arm_style_demangling):  Remove
