@@ -1,3 +1,7 @@
+2000-06-20  J.T. Conklin  <jtc@redback.com>
+
+	* gdb.texinfo: Fix typo, $bpnum is set to last breakpoint number.
+
 Fri May 26 15:55:33 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (pdf, gdbint.pdf, gdb.pdf, stabs.pdf): New targets.
