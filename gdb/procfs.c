@@ -2323,10 +2323,16 @@ wait_again:
 	    case FLTTRACE:
 	      statval = (SIGTRAP << 8) | 0177;
 	      break;	      
+#ifdef FLTWATCH
 	    case FLTWATCH:
+	      statval = (SIGTRAP << 8) | 0177;
+	      break;
+#endif
+#ifdef FLTKWATCH
 	    case FLTKWATCH:
 	      statval = (SIGTRAP << 8) | 0177;
 	      break;
+#endif
 	    case FLTSTACK:
 	    case FLTACCESS:
 	    case FLTBOUNDS:
