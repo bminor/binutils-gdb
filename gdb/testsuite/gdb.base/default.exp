@@ -320,13 +320,9 @@ gdb_test "info frame" "No stack.|No selected frame." "info frame"
 #test info files
 gdb_test "info files" "" "info files"
 #test info float
-if [istarget "arm*-*-*"] then {
-    gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
-} elseif [istarget "xscale*-*-*"] then {
-    gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
-} elseif [istarget "thumb*-*-*"] then {
-    gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
-} elseif [istarget "strongarm*-*-*"] then {
+if { [istarget "arm*-*-*"] || \
+	[istarget "xscale*-*-*"] || \
+	[istarget "strongarm*-*-*"] } then {
     gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
 } elseif [istarget "i\[3456\]86-*-*"] then {
     gdb_test "info float" "R7:.*Status Word:.*Opcode:.*" "info float"

@@ -1,3 +1,8 @@
+2002-05-08  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/long_long.exp: Merge clauses for arm and xscale.
+	* gdb.base/default.exp: Merge clauses for arm, strongarm, xscale.
+
 2002-05-06  Michael Snyder  <msnyder@redhat.com>
 
 	* lib/gdb.exp (gdb_test): Add case to allow for status wrapper.
