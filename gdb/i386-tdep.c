@@ -702,7 +702,6 @@ struct i386_frame_cache
   CORE_ADDR saved_regs[I386_NUM_SAVED_REGISTERS];
   CORE_ADDR saved_sp;
   CORE_ADDR return_pc;
-  int frameless;
 };
 
 /* Parse the first few instructions the function to see what registers
@@ -743,7 +742,6 @@ i386_frame_cache (struct frame_info *frame, void **cachep)
   memset (cache->saved_regs, 0, sizeof (cache->saved_regs));
   cache->saved_sp = 0;
   cache->return_pc = 0;
-  cache->frameless = 0;
 
   /* If this is a signal trampoline, get %esp and %eip from the
      signal context.  */
@@ -796,7 +794,6 @@ i386_frame_cache (struct frame_info *frame, void **cachep)
 	     setup yet.  In the latter case only %eip and %esp have
 	     changed, and we can determine their previous values.  We
 	     pretend we can do the same in the former case.  */
-	  cache->frameless = 1;
 
 	  frame_read_register (frame, SP_REGNUM, buf);
 	  cache->saved_regs[PC_REGNUM] = extract_address (buf, 4);
@@ -836,21 +833,28 @@ i386_frame_id_unwind (struct frame_info *frame, void **cachep,
   /* Start with a NULL frame ID.  */
   *id = null_frame_id;
 
-  /* The frame's base is the address of a 4-byte word containing the
-     calling frame's address.
+  /* In principle, %ebp holds the frame pointer, which holds the base
+     address for the current stack frame.  However, for functions that
+     don't need it, the frame pointer is optional.  For these
+     "frameless" functions the frame pointer is actaully the frame
+     pointer of the calling frame.  Signal trampolines are just a
+     special case of a "frameless" function.  They (usually) share
+     their frame pointer with the frame that was in progress when the
+     signal occurred.
 
-     Signal trampolines don't have a meaningful frame.  The frame
-     pointer value we use is actually the frame pointer of the calling
-     frame -- that is, the frame which was in progress when the signal
-     trampoline was entered.  GDB mostly treats this frame pointer
-     value as a magic cookie.  We detect the case of a signal
-     trampoline by testing for get_frame_type() == SIGTRAMP_FRAME,
-     which is set based on PC_IN_SIGTRAMP.  */
+     FIXME: kettenis/20030316: If we're at the start of a function,
+     and this function's frame hasn't been setup yet, we essentially
+     treat the function as frameless.  As a result, once the prologue
+     of the function has been executed and the frame has been set up,
+     the frame's base changes, which isn't good.  */
 
-  if (get_frame_type (frame) == SIGTRAMP_FRAME || cache->frameless)
-    id->base = get_frame_base (frame);
-  else if (!inside_entry_file (get_frame_pc (frame)))
-    id->base = read_memory_unsigned_integer (get_frame_base (frame), 4);
+    if (!inside_entry_file (get_frame_pc (frame)))
+    {
+      char buf[4];
+
+      frame_unwind_register (frame, FP_REGNUM, buf);
+      id->base = extract_address (buf, 4);
+    }
 
   id->pc = cache->return_pc;
 }

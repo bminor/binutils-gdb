@@ -1,5 +1,10 @@
 2003-03-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (struct i386_frame_cache): Remove frameless.
+	(i386_frame_cache): Don't set CACHE->frameless.
+	(i386_frame_id_unwind): Simplify: Just unwind the frame pointer in
+	all cases.
+
 	* i386-tdep.c (regcache_cooked_write_unsigned): Remove define.
 	(i386_frame_cache): Cache PC.
 	(i386_frame_pop, i386_frame_pc_unwind): Remove.
