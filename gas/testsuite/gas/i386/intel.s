@@ -619,3 +619,4 @@ rot5:
  nop
  nop
  nop
+ mov	eax, DWORD PTR gs_foo@GOT[ebx]

@@ -1,3 +1,7 @@
+2000-11-30  Diego Novillo  <dnovillo@redhat.com>
+
+	* intel.s, intel.d: New test for @GOT references.
+
 2000-11-28  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* gas/sh/err.exp: New, framework for error-testing.

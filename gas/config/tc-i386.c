@@ -1383,6 +1383,11 @@ md_assemble (line)
       {
 	union i386_op temp_op;
 	unsigned int temp_type;
+#ifdef BFD_ASSEMBLER
+	enum bfd_reloc_code_real temp_disp_reloc;
+#else
+	int temp_disp_reloc;
+#endif
 	int xchg1 = 0;
 	int xchg2 = 0;
 
@@ -1402,6 +1407,9 @@ md_assemble (line)
 	temp_op = i.op[xchg2];
 	i.op[xchg2] = i.op[xchg1];
 	i.op[xchg1] = temp_op;
+	temp_disp_reloc = i.disp_reloc[xchg2];
+	i.disp_reloc[xchg2] = i.disp_reloc[xchg1];
+	i.disp_reloc[xchg1] = temp_disp_reloc;
 
 	if (i.mem_operands == 2)
 	  {

@@ -1,3 +1,8 @@
+2000-11-30  Diego Novillo  <dnovillo@redhat.com>
+
+	* tc-i386.c (md_assemble): Swap i.disp_relocs when using intel
+	syntax.
+
 2000-11-29  Richard Henderson  <rth@redhat.com>
 
 	* dwarf2dbg.c: Rewrite from scratch.  Queue all debugging output

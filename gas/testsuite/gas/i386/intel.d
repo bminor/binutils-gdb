@@ -624,3 +624,4 @@ Disassembly of section .text:
  a7d:	90 [ 	]*nop    
  a7e:	90 [ 	]*nop    
  a7f:	90 [ 	]*nop    
+ a80:	8b 83 00 00 00 00 [ 	]*mov    0x0\(%ebx\),%eax
