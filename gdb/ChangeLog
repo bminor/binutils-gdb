@@ -1,3 +1,26 @@
+2000-02-22  Jim Blandy  <jimb@redhat.com>
+
+	* gdbarch.sh: Make the `default' field really default to zero, as
+ 	documented.
+
+	Bring COERCE_FLOAT_TO_DOUBLE under gdbarch's control.
+	* valops.c (COERCE_FLOAT_TO_DOUBLE): Rework definition to be
+	more function-like.
+	(default_coerce_float_to_double, standard_coerce_float_to_double):
+	New functions.
+	(value_arg_coerce): Adjust for new definition.
+	* value.h (default_coerce_float_to_double,
+	standard_coerce_float_to_double): New declarations for the above.
+	* gdbarch.sh (coerce_float_to_double): New entry, replacing macro.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* tm-alpha.h, tm-fr30.h, tm-m32r.h, tm-mips.h, tm-hppa.h,
+ 	tm-rs6000.h, tm-sh.h, tm-sparc.h (COERCE_FLOAT_TO_DOUBLE): Change
+ 	definitions.
+	* mips-tdep.c (mips_coerce_float_to_double): Supply our own custom
+	function here.
+	(mips_gdbarch_init): Install that as our coerce_float_to_double
+	function.
+
 2000-02-22  Kevin Buettner  <kevinb@redhat.com>
 
 	* ppc-linux-nat.c (supply_gregset, supply_fpregset): Add return

@@ -1,3 +1,7 @@
+2000-02-22  Jim Blandy  <jimb@redhat.com>
+
+	* gdbint.texinfo: Document COERCE_FLOAT_TO_DOUBLE --- the new form.
+
 2000-02-15  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* Makefile.in (diststuff): New target.
