@@ -1,5 +1,18 @@
 2001-09-28  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-hppa.c (elf32_hppa_check_relocs): Update comment since we
+	no longer allocate here.  Localise some vars to blocks where they
+	are used.
+	(elf32_hppa_adjust_dynamic_symbol): Correct a comment.  Delay
+	setting of vars until needed.
+	(allocate_dynrelocs): Don't create a .plt entry without a reloc
+	when symbol visibilty makes a function local.
+	(elf32_hppa_finish_dynamic_symbol): Move expressions out of
+	swap_reloca_out function calls.
+	(elf32_hppa_relocate_section): Likewies.  Comment typo fix.
+	(elf32_hppa_finish_dynamic_sections): Migrate common code out of
+	switch statement.
+
 	* elf32-i386.c (elf_i386_check_relocs): Update comment since we
 	no longer allocate here.  Localise some vars to blocks where they
 	are used.  Remove separate switch stmt for creating .got sec.
