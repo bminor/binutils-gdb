@@ -17,7 +17,7 @@ forward-include "{srcroot}"include:coff:symconst.h 'coff/symconst.h'
 forward-include "{srcroot}"bfd:libcoff.h 'bfd/libcoff.h'
 forward-include "{srcroot}"bfd:libecoff.h 'bfd/libecoff.h'
 
-forward-include "{srcroot}"opcode:mips.h 'opcode/mips.h'
+forward-include "{srcroot}"include:opcode:mips.h 'opcode/mips.h'
 
 echo '#define TARGET_CPU "mips"' >config.new
 echo '#define TARGET_ALIAS "mips-idt-ecoff"' >>config.new
