@@ -588,14 +588,14 @@ TAGS: force
 	etags $(INCDIR)/*.h $(srcdir)/*.h $(srcdir)/*.c
 
 do_mostlyclean:
-	rm -f *.o *~ core *.E *.p *.ip aout-params.h gen-aout config.log \
-		pic/*.o
+	rm -f *.o *~ core *.E *.p *.ip aout-params.h gen-aout pic/*.o
 do_clean: do_mostlyclean
 	rm -f libbfd.a TAGS bfd.h stmp-bfd.h bfd-tmp.h ofiles stamp-ofiles \
 		elf32-target.h elf64-target.h $(SHLIB) $(SHLINK) \
 		piclist stamp-piclist
 do_distclean: do_clean
-	rm -f Makefile config.status config.cache config.h stamp-h bfd-in3.h
+	rm -f Makefile config.status config.cache config.h config.log \
+		stamp-h bfd-in3.h
 	rm -rf pic stamp-picdir
 do_maintainer_clean: do_distclean
 	rm -f $(srcdir)/bfd-in2.h $(srcdir)/libbfd.h $(srcdir)/libcoff.h
