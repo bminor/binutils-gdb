@@ -42,7 +42,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$
  * $Log$
- * Revision 1.1  1991/03/21 21:11:20  gumby
+ * Revision 1.2  1991/04/03 22:10:51  steve
+ * Fixed typo
+ *
+ * Revision 1.1.1.1  1991/03/21  21:11:22  gumby
+ * Back from Intel with Steve
+ *
+ * Revision 1.1  1991/03/21  21:11:20  gumby
  * Initial revision
  *
  * Revision 1.1  1991/03/13  00:22:29  chrisb
@@ -61,7 +67,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  * Initial revision
  *
  */
-
+#include "sysdep.h"
+#include "bfd.h"
 #include "libbfd.h"
 
 
@@ -319,7 +326,7 @@ int bytes_to_do;
     unsigned int size;
     unsigned int check_sum;
     byte_as_two_char_type *data; 
-    int bytes_this_chunk = bytes_to_do - bytes_written;
+ unsigned   int bytes_this_chunk = bytes_to_do - bytes_written;
 
     if (bytes_this_chunk > CHUNK) {
       bytes_this_chunk = CHUNK;
