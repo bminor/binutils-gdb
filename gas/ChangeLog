@@ -1,5 +1,16 @@
 Tue Oct 31 13:29:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-ppc.c (md_pseudo_table): Add "bc" and "ec".
+	(ppc_stab_symbol): New static variable.
+	(ppc_change_csect): Check that ppc_toc_csect is not NULL.
+	(ppc_stabx): Set ppc_stab_symbol around call to symbol_make.  Set
+	sy_tc.real_name to the stab string.
+	(ppc_bc, ppc_ec): New static functions.
+	(ppc_canonicalize_symbol_name): If ppc_stab_symbol is set, don't
+	do anything.
+	(ppc_symbol_new_hook): If ppc_stab_symbol is set, don't look for a
+	suffix.
+
 	* input-scrub.c (input_scrub_push): Reset sb_index.
 
 Mon Oct 30 17:52:46 1995  Ian Lance Taylor  <ian@cygnus.com>

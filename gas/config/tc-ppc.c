@@ -53,10 +53,12 @@ static void ppc_tc PARAMS ((int));
 #ifdef OBJ_XCOFF
 static void ppc_comm PARAMS ((int));
 static void ppc_bb PARAMS ((int));
+static void ppc_bc PARAMS ((int));
 static void ppc_bf PARAMS ((int));
 static void ppc_biei PARAMS ((int));
 static void ppc_bs PARAMS ((int));
 static void ppc_eb PARAMS ((int));
+static void ppc_ec PARAMS ((int));
 static void ppc_ef PARAMS ((int));
 static void ppc_es PARAMS ((int));
 static void ppc_csect PARAMS ((int));
@@ -127,12 +129,14 @@ const pseudo_typeS md_pseudo_table[] =
   { "comm",	ppc_comm,	0 },
   { "lcomm",	ppc_comm,	1 },
   { "bb",	ppc_bb,		0 },
+  { "bc",	ppc_bc,		0 },
   { "bf",	ppc_bf,		0 },
   { "bi",	ppc_biei,	0 },
   { "bs",	ppc_bs,		0 },
   { "csect",	ppc_csect,	0 },
   { "data",	ppc_section,	'd' },
   { "eb",	ppc_eb,		0 },
+  { "ec",	ppc_ec,		0 },
   { "ef",	ppc_ef,		0 },
   { "ei",	ppc_biei,	1 },
   { "es",	ppc_es,		0 },
@@ -1769,6 +1773,10 @@ ppc_byte (ignore)
 
 /* XCOFF specific pseudo-op handling.  */
 
+/* This is set if we are creating a .stabx symbol, since we don't want
+   to handle symbol suffixes for such symbols.  */
+static boolean ppc_stab_symbol;
+
 /* The .comm and .lcomm pseudo-ops for XCOFF.  XCOFF puts common
    symbols in the .bss segment as though they were local common
    symbols, and uses a different smclas.  */
@@ -1998,7 +2006,8 @@ ppc_change_csect (sym)
 	case XMC_UA:
 	case XMC_BS:
 	case XMC_UC:
-	  if (ppc_toc_csect->sy_tc.subseg + 1 == ppc_data_subsegment)
+	  if (ppc_toc_csect != NULL
+	      && ppc_toc_csect->sy_tc.subseg + 1 == ppc_data_subsegment)
 	    after_toc = 1;
 	  S_SET_SEGMENT (sym, data_section);
 	  sym->sy_tc.subseg = ppc_data_subsegment;
@@ -2145,7 +2154,11 @@ ppc_stabx (ignore)
     }
   ++input_line_pointer;
 
+  ppc_stab_symbol = true;
   sym = symbol_make (name);
+  ppc_stab_symbol = false;
+
+  sym->sy_tc.real_name = name;
 
   (void) expression (&exp);
 
@@ -2523,6 +2536,53 @@ ppc_eb (ignore)
   S_SET_STORAGE_CLASS (sym, C_FCN);
   S_SET_NUMBER_AUXILIARY (sym, 1);
   SA_SET_SYM_LNNO (sym, get_absolute_expression ());
+  sym->sy_tc.output = 1;
+
+  ppc_frob_label (sym);
+
+  demand_empty_rest_of_line ();
+}
+
+/* The .bc pseudo-op.  This just creates a C_BCOMM symbol with a
+   specified name.  */
+
+static void
+ppc_bc (ignore)
+     int ignore;
+{
+  char *name;
+  int len;
+  symbolS *sym;
+
+  name = demand_copy_C_string (&len);
+  sym = symbol_make (name);
+  S_SET_SEGMENT (sym, ppc_coff_debug_section);
+  sym->bsym->flags |= BSF_DEBUGGING;
+  S_SET_STORAGE_CLASS (sym, C_BCOMM);
+  S_SET_VALUE (sym, 0);
+  sym->sy_tc.output = 1;
+
+  ppc_frob_label (sym);
+
+  if (strlen (name) > SYMNMLEN)
+    ppc_debug_name_section_size += strlen (name) + 3;
+
+  demand_empty_rest_of_line ();
+}
+
+/* The .ec pseudo-op.  This just creates a C_ECOMM symbol.  */
+
+static void
+ppc_ec (ignore)
+     int ignore;
+{
+  symbolS *sym;
+
+  sym = symbol_make (".ec");
+  S_SET_SEGMENT (sym, ppc_coff_debug_section);
+  sym->bsym->flags |= BSF_DEBUGGING;
+  S_SET_STORAGE_CLASS (sym, C_ECOMM);
+  S_SET_VALUE (sym, 0);
   sym->sy_tc.output = 1;
 
   ppc_frob_label (sym);
@@ -3264,6 +3324,9 @@ ppc_canonicalize_symbol_name (name)
 {
   char *s;
 
+  if (ppc_stab_symbol)
+    return name;
+
   for (s = name; *s != '\0' && *s != '{' && *s != '['; s++)
     ;
   if (*s != '\0')
@@ -3308,6 +3371,9 @@ ppc_symbol_new_hook (sym)
   sym->sy_tc.align = 0;
   sym->sy_tc.size = NULL;
   sym->sy_tc.within = NULL;
+
+  if (ppc_stab_symbol)
+    return;
 
   s = strchr (S_GET_NAME (sym), '[');
   if (s == (const char *) NULL)
