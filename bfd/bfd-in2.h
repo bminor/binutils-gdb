@@ -696,7 +696,7 @@ extern boolean bfd_coff_get_auxent
   PARAMS ((bfd *, struct symbol_cache_entry *, int, union internal_auxent *));
 
 extern boolean bfd_coff_set_symbol_class
-  PARAMS ((bfd *, struct symbol_cache_entry *, unsigned char));
+  PARAMS ((bfd *, struct symbol_cache_entry *, unsigned int));
 
 /* ARM Interworking support.  Called from linker.  */
 extern boolean bfd_arm_allocate_interworking_sections
@@ -2701,6 +2701,7 @@ enum bfd_flavour {
   bfd_target_os9k_flavour,
   bfd_target_versados_flavour,
   bfd_target_msdos_flavour,
+  bfd_target_ovax_flavour,
   bfd_target_evax_flavour
 };
 
