@@ -127,8 +127,6 @@ static CORE_ADDR branch_dest (int opcode, int instr, CORE_ADDR pc,
 			      CORE_ADDR safety);
 static CORE_ADDR skip_prologue (CORE_ADDR, CORE_ADDR,
                                 struct rs6000_framedata *);
-static void frame_get_saved_regs (struct frame_info * fi,
-				  struct rs6000_framedata * fdatap);
 
 /* Is REGNO an AltiVec register?  Return 1 if so, 0 otherwise.  */
 int
@@ -1372,128 +1370,6 @@ rs6000_skip_trampoline_code (CORE_ADDR pc)
   ii = read_register (11);	/* r11 holds destination addr   */
   pc = read_memory_addr (ii, gdbarch_tdep (current_gdbarch)->wordsize); /* (r11) value */
   return pc;
-}
-
-/* If saved registers of frame FI are not known yet, read and cache them.
-   &FDATAP contains rs6000_framedata; TDATAP can be NULL,
-   in which case the framedata are read.  */
-
-static void
-frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
-{
-  CORE_ADDR frame_addr;
-  struct rs6000_framedata work_fdata;
-  struct gdbarch_tdep * tdep = gdbarch_tdep (current_gdbarch);
-  int wordsize = tdep->wordsize;
-
-  if (deprecated_get_frame_saved_regs (fi))
-    return;
-
-  if (fdatap == NULL)
-    {
-      fdatap = &work_fdata;
-      (void) skip_prologue (get_frame_func (fi), get_frame_pc (fi), fdatap);
-    }
-
-  frame_saved_regs_zalloc (fi);
-
-  /* If there were any saved registers, figure out parent's stack
-     pointer.  */
-  /* The following is true only if the frame doesn't have a call to
-     alloca(), FIXME.  */
-
-  if (fdatap->saved_fpr == 0
-      && fdatap->saved_gpr == 0
-      && fdatap->saved_vr == 0
-      && fdatap->saved_ev == 0
-      && fdatap->lr_offset == 0
-      && fdatap->cr_offset == 0
-      && fdatap->vr_offset == 0
-      && fdatap->ev_offset == 0)
-    frame_addr = 0;
-  else
-    /* NOTE: cagney/2002-04-14: The ->frame points to the inner-most
-       address of the current frame.  Things might be easier if the
-       ->frame pointed to the outer-most address of the frame.  In the
-       mean time, the address of the prev frame is used as the base
-       address of this frame.  */
-    frame_addr = DEPRECATED_FRAME_CHAIN (fi);
-
-  /* if != -1, fdatap->saved_fpr is the smallest number of saved_fpr.
-     All fpr's from saved_fpr to fp31 are saved.  */
-
-  if (fdatap->saved_fpr >= 0)
-    {
-      int i;
-      CORE_ADDR fpr_addr = frame_addr + fdatap->fpr_offset;
-      for (i = fdatap->saved_fpr; i < 32; i++)
-	{
-	  deprecated_get_frame_saved_regs (fi)[FP0_REGNUM + i] = fpr_addr;
-	  fpr_addr += 8;
-	}
-    }
-
-  /* if != -1, fdatap->saved_gpr is the smallest number of saved_gpr.
-     All gpr's from saved_gpr to gpr31 are saved.  */
-
-  if (fdatap->saved_gpr >= 0)
-    {
-      int i;
-      CORE_ADDR gpr_addr = frame_addr + fdatap->gpr_offset;
-      for (i = fdatap->saved_gpr; i < 32; i++)
-	{
-	  deprecated_get_frame_saved_regs (fi)[tdep->ppc_gp0_regnum + i] = gpr_addr;
-	  gpr_addr += wordsize;
-	}
-    }
-
-  /* if != -1, fdatap->saved_vr is the smallest number of saved_vr.
-     All vr's from saved_vr to vr31 are saved.  */
-  if (tdep->ppc_vr0_regnum != -1 && tdep->ppc_vrsave_regnum != -1)
-    {
-      if (fdatap->saved_vr >= 0)
-	{
-	  int i;
-	  CORE_ADDR vr_addr = frame_addr + fdatap->vr_offset;
-	  for (i = fdatap->saved_vr; i < 32; i++)
-	    {
-	      deprecated_get_frame_saved_regs (fi)[tdep->ppc_vr0_regnum + i] = vr_addr;
-	      vr_addr += DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
-	    }
-	}
-    }
-
-  /* if != -1, fdatap->saved_ev is the smallest number of saved_ev.
-	All vr's from saved_ev to ev31 are saved. ?????	*/
-  if (tdep->ppc_ev0_regnum != -1 && tdep->ppc_ev31_regnum != -1)
-    {
-      if (fdatap->saved_ev >= 0)
-	{
-	  int i;
-	  CORE_ADDR ev_addr = frame_addr + fdatap->ev_offset;
-	  for (i = fdatap->saved_ev; i < 32; i++)
-	    {
-	      deprecated_get_frame_saved_regs (fi)[tdep->ppc_ev0_regnum + i] = ev_addr;
-              deprecated_get_frame_saved_regs (fi)[tdep->ppc_gp0_regnum + i] = ev_addr + 4;
-	      ev_addr += DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_ev0_regnum);
-            }
-	}
-    }
-
-  /* If != 0, fdatap->cr_offset is the offset from the frame that holds
-     the CR.  */
-  if (fdatap->cr_offset != 0)
-    deprecated_get_frame_saved_regs (fi)[tdep->ppc_cr_regnum] = frame_addr + fdatap->cr_offset;
-
-  /* If != 0, fdatap->lr_offset is the offset from the frame that holds
-     the LR.  */
-  if (fdatap->lr_offset != 0)
-    deprecated_get_frame_saved_regs (fi)[tdep->ppc_lr_regnum] = frame_addr + fdatap->lr_offset;
-
-  /* If != 0, fdatap->vrsave_offset is the offset from the frame that holds
-     the VRSAVE.  */
-  if (fdatap->vrsave_offset != 0)
-    deprecated_get_frame_saved_regs (fi)[tdep->ppc_vrsave_regnum] = frame_addr + fdatap->vrsave_offset;
 }
 
 /* Return the size of register REG when words are WORDSIZE bytes long.  If REG

@@ -1,5 +1,9 @@
 2004-03-23  Andrew Cagney  <cagney@redhat.com>
 
+	* rs6000-tdep.c (frame_get_saved_regs): Delete unused function.
+
+2004-03-23  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (SIGTRAMP_START, SIGTRAMP_END): Deprecate.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* i386obsd-tdep.c (i386obsd_init_abi): Update.
