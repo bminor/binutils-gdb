@@ -1,3 +1,12 @@
+2001-07-10  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* depend.c: Use FOPEN_.. macros in calls to fopen().
+	* input-file.c: As above.
+	* itbl-ops.c: As above.
+	* listing.c: As above.
+	* output-file.c: As above.
+	* read.c: As above.
+
 2001-07-08  Anders Norlander <anorland@synergenix.se>
 
 	* read.c (s_incbin): New .incbin function.

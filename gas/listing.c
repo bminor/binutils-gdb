@@ -485,7 +485,7 @@ buffer_line (file, line, size)
 	}
 
       last_open_file_info = file;
-      last_open_file = fopen (file->filename, "r");
+      last_open_file = fopen (file->filename, FOPEN_RT);
       if (last_open_file == NULL)
 	{
 	  file->at_end = 1;
@@ -1121,7 +1121,7 @@ listing_print (name)
     }
   else
     {
-      list_file = fopen (name, "w");
+      list_file = fopen (name, FOPEN_WT);
       if (list_file != NULL)
 	using_stdout = 0;
       else

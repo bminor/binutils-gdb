@@ -183,17 +183,18 @@ itbl_parse (char *insntbl)
 {
   extern FILE *yyin;
   extern int yyparse (void);
-  yyin = fopen (insntbl, "r");
+
+  yyin = fopen (insntbl, FOPEN_RT);
   if (yyin == 0)
     {
       printf ("Can't open processor instruction specification file \"%s\"\n",
 	      insntbl);
       return 1;
     }
-  else
-    {
-      while (yyparse ());
-    }
+
+  while (yyparse ())
+    ;
+
   fclose (yyin);
   itbl_have_entries = 1;
   return 0;

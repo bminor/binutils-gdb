@@ -1,6 +1,6 @@
 /* read.c - read a source file -
    Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000 Free Software Foundation, Inc.
+   1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -4950,7 +4950,7 @@ s_incbin (x)
   demand_empty_rest_of_line ();
 
   /* Try opening absolute path first, then try include dirs.  */
-  binfile = fopen (filename, "rb");
+  binfile = fopen (filename, FOPEN_RB);
   if (binfile == NULL)
     {
       int i;
@@ -4961,7 +4961,7 @@ s_incbin (x)
 	{
 	  sprintf (path, "%s/%s", include_dirs[i], filename);
 
-	  binfile = fopen (path, "rb");
+	  binfile = fopen (path, FOPEN_RB);
 	  if (binfile != NULL)
 	    break;
 	}
@@ -4974,6 +4974,8 @@ s_incbin (x)
 
   if (binfile)
     {
+      long   file_len;
+
       register_dependency (path);
 
       /* Compute the length of the file.  */
@@ -4982,16 +4984,16 @@ s_incbin (x)
 	  as_bad (_("seek to end of .incbin file failed `%s'"), path);
 	  goto done;
 	}
-      len = ftell (binfile);
+      file_len = ftell (binfile);
 
       /* If a count was not specified use the size of the file.  */
       if (count == 0)
-	count = len;
+	count = file_len;
 
-      if (skip + count > len)
+      if (skip + count > file_len)
 	{
 	  as_bad (_("skip (%ld) + count (%ld) larger than file size (%ld)"),
-		  skip, count, len);
+		  skip, count, file_len);
 	  goto done;
 	}
 
@@ -5064,7 +5066,7 @@ s_include (arg)
       strcpy (path, include_dirs[i]);
       strcat (path, "/");
       strcat (path, filename);
-      if (0 != (try = fopen (path, "r")))
+      if (0 != (try = fopen (path, FOPEN_RT)))
 	{
 	  fclose (try);
 	  goto gotit;
