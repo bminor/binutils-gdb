@@ -1,3 +1,8 @@
+2001-02-10  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (md_parse_option): Don't try to compile
+	ELF-only option code if not ELF.
+
 2001-02-08  David Mosberger  <davidm@hpl.hp.com>
 
 	* config/tc-ia64.h (md_elf_section_type): New macro.

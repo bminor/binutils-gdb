@@ -9057,6 +9057,7 @@ md_parse_option (c, arg)
       g_switch_value = 0x7fffffff;
       break;
 
+#ifdef OBJ_ELF
       /* When generating ELF code, we permit -KPIC and -call_shared to
 	 select SVR4_PIC, and -non_shared to select no PIC.  This is
 	 intended to be compatible with Irix 5.  */
@@ -9090,6 +9091,7 @@ md_parse_option (c, arg)
     case OPTION_XGOT:
       mips_big_got = 1;
       break;
+#endif /* OBJ_ELF */
 
     case 'G':
       if (! USE_GLOBAL_POINTER_OPT)
@@ -9107,6 +9109,7 @@ md_parse_option (c, arg)
       g_switch_seen = 1;
       break;
 
+#ifdef OBJ_ELF
       /* The -32 and -64 options tell the assembler to output the 32
          bit or the 64 bit MIPS ELF format.  */
     case OPTION_32:
@@ -9128,6 +9131,7 @@ md_parse_option (c, arg)
 	mips_64 = 1;
       }
       break;
+#endif /* OBJ_ELF */
 
     case OPTION_GP32:
       mips_gp32 = 1;
