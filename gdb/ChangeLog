@@ -1,5 +1,8 @@
 Mon Oct 19 15:09:57 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* remote-hms.c:  Disable all uses of serial_nextbaudrate and
+	serial_default_name().
+
 	* remote-hms.c, ser-go32.c, serial.h:  Change from
 	serial_timedreadchar() to new serial_readchar().
 

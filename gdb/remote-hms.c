@@ -564,6 +564,7 @@ set_rate()
 static void
 get_baudrate_right()
 {
+#if 0
   while (!is_baudrate_right()) 
   {
     baudrate = serial_nextbaudrate(baudrate);
@@ -575,6 +576,7 @@ get_baudrate_right()
     QUIT;
     serial_setbaudrate(baudrate);
   }
+#endif
 }
 
 static void
@@ -1398,7 +1400,8 @@ _initialize_remote_hms ()
   add_com ("speed", class_obscure, hms_speed,
 	   "Set the terminal line speed for HMS communications");
   
+#if 0
   dev_name = serial_default_name();
+#endif
+  dev_name = NULL;
 }
-
-
