@@ -1,5 +1,7 @@
 Thu Nov  3 18:19:13 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* Makefile.in (ALL_MACHINES): Include m68knetbsd.o.
+
 	* config/i386linux.mh (EXTRALIBS): Include -lm.
 
 Wed Nov  2 15:24:51 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
