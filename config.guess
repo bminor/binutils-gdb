@@ -16,6 +16,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+# Written by Per Bothner <bothner@cygnus.com>.
+# The master version of this file is at the FSF in /home/gd/gnu/lib.
 #
 # This script attempts to guess a canonical system name similar to
 # config.sub.  If it succeeds, it prints the system name on stdout, and
@@ -124,6 +126,19 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	exit 0 ;;
     *:AIX:2:3)
 	if grep bos325 /usr/include/stdio.h >/dev/null 2>&1; then
+		sed 's/^		//' << EOF >dummy.c
+		#include <sys/systemcfg.h>
+
+		main()
+			{
+			if (!__power_pc())
+				exit(1);
+			puts("powerpc-ibm-aix3.2.5");
+			exit(0);
+			}
+EOF
+		${CC-cc} dummy.c -o dummy && ./dummy && rm dummy.c dummy && exit 0
+		rm -f dummy.c dummy
 		echo rs6000-ibm-aix3.2.5
 	elif grep bos324 /usr/include/stdio.h >/dev/null 2>&1; then
 		echo rs6000-ibm-aix3.2.4
@@ -232,7 +247,7 @@ EOF
     *:Linux:*:*)
 	echo ${UNAME_MACHINE}-unknown-linux
 	exit 0 ;;
-    i[34]86:UNIX_SV:4.*:*)
+    i[34]86:UNIX_SV:4.*:* | i[34]86:SYSTEM_V:4.*:*)
 	if grep Novell /usr/include/link.h >/dev/null 2>/dev/null; then
 		echo ${UNAME_MACHINE}-univel-sysv${UNAME_RELEASE}
 	else
@@ -277,7 +292,7 @@ EOF
 	  && echo i486-ncr-sysv4 && exit 0 ;;
     33[56]0,3???:*:4.0:*)
 	uname -p 2>/dev/null | grep 86 >/dev/null \
-	  && echo i486-ncr-sysv43 && exit 0 ;;
+	  && echo i486-ncr-sysv4.3 && exit 0 ;;
     m680[234]0:LynxOS:2.2*:*)
 	echo m68k-lynx-lynxos${UNAME_RELEASE}
 	exit 0 ;;
@@ -336,7 +351,7 @@ main ()
 #endif
   int version;
   version=`(hostinfo | sed -n 's/.*NeXT Mach \([0-9]*\).*/\1/p') 2>/dev/null`;
-  printf ("%s-next-neststep%s\n", __ARCHITECTURE__,  version==2 ? "2" : "3");
+  printf ("%s-next-nextstep%s\n", __ARCHITECTURE__,  version==2 ? "2" : "3");
   exit (0);
 #endif
 

@@ -1,3 +1,19 @@
+Sat Aug 27 15:00:49 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* config.guess:  Fix i486-ncr-sysv43 -> i486-ncr-sysv4.3.
+	Fix type: *-next-neststep -> *-next-nextstep.
+
+	* config.guess:  Merge from FSF:
+
+	Fri Aug 26 18:45:25 1994  Philippe De Muyter (phdm@info.ucl.ac.be)
+
+	* config.guess: Recognize powerpc-ibm-aix3.2.5.
+
+	Wed Apr 20 06:36:32 1994  Philippe De Muyter  (phdm@info.ucl.ac.be)
+
+	* config.guess: Recognize UnixWare 1.1 (UNAME_SYSTEM is SYSTEM_V
+	instead of UNIX_SV for UnixWare 1.0).
+
 Sat Aug 27 01:56:30 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* Makefile.in (all-gdb):  Add dependencies on all-gcc and all-ld
