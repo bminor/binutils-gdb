@@ -557,14 +557,14 @@ configdoc.texi:	${DOCVER}-doc.texi
 
 # TeX output
 dvi: ld.dvi
-ld.dvi: $(srcdir)/ld.texinfo $(srcdir)/configdoc.texi
-	$(TEXI2DVI) $(srcdir)/ld.texinfo
+ld.dvi: $(srcdir)/ld.texinfo $(srcdir)/configdoc.texi $(BFDDIR)/doc/bfdsumm.texi
+	$(TEXI2DVI) -I$(BFDDIR)/doc $(srcdir)/ld.texinfo
 
 ldint.dvi: $(srcdir)/ldint.texinfo
 	$(TEXI2DVI) $(srcdir)/ldint.texinfo
 
 # info file for online browsing
-ld.info: $(srcdir)/ld.texinfo configdoc.texi
+ld.info: $(srcdir)/ld.texinfo configdoc.texi $(BFDDIR)/doc/bfdsumm.texi
 	$(MAKEINFO) -I$(BFDDIR)/doc -o ld.info $(srcdir)/ld.texinfo
 
 ldint.info: $(srcdir)/ldint.texinfo

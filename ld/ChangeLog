@@ -1,6 +1,8 @@
 Wed Nov  3 15:10:15 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
 
 	* Makefile.in (distclean): Don't delete dvi or info files.
+	(ld.info): Update dependency list.
+	(ld.dvi): Ditto.  Add -I option to get bfdsumm.texi.
 
 Wed Nov  3 12:07:39 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
