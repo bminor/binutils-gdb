@@ -1,3 +1,13 @@
+Mon Dec 20 10:37:48 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* as.c (main): Call listing_print before BFD gets closed, when
+	symbol data hasn't been freed up yet.
+
+Sun Dec 19 00:37:20 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-sparc.c (tc_gen_reloc): Test of pcrel_offset had sense
+	reversed.
+
 Thu Dec 16 21:13:11 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (md_begin): Initialize "dummy_label".

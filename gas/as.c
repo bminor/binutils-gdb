@@ -268,13 +268,7 @@ main (argc, argv)
 
 	    case 'R':
 	      /* -R means put data into text segment */
-#ifdef NO_FOLD_DATA_AND_TEXT
-	      as_warn ("-R option not supported on this target.");
-	      flag_readonly_data_in_text = 0;
-	      flagseen['R'] = 0;
-#else
 	      flag_readonly_data_in_text = 1;
-#endif
 	      break;
 
 	    case 'v':
@@ -341,6 +335,11 @@ main (argc, argv)
 #ifdef TC_I960
   brtab_emit ();
 #endif
+
+#ifndef NO_LISTING
+  listing_print ("");
+#endif
+
   if (seen_at_least_1_file ()
       && !((had_warnings () && flag_always_generate_output)
 	   || had_errors () > 0))
@@ -357,10 +356,6 @@ main (argc, argv)
 
   input_scrub_end ();
   md_end ();			/* MACHINE.c */
-
-#ifndef NO_LISTING
-  listing_print ("");
-#endif
 
   if ((had_warnings () && flagseen['Z'])
       || had_errors () > 0)
@@ -432,6 +427,7 @@ perform_an_assembly_pass (argc, argv)
   bfd_set_section_flags (stdoutput, data_section,
 			 applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC));
   bfd_set_section_flags (stdoutput, bss_section, applicable & SEC_ALLOC);
+  seg_info (bss_section)->bss = 1;
   subseg_new (BFD_ABS_SECTION_NAME, 0);
   subseg_new (BFD_UND_SECTION_NAME, 0);
   reg_section = subseg_new ("*GAS `reg' section*", 0);
