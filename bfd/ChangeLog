@@ -1,4 +1,13 @@
+Tue Feb  4 15:39:55 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* aoutx.h: (translate_from_native_sym_flags): fix constructor
+	stuff to use the New Order.
+
 Fri Jan 31 01:34:45 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* ieee.c:  Change type of envi[] to unsigned char.
+
+	* configure.in:  fix vax ultrix configuration.
 
 	* elf.c (bfd_section_from_shdr):  Deal with null return from
 	bfd_make_section().  (elf_object_p):  Select endianess properly.
