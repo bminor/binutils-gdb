@@ -1,3 +1,29 @@
+2002-09-30  Gavin Romig-Koch  <gavin@redhat.com>
+            Ken Raeburn  <raeburn@cygnus.com>
+            Aldy Hernandez  <aldyh@redhat.com>
+            DJ Delorie  <dj@redhat.com>
+            Michael Meissner  <meissner@redhat.com>
+            Eric Christopher  <echristo@redhat.com>
+            Richard Sandiford  <rsandifo@redhat.com>
+
+	* doc/c-mips.texi: Add entries for -march=vr4120,vr4130,vr4181,
+	vr5400 and vr5500.  Add entry for -mfix-vr4122-bugs.
+	* config/tc-mips.c (CPU_HAS_DROR, CPU_HAS_ROR): New macros.
+	(hilo_interlocks): True for CPU_VR5500.
+	(gpr_interlocks, cop_interlocks): True for CPU_VR5400 and CPU_VR5500.
+	(mips_fix_vr4122_bugs): New.
+	(append_insn): Work around 4122 errors if mips_fix_vr4122_bugs.
+	(mips_emit_delays): Likewise.
+	(macro2) [M_DROLI]: Use dror or dror32 if CPU_HAS_DROR.
+	[M_ROLI]: Likewise ror if CPU_HAS_ROR.
+	(validate_mips_insn, mips_ip): Handle '[', ']', 'e' and '%'.
+	(OPTION_FIX_VR4122, OPTION_NO_FIX_VR4122): New options.
+	(md_longopts): Add -mfix-vr4122-bugs and -no-mfix-vr4122-bugs.
+	(OPTION_ELF_BASE): Bump.
+	(md_parse_option): Handle the new options.
+	(mips_cpu_info_table): Add entries for vr4120, vr4130, vr4181,
+	vr5400 and vr5500.
+
 2002-09-29  H.J. Lu <hjl@gnu.org>
 
 	* config/tc-mips.c (md_apply_fix3): Subtract the symbol value

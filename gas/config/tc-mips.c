@@ -296,11 +296,18 @@ static int mips_32bitmode = 0;
 #define CPU_HAS_MDMX(cpu)	(false                 \
 				 )
 
+/* True if CPU has a dror instruction.  */
+#define CPU_HAS_DROR(CPU)	((CPU) == CPU_VR5400 || (CPU) == CPU_VR5500)
+
+/* True if CPU has a ror instruction.  */
+#define CPU_HAS_ROR(CPU)	CPU_HAS_DROR (CPU)
+
 /* Whether the processor uses hardware interlocks to protect
    reads from the HI and LO registers, and thus does not
    require nops to be inserted.  */
 
 #define hilo_interlocks (mips_arch == CPU_R4010                       \
+                         || mips_arch == CPU_VR5500                   \
                          || mips_arch == CPU_SB1                      \
                          )
 
@@ -308,12 +315,16 @@ static int mips_32bitmode = 0;
    from the GPRs, and thus does not require nops to be inserted.  */
 #define gpr_interlocks \
   (mips_opts.isa != ISA_MIPS1  \
+   || mips_arch == CPU_VR5400  \
+   || mips_arch == CPU_VR5500  \
    || mips_arch == CPU_R3900)
 
 /* As with other "interlocks" this is used by hardware that has FP
    (co-processor) interlocks.  */
 /* Itbl support may require additional care here.  */
 #define cop_interlocks (mips_arch == CPU_R4300                        \
+                        || mips_arch == CPU_VR5400                    \
+                        || mips_arch == CPU_VR5500                    \
                         || mips_arch == CPU_SB1                       \
 			)
 
@@ -550,6 +561,8 @@ static const unsigned int mips16_to_32_reg_map[] =
 {
   16, 17, 2, 3, 4, 5, 6, 7
 };
+
+static int mips_fix_4122_bugs;
 
 /* Since the MIPS does not have multiple forms of PC relative
    instructions, we do not have to do relaxing as is done on other
@@ -1689,6 +1702,50 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
       if (prev_prev_nop && nops == 0)
 	++nops;
 
+      if (mips_fix_4122_bugs && prev_insn.insn_mo->name)
+	{
+	  /* We're out of bits in pinfo, so we must resort to string
+	     ops here.  Shortcuts are selected based on opcodes being
+	     limited to the VR4122 instruction set.  */
+	  int min_nops = 0;
+	  const char *pn = prev_insn.insn_mo->name;
+	  const char *tn = ip->insn_mo->name;
+	  if (strncmp(pn, "macc", 4) == 0
+	      || strncmp(pn, "dmacc", 5) == 0)
+	    {
+	      /* Errata 21 - [D]DIV[U] after [D]MACC */
+	      if (strstr (tn, "div"))
+		{
+		  min_nops = 1;
+		}
+
+	      /* Errata 23 - Continuous DMULT[U]/DMACC instructions */
+	      if (pn[0] == 'd' /* dmacc */
+		  && (strncmp(tn, "dmult", 5) == 0
+		      || strncmp(tn, "dmacc", 5) == 0))
+		{
+		  min_nops = 1;
+		}
+
+	      /* Errata 24 - MT{LO,HI} after [D]MACC */
+	      if (strcmp (tn, "mtlo") == 0
+		  || strcmp (tn, "mthi") == 0)
+		{
+		  min_nops = 1;
+		}
+
+	    }
+	  else if (strncmp(pn, "dmult", 5) == 0
+		   && (strncmp(tn, "dmult", 5) == 0
+		       || strncmp(tn, "dmacc", 5) == 0))
+	    {
+	      /* Here is the rest of errata 23.  */
+	      min_nops = 1;
+	    }
+	  if (nops < min_nops)
+	    nops = min_nops;
+	}
+
       /* If we are being given a nop instruction, don't bother with
 	 one of the nops we would otherwise output.  This will only
 	 happen when a nop instruction is used with mips_optimize set
@@ -2584,6 +2641,20 @@ mips_emit_delays (insns)
 	  /* Itbl support may require additional care here.  */
 	  if (! prev_prev_insn_unreordered)
 	    ++nops;
+	}
+
+      if (mips_fix_4122_bugs && prev_insn.insn_mo->name)
+	{
+	  int min_nops = 0;
+	  const char *pn = prev_insn.insn_mo->name;
+	  if (strncmp(pn, "macc", 4) == 0
+	      || strncmp(pn, "dmacc", 5) == 0
+	      || strncmp(pn, "dmult", 5) == 0)
+	    {
+	      min_nops = 1;
+	    }
+	  if (nops < min_nops)
+	    nops = min_nops;
 	}
 
       if (nops > 0)
@@ -6714,6 +6785,17 @@ macro2 (ip)
 	if (imm_expr.X_op != O_constant)
 	  as_bad (_("rotate count too large"));
 	rot = imm_expr.X_add_number & 0x3f;
+	if (CPU_HAS_DROR (mips_arch))
+	  {
+	    rot = (64 - rot) & 0x3f;
+	    if (rot >= 32)
+	      macro_build ((char *) NULL, &icnt, NULL, "dror32",
+			   "d,w,<", dreg, sreg, rot - 32);
+	    else
+	      macro_build ((char *) NULL, &icnt, NULL, "dror",
+			   "d,w,<", dreg, sreg, rot);
+	    break;
+	  }
 	if (rot == 0)
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "dsrl",
 		       "d,w,<", dreg, sreg, 0);
@@ -6741,6 +6823,12 @@ macro2 (ip)
 	if (imm_expr.X_op != O_constant)
 	  as_bad (_("rotate count too large"));
 	rot = imm_expr.X_add_number & 0x1f;
+	if (CPU_HAS_ROR (mips_arch))
+	  {
+	    macro_build ((char *) NULL, &icnt, NULL, "ror",
+			 "d,w,<", dreg, sreg, (32 - rot) & 0x1f);
+	    break;
+	  }
 	if (rot == 0)
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srl",
 		       "d,w,<", dreg, sreg, 0);
@@ -7716,6 +7804,10 @@ validate_mips_insn (opc)
       case 'P': USE_BITS (OP_MASK_PERFREG,	OP_SH_PERFREG);	break;
       case 'U': USE_BITS (OP_MASK_RD,           OP_SH_RD);
 	        USE_BITS (OP_MASK_RT,           OP_SH_RT);	break;
+      case 'e': USE_BITS (OP_MASK_VECBYTE,	OP_SH_VECBYTE);	break;
+      case '%': USE_BITS (OP_MASK_VECALIGN,	OP_SH_VECALIGN); break;
+      case '[': break;
+      case ']': break;
       default:
 	as_bad (_("internal: bad mips opcode (unknown operand type `%c'): %s %s"),
 		c, opc->name, opc->args);
@@ -7907,6 +7999,8 @@ mips_ip (str, ip)
 		return;
 
 	    case ')':		/* these must match exactly */
+	    case '[':
+	    case ']':
 	      if (*s++ == *args)
 		continue;
 	      break;
@@ -8826,6 +8920,41 @@ mips_ip (str, ip)
 	      if (c > 7)
 		as_bad (_("invalid coprocessor sub-selection value (0-7)"));
 	      ip->insn_opcode |= c;
+	      continue;
+
+	    case 'e':
+	      /* Must be at least one digit.  */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+
+	      if ((unsigned long) imm_expr.X_add_number
+		  > (unsigned long) OP_MASK_VECBYTE)
+		{
+		  as_bad (_("bad byte vector index (%ld)"),
+			   (long) imm_expr.X_add_number);
+		  imm_expr.X_add_number = 0;
+		}
+
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_VECBYTE;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
+	    case '%':
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+
+	      if ((unsigned long) imm_expr.X_add_number
+		  > (unsigned long) OP_MASK_VECALIGN)
+		{
+		  as_bad (_("bad byte vector index (%ld)"),
+			   (long) imm_expr.X_add_number);
+		  imm_expr.X_add_number = 0;
+		}
+
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_VECALIGN;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
 	      continue;
 
 	    default:
@@ -9992,8 +10121,12 @@ struct option md_longopts[] =
   {"mdmx", no_argument, NULL, OPTION_MDMX},
 #define OPTION_NO_MDMX (OPTION_MD_BASE + 36)
   {"no-mdmx", no_argument, NULL, OPTION_NO_MDMX},
+#define OPTION_FIX_VR4122 (OPTION_MD_BASE + 37)
+#define OPTION_NO_FIX_VR4122 (OPTION_MD_BASE + 38)
+  {"mfix-vr4122-bugs",    no_argument, NULL, OPTION_FIX_VR4122},
+  {"no-mfix-vr4122-bugs", no_argument, NULL, OPTION_NO_FIX_VR4122},
 #ifdef OBJ_ELF
-#define OPTION_ELF_BASE    (OPTION_MD_BASE + 37)
+#define OPTION_ELF_BASE    (OPTION_MD_BASE + 39)
 #define OPTION_CALL_SHARED (OPTION_ELF_BASE + 0)
   {"KPIC",        no_argument, NULL, OPTION_CALL_SHARED},
   {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
@@ -10192,6 +10325,14 @@ md_parse_option (c, arg)
 	  return 0;
 	}
       g_switch_value = 0x7fffffff;
+      break;
+
+    case OPTION_FIX_VR4122:
+      mips_fix_4122_bugs = 1;
+      break;
+
+    case OPTION_NO_FIX_VR4122:
+      mips_fix_4122_bugs = 0;
       break;
 
 #ifdef OBJ_ELF
@@ -13644,6 +13785,9 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "r4010",          0,      ISA_MIPS2,      CPU_R4010 },
   { "vr4100",         0,      ISA_MIPS3,      CPU_VR4100 },
   { "vr4111",         0,      ISA_MIPS3,      CPU_R4111 },
+  { "vr4120",         0,      ISA_MIPS3,      CPU_VR4120 },
+  { "vr4130",         0,      ISA_MIPS3,      CPU_VR4120 },
+  { "vr4181",         0,      ISA_MIPS3,      CPU_R4111 },
   { "vr4300",         0,      ISA_MIPS3,      CPU_R4300 },
   { "r4400",          0,      ISA_MIPS3,      CPU_R4400 },
   { "r4600",          0,      ISA_MIPS3,      CPU_R4600 },
@@ -13655,6 +13799,8 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "r10000",         0,      ISA_MIPS4,      CPU_R10000 },
   { "r12000",         0,      ISA_MIPS4,      CPU_R12000 },
   { "vr5000",         0,      ISA_MIPS4,      CPU_R5000 },
+  { "vr5400",         0,      ISA_MIPS4,      CPU_VR5400 },
+  { "vr5500",         0,      ISA_MIPS4,      CPU_VR5500 },
   { "rm5200",         0,      ISA_MIPS4,      CPU_R5000 },
   { "rm5230",         0,      ISA_MIPS4,      CPU_R5000 },
   { "rm5231",         0,      ISA_MIPS4,      CPU_R5000 },
