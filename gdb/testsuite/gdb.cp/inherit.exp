@@ -45,7 +45,7 @@ proc test_ptype_si { } {
 
     # Print class A as a type.
 
-    set re_class	"class A \{${ws}public:"
+    set re_class	"((class|struct) A \{${ws}public:|struct A \{)"
     set re_fields	"int a;${ws}int x;"
     set re_synth_gcc_23	"A & operator=\\(A const ?&\\);${ws}A\\(A const ?&\\);${ws}A\\((void|)\\);"
 
@@ -85,7 +85,7 @@ proc test_ptype_si { } {
 
     # Print class B as a type.
 
-    set re_class	"class B : public A \{${ws}public:"
+    set re_class	"((class|struct) B : public A \{${ws}public:|struct B : public A \{)"
     set re_fields	"int b;${ws}int x;"
     set re_synth_gcc_23	"B & operator=\\(B const ?&\\);${ws}B\\(B const ?&\\);${ws}B\\((void|)\\);"
 
@@ -125,7 +125,7 @@ proc test_ptype_si { } {
 
     # Print class C as a type.
 
-    set re_class	"class C : public A \{${ws}public:"
+    set re_class	"((class|struct) C : public A \{${ws}public:|struct C : public A \{)"
     set re_fields	"int c;${ws}int x;"
     set re_synth_gcc_23	"C & operator=\\(C const ?&\\);${ws}C\\(C const ?&\\);${ws}C\\((void|)\\);"
 
@@ -177,20 +177,22 @@ proc test_ptype_si { } {
     gdb_test_multiple "ptype tagless_struct" $name {
 	-re "type = $XX_class${ws}$re_fields$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
-	    pass "$name (obsolete gcc or gdb)"
+	    pass "$name"
 	}
 	-re "type = $re_class${ws}$re_fields${ws}$XX_synth_gcc_23$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
-	    pass "$name (obsolete gcc or gdb)"
+	    pass "$name"
 	}
 	-re "type = $re_class${ws}$re_fields$nl\}$nl$gdb_prompt $" {
-	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2004-01-21 -gdwarf-2
-	    pass "$name (obsolete gcc or gdb)"
+	    # gcc 3.3.4 -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 -gdwarf-2
+	    # gcc HEAD 2004-07-31 -gstabs+
+	    pass "$name"
 	}
 	-re "type = $re_class${ws}$re_fields${ws}$re_synth_gcc_23$nl\}$nl$gdb_prompt $" {
-	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2004-01-21 -gstabs+
+	    # gcc 3.3.4 -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "$name"
 	}
     }
@@ -199,20 +201,22 @@ proc test_ptype_si { } {
     gdb_test_multiple "ptype v_tagless" $name {
 	-re "type = $XX_class${ws}$re_fields$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
-	    pass "$name (obsolete gcc or gdb)"
+	    pass "$name"
 	}
 	-re "type = $re_class${ws}$re_fields${ws}$XX_synth_gcc_23$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
-	    pass "$name (obsolete gcc or gdb)"
+	    pass "$name"
 	}
 	-re "type = $re_class${ws}$re_fields$nl\}$nl$gdb_prompt $" {
-	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2004-01-21 -gdwarf-2
-	    pass "$name (obsolete gcc or gdb)"
+	    # gcc 3.3.4 -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc HEAD 2004-07-31 -gdwarf-2
+	    # gcc HEAD 2004-07-31 -gstabs+
+	    pass "$name"
 	}
 	-re "type = $re_class${ws}$re_fields${ws}$re_synth_gcc_23$nl\}$nl$gdb_prompt $" {
-	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2004-01-21 -gstabs+
+	    # gcc 3.3.4 -gstabs+
+	    # gcc 3.4.1 -gstabs+
 	    pass "$name"
 	}
     }
@@ -307,7 +311,7 @@ proc test_ptype_vi { } {
 
     # ptype vA: type, class, object.
 
-    set re_class	"class vA \{${ws}public:"
+    set re_class	"((class|struct) vA \{${ws}public:|struct vA \{)"
     set re_fields	"int va;${ws}int vx;"
     set re_synth_gcc_23	"vA & operator=\\(vA const ?&\\);${ws}vA\\(vA const ?&\\);${ws}vA\\((void|)\\);"
 
@@ -348,7 +352,7 @@ proc test_ptype_vi { } {
     set re_access	"public:"
     set re_fields	"int vb;${ws}int vx;"
     set re_synth_gcc_2	"vB & operator=\\(vB const ?&\\);${ws}vB\\(int, vB const ?&\\);${ws}vB\\(int\\);"
-    set re_synth_gcc_3	"vB & operator=\\(vB const ?&\\);${ws}vB\\(vB const ?&\\);${ws}vB\\((void|)\\);"
+    set re_synth_gcc_3	"(vB & operator=\\(vB const ?&\\);${ws}|)vB\\(vB const ?&\\);${ws}vB\\((void|)\\);"
 
     set name "ptype vB"
     gdb_test_multiple "ptype vB" $name {
@@ -423,7 +427,7 @@ proc test_ptype_vi { } {
     set re_access	"public:"
     set re_fields	"int vc;${ws}int vx;"
     set re_synth_gcc_2	"vC & operator=\\(vC const ?&\\);${ws}vC\\(int, vC const ?&\\);${ws}vC\\(int\\);"
-    set re_synth_gcc_3	"vC & operator=\\(vC const ?&\\);${ws}vC\\(vC const ?&\\);${ws}vC\\((void|)\\);"
+    set re_synth_gcc_3	"(vC & operator=\\(vC const ?&\\);${ws}|)vC\\(vC const ?&\\);${ws}vC\\((void|)\\);"
 
     set name "ptype vC"
     gdb_test_multiple "ptype vC" $name {
@@ -506,7 +510,7 @@ proc test_ptype_mvi { } {
     set re_access	"public:"
     set re_fields	"int vd;${ws}int vx;"
     set re_synth_gcc_2	"vD & operator=\\(vD const ?&\\);${ws}vD\\(int, vD const ?&\\);${ws}vD\\(int\\);"
-    set re_synth_gcc_3	"vD & operator=\\(vD const ?&\\);${ws}vD\\(vD const ?&\\);${ws}vD\\((void|)\\);"
+    set re_synth_gcc_3	"(vD & operator=\\(vD const ?&\\);${ws}|)vD\\(vD const ?&\\);${ws}vD\\((void|)\\);"
 
     set name "ptype vD"
     gdb_test_multiple "ptype vD" $name {
@@ -581,7 +585,7 @@ proc test_ptype_mvi { } {
     set re_access	"public:"
     set re_fields	"int ve;${ws}int vx;"
     set re_synth_gcc_2	"vE & operator=\\(vE const ?&\\);${ws}vE\\(int, vE const ?&\\);${ws}vE\\(int\\);"
-    set re_synth_gcc_3	"vE & operator=\\(vE const ?&\\);${ws}vE\\(vE const ?&\\);${ws}vE\\((void|)\\);"
+    set re_synth_gcc_3	"(vE & operator=\\(vE const ?&\\);${ws}|)vE\\(vE const ?&\\);${ws}vE\\((void|)\\);"
 
     set name "ptype vE"
     gdb_test_multiple "ptype vE" $name {
@@ -812,7 +816,7 @@ proc test_print_anon_union {} {
 	}
     }
 
-    set re_class	"class class_with_anon_union \{${ws}public:"
+    set re_class	"((struct|class) class_with_anon_union \{${ws}public:|struct class_with_anon_union \{)"
     set re_fields	"int one;${ws}"
     set re_anon_union	"union \{${ws}int a;${ws}long int b;${ws}\};"
     set re_synth_gcc_23	"class_with_anon_union & operator=\\(class_with_anon_union const ?&\\);${ws}class_with_anon_union\\(class_with_anon_union const ?&\\);${ws}class_with_anon_union\\((void|)\\);"
@@ -888,13 +892,18 @@ proc test_print_svi_classes { } {
 	    pass $name
 	}
 	-re "$vhn = \{<vA> = \{va = 3, vx = 4\}, $re_vbptr_3 = $hex, vb = 5, vx = 6\}$nl$gdb_prompt $" {
-	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2004-01-21 -gdwarf-2
-	    # gcc HEAD 2004-01-21 -gstabs+
+	    # gcc 3.3.4 -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc 3.4.1 -gstabs+
+	    # gcc HEAD 2004-07-31 -gdwarf-2
 	    pass "$name (FIXME v3 vtbl ptr)"
 	}
 	-re "$vhn = \{<vA> = \{va = 3, vx = 4\}, $re_vbptr_3 = $hex <VTT for vB>, vb = 5, vx = 6\}$nl$gdb_prompt $" {
-	    # gcc 3.3.2 -gstabs+
+	    # gcc 3.3.4 -gstabs+
+	    pass $name
+	}
+	-re "$vhn = \{<vA> = \{va = 3, vx = 4\}, $re_vbptr_3 = $hex <typeinfo for vB>, vb = 5, vx = 6\}$nl$gdb_prompt $" {
+	    # gcc HEAD 2004-07-31 -gstabs+
 	    pass $name
 	}
     }
@@ -911,13 +920,18 @@ proc test_print_svi_classes { } {
 	    pass $name
 	}
 	-re "$vhn = \{<vA> = \{va = 7, vx = 8\}, $re_vbptr_3 = $hex, vc = 9, vx = 10\}$nl$gdb_prompt $" {
-	    # gcc 3.3.2 -gdwarf-2
-	    # gcc HEAD 2004-01-21 -gdwarf-2
-	    # gcc HEAD 2004-01-21 -gstabs+
+	    # gcc 3.3.4 -gdwarf-2
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc 3.4.1 -gstabs+
+	    # gcc HEAD 2004-07-31 -gdwarf-2
 	    pass "$name (FIXME v3 vtbl ptr)"
 	}
 	-re "$vhn = \{<vA> = \{va = 7, vx = 8\}, $re_vbptr_3 = $hex <VTT for vC>, vc = 9, vx = 10\}$nl$gdb_prompt $" {
-	    # gcc 3.3.2 -gstabs+
+	    # gcc 3.3.4 -gstabs+
+	    pass $name
+	}
+	-re "$vhn = \{<vA> = \{va = 7, vx = 8\}, $re_vbptr_3 = $hex <typeinfo for vC>, vc = 9, vx = 10\}$nl$gdb_prompt $" {
+	    # gcc HEAD 2004-07-31 -gstabs+
 	    pass $name
 	}
     }
@@ -1003,15 +1017,20 @@ proc test_print_mvi_classes { } {
 	    pass $name
 	}
 	-re "$vhn = \{<vD> = \{<vB> = \{<vA> = \{va = 0, vx = 0\}, $re_vbptr_3_vB = $hex, vb = 0, vx = 0\}, <vC> = \{$re_vbptr_3_vC = $hex, vc = 0, vx = 0\}, $re_vbptr_3_vD = $hex, vd = 0, vx = 0\}, $re_vbptr_3_vE = $hex, ve = 27, vx = 28\}$nl$gdb_prompt $" {
-	    # gcc 3.3.2 -gdwarf-2
-	    # gcc 3.3.2 -gstabs+
-	    # gcc HEAD 2004-01-21 -gdwarf-2
-	    # gcc HEAD 2004-01-21 -gstabs+
+	    # gcc 3.3.4 -gdwarf-2
+	    # gcc 3.3.4 -gstabs+
+	    # gcc 3.4.1 -gdwarf-2
+	    # gcc 3.4.1 -gstabs+
+	    # gcc HEAD 2004-07-31 -gdwarf-2
 	    pass "$name (FIXME v3 vtbl ptr)"
 	}
 	-re "$vhn = \{<vD> = \{<vB> = \{<vA> = \{va = 0, vx = 0\}, $re_vbptr_3_vB = $hex, vb = 0, vx = 0\}, <vC> = \{$re_vbptr_3_vC = $hex <VTT for vD>, vc = 0, vx = 0\}, $re_vbptr_3_vD = $hex, vd = 0, vx = 0\}, $re_vbptr_3_vE = $hex, ve = 27, vx = 28\}$nl$gdb_prompt $" {
 	    # gcc 3.2.7-rh -gstabs+
-	    pass "$name (FIXME v3 vtbl ptr)"
+	    pass $name
+	}
+	-re "$vhn = \{<vD> = \{<vB> = \{<vA> = \{va = 0, vx = 0\}, $re_vbptr_3_vB = $hex, vb = 0, vx = 0\}, <vC> = \{$re_vbptr_3_vC = $hex <typeinfo for vE>, vc = 0, vx = 0\}, $re_vbptr_3_vD = $hex, vd = 0, vx = 0\}, $re_vbptr_3_vE = $hex, ve = 27, vx = 28\}$nl$gdb_prompt $" {
+	    # gcc HEAD 2004-07-31 -gstabs+
+	    pass $name
 	}
     }
 }
