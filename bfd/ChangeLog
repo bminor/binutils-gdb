@@ -1,3 +1,9 @@
+Fri Sep 30 13:11:38 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* elfcode.h (elf_bfd_final_link): Remove assertion when a non
+        SEC_IN_MEMORY section is found in dynobj.  This can happen when
+	linking PIC compiled code.
+
 Thu Sep 29 15:21:44 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* reloc.c (bfd_install_relocation): Change type of "data" to

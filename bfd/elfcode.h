@@ -5640,7 +5640,9 @@ elf_bfd_final_link (abfd, info)
 	    continue;
 	  if ((o->flags & SEC_IN_MEMORY) == 0)
 	    {
-	      BFD_ASSERT (info->shared);
+	      /* At this point, we are only interested in sections
+                 created by elf_link_create_dynamic_sections.  FIXME:
+                 This test is fragile.  */
 	      continue;
 	    }
 	  if (! bfd_set_section_contents (abfd, o->output_section,
