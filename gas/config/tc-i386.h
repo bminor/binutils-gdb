@@ -120,6 +120,7 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
 #define SUB_SEGMENT_ALIGN(SEG)						\
   ((strcmp (obj_segment_name (SEG), ".text") == 0			\
     || strcmp (obj_segment_name (SEG), ".data") == 0			\
+    || strcmp (obj_segment_name (SEG), ".bss") == 0			\
     || strncmp (obj_segment_name (SEG), ".gnu.linkonce.t", 15) == 0	\
     || strncmp (obj_segment_name (SEG), ".gnu.linkonce.d", 15) == 0	\
     || strncmp (obj_segment_name (SEG), ".gnu.linkonce.r", 15) == 0)	\

@@ -1,3 +1,9 @@
+2000-05-03  Mark Elbrecht  <snowball3@bigfoot.com>
+
+	* bfd/coff-go32.c (COFF_SECTION_ALIGNMENT_ENTRIES): Add entry for
+	the .bss section.
+	* bfd/coff-stgo32.c (COFF_SECTION_ALIGNMENT_ENTRIES): Likewise.
+
 2000-05-02  H.J. Lu  <hjl@gnu.org>
 
 	* elf.c (prep_headers): USe ELFOSABI_NONE instead of
