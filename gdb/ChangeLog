@@ -1,5 +1,13 @@
 2001-11-17  Daniel Jacobowitz  <drow@mvista.com>
 
+	* arm-linux-nat.c: Don't include <asm/ptrace.h>.
+	(fetch_register): Use elf_gregset_t instead of struct pt_regs.
+	(fetch_regs): Likewise.
+	(store_register): Likewise.
+	(store_regs): Likewise.
+
+2001-11-17  Daniel Jacobowitz  <drow@mvista.com>
+
 	* sparc-linux-nat.c (fill_gregset): Replace read_register_gen
 	with regcache_collect.
 	(fill_fpregset): Likewise.

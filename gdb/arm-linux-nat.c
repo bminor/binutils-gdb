@@ -29,8 +29,6 @@
 #include <sys/utsname.h>
 #include <sys/procfs.h>
 
-#include <asm/ptrace.h>
-
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
 
@@ -397,7 +395,7 @@ static void
 fetch_register (int regno)
 {
   int ret, tid;
-  struct pt_regs regs;
+  elf_gregset_t regs;
 
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
@@ -410,20 +408,20 @@ fetch_register (int regno)
     }
 
   if (regno >= A1_REGNUM && regno < PC_REGNUM)
-    supply_register (regno, (char *) &regs.uregs[regno]);
+    supply_register (regno, (char *) &regs[regno]);
 
   if (PS_REGNUM == regno)
     {
       if (arm_apcs_32)
-        supply_register (PS_REGNUM, (char *) &regs.uregs[CPSR_REGNUM]);
+        supply_register (PS_REGNUM, (char *) &regs[CPSR_REGNUM]);
       else
-        supply_register (PS_REGNUM, (char *) &regs.uregs[PC_REGNUM]);
+        supply_register (PS_REGNUM, (char *) &regs[PC_REGNUM]);
     }
     
   if (PC_REGNUM == regno)
     { 
-      regs.uregs[PC_REGNUM] = ADDR_BITS_REMOVE (regs.uregs[PC_REGNUM]);
-      supply_register (PC_REGNUM, (char *) &regs.uregs[PC_REGNUM]);
+      regs[PC_REGNUM] = ADDR_BITS_REMOVE (regs[PC_REGNUM]);
+      supply_register (PC_REGNUM, (char *) &regs[PC_REGNUM]);
     }
 }
 
@@ -434,7 +432,7 @@ static void
 fetch_regs (void)
 {
   int ret, regno, tid;
-  struct pt_regs regs;
+  elf_gregset_t regs;
 
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
@@ -447,15 +445,15 @@ fetch_regs (void)
     }
 
   for (regno = A1_REGNUM; regno < PC_REGNUM; regno++)
-    supply_register (regno, (char *) &regs.uregs[regno]);
+    supply_register (regno, (char *) &regs[regno]);
 
   if (arm_apcs_32)
-    supply_register (PS_REGNUM, (char *) &regs.uregs[CPSR_REGNUM]);
+    supply_register (PS_REGNUM, (char *) &regs[CPSR_REGNUM]);
   else
-    supply_register (PS_REGNUM, (char *) &regs.uregs[PC_REGNUM]);
+    supply_register (PS_REGNUM, (char *) &regs[PC_REGNUM]);
 
-  regs.uregs[PC_REGNUM] = ADDR_BITS_REMOVE (regs.uregs[PC_REGNUM]);
-  supply_register (PC_REGNUM, (char *) &regs.uregs[PC_REGNUM]);
+  regs[PC_REGNUM] = ADDR_BITS_REMOVE (regs[PC_REGNUM]);
+  supply_register (PC_REGNUM, (char *) &regs[PC_REGNUM]);
 }
 
 /* Store all general registers of the process from the values in
@@ -465,7 +463,7 @@ static void
 store_register (int regno)
 {
   int ret, tid;
-  struct pt_regs regs;
+  elf_gregset_t regs;
   
   if (!register_valid[regno])
     return;
@@ -482,7 +480,7 @@ store_register (int regno)
     }
 
   if (regno >= A1_REGNUM && regno <= PC_REGNUM)
-    read_register_gen (regno, (char *) &regs.uregs[regno]);
+    read_register_gen (regno, (char *) &regs[regno]);
 
   ret = ptrace (PTRACE_SETREGS, tid, 0, &regs);
   if (ret < 0)
@@ -496,7 +494,7 @@ static void
 store_regs (void)
 {
   int ret, regno, tid;
-  struct pt_regs regs;
+  elf_gregset_t regs;
 
   /* Get the thread id for the ptrace call.  */
   tid = GET_THREAD_ID (inferior_ptid);
@@ -512,7 +510,7 @@ store_regs (void)
   for (regno = A1_REGNUM; regno <= PC_REGNUM; regno++)
     {
       if (register_valid[regno])
-	read_register_gen (regno, (char *) &regs.uregs[regno]);
+	read_register_gen (regno, (char *) &regs[regno]);
     }
 
   ret = ptrace (PTRACE_SETREGS, tid, 0, &regs);
