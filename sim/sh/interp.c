@@ -24,6 +24,14 @@
 #include "remote-sim.h"
 #include <sys/syscall.h>
 
+#if !defined (SYS_wait) && defined (SYS_wait4)
+#define SYS_wait SYS_wait4	/* SunOS 4.1.3 for example */
+#endif
+
+#if !defined (SYS_utime) && defined (SYS_utimes)
+#define SYS_utime SYS_utimes	/* SunOS 4.1.3 for example */
+#endif
+
 #ifndef SIGBUS
 #define SIGBUS SIGSEGV
 #endif
