@@ -1,3 +1,8 @@
+2003-12-18  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* hppa-tdep.c (hppa_gdbarch_init): Set long double floating
+	point type to floatformat_ia64_quad_big.
+
 2003-12-18  Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-tdep.c (skip_prologue_using_sal): New function.  Taken verbatim

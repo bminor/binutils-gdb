@@ -5092,6 +5092,11 @@ hppa_fetch_pointer_argument (struct frame_info *frame, int argi,
    So all these compilers use either ILP32 or LP64 model.
    TODO: gcc has more options so it needs more investigation.
 
+   For floating point types, see:
+
+     http://docs.hp.com/hpux/pdf/B3906-90006.pdf
+     HP-UX floating-point guide, hpux 11.00
+
    -- chastain 2003-12-18  */
 
 static struct gdbarch *
@@ -5180,6 +5185,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      and LP64, but might show differences some day.  */
   set_gdbarch_long_long_bit (gdbarch, 64);
   set_gdbarch_long_double_bit (gdbarch, 128);
+  set_gdbarch_long_double_format (gdbarch, &floatformat_ia64_quad_big);
 
   /* The following gdbarch vector elements do not depend on the address
      size, or in any other gdbarch element previously set.  */
