@@ -41,10 +41,9 @@ struct tic80_opcode
 
   unsigned long mask;
 
-  /* The format of this opcode.  I.E. short-immediate, register, long
-     immediate, etc.  FIXME: Will this ever be used?  */
+  /* Special purpose flags for this opcode. */
 
-  unsigned char format;
+  unsigned char flags;
 
   /* An array of operand codes.  Each code is an index into the operand
      table.  They appear in the order which the operands must appear in
@@ -147,9 +146,10 @@ extern const struct tic80_operand tic80_operands[];
    prints these with a leading 'a'.  */
 #define TIC80_OPERAND_FPA (020)
 
-/* This operand is a relative branch displacement.  The disassembler
-   prints these symbolically if possible.  */
-#define TIC80_OPERAND_RELATIVE (040)
+/* This operand is a PC relative branch offset.  The disassembler prints
+   these symbolically if possible.  Note that the offsets are taken as word
+   offsets. */
+#define TIC80_OPERAND_PCREL (040)
 
 /* This flag is a hint to the disassembler for using hex as the prefered
    printing format, even for small positive or negative immediate values.
@@ -180,13 +180,13 @@ extern const struct tic80_operand tic80_operands[];
 /* This operand is a floating point value */
 #define TIC80_OPERAND_FLOAT (010000)
 
-/* Values which go in the struct tic80_opcode format field to distinguish
-   between various types of instructions with the same mnemonic.  FIXME: Not
-   currently used? */
+/* This operand is an byte offset from a base relocation. The lower
+ two bits of the final relocated address are ignored when the value is
+ written to the program counter. */
+#define TIC80_OPERAND_BASEREL (020000)
 
-#define FMT_UNUSED	0		/* Unused */
-#define FMT_SI		1		/* Short immediate format */
-#define FMT_LI		2		/* Long immediate format */
-#define FMT_REG		3		/* Register format */
+/* Flag bits for the struct tic80_opcode flags field. */
+
+#define TIC80_VECTOR		1	/* Is a vector instruction */
 
 #endif /* TIC80_H */

@@ -1,4 +1,19 @@
 start-sanitize-tic80
+Thu Jan 16 20:48:55 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80.h (struct tic80_opcode): Change "format" field to "flags".
+	(FMT_UNUSED, FMT_SI, FMT_LI, FMT_REG): Delete.
+	(TIC80_VECTOR): Define a flag bit for the flags.  This one means
+	that the opcode can have two vector instructions in a single
+	32 bit word and we have to encode/decode both.
+	
+Tue Jan 14 19:37:09 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80.h (TIC80_OPERAND_PCREL): Renamed from
+	TIC80_OPERAND_RELATIVE for PC relative.
+	(TIC80_OPERAND_BASEREL): New flag bit for register
+	base relative.
+
 Mon Jan 13 15:56:38 1997  Fred Fish  <fnf@cygnus.com>
 
 	* tic80.h (TIC80_OPERAND_FLOAT): Add for floating point operands.
