@@ -1,3 +1,13 @@
+
+Sun Feb 23 17:22:00 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* gas/mips/itbl: Add comments.
+	* gas/mips/itbl.s: Add comments.  Prefix register names with $.
+	* gas/all/itbl: Generic table for testing for itbl support.
+	* gas/all/itbl.s: Generic assembly for testing for itbl support.
+	* gas/mips/itbl-test.c: Moved to gas/all.
+	* gas/all/itbl-test.c: Moved from gas/mips.
+
 start-sanitize-tic80
 Sat Feb 22 20:24:23 1997  Fred Fish  <fnf@cygnus.com>
 
