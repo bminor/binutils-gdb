@@ -1,3 +1,11 @@
+Thu Mar 14 19:15:06 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.guess: Recognize mips-*-sysv*.
+
+Mon Mar 11 15:36:42 1996  Dawn Perchik  <dawn@critters.cygnus.com>
+
+	* config.sub: Recognize mon960.
+
 Sun Mar 10 13:18:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Restore Canadian Cross handling of BISON and LEX,
