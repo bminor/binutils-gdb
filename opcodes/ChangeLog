@@ -1,3 +1,7 @@
+2005-01-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (powerpc_opcodes): Add optional 'l' arg to tlbiel.
+
 2005-01-19  Fred Fish  <fnf@specifixinc.com>
 
 	* mips-dis.c (no_aliases): New disassembly option flag.
