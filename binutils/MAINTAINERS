@@ -1,0 +1,45 @@
+		========= Binutils Maintainers =========
+
+This is the list of individuals responsible for maintenance and update
+of the "binutils" module, which includes the bfd, binutils, include,
+gas, gprof, ld, and opcodes subdirectories.  The home page for binutils
+is http://sourceware.cygnus.com/binutils/ and patches should be sent to
+binutils@sourceware.cygnus.com with "[patch]" as part of the subject.
+
+		--------- Blanket Write Privs ---------
+
+Nick Clifton <nickc@redhat.com> (head maintainer)
+Richard Henderson <rth@redhat.com>
+Ian Taylor <ian@zembu.com>
+Jeff Law <law@redhat.com>
+Jim Wilson <wilson@redhat.com>
+DJ Delorie <dj@redhat.com>
+Alan Modra <alan@linuxcare.com.au>
+
+		    --------- Maintainers ---------
+
+Maintainers are individuals who are responsible for, and have permission
+to check in changes in, certain subsets of the code.  Note that
+maintainers still need approval to check in changes outside of the
+immediate domain that they maintain.
+
+If there is no maintainer for a given domain then the responsibility
+falls to the head maintainer (above).  If there are several maintainers
+for a given domain then responsibility falls to the first maintainer.
+The first maintainer is free to devolve that responsibility among the
+other maintainers.
+
+MIPS		Ulf Carlsson <ulfc@calypso.engr.sgi.com>
+PPC		Geoff Keating <geoffk@redhat.com>
+ix86 COFF,PE	DJ Delorie <dj@redhat.com>
+ARM		Nick Clifton <nickc@redhat.com>
+
+	       --------- Write After Approval ---------
+
+Individuals with "write after approval" have the ability to check in
+changes, but they must get approval for each change from someone in
+one of the above lists (blanket write or maintainers).
+
+[It's a huge list, folks.  You know who you are.  If you have the
+ *ability* to do binutils checkins, you're in this group.  Just remember
+ to get approval before checking anything in.]

@@ -1,3 +1,7 @@
+2000-06-05  DJ Delorie  <dj@redhat.com>
+
+	* MAINTAINERS: new
+
 2000-07-04  Alexandre Oliva  <aoliva@redhat.com>
 
 	* coff-arm.c (coff_arm_relocate_section): Do not ignore the symbol
