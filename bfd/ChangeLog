@@ -1,3 +1,14 @@
+Fri Sep 17 02:04:31 1993  John Gilmore  (gnu@cygnus.com)
+
+	* hosts/{alphaosf.h, amix.h, apollo68.h, apollov68.h,
+	decstation.h, delta88.h, dgux.h, dose.h, go32.h, harris.h,
+	hp300.h, hp300bsd.h, hppabsd.h, hppahpux.h, i386aix.h, i386bsd.h,
+	i386linux.h, i386lynx.h, i386v.h, i386v4.h, irix3.h, irix4.h,
+	mipsbsd.h, ncr3000.h, rs6000.h, rtbsd.h, solaris2.h, sparc-ll.h,
+	std-host.h, stratus.h, sun3.h, sysv4.h, tahoe.h, ultra3.h,
+	vaxult.h, vaxult2.h, we32k.h}:  Make sure that "offsetof" is
+	defined on all hosts, now that archive.c uses it.
+
 Thu Sep 16 18:20:30 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elfcode.h (elf_map_symbols): Create section symbols for all
