@@ -1,3 +1,10 @@
+Fri Mar 17 16:38:08 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-configure: Revert previous move of target_cpu
+	calculation, mpw-config.in needs it.
+	* mpw-config.in: Add generic include forwards for cpu-specific
+	include files in aout and elf directories.
+
 Tue Mar 14 12:55:50 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-README: Filled in more details about how to install,
