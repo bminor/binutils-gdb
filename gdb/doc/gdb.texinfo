@@ -4145,6 +4145,7 @@ arrays.
 If @value{GDBN} is printing a large array, it will stop printing after it has
 printed the number of elements set by the @code{set print elements} command.
 This limit also applies to the display of strings.
+Setting the number of elements to zero means that the printing is unlimited.
 
 @item show print elements
 @kindex show print elements

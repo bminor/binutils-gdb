@@ -1,3 +1,8 @@
+Tue Jun  1 22:46:43 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.texinfo (set print elements):  Note that the number of
+	elements is set to unlimited by "set print elements 0".
+
 Mon May 31 08:06:55 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* stabs.texinfo (Builtin Type Descriptors): Try to clarify what
