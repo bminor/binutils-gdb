@@ -1,5 +1,11 @@
 2004-04-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-cr16c.c (elf32_cr16c_relocate_section): Use
+	RELOC_FOR_GLOBAL_SYMBOL.
+	(elf32_cr16c_add_symbol_hook): Remove const from Elf_Internal_Sym.
+
+2004-04-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-arm.h (elf32_arm_final_link_relocate): Handle
 	R_ARM_ALU* only if OLD_ARM_ABI is not defined.
 
