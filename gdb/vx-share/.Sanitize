@@ -1,5 +1,4 @@
-# Sanitize.in for devo.
-# $Id$
+# Sanitize.in for gdb/vx-share
 #
 
 # Each directory to survive it's way into a release will need a file
@@ -25,6 +24,7 @@ Do-first:
 
 Things-to-keep:
 
+README
 dbgRpcLib.h
 ptrace.h
 reg.h
@@ -41,19 +41,5 @@ xdr_regs.c
 xdr_regs.h
 
 Do-last:
-
-echo Done in `pwd`.
-
-#
-#
-# $Log$
-# Revision 1.2  1991/11/21 03:20:09  gnu
-# echo echo echo
-#
-# Revision 1.1  1991/05/23  22:05:02  rich
-# Initial revision
-#
-#
-#
 
 # End of file.
