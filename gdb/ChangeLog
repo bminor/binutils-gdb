@@ -1,3 +1,17 @@
+2002-02-20  Daniel Jacobowitz  <drow@mvista.com>
+
+	* coffread.c (coff_symfile_read): Clean up minimal symbols earlier.
+	* dbxread.c (elfstab_build_psymtabs): Don't call
+	install_minimal_symbols.
+	(stabsect_build_psymtabs): Likewise.
+	* elfread.c (elf_symfile_read): Call install_minimal_symbols
+	earlier.
+	* somread.c (som_symfile_read): Call install_minimal_symbols
+	and do_cleanups earlier.
+	* nlmread.c (nlm_symfile_read): Likewise.
+	* mdebugread.c (elfmdebug_build_psymtabs): Call
+	install_minimal_symbols and make appropriate cleanups.
+
 2003-02-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib.c (reload_shared_libraries): New function.

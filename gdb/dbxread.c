@@ -3556,7 +3556,6 @@ elfstab_build_psymtabs (struct objfile *objfile, int mainline,
   buildsym_new_init ();
   free_header_files ();
   init_header_files ();
-  install_minimal_symbols (objfile);
 
   processing_acc_compilation = 1;
 
@@ -3568,7 +3567,10 @@ elfstab_build_psymtabs (struct objfile *objfile, int mainline,
 
   /* In an elf file, we've already installed the minimal symbols that came
      from the elf (non-stab) symbol table, so always act like an
-     incremental load here. */
+     incremental load here.  dbx_symfile_read should not generate any new
+     minimal symbols, since we will have already read the ELF dynamic symbol
+     table and normal symbol entries won't be in the ".stab" section; but in
+     case it does, it will install them itself.  */
   dbx_symfile_read (objfile, 0);
 
   if (back_to)
@@ -3650,7 +3652,6 @@ stabsect_build_psymtabs (struct objfile *objfile, int mainline, char *stab_name,
   buildsym_new_init ();
   free_header_files ();
   init_header_files ();
-  install_minimal_symbols (objfile);
 
   /* Now, do an incremental load */
 

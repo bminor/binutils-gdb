@@ -542,6 +542,15 @@ elf_symfile_read (struct objfile *objfile, int mainline)
 
   elf_symtab_read (objfile, 1);
 
+  /* Install any minimal symbols that have been collected as the current
+     minimal symbols for this objfile.  The debug readers below this point
+     should not generate new minimal symbols; if they do it's their
+     responsibility to install them.  "mdebug" appears to be the only one
+     which will do this.  */
+
+  install_minimal_symbols (objfile);
+  do_cleanups (back_to);
+
   /* Now process debugging information, which is contained in
      special ELF sections. */
 
@@ -611,13 +620,6 @@ elf_symfile_read (struct objfile *objfile, int mainline)
 
   if (DWARF2_BUILD_FRAME_INFO_P ())
     DWARF2_BUILD_FRAME_INFO(objfile);
-
-  /* Install any minimal symbols that have been collected as the current
-     minimal symbols for this objfile. */
-
-  install_minimal_symbols (objfile);
-
-  do_cleanups (back_to);
 }
 
 /* This cleans up the objfile's sym_stab_info pointer, and the chain of
