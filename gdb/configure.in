@@ -572,6 +572,8 @@ sparc-*-sunos4*)	gdb_target=sun4os4 ;;
 sparc-*-sunos5*)	gdb_target=sun4sol2 ;;
 sparc-*-vxworks*)	gdb_target=vxsparc ;;
 sparc-*-*)		gdb_target=sun4os4 ;;
+# Use sparc-em for sparclet for now.
+sparclet-*-*)		gdb_target=sparc-em ;;
 sparclite*-*-*)		gdb_target=sparclite ;;
 sparc64-*-solaris2*)	gdb_target=sp64sol2 ;;
 sparc64-*-*)		gdb_target=sp64 ;;
