@@ -24,69 +24,129 @@
 
 #include "sim-basics.h"
 #include "sim-assert.h"
+#include "sim-io.h"
+
 
 INLINE_SIM_BITS\
 (unsigned_word)
-MASKED(unsigned_word val,
-       unsigned start,
-       unsigned stop)
+LSMASKED (unsigned_word val,
+	  int start,
+	  int stop)
 {
-  return ((val) & MASK(start, stop));
+  /* NOTE - start, stop can wrap */
+  val &= LSMASK (start, stop);
+  return val;
 }
 
 
-
 INLINE_SIM_BITS\
 (unsigned_word)
-LSMASKED(unsigned_word val,
-	 unsigned nr_bits)
+MSMASKED (unsigned_word val,
+	  int start,
+	  int stop)
 {
-  return MASKED(val,
-		WITH_TARGET_WORD_BITSIZE - nr_bits,
-		WITH_TARGET_WORD_BITSIZE - 1);
+  /* NOTE - start, stop can wrap */
+  val &= MSMASK (start, stop);
+  return val;
 }
 
 
-
 INLINE_SIM_BITS\
 (unsigned_word)
-EXTRACTED(unsigned_word val,
-	  unsigned start,
-	  unsigned stop)
+LSEXTRACTED (unsigned_word val,
+	     int start,
+	     int stop)
 {
-  ASSERT(start <= stop);
+  ASSERT (start >= stop);
 #if (WITH_TARGET_WORD_BITSIZE == 64)
-  return EXTRACTED64(val, start, stop);
+  return LSEXTRACTED64 (val, start, stop);
+#endif
+#if (WITH_TARGET_WORD_BITSIZE == 32)
+  if (stop >= 32)
+    return 0;
+  else
+    {
+      if (start < 32)
+	val &= LSMASK (start, 0);
+      val >>= stop;
+      return val;
+    }
+#endif
+}
+
+
+INLINE_SIM_BITS\
+(unsigned_word)
+MSEXTRACTED (unsigned_word val,
+	     int start,
+	     int stop)
+{
+  ASSERT (start <= stop);
+#if (WITH_TARGET_WORD_BITSIZE == 64)
+  return MSEXTRACTED64 (val, start, stop);
 #endif
 #if (WITH_TARGET_WORD_BITSIZE == 32)
   if (stop < 32)
     return 0;
   else
-    return ((val >> (63 - stop))
-	    & MASK(start+(63-stop), 63));
+    {
+      if (start >= 32)
+	val &= MSMASK (start, 64 - 1);
+      val >>= (64 - stop - 1);
+      return val;
+    }
 #endif
 }
 
 
 INLINE_SIM_BITS\
 (unsigned_word)
-INSERTED(unsigned_word val,
-	 unsigned start,
-	 unsigned stop)
+INSERTED (unsigned_word val,
+	  int start,
+	  int stop)
 {
-  ASSERT(start <= stop);
+  ASSERT ((WITH_TARGET_WORD_MSB == 0 && start <= stop)
+	  || (WITH_TARGET_WORD_MSB != 0 && start >= stop));
 #if (WITH_TARGET_WORD_BITSIZE == 64)
-  return INSERTED64(val, start, stop);
+  return INSERTED64 (val, start, stop);
 #endif
 #if (WITH_TARGET_WORD_BITSIZE == 32)
-  if (stop < 32)
+  /* Bit numbers are 0..63, even for 32 bit targets.
+     On 32 bit targets we ignore 0..31.  */
+  if (_LSB_SHIFT (64, stop) >= 32)
     return 0;
   else
-    return ((val & MASK(start+(63-stop), 63))
-	    << (63 - stop));
+    {
+      val &= LSMASK (_MAKE_WIDTH (start, stop), 0);
+      val <<= _LSB_SHIFT (64, stop);
+      return val;
+    }
 #endif
 }
 
+
+
+INLINE_SIM_BITS\
+(unsigned_word)
+SEXT (signed_word val,
+      int sign_bit)
+{
+  /* make the sign-bit most significant and then smear it back into
+     position */
+  ASSERT (sign_bit < 64);
+#if (WITH_TARGET_WORD_BITSIZE == 64)
+  return SEXT64 (val, sign_bit);
+#endif
+#if (WITH_TARGET_WORD_BITSIZE == 32)
+  if (_MSB_SHIFT (64, sign_bit) < 32)
+    return val;
+  else {
+    val <<= (_MSB_SHIFT (64, sign_bit) - 32);
+    val >>= (_MSB_SHIFT (64, sign_bit) - 32);
+    return val;
+  }
+#endif
+}
 
 
 

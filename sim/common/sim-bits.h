@@ -52,18 +52,16 @@
    <MACRO> (no size) version permits FIRST >= LAST and generates a
    wrapped bit mask vis ([0..LAST] | [FIRST..LSB]).
 
-   LSMASK*(NR_BITS): Like MASK only NR least significant bits are set.
+   LSMASK*(FIRST, LAST): Like MASK - LS bit is zero.
 
-   MSMASK*(NR_BITS): Like MASK only NR most significant bits are set.
+   MSMASK*(FIRST, LAST): Like MASK - LS bit is zero.
 
    MASKED*(VALUE, FIRST, LAST): Masks out all but bits [FIRST
    .. LAST].
 
-   LSMASKED*(VALUE, NR_BITS): Mask out all but the least significant
-   NR_BITS of the value.
+   LSMASKED*(VALUE, FIRST, LAST): Like MASKED - LS bit is zero.
 
-   MSMASKED*(VALUE, NR_BITS): Mask out all but the most significant
-   NR_BITS of the value.
+   MSMASKED*(VALUE, FIRST, LAST): Like MASKED - MS bit is zero.
 
    EXTRACTED*(VALUE, FIRST, LAST): Masks out bits [FIRST .. LAST] but
    also right shifts the masked value so that bit LAST becomes the
@@ -89,8 +87,8 @@
    IEA_MASKED(SHOULD_MASK, ADDR): Convert the address to the targets
    natural size.  If in 32bit mode, discard the high 32bits.
 
-   EXTENDED(VALUE): Convert VALUE (32bits of it) to the targets
-   natural size.  If in 64bit mode, sign extend the value.
+   EXTENDED*(VALUE): Convert the `*' bit value to the targets natural
+   word size.  Sign extned the value if needed.
 
    ALIGN_*(VALUE): Round upwards the value so that it is aligned.
 
@@ -187,6 +185,21 @@
 #endif
 
 
+/* LS/MS Bit operations */
+
+#define LSBIT8(POS) ((unsigned8)1 << (POS))
+#define LSBIT16(POS) ((unsigned16)1 << (POS))
+#define LSBIT32(POS) ((unsigned32)1 << (POS))
+#define LSBIT64(POS) ((unsigned64)1 << (POS))
+#define LSBIT(POS) ((unsigned_word)1 << (POS))
+
+#define MSBIT8(POS)  ((unsigned8)1 << (8 - 1 - (POS)))
+#define MSBIT16(POS) ((unsigned16)1 << (16 - 1 - (POS)))
+#define MSBIT32(POS) ((unsigned32)1 << (32 - 1 - (POS)))
+#define MSBIT64(POS) ((unsigned64)1 << (64 - 1 - (POS)))
+#define MSBIT(POS)   ((unsigned_word)1 << (WITH_TARGET_WORD_BITSIZE - 1 - (POS)))
+
+
 /* Bit operations */
 
 #define _BITn(WIDTH, POS) ((natural##WIDTH)1 \
@@ -219,22 +232,6 @@
 #endif
 
 
-/* LS/MS Bit operations */
-
-#define LSBIT8(POS) ((unsigned8)1 << (POS))
-#define LSBIT16(POS) ((unsigned16)1 << (POS))
-#define LSBIT32(POS) ((unsigned32)1 << (POS))
-#define LSBIT64(POS) ((unsigned64)1 << (POS))
-#define LSBIT(POS) ((unsigned_word)1 << (POS))
-
-#define MSBIT8(POS) ((unsigned8)1 << (8 - 1 - (POS)))
-#define MSBIT16(POS) ((unsigned16)1 << (16 - 1 - (POS)))
-#define MSBIT32(POS) ((unsigned32)1 << (32 - 1 - (POS)))
-#define MSBIT64(POS) ((unsigned64)1 << (64 - 1 - (POS)))
-#define MSBIT(POS) ((unsigned_word)1 << (WITH_TARGET_WORD_BITSIZE - 1 - (POS)))
-
-
-
 /* multi bit mask */
 
 /* 111111 -> mmll11 -> mm11ll */
@@ -242,10 +239,6 @@
 				     >> (_MSB_SHIFT (WIDTH, START) \
 					 + _LSB_SHIFT (WIDTH, STOP))) \
 				    << _LSB_SHIFT (WIDTH, STOP))
-
-#define MASK16(START, STOP)   _MASKn(16, (START), (STOP))
-#define MASK32(START, STOP)   _MASKn(32, (START), (STOP))
-#define MASK64(START, STOP)   _MASKn(64, (START), (STOP))
 
 #if (WITH_TARGET_WORD_MSB == 0)
 #define _POS_LE(START, STOP) (START <= STOP)
@@ -284,130 +277,98 @@
 #endif
 
 
-
 /* Multi-bit mask on least significant bits */
 
-#if (WITH_TARGET_WORD_MSB == 0)
-#define _LSMASKn(WIDTH, NR_BITS) _MASKn(WIDTH, (WIDTH - NR_BITS), (WIDTH - 1))
-#else
-#define _LSMASKn(WIDTH, NR_BITS) _MASKn(WIDTH, (NR_BITS - 1), 0)
-#endif
+#define _LSMASKn(WIDTH, FIRST, LAST) _MASKn (WIDTH, \
+					     _LSB_POS (WIDTH, FIRST), \
+					     _LSB_POS (WIDTH, LAST))
 
-#define LSMASK16(NR_BITS)  _LSMASKn (16, (NR_BITS))
-#define LSMASK32(NR_BITS)  _LSMASKn (32, (NR_BITS))
-#define LSMASK64(NR_BITS)  _LSMASKn (64, (NR_BITS))
+#define LSMASK16(FIRST, LAST)  _LSMASKn (16, (FIRST), (LAST))
+#define LSMASK32(FIRST, LAST)  _LSMASKn (32, (FIRST), (LAST))
+#define LSMASK64(FIRST, LAST)  _LSMASKn (64, (FIRST), (LAST))
 
-#if (WITH_TARGET_WORD_BITSIZE == 64)
-#define LSMASK(NR_BITS) ((NR_BITS) < 1 \
-			 ? 0 \
-			 : _MASKn (64, \
-				   _LSB_POS (64, \
-					     ((NR_BITS) < 1 ? 0 \
-					      : (NR_BITS) - 1)), \
-				   _LSB_POS (64, 0)))
-#endif
-#if (WITH_TARGET_WORD_BITSIZE == 32)
-#define LSMASK(NR_BITS) ((NR_BITS) < 1 \
-			 ? 0 \
-			 : _MASKn (32, \
-				   _LSB_POS (32, \
-					     ((NR_BITS) > 32 ? 31 \
-					      : (NR_BITS) < 1 ? 0 \
-					      : ((NR_BITS) - 1))), \
-				   _LSB_POS (32, 0)))
-#endif
-#if !defined (LSMASK)
-#error "LSMASK never defined"
-#endif
+#define LSMASK(FIRST, LAST) (MASK (_LSB_POS (64, FIRST), _LSB_POS (64, LAST)))
 
 
 /* Multi-bit mask on most significant bits */
 
+#define _MSMASKn(WIDTH, FIRST, LAST) _MASKn (WIDTH, \
+					     _MSB_POS (WIDTH, FIRST), \
+					     _MSB_POS (WIDTH, LAST))
+
+#define MSMASK16(FIRST, LAST) _MSMASKn (16, (FIRST), (LAST))
+#define MSMASK32(FIRST, LAST) _MSMASKn (32, (FIRST), (LAST))
+#define MSMASK64(FIRST, LAST) _MSMASKn (64, (FIRST), (LAST))
+
+#define MSMASK(FIRST, LAST) (MASK (_MSB_POS (64, FIRST), _MSB_POS (64, LAST)))
+
+
+
 #if (WITH_TARGET_WORD_MSB == 0)
-#define _MSMASKn(WIDTH, NR_BITS) _MASKn (WIDTH, 0, (NR_BITS - 1))
+#define MASK16 MSMASK16
+#define MASK32 MSMASK32
+#define MASK64 MSMASK64
 #else
-#define _MSMASKn(WIDTH, NR_BITS) _MASKn (WIDTH, (WIDTH - 1), (WIDTH - NR_BITS))
+#define MASK16 LSMASK16
+#define MASK32 LSMASK32
+#define MASK64 LSMASK64
 #endif
 
-#define MSMASK16(NR_BITS) _MSMASKn (16, (NR_BITS))
-#define MSMASK32(NR_BITS) _MSMASKn (32, (NR_BITS))
-#define MSMASK64(NR_BITS) _MSMASKn (64, (NR_BITS))
-
-#if (WITH_TARGET_WORD_BITSIZE == 64)
-#define MSMASK(NR_BITS) (NR_BITS < 1 \
-			 ? 0 \
-			 : _MASKn (64, \
-				   _MSB_POS (64, 0), \
-				   _MSB_POS (64, \
-					     ((NR_BITS) < 1 ? 0 \
-					      : (NR_BITS) - 1))))
-#endif
-#if (WITH_TARGET_WORD_BITSIZE == 32)
-#define MSMASK(NR_BITS) (NR_BITS <= 32 \
-			 ? 0 \
-			 : _MASKn (32, \
-				   _MSB_POS (32, 0), \
-				   _MSB_POS (32, \
-					     ((NR_BITS) <= 32 ? 0 \
-					      : (NR_BITS) - 33))))
-#endif
-#if !defined (MSMASK)
-#error "MSMASK never defined"
-#endif
 
 
 /* mask the required bits, leaving them in place */
 
-INLINE_SIM_BITS(unsigned16) MASKED16 (unsigned16 word, unsigned start, unsigned stop);
-INLINE_SIM_BITS(unsigned32) MASKED32 (unsigned32 word, unsigned start, unsigned stop);
-INLINE_SIM_BITS(unsigned64) MASKED64 (unsigned64 word, unsigned start, unsigned stop);
+INLINE_SIM_BITS(unsigned16) LSMASKED16 (unsigned16 word, int first, int last);
+INLINE_SIM_BITS(unsigned32) LSMASKED32 (unsigned32 word, int first, int last);
+INLINE_SIM_BITS(unsigned64) LSMASKED64 (unsigned64 word, int first, int last);
 
-INLINE_SIM_BITS(unsigned_word) MASKED (unsigned_word word, unsigned start, unsigned stop);
+INLINE_SIM_BITS(unsigned_word) LSMASKED (unsigned_word word, int first, int last);
 
+INLINE_SIM_BITS(unsigned16) MSMASKED16 (unsigned16 word, int first, int last);
+INLINE_SIM_BITS(unsigned32) MSMASKED32 (unsigned32 word, int first, int last);
+INLINE_SIM_BITS(unsigned64) MSMASKED64 (unsigned64 word, int first, int last);
 
-/* Ditto but nr of ls-bits specified */
+INLINE_SIM_BITS(unsigned_word) MSMASKED (unsigned_word word, int first, int last);
 
-INLINE_SIM_BITS(unsigned16) LSMASKED16 (unsigned16 word, unsigned nr_bits);
-INLINE_SIM_BITS(unsigned32) LSMASKED32 (unsigned32 word, unsigned nr_bits);
-INLINE_SIM_BITS(unsigned64) LSMASKED64 (unsigned64 word, unsigned nr_bits);
-
-INLINE_SIM_BITS(unsigned_word) LSMASKED (unsigned_word word, unsigned nr_bits);
-
-
-/* Ditto but nr of ms-bits specified */
-
-INLINE_SIM_BITS(unsigned16) MSMASKED16 (unsigned16 word, unsigned nr_bits);
-INLINE_SIM_BITS(unsigned32) MSMASKED32 (unsigned32 word, unsigned nr_bits);
-INLINE_SIM_BITS(unsigned64) MSMASKED64 (unsigned64 word, unsigned nr_bits);
-
-INLINE_SIM_BITS(unsigned_word) MSMASKED (unsigned_word word, unsigned nr_bits);
+#if (WITH_TARGET_WORD_MSB == 0)
+#define MASKED16 MSMASKED16
+#define MASKED32 MSMASKED32
+#define MASKED64 MSMASKED64
+#define MASKED MSMASKED
+#else
+#define MASKED16 LSMASKED16
+#define MASKED32 LSMASKED32
+#define MASKED64 LSMASKED64
+#define MASKED LSMASKED
+#endif
 
 
 
 /* extract the required bits aligning them with the lsb */
 
-INLINE_SIM_BITS(unsigned16) LSEXTRACTED16 (unsigned16 val, unsigned start, unsigned stop);
-INLINE_SIM_BITS(unsigned32) LSEXTRACTED32 (unsigned32 val, unsigned start, unsigned stop);
-INLINE_SIM_BITS(unsigned64) LSEXTRACTED64 (unsigned64 val, unsigned start, unsigned stop);
+INLINE_SIM_BITS(unsigned16) LSEXTRACTED16 (unsigned16 val, int start, int stop);
+INLINE_SIM_BITS(unsigned32) LSEXTRACTED32 (unsigned32 val, int start, int stop);
+INLINE_SIM_BITS(unsigned64) LSEXTRACTED64 (unsigned64 val, int start, int stop);
 
-INLINE_SIM_BITS(unsigned16) MSEXTRACTED16 (unsigned16 val, unsigned start, unsigned stop);
-INLINE_SIM_BITS(unsigned32) MSEXTRACTED32 (unsigned32 val, unsigned start, unsigned stop);
-INLINE_SIM_BITS(unsigned64) MSEXTRACTED64 (unsigned64 val, unsigned start, unsigned stop);
+INLINE_SIM_BITS(unsigned_word) LSEXTRACTED (unsigned_word val, int start, int stop);
+
+INLINE_SIM_BITS(unsigned16) MSEXTRACTED16 (unsigned16 val, int start, int stop);
+INLINE_SIM_BITS(unsigned32) MSEXTRACTED32 (unsigned32 val, int start, int stop);
+INLINE_SIM_BITS(unsigned64) MSEXTRACTED64 (unsigned64 val, int start, int stop);
+
+INLINE_SIM_BITS(unsigned_word) MSEXTRACTED (unsigned_word val, int start, int stop);
 
 #if (WITH_TARGET_WORD_MSB == 0)
-#define EXTRACTED16 MSEXTRACTED32
+#define EXTRACTED16 MSEXTRACTED16
 #define EXTRACTED32 MSEXTRACTED32
-#define EXTRACTED64 MSEXTRACTED32
+#define EXTRACTED64 MSEXTRACTED64
+#define EXTRACTED   MSEXTRACTED
 #else
-#define EXTRACTED16 LSEXTRACTED32
+#define EXTRACTED16 LSEXTRACTED16
 #define EXTRACTED32 LSEXTRACTED32
-#define EXTRACTED64 LSEXTRACTED32
+#define EXTRACTED64 LSEXTRACTED64
+#define EXTRACTED   LSEXTRACTED
 #endif
-
-
-
-
-INLINE_SIM_BITS(unsigned_word) EXTRACTED (unsigned_word val, unsigned start, unsigned stop);
 
 
 
@@ -430,13 +391,20 @@ INLINE_SIM_BITS(unsigned_word) EXTRACTED (unsigned_word val, unsigned start, uns
 
 /* move a group of bits around */
 
-INLINE_SIM_BITS(unsigned16) INSERTED16 (unsigned16 val, unsigned start, unsigned stop);
-INLINE_SIM_BITS(unsigned32) INSERTED32 (unsigned32 val, unsigned start, unsigned stop);
-INLINE_SIM_BITS(unsigned64) INSERTED64 (unsigned64 val, unsigned start, unsigned stop);
+INLINE_SIM_BITS(unsigned16) INSERTED16 (unsigned16 val, int start, int stop);
+INLINE_SIM_BITS(unsigned32) INSERTED32 (unsigned32 val, int start, int stop);
+INLINE_SIM_BITS(unsigned64) INSERTED64 (unsigned64 val, int start, int stop);
 
-INLINE_SIM_BITS(unsigned_word) INSERTED (unsigned_word val, unsigned start, unsigned stop);
+INLINE_SIM_BITS(unsigned_word) INSERTED (unsigned_word val, int start, int stop);
 
 
+
+/* Sign extend the quantity to the targets natural word size */
+
+#define EXTEND8(X) ((signed_word)(signed8)(X))
+#define EXTEND16(X) ((signed_word)(signed16)(X))
+#define EXTEND32(X) ((signed_word)(signed32)(X))
+#define EXTEND64(X) ((signed_word)(signed64)(X))
 
 /* depending on MODE return a 64bit or 32bit (sign extended) value */
 #if (WITH_TARGET_WORD_BITSIZE == 64)
@@ -483,24 +451,24 @@ INLINE_SIM_BITS(unsigned32) ROT32 (unsigned32 val, int shift);
 INLINE_SIM_BITS(unsigned64) ROT64 (unsigned64 val, int shift);
 
 
-INLINE_SIM_BITS(unsigned16) ROTL16 (unsigned16 val, unsigned shift);
-INLINE_SIM_BITS(unsigned32) ROTL32 (unsigned32 val, unsigned shift);
-INLINE_SIM_BITS(unsigned64) ROTL64 (unsigned64 val, unsigned shift);
+INLINE_SIM_BITS(unsigned16) ROTL16 (unsigned16 val, int shift);
+INLINE_SIM_BITS(unsigned32) ROTL32 (unsigned32 val, int shift);
+INLINE_SIM_BITS(unsigned64) ROTL64 (unsigned64 val, int shift);
 
 
-INLINE_SIM_BITS(unsigned16) ROTR16 (unsigned16 val, unsigned shift);
-INLINE_SIM_BITS(unsigned32) ROTR32 (unsigned32 val, unsigned shift);
-INLINE_SIM_BITS(unsigned64) ROTR64 (unsigned64 val, unsigned shift);
+INLINE_SIM_BITS(unsigned16) ROTR16 (unsigned16 val, int shift);
+INLINE_SIM_BITS(unsigned32) ROTR32 (unsigned32 val, int shift);
+INLINE_SIM_BITS(unsigned64) ROTR64 (unsigned64 val, int shift);
 
 
 
 /* Sign extension operations */
 
-INLINE_SIM_BITS(unsigned16) SEXT16 (signed16 val, unsigned sign_bit);
-INLINE_SIM_BITS(unsigned32) SEXT32 (signed32 val, unsigned sign_bit);
-INLINE_SIM_BITS(unsigned64) SEXT64 (signed64 val, unsigned sign_bit);
+INLINE_SIM_BITS(unsigned16) SEXT16 (signed16 val, int sign_bit);
+INLINE_SIM_BITS(unsigned32) SEXT32 (signed32 val, int sign_bit);
+INLINE_SIM_BITS(unsigned64) SEXT64 (signed64 val, int sign_bit);
 
-INLINE_SIM_BITS(unsigned_word) SEXT (signed_word val, unsigned sign_bit);
+INLINE_SIM_BITS(unsigned_word) SEXT (signed_word val, int sign_bit);
 
 
 

@@ -36,7 +36,6 @@
 /* NOTE: See end of file for #undef */
 #define unsignedN XCONCAT2(unsigned,N)
 #define signedN XCONCAT2(signed,N)
-#define MASKEDn XCONCAT2(MASKED,N)
 #define MASKn XCONCAT2(MASK,N)
 #define LSMASKEDn XCONCAT2(LSMASKED,N)
 #define LSMASKn XCONCAT2(LSMASK,N)
@@ -50,25 +49,16 @@
 #define ROTRn XCONCAT2(ROTR,N)
 #define SEXTn XCONCAT2(SEXT,N)
 
-/* TAGS: MASKED16 MASKED32 MASKED64 */
-
-INLINE_SIM_BITS\
-(unsignedN)
-MASKEDn (unsignedN word,
-	 unsigned start,
-	 unsigned stop)
-{
-  return (word & MASKn (start, stop));
-}
-
 /* TAGS: LSMASKED16 LSMASKED32 LSMASKED64 */
 
 INLINE_SIM_BITS\
 (unsignedN)
 LSMASKEDn (unsignedN word,
-	   unsigned nr_bits)
+	   int start,
+	   int stop)
 {
-  return (word & LSMASKn (nr_bits));
+  word &= LSMASKn (start, stop);
+  return word;
 }
 
 /* TAGS: MSMASKED16 MSMASKED32 MSMASKED64 */
@@ -76,9 +66,11 @@ LSMASKEDn (unsignedN word,
 INLINE_SIM_BITS\
 (unsignedN)
 MSMASKEDn (unsignedN word,
-	   unsigned nr_bits)
+	   int start,
+	   int stop)
 {
-  return (word & MSMASKn (nr_bits));
+  word &= MSMASKn (start, stop);
+  return word;
 }
 
 /* TAGS: LSEXTRACTED16 LSEXTRACTED32 LSEXTRACTED64 */
@@ -86,8 +78,8 @@ MSMASKEDn (unsignedN word,
 INLINE_SIM_BITS\
 (unsignedN)
 LSEXTRACTEDn (unsignedN val,
-	      unsigned start,
-	      unsigned stop)
+	      int start,
+	      int stop)
 {
   val <<= (N - 1 - start); /* drop high bits */
   val >>= (N - 1 - start) + (stop); /* drop low bits */
@@ -99,8 +91,8 @@ LSEXTRACTEDn (unsignedN val,
 INLINE_SIM_BITS\
 (unsignedN)
 MSEXTRACTEDn (unsignedN val,
-	      unsigned start,
-	      unsigned stop)
+	      int start,
+	      int stop)
 {
   val <<= (start); /* drop high bits */
   val >>= (start) + (N - 1 - stop); /* drop low bits */
@@ -112,11 +104,11 @@ MSEXTRACTEDn (unsignedN val,
 INLINE_SIM_BITS\
 (unsignedN)
 INSERTEDn (unsignedN val,
-	   unsigned start,
-	   unsigned stop)
+	   int start,
+	   int stop)
 {
-  val &= LSMASKn (_MAKE_WIDTH (start, stop));
   val <<= _LSB_SHIFT (N, stop);
+  val &= MASKn (start, stop);
   return val;
 }
 
@@ -140,7 +132,7 @@ ROTn (unsignedN val,
 INLINE_SIM_BITS\
 (unsignedN)
 ROTLn (unsignedN val,
-       unsigned shift)
+       int shift)
 {
   unsignedN result;
   ASSERT (shift <= N);
@@ -153,7 +145,7 @@ ROTLn (unsignedN val,
 INLINE_SIM_BITS\
 (unsignedN)
 ROTRn (unsignedN val,
-       unsigned shift)
+       int shift)
 {
   unsignedN result;
   ASSERT (shift <= N);
@@ -166,7 +158,7 @@ ROTRn (unsignedN val,
 INLINE_SIM_BITS\
 (unsignedN)
 SEXTn (signedN val,
-       unsigned sign_bit)
+       int sign_bit)
 {
   /* make the sign-bit most significant and then smear it back into
      position */

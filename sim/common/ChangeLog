@@ -1,3 +1,27 @@
+Tue Sep  9 02:10:36 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-fpu.c (DP_FRACHIGH2): Define LL using SIGNED64.
+
+Mon Sep  8 12:22:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-bits.c (MASKED): Delete.
+	(EXTRACTED): Delete.
+	(LSEXTRACTED, MSEXTRACTED): New functions.
+
+	* sim-n-bits.h (MASKEDn): Delete, define as MSMASKED or LSMASKED.
+	(MSMASKEDn, LSMASKEDn): Add last argument.
+	(MSMASK*): Ditto.
+	
+	* sim-bits.h (EXTEND8, EXTEND16): Define.
+	(EXTRACTED64): Define as 64 bit extract, not 32 bit.
+
+	* sim-run.c (sim_engine_run): Use CPU_CIA macro.
+
+	* sim-engine.h (SIM_ENGINE_HALT_HOOK): Use CPU_CIA to get at
+ 	current instruction address.
+
+	* sim-inline.h (*_ENGINE): Define.
+
 Fri Sep  5 08:39:02 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-core.c (sim_core_attach): Fix checks of modulo/mask.
