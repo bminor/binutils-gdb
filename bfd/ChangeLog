@@ -1,5 +1,11 @@
 Wed Jan 21 21:19:03 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coff-i386.c (coff_i386_rtype_to_howto): If COFF_WITH_PE, don't
+ 	adjust addend for an output common symbol (from Jimmy Blair
+ 	<jimmyb@wrs.com>).  If COFF_WITH_PE, adjust addend for PC relative
+ 	defined symbol to counteract adjustment made in generic relocation
+ 	code.
+
 	* dwarf2.c: Include sysdep.h, not stdio.h and stdlib.h.
 
 Wed Jan 21 21:16:06 1998  Manfred Hollstein  <manfred@s-direktnet.de>
