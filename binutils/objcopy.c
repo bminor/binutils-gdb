@@ -1,5 +1,5 @@
 /* objcopy.c -- copy object file from input to output, optionally massaging it.
-   Copyright (C) 1991 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -22,16 +22,21 @@
 #include "bucomm.h"
 #include <getopt.h>
 
-static void setup_sections ();
-static void copy_sections ();
-static void mangle_sections ();
+static void setup_section ();
+static void copy_section ();
+static void mangle_section ();
 
 #define nonfatal(s) {bfd_nonfatal(s); status = 1; return;}
 
 static asymbol **isympp = NULL;	/* Input symbols */
 static asymbol **osympp = NULL;	/* Output symbols that survive stripping */
+
+/* If `copy_byte' >= 0, copy only that byte of every `interleave' bytes.  */
+static int copy_byte = -1;
+static int interleave = 4;
+
 static boolean verbose;		/* Print file and target names. */
-static int status = 0;
+static int status = 0;		/* Exit status.  */
 
 enum strip_action
   {
@@ -58,20 +63,19 @@ static enum locals_action discard_locals;
 
 static struct option strip_options[] =
 {
-  {"strip-all", no_argument, 0, 's'},
-  {"strip-debug", no_argument, 0, 'S'},
   {"discard-all", no_argument, 0, 'x'},
   {"discard-locals", no_argument, 0, 'X'},
-  {"help", no_argument, 0, 'h'},
-  {"input-target", required_argument, 0, 'I'},
-  {"input-format", required_argument, 0, 'I'}, /* Obsolete */
-  {"output-target", required_argument, 0, 'O'},
-  {"output-format", required_argument, 0, 'O'},	/* Obsolete */
-  {"target", required_argument, 0, 'F'},
   {"format", required_argument, 0, 'F'}, /* Obsolete */
-
-  {"version", no_argument, 0, 'V'},
+  {"help", no_argument, 0, 'h'},
+  {"input-format", required_argument, 0, 'I'}, /* Obsolete */
+  {"input-target", required_argument, 0, 'I'},
+  {"output-format", required_argument, 0, 'O'},	/* Obsolete */
+  {"output-target", required_argument, 0, 'O'},
+  {"strip-all", no_argument, 0, 's'},
+  {"strip-debug", no_argument, 0, 'S'},
+  {"target", required_argument, 0, 'F'},
   {"verbose", no_argument, 0, 'v'},
+  {"version", no_argument, 0, 'V'},
   {0, no_argument, 0, 0}
 };
 
@@ -79,20 +83,21 @@ static struct option strip_options[] =
 
 static struct option copy_options[] =
 {
-  {"strip-all", no_argument, 0, 'S'},
-  {"strip-debug", no_argument, 0, 'g'},
+  {"byte", required_argument, 0, 'b'},
   {"discard-all", no_argument, 0, 'x'},
   {"discard-locals", no_argument, 0, 'X'},
-  {"help", no_argument, 0, 'h'},
-  {"input-target", required_argument, 0, 'I'},
-  {"input-format", required_argument, 0, 'I'}, /* Obsolete */
-  {"output-target", required_argument, 0, 'O'},
-  {"output-format", required_argument, 0, 'O'},	/* Obsolete */
-  {"target", required_argument, 0, 'F'},
   {"format", required_argument, 0, 'F'}, /* Obsolete */
-
-  {"version", no_argument, 0, 'V'},
+  {"help", no_argument, 0, 'h'},
+  {"input-format", required_argument, 0, 'I'}, /* Obsolete */
+  {"input-target", required_argument, 0, 'I'},
+  {"interleave", required_argument, 0, 'i'},
+  {"output-format", required_argument, 0, 'O'},	/* Obsolete */
+  {"output-target", required_argument, 0, 'O'},
+  {"strip-all", no_argument, 0, 'S'},
+  {"strip-debug", no_argument, 0, 'g'},
+  {"target", required_argument, 0, 'F'},
   {"verbose", no_argument, 0, 'v'},
+  {"version", no_argument, 0, 'V'},
   {0, no_argument, 0, 0}
 };
 
@@ -112,10 +117,12 @@ copy_usage (stream, status)
      int status;
 {
   fprintf (stream, "\
-Usage: %s [-vVSgxX] [-I bfdname] [-O bfdname] [-F bfdname]\n\
+Usage: %s [-vVSgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-b byte]\n\
+       [-i interleave] [--interleave=interleave] [--byte=byte]\n\
        [--input-target=bfdname] [--output-target=bfdname] [--target=bfdname]\n\
        [--strip-all] [--strip-debug] [--discard-all] [--discard-locals]\n\
-       [--verbose] [--version] [--help] in-file [out-file]\n", program_name);
+       [--verbose] [--version] [--help] in-file [out-file]\n",
+	   program_name);
   exit (status);
 }
 
@@ -200,6 +207,21 @@ filter_symbols (abfd, osyms, isyms, symcount)
   return dst_count;
 }
 
+/* Keep only every `copy_byte'th byte in MEMHUNK, which is *SIZE bytes long.
+   Adjust *SIZE.  */
+
+void
+filter_bytes (memhunk, size)
+     PTR memhunk;
+     bfd_size_type *size;
+{
+  char *from = memhunk + copy_byte, *to = memhunk, *end = memhunk + *size;
+
+  for (; from < end; from += interleave)
+    *to++ = *from;
+  *size /= interleave;
+}
+
 /* Copy object file IBFD onto OBFD.  */
 
 static void
@@ -266,9 +288,9 @@ copy_object (ibfd, obfd)
 
   /* bfd mandates that all output sections be created and sizes set before
      any output is done.  Thus, we traverse all sections multiple times.  */
-  bfd_map_over_sections (ibfd, setup_sections, (void *) obfd);
-  bfd_map_over_sections (ibfd, copy_sections, (void *) obfd);
-  bfd_map_over_sections (ibfd, mangle_sections, (void *) obfd);
+  bfd_map_over_sections (ibfd, setup_section, (void *) obfd);
+  bfd_map_over_sections (ibfd, copy_section, (void *) obfd);
+  bfd_map_over_sections (ibfd, mangle_section, (void *) obfd);
 }
 
 static char *
@@ -419,7 +441,7 @@ copy_file (input_filename, output_filename, input_target, output_target)
    as ISECTION in IBFD.  */
 
 static void
-setup_sections (ibfd, isection, obfd)
+setup_section (ibfd, isection, obfd)
      bfd *ibfd;
      sec_ptr isection;
      bfd *obfd;
@@ -493,7 +515,7 @@ loser:
    If stripping then don't copy any relocation info.  */
 
 static void
-copy_sections (ibfd, isection, obfd)
+copy_section (ibfd, isection, obfd)
      bfd *ibfd;
      sec_ptr isection;
      bfd *obfd;
@@ -544,6 +566,9 @@ copy_sections (ibfd, isection, obfd)
 	  nonfatal (bfd_get_filename (ibfd));
 	}
 
+      if (copy_byte >= 0)
+	filter_bytes (memhunk, &size);
+
       if (!bfd_set_section_contents (obfd, osection, memhunk, (file_ptr) 0,
 				     size))
 	{
@@ -559,7 +584,7 @@ copy_sections (ibfd, isection, obfd)
    their new location in the output file, through some complex sums.  */
 
 static void
-mangle_sections (ibfd, p, obfd)
+mangle_section (ibfd, p, obfd)
      bfd *ibfd;
      asection *p;
      bfd *obfd;
@@ -747,11 +772,29 @@ copy_main (argc, argv)
   boolean show_version = false;
   int c;
 
-  while ((c = getopt_long (argc, argv, "I:s:O:d:F:b:SgxXVv",
+  while ((c = getopt_long (argc, argv, "b:i:I:s:O:d:F:SgxXVv",
 			   copy_options, (int *) 0)) != EOF)
     {
       switch (c)
 	{
+	case 'b':
+	  copy_byte = atoi(optarg);
+	  if (copy_byte < 0)
+	    {
+	      fprintf (stderr, "%s: byte number must be non-negative\n",
+		       program_name);
+	      exit (1);
+	    }
+	  break;
+	case 'i':
+	  interleave = atoi(optarg);
+	  if (interleave < 1)
+	    {
+	      fprintf(stderr, "%s: interleave must be positive\n",
+		      program_name);
+	      exit (1);
+	    }
+	  break;
 	case 'I':
 	case 's':		/* "source" - 'I' is preferred */
 	  input_target = optarg;
@@ -760,7 +803,6 @@ copy_main (argc, argv)
 	  output_target = optarg;
 	  break;
 	case 'F':
-	case 'b':		/* "both" - 'F' is preferred */
 	  input_target = output_target = optarg;
 	  break;
 	case 'S':
@@ -794,6 +836,13 @@ copy_main (argc, argv)
     {
       printf ("GNU %s version %s\n", program_name, program_version);
       exit (0);
+    }
+
+  if (copy_byte >= interleave)
+    {
+      fprintf (stderr, "%s: byte number must be less than interleave\n",
+	       program_name);
+      exit (1);
     }
 
   if (optind == argc || optind + 2 < argc)

@@ -8,7 +8,7 @@
 ..
 
 .SH NAME
-objcopy\(em\&copy and translate object files
+objcopy \- copy and translate object files
 
 .SH SYNOPSIS
 .hy 0
@@ -22,6 +22,8 @@ objcopy\(em\&copy and translate object files
 .RB "[\|" \-g\ |\ \-\-strip\-debug\fR "\|]" 
 .RB "[\|" \-x\ |\ \-\-discard\-all\fR "\|]" 
 .RB "[\|" \-X\ |\ \-\-discard\-locals\fR "\|]" 
+.RB  "[\|" \-b\ \fIbyte\fP |\ \-\-byte=\fIbyte\fP "\|]" 
+.RB  "[\|" \-i\ \fIinterleave\fP |\ \-\-interleave=\fIinterleave\fP "\|]" 
 .RB "[\|" \-v\ |\ \-\-verbose\fR "\|]" 
 .RB "[\|" \-V\ |\ \-\-version\fR "\|]" 
 .RB "[\|" \-\-help\fR "\|]" 
@@ -84,6 +86,17 @@ Do not copy non-global symbols from the source file.
 .B \-X\fR, \fB\-\-discard\-locals
 Do not copy compiler-generated local symbols. (These usually start
 with "L" or ".").
+.TP
+.B \-b \fIbyte\fR, \fB\-\-byte=\fIbyte
+Keep only every \fIbyte\fPth byte of the input file (header data is
+not affected).  \fIbyte\fP can be in the range from 0 to the
+interleave-1.  This option is useful for creating files to program
+ROMs.  It is typically used with an srec output target.
+.TP
+.B \-i \fIinterleave\fR, \fB\-\-interleave=\fIinterleave
+Only copy one out of every \fIinterleave\fP bytes.  Which one to copy is
+selected by the \fB\-b\fP or \fB\-\-byte\fP option.  The default is 4.
+The interleave is ignored if neither \fB\-b\fP nor \fB\-\-byte\fP is given.
 .TP
 .B \-v\fR, \fB\-\-verbose
 Verbose output: list all object files modified.  In the case of

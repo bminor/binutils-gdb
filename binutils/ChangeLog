@@ -1,3 +1,24 @@
+Wed Jan 26 13:13:18 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* objcopy.c (filter_bytes): New function.
+	(copy_section): Call it.
+	(copy_options, copy_usage, copy_main): Add --byte option to
+	activate it.  Appropriate the -b option (which was an undocumented
+	synonym for -F) for it, also.  Add --interleave, -i option for
+	additional control.
+	(setup_section, copy_section, mangle_section): Renamed with no `s'
+	on the end.
+	* objcopy.1, binutils.texi: Document the new options.
+
+	* objdump.c (display_target_tables, display_target_list):
+	New functions broken out of display_info.
+	Eliminate some magic constants.  Use more meaningful variable names.
+	(dump_bfd_header): New function broken out of display_bfd.
+	(dump_section_header): New function broken out of dump_headers.
+	(remove_useless_symbols): Don't shadow global variable name with
+	parameter. 
+	(objdump_print_address): Fix backward test.
+
 Tue Jan 25 19:40:54 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* bucomm.c (print_arelt_descr): Change decl of `when' to time_t.

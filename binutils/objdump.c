@@ -57,11 +57,16 @@ struct objdump_disasm_info {
   asection *sec;
 };
 
+/* Architecture to disassemble for.  */
 char *machine = (char *) NULL;
+
+/* The symbol table.  */
 asymbol **syms;
 
+/* Number of bytes allocated for `syms'.  */
 unsigned int storage;
 
+/* Number of symbols in `syms'.  */
 unsigned int symcount = 0;
 
 /* Forward declarations.  */
@@ -118,52 +123,53 @@ static struct option long_options[]=
   {"version", no_argument, &show_version,    1},
   {0, no_argument, 0, 0}
 };
+
+static void
+dump_section_header (abfd, section, ignored)
+     bfd *abfd;
+     asection *section;
+     PTR ignored;
+{
+  char *comma = "";
 
+#define PF(x,y) \
+  if (section->flags & x) {  printf("%s%s",comma,y); comma = ", "; }
+
+
+  printf ("SECTION %d [%s]\t: size %08x",
+	  section->index,
+	  section->name,
+	  (unsigned) bfd_get_section_size_before_reloc (section));
+  printf (" vma ");
+  printf_vma (section->vma);
+  printf (" align 2**%u\n ",
+	  section->alignment_power);
+  PF (SEC_ALLOC, "ALLOC");
+  PF (SEC_CONSTRUCTOR, "CONSTRUCTOR");
+  PF (SEC_CONSTRUCTOR_TEXT, "CONSTRUCTOR TEXT");
+  PF (SEC_CONSTRUCTOR_DATA, "CONSTRUCTOR DATA");
+  PF (SEC_CONSTRUCTOR_BSS, "CONSTRUCTOR BSS");
+  PF (SEC_LOAD, "LOAD");
+  PF (SEC_RELOC, "RELOC");
+#ifdef SEC_BALIGN
+  PF (SEC_BALIGN, "BALIGN");
+#endif
+  PF (SEC_READONLY, "READONLY");
+  PF (SEC_CODE, "CODE");
+  PF (SEC_DATA, "DATA");
+  PF (SEC_ROM, "ROM");
+  PF (SEC_DEBUGGING, "DEBUGGING");
+  printf ("\n");
+#undef PF
+}
 
 static void
 dump_headers (abfd)
      bfd *abfd;
 {
-  asection *section;
-
-  for (section = abfd->sections;
-       section != (asection *) NULL;
-       section = section->next)
-    {
-      char *comma = "";
-
-#define PF(x,y) \
-	if (section->flags & x) {  printf("%s%s",comma,y); comma = ", "; }
-
-
-      printf ("SECTION %d [%s]\t: size %08x",
-	      section->index,
-	      section->name,
-	      (unsigned) bfd_get_section_size_before_reloc (section));
-      printf (" vma ");
-      printf_vma (section->vma);
-      printf (" align 2**%u\n ",
-	      section->alignment_power);
-      PF (SEC_ALLOC, "ALLOC");
-      PF (SEC_CONSTRUCTOR, "CONSTRUCTOR");
-      PF (SEC_CONSTRUCTOR_TEXT, "CONSTRUCTOR TEXT");
-      PF (SEC_CONSTRUCTOR_DATA, "CONSTRUCTOR DATA");
-      PF (SEC_CONSTRUCTOR_BSS, "CONSTRUCTOR BSS");
-      PF (SEC_LOAD, "LOAD");
-      PF (SEC_RELOC, "RELOC");
-#ifdef SEC_BALIGN
-      PF (SEC_BALIGN, "BALIGN");
-#endif
-      PF (SEC_READONLY, "READONLY");
-      PF (SEC_CODE, "CODE");
-      PF (SEC_DATA, "DATA");
-      PF (SEC_ROM, "ROM");
-      PF (SEC_DEBUGGING, "DEBUGGING");
-      printf ("\n");
-#undef PF
-    }
+  bfd_map_over_sections (abfd, dump_section_header, (PTR) NULL);
 }
-
+
 static asymbol **
 slurp_symtab (abfd)
      bfd *abfd;
@@ -172,8 +178,8 @@ slurp_symtab (abfd)
 
   if (!(bfd_get_file_flags (abfd) & HAS_SYMS))
     {
-      (void) printf ("No symbols in \"%s\".\n", bfd_get_filename (abfd));
-      return (NULL);
+      printf ("No symbols in \"%s\".\n", bfd_get_filename (abfd));
+      return NULL;
     }
 
   storage = get_symtab_upper_bound (abfd);
@@ -191,17 +197,18 @@ slurp_symtab (abfd)
   return sy;
 }
 
-/* Filter out (in place) symbols that are useless for dis-assemble.
-   Return count of useful symbols. */
+/* Filter out (in place) symbols that are useless for disassembly.
+   COUNT is the number of elements in SYMBOLS.
+   Return the number of useful symbols. */
 
-int remove_useless_symbols (syms, count)
-     asymbol **syms;
+int
+remove_useless_symbols (symbols, count)
+     asymbol **symbols;
      int count;
 {
-  register asymbol **in_ptr = syms;
-  register asymbol **out_ptr = syms;
+  register asymbol **in_ptr = symbols, **out_ptr = symbols;
 
-  while ( --count >= 0 )
+  while (--count >= 0)
     {
       asymbol *sym = *in_ptr++;
 
@@ -215,9 +222,8 @@ int remove_useless_symbols (syms, count)
 
       *out_ptr++ = sym;
     }
-  return out_ptr - syms;
+  return out_ptr - symbols;
 }
-
 
 /* Sort symbols into value order. */
 
@@ -241,14 +247,13 @@ compare_symbols (ap, bp)
   return 0;
 }
 
-/* Print the supplied address symbolically if possible */
+/* Print VMA symbolically to INFO if possible.  */
+
 void
 objdump_print_address (vma, info)
      bfd_vma vma;
      struct disassemble_info *info;
 {
-  /* Perform a binary search looking for the closest symbol to
-     the required value.  */
   /* @@ For relocateable files, should filter out symbols belonging to
      the wrong section.  Unfortunately, not enough information is supplied
      to this routine to determine the correct section in all cases.  */
@@ -257,9 +262,9 @@ objdump_print_address (vma, info)
      operand can be present at a time, so the 2-entry cache wouldn't be
      constantly churned by code doing heavy memory accesses.  */
 
+  /* Indices in `syms'.  */
   unsigned int min = 0;
   unsigned int max = symcount;
-
   unsigned int thisplace = 1;
   unsigned int oldthisplace;
 
@@ -267,117 +272,125 @@ objdump_print_address (vma, info)
 
   fprintf_vma (info->stream, vma);
 
-  if (symcount > 0)
+  if (symcount < 1)
+    return;
+
+  /* Perform a binary search looking for the closest symbol to
+     the required value.  */
+  while (true)
     {
-      while (true)
-	{
-	  asymbol *sym; asection *sym_sec;
-	  oldthisplace = thisplace;
-	  thisplace = (max + min) / 2;
-	  if (thisplace == oldthisplace)
-	    break;
-	  sym = syms[thisplace];
-	  vardiff = sym->value - vma;
-	  sym_sec = sym->section;
+      asymbol *sym;
+#if 0
+      asection *sym_sec;
+#endif
+      oldthisplace = thisplace;
+      thisplace = (max + min) / 2;
+      if (thisplace == oldthisplace)
+	break;
+      sym = syms[thisplace];
+      vardiff = sym->value - vma;
+#if 0
+      sym_sec = sym->section;
+#endif
 
-	  if (vardiff > 0)
-	    max = thisplace;
-	  else if (vardiff < 0)
-	    min = thisplace;
-	  else
-	    goto found;
-	}
-      /* We've run out of places to look, print the symbol before this one
-         see if this or the symbol before describes this location the best */
-
-      if (thisplace != 0)
-	{
-	  if (syms[thisplace - 1]->value - vma >
-	      syms[thisplace]->value - vma)
-	    {
-	      /* Previous symbol is in correct section and is closer */
-	      thisplace--;
-	    }
-	}
-
-    found:
-      {
-	bfd_vma val = syms[thisplace]->value;
-	int i;
-	if (syms[thisplace]->flags & (BSF_LOCAL|BSF_DEBUGGING))
-	  for (i = thisplace - 1; i >= 0; i--)
-	    {
-	      if (syms[i]->value == val
-		  && (!(syms[i]->flags & (BSF_LOCAL|BSF_DEBUGGING))
-		      || ((syms[thisplace]->flags & BSF_DEBUGGING)
-			  && !(syms[i]->flags & BSF_DEBUGGING))))
-		{
-		  thisplace = i;
-		  break;
-		}
-	    }
-	if (syms[thisplace]->flags & (BSF_LOCAL|BSF_DEBUGGING))
-	  for (i = thisplace + 1; i < symcount; i++)
-	    {
-	      if (syms[i]->value == val
-		  && (!(syms[i]->flags & (BSF_LOCAL|BSF_DEBUGGING))
-		      || ((syms[thisplace]->flags & BSF_DEBUGGING)
-			  && !(syms[i]->flags & BSF_DEBUGGING))))
-		{
-		  thisplace = i;
-		  break;
-		}
-	    }
-      }
-      {
-	/* If the file is relocateable, and the symbol could be from this
-	   section, prefer a symbol from this section over symbols from
-	   others, even if the other symbol's value might be closer.
-
-	   Note that this may be wrong for some symbol references if the
-	   sections have overlapping memory ranges, but in that case there's
-	   no way to tell what's desired without looking at the relocation
-	   table.  */
-	struct objdump_disasm_info *aux;
-	int i;
-
-	aux = (struct objdump_disasm_info *) info->application_data;
-	if (aux->abfd->flags & HAS_RELOC
-	    && vma >= bfd_get_section_vma (aux->abfd, aux->sec)
-	    && vma < (bfd_get_section_vma (aux->abfd, aux->sec)
-		      + bfd_get_section_size_before_reloc (aux->sec))
-	    && syms[thisplace]->section != aux->sec)
-	  {
-	    for (i = thisplace + 1; i < symcount; i++)
-	      if (syms[i]->value != syms[thisplace]->value)
-		break;
-	    while (--i >= 0)
-	      if (syms[i]->section == aux->sec)
-		{
-		  thisplace = i;
-		  break;
-		}
-	  }
-      }
-      fprintf (info->stream, " <%s", syms[thisplace]->name);
-      if (syms[thisplace]->value > vma)
-	{
-	  char buf[30], *p = buf;
-	  sprintf_vma (buf, syms[thisplace]->value - vma);
-	  while (*p == '0')
-	    p++;
-	  fprintf (info->stream, "-%s", p);
-	}
-      else if (vma > syms[thisplace]->value)
-	{
-	  char buf[30], *p = buf;
-	  sprintf_vma (buf, vma - syms[thisplace]->value);
-	  while (*p == '0')
-	    p++;
-	  fprintf (info->stream, "+%s", p);
-	}
-      fprintf (info->stream, ">");
+      if (vardiff > 0)
+	max = thisplace;
+      else if (vardiff < 0)
+	min = thisplace;
+      else
+	goto found;
     }
+  /* We've run out of places to look; see whether this or the
+     symbol before this describes this location the best.  */
+
+  if (thisplace != 0)
+    {
+      if (syms[thisplace - 1]->value - vma < syms[thisplace]->value - vma)
+	{
+	  /* Previous symbol is in correct section and is closer.  */
+	  thisplace--;
+	}
+    }
+
+ found:
+  {
+    /* If this symbol isn't global, search for one with the same value
+       that is.  */
+    bfd_vma val = syms[thisplace]->value;
+    int i;
+    if (syms[thisplace]->flags & (BSF_LOCAL|BSF_DEBUGGING))
+      for (i = thisplace - 1; i >= 0; i--)
+	{
+	  if (syms[i]->value == val
+	      && (!(syms[i]->flags & (BSF_LOCAL|BSF_DEBUGGING))
+		  || ((syms[thisplace]->flags & BSF_DEBUGGING)
+		      && !(syms[i]->flags & BSF_DEBUGGING))))
+	    {
+	      thisplace = i;
+	      break;
+	    }
+	}
+    if (syms[thisplace]->flags & (BSF_LOCAL|BSF_DEBUGGING))
+      for (i = thisplace + 1; i < symcount; i++)
+	{
+	  if (syms[i]->value == val
+	      && (!(syms[i]->flags & (BSF_LOCAL|BSF_DEBUGGING))
+		  || ((syms[thisplace]->flags & BSF_DEBUGGING)
+		      && !(syms[i]->flags & BSF_DEBUGGING))))
+	    {
+	      thisplace = i;
+	      break;
+	    }
+	}
+  }
+  {
+    /* If the file is relocateable, and the symbol could be from this
+       section, prefer a symbol from this section over symbols from
+       others, even if the other symbol's value might be closer.
+       
+       Note that this may be wrong for some symbol references if the
+       sections have overlapping memory ranges, but in that case there's
+       no way to tell what's desired without looking at the relocation
+       table.  */
+    struct objdump_disasm_info *aux;
+    int i;
+
+    aux = (struct objdump_disasm_info *) info->application_data;
+    if ((aux->abfd->flags & HAS_RELOC)
+	&& vma >= bfd_get_section_vma (aux->abfd, aux->sec)
+	&& vma < (bfd_get_section_vma (aux->abfd, aux->sec)
+		  + bfd_get_section_size_before_reloc (aux->sec))
+	&& syms[thisplace]->section != aux->sec)
+      {
+	for (i = thisplace + 1; i < symcount; i++)
+	  if (syms[i]->value != syms[thisplace]->value)
+	    break;
+	while (--i >= 0)
+	  if (syms[i]->section == aux->sec)
+	    {
+	      thisplace = i;
+	      break;
+	    }
+      }
+  }
+  fprintf (info->stream, " <%s", syms[thisplace]->name);
+  if (syms[thisplace]->value > vma)
+    {
+      char buf[30], *p = buf;
+      sprintf_vma (buf, syms[thisplace]->value - vma);
+      while (*p == '0')
+	p++;
+      fprintf (info->stream, "-%s", p);
+    }
+  else if (vma > syms[thisplace]->value)
+    {
+      char buf[30], *p = buf;
+      sprintf_vma (buf, vma - syms[thisplace]->value);
+      while (*p == '0')
+	p++;
+      fprintf (info->stream, "+%s", p);
+    }
+  fprintf (info->stream, ">");
 }
 
 #ifdef ARCH_all
@@ -432,7 +445,7 @@ disassemble_data (abfd)
   symcount = remove_useless_symbols (syms, symcount);
 
   /* Sort the symbols into section and symbol order */
-  (void) qsort (syms, symcount, sizeof (asymbol *), compare_symbols);
+  qsort (syms, symcount, sizeof (asymbol *), compare_symbols);
 
   if (machine != (char *) NULL)
     {
@@ -834,7 +847,33 @@ dump_stabs_1 (abfd, name1, name2)
 }
 
 static void
-list_matching_formats(p)
+dump_bfd_header (abfd)
+     bfd *abfd;
+{
+  char *comma = "";
+
+  printf ("architecture: %s, ",
+	  bfd_printable_arch_mach (bfd_get_arch (abfd),
+				   bfd_get_mach (abfd)));
+  printf ("flags 0x%08x:\n", abfd->flags);
+
+#define PF(x, y)    if (abfd->flags & x) {printf("%s%s", comma, y); comma=", ";}
+  PF (HAS_RELOC, "HAS_RELOC");
+  PF (EXEC_P, "EXEC_P");
+  PF (HAS_LINENO, "HAS_LINENO");
+  PF (HAS_DEBUG, "HAS_DEBUG");
+  PF (HAS_SYMS, "HAS_SYMS");
+  PF (HAS_LOCALS, "HAS_LOCALS");
+  PF (DYNAMIC, "DYNAMIC");
+  PF (WP_TEXT, "WP_TEXT");
+  PF (D_PAGED, "D_PAGED");
+  PF (BFD_IS_RELAXABLE, "BFD_IS_RELAXABLE");
+  printf ("\nstart address 0x");
+  printf_vma (abfd->start_address);
+}
+
+static void
+list_matching_formats (p)
      char **p;
 {
   fprintf(stderr, "%s: Matching formats:", program_name);
@@ -860,35 +899,13 @@ display_bfd (abfd)
 	}
       return;
     }
+
   printf ("\n%s:     file format %s\n", abfd->filename, abfd->xvec->name);
   if (dump_ar_hdrs)
     print_arelt_descr (stdout, abfd, true);
-
   if (dump_file_header)
-    {
-      char *comma = "";
-
-      printf ("architecture: %s, ",
-	      bfd_printable_arch_mach (bfd_get_arch (abfd),
-				       bfd_get_mach (abfd)));
-      printf ("flags 0x%08x:\n", abfd->flags);
-
-#define PF(x, y)    if (abfd->flags & x) {printf("%s%s", comma, y); comma=", ";}
-      PF (HAS_RELOC, "HAS_RELOC");
-      PF (EXEC_P, "EXEC_P");
-      PF (HAS_LINENO, "HAS_LINENO");
-      PF (HAS_DEBUG, "HAS_DEBUG");
-      PF (HAS_SYMS, "HAS_SYMS");
-      PF (HAS_LOCALS, "HAS_LOCALS");
-      PF (DYNAMIC, "DYNAMIC");
-      PF (WP_TEXT, "WP_TEXT");
-      PF (D_PAGED, "D_PAGED");
-      PF (BFD_IS_RELAXABLE, "BFD_IS_RELAXABLE");
-      printf ("\nstart address 0x");
-      printf_vma (abfd->start_address);
-    }
-  printf ("\n");
-
+    dump_bfd_header (abfd);
+  putchar ('\n');
   if (dump_section_headers)
     dump_headers (abfd);
   if (dump_symtab || dump_reloc_info || disassemble)
@@ -1150,92 +1167,124 @@ dump_relocs (abfd)
 
     }
 }
-
+
+/* A file to open each BFD on.  It will never actually be written to.  */
 #ifdef unix
 #define _DUMMY_NAME_ "/dev/null"
 #else
 #define _DUMMY_NAME_ "##dummy"
 #endif
+
+/* The length of the longest architecture name + 1.  */
+#define LONGEST_ARCH sizeof("rs6000:6000")
+
+/* List the targets that BFD is configured to support, each followed
+   by its endianness and the architectures it supports.  */
+
+static void
+display_target_list ()
+{
+  extern bfd_target *bfd_target_vector[];
+  int t;
+
+  for (t = 0; bfd_target_vector[t]; t++)
+    {
+      int a;
+      bfd_target *p = bfd_target_vector[t];
+      bfd *abfd = bfd_openw (_DUMMY_NAME_, p->name);
+
+      bfd_set_format (abfd, bfd_object);
+      printf ("%s\n (header %s, data %s)\n", p->name,
+	      p->header_byteorder_big_p ? "big endian" : "little endian",
+	      p->byteorder_big_p ? "big endian" : "little endian");
+      for (a = (int) bfd_arch_obscure + 1; a < (int) bfd_arch_last; a++)
+	if (bfd_set_arch_mach (abfd, (enum bfd_architecture) a, 0))
+	  printf ("  %s\n",
+		  bfd_printable_arch_mach ((enum bfd_architecture) a, 0));
+    }
+}
+
+/* Print a table showing which architectures are supported for entries
+   FIRST through LAST-1 of bfd_target_vector (targets across,
+   architectures down).  */
+
 static void
 display_info_table (first, last)
      int first;
      int last;
 {
-  unsigned int i, j;
+  int t, a;
   extern bfd_target *bfd_target_vector[];
 
-  printf ("\n%12s", " ");
-  for (i = first; i++ < last && bfd_target_vector[i];)
-    printf ("%s ", bfd_target_vector[i]->name);
-  printf ("\n");
+  /* Print heading of target names.  */
+  printf ("\n%*s", LONGEST_ARCH, " ");
+  for (t = first; t++ < last && bfd_target_vector[t];)
+    printf ("%s ", bfd_target_vector[t]->name);
+  putchar ('\n');
 
-  for (j = (int) bfd_arch_obscure + 1; (int) j < (int) bfd_arch_last; j++)
-    if (strcmp (bfd_printable_arch_mach (j, 0), "UNKNOWN!") != 0)
+  for (a = (int) bfd_arch_obscure + 1; a < (int) bfd_arch_last; a++)
+    if (strcmp (bfd_printable_arch_mach (a, 0), "UNKNOWN!") != 0)
       {
-	printf ("%11s ", bfd_printable_arch_mach (j, 0));
-	for (i = first; i++ < last && bfd_target_vector[i];)
+	printf ("%*s ", LONGEST_ARCH - 1, bfd_printable_arch_mach (a, 0));
+	for (t = first; t++ < last && bfd_target_vector[t];)
 	  {
-	    bfd_target *p = bfd_target_vector[i];
+	    bfd_target *p = bfd_target_vector[t];
 	    bfd *abfd = bfd_openw (_DUMMY_NAME_, p->name);
-	    int l = strlen (p->name);
-	    int ok;
-	    bfd_set_format (abfd, bfd_object);
-	    ok = bfd_set_arch_mach (abfd, j, 0);
 
-	    if (ok)
+	    bfd_set_format (abfd, bfd_object);
+	    if (bfd_set_arch_mach (abfd, a, 0))
 	      printf ("%s ", p->name);
 	    else
 	      {
+		int l = strlen (p->name);
 		while (l--)
-		  printf ("%c", ok ? '*' : '-');
-		printf (" ");
+		  putchar ('-');
+		putchar (' ');
 	      }
 	  }
-	printf ("\n");
+	putchar ('\n');
       }
+}
+
+/* Print tables of all the target-architecture combinations that
+   BFD has been configured to support.  */
+
+static void
+display_target_tables ()
+{
+  int t, columns;
+  extern bfd_target *bfd_target_vector[];
+  char *colum;
+  extern char *getenv ();
+
+  columns = 0;
+  colum = getenv ("COLUMNS");
+  if (colum != NULL)
+    columns = atoi (colum);
+  if (columns == 0)
+    columns = 80;
+
+  for (t = 0; bfd_target_vector[t];)
+    {
+      int oldt = t, wid;
+
+      for (wid = LONGEST_ARCH; bfd_target_vector[t] && wid < columns; t++)
+	wid += strlen (bfd_target_vector[t]->name) + 1;
+      t--;
+      if (oldt == t)
+	break;
+      display_info_table (oldt, t);
+    }
 }
 
 static void
 display_info ()
 {
-  char *colum;
-  unsigned int i, j, columns;
-  extern bfd_target *bfd_target_vector[];
-  extern char *getenv ();
-
   printf ("BFD header file version %s\n", BFD_VERSION);
-  for (i = 0; bfd_target_vector[i]; i++)
-    {
-      bfd_target *p = bfd_target_vector[i];
-      bfd *abfd = bfd_openw (_DUMMY_NAME_, p->name);
-      bfd_set_format (abfd, bfd_object);
-      printf ("%s\n (header %s, data %s)\n", p->name,
-	      p->header_byteorder_big_p ? "big endian" : "little endian",
-	      p->byteorder_big_p ? "big endian" : "little endian");
-      for (j = (int) bfd_arch_obscure + 1; j < (int) bfd_arch_last; j++)
-	if (bfd_set_arch_mach (abfd, (enum bfd_architecture) j, 0))
-	  printf ("  %s\n",
-		  bfd_printable_arch_mach ((enum bfd_architecture) j, 0));
-    }
-  columns = 0;
-  if ((colum = getenv ("COLUMNS")) != (char *) NULL)
-    columns = atoi (colum);
-  if (!columns)
-    columns = 80;
-  for (i = 0; bfd_target_vector[i];)
-    {
-      int old;
-      old = i;
-      for (j = 12; bfd_target_vector[i] && j < columns; i++)
-	j += strlen (bfd_target_vector[i]->name) + 1;
-      i--;
-      if (old == i)
-	break;
-      display_info_table (old, i);
-    }
+  display_target_list ();
+  display_target_tables ();
 }
 
-/** main and like trivia */
 int
 main (argc, argv)
      int argc;
