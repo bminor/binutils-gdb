@@ -1684,11 +1684,9 @@ FIXME
 	Also, what if child has exit()ed?  Must exit loop somehow.
   */
 
-void
+void 
 solib_create_inferior_hook()
 {
-  static int dyn_relocated;
-
   /* If we are using the BKPT_AT_SYMBOL code, then we don't need the base
      yet.  In fact, in the case of a SunOS4 executable being run on
      Solaris, we can't get it yet.  find_solib will get it when it needs
@@ -1705,32 +1703,6 @@ solib_create_inferior_hook()
     {
       warning ("shared library handler failed to enable breakpoint");
       return;
-    }
-
-  if (!dyn_relocated && exec_bfd->start_address != stop_pc)
-    {
-      /* We have to relocate the debug information.  */
-      CORE_ADDR displacement = stop_pc - exec_bfd->start_address;
-      struct section_offsets *new_offsets;
-      int i;
-
-      new_offsets = alloca (symfile_objfile->num_sections
-			    * sizeof (*new_offsets));
-
-      for (i = 0; i < symfile_objfile->num_sections; ++i)
-	ANOFFSET (new_offsets, i) =
-	  ANOFFSET (symfile_objfile->section_offsets, i);
-
-      ANOFFSET (new_offsets, SECT_OFF_TEXT) += displacement;
-      ANOFFSET (new_offsets, SECT_OFF_DATA) += displacement;
-      ANOFFSET (new_offsets, SECT_OFF_BSS) += displacement;
-      ANOFFSET (new_offsets, SECT_OFF_RODATA) += displacement;
-
-      objfile_relocate (symfile_objfile, new_offsets);
-      breakpoint_re_set ();
-
-      /* Make sure this relocation is done only once.  */
-      dyn_relocated = 1;
     }
 
 #ifndef SVR4_SHARED_LIBS

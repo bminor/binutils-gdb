@@ -1,4 +1,12 @@
+Wed Apr  8 16:47:33 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* solib.c (solib_create_inferior_hook): Remove Ulrich Drepper's
+	patch of March 23 1998.
+	* breakpoint.c (breakpoint_re_set_one): Remove Ulrich Drepper's
+	patch of March 23 1998.
+
 Sat Apr  4 10:05:00 1998  Dawn Perchik  <dawn@cygnus.com>
+
 	* mdebugread.c (parse_partial_symbols): If this is an .mdebug 
 	section in an ELF file, override a symbol's ECOFF section with its 
 	ELF section.  Also, fix stabs continuation where a stabs string 
