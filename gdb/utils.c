@@ -407,12 +407,11 @@ null_cleanup (void *arg)
 {
 }
 
-/* Add a continuation to the continuation list, the gloabl list
+/* Add a continuation to the continuation list, the global list
    cmd_continuation. The new continuation will be added at the front.*/
 void
-add_continuation (continuation_hook, arg_list)
-     void (*continuation_hook) (struct continuation_arg *);
-     struct continuation_arg *arg_list;
+add_continuation (void (*continuation_hook) (struct continuation_arg *),
+		  struct continuation_arg *arg_list)
 {
   struct continuation *continuation_ptr;
 
@@ -472,9 +471,9 @@ discard_all_continuations (void)
 /* Add a continuation to the continuation list, the global list
    intermediate_continuation. The new continuation will be added at the front.*/
 void
-add_intermediate_continuation (continuation_hook, arg_list)
-     void (*continuation_hook) (struct continuation_arg *);
-     struct continuation_arg *arg_list;
+add_intermediate_continuation (void (*continuation_hook)
+			       (struct continuation_arg *),
+			       struct continuation_arg *arg_list)
 {
   struct continuation *continuation_ptr;
 
@@ -1351,15 +1350,10 @@ parse_escape (char **string_ptr)
    be call for printing things which are independent of the language
    of the program being debugged. */
 
-static void printchar (int c, void (*do_fputs) (const char *, struct ui_file*), void (*do_fprintf) (struct ui_file*, const char *, ...), struct ui_file *stream, int quoter);
-
 static void
-printchar (c, do_fputs, do_fprintf, stream, quoter)
-     int c;
-     void (*do_fputs) (const char *, struct ui_file *);
-     void (*do_fprintf) (struct ui_file *, const char *, ...);
-     struct ui_file *stream;
-     int quoter;
+printchar (int c, void (*do_fputs) (const char *, struct ui_file *),
+	   void (*do_fprintf) (struct ui_file *, const char *, ...),
+	   struct ui_file *stream, int quoter)
 {
 
   c &= 0xFF;			/* Avoid sign bit follies */

@@ -1,5 +1,10 @@
 2000-11-03  Kevin Buettner  <kevinb@redhat.com>
 
+	* utils.c (add_continuation, add_intermediate_continuation,
+	printchar): Protoize.
+
+2000-11-03  Kevin Buettner  <kevinb@redhat.com>
+
 	* dwarf2read.c (new_symbol): Relocate address of symbol by the
 	base address of the section it is in rather than always using
 	the base address of the .text section.
