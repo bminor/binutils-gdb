@@ -1560,6 +1560,15 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
 
 	  /* We just assume (b & ~ fieldmask) == 0.  */
 
+	  /* We explicitly permit wrap around if this relocation
+	     covers the high bit of an address.  The Linux kernel
+	     relies on it, and it is the only way to write assembler
+	     code which can run when loaded at a location 0x80000000
+	     away from the location at which it is linked.  */
+	  if (howto->bitsize + rightshift
+	      == bfd_arch_bits_per_address (input_bfd))
+	    break;
+
 	  sum = a + b;
 	  if (sum < a || (sum & ~ fieldmask) != 0)
 	    {

@@ -1,5 +1,8 @@
 1999-06-11  Ian Lance Taylor  <ian@zembu.com>
 
+	* reloc.c (_bfd_relocate_contents): Permit bitfield relocations to
+	wrap if the relocation covers the high bit of an address.
+
 	* dwarf2.c (decode_line_info): Remove unused variable first_time.
 
 1999-06-10  Jakub Jelinek  <jj@ultra.linux.cz>
