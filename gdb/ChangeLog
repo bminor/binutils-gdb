@@ -1,3 +1,7 @@
+Thu Oct 21 12:23:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* symtab.c (decode_line_1): Don't use SYMBOL_LINE for functions.
+
 Thu Oct 21 02:59:07 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* remote-udi.c (udi_store_registers, store_register):  Use

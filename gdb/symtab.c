@@ -156,26 +156,9 @@ lookup_symtab_1 (name)
   /* Same search rules as above apply here, but now we look thru the
      psymtabs.  */
 
-  ALL_PSYMTABS (objfile, ps)
-    if (STREQ (name, ps -> filename))
-      goto got_psymtab;
-
-  if (!slash)
-    ALL_PSYMTABS (objfile, ps)
-      {
-	char *p = ps -> filename;
-	char *tail = strrchr (p, '/');
-
-	if (tail)
-	  p = tail + 1;
-
-	if (STREQ (p, name))
-	  goto got_psymtab;
-      }
-
-  return (NULL);
-
- got_psymtab:
+  ps = lookup_partial_symtab (name);
+  if (!ps)
+    return (NULL);
 
   if (ps -> readin)
     error ("Internal: readin %s pst for `%s' found when no symtab found.",
@@ -211,6 +194,9 @@ lookup_symtab (name)
   if (s) return s;
 
   /* If name not found as specified, see if adding ".c" helps.  */
+  /* Why is this?  Is it just a user convenience?  (If so, it's pretty
+     questionable in the presence of C++, FORTRAN, etc.).  It's not in
+     the GDB manual.  */
 
   copy = (char *) alloca (strlen (name) + 3);
   strcpy (copy, name);
@@ -222,9 +208,9 @@ lookup_symtab (name)
   return 0;
 }
 
-/* Lookup the partial symbol table of a source file named NAME.  This
-   only returns true on an exact match (ie. this semantics are
-   different from lookup_symtab.  */
+/* Lookup the partial symbol table of a source file named NAME.
+   *If* there is no '/' in the name, a match after a '/'
+   in the psymtab filename will also work.  */
 
 struct partial_symtab *
 lookup_partial_symtab (name)
@@ -240,6 +226,22 @@ char *name;
 	  return (pst);
 	}
     }
+
+  /* Now, search for a matching tail (only if name doesn't have any dirs) */
+
+  if (!strchr (name, '/'))
+    ALL_PSYMTABS (objfile, pst)
+      {
+	char *p = pst -> filename;
+	char *tail = strrchr (p, '/');
+
+	if (tail)
+	  p = tail + 1;
+
+	if (STREQ (p, name))
+	  return (pst);
+      }
+
   return (NULL);
 }
 
@@ -258,15 +260,25 @@ gdb_mangle_name (type, i, j)
   char *field_name = TYPE_FN_FIELDLIST_NAME (type, i);
   char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
   char *newname = type_name_no_tag (type);
-  int is_constructor = (physname[0]=='_' && physname[1]=='_');
+  int is_constructor;
   int is_destructor = DESTRUCTOR_PREFIX_P (physname);
   /* Need a new type prefix.  */
   char *const_prefix = method->is_const ? "C" : "";
   char *volatile_prefix = method->is_volatile ? "V" : "";
   char buf[20];
-#ifdef GCC_MANGLE_BUG
-  int len = newname == NULL ? 0 : strlen (newname);
+  int len = (newname == NULL ? 0 : strlen (newname));
+  char *opname;
 
+  is_constructor = newname && STREQ(field_name, newname);
+  if (!is_constructor)
+    is_constructor = (physname[0]=='_' && physname[1]=='_' && 
+		(isdigit(physname[2]) || physname[2]=='Q' || physname[2]=='t'));
+  if (!is_constructor)
+    is_constructor = (strncmp(physname, "__ct", 4) == 0); 
+  if (!is_destructor)
+    is_destructor = (strncmp(physname, "__dt", 4) == 0); 
+
+#ifndef GCC_MANGLE_BUG
   if (is_destructor)
     {
       mangled_name = (char*) xmalloc(strlen(physname)+1);
@@ -274,7 +286,16 @@ gdb_mangle_name (type, i, j)
       return mangled_name;
     }
 
-  sprintf (buf, "__%s%s%d", const_prefix, volatile_prefix, len);
+  if (len == 0)
+    {
+      sprintf (buf, "__%s%s", const_prefix, volatile_prefix);
+      if (strcmp(buf, "__") == 0)
+	buf[0] = '\0';
+    }
+  else
+    {
+      sprintf (buf, "__%s%s%d", const_prefix, volatile_prefix, len);
+    }
   mangled_name_len = ((is_constructor ? 0 : strlen (field_name))
 			  + strlen (buf) + len
 			  + strlen (physname)
@@ -310,7 +331,6 @@ gdb_mangle_name (type, i, j)
     strcat (mangled_name, newname);
 
 #else
-  char *opname;
 
   if (is_constructor)
     {
@@ -2003,15 +2023,13 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	  values.sals = (struct symtab_and_line *)xmalloc (sizeof (struct symtab_and_line));
 	  values.sals[0] = val;
 	  values.nelts = 1;
-	  
-	  /* I think this is always the same as the line that
-	     we calculate above, but the general principle is
-	     "trust the symbols more than stuff like
-	     SKIP_PROLOGUE".  */
-	  if (SYMBOL_LINE (sym) != 0)
-	    values.sals[0].line = SYMBOL_LINE (sym);
 
-	  /* We might need a canonical line spec if it is a static function.  */
+	  /* Don't use the SYMBOL_LINE; if used at all it points to
+	     the line containing the parameters or thereabouts, not
+	     the first line of code.  */
+
+	  /* We might need a canonical line spec if it is a static
+	     function.  */
 	  if (s == 0)
 	    {
 	      struct blockvector *bv = BLOCKVECTOR (sym_symtab);
