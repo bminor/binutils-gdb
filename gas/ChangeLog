@@ -1,5 +1,12 @@
 2003-07-14  Nick Clifton  <nickc@redhat.com>
 
+	* po/tr.po: Update with latest version.
+	* po/POTFILES.in: Regenerate.
+	* po/gas.pot: Regenerate.
+	* configure: Regenerate.
+
+2003-07-14  Nick Clifton  <nickc@redhat.com>
+
 	* config/tc-ip2k.c: Remove inclusion of <ctype.h>
 	* config/tc-tic4x.c: Replace inclusion of <ctype.h> with
 	"safe-ctype.h" and update use of macros.

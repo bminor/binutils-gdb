@@ -1,3 +1,11 @@
+2003-07-14  Nick Clifton  <nickc@redhat.com>
+
+	* po/tr.po: Update with latest version.
+	* po/SRC-POTFILES.in: Regenerate.
+	* po/bfd.pot: Regenerate.
+	* Makfile.in: Regenerate.
+	* configure: Regenerate.
+
 2003-07-12  Jeff Baker  <jbaker@qnx.com>
 
 	* bfd/config.bfd (__QNXTARGET__): Define for Neutrino architectures.

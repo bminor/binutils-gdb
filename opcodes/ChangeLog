@@ -1,3 +1,9 @@
+2003-07-14  Nick Clifton  <nickc@redhat.com>
+
+	* po/tr.po: Update with latest version.
+	* po/POTFILES.in: Regenerate.
+	* Makefile.in: Regenerate.
+
 2003-07-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/opcodes.pot: Regenerate.

@@ -1,13 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# Copyright (C) YEAR Free Software Foundation, Inc.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-07-11 13:57+0930\n"
+"POT-Creation-Date: 2003-07-14 11:32+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1544,7 +1543,7 @@ msgstr ""
 msgid "Bad .section directive: want a,s,w,x,M,S,G,T in string"
 msgstr ""
 
-#: config/tc-arc.c:1615 config/tc-arm.c:11416 config/tc-ip2k.c:221
+#: config/tc-arc.c:1615 config/tc-arm.c:11416 config/tc-ip2k.c:219
 msgid "md_estimate_size_before_relax\n"
 msgstr ""
 
@@ -3401,7 +3400,7 @@ msgid "Addend to unresolved symbol not on word boundary."
 msgstr ""
 
 #: config/tc-fr30.c:524 config/tc-frv.c:1289 config/tc-i960.c:798
-#: config/tc-ip2k.c:353 config/tc-m32r.c:1884 config/tc-openrisc.c:452
+#: config/tc-ip2k.c:351 config/tc-m32r.c:1884 config/tc-openrisc.c:452
 #: config/tc-xstormy16.c:636
 msgid "Bad call to md_atof()"
 msgstr ""
@@ -3671,7 +3670,7 @@ msgid "call tomd_estimate_size_before_relax \n"
 msgstr ""
 
 #: config/tc-h8300.c:2337 config/tc-mcore.c:2355 config/tc-pj.c:581
-#: config/tc-sh.c:3958
+#: config/tc-sh.c:3956
 #, c-format
 msgid "Cannot represent relocation type %s"
 msgstr ""
@@ -4172,7 +4171,7 @@ msgstr ""
 msgid "no such architecture modifier: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:880 config/tc-i386.c:5013
+#: config/tc-i386.c:880 config/tc-i386.c:5022
 msgid "Unknown architecture"
 msgstr ""
 
@@ -4185,7 +4184,7 @@ msgstr ""
 msgid "There are no unsigned pc-relative relocations"
 msgstr ""
 
-#: config/tc-i386.c:1199 config/tc-i386.c:5225
+#: config/tc-i386.c:1199 config/tc-i386.c:5234
 #, c-format
 msgid "can not do %d byte pc-relative relocation"
 msgstr ""
@@ -4404,7 +4403,7 @@ msgstr ""
 msgid "unimplemented segment type %d in operand"
 msgstr ""
 
-#: config/tc-i386.c:3789 config/tc-i386.c:6002
+#: config/tc-i386.c:3789 config/tc-i386.c:6011
 #, c-format
 msgid "expecting scale factor of 1, 2, 4, or 8: got `%s'"
 msgstr ""
@@ -4489,15 +4488,15 @@ msgstr ""
 msgid "long jump required"
 msgstr ""
 
-#: config/tc-i386.c:4796
+#: config/tc-i386.c:4805
 msgid "Bad call to md_atof ()"
 msgstr ""
 
-#: config/tc-i386.c:4964
+#: config/tc-i386.c:4973
 msgid "No compiled in support for x86_64"
 msgstr ""
 
-#: config/tc-i386.c:4985
+#: config/tc-i386.c:4994
 msgid ""
 "  -Q                      ignored\n"
 "  -V                      print assembler version number\n"
@@ -4507,65 +4506,65 @@ msgid ""
 "  -s                      ignored\n"
 msgstr ""
 
-#: config/tc-i386.c:4993
+#: config/tc-i386.c:5002
 msgid ""
 "  -n                      Do not optimize code alignment\n"
 "  -q                      quieten some warnings\n"
 msgstr ""
 
-#: config/tc-i386.c:5095 config/tc-s390.c:1841
+#: config/tc-i386.c:5104 config/tc-s390.c:1841
 msgid "GOT already in symbol table"
 msgstr ""
 
-#: config/tc-i386.c:5240
+#: config/tc-i386.c:5249
 #, c-format
 msgid "can not do %d byte relocation"
 msgstr ""
 
-#: config/tc-i386.c:5308 config/tc-s390.c:2285
+#: config/tc-i386.c:5317 config/tc-s390.c:2285
 #, c-format
 msgid "cannot represent relocation type %s"
 msgstr ""
 
-#: config/tc-i386.c:5604
+#: config/tc-i386.c:5613
 #, c-format
 msgid "too many memory references for '%s'"
 msgstr ""
 
-#: config/tc-i386.c:5767
+#: config/tc-i386.c:5776
 #, c-format
 msgid "Unknown operand modifier `%s'\n"
 msgstr ""
 
-#: config/tc-i386.c:5974
+#: config/tc-i386.c:5983
 #, c-format
 msgid "`%s' is not a valid segment register"
 msgstr ""
 
-#: config/tc-i386.c:5984 config/tc-i386.c:6105
+#: config/tc-i386.c:5993 config/tc-i386.c:6114
 msgid "Register scaling only allowed in memory operands."
 msgstr ""
 
-#: config/tc-i386.c:6015
+#: config/tc-i386.c:6024
 msgid "Too many register references in memory operand.\n"
 msgstr ""
 
-#: config/tc-i386.c:6084
+#: config/tc-i386.c:6093
 #, c-format
 msgid "Syntax error. Expecting a constant. Got `%s'.\n"
 msgstr ""
 
-#: config/tc-i386.c:6154
+#: config/tc-i386.c:6163
 #, c-format
 msgid "Unrecognized token '%s'"
 msgstr ""
 
-#: config/tc-i386.c:6171
+#: config/tc-i386.c:6180
 #, c-format
 msgid "Unexpected token `%s'\n"
 msgstr ""
 
-#: config/tc-i386.c:6315
+#: config/tc-i386.c:6324
 #, c-format
 msgid "Unrecognized token `%s'\n"
 msgstr ""
@@ -5005,19 +5004,19 @@ msgstr ""
 msgid "section `%s' aliased to `%s' is not used"
 msgstr ""
 
-#: config/tc-ip2k.c:125
+#: config/tc-ip2k.c:123
 msgid "IP2K specific command line options:\n"
 msgstr ""
 
-#: config/tc-ip2k.c:126
+#: config/tc-ip2k.c:124
 msgid "  -mip2022               restrict to IP2022 insns \n"
 msgstr ""
 
-#: config/tc-ip2k.c:127
+#: config/tc-ip2k.c:125
 msgid "  -mip2022ext            permit extended IP2022 insn\n"
 msgstr ""
 
-#: config/tc-ip2k.c:248
+#: config/tc-ip2k.c:246
 msgid "md_pcrel_from\n"
 msgstr ""
 
@@ -7916,6 +7915,188 @@ msgstr ""
 msgid "unsupported relocation type"
 msgstr ""
 
+#: config/tc-sh64.c:596
+msgid "This operand must be constant at assembly time"
+msgstr ""
+
+#: config/tc-sh64.c:711
+msgid "Invalid operand expression"
+msgstr ""
+
+#: config/tc-sh64.c:798 config/tc-sh64.c:904
+msgid "PTB operand is a SHmedia symbol"
+msgstr ""
+
+#: config/tc-sh64.c:801 config/tc-sh64.c:901
+msgid "PTA operand is a SHcompact symbol"
+msgstr ""
+
+#: config/tc-sh64.c:817
+msgid "invalid expression in operand"
+msgstr ""
+
+#: config/tc-sh64.c:1514
+#, c-format
+msgid "invalid operand, not a 5-bit unsigned value: %d"
+msgstr ""
+
+#: config/tc-sh64.c:1519
+#, c-format
+msgid "invalid operand, not a 6-bit signed value: %d"
+msgstr ""
+
+#: config/tc-sh64.c:1524
+#, c-format
+msgid "invalid operand, not a 6-bit unsigned value: %d"
+msgstr ""
+
+#: config/tc-sh64.c:1529 config/tc-sh64.c:1541
+#, c-format
+msgid "invalid operand, not a 11-bit signed value: %d"
+msgstr ""
+
+#: config/tc-sh64.c:1531
+#, c-format
+msgid "invalid operand, not a multiple of 32: %d"
+msgstr ""
+
+#: config/tc-sh64.c:1536
+#, c-format
+msgid "invalid operand, not a 10-bit signed value: %d"
+msgstr ""
+
+#: config/tc-sh64.c:1543
+#, c-format
+msgid "invalid operand, not an even value: %d"
+msgstr ""
+
+#: config/tc-sh64.c:1548
+#, c-format
+msgid "invalid operand, not a 12-bit signed value: %d"
+msgstr ""
+
+#: config/tc-sh64.c:1550
+#, c-format
+msgid "invalid operand, not a multiple of 4: %d"
+msgstr ""
+
+#: config/tc-sh64.c:1555
+#, c-format
+msgid "invalid operand, not a 13-bit signed value: %d"
+msgstr ""
+
+#: config/tc-sh64.c:1557
+#, c-format
+msgid "invalid operand, not a multiple of 8: %d"
+msgstr ""
+
+#: config/tc-sh64.c:1562
+#, c-format
+msgid "invalid operand, not a 16-bit signed value: %d"
+msgstr ""
+
+#: config/tc-sh64.c:1567
+#, c-format
+msgid "invalid operand, not an 16-bit unsigned value: %d"
+msgstr ""
+
+#: config/tc-sh64.c:1573
+msgid "operand out of range for PT, PTA and PTB"
+msgstr ""
+
+#: config/tc-sh64.c:1575
+#, c-format
+msgid "operand not a multiple of 4 for PT, PTA or PTB: %d"
+msgstr ""
+
+#: config/tc-sh64.c:2103
+#, c-format
+msgid "MOVI operand is not a 32-bit signed value: 0x%8x%08x"
+msgstr ""
+
+#: config/tc-sh64.c:2466 config/tc-sh64.c:2631 config/tc-sh64.c:2646
+msgid "invalid PIC reference"
+msgstr ""
+
+#: config/tc-sh64.c:2524
+msgid "can't find opcode"
+msgstr ""
+
+#: config/tc-sh64.c:2854
+#, c-format
+msgid "invalid operands to %s"
+msgstr ""
+
+#: config/tc-sh64.c:2860
+#, c-format
+msgid "excess operands to %s"
+msgstr ""
+
+#: config/tc-sh64.c:2906
+#, c-format
+msgid "The `.mode %s' directive is not valid with this architecture"
+msgstr ""
+
+#: config/tc-sh64.c:2914
+#, c-format
+msgid "Invalid argument to .mode: %s"
+msgstr ""
+
+#: config/tc-sh64.c:2945
+#, c-format
+msgid "The `.abi %s' directive is not valid with this architecture"
+msgstr ""
+
+#: config/tc-sh64.c:2951
+msgid "`.abi 64' but command-line options do not specify 64-bit ABI"
+msgstr ""
+
+#: config/tc-sh64.c:2956
+msgid "`.abi 32' but command-line options do not specify 32-bit ABI"
+msgstr ""
+
+#: config/tc-sh64.c:2959
+#, c-format
+msgid "Invalid argument to .abi: %s"
+msgstr ""
+
+#: config/tc-sh64.c:3014
+msgid "-no-mix is invalid without specifying SHcompact or SHmedia"
+msgstr ""
+
+#: config/tc-sh64.c:3019
+msgid "-shcompact-const-crange is invalid without SHcompact"
+msgstr ""
+
+#: config/tc-sh64.c:3022
+msgid "-expand-pt32 only valid with -abi=64"
+msgstr ""
+
+#: config/tc-sh64.c:3025
+msgid "-no-expand only valid with SHcompact or SHmedia"
+msgstr ""
+
+#: config/tc-sh64.c:3028
+msgid "-expand-pt32 invalid together with -no-expand"
+msgstr ""
+
+#: config/tc-sh64.c:3250
+msgid ""
+"SHmedia code not allowed in same section as constants and SHcompact code"
+msgstr ""
+
+#: config/tc-sh64.c:3268
+msgid "No segment info for current section"
+msgstr ""
+
+#: config/tc-sh64.c:3310
+msgid "duplicate datalabel operator ignored"
+msgstr ""
+
+#: config/tc-sh64.c:3380
+msgid "Invalid DataLabel expression"
+msgstr ""
+
 #: config/tc-sh.c:91
 msgid "directive .big encountered when option -big required"
 msgstr ""
@@ -8147,188 +8328,6 @@ msgstr ""
 msgid "misaligned offset"
 msgstr ""
 
-#: config/tc-sh64.c:596
-msgid "This operand must be constant at assembly time"
-msgstr ""
-
-#: config/tc-sh64.c:711
-msgid "Invalid operand expression"
-msgstr ""
-
-#: config/tc-sh64.c:798 config/tc-sh64.c:904
-msgid "PTB operand is a SHmedia symbol"
-msgstr ""
-
-#: config/tc-sh64.c:801 config/tc-sh64.c:901
-msgid "PTA operand is a SHcompact symbol"
-msgstr ""
-
-#: config/tc-sh64.c:817
-msgid "invalid expression in operand"
-msgstr ""
-
-#: config/tc-sh64.c:1514
-#, c-format
-msgid "invalid operand, not a 5-bit unsigned value: %d"
-msgstr ""
-
-#: config/tc-sh64.c:1519
-#, c-format
-msgid "invalid operand, not a 6-bit signed value: %d"
-msgstr ""
-
-#: config/tc-sh64.c:1524
-#, c-format
-msgid "invalid operand, not a 6-bit unsigned value: %d"
-msgstr ""
-
-#: config/tc-sh64.c:1529 config/tc-sh64.c:1541
-#, c-format
-msgid "invalid operand, not a 11-bit signed value: %d"
-msgstr ""
-
-#: config/tc-sh64.c:1531
-#, c-format
-msgid "invalid operand, not a multiple of 32: %d"
-msgstr ""
-
-#: config/tc-sh64.c:1536
-#, c-format
-msgid "invalid operand, not a 10-bit signed value: %d"
-msgstr ""
-
-#: config/tc-sh64.c:1543
-#, c-format
-msgid "invalid operand, not an even value: %d"
-msgstr ""
-
-#: config/tc-sh64.c:1548
-#, c-format
-msgid "invalid operand, not a 12-bit signed value: %d"
-msgstr ""
-
-#: config/tc-sh64.c:1550
-#, c-format
-msgid "invalid operand, not a multiple of 4: %d"
-msgstr ""
-
-#: config/tc-sh64.c:1555
-#, c-format
-msgid "invalid operand, not a 13-bit signed value: %d"
-msgstr ""
-
-#: config/tc-sh64.c:1557
-#, c-format
-msgid "invalid operand, not a multiple of 8: %d"
-msgstr ""
-
-#: config/tc-sh64.c:1562
-#, c-format
-msgid "invalid operand, not a 16-bit signed value: %d"
-msgstr ""
-
-#: config/tc-sh64.c:1567
-#, c-format
-msgid "invalid operand, not an 16-bit unsigned value: %d"
-msgstr ""
-
-#: config/tc-sh64.c:1573
-msgid "operand out of range for PT, PTA and PTB"
-msgstr ""
-
-#: config/tc-sh64.c:1575
-#, c-format
-msgid "operand not a multiple of 4 for PT, PTA or PTB: %d"
-msgstr ""
-
-#: config/tc-sh64.c:2103
-#, c-format
-msgid "MOVI operand is not a 32-bit signed value: 0x%8x%08x"
-msgstr ""
-
-#: config/tc-sh64.c:2466 config/tc-sh64.c:2631 config/tc-sh64.c:2646
-msgid "invalid PIC reference"
-msgstr ""
-
-#: config/tc-sh64.c:2524
-msgid "can't find opcode"
-msgstr ""
-
-#: config/tc-sh64.c:2854
-#, c-format
-msgid "invalid operands to %s"
-msgstr ""
-
-#: config/tc-sh64.c:2860
-#, c-format
-msgid "excess operands to %s"
-msgstr ""
-
-#: config/tc-sh64.c:2906
-#, c-format
-msgid "The `.mode %s' directive is not valid with this architecture"
-msgstr ""
-
-#: config/tc-sh64.c:2914
-#, c-format
-msgid "Invalid argument to .mode: %s"
-msgstr ""
-
-#: config/tc-sh64.c:2945
-#, c-format
-msgid "The `.abi %s' directive is not valid with this architecture"
-msgstr ""
-
-#: config/tc-sh64.c:2951
-msgid "`.abi 64' but command-line options do not specify 64-bit ABI"
-msgstr ""
-
-#: config/tc-sh64.c:2956
-msgid "`.abi 32' but command-line options do not specify 32-bit ABI"
-msgstr ""
-
-#: config/tc-sh64.c:2959
-#, c-format
-msgid "Invalid argument to .abi: %s"
-msgstr ""
-
-#: config/tc-sh64.c:3014
-msgid "-no-mix is invalid without specifying SHcompact or SHmedia"
-msgstr ""
-
-#: config/tc-sh64.c:3019
-msgid "-shcompact-const-crange is invalid without SHcompact"
-msgstr ""
-
-#: config/tc-sh64.c:3022
-msgid "-expand-pt32 only valid with -abi=64"
-msgstr ""
-
-#: config/tc-sh64.c:3025
-msgid "-no-expand only valid with SHcompact or SHmedia"
-msgstr ""
-
-#: config/tc-sh64.c:3028
-msgid "-expand-pt32 invalid together with -no-expand"
-msgstr ""
-
-#: config/tc-sh64.c:3250
-msgid ""
-"SHmedia code not allowed in same section as constants and SHcompact code"
-msgstr ""
-
-#: config/tc-sh64.c:3268
-msgid "No segment info for current section"
-msgstr ""
-
-#: config/tc-sh64.c:3310
-msgid "duplicate datalabel operator ignored"
-msgstr ""
-
-#: config/tc-sh64.c:3380
-msgid "Invalid DataLabel expression"
-msgstr ""
-
 #: config/tc-sparc.c:287
 msgid "Invalid default architecture, broken assembler."
 msgstr ""
@@ -8523,7 +8522,6 @@ msgid ": asr number must be between 0 and 31"
 msgstr ""
 
 #: config/tc-sparc.c:1658
-#, c-format
 msgid ": expecting %asrN"
 msgstr ""
 
