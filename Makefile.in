@@ -237,8 +237,8 @@ CXX_FOR_TARGET = ` \
   fi`
 
 AS_FOR_TARGET = ` \
-  if [ -f $$r/gas/as.new ] ; then \
-    echo $$r/gas/as.new ; \
+  if [ -f $$r/gas/as-new ] ; then \
+    echo $$r/gas/as-new ; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(AS); \
