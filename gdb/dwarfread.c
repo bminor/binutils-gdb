@@ -314,6 +314,23 @@ struct dieinfo {
   unsigned int		has_at_stmt_list:1;
   unsigned int		has_at_byte_size:1;
   unsigned int		short_element_list:1;
+
+  /* Kludge to identify register variables */
+
+  unsigned int		isreg;
+
+  /* Kludge to identify optimized out variables */
+
+  unsigned int		optimized_out;
+
+  /* Kludge to identify basereg references.
+     Nonzero if we have an offset relative to a basereg.  */
+
+  unsigned int		offreg;
+
+  /* Kludge to identify which base register is it relative to.  */
+
+  unsigned int		basereg;
 };
 
 static int diecount;	/* Approximate count of dies for compilation unit */
@@ -323,13 +340,6 @@ static char *dbbase;	/* Base pointer to dwarf info */
 static int dbsize;	/* Size of dwarf info in bytes */
 static int dbroff;	/* Relative offset from start of .debug section */
 static char *lnbase;	/* Base pointer to line section */
-static int isreg;	/* Kludge to identify register variables */
-static int optimized_out;  /* Kludge to identify optimized out variables */
-/* Kludge to identify basereg references.  Nonzero if we have an offset
-   relative to a basereg.  */
-static int offreg;
-/* Which base register is it relative to?  */
-static int basereg;
 
 /* This value is added to each symbol value.  FIXME:  Generalize to 
    the section_offsets structure used by dbxread (once this is done,
@@ -557,7 +567,7 @@ synthesize_typedef PARAMS ((struct dieinfo *, struct objfile *,
 			    struct type *));
 
 static int
-locval PARAMS ((char *));
+locval PARAMS ((struct dieinfo *));
 
 static void
 set_cu_language PARAMS ((struct dieinfo *));
@@ -1077,7 +1087,7 @@ struct_type (dip, thisdie, enddie, objfile)
 	      obsavestring (mbr.at_name, strlen (mbr.at_name),
 			    &objfile -> type_obstack);
 	  list -> field.type = decode_die_type (&mbr);
-	  list -> field.bitpos = 8 * locval (mbr.at_location);
+	  list -> field.bitpos = 8 * locval (&mbr);
 	  /* Handle bit fields. */
 	  list -> field.bitsize = mbr.at_bit_size;
 	  if (BITS_BIG_ENDIAN)
@@ -2186,23 +2196,23 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	static int locval (char *loc)
+	static int locval (struct dieinfo *dip)
 
 DESCRIPTION
 
 	Given pointer to a string of bytes that define a location, compute
 	the location and return the value.
 	A location description containing no atoms indicates that the
-	object is optimized out. The global optimized_out flag is set for
-	those, the return value is meaningless.
+	object is optimized out. The optimized_out flag is set for those,
+	the return value is meaningless.
 
 	When computing values involving the current value of the frame pointer,
 	the value zero is used, which results in a value relative to the frame
 	pointer, rather than the absolute value.  This is what GDB wants
 	anyway.
     
-	When the result is a register number, the global isreg flag is set,
-	otherwise it is cleared.  This is a kludge until we figure out a better
+	When the result is a register number, the isreg flag is set, otherwise
+	it is cleared.  This is a kludge until we figure out a better
 	way to handle the problem.  Gdb's design does not mesh well with the
 	DWARF notion of a location computing interpreter, which is a shame
 	because the flexibility goes unused.
@@ -2214,30 +2224,32 @@ NOTES
  */
 
 static int
-locval (loc)
-     char *loc;
+locval (dip)
+     struct dieinfo *dip;
 {
   unsigned short nbytes;
   unsigned short locsize;
   auto long stack[64];
   int stacki;
+  char *loc;
   char *end;
   int loc_atom_code;
   int loc_value_size;
   
+  loc = dip -> at_location;
   nbytes = attribute_size (AT_location);
   locsize = target_to_host (loc, nbytes, GET_UNSIGNED, current_objfile);
   loc += nbytes;
   end = loc + locsize;
   stacki = 0;
   stack[stacki] = 0;
-  isreg = 0;
-  offreg = 0;
-  optimized_out = 1;
+  dip -> isreg = 0;
+  dip -> offreg = 0;
+  dip -> optimized_out = 1;
   loc_value_size = TARGET_FT_LONG_SIZE (current_objfile);
   while (loc < end)
     {
-      optimized_out = 0;
+      dip -> optimized_out = 0;
       loc_atom_code = target_to_host (loc, SIZEOF_LOC_ATOM_CODE, GET_UNSIGNED,
 				      current_objfile);
       loc += SIZEOF_LOC_ATOM_CODE;
@@ -2254,15 +2266,15 @@ locval (loc)
 						     GET_UNSIGNED,
 						     current_objfile));
 	    loc += loc_value_size;
-	    isreg = 1;
+	    dip -> isreg = 1;
 	    break;
 	  case OP_BASEREG:
 	    /* push value of register (number) */
 	    /* Actually, we compute the value as if register has 0, so the
 	       value ends up being the offset from that register.  */
-	    offreg = 1;
-	    basereg = target_to_host (loc, loc_value_size, GET_UNSIGNED,
-				      current_objfile);
+	    dip -> offreg = 1;
+	    dip -> basereg = target_to_host (loc, loc_value_size, GET_UNSIGNED,
+					     current_objfile);
 	    loc += loc_value_size;
 	    stack[++stacki] = 0;
 	    break;
@@ -2972,7 +2984,7 @@ new_symbol (dip, objfile)
 	case TAG_global_variable:
 	  if (dip -> at_location != NULL)
 	    {
-	      SYMBOL_VALUE_ADDRESS (sym) = locval (dip -> at_location);
+	      SYMBOL_VALUE_ADDRESS (sym) = locval (dip);
 	      add_symbol_to_list (sym, &global_symbols);
 	      SYMBOL_CLASS (sym) = LOC_STATIC;
 	      SYMBOL_VALUE (sym) += baseaddr;
@@ -2981,18 +2993,19 @@ new_symbol (dip, objfile)
 	case TAG_local_variable:
 	  if (dip -> at_location != NULL)
 	    {
-	      if (optimized_out)
+	      int loc = locval (dip);
+	      if (dip -> optimized_out)
 		{
 		  SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
 		}
-	      else if (isreg)
+	      else if (dip -> isreg)
 		{
 		  SYMBOL_CLASS (sym) = LOC_REGISTER;
 		}
-	      else if (offreg)
+	      else if (dip -> offreg)
 		{
 		  SYMBOL_CLASS (sym) = LOC_BASEREG;
-		  SYMBOL_BASEREG (sym) = basereg;
+		  SYMBOL_BASEREG (sym) = dip -> basereg;
 		}
 	      else
 		{
@@ -3003,11 +3016,11 @@ new_symbol (dip, objfile)
 		{
 		  /* LOC_STATIC address class MUST use SYMBOL_VALUE_ADDRESS,
 		     which may store to a bigger location than SYMBOL_VALUE. */
-		  SYMBOL_VALUE_ADDRESS (sym) = locval (dip -> at_location);
+		  SYMBOL_VALUE_ADDRESS (sym) = loc;
 		}
 	      else
 		{
-		  SYMBOL_VALUE (sym) = locval (dip -> at_location);
+		  SYMBOL_VALUE (sym) = loc;
 		}
 	      add_symbol_to_list (sym, list_in_scope);
 	    }
@@ -3015,17 +3028,17 @@ new_symbol (dip, objfile)
 	case TAG_formal_parameter:
 	  if (dip -> at_location != NULL)
 	    {
-	      SYMBOL_VALUE (sym) = locval (dip -> at_location);
+	      SYMBOL_VALUE (sym) = locval (dip);
 	    }
 	  add_symbol_to_list (sym, list_in_scope);
-	  if (isreg)
+	  if (dip -> isreg)
 	    {
 	      SYMBOL_CLASS (sym) = LOC_REGPARM;
 	    }
-	  else if (offreg)
+	  else if (dip -> offreg)
 	    {
 	      SYMBOL_CLASS (sym) = LOC_BASEREG_ARG;
-	      SYMBOL_BASEREG (sym) = basereg;
+	      SYMBOL_BASEREG (sym) = dip -> basereg;
 	    }
 	  else
 	    {
