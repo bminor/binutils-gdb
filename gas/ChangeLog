@@ -1,3 +1,11 @@
+2003-04-30  H.J. Lu <hjl@gnu.org>
+
+	* config/tc-ia64.c (stmt_float_cons): Fix alignment for real10
+	and add real16.
+	(md_pseudo_table): Add "xreal16", "xreal16.ua", "real16" and
+	"real16.ua".
+	(md_atof): Add 6 byte padding of zero for real16.
+
 2003-04-29  Nick Clifton  <nickc@redhat.com>
 
 	* config/obj-elf.c (obj_elf_symver): Skip whitespace before the

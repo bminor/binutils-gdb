@@ -1,3 +1,10 @@
+2003-04-30  H.J. Lu <hjl@gnu.org>
+
+	* gas/ia64/ia64.exp: Add real.
+
+	* gas/ia64/real.s: New file.
+	* gas/ia64/real.d: Likewise.
+
 2003-04-29  Nick Clifton  <nickc@redhat.com>
 
 	* gas/elf/elf.exp: Invoke symver test.

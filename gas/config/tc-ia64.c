@@ -4410,19 +4410,25 @@ static void
 stmt_float_cons (kind)
      int kind;
 {
-  size_t size;
+  size_t alignment;
 
   switch (kind)
     {
-    case 'd': size = 8; break;
-    case 'x': size = 10; break;
+    case 'd':
+      alignment = 8;
+      break;
+
+    case 'x':
+    case 'X':
+      alignment = 16;
+      break;
 
     case 'f':
     default:
-      size = 4;
+      alignment = 4;
       break;
     }
-  ia64_do_align (size);
+  ia64_do_align (alignment);
   float_cons (kind);
 }
 
@@ -4899,6 +4905,7 @@ const pseudo_typeS md_pseudo_table[] =
     { "xreal4", dot_xfloat_cons, 'f' },
     { "xreal8", dot_xfloat_cons, 'd' },
     { "xreal10", dot_xfloat_cons, 'x' },
+    { "xreal16", dot_xfloat_cons, 'X' },
     { "xstring", dot_xstringer, 0 },
     { "xstringz", dot_xstringer, 1 },
 
@@ -4909,6 +4916,7 @@ const pseudo_typeS md_pseudo_table[] =
     { "xreal4.ua", dot_xfloat_cons_ua, 'f' },
     { "xreal8.ua", dot_xfloat_cons_ua, 'd' },
     { "xreal10.ua", dot_xfloat_cons_ua, 'x' },
+    { "xreal16.ua", dot_xfloat_cons_ua, 'X' },
 
     /* annotations/DV checking support */
     { "entry", dot_entry, 0 },
@@ -4952,6 +4960,7 @@ pseudo_opcode[] =
     { "real4", stmt_float_cons, 'f' },
     { "real8", stmt_float_cons, 'd' },
     { "real10", stmt_float_cons, 'x' },
+    { "real16", stmt_float_cons, 'X' },
     { "string", stringer, 0 },
     { "stringz", stringer, 1 },
 
@@ -4963,6 +4972,7 @@ pseudo_opcode[] =
     { "real4.ua", float_cons, 'f' },
     { "real8.ua", float_cons, 'd' },
     { "real10.ua", float_cons, 'x' },
+    { "real16.ua", float_cons, 'X' },
   };
 
 /* Declare a register by creating a symbol for it and entering it in
@@ -10585,6 +10595,12 @@ md_atof (type, lit, size)
     {
       md_number_to_chars (lit, (long) (*word--), sizeof (LITTLENUM_TYPE));
       lit += sizeof (LITTLENUM_TYPE);
+    }
+  if (type == 'X')
+    {
+      /* It is 10 byte floating point with 6 byte padding.  */
+      memset (lit, 0, 6);
+      *size = 8 * sizeof (LITTLENUM_TYPE);
     }
   return 0;
 }
