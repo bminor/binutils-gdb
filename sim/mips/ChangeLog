@@ -1,3 +1,51 @@
+Mon Apr 20 11:26:55 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (struct hilo_access, struct hilo_history): Define,
+ 	contains HI/LO access history.
+	(struct _sim_cpu): Make hiaccess and loaccess of type hilo_access.
+	(HIACCESS, LOACCESS): Delete, replace with
+	(HIHISTORY, LOHISTORY): New macros.
+	(start-sanitize-r5900):
+	(struct sim_5900_cpu): Make hi1access, lo1access of type
+ 	hilo_access.
+	(HI1ACCESS, LO1ACCESS): Delete, replace with
+	(HI1HISTORY, LO1HISTORY): New macros.
+	(end-sanitize-r5900):
+	(CHECKHILO): Delete all, moved to mips.igen
+	
+	* gencode.c (build_instruction): Do not generate checks for
+ 	correct HI/LO register usage.
+
+	* interp.c (old_engine_run): Delete checks for correct HI/LO
+ 	register usage.
+
+	* mips.igen (check_mt_hilo, check_mf_hilo, check_op_hilo,
+ 	check_mf_cycles): New functions.
+	(do_mfhi, do_mflo, "mthi", "mtlo", do_ddiv, do_ddivu, do_div,
+ 	do_divu, domultx, do_mult, do_multu): Use.
+
+	* tx.igen ("madd", "maddu"): Use.
+	(start-sanitize-r5900):
+	
+	r5900.igen: Update all HI/LO checks.
+	("mfhi1", "mflo1", "mthi1", "mthi1", "pmfhi", "pmflo", "pmfhl",
+ 	"pmthi", "pmtlo", "mpthl"): Check MF/MT HI/LO.
+	("mult1", "div1", "divu1", "multu1", "madd1", "maddu1", "pdivbw",
+ 	"pdivuw", "pdivw", "phmaddh", "phmsubh", "pmaddh", "madduw",
+ 	"pmaddw", "pmsubh", "pmsubw", "pmulth", "pmultuw", "pmultw"):
+ 	Check HI/LO op.
+	(end-sanitize-r5900):
+	
+start-sanitize-sky
+Mon Apr 20 18:39:47 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* interp.c (decode_coproc): Correct CMFC2/QMTC2
+	GPR access.
+
+	* r5900.igen (LQ,SQ): Use a pair of 64-bit accesses
+	instead of a single 128-bit access.
+
+end-sanitize-sky
 start-sanitize-sky
 Fri Apr 17 14:50:39 1998  Frank Ch. Eigler  <fche@cygnus.com>
 

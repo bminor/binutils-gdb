@@ -2527,9 +2527,6 @@ build_instruction (doisa, features, mips16, insn)
      {
      char* pipe = (insn->flags & PIPE1) ? "1" : "";
 
-     if (features & FEATURE_WARN_LOHI) {
-       printf("   CHECKHILO(\"Multiplication\");\n");
-     }
      printf("   {\n");
      if (GETDATASIZEINSN(insn) == DOUBLEWORD) {
        printf("   uword64 mid;\n");
@@ -2578,9 +2575,6 @@ build_instruction (doisa, features, mips16, insn)
       int boolU = (insn->flags & UNSIGNED);
       char* pipe = (insn->flags & PIPE1) ? "1" : "";
 
-      if (features & FEATURE_WARN_LOHI) {
-        printf("   CHECKHILO(\"Division\");\n");
-      }
       printf("   {\n");
 
       if (GETDATASIZEINSN(insn) == DOUBLEWORD) {
@@ -2697,14 +2691,8 @@ build_instruction (doisa, features, mips16, insn)
        if (insn->flags & LEFT)
 	printf("   GPR[destreg] = %s%s;\n",regname,(pipe1 ? "1" : ""));
        else {
-	 if (features & FEATURE_WARN_LOHI) {
-	   printf("   if (%s%sACCESS != 0)\n",regname,(pipe1 ? "1" : ""));
-	   printf("     sim_io_eprintf(sd,\"MT (move-to) over-writing %s register value\\n\");\n",regname);
-	 }
 	 printf("   %s%s = op1;\n",regname,(pipe1 ? "1" : ""));
        }
-       if (features & FEATURE_WARN_LOHI)
-	printf("   %s%sACCESS = 3; /* 3rd instruction will be safe */\n",regname,(pipe1 ? "1" : ""));
      } else
       if (insn->flags & SHIFT16)
        printf("   GPR[destreg] = (op2 << 16);\n");
@@ -2813,9 +2801,6 @@ build_instruction (doisa, features, mips16, insn)
      /* Some of this code is shared with the standard multiply
 	routines, so an effort should be made to merge where
 	possible. */
-     if (features & FEATURE_WARN_LOHI) {
-       printf("   CHECKHILO(\"Multiply-Add\");\n");
-     }
      if (features & FEATURE_WARN_RESULT) {
        /* Give user a warning if either op1 or op2 are not 16bit signed integers */
        printf("   if (NOTHALFWORDVALUE(op1) || NOTHALFWORDVALUE(op2))\n");

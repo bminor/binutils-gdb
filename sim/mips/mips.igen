@@ -98,6 +98,91 @@
 
 
 
+// Helper:
+// 
+// Check that an access to a HI/LO register meets timing requirements
+//
+// The following requirements exist:
+//
+//   -  A MT {HI,LO} update was not immediatly preceeded by a MF {HI,LO} read
+//   -  A OP {HI,LO} update was not immediatly preceeded by a MF {HI,LO} read
+//   -  A MF {HI,LO} read was not corrupted by a preceeding MT{LO,HI} update
+//      corruption occures when MT{LO,HI} is preceeded by a OP {HI,LO}.
+//
+
+:function:::int:check_mf_cycles:hilo_history *history, signed64 time, const char *new
+{
+  if (history->mf.timestamp + 3 > time)
+    {
+      sim_engine_abort (SD, CPU, CIA, "HILO: %s: %s at 0x%08lx too close to MF at 0x%08lx\n",
+			itable[MY_INDEX].name,
+			new, (long) CIA,
+			(long) history->mf.cia);      
+      return 0;
+    }
+  return 1;
+}
+
+:function:::int:check_mt_hilo:hilo_history *history
+{
+  signed64 time = sim_events_time (SD);
+  int ok = check_mf_cycles (SD_, history, time, "MT");
+  history->mt.timestamp = time;
+  history->mt.cia = CIA;
+  return ok;
+}
+
+:function:::int:check_mf_hilo:hilo_history *history, hilo_history *peer
+{
+  signed64 time = sim_events_time (SD);
+  int ok = 1;
+  if (peer != NULL
+      && peer->mt.timestamp > history->op.timestamp
+      && history->mf.timestamp < history->op.timestamp)
+    {
+      /* The peer has been written to since the last OP yet we have
+         not */
+      sim_engine_abort (SD, CPU, CIA, "HILO: %s: MF at 0x%08lx following OP at 0x%08lx corrupted by MT at 0x%08lx\n",
+			itable[MY_INDEX].name,
+			(long) CIA,
+			(long) history->op.cia,
+			(long) peer->mt.cia);      
+      ok = 0;
+    }
+  history->mf.timestamp = time;
+  history->mf.cia = CIA;
+  return ok;
+}
+
+:function:::int:check_op_hilo:hilo_history *hi, hilo_history *lo
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
+*r3900:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+// start-sanitize-r5900
+*r5900:
+// end-sanitize-r5900
+{
+  signed64 time = sim_events_time (SD);
+  int ok = (check_mf_cycles (SD_, hi, time, "OP")
+	    && check_mf_cycles (SD_, lo, time, "OP"));
+  hi->op.timestamp = time;
+  lo->op.timestamp = time;
+  hi->op.cia = CIA;
+  lo->op.cia = CIA;
+  return ok;
+}
+
+
+
 //
 // Mips Architecture:
 //
@@ -867,8 +952,8 @@
 
 :function:64::void:do_ddiv:int rs, int rt
 {
+  check_op_hilo (SD_, HIHISTORY, LOHISTORY);
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
-  CHECKHILO ("Division");
   {
     signed64 n = GPR[rs];
     signed64 d = GPR[rt];
@@ -916,8 +1001,8 @@
 
 :function:64::void:do_ddivu:int rs, int rt
 {
+  check_op_hilo (SD_, HIHISTORY, LOHISTORY);
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
-  CHECKHILO ("Division");
   {
     unsigned64 n = GPR[rs];
     unsigned64 d = GPR[rt];
@@ -957,8 +1042,8 @@
 
 :function:::void:do_div:int rs, int rt
 {
+  check_op_hilo (SD_, HIHISTORY, LOHISTORY);
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
-  CHECKHILO("Division");
   {
     signed32 n = GPR[rs];
     signed32 d = GPR[rt];
@@ -1006,8 +1091,8 @@
 
 :function:::void:do_divu:int rs, int rt
 {
+  check_op_hilo (SD_, HIHISTORY, LOHISTORY);
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
-  CHECKHILO ("Division");
   {
     unsigned32 n = GPR[rs];
     unsigned32 d = GPR[rt];
@@ -1060,8 +1145,8 @@
   int sign;
   unsigned64 op1 = GPR[rs];
   unsigned64 op2 = GPR[rt];
+  check_op_hilo (SD_, HIHISTORY, LOHISTORY);
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
-  CHECKHILO ("Multiplication");
   /* make signed multiply unsigned */ 
   sign = 0;
   if (signed_p)
@@ -2032,12 +2117,10 @@
 
 :function:::void:do_mfhi:int rd
 {
+  check_mf_hilo (SD_, HIHISTORY, LOHISTORY);
   TRACE_ALU_INPUT1 (HI);
   GPR[rd] = HI;
   TRACE_ALU_RESULT (GPR[rd]);
-#if 0
-  HIACCESS = 3;
-#endif
 }
 
 000000,0000000000,5.RD,00000,010000:SPECIAL:32::MFHI
@@ -2065,12 +2148,10 @@
 
 :function:::void:do_mflo:int rd
 {
+  check_mf_hilo (SD_, LOHISTORY, HIHISTORY);
   TRACE_ALU_INPUT1 (LO);
   GPR[rd] = LO;
   TRACE_ALU_RESULT (GPR[rd]);
-#if 0
-  LOACCESS = 3; /* 3rd instruction will be safe */
-#endif
 }
 
 000000,0000000000,5.RD,00000,010010:SPECIAL:32::MFLO
@@ -2154,14 +2235,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-#if 0
-  if (HIACCESS != 0)
-    sim_io_eprintf (sd, "MT (move-to) over-writing HI register value\n");
-#endif
+  check_mt_hilo (SD_, HIHISTORY);
   HI = GPR[RS];
-#if 0
-  HIACCESS = 3; /* 3rd instruction will be safe */
-#endif
 }
 
 
@@ -2184,14 +2259,8 @@
 *tx19:
 // end-sanitize-tx19
 {
-#if 0
-  if (LOACCESS != 0)
-    sim_io_eprintf (sd, "MT (move-to) over-writing LO register value\n");
-#endif
+  check_mt_hilo (SD_, LOHISTORY);
   LO = GPR[RS];
-#if 0
-  LOACCESS = 3; /* 3rd instruction will be safe */
-#endif
 }
 
 
@@ -2199,8 +2268,8 @@
 :function:::void:do_mult:int rs, int rt, int rd
 {
   signed64 prod;
+  check_op_hilo (SD_, HIHISTORY, LOHISTORY);
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
-  CHECKHILO ("Multiplication");
   prod = (((signed64)(signed32) GPR[rs])
 	  * ((signed64)(signed32) GPR[rt]));
   LO = EXTEND32 (VL4_8 (prod));
@@ -2242,8 +2311,8 @@
 :function:::void:do_multu:int rs, int rt, int rd
 {
   unsigned64 prod;
+  check_op_hilo (SD_, HIHISTORY, LOHISTORY);
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
-  CHECKHILO ("Multiplication");
   prod = (((unsigned64)(unsigned32) GPR[rs])
 	  * ((unsigned64)(unsigned32) GPR[rt]));
   LO = EXTEND32 (VL4_8 (prod));
@@ -3883,9 +3952,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:

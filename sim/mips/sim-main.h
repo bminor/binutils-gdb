@@ -170,6 +170,30 @@ convert (SD, CPU, cia, rm, op, from, to)
 
 
 
+/* HI/LO register accesses */
+
+/* For some MIPS targets, the HI/LO registers have certain timing
+   restrictions in that, for instance, a read of a HI register must be
+   separated by at least three instructions from a preceeding read.
+
+   The struct below is used to record the last access by each of A MT,
+   MF or other OP instruction to a HI/LO register.  See mips.igen for
+   more details. */
+
+typedef struct _hilo_access {
+  signed64 timestamp;
+  address_word cia;
+} hilo_access;
+
+typedef struct _hilo_history {
+  hilo_access mt;
+  hilo_access mf;
+  hilo_access op;
+} hilo_history;
+
+
+
+
 /* Integer ALU operations: */
 
 #include "sim-alu.h"
@@ -204,6 +228,17 @@ enum {
   R5900_FCSR_SU = BIT (3),
 };
 
+/* Table 10-1 FP format values.
+   Note: some of these bits are different to what is found in a
+   standard MIPS manual. */
+enum {
+  R5900_EXPMAX = 128,
+  R5900_EXPMIN = -127,
+  R5900_EXPBIAS = 127,
+};
+
+
+
 typedef struct _sim_r5900_cpu {
 
   /* The R5900 has 32 x 128bit general purpose registers.
@@ -237,16 +272,10 @@ typedef struct _sim_r5900_cpu {
 
   /* See comments below about needing to count cycles between updating
      and setting HI/LO registers */
-  int hi1access;
-  int lo1access;
-#define HI1ACCESS ((CPU)->r5900.hi1access)
-#define LO1ACCESS ((CPU)->r5900.lo1access)
-#if 0
-#define CHECKHILO(s) {\
-  if ((HIACCESS != 0) || (LOACCESS != 0) || (HI1ACCESS != 0) || (LO1ACCESS != 0))\
-    sim_io_eprintf(sd,"%s over-writing HI and LO registers values (PC = 0x%s HLPC = 0x%s)\n",(s),pr_addr(PC),pr_addr(HLPC));\
-}
-#endif
+  hilo_history hi1_history;
+#define HI1HISTORY (&(CPU)->r5900.hi1_history)
+  hilo_history lo1_history;
+#define LO1HISTORY (&(CPU)->r5900.lo1_history)
 
 } sim_r5900_cpu;
 
@@ -601,34 +630,15 @@ struct _sim_cpu {
 #define LLBIT ((CPU)->llbit)
 
 
-/* The HIACCESS and LOACCESS counts are used to ensure that
-   corruptions caused by using the HI or LO register to close to a
-   following operation are spotted. */
+/* The HIHISTORY and LOHISTORY timestamps are used to ensure that
+   corruptions caused by using the HI or LO register too close to a
+   following operation is spotted. See mips.igen for more details. */
 
-  int hiaccess;
-  int loaccess;
-#define HIACCESS ((CPU)->hiaccess)
-#define LOACCESS ((CPU)->loaccess)
+  hilo_history hi_history;
+#define HIHISTORY (&(CPU)->hi_history)
+  hilo_history lo_history;
+#define LOHISTORY (&(CPU)->lo_history)
 
-#if 0
-  unsigned_word HLPC;
-  /* If either of the preceding two instructions have accessed the HI
-     or LO registers, then the values they see should be
-     undefined. However, to keep the simulator world simple, we just
-     let them use the value read and raise a warning to notify the
-     user: */
-#define CHECKHILO(s) {\
-  if ((HIACCESS != 0) || (LOACCESS != 0)) \
-    sim_io_eprintf(sd,"%s over-writing HI and LO registers values (PC = 0x%s HLPC = 0x%s)\n",(s),pr_addr(PC),pr_addr(HLPC));\
-}
-#endif
-
-#if !defined CHECKHILO
-  /* The 4300 and a few other processors have interlocks on hi/lo
-     register reads, and hence do not have this problem.  To avoid
-     spurious warnings, we just disable this always.  */
-#define CHECKHILO(s)
-#endif
 
   /* start-sanitize-r5900 */
   sim_r5900_cpu r5900;

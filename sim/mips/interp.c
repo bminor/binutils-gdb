@@ -3300,8 +3300,8 @@ decode_coproc (SIM_DESC sd,
 		read_vu_vec_reg(&(vu0_device.regs), id, 1, A4_16(& xyzw, 2));
 		read_vu_vec_reg(&(vu0_device.regs), id, 2, A4_16(& xyzw, 1));
 		read_vu_vec_reg(&(vu0_device.regs), id, 3, A4_16(& xyzw, 0));
-		xyzw = T2H_16(xyzw);
-		memcpy(& GPR[rt], & xyzw, sizeof(xyzw));
+		GPR[rt] = T2H_8(* A8_16(& xyzw, 1));
+		GPR1[rt] = T2H_8(* A8_16(& xyzw, 0));
 	      }
 	    else /* CFC2 */
 	      {
@@ -3334,8 +3334,8 @@ decode_coproc (SIM_DESC sd,
 	    /* perform VU register address */
 	    if(i_25_21 == 0x05) /* QMTC2 */
 	      {
-		unsigned_16 xyzw;
-		memcpy(& xyzw, & GPR[rt], sizeof(xyzw));
+		unsigned_16 xyzw = U16_8(GPR1[rt], GPR[rt]);
+
 		xyzw = H2T_16(xyzw);
 		/* one word at a time, argh! */
 		write_vu_vec_reg(&(vu0_device.regs), id, 0, A4_16(& xyzw, 3));
@@ -3623,20 +3623,6 @@ sim_engine_run (sd, next_cpu_nr, nr_cpus, siggnal)
 #if ((WITH_FLOATING_POINT == HARD_FLOATING_POINT) != defined (HASFPU))
 #error "Mismatch between configure WITH_FLOATING_POINT and gencode HASFPU"
 #endif
-
-#if defined(WARN_LOHI)
-      /* Decrement the HI/LO validity ticks */
-      if (HIACCESS > 0)
-       HIACCESS--;
-      if (LOACCESS > 0)
-       LOACCESS--;
-      /* start-sanitize-r5900 */
-      if (HI1ACCESS > 0)
-       HI1ACCESS--;
-      if (LO1ACCESS > 0)
-       LO1ACCESS--;
-      /* end-sanitize-r5900 */
-#endif /* WARN_LOHI */
 
       /* For certain MIPS architectures, GPR[0] is hardwired to zero. We
          should check for it being changed. It is better doing it here,
