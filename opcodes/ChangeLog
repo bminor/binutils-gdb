@@ -1,3 +1,10 @@
+1999-07-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* dis-buf.c: Add ATTRIBUTE_UNUSED as appropriate.
+	(generic_strcat_address): Add cast to avoid warning.
+	* i386-dis.c: Initialize all structure fields to avoid warnings.
+	Add ATTRIBUTE_UNUSED as appropriate.
+
 1999-07-08  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* sparc-dis.c (print_insn_sparc): Differentiate between

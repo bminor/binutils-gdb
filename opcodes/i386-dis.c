@@ -118,6 +118,8 @@ fetch_data (info, addr)
   return 1;
 }
 
+#define XX NULL, 0
+
 #define Eb OP_E, b_mode
 #define indirEb OP_indirE, b_mode
 #define Gb OP_G, b_mode
@@ -279,48 +281,48 @@ static void BadOp PARAMS ((void));
 #define USE_GROUPS 1
 #define USE_PREFIX_USER_TABLE 2
 
-#define GRP1b NULL, NULL, 0, NULL, USE_GROUPS
-#define GRP1S NULL, NULL, 1, NULL, USE_GROUPS
-#define GRP1Ss NULL, NULL, 2, NULL, USE_GROUPS
-#define GRP2b NULL, NULL, 3, NULL, USE_GROUPS
-#define GRP2S NULL, NULL, 4, NULL, USE_GROUPS
-#define GRP2b_one NULL, NULL, 5, NULL, USE_GROUPS
-#define GRP2S_one NULL, NULL, 6, NULL, USE_GROUPS
-#define GRP2b_cl NULL, NULL, 7, NULL, USE_GROUPS
-#define GRP2S_cl NULL, NULL, 8, NULL, USE_GROUPS
-#define GRP3b NULL, NULL, 9, NULL, USE_GROUPS
-#define GRP3S NULL, NULL, 10, NULL, USE_GROUPS
-#define GRP4  NULL, NULL, 11, NULL, USE_GROUPS
-#define GRP5  NULL, NULL, 12, NULL, USE_GROUPS
-#define GRP6  NULL, NULL, 13, NULL, USE_GROUPS
-#define GRP7 NULL, NULL, 14, NULL, USE_GROUPS
-#define GRP8 NULL, NULL, 15, NULL, USE_GROUPS
-#define GRP9 NULL, NULL, 16, NULL, USE_GROUPS
-#define GRP10 NULL, NULL, 17, NULL, USE_GROUPS
-#define GRP11 NULL, NULL, 18, NULL, USE_GROUPS
-#define GRP12 NULL, NULL, 19, NULL, USE_GROUPS
-#define GRP13 NULL, NULL, 20, NULL, USE_GROUPS
-#define GRP14 NULL, NULL, 21, NULL, USE_GROUPS
-#define GRPAMD NULL, NULL, 22, NULL, USE_GROUPS
+#define GRP1b NULL, NULL, 0, NULL, USE_GROUPS, NULL, 0
+#define GRP1S NULL, NULL, 1, NULL, USE_GROUPS, NULL, 0
+#define GRP1Ss NULL, NULL, 2, NULL, USE_GROUPS, NULL, 0
+#define GRP2b NULL, NULL, 3, NULL, USE_GROUPS, NULL, 0
+#define GRP2S NULL, NULL, 4, NULL, USE_GROUPS, NULL, 0
+#define GRP2b_one NULL, NULL, 5, NULL, USE_GROUPS, NULL, 0
+#define GRP2S_one NULL, NULL, 6, NULL, USE_GROUPS, NULL, 0
+#define GRP2b_cl NULL, NULL, 7, NULL, USE_GROUPS, NULL, 0
+#define GRP2S_cl NULL, NULL, 8, NULL, USE_GROUPS, NULL, 0
+#define GRP3b NULL, NULL, 9, NULL, USE_GROUPS, NULL, 0
+#define GRP3S NULL, NULL, 10, NULL, USE_GROUPS, NULL, 0
+#define GRP4  NULL, NULL, 11, NULL, USE_GROUPS, NULL, 0
+#define GRP5  NULL, NULL, 12, NULL, USE_GROUPS, NULL, 0
+#define GRP6  NULL, NULL, 13, NULL, USE_GROUPS, NULL, 0
+#define GRP7 NULL, NULL, 14, NULL, USE_GROUPS, NULL, 0
+#define GRP8 NULL, NULL, 15, NULL, USE_GROUPS, NULL, 0
+#define GRP9 NULL, NULL, 16, NULL, USE_GROUPS, NULL, 0
+#define GRP10 NULL, NULL, 17, NULL, USE_GROUPS, NULL, 0
+#define GRP11 NULL, NULL, 18, NULL, USE_GROUPS, NULL, 0
+#define GRP12 NULL, NULL, 19, NULL, USE_GROUPS, NULL, 0
+#define GRP13 NULL, NULL, 20, NULL, USE_GROUPS, NULL, 0
+#define GRP14 NULL, NULL, 21, NULL, USE_GROUPS, NULL, 0
+#define GRPAMD NULL, NULL, 22, NULL, USE_GROUPS, NULL, 0
 
-#define PREGRP0 NULL, NULL, 0, NULL, USE_PREFIX_USER_TABLE
-#define PREGRP1 NULL, NULL, 1, NULL, USE_PREFIX_USER_TABLE
-#define PREGRP2 NULL, NULL, 2, NULL, USE_PREFIX_USER_TABLE
-#define PREGRP3 NULL, NULL, 3, NULL, USE_PREFIX_USER_TABLE
-#define PREGRP4 NULL, NULL, 4, NULL, USE_PREFIX_USER_TABLE
-#define PREGRP5 NULL, NULL, 5, NULL, USE_PREFIX_USER_TABLE
-#define PREGRP6 NULL, NULL, 6, NULL, USE_PREFIX_USER_TABLE
-#define PREGRP7 NULL, NULL, 7, NULL, USE_PREFIX_USER_TABLE
-#define PREGRP8 NULL, NULL, 8, NULL, USE_PREFIX_USER_TABLE
-#define PREGRP9 NULL, NULL, 9, NULL, USE_PREFIX_USER_TABLE
-#define PREGRP10 NULL, NULL, 10, NULL, USE_PREFIX_USER_TABLE
-#define PREGRP11 NULL, NULL, 11, NULL, USE_PREFIX_USER_TABLE
-#define PREGRP12 NULL, NULL, 12, NULL, USE_PREFIX_USER_TABLE
-#define PREGRP13 NULL, NULL, 13, NULL, USE_PREFIX_USER_TABLE
-#define PREGRP14 NULL, NULL, 14, NULL, USE_PREFIX_USER_TABLE
+#define PREGRP0 NULL, NULL, 0, NULL, USE_PREFIX_USER_TABLE, NULL, 0
+#define PREGRP1 NULL, NULL, 1, NULL, USE_PREFIX_USER_TABLE, NULL, 0
+#define PREGRP2 NULL, NULL, 2, NULL, USE_PREFIX_USER_TABLE, NULL, 0
+#define PREGRP3 NULL, NULL, 3, NULL, USE_PREFIX_USER_TABLE, NULL, 0
+#define PREGRP4 NULL, NULL, 4, NULL, USE_PREFIX_USER_TABLE, NULL, 0
+#define PREGRP5 NULL, NULL, 5, NULL, USE_PREFIX_USER_TABLE, NULL, 0
+#define PREGRP6 NULL, NULL, 6, NULL, USE_PREFIX_USER_TABLE, NULL, 0
+#define PREGRP7 NULL, NULL, 7, NULL, USE_PREFIX_USER_TABLE, NULL, 0
+#define PREGRP8 NULL, NULL, 8, NULL, USE_PREFIX_USER_TABLE, NULL, 0
+#define PREGRP9 NULL, NULL, 9, NULL, USE_PREFIX_USER_TABLE, NULL, 0
+#define PREGRP10 NULL, NULL, 10, NULL, USE_PREFIX_USER_TABLE, NULL, 0
+#define PREGRP11 NULL, NULL, 11, NULL, USE_PREFIX_USER_TABLE, NULL, 0
+#define PREGRP12 NULL, NULL, 12, NULL, USE_PREFIX_USER_TABLE, NULL, 0
+#define PREGRP13 NULL, NULL, 13, NULL, USE_PREFIX_USER_TABLE, NULL, 0
+#define PREGRP14 NULL, NULL, 14, NULL, USE_PREFIX_USER_TABLE, NULL, 0
 
 #define FLOATCODE 50
-#define FLOAT NULL, NULL, FLOATCODE
+#define FLOAT NULL, NULL, FLOATCODE, NULL, 0, NULL, 0
 
 struct dis386 {
   const char *name;
@@ -348,248 +350,248 @@ struct dis386 {
 
 static const struct dis386 dis386_att[] = {
   /* 00 */
-  { "addB",	Eb, Gb },
-  { "addS",	Ev, Gv },
-  { "addB",	Gb, Eb },
-  { "addS",	Gv, Ev },
-  { "addB",	AL, Ib },
-  { "addS",	eAX, Iv },
-  { "pushP",	es },
-  { "popP",	es },
+  { "addB",	Eb, Gb, XX },
+  { "addS",	Ev, Gv, XX },
+  { "addB",	Gb, Eb, XX },
+  { "addS",	Gv, Ev, XX },
+  { "addB",	AL, Ib, XX },
+  { "addS",	eAX, Iv, XX },
+  { "pushP",	es, XX, XX },
+  { "popP",	es, XX, XX },
   /* 08 */
-  { "orB",	Eb, Gb },
-  { "orS",	Ev, Gv },
-  { "orB",	Gb, Eb },
-  { "orS",	Gv, Ev },
-  { "orB",	AL, Ib },
-  { "orS",	eAX, Iv },
-  { "pushP",	cs },
-  { "(bad)" },	/* 0x0f extended opcode escape */
+  { "orB",	Eb, Gb, XX },
+  { "orS",	Ev, Gv, XX },
+  { "orB",	Gb, Eb, XX },
+  { "orS",	Gv, Ev, XX },
+  { "orB",	AL, Ib, XX },
+  { "orS",	eAX, Iv, XX },
+  { "pushP",	cs, XX, XX },
+  { "(bad)",	XX, XX, XX },	/* 0x0f extended opcode escape */
   /* 10 */
-  { "adcB",	Eb, Gb },
-  { "adcS",	Ev, Gv },
-  { "adcB",	Gb, Eb },
-  { "adcS",	Gv, Ev },
-  { "adcB",	AL, Ib },
-  { "adcS",	eAX, Iv },
-  { "pushP",	ss },
-  { "popP",	ss },
+  { "adcB",	Eb, Gb, XX },
+  { "adcS",	Ev, Gv, XX },
+  { "adcB",	Gb, Eb, XX },
+  { "adcS",	Gv, Ev, XX },
+  { "adcB",	AL, Ib, XX },
+  { "adcS",	eAX, Iv, XX },
+  { "pushP",	ss, XX, XX },
+  { "popP",	ss, XX, XX },
   /* 18 */
-  { "sbbB",	Eb, Gb },
-  { "sbbS",	Ev, Gv },
-  { "sbbB",	Gb, Eb },
-  { "sbbS",	Gv, Ev },
-  { "sbbB",	AL, Ib },
-  { "sbbS",	eAX, Iv },
-  { "pushP",	ds },
-  { "popP",	ds },
+  { "sbbB",	Eb, Gb, XX },
+  { "sbbS",	Ev, Gv, XX },
+  { "sbbB",	Gb, Eb, XX },
+  { "sbbS",	Gv, Ev, XX },
+  { "sbbB",	AL, Ib, XX },
+  { "sbbS",	eAX, Iv, XX },
+  { "pushP",	ds, XX, XX },
+  { "popP",	ds, XX, XX },
   /* 20 */
-  { "andB",	Eb, Gb },
-  { "andS",	Ev, Gv },
-  { "andB",	Gb, Eb },
-  { "andS",	Gv, Ev },
-  { "andB",	AL, Ib },
-  { "andS",	eAX, Iv },
-  { "(bad)" },			/* SEG ES prefix */
-  { "daa" },
+  { "andB",	Eb, Gb, XX },
+  { "andS",	Ev, Gv, XX },
+  { "andB",	Gb, Eb, XX },
+  { "andS",	Gv, Ev, XX },
+  { "andB",	AL, Ib, XX },
+  { "andS",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },			/* SEG ES prefix */
+  { "daa",	XX, XX, XX },
   /* 28 */
-  { "subB",	Eb, Gb },
-  { "subS",	Ev, Gv },
-  { "subB",	Gb, Eb },
-  { "subS",	Gv, Ev },
-  { "subB",	AL, Ib },
-  { "subS",	eAX, Iv },
-  { "(bad)" },			/* SEG CS prefix */
-  { "das" },
+  { "subB",	Eb, Gb, XX },
+  { "subS",	Ev, Gv, XX },
+  { "subB",	Gb, Eb, XX },
+  { "subS",	Gv, Ev, XX },
+  { "subB",	AL, Ib, XX },
+  { "subS",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },			/* SEG CS prefix */
+  { "das",	XX, XX, XX },
   /* 30 */
-  { "xorB",	Eb, Gb },
-  { "xorS",	Ev, Gv },
-  { "xorB",	Gb, Eb },
-  { "xorS",	Gv, Ev },
-  { "xorB",	AL, Ib },
-  { "xorS",	eAX, Iv },
-  { "(bad)" },			/* SEG SS prefix */
-  { "aaa" },
+  { "xorB",	Eb, Gb, XX },
+  { "xorS",	Ev, Gv, XX },
+  { "xorB",	Gb, Eb, XX },
+  { "xorS",	Gv, Ev, XX },
+  { "xorB",	AL, Ib, XX },
+  { "xorS",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },			/* SEG SS prefix */
+  { "aaa",	XX, XX, XX },
   /* 38 */
-  { "cmpB",	Eb, Gb },
-  { "cmpS",	Ev, Gv },
-  { "cmpB",	Gb, Eb },
-  { "cmpS",	Gv, Ev },
-  { "cmpB",	AL, Ib },
-  { "cmpS",	eAX, Iv },
-  { "(bad)" },			/* SEG DS prefix */
-  { "aas" },
+  { "cmpB",	Eb, Gb, XX },
+  { "cmpS",	Ev, Gv, XX },
+  { "cmpB",	Gb, Eb, XX },
+  { "cmpS",	Gv, Ev, XX },
+  { "cmpB",	AL, Ib, XX },
+  { "cmpS",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },			/* SEG DS prefix */
+  { "aas",	XX, XX, XX },
   /* 40 */
-  { "incS",	eAX },
-  { "incS",	eCX },
-  { "incS",	eDX },
-  { "incS",	eBX },
-  { "incS",	eSP },
-  { "incS",	eBP },
-  { "incS",	eSI },
-  { "incS",	eDI },
+  { "incS",	eAX, XX, XX },
+  { "incS",	eCX, XX, XX },
+  { "incS",	eDX, XX, XX },
+  { "incS",	eBX, XX, XX },
+  { "incS",	eSP, XX, XX },
+  { "incS",	eBP, XX, XX },
+  { "incS",	eSI, XX, XX },
+  { "incS",	eDI, XX, XX },
   /* 48 */
-  { "decS",	eAX },
-  { "decS",	eCX },
-  { "decS",	eDX },
-  { "decS",	eBX },
-  { "decS",	eSP },
-  { "decS",	eBP },
-  { "decS",	eSI },
-  { "decS",	eDI },
+  { "decS",	eAX, XX, XX },
+  { "decS",	eCX, XX, XX },
+  { "decS",	eDX, XX, XX },
+  { "decS",	eBX, XX, XX },
+  { "decS",	eSP, XX, XX },
+  { "decS",	eBP, XX, XX },
+  { "decS",	eSI, XX, XX },
+  { "decS",	eDI, XX, XX },
   /* 50 */
-  { "pushS",	eAX },
-  { "pushS",	eCX },
-  { "pushS",	eDX },
-  { "pushS",	eBX },
-  { "pushS",	eSP },
-  { "pushS",	eBP },
-  { "pushS",	eSI },
-  { "pushS",	eDI },
+  { "pushS",	eAX, XX, XX },
+  { "pushS",	eCX, XX, XX },
+  { "pushS",	eDX, XX, XX },
+  { "pushS",	eBX, XX, XX },
+  { "pushS",	eSP, XX, XX },
+  { "pushS",	eBP, XX, XX },
+  { "pushS",	eSI, XX, XX },
+  { "pushS",	eDI, XX, XX },
   /* 58 */
-  { "popS",	eAX },
-  { "popS",	eCX },
-  { "popS",	eDX },
-  { "popS",	eBX },
-  { "popS",	eSP },
-  { "popS",	eBP },
-  { "popS",	eSI },
-  { "popS",	eDI },
+  { "popS",	eAX, XX, XX },
+  { "popS",	eCX, XX, XX },
+  { "popS",	eDX, XX, XX },
+  { "popS",	eBX, XX, XX },
+  { "popS",	eSP, XX, XX },
+  { "popS",	eBP, XX, XX },
+  { "popS",	eSI, XX, XX },
+  { "popS",	eDI, XX, XX },
   /* 60 */
-  { "pushaP" },
-  { "popaP" },
-  { "boundS",	Gv, Ma },
-  { "arpl",	Ew, Gw },
-  { "(bad)" },			/* seg fs */
-  { "(bad)" },			/* seg gs */
-  { "(bad)" },			/* op size prefix */
-  { "(bad)" },			/* adr size prefix */
+  { "pushaP",	XX, XX, XX },
+  { "popaP",	XX, XX, XX },
+  { "boundS",	Gv, Ma, XX },
+  { "arpl",	Ew, Gw, XX },
+  { "(bad)",	XX, XX, XX },			/* seg fs */
+  { "(bad)",	XX, XX, XX },			/* seg gs */
+  { "(bad)",	XX, XX, XX },			/* op size prefix */
+  { "(bad)",	XX, XX, XX },			/* adr size prefix */
   /* 68 */
-  { "pushP",	Iv },		/* 386 book wrong */
+  { "pushP",	Iv, XX, XX },		/* 386 book wrong */
   { "imulS",	Gv, Ev, Iv },
-  { "pushP",	sIb },		/* push of byte really pushes 2 or 4 bytes */
+  { "pushP",	sIb, XX, XX },	/* push of byte really pushes 2 or 4 bytes */
   { "imulS",	Gv, Ev, sIb },
-  { "insb",	Yb, indirDX },
-  { "insR",	Yv, indirDX },
-  { "outsb",	indirDX, Xb },
-  { "outsR",	indirDX, Xv },
+  { "insb",	Yb, indirDX, XX },
+  { "insR",	Yv, indirDX, XX },
+  { "outsb",	indirDX, Xb, XX },
+  { "outsR",	indirDX, Xv, XX },
   /* 70 */
-  { "jo",	Jb },
-  { "jno",	Jb },
-  { "jb",	Jb },
-  { "jae",	Jb },
-  { "je",	Jb },
-  { "jne",	Jb },
-  { "jbe",	Jb },
-  { "ja",	Jb },
+  { "jo",	Jb, XX, XX },
+  { "jno",	Jb, XX, XX },
+  { "jb",	Jb, XX, XX },
+  { "jae",	Jb, XX, XX },
+  { "je",	Jb, XX, XX },
+  { "jne",	Jb, XX, XX },
+  { "jbe",	Jb, XX, XX },
+  { "ja",	Jb, XX, XX },
   /* 78 */
-  { "js",	Jb },
-  { "jns",	Jb },
-  { "jp",	Jb },
-  { "jnp",	Jb },
-  { "jl",	Jb },
-  { "jge",	Jb },
-  { "jle",	Jb },
-  { "jg",	Jb },
+  { "js",	Jb, XX, XX },
+  { "jns",	Jb, XX, XX },
+  { "jp",	Jb, XX, XX },
+  { "jnp",	Jb, XX, XX },
+  { "jl",	Jb, XX, XX },
+  { "jge",	Jb, XX, XX },
+  { "jle",	Jb, XX, XX },
+  { "jg",	Jb, XX, XX },
   /* 80 */
   { GRP1b },
   { GRP1S },
-  { "(bad)" },
+  { "(bad)",	XX, XX, XX },
   { GRP1Ss },
-  { "testB",	Eb, Gb },
-  { "testS",	Ev, Gv },
-  { "xchgB",	Eb, Gb },
-  { "xchgS",	Ev, Gv },
+  { "testB",	Eb, Gb, XX },
+  { "testS",	Ev, Gv, XX },
+  { "xchgB",	Eb, Gb, XX },
+  { "xchgS",	Ev, Gv, XX },
   /* 88 */
-  { "movB",	Eb, Gb },
-  { "movS",	Ev, Gv },
-  { "movB",	Gb, Eb },
-  { "movS",	Gv, Ev },
-  { "movQ",	Ev, Sw },
-  { "leaS",	Gv, M },
-  { "movQ",	Sw, Ev },
-  { "popQ",	Ev },
+  { "movB",	Eb, Gb, XX },
+  { "movS",	Ev, Gv, XX },
+  { "movB",	Gb, Eb, XX },
+  { "movS",	Gv, Ev, XX },
+  { "movQ",	Ev, Sw, XX },
+  { "leaS",	Gv, M, XX },
+  { "movQ",	Sw, Ev, XX },
+  { "popQ",	Ev, XX, XX },
   /* 90 */
-  { "nop" },
-  { "xchgS",	eCX, eAX },
-  { "xchgS",	eDX, eAX },
-  { "xchgS",	eBX, eAX },
-  { "xchgS",	eSP, eAX },
-  { "xchgS",	eBP, eAX },
-  { "xchgS",	eSI, eAX },
-  { "xchgS",	eDI, eAX },
+  { "nop",	XX, XX, XX },
+  { "xchgS",	eCX, eAX, XX },
+  { "xchgS",	eDX, eAX, XX },
+  { "xchgS",	eBX, eAX, XX },
+  { "xchgS",	eSP, eAX, XX },
+  { "xchgS",	eBP, eAX, XX },
+  { "xchgS",	eSI, eAX, XX },
+  { "xchgS",	eDI, eAX, XX },
   /* 98 */
-  { "cWtR" },
-  { "cRtd" },
-  { "lcallP",	Ap },
-  { "(bad)" },		/* fwait */
-  { "pushfP" },
-  { "popfP" },
-  { "sahf" },
-  { "lahf" },
+  { "cWtR",	XX, XX, XX },
+  { "cRtd",	XX, XX, XX },
+  { "lcallP",	Ap, XX, XX },
+  { "(bad)",	XX, XX, XX },		/* fwait */
+  { "pushfP",	XX, XX, XX },
+  { "popfP",	XX, XX, XX },
+  { "sahf",	XX, XX, XX },
+  { "lahf",	XX, XX, XX },
   /* a0 */
-  { "movB",	AL, Ob },
-  { "movS",	eAX, Ov },
-  { "movB",	Ob, AL },
-  { "movS",	Ov, eAX },
-  { "movsb",	Yb, Xb },
-  { "movsR",	Yv, Xv },
-  { "cmpsb",	Xb, Yb },
-  { "cmpsR",	Xv, Yv },
+  { "movB",	AL, Ob, XX },
+  { "movS",	eAX, Ov, XX },
+  { "movB",	Ob, AL, XX },
+  { "movS",	Ov, eAX, XX },
+  { "movsb",	Yb, Xb, XX },
+  { "movsR",	Yv, Xv, XX },
+  { "cmpsb",	Xb, Yb, XX },
+  { "cmpsR",	Xv, Yv, XX },
   /* a8 */
-  { "testB",	AL, Ib },
-  { "testS",	eAX, Iv },
-  { "stosB",	Yb, AL },
-  { "stosS",	Yv, eAX },
-  { "lodsB",	AL, Xb },
-  { "lodsS",	eAX, Xv },
-  { "scasB",	AL, Yb },
-  { "scasS",	eAX, Yv },
+  { "testB",	AL, Ib, XX },
+  { "testS",	eAX, Iv, XX },
+  { "stosB",	Yb, AL, XX },
+  { "stosS",	Yv, eAX, XX },
+  { "lodsB",	AL, Xb, XX },
+  { "lodsS",	eAX, Xv, XX },
+  { "scasB",	AL, Yb, XX },
+  { "scasS",	eAX, Yv, XX },
   /* b0 */
-  { "movB",	AL, Ib },
-  { "movB",	CL, Ib },
-  { "movB",	DL, Ib },
-  { "movB",	BL, Ib },
-  { "movB",	AH, Ib },
-  { "movB",	CH, Ib },
-  { "movB",	DH, Ib },
-  { "movB",	BH, Ib },
+  { "movB",	AL, Ib, XX },
+  { "movB",	CL, Ib, XX },
+  { "movB",	DL, Ib, XX },
+  { "movB",	BL, Ib, XX },
+  { "movB",	AH, Ib, XX },
+  { "movB",	CH, Ib, XX },
+  { "movB",	DH, Ib, XX },
+  { "movB",	BH, Ib, XX },
   /* b8 */
-  { "movS",	eAX, Iv },
-  { "movS",	eCX, Iv },
-  { "movS",	eDX, Iv },
-  { "movS",	eBX, Iv },
-  { "movS",	eSP, Iv },
-  { "movS",	eBP, Iv },
-  { "movS",	eSI, Iv },
-  { "movS",	eDI, Iv },
+  { "movS",	eAX, Iv, XX },
+  { "movS",	eCX, Iv, XX },
+  { "movS",	eDX, Iv, XX },
+  { "movS",	eBX, Iv, XX },
+  { "movS",	eSP, Iv, XX },
+  { "movS",	eBP, Iv, XX },
+  { "movS",	eSI, Iv, XX },
+  { "movS",	eDI, Iv, XX },
   /* c0 */
   { GRP2b },
   { GRP2S },
-  { "retP",	Iw },
-  { "retP" },
-  { "lesS",	Gv, Mp },
-  { "ldsS",	Gv, Mp },
-  { "movA",	Eb, Ib },
-  { "movQ",	Ev, Iv },
+  { "retP",	Iw, XX, XX },
+  { "retP",	XX, XX, XX },
+  { "lesS",	Gv, Mp, XX },
+  { "ldsS",	Gv, Mp, XX },
+  { "movA",	Eb, Ib, XX },
+  { "movQ",	Ev, Iv, XX },
   /* c8 */
-  { "enterP",	Iw, Ib },
-  { "leaveP" },
-  { "lretP",	Iw },
-  { "lretP" },
-  { "int3" },
-  { "int",	Ib },
-  { "into" },
-  { "iretP" },
+  { "enterP",	Iw, Ib, XX },
+  { "leaveP",	XX, XX, XX },
+  { "lretP",	Iw, XX, XX },
+  { "lretP",	XX, XX, XX },
+  { "int3",	XX, XX, XX },
+  { "int",	Ib, XX, XX },
+  { "into",	XX, XX, XX},
+  { "iretP",	XX, XX, XX },
   /* d0 */
   { GRP2b_one },
   { GRP2S_one },
   { GRP2b_cl },
   { GRP2S_cl },
-  { "aam",	sIb },
-  { "aad",	sIb },
-  { "(bad)" },
-  { "xlat",	DSBX },
+  { "aam",	sIb, XX, XX },
+  { "aad",	sIb, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "xlat",	DSBX, XX, XX },
   /* d8 */
   { FLOAT },
   { FLOAT },
@@ -600,287 +602,287 @@ static const struct dis386 dis386_att[] = {
   { FLOAT },
   { FLOAT },
   /* e0 */
-  { "loopne",	Jb },
-  { "loope",	Jb },
-  { "loop",	Jb },
-  { "jEcxz",	Jb },
-  { "inB",	AL, Ib },
-  { "inS",	eAX, Ib },
-  { "outB",	Ib, AL },
-  { "outS",	Ib, eAX },
+  { "loopne",	Jb, XX, XX },
+  { "loope",	Jb, XX, XX },
+  { "loop",	Jb, XX, XX },
+  { "jEcxz",	Jb, XX, XX },
+  { "inB",	AL, Ib, XX },
+  { "inS",	eAX, Ib, XX },
+  { "outB",	Ib, AL, XX },
+  { "outS",	Ib, eAX, XX },
   /* e8 */
-  { "callP",	Jv },
-  { "jmpP",	Jv },
-  { "ljmpP",	Ap },
-  { "jmp",	Jb },
-  { "inB",	AL, indirDX },
-  { "inS",	eAX, indirDX },
-  { "outB",	indirDX, AL },
-  { "outS",	indirDX, eAX },
+  { "callP",	Jv, XX, XX },
+  { "jmpP",	Jv, XX, XX },
+  { "ljmpP",	Ap, XX, XX },
+  { "jmp",	Jb, XX, XX },
+  { "inB",	AL, indirDX, XX },
+  { "inS",	eAX, indirDX, XX },
+  { "outB",	indirDX, AL, XX },
+  { "outS",	indirDX, eAX, XX },
   /* f0 */
-  { "(bad)" },			/* lock prefix */
-  { "(bad)" },
-  { "(bad)" },			/* repne */
-  { "(bad)" },			/* repz */
-  { "hlt" },
-  { "cmc" },
+  { "(bad)",	XX, XX, XX },			/* lock prefix */
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },			/* repne */
+  { "(bad)",	XX, XX, XX },			/* repz */
+  { "hlt",	XX, XX, XX },
+  { "cmc",	XX, XX, XX },
   { GRP3b },
   { GRP3S },
   /* f8 */
-  { "clc" },
-  { "stc" },
-  { "cli" },
-  { "sti" },
-  { "cld" },
-  { "std" },
+  { "clc",	XX, XX, XX },
+  { "stc",	XX, XX, XX },
+  { "cli",	XX, XX, XX },
+  { "sti",	XX, XX, XX },
+  { "cld",	XX, XX, XX },
+  { "std",	XX, XX, XX },
   { GRP4 },
   { GRP5 },
 };
 
 static const struct dis386 dis386_intel[] = {
   /* 00 */
-  { "add",	Eb, Gb },
-  { "add",	Ev, Gv },
-  { "add",	Gb, Eb },
-  { "add",	Gv, Ev },
-  { "add",	AL, Ib },
-  { "add",	eAX, Iv },
-  { "push",	es },
-  { "pop",	es },
+  { "add",	Eb, Gb, XX },
+  { "add",	Ev, Gv, XX },
+  { "add",	Gb, Eb, XX },
+  { "add",	Gv, Ev, XX },
+  { "add",	AL, Ib, XX },
+  { "add",	eAX, Iv, XX },
+  { "push",	es, XX, XX },
+  { "pop",	es, XX, XX },
   /* 08 */
-  { "or",	Eb, Gb },
-  { "or",	Ev, Gv },
-  { "or",	Gb, Eb },
-  { "or",	Gv, Ev },
-  { "or",	AL, Ib },
-  { "or",	eAX, Iv },
-  { "push",	cs },
-  { "(bad)" },	/* 0x0f extended opcode escape */
+  { "or",	Eb, Gb, XX },
+  { "or",	Ev, Gv, XX },
+  { "or",	Gb, Eb, XX },
+  { "or",	Gv, Ev, XX },
+  { "or",	AL, Ib, XX },
+  { "or",	eAX, Iv, XX },
+  { "push",	cs, XX, XX },
+  { "(bad)",	XX, XX, XX },	/* 0x0f extended opcode escape */
   /* 10 */
-  { "adc",	Eb, Gb },
-  { "adc",	Ev, Gv },
-  { "adc",	Gb, Eb },
-  { "adc",	Gv, Ev },
-  { "adc",	AL, Ib },
-  { "adc",	eAX, Iv },
-  { "push",	ss },
-  { "pop",	ss },
+  { "adc",	Eb, Gb, XX },
+  { "adc",	Ev, Gv, XX },
+  { "adc",	Gb, Eb, XX },
+  { "adc",	Gv, Ev, XX },
+  { "adc",	AL, Ib, XX },
+  { "adc",	eAX, Iv, XX },
+  { "push",	ss, XX, XX },
+  { "pop",	ss, XX, XX },
   /* 18 */
-  { "sbb",	Eb, Gb },
-  { "sbb",	Ev, Gv },
-  { "sbb",	Gb, Eb },
-  { "sbb",	Gv, Ev },
-  { "sbb",	AL, Ib },
-  { "sbb",	eAX, Iv },
-  { "push",	ds },
-  { "pop",	ds },
+  { "sbb",	Eb, Gb, XX },
+  { "sbb",	Ev, Gv, XX },
+  { "sbb",	Gb, Eb, XX },
+  { "sbb",	Gv, Ev, XX },
+  { "sbb",	AL, Ib, XX },
+  { "sbb",	eAX, Iv, XX },
+  { "push",	ds, XX, XX },
+  { "pop",	ds, XX, XX },
   /* 20 */
-  { "and",	Eb, Gb },
-  { "and",	Ev, Gv },
-  { "and",	Gb, Eb },
-  { "and",	Gv, Ev },
-  { "and",	AL, Ib },
-  { "and",	eAX, Iv },
-  { "(bad)" },			/* SEG ES prefix */
-  { "daa" },
+  { "and",	Eb, Gb, XX },
+  { "and",	Ev, Gv, XX },
+  { "and",	Gb, Eb, XX },
+  { "and",	Gv, Ev, XX },
+  { "and",	AL, Ib, XX },
+  { "and",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },			/* SEG ES prefix */
+  { "daa",	XX, XX, XX },
   /* 28 */
-  { "sub",	Eb, Gb },
-  { "sub",	Ev, Gv },
-  { "sub",	Gb, Eb },
-  { "sub",	Gv, Ev },
-  { "sub",	AL, Ib },
-  { "sub",	eAX, Iv },
-  { "(bad)" },			/* SEG CS prefix */
-  { "das" },
+  { "sub",	Eb, Gb, XX },
+  { "sub",	Ev, Gv, XX },
+  { "sub",	Gb, Eb, XX },
+  { "sub",	Gv, Ev, XX },
+  { "sub",	AL, Ib, XX },
+  { "sub",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },			/* SEG CS prefix */
+  { "das",	XX, XX, XX },
   /* 30 */
-  { "xor",	Eb, Gb },
-  { "xor",	Ev, Gv },
-  { "xor",	Gb, Eb },
-  { "xor",	Gv, Ev },
-  { "xor",	AL, Ib },
-  { "xor",	eAX, Iv },
-  { "(bad)" },			/* SEG SS prefix */
-  { "aaa" },
+  { "xor",	Eb, Gb, XX },
+  { "xor",	Ev, Gv, XX },
+  { "xor",	Gb, Eb, XX },
+  { "xor",	Gv, Ev, XX },
+  { "xor",	AL, Ib, XX },
+  { "xor",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },			/* SEG SS prefix */
+  { "aaa",	XX, XX, XX },
   /* 38 */
-  { "cmp",	Eb, Gb },
-  { "cmp",	Ev, Gv },
-  { "cmp",	Gb, Eb },
-  { "cmp",	Gv, Ev },
-  { "cmp",	AL, Ib },
-  { "cmp",	eAX, Iv },
-  { "(bad)" },			/* SEG DS prefix */
-  { "aas" },
+  { "cmp",	Eb, Gb, XX },
+  { "cmp",	Ev, Gv, XX },
+  { "cmp",	Gb, Eb, XX },
+  { "cmp",	Gv, Ev, XX },
+  { "cmp",	AL, Ib, XX },
+  { "cmp",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },			/* SEG DS prefix */
+  { "aas",	XX, XX, XX },
   /* 40 */
-  { "inc",	eAX },
-  { "inc",	eCX },
-  { "inc",	eDX },
-  { "inc",	eBX },
-  { "inc",	eSP },
-  { "inc",	eBP },
-  { "inc",	eSI },
-  { "inc",	eDI },
+  { "inc",	eAX, XX, XX },
+  { "inc",	eCX, XX, XX },
+  { "inc",	eDX, XX, XX },
+  { "inc",	eBX, XX, XX },
+  { "inc",	eSP, XX, XX },
+  { "inc",	eBP, XX, XX },
+  { "inc",	eSI, XX, XX },
+  { "inc",	eDI, XX, XX },
   /* 48 */
-  { "dec",	eAX },
-  { "dec",	eCX },
-  { "dec",	eDX },
-  { "dec",	eBX },
-  { "dec",	eSP },
-  { "dec",	eBP },
-  { "dec",	eSI },
-  { "dec",	eDI },
+  { "dec",	eAX, XX, XX },
+  { "dec",	eCX, XX, XX },
+  { "dec",	eDX, XX, XX },
+  { "dec",	eBX, XX, XX },
+  { "dec",	eSP, XX, XX },
+  { "dec",	eBP, XX, XX },
+  { "dec",	eSI, XX, XX },
+  { "dec",	eDI, XX, XX },
   /* 50 */
-  { "push",	eAX },
-  { "push",	eCX },
-  { "push",	eDX },
-  { "push",	eBX },
-  { "push",	eSP },
-  { "push",	eBP },
-  { "push",	eSI },
-  { "push",	eDI },
+  { "push",	eAX, XX, XX },
+  { "push",	eCX, XX, XX },
+  { "push",	eDX, XX, XX },
+  { "push",	eBX, XX, XX },
+  { "push",	eSP, XX, XX },
+  { "push",	eBP, XX, XX },
+  { "push",	eSI, XX, XX },
+  { "push",	eDI, XX, XX },
   /* 58 */
-  { "pop",	eAX },
-  { "pop",	eCX },
-  { "pop",	eDX },
-  { "pop",	eBX },
-  { "pop",	eSP },
-  { "pop",	eBP },
-  { "pop",	eSI },
-  { "pop",	eDI },
+  { "pop",	eAX, XX, XX },
+  { "pop",	eCX, XX, XX },
+  { "pop",	eDX, XX, XX },
+  { "pop",	eBX, XX, XX },
+  { "pop",	eSP, XX, XX },
+  { "pop",	eBP, XX, XX },
+  { "pop",	eSI, XX, XX },
+  { "pop",	eDI, XX, XX },
   /* 60 */
-  { "pusha" },
-  { "popa" },
-  { "bound",	Gv, Ma },
-  { "arpl",	Ew, Gw },
-  { "(bad)" },			/* seg fs */
-  { "(bad)" },			/* seg gs */
-  { "(bad)" },			/* op size prefix */
-  { "(bad)" },			/* adr size prefix */
+  { "pusha",	XX, XX, XX },
+  { "popa",	XX, XX, XX },
+  { "bound",	Gv, Ma, XX },
+  { "arpl",	Ew, Gw, XX },
+  { "(bad)",	XX, XX, XX },			/* seg fs */
+  { "(bad)",	XX, XX, XX },			/* seg gs */
+  { "(bad)",	XX, XX, XX },			/* op size prefix */
+  { "(bad)",	XX, XX, XX },			/* adr size prefix */
   /* 68 */
-  { "push",	Iv },		/* 386 book wrong */
+  { "push",	Iv, XX, XX },		/* 386 book wrong */
   { "imul",	Gv, Ev, Iv },
-  { "push",	sIb },		/* push of byte really pushes 2 or 4 bytes */
+  { "push",	sIb, XX, XX },	/* push of byte really pushes 2 or 4 bytes */
   { "imul",	Gv, Ev, sIb },
-  { "ins",	Yb, indirDX },
-  { "ins",	Yv, indirDX },
-  { "outs",	indirDX, Xb },
-  { "outs",	indirDX, Xv },
+  { "ins",	Yb, indirDX, XX },
+  { "ins",	Yv, indirDX, XX },
+  { "outs",	indirDX, Xb, XX },
+  { "outs",	indirDX, Xv, XX },
   /* 70 */
-  { "jo",	Jb },
-  { "jno",	Jb },
-  { "jb",	Jb },
-  { "jae",	Jb },
-  { "je",	Jb },
-  { "jne",	Jb },
-  { "jbe",	Jb },
-  { "ja",	Jb },
+  { "jo",	Jb, XX, XX },
+  { "jno",	Jb, XX, XX },
+  { "jb",	Jb, XX, XX },
+  { "jae",	Jb, XX, XX },
+  { "je",	Jb, XX, XX },
+  { "jne",	Jb, XX, XX },
+  { "jbe",	Jb, XX, XX },
+  { "ja",	Jb, XX, XX },
   /* 78 */
-  { "js",	Jb },
-  { "jns",	Jb },
-  { "jp",	Jb },
-  { "jnp",	Jb },
-  { "jl",	Jb },
-  { "jge",	Jb },
-  { "jle",	Jb },
-  { "jg",	Jb },
+  { "js",	Jb, XX, XX },
+  { "jns",	Jb, XX, XX },
+  { "jp",	Jb, XX, XX },
+  { "jnp",	Jb, XX, XX },
+  { "jl",	Jb, XX, XX },
+  { "jge",	Jb, XX, XX },
+  { "jle",	Jb, XX, XX },
+  { "jg",	Jb, XX, XX },
   /* 80 */
   { GRP1b },
   { GRP1S },
-  { "(bad)" },
+  { "(bad)",	XX, XX, XX },
   { GRP1Ss },
-  { "test",	Eb, Gb },
-  { "test",	Ev, Gv },
-  { "xchg",	Eb, Gb },
-  { "xchg",	Ev, Gv },
+  { "test",	Eb, Gb, XX },
+  { "test",	Ev, Gv, XX },
+  { "xchg",	Eb, Gb, XX },
+  { "xchg",	Ev, Gv, XX },
   /* 88 */
-  { "mov",	Eb, Gb },
-  { "mov",	Ev, Gv },
-  { "mov",	Gb, Eb },
-  { "mov",	Gv, Ev },
-  { "mov",	Ev, Sw },
-  { "lea",	Gv, M },
-  { "mov",	Sw, Ev },
-  { "pop",	Ev },
+  { "mov",	Eb, Gb, XX },
+  { "mov",	Ev, Gv, XX },
+  { "mov",	Gb, Eb, XX },
+  { "mov",	Gv, Ev, XX },
+  { "mov",	Ev, Sw, XX },
+  { "lea",	Gv, M, XX },
+  { "mov",	Sw, Ev, XX },
+  { "pop",	Ev, XX, XX },
   /* 90 */
-  { "nop" },
-  { "xchg",	eCX, eAX },
-  { "xchg",	eDX, eAX },
-  { "xchg",	eBX, eAX },
-  { "xchg",	eSP, eAX },
-  { "xchg",	eBP, eAX },
-  { "xchg",	eSI, eAX },
-  { "xchg",	eDI, eAX },
+  { "nop",	XX, XX, XX },
+  { "xchg",	eCX, eAX, XX },
+  { "xchg",	eDX, eAX, XX },
+  { "xchg",	eBX, eAX, XX },
+  { "xchg",	eSP, eAX, XX },
+  { "xchg",	eBP, eAX, XX },
+  { "xchg",	eSI, eAX, XX },
+  { "xchg",	eDI, eAX, XX },
   /* 98 */
-  { "cW" },		/* cwde and cbw */
-  { "cR" },		/* cdq and cwd */
-  { "lcall",	Ap },
-  { "(bad)" },		/* fwait */
-  { "pushf" },
-  { "popf" },
-  { "sahf" },
-  { "lahf" },
+  { "cW",	XX, XX, XX },		/* cwde and cbw */
+  { "cR",	XX, XX, XX },		/* cdq and cwd */
+  { "lcall",	Ap, XX, XX },
+  { "(bad)",	XX, XX, XX },		/* fwait */
+  { "pushf",	XX, XX, XX },
+  { "popf",	XX, XX, XX },
+  { "sahf",	XX, XX, XX },
+  { "lahf",	XX, XX, XX },
   /* a0 */
-  { "mov",	AL, Ob },
-  { "mov",	eAX, Ov },
-  { "mov",	Ob, AL },
-  { "mov",	Ov, eAX },
-  { "movs",	Yb, Xb },
-  { "movs",	Yv, Xv },
-  { "cmps",	Xb, Yb },
-  { "cmps",	Xv, Yv },
+  { "mov",	AL, Ob, XX },
+  { "mov",	eAX, Ov, XX },
+  { "mov",	Ob, AL, XX },
+  { "mov",	Ov, eAX, XX },
+  { "movs",	Yb, Xb, XX },
+  { "movs",	Yv, Xv, XX },
+  { "cmps",	Xb, Yb, XX },
+  { "cmps",	Xv, Yv, XX },
   /* a8 */
-  { "test",	AL, Ib },
-  { "test",	eAX, Iv },
-  { "stos",	Yb, AL },
-  { "stos",	Yv, eAX },
-  { "lods",	AL, Xb },
-  { "lods",	eAX, Xv },
-  { "scas",	AL, Yb },
-  { "scas",	eAX, Yv },
+  { "test",	AL, Ib, XX },
+  { "test",	eAX, Iv, XX },
+  { "stos",	Yb, AL, XX },
+  { "stos",	Yv, eAX, XX },
+  { "lods",	AL, Xb, XX },
+  { "lods",	eAX, Xv, XX },
+  { "scas",	AL, Yb, XX },
+  { "scas",	eAX, Yv, XX },
   /* b0 */
-  { "mov",	AL, Ib },
-  { "mov",	CL, Ib },
-  { "mov",	DL, Ib },
-  { "mov",	BL, Ib },
-  { "mov",	AH, Ib },
-  { "mov",	CH, Ib },
-  { "mov",	DH, Ib },
-  { "mov",	BH, Ib },
+  { "mov",	AL, Ib, XX },
+  { "mov",	CL, Ib, XX },
+  { "mov",	DL, Ib, XX },
+  { "mov",	BL, Ib, XX },
+  { "mov",	AH, Ib, XX },
+  { "mov",	CH, Ib, XX },
+  { "mov",	DH, Ib, XX },
+  { "mov",	BH, Ib, XX },
   /* b8 */
-  { "mov",	eAX, Iv },
-  { "mov",	eCX, Iv },
-  { "mov",	eDX, Iv },
-  { "mov",	eBX, Iv },
-  { "mov",	eSP, Iv },
-  { "mov",	eBP, Iv },
-  { "mov",	eSI, Iv },
-  { "mov",	eDI, Iv },
+  { "mov",	eAX, Iv, XX },
+  { "mov",	eCX, Iv, XX },
+  { "mov",	eDX, Iv, XX },
+  { "mov",	eBX, Iv, XX },
+  { "mov",	eSP, Iv, XX },
+  { "mov",	eBP, Iv, XX },
+  { "mov",	eSI, Iv, XX },
+  { "mov",	eDI, Iv, XX },
   /* c0 */
   { GRP2b },
   { GRP2S },
-  { "ret",	Iw },
-  { "ret" },
-  { "les",	Gv, Mp },
-  { "lds",	Gv, Mp },
-  { "mov",	Eb, Ib },
-  { "mov",	Ev, Iv },
+  { "ret",	Iw, XX, XX },
+  { "ret",	XX, XX, XX },
+  { "les",	Gv, Mp, XX },
+  { "lds",	Gv, Mp, XX },
+  { "mov",	Eb, Ib, XX },
+  { "mov",	Ev, Iv, XX },
   /* c8 */
-  { "enter",	Iw, Ib },
-  { "leave" },
-  { "lret",	Iw },
-  { "lret" },
-  { "int3" },
-  { "int",	Ib },
-  { "into" },
-  { "iret" },
+  { "enter",	Iw, Ib, XX },
+  { "leave",	XX, XX, XX },
+  { "lret",	Iw, XX, XX },
+  { "lret",	XX, XX, XX },
+  { "int3",	XX, XX, XX },
+  { "int",	Ib, XX, XX },
+  { "into",	XX, XX, XX },
+  { "iret",	XX, XX, XX },
   /* d0 */
   { GRP2b_one },
   { GRP2S_one },
   { GRP2b_cl },
   { GRP2S_cl },
-  { "aam",	sIb },
-  { "aad",	sIb },
-  { "(bad)" },
-  { "xlat",	DSBX },
+  { "aam",	sIb, XX, XX },
+  { "aad",	sIb, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "xlat",	DSBX, XX, XX },
   /* d8 */
   { FLOAT },
   { FLOAT },
@@ -891,39 +893,39 @@ static const struct dis386 dis386_intel[] = {
   { FLOAT },
   { FLOAT },
   /* e0 */
-  { "loopne",	Jb },
-  { "loope",	Jb },
-  { "loop",	Jb },
-  { "jEcxz",	Jb },
-  { "in",	AL, Ib },
-  { "in",	eAX, Ib },
-  { "out",	Ib, AL },
-  { "out",	Ib, eAX },
+  { "loopne",	Jb, XX, XX },
+  { "loope",	Jb, XX, XX },
+  { "loop",	Jb, XX, XX },
+  { "jEcxz",	Jb, XX, XX },
+  { "in",	AL, Ib, XX },
+  { "in",	eAX, Ib, XX },
+  { "out",	Ib, AL, XX },
+  { "out",	Ib, eAX, XX },
   /* e8 */
-  { "call",	Jv },
-  { "jmp",	Jv },
-  { "ljmp",	Ap },
-  { "jmp",	Jb },
-  { "in",	AL, indirDX },
-  { "in",	eAX, indirDX },
-  { "out",	indirDX, AL },
-  { "out",	indirDX, eAX },
+  { "call",	Jv, XX, XX },
+  { "jmp",	Jv, XX, XX },
+  { "ljmp",	Ap, XX, XX },
+  { "jmp",	Jb, XX, XX },
+  { "in",	AL, indirDX, XX },
+  { "in",	eAX, indirDX, XX },
+  { "out",	indirDX, AL, XX },
+  { "out",	indirDX, eAX, XX },
   /* f0 */
-  { "(bad)" },			/* lock prefix */
-  { "(bad)" },
-  { "(bad)" },			/* repne */
-  { "(bad)" },			/* repz */
-  { "hlt" },
-  { "cmc" },
+  { "(bad)",	XX, XX, XX },			/* lock prefix */
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },			/* repne */
+  { "(bad)",	XX, XX, XX },			/* repz */
+  { "hlt",	XX, XX, XX },
+  { "cmc",	XX, XX, XX },
   { GRP3b },
   { GRP3S },
   /* f8 */
-  { "clc" },
-  { "stc" },
-  { "cli" },
-  { "sti" },
-  { "cld" },
-  { "std" },
+  { "clc",	XX, XX, XX },
+  { "stc",	XX, XX, XX },
+  { "cli",	XX, XX, XX },
+  { "sti",	XX, XX, XX },
+  { "cld",	XX, XX, XX },
+  { "std",	XX, XX, XX },
   { GRP4 },
   { GRP5 },
 };
@@ -932,516 +934,584 @@ static const struct dis386 dis386_twobyte_att[] = {
   /* 00 */
   { GRP6 },
   { GRP7 },
-  { "larS", Gv, Ew },
-  { "lslS", Gv, Ew },
-  { "(bad)" },
-  { "(bad)" },
-  { "clts" },
-  { "(bad)" },
+  { "larS", Gv, Ew, XX },
+  { "lslS", Gv, Ew, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "clts", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
   /* 08 */
-  { "invd" },
-  { "wbinvd" },
-  { "(bad)" },
-  { "ud2a" },
-  { "(bad)" },
+  { "invd", XX, XX, XX },
+  { "wbinvd", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "ud2a", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
   { GRPAMD },
-  { "femms" },
+  { "femms", XX, XX, XX },
   { "", MX, EM, OPSUF }, /* See OP_3DNowSuffix */
   /* 10 */
   { PREGRP8 },
   { PREGRP9 },
   { "movlps", XM, EX, SIMD_Fixup, 'h' },  /* really only 2 operands */
   { "movlps", EX, XM, SIMD_Fixup, 'h' },
-  { "unpcklps", XM, EX },
-  { "unpckhps", XM, EX },
+  { "unpcklps", XM, EX, XX },
+  { "unpckhps", XM, EX, XX },
   { "movhps", XM, EX, SIMD_Fixup, 'l' },
   { "movhps", EX, XM, SIMD_Fixup, 'l' },
   /* 18 */
   { GRP14 },
-  { "(bad)" },  { "(bad)" },  { "(bad)" },
-  { "(bad)" },  { "(bad)" },  { "(bad)" },  { "(bad)" },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
   /* 20 */
   /* these are all backward in appendix A of the intel book */
-  { "movL", Rd, Cd },
-  { "movL", Rd, Dd },
-  { "movL", Cd, Rd },
-  { "movL", Dd, Rd },
-  { "movL", Rd, Td },
-  { "(bad)" },
-  { "movL", Td, Rd },
-  { "(bad)" },
+  { "movL", Rd, Cd, XX },
+  { "movL", Rd, Dd, XX },
+  { "movL", Cd, Rd, XX },
+  { "movL", Dd, Rd, XX },
+  { "movL", Rd, Td, XX },
+  { "(bad)", XX, XX, XX },
+  { "movL", Td, Rd, XX },
+  { "(bad)", XX, XX, XX },
   /* 28 */
-  { "movaps", XM, EX },
-  { "movaps", EX, XM },
+  { "movaps", XM, EX, XX },
+  { "movaps", EX, XM, XX },
   { PREGRP2 },
-  { "movntps", Ev, XM },
+  { "movntps", Ev, XM, XX },
   { PREGRP4 },
   { PREGRP3 },
-  { "ucomiss", XM, EX },
-  { "comiss", XM, EX },
+  { "ucomiss", XM, EX, XX },
+  { "comiss", XM, EX, XX },
   /* 30 */
-  { "wrmsr" },  { "rdtsc" },  { "rdmsr" },  { "rdpmc" },
-  { "sysenter" },  { "sysexit" },  { "(bad)" },  { "(bad)" },
+  { "wrmsr", XX, XX, XX },
+  { "rdtsc", XX, XX, XX },
+  { "rdmsr", XX, XX, XX },
+  { "rdpmc", XX, XX, XX },
+  { "sysenter", XX, XX, XX },
+  { "sysexit", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
   /* 38 */
-  { "(bad)" },  { "(bad)" },  { "(bad)" },  { "(bad)" },
-  { "(bad)" },  { "(bad)" },  { "(bad)" },  { "(bad)" },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
   /* 40 */
-  { "cmovo", Gv,Ev }, { "cmovno", Gv,Ev }, { "cmovb", Gv,Ev }, { "cmovae", Gv,Ev },
-  { "cmove", Gv,Ev }, { "cmovne", Gv,Ev }, { "cmovbe", Gv,Ev }, { "cmova", Gv,Ev },
+  { "cmovo", Gv, Ev, XX },
+  { "cmovno", Gv, Ev, XX },
+  { "cmovb", Gv, Ev, XX },
+  { "cmovae", Gv, Ev, XX },
+  { "cmove", Gv, Ev, XX },
+  { "cmovne", Gv, Ev, XX },
+  { "cmovbe", Gv, Ev, XX },
+  { "cmova", Gv, Ev, XX },
   /* 48 */
-  { "cmovs", Gv,Ev }, { "cmovns", Gv,Ev }, { "cmovp", Gv,Ev }, { "cmovnp", Gv,Ev },
-  { "cmovl", Gv,Ev }, { "cmovge", Gv,Ev }, { "cmovle", Gv,Ev }, { "cmovg", Gv,Ev },
+  { "cmovs", Gv, Ev, XX },
+  { "cmovns", Gv, Ev, XX },
+  { "cmovp", Gv, Ev, XX },
+  { "cmovnp", Gv, Ev, XX },
+  { "cmovl", Gv, Ev, XX },
+  { "cmovge", Gv, Ev, XX },
+  { "cmovle", Gv, Ev, XX },
+  { "cmovg", Gv, Ev, XX },
   /* 50 */
-  { "movmskps", Gv, EX },
+  { "movmskps", Gv, EX, XX },
   { PREGRP13 },
   { PREGRP12 },
   { PREGRP11 },
-  { "andps", XM, EX },
-  { "andnps", XM, EX },
-  { "orps", XM, EX },
-  { "xorps", XM, EX },
+  { "andps", XM, EX, XX },
+  { "andnps", XM, EX, XX },
+  { "orps", XM, EX, XX },
+  { "xorps", XM, EX, XX },
   /* 58 */
   { PREGRP0 },
   { PREGRP10 },
-  { "(bad)" },
-  { "(bad)" },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
   { PREGRP14 },
   { PREGRP7 },
   { PREGRP5 },
   { PREGRP6 },
   /* 60 */
-  { "punpcklbw", MX, EM },
-  { "punpcklwd", MX, EM },
-  { "punpckldq", MX, EM },
-  { "packsswb", MX, EM },
-  { "pcmpgtb", MX, EM },
-  { "pcmpgtw", MX, EM },
-  { "pcmpgtd", MX, EM },
-  { "packuswb", MX, EM },
+  { "punpcklbw", MX, EM, XX },
+  { "punpcklwd", MX, EM, XX },
+  { "punpckldq", MX, EM, XX },
+  { "packsswb", MX, EM, XX },
+  { "pcmpgtb", MX, EM, XX },
+  { "pcmpgtw", MX, EM, XX },
+  { "pcmpgtd", MX, EM, XX },
+  { "packuswb", MX, EM, XX },
   /* 68 */
-  { "punpckhbw", MX, EM },
-  { "punpckhwd", MX, EM },
-  { "punpckhdq", MX, EM },
-  { "packssdw", MX, EM },
-  { "(bad)" },  { "(bad)" },
-  { "movd", MX, Ed },
-  { "movq", MX, EM },
+  { "punpckhbw", MX, EM, XX },
+  { "punpckhwd", MX, EM, XX },
+  { "punpckhdq", MX, EM, XX },
+  { "packssdw", MX, EM, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "movd", MX, Ed, XX },
+  { "movq", MX, EM, XX },
   /* 70 */
   { "pshufw", MX, EM, Ib },
   { GRP10 },
   { GRP11 },
   { GRP12 },
-  { "pcmpeqb", MX, EM },
-  { "pcmpeqw", MX, EM },
-  { "pcmpeqd", MX, EM },
-  { "emms" },
+  { "pcmpeqb", MX, EM, XX },
+  { "pcmpeqw", MX, EM, XX },
+  { "pcmpeqd", MX, EM, XX },
+  { "emms", XX, XX, XX },
   /* 78 */
-  { "(bad)" },  { "(bad)" },  { "(bad)" },  { "(bad)" },
-  { "(bad)" },  { "(bad)" },
-  { "movd", Ed, MX },
-  { "movq", EM, MX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "movd", Ed, MX, XX },
+  { "movq", EM, MX, XX },
   /* 80 */
-  { "jo", Jv },
-  { "jno", Jv },
-  { "jb", Jv },
-  { "jae", Jv },
-  { "je", Jv },
-  { "jne", Jv },
-  { "jbe", Jv },
-  { "ja", Jv },
+  { "jo", Jv, XX, XX },
+  { "jno", Jv, XX, XX },
+  { "jb", Jv, XX, XX },
+  { "jae", Jv, XX, XX },
+  { "je", Jv, XX, XX },
+  { "jne", Jv, XX, XX },
+  { "jbe", Jv, XX, XX },
+  { "ja", Jv, XX, XX },
   /* 88 */
-  { "js", Jv },
-  { "jns", Jv },
-  { "jp", Jv },
-  { "jnp", Jv },
-  { "jl", Jv },
-  { "jge", Jv },
-  { "jle", Jv },
-  { "jg", Jv },
+  { "js", Jv, XX, XX },
+  { "jns", Jv, XX, XX },
+  { "jp", Jv, XX, XX },
+  { "jnp", Jv, XX, XX },
+  { "jl", Jv, XX, XX },
+  { "jge", Jv, XX, XX },
+  { "jle", Jv, XX, XX },
+  { "jg", Jv, XX, XX },
   /* 90 */
-  { "seto", Eb },
-  { "setno", Eb },
-  { "setb", Eb },
-  { "setae", Eb },
-  { "sete", Eb },
-  { "setne", Eb },
-  { "setbe", Eb },
-  { "seta", Eb },
+  { "seto", Eb, XX, XX },
+  { "setno", Eb, XX, XX },
+  { "setb", Eb, XX, XX },
+  { "setae", Eb, XX, XX },
+  { "sete", Eb, XX, XX },
+  { "setne", Eb, XX, XX },
+  { "setbe", Eb, XX, XX },
+  { "seta", Eb, XX, XX },
   /* 98 */
-  { "sets", Eb },
-  { "setns", Eb },
-  { "setp", Eb },
-  { "setnp", Eb },
-  { "setl", Eb },
-  { "setge", Eb },
-  { "setle", Eb },
-  { "setg", Eb },
+  { "sets", Eb, XX, XX },
+  { "setns", Eb, XX, XX },
+  { "setp", Eb, XX, XX },
+  { "setnp", Eb, XX, XX },
+  { "setl", Eb, XX, XX },
+  { "setge", Eb, XX, XX },
+  { "setle", Eb, XX, XX },
+  { "setg", Eb, XX, XX },
   /* a0 */
-  { "pushP", fs },
-  { "popP", fs },
-  { "cpuid" },
-  { "btS", Ev, Gv },
+  { "pushP", fs, XX, XX },
+  { "popP", fs, XX, XX },
+  { "cpuid", XX, XX, XX },
+  { "btS", Ev, Gv, XX },
   { "shldS", Ev, Gv, Ib },
   { "shldS", Ev, Gv, CL },
-  { "(bad)" },
-  { "(bad)" },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
   /* a8 */
-  { "pushP", gs },
-  { "popP", gs },
-  { "rsm" },
-  { "btsS", Ev, Gv },
+  { "pushP", gs, XX, XX },
+  { "popP", gs, XX, XX },
+  { "rsm", XX, XX, XX },
+  { "btsS", Ev, Gv, XX },
   { "shrdS", Ev, Gv, Ib },
   { "shrdS", Ev, Gv, CL },
   { GRP13 },
-  { "imulS", Gv, Ev },
+  { "imulS", Gv, Ev, XX },
   /* b0 */
-  { "cmpxchgB", Eb, Gb },
-  { "cmpxchgS", Ev, Gv },
-  { "lssS", Gv, Mp },
-  { "btrS", Ev, Gv },
-  { "lfsS", Gv, Mp },
-  { "lgsS", Gv, Mp },
-  { "movzbR", Gv, Eb },
-  { "movzwR", Gv, Ew }, /* yes, there really is movzww ! */
+  { "cmpxchgB", Eb, Gb, XX },
+  { "cmpxchgS", Ev, Gv, XX },
+  { "lssS", Gv, Mp, XX },
+  { "btrS", Ev, Gv, XX },
+  { "lfsS", Gv, Mp, XX },
+  { "lgsS", Gv, Mp, XX },
+  { "movzbR", Gv, Eb, XX },
+  { "movzwR", Gv, Ew, XX }, /* yes, there really is movzww ! */
   /* b8 */
-  { "(bad)" },
-  { "ud2b" },
+  { "(bad)", XX, XX, XX },
+  { "ud2b", XX, XX, XX },
   { GRP8 },
-  { "btcS", Ev, Gv },
-  { "bsfS", Gv, Ev },
-  { "bsrS", Gv, Ev },
-  { "movsbR", Gv, Eb },
-  { "movswR", Gv, Ew }, /* yes, there really is movsww ! */
+  { "btcS", Ev, Gv, XX },
+  { "bsfS", Gv, Ev, XX },
+  { "bsrS", Gv, Ev, XX },
+  { "movsbR", Gv, Eb, XX },
+  { "movswR", Gv, Ew, XX }, /* yes, there really is movsww ! */
   /* c0 */
-  { "xaddB", Eb, Gb },
-  { "xaddS", Ev, Gv },
+  { "xaddB", Eb, Gb, XX },
+  { "xaddS", Ev, Gv, XX },
   { PREGRP1 },
-  { "(bad)" },
+  { "(bad)", XX, XX, XX },
   { "pinsrw", MX, Ev, Ib },
   { "pextrw", Ev, MX, Ib },
   { "shufps", XM, EX, Ib },
   { GRP9 },
   /* c8 */
-  { "bswap", eAX },	/* bswap doesn't support 16 bit regs */
-  { "bswap", eCX },
-  { "bswap", eDX },
-  { "bswap", eBX },
-  { "bswap", eSP },
-  { "bswap", eBP },
-  { "bswap", eSI },
-  { "bswap", eDI },
+  { "bswap", eAX, XX, XX },	/* bswap doesn't support 16 bit regs */
+  { "bswap", eCX, XX, XX },
+  { "bswap", eDX, XX, XX },
+  { "bswap", eBX, XX, XX },
+  { "bswap", eSP, XX, XX },
+  { "bswap", eBP, XX, XX },
+  { "bswap", eSI, XX, XX },
+  { "bswap", eDI, XX, XX },
   /* d0 */
-  { "(bad)" },
-  { "psrlw", MX, EM },
-  { "psrld", MX, EM },
-  { "psrlq", MX, EM },
-  { "(bad)" },
-  { "pmullw", MX, EM },
-  { "(bad)" },
-  { "pmovmskb", Ev, MX },
+  { "(bad)", XX, XX, XX },
+  { "psrlw", MX, EM, XX },
+  { "psrld", MX, EM, XX },
+  { "psrlq", MX, EM, XX },
+  { "(bad)", XX, XX, XX },
+  { "pmullw", MX, EM, XX },
+  { "(bad)", XX, XX, XX },
+  { "pmovmskb", Ev, MX, XX },
   /* d8 */
-  { "psubusb", MX, EM },
-  { "psubusw", MX, EM },
-  { "pminub", MX, EM },
-  { "pand", MX, EM },
-  { "paddusb", MX, EM },
-  { "paddusw", MX, EM },
-  { "pmaxub", MX, EM },
-  { "pandn", MX, EM },
+  { "psubusb", MX, EM, XX },
+  { "psubusw", MX, EM, XX },
+  { "pminub", MX, EM, XX },
+  { "pand", MX, EM, XX },
+  { "paddusb", MX, EM, XX },
+  { "paddusw", MX, EM, XX },
+  { "pmaxub", MX, EM, XX },
+  { "pandn", MX, EM, XX },
   /* e0 */
-  { "pavgb", MX, EM },
-  { "psraw", MX, EM },
-  { "psrad", MX, EM },
-  { "pavgw", MX, EM },
-  { "pmulhuw", MX, EM },
-  { "pmulhw", MX, EM },
-  { "(bad)" },
-  { "movntq", Ev, MX },
+  { "pavgb", MX, EM, XX },
+  { "psraw", MX, EM, XX },
+  { "psrad", MX, EM, XX },
+  { "pavgw", MX, EM, XX },
+  { "pmulhuw", MX, EM, XX },
+  { "pmulhw", MX, EM, XX },
+  { "(bad)", XX, XX, XX },
+  { "movntq", Ev, MX, XX },
   /* e8 */
-  { "psubsb", MX, EM },
-  { "psubsw", MX, EM },
-  { "pminsw", MX, EM },
-  { "por", MX, EM },
-  { "paddsb", MX, EM },
-  { "paddsw", MX, EM },
-  { "pmaxsw", MX, EM },
-  { "pxor", MX, EM },
+  { "psubsb", MX, EM, XX },
+  { "psubsw", MX, EM, XX },
+  { "pminsw", MX, EM, XX },
+  { "por", MX, EM, XX },
+  { "paddsb", MX, EM, XX },
+  { "paddsw", MX, EM, XX },
+  { "pmaxsw", MX, EM, XX },
+  { "pxor", MX, EM, XX },
   /* f0 */
-  { "(bad)" },
-  { "psllw", MX, EM },
-  { "pslld", MX, EM },
-  { "psllq", MX, EM },
-  { "(bad)" },
-  { "pmaddwd", MX, EM },
-  { "psadbw", MX, EM },
-  { "maskmovq", MX, EM },
+  { "(bad)", XX, XX, XX },
+  { "psllw", MX, EM, XX },
+  { "pslld", MX, EM, XX },
+  { "psllq", MX, EM, XX },
+  { "(bad)", XX, XX, XX },
+  { "pmaddwd", MX, EM, XX },
+  { "psadbw", MX, EM, XX },
+  { "maskmovq", MX, EM, XX },
   /* f8 */
-  { "psubb", MX, EM },
-  { "psubw", MX, EM },
-  { "psubd", MX, EM },
-  { "(bad)" },
-  { "paddb", MX, EM },
-  { "paddw", MX, EM },
-  { "paddd", MX, EM },
-  { "(bad)" }
+  { "psubb", MX, EM, XX },
+  { "psubw", MX, EM, XX },
+  { "psubd", MX, EM, XX },
+  { "(bad)", XX, XX, XX },
+  { "paddb", MX, EM, XX },
+  { "paddw", MX, EM, XX },
+  { "paddd", MX, EM, XX },
+  { "(bad)", XX, XX, XX }
 };
 
 static const struct dis386 dis386_twobyte_intel[] = {
   /* 00 */
   { GRP6 },
   { GRP7 },
-  { "lar", Gv, Ew },
-  { "lsl", Gv, Ew },
-  { "(bad)" },
-  { "(bad)" },
-  { "clts" },
-  { "(bad)" },
+  { "lar", Gv, Ew, XX },
+  { "lsl", Gv, Ew, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "clts", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
   /* 08 */
-  { "invd" },
-  { "wbinvd" },
-  { "(bad)" },
-  { "ud2a" },
-  { "(bad)" },
+  { "invd", XX, XX, XX },
+  { "wbinvd", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "ud2a", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
   { GRPAMD },
-  { "femms" },
+  { "femms" , XX, XX, XX},
   { "", MX, EM, OPSUF }, /* See OP_3DNowSuffix */
   /* 10 */
   { PREGRP8 },
   { PREGRP9 },
   { "movlps", XM, EX, SIMD_Fixup, 'h' },  /* really only 2 operands */
   { "movlps", EX, XM, SIMD_Fixup, 'h' },
-  { "unpcklps", XM, EX },
-  { "unpckhps", XM, EX },
+  { "unpcklps", XM, EX, XX },
+  { "unpckhps", XM, EX, XX },
   { "movhps", XM, EX, SIMD_Fixup, 'l' },
   { "movhps", EX, XM, SIMD_Fixup, 'l' },
   /* 18 */
   { GRP14 },
-  { "(bad)" },  { "(bad)" },  { "(bad)" },
-  { "(bad)" },  { "(bad)" },  { "(bad)" },  { "(bad)" },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
   /* 20 */
   /* these are all backward in appendix A of the intel book */
-  { "mov", Rd, Cd },
-  { "mov", Rd, Dd },
-  { "mov", Cd, Rd },
-  { "mov", Dd, Rd },
-  { "mov", Rd, Td },
-  { "(bad)" },
-  { "mov", Td, Rd },
-  { "(bad)" },
+  { "mov", Rd, Cd, XX },
+  { "mov", Rd, Dd, XX },
+  { "mov", Cd, Rd, XX },
+  { "mov", Dd, Rd, XX },
+  { "mov", Rd, Td, XX },
+  { "(bad)", XX, XX, XX },
+  { "mov", Td, Rd, XX },
+  { "(bad)", XX, XX, XX },
   /* 28 */
-  { "movaps", XM, EX },
-  { "movaps", EX, XM },
+  { "movaps", XM, EX, XX },
+  { "movaps", EX, XM, XX },
   { PREGRP2 },
-  { "movntps", Ev, XM },
+  { "movntps", Ev, XM, XX },
   { PREGRP4 },
   { PREGRP3 },
-  { "ucomiss", XM, EX },
-  { "comiss", XM, EX },
+  { "ucomiss", XM, EX, XX },
+  { "comiss", XM, EX, XX },
   /* 30 */
-  { "wrmsr" },  { "rdtsc" },  { "rdmsr" },  { "rdpmc" },
-  { "sysenter" },  { "sysexit" },  { "(bad)" },  { "(bad)" },
+  { "wrmsr", XX, XX, XX },
+  { "rdtsc", XX, XX, XX },
+  { "rdmsr", XX, XX, XX },
+  { "rdpmc", XX, XX, XX },
+  { "sysenter", XX, XX, XX },
+  { "sysexit", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
   /* 38 */
-  { "(bad)" },  { "(bad)" },  { "(bad)" },  { "(bad)" },
-  { "(bad)" },  { "(bad)" },  { "(bad)" },  { "(bad)" },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
   /* 40 */
-  { "cmovo", Gv,Ev }, { "cmovno", Gv,Ev }, { "cmovb", Gv,Ev }, { "cmovae", Gv,Ev },
-  { "cmove", Gv,Ev }, { "cmovne", Gv,Ev }, { "cmovbe", Gv,Ev }, { "cmova", Gv,Ev },
+  { "cmovo", Gv, Ev, XX },
+  { "cmovno", Gv, Ev, XX },
+  { "cmovb", Gv, Ev, XX },
+  { "cmovae", Gv, Ev, XX },
+  { "cmove", Gv, Ev, XX },
+  { "cmovne", Gv, Ev, XX },
+  { "cmovbe", Gv, Ev, XX },
+  { "cmova", Gv, Ev, XX },
   /* 48 */
-  { "cmovs", Gv,Ev }, { "cmovns", Gv,Ev }, { "cmovp", Gv,Ev }, { "cmovnp", Gv,Ev },
-  { "cmovl", Gv,Ev }, { "cmovge", Gv,Ev }, { "cmovle", Gv,Ev }, { "cmovg", Gv,Ev },
+  { "cmovs", Gv, Ev, XX },
+  { "cmovns", Gv, Ev, XX },
+  { "cmovp", Gv, Ev, XX },
+  { "cmovnp", Gv, Ev, XX },
+  { "cmovl", Gv, Ev, XX },
+  { "cmovge", Gv, Ev, XX },
+  { "cmovle", Gv, Ev, XX },
+  { "cmovg", Gv, Ev, XX },
   /* 50 */
-  { "movmskps", Gv, EX },
+  { "movmskps", Gv, EX, XX },
   { PREGRP13 },
   { PREGRP12 },
   { PREGRP11 },
-  { "andps", XM, EX },
-  { "andnps", XM, EX },
-  { "orps", XM, EX },
-  { "xorps", XM, EX },
+  { "andps", XM, EX, XX },
+  { "andnps", XM, EX, XX },
+  { "orps", XM, EX, XX },
+  { "xorps", XM, EX, XX },
   /* 58 */
   { PREGRP0 },
   { PREGRP10 },
-  { "(bad)" },
-  { "(bad)" },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
   { PREGRP14 },
   { PREGRP7 },
   { PREGRP5 },
   { PREGRP6 },
   /* 60 */
-  { "punpcklbw", MX, EM },
-  { "punpcklwd", MX, EM },
-  { "punpckldq", MX, EM },
-  { "packsswb", MX, EM },
-  { "pcmpgtb", MX, EM },
-  { "pcmpgtw", MX, EM },
-  { "pcmpgtd", MX, EM },
-  { "packuswb", MX, EM },
+  { "punpcklbw", MX, EM, XX },
+  { "punpcklwd", MX, EM, XX },
+  { "punpckldq", MX, EM, XX },
+  { "packsswb", MX, EM, XX },
+  { "pcmpgtb", MX, EM, XX },
+  { "pcmpgtw", MX, EM, XX },
+  { "pcmpgtd", MX, EM, XX },
+  { "packuswb", MX, EM, XX },
   /* 68 */
-  { "punpckhbw", MX, EM },
-  { "punpckhwd", MX, EM },
-  { "punpckhdq", MX, EM },
-  { "packssdw", MX, EM },
-  { "(bad)" },  { "(bad)" },
-  { "movd", MX, Ed },
-  { "movq", MX, EM },
+  { "punpckhbw", MX, EM, XX },
+  { "punpckhwd", MX, EM, XX },
+  { "punpckhdq", MX, EM, XX },
+  { "packssdw", MX, EM, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "movd", MX, Ed, XX },
+  { "movq", MX, EM, XX },
   /* 70 */
   { "pshufw", MX, EM, Ib },
   { GRP10 },
   { GRP11 },
   { GRP12 },
-  { "pcmpeqb", MX, EM },
-  { "pcmpeqw", MX, EM },
-  { "pcmpeqd", MX, EM },
-  { "emms" },
+  { "pcmpeqb", MX, EM, XX },
+  { "pcmpeqw", MX, EM, XX },
+  { "pcmpeqd", MX, EM, XX },
+  { "emms", XX, XX, XX },
   /* 78 */
-  { "(bad)" },  { "(bad)" },  { "(bad)" },  { "(bad)" },
-  { "(bad)" },  { "(bad)" },
-  { "movd", Ed, MX },
-  { "movq", EM, MX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
+  { "movd", Ed, MX, XX },
+  { "movq", EM, MX, XX },
   /* 80 */
-  { "jo", Jv },
-  { "jno", Jv },
-  { "jb", Jv },
-  { "jae", Jv },
-  { "je", Jv },
-  { "jne", Jv },
-  { "jbe", Jv },
-  { "ja", Jv },
+  { "jo", Jv, XX, XX },
+  { "jno", Jv, XX, XX },
+  { "jb", Jv, XX, XX },
+  { "jae", Jv, XX, XX },
+  { "je", Jv, XX, XX },
+  { "jne", Jv, XX, XX },
+  { "jbe", Jv, XX, XX },
+  { "ja", Jv, XX, XX },
   /* 88 */
-  { "js", Jv },
-  { "jns", Jv },
-  { "jp", Jv },
-  { "jnp", Jv },
-  { "jl", Jv },
-  { "jge", Jv },
-  { "jle", Jv },
-  { "jg", Jv },
+  { "js", Jv, XX, XX },
+  { "jns", Jv, XX, XX },
+  { "jp", Jv, XX, XX },
+  { "jnp", Jv, XX, XX },
+  { "jl", Jv, XX, XX },
+  { "jge", Jv, XX, XX },
+  { "jle", Jv, XX, XX },
+  { "jg", Jv, XX, XX },
   /* 90 */
-  { "seto", Eb },
-  { "setno", Eb },
-  { "setb", Eb },
-  { "setae", Eb },
-  { "sete", Eb },
-  { "setne", Eb },
-  { "setbe", Eb },
-  { "seta", Eb },
+  { "seto", Eb, XX, XX },
+  { "setno", Eb, XX, XX },
+  { "setb", Eb, XX, XX },
+  { "setae", Eb, XX, XX },
+  { "sete", Eb, XX, XX },
+  { "setne", Eb, XX, XX },
+  { "setbe", Eb, XX, XX },
+  { "seta", Eb, XX, XX },
   /* 98 */
-  { "sets", Eb },
-  { "setns", Eb },
-  { "setp", Eb },
-  { "setnp", Eb },
-  { "setl", Eb },
-  { "setge", Eb },
-  { "setle", Eb },
-  { "setg", Eb },
+  { "sets", Eb, XX, XX },
+  { "setns", Eb, XX, XX },
+  { "setp", Eb, XX, XX },
+  { "setnp", Eb, XX, XX },
+  { "setl", Eb, XX, XX },
+  { "setge", Eb, XX, XX },
+  { "setle", Eb, XX, XX },
+  { "setg", Eb, XX, XX },
   /* a0 */
-  { "push", fs },
-  { "pop", fs },
-  { "cpuid" },
-  { "bt", Ev, Gv },
+  { "push", fs, XX, XX },
+  { "pop", fs, XX, XX },
+  { "cpuid", XX, XX, XX },
+  { "bt", Ev, Gv, XX },
   { "shld", Ev, Gv, Ib },
   { "shld", Ev, Gv, CL },
-  { "(bad)" },
-  { "(bad)" },
+  { "(bad)", XX, XX, XX },
+  { "(bad)", XX, XX, XX },
   /* a8 */
-  { "push", gs },
-  { "pop", gs },
-  { "rsm" },
-  { "bts", Ev, Gv },
+  { "push", gs, XX, XX },
+  { "pop", gs, XX, XX },
+  { "rsm" , XX, XX, XX},
+  { "bts", Ev, Gv, XX },
   { "shrd", Ev, Gv, Ib },
   { "shrd", Ev, Gv, CL },
   { GRP13 },
-  { "imul", Gv, Ev },
+  { "imul", Gv, Ev, XX },
   /* b0 */
-  { "cmpxchg", Eb, Gb },
-  { "cmpxchg", Ev, Gv },
-  { "lss", Gv, Mp },
-  { "btr", Ev, Gv },
-  { "lfs", Gv, Mp },
-  { "lgs", Gv, Mp },
-  { "movzx", Gv, Eb },
-  { "movzx", Gv, Ew },
+  { "cmpxchg", Eb, Gb, XX },
+  { "cmpxchg", Ev, Gv, XX },
+  { "lss", Gv, Mp, XX },
+  { "btr", Ev, Gv, XX },
+  { "lfs", Gv, Mp, XX },
+  { "lgs", Gv, Mp, XX },
+  { "movzx", Gv, Eb, XX },
+  { "movzx", Gv, Ew, XX },
   /* b8 */
-  { "(bad)" },
-  { "ud2b" },
+  { "(bad)", XX, XX, XX },
+  { "ud2b", XX, XX, XX },
   { GRP8 },
-  { "btc", Ev, Gv },
-  { "bsf", Gv, Ev },
-  { "bsr", Gv, Ev },
-  { "movsx", Gv, Eb },
-  { "movsx", Gv, Ew },
+  { "btc", Ev, Gv, XX },
+  { "bsf", Gv, Ev, XX },
+  { "bsr", Gv, Ev, XX },
+  { "movsx", Gv, Eb, XX },
+  { "movsx", Gv, Ew, XX },
   /* c0 */
-  { "xadd", Eb, Gb },
-  { "xadd", Ev, Gv },
+  { "xadd", Eb, Gb, XX },
+  { "xadd", Ev, Gv, XX },
   { PREGRP1 },
-  { "(bad)" },
+  { "(bad)", XX, XX, XX },
   { "pinsrw", MX, Ev, Ib },
   { "pextrw", Ev, MX, Ib },
   { "shufps", XM, EX, Ib },
   { GRP9 },
   /* c8 */
-  { "bswap", eAX },	/* bswap doesn't support 16 bit regs */
-  { "bswap", eCX },
-  { "bswap", eDX },
-  { "bswap", eBX },
-  { "bswap", eSP },
-  { "bswap", eBP },
-  { "bswap", eSI },
-  { "bswap", eDI },
+  { "bswap", eAX, XX, XX },	/* bswap doesn't support 16 bit regs */
+  { "bswap", eCX, XX, XX },
+  { "bswap", eDX, XX, XX },
+  { "bswap", eBX, XX, XX },
+  { "bswap", eSP, XX, XX },
+  { "bswap", eBP, XX, XX },
+  { "bswap", eSI, XX, XX },
+  { "bswap", eDI, XX, XX },
   /* d0 */
-  { "(bad)" },
-  { "psrlw", MX, EM },
-  { "psrld", MX, EM },
-  { "psrlq", MX, EM },
-  { "(bad)" },
-  { "pmullw", MX, EM },
-  { "(bad)" },
-  { "pmovmskb", Ev, MX },
+  { "(bad)", XX, XX, XX },
+  { "psrlw", MX, EM, XX },
+  { "psrld", MX, EM, XX },
+  { "psrlq", MX, EM, XX },
+  { "(bad)", XX, XX, XX },
+  { "pmullw", MX, EM, XX },
+  { "(bad)", XX, XX, XX },
+  { "pmovmskb", Ev, MX, XX },
   /* d8 */
-  { "psubusb", MX, EM },
-  { "psubusw", MX, EM },
-  { "pminub", MX, EM },
-  { "pand", MX, EM },
-  { "paddusb", MX, EM },
-  { "paddusw", MX, EM },
-  { "pmaxub", MX, EM },
-  { "pandn", MX, EM },
+  { "psubusb", MX, EM, XX },
+  { "psubusw", MX, EM, XX },
+  { "pminub", MX, EM, XX },
+  { "pand", MX, EM, XX },
+  { "paddusb", MX, EM, XX },
+  { "paddusw", MX, EM, XX },
+  { "pmaxub", MX, EM, XX },
+  { "pandn", MX, EM, XX },
   /* e0 */
-  { "pavgb", MX, EM },
-  { "psraw", MX, EM },
-  { "psrad", MX, EM },
-  { "pavgw", MX, EM },
-  { "pmulhuw", MX, EM },
-  { "pmulhw", MX, EM },
-  { "(bad)" },
-  { "movntq", Ev, MX },
+  { "pavgb", MX, EM, XX },
+  { "psraw", MX, EM, XX },
+  { "psrad", MX, EM, XX },
+  { "pavgw", MX, EM, XX },
+  { "pmulhuw", MX, EM, XX },
+  { "pmulhw", MX, EM, XX },
+  { "(bad)", XX, XX, XX },
+  { "movntq", Ev, MX, XX },
   /* e8 */
-  { "psubsb", MX, EM },
-  { "psubsw", MX, EM },
-  { "pminsw", MX, EM },
-  { "por", MX, EM },
-  { "paddsb", MX, EM },
-  { "paddsw", MX, EM },
-  { "pmaxsw", MX, EM },
-  { "pxor", MX, EM },
+  { "psubsb", MX, EM, XX },
+  { "psubsw", MX, EM, XX },
+  { "pminsw", MX, EM, XX },
+  { "por", MX, EM, XX },
+  { "paddsb", MX, EM, XX },
+  { "paddsw", MX, EM, XX },
+  { "pmaxsw", MX, EM, XX },
+  { "pxor", MX, EM, XX },
   /* f0 */
-  { "(bad)" },
-  { "psllw", MX, EM },
-  { "pslld", MX, EM },
-  { "psllq", MX, EM },
-  { "(bad)" },
-  { "pmaddwd", MX, EM },
-  { "psadbw", MX, EM },
-  { "maskmovq", MX, EM },
+  { "(bad)", XX, XX, XX },
+  { "psllw", MX, EM, XX },
+  { "pslld", MX, EM, XX },
+  { "psllq", MX, EM, XX },
+  { "(bad)", XX, XX, XX },
+  { "pmaddwd", MX, EM, XX },
+  { "psadbw", MX, EM, XX },
+  { "maskmovq", MX, EM, XX },
   /* f8 */
-  { "psubb", MX, EM },
-  { "psubw", MX, EM },
-  { "psubd", MX, EM },
-  { "(bad)" },
-  { "paddb", MX, EM },
-  { "paddw", MX, EM },
-  { "paddd", MX, EM },
-  { "(bad)" }
+  { "psubb", MX, EM, XX },
+  { "psubw", MX, EM, XX },
+  { "psubd", MX, EM, XX },
+  { "(bad)", XX, XX, XX },
+  { "paddb", MX, EM, XX },
+  { "paddw", MX, EM, XX },
+  { "paddd", MX, EM, XX },
+  { "(bad)", XX, XX, XX }
 };
 
 static const unsigned char onebyte_has_modrm[256] = {
@@ -1544,256 +1614,256 @@ static const char *index16[] = {
 static const struct dis386 grps[][8] = {
   /* GRP1b */
   {
-    { "addA",	Eb, Ib },
-    { "orA",	Eb, Ib },
-    { "adcA",	Eb, Ib },
-    { "sbbA",	Eb, Ib },
-    { "andA",	Eb, Ib },
-    { "subA",	Eb, Ib },
-    { "xorA",	Eb, Ib },
-    { "cmpA",	Eb, Ib }
+    { "addA",	Eb, Ib, XX },
+    { "orA",	Eb, Ib, XX },
+    { "adcA",	Eb, Ib, XX },
+    { "sbbA",	Eb, Ib, XX },
+    { "andA",	Eb, Ib, XX },
+    { "subA",	Eb, Ib, XX },
+    { "xorA",	Eb, Ib, XX },
+    { "cmpA",	Eb, Ib, XX }
   },
   /* GRP1S */
   {
-    { "addQ",	Ev, Iv },
-    { "orQ",	Ev, Iv },
-    { "adcQ",	Ev, Iv },
-    { "sbbQ",	Ev, Iv },
-    { "andQ",	Ev, Iv },
-    { "subQ",	Ev, Iv },
-    { "xorQ",	Ev, Iv },
-    { "cmpQ",	Ev, Iv }
+    { "addQ",	Ev, Iv, XX },
+    { "orQ",	Ev, Iv, XX },
+    { "adcQ",	Ev, Iv, XX },
+    { "sbbQ",	Ev, Iv, XX },
+    { "andQ",	Ev, Iv, XX },
+    { "subQ",	Ev, Iv, XX },
+    { "xorQ",	Ev, Iv, XX },
+    { "cmpQ",	Ev, Iv, XX }
   },
   /* GRP1Ss */
   {
-    { "addQ",	Ev, sIb },
-    { "orQ",	Ev, sIb },
-    { "adcQ",	Ev, sIb },
-    { "sbbQ",	Ev, sIb },
-    { "andQ",	Ev, sIb },
-    { "subQ",	Ev, sIb },
-    { "xorQ",	Ev, sIb },
-    { "cmpQ",	Ev, sIb }
+    { "addQ",	Ev, sIb, XX },
+    { "orQ",	Ev, sIb, XX },
+    { "adcQ",	Ev, sIb, XX },
+    { "sbbQ",	Ev, sIb, XX },
+    { "andQ",	Ev, sIb, XX },
+    { "subQ",	Ev, sIb, XX },
+    { "xorQ",	Ev, sIb, XX },
+    { "cmpQ",	Ev, sIb, XX }
   },
   /* GRP2b */
   {
-    { "rolA",	Eb, Ib },
-    { "rorA",	Eb, Ib },
-    { "rclA",	Eb, Ib },
-    { "rcrA",	Eb, Ib },
-    { "shlA",	Eb, Ib },
-    { "shrA",	Eb, Ib },
-    { "(bad)" },
-    { "sarA",	Eb, Ib },
+    { "rolA",	Eb, Ib, XX },
+    { "rorA",	Eb, Ib, XX },
+    { "rclA",	Eb, Ib, XX },
+    { "rcrA",	Eb, Ib, XX },
+    { "shlA",	Eb, Ib, XX },
+    { "shrA",	Eb, Ib, XX },
+    { "(bad)",	XX, XX, XX },
+    { "sarA",	Eb, Ib, XX },
   },
   /* GRP2S */
   {
-    { "rolQ",	Ev, Ib },
-    { "rorQ",	Ev, Ib },
-    { "rclQ",	Ev, Ib },
-    { "rcrQ",	Ev, Ib },
-    { "shlQ",	Ev, Ib },
-    { "shrQ",	Ev, Ib },
-    { "(bad)" },
-    { "sarQ",	Ev, Ib },
+    { "rolQ",	Ev, Ib, XX },
+    { "rorQ",	Ev, Ib, XX },
+    { "rclQ",	Ev, Ib, XX },
+    { "rcrQ",	Ev, Ib, XX },
+    { "shlQ",	Ev, Ib, XX },
+    { "shrQ",	Ev, Ib, XX },
+    { "(bad)",	XX, XX, XX },
+    { "sarQ",	Ev, Ib, XX },
   },
   /* GRP2b_one */
   {
-    { "rolA",	Eb },
-    { "rorA",	Eb },
-    { "rclA",	Eb },
-    { "rcrA",	Eb },
-    { "shlA",	Eb },
-    { "shrA",	Eb },
-    { "(bad)" },
-    { "sarA",	Eb },
+    { "rolA",	Eb, XX, XX },
+    { "rorA",	Eb, XX, XX },
+    { "rclA",	Eb, XX, XX },
+    { "rcrA",	Eb, XX, XX },
+    { "shlA",	Eb, XX, XX },
+    { "shrA",	Eb, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "sarA",	Eb, XX, XX },
   },
   /* GRP2S_one */
   {
-    { "rolQ",	Ev },
-    { "rorQ",	Ev },
-    { "rclQ",	Ev },
-    { "rcrQ",	Ev },
-    { "shlQ",	Ev },
-    { "shrQ",	Ev },
-    { "(bad)" },
-    { "sarQ",	Ev },
+    { "rolQ",	Ev, XX, XX },
+    { "rorQ",	Ev, XX, XX },
+    { "rclQ",	Ev, XX, XX },
+    { "rcrQ",	Ev, XX, XX },
+    { "shlQ",	Ev, XX, XX },
+    { "shrQ",	Ev, XX, XX },
+    { "(bad)",	XX, XX, XX},
+    { "sarQ",	Ev, XX, XX },
   },
   /* GRP2b_cl */
   {
-    { "rolA",	Eb, CL },
-    { "rorA",	Eb, CL },
-    { "rclA",	Eb, CL },
-    { "rcrA",	Eb, CL },
-    { "shlA",	Eb, CL },
-    { "shrA",	Eb, CL },
-    { "(bad)" },
-    { "sarA",	Eb, CL },
+    { "rolA",	Eb, CL, XX },
+    { "rorA",	Eb, CL, XX },
+    { "rclA",	Eb, CL, XX },
+    { "rcrA",	Eb, CL, XX },
+    { "shlA",	Eb, CL, XX },
+    { "shrA",	Eb, CL, XX },
+    { "(bad)",	XX, XX, XX },
+    { "sarA",	Eb, CL, XX },
   },
   /* GRP2S_cl */
   {
-    { "rolQ",	Ev, CL },
-    { "rorQ",	Ev, CL },
-    { "rclQ",	Ev, CL },
-    { "rcrQ",	Ev, CL },
-    { "shlQ",	Ev, CL },
-    { "shrQ",	Ev, CL },
-    { "(bad)" },
-    { "sarQ",	Ev, CL }
+    { "rolQ",	Ev, CL, XX },
+    { "rorQ",	Ev, CL, XX },
+    { "rclQ",	Ev, CL, XX },
+    { "rcrQ",	Ev, CL, XX },
+    { "shlQ",	Ev, CL, XX },
+    { "shrQ",	Ev, CL, XX },
+    { "(bad)",	XX, XX, XX },
+    { "sarQ",	Ev, CL, XX }
   },
   /* GRP3b */
   {
-    { "testA",	Eb, Ib },
-    { "(bad)",	Eb },
-    { "notA",	Eb },
-    { "negA",	Eb },
-    { "mulB",	AL, Eb },
-    { "imulB",	AL, Eb },
-    { "divB",	AL, Eb },
-    { "idivB",	AL, Eb }
+    { "testA",	Eb, Ib, XX },
+    { "(bad)",	Eb, XX, XX },
+    { "notA",	Eb, XX, XX },
+    { "negA",	Eb, XX, XX },
+    { "mulB",	AL, Eb, XX },
+    { "imulB",	AL, Eb, XX },
+    { "divB",	AL, Eb, XX },
+    { "idivB",	AL, Eb, XX }
   },
   /* GRP3S */
   {
-    { "testQ",	Ev, Iv },
-    { "(bad)" },
-    { "notQ",	Ev },
-    { "negQ",	Ev },
-    { "mulS",	eAX, Ev },
-    { "imulS",	eAX, Ev },
-    { "divS",	eAX, Ev },
-    { "idivS",	eAX, Ev },
+    { "testQ",	Ev, Iv, XX },
+    { "(bad)",	XX, XX, XX },
+    { "notQ",	Ev, XX, XX },
+    { "negQ",	Ev, XX, XX },
+    { "mulS",	eAX, Ev, XX },
+    { "imulS",	eAX, Ev, XX },
+    { "divS",	eAX, Ev, XX },
+    { "idivS",	eAX, Ev, XX },
   },
   /* GRP4 */
   {
-    { "incA", Eb },
-    { "decA", Eb },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
+    { "incA",	Eb, XX, XX },
+    { "decA",	Eb, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
   },
   /* GRP5 */
   {
-    { "incQ",	Ev },
-    { "decQ",	Ev },
-    { "callP",	indirEv },
-    { "callP",	indirEv },
-    { "jmpP",	indirEv },
-    { "ljmpP",	indirEv },
-    { "pushQ",	Ev },
-    { "(bad)" },
+    { "incQ",	Ev, XX, XX },
+    { "decQ",	Ev, XX, XX },
+    { "callP",	indirEv, XX, XX },
+    { "callP",	indirEv, XX, XX },
+    { "jmpP",	indirEv, XX, XX },
+    { "ljmpP",	indirEv, XX, XX },
+    { "pushQ",	Ev, XX, XX },
+    { "(bad)",	XX, XX, XX },
   },
   /* GRP6 */
   {
-    { "sldt",	Ew },
-    { "str",	Ew },
-    { "lldt",	Ew },
-    { "ltr",	Ew },
-    { "verr",	Ew },
-    { "verw",	Ew },
-    { "(bad)" },
-    { "(bad)" }
+    { "sldt",	Ew, XX, XX },
+    { "str",	Ew, XX, XX },
+    { "lldt",	Ew, XX, XX },
+    { "ltr",	Ew, XX, XX },
+    { "verr",	Ew, XX, XX },
+    { "verw",	Ew, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX }
   },
   /* GRP7 */
   {
-    { "sgdt", Ew },
-    { "sidt", Ew },
-    { "lgdt", Ew },
-    { "lidt", Ew },
-    { "smsw", Ew },
-    { "(bad)" },
-    { "lmsw", Ew },
-    { "invlpg", Ew },
+    { "sgdt", Ew, XX, XX },
+    { "sidt", Ew, XX, XX },
+    { "lgdt", Ew, XX, XX },
+    { "lidt", Ew, XX, XX },
+    { "smsw", Ew, XX, XX },
+    { "(bad)", XX, XX, XX },
+    { "lmsw", Ew, XX, XX },
+    { "invlpg", Ew, XX, XX },
   },
   /* GRP8 */
   {
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
-    { "btQ",	Ev, Ib },
-    { "btsQ",	Ev, Ib },
-    { "btrQ",	Ev, Ib },
-    { "btcQ",	Ev, Ib },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "btQ",	Ev, Ib, XX },
+    { "btsQ",	Ev, Ib, XX },
+    { "btrQ",	Ev, Ib, XX },
+    { "btcQ",	Ev, Ib, XX },
   },
   /* GRP9 */
   {
-    { "(bad)" },
-    { "cmpxchg8b", Ev },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
+    { "(bad)",	XX, XX, XX },
+    { "cmpxchg8b", Ev, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
   },
   /* GRP10 */
   {
-    { "(bad)" },
-    { "(bad)" },
-    { "psrlw", MS, Ib },
-    { "(bad)" },
-    { "psraw", MS, Ib },
-    { "(bad)" },
-    { "psllw", MS, Ib },
-    { "(bad)" },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "psrlw",	MS, Ib, XX },
+    { "(bad)",	XX, XX, XX },
+    { "psraw",	MS, Ib, XX },
+    { "(bad)",	XX, XX, XX },
+    { "psllw",	MS, Ib, XX },
+    { "(bad)",	XX, XX, XX },
   },
   /* GRP11 */
   {
-    { "(bad)" },
-    { "(bad)" },
-    { "psrld", MS, Ib },
-    { "(bad)" },
-    { "psrad", MS, Ib },
-    { "(bad)" },
-    { "pslld", MS, Ib },
-    { "(bad)" },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "psrld",	MS, Ib, XX },
+    { "(bad)",	XX, XX, XX },
+    { "psrad",	MS, Ib, XX },
+    { "(bad)",	XX, XX, XX },
+    { "pslld",	MS, Ib, XX },
+    { "(bad)",	XX, XX, XX },
   },
   /* GRP12 */
   {
-    { "(bad)" },
-    { "(bad)" },
-    { "psrlq", MS, Ib },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
-    { "psllq", MS, Ib },
-    { "(bad)" },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "psrlq",	MS, Ib, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "psllq",	MS, Ib, XX },
+    { "(bad)",	XX, XX, XX },
   },
   /* GRP13 */
   {
-    { "fxsave", Ev },
-    { "fxrstor", Ev },
-    { "ldmxcsr", Ev },
-    { "stmxcsr", Ev },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
-    { "sfence", None },
+    { "fxsave", Ev, XX, XX },
+    { "fxrstor", Ev, XX, XX },
+    { "ldmxcsr", Ev, XX, XX },
+    { "stmxcsr", Ev, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "sfence", None, XX, XX },
   },
   /* GRP14 */
   {
-    { "prefetchnta", Ev },
-    { "prefetcht0", Ev },
-    { "prefetcht1", Ev },
-    { "prefetcht2", Ev },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
+    { "prefetchnta", Ev, XX, XX },
+    { "prefetcht0", Ev, XX, XX },
+    { "prefetcht1", Ev, XX, XX },
+    { "prefetcht2", Ev, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
   },
   /* GRPAMD */
   {
-    { "prefetch", Eb },
-    { "prefetchw", Eb },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
+    { "prefetch", Eb, XX, XX },
+    { "prefetchw", Eb, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
   }
 
 };
@@ -1801,8 +1871,8 @@ static const struct dis386 grps[][8] = {
 static const struct dis386 prefix_user_table[][2] = {
   /* PREGRP0 */
   {
-    { "addps", XM, EX },
-    { "addss", XM, EX },
+    { "addps", XM, EX, XX },
+    { "addss", XM, EX, XX },
   },
   /* PREGRP1 */
   {
@@ -1811,68 +1881,68 @@ static const struct dis386 prefix_user_table[][2] = {
   },
   /* PREGRP2 */
   {
-    { "cvtpi2ps", XM, EM },
-    { "cvtsi2ss", XM, Ev },
+    { "cvtpi2ps", XM, EM, XX },
+    { "cvtsi2ss", XM, Ev, XX },
   },
   /* PREGRP3 */
   {
-    { "cvtps2pi", MX, EX },
-    { "cvtss2si", Gv, EX },
+    { "cvtps2pi", MX, EX, XX },
+    { "cvtss2si", Gv, EX, XX },
   },
   /* PREGRP4 */
   {
-    { "cvttps2pi", MX, EX },
-    { "cvttss2si", Gv, EX },
+    { "cvttps2pi", MX, EX, XX },
+    { "cvttss2si", Gv, EX, XX },
   },
   /* PREGRP5 */
   {
-    { "divps", XM, EX },
-    { "divss", XM, EX },
+    { "divps", XM, EX, XX },
+    { "divss", XM, EX, XX },
   },
   /* PREGRP6 */
   {
-    { "maxps", XM, EX },
-    { "maxss", XM, EX },
+    { "maxps", XM, EX, XX },
+    { "maxss", XM, EX, XX },
   },
   /* PREGRP7 */
   {
-    { "minps", XM, EX },
-    { "minss", XM, EX },
+    { "minps", XM, EX, XX },
+    { "minss", XM, EX, XX },
   },
   /* PREGRP8 */
   {
-    { "movups", XM, EX },
-    { "movss", XM, EX },
+    { "movups", XM, EX, XX },
+    { "movss", XM, EX, XX },
   },
   /* PREGRP9 */
   {
-    { "movups", EX, XM },
-    { "movss", EX, XM },
+    { "movups", EX, XM, XX },
+    { "movss", EX, XM, XX },
   },
   /* PREGRP10 */
   {
-    { "mulps", XM, EX },
-    { "mulss", XM, EX },
+    { "mulps", XM, EX, XX },
+    { "mulss", XM, EX, XX },
   },
   /* PREGRP11 */
   {
-    { "rcpps", XM, EX },
-    { "rcpss", XM, EX },
+    { "rcpps", XM, EX, XX },
+    { "rcpss", XM, EX, XX },
   },
   /* PREGRP12 */
   {
-    { "rsqrtps", XM, EX },
-    { "rsqrtss", XM, EX },
+    { "rsqrtps", XM, EX, XX },
+    { "rsqrtss", XM, EX, XX },
   },
   /* PREGRP13 */
   {
-    { "sqrtps", XM, EX },
-    { "sqrtss", XM, EX },
+    { "sqrtps", XM, EX, XX },
+    { "sqrtss", XM, EX, XX },
   },
   /* PREGRP14 */
   {
-    { "subps", XM, EX },
-    { "subss", XM, EX },
+    { "subps", XM, EX, XX },
+    { "subss", XM, EX, XX },
   }
 };
 
@@ -2043,7 +2113,8 @@ print_insn_i386 (pc, info)
   int needcomma;
   unsigned char need_modrm;
   unsigned char uses_f3_prefix;
-  int sizeflag, orig_sizeflag;
+  VOLATILE int sizeflag;
+  VOLATILE int orig_sizeflag;
 
   struct dis_private priv;
   bfd_byte *inbuf = priv.the_buffer;
@@ -2446,34 +2517,34 @@ static const char *float_mem_intel[] = {
 #define ST OP_ST, 0
 #define STi OP_STi, 0
 
-#define FGRPd9_2 NULL, NULL, 0
-#define FGRPd9_4 NULL, NULL, 1
-#define FGRPd9_5 NULL, NULL, 2
-#define FGRPd9_6 NULL, NULL, 3
-#define FGRPd9_7 NULL, NULL, 4
-#define FGRPda_5 NULL, NULL, 5
-#define FGRPdb_4 NULL, NULL, 6
-#define FGRPde_3 NULL, NULL, 7
-#define FGRPdf_4 NULL, NULL, 8
+#define FGRPd9_2 NULL, NULL, 0, NULL, 0, NULL, 0
+#define FGRPd9_4 NULL, NULL, 1, NULL, 0, NULL, 0
+#define FGRPd9_5 NULL, NULL, 2, NULL, 0, NULL, 0
+#define FGRPd9_6 NULL, NULL, 3, NULL, 0, NULL, 0
+#define FGRPd9_7 NULL, NULL, 4, NULL, 0, NULL, 0
+#define FGRPda_5 NULL, NULL, 5, NULL, 0, NULL, 0
+#define FGRPdb_4 NULL, NULL, 6, NULL, 0, NULL, 0
+#define FGRPde_3 NULL, NULL, 7, NULL, 0, NULL, 0
+#define FGRPdf_4 NULL, NULL, 8, NULL, 0, NULL, 0
 
 static const struct dis386 float_reg[][8] = {
   /* d8 */
   {
-    { "fadd",	ST, STi },
-    { "fmul",	ST, STi },
-    { "fcom",	STi },
-    { "fcomp",	STi },
-    { "fsub",	ST, STi },
-    { "fsubr",	ST, STi },
-    { "fdiv",	ST, STi },
-    { "fdivr",	ST, STi },
+    { "fadd",	ST, STi, XX },
+    { "fmul",	ST, STi, XX },
+    { "fcom",	STi, XX, XX },
+    { "fcomp",	STi, XX, XX },
+    { "fsub",	ST, STi, XX },
+    { "fsubr",	ST, STi, XX },
+    { "fdiv",	ST, STi, XX },
+    { "fdivr",	ST, STi, XX },
   },
   /* d9 */
   {
-    { "fld",	STi },
-    { "fxch",	STi },
+    { "fld",	STi, XX, XX },
+    { "fxch",	STi, XX, XX },
     { FGRPd9_2 },
-    { "(bad)" },
+    { "(bad)",	XX, XX, XX },
     { FGRPd9_4 },
     { FGRPd9_5 },
     { FGRPd9_6 },
@@ -2481,83 +2552,83 @@ static const struct dis386 float_reg[][8] = {
   },
   /* da */
   {
-    { "fcmovb",	ST, STi },
-    { "fcmove",	ST, STi },
-    { "fcmovbe",ST, STi },
-    { "fcmovu",	ST, STi },
-    { "(bad)" },
+    { "fcmovb",	ST, STi, XX },
+    { "fcmove",	ST, STi, XX },
+    { "fcmovbe",ST, STi, XX },
+    { "fcmovu",	ST, STi, XX },
+    { "(bad)",	XX, XX, XX },
     { FGRPda_5 },
-    { "(bad)" },
-    { "(bad)" },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
   },
   /* db */
   {
-    { "fcmovnb",ST, STi },
-    { "fcmovne",ST, STi },
-    { "fcmovnbe",ST, STi },
-    { "fcmovnu",ST, STi },
+    { "fcmovnb",ST, STi, XX },
+    { "fcmovne",ST, STi, XX },
+    { "fcmovnbe",ST, STi, XX },
+    { "fcmovnu",ST, STi, XX },
     { FGRPdb_4 },
-    { "fucomi",	ST, STi },
-    { "fcomi",	ST, STi },
-    { "(bad)" },
+    { "fucomi",	ST, STi, XX },
+    { "fcomi",	ST, STi, XX },
+    { "(bad)",	XX, XX, XX },
   },
   /* dc */
   {
-    { "fadd",	STi, ST },
-    { "fmul",	STi, ST },
-    { "(bad)" },
-    { "(bad)" },
+    { "fadd",	STi, ST, XX },
+    { "fmul",	STi, ST, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
 #if UNIXWARE_COMPAT
-    { "fsub",	STi, ST },
-    { "fsubr",	STi, ST },
-    { "fdiv",	STi, ST },
-    { "fdivr",	STi, ST },
+    { "fsub",	STi, ST, XX },
+    { "fsubr",	STi, ST, XX },
+    { "fdiv",	STi, ST, XX },
+    { "fdivr",	STi, ST, XX },
 #else
-    { "fsubr",	STi, ST },
-    { "fsub",	STi, ST },
-    { "fdivr",	STi, ST },
-    { "fdiv",	STi, ST },
+    { "fsubr",	STi, ST, XX },
+    { "fsub",	STi, ST, XX },
+    { "fdivr",	STi, ST, XX },
+    { "fdiv",	STi, ST, XX },
 #endif
   },
   /* dd */
   {
-    { "ffree",	STi },
-    { "(bad)" },
-    { "fst",	STi },
-    { "fstp",	STi },
-    { "fucom",	STi },
-    { "fucomp",	STi },
-    { "(bad)" },
-    { "(bad)" },
+    { "ffree",	STi, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "fst",	STi, XX, XX },
+    { "fstp",	STi, XX, XX },
+    { "fucom",	STi, XX, XX },
+    { "fucomp",	STi, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
   },
   /* de */
   {
-    { "faddp",	STi, ST },
-    { "fmulp",	STi, ST },
-    { "(bad)" },
+    { "faddp",	STi, ST, XX },
+    { "fmulp",	STi, ST, XX },
+    { "(bad)",	XX, XX, XX },
     { FGRPde_3 },
 #if UNIXWARE_COMPAT
-    { "fsubp",	STi, ST },
-    { "fsubrp",	STi, ST },
-    { "fdivp",	STi, ST },
-    { "fdivrp",	STi, ST },
+    { "fsubp",	STi, ST, XX },
+    { "fsubrp",	STi, ST, XX },
+    { "fdivp",	STi, ST, XX },
+    { "fdivrp",	STi, ST, XX },
 #else
-    { "fsubrp",	STi, ST },
-    { "fsubp",	STi, ST },
-    { "fdivrp",	STi, ST },
-    { "fdivp",	STi, ST },
+    { "fsubrp",	STi, ST, XX },
+    { "fsubp",	STi, ST, XX },
+    { "fdivrp",	STi, ST, XX },
+    { "fdivp",	STi, ST, XX },
 #endif
   },
   /* df */
   {
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
-    { "(bad)" },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "(bad)",	XX, XX, XX },
     { FGRPdf_4 },
-    { "fucomip",ST, STi },
-    { "fcomip", ST, STi },
-    { "(bad)" },
+    { "fucomip",ST, STi, XX },
+    { "fcomip", ST, STi, XX },
+    { "(bad)",	XX, XX, XX },
   },
 };
 
@@ -2661,8 +2732,8 @@ dofloat (sizeflag)
 /* ARGSUSED */
 static void
 OP_ST (ignore, sizeflag)
-     int ignore;
-     int sizeflag;
+     int ignore ATTRIBUTE_UNUSED;
+     int sizeflag ATTRIBUTE_UNUSED;
 {
   oappend ("%st");
 }
@@ -2670,8 +2741,8 @@ OP_ST (ignore, sizeflag)
 /* ARGSUSED */
 static void
 OP_STi (ignore, sizeflag)
-     int ignore;
-     int sizeflag;
+     int ignore ATTRIBUTE_UNUSED;
+     int sizeflag ATTRIBUTE_UNUSED;
 {
   sprintf (scratchbuf, "%%st(%d)", rm);
   oappend (scratchbuf);
@@ -3326,8 +3397,8 @@ OP_J (bytemode, sizeflag)
 /* ARGSUSED */
 static void
 OP_SEG (dummy, sizeflag)
-     int dummy;
-     int sizeflag;
+     int dummy ATTRIBUTE_UNUSED;
+     int sizeflag ATTRIBUTE_UNUSED;
 {
   static char *sreg[] = {
     "%es","%cs","%ss","%ds","%fs","%gs","%?","%?",
@@ -3339,7 +3410,7 @@ OP_SEG (dummy, sizeflag)
 /* ARGSUSED */
 static void
 OP_DIR (dummy, sizeflag)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
      int sizeflag;
 {
   int seg, offset;
@@ -3362,7 +3433,7 @@ OP_DIR (dummy, sizeflag)
 /* ARGSUSED */
 static void
 OP_OFF (ignore, sizeflag)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
      int sizeflag;
 {
   int off;
@@ -3431,8 +3502,8 @@ OP_DSreg (code, sizeflag)
 /* ARGSUSED */
 static void
 OP_C (dummy, sizeflag)
-     int dummy;
-     int sizeflag;
+     int dummy ATTRIBUTE_UNUSED;
+     int sizeflag ATTRIBUTE_UNUSED;
 {
   sprintf (scratchbuf, "%%cr%d", reg);
   oappend (scratchbuf);
@@ -3441,8 +3512,8 @@ OP_C (dummy, sizeflag)
 /* ARGSUSED */
 static void
 OP_D (dummy, sizeflag)
-     int dummy;
-     int sizeflag;
+     int dummy ATTRIBUTE_UNUSED;
+     int sizeflag ATTRIBUTE_UNUSED;
 {
   sprintf (scratchbuf, "%%db%d", reg);
   oappend (scratchbuf);
@@ -3451,8 +3522,8 @@ OP_D (dummy, sizeflag)
 /* ARGSUSED */
 static void
 OP_T (dummy, sizeflag)
-     int dummy;
-     int sizeflag;
+     int dummy ATTRIBUTE_UNUSED;
+     int sizeflag ATTRIBUTE_UNUSED;
 {
   sprintf (scratchbuf, "%%tr%d", reg);
   oappend (scratchbuf);
@@ -3471,8 +3542,8 @@ OP_Rd (bytemode, sizeflag)
 
 static void
 OP_MMX (ignore, sizeflag)
-     int ignore;
-     int sizeflag;
+     int ignore ATTRIBUTE_UNUSED;
+     int sizeflag ATTRIBUTE_UNUSED;
 {
   sprintf (scratchbuf, "%%mm%d", reg);
   oappend (scratchbuf);
@@ -3480,8 +3551,8 @@ OP_MMX (ignore, sizeflag)
 
 static void
 OP_XMM (bytemode, sizeflag)
-     int bytemode;
-     int sizeflag;
+     int bytemode ATTRIBUTE_UNUSED;
+     int sizeflag ATTRIBUTE_UNUSED;
 {
   sprintf (scratchbuf, "%%xmm%d", reg);
   oappend (scratchbuf);
@@ -3599,8 +3670,8 @@ static const char *Suffix3DNow[] = {
 
 static void
 OP_3DNowSuffix (bytemode, sizeflag)
-     int bytemode;
-     int sizeflag;
+     int bytemode ATTRIBUTE_UNUSED;
+     int sizeflag ATTRIBUTE_UNUSED;
 {
   const char *mnemonic;
 
@@ -3638,8 +3709,8 @@ static const char *simd_cmp_op [] = {
 
 static void
 OP_SIMD_Suffix (bytemode, sizeflag)
-     int bytemode;
-     int sizeflag;
+     int bytemode ATTRIBUTE_UNUSED;
+     int sizeflag ATTRIBUTE_UNUSED;
 {
   unsigned int cmp_type;
 
@@ -3666,7 +3737,7 @@ OP_SIMD_Suffix (bytemode, sizeflag)
 static void
 SIMD_Fixup (extrachar, sizeflag)
      int extrachar;
-     int sizeflag;
+     int sizeflag ATTRIBUTE_UNUSED;
 {
   /* Change movlps/movhps to movhlps/movlhps for 2 register operand
      forms of these instructions.  */
