@@ -1,3 +1,9 @@
+Wed Feb 14 16:46:42 1996  Martin Anantharaman  <martin@mail.imech.uni-duisburg.de>
+
+	* arsup.c (map_over_list): Reindent.  Don't assume that the
+	function does not delete the BFD.
+	(ar_addlib_doer): Don't set prev->next if prev is NULL.
+
 Wed Feb 14 15:12:17 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c (ieee_regno_to_genreg): Convert register numbers for m68k
