@@ -1,7 +1,12 @@
+Wed May 21 17:39:28 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-coff.c (symbol_to_chars): If TE_PE, don't add the
+	section address to the symbol value.
+
 Tue May 20 11:23:31 1997  Gavin Koch  <gavin@cygnus.com>
 
-	* config/tc-mips.c (macro_build,mips_ip): Move the INSN_ISA field into the
- 	new membership field.
+	* config/tc-mips.c (macro_build,mips_ip): Move the INSN_ISA field
+	into the new membership field.
 
 Thu May 15 10:00:53 1997  Nick Clifton  <nickc@cygnus.com>
 
@@ -12,9 +17,10 @@ Thu May 15 10:00:53 1997  Nick Clifton  <nickc@cygnus.com>
 Wed May 14 09:54:53 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (global variables): Added 'uses_apcs_26' flag to
-	hold APCS selection.  (md_begin): Added code to generate flags to
-	be set into the COFF header and the calls to the BFD functions to
-	do this.  (md_parse_option, md_show_usage): Added new command line
+	hold APCS selection.
+  	(md_begin): Added code to generate flags to be set into the COFF
+	header and the calls to the BFD functions to do this.
+  	(md_parse_option, md_show_usage): Added new command line
 	options -mapcs-32, -mapcs-26, -marmv2, -marmv2a, -marmv3,
 	-marmv3m, -marmv4, -marmv4t. 
 
