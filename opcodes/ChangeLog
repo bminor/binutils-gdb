@@ -1,5 +1,8 @@
 2004-11-19  Alan Modra  <amodra@bigpond.net.au>
 
+	* or32-opc.c (debug): Warning fix.
+	* po/POTFILES.in: Regenerate.
+
 	* maxq-dis.c: Formatting.
 	(print_insn): Warning fix.
 

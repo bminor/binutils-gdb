@@ -88,6 +88,7 @@ m68hc11-opc.c
 m68k-dis.c
 m68k-opc.c
 m88k-dis.c
+maxq-dis.c
 mcore-dis.c
 mcore-opc.h
 mips16-opc.c
