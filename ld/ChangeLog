@@ -1,3 +1,7 @@
+2004-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (wildcardp): Defined as a macro with strpbrk.
+
 2004-08-19  Mark Mitchell  <mark@codesourcery.com>
 
 	* configure.tgt (arm*-*-symbianelf*): New target.

@@ -67,7 +67,6 @@ static struct bfd_hash_table lang_definedness_table;
 /* Forward declarations.  */
 static void exp_init_os (etree_type *);
 static void init_map_userdata (bfd *, asection *, void *);
-static bfd_boolean wildcardp (const char *);
 static lang_input_statement_type *lookup_name (const char *);
 static bfd_boolean load_symbols (lang_input_statement_type *,
 				 lang_statement_list_type *);
@@ -106,6 +105,13 @@ static bfd_boolean ldlang_sysrooted_script = FALSE;
 int lang_statement_iteration = 0;
 
 etree_type *base; /* Relocation base - or null */
+
+/* Return TRUE if the PATTERN argument is a wildcard pattern.
+   Although backslashes are treated specially if a pattern contains
+   wildcards, we do not consider the mere presence of a backslash to
+   be enough to cause the pattern to be treated as a wildcard.
+   That lets us handle DOS filenames more naturally.  */
+#define wildcardp(pattern) (strpbrk ((pattern), "?*[") != NULL)
 
 #define new_stat(x, y) \
   (x##_type *) new_statement (x##_enum, sizeof (x##_type), y)
@@ -908,25 +914,6 @@ section_already_linked (bfd *abfd, asection *sec, void *data)
    These expand statements like *(.text) and foo.o to a list of
    explicit actions, like foo.o(.text), bar.o(.text) and
    foo.o(.text, .data).  */
-
-/* Return TRUE if the PATTERN argument is a wildcard pattern.
-   Although backslashes are treated specially if a pattern contains
-   wildcards, we do not consider the mere presence of a backslash to
-   be enough to cause the pattern to be treated as a wildcard.
-   That lets us handle DOS filenames more naturally.  */
-
-static bfd_boolean
-wildcardp (const char *pattern)
-{
-  const char *s;
-
-  for (s = pattern; *s != '\0'; ++s)
-    if (*s == '?'
-	|| *s == '*'
-	|| *s == '[')
-      return TRUE;
-  return FALSE;
-}
 
 /* Add SECTION to the output section OUTPUT.  Do this by creating a
    lang_input_section statement which is placed at PTR.  FILE is the
