@@ -1,3 +1,16 @@
+Mon Jul 25 12:21:07 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* configure.in (pc532mach_vec): Change to pc532machaout_vec.
+	* config.bfd (ns32k-*-netbsd*): Use ns32k-nbsd as bfd_name.
+	* Makefile.in (ALL_MACHINES): Add cpu-ns32k.o.
+	(BFD32_BACKENDS): Add aout-ns32k.o, netbsd532.o, m88kmach3.o,
+	pc532-mach.o.
+	* targets.c (pc532machaout_vec): Use instead of pc532mach_vec.
+	* config/pc532-mach.mt (DEFAULT_VECTOR): Ditto.
+	(SELECT_VECS): Remove.
+	* config/ns32k-nbsd.mt: New file, was ns32k-netbsd.mt.
+	* config/ns32k-netbsd.mt: Remove, name too long.
+
 Fri Jul 22 11:07:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* linker.c (generic_link_check_archive_element): When changing a

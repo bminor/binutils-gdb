@@ -72,7 +72,7 @@ BFD_H = bfd.h
 # Some of these files should be in BFD*_BACKENDS below, but some programs
 # won't link without them.  So, in order for some of the minimal-bfd
 # hacks to work, they're also included here for now.
-#	gdb: ecoff.o ecofflink.o elf.o
+#	gdb: elf.o
 #	objdump: elf.o
 #
 # Also, Jim Kingdon notes:
@@ -86,7 +86,7 @@ BFD_LIBS = \
 	archive.o archures.o bfd.o cache.o coffgen.o core.o ctor.o \
 	format.o init.o libbfd.o opncls.o reloc.o \
 	section.o syms.o targets.o hash.o linker.o \
-	ecoff.o ecofflink.o elf.o srec.o
+	elf.o srec.o
 
 # This list is alphabetized to make it easier to keep in sync
 # with the decls and initializer in archures.c.
@@ -101,6 +101,7 @@ ALL_MACHINES = \
 	cpu-m68k.o \
 	cpu-m88k.o \
 	cpu-mips.o \
+	cpu-ns32k.o \
 	cpu-powerpc.o \
 	cpu-rs6000.o \
 	cpu-sh.o \
@@ -110,9 +111,10 @@ ALL_MACHINES = \
 	cpu-z8k.o
 
 # The .o files needed by all of the 32 bit vectors that are configured into
-# target_vector in targets.c if configured with --with-targets=all.
+# target_vector in targets.c if configured with --enable-targets=all.
 BFD32_BACKENDS = \
 	aout-adobe.o \
+	aout-ns32k.o \
 	aout0.o \
 	aout32.o \
 	bout.o \
@@ -135,6 +137,8 @@ BFD32_BACKENDS = \
 	coff-u68k.o \
 	coff-we32k.o \
 	coff-z8k.o \
+	ecoff.o \
+	ecofflink.o \
 	elf32-gen.o \
 	elf32-hppa.o \
 	elf32-i386.o \
@@ -152,10 +156,12 @@ BFD32_BACKENDS = \
 	i386linux.o \
 	i386lynx.o \
 	netbsd386.o \
+	netbsd532.o \
 	i386mach3.o \
 	i386os9k.o \
 	ieee.o \
 	m68klynx.o \
+	m88kmach3.o \
 	mipsbsd.o \
 	newsos3.o \
 	nlm.o \
@@ -164,14 +170,15 @@ BFD32_BACKENDS = \
 	nlm32-ppc.o \
 	nlm32.o \
 	oasys.o \
+	pc532-mach.o \
 	reloc16.o \
 	sparclynx.o \
 	stab-syms.o \
 	sunos.o
 
 # The .o files needed by all of the 64 bit vectors that are configured into
-# target_vector in targets.c if configured with --with-targets=all
-# and --with-64-bit-bfd.
+# target_vector in targets.c if configured with --enable-targets=all
+# and --enable-64-bit-bfd.
 BFD64_BACKENDS = \
 	aout64.o \
 	coff-alpha.o \
