@@ -1078,6 +1078,11 @@ This option stops option processing.
 Set the line speed (baud rate or bits per second) of any serial
 interface used by @value{GDBN} for remote debugging.
 
+@item -l @var{timeout}
+@cindex @code{-l}
+Set the timeout (in seconds) of any communication used by @value{GDBN}
+for remote debugging.
+
 @item -tty @var{device}
 @itemx -t @var{device}
 @cindex @code{--tty}

@@ -1,3 +1,9 @@
+2004-12-07  Andreas Schwab  <schwab@suse.de>
+
+	* main.c (long_options): Add entry for "-l".
+	(print_gdb_help): Add line for -l option.
+	* NEWS: Mention it.
+
 2004-12-05  Randolph Chung  <tausq@debian.org>
 
 	* hppah-nat.c (store_inferior_registers): Rewrite logic to not use

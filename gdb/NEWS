@@ -14,6 +14,11 @@ NEC V850					v850-*-*
 
 *** Changes in GDB 6.3:
 
+* New command line option
+
+GDB now accepts -l followed by a number to set the timeout for remote
+debugging.
+
 * GDB works with GCC -feliminate-dwarf2-dups
 
 GDB now supports a more compact representation of DWARF-2 debug

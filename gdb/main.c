@@ -300,6 +300,7 @@ captured_main (void *data)
       {"statistics", no_argument, 0, OPT_STATISTICS},
       {"write", no_argument, &write_files, 1},
       {"args", no_argument, &set_args, 1},
+     {"l", required_argument, 0, 'l'},
       {0, no_argument, 0, 0}
     };
 
@@ -854,6 +855,7 @@ Options:\n\n\
                      Select a specific interpreter / user interface\n\
 "), stream);
   fputs_unfiltered (_("\
+  -l TIMEOUT         Set timeout in seconds for remote debugging.\n\
   --mapped           Use mapped symbol files if supported on this system.\n\
   --nw		     Do not use a window interface.\n\
   --nx               Do not read "), stream);
