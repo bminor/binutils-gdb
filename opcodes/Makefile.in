@@ -112,6 +112,7 @@ $(TARGETLIB): $(OFILES)
 # Circumvent Sun Make bug with VPATH.
 sparc-opc.o: sparc-opc.c
 m68881-ext.o: m68881-ext.c
+h8500-dis.o: h8500-dis.c
 
 tags etags: TAGS
 

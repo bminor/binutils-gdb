@@ -1,3 +1,7 @@
+Mon Mar 22 18:55:04 1993  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in:  Update for h8500-dis.c.
+
 Fri Mar 19 14:27:17 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* h8500-dis.c, h8500-opc.h: New files
