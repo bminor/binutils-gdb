@@ -523,13 +523,11 @@ som_solib_create_inferior_hook()
   have_endo = 0;
   /* If __d_pid is present, then put the inferior's pid into __d_pid.  hpux9
      requires __d_pid to be set.  hpux10 doesn't require __d_pid to be set
-     and the symbol may not be available.  */
+     and the symbol may not be available. 
+
+     Never warn about __d_pid.  */
   msymbol = lookup_minimal_symbol ("__d_pid", NULL, symfile_objfile);
-  if (msymbol == NULL)
-    {
-      warning ("Unable to find __d_pid symbol in object file.");
-    }
-  else
+  if (msymbol != NULL)
     {
       anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
       store_unsigned_integer (buf, 4, inferior_pid);
