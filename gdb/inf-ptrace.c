@@ -50,11 +50,12 @@ inf_ptrace_kill_inferior (void)
   /* This once used to call "kill" to kill the inferior just in case
      the inferior was still running.  As others have noted in the past
      (kingdon) there shouldn't be any way to get here if the inferior
-     is still running -- else there's a major problem elsewere in gdb
+     is still running -- else there's a major problem elsewere in GDB
      and it needs to be fixed.
 
-     The kill call causes problems under hpux10, so it's been removed;
-     if this causes problems we'll deal with them as they arise.  */
+     The kill call causes problems under HP-UX 10, so it's been
+     removed; if this causes problems we'll deal with them as they
+     arise.  */
   ptrace (PT_KILL, pid, (PTRACE_TYPE_ARG3) 0, 0);
   wait (&status);
   target_mourn_inferior ();
@@ -139,8 +140,7 @@ inf_ptrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  return pid_to_ptid (-1);
 	}
 
-      /* Did it exit?
-       */
+      /* Did it exit?  */
       if (target_has_exited (pid, status, &exit_status))
 	{
 	  /* ??rehrauer: For now, ignore this. */
@@ -153,7 +153,8 @@ inf_ptrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  return pid_to_ptid (pid);
 	}
     }
-  while (pid != PIDGET (inferior_ptid));	/* Some other child died or stopped */
+  while (pid != PIDGET (inferior_ptid)); /* Some other child died or
+                                            stopped.  */
 
   store_waitstatus (ourstatus, status);
   return pid_to_ptid (pid);
@@ -187,11 +188,11 @@ inf_ptrace_attach (char *args, int from_tty)
 
   dummy = args;
   pid = strtol (args, &dummy, 0);
-  /* Some targets don't set errno on errors, grrr! */
+  /* Some targets don't set errno on errors, grrr!  */
   if (pid == 0 && args == dummy)
     error ("Illegal process-id: %s\n", args);
 
-  if (pid == getpid ())		/* Trying to masturbate? */
+  if (pid == getpid ())		/* Trying to masturbate?  */
     error ("I refuse to debug myself!");
 
   if (from_tty)
@@ -305,7 +306,7 @@ inf_ptrace_open (char *arg, int from_tty)
 static void
 inf_ptrace_me (void)
 {
-  /* "Trace me, Dr. Memory!" */
+  /* "Trace me, Dr. Memory!"  */
   ptrace (0, 0, (PTRACE_TYPE_ARG3) 0, 0);
 }
 
@@ -320,20 +321,17 @@ inf_ptrace_him (int pid)
   /* On some targets, there must be some explicit synchronization
      between the parent and child processes after the debugger
      forks, and before the child execs the debuggee program.  This
-     call basically gives permission for the child to exec.
-   */
+     call basically gives permission for the child to exec.  */
 
   target_acknowledge_created_inferior (pid);
 
-  /* START_INFERIOR_TRAPS_EXPECTED is defined in inferior.h,
-   * and will be 1 or 2 depending on whether we're starting
-   * without or with a shell.
-   */
+  /* START_INFERIOR_TRAPS_EXPECTED is defined in inferior.h, and will
+     be 1 or 2 depending on whether we're starting without or with a
+     shell.  */
   startup_inferior (START_INFERIOR_TRAPS_EXPECTED);
 
   /* On some targets, there must be some explicit actions taken after
-     the inferior has been started up.
-   */
+     the inferior has been started up.  */
   target_post_startup_inferior (pid_to_ptid (pid));
 }
 
@@ -350,24 +348,22 @@ inf_ptrace_create_inferior (char *exec_file, char *allargs, char **env,
 		 NULL, NULL);
   /* We are at the first instruction we care about.  */
   observer_notify_inferior_created (&current_target, from_tty);
-  /* Pedal to the metal... */
+  /* Pedal to the metal...  */
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
 
 static void
 inf_ptrace_post_startup_inferior (ptid_t ptid)
 {
-  /* This version of Unix doesn't require a meaningful "post startup inferior"
-     operation by a debugger.
-   */
+  /* This version of Unix doesn't require a meaningful "post startup
+     inferior" operation by a debugger.  */
 }
 
 static void
 inf_ptrace_acknowledge_created_inferior (int pid)
 {
-  /* This version of Unix doesn't require a meaningful "acknowledge created inferior"
-     operation by a debugger.
-   */
+  /* This version of Unix doesn't require a meaningful "acknowledge
+     created inferior" operation by a debugger.  */
 }
 
 static int
@@ -422,8 +418,7 @@ inf_ptrace_remove_exec_catchpoint (int pid)
 static int
 inf_ptrace_reported_exec_events_per_exec_call (void)
 {
-  /* This version of Unix doesn't support notification of exec events.
-   */
+  /* This version of Unix doesn't support notification of exec events.  */
   return 1;
 }
 
@@ -442,9 +437,8 @@ inf_ptrace_has_exited (int pid, int wait_status, int *exit_status)
       return 1;
     }
 
-  /* ?? Do we really need to consult the event state, too?  Assume the
-     wait_state alone suffices.
-   */
+  /* ??? Do we really need to consult the event state, too?
+     Assume the wait_state alone suffices.  */
   return 0;
 }
 
@@ -464,8 +458,8 @@ inf_ptrace_can_run (void)
 /* Send a SIGINT to the process group.  This acts just like the user
    typed a ^C on the controlling terminal.
 
-   XXX - This may not be correct for all systems.  Some may want to
-   use killpg() instead of kill (-pgrp). */
+   FIXME: This may not be correct for all systems.  Some may want to
+   use killpg() instead of kill (-pgrp).  */
 
 static void
 inf_ptrace_stop (void)
@@ -546,7 +540,8 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 	    
 	    /* Copy data to be written over corresponding part of
 	       buffer.  */
-	    memcpy (buffer.byte + (offset - rounded_offset), writebuf, partial_len);
+	    memcpy (buffer.byte + (offset - rounded_offset),
+		    writebuf, partial_len);
 	    
 	    errno = 0;
 	    ptrace (PT_WRITE_D, PIDGET (inferior_ptid),

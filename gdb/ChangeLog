@@ -1,5 +1,7 @@
 2004-11-20  Mark Kettenis  <kettenis@gnu.org>
 
+	* inf-ptrace.c: Fix coding style.
+
 	* gdb_ptrace.h [PTRACE_TYPE_ARG5] (ptrace): New macro.
 	* infptrace.c (call_ptrace): Simply call ptrace with four
 	arguments.
