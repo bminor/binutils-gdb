@@ -452,8 +452,12 @@ static void
 sol_thread_attach (char *args, int from_tty)
 {
   procfs_ops.to_attach (args, from_tty);
-  /* Must get symbols from solibs before libthread_db can run! */
-  SOLIB_ADD ((char *) 0, from_tty, (struct target_ops *) 0);
+
+  if (auto_solib_add)
+    {
+      /* Must get symbols from solibs before libthread_db can run! */
+      SOLIB_ADD ((char *) 0, from_tty, (struct target_ops *) 0);
+    }
   if (sol_thread_active)
     {
       printf_filtered ("sol-thread active.\n");
@@ -1309,6 +1313,7 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
   return PS_OK;
 }
 
+#ifdef PR_MODEL_LP64
 /* Identify process as 32-bit or 64-bit.
    At the moment I'm using bfd to do this.
    There might be a more solaris-specific (eg. procfs) method,
@@ -1327,6 +1332,7 @@ ps_pdmodel (gdb_ps_prochandle_t ph, int *data_model)
 
   return PS_OK;
 }
+#endif /* PR_MODEL_LP64 */
 
 #ifdef TM_I386SOL2_H
 

@@ -1,3 +1,7 @@
+2000-09-05  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* sol-thread.c (ps_pdmodel): Protect with an ifdef.
+
 Mon Sep  4 16:21:31 2000  Andrew Cagney  <cagney@amy.cygnus.com>
 
 	* gdbarch.sh: Use printf instead of echo.
