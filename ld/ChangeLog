@@ -1,3 +1,8 @@
+Wed Apr  6 00:09:37 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* emultempl/hppaelf.em (hppaelf_finish): Only resize sections
+	if building a final executable.
+
 Tue Apr  5 12:17:30 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldmain.c (main): Check the return value of bfd_close.
