@@ -142,24 +142,27 @@ enum type_code
 
 #define TYPE_CODE_CLASS TYPE_CODE_STRUCT
 
-/* Some bits for the type's flags word. */
+/* Some bits for the type's flags word, and macros to test them. */
 
 /* Unsigned integer type.  If this is not set for a TYPE_CODE_INT, the
    type is signed (unless TYPE_FLAG_NOSIGN (below) is set). */
 
 #define TYPE_FLAG_UNSIGNED	(1 << 0)
+#define TYPE_UNSIGNED(t)	((t)->flags & TYPE_FLAG_UNSIGNED)
 
 /* No sign for this type.  In C++, "char", "signed char", and "unsigned
    char" are distinct types; so we need an extra flag to indicate the
    absence of a sign! */
 
 #define TYPE_FLAG_NOSIGN	(1 << 1)
+#define TYPE_NOSIGN(t)		((t)->flags & TYPE_FLAG_NOSIGN)
 
 /* This appears in a type's flags word if it is a stub type (e.g., if
    someone referenced a type that wasn't defined in a source file
    via (struct sir_not_appearing_in_this_film *)).  */
 
 #define TYPE_FLAG_STUB		(1 << 2)
+#define TYPE_STUB(t)		((t)->flags & TYPE_FLAG_STUB)
 
 /* The target type of this type is a stub type, and this type needs to
    be updated if it gets un-stubbed in check_typedef.
@@ -167,7 +170,8 @@ enum type_code
    gets set based on the TYPE_LENGTH of the target type.
    Also, set for TYPE_CODE_TYPEDEF. */
 
-#define TYPE_FLAG_TARGET_STUB (1 << 3)
+#define TYPE_FLAG_TARGET_STUB	(1 << 3)
+#define TYPE_TARGET_STUB(t)	((t)->flags & TYPE_FLAG_TARGET_STUB)
 
 /* Static type.  If this is set, the corresponding type had 
  * a static modifier.
@@ -175,26 +179,30 @@ enum type_code
  * are indicated by other means (bitpos == -1)
  */
 
-#define TYPE_FLAG_STATIC (1 << 4)
+#define TYPE_FLAG_STATIC	(1 << 4)
+#define TYPE_STATIC(t)		((t)->flags & TYPE_FLAG_STATIC)
 
 /* Constant type.  If this is set, the corresponding type has a
  * const modifier.
  */
 
-#define TYPE_FLAG_CONST (1 << 5)
+#define TYPE_FLAG_CONST		(1 << 5)
+#define TYPE_CONST(t)		((t)->flags & TYPE_FLAG_CONST)
 
 /* Volatile type.  If this is set, the corresponding type has a
  * volatile modifier.
  */
 
-#define TYPE_FLAG_VOLATILE (1 << 6)
+#define TYPE_FLAG_VOLATILE	(1 << 6)
+#define TYPE_VOLATILE(t)	((t)->flags & TYPE_FLAG_VOLATILE)
 
 
 /* This is a function type which appears to have a prototype.  We need this
    for function calls in order to tell us if it's necessary to coerce the args,
    or to just do the standard conversions.  This is used with a short field. */
 
-#define TYPE_FLAG_PROTOTYPED (1 << 7)
+#define TYPE_FLAG_PROTOTYPED	(1 << 7)
+#define TYPE_PROTOTYPED(t)	((t)->flags & TYPE_FLAG_PROTOTYPED)
 
 /* This flag is used to indicate that processing for this type
    is incomplete.
@@ -204,7 +212,8 @@ enum type_code
    info; the incomplete type has to be marked so that the class and
    the method can be assigned correct types.) */
 
-#define TYPE_FLAG_INCOMPLETE (1 << 8)
+#define TYPE_FLAG_INCOMPLETE	(1 << 8)
+#define TYPE_INCOMPLETE(t)	((t)->flags & TYPE_FLAG_INCOMPLETE)
 
 /* Instruction-space delimited type.  This is for Harvard architectures
    which have separate instruction and data address spaces (and perhaps
@@ -225,15 +234,19 @@ enum type_code
    If neither flag is set, the default space for functions / methods
    is instruction space, and for data objects is data memory.  */
 
-#define TYPE_FLAG_CODE_SPACE (1 << 9)
-#define TYPE_FLAG_DATA_SPACE (1 << 10)
+#define TYPE_FLAG_CODE_SPACE	(1 << 9)
+#define TYPE_CODE_SPACE(t)	((t)->flags & TYPE_FLAG_CODE_SPACE)
+
+#define TYPE_FLAG_DATA_SPACE	(1 << 10)
+#define TYPE_DATA_SPACE(t)	((t)->flags & TYPE_FLAG_DATA_SPACE)
 
 /* FIXME: Kludge to mark a varargs function type for C++ member
    function argument processing.  Currently only used in dwarf2read.c,
    but put it here so we won't accidentally overload the bit with
    another flag.  */
 
-#define TYPE_FLAG_VARARGS (1 << 11)
+#define TYPE_FLAG_VARARGS	(1 << 11)
+#define TYPE_VARARGS(t)		((t)->flags & TYPE_FLAG_VARARGS)
 
 struct type
   {
@@ -731,12 +744,7 @@ extern void allocate_cplus_struct_type (struct type *);
 #define TYPE_LENGTH(thistype) (thistype)->length
 #define TYPE_OBJFILE(thistype) (thistype)->objfile
 #define TYPE_FLAGS(thistype) (thistype)->flags
-#define TYPE_UNSIGNED(thistype) ((thistype)->flags & TYPE_FLAG_UNSIGNED)
-#define TYPE_NOSIGN(thistype) ((thistype)->flags & TYPE_FLAG_NOSIGN)
-#define TYPE_CONST(thistype) ((thistype)->flags & TYPE_FLAG_CONST)
-#define TYPE_VOLATILE(thistype) ((thistype)->flags & TYPE_FLAG_VOLATILE)
-#define TYPE_INCOMPLETE(thistype) ((thistype)->flags & TYPE_FLAG_INCOMPLETE)
-/* Note that TYPE_CODE can be TYPE_CODE_TYPEDEF, so if you wan the real
+/* Note that TYPE_CODE can be TYPE_CODE_TYPEDEF, so if you want the real
    type, you need to do TYPE_CODE (check_type (this_type)). */
 #define TYPE_CODE(thistype) (thistype)->code
 #define TYPE_NFIELDS(thistype) (thistype)->nfields

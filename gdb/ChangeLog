@@ -1,5 +1,13 @@
 2001-12-09  Fred Fish  <fnf@redhat.com>
 
+	* gdbtypes.h (TYPE_UNSIGNED, TYPE_NOSIGN, TYPE_CONST,
+	TYPE_VOLATILE, TYPE_INCOMPLETE): Move macros that test the
+	bits to location in file where the bits are defined.
+	(TYPE_STUB, TYPE_TARGET_STUB, TYPE_STATIC, TYPE_PROTOTYPED,
+	TYPE_CODE_SPACE, TYPE_DATA_SPACE): New test macros.
+
+2001-12-09  Fred Fish  <fnf@redhat.com>
+
 	* gdbtypes.c (allocate_stub_method): Replace hand crafted type
 	initialization with call to the init_type() function.
 
