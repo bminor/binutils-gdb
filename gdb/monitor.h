@@ -111,17 +111,18 @@ struct monitor_ops
 
 /* Flag defintions */
 
-#define MO_CLR_BREAK_USES_ADDR 0x1 /* If set, then clear breakpoint command
-				      uses address, otherwise it uses an index
-				      returned by the monitor.  */
-#define MO_FILL_USES_ADDR 0x2	/* If set, then memory fill command uses
-				   STARTADDR, ENDADDR+1, VALUE as args, else it
-				   uses STARTADDR, LENGTH, VALUE as args. */
-#define MO_NEED_REGDUMP_AFTER_CONT 0x4 /* If set, then monitor doesn't auto-
-					  matically supply register dump when
-					  coming back after a continue.  */
-#define MO_GETMEM_NEEDS_RANGE 0x8 /* getmem needs start addr and end addr */
-#define MO_GETMEM_READ_SINGLE 0x10 /* getmem can only read one loc at a time */
+#define MO_CLR_BREAK_USES_ADDR 0x1	/* If set, then clear breakpoint command
+					   uses address, otherwise it uses an index
+					   returned by the monitor.  */
+#define MO_FILL_USES_ADDR 0x2		/* If set, then memory fill command uses
+					   STARTADDR, ENDADDR+1, VALUE as args, else it
+					   uses STARTADDR, LENGTH, VALUE as args. */
+#define MO_NEED_REGDUMP_AFTER_CONT 0x4	/* If set, then monitor doesn't auto-
+					   matically supply register dump when
+					   coming back after a continue.  */
+#define MO_GETMEM_NEEDS_RANGE 0x8	/* getmem needs start addr and end addr */
+#define MO_GETMEM_READ_SINGLE 0x10	/* getmem can only read one loc at a time */
+#define MO_HANDLE_NL 0x20		/* handle \r\n combinations */
 
 extern struct monitor_ops        *current_monitor;
 

@@ -1,3 +1,22 @@
+Thu Dec 21 11:58:52 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* monitor.c (monitor_debug): Take prefix, and suffix arguments.
+	Print trailing newline after the suffix.
+	(monitor_printf{,_noecho}): Change monitor_debug calls.
+	(monitor_printf): Call monitor_expect instead of trying to do the
+	expect processing locally so that if there is extra junk, it
+	doesn't hang things up.
+	(readchar): If MO_HANDLE_NL is set, handle \r\n pairs and convert
+	them to a single \r.  Use monitor_debug to print out byte read.
+
+	* monitor.h (MO_HANDLE_NL): Add new flag.
+
+	* ppcbug-rom.c (ppcbug_ops{1,2}): Split into two ops, one that
+	uses lo 0 to load, and the other that uses lo 1.  Set flag
+	MO_HANDLE_NL.
+	(ppcbug_open{0,1}): Clone and split to handle ppcbug_ops{1,2}.
+	(_initialize_ppcbug_rom): Set up both ppcbug_open{0,1}.
+
 Wed Dec 20 10:54:41 1995  Fred Fish  <fnf@cygnus.com>
 
 	* defs.h: Delete extraneous whitespace at end of file.

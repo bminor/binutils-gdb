@@ -127,86 +127,107 @@ static char *ppcbug_regnames[NUM_REGS] =
  * strings. We also need a CR or LF on the end.
  */
 
-static struct target_ops ppcbug_ops;
+static struct target_ops ppcbug_ops0;
+static struct target_ops ppcbug_ops1;
 
 static char *ppcbug_inits[] = {"\r", NULL};
 
-static struct monitor_ops ppcbug_cmds =
-{
-				/* use read single because PPCBUG insists on emiting
-				   the word in character notation after the hex.  */
-  MO_CLR_BREAK_USES_ADDR | MO_GETMEM_READ_SINGLE,
-  ppcbug_inits,			/* Init strings */
-  "g\r",			/* continue command */
-  "t\r",			/* single step */
-  NULL,				/* interrupt command */
-  "br %x\r",			/* set a breakpoint */
-  "nobr %x\r",			/* clear a breakpoint */
-  "nobr\r",			/* clear all breakpoints */
-  "bf %x:%x %x;b\r",		/* fill (start count val) */
-  {
-    "ms %x %02x\r",		/* setmem.cmdb (addr, value) */
-    "ms %x %04x\r",		/* setmem.cmdw (addr, value) */
-    "ms %x %08x\r",		/* setmem.cmdl (addr, value) */
-    NULL,			/* setmem.cmdll (addr, value) */
-    NULL,			/* setreg.resp_delim */
-    NULL,			/* setreg.term */
-    NULL,			/* setreg.term_cmd */
-  },
-  {
-    "md %x;b\r",		/* getmem.cmdb addr */
-    "md %x;h\r",		/* getmem.cmdw addr */
-    "md %x;w\r",		/* getmem.cmdl addr */
-    "md %x:2;w\r",		/* getmem.cmdll addr */
-    " ",			/* getmem.resp_delim */
-    NULL,			/* getmem.term */
-    NULL,			/* getmem.term_cmd */
-  },
-  {
-    "rs %s %x\r",		/* setreg.cmd (name, value) */
-    NULL,			/* setreg.resp_delim */
-    NULL,			/* setreg.term */
-    NULL			/* setreg.term_cmd */
-  },
-  {
-    "rs %s\r",			/* getreg.cmd (name) */
-    "=",			/* getreg.resp_delim */
-    NULL,			/* getreg.term */
-    NULL			/* getreg.term_cmd */
-  },
-  "rd\r",			/* dump_registers */
-  "\\(\\w+\\) +=\\([0-9a-fA-F]+\\b\\)", /* register_pattern */
-  ppcbug_supply_register,	/* supply_register */
-  NULL,				/* load_routine (defaults to SRECs) */
-  "lo 0\r",			/* download command */
-  NULL,				/* load response */
-  "PPC1-Bug>",			/* monitor command prompt */
-  "\r",				/* end-of-line terminator */
-  NULL,				/* optional command terminator */
-  &ppcbug_ops,			/* target operations */
-  SERIAL_1_STOPBITS,		/* number of stop bits */
-  ppcbug_regnames,		/* registers names */
-  MONITOR_OPS_MAGIC		/* magic */
-  };
+#define PPC_CMDS(LOAD_CMD, OPS)						\
+{									\
+  MO_CLR_BREAK_USES_ADDR | MO_HANDLE_NL,				\
+  ppcbug_inits,			/* Init strings */			\
+  "g\r",			/* continue command */			\
+  "t\r",			/* single step */			\
+  NULL,				/* interrupt command */			\
+  "br %x\r",			/* set a breakpoint */			\
+  "nobr %x\r",			/* clear a breakpoint */		\
+  "nobr\r",			/* clear all breakpoints */		\
+  "bf %x:%x %x;b\r",		/* fill (start count val) */		\
+  {									\
+    "ms %x %02x\r",		/* setmem.cmdb (addr, value) */		\
+    "ms %x %04x\r",		/* setmem.cmdw (addr, value) */		\
+    "ms %x %08x\r",		/* setmem.cmdl (addr, value) */		\
+    NULL,			/* setmem.cmdll (addr, value) */	\
+    NULL,			/* setreg.resp_delim */			\
+    NULL,			/* setreg.term */			\
+    NULL,			/* setreg.term_cmd */			\
+  },									\
+  {									\
+    "md %x:%x;b\r",		/* getmem.cmdb (addr, len) */		\
+    "md %x:%x;b\r",		/* getmem.cmdw (addr, len) */		\
+    "md %x:%x;b\r",		/* getmem.cmdl (addr, len) */		\
+    NULL,			/* getmem.cmdll (addr, len) */		\
+    " ",			/* getmem.resp_delim */			\
+    NULL,			/* getmem.term */			\
+    NULL,			/* getmem.term_cmd */			\
+  },									\
+  {									\
+    "rs %s %x\r",		/* setreg.cmd (name, value) */		\
+    NULL,			/* setreg.resp_delim */			\
+    NULL,			/* setreg.term */			\
+    NULL			/* setreg.term_cmd */			\
+  },									\
+  {									\
+    "rs %s\r",			/* getreg.cmd (name) */			\
+    "=",			/* getreg.resp_delim */			\
+    NULL,			/* getreg.term */			\
+    NULL			/* getreg.term_cmd */			\
+  },									\
+  "rd\r",			/* dump_registers */			\
+  "\\(\\w+\\) +=\\([0-9a-fA-F]+\\b\\)", /* register_pattern */		\
+  ppcbug_supply_register,	/* supply_register */			\
+  NULL,				/* load_routine (defaults to SRECs) */	\
+  LOAD_CMD,			/* download command */			\
+  NULL,				/* load response */			\
+  "PPC1-Bug>",			/* monitor command prompt */		\
+  "\r",				/* end-of-line terminator */		\
+  NULL,				/* optional command terminator */	\
+  &OPS,				/* target operations */			\
+  SERIAL_1_STOPBITS,		/* number of stop bits */		\
+  ppcbug_regnames,		/* registers names */			\
+  MONITOR_OPS_MAGIC		/* magic */				\
+}
+
+
+static struct monitor_ops ppcbug_cmds0 = PPC_CMDS("lo 0\r", ppcbug_ops0);
+static struct monitor_ops ppcbug_cmds1 = PPC_CMDS("lo 1\r", ppcbug_ops1);
 
 static void
-ppcbug_open(args, from_tty)
+ppcbug_open0(args, from_tty)
      char *args;
      int from_tty;
 {
-  monitor_open (args, &ppcbug_cmds, from_tty);
+  monitor_open (args, &ppcbug_cmds0, from_tty);
+}
+
+static void
+ppcbug_open1(args, from_tty)
+     char *args;
+     int from_tty;
+{
+  monitor_open (args, &ppcbug_cmds1, from_tty);
 }
 
 void
 _initialize_ppcbug_rom ()
 {
-  init_monitor_ops (&ppcbug_ops);
+  init_monitor_ops (&ppcbug_ops0);
 
-  ppcbug_ops.to_shortname = "ppcbug";
-  ppcbug_ops.to_longname = "PowerPC PPCBug monitor";
-  ppcbug_ops.to_doc = "Debug via the PowerPC PPCBug monitor.\n\
+  ppcbug_ops0.to_shortname = "ppcbug";
+  ppcbug_ops0.to_longname = "PowerPC PPCBug monitor on port 0";
+  ppcbug_ops0.to_doc = "Debug via the PowerPC PPCBug monitor using port 0.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).";
-  ppcbug_ops.to_open = ppcbug_open;
+  ppcbug_ops0.to_open = ppcbug_open0;
 
-  add_target (&ppcbug_ops);
+  add_target (&ppcbug_ops0);
+
+  init_monitor_ops (&ppcbug_ops1);
+
+  ppcbug_ops1.to_shortname = "ppcbug1";
+  ppcbug_ops1.to_longname = "PowerPC PPCBug monitor on port 1";
+  ppcbug_ops1.to_doc = "Debug via the PowerPC PPCBug monitor using port 1.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).";
+  ppcbug_ops1.to_open = ppcbug_open1;
+
+  add_target (&ppcbug_ops1);
 }
