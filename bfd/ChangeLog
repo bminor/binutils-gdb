@@ -1,3 +1,9 @@
+Fri Jan 12 13:59:16 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Don't create a
+	DT_TEXTREL entry because of .rel.plt.  From Martin Pirker
+	<pirker@eiunix.tuwien.ac.at>.
+
 Thu Jan 11 17:06:14 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* section.c (SEC_{EXCLUDE,SORT_ENTRIES}): New section flags for
