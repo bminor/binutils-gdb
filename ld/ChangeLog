@@ -1,4 +1,18 @@
+Fri Sep 17 13:07:39 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* scripttempl/{h8300.sc,h8500.sc,i386coff.sc,m68kcoff.sc,sh.sc}:
+	Added statements to pass stab and stabstr sections through and
+	mark them as NOLOAD, which makes GDB happier.
+
+Wed Sep 15 16:02:29 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* configure.in: Accept m68k-lynx-lynxos config.
+
+	* Makefile.in: Use $(SHELL) to run genscripts.sh.
+
 Sun Sep 12 16:04:40 1993  Doug Evans  (dje@cygnus.com)
+
+	* config/coff-h8300.mt: Add EMUL=h8300h.
 
 	* ldmain.c (main): Call set_scripts_dir after argv has been processed.
 
