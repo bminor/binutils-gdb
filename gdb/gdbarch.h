@@ -94,7 +94,7 @@ extern enum gdb_osabi gdbarch_osabi (struct gdbarch *gdbarch);
 
 /* Number of bits in a char or unsigned char for the target machine.
    Just like CHAR_BIT in <limits.h> but describes the target machine.
-   v:2:TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
+   v:TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
   
    Number of bits in a short or unsigned short for the target machine. */
 
@@ -967,7 +967,7 @@ extern void set_gdbarch_deprecated_get_saved_register (struct gdbarch *gdbarch, 
 typedef int (gdbarch_convert_register_p_ftype) (int regnum, struct type *type);
 extern int gdbarch_convert_register_p (struct gdbarch *gdbarch, int regnum, struct type *type);
 extern void set_gdbarch_convert_register_p (struct gdbarch *gdbarch, gdbarch_convert_register_p_ftype *convert_register_p);
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (CONVERT_REGISTER_P)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (CONVERT_REGISTER_P)
 #error "Non multi-arch definition of CONVERT_REGISTER_P"
 #endif
 #if !defined (CONVERT_REGISTER_P)
@@ -977,7 +977,7 @@ extern void set_gdbarch_convert_register_p (struct gdbarch *gdbarch, gdbarch_con
 typedef void (gdbarch_register_to_value_ftype) (struct frame_info *frame, int regnum, struct type *type, void *buf);
 extern void gdbarch_register_to_value (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, void *buf);
 extern void set_gdbarch_register_to_value (struct gdbarch *gdbarch, gdbarch_register_to_value_ftype *register_to_value);
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_TO_VALUE)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_TO_VALUE)
 #error "Non multi-arch definition of REGISTER_TO_VALUE"
 #endif
 #if !defined (REGISTER_TO_VALUE)
@@ -987,7 +987,7 @@ extern void set_gdbarch_register_to_value (struct gdbarch *gdbarch, gdbarch_regi
 typedef void (gdbarch_value_to_register_ftype) (struct frame_info *frame, int regnum, struct type *type, const void *buf);
 extern void gdbarch_value_to_register (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, const void *buf);
 extern void set_gdbarch_value_to_register (struct gdbarch *gdbarch, gdbarch_value_to_register_ftype *value_to_register);
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (VALUE_TO_REGISTER)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (VALUE_TO_REGISTER)
 #error "Non multi-arch definition of VALUE_TO_REGISTER"
 #endif
 #if !defined (VALUE_TO_REGISTER)
@@ -1170,7 +1170,7 @@ extern void set_gdbarch_use_struct_convention (struct gdbarch *gdbarch, gdbarch_
    will be needed for that case to work.  NB: It is passed the callers
    frame since it is only after the callee has returned that this
    function is used.
-  M:::CORE_ADDR:extract_returned_value_address:struct frame_info *caller_frame:caller_frame */
+  M::CORE_ADDR:extract_returned_value_address:struct frame_info *caller_frame:caller_frame */
 
 #if defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS)
 /* Legacy for systems yet to multi-arch DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS */
