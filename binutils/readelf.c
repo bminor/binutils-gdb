@@ -458,7 +458,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 	  break;
 
 	case EM_PPC:
-	  rtype = ppc_reloc_type (ELF32_R_TYPE (info));
+	  rtype = elf_ppc_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	case EM_MIPS:
@@ -473,11 +473,11 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 	case EM_ARM:
 	  rtype = elf_arm_reloc_type (ELF32_R_TYPE (info));
 	  break;
-	  
+
 	case EM_CYGNUS_ARC:
 	  rtype = elf_arc_reloc_type (ELF32_R_TYPE (info));
 	  break;
-	  
+
 	case EM_PARISC:
 	  rtype = elf32_hppa_reloc_type (ELF32_R_TYPE (info));
 	  break;
@@ -1655,12 +1655,12 @@ process_relocs (file)
 	      char *                strtab;
 
 	      printf (_("\nRelocation section "));
-	      
+
 	      if (string_table == NULL)
 		printf ("%d", section->sh_name);
 	      else
 		printf ("'%s'", SECTION_NAME (section));
-	      
+
 	      printf (_(" at offset 0x%x contains %d entries:\n"),
 		 rel_offset, rel_size / section->sh_entsize);
 
