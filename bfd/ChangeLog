@@ -1,3 +1,18 @@
+Mon Oct 12 14:18:40 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-mips.c (mips_relocate_hi): Cope with missing refhi or reflo
+	relocs.
+
+Tue Oct  6 09:20:44 1998  Catherine Moore  <clm@cygnus.com>
+ 
+        * elf32-sparc.c:  Add HOWTO entries for R_SPARC_GNU_VTINHERIT and
+        R_SPARC_GNU_VTENTRY.
+        (elf32_sparc_check_relocs):  Handle them.
+        (elf32_sparc_reloc_type_lookup):  Likewise.
+        (elf32_sparc_relocate_section):  Likewise.
+        (elf32_sparc_gc_mark_hook):  New.
+        (elf32_sparc_gc_sweep_hook):  New.
+ 
 Mon Oct  5 14:55:30 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* som.c (som_finish_writing): Perform some sanity checks when
