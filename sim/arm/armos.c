@@ -233,8 +233,8 @@ ARMul_OSInit (ARMul_State * state)
   /* Intel do not want DEMON SWI support.  */
    if (state->is_XScale)
     swi_mask = SWI_MASK_ANGEL;
- 
-  return TRUE;
+
+   return TRUE;
 }
 
 void

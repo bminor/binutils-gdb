@@ -1,5 +1,10 @@
 2002-05-27  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* armvirt.c (GetWord): Only perform access checks if 'check'
+	is set.
+	(PutWord): Likewise.
+	* wrapper.c (sim_create_inferior): Report unknown machine
+	numbers.
 	* thumbemu.c (ARMul_ThumbDecode, Case 31): Do not set LR to pc +
 	2, it has already been advanced.
 

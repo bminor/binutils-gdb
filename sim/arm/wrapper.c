@@ -223,7 +223,8 @@ sim_create_inferior (sd, abfd, argv, env)
     default:
       (*sim_callback->printf_filtered)
 	(sim_callback,
-	 "Unknown machine type; please update sim_create_inferior.\n");
+	 "Unknown machine type '%d'; please update sim_create_inferior.\n",
+	 mach);
       /* fall through */
 
     case 0:
@@ -388,7 +389,7 @@ sim_store_register (sd, rn, memory, length)
   if (rn == 25)
     {
       state->Cpsr = frommem (state, memory);
-      ARMul_CPSRAltered (state);	     
+      ARMul_CPSRAltered (state);
     }
   else
     ARMul_SetReg (state, state->Mode, rn, frommem (state, memory));
