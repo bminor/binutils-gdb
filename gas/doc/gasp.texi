@@ -943,6 +943,11 @@ character matches those you can specify with @code{.RADIX}: @samp{B} for
 base 2, @samp{Q} for base 8, @samp{D} for base 10, and @samp{H} for base
 16.  (You can write this character in lower case if you prefer.)
 
+You can write floating point constants using the same syntax recognised
+by GAS @ref{Flonums,,Flonums,as,The GNU Assembler.}.  A constraint is
+that these constants will be interpreted as decimal values irrespective
+of the currently selected base.
+
 @c FIXME! What are rules for recognizing number in deflt base?  Whatever
 @c        is left over after parsing other things??
 

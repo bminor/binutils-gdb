@@ -1,3 +1,12 @@
+2002-02-12  Ben Elliston  <bje@redhat.com>
+
+	* NEWS: Document floating point number handling in gasp.
+	* gasp.c: Include <assert.h> and "xregex.h".
+	(is_flonum): New function.
+	(chew_flownum): Likewise.
+	(change_base): Consume flonums from the input, where possible.
+	* doc/gasp.texi (Constants): Document floating point numbers.
+
 2002-02-12  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* config/tc-hppa.c (hppa_fix_adjustable): Don't adjust final types
