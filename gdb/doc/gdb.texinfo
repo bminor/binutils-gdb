@@ -891,11 +891,16 @@ in sequential order.  The order makes a difference when the
 When @value{GDBN} starts, it reads any arguments other than options as
 specifying an executable file and core file (or process ID).  This is
 the same as if the arguments were specified by the @samp{-se} and
-@samp{-c} options respectively.  (@value{GDBN} reads the first argument
-that does not have an associated option flag as equivalent to the
-@samp{-se} option followed by that argument; and the second argument
-that does not have an associated option flag, if any, as equivalent to
-the @samp{-c} option followed by that argument.)
+@samp{-c} (or @samp{-p} options respectively.  (@value{GDBN} reads the
+first argument that does not have an associated option flag as
+equivalent to the @samp{-se} option followed by that argument; and the
+second argument that does not have an associated option flag, if any, as
+equivalent to the @samp{-c}/@samp{-p} option followed by that argument.)
+If the second argument begins with a decimal digit, @value{GDBN} will
+first attempt to attach to it as a process, and if that fails, attempt
+to open it as a corefile.  If you have a corefile whose name begins with
+a digit, you can prevent @value{GDBN} from treating it as a pid by 
+prefixing it with @samp{"./"}, eg. @samp{"./12345"}.
 
 If @value{GDBN} has not been configured to included core file support,
 such as for most embedded targets, then it will complain about a second
@@ -934,12 +939,16 @@ file.
 @itemx -c @var{file}
 @cindex @code{--core}
 @cindex @code{-c}
-Use file @var{file} as a core dump to examine.
+Use file @var{file} as a core dump to examine.  
 
 @item -c @var{number}
-Connect to process ID @var{number}, as with the @code{attach} command
-(unless there is a file in core-dump format named @var{number}, in which
-case @samp{-c} specifies that file as a core dump to read).
+@item -pid @var{number}
+@itemx -p @var{number}
+@cindex @code{--pid}
+@cindex @code{-p}
+Connect to process ID @var{number}, as with the @code{attach} command.
+If there is no such process, @value{GDBN} will attempt to open a core
+file named @var{number}.
 
 @item -command @var{file}
 @itemx -x @var{file}
