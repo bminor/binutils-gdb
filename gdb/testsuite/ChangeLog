@@ -1,3 +1,7 @@
+Tue Mar 15 08:45:50 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* TODO: Add suggestions for shared library tests.
+
 Sun Mar 13 10:45:22 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* TODO: Add suggestions for x/s tests.

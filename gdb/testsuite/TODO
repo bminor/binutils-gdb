@@ -132,6 +132,12 @@ that val_print_string ignores an error if the error occurs after the
 
 Test ability to process NMAGIC a.out files.
 
+Test shared libraries:  "next" over printf, "step" into a function in
+a shared library which has line number info, breakpoint in a function
+in a shared library (either before or after the program is run and the
+shared libraries are loaded--also maybe write a test where the PLT
+will be in an unloaded state even though the shared library is loaded).
+
 If there are two breakpoints in the same place, and exactly one of
 them has its condition true, test that the correct breakpoint gets
 printed.
