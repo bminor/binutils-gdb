@@ -1,4 +1,4 @@
-/* Macro definitions for GDB on a Stratus machine.
+/* Macro definitions for GDB hosted on a Stratus machine.
    Copyright (C) 1992, Free Software Foundation, Inc.
    Contributed by Peggy Fieland (pfieland@stratus.com)
 
@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* Pick up most of what we need from the generic mi860 host include file. */
+/* Pick up most of what we need from the generic i860 host include file. */
 
 #include "xm-i860.h"
 

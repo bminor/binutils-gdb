@@ -1,4 +1,4 @@
-/* Macro definitions for GDB on a Stratus machine.
+/* Macro definitions for GDB targeting a Stratus i860 machine.
    Copyright (C) 1992, Free Software Foundation, Inc.
 
 This file is part of GDB.
