@@ -99,14 +99,14 @@ case "${host}" in
   mips*-sgi-irix3*)       host_makefile_frag=config/mh-sysv ;;
   mips*-*-sysv4*)	  host_makefile_frag=config/mh-sysv4 ;;
   mips*-*-sysv*)	  host_makefile_frag=config/mh-riscos ;;
-  i[34]86-ncr-sysv43)     host_makefile_frag=config/mh-ncrsvr43 ;;
-  i[34]86-ncr-sysv4*)     host_makefile_frag=config/mh-ncr3000 ;;
-  i[34]86-*-sco*)         host_makefile_frag=config/mh-sco ;;
-  i[34]86-*-isc*)	  host_makefile_frag=config/mh-sysv ;;
-  i[34]86-*-linux*)       host_makefile_frag=config/mh-linux ;;
-  i[34]86-*-solaris2*)    host_makefile_frag=config/mh-sysv4 ;;
-  i[34]86-*-aix*)	  host_makefile_frag=config/mh-aix386 ;;
-  i[34]86-*-go32*)	  host_makefile_frag=config/mh-go32 ;;
+  i[345]86-ncr-sysv43)    host_makefile_frag=config/mh-ncrsvr43 ;;
+  i[345]86-ncr-sysv4*)    host_makefile_frag=config/mh-ncr3000 ;;
+  i[345]86-*-sco*)        host_makefile_frag=config/mh-sco ;;
+  i[345]86-*-isc*)	  host_makefile_frag=config/mh-sysv ;;
+  i[345]86-*-linux*)      host_makefile_frag=config/mh-linux ;;
+  i[345]86-*-solaris2*)   host_makefile_frag=config/mh-sysv4 ;;
+  i[345]86-*-aix*)	  host_makefile_frag=config/mh-aix386 ;;
+  i[345]86-*-go32*)	  host_makefile_frag=config/mh-go32 ;;
   vax-*-ultrix2*)         host_makefile_frag=config/mh-vaxult2 ;;
   *-ibm-aix*)             host_makefile_frag=config/mh-aix ;;
   *-bull-bosx*)           host_makefile_frag=config/mh-aix ;;
@@ -201,7 +201,7 @@ fi
 # Configure extra directories which are host specific
 
 case "${host}" in
-  i[34]86-*-go32*)
+  i[345]86-*-go32*)
 		  configdirs="$configdirs dosrel" ;;
 esac
 
@@ -212,13 +212,13 @@ esac
 noconfigdirs=""
 
 case "${host}" in
-  i[34]86-*-netbsd*)
+  i[345]86-*-netbsd*)
     noconfigdirs="tk fileutils"
     ;;
-  i[34]86-*-vsta)
+  i[345]86-*-vsta)
     noconfigdirs="tcl expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff"
     ;;
-  i[34]86-*-go32)
+  i[345]86-*-go32)
     noconfigdirs="tcl expect deja-gnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff"
     ;;
 esac
@@ -251,22 +251,22 @@ case "${target}" in
     esac
     noconfigdirs="$noconfigdirs ld shellutils"
     ;;
-  i[34]86-*-go32)
+  i[345]86-*-go32)
     # add the go32 support tools to the list
     # but don't build gdb
     configdirs=`echo go32 ${configdirs}`
     noconfigdirs="$noconfigdirs gdb libg++ libio librx"
     ;;
-  i[34]86-*-sco*)
+  i[345]86-*-sco*)
     noconfigdirs="$noconfigdirs gprof"
     ;;
-  i[34]86-*-solaris2*)
+  i[345]86-*-solaris2*)
     # The linker does static linking correctly, but the Solaris C library
     # has bugs such that some important functions won't work when statically
     # linked.  (See man pages for getpwuid, for example.)
     noconfigdirs="$noconfigdirs ld"
     ;;
-  i[34]86-*-sysv4*)
+  i[345]86-*-sysv4*)
     # The SYSV4 C compiler doesn't handle Emacs correctly
     case "${CC}" in
 	"" | cc*) noconfigdirs="$noconfigdirs emacs emacs19" ;;
@@ -312,9 +312,9 @@ case "${target}" in
     ;;
   sh-*-*)
     case "${host}" in
-      i[34]86-*-vsta) ;; # don't add gprof back in
+      i[345]86-*-vsta) ;; # don't add gprof back in
       *) configdirs=`echo gprof ${configdirs}` ;;
-      i[34]86-*-go32) ;; # don't add gprof back in
+      i[345]86-*-go32) ;; # don't add gprof back in
       *) configdirs=`echo gprof ${configdirs}` ;;
     esac
     ;;
