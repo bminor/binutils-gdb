@@ -1,5 +1,13 @@
 \input texinfo
 @setfilename bfdint.info
+
+@settitle BFD Internals
+@iftex
+@title{BFD Internals}
+@author{Ian Lance Taylor}
+@author{Cygnus Solutions}
+@end iftex
+
 @node Top
 @top BFD Internals
 @raisesections
@@ -278,7 +286,7 @@ always possible to use statically initialized structures holding
 function pointers and magic constants instead.
 @end itemize
 
-The following a list of the files which are compiled multiple times.
+The following is a list of the files which are compiled multiple times.
 
 @table @file
 @item aout-target.h
@@ -406,9 +414,9 @@ Relocation handling has been implemented in various different ways, all
 somewhat incompatible, none perfect.
 
 @menu
-BFD relocation concepts::	BFD relocation concepts
-BFD relocation functions::	BFD relocation functions
-BFD relocation future::		BFD relocation future
+* BFD relocation concepts::	BFD relocation concepts
+* BFD relocation functions::	BFD relocation functions
+* BFD relocation future::	BFD relocation future
 @end menu
 
 @node BFD relocation concepts
