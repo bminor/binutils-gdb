@@ -1,3 +1,18 @@
+2002-10-03  Adam Fedor  <fedor@gnu.org>
+
+	* objc-lang.c: ARI fixes.  Change string.h to gdb_string.h.
+	(objc_demangle): Remove assignment in if statements, Replace
+	free with xfree.
+	(add_msglist): Likewise.
+	(end_msglist): Likewise.
+	(complare_selectors): Likewise.
+	(selectors_info): Likewise.
+	(compare_classes): Likewise.
+	(classes_info): Likewise.
+	(print_object_command): Likewise.
+	(find_objc_msgcall_submethod): Replace PTR with void *.
+	* objc-lang.h: Remove check for __STDC__.
+
 2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* ui-out.h (ui_out_field_fmt_int): New prototype.
