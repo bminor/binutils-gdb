@@ -2036,22 +2036,33 @@ coff_arm_print_private_bfd_data (abfd, ptr)
 {
   FILE * file = (FILE *) ptr;
   
-  BFD_ASSERT (abfd != NULL && ptr != NULL)
+  BFD_ASSERT (abfd != NULL && ptr != NULL);
   
-  fprintf (file, "private flags = %x", coff_data (abfd)->flags);
+  /* xgettext:c-format */
+  fprintf (file, _("private flags = %x:"), coff_data (abfd)->flags);
   
   if (APCS_SET (abfd))
-    fprintf (file, ": [APCS-%d] [floats passed in %s registers] [%s]",
-	     APCS_26_FLAG (abfd) ? 26 : 32,
-	     APCS_FLOAT_FLAG (abfd) ? "float" : "integer",
-	     PIC_FLAG (abfd) ? "position independent" : "absolute position"
-	     );
+    {
+      /* xgettext: APCS is ARM Prodecure Call Standard, it should not be translated.  */
+      fprintf (file, " [APCS-%d]", APCS_26_FLAG (abfd) ? 26 : 32);
+
+      if (APCS_FLOAT_FLAG (abfd))
+	fprintf (file, _(" [floats passed in float registers]"));
+      else
+	fprintf (file, _(" [floats passed in integer registers]"));
+
+      if (PIC_FLAG (abfd))
+	fprintf (file, _(" [position independent]"));
+      else
+	fprintf (file, _(" [absolute position]"));
+    }
   
-  if (INTERWORK_SET (abfd))
-    fprintf (file, " [interworking %ssupported]",
-	     INTERWORK_FLAG (abfd) ? "" : "not " );
+  if (! INTERWORK_SET (abfd))
+    fprintf (file, _(" [interworking flag not initialised]"));
+  else if (INTERWORK_FLAG (abfd))
+    fprintf (file, _(" [interworking supported]"));
   else
-    fprintf (file, " [interworking flag not initialised]");
+    fprintf (file, _(" [interworking not supported]"));
   
   fputc ('\n', file);
   
@@ -2077,7 +2088,8 @@ _bfd_coff_arm_set_private_flags (abfd, flags)
 
   flag = (flags & F_APCS26) ? F_APCS_26 : 0;
   
-  /* Make sure that the APCS field has not been initialised to the opposite value.  */
+  /* Make sure that the APCS field has not been initialised to the opposite
+     value.  */
   if (APCS_SET (abfd)
       && (   (APCS_26_FLAG    (abfd) != flag)
 	  || (APCS_FLOAT_FLAG (abfd) != (flags & F_APCS_FLOAT))
@@ -2091,7 +2103,8 @@ _bfd_coff_arm_set_private_flags (abfd, flags)
 
   flag = (flags & F_INTERWORK);
   
-  /* If either the flags or the BFD do support interworking then do not set the interworking flag.  */
+  /* If either the flags or the BFD do support interworking then do not
+     set the interworking flag.  */
   if (INTERWORK_SET (abfd) && (INTERWORK_FLAG (abfd) != flag))
     flag = 0;
 
@@ -2114,7 +2127,8 @@ coff_arm_copy_private_bfd_data (src, dest)
   if (src == dest)
     return true;
 
-  /* If the destination is not in the same format as the source, do not do the copy.  */
+  /* If the destination is not in the same format as the source, do not do
+     the copy.  */
   if (src->xvec != dest->xvec)
     return true;
 
@@ -2134,14 +2148,16 @@ coff_arm_copy_private_bfd_data (src, dest)
 	    return false;
 	}
       else
-	SET_APCS_FLAGS (dest, APCS_26_FLAG (src) | APCS_FLOAT_FLAG (src) | PIC_FLAG (src));
+	SET_APCS_FLAGS (dest, APCS_26_FLAG (src) | APCS_FLOAT_FLAG (src)
+			| PIC_FLAG (src));
     }
 
   if (INTERWORK_SET (src))
     {
       if (INTERWORK_SET (dest))
 	{
-	  /* If the src and dest have different interworking flags then turn off the interworking bit.  */
+	  /* If the src and dest have different interworking flags then turn
+	     off the interworking bit.  */
 	  if (INTERWORK_FLAG (dest) != INTERWORK_FLAG (src))
 	    SET_INTERWORK_FLAG (dest, 0);
 	}
@@ -2182,13 +2198,16 @@ coff_arm_is_local_label_name (abfd, name)
     }
 #endif
   
-  /* devo/gcc/config/dbxcoff.h defines ASM_OUTPUT_SOURCE_LINE to generate local line numbers as .LM<number>, so treat these as local.  */
+  /* devo/gcc/config/dbxcoff.h defines ASM_OUTPUT_SOURCE_LINE to generate
+     local line numbers as .LM<number>, so treat these as local.  */
   
   switch (name[0])
     {
     case 'L': return true;
     case '.': return (name[1] == 'L' && name[2] == 'M') ? true : false;
-    default:  return false;     /* Cannot make our minds up - default to false so that it will not be stripped by accident.  */ 
+    default:  return false;     /* Cannot make our minds up - default to
+				   false so that it will not be stripped
+				   by accident.  */ 
     }
 }
 
@@ -2205,7 +2224,8 @@ coff_arm_link_output_has_begun (sub, info)
      bfd * sub;
      struct coff_final_link_info * info;
 {
-  return (sub->output_has_begun || sub == coff_arm_hash_table (info->info)->bfd_of_glue_owner);
+  return (sub->output_has_begun
+	  || sub == coff_arm_hash_table (info->info)->bfd_of_glue_owner);
 }
 
 static boolean
@@ -2213,7 +2233,9 @@ coff_arm_final_link_postscript (abfd, pfinfo)
      bfd * abfd;
      struct coff_final_link_info * pfinfo;
 {
-  struct coff_arm_link_hash_table * globals = coff_arm_hash_table (pfinfo->info);
+  struct coff_arm_link_hash_table * globals;
+
+  globals = coff_arm_hash_table (pfinfo->info);
   
   BFD_ASSERT (globals != NULL);
   
