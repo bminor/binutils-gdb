@@ -1,3 +1,7 @@
+Fri Dec 21 09:42:11 2001  Jeffrey A Law  (law@redhat.com)
+
+	* gdb.base/default.exp: Remove bogus hppa*-hp-hpux* xfails.
+
 2001-12-20  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.asm/arm.inc: New file.
