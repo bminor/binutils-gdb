@@ -1,6 +1,6 @@
 /* Remote target glue for the Oki op50n based eval board.
 
-   Copyright 1988, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -53,9 +53,6 @@ static char *op50n_regnames[NUM_REGS] =
 
 static struct target_ops op50n_ops;
 
-static char *op50n_loadtypes[] = {"none", "srec", "default", NULL};
-static char *op50n_loadprotos[] = {"none", NULL};
-
 static char *op50n_inits[] = {"\003.\n", NULL};
 
 static struct monitor_ops op50n_cmds =
@@ -102,15 +99,13 @@ static struct monitor_ops op50n_cmds =
   NULL,				/* dump_registers */
   NULL,				/* register_pattern */
   NULL,				/* supply_register */
+  NULL,				/* load routine */
   "r 0\n",			/* download command */
   NULL,				/* load response */
   "#",				/* monitor command prompt */
   NULL,				/* end-of-command delimitor */
   NULL,				/* optional command terminator */
   &op50n_ops,			/* target operations */
-  op50n_loadtypes,		/* loadtypes */
-  op50n_loadprotos,		/* loadprotos */
-  "2400,4800,9600,19200,exta,38400,extb", /* supported baud rates */
   SERIAL_1_STOPBITS,		/* number of stop bits */
   op50n_regnames,		/* register names */
   MONITOR_OPS_MAGIC		/* magic */

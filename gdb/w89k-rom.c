@@ -1,7 +1,7 @@
 /* Remote target glue for the WinBond ROM monitor running on the "Cougar"
    W89k eval board.
 
-   Copyright 1988, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -34,6 +34,7 @@ static void w89k_open PARAMS ((char *args, int from_tty));
  * different strings than GDB does, and doesn't support all the
  * registers either. So, typing "info reg sp" becomes a "r30".
  */
+
 static char *w89k_regnames[NUM_REGS] =
 {
   "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
@@ -239,9 +240,6 @@ w89k_load (desc, file, hashmark)
 
 static struct target_ops w89k_ops;
 
-static char *w89k_loadtypes[] = {"binary", NULL};
-static char *w89k_loadprotos[] = {"xmodem", NULL};
-
 static char *w89k_inits[] = {"\r", NULL};
 
 static struct monitor_ops w89k_cmds =
@@ -295,9 +293,6 @@ static struct monitor_ops w89k_cmds =
   NULL,				/* end-of-command delimitor */
   NULL,				/* optional command terminator */
   &w89k_ops,			/* target operations */
-  w89k_loadtypes,		/* loadtypes */
-  w89k_loadprotos,		/* loadprotos */
-  "9600",			/* supported baud rates */
   SERIAL_1_STOPBITS,		/* number of stop bits */
   w89k_regnames,		/* register names */
   MONITOR_OPS_MAGIC		/* magic */

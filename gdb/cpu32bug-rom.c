@@ -90,9 +90,6 @@ static char *cpu32bug_regnames[NUM_REGS] =
 
 static struct target_ops cpu32bug_ops;
 
-static char *cpu32bug_loadtypes[] = {"srec", NULL};
-static char *cpu32bug_loadprotos[] = {"none", NULL};
-
 static char *cpu32bug_inits[] = {"\r", NULL};
 
 static struct monitor_ops cpu32bug_cmds =
@@ -146,9 +143,6 @@ static struct monitor_ops cpu32bug_cmds =
   NULL,				/* end-of-command delimitor */
   NULL,				/* optional command terminator */
   &cpu32bug_ops,		/* target operations */
-  cpu32bug_loadtypes,		/* loadtypes */
-  cpu32bug_loadprotos,		/* loadprotos */
-  "9600",			/* supported baud rates */
   SERIAL_1_STOPBITS,		/* number of stop bits */
   cpu32bug_regnames,		/* registers names */
   MONITOR_OPS_MAGIC		/* magic */

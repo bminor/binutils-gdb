@@ -91,9 +91,6 @@ static char *rom68k_regnames[NUM_REGS] = {
 
 static struct target_ops rom68k_ops;
 
-static char *rom68k_loadtypes[] = {"srec", NULL};
-static char *rom68k_loadprotos[] = {"none", NULL};
-
 static char *rom68k_inits[] = {".\r\r", NULL}; /* Exits pm/pr & download cmds */
 
 static struct monitor_ops rom68k_cmds =
@@ -148,9 +145,6 @@ static struct monitor_ops rom68k_cmds =
   "=",				/* end-of-command delimitor */
   ".\r",			/* optional command terminator */
   &rom68k_ops,			/* target operations */
-  rom68k_loadtypes,		/* loadtypes */
-  rom68k_loadprotos,		/* loadprotos */
-  "9600",			/* supported baud rates */
   SERIAL_1_STOPBITS,		/* number of stop bits */
   rom68k_regnames,		/* registers names */
   MONITOR_OPS_MAGIC		/* magic */
@@ -176,8 +170,4 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   rom68k_ops.to_open = rom68k_open;
 
   add_target (&rom68k_ops);
-
-  /* This is the default, since it's the only baud rate supported by
-     the hardware.  */
-  baud_rate = 9600;
 }

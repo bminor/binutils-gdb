@@ -92,9 +92,6 @@ static char *est_regnames[NUM_REGS] =
 
 static struct target_ops est_ops;
 
-static char *est_loadtypes[] = {"srec", NULL};
-static char *est_loadprotos[] = {"none", NULL};
-
 static char *est_inits[] = {"he\r", /* Resets the prompt, and clears repeated cmds */
 			      NULL};
 
@@ -149,9 +146,6 @@ static struct monitor_ops est_cmds =
   NULL,				/* end-of-command delimitor */
   NULL,				/* optional command terminator */
   &est_ops,			/* target operations */
-  est_loadtypes,		/* loadtypes */
-  est_loadprotos,		/* loadprotos */
-  "9600",			/* supported baud rates */
   SERIAL_1_STOPBITS,		/* number of stop bits */
   est_regnames,			/* registers names */
   MONITOR_OPS_MAGIC		/* magic */

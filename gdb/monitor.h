@@ -107,9 +107,6 @@ struct monitor_ops
   char *cmd_delim;		/* end-of-command delimitor */
   char *cmd_end;		/* optional command terminator */
   struct target_ops *target;	/* target operations */
-  char **loadtypes;		/* the load types that are supported */
-  char **loadprotos;		/* the load protocols that are supported */
-  char *baudrates;		/* supported baud rates */
   int stopbits;			/* number of stop bits */
   char **regnames;		/* array of register names in ascii */
   int magic;			/* Check value */
