@@ -4588,7 +4588,10 @@ intel_e09_1 ()
   /* e09  : e10 e09'  */
   else if (cur_token.code == ':')
     {
-      intel_parser.is_mem = 1;
+      /* Mark as a memory operand only if it's not already known to be an
+	 offset expression.  */
+      if (intel_parser.op_modifier != OFFSET_FLAT)
+	intel_parser.is_mem = 1;
 
       return (intel_match_token (':') && intel_e10 () && intel_e09_1 ());
     }
@@ -4615,13 +4618,30 @@ intel_e10_1 ()
   if (cur_token.code == '[')
     {
       intel_match_token ('[');
-      intel_parser.is_mem = 1;
+
+      /* Mark as a memory operand only if it's not already known to be an
+	 offset expression.  If it's an offset expression, we need to keep
+	 the brace in.  */
+      if (intel_parser.op_modifier != OFFSET_FLAT)
+	intel_parser.is_mem = 1;
+      else
+	strcat (intel_parser.disp, "[");
 
       /* Add a '+' to the displacement string if necessary.  */
-      if (*intel_parser.disp != '\0')
+      if (*intel_parser.disp != '\0'
+	  && *(intel_parser.disp + strlen (intel_parser.disp) - 1) != '+')
 	strcat (intel_parser.disp, "+");
 
-      return (intel_expr () && intel_match_token (']') && intel_e10_1 ());
+      if (intel_expr () && intel_match_token (']'))
+	{
+	  /* Preserve brackets when the operand is an offset expression.  */
+	  if (intel_parser.op_modifier == OFFSET_FLAT)
+	    strcat (intel_parser.disp, "]");
+
+	  return intel_e10_1 ();
+	}
+      else
+	return 0;
     }
 
   /* e10'  Empty  */
@@ -4663,7 +4683,14 @@ intel_e11 ()
   else if (cur_token.code == '[')
     {
       intel_match_token ('[');
-      intel_parser.is_mem = 1;
+
+      /* Mark as a memory operand only if it's not already known to be an
+	 offset expression.  If it's an offset expression, we need to keep
+	 the brace in.  */
+      if (intel_parser.op_modifier != OFFSET_FLAT)
+	intel_parser.is_mem = 1;
+      else
+	strcat (intel_parser.disp, "[");
 
       /* Operands for jump/call inside brackets denote absolute addresses.  */
       if (current_templates->start->opcode_modifier & Jump
@@ -4673,10 +4700,20 @@ intel_e11 ()
 	i.types[this_operand] |= JumpAbsolute;
 
       /* Add a '+' to the displacement string if necessary.  */
-      if (*intel_parser.disp != '\0')
+      if (*intel_parser.disp != '\0'
+	  && *(intel_parser.disp + strlen (intel_parser.disp) - 1) != '+')
 	strcat (intel_parser.disp, "+");
 
-      return (intel_expr () && intel_match_token (']'));
+      if (intel_expr () && intel_match_token (']'))
+	{
+	  /* Preserve brackets when the operand is an offset expression.  */
+	  if (intel_parser.op_modifier == OFFSET_FLAT)
+	    strcat (intel_parser.disp, "]");
+
+	  return 1;
+	}
+      else
+	return 0;
     }
 
   /* e11  BYTE
@@ -4701,7 +4738,11 @@ intel_e11 ()
     {
       strcat (intel_parser.disp, cur_token.str);
       intel_match_token (cur_token.code);
-      intel_parser.is_mem = 1;
+
+      /* Mark as a memory operand only if it's not already known to be an
+	 offset expression.  */
+      if (intel_parser.op_modifier != OFFSET_FLAT)
+	intel_parser.is_mem = 1;
 
       return 1;
     }
@@ -4832,8 +4873,7 @@ intel_e11 ()
 
       /* The identifier represents a memory reference only if it's not
 	 preceded by an offset modifier.  */
-      if (intel_parser.op_modifier != OFFSET_FLAT
-	  && intel_parser.op_modifier != FLAT)
+      if (intel_parser.op_modifier != OFFSET_FLAT)
 	intel_parser.is_mem = 1;
 
       return 1;

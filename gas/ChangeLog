@@ -1,3 +1,12 @@
+2000-12-15  Diego Novillo  <dnovillo@redhat.com>
+
+	* config/tc-i386.c (intel_e09_1): Only flag as a memory operand if
+	it's not an offset expression. 
+	(intel_e10_1): Ditto. Also, if the operand is an offset expression,
+	keep the braces '[' and ']' in the output string.
+	(intel_e11): Ditto. Also remove comparison intel_parser.op_modifier
+	!= FLAT. There is no such op_modifier.
+
 2000-12-14  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* dwarf2dbg.c: If we don't have <limits.h>, try including <sys/param.h>
