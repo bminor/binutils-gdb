@@ -2505,30 +2505,6 @@ md_assemble (line)
   }
 }
 
-static int i386_is_reg PARAMS ((char *));
-
-static int
-i386_is_reg (reg_string)
-     char *reg_string;
-{
-  register char *s = reg_string;
-  register char *p;
-  char reg_name_given[MAX_REG_NAME_SIZE + 1];
-
-  if (is_space_char (*s))
-    ++s;
-
-  p = reg_name_given;
-  while ((*p++ = register_chars[(unsigned char) *s++]) != '\0')
-    if (p >= reg_name_given + MAX_REG_NAME_SIZE)
-      return 0;
-
-  if (!hash_find (reg_hash, reg_name_given))
-    return 0;
-  else
-    return 1;
-}
-
 static int i386_immediate PARAMS ((char *));
 
 static int
@@ -2982,6 +2958,7 @@ build_displacement_string (initial_disp, op_string)
 
   while (*temp_disp != '\0')
     {
+      char *end_op;
       int add_minus = (*temp_disp == '-');
 
       if (*temp_disp == '+' || *temp_disp == '-' || *temp_disp == '[')
@@ -2991,8 +2968,8 @@ build_displacement_string (initial_disp, op_string)
 	temp_disp++;
 
       /* Don't consider registers */
-      if (*temp_disp != REGISTER_PREFIX
-	  && !(allow_naked_reg && i386_is_reg (temp_disp)))
+      if ( !((*temp_disp == REGISTER_PREFIX || allow_naked_reg)
+	     && parse_register (temp_disp, &end_op)) )
 	{
 	  char *string_start = temp_disp;
 
@@ -3195,6 +3172,9 @@ i386_intel_memory_operand (operand_string)
 
       while (*op_string != ']')
 	{
+	  const reg_entry *temp_reg;
+	  char *end_op;
+	  char *temp_string;
 
 	  while (*end_of_operand_string != '+'
 		 && *end_of_operand_string != '-'
@@ -3202,41 +3182,33 @@ i386_intel_memory_operand (operand_string)
 		 && *end_of_operand_string != ']')
 	    end_of_operand_string++;
 
-	  if (*op_string == '+')
+	  temp_string = op_string;
+	  if (*temp_string == '+')
 	    {
-	      char *temp_string = op_string + 1;
+	      ++temp_string;
 	      if (is_space_char (*temp_string))
 		++temp_string;
-	      if (*temp_string == REGISTER_PREFIX
-		  || (allow_naked_reg && i386_is_reg (temp_string)))
-		++op_string;
 	    }
 
-	  if (*op_string == REGISTER_PREFIX
-	      || (allow_naked_reg && i386_is_reg (op_string)))
+	  if ((*temp_string == REGISTER_PREFIX || allow_naked_reg)
+	      && (temp_reg = parse_register (temp_string, &end_op)) != NULL)
 	    {
-	      const reg_entry *temp_reg;
-	      char *end_op;
-
-	      END_STRING_AND_SAVE (end_of_operand_string);
-	      temp_reg = parse_register (op_string, &end_op);
-	      RESTORE_END_STRING (end_of_operand_string);
-
-	      if (temp_reg == NULL)
-		return 0;
-
 	      if (i.base_reg == NULL)
 		i.base_reg = temp_reg;
 	      else
 		i.index_reg = temp_reg;
 
 	      i.types[this_operand] |= BaseIndex;
-
 	    }
-	  else if (is_digit_char (*op_string) || *op_string == '+' || *op_string == '-')
+	  else if (*temp_string == REGISTER_PREFIX)
 	    {
-
-	      char *temp_string = build_displacement_string (false, op_string);
+	      as_bad (_("bad register name `%s'"), temp_string);
+	      return 0;
+	    }
+	  else if (is_digit_char (*op_string)
+		   || *op_string == '+' || *op_string == '-')
+	    {
+	      temp_string = build_displacement_string (false, op_string);
 
 	      if (*temp_string == '+')
 		++temp_string;
@@ -3283,6 +3255,8 @@ i386_intel_operand (operand_string, got_a_float)
      char *operand_string;
      int got_a_float;
 {
+  const reg_entry * r;
+  char *end_op;
   char *op_string = operand_string;
 
   int operand_modifier = i386_operand_modifier (&op_string, got_a_float);
@@ -3315,17 +3289,9 @@ i386_intel_operand (operand_string, got_a_float)
 	  if (!i386_immediate (op_string))
 	    return 0;
 	}
-      else if (*op_string == REGISTER_PREFIX
-	       || (allow_naked_reg
-		   && i386_is_reg (op_string)))
+      else if ((*op_string == REGISTER_PREFIX || allow_naked_reg)
+	       && (r = parse_register (op_string, &end_op)) != NULL)
 	{
-	  register const reg_entry * r;
-	  char *end_op;
-
-	  r = parse_register (op_string, &end_op);
-	  if (r == NULL)
-	    return 0;
-
 	  /* Check for a segment override by searching for ':' after a
 	     segment register.  */
 	  op_string = end_op;
@@ -3360,11 +3326,14 @@ i386_intel_operand (operand_string, got_a_float)
 	  i.regs[this_operand] = r;
 	  i.reg_operands++;
 	}
-      else
+      else if (*op_string == REGISTER_PREFIX)
 	{
-	  if (!i386_intel_memory_operand (op_string))
-	    return 0;
+	  as_bad (_("bad register name `%s'"), op_string);
+	  return 0;
 	}
+      else if (!i386_intel_memory_operand (op_string))
+	return 0;
+
       break;
     }  /* end switch */
 
@@ -3378,6 +3347,8 @@ static int
 i386_operand (operand_string)
      char *operand_string;
 {
+  const reg_entry *r;
+  char *end_op;
   char *op_string = operand_string;
 
   if (is_space_char (*op_string))
@@ -3394,16 +3365,9 @@ i386_operand (operand_string)
     }
 
   /* Check if operand is a register. */
-  if (*op_string == REGISTER_PREFIX
-      || (allow_naked_reg && i386_is_reg (op_string)))
+  if ((*op_string == REGISTER_PREFIX || allow_naked_reg)
+      && (r = parse_register (op_string, &end_op)) != NULL)
     {
-      register const reg_entry *r;
-      char *end_op;
-
-      r = parse_register (op_string, &end_op);
-      if (r == NULL)
-	return 0;
-
       /* Check for a segment override by searching for ':' after a
 	 segment register.  */
       op_string = end_op;
@@ -3465,6 +3429,11 @@ i386_operand (operand_string)
       i.regs[this_operand] = r;
       i.reg_operands++;
     }
+  else if (*op_string == REGISTER_PREFIX)
+    {
+      as_bad (_("bad register name `%s'"), op_string);
+      return 0;
+    }
   else if (*op_string == IMMEDIATE_PREFIX)
     {				/* ... or an immediate */
       ++op_string;
@@ -3481,18 +3450,13 @@ i386_operand (operand_string)
 	   || *op_string == '(' )
     {
       /* This is a memory reference of some sort. */
-      char *end_of_operand_string;
-      register char *base_string;
-      int found_base_index_form;
+      char *base_string;
 
       /* Start and end of displacement string expression (if found). */
       char *displacement_string_start;
       char *displacement_string_end;
 
     do_memory_reference:
-      displacement_string_start = NULL;
-      displacement_string_end = NULL;
-
       if ((i.mem_operands == 1
 	   && (current_templates->start->opcode_modifier & IsString) == 0)
 	  || i.mem_operands == 2)
@@ -3506,17 +3470,19 @@ i386_operand (operand_string)
 	 looking for an ')' at the end of the operand, searching
 	 for the '(' matching it, and finding a REGISTER_PREFIX or ','
 	 after the '('.  */
-      found_base_index_form = 0;
-      end_of_operand_string = op_string + strlen (op_string);
+      base_string = op_string + strlen (op_string);
 
-      --end_of_operand_string;
-      if (is_space_char (*end_of_operand_string))
-	--end_of_operand_string;
+      --base_string;
+      if (is_space_char (*base_string))
+	--base_string;
 
-      base_string = end_of_operand_string;
+      /* If we only have a displacement, set-up for it to be parsed later. */
+      displacement_string_start = op_string;
+      displacement_string_end = base_string + 1;
 
       if (*base_string == ')')
 	{
+	  char *temp_string;
 	  unsigned int parens_balanced = 1;
 	  /* We've already checked that the number of left & right ()'s are
 	     equal, so this loop will not be infinite. */
@@ -3530,115 +3496,93 @@ i386_operand (operand_string)
 	    }
 	  while (parens_balanced);
 
-	  /* If there is a displacement set-up for it to be parsed later. */
-	  displacement_string_start = op_string;
-	  displacement_string_end = base_string;
+	  temp_string = base_string;
 
 	  /* Skip past '(' and whitespace.  */
 	  ++base_string;
 	  if (is_space_char (*base_string))
 	    ++base_string;
 
-	  if (*base_string == REGISTER_PREFIX
-	      || (allow_naked_reg && i386_is_reg (base_string))
-	      || *base_string == ',')
-	    found_base_index_form = 1;
-	}
-
-      /* If we can't parse a base index register expression, we've found
-	 a pure displacement expression.  We set up displacement_string_start
-	 and displacement_string_end for the code below. */
-      if (!found_base_index_form)
-	{
-	  displacement_string_start = op_string;
-	  displacement_string_end = end_of_operand_string + 1;
-	}
-      else
-	{
-	  i.types[this_operand] |= BaseIndex;
-
-	  /* Find base register (if any). */
-	  if (*base_string != ',')
+	  if (*base_string == ','
+	      || ((*base_string == REGISTER_PREFIX || allow_naked_reg)
+		  && (i.base_reg = parse_register (base_string, &end_op)) != NULL))
 	    {
-	      char *end_op;
+	      displacement_string_end = temp_string;
 
-	      /* Trim off the closing ')' so that parse_register won't
-		 see it.  */
-	      END_STRING_AND_SAVE (end_of_operand_string);
-	      i.base_reg = parse_register (base_string, &end_op);
-	      RESTORE_END_STRING (end_of_operand_string);
+	      i.types[this_operand] |= BaseIndex;
 
-	      if (i.base_reg == NULL)
-		return 0;
-
-	      base_string = end_op;
-	      if (is_space_char (*base_string))
-		++base_string;
-	    }
-
-	  /* There may be an index reg or scale factor here.  */
-	  if (*base_string == ',')
-	    {
-	      ++base_string;
-	      if (is_space_char (*base_string))
-		++base_string;
-
-	      if (*base_string == REGISTER_PREFIX
-		  || (allow_naked_reg && i386_is_reg (base_string)))
+	      if (i.base_reg)
 		{
-		  char *end_op;
-
-		  END_STRING_AND_SAVE (end_of_operand_string);
-		  i.index_reg = parse_register (base_string, &end_op);
-		  RESTORE_END_STRING (end_of_operand_string);
-
-		  if (i.index_reg == NULL)
-		    return 0;
-
 		  base_string = end_op;
 		  if (is_space_char (*base_string))
 		    ++base_string;
-		  if (*base_string == ',')
-		    {
-		      ++base_string;
-		      if (is_space_char (*base_string))
-			++base_string;
-		    }
-		  else if (*base_string != ')' )
-		    {
-		      as_bad (_("expecting `,' or `)' after index register in `%s'"),
-			      operand_string);
-		      return 0;
-		    }
 		}
 
-	      /* Check for scale factor. */
-	      if (isdigit ((unsigned char) *base_string))
+	      /* There may be an index reg or scale factor here.  */
+	      if (*base_string == ',')
 		{
-		  if (!i386_scale (base_string))
-		    return 0;
-
 		  ++base_string;
 		  if (is_space_char (*base_string))
 		    ++base_string;
-		  if (*base_string != ')')
+
+		  if ((*base_string == REGISTER_PREFIX || allow_naked_reg)
+		      && (i.index_reg = parse_register (base_string, &end_op)) != NULL)
 		    {
-		      as_bad (_("expecting `)' after scale factor in `%s'"),
-			      operand_string);
+		      base_string = end_op;
+		      if (is_space_char (*base_string))
+			++base_string;
+		      if (*base_string == ',')
+			{
+			  ++base_string;
+			  if (is_space_char (*base_string))
+			    ++base_string;
+			}
+		      else if (*base_string != ')' )
+			{
+			  as_bad (_("expecting `,' or `)' after index register in `%s'"),
+				  operand_string);
+			  return 0;
+			}
+		    }
+		  else if (*base_string == REGISTER_PREFIX)
+		    {
+		      as_bad (_("bad register name `%s'"), base_string);
+		      return 0;
+		    }
+
+		  /* Check for scale factor. */
+		  if (isdigit ((unsigned char) *base_string))
+		    {
+		      if (!i386_scale (base_string))
+			return 0;
+
+		      ++base_string;
+		      if (is_space_char (*base_string))
+			++base_string;
+		      if (*base_string != ')')
+			{
+			  as_bad (_("expecting `)' after scale factor in `%s'"),
+				  operand_string);
+			  return 0;
+			}
+		    }
+		  else if (!i.index_reg)
+		    {
+		      as_bad (_("expecting index register or scale factor after `,'; got '%c'"),
+			      *base_string);
 		      return 0;
 		    }
 		}
-	      else if (!i.index_reg)
+	      else if (*base_string != ')')
 		{
-		  as_bad (_("expecting index register or scale factor after `,'; got '%c'"),
-			  *base_string);
+		  as_bad (_("expecting `,' or `)' after base register in `%s'"),
+			  operand_string);
 		  return 0;
 		}
 	    }
-	  else if (*base_string != ')')
+	  else if (*base_string == REGISTER_PREFIX)
 	    {
-	      as_bad (_("expecting `,' or `)' after base register in `%s'"),
-		      operand_string);
+	      as_bad (_("bad register name `%s'"), base_string);
 	      return 0;
 	    }
 	}
@@ -4125,17 +4069,16 @@ output_invalid (c)
   return output_invalid_buf;
 }
 
-/* REG_STRING starts *before* REGISTER_PREFIX.  */
 
-static const reg_entry * parse_register PARAMS ((char *, char **));
+/* REG_STRING starts *before* REGISTER_PREFIX.  */
 
 static const reg_entry *
 parse_register (reg_string, end_op)
      char *reg_string;
      char **end_op;
 {
-  register char *s = reg_string;
-  register char *p;
+  char *s = reg_string;
+  char *p;
   char reg_name_given[MAX_REG_NAME_SIZE + 1];
   const reg_entry *r;
 
@@ -4147,38 +4090,31 @@ parse_register (reg_string, end_op)
     ++s;
 
   p = reg_name_given;
-  while ((*p++ = register_chars[(unsigned char) *s++]) != '\0')
+  while ((*p++ = register_chars[(unsigned char) *s]) != '\0')
     {
       if (p >= reg_name_given + MAX_REG_NAME_SIZE)
-	{
-	  if (!allow_naked_reg)
-	    {
-	      *p = '\0';
-	      as_bad (_("bad register name `%s'"), reg_name_given);
-	    }
-	  return (const reg_entry *) NULL;
-	}
+	return (const reg_entry *) NULL;
+      s++;
     }
 
-  *end_op = s - 1;
+  *end_op = s;
 
   r = (const reg_entry *) hash_find (reg_hash, reg_name_given);
 
   /* Handle floating point regs, allowing spaces in the (i) part.  */
   if (r == i386_regtab /* %st is first entry of table */)
     {
-      --s;
       if (is_space_char (*s))
 	++s;
       if (*s == '(')
 	{
-	  *p++ = *s++;
+	  ++s;
 	  if (is_space_char (*s))
 	    ++s;
 	  if (*s >= '0' && *s <= '7')
 	    {
 	      r = &i386_float_regtab[*s - '0'];
-	      *p++ = *s++;
+	      ++s;
 	      if (is_space_char (*s))
 		++s;
 	      if (*s == ')')
@@ -4186,22 +4122,10 @@ parse_register (reg_string, end_op)
 		  *end_op = s + 1;
 		  return r;
 		}
-	      *p++ = *s;
 	    }
-	  if (!allow_naked_reg)
-	    {
-	      *p = '\0';
-	      as_bad (_("bad register name `%s'"), reg_name_given);
-	    }
+	  /* We have "%st(" then garbage */
 	  return (const reg_entry *) NULL;
 	}
-    }
-
-  if (r == NULL)
-    {
-      if (!allow_naked_reg)
-	as_bad (_("bad register name `%s'"), reg_name_given);
-      return (const reg_entry *) NULL;
     }
 
   return r;

@@ -1,3 +1,13 @@
+1999-08-30  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (i386_intel_memory_operand): Combine
+	i386_is_reg and parse_register calls.  Remove END_STRING_AND_SAVE
+	and RESTORE_END_STRING around parse_register calls.
+	(i386_operand): Here too.
+	(i386_is_reg): Remove.
+	(parse_register): Move as_bad calls from within this function to
+	callers.
+
 1999-08-29  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	Based on a patch from H.J. Lu  <hjl@gnu.org>
