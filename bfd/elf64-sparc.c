@@ -1502,7 +1502,7 @@ sparc64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
   return TRUE;
 }
 
-/* This function takes care of emiting STT_REGISTER symbols
+/* This function takes care of emitting STT_REGISTER symbols
    which we cannot easily keep in the symbol hash table.  */
 
 static bfd_boolean

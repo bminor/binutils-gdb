@@ -1714,7 +1714,7 @@ bfd_elf_xtensa_reloc (abfd, reloc_entry, symbol, data, input_section,
 			      / bfd_octets_per_byte (abfd)))
     return bfd_reloc_outofrange;
 
-  /* Work out which section the relocation is targetted at and the
+  /* Work out which section the relocation is targeted at and the
      initial relocation command value.  */
 
   /* Get symbol value.  (Common symbols are special.)  */
@@ -4171,7 +4171,7 @@ analyze_relocations (link_info)
    expensive and unnecessary unless the target section is actually going
    to be relaxed.  This pass identifies all such sections by checking if
    they have L32Rs pointing to them.  In the process, the total number
-   of relocations targetting each section is also counted so that we
+   of relocations targeting each section is also counted so that we
    know how much space to allocate for source_relocs against each
    relaxable literal section.  */
 

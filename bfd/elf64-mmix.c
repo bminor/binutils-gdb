@@ -1280,7 +1280,7 @@ mmix_elf_reloc (abfd, reloc_entry, symbol, data, input_section,
   if (reloc_entry->address > input_section->_cooked_size)
     return bfd_reloc_outofrange;
 
-  /* Work out which section the relocation is targetted at and the
+  /* Work out which section the relocation is targeted at and the
      initial relocation command value.  */
 
   /* Get symbol value.  (Common symbols are special.)  */

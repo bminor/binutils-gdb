@@ -2641,7 +2641,7 @@ struct plt_entry
    pointers must reference the descriptor.  Thus, a function pointer
    initialized to the address of a function in a shared library will
    either require a copy reloc, or a dynamic reloc.  Using a copy reloc
-   redefines the function desctriptor symbol to point to the copy.  This
+   redefines the function descriptor symbol to point to the copy.  This
    presents a problem as a plt entry for that function is also
    initialized from the function descriptor symbol and the copy reloc
    may not be initialized first.  */

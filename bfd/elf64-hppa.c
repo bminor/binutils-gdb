@@ -975,7 +975,7 @@ elf64_hppa_dynamic_symbol_p (h, info)
     return FALSE;
 }
 
-/* Mark all funtions exported by this file so that we can later allocate
+/* Mark all functions exported by this file so that we can later allocate
    entries in .opd for them.  */
 
 static bfd_boolean
@@ -1211,7 +1211,7 @@ elf64_hppa_post_process_headers (abfd, link_info)
 }
 
 /* Create function descriptor section (.opd).  This section is called .opd
-   because it contains "official prodecure descriptors".  The "official"
+   because it contains "official procedure descriptors".  The "official"
    refers to the fact that these descriptors are used when taking the address
    of a procedure, thus ensuring a unique address for each procedure.  */
 
@@ -2281,7 +2281,7 @@ elf64_hppa_finalize_dlt (dyn_h, data)
       bfd_put_64 (sdlt->owner, value, sdlt->contents + dyn_h->dlt_offset);
     }
 
-  /* Create a relocation for the DLT entry assocated with this symbol.
+  /* Create a relocation for the DLT entry associated with this symbol.
      When building a shared library the symbol does not have to be dynamic.  */
   if (dyn_h->want_dlt
       && (elf64_hppa_dynamic_symbol_p (dyn_h->h, info) || info->shared))

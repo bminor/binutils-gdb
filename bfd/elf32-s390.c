@@ -484,7 +484,7 @@ elf_s390_is_local_label_name (abfd, name)
    Word 1 is a pointer to a structure describing the object
    Word 2 is used to point to the loader entry address.
 
-   The code for position independand PLT entries looks like this:
+   The code for position independent PLT entries looks like this:
 
    r12 holds addr of the current GOT at entry to the PLT
 

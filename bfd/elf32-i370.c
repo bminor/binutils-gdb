@@ -834,7 +834,7 @@ i370_elf_size_dynamic_sections (output_bfd, info)
      FIXME: We assume that there will never be relocations to
      locations in linker-created sections that do not have
      externally-visible names. Instead, we should work out precisely
-     which sections relocations are targetted at.  */
+     which sections relocations are targeted at.  */
   if (info->shared)
     {
       int c;

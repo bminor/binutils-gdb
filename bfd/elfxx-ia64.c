@@ -53,7 +53,7 @@
  		descriptor for a MIN_PLT entry, and requires one IPLT reloc.
 
   MIN_PLT	Created by PLTOFF entries against dynamic symbols.  This
- 		does not reqire dynamic relocations.  */
+ 		does not require dynamic relocations.  */
 
 #define NELEMS(a)	((int) (sizeof (a) / sizeof ((a)[0])))
 
@@ -81,7 +81,7 @@ struct elfNN_ia64_dyn_sym_info
   bfd_vma dtpmod_offset;
   bfd_vma dtprel_offset;
 
-  /* The symbol table entry, if any, that this was derrived from.  */
+  /* The symbol table entry, if any, that this was derived from.  */
   struct elf_link_hash_entry *h;
 
   /* Used to count non-got, non-plt relocations for delayed sizing
@@ -804,7 +804,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 
 	  isym = isymbuf + ELFNN_R_SYM (irel->r_info);
 	  if (isym->st_shndx == SHN_UNDEF)
-	    continue;	/* We can't do anthing with undefined symbols.  */
+	    continue;	/* We can't do anything with undefined symbols.  */
 	  else if (isym->st_shndx == SHN_ABS)
 	    tsec = bfd_abs_section_ptr;
 	  else if (isym->st_shndx == SHN_COMMON)
@@ -852,7 +852,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 
 	  else
 	    {
-	      /* We can't do anthing with undefined symbols.  */
+	      /* We can't do anything with undefined symbols.  */
 	      if (h->root.type == bfd_link_hash_undefined
 		  || h->root.type == bfd_link_hash_undefweak)
 		continue;
@@ -1954,7 +1954,7 @@ get_got (abfd, info, ia64_info)
 }
 
 /* Create function descriptor section (.opd).  This section is called .opd
-   because it contains "official prodecure descriptors".  The "official"
+   because it contains "official procedure descriptors".  The "official"
    refers to the fact that these descriptors are used when taking the address
    of a procedure, thus ensuring a unique address for each procedure.  */
 

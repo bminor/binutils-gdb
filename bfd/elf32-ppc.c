@@ -1764,7 +1764,7 @@ ppc_elf_relax_section (bfd *abfd,
 	    }
 	  isym = isymbuf + ELF32_R_SYM (irel->r_info);
 	  if (isym->st_shndx == SHN_UNDEF)
-	    continue;	/* We can't do anthing with undefined symbols.  */
+	    continue;	/* We can't do anything with undefined symbols.  */
 	  else if (isym->st_shndx == SHN_ABS)
 	    tsec = bfd_abs_section_ptr;
 	  else if (isym->st_shndx == SHN_COMMON)
@@ -4919,7 +4919,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  branch_bit = BRANCH_PREDICT_BIT;
 	  /* Fall thru */
 
-	  /* Branch not taken predicition relocations.  */
+	  /* Branch not taken prediction relocations.  */
 	case R_PPC_ADDR14_BRNTAKEN:
 	case R_PPC_REL14_BRNTAKEN:
 	  insn = bfd_get_32 (output_bfd, contents + rel->r_offset);

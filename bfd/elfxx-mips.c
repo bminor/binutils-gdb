@@ -2319,7 +2319,7 @@ mips_elf_merge_gots (bfd2got_, p)
    first available global GOT entry in G.  VALUE must contain the size
    of a GOT entry in bytes.  For each global GOT entry that requires a
    dynamic relocation, NEEDED_RELOCS is incremented, and the symbol is
-   marked as not elligible for lazy resolution through a function
+   marked as not eligible for lazy resolution through a function
    stub.  */
 static int
 mips_elf_set_global_got_offset (entryp, p)
@@ -2738,7 +2738,7 @@ _bfd_mips_elf_sign_extend (value, bits)
 }
 
 /* Return non-zero if the indicated VALUE has overflowed the maximum
-   range expressable by a signed number with the indicated number of
+   range expressible by a signed number with the indicated number of
    BITS.  */
 
 static bfd_boolean

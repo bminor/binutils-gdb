@@ -3640,7 +3640,7 @@ elf64_alpha_size_got_sections (info)
 	  if (this_got == NULL)
 	    continue;
 
-	  /* We are assuming no merging has yet ocurred.  */
+	  /* We are assuming no merging has yet occurred.  */
 	  BFD_ASSERT (this_got == i);
 
           if (alpha_elf_tdata (this_got)->total_got_size > MAX_GOT_SIZE)

@@ -1123,7 +1123,7 @@ elf_hppa_remark_useless_dynamic_symbols (struct elf_link_hash_entry *h,
      the generic code will warn that it is undefined.
 
      This behavior is undesirable on HPs since the standard shared
-     libraries contain reerences to undefined symbols.
+     libraries contain references to undefined symbols.
 
      So we twiddle the flags associated with such symbols so that they
      will not trigger the warning.  ?!? FIXME.  This is horribly fragile.
@@ -1261,7 +1261,7 @@ elf_hppa_final_link (bfd *abfd, struct bfd_link_info *info)
   hppa_info->data_segment_base = (bfd_vma)-1;
 
   /* HP's shared libraries have references to symbols that are not
-     defined anywhere.  The generic ELF BFD linker code will complaim
+     defined anywhere.  The generic ELF BFD linker code will complain
      about such symbols.
 
      So we detect the losing case and arrange for the flags on the symbol

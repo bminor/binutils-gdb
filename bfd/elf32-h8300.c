@@ -649,7 +649,7 @@ elf32_h8_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
 /* This function handles relaxing for the H8..
 
-   There's a few relaxing opportunites available on the H8:
+   There are a few relaxing opportunities available on the H8:
 
      jmp/jsr:24    ->    bra/bsr:8		2 bytes
      The jmp may be completely eliminated if the previous insn is a
@@ -1116,7 +1116,7 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 	/* FALLTHRU */
 
 	/* This is a 24/32bit absolute address in a "mov" insn, which may
-	   become a 16bit absoulte address if it is in the right range.  */
+	   become a 16-bit absolute address if it is in the right range.  */
 	case R_H8_DIR32A16:
 	  {
 	    bfd_vma value;

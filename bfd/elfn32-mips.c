@@ -941,7 +941,7 @@ static reloc_howto_type elf_mips_howto_table_rela[] =
 	 0x0000ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* 64 bit substraction.  */
+  /* 64 bit subtraction.  */
   HOWTO (R_MIPS_SUB,		/* type */
 	 0,			/* rightshift */
 	 4,			/* size (0 = byte, 1 = short, 2 = long) */

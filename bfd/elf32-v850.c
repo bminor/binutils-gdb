@@ -893,7 +893,7 @@ find_remembered_hi16s_reloc (addend, already_found)
   /* Extract the address.  */
   addr = match->address;
 
-  /* Remeber if this entry has already been used before.  */
+  /* Remember if this entry has already been used before.  */
   if (already_found)
     * already_found = match->found;
 
@@ -904,7 +904,7 @@ find_remembered_hi16s_reloc (addend, already_found)
 }
 
 /* FIXME:  The code here probably ought to be removed and the code in reloc.c
-   allowed to do its  stuff instead.  At least for most of the relocs, anwyay.  */
+   allowed to do its stuff instead.  At least for most of the relocs, anyway.  */
 
 static bfd_reloc_status_type
 v850_elf_perform_relocation (abfd, r_type, addend, address)
@@ -1362,7 +1362,7 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
   if (reloc->address > isection->_cooked_size)
     return bfd_reloc_outofrange;
 
-  /* Work out which section the relocation is targetted at and the
+  /* Work out which section the relocation is targeted at and the
      initial relocation command value.  */
 
   if (reloc->howto->pc_relative)

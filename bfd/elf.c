@@ -4677,7 +4677,7 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 	  if (IS_SOLARIS_PT_INTERP (segment, section))
 	    {
 	      /* Mininal change so that the normal section to segment
-		 assigment code will work.  */
+		 assignment code will work.  */
 	      segment->p_vaddr = section->vma;
 	      break;
 	    }

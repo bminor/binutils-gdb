@@ -469,7 +469,7 @@ mn10200_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 /* This function handles relaxing for the mn10200.
 
-   There's quite a few relaxing opportunites available on the mn10200:
+   There are quite a few relaxing opportunities available on the mn10200:
 
 	* jsr:24 -> jsr:16 					   2 bytes
 
@@ -918,7 +918,7 @@ mn10200_elf_relax_section (abfd, sec, link_info, again)
 		  if (value & 0x8000)
 		    continue;
 
-		  /* Note that we've changed the reldection contents, etc.  */
+		  /* Note that we've changed the relocation contents, etc.  */
 		  elf_section_data (sec)->relocs = internal_relocs;
 		  elf_section_data (sec)->this_hdr.contents = contents;
 		  symtab_hdr->contents = (unsigned char *) isymbuf;
@@ -957,7 +957,7 @@ mn10200_elf_relax_section (abfd, sec, link_info, again)
 		case 0x40:
 		case 0x44:
 		case 0xc8:
-		  /* Note that we've changed the reldection contents, etc.  */
+		  /* Note that we've changed the relocation contents, etc.  */
 		  elf_section_data (sec)->relocs = internal_relocs;
 		  elf_section_data (sec)->this_hdr.contents = contents;
 		  symtab_hdr->contents = (unsigned char *) isymbuf;
@@ -1040,7 +1040,7 @@ mn10200_elf_relax_section (abfd, sec, link_info, again)
 		      && (value & 0x8000) != 0)
 		    continue;
 
-		  /* Note that we've changed the reldection contents, etc.  */
+		  /* Note that we've changed the relocation contents, etc.  */
 		  elf_section_data (sec)->relocs = internal_relocs;
 		  elf_section_data (sec)->this_hdr.contents = contents;
 		  symtab_hdr->contents = (unsigned char *) isymbuf;

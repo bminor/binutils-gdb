@@ -875,7 +875,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	{
 	  /* This should be impossible, since ELF requires that all
 	     global symbols follow all local symbols, and that sh_info
-	     point to the first global symbol.  Unfortunatealy, Irix 5
+	     point to the first global symbol.  Unfortunately, Irix 5
 	     screws this up.  */
 	  continue;
 	}
@@ -1174,7 +1174,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  int new_flag;
 
 	  /* Check the alignment when a common symbol is involved. This
-	     can change when a common symbol is overriden by a normal
+	     can change when a common symbol is overridden by a normal
 	     definition or a common symbol is ignored due to the old
 	     normal definition. We need to make sure the maximum
 	     alignment is maintained.  */
@@ -1832,7 +1832,7 @@ compute_bucket_count (struct bfd_link_info *info)
 
 # if 1
 	  /* Variant 1: optimize for short chains.  We add the squares
-	     of all the chain lengths (which favous many small chain
+	     of all the chain lengths (which favors many small chain
 	     over a few long chains).  */
 	  for (j = 0; j < i; ++j)
 	    max += counts[j] * counts[j];
@@ -2056,7 +2056,7 @@ NAME(bfd_elf,size_dynamic_sections) (bfd *output_bfd,
 	    return FALSE;
 	}
 
-      /* Make all global versions with definiton.  */
+      /* Make all global versions with definition.  */
       for (t = verdefs; t != NULL; t = t->next)
 	for (d = t->globals.list; d != NULL; d = d->next)
 	  if (!d->symver && d->symbol)
@@ -2121,7 +2121,7 @@ NAME(bfd_elf,size_dynamic_sections) (bfd *output_bfd,
 
       if (!info->allow_undefined_version)
 	{
-	  /* Check if all global versions have a definiton.  */
+	  /* Check if all global versions have a definition.  */
 	  all_defined = TRUE;
 	  for (t = verdefs; t != NULL; t = t->next)
 	    for (d = t->globals.list; d != NULL; d = d->next)
@@ -5674,7 +5674,7 @@ elf_gc_sweep_symbol (struct elf_link_hash_entry *h, void *idxptr)
   return TRUE;
 }
 
-/* Propogate collected vtable information.  This is called through
+/* Propagate collected vtable information.  This is called through
    elf_link_hash_traverse.  */
 
 static bfd_boolean
@@ -5840,7 +5840,7 @@ elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
   return TRUE;
 }
 
-/* Called from check_relocs to record the existance of a VTINHERIT reloc.  */
+/* Called from check_relocs to record the existence of a VTINHERIT reloc.  */
 
 bfd_boolean
 elf_gc_record_vtinherit (bfd *abfd,
@@ -5896,7 +5896,7 @@ elf_gc_record_vtinherit (bfd *abfd,
   return TRUE;
 }
 
-/* Called from check_relocs to record the existance of a VTENTRY reloc.  */
+/* Called from check_relocs to record the existence of a VTENTRY reloc.  */
 
 bfd_boolean
 elf_gc_record_vtentry (bfd *abfd ATTRIBUTE_UNUSED,

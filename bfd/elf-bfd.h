@@ -788,7 +788,7 @@ struct elf_backend_data
     (bfd *, void *, asymbol *);
 
   /* This function, if defined, is called after all local symbols and
-     global symbols converted to locals are emited into the symtab
+     global symbols converted to locals are emitted into the symtab
      section.  It allows the backend to emit special global symbols
      not handled in the hash table.  */
   bfd_boolean (*elf_backend_output_arch_syms)

@@ -795,7 +795,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   else
     olddef = TRUE;
 
-  /* We need to rememeber if a symbol has a definition in a dynamic
+  /* We need to remember if a symbol has a definition in a dynamic
      object or is weak in all dynamic objects. Internal and hidden
      visibility will make it unavailable to dynamic objects.  */
   if (newdyn && (h->elf_link_hash_flags & ELF_LINK_DYNAMIC_DEF) == 0)
@@ -858,7 +858,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       return TRUE;
     }
 
-  /* We need to treat weak definiton right, depending on if there is a
+  /* We need to treat weak definition right, depending on if there is a
      definition from a dynamic object.  */
   if (bind == STB_WEAK)
     {
@@ -1127,7 +1127,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	      h->size, abfd, bfd_link_hash_common, sym->st_size)))
 	return FALSE;
 
-      /* If the predumed common symbol in the dynamic object is
+      /* If the presumed common symbol in the dynamic object is
 	 larger, pretend that the new symbol has its size.  */
 
       if (h->size > *pvalue)
@@ -1257,7 +1257,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 
   if (override)
     {
-      /* We are overridden by an old defition. We need to check if we
+      /* We are overridden by an old definition. We need to check if we
 	 need to create the indirect symbol from the default name.  */
       hi = elf_link_hash_lookup (elf_hash_table (info), name, TRUE,
 				 FALSE, FALSE);
@@ -1416,7 +1416,7 @@ nondefault:
     {
       /* Here SHORTNAME is a versioned name, so we don't expect to see
 	 the type of override we do in the case above unless it is
-	 overridden by a versioned definiton.  */
+	 overridden by a versioned definition.  */
       if (hi->root.type != bfd_link_hash_defined
 	  && hi->root.type != bfd_link_hash_defweak)
 	(*_bfd_error_handler)
