@@ -1,5 +1,11 @@
 2001-08-11  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/mn10300/tm-mn10300.h (PC_REGNUM, SP_REGNUM): Delete.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Initialize pc_regnum and
+	sp_regnum.
+
+2001-08-11  Andrew Cagney  <ac131313@redhat.com>
+
 	* doublest.c (convert_doublest_to_floatformat): Rename
 	floatformat_from_doublest.  Make static.
 	(convert_floatformat_to_doublest): Rename floatformat_to_doublest.

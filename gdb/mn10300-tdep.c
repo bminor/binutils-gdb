@@ -1074,6 +1074,8 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_register_virtual_type (gdbarch, mn10300_register_virtual_type);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, mn10300_dwarf2_reg_to_regnum);
   set_gdbarch_do_registers_info (gdbarch, mn10300_do_registers_info);
+  set_gdbarch_sp_regnum (gdbarch, 8);
+  set_gdbarch_pc_regnum (gdbarch, 9);
   set_gdbarch_fp_regnum (gdbarch, 31);
   set_gdbarch_virtual_frame_pointer (gdbarch, mn10300_virtual_frame_pointer);
 

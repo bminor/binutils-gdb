@@ -49,8 +49,6 @@
 #define A0_REGNUM 4
 #define A2_REGNUM 6
 #define A3_REGNUM 7
-#define SP_REGNUM 8
-#define PC_REGNUM 9
 #define MDR_REGNUM 10
 #define PSW_REGNUM 11
 #define LIR_REGNUM 12
