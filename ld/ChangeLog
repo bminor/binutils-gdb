@@ -1,3 +1,8 @@
+2002-06-05  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* emulparams/ns32knbsd.sh (EXECUTABLE_SYMBOLS): Set _DYNAMIC to 0.
+	(NONPAGED_TEXT_START_ADDR): Set to 0x1000.
+
 2002-06-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Place
