@@ -3516,7 +3516,7 @@ read_address (bfd *abfd, char *buf, const struct comp_unit_head *cu_header,
      
      This document is only a draft and is subject to change.  (So beware.)
 
-     - Kevin, Sept 4, 2000
+     - Kevin, Aug 4, 2000
    ] */
 
 static LONGEST
