@@ -6528,7 +6528,13 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  const Elf_Internal_Rela *lo16_relocation;
 		  reloc_howto_type *lo16_howto;
 
-		  /* Scan ahead to find a matching R_MIPS_LO16
+		  /* The combined value is the sum of the HI16 addend,
+		     left-shifted by sixteen bits, and the LO16
+		     addend, sign extended.  (Usually, the code does
+		     a `lui' of the HI16 value, and then an `addiu' of
+		     the LO16 value.)  
+
+		     Scan ahead to find a matching R_MIPS_LO16
 		     relocation.  */
 		  lo16_relocation 
 		    = mips_elf_next_lo16_relocation (rel, relend); 
@@ -6541,6 +6547,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 						lo16_relocation,
 						input_bfd, contents);
 		  l &= lo16_howto->src_mask;
+		  l = mips_elf_sign_extend (l, 16);
 
 		  /* Save the high-order bit for later.  When we
 		     encounter the R_MIPS_LO16 relocation we will need
@@ -6550,7 +6557,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  last_hi16_addend_valid_p = true;
 
 		  /* Compute the combined addend.  */
-		  addend |= l;
+		  addend += l;
 		}
 	      else if (r_type == R_MIPS_LO16) 
 		{
@@ -6571,11 +6578,6 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			    | ((addend & 0x7e00000) >> 16)
 			    | (addend & 0x1f));
 		}
-	      else if (r_type == R_MIPS16_26 
-		       || r_type == R_MIPS16_26)
-		/* The addend is stored without its two least
-		   significant bits (which are always zero.)  */
-		addend <<= 2;
 	    }
 	  else
 	    addend = rel->r_addend;
@@ -6608,6 +6610,12 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      || r_type == R_MIPS_GPREL32)
 	    addend -= (_bfd_get_gp_value (output_bfd)
 		       - _bfd_get_gp_value (input_bfd));
+	  else if (r_type == R_MIPS16_26 || r_type == R_MIPS16_26)
+	    /* The addend is stored without its two least
+	       significant bits (which are always zero.)  In a
+	       non-relocateable link, calculate_relocation will do
+	       this shift; here, we must do it ourselves.  */
+	    addend <<= 2;
 
 	  /* If the relocation is for a R_MIPS_HI16 or R_MIPS_GOT16,
 	     then we only want to write out the high-order 16 bits.
