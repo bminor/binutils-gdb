@@ -22,14 +22,15 @@
 #include "defs.h"
 #include "gdbcore.h"
 #include "inferior.h"
-#include "gdb_string.h"
+#include "regcache.h"
+#include "regset.h"
 
+#include "gdb_assert.h"
+#include "gdb_string.h"
 #include <sys/procfs.h>
 #include <sys/types.h>
 
 #include "elf-bfd.h"
-
-#include "gregset.h"
 
 char *
 child_pid_to_exec_file (int pid)
@@ -120,21 +121,35 @@ fbsd_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
 static char *
 fbsd_make_corefile_notes (bfd *obfd, int *note_size)
 {
+  struct gdbarch *gdbarch = current_gdbarch;
+  const struct regcache *regcache = current_regcache;
   gregset_t gregs;
   fpregset_t fpregs;
   char *note_data = NULL;
   Elf_Internal_Ehdr *i_ehdrp;
+  const struct regset *regset;
+  size_t size;
 
   /* Put a "FreeBSD" label in the ELF header.  */
   i_ehdrp = elf_elfheader (obfd);
   i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_FREEBSD;
 
-  fill_gregset (&gregs, -1);
+  gdb_assert (gdbarch_regset_from_core_section_p (gdbarch));
+
+  size = sizeof gregs;
+  regset = gdbarch_regset_from_core_section (gdbarch, ".reg", size);
+  gdb_assert (regset && regset->collect_regset);
+  regset->collect_regset (regset, regcache, -1, &gregs, size);
+
   note_data = elfcore_write_prstatus (obfd, note_data, note_size,
 				      ptid_get_pid (inferior_ptid),
 				      stop_signal, &gregs);
 
-  fill_fpregset (&fpregs, -1);
+  size = sizeof fpregs;
+  regset = gdbarch_regset_from_core_section (gdbarch, ".reg2", size);
+  gdb_assert (regset && regset->collect_regset);
+  regset->collect_regset (regset, regcache, -1, &fpregs, size);
+
   note_data = elfcore_write_prfpreg (obfd, note_data, note_size,
 				     &fpregs, sizeof (fpregs));
 

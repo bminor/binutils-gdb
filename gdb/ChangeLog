@@ -1,5 +1,11 @@
 2004-05-30  Mark Kettenis  <kettenis@gnu.org>
 
+	* fbsd-proc.c: Include "regcache.h", "regset.h" and
+	"gdb_assert.h".  Con't include "gregset.h".
+	(fbsd_make_corefile_notes): Use regset-based core file support
+	instead off fill_gregset and fill_fpregset.
+	* Makefile.in (fbsd-proc.o): Update dependencies.
+
 	* m88k-tdep.c (m88k_analyze_prologue): Fix handling of branch
 	instructions.
 	(m88k_frame_prev_register): Simplify code a bit.
