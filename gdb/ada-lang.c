@@ -36,9 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "breakpoint.h"
 #include "gdbcore.h"
 #include "ada-lang.h"
-#ifdef UI_OUT
 #include "ui-out.h"
-#endif
 
 struct cleanup *unresolved_names;
 
@@ -5054,7 +5052,6 @@ find_printable_frame (struct frame_info *fi, int level)
 void
 ada_report_exception_break (struct breakpoint *b)
 {
-#ifdef UI_OUT
   /* FIXME: break_on_exception should be defined in breakpoint.h */
   /*  if (b->break_on_exception == 1)
      {
@@ -5092,7 +5089,6 @@ ada_report_exception_break (struct breakpoint *b)
    else if (b->break_on_exception == 3)
    fputs_filtered ("on assert failure", gdb_stdout);
  */
-#endif
 }
 
 int

@@ -1,5 +1,11 @@
 2003-01-02  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.in: Remove UI_OUT configuration code.
+	* ada-lang.c: Update assuming UI_OUT is always true.
+	* Makefile.in (UIOUT_CFLAGS): Remove.
+	* configure: Regenerated.
+	* TODO: Remove blurb about elimination of -DUI_OUT.
+
 	* configure.in: Move code that provides the --enable-gdbcli,
 	--enable-gdbmi options right before the code that handles the
 	--enable-tui option.  Polish a bit.

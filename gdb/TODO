@@ -114,12 +114,6 @@ The following cleanups have been identified as part of GDB 5.2.
 
 --
 
-Remove old code that does not use ui_out functions and all the related
-"ifdef"s.  This also allows the elimination of -DUI_OUT from
-Makefile.in and configure.in.
-
---
-
 Compiler warnings.
 
 Eliminate warnings for all targets on at least one host for one of the
