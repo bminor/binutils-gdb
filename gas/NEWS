@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Limited support for Mapping Symbols as specified in the ARM ELF specification
+  has been added to the arm assembler.
+
 * On ARM architectures, added a new gas directive ".unreq" that undoes
   definitions created by ".req".
 
