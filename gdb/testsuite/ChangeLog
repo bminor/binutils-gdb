@@ -1,3 +1,12 @@
+Tue Oct 17 23:02:12 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* Many files: When warning about suppressed tests due to a 
+	nonexistant test binary, avoid incrementing the warning count.
+
+Tue Oct 10 11:00:41 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (TARGET_FLAGS_TO_PASS):  Remove BISON.
+	
 Sun Oct  8 04:23:14 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/return.exp:  Change xfail from "sparc-*-solaris2.*" to

@@ -444,5 +444,5 @@ if [set_lang_chill] then {
     test_float_literals_accepted
     test_arithmetic_expressions
 } else {
-    warning "$test_name tests suppressed."
+    warning "$test_name tests suppressed." 0
 }

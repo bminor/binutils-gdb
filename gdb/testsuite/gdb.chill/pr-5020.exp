@@ -82,7 +82,7 @@ set srcfile $binfile.ch
 if [skip_chill_tests] then { continue }
 
 if ![file exists $objdir/$subdir/$binfile] then {
-	warning "$objdir/$subdir/$binfile does not exist; tests suppressed."
+	warning "$objdir/$subdir/$binfile does not exist; tests suppressed." 0
 } else {
     do_tests
 }
