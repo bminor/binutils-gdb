@@ -1,3 +1,11 @@
+2003-11-19  Andrew Cagney  <cagney@redhat.com>
+
+	* stack.c (return_command): Handle "void", "legacy" and "unknown
+	location" return values separatly.
+	* values.c (using_struct_return): Return 0 for a "void" return
+	type.  Mention "register_value_being_returned".
+	(register_value_being_returned): Mention "using_struct_return".
+
 2003-11-19  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (offreg, basereg, isderef, frame_base_reg)

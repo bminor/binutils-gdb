@@ -1854,33 +1854,33 @@ return_command (char *retval_exp, int from_tty)
       if (VALUE_LAZY (return_value))
 	value_fetch_lazy (return_value);
 
-      /* Check that this architecture can handle the function's return
-         type.  In the case of "struct convention", still do the
-         "return", just also warn the user.  */
-      if (gdbarch_return_value_p (current_gdbarch))
+      if (TYPE_CODE (return_type) == TYPE_CODE_VOID)
+	/* If the return-type is "void", don't try to find the
+           return-value's location.  However, do still evaluate the
+           return expression so that, even when the expression result
+           is discarded, side effects such as "return i++" still
+           occure.  */
+	return_value = NULL;
+      else if (!gdbarch_return_value_p (current_gdbarch)
+	       && (TYPE_CODE (return_type) == TYPE_CODE_STRUCT
+		   || TYPE_CODE (return_type) == TYPE_CODE_UNION))
 	{
-	  if (gdbarch_return_value (current_gdbarch, return_type,
-				    NULL, NULL, NULL)
-	      == RETURN_VALUE_STRUCT_CONVENTION)
-	    return_value = NULL;
+	  /* NOTE: cagney/2003-10-20: Compatibility hack for legacy
+	     code.  Old architectures don't expect STORE_RETURN_VALUE
+	     to be called with with a small struct that needs to be
+	     stored in registers.  Don't start doing it now.  */
+	  query_prefix = "\
+A structure or union return type is not supported by this architecture.\n\
+If you continue, the return value that you specified will be ignored.\n";
+	  return_value = NULL;
 	}
-      else
+      else if (using_struct_return (return_type, 0))
 	{
-	  /* NOTE: cagney/2003-10-20: The double check is to ensure
-	     that the STORE_RETURN_VALUE call, further down, is not
-	     applied to a struct or union return-value.  It wasn't
-	     allowed previously, so don't start allowing it now.  An
-	     ABI that uses "register convention" to return small
-	     structures and should implement the "return_value"
-	     architecture method.  */
-	  if (using_struct_return (return_type, 0)
-	      || TYPE_CODE (return_type) == TYPE_CODE_STRUCT
-	      || TYPE_CODE (return_type) == TYPE_CODE_UNION)
-	    return_value = NULL;
+	  query_prefix = "\
+The location at which to store the function's return value is unknown.\n\
+If you continue, the return value that you specified will be ignored.\n";
+	  return_value = NULL;
 	}
-      if (return_value == NULL)
-	query_prefix = "\
-The location at which to store the function's return value is unknown.\n";
     }
 
   /* Does an interactive user really want to do this?  Include
