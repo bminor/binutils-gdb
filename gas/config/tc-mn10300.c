@@ -778,12 +778,88 @@ keep_going:
   if (opcode->format == FMT_D4)
     size = 6;
 
-  /* Write out the instruction.  */
-
+  /* Allocate space for the instruction.  */
   f = frag_more (size);
-  number_to_chars_bigendian (f, insn, size > 4 ? 4 : size);
-  if (size > 4)
-    number_to_chars_bigendian (f + 4, extension, size - 4);
+
+  /* Fill in bytes for the instruction.  Note that opcode fields
+     are written big-endian, 16 & 32bit immediates are written
+     little endian.  Egad.  */
+  if (opcode->format == FMT_S0
+      || opcode->format == FMT_S1
+      || opcode->format == FMT_D0
+      || opcode->format == FMT_D1)
+    {
+      number_to_chars_bigendian (f, insn, size);
+    }
+  else if (opcode->format == FMT_S2
+	   && opcode->opcode != 0xdf0000
+	   && opcode->opcode != 0xde0000)
+    {
+      /* A format S2 instruction that is _not_ "ret" and "retf".  */
+      number_to_chars_bigendian (f, (insn >> 16) & 0xff, 1);
+      number_to_chars_littleendian (f + 1, insn & 0xffff, 2);
+    }
+  else if (opcode->format == FMT_S2)
+    {
+      /* This must be a ret or retf, which is written entirely in big-endian
+	 format.  */
+      number_to_chars_bigendian (f, insn, 3);
+    }
+  else if (opcode->format == FMT_S4
+	   && opcode->opcode != 0xdc000000)
+    {
+      /* This must be a format S4 "call" instruction.  What a pain.  */
+      unsigned long temp = (insn >> 8) & 0xffff;
+      number_to_chars_bigendian (f, (insn >> 24) & 0xff, 1);
+      number_to_chars_littleendian (f + 1, temp, 2);
+      number_to_chars_bigendian (f + 3, insn & 0xff, 1);
+      number_to_chars_bigendian (f + 4, extension & 0xff, 1);
+    }
+  else if (opcode->format == FMT_S4)
+    {
+      /* This must be a format S4 "jmp" instruction.  */
+      unsigned long temp = ((insn & 0xffffff) << 8) | (extension & 0xff);
+      number_to_chars_bigendian (f, (insn >> 24) & 0xff, 1);
+      number_to_chars_littleendian (f + 1, temp, 4);
+    }
+  else if (opcode->format == FMT_S6)
+    {
+      unsigned long temp = ((insn & 0xffffff) << 8)
+			    | ((extension >> 16) & 0xff);
+      number_to_chars_bigendian (f, (insn >> 24) & 0xff, 1);
+      number_to_chars_littleendian (f + 1, temp, 4);
+      number_to_chars_bigendian (f + 5, (extension >> 8) & 0xff, 1);
+      number_to_chars_bigendian (f + 6, extension & 0xff, 1);
+    }
+  else if (opcode->format == FMT_D2
+	   && opcode->opcode != 0xfaf80000
+ 	   && opcode->opcode != 0xfaf00000
+	   && opcode->opcode != 0xfaf40000)
+    {
+      /* A format D2 instruction where the 16bit immediate is
+	 really a single 16bit value, not two 8bit values.  */
+      number_to_chars_bigendian (f, (insn >> 16) & 0xffff, 2);
+      number_to_chars_littleendian (f + 2, insn & 0xffff, 2);
+    }
+  else if (opcode->format == FMT_D2)
+    {
+      /* A format D2 instruction where the 16bit immediate
+	 is really two 8bit immediates.  */
+      number_to_chars_bigendian (f, insn, 4);
+    }
+  else if (opcode->format == FMT_D4)
+    {
+      unsigned long temp = ((insn & 0xffff) << 16) | (extension & 0xffff);
+      number_to_chars_bigendian (f, (insn >> 16) & 0xffff, 2);
+      number_to_chars_littleendian (f + 2, temp, 4);
+    }
+  else if (opcode->format == FMT_D5)
+    {
+      unsigned long temp = ((insn & 0xffff) << 16) | ((extension >> 8) & 0xffff);
+      number_to_chars_bigendian (f, (insn >> 16) & 0xffff, 2);
+      number_to_chars_littleendian (f + 2, temp, 4);
+      number_to_chars_bigendian (f + 6, extension & 0xff, 1);
+    }
 
   /* Create any fixups.  */
   for (i = 0; i < fc; i++)
@@ -867,9 +943,9 @@ keep_going:
 	  else
 	    {
 	      if (reloc_size == 32)
-		reloc = BFD_RELOC_MN10300_32B;
+		reloc = BFD_RELOC_32
 	      else if (reloc_size == 16)
-		reloc = BFD_RELOC_MN10300_16B;
+		reloc = BFD_RELOC_16
 	      else if (reloc_size == 8)
 		reloc = BFD_RELOC_8;
 	      else
