@@ -294,11 +294,11 @@ sh*-*-netbsdelf*)
 			targ_emul=shelf_nbsd
 			targ_extra_emuls=shlelf_nbsd
 			;;
-shle*-*-elf*)
+shle*-*-elf* | sh[1234]*le*-*-elf)
 			targ_emul=shlelf
 			targ_extra_emuls="shelf shl sh"
 			;;
-sh-*-elf* | sh-*-rtemself*)
+sh-*-elf* | sh[1234]*-*-elf | sh-*-rtemself*)
 			targ_emul=shelf
 			targ_extra_emuls="shlelf sh shl"
 			;;

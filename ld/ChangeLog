@@ -1,3 +1,7 @@
+Thu Jun 13 20:18:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* configure.tgt: Add support for sh[1234]*le*-*-elf, sh[1234]*-*-elf.
+
 2002-06-12  H.J. Lu <hjl@gnu.org>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_try_needed): Return

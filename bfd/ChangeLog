@@ -1,3 +1,8 @@
+Thu Jun 13 20:18:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	config.bfd: Add support for sh[1234]l*-*-elf* | sh3el*-*-elf*,
+	sh[1234]*-elf*.
+
 2002-06-12  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* elflink.h (elf_bfd_final_link): Improve error handling for missing
