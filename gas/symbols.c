@@ -206,10 +206,10 @@ static unsigned long local_symbol_conversion_count;
 /* Create a local symbol and insert it into the local hash table.  */
 
 static struct local_symbol *
-local_symbol_make (name, section, offset, frag)
+local_symbol_make (name, section, value, frag)
      const char *name;
      segT section;
-     valueT offset;
+     valueT value;
      fragS *frag;
 {
   char *name_copy;
@@ -224,7 +224,7 @@ local_symbol_make (name, section, offset, frag)
   ret->lsy_name = name_copy;
   ret->lsy_section = section;
   local_symbol_set_frag (ret, frag);
-  ret->lsy_offset = offset;
+  ret->lsy_value = value;
 
   hash_jam (local_hash, name_copy, (PTR) ret);
 
@@ -246,7 +246,7 @@ local_symbol_convert (locsym)
 
   ++local_symbol_conversion_count;
 
-  ret = symbol_new (locsym->lsy_name, locsym->lsy_section, locsym->lsy_offset,
+  ret = symbol_new (locsym->lsy_name, locsym->lsy_section, locsym->lsy_value,
 		    local_symbol_get_frag (locsym));
 
   if (local_symbol_resolved_p (locsym))
@@ -357,7 +357,7 @@ colon (sym_name)		/* Just seen "x:" - rattle symbols & frags.  */
 	  if (locsym->lsy_section != undefined_section
 	      && (local_symbol_get_frag (locsym) != frag_now
 		  || locsym->lsy_section != now_seg
-		  || locsym->lsy_offset != frag_now_fix ()))
+		  || locsym->lsy_value != frag_now_fix ()))
 	    {
 	      as_bad (_("Symbol %s already defined."), sym_name);
 	      return symbolP;
@@ -365,7 +365,7 @@ colon (sym_name)		/* Just seen "x:" - rattle symbols & frags.  */
 
 	  locsym->lsy_section = now_seg;
 	  local_symbol_set_frag (locsym, frag_now);
-	  locsym->lsy_offset = frag_now_fix ();
+	  locsym->lsy_value = frag_now_fix ();
 #endif
 	}
       else if (!S_IS_DEFINED (symbolP) || S_IS_COMMON (symbolP))
@@ -843,15 +843,15 @@ resolve_symbol_value (symp)
     {
       struct local_symbol *locsym = (struct local_symbol *) symp;
 
+      final_val = locsym->lsy_value;
       if (local_symbol_resolved_p (locsym))
-	return locsym->lsy_offset / bfd_octets_per_byte (stdoutput);
+	return final_val;
 
-      final_val = (local_symbol_get_frag (locsym)->fr_address
-		   + locsym->lsy_offset) / bfd_octets_per_byte (stdoutput);
+      final_val += local_symbol_get_frag (locsym)->fr_address / OCTETS_PER_BYTE;
 
       if (finalize_syms)
 	{
-	  locsym->lsy_offset = final_val;
+	  locsym->lsy_value = final_val;
 	  local_symbol_mark_resolved (locsym);
 	}
 
@@ -1574,7 +1574,7 @@ S_GET_VALUE (s)
 {
 #ifdef BFD_ASSEMBLER
   if (LOCAL_SYMBOL_CHECK (s))
-    return ((struct local_symbol *) s)->lsy_offset;
+    return ((struct local_symbol *) s)->lsy_value;
 #endif
 
   if (!s->sy_resolved && s->sy_value.X_op != O_constant)
@@ -1613,7 +1613,7 @@ S_SET_VALUE (s, val)
 #ifdef BFD_ASSEMBLER
   if (LOCAL_SYMBOL_CHECK (s))
     {
-      ((struct local_symbol *) s)->lsy_offset = val;
+      ((struct local_symbol *) s)->lsy_value = val;
       return;
     }
 #endif
@@ -2341,7 +2341,7 @@ print_symbol_value_1 (file, sym)
 #ifdef BFD_ASSEMBLER
       if (LOCAL_SYMBOL_CHECK (sym))
 	fprintf (file, "constant %lx",
-		 (long) ((struct local_symbol *) sym)->lsy_offset);
+		 (long) ((struct local_symbol *) sym)->lsy_value);
       else
 #endif
 	print_expr_1 (file, &sym->sy_value);
