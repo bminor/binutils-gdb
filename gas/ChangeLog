@@ -1,3 +1,9 @@
+Wed Jan 28 13:54:50 1998  Pat Rankin  <rankin@eql.caltech.edu>
+
+	as.h (unlink): Reverse 13-Feb-97 change; use of unlink vs remove
+	depends upon HAVE_{UNLINK,REMOVE} values rather than host
+	compiler.
+
 Wed Jan 28 13:48:08 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.h (RESOLVE_SYMBOL_REDEFINITION): Define.

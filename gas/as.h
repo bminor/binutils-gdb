@@ -1,5 +1,5 @@
 /* as.h - global header file
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -168,8 +168,8 @@ extern void free ();
 extern int errno;
 #endif
 
-/* This is needed for VMS with DEC C.  */
-#if ! defined (__GNUC__) && ! defined (HAVE_UNLINK) && defined (HAVE_REMOVE)
+/* This is needed for VMS.  */
+#if ! defined (HAVE_UNLINK) && defined (HAVE_REMOVE)
 #define unlink remove
 #endif
 
