@@ -170,6 +170,7 @@ de-stage3: force
 
 clean:
 	- rm -f TAGS $(OFILES) $(GENERATED_SOURCES) $(GENERATED_HEADERS)
+	- rm -f $(PROCESSED_SCRIPTS)
 	- rm -f ld ld1 ld2 ld3 ld.new mkscript *.o y.output
 
 lintlog:$(SOURCES) Makefile
