@@ -593,6 +593,12 @@ define_symbol (valu, string, desc, type, objfile)
 	    /* This was an anonymous type that was never fixed up.  */
 	    goto normal;
 
+#ifdef STATIC_TRANSFORM_NAME
+	  case 'X':
+	    /* SunPRO (3.0 at least) static variable encoding.  */
+	    goto normal;
+#endif
+
 	  default:
 	    complain (&unrecognized_cplus_name_complaint, string);
 	    goto normal;		/* Do *something* with it */

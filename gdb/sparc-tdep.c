@@ -279,8 +279,13 @@ CORE_ADDR
 sparc_extract_struct_value_address (regbuf)
      char regbuf[REGISTER_BYTES];
 {
+#ifdef GDB_TARGET_IS_SPARC64
+  return extract_address (regbuf + REGISTER_BYTE (O0_REGNUM),
+			  REGISTER_RAW_SIZE (O0_REGNUM));
+#else
   return read_memory_integer (((int *)(regbuf)) [SP_REGNUM] + (16 * SPARC_INTREG_SIZE), 
 	       		      TARGET_PTR_BIT / TARGET_CHAR_BIT);
+#endif
 }
 
 /* Find the pc saved in frame FRAME.  */
@@ -1272,7 +1277,7 @@ get_longjmp_target (pc)
    related to C++ mangling, it is done for C too.  */
 
 char *
-solaris_static_transform_name (name)
+sunpro_static_transform_name (name)
      char *name;
 {
   char *p;
@@ -1295,19 +1300,10 @@ solaris_static_transform_name (name)
 
 #ifdef GDB_TARGET_IS_SPARC64
 
-CORE_ADDR
-sparc64_extract_struct_value_address (regbuf)
-     char regbuf[REGISTER_BYTES];
-{
-  CORE_ADDR addr;
-
-  /* FIXME: We assume a non-leaf function.  */
-  addr = read_register (I0_REGNUM);
-  return addr;
-}
-
 /* Utilities for printing registers.
    Page numbers refer to the SPARC Architecture Manual.  */
+
+static void dump_ccreg PARAMS ((char *, int));
 
 static void
 dump_ccreg (reg, val)

@@ -1,3 +1,69 @@
+Sat Mar 25 01:16:10 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* buildsym.c (patch_subfile_name):  Update last_source_file
+	with the real source file name.
+	* dbxread.c (end_psymtab):  Handle static functions in the
+	SOFUN_ADDRESS_MAYBE_MISSING case by passing pst->filename
+	to lookup_minimal_symbol.
+	(process_one_symbol):  Ignore extra outermost context from
+	SunPRO cc and acc.
+	* stabsread.c (define_symbol):  Do not complain for SunPRO
+	static variable encoding if STATIC_TRANSFORM_NAME is defined.
+	* sparc-tdep.c, config/sparc/tm-sun4sol2.h
+	(sunpro_static_transform_name):  Renamed from
+	solaris_static_transform_name.
+	* config/sparc/tm-sun4os4.h (STATIC_TRANSFORM_NAME):
+	Define to sunpro_static_transform_name for acc 3.0 compiled
+	executables.
+	* procfs.c, config/alpha/nm-osf2.h (PROCFS_DONT_TRACE_FAULTS):
+	Renamed from PROCFS_DONT_TRACE_IFAULT, don't trace any faults
+	if defined.
+	* procfs.c (info_proc_siginfo):  Cast sip->si_addr to
+	`unsigned long' and use `lx' format for printing it.
+
+Fri Mar 24 15:45:42 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* configure.in:  Move test for m68*-est-* before m68*-*-coff*.
+	* findvar.c:  Move default def of CANNOT_STORE_REGISTER closer to
+	the beginning of the code.
+	* (write_register_gen):  New routine.  Analogous to
+	read_register_gen.
+	* (write_register_bytes):  Another rewrite!  Make it smarter about
+	not updating regs with the same value.
+	* monitor.c (printf_monitor readchar):  Use stderr instead of
+	stdout to output debug info.  Also cleanup readchar a little.
+	* (expect):  Make sure that excessive responses are null
+	terminated.
+	* (monitor_open):  Check for magic number in monitor_ops struct.
+	Allow multiple commands as init strings.  Also, clear all
+	breakpoints.
+	* (monitor_resume monitor_wait):  Send a command to dump all the
+	regs for those targets which don't do so when waking up after a
+	continue command.
+	* (monitor_wait):  Handle excessive response output better.
+	* (monitor_write_memory):  Use block fill, word, and long word
+	commands (if they exist) to write memory more efficiently.
+	* General cleanups to use flag bits instead of individual flag
+	words in monitor_ops struct.
+	* (monitor_command):  Return output from command.
+	* (monitor_load_srec):  Allocate buffer only once.  Use alloca.
+	Wait for load response string instead of using a timeout to start
+	sending S-records.  Fix bug where value of srec_frame shrinks.  If
+	hashmark is set, print `-' for retransmissions.  General cleanups.
+	* (monitor_make_srec):  Get rid of S-record default type kludge.
+	* monitor.h:  Use seperate struct for memory and register
+	read/write commands.  Memory commands can come in byte, word,
+	long, and longlong forms.
+	* (monitor_ops):  Change lots of fields.  Generalize some stuff.
+	Put all flags into flags word.  Allow init to be a list of commands.
+	Add command for clearing all breakpoints, block fill, dumping all
+	registers.
+	* remote-est.c:  Rewrite to use new monitor conventions.
+	* config/m68k/est.mt (TDEPFILES):  Add monitor.o.
+	* config/m68k/tm-est.h:  Set NUM_REGS to 18.
+	* testsuite/gdb.base/break.exp:  Lots of cleanups.  Use gdb_test
+	more thoroughly.
+
 Thu Mar 23 23:20:00 1995  Jeff Law  (law@snake.cs.utah.edu)
 
         * somsolib.c (som_solib_add): Handle case where a shared library

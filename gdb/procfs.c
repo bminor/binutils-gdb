@@ -1460,12 +1460,8 @@ create_procinfo (pid)
   prfillset (&pi->prrun.pr_fault);
   prdelset (&pi->prrun.pr_fault, FLTPAGE);
 
-#ifdef PROCFS_DONT_TRACE_IFAULT
-  /* Tracing T_IFAULT under Alpha OSF/1 causes a `floating point enable'
-     fault from which we cannot continue (except by disabling the
-     tracing). We rely on the delivery of a SIGTRAP signal (which is traced)
-     for the other T_IFAULT faults if tracing them is disabled.  */
-  prdelset (&pi->prrun.pr_fault, T_IFAULT);
+#ifdef PROCFS_DONT_TRACE_FAULTS
+  premptyset (&pi->prrun.pr_fault);
 #endif
 
   if (ioctl (pi->fd, PIOCWSTOP, &pi->prstatus) < 0)
@@ -2067,12 +2063,8 @@ do_attach (pid)
   prfillset (&pi->prrun.pr_fault);
   prdelset (&pi->prrun.pr_fault, FLTPAGE);
 
-#ifdef PROCFS_DONT_TRACE_IFAULT
-  /* Tracing T_IFAULT under Alpha OSF/1 causes a `floating point enable'
-     fault from which we cannot continue (except by disabling the
-     tracing). We rely on the delivery of a SIGTRAP signal (which is traced)
-     for the other T_IFAULT faults if tracing them is disabled.  */
-  prdelset (&pi->prrun.pr_fault, T_IFAULT);
+#ifdef PROCFS_DONT_TRACE_FAULTS
+  premptyset (&pi->prrun.pr_fault);
 #endif
 
   if (ioctl (pi->fd, PIOCSFAULT, &pi->prrun.pr_fault))
@@ -2997,7 +2989,8 @@ info_proc_siginfo (pip, summary)
 		  (sip -> si_signo == SIGSEGV) ||
 		  (sip -> si_signo == SIGBUS))
 		{
-		  printf_filtered ("addr=%#x ", sip -> si_addr);
+		  printf_filtered ("addr=%#lx ",
+				   (unsigned long) sip -> si_addr);
 		}
 	      else if ((sip -> si_signo == SIGCHLD))
 		{
@@ -3036,13 +3029,15 @@ info_proc_siginfo (pip, summary)
 	      if ((sip -> si_signo == SIGILL) ||
 		  (sip -> si_signo == SIGFPE))
 		{
-		  printf_filtered ("\t%-16#x %s.\n", sip -> si_addr,
+		  printf_filtered ("\t%#-16lx %s.\n",
+				   (unsigned long) sip -> si_addr,
 				   "Address of faulting instruction");
 		}
 	      else if ((sip -> si_signo == SIGSEGV) ||
 		       (sip -> si_signo == SIGBUS))
 		{
-		  printf_filtered ("\t%-16#x %s.\n", sip -> si_addr,
+		  printf_filtered ("\t%#-16lx %s.\n",
+				   (unsigned long) sip -> si_addr,
 				   "Address of faulting memory reference");
 		}
 	      else if ((sip -> si_signo == SIGCHLD))
