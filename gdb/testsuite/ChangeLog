@@ -1,3 +1,12 @@
+Sun Apr 11 17:21:45 1993  Rob Savoye  (rob at darkstar.cygnus.com)
+
+        * config/unix-gdb.exp: Gracefully exits if $GDB is a bogus path.
+
+Wed Apr  7 21:28:21 1993  Rob Savoye  (rob@cygnus.com)
+
+	* Makefile.in: Added --srcdir when invoking runtest, removed the
+	need for a local config file. (optional now)
+
 Wed Apr  7 14:13:41 1993  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.t21/demangle.exp:  Only count real fails (not xfails) for
