@@ -102,13 +102,21 @@ interrupts_update_pending (struct interrupts *interrupts)
 	{
 	  data = ioregs[idef->enable_paddr];
 	  if (!(data & idef->enabled_mask))
-	    continue;
+            {
+              /* Disable it.  */
+              interrupts->pending_mask &= ~(1 << idef->int_number);
+              continue;
+            }
 	}
 
       /* Interrupt is enabled, see if it's there.  */
       data = ioregs[idef->int_paddr];
       if (!(data & idef->int_mask))
-	continue;
+        {
+          /* Disable it.  */
+          interrupts->pending_mask &= ~(1 << idef->int_number);
+          continue;
+        }
 
       /* Ok, raise it.  */
       interrupts->pending_mask |= (1 << idef->int_number);
@@ -159,14 +167,17 @@ interrupts_get_current (struct interrupts *interrupts)
     }
 
   /* Returns the first interrupt number which is pending.
-     The interrupt priority is specified by the table `interrupt_order'.  */
+     The interrupt priority is specified by the table `interrupt_order'.
+     For these interrupts, the pending mask is cleared when the program
+     performs some actions on the corresponding device.  If the device
+     is not reset, the interrupt remains and will be re-raised when
+     we return from the interrupt (see 68HC11 pink book).  */
   for (i = 0; i < M6811_INT_NUMBER; i++)
     {
       enum M6811_INT int_number = interrupts->interrupt_order[i];
 
       if (interrupts->pending_mask & (1 << int_number))
 	{
-	  interrupts->pending_mask &= ~(1 << int_number);
 	  return int_number;
 	}
     }

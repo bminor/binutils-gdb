@@ -1,5 +1,11 @@
 2000-09-10  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* interrupts.c (interrupts_update_pending): Clear the mask of
+	pending interrupts here.
+	(interrupts_get_current): Don't clear the mask of pending interrupts.
+
+2000-09-10  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* sim-main.h: Define cycle_to_string.
 	* dv-m68hc11tim.c (cycle_to_string): New function to translate 
 	the cpu cycle into some formatted time string.
