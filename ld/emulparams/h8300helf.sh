@@ -8,5 +8,5 @@ TEMPLATE_NAME=elf32
 EMBEDDED=yes
 
 OTHER_RELOCATING_SECTIONS='
-.stack 0xfefc : { _stack = .; *(.stack) }
+.stack 0x2fefc : { _stack = .; *(.stack) }
 '

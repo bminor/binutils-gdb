@@ -1,3 +1,8 @@
+Fri Sep  7 11:34:24 2001  Jeffrey A Law  (law@cygnus.com)
+
+	* emulparams/h8300helf.sh: Move stack to a much higher memory address.
+	* emulparams/h8300self.sh: Similarly.
+
 2001-09-05 Danny Smith <dannysmith@users.souceforge.net>
 
 	* ld.texinfo (Options, --stack): Correct default value for stack
