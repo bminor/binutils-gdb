@@ -7,3 +7,7 @@ foo:
 	.quad	test_R_390_GOT64@GOT
 	.quad	test_R_390_PLT64@PLT
 	larl	%r1,test_R_390_GOTENT@GOT
+	.quad	test_R_390_GOTOFF64@GOTOFF
+	.quad	test_R_390_PLTOFF64@PLTOFF
+	.quad	test_R_390_GOTPLT64@GOTPLT
+	larl	%r1,test_R_390_GOTPLTENT@GOTPLT

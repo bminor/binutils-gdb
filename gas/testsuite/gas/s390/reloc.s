@@ -12,3 +12,10 @@ foo:
 	lhi	%r0,test_R_390_PC16-foo
 	bras	%r14,test_R_390_PC16DBL
 	bras	%r14,test_R_390_PLT16DBL
+	lhi	%r0,test_R_390_GOTOFF16@GOTOFF
+	.long	test_R_390_GOTOFF32@GOTOFF
+	lhi	%r0,test_R_390_PLTOFF16@PLTOFF
+	.long	test_R_390_PLTOFF32@PLTOFF
+	l	%r0,test_R_390_GOTPLT12@GOTPLT(%r1,%r2)
+	lhi	%r0,test_R_390_GOTPLT16@GOTPLT
+	.long	test_R_390_GOTPLT32@GOTPLT

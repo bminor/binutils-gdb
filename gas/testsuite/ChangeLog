@@ -1,3 +1,11 @@
+2003-01-20  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* gas/s390/reloc.d: Add tests for the new gotoff, gotplt and pltoff
+	relocations.
+	* gas/s390/reloc.s: Likewise.
+	* gas/s390/reloc64.d: Likewise.
+	* gas/s390/reloc64.s: Likewise.
+
 2003-01-07  DJ Delorie  <dj@redhat.com>
 
 	* gas/xstormy16/reloc-2.d: Adjust for fixed REL12 relocs.
