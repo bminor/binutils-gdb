@@ -1,4 +1,17 @@
 start-sanitize-sky
+Thu Dec 10 11:20:10 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/dvp/lower-2.[sd]: Handle label as immediate data.
+
+	Fri Sep 18 16:21:22 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/dvp/gifimage-1.[sd]: Add testcases for EOP.
+
+	Thu Jul 23 18:31:03 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* gas/dvp/upper-[12].[sd]: Test two-operand CLIP; remove
+	old one-operand CLIP.
+
 Wed Dec  9 14:01:32 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/vtable/vtable.exp: Do not run these tests for the dvp assembler.
