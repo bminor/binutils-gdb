@@ -1338,7 +1338,7 @@ parse_type(ax, bs, bigend)
 	tax = ax;
 	ecoff_swap_tir_in (bigend, &tax->a_ti, t);
 	if (t->bt > (sizeof (map_bt)/sizeof (*map_bt))) {
-		complain (&basic_type_complaint, t->bt);
+		complain (&basic_type_complaint, (char *)t->bt);
 		return builtin_type_int;
 	}
 	if (map_bt[t->bt]) {
@@ -1374,7 +1374,7 @@ parse_type(ax, bs, bigend)
 			break;
 		    case btTypedef:
 		    default:
-			complain (&basic_type_complaint, t->bt);
+			complain (&basic_type_complaint, (char *)t->bt);
 			return builtin_type_int;
 		}
 	}
@@ -1552,7 +1552,7 @@ upgrade_type(tpp, tq, ax, bigend)
 			TYPE_LENGTH(TYPE_TARGET_TYPE(t)) = id >> 3;
 		}
 		if (id != rf)
-			complain (&array_bitsize_complaint, rf);
+			complain (&array_bitsize_complaint, (char *)rf);
 
 		TYPE_LENGTH(t) = (upper < 0) ? 0 :
 			(upper - lower + 1) * (rf >> 3);
@@ -1564,7 +1564,7 @@ upgrade_type(tpp, tq, ax, bigend)
 		return 0;
 
 	default:
-		complain (&unknown_type_qual_complaint, tq);
+		complain (&unknown_type_qual_complaint, (char *)tq);
 		return 0;
 	}
 }
@@ -1681,8 +1681,8 @@ parse_external(es, skip_procedures, bigend)
 		/* If we have full symbols we do not need more */
 		if (skip_procedures)
 			return;
-		if (mylookup_symbol (es->asym.iss, top_stack->cur_block,
-					VAR_NAMESPACE, LOC_BLOCK))
+		if (mylookup_symbol ((char *)es->asym.iss, top_stack->cur_block,
+				     VAR_NAMESPACE, LOC_BLOCK))
 			break;
 		/* fall through */
 	case stGlobal:
@@ -2032,7 +2032,7 @@ parse_partial_symbols(end_of_text_seg, objfile)
 			/* Both complaints are valid:  one gives symbol name,
 			   the other the offending symbol type.  */
 			complain (&unknown_sym_complaint, (char *)sh->iss);
-			complain (&unknown_st_complaint, sh->st);
+			complain (&unknown_st_complaint, (char *)sh->st);
 			cur_sdx++;
 			continue;
 		    }
@@ -2062,7 +2062,7 @@ parse_partial_symbols(end_of_text_seg, objfile)
 			class = LOC_LABEL;
 			break;
 		      default:
-			complain (&unknown_ext_complaint, sh->iss);
+			complain (&unknown_ext_complaint, (char *)sh->iss);
 		      case stGlobal:
 			class = LOC_STATIC;
 			break;
@@ -2120,7 +2120,7 @@ parse_partial_symbols(end_of_text_seg, objfile)
 	for (s_idx = s_id0; s_idx < fh->crfd; s_idx++) {
 	    RFDT *rh = (RFDT *) (fh->rfdBase) + s_idx;
 	    if (*rh < 0 || *rh >= hdr->ifdMax)
-		complain(&bad_file_number_complaint, *rh);
+		complain(&bad_file_number_complaint, (char *)*rh);
 	    else
 		pst->dependencies[s_idx-s_id0] = fdr_to_pst[*rh].pst;
 	}
