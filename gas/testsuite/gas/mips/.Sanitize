@@ -15,7 +15,7 @@
 
 Do-first:
 
-vr5400_losers="vr5400.s"
+vr5400_losers="vr5400.s vr5400.d"
 if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
 	keep_these_too="$keep_these_too $vr5400_losers"
 	if [ -n "${verbose}" ] ; then
