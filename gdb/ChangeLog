@@ -21,7 +21,8 @@
 	
 2001-05-07  Daniel Berlin  <dan@cgsoftware.com>
 
-	* values.c (value_static_field): Handle static fields that have a constant value.
+	* values.c (value_static_field): Handle static fields that have a
+	constant value.
 
 2001-05-17  Michael Snyder  <msnyder@redhat.com>
 
