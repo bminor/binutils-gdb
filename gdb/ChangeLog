@@ -1,3 +1,7 @@
+Thu Jan 28 18:16:07 1999  Mark Alexander  <marka@cygnus.com>
+
+	* procfs.c (wait_fd): Handle deleted threads correctly.
+
 1999-01-28  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* utils.c (init_page_info): Force window size if running under emacs.

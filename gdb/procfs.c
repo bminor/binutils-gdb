@@ -970,8 +970,9 @@ wait_fd ()
 		    printf_filtered ("LWP %d exited.\n", 
 				     (pi->pid >> 16) & 0xffff);
 		  close_proc_file (pi);
+		  i--;			/* don't skip deleted entry */
 		  if (num_fds != 0)
-		    continue;		/* already another event to process */
+		    break;		/* already another event to process */
 		  else
 		    goto wait_again; 	/* wait for another event */
 		}
