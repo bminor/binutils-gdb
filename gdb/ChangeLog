@@ -1,5 +1,9 @@
 2002-11-19  Adam Fedor  <fedor@gnu.org>
 
+	* objc-exp.y: Revert to old skip_quoted usage.
+
+2002-11-19  Adam Fedor  <fedor@gnu.org>
+
 	* Makefile.in (SFILES): Add objc-exp.y objc-lang.c.
 	(objc_lang_h): Define.
 	(YYFILES): Add objc-exp.tab.c.
