@@ -387,28 +387,8 @@ _print_insn_mips (memaddr, word, info)
 	  if (op->pinfo != INSN_MACRO && (word & op->mask) == op->match)
 	    {
 	      register const char *d;
-	      int insn_isa;
 
-	      if ((op->membership & INSN_ISA) == INSN_ISA1)
-		insn_isa = 1;
-	      else if ((op->membership & INSN_ISA) == INSN_ISA2)
-		insn_isa = 2;
-	      else if ((op->membership & INSN_ISA) == INSN_ISA3)
-		insn_isa = 3;
-	      else if ((op->membership & INSN_ISA) == INSN_ISA4)
-		insn_isa = 4;
-	      else
-		insn_isa = 15;
-
-	      if (insn_isa > mips_isa
-		  && (target_processor == 4650
-		      && op->membership & INSN_4650) == 0
-		  && (target_processor == 4010
-		      && op->membership & INSN_4010) == 0
-		  && (target_processor == 4100
-		      && op->membership & INSN_4100) == 0
-		  && (target_processor == 3900
-		      && op->membership & INSN_3900) == 0)
+	      if (! OPCODE_IS_MEMBER (op, mips_isa, target_processor))
 		continue;
 
 	      (*info->fprintf_func) (info->stream, "%s", op->name);

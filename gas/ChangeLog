@@ -1,3 +1,8 @@
+1999-11-01  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* config/tc-mips.c (macro_build): Use OPCODE_IS_MEMBER.
+	(mips_ip): Use OPCODE_IS_MEMBER.
+
 Wed Oct 27 16:50:44 1999  Don Lindsay  <dlindsay@cygnus.com>
 
 	* config/tc-arm.c (reg_required_here): Improve comments.

@@ -2424,7 +2424,6 @@ macro_build (place, counter, ep, name, fmt, va_alist)
   struct mips_cl_insn insn;
   bfd_reloc_code_real_type r;
   va_list args;
-  int insn_isa;
 
 #ifdef USE_STDARG
   va_start (args, fmt);
@@ -2458,31 +2457,9 @@ macro_build (place, counter, ep, name, fmt, va_alist)
   /* Search until we get a match for NAME.  */
   while (1)
     {
-      insn_isa = 0;
-
-      if ((insn.insn_mo->membership & INSN_ISA) == INSN_ISA1)
-	insn_isa = 1;
-      else if ((insn.insn_mo->membership & INSN_ISA) == INSN_ISA2)
-	insn_isa = 2;
-      else if ((insn.insn_mo->membership & INSN_ISA) == INSN_ISA3)
-	insn_isa = 3;
-      else if ((insn.insn_mo->membership & INSN_ISA) == INSN_ISA4)
-	insn_isa = 4;
-
       if (strcmp (fmt, insn.insn_mo->args) == 0
 	  && insn.insn_mo->pinfo != INSN_MACRO
-	  && ((insn_isa != 0
-	       && insn_isa <= mips_opts.isa)
-	      || (mips_cpu == 4650
-		  && (insn.insn_mo->membership & INSN_4650) != 0)
-	      || (mips_cpu == 4010
-		  && (insn.insn_mo->membership & INSN_4010) != 0)
-	      || ((mips_cpu == 4100
-		   || mips_cpu == 4111
-		   )
-		  && (insn.insn_mo->membership & INSN_4100) != 0)
-	      || (mips_cpu == 3900
-		  && (insn.insn_mo->membership & INSN_3900) != 0))
+	  && OPCODE_IS_MEMBER (insn.insn_mo, mips_opts.isa, mips_cpu)
 	  && (mips_cpu != 4650 || (insn.insn_mo->pinfo & FP_D) == 0))
 	break;
 
@@ -7028,37 +7005,15 @@ mips_ip (str, ip)
   argsStart = s;
   for (;;)
     {
-      int insn_isa;
       boolean ok;
 
       assert (strcmp (insn->name, str) == 0);
 
-      insn_isa = 0;
-      if ((insn->membership & INSN_ISA) == INSN_ISA1)
-	insn_isa = 1;
-      else if ((insn->membership & INSN_ISA) == INSN_ISA2)
-	insn_isa = 2;
-      else if ((insn->membership & INSN_ISA) == INSN_ISA3)
-	insn_isa = 3;
-      else if ((insn->membership & INSN_ISA) == INSN_ISA4)
-	insn_isa = 4;
-
-      if (insn_isa != 0 
-	  && insn_isa <= mips_opts.isa)
+      if (OPCODE_IS_MEMBER (insn, mips_opts.isa, mips_cpu))
 	ok = true;
-      else if (insn->pinfo == INSN_MACRO)
+      else 
 	ok = false;
-      else if ((mips_cpu == 4650 && (insn->membership & INSN_4650) != 0)
-	       || (mips_cpu == 4010 && (insn->membership & INSN_4010) != 0)
-	       || ((mips_cpu == 4100
-		    || mips_cpu == 4111
-		    )
-		   && (insn->membership & INSN_4100) != 0)
-	       || (mips_cpu == 3900 && (insn->membership & INSN_3900) != 0))
-	ok = true;
-      else
-	ok = false;
-
+      
       if (insn->pinfo != INSN_MACRO)
 	{
 	  if (mips_cpu == 4650 && (insn->pinfo & FP_D) != 0)
@@ -7073,18 +7028,16 @@ mips_ip (str, ip)
 	      ++insn;
 	      continue;
 	    }
-
-	  if (insn_isa == 0
-              || insn_isa <= mips_opts.isa)
-	    insn_error = _("opcode not supported on this processor");
 	  else
 	    {
 	      static char buf[100];
-
-	      sprintf (buf, _("opcode requires -mips%d or greater"), insn_isa);
+	      sprintf (buf, 
+		       _("opcode not supported on this processor: %d (MIPS%d)"),
+		       mips_cpu, mips_opts.isa);
+		       
 	      insn_error = buf;
+	      return;
 	    }
-	  return;
 	}
 
       ip->insn_mo = insn;
