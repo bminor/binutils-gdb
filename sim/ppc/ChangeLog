@@ -1,3 +1,7 @@
+Tue Apr  1 18:15:14 1997  Jim Wilson  <wilson@cygnus.com>
+
+	* ppc-instructions: Change milhwu to mulhwu.
+
 Wed Apr  2 15:38:08 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sim_calls.c (sim_open): New arg `kind'.
