@@ -1,3 +1,7 @@
+2000-06-15  Alan Modra  <alan@linuxcare.com.au>
+
+	* ldmain.c (main): Only change SEC_READONLY for final link.
+
 2000-06-13  H.J. Lu  <hjl@gnu.org>
 
 	* configure: Regenerate.
@@ -10152,7 +10156,7 @@ Fri Oct 11 15:43:04 1991  Roland H. Pesch  (pesch at cygnus.com)
 Fri Oct 11 13:51:54 1991  Per Bothner  (bothner at cygnus.com)
 
 	* ldmain.c (main): Make config.magic_demand_paged be true
-	by default.  Don't the WP_TEXT and D_PAGED flags of
+	by default.  Don't set the WP_TEXT and D_PAGED flags of
 	output_bfd here; it's too late, so set it when output_bfd
 	is created (in ldlang.c).  Also fix setting of EXEC_P flag
 	* ldlang.c (ldlang_open_output):  Set output_bfd->flags here.
