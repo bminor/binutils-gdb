@@ -1,3 +1,11 @@
+start-sanitize-vr5400
+Mon Dec 15 10:34:15 1997  Jeffrey A Law  (law@cygnus.com)
+
+        * gas/mips/vr5400.s: Tweak mfpc, mtpc, mfps, mfps, and mtps for
+        better testing coverage.
+        * gas/mips/vr5400.d: Corresponding changes.
+
+end-sanitize-vr5400
 start-sanitize-tx49
 Thu Dec 11 09:23:05 1997  Gavin Koch  <gavin@cygnus.com>
 
