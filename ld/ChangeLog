@@ -1,3 +1,18 @@
+2003-04-14  Alan Modra  <amodra@bigpond.net.au>
+
+	From Prashanth Tamraparni <prashanth_t@in.ibm.com>
+	* scripttempl/elf.sc (CTOR): Handle crtbeginS.o, crtendS.o and
+	other variants of crtbegin.o, crtend.o.
+	(DTOR): Likewise.
+	* scripttempl/crisaout.sc (ctors, dtors): Likewise.
+	* scripttempl/elf_chaos.sc (CTOR, DTOR): Likewise.
+	* scripttempl/elfd10v.sc (CTOR, DTOR): Likewise.
+	* scripttempl/elfd30v.sc (CTOR, DTOR): Likewise.
+	* scripttempl/elfxtensa.sc (CTOR, DTOR): Likewise.
+	* scripttempl/iq2000.sc (CTOR, DTOR): Likewise.
+	* scripttempl/mmo.sc (ctors, dtors): Likewise.
+	* scripttempl/xstormy16.sc (CTOR, DTOR): Likewise.
+
 2003-04-09   Dmitry Diky  <diwil@mail.ru>
 
 	* scripttempl/elf32msp430.sc: Add initX, finiX, ctors, dtors
@@ -56,16 +71,16 @@
 
 2003-04-01  Bob Wilson  <bob.wilson@acm.org>
 
-        * Makefile.am (ALL_EMULATIONS): Add eelf32xtensa.o.
-        (eelf32xtensa.c): New target.
-        * Makefile.in: Regenerate.
-        * configure.tgt: Handle xtensa-*-*.
-        * gen-doc.texi: Set XTENSA variable.
-        * ld.texinfo: Set XTENSA variable.  Add new Xtensa node.
-        * emulparams/elf32xtensa.sh: New file.
-        * emulparams/xtensa-config.sh: Likewise.
-        * emultempl/xtensaelf.em: Likewise.
-        * scripttempl/elfxtensa.sc: Likewise.
+	* Makefile.am (ALL_EMULATIONS): Add eelf32xtensa.o.
+	(eelf32xtensa.c): New target.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Handle xtensa-*-*.
+	* gen-doc.texi: Set XTENSA variable.
+	* ld.texinfo: Set XTENSA variable.  Add new Xtensa node.
+	* emulparams/elf32xtensa.sh: New file.
+	* emulparams/xtensa-config.sh: Likewise.
+	* emultempl/xtensaelf.em: Likewise.
+	* scripttempl/elfxtensa.sc: Likewise.
 
 2003-04-01  Jakub Jelinek  <jakub@redhat.com>
 
@@ -95,11 +110,11 @@
 	directory name.
 	(add_keepsyms_file): Fix memory leak.
 	* ldmisc.c (vfinfo): Likewise.
-	* lexsup.c (parse_args): Likewise	
+	* lexsup.c (parse_args): Likewise.
 
 2003-03-25  Stan Cox   <scox@redhat.com>
 	    Nick Clifton  <nickc@redhat.com>
-	    
+
 	Contribute support for Intel's iWMMXt chip - an	ARM variant:
 
 	* emulparams/armelf.sh (OTHER_READONLY_SECTIONS): Define.
@@ -131,12 +146,12 @@
 	* ldfile.c (ldfile_try_open_bfd): Pop lexer start condition after
 	eof.
 
-2003-03-18  Danny Smith  <dannysmith@users.sourceforge,net>
+2003-03-18  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* defilep.y (opt_base): If no number given, set to default
 	(-1), not 0.
 
-2003-03-13  Danny Smith  <dannysmith@users.sourceforge,net> 
+2003-03-13  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* deffilep.y (def_import):  Use default extension of "dll"
 	if no extension provided in parsed IMPORT definition.
@@ -229,7 +244,7 @@
 	* emultempl/pe.em: Likewise.
 	* emultempl/ticoff.em: Likewise.
 	* emultempl/elf32.em: Likewise.  Don't duplicate long options either.
-	(gld${EMULATION_NAME}_add_sysroot): Prototype.	
+	(gld${EMULATION_NAME}_add_sysroot): Prototype.
 	* emultempl/armelf.em (PARSE_AND_LIST_LONGOPTS): Don't duplicate
 	options.
 	* emultempl/hppaelf.em (PARSE_AND_LIST_LONGOPTS): Likewise.
@@ -279,7 +294,7 @@
 	* gen-doc.texi: Set ARM and HPPA variables.
 	* ld.texinfo: Fix typos and obvious texinfo mistakes.  Make section
 	title capitalization more consistent.  Add missing menu entries for
-	machine-specific sections and conditionalize them consistently. 
+	machine-specific sections and conditionalize them consistently.
 	Conditionalize text that is irrelevant when SingleFormat is set.
 	Add @group divisions to improve page breaks in long examples.
 	Use @iftex/@ifnottex instead of @iftex/@ifinfo so that HTML output
@@ -335,10 +350,10 @@
 2003-02-17  Nick Clifton  <nickc@redhat.com>
 
 	* ldmain.c (main) Default allow_shlib_undefined to true.
-        * lexsup.c (ld_options): Add --no-allow-shlib-undefined.
-        (parse_args): Parse the new switch.
-        * ld.texinfo: Document new switch and default behaviour of
-        allowing undefined symbols in shared libraries.
+	* lexsup.c (ld_options): Add --no-allow-shlib-undefined.
+	(parse_args): Parse the new switch.
+	* ld.texinfo: Document new switch and default behaviour of
+	allowing undefined symbols in shared libraries.
 
 2003-02-11 Dmitry Diky  <diwil@mail.ru>
 
