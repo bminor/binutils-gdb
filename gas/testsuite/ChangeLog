@@ -1,3 +1,8 @@
+Sat Aug 28 00:16:12 1999  Jerry Quinn <jquinn@nortelnetworks.com>
+
+	  * gas/testsuite/gas/hppa/basic/basic.exp (do_fp_comp2):  New.
+	  * gas/testsuite/gas/hppa/basic/fp_comp2.s:  New.
+
 1999-08-20  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* gas/i386/general.s, gas/i386/general.l: Add .code16gcc
