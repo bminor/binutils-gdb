@@ -1204,7 +1204,7 @@ backtrace_command (arg, from_tty)
       argc = 0;
       for (i = 0; (argv[i] != (char *) NULL); i++)
 	{
-	  int j;
+	  unsigned int j;
 
 	  for (j = 0; (j < strlen (argv[i])); j++)
 	    argv[i][j] = tolower (argv[i][j]);

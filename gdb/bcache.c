@@ -85,19 +85,18 @@ expand_hash_table (struct bcache *bcache)
     4194301, 8388617, 16777213, 33554467, 67108859, 134217757,
     268435459, 536870923, 1073741827, 2147483659UL
   };
-  int new_num_buckets;
+  unsigned int new_num_buckets;
   struct bstring **new_buckets;
-  int i;
+  unsigned int i;
 
   /* Find the next size.  */
+  new_num_buckets = bcache->num_buckets * 2;
   for (i = 0; i < (sizeof (sizes) / sizeof (sizes[0])); i++)
     if (sizes[i] > bcache->num_buckets)
       {
 	new_num_buckets = sizes[i];
 	break;
       }
-  if (i >= (sizeof (sizes) / sizeof (sizes[0])))
-    new_num_buckets = bcache->num_buckets * 2;
 
   /* Allocate the new table.  */
   {
@@ -233,7 +232,7 @@ print_bcache_statistics (struct bcache *c, char *type)
 
   /* Count the number of occupied buckets, and measure chain lengths.  */
   {
-    int b;
+    unsigned int b;
     int *chain_length
       = (int *) alloca (c->num_buckets * sizeof (*chain_length));
 
@@ -275,7 +274,7 @@ print_bcache_statistics (struct bcache *c, char *type)
 
   printf_filtered ("  Cached '%s' statistics:\n", type);
   printf_filtered ("    Total object count:  %ld\n", c->total_count);
-  printf_filtered ("    Unique object count: %ld\n", c->unique_count);
+  printf_filtered ("    Unique object count: %lu\n", c->unique_count);
   printf_filtered ("    Percentage of duplicates, by count: ");
   print_percentage (c->total_count - c->unique_count, c->total_count);
   printf_filtered ("\n");
@@ -301,7 +300,7 @@ print_bcache_statistics (struct bcache *c, char *type)
 		   median_chain_length);
   printf_filtered ("    Average hash chain length: ");
   if (c->num_buckets > 0)
-    printf_filtered ("%3ld\n", c->unique_count / c->num_buckets);
+    printf_filtered ("%3lu\n", c->unique_count / c->num_buckets);
   else
     printf_filtered ("(not applicable)\n");
   printf_filtered ("    Maximum hash chain length: %3d\n", max_chain_length);

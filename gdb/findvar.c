@@ -1006,7 +1006,7 @@ supply_register (regno, val)
 #endif
 
 CORE_ADDR
-generic_target_read_pc (pid)
+generic_target_read_pc (int pid)
 {
 #ifdef PC_REGNUM
   if (PC_REGNUM >= 0)

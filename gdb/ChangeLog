@@ -1,3 +1,17 @@
+2000-02-07  Jim Kingdon  <kingdon@redhat.com>
+
+	Clean up compiler warnings:
+	* bcache.h, bcache.c, c-valprint.c, coffread.c, stabsread.c,
+	stack.c, valprint.c: Change variables to unsigned.
+	* bcache.c: Rearrange to avoid warnings about variables not being set.
+	* c-lang.c, ch-lang.c, f-lang.c, m2-lang.c: Include valprint.h
+	rather than declaring print_max and repeat_count_threashold
+	ourselves (incorrectly).
+	* valprint.h: Do declare repeat_count_threashold.
+	* ch-exp.c: Use default case for internal error.
+	* findvar.c: Don't omit argument type.
+	* symtab.c: Remove unused variable.
+
 2000-02-04  Nick Clifton  <nickc@cygnus.com>
 
 	* config/arm/tm-arm.h (LOWEST_PC): Define.

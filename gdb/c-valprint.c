@@ -87,7 +87,7 @@ c_val_print (type, valaddr, embedded_offset, address, stream, format, deref_ref,
 	         elements up to it.  */
 	      if (stop_print_at_null)
 		{
-		  int temp_len;
+		  unsigned int temp_len;
 
 		  /* Look for a NULL char. */
 		  for (temp_len = 0;

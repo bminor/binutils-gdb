@@ -26,6 +26,7 @@
 #include "language.h"
 #include "m2-lang.h"
 #include "c-lang.h"
+#include "valprint.h"
 
 extern void _initialize_m2_language PARAMS ((void));
 static struct type *m2_create_fundamental_type PARAMS ((struct objfile *, int));
@@ -124,8 +125,6 @@ m2_printstr (stream, string, length, width, force_ellipses)
   int in_quotes = 0;
   int need_comma = 0;
   extern int inspect_it;
-  extern int repeat_count_threshold;
-  extern int print_max;
 
   if (length == 0)
     {

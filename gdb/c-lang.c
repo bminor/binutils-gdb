@@ -25,6 +25,7 @@
 #include "parser-defs.h"
 #include "language.h"
 #include "c-lang.h"
+#include "valprint.h"
 
 extern void _initialize_c_language PARAMS ((void));
 static void c_emit_char (int c, struct ui_file * stream, int quoter);
@@ -110,8 +111,6 @@ c_printstr (stream, string, length, width, force_ellipses)
   int in_quotes = 0;
   int need_comma = 0;
   extern int inspect_it;
-  extern int repeat_count_threshold;
-  extern int print_max;
 
   /* If the string was not truncated due to `set print elements', and
      the last byte of it is a null, we don't print that, in traditional C

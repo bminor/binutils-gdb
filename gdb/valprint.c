@@ -684,7 +684,7 @@ print_binary_chars (stream, valaddr, len)
 #define BITS_IN_BYTES 8
 
   unsigned char *p;
-  int i;
+  unsigned int i;
   int b;
 
   /* Declared "int" so it will be signed.

@@ -26,6 +26,7 @@
 #include "parser-defs.h"
 #include "language.h"
 #include "ch-lang.h"
+#include "valprint.h"
 
 extern void _initialize_chill_language PARAMS ((void));
 
@@ -127,8 +128,6 @@ chill_printstr (stream, string, length, width, force_ellipses)
   int in_control_form = 0;
   int need_slashslash = 0;
   unsigned int c;
-  extern int repeat_count_threshold;
-  extern int print_max;
 
   if (length == 0)
     {
