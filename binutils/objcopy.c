@@ -293,31 +293,52 @@ copy_usage (stream, exit_status)
      FILE *stream;
      int exit_status;
 {
+  fprintf (stream, _("Usage: %s <switches> in-file [out-file]\n"), program_name);
+  fprintf (stream, _(" The switches are:\n"));
   fprintf (stream, _("\
-Usage: %s [-vVSpgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-b byte]\n\
-       [-j section] [-R section]\n\
-       [-i interleave] [--interleave=interleave] [--byte=byte]\n\
-       [--input-target=bfdname] [--output-target=bfdname] [--target=bfdname]\n\
-       [--strip-all] [--strip-debug] [--strip-unneeded] [--discard-all]\n\
-       [--discard-locals] [--debugging]\n\
-       [--only-section=section] [--remove-section=section]\n"),
-	   program_name);
-  fprintf (stream, _("\
-       [--gap-fill=val] [--pad-to=address] [--preserve-dates]\n\
-       [--set-start=val] \n\
-       [--change-start=incr] [--change-addresses=incr] \n\
-       (--adjust-start   and  --adjust-vma are aliases for these two) \n\
-       [--change-section-address=section{=,+,-}val]\n\
-       (--adjust-section-vma is an alias for --change-section-address)\n\
-       [--change-section-lma=section{=,+,-}val]\n\
-       [--change-section-vma=section{=,+,-}val]\n\
-       [--adjust-warnings] [--no-adjust-warnings]\n\
-       [--change-warnings] [--no-change-warnings]\n\
-       [--set-section-flags=section=flags] [--add-section=sectionname=filename]\n\
-       [--keep-symbol symbol] [-K symbol] [--strip-symbol symbol] [-N symbol]\n\
-       [--localize-symbol symbol] [-L symbol] [--weaken-symbol symbol]\n\
-       [-W symbol] [--change-leading-char] [--remove-leading-char] [--weaken]\n\
-       [--verbose] [--version] [--help] in-file [out-file]\n"));
+  -I --input-target <bfdname>      Assume input file is in format <bfdname>\n\
+  -O --output-target <bfdname>     Create an output file in format <bfdname>\n\
+  -F --target <bfdname>            Set both input and output format to <bfdname>\n\
+     --debugging                   Convert debugging information, if possible\n\
+  -p --preserve-dates              Copy modified/access timestamps to the output\n\
+  -j --only-section <name>         Only copy section <name> into the output\n\
+  -R --remove-section <name>       Remove section <name> from the output\n\
+  -S --strip-all                   Remove all symbol and relocation information\n\
+  -g --strip-debug                 Remove all debugging symbols\n\
+     --strip-unneeded              Remove all symbols not needed by relocations\n\
+  -N --strip-symbol <name>         Do not copy symbol <name>\n\
+  -K --keep-symbol <name>          Only copy symbol <name>\n\
+  -L --localize-symbol <name>      Force symbol <name> to be marked as a local\n\
+  -W --weaken-symbol <name>        Force symbol <name> to be marked as a weak\n\
+     --weaken                      Force all global symbols to be marked as weak\n\
+  -x --discard-all                 Remove all non-global symbols\n\
+  -X --discard-locals              Remove any compiler-generated symbols\n\
+  -i --interleave <number>         Only copy one out of every <number> bytes\n\
+  -b --byte <num>                  Select byte <num> in every interleaved block\n\
+     --gap-fill <val>              Fill gaps between sections with <val>\n\
+     --pad-to <addr>               Pad the last section up to address <addr>\n\
+     --set-start <addr>            Set the start address to <addr>\n\
+    {--change-start|--adjust-start} <incr>\n\
+                                   Add <incr> to the start address\n\
+    {--change-addresses|--adjust-vma} <incr>\n\
+                                   Add <incr> to LMA, VMA and start addresses\n\
+    {--change-section-address|--adjust-section-vma} <name>{=|+|-}<val>\n\
+                                   Change LMA and VMA of section <name> by <val>\n\
+     --change-section-lma <name>{=|+|-}<val>\n\
+                                   Change the LMA of section <name> by <val>\n\
+     --change-section-vma <name>{=|+|-}<val>\n\
+                                   Change the VMA of section <name> by <val>\n\
+    {--[no-]change-warnings|--[no-]adjust-warnings}\n\
+                                   Warn if a named section does not exist\n\
+     --set-section-flags <name>=<flags>\n\
+                                   Set section <name>'s properties to <flags>\n\
+     --add-section <name>=<file>   Add section <name> found in <file> to output\n\
+     --change-leading-char         Force output format's leading character style\n\
+     --remove-leading-char         Remove leading character from global symbols\n\
+  -v --verbose                     List all object files modified\n\
+  -V --version                     Display this program's version number\n\
+  -h --help                        Display this output\n\
+"));
   list_supported_targets (program_name, stream);
   if (exit_status == 0)
     fprintf (stream, _("Report bugs to bug-gnu-utils@gnu.org\n"));
@@ -329,14 +350,27 @@ strip_usage (stream, exit_status)
      FILE *stream;
      int exit_status;
 {
+  fprintf (stream, _("Usage: %s <switches> in-file(s)\n"), program_name);
+  fprintf (stream, _(" The switches are:\n"));
   fprintf (stream, _("\
-Usage: %s [-vVsSpgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-R section]\n\
-       [--input-target=bfdname] [--output-target=bfdname] [--target=bfdname]\n\
-       [--strip-all] [--strip-debug] [--strip-unneeded] [--discard-all]\n\
-       [--discard-locals] [--keep-symbol symbol] [-K symbol]\n\
-       [--strip-symbol symbol] [-N symbol] [--remove-section=section]\n\
-       [-o file] [--preserve-dates] [--verbose] [--version] [--help] file...\n"),
-	   program_name);
+  -I --input-target <bfdname>      Assume input file is in format <bfdname>\n\
+  -O --output-target <bfdname>     Create an output file in format <bfdname>\n\
+  -F --target <bfdname>            Set both input and output format to <bfdname>\n\
+  -p --preserve-dates              Copy modified/access timestamps to the output\n\
+  -R --remove-section <name>       Remove section <name> from the output\n\
+  -s --strip-all                   Remove all symbol and relocation information\n\
+  -g -S --strip-debug              Remove all debugging symbols\n\
+     --strip-unneeded              Remove all symbols not needed by relocations\n\
+  -N --strip-symbol <name>         Do not copy symbol <name>\n\
+  -K --keep-symbol <name>          Only copy symbol <name>\n\
+  -x --discard-all                 Remove all non-global symbols\n\
+  -X --discard-locals              Remove any compiler-generated symbols\n\
+  -v --verbose                     List all object files modified\n\
+  -V --version                     Display this program's version number\n\
+  -h --help                        Display this output\n\
+  -o <file>                        Place stripped output into <file>\n\
+"));
+
   list_supported_targets (program_name, stream);
   if (exit_status == 0)
     fprintf (stream, _("Report bugs to bug-gnu-utils@gnu.org\n"));
