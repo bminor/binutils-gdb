@@ -354,8 +354,7 @@ OBJ_FORMAT_CFILES = \
 	config/obj-evax.c \
 	config/obj-hp300.c \
 	config/obj-ieee.c \
-	config/obj-som.c \
-	config/obj-vms.c
+	config/obj-som.c
 
 OBJ_FORMAT_HFILES = \
 	config/obj-aout.h \
@@ -366,8 +365,7 @@ OBJ_FORMAT_HFILES = \
 	config/obj-evax.h \
 	config/obj-hp300.h \
 	config/obj-ieee.h \
-	config/obj-som.h \
-	config/obj-vms.h
+	config/obj-som.h
 
 # Emulation header files in config
 
@@ -598,8 +596,6 @@ obj-multi.o : $(srcdir)/config/obj-multi.c
 	$(COMPILE) -c $(srcdir)/config/obj-multi.c
 obj-som.o : $(srcdir)/config/obj-som.c
 	$(COMPILE) -c $(srcdir)/config/obj-som.c
-obj-vms.o : $(srcdir)/config/obj-vms.c
-	$(COMPILE) -c $(srcdir)/config/obj-vms.c
 
 e-mipself.o : $(srcdir)/config/e-mipself.c
 	$(COMPILE) -c $(srcdir)/config/e-mipself.c
@@ -1518,11 +1514,6 @@ DEPTC_vax_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/vax-inst.h $(INCDIR)/obstack.h subsegs.h \
   $(INCDIR)/elf/vax.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/opcode/vax.h \
   $(INCDIR)/safe-ctype.h
-DEPTC_vax_vms = $(INCDIR)/symcat.h $(srcdir)/config/obj-vms.h \
-  $(srcdir)/config/tc-vax.h $(INCDIR)/aout/stab_gnu.h \
-  $(INCDIR)/aout/stab.def $(srcdir)/config/vax-inst.h \
-  $(INCDIR)/obstack.h subsegs.h $(INCDIR)/opcode/vax.h \
-  $(INCDIR)/safe-ctype.h
 DEPTC_w65_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-w65.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/w65.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h \
@@ -2043,10 +2034,6 @@ DEPOBJ_vax_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-vax.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   struc-symbol.h dwarf2dbg.h $(INCDIR)/aout/aout64.h
-DEPOBJ_vax_vms = $(INCDIR)/symcat.h $(srcdir)/config/obj-vms.h \
-  $(srcdir)/config/tc-vax.h $(INCDIR)/aout/stab_gnu.h \
-  $(INCDIR)/aout/stab.def $(INCDIR)/safe-ctype.h subsegs.h \
-  $(INCDIR)/obstack.h
 DEPOBJ_w65_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-w65.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/w65.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h \
@@ -2404,8 +2391,6 @@ DEP_vax_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-vax.h \
 DEP_vax_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-vax.h
-DEP_vax_vms = $(srcdir)/config/obj-vms.h $(srcdir)/config/tc-vax.h \
-  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
 DEP_w65_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-w65.h \
   $(INCDIR)/symcat.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/w65.h \
   $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h

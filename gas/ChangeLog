@@ -1,3 +1,14 @@
+2005-03-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (OBJ_FORMAT_CFILES): Prune config/obj-vms.c.
+	(OBJ_FORMAT_HFILES): Prune config/obj-vms.h.
+	(obj-vms.o): Delete rule.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2005-03-18  C Jaiprakash  <cjaiprakash@noida.hcltech.com>
 
 	* config/tc-m68k.c (m68k_elf_final_processing): Set file specific

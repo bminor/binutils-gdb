@@ -38,8 +38,6 @@ config/obj-ieee.c
 config/obj-ieee.h
 config/obj-som.c
 config/obj-som.h
-config/obj-vms.c
-config/obj-vms.h
 config/tc-a29k.c
 config/tc-a29k.h
 config/tc-alpha.c
