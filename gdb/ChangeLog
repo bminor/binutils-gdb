@@ -1,3 +1,19 @@
+2004-04-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* vax-tdep.c (vax_store_arguments, vax_push_dummy_call)
+	(vax_unwind_dummy_id): New functions.
+	(vax_push_dummy_frame, vax_pop_frame): Remove functions.
+	(vax_call_dummy_words, sizeof_vax_call_dummy_words): Remove
+	variables.
+	(vax_fix_call_dummy): Remove function.
+	(vax_gdbarch_init): Set push_dummy_call and unwind_dummy_id.
+	Don't set deprecated_push_dummy_frame, deprecated_pop_frame,
+	call_dummy_location, deprecated_call_dummy_words,
+	deprecated_sizeof_call_dummy_words,
+	deprecated_call_dummy_breakpoint_offset,
+	deprecated_use_generic_dummy_frames, deprecated_pc_in_call_dummy,
+	and deprecated_dummy_write_sp.
+
 2004-04-13  David Carlton  <carlton@kealia.com>
 
 	* MAINTAINERS: Move myself to "paper trail" section.
