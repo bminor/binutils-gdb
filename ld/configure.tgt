@@ -457,7 +457,11 @@ powerpc*-*-linux*)
 		tdir_elf32ppcsim=$tdir_elf32ppc ;;
 	*)	targ_emul=elf32ppclinux
 		targ_extra_emuls="elf32ppc elf32ppcsim"
-		targ_extra_libpath=elf32ppc ;;
+		targ_extra_libpath=elf32ppc
+		if test "${want64}" = "true"; then
+		  targ_extra_emuls="$targ_extra_emuls elf64ppc"
+		fi
+		;;
 	esac ;;
 powerpc*le-*-elf* | powerpc*le-*-eabi* | powerpc*le-*-solaris* \
   | powerpc*le-*-sysv* | powerpc*le-*-vxworks*)

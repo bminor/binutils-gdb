@@ -1,5 +1,10 @@
 2002-07-31  H.J. Lu <hjl@gnu.org>
 
+	* configure.tgt (powerpc*-*-linux*): Enable elf64ppc for
+	--enable-64-bit-bfd.
+
+2002-07-31  H.J. Lu <hjl@gnu.org>
+
 	* configure.tgt: Enable x86-64 emulation for Linux/i386 if
 	64bit BFD is selected.
 
