@@ -1,3 +1,13 @@
+Mon Aug  9 09:37:18 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* config/i386-linux.mt (SELECT_VECS): Support bfd_elf32_i386_vec.
+	* config/m68k-elf.mt (SELECT_VECS): Support m68kcoff_vec.
+	* config/i386-elf.mt (SELECT_VECS): Support i386coff_vec.
+	* config/hppa-elf.mt (SELECT_VECS): Support hppa_vec.
+	* config/sparc-elf.mt (SELECT_VECS): Support sunos_big_vec.
+	* config/i386-sco.mt (SELECT_VECS): Don't define; Ian says it was
+	just a hack.
+
 Mon Aug  9 13:15:00 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* config/m88k-coff.mt (DEFAULT_VEC -> DEFAULT_VECTOR): renamed.
