@@ -1,3 +1,8 @@
+Fri May 22 16:00:00 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* cgen-asm.in (insert_normal): Handle empty fields and 64 bit hosts.
+	* cgen-dis.in (extract_normal): Likewise.
+
 start-sanitize-sky
 Fri May 22 11:44:10 1998  Doug Evans  <devans@canuck.cygnus.com>
 
