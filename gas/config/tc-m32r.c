@@ -475,6 +475,7 @@ can_make_parallel (a, b)
      m32r_insn * a;
      m32r_insn * b;
 {
+/* start-sanitize-m32rx */
   PIPE_ATTR a_pipe;
   PIPE_ATTR b_pipe;
 
@@ -495,6 +496,7 @@ can_make_parallel (a, b)
       || b_pipe == PIPE_O)
     return "Instructions share the same execution pipeline";
 
+/* end-sanitize-m32rx */
   if (   writes_to_dest_reg (a->insn)
       && writes_to_dest_reg (b->insn)
       && (get_dest_reg (a->fields) == get_dest_reg (b->fields)))
@@ -561,7 +563,8 @@ assemble_parallel_insn (str, str2)
       as_bad (errmsg);
       return;
     }
-
+  
+/* start-sanitize-m32rx */
   /* Check to see if this is an allowable parallel insn.  */
   if (CGEN_INSN_ATTR (first.insn, CGEN_INSN_PIPE) == PIPE_NONE)
     {
@@ -575,6 +578,7 @@ assemble_parallel_insn (str, str2)
       as_bad ("instruction '%s' is for the M32RX only", str);
       return;
     }
+/* end-sanitize-m32rx */
   
   *str2 = '|';       /* Restore the original assembly text, just in case it is needed.  */
   str3  = str;       /* Save the original string pointer.  */
@@ -592,6 +596,7 @@ assemble_parallel_insn (str, str2)
       return;
     }
 
+/* start-sanitize-m32rx */
   /* Check it.  */
   if (! enable_m32rx
       && CGEN_INSN_ATTR (second.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
@@ -609,6 +614,7 @@ assemble_parallel_insn (str, str2)
 	  return;
 	}
     }
+/* end-sanitize-m32rx */
 
   /* We assume that if the first instruction writes to a register that is
      read by the second instruction it is because the programmer intended
