@@ -1405,13 +1405,12 @@ read_xcoff_symtab (objfile, nsyms)
 	    continue;
 
 	  default:
-	    /* xlc and old versions of gcc put each variable in a
-	       separate csect, so we get an XTY_SD.  But new (2.5?
-	       2.6? something like that) gcc's put several variables
-	       in a csect, so that each variable only gets an XTY_LD.
-	       We still need to record them.  This will typically be
-	       XMC_RW; I suspect XMC_RO and XMC_BS might be possible
-	       too.  */
+	    /* xlc puts each variable in a separate csect, so we get
+	       an XTY_SD for each variable.  But gcc puts several
+	       variables in a csect, so that each variable only gets
+	       an XTY_LD.  We still need to record them.  This will
+	       typically be XMC_RW; I suspect XMC_RO and XMC_BS might
+	       be possible too.  */
 	    break;
 	  }
 
