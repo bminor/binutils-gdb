@@ -23,146 +23,160 @@
 #include "table.h"
 #include "filter.h"
 
-#include "ld-decode.h"
-#include "ld-cache.h"
-#include "ld-insn.h"
-
 #include "igen.h"
+
+#include "ld-insn.h"
+#include "ld-decode.h"
+
+#include "gen.h"
 
 #include "gen-semantics.h"
 #include "gen-support.h"
 
 static void
-print_support_function_name(lf *file,
-			    table_entry *function,
-			    int is_function_definition)
+print_support_function_name (lf *file,
+			     function_entry *function,
+			     int is_function_definition)
 {
-  if (it_is("internal", function->fields[insn_flags])) {
-    lf_print_function_type_function(file, print_semantic_function_type, "INLINE_SUPPORT",
-				    (is_function_definition ? "\n" : " "));
-    print_function_name(file,
-			function->fields[function_name],
-			NULL,
-			function_name_prefix_semantics);
-    lf_printf(file, "\n(");
-    print_semantic_function_formal(file);
-    lf_printf(file, ")");
-    if (!is_function_definition)
-      lf_printf(file, ";");
-    lf_printf(file, "\n");
-  }
-  else {
-    /* map the name onto a globally valid name */
-    if (!is_function_definition && strcmp(global_name_prefix, "") != 0) {
-      lf_indent_suppress(file);
-      lf_printf(file, "#define %s %s%s\n",
-		function->fields[function_name],
-		global_name_prefix,
-		function->fields[function_name]);
+  if (function->is_internal)
+    {
+      lf_print__function_type_function (file, print_semantic_function_type,
+					"INLINE_SUPPORT",
+					(is_function_definition ? "\n" : " "));
+      print_function_name (file,
+			   function->name,
+			   NULL,
+			   NULL,
+			   NULL,
+			   function_name_prefix_semantics);
+      lf_printf (file, "\n(");
+      lf_indent (file, +1);
+      print_semantic_function_formal (file, 0);
+      lf_indent (file, -1);
+      lf_printf (file, ")");
+      if (!is_function_definition)
+	lf_printf (file, ";");
+      lf_printf (file, "\n");
     }
-    lf_print_function_type(file,
-			   function->fields[function_type],
-			   "INLINE_SUPPORT",
-			   (is_function_definition ? "\n" : " "));
-    lf_printf(file, "%s%s\n(",
-	      global_name_prefix,
-	      function->fields[function_name]);
-    if (generate_smp)
-      lf_printf(file, "sim_cpu *cpu");
-    else
-      lf_printf(file, "SIM_DESC sd");
-    if (strcmp(function->fields[function_param], "") != 0)
-      lf_printf(file, ", %s", function->fields[function_param]);
-    lf_printf(file, ")%s", (is_function_definition ? "\n" : ";\n"));
-  }
+  else
+    {
+      /* map the name onto a globally valid name */
+      if (!is_function_definition
+	  && strcmp (options.prefix.global.name, "") != 0)
+	{
+	  lf_indent_suppress (file);
+	  lf_printf (file, "#define %s %s%s\n",
+		     function->name,
+		     options.prefix.global.name,
+		     function->name);
+	}
+      lf_print__function_type (file,
+			       function->type,
+			       "INLINE_SUPPORT",
+			       (is_function_definition ? "\n" : " "));
+      lf_printf (file, "%s%s\n(",
+		 options.prefix.global.name,
+		 function->name);
+      if (options.gen.smp)
+	lf_printf (file,
+		   "sim_cpu *cpu, %sinstruction_address cia, int MY_INDEX",
+		   options.prefix.global.name);
+      else
+	lf_printf (file,
+		   "SIM_DESC sd, %sinstruction_address cia, int MY_INDEX",
+		   options.prefix.global.name);
+      if (function->param != NULL
+	  && strlen (function->param) > 0)
+	lf_printf (file, ", %s", function->param);
+      lf_printf (file, ")%s", (is_function_definition ? "\n" : ";\n"));
+    }
 }
 
 
 static void
-support_h_function(insn_table *entry,
-		   lf *file,
-		   void *data,
-		   table_entry *function)
+support_h_function (lf *file,
+		    function_entry *function,
+		    void *data)
 {
-  ASSERT(function->fields[function_type] != NULL);
-  ASSERT(function->fields[function_param] != NULL);
-  print_support_function_name(file,
-			      function,
-			      0/*!is_definition*/);
+  ASSERT (function->type != NULL);
+  print_support_function_name (file,
+			       function,
+			       0/*!is_definition*/);
   lf_printf(file, "\n");
 }
 
 
 extern void
-gen_support_h(insn_table *table,
-	      lf *file)
+gen_support_h (lf *file,
+	       insn_table *table)
 {
   /* output the definition of `_SD'*/
-  if (generate_smp) {
-    lf_printf(file, "#define _SD cpu\n");
-    lf_printf(file, "#define SD cpu->sd\n");
-    lf_printf(file, "#define CPU cpu\n");
-  }
-  else {
-    lf_printf(file, "#define _SD sd\n");
-    lf_printf(file, "#define SD sd\n");
-    lf_printf(file, "#define CPU (&sd->cpu)\n");
-  }
+  if (options.gen.smp) 
+    {
+      lf_printf(file, "#define _SD cpu, cia, MY_INDEX\n");
+      lf_printf(file, "#define SD CPU_STATE (cpu)\n");
+      lf_printf(file, "#define CPU cpu\n");
+    }
+  else
+    {
+      lf_printf(file, "#define _SD sd, cia, MY_INDEX\n");
+      lf_printf(file, "#define SD sd\n");
+      lf_printf(file, "#define CPU (STATE_CPU (sd, 0))\n");
+    }
   lf_printf(file, "\n");
   /* output a declaration for all functions */
-  insn_table_traverse_function(table,
-			       file, NULL,
-			       support_h_function);
+  function_entry_traverse (file, table->functions,
+			   support_h_function,
+			   NULL);
   lf_printf(file, "\n");
   lf_printf(file, "#if defined(SUPPORT_INLINE)\n");
   lf_printf(file, "# if ((SUPPORT_INLINE & INCLUDE_MODULE)\\\n");
   lf_printf(file, "      && (SUPPORT_INLINE & INCLUDED_BY_MODULE))\n");
-  lf_printf(file, "#  include \"%ssupport.c\"\n", global_name_prefix);
+  lf_printf(file, "#  include \"%ssupport.c\"\n", options.prefix.global.name);
   lf_printf(file, "# endif\n");
   lf_printf(file, "#endif\n");
 }
 
 static void
-support_c_function(insn_table *table,
-		   lf *file,
-		   void *data,
-		   table_entry *function)
+support_c_function (lf *file,
+		    function_entry *function,
+		    void *data)
 {
-  ASSERT (function->fields[function_type] != NULL);
+  ASSERT (function->type != NULL);
   print_support_function_name (file,
 			       function,
 			       1/*!is_definition*/);
-  table_entry_print_cpp_line_nr (file, function);
   lf_printf (file, "{\n");
   lf_indent (file, +2);
-  if (function->annex == NULL)
-    error ("%s:%d: Function without body (or null statement)",
-	   function->file_name,
-	   function->line_nr);
-    lf_print__c_code (file, function->annex);
-  if (it_is ("internal", function->fields[insn_flags]))
+  if (function->code == NULL)
+    error (function->line,
+	   "Function without body (or null statement)");
+  lf_print__line_ref (file, function->code->line);
+  table_print_code (file, function->code);
+  if (function->is_internal)
     {
       lf_printf (file, "sim_io_error (sd, \"Internal function must longjump\\n\");\n");
       lf_printf (file, "return cia;\n");
     }
   lf_indent (file, -2);
   lf_printf (file, "}\n");
-  lf_print__internal_reference (file);
+  lf_print__internal_ref (file);
   lf_printf (file, "\n");
 }
 
 
 void
-gen_support_c(insn_table *table,
-	      lf *file)
+gen_support_c (lf *file,
+	       insn_table *table)
 {
   lf_printf(file, "#include \"sim-main.h\"\n");
-  lf_printf(file, "#include \"%sidecode.h\"\n", global_name_prefix);
-  lf_printf(file, "#include \"%ssupport.h\"\n", global_name_prefix);
+  lf_printf(file, "#include \"%sidecode.h\"\n", options.prefix.idecode.name);
+  lf_printf(file, "#include \"%sitable.h\"\n", options.prefix.itable.name);
+  lf_printf(file, "#include \"%ssupport.h\"\n", options.prefix.support.name);
   lf_printf(file, "\n");
 
   /* output a definition (c-code) for all functions */
-  insn_table_traverse_function(table,
-			       file, NULL,
-			       support_c_function);
+  function_entry_traverse (file, table->functions,
+			   support_c_function,
+			   NULL);
 }

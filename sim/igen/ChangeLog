@@ -1,3 +1,81 @@
+Tue Sep  9 03:30:26 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* igen.c (gen_run_c): New function. Generate sim_engine_run that
+ 	looks at the currently selected architecture.
+
+	* gen-engine.c, gen-idecode.c: Add multi-sim support - generate
+ 	one engine per model.
+	
+	* gen-semantics.c, gen-icache.c gen-support.c:
+ 	Update.
+
+	* ld-insn.h, ld-insn-h (load_insn_table): Rewrite.  table.h only
+ 	returns a line at a time.  Parse multi-word instructions.  Add
+ 	multi-sim support.
+
+	* table.h, table.c: Simplify.  Only parse a single line at a time.
+  	ld-insn can handle the rest.
+
+	* filter.h, filter.c (filter_parse, filter_add, filter_is_subset,
+ 	filter_is_common, filter_is_member, filter_next): New filter
+ 	operations.
+	(dump_filter): Ditto.
+	
+	* gen.h, gen.c: New file.  Takes the insn table and turns it into
+ 	a set of decode tables and semantic functions.
+	
+	* ld-insn.c: Copy generator code from here.
+	* gen.c: To here.
+
+Fri Aug  8 11:43:45 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* misc.h (NZALLOC): Allocate an N element array of TYPE.
+
+	* table.h, table.c: Simplify table parser so that it only
+ 	understands colon delimited lines and code blocks.
+	(table_read): Parse '{' ... '}' as a code block.
+	(table_print_code): New function, print out a code block to file.
+	(main): Add suport for standalone testing.
+	
+	* ld-insn.h, ld-insn.c:
+	
+	
+Mon Sep  1 11:41:12 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen-idecode.c (error_leaf_contains_multiple_insn): Make static.
+	(print_jump_definition, print_jump, print_jump_internal_function,
+ 	print_jump_insn, print_jump_until_stop_body): Delete, moved to
+ 	sim-engine.c
+
+	* igen.c (print_itrace_format): Delete unused variable chp.
+	(gen-engine.h): Include.
+
+	* table.c (current_file_name, current_line_entry,
+ 	current_line_entry): Make static.
+
+Wed Aug  6 12:31:17 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in: Define AR_FOR_BUILD, AR_FLAGS_FOR_BUILD,
+ 	RANLIB_FOR_BUILD and CFLAGS_FOR_BUILD.
+	* configure.in: Include simulator common/aclocal.m4.
+	* configure.in: Add --enable-sim-warnings option.
+	* configure: Re-generate.
+	
+	* Makefile.in: Use.
+
+	* Makefile.in (tmp-filter): New rule.
+	(igen.o, tmp-table, tmp-ld-decode, tmp-ld-cache, tmp-ld-insn,
+ 	ld-decode.o, ld-cache.o, ld-insn.o): Fix dependencies.
+	
+	* gen.h, gen.c: New files.
+  	
+	* Makefile.in (gen.o, tmp-gen): New rules, update all
+ 	dependencies.
+	
+Tue Jun 24 11:46:45 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ld-insn.c (load_insn_table): Accept %s as a function type.
+
 Thu Jun  5 17:14:32 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* igen.c (print_itrace_prefix): Move printing of insn prefix to

@@ -24,12 +24,12 @@
 #include "lf.h"
 #include "table.h"
 #include "filter.h"
-
-#include "ld-decode.h"
-#include "ld-cache.h"
-#include "ld-insn.h"
-
 #include "igen.h"
+
+#include "ld-insn.h"
+#include "ld-decode.h"
+
+#include "gen.h"
 
 #include "gen-semantics.h"
 #include "gen-icache.h"
@@ -37,53 +37,62 @@
 
 
 static void
-print_semantic_function_header(lf *file,
-			       const char *basename,
-			       insn_bits *expanded_bits,
-			       int is_function_definition)
+print_semantic_function_header (lf *file,
+				const char *basename,
+				const char *format_name,
+				opcode_bits *expanded_bits,
+				int is_function_definition,
+				int nr_prefetched_words)
 {
   int indent;
   lf_printf(file, "\n");
-  lf_print_function_type_function(file, print_semantic_function_type, "EXTERN_SEMANTICS",
-				  (is_function_definition ? "\n" : " "));
-  indent = print_function_name(file,
-			       basename,
-			       expanded_bits,
-			       function_name_prefix_semantics);
+  lf_print__function_type_function (file, print_semantic_function_type,
+				    "EXTERN_SEMANTICS",
+				    (is_function_definition ? "\n" : " "));
+  indent = print_function_name (file,
+				basename,
+				format_name,
+				NULL,
+				expanded_bits,
+				function_name_prefix_semantics);
   if (is_function_definition)
-    lf_indent(file, +indent);
+    {
+      indent += lf_printf (file, " ");
+      lf_indent (file, +indent);
+    }
   else
-    lf_printf(file, "\n");
-  lf_printf(file, "(");
-  print_semantic_function_formal(file);
-  lf_printf(file, ")");
+    {
+      lf_printf (file, "\n");
+    }
+  lf_printf (file, "(");
+  lf_indent (file, +1);
+  print_semantic_function_formal (file, nr_prefetched_words);
+  lf_indent (file, -1);
+  lf_printf (file, ")");
   if (is_function_definition)
-    lf_indent(file, -indent);
+    {
+      lf_indent (file, -indent);
+    }
   else
-    lf_printf(file, ";");
-  lf_printf(file, "\n");
+    {
+      lf_printf (file, ";");
+    }
+  lf_printf (file, "\n");
 }
 
 void
-print_semantic_declaration(insn_table *entry,
-			   lf *file,
-			   void *data,
-			   insn *instruction,
-			   int depth)
+print_semantic_declaration (lf *file,
+			    insn_entry *insn,
+			    opcode_bits *expanded_bits,
+			    insn_opcodes *opcodes,
+			    int nr_prefetched_words)
 {
-  if (generate_expanded_instructions) {
-    ASSERT(entry->nr_insn == 1);
-    print_semantic_function_header(file,
-				   instruction->file_entry->fields[insn_name],
-				   entry->expanded_bits,
-				   0/* is not function definition*/);
-  }
-  else {
-    print_semantic_function_header(file,
-				   instruction->file_entry->fields[insn_name],
-				   NULL,
-				   0/* is not function definition*/);
-  }
+  print_semantic_function_header (file,
+				  insn->name,
+				  insn->format_name,
+				  expanded_bits,
+				  0/* is not function definition*/,
+				  nr_prefetched_words);
 }
 
 
@@ -92,226 +101,277 @@ print_semantic_declaration(insn_table *entry,
 
 
 void
-print_idecode_invalid(lf *file,
-		      const char *result,
-		      invalid_type type)
+print_idecode_invalid (lf *file,
+		       const char *result,
+		       invalid_type type)
 {
   const char *name;
-  switch (type) {
-  default: name = "unknown"; break;
-  case invalid_illegal: name = "illegal"; break;
-  case invalid_fp_unavailable: name = "fp_unavailable"; break;
-  case invalid_wrong_slot: name = "wrong_slot"; break;
-  }
-  if ((code & generate_jumps))
-    lf_printf(file, "goto %s_%s;\n",
-	      (code & generate_with_icache) ? "icache" : "semantic",
-	      name);
-  else if ((code & generate_with_icache)) {
-    lf_printf(file, "%s %sicache_%s(", result, global_name_prefix, name);
-    print_icache_function_actual(file);
-    lf_printf(file, ");\n");
-  }
-  else {
-    lf_printf(file, "%s %ssemantic_%s(", result, global_name_prefix, name);
-    print_semantic_function_actual(file);
-    lf_printf(file, ");\n");
-  }
+  switch (type)
+    {
+    default: name = "unknown"; break;
+    case invalid_illegal: name = "illegal"; break;
+    case invalid_fp_unavailable: name = "fp_unavailable"; break;
+    case invalid_wrong_slot: name = "wrong_slot"; break;
+    }
+  if (options.gen.code == generate_jumps)
+    {
+      lf_printf (file, "goto %s_%s;\n",
+		 (options.gen.icache ? "icache" : "semantic"),
+		 name);
+    }
+  else if (options.gen.icache)
+    {
+      lf_printf (file, "%s %sicache_%s (", result, options.prefix.global.name, name);
+      print_icache_function_actual (file, 0);
+      lf_printf (file, ");\n");
+    }
+  else
+    {
+      lf_printf (file, "%s %ssemantic_%s (", result, options.prefix.global.name, name);
+      print_semantic_function_actual (file, 0);
+      lf_printf (file, ");\n");
+    }
 }
 
 
 void
-print_semantic_body(lf *file,
-		    insn *instruction,
-		    insn_bits *expanded_bits,
-		    opcode_field *opcodes)
+print_semantic_body (lf *file,
+		     insn_entry *instruction,
+		     opcode_bits *expanded_bits,
+		     insn_opcodes *opcodes)
 {
-  print_itrace(file, instruction->file_entry, 0/*put_value_in_cache*/);
-
+  print_itrace (file, instruction, 0/*put_value_in_cache*/);
+  
   /* validate the instruction, if a cache this has already been done */
-  if (!(code & generate_with_icache))
-    print_idecode_validate(file, instruction, opcodes);
-
+  if (!options.gen.icache)
+    {
+      print_idecode_validate (file, instruction, opcodes);
+    }
+  
   /* generate the profiling call - this is delayed until after the
      instruction has been verified */
-  lf_printf(file, "\n");
-  lf_indent_suppress(file);
-  lf_printf(file, "#if defined(WITH_MON)\n");
-  lf_printf(file, "/* monitoring: */\n");
-  lf_printf(file, "if (WITH_MON & MONITOR_INSTRUCTION_ISSUE) {\n");
-  lf_printf(file, "  mon_issue(");
-  print_function_name(file,
-		      instruction->file_entry->fields[insn_name],
-		      NULL,
-		      function_name_prefix_itable);
-  lf_printf(file, ", cpu, cia);\n");
-  lf_printf(file, "}\n");
-  lf_indent_suppress(file);
-  lf_printf(file, "#endif\n");
-  lf_printf(file, "\n");
-
-  /* determine the new instruction address */
-  lf_printf(file, "/* keep the next instruction address handy */\n");
-  if ((code & generate_with_semantic_returning_modified_nia_only))
-    lf_printf(file, "nia = -1;\n");
-  else if ((code & generate_with_semantic_delayed_branch)) {
-    lf_printf(file, "nia.ip = cia.dp; /* instruction pointer */\n");
-    lf_printf(file, "nia.dp = cia.dp + %d; /* delayed-slot pointer */\n",
-	      insn_bit_size / 8);
-  }
-  else
-    lf_printf(file, "nia = cia + %d;\n", insn_bit_size / 8);
-
-  /* if conditional, generate code to verify that the instruction
-     should be issued */
-  if (it_is("c", instruction->file_entry->fields[insn_options])
-      || (code & generate_with_semantic_conditional_issue)) {
-    lf_printf(file, "\n");
-    lf_printf(file, "/* execute only if conditional passes */\n");
-    lf_printf(file, "if (IS_CONDITION_OK) {\n");
-    lf_indent(file, +2);
-    /* FIXME - need to log a conditional failure */
+  {
+    lf_printf (file, "\n");
+    lf_indent_suppress (file);
+    lf_printf (file, "#if defined (WITH_MON)\n");
+    lf_printf (file, "/* monitoring: */\n");
+    lf_printf (file, "if (WITH_MON & MONITOR_INSTRUCTION_ISSUE)\n");
+    lf_printf (file, "  mon_issue (");
+    print_function_name (file,
+			 instruction->name,
+			 instruction->format_name,
+			 NULL,
+			 NULL,
+			 function_name_prefix_itable);
+    lf_printf (file, ", cpu, cia);\n");
+    lf_indent_suppress (file);
+    lf_printf (file, "#endif\n");
+    lf_printf (file, "\n");
   }
   
-  /* Architecture expects r0 to be zero.  Instead of having to check
-     every read to see if it is refering to r0 just zap the r0
-     register */
-  if ((code & generate_with_semantic_zero_r0))
+  /* determine the new instruction address */
+  {
+    lf_printf(file, "/* keep the next instruction address handy */\n");
+    if (options.gen.nia == nia_is_invalid)
+      {
+	lf_printf(file, "nia = %sINVALID_INSTRUCTION_ADDRESS;\n",
+		  options.prefix.global.uname);
+      }
+    else
+      {
+	int nr_immeds = instruction->nr_words - 1;
+	if (options.gen.delayed_branch)
+	  {
+	    if (nr_immeds > 0)
+	      {
+		lf_printf (file, "cia.dp += %d * %d; %s\n",
+			   options.insn_bit_size / 8, nr_immeds,
+			   "/* skip dp immeds */");
+	      }
+	    lf_printf (file, "nia.ip = cia.dp; %s\n",
+		       "/* instruction pointer */");
+	    lf_printf (file, "nia.dp = cia.dp + %d; %s\n",
+		       options.insn_bit_size / 8,
+		       "/* delayed-slot pointer */");
+	  }
+	else
+	  {
+	    if (nr_immeds > 0)
+	      {
+		lf_printf (file, "nia = cia + %d * (%d + 1); %s\n",
+			   options.insn_bit_size / 8, nr_immeds,
+			   "/* skip immeds as well */");
+		
+	      }
+	    else
+	      {
+		lf_printf (file, "nia = cia + %d;\n",
+			   options.insn_bit_size / 8);
+	      }
+	  }
+      }
+  }
+  
+  /* if conditional, generate code to verify that the instruction
+     should be issued */
+  if (filter_is_member (instruction->options, "c")
+      || options.gen.conditional_issue)
     {
       lf_printf (file, "\n");
-      lf_printf (file, "GPR(0) = 0;\n");
+      lf_printf (file, "/* execute only if conditional passes */\n");
+      lf_printf (file, "if (IS_CONDITION_OK)\n");
+      lf_printf (file, "  {\n");
+      lf_indent (file, +4);
+      /* FIXME - need to log a conditional failure */
     }
-
+  
+  /* Architecture expects a REG to be zero.  Instead of having to
+     check every read to see if it is refering to that REG just zap it
+     at the start of every instruction */
+  if (options.gen.zero_reg)
+    {
+      lf_printf (file, "\n");
+      lf_printf (file, "GPR(%d) = 0;\n", options.gen.zero_reg_nr);
+    }
+  
   /* generate the code (or at least something */
-  lf_printf(file, "\n");
-  lf_printf(file, "/* semantics: */\n");
-  if (instruction->file_entry->annex != NULL) {
-    /* true code */
-    table_entry_print_cpp_line_nr(file, instruction->file_entry);
-    lf_printf(file, "{\n");
-    lf_indent(file, +2);
-    lf_print__c_code(file, instruction->file_entry->annex);
-    lf_indent(file, -2);
-    lf_printf(file, "}\n");
-    lf_print__internal_reference(file);
-  }
-  else if (it_is("nop", instruction->file_entry->fields[insn_flags])) {
-    lf_print__internal_reference(file);
-  }
-  else {
-    /* abort so it is implemented now */
-    table_entry_print_cpp_line_nr(file, instruction->file_entry);
-    lf_printf(file, "sim_engine_abort (SD, CPU, cia, \"%s:%d:0x%%08lx:%%s unimplemented\\n\",\n",
-	      filter_filename(instruction->file_entry->file_name),
-	      instruction->file_entry->line_nr);
-    if ((code & generate_with_semantic_delayed_branch))
-      lf_printf(file, "              (long)cia.ip,\n");
-    else
-      lf_printf(file, "              (long)cia,\n");
-    lf_printf(file, "              itable[MY_INDEX].name);\n");
-    lf_print__internal_reference(file);
-  }
-
+  lf_printf (file, "\n");
+  lf_printf (file, "/* semantics: */\n");
+  if (instruction->code != NULL)
+    {
+      /* true code */
+      lf_printf (file, "{\n");
+      lf_indent (file, +2);
+      lf_print__line_ref (file, instruction->code->line);
+      table_print_code (file, instruction->code);
+      lf_indent (file, -2);
+      lf_printf (file, "}\n");
+      lf_print__internal_ref (file);
+    }
+  else if (filter_is_member (instruction->options, "nop"))
+    {
+      lf_print__internal_ref (file);
+    }
+  else
+    {
+      /* abort so it is implemented now */
+      lf_print__line_ref (file, instruction->line);
+      lf_printf (file, "sim_engine_abort (SD, CPU, cia, \"%s:%d:0x%%08lx:%%s unimplemented\\n\",\n",
+		 filter_filename (instruction->line->file_name),
+		 instruction->line->line_nr);
+      if (options.gen.delayed_branch)
+	{
+	  lf_printf (file, "              (long)cia.ip,\n");
+	}
+      else
+	{
+	  lf_printf (file, "              (long)cia,\n");
+	}
+      lf_printf (file, "              %sitable[MY_INDEX].name);\n",
+		 options.prefix.itable.name);
+      lf_print__internal_ref (file);
+    }
+  
   /* Close off the conditional execution */
-  if (it_is("c", instruction->file_entry->fields[insn_options])
-      || (code & generate_with_semantic_conditional_issue)) {
-    lf_indent(file, -2);
-    lf_printf(file, "}\n");
-  }  
+  if (filter_is_member (instruction->options, "c")
+      || options.gen.conditional_issue)
+    {
+      lf_indent (file, -4);
+      lf_printf (file, "  }\n");
+    }  
 }
 
 static void
-print_c_semantic(lf *file,
-		 insn *instruction,
-		 insn_bits *expanded_bits,
-		 opcode_field *opcodes,
-		 cache_table *cache_rules)
+print_c_semantic (lf *file,
+		  insn_entry *instruction,
+		  opcode_bits *expanded_bits,
+		  insn_opcodes *opcodes,
+		  cache_entry *cache_rules,
+		  int nr_prefetched_words)
 {
-
-  lf_printf(file, "{\n");
-  lf_indent(file, +2);
-
-  print_my_defines(file, expanded_bits, instruction->file_entry);
-  lf_printf(file, "\n");
-  print_icache_body(file,
-		    instruction,
-		    expanded_bits,
-		    cache_rules,
-		    ((code & generate_with_direct_access)
-		     ? define_variables
-		     : declare_variables),
-		    ((code & generate_with_icache)
-		     ? get_values_from_icache
-		     : do_not_use_icache));
-
-  lf_printf(file, "%sinstruction_address nia;\n", global_name_prefix);
-  print_semantic_body(file,
-		      instruction,
-		      expanded_bits,
-		      opcodes);
-  lf_printf(file, "return nia;\n");
-
+  
+  lf_printf (file, "{\n");
+  lf_indent (file, +2);
+  
+  print_my_defines (file,
+		    instruction->name,
+		    instruction->format_name,
+		    expanded_bits);
+  lf_printf (file, "\n");
+  print_icache_body (file,
+		     instruction,
+		     expanded_bits,
+		     cache_rules,
+		     (options.gen.direct_access
+		      ? define_variables
+		      : declare_variables),
+		     (options.gen.icache
+		      ? get_values_from_icache
+		      : do_not_use_icache),
+		     nr_prefetched_words);
+  
+  lf_printf (file, "%sinstruction_address nia;\n", options.prefix.global.name);
+  print_semantic_body (file,
+		       instruction,
+		       expanded_bits,
+		       opcodes);
+  lf_printf (file, "return nia;\n");
+  
   /* generate something to clean up any #defines created for the cache */
-  if (code & generate_with_direct_access)
-    print_icache_body(file,
-		      instruction,
-		      expanded_bits,
-		      cache_rules,
-		      undef_variables,
-		      ((code & generate_with_icache)
-		       ? get_values_from_icache
-		       : do_not_use_icache));
-
-  lf_indent(file, -2);
-  lf_printf(file, "}\n");
+  if (options.gen.direct_access)
+    {
+      print_icache_body (file,
+			 instruction,
+			 expanded_bits,
+			 cache_rules,
+			 undef_variables,
+			 (options.gen.icache
+			  ? get_values_from_icache
+			  : do_not_use_icache),
+			 nr_prefetched_words);
+    }
+  
+  lf_indent (file, -2);
+  lf_printf (file, "}\n");
 }
 
 static void
-print_c_semantic_function(lf *file,
-			  insn *instruction,
-			  insn_bits *expanded_bits,
-			  opcode_field *opcodes,
-			  cache_table *cache_rules)
+print_c_semantic_function (lf *file,
+			   insn_entry *instruction,
+			   opcode_bits *expanded_bits,
+			   insn_opcodes *opcodes,
+			   cache_entry *cache_rules,
+			   int nr_prefetched_words)
 {
   /* build the semantic routine to execute the instruction */
-  print_semantic_function_header(file,
-				 instruction->file_entry->fields[insn_name],
-				 expanded_bits,
-				 1/*is-function-definition*/);
-  print_c_semantic(file,
-		   instruction,
-		   expanded_bits,
-		   opcodes,
-		   cache_rules);
+  print_semantic_function_header (file,
+				  instruction->name,
+				  instruction->format_name,
+				  expanded_bits,
+				  1/*is-function-definition*/,
+				  nr_prefetched_words);
+  print_c_semantic (file,
+		    instruction,
+		    expanded_bits,
+		    opcodes,
+		    cache_rules,
+		    nr_prefetched_words);
 }
 
 void
-print_semantic_definition(insn_table *entry,
-			  lf *file,
-			  void *data,
-			  insn *instruction,
-			  int depth)
+print_semantic_definition (lf *file,
+			   insn_entry *insn,
+			   opcode_bits *expanded_bits,
+			   insn_opcodes *opcodes,
+			   cache_entry *cache_rules,
+			   int nr_prefetched_words)
 {
-  cache_table *cache_rules = (cache_table*)data;
-  if (generate_expanded_instructions) {
-    ASSERT(entry->nr_insn == 1
-	   && entry->opcode == NULL
-	   && entry->parent != NULL
-	   && entry->parent->opcode != NULL);
-    ASSERT(entry->nr_insn == 1
-	   && entry->opcode == NULL
-	   && entry->parent != NULL
-	   && entry->parent->opcode != NULL
-	   && entry->parent->opcode_rule != NULL);
-    print_c_semantic_function(file,
-			      entry->insns,
-			      entry->expanded_bits,
-			      entry->parent->opcode,
-			      cache_rules);
-  }
-  else {
-    print_c_semantic_function(file, instruction,
-			      NULL, NULL,
-			      cache_rules);
-  }
+  print_c_semantic_function (file,
+			     insn,
+			     expanded_bits,
+			     opcodes,
+			     cache_rules,
+			     nr_prefetched_words);
 }
+
+
