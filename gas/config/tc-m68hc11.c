@@ -231,6 +231,9 @@ const pseudo_typeS md_pseudo_table[] = {
   {"file", dwarf2_directive_file, 0},
   {"loc", dwarf2_directive_loc, 0},
 
+  /* Motorola ALIS.  */
+  {"xrefb", s_ignore, 0}, /* Same as xref  */
+
   {0, 0, 0}
 };
 
