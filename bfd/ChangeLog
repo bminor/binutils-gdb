@@ -1,3 +1,8 @@
+Mon Apr 22 15:07:24 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffgen.c (coff_renumber_symbols): Correct handling of
+	BSF_NOT_AT_END common symbols.
+
 Fri Apr 19 19:21:56 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-ppc.c (record_toc): Add cast to avoid warning.
