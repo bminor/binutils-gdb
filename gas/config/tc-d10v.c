@@ -75,8 +75,8 @@ static unsigned long do_assemble PARAMS ((char *str, struct d10v_opcode **opcode
 static unsigned long d10v_insert_operand PARAMS (( unsigned long insn, int op_type,
 						   offsetT value, int left, fixS *fix));
 static int parallel_ok PARAMS ((struct d10v_opcode *opcode1, unsigned long insn1, 
-				struct d10v_opcode *opcode2, unsigned long insn2));
-
+				struct d10v_opcode *opcode2, unsigned long insn2,
+				int exec_type));
 
 struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
@@ -279,7 +279,6 @@ md_convert_frag (abfd, sec, fragP)
   asection *sec;
   fragS *fragP;
 {
-  printf ("call to md_convert_frag \n");
   abort ();
 }
 
@@ -354,7 +353,6 @@ get_reloc (op)
 {
   int bits = op->bits;
 
-  /*  printf("get_reloc:  bits=%d  address=%d\n",bits,op->flags & OPERAND_ADDR);   */
   if (bits <= 4) 
     return (0);
       
@@ -532,12 +530,6 @@ build_insn (opcode, opers, insn)
 	{
 	  /* now create a fixup */
 
-	  /*
-	  printf("need a fixup: ");
-	  print_expr_1(stdout,&opers[i]);
-	  printf("\n");
-	  */
-
 	  if (fixups->fc >= MAX_INSN_FIXUPS)
 	    as_fatal ("too many fixups");
 
@@ -588,7 +580,6 @@ write_long (opcode, insn, fx)
   char *f = frag_more(4);
 
   insn |= FM11;
-  /* printf("INSN: %08x\n",insn); */
   number_to_chars_bigendian (f, insn, 4);
 
   for (i=0; i < fx->fc; i++) 
@@ -598,11 +589,6 @@ write_long (opcode, insn, fx)
 	  where = f - frag_now->fr_literal; 
 	  if (fx->fix[i].size == 2)
 	    where += 2;
-	  /*
-	  printf("fix_new_exp: where:%x size:%d\n    ",where,fx->fix[i].size);
-	  print_expr_1(stdout,&(fx->fix[i].exp));
-	  printf("\n");
-	  */
 
 	  if (fx->fix[i].reloc == BFD_RELOC_D10V_18)
 	    fx->fix[i].operand |= 4096;	  
@@ -640,7 +626,6 @@ write_1_short (opcode, insn, fx)
   else
     insn = FM00 | (insn << 15) | NOP;	/* left container */
 
-  /*  printf("INSN: %08x\n",insn);  */
   number_to_chars_bigendian (f, insn, 4);
   for (i=0; i < fx->fc; i++) 
     {
@@ -649,12 +634,6 @@ write_1_short (opcode, insn, fx)
 	  where = f - frag_now->fr_literal; 
 	  if (fx->fix[i].size == 2)
 	    where += 2;
-
-	  /*
-	  printf("fix_new_exp: where:%x size:%d\n    ",where, fx->fix[i].size);
-	  print_expr_1(stdout,&(fx->fix[i].exp));
-	  printf("\n");
-	  */
 
 	  if (fx->fix[i].reloc == BFD_RELOC_D10V_18)
 	    fx->fix[i].operand |= 4096;	  
@@ -705,7 +684,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
   switch (exec_type) 
     {
     case 0:	/* order not specified */
-      if ( Optimizing && parallel_ok (opcode1, insn1, opcode2, insn2))
+      if ( Optimizing && parallel_ok (opcode1, insn1, opcode2, insn2, exec_type))
 	{
 	  /* parallel */
 	  if (opcode1->unit == IU)
@@ -734,7 +713,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
       if (opcode1->exec_type & SEQ || opcode2->exec_type & SEQ)
 	as_fatal ("One of these instructions may not be executed in parallel.");
 
-      if ( !parallel_ok (opcode1, insn1, opcode2, insn2)
+      if ( !parallel_ok (opcode1, insn1, opcode2, insn2, exec_type)
 	   && (opcode1->exec_type & PARONLY) == 0
 	   && (opcode2->exec_type & PARONLY) == 0)
 	as_fatal ("Two instructions may not be executed in parallel with each other.");
@@ -775,7 +754,6 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
       as_fatal("unknown execution type passed to write_2_short()");
     }
 
-  /*  printf("INSN: %08x\n",insn); */
   f = frag_more(4);
   number_to_chars_bigendian (f, insn, 4);
 
@@ -795,12 +773,6 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	      if (fx->fix[i].reloc == BFD_RELOC_D10V_18)
 		fx->fix[i].operand |= 4096;	  
 
-	      /*
-		printf("fix_new_exp: where:%x reloc:%d\n    ",where,fx->fix[i].operand);
-		print_expr_1(stdout,&(fx->fix[i].exp));
-		printf("\n");
-		*/
-
 	      fix_new_exp (frag_now,
 			   where, 
 			   fx->fix[i].size,
@@ -819,9 +791,10 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 /* Check 2 instructions and determine if they can be safely */
 /* executed in parallel.  Returns 1 if they can be.         */
 static int
-parallel_ok (op1, insn1, op2, insn2) 
+parallel_ok (op1, insn1, op2, insn2, exec_type)
      struct d10v_opcode *op1, *op2;
      unsigned long insn1, insn2;
+     int exec_type;
 {
   int i, j, flags, mask, shift, regno;
   unsigned long ins, mod[2], used[2];
@@ -832,6 +805,11 @@ parallel_ok (op1, insn1, op2, insn2)
       || (op1->unit == BOTH) || (op2->unit == BOTH)
       || (op1->unit == IU && op2->unit == IU)
       || (op1->unit == MU && op2->unit == MU))
+    return 0;
+
+  /* If the first instruction is a branch and this is auto parallazation,
+     don't combine with any second instruction.  */
+  if (exec_type == 0 && (op1->exec_type & BRANCH) != 0)
     return 0;
 
   /* The idea here is to create two sets of bitmasks (mod and used) */
@@ -939,8 +917,6 @@ md_assemble (str)
   static int etype=0;		/* saved extype.  used for multiline instructions */
   char *str2;
 
-  /*  printf("md_assemble: str=%s\n",str); */
-
   if (etype == 0)
     {
       /* look for the special multiple instruction separators */
@@ -966,8 +942,7 @@ md_assemble (str)
 	  
 	  /* if two instructions are present and we already have one saved
 	     then first write it out */
-	  if (prev_opcode) 
-	    write_1_short (prev_opcode, prev_insn, fixups->next);
+	  d10v_cleanup(0);
 	  
 	  /* assemble first instruction and save it */
 	  prev_insn = do_assemble (str, &prev_opcode);
@@ -1000,16 +975,15 @@ md_assemble (str)
     {
       if (extype) 
 	as_fatal("Unable to mix instructions as specified");
-      if (prev_opcode) 
-	{
-	  write_1_short (prev_opcode, prev_insn, fixups->next);
-	  prev_opcode = NULL;
-	}
+      d10v_cleanup(0);
       write_long (opcode, insn, fixups);
       prev_opcode = NULL;
       return;
     }
   
+  if (prev_opcode && ((prev_seg != now_seg) || (prev_subseg != now_subseg)))
+    d10v_cleanup(0);
+
   if (prev_opcode && (write_2_short (prev_opcode, prev_insn, opcode, insn, extype, fixups) == 0)) 
     {
       /* no instructions saved */
@@ -1044,8 +1018,6 @@ do_assemble (str, opcode)
   expressionS myops[6];
   unsigned long insn;
 
-  /* printf("do_assemble: str=%s\n",str); */
-
   /* Drop leading whitespace */
   while (*str == ' ')
     str++;
@@ -1078,7 +1050,6 @@ do_assemble (str, opcode)
   input_line_pointer = save;
 
   insn = build_insn ((*opcode), myops, 0); 
-  /* printf("sub-insn = %lx\n",insn);  */
   return (insn);
 }
 
@@ -1270,7 +1241,6 @@ tc_gen_reloc (seg, fixp)
       return NULL;
     }
   reloc->addend = fixp->fx_addnumber;
-  /* printf("tc_gen_reloc: addr=%x  addend=%x\n", reloc->address, reloc->addend); */
   return reloc;
 }
 
@@ -1290,7 +1260,6 @@ md_pcrel_from_section (fixp, sec)
 {
   if (fixp->fx_addsy != (symbolS *)NULL && !S_IS_DEFINED (fixp->fx_addsy))
     return 0;
-  /* printf("pcrel_from_section: %x\n", fixp->fx_frag->fr_address + fixp->fx_where); */
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
 
@@ -1329,8 +1298,6 @@ md_apply_fix3 (fixp, valuep, seg)
 	}
     }
   
-  /* printf("md_apply_fix: value=0x%x  type=0x%x  where=0x%x size=%d line=%d\n", value, fixp->fx_r_type,fixp->fx_where,fixp->fx_size, fixp->fx_line); */
-  
   op_type = fixp->fx_r_type;
   if (op_type & 2048)
     {
@@ -1367,9 +1334,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
       else
 	{
-	  /* printf("   insn=%x  value=%x where=%x  pcrel=%x\n",insn,value,fixp->fx_where,fixp->fx_pcrel); */
 	  insn = d10v_insert_operand (insn, op_type, (offsetT)value, left, fixp);
-	  /* printf("   new insn=%x\n",insn); */
 	  bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);  
 	}
       break;
@@ -1385,7 +1350,6 @@ md_apply_fix3 (fixp, valuep, seg)
   return 0;
 }
 
-
 /* d10v_cleanup() is called after the assembler has finished parsing the input 
    file or after a label is defined.  Because the D10V assembler sometimes saves short 
    instructions to see if it can package them with the next instruction, there may
@@ -1397,7 +1361,7 @@ d10v_cleanup (done)
   segT seg;
   subsegT subseg;
 
-  if ( prev_opcode && (done  || (now_seg == prev_seg) && (now_subseg == prev_subseg)))
+  if (prev_opcode)
     {
       seg = now_seg;
       subseg = now_subseg;
