@@ -1,3 +1,7 @@
+2001-11-12  Anthony Green  <green@redhat.com>
+
+	* emulparams/armelf.sh (DATA_START_SYMBOLS): New symbol.
+
 2001-11-12  Alfred M. Szmidt  <ams@kemisten.nu>
 
 	* Makefile.am (GENSCRIPTS): Quote ${exec_prefix}.
