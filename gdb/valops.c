@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
@@ -577,6 +577,21 @@ Can't handle bitfield which doesn't fit in a single register.");
       error ("Left operand of assignment is not an lvalue.");
     }
 
+  /* If the field does not entirely fill a LONGEST, then zero the sign bits.
+     If the field is signed, and is negative, then sign extend. */
+  if ((VALUE_BITSIZE (toval) > 0)
+      && (VALUE_BITSIZE (toval) < 8 * sizeof (LONGEST)))
+    {
+      LONGEST fieldval = value_as_long (fromval);
+      LONGEST valmask = (((unsigned LONGEST) 1) << VALUE_BITSIZE (toval)) - 1;
+
+      fieldval &= valmask;
+      if (!TYPE_UNSIGNED (type) && (fieldval & (valmask ^ (valmask >> 1))))
+	fieldval |= ~valmask;
+
+      fromval = value_from_longest (type, fieldval);
+    }
+
   /* Return a value just like TOVAL except with the contents of FROMVAL
      (except in the case of the type if TOVAL is an internalvar).  */
 
@@ -586,8 +601,7 @@ Can't handle bitfield which doesn't fit in a single register.");
       type = VALUE_TYPE (fromval);
     }
 
-  val = allocate_value (type);
-  memcpy (val, toval, VALUE_CONTENTS_RAW (val) - (char *) val);
+  val = value_copy (toval);
   memcpy (VALUE_CONTENTS_RAW (val), VALUE_CONTENTS (fromval),
 	  TYPE_LENGTH (type));
   VALUE_TYPE (val) = type;
@@ -1404,7 +1418,7 @@ value_bitstring (ptr, len)
   struct type *type = create_set_type ((struct type*) NULL, domain_type);
   TYPE_CODE (type) = TYPE_CODE_BITSTRING;
   val = allocate_value (type);
-  memcpy (VALUE_CONTENTS_RAW (val), ptr, TYPE_LENGTH (type) / TARGET_CHAR_BIT);
+  memcpy (VALUE_CONTENTS_RAW (val), ptr, TYPE_LENGTH (type));
   return val;
 }
 

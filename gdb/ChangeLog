@@ -1,3 +1,11 @@
+Tue Sep 19 15:28:58 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* gdbtypes.c (create_set_type):  Set TYPE_LENGTH in bytes, not bits.
+	* valops.c (value_bitstring):  TYPE_LENGTH is bytes, not bits.
+
+	* gdbtypes.c (force_to_range_type):  Calculate upper limit of
+	TYPE_CODE_CHAR depending on TYPE_LENGTH (instead of just using 255).
+
 Mon Sep 18 01:43:42 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* somsolib.c (auto_solib_add_at_startup): Delete definition.  No

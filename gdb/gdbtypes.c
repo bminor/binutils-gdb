@@ -368,7 +368,8 @@ force_to_range_type (type)
       }
     case TYPE_CODE_CHAR:
       {
-	struct type *range_type = create_range_type (NULL, type, 0, 255);
+	int char_max = 1 << (TYPE_LENGTH (type) * HOST_CHAR_BIT) - 1;
+	struct type *range_type = create_range_type (NULL, type, 0, char_max);
 	TYPE_NAME (range_type) = TYPE_NAME (range_type);
 	TYPE_DUMMY_RANGE (range_type) = 1;
 	return range_type;
@@ -469,8 +470,7 @@ create_set_type (result_type, domain_type)
       high_bound = TYPE_HIGH_BOUND (domain_type);
       bit_length = high_bound - low_bound + 1;
       TYPE_LENGTH (result_type)
-	= ((bit_length + TARGET_CHAR_BIT - 1) / TARGET_CHAR_BIT)
-	  * TARGET_CHAR_BIT;
+	= (bit_length + TARGET_CHAR_BIT - 1) / TARGET_CHAR_BIT;
     }
   TYPE_FIELD_TYPE (result_type, 0) = domain_type;
   return (result_type);
