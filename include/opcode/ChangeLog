@@ -1,3 +1,23 @@
+start-sanitize-sky
+Mon Mar 23 10:00:19 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp.h (vif_operand_datalen_special): Declare.
+
+end-sanitize-sky
+start-sanitize-r5900
+Mon Mar 23 00:25:35 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mips.h (OP_MASK_VU*, OP_SH_VU*): New definitions for
+	r5900 vu0 gas support.
+
+end-sanitize-r5900
+start-sanitize-sky
+Fri Mar  6 17:35:54 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp.h (unpack_type): New enum.
+	(vif_unpack_len_value,vif_unpack_len): Declare.
+
+end-sanitize-sky
 start-sanitize-vr4320
 Tue Mar  3 11:45:09 1998  Gavin Koch  <gavin@cygnus.com>
 
