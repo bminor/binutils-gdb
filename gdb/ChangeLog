@@ -1,3 +1,9 @@
+2001-11-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (verify_gdbarch): Use a mem_file to accumulate all
+	error messages.  Print in a single batch.
+	* gdbarch.c: Re-generate.
+
 2001-11-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-nat.c (GETREGS_SUPPLIES, supply_gregset,

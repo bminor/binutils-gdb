@@ -1366,16 +1366,20 @@ cat <<EOF
 static void
 verify_gdbarch (struct gdbarch *gdbarch)
 {
+  struct ui_file *log;
+  struct cleanup *cleanups;
+  long dummy;
+  char *buf;
   /* Only perform sanity checks on a multi-arch target. */
   if (!GDB_MULTI_ARCH)
     return;
+  log = mem_fileopen ();
+  cleanups = make_cleanup_ui_file_delete (log);
   /* fundamental */
   if (gdbarch->byte_order == 0)
-    internal_error (__FILE__, __LINE__,
-                    "verify_gdbarch: byte-order unset");
+    fprintf_unfiltered (log, "\n\tbyte-order");
   if (gdbarch->bfd_arch_info == NULL)
-    internal_error (__FILE__, __LINE__,
-                    "verify_gdbarch: bfd_arch_info unset");
+    fprintf_unfiltered (log, "\n\tbfd_arch_info");
   /* Check those that need to be defined for the given multi-arch level. */
 EOF
 function_list | while do_read
@@ -1405,18 +1409,23 @@ do
 	then
 	    printf "  if ((GDB_MULTI_ARCH >= ${level})\n"
 	    printf "      && (${invalid_p}))\n"
-	    printf "    internal_error (__FILE__, __LINE__,\n"
-	    printf "                    \"gdbarch: verify_gdbarch: ${function} invalid\");\n"
+	    printf "    fprintf_unfiltered (log, \"\\\\n\\\\t${function}\");\n"
 	elif [ -n "${predefault}" ]
 	then
 	    printf "  if ((GDB_MULTI_ARCH >= ${level})\n"
 	    printf "      && (gdbarch->${function} == ${predefault}))\n"
-	    printf "    internal_error (__FILE__, __LINE__,\n"
-	    printf "                    \"gdbarch: verify_gdbarch: ${function} invalid\");\n"
+	    printf "    fprintf_unfiltered (log, \"\\\\n\\\\t${function}\");\n"
 	fi
     fi
 done
 cat <<EOF
+  buf = ui_file_xstrdup (log, &dummy);
+  make_cleanup (xfree, buf);
+  if (strlen (buf) > 0)
+    internal_error (__FILE__, __LINE__,
+                    "verify_gdbarch: the following are invalid ...%s",
+                    buf);
+  do_cleanups (cleanups);
 }
 EOF
 
