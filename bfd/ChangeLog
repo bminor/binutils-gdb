@@ -1,3 +1,7 @@
+Wed Apr 26 16:31:28 2000  Clinton Popetz  <cpopetz@cygnus.com>
+
+	* config.bfd: Remove extraneous bfd_powerpc_64_arch.
+
 Mon Apr 24 15:20:35 2000  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* Makefile.am (coff64-rs6000.lo): New rule.
