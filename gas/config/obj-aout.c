@@ -62,11 +62,14 @@ const segT N_TYPE_seg[N_TYPE + 2] =
 #endif
 
 static void obj_aout_line PARAMS ((int));
+static void obj_aout_weak PARAMS ((int));
 
 const pseudo_typeS obj_pseudo_table[] =
 {
   {"line", obj_aout_line, 0},	/* source code line number */
   {"ln", obj_aout_line, 0},	/* coff line number that we use anyway */
+
+  {"weak", obj_aout_weak, 0},	/* mark symbol as weak.  */
 
   /* coff debug pseudos (ignored) */
   {"def", s_ignore, 0},
@@ -273,6 +276,20 @@ obj_emit_symbols (where, symbol_rootP)
       if (!S_IS_DEBUG (symbolP) && !S_IS_DEFINED (symbolP))
 	S_SET_EXTERNAL (symbolP);
 
+      /* Adjust the type of a weak symbol.  */
+      if (S_GET_WEAK (symbolP))
+	{
+	  switch (S_GET_TYPE (symbolP))
+	    {
+	    case N_UNDF: S_SET_TYPE (symbolP, N_WEAKU); break;
+	    case N_ABS:	 S_SET_TYPE (symbolP, N_WEAKA); break;
+	    case N_TEXT: S_SET_TYPE (symbolP, N_WEAKT); break;
+	    case N_DATA: S_SET_TYPE (symbolP, N_WEAKD); break;
+	    case N_BSS:  S_SET_TYPE (symbolP, N_WEAKB); break;
+	    default: as_bad ("%s: bad type for weak symbol", temp); break;
+	    }
+	}
+
       obj_symbol_to_chars (where, symbolP);
       S_SET_NAME (symbolP, temp);
     }
@@ -290,6 +307,36 @@ obj_aout_line (ignore)
   new_logical_line ((char *) NULL, (int) (get_absolute_expression ()));
   demand_empty_rest_of_line ();
 }				/* obj_aout_line() */
+
+/* Handle .weak.  This is a GNU extension.  */
+
+static void
+obj_aout_weak (ignore)
+     int ignore;
+{
+  char *name;
+  int c;
+  symbolS *symbolP;
+
+  do
+    {
+      name = input_line_pointer;
+      c = get_symbol_end ();
+      symbolP = symbol_find_or_make (name);
+      *input_line_pointer = c;
+      SKIP_WHITESPACE ();
+      S_SET_WEAK (symbolP);
+      if (c == ',')
+	{
+	  input_line_pointer++;
+	  SKIP_WHITESPACE ();
+	  if (*input_line_pointer == '\n')
+	    c = '\n';
+	}
+    }
+  while (c == ',');
+  demand_empty_rest_of_line ();
+}
 
 void
 obj_read_begin_hook ()

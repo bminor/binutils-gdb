@@ -1,3 +1,17 @@
+Sat Jun 11 16:41:21 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Add weak symbols as an extension to a.out.
+	* read.c (pseudo_set): Only preserve external bit for OBJ_AOUT and
+	OBJ_BOUT if not BFD_ASSEMBLER.
+	* config/aout_gnu.h (N_WEAKU, N_WEAKA, N_WEAKT, N_WEAKD, N_WEAKB):
+	Define as in ../include/aout/aout64.h.
+	* config/obj-aout.h (OBJ_SYMFIELD_TYPE): If not BFD_ASSEMBLER,
+	define as char.
+	(S_GET_WEAK, S_SET_WEAK): Define if not BFD_ASSEMBLER.
+	* config/obj-aout.c (obj_pseudo_table): Add "weak".
+	(obj_emit_symbols): Adjust type of weak symbols.
+	(obj_aout_weak): New static function.
+
 Fri Jun 10 13:48:49 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-elf.c (obj_elf_section): Don't set any flags based on
