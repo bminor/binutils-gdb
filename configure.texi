@@ -1077,8 +1077,8 @@ might also be use to decide which libraries to build or what user
 interface the tool should provide.
 @end defvar
 
-@defvar{nfp}
-Is set to @code{true} if the user invoked configure with the @code{-nfp}
+@defvar{floating_point}
+Is set to @code{no} if the user invoked configure with the @code{-nfp}
 command line option, otherwise it is empty.  This is a request to target
 machines with @emph{no floating point} unit, even if the targets
 ordinarily have floating point units available.  This option has no
