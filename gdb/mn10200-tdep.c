@@ -37,7 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	mov fp,a0
 	mov sp,fp
 	add <size>,sp
-	Register saves for d2, d3, a3 as needed.  Saves start
+	Register saves for d2, d3, a1, a2 as needed.  Saves start
 	at fp - <size> and work towards higher addresses.  Note
 	that the saves are actually done off the stack pointer
 	in the prologue!  This makes for smaller code and easier
@@ -46,7 +46,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
      Without frame pointer:
         add <size>,sp
-	Register saves for d2, d3, a3 as needed.  Saves start
+	Register saves for d2, d3, a1, a2 as needed.  Saves start
 	at sp and work towards higher addresses.
 
 
@@ -325,6 +325,7 @@ mn10200_analyze_prologue (fi, pc)
        
      Search for movx d2,(X,a3) (0xf55eXX)
         then	movx d3,(X,a3) (0xf55fXX)
+        then	mov  a1,(X,a3) (0x5dXX)	   No frame pointer case
         then	mov  a2,(X,a3) (0x5eXX)	   No frame pointer case
         or  mov  a0,(X,a3) (0x5cXX)	   Frame pointer case.  */
 
@@ -359,6 +360,23 @@ mn10200_analyze_prologue (fi, pc)
 			     + extract_signed_integer (buf, 1));
 	}
       addr += 3;
+      if (addr >= stop)
+	return addr;
+      status = target_read_memory (addr, buf, 2);
+      if (status != 0)
+	return addr;
+    }
+  if (buf[0] == 0x5d)
+    {
+      if (fi)
+	{
+	  status = target_read_memory (addr + 1, buf, 1);
+	  if (status != 0)
+	    return addr;
+	  fi->fsr.regs[5] = (fi->frame + stack_size
+			     + extract_signed_integer (buf, 1));
+	}
+      addr += 2;
       if (addr >= stop)
 	return addr;
       status = target_read_memory (addr, buf, 2);

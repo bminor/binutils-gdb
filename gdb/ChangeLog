@@ -1,5 +1,8 @@
 Thu Mar 20 20:52:04 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10200-tdep.c (mn10200_analyze_prologue): Look for save of "a1"
+	in the prologue too.
+
 	* remote-sim.c (gdb_os_vprintf_filtered): Fix to work with non-ANSI
 	compilers.
 	(gdb_os_evprintf_filtered): Similarly.
