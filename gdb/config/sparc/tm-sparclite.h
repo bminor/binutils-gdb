@@ -24,8 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Select the sparclite disassembler.  Slightly different instruction set from
    the V8 sparc.  */
 
-#undef TM_PRINT_INSN
-#define TM_PRINT_INSN print_insn_sparclite
+#undef TM_PRINT_INSN_MACH
+#define TM_PRINT_INSN_MACH bfd_mach_sparc_sparclite
 
 /* Amount PC must be decremented by after a hardware instruction breakpoint.
    This is often the number of bytes in BREAKPOINT

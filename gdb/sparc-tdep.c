@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "obstack.h"
 #include "target.h"
 #include "value.h"
+#include "bfd.h"
 
 #ifdef	USE_PROC_FS
 #include <sys/procfs.h>
@@ -1548,5 +1549,6 @@ sparc_print_register_hook (regno)
 void
 _initialize_sparc_tdep ()
 {
-  tm_print_insn = TM_PRINT_INSN; /* Selects sparc/sparclite */
+  tm_print_insn = print_insn_sparc;
+  tm_print_insn_info.mach = TM_PRINT_INSN_MACH;  /* Selects sparc/sparclite */
 }

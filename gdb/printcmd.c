@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "gdb_string.h"
@@ -113,6 +113,7 @@ static int display_number;
 /* Pointer to the target-dependent disassembly function.  */
 
 int (*tm_print_insn) PARAMS ((bfd_vma, disassemble_info *));
+disassemble_info tm_print_insn_info;
 
 /* Prototypes for local functions.  */
 
@@ -271,7 +272,8 @@ print_formatted (val, format, size)
      register int format;
      int size;
 {
-  int len = TYPE_LENGTH (VALUE_TYPE (val));
+  struct type *type = check_typedef (VALUE_TYPE (val));
+  int len = TYPE_LENGTH (type);
 
   if (VALUE_LVAL (val) == lval_memory)
     next_address = VALUE_ADDRESS (val) + len;
@@ -296,14 +298,13 @@ print_formatted (val, format, size)
 
     default:
       if (format == 0
-	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_ARRAY
-	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_STRING
-	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_STRUCT
-	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_UNION
-	  || VALUE_REPEATED (val))
+	  || TYPE_CODE (type) == TYPE_CODE_ARRAY
+	  || TYPE_CODE (type) == TYPE_CODE_STRING
+	  || TYPE_CODE (type) == TYPE_CODE_STRUCT
+	  || TYPE_CODE (type) == TYPE_CODE_UNION)
 	value_print (val, gdb_stdout, format, Val_pretty_default);
       else
-	print_scalar_formatted (VALUE_CONTENTS (val), VALUE_TYPE (val),
+	print_scalar_formatted (VALUE_CONTENTS (val), type,
 				format, size, gdb_stdout);
     }
 }
@@ -324,7 +325,7 @@ print_scalar_formatted (valaddr, type, format, size, stream)
      GDB_FILE *stream;
 {
   LONGEST val_long;
-  int len = TYPE_LENGTH (type);
+  unsigned int len = TYPE_LENGTH (type);
 
   if (len > sizeof (LONGEST)
       && (format == 't'
@@ -334,18 +335,23 @@ print_scalar_formatted (valaddr, type, format, size, stream)
 	  || format == 'd'
 	  || format == 'x'))
     {
-      /* We can't print it normally, but we can print it in hex.
-         Printing it in the wrong radix is more useful than saying
-	 "use /x, you dummy".  */
-      /* FIXME:  we could also do octal or binary if that was the
-	 desired format.  */
-      /* FIXME:  we should be using the size field to give us a minimum
-	 field width to print.  */
-      val_print_type_code_int (type, valaddr, stream);
-      return;
-    }
+      if (! TYPE_UNSIGNED (type)
+	  || ! extract_long_unsigned_integer (valaddr, len, &val_long))
+	{
+	  /* We can't print it normally, but we can print it in hex.
+	     Printing it in the wrong radix is more useful than saying
+	     "use /x, you dummy".  */
+	  /* FIXME:  we could also do octal or binary if that was the
+	     desired format.  */
+	  /* FIXME:  we should be using the size field to give us a
+	     minimum field width to print.  */
+	  val_print_type_code_int (type, valaddr, stream);
+	  return;
+	}
 
-  if (format != 'f')
+      /* If we get here, extract_long_unsigned_integer set val_long.  */
+    }
+  else if (format != 'f')
     val_long = unpack_long (type, valaddr);
 
   /* If we are printing it as unsigned, truncate it in case it is actually
@@ -684,6 +690,7 @@ do_examine (fmt, addr)
 
   while (count > 0)
     {
+      QUIT;
       print_address (next_address, gdb_stdout);
       printf_filtered (":");
       for (i = maxelts;
@@ -1012,6 +1019,21 @@ address_info (exp, from_tty)
       printf_filtered ("a function at address ");
       print_address_numeric (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)), 1,
 			     gdb_stdout);
+      break;
+
+    case LOC_UNRESOLVED:
+      {
+	struct minimal_symbol *msym;
+
+	msym = lookup_minimal_symbol (SYMBOL_NAME (sym), NULL, NULL);
+	if (msym == NULL)
+	  printf_filtered ("unresolved");
+	else
+	  {
+	    printf_filtered ("static storage at address ");
+	    print_address_numeric (SYMBOL_VALUE_ADDRESS (msym), 1, gdb_stdout);
+	  }
+      }
       break;
 
     case LOC_OPTIMIZED_OUT:
@@ -1530,7 +1552,6 @@ print_frame_args (func, fi, num, stream)
       case LOC_REF_ARG:
 	{
 	  long current_offset = SYMBOL_VALUE (sym);
-
 	  arg_size = TYPE_LENGTH (SYMBOL_TYPE (sym));
 	  
 	  /* Compute address of next argument by adding the size of
@@ -1898,9 +1919,10 @@ printf_command (arg, from_tty)
  
 	if (argclass[nargs] == double_arg)
 	  {
-	    if (TYPE_LENGTH (VALUE_TYPE (val_args[nargs])) == sizeof (float))
+	    struct type *type = VALUE_TYPE (val_args[nargs]);
+	    if (TYPE_LENGTH (type) == sizeof (float))
 	      VALUE_TYPE (val_args[nargs]) = builtin_type_float;
-	    if (TYPE_LENGTH (VALUE_TYPE (val_args[nargs])) == sizeof (double))
+	    if (TYPE_LENGTH (type) == sizeof (double))
 	      VALUE_TYPE (val_args[nargs]) = builtin_type_double;
 	  }
 	nargs++;
@@ -2058,23 +2080,15 @@ print_insn (memaddr, stream)
      CORE_ADDR memaddr;
      GDB_FILE *stream;
 {
-  disassemble_info info;
-
-#define GDB_INIT_DISASSEMBLE_INFO(INFO, STREAM) \
-  (INFO).fprintf_func = (fprintf_ftype)fprintf_filtered, \
-  (INFO).stream = (STREAM), \
-  (INFO).read_memory_func = dis_asm_read_memory, \
-  (INFO).memory_error_func = dis_asm_memory_error, \
-  (INFO).print_address_func = dis_asm_print_address, \
-  (INFO).insn_info_valid = 0
-
-  GDB_INIT_DISASSEMBLE_INFO(info, stream);
-
   /* If there's no disassembler, something is very wrong.  */
   if (tm_print_insn == NULL)
     abort ();
 
-  return (*tm_print_insn) (memaddr, &info);
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    tm_print_insn_info.endian = BFD_ENDIAN_BIG;
+  else
+    tm_print_insn_info.endian = BFD_ENDIAN_LITTLE;
+  return (*tm_print_insn) (memaddr, &tm_print_insn_info);
 }
 
 
@@ -2229,4 +2243,9 @@ environment, the value is printed in its own window.");
   examine_h_type = init_type (TYPE_CODE_INT, 2, 0, "examine_h_type", NULL);
   examine_w_type = init_type (TYPE_CODE_INT, 4, 0, "examine_w_type", NULL);
   examine_g_type = init_type (TYPE_CODE_INT, 8, 0, "examine_g_type", NULL);
+
+  INIT_DISASSEMBLE_INFO_NO_ARCH (tm_print_insn_info, gdb_stdout, (fprintf_ftype)fprintf_filtered);
+  tm_print_insn_info.read_memory_func = dis_asm_read_memory;
+  tm_print_insn_info.memory_error_func = dis_asm_memory_error;
+  tm_print_insn_info.print_address_func = dis_asm_print_address;
 }

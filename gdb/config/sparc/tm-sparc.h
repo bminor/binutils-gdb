@@ -644,4 +644,4 @@ extern int deferred_stores;
 
 /* Select the sparc disassembler */
 
-#define TM_PRINT_INSN print_insn_sparc
+#define TM_PRINT_INSN_MACH bfd_mach_sparc

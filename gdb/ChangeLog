@@ -1,3 +1,20 @@
+Mon Jul 15 16:44:05 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* defs.h printcmd.c:  Create global disassemble_info structure
+	tm_print_insn_info.
+	* gdbtk.c (gdb_disassemble):  Setup di.mach from
+	tm_print_insn_info.mach, and set endian from TARGET_BYTE_ORDER.
+	* i386-tdep.c (set_assembly_language_command):  set
+	tm_print_insn_info.mach to the appropriate value for 386 or 8086
+	disassembly.
+	* printcmd.c (print_insn):  Move init of disassembler_info to
+	_initialize_printcmd.  Set endian for disassembler here.
+	* sparc-tdep.c:  Set tm_print_insn_info.mach as appropriate to
+	select sparc/sparclite.
+	* config/sparc/{tm-sparc.h tm-sparclite.h}:  Get rid of
+	TM_PRINT_INSN.  Set TM_PRINT_INSN_MACH to
+	bfd_mach_sparc/bfd_mach_sparc_sparclite.
+
 Fri Jul 12 19:04:32 1996  Fred Fish  <fnf@cygnus.com>
 
 	* hpread.c (hpread_lookup_type): Use xmmalloc/xmrealloc rather

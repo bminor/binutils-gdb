@@ -413,7 +413,7 @@ struct command_line
   struct command_line **body_list;
 };
 
-extern struct command_line *read_command_lines PARAMS ((void));
+extern struct command_line *read_command_lines PARAMS ((char *, int));
 
 extern void free_command_lines PARAMS ((struct command_line **));
 
@@ -902,18 +902,14 @@ extern const struct floatformat floatformat_unknown;
 
 #ifdef HAVE_LONG_DOUBLE
 typedef long double DOUBLEST;
-extern void floatformat_to_long_double PARAMS ((const struct floatformat *,
-						char *, DOUBLEST *));
-extern void floatformat_from_long_double PARAMS ((const struct floatformat *,
-						  DOUBLEST *, char *));
-#define FLOATFORMAT_TO_DOUBLEST floatformat_to_long_double
-#define FLOATFORMAT_FROM_DOUBLEST floatformat_from_long_double
 #else
 typedef double DOUBLEST;
-#define FLOATFORMAT_TO_DOUBLEST floatformat_to_double
-#define FLOATFORMAT_FROM_DOUBLEST floatformat_from_double
 #endif
 
+extern void floatformat_to_doublest PARAMS ((const struct floatformat *,
+					     char *, DOUBLEST *));
+extern void floatformat_from_doublest PARAMS ((const struct floatformat *,
+					       DOUBLEST *, char *));
 extern DOUBLEST extract_floating PARAMS ((void *, int));
 
 extern void store_floating PARAMS ((void *, int, DOUBLEST));
@@ -968,6 +964,7 @@ extern void dis_asm_print_address PARAMS ((bfd_vma addr,
 					   disassemble_info *info));
 
 extern int (*tm_print_insn) PARAMS ((bfd_vma, disassemble_info*));
+extern disassemble_info tm_print_insn_info;
 
 /* Hooks for alternate command interfaces.  */
 
@@ -983,7 +980,7 @@ extern void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer,
 extern void (*print_frame_info_listing_hook) PARAMS ((struct symtab *s,
 						      int line, int stopline,
 						      int noerror));
-extern int (*query_hook) PARAMS (());
+extern int (*query_hook) PARAMS ((const char *, va_list));
 extern void (*flush_hook) PARAMS ((FILE *stream));
 extern void (*create_breakpoint_hook) PARAMS ((struct breakpoint *b));
 extern void (*delete_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
@@ -991,6 +988,9 @@ extern void (*modify_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 extern void (*target_output_hook) PARAMS ((char *));
 extern void (*interactive_hook) PARAMS ((void));
 extern void (*registers_changed_hook) PARAMS ((void));
+extern void (*readline_begin_hook) PARAMS ((char *, ...));
+extern char * (*readline_hook) PARAMS ((char *));
+extern void (*readline_end_hook) PARAMS ((void));
 
 extern int (*target_wait_hook) PARAMS ((int pid,
 					struct target_waitstatus *status));

@@ -891,12 +891,18 @@ gdb_disassemble (clientData, interp, argc, argv)
 
   if (! di_initialized)
     {
-      INIT_DISASSEMBLE_INFO (di, gdb_stdout,
-			     (fprintf_ftype) fprintf_unfiltered);
+      INIT_DISASSEMBLE_INFO_NO_ARCH (di, gdb_stdout,
+				     (fprintf_ftype) fprintf_unfiltered);
       di.memory_error_func = dis_asm_memory_error;
       di.print_address_func = dis_asm_print_address;
       di_initialized = 1;
     }
+
+  di.mach = tm_print_insn_info.mach;
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    tm_print_insn_info.endian = BFD_ENDIAN_BIG;
+  else
+    tm_print_insn_info.endian = BFD_ENDIAN_LITTLE;
 
   if (argc != 3 && argc != 4)
     error ("wrong # args");
