@@ -1,3 +1,8 @@
+2002-11-07  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Bump version and set is_release.
+	* configure: Regenerate.
+
 2002-11-07  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: Updated Danish translation.
