@@ -1,3 +1,8 @@
+Thu Sep 14 13:10:10 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gas/sparc/{wrdr.[ds],rdpr.[ds]}: New tests.
+	* gas/sparc/sparc.exp: Run them.
+
 Wed Sep 13 16:35:51 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in, configure.in: Remove; the testsuite is now run
