@@ -11412,6 +11412,7 @@ configurations.
 
 @menu
 * HP-UX::                       HP-UX
+* BSD libkvm Interface::	Debugging BSD kernel memory images
 * SVR4 Process Information::    SVR4 process information
 * DJGPP Native::                Features specific to the DJGPP port
 * Cygwin Native::		Features specific to the Cygwin port
@@ -11423,6 +11424,46 @@ configurations.
 On HP-UX systems, if you refer to a function or variable name that
 begins with a dollar sign, @value{GDBN} searches for a user or system
 name first, before it searches for a convenience variable.
+
+@node BSD libkvm Interface
+@subsection BSD libkvm Interface
+
+@cindex libkvm
+@cindex kernel memory image
+@cindex kernel crash dump
+
+BSD-derived systems (FreeBSD/NetBSD/OpenBSD) have a kernel memory
+interface that provides a uniform interface for accessing kernel virtual
+memory images, including live systems and crash dumps.  @value{GDBN}
+uses this interface to allow you to debug live kernels and kernel crash
+dumps on many native BSD configurations.  This is implemented as a
+special @code{kvm} debugging target.  For debugging a live system, load
+the currently running kernel into @value{GDBN} and connect to the
+@code{kvm} target:
+
+@smallexample
+(@value{GDBP}) @b{target kvm}
+@end smallexample
+
+For debugging crash dumps, provide the file name of the crash dump as an
+argument:
+
+@smallexample
+(@value{GDBP}) @b{target kvm /var/crash/bsd.0}
+@end smallexample
+
+Once connected to the @code{kvm} target, the following commands are
+available:
+
+@table @code
+@kindex kvm
+@item kvm pcb
+Set current context from pcb address.
+
+@item kvm proc
+Set current context from proc address.  This command isn't available on
+modern FreeBSD systems.
+@end table
 
 @node SVR4 Process Information
 @subsection SVR4 process information

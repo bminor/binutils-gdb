@@ -1,3 +1,8 @@
+2004-07-03  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.texinfo (BSD libkvm Interface): New node (section)
+	(Native): Add it to the menu.
+
 2004-07-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdbint.texinfo (Target Architecture Definition): Remove
