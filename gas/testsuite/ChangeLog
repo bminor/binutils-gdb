@@ -1,3 +1,8 @@
+2001-03-24  Alan Modra  <alan@linuxcare.com.au>
+
+	* gas/i386/ssemmx2.s: Change movntq to movntdq.
+	* gas/i386/ssemmx2.d: Matching change.
+
 2001-03-19  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* gas/vax/quad.exp: Correct expected result.

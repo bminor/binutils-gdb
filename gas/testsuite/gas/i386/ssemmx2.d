@@ -33,7 +33,7 @@ Disassembly of section .text:
 [ 	]+65:	f3 0f 70 75 00 04[ 	]+pshufhw \$0x4,0x0\(%ebp\),%xmm6
 [ 	]+6b:	f2 0f 70 da 01[ 	]+pshuflw \$0x1,%xmm2,%xmm3
 [ 	]+70:	f2 0f 70 75 00 04[ 	]+pshuflw \$0x4,0x0\(%ebp\),%xmm6
-[ 	]+76:	66 0f e7 10[ 	]+movntq %xmm2,\(%eax\)
+[ 	]+76:	66 0f e7 10[ 	]+movntdq %xmm2,\(%eax\)
 [ 	]+7a:	66 0f 60 90 90 90 90 90 	punpcklbw 0x90909090\(%eax\),%xmm2
 [ 	]+82:	66 0f 61 90 90 90 90 90 	punpcklwd 0x90909090\(%eax\),%xmm2
 [ 	]+8a:	66 0f 62 90 90 90 90 90 	punpckldq 0x90909090\(%eax\),%xmm2
