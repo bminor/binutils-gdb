@@ -30,7 +30,7 @@ host_libs="mmalloc libiberty opcodes bfd readline glob tcl tk tclX"
 #
 host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 	    prms send-pr gprof gdbtest tgas etc expect dejagnu sim
-            m4 autoconf ispell grep diff rcs cvs fileutils shellutils
+            m4 autoconf ispell grep diff rcs cvs dosutils fileutils shellutils
 	    textutils wdiff find emacs uudecode hello tar gzip indent
 	    recode release"
 
