@@ -1,5 +1,14 @@
 Fri Feb 28 15:06:45 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* targets.c (bfd_default_vector): Make non-const.
+	(find_target): New static function, broken out of
+	bfd_find_target.
+	(bfd_set_default_target): New function.
+	(bfd_find_target): Call find_target.  When defaulting, use
+	bfd_default_vector[0] if it is not NULL.
+	* libbfd-in.h (bfd_default_vector): Adjust declaration.
+	* bfd-in2.h, libbfd.h: Rebuild.
+
 	* syms.c (bfd_is_local_label): Return false if the symbol has no
 	name.
 	* coff-i960.c (coff_i960_is_local_label_name): New function.
