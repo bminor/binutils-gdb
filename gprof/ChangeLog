@@ -1,3 +1,8 @@
+1999-07-15  Ian Lance Taylor  <ian@zembu.com>
+
+	* configure.in: Bump version number to 2.9.5.
+	* configure: Rebuild.
+
 1999-07-11  Ian Lance Taylor  <ian@zembu.com>
 
 	* corefile.c (core_create_function_syms): Add ATTRIBUTED_UNUSED.
