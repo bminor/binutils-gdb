@@ -580,6 +580,7 @@ hash_new_table (size, ptr)
      int size;
      hash_table *ptr;
 {
+  int i;
   ptr->size = size;
   ptr->table = (hash_entry **) xmalloc (size * (sizeof (hash_entry *)));
   /* Fill with null-pointer, not zero-bit-pattern.  */
