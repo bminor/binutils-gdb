@@ -481,9 +481,10 @@ A function is represented by a @samp{F} symbol descriptor for a global
 (extern) function, and @samp{f} for a static (local) function.  The next
 @samp{N_SLINE} symbol can be used to find the line number of the start
 of the function.  The value field is the address of the start of the
-function.  The type information of the stab represents the return type
-of the function; thus @samp{foo:f5} means that foo is a function
-returning type 5.
+function (absolute for @code{a.out}; relative to the start of the file
+for Sun's stabs-in-elf).  The type information of the stab represents
+the return type of the function; thus @samp{foo:f5} means that foo is a
+function returning type 5.
 
 The type information of the stab is optionally followed by type
 information for each argument, with each argument preceded by @samp{;}.
@@ -969,7 +970,7 @@ number of the register where the variable data will be stored.
 The value is the register number.
 
 AIX defines a separate symbol descriptor @samp{d} for floating point
-registers.  This seems unnecessary---why not just just give floating
+registers.  This seems unnecessary; why not just just give floating
 point registers different register numbers?  I have not verified whether
 the compiler actually uses @samp{d}.
 
@@ -1009,10 +1010,14 @@ Initialized static variables are represented by the @samp{S} and
 @samp{V} symbol descriptors.  @samp{S} means file scope static, and
 @samp{V} means procedure scope static.
 
-In a.out files, @code{N_STSYM} means the data segment (although gcc
-2.4.5 has a bug in that it uses @code{N_FUN}, so neither dbx nor gdb can
-find the variables), @code{N_FUN} means the text segment, and
-@code{N_LCSYM} means the bss segment.
+@c This is probably not worth mentioning; it is only true on the sparc
+@c for `double' variables which although declared const are actually in
+@c the data segment (the text segment can't guarantee 8 byte alignment).
+@c (although gcc
+@c 2.4.5 has a bug in that it uses @code{N_FUN}, so neither dbx nor gdb can
+@c find the variables)
+In a.out files, @code{N_STSYM} means the data segment, @code{N_FUN}
+means the text segment, and @code{N_LCSYM} means the bss segment.
 
 In xcoff files, each symbol has a section number, so the stab type
 need not indicate the segment.
@@ -3035,10 +3040,10 @@ BSS segment file-scope variable, @xref{Statics}.
 @item 0x2a N_MAIN    
 Name of main routine, @xref{Main Program}.
 
-@c FIXME: discuss this in the main body of the text where we talk about
-@c using N_FUN for variables.
+@c FIXME: discuss this in the Statics node where we talk about
+@c the fact that the n_type indicates the section.  
 @item 0x2c N_ROSYM
-Read-only data symbol (Solaris2).  Most systems use N_FUN for this.
+Variable in @code{.rodata} section, @xref{Statics}.
 
 @item 0x30     N_PC      
 Global symbol (for Pascal), @xref{N_PC}.
@@ -3047,7 +3052,7 @@ Global symbol (for Pascal), @xref{N_PC}.
 Number of symbols (according to Ultrix V4.0), @xref{N_NSYMS}.
 
 @item 0x34     N_NOMAP   
-No DST map for sym (according to Ultrix V4.0), @xref{N_NOMAP}.
+No DST map, @xref{N_NOMAP}.
 
 @c FIXME: describe this solaris feature in the body of the text (see
 @c comments in include/aout/stab.def).
@@ -3098,10 +3103,10 @@ Structure of union element, @xref{N_SSYM}.
 Last stab for module (Solaris2).
 
 @item 0x64     N_SO      
-Path and name of source file , @xref{Source Files}.
+Path and name of source file, @xref{Source Files}.
 
-@item 0x80     N_LSYM    
-Automatic var in the stack or type definition, @xref{N_LSYM}, @xref{Typedefs}.
+@item 0x80 N_LSYM
+Stack variable or type definition, @xref{N_LSYM}, @xref{Typedefs}.
 
 @item 0x82     N_BINCL   
 Beginning of an include file (Sun only), @xref{Source Files}.
@@ -3504,7 +3509,8 @@ Number of symbols (according to Ultrix V4.0)
 
 @node N_NOMAP
 @section 52 - 0x34 - N_NOMAP   
-no DST map for sym (according to Ultrix V4.0)
+No DST map for symbol (according to Ultrix V4.0).  I think this means a
+variable has been optimized out.
 
 @display
         name, ,0,type,ignored (stab.def)
@@ -3797,50 +3803,68 @@ alone, with no source file number.
 @end itemize
 
 @node Stabs-in-elf
-@appendix Using stabs with the ELF object file format.
+@appendix Using stabs with the @sc{elf} object file format.
 
-The ELF object file format allows tools to create object files with custom
-sections containing any arbitrary data.  To use stabs in ELF object files,
-the tools create two custom sections, a ".stab" section which contains
-an array of fixed length structures, one struct per stab, and a ".stabstr"
-section containing all the variable length strings that are referenced by
-stabs in the ".stab" section.  The byte order of the stabs binary data
-matches the byte order of the ELF file itself, as determined from the
-EI_DATA field in the e_ident member of the ELF header.
+The @sc{elf} object file format allows tools to create object files with
+custom sections containing any arbitrary data.  To use stabs in @sc{elf}
+object files, the tools create two custom sections, a section named
+@code{.stab} which contains an array of fixed length structures, one
+struct per stab, and a section named @code{.stabstr} containing all the
+variable length strings that are referenced by stabs in the @code{.stab}
+section.  The byte order of the stabs binary data matches the byte order
+of the @sc{elf} file itself, as determined from the @code{EI_DATA} field in
+the @code{e_ident} member of the @sc{elf} header.
 
-The first stab in the ".stab" section for each object file is a "synthetic
-stab", generated entirely by the assembler, with no corresponding ".stab"
-directive as input to the assembler.  This stab contains the following
-fields:
+@c Is "source file" the right term for this concept?  We don't mean that
+@c there is a separate one for include files (but "object file" or
+@c "object module" isn't quite right either; the output from ld -r is a
+@c single object file but contains many source files).
+The first stab in the @code{.stab} section for each source file is
+synthetic, generated entirely by the assembler, with no corresponding
+@code{.stab} directive as input to the assembler.  This stab contains
+the following fields:
 
-@itemize @bullet
-@item
-Offset in the ".stabstr" section to the source filename.
+@table @code
+@item n_strx
+Offset in the @code{.stabstr} section to the source filename.
 
-@item
-N_UNDF
+@item n_type
+@code{N_UNDF}.
 
-@item
+@item n_other
 Unused field, always zero.
 
-@item
-Count of upcoming symbols.  I.E. the number of remaining stabs for this
-object module.
+@item n_desc
+Count of upcoming symbols, i.e. the number of remaining stabs for this
+source file.
 
-@item
-Size of the string table fragment associated with this object module, in
+@item n_value
+Size of the string table fragment associated with this source file, in
 bytes.
+@end table
 
-@end itemize
-
-The ".stabstr" section always starts with a null byte (so that string
+The @code{.stabstr} section always starts with a null byte (so that string
 offsets of zero reference a null string), followed by random length strings,
 each of which is null byte terminated.
 
-The ELF section header for the ".stab" section has it's sh_link member set
-to the section number of the ".stabstr" section, and the ".stabstr" section
-has it's ELF section header sh_type member set to SHT_STRTAB to mark it as
-a string table.
+The @sc{elf} section header for the @code{.stab} section has it's
+@code{sh_link} member set to the section number of the @code{.stabstr}
+section, and the @code{.stabstr} section has it's @sc{elf} section
+header @code{sh_type} member set to @code{SHT_STRTAB} to mark it as a
+string table.
+
+Because the linker does not process the @code{.stab} section in any
+special way, none of the addresses in the @code{n_value} field of the
+stabs are relocated by the linker.  Instead they are relative to the
+source file (or some entity smaller than a source file, like a
+function).  To find the address of each section corresponding to a given
+source file, the (compiler? assembler?) puts out symbols giving the
+address of each section for a given source file.  Since these are normal
+@sc{elf} symbols, the linker can relocate them correctly.  They are
+named @code{Bbss.bss} for the bss section, @code{Ddata.data} for
+the data section, and @code{Drodata.rodata} for the rodata section.  I
+haven't yet figured out how the debugger gets the address for the text
+section.
 
 @contents
 @bye
