@@ -1,3 +1,9 @@
+2003-06-17  Nick Clifton  <nickc@redhat.com>
+
+	* gas/i386/absrel.d: Tweak patterns to work for i386-pc-cygwin
+	target as well.
+	* gas/i386/sub.d: Likewise.
+
 2003-06-17  Loren James Rittle  <rittle@latour.rsch.comm.mot.com>
 
 	* gas/alpha/elf-reloc-1.d: Allow system-specific gunk after
