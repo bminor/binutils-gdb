@@ -7020,7 +7020,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			{
 			  (*_bfd_error_handler)
 			    (_("`%s' referenced in section `%A' of %B: "
-			       "defined in discarded section `%A' of %B\n"),
+			       "defined in discarded section `%A' of %B"),
 			     o, input_bfd, sec, sec->owner, sym_name);
 			}
 
@@ -9640,21 +9640,21 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section * sec)
 
 	    case SEC_LINK_DUPLICATES_ONE_ONLY:
 	      (*_bfd_error_handler)
-		(_("%B: ignoring duplicate section `%A'\n"),
+		(_("%B: ignoring duplicate section `%A'"),
 		 abfd, sec);
 	      break;
 
 	    case SEC_LINK_DUPLICATES_SAME_SIZE:
 	      if (sec->size != l->sec->size)
 		(*_bfd_error_handler)
-		  (_("%B: duplicate section `%A' has different size\n"),
+		  (_("%B: duplicate section `%A' has different size"),
 		   abfd, sec);
 	      break;
 
 	    case SEC_LINK_DUPLICATES_SAME_CONTENTS:
 	      if (sec->size != l->sec->size)
 		(*_bfd_error_handler)
-		  (_("%B: duplicate section `%A' has different size\n"),
+		  (_("%B: duplicate section `%A' has different size"),
 		   abfd, sec);
 	      else if (sec->size != 0)
 		{
@@ -9662,16 +9662,16 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section * sec)
 
 		  if (!bfd_malloc_and_get_section (abfd, sec, &sec_contents))
 		    (*_bfd_error_handler)
-		      (_("%B: warning: could not read contents of section `%A'\n"),
+		      (_("%B: warning: could not read contents of section `%A'"),
 		       abfd, sec);
 		  else if (!bfd_malloc_and_get_section (l->sec->owner, l->sec,
 							&l_sec_contents))
 		    (*_bfd_error_handler)
-		      (_("%B: warning: could not read contents of section `%A'\n"),
+		      (_("%B: warning: could not read contents of section `%A'"),
 		       l->sec->owner, l->sec);
 		  else if (memcmp (sec_contents, l_sec_contents, sec->size) != 0)
 		    (*_bfd_error_handler)
-		      (_("%B: warning: duplicate section `%A' has different contents\n"),
+		      (_("%B: warning: duplicate section `%A' has different contents"),
 		       abfd, sec);
 
 		  if (sec_contents)
