@@ -35,8 +35,6 @@
 
 #include <elf/dwarf2.h>
 
-#define BYTES_PER_ADDRESS	(BFD_ARCH_SIZE / 8)
-
 /* Since we can't generate the prolog until the body is complete, we
    use three different subsegments for .debug_line: one holding the
    prolog, one for the directory and filename info, and one for the
@@ -106,7 +104,7 @@ static struct
     /* state machine state as per DWARF2 manual: */
     struct dwarf2_sm
       {
-	bfd_vma addr;
+	addressT addr;
 	unsigned int filenum;
 	unsigned int line;
 	unsigned int column;
@@ -148,11 +146,11 @@ ls =
 
 
 /* Function prototypes: */
-static void out_uleb128 PARAMS ((bfd_vma));
-static void out_sleb128 PARAMS ((bfd_signed_vma));
-static void gen_addr_line PARAMS ((int, bfd_vma));
+static void out_uleb128 PARAMS ((addressT));
+static void out_sleb128 PARAMS ((offsetT));
+static void gen_addr_line PARAMS ((int, addressT));
 static void reset_state_machine PARAMS ((void));
-static void out_set_addr PARAMS ((bfd_vma));
+static void out_set_addr PARAMS ((addressT));
 static void out_end_sequence PARAMS ((void));
 static int get_filenum PARAMS ((int, char *));
 static void gen_dir_list PARAMS ((void));
@@ -166,7 +164,7 @@ static void print_stats PARAMS ((unsigned long));
 /* Output an unsigned "little-endian base 128" number.  */
 static void
 out_uleb128 (value)
-     bfd_vma value;
+     addressT value;
 {
   unsigned char byte, more = 0x80;
 
@@ -184,7 +182,7 @@ out_uleb128 (value)
 /* Output a signed "little-endian base 128" number.  */
 static void
 out_sleb128 (value)
-     bfd_signed_vma value;
+     offsetT value;
 {
   unsigned char byte, more = 0x80;
 
@@ -206,7 +204,7 @@ out_sleb128 (value)
 static void
 gen_addr_line (line_delta, addr_delta)
      int line_delta;
-     bfd_vma addr_delta;
+     addressT addr_delta;
 {
   unsigned int tmp, opcode;
 
@@ -259,12 +257,13 @@ reset_state_machine ()
 /* Set an absolute address (may results in a relocation entry): */
 static void
 out_set_addr (addr)
-     bfd_vma addr;
+     addressT addr;
 {
   subsegT saved_subseg;
   segT saved_seg;
   expressionS expr;
   symbolS *sym;
+  int bytes_per_address;
 
   saved_seg = now_seg;
   saved_subseg = now_subseg;
@@ -274,14 +273,21 @@ out_set_addr (addr)
 
   subseg_set (saved_seg, saved_subseg);
 
+#ifdef BFD_ASSEMBLER
+  bytes_per_address = bfd_arch_bits_per_address (stdoutput) / 8;
+#else
+  /* FIXME.  */
+  bytes_per_address = 4;
+#endif
+
   out_opcode (DW_LNS_extended_op);
-  out_uleb128 (BYTES_PER_ADDRESS + 1);
+  out_uleb128 (bytes_per_address + 1);
 
   out_opcode (DW_LNE_set_address);
   expr.X_op = O_symbol;
   expr.X_add_symbol = sym;
   expr.X_add_number = 0;
-  emit_expr (&expr, BYTES_PER_ADDRESS);
+  emit_expr (&expr, bytes_per_address);
 }
 
 /* Emit DW_LNS_end_sequence and reset state machine.  Does not
@@ -289,7 +295,7 @@ out_set_addr (addr)
 static void
 out_end_sequence ()
 {
-  bfd_vma addr, delta;
+  addressT addr, delta;
 
   if (ls.text_seg)
     {
@@ -366,7 +372,7 @@ get_filenum (filenum, file)
 
 void
 dwarf2_gen_line_info (addr, l)
-     bfd_vma addr;
+     addressT addr;
      struct dwarf2_line_info *l;
 {
   unsigned int filenum = l->filenum;
@@ -393,9 +399,13 @@ dwarf2_gen_line_info (addr, l)
 
   if (!ls.line_seg)
     {
+#ifdef BFD_ASSEMBLER
       symbolS *secsym;
+#endif
 
       ls.line_seg = subseg_new (".debug_line", 0);
+
+#ifdef BFD_ASSEMBLER
       bfd_set_section_flags (stdoutput, ls.line_seg, SEC_READONLY);
 
       /* We're going to need this symbol.  */
@@ -404,6 +414,7 @@ dwarf2_gen_line_info (addr, l)
         symbol_set_bfdsym (secsym, ls.line_seg->symbol);
       else
         symbol_table_insert (section_symbol (ls.line_seg));
+#endif
     }
 
   saved_seg = now_seg;
@@ -585,7 +596,7 @@ print_stats (total_size)
 void
 dwarf2_finish ()
 {
-  bfd_vma body_size, total_size, prolog_size;
+  addressT body_size, total_size, prolog_size;
   subsegT saved_subseg;
   segT saved_seg;
   char *cp;

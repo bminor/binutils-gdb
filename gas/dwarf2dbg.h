@@ -39,7 +39,7 @@ extern void dwarf2_where PARAMS ((struct dwarf2_line_info *l));
    frag-relative offset of the instruction the information is for and
    L is the source information that should be associated with that
    address. */
-extern void dwarf2_gen_line_info PARAMS ((bfd_vma addr,
+extern void dwarf2_gen_line_info PARAMS ((addressT addr,
 					  struct dwarf2_line_info *l));
 
 /* Must be called after all other input is processed to finish up the
