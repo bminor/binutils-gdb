@@ -1,7 +1,6 @@
-/* Macro definitions for GDB for a Sparc running GNU/Linux.
+/* Target-dependent definitions for GNU/Linux SPARC.
 
-   Copyright 1989, 1992, 1994, 1995, 1998, 1999, 2002 Free Software
-   Foundation, Inc.
+   Copyright 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,16 +16,14 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#ifndef TM_SPARCLINUX_H
-#define TM_SPARCLINUX_H
+#ifndef TM_LINUX_H
+#define TM_LINUX_H
 
-#include "sparc/tm-sparc.h"
+#define GDB_MULTI_ARCH GDB_MULTI_ARCH_TM
 
-#define SIGCONTEXT_PC_OFFSET 12
+/* Shared library support.  */
+#include "solib.h"
 
-#include "config/tm-linux.h"
-
-#endif /* TM_SPARCLINUX_H */
+#endif /* tm-linux.h */

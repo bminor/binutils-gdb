@@ -131,6 +131,7 @@ s390*-*-*)		gdb_host=s390 ;;
 sh*-*-netbsdelf*)	gdb_host=nbsd ;;
 
 sparc-*-solaris2*)	gdb_host=sol2 ;;
+sparc-*-linux*)		gdb_host=linux ;;
 sparc64-*-freebsd*)	gdb_host=fbsd ;;
 
 vax-*-bsd*)		gdb_host=vaxbsd ;;

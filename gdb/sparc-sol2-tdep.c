@@ -37,116 +37,19 @@
 #include "sparc-tdep.h"
 
 /* From <sys/regset.h>.  */
-const int sparc_sol2_R_PSR = 32;
-const int sparc_sol2_R_PC  = 33;
-const int sparc_sol2_R_nPC = 34;
-const int sparc_sol2_R_Y   = 35;
-const int sparc_sol2_R_WIM = 36;
-const int sparc_sol2_R_TBR = 37;
-
-void
-sparc_sol2_supply_gregset (struct regcache *regcache,
-			   int regnum, const void *gregs)
+const struct sparc_gregset sparc32_sol2_gregset =
 {
-  const char *regs = gregs;
-  int i;
-
-  if (regnum == SPARC32_PSR_REGNUM || regnum == -1)
-    regcache_raw_supply (regcache, SPARC32_PSR_REGNUM,
-			 regs + sparc_sol2_R_PSR * 4);
-
-  if (regnum == SPARC32_PC_REGNUM || regnum == -1)
-    regcache_raw_supply (regcache, SPARC32_PC_REGNUM,
-			 regs + sparc_sol2_R_PC * 4);
-
-  if (regnum == SPARC32_NPC_REGNUM || regnum == -1)
-    regcache_raw_supply (regcache, SPARC32_NPC_REGNUM,
-			 regs + sparc_sol2_R_nPC * 4);
-
-  if (regnum == SPARC32_Y_REGNUM || regnum == -1)
-    regcache_raw_supply (regcache, SPARC32_Y_REGNUM,
-			 regs + sparc_sol2_R_Y * 4);
-
-  if ((regnum >= SPARC_G0_REGNUM && regnum <= SPARC_I7_REGNUM) || regnum == -1)
-    {
-      for (i = SPARC_G0_REGNUM; i <= SPARC_I7_REGNUM; i++)
-	{
-	  if (regnum == i || regnum == -1)
-	    regcache_raw_supply (regcache, i,
-				 (regs + (i - SPARC_G0_REGNUM) * 4));
-	}
-    }
-}
-
-void
-sparc_sol2_collect_gregset (const struct regcache *regcache,
-			    int regnum, void *gregs)
-{
-  char *regs = gregs;
-  int i;
-
-  if (regnum == SPARC32_PSR_REGNUM || regnum == -1)
-    regcache_raw_collect (regcache, SPARC32_PSR_REGNUM,
-			  regs + sparc_sol2_R_PSR * 4);
-
-  if (regnum == SPARC32_PC_REGNUM || regnum == -1)
-    regcache_raw_collect (regcache, SPARC32_PC_REGNUM,
-			  regs + sparc_sol2_R_PC * 4);
-
-  if (regnum == SPARC32_NPC_REGNUM || regnum == -1)
-    regcache_raw_collect (regcache, SPARC32_NPC_REGNUM,
-			  regs + sparc_sol2_R_nPC * 4);
-
-  if (regnum == SPARC32_Y_REGNUM || regnum == -1)
-    regcache_raw_collect (regcache, SPARC32_Y_REGNUM,
-			  regs + sparc_sol2_R_Y * 4);
-
-  if ((regnum >= SPARC_G0_REGNUM && regnum <= SPARC_I7_REGNUM) || regnum == -1)
-    {
-      /* %g0 is always zero.  */
-      for (i = SPARC_G1_REGNUM; i <= SPARC_I7_REGNUM; i++)
-	{
-	  if (regnum == i || regnum == -1)
-	    regcache_raw_collect (regcache, i,
-				  (regs + (i - SPARC_G0_REGNUM) * 4));
-	}
-    }
-}
-
-void
-sparc_sol2_supply_fpregset (struct regcache *regcache,
-			    int regnum, const void *fpregs)
-{
-  const char *regs = fpregs;
-  int i;
-
-  for (i = 0; i < 32; i++)
-    {
-      if (regnum == (SPARC_F0_REGNUM + i) || regnum == -1)
-	regcache_raw_supply (regcache, SPARC_F0_REGNUM + i, regs + (i * 4));
-    }
-
-  if (regnum == SPARC32_FSR_REGNUM || regnum == -1)
-    regcache_raw_supply (regcache, SPARC32_FSR_REGNUM, regs + (32 * 4) + 4);
-}
-
-void
-sparc_sol2_collect_fpregset (const struct regcache *regcache,
-			     int regnum, void *fpregs)
-{
-  char *regs = fpregs;
-  int i;
-
-  for (i = 0; i < 32; i++)
-    {
-      if (regnum == (SPARC_F0_REGNUM + i) || regnum == -1)
-	regcache_raw_collect (regcache, SPARC_F0_REGNUM + i, regs + (i * 4));
-    }
-
-  if (regnum == SPARC32_FSR_REGNUM || regnum == -1)
-    regcache_raw_collect (regcache, SPARC32_FSR_REGNUM, regs + (32 * 4) + 4);
-}
+  32 * 4,			/* %psr */
+  33 * 4,			/* %pc */
+  34 * 4,			/* %npc */
+  35 * 4,			/* %y */
+  36 * 4,			/* %wim */
+  37 * 4,			/* %tbr */
+  1 * 4,			/* %g1 */
+  16 * 4,			/* %l0 */
+};
 
+
 static int
 sparc_sol2_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
@@ -154,8 +57,8 @@ sparc_sol2_pc_in_sigtramp (CORE_ADDR pc, char *name)
 }
 
 static struct sparc32_frame_cache *
-sparc_sol2_sigtramp_frame_cache (struct frame_info *next_frame,
-				 void **this_cache)
+sparc32_sol2_sigtramp_frame_cache (struct frame_info *next_frame,
+				   void **this_cache)
 {
   struct sparc32_frame_cache *cache;
   CORE_ADDR mcontext_addr, addr;
@@ -199,53 +102,54 @@ sparc_sol2_sigtramp_frame_cache (struct frame_info *next_frame,
 }
 
 static void
-sparc_sol2_sigtramp_frame_this_id (struct frame_info *next_frame,
-				   void **this_cache, struct frame_id *this_id)
+sparc32_sol2_sigtramp_frame_this_id (struct frame_info *next_frame,
+				     void **this_cache,
+				     struct frame_id *this_id)
 {
   struct sparc32_frame_cache *cache =
-    sparc_sol2_sigtramp_frame_cache (next_frame, this_cache);
+    sparc32_sol2_sigtramp_frame_cache (next_frame, this_cache);
 
   (*this_id) = frame_id_build (cache->base, cache->pc);
 }
 
 static void
-sparc_sol2_sigtramp_frame_prev_register (struct frame_info *next_frame,
-					 void **this_cache,
-					 int regnum, int *optimizedp,
-					 enum lval_type *lvalp,
-					 CORE_ADDR *addrp,
-					 int *realnump, void *valuep)
+sparc32_sol2_sigtramp_frame_prev_register (struct frame_info *next_frame,
+					   void **this_cache,
+					   int regnum, int *optimizedp,
+					   enum lval_type *lvalp,
+					   CORE_ADDR *addrp,
+					   int *realnump, void *valuep)
 {
   struct sparc32_frame_cache *cache =
-    sparc_sol2_sigtramp_frame_cache (next_frame, this_cache);
+    sparc32_sol2_sigtramp_frame_cache (next_frame, this_cache);
 
   trad_frame_prev_register (next_frame, cache->saved_regs, regnum,
 			    optimizedp, lvalp, addrp, realnump, valuep);
 }
 
-static const struct frame_unwind sparc_sol2_sigtramp_frame_unwind =
+static const struct frame_unwind sparc32_sol2_sigtramp_frame_unwind =
 {
   SIGTRAMP_FRAME,
-  sparc_sol2_sigtramp_frame_this_id,
-  sparc_sol2_sigtramp_frame_prev_register
+  sparc32_sol2_sigtramp_frame_this_id,
+  sparc32_sol2_sigtramp_frame_prev_register
 };
 
 static const struct frame_unwind *
-sparc_sol2_sigtramp_frame_sniffer (struct frame_info *next_frame)
+sparc32_sol2_sigtramp_frame_sniffer (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
   char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
   if (sparc_sol2_pc_in_sigtramp (pc, name))
-    return &sparc_sol2_sigtramp_frame_unwind;
+    return &sparc32_sol2_sigtramp_frame_unwind;
 
   return NULL;
 }
 
 
 void
-sparc_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+sparc32_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
@@ -260,7 +164,7 @@ sparc_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Solaris has kernel-assisted single-stepping support.  */
   set_gdbarch_software_single_step (gdbarch, NULL);
 
-  frame_unwind_append_sniffer (gdbarch, sparc_sol2_sigtramp_frame_sniffer);
+  frame_unwind_append_sniffer (gdbarch, sparc32_sol2_sigtramp_frame_sniffer);
 }
 
 
@@ -271,5 +175,5 @@ void
 _initialize_sparc_sol2_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_sparc, 0,
-			  GDB_OSABI_SOLARIS, sparc_sol2_init_abi);
+			  GDB_OSABI_SOLARIS, sparc32_sol2_init_abi);
 }

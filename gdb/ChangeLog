@@ -1,3 +1,55 @@
+2003-10-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-tdep.h (struct sparc_gregset): New.
+	(sparc_sol2_supply_gregset, sparc_sol2_collect_gregset,
+	sparc_sol2_supply_fpregset, sparc_sol2_collect_fpregset): Remove
+	prototypes.
+	(sparc_supply_gregset, sparc_collect_gregset,
+	sparc_supply_fpregset, sparc_collect_fpregset): New prototypes.
+	(sparc32_sunos4_gregset, sparc32_sol2_gregset): New extern
+	declarations.
+	(sparc32_sol2_init_abi): Rename from sparc_sol2_init_abi.
+	* sparc-tdep.c (sparc_supply_gregset, sparc_collect_gregset,
+	sparc_supply_fpregset, sparc_collect_fpregset): New function.
+	(sparc32_sunos4_gregset): New variable.
+	* sparc-sol2-tdep.c (sparc_sol2_R_PSR, sparc_sol2_R_PC,
+	sparc_sol2_R_nPC, sparc_sol2_R_Y, sparc_sol2_R_WIM,
+	sparc_sol2_R_TBR): Remove variables.
+	(sparc_sol2_supply_gregset, sparc_sol2_collect_gregset,
+	sparc_sol2_supply_fpregset, sparc_sol2_collect_fpregset): Remove
+	functions.
+	(sparc32_sol2_gregset): New variable.
+	(sparc32_sol2_sigtramp_frame_cache): Rename from
+	sparc_sol2_sigtramp_frame_cache.
+	(sparc32_sol2_sigtramp_frame_this_id): Rename from
+	sparc_sol2_sigtramp_frame_this_id.
+	(sparc32_sol2_sigtramp_frame_prev_register): Rename from
+	sparc_sol2_sigtramp_frame_prev_register.
+	(sparc32_sol2_sigtramp_frame_unwind): Rename from
+	sparc_sol2_sigtramp_frame_unwind.
+	(sparc32_sol2_sigtramp_frame_sniffer): Rename from
+	sparc_sol2_sigtramp_frame_sniffer.
+	(sparc32_sol2_init_abi): Rename from sparc_sol2_init_abi.
+	(_initialize_sparc_sol2_tdep): Update.
+	* sparc-linux-tdep.c: New file.
+	* sparc-nat.o: Replace with new file.
+	* sparc-linux-nat.c: Remove file.
+	* config/sparc/linux.mh (XM_FILE, HOST_IPC): Remove.
+	(NATDEPFILES): Add sparc-sol2-nat.o and core-regset.o.  Remove
+	sparc-linux-nat.o.
+	* config/sparc/linux.mt (TDEPFILES): Add sparc-sol2-tdep.o and
+	sparc-linux-tdep.o.
+	* config/sparc/nm-linux.h: Don't include "config/nm-svr4.h" and
+	"solib.h".  Add protection against multiple inclusion.
+	(KERNEL_U_SIZE): Don't define.
+	(kernel_u_size): Remove prototype.
+	* config/sparc/tm-linux.h: Replace with new file.
+	* configure.tgt: Add sparc-*-linux*.
+	* configure.host: Add sparc-*-linux*.
+	* Makefile.in (ALLDEPFILES): Add sparc-linux-tdep.c and
+	sparc-nat.c.
+	(sparc-nat.o, sparc-linux-tdep.o): New dependencies.
+
 2003-10-18  Mark Kettenis  <kettenis@gnu.org>
 
 	Integrate SPARC and UltraSPARC targets.

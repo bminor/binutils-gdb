@@ -1076,6 +1076,179 @@ sparc_collect_rwindow (const struct regcache *regcache,
 	}
     }
 }
+
+/* Helper functions for dealing with register sets.  */
+
+/* FIXME: kettenis/20031125: Make these handle 64-bit register sets.  */
+
+void
+sparc_supply_gregset (const struct sparc_gregset *gregset,
+		      struct regcache *regcache,
+		      int regnum, const void *gregs)
+{
+  const char *regs = gregs;
+  int i;
+
+  if (regnum == SPARC32_PSR_REGNUM || regnum == -1)
+    regcache_raw_supply (regcache, SPARC32_PSR_REGNUM,
+			 regs + gregset->r_psr_offset);
+
+  if (regnum == SPARC32_PC_REGNUM || regnum == -1)
+    regcache_raw_supply (regcache, SPARC32_PC_REGNUM,
+			 regs + gregset->r_pc_offset);
+
+  if (regnum == SPARC32_NPC_REGNUM || regnum == -1)
+    regcache_raw_supply (regcache, SPARC32_NPC_REGNUM,
+			 regs + gregset->r_npc_offset);
+
+  if (regnum == SPARC32_Y_REGNUM || regnum == -1)
+    regcache_raw_supply (regcache, SPARC32_Y_REGNUM,
+			 regs + gregset->r_y_offset);
+
+  if (regnum == SPARC_G0_REGNUM || regnum == -1)
+    regcache_raw_supply (regcache, SPARC_G0_REGNUM, NULL);
+
+  if ((regnum >= SPARC_G1_REGNUM && regnum <= SPARC_O7_REGNUM) || regnum == -1)
+    {
+      int offset = gregset->r_g1_offset;
+
+      for (i = SPARC_G1_REGNUM; i <= SPARC_O7_REGNUM; i++)
+	{
+	  if (regnum == i || regnum == -1)
+	    regcache_raw_supply (regcache, i, regs + offset);
+	  offset += 4;
+	}
+    }
+
+  if ((regnum >= SPARC_L0_REGNUM && regnum <= SPARC_I7_REGNUM) || regnum == -1)
+    {
+      /* Not all of the register set variants include Locals and
+         Inputs.  For those that don't, we read them off the stack.  */
+      if (gregset->r_l0_offset == -1)
+	{
+	  ULONGEST sp;
+
+	  regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM, &sp);
+	  sparc_supply_rwindow (regcache, sp, regnum);
+	}
+      else
+	{
+	  int offset = gregset->r_l0_offset;
+
+	  for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)
+	    {
+	      if (regnum == i || regnum == -1)
+		regcache_raw_supply (regcache, i, regs + offset);
+	      offset += 4;
+	    }
+	}
+    }
+}
+
+void
+sparc_collect_gregset (const struct sparc_gregset *gregset,
+		       const struct regcache *regcache,
+		       int regnum, void *gregs)
+{
+  char *regs = gregs;
+  int i;
+
+  if (regnum == SPARC32_PSR_REGNUM || regnum == -1)
+    regcache_raw_collect (regcache, SPARC32_PSR_REGNUM,
+			  regs + gregset->r_psr_offset);
+
+  if (regnum == SPARC32_PC_REGNUM || regnum == -1)
+    regcache_raw_collect (regcache, SPARC32_PC_REGNUM,
+			  regs + gregset->r_pc_offset);
+
+  if (regnum == SPARC32_NPC_REGNUM || regnum == -1)
+    regcache_raw_collect (regcache, SPARC32_NPC_REGNUM,
+			  regs + gregset->r_npc_offset);
+
+  if (regnum == SPARC32_Y_REGNUM || regnum == -1)
+    regcache_raw_collect (regcache, SPARC32_Y_REGNUM,
+			  regs + gregset->r_y_offset);
+
+  if ((regnum >= SPARC_G1_REGNUM && regnum <= SPARC_O7_REGNUM) || regnum == -1)
+    {
+      int offset = gregset->r_g1_offset;
+
+      /* %g0 is always zero.  */
+      for (i = SPARC_G1_REGNUM; i <= SPARC_O7_REGNUM; i++)
+	{
+	  if (regnum == i || regnum == -1)
+	    regcache_raw_collect (regcache, i, regs + offset);
+	  offset += 4;
+	}
+    }
+
+  if ((regnum >= SPARC_L0_REGNUM && regnum <= SPARC_I7_REGNUM) || regnum == -1)
+    {
+      /* Not all of the register set variants include Locals and
+         Inputs.  For those that don't, we read them off the stack.  */
+      if (gregset->r_l0_offset != -1)
+	{
+	  int offset = gregset->r_l0_offset;
+
+	  for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)
+	    {
+	      if (regnum == i || regnum == -1)
+		regcache_raw_collect (regcache, i, regs + offset);
+	      offset += 4;
+	    }
+	}
+    }
+}
+
+void
+sparc_supply_fpregset (struct regcache *regcache,
+		       int regnum, const void *fpregs)
+{
+  const char *regs = fpregs;
+  int i;
+
+  for (i = 0; i < 32; i++)
+    {
+      if (regnum == (SPARC_F0_REGNUM + i) || regnum == -1)
+	regcache_raw_supply (regcache, SPARC_F0_REGNUM + i, regs + (i * 4));
+    }
+
+  if (regnum == SPARC32_FSR_REGNUM || regnum == -1)
+    regcache_raw_supply (regcache, SPARC32_FSR_REGNUM, regs + (32 * 4) + 4);
+}
+
+void
+sparc_collect_fpregset (const struct regcache *regcache,
+			int regnum, void *fpregs)
+{
+  char *regs = fpregs;
+  int i;
+
+  for (i = 0; i < 32; i++)
+    {
+      if (regnum == (SPARC_F0_REGNUM + i) || regnum == -1)
+	regcache_raw_collect (regcache, SPARC_F0_REGNUM + i, regs + (i * 4));
+    }
+
+  if (regnum == SPARC32_FSR_REGNUM || regnum == -1)
+    regcache_raw_collect (regcache, SPARC32_FSR_REGNUM, regs + (32 * 4) + 4);
+}
+
+
+/* SunOS 4.  */
+
+/* From <machine/reg.h>.  */
+const struct sparc_gregset sparc32_sunos4_gregset =
+{
+  0 * 4,			/* %psr */
+  1 * 4,			/* %pc */
+  2 * 4,			/* %npc */
+  3 * 4,			/* %y */
+  -1,				/* %wim */
+  -1,				/* %tbr */
+  4 * 4,			/* %g1 */
+  -1				/* %l0 */
+};
 
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

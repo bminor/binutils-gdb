@@ -26,6 +26,20 @@ struct gdbarch;
 struct regcache;
 struct trad_frame_saved_reg;
 
+/* Register offsets for the general-purpose register set.  */
+
+struct sparc_gregset
+{
+  int r_psr_offset;
+  int r_pc_offset;
+  int r_npc_offset;
+  int r_y_offset;
+  int r_wim_offset;
+  int r_tbr_offset;
+  int r_g1_offset;
+  int r_l0_offset;
+};
+
 /* SPARC architecture-specific information.  */
 
 struct gdbarch_tdep
@@ -129,18 +143,26 @@ extern void sparc_supply_rwindow (struct regcache *regcache,
 extern void sparc_collect_rwindow (const struct regcache *regcache,
 				   CORE_ADDR sp, int regnum);
 
-/* Functions exported from sparc-sol2-tdep.c.  */
+/* Register offsets for SunOS 4.  */
+extern const struct sparc_gregset sparc32_sunos4_gregset;
 
-extern void sparc_sol2_supply_gregset (struct regcache *regcache,
-				       int regnum, const void *gregs);
-extern void sparc_sol2_collect_gregset (const struct regcache *regcache,
-					int regnum, void *gregs);
-extern void sparc_sol2_supply_fpregset (struct regcache *regcache,
-					int regnum, const void *fpregs);
-extern void sparc_sol2_collect_fpregset (const struct regcache *regcache,
-					 int regnum, void *regs);
+extern void sparc_supply_gregset (const struct sparc_gregset *gregset,
+				  struct regcache *regcache,
+				  int regnum, const void *gregs);
+extern void sparc_collect_gregset (const struct sparc_gregset *gregset,
+				   const struct regcache *regcache,
+				   int regnum, void *gregs);
+extern void sparc_supply_fpregset (struct regcache *regcache,
+				   int regnum, const void *fpregs);
+extern void sparc_collect_fpregset (const struct regcache *regcache,
+				    int regnum, void *fpregs);
 
-extern void sparc_sol2_init_abi (struct gdbarch_info info,
+/* Functions and variables exported from sparc-sol2-tdep.c.  */
+
+/* Register offsets for Solaris 2.  */
+extern const struct sparc_gregset sparc32_sol2_gregset;
+
+extern void sparc32_sol2_init_abi (struct gdbarch_info info,
 				 struct gdbarch *gdbarch);
 
 #endif /* sparc-tdep.h */

@@ -1,7 +1,7 @@
-/* Macro definitions for running gdb on a Sparc running GNU/Linux.
+/* Native-dependent definitions for GNU/Linux SPARC.
 
-   Copyright 1989, 1992, 1996, 1998, 1999, 2000, 2002 Free Software
-   Foundation, Inc.
+   Copyright 1989, 1992, 1996, 1998, 1999, 2000, 2002, 2003
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,13 +20,11 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "config/nm-sysv4.h"
+#ifndef NM_LINUX_H
+#define NM_LINUX_H
+
 #include "config/nm-linux.h"
-#include "solib.h"
 
 #define FETCH_INFERIOR_REGISTERS
 
-/* Return sizeof user struct to callers in less machine dependent routines */
-
-#define KERNEL_U_SIZE kernel_u_size()
-extern int kernel_u_size (void);
+#endif /* nm-linux.h */

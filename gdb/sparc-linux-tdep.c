@@ -1,4 +1,4 @@
-/* Native-dependent code for Solaris SPARC.
+/* Target-dependent code for GNU/Linux SPARC.
 
    Copyright 2003 Free Software Foundation, Inc.
 
@@ -20,38 +20,27 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "regcache.h"
-
-#include <sys/procfs.h>
-#include "gregset.h"
+#include "gdbarch.h"
+#include "osabi.h"
 
 #include "sparc-tdep.h"
 
-/* These functions provide the (temporary) glue between the Solaris
-   SPARC target dependent code and the machine independent SVR4 /proc
-   support.  */
-
-void
-supply_gregset (prgregset_t *gregs)
+static void
+sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  sparc_supply_gregset (&sparc32_sol2_gregset, current_regcache, -1, gregs);
+  /* GNU/Linux is very similar to Solaris ...  */
+  sparc32_sol2_init_abi (info, gdbarch);
+
+  /* ... but doesn't have kernel-assisted single-stepping support.  */
+  set_gdbarch_software_single_step (gdbarch, sparc_software_single_step);
 }
 
-void
-supply_fpregset (prfpregset_t *fpregs)
-{
-  sparc_supply_fpregset (current_regcache, -1, fpregs);
-}
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern void _initialize_sparc_linux_tdep (void);
 
 void
-fill_gregset (prgregset_t *gregs, int regnum)
+_initialize_sparc_linux_tdep (void)
 {
-  sparc_collect_gregset (&sparc32_sol2_gregset,
-			 current_regcache, regnum, gregs);
-}
-
-void
-fill_fpregset (prfpregset_t *fpregs, int regnum)
-{
-  sparc_collect_fpregset (current_regcache, regnum, fpregs);
+  gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_LINUX,
+			  sparc32_linux_init_abi);
 }
