@@ -358,31 +358,13 @@ struct m68k_opcode m68k_opcodes[] =
 
 /* Fixed-size branches with short (byte) offsets */
 
-{"bhis",	one(0061000),		one(0177400), "BB", m68000up },
-{"blss",	one(0061400),		one(0177400), "BB", m68000up },
-{"bccs",	one(0062000),		one(0177400), "BB", m68000up },
-{"bcss",	one(0062400),		one(0177400), "BB", m68000up },
-{"bnes",	one(0063000),		one(0177400), "BB", m68000up },
-{"beqs",	one(0063400),		one(0177400), "BB", m68000up },
-{"jfeq",	one(0063400),		one(0177400), "BB", m68000up }, /* apparently a sun alias */
-{"bvcs",	one(0064000),		one(0177400), "BB", m68000up },
-{"bvss",	one(0064400),		one(0177400), "BB", m68000up },
-{"bpls",	one(0065000),		one(0177400), "BB", m68000up },
-{"bmis",	one(0065400),		one(0177400), "BB", m68000up },
-{"bges",	one(0066000),		one(0177400), "BB", m68000up },
-{"blts",	one(0066400),		one(0177400), "BB", m68000up },
-{"bgts",	one(0067000),		one(0177400), "BB", m68000up },
-{"bles",	one(0067400),		one(0177400), "BB", m68000up },
-{"bras",	one(0060000),		one(0177400), "BB", m68000up },
-{"bsrs",	one(0060400),		one(0177400), "BB", m68000up },
-
-#ifdef MRI
 {"bhi.s",	one(0061000),		one(0177400), "BB", m68000up },
 {"bls.s",	one(0061400),		one(0177400), "BB", m68000up },
 {"bcc.s",	one(0062000),		one(0177400), "BB", m68000up },
 {"bcs.s",	one(0062400),		one(0177400), "BB", m68000up },
 {"bne.s",	one(0063000),		one(0177400), "BB", m68000up },
 {"beq.s",	one(0063400),		one(0177400), "BB", m68000up },
+{"jfeq",	one(0063400),		one(0177400), "BB", m68000up }, /* apparently a sun alias */
 {"bvc.s",	one(0064000),		one(0177400), "BB", m68000up },
 {"bvs.s",	one(0064400),		one(0177400), "BB", m68000up },
 {"bpl.s",	one(0065000),		one(0177400), "BB", m68000up },
@@ -393,7 +375,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"ble.s",	one(0067400),		one(0177400), "BB", m68000up },
 {"bra.s",	one(0060000),		one(0177400), "BB", m68000up },
 {"bsr.s",	one(0060400),		one(0177400), "BB", m68000up },
-#endif
+
 /* Fixed-size branches with long (32-bit) offsets */
 
 {"bhil",	one(0061377),		one(0177777), "BL", m68020up },
@@ -542,6 +524,10 @@ struct m68k_opcode m68k_opcodes[] =
 {"cmpiw",	one(0006100),		one(0177700),		"#w;w", m68000up },
 {"cmpb",	one(0006000),		one(0177700),		"#b;b", m68000up },	/* cmpi written as cmp */
 {"cmpb",	one(0130000),		one(0170700),		";bDd", m68000up },
+#ifdef MRI
+{"cmpb",	one(0130410),		one(0170770),		"+s+d", m68000up },
+{"cmpw",	one(0130510),		one(0170770),		"+s+d", m68000up },
+#endif
 {"cmpw",	one(0006100),		one(0177700),		"#w;w", m68000up },
 {"cmpw",	one(0130100),		one(0170700),		"*wDd", m68000up },
 {"cmpw",	one(0130300),		one(0170700),		"*wAd", m68000up },	/* cmpa written as cmp */
@@ -1529,13 +1515,14 @@ struct m68k_opcode m68k_opcodes[] =
 {"illegal",	one(0045374),		one(0177777),		"",     m68000up },
 
 #ifdef MRI
-{"jmp.s",		one(0047300),		one(0177700),		"!s",   m68000up },
+{"jmps",		one(0047300),		one(0177700),		"!s",   m68000up },
 {"jmpl",		one(0047300),		one(0177700),		"!s",   m68000up },
 
 #endif
 {"jmp",		one(0047300),		one(0177700),		"!s",   m68000up },
 {"jsr",		one(0047200),		one(0177700),		"!s",   m68000up },
 {"lea",		one(0040700),		one(0170700),		"!sAd", m68000up },
+{"leal",	one(0040700),		one(0170700),		"!sAd", m68000up },
 {"linkw",	one(0047120),		one(0177770),		"As#w", m68000up },
 {"linkl",	one(0044010),		one(0177770),		"As#l", m68020up },
 {"link",	one(0047120),		one(0177770),		"As#w", m68000up },
@@ -1747,6 +1734,7 @@ struct m68k_opcode m68k_opcodes[] =
 #endif /* NO_68851 */
 
 {"pea",		one(0044100),		one(0177700),		"!s", m68000up },
+{"peal",	one(0044100),		one(0177700),		"!s", m68000up },
 
 #ifndef NO_68851
 {"pflusha",	two(0xf000, 0x2400),	two(0xffff, 0xffff),	"",		m68030 | m68851 },
@@ -1783,7 +1771,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"pmove",	two(0xf000, 0x4000),	two(0xffc0, 0xe3ff),	"*sP8",	m68030 | m68851 },
 {"pmove",	two(0xf000, 0x4200),	two(0xffc0, 0xe3ff),	"P8%s",	m68030 | m68851 },
 {"pmove",	two(0xf000, 0x4000),	two(0xffc0, 0xe3ff),	"|sW8",	m68030 | m68851 },
-{"pmove",	two(0xf000, 0x4200),	two(0xffc0, 0xe3ff),	"W8~s",	m68030 | m68851 },
+{"pmove",	two(0xf000, 0x4200),	two(0xffc0, 0xe3ff),	"W8*s",	m68030 | m68851 },
 
 /* BADx, BACx */
 {"pmove",	two(0xf000, 0x6200),	two(0xffc0, 0xe3e3),	"*sX3",	m68030 | m68851 },
