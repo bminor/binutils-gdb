@@ -22,6 +22,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/types.h>
 #include <string.h>
 #include <link.h>
+#include <sys/param.h>
+#include <fcntl.h>
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "symtab.h"
@@ -40,9 +43,62 @@ struct so_list {
     char inferior_so_name[MAX_PATH_SIZE];	/* Shared Object Library Name */
     struct so_list *next;			/* Next Structure */
     int	symbols_loaded;
+    bfd *so_bfd;
+    struct section_table *so_sections;
+    struct section_table *so_sections_end;
 };
 
 static struct so_list *so_list_head = 0;
+
+/*
+** Build a section map for a shared library, record its text size in
+** the so_list structure and set up the text section of the shared lib.
+*/
+static void
+solib_map_sections(so)
+struct so_list *so;
+{
+  char *filename;
+  char *scratch_pathname;
+  int scratch_chan;
+  struct section_table *p;
+  
+  filename = tilde_expand (so->inferior_so_name);
+  make_cleanup (free, filename);
+  
+  scratch_chan = openp (getenv ("PATH"), 1, filename, O_RDONLY, 0,
+			    &scratch_pathname);
+  if (scratch_chan < 0)
+    scratch_chan = openp (getenv ("LD_LIBRARY_PATH"), 1, filename, O_RDONLY, 0,
+			    &scratch_pathname);
+  if (scratch_chan < 0)
+	perror_with_name (filename);
+
+  so->so_bfd = bfd_fdopenr (scratch_pathname, NULL, scratch_chan);
+  if (!so->so_bfd)
+    error ("Could not open `%s' as an executable file: %s",
+	   scratch_pathname, bfd_errmsg (bfd_error));
+  if (!bfd_check_format (so->so_bfd, bfd_object))
+    error ("\"%s\": not in executable format: %s.",
+	   scratch_pathname, bfd_errmsg (bfd_error));
+  if (build_section_table (so->so_bfd, &so->so_sections, &so->so_sections_end))
+    error ("Can't find the file sections in `%s': %s", 
+	   exec_bfd->filename, bfd_errmsg (bfd_error));
+
+  for (p = so->so_sections; p < so->so_sections_end; p++)
+    {
+      if (strcmp (bfd_section_name (so->so_bfd, p->sec_ptr), ".text") == 0)
+	{
+	  /* Determine length of text section and relocate it. */
+	  so->ld_text = p->endaddr - p->addr;
+	  p->addr += (CORE_ADDR)so->inferior_lm.lm_addr;
+	  p->endaddr += (CORE_ADDR)so->inferior_lm.lm_addr;
+	}
+      else
+	/* All other sections are ignored for now. */
+	p->addr = p->endaddr = 0;
+    }
+}
 
 /*=======================================================================*/
 
@@ -128,6 +184,9 @@ int i;
 	 /* Zero everything after the first terminating null */
 	 strncpy(new->inferior_so_name, new->inferior_so_name, MAX_PATH_SIZE);
 
+#if 0
+	 /* This doesn't work for core files, so instead get ld_text
+	    using solib_map_sections (below).  */
 	 read_memory((CORE_ADDR)new->inferior_lm.lm_ld,
 		     &inferior_dynamic_cpy,
 		     sizeof(struct link_dynamic));
@@ -135,26 +194,55 @@ int i;
 		     &inferior_ld_2_cpy,
 		     sizeof(struct link_dynamic_2));
 	 new->ld_text = inferior_ld_2_cpy.ld_text;
-    
+#endif
+
 	 new->next = 0;
 	 new->symbols_loaded = 0;
+	 new->so_bfd = NULL;
+	 new->so_sections = NULL;
 	 if (so_list_ptr)
 	     so_list_ptr->next = new;
 	 else
 	     so_list_head = new;
+
+	 solib_map_sections (new);
+
 	 so_list_next = new;
      }
      return(so_list_next);
 }
+
+/*
+** Called by core_xfer_memory if the transfer form the core file failed.
+** We try to satisfy the request from the text sections of the shared libs.
+*/
+int
+solib_xfer_memory (memaddr, myaddr, len, write)
+     CORE_ADDR memaddr;
+     char *myaddr;
+     int len;
+     int write;
+{
+  int res;
+  register struct so_list *so = 0;
+
+  while (so = find_solib(so))
+    {
+      res = xfer_memory (memaddr, myaddr, len, write,
+		         so->so_bfd, so->so_sections, so->so_sections_end);
+      if (res)
+	return res;
+    }
+  return 0;
+}
 /*=======================================================================*/
 
-static void solib_add(arg_string, from_tty)
+void solib_add(arg_string, from_tty)
 char *arg_string;
 int from_tty;
 {	
     register struct so_list *so = 0;   	/* link map state variable */
     char *val;
-    int sz;
 
     if (arg_string == 0)
 	re_comp (".");
@@ -228,6 +316,10 @@ clear_solib()
 struct so_list *next;
 
   while (so_list_head) {
+    if (so_list_head->so_sections)
+      free (so_list_head->so_sections);
+    if (so_list_head->so_bfd)
+      bfd_close (so_list_head->so_bfd);
     next = so_list_head->next;
     free(so_list_head);
     so_list_head = next;

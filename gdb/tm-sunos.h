@@ -19,8 +19,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* This is for SunOS version 4, not for earlier versions.  */
 
 #define CLEAR_SOLIB clear_solib
+#define SOLIB_ADD(filename, from_tty) solib_add (filename, from_tty)
+#define SOLIB_XFER_MEMORY(memaddr, myaddr, len, write) solib_xfer_memory (memaddr, myaddr, len, write)
 
 /* If we can't set a breakpoint, and it's in a shared library, just
    disable it.  */
 #define DISABLE_UNSETTABLE_BREAK(addr) solib_address(addr)
 extern int solib_address ();			/* solib.c */
+extern int solib_xfer_memory ();
+extern void solib_add ();
+extern void clear_solib ();

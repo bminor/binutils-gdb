@@ -64,6 +64,9 @@ core_close (quitting)
     free (bfd_get_filename (core_bfd));
     bfd_close (core_bfd);
     core_bfd = NULL;
+#ifdef CLEAR_SOLIB
+    CLEAR_SOLIB ();
+#endif
   }
 }
 
@@ -140,7 +143,12 @@ core_open (filename, from_tty)
     set_current_frame ( create_new_frame (read_register (FP_REGNUM),
 					  read_pc ()));
     select_frame (get_current_frame (), 0);
-    /* FIXME, handle shared library reading here.  */
+#if 0
+    /* Shouldn't be necessary to read in symbols.  */
+#ifdef SOLIB_ADD
+    SOLIB_ADD (NULL, from_tty);
+#endif
+#endif /* 0 */
     print_sel_frame (0);	/* Print the top frame and source line */
   } else {
     printf (
@@ -370,8 +378,14 @@ core_xfer_memory (memaddr, myaddr, len, write)
      int len;
      int write;
 {
-  return xfer_memory (memaddr, myaddr, len, write,
+  int res;
+  res = xfer_memory (memaddr, myaddr, len, write,
 		      core_bfd, core_sections, core_sections_end);
+#ifdef SOLIB_XFER_MEMORY
+  if (res == 0)
+    res = SOLIB_XFER_MEMORY (memaddr, myaddr, len, write);
+#endif
+  return res;
 }
 
 /* Get the registers out of a core file.  This is the machine-

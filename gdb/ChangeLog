@@ -1,5 +1,16 @@
 Mon Apr 22 00:02:43 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
+	* Shared libaray/corefile changes from Peter Schauer:
+	core.c (core_close): Call CLEAR_SOLIB.
+	(core_open): Remove comment about "should deal with shared lib".
+	(core_xfer_memory): If we can't xfer the usual way, try the
+	shared libraries.
+	solib.c (so_list): New fields so_bfd and so_sections{,_end}.
+	(find_solib): Use solib_map_sections to get ld_text.
+	(solib_map_sections, solib_xfer_memory): New functions.
+	(clear_solib): Free so_sections and close so_bfd.
+	tm-sunos.h: Add solib_xfer_memory, solib_add.
+
 	* sparc-tdep.c (skip_prologue): Don't skip anything unless there
 	is a "save" instruction in there somewhere.
 
