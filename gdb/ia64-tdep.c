@@ -1116,7 +1116,7 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *next_frame,
       if (next_pc == 0)
 	break;
 
-      if (it == B && ((instr & 0x1e1f800003f) != 0x04000000000))
+      if (it == B && ((instr & 0x1e1f800003fLL) != 0x04000000000LL))
 	{
 	  /* Exit loop upon hitting a non-nop branch instruction. */ 
 	  if (trust_limit)
@@ -1228,7 +1228,7 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *next_frame,
 	    {
 	      cache->saved_regs[IA64_FR0_REGNUM + fM] = spill_addr;
 
-              if ((instr & 0x1efc0000000) == 0x0eec0000000)
+              if ((instr & 0x1efc0000000LL) == 0x0eec0000000LL)
 		spill_addr += imm;
 	      else
 		spill_addr = 0;		/* last one; must be done */

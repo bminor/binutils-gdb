@@ -1,3 +1,12 @@
+2004-05-18  Daniel Jacobowitz  <dan@debian.org>
+
+	* alpha-tdep.c (alpha_gdbarch_init): Use LL suffix for large
+	constants.
+	* amd64-tdep.c (amd64_skip_prologue): Likewise.
+	* ia64-tdep.c (examine_prologue): Likewise.
+	* ns32k-tdep.c (ns32k_fix_call_dummy): Remove unused function.
+	* v850-tdep.c (v850_fix_call_dummy): Likewise.
+
 2004-05-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* vax-tdep.c (vax_return_value): Implement

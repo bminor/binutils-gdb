@@ -419,33 +419,6 @@ ns32k_pop_frame (void)
   flush_cached_frames ();
 }
 
-/* The NS32000 call dummy sequence:
-
-	enter	0xff,0			82 ff 00
-	jsr	@0x00010203		7f ae c0 01 02 03
-	adjspd	0x69696969		7f a5 01 02 03 04
-	bpt				f2
-
-   It is 16 bytes long.  */
-
-#define NS32K_CALL_DUMMY_ADDR         5
-#define NS32K_CALL_DUMMY_NARGS        11
-
-static void
-ns32k_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
-                      struct value **args, struct type *type, int gcc_p)
-{
-  int flipped;
-
-  flipped = fun | 0xc0000000;
-  flip_bytes (&flipped, 4);
-  store_unsigned_integer (dummy + NS32K_CALL_DUMMY_ADDR, 4, flipped);
-
-  flipped = - nargs * 4;
-  flip_bytes (&flipped, 4);
-  store_unsigned_integer (dummy + NS32K_CALL_DUMMY_NARGS, 4, flipped);
-}
-
 static void
 ns32k_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {

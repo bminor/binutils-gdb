@@ -1019,27 +1019,6 @@ v850_frame_saved_pc (struct frame_info *fi)
 }
 
 
-/* Function: fix_call_dummy
-   Pokes the callee function's address into the CALL_DUMMY assembly stub.
-   Assumes that the CALL_DUMMY looks like this:
-   jarl <offset24>, r31
-   trap
- */
-
-static void
-v850_fix_call_dummy (char *dummy, CORE_ADDR sp, CORE_ADDR fun, int nargs,
-		     struct value **args, struct type *type, int gcc_p)
-{
-  long offset24;
-
-  offset24 = (long) fun - (long) entry_point_address ();
-  offset24 &= 0x3fffff;
-  offset24 |= 0xff800000;	/* jarl <offset24>, r31 */
-
-  store_unsigned_integer ((unsigned int *) &dummy[2], 2, offset24 & 0xffff);
-  store_unsigned_integer ((unsigned int *) &dummy[0], 2, offset24 >> 16);
-}
-
 static CORE_ADDR
 v850_saved_pc_after_call (struct frame_info *ignore)
 {

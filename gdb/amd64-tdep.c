@@ -781,7 +781,7 @@ amd64_skip_prologue (CORE_ADDR start_pc)
   struct amd64_frame_cache cache;
   CORE_ADDR pc;
 
-  pc = amd64_analyze_prologue (start_pc, 0xffffffffffffffff, &cache);
+  pc = amd64_analyze_prologue (start_pc, 0xffffffffffffffffLL, &cache);
   if (cache.frameless_p)
     return start_pc;
 

@@ -1499,7 +1499,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Lowest text address.  This is used by heuristic_proc_start()
      to decide when to stop looking.  */
-  tdep->vm_min_address = (CORE_ADDR) 0x120000000;
+  tdep->vm_min_address = (CORE_ADDR) 0x120000000LL;
 
   tdep->dynamic_sigtramp_offset = NULL;
   tdep->sigcontext_addr = NULL;
