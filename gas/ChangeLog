@@ -1,3 +1,7 @@
+Tue Oct 31 13:29:08 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* input-scrub.c (input_scrub_push): Reset sb_index.
+
 Mon Oct 30 17:52:46 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* listing.c (listing_newline): Don't create a frag in the absolute
