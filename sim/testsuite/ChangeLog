@@ -1,5 +1,11 @@
 Thu Feb 19 11:15:45 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* sim/m32r/or3.cgs: Test OR3 instruction.
+	* sim/m32r/rach.cgs: Test RACH instruction.
+	* sim/m32r/rem.cgs: Test REM instruction.
+	* sim/m32r/sub.cgs: Test SUB instruction.
+	* sim/m32r/mv.cgs: Test MV instruction.
+	* sim/m32r/mul.cgs: Test MUL instruction.
 	* sim/m32r/bl24.cgs: Test long BL instruction.
 	* sim/m32r/bl8.cgs: Test short BL instruction.
 	* sim/m32r/blez.cgs: Test BLEZ instruction.
@@ -44,6 +50,7 @@ start-sanitize-m342rx
 	* sim/m32r/bncl24.cgs: Test long BNCL instruction.
 	* sim/m32r/bncl8.cgs: Test short BNCL instruction.
 	* sim/m32r/divh.cgs: Test DIVH instruction.
+	* sim/m32r/rach-dsi.cgs: Test extended RACH instruction.
 end-sanitize-m342rx	
 Tue Feb 17 12:46:05 1998  Doug Evans  <devans@seba.cygnus.com>
 
