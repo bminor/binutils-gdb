@@ -67,7 +67,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define MAX_REGISTER_VIRTUAL_SIZE 4
 
-#define BREAKPOINT {0x40, 0x00} /* little-ended */
+#define BREAKPOINT {0x40, 0xF8} /* little-ended */
 
 #define FUNCTION_START_OFFSET 0
 

@@ -1,3 +1,7 @@
+Fri Dec  5 09:22:35 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config/v850/tm-v850.h (BREAKPOINT): Reverted back to old value...
+
 Thu Dec  4 09:30:22 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/v850/tm-v850.h (BREAKPOINT): Changed to match new value.
