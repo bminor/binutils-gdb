@@ -72,7 +72,7 @@ AC_CHECK_FUNCS(setpgid sbrk select poll sigaction)
 # If we are configured native on Linux, work around problems with sys/procfs.h
 if test "${target}" = "${host}"; then
   case "${host}" in
-  i[3456]86-*-linux*)
+  i[[3456]]86-*-linux*)
 	AC_DEFINE(START_INFERIOR_TRAPS_EXPECTED,"2")
 	AC_DEFINE(sys_quotactl)
 	;;
