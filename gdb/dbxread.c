@@ -1468,10 +1468,14 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
 
       SET_NAMESTRING ();
 
-      processing_gcc_compilation =
-	(bufp->n_type == N_TEXT
-	 && (strcmp (namestring, GCC_COMPILED_FLAG_SYMBOL) == 0
-	     || strcmp(namestring, GCC2_COMPILED_FLAG_SYMBOL) == 0));
+      processing_gcc_compilation = 0;
+      if (bufp->n_type == N_TEXT)
+	{
+	  if (strcmp (namestring, GCC_COMPILED_FLAG_SYMBOL) == 0)
+	    processing_gcc_compilation = 1;
+	  else if (strcmp (namestring, GCC2_COMPILED_FLAG_SYMBOL) == 0)
+	    processing_gcc_compilation = 2;
+	}
 
       /* Try to select a C++ demangling based on the compilation unit
 	 producer. */
@@ -1479,7 +1483,7 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
       if (processing_gcc_compilation)
 	{
 #if 1	  /* Works, but is experimental.  -fnf */
-	  if (current_demangling_style == auto_demangling)
+	  if (AUTO_DEMANGLING)
 	    {
 	      set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
 	    }
@@ -1523,18 +1527,22 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
       }
       /* We skip checking for a new .o or -l file; that should never
          happen in this routine. */
-      else if (type == N_TEXT
-	       && (strcmp (namestring, GCC_COMPILED_FLAG_SYMBOL) == 0
-		   || strcmp (namestring, GCC2_COMPILED_FLAG_SYMBOL) == 0))
+      else if (type == N_TEXT)
 	{
 	  /* I don't think this code will ever be executed, because
 	     the GCC_COMPILED_FLAG_SYMBOL usually is right before
 	     the N_SO symbol which starts this source file.
 	     However, there is no reason not to accept
 	     the GCC_COMPILED_FLAG_SYMBOL anywhere.  */
-	  processing_gcc_compilation = 1;
+
+	  processing_gcc_compilation = 0;
+	  if (strcmp (namestring, GCC_COMPILED_FLAG_SYMBOL) == 0)
+	    processing_gcc_compilation = 1;
+	  else if (strcmp (namestring, GCC2_COMPILED_FLAG_SYMBOL) == 0)
+	    processing_gcc_compilation = 2;
+
 #if 1	  /* Works, but is experimental.  -fnf */
-	  if (current_demangling_style == auto_demangling)
+	  if (AUTO_DEMANGLING)
 	    {
 	      set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
 	    }
@@ -1958,11 +1966,11 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     case N_OPT:			/* Solaris 2:  Compiler options */
       if (name)
 	{
-	  if (!strcmp (name, GCC2_COMPILED_FLAG_SYMBOL))
+	  if (strcmp (name, GCC2_COMPILED_FLAG_SYMBOL) == 0)
 	    {
-	      processing_gcc_compilation = 1;
+	      processing_gcc_compilation = 2;
 #if 1	      /* Works, but is experimental.  -fnf */
-	      if (current_demangling_style == auto_demangling)
+	      if (AUTO_DEMANGLING)
 		{
 		  set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
 		}
@@ -2045,16 +2053,16 @@ copy_pending (beg, begi, end)
    adjusted for elf details. */
 
 void
-DEFUN(elfstab_build_psymtabs, (objfile, section_offsets, mainline, 
+elfstab_build_psymtabs (objfile, section_offsets, mainline, 
 			       staboffset, stabsize,
-			       stabstroffset, stabstrsize),
-      struct objfile *objfile AND
-      struct section_offsets *section_offsets AND
-      int mainline AND
-      unsigned int staboffset AND
-      unsigned int stabsize AND
-      unsigned int stabstroffset AND
-      unsigned int stabstrsize)
+			       stabstroffset, stabstrsize)
+      struct objfile *objfile;
+      struct section_offsets *section_offsets;
+      int mainline;
+      unsigned int staboffset;
+      unsigned int stabsize;
+      unsigned int stabstroffset;
+      unsigned int stabstrsize;
 {
   int val;
   bfd *sym_bfd = objfile->obfd;

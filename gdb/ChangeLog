@@ -1,5 +1,11 @@
 Fri Sep 25 15:13:44 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* tm-sparc.h, dbxread.c (read_ofile_symtab):  Install Jim Wilson's
+	fix to differentiate between gcc1 & gcc2 compiled files so that we
+	can debug calls that pass structs as args correctly.
+	* symmisc.c (dump_symtab):  If block was compiled with gcc, say
+	so, and what version.
+
 	* remote.c (remote_wait):  Make regs be char to avoid picayune
 	ANSI compiler warnings.
 
