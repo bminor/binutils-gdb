@@ -112,6 +112,7 @@ sparc-dis.c
 sparc-opc.c
 stamp-h.in
 sysdep.h
+tic30-dis.c
 w65-dis.c
 w65-opc.h
 v850-opc.c
