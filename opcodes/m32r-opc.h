@@ -74,14 +74,14 @@ typedef enum cgen_insn_type {
  , M32R_INSN_SUBV, M32R_INSN_SUBX, M32R_INSN_TRAP, M32R_INSN_UNLOCK
  , M32R_INSN_SATB, M32R_INSN_SATH, M32R_INSN_SAT, M32R_INSN_PCMPBZ
  , M32R_INSN_SADD, M32R_INSN_MACWU1, M32R_INSN_MSBLO, M32R_INSN_MULWU1
- , M32R_INSN_MACLH1, M32R_INSN_SC, M32R_INSN_SNC, M32R_INSN_MAX
+ , M32R_INSN_MACLH1, M32R_INSN_SC, M32R_INSN_SNC
 } CGEN_INSN_TYPE;
 
 /* Index of `invalid' insn place holder.  */
 #define CGEN_INSN_INVALID M32R_INSN_INVALID
 
 /* Total number of insns in table.  */
-#define MAX_INSNS ((int) M32R_INSN_MAX)
+#define MAX_INSNS ((int) M32R_INSN_SNC + 1)
 
 /* This struct records data prior to insertion or after extraction.  */
 struct cgen_fields

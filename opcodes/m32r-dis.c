@@ -563,16 +563,20 @@ print_insn_m32r (pc, info)
   arch = info->arch;
   if (arch == bfd_arch_unknown)
     arch = CGEN_BFD_ARCH;
-      
-  /* There's no standard way to compute the isa number (e.g. for arm thumb)
+   
+  /* There's no standard way to compute the machine or isa number
      so we leave it to the target.  */
+#ifdef CGEN_COMPUTE_MACH
+  mach = CGEN_COMPUTE_MACH (info);
+#else
+  mach = info->mach;
+#endif
+
 #ifdef CGEN_COMPUTE_ISA
   isa = CGEN_COMPUTE_ISA (info);
 #else
   isa = 0;
 #endif
-
-  mach = info->mach;
 
   /* If we've switched cpu's, close the current table and open a new one.  */
   if (cd

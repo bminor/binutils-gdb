@@ -1,3 +1,15 @@
+2001-03-20  Patrick Macdonald  <patrickm@redhat.com>
+
+        * cgen-dis.in (print_insn_@arch@): Add support for target machine
+        determination via CGEN_COMPUTE_MACH.
+	* fr30-desc.c: Regenerate.
+	* fr30-dis.c: Regenerate.
+	* fr30-opc.h: Regenerate.
+	* m32r-desc.c: Regenerate.
+	* m32r-dis.c: Regenerate.
+	* m32r-opc.h: Regenerate.
+	* m32r-opinst.c: Regenerate.
+
 2001-03-20  H.J. Lu  <hjl@gnu.org>
 
 	* configure.in: Remove the redundent AC_ARG_PROGRAM.
