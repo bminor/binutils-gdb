@@ -1,5 +1,13 @@
 -*- text -*-
 
+Changes since binutils 2.7
+
+* Formats may now be specified as configuration triplets.  For example,
+  objdump -b i386-pc-linux.  The triplets are not passed through config.sub,
+  so they must be in canonical form.
+
+* Added --change-leading-char argument to objcopy.
+
 Changes since binutils 2.6
 
 * Added --enable-shared and --enable-commonbfdlib options to configure.
@@ -11,6 +19,12 @@ Changes since binutils 2.6
 * Added --remove-leading-char argument to objcopy.
 
 * The objdump --line-numbers option is now meaningful with --reloc.
+
+* Added --line-numbers option to nm.
+
+* Added --endian/-EB/-EL option to objdump.
+
+* Added support for Alpha OpenVMS/AXP.
 
 Changes since binutils 2.5
 

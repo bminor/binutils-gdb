@@ -1766,6 +1766,16 @@ The command to list valid target values is @samp{objdump -i}
 Some sample values are: @samp{a.out-hp300bsd}, @samp{ecoff-littlemips},
 @samp{a.out-sunos-big}.
 
+You can also specify a target using a configuration triplet.  This is
+the same sort of name that is passed to configure to specify a target.
+When you use a configuration triplet as an argument, it must be fully
+canonicalized.  You can see the canonical version of a triplet by
+running the shell script @file{config.sub} which is included with the
+sources.
+
+Some sample configuration triplets are: @samp{m68k-hp-bsd},
+@samp{mips-dec-ultrix}, @samp{sparc-sun-sunos}.
+
 @subheading @code{objdump} Target
 
 Ways to specify:
