@@ -1,3 +1,8 @@
+Tue Sep 13 16:23:57 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* aoutx.h (NAME(aout,final_link)): Don't assume that all the input
+        files are a.out.
+
 Tue Sep 13 11:09:39 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
 
 	* configure.host (sparc-*-netbsd): use sparcnbsd.

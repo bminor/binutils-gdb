@@ -698,6 +698,10 @@ NAME(aout,machine_type) (arch, machine, unknown)
     if (machine == 0)	arch_flags = M_29K;
     break;
 
+  case bfd_arch_arm:
+    if (machine == 0)	arch_flags = M_ARM;
+    break;
+    
   case bfd_arch_mips:
     switch (machine) {
     case 0:
@@ -1767,7 +1771,7 @@ add_to_stringtab (abfd, tab, str, copy)
   bfd_size_type index;
 
   /* An index of 0 always means the empty string.  */
-  if (*str == '\0')
+  if (str == 0 || *str == '\0')
     return 0;
 
   /* Don't hash if BFD_TRADITIONAL_FORMAT is set, because SunOS dbx
@@ -3307,23 +3311,26 @@ NAME(aout,final_link) (abfd, info, callback)
 	    }
 	}
 
-      sz = bfd_section_size (sub, obj_textsec (sub));
-      if (sz > max_contents_size)
-	max_contents_size = sz;
-      sz = bfd_section_size (sub, obj_datasec (sub));
-      if (sz > max_contents_size)
-	max_contents_size = sz;
+      if (bfd_get_flavour (sub) == bfd_target_aout_flavour)
+	{
+	  sz = bfd_section_size (sub, obj_textsec (sub));
+	  if (sz > max_contents_size)
+	    max_contents_size = sz;
+	  sz = bfd_section_size (sub, obj_datasec (sub));
+	  if (sz > max_contents_size)
+	    max_contents_size = sz;
 
-      sz = exec_hdr (sub)->a_trsize;
-      if (sz > max_relocs_size)
-	max_relocs_size = sz;
-      sz = exec_hdr (sub)->a_drsize;
-      if (sz > max_relocs_size)
-	max_relocs_size = sz;
+	  sz = exec_hdr (sub)->a_trsize;
+	  if (sz > max_relocs_size)
+	    max_relocs_size = sz;
+	  sz = exec_hdr (sub)->a_drsize;
+	  if (sz > max_relocs_size)
+	    max_relocs_size = sz;
 
-      sz = obj_aout_external_sym_count (sub);
-      if (sz > max_sym_count)
-	max_sym_count = sz;
+	  sz = obj_aout_external_sym_count (sub);
+	  if (sz > max_sym_count)
+	    max_sym_count = sz;
+	}
     }
 
   if (info->relocateable)
