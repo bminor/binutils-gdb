@@ -1,3 +1,8 @@
+2002-11-23  Andreas Schwab  <schwab@suse.de>
+
+	* m68k-tdep.c (m68k_register_virtual_type): Use architecture
+	invariant return values.
+
 2002-11-22  Andreas Schwab  <schwab@suse.de>
 
 	* valops.c (value_slice): Move declaration of `offset' to avoid

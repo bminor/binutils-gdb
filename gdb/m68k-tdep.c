@@ -159,18 +159,19 @@ m68k_register_virtual_size (int regnum)
 static struct type *
 m68k_register_virtual_type (int regnum)
 {
-  if (regnum == E_FPI_REGNUM)
-    return lookup_pointer_type (builtin_type_void);
-  else if ((unsigned) regnum >= E_FPC_REGNUM)
-    return builtin_type_int;
-  else if ((unsigned) regnum >= FP0_REGNUM)
-    return builtin_type_long_double;
-  else if (regnum == PS_REGNUM)
-    return builtin_type_int;
-  else if ((unsigned) regnum >= A0_REGNUM)
-    return lookup_pointer_type (builtin_type_void);
-  else
-    return builtin_type_int;
+  if (regnum >= FP0_REGNUM && regnum <= FP0_REGNUM + 7)
+    return builtin_type_m68881_ext;
+
+  if (regnum == E_FPI_REGNUM || regnum == PC_REGNUM)
+    return builtin_type_void_func_ptr;
+
+  if (regnum == E_FPC_REGNUM || regnum == E_FPS_REGNUM || regnum == PS_REGNUM)
+    return builtin_type_int32;
+
+  if (regnum >= A0_REGNUM && regnum <= A0_REGNUM + 7)
+    return builtin_type_void_data_ptr;
+
+  return builtin_type_int32;
 }
 
 /* Function: m68k_register_name
