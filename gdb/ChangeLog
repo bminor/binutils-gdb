@@ -1,3 +1,10 @@
+Wed Nov 17 09:43:31 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* valops.c (typecmp): improve prototype matching when calling
+	a method. Make 'p (*(ostream *) &cout) << "lll" ' to work.
+	* eval.c(evalute_subexp): fix operator search problem when call
+	like  p x.'operator+'(i).
+
 Tue Nov 16 17:15:03 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* i386ly-nat.c, i386lynx-nat.c, m68kly-nat.c:  Remove.  Move

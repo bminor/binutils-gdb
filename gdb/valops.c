@@ -1278,21 +1278,27 @@ typecmp (staticp, t1, t2)
   if (t1[!staticp] == 0) return 0;
   for (i = !staticp; t1[i] && TYPE_CODE (t1[i]) != TYPE_CODE_VOID; i++)
     {
+    struct type *tt1, *tt2;
       if (! t2[i])
 	return i+1;
-      if (TYPE_CODE (t1[i]) == TYPE_CODE_REF
+      tt1 = t1[i];
+      tt2 = VALUE_TYPE(t2[i]);
+      if (TYPE_CODE (tt1) == TYPE_CODE_REF
 	  /* We should be doing hairy argument matching, as below.  */
-	  && (TYPE_CODE (TYPE_TARGET_TYPE (t1[i]))
-	      == TYPE_CODE (VALUE_TYPE (t2[i]))))
+	  && (TYPE_CODE (TYPE_TARGET_TYPE (tt1)) == TYPE_CODE (tt2)))
 	{
 	  t2[i] = value_addr (t2[i]);
 	  continue;
 	}
 
-      if (TYPE_CODE (t1[i]) == TYPE_CODE_PTR
-	  && TYPE_CODE (VALUE_TYPE (t2[i])) == TYPE_CODE_ARRAY)
-	/* Array to pointer is a `trivial conversion' according to the ARM.  */
-	continue;
+      while (TYPE_CODE (tt1) == TYPE_CODE_PTR
+	  && (TYPE_CODE(tt2)==TYPE_CODE_ARRAY || TYPE_CODE(tt2)==TYPE_CODE_PTR))
+	{
+	   tt1 = TYPE_TARGET_TYPE(tt1); 
+	   tt2 = TYPE_TARGET_TYPE(tt2);
+	}
+      if (TYPE_CODE(tt1) == TYPE_CODE(tt2)) continue;
+      /* Array to pointer is a `trivial conversion' according to the ARM.  */
 
       /* We should be doing much hairier argument matching (see section 13.2
 	 of the ARM), but as a quick kludge, just check for the same type
@@ -1400,6 +1406,7 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
      register struct type *type;
 {
   int i;
+  value v;
   static int name_matched = 0;
 
   check_stub_type (type);
@@ -1425,7 +1432,8 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
 		    return (value)value_virtual_fn_field (arg1p, f, j, type, offset);
 		  if (TYPE_FN_FIELD_STATIC_P (f, j) && static_memfuncp)
 		    *static_memfuncp = 1;
-		  return (value)value_fn_field (arg1p, f, j, type, offset);
+		  v = (value)value_fn_field (arg1p, f, j, type, offset);
+		  if (v != (value)NULL) return v;
 		}
 	      j--;
 	    }
@@ -1434,7 +1442,6 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
 
   for (i = TYPE_N_BASECLASSES (type) - 1; i >= 0; i--)
     {
-      value v;
       int base_offset;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
@@ -1547,9 +1554,10 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
       if (!args[1])
 	{
 	  /* destructors are a special case.  */
-	  return (value)value_fn_field (NULL, TYPE_FN_FIELDLIST1 (t, 0),
-					TYPE_FN_FIELDLIST_LENGTH (t, 0),
-					0, 0);
+	  v = (value)value_fn_field (NULL, TYPE_FN_FIELDLIST1 (t, 0),
+				TYPE_FN_FIELDLIST_LENGTH (t, 0), 0, 0);
+	  if (!v) error("could not find destructor function named %s.", name);
+	  else return v;
 	}
       else
 	{

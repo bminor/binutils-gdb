@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "expression.h"
 #include "target.h"
 #include "frame.h"
+#include "demangle.h"
 #include "language.h"	/* For CAST_IS_CONVERSION */
 
 /* Values of NOSIDE argument to eval_subexp.  */
@@ -163,8 +164,8 @@ evaluate_subexp (expect_type, exp, pos, noside)
 {
   enum exp_opcode op;
   int tem, tem2, tem3;
-  register int pc, pc2, oldpos;
-  register value arg1, arg2, arg3;
+  register int pc, pc2 = 0, oldpos;
+  register value arg1 = NULL, arg2 = NULL, arg3;
   struct type *type;
   int nargs;
   value *argvec;
@@ -202,7 +203,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	goto nosideret;
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
-	  struct symbol * sym = exp->elts[pc + 1].symbol;
+	  struct symbol * sym = exp->elts[pc + 2].symbol;
 	  enum lval_type lv;
 
 	  switch (SYMBOL_CLASS (sym))
@@ -416,19 +417,50 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	{
 	  int static_memfuncp;
 	  value temp = arg2;
+	  char tstr[15], mangle_tstr[15], *ptr, *mangle_ptr;
+	  char *pp;
 
 	  argvec[1] = arg2;
-	  argvec[0] =
-	    value_struct_elt (&temp, argvec+1, &exp->elts[pc2 + 2].string,
+	  argvec[0] = 0;
+	  strcpy(tstr, &exp->elts[pc2+2].string);
+	  if (!strncmp(tstr, "operator", 8))
+	    {
+	       ptr = &tstr[8];
+	       strcpy(mangle_tstr, "__");
+	       mangle_ptr = &mangle_tstr[2];
+	       pp = cplus_mangle_opname(ptr, DMGL_ANSI);
+	       if (pp) 
+		 strcpy(mangle_ptr, pp);
+	       else
+	         strcpy(mangle_ptr, ptr);
+	       argvec[0] =
+	         value_struct_elt (&temp, argvec+1, mangle_tstr,
 			      &static_memfuncp,
 			      op == STRUCTOP_STRUCT
 			      ? "structure" : "structure pointer");
-	  if (VALUE_OFFSET (temp))
-	    {
-	      arg2 = value_from_longest (lookup_pointer_type (VALUE_TYPE (temp)),
-					 VALUE_ADDRESS (temp)+VALUE_OFFSET (temp));
-	      argvec[1] = arg2;
+	       if (!argvec[0]) 
+		 {
+	            pp = cplus_mangle_opname(ptr, DMGL_NO_OPTS);
+	            if (pp) 
+		      strcpy(mangle_ptr, pp);
+	            else
+	              strcpy(mangle_ptr, ptr);
+		    strcpy(tstr, mangle_tstr);
+	         }
 	    }
+          if (!argvec[0]) 
+	    {
+	      temp = arg2;
+	      argvec[0] =
+	      value_struct_elt (&temp, argvec+1, tstr,
+			      &static_memfuncp,
+			      op == STRUCTOP_STRUCT
+			      ? "structure" : "structure pointer");
+	    }
+	  arg2 = value_from_longest (lookup_pointer_type(VALUE_TYPE (temp)),
+			 VALUE_ADDRESS (temp)+VALUE_OFFSET (temp));
+	  argvec[1] = arg2;
+
 	  if (static_memfuncp)
 	    {
 	      argvec[1] = argvec[0];
