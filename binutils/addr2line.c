@@ -35,6 +35,7 @@
 #include "libiberty.h"
 #include "demangle.h"
 #include "bucomm.h"
+#include "budemang.h"
 
 static boolean with_functions;	/* -f, show function names.  */
 static boolean do_demangle;	/* -C, demangle names.  */
@@ -191,23 +192,22 @@ translate_addresses (abfd)
 	{
 	  if (with_functions)
 	    {
-	      if (functionname == NULL || *functionname == '\0')
-		printf ("??\n");
-	      else if (! do_demangle)
-		printf ("%s\n", functionname);
-	      else
-		{
-		  char *res;
+	      const char *name;
+	      char *alloc = NULL;
 
-		  res = cplus_demangle (functionname, DMGL_ANSI | DMGL_PARAMS);
-		  if (res == NULL)
-		    printf ("%s\n", functionname);
-		  else
-		    {
-		      printf ("%s\n", res);
-		      free (res);
-		    }
+	      name = functionname;
+	      if (name == NULL || *name == '\0')
+		name = "??";
+	      else if (do_demangle)
+		{
+		  alloc = demangle (abfd, name);
+		  name = alloc;
 		}
+
+	      printf ("%s\n", name);
+
+	      if (alloc != NULL)
+		free (alloc);
 	    }
 
 	  if (base_names && filename != NULL)

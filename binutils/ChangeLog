@@ -1,3 +1,20 @@
+2002-07-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* budemang.c: New file, "demangle" function.
+	* budemang.h: New file.
+	* addr2line.c (translate_addresses): Use "demangle".
+	* nm.c (print_symname): Likewise.
+	* objdump.c (objdump_print_symname): Likewise.
+	(dump_symbols): Likewise.  Also, don't use bfd_asymbol_name macro
+	here since that obfuscates.
+	* rdcoff.c: Don't #include demangle.h.
+	* Makefile.am (CFILES): Add budemang.c, emul_aix.c,
+	emul_vanilla.c.  Remove emul_$(EMULATION).c.  Sort.
+	(HFILES): Add budemang.h.  Sort.
+	(nm_new_SOURCES, objdump_SOURCES, addr2line_SOURCES): Add budemang.c.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2002-07-01  Matt Thomas  <matt@3am-software.com>
 
 	* readelf.c: Include "elf/vax.h".

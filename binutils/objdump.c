@@ -22,6 +22,7 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h"
 #include "progress.h"
 #include "bucomm.h"
+#include "budemang.h"
 #include "getopt.h"
 #include "safe-ctype.h"
 #include "dis-asm.h"
@@ -630,29 +631,20 @@ objdump_print_symname (abfd, info, sym)
 {
   char *alloc;
   const char *name;
-  const char *print;
 
   alloc = NULL;
   name = bfd_asymbol_name (sym);
-  if (! do_demangle || name[0] == '\0')
-    print = name;
-  else
+  if (do_demangle && name[0] != '\0')
     {
       /* Demangle the name.  */
-      if (bfd_get_symbol_leading_char (abfd) == name[0])
-	++name;
-
-      alloc = cplus_demangle (name, DMGL_ANSI | DMGL_PARAMS);
-      if (alloc == NULL)
-	print = name;
-      else
-	print = alloc;
+      alloc = demangle (abfd, name);
+      name = alloc;
     }
 
   if (info != NULL)
-    (*info->fprintf_func) (info->stream, "%s", print);
+    (*info->fprintf_func) (info->stream, "%s", name);
   else
-    printf ("%s", print);
+    printf ("%s", name);
 
   if (alloc != NULL)
     free (alloc);
@@ -2316,24 +2308,16 @@ dump_symbols (abfd, dynamic)
 	      const char *name;
 	      char *alloc;
 
-	      name = bfd_asymbol_name (*current);
+	      name = (*current)->name;
 	      alloc = NULL;
 	      if (do_demangle && name != NULL && *name != '\0')
 		{
-		  const char *n;
-
 		  /* If we want to demangle the name, we demangle it
                      here, and temporarily clobber it while calling
                      bfd_print_symbol.  FIXME: This is a gross hack.  */
 
-		  n = name;
-		  if (bfd_get_symbol_leading_char (cur_bfd) == *n)
-		    ++n;
-		  alloc = cplus_demangle (n, DMGL_ANSI | DMGL_PARAMS);
-		  if (alloc != NULL)
-		    (*current)->name = alloc;
-		  else
-		    (*current)->name = n;
+		  alloc = demangle (cur_bfd, name);
+		  (*current)->name = alloc;
 		}
 
 	      bfd_print_symbol (cur_bfd, stdout, *current,

@@ -25,7 +25,6 @@
 #include "coff/internal.h"
 #include "bucomm.h"
 #include "libiberty.h"
-#include "demangle.h"
 #include "debug.h"
 #include "budbg.h"
 
