@@ -1,3 +1,7 @@
+Fri Sep  8 16:46:29 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Build ld in mips*-*-bsd* case.
+
 Thu Sep  7 20:03:41 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* config.sub: Accept -lites* OS.  From Ian Dall.

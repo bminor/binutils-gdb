@@ -447,7 +447,7 @@ case "${target}" in
     noconfigdirs="$noconfigdirs gprof"
     ;;
   mips*-*-bsd*)
-    noconfigdirs="$noconfigdirs gprof ld"
+    noconfigdirs="$noconfigdirs gprof"
     ;;
   mips*-*-*)
     noconfigdirs="$noconfigdirs gprof"
