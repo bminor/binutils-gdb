@@ -3034,8 +3034,8 @@
 	{
 	  if (STATE_VERBOSE_P(SD))
 	    sim_io_eprintf (SD, 
-	      "Warning: PC 0x%x: semantic_DMxC1_COP1Sa 32-bit use of odd FPR number\n",
-	      CIA);
+	      "Warning: PC 0x%lx: semantic_DMxC1_COP1Sa 32-bit use of odd FPR number\n",
+	      (long) CIA);
 	  PENDING_FILL(RT,SET64HI(0xDEADC0DE) | 0xBAD0BAD0);
 	}
     }
@@ -3209,7 +3209,8 @@
 	{
 	  if (STATE_VERBOSE_P(SD))
 	    sim_io_eprintf (SD, 
-	      "Warning:  PC 0x%x: MTC1 not DMTC1 with 64 bit regs\n", CIA);
+			    "Warning:  PC 0x%lx: MTC1 not DMTC1 with 64 bit regs\n",
+			    (long) CIA);
 	  PENDING_FILL ((FS + FGRIDX), (SET64HI(0xDEADC0DE) | VL4_8(GPR[RT])));
 	}
       else
