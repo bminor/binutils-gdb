@@ -1,3 +1,15 @@
+2002-05-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+	2002-05-11  Nick Clifton  <nickc@cambridge.redhat.com>
+	* config/obj-coff.c: Fix compile time warnings when compiling
+	without BFD_ASSEMBLER defined.
+	Fix formatting.
+
+	* config/tc-sh.c (md_pcrel_from): Define for use with sh-hms
+	target.
+	(md_pcrel_from_section): Use md_pcrel_from().
+
 2002-05-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-i386.c (md_estimate_size_before_relax) Don't lose
