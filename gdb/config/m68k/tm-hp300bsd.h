@@ -27,7 +27,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define BELIEVE_PCC_PROMOTION 1
 
 /* Define BPT_VECTOR if it is different than the default.
-   This is the vector number used by traps to indicate a breakpoint. */
+   This is the vector number used by traps to indicate a breakpoint.
+
+   For hp300bsd the normal breakpoint vector is 0x2 (for debugging via
+   ptrace); for remote kernel debugging the breakpoint vector is 0xf.  */
 
 #define BPT_VECTOR 0x2
 #define REMOTE_BPT_VECTOR 0xf
