@@ -1,3 +1,9 @@
+Wed Nov 27 12:10:25 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Warn about a
+	relocation against a symbol defined in a section with no output
+	section.
+
 Tue Nov 26 11:07:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aclocal.m4 (BFD_CC_FOR_BUILD): Don't require AC_C_CROSS.
