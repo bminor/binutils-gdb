@@ -54,11 +54,20 @@ alphafbsd_use_struct_convention (int gcc_p, struct type *type)
   return 0;
 }
 
+static int
+alphafbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
+{
+  /* FIXME */
+  return 0;
+}
+
 static void
 alphafbsd_init_abi (struct gdbarch_info info,
                     struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  set_gdbarch_pc_in_sigtramp (gdbarch, alphafbsd_pc_in_sigtramp);
 
   set_gdbarch_use_struct_convention (gdbarch, alphafbsd_use_struct_convention);
 }

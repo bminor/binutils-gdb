@@ -123,11 +123,19 @@ alphanbsd_sigtramp_offset (CORE_ADDR pc)
   return -1;
 }
 
+static int
+alphanbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
+{
+  return (alphanbsd_sigtramp_offset (pc) >= 0);
+}
+
 static void
 alphanbsd_init_abi (struct gdbarch_info info,
                     struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  set_gdbarch_pc_in_sigtramp (gdbarch, alphanbsd_pc_in_sigtramp);
 
   /* NetBSD/alpha does not provide single step support via ptrace(2); we
      must use software single-stepping.  */

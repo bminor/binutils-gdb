@@ -85,11 +85,19 @@ alpha_linux_sigtramp_offset (CORE_ADDR pc)
   return -1;
 }
 
+static int
+alpha_linux_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
+{
+  return (alpha_linux_sigtramp_offset (pc) >= 0);
+}
+
 static void
 alpha_linux_init_abi (struct gdbarch_info info,
                       struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  set_gdbarch_pc_in_sigtramp (gdbarch, alpha_linux_pc_in_sigtramp);
 
   tdep->dynamic_sigtramp_offset = alpha_linux_sigtramp_offset;
 }

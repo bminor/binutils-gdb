@@ -37,11 +37,19 @@ alpha_osf1_skip_sigtramp_frame (struct frame_info *frame, CORE_ADDR pc)
   return 0;
 }
 
+static int
+alpha_osf1_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
+{
+  return (func_name != NULL && STREQ ("__sigtramp", func_name));
+}
+
 static void
 alpha_osf1_init_abi (struct gdbarch_info info,
                      struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  set_gdbarch_pc_in_sigtramp (gdbarch, alpha_osf1_pc_in_sigtramp);
 
   tdep->skip_sigtramp_frame = alpha_osf1_skip_sigtramp_frame;
 }

@@ -45,11 +45,6 @@ struct symbol;
 
 #define FUNCTION_START_OFFSET 0
 
-/* Are we currently handling a signal ?  */
-
-#define IN_SIGTRAMP(pc, name) alpha_osf_in_sigtramp ((pc), (name))
-extern int alpha_osf_in_sigtramp (CORE_ADDR, char *);
-
 #define BREAKPOINT {0x80, 0, 0, 0}	/* call_pal bpt */
 
 /* Special symbol found in blocks associated with routines.  We can hang

@@ -27,14 +27,9 @@
 
 #include "alpha/tm-alpha.h"
 
-/* Are we currently handling a signal ?  */
-
-extern LONGEST alpha_linux_sigtramp_offset (CORE_ADDR);
-#undef IN_SIGTRAMP
-#define IN_SIGTRAMP(pc, name)	(alpha_linux_sigtramp_offset (pc) >= 0)
-
 /* Get start and end address of sigtramp handler.  */
 
+extern LONGEST alpha_linux_sigtramp_offset (CORE_ADDR);
 #define SIGTRAMP_START(pc)	(pc - alpha_linux_sigtramp_offset (pc))
 #define SIGTRAMP_END(pc)	(SIGTRAMP_START(pc) + 3*4)
 

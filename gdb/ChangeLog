@@ -1,5 +1,23 @@
 2002-04-24  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* alpha-linux-tdep.c (alpha_linux_pc_in_sigtramp): New function.
+	(alpha_linux_init_abi): Set gdbarch_pc_in_sigtramp to
+	alpha_linux_pc_in_sigtramp.
+	* alpha-osf1-tdep.c (alpha_osf1_pc_in_sigtramp): New function.
+	(alpha_osf1_init_abi): Set gdbarch_pc_in_sigtramp to
+	alpha_osf1_pc_in_sigtramp.
+	* alpha-tdep.c (alpha_osf_in_sigtramp): Remove.
+	* alphafbsd-tdep.c (alphafbsd_pc_in_sigtramp): New function.
+	(alphafbsd_init_abi): Set gdbarch_pc_in_sigtramp to
+	alphafbsd_pc_in_sigtramp.
+	* alphanbsd-tdep.c (alphanbsd_pc_in_sigtramp): New function.
+	(alphanbsd_init_abi): Set gdbarch_pc_in_sigtramp to
+	alphanbsd_pc_in_sigtramp.
+	* config/alpha/tm-alpha.h (IN_SIGTRAMP): Remove.
+	* config/alpha/tm-alphalinux.h (IN_SIGTRAMP): Remove.
+
+2002-04-24  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* config/alpha/nbsd.mh (NATDEPFILES): Remove solib-legacy.o.
 
 2002-04-24  Jason Thorpe  <thorpej@wasabisystems.com>

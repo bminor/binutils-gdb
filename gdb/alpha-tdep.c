@@ -193,12 +193,6 @@ struct linked_proc_info
   }
  *linked_proc_desc_table = NULL;
 
-int
-alpha_osf_in_sigtramp (CORE_ADDR pc, char *func_name)
-{
-  return (func_name != NULL && STREQ ("__sigtramp", func_name));
-}
-
 static CORE_ADDR
 alpha_frame_past_sigtramp_frame (struct frame_info *frame, CORE_ADDR pc)
 {
