@@ -5,9 +5,11 @@ Fri Sep 30 19:05:20 1994  Pat Rankin  (rankin@eql.caltech.edu)
 
 Fri Sep 30 16:23:31 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
-	* Makefile.in (diststuff): Build make-gas.com.
-	(clean, mostlyclean): Delete make-gas.com.
-	(realclean): Separate target, depend on clean and distclean.
+	* Makefile.in (DISTSTUFF): New variable, listing only make-gas.com
+	for now.
+	(diststuff): New target; builds DISTSTUFF.
+	(realclean): Separate target, depend on clean and distclean, then
+	delete DISTSTUFF.
 	* make-gas.com: Deleted.
 
 	* config/tc-i386.c (i386_validate_fix) [BFD_ASSEMBLER]: New
