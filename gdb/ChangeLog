@@ -1,5 +1,7 @@
 2004-08-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* gdb_ptrace.h: GNU/Linux.
+
 	* config/alpha/nm-linux.h (PTRACE_ARG3_TYPE, PTRACE_XFER_TYPE):
 	Remove defines.
 

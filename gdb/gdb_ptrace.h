@@ -25,7 +25,7 @@
 /* The <sys/ptrace.h> header was introduced with 4.4BSD, and provided
    the PT_* symbolic constants for the ptrace(2) request numbers.  The
    ptrace(2) prototype was added later to the same header on BSD.
-   SunOS and Linux have slightly different symbolic names for the
+   SunOS and GNU/Linux have slightly different symbolic names for the
    constants that start with PTRACE_*.  System V still doesn't have
    (and probably never will have) a <sys/ptrace.h> with symbolic
    constants; the ptrace(2) prototype can be found in <unistd.h>.
