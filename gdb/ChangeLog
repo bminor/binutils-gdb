@@ -1,7 +1,10 @@
 Fri Mar  5 17:39:45 1993  John Gilmore  (gnu@cacophony.cygnus.com)
 
-	* am29k-tdep.c (initialize_29k):  Fix call_scratch_address doc.
-	Remove reginv command.
+	* am29k-tdep.c (TAGWORD_ZERO_MASK):  New #define.
+	(examine_tag):  Use it.
+	(read_register_stack):  Only look in the local registers for a
+	memory address if it's between rfb and rsp; go to memory otherwise.
+	(initialize_29k):  Fix call_scratch_address doc.  Remove reginv_com.
 	(reginv_com):  Remove ancient kludge command.
 
 Fri Mar  5 17:16:26 1993  K. Richard Pixley  (rich@rtl.cygnus.com)

@@ -22,10 +22,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "frame.h"
 #include "value.h"
-/*#include <sys/param.h> */
 #include "symtab.h"
 #include "inferior.h"
 #include "gdbcmd.h"
+
+/* If all these bits in an instruction word are zero, it is a "tag word"
+   which precedes a function entry point and gives stack traceback info.
+   This used to be defined as 0xff000000, but that treated 0x00000deb as
+   a tag word, while it is really used as a breakpoint.  */
+#define	TAGWORD_ZERO_MASK	0xff00f800
 
 extern CORE_ADDR text_start;	/* FIXME, kludge... */
 
@@ -329,7 +334,7 @@ examine_tag(p, is_trans, argcount, msize, mfp_used)
   unsigned int tag1, tag2;
 
   tag1 = read_memory_integer (p, 4);
-  if ((tag1 & 0xff000000) != 0)		/* Not a tag word */
+  if ((tag1 & TAGWORD_ZERO_MASK) != 0)	/* Not a tag word */
     return 0;
   if (tag1 & (1<<23)) 			/* A two word tag */
     {
@@ -400,7 +405,7 @@ init_frame_info (innermost_frame, fci)
 	 do not trace back beyond the start of the text segment
 	 (just as a sanity check to avoid going into never-never land).  */
       while (p >= text_start
-	     && ((insn = read_memory_integer (p, 4)) & 0xff000000) != 0)
+	     && ((insn = read_memory_integer (p, 4)) & TAGWORD_ZERO_MASK) != 0)
 	p -= 4;
       
       if (p < text_start)
@@ -524,11 +529,15 @@ read_register_stack (memaddr, myaddr, actual_mem_addr, lval)
       if (actual_mem_addr != NULL)
 	*actual_mem_addr = REGISTER_BYTE (regnum);
     }
-  else if (memaddr < rfb)
+  /* If it's in the part of the register stack that's in real registers,
+     get the value from the registers.  If it's anywhere else in memory
+     (e.g. in another thread's saved stack), skip this part and get
+     it from real live memory.  */
+  else if (memaddr < rfb && memaddr >= rsp)
     {
       /* It's in a register.  */
       int regnum = (memaddr - rsp) / 4 + LR0_REGNUM;
-      if (regnum < LR0_REGNUM || regnum > LR0_REGNUM + 127)
+      if (regnum > LR0_REGNUM + 127)
 	error ("Attempt to read register stack out of range.");
       if (myaddr != NULL)
 	read_register_gen (regnum, myaddr);
@@ -733,7 +742,7 @@ pop_frame ()
         {
 	  /* Note: word is in host byte order.  */
           word = read_memory_integer (rfb + i, 4);
-          write_register (LR0_REGNUM + ((rfb - gr1) % 0x80) + i / 4, word);					      
+          write_register (LR0_REGNUM + ((rfb - gr1) % 0x80) + i / 4, word);
         }								      
     }
   flush_cached_frames ();						      
@@ -796,6 +805,7 @@ push_dummy_frame ()
   write_register (lrnum++, read_register (PC_REGNUM));
   write_register (lrnum, read_register (NPC_REGNUM));
 }
+
 
 void
 _initialize_29k()
