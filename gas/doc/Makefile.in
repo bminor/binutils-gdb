@@ -29,10 +29,12 @@ srcdir = .
 
 prefix = /usr/local
 
-bindir = $(prefix)/bin
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+
 datadir = $(prefix)/lib
-libdir = $(prefix)/lib
-mandir = $(datadir)/man
+mandir = $(prefix)/man
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
 man3dir = $(mandir)/man3
@@ -42,7 +44,7 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
-infodir = $(datadir)/info
+infodir = $(prefix)/info
 includedir = $(prefix)/include
 docdir = $(datadir)/doc
 
@@ -57,19 +59,20 @@ AR_FLAGS = qv
 BISON = bison
 MAKEINFO = makeinfo
 RANLIB = ranlib
+MAKEINFO = makeinfo
 
 # What version of the manual you want (see *.m4); "all" includes everything
 CONFIG=all
 
 # Sun/Berkeley m4 doesn't have all the things we need; use GNU or sV
-M4=gm4
+M4=m4
 #M4=/usr/5bin/m4
 
 # Directory for gas source
 srcdir=..
 
 # Where to find texinfo.tex to format docn with TeX
-TEXIDIR = $(srcdir)/../texinfo/fsf
+TEXIDIR = $(srcdir)/../../texinfo/fsf
 
 #### host, target, and site specific Makefile frags come in here.
 ##
@@ -77,14 +80,20 @@ TEXIDIR = $(srcdir)/../texinfo/fsf
 all:
 clean:
 install:
+	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
+	$(INSTALL_DATA) $(srcdir)/as.1 $(man1dir)/as.1
 
 info: as.info
 
 as.info: as-${CONFIG}.texinfo
-	makeinfo -o as.info as-${CONFIG}.texinfo
+	$(MAKEINFO) -o as.info $(srcdir)/as-${CONFIG}.texinfo
 
 install-info: as.info
-	[ -d $(infodir) ] || mkdir $(infodir)
+	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
 	for i in as.info* ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done

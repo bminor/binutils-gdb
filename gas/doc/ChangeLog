@@ -1,3 +1,7 @@
+Tue Aug 18 14:19:01 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in: always create installation directories.
+
 Thu May 14 17:22:48 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* Makefile.in: use m4 rather than gm4.
