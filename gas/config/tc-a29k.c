@@ -104,7 +104,7 @@ const char line_comment_chars[] = "#";
 
 /* We needed an unused char for line separation to work around the
    lack of macros, using sed and such.  */
-const char line_separator_chars[] = "@";
+const char line_separator_chars[] = "";
 
 /* Chars that can be used to separate mant from exp in floating point nums */
 const char EXP_CHARS[] = "eE";

@@ -23,7 +23,11 @@
 
 #include "config.h"
 #include <stdio.h>
+#ifdef HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
 #include <ctype.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -382,7 +386,9 @@ get_any_string (idx, in, out, expand, pretend_quoted)
 	       || in->ptr[idx] == '<'
 	       || (macro_alternate && in->ptr[idx] == '\''))
 	{
-	  if (macro_alternate && expand)
+	  if (macro_alternate
+	      && ! macro_strip_at
+	      && expand)
 	    {
 	      /* Keep the quotes */
 	      sb_add_char (out,  '\"');
@@ -573,8 +579,10 @@ get_apost_token (idx, in, name, kind)
      int kind;
 {
   idx = get_token (idx, in, name);
-  if (idx < in->len && in->ptr[idx] == kind
-      && (! macro_mri || macro_strip_at))
+  if (idx < in->len
+      && in->ptr[idx] == kind
+      && (! macro_mri || macro_strip_at)
+      && (! macro_strip_at || kind == '@'))
     idx++;
   return idx;
 }
@@ -582,8 +590,8 @@ get_apost_token (idx, in, name, kind)
 /* Substitute the actual value for a formal parameter.  */
 
 static int
-sub_actual (src, in, t, formal_hash, kind, out, copyifnotthere)
-     int src;
+sub_actual (start, in, t, formal_hash, kind, out, copyifnotthere)
+     int start;
      sb *in;
      sb *t;
      struct hash_control *formal_hash;
@@ -591,11 +599,18 @@ sub_actual (src, in, t, formal_hash, kind, out, copyifnotthere)
      sb *out;
      int copyifnotthere;
 {
+  int src;
   formal_entry *ptr;
 
-  src = get_apost_token (src, in, t, kind);
-  /* See if it's in the macro's hash table */
-  ptr = (formal_entry *) hash_find (formal_hash, sb_terminate (t));
+  src = get_apost_token (start, in, t, kind);
+  /* See if it's in the macro's hash table, unless this is
+     macro_strip_at and kind is '@' and the token did not end in '@'.  */
+  if (macro_strip_at
+      && kind == '@'
+      && (src == start || in->ptr[src - 1] != '@'))
+    ptr = NULL;
+  else
+    ptr = (formal_entry *) hash_find (formal_hash, sb_terminate (t));
   if (ptr)
     {
       if (ptr->actual.len)

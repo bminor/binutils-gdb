@@ -31,9 +31,19 @@
 @node AMD29K Syntax
 @section Syntax
 @menu
+* AMD29K-Macros::		Macros
 * AMD29K-Chars::                Special Characters
 * AMD29K-Regs::                 Register Names
 @end menu
+
+@node AMD29K-Macros
+@subsection Macros
+
+@cindex Macros, AMD 29K
+@cindex AMD 29K macros
+The macro syntax used on the AMD 29K is like that described in the AMD
+29K Family Macro Assembler Specification.  Normal @code{@value{AS}}
+macros should still work.
 
 @node AMD29K-Chars
 @subsection Special Characters
@@ -41,12 +51,6 @@
 @cindex line comment character, AMD 29K
 @cindex AMD 29K line comment character
 @samp{;} is the line comment character.
-
-@cindex line separator, AMD 29K
-@cindex AMD 29K line separator
-@cindex statement separator, AMD 29K
-@cindex AMD 29K statement separator
-@samp{@@} can be used instead of a newline to separate statements.
 
 @cindex identifiers, AMD 29K
 @cindex AMD 29K identifiers
