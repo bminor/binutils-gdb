@@ -26,6 +26,7 @@ alpha-osf1.mt
 alpha-nw.mt
 nm-alpha.h
 tm-alpha.h
+tm-alphanw.h
 xm-alpha.h
 
 Things-to-lose:
