@@ -1,6 +1,5 @@
 /* ldfile.h -
-
-   Copyright (C) 1991 Free Software Foundation, Inc.
+   Copyright 1991, 1992 Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
@@ -18,10 +17,30 @@
    along with GLD; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
- 
+extern char *ldfile_input_filename;
+extern unsigned long ldfile_output_machine;
+extern enum bfd_architecture ldfile_output_architecture;
+extern const char *ldfile_output_machine_name;
 
-PROTO(void,ldfile_add_arch,(CONST char *CONST));
-PROTO(void,ldfile_add_library_path,(char *));
-PROTO(void,ldfile_open_command_file,(char *name));
-PROTO(void,ldfile_open_file,(struct lang_input_statement_struct *));
+/* Structure used to hold the list of directories to search for
+   libraries.  */
 
+typedef struct search_dirs 
+{
+  /* Next directory on list.  */
+  struct search_dirs *next;
+  /* Name of directory.  */
+  const char *name;
+  /* true if this is from the command line.  */
+  boolean cmdline;
+} search_dirs_type;
+
+extern search_dirs_type *search_head;
+
+void ldfile_add_arch PARAMS ((CONST char *));
+void ldfile_add_library_path PARAMS ((const char *, boolean cmdline));
+void ldfile_open_command_file PARAMS ((char *name));
+void ldfile_open_file PARAMS ((struct lang_input_statement_struct *));
+FILE *ldfile_find_command_file PARAMS ((char *name, char *extend));
+
+void ldfile_set_output_arch PARAMS ((CONST char *));

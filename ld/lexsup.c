@@ -189,7 +189,7 @@ parse_args (argc, argv)
 	  xexit (0);
 	  break;
 	case 'L':
-	  ldfile_add_library_path (optarg);
+	  ldfile_add_library_path (optarg, true);
 	  break;
 	case 'l':
 	  lang_add_input_file (optarg, lang_input_file_is_l_enum,
@@ -335,7 +335,7 @@ set_default_dirlist (dirlist_ptr)
       if (p != NULL)
 	*p = 0;
       if (*dirlist_ptr)
-	ldfile_add_library_path (dirlist_ptr);
+	ldfile_add_library_path (dirlist_ptr, true);
       if (p == NULL)
 	break;
       *p = ':';

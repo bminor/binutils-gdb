@@ -40,6 +40,7 @@ char *ldfile_input_filename;
 const char *ldfile_output_machine_name = "";
 unsigned long ldfile_output_machine;
 enum bfd_architecture ldfile_output_architecture;
+search_dirs_type *search_head;
 
 /* start-sanitize-mpw */
 #ifndef MPW
@@ -56,17 +57,8 @@ char *slash = ":";
 #endif /* MPW */
 /* end-sanitize-mpw */
 
-
-
-
 /* LOCAL */
-typedef struct search_dirs 
-{
-  char *name;
-  struct search_dirs *next;
-} search_dirs_type;
 
-static search_dirs_type *search_head;
 static search_dirs_type **search_tail_ptr = &search_head;
 
 typedef struct search_arch 
@@ -85,13 +77,16 @@ static bfd *open_a PARAMS ((char *arch, lang_input_statement_type *entry,
 static FILE *try_open PARAMS ((char *name, char *exten));
 
 void
-ldfile_add_library_path(name)
-char *name;
+ldfile_add_library_path (name, cmdline)
+     const char *name;
+     boolean cmdline;
 {
-  search_dirs_type *new =
-    (search_dirs_type *)xmalloc((bfd_size_type)(sizeof(search_dirs_type)));
+  search_dirs_type *new;
+
+  new = (search_dirs_type *) xmalloc (sizeof (search_dirs_type));
+  new->next = NULL;
   new->name = name;
-  new->next = (search_dirs_type*)NULL;
+  new->cmdline = cmdline;
   *search_tail_ptr = new;
   search_tail_ptr = &new->next;
 }

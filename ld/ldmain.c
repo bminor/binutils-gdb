@@ -397,7 +397,7 @@ check_for_scripts_dir (dir)
   res = stat (buf, &s) == 0 && S_ISDIR (s.st_mode);
   free (buf);
   if (res)
-    ldfile_add_library_path (dir);
+    ldfile_add_library_path (dir, false);
   return res;
 }
 
