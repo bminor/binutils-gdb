@@ -1,0 +1,5 @@
+EMULATION_NAME=mipsbig
+SCRIPT_NAME=mips
+OUTPUT_FORMAT="ecoff-bigmips"
+PAGE_SIZE=0x1000000
+ARCH=mips
