@@ -1,3 +1,11 @@
+Wed Jan 31 14:34:23 1996  Richard Henderson  <rth@tamu.edu>
+
+	* configure.tgt (m68*-apple-aux*): New target.
+	* emulparams/m68kaux.sh: New file.
+	* scripttempl/m68kaux.sc: New file.
+	* Makefile.in (ALL_EMULATIONS): Add em68kaux.o.
+	(em68kaux.c): New target.
+
 Tue Jan 30 13:18:56 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/aix.em (gld${EMULATION_NAME}_parse_args): Ignore

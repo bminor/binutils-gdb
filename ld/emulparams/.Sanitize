@@ -88,6 +88,7 @@ i386pe.sh
 lnk960.sh
 m68k4knbsd.sh
 m68kaout.sh
+m68kaux.sh
 m68kcoff.sh
 m68kelf.sh
 m68klynx.sh

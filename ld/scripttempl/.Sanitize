@@ -57,6 +57,7 @@ i386go32.sc
 i386lynx.sc
 i386msdos.sc
 i960.sc
+m68kaux.sc
 m68kcoff.sc
 m68klynx.sc
 m88kbcs.sc
