@@ -1,3 +1,8 @@
+2002-05-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/i386/x86-64-opcode.s: Pad out end of .text with zeros.
+	* gas/i386/x86-64-opcode.d: Adjust.
+
 2002-05-02  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* gas/arm/arm7t.s: Add thumb mode "sub r?, #0" and "add r?, #0".
