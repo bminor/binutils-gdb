@@ -9483,10 +9483,10 @@ display_debug_loc (Elf_Internal_Shdr *section,
 	    {
 	      if (start < next)
 		warn (_("There is a hole [0x%lx - 0x%lx] in .debug_loc section.\n"),
-		      start, next);
+		      start - section_begin, next - section_begin);
 	      else if (start > next)
 		warn (_("There is an overlap [0x%lx - 0x%lx] in .debug_loc section.\n"),
-		      start, next);
+		      start - section_begin, next - section_begin);
 	    }
 	  start = next;
 
@@ -9586,6 +9586,8 @@ display_debug_str (Elf_Internal_Shdr *section,
       addr  += lbytes;
       bytes -= lbytes;
     }
+
+  putchar ('\n');
 
   return 1;
 }

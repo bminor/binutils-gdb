@@ -1,3 +1,9 @@
+2005-01-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (display_debug_loc): Display offsets for hole and
+	overlap.
+	(display_debug_str): Add a newline at the end.
+
 2005-01-04  Armin Diehl  <diehl@nordrhein.de>
 
 	PR binutils/630
