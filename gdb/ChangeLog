@@ -1,5 +1,17 @@
 2001-03-23  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/sparc/tm-sp64.h (GDB_MULTI_ARCH): Down grade to
+ 	GDB_MULTI_ARCH_PARTIAL from two.  SOFTWARE_SINGLE_STEP is not
+ 	multi-arch.
+
+	* gdbarch.sh (SOFTWARE_SINGLE_STEP): Add.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+	* target.h (SOFTWARE_SINGLE_STEP_P)
+	(SOFTWARE_SINGLE_STEP): Delete macro definitions.
+
+2001-03-23  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh (gdbarch_register_read, gdbarch_register_write): Add.
 	* gdbarch.h, gdbarch.c: Regenerate.
 	

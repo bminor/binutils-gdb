@@ -513,6 +513,15 @@ v:2:TARGET_FLOAT_FORMAT:const struct floatformat *:float_format::::::default_flo
 v:2:TARGET_DOUBLE_FORMAT:const struct floatformat *:double_format::::::default_double_format (gdbarch)
 v:2:TARGET_LONG_DOUBLE_FORMAT:const struct floatformat *:long_double_format::::::&floatformat_unknown
 f:2:CONVERT_FROM_FUNC_PTR_ADDR:CORE_ADDR:convert_from_func_ptr_addr:CORE_ADDR addr:addr:::default_convert_from_func_ptr_addr::0
+# FIXME/cagney/2001-01-18: This should be split in two.  A target method that indicates if
+# the target needs software single step.  An ISA method to implement it.
+#
+# FIXME/cagney/2001-01-18: This should be replaced with something that inserts breakpoints
+# using the breakpoint system instead of blatting memory directly (as with rs6000).
+#
+# FIXME/cagney/2001-01-18: The logic is backwards.  It should be asking if the target can
+# single step.  If not, then implement single step using breakpoints.
+F:2:SOFTWARE_SINGLE_STEP:void:software_single_step:enum target_signal sig, int insert_breakpoints_p:sig, insert_breakpoints_p::0:0
 EOF
 }
 

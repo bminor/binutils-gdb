@@ -1489,6 +1489,46 @@ extern void set_gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch, gdb
 #endif
 #endif
 
+/* FIXME/cagney/2001-01-18: This should be split in two.  A target method that indicates if
+   the target needs software single step.  An ISA method to implement it.
+  
+   FIXME/cagney/2001-01-18: This should be replaced with something that inserts breakpoints
+   using the breakpoint system instead of blatting memory directly (as with rs6000).
+  
+   FIXME/cagney/2001-01-18: The logic is backwards.  It should be asking if the target can
+   single step.  If not, then implement single step using breakpoints. */
+
+#if defined (SOFTWARE_SINGLE_STEP)
+/* Legacy for systems yet to multi-arch SOFTWARE_SINGLE_STEP */
+#if !defined (SOFTWARE_SINGLE_STEP_P)
+#define SOFTWARE_SINGLE_STEP_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (SOFTWARE_SINGLE_STEP_P)
+#define SOFTWARE_SINGLE_STEP_P() (0)
+#endif
+
+extern int gdbarch_software_single_step_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SOFTWARE_SINGLE_STEP_P)
+#define SOFTWARE_SINGLE_STEP_P() (gdbarch_software_single_step_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (SOFTWARE_SINGLE_STEP)
+#define SOFTWARE_SINGLE_STEP(sig, insert_breakpoints_p) (internal_error (__FILE__, __LINE__, "SOFTWARE_SINGLE_STEP"), 0)
+#endif
+
+typedef void (gdbarch_software_single_step_ftype) (enum target_signal sig, int insert_breakpoints_p);
+extern void gdbarch_software_single_step (struct gdbarch *gdbarch, enum target_signal sig, int insert_breakpoints_p);
+extern void set_gdbarch_software_single_step (struct gdbarch *gdbarch, gdbarch_software_single_step_ftype *software_single_step);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SOFTWARE_SINGLE_STEP)
+#define SOFTWARE_SINGLE_STEP(sig, insert_breakpoints_p) (gdbarch_software_single_step (current_gdbarch, sig, insert_breakpoints_p))
+#endif
+#endif
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 

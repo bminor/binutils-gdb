@@ -246,6 +246,7 @@ struct gdbarch
   const struct floatformat * double_format;
   const struct floatformat * long_double_format;
   gdbarch_convert_from_func_ptr_addr_ftype *convert_from_func_ptr_addr;
+  gdbarch_software_single_step_ftype *software_single_step;
 };
 
 
@@ -326,6 +327,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   generic_get_saved_register,
+  0,
   0,
   0,
   0,
@@ -757,6 +759,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if (gdbarch->long_double_format == 0)
     gdbarch->long_double_format = &floatformat_unknown;
   /* Skip verify of convert_from_func_ptr_addr, invalid_p == 0 */
+  /* Skip verify of software_single_step, has predicate */
 }
 
 
@@ -1431,6 +1434,13 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: %s # %s\n",
                       "CONVERT_FROM_FUNC_PTR_ADDR(addr)",
                       XSTRING (CONVERT_FROM_FUNC_PTR_ADDR (addr)));
+#endif
+#if defined (SOFTWARE_SINGLE_STEP) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "SOFTWARE_SINGLE_STEP(sig, insert_breakpoints_p)",
+                      XSTRING (SOFTWARE_SINGLE_STEP (sig, insert_breakpoints_p)));
 #endif
 #ifdef TARGET_ARCHITECTURE
   if (TARGET_ARCHITECTURE != NULL)
@@ -2149,6 +2159,13 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: CONVERT_FROM_FUNC_PTR_ADDR = 0x%08lx\n",
                         (long) current_gdbarch->convert_from_func_ptr_addr
                         /*CONVERT_FROM_FUNC_PTR_ADDR ()*/);
+#endif
+#ifdef SOFTWARE_SINGLE_STEP
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: SOFTWARE_SINGLE_STEP = 0x%08lx\n",
+                        (long) current_gdbarch->software_single_step
+                        /*SOFTWARE_SINGLE_STEP ()*/);
 #endif
   if (current_gdbarch->dump_tdep != NULL)
     current_gdbarch->dump_tdep (current_gdbarch, file);
@@ -4213,6 +4230,30 @@ set_gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
                                         gdbarch_convert_from_func_ptr_addr_ftype convert_from_func_ptr_addr)
 {
   gdbarch->convert_from_func_ptr_addr = convert_from_func_ptr_addr;
+}
+
+int
+gdbarch_software_single_step_p (struct gdbarch *gdbarch)
+{
+  return gdbarch->software_single_step != 0;
+}
+
+void
+gdbarch_software_single_step (struct gdbarch *gdbarch, enum target_signal sig, int insert_breakpoints_p)
+{
+  if (gdbarch->software_single_step == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_software_single_step invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_software_single_step called\n");
+  gdbarch->software_single_step (sig, insert_breakpoints_p);
+}
+
+void
+set_gdbarch_software_single_step (struct gdbarch *gdbarch,
+                                  gdbarch_software_single_step_ftype software_single_step)
+{
+  gdbarch->software_single_step = software_single_step;
 }
 
 
