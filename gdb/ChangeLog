@@ -1,4 +1,10 @@
+2002-06-19  Andrew Cagney  <cagney@redhat.com>
+
+	* i386-linux-tdep.c (i386_linux_register_name): Make return type
+	constant.
+
 2002-06-18  Joel Brobecker  <brobecker@gnat.com>
+
 	* alpha-tdep.c (heuristic_proc_desc): Compute the size of the  
 	current frame using only the first stack size adjustment. All
 	subsequent size adjustments are not considered to be part of

@@ -38,7 +38,7 @@
 
 /* Return the name of register REG.  */
 
-static char *
+static const char *
 i386_linux_register_name (int reg)
 {
   /* Deal with the extra "orig_eax" pseudo register.  */
