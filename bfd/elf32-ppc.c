@@ -117,6 +117,9 @@ static boolean ppc_elf_section_from_shdr PARAMS ((bfd *,
 						  Elf32_Internal_Shdr *,
 						  char *));
 
+static bfd *ppc_elf_create_dynamic_sections PARAMS ((bfd *abfd,
+						     struct bfd_link_info *info));
+
 static boolean ppc_elf_check_relocs PARAMS ((bfd *,
 					     struct bfd_link_info *,
 					     asection *,
@@ -1176,6 +1179,36 @@ ppc_elf_fake_sections (abfd, shdr, asect)
 }
 
 
+/* Create the PowerPC dynamic sections */
+
+static bfd *
+ppc_elf_create_dynamic_sections (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  struct elf_link_hash_entry *h;
+  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
+  /* Create the .got section.  */
+  if (! _bfd_elf_create_got_section (abfd, info))
+    return (bfd *)0;
+
+  /* Also create the .got.neg section where we put negative offsets */
+  if (bfd_get_section_by_name (abfd, ".got.neg") == NULL)
+    {
+      asection *s = bfd_make_section (abfd, ".got.neg");
+      if (s == NULL
+	  || !bfd_set_section_flags (abfd, s,
+				     SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY)
+	  || !bfd_set_section_alignment (abfd, s, 2))
+	return (bfd *)0;
+    }
+
+  elf_hash_table (info)->dynobj = abfd;
+  return abfd;
+}
+
+
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -1261,6 +1294,11 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
       s = bfd_get_section_by_name (dynobj, ".rela.got");
       if (s != NULL)
 	s->_raw_size = 0;
+
+      /* Ditto for .rela.got.neg */
+      s = bfd_get_section_by_name (dynobj, ".rela.got.neg");
+      if (s != NULL)
+	s->_raw_size = 0;
     }
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
@@ -1317,7 +1355,8 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 	    }
 	}
       else if (strcmp (name, ".plt") != 0
-	       && strcmp (name, ".got") != 0)
+	       && strcmp (name, ".got") != 0
+	       && strcmp (name, ".got.neg") != 0)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
 	  continue;
@@ -1425,7 +1464,9 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   asection *sgot;
+  asection *sgot_neg;
   asection *srelgot;
+  asection *srelgot_neg;
   asection *sreloc;
 
   if (info->relocateable)
@@ -1469,16 +1510,16 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 
 	  if (dynobj == NULL)
 	    {
-	      /* Create the .got section.  */
-	      elf_hash_table (info)->dynobj = dynobj = abfd;
-	      if (! _bfd_elf_create_got_section (dynobj, info))
+	      dynobj = ppc_elf_create_dynamic_sections (abfd, info);
+	      if (!dynobj)
 		return false;
 	    }
 
 	  if (sgot == NULL)
 	    {
 	      sgot = bfd_get_section_by_name (dynobj, ".got");
-	      BFD_ASSERT (sgot != NULL);
+	      sgot_neg = bfd_get_section_by_name (dynobj, ".got.neg");
+	      BFD_ASSERT (sgot != NULL && sgot_neg != NULL);
 	    }
 
 	  if (srelgot == NULL
@@ -1490,6 +1531,21 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 		  srelgot = bfd_make_section (dynobj, ".rela.got");
 		  if (srelgot == NULL
 		      || ! bfd_set_section_flags (dynobj, srelgot,
+						  (SEC_ALLOC
+						   | SEC_LOAD
+						   | SEC_HAS_CONTENTS
+						   | SEC_IN_MEMORY
+						   | SEC_READONLY))
+		      || ! bfd_set_section_alignment (dynobj, srelgot, 2))
+		    return false;
+		}
+
+	      srelgot_neg = bfd_get_section_by_name (dynobj, ".rela.got.neg");
+	      if (srelgot_neg == NULL)
+		{
+		  srelgot_neg = bfd_make_section (dynobj, ".rela.got.neg");
+		  if (srelgot == NULL
+		      || ! bfd_set_section_flags (dynobj, srelgot_neg,
 						  (SEC_ALLOC
 						   | SEC_LOAD
 						   | SEC_HAS_CONTENTS
@@ -2019,10 +2075,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       /* Unknown relocation handling */
       if ((unsigned)r_type >= (unsigned)R_PPC_max || !ppc_elf_howto_table[(int)r_type])
 	{
-	  (*_bfd_error_handler)
-	    ("%s: unknown relocation type %d",
-	     bfd_get_filename (input_bfd),
-	     (int)r_type);
+	  (*_bfd_error_handler) ("%s: unknown relocation type %d",
+				 bfd_get_filename (input_bfd),
+				 (int)r_type);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = false;
@@ -2113,6 +2168,26 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       switch ((int)r_type)
 	{
 	default:
+	  (*_bfd_error_handler) ("%s: unknown relocation type %d",
+				 bfd_get_filename (input_bfd),
+				 (int)r_type);
+
+	  bfd_set_error (bfd_error_bad_value);
+	  ret = false;
+	  continue;
+
+	case R_PPC_NONE:			/* relocations that need no special processing */
+	case R_PPC_ADDR32:
+	case R_PPC_ADDR24:
+	case R_PPC_ADDR16:
+	case R_PPC_ADDR16_LO:
+	case R_PPC_ADDR16_HI:
+	case R_PPC_ADDR14:
+	case R_PPC_REL24:
+	case R_PPC_REL14:
+	case R_PPC_UADDR32:
+	case R_PPC_UADDR16:
+	case R_PPC_REL32:
 	  break;
 
 	case (int)R_PPC_ADDR14_BRTAKEN:		/* branch taken prediction relocations */
@@ -2138,8 +2213,20 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case (int)R_PPC_GOT16:			/* GOT16 relocations */
 	case (int)R_PPC_GOT16_LO:
 	case (int)R_PPC_GOT16_HI:
-	case (int)R_PPC_SDAREL16:
+	case (int)R_PPC_GOT16_HA:
+#ifdef DEBUG
 	  fprintf (stderr, "GOT relocations in section %s from section %s\n", input_section->name, sec->name);
+#endif
+	  if (dynobj == NULL)
+	    {
+	      dynobj = ppc_elf_create_dynamic_sections (output_bfd, info);
+	      if (!dynobj)
+		{
+		  ret = false;
+		  continue;
+		}
+	    }
+
 	  BFD_ASSERT (sec != (asection *)0);
 	  if (!sgot)
 	    {
@@ -2205,7 +2292,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      asection *srelgot;
 		      Elf_Internal_Rela outrel;
 
-		      /* We need to generate a R_SPARC_RELATIVE reloc
+		      /* We need to generate a R_PPC_RELATIVE reloc
 			 for the dynamic linker.  */
 		      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
 		      BFD_ASSERT (srelgot != NULL);
@@ -2249,6 +2336,46 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  BFD_ASSERT (sec != (asection *)0);
 	  addend += ((relocation + addend) & 0x8000) << 1;
 	  break;
+
+	case R_PPC_PLTREL24:
+	case R_PPC_COPY:
+	case R_PPC_GLOB_DAT:
+	case R_PPC_JMP_SLOT:
+	case R_PPC_RELATIVE:
+	case R_PPC_LOCAL24PC:
+	case R_PPC_PLT32:
+	case R_PPC_PLTREL32:
+	case R_PPC_PLT16_LO:
+	case R_PPC_PLT16_HI:
+	case R_PPC_PLT16_HA:
+	case R_PPC_SDAREL16:
+	case R_PPC_SECTOFF:
+	case R_PPC_SECTOFF_LO:
+	case R_PPC_SECTOFF_HI:
+	case R_PPC_SECTOFF_HA:
+	case R_PPC_EMB_NADDR32:
+	case R_PPC_EMB_NADDR16:
+	case R_PPC_EMB_NADDR16_LO:
+	case R_PPC_EMB_NADDR16_HI:
+	case R_PPC_EMB_NADDR16_HA:
+	case R_PPC_EMB_SDAI16:
+	case R_PPC_EMB_SDA2I16:
+	case R_PPC_EMB_SDA2REL:
+	case R_PPC_EMB_SDA21:
+	case R_PPC_EMB_MRKREF:
+	case R_PPC_EMB_RELSEC16:
+	case R_PPC_EMB_RELST_LO:
+	case R_PPC_EMB_RELST_HI:
+	case R_PPC_EMB_RELST_HA:
+	case R_PPC_EMB_BIT_FLD:
+	case R_PPC_EMB_RELSDA:
+	  (*_bfd_error_handler) ("%s: Relocation %s is not yet supported.",
+				 bfd_get_filename (input_bfd),
+				 ppc_elf_howto_table[ (int)r_type ]->name);
+
+	  bfd_set_error (bfd_error_bad_value);
+	  ret = false;
+	  continue;
 	}
 
 

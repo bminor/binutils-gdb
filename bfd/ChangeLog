@@ -1,3 +1,14 @@
+Sat Jan 13 09:36:52 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_create_dynamic_sections): New function to
+	create the .got and .got.neg sections.
+	(ppc_elf_size_dynamic_sections): Call it.
+	(ppc_elf_check_relocs): Call it.
+	(ppc_elf_size_dynamic_sections): Support .got.neg, just like .got.
+	(ppc_elf_check_relocs): Add error messages for relocations we
+	don't yet support.  Do not include R_PPC_SDAREL16 like a GOT
+	relocation.
+
 Fri Jan 12 15:27:59 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_fake_sections): Define, and handle the new
