@@ -727,7 +727,7 @@ struct
   {NULL, NULL, NULL},
 };
 
-/* sparc64 priviledged registers.  */
+/* sparc64 privileged registers.  */
 
 struct priv_reg_entry
 {
@@ -3941,7 +3941,7 @@ s_common (ignore)
   }
 }
 
-/* Handle the .empty pseudo-op.  This supresses the warnings about
+/* Handle the .empty pseudo-op.  This suppresses the warnings about
    invalid delay slot usage.  */
 
 static void
@@ -4008,7 +4008,7 @@ s_proc (ignore)
 }
 
 /* This static variable is set by s_uacons to tell sparc_cons_align
-   that the expession does not need to be aligned.  */
+   that the expression does not need to be aligned.  */
 
 static int sparc_no_align_cons = 0;
 

@@ -672,7 +672,7 @@ make_pcrel_absolute(fixP, add_number)
   register unsigned char *opcode = fixP->fx_frag->fr_opcode;
 
   /* Rewrite the PC relative instructions to absolute address ones.
-     these are rumoured to be faster, and the apollo linker refuses
+     these are rumored to be faster, and the apollo linker refuses
      to deal with the PC relative relocations.  */
   if (opcode[0] == 0x60 && opcode[1] == 0xff) /* BRA -> JMP.  */
     {
@@ -2400,7 +2400,7 @@ m68k_ip (instring)
 		  break;
 		}
 
-	      /* Figure out innner displacement stuff.  */
+	      /* Figure out inner displacement stuff.  */
 	      if (opP->mode == POST || opP->mode == PRE)
 		{
 		  if (cpu_of_arch (current_architecture) & cpu32)
@@ -4583,7 +4583,7 @@ md_convert_frag_1 (fragP)
       fragP->fr_opcode[1]  = 0x06;	/* Branch offset = 6.  */
 
       /* JF: these used to be fr_opcode[2,3], but they may be in a
-	   different frag, in which case refering to them is a no-no.
+	   different frag, in which case referring to them is a no-no.
 	   Only fr_opcode[0,1] are guaranteed to work.  */
       *buffer_address++ = 0x4e;	/* put in jmp long (0x4ef9) */
       *buffer_address++ = (char) 0xf9;
@@ -5443,7 +5443,7 @@ s_opt (ignore)
 }
 
 /* Skip ahead to a comma.  This is used for OPT options which we do
-   not suppor tand which take arguments.  */
+   not support and which take arguments.  */
 
 static void
 skip_to_comma (arg, on)

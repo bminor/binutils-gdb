@@ -596,7 +596,7 @@ static void pa_vtable_entry PARAMS ((int));
 static void pa_vtable_inherit  PARAMS ((int));
 #endif
 
-/* File and gloally scoped variable declarations.  */
+/* File and globally scoped variable declarations.  */
 
 #ifdef OBJ_SOM
 /* Root and final entry in the space chain.  */

@@ -1379,7 +1379,7 @@ md_assemble (line)
 
       if ((i.tm.cpu_flags & CpuPNI) && i.operands > 0)
 	{
-	  /* These Intel Precott New Instructions have the fixed
+	  /* These Intel Prescott New Instructions have the fixed
 	     operands with an opcode suffix which is coded in the same
 	     place as an 8-bit immediate field would be. Here we check
 	     those operands and remove them afterwards.  */

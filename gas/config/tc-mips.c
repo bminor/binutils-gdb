@@ -468,7 +468,7 @@ static int auto_align = 1;
    variable.  */
 static offsetT mips_cprestore_offset = -1;
 
-/* Similiar for NewABI PIC code, where $gp is callee-saved.  NewABI has some
+/* Similar for NewABI PIC code, where $gp is callee-saved.  NewABI has some
    more optimizations, it can use a register value instead of a memory-saved
    offset and even an other register than $gp as global pointer.  */
 static offsetT mips_cpreturn_offset = -1;
@@ -1708,8 +1708,8 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 	  /* The previous instruction reads the LO register; if the
 	     current instruction writes to the LO register, we must
 	     insert two NOPS.  Some newer processors have interlocks.
-	     Also the tx39's multiply instructions can be exectuted
-             immediatly after a read from HI/LO (without the delay),
+	     Also the tx39's multiply instructions can be executed
+             immediately after a read from HI/LO (without the delay),
              though the tx39's divide insns still do require the
 	     delay.  */
 	  if (! (hilo_interlocks
@@ -2288,7 +2288,7 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 		  && ISA_HAS_COPROC_DELAYS (mips_opts.isa)
 		  && (pinfo & INSN_READ_COND_CODE))
 	      /* We can not swap with an instruction that requires a
-		 delay slot, becase the target of the branch might
+		 delay slot, because the target of the branch might
 		 interfere with that instruction.  */
 	      || (! mips_opts.mips16
 		  && ISA_HAS_COPROC_DELAYS (mips_opts.isa)
@@ -3277,7 +3277,7 @@ macro_build_ldst_constoffset (char *place, int *counter, expressionS *ep,
 			  - 0x80000000);
     }
 
-  /* Right now, this routine can only handle signed 32-bit contants.  */
+  /* Right now, this routine can only handle signed 32-bit constants.  */
   if (! IS_SEXT_32BIT_NUM(ep->X_add_number + 0x8000))
     as_warn (_("operand overflow"));
 
@@ -3427,7 +3427,7 @@ check_absolute_expr (struct mips_cl_insn *ip, expressionS *ex)
            : 0)
 
 /*			load_register()
- *  This routine generates the least number of instructions neccessary to load
+ *  This routine generates the least number of instructions necessary to load
  *  an absolute expression value into a register.
  */
 static void
@@ -3980,11 +3980,11 @@ move_register (int *counter, int dest, int source)
  *   This routine implements the seemingly endless macro or synthesized
  * instructions and addressing modes in the mips assembly language. Many
  * of these macros are simple and are similar to each other. These could
- * probably be handled by some kind of table or grammer aproach instead of
+ * probably be handled by some kind of table or grammar approach instead of
  * this verbose method. Others are not simple macros but are more like
  * optimizing code generation.
  *   One interesting optimization is when several store macros appear
- * consecutivly that would load AT with the upper half of the same address.
+ * consecutively that would load AT with the upper half of the same address.
  * The ensuing load upper instructions are ommited. This implies some kind
  * of global optimization. We currently only optimize within a single macro.
  *   For many of the load and store macros if the address is specified as a
@@ -4028,7 +4028,7 @@ macro (struct mips_cl_insn *ip)
   expr1.X_add_symbol = NULL;
   expr1.X_add_number = 1;
 
-  /* Umatched fixups should not be put in the same frag as a relaxable
+  /* Unmatched fixups should not be put in the same frag as a relaxable
      macro.  For example, suppose we have:
 
 	lui $4,%hi(l1)		# 1
@@ -6096,7 +6096,7 @@ macro (struct mips_cl_insn *ip)
 	     files with -mabi=64, assembling them as o32 or n32 (with
 	     -Wa,-32 or -Wa,-n32).  This is not beautiful, but since
 	     the whole kernel is loaded into a memory region that is
-	     addressible with sign-extended 32-bit addresses, it is
+	     addressable with sign-extended 32-bit addresses, it is
 	     wasteful to compute the upper 32 bits of every
 	     non-literal address, that takes more space and time.
 	     Some day this should probably be implemented as an
@@ -11796,7 +11796,7 @@ s_align (int x ATTRIBUTE_UNUSED)
 
   /*
 
-    o  Note that the assembler pulls down any immediately preceeding label
+    o  Note that the assembler pulls down any immediately preceding label
        to the aligned address.
     o  It's not documented but auto alignment is reinstated by
        a .align pseudo instruction.
@@ -12551,7 +12551,7 @@ s_cprestore (int ignore ATTRIBUTE_UNUSED)
 }
 
 /* Handle the .cpreturn pseudo-op defined for NewABI PIC code. If an offset
-   was given in the preceeding .cpsetup, it results in:
+   was given in the preceding .cpsetup, it results in:
      ld		$gp, offset($sp)
 
    If a register $reg2 was given there, it results in:

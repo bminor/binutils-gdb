@@ -1319,7 +1319,7 @@ md_begin ()
 
   ppc_setup_opcodes ();
 
-  /* Tell the main code what the endianness is if it is not overidden
+  /* Tell the main code what the endianness is if it is not overridden
      by the user.  */
   if (!set_target_endian)
     {
@@ -2882,7 +2882,7 @@ static bfd_boolean ppc_stab_symbol;
 
 /* The .comm and .lcomm pseudo-ops for XCOFF.  XCOFF puts common
    symbols in the .bss segment as though they were local common
-   symbols, and uses a different smclas.  The native Aix 4.3.3 assember
+   symbols, and uses a different smclas.  The native Aix 4.3.3 assembler
    aligns .comm and .lcomm to 4 bytes.  */
 
 static void
@@ -3437,7 +3437,7 @@ ppc_stabx (ignore)
 
 /* The .function pseudo-op.  This takes several arguments.  The first
    argument seems to be the external name of the symbol.  The second
-   argment seems to be the label for the start of the function.  gcc
+   argument seems to be the label for the start of the function.  gcc
    uses the same name for both.  I have no idea what the third and
    fourth arguments are meant to be.  The optional fifth argument is
    an expression for the size of the function.  In COFF this symbol

@@ -424,7 +424,7 @@ md_parse_option (c, arg)
       break;
 
     case 'A':
-      /* Option -A is deprecated. Still available for compatability.  */
+      /* Option -A is deprecated. Still available for compatibility.  */
       if (arg != NULL && strcmp (arg, "esa") == 0)
 	current_cpu = S390_OPCODE_G5;
       else if (arg != NULL && strcmp (arg, "esame") == 0)
@@ -1357,7 +1357,7 @@ md_gather_operands (str, insn, opcode)
 	  /* After a displacement a block in parentheses can start.  */
 	  if (*str != '(')
 	    {
-	      /* Check if parethesed block can be skipped. If the next
+	      /* Check if parenthesized block can be skipped. If the next
 		 operand is neiter an optional operand nor a base register
 		 then we have a syntax error.  */
 	      operand = s390_operands + *(++opindex_ptr);
@@ -1368,7 +1368,7 @@ md_gather_operands (str, insn, opcode)
 	      while (!(operand->flags & S390_OPERAND_BASE))
 		operand = s390_operands + *(++opindex_ptr);
 
-	      /* If there is a next operand it must be seperated by a comma.  */
+	      /* If there is a next operand it must be separated by a comma.  */
 	      if (opindex_ptr[1] != '\0')
 		{
 		  if (*str++ != ',')
@@ -1401,7 +1401,7 @@ md_gather_operands (str, insn, opcode)
 	  if (*str++ != ')')
 	    as_bad (_("syntax error; missing ')' after base register"));
 	  skip_optional = 0;
-	  /* If there is a next operand it must be seperated by a comma.  */
+	  /* If there is a next operand it must be separated by a comma.  */
 	  if (opindex_ptr[1] != '\0')
 	    {
 	      if (*str++ != ',')
@@ -1420,7 +1420,7 @@ md_gather_operands (str, insn, opcode)
 		as_bad (_("syntax error; ')' not allowed here"));
 	      str++;
 	    }
-	  /* If there is a next operand it must be seperated by a comma.  */
+	  /* If there is a next operand it must be separated by a comma.  */
 	  if (opindex_ptr[1] != '\0')
 	    {
 	      if (*str++ != ',')

@@ -1180,7 +1180,7 @@ static const struct asm_opcode insns[] =
   {"mla",        0xe0200090, 3,  ARM_EXT_V2,       do_mla},
   {"mlas",       0xe0300090, 3,  ARM_EXT_V2,       do_mla},
 
-  /* Generic copressor instructions.  */
+  /* Generic coprocessor instructions.  */
   {"cdp",        0xee000000, 3,  ARM_EXT_V2,       do_cdp},
   {"ldc",        0xec100000, 3,  ARM_EXT_V2,       do_lstc},
   {"ldcl",       0xec500000, 3,  ARM_EXT_V2,       do_lstc},
@@ -2867,7 +2867,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 	      if (!req_entry)
 		as_bad (_("unreq: missing hash entry for \"%s\""), name);
 	      else if (req_entry->builtin)
-		/* FIXME: We are deleteing a built in register alias which
+		/* FIXME: We are deleting a built in register alias which
 		   points to a const data structure, so we only need to
 		   free up the memory used by the key in the hash table.
 		   Unfortunately we have not recorded this value, so this
@@ -2876,7 +2876,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 		;
 	      else
 		{
-		  /* Deleteing a user defined alias.  We need to free the
+		  /* Deleting a user defined alias.  We need to free the
 		     key and the value, but fortunately the key is the same
 		     as the value->name field.  */
 		  free ((char *) req_entry->name);

@@ -2459,7 +2459,7 @@ shmedia_find_cooked_opcode (char **str_p)
       /* The machine independent code will convert CMP/EQ into cmp/EQ
 	 because it thinks the '/' is the end of the symbol.  Moreover,
 	 all but the first sub-insn is a parallel processing insn won't
-	 be capitailzed.  Instead of hacking up the machine independent
+	 be capitalized.  Instead of hacking up the machine independent
 	 code, we just deal with it here.  */
       c = TOLOWER (c);
       name[nlen] = c;

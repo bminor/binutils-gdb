@@ -568,7 +568,7 @@ msp430_operands (opcode, line)
 	    res += msp430_dstoperand (&op2, l2, opcode->bin_opcode);
 
 	    if (res)
-	      break;	/* An error occured.  All warnings were done before.  */
+	      break;	/* An error occurred.  All warnings were done before.  */
 
 	    bin |= (op2.reg | (op1.reg << 8) | (op1.am << 4) | (op2.am << 7));
 
@@ -644,7 +644,7 @@ msp430_operands (opcode, line)
       res += msp430_dstoperand (&op2, l2, opcode->bin_opcode);
 
       if (res)
-	break;			/* Error occured.  All warnings were done before.  */
+	break;			/* Error occurred.  All warnings were done before.  */
 
       bin |= (op2.reg | (op1.reg << 8) | (op1.am << 4) | (op2.am << 7));
 
@@ -741,7 +741,7 @@ msp430_operands (opcode, line)
 	     mov r5,r6
 	     jmp -2
 
-	     is equial to:
+	     is equal to:
 	     lab:
 	     mov r5,r6
 	     jmp lab
@@ -960,7 +960,7 @@ msp430_srcoperand (op, l, bin, imm_op)
 	    }
 
 	  /* Now check constants.  */
-	  /* Substitude register mode with a constant generator if applicable.  */
+	  /* Substitute register mode with a constant generator if applicable.  */
 
 	  x = (short) x;	/* Extend sign.  */
 
@@ -1129,7 +1129,7 @@ msp430_srcoperand (op, l, bin, imm_op)
       return 0;
     }
 
-  /* Check if inderect register mode @Rn / postincrement @Rn+.  */
+  /* Check if indirect register mode @Rn / postincrement @Rn+.  */
   if (*l == '@')
     {
       char *t = l;

@@ -136,7 +136,7 @@ int sh_small;
 static int preset_target_arch;
 
 /* The bit mask of architectures that could
-   accomodate the insns seen so far.  */
+   accommodate the insns seen so far.  */
 static int valid_arch;
 
 const char EXP_CHARS[] = "eE";
@@ -151,7 +151,7 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #define ENCODE_RELAX(what,length) (((what) << 4) + (length))
 #define GET_WHAT(x) ((x>>4))
 
-/* These are the three types of relaxable instrction.  */
+/* These are the three types of relaxable instruction.  */
 /* These are the types of relaxable instructions; except for END which is
    a marker.  */
 #define COND_JUMP 1
@@ -1338,7 +1338,7 @@ parse_at (char *src, sh_operand_info *op)
 		     no matter if expr is a constant, or a more complex
 		     expression, e.g. sym-. or sym1-sym2.
 		     However, we also used to accept @(sym,pc)
-		     as adressing sym, i.e. meaning the same as plain sym.
+		     as addressing sym, i.e. meaning the same as plain sym.
 		     Some existing code does use the @(sym,pc) syntax, so
 		     we give it the old semantics for now, but warn about
 		     its use, so that users have some time to fix their code.
@@ -3023,7 +3023,7 @@ md_section_align (segT seg ATTRIBUTE_UNUSED, valueT size)
 }
 
 /* This static variable is set by s_uacons to tell sh_cons_align that
-   the expession does not need to be aligned.  */
+   the expression does not need to be aligned.  */
 
 static int sh_no_align_cons = 0;
 
@@ -3364,7 +3364,7 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_SH_PCRELIMM8BY4:
       /* The lower two bits of the PC are cleared before the
          displacement is added in.  We can assume that the destination
-         is on a 4 byte bounday.  If this instruction is also on a 4
+         is on a 4 byte boundary.  If this instruction is also on a 4
          byte boundary, then we want
 	   (target - here) / 4
 	 and target - here is a multiple of 4.

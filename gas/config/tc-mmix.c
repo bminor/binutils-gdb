@@ -275,7 +275,7 @@ struct obstack mmix_sym_obstack;
 #define STATE_GREG_UNDF ENCODE_RELAX (STATE_GREG, STATE_ZERO)
 #define STATE_GREG_DEF ENCODE_RELAX (STATE_GREG, STATE_MAX)
 
-/* These displacements are relative to the adress following the opcode
+/* These displacements are relative to the address following the opcode
    word of the instruction.  The catch-all states have zero for "reach"
    and "next" entries.  */
 
@@ -1464,7 +1464,7 @@ md_assemble (str)
       break;
 
     case mmix_operands_jmp:
-      /* A JMP.  Everyhing is already done.  */
+      /* A JMP.  Everything is already done.  */
       break;
 
     case mmix_operands_roundregs:
@@ -1839,7 +1839,7 @@ md_assemble (str)
 	    {
 	      /* Don't require non-register operands.  Always generate
 		 fixups, so we don't have to copy lots of code and create
-		 maintanance problems.  TRIP is supposed to be a rare
+		 maintenance problems.  TRIP is supposed to be a rare
 		 instruction, so the overhead should not matter.  We
 		 aren't allowed to fix_new_exp for an expression which is
 		 an  O_register at this point, however.  */

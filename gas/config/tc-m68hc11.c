@@ -233,7 +233,7 @@ static short flag_print_opcodes = 0;
 static struct hash_control *m68hc11_hash;
 
 /* Current cpu (either cpu6811 or cpu6812).  This is determined automagically
-   by 'get_default_target' by looking at default BFD vector.  This is overriden
+   by 'get_default_target' by looking at default BFD vector.  This is overridden
    with the -m<cpu> option.  */
 static int current_architecture = 0;
 
@@ -1569,7 +1569,7 @@ build_jump_insn (struct m68hc11_opcode *opcode, operand operands[],
   fragS *frag;
   int where;
 
-  /* The relative branch convertion is not supported for
+  /* The relative branch conversion is not supported for
      brclr and brset.  */
   assert ((opcode->format & M6811_OP_BITMASK) == 0);
   assert (nb_operands == 1);
@@ -1719,7 +1719,7 @@ build_dbranch_insn (struct m68hc11_opcode *opcode, operand operands[],
   char *f;
   unsigned long n;
 
-  /* The relative branch convertion is not supported for
+  /* The relative branch conversion is not supported for
      brclr and brset.  */
   assert ((opcode->format & M6811_OP_BITMASK) == 0);
   assert (nb_operands == 2);
@@ -2058,7 +2058,7 @@ build_reg_mode (operand *op, int format)
 }
 
 /* build_insn takes a pointer to the opcode entry in the opcode table,
-   the array of operand expressions and builds the correspding instruction.
+   the array of operand expressions and builds the corresponding instruction.
    This operation only deals with non relative jumps insn (need special
    handling).  */
 static void

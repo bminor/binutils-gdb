@@ -762,7 +762,7 @@ assemble_two_insns (str, str2, parallel_p)
   char *errmsg;
   char save_str2 = *str2;
 
-  /* Seperate the two instructions.  */
+  /* Separate the two instructions.  */
   *str2 = 0;
 
   /* Make sure the two insns begin on a 32 bit boundary.
@@ -1017,14 +1017,14 @@ md_assemble (str)
   /* Initialize GAS's cgen interface for a new instruction.  */
   gas_cgen_init_parse ();
 
-  /* Look for a parallel instruction seperator.  */
+  /* Look for a parallel instruction separator.  */
   if ((str2 = strstr (str, "||")) != NULL)
     {
       assemble_two_insns (str, str2, 1);
       return;
     }
 
-  /* Also look for a sequential instruction seperator.  */
+  /* Also look for a sequential instruction separator.  */
   if ((str2 = strstr (str, "->")) != NULL)
     {
       assemble_two_insns (str, str2, 0);
