@@ -524,6 +524,15 @@ rm -f configure.com configure.tgt configure.hst configure.pos
 exit 0
 
 #
+#
+# $Log$
+# Revision 1.44  1991/10/02 06:02:35  rich
+# Added rcs log line.
+#
+#
+#
+
+#
 # Local Variables:
 # fill-column: 131
 # End:
