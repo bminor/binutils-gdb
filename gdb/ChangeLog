@@ -1,5 +1,11 @@
 2004-10-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64-linux-tdep.c: Update copyright year.  Don't include
+	"solib-svr4.h".
+	(sparc64_linux_svr4_fetch_link_map_offsets): Remove function.
+	(sparc64_linux_init_abi): Don't set solib_svr4_link_map_offsets.
+	* Makefile.in (sparc64-linux-tdep.o): Update dependencies.
+
 	* sparc-linux-tdep.c: Update copyright year.
 	(sparc_linux_sigtramp_start): Change first argument from CORE_ADDR
 	to struct frame_info *.  Use safe_frame_unwind_memory instead of
