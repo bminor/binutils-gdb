@@ -1,3 +1,7 @@
+2002-08-28  Keith Seitz  <keiths@redhat.com>
+
+	* gdbmi.texinfo: Document the interpreter-exec command.
+
 2002-08-21  Keith Seitz  <keiths@redhat.com>
 
 	* mi-events.c (mi_target_changed): Renamed from mi_register_update.
