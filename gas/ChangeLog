@@ -4,6 +4,9 @@ Sat Aug 28 01:23:11 1999  Jeffrey A Law  (law@cygnus.com)
 
 Sat Aug 28 00:26:26 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 
+	* config/tc-hppa.c (pa_ip):  Add completer codes 'a', 'ch', 'cH',
+	'cS', and 'c*'.
+
 	* config/tc-hppa.c (pa_ip): Place completers behind prefix 'c'.
 
 	* config/tc-hppa.c (pa_ip):  Add cases for '.', '~'. '$'. and '!'

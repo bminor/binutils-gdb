@@ -1601,6 +1601,13 @@ pa_ip (str)
 	      CHECK_FIELD (num, 31, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
+	    /* Handle a 5 bit register field at 10 and 15.  */
+	    case 'a':
+	      num = pa_parse_number (&s, 0);
+	      CHECK_FIELD (num, 31, 0, 0);
+	      opcode |= num << 16;
+	      INSERT_FIELD_AND_CONTINUE (opcode, num, 21);
+
 	    /* Handle a 5 bit field length at 31.  */
 	    case 'T':
 	      num = pa_get_absolute_expression (&the_insn, &s);
@@ -1751,6 +1758,95 @@ pa_ip (str)
 		    flag = 0;
 
 		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 5);
+
+		/* Handle signed/unsigned at 21.  */
+		case 'S':
+		  {
+		    int sign = 1;
+		    if (strncasecmp (s, ",s", 2) == 0)
+		      {
+			sign = 1;
+			s += 2;
+		      }
+		    else if (strncasecmp (s, ",u", 2) == 0)
+		      {
+			sign = 0;
+			s += 2;
+		      }
+
+		    INSERT_FIELD_AND_CONTINUE (opcode, sign, 10);
+		  }
+
+		/* Handle left/right combination at 17:18.  */
+		case 'h':
+		  if (*s++ == ',')
+		    {
+		      int lr = 0;
+		      if (*s == 'r')
+			lr = 2;
+		      else if (*s == 'l')
+			lr = 0;
+		      else
+			as_bad(_("Invalid left/right combination completer"));
+
+		      s++;
+		      INSERT_FIELD_AND_CONTINUE (opcode, lr, 13);
+		    }
+		  else
+		    as_bad(_("Invalid left/right combination completer"));
+		  break;
+
+		/* Handle saturation at 24:25.  */
+		case 'H':
+		  {
+		    int sat = 3;
+		    if (strncasecmp (s, ",ss", 3) == 0)
+		      {
+			sat = 1;
+			s += 3;
+		      }
+		    else if (strncasecmp (s, ",us", 3) == 0)
+		      {
+			sat = 0;
+			s += 3;
+		      }
+
+		    INSERT_FIELD_AND_CONTINUE (opcode, sat, 6);
+		  }
+
+		/* Handle permutation completer.  */
+		case '*':
+		  if (*s++ == ',')
+		    {
+		      int permloc[4] = {13,10,8,6};
+		      int perm = 0;
+		      int i = 0;
+		      for (; i < 4; i++)
+		        {
+			  switch (*s++)
+			    {
+			    case '0':
+			      perm = 0;
+			      break;
+			    case '1':
+			      perm = 1;
+			      break;
+			    case '2':
+			      perm = 2;
+			      break;
+			    case '3':
+			      perm = 3;
+			      break;
+			    default:
+			      as_bad(_("Invalid permutation completer"));
+			    }
+			  opcode |= perm << permloc[i];
+			}
+		      continue;
+		    }
+		  else
+		    as_bad(_("Invalid permutation completer"));
+		  break;
 
 		default:
 		  abort ();
@@ -2479,6 +2575,13 @@ pa_ip (str)
 	      num = pa_get_absolute_expression (&the_insn, &s);
 	      s = expr_end;
 	      CHECK_FIELD (num, 3, 1, 0);
+	      INSERT_FIELD_AND_CONTINUE (opcode, num, 6);
+
+	    /* Handle a 4 bit shift count at 25.  */
+	    case '*':
+	      num = pa_get_absolute_expression (&the_insn, &s);
+	      s = expr_end;
+	      CHECK_FIELD (num, 15, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 6);
 
 	    /* Handle a 5 bit shift count at 26.  */
