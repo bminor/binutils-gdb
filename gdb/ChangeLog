@@ -1,3 +1,49 @@
+Sun Jul  5 17:17:16 1992  Fred Fish  (fnf@cygnus.com)
+
+	* maint.c:  New file.
+	* Makefile.in (SFILES_MAINDIR):  Add new file maint.c.
+	* Makefile.in (OBS):  Add new file maint.o.
+	* defs.h (command_class):  Add class_maintenance.
+	* defs.h (MAINTENANCE_CMDS):  Default to including maintenance
+	commands.  Allow for them (and other nonessential parts of gdb)
+	to be selectively left out under special circumstances.
+	* gdbtypes.c (recursive_dump_type):  New function; supports
+	maintenance print-type command.
+	* gdbtypes.h (recursive_dump_type, maintenance_print_type):
+	Add prototypes.
+	* main.c (maintenancelist, maintenanceinfolist):  Add maintenance
+	command lists.
+	* main.c (initialize_cmd_lists):  Eliminate unnecessary casts on
+	initializers.  Add initializations for setprintlist, showprintlist,
+	setchecklist, showchecklist, maintenancelist, and maintenanceinfolist.
+	* printcmd.c (maintenance_print_type):  New maintenance cmd.
+	* valprint.c (setprintlist, showprintlist):  Move to main.c, as
+	implied by comment that all cmd lists are owned by main.c.
+	* infcmd.c (unsetlist):  Move to main.c, as implied by comment
+	that all cmd lists are owned by main.c.
+	* language.c (setchecklist, showchecklist):  Move to main.c, as
+	implied by comment that all cmd lists are owned by main.c
+	* breakpoint.c (enablelist, enablebreaklist, disablelist, cmdlist,
+	deletelist):  Remove redundant declarations (also in gdbcmd.h).
+	* symmisc.c (printsyms_command):  Now maintenance_print_symbols.
+	* symmisc.c (printmsyms_command):  Now maintenance_print_msymbols.
+	* symmisc.c (printpsyms_command):  Now maintenance_print_psymbols.
+	* symmisc.c (printobjfiles_command):  Now maintenance_print_objfiles.
+	* symtab.h (maintenance_print_symbols, maintenance_print_psymbols,
+	maintenance_print_msymbols, maintenance_print_objfiles):
+	Add prototypes.
+	* symmisc.c (printsyms_command, printpsyms_command,
+	printmsyms_command, printobjfiles_command):  Removed from
+	_initialize_symmisc.
+	* main.c (dump_me_command):  Moved to maint.c and renamed to
+	maintenance_dump_me.
+	* breakpoint.c (all_breakpoints_info):  Rename to
+	maintenance_info_breakpoints.
+	* breakpoint.c (_initialize_breakpoint):  Convert add_info of
+	all_breakpoints_info to add maintenance_info_breakpoints to the
+	maintenanceinfolist instead.
+	main.c (initialize_main):  Set up maintenance class commands.
+
 Sun Jul  5 11:03:53 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* energize-patches:  Fix minor problems with building energize lib.

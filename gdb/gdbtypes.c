@@ -1105,3 +1105,113 @@ lookup_fundamental_type (objfile, typeid)
   return (type);
 }
 
+#if MAINTENANCE_CMDS
+
+void recursive_dump_type (type, spaces)
+    struct type *type;
+    int spaces;
+{
+  int idx;
+  struct field *fldp;
+
+  print_spaces_filtered (spaces, stdout);
+  printf_filtered ("type node @ 0x%x\n", type);
+  print_spaces_filtered (spaces, stdout);
+  printf_filtered ("name: 0x%x '%s'\n", type -> name,
+		   type -> name ? type -> name : "<NULL>");
+  print_spaces_filtered (spaces, stdout);
+  printf_filtered ("code: 0x%x ", type -> code);
+  switch (type -> code)
+    {
+      case TYPE_CODE_UNDEF: printf_filtered ("TYPE_CODE_UNDEF"); break;
+      case TYPE_CODE_PTR: printf_filtered ("TYPE_CODE_PTR"); break;
+      case TYPE_CODE_ARRAY: printf_filtered ("TYPE_CODE_ARRAY"); break;
+      case TYPE_CODE_STRUCT: printf_filtered ("TYPE_CODE_STRUCT"); break;
+      case TYPE_CODE_UNION: printf_filtered ("TYPE_CODE_UNION"); break;
+      case TYPE_CODE_ENUM: printf_filtered ("TYPE_CODE_ENUM"); break;
+      case TYPE_CODE_FUNC: printf_filtered ("TYPE_CODE_FUNC"); break;
+      case TYPE_CODE_INT: printf_filtered ("TYPE_CODE_INT"); break;
+      case TYPE_CODE_FLT: printf_filtered ("TYPE_CODE_FLT"); break;
+      case TYPE_CODE_VOID: printf_filtered ("TYPE_CODE_VOID"); break;
+      case TYPE_CODE_SET: printf_filtered ("TYPE_CODE_SET"); break;
+      case TYPE_CODE_RANGE: printf_filtered ("TYPE_CODE_RANGE"); break;
+      case TYPE_CODE_PASCAL_ARRAY: printf_filtered ("TYPE_CODE_PASCAL_ARRAY"); break;
+      case TYPE_CODE_ERROR: printf_filtered ("TYPE_CODE_ERROR"); break;
+      case TYPE_CODE_MEMBER: printf_filtered ("TYPE_CODE_MEMBER"); break;
+      case TYPE_CODE_METHOD: printf_filtered ("TYPE_CODE_METHOD"); break;
+      case TYPE_CODE_REF: printf_filtered ("TYPE_CODE_REF"); break;
+      case TYPE_CODE_CHAR: printf_filtered ("TYPE_CODE_CHAR"); break;
+      case TYPE_CODE_BOOL: printf_filtered ("TYPE_CODE_BOOL"); break;
+      default: printf_filtered ("<UNKNOWN TYPE CODE>"); break;
+    }
+  printf_filtered ("\n");
+  print_spaces_filtered (spaces, stdout);
+  printf_filtered ("length: %d\n", type -> length);
+  print_spaces_filtered (spaces, stdout);
+  printf_filtered ("objfile: 0x%x\n", type -> objfile);
+  print_spaces_filtered (spaces, stdout);
+  printf_filtered ("target_type: 0x%x\n", type -> target_type);
+  if (type -> target_type != NULL)
+    {
+      recursive_dump_type (type -> target_type, spaces + 2);
+    }
+  print_spaces_filtered (spaces, stdout);
+  printf_filtered ("pointer_type: 0x%x\n", type -> pointer_type);
+  print_spaces_filtered (spaces, stdout);
+  printf_filtered ("reference_type: 0x%x\n", type -> reference_type);
+  print_spaces_filtered (spaces, stdout);
+  printf_filtered ("function_type: 0x%x\n", type -> function_type);
+
+  print_spaces_filtered (spaces, stdout);
+  printf_filtered ("flags: 0x%x", type -> flags);
+  if (type -> flags & TYPE_FLAG_UNSIGNED)
+    printf_filtered (" TYPE_FLAG_UNSIGNED");
+  if (type -> flags & TYPE_FLAG_SIGNED)
+    printf_filtered (" TYPE_FLAG_SIGNED");
+  if (type -> flags & TYPE_FLAG_STUB)
+    printf_filtered (" TYPE_FLAG_STUB");
+  printf_filtered ("\n");
+
+  print_spaces_filtered (spaces, stdout);
+  printf_filtered ("nfields: %d at 0x%x\n", type -> nfields, type -> fields);
+  for (idx = 0; idx < type -> nfields; idx++)
+    {
+      fldp = &(type -> fields[idx]);
+      print_spaces_filtered (spaces + 2, stdout);
+      printf_filtered ("[%d] bitpos %d bitsize %d type 0x%x name 0x%x '%s'\n",
+		       idx, fldp -> bitpos, fldp -> bitsize, fldp -> type,
+		       fldp -> name, fldp -> name ? fldp -> name : "<NULL>");
+      if (fldp -> type != NULL)
+	{
+	  recursive_dump_type (fldp -> type, spaces + 4);
+	}
+    }
+
+  print_spaces_filtered (spaces, stdout);
+  printf_filtered ("vptr_basetype: 0x%x\n", type -> vptr_basetype);
+  if (type -> vptr_basetype != NULL)
+    {
+      recursive_dump_type (type -> vptr_basetype, spaces + 2);
+    }
+
+  print_spaces_filtered (spaces, stdout);
+  printf_filtered ("vptr_fieldno: %d\n", type -> vptr_fieldno);
+
+  switch (type -> code)
+    {
+      case TYPE_CODE_METHOD:
+      case TYPE_CODE_FUNC:
+	print_spaces_filtered (spaces, stdout);
+	printf_filtered ("arg_types: 0x%x\n",
+			 type -> type_specific.arg_types);
+	break;
+
+      case TYPE_CODE_STRUCT:
+	print_spaces_filtered (spaces, stdout);
+	printf_filtered ("cplus_stuff: 0x%x\n",
+			 type -> type_specific.cplus_stuff);
+	break;
+    }
+}
+
+#endif	/* MAINTENANCE_CMDS */

@@ -194,7 +194,7 @@ SFILES_MAINDIR = \
 	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
 	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
 	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
-	 minsyms.c mipsread.c
+	 minsyms.c mipsread.c maint.c
 
 # Source files in subdirectories (which will be handled separately by
 #  'make gdb.tar.Z').
@@ -280,7 +280,7 @@ OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     command.o utils.o expprint.o environ.o version.o gdbtypes.o \
     copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
     inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
-    buildsym.o objfiles.o minsyms.o \
+    buildsym.o objfiles.o minsyms.o maint.o \
     dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)

@@ -981,9 +981,6 @@ language_str(lang)
   return "Unknown";
 }
 
-struct cmd_list_element *setchecklist = NULL;
-struct cmd_list_element *showchecklist = NULL;
-
 static void
 set_check (ignore, from_tty)
    char *ignore;

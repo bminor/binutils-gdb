@@ -120,9 +120,6 @@ static void
 show_commands PARAMS ((char *, int));
 
 static void
-dump_me_command PARAMS ((char *, int));
-
-static void
 echo_command PARAMS ((char *, int));
 
 static void
@@ -227,7 +224,12 @@ struct cmd_list_element *enablebreaklist;
 
 struct cmd_list_element *setlist;
 
+/* Chain containing all defined unset subcommands */
+
+struct cmd_list_element *unsetlist;
+
 /* Chain containing all defined show subcommands.  */
+
 struct cmd_list_element *showlist;
 
 /* Chain containing all defined \"set history\".  */
@@ -235,11 +237,32 @@ struct cmd_list_element *showlist;
 struct cmd_list_element *sethistlist;
 
 /* Chain containing all defined \"show history\".  */
+
 struct cmd_list_element *showhistlist;
 
 /* Chain containing all defined \"unset history\".  */
 
 struct cmd_list_element *unsethistlist;
+
+/* Chain containing all defined maintenance subcommands. */
+
+#if MAINTENANCE_CMDS
+struct cmd_list_element *maintenancelist;
+#endif
+
+/* Chain containing all defined "maintenance info" subcommands. */
+
+#if MAINTENANCE_CMDS
+struct cmd_list_element *maintenanceinfolist;
+#endif
+
+struct cmd_list_element *setprintlist;
+
+struct cmd_list_element *showprintlist;
+
+struct cmd_list_element *setchecklist;
+
+struct cmd_list_element *showchecklist;
 
 /* stdio stream that command input is being read from.  */
 
@@ -1998,18 +2021,6 @@ echo_command (text, from_tty)
   fflush (stdout);
 }
 
-/* ARGSUSED */
-static void
-dump_me_command (args, from_tty)
-     char *args;
-     int from_tty;
-{
-  if (query ("Should GDB dump core? "))
-    {
-      signal (SIGQUIT, SIG_DFL);
-      kill (getpid (), SIGQUIT);
-    }
-}
 
 /* Functions to manipulate command line editing control variables.  */
 
@@ -2178,17 +2189,26 @@ batch_mode ()
 static void
 initialize_cmd_lists ()
 {
-  cmdlist = (struct cmd_list_element *) 0;
-  infolist = (struct cmd_list_element *) 0;
-  enablelist = (struct cmd_list_element *) 0;
-  disablelist = (struct cmd_list_element *) 0;
-  deletelist = (struct cmd_list_element *) 0;
-  enablebreaklist = (struct cmd_list_element *) 0;
-  setlist = (struct cmd_list_element *) 0;
+  cmdlist = NULL;
+  infolist = NULL;
+  enablelist = NULL;
+  disablelist = NULL;
+  deletelist = NULL;
+  enablebreaklist = NULL;
+  setlist = NULL;
+  unsetlist = NULL;
   showlist = NULL;
-  sethistlist = (struct cmd_list_element *) 0;
+  sethistlist = NULL;
   showhistlist = NULL;
-  unsethistlist = (struct cmd_list_element *) 0;
+  unsethistlist = NULL;
+#if MAINTENANCE_CMDS
+  maintenancelist = NULL;
+  maintenanceinfolist = NULL;
+#endif
+  setprintlist = NULL;
+  showprintlist = NULL;
+  setchecklist = NULL;
+  showchecklist = NULL;
 }
 
 /* Init the history buffer.  Note that we are called after the init file(s)
@@ -2247,6 +2267,12 @@ initialize_main ()
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */
 
+  add_cmd ("internals", class_maintenance, NO_FUNCTION,
+	   "Maintenance commands.\n\
+Some gdb commands are provided just for use by gdb maintainers.\n\
+These commands are subject to frequent change, and may not be as\n\
+well documented as user commands.",
+	   &cmdlist);
   add_cmd ("obscure", class_obscure, NO_FUNCTION, "Obscure features.", &cmdlist);
   add_cmd ("aliases", class_alias, NO_FUNCTION, "Aliases of other commands.", &cmdlist);
   add_cmd ("user-defined", class_user, NO_FUNCTION, "User-defined commands.\n\
@@ -2325,9 +2351,6 @@ when gdb is started.");
   c->function.sfunc = set_verbose;
   set_verbose (NULL, 0, c);
   
-  add_com ("dump-me", class_obscure, dump_me_command,
-	   "Get fatal error; make debugger dump its core.");
-
   add_show_from_set
     (add_set_cmd ("editing", class_support, var_boolean, (char *)&command_editing_p,
 	   "Set editing of command lines as they are typed.\n\

@@ -557,9 +557,17 @@ lookup_fundamental_type PARAMS ((struct objfile *, int));
 extern void
 fill_in_vptr_fieldno PARAMS ((struct type *));
 
+#if MAINTENANCE_CMDS
+extern void recursive_dump_type PARAMS ((struct type *, int));
+#endif
+
 /* printcmd.c */
 
 extern void
 print_scalar_formatted PARAMS ((char *, struct type *, int, int, FILE *));
+
+#if MAINTENANCE_CMDS
+extern void maintenance_print_type PARAMS ((char *, int));
+#endif
 
 #endif	/* GDBTYPES_H */

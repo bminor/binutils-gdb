@@ -2001,9 +2001,6 @@ set_radix (arg, from_tty, c)
   set_output_radix (arg, 0, c);
 }
 
-struct cmd_list_element *setprintlist = NULL;
-struct cmd_list_element *showprintlist = NULL;
-
 /*ARGSUSED*/
 static void
 set_print (arg, from_tty)

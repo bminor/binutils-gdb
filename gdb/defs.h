@@ -57,7 +57,7 @@ enum command_class
   /* Classes of commands */
   no_class = -1, class_run = 0, class_vars, class_stack,
   class_files, class_support, class_info, class_breakpoint,
-  class_alias, class_obscure, class_user
+  class_alias, class_obscure, class_user, class_maintenance
 };
 
 /* the cleanup list records things that have to be undone
@@ -786,5 +786,20 @@ push_word PARAMS ((CORE_ADDR, REGISTER_TYPE));
  */
 extern CORE_ADDR
 push_word ();
+
+/* Some parts of gdb might be considered optional, in the sense that they
+   are not essential for being able to build a working, usable debugger
+   for a specific environment.  For example, the maintenance commands
+   are there for the benefit of gdb maintainers.  As another example,
+   some environments really don't need gdb's that are able to read N
+   different object file formats.  In order to make it possible (but
+   not necessarily recommended) to build "stripped down" versions of
+   gdb, the following defines control selective compilation of those
+   parts of gdb which can be safely left out when necessary.  Note that
+   the default is to include everything. */
+
+#ifndef MAINTENANCE_CMDS
+#define MAINTENANCE_CMDS 1
+#endif
 
 #endif /* !defined (DEFS_H) */
