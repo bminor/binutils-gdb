@@ -737,14 +737,12 @@ DEFUN(swap_scnhdr_out,(abfd, scnhdr_int, scnhdr_ext),
   PUTWORD(abfd, scnhdr_int->s_scnptr, (bfd_byte *) scnhdr_ext->s_scnptr);
   PUTWORD(abfd, scnhdr_int->s_relptr, (bfd_byte *) scnhdr_ext->s_relptr);
   PUTWORD(abfd, scnhdr_int->s_lnnoptr, (bfd_byte *) scnhdr_ext->s_lnnoptr);
-
+  PUTWORD(abfd, scnhdr_int->s_flags, (bfd_byte *) scnhdr_ext->s_flags);
 #if defined(M88)
   PUTWORD(abfd, scnhdr_int->s_nlnno, (bfd_byte *) scnhdr_ext->s_nlnno);
-  PUTWORD(abfd, scnhdr_int->s_flags, (bfd_byte *) scnhdr_ext->s_flags);
   PUTWORD(abfd, scnhdr_int->s_nreloc, (bfd_byte *) scnhdr_ext->s_nreloc);
 #else
   PUTHALF(abfd, scnhdr_int->s_nlnno, (bfd_byte *) scnhdr_ext->s_nlnno);
-  PUTHALF(abfd, scnhdr_int->s_flags, (bfd_byte *) scnhdr_ext->s_flags);
   PUTHALF(abfd, scnhdr_int->s_nreloc, (bfd_byte *) scnhdr_ext->s_nreloc);
 #endif
 
@@ -2194,7 +2192,7 @@ DEFUN(coff_write_object_contents,(abfd),
       unsigned short    flags = 0;
       coff_set_flags(abfd, &magic, &flags);
       internal_f.f_magic = magic;
-      internal_f.f_flags = flags;
+      internal_f.f_flags |= flags;
       /* ...and the "opt"hdr... */
 
 #ifdef A29K 
