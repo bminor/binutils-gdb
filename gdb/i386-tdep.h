@@ -175,5 +175,6 @@ extern void i386_svr4_init_abi (struct gdbarch_info, struct gdbarch *);
 /* Functions exported from i386bsd-tdep.c.  */
 
 extern CORE_ADDR i386bsd_sigcontext_addr (struct frame_info *frame);
+extern void i386bsd_init_abi (struct gdbarch_info, struct gdbarch *);
 
 #endif /* i386-tdep.h */

@@ -1,3 +1,25 @@
+2002-09-02  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (i386nbsd-tdep.o): Add $(arch_utils_h),
+	$(i386_tdep_h), and $(nbsd_tdep_h) to dependency list.
+	* i386-tdep.h (i386bsd_init_abi): New prototype.
+	* i386bsd-tdep.c (i386bsd_init_abi): Remove "static" from
+	function declaration.
+	(_initialize_i386bsd_tdep): Don't register OS ABI handlers
+	for NetBSD-a.out or NetBSD-ELF.
+	(i386nbsd_sigtramp_start, i386nbsd_sigtramp_end)
+	(i386nbsd_sc_pc_offset, i386nbsd_sc_sp_offset)
+	(i386nbsd_init_abi, i386nbsdelf_init_abi): Move to...
+	* i386nbsd-tdep.c: ...here.  Include arch-utils.h, i386-tdep.h,
+	and nbsd-tdep.h.
+	(i386nbsd_pc_in_sigtramp): New function.
+	(i386nbsd_init_abi): Set gdbarch_pc_in_sigtramp to
+	i386nbsd_pc_in_sigtramp.
+	(_initialize_i386nbsd_tdep): Register i386nbsd_init_abi
+	and i386nbsdelf_init_abi OS ABI handlers.
+	* config/i386/nbsdaout.mt (TDEPFILES): Add nbsd-tdep.o.
+	* config/i386/nbsdelf.mt (TDEPFILES): Likewise.
+
 2002-09-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-nat.c (dummy_sse_values): Only try to fill in the SSE

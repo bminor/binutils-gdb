@@ -23,8 +23,11 @@
 #include "gdbtypes.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "arch-utils.h"
 
+#include "i386-tdep.h"
 #include "i387-tdep.h"
+#include "nbsd-tdep.h"
 
 /* Map a GDB register number to an offset in the reg structure.  */
 static int regmap[] =
@@ -137,9 +140,85 @@ static struct core_fns i386nbsd_elfcore_fns =
   NULL					/* next */
 };
 
+static int
+i386nbsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  /* Check for libc-provided signal trampoline.  */
+  if (nbsd_pc_in_sigtramp (pc, name))
+    return 1;
+
+  /* FIXME: sigtramp_start/sigtramp_end need to go away; we should
+     not be assuming the location of the kernel-provided trampoline!  */
+
+  return (pc >= tdep->sigtramp_start && pc < tdep->sigtramp_end);
+}
+
+CORE_ADDR i386nbsd_sigtramp_start = 0xbfbfdf20;
+CORE_ADDR i386nbsd_sigtramp_end = 0xbfbfdff0;
+
+/* From <machine/signal.h>.  */
+int i386nbsd_sc_pc_offset = 44;
+int i386nbsd_sc_sp_offset = 56;
+
+static void 
+i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* Obviously NetBSD is BSD-based.  */
+  i386bsd_init_abi (info, gdbarch);
+
+  /* NetBSD has different signal trampoline conventions.  */
+  set_gdbarch_pc_in_sigtramp (gdbarch, i386nbsd_pc_in_sigtramp);
+
+  /* NetBSD uses -freg-struct-return by default.  */
+  tdep->struct_return = reg_struct_return;
+
+  /* NetBSD uses a different memory layout.  */
+  tdep->sigtramp_start = i386nbsd_sigtramp_start;
+  tdep->sigtramp_end = i386nbsd_sigtramp_end;
+
+  /* NetBSD has a `struct sigcontext' that's different from the
+     origional 4.3 BSD.  */
+  tdep->sc_pc_offset = i386nbsd_sc_pc_offset;
+  tdep->sc_sp_offset = i386nbsd_sc_sp_offset;
+}
+
+/* NetBSD ELF.  */
+static void
+i386nbsdelf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* It's still NetBSD.  */
+  i386nbsd_init_abi (info, gdbarch);
+
+  /* But ELF-based.  */
+  i386_elf_init_abi (info, gdbarch);
+
+  /* NetBSD ELF uses SVR4-style shared libraries.  */
+  set_gdbarch_in_solib_call_trampoline (gdbarch,
+                                        generic_in_solib_call_trampoline);
+
+  /* NetBSD ELF uses -fpcc-struct-return by default.  */
+  tdep->struct_return = pcc_struct_return;
+
+  /* We support the SSE registers on NetBSD ELF.  */
+  tdep->num_xmm_regs = I386_NUM_XREGS - 1;
+  set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS
+                        + I386_NUM_XREGS);
+}
+
 void
 _initialize_i386nbsd_tdep (void)
 {
   add_core_fns (&i386nbsd_core_fns);
   add_core_fns (&i386nbsd_elfcore_fns);
+
+  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_NETBSD_AOUT,
+			  i386nbsd_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_NETBSD_ELF,
+			  i386nbsdelf_init_abi);
 }
