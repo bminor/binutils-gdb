@@ -2039,9 +2039,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 
     default:
       /* Check for any processor-specific section types.  */
-      if (bed->elf_backend_section_from_shdr)
-	(*bed->elf_backend_section_from_shdr) (abfd, hdr, name);
-      break;
+      return bed->elf_backend_section_from_shdr (abfd, hdr, name);
     }
 
   return TRUE;
@@ -2379,13 +2377,9 @@ bfd_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int index)
       return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "relro");
 
     default:
-      /* Check for any processor-specific program segment types.
-         If no handler for them, default to making "segment" sections.  */
+      /* Check for any processor-specific program segment types.  */
       bed = get_elf_backend_data (abfd);
-      if (bed->elf_backend_section_from_phdr)
-	return (*bed->elf_backend_section_from_phdr) (abfd, hdr, index);
-      else
-	return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "segment");
+      return bed->elf_backend_section_from_phdr (abfd, hdr, index);
     }
 }
 

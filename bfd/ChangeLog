@@ -1,3 +1,14 @@
+2005-03-01  Zack Weinberg  <zack@codesourcery.com>
+
+	* elf.c (bfd_section_from_shdr <default case>): Call
+	elf_backend_section_from_shdr hook unconditionally, and return
+	what it returns.
+	(bfd_section_from_phdr): Similarly, for elf_backend_section_from_phdr.
+	* elfxx-target.h (elf_backend_section_from_shdr)
+	(elf_backend_section_from_phdr): Default to
+	_bfd_elf_make_section_from_shdr and _bfd_elf_make_section_from_phdr
+	respectively.
+
 2005-03-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* targets.h: Typo fix.

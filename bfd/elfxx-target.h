@@ -326,13 +326,13 @@
 #define elf_backend_section_processing	0
 #endif
 #ifndef elf_backend_section_from_shdr
-#define elf_backend_section_from_shdr	0
+#define elf_backend_section_from_shdr	_bfd_elf_make_section_from_shdr
 #endif
 #ifndef elf_backend_section_flags
 #define elf_backend_section_flags	0
 #endif
 #ifndef elf_backend_section_from_phdr
-#define elf_backend_section_from_phdr	0
+#define elf_backend_section_from_phdr	_bfd_elf_make_section_from_phdr
 #endif
 #ifndef elf_backend_fake_sections
 #define elf_backend_fake_sections	0
