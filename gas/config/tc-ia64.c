@@ -6370,25 +6370,42 @@ emit_one_bundle ()
       /* resolve dynamic opcodes such as "break", "hint", and "nop":  */
       if (idesc->type == IA64_TYPE_DYN)
 	{
+	  enum ia64_opnd opnd1, opnd2;
+
 	  if ((strcmp (idesc->name, "nop") == 0)
 	      || (strcmp (idesc->name, "hint") == 0)
 	      || (strcmp (idesc->name, "break") == 0))
 	    insn_unit = required_unit;
-	  else if (strcmp (idesc->name, "chk.s") == 0)
+	  else if (strcmp (idesc->name, "chk.s") == 0
+	      || strcmp (idesc->name, "mov") == 0)
 	    {
 	      insn_unit = IA64_UNIT_M;
-	      if (required_unit == IA64_UNIT_I)
+	      if (required_unit == IA64_UNIT_I
+		  || (required_unit == IA64_UNIT_F && template == 6))
 		insn_unit = IA64_UNIT_I;
 	    }
 	  else
 	    as_fatal ("emit_one_bundle: unexpected dynamic op");
 
 	  sprintf (mnemonic, "%s.%c", idesc->name, "?imbf??"[insn_unit]);
+	  opnd1 = idesc->operands[0];
+	  opnd2 = idesc->operands[1];
 	  ia64_free_opcode (idesc);
-	  md.slot[curr].idesc = idesc = ia64_find_opcode (mnemonic);
+	  idesc = ia64_find_opcode (mnemonic);
+	  /* moves to/from ARs have collisions */
+	  if (opnd1 == IA64_OPND_AR3 || opnd2 == IA64_OPND_AR3)
+	    {
+	      while (idesc != NULL
+		     && (idesc->operands[0] != opnd1
+			 || idesc->operands[1] != opnd2))
+		idesc = get_next_opcode (idesc);
+	    }
 #if 0
-	  know (!idesc->next);	/* no resolved dynamic ops have collisions */
+	  else
+	    /* no other resolved dynamic ops have collisions */
+	    know (!get_next_opcode (idesc));
 #endif
+	  md.slot[curr].idesc = idesc;
 	}
       else
 	{
@@ -10071,17 +10088,22 @@ md_assemble (str)
 	    {
 	      if (ar_is_only_in_integer_unit (CURR_SLOT.opnd[rop].X_add_number))
 		mnemonic = "mov.i";
-	      else
+	      else if (ar_is_only_in_memory_unit (CURR_SLOT.opnd[rop].X_add_number))
 		mnemonic = "mov.m";
+	      else
+		rop = -1;
 	    }
 	  else
 	    abort ();
-	  ia64_free_opcode (idesc);
-	  idesc = ia64_find_opcode (mnemonic);
-	  while (idesc != NULL
-		 && (idesc->operands[0] != opnd1
-		     || idesc->operands[1] != opnd2))
-	    idesc = get_next_opcode (idesc);
+	  if (rop >= 0)
+	    {
+	      ia64_free_opcode (idesc);
+	      idesc = ia64_find_opcode (mnemonic);
+	      while (idesc != NULL
+		     && (idesc->operands[0] != opnd1
+			 || idesc->operands[1] != opnd2))
+		idesc = get_next_opcode (idesc);
+	    }
 	}
     }
   else if (strcmp (idesc->name, "mov.i") == 0

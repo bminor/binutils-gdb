@@ -1,3 +1,10 @@
+2005-01-25  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/ia64/dv-waw-err.l: Don't expect ar112 move warning to refer to
+	M-unit.
+	* gas/ia64/mov-ar.[ds]: New.
+	* gas/ia64/ia64.exp: Run new test.
+
 2005-01-24  Nick Clifton  <nickc@redhat.com>
 
 	* gas/all/sleb128.d: Do not assume an 8-bit byte.

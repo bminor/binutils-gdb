@@ -1,3 +1,10 @@
+2005-01-25  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (emit_one_bundle): Add late resolution of move
+	to/from application registers dynamic insns.
+	(md_assemble): Defer resolution of move to/from application registers
+	dynamic insns when they can be issued on either the I- or M-units.
+
 2005-01-25  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-frv.c (md_apply_fix3): Mark TLS symbols as such.
