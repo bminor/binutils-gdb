@@ -476,7 +476,6 @@ BFD32_BACKENDS = \
 	elf32-i386.lo \
 	elf32-i860.lo \
 	elf32-i960.lo \
-	elf32-ia64.lo \
 	elf32-ip2k.lo \
 	elf32-iq2000.lo \
 	elf32-m32r.lo \
@@ -749,6 +748,8 @@ BFD32_BACKENDS_CFILES = \
 # The .o files needed by all of the 64 bit vectors that are configured into
 # target_vector in targets.c if configured with --enable-targets=all
 # and --enable-64-bit-bfd.
+# elf32-ia64.c requires a 64-bit bfd_vma, and hence can not be put in
+# BFD32_BACKENDS.
 BFD64_BACKENDS = \
 	aix5ppc-core.lo \
 	aout64.lo \
@@ -759,6 +760,7 @@ BFD64_BACKENDS = \
 	elf64-x86-64.lo \
 	elf64-alpha.lo \
 	elf64-hppa.lo \
+	elf32-ia64.lo \
 	elf64-ia64.lo \
 	elf64-gen.lo \
 	elfn32-mips.lo \

@@ -1,3 +1,9 @@
+2005-03-24  James E Wilson  <wilson@specifixinc.com>
+
+	* Makefile.am (BFD32_BACKENDS): Delete elf32-ia64.lo.
+	(BFD64_BACKENDS): Add elf32-ia64.lo.
+	* Makefile.in: Regenerate.
+
 2005-03-23  Eric Christopher  <echristo@redhat.com>
 
 	* elfxx-mips.c (MIPS_ELF_READONLY_SECTION): New.
