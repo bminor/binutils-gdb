@@ -865,43 +865,43 @@ void OP_CF00 ()
   if (mask & 0x80)
     {
       sp -= 4;
-      State.regs[REG_D0 + 2] = load_mem (sp, 4);
+      store_mem (sp, 4, State.regs[REG_D0 + 2]);
     }
 
   if (mask & 0x40)
     {
       sp -= 4;
-      State.regs[REG_D0 + 3] = load_mem (sp, 4);
+      store_mem (sp, 4, State.regs[REG_D0 + 3]);
     }
 
   if (mask & 0x20)
     {
       sp -= 4;
-      State.regs[REG_A0 + 2] = load_mem (sp, 4);
+      store_mem (sp, 4, State.regs[REG_A0 + 2]);
     }
 
   if (mask & 0x10)
     {
       sp -= 4;
-      State.regs[REG_A0 + 3] = load_mem (sp, 4);
+      store_mem (sp, 4, State.regs[REG_A0 + 3]);
     }
 
   if (mask & 0x8)
     {
       sp -= 4;
-      State.regs[REG_D0] = load_mem (sp, 4);
+      store_mem (sp, 4, State.regs[REG_D0]);
       sp -= 4;
-      State.regs[REG_D0 + 1] = load_mem (sp, 4);
+      store_mem (sp, 4, State.regs[REG_D0 + 1]);
       sp -= 4;
-      State.regs[REG_A0] = load_mem (sp, 4);
+      store_mem (sp, 4, State.regs[REG_A0]);
       sp -= 4;
-      State.regs[REG_A0 + 1] = load_mem (sp, 4);
+      store_mem (sp, 4, State.regs[REG_A0 + 1]);
       sp -= 4;
-      State.regs[REG_MDR] = load_mem (sp, 4);
+      store_mem (sp, 4, State.regs[REG_MDR]);
       sp -= 4;
-      State.regs[REG_LIR] = load_mem (sp, 4);
+      store_mem (sp, 4, State.regs[REG_LIR]);
       sp -= 4;
-      State.regs[REG_LAR] = load_mem (sp, 4);
+      store_mem (sp, 4, State.regs[REG_LAR]);
       sp -= 4;
     }
 
@@ -1012,10 +1012,10 @@ void OP_2800 ()
   int z, c, n, v;
   unsigned long reg1, imm, value;
 
-  reg1 = State.regs[REG_D0 + ((insn & 0xc00) >> 8)];
+  reg1 = State.regs[REG_D0 + ((insn & 0x300) >> 8)];
   imm = SEXT8 (insn & 0xff);
   value = reg1 + imm;
-  State.regs[REG_D0 + ((insn & 0xc00) >> 8)] = value;
+  State.regs[REG_D0 + ((insn & 0x300) >> 8)] = value;
 
   z = (value == 0);
   n = (value & 0x80000000);
@@ -1078,10 +1078,10 @@ void OP_2000 ()
   int z, c, n, v;
   unsigned long reg1, imm, value;
 
-  reg1 = State.regs[REG_A0 + ((insn & 0xc00) >> 8)];
-  imm = insn & 0xff;
+  reg1 = State.regs[REG_A0 + ((insn & 0x300) >> 8)];
+  imm = SEXT8 (insn & 0xff);
   value = reg1 + imm;
-  State.regs[REG_A0 + ((insn & 0xc00) >> 8)] = value;
+  State.regs[REG_A0 + ((insn & 0x300) >> 8)] = value;
 
   z = (value == 0);
   n = (value & 0x80000000);
@@ -1101,7 +1101,7 @@ void OP_FAD00000 ()
   unsigned long reg1, imm, value;
 
   reg1 = State.regs[REG_A0 + ((insn & 0xc0000) >> 16)];
-  imm = 0xffff;
+  imm = SEXT16 (insn & 0xffff);
   value = reg1 + imm;
   State.regs[REG_A0 + ((insn & 0xc0000) >> 16)] = value;
 

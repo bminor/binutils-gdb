@@ -1,5 +1,7 @@
 Wed Nov 27 09:20:42 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* simops.c: Fix bugs in "movm" and "add imm,an".
+
 	* simops.c: Don't lose the upper 24 bits of the return
 	pointer in "call" and "calls" instructions.  Rough cut
 	at emulated system calls.
