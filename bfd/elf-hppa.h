@@ -1011,9 +1011,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
    a guide to help prioritize what relocation support is worked on first.
    The list will be deleted eventually.
 
-   27210 R_PARISC_SEGREL32
-   6 R_PARISC_LTOFF64
-   5 R_PARISC_SEGREL64  */
+   27210 R_PARISC_SEGREL32  */
 
   switch (r_type)
     {
