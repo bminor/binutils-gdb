@@ -719,7 +719,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   int bind;
   bfd *oldbfd;
   bfd_boolean newdyn, olddyn, olddef, newdef, newdyncommon, olddyncommon;
-  bfd_boolean newweak, oldweak;
+  bfd_boolean newweak, oldweak, old_asneeded;
 
   *skip = FALSE;
   *override = FALSE;
@@ -848,6 +848,14 @@ _bfd_elf_merge_symbol (bfd *abfd,
     olddef = FALSE;
   else
     olddef = TRUE;
+
+  /* If the old definition came from an as-needed dynamic library which
+     wasn't found to be needed, treat the sym as undefined.  */
+  old_asneeded = FALSE;
+  if (newdyn
+      && olddyn
+      && (elf_dyn_lib_class (oldbfd) & DYN_AS_NEEDED) != 0)
+    old_asneeded = TRUE;
 
   /* Check TLS symbol.  */
   if ((ELF_ST_TYPE (sym->st_info) == STT_TLS || h->type == STT_TLS)
@@ -1051,6 +1059,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
   if (olddyn
       && olddef
+      && !old_asneeded
       && h->root.type == bfd_link_hash_defined
       && h->def_dynamic
       && (h->root.u.def.section->flags & SEC_ALLOC) != 0
@@ -1102,7 +1111,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
   if (newdyn
       && newdef
-      && (olddef
+      && ((olddef && !old_asneeded)
 	  || (h->root.type == bfd_link_hash_common
 	      && (newweak
 		  || ELF_ST_TYPE (sym->st_info) == STT_FUNC))))
@@ -1152,7 +1161,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
      symbol is a function or is weak.  */
 
   flip = NULL;
-  if (! newdyn
+  if ((!newdyn || old_asneeded)
       && (newdef
 	  || (bfd_is_com_section (sec)
 	      && (oldweak
@@ -3936,6 +3945,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_free_vers;
 		}
+
+	      elf_dyn_lib_class (abfd) &= ~DYN_AS_NEEDED;
 
 	      add_needed = TRUE;
 	      ret = elf_add_dt_needed_tag (info, soname, add_needed);

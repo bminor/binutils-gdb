@@ -1,3 +1,10 @@
+2004-12-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (_bfd_elf_merge_symbol): Treat old definitions from
+	as-needed dynamic libs as undefined.
+	(elf_link_add_object_symbols): Remove DYN_AS_NEEDED from as-needed
+	libs when finding they are needed.
+
 2004-12-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (struct ppc64_elf_obj_tdata): Add opd_relocs.
