@@ -1,3 +1,7 @@
+2002-02-26  Brian Gaeke  <brg@dgate.org>
+
+	* Makefile.am (install-data-local): Install dis-asm.h.
+
 2002-02-26  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* configure.in (LINGUAS): Add de.po.

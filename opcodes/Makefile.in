@@ -416,7 +416,7 @@ acinclude.m4 aclocal.m4 config.in configure configure.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = libopcodes.a.c $(libopcodes_la_SOURCES)
 OBJECTS = libopcodes.a.$(OBJEXT) $(libopcodes_la_OBJECTS)
@@ -708,7 +708,7 @@ all-recursive-am: config.h
 install-exec-am: install-libLTLIBRARIES
 install-exec: install-exec-recursive
 
-install-data-am:
+install-data-am: install-data-local
 install-data: install-data-recursive
 
 install-am: all-am
@@ -784,10 +784,10 @@ maintainer-clean-recursive tags tags-recursive mostlyclean-tags \
 distclean-tags clean-tags maintainer-clean-tags distdir info-am info \
 dvi-am dvi check check-am installcheck-am installcheck install-info-am \
 install-info all-recursive-am install-exec-am install-exec \
-install-data-am install-data install-am install uninstall-am uninstall \
-all-redirect all-am all installdirs-am installdirs mostlyclean-generic \
-distclean-generic clean-generic maintainer-clean-generic clean \
-mostlyclean distclean maintainer-clean
+install-data-local install-data-am install-data install-am install \
+uninstall-am uninstall all-redirect all-am all installdirs-am \
+installdirs mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 
 disassemble.lo: disassemble.c $(INCDIR)/dis-asm.h
@@ -811,6 +811,12 @@ po/POTFILES.in: @MAINT@ Makefile
 # that's where the version number comes from.
 config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 	$(SHELL) ./config.status --recheck
+
+# Install libopcodes include file.
+install-data-local: 
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(includedir)
+	$(INSTALL_DATA) $(INCDIR)/dis-asm.h $(DESTDIR)$(includedir)/dis-asm.h
 
 run-cgen:
 	$(SHELL) $(srcdir)/cgen.sh opcodes $(srcdir) $(CGEN) \

@@ -271,6 +271,12 @@ po/POTFILES.in: @MAINT@ Makefile
 config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 	$(SHELL) ./config.status --recheck
 
+# Install libopcodes include file.
+install-data-local: 
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(includedir)
+	$(INSTALL_DATA) $(INCDIR)/dis-asm.h $(DESTDIR)$(includedir)/dis-asm.h
+
 CLEANFILES = \
 	stamp-m32r stamp-fr30 stamp-openrisc \
 	stamp-xstormy16 \
