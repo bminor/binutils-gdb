@@ -1,3 +1,10 @@
+2001-10-13  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2001-07-09 D.J. Barrow <djbarrow@de.ibm.com>:
+        * gdbarch.sh: Fixed CALL_DUMMY_BREAKPOINT_OFFSET to check
+	CALL_DUMMY_BREAKPOINT_OFFSET_P.
+	* gdbarch.c: Regenerate.
+	
 2001-10-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* thread-db.c: Fix a few formatting mistakes.
