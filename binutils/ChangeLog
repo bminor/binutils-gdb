@@ -1,3 +1,13 @@
+2004-10-13  Jakub Jelinek  <jakub@redhat.com>
+
+	* strings.c (statbuf): New typedef.
+	(file_stat): Define.
+	(strings_object_file): Avoid using get_file_size, instead do the
+	checks here, using file_stat.
+	* configure.in (HAVE_STAT64): New test.
+	* configure: Rebuilt.
+	* config.in: Rebuilt.
+
 2004-10-12  Paul Brook  <paul@codesourcery.com>
 
 	* readelf.c (decode_ARM_machine_flags): Support EABI version 4.

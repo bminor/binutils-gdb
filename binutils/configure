@@ -5035,12 +5035,66 @@ if test "$bu_cv_have_fopen64" != no; then
 #define HAVE_FOPEN64 1
 EOF
 
-  if test "$bu_cv_have_fopen64" = "need -D_LARGEFILE64_SOURCE"; then
-    cat >> confdefs.h <<\EOF
+fi
+echo $ac_n "checking for stat64""... $ac_c" 1>&6
+echo "configure:5054: checking for stat64" >&5
+if eval "test \"`echo '$''{'bu_cv_have_stat64'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 5059 "configure"
+#include "confdefs.h"
+#include <sys/stat.h>
+int main() {
+struct stat64 st; stat64 ("/tmp/foo", &st);
+; return 0; }
+EOF
+if { (eval echo configure:5066: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+  rm -rf conftest*
+  bu_cv_have_stat64=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  saved_CPPFLAGS=$CPPFLAGS
+ CPPFLAGS="$CPPFLAGS -D_LARGEFILE64_SOURCE"
+ cat > conftest.$ac_ext <<EOF
+#line 5076 "configure"
+#include "confdefs.h"
+#include <sys/stat.h>
+int main() {
+struct stat64 st; stat64 ("/tmp/foo", &st);
+; return 0; }
+EOF
+if { (eval echo configure:5083: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+  rm -rf conftest*
+  bu_cv_have_stat64="need -D_LARGEFILE64_SOURCE"
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  bu_cv_have_stat64=no
+fi
+rm -f conftest*
+ CPPFLAGS=$saved_CPPFLAGS
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$bu_cv_have_stat64" 1>&6
+if test "$bu_cv_have_stat64" != no; then
+  cat >> confdefs.h <<\EOF
+#define HAVE_STAT64 1
+EOF
+
+fi
+if test "$bu_cv_have_fopen64" = "need -D_LARGEFILE64_SOURCE" \
+   || test "$bu_cv_have_stat64" = "need -D_LARGEFILE64_SOURCE"; then
+  cat >> confdefs.h <<\EOF
 #define _LARGEFILE64_SOURCE 1
 EOF
 
-  fi
+  CPPFLAGS="$CPPFLAGS -D_LARGEFILE64_SOURCE"
 fi
 
 # Some systems have frexp only in -lm, not in -lc.

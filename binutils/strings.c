@@ -104,6 +104,13 @@ typedef off64_t file_off;
 typedef off_t file_off;
 #define file_open(s,m) fopen(s, m)
 #endif
+#ifdef HAVE_STAT64
+typedef struct stat64 statbuf;
+#define file_stat(f,s) stat64(f, s)
+#else
+typedef struct stat statbuf;
+#define file_stat(f,s) stat(f, s)
+#endif
 
 /* Radix for printing addresses (must be 8, 10 or 16).  */
 static int address_radix;
@@ -370,8 +377,17 @@ strings_object_file (const char *file)
 static bfd_boolean
 strings_file (char *file)
 {
-  if (get_file_size (file) < 1)
-    return FALSE;
+  statbuf st;
+
+  if (file_stat (file, &st) < 0)
+    {
+      if (errno == ENOENT)
+	non_fatal (_("'%s': No such file"), file);
+      else
+	non_fatal (_("Warning: could not locate '%s'.  reason: %s"),
+		   file, strerror (errno));
+      return FALSE;
+    }
 
   /* If we weren't told to scan the whole file,
      try to open it as an object file and only look at
