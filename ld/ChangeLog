@@ -1,3 +1,9 @@
+Wed Jul  1 17:51:19 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* ldmain.c (Q_enter_global_ref), ldindr.c (add_indirect): fix for
+	aliasing problems
+	
+
 Thu Jun 18 09:38:56 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* h8300hms.em, h8300hms.sc-sh:  do the right thing for -r
