@@ -45,6 +45,7 @@ gdbm.h
 getopt.h
 ieee.h
 ieee-float.h
+libiberty.h
 nlm
 oasys.h
 obstack.h

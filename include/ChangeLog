@@ -1,3 +1,27 @@
+Thu Feb 10 14:05:41 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* libiberty.h: New file.  Declares functions provided by
+	libiberty.
+
+Tue Feb  8 05:19:52 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	Handle obstack_chunk_alloc returning NULL.  This allows
+	obstacks to be used by libraries, without forcing them
+	to call exit or longjmp.
+	* obstack.h (struct obstack): Add alloc_failed flag.
+	_obstack_begin, _obstack_begin_1): Declare to return int, not void.
+	(obstack_finish): If alloc_failed, return NULL.
+	(obstack_base, obstack_next_free, objstack_object_size): 
+	If alloc_failed, return 0.
+	(obstack_grow, obstack_grow0, obstack_1grow, obstack_ptr_grow,
+	obstack_int_grow, obstack_blank): If alloc_failed, do nothing that
+	could corrupt the obstack.
+
+Mon Jan 24 15:06:05 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* bfdlink.h (struct bfd_link_callbacks): Add name, reloc_name and
+	addend argments to reloc_overflow callback.
+
 Fri Jan 21 19:13:12 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* dis-asm.h (print_insn_big_powerpc, print_insn_little_powerpc,
