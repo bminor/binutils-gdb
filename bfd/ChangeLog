@@ -1,3 +1,8 @@
+Tue Jun 17 11:55:02 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cofflink.c (_bfd_coff_link_input_bfd): If stripping debugging
+	symbols, skip N_ABS symbols with debugging storage classes.
+
 Mon Jun 16 18:56:27 1997  Geoff Keating  <geoffk@ozemail.com.au>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Don't emit R_PPC_REL*
