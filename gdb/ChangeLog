@@ -8,8 +8,8 @@
 	(ppcnbsd-nat.o)
 	(ppcnbsd-tdep.o): New dependency lists.
 	* ppc-tdep.h: Use generic OS ABI framework.
-	* ppc-linux-tdep.c (_initialize_ppc_linux_tdep,
-	ppc_linux_init_abi): New functions.
+	* ppc-linux-tdep.c (_initialize_ppc_linux_tdep)
+	(ppc_linux_init_abi): New functions.
 	(ppc_sysv_abi_broken_use_struct_convention)
 	(ppc_sysv_abi_use_struct_convention)
 	(ppc_sysv_abi_push_arguments): Move to...
