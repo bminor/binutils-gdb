@@ -1,5 +1,5 @@
 # Makefile template for Configure for the m32r simulator
-# Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+# Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
 # Contributed by Cygnus Support.
 #
 # This file is part of GDB, the GNU debugger.
@@ -20,35 +20,34 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-SIM_OBJS = sim-if.o m32r.o mainloop.o \
-	decode.o extract.o semantics.o seman-cache.o model.o \
-	sim-io.o sim-utils.o sim-load.o sim-abort.o sim-watch.o \
-	sim-module.o sim-options.o sim-trace.o sim-profile.o sim-model.o \
-	sim-core.o sim-events.o sim-endian.o sim-bits.o sim-config.o \
-	sim-hload.o \
-	cgen-utils.o cgen-trace.o cgen-scache.o
+M32R_OBJS = m32r.o decode.o extract.o sem.o model.o mloop.o
+# start-sanitize-m32rx
+M32RX_OBJS = m32rx.o decodex.o modelx.o mloopx.o
+# end-sanitize-m32rx
+
+SIM_OBJS = \
+	$(SIM_NEW_COMMON_OBJS) \
+	sim-hload.o sim-hrw.o sim-engine.o sim-model.o sim-reason.o \
+	cgen-utils.o cgen-trace.o cgen-scache.o \
+	sim-if.o arch.o \
+	$(M32R_OBJS)
 
 # Extra headers included by sim-main.h.
 SIM_EXTRA_DEPS = \
 	$(srcdir)/../common/cgen-types.h \
 	$(srcdir)/../common/cgen-sim.h \
 	$(srcdir)/../common/cgen-trace.h \
-	arch-defs.h
+	arch.h cpuall.h m32r-sim.h
 
-SIM_ENDIAN = @sim_endian@
-SIM_HOSTENDIAN = @sim_hostendian@
-SIM_SCACHE = @sim_scache@
-SIM_DEFAULT_MODEL = @sim_default_model@
-SIM_EXTRA_CFLAGS = \
-	$(SIM_ENDIAN) $(SIM_HOSTENDIAN) \
-	$(SIM_SCACHE) $(SIM_DEFAULT_MODEL)
+SIM_EXTRA_CFLAGS =
 
 SIM_RUN_OBJS = nrun.o
 SIM_EXTRA_CLEAN = m32r-clean
 
 ## COMMON_POST_CONFIG_FRAG
 
-CPU = m32r
+arch = m32r
+
 MAIN_INCLUDE_DEPS = \
 	sim-main.h \
 	$(srcdir)/../common/sim-config.h \
@@ -59,28 +58,96 @@ MAIN_INCLUDE_DEPS = \
 	$(srcdir)/../common/sim-profile.h \
 	tconfig.h
 INCLUDE_DEPS = $(MAIN_INCLUDE_DEPS) $(SIM_EXTRA_DEPS) cpu-sim.h
-OPS_INCLUDE_DEPS = mem-ops.h sem-ops.h
+OPS_INCLUDE_DEPS = \
+	$(srcdir)/../common/cgen-mem.h \
+	$(srcdir)/../common/cgen-ops.h
 
 sim-if.o: sim-if.c $(INCLUDE_DEPS) $(srcdir)/../common/sim-core.h
 m32r.o: m32r.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS)
 
-# FIXME: Use of `mono' is wip.
-mainloop.c: $(srcdir)/../common/genmloop.sh mainloop.in
-	rm -f mainloop.c
-	$(SHELL) $(srcdir)/../common/genmloop.sh mono $(CPU) $(srcdir)/mainloop.in >mainloop.c
-mainloop.o: mainloop.c sem-switch.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) \
-	$(srcdir)/../common/cgen-scache.h
+arch.o: arch.c $(INCLUDE_DEPS) cpu-opc.h
 
-decode.o: decode.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu-opc.h
-extract.o: extract.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS)
-semantics.o: semantics.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS)
-model.o: model.c $(INCLUDE_DEPS) cpu-opc.h
+# M32R objs
+
+# FIXME: Use of `mono' is wip.
+mloop.c: $(srcdir)/../common/genmloop.sh mloop.in Makefile
+	rm -f mloop.c
+	$(SHELL) $(srcdir)/../common/genmloop.sh $(SHELL) -mono -scache -fast m32r $(srcdir)/mloop.in | sed -e 's/@cpu@/m32r/' -e 's/@CPU@/M32R/' >mloop.c
+mloop.o: mloop.c sem-switch.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu.h
+
+decode.o: decode.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu-opc.h cpu.h
+extract.o: extract.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu.h
+sem.o: sem.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu.h
+model.o: model.c $(INCLUDE_DEPS) cpu-opc.h cpu.h
 
 # wip
 #extr-cache.o: extract.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS)
 #	$(CC) -c $(srcdir)/extract.c -o extr-cache.o -DSCACHE_P $(ALL_CFLAGS)
-seman-cache.o: semantics.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS)
-	$(CC) -c $(srcdir)/semantics.c -o seman-cache.o -DSCACHE_P $(ALL_CFLAGS)
+sem-cache.o: sem.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu.h
+	$(CC) -c $(srcdir)/sem.c -o sem-cache.o -DSCACHE_P $(ALL_CFLAGS)
+
+# start-sanitize-m32rx
+# M32RX objs
+
+# FIXME: Use of `mono' is wip.
+mloopx.c: $(srcdir)/../common/genmloop.sh mloopx.in Makefile
+	rm -f mloopx.c
+	$(SHELL) $(srcdir)/../common/genmloop.sh $(SHELL) -mono -no-scache -no-fast -parallel m32r $(srcdir)/mloopx.in | sed -e 's/@cpu@/m32rx/' -e 's/@CPU@/M32RX/' >mloopx.c
+mloopx.o: mloopx.c readx.c semx-switch.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpux.h
+
+decodex.o: decodex.c decodex.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu-opc.h cpux.h
+extractx.o: extractx.c decodex.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpux.h
+semx.o: semx.c decodex.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpux.h
+modelx.o: modelx.c $(INCLUDE_DEPS) cpu-opc.h cpux.h
+
+# wip
+#extr-cache.o: extract.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS)
+#	$(CC) -c $(srcdir)/extract.c -o extr-cache.o -DSCACHE_P $(ALL_CFLAGS)
+semx-cache.o: semx.c decode.h $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpux.h
+	$(CC) -c $(srcdir)/semx.c -o semx-cache.o -DSCACHE_P $(ALL_CFLAGS)
+# end-sanitize-m32rx
 
 m32r-clean:
-	rm -f mainloop.c
+	rm -f mloop.c stamp-arch stamp-cpu stamp-decode
+# start-sanitize-m32rx
+	rm -f mloopx.c stamp-xcpu stamp-xdecode
+# end-sanitize-m32rx
+	rm -f tmp-*
+
+# start-sanitize-cygnus
+# cgen support
+# For now, require developers to configure with --enable-maintainer-mode.
+# ??? Do we need to use a different option?
+
+stamp-arch: $(CGEN_MAIN_SCM) $(srccgen)/m32r.cpu
+	$(MAKE) cgen-arch
+	touch stamp-arch
+arch.h arch.c cpuall.h: @MAINT@ stamp-arch
+	@true
+
+stamp-cpu: $(CGEN_MAIN_SCM) $(CGEN_CPU_SCM) $(srccgen)/m32r.cpu
+	$(MAKE) cgen-cpu cpu=m32r mach=m32r SUFFIX= FLAGS="with-scache,with-profile fn" EXTRAFILES="$(CGEN_CPU_EXTR) $(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
+	touch stamp-cpu
+cpu.h extract.c sem.c sem-switch.c model.c: @MAINT@ stamp-cpu
+	@true
+
+stamp-decode: $(CGEN_MAIN_SCM) $(CGEN_DECODE_SCM) $(srccgen)/m32r.cpu
+	$(MAKE) cgen-decode cpu=m32r mach=m32r SUFFIX= FLAGS="with-scache,with-profile fn"
+	touch stamp-decode
+decode.h decode.c: @MAINT@ stamp-decode
+	@true
+# start-sanitize-cygnus
+
+# start-sanitize-m32rx
+stamp-xcpu: $(CGEN_MAIN_SCM) $(CGEN_CPU_SCM) $(srccgen)/m32r.cpu
+	$(MAKE) cgen-cpu cpu=m32rx mach=m32rx SUFFIX=x FLAGS="" EXTRAFILES="$(CGEN_CPU_READ) $(CGEN_CPU_SEMSW)"
+	touch stamp-xcpu
+cpux.h readx.c semx-switch.c modelx.c: @MAINT@ stamp-xcpu
+	@true
+
+stamp-xdecode: $(CGEN_MAIN_SCM) $(CGEN_DECODE_SCM) $(srccgen)/m32r.cpu
+	$(MAKE) cgen-decode cpu=m32rx mach=m32rx SUFFIX=x
+	touch stamp-xdecode
+decodex.h decodex.c: @MAINT@ stamp-xdecode
+	@true
+# end-sanitize-m32rx

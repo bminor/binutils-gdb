@@ -1,3 +1,58 @@
+Mon Jan 19 14:13:40 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* arch.c, arch.h, cpuall.h: New files.
+	* arch-defs.h: Deleted.
+	* mloop.in: Renamed from mainloop.in.
+	* Makefile.in: Update.
+	* sem-ops.h: Deleted.
+	* mem-ops.h: Deleted.
+start-sanitize-cygnus
+	Add cgen support for generating files.
+end-sanitize-cygnus
+	(arch): Renamed from CPU.
+	* decode.c: Redone.
+	* decode.h: Redone.
+	* extract.c: Redone.
+	* model.c: Redone.
+	* sem-switch.c: Redone.
+	* sem.c: Renamed from semantics.c, and redone.
+	* m32r-sim.h (PROFILE_COUNT_FILLNOPS): Update.
+	(GETTWI,SETTWI,BRANCH_NEW_PC): Define.
+	* m32r.c (WANT_CPU,WANT_CPU_M32R): Define.
+	(m32r_{fetch,store}_register): New functions.
+	(model_mark_{get,set}_h_gr): Prefix with m32r_.
+	(m32r_model_mark_{busy,unbusy}_reg): Prefix with m32r_.
+	(h_cr_{get,set}): Prefix with m32r_.
+	(do_trap): Fetch state from current_cpu, not current_state.
+	Call sim_engine_halt instead of engine_halt.
+	* sim-if.c (alloc_cpu): New function.
+	(free_state): New function.
+	(sim_open): Call sim_state_alloc, and malloc space for selected cpu
+	type.  Call sim_analyze_program.
+	(sim_create_inferior): Handle selected cpu type when setting PC.
+start-sanitize-m32rx
+	(sim_resume): Handle m32rx.
+end-sanitize-m32rx
+	(sim_stop_reason): Deleted.
+	(print_m32r_misc_cpu): Update.
+start-sanitize-m32rx
+	(sim_{fetch,store}_register): Handle m32rx.
+end-sanitize-m32rx
+	(sim_{read,write}): Deleted.
+	(sim_engine_illegal_insn): New function.
+	* sim-main.h: Don't include arch-defs.h,sim-core.h,sim-events.h.
+	Include arch.h,cpuall.h.  Include cpu.h,decode.h if m32r.
+start-sanitize-m32rx
+	Include cpux.h,decodex.h if m32rx.
+end-sanitize-m32rx
+	(_sim_cpu): Include member appropriate cpu_data member for the cpu.
+	(M32R_MISC_PROFILE): Renamed from M32R_PROFILE.
+	(sim_state): Delete members core,events,halt_jmp_buf.
+	Change `cpu' member to be a pointer to the cpu's struct, rather than
+	record inside the state struct.
+	* tconfig.in (WITH_DEVICES): Define here.
+	(WITH_FAST,WITH_SEM_SWITCH_{FULL,FAST}): Define for the cpu.
+
 Fri Jan 16 12:16:56 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* arch-defs.h (INSN_NAME): Fix typo.
