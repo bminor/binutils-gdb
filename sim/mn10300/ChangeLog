@@ -1,11 +1,4 @@
 start-sanitize-am30
-Thu May 14 19:30:11 1998  Andrew Cagney  <cagney@b1.cygnus.com>
-
-	* dv-mn103cpu.c: Use struct hw_event.
-	* dv-mn103cpu.c, dv-mn103int.c: Don't include hw-base.h, include
- 	hw-main.h
-	* dv-mn103cpu.c, dv-mn103int.c: Rename *_callback to *_method.
-
 Wed May  6 13:29:06 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_open): Create a polling PAL device.

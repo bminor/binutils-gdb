@@ -21,7 +21,7 @@
 
 
 #include "sim-main.h"
-#include "hw-main.h"
+#include "hw-base.h"
 
 /* DEVICE
 
@@ -107,7 +107,7 @@ struct mn103cpu_block {
 
 struct mn103cpu {
   struct mn103cpu_block block;
-  struct hw_event *pending_handler;
+  hw_event *pending_handler;
   int pending_level;
   int pending_nmi;
   int pending_reset;
@@ -151,9 +151,9 @@ static const struct hw_port_descriptor mn103cpu_ports[] = {
 /* Finish off the partially created hw device.  Attach our local
    callbacks.  Wire up our port names etc */
 
-static hw_io_read_buffer_method mn103cpu_io_read_buffer;
-static hw_io_write_buffer_method mn103cpu_io_write_buffer;
-static hw_port_event_method mn103cpu_port_event;
+static hw_io_read_buffer_callback mn103cpu_io_read_buffer;
+static hw_io_write_buffer_callback mn103cpu_io_write_buffer;
+static hw_port_event_callback mn103cpu_port_event;
 
 static void
 attach_mn103cpu_regs (struct hw *me,
@@ -425,7 +425,7 @@ mn103cpu_io_write_buffer (struct hw *me,
 }     
 
 
-const struct hw_descriptor dv_mn103cpu_descriptor[] = {
+const struct hw_device_descriptor dv_mn103cpu_descriptor[] = {
   { "mn103cpu", mn103cpu_finish, },
   { NULL },
 };
