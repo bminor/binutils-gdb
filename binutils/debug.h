@@ -432,10 +432,6 @@ extern PTR debug_init PARAMS ((void));
 
 extern boolean debug_set_filename PARAMS ((PTR, const char *));
 
-/* Append a string to the source filename.  */
-
-extern boolean debug_append_filename PARAMS ((PTR, const char *));
-
 /* Change source files to the given file name.  This is used for
    include files in a single compilation unit.  */
 

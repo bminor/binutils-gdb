@@ -664,34 +664,6 @@ debug_set_filename (handle, name)
   return true;
 }
 
-/* Append a string to the source filename.  */
-
-boolean
-debug_append_filename (handle, string)
-     PTR handle;
-     const char *string;
-{
-  struct debug_handle *info = (struct debug_handle *) handle;
-  char *n;
-
-  if (string == NULL)
-    string = "";
-
-  if (info->current_unit == NULL)
-    {
-      debug_error ("debug_append_filename: no current file");
-      return false;
-    }
-
-  n = (char *) xmalloc (strlen (info->current_unit->files->filename)
-			+ strlen (string)
-			+ 1);
-  sprintf (n, "%s%s", info->current_unit->files->filename, string);
-  info->current_unit->files->filename = n;
-
-  return true;
-}
-
 /* Change source files to the given file name.  This is used for
    include files in a single compilation unit.  */
 
