@@ -1,0 +1,279 @@
+#!/bin/sh
+
+# Configuration subroutine to validate and canonicalize a configuration type.
+# Supply the specified configuration type as an argument.
+# If it is invalid, we print an error message on stderr and exit with code 1.
+# Otherwise, we print the canonical config type on stdout and succeed.
+
+# This file is supposed to be the same for all GNU packages
+# and recognize all the CPU types, system types and aliases
+# that are meaningful with *any* GNU software.
+# Each package is responsible for reporting which valid configurations
+# it does not support.  The user should be able to distinguish
+# a failure to support a valid configuration from a meaningless
+# configuration.
+
+# Separate what the user gave into CPU:company and OS (if any).
+basic_machine=`echo $1 | sed 's/-[^-]*$//'`
+if [ $basic_machine != $1 ]
+then os=`echo $1 | sed 's/[^-]*-/-/'`
+else os=; fi
+
+# Decode aliases for certain machine:company combinations.
+case $basic_machine in
+	# Recognize the basic CPU types without company name.
+	vax | tahoe | i386 | i860 | m68k | m68000 | m88k | sparc | ns32k \
+	    | alliant | arm | c1 | c2 | mips | pyramid | tron | a29k \
+	    | rtpc | rs6000 | i960 | none)
+		;;
+	# Recognize the basic CPU types with company name.
+	vax:* | tahoe:* | i386:* | i860:* | m68k:* | m68000:* | m88k:* \
+		| sparc:* | ns32k:* | alliant:* | arm:* | c1:* | c2:* \
+		| mips:* | pyramid:* | tron:* | a29k:* | rtpc:* \
+		| rs6000:* | i960:*)
+		;;
+	# Recognize the machine names
+	# which stand for a CPU time and a company.
+	nindy960)
+		basic_machine=i960:intel
+		os=-nindy
+		;;
+	vxworks68)
+		basic_machine=m68k:wrs
+		os=-vxworks
+		;;
+	vxworks960)
+		basic_machine=i960:wrs
+		os=-vxworks
+		;;
+	am29k)
+		basic_machine=a29k:unknown
+		os=-bsd
+		;;
+	umax)
+		basic_machine=ns32k:umax
+		os=-sysv # maybe?
+		;;
+	pn)
+		basic_machine=pn:gould
+		os=-sysv # maybe?
+		;;
+	np1)
+		basic_machine=np1:gould
+		os=-sysv # maybe?
+		;;
+	merlin)
+		basic_machine=merlin:utek
+		os=-sysv # maybe?
+		;;
+	iris | iris4d)
+		basic_machine=mips:sgi
+		os=-sysv # maybe?
+		;;
+	news1000)
+		basic_machine=m68030:sony
+		os=-sysv # maybe?
+		;;
+	news | news700 | news800 | news900)
+		basic_machine=m68k:sony
+		os=-sysv # maybe?
+		;;
+	unixpc | safari | pc7300 | 3b1 | 7300 | 7300:att | att-7300)
+		basic_machine=m68k:att
+		os=-sysv # maybe?
+		;;
+	delta | 3300 | motorola-3300 | motorola-delta \
+	      | 3300:motorola | delta:motorola)
+		basic_machine=m68k:motorola
+		os=-sysv # maybe?
+		;;
+	vax:dec)
+		basic_machine=vax
+		os=-ultrix # maybe?
+		;;
+	balance)
+		basic_machine=ns32k:sequent
+		os=-dynix
+		;;
+        mmax)
+		basic_machine=ns32k:encore
+		os=-sysv # maybe?
+		;;
+	symmetry)
+		basic_machine=i386:sequent
+		os=-dynix
+		;;
+	sun2)
+		basic_machine=m68000:sun
+		os=-sunos4
+		;;
+	sun2os3)
+		basic_machine=m68000:sun
+		os=-sunos3
+		;;
+	sun2os4)
+		basic_machine=m68000:sun
+		os=-sunos4
+		;;
+	sun3)
+		basic_machine=m68k:sun
+		os=-sunos4
+		;;
+	sun3os3)
+		basic_machine=m68k:sun
+		os=-sunos3
+		;;
+	sun3os4)
+		basic_machine=m68k:sun
+		os=-sunos4
+		;;
+	sun4)
+		basic_machine=sparc:sun
+		os=-sunos4
+		;;
+	sun4os3)
+		basic_machine=sparc:sun
+		os=-sunos3
+		;;
+	sun4os4)
+		basic_machine=sparc:sun
+		os=-sunos4
+		;;
+	pbd)
+		basic_machine=sparc:unicom
+		os=-sysv
+		;;
+	roadrunner | sun386 | sun386i)
+		basic_machine=i386:sun
+		os=-sunos
+		;;
+	ps2)
+		basic_machine=i386:ibm
+		os=-sysv # maybe?
+		;;
+	i386sco)
+		basic_machine=i386:sco
+		os=-sysv # maybe?
+		;;
+	i386v)
+		basic_machine=i386:unknown
+		os=-sysv
+		;;
+	i386v32)
+		basic_machine=i386:unknown
+		os=-sysv32
+		;;
+	next)
+		basic_machine=m68k:next
+		os=-sysv # maybe?
+		;;
+	hp300bsd)
+		basic_machine=m68k:hp
+		os=-bsd
+		;;
+	hp300hpux | hpux | hp9k3[2-9][0-9])
+		basic_machine=m68k:hp
+		os=-hpux
+		;;
+	hp9k31[0-9] | hp9k2[0-9][0-9])
+		basic_machine=m68000:hp
+		os=-hpux
+		;;
+	isi | isi68)
+		basic_machine=m68k:isi
+		os=-sysv # maybe?
+		;;
+	apollo68)
+		basic_machine=m68k:apollo
+		os=-sysv # maybe?
+		;;
+	altos | altos3068)
+		basic_machine=m68k:altos
+		os=-sysv # maybe?
+		;;
+	altosgas)
+		basic_machine=m68k:altos
+		os=-gas
+		;;
+	miniframe)
+		basic_machine=m68000:convergent
+		os=-sysv # maybe?
+		;;
+	tower | tower-32)
+		basic_machine=m68k:ncr
+		os=-sysv # maybe?
+		;;
+	bigmips | news-3600 | risc-news)
+		basic_machine=mips:sony
+		os=-newsos # maybe?
+		;;
+	littlemips)
+		basic_machine=mips:little
+		os=-bsd
+		;;
+	dec3100 | decstatn | decstation | decstation-3100 | pmax)
+		basic_machine=mips:dec
+		os=-ultrix
+		;;
+	magnum | m3230)
+		basic_machine=mips:mips
+		os=-sysv # maybe?
+		;;
+	gmicro)
+		basic_machine=tron
+		os=-sysv # maybe?
+		;;
+	convex-c1)
+		basic_machine=c1:convex
+		os=-sysv # maybe?
+		;;
+	convex-c2)
+		basic_machine=c2:convex
+		os=-sysv # maybe?
+		;;
+	*)
+		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
+		exit 1
+		;;
+esac
+
+# Decode manufacturer-specific aliases for certain operating systems.
+
+case $os in
+	# First accept the basic system types.
+	# The portable systems comes first.
+	-bsd* | -sysv* | -mach* \
+		| -vms* | -sco* | -esix* | -isc* | -aix* | -sunos* | -hpux* \
+		| -unos* | -osf* | -v88r* | -aout | -coff | -bout \
+		| -nindy | -vxworks)
+		;;
+	-newsos*)
+		os=-bsd
+		;;
+	-ultrix*)
+		os=-bsd
+		;;
+	-osfrose*)
+		os=-osf
+		;;
+	-osf*)
+		os=-bsd
+		;;
+	-dynix*)
+		os=-bsd
+		;;
+	-ctix*)
+		os=-sysv
+		;;
+	*)
+		# Get rid of the `-' at the beginning of $os.
+		os=`echo $1 | sed 's/[^-]*-//'`
+		echo Invalid configuration \`$1\': system \`$os\' not recognized 1>&2
+		exit 1
+		;;
+esac
+
+cpu=`echo $basic_machine | sed 's/:.*$//'`
+vendor=`echo $basic_machine | sed 's/^.*://'`
+
+echo ${cpu}-${vendor}${os}
