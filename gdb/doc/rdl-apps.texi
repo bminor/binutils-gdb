@@ -1,2 +1,2 @@
-@include ../../readline/inc-readline.texinfo
-@include ../../readline/inc-history.texinfo
+@include ./../../readline/inc-read.texi
+@include ./../../readline/inc-hist.texi

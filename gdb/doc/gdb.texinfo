@@ -85,16 +85,26 @@ _fi__(!_GENERIC__)
 @finalout
 @end iftex
 @titlepage
-@title{Using _GDBN__}
-@subtitle{A Guide to the GNU Source-Level Debugger}
+@title Using _GDBN__
+@subtitle A Guide to the GNU Source-Level Debugger
 _if__(!_GENERIC__)
-@subtitle{On _HOST__ Systems}
+@subtitle On _HOST__ Systems
 _fi__(!_GENERIC__)
 @sp 1
 @subtitle _GDBN__ version _GDB_VN__
 @subtitle November 1991
-@author{Richard M. Stallman@qquad @hfill Free Software Foundation}
-@author{Roland H. Pesch@qquad @hfill Cygnus Support}
+@c TEXI2ROFF-KILL
+@c let's be nice to texi2roff, it can't be expected to know about hfill...
+@author Richard M. Stallman@qquad @hfill Free Software Foundation
+@author Roland H. Pesch@qquad @hfill Cygnus Support
+@ignore
+@c END TEXI2ROFF-KILL
+@c sneaky, eh?
+@author Richard M. Stallman, Free Software Foundation
+@author Roland H. Pesch, Cygnus Support
+@c TEXI2ROFF-KILL
+@end ignore
+@c END TEXI2ROFF-KILL
 @page
 @tex
 {\parskip=0pt
@@ -7005,10 +7015,14 @@ command set as a whole more consistent and easier to use and remember:
 @kindex show history write
 @kindex unset
 
+@c TEXI2ROFF-KILL
 @ifinfo
+@c END TEXI2ROFF-KILL
 @example
 OLD COMMAND               NEW COMMAND
+@c TEXI2ROFF-KILL
 ---------------           -------------------------------
+@c END TEXI2ROFF-KILL
 add-syms                  add-symbol-file
 delete environment        unset environment
 info convenience          show convenience
@@ -7036,6 +7050,7 @@ set/show vtblprint        set/show print vtbl
 
 unset                     [No longer an alias for delete]
 @end example
+@c TEXI2ROFF-KILL
 @end ifinfo
 
 @tex
@@ -7070,6 +7085,7 @@ set{\rm / }show vtblprint        &&set{\rm / }show print vtbl\cr
 unset                     &&\rm(No longer an alias for delete)\cr
 }
 @end tex
+@c END TEXI2ROFF-KILL
 
 @node Installing _GDBN__, Copying, Renamed Commands, Top
 @appendix Installing _GDBN__
@@ -7248,11 +7264,15 @@ The following table shows all the architectures, hosts, and OS prefixes
 that @code{configure} recognizes in _GDBN__ _GDB_VN__.  Entries in the ``OS
 prefix'' column ending in a @samp{*} may be followed by a release number.
 
+@c TEXI2ROFF-KILL
 @ifinfo
+@c END TEXI2ROFF-KILL
 @example
 
 ARCHITECTURE  VENDOR                     OS prefix
+@c TEXI2ROFF-KILL
 ------------+--------------------------+---------------------------
+@c END TEXI2ROFF-KILL
             |                          |
  580        | altos        hp          | aix*          msdos*     
  a29k       | amd          ibm         | amigados      newsos* 
@@ -7280,6 +7300,7 @@ ARCHITECTURE  VENDOR                     OS prefix
  xmp        |                          | 
  ymp        |                          |                          
 @end example
+@c TEXI2ROFF-KILL
 @end ifinfo
 @tex
 %\vskip\parskip
@@ -7316,6 +7337,7 @@ ARCHITECTURE  VENDOR                     OS prefix
  ymp        &&           &              &&            &             \cr
 }\hfil}
 @end tex                                              
+@c END TEXI2ROFF-KILL
 @quotation
 @emph{Warning:} Many combinations of architecture, vendor, and OS are
 untested.
