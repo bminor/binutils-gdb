@@ -1,3 +1,8 @@
+2002-08-18  Daniel Jacobowitz  <drow@mvista.com>
+
+	Fix PR gdb/655
+	* tui.c: Disable <termio.h> include.
+
 2002-03-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* tui-hooks.c: Add FIXME to explain true/false problem.  Update
