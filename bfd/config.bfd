@@ -564,7 +564,16 @@ case "${targ}" in
     targ_selvecs="m68knetbsd_vec hp300bsd_vec sunos_big_vec"
     targ_underscore=yes
     ;;
-  m68*-*-netbsd* | m68*-*-openbsd*)
+  m68*-*-netbsdelf*) 
+    targ_defvec=bfd_elf32_m68k_vec
+    targ_selvecs="m68knetbsd_vec m68k4knetbsd_vec hp300bsd_vec sunos_big_vec"
+    ;;
+  m68*-*-netbsdaout* | m68*-*-netbsd*)
+    targ_defvec=m68knetbsd_vec
+    targ_selvecs="m68k4knetbsd_vec bfd_elf32_m68k_vec hp300bsd_vec sunos_big_vec"
+    targ_underscore=yes
+    ;;
+  m68*-*-openbsd*)
     targ_defvec=m68knetbsd_vec
     targ_selvecs="m68k4knetbsd_vec hp300bsd_vec sunos_big_vec"
     targ_underscore=yes

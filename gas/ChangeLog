@@ -1,3 +1,10 @@
+2001-12-18  matthew green  <mrg@eterna.com.au>
+
+	* configure.in (m68k-*-netbsdelf*): New target.
+	(m68k-*-netbsd*): Also include ELF support.
+	(m68k-*-netbsdaout*): New alias for m68*-*-netbsd*.
+	* configure: Regenerate.
+
 2001-12-18  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* gasp.c (main): Protoype.

@@ -1,3 +1,9 @@
+2001-12-18  matthew green  <mrg@eterna.com.au>
+
+	* config.bfd (m68*-*-netbsdelf*): New target.
+	(m68*-*-netbsd): Also include bfd_elf32_m68k_vec.
+	(m68*-*-netbsdaout*): New alias for m68*-*-netbsd.
+
 2001-12-18  Jakub Jelinek  <jakub@redhat.com>
 
 	* elflink.h (size_dynamic_sections): Skip anonymous version tag.

@@ -316,6 +316,7 @@ ALL_EMULATIONS = \
 	em68kaux.o \
 	em68kcoff.o \
 	em68kelf.o \
+	em68kelfnbsd.o \
 	em68klinux.o \
 	em68klynx.o \
 	em68knbsd.o \
@@ -489,7 +490,7 @@ deffilep.c ldgram.c ldlex.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES)
 OBJECTS = $(ld_new_OBJECTS)
@@ -1259,7 +1260,7 @@ eelf64alpha.c: $(srcdir)/emulparams/elf64alpha.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64alpha "$(tdir_elf64alpha)"
 eelf64alpha_nbsd.c: $(srcdir)/emulparams/elf64alpha_nbsd.sh \
-  $(srcdir)/emulparams/elf64alpha_nbsd.sh \
+  $(srcdir)/emulparams/elf64alpha.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64alpha_nbsd "$(tdir_elf64alpha_nbsd)"
 eelf64hppa.c: $(srcdir)/emulparams/elf64hppa.sh \
@@ -1448,6 +1449,11 @@ em68kelf.c: $(srcdir)/emulparams/m68kelf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/m68kelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68kelf "$(tdir_m68kelf)"
+em68kelfnbsd.c: $(srcdir)/emulparams/m68kelfnbsd.sh \
+  $(srcdir)/emulparams/m68kelf.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/m68kelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} m68kelfnbsd "$(tdir_m68kelfnbsd)"
 em68klinux.c: $(srcdir)/emulparams/m68klinux.sh \
   $(srcdir)/emultempl/linux.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68klinux "$(tdir_m68klinux)"

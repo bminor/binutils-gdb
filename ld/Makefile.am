@@ -207,6 +207,7 @@ ALL_EMULATIONS = \
 	em68kaux.o \
 	em68kcoff.o \
 	em68kelf.o \
+	em68kelfnbsd.o \
 	em68klinux.o \
 	em68klynx.o \
 	em68knbsd.o \
@@ -727,6 +728,11 @@ em68kelf.c: $(srcdir)/emulparams/m68kelf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/m68kelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68kelf "$(tdir_m68kelf)"
+em68kelfnbsd.c: $(srcdir)/emulparams/m68kelfnbsd.sh \
+  $(srcdir)/emulparams/m68kelf.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/m68kelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} m68kelfnbsd "$(tdir_m68kelfnbsd)"
 em68klinux.c: $(srcdir)/emulparams/m68klinux.sh \
   $(srcdir)/emultempl/linux.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68klinux "$(tdir_m68klinux)"

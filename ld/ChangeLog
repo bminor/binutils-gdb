@@ -1,3 +1,15 @@
+2001-12-18  matthew green  <mrg@eterna.com.au>
+
+	* Makefile.am (ALL_EMULATIONS): Add m68kelfnbsd.o.
+	(m68kelfnbsd.c): New rule.
+	* Makefile.in: Regenerate.
+	* configure.tgt (m68*-hp-netbsd*): Renamed to ..
+	(m68*-*-netbsd*4k*): .. this.
+	(m68*-*-netbsdelf*): New target.
+	(m68*-*-netbsd*): Also include ELF support.
+	(m68*-*-netbsdaout*): New alias for m68*-*-netbsd*.
+	* emulparams/m68kelfnbsd.sh: New emulation.
+
 2001-12-18  Jakub Jelinek  <jakub@redhat.com>
 
 	* ldgram.y (vers_node): Support anonymous version tags.
