@@ -1,5 +1,7 @@
 Tue May 18 14:08:50 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* printcmd.c (print_address_symbolic): Use %u not %d for offset.
+
 	* blockframe.c (get_prev_frame_info): If pc in sigtramp, set
 	signal_handler_caller.
 	* tm-68k.h (FRAME_{CHAIN,SAVED_PC}): Deal with sigtramp.
