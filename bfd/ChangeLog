@@ -1,3 +1,17 @@
+1999-05-28  Nick Clifton  <nickc@cygnus.com>
+
+	* elf-bfd.h (struct elf_backend_data): Add new field:
+	elf_backend_post_process_headers.
+
+	* elfxx-target.h (elf_backend_post_process_headers): Define to
+	NULL if not already defined.
+	(elfNN_bed): Initialise elf_backend_post_process_headers field. 
+
+	* elf.c (prep_headers): Set the EI_OSABI and EI_ABIVERSION fields
+	to zero.
+	(_bfd_elf_compute_section_file_positions): Call
+	elf_backend_post_process_headers if defined. 
+
 1999-05-28  Ian Lance Taylor  <ian@zembu.com>
 
 	* configure.in: Check whether getuid and getgid exist.

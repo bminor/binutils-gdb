@@ -2011,6 +2011,10 @@ _bfd_elf_compute_section_file_positions (abfd, link_info)
   if (! prep_headers (abfd))
     return false;
 
+  /* Post process the headers if necessary.  */
+  if (bed->elf_backend_post_process_headers)
+    (*bed->elf_backend_post_process_headers) (abfd, link_info);
+
   failed = false;
   bfd_map_over_sections (abfd, elf_fake_sections, &failed);
   if (failed)
@@ -3041,6 +3045,9 @@ prep_headers (abfd)
   i_ehdrp->e_ident[EI_DATA] =
     bfd_big_endian (abfd) ? ELFDATA2MSB : ELFDATA2LSB;
   i_ehdrp->e_ident[EI_VERSION] = bed->s->ev_current;
+
+  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_SYSV;
+  i_ehdrp->e_ident[EI_ABIVERSION] = 0;
 
   for (count = EI_PAD; count < EI_NIDENT; count++)
     i_ehdrp->e_ident[count] = 0;
