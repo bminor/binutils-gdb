@@ -1,3 +1,11 @@
+Thu Sep 12 10:25:45 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* config/tc-arm.c (md_apply_fix3): Update two thumb instruction
+ 	slots when processing BL fixups.
+
+	* config/tc-arm.c (output_inst): Ensure Thumb BL fixup is marked
+ 	on the first half of the instruction.
+
 Wed Sep 11 00:09:35 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ecoff.c (ecoff_stab): Create an expression symbol for a complex
