@@ -2595,6 +2595,20 @@ assign_file_positions_for_segments (abfd)
 	  flags = sec->flags;
 	  align = 1 << bfd_get_section_alignment (abfd, sec);
 
+	  /* The section may have artificial alignment forced by a 
+	     link script.  Notice this case by the gap between the
+	     cumulative phdr vma and the section's vma.  */
+	  if (p->p_vaddr + p->p_memsz < sec->vma)
+	    {
+	      bfd_vma adjust = sec->vma - (p->p_vaddr + p->p_memsz);
+
+	      p->p_memsz += adjust;
+	      off += adjust;
+	      voff += adjust;
+	      if ((flags & SEC_LOAD) != 0)
+		p->p_filesz += adjust;
+	    }
+
 	  if (p->p_type == PT_LOAD)
 	    {
 	      bfd_vma adjust;
@@ -3291,6 +3305,8 @@ copy_private_bfd_data (ibfd, obfd)
       m->p_type = p->p_type;
       m->p_flags = p->p_flags;
       m->p_flags_valid = 1;
+      /* Default to using the physical address of the segment
+	 in the input BFD.  */
       m->p_paddr = p->p_paddr;
       m->p_paddr_valid = 1;
 
@@ -3305,9 +3321,19 @@ copy_private_bfd_data (ibfd, obfd)
       isec = 0;
       for (s = ibfd->sections; s != NULL; s = s->next)
 	{
-	  if (((s->vma >= p->p_vaddr
-		&& (s->vma + s->_raw_size <= p->p_vaddr + p->p_memsz
-		    || s->vma + s->_raw_size <= p->p_vaddr + p->p_filesz))
+	  boolean matching_lma = false;
+	  boolean lma_conflict = false;
+	  bfd_vma suggested_lma = 0;
+	  asection * os;
+	  
+#define is_contained_by(addr, len, bottom, phdr)		 	\
+	  ((addr) >= (bottom)				 	  	\
+	   && (   ((addr) + (len)) <= ((bottom) + (phdr)->p_memsz)	\
+	       || ((addr) + (len)) <= ((bottom) + (phdr)->p_filesz)))
+	    
+	  os = s->output_section;
+	  
+	  if ((is_contained_by (s->vma, s->_raw_size, p->p_vaddr, p)
 	       || (p->p_vaddr == 0
 		   && p->p_filesz > 0
 		   && (s->flags & SEC_HAS_CONTENTS) != 0
@@ -3315,10 +3341,37 @@ copy_private_bfd_data (ibfd, obfd)
 		   && ((bfd_vma) s->filepos + s->_raw_size
 		       <= p->p_offset + p->p_filesz)))
 	      && (s->flags & SEC_ALLOC) != 0
-	      && s->output_section != NULL)
+	      && os != NULL)
 	    {
-	      m->sections[isec] = s->output_section;
+	      m->sections[isec] = os;
 	      ++isec;
+
+	      /* Match up the physical address of the segment with the
+		 LMA addresses of its sections.  */
+
+	      if (is_contained_by (os->lma, os->_raw_size, m->p_paddr, p))
+		matching_lma = true;
+	      else if (suggested_lma == 0)
+		suggested_lma = os->lma;
+	      else if
+		(! is_contained_by (os->lma, os->_raw_size, suggested_lma, p))
+		lma_conflict = true;
+	    }
+	  
+	  if (matching_lma)
+	    {
+	      if (suggested_lma)
+		(*_bfd_error_handler)
+(_("Warning: Some sections' LMAs lie outside their segment's physical address\n"));
+	    }
+	  else if (lma_conflict)
+	    {
+	      (*_bfd_error_handler)
+(_("Warning: Cannot change segment's physical address to contain all of its sections' LMAs\n"));
+	    }
+	  else if (suggested_lma)
+	    {
+	      m->p_paddr = suggested_lma;
 	    }
 	}
       BFD_ASSERT (isec == csecs);
