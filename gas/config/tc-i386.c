@@ -2264,10 +2264,11 @@ md_assemble (line)
 	if (prefix)
 	  *p++ = DATA_PREFIX_OPCODE;
 	*p = i.tm.base_opcode;
-	/* 1 possible extra opcode + displacement go in fr_var.  */
+	/* 1 possible extra opcode + displacement go in var part.
+	   Pass reloc in fr_var.  */
 	frag_var (rs_machine_dependent,
 		  1 + size,
-		  1,
+		  i.disp_reloc[0],
 		  ((unsigned char) *p == JUMP_PC_RELATIVE
 		   ? ENCODE_RELAX_STATE (UNCOND_JUMP, SMALL) | code16
 		   : ENCODE_RELAX_STATE (COND_JUMP, SMALL) | code16),
@@ -3741,28 +3742,24 @@ i386_operand (operand_string)
   return 1;			/* normal return */
 }
 
-/*
- * md_estimate_size_before_relax()
- *
- * Called just before relax().
- * Any symbol that is now undefined will not become defined.
- * Return the correct fr_subtype in the frag.
- * Return the initial "guess for fr_var" to caller.
- * The guess for fr_var is ACTUALLY the growth beyond fr_fix.
- * Whatever we do to grow fr_fix or fr_var contributes to our returned value.
- * Although it may not be explicit in the frag, pretend fr_var starts with a
- * 0 value.
- */
+/* md_estimate_size_before_relax()
+
+   Called just before relax() for rs_machine_dependent frags.  The x86
+   assembler uses these frags to handle variable size jump
+   instructions.
+
+   Any symbol that is now undefined will not become defined.
+   Return the correct fr_subtype in the frag.
+   Return the initial "guess for variable size of frag" to caller.
+   The guess is actually the growth beyond the fixed part.  Whatever
+   we do to grow the fixed or variable part contributes to our
+   returned value.  */
+
 int
 md_estimate_size_before_relax (fragP, segment)
      register fragS *fragP;
      register segT segment;
 {
-  register unsigned char *opcode;
-  register int old_fr_fix;
-
-  old_fr_fix = fragP->fr_fix;
-  opcode = (unsigned char *) fragP->fr_opcode;
   /* We've already got fragP->fr_subtype right;  all we have to do is
      check for un-relaxable symbols.  On an ELF system, we can't relax
      an externally visible symbol, because it may be overridden by a
@@ -3782,19 +3779,18 @@ md_estimate_size_before_relax (fragP, segment)
 #else
       int reloc_type;
 #endif
+      unsigned char *opcode;
+      int old_fr_fix;
 
-      if (GOT_symbol /* Not quite right - we should switch on presence of
-			@PLT, but I cannot see how to get to that from
-			here.  We should have done this in md_assemble to
-			really get it right all of the time, but I think it
-			does not matter that much, as this will be right
-			most of the time. ERY  */
-	  && S_GET_SEGMENT(fragP->fr_symbol) == undefined_section)
-	reloc_type = BFD_RELOC_386_PLT32;
+      if (fragP->fr_var != NO_RELOC)
+	reloc_type = fragP->fr_var;
       else if (size == 2)
 	reloc_type = BFD_RELOC_16_PCREL;
       else
 	reloc_type = BFD_RELOC_32_PCREL;
+
+      old_fr_fix = fragP->fr_fix;
+      opcode = (unsigned char *) fragP->fr_opcode;
 
       switch (opcode[0])
 	{
@@ -3820,10 +3816,11 @@ md_estimate_size_before_relax (fragP, segment)
 	  break;
 	}
       frag_wane (fragP);
+      return fragP->fr_fix - old_fr_fix;
     }
-  return (fragP->fr_var + fragP->fr_fix - old_fr_fix);
-}				/* md_estimate_size_before_relax() */
-
+  return 1; /* Guess a short jump.  */
+}
+
 /*
  *			md_convert_frag();
  *

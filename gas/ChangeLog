@@ -1,3 +1,12 @@
+2000-05-23  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-i386.c (md_assemble): Pass jump reloc in fr_var...
+	(md_estimate_size_before_relax): so we can use it here instead of
+	old kludges.  Localise vars to blocks.  Comment.
+
+	* frags.c (frag_new): Update fr_var comments.
+	* frags.h (struct frag): Ditto.
+
 2000-05-22  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-ia64.c (FUNC_PC_RELATIVE): New.

@@ -95,11 +95,14 @@ frag_grow (nchars)
  * [frchain_now remains the same but frag_now is updated.]
  * Because this calculates the correct value of fr_fix by
  * looking at the obstack 'frags', it needs to know how many
- * characters at the end of the old frag belong to (the maximal)
- * fr_var: the rest must belong to fr_fix.
- * It doesn't actually set up the old frag's fr_var: you may have
- * set fr_var == 1, but allocated 10 chars to the end of the frag:
- * in this case you pass old_frags_var_max_size == 10.
+ * characters at the end of the old frag belong to the maximal
+ * variable part;  The rest must belong to fr_fix.
+ * It doesn't actually set up the old frag's fr_var.  You may have
+ * set fr_var == 1, but allocated 10 chars to the end of the frag;
+ * In this case you pass old_frags_var_max_size == 10.
+ * In fact, you may use fr_var for something totally unrelated to the
+ * size of the variable part of the frag;  None of the generic frag
+ * handling code makes use of fr_var.
  *
  * Make a new frag, initialising some components. Link new frag at end
  * of frchain_now.

@@ -51,7 +51,8 @@ struct frag
 
   /* (Fixed) number of octets we know we have.  May be 0. */
   offsetT fr_fix;
-  /* (Variable) number of octets after above.  May be 0. */
+  /* May be used for (Variable) number of octets after above.
+     The generic frag handling code no longer makes any use of fr_var.  */
   offsetT fr_var;
   /* For variable-length tail. */
   symbolS *fr_symbol;
