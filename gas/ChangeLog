@@ -1,3 +1,8 @@
+Tue Sep 12 10:36:40 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-arm.c (md_atof): Fix debugging printf, and leave it
+	out by default.
+
 Mon Sep 11 11:39:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* doc/configure.in: Remove unused file.
