@@ -1,5 +1,13 @@
 Tue Nov  2 15:45:51 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* emultempl/hppaosf.em:  Various fixes and support for linker stub
+	generation.
+	(hppaosf_finish, hppaosf_search_for_padding_statements,
+	hppaosf_create_output_section_statements): New functions in
+	support of linker stub generation.
+	(ld_hppaosf_emulation):  Redefine to include new
+	emulation-specific routines.
+
 	* ldlang.c (lang_process): Re-enable last call lang_size_sections.
 	Pass abs_output_section rather than NULL to avoid invalidating
 	absolute symbols.
