@@ -5261,6 +5261,7 @@ swap_out_syms (bfd *abfd,
   char *outbound_shndx;
   int idx;
   bfd_size_type amt;
+  bfd_boolean name_local_sections;
 
   if (!elf_map_symbols (abfd))
     return FALSE;
@@ -5326,6 +5327,10 @@ swap_out_syms (bfd *abfd,
       outbound_shndx += sizeof (Elf_External_Sym_Shndx);
   }
 
+  name_local_sections
+    = (bed->elf_backend_name_local_section_symbols
+       && bed->elf_backend_name_local_section_symbols (abfd));
+
   syms = bfd_get_outsymbols (abfd);
   for (idx = 0; idx < symcount; idx++)
     {
@@ -5335,7 +5340,8 @@ swap_out_syms (bfd *abfd,
       flagword flags = syms[idx]->flags;
       int type;
 
-      if ((flags & (BSF_SECTION_SYM | BSF_GLOBAL)) == BSF_SECTION_SYM)
+      if (!name_local_sections
+	  && (flags & (BSF_SECTION_SYM | BSF_GLOBAL)) == BSF_SECTION_SYM)
 	{
 	  /* Local section symbols have no name.  */
 	  sym.st_name = 0;

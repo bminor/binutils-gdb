@@ -4271,6 +4271,26 @@ _bfd_mips_elf_symbol_processing (bfd *abfd, asymbol *asym)
     }
 }
 
+/* There appears to be a bug in the MIPSpro linker that causes GOT_DISP
+   relocations against two unnamed section symbols to resolve to the
+   same address.  For example, if we have code like:
+
+	lw	$4,%got_disp(.data)($gp)
+	lw	$25,%got_disp(.text)($gp)
+	jalr	$25
+
+   then the linker will resolve both relocations to .data and the program
+   will jump there rather than to .text.
+
+   We can work around this problem by giving names to local section symbols.
+   This is also what the MIPSpro tools do.  */
+
+bfd_boolean
+_bfd_mips_elf_name_local_section_symbols (bfd *abfd)
+{
+  return SGI_COMPAT (abfd);
+}
+
 /* Work over a section just before writing it out.  This routine is
    used by both the 32-bit and the 64-bit ABI.  FIXME: We recognize
    sections that need the SHF_MIPS_GPREL flag by name; there has to be

@@ -1,3 +1,13 @@
+2004-02-09  Richard Sandiford  <rsandifo@redhat.com>
+
+	* bfd-elf.h (elf_backend_name_local_section_symbols): New hook.
+	* elf.c (swap_out_syms): Use it to decide whether local section
+	symbols should be named.
+	* elfxx-target.h (elf_backend_name_local_section_symbols): New macro.
+	* elfxx-mips.h (_bfd_mips_elf_name_local_section_symbols): Declare.
+	(elf_backend_name_local_section_symbols): Define.
+	* elfxx-mips.c (_bfd_mips_elf_name_local_section_symbols): New.
+
 2004-01-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (elfNN_ia64_relax_brl): New function.
