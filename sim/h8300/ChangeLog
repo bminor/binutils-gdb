@@ -1,3 +1,18 @@
+Thu Apr 17 03:06:39 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (SIM_OBJS): Add sim-load.o.
+	* compile.c (sim_kind, myname): New static locals.
+	(sim_open): Set sim_kind, myname.
+	(sim_load): Return SIM_RC.  New arg abfd.  Update test for h8300h.
+	Call sim_load_file to load file into simulator.  Set start address
+	from bfd.
+	(sim_create_inferior): Return SIM_RC.  Delete arg start_address.
+
+Mon Apr  7 15:45:02 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
 Wed Apr  2 15:06:28 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* compile.c (sim_open): New arg `kind'.
