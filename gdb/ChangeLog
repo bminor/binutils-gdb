@@ -1,8 +1,8 @@
 2002-01-09  Richard Earnshaw  <rearnsha@arm.com>
 
-	MAINTAINERS (write-after-approval): Add myself.
+	* MAINTAINERS (write-after-approval): Add myself.
 
-	arm-tdep.c (arm_init_extra_frame_info): Cast NULL argument to
+	* arm-tdep.c (arm_init_extra_frame_info): Cast NULL argument to
 	IN_SIGTRAMP.
 
 2002-01-08  Michael Snyder  <msnyder@redhat.com>
