@@ -4796,6 +4796,9 @@ elfNN_hpux_backend_section_from_bfd_section (abfd, sec, retval)
 #undef  elf_backend_section_from_bfd_section
 #define elf_backend_section_from_bfd_section elfNN_hpux_backend_section_from_bfd_section
 
+#undef  elf_backend_want_p_paddr_set_to_zero
+#define elf_backend_want_p_paddr_set_to_zero 1
+
 #undef  ELF_MAXPAGESIZE
 #define ELF_MAXPAGESIZE                 0x1000  /* 1K */
 
@@ -4803,3 +4806,5 @@ elfNN_hpux_backend_section_from_bfd_section (abfd, sec, retval)
 #define elfNN_bed elfNN_ia64_hpux_bed
 
 #include "elfNN-target.h"
+
+#undef  elf_backend_want_p_paddr_set_to_zero

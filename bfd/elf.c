@@ -4813,9 +4813,11 @@ copy_private_bfd_data (ibfd, obfd)
 
 	      /* The Solaris native linker always sets p_paddr to 0.
 		 We try to catch that case here, and set it to the
-		 correct value.  */
+		 correct value.  Note - some backends require that
+		 p_paddr be left as zero.  */
 	      if (segment->p_paddr == 0
 		  && segment->p_vaddr != 0
+		  && (! bed->want_p_paddr_set_to_zero)
 		  && isec == 0
 		  && output_section->lma != 0
 		  && (output_section->vma == (segment->p_vaddr
@@ -4832,7 +4834,10 @@ copy_private_bfd_data (ibfd, obfd)
 		 LMA address of the output section.  */
 	      if (IS_CONTAINED_BY_LMA (output_section, segment, map->p_paddr)
 		  || IS_CONTAINED_BY_FILEPOS (section, segment, bed)
-		  || IS_COREFILE_NOTE (segment, section))
+		  || IS_COREFILE_NOTE (segment, section)
+		  || (bed->want_p_paddr_set_to_zero &&
+		      IS_CONTAINED_BY_VMA (output_section, segment))
+                )
 		{
 		  if (matching_lma == 0)
 		    matching_lma = output_section->lma;

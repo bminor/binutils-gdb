@@ -859,6 +859,10 @@ struct elf_backend_data
   unsigned can_refcount : 1;
   unsigned want_got_sym : 1;
   unsigned want_dynbss : 1;
+    /* Targets which do not support physical addressing often require
+       that the p_paddr field in the section header to be set to zero.
+       This field indicates whether this behavior is required.  */
+  unsigned want_p_paddr_set_to_zero : 1;
 };
 
 /* Information stored for each BFD section in an ELF file.  This
