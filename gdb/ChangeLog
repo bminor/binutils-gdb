@@ -1,5 +1,9 @@
 2002-04-24  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* config/alpha/nbsd.mh (NATDEPFILES): Remove solib-legacy.o.
+
+2002-04-24  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (ALLDEPFILES): Add alphanbsd-nat.c and
 	alphanbsd-tdep.c.
 	(alphanbsd-nat.o): New dependency list.
