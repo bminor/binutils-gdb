@@ -3,21 +3,21 @@
 
    Contributed by Cygnus Solutions.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Work in progress */
 
@@ -97,12 +97,12 @@ set_gdb_event_hooks (struct gdb_events *vector)
 #endif
 
 enum gdb_event
-  {
-    breakpoint_create,
-    breakpoint_delete,
-    breakpoint_modify,
-    nr_gdb_events
-  };
+{
+  breakpoint_create,
+  breakpoint_delete,
+  breakpoint_modify,
+  nr_gdb_events
+};
 
 struct breakpoint_create
   {
@@ -125,9 +125,9 @@ struct event
     struct event *next;
     union
       {
-        struct breakpoint_create breakpoint_create;
-        struct breakpoint_delete breakpoint_delete;
-        struct breakpoint_modify breakpoint_modify;
+	struct breakpoint_create breakpoint_create;
+	struct breakpoint_delete breakpoint_delete;
+	struct breakpoint_modify breakpoint_modify;
       }
     data;
   };
@@ -191,20 +191,20 @@ gdb_events_deliver (struct gdb_events *vector)
     {
       struct event *event = delivering_events;
       switch (event->type)
-        {
-        case breakpoint_create:
-          vector->breakpoint_create
-            (event->data.breakpoint_create.b);
-          break;
-        case breakpoint_delete:
-          vector->breakpoint_delete
-            (event->data.breakpoint_delete.b);
-          break;
-        case breakpoint_modify:
-          vector->breakpoint_modify
-            (event->data.breakpoint_modify.b);
-          break;
-        }
+	{
+	case breakpoint_create:
+	  vector->breakpoint_create
+	    (event->data.breakpoint_create.b);
+	  break;
+	case breakpoint_delete:
+	  vector->breakpoint_delete
+	    (event->data.breakpoint_delete.b);
+	  break;
+	case breakpoint_modify:
+	  vector->breakpoint_modify
+	    (event->data.breakpoint_modify.b);
+	  break;
+	}
       delivering_events = event->next;
       free (event);
     }
@@ -219,19 +219,19 @@ _initialize_gdb_events (void)
   queue_event_hooks.breakpoint_create = queue_breakpoint_create;
   queue_event_hooks.breakpoint_delete = queue_breakpoint_delete;
   queue_event_hooks.breakpoint_modify = queue_breakpoint_modify;
-#endif	/* WITH_GDB_EVENTS */
+#endif
 
-  c=add_set_cmd("eventdebug", class_maintenance, var_zinteger,
-		(char *)&gdb_events_debug, "Set event debugging.\n\
+  c = add_set_cmd ("eventdebug", class_maintenance, var_zinteger,
+		   (char *) (&gdb_events_debug), "Set event debugging.\n\
 When non-zero, event/notify debugging is enabled.", &setlist);
-  deprecate_cmd(c,"set debug event");
-  deprecate_cmd(add_show_from_set(c,&showlist),"show debug event");
+  deprecate_cmd (c, "set debug event");
+  deprecate_cmd (add_show_from_set (c, &showlist), "show debug event");
 
   add_show_from_set (add_set_cmd ("event",
-                                  class_maintenance,
-                                  var_zinteger,
-                                  (char *)&gdb_events_debug,
-                                  "Set event debugging.\n\
+				  class_maintenance,
+				  var_zinteger,
+				  (char *) (&gdb_events_debug),
+				  "Set event debugging.\n\
 When non-zero, event/notify debugging is enabled.", &setdebuglist),
-                     &showdebuglist);
+		     &showdebuglist);
 }

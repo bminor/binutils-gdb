@@ -113,21 +113,21 @@ copyright ()
 
    Contributed by Cygnus Solutions.
 
-This file is part of GDB.
+   This file is part of GDB.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Work in progress */
 
@@ -388,19 +388,19 @@ EOF
 echo ""
 cat <<EOF
 enum gdb_event
-  {
+{
 EOF
 function_list | while eval read $read
 do
   case "${class}" in
     "f" )
-      echo "    ${function},"
+      echo "  ${function},"
       ;;
   esac
 done
 cat <<EOF
-    nr_gdb_events
-  };
+  nr_gdb_events
+};
 EOF
 
 # event data
@@ -535,7 +535,7 @@ void _initialize_gdb_events (void);
 void
 _initialize_gdb_events (void)
 {
-struct cmd_list_element *c;
+  struct cmd_list_element *c;
 #if WITH_GDB_EVENTS
 EOF
 function_list | while eval read $read
@@ -548,27 +548,31 @@ do
 done
 cat <<EOF
 #endif
-  c=add_set_cmd ("eventdebug",
+
+  c = add_set_cmd ("eventdebug", class_maintenance, var_zinteger,
+		   (char *) (&gdb_events_debug), "Set event debugging.\n\\
+When non-zero, event/notify debugging is enabled.", &setlist);
+  deprecate_cmd (c, "set debug event");
+  deprecate_cmd (add_show_from_set (c, &showlist), "show debug event");
+
+  add_show_from_set (add_set_cmd ("event",
                                   class_maintenance,
                                   var_zinteger,
-                                  (char *)&gdb_events_debug,
+                                  (char *) (&gdb_events_debug),
                                   "Set event debugging.\n\\
-When non-zero, event/notify debugging is enabled.", &setlist);
-  deprecate_cmd(c,"set debug event");
-  deprecate_cmd(add_show_from_set(c,&showlist),"show debug event");
-  add_show_from_set (add_set_cmd("event",
-  				 class_maintenance,
-				 var_zinteger,
-				 (char *)&gdb_events_debug,
-				 "Set event debugging.\n\\
-When non-zero, event/notify debugging is enabled.", &setdebuglist),&showdebuglist);
-
+When non-zero, event/notify debugging is enabled.", &setdebuglist),
+		     &showdebuglist);
 }
 EOF
 
 # close things off
 exec 1>&2
 #../move-if-change new-gdb-events.c gdb-events.c
+# Replace any leading spaces with tabs
+sed < new-gdb-events.c > tmp-gdb-events.c \
+    -e 's/\(	\)*        /\1	/g'
+mv tmp-gdb-events.c new-gdb-events.c
+# Move if changed?
 if ! test -r gdb-events.c
 then
   echo "File missing? mv new-gdb-events.c gdb-events.c" 1>&2
