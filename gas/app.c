@@ -684,7 +684,11 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
       else if (state == 14 || state == 15)
 	{
 	  if (ch == ')')
-	    state -= 14;
+	    {
+	      state -= 14;
+	      PUT (ch);
+	      ch = GET ();
+	    }
 	  else
 	    {
 	      PUT (ch);

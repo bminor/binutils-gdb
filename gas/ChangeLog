@@ -1,3 +1,8 @@
+2003-11-24  Jakub Jelinek  <jakub@redhat.com>
+
+	* app.c (do_scrub_chars): Add PUT (ch) and ch = GET ()
+	when transitioning from states 14 or 15 to 0 or 1.
+
 2003-11-23  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* hash.c: Convert to ISO-C.
