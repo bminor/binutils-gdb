@@ -82,6 +82,7 @@ TESTS = \
 	hello.ok \
 	exit47.ko \
 	\
+	t-mtsa.ok \
 	t-paddb.ok \
 	t-paddsb.ok \
 	t-paddsh.ok \

@@ -1,3 +1,7 @@
+Tue Jul 29 10:56:53 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-mtsa.s: Check move/from SA instructions.
+
 Mon Jul 28 20:51:16 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* t-pdivuw.s: Also check normal cases.
