@@ -187,9 +187,7 @@ sparc-*-netbsd* | sparc-*-knetbsd*-gnu)
 sparc64-*-netbsd* | sparc64-*-knetbsd*-gnu)
 			gdb_target=nbsd64 ;;
 sparc-*-openbsd*)	gdb_target=obsd ;;
-sparc64-*-openbsd*)	gdb_target=obsd64
-			gdb_osabi=GDB_OSABI_OPENBSD_ELF
-			;;
+sparc64-*-openbsd*)	gdb_target=obsd64 ;;
 sparc-*-solaris2.[0-6] | sparc-*-solaris2.[0-6].*)
 			gdb_target=sol2
 			;;
@@ -220,9 +218,7 @@ x86_64-*-linux*)	gdb_target=linux64
 			;;
 x86_64-*-netbsd* | x86_64-*-knetbsd*-gnu)
 			gdb_target=nbsd64 ;;
-x86_64-*-openbsd*)	gdb_target=obsd64
-			gdb_osabi=GDB_OSABI_OPENBSD_ELF
-			;;
+x86_64-*-openbsd*)	gdb_target=obsd64 ;;
 
 esac
 
@@ -231,6 +227,8 @@ esac
 case "${target}" in
 *-*-linux*)	gdb_osabi=GDB_OSABI_LINUX ;;
 *-*-nto*)	gdb_osabi=GDB_OSABI_QNXNTO ;;
+m68*-*-openbsd | m88*-*-openbsd | vax-*-openbsd*) ;;
+*-*-openbsd*)	gdb_osabi=GDB_OSABI_OPENBSD_ELF ;;
 *-*-solaris*)	gdb_osabi=GDB_OSABI_SOLARIS ;;
 *-*-*-gnu*)	;; # prevent non-GNU kernels to match the Hurd rule below
 *-*-gnu*)	gdb_osabi=GDB_OSABI_HURD ;;
