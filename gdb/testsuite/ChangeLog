@@ -1,5 +1,8 @@
 2005-01-19  Andrew Cagney  <cagney@gnu.org>
 
+	* gdb.stabs/Makefile.in (Makefile): Update dependencies -
+	configure.ac not configure.in.
+
 	* gdb.base/scope.exp (test_at_main): Delete any XFAIL and/or KFAIL
 	of powerpc*-*-*.
 	* gdb.hp/gdb.base-hp/callfwmall.exp (do_function_calls): Ditto.
