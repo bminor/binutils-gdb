@@ -9,7 +9,7 @@ TREE	= devo
 
 NATIVE  = native
 
-DATE	= 930426
+DATE	= 930511
 
 TAG	= latest-$(DATE)
 
@@ -58,7 +58,7 @@ all: all-cygnus
 endif
 
 ifeq ($(canonhost),sparc-sun-solaris2)
-TARGETS = $(NATIVE) m68k-vxworks m68k-aout sparc-aout
+TARGETS = $(NATIVE) m68k-vxworks m68k-aout sparc-aout mips-idt-ecoff
 CC = cc -Xs
 all: all-cygnus
 endif
@@ -83,15 +83,15 @@ all: all-cygnus
 endif
 
 ifeq ($(canonhost),m68k-hp-hpux)
-TARGETS	= m68k-vxworks
+TARGETS	= $(NATIVE) m68k-vxworks
 TMPDIR := $(shell mkdir $(canonhost)-tmpdir; cd $(canonhost)-tmpdir ; pwd)
 CC = cc +O1000 -Wp,-P
 CFLAGS = 
-all: all-native
+all: all-cygnus
 endif
 
 ifeq ($(canonhost),hppa1.1-hp-hpux)
-TARGETS = i960-vxworks m68k-aout m68k-vxworks
+TARGETS = i960-vxworks m68k-aout m68k-vxworks m68k-hp-hpux
 #TARGETS	= m68k-aout m68k-coff m68k-vxworks i960-vxworks a29k-amd-udi
 #TARGETS	= m68k-aout	i386-aout	a29k-amd-udi \
 #	  i960-vxworks	m68k-coff	m68k-vxworks \
