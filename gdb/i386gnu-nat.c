@@ -33,6 +33,8 @@
 #include <mach/message.h>
 #include <mach/exception.h>
 
+#include "i386-tdep.h"
+
 #include "gnu-nat.h"
 #include "i387-nat.h"
 
@@ -76,9 +78,7 @@ fetch_fpregs (struct proc *thread)
     {
       int i;
 
-      for (i = FP0_REGNUM; i <= FP7_REGNUM; i++)
-	supply_register (i, NULL);
-      for (i = FCTRL_REGNUM; i <= FOP_REGNUM; i++)
+      for (i = FP0_REGNUM; i <= FOP_REGNUM; i++)
 	supply_register (i, NULL);
 
       return;
