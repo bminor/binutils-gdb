@@ -1,3 +1,9 @@
+2002-05-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Return false for
+	unresolved relocs.
+	(ppc64_elf_size_dynamic_sections): Check for splt NULL.
+
 2002-05-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* bfd/bfd.c (bfd_get_arch_size): Remove bfd_set_error call for

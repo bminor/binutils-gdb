@@ -3897,7 +3897,7 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
 	    return false;
 	}
 
-      if (htab->splt->_raw_size != 0)
+      if (htab->splt != NULL && htab->splt->_raw_size != 0)
 	{
 	  if (!add_dynamic_entry (DT_PLTGOT, 0)
 	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
@@ -5716,12 +5716,15 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  && !(info->shared
 	       && (input_section->flags & SEC_DEBUGGING) != 0
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
-	(*_bfd_error_handler)
-	  (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
-	   bfd_archive_filename (input_bfd),
-	   bfd_get_section_name (input_bfd, input_section),
-	   (long) rel->r_offset,
-	   h->root.root.string);
+	{
+	  (*_bfd_error_handler)
+	    (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
+	     bfd_archive_filename (input_bfd),
+	     bfd_get_section_name (input_bfd, input_section),
+	     (long) rel->r_offset,
+	     h->root.root.string);
+	  ret = false;
+	}
 
       r = _bfd_final_link_relocate (ppc64_elf_howto_table[(int) r_type],
 				    input_bfd,
