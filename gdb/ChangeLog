@@ -1,3 +1,10 @@
+2001-07-18  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* Makefile.in (COMMON_OBS): Remove tui-file.o.
+	(SUBDIR_TUI_OBS): Add it here.
+	(SUBDIR_TUI_SRCS): Move tui-file.c and tui-file.h here.
+	(main.o): Remove dependency with tui-file.h.
+
 2001-07-17  Elena Zannoni  <ezannoni@redhat.com>
 
 	* Makefile.in (tui-file.o): Update dependencies.
