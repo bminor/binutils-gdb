@@ -1,3 +1,10 @@
+Mon Nov 25 11:23:32 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.host: Use long long for mips-sgi-irix6*.
+
+	* coffswap.h (coff_swap_scnhdr_out): Make line number overflow
+	only a warning.  From Philippe De Muyter <phdemuyt@ulb.ac.be>.
+
 Mon Nov 25 08:52:29 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-mn10300.c (bfd_elf32_mn10300_reloc): New function.
