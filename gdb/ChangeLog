@@ -1,3 +1,14 @@
+2001-06-25  Michael Snyder  <msnyder@redhat.com>
+
+	* infrun.c: Eliminate the "thread_step_needed" state variable, 
+	and replace it with a relatively simple test in resume.
+	(resume): Replace thread_step_needed logic with a test for
+	stepping, breakpoint_here_p and breakpoints_inserted.
+	Move CANNOT_STEP_BREAKPOINT logic to after thread_step logic.
+	(proceed): Discard thread_step_needed logic.
+	(wait_for_inferior, fetch_inferior_event, handle_inferior_event):
+	Discard thread_step_needed logic.
+
 2001-06-24  Fernando Nasser  <fnasser@redhat.com>
 
 	* remote-rdi.c (arm_rdi_wait): Fix return type in prototype.

@@ -110,31 +110,6 @@ static ptid_t previous_inferior_ptid;
 
 static int may_follow_exec = MAY_FOLLOW_EXEC;
 
-/* resume and wait_for_inferior use this to ensure that when
-   stepping over a hit breakpoint in a threaded application
-   only the thread that hit the breakpoint is stepped and the
-   other threads don't continue.  This prevents having another
-   thread run past the breakpoint while it is temporarily
-   removed.
-
-   This is not thread-specific, so it isn't saved as part of
-   the infrun state.
-
-   Versions of gdb which don't use the "step == this thread steps
-   and others continue" model but instead use the "step == this
-   thread steps and others wait" shouldn't do this.  */
-
-static int thread_step_needed = 0;
-
-/* This is true if thread_step_needed should actually be used.  At
-   present this is only true for HP-UX native.  */
-
-#ifndef USE_THREAD_STEP_NEEDED
-#define USE_THREAD_STEP_NEEDED (0)
-#endif
-
-static int use_thread_step_needed = USE_THREAD_STEP_NEEDED;
-
 /* GET_LONGJMP_TARGET returns the PC at which longjmp() will resume the
    program.  It needs to examine the jmp_buf argument and extract the PC
    from it.  The return value is non-zero on success, zero otherwise. */
@@ -821,13 +796,8 @@ resume (int step, enum target_signal sig)
   struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
   QUIT;
 
-#ifdef CANNOT_STEP_BREAKPOINT
-  /* Most targets can step a breakpoint instruction, thus executing it
-     normally.  But if this one cannot, just continue and we will hit
-     it anyway.  */
-  if (step && breakpoints_inserted && breakpoint_here_p (read_pc ()))
-    step = 0;
-#endif
+  /* FIXME: calling breakpoint_here_p (read_pc ()) three times! */
+
 
   /* Some targets (e.g. Solaris x86) have a kernel bug when stepping
      over an instruction that causes a page fault without triggering
@@ -910,41 +880,34 @@ resume (int step, enum target_signal sig)
     {
       ptid_t resume_ptid;
 
-      if (use_thread_step_needed && thread_step_needed)
-	{
-	  /* We stopped on a BPT instruction;
-	     don't continue other threads and
-	     just step this thread. */
-	  thread_step_needed = 0;
+      resume_ptid = RESUME_ALL;		/* Default */
 
-	  if (!breakpoint_here_p (read_pc ()))
-	    {
-	      /* Breakpoint deleted: ok to do regular resume
-	         where all the threads either step or continue. */
-	      resume_ptid = RESUME_ALL;
-	    }
-	  else
-	    {
-	      if (!step)
-		{
-		  warning ("Internal error, changing continue to step.");
-		  remove_breakpoints ();
-		  breakpoints_inserted = 0;
-		  trap_expected = 1;
-		  step = 1;
-		}
-	      resume_ptid = inferior_ptid;
-	    }
-	}
-      else
+      if ((step || singlestep_breakpoints_inserted_p) &&
+	  !breakpoints_inserted && breakpoint_here_p (read_pc ()))
 	{
-	  /* Vanilla resume. */
-	  if ((scheduler_mode == schedlock_on) ||
-	      (scheduler_mode == schedlock_step && step != 0))
-	    resume_ptid = inferior_ptid;
-	  else
-	    resume_ptid = RESUME_ALL;
+	  /* Stepping past a breakpoint without inserting breakpoints.
+	     Make sure only the current thread gets to step, so that
+	     other threads don't sneak past breakpoints while they are
+	     not inserted. */
+
+	  resume_ptid = inferior_ptid;
 	}
+
+      if ((scheduler_mode == schedlock_on) ||
+	  (scheduler_mode == schedlock_step && 
+	   (step || singlestep_breakpoints_inserted_p)))
+	{
+	  /* User-settable 'scheduler' mode requires solo thread resume. */
+	    resume_ptid = inferior_ptid;
+	}
+
+#ifdef CANNOT_STEP_BREAKPOINT
+      /* Most targets can step a breakpoint instruction, thus executing it
+	 normally.  But if this one cannot, just continue and we will hit
+	 it anyway.  */
+      if (step && breakpoints_inserted && breakpoint_here_p (read_pc ()))
+	step = 0;
+#endif
       target_resume (resume_ptid, step, sig);
     }
 
@@ -1019,16 +982,6 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   else
     {
       write_pc (addr);
-
-      /* New address; we don't need to single-step a thread
-         over a breakpoint we just hit, 'cause we aren't
-         continuing from there.
-
-         It's not worth worrying about the case where a user
-         asks for a "jump" at the current PC--if they get the
-         hiccup of re-hiting a hit breakpoint, what else do
-         they expect? */
-      thread_step_needed = 0;
     }
 
 #ifdef PREPARE_TO_PROCEED
@@ -1046,7 +999,6 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   if (PREPARE_TO_PROCEED (1) && breakpoint_here_p (read_pc ()))
     {
       oneproc = 1;
-      thread_step_needed = 1;
     }
 
 #endif /* PREPARE_TO_PROCEED */
@@ -1287,8 +1239,6 @@ wait_for_inferior (void)
   /* Fill in with reasonable starting values.  */
   init_execution_control_state (ecs);
 
-  thread_step_needed = 0;
-
   /* We'll update this if & when we switch to a new thread. */
   previous_inferior_ptid = inferior_ptid;
 
@@ -1346,8 +1296,6 @@ fetch_inferior_event (void *client_data)
 
       /* Fill in with reasonable starting values.  */
       init_execution_control_state (async_ecs);
-
-      thread_step_needed = 0;
 
       /* We'll update this if & when we switch to a new thread. */
       previous_inferior_ptid = inferior_ptid;
@@ -1498,11 +1446,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	/* Fall thru to the normal_state case. */
 
       case infwait_normal_state:
-	/* Since we've done a wait, we have a new event.  Don't
-	   carry over any expectations about needing to step over a
-	   breakpoint. */
-	thread_step_needed = 0;
-
 	/* See comments where a TARGET_WAITKIND_SYSCALL_RETURN event
 	   is serviced in this loop, below. */
 	if (ecs->enable_hw_watchpoints_after_wait)
@@ -1934,29 +1877,13 @@ handle_inferior_event (struct execution_control_state *ecs)
 		      context_switch (ecs);
 		    ecs->waiton_ptid = ecs->ptid;
 		    ecs->wp = &(ecs->ws);
-		    thread_step_needed = 1;
 		    ecs->another_trap = 1;
-
-		    /* keep_stepping will call resume, and the
-		       combination of "thread_step_needed" and
-		       "ecs->another_trap" will cause resume to
-		       solo-step the thread.  The subsequent trap
-		       event will be handled like any other singlestep
-		       event. */
 
 		    ecs->infwait_state = infwait_thread_hop_state;
 		    keep_going (ecs);
 		    registers_changed ();
 		    return;
 		  }
-	      }
-	    else
-	      {
-		/* This breakpoint matches--either it is the right
-		   thread or it's a generic breakpoint for all threads.
-		   Remember that we'll need to step just _this_ thread
-		   on any following user continuation! */
-		thread_step_needed = 1;
 	      }
 	  }
       }
@@ -2413,7 +2340,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	case BPSTAT_WHAT_SINGLE:
 	  if (breakpoints_inserted)
 	    {
-	      thread_step_needed = 1;
 	      remove_breakpoints ();
 	    }
 	  breakpoints_inserted = 0;
