@@ -137,7 +137,8 @@ pe_dll_id_target (target)
 {
   int i;
   for (i=0; pe_detail_list[i].target_name; i++)
-    if (strcmp (pe_detail_list[i].target_name, target) == 0)
+    if (strcmp (pe_detail_list[i].target_name, target) == 0
+	|| strcmp (pe_detail_list[i].object_target, target) == 0)
       {
 	pe_details = pe_detail_list+i;
 	return;
