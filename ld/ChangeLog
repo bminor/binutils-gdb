@@ -1,3 +1,14 @@
+2003-07-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* emulparams/elf64ppc.sh (OTHER_GOT_SECTIONS): Don't define.
+	(GOT): Define.
+	* emultempl/ppc64elf.em (stub_added): New static var.
+	(ppc_create_output_section_statements): Call ppc64_elf_init_stub_bfd.
+	(ppc_add_stub_section): Set stub_added.
+	(gld${EMULATION_NAME}_finish): Look for .got rather than .toc.  Adjust
+	ppc64_elf_size_stubs call and test for stubs.
+	* scripttempl/elf.sc (GOT): Define and use.
+
 2003-07-08  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* emultempl/sh64elf.em (sh64_elf_${EMULATION_NAME}_after_allocation):

@@ -29,6 +29,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 
 /* Fake input file for stubs.  */
 static lang_input_statement_type *stub_file;
+static int stub_added = 0;
 
 /* Whether we need to call ppc_layout_sections_again.  */
 static int need_laying_out = 0;
@@ -77,6 +78,7 @@ ppc_create_output_section_statements (void)
     }
 
   ldlang_add_file (stub_file);
+  ppc64_elf_init_stub_bfd (stub_file->the_bfd, &link_info);
 }
 
 static void
@@ -232,6 +234,7 @@ ppc_add_stub_section (const char *stub_sec_name, asection *input_section)
   if (info.add.head == NULL)
     goto err_ret;
 
+  stub_added = 1;
   if (hook_in_stub (&info, &os->children.head))
     return stub_sec;
 
@@ -330,7 +333,7 @@ gld${EMULATION_NAME}_finish (void)
 	      return;
 	    }
 
-	  toc_section = bfd_get_section_by_name (output_bfd, ".toc");
+	  toc_section = bfd_get_section_by_name (output_bfd, ".got");
 	  if (toc_section != NULL)
 	    lang_for_each_statement (build_toc_list);
 
@@ -340,7 +343,6 @@ gld${EMULATION_NAME}_finish (void)
 
 	  /* Call into the BFD backend to do the real work.  */
 	  if (!ppc64_elf_size_stubs (output_bfd,
-				     stub_file->the_bfd,
 				     &link_info,
 				     group_size,
 				     &ppc_add_stub_section,
@@ -355,7 +357,7 @@ gld${EMULATION_NAME}_finish (void)
   if (need_laying_out)
     ppc_layout_sections_again ();
 
-  if (stub_file != NULL && stub_file->the_bfd->sections != NULL)
+  if (stub_added)
     {
       char *msg = NULL;
       char *line, *endline;

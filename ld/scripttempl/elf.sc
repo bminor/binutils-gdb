@@ -82,6 +82,7 @@ if test -n "${COMMONPAGESIZE}"; then
 fi
 INTERP=".interp       ${RELOCATING-0} : { *(.interp) }"
 PLT=".plt          ${RELOCATING-0} : { *(.plt) }"
+test -z "$GOT" && GOT=".got          ${RELOCATING-0} : { *(.got.plt) *(.got) }"
 DYNAMIC=".dynamic      ${RELOCATING-0} : { *(.dynamic) }"
 RODATA=".rodata       ${RELOCATING-0} : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
 STACKNOTE="/DISCARD/ : { *(.note.GNU-stack) }"
@@ -325,7 +326,7 @@ cat <<EOF
   .jcr          ${RELOCATING-0} : { KEEP (*(.jcr)) }
   ${DATA_PLT+${PLT}}
   ${RELOCATING+${OTHER_GOT_SYMBOLS}}
-  .got          ${RELOCATING-0} : { *(.got.plt) *(.got) }
+  ${GOT}
   ${OTHER_GOT_SECTIONS}
   ${CREATE_SHLIB+${SDATA2}}
   ${CREATE_SHLIB+${SBSS2}}
