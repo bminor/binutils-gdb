@@ -96,7 +96,7 @@ install:
 	   || $(INSTALL_PROGRAM) gprof $(tooldir)/bin/gprof; 
 
 
-gprof:	$(OBJS)
+gprof:	$(OBJS) $(LIBS)
 	$(CC) -o $(PROG) $(LDFLAGS) $(OBJS) $(LIBS)
 
 mostlyclean:

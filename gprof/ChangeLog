@@ -1,3 +1,7 @@
+Thu Jun 23 11:22:41 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* Makefile.in (gprof): Depend on $(LIBS).
+
 Fri May 27 12:24:57 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	From binutils-2.4 release:
