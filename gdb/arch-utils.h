@@ -149,9 +149,21 @@ extern int default_stabs_argument_has_addr (struct gdbarch *gdbarch,
 
 extern int legacy_register_sim_regno (int regnum);
 
+/* Return the selected byte order, or BFD_ENDIAN_UNKNOWN if no byte
+   order was explicitly selected.  */
+extern enum bfd_endian selected_byte_order (void);
+
+/* Return the selected architecture's name, or NULL if no architecture
+   was explicitly selected.  */
+extern const char *selected_architecture_name (void);
+
 /* Initialize a ``struct info''.  Can't use memset(0) since some
-   default values are not zero.  */
+   default values are not zero.  "fill" takes all available
+   information and fills in any unspecified fields.  */
+
 extern void gdbarch_info_init (struct gdbarch_info *info);
+extern void gdbarch_info_fill (struct gdbarch *gdbarch,
+			       struct gdbarch_info *info);
 
 /* Similar to init, but this time fill in the blanks.  Information is
    obtained from the specified architecture, global "set ..." options,

@@ -1,5 +1,24 @@
 2003-11-13  Andrew Cagney  <cagney@redhat.com>
 
+	* arch-utils.h (selected_architecture_name): Declare.
+	(selected_byte_order): Declare.
+	* arch-utils.c (selected_byte_order): New function.
+	(selected_architecture_name): New function.
+	(target_architecture_auto): Make static.
+	(set_architecture_string): Make static.
+	(target_byte_order): Make static.
+	(target_byte_order_auto): Make static.
+	* gdbarch.sh (TARGET_BYTE_ORDER, TARGET_ARCHITECTURE): Delete
+	non-multi-arch definition.
+	(TARGET_ARCHITECTURE_AUTO, TARGET_BYTE_ORDER_AUTO): Delete.
+	(target_byte_order, target_architecture): Delete declaration.
+	(target_byte_order_auto, target_architecture_auto): Ditto.
+	* gdbarch.h: Re-generate.
+	* remote-sim.c (gdbsim_open): Use "selected_architecture_name" and
+	"selected_byte_order".
+	
+2003-11-13  Andrew Cagney  <cagney@redhat.com>
+
 	* ppc-linux-tdep.c (ppc_linux_return_value): Fix parameter order.
 
 2003-11-13  Jim Blandy  <jimb@redhat.com>

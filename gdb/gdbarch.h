@@ -2609,6 +2609,7 @@ extern void set_gdbarch_data (struct gdbarch *gdbarch,
 extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
 
 
+
 /* Register per-architecture memory region.
 
    Provide a memory-region swap mechanism.  Per-architecture memory
@@ -2625,33 +2626,6 @@ typedef void (gdbarch_swap_ftype) (void);
 extern void register_gdbarch_swap (void *data, unsigned long size, gdbarch_swap_ftype *init);
 #define REGISTER_GDBARCH_SWAP(VAR) register_gdbarch_swap (&(VAR), sizeof ((VAR)), NULL)
 
-
-
-/* The target-system-dependent byte order is dynamic */
-
-extern int target_byte_order;
-#ifndef TARGET_BYTE_ORDER
-#define TARGET_BYTE_ORDER (target_byte_order + 0)
-#endif
-
-extern int target_byte_order_auto;
-#ifndef TARGET_BYTE_ORDER_AUTO
-#define TARGET_BYTE_ORDER_AUTO (target_byte_order_auto + 0)
-#endif
-
-
-
-/* The target-system-dependent BFD architecture is dynamic */
-
-extern int target_architecture_auto;
-#ifndef TARGET_ARCHITECTURE_AUTO
-#define TARGET_ARCHITECTURE_AUTO (target_architecture_auto + 0)
-#endif
-
-extern const struct bfd_arch_info *target_architecture;
-#ifndef TARGET_ARCHITECTURE
-#define TARGET_ARCHITECTURE (target_architecture + 0)
-#endif
 
 
 /* Set the dynamic target-system-dependent parameters (architecture,
