@@ -1,3 +1,8 @@
+2002-11-29  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* config/tc-sh.c (md_apply_fix3): Call S_SET_THREAD_LOCAL
+	for TLS relocations.
+
 2002-11-29  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-ia64.c (md_apply_fix3): Add default case.

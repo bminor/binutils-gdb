@@ -3544,18 +3544,22 @@ md_apply_fix3 (fixP, valP, seg)
       md_number_to_chars (buf, val, 4);
       break;
 
-    case BFD_RELOC_32_GOT_PCREL:
-    case BFD_RELOC_SH_GOTPLT32:
     case BFD_RELOC_SH_TLS_GD_32:
     case BFD_RELOC_SH_TLS_LD_32:
     case BFD_RELOC_SH_TLS_IE_32:
+      S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      /* Fallthrough */
+    case BFD_RELOC_32_GOT_PCREL:
+    case BFD_RELOC_SH_GOTPLT32:
       * valP = 0; /* Fully resolved at runtime.  No addend.  */
       md_number_to_chars (buf, 0, 4);
       break;
 
-    case BFD_RELOC_32_GOTOFF:
     case BFD_RELOC_SH_TLS_LDO_32:
     case BFD_RELOC_SH_TLS_LE_32:
+      S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      /* Fallthrough */
+    case BFD_RELOC_32_GOTOFF:
       md_number_to_chars (buf, val, 4);
       break;
 #endif
