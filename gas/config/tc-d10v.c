@@ -651,7 +651,7 @@ build_insn (opcode, opers, insn)
 	      fixups->fix[fixups->fc].reloc =
 		get_reloc ((struct d10v_operand *) &d10v_operands[opcode->operands[i]]);
 
-	      /* Check that a immediate was passed to ops that expect one. */
+	      /* Check that an immediate was passed to ops that expect one.  */
 	      if ((flags & OPERAND_NUM)
 		  && (fixups->fix[fixups->fc].reloc == 0))
 		as_bad (_("operand is not an immediate"));

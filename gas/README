@@ -180,7 +180,7 @@ most of the above hosts, plus
 	decstation-bsd (a.out format, to be used in BSD 4.4)
 	ebmon29k
 	go32 (DOS on i386, with DJGPP -- old a.out version)
-	h8/300, h8/500 (Hitachi)
+	H8/300, H8/500 (Hitachi)
 	i386-aix (ps/2)
 	i960-coff
 	mips ecoff (decstation-ultrix, iris, mips magnum, mips-idt-ecoff)

@@ -1650,7 +1650,7 @@ tc_s390_fix_adjustable (fixP)
 }
 
 /* Return true if we must always emit a reloc for a type and false if
-   there is some hope of resolving it a assembly time.  */
+   there is some hope of resolving it at assembly time.  */
 int
 tc_s390_force_relocation (fixp)
      struct fix *fixp;

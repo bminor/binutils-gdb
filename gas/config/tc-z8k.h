@@ -33,7 +33,7 @@ struct internal_reloc;
 #define LOCAL_LABEL(x) 0
 #endif
 
-/* This macro translates between an internal fix and an coff reloc type */
+/* This macro translates between an internal fix and a coff reloc type.  */
 #define TC_COFF_FIX2RTYPE(fixP) abort ();
 
 #define BFD_ARCH bfd_arch_z8k

@@ -3818,7 +3818,7 @@ load_address (counter, reg, ep, used_at)
 	   dsll32	$reg,0
 	   daddu	$reg,$reg,$at
 
-	 If $at is already in use, we use an path which is suboptimal
+	 If $at is already in use, we use a path which is suboptimal
 	 on superscalar processors.
 	   lui		$reg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
 	   daddiu	$reg,<sym>		(BFD_RELOC_MIPS_HIGHER)
@@ -4854,7 +4854,7 @@ macro (ip)
 	      dsll32	$tempreg,0
 	      daddu	$tempreg,$tempreg,$at
 
-	    If $at is already in use, we use an path which is suboptimal
+	    If $at is already in use, we use a path which is suboptimal
 	    on superscalar processors.
 	      lui	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
 	      daddiu	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHER)

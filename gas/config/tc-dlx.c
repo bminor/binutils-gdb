@@ -585,7 +585,7 @@ dlx_parse_loadop (str)
 	  /* Searching for (/[ which will match the ]/).  */
 	  for (pb = idx - 1; str[pb] != match; pb -= 1)
 	    /* Match can only be either '[' or '(', if it is
-	       '(' then this can be an normal expression, we'll treat
+	       '(' then this can be a normal expression, we'll treat
 	       it as an operand.  */
 	    if (str[pb] == endm || pb < (idx - 5))
 	      goto load_no_rs1;

@@ -10401,7 +10401,7 @@ Thu Jul  8 14:15:05 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 Thu Jul  8 07:25:25 1993  Doug Evans  (dje@canuck.cygnus.com)
 
-	* config/tc-h8300.h (TC_CONS_RELOC): Use R_RELLONG if h8/300h.
+	* config/tc-h8300.h (TC_CONS_RELOC): Use R_RELLONG if H8/300H.
 
 Wed Jul  7 18:11:07 1993  david d `zoo' zuhn  (zoo at rtl.cygnus.com)
 

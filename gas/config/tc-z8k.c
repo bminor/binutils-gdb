@@ -871,7 +871,7 @@ get_specific (opcode, operands)
 
 	  if ((mode & CLASS_MASK) != (this_try->arg_info[i] & CLASS_MASK))
 	    {
-	      /* It could be an pc rel operand, if this is a da mode
+	      /* It could be a pc rel operand, if this is a da mode
 		 and we like disps, then insert it.  */
 
 	      if (mode == CLASS_DA && this_try->arg_info[i] == CLASS_DISP)

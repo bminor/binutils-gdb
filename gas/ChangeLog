@@ -1,3 +1,20 @@
+2002-12-16  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* ChangeLog-9295: Fix a typo.
+	* README: Likewise.
+	* config/tc-d10v.c: Fix a comment typo.
+	* config/tc-dlx.c: Likewise.
+	* config/tc-h8300.h: Likewise.
+	* config/tc-h8500.h: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-s390.c: Likewise.
+	* config/tc-sh.h: Likewise.
+	* config/tc-tic80.h: Likewise.
+	* config/tc-w65.h: Likewise.
+	* config/tc-z8k.c: Likewise.
+	* config/tc-z8k.h: Likewise.
+	* testsuite/gas/h8300/cmpsi2.s: Likewise.
+
 2002-12-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-d30v.c (check_range): Warning fixes, formatting.
