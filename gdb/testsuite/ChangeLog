@@ -1,5 +1,8 @@
 2004-06-09  Andrew Cagney  <cagney@gnu.org>
 
+	* gdb.base/structs.exp (test_struct_calls): Fix KFAIL for
+	gdb/1455, bug is specific to "long long" and "double".
+	
 	* gdb.base/structs.exp (test_struct_returns, test_struct_returns)
 	(test_struct_calls): Remove KFAIL of "long double" on i*86-*-*,
 	x86_64-*-*, sparc64-*-*, and sparc*-*-solaris2*.  PR tdep/1447

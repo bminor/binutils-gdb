@@ -218,7 +218,8 @@ proc test_struct_calls { n } {
     set tests "call $n ${testfile}"
 
     # Call fun${n}, checking the printed return-value.
-    setup_compiler_kfails structs-tc-* gcc-3-3 "DWARF 2" i*86-*-* gdb/1455
+    setup_compiler_kfails structs-tc-tll gcc-3-3 "DWARF 2" i*86-*-* gdb/1455
+    setup_compiler_kfails structs-tc-td gcc-3-3 "DWARF 2" i*86-*-* gdb/1455
     gdb_test "p/c fun${n}()"  "[foo ${n}]" "p/c fun<n>(); ${tests}"
 
     # Check that GDB can always pass a structure to an inferior function.
@@ -229,7 +230,8 @@ proc test_struct_calls { n } {
     # examining that global to confirm that the value is as expected.
 
     gdb_test "call Fun${n}(foo${n})" "" "call Fun<n>(foo<n>); ${tests}"
-    setup_compiler_kfails structs-tc-* gcc-3-3 "DWARF 2" i*86-*-* gdb/1455
+    setup_compiler_kfails structs-tc-tll gcc-3-3 "DWARF 2" i*86-*-* gdb/1455
+    setup_compiler_kfails structs-tc-td gcc-3-3 "DWARF 2" i*86-*-* gdb/1455
     gdb_test "p/c L${n}" [foo ${n}] "p/c L<n>; ${tests}"
 }
 
