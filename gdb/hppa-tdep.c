@@ -541,11 +541,10 @@ frame_chain_valid (chain, thisframe)
      FRAME thisframe;
 {
   struct minimal_symbol *msym;
+  struct unwind_table_entry *u;
 
   if (!chain)
     return 0;
-
-  struct unwind_table_entry *u;
 
   u = find_unwind_entry (thisframe->pc);
 
