@@ -1543,9 +1543,9 @@ use a new negative type number.
 @code{integer}.  32 bit signed integral type.
 
 @item -16
-@code{boolean}.  32 bit type.  How is the truth value encoded?  Is it
-the least significant bit or is it a question of whether the whole value
-is zero or non-zero?
+@code{boolean}.  32 bit type.  GDB and GCC assume that zero is false,
+one is true, and other values have unspecified meaning.  I hope this
+agrees with how the IBM tools use the type.
 
 @item -17
 @code{short real}.  IEEE single precision.

@@ -1,3 +1,8 @@
+Wed Feb  2 11:29:17 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Negative Type Numbers): Document format for type
+	-16.
+
 Thu Jan 27 16:53:56 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.texinfo (Selection, Frame Info): Update information about
