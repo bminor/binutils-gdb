@@ -651,13 +651,18 @@ const pseudo_typeS mote_pseudo_table[] =
   {0, 0, 0}
 };
 
-#define issbyte(x)	((x) >= -128 && (x) <= 127)
-#define isubyte(x)	((x) >= 0 && (x) <= 255)
-#define issword(x)	((x) >= -32768 && (x) <= 32767)
-#define isuword(x)	((x) >= 0 && (x) <= 65535)
+/* Truncate and sign-extend at 32 bits, so that building on a 64-bit host
+   gives identical results to a 32-bit host.  */
+#define TRUNC(X)	((valueT) (X) & 0xffffffff)
+#define SEXT(X)		((TRUNC (X) ^ 0x80000000) - 0x80000000)
 
-#define isbyte(x)	((x) >= -255 && (x) <= 255)
-#define isword(x)	((x) >= -65536 && (x) <= 65535)
+#define issbyte(x)	((valueT) SEXT (x) + 0x80 < 0x100)
+#define isubyte(x)	((valueT) TRUNC (x) < 0x100)
+#define issword(x)	((valueT) SEXT (x) + 0x8000 < 0x10000)
+#define isuword(x)	((valueT) TRUNC (x) < 0x10000)
+
+#define isbyte(x)	((valueT) SEXT (x) + 0xff < 0x1ff)
+#define isword(x)	((valueT) SEXT (x) + 0xffff < 0x1ffff)
 #define islong(x)	(1)
 
 static char notend_table[256];
@@ -1762,8 +1767,7 @@ m68k_ip (char *instring)
 		  if (opP->mode != IMMED)
 		    losing++;
 		  else if (opP->disp.exp.X_op != O_constant
-			   || opP->disp.exp.X_add_number < 1
-			   || opP->disp.exp.X_add_number > 8)
+			   || TRUNC (opP->disp.exp.X_add_number) - 1 > 7)
 		    losing++;
 		  else if (! m68k_quick
 			   && (strncmp (instring, "add", 3) == 0
@@ -1809,8 +1813,7 @@ m68k_ip (char *instring)
 		  if (opP->mode != IMMED)
 		    losing++;
 		  else if (opP->disp.exp.X_op != O_constant
-			   || opP->disp.exp.X_add_number < 0
-			   || opP->disp.exp.X_add_number > 7)
+			   || TRUNC (opP->disp.exp.X_add_number) > 7)
 		    losing++;
 		  break;
 
@@ -1823,9 +1826,8 @@ m68k_ip (char *instring)
 		  if (opP->mode != IMMED)
 		    losing++;
 		  else if (opP->disp.exp.X_op != O_constant
-			   || opP->disp.exp.X_add_number < -1
-                           || opP->disp.exp.X_add_number > 7
-                           || opP->disp.exp.X_add_number == 0)
+			   || (TRUNC (opP->disp.exp.X_add_number) != 0xffffffff
+			       && TRUNC (opP->disp.exp.X_add_number) - 1 > 6))
 		    losing++;
 		  break;
 
@@ -2306,7 +2308,7 @@ m68k_ip (char *instring)
 			  else
 			    {
 			      add_frag (adds (&opP->disp),
-					offs (&opP->disp),
+					SEXT (offs (&opP->disp)),
 					TAB (PCREL1632, SZ_UNDEF));
 			      break;
 			    }
@@ -2478,7 +2480,8 @@ m68k_ip (char *instring)
 			  frag_grow (14);
 			  nextword += baseo & 0xff;
 			  addword (nextword);
-			  add_frag (adds (&opP->disp), offs (&opP->disp),
+			  add_frag (adds (&opP->disp),
+				    SEXT (offs (&opP->disp)),
 				    TAB (PCINDEX, SZ_UNDEF));
 
 			  break;
@@ -2621,7 +2624,7 @@ m68k_ip (char *instring)
 		    {
 		      tmpreg = 0x3A;	/* 7.2 */
 		      add_frag (adds (&opP->disp),
-				offs (&opP->disp),
+				SEXT (offs (&opP->disp)),
 				TAB (ABSTOPCREL, SZ_UNDEF));
 		      break;
 		    }
@@ -2804,20 +2807,24 @@ m68k_ip (char *instring)
 		 out which mode.  We try in this order of preference:
 		 long branch, absolute jump, byte/word branches only.  */
 	      if (HAVE_LONG_BRANCH (current_architecture))
-		add_frag (adds (&opP->disp), offs (&opP->disp),
+		add_frag (adds (&opP->disp),
+			  SEXT (offs (&opP->disp)),
 			  TAB (BRANCHBWL, SZ_UNDEF));
 	      else if (! flag_keep_pcrel)
 		{
 		  if ((the_ins.opcode[0] == 0x6000)
 		      || (the_ins.opcode[0] == 0x6100))
-		    add_frag (adds (&opP->disp), offs (&opP->disp),
+		    add_frag (adds (&opP->disp),
+			      SEXT (offs (&opP->disp)),
 			      TAB (BRABSJUNC, SZ_UNDEF));
 		  else
-		    add_frag (adds (&opP->disp), offs (&opP->disp),
+		    add_frag (adds (&opP->disp),
+			      SEXT (offs (&opP->disp)),
 			      TAB (BRABSJCOND, SZ_UNDEF));
 		}
 	      else
-		add_frag (adds (&opP->disp), offs (&opP->disp),
+		add_frag (adds (&opP->disp),
+			  SEXT (offs (&opP->disp)),
 			  TAB (BRANCHBW, SZ_UNDEF));
 	      break;
 	    case 'w':
@@ -2831,10 +2838,12 @@ m68k_ip (char *instring)
 			  || (! flag_keep_pcrel)))
 		    {
 		      if (HAVE_LONG_BRANCH (current_architecture))
-			add_frag (adds (&opP->disp), offs (&opP->disp),
+			add_frag (adds (&opP->disp),
+				  SEXT (offs (&opP->disp)),
 				  TAB (DBCCLBR, SZ_UNDEF));
 		      else
-			add_frag (adds (&opP->disp), offs (&opP->disp),
+			add_frag (adds (&opP->disp),
+				  SEXT (offs (&opP->disp)),
 				  TAB (DBCCABSJ, SZ_UNDEF));
 		      break;
 		    }
@@ -2856,7 +2865,8 @@ m68k_ip (char *instring)
 		  addword (0);
 		}
 	      else
-		add_frag (adds (&opP->disp), offs (&opP->disp),
+		add_frag (adds (&opP->disp),
+			  SEXT (offs (&opP->disp)),
 			  TAB (FBRANCH, SZ_UNDEF));
 	      break;
 	    default:
@@ -4607,7 +4617,7 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   buf += fixP->fx_where;
   /* End ibm compiler workaround.  */
 
-  val = ((val & 0xffffffff) ^ 0x80000000) - 0x80000000;
+  val = SEXT (val);
 
   if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
     fixP->fx_done = 1;
@@ -5206,38 +5216,38 @@ get_num (struct m68k_exp *exp, int ok)
       switch (ok)
 	{
 	case 10:
-	  if (offs (exp) < 1 || offs (exp) > 8)
+	  if ((valueT) TRUNC (offs (exp)) - 1 > 7)
 	    {
 	      as_warn (_("expression out of range: defaulting to 1"));
 	      offs (exp) = 1;
 	    }
 	  break;
 	case 20:
-	  if (offs (exp) < 0 || offs (exp) > 7)
+	  if ((valueT) TRUNC (offs (exp)) > 7)
 	    goto outrange;
 	  break;
 	case 30:
-	  if (offs (exp) < 0 || offs (exp) > 15)
+	  if ((valueT) TRUNC (offs (exp)) > 15)
 	    goto outrange;
 	  break;
 	case 40:
-	  if (offs (exp) < 0 || offs (exp) > 32)
+	  if ((valueT) TRUNC (offs (exp)) > 32)
 	    goto outrange;
 	  break;
 	case 50:
-	  if (offs (exp) < 0 || offs (exp) > 127)
+	  if ((valueT) TRUNC (offs (exp)) > 127)
 	    goto outrange;
 	  break;
 	case 55:
-	  if (offs (exp) < -64 || offs (exp) > 63)
+	  if ((valueT) SEXT (offs (exp)) + 64 > 127)
 	    goto outrange;
 	  break;
 	case 60:
-	  if (offs (exp) < -128 || offs (exp) > 127)
+	  if ((valueT) SEXT (offs (exp)) + 128 > 255)
 	    goto outrange;
 	  break;
 	case 70:
-	  if (offs (exp) < 0 || offs (exp) > 4095)
+	  if ((valueT) TRUNC (offs (exp)) > 4095)
 	    {
 	    outrange:
 	      as_warn (_("expression out of range: defaulting to 0"));
@@ -5245,9 +5255,8 @@ get_num (struct m68k_exp *exp, int ok)
 	    }
 	  break;
 	case 80:
-	  if (offs (exp) < -1
-              || offs (exp) > 7
-              || offs (exp) == 0)
+	  if ((valueT) TRUNC (offs (exp)) != 0xffffffff
+              && (valueT) TRUNC (offs (exp)) - 1 > 6)
 	    {
 	      as_warn (_("expression out of range: defaulting to 1"));
 	      offs (exp) = 1;

@@ -1,3 +1,12 @@
+2005-03-21  Alan Modra  <amodra@bigpond.net.au>
+
+	PR gas/780
+	* config/tc-m68k.c (TRUNC, SEXT): Define.
+	(issbyte, isubyte, issword, isuword, isbyte, isword): Use the above.
+	(m68k_ip): Truncate or sign extend expressions as appropriate.
+	(get_num): Likewise.
+	(md_apply_fix3): Use SEXT.
+
 2005-03-17  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xg_apply_tentative_value): Rename to
