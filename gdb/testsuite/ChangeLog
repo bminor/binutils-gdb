@@ -1,3 +1,9 @@
+2001-12-10  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.asm/asm-source.exp (info symbol): Anchor the pattern
+ 	matching the entry point symbol's name at the beginning of the
+ 	line.
+
 2001-12-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.c++/classes.exp, gdb.c++/derivation.exp,

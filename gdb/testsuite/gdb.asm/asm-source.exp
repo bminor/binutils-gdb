@@ -122,7 +122,10 @@ gdb_expect {
     -re "info symbol 0x$entry_point\[\r\n\]*" {
 	exp_continue
     }
-    -re "(.*) in section .*$gdb_prompt $" {
+    -re "^(.*) in section .*$gdb_prompt $" {
+        # It's important to anchor the pattern above at the beginning
+        # of the line.  Without that carat, the (.*) may end up
+        # matching the empty string.
 	set entry_symbol $expect_out(1,string)
 	pass "info symbol"
     }
