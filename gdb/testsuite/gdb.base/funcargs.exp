@@ -54,16 +54,14 @@ proc integral_args {} {
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
     setup_xfail "a29k-*-udi"
-    send "run\n"
-    expect {
-	-re "The program .* has been started already.* \[(\]+y or n\[)\]+ $" {
-	    send "y\n"
-	    exp_continue
-	}
+
+    expect_after {
 	-re ".* call0a \[(\]+c=97 'a', s=1, i=2, l=3\[)\]+ .*$prompt $" {}
 	-re "$prompt $"  { fail "run to call0a" ; return }
 	timeout { fail "(timeout) run to call0a" ; return }
     }
+    gdb_run_cmd
+    expect_after;
 
     # Print each arg as a double check to see if we can print
     # them here as well as with backtrace.
@@ -123,16 +121,13 @@ proc unsigned_integral_args {} {
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
     setup_xfail "a29k-*-udi"
-    send "run\n"
-    expect {
-	-re "The program .* has been started already.* \[(\]+y or n\[)\]+ $" {
-	    send "y\n"
-	    exp_continue
-	}
+    expect_after {
 	-re ".* call1a \[(\]+uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*$prompt $" {}
 	-re "$prompt $" { fail "run to call1a" ; return }
 	timeout { fail "(timeout) run to call1a" ; return }
     }
+    gdb_run_cmd
+    expect_after;
 
     # Print each arg as a double check to see if we can print
     # them here as well as with backtrace.
@@ -198,19 +193,15 @@ proc float_and_integral_args {} {
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
     setup_xfail "a29k-*-udi"
-    send "run\n"
-    expect {
-	-re "The program .* has been started already.* \[(\]+y or n\[)\]+ $" {
-	    send "y\n"
-	    exp_continue
-	}
+    expect_after {
 	-re ".* call2a \[(\]+c=97 'a', f1=4, s=1, d1=5, i=2, f2=4, l=3, d2=5\[)\]+ .*$prompt $" {}
 	-re "$prompt $" { fail "run to call2a" ; return }
 	timeout { fail "(timeout) run to call2a" ; return }
     }
+    gdb_run_cmd
+    expect_after;
 
     # Print each arg as a double check to see if we can print
-
     if [gdb_test "print c" ".* = 97 'a'" ""] {
 	fail "print c"; return
     }
@@ -297,19 +288,16 @@ proc pointer_args {} {
     # Run; should stop at call3a and print actual arguments.
     # Try dereferencing the arguments.
 
-    send "run\n"
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
     setup_xfail "a29k-*-udi"
-    expect {
-	-re "The program .* has been started already.* \[(\]+y or n\[)\]+ $" {
-	    send "y\n"
-	    exp_continue
-	}
+    expect_after {
 	-re ".* call3a \[(\]+cp=$hex \"a\", sp=$hex, ip=$hex, lp=$hex\[)\]+ .*$prompt $" {}
 	-re "$prompt $" { fail "run to call3a" ; return }
 	timeout { fail "(timeout) run to call3a" ; return }
     }
+    gdb_run_cmd
+    expect_after;
 
     if [gdb_test "print *cp" ".* = 97 'a'" ""] {
 	fail "print *cp"; return
@@ -379,16 +367,13 @@ proc structs_by_reference {} {
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
     setup_xfail "a29k-*-udi"
-    send "run\n"
-    expect {
-	-re "The program .* has been started already.* \[(\]+y or n\[)\]+ $" {
-	    send "y\n"
-	    exp_continue
-	}
+    expect_after {
 	-re ".* call4a \[(\]+stp=$hex\[)\]+ .*$prompt $" {}
 	-re "$prompt $" { fail "run to call4a" ; return }
 	timeout { fail "(timeout) run to call4a" ; return }
     }
+    gdb_run_cmd
+    expect_after;
 
     if [gdb_test "print *stp" ".* = \{s1 = 101, s2 = 102\}" ""] {
 	fail "print *stp"; return
@@ -428,16 +413,13 @@ proc structs_by_value {} {
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
     setup_xfail "a29k-*-udi"
-    send "run\n"
-    expect {
-	-re "The program .* has been started already.* \[(\]+y or n\[)\]+ $" {
-	    send "y\n"
-	    exp_continue
-	}
+    expect_after {
 	-re ".* call5a \[(\]+st=\{s1 = 101, s2 = 102\}\[)\]+ .*$prompt $" {}
 	-re "$prompt $" { fail "run to call5a" ; return }
 	timeout { fail "(timeout) run to call5a" ; return }
     }
+    gdb_run_cmd
+    expect_after;
 
     if [gdb_test "print st" ".* = \{s1 = 101, s2 = 102\}" ""] {
 	fail "print st"; return
@@ -486,16 +468,13 @@ proc discard_and_shuffle {} {
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
     setup_xfail "a29k-*-udi"
-    send "run\n"
-    expect {
-	-re "The program .* has been started already.* \[(\]+y or n\[)\]+ $" {
-	    send "y\n"
-	    exp_continue
-	}
+    expect_after {
 	-re ".*Breakpoint $decimal, call6a .*$prompt $" {}
 	-re "$prompt $" { fail "run to call6a" ; return }
 	timeout { fail "(timeout) run to call6a" ; return }
     }
+    gdb_run_cmd
+    expect_after;
 
     send "backtrace 100\n"
     expect {
@@ -797,16 +776,13 @@ proc shuffle_round_robin {} {
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
     setup_xfail "a29k-*-udi"
-    send "run\n"
-    expect {
-	-re "The program .* has been started already.* \[(\]+y or n\[)\]+ $" {
-	    send "y\n"
-	    exp_continue
-	}
+    expect_after {
 	-re ".*Breakpoint $decimal, call7a .*$prompt $" {}
 	-re "$prompt $" { fail "run to call7a" ; return }
 	timeout { fail "(timeout) run to call7a" ; return }
     }
+    gdb_run_cmd
+    expect_after;
 
     setup_xfail "i960-*-*" 1813
     send "backtrace 100\n"
@@ -1093,17 +1069,13 @@ proc recursive_structs_by_value {} {
 
     # Run; should stop at hitbottom and print actual arguments.
     # Print backtrace.
-
-    send "run\n"
-    expect {
-	-re "The program .* has been started already.* \[(\]+y or n\[)\]+ $" {
-	    send "y\n"
-	    exp_continue
-	}
+    expect_after {
 	-re ".*Breakpoint $decimal, hitbottom .*$prompt $" {}
 	-re "$prompt $" { fail "run to hitbottom" ; return }
 	timeout { fail "(timeout) run to hitbottom" ; return }
     }
+    gdb_run_cmd
+    expect_after;
 
     # The a29k fails all of these tests, perhaps because the prologue
     # code is broken.
