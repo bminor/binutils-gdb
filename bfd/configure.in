@@ -484,6 +484,8 @@ do
     ecoff_biglittle_vec)	tb="$tb coff-mips.o ecoff.o ecofflink.o" ;;
     ecoffalpha_little_vec)	tb="$tb coff-alpha.o ecoff.o ecofflink.o"
 				target64=true ;;
+    go32coff_vec)		tb="$tb coff-go32.o cofflink.o" ;;
+    go32stubbedcoff_vec)	tb="$tb coff-stubgo32.o cofflink.o" ;;
     evax_alpha_vec)		tb="$tb evax-alpha.o evax-emh.o evax-egsd.o evax-etir.o evax-misc.o"
  				target64=true ;;
     h8300coff_vec)		tb="$tb coff-h8300.o reloc16.o" ;;

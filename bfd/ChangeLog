@@ -1,5 +1,8 @@
 Tue Jul 22 17:19:45 1997  Robert Hoehne <robert.hoehne@Mathematik.TU-Chemnitz.DE>
 
+	* coff-stubgo32.c: New file.
+	* go32stub.h: New file.
+	* coff-i386.c: If COFF_GO32_EXE, include coff/go32exe.h.
 	* coffswap.h (coff_swap_filehdr_in): Invoke
 	COFF_ADJUST_FILEHDR_IN_PRE and COFF_ADJUST_FILEHDR_IN_POST if they
 	are defined.
@@ -13,6 +16,14 @@ Tue Jul 22 17:19:45 1997  Robert Hoehne <robert.hoehne@Mathematik.TU-Chemnitz.DE
 	COFF_ADJUST_SCNHDR_IN_POST if they are defined.
 	(coff_swap_scnhdr_out): Invoke COFF_ADJUST_SCNHDR_OUT_PRE and
 	COFF_ADJUST_SCNHDR_OUT_POST if they are defined.
+	* targets.c (go32stubbedcoff_vec): Declare.
+	(bfd_target_vector): Add go32stubbedcoff_vec.
+	* configure.in (go32coff_vec): New target vector.
+	(go32stubbedcoff_vec): Likewise.
+	* Makefile.in: Rebuild dependencies.
+ 	(BFD32_BACKENDS): Add coff-stubgo32.o.
+	(BFD32_BACKENDS_CFILES): Add coff-stubgo32.c.
+	(HFILES): Add go32stub.h.
 
 Tue Jul 22 15:09:12 1997  Ian Lance Taylor  <ian@cygnus.com>
 

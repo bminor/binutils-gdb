@@ -30,6 +30,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/pe.h"
 #endif
 
+#ifdef COFF_GO32_EXE
+#include "coff/go32exe.h"
+#endif
+
 #include "libcoff.h"
 
 static bfd_reloc_status_type coff_i386_reloc 

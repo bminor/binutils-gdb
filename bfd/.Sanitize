@@ -109,6 +109,7 @@ coff-ppc.c
 coff-rs6000.c
 coff-sh.c
 coff-sparc.c
+coff-stubgo32.c
 coff-svm68k.c
 coff-u68k.c
 coff-we32k.c
@@ -196,6 +197,7 @@ format.c
 freebsd.h
 gen-aout.c
 genlink.h
+go32stub.h
 hash.c
 host-aout.c
 hosts
