@@ -1,6 +1,20 @@
+start-sanitize-gdbtk
+Thu May  2 19:17:49 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdbtk.tcl (debug_interface): New global, use to aid debugging.
+	(insert_breakpoint_tag, delete_breakpoint_tag): Fix range.
+	(file_popup_menu): Delete, never used.
+	(listing_window_popup): Rename from listing_window_button_1,
+	remove breakpoint toggling code.
+	(toggle_breakpoint): New procedure.
+	(create_file_win): Bind popup menu to button 2, toggle breakpoints
+ 	with button 1 in breakpoint area, add display of tagged areas if
+ 	debugging on.
+end-sanitize-gdbtk
+
 Thu May  2 12:46:14 1996  Jeffrey A Law  (law@cygnus.com)
 
-	* From Peter Schauer:
+	From Peter Schauer:
 	* breakpoint.h (enum bpdisp):  Add del_at_next_stop.
 	* breakpoint.c (insert_breakpoints, watchpoint_check,
 	bpstat_stop_status):  Avoid bad references to memory freed via
@@ -14,9 +28,9 @@ Thu May  2 12:46:14 1996  Jeffrey A Law  (law@cygnus.com)
 
 Wed May  1 17:29:18 1996  Fred Fish  <fnf@cygnus.com>
 
-	* Makefile.in (rs6000-nat.o): Dependant on xcoffsolib.h.
+	* Makefile.in (rs6000-nat.o): Depend on xcoffsolib.h.
 	* config/rs6000/rs6000.mh (NATDEPFILES): Move xcoffread.o ...
-	* config/rs6000/rs6000.mt (TDEPFILES): ... to here
+	* config/rs6000/rs6000.mt (TDEPFILES): ... to here.
 	* xcoffsolib.c (xcoff_relocate_symtab_hook): Define and initialize.
 	(solib_info): Call xcoff_relocate_symtab via the hook.
 	(sharedlibrary_command): Ditto.
@@ -39,6 +53,7 @@ Tue Apr 30 13:22:02 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	Solaris support.
 
 Mon Apr 29 16:17:31 1996  Dawn Perchik <dawn@cygnus.com>
+
 	* c-valprint.c (c_val_print): Fix printing for arrays defined 
 	with 0 length.
 
@@ -116,7 +131,7 @@ Wed Apr 24 00:32:55 1996  Jeffrey A Law  (law@cygnus.com)
 
 Mon Apr 22 20:17:01 1996  Fred Fish  <fnf@cygnus.com>
 
-	* Makefile.in (VERSION): Bump version number to 4.16.1
+	* Makefile.in (VERSION): Bump version number to 4.16.1.
 	* NEWS: Update for 4.16 release.
 
 Mon Apr 22 16:32:29 1996  Stan Shebs  <shebs@andros.cygnus.com>

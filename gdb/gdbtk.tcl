@@ -29,6 +29,8 @@ set breakpoint_file(-1) {[garbage]}
 set disassemble_with_source nosource
 set expr_update_list(0) 0
 
+set debug_interface 0
+
 #option add *Foreground Black
 #option add *Background White
 #option add *Font -*-*-medium-r-normal--18-*-*-*-m-*-*-1
@@ -635,9 +637,7 @@ proc insert_breakpoint_tag {win line} {
 	$win configure -state normal
 	$win delete $line.0
 	$win insert $line.0 "B"
-	$win tag add $line $line.0
-	$win tag add delete $line.0 "$line.0 lineend"
-	$win tag add margin $line.0 "$line.0 lineend"
+	$win tag add margin $line.0 $line.8
 
 	$win configure -state disabled
 }
@@ -661,9 +661,7 @@ proc delete_breakpoint_tag {win line} {
 	} else {
 		$win insert $line.0 " "
 	}
-	$win tag delete $line
-	$win tag add delete $line.0 "$line.0 lineend"
-	$win tag add margin $line.0 "$line.0 lineend"
+	$win tag add margin $line.0 $line.8
 	$win configure -state disabled
 }
 
@@ -803,67 +801,18 @@ bind .file_popup <Any-ButtonRelease-1> {
 #
 # Local procedure:
 #
-#	file_popup_menu (win x y xrel yrel) - Popup the file popup menu.
+#	listing_window_popup (win x y xrel yrel) - Handle popups for listing window
 #
 # Description:
 #
-#	This procedure is invoked as a result of a command binding in the
-#	listing window.  It does several things:
-#		o - It highlights the line under the cursor.
-#		o - It pops up the file popup menu which is intended to do
-#		    various things to the aforementioned line.
-#		o - Grabs the mouse for the file popup menu.
-#
-
-# Button 1 has been pressed in a listing window.  Pop up a menu.
-
-proc file_popup_menu {win x y xrel yrel} {
-	global wins
-	global win_to_file
-	global file_to_debug_file
-	global highlight
-	global selected_line
-	global selected_file
-	global selected_win
-
-# Map TK window name back to file name.
-
-	set file $win_to_file($win)
-
-	set pos [$win index @$xrel,$yrel]
-
-# Record selected file and line for menu button actions
-
-	set selected_file $file_to_debug_file($file)
-	set selected_line [lindex [split $pos .] 0]
-	set selected_win $win
-
-# Highlight the selected line
-
-	eval $win tag config breaktag $highlight
-	$win tag add breaktag "$pos linestart" "$pos linestart + 1l"
-
-# Post the menu near the pointer, (and grab it)
-
-	.file_popup entryconfigure 0 -label "$selected_file:$selected_line"
-	tk_popup .file_popup $x $y
-}
-
-#
-# Local procedure:
-#
-#	listing_window_button_1 (win x y xrel yrel) - Handle button 1 in listing window
-#
-# Description:
-#
-#	This procedure is invoked as a result of holding down button 1 in the
+#	This procedure is invoked by holding down button 2 (usually) in the
 #	listing window.  The action taken depends upon where the button was
 #	pressed.  If it was in the left margin (the breakpoint column), it
 #	sets or clears a breakpoint.  In the main text area, it will pop up a
 #	menu.
 #
 
-proc listing_window_button_1 {win x y xrel yrel} {
+proc listing_window_popup {win x y xrel yrel} {
 	global wins
 	global win_to_file
 	global file_to_debug_file
@@ -886,26 +835,60 @@ proc listing_window_button_1 {win x y xrel yrel} {
 	set selected_col [lindex $pos 1]
 	set selected_win $win
 
-# If we're in the margin, then toggle the breakpoint
-
-	if {$selected_col < 8} {
-		set pos_break $selected_file:$selected_line
-		set pos $file:$selected_line
-		set tmp pos_to_breakpoint($pos)
-		if {[info exists $tmp]} {
-			set bpnum [set $tmp]
-			gdb_cmd "delete	$bpnum"
-		} else {
-			gdb_cmd "break $pos_break"
-		}
-		return
-	}
-
 # Post the menu near the pointer, (and grab it)
 
 	.file_popup entryconfigure 0 -label "$selected_file:$selected_line"
 
         tk_popup .file_popup $x $y
+}
+
+#
+# Local procedure:
+#
+#	toggle_breakpoint (win x y xrel yrel) - Handle clicks on breakdots
+#
+# Description:
+#
+#	This procedure sets or clears breakpoints where the button clicked.
+#
+
+proc toggle_breakpoint {win x y xrel yrel} {
+	global wins
+	global win_to_file
+	global file_to_debug_file
+	global highlight
+	global selected_line
+	global selected_file
+	global selected_win
+	global pos_to_breakpoint
+
+# Map TK window name back to file name.
+
+	set file $win_to_file($win)
+
+	set pos [split [$win index @$xrel,$yrel] .]
+
+# Record selected file and line
+
+	set selected_file $file_to_debug_file($file)
+	set selected_line [lindex $pos 0]
+	set selected_col [lindex $pos 1]
+	set selected_win $win
+
+# If we're in the margin, then toggle the breakpoint
+
+	if {$selected_col < 8} {  # this is alway true actually
+              set pos_break $selected_file:$selected_line
+              set pos $file:$selected_line
+              set tmp pos_to_breakpoint($pos)
+              if {[info exists $tmp]} {
+                      set bpnum [set $tmp]
+                      gdb_cmd "delete $bpnum"
+              } else {
+                      gdb_cmd "break $pos_break"
+              }
+              return
+	}
 }
 
 #
@@ -1182,6 +1165,7 @@ proc create_file_win {filename debug_file} {
 	global breakpoint_file
 	global breakpoint_line
 	global line_numbers
+	global debug_interface
 
 # Replace all the dirty characters in $filename with clean ones, and generate
 # a unique name for the text widget.
@@ -1232,6 +1216,12 @@ proc create_file_win {filename debug_file} {
 	bind $win u {interactive_cmd up}
 	bind $win d {interactive_cmd down}
 
+	if $debug_interface {
+	    bind $win <Control-C> {
+		puts stdout burp
+	    }
+	}
+
 	$win delete 0.0 end
 	$win insert 0.0 [read $fh]
 	close $fh
@@ -1260,7 +1250,26 @@ proc create_file_win {filename debug_file} {
 		$win tag add margin $i.0 $i.8
 		}
 
-	$win tag bind margin <1> {listing_window_button_1 %W %X %Y %x %y}
+	# A debugging trick to highlight sensitive regions.
+	if $debug_interface {
+	    $win tag bind source <Enter> {
+		%W tag configure source -background yellow
+	    }
+	    $win tag bind source <Leave> {
+		%W tag configure source -background green
+	    }
+	    $win tag bind margin <Enter> {
+		%W tag configure margin -background red
+	    }
+	    $win tag bind margin <Leave> {
+		%W tag configure margin -background skyblue
+	    }
+	}
+
+	$win tag bind margin <1> {
+		toggle_breakpoint %W %X %Y %x %y
+		}
+
 	$win tag bind source <1> {
 		%W mark set anchor "@%x,%y wordstart"
 		set last [%W index "@%x,%y wordend"]
@@ -1283,11 +1292,15 @@ proc create_file_win {filename debug_file} {
 		}
 	$win tag bind sel <1> break
 	$win tag bind sel <Double-Button-1> {
-	  display_expression [selection get]
-	  break
+	    display_expression [selection get]
+	    break
 	}
         $win tag bind sel <B1-Motion> break
 	$win tag lower sel
+
+	$win tag bind source <2> {
+		listing_window_popup %W %X %Y %x %y
+		}
 
         # Make these bindings do nothing on the text window -- they
 	# are completely handled by the tag bindings above.
