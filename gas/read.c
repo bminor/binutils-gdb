@@ -214,22 +214,9 @@ static int dwarf_file_string;
 #endif
 #endif
 
-static void cons_worker (int, int);
-static int scrub_from_string (char *, int);
 static void do_align (int, char *, int, int);
 static void s_align (int, int);
-static void s_lcomm_internal (int, int);
 static int hex_float (int, char *);
-static inline int sizeof_sleb128 (offsetT);
-static inline int sizeof_uleb128 (valueT);
-static inline int output_sleb128 (char *, offsetT);
-static inline int output_uleb128 (char *, valueT);
-static inline int output_big_sleb128 (char *, LITTLENUM_TYPE *, int);
-static inline int output_big_uleb128 (char *, LITTLENUM_TYPE *, int);
-static int output_big_leb128 (char *, LITTLENUM_TYPE *, int, int);
-static void do_org (segT, expressionS *, int);
-char *demand_copy_string (int *lenP);
-static segT get_segmented_expression (expressionS *expP);
 static segT get_known_segmented_expression (expressionS * expP);
 static void pobegin (void);
 static int get_line_sb (sb *);
@@ -1328,16 +1315,18 @@ s_align_ptwo (int arg)
   s_align (arg, 0);
 }
 
-void
-s_comm (int ignore ATTRIBUTE_UNUSED)
+symbolS *
+s_comm_internal (int param,
+		 symbolS *(*comm_parse_extra) (int, symbolS *, addressT))
 {
-  register char *name;
-  register char c;
-  register char *p;
-  offsetT temp;
-  register symbolS *symbolP;
+  char *name;
+  char c;
+  char *p;
+  offsetT temp, size;
+  symbolS *symbolP = NULL;
   char *stop = NULL;
   char stopc;
+  expressionS exp;
 
   if (flag_mri)
     stop = mri_comment_field (&stopc);
@@ -1352,75 +1341,83 @@ s_comm (int ignore ATTRIBUTE_UNUSED)
     {
       as_bad (_("expected symbol name"));
       discard_rest_of_line ();
-      return;
+      goto out;
     }
 
   SKIP_WHITESPACE ();
 
-  if (*input_line_pointer != ',')
-    {
-      *p = 0;
-      as_bad (_("expected comma after \"%s\""), name);
-      *p = c;
-      ignore_rest_of_line ();
-      if (flag_mri)
-	mri_comment_end (stop, stopc);
-      return;
-    }
-
-  input_line_pointer++;		/* skip ',' */
-
-  if ((temp = get_absolute_expression ()) < 0)
-    {
-      as_warn (_(".COMMon length (%lu) out of range ignored"),
-	       (unsigned long) temp);
-      ignore_rest_of_line ();
-      if (flag_mri)
-	mri_comment_end (stop, stopc);
-      return;
-    }
+  /* Accept an optional comma after the name.  The comma used to be
+     required, but Irix 5 cc does not generate it for .lcomm.  */
+  if (*input_line_pointer == ',')
+    input_line_pointer++;
 
   *p = 0;
-  symbolP = symbol_find_or_make (name);
-  *p = c;
+  temp = get_absolute_expr (&exp);
+  size = temp;
+#ifdef BFD_ASSEMBLER
+  size &= ((offsetT) 2 << (stdoutput->arch_info->bits_per_address - 1)) - 1;
+#endif
+  if (exp.X_op == O_absent)
+    {
+      as_bad (_("missing size expression"));
+      *p = c;
+      ignore_rest_of_line ();
+      goto out;
+    }
+  else if (temp != size || !exp.X_unsigned)
+    {
+      as_warn (_("size (%ld) out of range, ignored"), (long) temp);
+      *p = c;
+      ignore_rest_of_line ();
+      goto out;
+    }
 
+  symbolP = symbol_find_or_make (name);
   if (S_IS_DEFINED (symbolP) && !S_IS_COMMON (symbolP))
     {
-      as_bad (_("symbol `%s' is already defined"),
-	      S_GET_NAME (symbolP));
+      symbolP = NULL;
+      as_bad (_("symbol `%s' is already defined"), name);
+      *p = c;
       ignore_rest_of_line ();
-      if (flag_mri)
-	mri_comment_end (stop, stopc);
-      return;
+      goto out;
     }
 
-  if (S_GET_VALUE (symbolP))
-    {
-      if (S_GET_VALUE (symbolP) != (valueT) temp)
-	as_bad (_("length of .comm \"%s\" is already %ld; not changing to %ld"),
-		S_GET_NAME (symbolP),
-		(long) S_GET_VALUE (symbolP),
-		(long) temp);
-    }
+  size = S_GET_VALUE (symbolP);
+  if (size == 0)
+    size = temp;
+  else if (size != temp)
+    as_warn (_("size of \"%s\" is already %ld; not changing to %ld"),
+	     name, (long) size, (long) temp);
+
+  *p = c;
+  if (comm_parse_extra != NULL)
+    symbolP = (*comm_parse_extra) (param, symbolP, size);
   else
     {
-      S_SET_VALUE (symbolP, (valueT) temp);
+      S_SET_VALUE (symbolP, (valueT) size);
       S_SET_EXTERNAL (symbolP);
-    }
 #ifdef OBJ_VMS
-  {
-    extern int flag_one;
-    if (!temp || !flag_one)
-      S_GET_OTHER(symbolP) = const_flag;
-  }
-#endif /* not OBJ_VMS */
-  know (symbolP->sy_frag == &zero_address_frag);
+      {
+	extern int flag_one;
+	if (size == 0 || !flag_one)
+	  S_GET_OTHER (symbolP) = const_flag;
+      }
+#endif
+    }
 
+  know (symbolP == NULL || symbolP->sy_frag == &zero_address_frag);
   demand_empty_rest_of_line ();
-
+ out:
   if (flag_mri)
     mri_comment_end (stop, stopc);
-}				/* s_comm() */
+  return symbolP;
+}
+
+void
+s_comm (int ignore)
+{
+  s_comm_internal (ignore, NULL);
+}
 
 /* The MRI COMMON pseudo-op.  We handle this by creating a common
    symbol with the appropriate name.  We make s_space do the right
@@ -1917,67 +1914,20 @@ s_linkonce (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
-static void
-s_lcomm_internal (/* 1 if this was a ".bss" directive, which may
-		     require a 3rd argument (alignment); 0 if it was
-		     an ".lcomm" (2 args only).  */
-		  int needs_align,
-		  /* 1 if the alignment value should be interpreted as
-		     the byte boundary, rather than the power of 2.  */
-		  int bytes_p)
+void
+bss_alloc (symbolS *symbolP, addressT size, int align)
 {
-  register char *name;
-  register char c;
-  register char *p;
-  register int temp;
-  register symbolS *symbolP;
+  char *pfrag;
   segT current_seg = now_seg;
   subsegT current_subseg = now_subseg;
-  const int max_alignment = 15;
-  int align = 0;
   segT bss_seg = bss_section;
-
-  name = input_line_pointer;
-  c = get_symbol_end ();
-  p = input_line_pointer;
-  *p = c;
-
-  if (name == p)
-    {
-      as_bad (_("expected symbol name"));
-      discard_rest_of_line ();
-      return;
-    }
-
-  SKIP_WHITESPACE ();
-
-  /* Accept an optional comma after the name.  The comma used to be
-     required, but Irix 5 cc does not generate it.  */
-  if (*input_line_pointer == ',')
-    {
-      ++input_line_pointer;
-      SKIP_WHITESPACE ();
-    }
-
-  if (is_end_of_line[(unsigned char) *input_line_pointer])
-    {
-      as_bad (_("missing size expression"));
-      return;
-    }
-
-  if ((temp = get_absolute_expression ()) < 0)
-    {
-      as_warn (_("BSS length (%d) < 0 ignored"), temp);
-      ignore_rest_of_line ();
-      return;
-    }
 
 #if defined (TC_MIPS) || defined (TC_ALPHA)
   if (OUTPUT_FLAVOR == bfd_target_ecoff_flavour
       || OUTPUT_FLAVOR == bfd_target_elf_flavour)
     {
       /* For MIPS and Alpha ECOFF or ELF, small objects are put in .sbss.  */
-      if ((unsigned) temp <= bfd_get_gp_size (stdoutput))
+      if (size <= bfd_get_gp_size (stdoutput))
 	{
 	  bss_seg = subseg_new (".sbss", 1);
 	  seg_info (bss_seg)->bss = 1;
@@ -1989,147 +1939,118 @@ s_lcomm_internal (/* 1 if this was a ".bss" directive, which may
 	}
     }
 #endif
+  subseg_set (bss_seg, 1);
 
-  if (!needs_align)
+  if (align)
     {
-      TC_IMPLICIT_LCOMM_ALIGNMENT (temp, align);
-
-      /* Still zero unless TC_IMPLICIT_LCOMM_ALIGNMENT set it.  */
-      if (align)
-	record_alignment (bss_seg, align);
+      record_alignment (bss_seg, align);
+      frag_align (align, 0, 0);
     }
+
+  /* Detach from old frag.  */
+  if (S_GET_SEGMENT (symbolP) == bss_seg)
+    symbol_get_frag (symbolP)->fr_symbol = NULL;
+
+  symbol_set_frag (symbolP, frag_now);
+  pfrag = frag_var (rs_org, 1, 1, 0, symbolP, size, NULL);
+  *pfrag = 0;
+
+#ifdef S_SET_SIZE
+  S_SET_SIZE (symbolP, size);
+#endif
+  S_SET_SEGMENT (symbolP, bss_seg);
+
+#ifdef OBJ_COFF
+  /* The symbol may already have been created with a preceding
+     ".globl" directive -- be careful not to step on storage class
+     in that case.  Otherwise, set it to static.  */
+  if (S_GET_STORAGE_CLASS (symbolP) != C_EXT)
+    S_SET_STORAGE_CLASS (symbolP, C_STAT);
+#endif /* OBJ_COFF */
+
+  subseg_set (current_seg, current_subseg);
+}
+
+offsetT
+parse_align (int align_bytes)
+{
+  expressionS exp;
+  addressT align;
+
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+    no_align:
+      as_bad (_("expected alignment after size"));
+      ignore_rest_of_line ();
+      return -1;
+    }
+
+  input_line_pointer++;
+  SKIP_WHITESPACE ();
+
+  align = get_absolute_expr (&exp);
+  if (exp.X_op == O_absent)
+    goto no_align;
+
+  if (!exp.X_unsigned)
+    {
+      as_warn (_("alignment negative; 0 assumed"));
+      align = 0;
+    }
+
+  if (align_bytes && align != 0)
+    {
+      /* convert to a power of 2 alignment */
+      unsigned int alignp2 = 0;
+      while ((align & 1) == 0)
+	align >>= 1, ++alignp2;
+      if (align != 1)
+	{
+	  as_bad (_("alignment not a power of 2"));
+	  ignore_rest_of_line ();
+	  return -1;
+	}
+      align = alignp2;
+    }
+  return align;
+}
+
+/* Called from s_comm_internal after symbol name and size have been
+   parsed.  NEEDS_ALIGN is 0 if it was an ".lcomm" (2 args only),
+   1 if this was a ".bss" directive which has a 3rd argument
+   (alignment as a power of 2), or 2 if this was a ".bss" directive
+   with alignment in bytes.  */
+
+static symbolS *
+s_lcomm_internal (int needs_align, symbolS *symbolP, addressT size)
+{
+  addressT align = 0;
 
   if (needs_align)
     {
-      align = 0;
-      SKIP_WHITESPACE ();
-
-      if (*input_line_pointer != ',')
-	{
-	  as_bad (_("expected comma after size"));
-	  ignore_rest_of_line ();
-	  return;
-	}
-
-      input_line_pointer++;
-      SKIP_WHITESPACE ();
-
-      if (is_end_of_line[(unsigned char) *input_line_pointer])
-	{
-	  as_bad (_("missing alignment"));
-	  return;
-	}
-
-      align = get_absolute_expression ();
-
-      if (bytes_p)
-	{
-	  /* Convert to a power of 2.  */
-	  if (align != 0)
-	    {
-	      unsigned int i;
-
-	      for (i = 0; (align & 1) == 0; align >>= 1, ++i)
-		;
-	      if (align != 1)
-		as_bad (_("alignment not a power of 2"));
-	      align = i;
-	    }
-	}
-
-      if (align > max_alignment)
-	{
-	  align = max_alignment;
-	  as_warn (_("alignment too large; %d assumed"), align);
-	}
-      else if (align < 0)
-	{
-	  align = 0;
-	  as_warn (_("alignment negative; 0 assumed"));
-	}
-
-      record_alignment (bss_seg, align);
+      align = parse_align (needs_align - 1);
+      if (align == (addressT) -1)
+	return NULL;
     }
   else
-    {
-      /* Assume some objects may require alignment on some systems.  */
-#if defined (TC_ALPHA) && ! defined (VMS)
-      if (temp > 1)
-	{
-	  align = ffs (temp) - 1;
-	  if (temp % (1 << align))
-	    abort ();
-	}
-#endif
-    }
+    /* Assume some objects may require alignment on some systems.  */
+    TC_IMPLICIT_LCOMM_ALIGNMENT (size, align);
 
-  *p = 0;
-  symbolP = symbol_find_or_make (name);
-  *p = c;
-
-  if (
-#if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT) \
-     || defined (OBJ_BOUT) || defined (OBJ_MAYBE_BOUT))
-#ifdef BFD_ASSEMBLER
-      (OUTPUT_FLAVOR != bfd_target_aout_flavour
-       || (S_GET_OTHER (symbolP) == 0 && S_GET_DESC (symbolP) == 0)) &&
-#else
-      (S_GET_OTHER (symbolP) == 0 && S_GET_DESC (symbolP) == 0) &&
-#endif
-#endif
-      (S_GET_SEGMENT (symbolP) == bss_seg
-       || (!S_IS_DEFINED (symbolP) && S_GET_VALUE (symbolP) == 0)))
-    {
-      char *pfrag;
-
-      subseg_set (bss_seg, 1);
-
-      if (align)
-	frag_align (align, 0, 0);
-
-      /* Detach from old frag.  */
-      if (S_GET_SEGMENT (symbolP) == bss_seg)
-	symbol_get_frag (symbolP)->fr_symbol = NULL;
-
-      symbol_set_frag (symbolP, frag_now);
-      pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
-			(offsetT) temp, (char *) 0);
-      *pfrag = 0;
-
-      S_SET_SEGMENT (symbolP, bss_seg);
-
-#ifdef OBJ_COFF
-      /* The symbol may already have been created with a preceding
-	 ".globl" directive -- be careful not to step on storage class
-	 in that case.  Otherwise, set it to static.  */
-      if (S_GET_STORAGE_CLASS (symbolP) != C_EXT)
-	{
-	  S_SET_STORAGE_CLASS (symbolP, C_STAT);
-	}
-#endif /* OBJ_COFF */
-
-#ifdef S_SET_SIZE
-      S_SET_SIZE (symbolP, temp);
-#endif
-    }
-  else
-    as_bad (_("symbol `%s' is already defined"), S_GET_NAME (symbolP));
-
-  subseg_set (current_seg, current_subseg);
-
-  demand_empty_rest_of_line ();
+  bss_alloc (symbolP, size, align);
+  return symbolP;
 }
 
 void
 s_lcomm (int needs_align)
 {
-  s_lcomm_internal (needs_align, 0);
+  s_comm_internal (needs_align, s_lcomm_internal);
 }
 
 void
 s_lcomm_bytes (int needs_align)
 {
-  s_lcomm_internal (needs_align, 1);
+  s_comm_internal (needs_align * 2, s_lcomm_internal);
 }
 
 void

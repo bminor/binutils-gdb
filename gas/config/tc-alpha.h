@@ -80,6 +80,21 @@ extern valueT alpha_gp_value;
 	: BFD_RELOC_ALPHA_LINKAGE);
 #endif
 
+#ifndef VMS
+#define TC_IMPLICIT_LCOMM_ALIGNMENT(size, align) \
+  do							\
+    {							\
+      align = 0;					\
+      if (size > 1)					\
+	{						\
+	  addressT temp = 1;				\
+	  while ((size & temp) == 0)			\
+	    ++align, temp <<= 1;			\
+	}						\
+    }							\
+  while (0)
+#endif
+
 #define md_number_to_chars		number_to_chars_littleendian
 
 extern int tc_get_register PARAMS ((int frame));

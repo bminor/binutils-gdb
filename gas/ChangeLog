@@ -1,3 +1,22 @@
+2003-12-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* read.c: Remove unneeded prototypes.
+	(s_comm): Split out code to..
+	(s_comm_internal): ..here.  Tidy error returns.  Rearrange so that
+	"name" from input line may be used in more places.  Merge code
+	testing for valid size from elf_common.  Merge code from
+	s_lcomm_internal.  Call comm_parse_extra.
+	(bss_alloc): New function, split out of s_lcomm_internal and
+	elf_common.
+	(parse_align): Likewise.
+	(s_lcomm_internal): Rewrite.
+	(s_lcomm, s_lcomm_bytes): Use s_comm_internal.
+	* read.h (bss_alloc, parse_align, s_comm_internal): Declare.
+	* config/obj-elf.c (elf_common): Split out code to..
+	(elf_common_parse): ..here.  Remove code common to s_comm_internal,
+	parse_align and bss_alloc.  Rearrange and Tidy.
+	* config/tc-alpha.h (TC_IMPLICIT_LCOMM_ALIGNMENT): Define.
+
 2003-12-10  Zack Weinberg  <zack@codesourcery.com>
 
 	* tc-ppc.c (md_assemble): Rewrite comment about optional operands

@@ -63,7 +63,6 @@ static void adjust_stab_sections PARAMS ((bfd *, asection *, PTR));
 static void build_group_lists PARAMS ((bfd *, asection *, PTR));
 static int elf_separate_stab_sections PARAMS ((void));
 static void elf_init_stab_section PARAMS ((segT));
-static symbolS *elf_common PARAMS ((int));
 
 #ifdef NEED_ECOFF_DEBUG
 static bfd_boolean elf_get_extr PARAMS ((asymbol *, EXTR *));
@@ -287,185 +286,96 @@ elf_file_symbol (s)
 #endif
 }
 
+/* Called from read.c:s_comm after we've parsed .comm symbol, size.
+   Parse a possible alignment value.  */
+
 static symbolS *
-elf_common (is_common)
-     int is_common;
+elf_common_parse (int ignore ATTRIBUTE_UNUSED, symbolS *symbolP, addressT size)
 {
-  char *name;
-  char c;
-  char *p;
-  offsetT temp, size, sign;
-  symbolS *symbolP;
-  int have_align;
-  expressionS exp;
+  addressT align = 0;
+  int is_local = symbol_get_obj (symbolP)->local;
 
-  if (flag_mri && is_common)
+  if (*input_line_pointer == ',')
     {
-      s_mri_common (0);
-      return NULL;
-    }
+      char *save = input_line_pointer;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
-  /* just after name is now '\0' */
-  p = input_line_pointer;
-  *p = c;
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer != ',')
-    {
-      as_bad (_("expected comma after symbol-name"));
-      ignore_rest_of_line ();
-      return NULL;
-    }
-  input_line_pointer++;		/* skip ',' */
-  temp = get_absolute_expr (&exp);
-  sign = (offsetT) 1 << (stdoutput->arch_info->bits_per_address - 1);
-  size = temp & ((sign << 1) - 1);
-  if (temp != size || !exp.X_unsigned)
-    {
-      as_bad (_(".COMMon length (%ld) out of range, ignored."), (long) temp);
-      ignore_rest_of_line ();
-      return NULL;
-    }
-  *p = 0;
-  symbolP = symbol_find_or_make (name);
-  *p = c;
-  if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
-    {
-      as_bad (_("symbol `%s' is already defined"), S_GET_NAME (symbolP));
-      ignore_rest_of_line ();
-      return NULL;
-    }
-  if (S_GET_VALUE (symbolP) != 0)
-    {
-      if (S_GET_VALUE (symbolP) != (valueT) size)
-	{
-	  as_warn (_("length of .comm \"%s\" is already %ld; not changed to %ld"),
-		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP),
-		   (long) size);
-	}
-    }
-  know (symbolP->sy_frag == &zero_address_frag);
-  if (*input_line_pointer != ',')
-    have_align = 0;
-  else
-    {
-      have_align = 1;
       input_line_pointer++;
       SKIP_WHITESPACE ();
-    }
-  if (! have_align || *input_line_pointer != '"')
-    {
-      if (! have_align)
-	temp = 0;
-      else
-	{
-	  temp = get_absolute_expr (&exp);
-	  if (!exp.X_unsigned)
-	    {
-	      temp = 0;
-	      as_warn (_("common alignment negative; 0 assumed"));
-	    }
-	}
-      if (symbol_get_obj (symbolP)->local)
-	{
-	  segT old_sec;
-	  int old_subsec;
-	  char *pfrag;
-	  int align;
 
-	/* allocate_bss: */
-	  old_sec = now_seg;
-	  old_subsec = now_subseg;
-	  if (temp)
-	    {
-	      /* convert to a power of 2 alignment */
-	      for (align = 0; (temp & 1) == 0; temp >>= 1, ++align);
-	      if (temp != 1)
-		{
-		  as_bad (_("common alignment not a power of 2"));
-		  ignore_rest_of_line ();
-		  return NULL;
-		}
-	    }
+      if (*input_line_pointer == '"')
+	{
+	  /* For sparc.  Accept .common symbol, length, "bss"  */
+	  input_line_pointer++;
+	  /* Some use the dot, some don't.  */
+	  if (*input_line_pointer == '.')
+	    input_line_pointer++;
+	  /* Some say data, some say bss.  */
+	  if (strncmp (input_line_pointer, "bss\"", 4) == 0)
+	    input_line_pointer += 4;
+	  else if (strncmp (input_line_pointer, "data\"", 5) == 0)
+	    input_line_pointer += 5;
 	  else
-	    align = 0;
-	  record_alignment (bss_section, align);
-	  subseg_set (bss_section, 0);
-	  if (align)
-	    frag_align (align, 0, 0);
-	  if (S_GET_SEGMENT (symbolP) == bss_section)
-	    symbol_get_frag (symbolP)->fr_symbol = 0;
-	  symbol_set_frag (symbolP, frag_now);
-	  pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
-			    (offsetT) size, (char *) 0);
-	  *pfrag = 0;
-	  S_SET_SIZE (symbolP, size);
-	  S_SET_SEGMENT (symbolP, bss_section);
-	  S_CLEAR_EXTERNAL (symbolP);
-	  subseg_set (old_sec, old_subsec);
+	    {
+	      char *p = input_line_pointer;
+	      char c;
+
+	      while (*--p != '"')
+		;
+	      while (!is_end_of_line[(unsigned char) *input_line_pointer])
+		if (*input_line_pointer++ == '"')
+		  break;
+	      c = *input_line_pointer;
+	      *input_line_pointer = '\0';
+	      as_bad (_("bad .common segment %s"), p);
+	      *input_line_pointer = c;
+	      ignore_rest_of_line ();
+	      return NULL;
+	    }
+	  /* ??? Don't ask me why these are always global.  */
+	  is_local = 0;
 	}
       else
 	{
-	allocate_common:
-	  S_SET_VALUE (symbolP, (valueT) size);
-	  S_SET_ALIGN (symbolP, temp);
-	  S_SET_EXTERNAL (symbolP);
-	  S_SET_SEGMENT (symbolP, bfd_com_section_ptr);
+	  input_line_pointer = save;
+	  align = parse_align (is_local);
+	  if (align == (addressT) -1)
+	    return NULL;
 	}
+    }
+
+  if (is_local)
+    {
+      bss_alloc (symbolP, size, align);
+      S_CLEAR_EXTERNAL (symbolP);
     }
   else
     {
-      input_line_pointer++;
-      /* @@ Some use the dot, some don't.  Can we get some consistency??  */
-      if (*input_line_pointer == '.')
-	input_line_pointer++;
-      /* @@ Some say data, some say bss.  */
-      if (strncmp (input_line_pointer, "bss\"", 4)
-	  && strncmp (input_line_pointer, "data\"", 5))
-	{
-	  while (*--input_line_pointer != '"')
-	    ;
-	  input_line_pointer--;
-	  goto bad_common_segment;
-	}
-      while (*input_line_pointer++ != '"')
-	;
-      goto allocate_common;
+      S_SET_VALUE (symbolP, size);
+      S_SET_ALIGN (symbolP, align);
+      S_SET_EXTERNAL (symbolP);
+      S_SET_SEGMENT (symbolP, bfd_com_section_ptr);
     }
 
   symbol_get_bfdsym (symbolP)->flags |= BSF_OBJECT;
 
-  demand_empty_rest_of_line ();
   return symbolP;
-
-  {
-  bad_common_segment:
-    p = input_line_pointer;
-    while (*p && *p != '\n')
-      p++;
-    c = *p;
-    *p = '\0';
-    as_bad (_("bad .common segment %s"), input_line_pointer + 1);
-    *p = c;
-    input_line_pointer = p;
-    ignore_rest_of_line ();
-    return NULL;
-  }
 }
 
 void
 obj_elf_common (is_common)
      int is_common;
 {
-  elf_common (is_common);
+  if (flag_mri && is_common)
+    s_mri_common (0);
+  else
+    s_comm_internal (0, elf_common_parse);
 }
 
 static void
 obj_elf_tls_common (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
-  symbolS *symbolP = elf_common (0);
+  symbolS *symbolP = s_comm_internal (0, elf_common_parse);
 
   if (symbolP)
     symbol_get_bfdsym (symbolP)->flags |= BSF_THREAD_LOCAL;
