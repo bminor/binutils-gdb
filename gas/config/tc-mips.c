@@ -11824,7 +11824,7 @@ s_cpsetup (int ignore ATTRIBUTE_UNUSED)
       expressionS ex;
 
       ex.X_op = O_symbol;
-      ex.X_add_symbol = symbol_find_or_make ("_gp");
+      ex.X_add_symbol = symbol_find_or_make ("__gnu_local_gp");
       ex.X_op_symbol = NULL;
       ex.X_add_number = 0;
 
