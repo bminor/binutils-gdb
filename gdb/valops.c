@@ -139,7 +139,29 @@ value_cast (type, arg2)
   if (code1 == TYPE_CODE_BOOL) 
     code1 = TYPE_CODE_INT; 
   if (code2 == TYPE_CODE_BOOL) 
-    code2 = TYPE_CODE_INT; 
+    code2 = TYPE_CODE_INT;
+
+  /* A cast to an undetermined-length array_type, such as (TYPE [])OBJECT,
+     is treated like a cast to (TYPE [N])OBJECT,
+     where N is sizeof(OBJECT)/sizeof(TYPE). */
+  if (code1 == TYPE_CODE_ARRAY
+      && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0
+      && TYPE_ARRAY_UPPER_BOUND_TYPE (type) == BOUND_CANNOT_BE_DETERMINED)
+    {
+      struct type *element_type = TYPE_TARGET_TYPE (type);
+      struct type *range_type = TYPE_INDEX_TYPE (type);
+      int low_bound = TYPE_LOW_BOUND (range_type);
+      int val_length = TYPE_LENGTH (VALUE_TYPE (arg2));
+      int new_length = val_length / TYPE_LENGTH (element_type);
+      if (val_length % TYPE_LENGTH (element_type) != 0)
+	warning("array element type size does not divide object size in cast");
+      range_type = create_range_type ((struct type *) NULL,
+				      TYPE_TARGET_TYPE (range_type),
+				      low_bound, new_length + low_bound - 1);
+      VALUE_TYPE (arg2) = create_array_type ((struct type *) NULL,
+					     element_type, range_type);
+      return arg2;
+    }
 
   scalar = (code2 == TYPE_CODE_INT || code2 == TYPE_CODE_FLT
 	    || code2 == TYPE_CODE_ENUM || code2 == TYPE_CODE_RANGE);
@@ -815,7 +837,7 @@ value_arg_coerce (arg, param_type)
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_REF:
-      if (TYPE_CODE (SYMBOL_TYPE (arg)) != TYPE_CODE_REF)
+      if (TYPE_CODE (VALUE_TYPE (arg)) != TYPE_CODE_REF)
 	{
 	  arg = value_addr (arg);
 	  VALUE_TYPE (arg) = param_type;
@@ -1911,8 +1933,7 @@ value_struct_elt_for_reference (domain, offset, curtype, name, intype)
 		(lookup_reference_type
 		 (lookup_member_type (TYPE_FN_FIELD_TYPE (f, j),
 				      domain)),
-		 (LONGEST) METHOD_PTR_FROM_VOFFSET
-		  (TYPE_FN_FIELD_VOFFSET (f, j)));
+		 (LONGEST) METHOD_PTR_FROM_VOFFSET (TYPE_FN_FIELD_VOFFSET (f, j)));
 	    }
 	  else
 	    {

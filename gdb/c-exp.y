@@ -548,8 +548,7 @@ block	:	BLOCKNAME
 			      struct symtab *tem =
 				  lookup_symtab (copy_name ($1.stoken));
 			      if (tem)
-				$$ = BLOCKVECTOR_BLOCK
-					 (BLOCKVECTOR (tem), STATIC_BLOCK);
+				$$ = BLOCKVECTOR_BLOCK (BLOCKVECTOR (tem), STATIC_BLOCK);
 			      else
 				error ("No file or function \"%s\".",
 				       copy_name ($1.stoken));
