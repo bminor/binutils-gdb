@@ -268,7 +268,7 @@ extern initialize_file_ftype _initialize_reggroup; /* -Wmissing-prototypes */
 void
 _initialize_reggroup (void)
 {
-  reggroups_data = register_gdbarch_data (reggroups_init);
+  reggroups_data = register_gdbarch_data (NULL, reggroups_init);
 
   /* The pre-defined list of groups.  */
   add_group (&default_groups, general_reggroup, XMALLOC (struct reggroup_el));

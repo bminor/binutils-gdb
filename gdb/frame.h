@@ -260,6 +260,7 @@ extern CORE_ADDR frame_sp_unwind (struct frame_info *);
 /* Following on from the `resume' address.  Return the entry point
    address of the function containing that resume address, or zero if
    that function isn't known.  */
+extern CORE_ADDR frame_unwind_func_by_symtab (struct frame_info *fi);
 extern CORE_ADDR frame_func_unwind (struct frame_info *fi);
 extern CORE_ADDR get_frame_func (struct frame_info *fi);
 

@@ -65,7 +65,8 @@ struct regcache;
    with the other unwind methods.  Memory for that cache should be
    allocated using frame_obstack_zalloc().  */
 
-typedef void (frame_this_id_ftype) (struct frame_info *next_frame,
+typedef void (frame_this_id_ftype) (const struct frame_unwind *self,
+				    struct frame_info *next_frame,
 				    void **this_prologue_cache,
 				    struct frame_id *this_id);
 
@@ -101,13 +102,15 @@ typedef void (frame_this_id_ftype) (struct frame_info *next_frame,
    with the other unwind methods.  Memory for that cache should be
    allocated using frame_obstack_zalloc().  */
 
-typedef void (frame_prev_register_ftype) (struct frame_info *next_frame,
-					  void **this_prologue_cache,
-					  int prev_regnum,
-					  int *optimized,
-					  enum lval_type * lvalp,
-					  CORE_ADDR *addrp,
-					  int *realnump, void *valuep);
+typedef void (frame_prev_register_ftype)
+     (const struct frame_unwind *self,
+      struct frame_info *next_frame,
+      void **this_prologue_cache,
+      int prev_regnum,
+      int *optimized,
+      enum lval_type * lvalp,
+      CORE_ADDR *addrp,
+      int *realnump, void *valuep);
 
 struct frame_unwind
 {
@@ -118,20 +121,33 @@ struct frame_unwind
      here?  */
   frame_this_id_ftype *this_id;
   frame_prev_register_ftype *prev_register;
+  const struct frame_data *unwind_data;
 };
 
 /* Given the NEXT frame, take a wiff of THIS frame's registers (namely
    the PC and attributes) and if it is the applicable unwinder return
    the unwind methods, or NULL if it is not.  */
 
-typedef const struct frame_unwind *(frame_unwind_sniffer_ftype) (struct frame_info *next_frame);
+struct frame_unwind_sniffer;
+
+typedef const struct frame_unwind *(frame_unwind_sniffer_ftype)
+     (const struct frame_unwind_sniffer *self,
+      struct frame_info *next_frame);
+
+struct frame_unwind_sniffer
+{
+  frame_unwind_sniffer_ftype *sniffer;
+  const struct frame_data *sniffer_data;
+};
 
 /* Add a frame sniffer to the list.  The predicates are polled in the
    order that they are appended.  The initial list contains the dummy
    frame sniffer.  */
 
-extern void frame_unwind_append_sniffer (struct gdbarch *gdbarch,
-					 frame_unwind_sniffer_ftype *sniffer);
+void frame_unwind_append_sniffer (struct gdbarch *gdbarch,
+				  frame_unwind_sniffer_ftype *sniffer);
+void frame_unwind_sniffer_append (struct gdbarch *gdbarch,
+				  const struct frame_unwind_sniffer *sniffer);
 
 /* Iterate through the next frame's sniffers until one returns with an
    unwinder implementation.  */

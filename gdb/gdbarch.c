@@ -5382,7 +5382,8 @@ struct gdbarch_data
 {
   unsigned index;
   int init_p;
-  gdbarch_data_init_ftype *init;
+  gdbarch_data_pre_init_ftype *pre_init;
+  gdbarch_data_post_init_ftype *post_init;
 };
 
 struct gdbarch_data_registration
@@ -5403,10 +5404,12 @@ struct gdbarch_data_registry gdbarch_data_registry =
 };
 
 struct gdbarch_data *
-register_gdbarch_data (gdbarch_data_init_ftype *init)
+register_gdbarch_data (gdbarch_data_pre_init_ftype *pre_init,
+		       gdbarch_data_post_init_ftype *post_init)
 {
   struct gdbarch_data_registration **curr;
   /* Append the new registraration.  */
+  gdb_assert ((pre_init != NULL) != (post_init != NULL));
   for (curr = &gdbarch_data_registry.registrations;
        (*curr) != NULL;
        curr = &(*curr)->next);
@@ -5414,7 +5417,8 @@ register_gdbarch_data (gdbarch_data_init_ftype *init)
   (*curr)->next = NULL;
   (*curr)->data = XMALLOC (struct gdbarch_data);
   (*curr)->data->index = gdbarch_data_registry.nr++;
-  (*curr)->data->init = init;
+  (*curr)->data->pre_init = pre_init;
+  (*curr)->data->post_init = post_init;
   (*curr)->data->init_p = 1;
   return (*curr)->data;
 }
@@ -5450,23 +5454,23 @@ void *
 gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *data)
 {
   gdb_assert (data->index < gdbarch->nr_data);
-  /* The data-pointer isn't initialized, call init() to get a value but
-     only if the architecture initializaiton has completed.  Otherwise
-     punt - hope that the caller knows what they are doing.  */
-  if (gdbarch->data[data->index] == NULL
-      && gdbarch->initialized_p)
+  if (gdbarch->data[data->index] == NULL)
     {
       /* Be careful to detect an initialization cycle.  */
       gdb_assert (data->init_p);
       data->init_p = 0;
-      gdb_assert (data->init != NULL);
-      gdbarch->data[data->index] = data->init (gdbarch);
+      if (data->pre_init != NULL)
+	gdbarch->data[data->index] = data->pre_init (gdbarch->obstack);
+      else if (gdbarch->initialized_p
+	       && data->post_init != NULL)
+	gdbarch->data[data->index] = data->post_init (gdbarch);
+      else
+	internal_error (__FILE__, __LINE__, "Bad initialization method");
       data->init_p = 1;
       gdb_assert (gdbarch->data[data->index] != NULL);
     }
   return gdbarch->data[data->index];
 }
-
 
 
 /* Keep a registry of swapped data required by GDB modules. */

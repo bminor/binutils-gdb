@@ -541,6 +541,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	stabsread.c stack.c std-regs.c symfile.c symmisc.c symtab.c \
 	target.c thread.c top.c tracepoint.c \
 	trad-frame.c \
+	tramp-frame.c \
 	typeprint.c \
 	ui-out.c utils.c ui-file.h ui-file.c \
 	user-regs.c \
@@ -904,7 +905,8 @@ COMMON_OBS = $(DEPFILES) $(YYOBJ) \
 	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o cp-support.o \
 	cp-namespace.o \
 	reggroups.o \
-	trad-frame.o
+	trad-frame.o \
+	tramp-frame.o
 
 TSOBS = inflow.o
 

@@ -22,6 +22,8 @@
 #if !defined (FRAME_BASE_H)
 #define FRAME_BASE_H 1
 
+struct frame_base;
+struct frame_base_sniffer;
 struct frame_info;
 struct frame_id;
 struct frame_unwind;
@@ -44,17 +46,20 @@ struct regcache;
 
 /* A generic base address.  */
 
-typedef CORE_ADDR (frame_this_base_ftype) (struct frame_info *next_frame,
+typedef CORE_ADDR (frame_this_base_ftype) (const struct frame_base *self,
+					   struct frame_info *next_frame,
 					   void **this_base_cache);
 
 /* The base address of the frame's local variables.  */
 
-typedef CORE_ADDR (frame_this_locals_ftype) (struct frame_info *next_frame,
+typedef CORE_ADDR (frame_this_locals_ftype) (const struct frame_base *self,
+					     struct frame_info *next_frame,
 					     void **this_base_cache);
 
 /* The base address of the frame's arguments / parameters.  */
 
-typedef CORE_ADDR (frame_this_args_ftype) (struct frame_info *next_frame,
+typedef CORE_ADDR (frame_this_args_ftype) (const struct frame_base *self,
+					   struct frame_info *next_frame,
 					   void **this_base_cache);
 
 struct frame_base
@@ -65,18 +70,28 @@ struct frame_base
   frame_this_base_ftype *this_base;
   frame_this_locals_ftype *this_locals;
   frame_this_args_ftype *this_args;
+  struct frame_data *base_data;
 };
 
 /* Given the NEXT frame, return the frame base methods for THIS frame,
    or NULL if it can't handle THIS frame.  */
 
-typedef const struct frame_base *(frame_base_sniffer_ftype) (struct frame_info *next_frame);
+typedef const struct frame_base *(frame_base_sniffer_ftype)
+     (const struct frame_base_sniffer *self,
+      struct frame_info *next_frame);
+struct frame_base_sniffer
+{
+  frame_base_sniffer_ftype *sniffer;
+  const struct frame_data *sniffer_data;
+};
 
 /* Append a frame base sniffer to the list.  The sniffers are polled
    in the order that they are appended.  */
 
 extern void frame_base_append_sniffer (struct gdbarch *gdbarch,
 				       frame_base_sniffer_ftype *sniffer);
+extern void frame_base_sniffer_append (struct gdbarch *gdbarch,
+				       const struct frame_base_sniffer *sniffer);
 
 /* Set the default frame base.  If all else fails, this one is
    returned.  If this isn't set, the default is to use legacy code

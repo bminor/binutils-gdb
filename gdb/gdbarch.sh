@@ -890,6 +890,7 @@ struct reggroup;
 struct regset;
 struct disassemble_info;
 struct target_ops;
+struct obstack;
 
 extern struct gdbarch *current_gdbarch;
 
@@ -1218,11 +1219,13 @@ extern void deprecated_current_gdbarch_select_hack (struct gdbarch *gdbarch);
 
 struct gdbarch_data;
 
-typedef void *(gdbarch_data_init_ftype) (struct gdbarch *gdbarch);
-extern struct gdbarch_data *register_gdbarch_data (gdbarch_data_init_ftype *init);
+typedef void *(gdbarch_data_pre_init_ftype) (struct obstack *obstack);
+typedef void *(gdbarch_data_post_init_ftype) (struct gdbarch *gdbarch);
+extern struct gdbarch_data *register_gdbarch_data (gdbarch_data_pre_init_ftype *pre,
+                                                   gdbarch_data_post_init_ftype *post);
 extern void set_gdbarch_data (struct gdbarch *gdbarch,
-			      struct gdbarch_data *data,
-			      void *pointer);
+                              struct gdbarch_data *data,
+                              void *pointer);
 
 extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
 

@@ -207,5 +207,5 @@ extern initialize_file_ftype _initialize_user_regs; /* -Wmissing-prototypes */
 void
 _initialize_user_regs (void)
 {
-  user_regs_data = register_gdbarch_data (user_regs_init);
+  user_regs_data = register_gdbarch_data (NULL, user_regs_init);
 }
