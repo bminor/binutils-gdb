@@ -674,7 +674,9 @@ static void s_ent PARAMS ((int));
 static void s_mipsend PARAMS ((int));
 static void s_file PARAMS ((int));
 static void s_mips_stab PARAMS ((int));
+static void s_mips_weakext PARAMS ((int));
 static int mips16_extended_frag PARAMS ((fragS *, asection *, long));
+
 
 static int validate_mips_insn PARAMS ((const struct mips_opcode *));
 
@@ -694,7 +696,7 @@ static int validate_mips_insn PARAMS ((const struct mips_opcode *));
    not MIPS CPU specific, but are also not specific to the object file
    format.  This file is probably the best place to define them, but
    they are not currently supported: .asm0, .endr, .lab, .repeat,
-   .struct, .weakext.  */
+   .struct.  */
 
 static const pseudo_typeS mips_pseudo_table[] =
 {
@@ -718,6 +720,7 @@ static const pseudo_typeS mips_pseudo_table[] =
   {"err", s_err, 0},
   {"half", s_cons, 1},
   {"dword", s_cons, 3},
+  {"weakext", s_mips_weakext, 0},
 
  /* These pseudo-ops are defined in read.c, but must be overridden
      here for one reason or another.  */
@@ -1794,11 +1797,11 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		 | ((address_expr->X_add_number & 0x3fffc) >> 2));
 	      break;
 
-	    /* start-sanitize-r5900
+	    /* start-sanitize-r5900 */
 	    case BFD_RELOC_MIPS15_S3:
 	      ip->insn_opcode |= ((imm_expr.X_add_number & 0x7fff) >> 3) << 6;
 	      break;
-	    /* end-sanitize-r5900
+	    /* end-sanitize-r5900 */
 
 	    case BFD_RELOC_16_PCREL_S2:
 	      goto need_reloc;
@@ -6912,6 +6915,36 @@ validate_mips_insn (opc)
       case 'x': break;
       case 'z': break;
       case 'P': USE_BITS (OP_MASK_PERFREG,	OP_SH_PERFREG);	break;
+	/* start-sanitize-r5900 */
+      case '0': USE_BITS (OP_MASK_VADDI,	OP_SH_VADDI);	break;
+      case '1': USE_BITS (OP_MASK_VUTREG,	OP_SH_VUTREG);	break;
+      case '2': USE_BITS (OP_MASK_VUSREG,	OP_SH_VUSREG);	break;
+      case '3': USE_BITS (OP_MASK_VUDREG,	OP_SH_VUDREG);	break;
+      case '4': USE_BITS (OP_MASK_VUTREG,	OP_SH_VUTREG);	break;
+      case '5': USE_BITS (OP_MASK_VUSREG,	OP_SH_VUSREG);	break;
+      case '6': USE_BITS (OP_MASK_VUDREG,	OP_SH_VUDREG);	break;
+      case '7':
+	USE_BITS (OP_MASK_VUTREG,		OP_SH_VUTREG);
+	USE_BITS (OP_MASK_VUFTF,		OP_SH_VUFTF);
+	break;
+      case '8':
+	USE_BITS (OP_MASK_VUSREG,		OP_SH_VUSREG);
+	USE_BITS (OP_MASK_VUFSF,		OP_SH_VUFSF);
+	break;
+      case '9': break;
+      case 'K': break;
+      case 'X': break;
+      case 'U': break;
+      case 'Q': break;
+      case 'J': break;
+      case 'O': USE_BITS (OP_MASK_VUCALLMS,	OP_SH_VUCALLMS);break;
+      case '&': USE_BITS (OP_MASK_VUDEST,	OP_SH_VUDEST);	break;
+      case '#':
+	p++;
+	 break;
+      case '-': break;
+      case '+': break;
+	/* end-sanitize-r5900 */
 	/* start-sanitize-vr5400 */
       case 'e': USE_BITS (OP_MASK_VECBYTE,	OP_SH_VECBYTE);	break;
       case '%': USE_BITS (OP_MASK_VECALIGN,	OP_SH_VECALIGN); break;
@@ -10720,6 +10753,55 @@ s_mips_stab (type)
     mips16_mark_labels ();
 
   s_stab (type);
+}
+
+/* Handle the .weakext pseudo-op as defined in Kane and Heinrich.
+ */
+
+static void
+s_mips_weakext (ignore)
+     int ignore;
+{
+  char *name;
+  int c;
+  symbolS *symbolP;
+  expressionS exp;
+
+  name = input_line_pointer;
+  c = get_symbol_end ();
+  symbolP = symbol_find_or_make (name);
+  S_SET_WEAK (symbolP);
+  *input_line_pointer = c;
+
+  SKIP_WHITESPACE ();
+
+  if (! is_end_of_line[(unsigned char) *input_line_pointer])
+    {
+      if (S_IS_DEFINED (symbolP))
+	{
+	  as_bad ("Ignoring attempt to redefine symbol `%s'.",
+		  S_GET_NAME (symbolP));
+	  ignore_rest_of_line ();
+	  return;
+	}
+      
+      if (*input_line_pointer == ',')
+	{
+	  ++input_line_pointer;
+	  SKIP_WHITESPACE ();
+	}
+      
+      expression (&exp);
+      if (exp.X_op != O_symbol)
+	{
+	  as_bad ("bad .weakext directive");
+	  ignore_rest_of_line();
+	  return;
+	}
+      symbolP->sy_value = exp;
+    }
+
+  demand_empty_rest_of_line ();
 }
 
 /* Parse a register string into a number.  Called from the ECOFF code
