@@ -1,5 +1,5 @@
 /* FRV-specific support for 32-bit ELF.
-   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004  Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -350,7 +350,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 0xffff,		/* dst_mask */
 	 FALSE),	        /* pcrel_offset */
 
-  /* The 32-bit address of the canonical descriptor of a function.  */
+  /* The 64-bit descriptor of a function.  */
   HOWTO (R_FRV_FUNCDESC_VALUE,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -461,6 +461,265 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 0xffff,		/* dst_mask */
 	 FALSE),	        /* pcrel_offset */
 
+  /* A 24-bit pc-relative relocation referencing the TLS PLT entry for
+     a thread-local symbol.  If the symbol number is 0, it refers to
+     the module.  */
+  HOWTO (R_FRV_GETTLSOFF,	/* type */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 26,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_GETTLSOFF",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0x7e03ffff,		/* src_mask */
+	 0x7e03ffff,		/* dst_mask */
+	 TRUE),		        /* pcrel_offset */
+
+  /* A 64-bit TLS descriptor for a symbol.  This relocation is only
+     valid as a REL, dynamic relocation.  */
+  HOWTO (R_FRV_TLSDESC_VALUE,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_TLSDESC_VALUE", /* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* A 12-bit signed operand with the GOT offset for the TLS
+     descriptor of the symbol.  */
+  HOWTO (R_FRV_GOTTLSDESC12,    /* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 12,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_GOTTLSDESC12",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xfff,		        /* src_mask */
+	 0xfff,		        /* dst_mask */
+	 FALSE),	        /* pcrel_offset */
+
+  /* The upper 16 bits of the GOT offset for the TLS descriptor of the
+     symbol.  */
+  HOWTO (R_FRV_GOTTLSDESCHI,    /* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_GOTTLSDESCHI",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),	        /* pcrel_offset */
+
+  /* The lower 16 bits of the GOT offset for the TLS descriptor of the
+     symbol.  */
+  HOWTO (R_FRV_GOTTLSDESCLO,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_GOTTLSDESCLO",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),	        /* pcrel_offset */
+
+  /* A 12-bit signed operand with the offset from the module base
+     address to the thread-local symbol address.  */
+  HOWTO (R_FRV_TLSMOFF12,        /* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 12,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_TLSMOFF12",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xfff,		        /* src_mask */
+	 0xfff,		        /* dst_mask */
+	 FALSE),	        /* pcrel_offset */
+
+  /* The upper 16 bits of the offset from the module base address to
+     the thread-local symbol address.  */
+  HOWTO (R_FRV_TLSMOFFHI,        /* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_TLSMOFFHI",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),	        /* pcrel_offset */
+
+  /* The lower 16 bits of the offset from the module base address to
+     the thread-local symbol address.  */
+  HOWTO (R_FRV_TLSMOFFLO,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_TLSMOFFLO",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),	        /* pcrel_offset */
+
+  /* A 12-bit signed operand with the GOT offset for the TLSOFF entry
+     for a symbol.  */
+  HOWTO (R_FRV_GOTTLSOFF12,        /* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 12,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_GOTTLSOFF12",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xfff,		        /* src_mask */
+	 0xfff,		        /* dst_mask */
+	 FALSE),	        /* pcrel_offset */
+
+  /* The upper 16 bits of the GOT offset for the TLSOFF entry for a
+     symbol.  */
+  HOWTO (R_FRV_GOTTLSOFFHI,        /* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_GOTTLSOFFHI",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),	        /* pcrel_offset */
+
+  /* The lower 16 bits of the GOT offset for the TLSOFF entry for a
+     symbol.  */
+  HOWTO (R_FRV_GOTTLSOFFLO,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_GOTTLSOFFLO",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),	        /* pcrel_offset */
+
+  /* The 32-bit offset from the thread pointer (not the module base
+     address) to a thread-local symbol.  */
+  HOWTO (R_FRV_TLSOFF,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_TLSOFF",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* An annotation for linker relaxation, that denotes the
+     symbol+addend whose TLS descriptor is referenced by the sum of
+     the two input registers of an ldd instruction.  */
+  HOWTO (R_FRV_TLSDESC_RELAX,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_TLSDESC_RELAX",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* An annotation for linker relaxation, that denotes the
+     symbol+addend whose TLS resolver entry point is given by the sum
+     of the two register operands of an calll instruction.  */
+  HOWTO (R_FRV_GETTLSOFF_RELAX,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_GETTLSOFF_RELAX", /* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* An annotation for linker relaxation, that denotes the
+     symbol+addend whose TLS offset GOT entry is given by the sum of
+     the two input registers of an ld instruction.  */
+  HOWTO (R_FRV_TLSOFF_RELAX,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_TLSOFF_RELAX",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* A 32-bit offset from the module base address to
+     the thread-local symbol address.  */
+  HOWTO (R_FRV_TLSMOFF,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_TLSMOFF",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),	        /* pcrel_offset */
 };
 
 /* GNU extension to record C++ vtable hierarchy.  */
@@ -542,6 +801,50 @@ static reloc_howto_type elf32_frv_rel_funcdesc_value_howto =
 	 0xffffffff,		/* dst_mask */
 	 FALSE);		/* pcrel_offset */
 
+static reloc_howto_type elf32_frv_rel_tlsdesc_value_howto =
+  /* A 64-bit TLS descriptor for a symbol.  The first word resolves to
+     an entry point, and the second resolves to a special argument.
+     If the symbol turns out to be in static TLS, the entry point is a
+     return instruction, and the special argument is the TLS offset
+     for the symbol.  If it's in dynamic TLS, the entry point is a TLS
+     offset resolver, and the special argument is a pointer to a data
+     structure allocated by the dynamic loader, containing the GOT
+     address for the offset resolver, the module id, the offset within
+     the module, and anything else the TLS offset resolver might need
+     to determine the TLS offset for the symbol in the running
+     thread.  */
+  HOWTO (R_FRV_TLSDESC_VALUE,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_TLSDESC_VALUE", /* name */
+	 TRUE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE);		/* pcrel_offset */
+
+static reloc_howto_type elf32_frv_rel_tlsoff_howto =
+  /* The 32-bit offset from the thread pointer (not the module base
+     address) to a thread-local symbol.  */
+  HOWTO (R_FRV_TLSOFF,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FRV_TLSOFF",	/* name */
+	 TRUE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE);		/* pcrel_offset */
+
+
 
 /* Map BFD reloc types to FRV ELF reloc types.  */
 #if 0
@@ -578,6 +881,22 @@ static const struct frv_reloc_map frv_reloc_map [] =
   { BFD_RELOC_FRV_GOTOFF12,   R_FRV_GOTOFF12 },
   { BFD_RELOC_FRV_GOTOFFHI,   R_FRV_GOTOFFHI },
   { BFD_RELOC_FRV_GOTOFFLO,   R_FRV_GOTOFFLO },
+  { BFD_RELOC_FRV_GETTLSOFF,  R_FRV_GETTLSOFF },
+  { BFD_RELOC_FRV_TLSDESC_VALUE, R_FRV_TLSDESC_VALUE },
+  { BFD_RELOC_FRV_GOTTLSDESC12, R_FRV_GOTTLSDESC12 },
+  { BFD_RELOC_FRV_GOTTLSDESCHI, R_FRV_GOTTLSDESCHI },
+  { BFD_RELOC_FRV_GOTTLSDESCLO, R_FRV_GOTTLSDESCLO },
+  { BFD_RELOC_FRV_TLSMOFF12,  R_FRV_TLSMOFF12 },
+  { BFD_RELOC_FRV_TLSMOFFHI,  R_FRV_TLSMOFFHI },
+  { BFD_RELOC_FRV_TLSMOFFLO,  R_FRV_TLSMOFFLO },
+  { BFD_RELOC_FRV_GOTTLSOFF12, R_FRV_GOTTLSOFF12 },
+  { BFD_RELOC_FRV_GOTTLSOFFHI, R_FRV_GOTTLSOFFHI },
+  { BFD_RELOC_FRV_GOTTLSOFFLO, R_FRV_GOTTLSOFFLO },
+  { BFD_RELOC_FRV_TLSOFF,     R_FRV_TLSOFF },
+  { BFD_RELOC_FRV_TLSDESC_RELAX, R_FRV_TLSDESC_RELAX },
+  { BFD_RELOC_FRV_GETTLSOFF_RELAX, R_FRV_GETTLSOFF_RELAX },
+  { BFD_RELOC_FRV_TLSOFF_RELAX, R_FRV_TLSOFF_RELAX },
+  { BFD_RELOC_FRV_TLSMOFF,    R_FRV_TLSMOFF },
   { BFD_RELOC_VTABLE_INHERIT, R_FRV_GNU_VTINHERIT },
   { BFD_RELOC_VTABLE_ENTRY,   R_FRV_GNU_VTENTRY },
 };
@@ -605,11 +924,16 @@ struct frvfdpic_elf_link_hash_table
   /* GOT base offset.  */
   bfd_vma got0;
   /* Location of the first non-lazy PLT entry, i.e., the number of
-     bytes taken by lazy PLT entries.  */
+     bytes taken by lazy PLT entries.  If locally-bound TLS
+     descriptors require a ret instruction, it will be placed at this
+     offset.  */
   bfd_vma plt0;
   /* A hash table holding information about which symbols were
      referenced with which PIC-related relocations.  */
   struct htab *relocs_info;
+  /* Summary reloc information collected by
+     _frvfdpic_count_got_plt_entries.  */
+  struct _frvfdpic_dynamic_got_info *g;
 };
 
 /* Get the FRV ELF linker hash table from a link_info structure.  */
@@ -633,6 +957,96 @@ struct frvfdpic_elf_link_hash_table
   (frvfdpic_hash_table (info)->got0)
 #define frvfdpic_plt_initial_offset(info) \
   (frvfdpic_hash_table (info)->plt0)
+#define frvfdpic_dynamic_got_plt_info(info) \
+  (frvfdpic_hash_table (info)->g)
+
+/* Currently it's the same, but if some day we have a reason to change
+   it, we'd better be using a different macro.
+
+   FIXME: if there's any TLS PLT entry that uses local-exec or
+   initial-exec models, we could use the ret at the end of any of them
+   instead of adding one more.  */
+#define frvfdpic_plt_tls_ret_offset(info) \
+  (frvfdpic_plt_initial_offset (info))
+
+/* The name of the dynamic interpreter.  This is put in the .interp
+   section.  */
+
+#define ELF_DYNAMIC_INTERPRETER "/lib/ld.so.1"
+
+#define DEFAULT_STACK_SIZE 0x20000
+
+/* This structure is used to collect the number of entries present in
+   each addressable range of the got.  */
+struct _frvfdpic_dynamic_got_info
+{
+  /* Several bits of information about the current link.  */
+  struct bfd_link_info *info;
+  /* Total GOT size needed for GOT entries within the 12-, 16- or 32-bit
+     ranges.  */
+  bfd_vma got12, gotlos, gothilo;
+  /* Total GOT size needed for function descriptor entries within the 12-,
+     16- or 32-bit ranges.  */
+  bfd_vma fd12, fdlos, fdhilo;
+  /* Total GOT size needed by function descriptor entries referenced
+     in PLT entries, that would be profitable to place in offsets
+     close to the PIC register.  */
+  bfd_vma fdplt;
+  /* Total PLT size needed by lazy PLT entries.  */
+  bfd_vma lzplt;
+  /* Total GOT size needed for TLS descriptor entries within the 12-,
+     16- or 32-bit ranges.  */
+  bfd_vma tlsd12, tlsdlos, tlsdhilo;
+  /* Total GOT size needed by TLS descriptors referenced in PLT
+     entries, that would be profitable to place in offers close to the
+     PIC register.  */
+  bfd_vma tlsdplt;
+  /* Total PLT size needed by TLS lazy PLT entries.  */
+  bfd_vma tlslzplt;
+  /* Number of relocations carried over from input object files.  */
+  unsigned long relocs;
+  /* Number of fixups introduced by relocations in input object files.  */
+  unsigned long fixups;
+  /* The number of fixups that reference the ret instruction added to
+     the PLT for locally-resolved TLS descriptors.  */
+  unsigned long tls_ret_refs;
+};
+
+/* This structure is used to assign offsets to got entries, function
+   descriptors, plt entries and lazy plt entries.  */
+
+struct _frvfdpic_dynamic_got_plt_info
+{
+  /* Summary information collected with _frvfdpic_count_got_plt_entries.  */
+  struct _frvfdpic_dynamic_got_info g;
+
+  /* For each addressable range, we record a MAX (positive) and MIN
+     (negative) value.  CUR is used to assign got entries, and it's
+     incremented from an initial positive value to MAX, then from MIN
+     to FDCUR (unless FDCUR wraps around first).  FDCUR is used to
+     assign function descriptors, and it's decreased from an initial
+     non-positive value to MIN, then from MAX down to CUR (unless CUR
+     wraps around first).  All of MIN, MAX, CUR and FDCUR always point
+     to even words.  ODD, if non-zero, indicates an odd word to be
+     used for the next got entry, otherwise CUR is used and
+     incremented by a pair of words, wrapping around when it reaches
+     MAX.  FDCUR is decremented (and wrapped) before the next function
+     descriptor is chosen.  FDPLT indicates the number of remaining
+     slots that can be used for function descriptors used only by PLT
+     entries.
+
+     TMAX, TMIN and TCUR are used to assign TLS descriptors.  TCUR
+     starts as MAX, and grows up to TMAX, then wraps around to TMIN
+     and grows up to MIN.  TLSDPLT indicates the number of remaining
+     slots that can be used for TLS descriptors used only by TLS PLT
+     entries.  */
+  struct _frvfdpic_dynamic_got_alloc_data
+  {
+    bfd_signed_vma max, cur, odd, fdcur, min;
+    bfd_signed_vma tmax, tcur, tmin;
+    bfd_vma fdplt, tlsdplt;
+  } got12, gotlos, gothilo;
+};
 
 /* Create an FRV ELF linker hash table.  */
 
@@ -661,7 +1075,15 @@ frvfdpic_elf_link_hash_table_create (bfd *abfd)
    its function descriptor must be assigned by the dynamic linker.  */
 #define FRVFDPIC_SYM_LOCAL(INFO, H) \
   (_bfd_elf_symbol_refs_local_p ((H), (INFO), 1) \
-   || ! elf_hash_table (INFO)->dynamic_sections_created)
+   || ! elf_hash_table (INFO)->dynamic_sections_created \
+   /* These two additional alternatives are needed for TLS
+      relocations, that use *ABS*+offset relocations to refer to the
+      TLS section of the local module.  FIXME: At some point during
+      linking, the definition section ceases to be regarded as the
+      absolute section, and starts being regarded as the undefined
+      section.  */ \
+   || bfd_is_abs_section ((H)->root.u.def.section) \
+   || bfd_is_und_section ((H)->root.u.def.section))
 #define FRVFDPIC_FUNCDESC_LOCAL(INFO, H) \
   ((H)->dynindx == -1 || ! elf_hash_table (INFO)->dynamic_sections_created)
 
@@ -707,6 +1129,24 @@ struct frvfdpic_relocs_info
   unsigned fdgoff12:1;
   unsigned fdgofflos:1;
   unsigned fdgoffhilo:1;
+  /* Whether a GETTLSOFF relocation references symbol+addend.  */
+  unsigned tlsplt:1;
+  /* FIXME: we should probably add tlspltdesc, tlspltoff and
+     tlspltimm, to tell what kind of TLS PLT entry we're generating.
+     We might instead just pre-compute flags telling whether the
+     object is suitable for local exec, initial exec or general
+     dynamic addressing, and use that all over the place.  We could
+     also try to do a better job of merging TLSOFF and TLSDESC entries
+     in main executables, but perhaps we can get rid of TLSDESC
+     entirely in them instead.  */
+  /* Whether a GOTTLSDESC relocation references symbol+addend.  */
+  unsigned tlsdesc12:1;
+  unsigned tlsdesclos:1;
+  unsigned tlsdeschilo:1;
+  /* Whether a GOTTLSOFF relocation references symbol+addend.  */
+  unsigned tlsoff12:1;
+  unsigned tlsofflos:1;
+  unsigned tlsoffhilo:1;
   /* Whether symbol+addend is referenced with GOTOFF12, GOTOFFLO or
      GOTOFFHI relocations.  The addend doesn't really matter, since we
      envision that this will only be used to check whether the symbol
@@ -736,9 +1176,10 @@ struct frvfdpic_relocs_info
      needed for this symbol.  */
   unsigned done:1;
 
-  /* The number of R_FRV_32, R_FRV_FUNCDESC and R_FRV_FUNCDESC_VALUE
-     relocations referencing the symbol.  */
-  unsigned relocs32, relocsfd, relocsfdv;
+  /* The number of R_FRV_32, R_FRV_FUNCDESC, R_FRV_FUNCDESC_VALUE and
+     R_FRV_TLSDESC_VALUE, R_FRV_TLSOFF relocations referencing
+     symbol+addend.  */
+  unsigned relocs32, relocsfd, relocsfdv, relocstlsd, relocstlsoff;
 
   /* The number of .rofixups entries and dynamic relocations allocated
      for this symbol, minus any that might have already been used.  */
@@ -754,6 +1195,10 @@ struct frvfdpic_relocs_info
      non-lazy and lazy, respectively.  If unassigned, should be
      (bfd_vma)-1.  */
   bfd_vma plt_entry, lzplt_entry;
+  /* The offsets of the GOT entries for TLS offset and TLS descriptor.  */
+  bfd_signed_vma tlsoff_entry, tlsdesc_entry;
+  /* The offset of the TLS offset PLT entry.  */
+  bfd_vma tlsplt_entry;
 };
 
 /* Compute a hash with the key fields of an frvfdpic_relocs_info entry.  */
@@ -763,7 +1208,7 @@ frvfdpic_relocs_info_hash (const void *entry_)
   const struct frvfdpic_relocs_info *entry = entry_;
 
   return (entry->symndx == -1
-	  ? entry->d.h->root.root.hash
+	  ? (long)entry->d.h->root.root.hash
 	  : entry->symndx + entry->d.abfd->id * 257) + entry->addend;
 }
 
@@ -807,6 +1252,7 @@ frvfdpic_relocs_info_find (struct htab *ht,
   (*loc)->addend = entry->addend;
   (*loc)->plt_entry = (bfd_vma)-1;
   (*loc)->lzplt_entry = (bfd_vma)-1;
+  (*loc)->tlsplt_entry = (bfd_vma)-1;
 
   return *loc;
 }
@@ -866,6 +1312,13 @@ frvfdpic_pic_merge_early_relocs_info (struct frvfdpic_relocs_info *e2,
   e2->fdgoff12 |= e1->fdgoff12;
   e2->fdgofflos |= e1->fdgofflos;
   e2->fdgoffhilo |= e1->fdgoffhilo;
+  e2->tlsplt |= e1->tlsplt;
+  e2->tlsdesc12 |= e1->tlsdesc12;
+  e2->tlsdesclos |= e1->tlsdesclos;
+  e2->tlsdeschilo |= e1->tlsdeschilo;
+  e2->tlsoff12 |= e1->tlsoff12;
+  e2->tlsofflos |= e1->tlsofflos;
+  e2->tlsoffhilo |= e1->tlsoffhilo;
   e2->gotoff |= e1->gotoff;
   e2->call |= e1->call;
   e2->sym |= e1->sym;
@@ -884,6 +1337,8 @@ frvfdpic_pic_merge_early_relocs_info (struct frvfdpic_relocs_info *e2,
   e2->relocs32 += e1->relocs32;
   e2->relocsfd += e1->relocsfd;
   e2->relocsfdv += e1->relocsfdv;
+  e2->relocstlsd += e1->relocstlsd;
+  e2->relocstlsoff += e1->relocstlsoff;
   e2->fixups += e1->fixups;
   e2->dynrelocs += e1->dynrelocs;
 
@@ -898,6 +1353,14 @@ frvfdpic_pic_merge_early_relocs_info (struct frvfdpic_relocs_info *e2,
     e2->plt_entry = e1->plt_entry;
   if (e1->lzplt_entry < e2->lzplt_entry)
     e2->lzplt_entry = e1->lzplt_entry;
+
+  if (abs (e1->tlsoff_entry) < abs (e2->tlsoff_entry))
+    e2->tlsoff_entry = e1->tlsoff_entry;
+  if (abs (e1->tlsdesc_entry) < abs (e2->tlsdesc_entry))
+    e2->tlsdesc_entry = e1->tlsdesc_entry;
+
+  if (e1->tlsplt_entry < e2->tlsplt_entry)
+    t2->tlsplt_entry = t1->tlsplt_entry;
 #endif
 }
 
@@ -1011,6 +1474,21 @@ _frvfdpic_osec_readonly_p (bfd *output_bfd, asection *osec)
   return ! (elf_tdata (output_bfd)->phdr[seg].p_flags & PF_W);
 }
 
+#define FRVFDPIC_TLS_BIAS (2048 - 16)
+
+/* Return the base VMA address which should be subtracted from real addresses
+   when resolving TLSMOFF relocation.
+   This is PT_TLS segment p_vaddr, plus the 2048-16 bias.  */
+
+static bfd_vma
+tls_biased_base (struct bfd_link_info *info)
+{
+  /* If tls_sec is NULL, we should have signalled an error already.  */
+  if (elf_hash_table (info)->tls_sec == NULL)
+    return FRVFDPIC_TLS_BIAS;
+  return elf_hash_table (info)->tls_sec->vma + FRVFDPIC_TLS_BIAS;
+}
+
 /* Generate relocations for GOT entries, function descriptors, and
    code for PLT and lazy PLT entries.  */
 
@@ -1030,7 +1508,8 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
     return TRUE;
   entry->done = 1;
 
-  if (entry->got_entry || entry->fdgot_entry || entry->fd_entry)
+  if (entry->got_entry || entry->fdgot_entry || entry->fd_entry
+      || entry->tlsoff_entry || entry->tlsdesc_entry)
     {
       /* If the symbol is dynamic, consider it for dynamic
 	 relocations, otherwise decay to section + offset.  */
@@ -1364,11 +1843,12 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 			  | ((entry->fd_entry >> 16)
 			     & (((bfd_vma)1 << 16) - 1)),
 			  plt_code);
+	      plt_code += 4;
 	      bfd_put_32 (output_bfd,
 			  0x9cf40000
 			  | (entry->fd_entry & (((bfd_vma)1 << 16) - 1)),
 			  plt_code);
-	      plt_code += 8;
+	      plt_code += 4;
 	    }
 	  /* ldd @(gr14,gr15),gr14 */
 	  bfd_put_32 (output_bfd, 0x9c08e14f, plt_code);
@@ -1409,6 +1889,372 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 		      | (((resolverStub_addr - entry->lzplt_entry)
 			  / 4) & (((bfd_vma)1 << 16) - 1)),
 		      lzplt_code);
+	}
+    }
+
+  /* Generate relocation for GOT entry holding the TLS offset.  */
+  if (entry->tlsoff_entry)
+    {
+      int idx = dynindx;
+      bfd_vma ad = addend;
+
+      if (entry->symndx != -1
+	  || FRVFDPIC_SYM_LOCAL (info, entry->d.h))
+	{
+	  /* If the symbol is dynamic but binds locally, use
+	     section+offset.  */
+	  if (sec)
+	    {
+	      if (entry->symndx == -1)
+		ad += entry->d.h->root.u.def.value;
+	      else
+		ad += sym->st_value;
+	      ad += sec->output_offset;
+	      if (sec->output_section
+		  && elf_section_data (sec->output_section))
+		idx = elf_section_data (sec->output_section)->dynindx;
+	      else
+		idx = 0;
+	    }
+	}
+
+      /* *ABS*+addend is special for TLS relocations, use only the
+	 addend.  */
+      if (info->executable
+	  && idx == 0
+	  && (bfd_is_abs_section (sec)
+	      || bfd_is_und_section (sec)))
+	;
+      /* If we're linking an executable, we can entirely omit the
+	 dynamic relocation if the symbol is local to this module.  */
+      else if (info->executable
+	       && (entry->symndx != -1
+		   || FRVFDPIC_SYM_LOCAL (info, entry->d.h)))
+	{
+	  if (sec)
+	    ad += sec->output_section->vma - tls_biased_base (info);
+	}
+      else
+	{
+	  if (idx == 0
+	      && (bfd_is_abs_section (sec)
+		  || bfd_is_und_section (sec)))
+	    {
+	      idx = elf_section_data (elf_hash_table (info)->tls_sec)->dynindx;
+	      ad += FRVFDPIC_TLS_BIAS;
+	    }
+	  _frvfdpic_add_dyn_reloc (output_bfd, frvfdpic_gotrel_section (info),
+				   _bfd_elf_section_offset
+				   (output_bfd, info,
+				    frvfdpic_got_section (info),
+				    frvfdpic_got_initial_offset (info)
+				    + entry->tlsoff_entry)
+				   + frvfdpic_got_section (info)
+				   ->output_section->vma
+				   + frvfdpic_got_section (info)
+				   ->output_offset,
+				   R_FRV_TLSOFF, idx, ad, entry);
+	}
+	
+      bfd_put_32 (output_bfd, ad,
+		  frvfdpic_got_section (info)->contents
+		  + frvfdpic_got_initial_offset (info)
+		  + entry->tlsoff_entry);
+    }
+
+  if (entry->tlsdesc_entry)
+    {
+      int idx = dynindx;
+      bfd_vma ad = addend;
+
+      /* If the symbol is dynamic but binds locally, use
+	 section+offset.  */
+      if (sec && (entry->symndx != -1
+		  || FRVFDPIC_SYM_LOCAL (info, entry->d.h)))
+	{
+	  if (entry->symndx == -1)
+	    ad += entry->d.h->root.u.def.value;
+	  else
+	    ad += sym->st_value;
+	  ad += sec->output_offset;
+	  if (sec->output_section && elf_section_data (sec->output_section))
+	    idx = elf_section_data (sec->output_section)->dynindx;
+	  else
+	    idx = 0;
+	}
+
+      /* If we didn't set up a TLS offset entry, but we're linking an
+	 executable and the symbol binds locally, we can use the
+	 module offset in the TLS descriptor in relaxations.  */
+      if (info->executable && ! entry->tlsoff_entry)
+	entry->tlsoff_entry = entry->tlsdesc_entry + 4;
+
+      if (info->executable && !info->pie
+	  && ((idx == 0
+	       && (bfd_is_abs_section (sec)
+		   || bfd_is_und_section (sec)))
+	      || entry->symndx != -1
+	      || FRVFDPIC_SYM_LOCAL (info, entry->d.h)))
+	{
+	  /* *ABS*+addend is special for TLS relocations, use only the
+	     addend for the TLS offset, and take the module id as
+	     0.  */
+	  if (idx == 0
+	      && (bfd_is_abs_section (sec)
+		  || bfd_is_und_section (sec)))
+	    ;
+	  /* For other TLS symbols that bind locally, add the section
+	     TLS offset to the addend.  */
+	  else if (sec)
+	    ad += sec->output_section->vma - tls_biased_base (info);
+
+	  bfd_put_32 (output_bfd,
+		      frvfdpic_plt_section (info)->output_section->vma
+		      + frvfdpic_plt_section (info)->output_offset
+		      + frvfdpic_plt_tls_ret_offset (info),
+		      frvfdpic_got_section (info)->contents
+		      + frvfdpic_got_initial_offset (info)
+		      + entry->tlsdesc_entry);
+
+	  _frvfdpic_add_rofixup (output_bfd,
+				 frvfdpic_gotfixup_section (info),
+				 frvfdpic_got_section (info)
+				 ->output_section->vma
+				 + frvfdpic_got_section (info)
+				 ->output_offset
+				 + frvfdpic_got_initial_offset (info)
+				 + entry->tlsdesc_entry, entry);
+
+	  BFD_ASSERT (frvfdpic_dynamic_got_plt_info (info)->tls_ret_refs);
+
+	  /* We've used one of the reserved fixups, so discount it so
+	     that we can check at the end that we've used them
+	     all.  */
+	  frvfdpic_dynamic_got_plt_info (info)->tls_ret_refs--;
+
+	  /* While at that, make sure the ret instruction makes to the
+	     right location in the PLT.  We could do it only when we
+	     got to 0, but since the check at the end will only print
+	     a warning, make sure we have the ret in place in case the
+	     warning is missed.  */
+	  bfd_put_32 (output_bfd, 0xc03a4000,
+		      frvfdpic_plt_section (info)->contents
+		      + frvfdpic_plt_tls_ret_offset (info));
+	}
+      else
+	{
+	  if (idx == 0
+	      && (bfd_is_abs_section (sec)
+		  || bfd_is_und_section (sec)))
+	    {
+	      idx = elf_section_data (elf_hash_table (info)->tls_sec)->dynindx;
+	      ad += FRVFDPIC_TLS_BIAS;
+	    }
+
+	  _frvfdpic_add_dyn_reloc (output_bfd, frvfdpic_gotrel_section (info),
+				   _bfd_elf_section_offset
+				   (output_bfd, info,
+				    frvfdpic_got_section (info),
+				    frvfdpic_got_initial_offset (info)
+				    + entry->tlsdesc_entry)
+				   + frvfdpic_got_section (info)
+				   ->output_section->vma
+				   + frvfdpic_got_section (info)
+				   ->output_offset,
+				   R_FRV_TLSDESC_VALUE, idx, ad, entry);
+
+	  bfd_put_32 (output_bfd, 0,
+		      frvfdpic_got_section (info)->contents
+		      + frvfdpic_got_initial_offset (info)
+		      + entry->tlsdesc_entry);
+	}
+
+      bfd_put_32 (output_bfd, ad,
+		  frvfdpic_got_section (info)->contents
+		  + frvfdpic_got_initial_offset (info)
+		  + entry->tlsdesc_entry + 4);
+    }
+
+  /* Generate code for the get-TLS-offset PLT entry.  */
+  if (entry->tlsplt_entry != (bfd_vma) -1)
+    {
+      bfd_byte *plt_code = frvfdpic_plt_section (info)->contents
+	+ entry->tlsplt_entry;
+      
+      if (info->executable
+	  && (entry->symndx != -1
+	      || FRVFDPIC_SYM_LOCAL (info, entry->d.h)))
+	{
+	  int idx = dynindx;
+	  bfd_vma ad = addend;
+
+	  /* sec may be NULL when referencing an undefweak symbol
+	     while linking a static executable.  */
+	  if (!sec)
+	    {
+	      BFD_ASSERT (entry->symndx == -1
+			  && entry->d.h->root.type == bfd_link_hash_undefweak);
+	    }
+	  else
+	    {
+	      if (entry->symndx == -1)
+		ad += entry->d.h->root.u.def.value;
+	      else
+		ad += sym->st_value;
+	      ad += sec->output_offset;
+	      if (sec->output_section
+		  && elf_section_data (sec->output_section))
+		idx = elf_section_data (sec->output_section)->dynindx;
+	      else
+		idx = 0;
+	    }
+	  
+	  /* *ABS*+addend is special for TLS relocations, use only the
+	     addend for the TLS offset, and take the module id as
+	     0.  */
+	  if (idx == 0
+	      && (bfd_is_abs_section (sec)
+		  || bfd_is_und_section (sec)))
+	    ;
+	  /* For other TLS symbols that bind locally, add the section
+	     TLS offset to the addend.  */
+	  else if (sec)
+	    ad += sec->output_section->vma - tls_biased_base (info);
+	  
+	  if ((bfd_signed_vma)ad >= -(1 << (16 - 1))
+	      && (bfd_signed_vma)ad < (1 << (16 - 1)))
+	    {
+	      /* setlos lo(ad), gr9 */
+	      bfd_put_32 (output_bfd,
+			  0x92fc0000
+			  | (ad
+			     & (((bfd_vma)1 << 16) - 1)),
+			  plt_code);
+	      plt_code += 4;
+	    }
+	  else
+	    {
+	      /* sethi.p hi(ad), gr9
+		 setlo lo(ad), gr9 */
+	      bfd_put_32 (output_bfd,
+			  0x12f80000
+			  | ((ad >> 16)
+			     & (((bfd_vma)1 << 16) - 1)),
+			  plt_code);
+	      plt_code += 4;
+	      bfd_put_32 (output_bfd,
+			  0x92f40000
+			  | (ad
+			     & (((bfd_vma)1 << 16) - 1)),
+			  plt_code);
+	      plt_code += 4;
+	    }
+	  /* ret */
+	  bfd_put_32 (output_bfd, 0xc03a4000, plt_code);
+	}
+      else if (entry->tlsoff_entry)
+	{
+	  /* Figure out what kind of PLT entry we need, depending on the
+	     location of the TLS descriptor within the GOT.  */
+	  if (entry->tlsoff_entry >= -(1 << (12 - 1))
+	      && entry->tlsoff_entry < (1 << (12 - 1)))
+	    {
+	      /* ldi @(gr15, tlsoff_entry), gr9 */
+	      bfd_put_32 (output_bfd,
+			  0x92c8f000 | (entry->tlsoff_entry
+					& ((1 << 12) - 1)),
+			  plt_code);
+	      plt_code += 4;
+	    }
+	  else
+	    {
+	      if (entry->tlsoff_entry >= -(1 << (16 - 1))
+		  && entry->tlsoff_entry < (1 << (16 - 1)))
+		{
+		  /* setlos lo(tlsoff_entry), gr8 */
+		  bfd_put_32 (output_bfd,
+			      0x90fc0000
+			      | (entry->tlsoff_entry
+				 & (((bfd_vma)1 << 16) - 1)),
+			      plt_code);
+		  plt_code += 4;
+		}
+	      else
+		{
+		  /* sethi.p hi(tlsoff_entry), gr8
+		     setlo lo(tlsoff_entry), gr8 */
+		  bfd_put_32 (output_bfd,
+			      0x10f80000
+			      | ((entry->tlsoff_entry >> 16)
+				 & (((bfd_vma)1 << 16) - 1)),
+			      plt_code);
+		  plt_code += 4;
+		  bfd_put_32 (output_bfd,
+			      0x90f40000
+			      | (entry->tlsoff_entry
+				 & (((bfd_vma)1 << 16) - 1)),
+			      plt_code);
+		  plt_code += 4;
+		}
+	      /* ld @(gr15,gr8),gr9 */
+	      bfd_put_32 (output_bfd, 0x9008f108, plt_code);
+	      plt_code += 4;
+	    }
+	  /* ret */
+	  bfd_put_32 (output_bfd, 0xc03a4000, plt_code);
+	}
+      else
+	{
+	  BFD_ASSERT (entry->tlsdesc_entry);
+
+	  /* Figure out what kind of PLT entry we need, depending on the
+	     location of the TLS descriptor within the GOT.  */
+	  if (entry->tlsdesc_entry >= -(1 << (12 - 1))
+	      && entry->tlsdesc_entry < (1 << (12 - 1)))
+	    {
+	      /* lddi @(gr15, tlsdesc_entry), gr8 */
+	      bfd_put_32 (output_bfd,
+			  0x90ccf000 | (entry->tlsdesc_entry
+					& ((1 << 12) - 1)),
+			  plt_code);
+	      plt_code += 4;
+	    }
+	  else
+	    {
+	      if (entry->tlsdesc_entry >= -(1 << (16 - 1))
+		  && entry->tlsdesc_entry < (1 << (16 - 1)))
+		{
+		  /* setlos lo(tlsdesc_entry), gr8 */
+		  bfd_put_32 (output_bfd,
+			      0x90fc0000
+			      | (entry->tlsdesc_entry
+				 & (((bfd_vma)1 << 16) - 1)),
+			      plt_code);
+		  plt_code += 4;
+		}
+	      else
+		{
+		  /* sethi.p hi(tlsdesc_entry), gr8
+		     setlo lo(tlsdesc_entry), gr8 */
+		  bfd_put_32 (output_bfd,
+			      0x10f80000
+			      | ((entry->tlsdesc_entry >> 16)
+				 & (((bfd_vma)1 << 16) - 1)),
+			      plt_code);
+		  plt_code += 4;
+		  bfd_put_32 (output_bfd,
+			      0x90f40000
+			      | (entry->tlsdesc_entry
+				 & (((bfd_vma)1 << 16) - 1)),
+			      plt_code);
+		  plt_code += 4;
+		}
+	      /* ldd @(gr15,gr8),gr8 */
+	      bfd_put_32 (output_bfd, 0x9008f148, plt_code);
+	      plt_code += 4;
+	    }
+	  /* jmpl @(gr8,gr0) */
+	  bfd_put_32 (output_bfd, 0x80308000, plt_code);
 	}
     }
 
@@ -1756,6 +2602,60 @@ frv_reloc_type_lookup (abfd, code)
     case BFD_RELOC_FRV_GOTOFFLO:
       return &elf32_frv_howto_table[ (int) R_FRV_GOTOFFLO];
 
+    case BFD_RELOC_FRV_GETTLSOFF:
+      return &elf32_frv_howto_table[ (int) R_FRV_GETTLSOFF];
+
+    case BFD_RELOC_FRV_TLSDESC_VALUE:
+      if (elf_elfheader (abfd)->e_type == ET_EXEC
+	  || elf_elfheader (abfd)->e_type == ET_DYN)
+	return &elf32_frv_rel_tlsdesc_value_howto;
+      return &elf32_frv_howto_table[ (int) R_FRV_TLSDESC_VALUE];
+
+    case BFD_RELOC_FRV_GOTTLSDESC12:
+      return &elf32_frv_howto_table[ (int) R_FRV_GOTTLSDESC12];
+
+    case BFD_RELOC_FRV_GOTTLSDESCHI:
+      return &elf32_frv_howto_table[ (int) R_FRV_GOTTLSDESCHI];
+
+    case BFD_RELOC_FRV_GOTTLSDESCLO:
+      return &elf32_frv_howto_table[ (int) R_FRV_GOTTLSDESCLO];
+
+    case BFD_RELOC_FRV_TLSMOFF12:
+      return &elf32_frv_howto_table[ (int) R_FRV_TLSMOFF12];
+
+    case BFD_RELOC_FRV_TLSMOFFHI:
+      return &elf32_frv_howto_table[ (int) R_FRV_TLSMOFFHI];
+
+    case BFD_RELOC_FRV_TLSMOFFLO:
+      return &elf32_frv_howto_table[ (int) R_FRV_TLSMOFFLO];
+
+    case BFD_RELOC_FRV_GOTTLSOFF12:
+      return &elf32_frv_howto_table[ (int) R_FRV_GOTTLSOFF12];
+
+    case BFD_RELOC_FRV_GOTTLSOFFHI:
+      return &elf32_frv_howto_table[ (int) R_FRV_GOTTLSOFFHI];
+
+    case BFD_RELOC_FRV_GOTTLSOFFLO:
+      return &elf32_frv_howto_table[ (int) R_FRV_GOTTLSOFFLO];
+
+    case BFD_RELOC_FRV_TLSOFF:
+      if (elf_elfheader (abfd)->e_type == ET_EXEC
+	  || elf_elfheader (abfd)->e_type == ET_DYN)
+	return &elf32_frv_rel_tlsoff_howto;
+      return &elf32_frv_howto_table[ (int) R_FRV_TLSOFF];
+
+    case BFD_RELOC_FRV_TLSDESC_RELAX:
+      return &elf32_frv_howto_table[ (int) R_FRV_TLSDESC_RELAX];
+
+    case BFD_RELOC_FRV_GETTLSOFF_RELAX:
+      return &elf32_frv_howto_table[ (int) R_FRV_GETTLSOFF_RELAX];
+
+    case BFD_RELOC_FRV_TLSOFF_RELAX:
+      return &elf32_frv_howto_table[ (int) R_FRV_TLSOFF_RELAX];
+
+    case BFD_RELOC_FRV_TLSMOFF:
+      return &elf32_frv_howto_table[ (int) R_FRV_TLSMOFF];
+
     case BFD_RELOC_VTABLE_INHERIT:
       return &elf32_frv_vtinherit_howto;
 
@@ -1813,6 +2713,14 @@ frvfdpic_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
 
     case R_FRV_FUNCDESC_VALUE:
       cache_ptr->howto = &elf32_frv_rel_funcdesc_value_howto;
+      break;
+
+    case R_FRV_TLSDESC_VALUE:
+      cache_ptr->howto = &elf32_frv_rel_tlsdesc_value_howto;
+      break;
+
+    case R_FRV_TLSOFF:
+      cache_ptr->howto = &elf32_frv_rel_tlsoff_howto;
       break;
 
     default:
@@ -1886,9 +2794,10 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
   struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
-  unsigned isec_segment, got_segment, plt_segment, gprel_segment,
+  unsigned isec_segment, got_segment, plt_segment, gprel_segment, tls_segment,
     check_segment[2];
   int silence_segment_error = !(info->shared || info->pie);
+  unsigned long insn;
 
   if (info->relocatable)
     return TRUE;
@@ -1911,12 +2820,17 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 					       ->output_section);
   else
     gprel_segment = -1;
-  if (IS_FDPIC (output_bfd) && elf_hash_table (info)->dynamic_sections_created)
+  if (IS_FDPIC (output_bfd) && frvfdpic_plt_section (info))
     plt_segment = _frvfdpic_osec_to_segment (output_bfd,
 					     frvfdpic_plt_section (info)
 					     ->output_section);
   else
     plt_segment = -1;
+  if (elf_hash_table (info)->tls_sec)
+    tls_segment = _frvfdpic_osec_to_segment (output_bfd,
+					     elf_hash_table (info)->tls_sec);
+  else
+    tls_segment = -1;
 
   for (rel = relocs; rel < relend; rel ++)
     {
@@ -1967,20 +2881,22 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	  name = h->root.root.string;
 
 	  if ((h->root.type == bfd_link_hash_defined
-	       || h->root.type == bfd_link_hash_defweak)
-	      && ! FRVFDPIC_SYM_LOCAL (info, h))
+	       || h->root.type == bfd_link_hash_defweak))
 	    {
-	      sec = NULL;
-	      relocation = 0;
-	    }
-	  else
-	  if (h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
-	    {
-	      sec = h->root.u.def.section;
-	      relocation = (h->root.u.def.value
-			    + sec->output_section->vma
-			    + sec->output_offset);
+	      if (/* TLSMOFF forces local binding.  */
+		  r_type != R_FRV_TLSMOFF
+		  && ! FRVFDPIC_SYM_LOCAL (info, h))
+		{
+		  sec = NULL;
+		  relocation = 0;
+		}
+	      else
+		{
+		  sec = h->root.u.def.section;
+		  relocation = (h->root.u.def.value
+				+ sec->output_section->vma
+				+ sec->output_offset);
+		}
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    {
@@ -2023,6 +2939,22 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_FRV_FUNCDESC_GOTOFFLO:
 	case R_FRV_FUNCDESC:
 	case R_FRV_FUNCDESC_VALUE:
+	case R_FRV_GETTLSOFF:
+	case R_FRV_TLSDESC_VALUE:
+	case R_FRV_GOTTLSDESC12:
+	case R_FRV_GOTTLSDESCHI:
+	case R_FRV_GOTTLSDESCLO:
+	case R_FRV_TLSMOFF12:
+	case R_FRV_TLSMOFFHI:
+	case R_FRV_TLSMOFFLO:
+	case R_FRV_GOTTLSOFF12:
+	case R_FRV_GOTTLSOFFHI:
+	case R_FRV_GOTTLSOFFLO:
+	case R_FRV_TLSOFF:
+	case R_FRV_TLSDESC_RELAX:
+	case R_FRV_GETTLSOFF_RELAX:
+	case R_FRV_TLSOFF_RELAX:
+	case R_FRV_TLSMOFF:
 	  if (h != NULL)
 	    picrel = frvfdpic_relocs_info_for_global (frvfdpic_relocs_info
 						      (info), input_bfd, h,
@@ -2062,6 +2994,604 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  break;
 	}
+
+      switch (r_type)
+	{
+	case R_FRV_GETTLSOFF:
+	case R_FRV_TLSDESC_VALUE:
+	case R_FRV_GOTTLSDESC12:
+	case R_FRV_GOTTLSDESCHI:
+	case R_FRV_GOTTLSDESCLO:
+	case R_FRV_TLSMOFF12:
+	case R_FRV_TLSMOFFHI:
+	case R_FRV_TLSMOFFLO:
+	case R_FRV_GOTTLSOFF12:
+	case R_FRV_GOTTLSOFFHI:
+	case R_FRV_GOTTLSOFFLO:
+	case R_FRV_TLSOFF:
+	case R_FRV_TLSDESC_RELAX:
+	case R_FRV_GETTLSOFF_RELAX:
+	case R_FRV_TLSOFF_RELAX:
+	case R_FRV_TLSMOFF:
+	  if (sec && (bfd_is_abs_section (sec) || bfd_is_und_section (sec)))
+	    relocation += tls_biased_base (info);
+	  break;
+
+	default:
+	  break;
+	}
+
+      /* Try to apply TLS relaxations.  */
+      if (1)
+	switch (r_type)
+	  {
+
+#define LOCAL_EXEC_P(info, picrel) \
+  ((info)->executable \
+   && (picrel->symndx != -1 || FRVFDPIC_SYM_LOCAL ((info), (picrel)->d.h)))
+#define INITIAL_EXEC_P(info, picrel) \
+  (((info)->executable || (info)->flags & DF_STATIC_TLS) \
+   && (picrel)->tlsoff_entry)
+
+#define IN_RANGE_FOR_OFST12_P(value) \
+  ((bfd_vma)((value) + 2048) < (bfd_vma)4096)
+#define IN_RANGE_FOR_SETLOS_P(value) \
+  ((bfd_vma)((value) + 32768) < (bfd_vma)65536)
+#define TLSMOFF_IN_RANGE_FOR_SETLOS_P(value, info) \
+  (IN_RANGE_FOR_SETLOS_P ((value) - tls_biased_base (info)))
+
+#define RELAX_GETTLSOFF_LOCAL_EXEC_P(info, picrel, value) \
+  (LOCAL_EXEC_P ((info), (picrel)) \
+   && TLSMOFF_IN_RANGE_FOR_SETLOS_P((value), (info)))
+#define RELAX_GETTLSOFF_INITIAL_EXEC_P(info, picrel) \
+  (INITIAL_EXEC_P ((info), (picrel)) \
+   && IN_RANGE_FOR_OFST12_P ((picrel)->tlsoff_entry))
+
+#define RELAX_TLSDESC_LOCAL_EXEC_P(info, picrel, value) \
+  (LOCAL_EXEC_P ((info), (picrel)))
+#define RELAX_TLSDESC_INITIAL_EXEC_P(info, picrel) \
+  (INITIAL_EXEC_P ((info), (picrel)))
+ 
+#define RELAX_GOTTLSOFF_LOCAL_EXEC_P(info, picrel, value) \
+  (LOCAL_EXEC_P ((info), (picrel)) \
+   && TLSMOFF_IN_RANGE_FOR_SETLOS_P((value), (info)))
+
+	  case R_FRV_GETTLSOFF:
+	    insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+
+	    /* Is this a call instruction?  */
+	    if ((insn & (unsigned long)0x01fc0000) != 0x003c0000)
+	      {
+		r = info->callbacks->warning
+		  (info,
+		   _("R_FRV_GETTLSOFF not applied to a call instruction"),
+		   name, input_bfd, input_section, rel->r_offset);
+		return FALSE;
+	      }
+	    
+	    if (RELAX_GETTLSOFF_LOCAL_EXEC_P (info, picrel,
+					      relocation + rel->r_addend))
+	      {
+		/* Replace the call instruction (except the packing bit)
+		   with setlos #tlsmofflo(symbol+offset), gr9.  */
+		insn &= (unsigned long)0x80000000;
+		insn |= (unsigned long)0x12fc0000;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		r_type = R_FRV_TLSMOFFLO;
+		howto  = elf32_frv_howto_table + r_type;
+		rel->r_info = ELF32_R_INFO (r_symndx, r_type);
+	      }
+
+	    else if (RELAX_GETTLSOFF_INITIAL_EXEC_P (info, picrel))
+	      {
+		/* Replace the call instruction (except the packing bit)
+		   with ldi @(gr15, #gottlsoff12(symbol+addend)), gr9.  */
+		insn &= (unsigned long)0x80000000;
+		insn |= (unsigned long)0x12c8f000;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		r_type = R_FRV_GOTTLSOFF12;
+		howto  = elf32_frv_howto_table + r_type;
+		rel->r_info = ELF32_R_INFO (r_symndx, r_type);
+	      }
+
+	    break;
+
+	  case R_FRV_GOTTLSDESC12:
+	    insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+
+	    /* Is this an lddi instruction?  */
+	    if ((insn & (unsigned long)0x01fc0000) != 0x00cc0000)
+	      {
+		r = info->callbacks->warning
+		  (info,
+		   _("R_FRV_GOTTLSDESC12 not applied to an lddi instruction"),
+		   name, input_bfd, input_section, rel->r_offset);
+		return FALSE;
+	      }
+
+	    if (RELAX_TLSDESC_LOCAL_EXEC_P (info, picrel,
+					    relocation + rel->r_addend)
+		&& TLSMOFF_IN_RANGE_FOR_SETLOS_P (relocation + rel->r_addend,
+						  info))
+	      {
+		/* Replace lddi @(grB, #gottlsdesc12(symbol+offset), grC
+		   with setlos #tlsmofflo(symbol+offset), gr<C+1>.
+		   Preserve the packing bit.  */
+		insn = (insn & (unsigned long)0x80000000)
+		  | ((insn + (unsigned long)0x02000000)
+		     & (unsigned long)0x7e000000);
+		insn |= (unsigned long)0x00fc0000;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		r_type = R_FRV_TLSMOFFLO;
+		howto  = elf32_frv_howto_table + r_type;
+		rel->r_info = ELF32_R_INFO (r_symndx, r_type);
+	      }
+
+	    else if (RELAX_TLSDESC_LOCAL_EXEC_P (info, picrel,
+						 relocation + rel->r_addend))
+	      {
+		/* Replace lddi @(grB, #gottlsdesc12(symbol+offset), grC
+		   with sethi #tlsmoffhi(symbol+offset), gr<C+1>.
+		   Preserve the packing bit.  */
+		insn = (insn & (unsigned long)0x80000000)
+		  | ((insn + (unsigned long)0x02000000)
+		     & (unsigned long)0x7e000000);
+		insn |= (unsigned long)0x00f80000;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		r_type = R_FRV_TLSMOFFHI;
+		howto  = elf32_frv_howto_table + r_type;
+		rel->r_info = ELF32_R_INFO (r_symndx, r_type);
+	      }
+
+	    else if (RELAX_TLSDESC_INITIAL_EXEC_P (info, picrel))
+	      {
+		/* Replace lddi @(grB, #gottlsdesc12(symbol+offset), grC
+		   with ldi @(grB, #gottlsoff12(symbol+offset),
+		   gr<C+1>.  Preserve the packing bit.  If gottlsoff12
+		   overflows, we'll error out, but that's sort-of ok,
+		   since we'd started with gottlsdesc12, that's actually
+		   more demanding.  Compiling with -fPIE instead of
+		   -fpie would fix it; linking with --relax should fix
+		   it as well.  */
+		insn = (insn & (unsigned long)0x80cbf000)
+		  | ((insn + (unsigned long)0x02000000)
+		     & (unsigned long)0x7e000000);
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		r_type = R_FRV_GOTTLSOFF12;
+		howto  = elf32_frv_howto_table + r_type;
+		rel->r_info = ELF32_R_INFO (r_symndx, r_type);
+	      }
+
+	    break;
+
+	  case R_FRV_GOTTLSDESCHI:
+	    insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+
+	    /* Is this a sethi instruction?  */
+	    if ((insn & (unsigned long)0x01ff0000) != 0x00f80000)
+	      {
+		r = info->callbacks->warning
+		  (info,
+		   _("R_FRV_GOTTLSDESCHI not applied to a sethi instruction"),
+		   name, input_bfd, input_section, rel->r_offset);
+		return FALSE;
+	      }
+
+	    if (RELAX_TLSDESC_LOCAL_EXEC_P (info, picrel,
+					    relocation + rel->r_addend)
+		|| (RELAX_TLSDESC_INITIAL_EXEC_P (info, picrel)
+		    && IN_RANGE_FOR_SETLOS_P (picrel->tlsoff_entry)))
+	      {
+		/* Replace sethi with a nop.  Preserve the packing bit.  */
+		insn &= (unsigned long)0x80000000;
+		insn |= (unsigned long)0x00880000;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		/* Nothing to relocate.  */
+		continue;
+	      }
+
+	    else if (RELAX_TLSDESC_INITIAL_EXEC_P (info, picrel))
+	      {
+		/* Simply decay GOTTLSDESC to GOTTLSOFF.  */
+		r_type = R_FRV_GOTTLSOFFHI;
+		howto  = elf32_frv_howto_table + r_type;
+		rel->r_info = ELF32_R_INFO (r_symndx, r_type);
+	      }
+
+	    break;
+	    
+	  case R_FRV_GOTTLSDESCLO:
+	    insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+
+	    /* Is this a setlo or setlos instruction?  */
+	    if ((insn & (unsigned long)0x01f70000) != 0x00f40000)
+	      {
+		r = info->callbacks->warning
+		  (info,
+		   _("R_FRV_GOTTLSDESCLO"
+		     " not applied to a setlo or setlos instruction"),
+		   name, input_bfd, input_section, rel->r_offset);
+		return FALSE;
+	      }
+
+	    if (RELAX_TLSDESC_LOCAL_EXEC_P (info, picrel,
+					    relocation + rel->r_addend)
+		|| (RELAX_TLSDESC_INITIAL_EXEC_P (info, picrel)
+		    && IN_RANGE_FOR_OFST12_P (picrel->tlsoff_entry)))
+	      {
+		/* Replace setlo/setlos with a nop.  Preserve the
+		   packing bit.  */
+		insn &= (unsigned long)0x80000000;
+		insn |= (unsigned long)0x00880000;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		/* Nothing to relocate.  */
+		continue;
+	      }
+
+	    else if (RELAX_TLSDESC_INITIAL_EXEC_P (info, picrel))
+	      {
+		/* If the corresponding sethi (if it exists) decayed
+		   to a nop, make sure this becomes (or already is) a
+		   setlos, not setlo.  */
+		if (IN_RANGE_FOR_SETLOS_P (picrel->tlsoff_entry))
+		  {
+		    insn |= (unsigned long)0x00080000;
+		    bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+		  }
+
+		/* Simply decay GOTTLSDESC to GOTTLSOFF.  */
+		r_type = R_FRV_GOTTLSOFFLO;
+		howto  = elf32_frv_howto_table + r_type;
+		rel->r_info = ELF32_R_INFO (r_symndx, r_type);
+	      }
+
+	    break;
+	    
+	  case R_FRV_TLSDESC_RELAX:
+	    insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+
+	    /* Is this an ldd instruction?  */
+	    if ((insn & (unsigned long)0x01fc0fc0) != 0x00080140)
+	      {
+		r = info->callbacks->warning
+		  (info,
+		   _("R_FRV_TLSDESC_RELAX not applied to an ldd instruction"),
+		   name, input_bfd, input_section, rel->r_offset);
+		return FALSE;
+	      }
+
+	    if (RELAX_TLSDESC_LOCAL_EXEC_P (info, picrel,
+					    relocation + rel->r_addend)
+		&& TLSMOFF_IN_RANGE_FOR_SETLOS_P (relocation + rel->r_addend,
+						  info))
+	      {
+		/* Replace ldd #tlsdesc(symbol+offset)@(grB, grA), grC
+		   with setlos #tlsmofflo(symbol+offset), gr<C+1>.
+		   Preserve the packing bit.  */
+		insn = (insn & (unsigned long)0x80000000)
+		  | ((insn + (unsigned long)0x02000000)
+		     & (unsigned long)0x7e000000);
+		insn |= (unsigned long)0x00fc0000;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		r_type = R_FRV_TLSMOFFLO;
+		howto  = elf32_frv_howto_table + r_type;
+		rel->r_info = ELF32_R_INFO (r_symndx, r_type);
+	      }
+
+	    else if (RELAX_TLSDESC_LOCAL_EXEC_P (info, picrel,
+						 relocation + rel->r_addend))
+	      {
+		/* Replace ldd #tlsdesc(symbol+offset)@(grB, grA), grC
+		   with sethi #tlsmoffhi(symbol+offset), gr<C+1>.
+		   Preserve the packing bit.  */
+		insn = (insn & (unsigned long)0x80000000)
+		  | ((insn + (unsigned long)0x02000000)
+		     & (unsigned long)0x7e000000);
+		insn |= (unsigned long)0x00f80000;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		r_type = R_FRV_TLSMOFFHI;
+		howto  = elf32_frv_howto_table + r_type;
+		rel->r_info = ELF32_R_INFO (r_symndx, r_type);
+	      }
+
+	    else if (RELAX_TLSDESC_INITIAL_EXEC_P (info, picrel)
+		     && IN_RANGE_FOR_OFST12_P (picrel->tlsoff_entry))
+	      {
+		/* Replace ldd #tlsdesc(symbol+offset)@(grB, grA), grC
+		   with ldi @(grB, #gottlsoff12(symbol+offset), gr<C+1>.
+		   Preserve the packing bit.  */
+		insn = (insn & (unsigned long)0x8003f000)
+		  | (unsigned long)0x00c80000
+		  | ((insn + (unsigned long)0x02000000)
+		     & (unsigned long)0x7e000000);
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		r_type = R_FRV_GOTTLSOFF12;
+		howto  = elf32_frv_howto_table + r_type;
+		rel->r_info = ELF32_R_INFO (r_symndx, r_type);
+	      }
+
+	    else if (RELAX_TLSDESC_INITIAL_EXEC_P (info, picrel))
+	      {
+		/* Replace ldd #tlsdesc(symbol+offset)@(grB, grA), grC
+		   with ld #tlsoff(symbol+offset)@(grB, grA), gr<C+1>.
+		   Preserve the packing bit.  */
+		insn = (insn & (unsigned long)0x81ffffbf)
+		  | ((insn + (unsigned long)0x02000000)
+		     & (unsigned long)0x7e000000);
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		/* #tlsoff(symbol+offset) is just a relaxation
+                    annotation, so there's nothing left to
+                    relocate.  */
+		continue;
+	      }
+
+	    break;
+
+	  case R_FRV_GETTLSOFF_RELAX:
+	    insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+
+	    /* Is this a calll or callil instruction?  */
+	    if ((insn & (unsigned long)0x7ff80fc0) != 0x02300000)
+	      {
+		r = info->callbacks->warning
+		  (info,
+		   _("R_FRV_GETTLSOFF_RELAX"
+		     " not applied to a calll instruction"),
+		   name, input_bfd, input_section, rel->r_offset);
+		return FALSE;
+	      }
+
+	    if (RELAX_TLSDESC_LOCAL_EXEC_P (info, picrel,
+					    relocation + rel->r_addend)
+		&& TLSMOFF_IN_RANGE_FOR_SETLOS_P (relocation + rel->r_addend,
+						  info))
+	      {
+		/* Replace calll with a nop.  Preserve the packing bit.  */
+		insn &= (unsigned long)0x80000000;
+		insn |= (unsigned long)0x00880000;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		/* Nothing to relocate.  */
+		continue;
+	      }
+
+	    else if (RELAX_TLSDESC_LOCAL_EXEC_P (info, picrel,
+						 relocation + rel->r_addend))
+	      {
+		/* Replace calll with setlo #tlsmofflo(symbol+offset), gr9.
+		   Preserve the packing bit.  */
+		insn &= (unsigned long)0x80000000;
+		insn |= (unsigned long)0x12f40000;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		r_type = R_FRV_TLSMOFFLO;
+		howto  = elf32_frv_howto_table + r_type;
+		rel->r_info = ELF32_R_INFO (r_symndx, r_type);
+	      }
+
+	    else if (RELAX_TLSDESC_INITIAL_EXEC_P (info, picrel))
+	      {
+		/* Replace calll with a nop.  Preserve the packing bit.  */
+		insn &= (unsigned long)0x80000000;
+		insn |= (unsigned long)0x00880000;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		/* Nothing to relocate.  */
+		continue;
+	      }
+
+	    break;
+
+	  case R_FRV_GOTTLSOFF12:
+	    insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+
+	    /* Is this an ldi instruction?  */
+	    if ((insn & (unsigned long)0x01fc0000) != 0x00c80000)
+	      {
+		r = info->callbacks->warning
+		  (info,
+		   _("R_FRV_GOTTLSOFF12 not applied to an ldi instruction"),
+		   name, input_bfd, input_section, rel->r_offset);
+		return FALSE;
+	      }
+
+	    if (RELAX_GOTTLSOFF_LOCAL_EXEC_P (info, picrel,
+					      relocation + rel->r_addend))
+	      {
+		/* Replace ldi @(grB, #gottlsoff12(symbol+offset), grC
+		   with setlos #tlsmofflo(symbol+offset), grC.
+		   Preserve the packing bit.  */
+		insn &= (unsigned long)0xfe000000;
+		insn |= (unsigned long)0x00fc0000;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		r_type = R_FRV_TLSMOFFLO;
+		howto  = elf32_frv_howto_table + r_type;
+		rel->r_info = ELF32_R_INFO (r_symndx, r_type);
+	      }
+
+	    break;
+
+	  case R_FRV_GOTTLSOFFHI:
+	    insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+
+	    /* Is this a sethi instruction?  */
+	    if ((insn & (unsigned long)0x01ff0000) != 0x00f80000)
+	      {
+		r = info->callbacks->warning
+		  (info,
+		   _("R_FRV_GOTTLSOFFHI not applied to a sethi instruction"),
+		   name, input_bfd, input_section, rel->r_offset);
+		return FALSE;
+	      }
+
+	    if (RELAX_GOTTLSOFF_LOCAL_EXEC_P (info, picrel,
+					      relocation + rel->r_addend)
+		|| (RELAX_TLSDESC_INITIAL_EXEC_P (info, picrel)
+		    && IN_RANGE_FOR_OFST12_P (picrel->tlsoff_entry)))
+	      {
+		/* Replace sethi with a nop.  Preserve the packing bit.  */
+		insn &= (unsigned long)0x80000000;
+		insn |= (unsigned long)0x00880000;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		/* Nothing to relocate.  */
+		continue;
+	      }
+
+	    break;
+
+	  case R_FRV_GOTTLSOFFLO:
+	    insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+
+	    /* Is this a setlo or setlos instruction?  */
+	    if ((insn & (unsigned long)0x01f70000) != 0x00f40000)
+	      {
+		r = info->callbacks->warning
+		  (info,
+		   _("R_FRV_GOTTLSOFFLO"
+		     " not applied to a setlo or setlos instruction"),
+		   name, input_bfd, input_section, rel->r_offset);
+		return FALSE;
+	      }
+
+	    if (RELAX_GOTTLSOFF_LOCAL_EXEC_P (info, picrel,
+					      relocation + rel->r_addend)
+		|| (RELAX_TLSDESC_INITIAL_EXEC_P (info, picrel)
+		    && IN_RANGE_FOR_OFST12_P (picrel->tlsoff_entry)))
+	      {
+		/* Replace setlo/setlos with a nop.  Preserve the
+		   packing bit.  */
+		insn &= (unsigned long)0x80000000;
+		insn |= (unsigned long)0x00880000;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		/* Nothing to relocate.  */
+		continue;
+	      }
+
+	    break;
+
+	  case R_FRV_TLSOFF_RELAX:
+	    insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+
+	    /* Is this an ld instruction?  */
+	    if ((insn & (unsigned long)0x01fc0fc0) != 0x00080100)
+	      {
+		r = info->callbacks->warning
+		  (info,
+		   _("R_FRV_TLSOFF_RELAX not applied to an ld instruction"),
+		   name, input_bfd, input_section, rel->r_offset);
+		return FALSE;
+	      }
+
+	    if (RELAX_GOTTLSOFF_LOCAL_EXEC_P (info, picrel,
+					      relocation + rel->r_addend))
+	      {
+		/* Replace ld #gottlsoff(symbol+offset)@(grB, grA), grC
+		   with setlos #tlsmofflo(symbol+offset), grC.
+		   Preserve the packing bit.  */
+		insn &= (unsigned long)0xfe000000;
+		insn |= (unsigned long)0x00fc0000;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		r_type = R_FRV_TLSMOFFLO;
+		howto  = elf32_frv_howto_table + r_type;
+		rel->r_info = ELF32_R_INFO (r_symndx, r_type);
+	      }
+
+	    else if (RELAX_TLSDESC_INITIAL_EXEC_P (info, picrel)
+		     && IN_RANGE_FOR_OFST12_P (picrel->tlsoff_entry))
+	      {
+		/* Replace ld #tlsoff(symbol+offset)@(grB, grA), grC
+		   with ldi @(grB, #gottlsoff12(symbol+offset), grC.
+		   Preserve the packing bit.  */
+		insn = (insn & (unsigned long)0xfe03f000)
+		  | (unsigned long)0x00c80000;;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		r_type = R_FRV_GOTTLSOFF12;
+		howto  = elf32_frv_howto_table + r_type;
+		rel->r_info = ELF32_R_INFO (r_symndx, r_type);
+	      }
+
+	    break;
+
+	  case R_FRV_TLSMOFFHI:
+	    insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+
+	    /* Is this a sethi instruction?  */
+	    if ((insn & (unsigned long)0x01ff0000) != 0x00f80000)
+	      {
+		r = info->callbacks->warning
+		  (info,
+		   _("R_FRV_TLSMOFFHI not applied to a sethi instruction"),
+		   name, input_bfd, input_section, rel->r_offset);
+		return FALSE;
+	      }
+
+	    if (TLSMOFF_IN_RANGE_FOR_SETLOS_P (relocation + rel->r_addend,
+					       info))
+	      {
+		/* Replace sethi with a nop.  Preserve the packing bit.  */
+		insn &= (unsigned long)0x80000000;
+		insn |= (unsigned long)0x00880000;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+
+		/* Nothing to relocate.  */
+		continue;
+	      }
+
+	    break;
+
+	  case R_FRV_TLSMOFFLO:
+	    insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+
+	    /* Is this a setlo or setlos instruction?  */
+	    if ((insn & (unsigned long)0x01f70000) != 0x00f40000)
+	      {
+		r = info->callbacks->warning
+		  (info,
+		   _("R_FRV_TLSMOFFLO"
+		     " not applied to a setlo or setlos instruction"),
+		   name, input_bfd, input_section, rel->r_offset);
+		return FALSE;
+	      }
+
+	    if (TLSMOFF_IN_RANGE_FOR_SETLOS_P (relocation + rel->r_addend,
+					       info))
+	      /* If the corresponding sethi (if it exists) decayed
+		 to a nop, make sure this becomes (or already is) a
+		 setlos, not setlo.  */
+	      {
+		insn |= (unsigned long)0x00080000;
+		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+	      }
+
+	    break;
+
+#if 0	    /* There's nothing to relax in these.  */
+	  case R_FRV_TLSDESC_VALUE:
+	  case R_FRV_TLSOFF:
+	  case R_FRV_TLSMOFF12:
+	  case R_FRV_TLSMOFFHI:
+	  case R_FRV_TLSMOFFLO:
+	  case R_FRV_TLSMOFF:
+#endif
+	  default:
+	    break;
+	  }
 
       switch (r_type)
 	{
@@ -2408,6 +3938,76 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	    : (unsigned)-1;
 	  break;
 
+	case R_FRV_GETTLSOFF:
+	  relocation = frvfdpic_plt_section (info)->output_section->vma
+	    + frvfdpic_plt_section (info)->output_offset
+	    + picrel->tlsplt_entry;
+	  BFD_ASSERT (picrel->tlsplt_entry != (bfd_vma)-1
+		      && picrel->tlsdesc_entry);
+	  check_segment[0] = isec_segment;
+	  check_segment[1] = plt_segment;
+	  break;
+
+	case R_FRV_GOTTLSDESC12:
+	case R_FRV_GOTTLSDESCHI:
+	case R_FRV_GOTTLSDESCLO:
+	  BFD_ASSERT (picrel->tlsdesc_entry);
+	  relocation = picrel->tlsdesc_entry;
+	  check_segment[0] = tls_segment;
+	  check_segment[1] = sec
+	    && ! bfd_is_abs_section (sec)
+	    && ! bfd_is_und_section (sec)
+	    ? _frvfdpic_osec_to_segment (output_bfd, sec->output_section)
+	    : tls_segment;
+	  break;
+
+	case R_FRV_TLSMOFF12:
+	case R_FRV_TLSMOFFHI:
+	case R_FRV_TLSMOFFLO:
+	case R_FRV_TLSMOFF:
+	  check_segment[0] = tls_segment;
+	  if (! sec)
+	    check_segment[1] = -1;
+	  else if (bfd_is_abs_section (sec)
+		   || bfd_is_und_section (sec))
+	    {
+	      relocation = 0;
+	      check_segment[1] = tls_segment;
+	    }
+	  else if (sec->output_section)
+	    {
+	      relocation -= tls_biased_base (info);
+	      check_segment[1] =
+		_frvfdpic_osec_to_segment (output_bfd, sec->output_section);
+	    }
+	  break;
+
+	case R_FRV_GOTTLSOFF12:
+	case R_FRV_GOTTLSOFFHI:
+	case R_FRV_GOTTLSOFFLO:
+	  BFD_ASSERT (picrel->tlsoff_entry);
+	  relocation = picrel->tlsoff_entry;
+	  check_segment[0] = tls_segment;
+	  check_segment[1] = sec
+	    && ! bfd_is_abs_section (sec)
+	    && ! bfd_is_und_section (sec)
+	    ? _frvfdpic_osec_to_segment (output_bfd, sec->output_section)
+	    : tls_segment;
+	  break;
+	  
+	case R_FRV_TLSDESC_VALUE:
+	case R_FRV_TLSOFF:
+	  /* These shouldn't be present in input object files.  */
+	  check_segment[0] = check_segment[1] = isec_segment;
+	  break;
+
+	case R_FRV_TLSDESC_RELAX:
+	case R_FRV_GETTLSOFF_RELAX:
+	case R_FRV_TLSOFF_RELAX:
+	  /* These are just annotations for relaxation, nothing to do
+	     here.  */
+	  continue;
+
 	default:
 	  check_segment[0] = isec_segment;
 	  check_segment[1] = sec
@@ -2452,6 +4052,7 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
       switch (r_type)
 	{
 	case R_FRV_GOTOFFHI:
+	case R_FRV_TLSMOFFHI:
 	  /* We need the addend to be applied before we shift the
 	     value right.  */
 	  relocation += rel->r_addend;
@@ -2459,6 +4060,8 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_FRV_GOTHI:
 	case R_FRV_FUNCDESC_GOTHI:
 	case R_FRV_FUNCDESC_GOTOFFHI:
+	case R_FRV_GOTTLSOFFHI:
+	case R_FRV_GOTTLSDESCHI:
 	  relocation >>= 16;
 	  /* Fall through.  */
 
@@ -2466,6 +4069,9 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_FRV_FUNCDESC_GOTLO:
 	case R_FRV_GOTOFFLO:
 	case R_FRV_FUNCDESC_GOTOFFLO:
+	case R_FRV_GOTTLSOFFLO:
+	case R_FRV_GOTTLSDESCLO:
+	case R_FRV_TLSMOFFLO:
 	  relocation &= 0xffff;
 	  break;
 
@@ -2494,11 +4100,19 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_FRV_FUNCDESC_GOTOFF12:
 	case R_FRV_FUNCDESC_GOTOFFHI:
 	case R_FRV_FUNCDESC_GOTOFFLO:
+	case R_FRV_GETTLSOFF:
+	case R_FRV_GOTTLSDESC12:
+	case R_FRV_GOTTLSDESCHI:
+	case R_FRV_GOTTLSDESCLO:
+	case R_FRV_GOTTLSOFF12:
+	case R_FRV_GOTTLSOFFHI:
+	case R_FRV_GOTTLSOFFLO:
 	  /* Note that we only want GOTOFFHI, not GOTOFFLO or GOTOFF12
 	     here, since we do want to apply the addend to the others.
 	     Note that we've applied the addend to GOTOFFHI before we
 	     shifted it right.  */
 	case R_FRV_GOTOFFHI:
+	case R_FRV_TLSMOFFHI:
 	  relocation -= rel->r_addend;
 	  break;
 
@@ -2512,7 +4126,7 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
      else if (r_type == R_FRV_LO16)
        r = elf32_frv_relocate_lo16 (input_bfd, rel, contents, relocation);
 
-     else if (r_type == R_FRV_LABEL24)
+     else if (r_type == R_FRV_LABEL24 || r_type == R_FRV_GETTLSOFF)
        r = elf32_frv_relocate_label24 (input_bfd, input_section, rel,
 				       contents, relocation);
 
@@ -2531,6 +4145,10 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
      else if (r_type == R_FRV_GPRELHI)
        r = elf32_frv_relocate_gprelhi (info, input_bfd, input_section, rel,
 				       contents, relocation);
+
+     else if (r_type == R_FRV_TLSOFF
+	      || r_type == R_FRV_TLSDESC_VALUE)
+       r = bfd_reloc_notsupported;
 
      else
        r = frv_final_link_relocate (howto, input_bfd, input_section, contents,
@@ -2705,7 +4323,7 @@ _frvfdpic_link_omit_section_dynsym (bfd *output_bfd ATTRIBUTE_UNUSED,
 static bfd_boolean
 _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
 {
-  flagword flags;
+  flagword flags, pltflags;
   asection *s;
   struct elf_link_hash_entry *h;
   struct bfd_link_hash_entry *bh;
@@ -2726,6 +4344,7 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
 	   | SEC_LINKER_CREATED);
+  pltflags = flags;
 
   s = bfd_make_section (abfd, ".got");
   if (s == NULL
@@ -2757,6 +4376,7 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
       h = (struct elf_link_hash_entry *) bh;
       h->def_regular = 1;
       h->type = STT_OBJECT;
+      /* h->other = STV_HIDDEN; */ /* Should we?  */
 
       /* Machine-specific: we want the symbol for executables as
 	 well.  */
@@ -2774,7 +4394,8 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
   if (IS_FDPIC (abfd))
     {
       frvfdpic_got_section (info) = s;
-      frvfdpic_relocs_info (info) = htab_try_create (1, frvfdpic_relocs_info_hash,
+      frvfdpic_relocs_info (info) = htab_try_create (1,
+						     frvfdpic_relocs_info_hash,
 						     frvfdpic_relocs_info_eq,
 						     (htab_del) NULL);
       if (! frvfdpic_relocs_info (info))
@@ -2816,33 +4437,22 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
   h = (struct elf_link_hash_entry *) bh;
   h->def_regular = 1;
   h->type = STT_OBJECT;
+  /* h->other = STV_HIDDEN; */ /* Should we?  */
 
   /* Machine-specific: we want the symbol for executables as well.  */
   if (IS_FDPIC (abfd) && ! bfd_elf_link_record_dynamic_symbol (info, h))
     return FALSE;
 
-  return TRUE;
-}
+  if (!IS_FDPIC (abfd))
+    return TRUE;
 
-/* Make sure the got and plt sections exist, and that our pointers in
-   the link hash table point to them.  */
+  /* FDPIC supports Thread Local Storage, and this may require a
+     procedure linkage table for TLS PLT entries.  */
 
-static bfd_boolean
-elf32_frvfdpic_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
-{
   /* This is mostly copied from
      elflink.c:_bfd_elf_create_dynamic_sections().  */
-  flagword flags, pltflags;
-  asection *s;
-  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
-  /* We need to create .plt, .rel[a].plt, .got, .got.plt, .dynbss, and
-     .rel[a].bss sections.  */
-
-  flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
-	   | SEC_LINKER_CREATED);
-
-  pltflags = flags;
+  flags = pltflags;
   pltflags |= SEC_CODE;
   if (bed->plt_not_loaded)
     pltflags &= ~ (SEC_CODE | SEC_LOAD | SEC_HAS_CONTENTS);
@@ -2871,6 +4481,7 @@ elf32_frvfdpic_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       h = (struct elf_link_hash_entry *) bh;
       h->def_regular = 1;
       h->type = STT_OBJECT;
+      /* h->other = STV_HIDDEN; */ /* Should we?  */
 
       if (! info->executable
 	  && ! bfd_elf_link_record_dynamic_symbol (info, h))
@@ -2886,7 +4497,29 @@ elf32_frvfdpic_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   /* FRV-specific: remember it.  */
   frvfdpic_pltrel_section (info) = s;
 
-  /* FRV-specific: we want to create the GOT in the FRV way.  */
+  return TRUE;
+}
+
+/* Make sure the got and plt sections exist, and that our pointers in
+   the link hash table point to them.  */
+
+static bfd_boolean
+elf32_frvfdpic_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
+{
+  /* This is mostly copied from
+     elflink.c:_bfd_elf_create_dynamic_sections().  */
+  flagword flags;
+  asection *s;
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
+  flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+	   | SEC_LINKER_CREATED);
+
+  /* We need to create .plt, .rel[a].plt, .got, .got.plt, .dynbss, and
+     .rel[a].bss sections.  */
+
+  /* FRV-specific: we want to create the GOT and the PLT in the FRV
+     way.  */
   if (! _frv_create_got_section (abfd, info))
     return FALSE;
 
@@ -2935,49 +4568,16 @@ elf32_frvfdpic_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   return TRUE;
 }
 
-/* The name of the dynamic interpreter.  This is put in the .interp
-   section.  */
+/* Compute the total GOT and PLT size required by each symbol in each
+   range.  Symbols may require up to 4 words in the GOT: an entry
+   pointing to the symbol, an entry pointing to its function
+   descriptor, and a private function descriptors taking two
+   words.  */
 
-#define ELF_DYNAMIC_INTERPRETER "/lib/ld.so.1"
-
-#define DEFAULT_STACK_SIZE 0x20000
-
-/* This structure is used to collect the number of entries present in
-   each addressable range of the got.  */
-struct _frvfdpic_dynamic_got_info
+static void
+_frvfdpic_count_nontls_entries (struct frvfdpic_relocs_info *entry,
+				struct _frvfdpic_dynamic_got_info *dinfo)
 {
-  /* Several bits of information about the current link.  */
-  struct bfd_link_info *info;
-  /* Total size needed for GOT entries within the 12-, 16- or 32-bit
-     ranges.  */
-  bfd_vma got12, gotlos, gothilo;
-  /* Total size needed for function descriptor entries within the 12-,
-     16- or 32-bit ranges.  */
-  bfd_vma fd12, fdlos, fdhilo;
-  /* Total size needed function descriptor entries referenced in PLT
-     entries, that would be profitable to place in offsets close to
-     the PIC register.  */
-  bfd_vma fdplt;
-  /* Total size needed by lazy PLT entries.  */
-  bfd_vma lzplt;
-  /* Number of relocations carried over from input object files.  */
-  unsigned long relocs;
-  /* Number of fixups introduced by relocations in input object files.  */
-  unsigned long fixups;
-};
-
-/* Compute the total GOT size required by each symbol in each range.
-   Symbols may require up to 4 words in the GOT: an entry pointing to
-   the symbol, an entry pointing to its function descriptor, and a
-   private function descriptors taking two words.  */
-
-static int
-_frvfdpic_count_got_plt_entries (void **entryp, void *dinfo_)
-{
-  struct frvfdpic_relocs_info *entry = *entryp;
-  struct _frvfdpic_dynamic_got_info *dinfo = dinfo_;
-  unsigned relocs = 0, fixups = 0;
-
   /* Allocate space for a GOT entry pointing to the symbol.  */
   if (entry->got12)
     dinfo->got12 += 4;
@@ -3031,9 +4631,82 @@ _frvfdpic_count_got_plt_entries (void **entryp, void *dinfo_)
 
   if (entry->lazyplt)
     dinfo->lzplt += 8;
+}
+
+/* Compute the total GOT size required by each TLS symbol in each
+   range.  Symbols may require up to 5 words in the GOT: an entry
+   holding the TLS offset for the symbol, and an entry with a full TLS
+   descriptor taking 4 words.  */
+
+static void
+_frvfdpic_count_tls_entries (struct frvfdpic_relocs_info *entry,
+			     struct _frvfdpic_dynamic_got_info *dinfo,
+			     bfd_boolean subtract)
+{
+  const int l = subtract ? -1 : 1;
+  
+  /* Allocate space for a GOT entry with the TLS offset of the
+     symbol.  */
+  if (entry->tlsoff12)
+    dinfo->got12 += 4 * l;
+  else if (entry->tlsofflos)
+    dinfo->gotlos += 4 * l;
+  else if (entry->tlsoffhilo)
+    dinfo->gothilo += 4 * l;
+  else
+    entry->relocstlsoff -= l;
+  entry->relocstlsoff += l;
+
+  /* If there's any TLSOFF relocation, mark the output file as not
+     suitable for dlopening.  This mark will remain even if we relax
+     all such relocations, but this is not a problem, since we'll only
+     do so for executables, and we definitely don't want anyone
+     dlopening executables.  */
+  if (entry->relocstlsoff)
+    dinfo->info->flags |= DF_STATIC_TLS;
+
+  /* Allocate space for a TLS descriptor.  */
+  if (entry->tlsdesc12)
+    dinfo->tlsd12 += 8 * l;
+  else if (entry->tlsdesclos)
+    dinfo->tlsdlos += 8 * l;
+  else if (entry->tlsplt)
+    dinfo->tlsdplt += 8 * l;
+  else if (entry->tlsdeschilo)
+    dinfo->tlsdhilo += 8 * l;
+  else
+    entry->relocstlsd -= l;
+  entry->relocstlsd += l;
+}
+
+/* Compute the number of dynamic relocations and fixups that a symbol
+   requires, and add (or subtract) from the grand and per-symbol
+   totals.  */
+
+static void
+_frvfdpic_count_relocs_fixups (struct frvfdpic_relocs_info *entry,
+			       struct _frvfdpic_dynamic_got_info *dinfo,
+			       bfd_boolean subtract)
+{
+  bfd_vma relocs = 0, fixups = 0, tlsrets = 0;
 
   if (!dinfo->info->executable || dinfo->info->pie)
-    relocs = entry->relocs32 + entry->relocsfd + entry->relocsfdv;
+    {
+      relocs = entry->relocs32 + entry->relocsfd + entry->relocsfdv
+	+ entry->relocstlsd;
+
+      /* In the executable, TLS relocations to symbols that bind
+	 locally (including those that resolve to global TLS offsets)
+	 are resolved immediately, without any need for fixups or
+	 dynamic relocations.  In shared libraries, however, we must
+	 emit dynamic relocations even for local symbols, because we
+	 don't know the module id the library is going to get at
+	 run-time, nor its TLS base offset.  */
+      if (!dinfo->info->executable
+	  || (entry->symndx == -1
+	      && ! FRVFDPIC_SYM_LOCAL (dinfo->info, entry->d.h)))
+	relocs += entry->relocstlsoff;
+    }
   else
     {
       if (entry->symndx != -1 || FRVFDPIC_SYM_LOCAL (dinfo->info, entry->d.h))
@@ -3041,9 +4714,14 @@ _frvfdpic_count_got_plt_entries (void **entryp, void *dinfo_)
 	  if (entry->symndx != -1
 	      || entry->d.h->root.type != bfd_link_hash_undefweak)
 	    fixups += entry->relocs32 + 2 * entry->relocsfdv;
+	  fixups += entry->relocstlsd;
+	  tlsrets += entry->relocstlsd;
 	}
       else
-	relocs += entry->relocs32 + entry->relocsfdv;
+	{
+	  relocs += entry->relocs32 + entry->relocsfdv
+	    + entry->relocstlsoff + entry->relocstlsd;
+	}
 
       if (entry->symndx != -1
 	  || FRVFDPIC_FUNCDESC_LOCAL (dinfo->info, entry->d.h))
@@ -3056,42 +4734,159 @@ _frvfdpic_count_got_plt_entries (void **entryp, void *dinfo_)
 	relocs += entry->relocsfd;
     }
 
+  if (subtract)
+    {
+      relocs = - relocs;
+      fixups = - fixups;
+      tlsrets = - tlsrets;
+    }
+
   entry->dynrelocs += relocs;
   entry->fixups += fixups;
   dinfo->relocs += relocs;
   dinfo->fixups += fixups;
+  dinfo->tls_ret_refs += tlsrets;
+}
+
+/* Look for opportunities to relax TLS relocations.  We can assume
+   we're linking the main executable or a static-tls library, since
+   otherwise we wouldn't have got here.  When relaxing, we have to
+   first undo any previous accounting of TLS uses of fixups, dynamic
+   relocations, GOT and PLT entries.  */
+
+static void
+_frvfdpic_relax_tls_entries (struct frvfdpic_relocs_info *entry,
+			     struct _frvfdpic_dynamic_got_info *dinfo,
+			     bfd_boolean relaxing)
+{
+  bfd_boolean changed = ! relaxing;
+
+  BFD_ASSERT (dinfo->info->executable
+	      || (dinfo->info->flags & DF_STATIC_TLS));
+
+  if (entry->tlsdesc12 || entry->tlsdesclos || entry->tlsdeschilo)
+    {
+      if (! changed)
+	{
+	  _frvfdpic_count_relocs_fixups (entry, dinfo, TRUE);
+	  _frvfdpic_count_tls_entries (entry, dinfo, TRUE);
+	  changed = TRUE;
+	}
+
+      /* When linking an executable, we can always decay GOTTLSDESC to
+	 TLSMOFF, if the symbol is local, or GOTTLSOFF, otherwise.
+	 When linking a static-tls shared library, using TLSMOFF is
+	 not an option, but we can still use GOTTLSOFF.  When decaying
+	 to GOTTLSOFF, we must keep the GOT entry in range.  We know
+	 it has to fit because we'll be trading the 4 words of hte TLS
+	 descriptor for a single word in the same range.  */
+      if (! dinfo->info->executable
+	  || (entry->symndx == -1
+	      && ! FRVFDPIC_SYM_LOCAL (dinfo->info, entry->d.h)))
+	{
+	  entry->tlsoff12 |= entry->tlsdesc12;
+	  entry->tlsofflos |= entry->tlsdesclos;
+	  entry->tlsoffhilo |= entry->tlsdeschilo;
+	}
+
+      entry->tlsdesc12 = entry->tlsdesclos = entry->tlsdeschilo = 0;
+    }
+
+  /* We can only decay TLSOFFs or call #gettlsoff to TLSMOFF in the
+     main executable.  We have to check whether the symbol's TLSOFF is
+     in range for a setlos.  For symbols with a hash entry, we can
+     determine exactly what to do; for others locals, we don't have
+     addresses handy, so we use the size of the TLS section as an
+     approximation.  If we get it wrong, we'll retain a GOT entry
+     holding the TLS offset (without dynamic relocations or fixups),
+     but we'll still optimize away the loads from it.  Since TLS sizes
+     are generally very small, it's probably not worth attempting to
+     do better than this.  */
+  if ((entry->tlsplt
+       || entry->tlsoff12 || entry->tlsofflos || entry->tlsoffhilo)
+      && dinfo->info->executable && relaxing
+      && ((entry->symndx == -1
+	   && FRVFDPIC_SYM_LOCAL (dinfo->info, entry->d.h)
+	   /* The above may hold for an undefweak TLS symbol, so make
+	      sure we don't have this case before accessing def.value
+	      and def.section.  */
+	   && (entry->d.h->root.type == bfd_link_hash_undefweak
+	       || (bfd_vma)(entry->d.h->root.u.def.value
+			    + (entry->d.h->root.u.def.section
+			       ->output_section->vma)
+			    + entry->d.h->root.u.def.section->output_offset
+			    + entry->addend
+			    - tls_biased_base (dinfo->info)
+			    + 32768) < (bfd_vma)65536))
+	  || (entry->symndx != -1
+	      && (elf_hash_table (dinfo->info)->tls_sec->size
+		  + abs (entry->addend) < 32768 + FRVFDPIC_TLS_BIAS))))
+    {
+      if (! changed)
+	{
+	  _frvfdpic_count_relocs_fixups (entry, dinfo, TRUE);
+	  _frvfdpic_count_tls_entries (entry, dinfo, TRUE);
+	  changed = TRUE;
+	}
+      
+      entry->tlsplt =
+	entry->tlsoff12 = entry->tlsofflos = entry->tlsoffhilo = 0;
+    }
+
+  /* We can decay `call #gettlsoff' to a ldi #tlsoff if we already
+     have a #gottlsoff12 relocation for this entry, or if we can fit
+     one more in the 12-bit (and 16-bit) ranges.  */
+  if (entry->tlsplt
+      && (entry->tlsoff12
+	  || (relaxing
+	      && dinfo->got12 + dinfo->fd12 + dinfo->tlsd12 <= 4096 - 12 - 4
+	      && (dinfo->got12 + dinfo->fd12 + dinfo->tlsd12
+		  + dinfo->gotlos + dinfo->fdlos + dinfo->tlsdlos
+		  <= 65536 - 12 - 4))))
+    {
+      if (! changed)
+	{
+	  _frvfdpic_count_relocs_fixups (entry, dinfo, TRUE);
+	  _frvfdpic_count_tls_entries (entry, dinfo, TRUE);
+	  changed = TRUE;
+	}
+
+      entry->tlsoff12 = 1;
+      entry->tlsplt = 0;
+    }
+
+  if (changed)
+    {
+      _frvfdpic_count_tls_entries (entry, dinfo, FALSE);
+      _frvfdpic_count_relocs_fixups (entry, dinfo, FALSE);
+    }
+
+  return;
+}
+
+/* Compute the total GOT and PLT size required by each symbol in each range. *
+   Symbols may require up to 4 words in the GOT: an entry pointing to
+   the symbol, an entry pointing to its function descriptor, and a
+   private function descriptors taking two words.  */
+
+static int
+_frvfdpic_count_got_plt_entries (void **entryp, void *dinfo_)
+{
+  struct frvfdpic_relocs_info *entry = *entryp;
+  struct _frvfdpic_dynamic_got_info *dinfo = dinfo_;
+
+  _frvfdpic_count_nontls_entries (entry, dinfo);
+
+  if (dinfo->info->executable || (dinfo->info->flags & DF_STATIC_TLS))
+    _frvfdpic_relax_tls_entries (entry, dinfo, FALSE);
+  else
+    {
+      _frvfdpic_count_tls_entries (entry, dinfo, FALSE);
+      _frvfdpic_count_relocs_fixups (entry, dinfo, FALSE);
+    }
 
   return 1;
 }
-
-/* This structure is used to assign offsets to got entries, function
-   descriptors, plt entries and lazy plt entries.  */
-
-struct _frvfdpic_dynamic_got_plt_info
-{
-  /* Summary information collected with _frvfdpic_count_got_plt_entries.  */
-  struct _frvfdpic_dynamic_got_info g;
-
-  /* For each addressable range, we record a MAX (positive) and MIN
-     (negative) value.  CUR is used to assign got entries, and it's
-     incremented from an initial positive value to MAX, then from MIN
-     to FDCUR (unless FDCUR wraps around first).  FDCUR is used to
-     assign function descriptors, and it's decreased from an initial
-     non-positive value to MIN, then from MAX down to CUR (unless CUR
-     wraps around first).  All of MIN, MAX, CUR and FDCUR always point
-     to even words.  ODD, if non-zero, indicates an odd word to be
-     used for the next got entry, otherwise CUR is used and
-     incremented by a pair of words, wrapping around when it reaches
-     MAX.  FDCUR is decremented (and wrapped) before the next function
-     descriptor is chosen.  FDPLT indicates the number of remaining
-     slots that can be used for function descriptors used only by PLT
-     entries.  */
-  struct _frvfdpic_dynamic_got_alloc_data
-  {
-    bfd_signed_vma max, cur, odd, fdcur, min;
-    bfd_vma fdplt;
-  } got12, gotlos, gothilo;
-};
 
 /* Determine the positive and negative ranges to be used by each
    offset range in the GOT.  FDCUR and CUR, that must be aligned to a
@@ -3111,9 +4906,12 @@ _frvfdpic_compute_got_alloc_data (struct _frvfdpic_dynamic_got_alloc_data *gad,
 				  bfd_vma got,
 				  bfd_vma fd,
 				  bfd_vma fdplt,
+				  bfd_vma tlsd,
+				  bfd_vma tlsdplt,
 				  bfd_vma wrap)
 {
   bfd_signed_vma wrapmin = -wrap;
+  const bfd_vma tdescsz = 8;
 
   /* Start at the given initial points.  */
   gad->fdcur = fdcur;
@@ -3158,22 +4956,7 @@ _frvfdpic_compute_got_alloc_data (struct _frvfdpic_dynamic_got_alloc_data *gad,
   if (gad->min < wrapmin)
     {
       gad->max += wrapmin - gad->min;
-      gad->min = wrapmin;
-    }
-  /* If there is space left and we have function descriptors
-     referenced in PLT entries that could take advantage of shorter
-     offsets, place them here.  */
-  else if (fdplt && gad->min > wrapmin)
-    {
-      bfd_vma fds;
-      if ((bfd_vma) (gad->min - wrapmin) < fdplt)
-	fds = gad->min - wrapmin;
-      else
-	fds = fdplt;
-
-      fdplt -= fds;
-      gad->min -= fds;
-      gad->fdplt += fds;
+      gad->tmin = gad->min = wrapmin;
     }
 
   /* If GOT entries took too much space, wrap some of them around.
@@ -3185,19 +4968,95 @@ _frvfdpic_compute_got_alloc_data (struct _frvfdpic_dynamic_got_alloc_data *gad,
       gad->min -= gad->max - wrap;
       gad->max = wrap;
     }
-  /* If there is more space left, try to place some more function
-     descriptors for PLT entries.  */
-  else if (fdplt && (bfd_vma) gad->max < wrap)
+
+  /* Add TLS descriptors.  */
+  gad->tmax = gad->max + tlsd;
+  gad->tmin = gad->min;
+  gad->tlsdplt = 0;
+
+  /* If TLS descriptors took too much space, wrap an integral number
+     of them around.  */
+  if ((bfd_vma) gad->tmax > wrap)
+    {
+      bfd_vma wrapsize = gad->tmax - wrap;
+
+      wrapsize += tdescsz / 2;
+      wrapsize &= ~ tdescsz / 2;
+
+      gad->tmin -= wrapsize;
+      gad->tmax -= wrapsize;
+    }
+
+  /* If there is space left and we have function descriptors
+     referenced in PLT entries that could take advantage of shorter
+     offsets, place them now.  */
+  if (fdplt && gad->tmin > wrapmin)
     {
       bfd_vma fds;
-      if ((bfd_vma) (wrap - gad->max) < fdplt)
-	fds = wrap - gad->max;
+
+      if ((bfd_vma) (gad->tmin - wrapmin) < fdplt)
+	fds = gad->tmin - wrapmin;
+      else
+	fds = fdplt;
+
+      fdplt -= fds;
+      gad->min -= fds;
+      gad->tmin -= fds;
+      gad->fdplt += fds;
+    }
+
+  /* If there is more space left, try to place some more function
+     descriptors for PLT entries.  */
+  if (fdplt && (bfd_vma) gad->tmax < wrap)
+    {
+      bfd_vma fds;
+
+      if ((bfd_vma) (wrap - gad->tmax) < fdplt)
+	fds = wrap - gad->tmax;
       else
 	fds = fdplt;
 
       fdplt -= fds;
       gad->max += fds;
+      gad->tmax += fds;
       gad->fdplt += fds;
+    }
+
+  /* If there is space left and we have TLS descriptors referenced in
+     PLT entries that could take advantage of shorter offsets, place
+     them now.  */
+  if (tlsdplt && gad->tmin > wrapmin)
+    {
+      bfd_vma tlsds;
+
+      if ((bfd_vma) (gad->tmin - wrapmin) < tlsdplt)
+	tlsds = (gad->tmin - wrapmin) & ~ (tdescsz / 2);
+      else
+	tlsds = tlsdplt;
+
+      tlsdplt -= tlsds;
+      gad->tmin -= tlsds;
+      gad->tlsdplt += tlsds;
+    }
+
+  /* If there is more space left, try to place some more TLS
+     descriptors for PLT entries.  Although we could try to fit an
+     additional TLS descriptor with half of it just before before the
+     wrap point and another right past the wrap point, this might
+     cause us to run out of space for the next region, so don't do
+     it.  */
+  if (tlsdplt && (bfd_vma) gad->tmax < wrap - tdescsz / 2)
+    {
+      bfd_vma tlsds;
+
+      if ((bfd_vma) (wrap - gad->tmax) < tlsdplt)
+	tlsds = (wrap - gad->tmax) & ~ (tdescsz / 2);
+      else
+	tlsds = tlsdplt;
+
+      tlsdplt -= tlsds;
+      gad->tmax += tlsds;
+      gad->tlsdplt += tlsds;
     }
 
   /* If odd was initially computed as an offset past the wrap point,
@@ -3211,6 +5070,11 @@ _frvfdpic_compute_got_alloc_data (struct _frvfdpic_dynamic_got_alloc_data *gad,
      equal to min.  */
   if (gad->cur == gad->max)
     gad->cur = gad->min;
+
+  /* Ditto for _frvfdpic_get_tlsdesc_entry().  */
+  gad->tcur = gad->max;
+  if (gad->tcur == gad->tmax)
+    gad->tcur = gad->tmin;
 
   return odd;
 }
@@ -3255,6 +5119,24 @@ _frvfdpic_get_fd_entry (struct _frvfdpic_dynamic_got_alloc_data *gad)
   if (gad->fdcur == gad->min)
     gad->fdcur = gad->max;
   return gad->fdcur -= 8;
+}
+
+/* Compute the location of the next TLS descriptor entry in the GOT,
+   given the allocation data for a range.  */
+inline static bfd_signed_vma
+_frvfdpic_get_tlsdesc_entry (struct _frvfdpic_dynamic_got_alloc_data *gad)
+{
+  bfd_signed_vma ret;
+
+  ret = gad->tcur;
+
+  gad->tcur += 8;
+
+  /* If we're at the top of the region, wrap around to the bottom.  */
+  if (gad->tcur == gad->tmax)
+    gad->tcur = gad->tmin;
+
+  return ret;
 }
 
 /* Assign GOT offsets for every GOT entry and function descriptor.
@@ -3302,6 +5184,35 @@ _frvfdpic_assign_got_entries (void **entryp, void *info_)
   else if (entry->privfd)
     entry->fd_entry = _frvfdpic_get_fd_entry (&dinfo->gothilo);
 
+  if (entry->tlsoff12)
+    entry->tlsoff_entry = _frvfdpic_get_got_entry (&dinfo->got12);
+  else if (entry->tlsofflos)
+    entry->tlsoff_entry = _frvfdpic_get_got_entry (&dinfo->gotlos);
+  else if (entry->tlsoffhilo)
+    entry->tlsoff_entry = _frvfdpic_get_got_entry (&dinfo->gothilo);
+
+  if (entry->tlsdesc12)
+    entry->tlsdesc_entry = _frvfdpic_get_tlsdesc_entry (&dinfo->got12);
+  else if (entry->tlsplt && dinfo->got12.tlsdplt)
+    {
+      dinfo->got12.tlsdplt -= 8;
+      entry->tlsdesc_entry = _frvfdpic_get_tlsdesc_entry (&dinfo->got12);
+    }
+  else if (entry->tlsdesclos)
+    entry->tlsdesc_entry = _frvfdpic_get_tlsdesc_entry (&dinfo->gotlos);
+  else if (entry->tlsplt && dinfo->gotlos.tlsdplt)
+    {
+      dinfo->gotlos.tlsdplt -= 8;
+      entry->tlsdesc_entry = _frvfdpic_get_tlsdesc_entry (&dinfo->gotlos);
+    }
+  else if (entry->tlsplt)
+    {
+      dinfo->gothilo.tlsdplt -= 8;
+      entry->tlsdesc_entry = _frvfdpic_get_tlsdesc_entry (&dinfo->gothilo);
+    }
+  else if (entry->tlsdeschilo)
+    entry->tlsdesc_entry = _frvfdpic_get_tlsdesc_entry (&dinfo->gothilo);
+
   return 1;
 }
 
@@ -3315,6 +5226,10 @@ _frvfdpic_assign_plt_entries (void **entryp, void *info_)
   struct frvfdpic_relocs_info *entry = *entryp;
   struct _frvfdpic_dynamic_got_plt_info *dinfo = info_;
 
+#if 1
+  if (entry->privfd)
+    BFD_ASSERT (entry->fd_entry);
+#else
   /* If this symbol requires a local function descriptor, allocate
      one.  */
   if (entry->privfd && entry->fd_entry == 0)
@@ -3336,6 +5251,7 @@ _frvfdpic_assign_plt_entries (void **entryp, void *info_)
 	  dinfo->gothilo.fdplt -= 8;
 	}
     }
+#endif
 
   if (entry->plt)
     {
@@ -3370,6 +5286,79 @@ _frvfdpic_assign_plt_entries (void **entryp, void *info_)
 	  == FRVFDPIC_LZPLT_RESOLV_LOC)
 	dinfo->g.lzplt += 4;
     }
+
+  if (entry->tlsplt)
+    {
+      int size;
+
+      entry->tlsplt_entry
+	= frvfdpic_plt_section (dinfo->g.info)->size;
+
+      if (dinfo->g.info->executable
+	  && (entry->symndx != -1
+	      || FRVFDPIC_SYM_LOCAL (dinfo->g.info, entry->d.h)))
+	{
+	  if ((bfd_signed_vma)entry->addend >= -(1 << (16 - 1))
+	      /* FIXME: here we use the size of the TLS section
+		 as an upper bound for the value of the TLS
+		 symbol, because we may not know the exact value
+		 yet.  If we get it wrong, we'll just waste a
+		 word in the PLT, and we should never get even
+		 close to 32 KiB of TLS anyway.  */
+	      && elf_hash_table (dinfo->g.info)->tls_sec
+	      && (elf_hash_table (dinfo->g.info)->tls_sec->size
+		  + (bfd_signed_vma)(entry->addend) <= (1 << (16 - 1))))
+	    size = 8;
+	  else
+	    size = 12;
+	}
+      else if (entry->tlsoff_entry)
+	{
+	  if (entry->tlsoff_entry >= -(1 << (12 - 1))
+	      && entry->tlsoff_entry < (1 << (12 - 1)))
+	    size = 8;
+	  else if (entry->tlsoff_entry >= -(1 << (16 - 1))
+		   && entry->tlsoff_entry < (1 << (16 - 1)))
+	    size = 12;
+	  else
+	    size = 16;
+	}
+      else
+	{
+	  BFD_ASSERT (entry->tlsdesc_entry);
+
+	  if (entry->tlsdesc_entry >= -(1 << (12 - 1))
+	      && entry->tlsdesc_entry < (1 << (12 - 1)))
+	    size = 8;
+	  else if (entry->tlsdesc_entry >= -(1 << (16 - 1))
+		   && entry->tlsdesc_entry < (1 << (16 - 1)))
+	    size = 12;
+	  else
+	    size = 16;
+	}
+      
+      frvfdpic_plt_section (dinfo->g.info)->size += size;
+    }
+
+  return 1;
+}
+
+/* Cancel out any effects of calling _frvfdpic_assign_got_entries and
+   _frvfdpic_assign_plt_entries.  */
+
+static int
+_frvfdpic_reset_got_plt_entries (void **entryp, void *ignore ATTRIBUTE_UNUSED)
+{
+  struct frvfdpic_relocs_info *entry = *entryp;
+
+  entry->got_entry = 0;
+  entry->fdgot_entry = 0;
+  entry->fd_entry = 0;
+  entry->plt_entry = (bfd_vma)-1;
+  entry->lzplt_entry = (bfd_vma)-1;
+  entry->tlsoff_entry = 0;
+  entry->tlsdesc_entry = 0;
+  entry->tlsplt_entry = (bfd_vma)-1;
 
   return 1;
 }
@@ -3430,6 +5419,216 @@ _frvfdpic_resolve_final_relocs_info (void **entryp, void *p)
   return 1;
 }
 
+/* Compute the total size of the GOT, the PLT, the dynamic relocations
+   section and the rofixup section.  Assign locations for GOT and PLT
+   entries.  */
+
+static bfd_boolean
+_frvfdpic_size_got_plt (bfd *output_bfd,
+			struct _frvfdpic_dynamic_got_plt_info *gpinfop)
+{
+  bfd_signed_vma odd;
+  bfd_vma limit, tlslimit;
+  struct bfd_link_info *info = gpinfop->g.info;
+  bfd *dynobj = elf_hash_table (info)->dynobj;
+
+  memcpy (frvfdpic_dynamic_got_plt_info (info), &gpinfop->g,
+	  sizeof (gpinfop->g));
+
+  odd = 12;
+  /* Compute the total size taken by entries in the 12-bit and 16-bit
+     ranges, to tell how many PLT function descriptors we can bring
+     into the 12-bit range without causing the 16-bit range to
+     overflow.  */
+  limit = odd + gpinfop->g.got12 + gpinfop->g.gotlos
+    + gpinfop->g.fd12 + gpinfop->g.fdlos
+    + gpinfop->g.tlsd12 + gpinfop->g.tlsdlos;
+  if (limit < (bfd_vma)1 << 16)
+    limit = ((bfd_vma)1 << 16) - limit;
+  else
+    limit = 0;
+  if (gpinfop->g.fdplt < limit)
+    {
+      tlslimit = (limit - gpinfop->g.fdplt) & ~ (bfd_vma) 8;
+      limit = gpinfop->g.fdplt;
+    }
+  else
+    tlslimit = 0;
+  if (gpinfop->g.tlsdplt < tlslimit)
+    tlslimit = gpinfop->g.tlsdplt;
+
+  /* Determine the ranges of GOT offsets that we can use for each
+     range of addressing modes.  */
+  odd = _frvfdpic_compute_got_alloc_data (&gpinfop->got12,
+					  0,
+					  odd,
+					  16,
+					  gpinfop->g.got12,
+					  gpinfop->g.fd12,
+					  limit,
+					  gpinfop->g.tlsd12,
+					  tlslimit,
+					  (bfd_vma)1 << (12-1));
+  odd = _frvfdpic_compute_got_alloc_data (&gpinfop->gotlos,
+					  gpinfop->got12.tmin,
+					  odd,
+					  gpinfop->got12.tmax,
+					  gpinfop->g.gotlos,
+					  gpinfop->g.fdlos,
+					  gpinfop->g.fdplt
+					  - gpinfop->got12.fdplt,
+					  gpinfop->g.tlsdlos,
+					  gpinfop->g.tlsdplt
+					  - gpinfop->got12.tlsdplt,
+					  (bfd_vma)1 << (16-1));
+  odd = _frvfdpic_compute_got_alloc_data (&gpinfop->gothilo,
+					  gpinfop->gotlos.tmin,
+					  odd,
+					  gpinfop->gotlos.tmax,
+					  gpinfop->g.gothilo,
+					  gpinfop->g.fdhilo,
+					  gpinfop->g.fdplt
+					  - gpinfop->got12.fdplt
+					  - gpinfop->gotlos.fdplt,
+					  gpinfop->g.tlsdhilo,
+					  gpinfop->g.tlsdplt
+					  - gpinfop->got12.tlsdplt
+					  - gpinfop->gotlos.tlsdplt,
+					  (bfd_vma)1 << (32-1));
+
+  /* Now assign (most) GOT offsets.  */
+  htab_traverse (frvfdpic_relocs_info (info), _frvfdpic_assign_got_entries,
+		 gpinfop);
+
+  frvfdpic_got_section (info)->size = gpinfop->gothilo.tmax
+    - gpinfop->gothilo.tmin
+    /* If an odd word is the last word of the GOT, we don't need this
+       word to be part of the GOT.  */
+    - (odd + 4 == gpinfop->gothilo.tmax ? 4 : 0);
+  if (frvfdpic_got_section (info)->size == 0)
+    frvfdpic_got_section (info)->flags |= SEC_EXCLUDE;
+  else if (frvfdpic_got_section (info)->size == 12
+	   && ! elf_hash_table (info)->dynamic_sections_created)
+    {
+      frvfdpic_got_section (info)->flags |= SEC_EXCLUDE;
+      frvfdpic_got_section (info)->size = 0;
+    }
+  /* This will be non-NULL during relaxation.  The assumption is that
+     the size of one of these sections will never grow, only shrink,
+     so we can use the larger buffer we allocated before.  */
+  else if (frvfdpic_got_section (info)->contents == NULL)
+    {
+      frvfdpic_got_section (info)->contents =
+	(bfd_byte *) bfd_zalloc (dynobj,
+				 frvfdpic_got_section (info)->size);
+      if (frvfdpic_got_section (info)->contents == NULL)
+	return FALSE;
+    }
+
+  if (frvfdpic_gotrel_section (info))
+    /* Subtract the number of lzplt entries, since those will generate
+       relocations in the pltrel section.  */
+    frvfdpic_gotrel_section (info)->size =
+      (gpinfop->g.relocs - gpinfop->g.lzplt / 8)
+      * get_elf_backend_data (output_bfd)->s->sizeof_rel;
+  else
+    BFD_ASSERT (gpinfop->g.relocs == 0);
+  if (frvfdpic_gotrel_section (info)->size == 0)
+    frvfdpic_gotrel_section (info)->flags |= SEC_EXCLUDE;
+  else if (frvfdpic_gotrel_section (info)->contents == NULL)
+    {
+      frvfdpic_gotrel_section (info)->contents =
+	(bfd_byte *) bfd_zalloc (dynobj,
+				 frvfdpic_gotrel_section (info)->size);
+      if (frvfdpic_gotrel_section (info)->contents == NULL)
+	return FALSE;
+    }
+
+  frvfdpic_gotfixup_section (info)->size = (gpinfop->g.fixups + 1) * 4;
+  if (frvfdpic_gotfixup_section (info)->size == 0)
+    frvfdpic_gotfixup_section (info)->flags |= SEC_EXCLUDE;
+  else if (frvfdpic_gotfixup_section (info)->contents == NULL)
+    {
+      frvfdpic_gotfixup_section (info)->contents =
+	(bfd_byte *) bfd_zalloc (dynobj,
+				 frvfdpic_gotfixup_section (info)->size);
+      if (frvfdpic_gotfixup_section (info)->contents == NULL)
+	return FALSE;
+    }
+
+  if (frvfdpic_pltrel_section (info))
+    {
+      frvfdpic_pltrel_section (info)->size =
+	gpinfop->g.lzplt / 8
+	* get_elf_backend_data (output_bfd)->s->sizeof_rel;
+      if (frvfdpic_pltrel_section (info)->size == 0)
+	frvfdpic_pltrel_section (info)->flags |= SEC_EXCLUDE;
+      else if (frvfdpic_pltrel_section (info)->contents == NULL)
+	{
+	  frvfdpic_pltrel_section (info)->contents =
+	    (bfd_byte *) bfd_zalloc (dynobj,
+				     frvfdpic_pltrel_section (info)->size);
+	  if (frvfdpic_pltrel_section (info)->contents == NULL)
+	    return FALSE;
+	}
+    }
+
+  /* Add 4 bytes for every block of at most 65535 lazy PLT entries,
+     such that there's room for the additional instruction needed to
+     call the resolver.  Since _frvfdpic_assign_got_entries didn't
+     account for them, our block size is 4 bytes smaller than the real
+     block size.  */
+  if (frvfdpic_plt_section (info))
+    {
+      frvfdpic_plt_section (info)->size = gpinfop->g.lzplt
+	+ ((gpinfop->g.lzplt + (FRVFDPIC_LZPLT_BLOCK_SIZE - 4) - 8)
+	   / (FRVFDPIC_LZPLT_BLOCK_SIZE - 4) * 4);
+    }
+
+  /* Reset it, such that _frvfdpic_assign_plt_entries() can use it to
+     actually assign lazy PLT entries addresses.  */
+  gpinfop->g.lzplt = 0;
+
+  /* Save information that we're going to need to generate GOT and PLT
+     entries.  */
+  frvfdpic_got_initial_offset (info) = -gpinfop->gothilo.tmin;
+
+  if (get_elf_backend_data (output_bfd)->want_got_sym)
+    elf_hash_table (info)->hgot->root.u.def.value
+      = frvfdpic_got_initial_offset (info);
+
+  if (frvfdpic_plt_section (info))
+    frvfdpic_plt_initial_offset (info) =
+      frvfdpic_plt_section (info)->size;
+
+  /* Allocate a ret statement at plt_initial_offset, to be used by
+     locally-resolved TLS descriptors.  */
+  if (gpinfop->g.tls_ret_refs)
+    frvfdpic_plt_section (info)->size += 4;
+
+  htab_traverse (frvfdpic_relocs_info (info), _frvfdpic_assign_plt_entries,
+		 gpinfop);
+
+  /* Allocate the PLT section contents only after
+     _frvfdpic_assign_plt_entries has a chance to add the size of the
+     non-lazy PLT entries.  */
+  if (frvfdpic_plt_section (info))
+    {
+      if (frvfdpic_plt_section (info)->size == 0)
+	frvfdpic_plt_section (info)->flags |= SEC_EXCLUDE;
+      else if (frvfdpic_plt_section (info)->contents == NULL)
+	{
+	  frvfdpic_plt_section (info)->contents =
+	    (bfd_byte *) bfd_zalloc (dynobj,
+				     frvfdpic_plt_section (info)->size);
+	  if (frvfdpic_plt_section (info)->contents == NULL)
+	    return FALSE;
+	}
+    }
+
+  return TRUE;
+}
+
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
@@ -3439,8 +5638,6 @@ elf32_frvfdpic_size_dynamic_sections (bfd *output_bfd,
   bfd *dynobj;
   asection *s;
   struct _frvfdpic_dynamic_got_plt_info gpinfo;
-  bfd_signed_vma odd;
-  bfd_vma limit;
 
   dynobj = elf_hash_table (info)->dynobj;
   BFD_ASSERT (dynobj != NULL);
@@ -3473,168 +5670,12 @@ elf32_frvfdpic_size_dynamic_sections (bfd *output_bfd,
   htab_traverse (frvfdpic_relocs_info (info), _frvfdpic_count_got_plt_entries,
 		 &gpinfo.g);
 
-  odd = 12;
-  /* Compute the total size taken by entries in the 12-bit and 16-bit
-     ranges, to tell how many PLT function descriptors we can bring
-     into the 12-bit range without causing the 16-bit range to
-     overflow.  */
-  limit = odd + gpinfo.g.got12 + gpinfo.g.gotlos
-    + gpinfo.g.fd12 + gpinfo.g.fdlos;
-  if (limit < (bfd_vma)1 << 16)
-    limit = ((bfd_vma)1 << 16) - limit;
-  else
-    limit = 0;
-  if (gpinfo.g.fdplt < limit)
-    limit = gpinfo.g.fdplt;
+  /* Allocate space to save the summary information, we're going to
+     use it if we're doing relaxations.  */
+  frvfdpic_dynamic_got_plt_info (info) = bfd_alloc (dynobj, sizeof (gpinfo.g));
 
-  /* Determine the ranges of GOT offsets that we can use for each
-     range of addressing modes.  */
-  odd = _frvfdpic_compute_got_alloc_data (&gpinfo.got12,
-					  0,
-					  odd,
-					  16,
-					  gpinfo.g.got12,
-					  gpinfo.g.fd12,
-					  limit,
-					  (bfd_vma)1 << (12-1));
-  odd = _frvfdpic_compute_got_alloc_data (&gpinfo.gotlos,
-					  gpinfo.got12.min,
-					  odd,
-					  gpinfo.got12.max,
-					  gpinfo.g.gotlos,
-					  gpinfo.g.fdlos,
-					  gpinfo.g.fdplt - gpinfo.got12.fdplt,
-					  (bfd_vma)1 << (16-1));
-  odd = _frvfdpic_compute_got_alloc_data (&gpinfo.gothilo,
-					  gpinfo.gotlos.min,
-					  odd,
-					  gpinfo.gotlos.max,
-					  gpinfo.g.gothilo,
-					  gpinfo.g.fdhilo,
-					  gpinfo.g.fdplt - gpinfo.got12.fdplt
-					  - gpinfo.gotlos.fdplt,
-					  (bfd_vma)1 << (32-1));
-
-  /* Now assign (most) GOT offsets.  */
-  htab_traverse (frvfdpic_relocs_info (info), _frvfdpic_assign_got_entries,
-		 &gpinfo);
-
-  frvfdpic_got_section (info)->size = gpinfo.gothilo.max
-    - gpinfo.gothilo.min
-    /* If an odd word is the last word of the GOT, we don't need this
-       word to be part of the GOT.  */
-    - (odd + 4 == gpinfo.gothilo.max ? 4 : 0);
-  if (frvfdpic_got_section (info)->size == 0)
-    frvfdpic_got_section (info)->flags |= SEC_EXCLUDE;
-  else if (frvfdpic_got_section (info)->size == 12
-	   && ! elf_hash_table (info)->dynamic_sections_created)
-    {
-      frvfdpic_got_section (info)->flags |= SEC_EXCLUDE;
-      frvfdpic_got_section (info)->size = 0;
-    }
-  else
-    {
-      frvfdpic_got_section (info)->contents =
-	(bfd_byte *) bfd_zalloc (dynobj,
-				 frvfdpic_got_section (info)->size);
-      if (frvfdpic_got_section (info)->contents == NULL)
-	return FALSE;
-    }
-
-  if (elf_hash_table (info)->dynamic_sections_created)
-    /* Subtract the number of lzplt entries, since those will generate
-       relocations in the pltrel section.  */
-    frvfdpic_gotrel_section (info)->size =
-      (gpinfo.g.relocs - gpinfo.g.lzplt / 8)
-      * get_elf_backend_data (output_bfd)->s->sizeof_rel;
-  else
-    BFD_ASSERT (gpinfo.g.relocs == 0);
-  if (frvfdpic_gotrel_section (info)->size == 0)
-    frvfdpic_gotrel_section (info)->flags |= SEC_EXCLUDE;
-  else
-    {
-      frvfdpic_gotrel_section (info)->contents =
-	(bfd_byte *) bfd_zalloc (dynobj,
-				 frvfdpic_gotrel_section (info)->size);
-      if (frvfdpic_gotrel_section (info)->contents == NULL)
-	return FALSE;
-    }
-
-  frvfdpic_gotfixup_section (info)->size = (gpinfo.g.fixups + 1) * 4;
-  if (frvfdpic_gotfixup_section (info)->size == 0)
-    frvfdpic_gotfixup_section (info)->flags |= SEC_EXCLUDE;
-  else
-    {
-      frvfdpic_gotfixup_section (info)->contents =
-	(bfd_byte *) bfd_zalloc (dynobj,
-				 frvfdpic_gotfixup_section (info)->size);
-      if (frvfdpic_gotfixup_section (info)->contents == NULL)
-	return FALSE;
-    }
-
-  if (elf_hash_table (info)->dynamic_sections_created)
-    {
-      frvfdpic_pltrel_section (info)->size =
-	gpinfo.g.lzplt / 8 * get_elf_backend_data (output_bfd)->s->sizeof_rel;
-      if (frvfdpic_pltrel_section (info)->size == 0)
-	frvfdpic_pltrel_section (info)->flags |= SEC_EXCLUDE;
-      else
-	{
-	  frvfdpic_pltrel_section (info)->contents =
-	    (bfd_byte *) bfd_zalloc (dynobj,
-				     frvfdpic_pltrel_section (info)->size);
-	  if (frvfdpic_pltrel_section (info)->contents == NULL)
-	    return FALSE;
-	}
-    }
-
-  /* Add 4 bytes for every block of at most 65535 lazy PLT entries,
-     such that there's room for the additional instruction needed to
-     call the resolver.  Since _frvfdpic_assign_got_entries didn't
-     account for them, our block size is 4 bytes smaller than the real
-     block size.  */
-  if (elf_hash_table (info)->dynamic_sections_created)
-    {
-      frvfdpic_plt_section (info)->size = gpinfo.g.lzplt
-	+ ((gpinfo.g.lzplt + (FRVFDPIC_LZPLT_BLOCK_SIZE - 4) - 8)
-	   / (FRVFDPIC_LZPLT_BLOCK_SIZE - 4) * 4);
-    }
-
-  /* Reset it, such that _frvfdpic_assign_plt_entries() can use it to
-     actually assign lazy PLT entries addresses.  */
-  gpinfo.g.lzplt = 0;
-
-  /* Save information that we're going to need to generate GOT and PLT
-     entries.  */
-  frvfdpic_got_initial_offset (info) = -gpinfo.gothilo.min;
-
-  if (get_elf_backend_data (output_bfd)->want_got_sym)
-    elf_hash_table (info)->hgot->root.u.def.value
-      += frvfdpic_got_initial_offset (info);
-
-  if (elf_hash_table (info)->dynamic_sections_created)
-    frvfdpic_plt_initial_offset (info) =
-      frvfdpic_plt_section (info)->size;
-
-  htab_traverse (frvfdpic_relocs_info (info), _frvfdpic_assign_plt_entries,
-		 &gpinfo);
-
-  /* Allocate the PLT section contents only after
-     _frvfdpic_assign_plt_entries has a chance to add the size of the
-     non-lazy PLT entries.  */
-  if (elf_hash_table (info)->dynamic_sections_created)
-    {
-      if (frvfdpic_plt_section (info)->size == 0)
-	frvfdpic_plt_section (info)->flags |= SEC_EXCLUDE;
-      else
-	{
-	  frvfdpic_plt_section (info)->contents =
-	    (bfd_byte *) bfd_zalloc (dynobj,
-				     frvfdpic_plt_section (info)->size);
-	  if (frvfdpic_plt_section (info)->contents == NULL)
-	    return FALSE;
-	}
-    }
+  if (!_frvfdpic_size_got_plt (output_bfd, &gpinfo))
+    return FALSE;
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
@@ -3691,6 +5732,7 @@ elf32_frvfdpic_always_size_sections (bfd *output_bfd,
 	  h = (struct elf_link_hash_entry *) bh;
 	  h->def_regular = 1;
 	  h->type = STT_OBJECT;
+	  /* This one must NOT be hidden.  */
 	}
 
       /* Create a stack section, and set its alignment.  */
@@ -3699,6 +5741,81 @@ elf32_frvfdpic_always_size_sections (bfd *output_bfd,
       if (sec == NULL
 	  || ! bfd_set_section_alignment (output_bfd, sec, 3))
 	return FALSE;
+    }
+
+  return TRUE;
+}
+
+/* Look for opportunities to relax TLS relocations.  We can assume
+   we're linking the main executable or a static-tls library, since
+   otherwise we wouldn't have got here.  */
+
+static int
+_frvfdpic_relax_got_plt_entries (void **entryp, void *dinfo_)
+{
+  struct frvfdpic_relocs_info *entry = *entryp;
+  struct _frvfdpic_dynamic_got_info *dinfo = dinfo_;
+
+  _frvfdpic_relax_tls_entries (entry, dinfo, TRUE);
+
+  return 1;
+}
+
+static bfd_boolean
+elf32_frvfdpic_relax_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
+			      struct bfd_link_info *info, bfd_boolean *again)
+{
+  struct _frvfdpic_dynamic_got_plt_info gpinfo;
+
+  /* If we return early, we didn't change anything.  */
+  *again = FALSE;
+
+  /* We'll do our thing when requested to relax the GOT section.  */
+  if (sec != frvfdpic_got_section (info))
+    return TRUE;
+
+  /* We can only relax when linking the main executable or a library
+     that can't be dlopened.  */
+  if (! info->executable && ! (info->flags & DF_STATIC_TLS))
+    return TRUE;
+
+  /* If there isn't a TLS section for this binary, we can't do
+     anything about its TLS relocations (it probably doesn't have
+     any.  */
+  if (elf_hash_table (info)->tls_sec == NULL)
+    return TRUE;
+
+  memset (&gpinfo, 0, sizeof (gpinfo));
+  memcpy (&gpinfo.g, frvfdpic_dynamic_got_plt_info (info), sizeof (gpinfo.g));
+
+  /* Now look for opportunities to relax, adjusting the GOT usage
+     as needed.  */
+  htab_traverse (frvfdpic_relocs_info (info),
+		 _frvfdpic_relax_got_plt_entries,
+		 &gpinfo.g);
+
+  /* If we changed anything, reset and re-assign GOT and PLT entries.  */
+  if (memcmp (frvfdpic_dynamic_got_plt_info (info),
+	      &gpinfo.g, sizeof (gpinfo.g)) != 0)
+    {
+      /* Clear GOT and PLT assignments.  */
+      htab_traverse (frvfdpic_relocs_info (info),
+		     _frvfdpic_reset_got_plt_entries,
+		     NULL);
+
+      /* The owner of the TLS section is the output bfd.  There should
+	 be a better way to get to it.  */
+      if (!_frvfdpic_size_got_plt (elf_hash_table (info)->tls_sec->owner,
+				   &gpinfo))
+	return FALSE;
+
+      /* Repeat until we don't make any further changes.  We could fail to
+	 introduce changes in a round if, for example, the 12-bit range is
+	 full, but we later release some space by getting rid of TLS
+	 descriptors in it.  We have to repeat the whole process because
+	 we might have changed the size of a section processed before this
+	 one.  */
+      *again = TRUE;
     }
 
   return TRUE;
@@ -3771,6 +5888,10 @@ elf32_frvfdpic_finish_dynamic_sections (bfd *output_bfd,
 
   dynobj = elf_hash_table (info)->dynobj;
 
+  if (frvfdpic_dynamic_got_plt_info (info))
+    {
+      BFD_ASSERT (frvfdpic_dynamic_got_plt_info (info)->tls_ret_refs == 0);
+    }
   if (frvfdpic_got_section (info))
     {
       BFD_ASSERT (frvfdpic_gotrel_section (info)->size
@@ -3783,6 +5904,7 @@ elf32_frvfdpic_finish_dynamic_sections (bfd *output_bfd,
 	  bfd_vma got_value = hgot->root.u.def.value
 	    + hgot->root.u.def.section->output_section->vma
 	    + hgot->root.u.def.section->output_offset;
+	  struct bfd_link_hash_entry *hend;
 
 	  _frvfdpic_add_rofixup (output_bfd, frvfdpic_gotfixup_section (info),
 				 got_value, 0);
@@ -3790,25 +5912,44 @@ elf32_frvfdpic_finish_dynamic_sections (bfd *output_bfd,
 	  if (frvfdpic_gotfixup_section (info)->size
 	      != (frvfdpic_gotfixup_section (info)->reloc_count * 4))
 	    {
+	    error:
 	      (*_bfd_error_handler)
 		("LINKER BUG: .rofixup section size mismatch");
 	      return FALSE;
 	    }
+
+	  hend = bfd_link_hash_lookup (info->hash, "__ROFIXUP_END__",
+				       FALSE, FALSE, TRUE);
+	  if (hend
+	      && (hend->type == bfd_link_hash_defined
+		  || hend->type == bfd_link_hash_defweak))
+	    {
+	      bfd_vma value = 
+		frvfdpic_gotfixup_section (info)->output_section->vma
+		+ frvfdpic_gotfixup_section (info)->output_offset
+		+ frvfdpic_gotfixup_section (info)->size
+		- hend->u.def.section->output_section->vma
+		- hend->u.def.section->output_offset;
+	      BFD_ASSERT (hend->u.def.value == value);
+	      if (hend->u.def.value != value)
+		goto error;
+	    }
 	}
     }
-  if (elf_hash_table (info)->dynamic_sections_created)
+  if (frvfdpic_pltrel_section (info))
     {
       BFD_ASSERT (frvfdpic_pltrel_section (info)->size
 		  == (frvfdpic_pltrel_section (info)->reloc_count
 		      * sizeof (Elf32_External_Rel)));
     }
 
-  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       Elf32_External_Dyn * dyncon;
       Elf32_External_Dyn * dynconend;
+
+      sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
 
       BFD_ASSERT (sdyn != NULL);
 
@@ -4082,6 +6223,15 @@ elf32_frv_check_relocs (abfd, info, sec, relocs)
 
       switch (ELF32_R_TYPE (rel->r_info))
 	{
+	case R_FRV_GETTLSOFF:
+	case R_FRV_TLSDESC_VALUE:
+	case R_FRV_GOTTLSDESC12:
+	case R_FRV_GOTTLSDESCHI:
+	case R_FRV_GOTTLSDESCLO:
+	case R_FRV_GOTTLSOFF12:
+	case R_FRV_GOTTLSOFFHI:
+	case R_FRV_GOTTLSOFFLO:
+	case R_FRV_TLSOFF:
 	case R_FRV_GOT12:
 	case R_FRV_GOTHI:
 	case R_FRV_GOTLO:
@@ -4096,6 +6246,10 @@ elf32_frv_check_relocs (abfd, info, sec, relocs)
 	case R_FRV_FUNCDESC_GOTOFFLO:
 	case R_FRV_FUNCDESC:
 	case R_FRV_FUNCDESC_VALUE:
+	case R_FRV_TLSMOFF12:
+	case R_FRV_TLSMOFFHI:
+	case R_FRV_TLSMOFFLO:
+	case R_FRV_TLSMOFF:
 	  if (! IS_FDPIC (abfd))
 	    goto bad_reloc;
 	  /* Fall through.  */
@@ -4206,6 +6360,45 @@ elf32_frv_check_relocs (abfd, info, sec, relocs)
 	  picrel->relocsfd++;
 	  break;
 
+	case R_FRV_GETTLSOFF:
+	  picrel->tlsplt = 1;
+	  break;
+
+	case R_FRV_TLSDESC_VALUE:
+	  picrel->relocstlsd++;
+	  goto bad_reloc;
+	  
+	case R_FRV_GOTTLSDESC12:
+	  picrel->tlsdesc12 = 1;
+	  break;
+
+	case R_FRV_GOTTLSDESCHI:
+	case R_FRV_GOTTLSDESCLO:
+	  picrel->tlsdeschilo = 1;
+	  break;
+
+	case R_FRV_TLSMOFF12:
+	case R_FRV_TLSMOFFHI:
+	case R_FRV_TLSMOFFLO:
+	case R_FRV_TLSMOFF:
+	  break;
+
+	case R_FRV_GOTTLSOFF12:
+	  picrel->tlsoff12 = 1;
+	  info->flags |= DF_STATIC_TLS;
+	  break;
+	  
+	case R_FRV_GOTTLSOFFHI:
+	case R_FRV_GOTTLSOFFLO:
+	  picrel->tlsoffhilo = 1;
+	  info->flags |= DF_STATIC_TLS;
+	  break;
+	  
+	case R_FRV_TLSOFF:
+	  picrel->relocstlsoff++;
+	  info->flags |= DF_STATIC_TLS;
+	  goto bad_reloc;
+
         /* This relocation describes the C++ object vtable hierarchy.
            Reconstruct it for later use during GC.  */
         case R_FRV_GNU_VTINHERIT:
@@ -4228,6 +6421,9 @@ elf32_frv_check_relocs (abfd, info, sec, relocs)
 	case R_FRV_GPREL32:
 	case R_FRV_GPRELHI:
 	case R_FRV_GPRELLO:
+	case R_FRV_TLSDESC_RELAX:
+	case R_FRV_GETTLSOFF_RELAX:
+	case R_FRV_TLSOFF_RELAX:
 	  break;
 
 	default:
@@ -4806,6 +7002,9 @@ frv_elf_print_private_bfd_data (abfd, ptr)
 #undef elf_backend_size_dynamic_sections
 #define elf_backend_size_dynamic_sections \
 		elf32_frvfdpic_size_dynamic_sections
+#undef bfd_elf32_bfd_relax_section
+#define bfd_elf32_bfd_relax_section \
+  elf32_frvfdpic_relax_section
 #undef elf_backend_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_symbol \
 		elf32_frvfdpic_finish_dynamic_symbol

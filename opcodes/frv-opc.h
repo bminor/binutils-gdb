@@ -366,6 +366,7 @@ struct cgen_fields
   long f_TLBPR_null;
   long f_LI_off;
   long f_LI_on;
+  long f_reloc_ann;
 };
 
 #define CGEN_INIT_PARSE(od) \

@@ -20,7 +20,7 @@ Disassembly of section \.text:
    1001c:	80 f4 00 1c 	setlo 0x1c,gr0
    10020:	80 f8 00 00 	sethi hi\(0x0\),gr0
    10024:	80 40 ff f8 	addi gr15,-8,gr0
-   10028:	80 fc ff f0 	setlos 0xfffffff0,gr0
+   10028:	80 fc ff f0 	setlos 0xf*fffffff0,gr0
    1002c:	80 f4 ff e8 	setlo 0xffe8,gr0
    10030:	80 f8 ff ff 	sethi 0xffff,gr0
    10034:	80 f4 ff 18 	setlo 0xff18,gr0

@@ -1,3 +1,75 @@
+2005-01-25  Alexandre Oliva  <aoliva@redhat.com>
+
+	2004-12-10  Alexandre Oliva  <aoliva@redhat.com>
+	* elf32-frv.c (elf32_frv_relocate_section): Force local binding
+	for TLSMOFF.
+	* reloc.c: Add R_FRV_TLSMOFF.
+	* elf32-frv.c (elf32_frv_howto_table): Likewise.
+	(frv_reloc_map, frv_reloc_type_lookup): Map it.
+	(elf32_frv_relocate_section): Handle it.
+	(elf32_frv_check_relocs): Likewise.
+	* libbfd.h, bfd-in2.h: Rebuilt.
+	2004-11-26  Alexandre Oliva  <aoliva@redhat.com>
+	* elf32-frv.c (_frvfdpic_emit_got_relocs_plt_entries): Don't crash
+	when given an undefweak TLS symbol.  Fix constant TLS PLT entries
+	such that they return the constant in gr9.
+	(_frvfdpic_relax_tls_entries): Don't crash for undefweak TLS
+	symbols.
+	(_frvfdpic_size_got_plt): Set _cooked_size of dynamic sections.
+	too, such that they shrink on relaxation.
+	(elf32_frvfdpic_finish_dynamic_sections): Check __ROFIXUP_END__ as
+	marking the position right past the _GLOBAL_OFFSET_TABLE_ value.
+	(_frvfdpic_assign_plt_entries): Shrink constant TLS PLT entries
+	if we can guarantee the use of 16-bit constants.
+	2004-11-10  Alexandre Oliva  <aoliva@redhat.com>
+	Introduce TLS support for FR-V FDPIC.
+	* reloc.c: Add TLS relocations.
+	* elf32-frv.c (elf32_frv_howto_table): Add TLS relocations.
+	(elf32_frv_rel_tlsdesc_value_howto): New.
+	(elf32_frv_rel_tlsoff_howto): New.
+	(frv_reloc_map): Add new mappings.
+	(struct frvfdpic_elf_link_hash_table): Add pointer to summary
+	reloc information.
+	(frvfdpic_dynamic_got_plt_info): New.
+	(frvfdpic_plt_tls_ret_offset): New.
+	(ELF_DYNAMIC_INTERPRETER, DEFAULT_STACK_SIZE): Move earlier.
+	(struct _frvfdpic_dynamic_got_info): Likewise.  Add TLS members.
+	(struct _frvfdpic_dynamic_got_plt_info): Likewise.
+	(FRVFDPIC_SYM_LOCAL): Regard symbols defined in the absolute
+	section as local.
+	(struct frvfdpic_relocs_info): Add TLS fields.
+	(frvfdpic_relocs_info_hash): Warning clean up.
+	(frvfdpic_relocs_info_find): Initialize tlsplt_entry.
+	(frvfdpic_pic_merge_early_relocs_info): Merge TLS fields.
+	(FRVFDPIC_TLS_BIAS): Define.
+	(tls_biased_base): New.
+	(_frvfdpic_emit_got_relocs_plt_entries): Deal with TLS
+	relocations.
+	(frv_reloc_type_lookup): Likewise.
+	(frvfdpic_info_to_howto_rel): Likewise.
+	(elf32_frv_relocate_section): Likewise.
+	(_frv_create_got_section): Create the PLT section here.
+	(elf32_frvfdpic_create_dynamic_sections): Not here.
+	(_frvfdpic_count_nontls_entries): Move out of...
+	(_frvfdpic_count_got_plt_entries): ... here.
+	(_frvfdpic_count_tls_entries): Likewise.  Add TLS support.
+	(_frvfdpic_count_relocs_fixups): Likewise.  Add relaxation
+	support.
+	(_frvfdpic_relax_tls_entries): New.
+	(_frvfdpic_compute_got_alloc_data): Add TLS support.
+	(_frvfdpic_get_tlsdesc_entry): New.
+	(_frvfdpic_assign_got_entries): Add TLS support.
+	(_frvfdpic_assign_plt_entries): Likewise.
+	(_frvfdpic_reset_got_plt_entries): New.
+	(_frvfdpic_size_got_plt): Move out of...
+	(elf32_frvfdpic_size_dynamic_sections): ... here.
+	(_frvfdpic_relax_got_plt_entries): New.
+	(elf32_frvfdpic_relax_section): New.
+	(elf32_frvfdpic_finish_dynamic_sections): Add TLS sanity check.
+	(elf32_frv_check_relocs): Add TLS support.
+	(bfd_elf32_bfd_relax_section): Define for FDPIC.
+	* libbfd.h, bfd-in2.h: Rebuilt.
+
 2005-01-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (_bfd_elf_get_dynamic_reloc_upper_bound): Only include

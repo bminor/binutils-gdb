@@ -33,7 +33,7 @@ Disassembly of section \.text:
  4f0:	80 f4 00 18 	setlo 0x18,gr0
  4f4:	80 f8 00 00 	sethi hi\(0x0\),gr0
  4f8:	80 40 ff f8 	addi gr15,-8,gr0
- 4fc:	80 fc ff e8 	setlos 0xffffffe8,gr0
+ 4fc:	80 fc ff e8 	setlos 0xf*ffffffe8,gr0
  500:	80 f4 ff e0 	setlo 0xffe0,gr0
  504:	80 f8 ff ff 	sethi 0xffff,gr0
  508:	80 f4 00 14 	setlo 0x14,gr0

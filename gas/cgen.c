@@ -372,6 +372,8 @@ gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
       *resultP = CGEN_PARSE_OPERAND_RESULT_ERROR;
       break;
     case O_constant:
+      if (want == CGEN_PARSE_OPERAND_SYMBOLIC)
+	goto de_fault;
       *valueP = exp.X_add_number;
       *resultP = CGEN_PARSE_OPERAND_RESULT_NUMBER;
       break;
@@ -379,6 +381,7 @@ gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
       *valueP = exp.X_add_number;
       *resultP = CGEN_PARSE_OPERAND_RESULT_REGISTER;
       break;
+    de_fault:
     default:
       queue_fixup (opindex, opinfo, &exp);
       *valueP = 0;

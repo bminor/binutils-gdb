@@ -2081,6 +2081,22 @@
 
 (dnf f-LI-off      "null field" (RESERVED) 25  1)
 (dnf f-LI-on       "null field" (RESERVED) 25  1)
+
+; Relocation annotations.
+(dsh h-reloc-ann   "relocation annotation" () (register BI))
+(dnf f-reloc-ann   "relocation annotation" () 0 0)
+
+(define-pmacro (dann xname xcomment xmode xparse xprint)
+  (define-operand
+    (name xname)
+    (comment xcomment)
+    (type h-reloc-ann)
+    (index f-reloc-ann)
+    (mode xmode)
+    (handlers (parse xparse) (print xprint))
+    )
+  )
+
 
 ; Enums.
 
@@ -3156,7 +3172,6 @@
 (dnop ae      "all entries indicator"     (HASH-PREFIX) h-uint f-ae)
 
 (dnop label16  "18 bit pc relative address" () h-iaddr f-label16)
-(dnop label24  "26 bit pc relative address" () h-iaddr f-label24)
 
 (dnop LRAE "Load Real Address E flag" () h-uint f-LRAE)
 (dnop LRAD "Load Real Address D flag" () h-uint f-LRAD)
@@ -3276,6 +3291,16 @@
   (type h-uint)
   (index f-u16)
   (handlers (parse "uhi16") (print "hi"))
+)
+
+(define-operand
+  (name label24)
+  (comment "26 bit pc relative address")
+  (attrs)
+  (type h-iaddr)
+  (index f-label24)
+  (mode SI)
+  (handlers (parse "call_label"))
 )
 
 ; operands representing hardware
@@ -4295,12 +4320,12 @@
       (fr500 (unit u-integer)) (fr550 (unit u-integer)))
 )
 
-(define-pmacro (load-gr-r name mode op ope comment)
+(define-pmacro (load-gr-r name mode op ope comment ann)
   (dni name
        (comment)
        ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2)
 	(FR400-MAJOR I-2) (FR450-MAJOR I-2))
-       (.str name "$pack @($GRi,$GRj),$GRk")
+       (.str name "$pack " ann "($GRi,$GRj),$GRk")
        (+ pack GRk op GRi ope GRj)
        (set GRk (c-call mode (.str "@cpu@_read_mem_" mode) pc (add GRi GRj)))
        ((fr400 (unit u-gr-load)) (fr450 (unit u-gr-load))
@@ -4308,11 +4333,13 @@
   )
 )
 
-(load-gr-r ldsb   QI OP_02 OPE1_00 "Load   signed byte")
-(load-gr-r ldub  UQI OP_02 OPE1_01 "Load unsigned byte")
-(load-gr-r ldsh   HI OP_02 OPE1_02 "Load   signed half")
-(load-gr-r lduh  UHI OP_02 OPE1_03 "Load unsigned half")
-(load-gr-r ld     SI OP_02 OPE1_04 "Load          word")
+(dann ldann "ld annotation" SI "ld_annotation" "at")
+
+(load-gr-r ldsb   QI OP_02 OPE1_00 "Load   signed byte" "@")
+(load-gr-r ldub  UQI OP_02 OPE1_01 "Load unsigned byte" "@")
+(load-gr-r ldsh   HI OP_02 OPE1_02 "Load   signed half" "@")
+(load-gr-r lduh  UHI OP_02 OPE1_03 "Load unsigned half" "@")
+(load-gr-r ld     SI OP_02 OPE1_04 "Load          word" "$ldann")
 
 (define-pmacro (load-fr-r name mode op ope comment)
   (dni name
@@ -4414,12 +4441,12 @@
 )
 
 (define-pmacro (load-double-r-r
-		name not_gr mode op ope regtype attr profile comment)
+		name not_gr mode op ope regtype attr profile comment ann)
   (dni name
        (comment)
        ((UNIT LOAD) (FR550-MAJOR I-3) (FR500-MAJOR I-2)
 	(FR400-MAJOR I-2) (FR450-MAJOR I-2) attr)
-       (.str name "$pack @($GRi,$GRj),$" regtype "doublek")
+       (.str name "$pack " ann "($GRi,$GRj),$" regtype "doublek")
        (+ pack (.sym regtype doublek) op GRi ope GRj)
        (sequence ((WI address))
 		 (load-double-semantics not_gr mode regtype address GRj))
@@ -4427,16 +4454,18 @@
   )
 )
 
+(dann lddann "ldd annotation" SI "ldd_annotation" "at")
+
 (load-double-r-r ldd  0 DI OP_02 OPE1_05 GR  NA
 		 ((fr400 (unit u-gr-load)) (fr450 (unit u-gr-load)) 
 		  (fr500 (unit u-gr-load)) (fr550 (unit u-gr-load)))
-		 "Load double word")
+		 "Load double word" "$lddann")
 (load-double-r-r lddf 1 DF OP_02 OPE1_0B FR  FR-ACCESS
 		 ((fr400 (unit u-fr-load)) (fr450 (unit u-fr-load))
 		  (fr500 (unit u-fr-load)) (fr550 (unit u-fr-load)))
-		 "Load double float")
+		 "Load double float" "@")
 (load-double-r-r lddc 1 DI OP_02 OPE1_0E CPR (MACH frv) ()
-		 "Load coprocessor double")
+		 "Load coprocessor double" "@")
 
 (define-pmacro (ne-load-double-r-r
 		name not_gr mode op ope regtype size is_float attr profile
@@ -6128,11 +6157,13 @@
       (fr500 (unit u-branch)) (fr550 (unit u-branch)))
 )
 
+(dann callann "call annotation" SI "call_annotation" "at")
+
 (dni calll
      "call and link"
      ((UNIT I0) (FR500-MAJOR I-5) (FR550-MAJOR I-6)
       (FR400-MAJOR I-5) (FR450-MAJOR I-5))
-     "calll$pack @($GRi,$GRj)"
+     "calll$pack $callann($GRi,$GRj)"
      (+ pack (misc-null-1) (LI-on) OP_0C GRi (misc-null-2) GRj)
      (jump-and-link-semantics GRi GRj LI)
      ((fr400 (unit u-branch)) (fr450 (unit u-branch))

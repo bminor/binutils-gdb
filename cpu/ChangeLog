@@ -1,3 +1,17 @@
+2005-01-25  Alexandre Oliva  <aoliva@redhat.com>
+
+	2004-11-10  Alexandre Oliva  <aoliva@redhat.com>
+	* frv.cpu: Add support for TLS annotations in loads and calll.
+	* frv.opc (parse_symbolic_address): New.
+	(parse_ldd_annotation): New.
+	(parse_call_annotation): New.
+	(parse_ld_annotation): New.
+	(parse_ulo16, parse_uslo16): Use parse_symbolic_address.
+	Introduce TLS relocations.
+	(parse_d12, parse_s12, parse_u12): Likewise.
+	(parse_uhi16): Likewise.  Fix constant checking on 64-bit host.
+	(parse_call_label, print_at): New.
+
 2004-12-21  Mikael Starvik  <starvik@axis.com>
 
 	* cris.cpu (cris-set-mem): Correct integral write semantics.

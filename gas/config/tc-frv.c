@@ -1380,12 +1380,18 @@ md_cgen_lookup_reloc (insn, operand, fixP)
 
     case FRV_OPERAND_LABEL24:
       fixP->fx_pcrel = TRUE;
+
+      if (fixP->fx_cgen.opinfo != 0)
+	return fixP->fx_cgen.opinfo;
+
       return BFD_RELOC_FRV_LABEL24;
 
     case FRV_OPERAND_UHI16:
     case FRV_OPERAND_ULO16:
     case FRV_OPERAND_SLO16:
-
+    case FRV_OPERAND_CALLANN:
+    case FRV_OPERAND_LDANN:
+    case FRV_OPERAND_LDDANN:
       /* The relocation type should be recorded in opinfo */
       if (fixP->fx_cgen.opinfo != 0)
         return fixP->fx_cgen.opinfo;
@@ -1416,9 +1422,45 @@ int
 frv_force_relocation (fix)
      fixS * fix;
 {
-  if (fix->fx_r_type == BFD_RELOC_FRV_GPREL12
-      || fix->fx_r_type == BFD_RELOC_FRV_GPRELU12)
-    return 1;
+  switch (fix->fx_r_type < BFD_RELOC_UNUSED
+	  ? fix->fx_r_type
+	  : fix->fx_cgen.opinfo)
+    {
+    case BFD_RELOC_FRV_GPREL12:
+    case BFD_RELOC_FRV_GPRELU12:
+    case BFD_RELOC_FRV_GPREL32:
+    case BFD_RELOC_FRV_GPRELHI:
+    case BFD_RELOC_FRV_GPRELLO:
+    case BFD_RELOC_FRV_GOT12:
+    case BFD_RELOC_FRV_GOTHI:
+    case BFD_RELOC_FRV_GOTLO:
+    case BFD_RELOC_FRV_FUNCDESC_VALUE:
+    case BFD_RELOC_FRV_FUNCDESC_GOTOFF12:
+    case BFD_RELOC_FRV_FUNCDESC_GOTOFFHI:
+    case BFD_RELOC_FRV_FUNCDESC_GOTOFFLO:
+    case BFD_RELOC_FRV_GOTOFF12:
+    case BFD_RELOC_FRV_GOTOFFHI:
+    case BFD_RELOC_FRV_GOTOFFLO:
+    case BFD_RELOC_FRV_GETTLSOFF:
+    case BFD_RELOC_FRV_TLSDESC_VALUE:
+    case BFD_RELOC_FRV_GOTTLSDESC12:
+    case BFD_RELOC_FRV_GOTTLSDESCHI:
+    case BFD_RELOC_FRV_GOTTLSDESCLO:
+    case BFD_RELOC_FRV_TLSMOFF12:
+    case BFD_RELOC_FRV_TLSMOFFHI:
+    case BFD_RELOC_FRV_TLSMOFFLO:
+    case BFD_RELOC_FRV_GOTTLSOFF12:
+    case BFD_RELOC_FRV_GOTTLSOFFHI:
+    case BFD_RELOC_FRV_GOTTLSOFFLO:
+    case BFD_RELOC_FRV_TLSOFF:
+    case BFD_RELOC_FRV_TLSDESC_RELAX:
+    case BFD_RELOC_FRV_GETTLSOFF_RELAX:
+    case BFD_RELOC_FRV_TLSOFF_RELAX:
+      return 1;
+
+    default:
+      break;
+    }
 
   return generic_force_reloc (fix);
 }
@@ -1439,6 +1481,64 @@ md_apply_fix3 (fixP, valP, seg)
 	/* Fall through.  */
       case BFD_RELOC_FRV_LO16:
 	*valP &= 0xffff;
+	break;
+
+	/* We need relocations for these, even if their symbols reduce
+	   to constants.  */
+      case BFD_RELOC_FRV_GPREL12:
+      case BFD_RELOC_FRV_GPRELU12:
+      case BFD_RELOC_FRV_GPREL32:
+      case BFD_RELOC_FRV_GPRELHI:
+      case BFD_RELOC_FRV_GPRELLO:
+      case BFD_RELOC_FRV_GOT12:
+      case BFD_RELOC_FRV_GOTHI:
+      case BFD_RELOC_FRV_GOTLO:
+      case BFD_RELOC_FRV_FUNCDESC_VALUE:
+      case BFD_RELOC_FRV_FUNCDESC_GOTOFF12:
+      case BFD_RELOC_FRV_FUNCDESC_GOTOFFHI:
+      case BFD_RELOC_FRV_FUNCDESC_GOTOFFLO:
+      case BFD_RELOC_FRV_GOTOFF12:
+      case BFD_RELOC_FRV_GOTOFFHI:
+      case BFD_RELOC_FRV_GOTOFFLO:
+      case BFD_RELOC_FRV_GETTLSOFF:
+      case BFD_RELOC_FRV_TLSDESC_VALUE:
+      case BFD_RELOC_FRV_GOTTLSDESC12:
+      case BFD_RELOC_FRV_GOTTLSDESCHI:
+      case BFD_RELOC_FRV_GOTTLSDESCLO:
+      case BFD_RELOC_FRV_TLSMOFF12:
+      case BFD_RELOC_FRV_TLSMOFFHI:
+      case BFD_RELOC_FRV_TLSMOFFLO:
+      case BFD_RELOC_FRV_GOTTLSOFF12:
+      case BFD_RELOC_FRV_GOTTLSOFFHI:
+      case BFD_RELOC_FRV_GOTTLSOFFLO:
+      case BFD_RELOC_FRV_TLSOFF:
+      case BFD_RELOC_FRV_TLSDESC_RELAX:
+      case BFD_RELOC_FRV_GETTLSOFF_RELAX:
+      case BFD_RELOC_FRV_TLSOFF_RELAX:
+	fixP->fx_addsy = expr_build_uconstant (0);
+	break;
+      }
+  else
+    switch (fixP->fx_cgen.opinfo)
+      {
+      case BFD_RELOC_FRV_GETTLSOFF:
+      case BFD_RELOC_FRV_TLSDESC_VALUE:
+      case BFD_RELOC_FRV_GOTTLSDESC12:
+      case BFD_RELOC_FRV_GOTTLSDESCHI:
+      case BFD_RELOC_FRV_GOTTLSDESCLO:
+      case BFD_RELOC_FRV_TLSMOFF12:
+      case BFD_RELOC_FRV_TLSMOFFHI:
+      case BFD_RELOC_FRV_TLSMOFFLO:
+      case BFD_RELOC_FRV_GOTTLSOFF12:
+      case BFD_RELOC_FRV_GOTTLSOFFHI:
+      case BFD_RELOC_FRV_GOTTLSOFFLO:
+      case BFD_RELOC_FRV_TLSOFF:
+      case BFD_RELOC_FRV_TLSDESC_RELAX:
+      case BFD_RELOC_FRV_GETTLSOFF_RELAX:
+      case BFD_RELOC_FRV_TLSOFF_RELAX:
+	/* Mark TLS symbols as such.  */
+	if (S_GET_SEGMENT (fixP->fx_addsy) != absolute_section)
+	  S_SET_THREAD_LOCAL (fixP->fx_addsy);
 	break;
       }
 
@@ -1602,6 +1702,16 @@ frv_pic_ptr (nbytes)
 	  else
 	    as_bad ("missing ')'");
 	  reloc_type = BFD_RELOC_FRV_FUNCDESC;
+	}
+      else if (strncasecmp (input_line_pointer, "tlsmoff(", 8) == 0)
+	{
+	  input_line_pointer += 8;
+	  expression (&exp);
+	  if (*input_line_pointer == ')')
+	    input_line_pointer++;
+	  else
+	    as_bad ("missing ')'");
+	  reloc_type = BFD_RELOC_FRV_TLSMOFF;
 	}
       else
 	expression (&exp);

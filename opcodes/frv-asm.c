@@ -73,6 +73,146 @@ static const char * parse_A1
 static const char * parse_A
   PARAMS ((CGEN_CPU_DESC, const char **, int, long *, long));
 
+inline static const char *
+parse_symbolic_address (CGEN_CPU_DESC cd,
+			const char **strp,
+			int opindex,
+			int opinfo,
+			enum cgen_parse_operand_result *resultp,
+			bfd_vma *valuep)
+{
+  enum cgen_parse_operand_result result_type;
+  const char *errmsg = (* cd->parse_operand_fn)
+    (cd, CGEN_PARSE_OPERAND_SYMBOLIC, strp, opindex, opinfo,
+     &result_type, valuep);
+
+  if (errmsg == NULL
+      && result_type != CGEN_PARSE_OPERAND_RESULT_QUEUED)
+    return "symbolic expression required";
+
+  if (resultp)
+    *resultp = result_type;
+
+  return errmsg;
+}
+
+static const char *
+parse_ldd_annotation (CGEN_CPU_DESC cd,
+		      const char **strp,
+		      int opindex,
+		      long *valuep)
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type;
+  bfd_vma value;
+
+  if (**strp == '#' || **strp == '%')
+    {
+      if (strncasecmp (*strp + 1, "tlsdesc(", 8) == 0)
+	{
+	  *strp += 9;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_TLSDESC_RELAX,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  if (valuep)
+	    *valuep = value;
+	  ++*strp;
+	  if (errmsg)
+	    return errmsg;
+	}
+    }
+  
+  while (**strp == ' ' || **strp == '\t')
+    ++*strp;
+  
+  if (**strp != '@')
+    return "missing `@'";
+
+  ++*strp;
+
+  return NULL;
+}
+
+static const char *
+parse_call_annotation (CGEN_CPU_DESC cd,
+		       const char **strp,
+		       int opindex,
+		       long *valuep)
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type;
+  bfd_vma value;
+
+  if (**strp == '#' || **strp == '%')
+    {
+      if (strncasecmp (*strp + 1, "gettlsoff(", 10) == 0)
+	{
+	  *strp += 11;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GETTLSOFF_RELAX,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  if (valuep)
+	    *valuep = value;
+	  ++*strp;
+	  if (errmsg)
+	    return errmsg;
+	}
+    }
+  
+  while (**strp == ' ' || **strp == '\t')
+    ++*strp;
+  
+  if (**strp != '@')
+    return "missing `@'";
+
+  ++*strp;
+
+  return NULL;
+}
+
+static const char *
+parse_ld_annotation (CGEN_CPU_DESC cd,
+		     const char **strp,
+		     int opindex,
+		     long *valuep)
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type;
+  bfd_vma value;
+
+  if (**strp == '#' || **strp == '%')
+    {
+      if (strncasecmp (*strp + 1, "tlsoff(", 7) == 0)
+	{
+	  *strp += 8;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_TLSOFF_RELAX,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  if (valuep)
+	    *valuep = value;
+	  ++*strp;
+	  if (errmsg)
+	    return errmsg;
+	}
+    }
+  
+  while (**strp == ' ' || **strp == '\t')
+    ++*strp;
+  
+  if (**strp != '@')
+    return "missing `@'";
+
+  ++*strp;
+
+  return NULL;
+}
+
 static const char *
 parse_ulo16 (cd, strp, opindex, valuep)
      CGEN_CPU_DESC cd;
@@ -103,73 +243,96 @@ parse_ulo16 (cd, strp, opindex, valuep)
       if (strncasecmp (*strp + 1, "gprello(", 8) == 0)
 	{
 	  *strp += 9;
-	  errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_FRV_GPRELLO,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GPRELLO,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
-	  if (errmsg == NULL
-	      && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	    value &= 0xffff;
 	  *valuep = value;
 	  return errmsg;
 	}
       else if (strncasecmp (*strp + 1, "gotlo(", 6) == 0)
 	{
 	  *strp += 7;
-	  errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_FRV_GOTLO,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTLO,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
-	  if (errmsg == NULL
-	      && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	    value &= 0xffff;
 	  *valuep = value;
 	  return errmsg;
 	}
       else if (strncasecmp (*strp + 1, "gotfuncdesclo(", 14) == 0)
 	{
 	  *strp += 15;
-	  errmsg = cgen_parse_address (cd, strp, opindex,
-				       BFD_RELOC_FRV_FUNCDESC_GOTLO,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_FUNCDESC_GOTLO,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
-	  if (errmsg == NULL
-	      && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	    value &= 0xffff;
 	  *valuep = value;
 	  return errmsg;
 	}
       else if (strncasecmp (*strp + 1, "gotofflo(", 9) == 0)
 	{
 	  *strp += 10;
-	  errmsg = cgen_parse_address (cd, strp, opindex,
-				       BFD_RELOC_FRV_GOTOFFLO,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTOFFLO,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
-	  if (errmsg == NULL
-	      && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	    value &= 0xffff;
 	  *valuep = value;
 	  return errmsg;
 	}
       else if (strncasecmp (*strp + 1, "gotofffuncdesclo(", 17) == 0)
 	{
 	  *strp += 18;
-	  errmsg = cgen_parse_address (cd, strp, opindex,
-				       BFD_RELOC_FRV_FUNCDESC_GOTOFFLO,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_FUNCDESC_GOTOFFLO,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
-	  if (errmsg == NULL
-	      && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	    value &= 0xffff;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "gottlsdesclo(", 13) == 0)
+	{
+	  *strp += 14;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTTLSDESCLO,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "tlsmofflo(", 10) == 0)
+	{
+	  *strp += 11;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_TLSMOFFLO,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "gottlsofflo(", 12) == 0)
+	{
+	  *strp += 13;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTTLSOFFLO,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
 	  *valuep = value;
 	  return errmsg;
 	}
@@ -207,73 +370,96 @@ parse_uslo16 (cd, strp, opindex, valuep)
       else if (strncasecmp (*strp + 1, "gprello(", 8) == 0)
 	{
 	  *strp += 9;
-	  errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_FRV_GPRELLO,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GPRELLO,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
-	  if (errmsg == NULL
-	      && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	    value &= 0xffff;
 	  *valuep = value;
 	  return errmsg;
 	}
       else if (strncasecmp (*strp + 1, "gotlo(", 6) == 0)
 	{
 	  *strp += 7;
-	  errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_FRV_GOTLO,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTLO,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
-	  if (errmsg == NULL
-	      && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	    value &= 0xffff;
 	  *valuep = value;
 	  return errmsg;
 	}
       else if (strncasecmp (*strp + 1, "gotfuncdesclo(", 14) == 0)
 	{
 	  *strp += 15;
-	  errmsg = cgen_parse_address (cd, strp, opindex,
-				       BFD_RELOC_FRV_FUNCDESC_GOTLO,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_FUNCDESC_GOTLO,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
-	  if (errmsg == NULL
-	      && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	    value &= 0xffff;
 	  *valuep = value;
 	  return errmsg;
 	}
       else if (strncasecmp (*strp + 1, "gotofflo(", 9) == 0)
 	{
 	  *strp += 10;
-	  errmsg = cgen_parse_address (cd, strp, opindex,
-				       BFD_RELOC_FRV_GOTOFFLO,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTOFFLO,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
-	  if (errmsg == NULL
-	      && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	    value &= 0xffff;
 	  *valuep = value;
 	  return errmsg;
 	}
       else if (strncasecmp (*strp + 1, "gotofffuncdesclo(", 17) == 0)
 	{
 	  *strp += 18;
-	  errmsg = cgen_parse_address (cd, strp, opindex,
-				       BFD_RELOC_FRV_FUNCDESC_GOTOFFLO,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_FUNCDESC_GOTOFFLO,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
-	  if (errmsg == NULL
-	      && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	    value &= 0xffff;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "gottlsdesclo(", 13) == 0)
+	{
+	  *strp += 14;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTTLSDESCLO,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "tlsmofflo(", 10) == 0)
+	{
+	  *strp += 11;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_TLSMOFFLO,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "gottlsofflo(", 12) == 0)
+	{
+	  *strp += 13;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTTLSOFFLO,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
 	  *valuep = value;
 	  return errmsg;
 	}
@@ -304,80 +490,110 @@ parse_uhi16 (cd, strp, opindex, valuep)
 	  ++*strp;
 	  if (errmsg == NULL
 	      && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	    value >>= 16;
+	    {
+	      /* If bfd_vma is wider than 32 bits, but we have a sign-
+		 or zero-extension, truncate it.  */
+	      if (value >= - ((bfd_vma)1 << 31)
+		  || value <= ((bfd_vma)1 << 31) - (bfd_vma)1)
+		value &= (((bfd_vma)1 << 16) << 16) - 1;
+	      value >>= 16;
+	    }
 	  *valuep = value;
 	  return errmsg;
 	}
       else if (strncasecmp (*strp + 1, "gprelhi(", 8) == 0)
 	{
 	  *strp += 9;
-	  errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_FRV_GPRELHI,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GPRELHI,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
-	  if (errmsg == NULL
-	      && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	    value >>= 16;
 	  *valuep = value;
 	  return errmsg;
 	}
       else if (strncasecmp (*strp + 1, "gothi(", 6) == 0)
 	{
 	  *strp += 7;
-	  errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_FRV_GOTHI,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTHI,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
-	  if (errmsg == NULL
-	      && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	    value >>= 16;
 	  *valuep = value;
 	  return errmsg;
 	}
       else if (strncasecmp (*strp + 1, "gotfuncdeschi(", 14) == 0)
 	{
 	  *strp += 15;
-	  errmsg = cgen_parse_address (cd, strp, opindex,
-				       BFD_RELOC_FRV_FUNCDESC_GOTHI,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_FUNCDESC_GOTHI,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
-	  if (errmsg == NULL
-	      && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	    value >>= 16;
 	  *valuep = value;
 	  return errmsg;
 	}
       else if (strncasecmp (*strp + 1, "gotoffhi(", 9) == 0)
 	{
 	  *strp += 10;
-	  errmsg = cgen_parse_address (cd, strp, opindex,
-				       BFD_RELOC_FRV_GOTOFFHI,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTOFFHI,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
-	  if (errmsg == NULL
-	      && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	    value >>= 16;
 	  *valuep = value;
 	  return errmsg;
 	}
       else if (strncasecmp (*strp + 1, "gotofffuncdeschi(", 17) == 0)
 	{
 	  *strp += 18;
-	  errmsg = cgen_parse_address (cd, strp, opindex,
-				       BFD_RELOC_FRV_FUNCDESC_GOTOFFHI,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_FUNCDESC_GOTOFFHI,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
-	  if (errmsg == NULL
-	      && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	    value >>= 16;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "gottlsdeschi(", 13) == 0)
+	{
+	  *strp += 14;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTTLSDESCHI,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "tlsmoffhi(", 10) == 0)
+	{
+	  *strp += 11;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_TLSMOFFHI,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "gottlsoffhi(", 12) == 0)
+	{
+	  *strp += 13;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTTLSOFFHI,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
 	  *valuep = value;
 	  return errmsg;
 	}
@@ -455,8 +671,9 @@ parse_d12 (cd, strp, opindex, valuep)
       if (strncasecmp (*strp + 1, "gprel12(", 8) == 0)
         {
           *strp += 9;
-          errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_FRV_GPREL12,
-                                       &result_type, &value);
+          errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GPREL12,
+					   &result_type, &value);
           if (**strp != ')')
             return "missing `)'";
           ++*strp;
@@ -466,8 +683,9 @@ parse_d12 (cd, strp, opindex, valuep)
       else if (strncasecmp (*strp + 1, "got12(", 6) == 0)
 	{
 	  *strp += 7;
-	  errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_FRV_GOT12,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOT12,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -477,9 +695,9 @@ parse_d12 (cd, strp, opindex, valuep)
       else if (strncasecmp (*strp + 1, "gotfuncdesc12(", 14) == 0)
 	{
 	  *strp += 15;
-	  errmsg = cgen_parse_address (cd, strp, opindex,
-				       BFD_RELOC_FRV_FUNCDESC_GOT12,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_FUNCDESC_GOT12,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -489,9 +707,9 @@ parse_d12 (cd, strp, opindex, valuep)
       else if (strncasecmp (*strp + 1, "gotoff12(", 9) == 0)
 	{
 	  *strp += 10;
-	  errmsg = cgen_parse_address (cd, strp, opindex,
-				       BFD_RELOC_FRV_GOTOFF12,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTOFF12,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -501,9 +719,45 @@ parse_d12 (cd, strp, opindex, valuep)
       else if (strncasecmp (*strp + 1, "gotofffuncdesc12(", 17) == 0)
 	{
 	  *strp += 18;
-	  errmsg = cgen_parse_address (cd, strp, opindex,
-				       BFD_RELOC_FRV_FUNCDESC_GOTOFF12,
-				       &result_type, &value);
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_FUNCDESC_GOTOFF12,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "gottlsdesc12(", 13) == 0)
+	{
+	  *strp += 14;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTTLSDESC12,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "tlsmoff12(", 10) == 0)
+	{
+	  *strp += 11;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_TLSMOFF12,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "gottlsoff12(", 12) == 0)
+	{
+	  *strp += 13;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTTLSOFF12,
+					   &result_type, &value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -526,74 +780,109 @@ parse_s12 (cd, strp, opindex, valuep)
   bfd_vma value;
  
   /* Check for small data reference.  */
-  if ((**strp == '#' || **strp == '%')
-      && strncasecmp (*strp + 1, "gprel12(", 8) == 0)
+  if (**strp == '#' || **strp == '%')
     {
-      *strp += 9;
-      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_FRV_GPREL12,
-                                    &result_type, &value);
-      if (**strp != ')')
-        return "missing `)'";
-      ++*strp;
-      *valuep = value;
-      return errmsg;
+      if (strncasecmp (*strp + 1, "gprel12(", 8) == 0)
+	{
+	  *strp += 9;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GPREL12,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing `)'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "got12(", 6) == 0)
+	{
+	  *strp += 7;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOT12,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "gotfuncdesc12(", 14) == 0)
+	{
+	  *strp += 15;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_FUNCDESC_GOT12,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "gotoff12(", 9) == 0)
+	{
+	  *strp += 10;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTOFF12,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "gotofffuncdesc12(", 17) == 0)
+	{
+	  *strp += 18;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_FUNCDESC_GOTOFF12,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "gottlsdesc12(", 13) == 0)
+	{
+	  *strp += 14;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTTLSDESC12,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "tlsmoff12(", 10) == 0)
+	{
+	  *strp += 11;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_TLSMOFF12,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
+      else if (strncasecmp (*strp + 1, "gottlsoff12(", 12) == 0)
+	{
+	  *strp += 13;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GOTTLSOFF12,
+					   &result_type, &value);
+	  if (**strp != ')')
+	    return "missing ')'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
     }
-  else if ((**strp == '#' || **strp == '%')
-	   && strncasecmp (*strp + 1, "got12(", 6) == 0)
-    {
-      *strp += 7;
-      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_FRV_GOT12,
-				   &result_type, &value);
-      if (**strp != ')')
-	return "missing ')'";
-      ++*strp;
-      *valuep = value;
-      return errmsg;
-    }
-  else if ((**strp == '#' || **strp == '%')
-	   && strncasecmp (*strp + 1, "gotfuncdesc12(", 14) == 0)
-    {
-      *strp += 15;
-      errmsg = cgen_parse_address (cd, strp, opindex,
-				   BFD_RELOC_FRV_FUNCDESC_GOT12,
-				   &result_type, &value);
-      if (**strp != ')')
-	return "missing ')'";
-      ++*strp;
-      *valuep = value;
-      return errmsg;
-    }
-  else if ((**strp == '#' || **strp == '%')
-	   && strncasecmp (*strp + 1, "gotoff12(", 9) == 0)
-    {
-      *strp += 10;
-      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_FRV_GOTOFF12,
-				   &result_type, &value);
-      if (**strp != ')')
-	return "missing ')'";
-      ++*strp;
-      *valuep = value;
-      return errmsg;
-    }
-  else if ((**strp == '#' || **strp == '%')
-	   && strncasecmp (*strp + 1, "gotofffuncdesc12(", 17) == 0)
-    {
-      *strp += 18;
-      errmsg = cgen_parse_address (cd, strp, opindex,
-				   BFD_RELOC_FRV_FUNCDESC_GOTOFF12,
-				   &result_type, &value);
-      if (**strp != ')')
-	return "missing ')'";
-      ++*strp;
-      *valuep = value;
-      return errmsg;
-    }
-  else
-    {
-      if (**strp == '#')
-        ++*strp;
-      return cgen_parse_signed_integer (cd, strp, opindex, valuep);
-    }
+
+  if (**strp == '#')
+    ++*strp;
+  return cgen_parse_signed_integer (cd, strp, opindex, valuep);
 }
 
 static const char *
@@ -612,8 +901,9 @@ parse_u12 (cd, strp, opindex, valuep)
       && strncasecmp (*strp + 1, "gprel12(", 8) == 0)
     {
       *strp += 9;
-      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_FRV_GPRELU12,
-                                    &result_type, &value);
+      errmsg = parse_symbolic_address (cd, strp, opindex,
+				       BFD_RELOC_FRV_GPRELU12,
+				       &result_type, &value);
       if (**strp != ')')
         return "missing `)'";
       ++*strp;
@@ -691,6 +981,38 @@ parse_even_register (cd, strP, tableP, valueP)
 
   return errmsg;
 }
+
+static const char *
+parse_call_label (CGEN_CPU_DESC cd,
+		  const char **strp,
+		  int opindex,
+		  int opinfo,
+		  enum cgen_parse_operand_result *resultp,
+		  bfd_vma *valuep)
+{
+  const char *errmsg;
+  bfd_vma value;
+ 
+  /* Check for small data reference.  */
+  if (opinfo == 0 && (**strp == '#' || **strp == '%'))
+    {
+      if (strncasecmp (*strp + 1, "gettlsoff(", 10) == 0)
+	{
+	  *strp += 11;
+	  errmsg = parse_symbolic_address (cd, strp, opindex,
+					   BFD_RELOC_FRV_GETTLSOFF,
+					   resultp, &value);
+	  if (**strp != ')')
+	    return "missing `)'";
+	  ++*strp;
+	  *valuep = value;
+	  return errmsg;
+	}
+    }
+
+  return cgen_parse_address (cd, strp, opindex, opinfo, resultp, valuep);
+}
+
 /* -- */
 
 const char * frv_cgen_parse_operand
@@ -878,6 +1200,9 @@ frv_cgen_parse_operand (cd, opindex, strp, fields)
     case FRV_OPERAND_AE :
       errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_AE, &fields->f_ae);
       break;
+    case FRV_OPERAND_CALLANN :
+      errmsg = parse_call_annotation (cd, strp, FRV_OPERAND_CALLANN, &fields->f_reloc_ann);
+      break;
     case FRV_OPERAND_CCOND :
       errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_CCOND, &fields->f_ccond);
       break;
@@ -912,9 +1237,15 @@ frv_cgen_parse_operand (cd, opindex, strp, fields)
     case FRV_OPERAND_LABEL24 :
       {
         bfd_vma value;
-        errmsg = cgen_parse_address (cd, strp, FRV_OPERAND_LABEL24, 0, NULL,  & value);
+        errmsg = parse_call_label (cd, strp, FRV_OPERAND_LABEL24, 0, NULL,  & value);
         fields->f_label24 = value;
       }
+      break;
+    case FRV_OPERAND_LDANN :
+      errmsg = parse_ld_annotation (cd, strp, FRV_OPERAND_LDANN, &fields->f_reloc_ann);
+      break;
+    case FRV_OPERAND_LDDANN :
+      errmsg = parse_ldd_annotation (cd, strp, FRV_OPERAND_LDDANN, &fields->f_reloc_ann);
       break;
     case FRV_OPERAND_LOCK :
       errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_LOCK, &fields->f_lock);

@@ -1,3 +1,63 @@
+2005-01-25  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ld-frv/fdpic.exp: Add -mfdpic to ASFLAGS.
+	* ld-frv/tls.exp: Likewise.
+	2004-11-26  Alexandre Oliva  <aoliva@redhat.com>
+	* ld-frv/tls-3.s: New.
+	* ld-frv/tls-static-3.d: New.
+	* ld-frv/tls-dynamic-3.d: New.
+	* ld-frv/tls-pie-3.d: New.
+	* ld-frv/tls-shared-3.d: New.
+	* ld-frv/tls-relax-static-3.d: New.
+	* ld-frv/tls-relax-dynamic-3.d: New.
+	* ld-frv/tls-relax-pie-3.d: New.
+	* ld-frv/tls-relax-shared-3.d: New.
+	* ld-frv/tls.exp: Run the new tests.
+	* ld-frv/tls-dynamic-2.d: Adjust for improved relaxation.
+	* ld-frv/tls-relax-dynamic-2.d: Likewise.
+	* ld-frv/tls-relax-initial-shared-2.d: Likewise.
+	2004-11-10  Alexandre Oliva  <aoliva@redhat.com>
+	* ld-frv/tls-1-dep.s: New.
+	* ld-frv/tls-1-shared.lds: New.
+	* ld-frv/tls-1.s: New.
+	* ld-frv/tls-2.s: New.
+	* ld-frv/tls-dynamic-1.d: New.
+	* ld-frv/tls-dynamic-2.d: New.
+	* ld-frv/tls-initial-shared-2.d: New.
+	* ld-frv/tls-pie-1.d: New.
+	* ld-frv/tls-relax-dynamic-1.d: New.
+	* ld-frv/tls-relax-dynamic-2.d: New.
+	* ld-frv/tls-relax-initial-shared-2.d: New.
+	* ld-frv/tls-relax-pie-1.d: New.
+	* ld-frv/tls-relax-shared-1.d: New.
+	* ld-frv/tls-relax-shared-2.d: New.
+	* ld-frv/tls-relax-static-1.d: New.
+	* ld-frv/tls-shared-1-fail.d: New.
+	* ld-frv/tls-shared-1.d: New.
+	* ld-frv/tls-shared-2.d: New.
+	* ld-frv/tls-static-1.d: New.
+	* ld-frv/tls.exp: New.
+	* ld-frv/fdpic-pie-1.d: Adjust for 64-bit host.
+	* ld-frv/fdpic-pie-2.d: Likewise.
+	* ld-frv/fdpic-pie-6.d: Likewise.
+	* ld-frv/fdpic-pie-7.d: Likewise.
+	* ld-frv/fdpic-pie-8.d: Likewise.
+	* ld-frv/fdpic-shared-1.d: Likewise.
+	* ld-frv/fdpic-shared-2.d: Likewise.
+	* ld-frv/fdpic-shared-3.d: Likewise.
+	* ld-frv/fdpic-shared-4.d: Likewise.
+	* ld-frv/fdpic-shared-5.d: Likewise.
+	* ld-frv/fdpic-shared-6.d: Likewise.
+	* ld-frv/fdpic-shared-7.d: Likewise.
+	* ld-frv/fdpic-shared-8.d: Likewise.
+	* ld-frv/fdpic-shared-local-2.d: Likewise.
+	* ld-frv/fdpic-shared-local-8.d: Likewise.
+	* ld-frv/fdpic-static-1.d: Likewise.
+	* ld-frv/fdpic-static-2.d: Likewise.
+	* ld-frv/fdpic-static-6.d: Likewise.
+	* ld-frv/fdpic-static-7.d: Likewise.
+	* ld-frv/fdpic-static-8.d: Likewise.
+
 2005-01-17  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ld-mips-elf/eh-frame2-{n32,n64}.d: New tests.

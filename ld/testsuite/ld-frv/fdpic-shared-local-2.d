@@ -21,11 +21,11 @@ Disassembly of section \.text:
  244:	80 f4 00 14 	setlo 0x14,gr0
  248:	80 f8 00 00 	sethi hi\(0x0\),gr0
  24c:	80 40 ff f8 	addi gr15,-8,gr0
- 250:	80 fc ff d0 	setlos 0xffffffd0,gr0
+ 250:	80 fc ff d0 	setlos 0xf*ffffffd0,gr0
  254:	80 f4 ff c8 	setlo 0xffc8,gr0
  258:	80 f8 ff ff 	sethi 0xffff,gr0
  25c:	80 40 ff bc 	addi gr15,-68,gr0
- 260:	80 fc ff bc 	setlos 0xffffffbc,gr0
+ 260:	80 fc ff bc 	setlos 0xf*ffffffbc,gr0
  264:	80 f4 ff bc 	setlo 0xffbc,gr0
  268:	80 f8 ff ff 	sethi 0xffff,gr0
  26c:	80 f4 00 1c 	setlo 0x1c,gr0

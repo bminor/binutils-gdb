@@ -67,6 +67,19 @@ static void print_lo
   PARAMS ((CGEN_CPU_DESC, PTR, long, unsigned, bfd_vma, int));
 
 static void
+print_at (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+	  PTR dis_info,
+	  CGEN_KEYWORD *names ATTRIBUTE_UNUSED,
+	  long value ATTRIBUTE_UNUSED,
+	  bfd_vma pc ATTRIBUTE_UNUSED,
+	  int length ATTRIBUTE_UNUSED
+	  )
+{
+  disassemble_info *info = (disassemble_info *) dis_info;
+  (*info->fprintf_func) (info->stream, "@");
+}  
+
+static void
 print_spr (cd, dis_info, names, regno, attrs)
      CGEN_CPU_DESC cd;
      PTR dis_info;
@@ -307,6 +320,9 @@ frv_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
     case FRV_OPERAND_AE :
       print_normal (cd, info, fields->f_ae, 0|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);
       break;
+    case FRV_OPERAND_CALLANN :
+      print_at (cd, info, fields->f_reloc_ann, 0, pc, length);
+      break;
     case FRV_OPERAND_CCOND :
       print_normal (cd, info, fields->f_ccond, 0|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);
       break;
@@ -336,6 +352,12 @@ frv_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
       break;
     case FRV_OPERAND_LABEL24 :
       print_address (cd, info, fields->f_label24, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_VIRTUAL), pc, length);
+      break;
+    case FRV_OPERAND_LDANN :
+      print_at (cd, info, fields->f_reloc_ann, 0, pc, length);
+      break;
+    case FRV_OPERAND_LDDANN :
+      print_at (cd, info, fields->f_reloc_ann, 0, pc, length);
       break;
     case FRV_OPERAND_LOCK :
       print_normal (cd, info, fields->f_lock, 0|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);

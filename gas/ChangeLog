@@ -1,3 +1,16 @@
+2005-01-25  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-frv.c (md_apply_fix3): Mark TLS symbols as such.
+	2004-12-10  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-frv.c (frv_pic_ptr): Add tlsmoff support.
+	2004-11-10  Alexandre Oliva  <aoliva@redhat.com>
+	* cgen.c (gas_cgen_parse_operand): Handle
+	CGEN_PARSE_OPERAND_SYMBOLIC.
+	* config/tc-frv.c (md_cgen_lookup_reloc): Handle TLS relocations.
+	(frv_force_relocation): Likewise.  Fix handling of PIC
+	relocations.
+	(md_apply_fix3): Likewise.
+
 2005-01-21  Ben Elliston  <bje@au.ibm.com>
 
 	* as.h: Remove #if 0'd code.
