@@ -21,6 +21,7 @@ t-rachi.s
 t-rdt.s
 t-rep.s
 t-rte.s
+t-sadd.s
 t-sp.s
 t-sub.s
 t-sub2w.s
