@@ -1,4 +1,3 @@
-start-sanitize-armelf
 Tue Aug 18 12:05:34 1998  Catherine Moore  <clm@cygnus.com>
 
         * emultempl/armelf.em (gld_armelf_before_allocation):
@@ -7,7 +6,6 @@ Tue Aug 18 12:05:34 1998  Catherine Moore  <clm@cygnus.com>
         (gld_armelf_after_open): Add bfd_ prefix to 
         elf32_arm_get_bfd_for_interworking.
 
-end-sanitize-armelf
 Fri Aug 14 15:34:29 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am: Rebuild dependencies.
@@ -26,7 +24,6 @@ Fri Aug 14 15:34:29 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* ld.texinfo (Output Section Keywords): Document SORT
  	(CONSTRUCTORS).
 
-start-sanitize-armelf
 Thu Aug 13 12:20:39 1998  Catherine Moore  <clm@cygnus.com>
  
        * emulparams/armelf.sh:  Define TEMPLATE_NAME to armelf.
@@ -34,7 +31,6 @@ Thu Aug 13 12:20:39 1998  Catherine Moore  <clm@cygnus.com>
        sections.
        * emultempl/armelf.em: New file.
  
-end-sanitize-armelf
 Thu Aug 13 12:52:45 1998  H.J. Lu  <hjl@gnu.org>
 
 	* Makefile.am (ld.dvi): Use " instead of ' for MAKEINFO.
@@ -47,33 +43,26 @@ Wed Aug 12 16:30:29 1998  Doug Evans  <devans@canuck.cygnus.com>
 	for .DVP.overlay.* for elf32elmip too.
 
 end-sanitize-sky
-start-sanitize-armelf
 Tue Aug 11 16:17:01 1998  Catherine Moore  <clm@cygnus.com>
 
         * scripttempl/elfarm.sc:  Change text start address
         back to zero.
 
-end-sanitize-armelf
 Tue Aug 11 10:01:12 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* emulparms/mn10200.sh (MAX_PAGESIZE): Define to 1.
 	* emulparms/mn10300.sh (MAX_PAGESIZE): Define to 1.
 
-start-sanitize-armelf
 Sun Aug  9 20:31:27 1998  Catherine Moore  <clm@cygnus.com>
 
         * scripttempl/elfarm.sc:  Set text start address to
         0x8000.  Add __bss_end definition.
 
-end-sanitize-armelf
-start-sanitize-armelf
 Sat Aug  1 11:47:37 1998  Catherine Moore  <clm@cygnus.com>
 
         * scripttempl/elfarm.sc:  New file.
         * emulparams/armelf.sh: Set SCRIPT_NAME to elfarm.
 
-end-sanitize-armelf
-start-sanitize-armelf
 Fri Jul 31 15:56:16 1998  Catherine Moore  <clm@cygnus.com>
 
         * emulparams/armelf.sh: New file.
@@ -81,7 +70,6 @@ Fri Jul 31 15:56:16 1998  Catherine Moore  <clm@cygnus.com>
         * Makefile.am (earmelf.o): New.
         * Makefile.in: Rebuild.
 
-end-sanitize-armelf
 Fri Jul 24 12:00:57 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (install-exec-local): Don't remove the file before
