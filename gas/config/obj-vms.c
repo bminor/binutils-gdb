@@ -154,7 +154,7 @@ struct VMS_DBG_Symbol
 };
 
 #define SYMTYPLST_SIZE (1<<4)	/* 16; must be power of two */
-#define SYMTYP_HASH(x) ((unsigned)(x) & (SYMTYPLST_SIZE-1))
+#define SYMTYP_HASH(x) ((unsigned) (x) & (SYMTYPLST_SIZE-1))
 struct VMS_DBG_Symbol *VMS_Symbol_type_list[SYMTYPLST_SIZE];
 
 /*
@@ -268,8 +268,8 @@ static int Current_Object_Record_Type;	/* Type of record in above	   */
  *	Macros for moving data around.  Must work on big-endian systems.
  */
 #ifdef VMS  /* These are more efficient for VMS->VMS systems */
-#define COPY_LONG(dest,val)	( *(long *)(dest) = (val) )
-#define COPY_SHORT(dest,val)	( *(short *)(dest) = (val) )
+#define COPY_LONG(dest,val)	( *(long *) (dest) = (val) )
+#define COPY_SHORT(dest,val)	( *(short *) (dest) = (val) )
 #else
 #define COPY_LONG(dest,val)	md_number_to_chars ((dest), (val), 4)
 #define COPY_SHORT(dest,val)	md_number_to_chars ((dest), (val), 2)
@@ -699,15 +699,15 @@ vms_tir_stack_psect (Psect_Index, Offset, Force)
   switch (Sta_P(psect_width,offset_width))
     {
       case Sta_P(1,1):	PUT_CHAR (TIR_S_C_STA_PB);
-			PUT_CHAR ((char)(unsigned char) Psect_Index);
+			PUT_CHAR ((char) (unsigned char) Psect_Index);
 			PUT_CHAR ((char) Offset);
 			break;
       case Sta_P(1,2):	PUT_CHAR (TIR_S_C_STA_PW);
-			PUT_CHAR ((char)(unsigned char) Psect_Index);
+			PUT_CHAR ((char) (unsigned char) Psect_Index);
 			PUT_SHORT (Offset);
 			break;
       case Sta_P(1,4):	PUT_CHAR (TIR_S_C_STA_PL);
-			PUT_CHAR ((char)(unsigned char) Psect_Index);
+			PUT_CHAR ((char) (unsigned char) Psect_Index);
 			PUT_LONG (Offset);
 			break;
       case Sta_P(2,1):	PUT_CHAR (TIR_S_C_STA_WPB);

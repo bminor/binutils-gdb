@@ -346,7 +346,7 @@ extern void SA_SET_SYM_ENDNDX PARAMS ((symbolS *, symbolS *));
 
 /* Modifiers */
 #define SF_SET(s,v)		(SF_GET (s) = (v))
-#define SF_SET_NORMAL_FIELD(s,v)(SF_GET (s) |= ((v) & SF_NORMAL_MASK))
+#define SF_SET_NORMAL_FIELD(s,v) (SF_GET (s) |= ((v) & SF_NORMAL_MASK))
 #define SF_SET_DEBUG_FIELD(s,v)	(SF_GET (s) |= ((v) & SF_DEBUG_MASK))
 #define SF_SET_FILE(s)		(SF_GET (s) |= SF_FILE)
 #define SF_SET_STATICS(s)	(SF_GET (s) |= SF_STATICS)
@@ -520,7 +520,7 @@ typedef struct
 
 /* Accessors */
 /* The name of the symbol */
-#define S_GET_NAME(s)		((char*)(s)->sy_symbol.ost_entry.n_offset)
+#define S_GET_NAME(s)		((char*) (s)->sy_symbol.ost_entry.n_offset)
 /* The pointer to the string table */
 #define S_GET_OFFSET(s)         ((s)->sy_symbol.ost_entry.n_offset)
 /* The numeric value of the segment */
@@ -534,7 +534,7 @@ typedef struct
 
 /* Modifiers */
 /* Set the name of the symbol */
-#define S_SET_NAME(s,v)		((s)->sy_symbol.ost_entry.n_offset = (unsigned long)(v))
+#define S_SET_NAME(s,v)		((s)->sy_symbol.ost_entry.n_offset = (unsigned long) (v))
 /* Set the offset of the symbol */
 #define S_SET_OFFSET(s,v)	((s)->sy_symbol.ost_entry.n_offset = (v))
 /* The numeric value of the segment */
@@ -642,7 +642,7 @@ typedef struct
 
 /* Modifiers */
 #define SF_SET(s,v)		(SF_GET (s) = (v))
-#define SF_SET_NORMAL_FIELD(s,v)(SF_GET (s) |= ((v) & SF_NORMAL_MASK))
+#define SF_SET_NORMAL_FIELD(s,v) (SF_GET (s) |= ((v) & SF_NORMAL_MASK))
 #define SF_SET_DEBUG_FIELD(s,v)	(SF_GET (s) |= ((v) & SF_DEBUG_MASK))
 #define SF_SET_FILE(s)		(SF_GET (s) |= SF_FILE)
 #define SF_SET_STATICS(s)	(SF_GET (s) |= SF_STATICS)
@@ -677,31 +677,31 @@ typedef struct
 #endif /* OBJ_COFF_OMIT_OPTIONAL_HEADER */
 
 #define H_GET_FILE_SIZE(h) \
-    (long)(FILHSZ + OBJ_COFF_AOUTHDRSZ + \
+    (long) (FILHSZ + OBJ_COFF_AOUTHDRSZ + \
 	   H_GET_NUMBER_OF_SECTIONS(h) * SCNHSZ + \
 	   H_GET_TEXT_SIZE(h) + H_GET_DATA_SIZE(h) + \
 	   H_GET_RELOCATION_SIZE(h) + H_GET_LINENO_SIZE(h) + \
 	   H_GET_SYMBOL_TABLE_SIZE(h) + \
 	   (h)->string_table_size)
 #define H_GET_TEXT_FILE_OFFSET(h) \
-    (long)(FILHSZ + OBJ_COFF_AOUTHDRSZ + \
+    (long) (FILHSZ + OBJ_COFF_AOUTHDRSZ + \
 	   H_GET_NUMBER_OF_SECTIONS(h) * SCNHSZ)
 #define H_GET_DATA_FILE_OFFSET(h) \
-    (long)(FILHSZ + OBJ_COFF_AOUTHDRSZ + \
+    (long) (FILHSZ + OBJ_COFF_AOUTHDRSZ + \
 	   H_GET_NUMBER_OF_SECTIONS(h) * SCNHSZ + \
 	   H_GET_TEXT_SIZE(h))
 #define H_GET_BSS_FILE_OFFSET(h) 0
 #define H_GET_RELOCATION_FILE_OFFSET(h) \
-    (long)(FILHSZ + OBJ_COFF_AOUTHDRSZ + \
+    (long) (FILHSZ + OBJ_COFF_AOUTHDRSZ + \
 	   H_GET_NUMBER_OF_SECTIONS(h) * SCNHSZ + \
 	   H_GET_TEXT_SIZE(h) + H_GET_DATA_SIZE(h))
 #define H_GET_LINENO_FILE_OFFSET(h) \
-    (long)(FILHSZ + OBJ_COFF_AOUTHDRSZ + \
+    (long) (FILHSZ + OBJ_COFF_AOUTHDRSZ + \
 	   H_GET_NUMBER_OF_SECTIONS(h) * SCNHSZ + \
 	   H_GET_TEXT_SIZE(h) + H_GET_DATA_SIZE(h) + \
 	   H_GET_RELOCATION_SIZE(h))
 #define H_GET_SYMBOL_TABLE_FILE_OFFSET(h) \
-    (long)(FILHSZ + OBJ_COFF_AOUTHDRSZ + \
+    (long) (FILHSZ + OBJ_COFF_AOUTHDRSZ + \
 	   H_GET_NUMBER_OF_SECTIONS(h) * SCNHSZ + \
 	   H_GET_TEXT_SIZE(h) + H_GET_DATA_SIZE(h) + \
 	   H_GET_RELOCATION_SIZE(h) + H_GET_LINENO_SIZE(h))
@@ -731,11 +731,11 @@ typedef struct
 #define H_GET_LINENO_SIZE(h)            ((h)->lineno_size)
 
 #ifndef OBJ_COFF_OMIT_OPTIONAL_HEADER
-#define H_GET_HEADER_SIZE(h)		(sizeof(FILHDR) \
-					 + sizeof(AOUTHDR)\
+#define H_GET_HEADER_SIZE(h)		(sizeof (FILHDR) \
+					 + sizeof (AOUTHDR)\
 					 + (H_GET_NUMBER_OF_SECTIONS(h) * SCNHSZ))
 #else /* OBJ_COFF_OMIT_OPTIONAL_HEADER */
-#define H_GET_HEADER_SIZE(h)		(sizeof(FILHDR) \
+#define H_GET_HEADER_SIZE(h)		(sizeof (FILHDR) \
 					 + (H_GET_NUMBER_OF_SECTIONS(h) * SCNHSZ))
 #endif /* OBJ_COFF_OMIT_OPTIONAL_HEADER */
 
@@ -771,7 +771,7 @@ typedef struct
 {
   struct internal_aouthdr aouthdr;	/* a.out header */
   struct internal_filehdr filehdr;	/* File header, not machine dep.  */
-  long string_table_size;	/* names + '\0' + sizeof(int) */
+  long string_table_size;	/* names + '\0' + sizeof (int) */
   long relocation_size;	/* Cumulated size of relocation
 			   information for all sections in
 			   bytes.  */

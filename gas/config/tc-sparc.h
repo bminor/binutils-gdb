@@ -186,15 +186,15 @@ extern void cons_fix_new_sparc
      {						\
        (X)->tc_fix_data = 0;			\
      }						\
-  while(0)
+  while (0)
 
 #define TC_FIX_DATA_PRINT(FILE, FIXP)					\
   do									\
     {									\
-      fprintf((FILE), "addend2=%ld\n",   				\
+      fprintf ((FILE), "addend2=%ld\n",   				\
 	      (unsigned long) (FIXP)->tc_fix_data);			\
     }									\
-  while(0)
+  while (0)
 
 #define DWARF2_LINE_MIN_INSN_LENGTH 4
 

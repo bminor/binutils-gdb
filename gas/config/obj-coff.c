@@ -248,7 +248,7 @@ obj_coff_weak (ignore)
 static void SA_SET_SYM_TAGNDX PARAMS ((symbolS *, symbolS *));
 
 #define GET_FILENAME_STRING(X) \
-((char*)(&((X)->sy_symbol.ost_auxent->x_file.x_n.x_offset))[1])
+((char*) (&((X)->sy_symbol.ost_auxent->x_file.x_n.x_offset))[1])
 
 /* @@ Ick.  */
 static segT
@@ -1474,7 +1474,7 @@ obj_coff_section (ignore)
       /* Add SEC_LINK_ONCE and SEC_LINK_DUPLICATES_DISCARD to .gnu.linkonce
          sections so adjust_reloc_syms in write.c will correctly handle
          relocs which refer to non-local symbols in these sections.  */
-      if (strncmp (name, ".gnu.linkonce", sizeof(".gnu.linkonce") - 1) == 0)
+      if (strncmp (name, ".gnu.linkonce", sizeof (".gnu.linkonce") - 1) == 0)
         flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 #endif
 
@@ -1626,7 +1626,7 @@ symbol_dump ()
 
   for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
     {
-      printf(_("0x%lx: \"%s\" type = %ld, class = %d, segment = %d\n"),
+      printf (_("0x%lx: \"%s\" type = %ld, class = %d, segment = %d\n"),
 	     (unsigned long) symbolP,
 	     S_GET_NAME(symbolP),
 	     (long) S_GET_DATA_TYPE(symbolP),

@@ -59,7 +59,7 @@ enum reloc_type
   };
 
 #define N_BADMAG(x)	(0)
-#define N_TXTOFF(x)	( sizeof(struct exec) )
+#define N_TXTOFF(x)	( sizeof (struct exec) )
 #define N_DATOFF(x)	( N_TXTOFF(x) + (x).a_text )
 #define N_TROFF(x)	( N_DATOFF(x) + (x).a_data )
 #define N_DROFF(x)	( N_TROFF(x) + (x).a_trsize )
@@ -84,7 +84,7 @@ struct exec
 typedef struct
   {
     struct exec header;		/* a.out header */
-    long string_table_size;	/* names + '\0' + sizeof(int) */
+    long string_table_size;	/* names + '\0' + sizeof (int) */
   }
 object_headers;
 
@@ -203,7 +203,7 @@ typedef struct nlist obj_symbol_type;	/* Symbol table entry */
 
 #define H_SET_STRING_SIZE(h,v)		((h)->string_table_size = (v))
 #define H_SET_SYMBOL_TABLE_SIZE(h,v)	((h)->header.a_syms = (v) * \
-					 sizeof(struct nlist))
+					 sizeof (struct nlist))
 
 /* line numbering stuff.  */
 #define OBJ_EMIT_LINENO(a, b, c)	{;}

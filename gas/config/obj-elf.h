@@ -96,7 +96,7 @@ struct elf_obj_sy
 extern void elf_begin PARAMS ((void));
 
 /* should be conditional on address size! */
-#define elf_symbol(asymbol) ((elf_symbol_type *)(&(asymbol)->the_bfd))
+#define elf_symbol(asymbol) ((elf_symbol_type *) (&(asymbol)->the_bfd))
 
 #ifndef S_GET_SIZE
 #define S_GET_SIZE(S) \
@@ -225,7 +225,7 @@ extern void obj_elf_init_stab_section PARAMS ((segT));
 
 #undef  INIT_STAB_SECTION
 #define INIT_STAB_SECTION(seg) \
-  ((void)(ECOFF_DEBUGGING ? 0 : (obj_elf_init_stab_section (seg), 0)))
+  ((void) (ECOFF_DEBUGGING ? 0 : (obj_elf_init_stab_section (seg), 0)))
 
 #undef OBJ_PROCESS_STAB
 #define OBJ_PROCESS_STAB(seg, what, string, type, other, desc)		\

@@ -229,7 +229,7 @@ extern void obj_aout_frob_file PARAMS ((void));
 typedef struct
   {
     struct exec header;		/* a.out header */
-    long string_table_size;	/* names + '\0' + sizeof(int) */
+    long string_table_size;	/* names + '\0' + sizeof (int) */
   }
 
 object_headers;

@@ -33,7 +33,7 @@ struct internal_reloc;
 #endif
 
 /* This macro translates between an internal fix and an coff reloc type */
-#define TC_COFF_FIX2RTYPE(fixP) abort();
+#define TC_COFF_FIX2RTYPE(fixP) abort ();
 
 #define BFD_ARCH bfd_arch_z8k
 #define COFF_MAGIC 0x8000

@@ -107,7 +107,7 @@ struct exec
   };
 
 #define N_BADMAG(x)	(((x).a_magic)!=BMAGIC)
-#define N_TXTOFF(x)	( sizeof(struct exec) )
+#define N_TXTOFF(x)	( sizeof (struct exec) )
 #define N_DATOFF(x)	( N_TXTOFF(x) + (x).a_text )
 #define N_TROFF(x)	( N_DATOFF(x) + (x).a_data )
 #define N_DROFF(x)	( N_TROFF(x) + (x).a_trsize )
@@ -239,14 +239,14 @@ struct relocation_info
 
 /* File header macro and type definition */
 
-#define H_GET_FILE_SIZE(h)	(sizeof(struct exec) + \
+#define H_GET_FILE_SIZE(h)	(sizeof (struct exec) + \
 				 H_GET_TEXT_SIZE(h) + H_GET_DATA_SIZE(h) + \
 				 H_GET_SYMBOL_TABLE_SIZE(h) + \
 				 H_GET_TEXT_RELOCATION_SIZE(h) + \
 				 H_GET_DATA_RELOCATION_SIZE(h) + \
 				 (h)->string_table_size)
 
-#define H_GET_HEADER_SIZE(h)		(sizeof(struct exec))
+#define H_GET_HEADER_SIZE(h)		(sizeof (struct exec))
 #define H_GET_TEXT_SIZE(h)		((h)->header.a_text)
 #define H_GET_DATA_SIZE(h)		((h)->header.a_data)
 #define H_GET_BSS_SIZE(h)		((h)->header.a_bss)
@@ -275,7 +275,7 @@ struct relocation_info
 #define H_SET_TEXT_RELOCATION_SIZE(h,v)	((h)->header.a_trsize = (v))
 #define H_SET_DATA_RELOCATION_SIZE(h,v)	((h)->header.a_drsize = (v))
 #define H_SET_SYMBOL_TABLE_SIZE(h,v)	((h)->header.a_syms = (v) * \
-					 sizeof(struct nlist))
+					 sizeof (struct nlist))
 
 #define H_SET_MAGIC_NUMBER(h,v)		((h)->header.a_magic = (v))
 
@@ -291,7 +291,7 @@ struct relocation_info
 typedef struct
   {
     struct exec header;		/* a.out header */
-    long string_table_size;	/* names + '\0' + sizeof(int) */
+    long string_table_size;	/* names + '\0' + sizeof (int) */
   }
 
 object_headers;

@@ -30,7 +30,7 @@ struct internal_reloc;
 #define WORKING_DOT_WORD
 
 /* This macro translates between an internal fix and an coff reloc type */
-#define TC_COFF_FIX2RTYPE(fixP) abort();
+#define TC_COFF_FIX2RTYPE(fixP) abort ();
 
 #define BFD_ARCH bfd_arch_h8300
 #define COFF_MAGIC ( Smode ? 0x8302 : Hmode ? 0x8301 : 0x8300)

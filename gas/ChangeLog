@@ -1,3 +1,19 @@
+2000-11-28  Kazu Hirata  <kazu@hxi.com>
+
+	* config/obj-aout.h: Fix formatting.
+	* config/obj-bout.h: Likewise.
+	* config/obj-coff.c: Likewise.
+	* config/obj-coff.h: Likewise.
+	* config/obj-elf.h: Likewise.
+	* config/obj-som.h: Likewise.
+	* config/obj-vms.c: Likewise.
+	* config/obj-vms.h: Likewise.
+	* config/tc-h8300.h: Likewise.
+	* config/tc-ns32k.h: Likewise.
+	* config/tc-sparc.h: Likewise.
+	* config/tc-tic54x.h: Likewise.
+	* config/tc-z8k.h: Likewise.
+
 2000-11-28  Nick Clifton  <nickc@redhat.com>
 
 	* doc/as.1 (COPYING): Mention that the GNU Free Documentation
