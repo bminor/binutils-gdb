@@ -27,6 +27,7 @@ echo Sanitizing `pwd`.
 
 Things-to-keep:
 COPYING
+doc
 ChangeLog
 Makefile.in
 TODO
@@ -38,14 +39,8 @@ aoutf1.h
 aoutx.h
 archive.c
 archures.c
-awkscan
-awkscan-ip
-awkscan-p
 bfd-in.h
 bfd.c
-bfd.doc.ps
-bfd.texinfo
-blins-p
 bout.c
 cache.c
 coffcode.h
@@ -56,15 +51,12 @@ configure.in
 core.c
 demo64.c
 ecoff.c
-exfilter
-exmerge
 filemode.c
 format.c
 host-aout.c
 i386coff.c
 icoff.c
 ieee.c
-intobfd
 libaout.h
 libbfd-in.h
 libbfd.c
@@ -75,27 +67,17 @@ libieee.h
 liboasys.h
 m68kcoff.c
 m88k-bcs.c
-mergecom-p
-movecom-p
 newsos3.c
 oasys.c
 opncls.c
 reloc.c
-scanit
-scanph
 section.c
-sedscript
-sedscript-p
 srec.c
-startcom-p
 sunos.c
 syms.c
 targets.c
-tolibbfd
-tolibcoff
 trad-core.c
 trad-core.h
-unPROTO
 
 Do-last:
 
@@ -128,7 +110,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.16  1991/08/22 07:31:21  gnu
+# Revision 1.17  1991/08/22 20:23:12  steve
+# *** empty log message ***
+#
+# Revision 1.16  1991/08/22  07:31:21  gnu
 # New config.sub
 #
 # Revision 1.15  1991/08/22  07:20:49  gnu
