@@ -22,6 +22,6 @@ dummy3 ()
 const
 #endif
 
-char version_string[] = "GNU assembler version 1.93 (alpha release)\n";
+char version_string[] = "GNU assembler version 1.94 (alpha release)\n";
 
 /* end of version.c */
