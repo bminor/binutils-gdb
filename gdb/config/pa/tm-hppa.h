@@ -238,8 +238,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    into VALBUF.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  memcpy (VALBUF, (REGBUF) + REGISTER_BYTE(TYPE_LENGTH(TYPE) > 4 ? \
-					  FP4_REGNUM :28), TYPE_LENGTH (TYPE))
+  { \
+    if (TYPE_CODE (TYPE) == TYPE_CODE_FLT) \
+      memcpy ((VALBUF), \
+	      ((int *)(REGBUF)) + REGISTER_BYTE (FP4_REGNUM), \
+	      TYPE_LENGTH (TYPE)); \
+    else \
+      memcpy ((VALBUF), \
+	      (char *)(REGBUF) + REGISTER_BYTE (28) + \
+	      (TYPE_LENGTH (TYPE) >= 4 ? 0 : 4 - TYPE_LENGTH (TYPE)), \
+	      TYPE_LENGTH (TYPE)); \
+  }
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
