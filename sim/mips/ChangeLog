@@ -1,3 +1,16 @@
+Thu Apr 17 03:18:14 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (SIM_OBJS): Add sim-load.o.
+	* interp.c: #include bfd.h.
+	(target_byte_order): Delete.
+	(sim_kind, myname, big_endian_p): New static locals.
+	(sim_open): Set sim_kind, myname.  Move call to set_endianness to
+	after argument parsing.  Recognize -E arg, set endianness accordingly.
+	(sim_load): Return SIM_RC.  New arg abfd.  Call sim_load_file to
+	load file into simulator.  Set PC from bfd.
+	(sim_create_inferior): Return SIM_RC.  Delete arg start_address.
+	(set_endianness): Use big_endian_p instead of target_byte_order.
+
 Wed Apr 16 17:55:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_size): Delete prototype - conflicts with

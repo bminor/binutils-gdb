@@ -62,7 +62,7 @@ code on the hardware.
 
 #include "getopt.h"
 #include "libiberty.h"
-
+#include "bfd.h"
 #include "callback.h"   /* GDB simulator callback interface */
 #include "remote-sim.h" /* GDB simulator interface */
 
@@ -86,8 +86,9 @@ char* pr_uword64 PARAMS ((uword64 addr));
 #include "engine.c"
 #undef SIM_MANIFESTS
 
-/* This variable holds the GDB view of the target endianness: */
-extern int target_byte_order;
+static SIM_OPEN_KIND sim_kind;
+static char *myname;
+static int big_endian_p;
 
 /* The following reserved instruction value is used when a simulator
    trap is required. NOTE: Care must be taken, since this value may be
@@ -666,6 +667,9 @@ sim_open (kind,argv)
      stdout and stderr are initialised: */
   callback->init(callback);
 
+  sim_kind = kind;
+  myname = argv[0];
+
   state = 0;
   CHECKSIM();
   if (state & simEXCEPTION) {
@@ -678,8 +682,6 @@ sim_open (kind,argv)
     if (*((char *)&data) != 0x12)
      state |= simHOSTBE; /* big-endian host */
   }
-
-  set_endianness ();
 
 #if defined(HASFPU)
   /* Check that the host FPU conforms to IEEE 754-1985 for the SINGLE
@@ -752,11 +754,15 @@ sim_open (kind,argv)
     while (1) {
       int option_index = 0;
 
-      c = getopt_long(argc,argv,"hn:s:tp",cmdline,&option_index);
+      c = getopt_long(argc,argv,"E:hn:s:tp",cmdline,&option_index);
       if (c == -1)
        break;
 
       switch (c) {
+       case 'E' :
+	 big_endian_p = strcmp (optarg, "big") == 0;
+         break;
+
        case 'h':
         callback->printf_filtered(callback,"Usage:\n\t\
 target sim [-h] [--log=<file>] [--name=<model>] [--size=<amount>]");
@@ -870,6 +876,8 @@ Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
       }
     }
   }
+
+  set_endianness ();
 
   /* If the host has "mmap" available we could use it to provide a
      very large virtual address space for the simulator, since memory
@@ -1449,39 +1457,44 @@ sim_info (sd,verbose)
   return;
 }
 
-int
-sim_load (sd,prog,from_tty)
+SIM_RC
+sim_load (sd,prog,abfd,from_tty)
      SIM_DESC sd;
      char *prog;
+     bfd *abfd;
      int from_tty;
 {
-  /* Return non-zero if the caller should handle the load. Zero if
-     we have loaded the image. */
-  return(-1);
+  extern bfd *sim_load_file (); /* ??? Don't know where this should live.  */
+  bfd *prog_bfd;
+
+  prog_bfd = sim_load_file (sd, myname, callback, prog, abfd,
+			    sim_kind == SIM_OPEN_DEBUG);
+  if (prog_bfd == NULL)
+    return SIM_RC_FAIL;
+#if 1
+  PC = (uword64) bfd_get_start_address (prog_bfd);
+#else
+  /* TODO: Sort this properly. SIM_ADDR may already be a 64bit value: */
+  PC = SIGNEXTEND(bfd_get_start_address(prog_bfd),32);
+#endif
+  if (abfd == NULL)
+    bfd_close (prog_bfd);
+  return SIM_RC_OK;
 }
 
-void
-sim_create_inferior (sd, start_address,argv,env)
+SIM_RC
+sim_create_inferior (sd, argv,env)
      SIM_DESC sd;
-     SIM_ADDR start_address;
      char **argv;
      char **env;
 {
 #ifdef DEBUG
-  printf("DBG: sim_create_inferior entered: start_address = 0x%s\n",pr_addr(start_address));
+  printf("DBG: sim_create_inferior entered: start_address = 0x%s\n",
+	 pr_addr(PC));
 #endif /* DEBUG */
 
   /* Prepare to execute the program to be simulated */
   /* argv and env are NULL terminated lists of pointers */
-
-#if 1
-  PC = (uword64)start_address;
-#else
-  /* TODO: Sort this properly. SIM_ADDR may already be a 64bit value: */
-  PC = SIGNEXTEND(start_address,32);
-#endif
-  /* NOTE: GDB normally sets the PC explicitly. However, this call is
-     used by other clients of the simulator. */
 
   if (argv || env) {
 #if 0 /* def DEBUG */
@@ -1498,7 +1511,7 @@ sim_create_inferior (sd, start_address,argv,env)
        true at the moment. */
   }
 
-  return;
+  return SIM_RC_OK;
 }
 
 void
@@ -2350,7 +2363,7 @@ set_endianness ()
      within the simulation, since it is possible to change the
      endianness of user programs. However, we perform the check here
      to ensure that the start-of-day values agree.  */
-  if (target_byte_order == 4321)
+  if (big_endian_p)
     state |= simBE;
 
   /* ??? This is a lot more code than is necessary to solve the problem.
