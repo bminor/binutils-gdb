@@ -6,7 +6,7 @@
 	(process_corefile_note_segment): New function.
 	(process_corefile_note_segments): New function.
 	(process_corefile_contents): New function.
-	(process_arch_specific): Add call to process_corefile_contents.
+	(process_file): Add call to process_corefile_contents.
 	(parse_args): Add parsing of -n/--notes command line switch.
 	(usage): Document new command line switch.
 
