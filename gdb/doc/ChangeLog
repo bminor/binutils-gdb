@@ -1,3 +1,11 @@
+2004-10-08  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Editing, History): Add cross-references to the
+	included Readline and History user documentation.  Remove
+	references to the symbol have-readline-appendices which is unused
+	and undefined.
+	(History): Fix indexing.
+
 2004-10-08  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdbint.texinfo (target_stopped_data_address): Update to

@@ -13383,7 +13383,7 @@ Prints a line of the form: @samp{Gdb's prompt is: @var{your-prompt}}
 @cindex readline
 @cindex command line editing
 
-@value{GDBN} reads its input commands via the @dfn{readline} interface.  This
+@value{GDBN} reads its input commands via the @dfn{Readline} interface.  This
 @sc{gnu} library provides consistent behavior for programs which provide a
 command line interface to the user.  Advantages are @sc{gnu} Emacs-style
 or @dfn{vi}-style inline editing of commands, @code{csh}-like history
@@ -13408,13 +13408,25 @@ Disable command line editing.
 Show whether command line editing is enabled.
 @end table
 
+@xref{Command Line Editing}, for more details about the Readline
+interface.  Users unfamiliar with @sc{gnu} Emacs or @code{vi} are
+encouraged to read that chapter.
+
 @node History
 @section Command history
+@cindex command history
 
 @value{GDBN} can keep track of the commands you type during your
 debugging sessions, so that you can be certain of precisely what
 happened.  Use these commands to manage the @value{GDBN} command
 history facility.
+
+@value{GDBN} uses the @sc{gnu} History library, a part of the Readline
+package, to provide the history facility.  @xref{Using History
+Interactively}, for the detailed description of the History library.
+
+Here is the description of @value{GDBN} commands related to command
+history.
 
 @table @code
 @cindex history substitution
@@ -13448,12 +13460,10 @@ This defaults to the value of the environment variable
 @code{HISTSIZE}, or to 256 if this variable is not set.
 @end table
 
-@cindex history expansion
 History expansion assigns special meaning to the character @kbd{!}.
-@ifset have-readline-appendices
-@xref{Event Designators}.
-@end ifset
+@xref{Event Designators}, for more details.
 
+@cindex history expansion, turn on/off
 Since @kbd{!} is also the logical not operator in C, history expansion
 is off by default. If you decide to enable history expansion with the
 @code{set history expansion on} command, you may sometimes need to
@@ -13467,18 +13477,11 @@ The commands to control history expansion are:
 @table @code
 @item set history expansion on
 @itemx set history expansion
-@cindex history expansion
+@kindex set history expansion
 Enable history expansion.  History expansion is off by default.
 
 @item set history expansion off
 Disable history expansion.
-
-The readline code comes with more complete documentation of
-editing and history expansion features.  Users unfamiliar with @sc{gnu} Emacs
-or @code{vi} may wish to read it.
-@ifset have-readline-appendices
-@xref{Command Line Editing}.
-@end ifset
 
 @c @group
 @kindex show history
