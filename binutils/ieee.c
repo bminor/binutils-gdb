@@ -3432,6 +3432,22 @@ ieee_regno_to_genreg (abfd, r)
      bfd *abfd;
      int r;
 {
+  switch (bfd_get_arch (abfd))
+    {
+    case bfd_arch_m68k:
+      /* For some reasons stabs adds 2 to the floating point register
+         numbers.  */
+      if (r >= 16)
+	r += 2;
+      break;
+
+    case bfd_arch_i960:
+      /* Stabs uses 0 to 15 for r0 to r15, 16 to 31 for g0 to g15, and
+         32 to 35 for fp0 to fp3.  */
+      --r;
+      break;
+    }
+
   return r;
 }
 
@@ -3442,6 +3458,22 @@ ieee_genreg_to_regno (abfd, r)
      bfd *abfd;
      int r;
 {
+  switch (bfd_get_arch (abfd))
+    {
+    case bfd_arch_m68k:
+      /* For some reason stabs add 2 to the floating point register
+         numbers.  */
+      if (r >= 18)
+	r -= 2;
+      break;
+
+    case bfd_arch_i960:
+      /* Stabs uses 0 to 15 for r0 to r15, 16 to 31 for g0 to g15, and
+         32 to 35 for fp0 to fp3.  */
+      ++r;
+      break;
+    }
+
   return r;
 }
 

@@ -1,3 +1,9 @@
+Wed Feb 14 15:12:17 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c (ieee_regno_to_genreg): Convert register numbers for m68k
+	and i960.
+	(ieee_genreg_to_regno): Likewise.
+
 Mon Feb 12 14:19:59 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c: Extensive changes to write code to put types in the
