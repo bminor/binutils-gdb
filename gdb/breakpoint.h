@@ -27,6 +27,8 @@
 
 #include "gdb-events.h"
 
+struct value;
+
 /* This is the maximum number of bytes a breakpoint instruction can take.
    Feel free to increase it.  It's just used in a few places to size
    arrays that should be independent of the target architecture.  */
@@ -249,10 +251,10 @@ struct breakpoint
        valid anywhere (e.g. consists just of global symbols).  */
     struct block *exp_valid_block;
     /* Value of the watchpoint the last time we checked it.  */
-    value_ptr val;
+    struct value *val;
 
     /* Holds the value chain for a hardware watchpoint expression.  */
-    value_ptr val_chain;
+    struct value *val_chain;
 
     /* Holds the address of the related watchpoint_scope breakpoint
        when using watchpoints on local variables (might the concept
@@ -479,7 +481,7 @@ struct bpstats
     /* Commands left to be done.  */
     struct command_line *commands;
     /* Old value associated with a watchpoint.  */
-    value_ptr old_val;
+    struct value *old_val;
 
     /* Nonzero if this breakpoint tells us to print the frame.  */
     char print;

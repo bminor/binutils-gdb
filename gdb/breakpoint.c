@@ -377,7 +377,7 @@ get_number_trailer (char **pp, int trailer)
          to pass to lookup_internalvar().  */
       char *varname;
       char *start = ++p;
-      value_ptr val;
+      struct value *val;
 
       while (isalnum (*p) || *p == '_')
 	p++;
@@ -866,8 +866,8 @@ insert_breakpoints (void)
       {
 	struct frame_info *saved_frame;
 	int saved_level, within_current_scope;
-	value_ptr mark = value_mark ();
-	value_ptr v;
+	struct value *mark = value_mark ();
+	struct value *v;
 
 	/* Save the current frame and level so we can restore it after
 	   evaluating the watchpoint expression on its own frame.  */
@@ -1306,7 +1306,8 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
 	   && b->enable_state == bp_enabled
 	   && !b->duplicate)
     {
-      value_ptr v, n;
+      struct value *v;
+      struct value *n;
 
       b->inserted = (is == mark_inserted);
       /* Walk down the saved value chain.  */
@@ -2250,7 +2251,7 @@ bpstat_print (bpstat bs)
 static int
 breakpoint_cond_eval (PTR exp)
 {
-  value_ptr mark = value_mark ();
+  struct value *mark = value_mark ();
   int i = !value_true (evaluate_expression ((struct expression *) exp));
   value_free_to_mark (mark);
   return i;
@@ -2321,8 +2322,8 @@ watchpoint_check (PTR p)
          call free_all_values.  We can't call free_all_values because
          we might be in the middle of evaluating a function call.  */
 
-      value_ptr mark = value_mark ();
-      value_ptr new_val = evaluate_expression (bs->breakpoint_at->exp);
+      struct value *mark = value_mark ();
+      struct value *new_val = evaluate_expression (bs->breakpoint_at->exp);
       if (!value_equal (b->val, new_val))
 	{
 	  release_value (new_val);
@@ -2543,7 +2544,7 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
 	     b->type == bp_access_watchpoint)
       {
 	CORE_ADDR addr;
-	value_ptr v;
+	struct value *v;
 	int found = 0;
 
 	addr = target_stopped_data_address ();
