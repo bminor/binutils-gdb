@@ -349,6 +349,7 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 
       switch (ELF64_R_TYPE (rel->r_info))
 	{
+	case R_X86_64_GOTPCREL:
 	case R_X86_64_GOT32:
 	  /* This symbol requires a global offset table entry.  */
 
@@ -372,7 +373,7 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 						   | SEC_IN_MEMORY
 						   | SEC_LINKER_CREATED
 						   | SEC_READONLY))
-		      || ! bfd_set_section_alignment (dynobj, srelgot, 2))
+		      || ! bfd_set_section_alignment (dynobj, srelgot, 3))
 		    return false;
 		}
 	    }
@@ -1265,7 +1266,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  bfd_put_64 (output_bfd, relocation, sgot->contents + off);
 
-      if (info->shared)
+		  if (info->shared)
 		    {
 		      asection *srelgot;
 		      Elf_Internal_Rela outrel;
@@ -1298,14 +1299,84 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_X86_64_GOTPCREL:
 	  /* Use global offset table as symbol value.  */
 
-	  if (sgot == NULL)
+	  BFD_ASSERT (sgot != NULL);
+	  if (h != NULL)
 	    {
-	      sgot = bfd_get_section_by_name (dynobj, ".got");
-	      BFD_ASSERT (sgot != NULL);
+	      bfd_vma off = h->got.offset;
+	      BFD_ASSERT (off != (bfd_vma) -1);
+
+	      if (! elf_hash_table (info)->dynamic_sections_created
+		  || (info->shared
+		      && (info->symbolic || h->dynindx == -1)
+		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+		{
+		  /* This is actually a static link, or it is a -Bsymbolic
+		     link and the symbol is defined locally, or the symbol
+		     was forced to be local because of a version file.  We
+		     must initialize this entry in the global offset table.
+		     Since the offset must always be a multiple of 8, we
+		     use the least significant bit to record whether we
+		     have initialized it already.
+
+		     When doing a dynamic link, we create a .rela.got
+		     relocation entry to initialize the value.  This is
+		     done in the finish_dynamic_symbol routine.  */
+		  if ((off & 1) != 0)
+		    off &= ~1;
+		  else
+		    {
+		      bfd_put_64 (output_bfd, relocation,
+				  sgot->contents + off);
+		      h->got.offset |= 1;
+		    }
+		}
+	      relocation = sgot->output_offset + off;
 	    }
+	  else
+	    {
+	      bfd_vma off;
 
-	  relocation = sgot->output_section->vma + (h->got.offset & ~1);
+	      BFD_ASSERT (local_got_offsets != NULL
+			  && local_got_offsets[r_symndx] != (bfd_vma) -1);
 
+	      off = local_got_offsets[r_symndx];
+
+	      /* The offset must always be a multiple of 8.  We use
+                 the least significant bit to record whether we have
+                 already generated the necessary reloc.  */
+	      if ((off & 1) != 0)
+		off &= ~1;
+	      else
+		{
+		  bfd_put_64 (output_bfd, relocation, sgot->contents + off);
+
+		  if (info->shared)
+		    {
+		      asection *srelgot;
+		      Elf_Internal_Rela outrel;
+
+		      /* We need to generate a R_X86_64_RELATIVE reloc
+			 for the dynamic linker.  */
+		      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+		      BFD_ASSERT (srelgot != NULL);
+
+		      outrel.r_offset = (sgot->output_section->vma
+					 + sgot->output_offset
+					 + off);
+		      outrel.r_info = ELF64_R_INFO (0, R_X86_64_RELATIVE);
+		      outrel.r_addend = relocation;
+		      bfd_elf64_swap_reloca_out (output_bfd, &outrel,
+						 (((Elf64_External_Rela *)
+						   srelgot->contents)
+						  + srelgot->reloc_count));
+		      ++srelgot->reloc_count;
+		    }
+
+		  local_got_offsets[r_symndx] |= 1;
+		}
+
+	      relocation = sgot->output_section->vma + off;
+	    }
 	  break;
 
 	case R_X86_64_PLT32:
@@ -1407,7 +1478,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		  BFD_ASSERT (h != NULL && h->dynindx != -1);
 		  relocate = false;
 		  outrel.r_info = ELF64_R_INFO (h->dynindx, r_type);
-		  outrel.r_addend = relocation + rela->r_addend;
+		  outrel.r_addend = rela->r_addend;
 		}
 	      else
 		{
@@ -1420,14 +1491,14 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		    {
 		      relocate = true;
 		      outrel.r_info = ELF64_R_INFO (0, R_X86_64_RELATIVE);
-		      outrel.r_addend = relocation + rela->r_addend;
+		      outrel.r_addend = rela->r_addend;
 		    }
 		  else
 		    {
 		      BFD_ASSERT (h->dynindx != -1);
 		      relocate = false;
 		      outrel.r_info = ELF64_R_INFO (h->dynindx, R_X86_64_32);
-		      outrel.r_addend = relocation + rela->r_addend;
+		      outrel.r_addend = rela->r_addend;
 		    }
 		}
 
