@@ -11,6 +11,8 @@
 ac_help=
 ac_default_prefix=/usr/local
 # Any additions from configure.in:
+ac_help="$ac_help
+  --enable-sim-powerpc "
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -637,7 +639,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 641 "configure"
+#line 643 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -660,6 +662,19 @@ else
 fi
 
 
+# Check whether --enable-sim-powerpc or --disable-sim-powerpc was given.
+enableval="$enable_sim_powerpc"
+if test -n "$enableval"; then
+  case "${enableval}" in
+yes)	powerpc_sim=yes ;;
+no)	powerpc_sim=no ;;
+*)	{ echo "configure: error: bad value ${enableval} given for sim-powerpc option" 1>&2; exit 1; } ;;
+esac
+else
+  if test x"$GCC" != x""; then powerpc_sim=yes; else powerpc_sim=no; fi
+fi
+
+
 # WHEN ADDING ENTRIES TO THIS MATRIX:
 #  Make sure that the left side always has two dashes.  Otherwise you
 #  can get spurious matches.  Even for unambiguous cases, do this as a
@@ -671,7 +686,7 @@ case "${target}" in
   h8500-*-*)		sim_target=h8500 ;;
   mips*-*-*)		sim_target=mips ;;
   sh*-*-*)		sim_target=sh ;; 
-  powerpc*-*-eabi*)	if test x$GCC != x""; then sim_target=ppc; fi ;;
+  powerpc*-*-eabi*)	if test x"powerpc_sim" = x"yes"; then sim_target=ppc; fi ;;
   w65-*-*)		sim_target=w65 ;;
   z8k*-*-*)		sim_target=z8k ;;
   *)			sim_target=none ;;

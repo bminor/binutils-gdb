@@ -21,6 +21,14 @@ else
 fi
 AC_SUBST(CC_FOR_BUILD)
 
+AC_ARG_ENABLE(sim-powerpc,
+[  --enable-sim-powerpc ],
+[case "${enableval}" in
+yes)	powerpc_sim=yes ;;
+no)	powerpc_sim=no ;;
+*)	AC_MSG_ERROR(bad value ${enableval} given for sim-powerpc option) ;;
+esac],[if test x"$GCC" != x""; then powerpc_sim=yes; else powerpc_sim=no; fi])
+
 # WHEN ADDING ENTRIES TO THIS MATRIX:
 #  Make sure that the left side always has two dashes.  Otherwise you
 #  can get spurious matches.  Even for unambiguous cases, do this as a
@@ -32,7 +40,7 @@ case "${target}" in
   h8500-*-*)		sim_target=h8500 ;;
   mips*-*-*)		sim_target=mips ;;
   sh*-*-*)		sim_target=sh ;; 
-  powerpc*-*-eabi*)	if test x$GCC != x""; then sim_target=ppc; fi ;;
+  powerpc*-*-eabi*)	if test x"powerpc_sim" = x"yes"; then sim_target=ppc; fi ;;
   w65-*-*)		sim_target=w65 ;;
   z8k*-*-*)		sim_target=z8k ;;
   *)			sim_target=none ;;
