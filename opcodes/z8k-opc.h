@@ -1621,14 +1621,14 @@ opcode_entry_type z8k_table[] = {
 	{CLASS_BIT+3,CLASS_BIT+0xd,CLASS_REGN0+(ARG_RS),CLASS_REG+(ARG_RD),0,0,0,0,0,},2,2,135},
 
 
-/* 0011 1101 dddd 0100 imm16 *** in rd,imm16 */
+/* 0011 1011 dddd 0100 imm16 *** in rd,imm16 */
 {
 #ifdef NICENAMES
 "in rd,imm16",16,12,
 0x00,
 #endif
 "in",OPC_in,0,{CLASS_REG_WORD+(ARG_RD),CLASS_IMM+(ARG_IMM16),},
-	{CLASS_BIT+3,CLASS_BIT+0xd,CLASS_REG+(ARG_RD),CLASS_BIT+4,CLASS_IMM+(ARG_IMM16),0,0,0,0,},2,4,136},
+	{CLASS_BIT+3,CLASS_BIT+0xb,CLASS_REG+(ARG_RD),CLASS_BIT+4,CLASS_IMM+(ARG_IMM16),0,0,0,0,},2,4,136},
 
 
 /* 0011 1100 ssN0 dddd *** inb rbd,@rs */

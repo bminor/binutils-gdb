@@ -731,6 +731,7 @@ get_operands (opcode, op_end, operand)
   char *ptr = op_end;
   char *savptr;
 
+  ptr++;
   switch (opcode->noperands)
     {
     case 0:
@@ -739,40 +740,35 @@ get_operands (opcode, op_end, operand)
       break;
 
     case 1:
-      ptr++;
       if (opcode->arg_info[0] == CLASS_CC)
-	{
-	  get_cc_operand (&ptr, operand + 0, 0);
-	}
+	get_cc_operand (&ptr, operand + 0, 0);
+
       else if (opcode->arg_info[0] == CLASS_FLAGS)
-	{
-	  get_flags_operand (&ptr, operand + 0, 0);
-	}
+	get_flags_operand (&ptr, operand + 0, 0);
+
       else if (opcode->arg_info[0] == (CLASS_IMM + (ARG_IMM2)))
-	{
-	  get_interrupt_operand (&ptr, operand + 0, 0);
-	}
+	get_interrupt_operand (&ptr, operand + 0, 0);
+
       else
-	{
-	  get_operand (&ptr, operand + 0, 0);
-	}
+	get_operand (&ptr, operand + 0, 0);
+
       operand[1].mode = 0;
       break;
 
     case 2:
-      ptr++;
       savptr = ptr;
       if (opcode->arg_info[0] == CLASS_CC)
-	{
-	  get_cc_operand (&ptr, operand + 0, 0);
-	}
+	get_cc_operand (&ptr, operand + 0, 0);
+
       else if (opcode->arg_info[0] == CLASS_CTRL)
 	{
 	  get_ctrl_operand (&ptr, operand + 0, 0);
+
 	  if (the_ctrl == 0)
 	    {
 	      ptr = savptr;
 	      get_operand (&ptr, operand + 0, 0);
+
 	      if (ptr == 0)
 		return NULL;
 	      if (*ptr == ',')
@@ -782,9 +778,8 @@ get_operands (opcode, op_end, operand)
 	    }
 	}
       else
-	{
-	  get_operand (&ptr, operand + 0, 0);
-	}
+	get_operand (&ptr, operand + 0, 0);
+
       if (ptr == 0)
 	return NULL;
       if (*ptr == ',')
@@ -793,7 +788,6 @@ get_operands (opcode, op_end, operand)
       break;
 
     case 3:
-      ptr++;
       get_operand (&ptr, operand + 0, 0);
       if (*ptr == ',')
 	ptr++;
@@ -804,7 +798,6 @@ get_operands (opcode, op_end, operand)
       break;
 
     case 4:
-      ptr++;
       get_operand (&ptr, operand + 0, 0);
       if (*ptr == ',')
 	ptr++;
@@ -1413,7 +1406,7 @@ md_section_align (seg, size)
 
 void
 md_apply_fix3 (fixP, valP, segment)
-     fixS *fixP;
+     fixS * fixP;
      valueT * valP;
      segT segment ATTRIBUTE_UNUSED;
 {
@@ -1483,7 +1476,7 @@ md_estimate_size_before_relax (fragP, segment_type)
      register fragS *fragP ATTRIBUTE_UNUSED;
      register segT segment_type ATTRIBUTE_UNUSED;
 {
-  printf (_("call tomd_estimate_size_before_relax \n"));
+  printf (_("call tomd_estimate_size_before_relax\n"));
   abort ();
 }
 

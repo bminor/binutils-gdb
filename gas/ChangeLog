@@ -1,3 +1,8 @@
+2002-08-22  Christian Groessler <chris@groessler.org>
+
+	* config/tc-z8k.c (get_operands): Adjust ptr variable also in
+	"case 0" case.
+
 2002-08-12  Graeme Peterson  <gp@qnx.com>
 
 	* configure.in: Add support for sh-**-nto* target.
