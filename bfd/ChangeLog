@@ -1,3 +1,9 @@
+Tue Aug 13 17:04:40 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_merge_private_bfd_data): If one module has
+	the -mrelocatable-lib bit set and the other doesn't, clear the
+	-mrelocatable-lib bit in the header.
+
 Sat Aug 10 22:59:17 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_link_add_object_symbols): Do not resolve a common
