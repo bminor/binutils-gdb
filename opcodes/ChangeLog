@@ -1,8 +1,10 @@
+start-sanitize-m32rx
 Mon Mar 23 11:32:11 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* m32r-opc.c (m32r_cgen_insn_table_entries): Fix SATH bit pattern
 	(PR15418).
 
+end-sanitize-m32rx
 start-sanitize-sky
 Mon Mar 23 09:45:04 1998  Doug Evans  <devans@canuck.cygnus.com>
 
