@@ -5,10 +5,10 @@ Thu Oct 15 02:59:30 1992  John Gilmore  (gnu@cygnus.com)
 	
 	* command.h:  Publicize prototype for not_just_help_class_command.
 	* command.c:  Remove proto.
-	* maint.c (maintenance_init):  Mark "mt" as an abbrev, to avoid
-	duplicated help output.  Move "maint info" from class info to
-	class maintenance, and improve text.
-	* infrun.c ():  Move "stop" to class_obscure, and give it a
+	* maint.c:  Mark "mt" as an abbrev, to avoid duplicated help
+	output.  Move "maint info" from class info to class maintenance,
+	and improve text.
+	* infrun.c:  Move "stop" to class_obscure, and give it a
 	function so it will not be seen as a global help topic.  FIXME,
 	it should be possible to set these attributes independently.
 

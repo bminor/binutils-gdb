@@ -167,10 +167,10 @@ to test internal functions such as the C++ demangler, etc.",
 		  &maintenancelist, "maintenance ", 0,
 		  &cmdlist);
 
-  add_com_alias ("mt", "maintenance", class_maintenance, 0);
+  add_com_alias ("mt", "maintenance", class_maintenance, 1);
 
-  add_prefix_cmd ("info", class_info, maintenance_info_command,
-		  "Commands for showing things about the program being debugged.",
+  add_prefix_cmd ("info", class_maintenance, maintenance_info_command,
+		  "Commands for showing internal info about the program being debugged.",
 		  &maintenanceinfolist, "maintenance info ", 0,
 		  &maintenancelist);
 

@@ -166,7 +166,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${NAT_CDEPS} \
 ADD_FILES = ${REGEX} ${ALLOCA}  ${XM_ADD_FILES} ${TM_ADD_FILES} ${NAT_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} ${NAT_ADD_FILES}
 
-VERSION = 4.6.7
+VERSION = 4.6.8
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -286,10 +286,10 @@ TAGFILES_MAINDIR = $(SFILES_MAINDIR) $(ALLDEPFILES_MAINDIR) \
              ${HFILES} ${ALLPARAM} ${POSSLIBS_MAINDIR} 
 TARFILES = ${TAGFILES_MAINDIR} ${OTHERS} ${REMOTE_EXAMPLES}
 
-OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
+OBS = version.o main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     values.o eval.o valops.o valarith.o valprint.o printcmd.o \
     symtab.o symfile.o symmisc.o infcmd.o infrun.o remote.o \
-    command.o utils.o expprint.o environ.o version.o gdbtypes.o \
+    command.o utils.o expprint.o environ.o gdbtypes.o \
     copying.o $(DEPFILES) mem-break.o target.o \
     ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
     buildsym.o objfiles.o minsyms.o maint.o demangle.o \

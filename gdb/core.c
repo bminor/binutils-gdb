@@ -48,6 +48,7 @@ core_file_command (filename, from_tty)
      int from_tty;
 {
   struct target_ops *t;
+
   dont_repeat ();			/* Either way, seems bogus. */
 
   t = find_core_target ();
@@ -57,7 +58,7 @@ core_file_command (filename, from_tty)
     else
       (t->to_open) (filename, from_tty);
   else
-    error ("unimplemented: core files");
+    error ("GDB can't read core files on this machine.");
 }
 
 
