@@ -418,12 +418,13 @@ Fred Fish wrote most of the support for Unix System Vr4.
 He also enhanced the command-completion support to cover C@t{++} overloaded
 symbols.
 
-Renesas America, Ltd. sponsored the support for H8/300, H8/500, and
-Super-H processors.
+Hitachi America (now Renesas America), Ltd. sponsored the support for
+H8/300, H8/500, and Super-H processors.
 
 NEC sponsored the support for the v850, Vr4xxx, and Vr5xxx processors.
 
-Renesas sponsored the support for D10V, D30V, and M32R/D processors.
+Mitsubishi (now Renesas) sponsored the support for D10V, D30V, and M32R/D
+processors.
 
 Toshiba sponsored the support for the TX39 Mips processor.
 

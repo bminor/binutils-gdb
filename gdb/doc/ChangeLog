@@ -1,3 +1,8 @@
+2003-10-23  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* gdb.texinfo (Contributors to GDB): Replace "Renesas"
+	with "Hitachi" and "Mitsubishi".
+
 2003-10-20  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Document
