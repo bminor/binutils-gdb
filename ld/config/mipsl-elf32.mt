@@ -1,1 +1,1 @@
-EMUL=elf32mipl
+EMUL=elf32lmip
