@@ -8940,7 +8940,7 @@ note_register_values (idesc)
       else if (idesc->operands[i] == IA64_OPND_PR_ROT)
 	{
 	  if (idesc->operands[1] & ((valueT) 1 << 43))
-	    qp_changemask = ~(valueT) 0xFFFFFFFFFFF | idesc->operands[1];
+	    qp_changemask = -((valueT) 1 << 44) | idesc->operands[1];
 	  else
 	    qp_changemask = idesc->operands[1];
 	  qp_changemask &= ~(valueT) 0xFFFF;

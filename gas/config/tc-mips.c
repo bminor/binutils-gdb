@@ -2116,7 +2116,8 @@ append_insn (place, ip, address_expr, reloc_type)
 	      break;
 
 	    case BFD_RELOC_MIPS_HIGHEST:
-	      tmp = (address_expr->X_add_number + 0x800080008000) >> 16;
+	      tmp = (address_expr->X_add_number
+		     + ((valueT) 0x8000 << 32) + 0x80008000) >> 16;
 	      tmp >>= 16;
 	      ip->insn_opcode |= (tmp >> 16) & 0xffff;
 	      break;

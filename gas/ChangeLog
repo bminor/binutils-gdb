@@ -1,3 +1,8 @@
+2003-06-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ia64.c (note_register_values): Warning fix.
+	* config/tc-mips.c (append_insn): Likewise.
+
 2003-06-29  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (mips_set_options,mips_opts): Support for
