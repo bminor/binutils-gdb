@@ -74,12 +74,6 @@ i[3456]86-*-unixware*)	gdb_host=i386v4 ;;
 i[3456]86-*-sysv*)	gdb_host=i386v ;;
 i[3456]86-*-isc*)	gdb_host=i386v32 ;;
 i[3456]86-*-cygwin32)	gdb_host=cygwin32 ;;
-i[3456]86-*-windows)	gdb_host=windows
-			# start-sanitize-mswin
-			configdirs=mswin
-			# end-sanitize-mswin
-			gdb_cv_c_long_long=no
-			gdb_cv_printf_has_long_long=no ;;
 m680[01]0-sun-sunos3*)	gdb_host=sun2os3 ;;
 m680[01]0-sun-sunos4*)	gdb_host=sun2os4 ;;
 m68030-sony-*)		gdb_host=news1000 ;;

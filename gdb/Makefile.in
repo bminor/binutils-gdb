@@ -108,6 +108,8 @@ READLINE = $(READLINE_DIR)/libreadline.a
 READLINE_SRC = $(srcdir)/$(READLINE_DIR)
 READLINE_CFLAGS = -I$(READLINE_SRC)
 
+WARN_CFLAGS = @WARN_CFLAGS@
+
 # Where is the INTL library?  Typically in ../intl.
 INTL_DIR = ../intl
 INTL = @INTLLIBS@
@@ -209,7 +211,7 @@ CXXFLAGS = -g -O
 INTERNAL_CFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS) \
-	$(INTL_CFLAGS) $(ENABLE_CFLAGS)
+	$(INTL_CFLAGS) $(ENABLE_CFLAGS) $(WARN_CFLAGS)
 
 # LDFLAGS is specifically reserved for setting from the command line
 # when running make.
@@ -538,9 +540,6 @@ NTSSTART = kdb-start.o
 
 SUBDIRS = doc \
 	testsuite \
-	$(start-sanitize-mswin) \
-	mswin \
-	$(end-sanitize-mswin) \
 	nlm
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
