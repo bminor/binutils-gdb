@@ -79,10 +79,10 @@ INSTOBJEXT = @INSTOBJEXT@
 
 all: all-@USE_NLS@
 
-all-yes: $(CATALOGS)
+all-yes: $(CATALOGS) @MAINT@ $(PACKAGE).pot
 all-no:
 
-$(srcdir)/$(PACKAGE).pot: @MAINT@ $(POTFILES)
+$(srcdir)/$(PACKAGE).pot: $(POTFILES)
 	$(XGETTEXT) --default-domain=$(PACKAGE) --directory=$(top_srcdir) \
 	  --add-comments --keyword=_ --keyword=N_ \
 	  --files-from=$(srcdir)/POTFILES.in

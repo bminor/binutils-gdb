@@ -1,3 +1,8 @@
+Fri Jun 12 13:40:05 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* po/Make-in (all-yes): If maintainer mode, depend on .pot file.
+	($(PACKAGE).pot): Unconditionally depend on POTFILES.
+
 Sun May 10 22:35:33 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* po/Make-in (install-info): New target.

@@ -1,3 +1,8 @@
+Fri Jun 12 13:36:54 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* po/Make-in (all-yes): If maintainer mode, depend on .pot file.
+	($(PACKAGE).pot): Unconditionally depend on POTFILES.
+
 start-sanitize-sky
 Fri Jun 12 12:46:57 1998  Doug Evans  <devans@canuck.cygnus.com>
 
