@@ -4708,12 +4708,12 @@ static struct mri_control_info *push_mri_control
 static void pop_mri_control PARAMS ((void));
 static int parse_mri_condition PARAMS ((int *));
 static int parse_mri_control_operand
-  PARAMS ((int *, char **, const char **, char **, const char **));
+  PARAMS ((int *, char **, char **, char **, char **));
 static int swap_mri_condition PARAMS ((int));
 static int reverse_mri_condition PARAMS ((int));
 static void build_mri_control_operand
-  PARAMS ((int, int, char *, const char *, char *, const char *,
-	   const char *, const char *, int));
+  PARAMS ((int, int, char *, char *, char *, char *, const char *,
+	   const char *, int));
 static void parse_mri_control_expression
   PARAMS ((char *, int, const char *, const char *, int));
 
@@ -4810,9 +4810,9 @@ static int
 parse_mri_control_operand (pcc, leftstart, leftstop, rightstart, rightstop)
      int *pcc;
      char **leftstart;
-     const char **leftstop;
+     char **leftstop;
      char **rightstart;
-     const char **rightstop;
+     char **rightstop;
 {
   char *s;
 
@@ -4937,52 +4937,52 @@ build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
      int qual;
      int cc;
      char *leftstart;
-     const char *leftstop;
+     char *leftstop;
      char *rightstart;
-     const char *rightstop;
+     char *rightstop;
      const char *truelab;
      const char *falselab;
      int extent;
 {
-  int leftreg, rightreg;
   char *buf;
   char *s;
 
-  /* See which sides of the comparison are plain registers.  */
-  if (leftstart == NULL)
-    leftreg = 0;
-  else
+  if (leftstart != NULL)
     {
-      char *l;
+      struct m68k_op leftop, rightop;
+      char c;
 
-      l = leftstart;
-      leftreg = m68k_reg_parse (&l) != 0;
-    }
-  if (rightstart == NULL)
-    rightreg = 0;
-  else
-    {
-      char *l;
+      /* Swap the compare operands, if necessary, to produce a legal
+	 m68k compare instruction.  Comparing a register operand with
+	 a non-register operand requires the register to be on the
+	 right (cmp, cmpa).  Comparing an immediate value with
+	 anything requires the immediate value to be on the left
+	 (cmpi).  */
 
-      l = rightstart;
-      rightreg = m68k_reg_parse (&l) != 0;
-    }
+      c = *leftstop;
+      *leftstop = '\0';
+      (void) m68k_ip_op (leftstart, &leftop);
+      *leftstop = c;
 
-  /* Swap the compare operands, if necessary, to produce a legal m68k
-     compare instruction.  */
-  if ((leftreg && ! rightreg)
-      || (rightstart != NULL && *rightstart == '#'))
-    {
-      char *temp;
-      const char *tempc;
+      c = *rightstop;
+      *rightstop = '\0';
+      (void) m68k_ip_op (rightstart, &rightop);
+      *rightstop = c;
 
-      cc = swap_mri_condition (cc);
-      temp = leftstart;
-      leftstart = rightstart;
-      rightstart = temp;
-      tempc = leftstop;
-      leftstop = rightstop;
-      rightstop = tempc;
+      if (rightop.mode == IMMED
+	  || ((leftop.mode == DREG || leftop.mode == AREG)
+	      && (rightop.mode != DREG && rightop.mode != AREG)))
+	{
+	  char *temp;
+
+	  cc = swap_mri_condition (cc);
+	  temp = leftstart;
+	  leftstart = rightstart;
+	  rightstart = temp;
+	  temp = leftstop;
+	  leftstop = rightstop;
+	  rightstop = temp;
+	}
     }
 
   if (truelab == NULL)
@@ -5044,9 +5044,9 @@ parse_mri_control_expression (stop, qual, truelab, falselab, extent)
   int c;
   int cc;
   char *leftstart;
-  const char *leftstop;
+  char *leftstop;
   char *rightstart;
-  const char *rightstop;
+  char *rightstop;
 
   c = *stop;
   *stop = '\0';
@@ -5154,7 +5154,8 @@ s_mri_if (qual)
   /* A structured control directive must end with THEN with an
      optional qualifier.  */
   s = input_line_pointer;
-  while (! is_end_of_line[(unsigned char) *s])
+  while (! is_end_of_line[(unsigned char) *s]
+	 && (! flag_mri || *s != '*'))
     ++s;
   --s;
   while (s > input_line_pointer && (*s == ' ' || *s == '\t'))
@@ -5204,6 +5205,12 @@ s_mri_if (qual)
     input_line_pointer = s + 3;
   else
     input_line_pointer = s + 1;
+
+  if (flag_mri)
+    {
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+    }
 
   demand_empty_rest_of_line ();
 }
@@ -5261,6 +5268,12 @@ s_mri_else (qual)
 
   colon (mri_control_stack->next);
 
+  if (flag_mri)
+    {
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+    }
+
   demand_empty_rest_of_line ();
 }
 
@@ -5286,6 +5299,12 @@ s_mri_endi (ignore)
   colon (mri_control_stack->bottom);
 
   pop_mri_control ();
+
+  if (flag_mri)
+    {
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+    }
 
   demand_empty_rest_of_line ();
 }
@@ -5320,6 +5339,12 @@ s_mri_break (extent)
   md_assemble (buf);
   free (buf);
 
+  if (flag_mri)
+    {
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+    }
+
   demand_empty_rest_of_line ();
 }
 
@@ -5352,6 +5377,12 @@ s_mri_next (extent)
   sprintf (buf, "bra%s %s", ex, n->next);
   md_assemble (buf);
   free (buf);
+
+  if (flag_mri)
+    {
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+    }
 
   demand_empty_rest_of_line ();
 }
@@ -5580,6 +5611,12 @@ s_mri_for (qual)
   *s = '\0';
   n->incr = buf;
 
+  if (flag_mri)
+    {
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+    }
+
   demand_empty_rest_of_line ();
 }
 
@@ -5610,6 +5647,12 @@ s_mri_endf (ignore)
 
   pop_mri_control ();
 
+  if (flag_mri)
+    {
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+    }
+
   demand_empty_rest_of_line ();
 }
 
@@ -5623,6 +5666,11 @@ s_mri_repeat (ignore)
 
   n = push_mri_control (mri_repeat);
   colon (n->top);
+  if (flag_mri)
+    {
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+    }
   demand_empty_rest_of_line ();
 }
 
@@ -5654,6 +5702,12 @@ s_mri_until (qual)
 
   input_line_pointer = s;
 
+  if (flag_mri)
+    {
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+    }
+
   demand_empty_rest_of_line ();
 }
 
@@ -5668,7 +5722,8 @@ s_mri_while (qual)
   struct mri_control_info *n;
 
   s = input_line_pointer;
-  while (! is_end_of_line[(unsigned char) *s])
+  while (! is_end_of_line[(unsigned char) *s]
+	 && (! flag_mri || *s != '*'))
     s++;
   --s;
   while (*s == ' ' || *s == '\t')
@@ -5694,6 +5749,12 @@ s_mri_while (qual)
   input_line_pointer = s + 1;
   if (*input_line_pointer == '.')
     input_line_pointer += 2;
+
+  if (flag_mri)
+    {
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+    }
 
   demand_empty_rest_of_line ();
 }
@@ -5722,6 +5783,12 @@ s_mri_endw (ignore)
   colon (mri_control_stack->bottom);
 
   pop_mri_control ();
+
+  if (flag_mri)
+    {
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+    }
 
   demand_empty_rest_of_line ();
 }

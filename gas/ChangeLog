@@ -1,3 +1,18 @@
+Tue Sep 19 11:31:31 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c (parse_mri_control_operand): Change leftstop
+	and rightstop to not be const.
+	(parse_mri_control_expression): Likewise.
+	(build_mri_control_operand): Likewise.  Use m68k_ip_op to examine
+	the operand, not m68k_reg_parse.
+	(s_mri_if): In MRI mode, stop at the first '*'.
+	(s_mri_while): Likewise.
+	(s_mri_else): In MRI mode, ignore trailing characters.
+	(s_mri_endi, s_mri_break, s_mri_next, s_mri_for): Likewise.
+	(s_mri_endf, s_mri_repeat, s_mri_until, s_mri_endw): Likewise.
+	* config/m68k-parse.y: Revert yesterday's change.
+	* config/m68k-parse.h: Revert yesterday's change.
+
 Mon Sep 18 15:22:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c (parse_mri_control_operand): Change leftstart
