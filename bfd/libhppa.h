@@ -26,13 +26,14 @@
 #define BYTES_IN_WORD 4
 #define PA_PAGESIZE 0x1000
 
-#ifndef INLINE
+#ifndef HINLINE
 #ifdef __GNUC__
-#define INLINE inline
+#define HINLINE extern inline
 #else
-#define INLINE
+/* INLINE is defined in bfd.h.  */
+#define HINLINE static INLINE
 #endif /* GNU C? */
-#endif /* INLINE */
+#endif /* HINLINE */
 
 /* The PA instruction set variants.  */
 enum pa_arch {pa10 = 10, pa11 = 11, pa20 = 20};
@@ -51,12 +52,14 @@ enum hppa_reloc_field_selector_type
     R_HPPA_LRSEL = 0x7,
     R_HPPA_RRSEL = 0x8,
     R_HPPA_NSEL  = 0x9,
-    R_HPPA_PSEL = 0xa,
-    R_HPPA_LPSEL = 0xb,
-    R_HPPA_RPSEL = 0xc,
-    R_HPPA_TSEL = 0xd,
-    R_HPPA_LTSEL = 0xe,
-    R_HPPA_RTSEL = 0xf
+    R_HPPA_NLSEL  = 0xa,
+    R_HPPA_NLRSEL  = 0xb,
+    R_HPPA_PSEL = 0xc,
+    R_HPPA_LPSEL = 0xd,
+    R_HPPA_RPSEL = 0xe,
+    R_HPPA_TSEL = 0xf,
+    R_HPPA_LTSEL = 0x10,
+    R_HPPA_RTSEL = 0x11
   };
 
 /* /usr/include/reloc.h defines these to constants.  We want to use
@@ -74,6 +77,8 @@ enum hppa_reloc_field_selector_type
 #undef e_lrsel
 #undef e_rrsel
 #undef e_nsel
+#undef e_nlsel
+#undef e_nlrsel
 #undef e_psel
 #undef e_lpsel
 #undef e_rpsel
@@ -100,6 +105,8 @@ enum hppa_reloc_field_selector_type_alt
     e_lrsel = R_HPPA_LRSEL,
     e_rrsel = R_HPPA_RRSEL,
     e_nsel = R_HPPA_NSEL,
+    e_nlsel = R_HPPA_NLSEL,
+    e_nlrsel = R_HPPA_NLRSEL,
     e_psel = R_HPPA_PSEL,
     e_lpsel = R_HPPA_LPSEL,
     e_rpsel = R_HPPA_RPSEL,
@@ -147,14 +154,14 @@ enum hppa_reloc_expr_type_alt
 #define HPPA_R_ADDEND(r,c)	(((r) << 22) + ((c) & 0x3FFFFF))
 
 /* Some functions to manipulate PA instructions.  */
-static INLINE unsigned int
+HINLINE unsigned int
 assemble_3 (x)
      unsigned int x;
 {
   return (((x & 1) << 2) | ((x & 6) >> 1)) & 7;
 }
 
-static INLINE void
+HINLINE void
 dis_assemble_3 (x, r)
      unsigned int x;
      unsigned int *r;
@@ -162,14 +169,14 @@ dis_assemble_3 (x, r)
   *r = (((x & 4) >> 2) | ((x & 3) << 1)) & 7;
 }
 
-static INLINE unsigned int
+HINLINE unsigned int
 assemble_12 (x, y)
      unsigned int x, y;
 {
   return (((y & 1) << 11) | ((x & 1) << 10) | ((x & 0x7fe) >> 1)) & 0xfff;
 }
 
-static INLINE void
+HINLINE void
 dis_assemble_12 (as12, x, y)
      unsigned int as12;
      unsigned int *x, *y;
@@ -178,7 +185,7 @@ dis_assemble_12 (as12, x, y)
   *x = ((as12 & 0x3ff) << 1) | ((as12 & 0x400) >> 10);
 }
 
-static INLINE unsigned long
+HINLINE unsigned long
 assemble_17 (x, y, z)
      unsigned int x, y, z;
 {
@@ -191,7 +198,7 @@ assemble_17 (x, y, z)
   return temp & 0x1ffff;
 }
 
-static INLINE void
+HINLINE void
 dis_assemble_17 (as17, x, y, z)
      unsigned int as17;
      unsigned int *x, *y, *z;
@@ -202,7 +209,7 @@ dis_assemble_17 (as17, x, y, z)
   *y = (((as17 & 0x00400) >> 10) | ((as17 & 0x3ff) << 1)) & 0x7ff;
 }
 
-static INLINE unsigned long
+HINLINE unsigned long
 assemble_21 (x)
      unsigned int x;
 {
@@ -216,7 +223,7 @@ assemble_21 (x)
   return temp & 0x1fffff;
 }
 
-static INLINE void
+HINLINE void
 dis_assemble_21 (as21, x)
      unsigned int as21, *x;
 {
@@ -231,14 +238,14 @@ dis_assemble_21 (as21, x)
   *x = temp;
 }
 
-static INLINE unsigned long
+HINLINE unsigned long
 sign_extend (x, len)
      unsigned int x, len;
 {
   return (int)(x >> (len - 1) ? (-1 << len) | x : x);
 }
 
-static INLINE unsigned int
+HINLINE unsigned int
 ones (n)
      int n;
 {
@@ -256,7 +263,7 @@ ones (n)
   return len_ones;
 }
 
-static INLINE void
+HINLINE void
 sign_unext (x, len, result)
      unsigned int x, len;
      unsigned int *result;
@@ -268,14 +275,14 @@ sign_unext (x, len, result)
   *result = x & len_ones;
 }
 
-static INLINE unsigned long
+HINLINE unsigned long
 low_sign_extend (x, len)
      unsigned int x, len;
 {
   return (int)((x & 0x1 ? (-1 << (len - 1)) : 0) | x >> 1);
 }
 
-static INLINE void
+HINLINE void
 low_sign_unext (x, len, result)
      unsigned int x, len;
      unsigned int *result;
@@ -301,7 +308,7 @@ low_sign_unext (x, len, result)
 
 /* Handle field selectors for PA instructions.  */
 
-static INLINE unsigned long
+HINLINE unsigned long
 hppa_field_adjust (value, constant_value, r_field)
      unsigned long value;
      unsigned long constant_value;
@@ -310,6 +317,7 @@ hppa_field_adjust (value, constant_value, r_field)
   switch (r_field)
     {
     case e_fsel:		/* F  : no change                      */
+    case e_nsel:		/* N  : no change		       */
       value += constant_value;
       break;
 
@@ -330,6 +338,7 @@ hppa_field_adjust (value, constant_value, r_field)
       break;
 
     case e_lsel:		/* L  : Arithmetic shift right 11 bits */
+    case e_nlsel:		/* NL  : Arithmetic shift right 11 bits */
       value += constant_value;
       value = (value & 0xfffff800) >> 11;
       break;
@@ -351,8 +360,8 @@ hppa_field_adjust (value, constant_value, r_field)
       value |= 0xfffff800;
       break;
 
-    case e_nsel:		/* Just a guess at the moment.	       */
     case e_lrsel:		/* LR : L with "rounded" constant      */
+    case e_nlrsel:		/* NLR : NL with "rounded" constant      */
       value = value + ((constant_value + 0x1000) & 0xffffe000);
       value = (value & 0xfffff800) >> 11;
       break;
@@ -417,7 +426,7 @@ hppa_field_adjust (value, constant_value, r_field)
    FIXME:  opcodes which do not map to a known format
    should return an error of some sort.  */
 
-static INLINE char
+HINLINE char
 bfd_hppa_insn2fmt (insn)
      unsigned long insn;
 {
@@ -476,7 +485,7 @@ bfd_hppa_insn2fmt (insn)
 /* Insert VALUE into INSN using R_FORMAT to determine exactly what
    bits to change.  */
    
-static INLINE unsigned long
+HINLINE unsigned long
 hppa_rebuild_insn (abfd, insn, value, r_format)
      bfd *abfd;
      unsigned long insn;

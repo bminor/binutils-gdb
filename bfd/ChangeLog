@@ -1,5 +1,9 @@
 Wed Mar 27 10:43:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* libhppa.h: Define HINLINE rather than INLINE.  Define it to
+	extern inline if using gcc and to static INLINE otherwise.  Change
+	all functions from static INLINE to HINLINE.
+
 	* ns32k.h: New file.
 	* cpu-ns32k.h: Include ns32k.h.  Rename externally visible
 	functions to start with _bfd_.
