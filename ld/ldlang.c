@@ -413,7 +413,7 @@ lang_memory_region_lookup (name)
      CONST char *CONST name;
 {
 
-  lang_memory_region_type *p = lang_memory_region_list;
+  lang_memory_region_type *p;
 
   for (p = lang_memory_region_list;
        p != (lang_memory_region_type *) NULL;
@@ -804,10 +804,17 @@ wild_doit (ptr, section, output, file)
 
   if (section->output_section == NULL)
     {
+      boolean first;
       lang_input_section_type *new;
+      flagword flags;
 
       if (output->bfd_section == NULL)
-	init_os (output);
+	{
+	  init_os (output);
+	  first = true;
+	}
+      else
+	first = false;
 
       /* Add a section reference to the list */
       new = new_stat (lang_input_section, ptr);
@@ -816,23 +823,38 @@ wild_doit (ptr, section, output, file)
       new->ifile = file;
       section->output_section = output->bfd_section;
 
+      flags = section->flags;
+
       /* We don't copy the SEC_NEVER_LOAD flag from an input section
 	 to an output section, because we want to be able to include a
 	 SEC_NEVER_LOAD section in the middle of an otherwise loaded
 	 section (I don't know why we want to do this, but we do).
 	 build_link_order in ldwrite.c handles this case by turning
-	 the embedded SEC_NEVER_LOAD section into a fill.
+	 the embedded SEC_NEVER_LOAD section into a fill.  */
 
-	 If final link, don't copy the SEC_LINK_ONCE flags, they've already
-	 been processed.  One reason to do this is that on pe format targets,
-	 .text$foo sections go into .text and it's odd to see .text with
-	 SEC_LINK_ONCE set.  */
+      flags &= ~ SEC_NEVER_LOAD;
 
-      section->output_section->flags |=
-	section->flags & (flagword) (~ (SEC_NEVER_LOAD
-					| (! link_info.relocateable
-					   ? SEC_LINK_ONCE | SEC_LINK_DUPLICATES
-					   : 0)));
+      /* If final link, don't copy the SEC_LINK_ONCE flags, they've
+	 already been processed.  One reason to do this is that on pe
+	 format targets, .text$foo sections go into .text and it's odd
+	 to see .text with SEC_LINK_ONCE set.  */
+
+      if (! link_info.relocateable)
+	flags &= ~ (SEC_LINK_ONCE | SEC_LINK_DUPLICATES);
+
+      /* If this is not the first input section, and the SEC_READONLY
+         flag is not currently set, then don't set it just because the
+         input section has it set.  */
+
+      if (! first && (section->output_section->flags & SEC_READONLY) == 0)
+	flags &= ~ SEC_READONLY;
+
+      section->output_section->flags |= flags;
+
+      /* If SEC_READONLY is not set in the input section, then clear
+         it from the output section.  */
+      if ((section->flags & SEC_READONLY) == 0)
+	section->output_section->flags &= ~SEC_READONLY;
 
       switch (output->sectype)
 	{
@@ -845,7 +867,7 @@ wild_doit (ptr, section, output, file)
 	  output->bfd_section->flags &= ~SEC_ALLOC;
 	  break;
 	case noload_section:
-	  output->bfd_section->flags &= ~ (SEC_LOAD | SEC_HAS_CONTENTS);
+	  output->bfd_section->flags &= ~SEC_LOAD;
 	  output->bfd_section->flags |= SEC_NEVER_LOAD;
 	  break;
 	}
@@ -3921,11 +3943,6 @@ lang_register_vers_node (name, version, deps)
 	{
 	  struct bfd_elf_version_expr *e2;
 
-	  for (e2 = t->globals; e2 != NULL; e2 = e2->next)
-	    if (strcmp (e1->match, e2->match) == 0)
-	      einfo ("%X%P: duplicate expression `%s' in version information\n",
-		     e1->match);
-
 	  for (e2 = t->locals; e2 != NULL; e2 = e2->next)
 	    if (strcmp (e1->match, e2->match) == 0)
 	      einfo ("%X%P: duplicate expression `%s' in version information\n",
@@ -3940,11 +3957,6 @@ lang_register_vers_node (name, version, deps)
 	  struct bfd_elf_version_expr *e2;
 
 	  for (e2 = t->globals; e2 != NULL; e2 = e2->next)
-	    if (strcmp (e1->match, e2->match) == 0)
-	      einfo ("%X%P: duplicate expression `%s' in version information\n",
-		     e1->match);
-
-	  for (e2 = t->locals; e2 != NULL; e2 = e2->next)
 	    if (strcmp (e1->match, e2->match) == 0)
 	      einfo ("%X%P: duplicate expression `%s' in version information\n",
 		     e1->match);
