@@ -38,3 +38,15 @@ Disassembly of section \.text:
 [ 	]+7a:[ 	]+6ffd fd7f ffff 688a[ 	]+move.d \[\$?pc\+ffff7ffd <x8\+0xffff7f9d>\],\$?r8
 [ 	]+82:[ 	]+5ffd ff7f 688a[ 	]+move.d \[\$?pc\+32767\],\$?r8
 [ 	]+88:[ 	]+6ffd 0280 0000 688a[ 	]+move.d \[\$?pc\+8002 <x8\+0x7fa2>\],\$?r8
+
+Disassembly of section \.text\.other:
+
+0+ <y>:
+[ 	]+0:[ 	]+80f1 688a[ 	]+move.d \[\$?pc-128\],\$?r8
+[ 	]+4:[ 	]+5ffd 7dff 688a[ 	]+move.d \[\$?pc-131\],\$?r8
+[ 	]+a:[ 	]+7ff1 688a[ 	]+move.d \[\$?pc\+127\],\$?r8
+[ 	]+e:[ 	]+5ffd 8200 688a[ 	]+move.d \[\$?pc\+130\],\$?r8
+[ 	]+14:[ 	]+5ffd 0080 688a[ 	]+move.d \[\$?pc-32768\],\$?r8
+[ 	]+1a:[ 	]+6ffd fd7f ffff 688a[ 	]+move.d \[\$?pc\+ffff7ffd <x8\+0xffff7f9d>\],\$?r8
+[ 	]+22:[ 	]+5ffd ff7f 688a[ 	]+move.d \[\$?pc\+32767\],\$?r8
+[ 	]+28:[ 	]+6ffd 0280 0000 688a[ 	]+move.d \[\$?pc\+8002 <x8\+0x7fa2>\],\$?r8
