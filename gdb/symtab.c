@@ -3830,7 +3830,7 @@ print_symbol_info (namespace_enum kind, struct symtab *s, struct symbol *sym,
   /* Typedef that is not a C++ class */
   if (kind == TYPES_NAMESPACE
       && SYMBOL_NAMESPACE (sym) != STRUCT_NAMESPACE)
-    c_typedef_print (SYMBOL_TYPE (sym), sym, gdb_stdout);
+    typedef_print (SYMBOL_TYPE (sym), sym, gdb_stdout);
   /* variable, func, or typedef-that-is-c++-class */
   else if (kind < TYPES_NAMESPACE ||
 	   (kind == TYPES_NAMESPACE &&

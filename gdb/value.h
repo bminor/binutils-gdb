@@ -536,7 +536,7 @@ extern void print_variable_value (struct symbol * var,
 
 extern int check_field (value_ptr, const char *);
 
-extern void c_typedef_print (struct type * type, struct symbol * news,
+extern void typedef_print (struct type * type, struct symbol * news,
 			     struct ui_file * stream);
 
 extern char *internalvar_name (struct internalvar *var);
