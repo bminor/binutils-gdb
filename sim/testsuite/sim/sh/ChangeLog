@@ -1,3 +1,9 @@
+2004-02-12  Michael Snyder  <msnyder@redhat.com>
+
+	* and.s, movi.s, sett.s: New files.
+	* allinsn.exp: Add new tests.
+	* testutils.inc (set_sr_bit): Fix macro labels.
+
 2004-01-07  Michael Snyder  <msnyder@redhat.com>
 
 	* dmxy.s, fipr.s, fpchg.s, ldrc.s, loop.s, movli.s, movua.s,
