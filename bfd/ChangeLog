@@ -1,3 +1,8 @@
+Tue Oct  7 11:40:37 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* som.c (som_construct_extended_name_table): Remove static
+	function, and define as macro instead.
+
 Fri Oct  3 14:02:17 1997  Richard Henderson  <rth@cygnus.com>
 
 	* config.bfd: Change alpha-*-* to alpha*-*-*; config.guess now
