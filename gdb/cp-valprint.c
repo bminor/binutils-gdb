@@ -68,8 +68,8 @@ cp_print_class_method (valaddr, type, stream)
      FILE *stream;
 {
   struct type *domain;
-  struct fn_field *f;
-  int j;
+  struct fn_field *f = NULL;
+  int j = 0;
   int len2;
   int offset;
   char *kind = "";

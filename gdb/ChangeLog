@@ -1,6 +1,14 @@
 Wed Sep  8 13:01:10 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	Gcc lint.
+	* c-exp.y (parse_number): initialize i.
+	* c-typeprint.c (c_type_print_varspec_prefix): include
+	  TYPE_CODE_BITSTRING in switch statements and do nothing.
+	* c-valprint.c (c_val_print): removed unused variable c.
+	* ch-valprint.c (chill_val_print): removed unused variable eltlen.
+	* cp-valprint.c (cp_print_class_method): initialize f & j.
+	* eval.c (evaluate_subexp): initialize pc2, arg1, arg2.
+	* expprint.c (print_subexp): initialize myprec, assoc, & tempstr.
 	* findvar.c (value_from_register): initialize first_addr.
 	* gdbtypes.c (lookup_struct_elt_type): localize use of temporary
 	  variable typename.

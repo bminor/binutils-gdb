@@ -94,7 +94,6 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
   struct type *elttype;
   unsigned eltlen;
   LONGEST val;
-  unsigned char c;
   CORE_ADDR addr;
 
   switch (TYPE_CODE (type))

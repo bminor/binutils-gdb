@@ -971,7 +971,7 @@ parse_number (p, len, parsed_float, putithere)
 {
   register LONGEST n = 0;
   register LONGEST prevn = 0;
-  register int i;
+  register int i = 0;
   register int c;
   register int base = input_radix;
   int unsigned_p = 0;

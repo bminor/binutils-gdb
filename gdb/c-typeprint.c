@@ -306,6 +306,7 @@ c_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
     case TYPE_CODE_SET:
     case TYPE_CODE_RANGE:
     case TYPE_CODE_STRING:
+    case TYPE_CODE_BITSTRING:
       /* These types need no prefix.  They are listed here so that
 	 gcc -Wall will reveal any types that haven't been handled.  */
       break;
@@ -429,6 +430,7 @@ c_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
     case TYPE_CODE_SET:
     case TYPE_CODE_RANGE:
     case TYPE_CODE_STRING:
+    case TYPE_CODE_BITSTRING:
       /* These types do not need a suffix.  They are listed so that
 	 gcc -Wall will report types that may not have been considered.  */
       break;

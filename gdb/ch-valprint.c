@@ -60,7 +60,6 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
   LONGEST val;
   unsigned int i = 0;		/* Number of characters printed.  */
   struct type *elttype;
-  unsigned eltlen;
   CORE_ADDR addr;
 
   switch (TYPE_CODE (type))
