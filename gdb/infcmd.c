@@ -187,7 +187,7 @@ run_command (args, from_tty)
 
   dont_repeat ();
 
-  if (inferior_pid)
+  if (inferior_pid && target_has_execution)
     {
       if (
 	  !query ("The program being debugged has been started already.\n\
@@ -1164,10 +1164,9 @@ attach_command (args, from_tty)
   clear_proceed_status ();
   stop_soon_quietly = 1;
 
-#ifndef MACH
-  /* Mach 3 does not generate any traps when attaching to inferior,
-     and to set up frames we can do this.  */
-
+  /* No traps are generated when attaching to inferior under Mach 3
+     or GNU hurd.  */
+#ifndef ATTACH_NO_WAIT
   wait_for_inferior ();
 #endif
 

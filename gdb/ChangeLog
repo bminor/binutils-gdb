@@ -1,3 +1,16 @@
+Sun Apr 28 03:44:30 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* breakpoint.c (delete_breakpoint):  Fix bpt->val, bpt->exp
+	storage leaks.
+	(breakpoint_re_set_one):  Fix b->exp, b->val, b->cond storage leaks.
+
+	* infcmd.c (run_command), solib.c (locate_base):  Check for
+	target_has_execution in addition to inferior_pid, a core file
+	from a threaded program is yielding a non-zero inferior_pid.
+
+	* sparc-tdep.c (get_saved_register):  Handle window registers
+	in a dummy frame correctly.
+
 Sat Apr 27 20:38:32 1996  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (CLIBS): Move $(MMALLOC) past all other libs,

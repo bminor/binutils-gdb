@@ -1972,6 +1972,8 @@ set_raw_breakpoint (sal)
 
 static int internal_breakpoint_number = -1;
 
+#ifdef GET_LONGJMP_TARGET
+
 static void
 create_longjmp_breakpoint (func_name)
      char *func_name;
@@ -2006,6 +2008,8 @@ create_longjmp_breakpoint (func_name)
     b->addr_string = strsave(func_name);
   b->number = internal_breakpoint_number--;
 }
+
+#endif	/* #ifdef GET_LONGJMP_TARGET */
 
 /* Call this routine when stepping and nexting to enable a breakpoint if we do
    a longjmp().  When we hit that breakpoint, call
@@ -3299,8 +3303,12 @@ delete_breakpoint (bpt)
     free (bpt->cond_string);
   if (bpt->addr_string != NULL)
     free (bpt->addr_string);
+  if (bpt->exp != NULL)
+    free (bpt->exp);
   if (bpt->exp_string != NULL)
     free (bpt->exp_string);
+  if (bpt->val != NULL)
+    value_free (bpt->val);
   if (bpt->source_file != NULL)
     free (bpt->source_file);
 
@@ -3433,9 +3441,13 @@ breakpoint_re_set_one (bint)
 	 particular level, but that's going to be less stable than filenames
 	 or functionnames.  */
       /* So for now, just use a global context.  */
+      if (b->exp)
+	free ((PTR)b->exp);
       b->exp = parse_expression (b->exp_string);
       b->exp_valid_block = innermost_block;
       mark = value_mark ();
+      if (b->val)
+	value_free (b->val);
       b->val = evaluate_expression (b->exp);
       release_value (b->val);
       if (VALUE_LAZY (b->val))
@@ -3444,6 +3456,8 @@ breakpoint_re_set_one (bint)
       if (b->cond_string != NULL)
 	{
 	  s = b->cond_string;
+	  if (b->cond)
+	    free ((PTR)b->cond);
 	  b->cond = parse_exp_1 (&s, (struct block *)0, 0);
 	}
       if (b->enable == enabled)
