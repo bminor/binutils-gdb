@@ -1,5 +1,5 @@
 /* Read dbx symbol tables and convert to internal format, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -64,6 +64,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native, now */
+
+/* defined in stabsread.c; used for completing cfront stabs strings */
+extern void resolve_cont PARAMS((struct objfile * objfile, struct symbol * sym, char * p));
 
 
 /* We put a pointer to this structure in the read_symtab_private field
@@ -242,7 +245,7 @@ static void
 init_bincl_list PARAMS ((int, struct objfile *));
 
 static char *
-dbx_next_symbol_text PARAMS ((void));
+dbx_next_symbol_text PARAMS ((struct objfile *));
 
 static void
 fill_symbuf PARAMS ((bfd *));
@@ -706,6 +709,7 @@ dbx_symfile_init (objfile)
 	  DBX_STRINGTAB (objfile) =
 	    (char *) obstack_alloc (&objfile -> psymbol_obstack,
 				    DBX_STRINGTAB_SIZE (objfile));
+	  OBJSTAT (objfile, sz_strtab += DBX_STRINGTAB_SIZE (objfile));
 	  
 	  /* Now read in the string table in one big gulp.  */
 	  
@@ -741,6 +745,68 @@ dbx_symfile_finish (objfile)
 static struct internal_nlist symbuf[4096];
 static int symbuf_idx;
 static int symbuf_end;
+
+/* cont_elem is used for continuing information in cfront.
+   It saves information about which types need to be fixed up and 
+   completed after all the stabs are read.  */
+struct cont_elem 
+  {
+    /* sym and stabsstring for continuing information in cfront */
+    struct symbol * sym;
+    char * stabs;
+    /* state dependancies (statics that must be preserved) */
+    int sym_idx;
+    int sym_end;
+    int symnum;
+    /* other state dependancies include:
+       (assumption is that these will not change since process_now FIXME!!)
+        stringtab_global
+        n_stabs
+        objfile
+        symfile_bfd */
+};
+static struct cont_elem cont_list[100];
+static int cont_count = 0;
+
+void 
+process_later(sym,p)
+  struct symbol * sym;
+  char * p;
+{
+  /* save state so we can process these stabs later */
+  cont_list[cont_count].sym_idx = symbuf_idx;
+  cont_list[cont_count].sym_end = symbuf_end;
+  cont_list[cont_count].symnum = symnum;
+  cont_list[cont_count].sym = sym;
+  cont_list[cont_count].stabs = p;
+  cont_count++;
+}
+
+void 
+process_now(objfile) 
+  struct objfile * objfile;
+{
+  int i;
+  /* save original state */
+  int save_symbuf_idx = symbuf_idx;
+  int save_symbuf_end = symbuf_end;
+  int save_symnum = symnum;
+  for (i=0; i<cont_count; i++) 
+    {
+      /* set state as if we were parsing stabs strings 
+         for this symbol */
+      symbuf_idx = cont_list[i].sym_idx;   /* statics used by gdb */
+      symbuf_end = cont_list[i].sym_end;  
+      symnum = cont_list[i].symnum;  
+      resolve_cont(objfile,cont_list[i].sym,cont_list[i].stabs);
+    }
+  /* restore original state */
+  symbuf_idx = save_symbuf_idx;
+  symbuf_end = save_symbuf_end;
+  symnum = save_symnum;
+  cont_count=0;  /* reset for next run */
+}
+
 
 /* Name of last function encountered.  Used in Solaris to approximate
    object file boundaries.  */
@@ -825,12 +891,14 @@ fill_symbuf (sym_bfd)
    call this function to get the continuation.  */
 
 static char *
-dbx_next_symbol_text ()
+dbx_next_symbol_text (objfile)
+     struct objfile *objfile;
 {
   if (symbuf_idx == symbuf_end)
     fill_symbuf (symfile_bfd);
   symnum++;
   SWAP_SYMBOL(&symbuf[symbuf_idx], symfile_bfd);
+  OBJSTAT (objfile, n_stabs++);
   return symbuf[symbuf_idx++].n_strx + stringtab_global
 	  + file_string_table_offset;
 }
@@ -1066,6 +1134,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
   int nsl;
   int past_first_source_file = 0;
   CORE_ADDR last_o_file_start = 0;
+  CORE_ADDR last_function_start = 0;
   struct cleanup *back_to;
   bfd *abfd;
 
@@ -1128,6 +1197,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
       if (bufp->n_type == (unsigned char)N_SLINE) continue;
 
       SWAP_SYMBOL (bufp, abfd);
+      OBJSTAT (objfile, n_stabs++);
 
       /* Ok.  There is a lot of code duplicated in the rest of this
          switch statement (for efficiency reasons).  Since I don't
@@ -1207,8 +1277,8 @@ start_psymtab (objfile, section_offsets,
      char *filename;
      CORE_ADDR textlow;
      int ldsymoff;
-     struct partial_symbol *global_syms;
-     struct partial_symbol *static_syms;
+     struct partial_symbol **global_syms;
+     struct partial_symbol **static_syms;
 {
   struct partial_symtab *result =
       start_psymtab_common(objfile, section_offsets,
@@ -1561,6 +1631,7 @@ read_ofile_symtab (pst)
       fill_symbuf (abfd);
       bufp = &symbuf[symbuf_idx++];
       SWAP_SYMBOL (bufp, abfd);
+      OBJSTAT (objfile, n_stabs++);
 
       SET_NAMESTRING ();
 
@@ -1616,6 +1687,7 @@ read_ofile_symtab (pst)
 	fill_symbuf(abfd);
       bufp = &symbuf[symbuf_idx++];
       SWAP_SYMBOL (bufp, abfd);
+      OBJSTAT (objfile, n_stabs++);
 
       type = bufp->n_type;
 
@@ -1669,8 +1741,17 @@ read_ofile_symtab (pst)
   if (last_source_start_addr == 0)
     last_source_start_addr = text_offset;
 
-  pst->symtab = end_symtab (text_offset + text_size, 0, 0, objfile,
-			    SECT_OFF_TEXT);
+  /* In reordered executables last_source_start_addr may not be the
+     lower bound for this symtab, instead use text_offset which comes
+     from pst->textlow which is correct.  */
+  if (last_source_start_addr > text_offset)
+    last_source_start_addr = text_offset;
+
+  pst->symtab = end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT);
+
+  if (ARM_DEMANGLING)	/* process incomplete C++ types now */
+    process_now(objfile);
+
   end_stabs ();
 }
 
@@ -1745,6 +1826,21 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     {
     case N_FUN:
     case N_FNAME:
+
+      if (! strcmp (name, ""))
+	{
+	  /* This N_FUN marks the end of a function.  This closes off the
+	     current block.  */
+	  within_function = 0;
+	  new = pop_context ();
+
+	  /* Make a block for the local symbols within.  */
+	  finish_block (new->name, &local_symbols, new->old_blocks,
+			function_start_offset, function_start_offset + valu,
+			objfile);
+	  break;
+	}
+
       /* Relocate for dynamic loading */
       valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
       goto define_a_symbol;
@@ -1896,7 +1992,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	      patch_subfile_names (current_subfile, name);
 	      break;		/* Ignore repeated SOs */
 	    }
-	  end_symtab (valu, 0, 0, objfile, SECT_OFF_TEXT);
+	  end_symtab (valu, objfile, SECT_OFF_TEXT);
 	  end_stabs ();
 	}
 
@@ -2131,7 +2227,8 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 		      && SYMBOL_NAME (m) [l] == '\0')
 		    /* last_pc_address was in this function */
 		    valu = SYMBOL_VALUE (m);
-		  else if (m && STREQN (SYMBOL_NAME (m+1), name, l)
+		  else if (m && SYMBOL_NAME (m+1)
+			   && STREQN (SYMBOL_NAME (m+1), name, l)
 			   && SYMBOL_NAME (m+1) [l] == '\0')
 		    /* last_pc_address was in last function */
 		    valu = SYMBOL_VALUE (m+1);
@@ -2268,6 +2365,7 @@ coffstab_build_psymtabs (objfile, section_offsets, mainline,
     error ("ridiculous string table size: %d bytes", stabstrsize);
   DBX_STRINGTAB (objfile) = (char *)
     obstack_alloc (&objfile->psymbol_obstack, stabstrsize+1);
+  OBJSTAT (objfile, sz_strtab += stabstrsize+1);
 
   /* Now read in the string table in one big gulp.  */
 
@@ -2373,6 +2471,7 @@ elfstab_build_psymtabs (objfile, section_offsets, mainline,
     error ("ridiculous string table size: %d bytes", stabstrsize);
   DBX_STRINGTAB (objfile) = (char *)
     obstack_alloc (&objfile->psymbol_obstack, stabstrsize+1);
+  OBJSTAT (objfile, sz_strtab += stabstrsize+1);
 
   /* Now read in the string table in one big gulp.  */
 
@@ -2460,6 +2559,7 @@ stabsect_build_psymtabs (objfile, section_offsets, mainline, stab_name,
     error ("ridiculous string table size: %d bytes", DBX_STRINGTAB_SIZE (objfile));
   DBX_STRINGTAB (objfile) = (char *)
     obstack_alloc (&objfile->psymbol_obstack, DBX_STRINGTAB_SIZE (objfile) + 1);
+  OBJSTAT (objfile, sz_strtab += DBX_STRINGTAB_SIZE (objfile) + 1);
 
   /* Now read in the string table in one big gulp.  */
 
