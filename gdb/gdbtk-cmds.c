@@ -3438,7 +3438,7 @@ gdb_path_conv (clientData, interp, objc, objv)
   {
     char pathname[256], *ptr;
 
-    cygwin_conv_to_full_win32_path (Tcl_GetStringFromObj (objv[1], NULL), pathname);
+    cygwin32_conv_to_full_win32_path (Tcl_GetStringFromObj (objv[1], NULL), pathname);
     for (ptr = pathname; *ptr; ptr++)
       {
 	if (*ptr == '\\')

@@ -71,6 +71,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "annotate.h"
 #include <sys/time.h>
 
+#ifdef __CYGWIN__
+#include <sys/cygwin.h> /* for cygwin32_attach_handle_to_fd */
+#endif
+
 /* For Cygwin, we use a timer to periodically check for Windows
    messages.  FIXME: It would be better to not poll, but to instead
    rewrite the target_wait routines to serve as input sources.
@@ -687,7 +691,6 @@ _initialize_gdbtk ()
   else
     {
       DWORD ft = GetFileType (GetStdHandle (STD_INPUT_HANDLE));
-      void cygwin_attach_handle_to_fd (char *, int, HANDLE, int, int);
 
       switch (ft)
 	{
@@ -697,15 +700,15 @@ _initialize_gdbtk ()
 	    break;
 	  default:
 	    AllocConsole();
-	    cygwin_attach_handle_to_fd ("/dev/conin", 0,
-					GetStdHandle (STD_INPUT_HANDLE),
-					1, GENERIC_READ);
-	    cygwin_attach_handle_to_fd ("/dev/conout", 1,
-					GetStdHandle (STD_OUTPUT_HANDLE),
-					0, GENERIC_WRITE);
-	    cygwin_attach_handle_to_fd ("/dev/conout", 2,
-					GetStdHandle (STD_ERROR_HANDLE),
-					0, GENERIC_WRITE);
+	    cygwin32_attach_handle_to_fd ("/dev/conin", 0,
+					  GetStdHandle (STD_INPUT_HANDLE),
+					  1, GENERIC_READ);
+	    cygwin32_attach_handle_to_fd ("/dev/conout", 1,
+					  GetStdHandle (STD_OUTPUT_HANDLE),
+					  0, GENERIC_WRITE);
+	    cygwin32_attach_handle_to_fd ("/dev/conout", 2,
+					  GetStdHandle (STD_ERROR_HANDLE),
+					  0, GENERIC_WRITE);
 	    break;
 	}
     }

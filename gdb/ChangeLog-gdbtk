@@ -1,3 +1,10 @@
+Thu Nov 19 13:14:57 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	* gdbtk-cmds.c: Can't start using new API names yet.  Switch back
+	to calling cygwin32_ funcs until some time has passed...
+	* gdbtk.c: Ditto.  Also, include sys/cygwin.h for Cygwin, instead
+	of providing own proto.
+
 Fri Nov 13 00:15:08 1998  Geoffrey Noer  <noer@cygnus.com>
 
 	Changes to account for name change from cygwin32 to cygwin and
