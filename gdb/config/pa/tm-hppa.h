@@ -240,7 +240,8 @@ extern int hppa_instruction_nullified (void);
    for register N.  On the PA-RISC, all regs are 4 bytes, including
    the FP registers (they're accessed as two 4 byte halves).  */
 
-#define REGISTER_RAW_SIZE(N) 4
+extern int hppa_register_raw_size (int reg_nr);
+#define REGISTER_RAW_SIZE(N) hppa_register_raw_size (N)
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */

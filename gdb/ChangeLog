@@ -1,3 +1,27 @@
+2002-12-26  J. Brobecker  <brobecker@gnat.com>
+
+	Continuing work to convert the hppa targets to multiarch partial.
+
+	* hppa-tdep.c: (hppa_register_raw_size): New function replacing
+	the body of macro REGISTER_RAW_SIZE.
+	* hppa-hpux-tdep.c: Add new functions replacing macro bodies from
+	config/pa/tm-hppah.h. These functions will be used to initialize
+	the gdbarch structure.
+	(hppa_hpux_pc_in_sigtramp): New function.
+	(hppa_hpux_frame_saved_pc_in_sigtramp): New function.
+	(hppa_hpux_frame_base_before_sigtramp): New function.
+	(hppa_hpux_frame_find_saved_regs_in_sigtramp): New function.
+	Add gdbcore.h #include.
+	* config/pa/tm-hppa.h (REGISTER_RAW_SIZE): Change the definition
+	of this gdbarch-eligible macro to a call to the new associated
+	function.
+	* config/pa/tm-hppah.h (PC_IN_SIGTRAMP): Likewise.
+	(FRAME_SAVED_PC_IN_SIGTRAMP): Change the definition of this macro
+	into a call to the new associated function.
+	(FRAME_BASE_BEFORE_SIGTRAMP): Likewise.
+	(FRAME_FIND_SAVED_REGS_IN_SIGTRAMP): Likewise.
+	* Makefile.in (hppa-hpux-tdep.o): Add dependency on gdbcore.h.
+
 2002-12-24  David Carlton  <carlton@math.stanford.edu>
 
 	* config/sparc/tm-sparc.h: Delete duplicate definition of

@@ -139,6 +139,7 @@ int hppa_inner_than (CORE_ADDR lhs, CORE_ADDR rhs);
 CORE_ADDR hppa_stack_align (CORE_ADDR sp);
 int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 int hppa_instruction_nullified (void);
+int hppa_register_raw_size (int reg_nr);
 int hppa_register_byte (int reg_nr);
 struct type * hppa_register_virtual_type (int reg_nr);
 void hppa_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
@@ -4810,6 +4811,13 @@ hppa_instruction_nullified (void)
   const int flags = (int) read_register (FLAGS_REGNUM);
 
   return ((ipsw & 0x00200000) && !(flags & 0x2));
+}
+
+int
+hppa_register_raw_size (int reg_nr)
+{
+  /* All registers have the same size.  */
+  return REGISTER_SIZE;
 }
 
 /* Index within the register vector of the first byte of the space i
