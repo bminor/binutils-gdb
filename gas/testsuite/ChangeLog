@@ -1,3 +1,12 @@
+2000-07-19  Alan Modra  <alan@linuxcare.com.au>
+
+	* gas/macros/macros.exp (test1): Run it for hppa*-*-linux*.
+	(semi): Likewise.
+	(strings): Don't run for hppa, except for hppa*-*-linux*.
+
+	* gas/hppa/parse/linesepbug.s: Ensure we have whitespace before
+	pseudos.
+
 2000-07-18  Scott Bambrough  <scottb@netwinder.org>
 
         * gas/arm/inst.d: Fix expected results to match current assembler

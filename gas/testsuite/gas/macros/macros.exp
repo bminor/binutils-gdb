@@ -1,6 +1,6 @@
 # Run some tests of gas macros.
 
-if ![istarget hppa*-*-*] {
+if { ![istarget hppa*-*-*] || [istarget *-*-linux*] } {
     run_dump_test test1
 }
 
@@ -19,11 +19,13 @@ if ![istarget *c54x*-*-*] {
 gas_test_error "err.s" "" "macro infinite recursion"
 
 case $target_triplet in {
-    { hppa*-*-* } { }
+    { hppa*-*-* } { if [istarget *-*-linux*] { run_dump_test semi } }
     { *c54x*-*-* } { }
     default {
 	run_dump_test semi
     }
 }
 
-run_dump_test strings
+if { ![istarget hppa*-*-*] || [istarget *-*-linux*] } {
+    run_dump_test strings
+}
