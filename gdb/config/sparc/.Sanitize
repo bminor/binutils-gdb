@@ -11,7 +11,7 @@
 
 # The lines between the "Do-first:" line and the "Things-to-keep:"
 # line are executed as a /bin/sh shell script before anything else is
-# done in this 
+# done in this directory. 
 
 Do-first:
 
@@ -28,6 +28,7 @@ nbsd.mt
 nm-nbsd.h
 nm-sparclynx.h
 nm-sun4os4.h
+nm-sysv4.h
 sp64.mt
 sp64sim.mt
 sparc-em.mt

@@ -74,6 +74,7 @@ nm-m68klynx.h
 nm-news.h
 nm-sun2.h
 nm-sun3.h
+nm-sysv4.h
 os68k.mt
 st2000.mt
 sun2os3.mh

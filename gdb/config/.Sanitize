@@ -35,10 +35,10 @@ i960
 m68k
 m88k
 mips
+nm-empty.h
 nm-lynx.h
 nm-m3.h
 nm-sysv4.h
-nm-trash.h
 none
 ns32k
 pa
