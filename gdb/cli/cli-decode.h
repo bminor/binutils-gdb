@@ -299,12 +299,6 @@ extern struct cmd_list_element *add_set_auto_boolean_cmd (char *name,
 							  char *doc,
 							  struct cmd_list_element **list);
 
-extern struct cmd_list_element *add_set_boolean_cmd (char *name,
-						     enum command_class class,
-						     int *var,
-						     char *doc,
-						     struct cmd_list_element **list);
-
 extern struct cmd_list_element *add_show_from_set (struct cmd_list_element *,
 						   struct cmd_list_element
 						   **);

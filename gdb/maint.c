@@ -783,16 +783,15 @@ passes without a response from the target, an error occurs.", &setlist),
 
 
 #ifdef NOTYET
-  /* FIXME: cagney/2001-09-24: A patch introducing a
-     add_set_boolean_cmd() is pending, the below should probably use
-     it.  A patch implementing profiling is pending, this just sets up
-     the framework.  */
-  tmpcmd = add_set_cmd ("profile", class_maintenance,
-			var_boolean, &maintenance_profile_p,
-			"Set internal profiling.\n\
-When enabled GDB is profiled.",
-			&maintenance_set_cmdlist);
-  set_cmd_sfunc (tmpcmd, maintenance_set_profile_cmd);
-  add_show_from_set (tmpcmd, &maintenance_show_cmdlist);
+  /* FIXME: cagney/2002-06-15: A patch implementing profiling is
+     pending, this just sets up the framework.  */
+  tmpcmd = add_setshow_boolean_cmd ("profile", class_maintenance,
+				    var_boolean, &maintenance_profile_p, "\
+Set internal profiling.\n\
+When enabled GDB is profiled.", "\
+Show internal profiling.\n",
+				    maintenance_set_profile_cmd, NULL,
+				    &maintenance_set_cmdlist,
+				    &maintenance_show_cmdlist);
 #endif
 }

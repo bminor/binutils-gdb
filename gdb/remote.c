@@ -6069,11 +6069,11 @@ response packet.  GDB supplies the initial `$' character, and the\n\
 terminating `#' character and checksum.",
 	   &maintenancelist);
 
-  add_show_from_set
-    (add_set_boolean_cmd ("remotebreak", no_class, &remote_break,
-			  "Set whether to send break if interrupted.\n",
-			  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("remotebreak", no_class, &remote_break,
+			   "Set whether to send break if interrupted.\n",
+			   "Show whether to send break if interrupted.\n",
+			   NULL, NULL,
+			   &setlist, &showlist);
 
   /* Install commands for configuring memory read/write packets. */
 

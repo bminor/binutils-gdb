@@ -1,3 +1,18 @@
+2002-06-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* cli/cli-decode.c (add_setshow_boolean_cmd): Replace
+	add_set_boolean_cmd.
+	(add_setshow_cmd): New function.
+	* command.h (add_setshow_boolean_cmd): Replace
+	add_set_boolean_cmd.
+	* remote-rdi.c (_initialize_remote_rdi): Update ``set rdiheartbeat''
+	and ``set rdiromatzero''.
+	* maint.c (_initialize_maint_cmds): Update commented out code.
+	* cli/cli-decode.h (add_set_boolean_cmd): Delete declaration.
+	* target.c (initialize_targets): Update `set
+	trust-readonly-sections'.
+	* remote.c (_initialize_remote): Update `set remotebreak'.
+
 2002-06-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-i386.h (FUNCTION_START_OFFSET, INNER_THAN,
