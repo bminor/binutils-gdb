@@ -70,7 +70,7 @@ static fd_set readfds;
 
 int
 serial_open(name)
-     char *name;
+     const char *name;
 {
   struct termios termios;
 
@@ -193,7 +193,7 @@ serial_setbaudrate(rate)
 
 int
 serial_write(str, len)
-     char *str;
+     const char *str;
      int len;
 {
   int cc;

@@ -1,3 +1,10 @@
+Tue Sep  8 21:05:18 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* serial.h:  Fix prototye for serial_raw().
+	* ser-bsd.c, ser-termios.c:  Fix args for serial_open() &
+	serial_write() to match prototypes.
+	* remote-st2000.c (get_reg_name):  Make *p be const.
+
 Tue Sep  8 17:24:52 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* remote-nindy.c (nindy_fetch_registers): Make return type void,

@@ -17,44 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* Return a sensible default name for a serial device, something which
-   can be used as an argument to serial_open.  */
-   
-const char *serial_default_name PARAMS ((void));
-
-/* Try to open the serial device "name", return 1 if ok, 0 if not.  */
-
-int serial_open PARAMS ((const char *name));
-
-/* Turn the port into raw mode.  */
-
-void serial_raw PARAMS ((void));
-
-/* Turn the port into normal mode.  */
-
-void serial_normal PARAMS ((void));
-
-/* Read one char from the serial device with <TO>-second timeout.
-   Return char, and set ok if ok.  */
-
-int serial_timedreadchar PARAMS ((int to, int *ok));
-
-/* Set the baudrate to the decimal value supplied, and return 1, or fail and
-   return 0.  */
-
-int serial_setbaudrate PARAMS ((int rate));
-
-/* Return the next rate in the sequence, or return 0 for failure.  */
-
-/* Write some chars to the device, returns 0 for failure.  See errno for
-   details. */
-
-int serial_write PARAMS ((const char *str , int len));
-
-/* Close the serial port */
-
-void serial_close PARAMS ((void));
-
 #ifdef HAVE_TERMIO
 
 #include <termios.h>
@@ -76,3 +38,40 @@ struct ttystate {
 };
 
 #endif /* not HAVE_TERMIO */
+/* Return a sensible default name for a serial device, something which
+   can be used as an argument to serial_open.  */
+   
+const char *serial_default_name PARAMS ((void));
+
+/* Try to open the serial device "name", return 1 if ok, 0 if not.  */
+
+int serial_open PARAMS ((const char *name));
+
+/* Turn the port into raw mode.  */
+
+void serial_raw PARAMS ((int fd, struct ttystate *oldstate));
+
+/* Turn the port into normal mode.  */
+
+void serial_normal PARAMS ((void));
+
+/* Read one char from the serial device with <TO>-second timeout.
+   Return char, and set ok if ok.  */
+
+int serial_timedreadchar PARAMS ((int to, int *ok));
+
+/* Set the baudrate to the decimal value supplied, and return 1, or fail and
+   return 0.  */
+
+int serial_setbaudrate PARAMS ((int rate));
+
+/* Return the next rate in the sequence, or return 0 for failure.  */
+
+/* Write some chars to the device, returns 0 for failure.  See errno for
+   details. */
+
+int serial_write PARAMS ((const char *str, int len));
+
+/* Close the serial port */
+
+void serial_close PARAMS ((void));

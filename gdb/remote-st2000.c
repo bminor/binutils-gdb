@@ -399,7 +399,8 @@ get_reg_name (regno)
      int regno;
 {
   static char buf[50];
-  char *p, *b;
+  const char *p;
+  char *b;
 
   b = buf;
 
