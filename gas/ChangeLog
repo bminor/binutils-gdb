@@ -1,3 +1,8 @@
+Thu Nov  3 15:43:02 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* config/tc-mips.c (load_address): Fix RELAX_ENCODE arguments for
+	NO_PIC case.
+
 Tue Nov  1 16:10:59 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* config/tc-mips.c (s_change_sec): If not GPOPT, don't permit
