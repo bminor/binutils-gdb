@@ -1,3 +1,7 @@
+Fri May  6 12:24:27 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* config/go32.mh : New file for Xgo32X.
+
 Fri May  6 15:15:35 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldfile.c (ldfile_open_command_file): Set bfd_error_system_call
@@ -582,17 +586,6 @@ Tue Jan 18 16:18:15 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* scripttempl/m88kbcs.sc: Don't use CREATE_OBJECT_SYMBOLS, that's
 	for a.out.
-
-Fri Jan 14 12:37:16 1994  Ian Lance Taylor  (ian@cygnus.com)
-
-	Motorola Delta sysV68 support from phdm@info.ucl.ac.BE (Philippe
-	De Muyter).
-	* configure.in (m68k-motorola-sysv*) New target.
-	* config/delta68.mt: New file.
-	* emulparams/delta68.sh: New file.
-	* scripttempl/delta68.sc: New file.
-	* Makefile.in (ALL_EMULATIONS): Added em_delta68.o.
-	(em_delta68.c): New target.
 
 Tue Jan 11 13:22:04 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
