@@ -157,10 +157,6 @@ typedef bfd_vma CORE_ADDR;
 #define STREQ(a,b) (*(a) == *(b) ? !strcmp ((a), (b)) : 0)
 #define STREQN(a,b,c) (*(a) == *(b) ? !strncmp ((a), (b), (c)) : 0)
 
-/* The character GNU C++ uses to build identifiers that must be unique from
-   the program's identifiers (such as $this and $$vptr).  */
-#define CPLUS_MARKER '$'	/* May be overridden to '.' for SysV */
-
 /* Check if a character is one of the commonly used C++ marker characters.  */
 extern int is_cplus_marker (int);
 

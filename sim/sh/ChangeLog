@@ -1,3 +1,11 @@
+Fri Oct 11 16:22:28 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* interp.c (trap): Return int.  Take extra parameter for address
+	of the trap instruction.  Changed all callers.
+	Add case 33 for profiling.
+	* gencode.c (trapa): Handle trap 33 using the trap function.
+	Add read of vector for generic traps.
+
 Wed Jul 17 19:36:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* Makefile.in (interp.o): Depend on $(srcroot)/include/gdb/sim-sh.h.

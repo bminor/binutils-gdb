@@ -618,6 +618,8 @@ do
     # which needs it but does not list it.  Should be fixed in right place.
     bfd_elf32_sh64_vec)		tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
     bfd_elf32_sh64l_vec)	tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
+    bfd_elf32_sh64lin_vec)	tb="$tb elf32-sh64-lin.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
+    bfd_elf32_sh64blin_vec)	tb="$tb elf32-sh64-lin.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
     bfd_elf32_sh64lnbsd_vec)	tb="$tb elf32-sh64-nbsd.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" ;;
     bfd_elf32_sh64nbsd_vec)	tb="$tb elf32-sh64-nbsd.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" ;;
     bfd_elf32_sh_vec)		tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo" ;;
@@ -654,6 +656,8 @@ do
     bfd_elf64_s390_vec)		tb="$tb elf64-s390.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_sh64_vec)		tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf64_sh64l_vec)	tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
+    bfd_elf64_sh64lin_vec)	tb="$tb elf64-sh64-lin.lo elf64.lo $elf" target_size=64 ;;
+    bfd_elf64_sh64blin_vec)	tb="$tb elf64-sh64-lin.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf64_sh64lnbsd_vec)	tb="$tb elf64-sh64-nbsd.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf64_sh64nbsd_vec)	tb="$tb elf64-sh64-nbsd.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf64_sparc_vec)	tb="$tb elf64-sparc.lo elf64.lo $elf"; target_size=64 ;;

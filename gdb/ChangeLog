@@ -1,3 +1,98 @@
+2002-10-11  Martin M. Hunt  <hunt@redhat.com>
+
+	* utils.c (string_to_core_addr): After turning string into
+	a number, convert to a CORE_ADDR using INTEGER_TO_ADDRESS
+	which will do necessary sign-extension, etc.
+
+2002-10-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* c-exp.y (THIS): Delete token and grammar rule.
+	(yylex): Don't return THIS.
+	* cp-valprint.c (vtbl_ptr_name_old): Delete.
+	(cp_is_vtbl_ptr_type): Don't check vtbl_ptr_name_old.
+	* demangle.c (cplus_markers): Update comment.  Put '$'
+	first.  Remove CPLUS_MARKER.
+	(_initialize_demangler): Don't call set_cplus_marker_for_demangling.
+	* jv-exp.y (THIS): Delete token and grammar rule.
+	(yylex): Don't return THIS.
+	* mips-tdep.c (mips_dump_tdep): Don't dump CPLUS_MARKER.
+	* objc-exp.y (THIS): Delete token and grammar rule.
+	(yylex): Don't return THIS.
+	* p-exp.y (yylex): Remove reference to CPLUS_MARKER.
+	* stabsread.c (vptr_name, vb_name): Replace CPLUS_MARKER with '$'.
+	(read_member_functions): Likewise for opname.
+	(read_tilde_fields): Use is_cplus_marker.
+
+	* defs.h (CPLUS_MARKER): Don't define.
+	* config/tm-sysv4.h (CPLUS_MARKER): Likewise.
+	* config/i386/xm-i386sco.h (CPLUS_MARKER): Likewise.
+	* config/mips/tm-irix3.h (CPLUS_MARKER): Likewise.
+	* config/mips/tm-irix6.h (CPLUS_MARKER): Likewise.
+	* config/rs6000/tm-rs6000.h (CPLUS_MARKER): Likewise.
+
+	* config/i386/tm-i386v4.h: Delete file.
+	* config/djgpp/fnchange.lst: Delete tm-i386v4.h.
+	* config/i386/tm-i386sol2.h: Include "i386/tm-i386.h" instead.
+	* config/i386/tm-i386v42mp.h: Include "i386/tm-i386.h" instead.
+	* config/i386/tm-ptx.h: Include "i386/tm-i386.h" instead.
+	* config/i386/i386gnu.mt (TM_FILE): Use tm-i386.h.
+	* config/i386/i386sco5.mt (TM_FILE): Likewise.
+	* config/i386/i386v4.mt (TM_FILE): Likewise.
+	* config/i386/ncr3000.mt (TM_FILE): Likewise.
+
+2002-10-10  Marko Mlinar  <markom@opencores.org>
+
+	* infrun.c (resume): Convert #ifdef HAVE_NONSTEPPABLE_WATCHPOINT into C,
+	accidentially not commited 2002-10-09
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+2002-10-09  Marko Mlinar  <markom@opencores.org>
+
+	* infrun.c (resume): Convert #ifdef HAVE_NONSTEPPABLE_WATCHPOINT into C.
+	* gdbarch.sh (HAVE_NONSTEPPABLE_WATCHPOINT): Add.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+2002-10-08  Petr Sorfa <petrs@caldera.com>
+
+	Revised and re-submitted by John Wolfe <jlw@caldera.com>
+
+	Move the Dwarf 2 abbrev table to a per-compilation-unit structure,
+	so we can work on more than one compilation unit at a time.  This
+	helps prepare GDB to handle inter-CU die references.
+	* dwarf2read.c (ABBREV_HASH_SIZE): moved definition forward in
+	the code to be defined before struct comp_unit_head.
+	(comp_unit_head): Added new members - offset, cu_head,
+	begin_die, next and dwarf2_abbrevs.
+	(dwarf2_abbrevs): Removed single static var; now member of
+	struct comp_unit_head.
+	dwarf2_build_psymtabs_hard): Complete new struct comp_unit_head
+	members.
+	(psymtab_to_symtab_1): Changed to work with the new
+	struct comp_unit_head.
+	(dwarf2_read_abbrevs): Now accepts a cu_header parameter and
+	constructs the dwarf2_abbrevs[] inside the cu_header.
+	(dwarf2_empty_abbrev_table): Now expects a ptr to a
+	dwarf2_abbrev table to clean up.
+	(dwarf2_lookup_abbrev): Now accepts a cu_header parameter and
+	handling of dwarf2_abbrevs inside the cu_header.
+	(read_partial_die): Now supports the call to the new
+	dwarf2_lookup_abbrev.
+	(read_full_die): Now supports the call to the new
+	dwarf2_lookup_abbrev.
+
+2002-10-06  Christopher Faylor  <cgf@redhat.com>
+
+	* Makefile.in (install-gdbtk): Add missing continuation backslash to
+	insure that shell variables, such as "transformed_name" are propagated
+	to later shell statements in rule.
+
+2002-10-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/nm-i386sco.h: Add protection against
+	multiple-inclusion.  Include "i386/nm-i386v.h".
+	(REGISTER_U_ADDR): Remove define.
+	(i386_register_u_addr): Remove prototype.
+
 2002-10-04  Michael Snyder  <msnyder@redhat.com>
 
 	* m32r-stub.c (handle_exception): Make sure exception is "trap"

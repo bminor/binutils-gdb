@@ -185,10 +185,8 @@ resolve_symbol_reference (struct objfile *, struct symbol *, char *);
 
 void stabsread_clear_cache (void);
 
-static const char vptr_name[] =
-{'_', 'v', 'p', 't', 'r', CPLUS_MARKER, '\0'};
-static const char vb_name[] =
-{'_', 'v', 'b', CPLUS_MARKER, '\0'};
+static const char vptr_name[] = "_vptr$";
+static const char vb_name[] = "_vb$";
 
 /* Define this as 1 if a pcc declaration of a char or short argument
    gives the correct address.  Otherwise assume pcc gives the
@@ -3179,8 +3177,7 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 	  /* This lets the user type "break operator+".
 	     We could just put in "+" as the name, but that wouldn't
 	     work for "*".  */
-	  static char opname[32] =
-	  {'o', 'p', CPLUS_MARKER};
+	  static char opname[32] = "op$";
 	  char *o = opname + 3;
 
 	  /* Skip past '::'.  */
@@ -4138,8 +4135,9 @@ read_tilde_fields (struct field_info *fip, char **pp, struct type *type,
 		   i >= TYPE_N_BASECLASSES (t);
 		   --i)
 		{
-		  if (!strncmp (TYPE_FIELD_NAME (t, i), vptr_name,
-				sizeof (vptr_name) - 1))
+		  char *name = TYPE_FIELD_NAME (t, i);
+		  if (!strncmp (name, vptr_name, sizeof (vptr_name) - 2)
+		      && is_cplus_marker (name[sizeof (vptr_name) - 1]))
 		    {
 		      TYPE_VPTR_FIELDNO (type) = i;
 		      goto gotit;

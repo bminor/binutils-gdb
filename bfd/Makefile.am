@@ -32,7 +32,7 @@ BFD32_LIBS = \
 	format.lo init.lo libbfd.lo opncls.lo reloc.lo \
 	section.lo syms.lo targets.lo hash.lo linker.lo \
 	srec.lo binary.lo tekhex.lo ihex.lo stabs.lo stab-syms.lo \
-	merge.lo dwarf2.lo
+	merge.lo dwarf2.lo simple.lo
 
 BFD64_LIBS = archive64.lo
 
@@ -41,7 +41,7 @@ BFD32_LIBS_CFILES = \
 	format.c init.c libbfd.c opncls.c reloc.c \
 	section.c syms.c targets.c hash.c linker.c \
 	srec.c binary.c tekhex.c ihex.c stabs.c stab-syms.c \
-	merge.c dwarf2.c
+	merge.c dwarf2.c simple.c
 
 BFD64_LIBS_CFILES = archive64.c
 
@@ -242,6 +242,7 @@ BFD32_BACKENDS = \
 	elf32-sh-lin.lo \
 	elf32-sh64.lo \
 	elf32-sh64-com.lo \
+	elf32-sh64-lin.lo \
 	elf32-sh-nbsd.lo \
 	elf32-sh64-nbsd.lo \
 	elf32-shqnx.lo \
@@ -401,6 +402,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-ppcqnx.c \
 	elf32-sh64.c \
 	elf32-sh64-com.c \
+	elf32-sh64-lin.c \
 	elf32-s390.c \
 	elf32-sh.c \
 	elf32-sh-lin.c \
@@ -497,6 +499,7 @@ BFD64_BACKENDS = \
 	elf64-mips.lo \
 	elf64-mmix.lo \
 	elf64-sh64.lo \
+	elf64-sh64-lin.lo \
 	elf64-sh64-nbsd.lo \
 	elf64-ppc.lo \
 	elf64-s390.lo \
@@ -525,6 +528,7 @@ BFD64_BACKENDS_CFILES = \
 	elf64-ppc.c \
 	elf64-s390.c \
 	elf64-sh64.c \
+	elf64-sh64-lin.c \
 	elf64-sh64-nbsd.c \
 	elf64-sparc.c \
 	elf64.c \
@@ -900,6 +904,7 @@ merge.lo: merge.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
 dwarf2.lo: dwarf2.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/dwarf2.h
+simple.lo: simple.c $(INCDIR)/filenames.h
 archive64.lo: archive64.c $(INCDIR)/filenames.h $(INCDIR)/aout/ar.h
 cpu-a29k.lo: cpu-a29k.c $(INCDIR)/filenames.h
 cpu-alpha.lo: cpu-alpha.c $(INCDIR)/filenames.h
@@ -1260,6 +1265,11 @@ elf32-sh64-com.lo: elf32-sh64-com.c $(INCDIR)/filenames.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/sh.h \
   $(INCDIR)/elf/reloc-macros.h $(srcdir)/../opcodes/sh64-opc.h
+elf32-sh64-lin.lo: elf32-sh64-lin.c elf32-sh64.c $(INCDIR)/filenames.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/../opcodes/sh64-opc.h \
+  elf32-sh.c $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
+  elf32-target.h
 elf32-s390.lo: elf32-s390.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/s390.h $(INCDIR)/elf/reloc-macros.h \
@@ -1578,6 +1588,10 @@ elf64-sh64.lo: elf64-sh64.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h \
   elf64-target.h
+elf64-sh64-lin.lo: elf64-sh64-lin.c elf64-sh64.c $(INCDIR)/filenames.h \
+  $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/sh.h \
+  $(INCDIR)/elf/reloc-macros.h elf64-target.h
 elf64-sh64-nbsd.lo: elf64-sh64-nbsd.c elf64-sh64.c \
   $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \

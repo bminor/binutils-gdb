@@ -1,7 +1,7 @@
 /* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
    generated from "bfd-in.h", "init.c", "opncls.c", "libbfd.c", 
    "section.c", "archures.c", "reloc.c", "syms.c", "bfd.c", "archive.c", 
-   "corefile.c", "targets.c" and "format.c".
+   "corefile.c", "targets.c", "format.c", "linker.c" and "simple.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* Main header file for the bfd library -- portable access to object files.
@@ -2505,6 +2505,14 @@ field in the instruction.  */
   BFD_RELOC_SH_IMM_HI16,
   BFD_RELOC_SH_IMM_HI16_PCREL,
   BFD_RELOC_SH_PT_16,
+  BFD_RELOC_SH_TLS_GD_32,
+  BFD_RELOC_SH_TLS_LD_32,
+  BFD_RELOC_SH_TLS_LDO_32,
+  BFD_RELOC_SH_TLS_IE_32,
+  BFD_RELOC_SH_TLS_LE_32,
+  BFD_RELOC_SH_TLS_DTPMOD32,
+  BFD_RELOC_SH_TLS_DTPOFF32,
+  BFD_RELOC_SH_TLS_TPOFF32,
 
 /* Thumb 23-, 12- and 9-bit pc-relative branches.  The lowest bit must
 be zero and is not stored in the instruction.  */
@@ -4120,6 +4128,17 @@ bfd_set_format PARAMS ((bfd *abfd, bfd_format format));
 
 const char *
 bfd_format_string PARAMS ((bfd_format format));
+
+/* Extracted from linker.c.  */
+boolean
+bfd_link_split_section PARAMS ((bfd *abfd, asection *sec));
+
+#define bfd_link_split_section(abfd, sec) \
+       BFD_SEND (abfd, _bfd_link_split_section, (abfd, sec))
+
+/* Extracted from simple.c.  */
+bfd_byte *
+bfd_simple_get_relocated_section_contents PARAMS ((bfd *abfd, asection *sec, bfd_byte *outbuf));
 
 #ifdef __cplusplus
 }

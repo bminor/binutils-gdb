@@ -270,6 +270,7 @@ struct gdbarch
   gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special;
   const char * name_of_malloc;
   int cannot_step_breakpoint;
+  int have_nonsteppable_watchpoint;
 };
 
 
@@ -428,6 +429,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   "malloc",
+  0,
   0,
   /* startup_gdbarch() */
 };
@@ -807,6 +809,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of coff_make_msymbol_special, invalid_p == 0 */
   /* Skip verify of name_of_malloc, invalid_p == 0 */
   /* Skip verify of cannot_step_breakpoint, invalid_p == 0 */
+  /* Skip verify of have_nonsteppable_watchpoint, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -1382,6 +1385,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: GET_SAVED_REGISTER = 0x%08lx\n",
                         (long) current_gdbarch->get_saved_register
                         /*GET_SAVED_REGISTER ()*/);
+#endif
+#ifdef HAVE_NONSTEPPABLE_WATCHPOINT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: HAVE_NONSTEPPABLE_WATCHPOINT # %s\n",
+                      XSTRING (HAVE_NONSTEPPABLE_WATCHPOINT));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: HAVE_NONSTEPPABLE_WATCHPOINT = %d\n",
+                      HAVE_NONSTEPPABLE_WATCHPOINT);
 #endif
 #ifdef INIT_EXTRA_FRAME_INFO
 #if GDB_MULTI_ARCH
@@ -5050,6 +5061,23 @@ set_gdbarch_cannot_step_breakpoint (struct gdbarch *gdbarch,
                                     int cannot_step_breakpoint)
 {
   gdbarch->cannot_step_breakpoint = cannot_step_breakpoint;
+}
+
+int
+gdbarch_have_nonsteppable_watchpoint (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of have_nonsteppable_watchpoint, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_have_nonsteppable_watchpoint called\n");
+  return gdbarch->have_nonsteppable_watchpoint;
+}
+
+void
+set_gdbarch_have_nonsteppable_watchpoint (struct gdbarch *gdbarch,
+                                          int have_nonsteppable_watchpoint)
+{
+  gdbarch->have_nonsteppable_watchpoint = have_nonsteppable_watchpoint;
 }
 
 
