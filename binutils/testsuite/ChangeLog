@@ -1,3 +1,8 @@
+Sat Aug 28 00:24:27 1999  Jerry Quinn <jquinn@nortelnetworks.com>
+
+	* binutils-all/hppa/freg.s:  New file.
+	* binutils-all/hppa/objdump.exp:  Add freg.s test.
+
 1999-08-09  Ian Lance Taylor  <ian@zembu.com>
 
 	* binutils-all/objcopy.exp: Add setup_xfail for simple copy test

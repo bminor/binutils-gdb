@@ -57,3 +57,29 @@ if [regexp $want $got] then {
 } else {
     fail "addendbug test"
 }
+
+###########################
+# Set up the test of freg.s
+###########################
+
+if {![binutils_assemble $srcdir/$subdir/freg.s tmpdir/freg.o]} then {
+    return
+}
+
+if [is_remote host] {
+    set objfile [remote_download host tmpdir/freg.o]
+} else {
+    set objfile tmpdir/freg.o
+}
+
+# Make sure that we get R float regs like we're supposed to
+
+set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS --disassemble $objfile"]
+
+set want "fmpyfadd,sgl fr4,fr4R,fr5R,fr5"
+
+if [regexp $want $got] then {
+    pass "freg test"
+} else {
+    fail "freg test"
+}
