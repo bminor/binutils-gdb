@@ -1,3 +1,18 @@
+Mon Oct 14 11:17:24 1996  Richard Henderson  <rth@tamu.edu>
+
+	* reloc.c: Create a new BFD_RELOC_ALPHA_ELF_LITERAL.  It was a 
+	mistake to have reused the ECOFF LITERAL for ELF since they have
+	different semantics.
+	* elf64-alpha.c (elf_reloc_map): Map from ELF_LITERAL.
+	* bfd-in2.h, libbfd.h: Rebuild.
+
+	* elf64-alpha.c (elf64_alpha_size_dynamic_sections): Trap .got
+	section overflow.
+
+	* elf64-alpha.c (elf64_alpha_relocate_section): Do not emit a
+	dynamic relocation for an undefweak symbol when we are building
+	a static executable.
+
 Thu Oct 10 11:15:06 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed (config.bfd, targmatch.sed): Edit references to

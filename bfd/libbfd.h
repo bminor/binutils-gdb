@@ -631,6 +631,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_ALPHA_GPDISP_LO16",
   "BFD_RELOC_ALPHA_GPDISP",
   "BFD_RELOC_ALPHA_LITERAL",
+  "BFD_RELOC_ALPHA_ELF_LITERAL",
   "BFD_RELOC_ALPHA_LITUSE",
   "BFD_RELOC_ALPHA_HINT",
   "BFD_RELOC_ALPHA_LINKAGE",
@@ -744,6 +745,18 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_D10V_18",
   "BFD_RELOC_D10V_18_PCREL",
 /* end-sanitize-d10v */
+
+/* start-sanitize-m32r */
+  "BFD_RELOC_M32R_UIMM24",
+  "BFD_RELOC_M32R_DISP8",
+  "BFD_RELOC_M32R_DISP16",
+  "BFD_RELOC_M32R_DISP24",
+/* end-sanitize-m32r */
+
+/* start-sanitize-v850 */
+  "BFD_RELOC_V850_9_PCREL",
+  "BFD_RELOC_V850_22_PCREL",
+/* end-sanitize-v850 */
 
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
