@@ -1,6 +1,9 @@
-HDEFINES = -DHOST_SYS=SUN3_SYS
-YACC = yacc -d
+CDEFINES=-DHOST_SYS=SUN3_SYS
+#CC=gcc -ansi -Wall
+CC=cc
+YACC=yacc -d
 
-HOSTING_EMU=LDEMULATION=gld68k; export LDEMULATION
-HOSTING_CRT0=/lib/crt0.o
+
+HOSTING_CRT0=/usr/lib/crt0.o /usr/lib/Fcrt1.o -L/usr/lib/fsoft.o
 HOSTING_LIBS=-lc
+HOSTING_EMU=LDEMULATION=gld68k; export LDEMULATION
