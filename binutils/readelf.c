@@ -3783,8 +3783,8 @@ process_version_sections (file)
 			    {
 			      Elf_External_Verneed   evn;
 			      Elf_External_Vernaux   evna;
-			      Elf_Internal_Vernaux     ivna;
-			      unsigned long            vna_off;
+			      Elf_Internal_Vernaux   ivna;
+			      unsigned long          vna_off;
 
 			      GET_DATA (offset, evn, "version need");
 
@@ -3882,10 +3882,10 @@ process_version_sections (file)
 
 		          do
 			    {
-			      Elf_Internal_Vernaux     ivna;
+			      Elf_Internal_Vernaux   ivna;
 			      Elf_External_Verneed   evn;
 			      Elf_External_Vernaux   evna;
-			      unsigned long            a_off;
+			      unsigned long          a_off;
 
 			      GET_DATA (offset, evn, "version need");
 
@@ -4310,14 +4310,14 @@ process_symbol_table (file)
 			  offset = version_info
 			    [DT_VERSIONTAGIDX (DT_VERNEED)] - loadaddr;
 
-			  GET_DATA (offset, evn, "version need");
-
-			  ivn.vn_aux  = BYTE_GET (evn.vn_aux);
-			  ivn.vn_next = BYTE_GET (evn.vn_next);
-
 			  do
 			    {
 			      unsigned long  vna_off;
+
+			      GET_DATA (offset, evn, "version need");
+
+			      ivn.vn_aux  = BYTE_GET (evn.vn_aux);
+			      ivn.vn_next = BYTE_GET (evn.vn_next);
 
 			      vna_off = offset + ivn.vn_aux;
 
