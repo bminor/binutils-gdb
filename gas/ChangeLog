@@ -6,7 +6,8 @@ Sun May 31 15:43:06 1998  Doug Evans  <devans@canuck.cygnus.com>
 	* config/tc-dvp.c (vuoverlay_string_section): New static global.
 	(md_begin): Create overlay string section.
 	(create_vuoverlay_section): Put section name in overlay string section.
-	Put string's offset in overlay table entry.
+	Put string's offset in overlay table entry.  Set SEC_CODE flag for
+	overlay sections.
 
 end-sanitize-sky
 Fri May 29 18:13:12 1998  Ian Lance Taylor  <ian@cygnus.com>
