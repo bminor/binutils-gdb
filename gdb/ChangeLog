@@ -1,3 +1,8 @@
+Tue Apr  4 12:13:19 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* printcmd.c (print_scalar_formatted): Use local variable ptr_bit
+ 	in shift.  Stop GCC thinking it has a shift overflow.
+
 2000-04-03  H.J. Lu  <hjl@gnu.org>
 
 	* TODO: Remove the regex entry.

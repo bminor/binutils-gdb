@@ -445,10 +445,13 @@ print_scalar_formatted (valaddr, type, format, size, stream)
     case 'a':
       {
 	/* Truncate address to the size of a target pointer, avoiding
-	   shifts larger or equal than the width of a CORE_ADDR.  */
+	   shifts larger or equal than the width of a CORE_ADDR.  The
+	   local variable PTR_BIT stops the compiler reporting a shift
+	   overflow when it won't occure. */
 	CORE_ADDR addr = unpack_pointer (type, valaddr);
-	if (TARGET_PTR_BIT < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
-	  addr &= ((CORE_ADDR) 1 << TARGET_PTR_BIT) - 1;
+	int ptr_bit = TARGET_PTR_BIT;
+	if (ptr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
+	  addr &= ((CORE_ADDR) 1 << ptr_bit) - 1;
 	print_address (addr, stream);
       }
       break;
