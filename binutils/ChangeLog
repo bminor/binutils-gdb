@@ -1,3 +1,8 @@
+2000-05-30  Alan Modra  <alan@linuxcare.com.au>
+
+	* objdump.c (display_target_list): Use bfd_close_all_done, not
+	bfd_close to fix crash caused by 2000-05-24 change.
+
 2000-05-25  DJ Delorie  <dj@cygnus.com>
 
 	* resrc.c (close_input_stream): zero out cpp_pipe after closing it.
