@@ -119,7 +119,7 @@ struct frame_extra_info
 };
 
 static const char *
-sh_sh64_register_name (int reg_nr)
+sh64_register_name (int reg_nr)
 {
   static char *register_names[] =
   {
@@ -248,7 +248,7 @@ pc_is_isa32 (bfd_vma memaddr)
 }
 
 static const unsigned char *
-sh_sh64_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+sh64_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   /* The BRK instruction for shmedia is 
      01101111 11110101 11111111 11110000
@@ -1321,7 +1321,8 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 		  else
 		    size = register_size (current_gdbarch, live_regnum);
 		  if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
-		    read_memory (deprecated_get_frame_saved_regs (frame)[regnum], raw_buffer, size);
+		    read_memory (deprecated_get_frame_saved_regs (frame)[regnum], 
+				 raw_buffer, size);
 		  else
 		    read_memory (deprecated_get_frame_saved_regs (frame)[regnum],
 				 raw_buffer
@@ -1917,7 +1918,7 @@ REGISTER_BYTE returns the register byte for the base register.
 */
 /* *INDENT-ON* */
 static int
-sh_sh64_register_byte (int reg_nr)
+sh64_register_byte (int reg_nr)
 {
   int base_regnum = -1;
 
@@ -2002,7 +2003,7 @@ sh_sh64_register_byte (int reg_nr)
 }
 
 static struct type *
-sh_sh64_build_float_register_type (int high)
+sh64_build_float_register_type (int high)
 {
   struct type *temp;
 
@@ -2027,12 +2028,12 @@ sh64_register_type (struct gdbarch *gdbarch, int reg_nr)
     return builtin_type_double;
   else if  (reg_nr >= FPP0_REGNUM 
 	    && reg_nr <= FPP_LAST_REGNUM)
-    return sh_sh64_build_float_register_type (1);
+    return sh64_build_float_register_type (1);
   else if ((reg_nr >= FV0_REGNUM
 	    && reg_nr <= FV_LAST_REGNUM)
 	   ||(reg_nr >= FV0_C_REGNUM 
 	      && reg_nr <= FV_LAST_C_REGNUM))
-    return sh_sh64_build_float_register_type (3);
+    return sh64_build_float_register_type (3);
   else if (reg_nr == FPSCR_REGNUM)
     return builtin_type_int;
   else if (reg_nr >= R0_C_REGNUM
@@ -2043,7 +2044,7 @@ sh64_register_type (struct gdbarch *gdbarch, int reg_nr)
 }
 
 static void
-sh_sh64_register_convert_to_virtual (int regnum, struct type *type,
+sh64_register_convert_to_virtual (int regnum, struct type *type,
 				     char *from, char *to)
 {
   if (TARGET_BYTE_ORDER != BFD_ENDIAN_LITTLE)
@@ -2061,14 +2062,14 @@ sh_sh64_register_convert_to_virtual (int regnum, struct type *type,
       DOUBLEST val;
       floatformat_to_doublest (&floatformat_ieee_double_littlebyte_bigword, 
 			       from, &val);
-      store_typed_floating(to, type, val);
+      store_typed_floating (to, type, val);
     }
   else
-    error("sh64_register_convert_to_virtual called with non DR register number");
+    error ("sh64_register_convert_to_virtual called with non DR register number");
 }
 
 static void
-sh_sh64_register_convert_to_raw (struct type *type, int regnum,
+sh64_register_convert_to_raw (struct type *type, int regnum,
 				 const void *from, void *to)
 {
   if (TARGET_BYTE_ORDER != BFD_ENDIAN_LITTLE)
@@ -2088,7 +2089,7 @@ sh_sh64_register_convert_to_raw (struct type *type, int regnum,
 				 &val, to);
     }
   else
-    error("sh64_register_convert_to_raw called with non DR register number");
+    error ("sh64_register_convert_to_raw called with non DR register number");
 }
 
 static void
@@ -2114,10 +2115,10 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			    + register_size (gdbarch, base_regnum) * portion));
 
       /* We must pay attention to the endianness.  */
-      sh_sh64_register_convert_to_virtual (reg_nr, 
-					   gdbarch_register_type (gdbarch, 
-								  reg_nr),
-					   temp_buffer, buffer);
+      sh64_register_convert_to_virtual (reg_nr, 
+					gdbarch_register_type (gdbarch, 
+							       reg_nr),
+					temp_buffer, buffer);
 
     }
 
@@ -2186,10 +2187,10 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			    + register_size (gdbarch, base_regnum) * portion));
 
       /* We must pay attention to the endianness.  */
-      sh_sh64_register_convert_to_virtual (reg_nr, 
-					   gdbarch_register_type (gdbarch, 
-								  reg_nr),
-					   temp_buffer, buffer);
+      sh64_register_convert_to_virtual (reg_nr, 
+					gdbarch_register_type (gdbarch, 
+							       reg_nr),
+					temp_buffer, buffer);
     }
 
   else if (reg_nr >= FV0_C_REGNUM 
@@ -2273,10 +2274,9 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       base_regnum = dr_reg_base_num (reg_nr);
       /* We must pay attention to the endianness.  */
-      sh_sh64_register_convert_to_raw (gdbarch_register_type (gdbarch, 
-							      reg_nr), reg_nr,
-				       buffer, temp_buffer);
-	  
+      sh64_register_convert_to_raw (gdbarch_register_type (gdbarch, reg_nr),
+				    reg_nr,
+				    buffer, temp_buffer);
 
       /* Write the real regs for which this one is an alias.  */
       for (portion = 0; portion < 2; portion++)
@@ -2348,10 +2348,10 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       for (portion = 0; portion < 2; portion++)
 	{
 	  /* We must pay attention to the endianness.  */
-	  sh_sh64_register_convert_to_raw (gdbarch_register_type (gdbarch,
-								  reg_nr), 
-					   reg_nr,
-					   buffer, temp_buffer);
+	  sh64_register_convert_to_raw (gdbarch_register_type (gdbarch,
+							       reg_nr), 
+					reg_nr,
+					buffer, temp_buffer);
 
 	  regcache_raw_write (regcache, base_regnum + portion,
 			      (temp_buffer
@@ -2870,16 +2870,16 @@ sh64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					 ((SIM_SH64_NR_FP_REGS + 1) * 4)
 					 + (SIM_SH64_NR_REGS - SIM_SH64_NR_FP_REGS -1) * 8);
 
-  set_gdbarch_register_name (gdbarch, sh_sh64_register_name);
+  set_gdbarch_register_name (gdbarch, sh64_register_name);
   set_gdbarch_register_type (gdbarch, sh64_register_type);
   set_gdbarch_deprecated_store_return_value (gdbarch, sh64_store_return_value);
-  set_gdbarch_deprecated_register_byte (gdbarch, sh_sh64_register_byte);
+  set_gdbarch_deprecated_register_byte (gdbarch, sh64_register_byte);
   set_gdbarch_pseudo_register_read (gdbarch, sh64_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, sh64_pseudo_register_write);
 
   set_gdbarch_deprecated_do_registers_info (gdbarch, sh64_do_registers_info);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh64_nofp_frame_init_saved_regs);
-  set_gdbarch_breakpoint_from_pc (gdbarch, sh_sh64_breakpoint_from_pc);
+  set_gdbarch_breakpoint_from_pc (gdbarch, sh64_breakpoint_from_pc);
   set_gdbarch_deprecated_call_dummy_words (gdbarch, sh64_call_dummy_words);
   set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (sh64_call_dummy_words));
 
