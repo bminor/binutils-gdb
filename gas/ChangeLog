@@ -1,3 +1,9 @@
+2003-11-07  Christian Groessler  <chris@groessler.org>
+
+	* doc/c-z8k.texi: Document command-line options.  Fix byte
+	register names.  Document '.z8001' and '.z8002' directives.
+	Extend addressing modes documentation.
+
 2003-11-07  Jonathan R. Grant  <jg-binutils@jguk.org>
 
 	* input-file.c (input_file_open): Use "No such file" error
