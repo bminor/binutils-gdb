@@ -1,3 +1,16 @@
+Thu Oct 26 22:53:17 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-scripts/script.s: Make symbols global.
+
+Fri Oct 20 12:22:16 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-undefined/undefined.exp: Add setup_xfails for arm*-*-pe*.
+
+Fri Sep 29 11:06:10 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-undefined/undefined.exp: Use -e when invoking the linker, to
+	prevent the SunOS linker from trying to create a shared library.
+
 Thu Sep 28 12:37:14 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-shared/shared.exp: Run the tests on sparc*-*-sunos4*.  Add
