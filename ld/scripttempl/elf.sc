@@ -232,7 +232,7 @@ SECTIONS
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
-  .sdata   ${RELOCATING-0} : { *(.sdata) *(.sdata.*) }
+  .sdata   ${RELOCATING-0} : { *(.sdata) *(.sdata.*) *(.gnu.linkonce.s.*) }
   ${RELOCATING+${OTHER_GOT_SECTIONS}}
   ${RELOCATING+_edata = .;}
   ${RELOCATING+PROVIDE (edata = .);}

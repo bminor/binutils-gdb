@@ -1,3 +1,8 @@
+1999-09-28  Geoffrey Keating  <geoffk@cygnus.com>
+
+	* scripttempl/elf.sc (.sdata): Include .gnu.linkonce.s.* sections
+	in .sdata too.
+
 1999-09-26  Nick Clifton  <nickc@cygnus.com>
 
 	* scripttempl/elf.sc (.bss): Accept sections named .bss.*
