@@ -1,5 +1,14 @@
 2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tuiStack.h (tuiGetLocatorFilename): Don't declare.
+	(tuiUpdateLocatorDisplay): Likewise.
+	* tuiStack.c (tuiGetLocatorFilename): Remove.
+	(tuiShowFrameInfo): Use tuiSetLocatorContent and tuiShowLocatorContent
+	instead of tuiUpdateLocatorDisplay.
+	(tuiUpdateLocatorDisplay): Remove.
+
+2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tuiStack.h (tuiClearLocatorDisplay): Don't declare.
 	* tuiStack.c (tuiClearLocatorDisplay): Remove.
 	(tuiShowLocatorContent): Use wclrtoeol to clear end of status line.

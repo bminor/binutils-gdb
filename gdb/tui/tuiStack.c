@@ -187,32 +187,6 @@ tuiSwitchFilename (char *fileName)
   return;
 }				/* tuiSwitchFilename */
 
-
-/*
-   ** tuiGetLocatorFilename().
-   **   Get the filename portion of the locator.
-   ** (elz)
- */
-void
-tuiGetLocatorFilename (TuiGenWinInfoPtr locator, char **filename)
-{
-
-  /* the current filename could be non known, in which case the xmalloc would
-     allocate no memory, because the length would be 0 */
-  if (((TuiWinElementPtr) locator->content[0])->whichElement.locator.fileName)
-    {
-      int name_length =
-      strlen (((TuiWinElementPtr) locator->content[0])->whichElement.locator.fileName);
-
-      (*filename) = (char *) xmalloc (name_length + 1);
-      strcpy ((*filename),
-	      ((TuiWinElementPtr) locator->content[0])->whichElement.locator.fileName);
-    }
-
-  return;
-}				/* tuiGetLocatorFilename */
-
-
 /*
    ** tuiUpdateLocatorInfoFromFrame().
    **        Function to update the locator, with the information extracted from frameInfo
@@ -278,21 +252,6 @@ tuiSetLocatorContent (struct frame_info *frameInfo)
   return;
 }				/* tuiSetLocatorContent */
 
-
-/*
-   ** tuiUpdateLocatorDisplay().
-   **        Function to update the locator display
- */
-void
-tuiUpdateLocatorDisplay (struct frame_info *frameInfo)
-{
-  tuiSetLocatorContent (frameInfo);
-  tuiShowLocatorContent ();
-
-  return;
-}				/* tuiUpdateLocatorDisplay */
-
-
 /*
    ** tuiShowFrameInfo().
    **        Function to print the frame inforrmation for the TUI.
@@ -318,7 +277,8 @@ tuiShowFrameInfo (struct frame_info *fi)
 
       startLine = 0;
       sourceAlreadyDisplayed = tuiSourceIsDisplayed (s->filename);
-      tuiUpdateLocatorDisplay (fi);
+      tuiSetLocatorContent (fi);
+      tuiShowLocatorContent ();
       for (i = 0; i < (sourceWindows ())->count; i++)
 	{
 	  TuiWhichElement *item;
@@ -373,7 +333,8 @@ tuiShowFrameInfo (struct frame_info *fi)
     }
   else
     {
-      tuiUpdateLocatorDisplay (fi);
+      tuiSetLocatorContent (fi);
+      tuiShowLocatorContent ();
       for (i = 0; i < (sourceWindows ())->count; i++)
 	{
 	  winInfo = (TuiWinInfoPtr) (sourceWindows ())->list[i];
