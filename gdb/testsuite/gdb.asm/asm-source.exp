@@ -41,6 +41,9 @@ if [istarget "d10v-*-*"] then {
 if [istarget "i\[3456\]86-*-*"] then {
     set asm-arch i386
 }
+if [istarget "m32r*-*"] then {
+    set asm-arch m32r
+}
 if { "${asm-arch}" == "" } {
     gdb_suppress_entire_file "Assembly source test -- not implemented for this target."
 }
