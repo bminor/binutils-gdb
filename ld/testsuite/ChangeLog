@@ -1,3 +1,8 @@
+2003-07-23  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* ld-srec/srec.exp: For m6811/m6812 use --defsym to define _.z soft
+	register.
+
 2003-07-22  H.J. Lu <hongjiu.lu@intel.com>
 
 	* ld-selective/selective.exp: Skip "ia64-*-*".
