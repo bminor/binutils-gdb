@@ -1,3 +1,7 @@
+2001-02-28  Matt Hiller  <hiller@redhat.com>	
+	
+	* MAINTAINERS: Add Matt Hiller to Write After Approval list.
+
 Tue Feb 27 16:56:13 2001  David Taylor  <taylor@redhat.com>
 
 	* symtab.c (search_symbols): Fix off by one error in test for
