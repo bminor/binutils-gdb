@@ -228,8 +228,8 @@ struct attribute
       {
 	char *str;
 	struct dwarf_block *blk;
-	unsigned int unsnd;
-	int snd;
+	unsigned long unsnd;
+	long int snd;
 	CORE_ADDR addr;
       }
     u;
@@ -597,7 +597,7 @@ static unsigned int read_2_bytes (bfd *, char *);
 
 static unsigned int read_4_bytes (bfd *, char *);
 
-static unsigned int read_8_bytes (bfd *, char *);
+static unsigned long read_8_bytes (bfd *, char *);
 
 static CORE_ADDR read_address (bfd *, char *);
 
@@ -605,9 +605,9 @@ static char *read_n_bytes (bfd *, char *, unsigned int);
 
 static char *read_string (bfd *, char *, unsigned int *);
 
-static unsigned int read_unsigned_leb128 (bfd *, char *, unsigned int *);
+static unsigned long read_unsigned_leb128 (bfd *, char *, unsigned int *);
 
-static int read_signed_leb128 (bfd *, char *, unsigned int *);
+static long read_signed_leb128 (bfd *, char *, unsigned int *);
 
 static void set_cu_language (unsigned int);
 
@@ -3452,7 +3452,7 @@ read_4_signed_bytes (abfd, buf)
   return bfd_get_signed_32 (abfd, (bfd_byte *) buf);
 }
 
-static unsigned int
+static unsigned long
 read_8_bytes (abfd, buf)
      bfd *abfd;
      char *buf;
@@ -3549,13 +3549,14 @@ read_string (abfd, buf, bytes_read_ptr)
 #endif
 }
 
-static unsigned int
+static unsigned long
 read_unsigned_leb128 (abfd, buf, bytes_read_ptr)
      bfd *abfd;
      char *buf;
      unsigned int *bytes_read_ptr;
 {
-  unsigned int result, num_read;
+  unsigned long result;
+  unsigned int num_read;
   int i, shift;
   unsigned char byte;
 
@@ -3568,7 +3569,7 @@ read_unsigned_leb128 (abfd, buf, bytes_read_ptr)
       byte = bfd_get_8 (abfd, (bfd_byte *) buf);
       buf++;
       num_read++;
-      result |= ((byte & 127) << shift);
+      result |= ((unsigned long)(byte & 127) << shift);
       if ((byte & 128) == 0)
 	{
 	  break;
@@ -3579,13 +3580,13 @@ read_unsigned_leb128 (abfd, buf, bytes_read_ptr)
   return result;
 }
 
-static int
+static long
 read_signed_leb128 (abfd, buf, bytes_read_ptr)
      bfd *abfd;
      char *buf;
      unsigned int *bytes_read_ptr;
 {
-  int result;
+  long result;
   int i, shift, size, num_read;
   unsigned char byte;
 
@@ -3599,7 +3600,7 @@ read_signed_leb128 (abfd, buf, bytes_read_ptr)
       byte = bfd_get_8 (abfd, (bfd_byte *) buf);
       buf++;
       num_read++;
-      result |= ((byte & 127) << shift);
+      result |= ((long)(byte & 127) << shift);
       shift += 7;
       if ((byte & 128) == 0)
 	{
@@ -5491,12 +5492,13 @@ dump_die (die)
 	case DW_FORM_data1:
 	case DW_FORM_data2:
 	case DW_FORM_data4:
+	case DW_FORM_data8:
 	case DW_FORM_ref1:
 	case DW_FORM_ref2:
 	case DW_FORM_ref4:
 	case DW_FORM_udata:
 	case DW_FORM_sdata:
-	  fprintf (stderr, "constant: %d", DW_UNSND (&die->attrs[i]));
+	  fprintf (stderr, "constant: %ld", DW_UNSND (&die->attrs[i]));
 	  break;
 	case DW_FORM_string:
 	  fprintf (stderr, "string: \"%s\"",
@@ -5512,7 +5514,6 @@ dump_die (die)
 	case DW_FORM_strp:	/* we do not support separate string
 				   section yet */
 	case DW_FORM_indirect:	/* we do not handle indirect yet */
-	case DW_FORM_data8:	/* we do not have 64 bit quantities */
 	default:
 	  fprintf (stderr, "unsupported attribute form: %d.",
 		   die->attrs[i].form);
