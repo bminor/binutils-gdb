@@ -178,6 +178,11 @@ ecoff_new_section_hook (abfd, section)
   else if (strcmp (section->name, _BSS) == 0
 	   || strcmp (section->name, _SBSS) == 0)
     section->flags |= SEC_ALLOC;
+  else if (strcmp (section->name, _LIB) == 0)
+    {
+      /* An Irix 4 shared libary.  */
+      section->flags |= SEC_SHARED_LIBRARY;
+    }
   else if (strcmp (section->name, REGINFO) == 0)
     {
       /* Setting SEC_SHARED_LIBRARY should make the linker leave the
@@ -326,6 +331,8 @@ ecoff_sec_to_styp_flags (name, flags)
     styp = STYP_PDATA;
   else if (strcmp (name, _XDATA) == 0)
     styp = STYP_XDATA;
+  else if (strcmp (name, _LIB) == 0)
+    styp = STYP_ECOFF_LIB;
   else if (flags & SEC_CODE) 
     styp = STYP_TEXT;
   else if (flags & SEC_DATA) 
@@ -397,6 +404,10 @@ ecoff_styp_to_sec_flags (abfd, hdr)
 	   || (styp_flags & STYP_LIT4))
     {
       sec_flags |= SEC_DATA | SEC_LOAD | SEC_ALLOC | SEC_READONLY;
+    }
+  else if (styp_flags & STYP_ECOFF_LIB)
+    {
+      sec_flags |= SEC_SHARED_LIBRARY;
     }
   else
     {
@@ -2250,6 +2261,15 @@ ecoff_compute_section_file_positions (abfd)
 	  sofar = (sofar + round - 1) &~ (round - 1);
 	  first_data = false;
 	}
+      else if (strcmp (current->name, _LIB) == 0)
+	{
+	  const bfd_vma round = ecoff_backend (abfd)->round;
+	  /* On Irix 4, the location of contents of the .lib section
+	     from a shared library section is also rounded up to a
+	     page boundary.  */
+
+	  sofar = (sofar + round - 1) &~ (round - 1);
+	}
 
       /* Align the sections in the file to the same boundary on
 	 which they are aligned in virtual memory.  */
@@ -2343,6 +2363,12 @@ ecoff_set_section_contents (abfd, section, location, offset, count)
      going to set output_has_begun to true.  */
   if (abfd->output_has_begun == false)
     ecoff_compute_section_file_positions (abfd);
+
+  /* If this is a .lib section, bump the vma address so that it winds
+     up being the number of .lib sections output.  This is right for
+     Irix 4.  Ian Taylor <ian@cygnus.com>.  */
+  if (strcmp (section->name, _LIB) == 0)
+    ++section->vma;
 
   if (count == 0)
     return true;
@@ -2568,8 +2594,7 @@ ecoff_write_object_contents (abfd)
 
       strncpy (section.s_name, current->name, sizeof section.s_name);
 
-      /* FIXME: is this correct for shared libraries?  I think it is
-	 but I have no platform to check.  Ian Lance Taylor.  */
+      /* This seems to be correct for Irix 4 shared libraries.  */
       vma = bfd_get_section_vma (abfd, current);
       if (strcmp (current->name, _LIB) == 0)
 	section.s_vaddr = 0;
@@ -2643,6 +2668,8 @@ ecoff_write_object_contents (abfd)
       else if ((section.s_flags & STYP_BSS) != 0
 	       || (section.s_flags & STYP_SBSS) != 0)
 	bss_size += bfd_get_section_size_before_reloc (current);
+      else if ((section.s_flags & STYP_ECOFF_LIB) != 0)
+	/* Do nothing */ ;
       else
 	abort ();
     }	
