@@ -1,3 +1,8 @@
+Mon Aug 21 18:30:42 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* ldmain.c (main): Remove PE stuff.
+	* lexsup.c (options): Load more PE options.
+
 Thu Aug 17 13:35:49 1995  steve chamberlain  <sac@slash.cygnus.com>
 	
 
