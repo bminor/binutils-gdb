@@ -1180,25 +1180,19 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
       && ((*argptr == p) || (p[-1] == ' ') || (p[-1] == '\t')))
     saved_arg2 += 2;
 
-  /* We have what looks like a class or namespace
-     scope specification (A::B), possibly with many
-     levels of namespaces or classes (A::B::C::D).
+  /* Given our example "AAA::inA::fun", we have two cases to consider:
 
-     Some versions of the HP ANSI C++ compiler (as also possibly
-     other compilers) generate class/function/member names with
-     embedded double-colons if they are inside namespaces. To
-     handle this, we loop a few times, considering larger and
-     larger prefixes of the string as though they were single
-     symbols.  So, if the initially supplied string is
-     A::B::C::D::foo, we have to look up "A", then "A::B",
-     then "A::B::C", then "A::B::C::D", and finally
-     "A::B::C::D::foo" as single, monolithic symbols, because
-     A, B, C or D may be namespaces.
+     1) AAA::inA is the name of a class.  In that case, presumably it
+        has a method called "fun"; we then look up that method using
+        find_method.
 
-     Note that namespaces can nest only inside other
-     namespaces, and not inside classes.  So we need only
-     consider *prefixes* of the string; there is no need to look up
-     "B::C" separately as a symbol in the previous example.  */
+     2) AAA::inA isn't the name of a class.  In that case, either the
+        user made a typo or AAA::inA is the name of a namespace.
+        Either way, we just look up AAA::inA::fun with lookup_symbol.
+
+     Thus, our first task is to find everything before the last set of
+     double-colons and figure out if it's the name of a class.  So we
+     first loop through all of the double-colons.  */
 
   p2 = p;		/* Save for restart.  */
 
@@ -1215,78 +1209,6 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 
   while (1)
     {
-
-      /* Start of lookup in the symbol tables. */
-
-      /* Lookup in the symbol table the substring between argptr and
-	 p. Note, this call changes the value of argptr.  */
-      /* PASS1: Before the call, argptr->"AAA::inA::fun",
-	 p->"::inA::fun".  After the call: argptr->"inA::fun", p
-	 unchanged.  */
-      /* PASS2: Before the call, argptr->"AAA::inA::fun", p->"::fun".
-	 After the call: argptr->"fun", p->"::fun".  */
-      sym_class = lookup_prefix_sym (argptr, p);
-
-      /* PASS1: assume sym_class == NULL. Skip the whole if-stmt. */
-      /* PASS2: assume sym_class has been found, i.e. "AAA::inA" is a
-	 class. Enter the if-stmt.  */
-      if (sym_class &&
-	  (t = check_typedef (SYMBOL_TYPE (sym_class)),
-	   (TYPE_CODE (t) == TYPE_CODE_STRUCT
-	    || TYPE_CODE (t) == TYPE_CODE_UNION)))
-	{
-	  /* Arg token is not digits => try it as a function name.
-	     Find the next token (everything up to end or next
-	     blank).  */
-	  if (**argptr
-	      && strchr (get_gdb_completer_quote_characters (),
-			 **argptr) != NULL)
-	    {
-	      p = skip_quoted (*argptr);
-	      *argptr = *argptr + 1;
-	    }
-	  else
-	    {
-	      /* PASS2: at this point argptr->"fun".  */
-	      p = *argptr;
-	      while (*p && *p != ' ' && *p != '\t' && *p != ',' && *p != ':')
-		p++;
-	      /* PASS2: at this point p->"".  String ended.  */
-	    }
-
-	  /* Allocate our own copy of the substring between argptr and
-	     p. */
-	  copy = (char *) alloca (p - *argptr + 1);
-	  memcpy (copy, *argptr, p - *argptr);
-	  copy[p - *argptr] = '\0';
-	  if (p != *argptr
-	      && copy[p - *argptr - 1]
-	      && strchr (get_gdb_completer_quote_characters (),
-			 copy[p - *argptr - 1]) != NULL)
-	    copy[p - *argptr - 1] = '\0';
-
-	  /* PASS2: At this point copy->"fun", p->"" */
-
-	  /* No line number may be specified.  */
-	  while (*p == ' ' || *p == '\t')
-	    p++;
-	  *argptr = p;
-
-	  /* Look for copy as a method of sym_class. */
-	  /* PASS2: at this point copy->"fun", sym_class is "AAA:inA".
-	     This concludes the scanning of the string for possible
-	     components matches.  If we find it here, we return. If
-	     not, and we are at the and of the string, we'll get out
-	     of the loop and lookup the whole string in the symbol
-	     tables.  */
-
-	  return find_method (funfirstline, canonical, saved_arg,
-			      copy, t, sym_class);
-	} /* End if symbol found */
-
-      /* End of lookup in the symbol tables.  */
-
-      /* Prepare for next run through the loop.  */
       /* Move pointer up to next possible class/namespace token.  */
 
       p = p2 + 1;	/* Restart with old value +1.  */
@@ -1294,6 +1216,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
       /* PASS1: at this point p2->"::inA::fun", so p->":inA::fun",
 	 i.e. if there is a double-colon, p will now point to the
 	 second colon. */
+      /* PASS2: p2->"::fun", p->":fun" */
 
       /* Move pointer ahead to next double-colon.  */
       while (*p && (p[0] != ' ') && (p[0] != '\t') && (p[0] != '\''))
@@ -1313,9 +1236,12 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	     the beginning of this loop (PASS1), we had
 	     p->":inA::fun", we'll trigger this when p has been
 	     advanced to point to "::fun".  */
+	  /* PASS2: we will not trigger this. */
 	  else if ((p[0] == ':') && (p[1] == ':'))
 	    break;	/* Found double-colon.  */
 	  else
+	    /* PASS2: We'll keep getting here, until p->"", at which point
+	       we exit this loop.  */
 	    p++;
 	}
 
@@ -1323,7 +1249,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	break;		/* Out of the while (1).  This would happen
 			   for instance if we have looked up
 			   unsuccessfully all the components of the
-			   string, and p->"".  */
+			   string, and p->""(PASS2)  */
 
       /* We get here if p points to ' ', '\t', '\'', "::" or ""(i.e
 	 string ended). */
@@ -1331,14 +1257,84 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
       p2 = p;
       /* Restore argptr as it was on entry to this function.  */
       *argptr = saved_arg2;
-      /* PASS1: at this point p->"::fun" argptr->"AAA::inA::fun".  */
+      /* PASS1: at this point p->"::fun" argptr->"AAA::inA::fun",
+	 p2->"::fun".  */
 
       /* All ready for next pass through the loop.  */
     }			/* while (1) */
 
-  /* Last chance attempt -- check entire name as a symbol.  Use "copy"
-     in preparation for jumping out of this block, to be consistent
-     with usage following the jump target.  */
+
+  /* Start of lookup in the symbol tables. */
+
+  /* Lookup in the symbol table the substring between argptr and
+     p. Note, this call changes the value of argptr.  */
+  /* Before the call, argptr->"AAA::inA::fun",
+     p->"", p2->"::fun".  After the call: argptr->"fun", p, p2
+     unchanged.  */
+  sym_class = lookup_prefix_sym (argptr, p2);
+
+  /* If sym_class has been found, and if "AAA::inA" is a class, then
+     we're in case 1 above.  So we look up "fun" as a method of that
+     class.  */
+  if (sym_class &&
+      (t = check_typedef (SYMBOL_TYPE (sym_class)),
+       (TYPE_CODE (t) == TYPE_CODE_STRUCT
+	|| TYPE_CODE (t) == TYPE_CODE_UNION)))
+    {
+      /* Arg token is not digits => try it as a function name.
+	 Find the next token (everything up to end or next
+	 blank).  */
+      if (**argptr
+	  && strchr (get_gdb_completer_quote_characters (),
+		     **argptr) != NULL)
+	{
+	  p = skip_quoted (*argptr);
+	  *argptr = *argptr + 1;
+	}
+      else
+	{
+	  /* At this point argptr->"fun".  */
+	  p = *argptr;
+	  while (*p && *p != ' ' && *p != '\t' && *p != ',' && *p != ':')
+	    p++;
+	  /* At this point p->"".  String ended.  */
+	}
+
+      /* Allocate our own copy of the substring between argptr and
+	 p. */
+      copy = (char *) alloca (p - *argptr + 1);
+      memcpy (copy, *argptr, p - *argptr);
+      copy[p - *argptr] = '\0';
+      if (p != *argptr
+	  && copy[p - *argptr - 1]
+	  && strchr (get_gdb_completer_quote_characters (),
+		     copy[p - *argptr - 1]) != NULL)
+	copy[p - *argptr - 1] = '\0';
+
+      /* At this point copy->"fun", p->"" */
+
+      /* No line number may be specified.  */
+      while (*p == ' ' || *p == '\t')
+	p++;
+      *argptr = p;
+      /* At this point arptr->"".  */
+
+      /* Look for copy as a method of sym_class. */
+      /* At this point copy->"fun", sym_class is "AAA:inA",
+	 saved_arg->"AAA::inA::fun".  This concludes the scanning of
+	 the string for possible components matches.  If we find it
+	 here, we return. If not, and we are at the and of the string,
+	 we'll lookup the whole string in the symbol tables.  */
+
+      return find_method (funfirstline, canonical, saved_arg,
+			  copy, t, sym_class);
+
+    } /* End if symbol found */
+
+
+  /* We couldn't find a class, so we're in case 2 above.  We check the
+     entire name as a symbol instead.  */
+
   copy = (char *) alloca (p - saved_arg2 + 1);
   memcpy (copy, saved_arg2, p - saved_arg2);
   /* Note: if is_quoted should be true, we snuff out quote here

@@ -1,3 +1,8 @@
+2004-02-11  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/breakpoint.exp: New.
+	* gdb.cp/breakpoint.cc: New.
+
 2004-02-11  Michael Chastain  <mec.gnu@mindspring.com>
 
 	Partial fix for PR gdb/1543.
