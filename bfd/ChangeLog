@@ -1,5 +1,15 @@
 Sun Dec  6 16:30:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	COFF weak symbol support, based on patches from Mark Elbrecht
+	<snowball3@usa.net>:
+	* coffcode.h (coff_slurp_symbol_table): Handle C_WEAKEXT.
+	* coffgen.c (coff_renumber_symbols): Handle weak symbols.
+	(coff_write_alien_symbol): Likewise.
+	* cofflink.c (coff_link_check_ar_symbols): Likewise.
+	(coff_link_add_symbols): Likewise.
+	(_bfd_coff_link_input_bfd): Likewise.
+	(_bfd_coff_write_global_sym): Likewise.
+
 	* elf.c (copy_private_bfd_data): Always initialize the
 	includes_phdrs field.
 
