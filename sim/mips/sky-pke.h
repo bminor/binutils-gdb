@@ -7,6 +7,11 @@
 #include "sky-device.h"
 
 
+/* Debugguing PKE? */
+
+#define PKE_DEBUG 
+
+
 /* External functions */
 
 void pke0_attach(SIM_DESC sd);
@@ -17,7 +22,7 @@ void pke1_issue();
 
 /* Quadword data type */
 
-typedef unsigned int quadword[4];
+typedef unsigned_4 quadword[4];
 
 /* truncate address to quadword */
 #define ADDR_TRUNC_QW(addr) ((addr) & ~0x0f)
@@ -29,8 +34,8 @@ typedef unsigned int quadword[4];
 
 #define PKE0_REGISTER_WINDOW_START 0x10000800
 #define PKE1_REGISTER_WINDOW_START 0x10000A00
-#define PKE0_FIFO_START            0x10008000
-#define PKE1_FIFO_START            0x10008010
+#define PKE0_FIFO_ADDR             0x10008000
+#define PKE1_FIFO_ADDR             0x10008010
 
 
 /* Quadword indices of PKE registers.  Actual registers sit at bottom
@@ -51,11 +56,11 @@ typedef unsigned int quadword[4];
 #define PKE_REG_ITOP    0x0d
 #define PKE_REG_TOP     0x0e /* pke1 only */
 #define PKE_REG_DBF     0x0f /* pke1 only */
-#define PKE_REG_R0      0x10
+#define PKE_REG_R0      0x10 /* R0 .. R3 must be contiguous */
 #define PKE_REG_R1      0x11
 #define PKE_REG_R2      0x12
 #define PKE_REG_R3      0x13
-#define PKE_REG_C0      0x14
+#define PKE_REG_C0      0x14 /* C0 .. C3 must be contiguous */
 #define PKE_REG_C1      0x15
 #define PKE_REG_C2      0x16
 #define PKE_REG_C3      0x17
@@ -64,9 +69,271 @@ typedef unsigned int quadword[4];
 
 #define PKE_REGISTER_WINDOW_SIZE  (sizeof(quadword) * PKE_NUM_REGS)
 
+
 /* virtual addresses for source-addr tracking */
 #define PKE0_SRCADDR    0x20000020
 #define PKE1_SRCADDR    0x20000024
+
+
+/* PKE commands */
+
+#define PKE_CMD_PKENOP_MASK 0x7F
+#define PKE_CMD_PKENOP_BITS 0x00
+#define PKE_CMD_STCYCL_MASK 0x7F
+#define PKE_CMD_STCYCL_BITS 0x01
+#define PKE_CMD_OFFSET_MASK 0x7F
+#define PKE_CMD_OFFSET_BITS 0x02
+#define PKE_CMD_BASE_MASK 0x7F
+#define PKE_CMD_BASE_BITS 0x03
+#define PKE_CMD_ITOP_MASK 0x7F
+#define PKE_CMD_ITOP_BITS 0x04
+#define PKE_CMD_STMOD_MASK 0x7F
+#define PKE_CMD_STMOD_BITS 0x05
+#define PKE_CMD_MSKPATH3_MASK 0x7F
+#define PKE_CMD_MSKPATH3_BITS 0x06
+#define PKE_CMD_PKEMARK_MASK 0x7F
+#define PKE_CMD_PKEMARK_BITS 0x07
+#define PKE_CMD_FLUSHE_MASK 0x7F
+#define PKE_CMD_FLUSHE_BITS 0x10
+#define PKE_CMD_FLUSH_MASK 0x7F
+#define PKE_CMD_FLUSH_BITS 0x11
+#define PKE_CMD_FLUSHA_MASK 0x7F
+#define PKE_CMD_FLUSHA_BITS 0x13
+#define PKE_CMD_PKEMSCAL_MASK 0x7F  /* CAL == "call" */
+#define PKE_CMD_PKEMSCAL_BITS 0x14
+#define PKE_CMD_PKEMSCNT_MASK 0x7F  /* CNT == "continue" */
+#define PKE_CMD_PKEMSCNT_BITS 0x17
+#define PKE_CMD_PKEMSCALF_MASK 0x7F /* CALF == "call after flush" */
+#define PKE_CMD_PKEMSCALF_BITS 0x15
+#define PKE_CMD_STMASK_MASK 0x7F
+#define PKE_CMD_STMASK_BITS 0x20
+#define PKE_CMD_STROW_MASK 0x7F
+#define PKE_CMD_STROW_BITS 0x30
+#define PKE_CMD_STCOL_MASK 0x7F
+#define PKE_CMD_STCOL_BITS 0x31
+#define PKE_CMD_MPG_MASK 0x7F
+#define PKE_CMD_MPG_BITS 0x4A
+#define PKE_CMD_DIRECT_MASK 0x7F
+#define PKE_CMD_DIRECT_BITS 0x50
+#define PKE_CMD_DIRECTHL_MASK 0x7F
+#define PKE_CMD_DIRECTHL_BITS 0x51
+#define PKE_CMD_UNPACK_MASK 0x60
+#define PKE_CMD_UNPACK_BITS 0x60
+
+/* test given word for particular PKE command bit pattern */
+#define IS_PKE_CMD(word,cmd) (((word) & PKE_CMD_##cmd##_MASK) == PKE_CMD_##cmd##_BITS)
+
+
+/* register bitmasks: bit numbers for end and beginning of fields */
+
+/* PKE opcode */
+#define PKE_OPCODE_I_E 31
+#define PKE_OPCODE_I_B 31
+#define PKE_OPCODE_CMD_E 30
+#define PKE_OPCODE_CMD_B 24
+#define PKE_OPCODE_NUM_E 23
+#define PKE_OPCODE_NUM_B 16
+#define PKE_OPCODE_IMM_E 15
+#define PKE_OPCODE_IMM_B 0
+
+/* STAT register */
+#define PKE_REG_STAT_FQC_E 28
+#define PKE_REG_STAT_FQC_B 24
+#define PKE_REG_STAT_FDR_E 23
+#define PKE_REG_STAT_FDR_B 23
+#define PKE_REG_STAT_ER1_E 13
+#define PKE_REG_STAT_ER1_B 13
+#define PKE_REG_STAT_ER0_E 12
+#define PKE_REG_STAT_ER0_B 12
+#define PKE_REG_STAT_INT_E 11
+#define PKE_REG_STAT_INT_B 11
+#define PKE_REG_STAT_PIS_E 10
+#define PKE_REG_STAT_PIS_B 10
+#define PKE_REG_STAT_PFS_E 9
+#define PKE_REG_STAT_PFS_B 9
+#define PKE_REG_STAT_PSS_E 8
+#define PKE_REG_STAT_PSS_B 8
+#define PKE_REG_STAT_DBF_E 7
+#define PKE_REG_STAT_DBF_B 7
+#define PKE_REG_STAT_MRK_E 6
+#define PKE_REG_STAT_MRK_B 6
+#define PKE_REG_STAT_PGW_E 3
+#define PKE_REG_STAT_PGW_B 3
+#define PKE_REG_STAT_PEW_E 2
+#define PKE_REG_STAT_PEW_B 2
+#define PKE_REG_STAT_PPS_E 1
+#define PKE_REG_STAT_PPS_B 0
+
+#define PKE_REG_STAT_PPS_IDLE 0x00
+#define PKE_REG_STAT_PPS_WAIT 0x01
+#define PKE_REG_STAT_PPS_DECODE 0x02
+#define PKE_REG_STAT_PPS_XFER 0x03
+
+/* DBF register */
+#define PKE_REG_DBF_DF_E 0
+#define PKE_REG_DBF_DF_B 0
+
+/* OFST register */
+#define PKE_REG_OFST_OFFSET_E 9
+#define PKE_REG_OFST_OFFSET_B 0
+
+/* OFST register */
+#define PKE_REG_TOPS_TOPS_E 9
+#define PKE_REG_TOPS_TOPS_B 0
+
+/* BASE register */
+#define PKE_REG_BASE_BASE_E 9
+#define PKE_REG_BASE_BASE_B 0
+
+/* ITOPS register */
+#define PKE_REG_ITOPS_ITOPS_E 9
+#define PKE_REG_ITOPS_ITOPS_B 0
+
+/* MODE register */
+#define PKE_REG_MODE_MDE_E 1
+#define PKE_REG_MODE_MDE_B 0
+
+/* MARK register */
+#define PKE_REG_MARK_MARK_E 15
+#define PKE_REG_MARK_MARK_B 0
+
+/* ITOP register */
+#define PKE_REG_ITOP_ITOP_E 9
+#define PKE_REG_ITOP_ITOP_B 0
+
+/* TOP register */
+#define PKE_REG_TOP_TOP_E 9
+#define PKE_REG_TOP_TOP_B 0
+
+/* MASK register */
+#define PKE_REG_MASK_MASK_E 31
+#define PKE_REG_MASK_MASK_B 0
+
+/* CYCLE register */
+#define PKE_REG_CYCLE_WL_E 15
+#define PKE_REG_CYCLE_WL_B 8
+#define PKE_REG_CYCLE_CL_E 7
+#define PKE_REG_CYCLE_CL_B 0
+
+/* ERR register */
+#define PKE_REG_ERR_ME1_E 2
+#define PKE_REG_ERR_ME1_B 2
+#define PKE_REG_ERR_ME0_E 1
+#define PKE_REG_ERR_ME0_B 1
+#define PKE_REG_ERR_MII_E 0
+#define PKE_REG_ERR_MII_B 0
+
+
+/* source-addr for words written to VU/GPUIF ports */
+#define PKE0_SRCADDR 0x20000020 /* from 1998-01-22 e-mail plans */
+#define PKE1_SRCADDR 0x20000024 /* from 1998-01-22 e-mail plans */
+
+
+/* UNPACK opcodes */
+#define PKE_UNPACK(vn,vl) ((vn) << 2 | (vl))
+#define PKE_UNPACK_S_32  PKE_UNPACK(0, 0)
+#define PKE_UNPACK_S_16  PKE_UNPACK(0, 1)
+#define PKE_UNPACK_S_8   PKE_UNPACK(0, 2)
+#define PKE_UNPACK_V2_32 PKE_UNPACK(1, 0)
+#define PKE_UNPACK_V2_16 PKE_UNPACK(1, 1)
+#define PKE_UNPACK_V2_8  PKE_UNPACK(1, 2)
+#define PKE_UNPACK_V3_32 PKE_UNPACK(2, 0)
+#define PKE_UNPACK_V3_16 PKE_UNPACK(2, 1)
+#define PKE_UNPACK_V3_8  PKE_UNPACK(2, 2)
+#define PKE_UNPACK_V4_32 PKE_UNPACK(3, 0)
+#define PKE_UNPACK_V4_16 PKE_UNPACK(3, 1)
+#define PKE_UNPACK_V4_8  PKE_UNPACK(3, 2)
+#define PKE_UNPACK_V4_5  PKE_UNPACK(3, 3)
+
+
+/* MASK register sub-field definitions */
+#define PKE_MASKREG_INPUT 0
+#define PKE_MASKREG_ROW 1
+#define PKE_MASKREG_COLUMN 2
+#define PKE_MASKREG_NOTHING 3
+
+
+/* STMOD register field definitions */
+#define PKE_MODE_INPUT 0
+#define PKE_MODE_ADDROW 1
+#define PKE_MODE_ACCROW 2
+
+
+/* extract a MASK register sub-field for row [0..3] and column [0..3] */
+/* MASK register is laid out of 2-bit values in this r-c order */
+/* m33 m32 m31 m30 m23 m22 m21 m20 m13 m12 m11 m10 m03 m02 m01 m00 */
+#define PKE_MASKREG_GET(me,row,col) \
+((((me)->regs[PKE_REG_MASK][0]) >> (8*(row) + 2*(col))) & 0x03)
+
+
+/* and now a few definitions that rightfully belong elsewhere */ 
+#ifdef PKE_DEBUG
+
+/* GPUIF addresses */
+#define GPUIF_PATH3_FIFO_ADDR  0x10008020    /* data from CORE        */
+#define GPUIF_PATH1_FIFO_ADDR  0x10008030    /* data from VU1         */ 
+#define GPUIF_PATH2_FIFO_ADDR  0x10008040    /* data from PKE1        */
+
+/* VU STAT register */
+#define VU_REG_STAT_VGW_E 4
+#define VU_REG_STAT_VGW_B 4
+#define VU_REG_STAT_VBS_E 0
+#define VU_REG_STAT_VBS_B 0
+
+/* VU PC pseudo-registers */ /* omitted from 1998-01-22 e-mail plans */
+#define VU0_PC_START 0x20025000
+#define VU1_PC_START 0x20026000
+
+/* VU source-addr tracking tables */ /* changed from 1998-01-22 e-mail plans */
+#define VU0_MEM0_SRCADDR_START 0x21000000
+#define VU0_MEM1_SRCADDR_START 0x21004000
+#define VU1_MEM0_SRCADDR_START 0x21008000
+#define VU1_MEM1_SRCADDR_START 0x2100C000
+
+#endif /* PKE_DEBUG */
+
+
+/* operations  */
+/* unsigned 32-bit mask of given width */
+#define BIT_MASK(width) ((((unsigned_4)1) << (width+1)) - 1)
+/* e.g.: BIT_MASK(5) = 00011111 */
+
+/* mask between given given bits numbers (MSB) */
+#define BIT_MASK_BTW(begin,end) (BIT_MASK(end) & ~BIT_MASK(begin)) 
+/* e.g.: BIT_MASK_BTW(4,11) = 0000111111110000 */
+
+/* set bitfield value */
+#define BIT_MASK_SET(lvalue,begin,end,value) \
+do { \
+  lvalue &= ~BIT_MASK_BTW(begin,end); \
+  lvalue |= (((value) << (begin)) & BIT_MASK_BTW(begin,end)); \
+} while(0)
+
+/* get bitfield value */
+#define BIT_MASK_GET(rvalue,begin,end) \
+  (((rvalue) & BIT_MASK_BTW(begin,end)) >> (begin))
+/* e.g., BIT_MASK_GET(0000111100001111, 2, 8) = 0000000100001100 */
+
+/* get bitfield value, sign-extended to given bit number */
+#define BIT_MASK_GET_SX(rvalue,begin,end,sx) \
+  (BIT_MASK_GET(rvalue,begin,end) | ((BIT_MASK_GET(rvalue,begin,end) & BIT_MASK_BTW(end,end)) ? BIT_MASK_BTW(end,sx) : 0))
+/* e.g., BIT_MASK_GET_SX(0000111100001111, 2, 8, 15) = 1111111100001100 */
+
+
+/* These ugly macro hacks allow succinct bitfield accesses */
+/* set a bitfield in a register by "name" */
+#define PKE_REG_MASK_SET(me,reg,flag,value) \
+     BIT_MASK_SET(((me)->regs[PKE_REG_##reg][0]), \
+		  PKE_REG_##reg##_##flag##_B, PKE_REG_##reg##_##flag##_E, \
+		  (value))
+
+/* get a bitfield from a register by "name" */
+#define PKE_REG_MASK_GET(me,reg,flag) \
+     BIT_MASK_GET(((me)->regs[PKE_REG_##reg][0]), \
+                  PKE_REG_##reg##_##flag##_B, PKE_REG_##reg##_##flag##_E)
+
+
+#define PKE_LIMIT(value,max) ((value) > (max) ? (max) : (value))
 
 
 /* One row in the FIFO */
@@ -76,6 +343,8 @@ struct fifo_quadword
   quadword data;
   /* source main memory address (or 0: unknown) */
   address_word source_address;
+  /* DMA tag present in lower 64 bits */
+  unsigned_4 dma_tag_present;
 };
 
 
@@ -89,9 +358,6 @@ struct pke_device
   int pke_number;
   int flags;
 
-  address_word register_memory_addr;
-  address_word fifo_memory_addr;
-
   /* quadword registers */
   quadword regs[PKE_NUM_REGS];
 
@@ -100,10 +366,11 @@ struct pke_device
   int fifo_num_elements; /* no. of quadwords occupied in FIFO */
   int fifo_buffer_size;  /* no. of quadwords of space in FIFO */
   FILE* fifo_trace_file; /* or 0 for no trace */
+  /* XXX: assumes FIFOs grow indefinately */
 
-  /* index into FIFO of current instruction */
-  int program_counter; 
-
+  /* PC */
+  int fifo_pc;  /* 0 .. (fifo_num_elements-1): quadword index of next instruction */
+  int qw_pc;    /* 0 .. 3:                     word index of next instruction */
 };
 
 
@@ -111,7 +378,6 @@ struct pke_device
 
 #define PKE_FLAG_NONE 0
 /* none at present */
-
 
 
 #endif /* H_PKE_H */
