@@ -116,6 +116,9 @@ extern int m68k_aout_machtype;
 #define NO_PSEUDO_DOT
 #endif
 
+extern void m68k_mri_mode_change PARAMS ((int));
+#define MRI_MODE_CHANGE(i) m68k_mri_mode_change (i)
+
 #ifdef BFD_ASSEMBLER
 
 #define tc_frob_symbol(sym,punt) \

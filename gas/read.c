@@ -333,6 +333,8 @@ static const pseudo_typeS potable[] =
   {"lsym", s_lsym, 0},
   {"macro", s_macro, 0},
   {"mexit", s_mexit, 0},
+  {"mri", s_mri, 0},
+  {".mri", s_mri, 0},	/* Special case so .mri works in MRI mode.  */
   {"name", s_ignore, 0},
   {"noformat", s_ignore, 0},
   {"nolist", listing_list, 0},	/* Turn listing off */
@@ -1992,6 +1994,37 @@ s_mexit (ignore)
      int ignore;
 {
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
+}
+
+/* Switch in and out of MRI mode.  */
+
+void
+s_mri (ignore)
+     int ignore;
+{
+  int on, old_flag;
+
+  on = get_absolute_expression ();
+  old_flag = flag_mri;
+  if (on != 0)
+    {
+      flag_mri = 1;
+#ifdef TC_M68K
+      flag_m68k_mri = 1;
+#endif
+    }
+  else
+    {
+      flag_mri = 0;
+      flag_m68k_mri = 0;
+    }
+
+#ifdef MRI_MODE_CHANGE
+  if (on != old_flag)
+    MRI_MODE_CHANGE (on);
+#endif
+
+  demand_empty_rest_of_line ();
 }
 
 /* Handle changing the location counter.  */

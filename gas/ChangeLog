@@ -5,6 +5,32 @@ Mon Feb 12 15:53:46 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 Mon Feb 12 15:41:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* read.c (potable): Add "mri" and ".mri".
+	(s_mri): New function.
+	* read.h (s_mri): Declare.
+	* app.c (scrub_m68k_mri): New static variable.
+	(mri_pseudo): New static variable.
+	(do_scrub_begin): Add m68k_mri parameter.  Use it rather than
+	flag_m68k_mri.  Initialize scrub_m68k_mri.
+	(mri_state, mri_last_ch): New static variables.
+	(struct app_save): Add scrub_m68k_mri, mri_state, and mri_last_ch
+	fields.
+	(app_push): Save new fields.
+	(app_pop): Restore new fields.
+	(do_scrub_chars): Check scrub_m68k_mri rather than flag_mri_mri.
+	If TC_M68K, use a trivial state machine to look for occurrences of
+	the .mri pseudo-op, and change the mode appropriately.
+	* as.h (do_scrub_begin): Update prototype.
+	* input-scrub.c (input_scrub_begin): Pass flag_m68k_mri to
+	do_scrub_begin.
+	* config/tc-m68k.c (reg_prefix_optional_seen): New static
+	variable.
+	(m68k_mri_mode_change): New function.
+	(md_parse_option): Set reg_prefix_optional_seen.
+	* config/tc-m68k.h (m68k_mri_mode_change): Declare.
+	(MRI_MODE_CHANGE): Define.
+	* doc/as.texinfo: Document .mri pseudo-op.
+
 	* app.c (do_scrub_chars): In MRI mode, don't treat '#' as a
 	comment character.
 

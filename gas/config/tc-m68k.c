@@ -74,6 +74,9 @@ int flag_reg_prefix_optional = REGISTER_PREFIX_OPTIONAL;
 int flag_reg_prefix_optional;
 #endif
 
+/* Whether --register-prefix-optional was used on the command line.  */
+static int reg_prefix_optional_seen;
+
 /* The floating point coprocessor to use by default.  */
 static enum m68k_register m68k_float_copnum = COP1;
 
@@ -3488,6 +3491,43 @@ m68k_init_after_args ()
     md_relax_table[TAB (PCINDEX, BYTE)].rlx_more = 0;
 }
 
+/* This is called if we go in or out of MRI mode because of the .mri
+   pseudo-op.  */
+
+void
+m68k_mri_mode_change (on)
+     int on;
+{
+  if (on)
+    {
+      if (! flag_reg_prefix_optional)
+	{
+	  flag_reg_prefix_optional = 1;
+#ifdef REGISTER_PREFIX
+	  init_regtable ();
+#endif
+	}
+      m68k_abspcadd = 1;
+      m68k_rel32 = 0;
+    }
+  else
+    {
+      if (! reg_prefix_optional_seen)
+	{
+#ifdef REGISTER_PREFIX_OPTIONAL
+	  flag_reg_prefix_optional = REGISTER_PREFIX_OPTIONAL;
+#else
+	  flag_reg_prefix_optional = 0;
+#endif
+#ifdef REGISTER_PREFIX
+	  init_regtable ();
+#endif
+	}
+      m68k_abspcadd = 0;
+      m68k_rel32 = 1;
+    }
+}
+
 /* Equal to MAX_PRECISION in atof-ieee.c */
 #define MAX_LITTLENUMS 6
 
@@ -6189,6 +6229,7 @@ md_parse_option (c, arg)
 
     case OPTION_REGISTER_PREFIX_OPTIONAL:
       flag_reg_prefix_optional = 1;
+      reg_prefix_optional_seen = 1;
       break;
 
       /* -V: SVR4 argument to print version ID.  */
