@@ -1,3 +1,10 @@
+2000-01-27  Thomas de Lellis  <tdel@windriver.com>
+
+        * arm-dis.c (printf_insn_big_arm): Treat ELF symbols with the
+	ARM_STT_16BIT flag as Thumb code symbols.
+        
+        * arm-dis.c (printf_insn_little_arm): Ditto.
+
 2000-01-25  Thomas de Lellis  <tdel@windriver.com>
 
 	* arm-dis.c (printf_insn_thumb): Prevent double dumping

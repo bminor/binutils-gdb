@@ -1,3 +1,10 @@
+2000-01-27  Thomas de Lellis <tdel@windriver.com>
+
+        * config/tc-arm.c (armadjust_symtab): If the assembler is in
+	Thumb mode but the label seen was not declared as '.thumb_func'
+	then set the ST_INFO type to STT_ARM_16BIT mode.   This allows
+	correct disassembly of Thumb code bounded by non function labels. 
+
 2000-01-27  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* Makefile.am (MULTI_CFILES): Add config/e-i386aout.c

@@ -714,7 +714,7 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info, no_pipeline_knowledge)
 	    {
 	    case R_ARM_PC24:
 	      /* This one is a call from arm code.  We need to look up
-	         the target of the call. If it is a thumb target, we
+	         the target of the call.  If it is a thumb target, we
 	         insert glue.  */
 
 	      if (ELF_ST_TYPE(h->type) == STT_ARM_TFUNC)
@@ -723,7 +723,7 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info, no_pipeline_knowledge)
 
 	    case R_ARM_THM_PC22:
 	      /* This one is a call from thumb code.  We look
-	         up the target of the call. If it is not a thumb
+	         up the target of the call.  If it is not a thumb
                  target, we insert glue.  */
 
 	      if (ELF_ST_TYPE (h->type) != STT_ARM_TFUNC)
@@ -737,6 +737,7 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info, no_pipeline_knowledge)
     }
 
   return true;
+  
 error_return:
   if (free_relocs != NULL)
     free (free_relocs);
@@ -744,8 +745,8 @@ error_return:
     free (free_contents);
   if (free_extsyms != NULL)
     free (free_extsyms);
+  
   return false;
-
 }
 
 /* The thumb form of a long branch is a bit finicky, because the offset
@@ -2103,10 +2104,22 @@ elf32_arm_get_symbol_type (elf_sym, type)
      Elf_Internal_Sym * elf_sym;
      int type;
 {
-  if (ELF_ST_TYPE (elf_sym->st_info) == STT_ARM_TFUNC)
-    return ELF_ST_TYPE (elf_sym->st_info);
-  else
-    return type;
+  switch (ELF_ST_TYPE (elf_sym->st_info))
+    {
+    case STT_ARM_TFUNC:
+      return ELF_ST_TYPE (elf_sym->st_info);
+      break;
+    case STT_ARM_16BIT:
+      /* If the symbol is not an object, return the STT_ARM_16BIT flag.
+	 This allows us to distinguish between data used by Thumb instructions
+	 and non-data (which is probably code) inside Thumb regions of an
+	 executable.  */
+      if (type != STT_OBJECT)
+	return ELF_ST_TYPE (elf_sym->st_info);
+      break;
+    }
+
+  return type;
 }
 
 static asection *

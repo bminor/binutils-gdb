@@ -871,15 +871,13 @@ print_insn_big_arm (pc, info)
   unsigned char      b[4];
   long               given;
   int                status;
-  coff_symbol_type * cs;
-  elf_symbol_type *  es;
   int                is_thumb;
   
   if (info->disassembler_options)
     {
       parse_disassembler_options (info->disassembler_options);
       
-      /* To avoid repeated parsing of this option, we remove it here.  */
+      /* To avoid repeated parsing of the options, we remove it here.  */
       info->disassembler_options = NULL;
     }
   
@@ -889,6 +887,8 @@ print_insn_big_arm (pc, info)
     {
       if (bfd_asymbol_flavour (*info->symbols) == bfd_target_coff_flavour)
 	{
+	  coff_symbol_type * cs;
+	  
 	  cs = coffsymbol (*info->symbols);
 	  is_thumb = (   cs->native->u.syment.n_sclass == C_THUMBEXT
 		      || cs->native->u.syment.n_sclass == C_THUMBSTAT
@@ -898,9 +898,11 @@ print_insn_big_arm (pc, info)
 	}
       else if (bfd_asymbol_flavour (*info->symbols) == bfd_target_elf_flavour)
 	{
+	  elf_symbol_type *  es;
+	  
 	  es = *(elf_symbol_type **)(info->symbols);
-	  is_thumb = ELF_ST_TYPE (es->internal_elf_sym.st_info) ==
-	    STT_ARM_TFUNC;
+	  is_thumb = (ELF_ST_TYPE (es->internal_elf_sym.st_info) == STT_ARM_TFUNC)
+	          || (ELF_ST_TYPE (es->internal_elf_sym.st_info) == STT_ARM_16BIT);
 	}
     }
 
@@ -953,15 +955,13 @@ print_insn_little_arm (pc, info)
   unsigned char      b[4];
   long               given;
   int                status;
-  coff_symbol_type * cs;
-  elf_symbol_type *  es;
   int                is_thumb;
 
   if (info->disassembler_options)
     {
       parse_disassembler_options (info->disassembler_options);
       
-      /* To avoid repeated parsing of this option, we remove it here.  */
+      /* To avoid repeated parsing of the options, we remove it here.  */
       info->disassembler_options = NULL;
     }
 
@@ -971,6 +971,8 @@ print_insn_little_arm (pc, info)
     {
       if (bfd_asymbol_flavour (*info->symbols) == bfd_target_coff_flavour)
 	{
+	  coff_symbol_type * cs;
+	  
 	  cs = coffsymbol (*info->symbols);
 	  is_thumb = (   cs->native->u.syment.n_sclass == C_THUMBEXT
 		      || cs->native->u.syment.n_sclass == C_THUMBSTAT
@@ -980,9 +982,11 @@ print_insn_little_arm (pc, info)
 	}
       else if (bfd_asymbol_flavour (*info->symbols) == bfd_target_elf_flavour)
 	{
+	  elf_symbol_type *  es;
+	  
 	  es = *(elf_symbol_type **)(info->symbols);
-	  is_thumb = ELF_ST_TYPE (es->internal_elf_sym.st_info) ==
-	    STT_ARM_TFUNC;
+	  is_thumb = (ELF_ST_TYPE (es->internal_elf_sym.st_info) == STT_ARM_TFUNC)
+	          || (ELF_ST_TYPE (es->internal_elf_sym.st_info) == STT_ARM_16BIT);
 	}
     }
   

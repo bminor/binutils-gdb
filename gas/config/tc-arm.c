@@ -6888,12 +6888,14 @@ arm_adjust_symtab ()
     {
       if (ARM_IS_THUMB (sym))
         {
+	  elf_sym = elf_symbol (symbol_get_bfdsym (sym));
+	  bind = ELF_ST_BIND (elf_sym);
+	  
+	  /* If it's a .thumb_func, declare it as so, else tag label as .code 16.  */
 	  if (THUMB_IS_FUNC (sym))
-	    {
-	      elf_sym = elf_symbol (symbol_get_bfdsym (sym));
-	      bind = ELF_ST_BIND (elf_sym);
-	      elf_sym->internal_elf_sym.st_info = ELF_ST_INFO (bind, STT_ARM_TFUNC);
-            }
+	    elf_sym->internal_elf_sym.st_info = ELF_ST_INFO (bind, STT_ARM_TFUNC);
+	  else
+	    elf_sym->internal_elf_sym.st_info = ELF_ST_INFO (bind, STT_ARM_16BIT);
          }
      }
 #endif
