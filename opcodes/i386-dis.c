@@ -250,6 +250,9 @@ fetch_data (info, addr)
 #define OPSUF OP_3DNowSuffix, 0
 #define OPSIMD OP_SIMD_Suffix, 0
 
+#define cond_jump_flag NULL, cond_jump_mode
+#define loop_jcxz_flag NULL, loop_jcxz_mode
+
 /* bits in sizeflag */
 #if 0 /* leave undefined until someone adds the extra flag to objdump */
 #define SUFFIX_ALWAYS 4
@@ -312,6 +315,8 @@ static void BadOp PARAMS ((void));
 #define q_mode 5  /* quad word operand */
 #define x_mode 6
 #define m_mode 7  /* d_mode in 32bit, q_mode in 64bit mode.  */
+#define cond_jump_mode 8
+#define loop_jcxz_mode 9
 
 #define es_reg 100
 #define cs_reg 101
@@ -430,6 +435,7 @@ struct dis386 {
    'A' => print 'b' if no register operands or suffix_always is true
    'B' => print 'b' if suffix_always is true
    'E' => print 'e' if 32-bit form of jcxz
+   'F' => print 'w' or 'l' depending on address size prefix (loop insns)
    'L' => print 'l' if suffix_always is true
    'N' => print 'n' if instruction has no wait "prefix"
    'O' => print 'd', or 'o'
@@ -574,23 +580,23 @@ static const struct dis386 dis386_att[] = {
   { "outsb",	indirDX, Xb, XX },
   { "outsR",	indirDX, Xv, XX },
   /* 70 */
-  { "jo",	Jb, XX, XX },
-  { "jno",	Jb, XX, XX },
-  { "jb",	Jb, XX, XX },
-  { "jae",	Jb, XX, XX },
-  { "je",	Jb, XX, XX },
-  { "jne",	Jb, XX, XX },
-  { "jbe",	Jb, XX, XX },
-  { "ja",	Jb, XX, XX },
+  { "jo",	Jb, cond_jump_flag, XX },
+  { "jno",	Jb, cond_jump_flag, XX },
+  { "jb",	Jb, cond_jump_flag, XX },
+  { "jae",	Jb, cond_jump_flag, XX },
+  { "je",	Jb, cond_jump_flag, XX },
+  { "jne",	Jb, cond_jump_flag, XX },
+  { "jbe",	Jb, cond_jump_flag, XX },
+  { "ja",	Jb, cond_jump_flag, XX },
   /* 78 */
-  { "js",	Jb, XX, XX },
-  { "jns",	Jb, XX, XX },
-  { "jp",	Jb, XX, XX },
-  { "jnp",	Jb, XX, XX },
-  { "jl",	Jb, XX, XX },
-  { "jge",	Jb, XX, XX },
-  { "jle",	Jb, XX, XX },
-  { "jg",	Jb, XX, XX },
+  { "js",	Jb, cond_jump_flag, XX },
+  { "jns",	Jb, cond_jump_flag, XX },
+  { "jp",	Jb, cond_jump_flag, XX },
+  { "jnp",	Jb, cond_jump_flag, XX },
+  { "jl",	Jb, cond_jump_flag, XX },
+  { "jge",	Jb, cond_jump_flag, XX },
+  { "jle",	Jb, cond_jump_flag, XX },
+  { "jg",	Jb, cond_jump_flag, XX },
   /* 80 */
   { GRP1b },
   { GRP1S },
@@ -701,10 +707,10 @@ static const struct dis386 dis386_att[] = {
   { FLOAT },
   { FLOAT },
   /* e0 */
-  { "loopne",	Jb, XX, XX },
-  { "loope",	Jb, XX, XX },
-  { "loop",	Jb, XX, XX },
-  { "jEcxz",	Jb, XX, XX },
+  { "loopneF",	Jb, loop_jcxz_flag, XX },
+  { "loopeF",	Jb, loop_jcxz_flag, XX },
+  { "loopF",	Jb, loop_jcxz_flag, XX },
+  { "jEcxz",	Jb, loop_jcxz_flag, XX },
   { "inB",	AL, Ib, XX },
   { "inS",	eAX, Ib, XX },
   { "outB",	Ib, AL, XX },
@@ -1160,23 +1166,23 @@ static const struct dis386 disx86_64_att[] = {
   { "outsb",	indirDX, Xb, XX },
   { "outsR",	indirDX, Xv, XX },
   /* 70 */
-  { "jo",	Jb, XX, XX },
-  { "jno",	Jb, XX, XX },
-  { "jb",	Jb, XX, XX },
-  { "jae",	Jb, XX, XX },
-  { "je",	Jb, XX, XX },
-  { "jne",	Jb, XX, XX },
-  { "jbe",	Jb, XX, XX },
-  { "ja",	Jb, XX, XX },
+  { "jo",	Jb, cond_jump_flag, XX },
+  { "jno",	Jb, cond_jump_flag, XX },
+  { "jb",	Jb, cond_jump_flag, XX },
+  { "jae",	Jb, cond_jump_flag, XX },
+  { "je",	Jb, cond_jump_flag, XX },
+  { "jne",	Jb, cond_jump_flag, XX },
+  { "jbe",	Jb, cond_jump_flag, XX },
+  { "ja",	Jb, cond_jump_flag, XX },
   /* 78 */
-  { "js",	Jb, XX, XX },
-  { "jns",	Jb, XX, XX },
-  { "jp",	Jb, XX, XX },
-  { "jnp",	Jb, XX, XX },
-  { "jl",	Jb, XX, XX },
-  { "jge",	Jb, XX, XX },
-  { "jle",	Jb, XX, XX },
-  { "jg",	Jb, XX, XX },
+  { "js",	Jb, cond_jump_flag, XX },
+  { "jns",	Jb, cond_jump_flag, XX },
+  { "jp",	Jb, cond_jump_flag, XX },
+  { "jnp",	Jb, cond_jump_flag, XX },
+  { "jl",	Jb, cond_jump_flag, XX },
+  { "jge",	Jb, cond_jump_flag, XX },
+  { "jle",	Jb, cond_jump_flag, XX },
+  { "jg",	Jb, cond_jump_flag, XX },
   /* 80 */
   { GRP1b },
   { GRP1S },
@@ -1287,10 +1293,10 @@ static const struct dis386 disx86_64_att[] = {
   { FLOAT },
   { FLOAT },
   /* e0 */
-  { "loopne",	Jb, XX, XX },
-  { "loope",	Jb, XX, XX },
-  { "loop",	Jb, XX, XX },
-  { "jEcxz",	Jb, XX, XX },
+  { "loopneF",	Jb, loop_jcxz_flag, XX },
+  { "loopeF",	Jb, loop_jcxz_flag, XX },
+  { "loopF",	Jb, loop_jcxz_flag, XX },
+  { "jEcxz",	Jb, loop_jcxz_flag, XX },
   { "inB",	AL, Ib, XX },
   { "inS",	eAX, Ib, XX },
   { "outB",	Ib, AL, XX },
@@ -1763,23 +1769,23 @@ static const struct dis386 dis386_twobyte_att[] = {
   { PREGRP23 },
   { PREGRP20 },
   /* 80 */
-  { "jo", Jv, XX, XX },
-  { "jno", Jv, XX, XX },
-  { "jb", Jv, XX, XX },
-  { "jae", Jv, XX, XX },
-  { "je", Jv, XX, XX },
-  { "jne", Jv, XX, XX },
-  { "jbe", Jv, XX, XX },
-  { "ja", Jv, XX, XX },
+  { "jo",  Jv, cond_jump_flag, XX },
+  { "jno", Jv, cond_jump_flag, XX },
+  { "jb",  Jv, cond_jump_flag, XX },
+  { "jae", Jv, cond_jump_flag, XX },
+  { "je",  Jv, cond_jump_flag, XX },
+  { "jne", Jv, cond_jump_flag, XX },
+  { "jbe", Jv, cond_jump_flag, XX },
+  { "ja",  Jv, cond_jump_flag, XX },
   /* 88 */
-  { "js", Jv, XX, XX },
-  { "jns", Jv, XX, XX },
-  { "jp", Jv, XX, XX },
-  { "jnp", Jv, XX, XX },
-  { "jl", Jv, XX, XX },
-  { "jge", Jv, XX, XX },
-  { "jle", Jv, XX, XX },
-  { "jg", Jv, XX, XX },
+  { "js",  Jv, cond_jump_flag, XX },
+  { "jns", Jv, cond_jump_flag, XX },
+  { "jp",  Jv, cond_jump_flag, XX },
+  { "jnp", Jv, cond_jump_flag, XX },
+  { "jl",  Jv, cond_jump_flag, XX },
+  { "jge", Jv, cond_jump_flag, XX },
+  { "jle", Jv, cond_jump_flag, XX },
+  { "jg",  Jv, cond_jump_flag, XX },
   /* 90 */
   { "seto", Eb, XX, XX },
   { "setno", Eb, XX, XX },
@@ -3126,17 +3132,44 @@ print_insn_i386 (pc, info)
       used_prefixes |= PREFIX_LOCK;
     }
 
-  if (!uses_SSE_prefix && (prefixes & PREFIX_DATA))
-    sizeflag ^= DFLAG;
-
   if (prefixes & PREFIX_ADDR)
     {
       sizeflag ^= AFLAG;
-      if (sizeflag & AFLAG)
-        oappend ("addr32 ");
-      else
-	oappend ("addr16 ");
-      used_prefixes |= PREFIX_ADDR;
+      if (dp->bytemode2 != loop_jcxz_mode)
+	{
+	  if (sizeflag & AFLAG)
+	    oappend ("addr32 ");
+	  else
+	    oappend ("addr16 ");
+	  used_prefixes |= PREFIX_ADDR;
+	}
+    }
+
+  if (!uses_SSE_prefix && (prefixes & PREFIX_DATA))
+    {
+      sizeflag ^= DFLAG;
+      if (dp->bytemode2 == cond_jump_mode && dp->bytemode1 == v_mode)
+	{
+	  if (sizeflag & DFLAG)
+	    oappend ("data32 ");
+	  else
+	    oappend ("data16 ");
+	  used_prefixes |= PREFIX_DATA;
+	}
+    }
+
+  if (dp->bytemode2 == cond_jump_mode || dp->bytemode2 == loop_jcxz_mode)
+    {
+      if ((prefixes & (PREFIX_CS | PREFIX_DS)) == PREFIX_CS)
+	{
+	  oappend ("cs ");
+	  used_prefixes |= PREFIX_CS;
+	}
+      if ((prefixes & (PREFIX_CS | PREFIX_DS)) == PREFIX_DS)
+	{
+	  oappend ("ds ");
+	  used_prefixes |= PREFIX_DS;
+	}
     }
 
   if (need_modrm)
@@ -3717,6 +3750,21 @@ putop (template, sizeflag)
 	case 'E':		/* For jcxz/jecxz */
 	  if (sizeflag & AFLAG)
 	    *obufp++ = 'e';
+	  used_prefixes |= (prefixes & PREFIX_ADDR);
+	  break;
+	case 'F':
+	  if ((prefixes & PREFIX_ADDR)
+#ifdef SUFFIX_ALWAYS
+	      || (sizeflag & SUFFIX_ALWAYS)
+#endif
+	      )
+	    {
+	      if (sizeflag & AFLAG)
+		*obufp++ = 'l';
+	      else
+		*obufp++ = 'w';
+	      used_prefixes |= (prefixes & PREFIX_ADDR);
+	    }
 	  break;
 	case 'I':
           if (intel_syntax)
@@ -4703,7 +4751,6 @@ OP_J (bytemode, sizeflag)
 	     displacement is added!  */
 	  mask = 0xffff;
 	}
-      used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     default:
       oappend (INTERNAL_DISASSEMBLER_ERROR);

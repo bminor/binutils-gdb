@@ -1,3 +1,17 @@
+2001-06-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* i386-dis.c (cond_jump_flag, loop_jcxz_flag): Define.
+	(cond_jump_mode, loop_jcxz_mode): Define.
+	(dis386_att): Add cond_jump_flag and loop_jcxz_flag as
+	appropriate, and 'F' suffix to loop insns.
+	(disx86_64_att): Likewise.
+	(dis386_twobyte_att): Likewise.
+	(print_insn_i386): Don't output addr prefix for loop, jcxz insns.
+	Output data size prefix for long conditional jumps.  Output cs and
+	ds branch hints.
+	(putop): Handle 'F', and mark PREFIX_ADDR used for case 'E'.
+	(OP_J): Don't make PREFIX_DATA used.
+
 2001-06-04  Alexandre Oliva  <aoliva@redhat.com>
 
 	* sh-opc.h (sh_table): Complete last element entry to avoid
