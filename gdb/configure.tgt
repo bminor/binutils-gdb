@@ -294,6 +294,9 @@ tic80-*-*)		gdb_target=tic80
 
 vax-*-*)		gdb_target=vax ;;
 
+fr30-*-*)		gdb_target=fr30
+			;;
+
 v850-*-*)		gdb_target=v850
 			case ${gdb_host}-${enable_gdbtk-no} in
 			cygwin*-yes )
