@@ -1,5 +1,8 @@
 2002-03-05  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-hppa.c (clobber_millicode_symbols): Remove hack to keep
+	symbols that have been forced local.
+
 	* elflink.h (elf_bfd_final_link): Call elf_link_output_extsym
 	to output forced local syms for non-shared link.
 	(elf_link_output_extsym): Tweak condition for calling backend

@@ -2217,10 +2217,6 @@ clobber_millicode_symbols (h, info)
       && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
     {
       elf32_hppa_hide_symbol (info, h, true);
-
-      /* ?!? We only want to remove these from the dynamic symbol table.
-	 Therefore we do not leave ELF_LINK_FORCED_LOCAL set.  */
-      h->elf_link_hash_flags &= ~ELF_LINK_FORCED_LOCAL;
     }
   return true;
 }
