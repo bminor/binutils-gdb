@@ -1112,9 +1112,6 @@ lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
 	   `echo $(DEPFILES) | sed 's/\.o /\.c /g'`
 
-flint:  $(filter-out %.y,$(LINTFILES)) $(DEPFILES:.c=.o)
-	flint co.lnt $(LINTFLAGS) $^
-
 gdb.cxref: $(SFILES)
 	cxref -I. $(SFILES) >gdb.cxref
 
