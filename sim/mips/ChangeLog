@@ -1,3 +1,9 @@
+2005-01-14  Andrew Cagney  <cagney@gnu.org>
+
+	* configure.ac: Sinclude aclocal.m4 before common.m4.  Add
+	explicit call to AC_CONFIG_HEADER.
+	* configure: Regenerate.
+
 2005-01-12  Andrew Cagney  <cagney@gnu.org>
 
 	* configure.ac: Update to use ../common/common.m4.

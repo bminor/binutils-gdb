@@ -1,3 +1,10 @@
+2005-01-14  Andrew Cagney  <cagney@gnu.org>
+
+	* configure.ac: Replace SIM_AC_COMMON with sinclude of common.m4.
+	Add explicit call to AC_CONFIG_HEADER.
+	* common.m4: Delete call to AC_CONFIG_HEADER, update usage.
+	* configure: Re-generate.
+
 2005-01-12  Andrew Cagney  <cagney@gnu.org>
 
 	* common.m4: New file, based on of aclocal.m4.

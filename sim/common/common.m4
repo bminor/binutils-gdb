@@ -10,13 +10,13 @@
 # dnl Process this file with autoconf to produce a configure script.
 # AC_PREREQ(2.5)dnl
 # AC_INIT(Makefile.in)
+# AC_CONFIG_HEADER(config.h:config.in)
 #
+# sinclude(../common/aclocal.m4)
 # sinclude(../common/common.m4)
 #
 # ... target specific stuff ...
 
-# autoconf.info says this should be called right after AC_INIT.
-AC_CONFIG_HEADER(config.h:config.in)
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 AC_PROG_CC
