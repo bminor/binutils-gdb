@@ -3,7 +3,7 @@ Wed Aug  9 11:42:36 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 	 * configure.in (powerpc-*-aix*): Recognize as a new gdb host
 	 and target.
 	 (powerpc-*-eabi*): Don't set configdirs.
-	 (powerpcle-*-eabi*0: Likewise.
+	 (powerpcle-*-eabi*): Likewise.
 	 * configure: Updated.
 	 * rs6000-nat.c (vmap_ldinfo): Don't relocate data addresses
 	 for the main objfile if DONT_RELOCATE_SYMFILE_OBJFILE is
