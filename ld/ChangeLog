@@ -1,3 +1,110 @@
+2002-02-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	Contribute sh64-elf.
+	2002-01-24  Alexandre Oliva  <aoliva@redhat.com>
+	* emulparams/shelf32.sh (STACK_ADDR): Define as formerly defined
+	in OTHER_RELOCATABLE_SECTIONS.
+	2002-01-18  Alexandre Oliva  <aoliva@redhat.com>
+	* emulparams/shelf32.sh (STACK_ADDR): Define.
+	(OTHER_RELOCATABLE_SECTIONS): Renamed to...
+	(OTHER_SECTIONS): this.	 Removed stack settings.
+	* emulparams/shelf64.sh (OTHER_RELOCATABLE_SECTIONS): Do not set.
+	(OTHER_SECTIONS): Reset after sourcing shelf32.sh.
+	2001-03-12  DJ Delorie	<dj@redhat.com>
+	* emultempl/sh64elf.em (sh64_elf_$_before_allocation): Disable
+	relaxing if any shmedia or mixed sections are found.
+	2001-03-07  DJ Delorie	<dj@redhat.com>
+	* emultempl/sh64elf.em (sh64_elf_before_allocation): Pass f to
+	einfo.	Gracefully decline to output to non-elf formats.
+	2001-03-06  Hans-Peter Nilsson	<hpn@redhat.com>
+	* emulparams/shelf64.sh (OTHER_RELOCATING_SECTIONS) <.stack>:
+	Default to _end aligned to next multiple of 0x40000, plus 0x40000.
+	* emulparams/shelf32.sh: Ditto.
+	2001-01-14  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* emulparams/shelf32.sh (OTHER_RELOCATING_SECTIONS): Tweak
+	comment.
+	2001-01-10  Ben Elliston  <bje@redhat.com>
+	* emulparams/shelf32.sh (OTHER_RELOCATING_SECTIONS): Avoid
+	non-portable shell constructs. From Hans-Peter Nilsson.
+	2001-01-09  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* emulparams/shelf64.sh (EXTRA_EM_FILE): Define empty.
+	* Makefile.am (eshelf64.c, eshlelf64.c, eshlelf32.c): Adjust
+	dependencies to the shell script include chain.
+	* Makefile.in: Regenerate.
+	2001-01-06  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* emultempl/sh64elf.em: Update and tweak comments.
+	(sh64_elf_${EMULATION_NAME}_after_allocation): Always allocate and
+	make a .cranges section SEC_IN_MEMORY.
+	2000-12-30  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* emultempl/sh64elf.em
+	(sh64_elf_${EMULATION_NAME}_before_allocation): Don't stop when
+	.cranges section found to be necessary; continue and set stored
+	section contents flags for sections with non-mixed contents.
+	Use a struct sh64_section_data container and sh64_elf_section_data
+	to store contents-type flags.
+	Remove unused update of "isec".
+	(sh64_elf_${EMULATION_NAME}_after_allocation): Only process
+	sections marked SHF_SH5_ISA32_MIXED.  Use sh64_elf_section_data to
+	access contents-type flags.  Assert that the associated container
+	is initialized.	 Use that container, not elf_gp_size, to hold size
+	of linker-generated cranges contents.
+	2000-12-18  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* emultempl/sh64elf.em
+	(sh64_elf_${EMULATION_NAME}_before_allocation): Exit early if
+	there's already a .cranges section.  When section flag difference
+	is found, don't NULL-check cranges a second time.  Tweak comments.
+	(sh64_elf_${EMULATION_NAME}_after_allocation): Use size after
+	merging, not max size, as size of ld-generated .cranges contents.
+	Don't set ELF section flags in output section.	When checking for
+	needed .cranges descriptors, don't use a variable; compare
+	incoming ELF section flags directly to SHF_SH5_ISA32_MIXED.  Tweak
+	comments.
+	2000-12-18  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* emultempl/sh64elf.em: New file.
+	* Makefile.am (eshelf32.c, eshlelf32.c): Adjust dependencies.
+	* Makefile.in: Regenerate.
+	* emulparams/shelf32.sh (OUTPUT_FORMAT): Only set if not set.
+	(OTHER_RELOCATING_SECTIONS): Ditto.
+	(EXTRA_EM_FILE): New, set to sh64elf if not set.
+	* emulparams/shlelf32.sh: Stub out all settings except
+	OUTPUT_FORMAT.	Source shelf32.sh.
+	* emulparams/shelf64.sh: Similar, but also keep ELF_SIZE and
+	OTHER_RELOCATING_SECTIONS.
+	(OTHER_RELOCATING_SECTIONS): Remove .cranges.
+	* emulparams/shlelf64.sh: Stub out all settings except
+	OUTPUT_FORMAT.	Source shelf64.sh.
+	2000-12-15  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* emulparams/shelf64.sh (OTHER_RELOCATING_SECTIONS): Include
+	.cranges section.
+	(DATA_START_SYMBOLS): Define, provide ___data.
+	(OTHER_READONLY_SYMBOLS): Define, provide ___rodata and align to 8
+	for consecutive .data section.
+	(OTHER_GOT_SECTIONS): Define, align to 8 for consecutive .bss
+	section after .data section.
+	* emulparams/shlelf64.sh: Ditto.
+	* emulparams/shelf32.sh: Ditto.
+	(ALIGNMENT): Define to 8.
+	* emulparams/shelf32.sh: Ditto.
+	2000-12-12  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* configure.tgt (sh64-*-elf*): Assign targ_extra_libpath to get
+	built-in linker scripts.
+	2000-11-30  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* emulparams/shlelf64.sh: New.
+	* emulparams/shelf64.sh: New.
+	* configure.tgt (sh64-*-elf*): Add shelf64 and shlelf64 to
+	targ_extra_emuls.
+	* Makefile.am: Add support for shlelf64 and shelf64.
+	* Makefile.in: Regenerate.
+	2000-11-29  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* configure.tgt (sh64-*-elf*): Add shelf as default.
+	Add shlelf to targ_extra_emuls.
+	2000-11-24  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* emulparams/shelf32.sh: New file.
+	* emulparams/shlelf32.sh: New file.
+	* Makefile.am: Add support for shlelf32 and shelf32.
+	* configure.tgt: Map sh64-*-elf* to shlelf32 and shelf32.
+	* Makefile.in: Regenerate.
+
 2002-02-05  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ldlang.c (lang_reset_memory_regions): Rename from

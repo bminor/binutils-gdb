@@ -237,6 +237,8 @@ ALL_EMULATIONS = \
 	eriscix.o \
 	esa29200.o \
 	esh.o \
+	eshelf32.o \
+	eshlelf32.o \
 	eshelf.o \
 	eshelf_linux.o \
 	eshlelf_linux.o \
@@ -266,6 +268,8 @@ ALL_EMULATIONS = \
 ALL_64_EMULATIONS = \
 	eelf64_aix.o \
 	eelf64_ia64.o \
+	eshelf64.o \
+	eshlelf64.o \
 	eelf_x86_64.o \
 	eelf64_s390.o \
 	eelf64_sparc.o \
@@ -840,6 +844,14 @@ esh.c: $(srcdir)/emulparams/sh.sh \
 eshelf.c: $(srcdir)/emulparams/shelf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shelf "$(tdir_shelf)"
+eshelf32.c: $(srcdir)/emulparams/shelf32.sh \
+  $(BFDDIR)/libbfd.h $(INCDIR)/libiberty.h \
+  $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shelf32 "$(tdir_shelf32)"
+eshelf64.c: $(srcdir)/emulparams/shelf64.sh $(srcdir)/emulparams/shelf32.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shelf64 "$(tdir_shelf64)"
 eshelf_linux.c: $(srcdir)/emulparams/shelf_linux.sh \
   $(srcdir)/emulparams/shlelf_linux.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -860,6 +872,15 @@ eshlelf.c: $(srcdir)/emulparams/shlelf.sh \
   $(srcdir)/emulparams/shelf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shlelf "$(tdir_shlelf)"
+eshlelf32.c: $(srcdir)/emulparams/shlelf32.sh \
+  $(BFDDIR)/libbfd.h $(INCDIR)/libiberty.h $(srcdir)/emulparams/shelf32.sh \
+  $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shlelf32 "$(tdir_shlelf32)"
+eshlelf64.c: $(srcdir)/emulparams/shlelf64.sh \
+  $(srcdir)/emulparams/shelf64.sh $(srcdir)/emulparams/shelf32.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shlelf64 "$(tdir_shlelf64)"
 eshl.c: $(srcdir)/emulparams/shl.sh \
   $(srcdir)/emulparams/sh.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sh.sc ${GEN_DEPENDS}

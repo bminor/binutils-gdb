@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -346,6 +346,8 @@ ALL_EMULATIONS = \
 	eriscix.o \
 	esa29200.o \
 	esh.o \
+	eshelf32.o \
+	eshlelf32.o \
 	eshelf.o \
 	eshelf_linux.o \
 	eshlelf_linux.o \
@@ -376,6 +378,8 @@ ALL_EMULATIONS = \
 ALL_64_EMULATIONS = \
 	eelf64_aix.o \
 	eelf64_ia64.o \
+	eshelf64.o \
+	eshlelf64.o \
 	eelf_x86_64.o \
 	eelf64_s390.o \
 	eelf64_sparc.o \
@@ -684,7 +688,7 @@ uninstall-info:
 	else ii=; fi; \
 	list='$(INFO_DEPS)'; \
 	for file in $$list; do \
-	  test -z "$$ii" \
+	  test -z "$ii" \
 	    || install-info --info-dir=$(DESTDIR)$(infodir) --remove $$file; \
 	done
 	@$(NORMAL_UNINSTALL)
@@ -797,7 +801,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" != "." || dot_seen=yes; \
+	  test "$$subdir" = "." && dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \
@@ -1561,6 +1565,14 @@ esh.c: $(srcdir)/emulparams/sh.sh \
 eshelf.c: $(srcdir)/emulparams/shelf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shelf "$(tdir_shelf)"
+eshelf32.c: $(srcdir)/emulparams/shelf32.sh \
+  $(BFDDIR)/libbfd.h $(INCDIR)/libiberty.h \
+  $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shelf32 "$(tdir_shelf32)"
+eshelf64.c: $(srcdir)/emulparams/shelf64.sh $(srcdir)/emulparams/shelf32.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shelf64 "$(tdir_shelf64)"
 eshelf_linux.c: $(srcdir)/emulparams/shelf_linux.sh \
   $(srcdir)/emulparams/shlelf_linux.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -1581,6 +1593,15 @@ eshlelf.c: $(srcdir)/emulparams/shlelf.sh \
   $(srcdir)/emulparams/shelf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shlelf "$(tdir_shlelf)"
+eshlelf32.c: $(srcdir)/emulparams/shlelf32.sh \
+  $(BFDDIR)/libbfd.h $(INCDIR)/libiberty.h $(srcdir)/emulparams/shelf32.sh \
+  $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shlelf32 "$(tdir_shlelf32)"
+eshlelf64.c: $(srcdir)/emulparams/shlelf64.sh \
+  $(srcdir)/emulparams/shelf64.sh $(srcdir)/emulparams/shelf32.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shlelf64 "$(tdir_shlelf64)"
 eshl.c: $(srcdir)/emulparams/shl.sh \
   $(srcdir)/emulparams/sh.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sh.sc ${GEN_DEPENDS}

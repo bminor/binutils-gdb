@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2002-01-31 17:09+0000\n"
+"POT-Creation-Date: 2002-02-08 04:11-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -271,7 +271,7 @@ msgstr ""
 msgid "Errors encountered processing file %s for interworking"
 msgstr ""
 
-#: emultempl/pe.em:1297 ldlang.c:2050 ldlang.c:4441 ldlang.c:4474
+#: emultempl/pe.em:1297 ldlang.c:2049 ldlang.c:4440 ldlang.c:4473
 #: ldmain.c:1069
 msgid "%P%F: bfd_link_hash_lookup failed: %E\n"
 msgstr ""
@@ -478,206 +478,206 @@ msgstr ""
 msgid "%P%F: cannot represent machine `%s'\n"
 msgstr ""
 
-#: ldlang.c:771
+#: ldlang.c:770
 msgid ""
 "\n"
 "Memory Configuration\n"
 "\n"
 msgstr ""
 
-#: ldlang.c:773
+#: ldlang.c:772
 msgid "Name"
 msgstr ""
 
-#: ldlang.c:773
+#: ldlang.c:772
 msgid "Origin"
 msgstr ""
 
-#: ldlang.c:773
+#: ldlang.c:772
 msgid "Length"
 msgstr ""
 
-#: ldlang.c:773
+#: ldlang.c:772
 msgid "Attributes"
 msgstr ""
 
-#: ldlang.c:815
+#: ldlang.c:814
 msgid ""
 "\n"
 "Linker script and memory map\n"
 "\n"
 msgstr ""
 
-#: ldlang.c:832
+#: ldlang.c:831
 msgid "%P%F: Illegal use of `%s' section\n"
 msgstr ""
 
-#: ldlang.c:842
+#: ldlang.c:841
 msgid "%P%F: output format %s cannot represent section called %s\n"
 msgstr ""
 
-#: ldlang.c:1004
+#: ldlang.c:1003
 msgid "%P: %B: warning: ignoring duplicate section `%s'\n"
 msgstr ""
 
-#: ldlang.c:1007
+#: ldlang.c:1006
 msgid "%P: %B: warning: ignoring duplicate `%s' section symbol `%s'\n"
 msgstr ""
 
-#: ldlang.c:1021
+#: ldlang.c:1020
 msgid "%P: %B: warning: duplicate section `%s' has different size\n"
 msgstr ""
 
-#: ldlang.c:1069
+#: ldlang.c:1068
 msgid "%P%F: Failed to create hash table\n"
 msgstr ""
 
-#: ldlang.c:1484
+#: ldlang.c:1483
 msgid "%B: file not recognized: %E\n"
 msgstr ""
 
-#: ldlang.c:1485
+#: ldlang.c:1484
 msgid "%B: matching formats:"
 msgstr ""
 
-#: ldlang.c:1492
+#: ldlang.c:1491
 msgid "%F%B: file not recognized: %E\n"
 msgstr ""
 
-#: ldlang.c:1548
+#: ldlang.c:1547
 msgid "%F%B: member %B in archive is not an object\n"
 msgstr ""
 
-#: ldlang.c:1559 ldlang.c:1573
+#: ldlang.c:1558 ldlang.c:1572
 msgid "%F%B: could not read symbols: %E\n"
 msgstr ""
 
-#: ldlang.c:1834
+#: ldlang.c:1833
 msgid ""
 "%P: warning: could not find any targets that match endianness requirement\n"
 msgstr ""
 
-#: ldlang.c:1847
+#: ldlang.c:1846
 msgid "%P%F: target %s not found\n"
 msgstr ""
 
-#: ldlang.c:1849
+#: ldlang.c:1848
 msgid "%P%F: cannot open output file %s: %E\n"
 msgstr ""
 
-#: ldlang.c:1859
+#: ldlang.c:1858
 msgid "%P%F:%s: can not make object file: %E\n"
 msgstr ""
 
-#: ldlang.c:1863
+#: ldlang.c:1862
 msgid "%P%F:%s: can not set architecture: %E\n"
 msgstr ""
 
-#: ldlang.c:1867
+#: ldlang.c:1866
 msgid "%P%F: can not create link hash table: %E\n"
 msgstr ""
 
-#: ldlang.c:2169
+#: ldlang.c:2168
 msgid " load address 0x%V"
 msgstr ""
 
-#: ldlang.c:2299
+#: ldlang.c:2298
 msgid "%W (size before relaxing)\n"
 msgstr ""
 
-#: ldlang.c:2381
+#: ldlang.c:2380
 #, c-format
 msgid "Address of section %s set to "
 msgstr ""
 
-#: ldlang.c:2535
+#: ldlang.c:2534
 #, c-format
 msgid "Fail with %d\n"
 msgstr ""
 
-#: ldlang.c:2777
+#: ldlang.c:2776
 msgid "%X%P: section %s [%V -> %V] overlaps section %s [%V -> %V]\n"
 msgstr ""
 
-#: ldlang.c:2806
+#: ldlang.c:2805
 msgid "%X%P: address 0x%v of %B section %s is not within region %s\n"
 msgstr ""
 
-#: ldlang.c:2814
+#: ldlang.c:2813
 msgid "%X%P: region %s is full (%B section %s)\n"
 msgstr ""
 
-#: ldlang.c:2864
+#: ldlang.c:2863
 msgid "%P%X: Internal error on COFF shared library section %s\n"
 msgstr ""
 
-#: ldlang.c:2906
+#: ldlang.c:2905
 msgid "%P: warning: no memory region specified for section `%s'\n"
 msgstr ""
 
-#: ldlang.c:2921
+#: ldlang.c:2920
 msgid "%P: warning: changing start of section %s by %u bytes\n"
 msgstr ""
 
-#: ldlang.c:2935
+#: ldlang.c:2934
 msgid "%F%S: non constant address expression for section %s\n"
 msgstr ""
 
-#: ldlang.c:2999
+#: ldlang.c:2998
 msgid "%X%P: use an absolute load address or a load memory region, not both\n"
 msgstr ""
 
-#: ldlang.c:3114
+#: ldlang.c:3113
 msgid "%P%F: can't relax section: %E\n"
 msgstr ""
 
-#: ldlang.c:3273
+#: ldlang.c:3272
 msgid "%F%P: invalid data statement\n"
 msgstr ""
 
-#: ldlang.c:3310
+#: ldlang.c:3309
 msgid "%F%P: invalid reloc statement\n"
 msgstr ""
 
-#: ldlang.c:3448
+#: ldlang.c:3447
 msgid "%P%F:%s: can't set start address\n"
 msgstr ""
 
-#: ldlang.c:3461 ldlang.c:3478
+#: ldlang.c:3460 ldlang.c:3477
 msgid "%P%F: can't set start address\n"
 msgstr ""
 
-#: ldlang.c:3473
+#: ldlang.c:3472
 msgid "%P: warning: cannot find entry symbol %s; defaulting to %V\n"
 msgstr ""
 
-#: ldlang.c:3483
+#: ldlang.c:3482
 msgid "%P: warning: cannot find entry symbol %s; not setting start address\n"
 msgstr ""
 
-#: ldlang.c:3525
+#: ldlang.c:3524
 msgid ""
 "%P: warning: %s architecture of input file `%B' is incompatible with %s "
 "output\n"
 msgstr ""
 
-#: ldlang.c:3538
+#: ldlang.c:3537
 msgid ""
 "%P%F: Relocatable linking with relocations from format %s (%B) to format %s "
 "(%B) is not supported\n"
 msgstr ""
 
-#: ldlang.c:3558
+#: ldlang.c:3557
 msgid "%E%X: failed to merge target specific data of file %B\n"
 msgstr ""
 
-#: ldlang.c:3647
+#: ldlang.c:3646
 msgid ""
 "\n"
 "Allocating common symbols\n"
 msgstr ""
 
-#: ldlang.c:3648
+#: ldlang.c:3647
 msgid ""
 "Common symbol       size              file\n"
 "\n"
@@ -686,48 +686,48 @@ msgstr ""
 #. This message happens when using the
 #. svr3.ifile linker script, so I have
 #. disabled it.
-#: ldlang.c:3730
+#: ldlang.c:3729
 msgid "%P: no [COMMON] command, defaulting to .bss\n"
 msgstr ""
 
-#: ldlang.c:3789
+#: ldlang.c:3788
 msgid "%P%F: invalid syntax in flags\n"
 msgstr ""
 
-#: ldlang.c:4390
+#: ldlang.c:4389
 msgid "%P%Fmultiple STARTUP files\n"
 msgstr ""
 
-#: ldlang.c:4658
+#: ldlang.c:4657
 msgid "%F%P: bfd_record_phdr failed: %E\n"
 msgstr ""
 
-#: ldlang.c:4677
+#: ldlang.c:4676
 msgid "%X%P: section `%s' assigned to non-existent phdr `%s'\n"
 msgstr ""
 
-#: ldlang.c:5003
+#: ldlang.c:5002
 msgid "%X%P: unknown language `%s' in version information\n"
 msgstr ""
 
-#: ldlang.c:5055
+#: ldlang.c:5054
 msgid ""
 "%X%P: anonymous version tag cannot be combined with other version tags\n"
 msgstr ""
 
-#: ldlang.c:5062
+#: ldlang.c:5061
 msgid "%X%P: duplicate version tag `%s'\n"
 msgstr ""
 
-#: ldlang.c:5075 ldlang.c:5088
+#: ldlang.c:5074 ldlang.c:5087
 msgid "%X%P: duplicate expression `%s' in version information\n"
 msgstr ""
 
-#: ldlang.c:5130
+#: ldlang.c:5129
 msgid "%X%P: unable to find version dependency `%s'\n"
 msgstr ""
 
-#: ldlang.c:5152
+#: ldlang.c:5151
 msgid "%X%P: unable to read .exports section contents\n"
 msgstr ""
 
