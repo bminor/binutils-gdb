@@ -1,3 +1,12 @@
+1999-06-30  Mark Mitchell  <mark@codesourcery.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eelf32bmipn32.o.
+	(eelf32bmipn32.c): New target.
+	* Makefile.in: Regenerated.
+	* configure.tgt (mips-sgi-irix6*): Make n32 the default
+	emulation.
+	* emulparams/elf32bmipn32.sh: New file.
+	
 1999-06-28  Jim Pick <jim@jimpick.com>
 
 	* emultempl/armelf.em: Added code so that .xs linker scripts are
