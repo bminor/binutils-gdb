@@ -113,7 +113,7 @@ DEFUN(hash_string,(key),
 static
 #ifdef __GNUC__
 __inline
-#endif ldsym_type *bp;
+#endif
 ldsym_type *
 DEFUN(search,(key,hashval) ,
       CONST char *key AND
