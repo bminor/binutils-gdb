@@ -1,3 +1,36 @@
+2004-02-02  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* breakpoint.h (struct breakpoint): Add new flag, from_tty,
+	and pending fields for pending breakpoint support.
+	* breakpoint.c (breakpoint_enabled): Add check for not pending.
+	(condition_command): Only parse condition if not a pending
+	breakpoint.
+	(print_one_breakpoint): Add support for pending breakpoints.
+	(describe_other_breakpoints): Add checks to verify we are not
+	dealing with pending breakpoints.
+	(check_duplicates): Don't check pending breakpoints.
+	(set_raw_breakpoint): Initialize pending flag.
+	(do_restore_lang_radix_cleanup): New cleanup routine.
+	(resolve_pending_breakpoint): New function.
+	(re_enable_breakpoints_in_shlibs): Try and resolve any
+	pending breakpoints via resolve_pending_breakpoint.
+	(mention): Add pending breakpoint support.
+	(parse_breakpoint_sals): Add new parameter to pass to
+	decode_line_1 to indicate silent errors when files or functions
+	are not found.  Change all callers.
+	(do_captured_parse_breakpoint): New function.
+	(break_command_1): Change prototype to return an rc value and to
+	take an optional pending breakpoint pointer.  Support creating
+	a pending breakpoint if a "not found" form of error occurs when
+	parsing the breakpoint.  Also support resolving an existing pending
+	breakpoint and be silent if the resolution fails.
+	(create_breakpoints): Change prototype to take pending breakpoint
+	pointer.  When resolving a pending breakpoint, use the new pointer
+	to provide a conditional or commands added by the end-user.
+	(delete_breakpoint): Add appropriate check for pending.
+	(breakpoint_re_set_one): Ditto.
+	(do_enable_breakpoint): Ditto.
+
 2004-02-02  David Carlton  <carlton@kealia.com>
 
 	* valops.c (enum oload_classification): New.
