@@ -1,3 +1,15 @@
+Tue Dec  8 13:30:58 1992  Fred Fish  (fnf@cygnus.com)
+
+	Changes for Amiga Unix from rhealey@ub.d.umn.edu.
+	* config/amix.mh (NAT_FILE):  Add, set to nm-sysv4.h.
+	* config/amix.mh (NATDEPFILES):  Add.
+	* config/amix.mh (XDEPFILES):  Move procfs.o and fork-child.o
+	to NATDEPFILES.
+
+	* dwarfread.c (decode_subscr_data):  Remove spurious test that
+	accepted only integer subscript types.  We don't do anything
+	with the type at the moment anyway.
+
 	**** start-sanitize-chill ****
 Fri Dec  4 06:56:56 1992  Fred Fish  (fnf@cygnus.com)
 

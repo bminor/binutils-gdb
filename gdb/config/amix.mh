@@ -1,5 +1,7 @@
 # Host: Commodore Amiga running SVR4.
-XDEPFILES= procfs.o fork-child.o
+NAT_FILE= nm-sysv4.h
+NATDEPFILES= corelow.o procfs.o fork-child.o
+XDEPFILES=
 XM_FILE= xm-amix.h
 SYSV_DEFINE=-DSYSV
 REGEX=regex.o

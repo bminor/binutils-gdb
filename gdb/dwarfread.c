@@ -1299,34 +1299,26 @@ decode_subscr_data (scan, end)
       typep = decode_array_element_type (scan);
       break;
     case FMT_FT_C_C:
+      /* Read the type of the index, but don't do anything with it.
+	 FIXME:  This is OK for C since only int's are allowed.
+	 It might not be OK for other languages. */
       fundtype = target_to_host (scan, SIZEOF_FMT_FT, GET_UNSIGNED,
 				 current_objfile);
       scan += SIZEOF_FMT_FT;
-      if (fundtype != FT_integer && fundtype != FT_signed_integer
-	  && fundtype != FT_unsigned_integer)
+      nbytes = TARGET_FT_LONG_SIZE (current_objfile);
+      lowbound = target_to_host (scan, nbytes, GET_UNSIGNED, current_objfile);
+      scan += nbytes;
+      highbound = target_to_host (scan, nbytes, GET_UNSIGNED, current_objfile);
+      scan += nbytes;
+      nexttype = decode_subscr_data (scan, end);
+      if (nexttype != NULL)
 	{
-	  SQUAWK (("array subscripts must be integral types, not type 0x%x",
-		   fundtype));
-	}
-      else
-	{
-	  nbytes = TARGET_FT_LONG_SIZE (current_objfile);
-	  lowbound = target_to_host (scan, nbytes, GET_UNSIGNED,
-				     current_objfile);
-	  scan += nbytes;
-	  highbound = target_to_host (scan, nbytes, GET_UNSIGNED,
-				      current_objfile);
-	  scan += nbytes;
-	  nexttype = decode_subscr_data (scan, end);
-	  if (nexttype != NULL)
-	    {
-	      typep = alloc_type (current_objfile);
-	      TYPE_CODE (typep) = TYPE_CODE_ARRAY;
-	      TYPE_LENGTH (typep) = TYPE_LENGTH (nexttype);
-	      TYPE_LENGTH (typep) *= (highbound - lowbound) + 1;
-	      TYPE_TARGET_TYPE (typep) = nexttype;
-	    }		    
-	}
+	  typep = alloc_type (current_objfile);
+	  TYPE_CODE (typep) = TYPE_CODE_ARRAY;
+	  TYPE_LENGTH (typep) = TYPE_LENGTH (nexttype);
+	  TYPE_LENGTH (typep) *= (highbound - lowbound) + 1;
+	  TYPE_TARGET_TYPE (typep) = nexttype;
+	}		    
       break;
     case FMT_FT_C_X:
     case FMT_FT_X_C:
