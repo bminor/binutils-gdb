@@ -1,5 +1,8 @@
 2003-05-30  Andrew Cagney  <cagney@redhat.com>
 
+	* config/sparc/tm-sparc.h (sparc_extract_struct_value_address):
+	Change parameter type to a "struct regcache *".
+
 	* gdbarch.sh: Regardless of the multi-arch level, always define
 	the macro when not already defined.
 	* gdbarch.h, gdbarch.c: Re-generate.
