@@ -25,9 +25,7 @@
 
 /* Some definitions and declarations to go with use of obstacks.  */
 
-#include "obstack.h"
-#define obstack_chunk_alloc xmalloc
-#define obstack_chunk_free xfree
+#include "gdb_obstack.h"
 
 /* Don't do this; it means that if some .o's are compiled with GNU C
    and some are not (easy to do accidentally the way we configure

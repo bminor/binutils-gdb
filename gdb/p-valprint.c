@@ -21,7 +21,7 @@
 /* This file is derived from c-valprint.c */
 
 #include "defs.h"
-#include "obstack.h"
+#include "gdb_obstack.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"

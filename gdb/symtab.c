@@ -40,7 +40,7 @@
 #include "linespec.h"
 #include "filenames.h"		/* for FILENAME_CMP */
 
-#include "obstack.h"
+#include "gdb_obstack.h"
 
 #include <sys/types.h>
 #include <fcntl.h>

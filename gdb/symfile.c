@@ -38,7 +38,7 @@
 #include "demangle.h"
 #include "inferior.h"		/* for write_pc */
 #include "gdb-stabs.h"
-#include "obstack.h"
+#include "gdb_obstack.h"
 #include "completer.h"
 #include "bcache.h"
 

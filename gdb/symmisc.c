@@ -29,7 +29,7 @@
 #include "objfiles.h"
 #include "breakpoint.h"
 #include "command.h"
-#include "obstack.h"
+#include "gdb_obstack.h"
 #include "language.h"
 #include "bcache.h"
 

@@ -567,13 +567,18 @@ LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 # (Why would we not want to depend on them?  If one of these changes in a 
 # non-binary-compatible way, it is a real pain to remake the right stuff
 # without these dependencies -kingdon, 13 Mar 1994)
+aout_aout64_h =	$(INCLUDE_DIR)/aout/aout64.h
 getopt_h =	$(INCLUDE_DIR)/getopt.h
 floatformat_h =	$(INCLUDE_DIR)/floatformat.h
 bfd_h =		$(BFD_DIR)/bfd.h
 callback_h =	$(INCLUDE_DIR)/gdb/callback.h
+coff_sym_h =	$(INCLUDE_DIR)/coff/sym.h
+coff_symconst_h =	$(INCLUDE_DIR)/coff/symconst.h
+coff_ecoff_h =	$(INCLUDE_DIR)/coff/ecoff.h
 dis_asm_h =	$(INCLUDE_DIR)/dis-asm.h 
 elf_sh_h =	$(INCLUDE_DIR)/elf/sh.h
 elf_bfd_h =	$(BFD_SRC)/elf-bfd.h
+libaout_h =	$(BFD_SRC)/libaout.h
 remote_sim_h =	$(INCLUDE_DIR)/gdb/remote-sim.h
 demangle_h =    $(INCLUDE_DIR)/demangle.h
 obstack_h =     $(INCLUDE_DIR)/obstack.h
@@ -624,10 +629,12 @@ dwarf2cfi_h =	dwarf2cfi.h
 event_loop_h =  event-loop.h
 event_top_h = 	event-top.h
 expression_h =	expression.h $(doublest_h) $(symtab_h)
+f_lang_h =	f-lang.h
 frame_h =	frame.h
 gdb_h =		gdb.h
 gdb_assert_h =	gdb_assert.h
 gdb_events_h =	gdb-events.h
+gdb_obstack_h =	$(obstack_h)
 gdb_stabs_h =	gdb-stabs.h
 gdb_string_h =  gdb_string.h
 gdb_wait_h =	gdb_wait.h
@@ -648,7 +655,7 @@ macrotab_h =    macrotab.h
 macroscope_h =  macroscope.h $(macrotab_h) $(symtab_h)
 memattr_h =     memattr.h
 monitor_h =	monitor.h
-objfiles_h =	objfiles.h
+objfiles_h =	objfiles.h $(gdb_obstack_h)
 parser_defs_h =	parser-defs.h $(doublest_h)
 ppc_tdep_h =	ppc-tdep.h osabi.h
 regcache_h =	regcache.h
@@ -662,7 +669,7 @@ solist_h =	solist.h
 source_h =	source.h
 stabsread_h =	stabsread.h
 symfile_h =	symfile.h
-symtab_h =	symtab.h
+symtab_h =	symtab.h $(gdb_obstack_h)
 target_h =      target.h $(bfd_h) $(symtab_h) $(dcache_h) $(memattr_h)
 terminal_h =	terminal.h
 top_h =		top.h
@@ -1311,7 +1318,7 @@ armnbsd-tdep.o: armnbsd-tdep.c $(defs_h) $(arm_tdep_h) solib-svr4.h \
 avr-tdep.o: avr-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 	$(symfile_h) $(regcache_h) $(arch_utils_h)
 
-bcache.o: bcache.c $(bcache_h) $(defs_h)
+bcache.o: bcache.c $(defs_h) $(gdb_obstack_h) $(bcache_h) $(gdb_string_h)
 
 blockframe.o: blockframe.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(objfiles_h) $(symfile_h) $(target_h) $(regcache_h)
@@ -1321,11 +1328,10 @@ breakpoint.o: breakpoint.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(gdb_string_h) $(gdb_events_h) $(linespec_h) $(ui_out_h) \
 	$(completer_h) $(gdb_h)
 
-buildsym.o: buildsym.c $(bfd_h) $(buildsym_h) $(complaints_h) $(defs_h) \
-	$(objfiles_h) $(symfile_h) $(symtab_h) $(gdb_string_h) \
-	$(obstack_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
-	$(language_h) $(bcache_h) $(filenames_h) $(stabsread_h) \
-	$(macrotab_h)
+buildsym.o: buildsym.c $(defs_h) $(bfd_h) $(gdb_obstack_h) $(symtab_h) \
+	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(complaints_h) \
+	$(gdb_string_h) $(expression_h) $(language_h) $(bcache_h) \
+	$(filenames_h) $(macrotab_h) $(demangle_h) $(buildsym_h) $(stabsread_h)
 
 builtin-regs.o: builtin-regs.c $(defs.h) $(builtin_regs_h) $(gdbtypes_h) \
 	$(gdb_string_h) $(value_h) $(frame_h)
@@ -1334,9 +1340,10 @@ c-lang.o: c-lang.c $(c_lang_h) $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(parser_defs_h) $(symtab_h) $(macroscope_h) \
 	gdb_assert.h
 
-c-typeprint.o: c-typeprint.c $(c_lang_h) $(defs_h) $(expression_h) \
-	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) $(language_h) $(symtab_h) \
-	$(target_h) $(typeprint_h) $(value_h) $(gdb_string_h) $(cp_abi_h)
+c-typeprint.o: c-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
+	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(target_h) \
+	$(language_h) $(demangle_h) $(c_lang_h) $(typeprint_h) $(cp_abi_h) \
+	$(gdb_string_h)
 
 c-valprint.o: c-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(symtab_h) $(valprint_h) $(value_h) $(cp_abi_h)
@@ -1347,9 +1354,9 @@ doublest.o: doublest.c $(defs_h) $(doublest_h) $(floatformat_h) $(gdbtypes_h) \
 f-lang.o: f-lang.c f-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(parser_defs_h) $(symtab_h) $(gdb_string_h)
 
-f-typeprint.o: f-typeprint.c f-lang.h $(defs_h) $(expression_h) \
-	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) $(language_h) $(symtab_h) \
-	$(target_h) $(typeprint_h) $(value_h) $(gdb_string_h)
+f-typeprint.o: f-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
+	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(target_h) \
+	$(f_lang_h) $(gdb_string_h)
 
 f-valprint.o: f-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(symtab_h) $(valprint_h) $(value_h) $(gdb_string_h)
@@ -1360,19 +1367,21 @@ ch-exp.o: ch-exp.c ch-lang.h $(defs_h) $(language_h) $(parser_defs_h) \
 ch-lang.o: ch-lang.c ch-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(parser_defs_h) $(symtab_h)
 
-ch-typeprint.o: ch-typeprint.c ch-lang.h $(defs_h) $(expression_h) \
-	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) $(language_h) $(symtab_h) \
-	$(target_h) $(value_h) $(typeprint_h) $(gdb_string_h)
+ch-typeprint.o: ch-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) \
+	$(symtab_h) $(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) \
+	$(target_h) $(language_h) $(ch_lang_h) $(typeprint_h) $(gdb_string_h)
 
-ch-valprint.o: ch-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
-	$(language_h) $(symtab_h) $(valprint_h) $(value_h) $(c_lang_h)
+ch-valprint.o: ch-valprint.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \
+	$(gdbtypes_h) $(valprint_h) $(expression_h) $(value_h) $(language_h) \
+	$(demangle_h) $(c_lang_h) $(typeprint_h) $(ch_lang_h) $(annotate_h)
 
 coff-solib.o: coff-solib.c $(defs_h)
 
-coffread.o: coffread.c $(bfd_h) $(breakpoint_h) $(buildsym_h) \
-	$(complaints_h) $(defs_h) $(expression_h) $(gdbtypes_h) $(objfiles_h) \
-	$(symfile_h) $(symtab_h) $(gdb_stabs_h) $(stabsread_h) $(target_h) \
-	$(gdb_string_h)
+coffread.o: coffread.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(demangle_h) \
+	$(breakpoint_h) $(bfd_h) $(gdb_obstack_h) $(gdb_string_h) \
+	$(coff_internal_h) $(libcoff_h) $(symfile_h) $(objfiles_h) \
+	$(buildsym_h) $(gdb_stabs_h) $(stabsread_h) $(complaints_h) \
+	$(target_h) $(gdb_assert_h)
 
 complaints.o: complaints.c $(complaints_h) $(defs_h) $(gdbcmd_h)
 
@@ -1404,8 +1413,10 @@ linux-proc.o: linux-proc.c $(defs_h) $(inferior_h) $(gregset_h) \
 
 cp-abi.o: cp-abi.c $(defs_h) $(value_h) $(cp_abi_h)
 
-cp-valprint.o: cp-valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
-	$(gdbtypes_h) $(symtab_h) $(value_h) $(gdb_string_h) $(cp_abi_h)
+cp-valprint.o: cp-valprint.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \
+	$(gdbtypes_h) $(expression_h) $(value_h) $(command_h) $(gdbcmd_h) \
+	$(demangle_h) $(annotate_h) $(gdb_string_h) $(c_lang_h) $(target_h) \
+	$(cp_abi_h)
 
 dcache.o: dcache.c $(dcache_h) $(defs_h) $(gdbcmd_h) $(gdb_string_h) \
 	$(gdbcore_h) $(target_h)
@@ -1415,11 +1426,11 @@ d10v-tdep.o: d10v-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(gdbtypes_h) \
 	$(dis_asm_h) $(symfile_h) $(objfiles_h) $(language_h) $(arch_utils_h) \
 	$(regcache_h) $(floatformat_h) $(sim_d10v_h) $(sim_regno_h)
 
-dbxread.o: dbxread.c $(breakpoint_h) $(buildsym_h) $(command_h) \
-	$(complaints_h) $(defs_h) $(expression_h) $(gdb_stabs_h) $(gdbcore_h) \
-	$(gdbtypes_h) $(language_h) $(objfiles_h) \
-	$(stabsread_h) $(symfile_h) $(symtab_h) $(target_h) $(gdb_string_h) \
-	$(cp_abi_h)
+dbxread.o: dbxread.c $(defs_h) $(gdb_string_h) $(gdb_obstack_h) $(gdb_stat_h) \
+	$(symtab_h) $(breakpoint_h) $(target_h) $(gdbcore_h) $(libaout_h) \
+	$(symfile_h) $(objfiles_h) $(buildsym_h) $(stabsread_h) \
+	$(gdb_stabs_h) $(demangle_h) $(language_h) $(complaints_h) \
+	$(cp_abi_h) $(aout_aout64_h) $(aout_stab_gnu_h)
 
 delta68-nat.o: delta68-nat.c $(defs_h)
 
@@ -1431,7 +1442,9 @@ dink32-rom.o: dink32-rom.c $(monitor_h) $(bfd_h) $(gdb_wait_h) $(defs_h) \
 
 dpx2-nat.o: dpx2-nat.c $(defs_h) $(gdbcore_h) $(gdb_string_h)
 
-dstread.o: dstread.c $(gdb_string_h)
+dstread.o: dstread.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(breakpoint_h) \
+	$(bfd_h) $(symfile_h) $(objfiles_h) $(buildsym_h) $(gdb_obstack_h) \
+	$(gdb_string_h) $(dst_h)
 
 dwarf2cfi.o: dwarf2cfi.c $(defs_h) $(symtab_h) $(symfile_h) $(objfiles_h) \
 	$(target_h) $(inferior_h) $(regcache_h) $(dwarf2cfi_h)
@@ -1764,12 +1777,14 @@ m32r-tdep.o: m32r-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 p-lang.o: p-lang.c p-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(parser_defs_h) $(symtab_h) $(gdb_string_h)
 
-p-typeprint.o: p-typeprint.c p-lang.h $(defs_h) $(expression_h) \
-	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) $(language_h) $(symtab_h) \
-	$(target_h) $(typeprint_h) $(value_h) $(gdb_string_h)
+p-typeprint.o: p-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
+	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(target_h) \
+	$(language_h) $(p_lang_h) $(typeprint_h) $(gdb_string_h)
 
-p-valprint.o: p-valprint.c p-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
-	$(language_h) $(symtab_h) $(valprint_h) $(value_h) $(gdb_string_h)
+p-valprint.o: p-valprint.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \
+	$(gdbtypes_h) $(expression_h) $(value_h) $(command_h) $(gdbcmd_h) \
+	$(gdbcore_h) $(demangle_h) $(valprint_h) $(typeprint_h) $(language_h) \
+	$(target_h) $(annotate_h) $(p_lang_h) $(cp_abi_h)
 
 m68hc11-tdep.o: m68hc11-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdb_string_h) $(value_h) $(inferior_h) \
@@ -1799,10 +1814,12 @@ mcore-tdep.o: mcore-tdep.c $(defs_h) $(frame_h) $(gdbcmd_h) $(value_h) \
 mcore-rom.o: mcore-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(gdb_string_h) $(regcache_h) $(serial_h)
 
-mdebugread.o: mdebugread.c $(buildsym_h) $(complaints_h) $(bfd_h) $(defs_h) \
-	$(expression_h) $(gdb_stabs_h) $(gdbcore_h) $(gdbtypes_h) \
-	$(language_h) $(objfiles_h) $(stabsread_h) \
-	$(symfile_h) $(symtab_h) $(gdb_string_h)
+mdebugread.o: mdebugread.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(gdbcore_h) \
+	$(symfile_h) $(objfiles_h) $(gdb_obstack_h) $(buildsym_h) \
+	$(stabsread_h) $(complaints_h) $(demangle_h) $(gdb_assert_h) \
+	$(coff_sym_h) $(coff_symconst_h) $(gdb_stat_h) $(gdb_string_h) \
+	$(bfd_h) $(coff_ecoff_h) $(libaout_h) $(aout_aout64_h) \
+	$(aout_stab_gnu_h) $(expression_h) $(language_h)
 
 mipsm3-nat.o: mipsm3-nat.c $(defs_h) $(inferior_h) $(regcache_h)
 
@@ -1885,8 +1902,9 @@ nindy-tdep.o: nindy-tdep.c $(defs_h) $(frame_h) $(symtab_h)  $(gdbcore_h)
 
 ns32k-tdep.o: ns32k-tdep.c $(bfd_h) $(dis_asm_h) $(defs_h)
 
-objfiles.o: objfiles.c $(bfd_h) $(defs_h) $(objfiles_h) $(symfile_h) \
-	$(symtab_h) $(gdb_string_h) $(breakpoint_h) $(bcache_h)
+objfiles.o: objfiles.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
+	$(objfiles_h) $(gdb_stabs_h) $(target_h) $(bcache_h) $(gdb_stat_h) \
+	$(gdb_obstack_h) $(gdb_string_h) $(breakpoint_h) $(mmalloc_h)
 
 solib-osf.o: solib-osf.c $(defs_h) $(inferior_h) $(symtab_h) $(objfiles_h) \
 	$(symfile_h) $(target_h) $(gdb_string_h) $(solist_h)
@@ -2160,10 +2178,11 @@ xstormy16-tdep.o: xstormy16-tdep.c $(defs_h) $(value_h) $(inferior_h) \
 
 dsrec.o: dsrec.c $(defs_h) srec.h
 
-stabsread.o: stabsread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
-	$(INCLUDE_DIR)/aout/stab_gnu.h $(buildsym_h) $(complaints_h) \
-	$(defs_h) $(gdbtypes_h) $(objfiles_h) $(stabsread_h) $(symfile_h) \
-	$(symtab_h) $(gdb_string_h) $(doublest_h)
+stabsread.o: stabsread.c $(defs_h) $(gdb_string_h) $(bfd_h) $(gdb_obstack_h) \
+	$(symtab_h) $(gdbtypes_h) $(expression_h) $(symfile_h) $(objfiles_h) \
+	$(aout_stab_gnu_h) $(libaout_h) $(aout_aout64_h) $(gdb_stabs_h) \
+	$(buildsym_h) $(complaints_h) $(demangle_h) $(language_h) \
+	$(doublest_h) $(stabsread_h)
 
 stack.o: stack.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 	$(language_h) $(target_h) $(gdb_string_h) $(ui_out_h)
@@ -2179,32 +2198,37 @@ ax-gdb.o: ax-gdb.c $(defs_h) $(symtab_h) $(symfile_h) $(gdbtypes_h) \
 
 sun3-nat.o: sun3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 
-symfile.o: symfile.c $(breakpoint_h) $(complaints_h) $(defs_h) \
-	$(expression_h) $(gdb_stabs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(gdbtypes_h) $(language_h) $(objfiles_h) $(symfile_h) $(symtab_h) \
-	$(target_h) $(gdb_string_h) $(completer_h) $(bcache_h)
+symfile.o: symfile.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(gdbcore_h) \
+	$(frame_h) $(target_h) $(value_h) $(symfile_h) $(objfiles_h) \
+	$(gdbcmd_h) $(breakpoint_h) $(language_h) $(complaints_h) \
+	$(demangle_h) $(inferior_h) $(gdb_stabs_h) $(gdb_obstack_h) \
+	$(completer_h) $(bcache_h) $(gdb_string_h) $(gdb_stat_h)
 
 symm-tdep.o: symm-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 symm-nat.o: symm-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 
-symmisc.o: symmisc.c $(bfd_h) $(breakpoint_h) $(command_h) $(defs_h) \
-	$(expression_h) $(gdbtypes_h) $(language_h) $(objfiles_h) \
-	$(symfile_h) $(symtab_h) $(gdb_string_h)
+symmisc.o: symmisc.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(bfd_h) \
+	$(symfile_h) $(objfiles_h) $(breakpoint_h) $(command_h) \
+	$(gdb_obstack_h) $(language_h) $(bcache_h) $(gdb_string_h)
 
-symtab.o: symtab.c $(call_cmds_h) $(defs_h) $(expression_h) $(frame_h) \
-	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) $(language_h) $(objfiles_h) \
-	$(gdb_regex_h) $(symfile_h) $(symtab_h) $(target_h) $(value_h) \
-	$(gdb_string_h) $(linespec_h) $(cp_abi_h)
+symtab.o: symtab.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(gdbcore_h) \
+	$(frame_h) $(target_h) $(value_h) $(symfile_h) $(objfiles_h) \
+	$(gdbcmd_h) $(call_cmds_h) $(gdb_regex_h) $(expression_h) \
+	$(language_h) $(demangle_h) $(inferior_h) $(linespec_h) \
+	$(filenames_h) $(gdb_obstack_h) $(gdb_string_h) $(gdb_stat_h) \
+	$(cp_abi_h)
 
 linespec.o: linespec.c $(linespec_h) $(defs_h) $(frame_h) $(value_h) \
 	$(objfiles_h) $(symfile_h) $(completer_h) $(symtab_h) \
 	$(demangle_h) $(command_h) $(cp_abi_h)
 
-macroexp.o: macroexp.c $(defs_h) $(macrotab_h)
+macroexp.o: macroexp.c $(defs_h) $(gdb_obstack_h) $(bcache_h) $(macrotab_h) \
+	$(macroexp_h) $(gdb_assert_h)
 
-macrotab.o: macrotab.c $(defs_h) $(obstack_h) $(objfiles_h) $(symtab_h) \
-	$(macrotab_h) $(splay_tree_h) gdb_assert.h $(bcache_h)
+macrotab.o: macrotab.c $(defs_h) $(gdb_obstack_h) $(splay_tree_h) $(symtab_h) \
+	$(symfile_h) $(objfiles_h) $(macrotab_h) $(gdb_assert_h) $(bcache_h) \
+	$(complaints_h)
 
 macroscope.o: macroscope.c $(defs_h) $(macroscope_h)
 
@@ -2228,9 +2252,9 @@ top.o: top.c $(top_h) $(bfd_h) $(getopt_h) $(readline_headers) $(call_cmds_h) \
 	$(completer_h) $(version_h) $(ui_out_h) $(doublest_h) \
 	$(serial_h)
 
-typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
-	$(gdbcore_h) $(gdbtypes_h) $(language_h) $(symtab_h) $(target_h) \
-	$(value_h) $(gdb_string_h) $(cp_abi_h)
+typeprint.o: typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
+	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(command_h) \
+	$(gdbcmd_h) $(target_h) $(language_h) $(cp_abi_h) $(gdb_string_h)
 
 utils.o: utils.c $(bfd_h) $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(language_h) $(target_h) $(terminal_h) $(readline_headers) \

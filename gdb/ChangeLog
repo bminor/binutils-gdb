@@ -1,3 +1,34 @@
+2002-07-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb_obstack.h: New file.
+	* symtab.h: Include "gdb_obstack.h" instead of "obstack.h".
+	(obstack_chunk_alloc, obstack_chunk_free): Delete macros.
+	* objfiles.h: Include "gdb_obstack.h".
+	* Makefile.in (gdb_obstack_h): Define.
+	(symtab_h): Add $(gdb_obstack_h).
+	(objfiles_h): Add $(gdb_obstack_h).
+	
+	* objfiles.c: Include "gdb_obstack.h" instead of "obstack.h".
+	* macrotab.c, cp-valprint.c, dbxread.c: Ditto.
+	* ch-typeprint.c, ch-valprint.c, dstread.c: Ditto.
+	* macroexp.c, p-typeprint.c, stabsread.c: Ditto.
+	* symtab.c, f-typeprint.c, mdebugread.c: Ditto.
+	* p-valprint.c, symmisc.c, typeprint.c: Ditto.
+	* symfile.c, coffread.c, c-typeprint.c: Ditto.
+	* buildsym.c, bcache.c, ada-typeprint.c: Ditto.
+
+	* Makefile.in (bcache.o): Update dependencies.
+	(buildsym.o, c-typeprint.o, ch-typeprint.o): Ditto.
+	(ch-valprint.o, coffread.o, cp-valprint.o): Ditto.
+	(dbxread.o, dstread.o, f-typeprint.o): Ditto.
+	(objfiles.o, p-typeprint.o, p-valprint.o): Ditto.
+	(stabsread.o, symfile.o, symmisc.o): Ditto.
+	(symtab.o, typeprint.o, macroexp.o): Ditto.
+	(macrotab.o, mdebugread.o): Ditto.
+	(f_lang_h, coff_sym_h, coff_symconst_h): Define.
+	(coff_ecoff_h, aout_aout64_h): Define.
+	(aout_stabs_gnu_h, libaout_h): Define.
+
 2002-07-29  Andrew Cagney  <cagney@redhat.com>
 
 	* regcache.c (struct regcache_descr): Rename nr_registers to

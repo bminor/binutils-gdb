@@ -29,7 +29,7 @@
 #include "defs.h"
 #include "gdb_string.h"
 #include "bfd.h"
-#include "obstack.h"
+#include "gdb_obstack.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"

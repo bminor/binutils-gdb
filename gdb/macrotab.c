@@ -20,7 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "obstack.h"
+#include "gdb_obstack.h"
 #include "splay-tree.h"
 #include "symtab.h"
 #include "symfile.h"

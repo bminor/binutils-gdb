@@ -47,7 +47,7 @@
 #include "gdbcore.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "obstack.h"
+#include "gdb_obstack.h"
 #include "buildsym.h"
 #include "stabsread.h"
 #include "complaints.h"

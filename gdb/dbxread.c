@@ -42,7 +42,7 @@
 #include <fcntl.h>
 #endif
 
-#include "obstack.h"
+#include "gdb_obstack.h"
 #include "gdb_stat.h"
 #include "symtab.h"
 #include "breakpoint.h"

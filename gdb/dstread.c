@@ -28,7 +28,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "buildsym.h"
-#include "obstack.h"
+#include "gdb_obstack.h"
 
 #include "gdb_string.h"
 
