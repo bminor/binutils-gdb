@@ -1,5 +1,8 @@
 Thu Apr 25 11:39:51 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Add * after sparc*-*-vxworks.
+	* configure: Rebuild.
+
 	* app.c (do_scrub_begin): If tc_comment_chars is not defined,
 	define it to comment_chars.  Use tc_comment_chars rather than
 	comment_chars.
