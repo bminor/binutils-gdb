@@ -162,3 +162,15 @@ typedef struct nlmNAME(external_custom_header)
   unsigned char dataLength[NLM_TARGET_LONG_SIZE];
 
 } NlmNAME(External_Custom_Header);
+
+typedef struct nlmNAME(external_cygnus_section_header)
+{
+
+  /* The header is recognized by "CyGnUsSeCs" in the stamp field.  */
+  char stamp[10];
+
+  unsigned char offset[NLM_TARGET_LONG_SIZE];
+
+  unsigned char length[NLM_TARGET_LONG_SIZE];
+
+} NlmNAME(External_Cygnus_Section_Header);

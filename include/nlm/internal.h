@@ -282,3 +282,18 @@ typedef struct nlm_internal_custom_header
 #define Nlm32_Internal_Custom_Header Nlm_Internal_Custom_Header
 #define nlm64_internal_custom_header nlm_internal_custom_header
 #define Nlm64_Internal_Custom_Header Nlm_Internal_Custom_Header
+
+typedef struct nlm_internal_cygnus_section_header
+{
+  /* The header is recognized by "CyGnUsSeCs" in the stamp field. */
+  char stamp[10];
+  /* File location of debugging information.  */
+  file_ptr offset;
+  /* Length of debugging information.  */
+  bfd_size_type length;
+} Nlm_Internal_Cygnus_Section_Header;
+
+#define nlm32_internal_cygnus_section_header nlm_internal_cygnus_section_header
+#define Nlm32_Internal_Cygnus_Section_Header Nlm_Internal_Cygnus_Section_Header
+#define nlm64_internal_cygnus_section_header nlm_internal_cygnus_section_header
+#define Nlm64_Internal_Cygnus_Section_Header Nlm_Internal_Cygnus_Section_Header
