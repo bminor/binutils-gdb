@@ -1,3 +1,7 @@
+2001-07-03  H.J. Lu  <hjl@gnu.org>
+
+	* gas/mips/lb-xgot-ilocks.d: Add -march=r3900.
+
 2001-07-01  Ben Elliston  <bje@redhat.com>
 
 	* gas/m88k/allinsn.s: New file.
