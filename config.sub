@@ -4,20 +4,20 @@
 # This file is (in principle) common to ALL GNU software.
 # The presence of a machine in this file suggests that SOME GNU software
 # can handle that machine.  It does not imply ALL GNU software can. 
-
-#This file is free software; you can redistribute it and/or modify
-#it under the terms of the GNU General Public License as published by
-#the Free Software Foundation; either version 2 of the License, or
-#(at your option) any later version.
-
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU General Public License for more details.
-
-#You should have received a copy of the GNU General Public License
-#along with this program; if not, write to the Free Software
-#Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# This file is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 # Configuration subroutine to validate and canonicalize a configuration type.
@@ -38,7 +38,7 @@
 #	CPU_TYPE-MANUFACTURER-OPERATING_SYSTEM
 # It is wrong to echo any other type of specification.
 
-if [ x$1 = x ]						# CYGNUS LOCAL
+if [ x$1 = x ]
 then
 	echo Configuration name missing. 1>&2
 	echo "Usage: $0 CPU-MFR-OPSYS" 1>&2
@@ -76,11 +76,20 @@ case $os in
 	-unicom* | -ibm* | -next | -hp | -isi* | -apollo | -altos* | \
 	-convergent* | -ncr* | -news | -32* | -3600* | -3100* | -hitachi* |\
 	-c[123]* | -convex* | -sun | -crds | -omron* | -dg | -ultra | -tti* | \
-	-harris | -dolphin | -highlevel | -gould | -cbm | -ns | -masscomp | \
+	-harris | -dolphin | -highlevel | -gould | -cbm | -ns | -masscomp )
+		os=
+		basic_machine=$1
+		;;
 	-sim | -cisco | -oki | -wec | -winbond )	# CYGNUS LOCAL
 		os=
 		basic_machine=$1
 		;;
+## start-sanitize-mpw
+	-apple*)
+		os=
+		basic_machine=$1
+		;;
+## end-sanitize-mpw
 	-scout)						# CYGNUS LOCAL
 		;;
 	-wrs)						# CYGNUS LOCAL
@@ -120,7 +129,7 @@ case $os in
 	-isc*)
 		basic_machine=`echo $1 | sed -e 's/86-.*/86-unknown/'`
 		;;
-	-lynx*)			# CYGNUS LOCAL: lynx
+	-lynx*)
 		os=-lynxos
 		;;
 	-ptx*)
@@ -140,8 +149,10 @@ case $basic_machine in
 		| alpha | we32k | ns16k | clipper | sparclite | i370 | sh \
 		| powerpc | sparc64 | 1750a | dsp16xx | mips64 | mipsel \
 		| mips64el | mips64orion | mips64orionel \
-		| m88110 | sparc | m680[01234]0 | m683?2 | z8k | v70 \
-		| h8500) # CYGNUS LOCAL
+		| sparc)
+		basic_machine=$basic_machine-unknown
+		;;
+	m88110 | m680[01234]0 | m683?2 | z8k | v70 | h8500 | w65) # CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
 	# Object if more than one company name word.
@@ -157,24 +168,10 @@ case $basic_machine in
 	      | hppa1.0-* | hppa1.1-* | alpha-* | we32k-* | cydra-* | ns16k-* \
 	      | pn-* | np1-* | xps100-* | clipper-* | orion-* | sparclite-* \
 	      | sh-* | powerpc-* | sparc64-* | mips64-* | mipsel-* \
-	      | mips64el-* | mips64orion-* | mips64orionel-* \
-	      | m88110-* | m680[01234]0-* | m683?2-* | z8k-* \
-	      | h8500-* ) # CYGNUS LOCAL
+	      | mips64el-* | mips64orion-* | mips64orionel-*)
 		;;
-# start-sanitize-arc
-	arc)
-		basic_machine=$basic_machine-unknown
+	m88110-* | m680[01234]0-* | m683?2-* | z8k-* | h8500-*) # CYGNUS LOCAL
 		;;
-	arc-*)
-		;;
-# end-sanitize-arc
-# start-sanitize-r16
-	r16)
-		basic_machine=$basic_machine-unknown
-		;;
-	r16-*)
-		;;
-# end-sanitize-r16
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
 	386bsd)						# CYGNUS LOCAL
@@ -228,6 +225,13 @@ case $basic_machine in
 		basic_machine=m68k-apollo
 		os=-bsd
 		;;
+# start-sanitize-arc
+	arc)
+		basic_machine=arc-unknown
+		;;
+	arc-*)
+		;;
+# end-sanitize-arc
 	balance)
 		basic_machine=ns32k-sequent
 		os=-dynix
@@ -549,6 +553,13 @@ case $basic_machine in
 	ps2)
 		basic_machine=i386-ibm
 		;;
+# start-sanitize-rce
+	rce)
+		basic_machine=rce-unknown
+		;;
+	rce-*)
+		;;
+# end-sanitize-rce
 	rom68k)						# CYGNUS LOCAL
 		basic_machine=m68k-rom68k
 		os=-coff
@@ -646,7 +657,7 @@ case $basic_machine in
 	tower | tower-32)
 		basic_machine=m68k-ncr
 		;;
-	udi29k)						# CYGNUS LOCAL
+	udi29k)
 		basic_machine=a29k-amd
 		os=-udi
 		;;
@@ -677,6 +688,10 @@ case $basic_machine in
 	vxworks68)
 		basic_machine=m68k-wrs
 		os=-vxworks
+		;;
+	w65*)
+ 		basic_machine=w65-wdc
+ 		os=-none
 		;;
 	xmp)
 		basic_machine=xmp-cray
@@ -785,12 +800,21 @@ case $os in
 	      | -riscos* | -linux* | -uniplus* | -iris* | -rtu* | -xenix* \
 	      | -hiux* | -386bsd* | -netbsd* | -freebsd* | -riscix* \
 	      | -lynxos* | -bosx* | -nextstep* | -cxux* | -aout* | -elf* \
-	      | -ptx* | -coff* | -winnt* \
-	      | -go32 | -vsta | -sim | -es1800* | -udi | -hms* | -xray \
-	      | -os68k* | -none* | -v88r* | -windows* | -osx \
-	      | -abug | -ecoff* | -netware* | -proelf | -os9* )
-				# The last three lines above are CYGNUS LOCAL
+	      | -ptx* | -coff* | -ecoff* | -winnt* | -vsta | -udi | -eabi*)
 		;;
+	# CYGNUS LOCAL
+	-go32 | -sim | -es1800* | -hms* | -xray | -os68k* | -none* | -v88r* \
+	      | -windows* | -osx | -abug |  -netware* | -proelf | -os9*)
+		;;
+## start-sanitize-mpw
+	-macos*)
+		;;
+	-mac*)
+		os=`echo $os | sed -e 's|mac|macos|'`
+		;;
+	-mpw*)
+		;;
+## end-sanitize-mpw
 	-sunos5*)
 		os=`echo $os | sed -e 's|sunos5|solaris2|'`
 		;;
@@ -971,7 +995,7 @@ case $basic_machine in
 		;;
 ## start-sanitize-mpw
 	*-apple)					# CYGNUS LOCAL
-		os=-mpw
+		os=-macos7
 		;;
 ## end-sanitize-mpw
 	*)
@@ -1026,13 +1050,13 @@ case $basic_machine in
 				vendor=sequent
 				;;
 			-vxworks*)
-				vendor=wrs		# CYGNUS LOCAL
+				vendor=wrs
 				;;
 			-hms*)				# CYGNUS LOCAL
 				vendor=hitachi
 				;;
 ## start-sanitize-mpw
-			-mpw*)				# CYGNUS LOCAL
+			-mpw* | -macos*)
 				vendor=apple
 				;;
 ## end-sanitize-mpw
