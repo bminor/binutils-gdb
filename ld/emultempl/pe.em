@@ -68,8 +68,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 
 #include "deffile.h"
 #include "pe-dll.h"
-
-#include <ctype.h>
+#include "safe-ctype.h"
 
 /* Permit the emulation parameters to override the default section
    alignment by setting OVERRIDE_SECTION_ALIGNMENT.  FIXME: This makes
@@ -1648,7 +1647,7 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 	  /* If the name of the section is representable in C, then create
 	     symbols to mark the start and the end of the section.  */
 	  for (ps = outsecname; *ps != '\0'; ps++)
-	    if (! isalnum ((unsigned char) *ps) && *ps != '_')
+	    if (! ISALNUM ((unsigned char) *ps) && *ps != '_')
 	      break;
 	  if (*ps == '\0')
 	    {

@@ -1414,7 +1414,7 @@ pdp11.lo: pdp11.c $(INCDIR)/filenames.h libaout.h $(INCDIR)/bfdlink.h \
   aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h $(INCDIR)/safe-ctype.h
 pef.lo: pef.c pef.h pef-traceback.h $(INCDIR)/filenames.h \
-  $(INCDIR)/libiberty.h
+  $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h
 pe-arm.lo: pe-arm.c $(INCDIR)/filenames.h coff-arm.c \
   $(INCDIR)/coff/arm.h $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
