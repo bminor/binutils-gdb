@@ -1,5 +1,10 @@
 2001-06-27  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* write.c (write_object_file): Do not set finalize_syms until
+	after the segments have been sized.  Some backends may still
+	need to access the syms's frags in order to adjust relaxed
+	frags.
+
 	* config/tc-arm.c (do_ldst): Use MVN to build simple inverted
 	constants.
 

@@ -1574,14 +1574,17 @@ write_object_file ()
       if (!changed)
 	break;
     }
-  /* Relaxation has completed.  Freeze all syms.  */
-  finalize_syms = 1;
 
+  /* Note - we do not set finalize_syms here because some targets
+     do not finish sizing all of their frags until after size_seg
+     has completed.  */
   bfd_map_over_sections (stdoutput, size_seg, (char *) 0);
 #else
   relax_and_size_all_segments ();
-  finalize_syms = 1;
 #endif /* BFD_ASSEMBLER  */
+
+  /* Relaxation has completed.  Freeze all syms.  */
+  finalize_syms = 1;
 
 #if defined (BFD_ASSEMBLER) && defined (OBJ_COFF) && defined (TE_GO32)
   /* Now that the segments have their final sizes, run through the
