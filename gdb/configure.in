@@ -374,7 +374,7 @@ fi
 # do anything to look for the matching include files.
 # -- chastain 2004-05-01
 
-AC_SEARCH_LIBS(initscr, [ncurses Hcurses curses pdcurses], [],
+AC_SEARCH_LIBS(initscr, [ncurses Hcurses cursesX curses pdcurses], [],
   [AC_MSG_WARN([no curses library found])])
 
 # Check whether the wborder function is provided by the curses
@@ -429,7 +429,7 @@ case $host_os in
    Solaris 2.[789] when using GCC. ]])
     fi ;;
 esac
-AC_CHECK_HEADERS(curses.h ncurses.h term.h)
+AC_CHECK_HEADERS(curses.h cursesX.h ncurses.h term.h)
 
 # FIXME: kettenis/20030102: In most cases we include these
 # unconditionally, so what's the point in checking these?

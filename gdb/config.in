@@ -269,6 +269,9 @@
 /* Define if you have the <curses.h> header file.  */
 #undef HAVE_CURSES_H
 
+/* Define if you have the <cursesX.h> header file.  */
+#undef HAVE_CURSESX_H
+
 /* Define if you have the <dirent.h> header file.  */
 #undef HAVE_DIRENT_H
 
@@ -464,6 +467,9 @@
 
 /* Define to 1 if your system has td_pcb in struct thread. */
 #undef HAVE_STRUCT_THREAD_TD_PCB
+
+/* Define to 1 if your system has struct lwp. */
+#undef HAVE_STRUCT_LWP
 
 /* Define to 1 if your system has struct reg in <machine/reg.h>. */
 #undef HAVE_STRUCT_REG
