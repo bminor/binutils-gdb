@@ -116,6 +116,7 @@ ${srcdir}/config/gould/xm-np1.h\
 ${srcdir}/config/gould/xm-pn.h\
 ${srcdir}/config/h8300/tm-h8300.h\
 ${srcdir}/config/h8500/tm-h8500.h\
+${srcdir}/config/i386/nm-i386aix.h\
 ${srcdir}/config/i386/nm-i386bsd.h\
 ${srcdir}/config/i386/nm-i386lynx.h\
 ${srcdir}/config/i386/nm-i386mach.h\
@@ -125,6 +126,7 @@ ${srcdir}/config/i386/nm-i386v.h\
 ${srcdir}/config/i386/nm-i386v4.h\
 ${srcdir}/config/i386/nm-linux.h\
 ${srcdir}/config/i386/nm-sun386.h\
+${srcdir}/config/i386/tm-i386aix.h\
 ${srcdir}/config/i386/tm-i386bsd.h\
 ${srcdir}/config/i386/tm-i386lynx.h\
 ${srcdir}/config/i386/tm-i386v.h\
@@ -133,6 +135,7 @@ ${srcdir}/config/i386/tm-linux.h\
 ${srcdir}/config/i386/tm-sun386.h\
 ${srcdir}/config/i386/tm-symmetry.h\
 ${srcdir}/config/i386/xm-go32.h\
+${srcdir}/config/i386/xm-i386aix.h\
 ${srcdir}/config/i386/xm-i386bsd.h\
 ${srcdir}/config/i386/xm-i386lynx.h\
 ${srcdir}/config/i386/xm-i386mach.h\
@@ -254,6 +257,8 @@ ${srcdir}/config/gould/pn.mt\
 ${srcdir}/config/h8300/h8300hms.mt\
 ${srcdir}/config/h8500/h8500hms.mt\
 ${srcdir}/config/i386/go32.mh\
+${srcdir}/config/i386/i386aix.mh\
+${srcdir}/config/i386/i386aix.mt\
 ${srcdir}/config/i386/i386aout.mt\
 ${srcdir}/config/i386/i386bsd.mh\
 ${srcdir}/config/i386/i386bsd.mt\

@@ -1,0 +1,12 @@
+# Host: IBM PS/2 (i386) running AIX PS/2
+XDEPFILES= 
+XM_FILE= xm-i386aix.h
+NAT_FILE= nm-i386v.h
+NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o i386v-nat.o
+XM_CLIBS=
+SYSV_DEFINE=-DSYSV -D_AIX -D_I386
+REGEX=regex.o
+REGEX1=regex.o
+TERMCAP=-lcurses
+# Use gcc. Only coff output can be debugged
+CC=gcc

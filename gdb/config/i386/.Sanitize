@@ -22,6 +22,8 @@ Do-first:
 Things-to-keep:
 
 go32.mh
+i386aix.mh
+i386aix.mt
 i386aout.mt
 i386bsd.mh
 i386bsd.mt
@@ -41,6 +43,7 @@ linux.mh
 linux.mt
 ncr3000.mh
 ncr3000.mt
+nm-i386aix.h
 nm-i386bsd.h
 nm-i386lynx.h
 nm-i386mach.h
@@ -54,6 +57,7 @@ sun386.mh
 sun386.mt
 symmetry.mh
 symmetry.mt
+tm-i386aix.h
 tm-i386bsd.h
 tm-i386lynx.h
 tm-i386v.h
@@ -62,6 +66,7 @@ tm-linux.h
 tm-sun386.h
 tm-symmetry.h
 xm-go32.h
+xm-i386aix.h
 xm-i386bsd.h
 xm-i386lynx.h
 xm-i386mach.h
