@@ -1,3 +1,9 @@
+2005-04-01  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Set Watchpoints): Document can-use-hw-watchpoints.
+	Rearrange index entries and improve wording about support for
+	hardware watchpoints.
+
 2005-03-10  Bob Rossi  <bob@brasko.net>
 
 	* gdb.texinfo: Update copyright

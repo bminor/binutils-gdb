@@ -2741,12 +2741,12 @@ You can see these breakpoints with the @value{GDBN} maintenance command
 @subsection Setting watchpoints
 
 @cindex setting watchpoints
-@cindex software watchpoints
-@cindex hardware watchpoints
 You can use a watchpoint to stop execution whenever the value of an
 expression changes, without having to predict a particular place where
 this may happen.
 
+@cindex software watchpoints
+@cindex hardware watchpoints
 Depending on your system, watchpoints may be implemented in software or
 hardware.  @value{GDBN} does software watchpointing by single-stepping your
 program and testing the variable's value each time, which is hundreds of
@@ -2754,10 +2754,9 @@ times slower than normal execution.  (But this may still be worth it, to
 catch errors where you have no clue what part of your program is the
 culprit.)
 
-On some systems, such as HP-UX, @sc{gnu}/Linux and some other x86-based targets,
-@value{GDBN} includes support for
-hardware watchpoints, which do not slow down the running of your
-program.
+On some systems, such as HP-UX, @sc{gnu}/Linux and most other
+x86-based targets, @value{GDBN} includes support for hardware
+watchpoints, which do not slow down the running of your program.
 
 @table @code
 @kindex watch
@@ -2785,7 +2784,17 @@ watchpoints execute very quickly, and the debugger reports a change in
 value at the exact instruction where the change occurs.  If @value{GDBN}
 cannot set a hardware watchpoint, it sets a software watchpoint, which
 executes more slowly and reports the change in value at the next
-statement, not the instruction, after the change occurs.
+@emph{statement}, not the instruction, after the change occurs.
+
+@vindex can-use-hw-watchpoints
+@cindex use only software watchpoints
+You can force @value{GDBN} to use only software watchpoints with the
+@kbd{set can-use-hw-watchpoints 0} command.  With this variable set to
+zero, @value{GDBN} will never try to use hardware watchpoints, even if
+the underlying system supports them.  (Note that hardware-assisted
+watchpoints that were set @emph{before} setting
+@code{can-use-hw-watchpoints} to zero will still use the hardware
+mechanism of watching expressiion values.)
 
 When you issue the @code{watch} command, @value{GDBN} reports
 
