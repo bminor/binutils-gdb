@@ -1,3 +1,14 @@
+2001-07-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/default.exp (ld_nm): Add "nmflags" arg.
+	* lib/ld-lib.exp (default_ld_nm): Likewise.
+	* ld-empic/empic.exp: Adjust call to ld_nm.
+	* ld-scripts/defined.exp: Likewise.
+	* ld-scripts/script.exp: Likewise.
+	* ld-scripts/sizeof.exp: Likewise.
+	* ld-selective/selective.exp: Likewise.
+	* ld-sh/sh.exp: Likewise.
+
 2001-07-12  H.J. Lu  <hjl@gnu.org>
 
 	* ld-selective/selective.exp: Mark selective1, selective2,

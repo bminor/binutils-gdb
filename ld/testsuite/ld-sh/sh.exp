@@ -32,7 +32,7 @@ if ![ld_assemble $as "-relax $srcdir/$subdir/sh1.s" tmpdir/sh1.o] {
 } else { if ![ld_simple_link $ld tmpdir/sh1 "-relax tmpdir/sh1.o"] {
     fail $testsimple
 } else {
-    if ![ld_nm $nm tmpdir/sh1] {
+    if ![ld_nm $nm "" tmpdir/sh1] {
 	unresolved $testsimple
     } else {
 	if {![info exists nm_output(bar)] \

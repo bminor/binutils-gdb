@@ -283,7 +283,7 @@ proc default_ld_assemble { as source object } {
 # default_ld_nm
 #	run nm on a file, putting the result in the array nm_output
 #
-proc default_ld_nm { nm object } {
+proc default_ld_nm { nm nmflags object } {
     global NMFLAGS
     global nm_output
     global host_triplet
@@ -299,9 +299,9 @@ proc default_ld_nm { nm object } {
 
     if ![info exists NMFLAGS] { set NMFLAGS "" }
 
-    verbose -log "$nm $NMFLAGS $object >tmpdir/nm.out"
+    verbose -log "$nm $NMFLAGS $nmflags $object >tmpdir/nm.out"
 
-    catch "exec $nm $NMFLAGS $object >tmpdir/nm.out" exec_output
+    catch "exec $nm $NMFLAGS $nmflags $object >tmpdir/nm.out" exec_output
     set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
 	set file [open tmpdir/nm.out r]

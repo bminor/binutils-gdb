@@ -158,8 +158,8 @@ proc ld_assemble { as source object } {
 # ld_nm
 #	run nm on a file
 #
-proc ld_nm { nm object } {
-	default_ld_nm $nm $object
+proc ld_nm { nm nmflags object } {
+	default_ld_nm $nm $nmflags $object
 }
 
 #

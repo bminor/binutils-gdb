@@ -106,7 +106,7 @@ foreach testitem $seltests {
 	continue
     }
 
-    if ![ld_nm $nm $ldfile] {
+    if ![ld_nm $nm "" $ldfile] {
 	unresolved $testname
 	continue
     }
