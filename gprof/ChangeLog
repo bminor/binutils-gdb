@@ -1,3 +1,13 @@
+Fri Oct  6 16:25:32 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	Mon Sep 25 22:49:32 1995  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* Makefile.in: Add dependecies for $(OBJS) on header files.
+
+	* cg_print.c (print_cycle, print_members, cg_print_index): Fix new
+	style output format to make it consistent.
+	* dummy.c (find_call): Fix typo in error message.
+
 Wed Sep 20 13:21:02 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (maintainer-clean): New target, synonym for

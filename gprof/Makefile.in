@@ -117,6 +117,11 @@ Makefile: Makefile.in config.status
 config.status: configure
 	$(SHELL) config.status --recheck
 
+$(OBJS): ../bfd/bfd.h call_graph.h cg_arcs.h cg_print.h core.h gmon_io.h \
+	 gmon_out.h gprof.h hertz.h hist.h search_list.h source.h sym_ids.h \
+	 symtab.h utils.h $(srcdir)/../include/libiberty.h \
+	 $(srcdir)/../bfd/sysdep.h $(MY_TARGET).h
+
 # These get around a bug in Sun Make in SunOS 4.1.1 and Solaris 2
 $(MY_TARGET).o: $(MY_TARGET).c
 basic_blocks.o: basic_blocks.c

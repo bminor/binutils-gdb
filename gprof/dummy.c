@@ -11,6 +11,6 @@ void
 DEFUN (find_call, (parent, p_lowpc, p_highpc),
        Sym * parent AND bfd_vma p_lowpc AND bfd_vma p_highpc)
 {
-  fprintf (stderr, "%s: -c supported on this machine architecture\n",
+  fprintf (stderr, "%s: -c not supported on this machine architecture\n",
 	   whoami);
 }

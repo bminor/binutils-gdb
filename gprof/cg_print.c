@@ -82,7 +82,9 @@ DEFUN (print_cycle, (cyc), Sym * cyc)
   char buf[BUFSIZ];
 
   sprintf (buf, "[%d]", cyc->cg.index);
-  printf ("%-6.6s %5.1f %7.2f %11.2f %7d", buf,
+  printf (bsd_style_output
+	  ? "%-6.6s %5.1f %7.2f %11.2f %7d"
+	  : "%-6.6s %5.1f %7.2f %7.2f %7d", buf,
 	  100 * (cyc->cg.prop.self + cyc->cg.prop.child) / print_time,
 	  cyc->cg.prop.self / hz, cyc->cg.prop.child / hz, cyc->ncalls);
   if (cyc->cg.self_calls != 0)
@@ -93,7 +95,7 @@ DEFUN (print_cycle, (cyc), Sym * cyc)
     {
       printf (" %7.7s", "");
     }
-  printf (" <cycle %d as a whole>\t[%d]\n", cyc->cg.cyc.num, cyc->cg.index);
+  printf (" <cycle %d as a whole> [%d]\n", cyc->cg.cyc.num, cyc->cg.index);
 }
 
 
@@ -170,7 +172,9 @@ DEFUN (print_members, (cyc), Sym * cyc)
   sort_members (cyc);
   for (member = cyc->cg.cyc.next; member; member = member->cg.cyc.next)
     {
-      printf ("%6.6s %5.5s %7.2f %11.2f %7d",
+      printf (bsd_style_output
+	      ? "%6.6s %5.5s %7.2f %11.2f %7d"
+	      : "%6.6s %5.5s %7.2f %7.2f %7d",
 	      "", "", member->cg.prop.self / hz, member->cg.prop.child / hz,
 	      member->ncalls);
       if (member->cg.self_calls != 0)
@@ -627,9 +631,22 @@ DEFUN_VOID (cg_print_index)
 	    }
 	  else
 	    {
-	      printf ("%6.6s ", buf);
-	      sprintf (buf, "<cycle %d>", sym->cg.cyc.num);
-	      printf ("%-19.19s", buf);
+	      if (bsd_style_output)
+		{
+		  printf ("%6.6s ", buf);
+		  sprintf (buf, "<cycle %d>", sym->cg.cyc.num);
+		  printf ("%-19.19s", buf);
+		}
+	      else
+		{
+		  col += strlen (buf);
+		  for (; col < starting_col + 5; ++col)
+		    putchar (' ');
+		  printf (" %s ", buf);
+		  sprintf (buf, "<cycle %d>", sym->cg.cyc.num);
+		  printf ("%s", buf);
+		  col += strlen (buf);
+		}
 	    }
 	  starting_col += column_width;
 	}
