@@ -346,7 +346,6 @@ remote-mm.c
 remote-nindy.c
 remote-nrom.c
 remote-os9k.c
-remote-pa.c
 remote-rdp.c
 remote-sim.c
 remote-st.c
