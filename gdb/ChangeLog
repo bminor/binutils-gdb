@@ -1,3 +1,8 @@
+Fri Nov 21 02:19:57 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* Makefile.in: also revert SHELL change until configury
+	changes work
+
 Thu Nov 20 16:35:13 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* sparc-tdep.c (sparc_pc_adjust): Don't assume sizeof (long) == 4.
