@@ -1,3 +1,7 @@
+2004-07-27  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.threads/watchthreads.exp: New test for threaded watchpoints.
+
 2004-07-26  Nick Clifton  <nickc@redhat.com>
 
 	* gdb.asm/asm-source.exp (debug-flags): New variable.  If a known
