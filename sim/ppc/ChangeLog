@@ -1,3 +1,27 @@
+Mon Sep 28 09:42:45 1998  Drew Moseley  <dmoseley@cygnus.com>
+
+	* table.c (table_open): For cygwin hosts, we need to use the return value
+	from the read routine as the number of bytes to process.  This apparently
+ 	is due to text-mode vs binary-mode.  If the mounts are done text-mode,
+ 	then the size returnedby fstat() may be different than the number of
+ 	bytes "read" in text mode.
+
+Sun Oct  4 00:50:47 1998  Felix Lee  <flee@cygnus.com>
+
+	* emul_netbsd.c (do_open): fix order-of-evaluation problem.
+	(do_close): ditto.
+	(do_fstat): ditto.
+	(do_lstat): ditto.
+
+1998-09-03  Michael Meissner  <meissner@cygnus.com>
+
+	* emul_{netbsd,unix}.c: Update copyright year.
+
+Mon Jun 29 10:57:36 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* sim_calls.c (sim_fetch_register, sim_store_register):
+	return zero when nothing to do.
+
 1998-06-26  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in (AC_CHECK_HEADERS): Don't check for sys/mount.h.
