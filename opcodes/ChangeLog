@@ -1,8 +1,10 @@
 Mon Apr  8 14:00:44 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Permit --enable-shared to specify a list of
-	directories.
+	directories.  Set and substitute BFD_PICLIST.
 	* configure: Rebuild.
+	* Makefile.in (BFD_PICLIST): Rename from BFD_LIST.  Change all
+	uses.  Set to @BFD_PICLIST@.
 
 Fri Apr  5 17:12:27 1996  Jeffrey A Law  (law@cygnus.com)
 
