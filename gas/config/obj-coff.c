@@ -1014,18 +1014,23 @@ coff_frob_symbol (symp, punt)
 
   if (coffsymbol (symp->bsym)->lineno)
     {
-      int i, n;
+      int i;
       struct line_no *lptr;
       alent *l;
 
       lptr = (struct line_no *) coffsymbol (symp->bsym)->lineno;
       for (i = 0; lptr; lptr = lptr->next)
 	i++;
-      n = i + 1;
       lptr = (struct line_no *) coffsymbol (symp->bsym)->lineno;
-      l = (alent *) bfd_alloc_by_size_t (stdoutput, n * sizeof (alent));
+
+      /* We need i entries for line numbers, plus 1 for the first
+	 entry which BFD will override, plus 1 for the last zero
+	 entry (a marker for BFD).  */
+      l = (alent *) bfd_alloc_by_size_t (stdoutput, (i + 2) * sizeof (alent));
       coffsymbol (symp->bsym)->lineno = l;
-      for (i = n - 1; i > 0; i--)
+      l[i + 1].line_number = 0;
+      l[i + 1].u.sym = NULL;
+      for (; i > 0; i--)
 	{
 	  if (lptr->frag)
 	    lptr->l.u.offset += lptr->frag->fr_address;
@@ -1044,6 +1049,11 @@ coff_adjust_section_syms (abfd, sec, x)
   symbolS *secsym;
   segment_info_type *seginfo = seg_info (sec);
   int nlnno, nrelocs = 0;
+
+  /* RS/6000 gas creates a .debug section manually in ppc_frob_file in
+     tc-ppc.c.  Do not get confused by it.  */
+  if (seginfo == NULL)
+    return;
 
   if (!strcmp (sec->name, ".text"))
     nlnno = n_line_nos;
@@ -1291,8 +1301,8 @@ symbol_dump ()
 #include "frags.h"
 /* This is needed because we include internal bfd things. */
 #include <time.h>
-#include "../bfd/libbfd.h"
-#include "../bfd/libcoff.h"
+#include "bfd/libbfd.h"
+#include "bfd/libcoff.h"
 
 /* The NOP_OPCODE is for the alignment fill value.  Fill with nop so
    that we can stick sections together without causing trouble.  */
@@ -3687,16 +3697,18 @@ fixup_segment (segP, this_segment_type)
 #ifndef TC_M88K
 	  /* The m88k uses the offset field of the reloc to get around
 	     this problem.  */
-	  if ((size == 1 &&
-	  (add_number & ~0xFF) && ((add_number & ~0xFF) != (-1 & ~0xFF))) ||
-	      (size == 2 &&
-	       (add_number & ~0xFFFF) && ((add_number & ~0xFFFF) != (-1 & ~0xFFFF))))
+	  if ((size == 1
+	       && (add_number & ~0xFF)
+	       && ((add_number & ~0xFF) != (-1 & ~0xFF)))
+	      || (size == 2
+		  && (add_number & ~0xFFFF)
+		  && ((add_number & ~0xFFFF) != (-1 & ~0xFFFF))))
 	    {
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    "Value of %ld too large for field of %d bytes at 0x%lx",
 			    (long) add_number, size,
 			    (unsigned long) (fragP->fr_address + where));
-	    }			/* generic error checking */
+	    }
 #endif
 #ifdef WARN_SIGNED_OVERFLOW_WORD
 	  /* Warn if a .word value is too large when treated as

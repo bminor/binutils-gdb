@@ -28,7 +28,7 @@
 #include "bfd.h"
 #include "subsegs.h"
 #define DEFINE_TABLE
-#include "../opcodes/rce-opc.h"
+#include "opcodes/rce-opc.h"
 #include <ctype.h>
 #include <string.h>
 

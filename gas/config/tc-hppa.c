@@ -27,8 +27,8 @@
 #include "as.h"
 #include "subsegs.h"
 
-#include "../bfd/libhppa.h"
-#include "../bfd/libbfd.h"
+#include "bfd/libhppa.h"
+#include "bfd/libbfd.h"
 
 /* Be careful, this file includes data *declarations*.  */
 #include "opcode/hppa.h"

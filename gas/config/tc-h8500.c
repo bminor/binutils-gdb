@@ -28,7 +28,7 @@
 #include "subsegs.h"
 #define DEFINE_TABLE
 #define ASSEMBLER_TABLE
-#include "../opcodes/h8500-opc.h"
+#include "opcodes/h8500-opc.h"
 #include <ctype.h>
 
 const char comment_chars[] = "!";
