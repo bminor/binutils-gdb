@@ -37,12 +37,12 @@ extern int nindy_initial_brk;	/* Send a BREAK to reset board first */
 extern char *nindy_ttyname;	/* Name of serial port to talk to nindy */
 
 #define	ADDITIONAL_OPTIONS \
-	{"O", 0, &nindy_old_protocol, 1},	\
-	{"brk", 0, &nindy_initial_brk, 1},	\
-	{"r", 1, 0, 1004},  /* 1004 is magic cookie for ADDL_CASES */
+	{"O", no_argument, &nindy_old_protocol, 1},	\
+	{"brk", no_argument, &nindy_initial_brk, 1},	\
+	{"ser", required_argument, 0, 1004},  /* 1004 is magic cookie for ADDL_CASES */
 
 #define	ADDITIONAL_OPTION_CASES	\
-	case 1004:	/* -r option:  remote nindy auto-start */	\
+	case 1004:	/* -ser option:  remote nindy auto-start */	\
 	  nindy_ttyname = optarg;	\
 	  break;
 
@@ -50,7 +50,7 @@ extern char *nindy_ttyname;	/* Name of serial port to talk to nindy */
 	"\
   -O                Use old protocol to talk to a Nindy target\n\
   -brk              Send a break to a Nindy target to reset it.\n\
-  -r SERIAL         Open remote Nindy session to SERIAL port.\n\
+  -ser SERIAL       Open remote Nindy session to SERIAL port.\n\
 "
 
 /* If specified on the command line, open tty for talking to nindy,

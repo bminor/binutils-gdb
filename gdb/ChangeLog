@@ -1,3 +1,18 @@
+Wed Oct  7 12:24:01 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* Makefile.in (nindy.o): Define "STRIP" as pathname of strip
+	program.
+	* nindy-share/nindy.c (coffstrip): Use that pathname, instead of
+	searching for a "bfd_strip" program.  Also, fixed up arguments
+	passed to that program.
+
+	* tm-nindy960.h (ADDITIONAL_OPTIONS): Use "-ser" rather than "-r",
+	which is now used for something else.  Rewrite description of
+	associated parameters to match how gdb does it now.
+	(ADDITIONAL_OPTION_HELP): Fix message accordingly.
+
+	* m68k-pinsn.c (print_insn_arg): Handle new "`" operand type.
+
 Tue Oct  6 14:47:11 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	NOTICE_SIGNAL_HANDLING_CHANGE macro added to the target vector as

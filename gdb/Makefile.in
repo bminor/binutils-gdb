@@ -22,6 +22,7 @@ program_transform_name =
 exec_prefix = $(prefix)
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
+tooldir = $(libdir)/$(target_alias)
 
 datadir = $(prefix)/lib
 mandir = $(prefix)/man
@@ -746,7 +747,8 @@ xdr_regs.o: ${srcdir}/vx-share/xdr_regs.c
 	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/vx-share/xdr_regs.c
 
 nindy.o: ${srcdir}/nindy-share/nindy.c
-	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/nindy-share/nindy.c
+	${CC} -c ${INTERNAL_CFLAGS} -DSTRIP='"$(tooldir)/bin/strip"' \
+		${srcdir}/nindy-share/nindy.c
 
 Onindy.o: ${srcdir}/nindy-share/Onindy.c
 	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/nindy-share/Onindy.c
