@@ -57,6 +57,7 @@ c-exp.y
 coffread.c
 command.c
 command.h
+config
 configure.in
 convex-pinsn.c
 convex-tdep.c
@@ -187,7 +188,6 @@ tahoe-opcode.h
 tahoe-pinsn.c
 target.c
 target.h
-tconfig
 terminal.h
 tm-29k.h
 tm-3b1.h
@@ -244,7 +244,6 @@ vax-pinsn.c
 vx-share
 xcoffexec.c
 xcoffread.c
-xconfig
 xm-3b1.h
 xm-m88k.h
 xm-altos.h
