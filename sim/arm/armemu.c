@@ -24,6 +24,7 @@ static ARMword GetDPRegRHS (ARMul_State * state, ARMword instr);
 static ARMword GetDPSRegRHS (ARMul_State * state, ARMword instr);
 static void WriteR15 (ARMul_State * state, ARMword src);
 static void WriteSR15 (ARMul_State * state, ARMword src);
+static void WriteR15Branch (ARMul_State * state, ARMword src);
 static ARMword GetLSRegRHS (ARMul_State * state, ARMword instr);
 static ARMword GetLS7RHS (ARMul_State * state, ARMword instr);
 static unsigned LoadWord (ARMul_State * state, ARMword instr,
@@ -1082,35 +1083,8 @@ ARMul_Emulate26 (register ARMul_State * state)
 #ifdef MODET
 	      if (BITS (4, 27) == 0x12FFF1)
 		{		/* BX */
-		  /* Branch to the address in RHSReg. If bit0 of
-		     destination address is 1 then switch to Thumb mode: */
-		  ARMword addr = state->Reg[RHSReg];
-
-		  /* If we read the PC then the bottom bit is clear */
-		  if (RHSReg == 15)
-		    addr &= ~1;
-
-		  /* Enable this for a helpful bit of debugging when
-		     GDB is not yet fully working... 
-		     fprintf (stderr, "BX at %x to %x (go %s)\n",
-		     state->Reg[15], addr, (addr & 1) ? "thumb": "arm" ); */
-
-		  if (addr & (1 << 0))
-		    {		/* Thumb bit */
-		      SETT;
-		      state->Reg[15] = addr & 0xfffffffe;
-		      /* NOTE: The other CPSR flag setting blocks do not
-		         seem to update the state->Cpsr state, but just do
-		         the explicit flag. The copy from the seperate
-		         flags to the register must happen later. */
-		      FLUSHPIPE;
-		    }
-		  else
-		    {
-		      CLEART;
-		      state->Reg[15] = addr & 0xfffffffc;
-		      FLUSHPIPE;
-		    }
+		  WriteR15Branch (state, state->Reg[RHSReg]);
+		  break;
 		}
 #endif
 	      if (DESTReg == 15)
@@ -3128,11 +3102,14 @@ GetDPSRegRHS (ARMul_State * state, ARMword instr)
 static void
 WriteR15 (ARMul_State * state, ARMword src)
 {
-  /* The ARM documentation implies (but doe snot state) that the bottom bit of the PC is never set */
+  /* The ARM documentation states that the two least significant bits
+     are discarded when setting PC, except in the cases handled by
+     WriteR15Branch() below.  */
+  src &= 0xfffffffc;
 #ifdef MODE32
-  state->Reg[15] = src & PCBITS & ~0x1;
+  state->Reg[15] = src & PCBITS;
 #else
-  state->Reg[15] = (src & R15PCBITS & ~0x1) | ECC | ER15INT | EMODE;
+  state->Reg[15] = (src & R15PCBITS) | ECC | ER15INT | EMODE;
   ARMul_R15Altered (state);
 #endif
   FLUSHPIPE;
@@ -3145,6 +3122,7 @@ WriteR15 (ARMul_State * state, ARMword src)
 static void
 WriteSR15 (ARMul_State * state, ARMword src)
 {
+  src &= 0xfffffffc;
 #ifdef MODE32
   state->Reg[15] = src & PCBITS;
   if (state->Bank > 0)
@@ -3160,6 +3138,29 @@ WriteSR15 (ARMul_State * state, ARMword src)
   ARMul_R15Altered (state);
 #endif
   FLUSHPIPE;
+}
+
+/* In machines capable of running in Thumb mode, BX, BLX, LDR and LDM
+   will switch to Thumb mode if the least significant bit is set. */
+
+static void
+WriteR15Branch (ARMul_State * state, ARMword src)
+{
+#ifdef MODET
+  if (src & 1)
+    {		/* Thumb bit */
+      SETT;
+      state->Reg[15] = src & 0xfffffffe;
+    }
+  else
+    {
+      CLEART;
+      state->Reg[15] = src & 0xfffffffc;
+    }
+  FLUSHPIPE;
+#else
+  WriteR15 (state, src);
+#endif
 }
 
 /***************************************************************************\
@@ -3249,7 +3250,7 @@ LoadWord (ARMul_State * state, ARMword instr, ARMword address)
     }
   if (address & 3)
     dest = ARMul_Align (state, address, dest);
-  WRITEDEST (dest);
+  WRITEDESTB (dest);
   ARMul_Icycles (state, 1, 0L);
 
   return (DESTReg != LHSReg);
@@ -3471,10 +3472,7 @@ LoadMult (ARMul_State * state, ARMword instr, ARMword address, ARMword WBBase)
 
   if (BIT (15) && !state->Aborted)
     {				/* PC is in the reg list */
-#ifdef MODE32
-      state->Reg[15] = PC;
-#endif
-      FLUSHPIPE;
+      WriteR15Branch(state, PC);
     }
 
   ARMul_Icycles (state, 1, 0L);	/* to write back the final register */

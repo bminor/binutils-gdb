@@ -332,6 +332,11 @@ extern ARMword isize;
                          ARMul_NegZero(state, d) ; \
                          }
 
+#define WRITEDESTB(d) if (DESTReg == 15) \
+                        WriteR15Branch(state, d) ; \
+                     else \
+                          DEST = d
+
 #define BYTETOBUS(data) ((data & 0xff) | \
                         ((data & 0xff) << 8) | \
                         ((data & 0xff) << 16) | \

@@ -1,5 +1,13 @@
 2000-07-04  Alexandre Oliva  <aoliva@redhat.com>
 
+	* armemu.h (WRITEDESTB): New macro.
+	* armemu.c (ARMul_Emulate26, bl): Use WriteR15Branch() to
+	modify PC.  Moved the existing logic...
+	(WriteR15Branch): ... here.  New function.
+	(WriteR15, WriteSR15): Drop the two least significant bits.
+	(LoadSMult): Use WriteR15Branch() to modify PC.
+	(LoadMult): Use WRITEDESTB() instead of WRITEDEST().
+
 	* armemu.h (GETSPSR): Call ARMul_GetSPSR().
 	* armsupp.c (ARMul_CPSRAltered): Zero out bits as they're
 	extracted from state->Cpsr, but preserve the unused bits.
