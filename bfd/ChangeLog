@@ -1,3 +1,8 @@
+2000-07-21  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-mips.c (_bfd_mips_elf_check_relocs): Detect out of
+	range symbol indices in relocs and issue an error message.
+
 2000-07-20  H.J. Lu  <hjl@gnu.org>
 
 	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Don't check
