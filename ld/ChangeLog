@@ -1,3 +1,9 @@
+Mon Jul 19 14:19:14 1999  Mark P. Mitchell  <mark@codesourcery.com>
+
+	* emulparams/elf32bmipn32.sh (OTHER_RELOCATING_SECTIONS): Add
+	.MIPS.events and .MIPS.content handling.
+	* emulparams/elf64bmip.sh (OTHER_RELOCATING_SECTIONS): Likewise.
+
 1999-07-17  Nick Clifton  <nickc@cygnus.com>
 
 	* ldlang.c (get_target): New function: Return true iff the

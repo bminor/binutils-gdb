@@ -41,3 +41,35 @@ EXECUTABLE_SYMBOLS="
 # segment.
 WRITABLE_RODATA=
 
+OTHER_RELOCATING_SECTIONS='
+  .MIPS.events.text :
+    {
+       *(.MIPS.events.text)
+       *(.MIPS.events.gnu.linkonce.t*)
+    }
+  .MIPS.content.text : 
+    {
+       *(.MIPS.content.text)
+       *(.MIPS.content.gnu.linkonce.t*)
+    }
+  .MIPS.events.data : 
+    {
+       *(.MIPS.events.data)
+       *(.MIPS.events.gnu.linkonce.d*)
+    }
+  .MIPS.content.data : 
+    {
+       *(.MIPS.content.data)
+       *(.MIPS.content.gnu.linkonce.d*)
+    }
+  .MIPS.events.rodata : 
+    {
+       *(.MIPS.events.rodata)
+       *(.MIPS.events.gnu.linkonce.r*)
+    }
+  .MIPS.content.rodata : 
+    {
+       *(.MIPS.content.rodata)
+       *(.MIPS.content.gnu.linkonce.r*)
+    }
+'
