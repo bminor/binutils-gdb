@@ -7150,8 +7150,11 @@ cd gdb-_GDB_VN__/bfd
 @end group
 @end example
 
-You can install @code{_GDBP__} anywhere; it has no hardwired paths.  However,
-you should make sure that the shell on your path (named by the
+You can install @code{_GDBP__} anywhere; it has no hardwired paths.  
+Simply copy @code{gdb/gdb} to the desired directory.
+@comment What about installing the man pages, info files, etc?
+
+However, you should make sure that the shell on your path (named by the
 @samp{SHELL} environment variable) is publicly readable; some systems
 refuse to let _GDBN__ debug child processes whose programs are not
 readable, and _GDBN__ uses the shell to start your program.
