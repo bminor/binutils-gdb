@@ -40,6 +40,7 @@ blt.d
 blt.s
 bltu.d
 bltu.s
+div-ilocks.d
 div.d
 div.s
 jal-empic.d
@@ -76,6 +77,7 @@ lifloat.s
 mips.exp
 mips4.d
 mips4.s
+div-ilocks.d
 mul.d
 mul.s
 rol.d
