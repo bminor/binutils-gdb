@@ -2333,6 +2333,10 @@ struct ppc64_elf_obj_tdata
   asection *got;
   asection *relgot;
 
+  /* Used during garbage collection.  We attach global symbols defined
+     on removed .opd entries to this section so that the sym is removed.  */
+  asection *deleted_section;
+
   /* TLS local dynamic got entry handling.  Suppose for multiple GOT
      sections means we potentially need one of these for each input bfd.  */
   union {
@@ -5227,8 +5231,18 @@ adjust_opd_syms (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
       if (adjust == -1)
 	{
 	  /* This entry has been deleted.  */
+	  asection *dsec = ppc64_elf_tdata (sym_sec->owner)->deleted_section;
+	  if (dsec == NULL)
+	    {
+	      for (dsec = sym_sec->owner->sections; dsec; dsec = dsec->next)
+		if (elf_discarded_section (dsec))
+		  {
+		    ppc64_elf_tdata (sym_sec->owner)->deleted_section = dsec;
+		    break;
+		  }
+	    }
 	  eh->elf.root.u.def.value = 0;
-	  eh->elf.root.u.def.section = &bfd_abs_section;
+	  eh->elf.root.u.def.section = dsec;
 	}
       else
 	eh->elf.root.u.def.value += adjust;
