@@ -1,3 +1,9 @@
+Mon Feb  2 17:13:03 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdbint.texinfo: Remove obsolete mentions of pinsn.c and opcode.h
+ 	files, finish sorting of host vs target vs native macros, describe
+ 	some more of them.
+
 Tue Jan 13 16:44:50 1998  Fred Fish  <fnf@cygnus.com>
 
 	* gdbint.texinfo (Host Conditionals): Document change from
