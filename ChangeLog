@@ -1,3 +1,16 @@
+Tue May 25 12:44:18 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* build-all.mk (all-cross): New target for Canadian Cross.
+	Added Q2 go32 targets.
+	* test-build.mk: Configure go32 cross sparclite-aout and
+	mips-idt-ecoff -with-gnu-ld.  Moved build binary directory from
+	PARTIAL_HOLE_DIRS to BUILD_HOLES_DIRS.
+
+Mon May 24 15:30:06 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: fix Alpha GDB typo; also, don't build DejaGnu for
+	GO32 hosted toolchains
+
 Mon May 24 14:18:41 1993  Rob Savoye  (rob at darkstar.cygnus.com)
 
 	* configure: change  so "-exec-prefix" gets passed down rather

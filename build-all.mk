@@ -39,6 +39,9 @@ endif
 ifeq ($(canonhost),i486-unknown-sco3.2v4.0)
 canonhost := i386-sco3.2v4
 endif
+ifeq ($(canonhost),i386-unknown-go32)
+canonhost := i386-go32
+endif
 
 ifeq ($(canonhost),sparc-sun-sunos4.1.1)
 TARGETS = $(NATIVE)	i386-go32	m68k-aout	m68k-vxworks \
@@ -103,6 +106,17 @@ endif
 ifeq ($(canonhost),i386-sco3.2v4)
 TARGETS = $(NATIVE) i386-aout
 all: all-cygnus
+endif
+
+ifeq ($(canonhost),i386-go32)
+TARGETS = m68k-aout a29k-amd-udi m68k-coff i386-aout sparclite-aout \
+	  h8300-sim mips-idt-ecoff
+ifndef build
+build := $(shell $(TREE)/config.guess)
+endif
+CC = i386-go32-gcc
+GCC = i386-go32-gcc -O
+all: all-cross
 endif
 
 FLAGS_TO_PASS := \
@@ -173,6 +187,16 @@ all-native:
 	@for i in $(TARGETS) ; do \
 	    echo "building $(canonhost) cross to $$i" ; \
             $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i do-native $(tlog) && \
+	       echo "     completed successfully" ; \
+	done
+
+all-cross:
+	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
+	rm -f /usr/cygnus/$(TAG)
+	ln -s $(INSTALLDIR) /usr/cygnus/$(TAG)
+	@for i in $(TARGETS) ; do \
+	    echo "building $(canonhost) cross to $$i" ; \
+            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build=$(build) do-cygnus $(tlog) && \
 	       echo "     completed successfully" ; \
 	done
 
