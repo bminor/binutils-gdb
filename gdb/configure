@@ -3481,7 +3481,7 @@ EOF
 cat >> $CONFIG_STATUS <<\EOF
 
 if test "${nativefile}" = ""; then
-sed -e '/^NATDEPFILES= /s//# NATDEPFILES= /' \
+sed -e '/^NATDEPFILES[ 	]*=[ 	]*/s//# NATDEPFILES=/' \
 	< Makefile > Makefile.tem
 mv -f Makefile.tem Makefile
 fi

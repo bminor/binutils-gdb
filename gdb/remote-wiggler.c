@@ -81,6 +81,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define WIGGLER_WRITE_INT_MEM 0x81 /* Write Internal Memory */
 #define WIGGLER_JUMP 0x82	/* Jump to Subroutine */
 
+#define WIGGLER_ERASE_FLASH 0x90 /* Erase flash memory */
+#define WIGGLER_PROGRAM_FLASH 0x91 /* Write flash memory */
+#define WIGGLER_EXIT_MON 0x93	/* Exit the flash programming monitor  */
+#define WIGGLER_ENTER_MON 0x94	/* Enter the flash programming monitor  */
+
 #define WIGGLER_SET_STATUS 0x0a	/* Set status */
 #define   WIGGLER_FLAG_STOP 0x0 /* Stop the target, enter BDM */
 #define   WIGGLER_FLAG_START 0x01 /* Start the target at PC */
@@ -195,6 +200,7 @@ wiggler_error (s, error_code)
   char buf[100];
 
   fputs_filtered (s, gdb_stderr);
+  fputs_filtered (" ", gdb_stderr);
 
   switch (error_code)
     {
@@ -211,6 +217,7 @@ wiggler_error (s, error_code)
     case 0x14: s = "Parameter error"; break;
     case 0x15: s = "Internal error"; break;
     case 0x16: s = "Register buffer error"; break;
+    case 0x80: s = "Flash erase error"; break;
     default:
       sprintf (buf, "Unknown error code %d", error_code);
       s = buf;
@@ -829,7 +836,6 @@ wiggler_write_bytes (memaddr, myaddr, len)
       int status, error_code;
 
       numbytes = min (len, 256 - 8);
-/*      numbytes = min (len, 40);*/
 
       buf[1] = memaddr >> 24;
       buf[2] = memaddr >> 16;
@@ -847,7 +853,7 @@ wiggler_write_bytes (memaddr, myaddr, len)
       status = p[1];
       error_code = p[2];
 
-      if (error_code == 11)	/* Got a bus error? */
+      if (error_code == 0x11)	/* Got a bus error? */
 	{
 	  CORE_ADDR error_address;
 
@@ -864,7 +870,7 @@ wiggler_write_bytes (memaddr, myaddr, len)
 	  break;
 	}
       else if (error_code != 0)
-	wiggler_error ("wiggler_store_registers:", error_code);
+	wiggler_error ("wiggler_write_bytes:", error_code);
 
       len -= numbytes;
       memaddr += numbytes;
@@ -937,7 +943,7 @@ wiggler_read_bytes (memaddr, myaddr, len)
 	  break;
 	}
       else if (error_code != 0)
-	wiggler_error ("wiggler_store_registers:", error_code);
+	wiggler_error ("wiggler_read_bytes:", error_code);
 
       memcpy (myaddr, &p[4], numbytes);
 
@@ -955,7 +961,7 @@ wiggler_read_bytes (memaddr, myaddr, len)
 
 /* ARGSUSED */
 static int
-wiggler_xfer_memory(memaddr, myaddr, len, should_write, target)
+wiggler_xfer_memory (memaddr, myaddr, len, should_write, target)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
@@ -1307,6 +1313,10 @@ get_packet (cmd, lenp, timeout)
 	case WIGGLER_MOVE_MEM:	/* Move Memory */
 	case WIGGLER_WRITE_INT_MEM: /* Write Internal Memory */
 	case WIGGLER_JUMP:	/* Jump to Subroutine */
+	case WIGGLER_ERASE_FLASH: /* Erase flash memory */
+	case WIGGLER_PROGRAM_FLASH: /* Write flash memory */
+	case WIGGLER_EXIT_MON:	/* Exit the flash programming monitor  */
+	case WIGGLER_ENTER_MON:	/* Enter the flash programming monitor  */
 	  len = 0;
 	  break;
 	case WIGGLER_GET_VERSION: /* Get Version */
@@ -1446,7 +1456,16 @@ wiggler_load (args, from_tty)
      int from_tty;
 {
   generic_load (args, from_tty);
+
   inferior_pid = 0;
+
+/* This is necessary because many things were based on the PC at the time that
+   we attached to the monitor, which is no longer valid now that we have loaded
+   new code (and just changed the PC).  Another way to do this might be to call
+   normal_stop, except that the stack may not be valid, and things would get
+   horribly confused... */
+
+  clear_symtab_users ();
 }
 
 /* BDM (at least on CPU32) uses a different breakpoint */
@@ -1505,6 +1524,91 @@ bdm_restart_command (args, from_tty)
   clear_proceed_status ();
   wait_for_inferior ();
   normal_stop ();
+}
+
+static int
+flash_xfer_memory (memaddr, myaddr, len, should_write, target)
+     CORE_ADDR memaddr;
+     char *myaddr;
+     int len;
+     int should_write;
+     struct target_ops *target;			/* ignored */
+{
+  char buf[256 + 10];
+  unsigned char *p;
+  int origlen;
+
+  if (!should_write)
+    abort ();
+
+  origlen = len;
+
+  buf[0] = WIGGLER_PROGRAM_FLASH;
+
+  while (len > 0)
+    {
+      int numbytes;
+      int pktlen;
+      int status, error_code;
+
+      numbytes = min (len, 256 - 6);
+
+      buf[1] = memaddr >> 24;
+      buf[2] = memaddr >> 16;
+      buf[3] = memaddr >> 8;
+      buf[4] = memaddr;
+
+      buf[5] = numbytes;
+
+      memcpy (&buf[6], myaddr, numbytes);
+      put_packet (buf, 6 + numbytes);
+      p = get_packet (WIGGLER_PROGRAM_FLASH, &pktlen, remote_timeout);
+      if (pktlen < 3)
+	error ("Truncated response packet from Wiggler");
+
+      status = p[1];
+      error_code = p[2];
+
+      if (error_code != 0)	
+	wiggler_error ("flash_xfer_memory:", error_code);
+
+      len -= numbytes;
+      memaddr += numbytes;
+      myaddr += numbytes;
+    }
+
+  return origlen - len;
+}
+
+static void
+bdm_update_flash_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  int status, pktlen;
+  struct cleanup *old_chain;
+
+  if (!wiggler_desc)
+    error ("Not connected to wiggler.");
+
+  if (!args)
+    error ("Must specify file containing new Wiggler code.");
+
+/*  old_chain = make_cleanup (flash_cleanup, 0);*/
+
+  do_command (WIGGLER_ENTER_MON, &status, &pktlen);
+
+  do_command (WIGGLER_ERASE_FLASH, &status, &pktlen);
+
+  wiggler_ops.to_xfer_memory = flash_xfer_memory;
+
+  generic_load (args, from_tty);
+
+  wiggler_ops.to_xfer_memory = wiggler_xfer_memory;
+
+  do_command (WIGGLER_EXIT_MON, &status, &pktlen);
+
+/*  discard_cleanups (old_chain);*/
 }
 
 /* Define the target subroutine names */
@@ -1570,4 +1674,5 @@ _initialize_remote_wiggler ()
 
   add_cmd ("reset", class_obscure, bdm_reset_command, "", &bdm_cmd_list);
   add_cmd ("restart", class_obscure, bdm_restart_command, "", &bdm_cmd_list);
+  add_cmd ("update-flash", class_obscure, bdm_update_flash_command, "", &bdm_cmd_list);
 }

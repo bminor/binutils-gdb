@@ -1,3 +1,25 @@
+Sun Sep  8 15:14:00 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* blockframe.c (inside_main_func):  Cleanup slightly.  Move
+	mainsym def into the block it's used in.
+	* configure.in configure:  Allow NATDEPFILES to be recognized in
+	.mh files regardless of whitespace.
+
+	* cpu32bug-rom.c (cpu32bug_cmds):  Change load_response string to
+	keep downloads from hanging.
+
+	* remote-wiggler.c:  Add support for flash upgrades.
+	* (wiggler_error):  Fix message format.  Add new error code.
+	* (wiggler_write_byets):  Error code is hex.  Report errors with
+	proper routine name.
+	* (wiggler_read_byets):  Report errors with proper routine name.
+	* (get_packet):  Add support for new flash commands.
+	* (wiggler_load):  Call clear_symtab_users() to reset things
+	properly after download.
+	* (flash_xfer_memory bdm_update_flash_command):  New funxtions to
+	support flash upgrades for Wiggler.
+	* (_initialize_remote_wiggler):  Add `bdm update-flash' command.
+
 Fri Sep  6 13:14:13 1996  Geoffrey Noer  <noer@cygnus.com>
 
 	* ser-tcp.c: don't include netinet/tcp.h if __CYGWIN32__
