@@ -134,6 +134,7 @@ ppc-cache-rules
 ppc-instructions
 ppc-opcode-complex
 ppc-opcode-flat
+ppc-opcode-goto
 ppc-opcode-jump
 ppc-opcode-simple
 ppc-opcode-stupid
