@@ -2076,10 +2076,8 @@ tc_gen_reloc (section, fixp)
   /* @@ Why fx_addnumber sometimes and fx_offset other times?  */
   if (reloc->howto->pc_relative == 0)
     reloc->addend = fixp->fx_addnumber;
-  else if (reloc->howto->pcrel_offset)
-    reloc->addend = fixp->fx_offset - reloc->address;
   else
-    reloc->addend = fixp->fx_offset;
+    reloc->addend = fixp->fx_offset - reloc->address;
 
   return reloc;
 }

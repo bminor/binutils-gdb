@@ -1,3 +1,8 @@
+Thu Jan  6 18:05:21 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/tc-sparc.c (tc_gen_reloc): Fix handling of addends in
+	non-pcrel_offset relocations.
+
 Thu Jan  6 01:06:40 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (mips_ip): Warn about using $1 as well as $at
