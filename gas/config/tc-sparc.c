@@ -28,6 +28,13 @@
 #include "opcode/sparc.h"
 
 static void sparc_ip PARAMS ((char *, const struct sparc_opcode **));
+static int in_signed_range PARAMS ((bfd_signed_vma, bfd_signed_vma));
+static int in_bitfield_range PARAMS ((bfd_signed_vma, bfd_signed_vma));
+static int sparc_ffs PARAMS ((unsigned int));
+static bfd_vma BSR PARAMS ((bfd_vma, int));
+static int cmp_reg_entry PARAMS ((const PTR, const PTR));
+static int parse_keyword_arg PARAMS ((int (*) (const char *), char **, int *));
+static int parse_const_expr_arg PARAMS ((char **, int *));
 
 /* Current architecture.  We don't bump up unless necessary.  */
 static enum sparc_opcode_arch_val current_architecture = SPARC_OPCODE_ARCH_V6;
@@ -153,6 +160,9 @@ struct sparc_it
 
 struct sparc_it the_insn, set_insn;
 
+static void output_insn
+  PARAMS ((const struct sparc_opcode *, struct sparc_it *));
+
 /* Return non-zero if VAL is in the range -(MAX+1) to MAX.  */
 
 static INLINE int
@@ -237,6 +247,8 @@ static int special_case;
 
 /* The last instruction to be assembled.  */
 static const struct sparc_opcode *last_insn;
+/* The assembled opcode of `last_insn'.  */
+static unsigned long last_opcode;
 
 /*
  * sort of like s_lcomm
@@ -363,7 +375,7 @@ s_reserve (ignore)
 
 	  symbolP->sy_frag = frag_now;
 	  pfrag = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
-			    size, (char *)0);
+			    (offsetT) size, (char *)0);
 	  *pfrag = 0;
 
 	  S_SET_SEGMENT (symbolP, bss_section);
@@ -413,7 +425,7 @@ s_common (ignore)
   *p = 0;
   symbolP = symbol_find_or_make (name);
   *p = c;
-  if (S_IS_DEFINED (symbolP))
+  if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
     {
       as_bad ("Ignoring attempt to re-define symbol");
       ignore_rest_of_line ();
@@ -476,8 +488,8 @@ s_common (ignore)
 	  if (S_GET_SEGMENT (symbolP) == bss_section)
 	    symbolP->sy_frag->fr_symbol = 0;
 	  symbolP->sy_frag = frag_now;
-	  p = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
-			(char *) 0);
+	  p = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
+			(offsetT) size, (char *) 0);
 	  *p = 0;
 	  S_SET_SEGMENT (symbolP, bss_section);
 	  S_CLEAR_EXTERNAL (symbolP);
@@ -492,8 +504,7 @@ s_common (ignore)
 	  S_SET_ALIGN (symbolP, temp);
 #endif
 	  S_SET_EXTERNAL (symbolP);
-	  /* should be common, but this is how gas does it for now */
-	  S_SET_SEGMENT (symbolP, bfd_und_section_ptr);
+	  S_SET_SEGMENT (symbolP, bfd_com_section_ptr);
 	}
     }
   else
@@ -669,7 +680,7 @@ sparc_cons_align (nbytes)
     }
 
   p = frag_var (rs_align_code, 1, 1, (relax_substateT) 0,
-		(symbolS *) NULL, (long) nalign, (char *) NULL);
+		(symbolS *) NULL, (offsetT) nalign, (char *) NULL);
 
   record_alignment (now_seg, nalign);
 }
@@ -716,9 +727,13 @@ struct priv_reg_entry priv_reg_table[] =
 };
 
 static int
-cmp_reg_entry (p, q)
-     struct priv_reg_entry *p, *q;
+cmp_reg_entry (parg, qarg)
+     const PTR parg;
+     const PTR qarg;
 {
+  const struct priv_reg_entry *p = (const struct priv_reg_entry *) parg;
+  const struct priv_reg_entry *q = (const struct priv_reg_entry *) qarg;
+
   return strcmp (q->name, p->name);
 }
 
@@ -852,6 +867,7 @@ output_insn (insn, the_insn)
     }
 
   last_insn = insn;
+  last_opcode = the_insn->opcode;
 }
 
 void
@@ -864,11 +880,16 @@ md_assemble (str)
   special_case = 0;
   sparc_ip (str, &insn);
 
-  /* We warn about attempts to put a floating point branch in a delay slot.  */
+  /* We warn about attempts to put a floating point branch in a delay slot,
+     unless the delay slot has been annulled.  */
   if (insn != NULL
       && last_insn != NULL
       && (insn->flags & F_FBR) != 0
-      && (last_insn->flags & F_DELAYED) != 0)
+      && (last_insn->flags & F_DELAYED) != 0
+      /* ??? This test isn't completely accurate.  We assume anything with
+	 F_{UNBR,CONDBR,FBR} set is annullable.  */
+      && ((last_insn->flags & (F_UNBR | F_CONDBR | F_FBR)) == 0
+	  || (last_opcode & ANNUL) == 0))
     as_warn ("FP branch in delay slot");
 
   /* SPARC before v9 requires a nop instruction between a floating
@@ -1114,7 +1135,7 @@ md_assemble (str)
 
 static int
 parse_keyword_arg (lookup_fn, input_pointerP, valueP)
-     int (*lookup_fn) ();
+     int (*lookup_fn) PARAMS ((const char *));
      char **input_pointerP;
      int *valueP;
 {
@@ -2308,7 +2329,6 @@ md_atof (type, litP, sizeP)
   int i,prec;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
   char *t;
-  char *atof_ieee ();
 
   switch (type)
     {
@@ -2668,6 +2688,7 @@ tc_gen_reloc (section, fixp)
 	{
 	case BFD_RELOC_32_PCREL_S2:
 	  if (! S_IS_DEFINED (fixp->fx_addsy)
+	      || S_IS_COMMON (fixp->fx_addsy)
 	      || S_IS_EXTERNAL (fixp->fx_addsy)
 	      || S_IS_WEAK (fixp->fx_addsy))
 	    code = BFD_RELOC_SPARC_WPLT30;
