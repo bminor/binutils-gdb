@@ -172,9 +172,9 @@ all:	run $(TARGETLIB) $(GDB_OBJ)
 # Headers outside sim/ppc.
 ANSIDECL_H = $(srcroot)/include/ansidecl.h
 BFD_H = ../../bfd/bfd.h
+DEFS_H = $(srcroot)/gdb/defs.h
 GDB_CALLBACK_H = $(srcroot)/include/gdb/callback.h
 GDB_REMOTE_SIM_H = $(srcroot)/include/gdb/remote-sim.h
-GDB_SIM_PPC_H = $(srcroot)/include/gdb/sim-ppc.h
 COMMON_SIM_BASE_H = $(srcroot)/sim/common/sim-base.h
 COMMON_SIM_BASICS_H = $(srcroot)/sim/common/sim-basics.h
 COMMON_SIM_FPU_H = $(srcroot)/sim/common/sim-fpu.h
@@ -597,7 +597,7 @@ model.o: model.c $(CPU_H) $(MON_H)
 
 events.o: events.c $(BASICS_H) $(EVENTS_H)
 
-sim_calls.o: sim_calls.c $(PSIM_H) $(OPTIONS_H) $(REGISTERS_H) $(BFD_H) $(GDB_CALLBACK_H) $(GDB_REMOTE_SIM_H) $(GDB_SIM_PPC_H)
+sim_calls.o: sim_calls.c $(PSIM_H) $(OPTIONS_H) $(DEFS_H) $(BFD_H) $(GDB_CALLBACK_H) $(GDB_REMOTE_SIM_H)
 
 spreg.o: spreg.c $(BASICS_H) $(SPREG_H)
 
