@@ -4872,6 +4872,11 @@ sh_elf_gc_mark_hook (sec, info, rel, h, sym)
 	  break;
 
 	default:
+#ifdef INCLUDE_SHMEDIA
+	  while (h->root.type == bfd_link_hash_indirect
+		 && h->root.u.i.link)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+#endif
 	  switch (h->root.type)
 	    {
 	    case bfd_link_hash_defined:

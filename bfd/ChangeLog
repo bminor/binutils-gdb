@@ -1,3 +1,9 @@
+2002-08-16  Stephen Clarke <stephen.clarke@superh.com>
+
+	* bfd/elf32-sh.c (sh_elf_gc_mark_hook): For sh64, skip indirect
+	symbols when looking for section referred to by a relocation.
+	* bfd/elf64-sh.c (sh_elf64_gc_mark_hook): Likewise.
+	
 2002-08-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-i370.c: Move reloc enum to include/elf/i370.h.

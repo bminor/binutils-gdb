@@ -2423,6 +2423,9 @@ sh_elf64_gc_mark_hook (sec, info, rel, h, sym)
 	  break;
 
 	default:
+	  while (h->root.type == bfd_link_hash_indirect
+		 && h->root.u.i.link)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	  switch (h->root.type)
 	    {
 	    case bfd_link_hash_defined:
