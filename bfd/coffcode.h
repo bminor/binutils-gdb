@@ -327,12 +327,6 @@ sec_to_styp_flags (sec_name, sec_flags)
   else if (!strcmp (sec_name, _DATA))
     {
       styp_flags = STYP_DATA;
-#ifdef TWO_DATA_SECS
-    }
-  else if (!strcmp (sec_name, ".data2"))
-    {
-      styp_flags = STYP_DATA;
-#endif /* TWO_DATA_SECS */
     }
   else if (!strcmp (sec_name, _BSS))
     {
@@ -475,11 +469,7 @@ styp_to_sec_flags (abfd, hdr, name)
       else
 	sec_flags |= SEC_CODE | SEC_LOAD | SEC_ALLOC;
     }
-  else if (strcmp (name, _DATA) == 0
-#ifdef TWO_DATA_SECS
-	   || strcmp (name, ".data2") == 0
-#endif
-	   )
+  else if (strcmp (name, _DATA) == 0)
     {
       if (sec_flags & SEC_NEVER_LOAD)
 	sec_flags |= SEC_DATA | SEC_COFF_SHARED_LIBRARY;
@@ -650,9 +640,6 @@ dependent COFF routines:
 .       bfd     *abfd,
 .       PTR     internal_scnhdr,
 .       const char *name));
-. asection *(*_bfd_make_section_hook) PARAMS ((
-.       bfd     *abfd,
-.       char    *name));
 . void (*_bfd_set_alignment_hook) PARAMS ((
 .       bfd     *abfd,
 .       asection *sec,
@@ -773,9 +760,6 @@ dependent COFF routines:
 .#define bfd_coff_styp_to_sec_flags_hook(abfd, scnhdr, name)\
 .        ((coff_backend_info (abfd)->_bfd_styp_to_sec_flags_hook) (abfd, scnhdr, name))
 .
-.#define bfd_coff_make_section_hook(abfd, name)\
-.        ((coff_backend_info (abfd)->_bfd_make_section_hook) (abfd, name))
-.
 .#define bfd_coff_set_alignment_hook(abfd, sec, scnhdr)\
 .        ((coff_backend_info (abfd)->_bfd_set_alignment_hook) (abfd, sec, scnhdr))
 .
@@ -843,22 +827,6 @@ coff_bad_format_hook (abfd, filehdr)
 #endif
 
   return true;
-}
-
-static asection *
-coff_make_section_hook (abfd, name)
-     bfd * abfd;
-     char *name;
-{
-#ifdef TWO_DATA_SECS
-  /* FIXME: This predates the call to bfd_make_section_anyway
-     in make_a_section_from_file, and can probably go away.  */
-  /* On SCO a file created by the Microsoft assembler can have two
-     .data sections.  We use .data2 for the second one.  */
-  if (strcmp (name, _DATA) == 0)
-    return bfd_make_section (abfd, ".data2");
-#endif
-  return (asection *) NULL;
 }
 
 /*
@@ -1835,12 +1803,6 @@ coff_write_object_contents (abfd)
       else if (!strcmp (current->name, _DATA))
 	{
 	  data_sec = current;
-#ifdef TWO_DATA_SECS
-	}
-      else if (!strcmp (current->name, ".data2"))
-	{
-	  data_sec = current;
-#endif /* TWO_DATA_SECS */
 	}
       else if (!strcmp (current->name, _BSS))
 	{
@@ -2845,8 +2807,8 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
 #endif
   coff_swap_filehdr_in, coff_swap_aouthdr_in, coff_swap_scnhdr_in,
   coff_swap_reloc_in, coff_bad_format_hook, coff_set_arch_mach_hook,
-  coff_mkobject_hook, styp_to_sec_flags, coff_make_section_hook,
-  coff_set_alignment_hook, coff_slurp_symbol_table, symname_in_debug_hook,
+  coff_mkobject_hook, styp_to_sec_flags, coff_set_alignment_hook,
+  coff_slurp_symbol_table, symname_in_debug_hook,
   coff_reloc16_extra_cases, coff_reloc16_estimate,
   coff_sym_is_global, coff_compute_section_file_positions,
   coff_start_final_link, coff_relocate_section, coff_rtype_to_howto,
