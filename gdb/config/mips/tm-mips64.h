@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define GDB_TARGET_IS_MIPS64
+#define GDB_TARGET_IS_MIPS64 1
 
 /* force LONGEST to be long long in gdb */
 #define FORCE_LONG_LONG

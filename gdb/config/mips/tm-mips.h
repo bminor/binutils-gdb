@@ -27,6 +27,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 #endif
 
+#if !defined (GDB_TARGET_IS_MIPS64)
+#define GDB_TARGET_IS_MIPS64 0
+#endif
+
 /* Floating point is IEEE compliant */
 #define IEEE_FLOAT
 
@@ -344,50 +348,57 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 
-#if TARGET_BYTE_ORDER == BIG_ENDIAN && ! defined (GDB_TARGET_IS_MIPS64)
 /* For big endian mips machines we need to switch the order of the
    words with a floating-point value (it was already coerced to a double
    by mips_push_arguments).  */
 #define FIX_CALL_DUMMY(dummyname, start_sp, fun, nargs, args, rettype, gcc_p) \
-  do {									\
-    ((int*)(dummyname))[11] |= ((unsigned long)(fun)) >> 16;		\
-    ((int*)(dummyname))[12] |= (unsigned short)(fun);			\
-    if (! mips_fpu) {							\
-      ((int *) (dummyname))[3] = 0; ((int *) (dummyname))[4] = 0;	\
-      ((int *) (dummyname))[5] = 0; ((int *) (dummyname))[6] = 0;	\
-    } else {								\
-      if (nargs > 0 &&							\
-	  TYPE_CODE(VALUE_TYPE(args[0])) == TYPE_CODE_FLT) {		\
-	if (TYPE_LENGTH(VALUE_TYPE(args[0])) > 8)			\
-	  error ("Can't pass floating point value of more than 8 bytes to a function"); \
-	((int *) (dummyname))[3] = MK_OP(OP_LDFPR,SP_REGNUM,12,4);	\
-	((int *) (dummyname))[4] = MK_OP(OP_LDFPR,SP_REGNUM,13,0);	\
-      }									\
-      if (nargs > 1 &&							\
-	  TYPE_CODE(VALUE_TYPE(args[1])) == TYPE_CODE_FLT) {		\
-	if (TYPE_LENGTH(VALUE_TYPE(args[1])) > 8)			\
-	  error ("Can't pass floating point value of more than 8 bytes to a function"); \
-	((int *) (dummyname))[5] = MK_OP(OP_LDFPR,SP_REGNUM,14,12);	\
-	((int *) (dummyname))[6] = MK_OP(OP_LDFPR,SP_REGNUM,15,8);	\
-      }									\
+  do									\
+    {									\
+      store_unsigned_integer						\
+	(dummyname + 11 * 4, 4,						\
+	 (extract_unsigned_integer (dummyname + 11 * 4, 4)		\
+	  | (((fun) >> 16) & 0xffff)));					\
+      store_unsigned_integer						\
+	(dummyname + 12 * 4, 4,						\
+	 (extract_unsigned_integer (dummyname + 12 * 4, 4)		\
+	  | ((fun) & 0xffff)));						\
+      if (! mips_fpu)							\
+	{								\
+	  store_unsigned_integer (dummyname + 3 * 4, 4,			\
+				  (unsigned LONGEST) 0);		\
+	  store_unsigned_integer (dummyname + 4 * 4, 4,			\
+				  (unsigned LONGEST) 0);		\
+	  store_unsigned_integer (dummyname + 5 * 4, 4,			\
+				  (unsigned LONGEST) 0);		\
+	  store_unsigned_integer (dummyname + 6 * 4, 4,			\
+				  (unsigned LONGEST) 0);		\
+	}								\
+      else if (TARGET_BYTE_ORDER == BIG_ENDIAN				\
+	       && ! GDB_TARGET_IS_MIPS64)				\
+	{								\
+	  if (nargs > 0							\
+	      && TYPE_CODE (VALUE_TYPE (args[0])) == TYPE_CODE_FLT)	\
+	    {								\
+	      if (TYPE_LENGTH (VALUE_TYPE (args[0])) > 8)		\
+		error ("floating point value too large to pass to function");\
+	      store_unsigned_integer					\
+		(dummyname + 3 * 4, 4, MK_OP (OP_LDFPR, SP_REGNUM, 12, 4));\
+	      store_unsigned_integer					\
+		(dummyname + 4 * 4, 4, MK_OP (OP_LDFPR, SP_REGNUM, 13, 0));\
+	    }								\
+	  if (nargs > 1							\
+	      && TYPE_CODE (VALUE_TYPE (args[1])) == TYPE_CODE_FLT)	\
+	    {								\
+	      if (TYPE_LENGTH (VALUE_TYPE (args[1])) > 8)		\
+		error ("floating point value too large to pass to function");\
+	      store_unsigned_integer					\
+		(dummyname + 5 * 4, 4, MK_OP (OP_LDFPR, SP_REGNUM, 14, 12));\
+	      store_unsigned_integer					\
+		(dummyname + 6 * 4, 4, MK_OP (OP_LDFPR, SP_REGNUM, 15, 8));\
+	    }								\
+	}								\
     }									\
-  } while (0)
-#else
-#define FIX_CALL_DUMMY(dummyname, start_sp, fun, nargs,	args, rettype, gcc_p)\
-  do \
-    { \
-      ((int*)(dummyname))[11] |= ((unsigned long)(fun)) >> 16; \
-      ((int*)(dummyname))[12] |= (unsigned short)(fun); \
-      if (! mips_fpu) \
-	{ \
-	  ((int *) (dummyname))[3] = 0; \
-	  ((int *) (dummyname))[4] = 0; \
-	  ((int *) (dummyname))[5] = 0; \
-	  ((int *) (dummyname))[6] = 0; \
-	} \
-    } \
   while (0)
-#endif
 
 /* There's a mess in stack frame creation.  See comments in blockframe.c
    near reference to INIT_FRAME_PC_FIRST.  */
