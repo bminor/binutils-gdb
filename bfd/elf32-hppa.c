@@ -149,9 +149,10 @@ static const bfd_byte plt_stub[] =
 #endif
 
 /* We don't need to copy any PC- or GP-relative dynamic relocs into a
-   shared object's dynamic section.  */
-#ifndef RELATIVE_DYNAMIC_RELOCS
-#define RELATIVE_DYNAMIC_RELOCS 0
+   shared object's dynamic section.  All the relocs of the limited
+   class we are interested in, are absolute.  See check_relocs.  */
+#ifndef IS_ABSOLUTE_RELOC
+#define IS_ABSOLUTE_RELOC(r_type) 1
 #endif
 
 enum elf32_hppa_stub_type {
@@ -208,7 +209,6 @@ struct elf32_hppa_link_hash_entry {
   asection *stub_reloc_sec;
 #endif
 
-#if ! LONG_BRANCH_PIC_IN_SHLIB || RELATIVE_DYNAMIC_RELOCS
   /* Used to count relocations for delayed sizing of relocation
      sections.  */
   struct elf32_hppa_dyn_reloc_entry {
@@ -222,7 +222,6 @@ struct elf32_hppa_link_hash_entry {
     /* Number of relocs copied in this section.  */
     bfd_size_type count;
   } *reloc_entries;
-#endif
 
   /* Set during a static link if we detect a function is PIC.  */
   unsigned int maybe_pic_call:1;
@@ -366,14 +365,8 @@ static boolean elf32_hppa_adjust_dynamic_symbol
 static boolean hppa_handle_PIC_calls
   PARAMS ((struct elf_link_hash_entry *, PTR));
 
-static boolean allocate_plt_and_got
+static boolean allocate_plt_and_got_and_discard_relocs
   PARAMS ((struct elf_link_hash_entry *, PTR));
-
-#if ((! LONG_BRANCH_PIC_IN_SHLIB && LONG_BRANCH_VIA_PLT) \
-     || RELATIVE_DYNAMIC_RELOCS)
-static boolean hppa_discard_copies
-  PARAMS ((struct elf_link_hash_entry *, PTR));
-#endif
 
 static boolean clobber_millicode_symbols
   PARAMS ((struct elf_link_hash_entry *, struct bfd_link_info *));
@@ -494,9 +487,7 @@ hppa_link_hash_newfunc (entry, table, string)
       ret->stub_reloc_sec = NULL;
 #endif
       ret->stub_cache = NULL;
-#if ! LONG_BRANCH_PIC_IN_SHLIB || RELATIVE_DYNAMIC_RELOCS
       ret->reloc_entries = NULL;
-#endif
       ret->maybe_pic_call = 0;
       ret->pic_call = 0;
       ret->plabel = 0;
@@ -1452,17 +1443,7 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 	  if (h != NULL)
 	    {
 	      if (h->elf.got.refcount == -1)
-		{
-		  h->elf.got.refcount = 1;
-
-		  /* Make sure this symbol is output as a dynamic symbol.  */
-		  if (h->elf.dynindx == -1)
-		    {
-		      if (! bfd_elf32_link_record_dynamic_symbol (info,
-								  &h->elf))
-			return false;
-		    }
-		}
+		h->elf.got.refcount = 1;
 	      else
 		h->elf.got.refcount += 1;
 	    }
@@ -1553,7 +1534,10 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 	  /* Flag this symbol as having a non-got, non-plt reference
 	     so that we generate copy relocs if it turns out to be
 	     dynamic.  */
-	  if (h != NULL)
+	  if (need_entry == NEED_DYNREL
+	      && h != NULL
+	      && !info->shared
+	      && (sec->flags & SEC_READONLY) != 0)
 	    h->elf.elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
 
 	  /* If we are creating a shared library then we need to copy
@@ -1579,16 +1563,21 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 	     is absolute too, as in that case it is the reloc in the
 	     stub we will be creating, rather than copying the PCREL
 	     reloc in the branch.  */
-	  if ((sec->flags & SEC_ALLOC) != 0
-	      && info->shared
-#if RELATIVE_DYNAMIC_RELOCS
-	      && (!info->symbolic
-		  || is_absolute_reloc (r_type)
-		  || (h != NULL
-		      && ((h->elf.elf_link_hash_flags
-			   & ELF_LINK_HASH_DEF_REGULAR) == 0)))
-#endif
-	      )
+	  if ((info->shared
+	       && (sec->flags & SEC_ALLOC) != 0
+	       && (IS_ABSOLUTE_RELOC (r_type)
+		   || (h != NULL
+		       && (!info->symbolic
+			   || h->elf.root.type == bfd_link_hash_defweak
+			   || (h->elf.elf_link_hash_flags
+			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
+	      || (!info->shared
+		  && (sec->flags & SEC_ALLOC) != 0
+		  && h != NULL
+		  && (h->elf.elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
+		  && (h->elf.root.type == bfd_link_hash_defweak
+		      || (h->elf.elf_link_hash_flags
+			  & ELF_LINK_HASH_DEF_REGULAR) == 0)))
 	    {
 	      boolean doit;
 	      asection *srel;
@@ -1676,16 +1665,13 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 		{
 		  srel->_raw_size += sizeof (Elf32_External_Rela);
 
-#if ! LONG_BRANCH_PIC_IN_SHLIB || RELATIVE_DYNAMIC_RELOCS
 		  /* Keep track of relocations we have entered for
 		     this global symbol, so that we can discard them
 		     later if necessary.  */
-		  if (h != NULL
-		      && (0
-#if RELATIVE_DYNAMIC_RELOCS
-			  || ! is_absolute_reloc (rtype)
-#endif
-			  || (need_entry & NEED_STUBREL)))
+		  if (!info->shared
+		      || (h != NULL
+			  && (! IS_ABSOLUTE_RELOC (rtype)
+			      || (need_entry & NEED_STUBREL))))
 		    {
 		      struct elf32_hppa_dyn_reloc_entry *p;
 
@@ -1709,11 +1695,10 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 			 set.  Leave the count at zero for the
 			 NEED_STUBREL case as we only ever have one
 			 stub reloc per section per symbol, and this
-			 simplifies code in hppa_discard_copies.  */
+			 simplifies code to discard unneeded relocs.  */
 		      if (! (need_entry & NEED_STUBREL))
 			++p->count;
 		    }
-#endif
 		}
 	    }
 	}
@@ -1941,18 +1926,6 @@ elf32_hppa_adjust_dynamic_symbol (info, h)
 	    {
 	      h->plt.offset = (bfd_vma) -1;
 	      h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
-	      return true;
-	    }
-	}
-
-      if (! ((struct elf32_hppa_link_hash_entry *) h)->pic_call)
-	{
-	  /* Make sure this symbol is output as a dynamic symbol.  */
-	  if (h->dynindx == -1
-	      && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
-	    {
-	      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
-		return false;
 	    }
 	}
 
@@ -2070,13 +2043,14 @@ hppa_handle_PIC_calls (h, inf)
    global syms.  */
 
 static boolean
-allocate_plt_and_got (h, inf)
+allocate_plt_and_got_and_discard_relocs (h, inf)
      struct elf_link_hash_entry *h;
      PTR inf;
 {
   struct bfd_link_info *info;
   struct elf32_hppa_link_hash_table *hplink;
   asection *s;
+  struct elf32_hppa_link_hash_entry *eh;
 
   if (h->root.type == bfd_link_hash_indirect
       || h->root.type == bfd_link_hash_warning)
@@ -2088,6 +2062,17 @@ allocate_plt_and_got (h, inf)
        && h->plt.refcount > 0)
       || ((struct elf32_hppa_link_hash_entry *) h)->pic_call)
     {
+      /* Make sure this symbol is output as a dynamic symbol.
+	 Undefined weak syms won't yet be marked as dynamic.  */
+      if (h->dynindx == -1
+	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0
+	  && h->type != STT_PARISC_MILLI
+	  && !((struct elf32_hppa_link_hash_entry *) h)->pic_call)
+	{
+	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	    return false;
+	}
+
       /* Make an entry in the .plt section.  */
       s = hplink->splt;
       h->plt.offset = s->_raw_size;
@@ -2119,6 +2104,16 @@ allocate_plt_and_got (h, inf)
     {
       boolean dyn;
 
+      /* Make sure this symbol is output as a dynamic symbol.
+	 Undefined weak syms won't yet be marked as dynamic.  */
+      if (h->dynindx == -1
+	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0
+	  && h->type != STT_PARISC_MILLI)
+	{
+	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	    return false;
+	}
+
       s = hplink->sgot;
       h->got.offset = s->_raw_size;
       s->_raw_size += GOT_ENTRY_SIZE;
@@ -2129,58 +2124,75 @@ allocate_plt_and_got (h, inf)
   else
     h->got.offset = (bfd_vma) -1;
 
-  return true;
-}
-
-#if ((! LONG_BRANCH_PIC_IN_SHLIB && LONG_BRANCH_VIA_PLT) \
-     || RELATIVE_DYNAMIC_RELOCS)
-/* This function is called via elf_link_hash_traverse to discard space
-   we allocated for relocs that it turned out we didn't need.  */
-
-static boolean
-hppa_discard_copies (h, inf)
-     struct elf_link_hash_entry *h;
-     PTR inf;
-{
-  struct elf32_hppa_dyn_reloc_entry *s;
-  struct elf32_hppa_link_hash_entry *eh;
-  struct bfd_link_info *info;
+  /* If this is a -Bsymbolic shared link, then we need to discard all
+     space allocated for dynamic relocs against symbols defined in a
+     regular object.  For the normal shared case, discard space for
+     relocs that have become local due to symbol visibility changes.
+     For the non-shared case, discard space for symbols which turn out
+     to need copy relocs or are not dynamic.  We also need to lose
+     relocs we've allocated for long branch stubs if we know we won't
+     be generating a stub.  */
 
   eh = (struct elf32_hppa_link_hash_entry *) h;
-  info = (struct bfd_link_info *) inf;
+  if (eh->reloc_entries == NULL)
+    return true;
+
+  /* First handle the non-shared case.  */
+  if (!info->shared
+      && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
+      && ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+	  || h->root.type == bfd_link_hash_undefweak
+	  || h->root.type == bfd_link_hash_undefined))
+    {
+      /* Make sure this symbol is output as a dynamic symbol.
+	 Undefined weak syms won't yet be marked as dynamic.  */
+      if (h->dynindx == -1
+	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0
+	  && h->type != STT_PARISC_MILLI)
+	{
+	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	    return false;
+	}
+
+      /* If that succeeded, we know we'll be keeping all the relocs.  */
+      if (h->dynindx != -1)
+	return true;
+    }
 
 #if ! LONG_BRANCH_PIC_IN_SHLIB && LONG_BRANCH_VIA_PLT
   /* Handle the stub reloc case.  If we have a plt entry for the
-     function, we won't be needing long branch stubs.  s->count will
+     function, we won't be needing long branch stubs.  c->count will
      only be zero for stub relocs, which provides a handy way of
      flagging these relocs, and means we need do nothing special for
      the forced local and symbolic link case.  */
   if (eh->stub_reloc_sec != NULL
       && eh->elf.plt.offset != (bfd_vma) -1)
     {
-      for (s = eh->reloc_entries; s != NULL; s = s->next)
-	if (s->count == 0)
-	  s->section->_raw_size -= sizeof (Elf32_External_Rela);
+      struct elf32_hppa_dyn_reloc_entry *c;
+
+      for (c = eh->reloc_entries; c != NULL; c = c->next)
+	if (c->count == 0)
+	  c->section->_raw_size -= sizeof (Elf32_External_Rela);
     }
 #endif
 
-#if RELATIVE_DYNAMIC_RELOCS
-  /* If a symbol has been forced local or we have found a regular
+  /* Discard any relocs in the non-shared case.  For the shared case,
+     if a symbol has been forced local or we have found a regular
      definition for the symbolic link case, then we won't be needing
      any relocs.  */
-  if (eh->elf.dynindx == -1
+  if (!info->shared
       || ((eh->elf.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
-	  && !is_absolute_reloc (r_type)
-	  && info->symbolic))
+	  && ((eh->elf.elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
+	      || info->symbolic)))
     {
-      for (s = eh->reloc_entries; s != NULL; s = s->next)
-	s->section->_raw_size -= s->count * sizeof (Elf32_External_Rela);
+      struct elf32_hppa_dyn_reloc_entry *c;
+
+      for (c = eh->reloc_entries; c != NULL; c = c->next)
+	c->section->_raw_size -= c->count * sizeof (Elf32_External_Rela);
     }
-#endif
 
   return true;
 }
-#endif
 
 /* This function is called via elf_link_hash_traverse to force
    millicode symbols local so they do not end up as globals in the
@@ -2228,7 +2240,6 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 
   if (hplink->root.dynamic_sections_created)
     {
-
       /* Set the contents of the .interp section to the interpreter.  */
       if (! info->shared)
 	{
@@ -2318,22 +2329,11 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 	}
     }
 
-  /* Allocate global sym .plt and .got entries.  */
+  /* Allocate global sym .plt and .got entries.  Also discard all
+     unneeded relocs.  */
   elf_link_hash_traverse (&hplink->root,
-			  allocate_plt_and_got,
-			  info);
-
-#if ((! LONG_BRANCH_PIC_IN_SHLIB && LONG_BRANCH_VIA_PLT) \
-     || RELATIVE_DYNAMIC_RELOCS)
-  /* If this is a -Bsymbolic shared link, then we need to discard all
-     relocs against symbols defined in a regular object.  We also need
-     to lose relocs we've allocated for long branch stubs if we know
-     we won't be generating a stub.  */
-  if (info->shared)
-    elf_link_hash_traverse (&hplink->root,
-			    hppa_discard_copies,
-			    info);
-#endif
+			  allocate_plt_and_got_and_discard_relocs,
+			  (PTR) info);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
@@ -3896,19 +3896,30 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	     hppa_discard_copies.  ie. We need exactly the same
 	     condition as in check_relocs, with some extra conditions
 	     (dynindx test in this case) to cater for relocs removed
-	     by hppa_discard_copies.  */
-	  if ((input_section->flags & SEC_ALLOC) != 0
-	      && info->shared
-#if RELATIVE_DYNAMIC_RELOCS
-	      && (is_absolute_reloc (r_type)
-		  || ((!info->symbolic
-		       || (h != NULL
-			   && ((h->elf.elf_link_hash_flags
-				& ELF_LINK_HASH_DEF_REGULAR) == 0
-			       || h->elf.root.type == bfd_link_hash_defweak)))
-		      && (h == NULL || h->elf.dynindx != -1)))
-#endif
-	      )
+	     by hppa_discard_copies.  If you squint, the non-shared
+	     test here does indeed match the one in check_relocs, the
+	     difference being that here we test DEF_DYNAMIC rather
+	     than a maybe-DEF_DYNAMIC via !DEF_REGULAR.  Common syms
+	     end up with !DEF_REGULAR, which is why we can't use that
+	     here.  Conversely, DEF_DYNAMIC can't be used in
+	     check_relocs as there all files have not been loaded.  */
+	  if ((info->shared
+	       && (input_section->flags & SEC_ALLOC) != 0
+	       && (IS_ABSOLUTE_RELOC (r_type)
+		   || (h != NULL
+		       && h->elf.dynindx != -1
+		       && (!info->symbolic
+			   || (h->elf.elf_link_hash_flags
+			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
+	      || (!info->shared
+		  && (input_section->flags & SEC_ALLOC) != 0
+		  && h != NULL
+		  && h->elf.dynindx != -1
+		  && (h->elf.elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
+		  && ((h->elf.elf_link_hash_flags
+		       & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+		      || h->elf.root.type == bfd_link_hash_undefweak
+		      || h->elf.root.type == bfd_link_hash_undefined)))
 	    {
 	      Elf_Internal_Rela outrel;
 	      boolean skip;
@@ -3959,6 +3970,8 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else if (h != NULL
 		       && h->elf.dynindx != -1
 		       && (plabel
+			   || !IS_ABSOLUTE_RELOC (r_type)
+			   || !info->shared
 			   || !info->symbolic
 			   || (h->elf.elf_link_hash_flags
 			       & ELF_LINK_HASH_DEF_REGULAR) == 0))

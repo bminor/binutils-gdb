@@ -1,5 +1,28 @@
 2001-06-27  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-hppa.c (elf32_hppa_check_relocs): Don't make syms dynamic
+	here..
+	(elf32_hppa_adjust_dynamic_symbol): ..nor here..
+	(allocate_plt_and_got_and_discard_relocs): .. instead do so here
+	after gc has run.
+
+	* elf32-hppa.c (RELATIVE_DYNAMIC_RELOCS): Delete.
+	(IS_ABSOLUTE_RELOC): Define.
+	(elf32_hppa_link_hash_entry): Always include reloc_entries field.
+	(hppa_link_hash_newfunc): Always init it.
+	(elf32_hppa_check_relocs): Mark symbols as ELF_LINK_NON_GOT_REF to
+	create COPY relocs only when the reloc is in a read-only section.
+	Instead, allocate space for a dynamic reloc to reference the
+	library symbol directly.  Keep track of space we allocate using
+	relocs_entries.
+	(hppa_discard_copies): Delete, and move code to..
+	(allocate_plt_and_got): ..here.  Rename to
+	allocate_plt_and_got_and_discard_relocs.  Remove unneeded dynamic
+	relocs for non-shared link.
+	(elf32_hppa_size_dynamic_sections): Update calls to above.
+	(elf32_hppa_relocate_section): Write out the dynamic relocs used
+	in lieu of COPY relocs.
+
 	* elf32-i386.c (elf_i386_check_relocs): Don't make syms dynamic
 	here..
 	(elf_i386_adjust_dynamic_symbol): ..nor here..
