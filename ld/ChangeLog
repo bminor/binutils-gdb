@@ -1,5 +1,7 @@
 Tue Mar 12 12:02:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure: Rebuild with autoconf 2.8.
+
 	Don't do SunOS style dynamic linking for sparc-aout:
 	* configure.tgt (sparc64-*-aout*): Use sparcaout, not sun4.
 	(sparclite*-fujitsu-*, sparc*-*-aout): Likewise.

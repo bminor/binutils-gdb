@@ -1,3 +1,12 @@
+Tue Mar 12 12:14:10 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Rebuild with autoconf 2.8.
+
+Thu Mar  7 15:11:10 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* sparc-dis.c (print_insn_sparc): Handle 'O' operand char like 'r'.
+	* sparc-opc.c (sparc_opcodes): Use 'O' operand char for `neg reg'.
+
 Tue Mar  5 15:51:57 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Don't set SHLIB or SHLINK to an empty string,
