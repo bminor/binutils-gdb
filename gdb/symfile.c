@@ -3023,30 +3023,35 @@ read_target_long_array (CORE_ADDR memaddr, unsigned int *myaddr, int len)
 static int
 simple_read_overlay_table (void)
 {
-  struct minimal_symbol *msym;
+  struct minimal_symbol *novlys_msym, *ovly_table_msym;
 
   simple_free_overlay_table ();
-  msym = lookup_minimal_symbol ("_novlys", 0, 0);
-  if (msym != NULL)
-    cache_novlys = read_memory_integer (SYMBOL_VALUE_ADDRESS (msym), 4);
-  else
-    return 0;			/* failure */
-  cache_ovly_table = (void *) xmalloc (cache_novlys * sizeof (*cache_ovly_table));
-  if (cache_ovly_table != NULL)
+  novlys_msym = lookup_minimal_symbol ("_novlys", 0, 0);
+  if (! novlys_msym)
     {
-      msym = lookup_minimal_symbol ("_ovly_table", 0, 0);
-      if (msym != NULL)
-	{
-	  cache_ovly_table_base = SYMBOL_VALUE_ADDRESS (msym);
-	  read_target_long_array (cache_ovly_table_base,
-				  (int *) cache_ovly_table,
-				  cache_novlys * 4);
-	}
-      else
-	return 0;		/* failure */
+      error ("Error reading inferior's overlay table: "
+             "couldn't find `_novlys' variable\n"
+             "in inferior.  Use `overlay manual' mode.");
+      return 0;
     }
-  else
-    return 0;			/* failure */
+
+  ovly_table_msym = lookup_minimal_symbol ("_ovly_table", 0, 0);
+  if (! ovly_table_msym)
+    {
+      error ("Error reading inferior's overlay table: couldn't find "
+             "`_ovly_table' array\n"
+             "in inferior.  Use `overlay manual' mode.");
+      return 0;
+    }
+
+  cache_novlys = read_memory_integer (SYMBOL_VALUE_ADDRESS (novlys_msym), 4);
+  cache_ovly_table
+    = (void *) xmalloc (cache_novlys * sizeof (*cache_ovly_table));
+  cache_ovly_table_base = SYMBOL_VALUE_ADDRESS (ovly_table_msym);
+  read_target_long_array (cache_ovly_table_base,
+                          (int *) cache_ovly_table,
+                          cache_novlys * 4);
+
   return 1;			/* SUCCESS */
 }
 
@@ -3147,11 +3152,9 @@ simple_overlay_update (struct obj_section *osect)
      Or else we want all the sections, in which case it's actually
      more efficient to read the whole table in one block anyway.  */
 
-  if (simple_read_overlay_table () == 0)	/* read failed?  No table? */
-    {
-      warning ("Failed to read the target overlay mapping table.");
-      return;
-    }
+  if (! simple_read_overlay_table ())
+    return;
+
   /* Now may as well update all sections, even if only one was requested. */
   ALL_OBJSECTIONS (objfile, osect)
     if (section_is_overlay (osect->the_bfd_section))
