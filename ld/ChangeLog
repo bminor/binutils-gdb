@@ -1,3 +1,9 @@
+Tue Feb 13 14:04:19 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_stat_needed): Warn if
+	it looks like we might be linking in two different versions of the
+	same shared library.  Based on a patch from H J Lu <hjl@zoom.com>.
+
 Thu Feb  8 19:25:54 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (lang_size_sections): Increment the section size when a
