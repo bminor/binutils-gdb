@@ -1,3 +1,18 @@
+2004-12-15 Jan Beulich  <jbeulich@novell.com>
+
+	* doc/binutils.texi: Document --strip-unneeded-symbol and
+	--strip-unneeded-symbols.
+	* objcopy.c (strip_unneeded_list): New.
+	(enum command_line_switch): Add OPTION_STRIP_UNNEEDED_SYMBOL
+	and OPTION_STRIP_UNNEEDED_SYMBOLS.
+	(copy_options): Add  --strip-unneeded-symbol and
+	--strip-unneeded-symbols.
+	(copy_usage): Likewise.
+	(filter_symbols): Suppress copying of symbol if in strip_unneeded_list
+	and the symbol is not needed.
+	(copy_main): Handle OPTION_STRIP_UNNEEDED_SYMBOL and
+	OPTION_STRIP_UNNEEDED_SYMBOLS.
+
 2004-12-09  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* readelf.c (get_machine_flags): Handle E_MIPS_MACH_9000.

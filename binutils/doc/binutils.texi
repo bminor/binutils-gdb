@@ -947,6 +947,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{-g}|@option{--strip-debug}]
         [@option{-K} @var{symbolname}|@option{--keep-symbol=}@var{symbolname}]
         [@option{-N} @var{symbolname}|@option{--strip-symbol=}@var{symbolname}]
+        [@option{--strip-unneeded-symbol=}@var{symbolname}]
         [@option{-G} @var{symbolname}|@option{--keep-global-symbol=}@var{symbolname}]
         [@option{-L} @var{symbolname}|@option{--localize-symbol=}@var{symbolname}]
         [@option{-W} @var{symbolname}|@option{--weaken-symbol=}@var{symbolname}]
@@ -978,6 +979,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--weaken}]
         [@option{--keep-symbols=}@var{filename}]
         [@option{--strip-symbols=}@var{filename}]
+        [@option{--strip-unneeded-symbols=}@var{filename}]
         [@option{--keep-global-symbols=}@var{filename}]
         [@option{--localize-symbols=}@var{filename}]
         [@option{--weaken-symbols=}@var{filename}]
@@ -1105,6 +1107,10 @@ be given more than once.
 @itemx --strip-symbol=@var{symbolname}
 Do not copy symbol @var{symbolname} from the source file.  This option
 may be given more than once.
+
+@item --strip-unneeded-symbol=@var{symbolname}
+Do not copy symbol @var{symbolname} from the source file unless it is needed
+by a relocation.  This option may be given more than once.
 
 @item -G @var{symbolname}
 @itemx --keep-global-symbol=@var{symbolname}
@@ -1346,6 +1352,12 @@ Apply @option{--strip-symbol} option to each symbol listed in the file
 @var{filename}.  @var{filename} is simply a flat file, with one symbol
 name per line.  Line comments may be introduced by the hash character.
 This option may be given more than once.
+
+@item --strip-unneeded-symbols=@var{filename}
+Apply @option{--strip-unneeded-symbol} option to each symbol listed in
+the file @var{filename}.  @var{filename} is simply a flat file, with one
+symbol name per line.  Line comments may be introduced by the hash
+character.  This option may be given more than once.
 
 @item --keep-global-symbols=@var{filename}
 Apply @option{--keep-global-symbol} option to each symbol listed in the

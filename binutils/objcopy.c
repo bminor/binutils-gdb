@@ -192,6 +192,7 @@ static bfd_boolean wildcard = FALSE;
 /* List of symbols to strip, keep, localize, keep-global, weaken,
    or redefine.  */
 static struct symlist *strip_specific_list = NULL;
+static struct symlist *strip_unneeded_list = NULL;
 static struct symlist *keep_specific_list = NULL;
 static struct symlist *localize_specific_list = NULL;
 static struct symlist *keepglobal_specific_list = NULL;
@@ -231,6 +232,8 @@ enum command_line_switch
     OPTION_SREC_LEN,
     OPTION_SREC_FORCES3,
     OPTION_STRIP_SYMBOLS,
+    OPTION_STRIP_UNNEEDED_SYMBOL,
+    OPTION_STRIP_UNNEEDED_SYMBOLS,
     OPTION_KEEP_SYMBOLS,
     OPTION_LOCALIZE_SYMBOLS,
     OPTION_KEEPGLOBAL_SYMBOLS,
@@ -340,6 +343,8 @@ static struct option copy_options[] =
   {"strip-all", no_argument, 0, 'S'},
   {"strip-debug", no_argument, 0, 'g'},
   {"strip-unneeded", no_argument, 0, OPTION_STRIP_UNNEEDED},
+  {"strip-unneeded-symbol", required_argument, 0, OPTION_STRIP_UNNEEDED_SYMBOL},
+  {"strip-unneeded-symbols", required_argument, 0, OPTION_STRIP_UNNEEDED_SYMBOLS},
   {"strip-symbol", required_argument, 0, 'N'},
   {"strip-symbols", required_argument, 0, OPTION_STRIP_SYMBOLS},
   {"target", required_argument, 0, 'F'},
@@ -405,6 +410,9 @@ copy_usage (FILE *stream, int exit_status)
   -g --strip-debug                 Remove all debugging symbols & sections\n\
      --strip-unneeded              Remove all symbols not needed by relocations\n\
   -N --strip-symbol <name>         Do not copy symbol <name>\n\
+     --strip-unneeded-symbol <name>\n\
+                                   Do not copy symbol <name> unless needed by\n\
+                                     relocations\n\
      --only-keep-debug             Strip everything but the debug information\n\
   -K --keep-symbol <name>          Only copy symbol <name>\n\
   -L --localize-symbol <name>      Force symbol <name> to be marked as a local\n\
@@ -443,6 +451,9 @@ copy_usage (FILE *stream, int exit_status)
      --srec-len <number>           Restrict the length of generated Srecords\n\
      --srec-forceS3                Restrict the type of generated Srecords to S3\n\
      --strip-symbols <file>        -N for all symbols listed in <file>\n\
+     --strip-unneeded-symbols <file>\n\
+                                   --strip-unneeded-symbol for all symbols listed\n\
+                                     in <file>\n\
      --keep-symbols <file>         -K for all symbols listed in <file>\n\
      --localize-symbols <file>     -L for all symbols listed in <file>\n\
      --keep-global-symbols <file>  -G for all symbols listed in <file>\n\
@@ -902,6 +913,10 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 			|| ! bfd_is_local_label (abfd, sym))));
 
       if (keep && is_specified_symbol (name, strip_specific_list))
+	keep = 0;
+      if (keep
+	  && !(flags & BSF_KEEP)
+	  && is_specified_symbol (name, strip_unneeded_list))
 	keep = 0;
       if (!keep && is_specified_symbol (name, keep_specific_list))
 	keep = 1;
@@ -2525,6 +2540,10 @@ copy_main (int argc, char *argv[])
 	  add_specific_symbol (optarg, &strip_specific_list);
 	  break;
 
+	case OPTION_STRIP_UNNEEDED_SYMBOL:
+	  add_specific_symbol (optarg, &strip_unneeded_list);
+	  break;
+
 	case 'L':
 	  add_specific_symbol (optarg, &localize_specific_list);
 	  break;
@@ -2856,6 +2875,10 @@ copy_main (int argc, char *argv[])
 
 	case OPTION_STRIP_SYMBOLS:
 	  add_specific_symbols (optarg, &strip_specific_list);
+	  break;
+
+	case OPTION_STRIP_UNNEEDED_SYMBOLS:
+	  add_specific_symbols (optarg, &strip_unneeded_list);
 	  break;
 
 	case OPTION_KEEP_SYMBOLS:
