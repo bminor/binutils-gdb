@@ -1,3 +1,14 @@
+2003-06-05  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (value_h): Add $(frame_h).
+	* value.h: Include "frame.h".
+	(struct value): Replace "frame_addr" with "frame_id".
+	(VALUE_FRAME_ID): Replace VALUE_FRAME.
+	* values.c (allocate_value): Use VALUE_FRAME_ID.
+	(value_copy): Use VALUE_FRAME_ID.
+	* findvar.c (value_from_register): Use VALUE_FRAME_ID.
+	* valops.c (value_assign): Update.  Use frame_find_by_id.
+
 2003-06-05  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-tdep.c (x86_64_push_arguments): Don't clear offset
