@@ -977,12 +977,7 @@ operand (expressionS *expressionP)
       /* expression () will pass trailing whitespace.  */
       if ((c == '(' && *input_line_pointer != ')')
 	  || (c == '[' && *input_line_pointer != ']'))
-	{
-#ifdef RELAX_PAREN_GROUPING
-	  if (c != '(')
-#endif
-	    as_bad (_("missing '%c'"), c == '(' ? ')' : ']');
-	}
+	as_bad (_("missing '%c'"), c == '(' ? ')' : ']');
       else
 	input_line_pointer++;
       SKIP_WHITESPACE ();

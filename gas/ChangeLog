@@ -1,5 +1,8 @@
 2005-03-03  Nick Clifton  <nickc@redhat.com>
 
+	* expr.c (operand): Remove redundant code enclosed by #ifdef
+	RELAX_PAREN_GROUPING....#endif.
+
 	* config/tc-mn10200.c (tc_gen_reloc): Handle the case where the
 	reloc is the difference of two symbols defined in the same
 	section.
