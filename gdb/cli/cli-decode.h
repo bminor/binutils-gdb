@@ -110,7 +110,7 @@ struct cmd_list_element
      */
     int flags;
 
-    /* if this command is deprecated, this is the replacement name */
+    /* If this command is deprecated, this is the replacement name.  */
     char *replacement;
 
     /* If this command represents a show command, then this function
@@ -123,8 +123,8 @@ struct cmd_list_element
     /* Hook for another command to be executed after this command.  */
     struct cmd_list_element *hook_post;
 
-    /* Flag that specifies if this command is already running it's hook. */
-    /* Prevents the possibility of hook recursion. */
+    /* Flag that specifies if this command is already running it's hook.  */
+    /* Prevents the possibility of hook recursion.  */
     int hook_in;
 
     /* Nonzero identifies a prefix command.  For them, the address
