@@ -468,11 +468,14 @@ dwarf2_gen_line_info (addr, l)
       any_output = 1;
       if (addr < ls.sm.addr)
 	{
-	  if (!ls.sm.empty_sequence)
-	    {
-	      out_end_sequence ();
-	      ls.sm.empty_sequence = 1;
-	    }
+	  /* This happens when a new frag got allocated (for whatever
+	     reason).  Deal with it by generating a reference symbol.
+	     Note: no end_sequence needs to be generated because the
+	     address did not really decrease (only the reference point
+	     changed).
+
+	     ??? Perhaps we should directly check for a change of
+	     frag_now instead?  */
 	  out_set_addr (addr);
 	  ls.sm.addr = addr;
 	}
@@ -510,7 +513,7 @@ gen_dir_list ()
 	    {
 	      if (strcmp (str, dp) == 0)
 		{
-		  ls.file[i].dir = j;
+		  ls.file[i].dir = j + 1;
 		  break;
 		}
 	      dp += strlen (dp);

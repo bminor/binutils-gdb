@@ -1,3 +1,10 @@
+1999-06-26  David Mosberger  <davidm@hpl.hp.com>
+
+	* dwarf2dbg.c (dwarf2_gen_line_info): Don't call
+	out_end_sequence() when the address decreases due to a new frag.
+	(gen_dir_list): Set ls.file[i].dir to j + 1 (not j) because file
+	numbering starts with 1.
+
 1999-06-23  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-mcore.c (md_pseudo_table): Add .comm for ELF and allow
