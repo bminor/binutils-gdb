@@ -1295,7 +1295,7 @@ add_to_lit_pool ()
 
   if (lit_count == next_literal_pool_place) /* New entry.  */
     {
-      if (next_literal_pool_place > MAX_LITERAL_POOL_SIZE)
+      if (next_literal_pool_place >= MAX_LITERAL_POOL_SIZE)
 	{
 	  inst.error = _("Literal Pool Overflow");
 	  return FAIL;
