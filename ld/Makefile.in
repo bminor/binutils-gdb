@@ -23,6 +23,7 @@ srcdir = .
 prefix = /usr/local
 
 program_prefix =
+program_suffix =
 exec_prefix = $(prefix)
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
@@ -412,13 +413,12 @@ objdump:objdump.c
 
 .PHONY: install
 install: $(LD_PROG)
-	mv ld.new ld
-	-rm -f $(bindir)/$(program_prefix)ld
-	$(INSTALL_PROGRAM) ld $(bindir)/$(program_prefix)ld
+	-rm -f $(bindir)/$(program_prefix)ld$(program_suffix)
+	$(INSTALL_PROGRAM) ld.new $(bindir)/$(program_prefix)ld$(program_suffix)
 	-rm -f $(tooldir)/ld
-	if [ -d $(tooldir) ]; then $(INSTALL_PROGRAM) ld $(tooldir)/ld; else true; fi
-	-rm -f $(man1dir)/$(program_prefix)ld.1
-	$(INSTALL_DATA) $(srcdir)/gld.1 $(man1dir)/$(program_prefix)ld.1
+	if [ -d $(tooldir) ]; then $(INSTALL_PROGRAM) ld.new $(tooldir)/ld; else true; fi
+	-rm -f $(man1dir)/$(program_prefix)ld$(program_suffix).1
+	$(INSTALL_DATA) $(srcdir)/gld.1 $(man1dir)/$(program_prefix)ld$(program_suffix).1
 
 install-info: info
 	for i in ld.info* ; do \
