@@ -1,3 +1,7 @@
+2002-11-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/ppc/booke.d: Adjust output for corrected condition reg.
+
 2002-11-07  Nick Clifton  <nickc@redhat.com>
 
 	* gas/all/gas.exp: Only run fastcall test for x86 PE targets.
