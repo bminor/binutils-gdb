@@ -1,5 +1,8 @@
 2004-09-12  Andrew Cagney  <cagney@gnu.org>
 
+	* config/m68k/nbsdelf.mh: Add missing trailing newline.  Problem
+	reported by Dave Anderson.
+
 	* target.c (target_info): Delete #ifdef call to FILES_INFO_HOOK.
 
 	* inferior.h (STORE_STRUCT_RETURN): Delete macro.
