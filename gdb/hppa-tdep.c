@@ -2234,10 +2234,11 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
   {
     int final_iteration = 0;
     CORE_ADDR pc;
-    CORE_ADDR end_pc = skip_prologue_using_sal (pc);
+    CORE_ADDR end_pc;
     int looking_for_sp = u->Save_SP;
     int looking_for_rp = u->Save_RP;
     int fp_loc = -1;
+    end_pc = skip_prologue_using_sal (frame_func_unwind (next_frame));
     if (end_pc == 0)
       end_pc = frame_pc_unwind (next_frame);
     frame_size = 0;

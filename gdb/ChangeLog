@@ -1,5 +1,10 @@
 2004-04-05  Andrew Cagney  <cagney@redhat.com>
 
+	* hppa-tdep.c (hppa_frame_cache): Pass the frame's func to
+	skip_prologue_using_sal.
+
+2004-04-05  Andrew Cagney  <cagney@redhat.com>
+
 	* config/i386/tm-i386.h: Delete file.
 	* config/i386/tm-vxworks.h: Update copyright, do not include
 	"tm-i386.h".
