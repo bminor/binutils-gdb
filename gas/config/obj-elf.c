@@ -31,10 +31,14 @@ static void obj_elf_size PARAMS ((void));
 static void obj_elf_type PARAMS ((void));
 static void obj_elf_ident PARAMS ((void));
 static void obj_elf_weak PARAMS ((void));
+static void obj_elf_local PARAMS ((void));
+static void obj_elf_common PARAMS ((void));
 
 const pseudo_typeS obj_pseudo_table[] =
 {
+  {"comm", obj_elf_common, 0},
   {"ident", obj_elf_ident, 0},
+  {"local", obj_elf_local, 0},
   {"previous", obj_elf_previous, 0},
   {"section", obj_elf_section, 0},
   {"size", obj_elf_size, 0},
@@ -80,6 +84,168 @@ elf_file_symbol (s)
       verify_symbol_chain (symbol_rootP, symbol_lastP);
 #endif
     }
+}
+
+static void
+obj_elf_common ()
+{
+  char *name;
+  char c;
+  char *p;
+  int temp, size;
+  symbolS *symbolP;
+
+  name = input_line_pointer;
+  c = get_symbol_end ();
+  /* just after name is now '\0' */
+  p = input_line_pointer;
+  *p = c;
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+      as_bad ("Expected comma after symbol-name");
+      ignore_rest_of_line ();
+      return;
+    }
+  input_line_pointer++;		/* skip ',' */
+  if ((temp = get_absolute_expression ()) < 0)
+    {
+      as_bad (".COMMon length (%d.) <0! Ignored.", temp);
+      ignore_rest_of_line ();
+      return;
+    }
+  size = temp;
+  *p = 0;
+  symbolP = symbol_find_or_make (name);
+  *p = c;
+  if (S_IS_DEFINED (symbolP))
+    {
+      as_bad ("Ignoring attempt to re-define symbol");
+      ignore_rest_of_line ();
+      return;
+    }
+  if (S_GET_VALUE (symbolP) != 0)
+    {
+      if (S_GET_VALUE (symbolP) != size)
+	{
+	  as_warn ("Length of .comm \"%s\" is already %ld. Not changed to %d.",
+		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
+	}
+    }
+  know (symbolP->sy_frag == &zero_address_frag);
+  if (*input_line_pointer != ',')
+    {
+      as_bad ("Expected comma after common length");
+      ignore_rest_of_line ();
+      return;
+    }
+  input_line_pointer++;
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != '"')
+    {
+      temp = get_absolute_expression ();
+      if (temp < 0)
+	{
+	  temp = 0;
+	  as_warn ("Common alignment negative; 0 assumed");
+	}
+      if (symbolP->local)
+	{
+	  segT old_sec;
+	  int old_subsec;
+	  char *p;
+	  int align;
+
+	allocate_bss:
+	  old_sec = now_seg;
+	  old_subsec = now_subseg;
+	  align = temp;
+	  record_alignment (bss_section, align);
+	  subseg_set (bss_section, 0);
+	  if (align)
+	    frag_align (align, 0);
+	  if (S_GET_SEGMENT (symbolP) == bss_section)
+	    symbolP->sy_frag->fr_symbol = 0;
+	  symbolP->sy_frag = frag_now;
+	  p = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
+			(char *) 0);
+	  *p = 0;
+	  S_SET_SEGMENT (symbolP, bss_section);
+	  S_CLEAR_EXTERNAL (symbolP);
+	  subseg_set (old_sec, old_subsec);
+	}
+      else
+	{
+	allocate_common:
+	  S_SET_VALUE (symbolP, size);
+	  S_SET_EXTERNAL (symbolP);
+	  /* should be common, but this is how gas does it for now */
+	  S_SET_SEGMENT (symbolP, &bfd_und_section);
+	}
+    }
+  else
+    {
+      input_line_pointer++;
+      /* @@ Some use the dot, some don't.  Can we get some consistency??  */
+      if (*input_line_pointer == '.')
+	input_line_pointer++;
+      /* @@ Some say data, some say bss.  */
+      if (strncmp (input_line_pointer, "bss\"", 4)
+	  && strncmp (input_line_pointer, "data\"", 5))
+	{
+	  while (*--input_line_pointer != '"')
+	    ;
+	  input_line_pointer--;
+	  goto bad_common_segment;
+	}
+      while (*input_line_pointer++ != '"')
+	;
+      goto allocate_common;
+    }
+  demand_empty_rest_of_line ();
+  return;
+
+  {
+  bad_common_segment:
+    p = input_line_pointer;
+    while (*p && *p != '\n')
+      p++;
+    c = *p;
+    *p = '\0';
+    as_bad ("bad .common segment %s", input_line_pointer + 1);
+    *p = c;
+    input_line_pointer = p;
+    ignore_rest_of_line ();
+    return;
+  }
+}
+
+static void 
+obj_elf_local ()
+{
+  char *name;
+  int c;
+  symbolS *symbolP;
+
+  do
+    {
+      name = input_line_pointer;
+      c = get_symbol_end ();
+      symbolP = symbol_find_or_make (name);
+      *input_line_pointer = c;
+      SKIP_WHITESPACE ();
+      S_CLEAR_EXTERNAL (symbolP);
+      symbolP->local = 1;
+      if (c == ',')
+	{
+	  input_line_pointer++;
+	  SKIP_WHITESPACE ();
+	  if (*input_line_pointer == '\n')
+	    c = '\n';
+	}
+    }
+  while (c == ',');
+  demand_empty_rest_of_line ();
 }
 
 static void 
