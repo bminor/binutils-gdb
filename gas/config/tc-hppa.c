@@ -2830,6 +2830,17 @@ pa_ip (str)
 		  continue;
 		}
 
+	    /* Handle '%r1' implicit operand of addil instruction.  */
+	    case 'Z':
+	      if (*s == ',' && *(s + 1) == '%' && *(s + 3) == '1'
+		  && (*(s + 2) == 'r' || *(s + 2) == 'R'))
+		{
+		  s += 4;
+		  continue;
+		}
+	      else
+	        break;
+
 	    /* Handle a 2 bit shift count at 25.  */
 	    case '.':
 	      num = pa_get_absolute_expression (&the_insn, &s);
