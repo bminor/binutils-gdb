@@ -5897,8 +5897,6 @@ elf_link_input_bfd (finfo, input_bfd)
   asection *o;
   struct elf_backend_data *bed;
   boolean emit_relocs;
-  reloc_howto_type *none_howto;
-  bfd_vma none_r_info;
 
   output_bfd = finfo->output_bfd;
   bed = get_elf_backend_data (output_bfd);
@@ -6070,9 +6068,6 @@ elf_link_input_bfd (finfo, input_bfd)
 	return false;
     }
 
-  none_howto = bfd_reloc_type_lookup (output_bfd, BFD_RELOC_NONE);
-  none_r_info = ELF_R_INFO (0, none_howto->type);
-
   /* Relocate the contents of each section.  */
   for (o = input_bfd->sections; o != NULL; o = o->next)
     {
@@ -6125,13 +6120,12 @@ elf_link_input_bfd (finfo, input_bfd)
 	  {
 	    Elf_Internal_Rela *rel, *relend;
 	    /* Run through the relocs looking for any against section
-	       symbols from removed link-once sections.  Set any such
-	       relocs to be against 0.  We should really complain if
-	       anything in the final link tries to use it, but
-	       DWARF-based exception handling might have an entry in
-	       .eh_frame to describe a routine in the linkonce section,
-	       and it turns out to be hard to remove the .eh_frame entry
-	       too.  FIXME.  */
+	       symbols from removed link-once sections.  Zero any such
+	       relocs.  We should really complain if anything in the
+	       final link tries to use it, but DWARF-based exception
+	       handling might have an entry in .eh_frame to describe a
+	       routine in the linkonce section, and it turns out to be
+	       hard to remove the .eh_frame entry too.  FIXME.  */
 	    rel = internal_relocs;
 	    relend = rel + o->reloc_count * bed->s->int_rels_per_ext_rel;
 	    for ( ; rel < relend; rel++)
@@ -6151,21 +6145,20 @@ elf_link_input_bfd (finfo, input_bfd)
 			    && (sec->flags & SEC_LINK_ONCE) != 0
 			    && bfd_is_abs_section (sec->output_section))
 			  {
-			    rel->r_info = none_r_info;
-
 #if BFD_VERSION_DATE > 20021005
 			    (*finfo->info->callbacks->warning)
 			      (finfo->info,
 			       _("warning: relocation against removed section; zeroing"),
 			       NULL, input_bfd, o, rel->r_offset);
 #endif
+			    memset (rel, 0, sizeof (*rel));
 			  }
 		      }
 		  }
 	      }
 	  }
 #else
-#error "This kludge ought to be fixed properly in gcc by now"
+#error "gcc should be fixed by now, and this kludge no longer needed"
 #endif
 
 	  /* Relocate the section by invoking a back end routine.

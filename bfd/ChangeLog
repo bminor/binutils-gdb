@@ -1,3 +1,23 @@
+2001-10-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_link_input_bfd): Zero the reloc instead of doing
+	bfd_reloc_type_lookup (bfd, BFD_RELOC_NONE) as bfd_reloc_type_lookup
+	doesn't accept BFD_RELOC_* on some targets, eg. hppa.
+
+	* elf32-hppa.c (elf32_hppa_link_hash_entry): Remove plt_abs.
+	(hppa_link_hash_newfunc): Likewise.
+	(elf32_hppa_finish_dynamic_symbol): Likewise.
+	(allocate_dynrelocs): Always allocate .got relocs if shared.
+	(elf32_hppa_relocate_section): Output them too.  Similarly
+	consolidate .plt reloc code, and no longer initialise .plt
+	when a reloc is output.
+	(elf32_hppa_finish_dynamic_symbol): Only initialise .plt entries
+	when no reloc is output.
+
+	From Herbert Xu <herbert@gondor.apana.org.au>
+	* elf32-hppa.c (final_link_relocate): Call bfd_set_error for
+	unreachable branches.
+
 2001-10-22  H.J. Lu <hjl@gnu.org>
 
 	* configure.in (WIN32LIBADD): Use -L../libiberty for

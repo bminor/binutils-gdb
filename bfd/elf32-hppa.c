@@ -213,10 +213,6 @@ struct elf32_hppa_link_hash_entry {
 
   /* Set if this symbol is used by a plabel reloc.  */
   unsigned int plabel:1;
-
-  /* Set if this symbol is an init or fini function and thus should
-     use an absolute reloc.  */
-  unsigned int plt_abs:1;
 };
 
 struct elf32_hppa_link_hash_table {
@@ -462,7 +458,6 @@ hppa_link_hash_newfunc (entry, table, string)
       eh->maybe_pic_call = 0;
       eh->pic_call = 0;
       eh->plabel = 0;
-      eh->plt_abs = 0;
     }
 
   return entry;
@@ -2065,8 +2060,6 @@ allocate_dynrelocs (h, inf)
 
   if (h->got.refcount > 0)
     {
-      boolean dyn;
-
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
       if (h->dynindx == -1
@@ -2080,9 +2073,13 @@ allocate_dynrelocs (h, inf)
       s = htab->sgot;
       h->got.offset = s->_raw_size;
       s->_raw_size += GOT_ENTRY_SIZE;
-      dyn = htab->elf.dynamic_sections_created;
-      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h))
-	htab->srelgot->_raw_size += sizeof (Elf32_External_Rela);
+      if (htab->elf.dynamic_sections_created
+	  && (info->shared
+	      || (h->dynindx != -1
+		  && h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0))
+	{
+	  htab->srelgot->_raw_size += sizeof (Elf32_External_Rela);
+	}
     }
   else
     h->got.offset = (bfd_vma) -1;
@@ -3468,6 +3465,7 @@ final_link_relocate (input_section, contents, rel, value, htab, sym_sec, h)
 	 input_section->name,
 	 (long) rel->r_offset,
 	 stub_entry->root.string);
+      bfd_set_error (bfd_error_bad_value);
       return bfd_reloc_notsupported;
     }
 
@@ -3539,7 +3537,6 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_reloc_status_type r;
       const char *sym_name;
       boolean plabel;
-      bfd_vma off;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type >= (unsigned int) R_PARISC_UNIMPLEMENTED)
@@ -3639,87 +3636,88 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PARISC_DLTIND14F:
 	case R_PARISC_DLTIND14R:
 	case R_PARISC_DLTIND21L:
-	  /* Relocation is to the entry for this symbol in the global
-	     offset table.  */
-	  if (h != NULL)
-	    {
-	      boolean dyn;
+	  {
+	    bfd_vma off;
+	    boolean do_got = 0;
 
-	      off = h->elf.got.offset;
-	      dyn = htab->elf.dynamic_sections_created;
-	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, &h->elf))
-		{
-		  /* This is actually a static link, or it is a
-		     -Bsymbolic link and the symbol is defined
-		     locally, or the symbol was forced to be local
-		     because of a version file.  We must initialize
-		     this entry in the global offset table.  Since the
-		     offset must always be a multiple of 4, we use the
-		     least significant bit to record whether we have
-		     initialized it already.
+	    /* Relocation is to the entry for this symbol in the
+	       global offset table.  */
+	    if (h != NULL)
+	      {
+		boolean dyn;
 
-		     When doing a dynamic link, we create a .rela.got
-		     relocation entry to initialize the value.  This
-		     is done in the finish_dynamic_symbol routine.  */
-		  if ((off & 1) != 0)
-		    off &= ~1;
-		  else
-		    {
-		      bfd_put_32 (output_bfd, relocation,
-				  htab->sgot->contents + off);
-		      h->elf.got.offset |= 1;
-		    }
-		}
-	    }
-	  else
-	    {
-	      /* Local symbol case.  */
-	      if (local_got_offsets == NULL)
-		abort ();
+		off = h->elf.got.offset;
+		dyn = htab->elf.dynamic_sections_created;
+		if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, &h->elf))
+		  {
+		    /* If we aren't going to call finish_dynamic_symbol,
+		       then we need to handle initialisation of the .got
+		       entry and create needed relocs here.  Since the
+		       offset must always be a multiple of 4, we use the
+		       least significant bit to record whether we have
+		       initialised it already.  */
+		    if ((off & 1) != 0)
+		      off &= ~1;
+		    else
+		      {
+			h->elf.got.offset |= 1;
+			do_got = 1;
+		      }
+		  }
+	      }
+	    else
+	      {
+		/* Local symbol case.  */
+		if (local_got_offsets == NULL)
+		  abort ();
 
-	      off = local_got_offsets[r_symndx];
+		off = local_got_offsets[r_symndx];
 
-	      /* The offset must always be a multiple of 4.  We use
-		 the least significant bit to record whether we have
-		 already generated the necessary reloc.  */
-	      if ((off & 1) != 0)
-		off &= ~1;
-	      else
-		{
+		/* The offset must always be a multiple of 4.  We use
+		   the least significant bit to record whether we have
+		   already generated the necessary reloc.  */
+		if ((off & 1) != 0)
+		  off &= ~1;
+		else
+		  {
+		    local_got_offsets[r_symndx] |= 1;
+		    do_got = 1;
+		  }
+	      }
+
+	    if (do_got)
+	      {
+		if (info->shared)
+		  {
+		    /* Output a dynamic relocation for this GOT entry.
+		       In this case it is relative to the base of the
+		       object because the symbol index is zero.  */
+		    Elf_Internal_Rela outrel;
+		    asection *srelgot = htab->srelgot;
+		    Elf32_External_Rela *loc;
+
+		    outrel.r_offset = (off
+				       + htab->sgot->output_offset
+				       + htab->sgot->output_section->vma);
+		    outrel.r_info = ELF32_R_INFO (0, R_PARISC_DIR32);
+		    outrel.r_addend = relocation;
+		    loc = (Elf32_External_Rela *) srelgot->contents;
+		    loc += srelgot->reloc_count++;
+		    bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
+		  }
+		else
 		  bfd_put_32 (output_bfd, relocation,
 			      htab->sgot->contents + off);
+	      }
 
-		  if (info->shared)
-		    {
-		      /* Output a dynamic relocation for this GOT
-			 entry.  In this case it is relative to the
-			 base of the object because the symbol index
-			 is zero.  */
-		      Elf_Internal_Rela outrel;
-		      asection *srelgot = htab->srelgot;
-		      Elf32_External_Rela *loc;
+	    if (off >= (bfd_vma) -2)
+	      abort ();
 
-		      outrel.r_offset = (off
-					 + htab->sgot->output_offset
-					 + htab->sgot->output_section->vma);
-		      outrel.r_info = ELF32_R_INFO (0, R_PARISC_DIR32);
-		      outrel.r_addend = relocation;
-		      loc = (Elf32_External_Rela *) srelgot->contents;
-		      loc += srelgot->reloc_count++;
-		      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
-		    }
-
-		  local_got_offsets[r_symndx] |= 1;
-		}
-	    }
-
-	  if (off >= (bfd_vma) -2)
-	    abort ();
-
-	  /* Add the base of the GOT to the relocation value.  */
-	  relocation = (off
-			+ htab->sgot->output_offset
-			+ htab->sgot->output_section->vma);
+	    /* Add the base of the GOT to the relocation value.  */
+	    relocation = (off
+			  + htab->sgot->output_offset
+			  + htab->sgot->output_section->vma);
+	  }
 	  break;
 
 	case R_PARISC_SEGREL32:
@@ -3734,6 +3732,9 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PARISC_PLABEL32:
 	  if (htab->elf.dynamic_sections_created)
 	    {
+	      bfd_vma off;
+	      boolean do_plt = 0;
+
 	      /* If we have a global symbol with a PLT slot, then
 		 redirect this relocation to it.  */
 	      if (h != NULL)
@@ -3748,13 +3749,8 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 			off &= ~1;
 		      else
 			{
-			  bfd_put_32 (output_bfd,
-				      relocation,
-				      htab->splt->contents + off);
-			  bfd_put_32 (output_bfd,
-				      elf_gp (htab->splt->output_section->owner),
-				      htab->splt->contents + off + 4);
 			  h->elf.plt.offset |= 1;
+			  do_plt = 1;
 			}
 		    }
 		}
@@ -3775,32 +3771,38 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		    off &= ~1;
 		  else
 		    {
+		      local_plt_offsets[r_symndx] |= 1;
+		      do_plt = 1;
+		    }
+		}
+
+	      if (do_plt)
+		{
+		  if (info->shared)
+		    {
+		      /* Output a dynamic IPLT relocation for this
+			 PLT entry.  */
+		      Elf_Internal_Rela outrel;
+		      asection *srelplt = htab->srelplt;
+		      Elf32_External_Rela *loc;
+
+		      outrel.r_offset = (off
+					 + htab->splt->output_offset
+					 + htab->splt->output_section->vma);
+		      outrel.r_info = ELF32_R_INFO (0, R_PARISC_IPLT);
+		      outrel.r_addend = relocation;
+		      loc = (Elf32_External_Rela *) srelplt->contents;
+		      loc += srelplt->reloc_count++;
+		      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
+		    }
+		  else
+		    {
 		      bfd_put_32 (output_bfd,
 				  relocation,
 				  htab->splt->contents + off);
 		      bfd_put_32 (output_bfd,
 				  elf_gp (htab->splt->output_section->owner),
 				  htab->splt->contents + off + 4);
-
-		      if (info->shared)
-			{
-			  /* Output a dynamic IPLT relocation for this
-			     PLT entry.  */
-			  Elf_Internal_Rela outrel;
-			  asection *srelplt = htab->srelplt;
-			  Elf32_External_Rela *loc;
-
-			  outrel.r_offset = (off
-					     + htab->splt->output_offset
-					     + htab->splt->output_section->vma);
-			  outrel.r_info = ELF32_R_INFO (0, R_PARISC_IPLT);
-			  outrel.r_addend = relocation;
-			  loc = (Elf32_External_Rela *) srelplt->contents;
-			  loc += srelplt->reloc_count++;
-			  bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
-			}
-
-		      local_plt_offsets[r_symndx] |= 1;
 		    }
 		}
 
@@ -3881,6 +3883,8 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	      skip = false;
 	      if (elf_section_data (input_section)->stab_info != NULL)
 		{
+		  bfd_vma off;
+
 		  off = (_bfd_stab_section_offset
 			 (output_bfd, &htab->elf.stab_info,
 			  input_section,
@@ -4076,8 +4080,7 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  rel.r_offset = (h->plt.offset
 			  + htab->splt->output_offset
 			  + htab->splt->output_section->vma);
-	  if (! ((struct elf32_hppa_link_hash_entry *) h)->plt_abs
-	      && h->dynindx != -1)
+	  if (h->dynindx != -1)
 	    {
 	      /* To support lazy linking, the function pointer is
 		 initialised to point to a special stub stored at the
@@ -4104,19 +4107,14 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  bfd_elf32_swap_reloca_out (htab->splt->output_section->owner,
 				     &rel, loc);
 	}
-
-      bfd_put_32 (htab->splt->owner,
-		  value,
-		  htab->splt->contents + h->plt.offset);
-      bfd_put_32 (htab->splt->owner,
-		  elf_gp (htab->splt->output_section->owner),
-		  htab->splt->contents + h->plt.offset + 4);
-      if (PLABEL_PLT_ENTRY_SIZE != PLT_ENTRY_SIZE
-	  && ((struct elf32_hppa_link_hash_entry *) h)->plabel
-	  && h->dynindx != -1)
+      else
 	{
-	  memset (htab->splt->contents + h->plt.offset + 8,
-		  0, PLABEL_PLT_ENTRY_SIZE - PLT_ENTRY_SIZE);
+	  bfd_put_32 (htab->splt->owner,
+		      value,
+		      htab->splt->contents + h->plt.offset);
+	  bfd_put_32 (htab->splt->owner,
+		      elf_gp (htab->splt->output_section->owner),
+		      htab->splt->contents + h->plt.offset + 4);
 	}
 
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
