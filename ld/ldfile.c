@@ -114,6 +114,16 @@ open_a(arch, entry, lib, suffix)
 {
   bfd*desc;
   search_dirs_type *search ;
+
+  /* If this is not an archive, try to open it in the current
+     directory first.  */
+  if (! entry->is_archive)
+    {
+      desc = cached_bfd_openr (entry->filename, entry);
+      if (desc != NULL)
+	return desc;
+    }
+
   for (search = search_head;
        search != (search_dirs_type *)NULL;
        search = search->next) 
