@@ -28,7 +28,7 @@ Fri Feb 18 14:16:32 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 Thu Feb 17 16:25:18 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
-	Some support for PowerPC ELF, although it isn't in BFD yet.
+	Some support for PowerPC ELF.
 	* configure.in: If cpu is powerpc*, use ppc.
 	(ppc-*-sysv4*): Use object format elf.
 	* config/tc-ppc.h: Only declare a number of things if OBJ_COFF is
