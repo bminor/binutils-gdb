@@ -1,6 +1,7 @@
 Mon Mar  2 10:20:06 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* Make-common.in (TAGS): Make smarter.
+	* Makefile.in (TAGS): Ditto.
 
 	* sim-core.c (sim_core_attach): Use xmalloc instead of zalloc.
 	Use 0xa5 as initial value.
