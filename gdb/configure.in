@@ -131,9 +131,10 @@ AC_HEADER_STAT
 
 AC_C_CONST
 
-AC_CHECK_FUNCS(setpgid setpgrp sbrk sigaction isascii bzero bcopy btowc poll sigprocmask)
-AC_FUNC_VFORK
+AC_CHECK_FUNCS(bcopy btowc bzero isascii poll sbrk setpgid setpgrp \
+	sigaction sigprocmask sigsetmask)
 AC_FUNC_ALLOCA
+AC_FUNC_VFORK
 dnl AC_FUNC_SETPGRP does not work when cross compiling
 dnl Instead, assume we will have a prototype for setpgrp if cross compiling.
 if test "$cross_compiling" = no; then

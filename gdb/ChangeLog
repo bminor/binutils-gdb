@@ -1,3 +1,23 @@
+2001-08-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* event-top.c (async_stop_sig) [HAVE_SIGPROCMASK]: Some
+	gratuitious whitespace changes.
+	[!HAVE_SIGPROCMASK]: Call sigsetmask if HAVE_SIGSETMASK is defined.
+	* top.c: Remove redundant logic to define HAVE_SIGSETMASK.
+	(sigsetmask) Don't define macro.
+	(stop_sig) [HAVE_SIGPROCMASK]: Add bit of code snatched from
+	async_stop_sig from event-top.c.
+	[!HAVE_SIGPROCMASK]: Call sigsetmask if HAVE_SIGSETMASK is
+	defined.
+	* configure.in (AC_CHECK_FUNCS): Put functions in alphabetical
+	order.  Add sigsetmask.
+	(AC_FUNC_VFORK, AC_FUNC_ALLOCA): Reorder such that they're in
+	alphabetical order.
+	* config/xm-aix4.h, config/alpha/xm-alphalinux.h,
+	config/i386/xm-cygwin.h, config/rs6000/xm-rs6000.h
+	(HAVE_SIGSETMASK): Remove.
+	* aclocal.m4, config.in, configure
+
 2001-08-26  Andrew Cagney  <ac131313@redhat.com>
 
 	From 2001-06-29 Andrew Cagney  <ac131313@redhat.com>:

@@ -1042,10 +1042,11 @@ async_stop_sig (gdb_client_data arg)
 #if HAVE_SIGPROCMASK
   {
     sigset_t zero;
+
     sigemptyset (&zero);
     sigprocmask (SIG_SETMASK, &zero, 0);
   }
-#else
+#elif HAVE_SIGSETMASK
   sigsetmask (0);
 #endif
   kill (getpid (), SIGTSTP);

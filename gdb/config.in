@@ -41,9 +41,6 @@
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef pid_t
 
-/* Define if you need to in order for stat and other things to work.  */
-#undef _POSIX_SOURCE
-
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
 
@@ -243,6 +240,9 @@
 
 /* Define if you have the sigprocmask function.  */
 #undef HAVE_SIGPROCMASK
+
+/* Define if you have the sigsetmask function.  */
+#undef HAVE_SIGSETMASK
 
 /* Define if you have the socketpair function.  */
 #undef HAVE_SOCKETPAIR

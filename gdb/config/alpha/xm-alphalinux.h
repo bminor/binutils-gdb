@@ -1,5 +1,5 @@
 /* Host definitions for GDB running on an Alpha under Linux
-   Copyright 1996 Free Software Foundation, Inc.
+   Copyright 1996, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,5 +26,4 @@
 #define NO_SIGINTERRUPT
 
 #define HAVE_TERMIOS
-#define HAVE_SIGSETMASK	1
 #define USG

@@ -27,8 +27,6 @@
 /* Define this if source files use \r\n rather than just \n.  */
 #define CRLF_SOURCE_FILES
 
-#define HAVE_SIGSETMASK 0
-
 /* If under Cygwin, provide backwards compatibility with older
    Cygwin compilers that don't define the current cpp define. */
 #ifdef __CYGWIN32__

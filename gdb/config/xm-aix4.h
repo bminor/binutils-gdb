@@ -1,5 +1,6 @@
 /* Parameters for hosting on an PowerPC, for GDB, the GNU debugger.
-   Copyright 1995, 1996, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001
+   Free Software Foundation, Inc.
    Contributed by Cygnus Corporation.
 
    This file is part of GDB.
@@ -43,7 +44,6 @@
 /* #define HAVE_TERMIO 1 */
 
 #define	USG 1
-#define	HAVE_SIGSETMASK	1
 
 #define FIVE_ARG_PTRACE
 

@@ -178,19 +178,6 @@ static void stop_sig (int);
 #endif
 #endif
 
-/* Some System V have job control but not sigsetmask(). */
-#if !defined (HAVE_SIGSETMASK)
-#if !defined (USG)
-#define HAVE_SIGSETMASK 1
-#else
-#define HAVE_SIGSETMASK 0
-#endif
-#endif
-
-#if 0 == (HAVE_SIGSETMASK)
-#define sigsetmask(n)
-#endif
-
 /* Hooks for alternate command interfaces.  */
 
 /* Called after most modules have been initialized, but before taking users
@@ -922,7 +909,16 @@ stop_sig (int signo)
 {
 #if STOP_SIGNAL == SIGTSTP
   signal (SIGTSTP, SIG_DFL);
+#if HAVE_SIGPROCMASK
+  {
+    sigset_t zero;
+
+    sigemptyset (&zero);
+    sigprocmask (SIG_SETMASK, &zero, 0);
+  }
+#elif HAVE_SIGSETMASK
   sigsetmask (0);
+#endif
   kill (getpid (), SIGTSTP);
   signal (SIGTSTP, stop_sig);
 #else

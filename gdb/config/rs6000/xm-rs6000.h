@@ -44,7 +44,6 @@
 /* #define HAVE_TERMIO 1 */
 
 #define	USG 1
-#define	HAVE_SIGSETMASK	1
 
 #define FIVE_ARG_PTRACE
 
