@@ -103,7 +103,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 	    = gregs->r_ps;
 	  *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (PC_REGNUM)]
 	    = gregs->r_pc;
-	  *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (DEPRECATED_NPC_REGNUM)]
+	  *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (gdbarch_tdep (current_gdbarch)->npc_regnum)]
 	    = gregs->r_npc;
 	  *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (Y_REGNUM)]
 	    = gregs->r_y;
