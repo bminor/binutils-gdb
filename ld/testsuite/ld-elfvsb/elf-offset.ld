@@ -58,6 +58,8 @@ SECTIONS
   .rela.bss      : { *(.rela.bss)		}
   .rel.plt       : { *(.rel.plt)		}
   .rela.plt      : { *(.rela.plt)		}
+  .rel.eh_frame  : { *(.rel.eh_frame)		}
+  .rela.eh_frame : { *(.rela.eh_frame)		}
   .init          : { KEEP (*(.init))	}
   .plt      : { *(.plt)	}
   .text      :

@@ -259,6 +259,12 @@ proc visibility_run {visibility} {
 		setup_xfail "ia64-*-linux*"
 		setup_xfail "alpha*-*-linux*"
 	    }
+	    if { ![ string match $visibility "hidden" ]
+		 && ![ string match $visibility "hidden_undef" ]
+		 && ![ string match $visibility "hidden_undef_def" ]
+		 && ![ string match $visibility "protected_undef" ] } {
+		setup_xfail "s390x-*-linux*"
+	    }
 	    setup_xfail "x86_64-*-linux*"
 
 	    visibility_test $visibility vnp "visibility ($visibility) (non PIC)" mainnp.o sh1np.o sh2np.o elfvsb
@@ -346,6 +352,12 @@ proc visibility_run {visibility} {
 		     && ![ string match $visibility "protected_undef" ] } {
 		    setup_xfail "ia64-*-linux*"
 		    setup_xfail "alpha*-*-linux*"
+		}
+		if { ![ string match $visibility "hidden" ]
+		     && ![ string match $visibility "hidden_undef" ]
+		     && ![ string match $visibility "hidden_undef_def" ]
+		     && ![ string match $visibility "protected_undef" ] } {
+		    setup_xfail "s390x-*-linux*"
 		}
 		setup_xfail "x86_64-*-linux*"
 		visibility_test $visibility vmpnp "visibility ($visibility) (PIC main, non PIC so)" mainp.o sh1np.o sh2np.o elfvsb

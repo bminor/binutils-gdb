@@ -1,3 +1,14 @@
+2003-05-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* ld-elfvsb/elf-offset.ld: Add .rel.eh_frame and .rela.eh_frame
+	to linker script.
+	* ld-elfvsb/elfvsb.exp (visibility_run): Add setup_xfails for s390x.
+	* ld-selective/selective.exp: Disable for s390 and s390x.
+	* ld-shared/elf-offset.ld: Add .rel.eh_frame and .rela.eh_frame
+	to linker script.
+	* ld-shared/shared.exp (shared_test): Add setup_xfails for s390x.
+	* ld-undefined/undefined.exp (checkund): Remove setup_xfail for s390x.
+
 2003-05-08  H.J. Lu <hongjiu.lu@intel.com>
 
 	* ld-elfvers/vers.exp: Add vers27d4 and vers27d5 to test
