@@ -685,6 +685,11 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
   /* We may get more than one warning, don't double space all of them... */
   warning_pre_print = "\nwarning: ";
 
+  /* We need a default language for parsing expressions, so simple things like
+     "set width 0" won't fail if no language is explicitly set in a config file
+     or implicitly set by reading an executable during startup. */
+  set_language (language_c);
+
   /* Read and execute $HOME/.gdbinit file, if it exists.  This is done
      *before* all the command line arguments are processed; it sets
      global parameters, which are independent of what file you are
@@ -699,8 +704,6 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
       strcat (homeinit, gdbinit);
       if (!inhibit_gdbinit && access (homeinit, R_OK) == 0)
 	{
-	  /* The official language of expressions in $HOME/.gdbinit is C. */
-	  set_language (language_c);
 	  if (!setjmp (to_top_level))
 	    source_command (homeinit, 0);
 	}
@@ -794,9 +797,6 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
       || memcmp ((char *) &homebuf, (char *) &cwdbuf, sizeof (struct stat)))
     if (!inhibit_gdbinit && access (gdbinit, R_OK) == 0)
       {
-	/* If no language has been set yet, default to C. */
-	if (current_language->la_language == language_unknown)
-	  set_language (language_c);
 	if (!setjmp (to_top_level))
 	  source_command (gdbinit, 0);
       }
@@ -804,10 +804,6 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
 
   for (i = 0; i < ncmd; i++)
     {
-      /* If no language has been set yet, default to C.  For consistency with
-         other places, we redo this each time before sourcing commands. */
-      if (current_language->la_language == language_unknown)
-	set_language (language_c);
       if (!setjmp (to_top_level))
 	{
 	  if (cmdarg[i][0] == '-' && cmdarg[i][1] == '\0')

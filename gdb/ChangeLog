@@ -1,3 +1,10 @@
+Sep 20 08:42:12 1992  Fred Fish  (fnf@cygnus.com)
+
+	* main.c (main):  Back out previous language setting changes.
+	Replace with simple default to C before processing any init
+	files.  There MUST be a language set, even in the absence of
+	init files or executables, or expression parsing fails.
+
 Sat Sep 19 09:52:26 1992  Fred Fish  (fnf@cygnus.com)
 
 	* main.c (main):  Move code that sets initial language to
