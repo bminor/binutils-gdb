@@ -1,9 +1,6 @@
-Sat Jan 15 09:57:22 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+Fri Jan 14 14:24:21 1994  Rob Savoye  (rob@darkstar.cygnus.com)
 
-	* gdb.t16/printcmds.exp (test_print_strings): Accept
-	"(unsigned char *) " before the string.
-
-	* TODO: Add notes about printing of fancy types and GDB expressions.
+	* Most .exp files: Tweak to run under either version of expect.
 
 Thu Jan 13 17:16:09 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
