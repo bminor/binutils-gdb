@@ -1,5 +1,6 @@
 /* Routines to help build PEI-format DLLs (Win32 etc)
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
    Written by DJ Delorie <dj@cygnus.com>
 
    This file is part of GLD, the Gnu Linker.
@@ -2176,6 +2177,7 @@ pe_create_import_fixup (arelent *rel, asection *s, int addend)
 
       /* If we ever use autoimport, we have to cast text section writable.  */
       config.text_read_only = FALSE;
+      output_bfd->flags &= ~WP_TEXT;   
     }
 
   if (addend == 0 || link_info.pei386_runtime_pseudo_reloc)

@@ -1,3 +1,10 @@
+2004-01-20  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* pe-dll.c (pe_create_import_fixup): Clear WP_TEXT flag.
+	* ld.texinfo (--omagic): Note that writable text section
+	does not conform to published PE-COFF specs.
+	(--enable-auto-import): Likewise.
+
 2004-01-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/elf32ppc.sh (COMMONPAGESIZE): Define.

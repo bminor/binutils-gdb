@@ -687,7 +687,9 @@ Turn off page alignment of sections, and mark the output as
 Set the text and data sections to be readable and writable.  Also, do
 not page-align the data segment, and disable linking against shared
 libraries.  If the output format supports Unix style magic numbers,
-mark the output as @code{OMAGIC}.
+mark the output as @code{OMAGIC}. Note: Although a writable text section
+is allowed for PE-COFF targets, it does not conform to the format
+specification published by Microsoft.
 
 @kindex --no-omagic
 @cindex OMAGIC
@@ -1950,8 +1952,13 @@ uwin, pw, etc.  For instance, cygwin DLLs typically use
 @item --enable-auto-import
 Do sophisticated linking of @code{_symbol} to @code{__imp__symbol} for 
 DATA imports from DLLs, and create the necessary thunking symbols when 
-building the import libraries with those DATA exports.  This generally 
-will 'just work' -- but sometimes you may see this message:
+building the import libraries with those DATA exports. Note: Use of the
+'auto-import' extension will cause the text section of the image file
+to be made writable. This does not conform to the PE-COFF format
+specification published by Microsoft.
+
+Using 'auto-import' generally will 'just work' -- but sometimes you may
+see this message:
 
 "variable '<var>' can't be auto-imported. Please read the 
 documentation for ld's @code{--enable-auto-import} for details."
