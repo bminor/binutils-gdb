@@ -24,3 +24,8 @@ extern void	bzero	PARAMS ((char *, int));
 extern int strtol();
 
 #include "fopen-same.h"
+
+#define POSIX_UTIME
+#ifndef _ES_MP
+#define HAVE_PROCFS    /* Used for core file stuff only */
+#endif

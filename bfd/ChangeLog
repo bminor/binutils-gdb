@@ -1,5 +1,8 @@
 Sat Jul 16 13:55:38 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
+	* config.bfd (m88*-harris-cxux*): Recognize.
+	* hosts/harris.h (POSIX_UTIME, HAVE_PROCFS): Define.
+
 	* configure.host (m68*-atari-sysv4*): New host.
 	(m68*-cbm-sysv4*): Use m68kv4 instead of amix.
 	* hosts/amix.h: Remove.
