@@ -1,3 +1,9 @@
+Fri Jun  4 10:43:33 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in (mips-idt-ecoffl*): New target; use idtl.
+	(mips-idt-ecoff*): Added trailing '*'.
+	* config/mips/idtl.mt: New file; like idt.mt, but little endian.
+
 Thu Jun  3 17:36:56 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* ser-go32.c:  Clean up lots of compilation nits.

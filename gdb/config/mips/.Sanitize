@@ -26,6 +26,7 @@ bigmips.mt
 decstation.mh
 decstation.mt
 idt.mt
+idtl.mt
 irix3.mh
 irix3.mt
 irix4.mh
