@@ -1,3 +1,8 @@
+2002-08-22  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS: Change the s390 target to s390-linux-gnu (second
+	attempt).
+
 2002-08-22  Jim Blandy  <jimb@redhat.com>
 
 	* coffread.c (coff_symfile_read): Don't try to read the line

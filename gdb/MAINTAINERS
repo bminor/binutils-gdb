@@ -134,7 +134,7 @@ maintainer works with the native maintainer when resolving API issues.
 	powerpc		--target=powerpc-eabi ,-Werror
 			Kevin Buettner		kevinb@redhat.com
 
-	s390		--target=s390-linux ,-Werror
+	s390		--target=s390-linux-gnu ,-Werror
 			(contact DJ Barrow	djbarrow@de.ibm.com)
 
 	sh		--target=sh-elf ,-Werror
