@@ -1,3 +1,8 @@
+2004-01-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/asm-source.exp: Update copyright year.  Link statically
+	for *-*-solaris2*.
+
 2003-12-31  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/classes.exp: Rewrite.  Clean up patterns to match
