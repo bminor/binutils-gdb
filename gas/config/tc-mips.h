@@ -129,6 +129,9 @@ extern void mips_frob_file_after_relocs PARAMS ((void));
 #define tc_fix_adjustable(fixp) mips_fix_adjustable (fixp)
 extern int mips_fix_adjustable PARAMS ((struct fix *));
 
+/* Values passed to md_apply_fix3 don't include symbol values.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
+
 /* Global syms must not be resolved, to support ELF shared libraries.
    When generating embedded code, we don't have shared libs.  */
 #define EXTERN_FORCE_RELOC			\

@@ -434,7 +434,6 @@ static const Elf_Internal_Rela *mips_elf_next_relocation
 	   const Elf_Internal_Rela *));
 static bfd_boolean mips_elf_local_relocation_p
   PARAMS ((bfd *, const Elf_Internal_Rela *, asection **, bfd_boolean));
-static bfd_vma mips_elf_sign_extend PARAMS ((bfd_vma, int));
 static bfd_boolean mips_elf_overflow_p PARAMS ((bfd_vma, int));
 static bfd_vma mips_elf_high PARAMS ((bfd_vma));
 static bfd_vma mips_elf_higher PARAMS ((bfd_vma));
@@ -1091,8 +1090,8 @@ _bfd_mips_elf_gprel16_with_gp (abfd, symbol, reloc_entry, input_section,
      bfd_vma gp;
 {
   bfd_vma relocation;
-  unsigned long insn;
-  unsigned long val;
+  unsigned long insn = 0;
+  bfd_signed_vma val;
 
   if (bfd_is_com_section (symbol->section))
     relocation = 0;
@@ -1105,20 +1104,16 @@ _bfd_mips_elf_gprel16_with_gp (abfd, symbol, reloc_entry, input_section,
   if (reloc_entry->address > input_section->_cooked_size)
     return bfd_reloc_outofrange;
 
-  insn = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
-
   /* Set val to the offset into the section or symbol.  */
-  if (reloc_entry->howto->src_mask == 0)
+  val = reloc_entry->addend;
+
+  if (reloc_entry->howto->partial_inplace)
     {
-      /* This case occurs with the 64-bit MIPS ELF ABI.  */
-      val = reloc_entry->addend;
+      insn = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
+      val += insn & 0xffff;
     }
-  else
-    {
-      val = ((insn & 0xffff) + reloc_entry->addend) & 0xffff;
-      if (val & 0x8000)
-	val -= 0x10000;
-    }
+
+  _bfd_mips_elf_sign_extend(val, 16);
 
   /* Adjust val for the final section location and GP value.  If we
      are producing relocateable output, we don't want to do this for
@@ -1127,13 +1122,18 @@ _bfd_mips_elf_gprel16_with_gp (abfd, symbol, reloc_entry, input_section,
       || (symbol->flags & BSF_SECTION_SYM) != 0)
     val += relocation - gp;
 
-  insn = (insn & ~0xffff) | (val & 0xffff);
-  bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc_entry->address);
+  if (reloc_entry->howto->partial_inplace)
+    {
+      insn = (insn & ~0xffff) | (val & 0xffff);
+      bfd_put_32 (abfd, (bfd_vma) insn,
+		  (bfd_byte *) data + reloc_entry->address);
+    }
+  else
+    reloc_entry->addend = val;
 
   if (relocateable)
     reloc_entry->address += input_section->output_offset;
-
-  else if ((long) val >= 0x8000 || (long) val < -0x8000)
+  else if (((val & ~0xffff) != ~0xffff) && ((val & ~0xffff) != 0))
     return bfd_reloc_overflow;
 
   return bfd_reloc_ok;
@@ -2741,8 +2741,8 @@ mips_elf_local_relocation_p (input_bfd, relocation, local_sections,
 
 /* Sign-extend VALUE, which has the indicated number of BITS.  */
 
-static bfd_vma
-mips_elf_sign_extend (value, bits)
+bfd_vma
+_bfd_mips_elf_sign_extend (value, bits)
      bfd_vma value;
      int bits;
 {
@@ -3305,7 +3305,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       return bfd_reloc_continue;
 
     case R_MIPS_16:
-      value = symbol + mips_elf_sign_extend (addend, 16);
+      value = symbol + _bfd_mips_elf_sign_extend (addend, 16);
       overflowed_p = mips_elf_overflow_p (value, 16);
       break;
 
@@ -3356,7 +3356,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       break;
 
     case R_MIPS_GNU_REL16_S2:
-      value = symbol + mips_elf_sign_extend (addend << 2, 18) - p;
+      value = symbol + _bfd_mips_elf_sign_extend (addend << 2, 18) - p;
       overflowed_p = mips_elf_overflow_p (value, 18);
       value = (value >> 2) & howto->dst_mask;
       break;
@@ -3381,7 +3381,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       if (local_p)
 	value = (((addend << 2) | ((p + 4) & 0xf0000000)) + symbol) >> 2;
       else
-	value = (mips_elf_sign_extend (addend << 2, 28) + symbol) >> 2;
+	value = (_bfd_mips_elf_sign_extend (addend << 2, 28) + symbol) >> 2;
       value &= howto->dst_mask;
       break;
 
@@ -3441,7 +3441,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
 	 instruction.  If the addend was separate, leave it alone,
 	 otherwise we may lose significant bits.  */
       if (howto->partial_inplace)
-	addend = mips_elf_sign_extend (addend, 16);
+	addend = _bfd_mips_elf_sign_extend (addend, 16);
       value = symbol + addend - gp;
       /* If the symbol was local, any earlier relocatable links will
 	 have adjusted its addend with the gp offset, so compensate
@@ -3490,7 +3490,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       break;
 
     case R_MIPS_PC16:
-      value = mips_elf_sign_extend (addend, 16) + symbol - p;
+      value = _bfd_mips_elf_sign_extend (addend, 16) + symbol - p;
       overflowed_p = mips_elf_overflow_p (value, 16);
       break;
 
@@ -3853,7 +3853,7 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
   /* We begin by assuming that the offset for the dynamic relocation
      is the same as for the original relocation.  We'll adjust this
      later to reflect the correct output offsets.  */
-  if (elf_section_data (input_section)->sec_info_type != ELF_INFO_TYPE_STABS)
+  if (input_section->sec_info_type != ELF_INFO_TYPE_STABS)
     {
       outrel[1].r_offset = rel[1].r_offset;
       outrel[2].r_offset = rel[2].r_offset;
@@ -6353,7 +6353,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 						input_bfd, contents);
 		  l &= lo16_howto->src_mask;
 		  l <<= lo16_howto->rightshift;
-		  l = mips_elf_sign_extend (l, 16);
+		  l = _bfd_mips_elf_sign_extend (l, 16);
 
 		  addend <<= 16;
 

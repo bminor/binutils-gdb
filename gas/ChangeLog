@@ -1,5 +1,16 @@
 2003-06-11  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* config/tc-mips.c (md_pcrel_from): Return actual pcrel address.
+	(md_apply_fix3): Ignore non-special relocations. Remove superfluous
+	exceptions from size assert. Remove most of the addend fixup
+	specialcasing. Remove value, use valP directly. simplify fx_addnumber
+	handling. Remove zero addend specialcases.
+	(tc_gen_reloc): Use appropriate value for reloc2 addend. Remove
+	the addend fixup specialcase.
+	* config/tc-mips.h (MD_APPLY_SYM_VALUE): Define as 0.
+
+2003-06-11  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* write.c (write_relocs): Use xcalloc. Fix relocs initialization
 	in the RELOC_EXPANSION_POSSIBLE case.
 

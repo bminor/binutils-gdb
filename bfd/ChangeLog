@@ -1,3 +1,51 @@
+2003-06-11  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elf32-mips.c (mips_elf_generic_reloc): New Function.
+	(elf_mips_howto_table_rel): Use it.
+	(gprel32_with_gp): Move prototype.
+	(mips_elf_hi16_reloc): Check for ! BSF_LOCAL instead of zero addend.
+	Use mips_elf_generic_reloc.
+	(mips_elf_got16_reloc): Check for ! BSF_LOCAL instead of zero addend.
+	Code cleanup.
+	(_bfd_mips_elf32_gprel16_reloc): Check for ! BSF_LOCAL instead of
+	zero addend.
+	(mips_elf_gprel32_reloc): Likewise. Use the same GP assignment logic
+	as in the other *_gprel*_reloc functions.
+	(gprel32_with_gp): Handle partial_inplace properly.
+	(mips32_64bit_reloc): Use mips_elf_generic_reloc.
+	(mips16_gprel_reloc): Check for ! BSF_LOCAL instead of zero addend.
+	Do addend handling directly instead of calling
+	_bfd_mips_elf_gprel16_with_gp. Handle partial_inplace properly.
+	* elf64-mips.c (mips_elf64_hi16_reloc): Check for ! BSF_LOCAL instead
+	of zero addend. Handle partial_inplace properly.
+	(mips_elf64_got16_reloc): Check for ! BSF_LOCAL instead of zero
+	addend.
+	(mips_elf64_gprel16_reloc): Likewise.
+	(mips_elf64_literal_reloc): Likewise.
+	(mips_elf64_gprel32_reloc): Likewise. Use the same GP assignment
+	logic as in the other *_gprel*_reloc functions. Handle
+	partial_inplace properly.
+	(mips_elf64_shift6_reloc): Check for ! BSF_LOCAL instead of zero
+	addend. Handle partial_inplace properly.
+	(mips16_gprel_reloc): Likewise. Do addend handling directly instead
+	of calling _bfd_mips_elf_gprel16_with_gp.
+	* elfn32-mips.c (mips_elf_got16_reloc): Check for BSF_LOCAL.
+	(mips_elf_gprel32_reloc): Check for ! BSF_LOCAL instead
+	of zero addend.
+	(mips_elf_shift6_reloc): Handle partial_inplace properly.
+	(mips16_gprel_reloc): Likewise. Do addend handling directly instead
+	of calling _bfd_mips_elf_gprel16_with_gp.
+	* elfxx-mips.c (_bfd_mips_elf_gprel16_with_gp): Handle
+	partial_inplace properly. Fix wrong addend handling. Fix overflow
+	check.
+	(_bfd_mips_elf_sign_extend): Renamed from mips_elf_sign_extend and
+	exported.
+	(mips_elf_calculate_relocation): Use _bfd_mips_elf_sign_extend.
+	(_bfd_mips_elf_relocate_section): Likewise.
+	(mips_elf_create_dynamic_relocation): Update sec_info_type access.
+	* elfxx-mips.h (_bfd_mips_relax_section): Fix prototype declaration.
+	(_bfd_mips_elf_sign_extend): New prototype.
+
 2003-06-11 Federico G. Schwindt <fgsch@lodoss.net>
 	
 	* config.bfd (sparc-*-openbsd[0-2].* | sparc-*-openbsd3.[0-1]):

@@ -1447,15 +1447,17 @@ mips_elf64_hi16_reloc (abfd, reloc_entry, symbol, data, input_section,
      want to change anything.  */
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
-      && (! reloc_entry->howto->partial_inplace
-	  || reloc_entry->addend == 0))
+      && (symbol->flags & BSF_LOCAL) != 0)
     {
       reloc_entry->address += input_section->output_offset;
       return bfd_reloc_ok;
     }
 
-  if (((reloc_entry->addend & 0xffff) + 0x8000) & ~0xffff)
-    reloc_entry->addend += 0x8000;
+  if (reloc_entry->howto->partial_inplace)
+    {
+      if (((reloc_entry->addend & 0xffff) + 0x8000) & ~0xffff)
+	reloc_entry->addend += 0x8000;
+    }
 
   return bfd_reloc_continue;
 }
@@ -1488,7 +1490,8 @@ mips_elf64_got16_reloc (abfd, reloc_entry, symbol, data, input_section,
   /* If we're relocating, and this is a local symbol, we can handle it
      just like an R_MIPS_HI16.  */
   if (output_bfd != (bfd *) NULL
-      && (symbol->flags & BSF_SECTION_SYM) != 0)
+      && ((symbol->flags & BSF_SECTION_SYM) != 0
+	  || (symbol->flags & BSF_LOCAL) == 0))
     return mips_elf64_hi16_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
@@ -1610,14 +1613,11 @@ mips_elf64_gprel16_reloc (abfd, reloc_entry, symbol, data, input_section,
   bfd_reloc_status_type ret;
   bfd_vma gp;
 
-  /* If we're relocating, and this is an external symbol with no
-     addend, we don't want to change anything.  We will only have an
-     addend if this is a newly created reloc, not read from an ELF
-     file.  */
+  /* If we're relocating, and this is an external symbol, we don't want
+     to change anything.  */
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
-      && (! reloc_entry->howto->partial_inplace
-	  || reloc_entry->addend == 0))
+      && (symbol->flags & BSF_LOCAL) != 0)
     {
       reloc_entry->address += input_section->output_offset;
       return bfd_reloc_ok;
@@ -1662,8 +1662,7 @@ mips_elf64_literal_reloc (abfd, reloc_entry, symbol, data, input_section,
      want to change anything.  */
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
-      && (! reloc_entry->howto->partial_inplace
-	  || reloc_entry->addend == 0))
+      && (symbol->flags & BSF_LOCAL) != 0)
     {
       reloc_entry->address += input_section->output_offset;
       return bfd_reloc_ok;
@@ -1706,15 +1705,13 @@ mips_elf64_gprel32_reloc (abfd, reloc_entry, symbol, data, input_section,
   bfd_reloc_status_type ret;
   bfd_vma gp;
   bfd_vma relocation;
-  unsigned long val;
+  bfd_vma val;
 
-  /* If we're relocating, and this is an external symbol with no
-     addend, we don't want to change anything.  We will only have an
-     addend if this is a newly created reloc, not read from an ELF
-     file.  */
+  /* If we're relocating, and this is an external symbol, we don't want
+     to change anything.  */
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
-      && reloc_entry->addend == 0)
+      && (symbol->flags & BSF_LOCAL) != 0)
     {
       *error_message = (char *)
 	_("32bits gp relative relocation occurs for an external symbol");
@@ -1722,20 +1719,17 @@ mips_elf64_gprel32_reloc (abfd, reloc_entry, symbol, data, input_section,
     }
 
   if (output_bfd != (bfd *) NULL)
-    {
-      relocateable = TRUE;
-      gp = _bfd_get_gp_value (output_bfd);
-    }
+    relocateable = TRUE;
   else
     {
       relocateable = FALSE;
       output_bfd = symbol->section->output_section->owner;
-
-      ret = mips_elf64_final_gp (output_bfd, symbol, relocateable,
-				 error_message, &gp);
-      if (ret != bfd_reloc_ok)
-	return ret;
     }
+
+    ret = mips_elf64_final_gp (output_bfd, symbol, relocateable,
+			       error_message, &gp);
+    if (ret != bfd_reloc_ok)
+      return ret;
 
   if (bfd_is_com_section (symbol->section))
     relocation = 0;
@@ -1748,16 +1742,11 @@ mips_elf64_gprel32_reloc (abfd, reloc_entry, symbol, data, input_section,
   if (reloc_entry->address > input_section->_cooked_size)
     return bfd_reloc_outofrange;
 
-  if (reloc_entry->howto->src_mask == 0)
-    {
-      /* This case arises with the 64-bit MIPS ELF ABI.  */
-      val = 0;
-    }
-  else
-    val = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
-
   /* Set val to the offset into the section or symbol.  */
-  val += reloc_entry->addend;
+  val = reloc_entry->addend;
+
+  if (reloc_entry->howto->partial_inplace)
+    val += bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
 
   /* Adjust val for the final section location and GP value.  If we
      are producing relocateable output, we don't want to do this for
@@ -1766,7 +1755,10 @@ mips_elf64_gprel32_reloc (abfd, reloc_entry, symbol, data, input_section,
       || (symbol->flags & BSF_SECTION_SYM) != 0)
     val += relocation - gp;
 
-  bfd_put_32 (abfd, val, (bfd_byte *) data + reloc_entry->address);
+  if (reloc_entry->howto->partial_inplace)
+    bfd_put_32 (abfd, val, (bfd_byte *) data + reloc_entry->address);
+  else
+    reloc_entry->addend = val;
 
   if (relocateable)
     reloc_entry->address += input_section->output_offset;
@@ -1792,15 +1784,17 @@ mips_elf64_shift6_reloc (abfd, reloc_entry, symbol, data, input_section,
      want to change anything.  */
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
-      && (! reloc_entry->howto->partial_inplace
-	  || reloc_entry->addend == 0))
+      && (symbol->flags & BSF_LOCAL) != 0)
     {
       reloc_entry->address += input_section->output_offset;
       return bfd_reloc_ok;
     }
 
-  reloc_entry->addend = (reloc_entry->addend & 0x00007c0)
-			| (reloc_entry->addend & 0x00000800) >> 9;
+  if (reloc_entry->howto->partial_inplace)
+    {
+      reloc_entry->addend = ((reloc_entry->addend & 0x00007c0)
+			     | (reloc_entry->addend & 0x00000800) >> 9);
+    }
 
   return bfd_reloc_continue;
 }
@@ -1857,16 +1851,16 @@ mips16_gprel_reloc (abfd, reloc_entry, symbol, data, input_section,
   bfd_boolean relocateable;
   bfd_reloc_status_type ret;
   bfd_vma gp;
-  unsigned short extend, insn;
-  unsigned long final;
+  unsigned short extend = 0;
+  unsigned short insn = 0;
+  bfd_signed_vma val;
+  bfd_vma relocation;
 
   /* If we're relocating, and this is an external symbol with no
-     addend, we don't want to change anything.  We will only have an
-     addend if this is a newly created reloc, not read from an ELF
-     file.  */
+     addend, we don't want to change anything.  */
   if (output_bfd != NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
-      && reloc_entry->addend == 0)
+      && (symbol->flags & BSF_LOCAL) != 0)
     {
       reloc_entry->address += input_section->output_offset;
       return bfd_reloc_ok;
@@ -1888,33 +1882,55 @@ mips16_gprel_reloc (abfd, reloc_entry, symbol, data, input_section,
   if (reloc_entry->address > input_section->_cooked_size)
     return bfd_reloc_outofrange;
 
-  /* Pick up the mips16 extend instruction and the real instruction.  */
-  extend = bfd_get_16 (abfd, (bfd_byte *) data + reloc_entry->address);
-  insn = bfd_get_16 (abfd, (bfd_byte *) data + reloc_entry->address + 2);
+  if (bfd_is_com_section (symbol->section))
+    relocation = 0;
+  else
+    relocation = symbol->value;
 
-  /* Stuff the current addend back as a 32 bit value, do the usual
-     relocation, and then clean up.  */
-  bfd_put_32 (abfd,
-	      (bfd_vma) (((extend & 0x1f) << 11)
-			 | (extend & 0x7e0)
-			 | (insn & 0x1f)),
-	      (bfd_byte *) data + reloc_entry->address);
+  relocation += symbol->section->output_section->vma;
+  relocation += symbol->section->output_offset;
 
-  ret = _bfd_mips_elf_gprel16_with_gp (abfd, symbol, reloc_entry,
-				       input_section, relocateable, data, gp);
+  /* Set val to the offset into the section or symbol.  */
+  val = reloc_entry->addend;
 
-  final = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
-  bfd_put_16 (abfd,
-	      (bfd_vma) ((extend & 0xf800)
-			 | ((final >> 11) & 0x1f)
-			 | (final & 0x7e0)),
-	      (bfd_byte *) data + reloc_entry->address);
-  bfd_put_16 (abfd,
-	      (bfd_vma) ((insn & 0xffe0)
-			 | (final & 0x1f)),
-	      (bfd_byte *) data + reloc_entry->address + 2);
+  if (reloc_entry->howto->partial_inplace)
+    {
+      /* Pick up the mips16 extend instruction and the real instruction.  */
+      extend = bfd_get_16 (abfd, (bfd_byte *) data + reloc_entry->address);
+      insn = bfd_get_16 (abfd, (bfd_byte *) data + reloc_entry->address + 2);
+      val += ((extend & 0x1f) << 11) | (extend & 0x7e0) | (insn & 0x1f);
+    }
 
-  return ret;
+  _bfd_mips_elf_sign_extend(val, 16);
+
+  /* Adjust val for the final section location and GP value.  If we
+     are producing relocateable output, we don't want to do this for
+     an external symbol.  */
+  if (! relocateable
+      || (symbol->flags & BSF_SECTION_SYM) != 0)
+    val += relocation - gp;
+
+  if (reloc_entry->howto->partial_inplace)
+    {
+      bfd_put_16 (abfd,
+		  (bfd_vma) ((extend & 0xf800)
+			     | ((val >> 11) & 0x1f)
+			     | (val & 0x7e0)),
+		  (bfd_byte *) data + reloc_entry->address);
+      bfd_put_16 (abfd,
+		  (bfd_vma) ((insn & 0xffe0)
+			     | (val & 0x1f)),
+		  (bfd_byte *) data + reloc_entry->address + 2);
+    }
+  else
+    reloc_entry->addend = val;
+
+  if (relocateable)
+    reloc_entry->address += input_section->output_offset;
+  else if (((val & ~0xffff) != ~0xffff) && ((val & ~0xffff) != 0))
+    return bfd_reloc_overflow;
+
+  return bfd_reloc_ok;
 }
 
 /* A mapping from BFD reloc types to MIPS ELF reloc types.  */

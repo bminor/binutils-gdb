@@ -11381,13 +11381,16 @@ long
 md_pcrel_from (fixP)
      fixS *fixP;
 {
-  if (OUTPUT_FLAVOR != bfd_target_aout_flavour
-      && fixP->fx_addsy != (symbolS *) NULL
-      && ! S_IS_DEFINED (fixP->fx_addsy))
-    return 4;
-
-  /* Return the address of the delay slot.  */
-  return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
+  valueT addr = fixP->fx_where + fixP->fx_frag->fr_address;
+  switch (fixP->fx_r_type)
+    {
+    case BFD_RELOC_16_PCREL_S2:
+    case BFD_RELOC_MIPS_JMP:
+      /* Return the address of the delay slot.  */
+      return addr + 4;
+    default:
+      return addr;
+    }
 }
 
 /* This is called before the symbol table is processed.  In order to
@@ -11648,132 +11651,78 @@ md_apply_fix3 (fixP, valP, seg)
 {
   bfd_byte *buf;
   long insn;
-  valueT value;
   static int previous_fx_r_type = 0;
+  reloc_howto_type *howto;
 
-  /* FIXME: Maybe just return for all reloc types not listed below?
-     Eric Christopher says: "This is stupid, please rewrite md_apply_fix3. */
-  if (fixP->fx_r_type == BFD_RELOC_8)
-      return;
+  /* We ignore generic BFD relocations we don't know about.  */
+  howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
+  if (! howto)
+    return;
 
   assert (fixP->fx_size == 4
 	  || fixP->fx_r_type == BFD_RELOC_16
-	  || fixP->fx_r_type == BFD_RELOC_32
-	  || fixP->fx_r_type == BFD_RELOC_MIPS_JMP
-	  || fixP->fx_r_type == BFD_RELOC_HI16_S
-	  || fixP->fx_r_type == BFD_RELOC_LO16
-	  || fixP->fx_r_type == BFD_RELOC_GPREL16
-	  || fixP->fx_r_type == BFD_RELOC_MIPS_LITERAL
-	  || fixP->fx_r_type == BFD_RELOC_GPREL32
 	  || fixP->fx_r_type == BFD_RELOC_64
 	  || fixP->fx_r_type == BFD_RELOC_CTOR
 	  || fixP->fx_r_type == BFD_RELOC_MIPS_SUB
-	  || fixP->fx_r_type == BFD_RELOC_MIPS_HIGHEST
-	  || fixP->fx_r_type == BFD_RELOC_MIPS_HIGHER
-	  || fixP->fx_r_type == BFD_RELOC_MIPS_SCN_DISP
-	  || fixP->fx_r_type == BFD_RELOC_MIPS_REL16
-	  || fixP->fx_r_type == BFD_RELOC_MIPS_RELGOT
 	  || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-	  || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY
-	  || fixP->fx_r_type == BFD_RELOC_MIPS_JALR);
+	  || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY);
 
-  value = *valP;
+  buf = (bfd_byte *) (fixP->fx_frag->fr_literal + fixP->fx_where);
 
   /* If we aren't adjusting this fixup to be against the section
      symbol, we need to adjust the value.  */
 #ifdef OBJ_ELF
   if (fixP->fx_addsy != NULL && OUTPUT_FLAVOR == bfd_target_elf_flavour)
     {
-      if (mips_need_elf_addend_fixup (fixP))
+      if (mips_need_elf_addend_fixup (fixP)
+	  && howto->partial_inplace
+	  && fixP->fx_r_type != BFD_RELOC_GPREL16
+	  && fixP->fx_r_type != BFD_RELOC_GPREL32
+	  && fixP->fx_r_type != BFD_RELOC_MIPS16_GPREL)
 	{
-	  reloc_howto_type *howto;
-	  valueT symval = S_GET_VALUE (fixP->fx_addsy);
+	  /* In this case, the bfd_install_relocation routine will
+	     incorrectly add the symbol value back in.  We just want
+	     the addend to appear in the object file.
 
-	  value -= symval;
+	     The condition above used to include
+	     "&& (! fixP->fx_pcrel || howto->pcrel_offset)".
 
-	  howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
-	  if (value != 0 && howto && howto->partial_inplace)
-	    {
-	      /* In this case, the bfd_install_relocation routine will
-		 incorrectly add the symbol value back in.  We just want
-		 the addend to appear in the object file.
+	     However, howto can't be trusted here, because we
+	     might change the reloc type in tc_gen_reloc.  We can
+	     check howto->partial_inplace because that conversion
+	     happens to preserve howto->partial_inplace; but it
+	     does not preserve howto->pcrel_offset.  I've just
+	     eliminated the check, because all MIPS PC-relative
+	     relocations are marked howto->pcrel_offset.
 
-		 The condition above used to include
-		 "&& (! fixP->fx_pcrel || howto->pcrel_offset)".
+	     howto->pcrel_offset was originally added for
+	     R_MIPS_PC16, which is generated for code like
 
-		 However, howto can't be trusted here, because we
-		 might change the reloc type in tc_gen_reloc.  We can
-		 check howto->partial_inplace because that conversion
-		 happens to preserve howto->partial_inplace; but it
-		 does not preserve howto->pcrel_offset.  I've just
-		 eliminated the check, because all MIPS PC-relative
-		 relocations are marked howto->pcrel_offset.
-
-		 howto->pcrel_offset was originally added for
-		 R_MIPS_PC16, which is generated for code like
-
-		 	globl g1 .text
-			.text
-			.space 20
-		 g1:
-		 x:
-		 	bal g1
-	       */
-	      value -= symval;
-
-	      /* Make sure the addend is still non-zero.  If it became zero
-		 after the last operation, set it to a spurious value and
-		 subtract the same value from the object file's contents.  */
-	      if (value == 0)
-		{
-		  value = 8;
-
-		  /* The in-place addends for LO16 relocations are signed;
-		     leave the matching HI16 in-place addends as zero.  */
-		  if (fixP->fx_r_type != BFD_RELOC_HI16_S)
-		    {
-		      bfd_vma contents, mask, field;
-
-		      contents = bfd_get_bits (fixP->fx_frag->fr_literal
-					       + fixP->fx_where,
-					       fixP->fx_size * 8,
-					       target_big_endian);
-
-		      /* MASK has bits set where the relocation should go.
-			 FIELD is -value, shifted into the appropriate place
-			 for this relocation.  */
-		      mask = 1 << (howto->bitsize - 1);
-		      mask = (((mask - 1) << 1) | 1) << howto->bitpos;
-		      field = (-value >> howto->rightshift) << howto->bitpos;
-
-		      bfd_put_bits ((field & mask) | (contents & ~mask),
-				    fixP->fx_frag->fr_literal + fixP->fx_where,
-				    fixP->fx_size * 8,
-				    target_big_endian);
-		    }
-		}
-	    }
+		    globl g1 .text
+		    .text
+		    .space 20
+	     g1:
+	     x:
+		    bal g1
+	   */
+	  *valP -= S_GET_VALUE (fixP->fx_addsy);
 	}
 
       /* This code was generated using trial and error and so is
 	 fragile and not trustworthy.  If you change it, you should
 	 rerun the elf-rel, elf-rel2, and empic testcases and ensure
 	 they still pass.  */
-      if (fixP->fx_pcrel || fixP->fx_subsy != NULL)
+      if (fixP->fx_pcrel)
 	{
-	  value += fixP->fx_frag->fr_address + fixP->fx_where;
+	  *valP += fixP->fx_frag->fr_address + fixP->fx_where;
 
 	  /* BFD's REL handling, for MIPS, is _very_ weird.
 	     This gives the right results, but it can't possibly
 	     be the way things are supposed to work.  */
-	  if (fixP->fx_r_type != BFD_RELOC_16_PCREL_S2
-	      || S_GET_SEGMENT (fixP->fx_addsy) != undefined_section)
-	    value += fixP->fx_frag->fr_address + fixP->fx_where;
+	  *valP += fixP->fx_frag->fr_address + fixP->fx_where;
 	}
     }
 #endif
-
-  fixP->fx_addnumber = value;	/* Remember value for tc_gen_reloc.  */
 
   /* We are not done if this is a composite relocation to set up gp.  */
   if (fixP->fx_addsy == NULL && ! fixP->fx_pcrel
@@ -11827,15 +11776,13 @@ md_apply_fix3 (fixP, valP, seg)
       /* We currently always generate a reloc against a symbol, which
          means that we don't want an addend even if the symbol is
          defined.  */
-      fixP->fx_addnumber = 0;
+      *valP = 0;
       break;
 
     case BFD_RELOC_PCREL_HI16_S:
       /* The addend for this is tricky if it is internal, so we just
 	 do everything here rather than in bfd_install_relocation.  */
-      if (OUTPUT_FLAVOR == bfd_target_elf_flavour
-	  && !fixP->fx_done
-	  && value != 0)
+      if (OUTPUT_FLAVOR == bfd_target_elf_flavour && !fixP->fx_done)
 	break;
       if (fixP->fx_addsy
 	  && (symbol_get_bfdsym (fixP->fx_addsy)->flags & BSF_SECTION_SYM) == 0)
@@ -11843,30 +11790,26 @@ md_apply_fix3 (fixP, valP, seg)
 	  /* For an external symbol adjust by the address to make it
 	     pcrel_offset.  We use the address of the RELLO reloc
 	     which follows this one.  */
-	  value += (fixP->fx_next->fx_frag->fr_address
+	  *valP += (fixP->fx_next->fx_frag->fr_address
 		    + fixP->fx_next->fx_where);
 	}
-      value = ((value + 0x8000) >> 16) & 0xffff;
-      buf = (bfd_byte *) fixP->fx_frag->fr_literal + fixP->fx_where;
+      *valP = ((*valP + 0x8000) >> 16) & 0xffff;
       if (target_big_endian)
 	buf += 2;
-      md_number_to_chars ((char *) buf, value, 2);
+      md_number_to_chars ((char *) buf, *valP, 2);
       break;
 
     case BFD_RELOC_PCREL_LO16:
       /* The addend for this is tricky if it is internal, so we just
 	 do everything here rather than in bfd_install_relocation.  */
-      if (OUTPUT_FLAVOR == bfd_target_elf_flavour
-	  && !fixP->fx_done
-	  && value != 0)
+      if (OUTPUT_FLAVOR == bfd_target_elf_flavour && !fixP->fx_done)
 	break;
       if (fixP->fx_addsy
 	  && (symbol_get_bfdsym (fixP->fx_addsy)->flags & BSF_SECTION_SYM) == 0)
-	value += fixP->fx_frag->fr_address + fixP->fx_where;
-      buf = (bfd_byte *) fixP->fx_frag->fr_literal + fixP->fx_where;
+	*valP += fixP->fx_frag->fr_address + fixP->fx_where;
       if (target_big_endian)
 	buf += 2;
-      md_number_to_chars ((char *) buf, value, 2);
+      md_number_to_chars ((char *) buf, *valP, 2);
       break;
 
     case BFD_RELOC_64:
@@ -11876,24 +11819,19 @@ md_apply_fix3 (fixP, valP, seg)
 	  || (mips_pic == EMBEDDED_PIC && SWITCH_TABLE (fixP)))
 	{
 	  if (8 <= sizeof (valueT))
-	    md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
-				value, 8);
+	    md_number_to_chars (buf, *valP, 8);
 	  else
 	    {
-	      long w1, w2;
-	      long hiv;
+	      valueT hiv;
 
-	      w1 = w2 = fixP->fx_where;
-	      if (target_big_endian)
-		w1 += 4;
-	      else
-		w2 += 4;
-	      md_number_to_chars (fixP->fx_frag->fr_literal + w1, value, 4);
-	      if ((value & 0x80000000) != 0)
+	      if ((*valP & 0x80000000) != 0)
 		hiv = 0xffffffff;
 	      else
 		hiv = 0;
-	      md_number_to_chars (fixP->fx_frag->fr_literal + w2, hiv, 4);
+	      md_number_to_chars ((char *)(buf + target_big_endian ? 4 : 0),
+				  *valP, 4);
+	      md_number_to_chars ((char *)(buf + target_big_endian ? 0 : 4),
+				  hiv, 4);
 	    }
 	}
       break;
@@ -11907,8 +11845,7 @@ md_apply_fix3 (fixP, valP, seg)
 	 entry.  */
       if (fixP->fx_done
 	  || (mips_pic == EMBEDDED_PIC && SWITCH_TABLE (fixP)))
-	md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
-			    value, 4);
+	md_number_to_chars (buf, *valP, 4);
       break;
 
     case BFD_RELOC_16:
@@ -11916,8 +11853,7 @@ md_apply_fix3 (fixP, valP, seg)
          value now.  */
       assert (fixP->fx_size == 2);
       if (fixP->fx_done)
-	md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
-			    value, 2);
+	md_number_to_chars (buf, *valP, 2);
       break;
 
     case BFD_RELOC_LO16:
@@ -11925,82 +11861,69 @@ md_apply_fix3 (fixP, valP, seg)
 	 up deleting a LO16 reloc.  See the 'o' case in mips_ip.  */
       if (fixP->fx_done)
 	{
-	  if (value + 0x8000 > 0xffff)
+	  if (*valP + 0x8000 > 0xffff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("relocation overflow"));
-	  buf = (bfd_byte *) fixP->fx_frag->fr_literal + fixP->fx_where;
 	  if (target_big_endian)
 	    buf += 2;
-	  md_number_to_chars ((char *) buf, value, 2);
+	  md_number_to_chars ((char *) buf, *valP, 2);
 	}
       break;
 
     case BFD_RELOC_16_PCREL_S2:
-      if ((value & 0x3) != 0)
+      if ((*valP & 0x3) != 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("Branch to odd address (%lx)"), (long) value);
+		      _("Branch to odd address (%lx)"), (long) *valP);
 
       /*
        * We need to save the bits in the instruction since fixup_segment()
        * might be deleting the relocation entry (i.e., a branch within
        * the current segment).
        */
-      if (!fixP->fx_done && (value != 0 || HAVE_NEWABI))
+      if (! fixP->fx_done)
 	break;
-      /* If 'value' is zero, the remaining reloc code won't actually
-	 do the store, so it must be done here.  This is probably
-	 a bug somewhere.  */
-      if (!fixP->fx_done
-	  && (fixP->fx_r_type != BFD_RELOC_16_PCREL_S2
-	      || fixP->fx_addsy == NULL			/* ??? */
-	      || ! S_IS_DEFINED (fixP->fx_addsy)))
-	value -= fixP->fx_frag->fr_address + fixP->fx_where;
-
-      value = (offsetT) value >> 2;
 
       /* update old instruction data */
-      buf = (bfd_byte *) (fixP->fx_where + fixP->fx_frag->fr_literal);
       if (target_big_endian)
 	insn = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
       else
 	insn = (buf[3] << 24) | (buf[2] << 16) | (buf[1] << 8) | buf[0];
 
-      if (value + 0x8000 <= 0xffff)
-	insn |= value & 0xffff;
-      else
+      if (*valP + 0x20000 <= 0x3ffff)
+	{
+	  insn |= (*valP >> 2) & 0xffff;
+	  md_number_to_chars ((char *) buf, (valueT) insn, 4);
+	}
+      else if (mips_pic == NO_PIC
+	       && fixP->fx_done
+	       && fixP->fx_frag->fr_address >= text_section->vma
+	       && (fixP->fx_frag->fr_address
+		   < text_section->vma + text_section->_raw_size)
+	       && ((insn & 0xffff0000) == 0x10000000	 /* beq $0,$0 */
+		   || (insn & 0xffff0000) == 0x04010000	 /* bgez $0 */
+		   || (insn & 0xffff0000) == 0x04110000)) /* bgezal $0 */
 	{
 	  /* The branch offset is too large.  If this is an
              unconditional branch, and we are not generating PIC code,
              we can convert it to an absolute jump instruction.  */
-	  if (mips_pic == NO_PIC
-	      && fixP->fx_done
-	      && fixP->fx_frag->fr_address >= text_section->vma
-	      && (fixP->fx_frag->fr_address
-		  < text_section->vma + text_section->_raw_size)
-	      && ((insn & 0xffff0000) == 0x10000000	 /* beq $0,$0 */
-		  || (insn & 0xffff0000) == 0x04010000	 /* bgez $0 */
-		  || (insn & 0xffff0000) == 0x04110000)) /* bgezal $0 */
-	    {
-	      if ((insn & 0xffff0000) == 0x04110000)	 /* bgezal $0 */
-		insn = 0x0c000000;	/* jal */
-	      else
-		insn = 0x08000000;	/* j */
-	      fixP->fx_r_type = BFD_RELOC_MIPS_JMP;
-	      fixP->fx_done = 0;
-	      fixP->fx_addsy = section_symbol (text_section);
-	      fixP->fx_addnumber = (value << 2) + md_pcrel_from (fixP);
-	    }
+	  if ((insn & 0xffff0000) == 0x04110000)	 /* bgezal $0 */
+	    insn = 0x0c000000;	/* jal */
 	  else
-	    {
-	      /* If we got here, we have branch-relaxation disabled,
-		 and there's nothing we can do to fix this instruction
-		 without turning it into a longer sequence.  */
-	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("Branch out of range"));
-	    }
+	    insn = 0x08000000;	/* j */
+	  fixP->fx_r_type = BFD_RELOC_MIPS_JMP;
+	  fixP->fx_done = 0;
+	  fixP->fx_addsy = section_symbol (text_section);
+	  *valP += md_pcrel_from (fixP);
+	  md_number_to_chars ((char *) buf, (valueT) insn, 4);
 	}
-
-      md_number_to_chars ((char *) buf, (valueT) insn, 4);
+      else
+	{
+	  /* If we got here, we have branch-relaxation disabled,
+	     and there's nothing we can do to fix this instruction
+	     without turning it into a longer sequence.  */
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("Branch out of range"));
+	}
       break;
 
     case BFD_RELOC_VTABLE_INHERIT:
@@ -12018,6 +11941,9 @@ md_apply_fix3 (fixP, valP, seg)
     default:
       internalError ();
     }
+
+  /* Remember value for tc_gen_reloc.  */
+  fixP->fx_addnumber = *valP;
 }
 
 #if 0
@@ -13864,7 +13790,7 @@ tc_gen_reloc (section, fixp)
       reloc2->address = (reloc->address
 			 + (RELAX_RELOC2 (fixp->fx_frag->fr_subtype)
 			    - RELAX_RELOC1 (fixp->fx_frag->fr_subtype)));
-      reloc2->addend = fixp->fx_addnumber
+      reloc2->addend = fixp->fx_addnumber - S_GET_VALUE (fixp->fx_addsy)
 	+ fixp->fx_frag->tc_frag_data.tc_fr_offset;
       reloc2->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_LO16);
       assert (reloc2->howto != NULL);
@@ -13968,27 +13894,6 @@ tc_gen_reloc (section, fixp)
 			bfd_get_reloc_code_name (code));
 	}
     }
-
-#ifdef OBJ_ELF
-  /* md_apply_fix3 has a double-subtraction hack to get
-     bfd_install_relocation to behave nicely.  GPREL relocations are
-     handled correctly without this hack, so undo it here.  We can't
-     stop md_apply_fix3 from subtracting twice in the first place since
-     the fake addend is required for variant frags above.  */
-  if (fixp->fx_addsy != NULL && OUTPUT_FLAVOR == bfd_target_elf_flavour
-      && (code == BFD_RELOC_GPREL16 || code == BFD_RELOC_MIPS16_GPREL)
-      && reloc->addend != 0
-      && mips_need_elf_addend_fixup (fixp))
-    {
-      /* If howto->partial_inplace is false, md_apply_fix3 will only
-	 subtract it once.  */
-      reloc_howto_type *howto;
-
-      howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
-      if (howto->partial_inplace)
-	reloc->addend += S_GET_VALUE (fixp->fx_addsy);
-    }
-#endif
 
   /* To support a PC relative reloc when generating embedded PIC code
      for ECOFF, we use a Cygnus extension.  We check for that here to
