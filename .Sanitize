@@ -299,6 +299,35 @@ else
 	done
 fi
 
+v850_files="ChangeLog config.sub configure.in"
+
+if ( echo $* | grep keep\-v850 > /dev/null ) ; then
+	for i in $v850_files ; do
+		if test ! -d $i && (grep sanitize-v850 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping v850 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-v850 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"v850\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-v850/,/end-\sanitize\-v850/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
 if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
 	echo Catering to RMS by removing traces of \"gdbtk\"...
 	if [ -n "${verbose}" ] ; then

@@ -1,3 +1,26 @@
+start-sanitize-v850
+Tue Aug 20 13:08:47 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
+
+	* configure.in (v850-*-*): Set up initial $noconfigdirs.
+	* config.sub (basic_machine): Recognize v850.
+
+end-sanitize-v850
+Thu Aug 15 12:19:33 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-configure: Handle multiple enable/disable options and
+	pass them down recursively, handle -c and -s flags appropriately
+	depending on choice of compiler, add escape mechanism for
+	quoted arguments to gC.
+
+Mon Aug 12 13:15:13 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (powerpc*-*-*): For eabi, system V.4, Linux, and
+	solaris targets, use config/mt-ppc to set C{,XX}FLAGS_FOR_TARGETS
+	so that -mrelocatable-lib and -mno-eabi are used.
+
+	* Makefile.in (CONFIGURE_TARGET_MODULES): If target compiler does
+	not support --print-multi-lib, don't abort.
+
 Sun Aug 11 20:51:50 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* config/mh-cygwin32 (CFLAGS):  Define _WIN32 to be compatible

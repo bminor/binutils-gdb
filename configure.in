@@ -559,6 +559,9 @@ case "${target}" in
   v810-*-*)
     noconfigdirs="$noconfigdirs bfd binutils gas gcc gdb ld target-libio target-libg++ target-libstdc++ opcodes target-libgloss"
     ;;
+  v850-*-*)
+    noconfigdirs="$noconfigdirs gdb ld target-libio target-libg++ target-libstdc++ target-libgloss"
+    ;;
   vax-*-vms)
     noconfigdirs="$noconfigdirs bfd binutils gdb ld target-newlib opcodes target-libgloss"
     ;;

@@ -141,6 +141,9 @@ case $os in
 	-windowsnt*)
 		os=`echo $os | sed -e 's/windowsnt/winnt/'`
 		;;
+	-psos*)
+		os=-psos
+		;;
 esac
 
 # Decode aliases for certain CPU-COMPANY combinations.
@@ -150,10 +153,10 @@ case $basic_machine in
 	tahoe | i[3456]86 | i860 | m68k | m68000 | m88k | ns32k | arm \
 		| arme[lb] | pyramid \
 		| tron | a29k | 580 | i960 | h8300 | hppa1.0 | hppa1.1 \
-		| alpha | we32k | ns16k | clipper | sparclite | i370 | sh \
-		| powerpc | powerpcle | sparc64 | 1750a | dsp16xx | mips64 | mipsel \
+		| alpha | we32k | ns16k | clipper | i370 | sh \
+		| powerpc | powerpcle | 1750a | dsp16xx | mips64 | mipsel \
 		| pdp11 | mips64el | mips64orion | mips64orionel \
-		| sparc)
+		| sparc | sparclet | sparclite | sparc64)
 		basic_machine=$basic_machine-unknown
 		;;
 	m88110 | m680[01234]0 | m683?2 | m68360 | z8k | v70 | h8500 | w65) # CYGNUS LOCAL
@@ -165,6 +168,14 @@ case $basic_machine in
 	mips64vr4100 | mips64vr4100el) # CYGNUS LOCAL jsmith/vr4100
 		basic_machine=$basic_machine-unknown
 		;;
+	v850)				# CYGNUS LOCAL jtc/v850
+		basic_machine=$basic_machine-unknown
+		;;
+# start-sanitize-d10v
+	d10v)				# CYGNUS LOCAL meissner/d10v
+		basic_machine=$basic_machine-unknown
+		;;
+# end-sanitize-d10v
 	# Object if more than one company name word.
 	*-*-*)
 		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
@@ -523,6 +534,10 @@ case $basic_machine in
 		basic_machine=i960-intel
 		os=-nindy
 		;;
+	mon960)
+		basic_machine=i960-intel
+		os=-mon960
+		;;
 	np1)
 		basic_machine=np1-gould
 		;;
@@ -589,13 +604,6 @@ case $basic_machine in
 	ps2)
 		basic_machine=i386-ibm
 		;;
-# start-sanitize-rce
-	rce)
-		basic_machine=rce-unknown
-		;;
-	rce-*)
-		;;
-# end-sanitize-rce
 	rom68k)						# CYGNUS LOCAL
 		basic_machine=m68k-rom68k
 		os=-coff
@@ -620,20 +628,6 @@ case $basic_machine in
 	sparclite-wrs)					# CYGNUS LOCAL
 		basic_machine=sparclite-wrs
 		os=-vxworks
-		;;
-	sparcfrw)					# CYGNUS LOCAL
-		basic_machine=sparcfrw-sun
-		os=-sunos4
-		;;
-	sparcfrwcompat)					# CYGNUS LOCAL
-		basic_machine=sparcfrwcompat-sun
-		os=-sunos4
-		;;
-	sparclitefrw)					# CYGNUS LOCAL
-		basic_machine=sparclitefrw-fujitsu
-		;;
-	sparclitefrwcompat)				# CYGNUS LOCAL
-		basic_machine=sparclitefrwcompat-fujitsu
 		;;
 	sps7)
 		basic_machine=m68k-bull
@@ -836,21 +830,22 @@ case $os in
 	# Each alternative MUST END IN A *, to match a version number.
 	# -sysv* is not here because it comes later, after sysvr4.
 	-gnu* | -bsd* | -mach* | -minix* | -genix* | -ultrix* | -irix* \
-	      | -vms* | -sco* | -esix* | -isc* | -aix* | -sunos | -sunos[3456]* \
+	      | -*vms* | -sco* | -esix* | -isc* | -aix* | -sunos | -sunos[3456]* \
 	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -solaris* | -sym* \
-	      | -amigados* | -msdos* | -moss* | -newsos* | -unicos* | -aos* \
-	      | -nindy* | -vxworks* | -ebmon* | -hms* | -mvs* | -clix* \
+	      | -amigados* | -msdos* | -moss* | -newsos* | -unicos* | -aos* | -aof* \
+	      | -nindy* | -mon960* | -vxworks* | -ebmon* | -hms* | -mvs* | -clix* \
 	      | -riscos* | -linux* | -uniplus* | -iris* | -rtu* | -xenix* \
 	      | -hiux* | -386bsd* | -netbsd* | -freebsd* | -riscix* \
 	      | -lynxos* | -bosx* | -nextstep* | -cxux* | -aout* | -elf* \
 	      | -ptx* | -coff* | -ecoff* | -winnt* | -domain* | -vsta* \
-	      | -udi* | -eabi* | -lites* | -ieee* | -go32* | -aux*)
+	      | -udi* | -eabi* | -lites* | -ieee* | -go32* | -aux* \
+	      | -cygwin32* | -pe* | -psos*)
 	# Remember, each alternative MUST END IN *, to match a version number.
 		;;
 	# CYGNUS LOCAL
 	-sim | -es1800* | -hms* | -xray | -os68k* | -none* | -v88r* \
 	      | -windows* | -osx | -abug |  -netware* | -proelf | -os9* \
-	      | -macos* | -mpw* | -magic* | -pe* | -win32)
+	      | -macos* | -mpw* | -magic* | -rtems*)
 		;;
 	-mac*)
 		os=`echo $os | sed -e 's|mac|macos|'`
