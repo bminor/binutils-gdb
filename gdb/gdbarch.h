@@ -1155,19 +1155,8 @@ typedef enum return_value_convention (gdbarch_return_value_ftype) (struct gdbarc
 extern enum return_value_convention gdbarch_return_value (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf);
 extern void set_gdbarch_return_value (struct gdbarch *gdbarch, gdbarch_return_value_ftype *return_value);
 
-/* The deprecated methods RETURN_VALUE_ON_STACK, EXTRACT_RETURN_VALUE,
-   STORE_RETURN_VALUE and USE_STRUCT_CONVENTION have all been folded
-   into RETURN_VALUE. */
-
-typedef int (gdbarch_return_value_on_stack_ftype) (struct type *type);
-extern int gdbarch_return_value_on_stack (struct gdbarch *gdbarch, struct type *type);
-extern void set_gdbarch_return_value_on_stack (struct gdbarch *gdbarch, gdbarch_return_value_on_stack_ftype *return_value_on_stack);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (RETURN_VALUE_ON_STACK)
-#error "Non multi-arch definition of RETURN_VALUE_ON_STACK"
-#endif
-#if !defined (RETURN_VALUE_ON_STACK)
-#define RETURN_VALUE_ON_STACK(type) (gdbarch_return_value_on_stack (current_gdbarch, type))
-#endif
+/* The deprecated methods EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE and
+   USE_STRUCT_CONVENTION have all been folded into RETURN_VALUE. */
 
 typedef void (gdbarch_extract_return_value_ftype) (struct type *type, struct regcache *regcache, void *valbuf);
 extern void gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, void *valbuf);

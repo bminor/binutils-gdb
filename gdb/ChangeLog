@@ -1,3 +1,22 @@
+2004-06-13  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbarch.sh (RETURN_VALUE_ON_STACK): Delete method.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* m68hc11-tdep.c (m68hc11_return_value_on_stack): Delete function.
+	(m68hc11_use_struct_convention): Delete function.
+	(m68hc11_extract_struct_value_address): Delete function.
+	(m68hc11_return_value): New function.
+	(m68hc11_gdbarch_init): Instead of store_return_value,
+	extract_return_value, return_value_on_stack,
+	deprecated_extract_struct_value_address and use_struct_convention,
+	set return_value.
+	* values.c (using_struct_return): Do not call
+	RETURN_VALUE_ON_STACK.
+	* arch-utils.h (generic_return_value_on_stack_not): Delete
+	declaration.
+	* arch-utils.c (generic_return_value_on_stack_not): Delete
+	function.
+	
 2004-06-12  Andrew Cagney  <cagney@gnu.org>
 
 	* values.c (register_value_being_returned): Delete function.

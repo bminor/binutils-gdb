@@ -1,3 +1,8 @@
+2004-06-13  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	description of RETURN_VALUE_ON_STACK.
+
 2004-06-09  Andrew Cagney  <cagney@gnu.org>
 
 	* gdbint.texinfo (Native Debugging): Restore "@table @code"

@@ -562,11 +562,9 @@ F:2:DEPRECATED_STORE_STRUCT_RETURN:void:deprecated_store_struct_return:CORE_ADDR
 
 M:::enum return_value_convention:return_value:struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf:valtype, regcache, readbuf, writebuf
 
-# The deprecated methods RETURN_VALUE_ON_STACK, EXTRACT_RETURN_VALUE,
-# STORE_RETURN_VALUE and USE_STRUCT_CONVENTION have all been folded
-# into RETURN_VALUE.
+# The deprecated methods EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE and
+# USE_STRUCT_CONVENTION have all been folded into RETURN_VALUE.
 
-f:2:RETURN_VALUE_ON_STACK:int:return_value_on_stack:struct type *type:type:::generic_return_value_on_stack_not::0
 f:2:EXTRACT_RETURN_VALUE:void:extract_return_value:struct type *type, struct regcache *regcache, void *valbuf:type, regcache, valbuf:::legacy_extract_return_value::0
 f:2:STORE_RETURN_VALUE:void:store_return_value:struct type *type, struct regcache *regcache, const void *valbuf:type, regcache, valbuf:::legacy_store_return_value::0
 f:2:DEPRECATED_EXTRACT_RETURN_VALUE:void:deprecated_extract_return_value:struct type *type, char *regbuf, char *valbuf:type, regbuf, valbuf

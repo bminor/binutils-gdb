@@ -184,7 +184,6 @@ struct gdbarch
   gdbarch_deprecated_pop_frame_ftype *deprecated_pop_frame;
   gdbarch_deprecated_store_struct_return_ftype *deprecated_store_struct_return;
   gdbarch_return_value_ftype *return_value;
-  gdbarch_return_value_on_stack_ftype *return_value_on_stack;
   gdbarch_extract_return_value_ftype *extract_return_value;
   gdbarch_store_return_value_ftype *store_return_value;
   gdbarch_deprecated_extract_return_value_ftype *deprecated_extract_return_value;
@@ -333,7 +332,6 @@ struct gdbarch startup_gdbarch =
   0,  /* deprecated_pop_frame */
   0,  /* deprecated_store_struct_return */
   0,  /* return_value */
-  0,  /* return_value_on_stack */
   0,  /* extract_return_value */
   0,  /* store_return_value */
   0,  /* deprecated_extract_return_value */
@@ -463,7 +461,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->convert_register_p = generic_convert_register_p;
   current_gdbarch->pointer_to_address = unsigned_pointer_to_address;
   current_gdbarch->address_to_pointer = unsigned_address_to_pointer;
-  current_gdbarch->return_value_on_stack = generic_return_value_on_stack_not;
   current_gdbarch->extract_return_value = legacy_extract_return_value;
   current_gdbarch->store_return_value = legacy_store_return_value;
   current_gdbarch->use_struct_convention = generic_use_struct_convention;
@@ -611,7 +608,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of deprecated_pop_frame, has predicate */
   /* Skip verify of deprecated_store_struct_return, has predicate */
   /* Skip verify of return_value, has predicate */
-  /* Skip verify of return_value_on_stack, invalid_p == 0 */
   /* Skip verify of extract_return_value, invalid_p == 0 */
   /* Skip verify of store_return_value, invalid_p == 0 */
   /* Skip verify of use_struct_convention, invalid_p == 0 */
@@ -1809,16 +1805,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: remote_translate_xfer_address = 0x%08lx\n",
                       (long) current_gdbarch->remote_translate_xfer_address);
-#ifdef RETURN_VALUE_ON_STACK
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "RETURN_VALUE_ON_STACK(type)",
-                      XSTRING (RETURN_VALUE_ON_STACK (type)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: RETURN_VALUE_ON_STACK = <0x%08lx>\n",
-                      (long) current_gdbarch->return_value_on_stack
-                      /*RETURN_VALUE_ON_STACK ()*/);
-#endif
 #ifdef SDB_REG_TO_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -3574,23 +3560,6 @@ set_gdbarch_return_value (struct gdbarch *gdbarch,
                           gdbarch_return_value_ftype return_value)
 {
   gdbarch->return_value = return_value;
-}
-
-int
-gdbarch_return_value_on_stack (struct gdbarch *gdbarch, struct type *type)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->return_value_on_stack != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_return_value_on_stack called\n");
-  return gdbarch->return_value_on_stack (type);
-}
-
-void
-set_gdbarch_return_value_on_stack (struct gdbarch *gdbarch,
-                                   gdbarch_return_value_on_stack_ftype return_value_on_stack)
-{
-  gdbarch->return_value_on_stack = return_value_on_stack;
 }
 
 void

@@ -43,11 +43,6 @@ extern gdbarch_store_return_value_ftype legacy_store_return_value;
    address passed as an invisible first argument to the function.  */
 extern gdbarch_use_struct_convention_ftype always_use_struct_convention;
 
-/* Only structures, unions, and arrays are returned using the struct
-   convention.  Note that arrays are never passed by value in the C
-   language family, so that case is irrelevant for C.  */
-extern gdbarch_return_value_on_stack_ftype generic_return_value_on_stack_not;
-
 /* Typical remote_translate_xfer_address */
 extern gdbarch_remote_translate_xfer_address_ftype generic_remote_translate_xfer_address;
 

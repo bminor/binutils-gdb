@@ -84,12 +84,6 @@ legacy_register_sim_regno (int regnum)
     return LEGACY_SIM_REGNO_IGNORE;
 }
 
-int
-generic_return_value_on_stack_not (struct type *type)
-{
-  return 0;
-}
-
 CORE_ADDR
 generic_skip_trampoline_code (CORE_ADDR pc)
 {
