@@ -1,3 +1,7 @@
+Mon Jul  8 17:30:52 1996  Jim Wilson  <wilson@cygnus.com>
+
+	* mh-irix6: New file.
+
 Mon Jul  8 15:15:37 1996  Jason Merrill  <jason@yorick.cygnus.com>
 
 	* mt-sparcpic (PICFLAG_FOR_TARGET): Use -fPIC.
