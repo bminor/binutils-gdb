@@ -1,3 +1,8 @@
+Tue Sep  7 14:11:52 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t15/{return.c,return.exp,Makefile.in}:
+	New test, currently commented out.
+
 Tue Aug 31 16:51:29 1993  Rob Savoye  (rob@darkstar.cygnus.com)
 
 	* config/udi-gdb.exp: gdb_exit now kills any isstip processes
