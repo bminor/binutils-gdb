@@ -1,5 +1,9 @@
 2005-01-07  Andrew Cagney  <cagney@gnu.org>
 
+	* configure.tgt: Disable arm*-*-*, thumb*-*-*, strongarm*-*-*,
+	xscale-*-* and i[34567]86-*-netware* code adding rdi-share or nlm
+	to configdirs.
+
 	* configure.in: Replace configdirs with multiple references to
 	AC_CONFIG_SUBDIRS.
 	* configure: Re-generate.
