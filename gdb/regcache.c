@@ -499,12 +499,6 @@ deprecated_grub_regcache_for_registers (struct regcache *regcache)
   return regcache->registers;
 }
 
-char *
-deprecated_grub_regcache_for_register_valid (struct regcache *regcache)
-{
-  return regcache->register_valid_p;
-}
-
 /* Global structure containing the current regcache.  */
 /* FIXME: cagney/2002-05-11: The two global arrays registers[] and
    deprecated_register_valid[] currently point into this structure.  */
@@ -1424,7 +1418,7 @@ build_regcache (void)
   current_regcache = regcache_xmalloc (current_gdbarch);
   current_regcache->readonly_p = 0;
   deprecated_registers = deprecated_grub_regcache_for_registers (current_regcache);
-  deprecated_register_valid = deprecated_grub_regcache_for_register_valid (current_regcache);
+  deprecated_register_valid = current_regcache->register_valid_p;
 }
 
 static void

@@ -1,3 +1,11 @@
+2003-05-15  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.c (build_regcache): Set deprecated_register_valid
+	directly.
+	(deprecated_grub_regcache_for_register_valid): Delete function.
+	* regcache.h (deprecated_grub_regcache_for_register_valid): Delete
+	declaration.
+
 2003-05-15  David Carlton  <carlton@bactrian.org>
 	
 	Committed by Elena Zannoni <ezannoni@redhat.com>    

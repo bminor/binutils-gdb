@@ -196,7 +196,6 @@ extern void regcache_cpy_no_passthrough (struct regcache *dest, struct regcache 
    parameterized with FRAME or REGCACHE.  */
 
 extern char *deprecated_grub_regcache_for_registers (struct regcache *);
-extern char *deprecated_grub_regcache_for_register_valid (struct regcache *);
 extern void deprecated_read_register_gen (int regnum, char *myaddr);
 extern void deprecated_write_register_gen (int regnum, char *myaddr);
 extern void deprecated_read_register_bytes (int regbyte, char *myaddr,
