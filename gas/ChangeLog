@@ -1,3 +1,7 @@
+Sun Aug 20 15:54:37 1995  Jim Wilson  <wilson@cygnus.com>
+
+	* config/tc-arm.c (md_reloc_size): Add const to declaration.
+
 Fri Aug 18 10:58:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* read.c (s_include): In MRI mode, don't expect quotes around the
