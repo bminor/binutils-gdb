@@ -1,5 +1,9 @@
 Wed Mar 16 17:11:37 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/tc-mips.c (mips_ip): Only accept overly large values for
+	the 'j' operand if there are no further alternatives for this
+	instruction.
+
 	* config/obj-coffbfd.c (adjust_stab_section): Initialize
 	stabstrseg to SEG_UNKNOWN, not -1.  After loop, check whether it
 	is not SEG_UNKNOWN rather than checking whether it is >= 0.
