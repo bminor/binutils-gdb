@@ -1,5 +1,8 @@
 Mon Nov 13 13:24:38 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* libbfd.c (bfd_get_file_window): Use casts to avoid doing
+	arithmetic on PTR types.
+
 	* aout-target.h (MY(callback)): Set the lma of the sections.
 
 	* ecoff.c (ecoff_reloc_link_order): Turn a reloc against a defined
