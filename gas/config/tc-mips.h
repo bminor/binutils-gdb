@@ -83,6 +83,9 @@ struct mips_cl_insn
 
 extern int tc_get_register PARAMS ((int frame));
 
+#define md_after_parse_args() mips_after_parse_args()
+extern void mips_after_parse_args PARAMS ((void));
+
 #define tc_init_after_args() mips_init_after_args()
 extern void mips_init_after_args PARAMS ((void));
 

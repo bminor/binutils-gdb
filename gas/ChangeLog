@@ -1,3 +1,9 @@
+2002-06-04  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* config/tc-mips.c (mips_after_parse_args): New function.
+	(md_begin): Move processing of defaults to mips_after_parse_args.
+	config/tc-mips.h (md_after_parse_args): Define.
+
 2002-06-04  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* configure.in (sh5*): Set cpu_type to sh64 and endian to big.

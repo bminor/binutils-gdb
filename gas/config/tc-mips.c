@@ -1036,240 +1036,10 @@ md_begin ()
 {
   register const char *retval = NULL;
   int i = 0;
-  const char *cpu;
-  char *a = NULL;
   int broken = 0;
-  int mips_isa_from_cpu;
-  int target_cpu_had_mips16 = 0;
-  const struct mips_cpu_info *ci;
-
-  /* GP relative stuff not working for PE */
-  if (strncmp (TARGET_OS, "pe", 2) == 0
-      && g_switch_value != 0)
-    {
-      if (g_switch_seen)
-	as_bad (_("-G not supported in this configuration."));
-      g_switch_value = 0;
-    }
-
-  cpu = TARGET_CPU;
-  if (strcmp (cpu + (sizeof TARGET_CPU) - 3, "el") == 0)
-    {
-      a = xmalloc (sizeof TARGET_CPU);
-      strcpy (a, TARGET_CPU);
-      a[(sizeof TARGET_CPU) - 3] = '\0';
-      cpu = a;
-    }
-
-  if (strncmp (cpu, "mips16", sizeof "mips16" - 1) == 0)
-    {
-      target_cpu_had_mips16 = 1;
-      cpu += sizeof "mips16" - 1;
-    }
-
-  if (mips_opts.mips16 < 0)
-    mips_opts.mips16 = target_cpu_had_mips16;
-
-  /* Backward compatibility for historic -mcpu= option.  Check for
-     incompatible options, warn if -mcpu is used.  */
-  if (mips_cpu != CPU_UNKNOWN
-      && mips_arch != CPU_UNKNOWN
-      && mips_cpu != mips_arch)
-    {
-      as_fatal (_("The -mcpu option can't be used together with -march. "
-		  "Use -mtune instead of -mcpu."));
-    }
-
-  if (mips_cpu != CPU_UNKNOWN
-      && mips_tune != CPU_UNKNOWN
-      && mips_cpu != mips_tune)
-    {
-      as_fatal (_("The -mcpu option can't be used together with -mtune. "
-		  "Use -march instead of -mcpu."));
-    }
-
-#if 1
-  /* For backward compatibility, let -mipsN set various defaults.  */
-  /* This code should go away, to be replaced with something rather more
-     draconian.  Until GCC 3.1 has been released for some reasonable
-     amount of time, however, we need to support this.  */
-  if (mips_opts.isa != ISA_UNKNOWN)
-    {
-      /* Translate -mipsN to the appropriate settings of file_mips_gp32
-	 and file_mips_fp32.  Tag binaries as using the mipsN ISA.  */
-      if (file_mips_gp32 < 0)
-	{
-	  if (ISA_HAS_64BIT_REGS (mips_opts.isa))
-	    file_mips_gp32 = 0;
-	  else
-	    file_mips_gp32 = 1;
-	}
-      if (file_mips_fp32 < 0)
-	{
-	  if (ISA_HAS_64BIT_REGS (mips_opts.isa))
-	    file_mips_fp32 = 0;
-	  else
-	    file_mips_fp32 = 1;
-	}
-
-      ci = mips_cpu_info_from_isa (mips_opts.isa);
-      assert (ci != NULL);
-      /* -mipsN has higher priority than -mcpu but lower than -march.  */
-      if (mips_arch == CPU_UNKNOWN)
-	mips_arch = ci->cpu;
-
-      /* Default mips_abi.  */
-      if (mips_opts.abi == NO_ABI)
-	{
-	  if (mips_opts.isa == ISA_MIPS1 || mips_opts.isa == ISA_MIPS2)
-	    mips_opts.abi = O32_ABI;
-	  else if (mips_opts.isa == ISA_MIPS3 || mips_opts.isa == ISA_MIPS4)
-	    mips_opts.abi = O64_ABI;
-	}
-    }
-
-  if (mips_arch == CPU_UNKNOWN && mips_cpu != CPU_UNKNOWN)
-    {
-      ci = mips_cpu_info_from_cpu (mips_cpu);
-      assert (ci != NULL);
-      mips_arch = ci->cpu;
-      as_warn (_("The -mcpu option is deprecated.  Please use -march and "
-		 "-mtune instead."));
-    }
-
-  /* Set tune from -mcpu, not from -mipsN.  */
-  if (mips_tune == CPU_UNKNOWN && mips_cpu != CPU_UNKNOWN)
-    {
-      ci = mips_cpu_info_from_cpu (mips_cpu);
-      assert (ci != NULL);
-      mips_tune = ci->cpu;
-    }
-
-  /* At this point, mips_arch will either be CPU_UNKNOWN if no ARCH was
-     specified on the command line, or some other value if one was.
-     Similarly, mips_opts.isa will be ISA_UNKNOWN if not specified on
-     the command line, or will be set otherwise if one was.  */
-
-  if (mips_arch != CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
-    /* Handled above.  */;
-#else
-  if (mips_arch == CPU_UNKNOWN && mips_cpu != CPU_UNKNOWN)
-    {
-      ci = mips_cpu_info_from_cpu (mips_cpu);
-      assert (ci != NULL);
-      mips_arch = ci->cpu;
-      as_warn (_("The -mcpu option is deprecated.  Please use -march and "
-		 "-mtune instead."));
-    }
-
-  /* At this point, mips_arch will either be CPU_UNKNOWN if no ARCH was
-     specified on the command line, or some other value if one was.
-     Similarly, mips_opts.isa will be ISA_UNKNOWN if not specified on
-     the command line, or will be set otherwise if one was.  */
-
-  if (mips_arch != CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
-    {
-      /* We have to check if the isa is the default isa of arch.  Otherwise
-         we'll get invalid object file headers.  */
-      ci = mips_cpu_info_from_cpu (mips_arch);
-      assert (ci != NULL);
-      if (mips_opts.isa != ci->isa)
-	{
-	  /* This really should be an error instead of a warning, but old
-	     compilers only have -mcpu which sets both arch and tune.  For
-	     now, we discard arch and preserve tune.  */
-	  as_warn (_("The -march option is incompatible to -mipsN and "
-		     "therefore ignored."));
-	  if (mips_tune == CPU_UNKNOWN)
-	    mips_tune = mips_arch;
-	  ci = mips_cpu_info_from_isa (mips_opts.isa);
-	  assert (ci != NULL);
-	  mips_arch = ci->cpu;
-	}
-    }
-#endif
-  else if (mips_arch != CPU_UNKNOWN && mips_opts.isa == ISA_UNKNOWN)
-    {
-      /* We have ARCH, we need ISA.  */
-      ci = mips_cpu_info_from_cpu (mips_arch);
-      assert (ci != NULL);
-      mips_opts.isa = ci->isa;
-    }
-  else if (mips_arch == CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
-    {
-      /* We have ISA, we need default ARCH.  */
-      ci = mips_cpu_info_from_isa (mips_opts.isa);
-      assert (ci != NULL);
-      mips_arch = ci->cpu;
-    }
-  else
-    {
-      /* We need to set both ISA and ARCH from target cpu.  */
-      ci = mips_cpu_info_from_name (cpu);
-      if (ci == NULL)
-	ci = mips_cpu_info_from_cpu (CPU_R3000);
-      assert (ci != NULL);
-      mips_opts.isa = ci->isa;
-      mips_arch = ci->cpu;
-    }
-
-  if (mips_tune == CPU_UNKNOWN)
-    mips_tune = mips_arch;
-
-  ci = mips_cpu_info_from_cpu (mips_arch);
-  assert (ci != NULL);
-  mips_isa_from_cpu = ci->isa;
-
-  /* End of TARGET_CPU processing, get rid of malloced memory
-     if necessary.  */
-  cpu = NULL;
-  if (a != NULL)
-    {
-      free (a);
-      a = NULL;
-    }
-
-  if (mips_opts.isa == ISA_MIPS1 && mips_trap)
-    as_bad (_("trap exception not supported at ISA 1"));
-
-  /* Set the EABI kind based on the ISA before the user gets
-     to change the ISA with directives.  This isn't really
-     the best, but then neither is basing the abi on the isa.  */
-  if (ISA_HAS_64BIT_REGS (mips_opts.isa)
-      && mips_opts.abi == EABI_ABI)
-    mips_eabi64 = 1;
-
-  /* If they asked for mips1 or mips2 and a cpu that is
-     mips3 or greater, then mark the object file 32BITMODE.  */
-  if (mips_isa_from_cpu != ISA_UNKNOWN
-      && ! ISA_HAS_64BIT_REGS (mips_opts.isa)
-      && ISA_HAS_64BIT_REGS (mips_isa_from_cpu))
-    mips_32bitmode = 1;
-
-  /* If the selected architecture includes support for ASEs, enable
-     generation of code for them.  */
-  if (mips_opts.ase_mips3d == -1 && CPU_HAS_MIPS3D (mips_arch))
-    mips_opts.ase_mips3d = 1;
-  if (mips_opts.ase_mdmx == -1 && CPU_HAS_MDMX (mips_arch))
-    mips_opts.ase_mdmx = 1;
 
   if (! bfd_set_arch_mach (stdoutput, bfd_arch_mips, mips_arch))
     as_warn (_("Could not set architecture and machine"));
-
-  if (file_mips_gp32 < 0)
-    file_mips_gp32 = 0;
-  if (file_mips_fp32 < 0)
-    file_mips_fp32 = 0;
-
-  file_mips_isa = mips_opts.isa;
-  file_mips_abi = mips_opts.abi;
-  file_ase_mips3d = mips_opts.ase_mips3d;
-  file_ase_mdmx = mips_opts.ase_mdmx;
-  mips_opts.gp32 = file_mips_gp32;
-  mips_opts.fp32 = file_mips_fp32;
-
-  if (HAVE_NEWABI)
-    mips_big_got = 1;
 
   op_hash = hash_new ();
 
@@ -10628,6 +10398,241 @@ MIPS options:\n\
 -n32			create n32 ABI object file\n\
 -64			create 64 ABI object file\n"));
 #endif
+}
+
+void
+mips_after_parse_args ()
+{
+  const char *cpu;
+  char *a = NULL;
+  int mips_isa_from_cpu;
+  int target_cpu_had_mips16 = 0;
+  const struct mips_cpu_info *ci;
+
+  /* GP relative stuff not working for PE */
+  if (strncmp (TARGET_OS, "pe", 2) == 0
+      && g_switch_value != 0)
+    {
+      if (g_switch_seen)
+	as_bad (_("-G not supported in this configuration."));
+      g_switch_value = 0;
+    }
+
+  cpu = TARGET_CPU;
+  if (strcmp (cpu + (sizeof TARGET_CPU) - 3, "el") == 0)
+    {
+      a = xmalloc (sizeof TARGET_CPU);
+      strcpy (a, TARGET_CPU);
+      a[(sizeof TARGET_CPU) - 3] = '\0';
+      cpu = a;
+    }
+
+  if (strncmp (cpu, "mips16", sizeof "mips16" - 1) == 0)
+    {
+      target_cpu_had_mips16 = 1;
+      cpu += sizeof "mips16" - 1;
+    }
+
+  if (mips_opts.mips16 < 0)
+    mips_opts.mips16 = target_cpu_had_mips16;
+
+  /* Backward compatibility for historic -mcpu= option.  Check for
+     incompatible options, warn if -mcpu is used.  */
+  if (mips_cpu != CPU_UNKNOWN
+      && mips_arch != CPU_UNKNOWN
+      && mips_cpu != mips_arch)
+    {
+      as_fatal (_("The -mcpu option can't be used together with -march. "
+		  "Use -mtune instead of -mcpu."));
+    }
+
+  if (mips_cpu != CPU_UNKNOWN
+      && mips_tune != CPU_UNKNOWN
+      && mips_cpu != mips_tune)
+    {
+      as_fatal (_("The -mcpu option can't be used together with -mtune. "
+		  "Use -march instead of -mcpu."));
+    }
+
+#if 1
+  /* For backward compatibility, let -mipsN set various defaults.  */
+  /* This code should go away, to be replaced with something rather more
+     draconian.  Until GCC 3.1 has been released for some reasonable
+     amount of time, however, we need to support this.  */
+  if (mips_opts.isa != ISA_UNKNOWN)
+    {
+      /* Translate -mipsN to the appropriate settings of file_mips_gp32
+	 and file_mips_fp32.  Tag binaries as using the mipsN ISA.  */
+      if (file_mips_gp32 < 0)
+	{
+	  if (ISA_HAS_64BIT_REGS (mips_opts.isa))
+	    file_mips_gp32 = 0;
+	  else
+	    file_mips_gp32 = 1;
+	}
+      if (file_mips_fp32 < 0)
+	{
+	  if (ISA_HAS_64BIT_REGS (mips_opts.isa))
+	    file_mips_fp32 = 0;
+	  else
+	    file_mips_fp32 = 1;
+	}
+
+      ci = mips_cpu_info_from_isa (mips_opts.isa);
+      assert (ci != NULL);
+      /* -mipsN has higher priority than -mcpu but lower than -march.  */
+      if (mips_arch == CPU_UNKNOWN)
+	mips_arch = ci->cpu;
+
+      /* Default mips_abi.  */
+      if (mips_opts.abi == NO_ABI)
+	{
+	  if (mips_opts.isa == ISA_MIPS1 || mips_opts.isa == ISA_MIPS2)
+	    mips_opts.abi = O32_ABI;
+	  else if (mips_opts.isa == ISA_MIPS3 || mips_opts.isa == ISA_MIPS4)
+	    mips_opts.abi = O64_ABI;
+	}
+    }
+
+  if (mips_arch == CPU_UNKNOWN && mips_cpu != CPU_UNKNOWN)
+    {
+      ci = mips_cpu_info_from_cpu (mips_cpu);
+      assert (ci != NULL);
+      mips_arch = ci->cpu;
+      as_warn (_("The -mcpu option is deprecated.  Please use -march and "
+		 "-mtune instead."));
+    }
+
+  /* Set tune from -mcpu, not from -mipsN.  */
+  if (mips_tune == CPU_UNKNOWN && mips_cpu != CPU_UNKNOWN)
+    {
+      ci = mips_cpu_info_from_cpu (mips_cpu);
+      assert (ci != NULL);
+      mips_tune = ci->cpu;
+    }
+
+  /* At this point, mips_arch will either be CPU_UNKNOWN if no ARCH was
+     specified on the command line, or some other value if one was.
+     Similarly, mips_opts.isa will be ISA_UNKNOWN if not specified on
+     the command line, or will be set otherwise if one was.  */
+
+  if (mips_arch != CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
+    /* Handled above.  */;
+#else
+  if (mips_arch == CPU_UNKNOWN && mips_cpu != CPU_UNKNOWN)
+    {
+      ci = mips_cpu_info_from_cpu (mips_cpu);
+      assert (ci != NULL);
+      mips_arch = ci->cpu;
+      as_warn (_("The -mcpu option is deprecated.  Please use -march and "
+		 "-mtune instead."));
+    }
+
+  /* At this point, mips_arch will either be CPU_UNKNOWN if no ARCH was
+     specified on the command line, or some other value if one was.
+     Similarly, mips_opts.isa will be ISA_UNKNOWN if not specified on
+     the command line, or will be set otherwise if one was.  */
+
+  if (mips_arch != CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
+    {
+      /* We have to check if the isa is the default isa of arch.  Otherwise
+         we'll get invalid object file headers.  */
+      ci = mips_cpu_info_from_cpu (mips_arch);
+      assert (ci != NULL);
+      if (mips_opts.isa != ci->isa)
+	{
+	  /* This really should be an error instead of a warning, but old
+	     compilers only have -mcpu which sets both arch and tune.  For
+	     now, we discard arch and preserve tune.  */
+	  as_warn (_("The -march option is incompatible to -mipsN and "
+		     "therefore ignored."));
+	  if (mips_tune == CPU_UNKNOWN)
+	    mips_tune = mips_arch;
+	  ci = mips_cpu_info_from_isa (mips_opts.isa);
+	  assert (ci != NULL);
+	  mips_arch = ci->cpu;
+	}
+    }
+#endif
+  else if (mips_arch != CPU_UNKNOWN && mips_opts.isa == ISA_UNKNOWN)
+    {
+      /* We have ARCH, we need ISA.  */
+      ci = mips_cpu_info_from_cpu (mips_arch);
+      assert (ci != NULL);
+      mips_opts.isa = ci->isa;
+    }
+  else if (mips_arch == CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
+    {
+      /* We have ISA, we need default ARCH.  */
+      ci = mips_cpu_info_from_isa (mips_opts.isa);
+      assert (ci != NULL);
+      mips_arch = ci->cpu;
+    }
+  else
+    {
+      /* We need to set both ISA and ARCH from target cpu.  */
+      ci = mips_cpu_info_from_name (cpu);
+      if (ci == NULL)
+	ci = mips_cpu_info_from_cpu (CPU_R3000);
+      assert (ci != NULL);
+      mips_opts.isa = ci->isa;
+      mips_arch = ci->cpu;
+    }
+
+  if (mips_tune == CPU_UNKNOWN)
+    mips_tune = mips_arch;
+
+  ci = mips_cpu_info_from_cpu (mips_arch);
+  assert (ci != NULL);
+  mips_isa_from_cpu = ci->isa;
+
+  /* End of TARGET_CPU processing, get rid of malloced memory
+     if necessary.  */
+  cpu = NULL;
+  if (a != NULL)
+    {
+      free (a);
+      a = NULL;
+    }
+
+  if (mips_opts.isa == ISA_MIPS1 && mips_trap)
+    as_bad (_("trap exception not supported at ISA 1"));
+
+  /* Set the EABI kind based on the ISA before the user gets
+     to change the ISA with directives.  This isn't really
+     the best, but then neither is basing the abi on the isa.  */
+  if (ISA_HAS_64BIT_REGS (mips_opts.isa)
+      && mips_opts.abi == EABI_ABI)
+    mips_eabi64 = 1;
+
+  /* If they asked for mips1 or mips2 and a cpu that is
+     mips3 or greater, then mark the object file 32BITMODE.  */
+  if (mips_isa_from_cpu != ISA_UNKNOWN
+      && ! ISA_HAS_64BIT_REGS (mips_opts.isa)
+      && ISA_HAS_64BIT_REGS (mips_isa_from_cpu))
+    mips_32bitmode = 1;
+
+  /* If the selected architecture includes support for ASEs, enable
+     generation of code for them.  */
+  if (mips_opts.ase_mips3d == -1 && CPU_HAS_MIPS3D (mips_arch))
+    mips_opts.ase_mips3d = 1;
+  if (mips_opts.ase_mdmx == -1 && CPU_HAS_MDMX (mips_arch))
+    mips_opts.ase_mdmx = 1;
+
+  if (file_mips_gp32 < 0)
+    file_mips_gp32 = 0;
+  if (file_mips_fp32 < 0)
+    file_mips_fp32 = 0;
+
+  file_mips_isa = mips_opts.isa;
+  file_mips_abi = mips_opts.abi;
+  file_ase_mips3d = mips_opts.ase_mips3d;
+  file_ase_mdmx = mips_opts.ase_mdmx;
+  mips_opts.gp32 = file_mips_gp32;
+  mips_opts.fp32 = file_mips_fp32;
+
+  if (HAVE_NEWABI)
+    mips_big_got = 1;
 }
 
 void
