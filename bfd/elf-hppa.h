@@ -349,6 +349,9 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	    case e_rtsel:
 	      final_type = R_PARISC_DLTIND14R;
 	      break;
+	    case e_rtpsel:
+	      final_type = R_PARISC_LTOFF_FPTR14DR;
+	      break;
 	    case e_tsel:
 	      final_type = R_PARISC_DLTIND14F;
 	      break;
@@ -385,6 +388,9 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	    case e_ltsel:
 	      final_type = R_PARISC_DLTIND21L;
 	      break;
+	    case e_ltpsel:
+	      final_type = R_PARISC_LTOFF_FPTR21L;
+	      break;
 	    case e_lpsel:
 	      final_type = R_PARISC_PLABEL21L;
 	      break;
@@ -414,6 +420,8 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	      final_type = R_PARISC_DIR64;
 	      break;
 	    case e_psel:
+	      final_type = R_PARISC_FPTR64;
+	      break;
 	    default:
 	      return NULL;
 	    }
