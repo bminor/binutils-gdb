@@ -668,7 +668,7 @@ sigtramp_saved_pc (struct frame_info *frame)
 {
   CORE_ADDR sigcontext_addr;
   char *buf;
-  int ptrbytes = TARGET_PTR_BIT / TARGET_CHAR_BIT;
+  int ptrbytes = TYPE_LENGTH (builtin_type_void_code_ptr);
   int sigcontext_offs = (2 * TARGET_INT_BIT) / TARGET_CHAR_BIT;
 
   buf = alloca (ptrbytes);
@@ -684,7 +684,7 @@ sigtramp_saved_pc (struct frame_info *frame)
   /* Don't cause a memory_error when accessing sigcontext in case the stack
      layout has changed or the stack is corrupt.  */
   target_read_memory (sigcontext_addr + SIGCONTEXT_PC_OFFSET, buf, ptrbytes);
-  return extract_typed_address (buf, builtin_type_void_data_ptr);
+  return extract_typed_address (buf, builtin_type_void_code_ptr);
 }
 #endif /* SIGCONTEXT_PC_OFFSET */
 

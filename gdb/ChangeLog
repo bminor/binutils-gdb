@@ -1,3 +1,10 @@
+2002-11-09  Klee Dienes  <kdienes@apple.com>
+
+	* blockframe.c (sigtramp_saved_pc): Use
+	builtin_type_void_code_ptr, not builtin_type_void_data_ptr (we are
+	extracting the PC).  Use TYPE_LENGTH (builtin_type_void_code_ptr)
+	instead of (TARGET_PTR_BIT / TARGET_CHAR_BIT).
+	
 2002-11-09  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.c (get_prev_frame): Test prev_p to identify a previously
