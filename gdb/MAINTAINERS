@@ -279,9 +279,7 @@ breakpoints		Michael Snyder		msnyder@redhat.com
 			Jim Blandy		jimb@redhat.com
 language support	(Blanket Write Privs Maintainers)
   C++			Daniel Jacobowitz	dan@debian.org
-  Java support (devolved)
-			Per Bothner		per@bothner.com
-			Anthony Green 		green@redhat.com
+  Java support		(Global Maintainers)
   Pascal support	Pierre Muller		muller@sources.redhat.com
   Scheme support	Jim Blandy		jimb@redhat.com
 
@@ -450,6 +448,8 @@ David Taylor (d10v, sparc, utils, defs,
   expression evaluator, language support)	taylor at candd dot org
 J.T. Conklin (dcache, NetBSD, remote)		jtc at redback dot com
 Frank Ch. Eigler (sim)				fche at redhat dot com
+Per Bothner (Java)				per at bothner dot com
+Anthony Green (Java)				per at bothner dot com
 
 
 
