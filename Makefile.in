@@ -79,6 +79,10 @@ MAKEINFO = `if [ -f $${rootme}/texinfo/makeinfo/makeinfo ] ; \
 	then echo $${rootme}/texinfo/makeinfo/makeinfo ; \
 	else echo makeinfo ; fi`
 
+RUNTEST = `if [ -f $${rootme}/dejagnu/runtest ] ; \
+	then echo EXPECT=$${rootme}/expect/expect $${rootme}/dejagnu/runtest ; \
+	else echo runtest ; fi`
+
 
 # libraries that may need to be augmented on a system-by-system basis
 X11_LIB = -lX11
@@ -220,6 +224,7 @@ BASE_FLAGS_TO_PASS = \
 	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
 	"PRMS=$(PRMS)" \
 	"RANLIB_FOR_TARGET=$(RANLIB_FOR_TARGET)" \
+	"RUNTEST=$(RUNTEST)" \
 	"XTRAFLAGS_FOR_TARGET=$(XTRAFLAGS)" \
 	"exec_prefix=$(exec_prefix)" \
 	"prefix=$(prefix)" \
@@ -276,7 +281,7 @@ EXTRA_GCC_FLAGS = \
 
 GCC_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_GCC_FLAGS)
 
-# This is a list of the targets for all the modules which are compiled
+# This is a list of the targets for all of the modules which are compiled
 # using $(FLAGS_TO_PASS).
 ALL_MODULES = \
 	all-autoconf \
@@ -323,7 +328,54 @@ ALL_MODULES = \
 	all-uudecode \
 	all-wdiff
 
-# This is a list of the install targets for all the modules which are
+# This is a list of the check targets for all of the modules which are
+# compiled using $(FLAGS_TO_PASS).
+CHECK_MODULES = \
+	check-autoconf \
+	check-bfd \
+	check-binutils \
+	check-byacc \
+	check-cvs \
+	check-dejagnu \
+	check-diff \
+	check-etc \
+	check-fileutils \
+	check-find \
+	check-flex \
+	check-gas \
+	check-gawk \
+	check-gdb \
+	check-gprof \
+	check-grep \
+	check-gzip \
+	check-hello \
+	check-indent \
+	check-ispell \
+	check-ld \
+	check-libiberty \
+	check-m4 \
+	check-make \
+	check-mmcheckoc \
+	check-opcodes \
+	check-patch \
+	check-prms \
+	check-rcs \
+	check-readline \
+	check-recode \
+	check-sed \
+	check-send-pr \
+	check-shellutils \
+	check-sim \
+	check-tar \
+	check-tcl \
+	check-texinfo \
+	check-textutils \
+	check-tgas \
+	check-time \
+	check-uudecode \
+	check-wdiff
+
+# This is a list of the install targets for all of the modules which are
 # compiled using $(FLAGS_TO_PASS).
 INSTALL_MODULES = \
 	install-autoconf \
@@ -371,13 +423,21 @@ INSTALL_MODULES = \
 	install-uudecode \
 	install-wdiff
 
-# This is a list of the targets for all the modules which are compiled
+# This is a list of the targets for all of the modules which are compiled
 # using $(X11_FLAGS_TO_PASS).
 ALL_X11_MODULES = \
 	all-emacs \
 	all-expect \
 	all-tclX \
 	all-tk
+
+# This is a list of the check targets for all of the modules which are
+# compiled using $(X11_FLAGS_TO_PASS).
+CHECK_X11_MODULES = \
+	check-emacs \
+	check-expect \
+	check-tclX \
+	check-tk
 
 # This is a list of the install targets for all the modules which are
 # compiled using $(X11_FLAGS_TO_PASS).
@@ -387,7 +447,7 @@ INSTALL_X11_MODULES = \
 	install-tclX \
 	install-tk
 
-# This is a list of the targets for all the modules which are compiled
+# This is a list of the targets for all of the modules which are compiled
 # using $(TARGET_FLAGS_TO_PASS).
 ALL_TARGET_MODULES = \
 	$(start-sanitize-chill) \
@@ -397,7 +457,17 @@ ALL_TARGET_MODULES = \
 	all-newlib \
 	all-xiberty
 
-# This is a list of the install targets for all the modules which are
+# This is a list of the check targets for all of the modules which are
+# compiled using $(TARGET_FLAGS_TO_PASS).
+CHECK_TARGET_MODULES = \
+	$(start-sanitize-chill) \
+	check-chillrt \
+	$(end-sanitize-chill) \
+	check-libg++ \
+	check-newlib \
+	check-xiberty
+
+# This is a list of the install targets for all of the modules which are
 # compiled using $(TARGET_FLAGS_TO_PASS).
 INSTALL_TARGET_MODULES = \
 	$(start-sanitize-chill) \
@@ -603,6 +673,19 @@ $(ALL_MODULES) all-glob:
 	  true; \
 	fi
 
+# This rule is used to check the modules which use FLAGS_TO_PASS.  To
+# build a target check-X means to cd to X and make all.
+.PHONY: $(CHECK_MODULES) 
+$(CHECK_MODULES):
+	@dir=`echo $@ | sed -e 's/check-//'`; \
+	if [ -f ./$${dir}/Makefile ] ; then \
+	  rootme=`pwd`; export rootme; \
+	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) check); \
+	else \
+	  true; \
+	fi
+
 # This rule is used to install the modules which use FLAGS_TO_PASS.
 # To build a target install-X means to cd to X and make install.
 .PHONY: $(INSTALL_MODULES)
@@ -616,9 +699,8 @@ $(INSTALL_MODULES): install-dirs
 	  true; \
 	fi
 
-# This rule is used the build the modules which use
-# TARGET_FLAGS_TO_PASS.  To build a target all-X means to cd to X and
-# make all.
+# This rule is used to build the modules which use TARGET_FLAGS_TO_PASS.
+# To build a target all-X means to cd to X and make all.
 .PHONY: $(ALL_TARGET_MODULES)
 $(ALL_TARGET_MODULES):
 	@dir=`echo $@ | sed -e 's/all-//'`; \
@@ -626,6 +708,19 @@ $(ALL_TARGET_MODULES):
 	  rootme=`pwd`; export rootme; \
 	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
 	  (cd $${dir}; $(MAKE) $(TARGET_FLAGS_TO_PASS) all); \
+	else \
+	  true; \
+	fi
+
+# This rule is used to check the modules which use TARGET_FLAGS_TO_PASS.
+# To build a target install-X means to cd to X and make install.
+.PHONY: $(CHECK_TARGET_MODULES)
+$(CHECK_TARGET_MODULES):
+	@dir=`echo $@ | sed -e 's/check-//'`; \
+	if [ -f ./$${dir}/Makefile ] ; then \
+	  rootme=`pwd`; export rootme; \
+	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  (cd $${dir}; $(MAKE) $(TARGET_FLAGS_TO_PASS) check); \
 	else \
 	  true; \
 	fi
@@ -644,7 +739,7 @@ $(INSTALL_TARGET_MODULES): install-dirs
 	  true; \
 	fi
 
-# This rule is used the build the modules which use X11_FLAGS_TO_PASS.
+# This rule is used to build the modules which use X11_FLAGS_TO_PASS.
 # To build a target all-X means to cd to X and make all.
 .PHONY: $(ALL_X11_MODULES)
 $(ALL_X11_MODULES):
@@ -658,11 +753,25 @@ $(ALL_X11_MODULES):
 	  true; \
 	fi
 
-# This rule is used the install the modules which use X11_FLAGS_TO_PASS.
+# This rule is used to check the modules which use X11_FLAGS_TO_PASS.
+# To build a target check-X means to cd to X and make all.
+.PHONY: $(CHECK_X11_MODULES)
+$(CHECK_X11_MODULES):
+	@dir=`echo $@ | sed -e 's/check-//'`; \
+	if [ -f ./$${dir}/Makefile ] ; then \
+	  rootme=`pwd`; export rootme; \
+	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  (cd $${dir}; \
+	   $(MAKE) $(FLAGS_TO_PASS) $(X11_FLAGS_TO_PASS) check); \
+	else \
+	  true; \
+	fi
+
+# This rule is used to install the modules which use X11_FLAGS_TO_PASS.
 # To build a target install-X means to cd to X and make install.
 .PHONY: $(INSTALL_X11_MODULES)
 $(INSTALL_X11_MODULES):
-	@dir=`echo $@ | sed -e 's/all-//'`; \
+	@dir=`echo $@ | sed -e 's/install-//'`; \
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  rootme=`pwd`; export rootme; \
 	  srcroot=`cd $(srcdir); pwd`; export srcroot; \

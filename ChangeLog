@@ -1,3 +1,13 @@
+Fri Apr  9 13:51:06 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: add comment for --with-x default values
+
+	* config.guess: handle Motorola Delta88 box for SVR3 and SVR4.
+
+	* Makefile.in: add check-* targets for each of the directories in
+	the tree.  Add a definition of RUNTEST that will use the one we
+	just built, if it exists.  Pass this down via FLAGS_TO_PASS.
+
 Thu Apr  8 09:21:30 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure.in: Removed obsolete references to bfd_target and

@@ -111,7 +111,8 @@ esac
 # it's not even worth trying to configure, much less build, that tool.
 
 case ${with_x} in
-  yes)  ;;
+  yes)  # the default value for this tree is that X11 is available
+	;;
   no | "")
     	configdirs=`echo ${configdirs} | sed -e 's/tk//'`
 	;;
