@@ -58,18 +58,16 @@ static int print_variant_part (struct type*, int, char*,
 			       struct ui_file*, int, int, enum val_prettyprint,
 			       int, struct type*, char*);
 
-static void
-val_print_packed_array_elements (struct type*, char *valaddr, int,
-				 struct ui_file*, int, int, 
-				 enum val_prettyprint);
+static void val_print_packed_array_elements (struct type*, char *valaddr, int,
+					     struct ui_file*, int, int, 
+					     enum val_prettyprint);
 
 static void adjust_type_signedness (struct type*);
 
 static int ada_val_print_stub (PTR args0);
 
-static int
-ada_val_print_1 (struct type*, char*, int, CORE_ADDR, struct ui_file*,
-		 int, int, int, enum val_prettyprint);
+static int ada_val_print_1 (struct type*, char*, int, CORE_ADDR, struct ui_file*,
+			    int, int, int, enum val_prettyprint);
 
 
 /* Make TYPE unsigned if its range of values includes no negatives. */

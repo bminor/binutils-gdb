@@ -1,3 +1,16 @@
+2002-08-11  Aidan Skinner <aidan@velvet.net>
+
+	* ada-lang.c (ada_lookup_partial_symbol)
+	(to_fixed_variant_branch_type) (find_line_in_linetable): Fix
+	prototype names so that grep ^func works properly.
+
+	* ada-lang.c (ada_array_element_type)
+	(ada_lookup_partial_symbol): Fix typos in parameter list.
+
+	* ada-valprint.c (val_print_packed_array_elements) (ada_val_print_1):
+	Fix prototype names so that grep ^func works properly.
+ 	
+	
 2002-08-10  Andrew Cagney  <cagney@redhat.com>
 	    Elena Zannoni  <ezannoni@redhat.com>
 	    Martin M. Hunt  <hunt@redhat.com>

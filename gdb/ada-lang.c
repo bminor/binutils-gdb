@@ -95,9 +95,8 @@ static int is_nonfunction (struct symbol**, int);
 
 static void add_defn_to_vec (struct symbol*, struct block*);
 
-static struct partial_symbol* 
-ada_lookup_partial_symbol (struct partial_symtab*, const char*, 
-			   int, namespace_enum, int);
+static struct partial_symbol* ada_lookup_partial_symbol (struct partial_symtab*, const char*, 
+							 int, namespace_enum, int);
 
 static struct symtab* symtab_for_sym (struct symbol*);
 
@@ -128,8 +127,7 @@ static struct type * ada_create_fundamental_type (struct objfile*, int);
 
 static int  is_dynamic_field (struct type *, int);
 
-static struct type*
-to_fixed_variant_branch_type (struct type*, char*, CORE_ADDR, struct value*);
+static struct type* to_fixed_variant_branch_type (struct type*, char*, CORE_ADDR, struct value*);
 
 static struct type* to_fixed_range_type (char*, struct value*, struct objfile*);
 
@@ -159,8 +157,7 @@ static int wild_match (const char*, int, const char*);
 
 static struct symtabs_and_lines find_sal_from_funcs_and_line (const char*, int, struct symbol**, int);
 
-static int
-find_line_in_linetable (struct linetable*, int, struct symbol**, int, int*);
+static int find_line_in_linetable (struct linetable*, int, struct symbol**, int, int*);
 
 static int find_next_line_in_linetable (struct linetable*, int, int, int);
 
@@ -1695,7 +1692,7 @@ ada_array_arity (struct type* type)
    NINDICES is -1. Otherwise, returns NULL. */
 
 struct type*
-ada_array_element_type (struct btype* type, int nindices)
+ada_array_element_type (struct type* type, int nindices)
 {
   type = desc_base_type (type);
 
@@ -3271,7 +3268,7 @@ add_defn_to_vec (struct symbol* sym, struct block* block)
    wild-card match if WILD. */
 
 static struct partial_symbol *
-ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global, namespace_enumnamespace, int wild)
+ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global, namespace_enum namespace, int wild)
 {
   struct partial_symbol **start;
   int name_len = strlen (name);
