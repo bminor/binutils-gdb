@@ -1,5 +1,8 @@
 Tue May  7 00:36:39 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* internal.h (R_JMPL2): Renamed from R_JMPL_B8 to be
+	consistent with other similar relocs.
+
 	* internal.h (H8/300 specific relocs): Add comments better
 	explaining what each reloc is used for.
 	(R_MOV16B1, R_MOV16B2): Renamed from R_MOVB1 and R_MOVB2.
