@@ -115,6 +115,13 @@ extern struct simops Simops[];
 #define REG_LIR 12
 #define REG_LAR 13
 #define REG_MDRQ 14
+#define REG_E0 15
+#define REG_SSP 23
+#define REG_MSP 24
+#define REG_USP 25
+#define REG_MCRH 26
+#define REG_MCRL 27
+#define REG_MCVF 28
 
 #if WITH_COMMON
 /* These definitions conflict with similar macros in common.  */

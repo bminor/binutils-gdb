@@ -1,3 +1,340 @@
+1999-12-06  Christopher Faylor  <cgf@cygnus.com>
+
+	* dcache.c (set_dcache_state): New function.
+	* dcache.h: Declare set_dcache_state().
+
+Sat Dec  4 15:17:44 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (build_remote_packet_sizes): Reduce the default packet
+ 	size of 400 bytes by one to 399.  Stops GDB trashing stubs that
+ 	append a trailing NUL to an already full buffer.
+
+Sat Dec  4 01:16:47 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* tracepoint.c (remote_get_noisy_reply): Add parameter sizeof_buf.
+	(finish_tfind_command): Add parameter sizeof_msg.
+	
+	* remote.c (remote_threads_info): Move assignment operator to
+ 	outside of function call.
+	(remote_send): Add parameter sizeof_buf.
+	(getpkt): Add parameter sizeof_buf. Call read_frame passing in
+ 	sizeof_buf.
+
+	* remote.h (getpkt): Update.
+	
+	* tracepoint.c (remote_set_transparent_ranges,
+ 	remote_get_noisy_reply, trace_start_command, trace_stop_command,
+ 	trace_status_command, finish_tfind_command, trace_find_pc_command,
+ 	trace_find_tracepoint_command, trace_find_line_command,
+ 	trace_find_range_command, trace_find_outside_command): Update.
+
+	* remote.c (set_thread, remote_thread_alive,
+ 	remote_get_threadinfo, remote_get_threadlist,
+ 	remote_current_thread, remote_threads_info,
+ 	extended_remote_restart, get_offsets, remote_open_1,
+ 	remote_async_open_1, remote_wait, remote_async_wait,
+ 	remote_fetch_registers, check_binary_download, remote_write_bytes,
+ 	remote_read_bytes, remote_send, remote_detach,
+ 	remote_async_detach, remote_fetch_registers,
+ 	store_register_using_P, store_register_using_P,
+ 	remote_fetch_registers, remote_store_registers, putpkt_binary,
+ 	remote_insert_breakpoint, remote_remove_breakpoint,
+ 	compare_sections_command, remote_rcmd, packet_command,
+ 	remote_info_process, remote_query, remote_insert_watchpoint,
+ 	remote_search, remote_remove_watchpoint,
+ 	remote_insert_hw_breakpoint, remote_remove_hw_breakpoint): Update.
+
+Fri Dec  3 17:38:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* (read_frame): Add sizeof_buf parameter. Don't allow repeat when
+ 	first character.  Always leave space at the end of the buffer.
+  	Return size of packet or -1.
+	(getpkt): Update.  Pass in PBUFSIZ.
+
+Thu Dec  2 17:14:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ser-pipe.c: Include <string.h> for memset().
+
+1999-12-01  Christopher Faylor  <cgf@cygnus.com>
+
+	* config/i386/tm-cygwin.h: Change tm-i386.h include back to tm-i386v.h.
+
+1999-12-01  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* inf-loop.c (inferior_event_handler): In case of
+ 	INF_EXEC_CONTINUE, don't do all the regular continuations, but
+ 	just the intermediate ones.
+
+	* infcmd.c (step_once): Add the continuation to the
+ 	intermediate_continuation list instead of the regular continuation
+ 	list.
+
+	* utils.c (add_intermediate_continuation): New function, to add
+ 	continuations to the intermedite_continuation list.
+	(do_all_intermediate_continuations): New function, do all the
+ 	continuations in the intermediate list.
+	(discard_all_intermediate_continuations): New function, discard
+ 	all the continuations in the intermediate list.
+	(intermediate_continuation): New global list for use by step_1().
+
+	* defs.h: Export intermediate_continuation,
+ 	add_intermediate_continuation, do_all_intermediate_continuations,
+ 	discard_all_intermediate_continuations.
+
+1999-11-30  Christopher Faylor  <cgf@cygnus.com>
+
+	* win32-nat.c (mappings): Reorganize slightly for new uniform i386
+	register configuration.
+	(do_child_fetch_inferior_registers): Handle special case floating point
+	registers.
+	(handle_output_debug_string): Handle cygwin-specific signals broadcast
+	from the cygwin DLL.
+	(handle_exceptions): Add code to properly allow continuation after a
+	CTRL-C.
+	(child_continue): Accept propagated "continue_status" which controls
+	how the inferior should be continued.
+	(get_child_debug_event): New function.
+	(child_wait): Use above function to handle debug events.
+	(child_create_inferior): Add more intelligent method for running the
+	inferior to the appropriate point before handing it off to the rest of
+	gdb.
+	(child_stop): Specifically send a CTRL-C to the debugged process.
+	(child_kill_inferior): Set global continue status here to cause
+	inferior to run to completion.
+	(child_resume): Eliminate code which attempts to decide how to continue
+	the inferior.  This is now handled by child_continue.
+	* config/i386/tm-cygwin.h: Gut and reorganize for consistency with new
+	tm-i386.h.
+
+	Patch from Egor Duda (deo@logos-m.ru)
+	* win32-nat.c (psapi_get_dll_name): New function.
+	(handle_load_dll): Correctly load DLL symbol tables after attaching to
+	a running pid.
+
+1999-11-30  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* infrun.c (handle_inferior_pid): revert 11-29 change: resuming
+	a thread other than the current thread with a signal.  Apparently
+	target_resume with a specific pid, a specific signal, and no step
+	means to continue ALL threads but to only send the signal to one
+	(and not, as I had assumed, to continue only the specified thread).
+	* i386-linux-nat.c (fill_gregset): guard against invalid input.
+	
+1999-11-30  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* infcmd.c (step_once): New function. Used to do just one step
+ 	operation.
+	(step_1_continuation): New function. Figure out if we need to step
+ 	again before returning control to the user.
+	(step_1): If we are in asynchronous mode, don't do the for loop,
+ 	but rather delegate to continuations the task of repeating the
+ 	step operation.
+
+	* utils.c (do_all_continuations): Copy the continuation list aside
+ 	before working on it.
+
+	* target.h (enum inferior_event_type): Add new enum
+ 	INF_EXEC_CONTINUE.
+
+	* inf-loop.c (inferior_event_handler): Handle new case
+ 	INF_EXEC_CONTINUE.
+
+	* infrun.c (fetch_inferior_event): If we are in the middle of a
+ 	'step n' type command, don't say that the execution is complete,
+ 	but that it will have to continue.
+
+1999-11-30  Kevin Buettner  <kevinb@cygnus.com>
+
+	* utils.c (verror): Don't traverse va_list argument twice.  Also,
+	removed extraneous va_end() call.
+
+1999-11-29  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* infrun.c (handle_inferior_pid): If a child thread stops on a 
+	signal that we are ignoring, and GDB silently resumes the child, 
+	resume ALL threads (not just the one that got the signal).  All
+	threads are stopped, so all must be resumed.
+	(handle_inferior_pid): on detecting a thread context switch, 
+	swap infrun_state ONLY if both the old thread and the new one
+	are in the thread list.  Otherwise state information will be lost!
+	Problem may arise with flaky back-ends.
+	
+1999-11-29  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* breakpoint.c (bpstat_stop_status): Don't decrease hit_count
+	in case of a wp that has not changed.
+
+Mon Nov 29 12:14:10 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbtypes.c (init_simd_type): Make static.
+
+	* configure.in (AC_CHECK_HEADERS): Check for <sys/ioctl.h>.
+	* configure, config.h: Re-generate.
+	* inflow.c: Include <sys/ioctl.h>
+
+	* i386b-nat.c: Include "gdbcore.h".
+	* fork-child.c: Include "command.h".
+
+	* remote.c (remote_cisco_section_offsets,
+ 	remote_start_remote_dummy, store_register_using_P,
+ 	remote_info_process, remote_cisco_open, remote_cisco_close,
+ 	readsocket, readtty, minitelnet, remote_cisco_wait,
+ 	init_remote_async_ops, init_extended_async_remote_ops,
+ 	set_remote_cmd), infrun.c (default_skip_permanent_breakpoint): Use
+ 	ISO-C syntax for function definition.
+
+Mon Nov 29 11:28:21 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* stabsread.c: Revert 1999-11-09 Jim Blandy
+ 	<jimb@zwingli.cygnus.com> and 1999-11-08 Jim Blandy
+ 	<jimb@zenia.red-bean.com>.  Broken on non-Linux targets.
+
+1999-11-26  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* symfile.c (show_load_progress): Add total sent so far to the
+ 	information passsed to the hook users.
+	(generic_load): Collect total sent so far and pass that to the
+ 	progress hook.
+
+	* defs.h (show_load_progress): Update.
+
+1999-11-25  Nick Clifton  <nickc@cygnus.com>
+
+	* coffread.c (coff_symfile_read): Treat "epoc-pe" targets as "pe"
+	targets.
+	* dbxread.c (dbx_read_symfile): Treat "epoc-pe" targets as "pe"
+	targets. 
+
+Wed Nov 24 17:07:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (init.c): Add SUBDIR_INIT_FILES so that sub
+ 	directories can hook in extra init files.
+
+1999-11-23  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* defs.h (show_load_progress): Export.
+
+	* symfile.c (show_load_progress): New hook for download.
+	(generic_load): Collect total size of executable to load. 
+	Call progress hook when downloading.
+
+Thu Nov 18 11:54:24 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* arc-tdep.c (codestream_fill): Rewrite byte swap code using
+ 	function extract_unsigned_integer.
+
+Wed Nov 17 17:01:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* arm-xdep.c: #include "arm-opcode.h" -> "opcode/arm.h".
+
+1999-11-22  Jim Blandy  <jimb@cygnus.com>
+
+	* Makefile.in (i386-tdep.o): Update list of dependencies.
+
+1999-11-22  Jim Blandy  <jimb@zenia.red-bean.com>
+
+	* config/i386/tm-i386v.h (NUM_REGS, REGISTER_NAMES,
+	REGISTER_BYTES, REGISTER_BYTE, REGISTER_RAW_SIZE,
+	REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+	MAX_REGISTER_VIRTUAL_SIZE, REGISTER_VIRTUAL_TYPE): Deleted.  All
+	of these should inherit identical or compatible values from
+	tm-i386.h, as long as you don't define HAVE_SSE_REGS or
+	HAVE_I387_REGS, which are new anyway.
+
+Mon Nov 22 21:39:27 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* target.c (do_target_signal_to_host): New function.  Indicate of
+ 	the conversion was successful to the caller via an additional
+ 	parameter.
+	(target_signal_to_host_p): New function. Return non-zero if the
+ 	GDB signal exists on the host system.
+	(target_signal_to_host): Rewrite.  Use do_target_signal_to_host.
+	* target.h (target_signal_to_host_p): Add declaration. Document
+ 	target_singal vs host signal vs target OS signal confusion.
+	
+	From 1999-11-08 Jimmy Guo <guo@cup.hp.com>:
+	* hppah-nat.c (require_notification_of_events): Start by ignoring
+ 	all signals and then adding back in ones we're interested in.
+	
+Thu Nov 18 18:12:48 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* jv-typeprint.c (java_type_print_base), kod-cisco.c
+ 	(cisco_kod_open), kod.c (kod_set_os), xcoffread.c
+ 	(process_linenos), symfile.c (add_symbol_file_command),
+ 	remote-rdi.c (arm_rdi_open, rdilogfile_command), main.c
+ 	(captured_main), go32-nat.c (go32_create_inferior), exec.c
+ 	(exec_file_attach), corefile.c (core_file_command,
+ 	reopen_exec_file): Replace strdup with xstrdup.
+
+Mon Nov 22 12:02:47 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* bcache.c (print_bcache_statistics): Fix printf_filtered
+ 	arguments.
+	(print_percentage): Make function void.
+
+1999-11-21  Jim Blandy  <jimb@zenia.red-bean.com>
+
+	Make the bcache hash table grow.
+	* bcache.h (BCACHE_NUM_BUCKETS): Delete definition.
+	(struct bcache): Add new element: num_buckets.  Make bucket be a
+	pointer to an array, not an array.
+	(free_bcache): New extern declaration.
+	* bcache.c (CHAIN_LENGTH_THRESHOLD): New constant.
+	(expand_hash_table): New function.
+	(bcache): Grow the hash table if the average chain length reaches
+	CHAIN_LENGTH_THRESHOLD.
+	(free_bcache): New function.
+	(print_bcache_statistics): Don't assume that the number of buckets
+	is constant any more.
+	(BSTRING_SIZE): Moved down to just above 'bcache' function, where
+	it's used.
+	* objfiles.c (free_objfile): Call free_bcache, instead of just 
+	freeing the bcache's obstack directly.
+	* symfile.c (reread_symbols): Same.
+
+1999-11-20  Jim Blandy  <jimb@zenia.red-bean.com>
+
+	* bcache.c, bcache.h: Rewritten.  New version imposes less memory
+	overhead, and has a more effective hash function, so it's probably
+	faster, too.
+
+	* config/nm-linux.h: No need to check whether __STDC__ is
+	#defined --- GDB requires ANSI C now.
+
+	* config/i386/nm-linux.h (linuxthreads_pid_to_str,
+	linuxthreads_prepare_to_proceed): Delete declarations --- they're
+	provided by config/nm-linux.h now.
+
+1999-11-19  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* top.c (print_command_lines): Remove unused var.
+
+1999-11-19  Jim Kingdon  <kingdon@redhat.com>
+
+        Patch applied by Jim Blandy <jimb@cygnus.com>:
+
+	Enable threads for all linux architectures:
+	* config/nm-linux.h: New file.
+	config/alpha/nm-linux.h, config/i386/nm-linux.h,
+	config/m68k/nm-linux.h, config/sparc/nm-linux.h: Use it.
+	* config/tm-linux.h: New file.
+	* config/i386/tm-linux.h, config/m68k/tm-linux.h,
+	config/sparc/tm-linux.h, config/alpha/tm-alphalinux.h: Use it.
+	* config/m68k/linux.mh, config/sparc/linux.mh,
+	config/alpha/alpha-linux.mh: Add linux-thread.o.
+
+1999-11-18  Tom Tromey  <tromey@cygnus.com>
+
+	* tracepoint.h (get_tracepoint_by_number): Updated declaration.
+	* tracepoint.c (trace_pass_command): Better error message.  Fixed
+	logic when `all' not specified.
+	(get_tracepoint_by_number): Added `optional_p' argument.  Fixed
+	all callers.
+
+Wed Nov 17 17:40:30 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* findvar.c (SWAP_FLOATING): Delete macro. Unused.
+
 1999-11-16  Mark Salter  <msalter@cygnus.com>
 
 	* monitor.c (monitor_supply_register): Initialize value to zero.
@@ -4885,6 +5222,7 @@ Mon Jun  7 21:08:50 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 
 	* config/mips/tm-mips.h (mips_init_extra_frame_info), mips-tdep.c:
  	Rename init_extra_frame_info.  Add argument ``fromleaf''.
+	mips-tdep.c (mips_gdbarch_init): Add mips_init_extra_frame_info.
 
 	* config/mips/tm-mips.h (mips_print_extra_frame_info),
  	mips-tdep.c: New function.
@@ -4902,6 +5240,7 @@ Mon Jun  7 20:11:07 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 	(mips_register_name): New function.
 	(mips_set_processor_type): Update mips_processor_reg_names.
 	(mips_generic_reg_names): Initialize using MIPS_REGISTER_NAMES.
+	(mips_gdbarch_init): Add mips_register_name.
 
 Sun Jun  6 11:09:19 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -5993,6 +6332,15 @@ Fri Apr 16 15:39:10 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	HAVE_NONSTEPPABLE_WATCHPOINT, HAVE_CONTINUABLE_WATCHPOINT]: Test
  	at runtime instead of compile time.
 
+Thu Apr 15 15:15:07 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* mips-tdep.c (struct gdbarch_tdep): Rename elf_abi to
+ 	elf_flags. Check ABFD is elf_flavour before extracting elf_flags.
+  	Match ARCH against entire elf_flags instead of just the
+ 	EF_MIPS_ABI field.
+	(mips_gdbarch_init): Extract/print ef_mips_arch and
+ 	ef_mips_bitptrs and ef_mips_abi fields from elf_flags.
+
 1999-04-14  Philippe De Muyter  <phdm@macqel.be>
 
 	* breakpoint.c (maintenance_info_breakpoints): Function made
@@ -6356,6 +6704,8 @@ Thu Mar 25 19:30:02 1999  Andrew Cagney  <cagney@amy.cygnus.com>
  	pc_in_call_dummy_after_text_end, pc_in_call_dummy_on_stack,
  	pc_in_call_dummy_at_entry_point): Convert PC_IN_CALL_DUMMY macro's
  	into functions.
+
+	* mips-tdep.c (mips_gdbarch_init): Initialize above
 
 Tue Mar 23 17:22:57 1999  Philippe De Muyter  <phdm@macqel.be>
 
@@ -6989,6 +7339,28 @@ Fri Jan 29 16:51:11 1999  Andrew Cagney  <cagney@chook.cygnus.com>
  	return_value_location.  For store, ensure that remainder of
  	register is zero.
 	
+Thu Jan 28 18:58:02 1999  Andrew Cagney  <cagney@chook.cygnus.com>
+
+	From John Metzler <jmetzler@cygnus.com>:
+	* mips-tdep.c (struct gdbarch_tdep): Add mips_saved_regsize.
+	(MIPS_SAVED_REGSIZE): Define.
+	(mips_find_saved_regs, read_next_frame_reg, mips_pop_frame):
+ 	Read/write MIPS_SAVED_REGSIZE bytes of register on stack instead
+ 	of MIPS_REGSIZE.
+	(mips_gdbarch_init): Initialize mips_saved_regsize.
+
+	* mips-tdep.c (mips_frame_saved_pc, mips16_heuristic_proc_desc,
+ 	mips_push_arguments, mips_push_dummy_frame,
+ 	mips_use_struct_convention): Ditto.  For MIPS_SAVED_REGSIZE <
+ 	REGISTER_RAW_SIZE, handle little/big endian issues from only using
+ 	half the register.
+	(STACK_ARGSIZE): Default to MIPS_SAVED_REGSIZE instead of
+ 	MIPS_REGSIZE.
+
+	* mips-tdep.c (struct gdbarch_tdep, FP_REGISTER_DOUBLE,
+ 	mips_gdbarch_init): Apply similar changes.  Add
+ 	mips_fp_register_double to struct.
+
 Wed Feb 17 10:10:27 1999  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
 	* gdbtypes.h (get_discrete_bounds):  Remove duplicate decl.
@@ -7358,6 +7730,11 @@ Wed Jan 27 13:20:25 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* hp-psymtab-read.c: Reformat comments, update copyright.
 
+Wed Jan 27 15:09:22 1999  Andrew Cagney  <cagney@chook.cygnus.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Trace e_flags from BFD
+ 	elf_info.
+
 Tue Jan 26 16:02:47 1999  Mark Alexander  <marka@cygnus.com>
 
 	* v850-tdep.c (v850_generic_reg_names, v850e_reg_names,
@@ -7614,6 +7991,8 @@ Fri Jan 15 17:11:48 EST 1999  Zdenek Radouch   (radouch@cygnus.com)
 
 Thu Jan 14 18:29:17 1999  David Taylor  <taylor@texas.cygnus.com>
 
+	* mips-tdep.c (mips_gdbarch_init): fix stream arg in
+	fprintf_unfiltered calls.
 	* remote-mm.c (mm_wait): fix stream arg to gdb_flush.
 	* remote-udi.c (udi_wait): fix stream arg to fwrite.
 	* symmisc.c (maintenance_check_symtabs): fix stream argument to

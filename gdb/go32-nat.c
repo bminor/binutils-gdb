@@ -692,7 +692,7 @@ go32_create_inferior (char *exec_file, char *args, char **env)
 	error ("Syntax error in command line.");
     }
   else
-    child_cmd.command = strdup (args);
+    child_cmd.command = xstrdup (args);
 
   cmdline = (char *) alloca (strlen (args) + 4);
   cmdline[0] = strlen (args);

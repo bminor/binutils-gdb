@@ -1,4 +1,4 @@
-# Copyright (C) 1992, 1994, 1995, 1997 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1994, 1995, 1997, 1999 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -328,10 +328,13 @@ proc test_ptype_class_objects {} {
     # for now, but with a FIXME.  At some future point, gdb should use a
     # portable representation for the virtual table constructs.
 
+    # The format of a g++ virtual base pointer.
+    set vbptr "(_vb\[$.\]|__vb_)\[0-9\]?"
+
     setup_xfail_format "DWARF 1"
     send_gdb "ptype class vB\n"
     gdb_expect {
-	-re "type = class vB : public virtual vA \{${ws}private:${ws}vA \\*_vb.vA;${ws}public:${ws}int vb;${ws}int vx;${ws}vB & operator=\\(vB const &\\);${ws}vB\\(int, vB const &\\);${ws}vB\\(int\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class vB : public virtual vA \{${ws}private:${ws}vA \\*${vbptr}vA;${ws}public:${ws}int vb;${ws}int vx;${ws}vB & operator=\\(vB const &\\);${ws}vB\\(int, vB const &\\);${ws}vB\\(int\\);${ws}\}$nl$gdb_prompt $" {
 	    setup_xfail "*-*-*"
 	    fail "ptype class vB (FIXME: non-portable virtual table constructs)"
 	}
@@ -358,7 +361,7 @@ proc test_ptype_class_objects {} {
     setup_xfail_format "DWARF 1"
     send_gdb "ptype class vC\n"
     gdb_expect {
-	-re "type = class vC : public virtual vA \{${ws}private:${ws}vA \\*_vb.vA;${ws}public:${ws}int vc;${ws}int vx;${ws}vC & operator=\\(vC const &\\);${ws}vC\\(int, vC const &\\);${ws}vC\\(int\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class vC : public virtual vA \{${ws}private:${ws}vA \\*${vbptr}vA;${ws}public:${ws}int vc;${ws}int vx;${ws}vC & operator=\\(vC const &\\);${ws}vC\\(int, vC const &\\);${ws}vC\\(int\\);${ws}\}$nl$gdb_prompt $" {
 	    setup_xfail "*-*-*"
 	    fail "ptype class vC (FIXME: non-portable virtual table constructs)"
 	}
@@ -385,7 +388,7 @@ proc test_ptype_class_objects {} {
     setup_xfail_format "DWARF 1"
     send_gdb "ptype class vD\n"
     gdb_expect {
-	-re "type = class vD : public virtual vB, public virtual vC \{${ws}private:${ws}vC \\*_vb.vC;${ws}vB \\*_vb.vB;${ws}public:${ws}int vd;${ws}int vx;${ws}vD & operator=\\(vD const &\\);${ws}vD\\(int, vD const &\\);${ws}vD\\(int\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class vD : public virtual vB, public virtual vC \{${ws}private:${ws}vC \\*${vbptr}vC;${ws}vB \\*${vbptr}vB;${ws}public:${ws}int vd;${ws}int vx;${ws}vD & operator=\\(vD const &\\);${ws}vD\\(int, vD const &\\);${ws}vD\\(int\\);${ws}\}$nl$gdb_prompt $" {
 	    setup_xfail "*-*-*"
 	    fail "ptype class vD (FIXME: non-portable virtual table constructs)"
 	}
@@ -412,7 +415,7 @@ proc test_ptype_class_objects {} {
     setup_xfail_format "DWARF 1"
     send_gdb "ptype class vE\n"
     gdb_expect {
-	-re "type = class vE : public virtual vD \{${ws}private:${ws}vD \\*_vb.vD;${ws}public:${ws}int ve;${ws}int vx;${ws}vE & operator=\\(vE const &\\);${ws}vE\\(int, vE const &\\);${ws}vE\\(int\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class vE : public virtual vD \{${ws}private:${ws}vD \\*${vbptr}vD;${ws}public:${ws}int ve;${ws}int vx;${ws}vE & operator=\\(vE const &\\);${ws}vE\\(int, vE const &\\);${ws}vE\\(int\\);${ws}\}$nl$gdb_prompt $" {
 	    setup_xfail "*-*-*"
 	    fail "ptype class vE (FIXME: non-portable virtual table constructs)"
 	}
@@ -456,7 +459,7 @@ proc test_ptype_class_objects {} {
         -re "type = class Foo \{${ws}public:${ws}int x;${ws}int y;${ws}static int st;\r\n${ws}Foo\\(int, int\\);${ws}int operator!.void.;${ws}operator int.void.;${ws}int times.int.;$nl\}$nl$gdb_prompt $" {
             pass "ptype class Foo(aCC)"
         }
-	-re "type = class Foo \{${ws}public:${ws}int x;${ws}int y;${ws}static int st;${ws}Foo & operator=\\(Foo const &\\);${ws}Foo\\(Foo const &\\);${ws}Foo\\(int, int\\);${ws}int operator!\\(void\\);${ws}int operator int\\(void\\);${ws}int times\\(int\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class Foo \{${ws}public:${ws}int x;${ws}int y;${ws}static int st;${ws}Foo & operator=\\(Foo const &\\);${ws}Foo\\(Foo const &\\);${ws}Foo\\(int, int\\);${ws}int operator!\\(void\\);${ws}operator int\\(void\\);${ws}int times\\(int\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype class Foo"
 	}
 	-re "type = class Foo \{${ws}public:${ws}int x;${ws}int y;${ws}static int st;((${ws}Foo & operator=\\(Foo const &\\);)|(${ws}Foo\\(Foo const &\\);)|(${ws}Foo\\(int, int\\);)|(${ws}int operator!\\(void\\);)|(${ws}int operator int\\(void\\);)|(${ws}int times\\(int\\);))*${ws}\}$nl$gdb_prompt $" {
@@ -828,11 +831,12 @@ gdb_expect {
 }
 
 # ptype on the enum member
-# The second success case is a little dubious, but it's not clear what
+# The third success case is a little dubious, but it's not clear what
 # ought to be required of a ptype on a private enum... -sts 19990324
 send_gdb "ptype obj_with_enum.priv_enum\n"   
 gdb_expect {   
    -re "type = enum ClassWithEnum::PrivEnum \\{red, green, blue, yellow = 42\\}.*$gdb_prompt $" { pass "ptype obj_with_enum.priv_enum" }
+   -re "type = enum PrivEnum \\{red, green, blue, yellow = 42\\}.*$gdb_prompt $" { pass "ptype obj_with_enum.priv_enum" }
    -re "type = enum \\{red, green, blue, yellow = 42\\}.*$gdb_prompt $" { pass "ptype obj_with_enum.priv_enum" }
    -re "$gdb_prompt $"                     { fail "ptype obj_with_enum.priv_enum" }
    timeout                             { fail "(timeout) ptype obj_with_enum.priv_enum" }

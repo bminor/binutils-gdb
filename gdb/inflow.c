@@ -52,6 +52,10 @@
 #endif
 #endif /* sgtty */
 
+#ifdef HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
+
 #if defined (SIGIO) && defined (FASYNC) && defined (FD_SET) && defined (F_SETOWN)
 static void
 handle_sigio PARAMS ((int));

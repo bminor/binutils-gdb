@@ -1675,10 +1675,16 @@ target_signal_from_host (hostsig)
   return TARGET_SIGNAL_UNKNOWN;
 }
 
-int
-target_signal_to_host (oursig)
-     enum target_signal oursig;
+/* Convert a OURSIG (an enum target_signal) to the form used by the
+   target operating system (refered to as the ``host'') or zero if the
+   equivalent host signal is not available.  Set/clear OURSIG_OK
+   accordingly. */
+
+static int
+do_target_signal_to_host (enum target_signal oursig,
+			  int *oursig_ok)
 {
+  *oursig_ok = 1;
   switch (oursig)
     {
     case TARGET_SIGNAL_0:
@@ -1913,12 +1919,34 @@ target_signal_to_host (oursig)
 	    return retsig;
 	}
 #endif
+      *oursig_ok = 0;
+      return 0;
+    }
+}
+
+int
+target_signal_to_host_p (enum target_signal oursig)
+{
+  int oursig_ok;
+  do_target_signal_to_host (oursig, &oursig_ok);
+  return oursig_ok;
+}
+
+int
+target_signal_to_host (enum target_signal oursig)
+{
+  int oursig_ok;
+  int targ_signo = do_target_signal_to_host (oursig, &oursig_ok);
+  if (!oursig_ok)
+    {
       /* The user might be trying to do "signal SIGSAK" where this system
          doesn't have SIGSAK.  */
       warning ("Signal %s does not exist on this system.\n",
 	       target_signal_to_name (oursig));
       return 0;
     }
+  else
+    return targ_signo;
 }
 
 /* Helper function for child_wait and the Lynx derivatives of child_wait.

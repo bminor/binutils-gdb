@@ -194,7 +194,10 @@ test_i "nexti over function" "nexti" \
 # right behavior for GDB or not, but we'll catch it here, so folks
 # won't forget about it.
 
-send_gdb "break [gdb_get_line_number "step-test.exp: large struct by value"]\n"
+gdb_test \
+  "break [gdb_get_line_number "step-test.exp: large struct by value"]" \
+  ".*Breakpoint.* at .*" \
+  "set breakpoint at call to large_struct_by_value"
 gdb_test "continue" \
          ".*Breakpoint ${decimal},.*large_struct_by_value.*" \
 	 "run to pass large struct"

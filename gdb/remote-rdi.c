@@ -236,7 +236,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
 
   /* split name after whitespace, pass tail as arg to open command */
 
-  devName = strdup (name);
+  devName = xstrdup (name);
   p = strchr (devName, ' ');
   if (p)
     {
@@ -1011,7 +1011,7 @@ rdilogfile_command (char *arg, int from_tty)
   if (log_filename)
     free (log_filename);
 
-  log_filename = strdup (arg);
+  log_filename = xstrdup (arg);
 
   Adp_SetLogfile (log_filename);
 }
@@ -1050,7 +1050,7 @@ _initialize_remote_rdi ()
   init_rdi_ops ();
   add_target (&arm_rdi_ops);
 
-  log_filename = strdup ("rdi.log");
+  log_filename = xstrdup ("rdi.log");
   Adp_SetLogfile (log_filename);
   Adp_SetLogEnable (log_enable);
 

@@ -17,6 +17,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#define GDB_MULTI_ARCH 1
 #define TARGET_BYTE_ORDER_SELECTABLE_P 1
 #define TARGET_MONITOR_PROMPT "<RISQ> "
 #define MIPS_EABI 1

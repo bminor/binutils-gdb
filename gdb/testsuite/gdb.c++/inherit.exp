@@ -1,4 +1,4 @@
-# Copyright (C) 1992, 1993, 1994, 1997 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1993, 1994, 1997, 1999 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,6 +21,9 @@
 
 set ws "\[\r\n\t \]+"
 set nl "\[\r\n\]+"
+
+# The format of a g++ virtual base pointer.
+set vbptr "(_vb\[$.\]|__vb_)\[0-9\]?"
 
 if $tracelevel then {
 	strace $tracelevel
@@ -575,6 +578,7 @@ proc test_ptype_vi {} {
     global gdb_prompt
     global ws
     global nl
+    global vbptr
 
     # This class does not use any C++-specific features, so it's fine for
     # it to print as "struct".
@@ -621,7 +625,7 @@ proc test_ptype_vi {} {
     setup_xfail_format "DWARF 1"
     send_gdb "ptype vB\n"
     gdb_expect {
-	-re "ptype vB${nl}type = class vB : public virtual vA \{$nl  private:${ws}vA \[*\]+_vb\[\\\$\.\]+vA;$nl  public:${ws}int vb;${ws}int vx;$nl.*\}$nl$gdb_prompt $" {
+	-re "ptype vB${nl}type = class vB : public virtual vA \{$nl  private:${ws}vA \\*${vbptr}vA;$nl  public:${ws}int vb;${ws}int vx;$nl.*\}$nl$gdb_prompt $" {
 	    pass "ptype vB"
 	}
 	-re "ptype vB${nl}type = class vB : public virtual vA \{$nl  public:${ws}int vb;${ws}int vx;$nl.*\}$nl$gdb_prompt $" {
@@ -634,7 +638,7 @@ proc test_ptype_vi {} {
     setup_xfail_format "DWARF 1"
     send_gdb "ptype class vB\n"
     gdb_expect {
-	-re "type = class vB : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \[*\]+_vb\[\\\$\.\]vA;$nl\[ \]*public:$nl\[ \]*int vb;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
+	-re "type = class vB : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \\*${vbptr}vA;$nl\[ \]*public:$nl\[ \]*int vb;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
 	    pass "ptype class vB"
 	}
 	-re "type = class vB : public virtual vA \{$nl\[ \]*public:$nl\[ \]*int vb;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
@@ -647,7 +651,7 @@ proc test_ptype_vi {} {
     setup_xfail_format "DWARF 1"
     send_gdb "ptype g_vB\n"
     gdb_expect {
-	-re "type = class vB : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \[*\]+_vb\[\\\$\.\]vA;$nl\[ \]*public:$nl\[ \]*int vb;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
+	-re "type = class vB : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \\*${vbptr}vA;$nl\[ \]*public:$nl\[ \]*int vb;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
 	    pass "ptype g_vB"
 	}
 	-re "type = class vB : public virtual vA \{$nl\[ \]*public:$nl\[ \]*int vb;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
@@ -660,7 +664,7 @@ proc test_ptype_vi {} {
     setup_xfail_format "DWARF 1"
     send_gdb "ptype vC\n"
     gdb_expect {
-	-re "type = class vC : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \[*\]+_vb\[\\\$\.\]vA;$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
+	-re "type = class vC : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \\*${vbptr}vA;$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
             pass "ptype vC"
 	}
 	-re "type = class vC : public virtual vA \{$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
@@ -673,7 +677,7 @@ proc test_ptype_vi {} {
     setup_xfail_format "DWARF 1"
     send_gdb "ptype class vC\n"
     gdb_expect {
-	-re "type = class vC : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \[*\]+_vb\[\\\$\.\]vA;$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
+	-re "type = class vC : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \\*${vbptr}vA;$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
             pass "ptype class vC"
 	}
 	-re "type = class vC : public virtual vA \{$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
@@ -686,7 +690,7 @@ proc test_ptype_vi {} {
     setup_xfail_format "DWARF 1"
     send_gdb "ptype g_vC\n"
     gdb_expect {
-	-re "type = class vC : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \[*\]+_vb\[\\\$\.\]vA;$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
+	-re "type = class vC : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \\*${vbptr}vA;$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
             pass "ptype g_vC"
 	}
 	-re "type = class vC : public virtual vA \{$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
@@ -706,6 +710,7 @@ proc test_print_svi_classes {} {
     global hex
     global decimal
     global nl
+    global vbptr
 
     # Print all members of g_vA.
 
@@ -722,7 +727,7 @@ proc test_print_svi_classes {} {
 	-re ".* = \{\<class vA\> = \{va = 3, vx = 4\}, vb = 5, vx = 6, __vfp = $hex\}$nl$gdb_prompt $" {
 	    pass "print g_vB (aCC)"
 	}
-	-re ".* = \{\<vA\> = \{va = 3, vx = 4\}, _vb\[\\\$\.\]vA = $hex, vb = 5, vx = 6\}$nl$gdb_prompt $" {
+	-re ".* = \{\<vA\> = \{va = 3, vx = 4\}, ${vbptr}vA = $hex, vb = 5, vx = 6\}$nl$gdb_prompt $" {
 	    pass "print g_vB"
 	}
 	-re ".*invalid address 0x0.*$gdb_prompt $" {
@@ -746,7 +751,7 @@ proc test_print_svi_classes {} {
 	-re ".* = \{\<class vA\> = \{va = 7, vx = 8\}, vc = 9, vx = 10, __vfp = $hex\}$nl$gdb_prompt $" {
 	    pass "print g_vC (aCC)"
 	}
-	-re ".* = \{\<vA\> = \{va = 7, vx = 8\}, _vb\[\\\$\.\]vA = $hex, vc = 9, vx = 10\}$nl$gdb_prompt $" {
+	-re ".* = \{\<vA\> = \{va = 7, vx = 8\}, ${vbptr}vA = $hex, vc = 9, vx = 10\}$nl$gdb_prompt $" {
 	    pass "print g_vC"
 	}
 	-re ".*$gdb_prompt $" { fail "print g_vC" }
@@ -836,11 +841,12 @@ proc test_ptype_mvi {} {
     global gdb_prompt
     global ws
     global nl
+    global vbptr
 
     setup_xfail_format "DWARF 1"
     send_gdb "ptype vD\n"
     gdb_expect {
-	-re "type = class vD : public virtual vB, public virtual vC \{${ws}private:${ws}vC \[*\]+_vb\[\\\$\.\]vC;${ws}vB \[*\]+_vb\[\\\$\.\]vB;${ws}public:${ws}int vd;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
+	-re "type = class vD : public virtual vB, public virtual vC \{${ws}private:${ws}vC \\*${vbptr}vC;${ws}vB \\*${vbptr}vB;${ws}public:${ws}int vd;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
 	    pass "ptype vD"
 	}
         -re ".*class vD : public virtual vB, public virtual vC \{${ws}public:${ws}int vd;${ws}int vx;.*\}.*$gdb_prompt $" {
@@ -853,7 +859,7 @@ proc test_ptype_mvi {} {
     setup_xfail_format "DWARF 1"
     send_gdb "ptype class vD\n"
     gdb_expect {
-	-re "type = class vD : public virtual vB, public virtual vC \{${ws}private:${ws}vC \[*\]+_vb\[\\\$\.\]vC;${ws}vB \[*\]+_vb\[\\\$\.\]vB;${ws}public:${ws}int vd;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
+	-re "type = class vD : public virtual vB, public virtual vC \{${ws}private:${ws}vC \\*${vbptr}vC;${ws}vB \\*${vbptr}vB;${ws}public:${ws}int vd;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
 	    pass "ptype class vD"
 	}
 	-re ".*class vD : public virtual vB, public virtual vC \{${ws}public:${ws}int vd;${ws}int vx;.*\}.*$gdb_prompt $" {
@@ -866,7 +872,7 @@ proc test_ptype_mvi {} {
     setup_xfail_format "DWARF 1"
     send_gdb "ptype g_vD\n"
     gdb_expect {
-	-re "type = class vD : public virtual vB, public virtual vC \{${ws}private:${ws}vC \[*\]+_vb\[\\\$\.\]vC;${ws}vB \[*\]+_vb\[\\\$\.\]vB;${ws}public:${ws}int vd;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
+	-re "type = class vD : public virtual vB, public virtual vC \{${ws}private:${ws}vC \\*${vbptr}vC;${ws}vB \\*${vbptr}vB;${ws}public:${ws}int vd;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
 	    pass "ptype g_vD"
 	}
 	-re ".*class vD : public virtual vB, public virtual vC \{${ws}public:${ws}int vd;${ws}int vx;\r\n.*\}.*$gdb_prompt $" {
@@ -879,7 +885,7 @@ proc test_ptype_mvi {} {
     setup_xfail_format "DWARF 1"
     send_gdb "ptype vE\n"
     gdb_expect {
-	-re "type = class vE : public virtual vD \{${ws}private:${ws}vD \[*\]+_vb\[\\\$\.\]vD;${ws}public:${ws}int ve;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
+	-re "type = class vE : public virtual vD \{${ws}private:${ws}vD \\*${vbptr}vD;${ws}public:${ws}int ve;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
 	    pass "ptype vE"
 	}
 	-re ".*class vE : public virtual vD \{${ws}public:${ws}int ve;${ws}int vx;\r\n.*\}.*$gdb_prompt $" {
@@ -892,7 +898,7 @@ proc test_ptype_mvi {} {
     setup_xfail_format "DWARF 1"
     send_gdb "ptype class vE\n"
     gdb_expect {
-	-re "type = class vE : public virtual vD \{${ws}private:${ws}vD \[*\]+_vb\[\\\$\.\]vD;${ws}public:${ws}int ve;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
+	-re "type = class vE : public virtual vD \{${ws}private:${ws}vD \\*${vbptr}vD;${ws}public:${ws}int ve;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
 	    pass "ptype class vE"
 	}
 	-re "type = class vE : public virtual vD \{${ws}public:${ws}int ve;${ws}int vx;\r\n.*\}.*$gdb_prompt $" {
@@ -905,7 +911,7 @@ proc test_ptype_mvi {} {
     setup_xfail_format "DWARF 1"
     send_gdb "ptype g_vE\n"
     gdb_expect {
-	-re "type = class vE : public virtual vD \{${ws}private:${ws}vD \[*\]+_vb\[\\\$\.\]vD;${ws}public:${ws}int ve;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
+	-re "type = class vE : public virtual vD \{${ws}private:${ws}vD \\*${vbptr}vD;${ws}public:${ws}int ve;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
 	    pass "ptype g_vE"
 	}
 	-re "type = class vE : public virtual vD \{${ws}public:${ws}int ve;${ws}int vx;\r\n.*\}.*$gdb_prompt $" {
@@ -925,6 +931,7 @@ proc test_print_mvi_classes {} {
     global hex
     global decimal
     global nl
+    global vbptr
 
     # Print all members of g_vD.
 
@@ -937,7 +944,7 @@ proc test_print_mvi_classes {} {
 	-re ".* = \{\<class vB\> = \{\<class vA\> = \{va = 19, vx = 20\}, vb = 21, vx = 22, __vfp = $hex\}, \<class vC\> = \{vc = 23, vx = 24, __vfp = $hex\}, vd = 25, vx = 26, __vfp = $hex\}$nl$gdb_prompt $" {
 	    pass "print g_vD (aCC)"
 	}
-	-re ".* = \{\<vB\> = \{\<vA\> = \{va = 19, vx = 20\}, _vb\[\\\$\.\]vA = $hex, vb = 21, vx = 22\}, \<vC\> = \{_vb\[\\\$\.\]vA = $hex, vc = 23, vx = 24\}, _vb\[\\\$\.\]vC = $hex, _vb\[\\\$\.\]vB = $hex, vd = 25, vx = 26\}$nl$gdb_prompt $" {
+	-re ".* = \{\<vB\> = \{\<vA\> = \{va = 19, vx = 20\}, ${vbptr}vA = $hex, vb = 21, vx = 22\}, \<vC\> = \{${vbptr}vA = $hex, vc = 23, vx = 24\}, ${vbptr}vC = $hex, ${vbptr}vB = $hex, vd = 25, vx = 26\}$nl$gdb_prompt $" {
 	    pass "print g_vD"
 	}
 	-re ".*invalid address 0x0.*$gdb_prompt $" {
@@ -961,7 +968,7 @@ proc test_print_mvi_classes {} {
 	-re ".* = \{\<class vD\> = \{\<class vB\> = \{\<class vA\> = \{va = 0, vx = 0\}, vb = 0, vx = 0, __vfp = $hex\}, \<class vC\> = \{vc = 0, vx = 0, __vfp = $hex\}, vd = 0, vx = 0, __vfp = $hex\}, ve = 27, vx = 28, __vfp = $hex\}$nl$gdb_prompt $" {
 	    pass "print g_vE (aCC)"
 	}
-	-re ".* = \{\<vD\> = \{\<vB\> = \{\<vA\> = \{va = 0, vx = 0\}, _vb\[\\\$\.\]vA = $hex, vb = 0, vx = 0\}, \<vC\> = \{_vb\[\\\$\.\]vA = $hex, vc = 0, vx = 0\}, _vb\[\\\$\.\]vC = $hex, _vb\[\\\$\.\]vB = $hex, vd = 0, vx = 0\}, _vb\[\\\$\.\]vD = $hex, ve = 27, vx = 28\}$nl$gdb_prompt $" {
+	-re ".* = \{\<vD\> = \{\<vB\> = \{\<vA\> = \{va = 0, vx = 0\}, ${vbptr}vA = $hex, vb = 0, vx = 0\}, \<vC\> = \{${vbptr}vA = $hex, vc = 0, vx = 0\}, ${vbptr}vC = $hex, ${vbptr}vB = $hex, vd = 0, vx = 0\}, ${vbptr}vD = $hex, ve = 27, vx = 28\}$nl$gdb_prompt $" {
 	    pass "print g_vE"
 	}
 	-re ".*$gdb_prompt $" { fail "print g_vE" }

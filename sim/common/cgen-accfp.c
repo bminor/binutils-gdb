@@ -42,10 +42,13 @@ subsf (CGEN_FPU* fpu, SF x, SF y)
   sim_fpu op2;
   sim_fpu ans;
   unsigned32 res;
+  sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
   sim_fpu_32to (&op2, y);
-  sim_fpu_sub (&ans, &op1, &op2);
+  status = sim_fpu_sub (&ans, &op1, &op2);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to32 (&res, &ans);
 
   return res;
@@ -58,10 +61,13 @@ mulsf (CGEN_FPU* fpu, SF x, SF y)
   sim_fpu op2;
   sim_fpu ans;
   unsigned32 res;
+  sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
   sim_fpu_32to (&op2, y);
-  sim_fpu_mul (&ans, &op1, &op2);
+  status = sim_fpu_mul (&ans, &op1, &op2);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to32 (&res, &ans);
 
   return res;
@@ -92,9 +98,12 @@ negsf (CGEN_FPU* fpu, SF x)
   sim_fpu op1;
   sim_fpu ans;
   unsigned32 res;
+  sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
-  sim_fpu_neg (&ans, &op1);
+  status = sim_fpu_neg (&ans, &op1);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to32 (&res, &ans);
 
   return res;
@@ -106,9 +115,12 @@ abssf (CGEN_FPU* fpu, SF x)
   sim_fpu op1;
   sim_fpu ans;
   unsigned32 res;
+  sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
-  sim_fpu_abs (&ans, &op1);
+  status = sim_fpu_abs (&ans, &op1);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to32 (&res, &ans);
 
   return res;
@@ -120,9 +132,12 @@ sqrtsf (CGEN_FPU* fpu, SF x)
   sim_fpu op1;
   sim_fpu ans;
   unsigned32 res;
+  sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
-  sim_fpu_sqrt (&ans, &op1);
+  status = sim_fpu_sqrt (&ans, &op1);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to32 (&res, &ans);
 
   return res;
@@ -134,9 +149,12 @@ invsf (CGEN_FPU* fpu, SF x)
   sim_fpu op1;
   sim_fpu ans;
   unsigned32 res;
+  sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
-  sim_fpu_inv (&ans, &op1);
+  status = sim_fpu_inv (&ans, &op1);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to32 (&res, &ans);
 
   return res;
@@ -149,10 +167,13 @@ minsf (CGEN_FPU* fpu, SF x, SF y)
   sim_fpu op2;
   sim_fpu ans;
   unsigned32 res;
+  sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
   sim_fpu_32to (&op2, y);
-  sim_fpu_min (&ans, &op1, &op2);
+  status = sim_fpu_min (&ans, &op1, &op2);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to32 (&res, &ans);
 
   return res;
@@ -165,10 +186,13 @@ maxsf (CGEN_FPU* fpu, SF x, SF y)
   sim_fpu op2;
   sim_fpu ans;
   unsigned32 res;
+  sim_fpu_status status;
 
   sim_fpu_32to (&op1, x);
   sim_fpu_32to (&op2, y);
-  sim_fpu_max (&ans, &op1, &op2);
+  status = sim_fpu_max (&ans, &op1, &op2);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to32 (&res, &ans);
 
   return res;
@@ -354,10 +378,13 @@ subdf (CGEN_FPU* fpu, DF x, DF y)
   sim_fpu op2;
   sim_fpu ans;
   unsigned64 res;
+  sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
   sim_fpu_64to (&op2, y);
-  sim_fpu_sub (&ans, &op1, &op2);
+  status = sim_fpu_sub (&ans, &op1, &op2);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to64 (&res, &ans);
 
   return res;
@@ -370,10 +397,13 @@ muldf (CGEN_FPU* fpu, DF x, DF y)
   sim_fpu op2;
   sim_fpu ans;
   unsigned64 res;
+  sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
   sim_fpu_64to (&op2, y);
-  sim_fpu_mul (&ans, &op1, &op2);
+  status = sim_fpu_mul (&ans, &op1, &op2);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to64 (&res, &ans);
 
   return res;
@@ -386,10 +416,13 @@ divdf (CGEN_FPU* fpu, DF x, DF y)
   sim_fpu op2;
   sim_fpu ans;
   unsigned64 res;
+  sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
   sim_fpu_64to (&op2, y);
-  sim_fpu_div (&ans, &op1, &op2);
+  status = sim_fpu_div (&ans, &op1, &op2);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to64 (&res, &ans);
 
   return res;
@@ -401,9 +434,12 @@ negdf (CGEN_FPU* fpu, DF x)
   sim_fpu op1;
   sim_fpu ans;
   unsigned64 res;
+  sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
-  sim_fpu_neg (&ans, &op1);
+  status = sim_fpu_neg (&ans, &op1);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to64 (&res, &ans);
 
   return res;
@@ -415,9 +451,12 @@ absdf (CGEN_FPU* fpu, DF x)
   sim_fpu op1;
   sim_fpu ans;
   unsigned64 res;
+  sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
-  sim_fpu_abs (&ans, &op1);
+  status = sim_fpu_abs (&ans, &op1);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to64 (&res, &ans);
 
   return res;
@@ -429,9 +468,12 @@ sqrtdf (CGEN_FPU* fpu, DF x)
   sim_fpu op1;
   sim_fpu ans;
   unsigned64 res;
+  sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
-  sim_fpu_sqrt (&ans, &op1);
+  status = sim_fpu_sqrt (&ans, &op1);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to64 (&res, &ans);
 
   return res;
@@ -443,9 +485,12 @@ invdf (CGEN_FPU* fpu, DF x)
   sim_fpu op1;
   sim_fpu ans;
   unsigned64 res;
+  sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
-  sim_fpu_inv (&ans, &op1);
+  status = sim_fpu_inv (&ans, &op1);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to64 (&res, &ans);
 
   return res;
@@ -458,10 +503,13 @@ mindf (CGEN_FPU* fpu, DF x, DF y)
   sim_fpu op2;
   sim_fpu ans;
   unsigned64 res;
+  sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
   sim_fpu_64to (&op2, y);
-  sim_fpu_min (&ans, &op1, &op2);
+  status = sim_fpu_min (&ans, &op1, &op2);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to64 (&res, &ans);
 
   return res;
@@ -474,10 +522,13 @@ maxdf (CGEN_FPU* fpu, DF x, DF y)
   sim_fpu op2;
   sim_fpu ans;
   unsigned64 res;
+  sim_fpu_status status;
 
   sim_fpu_64to (&op1, x);
   sim_fpu_64to (&op2, y);
-  sim_fpu_max (&ans, &op1, &op2);
+  status = sim_fpu_max (&ans, &op1, &op2);
+  if (status != 0)
+    (*fpu->ops->error) (fpu, status);
   sim_fpu_to64 (&res, &ans);
 
   return res;

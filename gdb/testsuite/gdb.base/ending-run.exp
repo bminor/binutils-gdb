@@ -175,6 +175,12 @@ gdb_expect {
 if {![target_info exists use_cygmon] || ![target_info use_cygmon]} {
     send_gdb "n\n"
     gdb_expect {
+	-re "Program exited normally.*$gdb_prompt $" {
+	    # If we actually have debug info for the start function,
+	    # then we won't get the "Single-stepping until function
+	    # exit" message.
+	    pass "step to end of run 1"
+	}
 	-re ".*Single.*Program exited.*$gdb_prompt $" {
 	    pass "step to end of run 1"
 	}

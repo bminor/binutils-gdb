@@ -90,7 +90,7 @@ core_file_command (filename, from_tty)
 	    symfile = t->to_core_file_to_sym_file (filename);
 	    if (symfile)
 	      {
-		char *symfile_copy = strdup (symfile);
+		char *symfile_copy = xstrdup (symfile);
 
 		make_cleanup (free, symfile_copy);
 		symbol_file_command (symfile_copy, from_tty);
@@ -185,7 +185,7 @@ reopen_exec_file ()
     return;
 
   /* If the timestamp of the exec file has changed, reopen it. */
-  filename = strdup (bfd_get_filename (exec_bfd));
+  filename = xstrdup (bfd_get_filename (exec_bfd));
   make_cleanup (free, filename);
   mtime = bfd_get_mtime (exec_bfd);
   res = stat (filename, &st);

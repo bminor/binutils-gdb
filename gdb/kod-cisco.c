@@ -85,7 +85,7 @@ cisco_kod_open (kod_display_callback_ftype *display_func,
 
   /* Return name, version, and description.  I hope we have enough
      space.  */
-  return (strdup ("gdbkodcisco v0.0.0 - Cisco Kernel Object Display"));
+  return (xstrdup ("gdbkodcisco v0.0.0 - Cisco Kernel Object Display"));
 }
 
 /* Close the connection.  */

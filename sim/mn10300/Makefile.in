@@ -113,6 +113,8 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen
 	../igen/igen \
 		$(IGEN_TRACE) \
 		-G gen-direct-access \
+                -M mn10300,am33 -G gen-multi-sim=am33 \
+		-I $(srcdir) \
 		-i $(IGEN_INSN) \
 		-o $(IGEN_DC) \
 		-x \

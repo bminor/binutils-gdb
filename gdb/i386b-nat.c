@@ -26,6 +26,7 @@
 #include <machine/reg.h>
 #include <machine/frame.h>
 #include "inferior.h"
+#include "gdbcore.h" /* for registers_fetched() */
 
 void
 fetch_inferior_registers (regno)

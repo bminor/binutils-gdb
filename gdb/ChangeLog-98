@@ -3354,6 +3354,10 @@ Fri Dec 18 14:23:34 1998  Andrew Cagney  <cagney@chook>
  	functions, handle commands.
 	(mips_push_arguments, mips_push_dummy_frame, mips_pop_frame,
  	mips_extract_return_value): Update.
+	(_initialize_mips_tdep): Set mips_fpu_type according to current
+ 	processor.
+	(_initialize_mips_tdep): Only define ``set processor'' command
+ 	when not multi-sim.
 	
 Fri Dec 18 12:56:56 1998  Andrew Cagney  <cagney@chook>
 
@@ -3361,6 +3365,7 @@ Fri Dec 18 12:56:56 1998  Andrew Cagney  <cagney@chook>
  	by-value.
 	(struct gdbarch_info): Add struct gdbarch_tdep_info *tdep_info.
 	* gdbarch.c (gdbarch_update): Update.
+	* mips-tdep.c: (mips_gdbarch_init): Update
 
 	* gdbarch.c (gdbarch_update): Add more tracing.
 	
@@ -3368,7 +3373,18 @@ Thu Dec 17 02:15:40 1998  Andrew Cagney  <cagney@chook.cygnus.com>
 
 	* configure.tgt (gdb_target): Identify mips64*vr4100*-*-elf* as
  	vr4100.
+	* config/mips/vr4100.mt, config/mips/tm-vr4100.h: Replace
+ 	vr4xxx.mt and tm-vr4xxx.h.
 	
+Thu Dec 17 02:06:17 1998  Andrew Cagney  <cagney@chook.cygnus.com>
+
+	* mips-tdep.c (mips_gdbarch_init): New function. Initialize a MIPS
+ 	architecture vector.
+	(_initialize_mips_tdep): Register MIPS with GDBARCH.
+	(struct gdbarch_tdep): Define.
+	(MIPS_EABI, MIPS_LAST_FP_ARG_REGNUM, MIPS_LAST_ARG_REGNUM): When
+ 	multi-arch, get value from gdbarch->tdep.
+
 Thu Dec 17 02:01:58 1998  Andrew Cagney  <cagney@chook>
 
 	* gdbtypes.c (_initialize_gdbtypes): Register all builtin types
@@ -4933,6 +4949,13 @@ Thu Jul 30 13:53:50 1998  Mark Alexander  <marka@cygnus.com>
 	* symfile.c (add_symbol_file_command): Test for the from_tty
 	parameter and avoid query when not interactive.
 
+Wed Jul 29 10:39:29 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-tdep.c (set_movm_offsets): Do nothing for the am33
+	registers if we are not in am33 mode.
+	(mn10300_frame_chain, mn10300_frame_saved_pc): Similarly.
+	(set_machine_hook): Keep track of whether or not we're in am33 mode.
+
 Mon Jul 27 16:11:42 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* tracepoint.c (remote_set_transparent_ranges): new function.
@@ -4958,6 +4981,12 @@ Mon Jul 27 10:45:56 1998  Martin M. Hunt  <hunt@cygnus.com>
 	* config/d10v/tm-d10v.h (REGISTER_NAMES): sp -> r15.  The
 	stack pointer et al are synthesized from the SP_REGNUM (etc)
 	defines and should not be mentioned in REGISTER_NAMES.
+
+Mon Jul 27 08:54:41 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-tdep.c (mn10300_frame_chain): Account for space saved
+	by am33 register saves.
+	(mn10300_frame_saved_pc): Similarly.
 
 Fri Jul 24 14:41:19 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
@@ -5062,6 +5091,9 @@ Thu Jul  9 16:16:47 1998  Jeffrey A Law  (law@cygnus.com)
 	* tm-mn10300 (NUM_REGS): Bump to 32.
 	(REGISTER_NAMES): Updated accordingly.
 
+	* mn10300-tdep.c (am33_register_names): New variable.
+	(mn10300_analyze_prologue): Handle regs saved by am33 prologues.
+	* tm-mn10300.h (E0_REGNUM): Define.
 
 Tue Jul 7 7:40:13 1998  Ron Unrau  <runrau@cygnus.com>
 

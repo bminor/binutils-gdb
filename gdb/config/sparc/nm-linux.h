@@ -27,6 +27,3 @@
 
 #define KERNEL_U_SIZE kernel_u_size()
 extern int kernel_u_size PARAMS ((void));
-
-/* Linux is svr4ish but not that much */
-#undef USE_PROC_FS

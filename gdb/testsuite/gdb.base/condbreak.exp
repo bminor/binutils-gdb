@@ -182,10 +182,10 @@ gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.
 # Until the Dwarf2 writer gets fixed, I'm going to XFAIL its behavior.
 send_gdb "continue\n"
 gdb_expect {
-    -re  "Continuing\\..*Breakpoint \[0-9\]+, marker1 \\(\\) at .*$srcfile:4\[38\].*4\[38\]\[\t \]+.*" {
+    -re  "Continuing\\..*Breakpoint \[0-9\]+, marker1 \\(\\) at .*$srcfile:4\[38\].*4\[38\]\[\t \]+.*$gdb_prompt $" {
 	pass "run until breakpoint at marker1"
     }
-    -re  "Continuing\\..*Breakpoint \[0-9\]+, $hex in marker1 \\(\\) at .*$srcfile:4\[38\].*4\[38\]\[\t \]+.*" {
+    -re  "Continuing\\..*Breakpoint \[0-9\]+, $hex in marker1 \\(\\) at .*$srcfile:4\[38\].*4\[38\]\[\t \]+.*$gdb_prompt $" {
 	xfail "run until breakpoint at marker1"
     }
     -re "$gdb_prompt $" {

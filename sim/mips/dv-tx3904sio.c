@@ -1,6 +1,6 @@
 /*  This file is part of the program GDB, the GNU debugger.
     
-    Copyright (C) 1998 Free Software Foundation, Inc.
+    Copyright (C) 1998, 1999 Free Software Foundation, Inc.
     Contributed by Cygnus Solutions.
     
     This program is free software; you can redistribute it and/or modify
@@ -167,6 +167,7 @@ struct tx3904sio
   unsigned_4 sdisr;
 #define SDISR_WR_MASK       0x00070000U
 #define SDISR_SET_BYTE(c,o,b) ((c)->sdisr = SDISR_WR_MASK & (((c)->sdisr & ~LSMASK32((o)*8+7,(o)*8)) | ((b)<< (o)*8)))
+#define SDISR_CLEAR_FLAG_BYTE(c,o,b) ((c)->sdisr = SDISR_WR_MASK & (((c)->sdisr & ~LSMASK32((o)*8+7,(o)*8)) & ((b)<< (o)*8)))
 #define SDISR_GET_TDIS(c)   ((c)->sdisr & 0x00020000)
 #define SDISR_SET_TDIS(c)   ((c)->sdisr |= 0x00020000)
 #define SDISR_GET_RDIS(c)   ((c)->sdisr & 0x00010000)
@@ -419,7 +420,7 @@ tx3904sio_io_write_buffer (struct hw *me,
 	    last_int = controller->sdisr & controller->sdicr;
 	    /* HW_TRACE ((me, "sdisr - sdisr %08x sdicr %08x", 
 	       controller->sdisr, controller->sdicr)); */
-	    SDISR_SET_BYTE(controller, reg_offset, write_byte);
+	    SDISR_CLEAR_FLAG_BYTE(controller, reg_offset, write_byte);
 	    /* HW_TRACE ((me, "sdisr + sdisr %08x sdicr %08x", 
 	       controller->sdisr, controller->sdicr)); */
 	    next_int = controller->sdisr & controller->sdicr;

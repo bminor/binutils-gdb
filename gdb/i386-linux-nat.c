@@ -58,6 +58,13 @@ static int regmap[] =
    file may or may not define it, and even if it is defined, the
    kernel will return EIO if it's running on a pre-SSE processor.
 
+   PTRACE_GETXFPREGS is a Cygnus invention, since we wrote our own
+   Linux kernel patch for SSE support.  That patch may or may not
+   actually make it into the official distribution.  If you find that
+   years have gone by since this stuff was added, and Linux isn't
+   using PTRACE_GETXFPREGS, that means that our patch didn't make it,
+   and you can delete this, and the related code.
+
    My instinct is to attach this to some architecture- or
    target-specific data structure, but really, a particular GDB
    process can only run on top of one kernel at a time.  So it's okay
@@ -121,7 +128,7 @@ fill_gregset (gregset_t *gregsetp,
 {
   if (regno == -1)
     convert_to_gregset (gregsetp, registers, 0);
-  else
+  else if (regno >= 0 && regno < NUM_GREGS)
     {
       signed char valid[NUM_GREGS];
       memset (valid, 0, sizeof (valid));

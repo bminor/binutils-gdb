@@ -23,14 +23,12 @@
 #define NM_LINUX_H
 
 #include "i386/nm-i386v.h"
+#include "nm-linux.h"
 
 /* Return sizeof user struct to callers in less machine dependent routines */
 
 #define KERNEL_U_SIZE kernel_u_size()
 extern int kernel_u_size PARAMS ((void));
-
-/* Tell gdb that we can attach and detach other processes */
-#define ATTACH_DETACH
 
 #define U_REGS_OFFSET 0
 
@@ -73,15 +71,5 @@ extern int
 i386_insert_watchpoint PARAMS ((int pid, CORE_ADDR addr, int len, int rw));
 extern int
 i386_remove_watchpoint PARAMS ((int pid, CORE_ADDR addr, int len));
-
-/* Support for the glibc linuxthreads package. */
-
-extern char *
-linuxthreads_pid_to_str PARAMS ((int pid));
-#define target_pid_to_str(PID) linuxthreads_pid_to_str (PID)
-
-extern int
-linuxthreads_prepare_to_proceed PARAMS ((int step));
-#define PREPARE_TO_PROCEED(select_it) linuxthreads_prepare_to_proceed (1)
 
 #endif /* #ifndef NM_LINUX_H */

@@ -288,7 +288,7 @@ char *line;
 int linesize = 100;
 
 /* Nonzero if the current command is modified by "server ".  This
-   affects things like recording into the command history, comamnds
+   affects things like recording into the command history, commands
    repeating on RETURN, etc.  This is so a user interface (emacs, GUI,
    whatever) can issue its own commands and also send along commands
    from the user, and have the user not notice that the user interface
@@ -472,7 +472,7 @@ PARAMS ((void)) ATTR_NORETURN;
 /* Return for reason REASON.  This generally gets back to the command
    loop, but can be caught via catch_errors.  */
 
-     NORETURN void
+NORETURN void
 return_to_top_level (reason)
      enum return_reason reason;
 {

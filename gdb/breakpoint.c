@@ -2071,8 +2071,8 @@ print_it_typical (bs)
        here. */
 
     case bp_finish:
-    case bp_none:
     case bp_until:
+    case bp_none:
     case bp_longjmp:
     case bp_longjmp_resume:
     case bp_step_resume:
@@ -2428,8 +2428,6 @@ bpstat_stop_status (pc, not_a_breakpoint)
 	    /* Don't stop.  */
 	    bs->print_it = print_it_noop;
 	    bs->stop = 0;
-	    /* Don't consider this a hit.  */
-	    --(b->hit_count);
 	    continue;
 	  default:
 	    /* Can't happen.  */

@@ -604,6 +604,7 @@ dbx_symfile_read (objfile, mainline)
      || (0 == strncmp (bfd_get_target (sym_bfd), "som", 3))
      || (0 == strncmp (bfd_get_target (sym_bfd), "coff", 4))
      || (0 == strncmp (bfd_get_target (sym_bfd), "pe", 2))
+     || (0 == strncmp (bfd_get_target (sym_bfd), "epoc-pe", 7))
      || (0 == strncmp (bfd_get_target (sym_bfd), "nlm", 3)));
 
   val = bfd_seek (sym_bfd, DBX_SYMTAB_OFFSET (objfile), SEEK_SET);

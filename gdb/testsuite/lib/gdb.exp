@@ -1189,7 +1189,7 @@ proc gdb_expect { args } {
     }
 }
 
-# gdb_expect_list MESSAGE SENTINAL LIST -- expect a sequence of outputs
+# gdb_expect_list MESSAGE SENTINEL LIST -- expect a sequence of outputs
 #
 # Check for long sequence of output by parts.
 # MESSAGE: is the test message to be printed with the test success/fail.
@@ -1202,7 +1202,7 @@ proc gdb_expect { args } {
 #    0 if the test passes,
 #   -1 if there was an internal error.
 #
-proc gdb_expect_list {test sentinal list} {
+proc gdb_expect_list {test sentinel list} {
     global gdb_prompt
     global suppress_flag
     set index 0
@@ -1216,16 +1216,20 @@ proc gdb_expect_list {test sentinal list} {
 	if { ${index} == [llength ${list}] } {
 	    if { ${ok} } {
 		gdb_expect {
-		    -re "${pattern}${sentinal}" {
-			pass "${test}, pattern ${index} + sentinal"
+		    -re "${pattern}${sentinel}" {
+			pass "${test}, pattern ${index} + sentinel"
+		    }
+		    -re "${sentinel}" {
+			fail "${test}, pattern ${index} + sentinel"
+			set ok 0
 		    }
 		    timeout {
-			fail "${test}, pattern ${index} + sentinal (timeout)"
+			fail "${test}, pattern ${index} + sentinel (timeout)"
 			set ok 0
 		    }
 		}
 	    } else {
-		fail "${test}, pattern ${index} + sentinal"
+		unresolved "${test}, pattern ${index} + sentinel"
 	    }
 	} else {
 	    if { ${ok} } {
@@ -1233,7 +1237,7 @@ proc gdb_expect_list {test sentinal list} {
 		    -re "${pattern}" {
 			pass "${test}, pattern ${index}"
 		    }
-		    -re "${sentinal}" {
+		    -re "${sentinel}" {
 			fail "${test}, pattern ${index}"
 			set ok 0
 		    }
@@ -1243,7 +1247,7 @@ proc gdb_expect_list {test sentinal list} {
 		    }
 		}
 	    } else {
-		fail "${test}, pattern ${index}"
+		unresolved "${test}, pattern ${index}"
 	    }
 	}
     }

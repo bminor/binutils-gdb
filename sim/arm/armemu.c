@@ -878,7 +878,6 @@ mainswitch:
              break ;
 
           case 0x10 : /* TST reg and MRS CPSR and SWP word */
-	 
 #ifdef MODET
              if (BITS(4,11) == 0xB) {
                /* STRH register offset, no write-back, down, pre indexed */
@@ -2410,13 +2409,13 @@ mainswitch:
 *                        Co-Processor Data Transfers                        *
 \***************************************************************************/
 
-          case 0xc0 :
-          case 0xc4 : /* Store , No WriteBack , Post Dec */
+          case 0xc4 :
+          case 0xc0 : /* Store , No WriteBack , Post Dec */
              ARMul_STC(state,instr,LHS) ;
              break ;
 
-          case 0xc1 :
-          case 0xc5 : /* Load , No WriteBack , Post Dec */
+          case 0xc5 :
+          case 0xc1 : /* Load , No WriteBack , Post Dec */
              ARMul_LDC(state,instr,LHS) ;
              break ;
 
@@ -2511,7 +2510,8 @@ mainswitch:
 *            Co-Processor Register Transfers (MCR) and Data Ops             *
 \***************************************************************************/
 
-          case 0xe0 : case 0xe2 : case 0xe4 : case 0xe6 :
+       case 0xe2 :
+          case 0xe0 : case 0xe4 : case 0xe6 :
           case 0xe8 : case 0xea : case 0xec : case 0xee :
              if (BIT(4)) { /* MCR */
                 if (DESTReg == 15) {

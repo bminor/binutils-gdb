@@ -35,6 +35,9 @@
 #include "target.h"
 
 #include "opcode/mips.h"
+#include "elf/mips.h"
+#include "elf-bfd.h"
+
 
 struct frame_extra_info
   {
@@ -67,6 +70,56 @@ static enum mips_fpu_type mips_fpu_type = MIPS_DEFAULT_FPU_TYPE;
 /* Do not use "TARGET_IS_MIPS64" to test the size of floating point registers */
 #ifndef FP_REGISTER_DOUBLE
 #define FP_REGISTER_DOUBLE (REGISTER_VIRTUAL_SIZE(FP0_REGNUM) == 8)
+#endif
+
+
+/* MIPS specific per-architecture information */
+struct gdbarch_tdep
+  {
+    /* from the elf header */
+    int elf_flags;
+    /* mips options */
+    int mips_eabi;
+    enum mips_fpu_type mips_fpu_type;
+    int mips_last_arg_regnum;
+    int mips_last_fp_arg_regnum;
+    int mips_saved_regsize;
+    int mips_fp_register_double;
+  };
+
+#if GDB_MULTI_ARCH
+#undef MIPS_EABI
+#define MIPS_EABI (gdbarch_tdep (current_gdbarch)->mips_eabi)
+#endif
+
+#if GDB_MULTI_ARCH
+#undef MIPS_LAST_FP_ARG_REGNUM
+#define MIPS_LAST_FP_ARG_REGNUM (gdbarch_tdep (current_gdbarch)->mips_last_fp_arg_regnum)
+#endif
+
+#if GDB_MULTI_ARCH
+#undef MIPS_LAST_ARG_REGNUM
+#define MIPS_LAST_ARG_REGNUM (gdbarch_tdep (current_gdbarch)->mips_last_arg_regnum)
+#endif
+
+#if GDB_MULTI_ARCH
+#undef MIPS_FPU_TYPE
+#define MIPS_FPU_TYPE (gdbarch_tdep (current_gdbarch)->mips_fpu_type)
+#endif
+
+#if GDB_MULTI_ARCH
+#undef MIPS_SAVED_REGSIZE
+#define MIPS_SAVED_REGSIZE (gdbarch_tdep (current_gdbarch)->mips_saved_regsize)
+#endif
+
+/* Indicate that the ABI makes use of double-precision registers
+   provided by the FPU (rather than combining pairs of registers to
+   form double-precision values).  Do not use "TARGET_IS_MIPS64" to
+   determine if the ABI is using double-precision registers.  See also
+   MIPS_FPU_TYPE. */
+#if GDB_MULTI_ARCH
+#undef FP_REGISTER_DOUBLE
+#define FP_REGISTER_DOUBLE (gdbarch_tdep (current_gdbarch)->mips_fp_register_double)
 #endif
 
 
@@ -3130,6 +3183,10 @@ set_mipsfpu_single_command (args, from_tty)
 {
   mips_fpu_type = MIPS_FPU_SINGLE;
   mips_fpu_type_auto = 0;
+  if (GDB_MULTI_ARCH)
+    {
+      gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_SINGLE;
+    }
 }
 
 static void set_mipsfpu_double_command PARAMS ((char *, int));
@@ -3140,6 +3197,10 @@ set_mipsfpu_double_command (args, from_tty)
 {
   mips_fpu_type = MIPS_FPU_DOUBLE;
   mips_fpu_type_auto = 0;
+  if (GDB_MULTI_ARCH)
+    {
+      gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_DOUBLE;
+    }
 }
 
 static void set_mipsfpu_none_command PARAMS ((char *, int));
@@ -3150,6 +3211,10 @@ set_mipsfpu_none_command (args, from_tty)
 {
   mips_fpu_type = MIPS_FPU_NONE;
   mips_fpu_type_auto = 0;
+  if (GDB_MULTI_ARCH)
+    {
+      gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_NONE;
+    }
 }
 
 static void set_mipsfpu_auto_command PARAMS ((char *, int));
@@ -3565,12 +3630,256 @@ mips_call_dummy_address ()
 
 
 
+static gdbarch_init_ftype mips_gdbarch_init;
+static struct gdbarch *
+mips_gdbarch_init (info, arches)
+     struct gdbarch_info info;
+     struct gdbarch_list *arches;
+{
+  static LONGEST mips_call_dummy_words[] =
+  {0};
+  struct gdbarch *gdbarch;
+  struct gdbarch_tdep *tdep;
+  int elf_flags;
+  char *ef_mips_abi;
+  int ef_mips_bitptrs;
+  int ef_mips_arch;
+
+  /* Extract the elf_flags if available */
+  if (info.abfd != NULL
+      && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
+    elf_flags = elf_elfheader (info.abfd)->e_flags;
+  else
+    elf_flags = 0;
+
+  /* try to find a pre-existing architecture */
+  for (arches = gdbarch_list_lookup_by_info (arches, &info);
+       arches != NULL;
+       arches = gdbarch_list_lookup_by_info (arches->next, &info))
+    {
+      /* MIPS needs to be pedantic about which ABI the object is
+         using. */
+      if (gdbarch_tdep (current_gdbarch)->elf_flags != elf_flags)
+	continue;
+      return arches->gdbarch;
+    }
+
+  /* Need a new architecture. Fill in a target specific vector. */
+  tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
+  gdbarch = gdbarch_alloc (&info, tdep);
+  tdep->elf_flags = elf_flags;
+
+  /* Initially set everything according to the ABI. */
+  set_gdbarch_short_bit (gdbarch, 16);
+  set_gdbarch_int_bit (gdbarch, 32);
+  set_gdbarch_float_bit (gdbarch, 32);
+  set_gdbarch_double_bit (gdbarch, 64);
+  set_gdbarch_long_double_bit (gdbarch, 64);
+  switch ((elf_flags & EF_MIPS_ABI))
+    {
+    case E_MIPS_ABI_O32:
+      ef_mips_abi = "o32";
+      tdep->mips_eabi = 0;
+      tdep->mips_saved_regsize = 4;
+      tdep->mips_fp_register_double = 0;
+      set_gdbarch_long_bit (gdbarch, 32);
+      set_gdbarch_ptr_bit (gdbarch, 32);
+      set_gdbarch_long_long_bit (gdbarch, 64);
+      break;
+    case E_MIPS_ABI_O64:
+      ef_mips_abi = "o64";
+      tdep->mips_eabi = 0;
+      tdep->mips_saved_regsize = 8;
+      tdep->mips_fp_register_double = 1;
+      set_gdbarch_long_bit (gdbarch, 32);
+      set_gdbarch_ptr_bit (gdbarch, 32);
+      set_gdbarch_long_long_bit (gdbarch, 64);
+      break;
+    case E_MIPS_ABI_EABI32:
+      ef_mips_abi = "eabi32";
+      tdep->mips_eabi = 1;
+      tdep->mips_saved_regsize = 4;
+      tdep->mips_fp_register_double = 0;
+      set_gdbarch_long_bit (gdbarch, 32);
+      set_gdbarch_ptr_bit (gdbarch, 32);
+      set_gdbarch_long_long_bit (gdbarch, 64);
+      break;
+    case E_MIPS_ABI_EABI64:
+      ef_mips_abi = "eabi64";
+      tdep->mips_eabi = 1;
+      tdep->mips_saved_regsize = 8;
+      tdep->mips_fp_register_double = 1;
+      set_gdbarch_long_bit (gdbarch, 64);
+      set_gdbarch_ptr_bit (gdbarch, 64);
+      set_gdbarch_long_long_bit (gdbarch, 64);
+      break;
+    default:
+      ef_mips_abi = "default";
+      tdep->mips_eabi = 0;
+      tdep->mips_saved_regsize = MIPS_REGSIZE;
+      tdep->mips_fp_register_double = (REGISTER_VIRTUAL_SIZE (FP0_REGNUM) == 8);
+      set_gdbarch_long_bit (gdbarch, 32);
+      set_gdbarch_ptr_bit (gdbarch, 32);
+      set_gdbarch_long_long_bit (gdbarch, 64);
+      break;
+    }
+
+  /* determine the ISA */
+  switch (elf_flags & EF_MIPS_ARCH)
+    {
+    case E_MIPS_ARCH_1:
+      ef_mips_arch = 1;
+      break;
+    case E_MIPS_ARCH_2:
+      ef_mips_arch = 2;
+      break;
+    case E_MIPS_ARCH_3:
+      ef_mips_arch = 3;
+      break;
+    case E_MIPS_ARCH_4:
+      ef_mips_arch = 0;
+      break;
+    default:
+      break;
+    }
+
+#if 0
+  /* determine the size of a pointer */
+  if ((elf_flags & EF_MIPS_32BITPTRS))
+    {
+      ef_mips_bitptrs = 32;
+    }
+  else if ((elf_flags & EF_MIPS_64BITPTRS))
+    {
+      ef_mips_bitptrs = 64;
+    }
+  else
+    {
+      ef_mips_bitptrs = 0;
+    }
+#endif
+
+  /* Select either of the two alternative ABI's */
+  if (tdep->mips_eabi)
+    {
+      /* EABI uses R4 through R11 for args */
+      tdep->mips_last_arg_regnum = 11;
+      /* EABI uses F12 through F19 for args */
+      tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 19;
+    }
+  else
+    {
+      /* old ABI uses R4 through R7 for args */
+      tdep->mips_last_arg_regnum = 7;
+      /* old ABI uses F12 through F15 for args */
+      tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 15;
+    }
+
+  /* enable/disable the MIPS FPU */
+  if (!mips_fpu_type_auto)
+    tdep->mips_fpu_type = mips_fpu_type;
+  else if (info.bfd_arch_info != NULL
+	   && info.bfd_arch_info->arch == bfd_arch_mips)
+    switch (info.bfd_arch_info->mach)
+      {
+      case bfd_mach_mips4100:
+	tdep->mips_fpu_type = MIPS_FPU_NONE;
+	break;
+      default:
+	tdep->mips_fpu_type = MIPS_FPU_DOUBLE;
+	break;
+      }
+  else
+    tdep->mips_fpu_type = MIPS_FPU_DOUBLE;
+
+  /* MIPS version of register names.  NOTE: At present the MIPS
+     register name management is part way between the old -
+     #undef/#define REGISTER_NAMES and the new REGISTER_NAME(nr).
+     Further work on it is required. */
+  set_gdbarch_register_name (gdbarch, mips_register_name);
+  set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
+  set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
+  set_gdbarch_read_fp (gdbarch, generic_target_read_fp);
+  set_gdbarch_write_fp (gdbarch, generic_target_write_fp);
+  set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
+  set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
+
+  /* Initialize a frame */
+  set_gdbarch_init_extra_frame_info (gdbarch, mips_init_extra_frame_info);
+
+  /* MIPS version of CALL_DUMMY */
+
+  set_gdbarch_call_dummy_p (gdbarch, 1);
+  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
+  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
+  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
+  set_gdbarch_call_dummy_address (gdbarch, mips_call_dummy_address);
+  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
+  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
+  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
+  set_gdbarch_call_dummy_length (gdbarch, 0);
+  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
+  set_gdbarch_call_dummy_words (gdbarch, mips_call_dummy_words);
+  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (mips_call_dummy_words));
+  set_gdbarch_push_return_address (gdbarch, mips_push_return_address);
+  set_gdbarch_push_arguments (gdbarch, mips_push_arguments);
+  set_gdbarch_register_convertible (gdbarch, generic_register_convertible_not);
+
+  set_gdbarch_frame_chain_valid (gdbarch, default_frame_chain_valid);
+  set_gdbarch_get_saved_register (gdbarch, default_get_saved_register);
+
+  if (gdbarch_debug)
+    {
+      fprintf_unfiltered (gdb_stderr,
+			  "mips_gdbarch_init: (info)elf_flags = 0x%x\n",
+			  elf_flags);
+      fprintf_unfiltered (gdb_stderr,
+			  "mips_gdbarch_init: (info)ef_mips_abi = %s\n",
+			  ef_mips_abi);
+      fprintf_unfiltered (gdb_stderr,
+			  "mips_gdbarch_init: (info)ef_mips_arch = %d\n",
+			  ef_mips_arch);
+      fprintf_unfiltered (gdb_stderr,
+			  "mips_gdbarch_init: (info)ef_mips_bitptrs = %d\n",
+			  ef_mips_bitptrs);
+      fprintf_unfiltered (gdb_stderr,
+			  "mips_gdbarch_init: MIPS_EABI = %d\n",
+			  tdep->mips_eabi);
+      fprintf_unfiltered (gdb_stderr,
+			  "mips_gdbarch_init: MIPS_LAST_ARG_REGNUM = %d\n",
+			  tdep->mips_last_arg_regnum);
+      fprintf_unfiltered (gdb_stderr,
+		   "mips_gdbarch_init: MIPS_LAST_FP_ARG_REGNUM = %d (%d)\n",
+			  tdep->mips_last_fp_arg_regnum,
+			  tdep->mips_last_fp_arg_regnum - FP0_REGNUM);
+      fprintf_unfiltered (gdb_stderr,
+		       "mips_gdbarch_init: tdep->mips_fpu_type = %d (%s)\n",
+			  tdep->mips_fpu_type,
+			  (tdep->mips_fpu_type == MIPS_FPU_NONE ? "none"
+			 : tdep->mips_fpu_type == MIPS_FPU_SINGLE ? "single"
+			 : tdep->mips_fpu_type == MIPS_FPU_DOUBLE ? "double"
+			   : "???"));
+      fprintf_unfiltered (gdb_stderr,
+		       "mips_gdbarch_init: tdep->mips_saved_regsize = %d\n",
+			  tdep->mips_saved_regsize);
+      fprintf_unfiltered (gdb_stderr,
+	     "mips_gdbarch_init: tdep->mips_fp_register_double = %d (%s)\n",
+			  tdep->mips_fp_register_double,
+			(tdep->mips_fp_register_double ? "true" : "false"));
+    }
+
+  return gdbarch;
+}
+
+
 void
 _initialize_mips_tdep ()
 {
   static struct cmd_list_element *mipsfpulist = NULL;
   struct cmd_list_element *c;
 
+  if (GDB_MULTI_ARCH)
+    register_gdbarch_init (bfd_arch_mips, mips_gdbarch_init);
   if (!tm_print_insn)		/* Someone may have already set it */
     tm_print_insn = gdb_print_insn_mips;
 
@@ -3602,6 +3911,7 @@ _initialize_mips_tdep ()
 	   "Show current use of MIPS floating-point coprocessor target.",
 	   &showlist);
 
+#if !GDB_MULTI_ARCH
   c = add_set_cmd ("processor", class_support, var_string_noescape,
 		   (char *) &tmp_mips_processor_type,
 		   "Set the type of MIPS processor in use.\n\
@@ -3614,6 +3924,7 @@ Set this to be able to access processor-type-specific registers.\n\
 
   tmp_mips_processor_type = strsave (DEFAULT_MIPS_TYPE);
   mips_set_processor_type_command (strsave (DEFAULT_MIPS_TYPE), 0);
+#endif
 
   /* We really would like to have both "0" and "unlimited" work, but
      command.c doesn't deal with that.  So make it a var_zinteger

@@ -229,7 +229,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19991116
+VERSION = 19991206
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -624,10 +624,11 @@ uninstall: force
 # of the functions might change, so this files needs to depend on all the
 # object files that will be linked into gdb.
 
-init.c: $(OBS) $(TSOBS)
+INIT_FILES = $(OBS) $(TSOBS) $(SUBDIR_INIT_FILES)
+init.c: $(INIT_FILES)
 	@echo Making init.c
 	@rm -f init.c-tmp init.l-tmp
-	@-echo $(OBS) $(TSOBS) | \
+	@-echo $(INIT_FILES) | \
 	tr ' ' '\012' | \
 	sed -e '/^Onindy.o/d' \
 	    -e '/^init.o/d' \
@@ -1195,8 +1196,9 @@ hppah-nat.o: hppah-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h
 
 i386gnu-nat.o: gnu-nat.h
 
-i386-tdep.o: i386-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
-	gdb_string.h
+i386-tdep.o: i386-tdep.c $(defs_h) gdb_string.h $(frame_h)	\
+	$(inferior_h) $(gdbcore_h) target.h $(floatformat_h)	\
+	$(symtab_h) $(gdbcmd_h) $(command_h)
 
 i386aix-nat.o: i386aix-nat.c $(defs_h) $(frame_h) $(inferior_h) \
 	language.h $(gdbcore_h) $(floatformat_h) target.h

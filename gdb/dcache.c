@@ -538,6 +538,13 @@ dcache_info (exp, tty)
     }
 }
 
+/* Turn dcache on or off. */
+void
+set_dcache_state (int what)
+{
+  dcache_enabled_p = !!what;
+}
+
 void
 _initialize_dcache ()
 {

@@ -125,19 +125,44 @@ proc gdb_load_timed {executable downloadsize class writesize} {
     pass $test
 }
 
-
-
 gdb_load_timed $binfile {} "" {}
 
-# Typically about 400 bytes can be downloaded
-gdb_load_timed $binfile 0 "limit" 399
-gdb_load_timed $binfile 0 "limit" 401
-
-# fall back to the default
-gdb_load_timed $binfile 0 "limit" 0
+# Typically about 400-1 bytes can be downloaded
+gdb_load_timed $binfile 0 "limit" 398
+gdb_load_timed $binfile 0 "limit" 400
 
 # Absolute max is 16384
 gdb_load_timed $binfile 0 "fixed" 0
 gdb_load_timed $binfile 0 "fixed" 16385
+
+# fall back to the default
+gdb_load_timed $binfile 0 "limit" 0
+
+
+#
+# Part THREE: Check the upload behavour
+#
+
+# Carefully check memory around each of the most common packet edge
+# conditions
+
+gdb_test "x/8ub random_data" \
+	"<random_data>:\[ \t\]+60\[ \t\]+74\[ \t\]+216\[ \t\]+38\[ \t\]+149\[ \t\]+49\[ \t\]+207\[ \t\]+44"
+
+gdb_test "x/8ub random_data + 400 - 4" \
+	"<random_data\\+396>:\[ \t\]+185\[ \t\]+255\[ \t\]+50\[ \t\]+140\[ \t\]+237\[ \t\]+172\[ \t\]+143\[ \t\]+93"
+
+gdb_test "x/8ub random_data + 16384 - 4" \
+	"<random_data\\+16380>:\[ \t\]+178\[ \t\]+180\[ \t\]+135\[ \t\]+93\[ \t\]+70\[ \t\]+62\[ \t\]+205\[ \t\]+76"
+
+
+# Read a chunk just larger than the packet size (reduce the packet
+# size to make life easier)
+gdb_test "set remote memory-read-packet-size 16" \
+	""
+gdb_test "show remote memory-read-packet-size" \
+	"The memory-read-packet-size is 16. Packets are limited to 16 bytes."
+gdb_test "x/17ub random_data" \
+	"<random_data>:\[ \t\]+60\[ \t\]+74\[ \t\]+216\[ \t\]+38\[ \t\]+149\[ \t\]+49\[ \t\]+207\[ \t\]+44.*<random_data\\+8>:\[ \t\]+124\[ \t\]+38\[ \t\]+93\[ \t\]+125\[ \t\]+232\[ \t\]+67\[ \t\]+228\[ \t\]+56.*<random_data\\+16>:\[ \t\]+161"
 
 gdb_exit

@@ -21,23 +21,14 @@
 #ifndef NM_LINUX_H
 #define NM_LINUX_H
 
+#include "nm-linux.h"
+
 /* Return sizeof user struct to callers in less machine dependent routines */
 
 #define KERNEL_U_SIZE kernel_u_size()
 extern int kernel_u_size PARAMS ((void));
 
-/* Tell gdb that we can attach and detach other processes */
-#define ATTACH_DETACH
-
 #define U_REGS_OFFSET 0
-
-/* We define this if link.h is available, because with ELF we use SVR4 style
-   shared libraries. */
-
-#ifdef HAVE_LINK_H
-#define SVR4_SHARED_LIBS
-#include "solib.h"		/* Support for shared libraries. */
-#endif
 
 #define REGISTER_U_ADDR(addr, blockend, regno) \
 	(addr) = m68k_linux_register_u_addr ((blockend),(regno));

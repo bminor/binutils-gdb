@@ -1,3 +1,11 @@
+1999-11-29  Mark Salter  <msalter@cygnus.com>
+
+	* dv-tx3904sio.c (tx3904sio_io_write_buffer): Use write value as a mask
+	to clear status bits in sdisr register. This is how the hardware works.
+
+	* interp.c (sim_open): Added more memory aliases for jmr3904 hardware
+	being used by cygmon.
+
 1999-11-11  Andrew Haley  <aph@cygnus.com>
 
 	* interp.c (decode_coproc): Correctly handle DMFC0 and DMTC0

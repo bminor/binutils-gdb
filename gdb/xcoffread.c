@@ -753,7 +753,7 @@ process_linenos (start, end)
 	    start_subfile (fakename, (char *) 0);
 	    free (current_subfile->name);
 	  }
-	  current_subfile->name = strdup (inclTable[ii].name);
+	  current_subfile->name = xstrdup (inclTable[ii].name);
 #endif
 
 	  if (lv == lineTb)

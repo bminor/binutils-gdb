@@ -98,6 +98,7 @@ static struct cleanup *exec_error_cleanup_chain;
    support async execution.  The finish and until commands use it. So
    does the target extended-remote command. */
 struct continuation *cmd_continuation;
+struct continuation *intermediate_continuation;
 
 /* Nonzero if we have job control. */
 
@@ -406,7 +407,7 @@ null_cleanup (arg)
 }
 
 /* Add a continuation to the continuation list, the gloabl list
-   cmd_continuation. */
+   cmd_continuation. The new continuation will be added at the front.*/
 void
 add_continuation (continuation_hook, arg_list)
      void (*continuation_hook) PARAMS ((struct continuation_arg *));
@@ -422,19 +423,34 @@ add_continuation (continuation_hook, arg_list)
 }
 
 /* Walk down the cmd_continuation list, and execute all the
-   continuations. */
+   continuations. There is a problem though. In some cases new
+   continuations may be added while we are in the middle of this
+   loop. If this happens they will be added in the front, and done
+   before we have a chance of exhausting those that were already
+   there. We need to then save the beginning of the list in a pointer
+   and do the continuations from there on, instead of using the
+   global beginning of list as our iteration pointer.*/
 void
 do_all_continuations ()
 {
   struct continuation *continuation_ptr;
+  struct continuation *saved_continuation;
 
-  while (cmd_continuation)
-    {
-      (cmd_continuation->continuation_hook) (cmd_continuation->arg_list);
-      continuation_ptr = cmd_continuation;
-      cmd_continuation = continuation_ptr->next;
-      free (continuation_ptr);
-    }
+  /* Copy the list header into another pointer, and set the global
+     list header to null, so that the global list can change as a side
+     effect of invoking the continuations and the processing of
+     the preexisting continuations will not be affected. */
+  continuation_ptr = cmd_continuation;
+  cmd_continuation = NULL;
+
+  /* Work now on the list we have set aside. */
+  while (continuation_ptr)
+     {
+       (continuation_ptr->continuation_hook) (continuation_ptr->arg_list);
+       saved_continuation = continuation_ptr;
+       continuation_ptr = continuation_ptr->next;
+       free (saved_continuation);
+     }
 }
 
 /* Walk down the cmd_continuation list, and get rid of all the
@@ -448,6 +464,68 @@ discard_all_continuations ()
     {
       continuation_ptr = cmd_continuation;
       cmd_continuation = continuation_ptr->next;
+      free (continuation_ptr);
+    }
+}
+
+/* Add a continuation to the continuation list, the gloabl list
+   intermediate_continuation. The new continuation will be added at the front.*/
+void
+add_intermediate_continuation (continuation_hook, arg_list)
+     void (*continuation_hook) PARAMS ((struct continuation_arg *));
+     struct continuation_arg *arg_list;
+{
+  struct continuation *continuation_ptr;
+
+  continuation_ptr = (struct continuation *) xmalloc (sizeof (struct continuation));
+  continuation_ptr->continuation_hook = continuation_hook;
+  continuation_ptr->arg_list = arg_list;
+  continuation_ptr->next = intermediate_continuation;
+  intermediate_continuation = continuation_ptr;
+}
+
+/* Walk down the cmd_continuation list, and execute all the
+   continuations. There is a problem though. In some cases new
+   continuations may be added while we are in the middle of this
+   loop. If this happens they will be added in the front, and done
+   before we have a chance of exhausting those that were already
+   there. We need to then save the beginning of the list in a pointer
+   and do the continuations from there on, instead of using the
+   global beginning of list as our iteration pointer.*/
+void
+do_all_intermediate_continuations ()
+{
+  struct continuation *continuation_ptr;
+  struct continuation *saved_continuation;
+
+  /* Copy the list header into another pointer, and set the global
+     list header to null, so that the global list can change as a side
+     effect of invoking the continuations and the processing of
+     the preexisting continuations will not be affected. */
+  continuation_ptr = intermediate_continuation;
+  intermediate_continuation = NULL;
+
+  /* Work now on the list we have set aside. */
+  while (continuation_ptr)
+     {
+       (continuation_ptr->continuation_hook) (continuation_ptr->arg_list);
+       saved_continuation = continuation_ptr;
+       continuation_ptr = continuation_ptr->next;
+       free (saved_continuation);
+     }
+}
+
+/* Walk down the cmd_continuation list, and get rid of all the
+   continuations. */
+void
+discard_all_intermediate_continuations ()
+{
+  struct continuation *continuation_ptr;
+
+  while (intermediate_continuation)
+    {
+      continuation_ptr = intermediate_continuation;
+      intermediate_continuation = continuation_ptr->next;
       free (continuation_ptr);
     }
 }
@@ -525,17 +603,28 @@ error_begin ()
 NORETURN void
 verror (const char *string, va_list args)
 {
+  char *err_string;
+  struct cleanup *err_string_cleanup;
   /* FIXME: cagney/1999-11-10: All error calls should come here.
      Unfortunatly some code uses the sequence: error_begin(); print
      error message; return_to_top_level.  That code should be
      flushed. */
   error_begin ();
-  vfprintf_filtered (gdb_stderr, string, args);
-  fprintf_filtered (gdb_stderr, "\n");
-  /* Save it as the last error as well (no newline) */
+  /* NOTE: It's tempting to just do the following...
+	vfprintf_filtered (gdb_stderr, string, args);
+     and then follow with a similar looking statement to cause the message
+     to also go to gdb_lasterr.  But if we do this, we'll be traversing the
+     va_list twice which works on some platforms and fails miserably on
+     others. */
+  /* Save it as the last error */
   gdb_file_rewind (gdb_lasterr);
   vfprintf_filtered (gdb_lasterr, string, args);
-  va_end (args);
+  /* Retrieve the last error and print it to gdb_stderr */
+  err_string = error_last_message ();
+  err_string_cleanup = make_cleanup (free, err_string);
+  fputs_filtered (err_string, gdb_stderr);
+  fprintf_filtered (gdb_stderr, "\n");
+  do_cleanups (err_string_cleanup);
   return_to_top_level (RETURN_ERROR);
 }
 

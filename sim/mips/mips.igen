@@ -3235,6 +3235,7 @@
 
 
 // MOVF
+// MOVT
 000000,5.RS,3.CC,0,1.TF,5.RD,00000000001:SPECIAL:32::MOVtf
 "mov%s<TF> r<RD>, r<RS>, <CC>"
 *mipsIV:
@@ -3246,6 +3247,7 @@
 
 
 // MOVF.fmt
+// MOVT.fmt
 010001,10,3.FMT,3.CC,0,1.TF,5.FS,5.FD,010001:COP1:32::MOVtf.fmt
 "mov%s<TF>.%s<FMT> f<FD>, f<FS>, <CC>"
 *mipsIV:

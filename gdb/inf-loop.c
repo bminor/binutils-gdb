@@ -78,6 +78,12 @@ inferior_event_handler (enum inferior_event_type event_type,
       complete_execution ();
       break;
 
+    case INF_EXEC_CONTINUE:
+      /* Is there anything left to do for the command issued to
+         complete? */
+      do_all_intermediate_continuations ();
+      break;
+
     case INF_QUIT_REQ: 
       /* FIXME: ezannoni 1999-10-04. This call should really be a
 	 target vector entry, so that it can be used for any kind of

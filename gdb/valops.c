@@ -662,8 +662,8 @@ value_assign (toval, fromval)
 	      > len * HOST_CHAR_BIT)
 	    /* Getting this right would involve being very careful about
 	       byte order.  */
-	    error ("\
-Can't handle bitfield which doesn't fit in a single register.");
+	    error ("Can't assign to bitfields that cross register "
+		   "boundaries.");
 
 	  read_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
 			       buffer, len);

@@ -72,7 +72,7 @@
     }									\
 }
 
-#include "tm-sysv4.h"
+#include "tm-linux.h"
 #include "m68k/tm-m68k.h"
 
 /* Extract from an array REGBUF containing the (raw) register state

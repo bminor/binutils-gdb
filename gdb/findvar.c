@@ -258,25 +258,6 @@ store_address (addr, len, val)
   store_unsigned_integer (addr, len, val);
 }
 
-/* Swap LEN bytes at BUFFER between target and host byte-order.  */
-#define SWAP_FLOATING(buffer,len) \
-  do                                                                    \
-    {                                                                   \
-      if (TARGET_BYTE_ORDER != HOST_BYTE_ORDER)                         \
-        {                                                               \
-          char tmp;                                                     \
-          char *p = (char *)(buffer);                                   \
-          char *q = ((char *)(buffer)) + len - 1;                       \
-          for (; p < q; p++, q--)                                       \
-            {                                                           \
-              tmp = *q;                                                 \
-              *q = *p;                                                  \
-              *p = tmp;                                                 \
-            }                                                           \
-        }                                                               \
-    }                                                                   \
-  while (0)
-
 /* Extract a floating-point number from a target-order byte-stream at ADDR.
    Returns the value as type DOUBLEST.
 
@@ -680,20 +661,22 @@ registers_fetched ()
     register_valid[i] = 1;
 }
 
-/* read_register_bytes and write_register_bytes are generally a *BAD* idea.
-   They are inefficient because they need to check for partial updates, which
-   can only be done by scanning through all of the registers and seeing if the
-   bytes that are being read/written fall inside of an invalid register.  [The
-   main reason this is necessary is that register sizes can vary, so a simple
-   index won't suffice.]  It is far better to call read_register_gen if you
-   want to get at the raw register contents, as it only takes a regno as an
-   argument, and therefore can't do a partial register update.  It would also
-   be good to have a write_register_gen for similar reasons.
+/* read_register_bytes and write_register_bytes are generally a *BAD*
+   idea.  They are inefficient because they need to check for partial
+   updates, which can only be done by scanning through all of the
+   registers and seeing if the bytes that are being read/written fall
+   inside of an invalid register.  [The main reason this is necessary
+   is that register sizes can vary, so a simple index won't suffice.]
+   It is far better to call read_register_gen and write_register_gen
+   if you want to get at the raw register contents, as it only takes a
+   regno as an argument, and therefore can't do a partial register
+   update.
 
-   Prior to the recent fixes to check for partial updates, both read and
-   write_register_bytes always checked to see if any registers were stale, and
-   then called target_fetch_registers (-1) to update the whole set.  This
-   caused really slowed things down for remote targets.  */
+   Prior to the recent fixes to check for partial updates, both read
+   and write_register_bytes always checked to see if any registers
+   were stale, and then called target_fetch_registers (-1) to update
+   the whole set.  This caused really slowed things down for remote
+   targets.  */
 
 /* Copy INLEN bytes of consecutive data from registers
    starting with the INREGBYTE'th byte of register data
@@ -720,7 +703,6 @@ read_register_bytes (inregbyte, myaddr, inlen)
   for (regno = 0; regno < NUM_REGS; regno++)
     {
       int regstart, regend;
-      int startin, endin;
 
       if (register_valid[regno])
 	continue;
@@ -731,15 +713,12 @@ read_register_bytes (inregbyte, myaddr, inlen)
       regstart = REGISTER_BYTE (regno);
       regend = regstart + REGISTER_RAW_SIZE (regno);
 
-      startin = regstart >= inregbyte && regstart < inregend;
-      endin = regend > inregbyte && regend <= inregend;
-
-      if (!startin && !endin)
+      if (regend <= inregbyte || inregend <= regstart)
+	/* The range the user wants to read doesn't overlap with regno.  */
 	continue;
 
       /* We've found an invalid register where at least one byte will be read.
          Update it from the target.  */
-
       target_fetch_registers (regno);
 
       if (!register_valid[regno])
@@ -832,39 +811,40 @@ write_register_bytes (myregstart, myaddr, inlen)
   for (regno = 0; regno < NUM_REGS; regno++)
     {
       int regstart, regend;
-      int startin, endin;
-      char regbuf[MAX_REGISTER_RAW_SIZE];
 
       regstart = REGISTER_BYTE (regno);
       regend = regstart + REGISTER_RAW_SIZE (regno);
 
-      startin = regstart >= myregstart && regstart < myregend;
-      endin = regend > myregstart && regend <= myregend;
+      /* Is this register completely outside the range the user is writing?  */
+      if (myregend <= regstart || regend <= myregstart)
+	/* do nothing */ ;		
 
-      if (!startin && !endin)
-	continue;		/* Register is completely out of range */
+      /* Is this register completely within the range the user is writing?  */
+      else if (myregstart <= regstart && regend <= myregend)
+	write_register_gen (regno, myaddr + (regstart - myregstart));
 
-      if (startin && endin)	/* register is completely in range */
+      /* The register partially overlaps the range being written.  */
+      else
 	{
-	  write_register_gen (regno, myaddr + (regstart - myregstart));
-	  continue;
+	  char regbuf[MAX_REGISTER_RAW_SIZE];
+	  /* What's the overlap between this register's bytes and
+             those the caller wants to write?  */
+	  int overlapstart = max (regstart, myregstart);
+	  int overlapend   = min (regend,   myregend);
+
+	  /* We may be doing a partial update of an invalid register.
+	     Update it from the target before scribbling on it.  */
+	  read_register_gen (regno, regbuf);
+
+	  memcpy (registers + overlapstart,
+		  myaddr + (overlapstart - myregstart),
+		  overlapend - overlapstart);
+
+	  target_store_registers (regno);
 	}
-
-      /* We may be doing a partial update of an invalid register.  Update it
-         from the target before scribbling on it.  */
-      read_register_gen (regno, regbuf);
-
-      if (startin)
-	memcpy (registers + regstart,
-		myaddr + regstart - myregstart,
-		myregend - regstart);
-      else			/* endin */
-	memcpy (registers + myregstart,
-		myaddr,
-		regend - myregstart);
-      target_store_registers (regno);
     }
 }
+
 
 /* Return the raw contents of register REGNO, regarding it as an integer.  */
 /* This probably should be returning LONGEST rather than CORE_ADDR.  */

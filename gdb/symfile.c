@@ -64,6 +64,11 @@ extern int hp_cxx_exception_support_initialized;
 #endif
 
 int (*ui_load_progress_hook) (const char *section, unsigned long num);
+void (*show_load_progress) (const char *section,
+			    unsigned long section_sent, 
+			    unsigned long section_size, 
+			    unsigned long total_sent, 
+			    unsigned long total_size);
 void (*pre_add_symbol_hook) PARAMS ((char *));
 void (*post_add_symbol_hook) PARAMS ((void));
 void (*target_new_objfile_hook) PARAMS ((struct objfile *));
@@ -1225,6 +1230,8 @@ generic_load (char *args, int from_tty)
   char *filename;
   struct cleanup *old_cleanups;
   char *offptr;
+  CORE_ADDR total_size = 0;
+  CORE_ADDR total_sent = 0;
 
   /* Parse the input argument - the user can specify a load offset as
      a second argument. */
@@ -1261,6 +1268,10 @@ generic_load (char *args, int from_tty)
       error ("\"%s\" is not an object file: %s", filename,
 	     bfd_errmsg (bfd_get_error ()));
     }
+
+  for (s = loadfile_bfd->sections; s; s = s->next)
+    if (s->flags & SEC_LOAD)
+      total_size += bfd_get_section_size_before_reloc (s);
 
   start_time = time (NULL);
 
@@ -1331,10 +1342,14 @@ generic_load (char *args, int from_tty)
 		  buffer += len;
 		  write_count += 1;
 		  sent += len;
+		  total_sent += len;
 		  if (quit_flag
 		      || (ui_load_progress_hook != NULL
 			  && ui_load_progress_hook (sect_name, sent)))
 		    error ("Canceled the download");
+
+		  if (show_load_progress != NULL)
+		    show_load_progress (sect_name, sent, size, total_sent, total_size);
 		}
 	      while (sent < size);
 
@@ -1435,7 +1450,7 @@ add_symbol_file_command (args, from_tty)
 
   /* Make a copy of the string that we can safely write into. */
 
-  args = strdup (args);
+  args = xstrdup (args);
   make_cleanup (free, args);
 
   /* Ensure section_addrs is initialized */
@@ -1560,7 +1575,7 @@ add_symbol_file_command (args, from_tty)
                    text data or bss section. This is redundent but
                    eventually, none will be given special treatment */
 		{
-		  section_addrs.other[sec_num].name = strdup (sec);
+		  section_addrs.other[sec_num].name = xstrdup (sec);
 		  make_cleanup (free, section_addrs.other[sec_num].name);
 		  section_addrs.other[sec_num++].addr = addr;
 		  printf_filtered ("\t%s_addr = %s\n",
@@ -1715,9 +1730,7 @@ reread_symbols ()
 		      sizeof (objfile->static_psymbols));
 
 	      /* Free the obstacks for non-reusable objfiles */
-	      obstack_free (&objfile->psymbol_cache.cache, 0);
-	      memset (&objfile->psymbol_cache, 0,
-		      sizeof (objfile->psymbol_cache));
+	      free_bcache (&objfile->psymbol_cache);
 	      obstack_free (&objfile->psymbol_obstack, 0);
 	      obstack_free (&objfile->symbol_obstack, 0);
 	      obstack_free (&objfile->type_obstack, 0);

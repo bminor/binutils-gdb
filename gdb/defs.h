@@ -689,12 +689,19 @@ struct continuation continuation;
 
 /* In infrun.c. */
 extern struct continuation *cmd_continuation;
+/* Used only by the step_1 function. */
+extern struct continuation *intermediate_continuation;
 
 /* From utils.c */
 extern void add_continuation (void (*)(struct continuation_arg *),
 			      struct continuation_arg *);
 extern void do_all_continuations (void);
 extern void discard_all_continuations (void);
+
+extern void add_intermediate_continuation (void (*)(struct continuation_arg *),
+			      struct continuation_arg *);
+extern void do_all_intermediate_continuations (void);
+extern void discard_all_intermediate_continuations (void);
 
 /* String containing the current directory (what getwd would return).  */
 
@@ -1181,6 +1188,11 @@ extern int event_loop_p;
 
 extern void (*init_ui_hook) (char *argv0);
 extern void (*command_loop_hook) (void);
+extern void (*show_load_progress) (const char *section,
+				   unsigned long section_sent, 
+				   unsigned long section_size, 
+				   unsigned long total_sent, 
+				   unsigned long total_size);
 /* NOTE: cagney/1999-10-14: fputs_unfiltered_hook is deprecated.
    Instead code wanting to control GDB's output should be overriding
    the gdb_std* files. */

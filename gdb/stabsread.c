@@ -91,7 +91,7 @@ static char *
 static struct type *
   dbx_alloc_type PARAMS ((int[2], struct objfile *));
 
-static LONGEST read_huge_number PARAMS ((char **, int, int *));
+static long read_huge_number PARAMS ((char **, int, int *));
 
 static struct type *error_type PARAMS ((char **, struct objfile *));
 
@@ -4480,7 +4480,7 @@ read_sun_floating_type (pp, typenums, objfile)
 
    If encounter garbage, set *BITS to -1 and return 0.  */
 
-static LONGEST
+static long
 read_huge_number (pp, end, bits)
      char **pp;
      int end;
@@ -4488,12 +4488,12 @@ read_huge_number (pp, end, bits)
 {
   char *p = *pp;
   int sign = 1;
-  LONGEST n = 0;
+  long n = 0;
   int radix = 10;
   char overflow = 0;
   int nbits = 0;
   int c;
-  LONGEST upper_limit;
+  long upper_limit;
 
   if (*p == '-')
     {
@@ -4510,9 +4510,9 @@ read_huge_number (pp, end, bits)
     }
 
   if (os9k_stabs)
-    upper_limit = ULONGEST_MAX / radix;
+    upper_limit = ULONG_MAX / radix;
   else
-    upper_limit = LONGEST_MAX / radix;
+    upper_limit = LONG_MAX / radix;
 
   while ((c = *p++) >= '0' && c < ('0' + radix))
     {
@@ -4593,7 +4593,7 @@ read_range_type (pp, typenums, objfile)
 {
   char *orig_pp = *pp;
   int rangenums[2];
-  LONGEST n2, n3;
+  long n2, n3;
   int n2bits, n3bits;
   int self_subrange;
   struct type *result_type;
@@ -4646,8 +4646,8 @@ read_range_type (pp, typenums, objfile)
          fit in a long but <large number>-1 does.  */
       else if ((n2bits != 0 && n3bits != 0 && n2bits == n3bits + 1)
 	       || (n2bits != 0 && n3bits == 0
-		   && (n2bits == sizeof (LONGEST) * HOST_CHAR_BIT)
-		   && n3 == LONGEST_MAX))
+		   && (n2bits == sizeof (long) * HOST_CHAR_BIT)
+		   && n3 == LONG_MAX))
 	{
 	  got_signed = 1;
 	  nbits = n2bits;

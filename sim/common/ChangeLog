@@ -1,3 +1,34 @@
+1999-12-01  Dave Brolley  <brolley@cygnus.com>
+
+	* cgen-accfp.c (subsf): Check status code.
+	(mulsf): Ditto.
+	(negsf): Ditto.
+	(abssf): Ditto.
+	(sqrtsf): Ditto.
+	(invsf): Ditto.
+	(minsf): Ditto.
+	(maxsf): Ditto.
+	(subdf): Ditto.
+	(muldf): Ditto.
+	(divdf): Ditto.
+	(negdf): Ditto.
+	(absdf): Ditto.
+	(sqrtdf): Ditto.
+	(invdf): Ditto.
+	(mindf): Ditto.
+	(maxdf): Ditto.
+
+1999-11-26  Dave Brolley  <brolley@cygnus.com>
+
+	* cgen-par.h (fn_df_write): Mode of data is DF.
+	(sim_queue_fn_df_write): Mode of data is DF.
+	* cgen-par.c (sim_queue_fn_df_write): Mode of data is DF.
+
+1999-11-22  Dave Brolley  <brolley@cygnus.com>
+
+	* cgen-trace.c (SIZE_TRACE_BUF): Inxrease size of trace buffer.
+	* cgen-par.h (CGEN_WRITE_QUEUE_SIZE): Increase size of queue.
+
 1999-11-04  Dave Brolley  <brolley@cygnus.com>
 
 	* cgen-par.h (cgen_write_queue_kind): Add CGEN_FN_XI_WRITE and

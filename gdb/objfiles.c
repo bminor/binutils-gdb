@@ -486,7 +486,7 @@ free_objfile (objfile)
       if (objfile->static_psymbols.list)
 	mfree (objfile->md, objfile->static_psymbols.list);
       /* Free the obstacks for non-reusable objfiles */
-      obstack_free (&objfile->psymbol_cache.cache, 0);
+      free_bcache (&objfile->psymbol_cache);
       obstack_free (&objfile->psymbol_obstack, 0);
       obstack_free (&objfile->symbol_obstack, 0);
       obstack_free (&objfile->type_obstack, 0);

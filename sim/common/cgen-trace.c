@@ -51,7 +51,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #ifndef SIZE_TRACE_BUF
-#define SIZE_TRACE_BUF 256
+#define SIZE_TRACE_BUF 1024
 #endif
 
 static void

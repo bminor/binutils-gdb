@@ -66,6 +66,10 @@ struct type *builtin_type_int64;
 struct type *builtin_type_uint64;
 struct type *builtin_type_bool;
 struct type *builtin_type_v4sf;
+struct type *builtin_type_v4si;
+struct type *builtin_type_v8qi;
+struct type *builtin_type_v4hi;
+struct type *builtin_type_v2si;
 
 int opaque_type_resolution = 1;
 
@@ -644,7 +648,7 @@ create_set_type (result_type, domain_type)
 	init_simd_type ("__builtin_v4sf", builtin_type_float, "f", 4)
    The type returned is a permanent type, allocated using malloc; it
    doesn't live in any objfile's obstack.  */
-struct type *
+static struct type *
 init_simd_type (char *name,
 		struct type *elt_type,
 		char *elt_name,
@@ -2968,6 +2972,14 @@ build_gdbtypes ()
   /* Build SIMD types.  */
   builtin_type_v4sf
     = init_simd_type ("__builtin_v4sf", builtin_type_float, "f", 4);
+  builtin_type_v4si
+    = init_simd_type ("__builtin_v4si", builtin_type_int32, "f", 4);
+  builtin_type_v8qi
+    = init_simd_type ("__builtin_v8qi", builtin_type_int8, "f", 8);
+  builtin_type_v4hi
+    = init_simd_type ("__builtin_v4hi", builtin_type_int16, "f", 4);
+  builtin_type_v2si
+    = init_simd_type ("__builtin_v2si", builtin_type_int32, "f", 2);
 }
 
 
@@ -3007,5 +3019,9 @@ _initialize_gdbtypes ()
   register_gdbarch_swap (&builtin_type_int64, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_uint64, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v4sf, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v4si, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v8qi, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v4hi, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v2si, sizeof (struct type *), NULL);
   register_gdbarch_swap (NULL, 0, build_gdbtypes);
 }

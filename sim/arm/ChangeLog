@@ -1,3 +1,10 @@
+1999-11-22  Nick Clifton  <nickc@cygnus.com>
+
+	* armos.c (SWIread): Generate an error message if a huge read is
+	performed.
+	(SWIwrite): Generate an error message if a huge write is
+	performed.
+
 1999-10-27  Nick Clifton  <nickc@cygnus.com>
 
 	* thumbemu.c (ARMul_ThumbDecode): Accept 0xbebe as a thumb

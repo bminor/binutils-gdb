@@ -59,6 +59,15 @@ Tue Feb 16 23:57:17 1999  Jeffrey A Law  (law@cygnus.com)
 	generation. (mn103int_finish): Install it as ioctl handler.
 	* dv-mn103tim.c: Support timer 6 specially.  Endianness fixes.
 	
+Wed Oct 14 12:11:05 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* am33.igen: Allow autoincrement stores using the same register
+	for source and destination operands.
+
+Mon Aug 31 10:19:55 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * am33.igen: Reverse HI/LO outputs of 4 operand "mul" and "mulu".
+
 Fri Aug 28 14:40:49 1998  Joyce Janczyn  <janczyn@cygnus.com>
 
 	* interp.c (sim_open): Check for invalid --board option, fix
@@ -73,6 +82,21 @@ Mon Aug 24 11:50:09 1998  Joyce Janczyn  <janczyn@cygnus.com>
 
 	* sim-main.h (SIM_HANDLES_LMA): Define SIM_HANDLES_LMA.
 
+Wed Aug 12 12:36:07 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* am33.igen: Handle case where first DSP operation modifies a 
+	register used in the second DSP operation correctly.
+
+Tue Jul 28 10:10:25 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* am33.igen: Detect cases where two operands must not match for
+	DSP instructions too.
+
+Mon Jul 27 12:04:17 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* am33.igen: Detect cases where two operands must not match in
+	non-DSP instructions.
+
 Fri Jul 24 18:15:21 1998  Joyce Janczyn  <janczyn@cygnus.com>
 
 	* op_utils.c (do_syscall): Rewrite to use common/syscall.c.
@@ -83,21 +107,71 @@ Fri Jul 24 18:15:21 1998  Joyce Janczyn  <janczyn@cygnus.com>
 	* mn10300.igen: Change C++ style comments to C style comments.
 	Check for divide by zero in div and divu ops.
 
+Fri Jul 24 12:49:28 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* am33.igen (translate_xreg): New function.  Use it as needed.
+
+Thu Jul 23 10:05:28 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* am33.igen: Add some missing instructions.
+
+	* am33.igen: Autoincrement loads/store fixes.
+
+Tue Jul 21 09:48:14 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* am33.igen: Add mov_lCC DSP instructions.
+
+	* am33.igen: Add most am33 DSP instructions.
+
 Thu Jul  9 10:06:55 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300.igen: Fix Z bit for addc and subc instructions.
 	Minor fixes in multiply/divide patterns.
 
+	* am33.igen: Add missing mul[u] imm32,Rn.  Fix condition code
+	handling for many instructions.  Fix sign extension for some
+	24bit immediates.
+
+	* am33.igen: Fix Z bit for remaining addc/subc instructions.
+	Do not sign extend immediate for mov imm,XRn.
+	More random mul, mac & div fixes.
+	Remove some unused variables.
+	Sign extend 24bit displacement in memory addresses.
+
+	* am33.igen: Fix Z bit for addc Rm,Rn and subc Rm,Rn.  Various
+	fixes to 2 register multiply, divide and mac instructions.  Set
+	Z,N correctly for sat16.  Sign extend 24 bit immediate for add,
+	and sub instructions.
+
+	* am33.igen: Add remaining non-DSP instructions.
+
+Wed Jul  8 16:29:12 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* am33.igen (translate_rreg): New function.  Use it as appropriate.
+
+	* am33.igen: More am33 instructions.  Fix "div".
+
+Mon Jul  6 15:39:22 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300.igen: Add am33 support.
+
+	* Makefile.in: Use multi-sim to support both a mn10300 and am33
+	simulator.
+
+	* am33.igen: Add many more am33 instructions.
 
 Wed Jul  1 17:07:09 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300_sim.h (FETCH24): Define.
 
+	* mn10300_sim.h: Add defines for some registers found on the AM33.
+	* am33.igen: New file with some am33 support.
 
 Tue Jun 30 11:23:20 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300_sim.h: Include bfd.h
 	(struct state): Add more room for processor specific registers.
+	(REG_E0): Define.
 
 Thu Jun 25 10:12:03 1998  Joyce Janczyn  <janczyn@cygnus.com>
 

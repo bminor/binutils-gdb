@@ -1,3 +1,65 @@
+Sat Dec  4 15:21:18 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/remote.c: Fill the buffer with truely random data.
+  	Change the buffer type to ``unsigned char'' to simplify size
+ 	arithmetic.
+
+	* gdb.base/remote.exp: Reduce download numbers by one.  Typical
+ 	stub only handles 400-1 byte packets.  Verify that the download
+ 	worked.
+
+1999-11-30  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* lib/gdb.exp (gdb_expect_list): FAIL only once on multiple pattern
+	tests, using UNRESOLVED for the untested cases.  Also, does not wait
+	for a timeout if the prompt was received before a recognizable pattern.
+
+1999-11-29  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* lib/gdb.exp (gdb_expect_list): Fix spelling.
+
+1999-11-29  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdb.base/watchpoint.exp: Add tests cases for the hit count of
+ 	watchpoints.
+
+1999-11-24  Jason Merrill  <jason@casey.cygnus.com>
+
+	* gdb.base/condbreak.exp: Add missing '$gdb_prompt $'.
+
+	* gdb.c++/local.exp: Be more flexible in recognizing local class
+	name mangling.  Don't allow horribly truncated method names.
+	* gdb.c++/derivation.exp: Expect protected inheritance.
+	* gdb.c++/inherit.exp: Be more flexible in recognizing vbase pointers.
+	* gdb.c++/virtfunc.exp: Likewise.
+	* gdb.c++/classes.exp: Likewise.  Don't require the enclosing scope
+	when printing a nested enum.
+
+1999-11-22  Jim Blandy  <jimb@cygnus.com>
+
+	* gdb.base/step-test.exp: Properly await GDB's response to setting
+	a breakpoint on the call to large_struct_by_value.
+
+	* gdb.base/ending-run.exp ("step to end of run 1"): Don't fail
+	just because we have debug info for the `start' function.
+
+1999-11-19  Jim Blandy  <jimb@zenia.red-bean.com>
+
+	* gdb.threads/linux-dp.exp ("create philosopher"): Recognize the
+	"Unknown signal" messages, which indicate (on LinuxThreads) that
+	GDB doesn't know how to debug threads on this system.  This is
+	better than hanging while philosopher 0 dumps chatter into gdb.log.
+
+1999-11-18  Tom Tromey  <tromey@cygnus.com>
+
+	* gdb.trace/deltrace.exp: Updated test to reflect new error text.
+
+1999-11-18  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/coremaker2.c: Add sample program for generating
+	cores that is more self contained than coremaker.c.  Eventually
+	I'll add more code to this and tie it into the testsuite.
+
 1999-11-12  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.base/dollar.exp: Remove, now in gdb.hp.
@@ -83,7 +145,6 @@ Mon Oct 11 13:57:21 1999  Andrew Cagney  <cagney@amy.cygnus.com>
  	containing exp_continue into a while within an expect.  Don't
  	attempt a start more than three times.  Check return value from
  	gdb_load.
-	
 	
 Wed Oct  6 12:05:58 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -1332,6 +1393,17 @@ Fri Sep 11 13:58:02 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdb.base/setshow.exp: Fix error introduced by call to runto_main.
 
+Fri Jul 24 15:51:34 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.disasm/am33.s: Add tests for autoincrement instructions.
+	* gdb.disasm/am33.exp: Run time.  Update tests which use r8-r15
+	to use a0-a3/d0-d3 as needed.
+
+Thu Jul 16 18:20:46 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.disasm/am33.s: Add 4 operand mul and mulu tests.
+	* gdb.disasm/am33.exp: Corresponding changes.
+
 1998-07-11  Felix Lee  <flee@cygnus.com>
 
 	* gdb.base/callfuncs.exp: add cmp10 test.
@@ -1350,11 +1422,21 @@ Fri Jun 26 14:52:47 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 	* gdb.base/scope.exp:  Remove extraneous newline in filelocal_bss
 	before run test.
 
+Fri Jun 26 11:12:17 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* am33.exp: Just compile, do not link the testcase.
+	* am33.s: Add ".am33" pseudoop to force am33 mode.
+
 1998-06-25  Felix Lee  <flee@cygnus.com>
 
 	* gdb.base/setshow.exp: make sure $pc is sane.
 
 	* gdb.stabs/weird.exp: split expect patterns properly.
+
+Wed Jun 24 13:03:15 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.disasm/am33.s: New disassembler testfile for the am33.
+	* gdb.disasm/am33.exp: Run it.
 
 Tue Jun 23 11:45:01 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 

@@ -49,6 +49,13 @@ static char *mn10300_generic_register_names[] =
  "", "", "", "", "", "", "", "fp"};
 
 static char **mn10300_register_names = mn10300_generic_register_names;
+static char *am33_register_names[] =
+{
+  "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3",
+  "sp", "pc", "mdr", "psw", "lir", "lar", "",
+  "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+  "ssp", "msp", "usp", "mcrh", "mcrl", "mcvf", "", "", ""};
+static int am33_mode;
 
 char *
 mn10300_register_name (i)
@@ -204,6 +211,13 @@ set_movm_offsets (fi, movm_args)
     {
       fi->saved_regs[D2_REGNUM] = fi->frame + offset;
       offset += 4;
+    }
+  if (am33_mode && movm_args & 0x02)
+    {
+      fi->saved_regs[E0_REGNUM + 5] = fi->frame + offset;
+      fi->saved_regs[E0_REGNUM + 4] = fi->frame + offset + 4;
+      fi->saved_regs[E0_REGNUM + 3] = fi->frame + offset + 8;
+      fi->saved_regs[E0_REGNUM + 2] = fi->frame + offset + 12;
     }
 }
 
@@ -550,6 +564,13 @@ mn10300_frame_chain (fi)
       adjust += (fi->saved_regs[D3_REGNUM] ? 4 : 0);
       adjust += (fi->saved_regs[A2_REGNUM] ? 4 : 0);
       adjust += (fi->saved_regs[A3_REGNUM] ? 4 : 0);
+      if (am33_mode)
+	{
+	  adjust += (fi->saved_regs[E0_REGNUM + 5] ? 4 : 0);
+	  adjust += (fi->saved_regs[E0_REGNUM + 4] ? 4 : 0);
+	  adjust += (fi->saved_regs[E0_REGNUM + 3] ? 4 : 0);
+	  adjust += (fi->saved_regs[E0_REGNUM + 2] ? 4 : 0);
+	}
 
       /* Our caller does not have a frame pointer.  So his frame starts
          at the base of our frame (fi->frame) + register save space
@@ -740,6 +761,13 @@ mn10300_frame_saved_pc (fi)
   adjust += (fi->saved_regs[D3_REGNUM] ? 4 : 0);
   adjust += (fi->saved_regs[A2_REGNUM] ? 4 : 0);
   adjust += (fi->saved_regs[A3_REGNUM] ? 4 : 0);
+  if (am33_mode)
+    {
+      adjust += (fi->saved_regs[E0_REGNUM + 5] ? 4 : 0);
+      adjust += (fi->saved_regs[E0_REGNUM + 4] ? 4 : 0);
+      adjust += (fi->saved_regs[E0_REGNUM + 3] ? 4 : 0);
+      adjust += (fi->saved_regs[E0_REGNUM + 2] ? 4 : 0);
+    }
 
   return (read_memory_integer (fi->frame + adjust, REGISTER_SIZE));
 }
@@ -815,6 +843,13 @@ set_machine_hook (filename)
       mn10300_register_names = mn10300_generic_register_names;
     }
 
+  am33_mode = 0;
+  if (bfd_get_mach (exec_bfd) == bfd_mach_am33)
+    {
+
+      mn10300_register_names = am33_register_names;
+      am33_mode = 1;
+    }
 }
 
 void

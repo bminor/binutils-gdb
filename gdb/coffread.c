@@ -610,7 +610,9 @@ coff_symfile_read (objfile, mainline)
   int stringtab_offset;
   struct cleanup *back_to;
   int stabstrsize;
-
+  int len;
+  char * target;
+  
   info = (struct coff_symfile_info *) objfile->sym_private;
   dbxinfo = objfile->sym_stab_info;
   symfile_bfd = abfd;		/* Kludge for swap routines */
@@ -643,7 +645,9 @@ coff_symfile_read (objfile, mainline)
      from the section address, rather than as absolute addresses.
      FIXME: We should use BFD to read the symbol table, and thus avoid
      this problem.  */
-  pe_file = strncmp (bfd_get_target (objfile->obfd), "pe", 2) == 0;
+  pe_file = !
+    (   strncmp (bfd_get_target (objfile->obfd), "pe", 2)
+      | strncmp (bfd_get_target (objfile->obfd), "epoc-pe", 7));
 
 /* End of warning */
 

@@ -142,7 +142,7 @@ void sim_queue_fn_xi_write (
 
 void sim_queue_fn_df_write (
   SIM_CPU *cpu,
-  void (*write_function)(SIM_CPU *cpu, UINT, DI),
+  void (*write_function)(SIM_CPU *cpu, UINT, DF),
   UINT regno,
   DF value
 )

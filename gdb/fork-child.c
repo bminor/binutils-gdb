@@ -28,6 +28,7 @@
 #include "gdbcore.h"
 #include "terminal.h"
 #include "gdbthread.h"
+#include "command.h" /* for dont_repeat () */
 
 #include <signal.h>
 

@@ -18,6 +18,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#include "nm-linux.h"
+
 /* Figure out where the longjmp will land.  We expect that we have just entered
    longjmp and haven't yet setup the stack frame, so the args are still in the
    argument regs.  A0_REGNUM points at the jmp_buf structure from which we
@@ -28,13 +30,12 @@
 extern int
 get_longjmp_target PARAMS ((CORE_ADDR *));
 
-/* Tell gdb that we can attach and detach other processes */
-#define ATTACH_DETACH
-
 /* ptrace register ``addresses'' are absolute.  */
 
 #define U_REGS_OFFSET 0
 
+/* FIXME: This is probably true, or should be, on all Linux ports.
+   IA64?  Sparc64?  */
 #define PTRACE_ARG3_TYPE long
 
 /* ptrace transfers longs, the ptrace man page is lying.  */
@@ -51,10 +52,7 @@ get_longjmp_target PARAMS ((CORE_ADDR *));
 
 /* Support for shared libraries.  */
 
-#include "solib.h"
-
 #ifdef __ELF__
-#define SVR4_SHARED_LIBS
 #define TARGET_ELF64
 #endif
 
@@ -65,3 +63,4 @@ get_longjmp_target PARAMS ((CORE_ADDR *));
 /* Given a pointer to either a gregset_t or fpregset_t, return a
    pointer to the first register.  */
 #define ALPHA_REGSET_BASE(regsetp)  ((long *) (regsetp))
+

@@ -28,6 +28,7 @@
 #endif
 
 #include "i386/tm-i386.h"
+#include "tm-linux.h"
 
 /* Size of sigcontext, from <asm/sigcontext.h>.  */
 #define LINUX_SIGCONTEXT_SIZE (88)
@@ -37,10 +38,6 @@
 
 /* Offset to saved SP in sigcontext, from <asm/sigcontext.h>.  */
 #define LINUX_SIGCONTEXT_SP_OFFSET (28)
-
-/* We need this file for the SOLIB_TRAMPOLINE stuff. */
-
-#include "tm-sysv4.h"
 
 #define LOW_RETURN_REGNUM 0	/* holds low four bytes of result */
 #define HIGH_RETURN_REGNUM 2	/* holds high four bytes of result */
@@ -166,18 +163,6 @@ extern CORE_ADDR i386_linux_sigtramp_saved_pc PARAMS ((struct frame_info *));
       : read_memory_integer ((FRAME)->frame + 4, 4)))
 
 extern CORE_ADDR i386_linux_sigtramp_saved_sp PARAMS ((struct frame_info *));
-
-/* Some versions of Linux have real-time signal support in the C library, and
-   some don't.  We have to include this file to find out.  */
-#include <signal.h>
-
-#ifdef __SIGRTMIN
-#define REALTIME_LO __SIGRTMIN
-#define REALTIME_HI (__SIGRTMAX + 1)
-#else
-#define REALTIME_LO 32
-#define REALTIME_HI 64
-#endif
 
 /* When we call a function in a shared library, and the PLT sends us
    into the dynamic linker to find the function's real address, we

@@ -1087,6 +1087,28 @@ OP_4E09 ()
   trace_output_flag ();
 }
 
+/* cpfg */
+void
+OP_4E0F ()
+{
+  uint8 val;
+  
+  trace_input ("cpfg", OP_FLAG_OUTPUT, OP_FLAG, OP_VOID);
+  
+  if (OP[1] == 0)
+    val = PSW_F0;
+  else if (OP[1] == 1)
+    val = PSW_F1;
+  else
+    val = PSW_C;
+  if (OP[0] == 0)
+    SET_PSW_F0 (val);
+  else
+    SET_PSW_F1 (val);
+
+  trace_output_flag ();
+}
+
 /* dbt */
 void
 OP_5F20 ()

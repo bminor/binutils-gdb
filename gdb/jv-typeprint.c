@@ -281,7 +281,7 @@ java_type_print_base (type, stream, show, level)
 				    DMGL_ANSI | DMGL_PARAMS | DMGL_JAVA);
 
 		  if (demangled_name == NULL)
-		    demangled_name = strdup (mangled_name);
+		    demangled_name = xstrdup (mangled_name);
 
 		  {
 		    char *demangled_no_class;

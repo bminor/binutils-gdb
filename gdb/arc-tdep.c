@@ -97,6 +97,7 @@ static unsigned int codestream_fill PARAMS ((int));
 #define CODESTREAM_BUFSIZ 16
 static CORE_ADDR codestream_next_addr;
 static CORE_ADDR codestream_addr;
+/* FIXME assumes sizeof (int) == 32? */
 static unsigned int codestream_buf[CODESTREAM_BUFSIZ];
 static int codestream_off;
 static int codestream_cnt;
@@ -124,16 +125,15 @@ codestream_fill (peek_flag)
 	       CODESTREAM_BUFSIZ * sizeof (codestream_buf[0]));
   /* FIXME: check return code?  */
 
-  /* Handle byte order differences.  */
-  if (HOST_BYTE_ORDER != TARGET_BYTE_ORDER)
-    {
-      register unsigned int i, j, n = sizeof (codestream_buf[0]);
-      register char tmp, *p;
-      for (i = 0, p = (char *) codestream_buf; i < CODESTREAM_BUFSIZ;
-	   ++i, p += n)
-	for (j = 0; j < n / 2; ++j)
-	  tmp = p[j], p[j] = p[n - 1 - j], p[n - 1 - j] = tmp;
-    }
+
+  /* Handle byte order differences -> convert to host byte ordering.  */
+  {
+    int i;
+    for (i = 0; i < CODESTREAM_BUFSIZ; i++)
+      codestream_buf[i] =
+	extract_unsigned_integer (&codestream_buf[i],
+				  sizeof (codestream_buf[i]));
+  }
 
   if (peek_flag)
     return codestream_peek ();

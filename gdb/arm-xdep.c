@@ -21,7 +21,7 @@
 #include "defs.h"
 #include "frame.h"
 #include "inferior.h"
-#include "arm-opcode.h"
+#include "opcode/arm.h"
 
 #include <sys/param.h>
 #include <sys/dir.h>

@@ -278,7 +278,12 @@ enum inferior_event_type
     /* We are called because a timer went off. */
     INF_TIMER,
     /* We are called to do stuff after the inferior stops. */
-    INF_EXEC_COMPLETE
+    INF_EXEC_COMPLETE,
+    /* We are called to do some stuff after the inferior stops, but we
+       are expected to reenter the proceed() and
+       handle_inferior_event() functions. This is used only in case of
+       'step n' like commands. */
+    INF_EXEC_CONTINUE
   };
 
 /* Return the string for a signal.  */
@@ -1343,7 +1348,23 @@ extern asection *target_memory_bfd_section;
 /* This is for native targets which use a unix/POSIX-style waitstatus.  */
 extern void store_waitstatus PARAMS ((struct target_waitstatus *, int));
 
-/* Convert between host signal numbers and enum target_signal's.  */
+/* Predicate to target_signal_to_host(). Return non-zero if the enum
+   targ_signal SIGNO has an equivalent ``host'' representation. */
+/* FIXME: cagney/1999-11-22: The name below was chosen in preference
+   to the shorter target_signal_p() because it is far less ambigious.
+   In this context ``target_signal'' refers to GDB's internal
+   representation of the target's set of signals while ``host signal''
+   refers to the target operating system's signal.  Confused? */
+extern int target_signal_to_host_p (enum target_signal signo);
+
+/* Convert between host signal numbers and enum target_signal's.
+   target_signal_to_host() returns 0 and prints a warning() on GDB's
+   console if SIGNO has no equivalent host representation. */
+/* FIXME: cagney/1999-11-22: Here ``host'' is used incorrectly, it is
+   refering to the target operating system's signal numbering.
+   Similarly, ``enum target_signal'' is named incorrectly, ``enum
+   gdb_signal'' would probably be better as it is refering to GDB's
+   internal representation of a target operating system's signal. */
 extern enum target_signal target_signal_from_host PARAMS ((int));
 extern int target_signal_to_host PARAMS ((enum target_signal));
 

@@ -227,7 +227,7 @@ exec_file_attach (args, from_tty)
          same malloc'd string.  However exec_close() will attempt to free it
          via the exec_bfd->name pointer, so we need to make another copy and
          leave exec_bfd as the new owner of the original copy. */
-      scratch_pathname = strdup (scratch_pathname);
+      scratch_pathname = xstrdup (scratch_pathname);
       make_cleanup (free, scratch_pathname);
 
       if (!bfd_check_format (exec_bfd, bfd_object))

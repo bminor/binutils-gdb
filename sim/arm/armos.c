@@ -308,6 +308,12 @@ SWIread (ARMul_State *state, ARMword f, ARMword ptr, ARMword len)
   int i;
   char *local = malloc (len);
 
+  if (local == NULL)
+    {
+      fprintf (stderr, "sim: Unable to read 0x%x bytes - out of memory\n", len);
+      return;
+    }
+  
   res = read (f, local, len);
   if (res > 0)
     for (i = 0; i < res; i++) 
@@ -325,10 +331,15 @@ SWIwrite (ARMul_State *state, ARMword f, ARMword ptr, ARMword len)
   int i;
   char *local = malloc (len);
 
-  for (i = 0; i < len; i++) 
+  if (local == NULL)
     {
-      local[i] = ARMul_ReadByte (state, ptr + i);
+      fprintf (stderr, "sim: Unable to write 0x%x bytes - out of memory\n", len);
+      return;
     }
+  
+  for (i = 0; i < len; i++) 
+    local[i] = ARMul_ReadByte (state, ptr + i);
+
   res = write (f, local, len);
   state->Reg[0] = res == -1 ? -1 : len - res;
   free (local);

@@ -698,6 +698,8 @@ require_notification_of_events (pid)
 #if defined(PT_SET_EVENT_MASK)
   int pt_status;
   ptrace_event_t ptrace_events;
+  int nsigs;
+  int signum;
 
   /* Instruct the kernel as to the set of events we wish to be
      informed of.  (This support does not exist before HPUX 10.0.
@@ -709,7 +711,29 @@ require_notification_of_events (pid)
      the kernel to keep certain signals hidden from us, we do it
      by calling sigdelset (ptrace_events.pe_signals, signal) for
      each such signal here, before doing PT_SET_EVENT_MASK.  */
-  sigemptyset (&ptrace_events.pe_signals);
+  /* RM: The above comment is no longer true. We start with ignoring
+     all signals, and then add the ones we are interested in. We could
+     do it the other way: start by looking at all signals and then
+     deleting the ones that we aren't interested in, except that
+     multiple gdb signals may be mapped to the same host signal
+     (eg. TARGET_SIGNAL_IO and TARGET_SIGNAL_POLL both get mapped to
+     signal 22 on HPUX 10.20) We want to be notified if we are
+     interested in either signal.  */
+  sigfillset (&ptrace_events.pe_signals);
+
+  /* RM: Let's not bother with signals we don't care about */
+  nsigs = (int) TARGET_SIGNAL_LAST;
+  for (signum = nsigs; signum > 0; signum--)
+    {
+      if ((signal_stop_state (signum)) ||
+	  (signal_print_state (signum)) ||
+	  (!signal_pass_state (signum)))
+	{
+	  if (target_signal_to_host_p (signum))
+	    sigdelset (&ptrace_events.pe_signals,
+		       target_signal_to_host (signum));
+	}
+    }
 
   ptrace_events.pe_set_event = 0;
 

@@ -28,7 +28,7 @@
    FOREVER, wait forever rather than timing out; this is used while
    the target is executing user code.  */
 
-extern void getpkt (char *buf, int forever);
+extern void getpkt (char *buf, long sizeof_buf, int forever);
 
 /* Send a packet to the remote machine, with error checking.  The data
    of the packet is in BUF.  The string in BUF can be at most PBUFSIZ

@@ -38,7 +38,9 @@ struct value
     /* Location of value (if lval).  */
     union
       {
-	/* Address in inferior or byte of registers structure.  */
+	/* If lval == lval_memory, this is the address in the inferior.
+	   If lval == lval_register, this is the byte offset into the
+	   registers structure.  */
 	CORE_ADDR address;
 	/* Pointer to internal variable.  */
 	struct internalvar *internalvar;
@@ -48,8 +50,10 @@ struct value
       }
     location;
     /* Describes offset of a value within lval of a structure in bytes.
-       This is used in retrieving contents from target memory. [Note also
-       the member embedded_offset below.] */
+       If lval == lval_memory, this is an offset to the address.
+       If lval == lval_register, this is a further offset from
+          location.address within the registers structure.  
+       Note also the member embedded_offset below.  */
     int offset;
     /* Only used for bitfields; number of bits contained in them.  */
     int bitsize;

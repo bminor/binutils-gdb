@@ -66,7 +66,25 @@ gdb_test "info threads" "" "info threads 1"
 gdb_breakpoint [gdb_get_line_number "linuxthreads.exp: create philosopher"]
 for {set i 0} {$i < 5} {incr i} {
     gdb_continue_to_breakpoint "about to create philosopher: $i"
-    gdb_test "next" "\\\[New Thread .*\\\].*" "create philosopher: $i"
+    send_gdb "next\n"
+    gdb_expect {
+	-re "\\\[New Thread .*\\\].*$gdb_prompt $" {
+	    pass "create philosopher: $i"
+	}
+	-re "Program received signal.*(Unknown signal|SIGUSR).*$gdb_prompt $" {
+	    # It would be nice if we could catch the message that GDB prints
+	    # when it first notices that the thread library doesn't support
+	    # debugging, or if we could explicitly ask GDB somehow.
+	    unsupported "This GDB does not support threads on this system."
+	    return -1
+	}
+	-re "$gdb_prompt $" {
+	    fail "create philosopher: $i"
+	}
+	timeout {
+	    fail "(timeout) create philosopher: $i"
+	}
+    }
 }
 
 # Run until there are some threads.

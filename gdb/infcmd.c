@@ -88,6 +88,8 @@ static void signal_command PARAMS ((char *, int));
 static void jump_command PARAMS ((char *, int));
 
 static void step_1 PARAMS ((int, int, char *));
+static void step_once (int skip_subroutines, int single_inst, int count);
+static void step_1_continuation (struct continuation_arg *arg);
 
 void nexti_command PARAMS ((char *, int));
 
@@ -472,11 +474,131 @@ step_1 (skip_subroutines, single_inst, count_string)
   if (!single_inst || skip_subroutines)		/* leave si command alone */
     {
       enable_longjmp_breakpoint ();
-      cleanups = make_cleanup ((make_cleanup_func) disable_longjmp_breakpoint,
-			       0);
+      if (!event_loop_p || !target_can_async_p ())
+	cleanups = make_cleanup ((make_cleanup_func) disable_longjmp_breakpoint,
+				 0);
+      else
+	make_exec_cleanup ((make_cleanup_func) disable_longjmp_breakpoint, 0);
     }
 
-  for (; count > 0; count--)
+  /* In synchronous case, all is well, just use the regular for loop. */
+  if (!event_loop_p || !target_can_async_p ())
+    {
+      for (; count > 0; count--)
+	{
+	  clear_proceed_status ();
+
+	  frame = get_current_frame ();
+	  if (!frame)		/* Avoid coredump here.  Why tho? */
+	    error ("No current frame");
+	  step_frame_address = FRAME_FP (frame);
+	  step_sp = read_sp ();
+
+	  if (!single_inst)
+	    {
+	      find_pc_line_pc_range (stop_pc, &step_range_start, &step_range_end);
+	      if (step_range_end == 0)
+		{
+		  char *name;
+		  if (find_pc_partial_function (stop_pc, &name, &step_range_start,
+						&step_range_end) == 0)
+		    error ("Cannot find bounds of current function");
+
+		  target_terminal_ours ();
+		  printf_filtered ("\
+Single stepping until exit from function %s, \n\
+which has no line number information.\n", name);
+		}
+	    }
+	  else
+	    {
+	      /* Say we are stepping, but stop after one insn whatever it does.  */
+	      step_range_start = step_range_end = 1;
+	      if (!skip_subroutines)
+		/* It is stepi.
+		   Don't step over function calls, not even to functions lacking
+		   line numbers.  */
+		step_over_calls = 0;
+	    }
+
+	  if (skip_subroutines)
+	    step_over_calls = 1;
+
+	  step_multi = (count > 1);
+	  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
+
+	  if (!stop_step)
+	    break;
+
+	  /* FIXME: On nexti, this may have already been done (when we hit the
+	     step resume break, I think).  Probably this should be moved to
+	     wait_for_inferior (near the top).  */
+#if defined (SHIFT_INST_REGS)
+	  SHIFT_INST_REGS ();
+#endif
+	}
+
+      if (!single_inst || skip_subroutines)
+	do_cleanups (cleanups);
+      return;
+    }
+  /* In case of asynchronous target things get complicated, do only
+     one step for now, before returning control to the event loop. Let
+     the continuation figure out how many other steps we need to do,
+     and handle them one at the time, through step_once(). */
+  else
+    {
+      if (event_loop_p && target_can_async_p ())
+	step_once (skip_subroutines, single_inst, count);
+    }
+}
+
+/* Called after we are done with one step operation, to check whether
+   we need to step again, before we print the prompt and return control
+   to the user. If count is > 1, we will need to do one more call to
+   proceed(), via step_once(). Basically it is like step_once and
+   step_1_continuation are co-recursive. */
+static void
+step_1_continuation (arg)
+     struct continuation_arg *arg;
+{
+ int count;
+ int skip_subroutines;
+ int single_inst;
+
+ skip_subroutines = (int) arg->data;
+ single_inst = (int) (arg->next)->data;
+ count = (int) ((arg->next)->next)->data;
+
+ if (stop_step)
+   {
+     /* FIXME: On nexti, this may have already been done (when we hit the
+	step resume break, I think).  Probably this should be moved to
+	wait_for_inferior (near the top).  */
+#if defined (SHIFT_INST_REGS)
+     SHIFT_INST_REGS ();
+#endif
+     step_once (skip_subroutines, single_inst, count - 1);
+   }
+ else
+   if (!single_inst || skip_subroutines)
+     do_exec_cleanups (ALL_CLEANUPS);
+}
+
+/* Do just one step operation. If count >1 we will have to set up a
+   continuation to be done after the target stops (after this one
+   step). This is useful to implement the 'step n' kind of commands, in
+   case of asynchronous targets. We had to split step_1 into two parts,
+   one to be done before proceed() and one afterwards. This function is
+   called in case of step n with n>1, after the first step operation has
+   been completed.*/
+static void 
+step_once (int skip_subroutines, int single_inst, int count) 
+{ 
+  struct continuation_arg *arg1; struct continuation_arg *arg2;
+  struct continuation_arg *arg3; struct frame_info *frame;
+
+  if (count > 0)
     {
       clear_proceed_status ();
 
@@ -517,21 +639,23 @@ which has no line number information.\n", name);
 	step_over_calls = 1;
 
       step_multi = (count > 1);
+      arg1 =
+	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+      arg2 =
+	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+      arg3 =
+	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+      arg1->next = arg2;
+      arg1->data = (PTR) skip_subroutines;
+      arg2->next = arg3;
+      arg2->data = (PTR) single_inst;
+      arg3->next = NULL;
+      arg3->data = (PTR) count;
+      add_intermediate_continuation (step_1_continuation, arg1);
       proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
-      if (!stop_step)
-	break;
-
-      /* FIXME: On nexti, this may have already been done (when we hit the
-         step resume break, I think).  Probably this should be moved to
-         wait_for_inferior (near the top).  */
-#if defined (SHIFT_INST_REGS)
-      SHIFT_INST_REGS ();
-#endif
     }
-
-  if (!single_inst || skip_subroutines)
-    do_cleanups (cleanups);
 }
+
 
 /* Continue program at specified address.  */
 

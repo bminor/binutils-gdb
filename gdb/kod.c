@@ -145,7 +145,7 @@ kod_set_os (char *arg, int from_tty, struct cmd_list_element *command)
       delete_cmd (old_operating_system, &infolist);
       free (old_operating_system);
     }
-  old_operating_system = strdup (operating_system);
+  old_operating_system = xstrdup (operating_system);
 
   if (! operating_system || ! *operating_system)
     {

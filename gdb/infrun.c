@@ -270,7 +270,7 @@ static int use_thread_step_needed = USE_THREAD_STEP_NEEDED;
 #ifndef SKIP_PERMANENT_BREAKPOINT 
 #define SKIP_PERMANENT_BREAKPOINT (default_skip_permanent_breakpoint)
 static void
-default_skip_permanent_breakpoint ()
+default_skip_permanent_breakpoint (void)
 {
   error_begin ();
   fprintf_filtered (gdb_stderr, "\
@@ -1341,7 +1341,10 @@ fetch_inferior_event (client_data)
 	 if there are any. */
       do_exec_cleanups (old_cleanups);
       normal_stop ();
-      inferior_event_handler (INF_EXEC_COMPLETE, NULL);
+      if (step_multi && stop_step)
+	inferior_event_handler (INF_EXEC_CONTINUE, NULL);
+      else
+	inferior_event_handler (INF_EXEC_COMPLETE, NULL);
     }
 }
 
@@ -1351,6 +1354,7 @@ fetch_inferior_event (client_data)
 void
 init_execution_control_state (struct execution_control_state *ecs)
 {
+  /* ecs->another_trap? */
   ecs->random_signal = 0;
   ecs->remove_breakpoints_on_following_step = 0;
   ecs->handling_longjmp = 0;	/* FIXME */
@@ -1897,34 +1901,42 @@ handle_inferior_event (struct execution_control_state *ecs)
 	/* It's a SIGTRAP or a signal we're interested in.  Switch threads,
 	   and fall into the rest of wait_for_inferior().  */
 
-	/* Save infrun state for the old thread.  */
-	save_infrun_state (inferior_pid, prev_pc,
-			   prev_func_start, prev_func_name,
-			   trap_expected, step_resume_breakpoint,
-			   through_sigtramp_breakpoint,
-			   step_range_start, step_range_end,
-			   step_frame_address, ecs->handling_longjmp,
-			   ecs->another_trap,
-			   ecs->stepping_through_solib_after_catch,
-			   ecs->stepping_through_solib_catchpoints,
-			   ecs->stepping_through_sigtramp);
+	/* Caution: it may happen that the new thread (or the old one!)
+	   is not in the thread list.  In this case we must not attempt
+	   to "switch context", or we run the risk that our context may
+	   be lost.  This may happen as a result of the target module
+	   mishandling thread creation.  */
 
+	if (in_thread_list (inferior_pid) && in_thread_list (ecs->pid))
+	  { /* Perform infrun state context switch: */
+	    /* Save infrun state for the old thread.  */
+	    save_infrun_state (inferior_pid, prev_pc,
+			       prev_func_start, prev_func_name,
+			       trap_expected, step_resume_breakpoint,
+			       through_sigtramp_breakpoint,
+			       step_range_start, step_range_end,
+			       step_frame_address, ecs->handling_longjmp,
+			       ecs->another_trap,
+			       ecs->stepping_through_solib_after_catch,
+			       ecs->stepping_through_solib_catchpoints,
+			       ecs->stepping_through_sigtramp);
+
+	    /* Load infrun state for the new thread.  */
+	    load_infrun_state (ecs->pid, &prev_pc,
+			       &prev_func_start, &prev_func_name,
+			       &trap_expected, &step_resume_breakpoint,
+			       &through_sigtramp_breakpoint,
+			       &step_range_start, &step_range_end,
+			       &step_frame_address, &ecs->handling_longjmp,
+			       &ecs->another_trap,
+			       &ecs->stepping_through_solib_after_catch,
+			       &ecs->stepping_through_solib_catchpoints,
+			       &ecs->stepping_through_sigtramp);
+	  }
 	if (may_switch_from_inferior_pid)
 	  switched_from_inferior_pid = inferior_pid;
 
 	inferior_pid = ecs->pid;
-
-	/* Load infrun state for the new thread.  */
-	load_infrun_state (inferior_pid, &prev_pc,
-			   &prev_func_start, &prev_func_name,
-			   &trap_expected, &step_resume_breakpoint,
-			   &through_sigtramp_breakpoint,
-			   &step_range_start, &step_range_end,
-			   &step_frame_address, &ecs->handling_longjmp,
-			   &ecs->another_trap,
-			   &ecs->stepping_through_solib_after_catch,
-			   &ecs->stepping_through_solib_catchpoints,
-			   &ecs->stepping_through_sigtramp);
 
 	if (context_hook)
 	  context_hook (pid_to_thread_id (ecs->pid));

@@ -48,4 +48,8 @@ int dcache_xfer_memory PARAMS ((DCACHE * cache, CORE_ADDR mem, char *my, int len
 
 /* Write the bytes at ADDR into the data cache and the remote machine. */
 int dcache_poke_block PARAMS ((DCACHE * cache, CORE_ADDR mem, char *my, int len));
+
+/* Turn dcache state on or off */
+void set_dcache_state (int);
+
 #endif /* DCACHE_H */
