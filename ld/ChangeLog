@@ -1,3 +1,8 @@
+Mon Dec  7 21:10:09 1998  J.J. van der Heijden  <j.j.vanderheijden@student.utwente.nl>
+
+	* configure.tgt (i[3456]86-*-mingw32*): Add cygwin target specific
+	files.
+
 Sun Dec  6 16:33:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.tgt (m68*-*-gnu*): New target.  From Aymeric Vincent
