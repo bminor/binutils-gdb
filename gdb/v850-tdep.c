@@ -705,7 +705,7 @@ v850_pop_frame (struct frame_info *frame)
  */
 
 CORE_ADDR
-v850_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+v850_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		     unsigned char struct_return, CORE_ADDR struct_addr)
 {
   int argreg;
@@ -817,7 +817,7 @@ v850_frame_saved_pc (struct frame_info *fi)
 
 int
 v850_fix_call_dummy (char *dummy, CORE_ADDR sp, CORE_ADDR fun, int nargs,
-		     value_ptr *args, struct type *type, int gcc_p)
+		     struct value **args, struct type *type, int gcc_p)
 {
   long offset24;
 

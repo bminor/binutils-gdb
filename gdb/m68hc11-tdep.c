@@ -808,7 +808,7 @@ m68hc11_stack_align (CORE_ADDR addr)
 
 static CORE_ADDR
 m68hc11_push_arguments (int nargs,
-                        value_ptr *args,
+                        struct value **args,
                         CORE_ADDR sp,
                         int struct_return,
                         CORE_ADDR struct_addr)

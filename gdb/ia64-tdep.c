@@ -1749,11 +1749,11 @@ find_func_descr (CORE_ADDR faddr, CORE_ADDR *fdaptr)
 }
 
 CORE_ADDR
-ia64_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		    int struct_return, CORE_ADDR struct_addr)
 {
   int argno;
-  value_ptr arg;
+  struct value *arg;
   struct type *type;
   int len, argoffset;
   int nslots, rseslots, memslots, slotnum, nfuncargs;

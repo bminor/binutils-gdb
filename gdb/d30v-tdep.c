@@ -869,7 +869,8 @@ d30v_do_registers_info (int regnum, int fpregs)
 
 CORE_ADDR
 d30v_fix_call_dummy (char *dummyname, CORE_ADDR start_sp, CORE_ADDR fun,
-		     int nargs, value_ptr *args, struct type *type, int gcc_p)
+		     int nargs, struct value **args,
+		     struct type *type, int gcc_p)
 {
   int regnum;
   CORE_ADDR sp;
@@ -907,7 +908,7 @@ d30v_pop_dummy_frame (struct frame_info *fi)
 
 
 CORE_ADDR
-d30v_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+d30v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
   int i, len, index = 0, regnum = 2;
@@ -919,7 +920,7 @@ d30v_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
   /* Pass 1. Put all large args on stack */
   for (i = 0; i < nargs; i++)
     {
-      value_ptr arg = args[i];
+      struct value *arg = args[i];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       len = TYPE_LENGTH (arg_type);
       contents = VALUE_CONTENTS (arg);
@@ -937,7 +938,7 @@ d30v_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
 
   for (i = 0; i < nargs; i++)
     {
-      value_ptr arg = args[i];
+      struct value *arg = args[i];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       len = TYPE_LENGTH (arg_type);
       contents = VALUE_CONTENTS (arg);

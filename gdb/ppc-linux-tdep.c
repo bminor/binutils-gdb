@@ -423,7 +423,7 @@ ppc_linux_frame_chain (struct frame_info *thisframe)
    starting from r4. */
 
 CORE_ADDR
-ppc_sysv_abi_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 			     int struct_return, CORE_ADDR struct_addr)
 {
   int argno;
@@ -432,7 +432,7 @@ ppc_sysv_abi_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
   int structstkspace;
   int argoffset;
   int structoffset;
-  value_ptr arg;
+  struct value *arg;
   struct type *type;
   int len;
   char old_sp_buf[4];

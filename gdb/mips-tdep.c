@@ -2157,7 +2157,7 @@ mips_type_needs_double_align (struct type *type)
 
 CORE_ADDR
 mips_push_arguments (int nargs,
-		     value_ptr *args,
+		     struct value **args,
 		     CORE_ADDR sp,
 		     int struct_return,
 		     CORE_ADDR struct_addr)
@@ -2215,7 +2215,7 @@ mips_push_arguments (int nargs,
     {
       char *val;
       char valbuf[MAX_REGISTER_RAW_SIZE];
-      value_ptr arg = args[argnum];
+      struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       int len = TYPE_LENGTH (arg_type);
       enum type_code typecode = TYPE_CODE (arg_type);

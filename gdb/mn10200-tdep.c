@@ -718,7 +718,7 @@ mn10200_pop_frame (struct frame_info *frame)
    order on the stack.  */
 
 CORE_ADDR
-mn10200_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+mn10200_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 			unsigned char struct_return, CORE_ADDR struct_addr)
 {
   int argnum = 0;

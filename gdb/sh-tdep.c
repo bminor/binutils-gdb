@@ -974,7 +974,7 @@ sh_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 #if 0
 void
 sh_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
-		   value_ptr *args, struct type *type, int gcc_p)
+		   struct value **args, struct type *type, int gcc_p)
 {
   *(unsigned long *) (dummy + 8) = fun;
 }

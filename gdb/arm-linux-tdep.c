@@ -104,7 +104,7 @@ arm_linux_extract_return_value (struct type *type,
 #define UNMAKE_THUMB_ADDR(addr) ((addr) & ~1)
    	  
 CORE_ADDR
-arm_linux_push_arguments (int nargs, value_ptr * args, CORE_ADDR sp,
+arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		          int struct_return, CORE_ADDR struct_addr)
 {
   char *fp;

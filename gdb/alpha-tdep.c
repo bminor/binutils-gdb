@@ -902,7 +902,7 @@ setup_arbitrary_frame (int argc, CORE_ADDR *argv)
    structure to be returned is passed as a hidden first argument.  */
 
 CORE_ADDR
-alpha_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+alpha_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		      int struct_return, CORE_ADDR struct_addr)
 {
   int i;
@@ -922,7 +922,7 @@ alpha_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
 
   for (i = 0, m_arg = alpha_args; i < nargs; i++, m_arg++)
     {
-      value_ptr arg = args[i];
+      struct value *arg = args[i];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       /* Cast argument to long if necessary as the compiler does it too.  */
       switch (TYPE_CODE (arg_type))

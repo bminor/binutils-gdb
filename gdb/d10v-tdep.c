@@ -1006,7 +1006,7 @@ pop_stack_item (struct stack_item *si)
 
 
 static CORE_ADDR
-d10v_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
   int i;
@@ -1016,7 +1016,7 @@ d10v_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
   /* Fill in registers and arg lists */
   for (i = 0; i < nargs; i++)
     {
-      value_ptr arg = args[i];
+      struct value *arg = args[i];
       struct type *type = check_typedef (VALUE_TYPE (arg));
       char *contents = VALUE_CONTENTS (arg);
       int len = TYPE_LENGTH (type);

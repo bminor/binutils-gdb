@@ -1983,7 +1983,7 @@ gdb_print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
    args are also passed in registers o0 - o5.  */
 
 CORE_ADDR
-sparc32_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+sparc32_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 			int struct_return, CORE_ADDR struct_addr)
 {
   int i, j, oregnum;
@@ -2002,7 +2002,7 @@ sparc32_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
      and sizes. */
   for (i = 0, m_arg = sparc_args; i < nargs; i++, m_arg++)
     {
-      value_ptr arg = args[i];
+      struct value *arg = args[i];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       /* Cast argument to long if necessary as the compiler does it too.  */
       switch (TYPE_CODE (arg_type))
@@ -2292,7 +2292,7 @@ sparc64_write_fp (CORE_ADDR val)
    int and float, we will waste every other register of both types.  */
 
 CORE_ADDR
-sparc64_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+sparc64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 			int struct_return, CORE_ADDR struct_retaddr)
 {
   int i, j, register_counter = 0;
@@ -2307,7 +2307,7 @@ sparc64_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
   for (i = nargs - 1; i >= 0; i--)
     {
       int len = TYPE_LENGTH (check_typedef (VALUE_TYPE (args[i])));
-      value_ptr copyarg = args[i];
+      struct value *copyarg = args[i];
       int copylen = len;
 
       if (copylen < SPARC_INTREG_SIZE)
@@ -2333,7 +2333,7 @@ sparc64_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
   for (i = 0; i < nargs; i++)
     {
       int len = TYPE_LENGTH (check_typedef (VALUE_TYPE (args[i])));
-      value_ptr copyarg = args[i];
+      struct value *copyarg = args[i];
       enum type_code typecode = TYPE_CODE (VALUE_TYPE (args[i]));
       int copylen = len;
 

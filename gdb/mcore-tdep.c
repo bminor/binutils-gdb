@@ -55,7 +55,7 @@ void mcore_virtual_frame_pointer (CORE_ADDR pc, long *reg, long *offset);
 
 CORE_ADDR mcore_push_return_address (CORE_ADDR pc, CORE_ADDR sp);
 
-CORE_ADDR mcore_push_arguments (int nargs, value_ptr * args, CORE_ADDR sp,
+CORE_ADDR mcore_push_arguments (int nargs, struct value ** args, CORE_ADDR sp,
 			unsigned char struct_return, CORE_ADDR struct_addr);
 
 void mcore_pop_frame (struct frame_info *fi);
@@ -747,7 +747,7 @@ mcore_pop_frame (struct frame_info *fi)
    bytes) as hidden first arguments. */
 
 CORE_ADDR
-mcore_push_arguments (int nargs, value_ptr * args, CORE_ADDR sp,
+mcore_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		      unsigned char struct_return, CORE_ADDR struct_addr)
 {
   int argreg;

@@ -1,3 +1,26 @@
+2001-07-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* mn10200-tdep.c: Replace value_ptr with ``struct value *''.
+	* mcore-tdep.c: Ditto.
+	* sparc-tdep.c: Ditto.
+	* sh-tdep.c: Ditto.
+	* rs6000-tdep.c: Ditto.
+	* ppc-linux-tdep.c: Ditto.
+	* m68hc11-tdep.c: Ditto.
+	* ia64-tdep.c: Ditto.
+	* i386-tdep.c: Ditto.
+	* arm-linux-tdep.c: Ditto.
+	* hppa-tdep.c: Ditto.
+	* h8500-tdep.c: Ditto.
+	* fr30-tdep.c: Ditto.
+	* arm-tdep.c: Ditto.
+	* alpha-tdep.c: Ditto.
+	* d30v-tdep.c: Ditto.
+	* d10v-tdep.c: Ditto.
+	* m32r-tdep.c: Ditto.
+	* mips-tdep.c: Ditto.
+	* v850-tdep.c: Ditto.
+
 2001-07-15  Elena Zannoni  <ezannoni@redhat.com>
  
 	* top.c (readline_line_completion_function, noop_completer): Move

@@ -845,7 +845,7 @@ rs6000_pop_frame (void)
 
 static void
 rs6000_fix_call_dummy (char *dummyname, CORE_ADDR pc, CORE_ADDR fun,
-		       int nargs, value_ptr *args, struct type *type,
+		       int nargs, struct value **args, struct type *type,
 		       int gcc_p)
 {
 #define	TOC_ADDR_OFFSET		20
@@ -878,7 +878,7 @@ rs6000_fix_call_dummy (char *dummyname, CORE_ADDR pc, CORE_ADDR fun,
    starting from r4. */
 
 static CORE_ADDR
-rs6000_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		       int struct_return, CORE_ADDR struct_addr)
 {
   int ii;
@@ -889,7 +889,7 @@ rs6000_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
   int f_argno = 0;		/* current floating point argno */
   int wordsize = TDEP->wordsize;
 
-  value_ptr arg = 0;
+  struct value *arg = 0;
   struct type *type;
 
   CORE_ADDR saved_sp;
@@ -1008,7 +1008,7 @@ ran_out_of_registers_for_arguments:
 
       for (; jj < nargs; ++jj)
 	{
-	  value_ptr val = args[jj];
+	  struct value *val = args[jj];
 	  space += ((TYPE_LENGTH (VALUE_TYPE (val))) + 3) & -4;
 	}
 

@@ -476,7 +476,7 @@ h8500_is_trapped_internalvar (char *name)
     return 0;
 }
 
-value_ptr
+struct value *
 h8500_value_of_trapped_internalvar (struct internalvar *var)
 {
   LONGEST regval;
@@ -523,7 +523,7 @@ h8500_value_of_trapped_internalvar (struct internalvar *var)
 }
 
 void
-h8500_set_trapped_internalvar (struct internalvar *var, value_ptr newval,
+h8500_set_trapped_internalvar (struct internalvar *var, struct value *newval,
 			       int bitpos, int bitsize, int offset)
 {
   char *page_regnum, *regnum;

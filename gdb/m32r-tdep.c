@@ -592,7 +592,7 @@ m32r_frame_saved_pc (struct frame_info *fi)
    passed as an implicit first argument, always in R0. */
 
 CORE_ADDR
-m32r_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+m32r_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		     unsigned char struct_return, CORE_ADDR struct_addr)
 {
   int stack_offset, stack_alloc;
@@ -675,7 +675,7 @@ m32r_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
 
 void
 m32r_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
-		     value_ptr *args, struct type *type, int gcc_p)
+		     struct value **args, struct type *type, int gcc_p)
 {
   /* ld24 r8, <(imm24) fun> */
   *(unsigned long *) (dummy) = (fun & 0x00ffffff) | 0xe8000000;

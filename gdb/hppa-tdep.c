@@ -148,7 +148,7 @@ extern int hp_som_som_object_present;
 extern int exception_catchpoints_are_fragile;
 
 /* This is defined in valops.c. */
-extern value_ptr find_function_in_inferior (char *);
+extern struct value *find_function_in_inferior (char *);
 
 /* Should call_function allocate stack space for a struct return?  */
 int
@@ -1667,7 +1667,7 @@ restore_pc_queue (struct frame_saved_regs *fsr)
    to the callee, so we do that too.  */
    
 CORE_ADDR
-hppa_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
   /* array of arguments' offsets */
@@ -1786,7 +1786,7 @@ hppa_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
    arguments into registers as needed by the ABI. */
    
 CORE_ADDR
-hppa_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
   /* array of arguments' offsets */
@@ -1875,10 +1875,10 @@ hppa_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
    This function does the same stuff as value_being_returned in values.c, but
    gets the value from the stack rather than from the buffer where all the
    registers were saved when the function called completed. */
-value_ptr
+struct value *
 hppa_value_returned_from_stack (register struct type *valtype, CORE_ADDR addr)
 {
-  register value_ptr val;
+  register struct value *val;
 
   val = allocate_value (valtype);
   CHECK_TYPEDEF (valtype);
@@ -1914,15 +1914,16 @@ find_stub_with_shl_get (struct minimal_symbol *function, CORE_ADDR handle)
   struct symbol *get_sym, *symbol2;
   struct minimal_symbol *buff_minsym, *msymbol;
   struct type *ftype;
-  value_ptr *args;
-  value_ptr funcval, val;
+  struct value **args;
+  struct value *funcval;
+  struct value *val;
 
   int x, namelen, err_value, tmp = -1;
   CORE_ADDR endo_buff_addr, value_return_addr, errno_return_addr;
   CORE_ADDR stub_addr;
 
 
-  args = (value_ptr *) alloca (sizeof (value_ptr) * 8);		/* 6 for the arguments and one null one??? */
+  args = alloca (sizeof (struct value *) * 8);		/* 6 for the arguments and one null one??? */
   funcval = find_function_in_inferior ("__d_shl_get");
   get_sym = lookup_symbol ("__d_shl_get", NULL, VAR_NAMESPACE, NULL, NULL);
   buff_minsym = lookup_minimal_symbol ("__buffer", NULL, NULL);
@@ -2009,7 +2010,7 @@ cover_find_stub_with_shl_get (PTR args_untyped)
 
 CORE_ADDR
 hppa_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
-		     value_ptr *args, struct type *type, int gcc_p)
+		     struct value **args, struct type *type, int gcc_p)
 {
   CORE_ADDR dyncall_addr;
   struct minimal_symbol *msymbol;
