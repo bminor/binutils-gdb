@@ -1,3 +1,13 @@
+2002-10-12  Adam Fedor  <fedor@gnu.org>
+
+	* language.c (binop_result_type): Add language_objc to case.
+        (integral_type): Likewise.
+        (character_type): Likewise.
+        (string_type): Likewise.
+        (boolean_type): Likewise.
+        (structured_type): Likewise.
+        (binop_type_check): Likewise.
+
 2002-10-11  Adam Fedor  <fedor@gnu.org>
 
 	* printcmd.c (address_info): Print 'self' for ObjC.
