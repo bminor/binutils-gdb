@@ -60,8 +60,6 @@ maintainer works with the native maintainer when resolving API issues.
 	alpha		--target=alpha-elf ,-Werror
 			Maintenance only
 
-	arc		(--target=arc-elf OBSOLETE)
-
 	arm		--target=arm-elf ,
 			Fernando Nasser		fnasser@redhat.com
 			Scott Bambrough		scottb@netwinder.org
@@ -77,10 +75,6 @@ maintainer works with the native maintainer when resolving API issues.
 	d10v		--target=d10v-elf ,-Werror
 			Maintenance only
 
-	d30v		(--target=d30v-elf OBSOLETE)
-
-	fr30		(--target=fr30-elf OBSOLETE)
-
 	h8300		--target=h8300hms ,-Werror
 			Maintenance only
 
@@ -90,8 +84,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	i386		--target=i386-elf ,-Werror
 			Mark Kettenis           kettenis@gnu.org
-
-	i960		(--target=i960-coff OBSOLETE)
 
 	ia64		--target=ia64-linux-gnu ,-Werror
 			(--target=ia64-elf broken)
@@ -106,8 +98,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	m68k		--target=m68k-elf ,-Werror
 			Maintenance only
-
-	m88k		(--target=m88k OBSOLETE)
 
 	mcore		--target=mcore-elf ,-Werror
 			Maintenance only
