@@ -64,7 +64,6 @@ complain (va_alist)
 {
   va_list args;
   struct complaint *complaint;
-  char *val;
 
   va_start (args);
   complaint = va_arg (args, struct complaint *);
@@ -142,6 +141,7 @@ clear_complaints (sym_reading, noisy)
   complaint_series = sym_reading ? 1 + noisy : 0;
 }
 
+void
 _initialize_complaints ()
 {
   add_show_from_set

@@ -174,22 +174,22 @@ evaluate_subexp (expect_type, exp, pos, noside)
   switch (op)
     {
     case OP_SCOPE:
-      tem = strlen (&exp->elts[pc + 2].string);
-      (*pos) += 3 + ((tem + sizeof (union exp_element))
+      tem = longest_to_int (exp->elts[pc + 2].longconst);
+      (*pos) += 4 + ((tem + sizeof (union exp_element))
 		     / sizeof (union exp_element));
       arg1 = value_struct_elt_for_reference (exp->elts[pc + 1].type,
 					     0,
 					     exp->elts[pc + 1].type,
-					     &exp->elts[pc + 2].string,
+					     &exp->elts[pc + 3].string,
 					     expect_type);
       if (arg1 == NULL)
-	error ("There is no field named %s", &exp->elts[pc + 2].string);
+	error ("There is no field named %s", &exp->elts[pc + 3].string);
       return arg1;
 
     case OP_LONG:
       (*pos) += 3;
       return value_from_longest (exp->elts[pc + 1].type,
-			      exp->elts[pc + 2].longconst);
+				 exp->elts[pc + 2].longconst);
 
     case OP_DOUBLE:
       (*pos) += 3;
@@ -237,22 +237,24 @@ evaluate_subexp (expect_type, exp, pos, noside)
       (*pos) += 2;
       return value_of_register (longest_to_int (exp->elts[pc + 1].longconst));
 
+    /* start-sanitize-chill */
     case OP_BOOL:
       (*pos) += 2;
       return value_from_longest (builtin_type_chill_bool,
 				 exp->elts[pc + 1].longconst);
+    /* end-sanitize-chill */
 
     case OP_INTERNALVAR:
       (*pos) += 2;
       return value_of_internalvar (exp->elts[pc + 1].internalvar);
 
     case OP_STRING:
-      tem = strlen (&exp->elts[pc + 1].string);
-      (*pos) += 2 + ((tem + sizeof (union exp_element))
+      tem = longest_to_int (exp->elts[pc + 1].longconst);
+      (*pos) += 3 + ((tem + sizeof (union exp_element))
 		     / sizeof (union exp_element));
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      return value_string (&exp->elts[pc + 1].string, tem);
+      return value_string (&exp->elts[pc + 2].string, tem);
 
     case TERNOP_COND:
       /* Skip third and second args to evaluate the first one.  */
@@ -347,8 +349,8 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	  nargs = longest_to_int (exp->elts[pc + 1].longconst) + 1;
 	  /* First, evaluate the structure into arg2 */
 	  pc2 = (*pos)++;
-	  tem2 = strlen (&exp->elts[pc2 + 1].string);
-	  *pos += 2 + (tem2 + sizeof (union exp_element)) / sizeof (union exp_element);
+	  tem2 = longest_to_int (exp->elts[pc2 + 1].longconst);
+	  *pos += 3 + (tem2 + sizeof (union exp_element)) / sizeof (union exp_element);
 	  if (noside == EVAL_SKIP)
 	    goto nosideret;
 
@@ -383,7 +385,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 
 	  argvec[1] = arg2;
 	  argvec[0] =
-	    value_struct_elt (&temp, argvec+1, &exp->elts[pc2 + 1].string,
+	    value_struct_elt (&temp, argvec+1, &exp->elts[pc2 + 2].string,
 			      &static_memfuncp,
 			      op == STRUCTOP_STRUCT
 			      ? "structure" : "structure pointer");
@@ -428,40 +430,40 @@ evaluate_subexp (expect_type, exp, pos, noside)
       return call_function_by_hand (argvec[0], nargs, argvec + 1);
 
     case STRUCTOP_STRUCT:
-      tem = strlen (&exp->elts[pc + 1].string);
-      (*pos) += 2 + ((tem + sizeof (union exp_element))
+      tem = longest_to_int (exp->elts[pc + 1].longconst);
+      (*pos) += 3 + ((tem + sizeof (union exp_element))
 		     / sizeof (union exp_element));
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	return value_zero (lookup_struct_elt_type (VALUE_TYPE (arg1),
-						   &exp->elts[pc + 1].string,
+						   &exp->elts[pc + 2].string,
 						   0),
 			   lval_memory);
       else
 	{
 	  value temp = arg1;
-	  return value_struct_elt (&temp, (value *)0, &exp->elts[pc + 1].string,
+	  return value_struct_elt (&temp, (value *)0, &exp->elts[pc + 2].string,
 				   (int *) 0, "structure");
 	}
 
     case STRUCTOP_PTR:
-      tem = strlen (&exp->elts[pc + 1].string);
-      (*pos) += 2 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
+      tem = longest_to_int (exp->elts[pc + 1].longconst);
+      (*pos) += 3 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	return value_zero (lookup_struct_elt_type (TYPE_TARGET_TYPE
 						   (VALUE_TYPE (arg1)),
-						   &exp->elts[pc + 1].string,
+						   &exp->elts[pc + 2].string,
 						   0),
 			   lval_memory);
       else
 	{
 	  value temp = arg1;
-	  return value_struct_elt (&temp, (value *)0, &exp->elts[pc + 1].string,
+	  return value_struct_elt (&temp, (value *)0, &exp->elts[pc + 2].string,
 				   (int *) 0, "structure pointer");
 	}
 
@@ -804,9 +806,8 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	{
 	  if (op == OP_SCOPE)
 	    {
-	      char *name = &exp->elts[pc+3].string;
-	      int temm = strlen (name);
-	      (*pos) += 2 + (temm + sizeof (union exp_element)) / sizeof (union exp_element);
+	      int temm = longest_to_int (exp->elts[pc+3].longconst);
+	      (*pos) += 3 + (temm + sizeof (union exp_element)) / sizeof (union exp_element);
 	    }
 	  else
 	    evaluate_subexp (expect_type, exp, pos, EVAL_SKIP);

@@ -291,53 +291,78 @@ allocate_stub_method (type)
   return (mtype);
 }
 
+/* Create a range type using either a blank type supplied in RESULT_TYPE,
+   or creating a new type.  Indices will be of type INDEX_TYPE, and will
+   range from LOW_BOUND to HIGH_BOUND, inclusive.
+
+   FIXME:  Maybe we should check the TYPE_CODE of RESULT_TYPE to make
+   sure it is TYPE_CODE_UNDEF before we bash it into a range type? */
+
+struct type *
+create_range_type (result_type, index_type, low_bound, high_bound)
+     struct type *result_type;
+     struct type *index_type;
+     int low_bound;
+     int high_bound;
+{
+  if (result_type == NULL)
+    {
+      result_type = alloc_type (TYPE_OBJFILE (index_type));
+    }
+  TYPE_CODE (result_type) = TYPE_CODE_RANGE;
+  TYPE_TARGET_TYPE (result_type) = index_type;
+  TYPE_LENGTH (result_type) = TYPE_LENGTH (index_type);
+  TYPE_NFIELDS (result_type) = 2;
+  TYPE_FIELDS (result_type) = (struct field *)
+    TYPE_ALLOC (result_type, 2 * sizeof (struct field));
+  memset (TYPE_FIELDS (result_type), 0, 2 * sizeof (struct field));
+  TYPE_FIELD_BITPOS (result_type, 0) = low_bound;
+  TYPE_FIELD_BITPOS (result_type, 1) = high_bound;
+  TYPE_FIELD_TYPE (result_type, 0) = builtin_type_int;		/* FIXME */
+  TYPE_FIELD_TYPE (result_type, 1) = builtin_type_int;		/* FIXME */
+
+  return (result_type);
+}
+
+
 /* Create an array type using either a blank type supplied in RESULT_TYPE,
    or creating a new type.  Elements will be of type ELEMENT_TYPE, the
-   indices will be of type INDEX_TYPE, and will range from LOW_BOUND
-   to HIGH_BOUND, inclusive.
+   indices will be of type RANGE_TYPE.
 
    FIXME:  Maybe we should check the TYPE_CODE of RESULT_TYPE to make
    sure it is TYPE_CODE_UNDEF before we bash it into an array type? */
 
 struct type *
-create_array_type (result_type, element_type, index_type, low_bound,
-		   high_bound)
+create_array_type (result_type, element_type, range_type)
      struct type *result_type;
      struct type *element_type;
-     struct type *index_type;
-     int low_bound;
-     int high_bound;
+     struct type *range_type;
 {
-  struct type *range_type;
+  int low_bound;
+  int high_bound;
 
-  /* Create a blank type if we are not given one to bash on. */
+  if (TYPE_CODE (range_type) != TYPE_CODE_RANGE)
+    {
+      /* FIXME:  We only handle range types at the moment.  Complain and
+	 create a dummy range type to use. */
+      warning ("internal error:  array index type must be a range type");
+      range_type = lookup_fundamental_type (TYPE_OBJFILE (range_type),
+					    FT_INTEGER);
+      range_type = create_range_type ((struct type *) NULL, range_type, 0, 0);
+    }
   if (result_type == NULL)
     {
       result_type = alloc_type (TYPE_OBJFILE (element_type));
     }
-
-  /* Create a range type.  */
-  range_type = alloc_type (TYPE_OBJFILE (element_type));
-  TYPE_CODE (range_type) = TYPE_CODE_RANGE;
-  TYPE_TARGET_TYPE (range_type) = index_type;
-  TYPE_LENGTH (range_type) = sizeof (int);  /* This should never be needed. */
-  TYPE_NFIELDS (range_type) = 2;
-  TYPE_FIELDS (range_type) = (struct field *)
-    TYPE_ALLOC (range_type, 2 * sizeof (struct field));
-  memset (TYPE_FIELDS (range_type), 0, 2 * sizeof (struct field));
-  TYPE_FIELD_BITPOS (range_type, 0) = low_bound;
-  TYPE_FIELD_BITPOS (range_type, 1) = high_bound;
-  TYPE_FIELD_TYPE (range_type, 0) = builtin_type_int; /* FIXME */
-  TYPE_FIELD_TYPE (range_type, 1) = builtin_type_int; /* FIXME */
-
-  /* Create the array type. */
   TYPE_CODE (result_type) = TYPE_CODE_ARRAY;
   TYPE_TARGET_TYPE (result_type) = element_type;
+  low_bound = TYPE_FIELD_BITPOS (range_type, 0);
+  high_bound = TYPE_FIELD_BITPOS (range_type, 1);
   TYPE_LENGTH (result_type) =
     TYPE_LENGTH (element_type) * (high_bound - low_bound + 1);
   TYPE_NFIELDS (result_type) = 1;
-  TYPE_FIELDS (result_type) = (struct field *)
-    TYPE_ALLOC (result_type, sizeof (struct field));
+  TYPE_FIELDS (result_type) =
+    (struct field *) TYPE_ALLOC (result_type, sizeof (struct field));
   memset (TYPE_FIELDS (result_type), 0, sizeof (struct field));
   TYPE_FIELD_TYPE (result_type, 0) = range_type;
   TYPE_VPTR_FIELDNO (result_type) = -1;
@@ -1072,8 +1097,6 @@ print_cplus_stuff (type, spaces)
      struct type *type;
      int spaces;
 {
-  int bitno;
-
   printfi_filtered (spaces, "n_baseclasses %d\n",
 		    TYPE_N_BASECLASSES (type));
   printfi_filtered (spaces, "nfn_fields %d\n",

@@ -135,10 +135,6 @@ yyparse PARAMS ((void));
     int *ivec;
   }
 
-%{
-static int parse_number PARAMS ((void));
-%}
-
 %token <voidval> FIXME
 
 %token <typed_val>	INTEGER_LITERAL
@@ -874,8 +870,6 @@ decode_integer_literal (valptr, tokptrptr)
   char *tokptr = *tokptrptr;
   int base = 0;
   int ival = 0;
-  int digits = 0;
-  int temp;
   int explicit_base = 0;
   
   /* Look for an explicit base specifier, which is optional. */
@@ -1042,9 +1036,9 @@ match_integer_literal ()
     }
 }
 
+#if 0
 static void convert_float ()
 {
-#if 0
     extern double strtod ();
     double d;
     char	tmp[256];
@@ -1075,8 +1069,8 @@ static void convert_float ()
 	;
     }
     yylval.dval = d;
-#endif
 }
+#endif
 
 /* Take care of parsing a number (anything that starts with a digit).
    Set yylval and return the token type; update lexptr.
@@ -1084,35 +1078,30 @@ static void convert_float ()
 
 /*** Needs some error checking for the float case ***/
 
-static int
-parse_number ()
-{
-}
-
 struct token
 {
   char *operator;
   int token;
 };
 
-const static struct token tokentab5[] =
+static const struct token tokentab5[] =
 {
     { "ANDIF", ANDIF }
 };
 
-const static struct token tokentab4[] =
+static const struct token tokentab4[] =
 {
     { "ORIF", ORIF }
 };
 
-const static struct token tokentab3[] =
+static const struct token tokentab3[] =
 {
     { "NOT", NOT },
     { "XOR", LOGXOR },
     { "AND", LOGAND }
 };
 
-const static struct token tokentab2[] =
+static const struct token tokentab2[] =
 {
     { "//", SLASH_SLASH },
     { "/=", NOTEQUAL },
@@ -1265,6 +1254,18 @@ yylex ()
 	      case LOC_STATIC:
 		/* Found a global or local static variable. */
 		return (LOCATION_NAME);
+	      case LOC_UNDEF:
+	      case LOC_CONST:
+	      case LOC_REGISTER:
+	      case LOC_ARG:
+	      case LOC_REF_ARG:
+	      case LOC_REGPARM:
+	      case LOC_LOCAL:
+	      case LOC_TYPEDEF:
+	      case LOC_LABEL:
+	      case LOC_CONST_BYTES:
+	      case LOC_LOCAL_ARG:
+		break;
 	      }
 	  }
 	else if (!have_full_symbols () && !have_partial_symbols ())

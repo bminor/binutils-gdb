@@ -22,3 +22,10 @@ m2_parse PARAMS ((void));	/* Defined in m2-exp.y */
 
 extern void
 m2_error PARAMS ((char *));	/* Defined in m2-exp.y */
+
+extern void			/* Defined in m2-typeprint.c */
+m2_print_type PARAMS ((struct type *, char *, FILE *, int, int));
+
+extern int
+m2_val_print PARAMS ((struct type *, char *, CORE_ADDR, FILE *, int, int,
+		      int, enum val_prettyprint));

@@ -427,9 +427,10 @@ source_info (ignore, from_tty)
   if (s->fullname)
     printf_filtered ("Located in %s\n", s->fullname);
   if (s->nlines)
-    printf_filtered ("Contains %d lines\n", s->nlines);
+    printf_filtered ("Contains %d line%s.\n", s->nlines,
+		     s->nlines == 1 ? "" : "s");
 
-  printf_filtered("Source language %s.\n", language_str (s->language));
+  printf_filtered("Source language is %s.\n", language_str (s->language));
 }
 
 
@@ -610,13 +611,15 @@ find_source_lines (s, desc)
      int desc;
 {
   struct stat st;
-  char c;
   register char *data, *p, *end;
   int nlines = 0;
   int lines_allocated = 1000;
   int *line_charpos;
   long exec_mtime;
   int size;
+#ifdef LSEEK_NOT_LINEAR
+  char c;
+#endif
 
   line_charpos = (int *) xmmalloc (s -> objfile -> md,
 				   lines_allocated * sizeof (int));
@@ -779,6 +782,8 @@ identify_source_line (s, line, mid_statement)
     get_filename_and_charpos (s, (char **)NULL);
   if (s->fullname == 0)
     return 0;
+  if (line >= s->nlines) 
+   return 0;
   printf ("\032\032%s:%d:%d:%s:0x%x\n", s->fullname,
 	  line, s->line_charpos[line - 1],
 	  mid_statement ? "middle" : "beg",

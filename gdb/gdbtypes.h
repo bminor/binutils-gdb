@@ -195,6 +195,7 @@ struct type
 	 containing structure.  For a function type, this is the
 	 position in the argument list of this argument.
 	 For a range bound or enum value, this is the value itself.
+	 (FIXME:  What about ranges larger than host int size?)
 	 For BITS_BIG_ENDIAN=1 targets, it is the bit offset to the MSB.
 	 For BITS_BIG_ENDIAN=0 targets, it is the bit offset to the LSB. */
 
@@ -583,8 +584,10 @@ extern struct type *
 lookup_function_type PARAMS ((struct type *));
 
 extern struct type *
-create_array_type PARAMS ((struct type *, struct type *, struct type *, int,
-			   int));
+create_range_type PARAMS ((struct type *, struct type *, int, int));
+
+extern struct type *
+create_array_type PARAMS ((struct type *, struct type *, struct type *));
 
 extern struct type *
 lookup_unsigned_typename PARAMS ((char *));

@@ -137,18 +137,6 @@ static void
 display_command PARAMS ((char *, int));
 
 static void
-ptype_command PARAMS ((char *, int));
-
-static struct type *
-ptype_eval PARAMS ((struct expression *));
-
-static void
-whatis_command PARAMS ((char *, int));
-
-static void
-whatis_exp PARAMS ((char *, int));
-
-static void
 x_command PARAMS ((char *, int));
 
 static void
@@ -445,9 +433,9 @@ print_scalar_formatted (valaddr, type, format, size, stream)
 
     case 'd':
 #ifdef LONG_LONG
-      fprintf_filtered (stream, "%lld", val_long);
+      fprintf_filtered (stream, local_decimal_format_custom("ll"), val_long);
 #else
-      fprintf_filtered (stream, "%d", val_long);
+      fprintf_filtered (stream, local_decimal_format(), val_long);
 #endif
       break;
 
@@ -531,7 +519,9 @@ print_scalar_formatted (valaddr, type, format, size, stream)
 	    if (*cp == '\0')
 	      cp--;
 	  }
+	fprintf_filtered (stream, local_binary_format_prefix());
         fprintf_filtered (stream, cp);
+	fprintf_filtered (stream, local_binary_format_suffix());
       }
       break;
 
@@ -1052,94 +1042,7 @@ x_command (exp, from_tty)
       set_internalvar (lookup_internalvar ("__"), last_examine_value);
     }
 }
-
-/* Commands for printing types of things.  */
 
-/* Print type of EXP, or last thing in value history if EXP == NULL.
-   show is passed to type_print.  */
-static void
-whatis_exp (exp, show)
-     char *exp;
-     int show;
-{
-  struct expression *expr;
-  register value val;
-  register struct cleanup *old_chain;
-
-  if (exp)
-    {
-      expr = parse_expression (exp);
-      old_chain = make_cleanup (free_current_contents, &expr);
-      val = evaluate_type (expr);
-    }
-  else
-    val = access_value_history (0);
-
-  printf_filtered ("type = ");
-  type_print (VALUE_TYPE (val), "", stdout, show);
-  printf_filtered ("\n");
-
-  if (exp)
-    do_cleanups (old_chain);
-}
-
-/* ARGSUSED */
-static void
-whatis_command (exp, from_tty)
-     char *exp;
-     int from_tty;
-{
-  /* Most of the time users do not want to see all the fields
-     in a structure.  If they do they can use the "ptype" command.
-     Hence the "-1" below.  */
-  whatis_exp (exp, -1);
-}
-
-/* Simple subroutine for ptype_command.  */
-static
-struct type *
-ptype_eval(exp)
-   struct expression *exp;
-{
-   if(exp->elts[0].opcode==OP_TYPE)
-      return exp->elts[1].type;
-   else
-      return 0;
-}
-
-/* TYPENAME is either the name of a type, or an expression.  */
-/* ARGSUSED */
-static void
-ptype_command (typename, from_tty)
-     char *typename;
-     int from_tty;
-{
-  register struct type *type;
-  struct expression *expr;
-  register struct cleanup *old_chain;
-
-  if (typename)
-  {
-     expr = parse_expression (typename);
-     old_chain = make_cleanup (free_current_contents, &expr);
-     type = ptype_eval (expr);
-
-     if(type)
-     {
-	printf_filtered ("type = ");
-	type_print (type, "", stdout, 1);
-	printf_filtered ("\n");
-	do_cleanups (old_chain);
-     }
-     else
-     {
-	do_cleanups (old_chain);
-	whatis_exp (typename, 1);
-     }
-  }
-  else
-     whatis_exp (typename, 1);
-}
 
 /* Add an expression to the auto-display chain.
    Specify the expression.  */
@@ -1211,7 +1114,7 @@ clear_displays ()
 {
   register struct display *d;
 
-  while (d = display_chain)
+  while ((d = display_chain) != NULL)
     {
       free ((PTR)d->exp);
       display_chain = d->next;
@@ -1583,18 +1486,17 @@ print_frame_args (func, fi, num, stream)
 	continue;
       }
 
-      /* We have to re-look-up the symbol because arguments often have
+      /* If the symbol name is non-null, 
+	 we have to re-look-up the symbol because arguments often have
 	 two entries (one a parameter, one a register or local), and the one
 	 we want is the non-parm, which lookup_symbol will find for
-	 us.  After this, sym could be any SYMBOL_CLASS...  */
-#ifdef IBM6000_TARGET
-      /* AIX/RS6000 implements a concept of traceback tables, in which case
-         it creates nameless parameters. Looking for those parameter symbols
-	 will result in an error. */
+	 us.  After this, sym could be any SYMBOL_CLASS... 
 
-      if ( *SYMBOL_NAME (sym))
-#endif
-      sym = lookup_symbol (SYMBOL_NAME (sym),
+	 Null parameter names occur on the RS/6000, for traceback tables.
+	 FIXME, should we even print them?  */
+
+      if (*SYMBOL_NAME (sym))
+        sym = lookup_symbol (SYMBOL_NAME (sym),
 		    b, VAR_NAMESPACE, (int *)NULL, (struct symtab **)NULL);
 
       /* Print the current arg.  */
@@ -2005,15 +1907,6 @@ with this command or \"print\".");
 Default is the function surrounding the pc of the selected frame.\n\
 With a single argument, the function surrounding that address is dumped.\n\
 Two arguments are taken as a range of memory to dump.");
-
-  add_com ("ptype", class_vars, ptype_command,
-	   "Print definition of type TYPE.\n\
-Argument may be a type name defined by typedef, or \"struct STRUCTNAME\"\n\
-or \"union UNIONNAME\" or \"enum ENUMNAME\".\n\
-The selected stack frame's lexical context is used to look up the name.");
-
-  add_com ("whatis", class_vars, whatis_command,
-	   "Print data type of expression EXP.");
 
 #if 0
   add_com ("whereis", class_vars, whereis_command,

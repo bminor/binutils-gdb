@@ -1031,7 +1031,9 @@ struct_type (dip, thisdie, enddie, objfile)
   char *tpart1;
   struct dieinfo mbr;
   char *nextdie;
+#if !BITS_BIG_ENDIAN
   int anonymous_size;
+#endif
   
   if ((type = lookup_utype (dip -> die_ref)) == NULL)
     {
@@ -1353,6 +1355,7 @@ decode_subscript_data_item (scan, end)
   struct type *typep = NULL;	/* Array type we are building */
   struct type *nexttype;	/* Type of each element (may be array) */
   struct type *indextype;	/* Type of this index */
+  struct type *rangetype;
   unsigned int format;
   unsigned short fundtype;
   unsigned long lowbound;
@@ -1384,8 +1387,9 @@ decode_subscript_data_item (scan, end)
 	  complain (&subscript_data_items, DIE_ID, DIE_NAME);
 	  nexttype = dwarf_fundamental_type (current_objfile, FT_INTEGER);
 	}
-      typep = create_array_type ((struct type *) NULL, nexttype, indextype,
-				 lowbound, highbound);
+      rangetype = create_range_type ((struct type *) NULL, indextype,
+				      lowbound, highbound);
+      typep = create_array_type ((struct type *) NULL, nexttype, rangetype);
       break;
     case FMT_FT_C_X:
     case FMT_FT_X_C:
@@ -1395,13 +1399,15 @@ decode_subscript_data_item (scan, end)
     case FMT_UT_X_C:
     case FMT_UT_X_X:
       complain (&unhandled_array_subscript_format, DIE_ID, DIE_NAME, format);
-      typep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
-      typep = create_array_type ((struct type *) NULL, typep, typep, 0, 1);
+      nexttype = dwarf_fundamental_type (current_objfile, FT_INTEGER);
+      rangetype = create_range_type ((struct type *) NULL, nexttype, 0, 0);
+      typep = create_array_type ((struct type *) NULL, nexttype, rangetype);
       break;
     default:
       complain (&unknown_array_subscript_format, DIE_ID, DIE_NAME, format);
-      typep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
-      typep = create_array_type ((struct type *) NULL, typep, typep, 0, 1);
+      nexttype = dwarf_fundamental_type (current_objfile, FT_INTEGER);
+      rangetype = create_range_type ((struct type *) NULL, nexttype, 0, 0);
+      typep = create_array_type ((struct type *) NULL, nexttype, rangetype);
       break;
     }
   return (typep);

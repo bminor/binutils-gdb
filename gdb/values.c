@@ -314,7 +314,7 @@ clear_value_history ()
   while (value_history_chain)
     {
       for (i = 0; i < VALUE_HISTORY_CHUNK; i++)
-	if (val = value_history_chain->values[i])
+	if ((val = value_history_chain->values[i]) != NULL)
 	  free ((PTR)val);
       next = value_history_chain->next;
       free ((PTR)value_history_chain);

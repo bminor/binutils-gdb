@@ -211,7 +211,6 @@ c_create_fundamental_type (objfile, typeid)
      int typeid;
 {
   register struct type *type = NULL;
-  register int nbytes;
 
   switch (typeid)
     {
@@ -328,7 +327,7 @@ c_create_fundamental_type (objfile, typeid)
 /* Table mapping opcodes into strings for printing operators
    and precedences of the operators.  */
 
-const static struct op_print c_op_print_tab[] =
+static const struct op_print c_op_print_tab[] =
   {
     {",",  BINOP_COMMA, PREC_COMMA, 0},
     {"=",  BINOP_ASSIGN, PREC_ASSIGN, 1},
@@ -418,6 +417,8 @@ const struct language_defn c_language_defn = {
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_create_fundamental_type,	/* Create fundamental type in this language */
+  c_print_type,			/* Print a type using appropriate syntax */
+  c_val_print,			/* Print a value using appropriate syntax */
   &BUILTIN_TYPE_LONGEST,	/* longest signed   integral type */
   &BUILTIN_TYPE_UNSIGNED_LONGEST,/* longest unsigned integral type */
   &builtin_type_double,		/* longest floating point type */ /*FIXME*/
@@ -440,6 +441,8 @@ const struct language_defn cplus_language_defn = {
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_create_fundamental_type,	/* Create fundamental type in this language */
+  c_print_type,			/* Print a type using appropriate syntax */
+  c_val_print,			/* Print a value using appropriate syntax */
   &BUILTIN_TYPE_LONGEST,	 /* longest signed   integral type */
   &BUILTIN_TYPE_UNSIGNED_LONGEST,/* longest unsigned integral type */
   &builtin_type_double,		/* longest floating point type */ /*FIXME*/

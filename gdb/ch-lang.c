@@ -164,7 +164,6 @@ chill_create_fundamental_type (objfile, typeid)
      int typeid;
 {
   register struct type *type = NULL;
-  register int nbytes;
 
   switch (typeid)
     {
@@ -173,16 +172,20 @@ chill_create_fundamental_type (objfile, typeid)
 	   language, create the equivalent of a C integer type with the
 	   name "<?type?>".  When all the dust settles from the type
 	   reconstruction work, this should probably become an error. */
-	type = init_type (TYPE_CODE_INT,
-			  TARGET_INT_BIT / TARGET_CHAR_BIT,
-			  0, "<?type?>", objfile);
+	type = init_type (TYPE_CODE_INT, 2, 0, "<?type?>", objfile);
         warning ("internal error: no chill fundamental type %d", typeid);
+	break;
+      case FT_VOID:
+	/* FIXME:  Currently the GNU Chill compiler emits some DWARF entries for
+	   typedefs, unrelated to anything directly in the code being compiled,
+	   that have some FT_VOID types.  Just fake it for now. */
+	type = init_type (TYPE_CODE_VOID, 0, 0, "<?VOID?>", objfile);
 	break;
       case FT_BOOLEAN:
 	type = init_type (TYPE_CODE_BOOL, 1, TYPE_FLAG_UNSIGNED, "BOOL", objfile);
 	break;
       case FT_CHAR:
-	type = init_type (TYPE_CODE_INT, 1, TYPE_FLAG_UNSIGNED, "CHAR", objfile);
+	type = init_type (TYPE_CODE_CHAR, 1, TYPE_FLAG_UNSIGNED, "CHAR", objfile);
 	break;
       case FT_SIGNED_CHAR:
 	type = init_type (TYPE_CODE_INT, 1, TYPE_FLAG_SIGNED, "BYTE", objfile);
@@ -215,7 +218,7 @@ chill_create_fundamental_type (objfile, typeid)
 
 /* Table of operators and their precedences for printing expressions.  */
 
-const static struct op_print chill_op_print_tab[] = {
+static const struct op_print chill_op_print_tab[] = {
     {"AND", BINOP_LOGICAL_AND, PREC_LOGICAL_AND, 0},
     {"OR",  BINOP_LOGICAL_OR, PREC_LOGICAL_OR, 0},
     {"NOT", UNOP_LOGICAL_NOT, PREC_PREFIX, 0},
@@ -265,6 +268,8 @@ const struct language_defn chill_language_defn = {
   chill_printchar,		/* print a character constant */
   chill_printstr,		/* function to print a string constant */
   chill_create_fundamental_type,/* Create fundamental type in this language */
+  chill_print_type,		/* Print a type using appropriate syntax */
+  chill_val_print,		/* Print a value using appropriate syntax */
   &BUILTIN_TYPE_LONGEST,	/* longest signed   integral type */
   &BUILTIN_TYPE_UNSIGNED_LONGEST,/* longest unsigned integral type */
   &builtin_type_chill_real,	/* longest floating point type */

@@ -1555,7 +1555,8 @@ upgrade_type(tpp, tq, ax, bigend)
 		return 0;
 
 	case tqArray:
-		/* We should probably try to use create_array_type here.  FIXME! */
+		/* We should probably try to use create_range_type and
+		   create_array_type here.  FIXME! */
 		off = 0;
 		t = init_type(TYPE_CODE_ARRAY, 0, 0, (char *) NULL,
 			      (struct objfile *) NULL);

@@ -76,20 +76,20 @@ print_subexp (exp, pos, stream, prec)
     case OP_SCOPE:
       myprec = PREC_PREFIX;
       assoc = 0;
-      (*pos) += 2;
+      (*pos) += 3;
       print_subexp (exp, pos, stream,
 		    (enum precedence) ((int) myprec + assoc));
       fputs_filtered (" :: ", stream);
-      nargs = strlen (&exp->elts[pc + 2].string);
-      (*pos) += 1 + (nargs + sizeof (union exp_element)) / sizeof (union exp_element);
+      nargs = longest_to_int (exp->elts[pc + 2].longconst);
+      (*pos) += 2 + (nargs + sizeof (union exp_element)) / sizeof (union exp_element);
 
-      fputs_filtered (&exp->elts[pc + 2].string, stream);
+      fputs_filtered (&exp->elts[pc + 3].string, stream);
       return;
 
     case OP_LONG:
       (*pos) += 3;
       value_print (value_from_longest (exp->elts[pc + 1].type,
-				    exp->elts[pc + 2].longconst),
+				       exp->elts[pc + 2].longconst),
 		   stream, 0, Val_no_prettyprint);
       return;
 
@@ -145,12 +145,13 @@ print_subexp (exp, pos, stream, prec)
       return;
 
     case OP_STRING:
-      nargs = strlen (&exp->elts[pc + 1].string);
-      (*pos) += 2 + (nargs + sizeof (union exp_element)) / sizeof (union exp_element);
-      /* local_printstr will print using the current repeat count threshold.
+      nargs = longest_to_int (exp -> elts[pc + 1].longconst);
+      (*pos) += 3 + (nargs + sizeof (union exp_element))
+	/ sizeof (union exp_element);
+      /* LA_PRINT_STRING will print using the current repeat count threshold.
 	 If necessary, we can temporarily set it to zero, or pass it as an
-	 additional parameter to local_printstr.  -fnf */
-      local_printstr (stream, &exp->elts[pc + 1].string, nargs, 0);
+	 additional parameter to LA_PRINT_STRING.  -fnf */
+      LA_PRINT_STRING (stream, &exp->elts[pc + 2].string, nargs, 0);
       return;
 
     case TERNOP_COND:
@@ -170,20 +171,20 @@ print_subexp (exp, pos, stream, prec)
       return;
 
     case STRUCTOP_STRUCT:
-      tem = strlen (&exp->elts[pc + 1].string);
-      (*pos) += 2 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
+      tem = longest_to_int (exp->elts[pc + 1].longconst);
+      (*pos) += 3 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
       fputs_filtered (".", stream);
-      fputs_filtered (&exp->elts[pc + 1].string, stream);
+      fputs_filtered (&exp->elts[pc + 2].string, stream);
       return;
 
     /* Will not occur for Modula-2 */
     case STRUCTOP_PTR:
-      tem = strlen (&exp->elts[pc + 1].string);
-      (*pos) += 2 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
+      tem = longest_to_int (exp->elts[pc + 1].longconst);
+      (*pos) += 3 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
       fputs_filtered ("->", stream);
-      fputs_filtered (&exp->elts[pc + 1].string, stream);
+      fputs_filtered (&exp->elts[pc + 2].string, stream);
       return;
 
     case BINOP_SUBSCRIPT:

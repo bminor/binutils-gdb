@@ -332,6 +332,7 @@ value_of_trapped_internalvar (var)
   char *name = var->name;
   value val;
   struct type *type;
+  struct type *range_type;
   long len = *read_vector_register (VL_REGNUM);
   if (len <= 0 || len > 128) len = 128;
 
@@ -350,8 +351,10 @@ value_of_trapped_internalvar (var)
       long vm[4];
       long i, *p;
       bcopy (read_vector_register_1 (VM_REGNUM), vm, sizeof vm);
-      type = create_array_type ((struct type *) NULL, builtin_type_int,
-				builtin_type_int, 0, len - 1);
+      range_type =
+	create_range_type ((struct type *) NULL, builtin_type_int, 0, len - 1);
+      type =
+	create_array_type ((struct type *) NULL, builtin_type_int, range_type);
       val = allocate_value (type);
       p = (long *) VALUE_CONTENTS (val);
       for (i = 0; i < len; i++) 
@@ -359,8 +362,11 @@ value_of_trapped_internalvar (var)
     }
   else if (name[0] == 'V')
     {
-      type = create_array_type ((struct type *) NULL, builtin_type_long_long,
-				builtin_type_int, 0, len - 1);
+      range_type =
+	create_range_type ((struct type *) NULL, builtin_type_int 0, len - 1);
+      type =
+	create_array_type ((struct type *) NULL, builtin_type_long_long,
+			   range_type);
       val = allocate_value (type);
       bcopy (read_vector_register_1 (name[1] - '0'),
 	     VALUE_CONTENTS (val), TYPE_LENGTH (type));
@@ -368,8 +374,11 @@ value_of_trapped_internalvar (var)
   else if (name[0] == 'v')
     {
       long *p1, *p2;
-      type = create_array_type ((struct type *) NULL, builtin_type_long,
-				builtin_type_int, 0, len - 1);
+      range_type =
+	create_range_type ((struct type *) NULL, builtin_type_int 0, len - 1);
+      type =
+	create_array_type ((struct type *) NULL, builtin_type_long,
+			   range_type);
       val = allocate_value (type);
       p1 = read_vector_register_1 (name[1] - '0');
       p2 = (long *) VALUE_CONTENTS (val);

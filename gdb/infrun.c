@@ -510,6 +510,7 @@ wait_for_inferior ()
   int remove_breakpoints_on_following_step = 0;
   int current_line;
   int handling_longjmp = 0;	/* FIXME */
+  struct symtab *symtab;
 
   sal = find_pc_line(prev_pc, 0);
   current_line = sal.line;
@@ -972,8 +973,9 @@ wait_for_inferior ()
 	      if (tmp != 0)
 		stop_func_start = tmp;
 
-	      if (find_pc_function (stop_func_start) != 0)
-	        goto step_into_function;
+	      symtab = find_pc_symtab (stop_pc);
+	      if (symtab && LINETABLE (symtab))
+		goto step_into_function;
 
 step_over_function:
 	      /* A subroutine call has happened.  */
@@ -1198,9 +1200,6 @@ save_pc:
 void
 normal_stop ()
 {
-  char *tem;
-  struct cmd_list_element *c;
-
   /* Make sure that the current_frame's pc is correct.  This
      is a correction for setting up the frame info before doing
      DECR_PC_AFTER_BREAK */
@@ -1301,6 +1300,7 @@ hook_stop_stub (cmd)
      char *cmd;
 {
   execute_user_command ((struct cmd_list_element *)cmd, 0);
+  return (0);
 }
 
 
@@ -1695,7 +1695,7 @@ Pass means let program see this signal; otherwise program doesn't know.\n\
 Ignore is a synonym for nopass and noignore is a synonym for pass.\n\
 Pass and Stop may be combined.");
 
-  stop_command = add_cmd ("stop", class_pseudo, NO_FUNCTION,
+  stop_command = add_cmd ("stop", class_obscure, not_just_help_class_command,
 	   "There is no `stop' command, but you can set a hook on `stop'.\n\
 This allows you to set a list of commands to be run each time execution\n\
 of the inferior program stops.", &cmdlist);

@@ -200,7 +200,6 @@ m2_create_fundamental_type (objfile, typeid)
      int typeid;
 {
   register struct type *type = NULL;
-  register int nbytes;
 
   switch (typeid)
     {
@@ -351,7 +350,7 @@ m2_create_fundamental_type (objfile, typeid)
 
 /* Table of operators and their precedences for printing expressions.  */
 
-const static struct op_print m2_op_print_tab[] = {
+static const struct op_print m2_op_print_tab[] = {
     {"+",   BINOP_ADD, PREC_ADD, 0},
     {"+",   UNOP_PLUS, PREC_PREFIX, 0},
     {"-",   BINOP_SUB, PREC_ADD, 0},
@@ -404,6 +403,8 @@ const struct language_defn m2_language_defn = {
   m2_printchar,			/* Print character constant */
   m2_printstr,			/* function to print string constant */
   m2_create_fundamental_type,	/* Create fundamental type in this language */
+  m2_print_type,		/* Print a type using appropriate syntax */
+  m2_val_print,			/* Print a value using appropriate syntax */
   &builtin_type_m2_int,		/* longest signed   integral type */
   &builtin_type_m2_card,	/* longest unsigned integral type */
   &builtin_type_m2_real,	/* longest floating point type */

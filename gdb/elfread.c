@@ -432,9 +432,7 @@ elf_symfile_read (objfile, section_offsets, mainline)
 {
   bfd *abfd = objfile->obfd;
   struct elfinfo ei;
-  struct dbx_symfile_info *dbx;
   struct cleanup *back_to;
-  asection *text_sect;
   CORE_ADDR offset;
 
   init_minimal_symbol_collection ();

@@ -1145,7 +1145,7 @@ find_pc_line (pc, notcurrent)
       val.pc = best->pc;
       if (best_end && (!alt || best_end < alt->pc))
 	val.end = best_end;
-      else if (alt->pc)
+      else if (alt)
 	val.end = alt->pc;
       else
 	val.end = BLOCK_END (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK));
@@ -2352,7 +2352,7 @@ list_symbols (regexp, class, bpt)
 		    /* Typedef that is not a C++ class */
 		    if (class == 2
 			&& SYMBOL_NAMESPACE (sym) != STRUCT_NAMESPACE)
-		      typedef_print (SYMBOL_TYPE(sym), sym, stdout);
+		      c_typedef_print (SYMBOL_TYPE(sym), sym, stdout);
 		    /* variable, func, or typedef-that-is-c++-class */
 		    else if (class < 2 || 
 			     (class == 2 && 
@@ -2367,13 +2367,15 @@ list_symbols (regexp, class, bpt)
 		      }
 		    else
 		      {
-# if 0
-/* FIXME, why is this zapped out? */
+# if 0  /* FIXME, why is this zapped out? */
 			char buf[1024];
-			type_print_base (TYPE_FN_FIELD_TYPE(t, i), stdout, 0, 0); 
-			type_print_varspec_prefix (TYPE_FN_FIELD_TYPE(t, i), stdout, 0); 
+			c_type_print_base (TYPE_FN_FIELD_TYPE(t, i),
+					   stdout, 0, 0); 
+			c_type_print_varspec_prefix (TYPE_FN_FIELD_TYPE(t, i),
+						     stdout, 0); 
 			sprintf (buf, " %s::", type_name_no_tag (t));
-			type_print_method_args (TYPE_FN_FIELD_ARGS (t, i), buf, name, stdout);
+			cp_type_print_method_args (TYPE_FN_FIELD_ARGS (t, i),
+						   buf, name, stdout);
 # endif
 		      }
 		  }

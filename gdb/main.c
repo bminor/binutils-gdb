@@ -898,7 +898,6 @@ execute_command (p, from_tty)
      int from_tty;
 {
   register struct cmd_list_element *c;
-  register struct command_line *cmdlines;
   register enum language flang;
   static int warned = 0;
 
@@ -2072,7 +2071,7 @@ echo_command (text, from_tty)
   register int c;
 
   if (text)
-    while (c = *p++)
+    while ((c = *p++) != '\0')
       {
 	if (c == '\\')
 	  {

@@ -98,33 +98,89 @@ struct language_format_info
 
 /* Structure tying together assorted information about a language.  */
 
-struct language_defn {
-  char *	   la_name;		/* Name of the language */
-  enum language    la_language;		/* its symtab language-enum (defs.h) */
-  struct type ** const
-		  *la_builtin_type_vector;  /* Its builtin types */
-  enum range_check la_range_check;	/* Default range checking */
-  enum type_check  la_type_check;	/* Default type checking */
-  int            (*la_parser) PARAMS((void));	/* Parser function */
-  void           (*la_error) PARAMS ((char *)); /* Parser error function */
-  void		 (*la_printchar) PARAMS ((int, FILE *));
-  void		 (*la_printstr) PARAMS ((FILE *, char *, unsigned int, int));
-  struct type   *(*la_fund_type) PARAMS ((struct objfile *, int));
-  struct type	 **la_longest_int;	/* Longest signed integral type */
-  struct type	 **la_longest_unsigned_int; /* Longest uns integral type */
-  struct type	 **la_longest_float;	/* Longest floating point type */
-  struct language_format_info
-		   la_binary_format;	/* Base 2 (binary) formats. */
-  struct language_format_info
-    		   la_octal_format;	/* Base 8 (octal) formats. */
-  struct language_format_info
-    		   la_decimal_format;	/* Base 10 (decimal) formats */
-  struct language_format_info
-    		   la_hex_format;	/* Base 16 (hexadecimal) formats */
-  const struct op_print
-		  *la_op_print_tab;	/* Table for printing expressions */
-/* Add fields above this point, so the magic number is always last. */
-  long 		   la_magic;		/* Magic number for compat checking */
+struct language_defn
+{
+  /* Name of the language */
+  
+  char *la_name;
+
+  /* its symtab language-enum (defs.h) */
+
+  enum language la_language;
+
+  /* Its builtin types */
+
+  struct type ** const *la_builtin_type_vector;
+
+  /* Default range checking */
+
+  enum range_check la_range_check;
+
+  /* Default type checking */
+
+  enum type_check la_type_check;
+
+  /* Parser function. */
+  
+  int (*la_parser) PARAMS((void));
+
+  /* Parser error function */
+
+  void (*la_error) PARAMS ((char *));
+
+  void (*la_printchar) PARAMS ((int, FILE *));
+
+  void (*la_printstr) PARAMS ((FILE *, char *, unsigned int, int));
+
+  struct type *(*la_fund_type) PARAMS ((struct objfile *, int));
+
+  /* Print a type using syntax appropriate for this language. */
+
+  void (*la_print_type) PARAMS ((struct type *, char *, FILE *, int, int));
+
+  /* Print a value using syntax appropriate for this language. */
+
+  int (*la_val_print) PARAMS ((struct type *, char *,  CORE_ADDR, FILE *,
+			       int, int, int, enum val_prettyprint));
+
+  /* Longest signed integral type */
+
+  struct type **la_longest_int;
+
+  /* Longest unsigned integral type */
+
+  struct type **la_longest_unsigned_int;
+
+  /* Longest floating point type */
+
+  struct type **la_longest_float;
+
+  /* Base 2 (binary) formats. */
+
+  struct language_format_info la_binary_format;
+
+  /* Base 8 (octal) formats. */
+
+  struct language_format_info la_octal_format;
+
+  /* Base 10 (decimal) formats */
+
+  struct language_format_info la_decimal_format;
+
+  /* Base 16 (hexadecimal) formats */
+
+  struct language_format_info la_hex_format;
+
+
+  /* Table for printing expressions */
+
+  const struct op_print *la_op_print_tab;
+
+  /* Add fields above this point, so the magic number is always last. */
+  /* Magic number for compat checking */
+
+  long la_magic;
+
 };
 
 #define LANG_MAGIC	910823L
@@ -181,6 +237,13 @@ set_language PARAMS ((enum language));
 #define create_fundamental_type(objfile,typeid) \
   (current_language->la_fund_type(objfile, typeid))
 
+#define LA_PRINT_TYPE(type,varstring,stream,show,level) \
+  (current_language->la_print_type(type,varstring,stream,show,level))
+
+#define LA_VAL_PRINT(type,valaddr,addr,stream,fmt,deref,recurse,pretty) \
+  (current_language->la_val_print(type,valaddr,addr,stream,fmt,deref, \
+				  recurse,pretty))
+
 /* Return a format string for printf that will print a number in one of
    the local (language-specific) formats.  Result is static and is
    overwritten by the next call.  Takes printf options like "08" or "l"
@@ -222,9 +285,9 @@ set_language PARAMS ((enum language));
 #define local_hex_format_suffix() \
   (current_language->la_hex_format.la_format_suffix)
 
-#define local_printchar(ch, stream) \
+#define LA_PRINT_CHAR(ch, stream) \
   (current_language->la_printchar(ch, stream))
-#define local_printstr(stream, string, length, force_ellipses) \
+#define LA_PRINT_STRING(stream, string, length, force_ellipses) \
   (current_language->la_printstr(stream, string, length, force_ellipses))
 
 /* Test a character to decide whether it can be printed in literal form

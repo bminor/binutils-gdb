@@ -1073,7 +1073,7 @@ read_type (pp, objfile)
 	
 	  /* Copy the prefix.  */
 	  from = prefix;
-	  while (*to++ = *from++)
+	  while ((*to++ = *from++) != '\0')
 	    ;
 	  to--; 
 	
@@ -2372,7 +2372,9 @@ read_array_type (pp, type, objfile)
       upper = -1;
     }
 
-  type = create_array_type (type, element_type, index_type, lower, upper);
+  range_type =
+    create_range_type ((struct type *) NULL, index_type, lower, upper);
+  type = create_array_type (type, element_type, range_type);
 
   /* If we have an array whose element type is not yet known, but whose
      bounds *are* known, record it to be adjusted at the end of the file.  */
@@ -2745,6 +2747,7 @@ read_range_type (pp, typenums, objfile)
   int n2bits, n3bits;
   int self_subrange;
   struct type *result_type;
+  struct type *index_type;
 
   /* First comes a type we are a subrange of.
      In C it is usually 0, 1 or the type being defined.  */
@@ -2903,26 +2906,15 @@ read_range_type (pp, typenums, objfile)
   if (self_subrange)
     return error_type (pp);
 
-  result_type = alloc_type (objfile);
+  index_type = *dbx_lookup_type (rangenums);
+  if (index_type == NULL)
+    {
+      complain (&range_type_base_complaint, rangenums[1]);
+      index_type = lookup_fundamental_type (objfile, FT_INTEGER);
+    }
 
-  TYPE_CODE (result_type) = TYPE_CODE_RANGE;
-
-  TYPE_TARGET_TYPE (result_type) = *dbx_lookup_type(rangenums);
-  if (TYPE_TARGET_TYPE (result_type) == 0) {
-    complain (&range_type_base_complaint, rangenums[1]);
-    TYPE_TARGET_TYPE (result_type) = lookup_fundamental_type (objfile, FT_INTEGER);
-  }
-
-  TYPE_NFIELDS (result_type) = 2;
-  TYPE_FIELDS (result_type) = (struct field *)
-      TYPE_ALLOC (result_type, 2 * sizeof (struct field));
-  memset (TYPE_FIELDS (result_type), 0, 2 * sizeof (struct field));
-  TYPE_FIELD_BITPOS (result_type, 0) = n2;
-  TYPE_FIELD_BITPOS (result_type, 1) = n3;
-
-  TYPE_LENGTH (result_type) = TYPE_LENGTH (TYPE_TARGET_TYPE (result_type));
-
-  return result_type;
+  result_type = create_range_type ((struct type *) NULL, index_type, n2, n3);
+  return (result_type);
 }
 
 /* Read a number from the string pointed to by *PP.

@@ -847,7 +847,7 @@ unset_environment_command (var, from_tty)
 
 /* Handle the execution path (PATH variable) */
 
-const static char path_var_name[] = "PATH";
+static const char path_var_name[] = "PATH";
 
 /* ARGSUSED */
 static void

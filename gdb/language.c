@@ -1140,8 +1140,36 @@ unk_lang_create_fundamental_type (objfile, typeid)
   error ("internal error - unimplemented function unk_lang_create_fundamental_type called.");
 }
 
+void
+unk_lang_print_type (type, varstring, stream, show, level)
+     struct type *type;
+     char *varstring;
+     FILE *stream;
+     int show;
+     int level;
+{
+  error ("internal error - unimplemented function unk_lang_print_type called.");
+}
+
+int
+unk_lang_val_print (type, valaddr, address, stream, format, deref_ref,
+		    recurse, pretty)
+     struct type *type;
+     char *valaddr;
+     CORE_ADDR address;
+     FILE *stream;
+     int format;
+     int deref_ref;
+     int recurse;
+     enum val_prettyprint pretty;
+{
+  error ("internal error - unimplemented function unk_lang_val_print called.");
+}
+
 static struct type ** const (unknown_builtin_types[]) = { 0 };
-static const struct op_print unk_op_print_tab[] = { 0 };
+static const struct op_print unk_op_print_tab[] = {
+    {NULL, 0, 0, 0}
+};
 
 const struct language_defn unknown_language_defn = {
   "unknown",
@@ -1154,6 +1182,8 @@ const struct language_defn unknown_language_defn = {
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_create_fundamental_type,
+  unk_lang_print_type,		/* Print a type using appropriate syntax */
+  unk_lang_val_print,		/* Print a value using appropriate syntax */
   &builtin_type_error,		/* longest signed   integral type */
   &builtin_type_error,		/* longest unsigned integral type */
   &builtin_type_error,		/* longest floating point type */
@@ -1177,6 +1207,8 @@ const struct language_defn auto_language_defn = {
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_create_fundamental_type,
+  unk_lang_print_type,		/* Print a type using appropriate syntax */
+  unk_lang_val_print,		/* Print a value using appropriate syntax */
   &builtin_type_error,		/* longest signed   integral type */
   &builtin_type_error,		/* longest unsigned integral type */
   &builtin_type_error,		/* longest floating point type */
@@ -1199,6 +1231,8 @@ const struct language_defn local_language_defn = {
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_create_fundamental_type,
+  unk_lang_print_type,		/* Print a type using appropriate syntax */
+  unk_lang_val_print,		/* Print a value using appropriate syntax */
   &builtin_type_error,		/* longest signed   integral type */
   &builtin_type_error,		/* longest unsigned integral type */
   &builtin_type_error,		/* longest floating point type */

@@ -55,9 +55,6 @@ dump_msymbols PARAMS ((struct objfile *, FILE *));
 static void 
 dump_objfile PARAMS ((struct objfile *));
 
-static void
-printobjfiles_command PARAMS ((char *, int));
-
 static int
 block_depth PARAMS ((struct block *));
 
@@ -65,19 +62,11 @@ static void
 print_partial_symbol PARAMS ((struct partial_symbol *, int, char *, FILE *));
 
 static void
-printpsyms_command PARAMS ((char *, int));
-
-static void
 print_symbol PARAMS ((struct symbol *, int, FILE *));
-
-static void
-printsyms_command PARAMS ((char *, int));
 
 static void
 free_symtab_block PARAMS ((struct objfile *, struct block *));
 
-static void
-printmsyms_command PARAMS ((char *, int));
 
 /* Free a struct block <- B and all the symbols defined in that block.  */
 
@@ -151,6 +140,8 @@ free_symtab (s)
     mfree (s -> objfile -> md, s -> fullname);
   mfree (s -> objfile -> md, (PTR) s);
 }
+
+#if MAINTENANCE_CMDS
 
 static void 
 dump_objfile (objfile)
@@ -267,11 +258,12 @@ dump_psymtab (objfile, psymtab, outfile)
 
   /* FIXME, we need to be able to print the relocation stuff. */
   /* This prints some garbage for anything but stabs right now.  FIXME.  */
-  fprintf_filtered (outfile, "  Relocate symbols by 0x%x, 0x%x, 0x%x, 0x%x.\n",
-		    ANOFFSET (psymtab->section_offsets, 0),
-		    ANOFFSET (psymtab->section_offsets, 1),
-		    ANOFFSET (psymtab->section_offsets, 2),
-		    ANOFFSET (psymtab->section_offsets, 3));
+  if (psymtab->section_offsets)
+    fprintf_filtered (outfile, "  Relocate symbols by 0x%x, 0x%x, 0x%x, 0x%x.\n",
+		      ANOFFSET (psymtab->section_offsets, 0),
+		      ANOFFSET (psymtab->section_offsets, 1),
+		      ANOFFSET (psymtab->section_offsets, 2),
+		      ANOFFSET (psymtab->section_offsets, 3));
 
   fprintf_filtered (outfile, "  Symbols cover text addresses 0x%x-0x%x\n",
 		    psymtab -> textlow, psymtab -> texthigh);
@@ -334,6 +326,8 @@ dump_symtab (objfile, symtab, outfile)
 	fprintf (outfile, " (under 0x%x)", (unsigned int) BLOCK_SUPERBLOCK (b));
       if (BLOCK_FUNCTION (b))
 	fprintf (outfile, " %s", SYMBOL_NAME (BLOCK_FUNCTION (b)));
+      if (BLOCK_GCC_COMPILED(b))
+	fprintf (outfile, " gcc%d compiled", BLOCK_GCC_COMPILED(b));
       fputc ('\n', outfile);
       blen = BLOCK_NSYMS (b);
       for (j = 0; j < blen; j++)
@@ -344,8 +338,8 @@ dump_symtab (objfile, symtab, outfile)
   fprintf (outfile, "\n");
 }
 
-static void
-printsyms_command (args, from_tty)
+void
+maintenance_print_symbols (args, from_tty)
      char *args;
      int from_tty;
 {
@@ -361,7 +355,7 @@ printsyms_command (args, from_tty)
 
   if (args == NULL)
     {
-      error ("printsyms takes an output file name and optional symbol file name");
+      error ("print-symbols takes an output file name and optional symbol file name");
     }
   else if ((argv = buildargv (args)) == NULL)
     {
@@ -412,7 +406,7 @@ print_symbol (symbol, depth, outfile)
     {
       if (TYPE_NAME (SYMBOL_TYPE (symbol)))
 	{
-	  type_print_1 (SYMBOL_TYPE (symbol), "", outfile, 1, depth);
+	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), "", outfile, 1, depth);
 	}
       else
 	{
@@ -422,7 +416,7 @@ print_symbol (symbol, depth, outfile)
 		: (TYPE_CODE (SYMBOL_TYPE (symbol)) == TYPE_CODE_STRUCT
 		   ? "struct" : "union")),
 	       SYMBOL_NAME (symbol));
-	  type_print_1 (SYMBOL_TYPE (symbol), "", outfile, 1, depth);
+	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), "", outfile, 1, depth);
 	}
       fprintf (outfile, ";\n");
     }
@@ -433,9 +427,9 @@ print_symbol (symbol, depth, outfile)
       if (SYMBOL_TYPE (symbol))
 	{
 	  /* Print details of types, except for enums where it's clutter.  */
-	  type_print_1 (SYMBOL_TYPE (symbol), SYMBOL_NAME (symbol), outfile,
-			TYPE_CODE (SYMBOL_TYPE (symbol)) != TYPE_CODE_ENUM,
-			depth);
+	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), SYMBOL_NAME (symbol), outfile,
+			 TYPE_CODE (SYMBOL_TYPE (symbol)) != TYPE_CODE_ENUM,
+			 depth);
 	  fprintf (outfile, "; ");
 	}
       else
@@ -533,8 +527,8 @@ print_symbol (symbol, depth, outfile)
   fprintf (outfile, "\n");
 }
 
-static void
-printpsyms_command (args, from_tty)
+void
+maintenance_print_psymbols (args, from_tty)
      char *args;
      int from_tty;
 {
@@ -550,7 +544,7 @@ printpsyms_command (args, from_tty)
 
   if (args == NULL)
     {
-      error ("printpsyms takes an output file name and optional symbol file name");
+      error ("print-psymbols takes an output file name and optional symbol file name");
     }
   else if ((argv = buildargv (args)) == NULL)
     {
@@ -665,8 +659,8 @@ print_partial_symbol (p, count, what, outfile)
     }
 }
 
-static void
-printmsyms_command (args, from_tty)
+void
+maintenance_print_msymbols (args, from_tty)
      char *args;
      int from_tty;
 {
@@ -681,7 +675,7 @@ printmsyms_command (args, from_tty)
 
   if (args == NULL)
     {
-      error ("printmsyms takes an output file name and optional symbol file name");
+      error ("print-msymbols takes an output file name and optional symbol file name");
     }
   else if ((argv = buildargv (args)) == NULL)
     {
@@ -716,8 +710,8 @@ printmsyms_command (args, from_tty)
   do_cleanups (cleanups);
 }
 
-static void
-printobjfiles_command (ignore, from_tty)
+void
+maintenance_print_objfiles (ignore, from_tty)
      char *ignore;
      int from_tty;
 {
@@ -730,6 +724,7 @@ printobjfiles_command (ignore, from_tty)
     dump_objfile (objfile);
   immediate_quit--;
 }
+
 
 /* Return the nexting depth of a block within other blocks in its symtab.  */
 
@@ -738,9 +733,14 @@ block_depth (block)
      struct block *block;
 {
   register int i = 0;
-  while (block = BLOCK_SUPERBLOCK (block)) i++;
+  while ((block = BLOCK_SUPERBLOCK (block)) != NULL) 
+    {
+      i++;
+    }
   return i;
 }
+
+#endif	/* MAINTENANCE_CMDS */
 
 
 /* Increase the space allocated for LISTP, which is probably
@@ -829,20 +829,3 @@ add_psymbol_addr_to_list (name, namelength, namespace, class, listp, psymval)
 }
 
 #endif /* DEBUG */
-
-void
-_initialize_symmisc ()
-{
-  add_com ("printmsyms", class_obscure, printmsyms_command,
-	   "Print dump of current minimal symbol definitions to file OUTFILE.\n\
-If a SOURCE file is specified, dump only that file's symbols.");
-  add_com ("printpsyms", class_obscure, printpsyms_command,
-	  "Print dump of current partial symbol definitions to file OUTFILE.\n\
-If a SOURCE file is specified, dump only that file's partial symbols.");
-  add_com ("printsyms", class_obscure, printsyms_command,
-	   "Print dump of current symbol definitions to file OUTFILE.\n\
-If a SOURCE file is specified, dump only that file's symbols.");
-  add_com ("printobjfiles", class_obscure, printobjfiles_command,
-	   "Print dump of current object file definitions.");
-}
-

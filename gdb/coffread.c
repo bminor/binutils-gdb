@@ -1777,7 +1777,7 @@ decode_type (cs, c_type, aux)
 	{
 	  int i, n;
 	  register unsigned short *dim;
-	  struct type *base_type, *index_type;
+	  struct type *base_type, *index_type, *range_type;
 
 	  /* Define an array type.  */
 	  /* auxent refers to array, not base type */
@@ -1794,8 +1794,10 @@ decode_type (cs, c_type, aux)
 
 	  base_type = decode_type (cs, new_c_type, aux);
 	  index_type = lookup_fundamental_type (current_objfile, FT_INTEGER);
-	  type = create_array_type ((struct type *) NULL, base_type,
-				    index_type, 0, n - 1);
+	  range_type =
+	    create_range_type ((struct type *) NULL, index_type, 0, n - 1);
+	  type =
+	    create_array_type ((struct type *) NULL, base_type, range_type);
 	}
       return type;
     }

@@ -1,3 +1,133 @@
+Fri Dec 18 10:32:25 1992  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (VERSION):  Bump to 4.7.4.
+	* Makefile.in (SFILES_MAINDIR):  Add typeprint.c, c-typeprint.c,
+	  m2-typeprint.c, c-valprint.c cp-valprint.c m2-valprint.c.
+	* Makefile.in (HFILES):  Add valprint.h.
+	* Makefile.in (OBS):  Add typeprint.o, c-typeprint.o,
+	  m2-typeprint.o, c-valprint.o, cp-valprint.o m2-valprint.o.
+	* typeprint.c, typeprint.h:  New files for language independent
+	  type printing functions.
+	* c-typeprint.c, m2-typeprint.c:  New files for language dependent
+	  type printing functions and definitions.
+	* valprint.h:  New include file for language independent value
+	  printing definitions.
+	* c-valprint.c, cp-valprint.c, m2-valprint.c:  New files for language
+	  dependent value printing functions.
+	* c-exp.y (production ptype):  Add range_type variable and use new
+	  create_range_type function.
+	* c-exp.y (tokentab2, tokentab3), c-lang.c (c_op_print_tab),
+	  infcmd.c (path_var_name), language.c (unk_op_print_tab), 
+	  m2-lang.c (m2_op_print_tab):  Change from ANSI-obsolescent
+	  "const static" to ANSI-conformant "static const".
+	* c-exp.y (c_create_fundamental_type):  Remove unused nbytes.
+	* c-exp.y (c_language_defn, cplus_language_defn):  Add c_print_type,
+	  and c_val_print.
+	* c-lang.h (c_print_type, c_val_print):  Add prototypes.
+	* coffread.c (decode_type):  Add range_type variable and call to
+	  new create_range_type function.
+	* complaints.c (complain):  Remove unused val variable.
+	* complaints.c (_initialize_complaints):  Make it void.
+	* convex-tdep.c (value_of_trapped_internalvar):  Add range_type
+	  variable and call new create_range_type function.
+	* defs.h (enum val_prettyprint):  Move enum from value.h to here
+	  so we can avoid having to include value.h just for prototypes that
+	  need the enum (thanks ANSI).
+	* dwarfread.c (struct_type):  Local anonymous_size variable is
+	  only used if !BITS_BIG_ENDIAN.
+	* dwarfread.c (decode_subscript_data_item):  Add rangetype
+	  variable and call new create_range_type function.
+	* elfread.c (elf_symfile_read):  Remove unused dbx and text_sect
+	  variables.
+	* eval.c (evaluate_subexp):  Remove unused local variable name
+	  and the statement with no side effects that initializes it.
+	* expprint.c (print_subexp):  Change local_printstr to
+	  LA_PRINT_STRING.
+	* gdbtypes.c (create_range_type):  New function that creates
+	  a range type using code fragments from object file readers as
+	  an example of what has to be initialized.
+	* gdbtypes.c (create_array_type):  Removed index_type, low_bound,
+	  and high_bound parameters, replaced with a single range_type
+	  parameter.  Change function body to use passed in range_type
+	  rather than handcrafting one.
+	* gdbtypes.h (create_range_type):  Add prototype.
+	* gdbtypes.h (create_array_type):  Change prototype parameters.
+	* infrun.c (normal_stop):  Remove unused local variables tem and c.
+	* infrun.c (hook_stop_stub):  Return 0 rather than random value.
+	* language.c (unk_lang_print_type, unk_lang_val_print):  Add
+	  stub functions that call error if called.
+	* language.c (unknown_language_defn, auto_language_defn,
+	  local_language_defn):  Add initializers unk_lang_print_type and
+	  unk_lang_val_print.
+	* language.h (struct language_defn):  Reformat for larger
+	  comments, add la_print_type and la_val_print members.  Add
+	  LA_PRINT_TYPE and LA_VAL_PRINT macros.  Change local_printchar
+	  to LA_PRINT_CHAR and local_printstr to LA_PRINT_STRING.
+	* m2-lang.c (m2_create_fundamental_type):  Remove unused local
+	  variable nbytes.
+	* m2-lang.c (m2_language_defn):  Add initializers m2_print_type
+	  and m2_val_print.
+	* m2-lang.h (m2_print_type, m2_val_print):  Add prototypes.
+	* main.c (execute_command): Remove unused local variable cmdlines.
+	* main.c (echo_command), stabsread.c (read_type), printcmd.c
+	  (clear_displays), symmisc.c (block_depth), values.c
+	  (clear_value_history):
+	  Make testing of truth value of assignment result explicit.
+	* mipsread.c (upgrade_type):  Update FIXME to include future use
+	  of create_range_type.
+	* printcmd.c (ptype_command, ptype_eval, whatis_command,
+	  whatis_exp, maintenance_print_type):  Move prototypes and functions
+	  to new typeprint.c.
+	* printcmd.c (_initialize_printcmd):  Move add_com calls for
+	  ptype_command and whatis_command to new typeprint.c.
+	* ser-bsd.c (serial_open):  Remove unused variable sgttyb.
+	* source.c (find_source_lines):  Local variable c only used
+	  when LSEEK_NOT_LINEAR is defined.
+	* stabsread.c (read_array_type):  Use new create_range_type
+	  function.
+	* stabsread.c (read_range_type):  Add new index_type variable and
+	  call new create_range_type function rather than handcrafting
+	  range types.
+	* symmisc.c (type_print_1):  Change usages to LA_PRINT_TYPE.
+	* symtab.c (typedef_print usages):  Use c_typedef_print, renamed.
+	* symtab.c (type_print_base usages):  Use c_type_print_base.
+	* symtab.c (type_print_varspec_prefix usages):  Use 
+	  c_type_print_varspec_prefix.
+	* symtab.c (type_print_method_args usages):  Use
+	  cp_type_print_method_args.
+	* valprint.c:  Completely ripped apart and the fragments used
+	  to create c-valprint.c, cp-valprint.c, m2-valprint.c, and
+	  valprint.h.  Remaining stuff is language independent.
+	* value.h (struct fn_field):  Forward declare for prototypes.
+	* value.h (type_print_1):  Remove prototype.
+	* value.h (enum val_prettyprint):  Moved to defs.h.
+	* value.h (typedef_print):  Prototype renamed to c_typedef_print.
+	* value.h (baseclass_offset):  Add prototype.
+	**** start-sanitize-chill ****
+	* Makefile.in (SFILES_MAINDIR):  Add ch-typeprint.c, ch-valprint.c.
+	* Makefile.in (OBS):  Add ch-typeprint.o, ch-valprint.o.
+	* ch-typeprint.c:  New file for language dependent type printing.
+	* ch-valprint.c:  New file for language dependent value printing.
+	* ch-exp.y (parse_number):  Remove prototype and stub function.
+	* ch-exp.y (decode_integer_literal):  Removed unused digits and
+	  temp variables.
+	* ch-exp.y (convert_float):  Completely ifdef out for now.
+	* ch-exp.y (tokentab2, tokentab3, tokentab4, tokentab5),
+	  ch-lang.c (chill_op_print_tab):
+	  Change from ANSI-obsolescent "const static" to ANSI-conformant
+	  "static const".
+	* ch-exp.y (yylex):  Add unhandled storage class enumeration
+	  literals to switch statement for completeness.
+	* ch-lang.c (chill_create_fundamental_types):  Remove unused
+	  nbytes variable.  Change dummy type to 2 bytes to match int.
+	  Handle FT_VOID types gratuituously added to chill DWARF by
+	  compiler.  Change FT_CHAR case to generate an TYPE_CODE_CHAR
+	  type rather than a one byte TYPE_CODE_INT type.
+	* ch-lang.c (chill_language_defn):  Add chill_print_type and
+	  chill_val_print.
+	* ch-lang.h (chill_print_type, chill_val_print):  Add prototypes.
+	**** end-sanitize-chill ****
+
 Thu Dec 17 00:44:57 1992  John Gilmore  (gnu@cygnus.com)
 
 	Eliminate uses of NAMES_HAVE_UNDERSCORE, using

@@ -34,6 +34,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Prototypes for local functions */
 
 static void
+print_hex_chars PARAMS ((FILE *, unsigned char *, unsigned int));
+
+static void
 show_print PARAMS ((char *, int));
 
 static void
@@ -46,41 +49,7 @@ static void
 set_output_radix PARAMS ((char *, int, struct cmd_list_element *));
 
 static void
-type_print_base PARAMS ((struct type *, FILE *, int, int));
-
-static void
-type_print_args PARAMS ((struct type *, FILE *));
-
-static void
-type_print_varspec_suffix PARAMS ((struct type *, FILE *, int, int, int));
-
-static void
-type_print_varspec_prefix PARAMS ((struct type *, FILE *, int, int));
-
-static void
-type_print_derivation_info PARAMS ((FILE *, struct type *));
-
-static void
-type_print_method_args PARAMS ((struct type **, char *, char *, int, FILE *));
-
-static void
-cplus_val_print PARAMS ((struct type *, char *, FILE *, int, int,
-			 enum val_prettyprint, struct type **));
-
-static void
-val_print_fields PARAMS ((struct type *, char *, FILE *, int, int,
-			  enum val_prettyprint, struct type **));
-
-static int
-is_vtbl_member PARAMS ((struct type *));
-
-static int
-is_vtbl_ptr_type PARAMS ((struct type *));
-
-static void
-print_hex_chars PARAMS ((FILE *, unsigned char *, unsigned));
-
-extern int demangle;	/* whether to print C++ syms raw or source-form */
+value_print_array_elements PARAMS ((value, FILE *, int, enum val_prettyprint));
 
 /* Maximum number of chars to print for a string pointer value
    or vector contents, or UINT_MAX for no limit.  */
@@ -99,19 +68,235 @@ int output_format = 0;
 
 unsigned int repeat_count_threshold = 10;
 
-/* Define a mess of print controls.  */
+int prettyprint_structs;	/* Controls pretty printing of structures */
+int prettyprint_arrays;		/* Controls pretty printing of arrays.  */
 
-int prettyprint;	/* Controls pretty printing of structures */
-int vtblprint;		/* Controls printing of vtbl's */
-int unionprint;		/* Controls printing of nested unions.  */
-int arrayprint;		/* Controls pretty printing of arrays.  */
-int addressprint;	/* Controls pretty printing of addresses.  */
-int objectprint;	/* Controls looking up an object's derived type
-			   using what we find in its vtables.  */
+/* If nonzero, causes unions inside structures or other unions to be
+   printed. */
 
-struct obstack dont_print_obstack;
+int unionprint;			/* Controls printing of nested unions.  */
+
+/* If nonzero, causes machine addresses to be printed in certain contexts. */
+
+int addressprint;		/* Controls printing of machine addresses */
 
 
+/* Print data of type TYPE located at VALADDR (within GDB),
+   which came from the inferior at address ADDRESS,
+   onto stdio stream STREAM according to FORMAT
+   (a letter or 0 for natural format).  The data at VALADDR
+   is in target byte order.
+
+   If the data are a string pointer, returns the number of
+   sting characters printed.
+
+   if DEREF_REF is nonzero, then dereference references,
+   otherwise just print them like pointers.
+
+   The PRETTY parameter controls prettyprinting.  */
+
+int
+val_print (type, valaddr, address, stream, format, deref_ref, recurse,
+	     pretty)
+     struct type *type;
+     char *valaddr;
+     CORE_ADDR address;
+     FILE *stream;
+     int format;
+     int deref_ref;
+     int recurse;
+     enum val_prettyprint pretty;
+{
+  if (pretty == Val_pretty_default)
+    {
+      pretty = prettyprint_structs ? Val_prettyprint : Val_no_prettyprint;
+    }
+  
+  QUIT;
+
+  /* Ensure that the type is complete and not just a stub.  If the type is
+     only a stub and we can't find and substitute its complete type, then
+     print appropriate string and return.  Typical types that my be stubs
+     are structs, unions, and C++ methods. */
+
+  check_stub_type (type);
+  if (TYPE_FLAGS (type) & TYPE_FLAG_STUB)
+    {
+      fprintf_filtered (stream, "<incomplete type>");
+      fflush (stream);
+      return (0);
+    }
+  
+  return (LA_VAL_PRINT (type, valaddr, address, stream, format, deref_ref,
+			recurse, pretty));
+}
+
+/* Print the value VAL in C-ish syntax on stream STREAM.
+   FORMAT is a format-letter, or 0 for print in natural format of data type.
+   If the object printed is a string pointer, returns
+   the number of string bytes printed.  */
+
+int
+value_print (val, stream, format, pretty)
+     value val;
+     FILE *stream;
+     int format;
+     enum val_prettyprint pretty;
+{
+  register unsigned int n, typelen;
+
+  if (val == 0)
+    {
+      printf_filtered ("<address of value unknown>");
+      return 0;
+    }
+  if (VALUE_OPTIMIZED_OUT (val))
+    {
+      printf_filtered ("<value optimized out>");
+      return 0;
+    }
+
+  /* A "repeated" value really contains several values in a row.
+     They are made by the @ operator.
+     Print such values as if they were arrays.  */
+
+  if (VALUE_REPEATED (val))
+    {
+      n = VALUE_REPETITIONS (val);
+      typelen = TYPE_LENGTH (VALUE_TYPE (val));
+      fprintf_filtered (stream, "{");
+      /* Print arrays of characters using string syntax.  */
+      if (typelen == 1 && TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_INT
+	  && format == 0)
+	LA_PRINT_STRING (stream, VALUE_CONTENTS (val), n, 0);
+      else
+	{
+	  value_print_array_elements (val, stream, format, pretty);
+	}
+      fprintf_filtered (stream, "}");
+      return (n * typelen);
+    }
+  else
+    {
+      struct type *type = VALUE_TYPE (val);
+
+      /* If it is a pointer, indicate what it points to.
+
+	 Print type also if it is a reference.
+
+         C++: if it is a member pointer, we will take care
+	 of that when we print it.  */
+      if (TYPE_CODE (type) == TYPE_CODE_PTR ||
+	  TYPE_CODE (type) == TYPE_CODE_REF)
+	{
+	  /* Hack:  remove (char *) for char strings.  Their
+	     type is indicated by the quoted string anyway. */
+          if (TYPE_CODE (type) == TYPE_CODE_PTR &&
+	      TYPE_LENGTH (TYPE_TARGET_TYPE (type)) == sizeof(char) &&
+	      TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_INT &&
+	      !TYPE_UNSIGNED (TYPE_TARGET_TYPE (type)))
+	    {
+		/* Print nothing */
+	    }
+	  else
+	    {
+	      fprintf_filtered (stream, "(");
+	      type_print (type, "", stream, -1);
+	      fprintf_filtered (stream, ") ");
+	    }
+	}
+      return (val_print (type, VALUE_CONTENTS (val),
+			 VALUE_ADDRESS (val), stream, format, 1, 0, pretty));
+    }
+}
+
+/*  Called by various <lang>_val_print routines to print TYPE_CODE_INT's */
+
+void
+val_print_type_code_int (type, valaddr, stream)
+     struct type *type;
+     char *valaddr;
+     FILE *stream;
+{
+  char *p;
+  /* Pointer to first (i.e. lowest address) nonzero character.  */
+  char *first_addr;
+  unsigned int len;
+
+  if (TYPE_LENGTH (type) > sizeof (LONGEST))
+    {
+      if (TYPE_UNSIGNED (type))
+	{
+	  /* First figure out whether the number in fact has zeros
+	     in all its bytes more significant than least significant
+	     sizeof (LONGEST) ones.  */
+	  len = TYPE_LENGTH (type);
+	  
+#if TARGET_BYTE_ORDER == BIG_ENDIAN
+	  for (p = valaddr;
+	       len > sizeof (LONGEST) && p < valaddr + TYPE_LENGTH (type);
+	       p++)
+#else		/* Little endian.  */
+	  first_addr = valaddr;
+	  for (p = valaddr + TYPE_LENGTH (type);
+	       len > sizeof (LONGEST) && p >= valaddr;
+	       p--)
+#endif		/* Little endian.  */
+	    {
+	      if (*p == 0)
+		{
+		  len--;
+		}
+	      else
+		{
+		  break;
+		}
+	    }
+#if TARGET_BYTE_ORDER == BIG_ENDIAN
+	  first_addr = p;
+#endif
+	  if (len <= sizeof (LONGEST))
+	    {
+	      /* We can print it in decimal.  */
+	      fprintf_filtered
+		(stream, 
+#if defined (LONG_LONG)
+		 "%llu",
+#else
+		 "%lu",
+#endif
+		 unpack_long (BUILTIN_TYPE_LONGEST, first_addr));
+	    }
+	  else
+	    {
+	      /* It is big, so print it in hex.  */
+	      print_hex_chars (stream, (unsigned char *) first_addr, len);
+	    }
+	}
+      else
+	{
+	  /* Signed.  One could assume two's complement (a reasonable
+	     assumption, I think) and do better than this.  */
+	  print_hex_chars (stream, (unsigned char *) valaddr,
+			   TYPE_LENGTH (type));
+	}
+    }
+  else
+    {
+#ifdef PRINT_TYPELESS_INTEGER
+      PRINT_TYPELESS_INTEGER (stream, type, unpack_long (type, valaddr));
+#else
+      fprintf_filtered (stream, TYPE_UNSIGNED (type) ?
+#if defined (LONG_LONG)
+			"%llu" : "%lld",
+#else
+			"%u" : "%d",
+#endif
+			unpack_long (type, valaddr));
+#endif
+    }
+}			
+
 /* Print a floating point value of type TYPE, pointed to in GDB by VALADDR,
    on STREAM.  */
 
@@ -197,6 +382,7 @@ print_floating (valaddr, type, stream)
 }
 
 /* VALADDR points to an integer of LEN bytes.  Print it in hex on stream.  */
+
 static void
 print_hex_chars (stream, valaddr, len)
      FILE *stream;
@@ -219,429 +405,19 @@ print_hex_chars (stream, valaddr, len)
       fprintf_filtered (stream, "%02x", *p);
     }
 }
-
-/* Print the value VAL in C-ish syntax on stream STREAM.
-   FORMAT is a format-letter, or 0 for print in natural format of data type.
-   If the object printed is a string pointer, returns
-   the number of string bytes printed.  */
 
-int
-value_print (val, stream, format, pretty)
-     value val;
-     FILE *stream;
-     int format;
-     enum val_prettyprint pretty;
-{
-  register unsigned int i, n, typelen;
+/*  Called by various <lang>_val_print routines to print elements of an
+    array in the form "<elem1>, <elem2>, <elem3>, ...".
 
-  if (val == 0)
-    {
-      printf_filtered ("<address of value unknown>");
-      return 0;
-    }
-  if (VALUE_OPTIMIZED_OUT (val))
-    {
-      printf_filtered ("<value optimized out>");
-      return 0;
-    }
+    (FIXME?)  Assumes array element separator is a comma, which is correct
+    for all languages currently handled.
+    (FIXME?)  Some languages have a notation for repeated array elements,
+    perhaps we should try to use that notation when appropriate.
+    */
 
-  /* A "repeated" value really contains several values in a row.
-     They are made by the @ operator.
-     Print such values as if they were arrays.  */
-
-  else if (VALUE_REPEATED (val))
-    {
-      n = VALUE_REPETITIONS (val);
-      typelen = TYPE_LENGTH (VALUE_TYPE (val));
-      fprintf_filtered (stream, "{");
-      /* Print arrays of characters using string syntax.  */
-      if (typelen == 1 && TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_INT
-	  && format == 0)
-	local_printstr (stream, VALUE_CONTENTS (val), n, 0);
-      else
-	{
-	  unsigned int things_printed = 0;
-	  
-	  for (i = 0; i < n && things_printed < print_max; i++)
-	    {
-	      /* Position of the array element we are examining to see
-		 whether it is repeated.  */
-	      unsigned int rep1;
-	      /* Number of repetitions we have detected so far.  */
-	      unsigned int reps;
-
-	      if (i != 0)
-		fprintf_filtered (stream, ", ");
-	      wrap_here ("");
-
-	      rep1 = i + 1;
-	      reps = 1;
-	      while (rep1 < n
-		     && !memcmp (VALUE_CONTENTS (val) + typelen * i,
-			       VALUE_CONTENTS (val) + typelen * rep1, typelen))
-		{
-		  ++reps;
-		  ++rep1;
-		}
-
-	      if (reps > repeat_count_threshold)
-		{
-		  val_print (VALUE_TYPE (val),
-			     VALUE_CONTENTS (val) + typelen * i,
-			     VALUE_ADDRESS (val) + typelen * i,
-			     stream, format, 1, 0, pretty);
-		  fprintf (stream, " <repeats %u times>", reps);
-		  i = rep1 - 1;
-		  things_printed += repeat_count_threshold;
-		}
-	      else
-		{
-		  val_print (VALUE_TYPE (val),
-			     VALUE_CONTENTS (val) + typelen * i,
-			     VALUE_ADDRESS (val) + typelen * i,
-			     stream, format, 1, 0, pretty);
-		  things_printed++;
-		}
-	    }
-	  if (i < n)
-	    fprintf_filtered (stream, "...");
-	}
-      fprintf_filtered (stream, "}");
-      return n * typelen;
-    }
-  else
-    {
-      struct type *type = VALUE_TYPE (val);
-
-      /* If it is a pointer, indicate what it points to.
-
-	 Print type also if it is a reference.
-
-         C++: if it is a member pointer, we will take care
-	 of that when we print it.  */
-      if (TYPE_CODE (type) == TYPE_CODE_PTR
-	  || TYPE_CODE (type) == TYPE_CODE_REF)
-	{
-	  /* Hack:  remove (char *) for char strings.  Their
-	     type is indicated by the quoted string anyway. */
-          if (TYPE_CODE (type) == TYPE_CODE_PTR
-	      && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) == sizeof(char)
-	      && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_INT
-	      && !TYPE_UNSIGNED (TYPE_TARGET_TYPE (type)))
-	    {
-		/* Print nothing */
-	    }
-	  else
-	    {
-	      fprintf_filtered (stream, "(");
-	      type_print (type, "", stream, -1);
-	      fprintf_filtered (stream, ") ");
-	    }
-	}
-      return val_print (type, VALUE_CONTENTS (val),
-			VALUE_ADDRESS (val), stream, format, 1, 0, pretty);
-    }
-}
-
-/* Return truth value for assertion that TYPE is of the type
-   "pointer to virtual function".  */
-static int
-is_vtbl_ptr_type(type)
-     struct type *type;
-{
-  char *typename = type_name_no_tag (type);
-  static const char vtbl_ptr_name[] =
-    { CPLUS_MARKER,'v','t','b','l','_','p','t','r','_','t','y','p','e', 0 };
-
-  return (typename != NULL && !strcmp(typename, vtbl_ptr_name));
-}
-
-/* Return truth value for the assertion that TYPE is of the type
-   "pointer to virtual function table".  */
-static int
-is_vtbl_member(type)
-     struct type *type;
-{
-  if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    type = TYPE_TARGET_TYPE (type);
-  else
-    return 0;
-
-  if (TYPE_CODE (type) == TYPE_CODE_ARRAY
-      && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT)
-    /* Virtual functions tables are full of pointers to virtual functions.  */
-    return is_vtbl_ptr_type (TYPE_TARGET_TYPE (type));
-  return 0;
-}
-
-/* Mutually recursive subroutines of cplus_val_print and val_print to print out
-   a structure's fields: val_print_fields and cplus_val_print.
-
-   TYPE, VALADDR, STREAM, RECURSE, and PRETTY have the
-   same meanings as in cplus_val_print and val_print.
-
-   DONT_PRINT is an array of baseclass types that we
-   should not print, or zero if called from top level.  */
-
-static void
-val_print_fields (type, valaddr, stream, format, recurse, pretty, dont_print)
-     struct type *type;
-     char *valaddr;
-     FILE *stream;
-     int format;
-     int recurse;
-     enum val_prettyprint pretty;
-     struct type **dont_print;
-{
-  int i, len, n_baseclasses;
-
-  check_stub_type (type);
-
-  fprintf_filtered (stream, "{");
-  len = TYPE_NFIELDS (type);
-  n_baseclasses = TYPE_N_BASECLASSES (type);
-
-  /* Print out baseclasses such that we don't print
-     duplicates of virtual baseclasses.  */
-  if (n_baseclasses > 0)
-    cplus_val_print (type, valaddr, stream, format, recurse+1, pretty, dont_print);
-
-  if (!len && n_baseclasses == 1)
-    fprintf_filtered (stream, "<No data fields>");
-  else
-    {
-      extern int inspect_it;
-      int fields_seen = 0;
-
-      for (i = n_baseclasses; i < len; i++)
-	{
-	  /* Check if static field */
-	  if (TYPE_FIELD_STATIC (type, i))
-	    continue;
-	  if (fields_seen)
-	    fprintf_filtered (stream, ", ");
-	  else if (n_baseclasses > 0)
-	    {
-	      if (pretty)
-		{
-		  fprintf_filtered (stream, "\n");
-		  print_spaces_filtered (2 + 2 * recurse, stream);
-		  fputs_filtered ("members of ", stream);
-		  fputs_filtered (type_name_no_tag (type), stream);
-		  fputs_filtered (": ", stream);
-		}
-	    }
-	  fields_seen = 1;
-
-	  if (pretty)
-	    {
-	      fprintf_filtered (stream, "\n");
-	      print_spaces_filtered (2 + 2 * recurse, stream);
-	    }
-	  else 
-	    {
-	      wrap_here (n_spaces (2 + 2 * recurse));
-	    }
-	  if (inspect_it)
-	    {
-	      if (TYPE_CODE (TYPE_FIELD_TYPE (type, i)) == TYPE_CODE_PTR)
-		fputs_filtered ("\"( ptr \"", stream);
-	      else
-		fputs_filtered ("\"( nodef \"", stream);
-	      fprint_symbol (stream, TYPE_FIELD_NAME (type, i));
-	      fputs_filtered ("\" \"", stream);
-	      fprint_symbol (stream, TYPE_FIELD_NAME (type, i));
-	      fputs_filtered ("\") \"", stream);
-	    }
-	  else
-	    {
-	      fprint_symbol (stream, TYPE_FIELD_NAME (type, i));
-	      fputs_filtered (" = ", stream);
-	    }
-	  if (TYPE_FIELD_PACKED (type, i))
-	    {
-	      value v;
-
-	      /* Bitfields require special handling, especially due to byte
-		 order problems.  */
-	      v = value_from_longest (TYPE_FIELD_TYPE (type, i),
-				   unpack_field_as_long (type, valaddr, i));
-
-	      val_print (TYPE_FIELD_TYPE (type, i), VALUE_CONTENTS (v), 0,
-			 stream, format, 0, recurse + 1, pretty);
-	    }
-	  else
-	    {
-	      val_print (TYPE_FIELD_TYPE (type, i), 
-			 valaddr + TYPE_FIELD_BITPOS (type, i) / 8,
-			 0, stream, format, 0, recurse + 1, pretty);
-	    }
-	}
-      if (pretty)
-	{
-	  fprintf_filtered (stream, "\n");
-	  print_spaces_filtered (2 * recurse, stream);
-	}
-    }
-  fprintf_filtered (stream, "}");
-}
-
-/* Special val_print routine to avoid printing multiple copies of virtual
-   baseclasses.  */
-
-static void
-cplus_val_print (type, valaddr, stream, format, recurse, pretty, dont_print)
-     struct type *type;
-     char *valaddr;
-     FILE *stream;
-     int format;
-     int recurse;
-     enum val_prettyprint pretty;
-     struct type **dont_print;
-{
-  struct obstack tmp_obstack;
-  struct type **last_dont_print
-    = (struct type **)obstack_next_free (&dont_print_obstack);
-  int i, n_baseclasses = TYPE_N_BASECLASSES (type);
-
-  if (dont_print == 0)
-    {
-      /* If we're at top level, carve out a completely fresh
-	 chunk of the obstack and use that until this particular
-	 invocation returns.  */
-      tmp_obstack = dont_print_obstack;
-      /* Bump up the high-water mark.  Now alpha is omega.  */
-      obstack_finish (&dont_print_obstack);
-    }
-
-  for (i = 0; i < n_baseclasses; i++)
-    {
-      char *baddr;
-      int err;
-
-      if (BASETYPE_VIA_VIRTUAL (type, i))
-	{
-	  struct type **first_dont_print
-	    = (struct type **)obstack_base (&dont_print_obstack);
-
-	  int j = (struct type **)obstack_next_free (&dont_print_obstack)
-	    - first_dont_print;
-
-	  while (--j >= 0)
-	    if (TYPE_BASECLASS (type, i) == first_dont_print[j])
-	      goto flush_it;
-
-	  obstack_ptr_grow (&dont_print_obstack, TYPE_BASECLASS (type, i));
-	}
-
-      /* Fix to use baseclass_offset instead. FIXME */
-      baddr = baseclass_addr (type, i, valaddr, 0, &err);
-      if (err == 0 && baddr == 0)
-	error ("could not find virtual baseclass `%s'\n",
-	       type_name_no_tag (TYPE_BASECLASS (type, i)));
-
-      if (pretty)
-	{
-	  fprintf_filtered (stream, "\n");
-	  print_spaces_filtered (2 * recurse, stream);
-	}
-      fputs_filtered ("<", stream);
-      fputs_filtered (type_name_no_tag (TYPE_BASECLASS (type, i)), stream);
-      fputs_filtered ("> = ", stream);
-      if (err != 0)
-	fprintf_filtered (stream, "<invalid address 0x%x>", baddr);
-      else
-	val_print_fields (TYPE_BASECLASS (type, i), baddr, stream, format,
-			  recurse, pretty,
-			  (struct type **)obstack_base (&dont_print_obstack));
-      fputs_filtered (", ", stream);
-
-    flush_it:
-      ;
-    }
-
-  if (dont_print == 0)
-    {
-      /* Free the space used to deal with the printing
-	 of this type from top level.  */
-      obstack_free (&dont_print_obstack, last_dont_print);
-      /* Reset watermark so that we can continue protecting
-	 ourselves from whatever we were protecting ourselves.  */
-      dont_print_obstack = tmp_obstack;
-    }
-}
-
-static void
-print_class_member (valaddr, domain, stream, prefix)
-     char *valaddr;
-     struct type *domain;
-     FILE *stream;
-     char *prefix;
-{
-  
-  /* VAL is a byte offset into the structure type DOMAIN.
-     Find the name of the field for that offset and
-     print it.  */
-  int extra = 0;
-  int bits = 0;
-  register unsigned int i;
-  unsigned len = TYPE_NFIELDS (domain);
-  /* @@ Make VAL into bit offset */
-  LONGEST val = unpack_long (builtin_type_int, valaddr) << 3;
-  for (i = TYPE_N_BASECLASSES (domain); i < len; i++)
-    {
-      int bitpos = TYPE_FIELD_BITPOS (domain, i);
-      QUIT;
-      if (val == bitpos)
-	break;
-      if (val < bitpos && i != 0)
-	{
-	  /* Somehow pointing into a field.  */
-	  i -= 1;
-	  extra = (val - TYPE_FIELD_BITPOS (domain, i));
-	  if (extra & 0x7)
-	    bits = 1;
-	  else
-	    extra >>= 3;
-	  break;
-	}
-    }
-  if (i < len)
-    {
-      char *name;
-      fprintf_filtered (stream, prefix);
-      name = type_name_no_tag (domain);
-      if (name)
-        fputs_filtered (name, stream);
-      else
-	type_print_base (domain, stream, 0, 0);
-      fprintf_filtered (stream, "::");
-      fputs_filtered (TYPE_FIELD_NAME (domain, i), stream);
-      if (extra)
-	fprintf_filtered (stream, " + %d bytes", extra);
-      if (bits)
-	fprintf_filtered (stream, " (offset in bits)");
-    }
-  else
-    fprintf_filtered (stream, "%d", val >> 3);
-}
-
-/* Print data of type TYPE located at VALADDR (within GDB),
-   which came from the inferior at address ADDRESS,
-   onto stdio stream STREAM according to FORMAT
-   (a letter or 0 for natural format).  The data at VALADDR
-   is in target byte order.
-
-   If the data are a string pointer, returns the number of
-   sting characters printed.
-
-   if DEREF_REF is nonzero, then dereference references,
-   otherwise just print them like pointers.
-
-   The PRETTY parameter controls prettyprinting.  */
-
-int
-val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
+void
+val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
+			  recurse, pretty, i)
      struct type *type;
      char *valaddr;
      CORE_ADDR address;
@@ -650,1309 +426,125 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
      int deref_ref;
      int recurse;
      enum val_prettyprint pretty;
+     unsigned int i;
 {
-  register unsigned int i;
+  unsigned int things_printed = 0;
   unsigned len;
   struct type *elttype;
   unsigned eltlen;
-  LONGEST val;
-  unsigned char c;
-
-  if (pretty == Val_pretty_default)
-    {
-      pretty = prettyprint ? Val_prettyprint : Val_no_prettyprint;
-    }
-  
-  QUIT;
-
-  check_stub_type (type);
-  
-  if (TYPE_FLAGS (type) & TYPE_FLAG_STUB)
-    {
-      fprintf_filtered (stream, "<unknown struct>");
-      fflush (stream);
-      return 0;
-    }
-  
-  switch (TYPE_CODE (type))
-    {
-    case TYPE_CODE_ARRAY:
-      if (TYPE_LENGTH (type) > 0
-	  && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
-	{
-	  elttype = TYPE_TARGET_TYPE (type);
-	  eltlen = TYPE_LENGTH (elttype);
-	  len = TYPE_LENGTH (type) / eltlen;
-	  if (arrayprint)
-	    print_spaces_filtered (2 + 2 * recurse, stream);
-	  fprintf_filtered (stream, "{");
-	  /* For an array of chars, print with string syntax.  */
-	  if (eltlen == 1 && TYPE_CODE (elttype) == TYPE_CODE_INT
-	      && (format == 0 || format == 's') )
-	    local_printstr (stream, valaddr, len, 0);
-	  else
-	    {
-	      unsigned int things_printed = 0;
+  /* Position of the array element we are examining to see
+     whether it is repeated.  */
+  unsigned int rep1;
+  /* Number of repetitions we have detected so far.  */
+  unsigned int reps;
+      
+  elttype = TYPE_TARGET_TYPE (type);
+  eltlen = TYPE_LENGTH (elttype);
+  len = TYPE_LENGTH (type) / eltlen;
 	      
-	      /* If this is a virtual function table, print the 0th
-		 entry specially, and the rest of the members normally.  */
-	      if (is_vtbl_ptr_type (elttype))
-		{
-		  fprintf_filtered (stream, "%d vtable entries", len-1);
-		  i = 1;
-		}
-	      else
-		i = 0;
-
-	      for (; i < len && things_printed < print_max; i++)
-		{
-		  /* Position of the array element we are examining to see
-		     whether it is repeated.  */
-		  unsigned int rep1;
-		  /* Number of repetitions we have detected so far.  */
-		  unsigned int reps;
-		  
-		  if (i != 0)
-		    if (arrayprint)
-		      {
-		        fprintf_filtered (stream, ",\n");
-	                print_spaces_filtered (2 + 2 * recurse, stream);
-		      }
-		    else
-		      fprintf_filtered (stream, ", ");
-		    wrap_here (n_spaces (2 + 2 * recurse));
-		  
-		  rep1 = i + 1;
-		  reps = 1;
-		  while (rep1 < len
-			 && !memcmp (valaddr + i * eltlen,
-				     valaddr + rep1 * eltlen, eltlen))
-		    {
-		      ++reps;
-		      ++rep1;
-		    }
-
-		  if (reps > repeat_count_threshold)
-		    {
-		      val_print (elttype, valaddr + i * eltlen,
-				 0, stream, format, deref_ref,
-				 recurse + 1, pretty);
-		      fprintf_filtered (stream, " <repeats %u times>", reps);
-		      i = rep1 - 1;
-		      things_printed += repeat_count_threshold;
-		    }
-		  else
-		    {
-		      val_print (elttype, valaddr + i * eltlen,
-				 0, stream, format, deref_ref,
-				 recurse + 1, pretty);
-		      things_printed++;
-		    }
-		}
-	      if (i < len)
-		fprintf_filtered (stream, "...");
-	    }
-	  fprintf_filtered (stream, "}");
-	  break;
-	}
-      /* Array of unspecified length: treat like pointer to first elt.  */
-      valaddr = (char *) &address;
-
-    case TYPE_CODE_PTR:
-      if (format && format != 's')
+  for (; i < len && things_printed < print_max; i++)
+    {
+      if (i != 0)
 	{
-	  print_scalar_formatted (valaddr, type, format, 0, stream);
-	  break;
-	}
-      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD)
-	{
-	  struct type *domain = TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type));
-	  struct fn_field *f;
-	  int j, len2;
-	  char *kind = "";
-	  CORE_ADDR addr;
-
-	  addr = unpack_pointer (lookup_pointer_type (builtin_type_void),
-				valaddr);
-	  if (METHOD_PTR_IS_VIRTUAL(addr))
+	  if (prettyprint_arrays)
 	    {
-	      int offset = METHOD_PTR_TO_VOFFSET(addr);
-	      len = TYPE_NFN_FIELDS (domain);
-	      for (i = 0; i < len; i++)
-		{
-		  f = TYPE_FN_FIELDLIST1 (domain, i);
-		  len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
-
-		  for (j = 0; j < len2; j++)
-		    {
-		      QUIT;
-		      if (TYPE_FN_FIELD_VOFFSET (f, j) == offset)
-			{
-			  kind = "virtual ";
-			  goto common;
-			}
-		    }
-		}
+	      fprintf_filtered (stream, ",\n");
+	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
 	  else
-	    {
-	      struct symbol *sym = find_pc_function (addr);
-	      if (sym == 0)
-		error ("invalid pointer to member function");
-	      len = TYPE_NFN_FIELDS (domain);
-	      for (i = 0; i < len; i++)
-		{
-		  f = TYPE_FN_FIELDLIST1 (domain, i);
-		  len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
-
-		  for (j = 0; j < len2; j++)
-		    {
-		      QUIT;
-		      if (!strcmp (SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j)))
-			goto common;
-		    }
-		}
-	    }
-	common:
-	  if (i < len)
-	    {
-	      fprintf_filtered (stream, "&");
-	      type_print_varspec_prefix (TYPE_FN_FIELD_TYPE (f, j), stream, 0, 0);
-	      fprintf (stream, kind);
-	      if (TYPE_FN_FIELD_PHYSNAME (f, j)[0] == '_'
-		  && TYPE_FN_FIELD_PHYSNAME (f, j)[1] == CPLUS_MARKER)
-		type_print_method_args
-		  (TYPE_FN_FIELD_ARGS (f, j) + 1, "~",
-		   TYPE_FN_FIELDLIST_NAME (domain, i), 0, stream);
-	      else
-		type_print_method_args
-		  (TYPE_FN_FIELD_ARGS (f, j), "",
-		   TYPE_FN_FIELDLIST_NAME (domain, i), 0, stream);
-	      break;
-	    }
-	  fprintf_filtered (stream, "(");
-  	  type_print (type, "", stream, -1);
-	  fprintf_filtered (stream, ") %d", (int) addr >> 3);
-	}
-      else if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_MEMBER)
-	{
-	  print_class_member (valaddr,
-			      TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type)),
-			      stream, "&");
-	}
-      else
-	{
-	  CORE_ADDR addr = unpack_pointer (type, valaddr);
-	  elttype = TYPE_TARGET_TYPE (type);
-
-	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
-	    {
-	      /* Try to print what function it points to.  */
-	      print_address_demangle (addr, stream, demangle);
-	      /* Return value is irrelevant except for string pointers.  */
-	      return 0;
-	    }
-
-	  if (addressprint && format != 's')
-	    fprintf_filtered (stream, "0x%x", addr);
-
-	  /* For a pointer to char or unsigned char,
-	     also print the string pointed to, unless pointer is null.  */
-	  i = 0;		/* Number of characters printed.  */
-	  if (TYPE_LENGTH (elttype) == 1 
-	      && TYPE_CODE (elttype) == TYPE_CODE_INT
-	      && (format == 0 || format == 's')
-	      && addr != 0
-	      /* If print_max is UINT_MAX, the alloca below will fail.
-	         In that case don't try to print the string.  */
-	      && print_max < UINT_MAX)
-	    {
-	      int first_addr_err = 0;
-	      int errcode = 0;
-	      
-	      /* Get first character.  */
-	      errcode = target_read_memory (addr, (char *)&c, 1);
-	      if (errcode != 0)
-		{
-		  /* First address out of bounds.  */
-		  first_addr_err = 1;
-		}
-	      else
-		{
-		  /* A real string.  */
-		  char *string = (char *) alloca (print_max);
-
-		  /* If the loop ends by us hitting print_max characters,
-		     we need to have elipses at the end.  */
-		  int force_ellipses = 1;
-
-		  /* This loop always fetches print_max characters, even
-		     though local_printstr might want to print more or fewer
-		     (with repeated characters).  This is so that
-		     we don't spend forever fetching if we print
-		     a long string consisting of the same character
-		     repeated.  Also so we can do it all in one memory
-		     operation, which is faster.  However, this will be
-		     slower if print_max is set high, e.g. if you set
-		     print_max to 1000, not only will it take a long
-		     time to fetch short strings, but if you are near
-		     the end of the address space, it might not work. */
-		  QUIT;
-		  errcode = target_read_memory (addr, string, print_max);
-		  if (errcode != 0)
-		    {
-		      /* Try reading just one character.  If that succeeds,
-			 assume we hit the end of the address space, but
-			 the initial part of the string is probably safe. */
-		      char x[1];
-		      errcode = target_read_memory (addr, x, 1);
-		    }
-		  if (errcode != 0)
-		      force_ellipses = 0;
-		  else 
-		    for (i = 0; i < print_max; i++)
-		      if (string[i] == '\0')
-			{
-			  force_ellipses = 0;
-			  break;
-		        }
-		  QUIT;
-
-		  if (addressprint)
-		    fputs_filtered (" ", stream);
-		  local_printstr (stream, string, i, force_ellipses);
-		}
-
-	      if (errcode != 0)
-		{
-		  if (errcode == EIO)
-		    {
-		      fprintf_filtered (stream,
-					(" <Address 0x%x out of bounds>"
-					 + first_addr_err),
-					addr + i);
-		    }
-		  else
-		    {
-		      error ("Error reading memory address 0x%x: %s.",
-			     addr + i, safe_strerror (errcode));
-		    }
-		}
-
-	      fflush (stream);
-	    }
-	  else /* print vtbl's nicely */
- 	  if (is_vtbl_member(type))
-  	    {
-	      CORE_ADDR vt_address = unpack_pointer (type, valaddr);
-
-	      struct minimal_symbol *msymbol =
-		lookup_minimal_symbol_by_pc (vt_address);
-	      if ((msymbol != NULL) && (vt_address == msymbol -> address))
-		{
-		  fputs_filtered (" <", stream);
-		  fputs_demangled (msymbol -> name, stream,
-				   DMGL_ANSI | DMGL_PARAMS);
-		  fputs_filtered (">", stream);
-		}
-	      if (vtblprint)
-	        {
-		  value vt_val;
-
-		  vt_val = value_at (TYPE_TARGET_TYPE (type), vt_address);
-		  val_print (VALUE_TYPE (vt_val), VALUE_CONTENTS (vt_val),
-			     VALUE_ADDRESS (vt_val), stream, format,
-			     deref_ref, recurse + 1, pretty);
-		  if (pretty)
-		    {
-		      fprintf_filtered (stream, "\n");
-		      print_spaces_filtered (2 + 2 * recurse, stream);
-		    }
-	        }
-	      }
-
-	  /* Return number of characters printed, plus one for the
-	     terminating null if we have "reached the end".  */
-	  return i + (print_max && i != print_max);
-	}
-      break;
-
-    case TYPE_CODE_MEMBER:
-      error ("not implemented: member type in val_print");
-      break;
-
-    case TYPE_CODE_REF:
-      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_MEMBER)
-        {
-	  print_class_member (valaddr,
-			      TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type)),
-			      stream, "");
-	  break;
-	}
-      if (addressprint)
-        {
-	  fprintf_filtered (stream, "@0x%lx",
-	  		    unpack_long (builtin_type_int, valaddr));
-	  if (deref_ref)
-	    fputs_filtered (": ", stream);
-        }
-      /* De-reference the reference.  */
-      if (deref_ref)
-	{
-	  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_UNDEF)
-	    {
-	      value deref_val =
-		value_at
-		  (TYPE_TARGET_TYPE (type),
-		   unpack_pointer (lookup_pointer_type (builtin_type_void),
-				   valaddr));
-	      val_print (VALUE_TYPE (deref_val), VALUE_CONTENTS (deref_val),
-			 VALUE_ADDRESS (deref_val), stream, format,
-			 deref_ref, recurse + 1, pretty);
-	    }
-	  else
-	    fputs_filtered ("???", stream);
-	}
-      break;
-
-    case TYPE_CODE_UNION:
-      if (recurse && !unionprint)
-	{
-	  fprintf_filtered (stream, "{...}");
-	  break;
-	}
-      /* Fall through.  */
-    case TYPE_CODE_STRUCT:
-      if (vtblprint && is_vtbl_ptr_type(type))
-	{
-          /* Print the unmangled name if desired.  */
-	  print_address_demangle(*((int *) (valaddr +	/* FIXME bytesex */
-	      TYPE_FIELD_BITPOS (type, VTBL_FNADDR_OFFSET) / 8)),
-	      stream, demangle);
-	  break;
-	}
-      val_print_fields (type, valaddr, stream, format, recurse, pretty, 0);
-      break;
-
-    case TYPE_CODE_ENUM:
-      if (format)
-	{
-	  print_scalar_formatted (valaddr, type, format, 0, stream);
-	  break;
-	}
-      len = TYPE_NFIELDS (type);
-      val = unpack_long (builtin_type_int, valaddr);
-      for (i = 0; i < len; i++)
-	{
-	  QUIT;
-	  if (val == TYPE_FIELD_BITPOS (type, i))
-	    break;
-	}
-      if (i < len)
-	fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
-      else
-#ifdef LONG_LONG
-	fprintf_filtered (stream, "%lld", val);
-#else
-	fprintf_filtered (stream, "%ld", val);
-#endif
-      break;
-
-    case TYPE_CODE_FUNC:
-      if (format)
-	{
-	  print_scalar_formatted (valaddr, type, format, 0, stream);
-	  break;
-	}
-      /* FIXME, we should consider, at least for ANSI C language, eliminating
-	 the distinction made between FUNCs and POINTERs to FUNCs.  */
-      fprintf_filtered (stream, "{");
-      type_print (type, "", stream, -1);
-      fprintf_filtered (stream, "} ");
-      /* Try to print what function it points to, and its address.  */
-      print_address_demangle (address, stream, demangle);
-      break;
-
-    case TYPE_CODE_INT:
-      if (format || output_format)
-	{
-	  print_scalar_formatted (valaddr, type,
-				  format? format: output_format,
-				  0, stream);
-	  break;
-	}
-      if (TYPE_LENGTH (type) > sizeof (LONGEST))
-	{
-	  if (TYPE_UNSIGNED (type))
-	    {
-	      /* First figure out whether the number in fact has zeros
-		 in all its bytes more significant than least significant
-		 sizeof (LONGEST) ones.  */
-	      char *p;
-	      /* Pointer to first (i.e. lowest address) nonzero character.  */
-	      char *first_addr;
-	      len = TYPE_LENGTH (type);
-
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
-	      for (p = valaddr;
-		   len > sizeof (LONGEST)
-		   && p < valaddr + TYPE_LENGTH (type);
-		   p++)
-#else /* Little endian.  */
-	      first_addr = valaddr;
-	      for (p = valaddr + TYPE_LENGTH (type);
-		   len > sizeof (LONGEST) && p >= valaddr;
-		   p--)
-#endif /* Little endian.  */
-		{
-		  if (*p == 0)
-		    len--;
-		  else
-		    break;
-		}
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
-	      first_addr = p;
-#endif
-	      
-	      if (len <= sizeof (LONGEST))
-		{
-		  /* We can print it in decimal.  */
-		  fprintf_filtered
-		    (stream, 
-#if defined (LONG_LONG)
-		     "%llu",
-#else
-		     "%lu",
-#endif
-		     unpack_long (BUILTIN_TYPE_LONGEST, first_addr));
-		}
-	      else
-		{
-		  /* It is big, so print it in hex.  */
-		  print_hex_chars (stream, (unsigned char *)first_addr, len);
-		}
-	    }
-	  else
-	    {
-	      /* Signed.  One could assume two's complement (a reasonable
-		 assumption, I think) and do better than this.  */
-	      print_hex_chars (stream, (unsigned char *)valaddr,
-			       TYPE_LENGTH (type));
-	    }
-	  break;
-	}
-#ifdef PRINT_TYPELESS_INTEGER
-      PRINT_TYPELESS_INTEGER (stream, type, unpack_long (type, valaddr));
-#else
-#ifndef LONG_LONG
-      fprintf_filtered (stream,
-			TYPE_UNSIGNED (type) ? "%u" : "%d",
-			unpack_long (type, valaddr));
-#else
-      fprintf_filtered (stream,
-			TYPE_UNSIGNED (type) ? "%llu" : "%lld",
-			unpack_long (type, valaddr));
-#endif
-#endif
-			
-      if (TYPE_LENGTH (type) == 1)
-	{
-	  fputs_filtered (" ", stream);
-	  local_printchar ((unsigned char) unpack_long (type, valaddr), 
-			   stream);
-	}
-      break;
-
-    case TYPE_CODE_CHAR:
-      if (format || output_format)
-	{
-	  print_scalar_formatted (valaddr, type,
-				  format? format: output_format,
-				  0, stream);
-	  break;
-	}
-      fprintf_filtered (stream, TYPE_UNSIGNED (type) ? "%u" : "%d",
-			unpack_long (type, valaddr));
-      fputs_filtered (" ", stream);
-      local_printchar ((unsigned char) unpack_long (type, valaddr), stream);
-      break;
-
-    case TYPE_CODE_FLT:
-      if (format)
-	print_scalar_formatted (valaddr, type, format, 0, stream);
-      else
-	print_floating (valaddr, type, stream);
-      break;
-
-    case TYPE_CODE_VOID:
-      fprintf_filtered (stream, "void");
-      break;
-
-    case TYPE_CODE_UNDEF:
-      /* This happens (without TYPE_FLAG_STUB set) on systems which don't use
-	 dbx xrefs (NO_DBX_XREFS in gcc) if a file has a "struct foo *bar"
-	 and no complete type for struct foo in that file.  */
-      fprintf_filtered (stream, "<unknown struct>");
-      break;
-
-    case TYPE_CODE_ERROR:
-      fprintf_filtered (stream, "?");
-      break;
-
-    case TYPE_CODE_RANGE:
-      /* FIXME, we should not ever have to print one of these yet.  */
-      fprintf_filtered (stream, "<range type>");
-      break;
-
-    /* start-sanitize-chill (FIXME!) */
-    case TYPE_CODE_BOOL:
-      val = unpack_long (builtin_type_chill_bool, valaddr);
-      fprintf_filtered (stream, val ? "TRUE" : "FALSE");
-      break;
-    /* end-sanitize-chill */
-
-    default:
-      error ("Invalid type code in symbol table.");
-    }
-  fflush (stream);
-  return 0;
-}
-
-/* Print a description of a type in the format of a 
-   typedef for the current language.
-   NEW is the new name for a type TYPE. */
-void
-typedef_print (type, new, stream)
-   struct type *type;
-   struct symbol *new;
-   FILE *stream;
-{
-   switch (current_language->la_language)
-   {
-#ifdef _LANG_c
-   case language_c:
-   case language_cplus:
-      fprintf_filtered(stream, "typedef ");
-      type_print(type,"",stream,0);
-      if(TYPE_NAME ((SYMBOL_TYPE (new))) == 0
-	 || 0 != strcmp (TYPE_NAME ((SYMBOL_TYPE (new))),
-			 SYMBOL_NAME (new)))
-	 fprintf_filtered(stream,  " %s", SYMBOL_NAME(new));
-      break;
-#endif
-#ifdef _LANG_m2
-   case language_m2:
-      fprintf_filtered(stream, "TYPE ");
-      if(!TYPE_NAME(SYMBOL_TYPE(new)) ||
-	 strcmp (TYPE_NAME(SYMBOL_TYPE(new)),
-		    SYMBOL_NAME(new)))
-	 fprintf_filtered(stream, "%s = ", SYMBOL_NAME(new));
-      else
-	 fprintf_filtered(stream, "<builtin> = ");
-      type_print(type,"",stream,0);
-      break;
-#endif
-/* start-sanitize-chill */
-#ifdef _LANG_chill
-   case language_chill:
-      error("Missing Chill support in function typedef_print."); /*FIXME*/
-#endif
-/* end-sanitize-chill */
-   default:
-      error("Language not supported.");
-   }
-   fprintf_filtered(stream, ";\n");
-}
-
-
-/* Print a description of a type TYPE
-   in the form of a declaration of a variable named VARSTRING.
-   (VARSTRING is demangled if necessary.)
-   Output goes to STREAM (via stdio).
-   If SHOW is positive, we show the contents of the outermost level
-   of structure even if there is a type name that could be used instead.
-   If SHOW is negative, we never show the details of elements' types.  */
-
-void
-type_print (type, varstring, stream, show)
-     struct type *type;
-     char *varstring;
-     FILE *stream;
-     int show;
-{
-  type_print_1 (type, varstring, stream, show, 0);
-}
-
-/* LEVEL is the depth to indent lines by.  */
-
-void
-type_print_1 (type, varstring, stream, show, level)
-     struct type *type;
-     char *varstring;
-     FILE *stream;
-     int show;
-     int level;
-{
-  register enum type_code code;
-  char *demangled = NULL;
-  int demangled_args;
-
-  type_print_base (type, stream, show, level);
-  code = TYPE_CODE (type);
-  if ((varstring && *varstring)
-      ||
-      /* Need a space if going to print stars or brackets;
-	 but not if we will print just a type name.  */
-      ((show > 0 || TYPE_NAME (type) == 0)
-       &&
-       (code == TYPE_CODE_PTR || code == TYPE_CODE_FUNC
-	|| code == TYPE_CODE_METHOD
-	|| code == TYPE_CODE_ARRAY
-	|| code == TYPE_CODE_MEMBER
-	|| code == TYPE_CODE_REF)))
-    fprintf_filtered (stream, " ");
-  type_print_varspec_prefix (type, stream, show, 0);
-
-  /* See if the name has a C++ demangled equivalent, and if so, print that
-     instead. */
-
-  if (demangle)
-    {
-      demangled = cplus_demangle (varstring, DMGL_ANSI | DMGL_PARAMS);
-    }
-  fputs_filtered ((demangled != NULL) ? demangled : varstring, stream);
-
-  /* For demangled function names, we have the arglist as part of the name,
-     so don't print an additional pair of ()'s */
-
-  demangled_args = (demangled != NULL) && (code == TYPE_CODE_FUNC);
-  type_print_varspec_suffix (type, stream, show, 0, demangled_args);
-
-  if (demangled)
-    {
-      free (demangled);
-    }
-}
-
-/* Print the method arguments ARGS to the file STREAM.  */
-static void
-type_print_method_args (args, prefix, varstring, staticp, stream)
-     struct type **args;
-     char *prefix, *varstring;
-     int staticp;
-     FILE *stream;
-{
-  int i;
-
-  fputs_demangled (prefix, stream, DMGL_ANSI | DMGL_PARAMS);
-  fputs_demangled (varstring, stream, DMGL_ANSI | DMGL_PARAMS);
-  fputs_filtered (" (", stream);
-  if (args && args[!staticp] && args[!staticp]->code != TYPE_CODE_VOID)
-    {
-      i = !staticp;		/* skip the class variable */
-      while (1)
-	{
-	  type_print (args[i++], "", stream, 0);
-	  if (!args[i]) 
-	    {
-	      fprintf_filtered (stream, " ...");
-	      break;
-	    }
-	  else if (args[i]->code != TYPE_CODE_VOID)
 	    {
 	      fprintf_filtered (stream, ", ");
 	    }
-	  else break;
 	}
-    }
-  fprintf_filtered (stream, ")");
-}
-  
-/* If TYPE is a derived type, then print out derivation information.
-   Print only the actual base classes of this type, not the base classes
-   of the base classes.  I.E.  for the derivation hierarchy:
-
-	class A { int a; };
-	class B : public A {int b; };
-	class C : public B {int c; };
-
-   Print the type of class C as:
-
-   	class C : public B {
-		int c;
-	}
-
-   Not as the following (like gdb used to), which is not legal C++ syntax for
-   derived types and may be confused with the multiple inheritance form:
-
-	class C : public B : public A {
-		int c;
-	}
-
-   In general, gdb should try to print the types as closely as possible to
-   the form that they appear in the source code. */
-
-static void
-type_print_derivation_info (stream, type)
-     FILE *stream;
-     struct type *type;
-{
-  char *name;
-  int i;
-
-  for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
-    {
-      fputs_filtered (i == 0 ? ": " : ", ", stream);
-      fprintf_filtered (stream, "%s%s ",
-			BASETYPE_VIA_PUBLIC (type, i) ? "public" : "private",
-			BASETYPE_VIA_VIRTUAL(type, i) ? " virtual" : "");
-      name = type_name_no_tag (TYPE_BASECLASS (type, i));
-      fprintf_filtered (stream, "%s", name ? name : "(null)");
-    }
-  if (i > 0)
-    {
-      fputs_filtered (" ", stream);
-    }
-}
-
-/* Print any asterisks or open-parentheses needed before the
-   variable name (to describe its type).
-
-   On outermost call, pass 0 for PASSED_A_PTR.
-   On outermost call, SHOW > 0 means should ignore
-   any typename for TYPE and show its details.
-   SHOW is always zero on recursive calls.  */
-
-static void
-type_print_varspec_prefix (type, stream, show, passed_a_ptr)
-     struct type *type;
-     FILE *stream;
-     int show;
-     int passed_a_ptr;
-{
-  char *name;
-  if (type == 0)
-    return;
-
-  if (TYPE_NAME (type) && show <= 0)
-    return;
-
-  QUIT;
-
-  switch (TYPE_CODE (type))
-    {
-    case TYPE_CODE_PTR:
-      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
-      fprintf_filtered (stream, "*");
-      break;
-
-    case TYPE_CODE_MEMBER:
-      if (passed_a_ptr)
-	fprintf_filtered (stream, "(");
-      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
-      fprintf_filtered (stream, " ");
-      name = type_name_no_tag (TYPE_DOMAIN_TYPE (type));
-      if (name)
-	fputs_filtered (name, stream);
-      else
-        type_print_base (TYPE_DOMAIN_TYPE (type), stream, 0, passed_a_ptr);
-      fprintf_filtered (stream, "::");
-      break;
-
-    case TYPE_CODE_METHOD:
-      if (passed_a_ptr)
-	fprintf (stream, "(");
-      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
-      if (passed_a_ptr)
-	{
-	  fprintf_filtered (stream, " ");
-	  type_print_base (TYPE_DOMAIN_TYPE (type), stream, 0, passed_a_ptr);
-	  fprintf_filtered (stream, "::");
-	}
-      break;
-
-    case TYPE_CODE_REF:
-      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
-      fprintf_filtered (stream, "&");
-      break;
-
-    case TYPE_CODE_FUNC:
-      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
-      if (passed_a_ptr)
-	fprintf_filtered (stream, "(");
-      break;
-
-    case TYPE_CODE_ARRAY:
-      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
-      if (passed_a_ptr)
-	fprintf_filtered (stream, "(");
-      break;
-
-    case TYPE_CODE_UNDEF:
-    case TYPE_CODE_STRUCT:
-    case TYPE_CODE_UNION:
-    case TYPE_CODE_ENUM:
-    case TYPE_CODE_INT:
-    case TYPE_CODE_FLT:
-    case TYPE_CODE_VOID:
-    case TYPE_CODE_ERROR:
-    case TYPE_CODE_CHAR:
-    case TYPE_CODE_BOOL:
-    case TYPE_CODE_SET:
-    case TYPE_CODE_RANGE:
-    case TYPE_CODE_PASCAL_ARRAY:
-      /* These types need no prefix.  They are listed here so that
-	 gcc -Wall will reveal any types that haven't been handled.  */
-      break;
-    }
-}
-
-static void
-type_print_args (type, stream)
-     struct type *type;
-     FILE *stream;
-{
-  int i;
-  struct type **args;
-
-  fprintf_filtered (stream, "(");
-  args = TYPE_ARG_TYPES (type);
-  if (args != NULL)
-    {
-      if (args[1] == NULL)
-	{
-	  fprintf_filtered (stream, "...");
-	}
-      else
-	{
-	  for (i = 1;
-	       args[i] != NULL && args[i]->code != TYPE_CODE_VOID;
-	       i++)
-	    {
-	      type_print_1 (args[i], "", stream, -1, 0);
-	      if (args[i+1] == NULL)
-		{
-		  fprintf_filtered (stream, "...");
-		}
-	      else if (args[i+1]->code != TYPE_CODE_VOID)
-		{
-		  fprintf_filtered (stream, ",");
-		  wrap_here ("    ");
-		}
-	    }
-	}
-    }
-  fprintf_filtered (stream, ")");
-}
-
-/* Print any array sizes, function arguments or close parentheses
-   needed after the variable name (to describe its type).
-   Args work like type_print_varspec_prefix.  */
-
-static void
-type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
-     struct type *type;
-     FILE *stream;
-     int show;
-     int passed_a_ptr;
-     int demangled_args;
-{
-  if (type == 0)
-    return;
-
-  if (TYPE_NAME (type) && show <= 0)
-    return;
-
-  QUIT;
-
-  switch (TYPE_CODE (type))
-    {
-    case TYPE_CODE_ARRAY:
-      if (passed_a_ptr)
-	fprintf_filtered (stream, ")");
+      wrap_here (n_spaces (2 + 2 * recurse));
       
-      fprintf_filtered (stream, "[");
-      if (TYPE_LENGTH (type) > 0
-	  && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
-	fprintf_filtered (stream, "%d",
-			  (TYPE_LENGTH (type)
-			   / TYPE_LENGTH (TYPE_TARGET_TYPE (type))));
-      fprintf_filtered (stream, "]");
-      
-      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
-				 0, 0);
-      break;
-
-    case TYPE_CODE_MEMBER:
-      if (passed_a_ptr)
-	fprintf_filtered (stream, ")");
-      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
-      break;
-
-    case TYPE_CODE_METHOD:
-      if (passed_a_ptr)
-	fprintf_filtered (stream, ")");
-      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
-      if (passed_a_ptr)
+      rep1 = i + 1;
+      reps = 1;
+      while ((rep1 < len) && 
+	     !memcmp (valaddr + i * eltlen, valaddr + rep1 * eltlen, eltlen))
 	{
-	  type_print_args (type, stream);
+	  ++reps;
+	  ++rep1;
 	}
-      break;
-
-    case TYPE_CODE_PTR:
-    case TYPE_CODE_REF:
-      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 1, 0);
-      break;
-
-    case TYPE_CODE_FUNC:
-      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
-				 passed_a_ptr, 0);
-      if (passed_a_ptr)
-	fprintf_filtered (stream, ")");
-      if (!demangled_args)
-	fprintf_filtered (stream, "()");
-      break;
-
-    case TYPE_CODE_UNDEF:
-    case TYPE_CODE_STRUCT:
-    case TYPE_CODE_UNION:
-    case TYPE_CODE_ENUM:
-    case TYPE_CODE_INT:
-    case TYPE_CODE_FLT:
-    case TYPE_CODE_VOID:
-    case TYPE_CODE_ERROR:
-    case TYPE_CODE_CHAR:
-    case TYPE_CODE_BOOL:
-    case TYPE_CODE_SET:
-    case TYPE_CODE_RANGE:
-    case TYPE_CODE_PASCAL_ARRAY:
-      /* These types do not need a suffix.  They are listed so that
-	 gcc -Wall will report types that may not have been considered.  */
-      break;
+      
+      if (reps > repeat_count_threshold)
+	{
+	  val_print (elttype, valaddr + i * eltlen, 0, stream, format,
+		     deref_ref, recurse + 1, pretty);
+	  fprintf_filtered (stream, " <repeats %u times>", reps);
+	  i = rep1 - 1;
+	  things_printed += repeat_count_threshold;
+	}
+      else
+	{
+	  val_print (elttype, valaddr + i * eltlen, 0, stream, format,
+		     deref_ref, recurse + 1, pretty);
+	  things_printed++;
+	}
+    }
+  if (i < len)
+    {
+      fprintf_filtered (stream, "...");
     }
 }
-
-/* Print the name of the type (or the ultimate pointer target,
-   function value or array element), or the description of a
-   structure or union.
-
-   SHOW nonzero means don't print this type as just its name;
-   show its real definition even if it has a name.
-   SHOW zero means print just typename or struct tag if there is one
-   SHOW negative means abbreviate structure elements.
-   SHOW is decremented for printing of structure elements.
-
-   LEVEL is the depth to indent by.
-   We increase it for some recursive calls.  */
 
 static void
-type_print_base (type, stream, show, level)
-     struct type *type;
+value_print_array_elements (val, stream, format, pretty)
+     value val;
      FILE *stream;
-     int show;
-     int level;
+     int format;
+     enum val_prettyprint pretty;
 {
-  char *name;
-  register int i;
-  register int len;
-  register int lastval;
-  char *mangled_name;
-  char *demangled_name;
-  enum {s_none, s_public, s_private, s_protected} section_type;
-  QUIT;
-
-  wrap_here ("    ");
-  if (type == NULL)
+  unsigned int things_printed = 0;
+  register unsigned int i, n, typelen;
+  /* Position of the array elem we are examining to see if it is repeated.  */
+  unsigned int rep1;
+  /* Number of repetitions we have detected so far.  */
+  unsigned int reps;
+    
+  n = VALUE_REPETITIONS (val);
+  typelen = TYPE_LENGTH (VALUE_TYPE (val));
+  for (i = 0; i < n && things_printed < print_max; i++)
     {
-      fputs_filtered ("<type unknown>", stream);
-      return;
+      if (i != 0)
+	{
+	  fprintf_filtered (stream, ", ");
+	}
+      wrap_here ("");
+      
+      rep1 = i + 1;
+      reps = 1;
+      while (rep1 < n && !memcmp (VALUE_CONTENTS (val) + typelen * i,
+				  VALUE_CONTENTS (val) + typelen * rep1,
+				  typelen))
+	{
+	  ++reps;
+	  ++rep1;
+	}
+      
+      if (reps > repeat_count_threshold)
+	{
+	  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val) + typelen * i,
+		     VALUE_ADDRESS (val) + typelen * i, stream, format, 1,
+		     0, pretty);
+	  fprintf (stream, " <repeats %u times>", reps);
+	  i = rep1 - 1;
+	  things_printed += repeat_count_threshold;
+	}
+      else
+	{
+	  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val) + typelen * i,
+		     VALUE_ADDRESS (val) + typelen * i, stream, format, 1,
+		     0, pretty);
+	  things_printed++;
+	}
     }
-
-  /* When SHOW is zero or less, and there is a valid type name, then always
-     just print the type name directly from the type. */
-
-  if ((show <= 0) && (TYPE_NAME (type) != NULL))
+  if (i < n)
     {
-      fputs_filtered (TYPE_NAME (type), stream);
-      return;
-    }
-
-  switch (TYPE_CODE (type))
-    {
-    case TYPE_CODE_ARRAY:
-    case TYPE_CODE_PTR:
-    case TYPE_CODE_MEMBER:
-    case TYPE_CODE_REF:
-    case TYPE_CODE_FUNC:
-    case TYPE_CODE_METHOD:
-      type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
-      break;
-
-    case TYPE_CODE_STRUCT:
-      fprintf_filtered (stream,
-			HAVE_CPLUS_STRUCT (type) ? "class " : "struct ");
-      goto struct_union;
-
-    case TYPE_CODE_UNION:
-      fprintf_filtered (stream, "union ");
-    struct_union:
-      if (name = type_name_no_tag (type))
-	{
-	  fputs_filtered (name, stream);
-	  fputs_filtered (" ", stream);
-	  wrap_here ("    ");
-	}
-      if (show < 0)
-	fprintf_filtered (stream, "{...}");
-      else
-	{
-	  check_stub_type (type);
-	  
-	  type_print_derivation_info (stream, type);
-	  
-	  fprintf_filtered (stream, "{\n");
-	  if ((TYPE_NFIELDS (type) == 0) && (TYPE_NFN_FIELDS (type) == 0))
-	    {
-	      if (TYPE_FLAGS (type) & TYPE_FLAG_STUB)
-		fprintfi_filtered (level + 4, stream, "<incomplete type>\n");
-	      else
-		fprintfi_filtered (level + 4, stream, "<no data fields>\n");
-	    }
-
-	  /* Start off with no specific section type, so we can print
-	     one for the first field we find, and use that section type
-	     thereafter until we find another type. */
-
-	  section_type = s_none;
-
-	  /* If there is a base class for this type,
-	     do not print the field that it occupies.  */
-
-	  len = TYPE_NFIELDS (type);
-	  for (i = TYPE_N_BASECLASSES (type); i < len; i++)
-	    {
-	      QUIT;
-	      /* Don't print out virtual function table.  */
-	      if ((TYPE_FIELD_NAME (type, i))[5] == CPLUS_MARKER &&
-		  !strncmp (TYPE_FIELD_NAME (type, i), "_vptr", 5))
-		continue;
-
-	      /* If this is a C++ class we can print the various C++ section
-		 labels. */
-
-	      if (HAVE_CPLUS_STRUCT (type))
-		{
-		  if (TYPE_FIELD_PROTECTED (type, i))
-		    {
-		      if (section_type != s_protected)
-			{
-			  section_type = s_protected;
-			  fprintfi_filtered (level + 2, stream,
-					     "protected:\n");
-			}
-		    }
-		  else if (TYPE_FIELD_PRIVATE (type, i))
-		    {
-		      if (section_type != s_private)
-			{
-			  section_type = s_private;
-			  fprintfi_filtered (level + 2, stream, "private:\n");
-			}
-		    }
-		  else
-		    {
-		      if (section_type != s_public)
-			{
-			  section_type = s_public;
-			  fprintfi_filtered (level + 2, stream, "public:\n");
-			}
-		    }
-		}
-
-	      print_spaces_filtered (level + 4, stream);
-	      if (TYPE_FIELD_STATIC (type, i))
-		{
-		  fprintf_filtered (stream, "static ");
-		}
-	      type_print_1 (TYPE_FIELD_TYPE (type, i),
-			    TYPE_FIELD_NAME (type, i),
-			    stream, show - 1, level + 4);
-	      if (!TYPE_FIELD_STATIC (type, i)
-		  && TYPE_FIELD_PACKED (type, i))
-		{
-		  /* It is a bitfield.  This code does not attempt
-		     to look at the bitpos and reconstruct filler,
-		     unnamed fields.  This would lead to misleading
-		     results if the compiler does not put out fields
-		     for such things (I don't know what it does).  */
-		  fprintf_filtered (stream, " : %d",
-				    TYPE_FIELD_BITSIZE (type, i));
-		}
-	      fprintf_filtered (stream, ";\n");
-	    }
-
-	  /* If there are both fields and methods, put a space between. */
-	  len = TYPE_NFN_FIELDS (type);
-	  if (len && section_type != s_none)
-	     fprintf_filtered (stream, "\n");
-
-	  /* C++: print out the methods */
-
-	  for (i = 0; i < len; i++)
-	    {
-	      struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
-	      int j, len2 = TYPE_FN_FIELDLIST_LENGTH (type, i);
-	      char *method_name = TYPE_FN_FIELDLIST_NAME (type, i);
-	      int is_constructor = name && strcmp(method_name, name) == 0;
-	      for (j = 0; j < len2; j++)
-		{
-		  QUIT;
-		  if (TYPE_FN_FIELD_PROTECTED (f, j))
-		    {
-		      if (section_type != s_protected)
-			{
-			  section_type = s_protected;
-			  fprintfi_filtered (level + 2, stream,
-					     "protected:\n");
-			}
-		    }
-		  else if (TYPE_FN_FIELD_PRIVATE (f, j))
-		    {
-		      if (section_type != s_private)
-			{
-			  section_type = s_private;
-			  fprintfi_filtered (level + 2, stream, "private:\n");
-			}
-		    }
-		  else
-		    {
-		      if (section_type != s_public)
-			{
-			  section_type = s_public;
-			  fprintfi_filtered (level + 2, stream, "public:\n");
-			}
-		    }
-
-		  print_spaces_filtered (level + 4, stream);
-		  if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
-		    fprintf_filtered (stream, "virtual ");
-		  else if (TYPE_FN_FIELD_STATIC_P (f, j))
-		    fprintf_filtered (stream, "static ");
-		  if (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)) == 0)
-		    {
-		      /* Keep GDB from crashing here.  */
-		      fprintf (stream, "<undefined type> %s;\n",
-			       TYPE_FN_FIELD_PHYSNAME (f, j));
-		      break;
-		    }
-		  else if (!is_constructor)
-		    {
-		      type_print (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)),
-				  "", stream, 0);
-		      fputs_filtered (" ", stream);
-		    }
-		  if (TYPE_FN_FIELD_STUB (f, j))
-		    {
-		      /* Build something we can demangle.  */
-		      mangled_name = gdb_mangle_name (type, i, j);
-		      demangled_name =
-			  cplus_demangle (mangled_name,
-					  DMGL_ANSI | DMGL_PARAMS);
-		      if (demangled_name == NULL)
-			fprintf_filtered (stream, "<badly mangled name %s>",
-			    mangled_name);
-		      else 
-			{
-			  fprintf_filtered (stream, "%s",
-			      strchr (demangled_name, ':') + 2);
-			  free (demangled_name);
-			}
-		      free (mangled_name);
-		    }
-		  else if (TYPE_FN_FIELD_PHYSNAME (f, j)[0] == '_'
-		        && TYPE_FN_FIELD_PHYSNAME (f, j)[1] == CPLUS_MARKER)
-		    type_print_method_args
-		      (TYPE_FN_FIELD_ARGS (f, j) + 1, "~",
-		       method_name, 0, stream);
-		  else
-		    type_print_method_args
-		      (TYPE_FN_FIELD_ARGS (f, j), "",
-		       method_name,
-		       TYPE_FN_FIELD_STATIC_P (f, j), stream);
-
-		  fprintf_filtered (stream, ";\n");
-		}
-	    }
-
-	  fprintfi_filtered (level, stream, "}");
-	}
-      break;
-
-    case TYPE_CODE_ENUM:
-      fprintf_filtered (stream, "enum ");
-      if (name = type_name_no_tag (type))
-	{
-	  fputs_filtered (name, stream);
-	  fputs_filtered (" ", stream);
-	}
-      wrap_here ("    ");
-      if (show < 0)
-	fprintf_filtered (stream, "{...}");
-      else
-	{
-	  fprintf_filtered (stream, "{");
-	  len = TYPE_NFIELDS (type);
-	  lastval = 0;
-	  for (i = 0; i < len; i++)
-	    {
-	      QUIT;
-	      if (i) fprintf_filtered (stream, ", ");
-	      wrap_here ("    ");
-	      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
-	      if (lastval != TYPE_FIELD_BITPOS (type, i))
-		{
-		  fprintf_filtered (stream, " = %d", TYPE_FIELD_BITPOS (type, i));
-		  lastval = TYPE_FIELD_BITPOS (type, i);
-		}
-	      lastval++;
-	    }
-	  fprintf_filtered (stream, "}");
-	}
-      break;
-
-    case TYPE_CODE_VOID:
-      fprintf_filtered (stream, "void");
-      break;
-
-    case TYPE_CODE_UNDEF:
-      fprintf_filtered (stream, "struct <unknown>");
-      break;
-
-    case TYPE_CODE_ERROR:
-      fprintf_filtered (stream, "<unknown type>");
-      break;
-
-    case TYPE_CODE_RANGE:
-      /* This should not occur */
-      fprintf_filtered (stream, "<range type>");
-      break;
-
-    default:
-      /* Handle types not explicitly handled by the other cases,
-	 such as fundamental types.  For these, just print whatever
-	 the type name is, as recorded in the type itself.  If there
-	 is no type name, then complain. */
-      if (TYPE_NAME (type) != NULL)
-	{
-	  fputs_filtered (TYPE_NAME (type), stream);
-	}
-      else
-	{
-	  error ("Invalid type code (%d) in symbol table.", TYPE_CODE (type));
-	}
-      break;
+      fprintf_filtered (stream, "...");
     }
 }
+
 
 #if 0
 /* Validate an input or output radix setting, and make sure the user
@@ -2079,7 +671,8 @@ _initialize_valprint ()
      &showprintlist);
 
   add_show_from_set
-    (add_set_cmd ("pretty", class_support, var_boolean, (char *)&prettyprint,
+    (add_set_cmd ("pretty", class_support, var_boolean,
+		  (char *)&prettyprint_structs,
 		  "Set prettyprinting of structures.",
 		  &setprintlist),
      &showprintlist);
@@ -2091,20 +684,9 @@ _initialize_valprint ()
      &showprintlist);
   
   add_show_from_set
-    (add_set_cmd ("vtbl", class_support, var_boolean, (char *)&vtblprint,
-		  "Set printing of C++ virtual function tables.",
-		  &setprintlist),
-     &showprintlist);
-
-  add_show_from_set
-    (add_set_cmd ("array", class_support, var_boolean, (char *)&arrayprint,
+    (add_set_cmd ("array", class_support, var_boolean,
+		  (char *)&prettyprint_arrays,
 		  "Set prettyprinting of arrays.",
-		  &setprintlist),
-     &showprintlist);
-
-  add_show_from_set
-    (add_set_cmd ("object", class_support, var_boolean, (char *)&objectprint,
-	  "Set printing of object's derived type based on vtable info.",
 		  &setprintlist),
      &showprintlist);
 
@@ -2141,14 +723,9 @@ _initialize_valprint ()
   c->function.sfunc = set_radix;
 
   /* Give people the defaults which they are used to.  */
-  prettyprint = 0;
+  prettyprint_structs = 0;
+  prettyprint_arrays = 0;
   unionprint = 1;
-  vtblprint = 0;
-  arrayprint = 0;
   addressprint = 1;
-  objectprint = 0;
-
   print_max = 200;
-
-  obstack_begin (&dont_print_obstack, 32 * sizeof (struct type *));
 }

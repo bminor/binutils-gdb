@@ -705,6 +705,7 @@ ptype	:	typebase
 		  int done = 0;
 		  int array_size;
 		  struct type *follow_type = $1;
+		  struct type *range_type;
 		  
 		  while (!done)
 		    switch (pop_type ())
@@ -721,10 +722,15 @@ ptype	:	typebase
 		      case tp_array:
 			array_size = pop_type_int ();
 			if (array_size != -1)
-			  follow_type =
-			    create_array_type ((struct type *) NULL,
-					       follow_type, builtin_type_int,
-					       0, array_size - 1);
+			  {
+			    range_type =
+			      create_range_type ((struct type *) NULL,
+						 builtin_type_int, 0,
+						 array_size - 1);
+			    follow_type =
+			      create_array_type ((struct type *) NULL,
+						 follow_type, range_type);
+			  }
 			else
 			  follow_type = lookup_pointer_type (follow_type);
 			break;
@@ -1039,13 +1045,13 @@ struct token
   enum exp_opcode opcode;
 };
 
-const static struct token tokentab3[] =
+static const struct token tokentab3[] =
   {
     {">>=", ASSIGN_MODIFY, BINOP_RSH},
     {"<<=", ASSIGN_MODIFY, BINOP_LSH}
   };
 
-const static struct token tokentab2[] =
+static const struct token tokentab2[] =
   {
     {"+=", ASSIGN_MODIFY, BINOP_ADD},
     {"-=", ASSIGN_MODIFY, BINOP_SUB},
