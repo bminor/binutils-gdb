@@ -158,9 +158,9 @@ remote_open (char *name)
 #if defined(F_SETFL) && defined (FASYNC)
   save_fcntl_flags = fcntl (remote_desc, F_GETFL, 0);
   fcntl (remote_desc, F_SETFL, save_fcntl_flags | FASYNC);
-#endif
 #if defined (F_SETOWN)
   fcntl (remote_desc, F_SETOWN, getpid ());
+#endif
 #endif
   disable_async_io ();
   fprintf (stderr, "Remote debugging using %s\n", name);

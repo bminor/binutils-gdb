@@ -1,5 +1,10 @@
 2001-07-11  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbserver/remote-utils.c (remote_open): Only
+	check for F_SETOWN if we had F_SETFL and FASYNC.
+
+2001-07-11  Daniel Jacobowitz  <drow@mvista.com>
+
 	From Michael Fedrowitz  <michael.fedrowitz@informatik.uni-ulm.de>:
 
 	* config/m68k/linux.mh: Remove core-regset.o.
