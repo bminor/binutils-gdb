@@ -1,5 +1,8 @@
 Mon Jun  6 10:57:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* ecoff.c (ecoff_bfd_copy_private_bfd_data): Don't try to copy
+	data to a non-ECOFF file.
+
 	* libbfd-in.h: Add warning that libbfd.h is a generated file.
 	* libbfd.h: Rebuilt.
 

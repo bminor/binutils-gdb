@@ -2178,7 +2178,11 @@ ecoff_bfd_copy_private_bfd_data (ibfd, obfd)
   size_t c;
   boolean local;
 
-  BFD_ASSERT (ibfd->xvec == obfd->xvec);
+  /* This function is selected based on the input vector.  We only
+     want to copy information over if the output BFD also uses ECOFF
+     format.  */
+  if (bfd_get_flavour (obfd) != bfd_target_ecoff_flavour)
+    return true;
 
   /* Copy the GP value and the register masks.  */
   ecoff_data (obfd)->gp = ecoff_data (ibfd)->gp;
