@@ -104,6 +104,9 @@ struct target_ops
      symbols.  */
 
   void (*look_up_symbols) (void);
+
+  /* Send a signal to the inferior process, however is appropriate.  */
+  void (*send_signal) (int);
 };
 
 extern struct target_ops *the_target;

@@ -1,3 +1,13 @@
+2003-06-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c (linux_wait_for_event): Correct comment typos.
+	(linux_resume_one_process): Call check_removed_breakpoint.
+	(linux_send_signal): New function.
+	(linux_target_ops): Add linux_send_signal.
+	* remote-utils.c (putpkt, input_interrupt): Use send_signal instead
+	of kill.
+	* target.h (struct target_ops): Add send_signal.
+
 2003-05-29  Jim Blandy  <jimb@redhat.com>
 
 	* linux-low.c (usr_store_inferior_registers): Transfer buf in
