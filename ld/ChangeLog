@@ -1,3 +1,11 @@
+Thu Aug 31 16:37:07 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* ldemul.c (ldemul_parse_args): New.
+	* ldemul.h (ld_emulation_xfer_struct): Add parse_args.
+	* lexsup.c (all pe stuff): Moved into pe.em
+	(parse_args): Call emulation arg parser.
+	* emultempl/pe.em (parse_args): handle PE specfic args.
+
 Thu Aug 31 17:01:37 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (lang_memory_region_lookup): Don't use the first region
