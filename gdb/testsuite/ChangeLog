@@ -1,4 +1,11 @@
+Mon Jul  5 22:03:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t07/{gdbme.c,watchpoint.exp}: Add test for 2597.  Also add
+	test_stepping tests.
+
 Fri Jul  2 09:08:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t{06,17}/Makefile.in (clean): Remove all executables.
 
 	* gdb.t17/{interrupt.{c,exp},Makefile.in}: New test for solaris bug.
 
