@@ -111,9 +111,10 @@ typedef struct
   unsigned int ost_flags; /* obj_coff internal use only flags */
 } obj_symbol_type;
 
+#ifndef DO_NOT_STRIP
 #define DO_NOT_STRIP	0
 #define DO_STRIP	1
-
+#endif
 /* Symbol table macros and constants */
 
 /* Possible and usefull section number in symbol table 

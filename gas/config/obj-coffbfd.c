@@ -315,98 +315,108 @@ void DEFUN(do_relocs_for,(abfd, file_cursor),
 	   bfd *abfd AND
 	   unsigned long *file_cursor)
 {
-    unsigned int nrelocs;
-
-
-
-    unsigned int idx;
+  unsigned int nrelocs;
+  unsigned int idx;
   
-
-
-
-    for (idx = SEG_E0; idx < SEG_E9; idx++) 
+  for (idx = SEG_E0; idx < SEG_E9; idx++) 
+  {
+    if (segment_info[idx].scnhdr.s_name[0]) 
     {
-	if (segment_info[idx].scnhdr.s_name[0]) 
-	{
 
-	    struct external_reloc *ext_ptr;
-	    struct external_reloc *external_reloc_vec;
-	    unsigned int external_reloc_size;
-	    unsigned int count = 0;
-	    unsigned int base  = segment_info[idx].scnhdr.s_paddr;
-	    fixS *   fix_ptr = segment_info[idx].fix_root;
-	    nrelocs = count_entries_in_chain(idx);
-	    external_reloc_size = nrelocs * RELSZ;
-	    external_reloc_vec =
-	     (struct external_reloc*)malloc(external_reloc_size);
+      struct external_reloc *ext_ptr;
+      struct external_reloc *external_reloc_vec;
+      unsigned int external_reloc_size;
+      unsigned int count = 0;
+      unsigned int base  = segment_info[idx].scnhdr.s_paddr;
+      fixS *   fix_ptr = segment_info[idx].fix_root;
+      nrelocs = count_entries_in_chain(idx);
+      external_reloc_size = nrelocs * RELSZ;
+      external_reloc_vec =
+       (struct external_reloc*)malloc(external_reloc_size);
 
 	
 	    
-	    ext_ptr = external_reloc_vec;
+      ext_ptr = external_reloc_vec;
 	    
-	    /* Fill in the internal coff style reloc struct from the
-	       internal fix list */
-	    while (fix_ptr)
-	    {
-		symbolS *symbol_ptr;
-		struct internal_reloc intr;
+      /* Fill in the internal coff style reloc struct from the
+	 internal fix list */
+      while (fix_ptr)
+      {
+	symbolS *symbol_ptr;
+	struct internal_reloc intr;
 
-		/* Only output some of the relocations */
-		if (TC_COUNT_RELOC(fix_ptr))
-		{
-		    symbolS *dot;
-		    symbol_ptr = fix_ptr->fx_addsy;
-		    
-		    intr.r_type = TC_COFF_FIX2RTYPE(fix_ptr);
-		    intr.r_vaddr = base +  fix_ptr->fx_frag->fr_address +  fix_ptr->fx_where ;
-
-
-		    /* Turn the segment of the symbol into an offset
-		     */
-		    dot =
-		     segment_info[S_GET_SEGMENT(symbol_ptr)].dot;
-   
-		    if (dot)
-		    {
-			intr.r_symndx = dot->sy_number;
-		    }
-		    else 
-		    {
-			intr.r_symndx = symbol_ptr->sy_number;
-		    }
-
+	/* Only output some of the relocations */
+	if (TC_COUNT_RELOC(fix_ptr))
+	{
+#ifdef TC_RELOC_MANGLE(fix_ptr, &intr)
+	  TC_RELOC_MANGLE(fix_ptr, &intr);
 		
-		    (void)bfd_coff_swap_reloc_out(abfd, &intr, ext_ptr);
-		    ext_ptr++;
+#else
+	  symbolS *dot;
+	  symbol_ptr = fix_ptr->fx_addsy;
+
+	  intr.r_type = TC_COFF_FIX2RTYPE(fix_ptr);
+	  intr.r_vaddr =
+	   base + fix_ptr->fx_frag->fr_address + fix_ptr->fx_where ;
+
+	  intr.r_offset = fix_ptr->fx_offset;
+
+	  intr.r_offset = 0;
+
+	  /* Turn the segment of the symbol into an offset
+	   */
+	  if (symbol_ptr) 
+	  {
+	    dot = segment_info[S_GET_SEGMENT(symbol_ptr)].dot;
+	    if (dot)
+	    {
+	      intr.r_symndx = dot->sy_number;
+	    }
+	    else 
+	    {
+	      intr.r_symndx = symbol_ptr->sy_number;
+	    }
+
+	  }
+	  else 
+	  {
+	    intr.r_symndx = -1;
+
+
+	  }
+#endif
+
+	  (void)bfd_coff_swap_reloc_out(abfd, &intr, ext_ptr);
+	  ext_ptr++;
 
 #if defined(TC_A29K)
-		    /* The 29k has a special kludge for the high 16 bit reloc.
-		       Two relocations are emmited, R_IHIHALF, and
-		       R_IHCONST. The second one doesn't contain a symbol,
-		       but uses the value for offset */
+	  /* The 29k has a special kludge for the high 16 bit reloc.
+	     Two relocations are emmited, R_IHIHALF, and
+	     R_IHCONST. The second one doesn't contain a symbol,
+	     but uses the value for offset */
 		
-		    if (intr.r_type == R_IHIHALF)
-		    {
-			/* now emit the second bit */
-			intr.r_type = R_IHCONST;	
-			intr.r_symndx = fix_ptr->fx_addnumber;
-			(void)bfd_coff_swap_reloc_out(abfd,&intr,ext_ptr);
-			ext_ptr++;
-		    }
+	  if (intr.r_type == R_IHIHALF)
+	  {
+	    /* now emit the second bit */
+	    intr.r_type = R_IHCONST;	
+	    intr.r_symndx = fix_ptr->fx_addnumber;
+	    (void)bfd_coff_swap_reloc_out(abfd,&intr,ext_ptr);
+	    ext_ptr++;
+	  }
 #endif
-		}
-		
-		fix_ptr = fix_ptr->fx_next;
-	    }
-      
-	    /* Write out the reloc table */
-	    segment_info[idx].scnhdr.s_relptr = *file_cursor;
-	    segment_info[idx].scnhdr.s_nreloc = nrelocs;
-	    bfd_write((PTR)external_reloc_vec, 1, external_reloc_size, abfd);
-	    *file_cursor += external_reloc_size;
-	    free( external_reloc_vec);
 	}
+		
+	fix_ptr = fix_ptr->fx_next;
+      }
+      
+      /* Write out the reloc table */
+      segment_info[idx].scnhdr.s_relptr = *file_cursor;
+      segment_info[idx].scnhdr.s_nreloc = nrelocs;
+      bfd_write((PTR)external_reloc_vec, 1, external_reloc_size, abfd);
+      *file_cursor += external_reloc_size;
+      free( external_reloc_vec);
     }
+  }
 }
 
 
@@ -1622,11 +1632,12 @@ extern void DEFUN_VOID(write_object_file)
 
     /* Turn the gas native symbol table shape into a coff symbol table */
     crawl_symbols(&filehdr, abfd);
-
+#ifndef TC_H8300
     for (i = SEG_E0; i < SEG_UNKNOWN; i++) 
     {
 	fixup_segment(segment_info[i].fix_root, i);
     }
+#endif
 
     file_cursor =   FILHSZ + SCNHSZ * filehdr.f_nscns ;
 
