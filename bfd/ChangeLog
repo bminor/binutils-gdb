@@ -31,7 +31,8 @@ Tue Sep  6 14:51:11 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 	is positive, since it always is.  Remove use of pad, which is
 	always zero.  Check obj_raw_syment_count, not bfd_get_symcount,
 	for the number of symbols, but only write them out if
-	bfd_get_symcount is non-zero.
+	bfd_get_symcount is non-zero.  Don't check obj_raw_syment_count
+	until after coff_write_symbols is called.
 	(coff_slurp_symbol_table): Use obj_raw_syment_count, not
 	bfd_get_symcount for the number of symbols.  Don't set
 	obj_conv_table_size.
@@ -48,7 +49,8 @@ Tue Sep  6 14:51:11 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 	and obj_conv_table_size here.
 	(coff_count_linenumbers): Reindent.  If bfd_get_symcount is zero,
 	add up the line numbers from the sections.
-	(coff_write_symbols): Don't set bfd_get_symcount.
+	(coff_write_symbols): Set obj_raw_syment_count, not
+	bfd_get_symcount.
 	(coff_pointerize_aux): Don't pointerize a nonpositive x_endndx
 	field.
 	(coff_get_normalized_symtab): Use obj_raw_syment_count, not

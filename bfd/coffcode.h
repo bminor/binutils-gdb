@@ -1741,11 +1741,6 @@ coff_write_object_contents (abfd)
     */
   internal_f.f_timdat = 0;
 
-  if (obj_raw_syment_count (abfd) != 0)
-    internal_f.f_symptr = sym_base;
-  else
-    internal_f.f_symptr = 0;
-
   internal_f.f_flags = 0;
 
   if (abfd->flags & EXEC_P)
@@ -1757,8 +1752,6 @@ coff_write_object_contents (abfd)
     internal_f.f_flags |= F_RELFLG;
   if (!haslinno)
     internal_f.f_flags |= F_LNNO;
-  if (obj_raw_syment_count (abfd) == 0)
-    internal_f.f_flags |= F_LSYMS;
   if (abfd->flags & EXEC_P)
     internal_f.f_flags |= F_EXEC;
 
@@ -1866,6 +1859,18 @@ coff_write_object_contents (abfd)
       if (! coff_write_relocs (abfd))
 	return false;
     }
+
+  /* If bfd_get_symcount (abfd) != 0, then we are not using the COFF
+     backend linker, and obj_raw_syment_count is not valid until after
+     coff_write_symbols is called.  */
+  if (obj_raw_syment_count (abfd) != 0)
+    internal_f.f_symptr = sym_base;
+  else
+    {
+      internal_f.f_symptr = 0;
+      internal_f.f_flags |= F_LSYMS;
+    }
+
   if (text_sec)
     {
       internal_a.tsize = bfd_get_section_size_before_reloc (text_sec);
