@@ -1,3 +1,7 @@
+2000-09-05  Steven Johnson  <sbjohnson@ozemail.com.au>
+
+	* cpu-powerpc.c  (arch_info_struct): Added MPC860 Family entry.
+
 2000-09-05  Alan Modra  <alan@linuxcare.com.au>
 
 	Shared library and PIC support.

@@ -201,6 +201,20 @@ static const bfd_arch_info_type arch_info_struct[] =
     false, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
+    &arch_info_struct[11]
+  },
+  {
+    32,       /* 32 bits in a word */
+    32,       /* 32 bits in an address */
+    8,        /* 8 bits in a byte */
+    bfd_arch_powerpc,
+    bfd_mach_ppc_860,
+    "powerpc",
+    "powerpc:MPC8XX",
+    3,
+    false, /* not the default */
+    powerpc_compatible,
+    bfd_default_scan,
     0
   }
 };
