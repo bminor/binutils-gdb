@@ -5789,7 +5789,7 @@ macro (ip)
       R4000 uses interlocks to handle coproc delays.
       Other chips (like the R3000) require nops to be inserted for delays.
 
-      FIXME: Currently, we require that the user handles delays.
+      FIXME: Currently, we require that the user handle delays.
       In order to fill delay slots for non-interlocked chips,
       we must have a way to specify delays based on the coprocessor.
       Eg. 4 cycles if load coproc reg from memory, 1 if in cache, etc.

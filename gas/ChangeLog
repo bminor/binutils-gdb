@@ -1,3 +1,7 @@
+2001-08-11  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-mips.c: Fix a comment typo.
+
 2001-08-10  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (move_register): New function.
