@@ -1,5 +1,9 @@
 2003-04-06  Andrew Cagney  <cagney@redhat.com>
 
+	* arm-tdep.c (arm_frameless_function_invocation): Fix typo.
+
+2003-04-06  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.h (legacy_frame_chain_valid): Rename frame_chain_valid.
 	Update comment.
 	* frame.c (legacy_saved_regs_this_id): Update.
