@@ -1,6 +1,12 @@
 Wed Jan  5 14:22:22 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* literal.c: New file.
+	* Makefile.in (REAL_SOURCES, OBJS): List it.
+
+	* as.h (DEBUG): Don't define.
+	(struct expressionS, struct fix): Declare in case they're used in
+	prototypes.
+	(add_to_literal_pool) [BFD_ASSEMBLER]: Declare.
 
 	* config/tc-mips.h (TARGET_FORMAT) [OBJ_AOUT]: Fix for new names
 	in bfd.
