@@ -27,6 +27,9 @@
 #include "budbg.h"
 #include <sys/stat.h>
 
+#include "elf/internal.h"
+#include "elf-bfd.h"
+
 #ifdef HAVE_GOOD_UTIME_H
 #include <utime.h>
 #else /* ! HAVE_GOOD_UTIME_H */
@@ -72,7 +75,7 @@ static void set_times PARAMS ((const char *, const struct stat *));
 static int strip_main PARAMS ((int, char **));
 static int copy_main PARAMS ((int, char **));
 
-#define RETURN_NONFATAL(s) {bfd_nonfatal(s); status = 1; return;}
+#define RETURN_NONFATAL(s) {bfd_nonfatal (s); status = 1; return;}
 
 static asymbol **isympp = NULL;	/* Input symbols */
 static asymbol **osympp = NULL;	/* Output symbols that survive stripping */
@@ -621,8 +624,8 @@ copy_object (ibfd, obfd)
 
   if (verbose)
     printf (_("copy from %s(%s) to %s(%s)\n"),
-	    bfd_get_filename(ibfd), bfd_get_target(ibfd),
-	    bfd_get_filename(obfd), bfd_get_target(obfd));
+	    bfd_get_filename (ibfd), bfd_get_target (ibfd),
+	    bfd_get_filename (obfd), bfd_get_target (obfd));
 
   if (set_start_set)
     start = set_start;
@@ -644,14 +647,15 @@ copy_object (ibfd, obfd)
 					bfd_get_mach (ibfd)));
   
   if (!bfd_set_format (obfd, bfd_get_format (ibfd)))
-    RETURN_NONFATAL (bfd_get_filename(ibfd));
+    RETURN_NONFATAL (bfd_get_filename (ibfd));
 
   if (isympp)
     free (isympp);
+  
   if (osympp != isympp)
     free (osympp);
 
-  /* bfd mandates that all output sections be created and sizes set before
+  /* BFD mandates that all output sections be created and sizes set before
      any output is done.  Thus, we traverse all sections multiple times.  */
   bfd_map_over_sections (ibfd, setup_section, (void *) obfd);
 
@@ -753,7 +757,7 @@ copy_object (ibfd, obfd)
 		    {
 		      non_fatal (_("Can't fill gap after %s: %s"),
 			       bfd_get_section_name (obfd, osections[i]),
-			       bfd_errmsg (bfd_get_error()));
+			       bfd_errmsg (bfd_get_error ()));
 		      status = 1;
 		      break;
 		    }
@@ -902,6 +906,7 @@ copy_object (ibfd, obfd)
 		    now = 8192;
 		  else
 		    now = left;
+
 		  if (! bfd_set_section_contents (obfd, osections[i], buf,
 						  off, now))
 		    RETURN_NONFATAL (bfd_get_filename (obfd));
@@ -964,7 +969,7 @@ copy_archive (ibfd, obfd, output_target)
   while (!status && this_element != (bfd *) NULL)
     {
       /* Create an output file for this member.  */
-      char *output_name = concat (dir, "/", bfd_get_filename(this_element),
+      char *output_name = concat (dir, "/", bfd_get_filename (this_element),
 				  (char *) NULL);
       bfd *output_bfd = bfd_openw (output_name, output_target);
       bfd *last_element;
@@ -1124,6 +1129,7 @@ setup_section (ibfd, isection, obfdarg)
     return;
 
   osection = bfd_make_section_anyway (obfd, bfd_section_name (ibfd, isection));
+  
   if (osection == NULL)
     {
       err = "making";
@@ -1138,7 +1144,7 @@ setup_section (ibfd, isection, obfdarg)
       err = "size";
       goto loser;
     }
-
+  
   vma = bfd_section_vma (ibfd, isection);
   if (p != NULL && p->change_vma == CHANGE_MODIFY)
     vma += p->vma_val;
@@ -1161,7 +1167,7 @@ setup_section (ibfd, isection, obfdarg)
       else if (p->change_lma == CHANGE_SET)
 	lma = p->lma_val;
       else
-	abort();
+	abort ();
     }
   else
     lma += change_section_address;
@@ -1814,12 +1820,12 @@ copy_main (argc, argv)
       switch (c)
 	{
 	case 'b':
-	  copy_byte = atoi(optarg);
+	  copy_byte = atoi (optarg);
 	  if (copy_byte < 0)
 	    fatal (_("byte number must be non-negative"));
 	  break;
 	case 'i':
-	  interleave = atoi(optarg);
+	  interleave = atoi (optarg);
 	  if (interleave < 1)
 	    fatal (_("interleave must be positive"));
 	  break;

@@ -1,3 +1,8 @@
+Wed Jul  1 16:29:50 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* objcopy.c: Minor formatting improvements.
+	* readelf.c: Minor output formatting improvement.
+
 Wed Jul  1 14:23:48 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* rclex.l: Add casts and change types to avoid warnings.

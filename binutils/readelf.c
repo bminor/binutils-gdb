@@ -1640,7 +1640,7 @@ process_section_headers (file)
   
   printf (_("\nSection Header%s:\n"), elf_header.e_shnum > 1 ? "s" : "");
   printf
-    (_("  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk In  Al\n"));
+    (_("  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n"));
       
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum;
