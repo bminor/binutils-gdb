@@ -80,7 +80,6 @@
 
 /* Some useful combinations:  */
 #define ARM_ANY		0x00ffffff
-#define ARM_2UP		(ARM_ANY - ARM_1)
 #define ARM_ALL		ARM_ANY
 
 #define FPU_FPA_EXT_V1	0x80000000	/* Base FPA instruction set.  */
@@ -188,7 +187,6 @@ struct arm_it
 {
   const char *  error;
   unsigned long instruction;
-  int           suffix;
   int           size;
   struct
   {
@@ -279,7 +277,6 @@ LITTLENUM_TYPE fp_values[NUM_FLOAT_VALS][MAX_LITTLENUMS];
 
 #define CONDS_BIT        0x00100000
 #define LOAD_BIT         0x00100000
-#define TRANS_BIT	 0x00200000
 
 #define DOUBLE_LOAD_FLAG 0x00000001
 
@@ -289,8 +286,8 @@ struct asm_cond
   unsigned long value;
 };
 
-/* This is to save a hash look-up in the common case.  */
 #define COND_ALWAYS 0xe0000000
+#define COND_MASK   0xf0000000
 
 static const struct asm_cond conds[] =
 {
@@ -310,137 +307,6 @@ static const struct asm_cond conds[] =
   {"le", 0xd0000000},
   {"al", 0xe0000000},
   {"nv", 0xf0000000}
-};
-
-/* Warning: If the top bit of the set_bits is set, then the standard
-   instruction bitmask is ignored, and the new bitmask is taken from
-   the set_bits:  */
-struct asm_flg
-{
-  const char *  template;	/* Basic flag string.  */
-  unsigned long set_bits;	/* Bits to set.  */
-};
-
-static const struct asm_flg s_flag[] =
-{
-  {"s", CONDS_BIT},
-  {NULL, 0}
-};
-
-static const struct asm_flg ldr_flags[] =
-{
-  {"d",  DOUBLE_LOAD_FLAG},
-  {"b",  0x00400000},
-  {"t",  TRANS_BIT},
-  {"bt", 0x00400000 | TRANS_BIT},
-  {"h",  0x801000b0},
-  {"sh", 0x801000f0},
-  {"sb", 0x801000d0},
-  {NULL, 0}
-};
-
-static const struct asm_flg str_flags[] =
-{
-  {"d",  DOUBLE_LOAD_FLAG},
-  {"b",  0x00400000},
-  {"t",  TRANS_BIT},
-  {"bt", 0x00400000 | TRANS_BIT},
-  {"h",  0x800000b0},
-  {NULL, 0}
-};
-
-static const struct asm_flg byte_flag[] =
-{
-  {"b", 0x00400000},
-  {NULL, 0}
-};
-
-static const struct asm_flg cmp_flags[] =
-{
-  {"s", CONDS_BIT},
-  {"p", 0x0010f000},
-  {NULL, 0}
-};
-
-static const struct asm_flg ldm_flags[] =
-{
-  {"ed", 0x01800000},
-  {"fd", 0x00800000},
-  {"ea", 0x01000000},
-  {"fa", 0x00000000},
-  {"ib", 0x01800000},
-  {"ia", 0x00800000},
-  {"db", 0x01000000},
-  {"da", 0x00000000},
-  {NULL, 0}
-};
-
-static const struct asm_flg stm_flags[] =
-{
-  {"ed", 0x00000000},
-  {"fd", 0x01000000},
-  {"ea", 0x00800000},
-  {"fa", 0x01800000},
-  {"ib", 0x01800000},
-  {"ia", 0x00800000},
-  {"db", 0x01000000},
-  {"da", 0x00000000},
-  {NULL, 0}
-};
-
-static const struct asm_flg lfm_flags[] =
-{
-  {"fd", 0x00800000},
-  {"ea", 0x01000000},
-  {NULL, 0}
-};
-
-static const struct asm_flg sfm_flags[] =
-{
-  {"fd", 0x01000000},
-  {"ea", 0x00800000},
-  {NULL, 0}
-};
-
-static const struct asm_flg round_flags[] =
-{
-  {"p", 0x00000020},
-  {"m", 0x00000040},
-  {"z", 0x00000060},
-  {NULL, 0}
-};
-
-/* The implementation of the FIX instruction is broken on some assemblers,
-   in that it accepts a precision specifier as well as a rounding specifier,
-   despite the fact that this is meaningless.  To be more compatible, we
-   accept it as well, though of course it does not set any bits.  */
-static const struct asm_flg fix_flags[] =
-{
-  {"p", 0x00000020},
-  {"m", 0x00000040},
-  {"z", 0x00000060},
-  {"sp", 0x00000020},
-  {"sm", 0x00000040},
-  {"sz", 0x00000060},
-  {"dp", 0x00000020},
-  {"dm", 0x00000040},
-  {"dz", 0x00000060},
-  {"ep", 0x00000020},
-  {"em", 0x00000040},
-  {"ez", 0x00000060},
-  {NULL, 0}
-};
-
-static const struct asm_flg except_flag[] =
-{
-  {"e", 0x00400000},
-  {NULL, 0}
-};
-
-static const struct asm_flg long_flag[] =
-{
-  {"l", 0x00400000},
-  {NULL, 0}
 };
 
 struct asm_psr
@@ -619,13 +485,15 @@ static void do_arit		PARAMS ((char *, unsigned long));
 static void do_cmp		PARAMS ((char *, unsigned long));
 static void do_mov		PARAMS ((char *, unsigned long));
 static void do_ldst		PARAMS ((char *, unsigned long));
+static void do_ldstt		PARAMS ((char *, unsigned long));
 static void do_ldmstm		PARAMS ((char *, unsigned long));
 static void do_branch		PARAMS ((char *, unsigned long));
 static void do_swi		PARAMS ((char *, unsigned long));
 
 /* Pseudo Op codes.  */
 static void do_adr		PARAMS ((char *, unsigned long));
-static void do_nop		PARAMS ((char *, unsigned long));
+static void do_adrl		PARAMS ((char *, unsigned long));
+static void do_empty		PARAMS ((char *, unsigned long));
 
 /* ARM v2.  */
 static void do_mul		PARAMS ((char *, unsigned long));
@@ -641,10 +509,13 @@ static void do_mrs		PARAMS ((char *, unsigned long));
 /* ARM v3M.  */
 static void do_mull		PARAMS ((char *, unsigned long));
 
+/* ARM v4.  */
+static void do_ldstv4		PARAMS ((char *, unsigned long));
+
 /* ARM v4T.  */
 static void do_bx               PARAMS ((char *, unsigned long));
 
-/* ARM_v5.  */
+/* ARM v5.  */
 static void do_blx		PARAMS ((char *, unsigned long));
 static void do_bkpt		PARAMS ((char *, unsigned long));
 static void do_clz		PARAMS ((char *, unsigned long));
@@ -704,17 +575,21 @@ static void do_c_ldst_1		PARAMS ((char *, unsigned long));
 static void do_c_ldst_2		PARAMS ((char *, unsigned long));
 static void do_c_ldst_3		PARAMS ((char *, unsigned long));
 static void do_c_ldst_4		PARAMS ((char *, unsigned long));
-static int cirrus_reg_required_here	PARAMS ((char **, int, enum cirrus_regtype));
+static int cirrus_reg_required_here	PARAMS ((char **, int,
+						 enum cirrus_regtype));
 static int cirrus_valid_reg	PARAMS ((int, enum cirrus_regtype));
 static int cirrus_parse_offset	PARAMS ((char **, int *));
 
-static void fix_new_arm		PARAMS ((fragS *, int, short, expressionS *, int, int));
+static void fix_new_arm		PARAMS ((fragS *, int, short, expressionS *,
+					 int, int));
 static int arm_reg_parse	PARAMS ((char **));
 static const struct asm_psr * arm_psr_parse PARAMS ((char **));
-static void symbol_locate	PARAMS ((symbolS *, const char *, segT, valueT, fragS *));
+static void symbol_locate	PARAMS ((symbolS *, const char *, segT, valueT,
+					 fragS *));
 static int add_to_lit_pool	PARAMS ((void));
 static unsigned validate_immediate PARAMS ((unsigned));
-static unsigned validate_immediate_twopart PARAMS ((unsigned int, unsigned int *));
+static unsigned validate_immediate_twopart PARAMS ((unsigned int,
+						    unsigned int *));
 static int validate_offset_imm	PARAMS ((unsigned int, int));
 static void opcode_select	PARAMS ((int));
 static void end_of_line		PARAMS ((char *));
@@ -735,7 +610,8 @@ static int fp_op2		PARAMS ((char **));
 static long reg_list		PARAMS ((char **));
 static void thumb_load_store	PARAMS ((char *, int, int));
 static int decode_shift		PARAMS ((char **, int));
-static int ldst_extend		PARAMS ((char **, int));
+static int ldst_extend		PARAMS ((char **));
+static int ldst_extend_v4		PARAMS ((char **));
 static void thumb_add_sub	PARAMS ((char *, int));
 static void insert_reg		PARAMS ((int));
 static void thumb_shift		PARAMS ((char *, int));
@@ -755,11 +631,6 @@ static bfd_reloc_code_real_type	arm_parse_reloc PARAMS ((void));
 /* ARM instructions take 4bytes in the object file, Thumb instructions
    take 2:  */
 #define INSN_SIZE       4
-
-/* LONGEST_INST is the longest basic instruction name without
-   conditions or flags.  ARM7M has 4 of length 5.  El Segundo
-   has one basic instruction name of length 7 (SMLALxy).  */
-#define LONGEST_INST 10
 
 /* "INSN<cond> X,Y" where X:bit12, Y:bit16.  */
 #define CIRRUS_MODE1	0x100c
@@ -787,15 +658,12 @@ struct asm_opcode
   /* Basic instruction code.  */
   unsigned long value;
 
-  /* Compulsory suffix that must follow conds.  If "", then the
-     instruction is not conditional and must have no suffix.  */
-  const char * comp_suffix;
+  /* Offset into the template where the condition code (if any) will be.
+     If zero, then the instruction is never conditional.  */
+  unsigned cond_offset;
 
-  /* Bits to toggle if flag 'n' set.  */
-  const struct asm_flg * flags;
-
-  /* Which CPU variants this exists for.  */
-  unsigned long variants;
+  /* Which architecture variant provides this instruction.  */
+  unsigned long variant;
 
   /* Function to call to parse args.  */
   void (* parms) PARAMS ((char *, unsigned long));
@@ -803,260 +671,714 @@ struct asm_opcode
 
 static const struct asm_opcode insns[] =
 {
-  /* XXX Temporary hack.  Override the normal load/store entry points.  */
-  {"ldr",   0x000000d0, NULL,   ldr_flags,   ARM_EXT_V1,        do_ldrd},
-  {"str",   0x000000f0, NULL,   str_flags,   ARM_EXT_V1,        do_ldrd},
-
   /* Core ARM Instructions.  */
-  {"and",   0x00000000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
-  {"eor",   0x00200000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
-  {"sub",   0x00400000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
-  {"rsb",   0x00600000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
-  {"add",   0x00800000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
-  {"adc",   0x00a00000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
-  {"sbc",   0x00c00000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
-  {"rsc",   0x00e00000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
-  {"orr",   0x01800000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
-  {"bic",   0x01c00000, NULL,   s_flag,      ARM_EXT_V1,      do_arit},
-  {"tst",   0x01000000, NULL,   cmp_flags,   ARM_EXT_V1,      do_cmp},
-  {"teq",   0x01200000, NULL,   cmp_flags,   ARM_EXT_V1,      do_cmp},
-  {"cmp",   0x01400000, NULL,   cmp_flags,   ARM_EXT_V1,      do_cmp},
-  {"cmn",   0x01600000, NULL,   cmp_flags,   ARM_EXT_V1,      do_cmp},
-  {"mov",   0x01a00000, NULL,   s_flag,      ARM_EXT_V1,      do_mov},
-  {"mvn",   0x01e00000, NULL,   s_flag,      ARM_EXT_V1,      do_mov},
-  {"str",   0x04000000, NULL,   str_flags,   ARM_EXT_V1,      do_ldst},
-  {"ldr",   0x04100000, NULL,   ldr_flags,   ARM_EXT_V1,      do_ldst},
-  {"stm",   0x08000000, NULL,   stm_flags,   ARM_EXT_V1,      do_ldmstm},
-  {"ldm",   0x08100000, NULL,   ldm_flags,   ARM_EXT_V1,      do_ldmstm},
-  {"swi",   0x0f000000, NULL,   NULL,        ARM_EXT_V1,      do_swi},
+  {"and",        0xe0000000, 3,  ARM_EXT_V1,       do_arit},
+  {"ands",       0xe0100000, 3,  ARM_EXT_V1,       do_arit},
+  {"eor",        0xe0200000, 3,  ARM_EXT_V1,       do_arit},
+  {"eors",       0xe0300000, 3,  ARM_EXT_V1,       do_arit},
+  {"sub",        0xe0400000, 3,  ARM_EXT_V1,       do_arit},
+  {"subs",       0xe0500000, 3,  ARM_EXT_V1,       do_arit},
+  {"rsb",        0xe0600000, 3,  ARM_EXT_V1,       do_arit},
+  {"rsbs",       0xe0700000, 3,  ARM_EXT_V1,       do_arit},
+  {"add",        0xe0800000, 3,  ARM_EXT_V1,       do_arit},
+  {"adds",       0xe0900000, 3,  ARM_EXT_V1,       do_arit},
+  {"adc",        0xe0a00000, 3,  ARM_EXT_V1,       do_arit},
+  {"adcs",       0xe0b00000, 3,  ARM_EXT_V1,       do_arit},
+  {"sbc",        0xe0c00000, 3,  ARM_EXT_V1,       do_arit},
+  {"sbcs",       0xe0d00000, 3,  ARM_EXT_V1,       do_arit},
+  {"rsc",        0xe0e00000, 3,  ARM_EXT_V1,       do_arit},
+  {"rscs",       0xe0f00000, 3,  ARM_EXT_V1,       do_arit},
+  {"orr",        0xe1800000, 3,  ARM_EXT_V1,       do_arit},
+  {"orrs",       0xe1900000, 3,  ARM_EXT_V1,       do_arit},
+  {"bic",        0xe1c00000, 3,  ARM_EXT_V1,       do_arit},
+  {"bics",       0xe1d00000, 3,  ARM_EXT_V1,       do_arit},
+
+  {"tst",        0xe1100000, 3,  ARM_EXT_V1,       do_cmp},
+  {"tsts",       0xe1100000, 3,  ARM_EXT_V1,       do_cmp},
+  {"tstp",       0xe110f000, 3,  ARM_EXT_V1,       do_cmp},
+  {"teq",        0xe1300000, 3,  ARM_EXT_V1,       do_cmp},
+  {"teqs",       0xe1300000, 3,  ARM_EXT_V1,       do_cmp},
+  {"teqp",       0xe130f000, 3,  ARM_EXT_V1,       do_cmp},
+  {"cmp",        0xe1500000, 3,  ARM_EXT_V1,       do_cmp},
+  {"cmps",       0xe1500000, 3,  ARM_EXT_V1,       do_cmp},
+  {"cmpp",       0xe150f000, 3,  ARM_EXT_V1,       do_cmp},
+  {"cmn",        0xe1700000, 3,  ARM_EXT_V1,       do_cmp},
+  {"cmns",       0xe1700000, 3,  ARM_EXT_V1,       do_cmp},
+  {"cmnp",       0xe170f000, 3,  ARM_EXT_V1,       do_cmp},
+
+  {"mov",        0xe1a00000, 3,  ARM_EXT_V1,       do_mov},
+  {"movs",       0xe1b00000, 3,  ARM_EXT_V1,       do_mov},
+  {"mvn",        0xe1e00000, 3,  ARM_EXT_V1,       do_mov},
+  {"mvns",       0xe1f00000, 3,  ARM_EXT_V1,       do_mov},
+
+  {"ldr",        0xe4100000, 3,  ARM_EXT_V1,       do_ldst},
+  {"ldrb",       0xe4500000, 3,  ARM_EXT_V1,       do_ldst},
+  {"ldrt",       0xe4300000, 3,  ARM_EXT_V1,       do_ldstt},
+  {"ldrbt",      0xe4700000, 3,  ARM_EXT_V1,       do_ldstt},
+  {"str",        0xe4000000, 3,  ARM_EXT_V1,       do_ldst},
+  {"strb",       0xe4400000, 3,  ARM_EXT_V1,       do_ldst},
+  {"strt",       0xe4200000, 3,  ARM_EXT_V1,       do_ldstt},
+  {"strbt",      0xe4600000, 3,  ARM_EXT_V1,       do_ldstt},
+
+  {"stmia",      0xe8800000, 3,  ARM_EXT_V1,       do_ldmstm},
+  {"stmib",      0xe9800000, 3,  ARM_EXT_V1,       do_ldmstm},
+  {"stmda",      0xe8000000, 3,  ARM_EXT_V1,       do_ldmstm},
+  {"stmdb",      0xe9000000, 3,  ARM_EXT_V1,       do_ldmstm},
+  {"stmfd",      0xe9000000, 3,  ARM_EXT_V1,       do_ldmstm},
+  {"stmfa",      0xe9800000, 3,  ARM_EXT_V1,       do_ldmstm},
+  {"stmea",      0xe8800000, 3,  ARM_EXT_V1,       do_ldmstm},
+  {"stmed",      0xe8000000, 3,  ARM_EXT_V1,       do_ldmstm},
+
+  {"ldmia",      0xe8900000, 3,  ARM_EXT_V1,       do_ldmstm},
+  {"ldmib",      0xe9900000, 3,  ARM_EXT_V1,       do_ldmstm},
+  {"ldmda",      0xe8100000, 3,  ARM_EXT_V1,       do_ldmstm},
+  {"ldmdb",      0xe9100000, 3,  ARM_EXT_V1,       do_ldmstm},
+  {"ldmfd",      0xe8900000, 3,  ARM_EXT_V1,       do_ldmstm},
+  {"ldmfa",      0xe8100000, 3,  ARM_EXT_V1,       do_ldmstm},
+  {"ldmea",      0xe9100000, 3,  ARM_EXT_V1,       do_ldmstm},
+  {"ldmed",      0xe9900000, 3,  ARM_EXT_V1,       do_ldmstm},
+
+  {"swi",        0xef000000, 3,  ARM_EXT_V1,       do_swi},
 #ifdef TE_WINCE
   /* XXX This is the wrong place to do this.  Think multi-arch.  */
-  {"bl",    0x0b000000, NULL,   NULL,        ARM_EXT_V1,      do_branch},
-  {"b",     0x0a000000, NULL,   NULL,        ARM_EXT_V1,      do_branch},
+  {"bl",         0xeb000000, 2,  ARM_EXT_V1,       do_branch},
+  {"b",          0xea000000, 1,  ARM_EXT_V1,       do_branch},
 #else
-  {"bl",    0x0bfffffe, NULL,   NULL,        ARM_EXT_V1,      do_branch},
-  {"b",     0x0afffffe, NULL,   NULL,        ARM_EXT_V1,      do_branch},
+  {"bl",         0xebfffffe, 2,  ARM_EXT_V1,       do_branch},
+  {"b",          0xeafffffe, 1,  ARM_EXT_V1,       do_branch},
 #endif
 
   /* Pseudo ops.  */
-  {"adr",   0x028f0000, NULL,   long_flag,   ARM_EXT_V1,      do_adr},
-  {"nop",   0x01a00000, NULL,   NULL,        ARM_EXT_V1,      do_nop},
+  {"adr",        0xe28f0000, 3,  ARM_EXT_V1,       do_adr},
+  {"adrl",       0xe28f0000, 3,  ARM_EXT_V1,       do_adrl},
+  {"nop",        0xe1a00000, 3,  ARM_EXT_V1,       do_empty},
 
   /* ARM 2 multiplies.  */
-  {"mul",   0x00000090, NULL,   s_flag,      ARM_EXT_V2,      do_mul},
-  {"mla",   0x00200090, NULL,   s_flag,      ARM_EXT_V2,      do_mla},
+  {"mul",        0xe0000090, 3,  ARM_EXT_V2,       do_mul},
+  {"muls",       0xe0100090, 3,  ARM_EXT_V2,       do_mul},
+  {"mla",        0xe0200090, 3,  ARM_EXT_V2,       do_mla},
+  {"mlas",       0xe0300090, 3,  ARM_EXT_V2,       do_mla},
 
   /* Generic copressor instructions.  */
-  {"cdp",   0x0e000000, NULL,  NULL,         ARM_EXT_V2,      do_cdp},
-  {"ldc",   0x0c100000, NULL,  long_flag,    ARM_EXT_V2,      do_lstc},
-  {"stc",   0x0c000000, NULL,  long_flag,    ARM_EXT_V2,      do_lstc},
-  {"mcr",   0x0e000010, NULL,  NULL,         ARM_EXT_V2,      do_co_reg},
-  {"mrc",   0x0e100010, NULL,  NULL,         ARM_EXT_V2,      do_co_reg},
+  {"cdp",        0xee000000, 3,  ARM_EXT_V2,       do_cdp},
+  {"ldc",        0xec100000, 3,  ARM_EXT_V2,       do_lstc},
+  {"ldcl",       0xec500000, 3,  ARM_EXT_V2,       do_lstc},
+  {"stc",        0xec000000, 3,  ARM_EXT_V2,       do_lstc},
+  {"stcl",       0xec400000, 3,  ARM_EXT_V2,       do_lstc},
+  {"mcr",        0xee000010, 3,  ARM_EXT_V2,       do_co_reg},
+  {"mrc",        0xee100010, 3,  ARM_EXT_V2,       do_co_reg},
 
   /* ARM 3 - swp instructions.  */
-  {"swp",   0x01000090, NULL,   byte_flag,   ARM_EXT_V2S,      do_swap},
+  {"swp",        0xe1000090, 3,  ARM_EXT_V2S,      do_swap},
+  {"swpb",       0xe1400090, 3,  ARM_EXT_V2S,      do_swap},
 
   /* ARM 6 Status register instructions.  */
-  {"mrs",   0x010f0000, NULL,   NULL,        ARM_EXT_V3,      do_mrs},
-  {"msr",   0x0120f000, NULL,   NULL,        ARM_EXT_V3,      do_msr},
-  /* ScottB: our code uses 0x0128f000 for msr.
+  {"mrs",        0xe10f0000, 3,  ARM_EXT_V3,       do_mrs},
+  {"msr",        0xe120f000, 3,  ARM_EXT_V3,       do_msr},
+  /* ScottB: our code uses     0xe128f000 for msr.
      NickC:  but this is wrong because the bits 16 through 19 are
-	     handled by the PSR_xxx defines above.  */
+             handled by the PSR_xxx defines above.  */
 
   /* ARM 7M long multiplies - need signed/unsigned flags!  */
-  {"smull", 0x00c00090, NULL,   s_flag,      ARM_EXT_V3M,  do_mull},
-  {"umull", 0x00800090, NULL,   s_flag,      ARM_EXT_V3M,  do_mull},
-  {"smlal", 0x00e00090, NULL,   s_flag,      ARM_EXT_V3M,  do_mull},
-  {"umlal", 0x00a00090, NULL,   s_flag,      ARM_EXT_V3M,  do_mull},
+  {"smull",      0xe0c00090, 5,  ARM_EXT_V3M,      do_mull},
+  {"smulls",     0xe0d00090, 5,  ARM_EXT_V3M,      do_mull},
+  {"umull",      0xe0800090, 5,  ARM_EXT_V3M,      do_mull},
+  {"umulls",     0xe0900090, 5,  ARM_EXT_V3M,      do_mull},
+  {"smlal",      0xe0e00090, 5,  ARM_EXT_V3M,      do_mull},
+  {"smlals",     0xe0f00090, 5,  ARM_EXT_V3M,      do_mull},
+  {"umlal",      0xe0a00090, 5,  ARM_EXT_V3M,      do_mull},
+  {"umlals",     0xe0b00090, 5,  ARM_EXT_V3M,      do_mull},
+
+  /* ARM Architecture 4.  */
+  {"ldrh",       0xe01000b0, 3,  ARM_EXT_V4,       do_ldstv4},
+  {"ldrsh",      0xe01000f0, 3,  ARM_EXT_V4,       do_ldstv4},
+  {"ldrsb",      0xe01000d0, 3,  ARM_EXT_V4,       do_ldstv4},
+  {"strh",       0xe00000b0, 3,  ARM_EXT_V4,       do_ldstv4},
 
   /* ARM Architecture 4T.  */
-  /* Note: bx (and blx) are required on V5, even if the processor does
-     not support Thumb.   */
-  {"bx",    0x012fff10, NULL,   NULL,        ARM_EXT_V4T | ARM_EXT_V5, do_bx},
+  /* Note: bx (and blx) are required on V5, even if the processor does 
+     not support Thumb.  */
+  {"bx",         0xe12fff10, 2,  ARM_EXT_V4T | ARM_EXT_V5, do_bx},
 
-  /*  ARM ISA extension 5.  */
-  /* Note: blx is actually 2 opcodes, so the .value is set dynamically.
-     And it's sometimes conditional and sometimes not.  */
-  {"blx",            0, NULL,   NULL,        ARM_EXT_V5, do_blx},
-  {"clz",   0x016f0f10, NULL,   NULL,        ARM_EXT_V5, do_clz},
-  {"bkpt",  0xe1200070, "",   	NULL,        ARM_EXT_V5, do_bkpt},
-  {"ldc2",  0xfc100000, "",  	long_flag,   ARM_EXT_V5, do_lstc2},
-  {"stc2",  0xfc000000, "",  	long_flag,   ARM_EXT_V5, do_lstc2},
-  {"cdp2",  0xfe000000, "",  	NULL,        ARM_EXT_V5, do_cdp2},
-  {"mcr2",  0xfe000010, "",  	NULL,        ARM_EXT_V5, do_co_reg2},
-  {"mrc2",  0xfe100010, "",  	NULL,        ARM_EXT_V5, do_co_reg2},
+  /*  ARM Architecture 5.  */
+  /* Note: blx has 2 variants, so the .value is set dynamically.
+     Only one of the variants has conditional execution.  */
+  {"blx",        0xe0000000, 3,  ARM_EXT_V5,       do_blx},
+  {"clz",        0xe16f0f10, 3,  ARM_EXT_V5,       do_clz},
+  {"bkpt",       0xe1200070, 0,  ARM_EXT_V5,       do_bkpt},
+  {"ldc2",       0xfc100000, 0,  ARM_EXT_V5,       do_lstc2},
+  {"ldc2l",      0xfc500000, 0,  ARM_EXT_V5,       do_lstc2},
+  {"stc2",       0xfc000000, 0,  ARM_EXT_V5,       do_lstc2},
+  {"stc2l",      0xfc400000, 0,  ARM_EXT_V5,       do_lstc2},
+  {"cdp2",       0xfe000000, 0,  ARM_EXT_V5,       do_cdp2},
+  {"mcr2",       0xfe000010, 0,  ARM_EXT_V5,       do_co_reg2},
+  {"mrc2",       0xfe100010, 0,  ARM_EXT_V5,       do_co_reg2},
 
-/*  ARM Architecture 5ExP.  */
-  {"smlabb", 0x01000080, NULL,   NULL,        ARM_EXT_V5ExP, do_smla},
-  {"smlatb", 0x010000a0, NULL,   NULL,        ARM_EXT_V5ExP, do_smla},
-  {"smlabt", 0x010000c0, NULL,   NULL,        ARM_EXT_V5ExP, do_smla},
-  {"smlatt", 0x010000e0, NULL,   NULL,        ARM_EXT_V5ExP, do_smla},
+  /*  ARM Architecture 5ExP.  */
+  {"smlabb",     0xe1000080, 6,  ARM_EXT_V5ExP,    do_smla},
+  {"smlatb",     0xe10000a0, 6,  ARM_EXT_V5ExP,    do_smla},
+  {"smlabt",     0xe10000c0, 6,  ARM_EXT_V5ExP,    do_smla},
+  {"smlatt",     0xe10000e0, 6,  ARM_EXT_V5ExP,    do_smla},
 
-  {"smlawb", 0x01200080, NULL,   NULL,        ARM_EXT_V5ExP, do_smla},
-  {"smlawt", 0x012000c0, NULL,   NULL,        ARM_EXT_V5ExP, do_smla},
+  {"smlawb",     0xe1200080, 6,  ARM_EXT_V5ExP,    do_smla},
+  {"smlawt",     0xe12000c0, 6,  ARM_EXT_V5ExP,    do_smla},
 
-  {"smlalbb",0x01400080, NULL,   NULL,        ARM_EXT_V5ExP, do_smlal},
-  {"smlaltb",0x014000a0, NULL,   NULL,        ARM_EXT_V5ExP, do_smlal},
-  {"smlalbt",0x014000c0, NULL,   NULL,        ARM_EXT_V5ExP, do_smlal},
-  {"smlaltt",0x014000e0, NULL,   NULL,        ARM_EXT_V5ExP, do_smlal},
+  {"smlalbb",    0xe1400080, 7,  ARM_EXT_V5ExP,    do_smlal},
+  {"smlaltb",    0xe14000a0, 7,  ARM_EXT_V5ExP,    do_smlal},
+  {"smlalbt",    0xe14000c0, 7,  ARM_EXT_V5ExP,    do_smlal},
+  {"smlaltt",    0xe14000e0, 7,  ARM_EXT_V5ExP,    do_smlal},
 
-  {"smulbb", 0x01600080, NULL,   NULL,        ARM_EXT_V5ExP, do_smul},
-  {"smultb", 0x016000a0, NULL,   NULL,        ARM_EXT_V5ExP, do_smul},
-  {"smulbt", 0x016000c0, NULL,   NULL,        ARM_EXT_V5ExP, do_smul},
-  {"smultt", 0x016000e0, NULL,   NULL,        ARM_EXT_V5ExP, do_smul},
+  {"smulbb",     0xe1600080, 6,  ARM_EXT_V5ExP,    do_smul},
+  {"smultb",     0xe16000a0, 6,  ARM_EXT_V5ExP,    do_smul},
+  {"smulbt",     0xe16000c0, 6,  ARM_EXT_V5ExP,    do_smul},
+  {"smultt",     0xe16000e0, 6,  ARM_EXT_V5ExP,    do_smul},
 
-  {"smulwb", 0x012000a0, NULL,   NULL,        ARM_EXT_V5ExP, do_smul},
-  {"smulwt", 0x012000e0, NULL,   NULL,        ARM_EXT_V5ExP, do_smul},
+  {"smulwb",     0xe12000a0, 6,  ARM_EXT_V5ExP,    do_smul},
+  {"smulwt",     0xe12000e0, 6,  ARM_EXT_V5ExP,    do_smul},
 
-  {"qadd",   0x01000050, NULL,   NULL,        ARM_EXT_V5ExP, do_qadd},
-  {"qdadd",  0x01400050, NULL,   NULL,        ARM_EXT_V5ExP, do_qadd},
-  {"qsub",   0x01200050, NULL,   NULL,        ARM_EXT_V5ExP, do_qadd},
-  {"qdsub",  0x01600050, NULL,   NULL,        ARM_EXT_V5ExP, do_qadd},
+  {"qadd",       0xe1000050, 4,  ARM_EXT_V5ExP,    do_qadd},
+  {"qdadd",      0xe1400050, 5,  ARM_EXT_V5ExP,    do_qadd},
+  {"qsub",       0xe1200050, 4,  ARM_EXT_V5ExP,    do_qadd},
+  {"qdsub",      0xe1600050, 5,  ARM_EXT_V5ExP,    do_qadd},
 
   /*  ARM Architecture 5E.  */
-  {"pld",   0xf450f000, "",     NULL,         ARM_EXT_V5E, do_pld},
-  {"ldr",   0x000000d0, NULL,   ldr_flags,    ARM_EXT_V5E, do_ldrd},
-  {"str",   0x000000f0, NULL,   str_flags,    ARM_EXT_V5E, do_ldrd},
-  {"mcrr",  0x0c400000, NULL,   NULL,         ARM_EXT_V5E, do_co_reg2c},
-  {"mrrc",  0x0c500000, NULL,   NULL,         ARM_EXT_V5E, do_co_reg2c},
+  {"pld",        0xf450f000, 0,  ARM_EXT_V5E,      do_pld},
+  {"ldrd",       0xe00000d0, 3,  ARM_EXT_V5E,      do_ldrd},
+  {"strd",       0xe00000f0, 3,  ARM_EXT_V5E,      do_ldrd},
+
+  {"mcrr",       0xec400000, 4,  ARM_EXT_V5E,      do_co_reg2c},
+  {"mrrc",       0xec500000, 4,  ARM_EXT_V5E,      do_co_reg2c},
 
   /* Core FPA instruction set (V1).  */
-  {"wfs",   0x0e200110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fpa_ctrl},
-  {"rfs",   0x0e300110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fpa_ctrl},
-  {"wfc",   0x0e400110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fpa_ctrl},
-  {"rfc",   0x0e500110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fpa_ctrl},
-  {"ldf",   0x0c100100, "sdep", NULL,        FPU_FPA_EXT_V1,      do_fpa_ldst},
-  {"stf",   0x0c000100, "sdep", NULL,        FPU_FPA_EXT_V1,      do_fpa_ldst},
-  {"mvf",   0x0e008100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
-  {"mnf",   0x0e108100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
-  {"abs",   0x0e208100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
-  {"rnd",   0x0e308100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
-  {"sqt",   0x0e408100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
-  {"log",   0x0e508100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
-  {"lgn",   0x0e608100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
-  {"exp",   0x0e708100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
-  {"sin",   0x0e808100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
-  {"cos",   0x0e908100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
-  {"tan",   0x0ea08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
-  {"asn",   0x0eb08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
-  {"acs",   0x0ec08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
-  {"atn",   0x0ed08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
-  {"urd",   0x0ee08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
-  {"nrm",   0x0ef08100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_monadic},
-  {"adf",   0x0e000100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
-  {"suf",   0x0e200100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
-  {"rsf",   0x0e300100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
-  {"muf",   0x0e100100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
-  {"dvf",   0x0e400100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
-  {"rdf",   0x0e500100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
-  {"pow",   0x0e600100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
-  {"rpw",   0x0e700100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
-  {"rmf",   0x0e800100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
-  {"fml",   0x0e900100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
-  {"fdv",   0x0ea00100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
-  {"frd",   0x0eb00100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
-  {"pol",   0x0ec00100, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_dyadic},
-  {"cmf",   0x0e90f110, NULL,   except_flag, FPU_FPA_EXT_V1,      do_fpa_cmp},
-  {"cnf",   0x0eb0f110, NULL,   except_flag, FPU_FPA_EXT_V1,      do_fpa_cmp},
-  /* The FPA10 data sheet suggests that the 'E' of cmfe/cnfe should not
-     be an optional suffix, but part of the instruction.  To be compatible,
-     we accept either.  */
-  {"cmfe",  0x0ed0f110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fpa_cmp},
-  {"cnfe",  0x0ef0f110, NULL,   NULL,        FPU_FPA_EXT_V1,      do_fpa_cmp},
-  {"flt",   0x0e000110, "sde",  round_flags, FPU_FPA_EXT_V1,      do_fpa_from_reg},
-  {"fix",   0x0e100110, NULL,   fix_flags,   FPU_FPA_EXT_V1,      do_fpa_to_reg},
+  {"wfs",        0xee200110, 3,  FPU_FPA_EXT_V1,   do_fpa_ctrl},
+  {"rfs",        0xee300110, 3,  FPU_FPA_EXT_V1,   do_fpa_ctrl},
+  {"wfc",        0xee400110, 3,  FPU_FPA_EXT_V1,   do_fpa_ctrl},
+  {"rfc",        0xee500110, 3,  FPU_FPA_EXT_V1,   do_fpa_ctrl},
+
+  {"ldfs",       0xec100100, 3,  FPU_FPA_EXT_V1,   do_fpa_ldst},
+  {"ldfd",       0xec108100, 3,  FPU_FPA_EXT_V1,   do_fpa_ldst},
+  {"ldfe",       0xec500100, 3,  FPU_FPA_EXT_V1,   do_fpa_ldst},
+  {"ldfp",       0xec508100, 3,  FPU_FPA_EXT_V1,   do_fpa_ldst},
+
+  {"stfs",       0xec000100, 3,  FPU_FPA_EXT_V1,   do_fpa_ldst},
+  {"stfd",       0xec008100, 3,  FPU_FPA_EXT_V1,   do_fpa_ldst},
+  {"stfe",       0xec400100, 3,  FPU_FPA_EXT_V1,   do_fpa_ldst},
+  {"stfp",       0xec408100, 3,  FPU_FPA_EXT_V1,   do_fpa_ldst},
+
+  {"mvfs",       0xee008100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mvfsp",      0xee008120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mvfsm",      0xee008140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mvfsz",      0xee008160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mvfd",       0xee008180, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mvfdp",      0xee0081a0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mvfdm",      0xee0081c0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mvfdz",      0xee0081e0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mvfe",       0xee088100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mvfep",      0xee088120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mvfem",      0xee088140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mvfez",      0xee088160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+
+  {"mnfs",       0xee108100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mnfsp",      0xee108120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mnfsm",      0xee108140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mnfsz",      0xee108160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mnfd",       0xee108180, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mnfdp",      0xee1081a0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mnfdm",      0xee1081c0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mnfdz",      0xee1081e0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mnfe",       0xee188100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mnfep",      0xee188120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mnfem",      0xee188140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"mnfez",      0xee188160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+
+  {"abss",       0xee208100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"abssp",      0xee208120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"abssm",      0xee208140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"abssz",      0xee208160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"absd",       0xee208180, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"absdp",      0xee2081a0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"absdm",      0xee2081c0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"absdz",      0xee2081e0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"abse",       0xee288100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"absep",      0xee288120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"absem",      0xee288140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"absez",      0xee288160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+
+  {"rnds",       0xee308100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"rndsp",      0xee308120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"rndsm",      0xee308140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"rndsz",      0xee308160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"rndd",       0xee308180, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"rnddp",      0xee3081a0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"rnddm",      0xee3081c0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"rnddz",      0xee3081e0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"rnde",       0xee388100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"rndep",      0xee388120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"rndem",      0xee388140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"rndez",      0xee388160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+
+  {"sqts",       0xee408100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sqtsp",      0xee408120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sqtsm",      0xee408140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sqtsz",      0xee408160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sqtd",       0xee408180, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sqtdp",      0xee4081a0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sqtdm",      0xee4081c0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sqtdz",      0xee4081e0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sqte",       0xee488100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sqtep",      0xee488120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sqtem",      0xee488140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sqtez",      0xee488160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+
+  {"logs",       0xee508100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"logsp",      0xee508120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"logsm",      0xee508140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"logsz",      0xee508160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"logd",       0xee508180, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"logdp",      0xee5081a0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"logdm",      0xee5081c0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"logdz",      0xee5081e0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"loge",       0xee588100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"logep",      0xee588120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"logem",      0xee588140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"logez",      0xee588160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+
+  {"lgns",       0xee608100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"lgnsp",      0xee608120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"lgnsm",      0xee608140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"lgnsz",      0xee608160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"lgnd",       0xee608180, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"lgndp",      0xee6081a0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"lgndm",      0xee6081c0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"lgndz",      0xee6081e0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"lgne",       0xee688100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"lgnep",      0xee688120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"lgnem",      0xee688140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"lgnez",      0xee688160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+
+  {"exps",       0xee708100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"expsp",      0xee708120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"expsm",      0xee708140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"expsz",      0xee708160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"expd",       0xee708180, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"expdp",      0xee7081a0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"expdm",      0xee7081c0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"expdz",      0xee7081e0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"expe",       0xee788100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"expep",      0xee788120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"expem",      0xee788140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"expdz",      0xee788160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+
+  {"sins",       0xee808100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sinsp",      0xee808120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sinsm",      0xee808140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sinsz",      0xee808160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sind",       0xee808180, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sindp",      0xee8081a0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sindm",      0xee8081c0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sindz",      0xee8081e0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sine",       0xee888100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sinep",      0xee888120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sinem",      0xee888140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"sinez",      0xee888160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+
+  {"coss",       0xee908100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"cossp",      0xee908120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"cossm",      0xee908140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"cossz",      0xee908160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"cosd",       0xee908180, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"cosdp",      0xee9081a0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"cosdm",      0xee9081c0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"cosdz",      0xee9081e0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"cose",       0xee988100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"cosep",      0xee988120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"cosem",      0xee988140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"cosez",      0xee988160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+
+  {"tans",       0xeea08100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"tansp",      0xeea08120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"tansm",      0xeea08140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"tansz",      0xeea08160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"tand",       0xeea08180, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"tandp",      0xeea081a0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"tandm",      0xeea081c0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"tandz",      0xeea081e0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"tane",       0xeea88100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"tanep",      0xeea88120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"tanem",      0xeea88140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"tanez",      0xeea88160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+
+  {"asns",       0xeeb08100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"asnsp",      0xeeb08120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"asnsm",      0xeeb08140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"asnsz",      0xeeb08160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"asnd",       0xeeb08180, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"asndp",      0xeeb081a0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"asndm",      0xeeb081c0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"asndz",      0xeeb081e0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"asne",       0xeeb88100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"asnep",      0xeeb88120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"asnem",      0xeeb88140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"asnez",      0xeeb88160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+
+  {"acss",       0xeec08100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"acssp",      0xeec08120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"acssm",      0xeec08140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"acssz",      0xeec08160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"acsd",       0xeec08180, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"acsdp",      0xeec081a0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"acsdm",      0xeec081c0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"acsdz",      0xeec081e0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"acse",       0xeec88100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"acsep",      0xeec88120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"acsem",      0xeec88140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"acsez",      0xeec88160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+
+  {"atns",       0xeed08100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"atnsp",      0xeed08120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"atnsm",      0xeed08140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"atnsz",      0xeed08160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"atnd",       0xeed08180, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"atndp",      0xeed081a0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"atndm",      0xeed081c0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"atndz",      0xeed081e0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"atne",       0xeed88100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"atnep",      0xeed88120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"atnem",      0xeed88140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"atnez",      0xeed88160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+
+  {"urds",       0xeee08100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"urdsp",      0xeee08120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"urdsm",      0xeee08140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"urdsz",      0xeee08160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"urdd",       0xeee08180, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"urddp",      0xeee081a0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"urddm",      0xeee081c0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"urddz",      0xeee081e0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"urde",       0xeee88100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"urdep",      0xeee88120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"urdem",      0xeee88140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"urdez",      0xeee88160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+
+  {"nrms",       0xeef08100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"nrmsp",      0xeef08120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"nrmsm",      0xeef08140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"nrmsz",      0xeef08160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"nrmd",       0xeef08180, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"nrmdp",      0xeef081a0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"nrmdm",      0xeef081c0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"nrmdz",      0xeef081e0, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"nrme",       0xeef88100, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"nrmep",      0xeef88120, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"nrmem",      0xeef88140, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+  {"nrmez",      0xeef88160, 3,  FPU_FPA_EXT_V1,   do_fpa_monadic},
+
+  {"adfs",       0xee000100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"adfsp",      0xee000120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"adfsm",      0xee000140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"adfsz",      0xee000160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"adfd",       0xee000180, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"adfdp",      0xee0001a0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"adfdm",      0xee0001c0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"adfdz",      0xee0001e0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"adfe",       0xee080100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"adfep",      0xee080120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"adfem",      0xee080140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"adfez",      0xee080160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+
+  {"sufs",       0xee200100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"sufsp",      0xee200120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"sufsm",      0xee200140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"sufsz",      0xee200160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"sufd",       0xee200180, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"sufdp",      0xee2001a0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"sufdm",      0xee2001c0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"sufdz",      0xee2001e0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"sufe",       0xee280100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"sufep",      0xee280120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"sufem",      0xee280140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"sufez",      0xee280160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+
+  {"rsfs",       0xee300100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rsfsp",      0xee300120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rsfsm",      0xee300140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rsfsz",      0xee300160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rsfd",       0xee300180, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rsfdp",      0xee3001a0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rsfdm",      0xee3001c0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rsfdz",      0xee3001e0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rsfe",       0xee380100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rsfep",      0xee380120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rsfem",      0xee380140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rsfez",      0xee380160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+
+  {"mufs",       0xee100100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"mufsp",      0xee100120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"mufsm",      0xee100140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"mufsz",      0xee100160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"mufd",       0xee100180, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"mufdp",      0xee1001a0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"mufdm",      0xee1001c0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"mufdz",      0xee1001e0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"mufe",       0xee180100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"mufep",      0xee180120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"mufem",      0xee180140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"mufez",      0xee180160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+
+  {"dvfs",       0xee400100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"dvfsp",      0xee400120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"dvfsm",      0xee400140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"dvfsz",      0xee400160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"dvfd",       0xee400180, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"dvfdp",      0xee4001a0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"dvfdm",      0xee4001c0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"dvfdz",      0xee4001e0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"dvfe",       0xee480100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"dvfep",      0xee480120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"dvfem",      0xee480140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"dvfez",      0xee480160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+
+  {"rdfs",       0xee500100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rdfsp",      0xee500120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rdfsm",      0xee500140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rdfsz",      0xee500160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rdfd",       0xee500180, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rdfdp",      0xee5001a0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rdfdm",      0xee5001c0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rdfdz",      0xee5001e0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rdfe",       0xee580100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rdfep",      0xee580120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rdfem",      0xee580140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rdfez",      0xee580160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+
+  {"pows",       0xee600100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"powsp",      0xee600120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"powsm",      0xee600140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"powsz",      0xee600160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"powd",       0xee600180, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"powdp",      0xee6001a0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"powdm",      0xee6001c0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"powdz",      0xee6001e0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"powe",       0xee680100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"powep",      0xee680120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"powem",      0xee680140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"powez",      0xee680160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+
+  {"rpws",       0xee700100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rpwsp",      0xee700120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rpwsm",      0xee700140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rpwsz",      0xee700160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rpwd",       0xee700180, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rpwdp",      0xee7001a0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rpwdm",      0xee7001c0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rpwdz",      0xee7001e0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rpwe",       0xee780100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rpwep",      0xee780120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rpwem",      0xee780140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rpwez",      0xee780160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+
+  {"rmfs",       0xee800100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rmfsp",      0xee800120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rmfsm",      0xee800140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rmfsz",      0xee800160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rmfd",       0xee800180, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rmfdp",      0xee8001a0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rmfdm",      0xee8001c0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rmfdz",      0xee8001e0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rmfe",       0xee880100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rmfep",      0xee880120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rmfem",      0xee880140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"rmfez",      0xee880160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+
+  {"fmls",       0xee900100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fmlsp",      0xee900120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fmlsm",      0xee900140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fmlsz",      0xee900160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fmld",       0xee900180, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fmldp",      0xee9001a0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fmldm",      0xee9001c0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fmldz",      0xee9001e0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fmle",       0xee980100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fmlep",      0xee980120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fmlem",      0xee980140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fmlez",      0xee980160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+
+  {"fdvs",       0xeea00100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fdvsp",      0xeea00120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fdvsm",      0xeea00140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fdvsz",      0xeea00160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fdvd",       0xeea00180, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fdvdp",      0xeea001a0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fdvdm",      0xeea001c0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fdvdz",      0xeea001e0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fdve",       0xeea80100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fdvep",      0xeea80120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fdvem",      0xeea80140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"fdvez",      0xeea80160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+
+  {"frds",       0xeeb00100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"frdsp",      0xeeb00120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"frdsm",      0xeeb00140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"frdsz",      0xeeb00160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"frdd",       0xeeb00180, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"frddp",      0xeeb001a0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"frddm",      0xeeb001c0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"frddz",      0xeeb001e0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"frde",       0xeeb80100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"frdep",      0xeeb80120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"frdem",      0xeeb80140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"frdez",      0xeeb80160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+
+  {"pols",       0xeec00100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"polsp",      0xeec00120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"polsm",      0xeec00140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"polsz",      0xeec00160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"pold",       0xeec00180, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"poldp",      0xeec001a0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"poldm",      0xeec001c0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"poldz",      0xeec001e0, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"pole",       0xeec80100, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"polep",      0xeec80120, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"polem",      0xeec80140, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+  {"polez",      0xeec80160, 3,  FPU_FPA_EXT_V1,   do_fpa_dyadic},
+
+  {"cmf",        0xee90f110, 3,  FPU_FPA_EXT_V1,   do_fpa_cmp},
+  {"cmfe",       0xeed0f110, 3,  FPU_FPA_EXT_V1,   do_fpa_cmp},
+  {"cnf",        0xeeb0f110, 3,  FPU_FPA_EXT_V1,   do_fpa_cmp},
+  {"cnfe",       0xeef0f110, 3,  FPU_FPA_EXT_V1,   do_fpa_cmp},
+  /* The FPA10 data sheet suggests that the 'E' of cmfe/cnfe should
+     not be an optional suffix, but part of the instruction.  To be
+     compatible, we accept either.  */
+  {"cmfe",       0xeed0f110, 4,  FPU_FPA_EXT_V1,   do_fpa_cmp},
+  {"cnfe",       0xeef0f110, 4,  FPU_FPA_EXT_V1,   do_fpa_cmp},
+
+  {"flts",       0xee000110, 3,  FPU_FPA_EXT_V1,   do_fpa_from_reg},
+  {"fltsp",      0xee000130, 3,  FPU_FPA_EXT_V1,   do_fpa_from_reg},
+  {"fltsm",      0xee000150, 3,  FPU_FPA_EXT_V1,   do_fpa_from_reg},
+  {"fltsz",      0xee000170, 3,  FPU_FPA_EXT_V1,   do_fpa_from_reg},
+  {"fltd",       0xee000190, 3,  FPU_FPA_EXT_V1,   do_fpa_from_reg},
+  {"fltdp",      0xee0001b0, 3,  FPU_FPA_EXT_V1,   do_fpa_from_reg},
+  {"fltdm",      0xee0001d0, 3,  FPU_FPA_EXT_V1,   do_fpa_from_reg},
+  {"fltdz",      0xee0001f0, 3,  FPU_FPA_EXT_V1,   do_fpa_from_reg},
+  {"flte",       0xee080110, 3,  FPU_FPA_EXT_V1,   do_fpa_from_reg},
+  {"fltep",      0xee080130, 3,  FPU_FPA_EXT_V1,   do_fpa_from_reg},
+  {"fltem",      0xee080150, 3,  FPU_FPA_EXT_V1,   do_fpa_from_reg},
+  {"fltez",      0xee080170, 3,  FPU_FPA_EXT_V1,   do_fpa_from_reg},
+
+  /* The implementation of the FIX instruction is broken on some
+     assemblers, in that it accepts a precision specifier as well as a
+     rounding specifier, despite the fact that this is meaningless.
+     To be more compatible, we accept it as well, though of course it
+     does not set any bits.  */
+  {"fix",        0xee100110, 3,  FPU_FPA_EXT_V1,   do_fpa_to_reg},
+  {"fixp",       0xee100130, 3,  FPU_FPA_EXT_V1,   do_fpa_to_reg},
+  {"fixm",       0xee100150, 3,  FPU_FPA_EXT_V1,   do_fpa_to_reg},
+  {"fixz",       0xee100170, 3,  FPU_FPA_EXT_V1,   do_fpa_to_reg},
+  {"fixsp",      0xee100130, 3,  FPU_FPA_EXT_V1,   do_fpa_to_reg},
+  {"fixsm",      0xee100150, 3,  FPU_FPA_EXT_V1,   do_fpa_to_reg},
+  {"fixsz",      0xee100170, 3,  FPU_FPA_EXT_V1,   do_fpa_to_reg},
+  {"fixdp",      0xee100130, 3,  FPU_FPA_EXT_V1,   do_fpa_to_reg},
+  {"fixdm",      0xee100150, 3,  FPU_FPA_EXT_V1,   do_fpa_to_reg},
+  {"fixdz",      0xee100170, 3,  FPU_FPA_EXT_V1,   do_fpa_to_reg},
+  {"fixep",      0xee100130, 3,  FPU_FPA_EXT_V1,   do_fpa_to_reg},
+  {"fixem",      0xee100150, 3,  FPU_FPA_EXT_V1,   do_fpa_to_reg},
+  {"fixez",      0xee100170, 3,  FPU_FPA_EXT_V1,   do_fpa_to_reg},
 
   /* Instructions that were new with the real FPA, call them V2.  */
-  {"lfm",   0x0c100200, NULL,   lfm_flags,   FPU_FPA_EXT_V2, do_fpa_ldmstm},
-  {"sfm",   0x0c000200, NULL,   sfm_flags,   FPU_FPA_EXT_V2, do_fpa_ldmstm},
+  {"lfm",        0xec100200, 3,  FPU_FPA_EXT_V2,   do_fpa_ldmstm},
+  {"lfmfd",      0xec900200, 3,  FPU_FPA_EXT_V2,   do_fpa_ldmstm},
+  {"lfmea",      0xed100200, 3,  FPU_FPA_EXT_V2,   do_fpa_ldmstm},
+  {"sfm",        0xec000200, 3,  FPU_FPA_EXT_V2,   do_fpa_ldmstm},
+  {"sfmfd",      0xed000200, 3,  FPU_FPA_EXT_V2,   do_fpa_ldmstm},
+  {"sfmea",      0xec800200, 3,  FPU_FPA_EXT_V2,   do_fpa_ldmstm},
 
   /* Intel XScale extensions to ARM V5 ISA.  (All use CP0).  */
-  {"mia",   0x0e200010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
-  {"miaph", 0x0e280010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
-  {"miabb", 0x0e2c0010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
-  {"miabt", 0x0e2d0010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
-  {"miatb", 0x0e2e0010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
-  {"miatt", 0x0e2f0010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
-  {"mar",   0x0c400000, NULL,   NULL,        ARM_EXT_XSCALE, do_mar},
-  {"mra",   0x0c500000, NULL,   NULL,        ARM_EXT_XSCALE, do_mra},
+  {"mia",        0xee200010, 3,  ARM_EXT_XSCALE,   do_mia},
+  {"miaph",      0xee280010, 5,  ARM_EXT_XSCALE,   do_mia},
+  {"miabb",      0xee2c0010, 5,  ARM_EXT_XSCALE,   do_mia},
+  {"miabt",      0xee2d0010, 5,  ARM_EXT_XSCALE,   do_mia},
+  {"miatb",      0xee2e0010, 5,  ARM_EXT_XSCALE,   do_mia},
+  {"miatt",      0xee2f0010, 5,  ARM_EXT_XSCALE,   do_mia},
+  {"mar",        0xec400000, 3,  ARM_EXT_XSCALE,   do_mar},
+  {"mra",        0xec500000, 3,  ARM_EXT_XSCALE,   do_mra},
 
   /* Cirrus DSP instructions.  */
-  {"cfldrs",	0x0c100400,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_ldst_1},
-  {"cfldrd",	0x0c500400,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_ldst_2},
-  {"cfldr32",	0x0c100500,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_ldst_3},
-  {"cfldr64",	0x0c500500,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_ldst_4},
-  {"cfstrs",	0x0c000400,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_ldst_1},
-  {"cfstrd",	0x0c400400,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_ldst_2},
-  {"cfstr32",	0x0c000500,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_ldst_3},
-  {"cfstr64",	0x0c400500,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_ldst_4},
-  {"cfmvsr",	0x0e000450,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_2},
-  {"cfmvrs",	0x0e100450,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfmvdlr",	0x0e000410,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_2},
-  {"cfmvrdl",	0x0e100410,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfmvdhr",	0x0e000430,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_2},
-  {"cfmvrdh",	0x0e100430,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfmv64lr",	0x0e000510,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_2},
-  {"cfmvr64l",	0x0e100510,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfmv64hr",	0x0e000530,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_2},
-  {"cfmvr64h",	0x0e100530,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfmval32",	0x0e100610,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmv32al",	0x0e000610,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmvam32",	0x0e100630,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmv32am",	0x0e000630,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmvah32",	0x0e100650,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmv32ah",	0x0e000650,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmv32a",	0x0e000670,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmva32",	0x0e100670,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmv64a",	0x0e000690,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmva64",	0x0e100690,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmvsc32",	0x0e1006b0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_dspsc_1},
-  {"cfmv32sc",	0x0e0006b0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_dspsc_2},
-  {"cfcpys",	0x0e000400,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcpyd",	0x0e000420,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcvtsd",	0x0e000460,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcvtds",	0x0e000440,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcvt32s",	0x0e000480,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcvt32d",	0x0e0004a0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcvt64s",	0x0e0004c0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcvt64d",	0x0e0004e0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcvts32",	0x0e100580,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcvtd32",	0x0e1005a0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cftruncs32",0x0e1005c0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cftruncd32",0x0e1005e0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfrshl32",	0x0e000550,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_4},
-  {"cfrshl64",	0x0e000570,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_4},
-  {"cfsh32",	0x0e000500,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_shift_1},
-  {"cfsh64",	0x0e200500,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_shift_2},
-  {"cfcmps",	0x0e100490,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfcmpd",	0x0e1004b0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfcmp32",	0x0e100590,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfcmp64",	0x0e1005b0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfabss",	0x0e300400,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfabsd",	0x0e300420,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfnegs",	0x0e300440,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfnegd",	0x0e300460,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfadds",	0x0e300480,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfaddd",	0x0e3004a0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfsubs",	0x0e3004c0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfsubd",	0x0e3004e0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfmuls",	0x0e100400,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfmuld",	0x0e100420,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfabs32",	0x0e300500,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfabs64",	0x0e300520,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfneg32",	0x0e300540,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfneg64",	0x0e300560,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfadd32",	0x0e300580,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfadd64",	0x0e3005a0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfsub32",	0x0e3005c0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfsub64",	0x0e3005e0,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfmul32",	0x0e100500,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfmul64",	0x0e100520,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfmac32",	0x0e100540,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfmsc32",	0x0e100560,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfmadd32",	0x0e000600,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_quad_6},
-  {"cfmsub32",	0x0e100600,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_quad_6},
-  {"cfmadda32",	0x0e200600,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_quad_6},
-  {"cfmsuba32",	0x0e300600,	NULL,	NULL,	ARM_EXT_MAVERICK, do_c_quad_6},
+  {"cfldrs",     0xec100400, 6,  ARM_EXT_MAVERICK, do_c_ldst_1},
+  {"cfldrd",     0xec500400, 6,  ARM_EXT_MAVERICK, do_c_ldst_2},
+  {"cfldr32",    0xec100500, 7,  ARM_EXT_MAVERICK, do_c_ldst_3},
+  {"cfldr64",    0xec500500, 7,  ARM_EXT_MAVERICK, do_c_ldst_4},
+  {"cfstrs",     0xec000400, 6,  ARM_EXT_MAVERICK, do_c_ldst_1},
+  {"cfstrd",     0xec400400, 6,  ARM_EXT_MAVERICK, do_c_ldst_2},
+  {"cfstr32",    0xec000500, 7,  ARM_EXT_MAVERICK, do_c_ldst_3},
+  {"cfstr64",    0xec400500, 7,  ARM_EXT_MAVERICK, do_c_ldst_4},
+  {"cfmvsr",     0xee000450, 6,  ARM_EXT_MAVERICK, do_c_binops_2},
+  {"cfmvrs",     0xee100450, 6,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfmvdlr",    0xee000410, 7,  ARM_EXT_MAVERICK, do_c_binops_2},
+  {"cfmvrdl",    0xee100410, 7,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfmvdhr",    0xee000430, 7,  ARM_EXT_MAVERICK, do_c_binops_2},
+  {"cfmvrdh",    0xee100430, 7,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfmv64lr",   0xee000510, 8,  ARM_EXT_MAVERICK, do_c_binops_2},
+  {"cfmvr64l",   0xee100510, 8,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfmv64hr",   0xee000530, 8,  ARM_EXT_MAVERICK, do_c_binops_2},
+  {"cfmvr64h",   0xee100530, 8,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfmval32",   0xee100610, 8,  ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmv32al",   0xee000610, 8,  ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmvam32",   0xee100630, 8,  ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmv32am",   0xee000630, 8,  ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmvah32",   0xee100650, 8,  ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmv32ah",   0xee000650, 8,  ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmv32a",    0xee000670, 7,  ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmva32",    0xee100670, 7,  ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmv64a",    0xee000690, 7,  ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmva64",    0xee100690, 7,  ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmvsc32",   0xee1006b0, 8,  ARM_EXT_MAVERICK, do_c_dspsc_1},
+  {"cfmv32sc",   0xee0006b0, 8,  ARM_EXT_MAVERICK, do_c_dspsc_2},
+  {"cfcpys",     0xee000400, 6,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcpyd",     0xee000420, 6,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcvtsd",    0xee000460, 7,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcvtds",    0xee000440, 7,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcvt32s",   0xee000480, 8,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcvt32d",   0xee0004a0, 8,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcvt64s",   0xee0004c0, 8,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcvt64d",   0xee0004e0, 8,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcvts32",   0xee100580, 8,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfcvtd32",   0xee1005a0, 8,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cftruncs32", 0xee1005c0, 10, ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cftruncd32", 0xee1005e0, 10, ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfrshl32",   0xee000550, 8,  ARM_EXT_MAVERICK, do_c_triple_4},
+  {"cfrshl64",   0xee000570, 8,  ARM_EXT_MAVERICK, do_c_triple_4},
+  {"cfsh32",     0xee000500, 6,  ARM_EXT_MAVERICK, do_c_shift_1},
+  {"cfsh64",     0xee200500, 6,  ARM_EXT_MAVERICK, do_c_shift_2},
+  {"cfcmps",     0xee100490, 6,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfcmpd",     0xee1004b0, 6,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfcmp32",    0xee100590, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfcmp64",    0xee1005b0, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfabss",     0xee300400, 6,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfabsd",     0xee300420, 6,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfnegs",     0xee300440, 6,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfnegd",     0xee300460, 6,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfadds",     0xee300480, 6,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfaddd",     0xee3004a0, 6,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfsubs",     0xee3004c0, 6,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfsubd",     0xee3004e0, 6,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfmuls",     0xee100400, 6,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfmuld",     0xee100420, 6,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfabs32",    0xee300500, 7,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfabs64",    0xee300520, 7,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfneg32",    0xee300540, 7,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfneg64",    0xee300560, 7,  ARM_EXT_MAVERICK, do_c_binops_1},
+  {"cfadd32",    0xee300580, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfadd64",    0xee3005a0, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfsub32",    0xee3005c0, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfsub64",    0xee3005e0, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfmul32",    0xee100500, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfmul64",    0xee100520, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfmac32",    0xee100540, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfmsc32",    0xee100560, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
+  {"cfmadd32",   0xee000600, 8,  ARM_EXT_MAVERICK, do_c_quad_6},
+  {"cfmsub32",   0xee100600, 8,  ARM_EXT_MAVERICK, do_c_quad_6},
+  {"cfmadda32",  0xee200600, 9,  ARM_EXT_MAVERICK, do_c_quad_6},
+  {"cfmsuba32",  0xee300600, 9,  ARM_EXT_MAVERICK, do_c_quad_6},
 };
 
 /* Defines for various bits that we will want to toggle.  */
@@ -1070,8 +1392,9 @@ static const struct asm_opcode insns[] =
 #define LDM_TYPE_2_OR_3	0x00400000
 
 #define LITERAL_MASK	0xf000f000
-#define COND_MASK	0xf0000000
 #define OPCODE_MASK	0xfe1fffff
+#define V4_STR_BIT	0x00000020
+
 #define DATA_OP_SHIFT	21
 
 /* Codes to distinguish the arithmetic instructions.  */
@@ -1212,7 +1535,7 @@ struct thumb_opcode
   int size;
 
   /* Which CPU variants this exists for.  */
-  unsigned long variants;
+  unsigned long variant;
 
   /* Function to call to parse args.  */
   void (* parms) PARAMS ((char *));
@@ -2393,7 +2716,7 @@ cp_address_required_here (str)
 }
 
 static void
-do_nop (str, flags)
+do_empty (str, flags)
      char * str;
      unsigned long flags;
 {
@@ -2780,7 +3103,7 @@ ld_mode_required_here (string)
 	  if (skip_past_comma (& str) == SUCCESS)
 	    {
 	      /* [Rn],... (post inc) */
-	      if (ldst_extend (& str, 1) == FAIL)
+	      if (ldst_extend_v4 (&str) == FAIL)
 		return FAIL;
 	    }
 	  else 	      /* [Rn] */
@@ -2807,7 +3130,7 @@ ld_mode_required_here (string)
 
 	  pre_inc = 1;
 
-	  if (ldst_extend (& str, 1) == FAIL)
+	  if (ldst_extend_v4 (&str) == FAIL)
 	    return FAIL;
 
 	  skip_whitespace (str);
@@ -3630,7 +3953,7 @@ do_pld (str, flags)
       return;
     }
 
-  ++ str;
+  ++str;
   skip_whitespace (str);
 
   if ((rd = reg_required_here (& str, 16)) == FAIL)
@@ -3638,21 +3961,23 @@ do_pld (str, flags)
 
   skip_whitespace (str);
 
-  if (* str == ']')
+  if (*str == ']')
     {
       /* [Rn], ... ?  */
-      ++ str;
+      ++str;
       skip_whitespace (str);
 
-      if (skip_past_comma (& str) == SUCCESS)
+      /* Post-indexed addressing is not allowed with PLD.  */
+      if (skip_past_comma (&str) == SUCCESS)
 	{
-	  if (ldst_extend (& str, 0) == FAIL)
-	    return;
+	  inst.error
+	    = _("post-indexed expression used in preload instruction");
+	  return;
 	}
-      else if (* str == '!') /* [Rn]! */
+      else if (*str == '!') /* [Rn]! */
 	{
 	  inst.error = _("writeback used in preload instruction");
-	  ++ str;
+	  ++str;
 	}
       else /* [Rn] */
 	inst.instruction |= INDEX_UP | PRE_INDEX;
@@ -3665,7 +3990,7 @@ do_pld (str, flags)
 	  return;
 	}
 
-      if (ldst_extend (& str, 0) == FAIL)
+      if (ldst_extend (&str) == FAIL)
 	return;
 
       skip_whitespace (str);
@@ -3705,35 +4030,6 @@ do_ldrd (str, flags)
   int rd;
   int rn;
 
-  if (flags != DOUBLE_LOAD_FLAG)
-    {
-      /* Change instruction pattern to normal ldr/str.  */
-      if (inst.instruction & 0x20)
-	inst.instruction = (inst.instruction & COND_MASK) | 0x04000000; /* str */
-      else
-	inst.instruction = (inst.instruction & COND_MASK) | 0x04100000; /* ldr */
-
-      /* Perform a normal load/store instruction parse.  */
-      do_ldst (str, flags);
-
-      return;
-    }
-
-  if ((cpu_variant & ARM_EXT_XSCALE) != ARM_EXT_XSCALE)
-    {
-      static char buff[128];
-
-      --str;
-      while (ISSPACE (*str))
-	--str;
-      str -= 4;
-
-      /* Deny all knowledge.  */
-      sprintf (buff, _("bad instruction '%.100s'"), str);
-      inst.error = buff;
-      return;
-    }
-
   skip_whitespace (str);
 
   if ((rd = reg_required_here (& str, 12)) == FAIL)
@@ -3757,17 +4053,27 @@ do_ldrd (str, flags)
       return;
     }
 
-  if (rd == REG_LR || rd == 12)
+  if (rd == REG_LR)
     {
       inst.error = _("r12 or r14 not allowed here");
       return;
     }
 
   if (((rd == rn) || (rd + 1 == rn))
-      &&
-      ((inst.instruction & WRITE_BACK)
-       || (!(inst.instruction & PRE_INDEX))))
+      && ((inst.instruction & WRITE_BACK)
+	  || (!(inst.instruction & PRE_INDEX))))
     as_warn (_("pre/post-indexing used when modified address register is destination"));
+
+  /* For an index-register load, the index register must not overlap the
+     destination (even if not write-back).  */
+  if ((inst.instruction & V4_STR_BIT) == 0
+      && (inst.instruction & HWOFFSET_IMM) == 0)
+    {
+      int rm = inst.instruction & 0x0000000f;
+
+      if (rm == rd || (rm == rd + 1))
+	as_warn (_("ldrd destination registers must not overlap index register"));
+    }
 
   end_of_line (str);
 }
@@ -4285,6 +4591,8 @@ do_adr (str, flags)
      char * str;
      unsigned long flags;
 {
+  /* This is a pseudo-op of the form "adr rd, label" to be converted
+     into a relative address of the form "add rd, pc, #label-.-8".  */
   skip_whitespace (str);
 
   if (reg_required_here (&str, 12) == FAIL
@@ -4296,33 +4604,46 @@ do_adr (str, flags)
       return;
     }
 
-  if (flags & 0x00400000)
+  /* Frag hacking will turn this into a sub instruction if the offset turns
+     out to be negative.  */
+  inst.reloc.type = BFD_RELOC_ARM_IMMEDIATE;
+  inst.reloc.exp.X_add_number -= 8; /* PC relative adjust.  */
+  inst.reloc.pc_rel = 1;
+
+  end_of_line (str);
+}
+
+static void
+do_adrl (str, flags)
+     char * str;
+     unsigned long flags;
+{
+  /* This is a pseudo-op of the form "adrl rd, label" to be converted
+     into a relative address of the form:
+     add rd, pc, #low(label-.-8)"
+     add rd, rd, #high(label-.-8)"  */
+
+  skip_whitespace (str);
+
+  if (reg_required_here (&str, 12) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || my_get_expression (&inst.reloc.exp, &str))
     {
-      /* This is a pseudo-op of the form "adrl rd, label" to be converted
-	 into a relative address of the form:
-	 add rd, pc, #low(label-.-8)"
-	 add rd, rd, #high(label-.-8)"  */
-      /* Frag hacking will turn this into a sub instruction if the offset turns
-	 out to be negative.  */
-      inst.reloc.type              = BFD_RELOC_ARM_ADRL_IMMEDIATE;
-      inst.reloc.exp.X_add_number -= 8; /* PC relative adjust  */
-      inst.reloc.pc_rel            = 1;
-      inst.instruction            |= flags & ~0x00400000;
-      inst.size                    = INSN_SIZE * 2;
-    }
-  else
-    {
-      /* This is a pseudo-op of the form "adr rd, label" to be converted
-	 into a relative address of the form "add rd, pc, #label-.-8".  */
-      /* Frag hacking will turn this into a sub instruction if the offset turns
-	 out to be negative.  */
-      inst.reloc.type = BFD_RELOC_ARM_IMMEDIATE;
-      inst.reloc.exp.X_add_number -= 8; /* PC relative adjust.  */
-      inst.reloc.pc_rel = 1;
-      inst.instruction |= flags;
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+
+      return;
     }
 
   end_of_line (str);
+  /* Frag hacking will turn this into a sub instruction if the offset turns
+     out to be negative.  */
+  inst.reloc.type              = BFD_RELOC_ARM_ADRL_IMMEDIATE;
+  inst.reloc.exp.X_add_number -= 8; /* PC relative adjust  */
+  inst.reloc.pc_rel            = 1;
+  inst.size                    = INSN_SIZE * 2;
+
+  return;
 }
 
 static void
@@ -4348,9 +4669,6 @@ do_cmp (str, flags)
     }
 
   inst.instruction |= flags;
-  if ((flags & 0x0000f000) == 0)
-    inst.instruction |= CONDS_BIT;
-
   end_of_line (str);
   return;
 }
@@ -4383,9 +4701,8 @@ do_mov (str, flags)
 }
 
 static int
-ldst_extend (str, hwse)
+ldst_extend (str)
      char ** str;
-     int     hwse;
 {
   int add = INDEX_UP;
 
@@ -4401,8 +4718,7 @@ ldst_extend (str, hwse)
 	{
 	  int value = inst.reloc.exp.X_add_number;
 
-	  if ((hwse && (value < -255 || value > 255))
-	      || (value < -4095 || value > 4095))
+	  if (value < -4095 || value > 4095)
 	    {
 	      inst.error = _("address offset too large");
 	      return FAIL;
@@ -4414,23 +4730,11 @@ ldst_extend (str, hwse)
 	      add = 0;
 	    }
 
-	  /* Halfword and signextension instructions have the
-             immediate value split across bits 11..8 and bits 3..0.  */
-	  if (hwse)
-	    inst.instruction |= (add | HWOFFSET_IMM
-				 | ((value >> 4) << 8) | (value & 0xF));
-	  else
-	    inst.instruction |= add | value;
+	  inst.instruction |= add | value;
 	}
       else
 	{
-	  if (hwse)
-	    {
-	      inst.instruction |= HWOFFSET_IMM;
-	      inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM8;
-	    }
-	  else
-	    inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM;
+	  inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM;
 	  inst.reloc.pc_rel = 0;
 	}
       return SUCCESS;
@@ -4447,14 +4751,9 @@ ldst_extend (str, hwse)
       if (reg_required_here (str, 0) == FAIL)
 	return FAIL;
 
-      if (hwse)
-	inst.instruction |= add;
-      else
-	{
-	  inst.instruction |= add | OFFSET_REG;
-	  if (skip_past_comma (str) == SUCCESS)
-	    return decode_shift (str, SHIFT_RESTRICT);
-	}
+      inst.instruction |= add | OFFSET_REG;
+      if (skip_past_comma (str) == SUCCESS)
+	return decode_shift (str, SHIFT_RESTRICT);
 
       return SUCCESS;
     }
@@ -4465,46 +4764,26 @@ do_ldst (str, flags)
      char *        str;
      unsigned long flags;
 {
-  int halfword = 0;
   int pre_inc = 0;
   int conflict_reg;
   int value;
 
-  /* This is not ideal, but it is the simplest way of dealing with the
-     ARM7T halfword instructions (since they use a different
-     encoding, but the same mnemonic):  */
-  halfword = (flags & 0x80000000) != 0;
-  if (halfword)
-    {
-      /* This is actually a load/store of a halfword, or a
-         signed-extension load.  */
-      if ((cpu_variant & ARM_EXT_V4) == 0)
-	{
-	  inst.error
-	    = _("Processor does not support halfwords or signed bytes");
-	  return;
-	}
-
-      inst.instruction = ((inst.instruction & COND_MASK)
-			  | (flags & ~COND_MASK));
-
-      flags = 0;
-    }
-
   skip_whitespace (str);
 
-  if ((conflict_reg = reg_required_here (& str, 12)) == FAIL)
+  if ((conflict_reg = reg_required_here (&str, 12)) == FAIL)
     {
       if (!inst.error)
 	inst.error = BAD_ARGS;
       return;
     }
 
-  if (skip_past_comma (& str) == FAIL)
+  if (skip_past_comma (&str) == FAIL)
     {
       inst.error = _("Address expected");
       return;
     }
+
+  flags = 0;
 
   if (*str == '[')
     {
@@ -4529,26 +4808,16 @@ do_ldst (str, flags)
 	  if (skip_past_comma (&str) == SUCCESS)
 	    {
 	      /* [Rn],... (post inc)  */
-	      if (ldst_extend (&str, halfword) == FAIL)
+	      if (ldst_extend (&str) == FAIL)
 		return;
 	      if (conflict_reg)
-		{
-		  if (flags & TRANS_BIT)
-		    as_warn (_("Rn and Rd must be different in %s"),
-			     ((inst.instruction & LOAD_BIT)
-			      ? "LDRT" : "STRT"));
-		  else
-		    as_warn (_("%s register same as write-back base"),
-			     ((inst.instruction & LOAD_BIT)
-			      ? _("destination") : _("source")));
-		}
+		as_warn (_("%s register same as write-back base"),
+			 ((inst.instruction & LOAD_BIT)
+			  ? _("destination") : _("source")));
 	    }
 	  else
 	    {
 	      /* [Rn]  */
-	      if (halfword)
-		inst.instruction |= HWOFFSET_IMM;
-
 	      skip_whitespace (str);
 
 	      if (*str == '!')
@@ -4561,16 +4830,8 @@ do_ldst (str, flags)
 		  inst.instruction |= WRITE_BACK;
 		}
 
-	      flags |= INDEX_UP;
-	      if (flags & TRANS_BIT)
-		{
-		  if (conflict_reg)
-		    as_warn (_("Rn and Rd must be different in %s"),
-			     ((inst.instruction & LOAD_BIT)
-			      ? "LDRT" : "STRT"));
-		}
-		else
-		  pre_inc = 1;
+	      inst.instruction |= INDEX_UP;
+	      pre_inc = 1;
 	    }
 	}
       else
@@ -4583,7 +4844,7 @@ do_ldst (str, flags)
 	    }
 
 	  pre_inc = 1;
-	  if (ldst_extend (&str, halfword) == FAIL)
+	  if (ldst_extend (&str) == FAIL)
 	    return;
 
 	  skip_whitespace (str);
@@ -4624,6 +4885,321 @@ do_ldst (str, flags)
 	  return;
 	}
 
+      if (inst.reloc.exp.X_op == O_constant
+	  && (value = validate_immediate (inst.reloc.exp.X_add_number)) != FAIL)
+	{
+	  /* This can be done with a mov instruction.  */
+	  inst.instruction &= LITERAL_MASK;
+	  inst.instruction |= INST_IMMEDIATE | (OPCODE_MOV << DATA_OP_SHIFT);
+	  inst.instruction |= (value & 0xfff);
+	  end_of_line (str);
+	  return;
+	}
+      else
+	{
+	  /* Insert into literal pool.  */
+	  if (add_to_lit_pool () == FAIL)
+	    {
+	      if (!inst.error)
+		inst.error = _("literal pool insertion failed");
+	      return;
+	    }
+
+	  /* Change the instruction exp to point to the pool.  */
+	  inst.reloc.type = BFD_RELOC_ARM_LITERAL;
+	  inst.reloc.pc_rel = 1;
+	  inst.instruction |= (REG_PC << 16);
+	  pre_inc = 1;
+	}
+    }
+  else
+    {
+      if (my_get_expression (&inst.reloc.exp, &str))
+	return;
+
+      inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM;
+#ifndef TE_WINCE
+      /* PC rel adjust.  */
+      inst.reloc.exp.X_add_number -= 8;
+#endif
+      inst.reloc.pc_rel = 1;
+      inst.instruction |= (REG_PC << 16);
+      pre_inc = 1;
+    }
+
+  inst.instruction |= (pre_inc ? PRE_INDEX : 0);
+  end_of_line (str);
+  return;
+}
+
+static void
+do_ldstt (str, flags)
+     char *        str;
+     unsigned long flags;
+{
+  int conflict_reg;
+
+  skip_whitespace (str);
+
+  if ((conflict_reg = reg_required_here (& str, 12)) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (& str) == FAIL)
+    {
+      inst.error = _("Address expected");
+      return;
+    }
+
+  if (*str == '[')
+    {
+      int reg;
+
+      str++;
+
+      skip_whitespace (str);
+
+      if ((reg = reg_required_here (&str, 16)) == FAIL)
+	return;
+
+      /* ldrt/strt always use post-indexed addressing, so if the base is
+	 the same as Rd, we warn.  */
+      if (conflict_reg == reg)
+	as_warn (_("%s register same as write-back base"),
+		 ((inst.instruction & LOAD_BIT)
+		  ? _("destination") : _("source")));
+
+      skip_whitespace (str);
+
+      if (*str == ']')
+	{
+	  str ++;
+
+	  if (skip_past_comma (&str) == SUCCESS)
+	    {
+	      /* [Rn],... (post inc)  */
+	      if (ldst_extend (&str) == FAIL)
+		return;
+	    }
+	  else
+	    {
+	      /* [Rn]  */
+	      skip_whitespace (str);
+
+	      /* Skip a write-back '!'.  */
+	      if (*str == '!')
+		str++;
+
+	      inst.instruction |= INDEX_UP;
+	    }
+	}
+      else
+	{
+	  inst.error = _("post-indexed expression expected");
+	  return;
+	}
+    }
+  else
+    {
+      inst.error = _("post-indexed expression expected");
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static int
+ldst_extend_v4 (str)
+     char ** str;
+{
+  int add = INDEX_UP;
+
+  switch (**str)
+    {
+    case '#':
+    case '$':
+      (*str)++;
+      if (my_get_expression (& inst.reloc.exp, str))
+	return FAIL;
+
+      if (inst.reloc.exp.X_op == O_constant)
+	{
+	  int value = inst.reloc.exp.X_add_number;
+
+	  if (value < -255 || value > 255)
+	    {
+	      inst.error = _("address offset too large");
+	      return FAIL;
+	    }
+
+	  if (value < 0)
+	    {
+	      value = -value;
+	      add = 0;
+	    }
+
+	  /* Halfword and signextension instructions have the
+             immediate value split across bits 11..8 and bits 3..0.  */
+	  inst.instruction |= (add | HWOFFSET_IMM
+			       | ((value >> 4) << 8) | (value & 0xF));
+	}
+      else
+	{
+	  inst.instruction |= HWOFFSET_IMM;
+	  inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM8;
+	  inst.reloc.pc_rel = 0;
+	}
+      return SUCCESS;
+
+    case '-':
+      add = 0;
+      /* Fall through.  */
+
+    case '+':
+      (*str)++;
+      /* Fall through.  */
+
+    default:
+      if (reg_required_here (str, 0) == FAIL)
+	return FAIL;
+
+      inst.instruction |= add;
+      return SUCCESS;
+    }
+}
+
+/* Halfword and signed-byte load/store operations.  */
+static void
+do_ldstv4 (str, flags)
+     char *        str;
+     unsigned long flags;
+{
+  int pre_inc = 0;
+  int conflict_reg;
+  int value;
+
+  skip_whitespace (str);
+
+  if ((conflict_reg = reg_required_here (& str, 12)) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (& str) == FAIL)
+    {
+      inst.error = _("Address expected");
+      return;
+    }
+
+  if (*str == '[')
+    {
+      int reg;
+
+      str++;
+
+      skip_whitespace (str);
+
+      if ((reg = reg_required_here (&str, 16)) == FAIL)
+	return;
+
+      /* Conflicts can occur on stores as well as loads.  */
+      conflict_reg = (conflict_reg == reg);
+
+      skip_whitespace (str);
+
+      if (*str == ']')
+	{
+	  str ++;
+
+	  if (skip_past_comma (&str) == SUCCESS)
+	    {
+	      /* [Rn],... (post inc)  */
+	      if (ldst_extend_v4 (&str) == FAIL)
+		return;
+	      if (conflict_reg)
+		as_warn (_("%s register same as write-back base"),
+			 ((inst.instruction & LOAD_BIT)
+			  ? _("destination") : _("source")));
+	    }
+	  else
+	    {
+	      /* [Rn]  */
+	      inst.instruction |= HWOFFSET_IMM;
+
+	      skip_whitespace (str);
+
+	      if (*str == '!')
+		{
+		  if (conflict_reg)
+		    as_warn (_("%s register same as write-back base"),
+			     ((inst.instruction & LOAD_BIT)
+			      ? _("destination") : _("source")));
+		  str++;
+		  inst.instruction |= WRITE_BACK;
+		}
+
+	      inst.instruction |= INDEX_UP;
+	      pre_inc = 1;
+	    }
+	}
+      else
+	{
+	  /* [Rn,...]  */
+	  if (skip_past_comma (&str) == FAIL)
+	    {
+	      inst.error = _("pre-indexed expression expected");
+	      return;
+	    }
+
+	  pre_inc = 1;
+	  if (ldst_extend_v4 (&str) == FAIL)
+	    return;
+
+	  skip_whitespace (str);
+
+	  if (*str++ != ']')
+	    {
+	      inst.error = _("missing ]");
+	      return;
+	    }
+
+	  skip_whitespace (str);
+
+	  if (*str == '!')
+	    {
+	      if (conflict_reg)
+		as_warn (_("%s register same as write-back base"),
+			 ((inst.instruction & LOAD_BIT)
+			  ? _("destination") : _("source")));
+	      str++;
+	      inst.instruction |= WRITE_BACK;
+	    }
+	}
+    }
+  else if (*str == '=')
+    {
+      /* XXX Does this work correctly for half-word/byte ops?  */
+      /* Parse an "ldr Rd, =expr" instruction; this is another pseudo op.  */
+      str++;
+
+      skip_whitespace (str);
+
+      if (my_get_expression (&inst.reloc.exp, &str))
+	return;
+
+      if (inst.reloc.exp.X_op != O_constant
+	  && inst.reloc.exp.X_op != O_symbol)
+	{
+	  inst.error = _("Constant expression expected");
+	  return;
+	}
+
       if (inst.reloc.exp.X_op == O_constant)
 	{
 	  value = validate_immediate (inst.reloc.exp.X_add_number);
@@ -4633,7 +5209,7 @@ do_ldst (str, flags)
 	      /* This can be done with a mov instruction.  */
 	      inst.instruction &= LITERAL_MASK;
 	      inst.instruction |= INST_IMMEDIATE | (OPCODE_MOV << DATA_OP_SHIFT);
-	      inst.instruction |= (flags & COND_MASK) | (value & 0xfff);
+	      inst.instruction |= value & 0xfff;
 	      end_of_line (str);
 	      return;
 	    }
@@ -4645,7 +5221,7 @@ do_ldst (str, flags)
 	      /* This can be done with a mvn instruction.  */
 	      inst.instruction &= LITERAL_MASK;
 	      inst.instruction |= INST_IMMEDIATE | (OPCODE_MVN << DATA_OP_SHIFT);
-	      inst.instruction |= (flags & COND_MASK) | (value & 0xfff);
+	      inst.instruction |= value & 0xfff;
 	      end_of_line (str);
 	      return;
 	    }
@@ -4660,14 +5236,8 @@ do_ldst (str, flags)
 	}
 
       /* Change the instruction exp to point to the pool.  */
-      if (halfword)
-	{
-	  inst.instruction |= HWOFFSET_IMM;
-	  inst.reloc.type = BFD_RELOC_ARM_HWLITERAL;
-	}
-      else
-	inst.reloc.type = BFD_RELOC_ARM_LITERAL;
-
+      inst.instruction |= HWOFFSET_IMM;
+      inst.reloc.type = BFD_RELOC_ARM_HWLITERAL;
       inst.reloc.pc_rel = 1;
       inst.instruction |= (REG_PC << 16);
       pre_inc = 1;
@@ -4677,13 +5247,8 @@ do_ldst (str, flags)
       if (my_get_expression (&inst.reloc.exp, &str))
 	return;
 
-      if (halfword)
-	{
-	  inst.instruction |= HWOFFSET_IMM;
-	  inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM8;
-	}
-      else
-	inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM;
+      inst.instruction |= HWOFFSET_IMM;
+      inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM8;
 #ifndef TE_WINCE
       /* PC rel adjust.  */
       inst.reloc.exp.X_add_number -= 8;
@@ -4693,10 +5258,7 @@ do_ldst (str, flags)
       pre_inc = 1;
     }
 
-  if (pre_inc && (flags & TRANS_BIT))
-    inst.error = _("Pre-increment instruction with translate");
-
-  inst.instruction |= flags | (pre_inc ? PRE_INDEX : 0);
+  inst.instruction |= (pre_inc ? PRE_INDEX : 0);
   end_of_line (str);
   return;
 }
@@ -4851,7 +5413,7 @@ do_ldmstm (str, flags)
 
   if (*str == '!')
     {
-      flags |= WRITE_BACK;
+      inst.instruction |= WRITE_BACK;
       str++;
     }
 
@@ -4866,7 +5428,7 @@ do_ldmstm (str, flags)
   if (*str == '^')
     {
       str++;
-      flags |= LDM_TYPE_2_OR_3;
+      inst.instruction |= LDM_TYPE_2_OR_3;
     }
 
   inst.instruction |= flags | range;
@@ -5223,23 +5785,6 @@ do_fpa_ldst (str, flags)
 {
   skip_whitespace (str);
 
-  switch (inst.suffix)
-    {
-    case SUFF_S:
-      break;
-    case SUFF_D:
-      inst.instruction |= CP_T_X;
-      break;
-    case SUFF_E:
-      inst.instruction |= CP_T_Y;
-      break;
-    case SUFF_P:
-      inst.instruction |= CP_T_X | CP_T_Y;
-      break;
-    default:
-      abort ();
-    }
-
   if (fp_reg_required_here (&str, 12) == FAIL)
     {
       if (!inst.error)
@@ -5314,7 +5859,7 @@ do_fpa_ldmstm (str, flags)
       abort ();
     }
 
-  if (flags)
+  if (inst.instruction & (CP_T_Pre | CP_T_UD)) /* ed/fd format.  */
     {
       int reg;
       int write_back;
@@ -5361,26 +5906,26 @@ do_fpa_ldmstm (str, flags)
       else
 	write_back = 0;
 
-      if (flags & CP_T_Pre)
+      if (inst.instruction & CP_T_Pre)
 	{
 	  /* Pre-decrement.  */
 	  offset = 3 * num_regs;
 	  if (write_back)
-	    flags |= CP_T_WB;
+	    inst.instruction |= CP_T_WB;
 	}
       else
 	{
 	  /* Post-increment.  */
 	  if (write_back)
 	    {
-	      flags |= CP_T_WB;
+	      inst.instruction |= CP_T_WB;
 	      offset = 3 * num_regs;
 	    }
 	  else
 	    {
 	      /* No write-back, so convert this into a standard pre-increment
 		 instruction -- aesthetically more pleasing.  */
-	      flags = CP_T_Pre | CP_T_UD;
+	      inst.instruction |= CP_T_Pre | CP_T_UD;
 	      offset = 0;
 	    }
 	}
@@ -5404,20 +5949,6 @@ do_fpa_dyadic (str, flags)
      unsigned long flags;
 {
   skip_whitespace (str);
-
-  switch (inst.suffix)
-    {
-    case SUFF_S:
-      break;
-    case SUFF_D:
-      inst.instruction |= 0x00000080;
-      break;
-    case SUFF_E:
-      inst.instruction |= 0x00080000;
-      break;
-    default:
-      abort ();
-    }
 
   if (fp_reg_required_here (&str, 12) == FAIL)
     {
@@ -5453,20 +5984,6 @@ do_fpa_monadic (str, flags)
      unsigned long flags;
 {
   skip_whitespace (str);
-
-  switch (inst.suffix)
-    {
-    case SUFF_S:
-      break;
-    case SUFF_D:
-      inst.instruction |= 0x00000080;
-      break;
-    case SUFF_E:
-      inst.instruction |= 0x00080000;
-      break;
-    default:
-      abort ();
-    }
 
   if (fp_reg_required_here (&str, 12) == FAIL)
     {
@@ -5521,20 +6038,6 @@ do_fpa_from_reg (str, flags)
      unsigned long flags;
 {
   skip_whitespace (str);
-
-  switch (inst.suffix)
-    {
-    case SUFF_S:
-      break;
-    case SUFF_D:
-      inst.instruction |= 0x00000080;
-      break;
-    case SUFF_E:
-      inst.instruction |= 0x00080000;
-      break;
-    default:
-      abort ();
-    }
 
   if (fp_reg_required_here (&str, 16) == FAIL)
     {
@@ -7227,6 +7730,54 @@ set_constant_flonums ()
       abort ();
 }
 
+/* Iterate over the base tables to create the instruction patterns.  */
+static void
+build_arm_ops_hsh ()
+{
+  unsigned int i;
+  unsigned int j;
+  static struct obstack insn_obstack;
+
+  obstack_begin (&insn_obstack, 4000);
+
+  for (i = 0; i < sizeof (insns) / sizeof (struct asm_opcode); i++)
+    {
+      CONST struct asm_opcode *insn = insns + i;
+
+      if (insn->cond_offset != 0)
+	{
+	  /* Insn supports conditional execution.  Build the varaints
+	     and insert them in the hash table.  */
+	  for (j = 0; j < sizeof (conds) / sizeof (struct asm_cond); j++)
+	    {
+	      unsigned len = strlen (insn->template);
+	      struct asm_opcode *new;
+	      char *template;
+
+	      new = obstack_alloc (&insn_obstack, sizeof (struct asm_opcode));
+	      /* All condition codes are two characters.  */
+	      template = obstack_alloc (&insn_obstack, len + 3);
+
+	      strncpy (template, insn->template, insn->cond_offset);
+	      strcpy (template + insn->cond_offset, conds[j].template);
+	      if (len > insn->cond_offset)
+		strcpy (template + insn->cond_offset + 2,
+			insn->template + insn->cond_offset);
+	      new->template = template;
+	      new->cond_offset = 0;
+	      new->variant = insn->variant;
+	      new->parms = insn->parms;
+	      new->value = (insn->value & ~COND_MASK) | conds[j].value;
+
+	      hash_insert (arm_ops_hsh, new->template, (PTR) new);
+	    }
+	}
+      /* Finally, insert the unconditional insn in the table directly;
+	 no need to build a copy.  */
+      hash_insert (arm_ops_hsh, insn->template, (PTR) insn);
+    }
+}
+
 void
 md_begin ()
 {
@@ -7241,8 +7792,7 @@ md_begin ()
       || (arm_psr_hsh = hash_new ()) == NULL)
     as_fatal (_("Virtual memory exhausted"));
 
-  for (i = 0; i < sizeof (insns) / sizeof (struct asm_opcode); i++)
-    hash_insert (arm_ops_hsh, insns[i].template, (PTR) (insns + i));
+  build_arm_ops_hsh ();
   for (i = 0; i < sizeof (tinsns) / sizeof (struct thumb_opcode); i++)
     hash_insert (arm_tops_hsh, tinsns[i].template, (PTR) (tinsns + i));
   for (i = 0; i < sizeof (conds) / sizeof (struct asm_cond); i++)
@@ -8441,7 +8991,7 @@ md_assemble (str)
       if (opcode)
 	{
 	  /* Check that this instruction is supported for this CPU.  */
-	  if (thumb_mode == 1 && (opcode->variants & cpu_variant) == 0)
+	  if (thumb_mode == 1 && (opcode->variant & cpu_variant) == 0)
 	    {
 	      as_bad (_("selected processor does not support this opcode"));
 	      return;
@@ -8457,156 +9007,26 @@ md_assemble (str)
   else
     {
       const struct asm_opcode * opcode;
-      unsigned long cond_code;
 
-      inst.size = INSN_SIZE;
-      /* P now points to the end of the opcode, probably white space, but we
-	 have to break the opcode up in case it contains condionals and flags;
-	 keep trying with progressively smaller basic instructions until one
-	 matches, or we run out of opcode.  */
-      q = (p - str > LONGEST_INST) ? str + LONGEST_INST : p;
+      c = *p;
+      *p = '\0';
+      opcode = (CONST struct asm_opcode *) hash_find (arm_ops_hsh, str);
+      *p = c;
 
-      for (; q != str; q--)
+      if (opcode)
 	{
-	  c = *q;
-	  *q = '\0';
-
-	  opcode = (const struct asm_opcode *) hash_find (arm_ops_hsh, str);
-	  *q = c;
-
-	  if (opcode && opcode->template)
+	  /* Check that this instruction is supported for this CPU.  */
+	  if ((opcode->variant & cpu_variant) == 0)
 	    {
-	      unsigned long flag_bits = 0;
-	      char * r;
-
-	      /* Check that this instruction is supported for this CPU.  */
-	      if ((opcode->variants & cpu_variant) == 0)
-		goto try_shorter;
-
-	      inst.instruction = opcode->value;
-	      if (q == p)		/* Just a simple opcode.  */
-		{
-		  if (opcode->comp_suffix)
-		    {
-		      if (*opcode->comp_suffix != '\0')
-			as_bad (_("Opcode `%s' must have suffix from list: <%s>"),
-				str, opcode->comp_suffix);
-		      else
-			/* Not a conditional instruction.  */
-			(*opcode->parms) (q, 0);
-		    }
-		  else
-		    {
-		      /* A conditional instruction with default condition.  */
-		      inst.instruction |= COND_ALWAYS;
-		      (*opcode->parms) (q, 0);
-		    }
-		  output_inst ();
-		  return;
-		}
-
-	      /* Not just a simple opcode.  Check if extra is a
-                 conditional.  */
-	      r = q;
-	      if (p - r >= 2)
-		{
-		  const struct asm_cond *cond;
-		  char d = *(r + 2);
-
-		  *(r + 2) = '\0';
-		  cond = (const struct asm_cond *) hash_find (arm_cond_hsh, r);
-		  *(r + 2) = d;
-		  if (cond)
-		    {
-		      if (cond->value == 0xf0000000)
-			as_tsktsk (
-_("Warning: Use of the 'nv' conditional is deprecated\n"));
-
-		      cond_code = cond->value;
-		      r += 2;
-		    }
-		  else
-		    cond_code = COND_ALWAYS;
-		}
-	      else
-		cond_code = COND_ALWAYS;
-
-	      /* Apply the conditional, or complain it's not allowed.  */
-	      if (opcode->comp_suffix && *opcode->comp_suffix == '\0')
-		{
-		  /* Instruction isn't conditional.  */
-		  if (cond_code != COND_ALWAYS)
-		    {
-		      as_bad (_("Opcode `%s' is unconditional\n"), str);
-		      return;
-		    }
-		}
-	      else
-		/* Instruction is conditional: set the condition into it.  */
-		inst.instruction |= cond_code;
-
-	      /* If there is a compulsory suffix, it should come here
-		 before any optional flags.  */
-	      if (opcode->comp_suffix && *opcode->comp_suffix != '\0')
-		{
-		  const char *s = opcode->comp_suffix;
-
-		  while (*s)
-		    {
-		      inst.suffix++;
-		      if (*r == *s)
-			break;
-		      s++;
-		    }
-
-		  if (*s == '\0')
-		    {
-		      as_bad (_("Opcode `%s' must have suffix from <%s>\n"),
-			      str, opcode->comp_suffix);
-		      return;
-		    }
-
-		  r++;
-		}
-
-	      /* The remainder, if any should now be flags for the instruction;
-		 Scan these checking each one found with the opcode.  */
-	      if (r != p)
-		{
-		  char d;
-		  const struct asm_flg *flag = opcode->flags;
-
-		  if (flag)
-		    {
-		      int flagno;
-
-		      d = *p;
-		      *p = '\0';
-
-		      for (flagno = 0; flag[flagno].template; flagno++)
-			{
-			  if (streq (r, flag[flagno].template))
-			    {
-			      flag_bits |= flag[flagno].set_bits;
-			      break;
-			    }
-			}
-
-		      *p = d;
-		      if (! flag[flagno].template)
-			goto try_shorter;
-		    }
-		  else
-		    goto try_shorter;
-		}
-
-	      (*opcode->parms) (p, flag_bits);
-	      output_inst ();
+	      as_bad (_("selected processor does not support this opcode"));
 	      return;
 	    }
 
-	try_shorter:
-	  ;
+	  inst.instruction = opcode->value;
+	  inst.size = INSN_SIZE;
+	  (*opcode->parms) (p, 0);
+	  output_inst ();
+	  return;
 	}
     }
 

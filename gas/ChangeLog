@@ -1,3 +1,44 @@
+2001-12-05  Richard Earnshaw  <rearnsha@arm.com>
+
+	* tc-arm.c (struct asm_opcode): Delete comp_suffix and flags.  Add
+	cond_offset.  Rename variants->variant.
+	(insns): Adjust for new format.  Explicitly code each variant that
+	takes flags.  Remove temporary instructions.
+	(struct arm_it): Remove redundant field suffix.
+	(s_flag, ldr_flags, str_flags, byte_flag, cmp_flags, ldm_flags)
+	(stm_flags, lfm_flags, sfm_flags, round_flags, fix_flags, except_flag)
+	(long_flag): Delete.
+	(struct asm_flg): Delete.
+	(LONGEST_INST): Delete.
+	(V4_STR_BIT): Define.
+	(struct thumb_opcode): Rename variants->variant.
+	(do_empty): Renamed from do_nop.
+	(ldst_extend): Delete argument hwse.  Split code for half-word and
+	signed byte instructions to ...
+	(ldst_extend_v4): ... here.
+	(ld_mode_required_here): Use ldst_extend_v4.
+	(do_ldrd): Simplify now that this is only called for ldrd.  No
+	need to test for XScale, which was wrong anyway.  Don't reject r12
+	as a target register.  Add test that ldrd doesn't update an index
+	register.
+	(do_pld): Don't allow post-indexed or write-back addressing modes.
+	Adjust call to ldst_extend.
+	(do_adr): Split code for adrl to ...
+	(do_adrl): ... here.
+	(do_cmp): No need to fold in COND_BIT.
+	(do_ldst): Simplify.  Split code for ldrt/strt into do_ldstt.  Split
+	code to handle half-word and signed byte instructions to ...
+	(do_ldstv4): ... here.
+	(do_ldstt): New function.  Handle load/store with translate.
+	(do_ldmstm): Write feature modification bits directly into
+	inst.instruction.
+	(do_fpa_ldst): Remove suffix handling code.
+	(do_fpa_dyadic, do_fpa_monadic, do_fpa_from_reg): Likewise.
+	(do_fpa_ldmstm): Type of access is now held in inst.instruction.
+	(build_arm_ops_hsh): New function.
+	(md_begin): Call it.  Don't build the ARM opcode directly.
+	(md_assemble): Simplify ARM instruction handling.
+
 2001-12-05  Arati Dikey <aratid@kpit.com>
  
  	* tc-sh.c (parse_at): Corrected incorrect op->type selection due
