@@ -1,3 +1,7 @@
+Sun Mar 20 12:06:05 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* Makefile.in (STAGESTUFF): Add gasp.new.
+
 Fri Mar 18 20:09:16 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* write.c (symbol_table_frozen): New variable, to be set after

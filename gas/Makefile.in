@@ -79,7 +79,7 @@ CC_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CC); \
     else \
-      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+      t='$(program_transform_name)'; echo gcc | sed -e 's/brokensed/brokensed/' $$t; \
     fi; \
   fi`
 
@@ -90,7 +90,7 @@ NM_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(NM); \
     else \
-       t='$(program_transform_name)'; echo nm | sed -e '' $$t ; \
+       t='$(program_transform_name)'; echo nm | sed -e 's/brokensed/brokensed/' $$t ; \
     fi; \
   fi`
 
@@ -102,7 +102,7 @@ OBJDUMP_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(OBJDUMP); \
     else \
-       t='$(program_transform_name)'; echo objdump | sed -e '' $$t ; \
+       t='$(program_transform_name)'; echo objdump | sed -e 's/brokensed/brokensed/' $$t ; \
     fi; \
   fi`
 
@@ -239,6 +239,12 @@ dvi info install-info clean-info:
 	@srcroot=`cd $(srcroot); pwd`; export srcroot; \
 	(cd doc ; $(MAKE) $(FLAGS_TO_PASS) $@)
 
+make-gas.com: stamp-mk.com
+stamp-mk.com: vmsconf.sh Makefile
+	sh $(srcdir)/vmsconf.sh $(OBJS) ../libiberty/obstack.o ../libiberty/strdup.o > new-make.com
+	$(srcdir)/../move-if-change new-make.com $(srcdir)/make-gas.com
+	touch stamp-mk.com
+
 # Now figure out from those variables how to compile and link.
 
 # This is the variable actually used when we compile.
@@ -247,7 +253,7 @@ ALL_CFLAGS = $(INTERNAL_CFLAGS) $(CROSS) $(CFLAGS) $(HDEFINES) $(TDEFINES)
 # How to link with both our special library facilities
 # and the system's installed libraries.
 
-LIBS = ../opcodes/libopcodes.a $(BFDLIB) $(LOCAL_LOADLIBES) \
+LIBS = $(OPCODES_LIB) $(BFDLIB) $(LOCAL_LOADLIBES) \
 	../libiberty/libiberty.a
 
 # Specify the directories to be searched for header files.
@@ -266,7 +272,7 @@ SUBDIR_INCLUDES = -I.. -I$(srcdir) -I$(srcdir)/config
 .NOEXPORT:
 
 # Files to be copied away after each stage in building.
-STAGESTUFF = *.o as.new
+STAGESTUFF = *.o as.new gasp.new
 
 as.new: $(OBJS) $(LIBS)
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
@@ -352,6 +358,9 @@ input-scrub.o : input-scrub.c /usr/include/errno.h /usr/include/sys/errno.h \
 listing.o : listing.c as.h host.h targ-env.h flonum.h bignum.h \
   listing.h obj-format.h targ-cpu.h struc-symbol.h write.h expr.h \
   frags.h hash.h read.h symbols.h tc.h obj.h input-file.h subsegs.h
+literal.o : literal.c subsegs.h as.h host.h targ-env.h obj-format.h \
+  targ-cpu.h  struc-symbol.h \
+  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
 messages.o : messages.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
@@ -431,7 +440,7 @@ install:
 	srcroot=`cd $(srcroot); pwd`; export srcroot; \
 	$(INSTALL_XFORM) as.new $(bindir)/as; \
 	$(INSTALL_XFORM1) $(srcdir)/doc/as.1 $(man1dir)/as.1; \
-	n=`t='$(program_transform_name)'; echo as | sed -e "" $$t`; \
+	n=`t='$(program_transform_name)'; echo as | sed -e "s/brokensed/brokensed/" $$t`; \
 	if [ -d $(tooldir) ]; then \
 	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
 	  rm -f $(tooldir)/bin/as; \
@@ -440,7 +449,7 @@ install:
 	else true; fi
 	srcroot=`cd $(srcroot); pwd`; export srcroot; \
 	$(INSTALL_XFORM) gasp.new $(bindir)/gasp; \
-	n=`t='$(program_transform_name)'; echo gasp | sed -e "" $$t`; \
+	n=`t='$(program_transform_name)'; echo gasp | sed -e "s/brokensed/brokensed/" $$t`; \
 	if [ -d $(tooldir) ]; then \
 	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
 	  rm -f $(tooldir)/bin/gasp; \
@@ -450,10 +459,10 @@ install:
 
 # Cancel installation by deleting the installed files.
 uninstall:
-	-n=`t='$(program_transform_name)'; echo as | sed -e "" $$t`; \
+	-n=`t='$(program_transform_name)'; echo as | sed -e "s/brokensed/brokensed/" $$t`; \
 	rm -f $(bindir)/$$n; \
 	rm -f $(mandir)/$$n.1
-	-n=`t='$(program_transform_name)'; echo gasp | sed -e "" $$t`; \
+	-n=`t='$(program_transform_name)'; echo gasp | sed -e "s/brokensed/brokensed/" $$t`; \
 	rm -f $(bindir)/$$n; \
 
 # These exist for maintenance purposes.
