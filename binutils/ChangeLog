@@ -1,3 +1,9 @@
+2000-08-05  Jason Eckhardt  <jle@cygnus.com>
+
+	* readelf.c (elf/i860.h): Include.
+	(dump_relocations): Add recognition of i860 architecture.
+	(guess_is_rela): Add recognition of i860 architecture.
+
 2000-08-03  Nick Clifton  <nickc@cygnus.com>
 
 	* MAINTAINERS: Add information about CGEN maintainers.

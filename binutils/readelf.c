@@ -72,6 +72,7 @@
 #include "elf/avr.h"
 #include "elf/ia64.h"
 #include "elf/cris.h"
+#include "elf/i860.h"
 
 #include "bucomm.h"
 #include "getopt.h"
@@ -567,6 +568,7 @@ guess_is_rela (e_machine)
     case EM_IA_64:
     case EM_AVR:
     case EM_CRIS:
+    case EM_860:
       return TRUE;
 
     case EM_MMA:
@@ -884,6 +886,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 
 	case EM_CRIS:
 	  rtype = elf_cris_reloc_type (type);
+	  break;
+
+	case EM_860:
+	  rtype = elf_i860_reloc_type (type);
 	  break;
 	}
 
