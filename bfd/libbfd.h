@@ -59,6 +59,7 @@ struct artdata {
 				   archive.  */
   file_ptr armap_datepos;	/* Position within archive to seek to
 				   rewrite the date field.  */
+  PTR tdata;			/* Backend specific information.  */
 };
 
 #define bfd_ardata(bfd) ((bfd)->tdata.aout_ar_data)
@@ -100,8 +101,9 @@ int		bfd_stat  PARAMS ((bfd *abfd, struct stat *));
 
 bfd *	_bfd_create_empty_archive_element_shell PARAMS ((bfd *obfd));
 bfd *	look_for_bfd_in_cache PARAMS ((bfd *arch_bfd, file_ptr index));
+boolean _bfd_add_bfd_to_archive_cache PARAMS ((bfd *, file_ptr, bfd *));
 boolean	_bfd_generic_mkarchive PARAMS ((bfd *abfd));
-struct areltdata *	snarf_ar_hdr PARAMS ((bfd *abfd));
+struct areltdata *	_bfd_snarf_ar_hdr PARAMS ((bfd *abfd));
 bfd_target *		bfd_generic_archive_p PARAMS ((bfd *abfd));
 boolean	bfd_slurp_armap PARAMS ((bfd *abfd));
 boolean bfd_slurp_bsd_armap_f2 PARAMS ((bfd *abfd));

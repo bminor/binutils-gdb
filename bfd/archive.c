@@ -170,28 +170,40 @@ struct ar_cache {
 #define arch_eltdata(bfd) ((struct areltdata *)((bfd)->arelt_data))
 #define arch_hdr(bfd) ((struct ar_hdr *)arch_eltdata(bfd)->arch_header)
 
-/* Forward declarations of functions */
-
-boolean
-compute_and_write_armap PARAMS ((bfd *arch, unsigned int elength));
-
-static boolean
-bsd_update_armap_timestamp PARAMS ((bfd *arch));
-
-
+static char *get_extended_arelt_filename PARAMS ((bfd *arch,
+						  const char *name));
+static bfd *get_elt_at_filepos PARAMS ((bfd *archive, file_ptr filepos));
+static boolean do_slurp_bsd_armap PARAMS ((bfd *abfd));
+static boolean do_slurp_coff_armap PARAMS ((bfd *abfd));
+static const char *normalize PARAMS ((const char *file));
+static boolean bfd_construct_extended_name_table PARAMS ((bfd *abfd,
+							  char **tabloc,
+							  unsigned int *));
+static struct areltdata *bfd_ar_hdr_from_filesystem PARAMS ((bfd *abfd,
+							     const char *));
+static boolean compute_and_write_armap PARAMS ((bfd *arch,
+						unsigned int elength));
+static boolean bsd_update_armap_timestamp PARAMS ((bfd *arch));
 
 boolean
 _bfd_generic_mkarchive (abfd)
      bfd *abfd;
 {
-  abfd->tdata.aout_ar_data = (struct artdata *)bfd_zalloc(abfd,
-							  sizeof (struct artdata));
+  abfd->tdata.aout_ar_data = ((struct artdata *)
+			      bfd_zalloc (abfd, sizeof (struct artdata)));
 
-  if (bfd_ardata (abfd) == NULL) {
+  if (bfd_ardata (abfd) == NULL)
+    {
       bfd_error = no_memory;
       return false;
     }
-  bfd_ardata(abfd)->cache = 0;
+
+  bfd_ardata (abfd)->cache = NULL;
+  bfd_ardata (abfd)->archive_head = NULL;
+  bfd_ardata (abfd)->symdefs = NULL;
+  bfd_ardata (abfd)->extended_names = NULL;
+  bfd_ardata (abfd)->tdata = NULL;
+
   return true;
 }
 
@@ -217,10 +229,10 @@ DESCRIPTION
 */
 
 symindex
-DEFUN(bfd_get_next_mapent,(abfd, prev, entry),
-     bfd *abfd AND
-     symindex prev AND
-     carsym **entry)
+bfd_get_next_mapent (abfd, prev, entry)
+     bfd *abfd;
+     symindex prev;
+     carsym **entry;
 {
   if (!bfd_has_map (abfd)) {
     bfd_error = invalid_operation;
@@ -265,9 +277,9 @@ DESCRIPTION
 */
 
 boolean
-DEFUN(bfd_set_archive_head,(output_archive, new_head),
-     bfd *output_archive AND 
-     bfd *new_head)
+bfd_set_archive_head (output_archive, new_head)
+     bfd *output_archive;
+     bfd *new_head;
 {
 
   output_archive->archive_head = new_head;
@@ -290,7 +302,7 @@ look_for_bfd_in_cache (arch_bfd, filepos)
 
 /* Kind of stupid to call cons for each one, but we don't do too many */
 boolean
-add_bfd_to_cache (arch_bfd, filepos, new_elt)
+_bfd_add_bfd_to_archive_cache (arch_bfd, filepos, new_elt)
      bfd *arch_bfd, *new_elt;
      file_ptr filepos;
 {
@@ -317,15 +329,14 @@ add_bfd_to_cache (arch_bfd, filepos, new_elt)
     
   return true;
 }
-
 
-
 /* The name begins with space.  Hence the rest of the name is an index into
    the string table. */
-char *
+
+static char *
 get_extended_arelt_filename (arch, name)
      bfd *arch;
-     char *name;
+     const char *name;
 {
   unsigned long index = 0;
 
@@ -352,7 +363,7 @@ get_extended_arelt_filename (arch, name)
 */
 
 struct areltdata *
-snarf_ar_hdr (abfd)
+_bfd_snarf_ar_hdr (abfd)
      bfd *abfd;
 {
 #ifndef errno
@@ -475,7 +486,7 @@ snarf_ar_hdr (abfd)
    element, since it handles the bookkeeping so nicely for us.
 */
 
-bfd *
+static bfd *
 get_elt_at_filepos (archive, filepos)
      bfd *archive;
      file_ptr filepos;
@@ -493,7 +504,7 @@ get_elt_at_filepos (archive, filepos)
       return NULL;
     }
 
-  if ((new_areldata = snarf_ar_hdr (archive)) == NULL)
+  if ((new_areldata = _bfd_snarf_ar_hdr (archive)) == NULL)
     return NULL;
   
   n_nfd = _bfd_create_empty_archive_element_shell (archive);
@@ -507,7 +518,7 @@ get_elt_at_filepos (archive, filepos)
   n_nfd->arelt_data = (PTR) new_areldata;
   n_nfd->filename = new_areldata->filename;
 
-  if (add_bfd_to_cache (archive, filepos, n_nfd))
+  if (_bfd_add_bfd_to_archive_cache (archive, filepos, n_nfd))
     return n_nfd;
 
   /* huh? */
@@ -530,9 +541,9 @@ DESCRIPTION
 
 */
 bfd *
-DEFUN(bfd_get_elt_at_index,(abfd, index),
-     bfd *abfd AND
-     int index)
+bfd_get_elt_at_index (abfd, index)
+     bfd *abfd;
+     int index;
 {
   bfd *result =
     get_elt_at_filepos
@@ -603,50 +614,60 @@ bfd_generic_archive_p (abfd)
 {
   char armag[SARMAG+1];
 
-  if (bfd_read ((PTR)armag, 1, SARMAG, abfd) != SARMAG) {
-    bfd_error = wrong_format;
-    return 0;
-  }
+  if (bfd_read ((PTR) armag, 1, SARMAG, abfd) != SARMAG)
+    {
+      bfd_error = wrong_format;
+      return NULL;
+    }
 
 #ifdef GNU960
-  if (strncmp (armag, BFD_GNU960_ARMAG(abfd), SARMAG)) return 0;
+  if (strncmp (armag, BFD_GNU960_ARMAG(abfd), SARMAG) != 0)
+    return 0;
 #else
-  if (strncmp (armag, ARMAG, SARMAG) &&
-      strncmp (armag, ARMAGB, SARMAG)) return 0;
+  if (strncmp (armag, ARMAG, SARMAG) != 0 &&
+      strncmp (armag, ARMAGB, SARMAG) != 0)
+    return 0;
 #endif
-
-
 
   /* We are setting bfd_ardata(abfd) here, but since bfd_ardata
      involves a cast, we can't do it as the left operand of assignment. */
-  abfd->tdata.aout_ar_data = (struct artdata *) bfd_zalloc(abfd,sizeof (struct artdata));
+  abfd->tdata.aout_ar_data = ((struct artdata *)
+			      bfd_zalloc (abfd, sizeof (struct artdata)));
 
-  if (bfd_ardata (abfd)  == NULL) {
-    bfd_error = no_memory;
-    return 0;
-  }
+  if (bfd_ardata (abfd) == NULL)
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
 
   bfd_ardata (abfd)->first_file_filepos = SARMAG;
+  bfd_ardata (abfd)->cache = NULL;
+  bfd_ardata (abfd)->archive_head = NULL;
+  bfd_ardata (abfd)->symdefs = NULL;
+  bfd_ardata (abfd)->extended_names = NULL;
+  bfd_ardata (abfd)->tdata = NULL;
   
-  if (!BFD_SEND (abfd, _bfd_slurp_armap, (abfd))) {
-    bfd_release(abfd, bfd_ardata (abfd));
-    abfd->tdata.aout_ar_data = NULL;
-    return 0;
-  }
+  if (! BFD_SEND (abfd, _bfd_slurp_armap, (abfd)))
+    {
+      bfd_release(abfd, bfd_ardata (abfd));
+      abfd->tdata.aout_ar_data = NULL;
+      return NULL;
+    }
 
-  if (!BFD_SEND (abfd, _bfd_slurp_extended_name_table, (abfd))) {
-    bfd_release(abfd, bfd_ardata (abfd));
-    abfd->tdata.aout_ar_data = NULL;
-    return 0;
-  }
+  if (! BFD_SEND (abfd, _bfd_slurp_extended_name_table, (abfd)))
+    {
+      bfd_release(abfd, bfd_ardata (abfd));
+      abfd->tdata.aout_ar_data = NULL;
+      return NULL;
+    }
   
   return abfd->xvec;
 }
 
 /* Returns false on error, true otherwise */
 static boolean
-DEFUN (do_slurp_bsd_armap, (abfd),
-       bfd *abfd)
+do_slurp_bsd_armap (abfd)
+     bfd *abfd;
 {
   struct areltdata *mapdata;
   unsigned int counter = 0;
@@ -655,8 +676,9 @@ DEFUN (do_slurp_bsd_armap, (abfd),
   char *stringbase;
   unsigned int parsed_size;
 
-  mapdata = snarf_ar_hdr (abfd);
-  if (mapdata == NULL) return false;
+  mapdata = _bfd_snarf_ar_hdr (abfd);
+  if (mapdata == NULL)
+    return false;
   parsed_size = mapdata->parsed_size;
   bfd_release (abfd, (PTR)mapdata); /* Don't need it any more. */
     
@@ -708,8 +730,8 @@ DEFUN (do_slurp_bsd_armap, (abfd),
 
 /* Returns false on error, true otherwise */
 static boolean
-DEFUN (do_slurp_coff_armap, (abfd),
-       bfd *abfd)
+do_slurp_coff_armap (abfd)
+     bfd *abfd;
 {
   struct areltdata *mapdata;
   int *raw_armap, *rawptr;
@@ -724,8 +746,9 @@ DEFUN (do_slurp_coff_armap, (abfd),
   char int_buf[sizeof(long)];
   unsigned int carsym_size, ptrsize, i;
   
-  mapdata = snarf_ar_hdr (abfd);
-  if (mapdata == NULL) return false;
+  mapdata = _bfd_snarf_ar_hdr (abfd);
+  if (mapdata == NULL)
+    return false;
   parsed_size = mapdata->parsed_size;
   bfd_release (abfd, (PTR)mapdata); /* Don't need it any more. */
 
@@ -865,8 +888,9 @@ bfd_slurp_bsd_armap_f2 (abfd)
       return true;
     }
 
-  mapdata = snarf_ar_hdr (abfd);
-  if (mapdata == NULL) return false;
+  mapdata = _bfd_snarf_ar_hdr (abfd);
+  if (mapdata == NULL)
+    return false;
 
   raw_armap = (int *) bfd_zalloc(abfd,mapdata->parsed_size);
   if (raw_armap == NULL)
@@ -952,8 +976,9 @@ _bfd_slurp_extended_name_table (abfd)
       return true;
     }
 
-    namedata = snarf_ar_hdr (abfd);
-    if (namedata == NULL) return false;
+    namedata = _bfd_snarf_ar_hdr (abfd);
+    if (namedata == NULL)
+      return false;
   
     bfd_ardata (abfd)->extended_names = bfd_zalloc(abfd,namedata->parsed_size);
     if (bfd_ardata (abfd)->extended_names == NULL) {
@@ -999,9 +1024,9 @@ _bfd_slurp_extended_name_table (abfd)
 
 /* Return a copy of the stuff in the filename between any :]> and a
    semicolon */
-static CONST char *
-DEFUN(normalize,(file),
-      CONST char *file)
+static const char *
+normalize (file)
+     const char *file;
 {
   CONST char *first;
   CONST char *last;
@@ -1031,9 +1056,9 @@ DEFUN(normalize,(file),
 }
 
 #else
-static CONST char *
-DEFUN (normalize, (file),
-       CONST char *file)
+static const char *
+normalize (file)
+     const char *file;
 {
   CONST char *    filename = strrchr(file, '/');
 
@@ -1053,11 +1078,11 @@ DEFUN (normalize, (file),
    Returns true if it ran successfully, false if something went wrong.
    A successful return may still involve a zero-length tablen!
    */
-boolean
-DEFUN (bfd_construct_extended_name_table, (abfd, tabloc, tablen),
-       bfd *abfd AND
-       char **tabloc AND
-       unsigned int *tablen)
+static boolean
+bfd_construct_extended_name_table (abfd, tabloc, tablen)
+     bfd *abfd;
+     char **tabloc;
+     unsigned int *tablen;
 {
   unsigned int maxname = abfd->xvec->ar_max_namelen;
   unsigned int total_namelen = 0;
@@ -1118,16 +1143,15 @@ DEFUN (bfd_construct_extended_name_table, (abfd, tabloc, tablen),
    The filename field of the ar_hdr will NOT be initialized
 */
 
-struct areltdata *
-DEFUN(bfd_ar_hdr_from_filesystem, (abfd,filename),
-      bfd* abfd AND
-      CONST char *filename)
+static struct areltdata *
+bfd_ar_hdr_from_filesystem (abfd,filename)
+     bfd* abfd;
+     const char *filename;
 {
   struct stat status;
   struct areltdata *ared;
   struct ar_hdr *hdr;
   char *temp, *temp1;
-
 
   if (stat (filename, &status) != 0) {
     bfd_error = system_call_error;
@@ -1175,9 +1199,9 @@ DEFUN(bfd_ar_hdr_from_filesystem, (abfd,filename),
 */
 
 struct ar_hdr *
-DEFUN(bfd_special_undocumented_glue, (abfd, filename),
-      bfd *abfd AND
-      char *filename)
+bfd_special_undocumented_glue (abfd, filename)
+     bfd *abfd;
+     char *filename;
 {
   struct areltdata *ar_elt = bfd_ar_hdr_from_filesystem (abfd, filename);
   if (ar_elt == NULL)
@@ -1269,7 +1293,8 @@ bfd_bsd_truncate_arname (abfd, pathname, arhdr)
     length = maxlen;
   }
 
-  if (length < maxlen) (hdr->ar_name)[length] = ar_padchar (abfd);
+  if (length < maxlen)
+    (hdr->ar_name)[length] = ar_padchar (abfd);
 }
 
 /* Store name into ar header.  Truncates the name to fit.
@@ -1309,7 +1334,8 @@ bfd_gnu_truncate_arname (abfd, pathname, arhdr)
     length = maxlen;
   }
 
-  if (length < 16) (hdr->ar_name)[length] = ar_padchar (abfd);
+  if (length < 16)
+    (hdr->ar_name)[length] = ar_padchar (abfd);
 }
 
 
@@ -1455,7 +1481,7 @@ _bfd_write_archive_contents (arch)
 
 /* Note that the namidx for the first symbol is 0 */
 
-boolean
+static boolean
 compute_and_write_armap (arch, elength)
      bfd *arch;
      unsigned int elength;

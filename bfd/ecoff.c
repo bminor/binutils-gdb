@@ -1147,7 +1147,7 @@ ecoff_get_symtab_upper_bound (abfd)
   return (bfd_get_symcount (abfd) + 1) * (sizeof (ecoff_symbol_type *));
 }
 
-/* Get the canonicals symbols.  */
+/* Get the canonical symbols.  */
 
 unsigned int
 ecoff_get_symtab (abfd, alocation)
@@ -2811,10 +2811,10 @@ ecoff_write_object_contents (abfd)
 }
 
 /* Archive handling.  ECOFF uses what appears to be a unique type of
-   archive header (which I call an armap).  The byte ordering of the
-   armap and the contents are encoded in the name of the armap itself.
-   At least for now, we only support archives with the same byte
-   ordering in the armap and the contents.
+   archive header (armap).  The byte ordering of the armap and the
+   contents are encoded in the name of the armap itself.  At least for
+   now, we only support archives with the same byte ordering in the
+   armap and the contents.
 
    The first four bytes in the armap are the number of symbol
    definitions.  This is always a power of two.
@@ -2829,10 +2829,6 @@ ecoff_write_object_contents (abfd)
 
    The symbols are hashed into the armap with a closed hashing scheme.
    See the functions below for the details of the algorithm.
-
-   We could use the hash table when looking up symbols in a library.
-   This would require a new BFD target entry point to replace the
-   bfd_get_next_mapent function used by the linker.
 
    After the symbol definitions comes four bytes holding the size of
    the string table, followed by the string table itself.  */
@@ -2942,7 +2938,7 @@ ecoff_slurp_armap (abfd)
 
   /* Read in the armap.  */
   ardata = bfd_ardata (abfd);
-  mapdata = snarf_ar_hdr (abfd);
+  mapdata = _bfd_snarf_ar_hdr (abfd);
   if (mapdata == (struct areltdata *) NULL)
     return false;
   parsed_size = mapdata->parsed_size;
@@ -2962,6 +2958,8 @@ ecoff_slurp_armap (abfd)
       return false;
     }
     
+  ardata->tdata = (PTR) raw_armap;
+
   count = bfd_h_get_32 (abfd, (PTR) raw_armap);
 
   ardata->symdef_count = 0;
@@ -3232,6 +3230,11 @@ ecoff_archive_p (abfd)
     }
 
   bfd_ardata (abfd)->first_file_filepos = SARMAG;
+  bfd_ardata (abfd)->cache = NULL;
+  bfd_ardata (abfd)->archive_head = NULL;
+  bfd_ardata (abfd)->symdefs = NULL;
+  bfd_ardata (abfd)->extended_names = NULL;
+  bfd_ardata (abfd)->tdata = NULL;
   
   if (ecoff_slurp_armap (abfd) == false
       || ecoff_slurp_extended_name_table (abfd) == false)

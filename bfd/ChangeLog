@@ -1,5 +1,24 @@
 Mon Jan  3 11:41:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* libbfd-in.h (struct artdata): Added tdata field.
+	(_bfd_add_bfd_to_archive_cache): Declare.
+	(_bfd_snarf_ar_hdr): Renamed from snarf_ar_hdr.
+	* libbfd.h: Rebuilt.
+	* archive.c: Cleaned up some more.
+	(_bfd_generic_mkarchive, bfd_generic_archive_p): Initialize
+	pointer elements of artdata.
+	(_bfd_add_bfd_to_archive_cache): Renamed from add_bfd_to_cache.
+	(_bfd_snarf_ar_hdr): Renamed from snarf_ar_hdr.
+	(get_extended_arelt_filename, get_elt_at_filepos,
+	bfd_construct_extended_name_table, bfd_ar_hdr_from_filesystem,
+	compute_and_write_armap): Made static.
+	* ecoff.c: Some comment changes.
+	(ecoff_slurp_armap): Handle rename of snarf_ar_hdr.  Set
+	ardata->tdata to raw_armap.
+	(ecoff_archive_p): Initialize pointer elements of artdata.
+	* coff-rs6000.c (rs6000coff_get_elt_at_filepos): Handle rename of
+	add_bfd_to_cache.
+
 	* hash.c: Added some documentation.
 
 Mon Jan  3 11:09:28 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
