@@ -1,3 +1,7 @@
+1999-07-15  J.T. Conklin  <jtc@redback.com>
+
+	* config.bfd (i[3456]86-*-vxworks*): New target.
+
 1999-07-15  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (mips_elf_stub_section_p): New function.
