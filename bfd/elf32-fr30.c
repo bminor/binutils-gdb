@@ -36,6 +36,10 @@ static boolean fr30_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static bfd_reloc_status_type fr30_final_link_relocate
   PARAMS ((reloc_howto_type *, bfd *, asection *, bfd_byte *, Elf_Internal_Rela *, bfd_vma));
+static boolean fr30_elf_gc_sweep_hook
+  PARAMS ((bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *));
+static asection * fr30_elf_gc_mark_hook
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *, struct elf_link_hash_entry *, Elf_Internal_Sym *));
 
 static reloc_howto_type fr30_elf_howto_table [] =
 {
@@ -523,7 +527,14 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_vma                      relocation;
       bfd_reloc_status_type        r;
       const char *                 name = NULL;
-
+      int                          r_type;
+      
+      r_type = ELF32_R_TYPE (rel->r_info);
+      
+      if (   r_type == R_FR30_GNU_VTINHERIT
+	  || r_type == R_FR30_GNU_VTENTRY)
+	continue;
+      
       r_symndx = ELF32_R_SYM (rel->r_info);
 
       if (info->relocateable)
@@ -664,6 +675,63 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
+/* Return the section that should be marked against GC for a given
+   relocation.  */
+
+static asection *
+fr30_elf_gc_mark_hook (abfd, info, rel, h, sym)
+     bfd *                        abfd;
+     struct bfd_link_info *       info;
+     Elf_Internal_Rela *          rel;
+     struct elf_link_hash_entry * h;
+     Elf_Internal_Sym *           sym;
+{
+  if (h != NULL)
+    {
+      switch (ELF32_R_TYPE (rel->r_info))
+	{
+	case R_FR30_GNU_VTINHERIT:
+	case R_FR30_GNU_VTENTRY:
+	  break;
+
+	default:
+	  switch (h->root.type)
+	    {
+	    case bfd_link_hash_defined:
+	    case bfd_link_hash_defweak:
+	      return h->root.u.def.section;
+
+	    case bfd_link_hash_common:
+	      return h->root.u.c.p->section;
+	    }
+	}
+    }
+  else
+    {
+      if (!(elf_bad_symtab (abfd)
+	    && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
+	  && ! ((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
+		&& sym->st_shndx != SHN_COMMON))
+	{
+	  return bfd_section_from_elf_index (abfd, sym->st_shndx);
+	}
+    }
+
+  return NULL;
+}
+
+/* Update the got entry reference counts for the section being removed.  */
+
+static boolean
+fr30_elf_gc_sweep_hook (abfd, info, sec, relocs)
+     bfd *                     abfd;
+     struct bfd_link_info *    info;
+     asection *                sec;
+     const Elf_Internal_Rela * relocs;
+{
+  return true;
+}
+
 #define ELF_ARCH		bfd_arch_fr30
 #define ELF_MACHINE_CODE	EM_CYGNUS_FR30
 #define ELF_MAXPAGESIZE		0x1000
@@ -674,7 +742,11 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 #define elf_info_to_howto_rel			NULL
 #define elf_info_to_howto			fr30_info_to_howto_rela
 #define elf_backend_relocate_section		fr30_elf_relocate_section
+#define elf_backend_gc_mark_hook		fr30_elf_gc_mark_hook
+#define elf_backend_gc_sweep_hook		fr30_elf_gc_sweep_hook
+
+#define elf_backend_can_gc_sections		1
 
 #define bfd_elf32_bfd_reloc_type_lookup		fr30_reloc_type_lookup
-					
+
 #include "elf32-target.h"

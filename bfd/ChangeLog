@@ -1,3 +1,9 @@
+1999-02-01  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-fr30.c (fr30_elf_gc_mark_hook): New function.
+	(fr30_elf_gc_sweep_hook): New function.
+	(elf_backend_can_gc_sections): Define.
+
 Mon Feb  1 12:21:47 1999  Catherine Moore  <clm@cygnus.com>
 
         * targets.c (bfd_target_vector):  Add bfd_elf32_littlearm_oabi_vec
