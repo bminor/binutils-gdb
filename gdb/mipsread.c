@@ -782,6 +782,33 @@ free_numargs()
 	numargs_list = 0;
 }
 
+char*
+prepend_tag_kind(tag_name, type_code)
+     char *tag_name;
+     int type_code;
+{
+    char *prefix;
+    char *result;
+    switch (type_code) {
+      case TYPE_CODE_ENUM:
+	prefix = "enum ";
+	break;
+      case TYPE_CODE_STRUCT:
+	prefix = "struct ";
+	break;
+      case TYPE_CODE_UNION:
+	prefix = "union ";
+	break;
+      default:
+	prefix = "";
+    }
+
+    result = (char*)obstack_alloc (symbol_obstack,
+				   strlen(prefix) + strlen(tag_name) + 1);
+    sprintf(result, "%s%s", prefix, tag_name);
+    return result;
+}
+
 
 /* Parsing Routines proper. */
 
@@ -830,7 +857,7 @@ parse_symbol(sh, ax)
 		if (sh->sc == scRegister) {
 			class = LOC_REGISTER;
 			if (sh->value > 31)
-				sh->value += 6;
+				sh->value += FP0_REGNUM-32;
 		} else
 			class = LOC_LOCAL;
 		b = top_stack->cur_block;
@@ -865,7 +892,7 @@ data:		/* Common code for symbols describing data */
 		if (sh->sc == scRegister) {
 			SYMBOL_CLASS(s) = LOC_REGPARM;
 			if (sh->value > 31)
-				sh->value += 6;
+				sh->value += FP0_REGNUM-32;
 		} else
 			SYMBOL_CLASS(s) = LOC_ARG;
 		SYMBOL_VALUE(s) = sh->value;
@@ -980,19 +1007,15 @@ data:		/* Common code for symbols describing data */
 		    SYMBOL_CLASS(s) = LOC_TYPEDEF;
 		    SYMBOL_VALUE(s) = 0;
 		    add_symbol(s, top_stack->cur_block);
-		    /* If this type was expected, use its partial definition */
-		    if (pend)
-			t = is_pending_symbol(cur_fdr, sh)->t;
-		    else
-			t = new_type(sh->iss);
 
 		    /* First count the number of fields. */
 		    for (tsym = sh+1; tsym->st != stEnd; tsym++)
 			if (tsym->st == stMember) {
 			    if (nfields == 0 && type_code == TYPE_CODE_UNDEF)
-				/* If the type of the member is Void,
+				/* If the type of the member is Nil (or Void)
 				   assume the tag is an enumeration. */
 				if (tsym->index == indexNil
+				    || ax[tsym->index].ti.bt == btNil
 				    || ax[tsym->index].ti.bt == btVoid)
 				    type_code = TYPE_CODE_ENUM;
 			    nfields++;
@@ -1046,6 +1069,12 @@ data:		/* Common code for symbols describing data */
 			if (max_value == 0) type_code = TYPE_CODE_UNION;
 			else type_code = TYPE_CODE_STRUCT;
 		    
+		    /* If this type was expected, use its partial definition */
+		    if (pend)
+			t = is_pending_symbol(cur_fdr, sh)->t;
+		    else
+			t = new_type(prepend_tag_kind(sh->iss, type_code));
+
 		    TYPE_CODE(t) = type_code;
 		    TYPE_NFIELDS(t) = nfields;
 		    TYPE_FIELDS(t) = f = (struct field*)
@@ -1310,7 +1339,8 @@ static struct type *parse_type(ax, sh, bs)
 		    complain (&bad_tag_guess_complaint, 0);
 		    TYPE_CODE(tp) = type_code;
 		}
-		TYPE_NAME(tp) = obsavestring(pn, strlen(pn));
+		if (TYPE_NAME(tp) == NULL || strcmp(TYPE_NAME(tp), name) != 0)
+		    TYPE_NAME(tp) = obsavestring(name, strlen(name));
 	}
 
 	/* Deal with range types */

@@ -1,3 +1,17 @@
+Tue Feb  4 18:05:44 1992  Per Bothner  (bothner at cygnus.com)
+
+	* mipsread.c:  Use (FP0_REGNUM-32) instead of magic number 6.
+	(This is just for clarity - and one day permitting us to
+	 change FP0_REGNUM from 38 to 32, which would make more sense.)
+	* tm-mips.h:  Added STAB_REG_TO_REGNUM macro, so that
+	register numbers in stabs-in-ecoff get handled correctly.
+
+Sat Feb  1 04:45:10 1992  Stu Grossman  (grossman at cygnus.com)
+
+ 	* xm-vax.h, xm-vaxult.h, xm-vaxbsd.h, config/mh-vaxult,
+	config/mh-vaxbsd, configure.in:  Split up config stuff for Vaxen
+	into BSD and Ultrix.
+
 Sat Feb  1 04:39:41 1992  John Gilmore  (gnu at cygnus.com)
 
 	* dbxread.c (dbx_symfile_init):  Call malloc, not xmalloc.
