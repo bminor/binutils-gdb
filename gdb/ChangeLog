@@ -1,3 +1,12 @@
+Sat Jul 22 23:44:18 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* defs.h (ATTR_FORMAT): Disable if ANSI_PROTOTYPES is not defined.
+
+Fri Jul 21 16:50:28 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* lynx-nat.c (child_thread_alive): New function.  Somehow I
+	forgot to check this in with all the other thread_alive changes.
+
 Thu Jul 20 22:22:34 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* somread.c (som_symtab_read): Add unsatisfied common symbols to
