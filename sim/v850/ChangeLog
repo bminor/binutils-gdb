@@ -1,4 +1,11 @@
+Tue Oct 29 14:22:55 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c: Include <sys/stat.h>.
+	(OP_10007E0): Handle SYS_stat.
+
 Thu Oct 24 12:26:35 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c (OP_10007E0): Don't declare errno.
 
 	* simops.c (OP_500): Mask off low bit in displacement
 	for sld.w.

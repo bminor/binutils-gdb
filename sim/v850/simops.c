@@ -4,6 +4,7 @@
 #include "sys/syscall.h"
 #include "bfd.h"
 #include <errno.h>
+#include <sys/stat.h>
 
 enum op_types {
   OP_UNKNOWN,
@@ -1957,8 +1958,6 @@ OP_14007E0 ()
 void
 OP_10007E0 ()
 {
-  extern int errno;
-
   trace_input ("trap", OP_TRAP, 0);
   trace_output (OP_TRAP);
 
@@ -2053,7 +2052,6 @@ OP_10007E0 ()
 	    State.exception = SIGQUIT;
 	  break;
 
-#if 0
 	case SYS_stat:	/* added at hmsi */
 	  /* stat system call */
 	  {
@@ -2064,27 +2062,24 @@ OP_10007E0 ()
 
 	    buf = PARM2;
 
-	    /* The hard-coded offsets and sizes were determined by using
-	     * the D10V compiler on a test program that used struct stat.
-	     */
-	    SW  (buf,    host_stat.st_dev);
-	    SW  (buf+2,  host_stat.st_ino);
-	    SW  (buf+4,  host_stat.st_mode);
-	    SW  (buf+6,  host_stat.st_nlink);
-	    SW  (buf+8,  host_stat.st_uid);
-	    SW  (buf+10, host_stat.st_gid);
-	    SW  (buf+12, host_stat.st_rdev);
-	    SLW (buf+16, host_stat.st_size);
-	    SLW (buf+20, host_stat.st_atime);
-	    SLW (buf+28, host_stat.st_mtime);
-	    SLW (buf+36, host_stat.st_ctime);
+	    /* Just wild-assed guesses.  */
+	    store_mem (buf, 2, host_stat.st_dev);
+	    store_mem (buf + 2, 2, host_stat.st_ino);
+	    store_mem (buf + 4, 4, host_stat.st_mode);
+	    store_mem (buf + 8, 2, host_stat.st_nlink);
+	    store_mem (buf + 10, 2, host_stat.st_uid);
+	    store_mem (buf + 12, 2, host_stat.st_gid);
+	    store_mem (buf + 14, 2, host_stat.st_rdev);
+	    store_mem (buf + 16, 4, host_stat.st_size);
+	    store_mem (buf + 20, 4, host_stat.st_atime);
+	    store_mem (buf + 28, 4, host_stat.st_mtime);
+	    store_mem (buf + 36, 4, host_stat.st_ctime);
 	  }
 	  break;
 
 	case SYS_chown:
 	  RETVAL = chown (MEMPTR (PARM1), PARM2, PARM3);
 	  break;
-#endif
 	case SYS_chmod:
 	  RETVAL = chmod (MEMPTR (PARM1), PARM2);
 	  break;
