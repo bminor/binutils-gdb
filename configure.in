@@ -41,7 +41,7 @@
 
 # these libraries are used by various programs built for the host environment
 #
-host_libs="mmalloc libiberty opcodes bfd readline gash tcl tk tclX"
+host_libs="mmalloc libiberty opcodes bfd readline gash db itcl tcl tk tclX"
 
 if [ "${enable_gdbgui}" = "yes" ] ; then
 	host_libs="${host_libs} libgui"
@@ -49,7 +49,7 @@ fi
 
 # these tools are built for the host environment
 #
-host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch prms send-pr gprof gdbtest tgas etc expect dejagnu sim bash m4 autoconf ispell grep diff rcs cvs fileutils shellutils time textutils wdiff find emacs emacs19 uudecode hello tar gzip indent recode release sed utils guile perl apache inet gawk findutils"
+host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch prms send-pr gprof gdbtest tgas etc expect dejagnu sim bash m4 autoconf ispell grep diff rcs cvs fileutils shellutils time textutils wdiff find emacs emacs19 uudecode hello tar gzip indent recode release sed utils guile perl apache inet gawk findutils sn"
 
 
 # these libraries are built for the target environment, and are built after
@@ -79,7 +79,7 @@ target_tools="target-examples target-groff"
 #
 # This must be a single line because of the way it is searched by grep in
 # the code below.
-native_only="autoconf cvs emacs emacs19 fileutils find gawk grep gzip hello indent ispell m4 rcs recode sed shellutils tar textutils gash uudecode wdiff gprof target-groff guile perl apache inet time bash prms"
+native_only="autoconf cvs emacs emacs19 fileutils find gawk grep gzip hello indent ispell m4 rcs recode sed shellutils tar textutils gash uudecode wdiff gprof target-groff guile perl apache inet time bash prms sn"
 
 # directories to be built in a cross environment only
 #
@@ -370,13 +370,13 @@ noconfigdirs=""
 
 case "${host}" in
   i[3456]86-*-vsta)
-    noconfigdirs="tcl expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet"
+    noconfigdirs="tcl expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl db sn"
     ;;
   i[3456]86-*-go32)
-    noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet"
+    noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl db sn"
 	;;
   *-*-cygwin32)
-     noconfigdirs="tk tcl expect dejagnu cvs autoconf bison send-pr gprof rcs guile perl texinfo apache inet"
+     noconfigdirs="tk tcl expect dejagnu cvs autoconf bison send-pr gprof rcs guile perl texinfo apache inet itcl db sn"
     ;;
   *-*-windows*)
 # This is only used to build WinGDB...
@@ -384,7 +384,7 @@ case "${host}" in
      target_configdirs=
     ;;
   ppc*-*-pe)
-     noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache inet"
+     noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache inet itcl db sn"
     ;;
 esac
 
@@ -428,7 +428,7 @@ case "${target}" in
     ;;
 # start-sanitize-d30v
   d30v-*-*)
-    noconfigdirs="$noconfigdirs tcl tk expect gcc gdb newlib target-librx target-libg++ target-libstdc++ target-libio target-libgloss"
+    noconfigdirs="$noconfigdirs tcl tk expect gcc gdb newlib target-librx target-libg++ target-libstdc++ target-libio target-libgloss itcl db sn"
     ;;
 # end-sanitize-d30v
   h8300*-*-* | \
@@ -455,7 +455,7 @@ case "${target}" in
     ;;
   *-*-cygwin32)
     target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs tcl tk expect target-libgloss"
+    noconfigdirs="$noconfigdirs tcl tk expect target-libgloss itcl db sn"
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
 
@@ -505,13 +505,13 @@ case "${target}" in
     ;;
   powerpc*-*-winnt* | powerpc*-*-pe* | ppc*-*-pe)
     target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs gdb tcl tk make expect target-libgloss"
+    noconfigdirs="$noconfigdirs gdb tcl tk make expect target-libgloss itcl db sn"
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
     ;;
     # This is temporary until we can link against shared libraries
   powerpcle-*-solaris*)
-    noconfigdirs="$noconfigdirs gdb sim make tcl tk expect"
+    noconfigdirs="$noconfigdirs gdb sim make tcl tk expect itcl db sn"
     ;;
   rs6000-*-lynxos*)
     # The CVS server code doesn't work on the RS/6000
@@ -613,7 +613,7 @@ esac
 # If we are building a Canadian Cross, discard tools that can not be built
 # using a cross compiler.  FIXME: These tools should be fixed.
 if [ "${build}" != "${host}" ]; then
-  noconfigdirs="$noconfigdirs tcl tk expect dejagnu"
+  noconfigdirs="$noconfigdirs tcl tk expect dejagnu itcl db sn"
 fi
 
 # Make sure we don't let GNU ld be added if we didn't want it.

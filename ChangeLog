@@ -1,5 +1,10 @@
 Tue Feb 25 11:41:51 1997  Tom Tromey  <tromey@cygnus.com>
 
+	* configure.in (host_libs): Added db, itcl.
+	(host_tools): Added sn.
+	(noconfigdirs): Added itcl, db, sn in appropriate places.
+	(native_only): Added sn.
+
 	* Makefile.in (all-db, all-sn): New targets.
 	(ALL_MODULES): Added all-sn.
 	(CROSS_CHECK_MODULES): Added check-sn.
