@@ -949,8 +949,8 @@ lookup_symbol_aux (const char *name, const struct block *block,
 		   && MSYMBOL_TYPE (msymbol) != mst_file_text
 		   && !STREQ (name, SYMBOL_NAME (msymbol)))
 	    {
-	      return lookup_symbol (SYMBOL_NAME (msymbol), block,
-				    namespace, is_a_field_of_this, symtab);
+	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), block,
+					namespace, is_a_field_of_this, symtab);
 	    }
 	}
     }

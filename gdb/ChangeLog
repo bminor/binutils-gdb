@@ -1,3 +1,10 @@
+2001-02-19  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	From Peter Schauer <Peter.Schauer@regent.e-technik.tu-muenchen.de>
+ 	* symtab.c (lookup_symbol_aux): Call lookup_symbol_aux, not
+ 	lookup_symbol, when trying to find a symbol with a mangled name,
+ 	to avoid infinite recursion.
+
 2001-02-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* TODO (5.2): Mention G++ 3.0 ABI.  General cleanups.
