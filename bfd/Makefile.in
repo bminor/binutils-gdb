@@ -69,16 +69,20 @@ TARGETLIB = libbfd.a
 # bfd.h goes here, for now
 BFD_H = bfd.h
 
+# Some of these files should be in BFD*_BACKENDS below, but some programs
+# won't link without them.  So, in order for some of the minimal-bfd
+# hacks to work, they're also included here for now.
+#	gdb: ecoff.o
+#	objdump: elf.o
 BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 	archures.o core.o section.o format.o syms.o reloc.o init.o \
-	ctor.o seclet.o coffgen.o ecoff.o reloc16.o
+	ctor.o seclet.o coffgen.o ecoff.o reloc16.o elf.o
 
 ALL_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
 	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o cpu-hppa.o \
 	cpu-z8k.o cpu-we32k.o cpu-h8500.o cpu-alpha.o cpu-sh.o
 
 BFD32_BACKENDS = \
-	elf.o \
 	elf32.o elf32-sparc.o elf32-i386.o elf32-i860.o elf32-m68k.o \
 	elf32-hppa.o elf32-mips.o elf32-m88k.o elf32-gen.o \
 	nlm.o \
@@ -175,8 +179,7 @@ install-info: force
 OFILES = $(BFD_LIBS) $(BFD_BACKENDS) $(BFD_MACHINES) $(HDEPFILES) $(TDEPFILES)
 
 ofiles : Makefile
-	rm -f ofiles2 ofiles ofiles3
-	cp /dev/null ofiles2
+	rm -f ofiles
 	f=""; \
 	for i in $(OFILES) ; do \
 	  case " $$f " in \
@@ -219,11 +222,11 @@ TAGS: force
 do_mostlyclean:
 	rm -f *.o *~ core *.E *.p *.ip aout-params.h gen-aout
 do_clean: do_mostlyclean
-	rm -f libbfd.a TAGS bfd.h stmp-bfd.h
+	rm -f libbfd.a TAGS bfd.h stmp-bfd.h ofiles
 do_distclean: do_clean
 	rm -f Makefile config.status sysdep.h
 do_realclean: do_distclean
-	rm -f $(srcdir)/libcoff.h $(srcdir)/libbfd.h $(BFDIN_H)
+	rm -f $(srcdir)/libcoff.h $(srcdir)/libbfd.h $(srcdir)/bfd-in2.h
 
 mostlyclean: do_mostlyclean
 	$(MAKE) subdir_do DO=mostlyclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
@@ -335,19 +338,19 @@ $(BFD_H): stmp-bfd.h ; @true
 
 # The file ../include/bfd.h is from earlier attempts to get this right.
 # If the file is still there, kill it.
-stmp-bfd.h : $(BFDIN_H) Makefile
-	rm -f bfd.h2 64 ../include/bfd.h
+stmp-bfd.h : $(srcdir)/bfd-in2.h Makefile
+	rm -f bfd.h-new 64 ../include/bfd.h
 	-grep HOST_64_BIT sysdep.h > 64
-	sed -e 's/@WORDSIZE@/$(WORDSIZE)/' -e '/64-bit.*sysdep.h/ r 64' < $(BFDIN_H) > bfd.h2
-	$(srcdir)/../move-if-change bfd.h2 $(BFD_H)
+	sed -e 's/@WORDSIZE@/$(WORDSIZE)/' -e '/64-bit.*sysdep.h/ r 64' < $(srcdir)/bfd-in2.h > bfd.h-new
+	$(srcdir)/../move-if-change bfd.h-new $(BFD_H)
 	rm -f 64
 	touch stmp-bfd.h
 
 # Could really use a "copy-if-change"...
 headers:
 	(cd $(docdir); $(MAKE) protos $(FLAGS_TO_PASS))
-	cp $(docdir)/bfd.h bfd.h-new
-	$(srcdir)/../move-if-change bfd.h-new $(BFDIN_H)
+	cp $(docdir)/bfd.h bfd-in2.h-new
+	$(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
 	cp $(docdir)/libbfd.h libbfd.h-new
 	$(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
 	cp $(docdir)/libcoff.h libcoff.h-new
