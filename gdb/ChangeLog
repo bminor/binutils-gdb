@@ -1,3 +1,9 @@
+Wed May 15 11:02:48 1991  Roland H. Pesch  (pesch at fowanton.cygnus.com)
+
+	* pretex.m4: modify explanatory text slightly (and redefine
+	"regexp") to keep GNU m4 from complaining.  (It still crashes
+	later, but one step at a time...)
+
 Wed May 15 10:32:12 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* readline/readline.c (update_line):  Avoid dereferencing a pointer
