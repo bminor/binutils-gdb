@@ -1,3 +1,10 @@
+2004-10-24  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/getaa-6b.d, ld-mmix/getaa-6f.d, ld-mmix/getaa14b.d,
+	ld-mmix/getaa14f.d, ld-mmix/jumpa-6b.d, ld-mmix/jumpa-6f.d,
+	ld-mmix/jumpa14b.d, ld-mmix/jumpa14f.d, ld-mmix/reg-1.d,
+	ld-mmix/reg-1m.d: Adjust for changed error message format.
+
 2004-10-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/exclude.exp: Allow cris-*-elf.
