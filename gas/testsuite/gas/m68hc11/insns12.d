@@ -1,6 +1,6 @@
 #objdump: -d --prefix-addresses --reloc
 #as: -m68hc12
-#name: insns12
+#name: 68HC12 specific instructions (insns12)
 
 .*:  +file format elf32-m68hc12
 
@@ -79,7 +79,7 @@ Disassembly of section .text:
 0+a1 <special_test\+0x74> emul
 0+a2 <special_test\+0x75> emuls
 0+a4 <special_test\+0x77> etbl	3,X
-0+a7 <special_test\+0x7a> etbl	4,PC
+0+a7 <special_test\+0x7a> etbl	4,PC \{0+ae <special_test\+0x81>\}
 0+aa <special_test\+0x7d> rev
 0+ac <special_test\+0x7f> revw
 0+ae <special_test\+0x81> wav
