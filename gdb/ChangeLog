@@ -1,3 +1,7 @@
+Wed Oct 22 12:15:37 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* symtab.c: Include inferior.h.
+
 Tue Oct 21 14:15:26 1997  Per Bothner  <bothner@cygnus.com>
 
 	* ch-exp.c:  Rename FIELD_NAME to DOT_FIELD_NAME (to avoid conflict).

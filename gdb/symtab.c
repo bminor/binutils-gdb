@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "expression.h"
 #include "language.h"
 #include "demangle.h"
+#include "inferior.h"
 
 #include "obstack.h"
 
@@ -912,8 +913,6 @@ lookup_block_symbol (block, name, namespace)
      const char *name;
      const namespace_enum namespace;
 {
-  extern struct symbol *ref_search_val PARAMS ((struct symbol *sym,
-					        CORE_ADDR addr));
   register int bot, top, inc;
   register struct symbol *sym;
   register struct symbol *sym_found = NULL;
