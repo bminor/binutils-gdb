@@ -412,7 +412,7 @@ changequote([,])dnl
       ppc-*-beos*)			fmt=coff ;;
       ppc-*-*n*bsd* | ppc-*-elf*)	fmt=elf ;;
       ppc-*-eabi* | ppc-*-sysv4*)	fmt=elf ;;
-      ppc-*-linux-gnu*)			fmt=elf
+      ppc-*-linux-gnu*)			fmt=elf em=linux
 	    case "$endian" in
 		big)  ;;
 		*)    AC_MSG_ERROR(GNU/Linux must be configured big endian) ;;

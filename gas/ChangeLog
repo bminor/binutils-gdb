@@ -1,3 +1,8 @@
+2003-10-16  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* configure.in: Set em=linux for ppc-*-linux-gnu* target.
+	* configure: Regenerate.
+
 2003-10-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* doc/as.texinfo (Align): Correct list of byte targets.
