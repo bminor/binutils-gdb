@@ -127,7 +127,7 @@ core_open (filename, from_tty)
 	   bfd_errmsg (bfd_error));
 
   ontop = !push_target (&core_ops);
-  make_cleanup (pop_target, 0);
+  make_cleanup (unpush_target, &core_ops);
 
   p = bfd_core_file_failing_command (core_bfd);
   if (p)
