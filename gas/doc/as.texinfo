@@ -334,7 +334,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
     @b{-AKC}|@b{-AMC}]
    [@b{-b}] [@b{-no-relax}]
 @end ifset
-@ifset M32R
+@ifset IA64
 
 @emph{Target IA-64 options:}
    [@b{-mconstant-gp}|@b{-mauto-pic}]
@@ -342,10 +342,11 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mle}|@b{mbe}]
    [@b{-x}|@b{-xexplicit}] [@b{-xauto}] [@b{-xdebug}]
 @end ifset
+@ifset M32R
 
 @emph{Target M32R options:}
    [@b{--m32rx}|@b{--[no-]warn-explicit-parallel-conflicts}|
-    @b{--W[n]p}]
+   @b{--W[n]p}]
 @end ifset
 @ifset M680X0
 

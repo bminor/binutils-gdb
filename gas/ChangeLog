@@ -1,5 +1,7 @@
 2002-02-26  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* doc/as.texinfo (Overview): Add missing @ifset IA64
+
 	* configure.in (LINGUAS): Add es.po.
 	* configure: Regenerate.
 	* po/es.po: New file.
