@@ -4794,11 +4794,12 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
     trad_frame_set_value (cache->saved_regs, SP_REGNUM, cache->base);
   }
 
-  /* The PC is found in the "return register".  */
+  /* The PC is found in the "return register", "Millicode" uses "r31"
+     as the return register while normal code uses "rp".  */
   if (u->Millicode)
-    cache->saved_regs[PC_REGNUM] = cache->saved_regs[31];
+    cache->saved_regs[PCOQ_HEAD_REGNUM] = cache->saved_regs[31];
   else
-    cache->saved_regs[PC_REGNUM] = cache->saved_regs[RP_REGNUM];
+    cache->saved_regs[PCOQ_HEAD_REGNUM] = cache->saved_regs[RP_REGNUM];
 
   {
     /* Convert all the offsets into addresses.  */
@@ -4829,8 +4830,36 @@ hppa_frame_prev_register (struct frame_info *next_frame,
 				 int *realnump, void *valuep)
 {
   struct hppa_frame_cache *info = hppa_frame_cache (next_frame, this_cache);
-  trad_frame_prev_register (next_frame, info->saved_regs, regnum,
-			    optimizedp, lvalp, addrp, realnump, valuep);
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  if (regnum == PCOQ_TAIL_REGNUM)
+    {
+      /* The PCOQ TAIL, or NPC, needs to be computed from the unwound
+	 PC register.  */
+      *optimizedp = 0;
+      *lvalp = not_lval;
+      *addrp = 0;
+      *realnump = 0;
+      if (valuep)
+	{
+	  int regsize = register_size (gdbarch, PCOQ_HEAD_REGNUM);
+	  CORE_ADDR pc;
+	  int optimized;
+	  enum lval_type lval;
+	  CORE_ADDR addr;
+	  int realnum;
+	  bfd_byte value[MAX_REGISTER_SIZE];
+	  trad_frame_prev_register (next_frame, info->saved_regs,
+				    PCOQ_HEAD_REGNUM, &optimized, &lval, &addr,
+				    &realnum, &value);
+	  pc = extract_unsigned_integer (&value, regsize);
+	  store_unsigned_integer (valuep, regsize, pc + 4);
+	}
+    }
+  else
+    {
+      trad_frame_prev_register (next_frame, info->saved_regs, regnum,
+				optimizedp, lvalp, addrp, realnump, valuep);
+    }
 }
 
 static const struct frame_unwind hppa_frame_unwind =
@@ -5827,15 +5856,15 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
       
   /* Frame unwind methods.  */
-  if (0)
+  switch (tdep->bytes_per_address)
     {
+    case 4:
       set_gdbarch_unwind_dummy_id (gdbarch, hppa_unwind_dummy_id);
       set_gdbarch_unwind_pc (gdbarch, hppa_unwind_pc);
       frame_unwind_append_sniffer (gdbarch, hppa_frame_unwind_sniffer);
       frame_base_append_sniffer (gdbarch, hppa_frame_base_sniffer);
-    }
-  else
-    {
+      break;
+    case 8:
       set_gdbarch_deprecated_saved_pc_after_call (gdbarch, hppa_saved_pc_after_call);
       set_gdbarch_deprecated_init_frame_pc (gdbarch, deprecated_init_frame_pc_default);
       set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, hppa_frame_init_saved_regs);
@@ -5845,6 +5874,9 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_deprecated_frameless_function_invocation (gdbarch, hppa_frameless_function_invocation);
       set_gdbarch_deprecated_frame_saved_pc (gdbarch, hppa_frame_saved_pc);
       set_gdbarch_deprecated_pop_frame (gdbarch, hppa_pop_frame);
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
     }
 
   /* Hook in ABI-specific overrides, if they have been registered.  */

@@ -1,5 +1,11 @@
 2004-02-27  Andrew Cagney  <cagney@redhat.com>
 
+	* hppa-tdep.c (hppa_gdbarch_init): On 32-bit systems always use
+	the new frame unwind code.
+	(hppa_frame_cache): Use PCOQ_HEAD_REGNUM instead of PC_REGNUM.
+	(hppa_frame_prev_register): Compute PCOQ_TAIL_REGNUM from
+	PCOQ_HEAD_REGNUM.
+
 	* hppa-tdep.c (hppa_gdbarch_init): On 32-bit systems always
 	"return_value" and "push_dummy_call".
 	(hppa32_use_struct_convention): Delete unused function.
