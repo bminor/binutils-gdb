@@ -1,3 +1,7 @@
+2000-02-23  Jim Blandy  <jimb@redhat.com>
+
+	* gdbint.texinfo (FUNCTION_START_OFFSET): Document.
+
 2000-02-22  Jim Blandy  <jimb@redhat.com>
 
 	* gdbint.texinfo: Document COERCE_FLOAT_TO_DOUBLE --- the new form.
