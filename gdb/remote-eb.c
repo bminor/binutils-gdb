@@ -44,6 +44,8 @@ extern struct value *call_function_by_hand();
 
 extern struct target_ops eb_ops;		/* Forward declaration */
 
+static void eb_close();
+
 #define LOG_FILE "eb.log"
 #if defined (LOG_FILE)
 FILE *log_file;
