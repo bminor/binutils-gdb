@@ -58,35 +58,6 @@ struct machine_it
 }
 the_insn;
 
-/* static void print_insn PARAMS ((struct machine_it *)); */
-char * parse_operand    PARAMS ((char *, expressionS *));
-int md_chars_to_number  PARAMS ((unsigned char *, int));
-
-static void machine_ip          PARAMS ((char *));
-static void s_proc              PARAMS ((int));
-static void insert_sreg         PARAMS ((char *, int));
-static int  hilo_modifier_ok    PARAMS ((char *));
-static int  is_ldst_registers   PARAMS ((char *));
-static int  match_sft_register  PARAMS ((char *));
-static void define_some_regs    PARAMS ((void));
-static char * dlx_parse_loadop  PARAMS ((char *));
-static char * dlx_parse_storeop PARAMS ((char *));
-static char * fix_ld_st_operand PARAMS ((unsigned long, char *));
-
-const pseudo_typeS
-
-dlx_pseudo_table[] =
-  {
-    /* Some additional ops that are used by gcc-dlx.  */
-    {"asciiz", stringer, 1},
-    {"half", cons, 2},
-    {"dword", cons, 8},
-    {"word", cons, 4},
-    {"proc", s_proc, 0},
-    {"endproc", s_proc, 1},
-    {NULL, 0, 0},
-  };
-
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful.  */
 const char comment_chars[] = ";";
@@ -113,9 +84,7 @@ const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 static void
-insert_sreg (regname, regnum)
-     char *regname;
-     int regnum;
+insert_sreg (char *regname, int regnum)
 {
   /* Must be large enough to hold the names of the special registers.  */
   char buf[80];
@@ -135,7 +104,7 @@ insert_sreg (regname, regnum)
    See MIPS Assembly Language Programmer's Guide page 1-4   */
 
 static void
-define_some_regs ()
+define_some_regs (void)
 {
   /* Software representation.  */
   insert_sreg ("zero",  0);
@@ -176,11 +145,10 @@ define_some_regs ()
   insert_sreg ("iad",   2);
 }
 
-/* Subroutine check the string to match an register, */
+/* Subroutine check the string to match an register.  */
 
 static int
-match_sft_register (name)
-     char *name;
+match_sft_register (char *name)
 {
 #define MAX_REG_NO  35
 /* Currently we have 35 software registers defined -
@@ -211,8 +179,7 @@ match_sft_register (name)
 /* Subroutine check the string to match an register.  */
 
 static int
-is_ldst_registers (name)
-     char *name;
+is_ldst_registers (char *name)
 {
   char *ptr = name;
 
@@ -229,8 +196,7 @@ is_ldst_registers (name)
    If DEFAULT_PREFIX is NULL, use the target's "leading char".  */
 
 static void
-s_proc (end_p)
-     int end_p;
+s_proc (int end_p)
 {
   /* Record the current function so that we can issue an error message for
      misplaced .func,.endfunc, and also so that .endfunc needs no
@@ -303,7 +269,7 @@ s_proc (end_p)
    need.  */
 
 void
-md_begin ()
+md_begin (void)
 {
   const char *retval = NULL;
   int lose = 0;
@@ -317,7 +283,7 @@ md_begin ()
     {
       const char *name = machine_opcodes[i].name;
 
-      retval = hash_insert (op_hash, name, (PTR) &machine_opcodes[i]);
+      retval = hash_insert (op_hash, name, (void *) &machine_opcodes[i]);
 
       if (retval != NULL)
 	{
@@ -333,170 +299,6 @@ md_begin ()
   define_some_regs ();
 }
 
-/* Assemble a single instruction.  Its label has already been handled
-   by the generic front end.  We just parse opcode and operands, and
-   produce the bytes of data and relocation.  */
-
-void
-md_assemble (str)
-     char *str;
-{
-  char *toP;
-  fixS *fixP;
-  bit_fixS *bitP;
-
-  know (str);
-  machine_ip (str);
-  toP = frag_more (4);
-  /* Put out the opcode.  */
-  md_number_to_chars (toP, the_insn.opcode, 4);
-
-  /* Put out the symbol-dependent stuff.  */
-  if (the_insn.reloc != NO_RELOC)
-    {
-      fixP = fix_new_exp (frag_now,
-			  (toP - frag_now->fr_literal + the_insn.reloc_offset),
-			  the_insn.size, & the_insn.exp, the_insn.pcrel,
-			  the_insn.reloc);
-
-      /* Turn off complaints that the addend is
-	 too large for things like foo+100000@ha.  */
-      switch (the_insn.reloc)
-	{
-	case RELOC_DLX_HI16:
-	case RELOC_DLX_LO16:
-	  fixP->fx_no_overflow = 1;
-	  break;
-	default:
-	  break;
-	}
-
-      switch (fixP->fx_r_type)
-	{
-	case RELOC_DLX_REL26:
-	  bitP = malloc (sizeof (bit_fixS));
-	  bitP->fx_bit_size = 26;
-	  bitP->fx_bit_offset = 25;
-	  bitP->fx_bit_base = the_insn.opcode & 0xFC000000;
-	  bitP->fx_bit_base_adj = 0;
-	  bitP->fx_bit_max = 0;
-	  bitP->fx_bit_min = 0;
-	  bitP->fx_bit_add = 0x03FFFFFF;
-	  fixP->fx_bit_fixP = bitP;
-	  break;
-	case RELOC_DLX_LO16:
-	case RELOC_DLX_REL16:
-	  bitP = malloc (sizeof (bit_fixS));
-	  bitP->fx_bit_size = 16;
-	  bitP->fx_bit_offset = 15;
-	  bitP->fx_bit_base = the_insn.opcode & 0xFFFF0000;
-	  bitP->fx_bit_base_adj = 0;
-	  bitP->fx_bit_max = 0;
-	  bitP->fx_bit_min = 0;
-	  bitP->fx_bit_add = 0x0000FFFF;
-	  fixP->fx_bit_fixP = bitP;
-	  break;
-	case RELOC_DLX_HI16:
-	  bitP = malloc (sizeof (bit_fixS));
-	  bitP->fx_bit_size = 16;
-	  bitP->fx_bit_offset = 15;
-	  bitP->fx_bit_base = the_insn.opcode & 0xFFFF0000;
-	  bitP->fx_bit_base_adj = 0;
-	  bitP->fx_bit_max = 0;
-	  bitP->fx_bit_min = 0;
-	  bitP->fx_bit_add = 0x0000FFFF;
-	  fixP->fx_bit_fixP = bitP;
-	  break;
-	default:
-	  fixP->fx_bit_fixP = (bit_fixS *)NULL;
-	  break;
-	}
-    }
-}
-
-static int
-hilo_modifier_ok (s)
-     char *s;
-{
-  char *ptr = s;
-  int   idx, count = 1;
-
-  if (*ptr != '(')
-    return 1;
-
-  for (idx = 1; ptr[idx] != '\0' && ptr[idx] != '[' && idx < 73; idx += 1)
-    {
-      if (count == 0)
-	return count;
-
-      if (ptr[idx] == '(')
-	count += 1;
-
-      if (ptr[idx] == ')')
-	count -= 1;
-    }
-
-  return (count == 0) ? 1:0;
-}
-
-char *
-parse_operand (s, operandp)
-     char *s;
-     expressionS *operandp;
-{
-  char *save = input_line_pointer;
-  char *new;
-
-  the_insn.HI = the_insn.LO = 0;
-
-  /* Search for %hi and %lo, make a mark and skip it.  */
-  if (strncmp (s, "%hi", 3) == 0)
-    {
-      s += 3;
-      the_insn.HI = 1;
-    }
-  else
-    {
-      if (strncmp (s, "%lo", 3) == 0)
-	{
-	  s += 3;
-	  the_insn.LO = 1;
-	}
-      else
-	the_insn.LO = 0;
-    }
-
-  if (the_insn.HI || the_insn.LO)
-    {
-      if (!hilo_modifier_ok (s))
-	as_bad (_("Expression Error for operand modifier %%hi/%%lo\n"));
-    }
-
-  /* Check for the % and $ register representation    */
-  if ((s[0] == '%' || s[0] == '$' || s[0] == 'r' || s[0] == 'R')
-      && ISDIGIT ((unsigned char) s[1]))
-    {
-      /* We have a numeric register expression.  No biggy.  */
-      s += 1;
-      input_line_pointer = s;
-      (void) expression (operandp);
-      if (operandp->X_op != O_constant
-	  || operandp->X_add_number > 31)
-	as_bad (_("Invalid expression after %%%%\n"));
-      operandp->X_op = O_register;
-    }
-  else
-    {
-      /* Normal operand parsing.  */
-      input_line_pointer = s;
-      (void) expression (operandp);
-    }
-
-  new = input_line_pointer;
-  input_line_pointer = save;
-  return new;
-}
-
 /* This function will check the opcode and return 1 if the opcode is one
    of the load/store instruction, and it will fix the operand string to
    the standard form so we can use the standard parse_operand routine.  */
@@ -506,8 +308,7 @@ parse_operand (s, operandp)
 static char iBuf[81];
 
 static char *
-dlx_parse_loadop (str)
-     char * str;
+dlx_parse_loadop (char * str)
 {
   char *ptr = str;
   int   idx = 0;
@@ -625,8 +426,7 @@ dlx_parse_loadop (str)
 }
 
 static char *
-dlx_parse_storeop (str)
-     char * str;
+dlx_parse_storeop (char * str)
 {
   char *ptr = str;
   int   idx = 0;
@@ -743,9 +543,7 @@ dlx_parse_storeop (str)
 }
 
 static char *
-fix_ld_st_operand (opcode, str)
-     unsigned long opcode;
-     char* str;
+fix_ld_st_operand (unsigned long opcode, char* str)
 {
   /* Check the opcode.  */
   switch ((int) opcode)
@@ -768,13 +566,92 @@ fix_ld_st_operand (opcode, str)
     }
 }
 
+static int
+hilo_modifier_ok (char *s)
+{
+  char *ptr = s;
+  int   idx, count = 1;
+
+  if (*ptr != '(')
+    return 1;
+
+  for (idx = 1; ptr[idx] != '\0' && ptr[idx] != '[' && idx < 73; idx += 1)
+    {
+      if (count == 0)
+	return count;
+
+      if (ptr[idx] == '(')
+	count += 1;
+
+      if (ptr[idx] == ')')
+	count -= 1;
+    }
+
+  return (count == 0) ? 1:0;
+}
+
+static char *
+parse_operand (char *s, expressionS *operandp)
+{
+  char *save = input_line_pointer;
+  char *new;
+
+  the_insn.HI = the_insn.LO = 0;
+
+  /* Search for %hi and %lo, make a mark and skip it.  */
+  if (strncmp (s, "%hi", 3) == 0)
+    {
+      s += 3;
+      the_insn.HI = 1;
+    }
+  else
+    {
+      if (strncmp (s, "%lo", 3) == 0)
+	{
+	  s += 3;
+	  the_insn.LO = 1;
+	}
+      else
+	the_insn.LO = 0;
+    }
+
+  if (the_insn.HI || the_insn.LO)
+    {
+      if (!hilo_modifier_ok (s))
+	as_bad (_("Expression Error for operand modifier %%hi/%%lo\n"));
+    }
+
+  /* Check for the % and $ register representation    */
+  if ((s[0] == '%' || s[0] == '$' || s[0] == 'r' || s[0] == 'R')
+      && ISDIGIT ((unsigned char) s[1]))
+    {
+      /* We have a numeric register expression.  No biggy.  */
+      s += 1;
+      input_line_pointer = s;
+      (void) expression (operandp);
+      if (operandp->X_op != O_constant
+	  || operandp->X_add_number > 31)
+	as_bad (_("Invalid expression after %%%%\n"));
+      operandp->X_op = O_register;
+    }
+  else
+    {
+      /* Normal operand parsing.  */
+      input_line_pointer = s;
+      (void) expression (operandp);
+    }
+
+  new = input_line_pointer;
+  input_line_pointer = save;
+  return new;
+}
+
 /* Instruction parsing.  Takes a string containing the opcode.
    Operands are at input_line_pointer.  Output is in the_insn.
    Warnings or errors are generated.  */
 
 static void
-machine_ip (str)
-     char *str;
+machine_ip (char *str)
 {
   char *s;
   const char *args;
@@ -1017,6 +894,86 @@ machine_ip (str)
     }
 }
 
+/* Assemble a single instruction.  Its label has already been handled
+   by the generic front end.  We just parse opcode and operands, and
+   produce the bytes of data and relocation.  */
+
+void
+md_assemble (char *str)
+{
+  char *toP;
+  fixS *fixP;
+  bit_fixS *bitP;
+
+  know (str);
+  machine_ip (str);
+  toP = frag_more (4);
+  /* Put out the opcode.  */
+  md_number_to_chars (toP, the_insn.opcode, 4);
+
+  /* Put out the symbol-dependent stuff.  */
+  if (the_insn.reloc != NO_RELOC)
+    {
+      fixP = fix_new_exp (frag_now,
+			  (toP - frag_now->fr_literal + the_insn.reloc_offset),
+			  the_insn.size, & the_insn.exp, the_insn.pcrel,
+			  the_insn.reloc);
+
+      /* Turn off complaints that the addend is
+	 too large for things like foo+100000@ha.  */
+      switch (the_insn.reloc)
+	{
+	case RELOC_DLX_HI16:
+	case RELOC_DLX_LO16:
+	  fixP->fx_no_overflow = 1;
+	  break;
+	default:
+	  break;
+	}
+
+      switch (fixP->fx_r_type)
+	{
+	case RELOC_DLX_REL26:
+	  bitP = malloc (sizeof (bit_fixS));
+	  bitP->fx_bit_size = 26;
+	  bitP->fx_bit_offset = 25;
+	  bitP->fx_bit_base = the_insn.opcode & 0xFC000000;
+	  bitP->fx_bit_base_adj = 0;
+	  bitP->fx_bit_max = 0;
+	  bitP->fx_bit_min = 0;
+	  bitP->fx_bit_add = 0x03FFFFFF;
+	  fixP->fx_bit_fixP = bitP;
+	  break;
+	case RELOC_DLX_LO16:
+	case RELOC_DLX_REL16:
+	  bitP = malloc (sizeof (bit_fixS));
+	  bitP->fx_bit_size = 16;
+	  bitP->fx_bit_offset = 15;
+	  bitP->fx_bit_base = the_insn.opcode & 0xFFFF0000;
+	  bitP->fx_bit_base_adj = 0;
+	  bitP->fx_bit_max = 0;
+	  bitP->fx_bit_min = 0;
+	  bitP->fx_bit_add = 0x0000FFFF;
+	  fixP->fx_bit_fixP = bitP;
+	  break;
+	case RELOC_DLX_HI16:
+	  bitP = malloc (sizeof (bit_fixS));
+	  bitP->fx_bit_size = 16;
+	  bitP->fx_bit_offset = 15;
+	  bitP->fx_bit_base = the_insn.opcode & 0xFFFF0000;
+	  bitP->fx_bit_base_adj = 0;
+	  bitP->fx_bit_max = 0;
+	  bitP->fx_bit_min = 0;
+	  bitP->fx_bit_add = 0x0000FFFF;
+	  fixP->fx_bit_fixP = bitP;
+	  break;
+	default:
+	  fixP->fx_bit_fixP = NULL;
+	  break;
+	}
+    }
+}
+
 /* This is identical to the md_atof in m68k.c.  I think this is right,
    but I'm not sure.
 
@@ -1030,10 +987,7 @@ machine_ip (str)
 #define MAX_LITTLENUMS 6
 
 char *
-md_atof (type, litP, sizeP)
-     char type;
-     char *litP;
-     int *sizeP;
+md_atof (int type, char *litP, int *sizeP)
 {
   int prec;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
@@ -1088,35 +1042,13 @@ md_atof (type, litP, sizeP)
 
 /* Write out big-endian.  */
 void
-md_number_to_chars (buf, val, n)
-     char *buf;
-     valueT val;
-     int n;
+md_number_to_chars (char *buf, valueT val, int n)
 {
   number_to_chars_bigendian (buf, val, n);
 }
 
-/* md_chars_to_number:  convert from target byte order to host byte order.  */
-
-int
-md_chars_to_number (val, n)
-     unsigned char *val;	/* Value in target byte order.  */
-     int n;			/* Number of bytes in the input.  */
-{
-  int retval;
-
-  for (retval = 0; n--;)
-    {
-      retval <<= 8;
-      retval |= val[n];
-    }
-
-  return retval;
-}
-
 bfd_boolean
-md_dlx_fix_adjustable (fixP)
-   fixS *fixP;
+md_dlx_fix_adjustable (fixS *fixP)
 {
   /* We need the symbol name for the VTABLE entries.  */
   return (fixP->fx_r_type != BFD_RELOC_VTABLE_INHERIT
@@ -1124,10 +1056,7 @@ md_dlx_fix_adjustable (fixP)
 }
 
 void
-md_apply_fix3 (fixP, valP, seg)
-     fixS *fixP;
-     valueT *valP;
-     segT seg ATTRIBUTE_UNUSED;
+md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   long val = *valP;
   char *place = fixP->fx_where + fixP->fx_frag->fr_literal;
@@ -1136,41 +1065,41 @@ md_apply_fix3 (fixP, valP, seg)
     {
     case RELOC_DLX_LO16:
     case RELOC_DLX_REL16:
-      if (fixP->fx_bit_fixP != (bit_fixS *) NULL)
+      if (fixP->fx_bit_fixP != NULL)
 	{
 	  val = (val & 0x0000FFFF) | fixP->fx_bit_fixP->fx_bit_base;
 	  free (fixP->fx_bit_fixP);
-	  fixP->fx_bit_fixP = (bit_fixS *) NULL;
+	  fixP->fx_bit_fixP = NULL;
 	}
 #ifdef DEBUG
       else
-	know ((fixP->fx_bit_fixP != (bit_fixS *) NULL));
+	know ((fixP->fx_bit_fixP != NULL));
 #endif
       break;
 
     case RELOC_DLX_HI16:
-      if (fixP->fx_bit_fixP != (bit_fixS *) NULL)
+      if (fixP->fx_bit_fixP != NULL)
 	{
 	  val = (val >> 16) | fixP->fx_bit_fixP->fx_bit_base;
 	  free (fixP->fx_bit_fixP);
-	  fixP->fx_bit_fixP = (bit_fixS *)NULL;
+	  fixP->fx_bit_fixP = NULL;
 	}
 #ifdef DEBUG
       else
-	know ((fixP->fx_bit_fixP != (bit_fixS *) NULL));
+	know ((fixP->fx_bit_fixP != NULL));
 #endif
       break;
 
     case RELOC_DLX_REL26:
-      if (fixP->fx_bit_fixP != (bit_fixS *) NULL)
+      if (fixP->fx_bit_fixP != NULL)
 	{
 	  val = (val & 0x03FFFFFF) | fixP->fx_bit_fixP->fx_bit_base;
 	  free (fixP->fx_bit_fixP);
-	  fixP->fx_bit_fixP = (bit_fixS *) NULL;
+	  fixP->fx_bit_fixP = NULL;
 	}
 #ifdef DEBUG
       else
-	know ((fixP->fx_bit_fixP != (bit_fixS *) NULL));
+	know ((fixP->fx_bit_fixP != NULL));
 #endif
       break;
 
@@ -1206,24 +1135,21 @@ struct option md_longopts[] =
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (c, arg)
-     int c     ATTRIBUTE_UNUSED;
-     char *arg ATTRIBUTE_UNUSED;
+md_parse_option (int c     ATTRIBUTE_UNUSED,
+		 char *arg ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 void
-md_show_usage (stream)
-     FILE *stream ATTRIBUTE_UNUSED;
+md_show_usage (FILE *stream ATTRIBUTE_UNUSED)
 {
 }
 
 /* This is called when a line is unrecognized.  */
 
 int
-dlx_unrecognized_line (c)
-     int c;
+dlx_unrecognized_line (int c)
 {
   int lab;
   char *s;
@@ -1241,10 +1167,8 @@ dlx_unrecognized_line (c)
     }
 
   if (*s != ':')
-    {
-      /* Not a label definition.  */
-      return 0;
-    }
+    /* Not a label definition.  */
+    return 0;
 
   if (dollar_label_defined (lab))
     {
@@ -1264,20 +1188,17 @@ dlx_unrecognized_line (c)
    are a lot of them.  */
 
 symbolS *
-md_undefined_symbol (name)
-     char *name ATTRIBUTE_UNUSED;
+md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
   return NULL;
 }
-
 
 /* Parse an operand that is machine-specific, the function was called
    in expr.c by operand() function, when everything failed before it
    call a quit.  */
 
 void
-md_operand (expressionP)
-     expressionS* expressionP;
+md_operand (expressionS* expressionP)
 {
   /* Check for the #number representation    */
   if (input_line_pointer[0] == '#' &&
@@ -1298,9 +1219,8 @@ md_operand (expressionP)
 /* Round up a section size to the appropriate boundary.  */
 
 valueT
-md_section_align (segment, size)
-     segT segment ATTRIBUTE_UNUSED;
-     valueT size;
+md_section_align (segT segment ATTRIBUTE_UNUSED,
+		  valueT size)
 {
   /* Byte alignment is fine.  */
   return size;
@@ -1311,8 +1231,7 @@ md_section_align (segment, size)
    which we have set up as the address of the fixup too.  */
 
 long
-md_pcrel_from (fixP)
-     fixS* fixP;
+md_pcrel_from (fixS* fixP)
 {
   return 4 + fixP->fx_where + fixP->fx_frag->fr_address;
 }
@@ -1323,16 +1242,15 @@ md_pcrel_from (fixP)
    The above FIXME is from a29k, but I think it is also needed here.    */
 
 arelent *
-tc_gen_reloc (section, fixP)
-     asection *section ATTRIBUTE_UNUSED;
-     fixS *fixP;
+tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
+	      fixS *fixP)
 {
   arelent * reloc;
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
+  reloc = xmalloc (sizeof (arelent));
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
 
-  if (reloc->howto == (reloc_howto_type *) NULL)
+  if (reloc->howto == NULL)
     {
       as_bad_where (fixP->fx_file, fixP->fx_line,
 		    "internal error: can't export reloc type %d (`%s')",
@@ -1343,7 +1261,7 @@ tc_gen_reloc (section, fixP)
 
   assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
 
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
 
@@ -1354,11 +1272,23 @@ tc_gen_reloc (section, fixP)
   return reloc;
 }
 
-extern void pop_insert PARAMS ((const pseudo_typeS *));
+const pseudo_typeS
+dlx_pseudo_table[] =
+{
+  /* Some additional ops that are used by gcc-dlx.  */
+  {"asciiz", stringer, 1},
+  {"half", cons, 2},
+  {"dword", cons, 8},
+  {"word", cons, 4},
+  {"proc", s_proc, 0},
+  {"endproc", s_proc, 1},
+  {NULL, NULL, 0}
+};
 
 void
-dlx_pop_insert ()
+dlx_pop_insert (void)
 {
   pop_insert (dlx_pseudo_table);
   return ;
 }
+

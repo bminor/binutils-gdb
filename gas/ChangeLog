@@ -1,3 +1,62 @@
+2005-03-24  Nick Clifton  <nickc@redhat.com>
+
+	* write.h (bit_fix_new): Remove redundant prototype.
+	* config/atof-ieee.c: Convert to ISO-C90 and fix formatting.
+	* config/obj-aout.c: Convert to ISO-C90 and fix formatting.
+	* config/obj-aout.h: Convert to ISO-C90 and fix formatting.
+	* config/obj-bout.c: Convert to ISO-C90 and fix formatting.
+	* config/obj-bout.h: Convert to ISO-C90 and fix formatting.
+	* config/obj-ecoff.c: Convert to ISO-C90 and fix formatting.
+	* config/obj-ecoff.h: Convert to ISO-C90 and fix formatting.
+	* config/obj-som.c: Convert to ISO-C90 and fix formatting.
+	* config/obj-som.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-a29k.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-a29k.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-alpha.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-alpha.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-arc.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-arc.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-d10v.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-d10v.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-d30v.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-d30v.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-dlx.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-dlx.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-fr30.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-fr30.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-h8500.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-h8500.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-i370.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-i370.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-i960.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-ip2k.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-ip2k.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-m32r.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-m32r.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-m88k.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-m88k.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-mcore.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-mcore.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-mn10200.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-ns32k.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-ns32k.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-openrisc.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-openrisc.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-or32.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-or32.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-pdp11.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-pj.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-pj.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-tahoe.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-tic80.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-tic80.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-v850.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-v850.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-w65.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-w65.h: Convert to ISO-C90 and fix formatting.
+	* config/tc-xstormy16.c: Convert to ISO-C90 and fix formatting.
+	* config/tc-xstormy16.h: Convert to ISO-C90 and fix formatting.	
+
 2005-03-23  Jim Blandy  <jimb@redhat.com>
 
 	* config/tc-arm.c (arm_adjust_symtab): Fetch elf_sym's binding

@@ -1,6 +1,6 @@
 /* tc-mn10200.c -- Assembler code for the Matsushita 10200
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
-   Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
+   2005  Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -53,7 +53,8 @@ const char EXP_CHARS[] = "eE";
    as in 0d1.0.  */
 const char FLT_CHARS[] = "dD";
 
-const relax_typeS md_relax_table[] = {
+const relax_typeS md_relax_table[] =
+ {
   /* bCC relaxing  */
   {0x81, -0x7e, 2, 1},
   {0x8004, -0x7ffb, 5, 2},
@@ -72,34 +73,27 @@ const relax_typeS md_relax_table[] = {
 
 };
 
-/* Local functions.  */
-static void mn10200_insert_operand PARAMS ((unsigned long *, unsigned long *,
-					    const struct mn10200_operand *,
-					    offsetT, char *, unsigned,
-					    unsigned));
-static unsigned long check_operand PARAMS ((unsigned long,
-					    const struct mn10200_operand *,
-					    offsetT));
-static int reg_name_search PARAMS ((const struct reg_name *, int, const char *));
-static bfd_boolean data_register_name PARAMS ((expressionS *expressionP));
-static bfd_boolean address_register_name PARAMS ((expressionS *expressionP));
-static bfd_boolean other_register_name PARAMS ((expressionS *expressionP));
 
 /* Fixups.  */
-#define MAX_INSN_FIXUPS (5)
+#define MAX_INSN_FIXUPS 5
+
 struct mn10200_fixup
 {
   expressionS exp;
   int opindex;
   bfd_reloc_code_real_type reloc;
 };
+
 struct mn10200_fixup fixups[MAX_INSN_FIXUPS];
 static int fc;
 
 const char *md_shortopts = "";
-struct option md_longopts[] = {
+
+struct option md_longopts[] =
+{
   {NULL, no_argument, NULL, 0}
 };
+
 size_t md_longopts_size = sizeof (md_longopts);
 
 /* The target specific pseudo-ops which we support.  */
@@ -145,10 +139,9 @@ static const struct reg_name other_registers[] =
    number from the array on success, or -1 on failure.  */
 
 static int
-reg_name_search (regs, regcount, name)
-     const struct reg_name *regs;
-     int regcount;
-     const char *name;
+reg_name_search (const struct reg_name *regs,
+		 int regcount,
+		 const char *name)
 {
   int middle, low, high;
   int cmp;
@@ -172,19 +165,17 @@ reg_name_search (regs, regcount, name)
 }
 
 /* Summary of register_name().
- *
- * in: Input_line_pointer points to 1st char of operand.
- *
- * out: An expressionS.
- *	The operand may have been a register: in this case, X_op == O_register,
- *	X_add_number is set to the register number, and truth is returned.
- *	Input_line_pointer->(next non-blank) char after operand, or is in
- *	its original state.
- */
+
+   in: Input_line_pointer points to 1st char of operand.
+
+   out: An expressionS.
+  	The operand may have been a register: in this case, X_op == O_register,
+  	X_add_number is set to the register number, and truth is returned.
+  	Input_line_pointer->(next non-blank) char after operand, or is in
+  	its original state.  */
 
 static bfd_boolean
-data_register_name (expressionP)
-     expressionS *expressionP;
+data_register_name (expressionS *expressionP)
 {
   int reg_number;
   char *name;
@@ -219,19 +210,17 @@ data_register_name (expressionP)
 }
 
 /* Summary of register_name().
- *
- * in: Input_line_pointer points to 1st char of operand.
- *
- * out: An expressionS.
- *	The operand may have been a register: in this case, X_op == O_register,
- *	X_add_number is set to the register number, and truth is returned.
- *	Input_line_pointer->(next non-blank) char after operand, or is in
- *	its original state.
- */
+
+   in: Input_line_pointer points to 1st char of operand.
+
+   out: An expressionS.
+  	The operand may have been a register: in this case, X_op == O_register,
+  	X_add_number is set to the register number, and truth is returned.
+  	Input_line_pointer->(next non-blank) char after operand, or is in
+  	its original state.  */
 
 static bfd_boolean
-address_register_name (expressionP)
-     expressionS *expressionP;
+address_register_name (expressionS *expressionP)
 {
   int reg_number;
   char *name;
@@ -266,19 +255,17 @@ address_register_name (expressionP)
 }
 
 /* Summary of register_name().
- *
- * in: Input_line_pointer points to 1st char of operand.
- *
- * out: An expressionS.
- *	The operand may have been a register: in this case, X_op == O_register,
- *	X_add_number is set to the register number, and truth is returned.
- *	Input_line_pointer->(next non-blank) char after operand, or is in
- *	its original state.
- */
+
+   in: Input_line_pointer points to 1st char of operand.
+
+   out: An expressionS.
+  	The operand may have been a register: in this case, X_op == O_register,
+  	X_add_number is set to the register number, and truth is returned.
+  	Input_line_pointer->(next non-blank) char after operand, or is in
+  	its original state.  */
 
 static bfd_boolean
-other_register_name (expressionP)
-     expressionS *expressionP;
+other_register_name (expressionS *expressionP)
 {
   int reg_number;
   char *name;
@@ -313,33 +300,27 @@ other_register_name (expressionP)
 }
 
 void
-md_show_usage (stream)
-     FILE *stream;
+md_show_usage (FILE *stream)
 {
   fprintf (stream, _("MN10200 options:\n\
 none yet\n"));
 }
 
 int
-md_parse_option (c, arg)
-     int c ATTRIBUTE_UNUSED;
-     char *arg ATTRIBUTE_UNUSED;
+md_parse_option (int c ATTRIBUTE_UNUSED,
+		 char *arg ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 symbolS *
-md_undefined_symbol (name)
-     char *name ATTRIBUTE_UNUSED;
+md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 char *
-md_atof (type, litp, sizep)
-     int type;
-     char *litp;
-     int *sizep;
+md_atof (int type, char *litp, int *sizep)
 {
   int prec;
   LITTLENUM_TYPE words[4];
@@ -377,10 +358,9 @@ md_atof (type, litp, sizep)
 }
 
 void
-md_convert_frag (abfd, sec, fragP)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *sec;
-     fragS *fragP;
+md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
+		 asection *sec,
+		 fragS *fragP)
 {
   static unsigned long label_count = 0;
   char buf[40];
@@ -728,16 +708,14 @@ md_convert_frag (abfd, sec, fragP)
 }
 
 valueT
-md_section_align (seg, addr)
-     asection *seg;
-     valueT addr;
+md_section_align (asection *seg, valueT addr)
 {
   int align = bfd_get_section_alignment (stdoutput, seg);
   return ((addr + (1 << align) - 1) & (-1 << align));
 }
 
 void
-md_begin ()
+md_begin (void)
 {
   char *prev_name = "";
   register const struct mn10200_opcode *op;
@@ -766,9 +744,169 @@ md_begin ()
   linkrelax = 1;
 }
 
+static unsigned long
+check_operand (unsigned long insn ATTRIBUTE_UNUSED,
+	       const struct mn10200_operand *operand,
+	       offsetT val)
+{
+  /* No need to check 24bit or 32bit operands for a bit.  */
+  if (operand->bits < 24
+      && (operand->flags & MN10200_OPERAND_NOCHECK) == 0)
+    {
+      long min, max;
+      offsetT test;
+
+      if ((operand->flags & MN10200_OPERAND_SIGNED) != 0)
+	{
+	  max = (1 << (operand->bits - 1)) - 1;
+	  min = - (1 << (operand->bits - 1));
+	}
+      else
+	{
+	  max = (1 << operand->bits) - 1;
+	  min = 0;
+	}
+
+      test = val;
+
+      if (test < (offsetT) min || test > (offsetT) max)
+	return 0;
+      else
+	return 1;
+    }
+  return 1;
+}
+/* If while processing a fixup, a reloc really needs to be created
+   Then it is done here.  */
+
+arelent *
+tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
+{
+  arelent *reloc;
+  reloc = xmalloc (sizeof (arelent));
+
+  if (fixp->fx_subsy != NULL)
+    {
+      if (S_GET_SEGMENT (fixp->fx_addsy) == S_GET_SEGMENT (fixp->fx_subsy)
+	  && S_IS_DEFINED (fixp->fx_subsy))
+	{
+	  fixp->fx_offset -= S_GET_VALUE (fixp->fx_subsy);
+	  fixp->fx_subsy = NULL;
+	}
+      else
+	/* FIXME: We should try more ways to resolve difference expressions
+	   here.  At least this is better than silently ignoring the
+	   subtrahend.  */
+	as_bad_where (fixp->fx_file, fixp->fx_line,
+		      _("can't resolve `%s' {%s section} - `%s' {%s section}"),
+		      fixp->fx_addsy ? S_GET_NAME (fixp->fx_addsy) : "0",
+		      segment_name (fixp->fx_addsy
+				    ? S_GET_SEGMENT (fixp->fx_addsy)
+				    : absolute_section),
+		      S_GET_NAME (fixp->fx_subsy),
+		      segment_name (S_GET_SEGMENT (fixp->fx_addsy)));
+    }
+
+  reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
+  if (reloc->howto == NULL)
+    {
+      as_bad_where (fixp->fx_file, fixp->fx_line,
+		    _("reloc %d not supported by object file format"),
+		    (int) fixp->fx_r_type);
+      return NULL;
+    }
+  reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
+  reloc->addend = fixp->fx_offset;
+  return reloc;
+}
+
+int
+md_estimate_size_before_relax (fragS *fragp, asection *seg)
+{
+  if (fragp->fr_subtype == 6
+      && (!S_IS_DEFINED (fragp->fr_symbol)
+	  || seg != S_GET_SEGMENT (fragp->fr_symbol)))
+    fragp->fr_subtype = 7;
+  else if (fragp->fr_subtype == 8
+	   && (!S_IS_DEFINED (fragp->fr_symbol)
+	       || seg != S_GET_SEGMENT (fragp->fr_symbol)))
+    fragp->fr_subtype = 10;
+
+  if (fragp->fr_subtype >= sizeof (md_relax_table) / sizeof (md_relax_table[0]))
+    abort ();
+
+  return md_relax_table[fragp->fr_subtype].rlx_length;
+}
+
+long
+md_pcrel_from (fixS *fixp)
+{
+  return fixp->fx_frag->fr_address;
+}
+
 void
-md_assemble (str)
-     char *str;
+md_apply_fix3 (fixS * fixP, valueT * valP ATTRIBUTE_UNUSED, segT seg ATTRIBUTE_UNUSED)
+{
+  /* We shouldn't ever get here because linkrelax is nonzero.  */
+  abort ();
+  fixP->fx_done = 1;
+}
+
+/* Insert an operand value into an instruction.  */
+
+static void
+mn10200_insert_operand (unsigned long *insnp,
+			unsigned long *extensionp,
+			const struct mn10200_operand *operand,
+			offsetT val,
+			char *file,
+			unsigned int line,
+			unsigned int shift)
+{
+  /* No need to check 24 or 32bit operands for a bit.  */
+  if (operand->bits < 24
+      && (operand->flags & MN10200_OPERAND_NOCHECK) == 0)
+    {
+      long min, max;
+      offsetT test;
+
+      if ((operand->flags & MN10200_OPERAND_SIGNED) != 0)
+	{
+	  max = (1 << (operand->bits - 1)) - 1;
+	  min = - (1 << (operand->bits - 1));
+	}
+      else
+	{
+	  max = (1 << operand->bits) - 1;
+	  min = 0;
+	}
+
+      test = val;
+
+      if (test < (offsetT) min || test > (offsetT) max)
+	as_warn_value_out_of_range (_("operand"), test, (offsetT) min, (offsetT) max, file, line);
+    }
+
+  if ((operand->flags & MN10200_OPERAND_EXTENDED) == 0)
+    {
+      *insnp |= (((long) val & ((1 << operand->bits) - 1))
+		 << (operand->shift + shift));
+
+      if ((operand->flags & MN10200_OPERAND_REPEATED) != 0)
+	*insnp |= (((long) val & ((1 << operand->bits) - 1))
+		   << (operand->shift + shift + 2));
+    }
+  else
+    {
+      *extensionp |= (val >> 16) & 0xff;
+      *insnp |= val & 0xffff;
+    }
+}
+
+void
+md_assemble (char *str)
 {
   char *s;
   struct mn10200_opcode *opcode;
@@ -957,7 +1095,7 @@ md_assemble (str)
 		extra_shift = 0;
 
 	      mn10200_insert_operand (&insn, &extension, operand,
-				      ex.X_add_number, (char *) NULL,
+				      ex.X_add_number, NULL,
 				      0, extra_shift);
 
 	      break;
@@ -976,7 +1114,7 @@ md_assemble (str)
 		}
 
 	      mn10200_insert_operand (&insn, &extension, operand,
-				      ex.X_add_number, (char *) NULL,
+				      ex.X_add_number, NULL,
 				      0, 0);
 	      break;
 
@@ -1051,7 +1189,6 @@ keep_going:
     abort ();
 
   /* Write out the instruction.  */
-
   if (relaxable && fc > 0)
     {
       int type;
@@ -1094,7 +1231,6 @@ keep_going:
       else
 	number_to_chars_bigendian (f + size, 0, 8 - size);
     }
-
   else
     {
       f = frag_more (size);
@@ -1118,9 +1254,7 @@ keep_going:
 	  number_to_chars_littleendian (f + 4, extension & 0xff, 1);
 	}
       else
-	{
-	  number_to_chars_bigendian (f, insn, size > 4 ? 4 : size);
-	}
+	number_to_chars_bigendian (f, insn, size > 4 ? 4 : size);
 
       /* Create any fixups.  */
       for (i = 0; i < fc; i++)
@@ -1222,174 +1356,3 @@ keep_going:
     }
 }
 
-/* If while processing a fixup, a reloc really needs to be created
-   Then it is done here.  */
-
-arelent *
-tc_gen_reloc (seg, fixp)
-     asection *seg ATTRIBUTE_UNUSED;
-     fixS *fixp;
-{
-  arelent *reloc;
-  reloc = (arelent *) xmalloc (sizeof (arelent));
-
-  if (fixp->fx_subsy != NULL)
-    {
-      if (S_GET_SEGMENT (fixp->fx_addsy) == S_GET_SEGMENT (fixp->fx_subsy)
-	  && S_IS_DEFINED (fixp->fx_subsy))
-	{
-	  fixp->fx_offset -= S_GET_VALUE (fixp->fx_subsy);
-	  fixp->fx_subsy = NULL;
-	}
-      else
-	/* FIXME: We should try more ways to resolve difference expressions
-	   here.  At least this is better than silently ignoring the
-	   subtrahend.  */
-	as_bad_where (fixp->fx_file, fixp->fx_line,
-		      _("can't resolve `%s' {%s section} - `%s' {%s section}"),
-		      fixp->fx_addsy ? S_GET_NAME (fixp->fx_addsy) : "0",
-		      segment_name (fixp->fx_addsy
-				    ? S_GET_SEGMENT (fixp->fx_addsy)
-				    : absolute_section),
-		      S_GET_NAME (fixp->fx_subsy),
-		      segment_name (S_GET_SEGMENT (fixp->fx_addsy)));
-    }
-
-  reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
-  if (reloc->howto == (reloc_howto_type *) NULL)
-    {
-      as_bad_where (fixp->fx_file, fixp->fx_line,
-		    _("reloc %d not supported by object file format"),
-		    (int) fixp->fx_r_type);
-      return NULL;
-    }
-  reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
-  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
-  reloc->addend = fixp->fx_offset;
-  return reloc;
-}
-
-int
-md_estimate_size_before_relax (fragp, seg)
-     fragS *fragp;
-     asection *seg;
-{
-  if (fragp->fr_subtype == 6
-      && (!S_IS_DEFINED (fragp->fr_symbol)
-	  || seg != S_GET_SEGMENT (fragp->fr_symbol)))
-    fragp->fr_subtype = 7;
-  else if (fragp->fr_subtype == 8
-	   && (!S_IS_DEFINED (fragp->fr_symbol)
-	       || seg != S_GET_SEGMENT (fragp->fr_symbol)))
-    fragp->fr_subtype = 10;
-
-  if (fragp->fr_subtype >= sizeof (md_relax_table) / sizeof (md_relax_table[0]))
-    abort ();
-
-  return md_relax_table[fragp->fr_subtype].rlx_length;
-}
-
-long
-md_pcrel_from (fixp)
-     fixS *fixp;
-{
-  return fixp->fx_frag->fr_address;
-}
-
-void
-md_apply_fix3 (fixP, valP, seg)
-     fixS * fixP;
-     valueT * valP ATTRIBUTE_UNUSED;
-     segT seg ATTRIBUTE_UNUSED;
-{
-  /* We shouldn't ever get here because linkrelax is nonzero.  */
-  abort ();
-  fixP->fx_done = 1;
-}
-
-/* Insert an operand value into an instruction.  */
-
-static void
-mn10200_insert_operand (insnp, extensionp, operand, val, file, line, shift)
-     unsigned long *insnp;
-     unsigned long *extensionp;
-     const struct mn10200_operand *operand;
-     offsetT val;
-     char *file;
-     unsigned int line;
-     unsigned int shift;
-{
-  /* No need to check 24 or 32bit operands for a bit.  */
-  if (operand->bits < 24
-      && (operand->flags & MN10200_OPERAND_NOCHECK) == 0)
-    {
-      long min, max;
-      offsetT test;
-
-      if ((operand->flags & MN10200_OPERAND_SIGNED) != 0)
-	{
-	  max = (1 << (operand->bits - 1)) - 1;
-	  min = - (1 << (operand->bits - 1));
-	}
-      else
-	{
-	  max = (1 << operand->bits) - 1;
-	  min = 0;
-	}
-
-      test = val;
-
-      if (test < (offsetT) min || test > (offsetT) max)
-	as_warn_value_out_of_range (_("operand"), test, (offsetT) min, (offsetT) max, file, line);
-    }
-
-  if ((operand->flags & MN10200_OPERAND_EXTENDED) == 0)
-    {
-      *insnp |= (((long) val & ((1 << operand->bits) - 1))
-		 << (operand->shift + shift));
-
-      if ((operand->flags & MN10200_OPERAND_REPEATED) != 0)
-	*insnp |= (((long) val & ((1 << operand->bits) - 1))
-		   << (operand->shift + shift + 2));
-    }
-  else
-    {
-      *extensionp |= (val >> 16) & 0xff;
-      *insnp |= val & 0xffff;
-    }
-}
-
-static unsigned long
-check_operand (insn, operand, val)
-     unsigned long insn ATTRIBUTE_UNUSED;
-     const struct mn10200_operand *operand;
-     offsetT val;
-{
-  /* No need to check 24bit or 32bit operands for a bit.  */
-  if (operand->bits < 24
-      && (operand->flags & MN10200_OPERAND_NOCHECK) == 0)
-    {
-      long min, max;
-      offsetT test;
-
-      if ((operand->flags & MN10200_OPERAND_SIGNED) != 0)
-	{
-	  max = (1 << (operand->bits - 1)) - 1;
-	  min = - (1 << (operand->bits - 1));
-	}
-      else
-	{
-	  max = (1 << operand->bits) - 1;
-	  min = 0;
-	}
-
-      test = val;
-
-      if (test < (offsetT) min || test > (offsetT) max)
-	return 0;
-      else
-	return 1;
-    }
-  return 1;
-}

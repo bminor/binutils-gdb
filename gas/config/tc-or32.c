@@ -47,31 +47,29 @@
 static struct hash_control *op_hash = NULL;
 
 struct machine_it
-  {
-    char *          error;
-    unsigned long   opcode;
-    struct nlist *  nlistp;
-    expressionS     exp;
-    int             pcrel;
-    int             reloc_offset;   /* Offset of reloc within insn.  */
-    int             reloc;
-  }
+{
+  char *          error;
+  unsigned long   opcode;
+  struct nlist *  nlistp;
+  expressionS     exp;
+  int             pcrel;
+  int             reloc_offset;   /* Offset of reloc within insn.  */
+  int             reloc;
+}
 the_insn;
 
-static void machine_ip PARAMS ((char *));
-
 const pseudo_typeS md_pseudo_table[] =
-  {
-    {"align",   s_align_bytes,  4 },
-    {"space",   s_space,        0 },
-    {"cputype", s_ignore,       0 },
-    {"reg",     s_lsym,         0 },  /* Register equate, same as equ.  */
-    {"sect",    s_ignore,       0 },  /* Creation of coff sections.  */
-    {"proc",    s_ignore,       0 },  /* Start of a function.  */
-    {"endproc", s_ignore,       0 },  /* Function end.  */
-    {"word",    cons,           4 },
-    {NULL,      0,              0 },
-  };
+{
+  {"align",   s_align_bytes,  4 },
+  {"space",   s_space,        0 },
+  {"cputype", s_ignore,       0 },
+  {"reg",     s_lsym,         0 },  /* Register equate, same as equ.  */
+  {"sect",    s_ignore,       0 },  /* Creation of coff sections.  */
+  {"proc",    s_ignore,       0 },  /* Start of a function.  */
+  {"endproc", s_ignore,       0 },  /* Function end.  */
+  {"word",    cons,           4 },
+  {NULL,      0,              0 },
+};
 
 int md_short_jump_size  = 4;
 int md_long_jump_size   = 4;
@@ -114,20 +112,17 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 /* "l.jalr r9" precalculated opcode.  */
 static unsigned long jalr_r9_opcode;
 
+static void machine_ip (char *);
 
-static int check_invalid_opcode PARAMS ((unsigned long));
-static void encode PARAMS ((const struct machine_opcode *, unsigned long *, signed long, char));
-static char *parse_operand PARAMS ((char *, expressionS *, int));
 
 /* Set bits in machine opcode according to insn->encoding
    description and passed operand.  */
 
 static void
-encode (insn, opcode, param_val, param_ch)
-     const struct machine_opcode *insn;
-     unsigned long *opcode;
-     signed long param_val;
-     char param_ch;
+encode (const struct machine_opcode *insn,
+	unsigned long *opcode,
+	signed long param_val,
+	char param_ch)
 {
   int opc_pos = 0;
   int param_pos = 0;
@@ -195,7 +190,7 @@ encode (insn, opcode, param_val, param_ch)
    need.  */
 
 void
-md_begin ()
+md_begin (void)
 {
   const char *retval = NULL;
   int lose = 0;
@@ -215,7 +210,7 @@ md_begin ()
           continue;
         }
 
-      retval = hash_insert (op_hash, name, (PTR) &machine_opcodes[i]);
+      retval = hash_insert (op_hash, name, (void *) &machine_opcodes[i]);
       if (retval != NULL)
         {
           fprintf (stderr, "internal error: can't hash `%s': %s\n",
@@ -233,8 +228,7 @@ md_begin ()
 /* Returns non zero if instruction is to be used.  */
 
 static int
-check_invalid_opcode (opcode)
-     unsigned long opcode;
+check_invalid_opcode (unsigned long opcode)
 {
   return opcode == jalr_r9_opcode;
 }
@@ -244,8 +238,7 @@ check_invalid_opcode (opcode)
    produce the bytes of data and relocation.  */
 
 void
-md_assemble (str)
-     char *str;
+md_assemble (char *str)
 {
   char *toP;
 
@@ -283,10 +276,7 @@ static int mask_or_shift = 0;
 
 #ifdef BFD_ASSEMBLER
 static char *
-parse_operand (s, operandp, opt)
-     char *s;
-     expressionS *operandp;
-     int opt;
+parse_operand (char *s, expressionS *operandp, int opt)
 {
   char *save = input_line_pointer;
   char *new;
@@ -351,10 +341,7 @@ parse_operand (s, operandp, opt)
 #else
 
 static char *
-parse_operand (s, operandp, opt)
-     char *s;
-     expressionS *operandp;
-     int opt;
+parse_operand (char *s, expressionS *operandp, int opt)
 {
   char *save = input_line_pointer;
   char *new;
@@ -380,7 +367,6 @@ parse_operand (s, operandp, opt)
     }
   else
     mask_or_shift = 0;
-
 
   expression (operandp);
 
@@ -430,8 +416,7 @@ parse_operand (s, operandp, opt)
 
 #ifdef BFD_ASSEMBLER
 static void
-machine_ip (str)
-     char *str;
+machine_ip (char *str)
 {
   char *s;
   const char *args;
@@ -485,10 +470,8 @@ machine_ip (str)
      If an operand matches, we modify the_insn or opcode appropriately,
      and do a "continue".  If an operand fails to match, we "break".  */
   if (insn->args[0] != '\0')
-    {
-      /* Prime the pump.  */
-      s = parse_operand (s, operand, insn->args[0] == 'I');
-    }
+    /* Prime the pump.  */
+    s = parse_operand (s, operand, insn->args[0] == 'I');
 
   for (args = insn->args;; ++args)
     {
@@ -579,9 +562,7 @@ machine_ip (str)
             }
 
           if (*s == '(')
-            {
-              operand->X_op = O_constant;
-            }
+	    operand->X_op = O_constant;
           else if (*s == ')')
             s += 1;
 #if DEBUG
@@ -641,8 +622,7 @@ machine_ip (str)
 #else
 
 static void
-machine_ip (str)
-     char *str;
+machine_ip (char *str)
 {
   char *s;
   const char *args;
@@ -790,9 +770,7 @@ machine_ip (str)
             }
 
           if (*s == '(')
-            {
-              operand->X_op = O_constant;
-            }
+	    operand->X_op = O_constant;
           else if (*s == ')')
             s += 1;
 #if DEBUG
@@ -861,10 +839,7 @@ machine_ip (str)
 #define MAX_LITTLENUMS 6
 
 char *
-md_atof (type, litP, sizeP)
-     char   type;
-     char * litP;
-     int *  sizeP;
+md_atof (int type, char * litP, int *  sizeP)
 {
   int prec;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
@@ -920,20 +895,14 @@ md_atof (type, litP, sizeP)
 /* Write out big-endian.  */
 
 void
-md_number_to_chars (buf, val, n)
-     char *buf;
-     valueT val;
-     int n;
+md_number_to_chars (char *buf, valueT val, int n)
 {
   number_to_chars_bigendian (buf, val, n);
 }
 
 #ifdef BFD_ASSEMBLER
 void
-md_apply_fix3 (fixP, val, seg)
-     fixS *   fixP;
-     valueT * val;
-     segT     seg ATTRIBUTE_UNUSED;
+md_apply_fix3 (fixS * fixP, valueT * val, segT seg ATTRIBUTE_UNUSED)
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   long t_val;
@@ -1029,10 +998,7 @@ md_apply_fix3 (fixP, val, seg)
 }
 #else
 void
-md_apply_fix3 (fixP, valP, seg)
-     fixS *fixP;
-     valueT *valP;
-     segT seg ATTRIBUTE_UNUSED;
+md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   long val = *valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
@@ -1155,8 +1121,7 @@ md_apply_fix3 (fixP, valP, seg)
 
 #ifdef OBJ_COFF
 short
-tc_coff_fix2rtype (fixP)
-     fixS *fixP;
+tc_coff_fix2rtype (fixS *fixP)
 {
 #if DEBUG
   printf ("tc_coff_fix2rtype\n");
@@ -1164,16 +1129,11 @@ tc_coff_fix2rtype (fixP)
 
   switch (fixP->fx_r_type)
     {
-    case RELOC_32:
-      return (R_WORD);
-    case RELOC_8:
-      return (R_BYTE);
-    case RELOC_CONST:
-      return (R_ILOHALF);
-    case RELOC_CONSTH:
-      return (R_IHIHALF);
-    case RELOC_JUMPTARG:
-      return (R_IREL);
+    case RELOC_32:        return R_WORD;
+    case RELOC_8:         return R_BYTE;
+    case RELOC_CONST:     return R_ILOHALF;
+    case RELOC_CONSTH:    return R_IHIHALF;
+    case RELOC_JUMPTARG:  return R_IREL;
     default:
       printf ("need %d\n", fixP->fx_r_type);
       abort ();
@@ -1187,12 +1147,11 @@ tc_coff_fix2rtype (fixP)
 /* Should never be called for or32.  */
 
 void
-md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
-     char *    ptr       ATTRIBUTE_UNUSED;
-     addressT  from_addr ATTRIBUTE_UNUSED;
-     addressT  to_addr   ATTRIBUTE_UNUSED;
-     fragS *   frag      ATTRIBUTE_UNUSED;
-     symbolS * to_symbol ATTRIBUTE_UNUSED;
+md_create_short_jump (char *    ptr       ATTRIBUTE_UNUSED,
+		      addressT  from_addr ATTRIBUTE_UNUSED,
+		      addressT  to_addr   ATTRIBUTE_UNUSED,
+		      fragS *   frag      ATTRIBUTE_UNUSED,
+		      symbolS * to_symbol ATTRIBUTE_UNUSED)
 {
   as_fatal ("or32_create_short_jmp\n");
 }
@@ -1201,20 +1160,18 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
 
 #ifndef BFD_ASSEMBLER
 void
-md_convert_frag (headers, seg, fragP)
-     object_headers * headers ATTRIBUTE_UNUSED;
-     segT             seg     ATTRIBUTE_UNUSED;
-     register fragS * fragP   ATTRIBUTE_UNUSED;
+md_convert_frag (object_headers * headers ATTRIBUTE_UNUSED,
+		 segT             seg     ATTRIBUTE_UNUSED,
+		 register fragS * fragP   ATTRIBUTE_UNUSED)
 {
   as_fatal ("or32_convert_frag\n");
 }
 
 #else
 void
-md_convert_frag (headers, seg, fragP)
-     bfd *   headers ATTRIBUTE_UNUSED;
-     segT    seg     ATTRIBUTE_UNUSED;
-     fragS * fragP   ATTRIBUTE_UNUSED;
+md_convert_frag (bfd *   headers ATTRIBUTE_UNUSED,
+		 segT    seg     ATTRIBUTE_UNUSED,
+		 fragS * fragP   ATTRIBUTE_UNUSED)
 {
   as_fatal ("or32_convert_frag\n");
 }
@@ -1223,12 +1180,11 @@ md_convert_frag (headers, seg, fragP)
 /* Should never be called for or32.  */
 
 void
-md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
-     char *    ptr       ATTRIBUTE_UNUSED;
-     addressT  from_addr ATTRIBUTE_UNUSED;
-     addressT  to_addr   ATTRIBUTE_UNUSED;
-     fragS *   frag      ATTRIBUTE_UNUSED;
-     symbolS * to_symbol ATTRIBUTE_UNUSED;
+md_create_long_jump (char *    ptr       ATTRIBUTE_UNUSED,
+		     addressT  from_addr ATTRIBUTE_UNUSED,
+		     addressT  to_addr   ATTRIBUTE_UNUSED,
+		     fragS *   frag      ATTRIBUTE_UNUSED,
+		     symbolS * to_symbol ATTRIBUTE_UNUSED)
 {
   as_fatal ("or32_create_long_jump\n");
 }
@@ -1236,9 +1192,8 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
 /* Should never be called for or32.  */
 
 int
-md_estimate_size_before_relax (fragP, segtype)
-     fragS * fragP   ATTRIBUTE_UNUSED;
-     segT    segtype ATTRIBUTE_UNUSED;
+md_estimate_size_before_relax (fragS * fragP   ATTRIBUTE_UNUSED,
+			       segT    segtype ATTRIBUTE_UNUSED)
 {
   as_fatal ("or32_estimate_size_before_relax\n");
   return 0;
@@ -1254,10 +1209,9 @@ md_estimate_size_before_relax (fragP, segtype)
 
 #ifdef OBJ_AOUT
 void
-tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
-     char *where;
-     fixS *fixP;
-     relax_addressT segment_address_in_file;
+tc_aout_fix_to_chars (char *where,
+		      fixS *fixP,
+		      relax_addressT segment_address_in_file)
 {
   long r_symbolnum;
 
@@ -1291,22 +1245,19 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
 const char *md_shortopts = "";
 
 struct option md_longopts[] =
-  {
-    { NULL, no_argument, NULL, 0 }
-  };
+{
+  { NULL, no_argument, NULL, 0 }
+};
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (c, arg)
-     int    c   ATTRIBUTE_UNUSED;
-     char * arg ATTRIBUTE_UNUSED;
+md_parse_option (int c ATTRIBUTE_UNUSED, char * arg ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 void
-md_show_usage (stream)
-     FILE * stream ATTRIBUTE_UNUSED;
+md_show_usage (FILE * stream ATTRIBUTE_UNUSED)
 {
 }
 
@@ -1314,8 +1265,7 @@ md_show_usage (stream)
    definitions of or32 style local labels.  */
 
 int
-or32_unrecognized_line (c)
-     int c;
+or32_unrecognized_line (int c)
 {
   int lab;
   char *s;
@@ -1350,38 +1300,12 @@ or32_unrecognized_line (c)
   return 1;
 }
 
-#ifndef BFD_ASSEMBLER
-/* Record a fixup for a cons expression.  */
-/*
-  void
-or32_cons_fix_new (frag, where, nbytes, exp)
-     fragS *frag;
-     int where;
-     int nbytes;
-     expressionS *exp;
-{
-  fix_new_exp (frag, where, nbytes, exp, 0,
-		   nbytes == 5 ? RELOC_32
-                   : nbytes == 2 ? RELOC_16
-		   : RELOC_8);
-}
-void
-tc_aout_pre_write_hook ()
-{
-#if DEBUG
-  printf ("In tc_aout_pre_write_hook()\n");
-#endif
-}
-*/
-#endif
-
 /* Default the values of symbols known that should be "predefined".  We
    don't bother to predefine them unless you actually use one, since there
    are a lot of them.  */
 
 symbolS *
-md_undefined_symbol (name)
-     char *name ATTRIBUTE_UNUSED;
+md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
 #ifndef BFD_ASSEMBLER
   long regnum;
@@ -1417,8 +1341,7 @@ md_undefined_symbol (name)
 /* Parse an operand that is machine-specific.  */
 
 void
-md_operand (expressionP)
-     expressionS *expressionP;
+md_operand (expressionS *expressionP)
 {
 #if DEBUG
   printf ("  md_operand(input_line_pointer = %s)\n", input_line_pointer);
@@ -1546,9 +1469,7 @@ md_operand (expressionP)
 /* Round up a section size to the appropriate boundary.  */
 
 valueT
-md_section_align (segment, size)
-     segT segment ATTRIBUTE_UNUSED;
-     valueT size ATTRIBUTE_UNUSED;
+md_section_align (segT segment ATTRIBUTE_UNUSED, valueT size ATTRIBUTE_UNUSED)
 {
   return size;      /* Byte alignment is fine.  */
 }
@@ -1558,8 +1479,7 @@ md_section_align (segment, size)
    which we have set up as the address of the fixup too.  */
 
 long
-md_pcrel_from (fixP)
-     fixS *fixP;
+md_pcrel_from (fixS *fixP)
 {
   return fixP->fx_where + fixP->fx_frag->fr_address;
 }
@@ -1568,14 +1488,12 @@ md_pcrel_from (fixP)
 
 #ifdef BFD_ASSEMBLER
 arelent *
-tc_gen_reloc (seg, fixp)
-     asection *seg ATTRIBUTE_UNUSED;
-     fixS *fixp;
+tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *reloc;
 
-  reloc = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  reloc = xmalloc (sizeof (arelent));
+  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   /*  reloc->address = fixp->fx_frag->fr_address + fixp->fx_where + fixp->fx_addnumber;*/
@@ -1596,4 +1514,3 @@ tc_gen_reloc (seg, fixp)
   return reloc;
 }
 #endif
-

@@ -1,6 +1,6 @@
 /* This file is tc-mcore.h
 
-   Copyright 1999, 2000, 2001, 2002, 2003
+   Copyright 1999, 2000, 2001, 2002, 2003, 2005
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -52,7 +52,7 @@
 #define LOCAL_LABELS_FB 1
 
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep (frag)
-int tc_coff_sizemachdep PARAMS ((struct frag *));
+int tc_coff_sizemachdep (struct frag *);
 
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
@@ -89,10 +89,8 @@ struct mcore_tc_sy
 
 /* When relaxing, we need to emit various relocs we otherwise wouldn't.  */
 #define TC_FORCE_RELOCATION(fix) mcore_force_relocation (fix)
-extern int mcore_force_relocation PARAMS ((struct fix *));
 
 #define tc_fix_adjustable(FIX) mcore_fix_adjustable (FIX)
-extern bfd_boolean mcore_fix_adjustable PARAMS ((struct fix *));
 
 /* Values passed to md_apply_fix3 don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
@@ -105,8 +103,10 @@ extern bfd_boolean mcore_fix_adjustable PARAMS ((struct fix *));
 
 #include "write.h"        /* For definition of fixS */
 
-extern void      md_mcore_end        PARAMS ((void));
-extern long      md_pcrel_from_section         PARAMS ((fixS *, segT));
-extern arelent * tc_gen_reloc                  PARAMS ((asection *, fixS *));
+extern void        md_mcore_end           (void);
+extern long        md_pcrel_from_section  (fixS *, segT);
+extern arelent *   tc_gen_reloc           (asection *, fixS *);
+extern int         mcore_force_relocation (fixS *);
+extern bfd_boolean mcore_fix_adjustable   (fixS *);
 
 #endif /* TC_MCORE */

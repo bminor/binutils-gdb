@@ -57,10 +57,9 @@ extern const pseudo_typeS aout_pseudo_table[];
 #define obj_pop_insert() pop_insert (aout_pseudo_table)
 #endif
 
-/* SYMBOL TABLE */
-/* Symbol table entry data type */
+/* Symbol table entry data type.  */
 
-typedef struct nlist obj_symbol_type;	/* Symbol table entry */
+typedef struct nlist obj_symbol_type;	/* Symbol table entry.  */
 
 /* Symbol table macros and constants */
 
@@ -83,26 +82,25 @@ asection *text_section, *data_section, *bss_section;
 
 #define obj_frob_symbol(S,PUNT)	obj_aout_frob_symbol (S, &PUNT)
 #define obj_frob_file_before_fix() obj_aout_frob_file_before_fix ()
-extern void obj_aout_frob_symbol PARAMS ((symbolS *, int *));
-extern void obj_aout_frob_file_before_fix PARAMS ((void));
 
-#define obj_sec_sym_ok_for_reloc(SEC)	(1)
+extern void obj_aout_frob_symbol (symbolS *, int *);
+extern void obj_aout_frob_file_before_fix (void);
+
+#define obj_sec_sym_ok_for_reloc(SEC)	1
 
 #else
 
 /* We use the sy_obj field to record whether a symbol is weak.  */
 #define OBJ_SYMFIELD_TYPE char
 
-/*
- *  Macros to extract information from a symbol table entry.
- *  This syntactic indirection allows independence regarding a.out or coff.
- *  The argument (s) of all these macros is a pointer to a symbol table entry.
- */
+/* Macros to extract information from a symbol table entry.
+   This syntactic indirection allows independence regarding a.out or coff.
+   The argument (s) of all these macros is a pointer to a symbol table entry.  */
 
-/* True if the symbol is external */
+/* True if the symbol is external.  */
 #define S_IS_EXTERNAL(s)	((s)->sy_symbol.n_type & N_EXT)
 
-/* True if symbol has been defined, ie is in N_{TEXT,DATA,BSS,ABS} or N_EXT */
+/* True if symbol has been defined, ie is in N_{TEXT,DATA,BSS,ABS} or N_EXT.  */
 #define S_IS_DEFINED(s) \
   (S_GET_TYPE (s) != N_UNDF || S_GET_DESC (s) != 0)
 
@@ -117,9 +115,9 @@ extern void obj_aout_frob_file_before_fix PARAMS ((void));
 
 #define S_IS_REGISTER(s)	((s)->sy_symbol.n_type == N_REGISTER)
 
-/* True if a debug special symbol entry */
+/* True if a debug special symbol entry.  */
 #define S_IS_DEBUG(s)		((s)->sy_symbol.n_type & N_STAB)
-/* True if a symbol is local symbol name */
+/* True if a symbol is local symbol name.  */
 #define S_IS_LOCAL(s) 					\
   ((S_GET_NAME (s) 					\
     && !S_IS_DEBUG (s) 					\
@@ -129,59 +127,59 @@ extern void obj_aout_frob_file_before_fix PARAMS ((void));
    || (flag_strip_local_absolute			\
        && ! S_IS_EXTERNAL(s)				\
        && S_GET_SEGMENT (s) == absolute_section))
-/* True if a symbol is not defined in this file */
+/* True if a symbol is not defined in this file.  */
 #define S_IS_EXTERN(s)		((s)->sy_symbol.n_type & N_EXT)
-/* True if the symbol has been generated because of a .stabd directive */
-#define S_IS_STABD(s)		(S_GET_NAME(s) == (char *)0)
+/* True if the symbol has been generated because of a .stabd directive.  */
+#define S_IS_STABD(s)		(S_GET_NAME(s) == NULL)
 
-/* Accessors */
-/* The name of the symbol */
+/* Accessors.  */
+/* The name of the symbol.  */
 #define S_GET_NAME(s)		((s)->sy_symbol.n_un.n_name)
-/* The pointer to the string table */
+/* The pointer to the string table.  */
 #define S_GET_OFFSET(s)		((s)->sy_symbol.n_un.n_strx)
-/* The type of the symbol */
+/* The type of the symbol.  */
 #define S_GET_TYPE(s)		((s)->sy_symbol.n_type & N_TYPE)
-/* The numeric value of the segment */
+/* The numeric value of the segment.  */
 #define S_GET_SEGMENT(s)	(N_TYPE_seg[S_GET_TYPE(s)])
-/* The n_other expression value */
+/* The n_other expression value.  */
 #define S_GET_OTHER(s)		((s)->sy_symbol.n_other)
-/* The n_desc expression value */
+/* The n_desc expression value.  */
 #define S_GET_DESC(s)		((s)->sy_symbol.n_desc)
 /* Whether the symbol is weak.  */
 #define S_GET_WEAK(s)		((s)->sy_obj)
 
-/* Modifiers */
-/* Assume that a symbol cannot be simultaneously in more than on segment */
-/* set segment */
-#define S_SET_SEGMENT(s,seg)	((s)->sy_symbol.n_type &= ~N_TYPE,(s)->sy_symbol.n_type|=SEGMENT_TO_SYMBOL_TYPE(seg))
-/* The symbol is external */
+/* Modifiers.  */
+/* Assume that a symbol cannot be simultaneously in more than on segment.  */
+/* Set segment.  */
+#define S_SET_SEGMENT(s,seg)	((s)->sy_symbol.n_type &= ~N_TYPE,(s)->sy_symbol.n_type |= SEGMENT_TO_SYMBOL_TYPE (seg))
+/* The symbol is external.  */
 #define S_SET_EXTERNAL(s)	((s)->sy_symbol.n_type |= N_EXT)
-/* The symbol is not external */
+/* The symbol is not external.  */
 #define S_CLEAR_EXTERNAL(s)	((s)->sy_symbol.n_type &= ~N_EXT)
-/* Set the name of the symbol */
+/* Set the name of the symbol.  */
 #define S_SET_NAME(s,v)		((s)->sy_symbol.n_un.n_name = (v))
-/* Set the offset in the string table */
+/* Set the offset in the string table.  */
 #define S_SET_OFFSET(s,v)	((s)->sy_symbol.n_un.n_strx = (v))
-/* Set the n_type field */
+/* Set the n_type field.  */
 #define S_SET_TYPE(s,t)		((s)->sy_symbol.n_type = (t))
-/* Set the n_other expression value */
+/* Set the n_other expression value.  */
 #define S_SET_OTHER(s,v)	((s)->sy_symbol.n_other = (v))
-/* Set the n_desc expression value */
+/* Set the n_desc expression value.  */
 #define S_SET_DESC(s,v)		((s)->sy_symbol.n_desc = (v))
 /* Mark the symbol as weak.  This causes n_type to be adjusted when
    the symbol is written out.  */
 #define S_SET_WEAK(s)		((s)->sy_obj = 1)
 
-/* File header macro and type definition */
+/* File header macro and type definition.  */
 
-#define H_GET_FILE_SIZE(h)	(H_GET_HEADER_SIZE(h) \
-				 + H_GET_TEXT_SIZE(h) \
-				 + H_GET_DATA_SIZE(h) \
-				 + H_GET_TEXT_RELOCATION_SIZE(h) \
-				 + H_GET_DATA_RELOCATION_SIZE(h) \
-				 + H_GET_LINENO_SIZE(h) \
-				 + H_GET_SYMBOL_TABLE_SIZE(h) \
-				 + H_GET_STRING_SIZE(h))
+#define H_GET_FILE_SIZE(h)	(H_GET_HEADER_SIZE (h) \
+				 + H_GET_TEXT_SIZE (h) \
+				 + H_GET_DATA_SIZE (h) \
+				 + H_GET_TEXT_RELOCATION_SIZE (h) \
+				 + H_GET_DATA_RELOCATION_SIZE (h) \
+				 + H_GET_LINENO_SIZE (h) \
+				 + H_GET_SYMBOL_TABLE_SIZE (h) \
+				 + H_GET_STRING_SIZE (h))
 
 #define H_GET_HEADER_SIZE(h)		(EXEC_BYTES_SIZE)
 #define H_GET_TEXT_SIZE(h)		((h)->header.a_text)
@@ -200,31 +198,31 @@ extern void obj_aout_frob_file_before_fix PARAMS ((void));
 #define H_GET_MAGIC_NUMBER(h)		((h)->header.a_info & 0xffff)
 
 #define H_SET_DYNAMIC(h,v)		((h)->header.a_info = (((v) << 31) \
-							       | (H_GET_VERSION(h) << 24) \
-							       | (H_GET_MACHTYPE(h) << 16) \
-							       | (H_GET_MAGIC_NUMBER(h))))
+							       | (H_GET_VERSION (h) << 24) \
+							       | (H_GET_MACHTYPE (h) << 16) \
+							       | (H_GET_MAGIC_NUMBER (h))))
 
-#define H_SET_VERSION(h,v)		((h)->header.a_info = ((H_GET_DYNAMIC(h) << 31) \
+#define H_SET_VERSION(h,v)		((h)->header.a_info = ((H_GET_DYNAMIC (h) << 31) \
 							       | ((v) << 24) \
-							       | (H_GET_MACHTYPE(h) << 16) \
-							       | (H_GET_MAGIC_NUMBER(h))))
+							       | (H_GET_MACHTYPE (h) << 16) \
+							       | (H_GET_MAGIC_NUMBER (h))))
 
-#define H_SET_MACHTYPE(h,v)		((h)->header.a_info = ((H_GET_DYNAMIC(h) << 31) \
-							       | (H_GET_VERSION(h) << 24) \
+#define H_SET_MACHTYPE(h,v)		((h)->header.a_info = ((H_GET_DYNAMIC (h) << 31) \
+							       | (H_GET_VERSION (h) << 24) \
 							       | ((v) << 16) \
-							       | (H_GET_MAGIC_NUMBER(h))))
+							       | (H_GET_MAGIC_NUMBER (h))))
 
-#define H_SET_MAGIC_NUMBER(h,v)		((h)->header.a_info = ((H_GET_DYNAMIC(h) << 31) \
-							       | (H_GET_VERSION(h) << 24) \
-							       | (H_GET_MACHTYPE(h) << 16) \
+#define H_SET_MAGIC_NUMBER(h,v)		((h)->header.a_info = ((H_GET_DYNAMIC (h) << 31) \
+							       | (H_GET_VERSION (h) << 24) \
+							       | (H_GET_MACHTYPE (h) << 16) \
 							       | ((v))))
 
-#define H_SET_TEXT_SIZE(h,v)		((h)->header.a_text = md_section_align(SEG_TEXT, (v)))
-#define H_SET_DATA_SIZE(h,v)		((h)->header.a_data = md_section_align(SEG_DATA, (v)))
-#define H_SET_BSS_SIZE(h,v)		((h)->header.a_bss = md_section_align(SEG_BSS, (v)))
+#define H_SET_TEXT_SIZE(h,v)		((h)->header.a_text = md_section_align (SEG_TEXT, (v)))
+#define H_SET_DATA_SIZE(h,v)		((h)->header.a_data = md_section_align (SEG_DATA, (v)))
+#define H_SET_BSS_SIZE(h,v)		((h)->header.a_bss = md_section_align (SEG_BSS, (v)))
 
-#define H_SET_RELOCATION_SIZE(h,t,d)	(H_SET_TEXT_RELOCATION_SIZE((h),(t)),\
-					 H_SET_DATA_RELOCATION_SIZE((h),(d)))
+#define H_SET_RELOCATION_SIZE(h,t,d)	(H_SET_TEXT_RELOCATION_SIZE ((h),(t)),\
+					 H_SET_DATA_RELOCATION_SIZE ((h),(d)))
 
 #define H_SET_TEXT_RELOCATION_SIZE(h,v)	((h)->header.a_trsize = (v))
 #define H_SET_DATA_RELOCATION_SIZE(h,v)	((h)->header.a_drsize = (v))
@@ -234,18 +232,18 @@ extern void obj_aout_frob_file_before_fix PARAMS ((void));
 #define H_SET_STRING_SIZE(h,v)		((h)->string_table_size = (v))
 
 typedef struct
-  {
-    struct exec header;		/* a.out header */
-    long string_table_size;	/* names + '\0' + sizeof (int) */
-  }
+{
+  struct exec header;		/* a.out header.  */
+  long string_table_size;	/* names + '\0' + sizeof (int).  */
+}
 
 object_headers;
 
-/* line numbering stuff.  */
+/* Line numbering stuff.  */
 #define OBJ_EMIT_LINENO(a, b, c)	{;}
 
 struct fix;
-void tc_aout_fix_to_chars PARAMS ((char *where, struct fix *fixP, relax_addressT segment_address));
+extern void tc_aout_fix_to_chars (char *, struct fix *, relax_addressT);
 
 #endif
 

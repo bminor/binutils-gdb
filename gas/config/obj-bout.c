@@ -22,20 +22,20 @@
 #include "as.h"
 #include "obstack.h"
 
-/* In: segT   Out: N_TYPE bits  */
+/* In: segT   Out: N_TYPE bits.  */
 const short seg_N_TYPE[] =
 {
   N_ABS,
   N_TEXT,
   N_DATA,
   N_BSS,
-  N_UNDF,			/* unknown  */
-  N_UNDF,			/* error  */
-  N_UNDF,			/* expression  */
-  N_UNDF,			/* debug  */
-  N_UNDF,			/* ntv  */
-  N_UNDF,			/* ptv  */
-  N_REGISTER,			/* register  */
+  N_UNDF,			/* Unknown.  */
+  N_UNDF,			/* Error.  */
+  N_UNDF,			/* Expression.  */
+  N_UNDF,			/* Debug.  */
+  N_UNDF,			/* Ntv.  */
+  N_UNDF,			/* Ptv.  */
+  N_REGISTER,			/* Register.  */
 };
 
 const segT N_TYPE_seg[N_TYPE + 2] =
@@ -53,32 +53,8 @@ const segT N_TYPE_seg[N_TYPE + 2] =
   SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF,
   SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF,
   SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF,
-  SEG_REGISTER,			/* dummy N_REGISTER for regs = 30  */
+  SEG_REGISTER,			/* Dummy N_REGISTER for regs = 30.   */
   SEG_GOOF,
-};
-
-static void obj_bout_line PARAMS ((int));
-
-const pseudo_typeS obj_pseudo_table[] =
-{
-  {"line", obj_bout_line, 0},	/* Source code line number.  */
-
-/* coff debugging directives.  Currently ignored silently.  */
-  {"def", s_ignore, 0},
-  {"dim", s_ignore, 0},
-  {"endef", s_ignore, 0},
-  {"ln", s_ignore, 0},
-  {"scl", s_ignore, 0},
-  {"size", s_ignore, 0},
-  {"tag", s_ignore, 0},
-  {"type", s_ignore, 0},
-  {"val", s_ignore, 0},
-
-/* other stuff we don't handle */
-  {"ABORT", s_ignore, 0},
-  {"ident", s_ignore, 0},
-
-  {NULL, NULL, 0}		/* End sentinel.  */
 };
 
 /* Relocation.  */
@@ -86,10 +62,9 @@ const pseudo_typeS obj_pseudo_table[] =
 /* Crawl along a fixS chain. Emit the segment's relocations.  */
 
 void
-obj_emit_relocations (where, fixP, segment_address_in_file)
-     char **where;
-     fixS *fixP;		/* Fixup chain for this segment.  */
-     relax_addressT segment_address_in_file;
+obj_emit_relocations (char **where,
+		      fixS *fixP,		/* Fixup chain for this segment.  */
+		      relax_addressT segment_address_in_file)
 {
   for (; fixP; fixP = fixP->fx_next)
     {
@@ -106,8 +81,8 @@ obj_emit_relocations (where, fixP, segment_address_in_file)
 
 	  tc_bout_fix_to_chars (*where, fixP, segment_address_in_file);
 	  *where += md_reloc_size;
-	}			/* if there's a symbol  */
-    }				/* for each fixup  */
+	}
+    }
 }
 
 /* Aout file generation & utilities .  */
@@ -115,9 +90,7 @@ obj_emit_relocations (where, fixP, segment_address_in_file)
 /* Convert a lvalue to machine dependent data.  */
 
 void
-obj_header_append (where, headers)
-     char **where;
-     object_headers *headers;
+obj_header_append (char **where, object_headers *headers)
 {
   /* Always leave in host byte order.  */
   char *p;
@@ -126,9 +99,7 @@ obj_header_append (where, headers)
 
   /* Force to at least 2.  */
   if (headers->header.a_talign < 2)
-    {
-      headers->header.a_talign = 2;
-    }
+    headers->header.a_talign = 2;
 
   headers->header.a_dalign = section_alignment[SEG_DATA];
   headers->header.a_balign = section_alignment[SEG_BSS];
@@ -168,11 +139,10 @@ obj_header_append (where, headers)
 }
 
 void
-obj_symbol_to_chars (where, symbolP)
-     char **where;
-     symbolS *symbolP;
+obj_symbol_to_chars (char **where, symbolS *symbolP)
 {
   char *p = *where;
+
   host_number_to_chars (p, S_GET_OFFSET (symbolP), 4);
   p += 4;
   /* Can't use S_GET_TYPE here as it masks.  */
@@ -186,9 +156,7 @@ obj_symbol_to_chars (where, symbolP)
 }
 
 void
-obj_emit_symbols (where, symbol_rootP)
-     char **where;
-     symbolS *symbol_rootP;
+obj_emit_symbols (char **where, symbolS *symbol_rootP)
 {
   symbolS *symbolP;
 
@@ -212,32 +180,29 @@ obj_emit_symbols (where, symbol_rootP)
 }
 
 void
-obj_symbol_new_hook (symbolP)
-     symbolS *symbolP;
+obj_symbol_new_hook (symbolS *symbolP)
 {
   S_SET_OTHER (symbolP, 0);
   S_SET_DESC (symbolP, 0);
 }
 
 static void
-obj_bout_line (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+obj_bout_line (int ignore ATTRIBUTE_UNUSED)
 {
   /* Assume delimiter is part of expression.  */
   /* BSD4.2 as fails with delightful bug, so we are not being
      incompatible here.  */
-  new_logical_line ((char *) NULL, (int) (get_absolute_expression ()));
+  new_logical_line (NULL, (int) (get_absolute_expression ()));
   demand_empty_rest_of_line ();
 }
 
 void
-obj_read_begin_hook ()
+obj_read_begin_hook (void)
 {
 }
 
 void
-obj_crawl_symbol_chain (headers)
-     object_headers *headers;
+obj_crawl_symbol_chain (object_headers *headers)
 {
   symbolS **symbolPP;
   symbolS *symbolP;
@@ -251,7 +216,7 @@ obj_crawl_symbol_chain (headers)
       if (flag_readonly_data_in_text && (S_GET_SEGMENT (symbolP) == SEG_DATA))
 	{
 	  S_SET_SEGMENT (symbolP, SEG_TEXT);
-	}			/* if pushing data into text  */
+	}
 
       resolve_symbol_value (symbolP);
 
@@ -287,7 +252,7 @@ obj_crawl_symbol_chain (headers)
       /* FIXME-SOON this ifdef seems highly dubious to me.  xoxorich.  */
 	      || !S_IS_DEFINED (symbolP)
 	      || S_IS_EXTERNAL (symbolP)
-#endif /* TC_I960 */
+#endif
 	      || (S_GET_NAME (symbolP)[0] != '\001'
 		  && (flag_keep_locals || !S_LOCAL_NAME (symbolP)))))
 	{
@@ -308,15 +273,13 @@ obj_crawl_symbol_chain (headers)
       else
 	{
 	  if (S_IS_EXTERNAL (symbolP) || !S_IS_DEFINED (symbolP))
-	    {
-	      as_bad (_("Local symbol %s never defined"),
-		      S_GET_NAME (symbolP));
-	    }			/* Oops.  */
+	    as_bad (_("Local symbol %s never defined"),
+		    S_GET_NAME (symbolP));
 
 	  /* Unhook it from the chain.  */
 	  *symbolPP = symbol_next (symbolP);
-	}			/* if this symbol should be in the output  */
-    }				/* for each symbol  */
+	}
+    }
 
   H_SET_SYMBOL_TABLE_SIZE (headers, symbol_number);
 }
@@ -324,8 +287,7 @@ obj_crawl_symbol_chain (headers)
 /* Find strings by crawling along symbol table chain.  */
 
 void
-obj_emit_strings (where)
-     char **where;
+obj_emit_strings (char **where)
 {
   symbolS *symbolP;
 
@@ -333,9 +295,30 @@ obj_emit_strings (where)
   *where += 4;
 
   for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
-    {
-      if (S_GET_NAME (symbolP))
-	append (where, S_GET_NAME (symbolP),
-		(unsigned long) (strlen (S_GET_NAME (symbolP)) + 1));
-    }				/* Walk symbol chain.  */
+    if (S_GET_NAME (symbolP))
+      append (where, S_GET_NAME (symbolP),
+	      (unsigned long) (strlen (S_GET_NAME (symbolP)) + 1));
 }
+
+const pseudo_typeS obj_pseudo_table[] =
+{
+  {"line", obj_bout_line, 0},	/* Source code line number.  */
+
+  /* COFF debugging directives.  Currently ignored silently.  */
+  {"def", s_ignore, 0},
+  {"dim", s_ignore, 0},
+  {"endef", s_ignore, 0},
+  {"ln", s_ignore, 0},
+  {"scl", s_ignore, 0},
+  {"size", s_ignore, 0},
+  {"tag", s_ignore, 0},
+  {"type", s_ignore, 0},
+  {"val", s_ignore, 0},
+
+  /* Other stuff we don't handle.  */
+  {"ABORT", s_ignore, 0},
+  {"ident", s_ignore, 0},
+
+  {NULL, NULL, 0}
+};
+

@@ -28,16 +28,16 @@
 #define DEFINE_TABLE
 #include "../opcodes/w65-opc.h"
 
-const char comment_chars[] = "!";
+const char comment_chars[]        = "!";
 const char line_separator_chars[] = ";";
-const char line_comment_chars[] = "!#";
+const char line_comment_chars[]   = "!#";
 
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
 
    pseudo-op name without dot
    function to call to execute this pseudo-op
-   Integer arg to pass to the function  */
+   Integer arg to pass to the function.  */
 
 #define OP_BCC	0x90
 #define OP_BCS	0xB0
@@ -50,82 +50,18 @@ const char line_comment_chars[] = "!#";
 #define OP_BVC	0x50
 #define OP_BVS	0x70
 
-static void s_longa PARAMS ((int));
-static char *parse_exp PARAMS ((char *));
-static char *get_operands PARAMS ((const struct opinfo *, char *));
-static const struct opinfo *get_specific PARAMS ((const struct opinfo *));
-static void build_Mytes PARAMS ((const struct opinfo *));
-
-
-const pseudo_typeS md_pseudo_table[] = {
-  {"int", cons, 2},
-  {"word", cons, 2},
-  {"longa", s_longa, 0},
-  {"longi", s_longa, 1},
-  {0, 0, 0}
-};
-
-const char EXP_CHARS[] = "eE";
-
-/* Chars that mean this number is a floating point constant.  */
-/* As in 0f12.456 */
-/* or    0d1.2345e12 */
-const char FLT_CHARS[] = "rRsSfFdDxXpP";
-
-/* Opcode mnemonics */
-static struct hash_control *opcode_hash_control;
-
-int M;				/* M flag */
-int X;				/* X flag */
-
-#define C(a,b) ENCODE_RELAX(a,b)
-#define ENCODE_RELAX(what,length) (((what) << 2) + (length))
-
-#define GET_WHAT(x) ((x>>2))
-
-#define BYTE_DISP 1
-#define WORD_DISP 2
-#define UNDEF_BYTE_DISP 0
-#define UNDEF_WORD_DISP 3
-
-#define COND_BRANCH 	1
-#define UNCOND_BRANCH   2
-#define END 	3
-
-#define BYTE_F 127		/* How far we can branch forwards */
-#define BYTE_B -126		/* How far we can branch backwards */
-#define WORD_F 32767
-#define WORD_B 32768
-
-relax_typeS md_relax_table[C (END, 0)] = {
-  { 0, 0, 0, 0 },
-  { 0, 0, 0, 0 },
-  { 0, 0, 0, 0 },
-  { 0, 0, 0, 0 },
-
-  /* COND_BRANCH */
-  { 0,       0,       0,  0 },				/* UNDEF_BYTE_DISP */
-  { BYTE_F,  BYTE_B,  2,  C (COND_BRANCH, WORD_DISP) },	/* BYTE_DISP */
-  { WORD_F,  WORD_B,  5,  0 },				/* WORD_DISP */
-  { 0,       0,       5,  0 },				/* UNDEF_WORD_DISP */
-
-  /* UNCOND_BRANCH */
-  { 0,       0,       0,  0 },				  /* UNDEF_BYTE_DISP */
-  { BYTE_F,  BYTE_B,  2,  C (UNCOND_BRANCH, WORD_DISP) }, /* BYTE_DISP */
-  { WORD_F,  WORD_B,  3,  0 },				  /* WORD_DISP */
-  { 0,       0,       3,  0 }				  /* UNDEF_WORD_DISP */
-
-};
+static int M;				/* M flag.  */
+static int X;				/* X flag.  */
 
 /* This function is called once, at assembler startup time.  This
    should set up all the tables, etc that the MD part of the assembler
    needs.  */
 
 static void
-s_longa (xmode)
-     int xmode;
+s_longa (int xmode)
 {
   int *p = xmode ? &X : &M;
+
   while (*input_line_pointer == ' ')
     input_line_pointer++;
   if (strncmp (input_line_pointer, "on", 2) == 0)
@@ -143,8 +79,65 @@ s_longa (xmode)
   demand_empty_rest_of_line ();
 }
 
+const pseudo_typeS md_pseudo_table[] =
+{
+  {"int", cons, 2},
+  {"word", cons, 2},
+  {"longa", s_longa, 0},
+  {"longi", s_longa, 1},
+  {0, 0, 0}
+};
+
+const char EXP_CHARS[] = "eE";
+
+/* Chars that mean this number is a floating point constant.  */
+/* As in 0f12.456 */
+/* or    0d1.2345e12 */
+const char FLT_CHARS[] = "rRsSfFdDxXpP";
+
+/* Opcode mnemonics */
+static struct hash_control *opcode_hash_control;
+
+#define C(a, b)                    ENCODE_RELAX(a,b)
+#define ENCODE_RELAX(what, length) (((what) << 2) + (length))
+
+#define GET_WHAT(x) (((x) >> 2))
+
+#define BYTE_DISP       1
+#define WORD_DISP       2
+#define UNDEF_BYTE_DISP 0
+#define UNDEF_WORD_DISP 3
+#define COND_BRANCH 	1
+#define UNCOND_BRANCH   2
+#define END 	        3
+
+#define BYTE_F 127	/* How far we can branch forwards.  */
+#define BYTE_B -126	/* How far we can branch backwards.  */
+#define WORD_F 32767
+#define WORD_B 32768
+
+relax_typeS md_relax_table[C (END, 0)] =
+{
+  { 0, 0, 0, 0 },
+  { 0, 0, 0, 0 },
+  { 0, 0, 0, 0 },
+  { 0, 0, 0, 0 },
+
+  /* COND_BRANCH */
+  { 0,       0,       0,  0 },				/* UNDEF_BYTE_DISP */
+  { BYTE_F,  BYTE_B,  2,  C (COND_BRANCH, WORD_DISP) },	/* BYTE_DISP */
+  { WORD_F,  WORD_B,  5,  0 },				/* WORD_DISP */
+  { 0,       0,       5,  0 },				/* UNDEF_WORD_DISP */
+
+  /* UNCOND_BRANCH */
+  { 0,       0,       0,  0 },				  /* UNDEF_BYTE_DISP */
+  { BYTE_F,  BYTE_B,  2,  C (UNCOND_BRANCH, WORD_DISP) }, /* BYTE_DISP */
+  { WORD_F,  WORD_B,  3,  0 },				  /* WORD_DISP */
+  { 0,       0,       3,  0 }				  /* UNDEF_WORD_DISP */
+};
+
 void
-md_begin ()
+md_begin (void)
 {
   const struct opinfo *opcode;
   char *prev_name = "";
@@ -164,15 +157,14 @@ md_begin ()
   flag_signed_overflow_ok = 1;
 }
 
-static expressionS immediate;	/* absolute expression */
-static expressionS immediate1;	/* absolute expression */
+static expressionS immediate;	/* Absolute expression.  */
+static expressionS immediate1;	/* Absolute expression.  */
 int expr_size;
 int expr_shift;
 int tc_cons_reloc;
 
 void
-w65_expression (dest)
-     expressionS *dest;
+w65_expression (expressionS *dest)
 {
   expr_size = 0;
   expr_shift = 0;
@@ -202,8 +194,7 @@ w65_expression (dest)
 int amode;
 
 static char *
-parse_exp (s)
-     char *s;
+parse_exp (char *s)
 {
   char *save;
   char *new;
@@ -219,12 +210,10 @@ parse_exp (s)
 }
 
 static char *
-get_operands (info, ptr)
-     const struct opinfo *info;
-     char *ptr;
+get_operands (const struct opinfo *info, char *ptr)
 {
-  register int override_len = 0;
-  register int bytes = 0;
+  int override_len = 0;
+  int bytes = 0;
 
   while (*ptr == ' ')
     ptr++;
@@ -274,9 +263,7 @@ get_operands (info, ptr)
 	      ptr += 2;
 	    }
 	  else
-	    {
-	      as_bad (_("syntax error after <exp"));
-	    }
+	    as_bad (_("syntax error after <exp"));
 	}
       else
 	{
@@ -317,9 +304,7 @@ get_operands (info, ptr)
 	      bytes = 2;
 	    }
 	  else
-	    {
-	      as_bad (_("syntax error after <exp"));
-	    }
+	    as_bad (_("syntax error after <exp"));
 	}
       else
 	{
@@ -328,9 +313,7 @@ get_operands (info, ptr)
 	}
     }
   else if (ptr[0] == 'a')
-    {
-      amode = ADDR_ACC;
-    }
+    amode = ADDR_ACC;
   else if (ptr[0] == '(')
     {
       /* Look for (exp),y
@@ -363,9 +346,8 @@ get_operands (info, ptr)
 	  ptr++;
 	}
       else
-	{
-	  override_len = 0;
-	}
+	override_len = 0;
+
       ptr = parse_exp (ptr);
 
       if (ptr[0] == ',')
@@ -415,13 +397,13 @@ get_operands (info, ptr)
 		  bytes = 2;
 		}
 	      ptr++;
-
 	    }
 	}
     }
   else if (ptr[0] == '[')
     {
       ptr = parse_exp (ptr + 1);
+
       if (ptr[0] == ']')
 	{
 	  ptr++;
@@ -566,24 +548,21 @@ get_operands (info, ptr)
    provided.  */
 
 static const struct opinfo *
-get_specific (opcode)
-     const struct opinfo *opcode;
+get_specific (const struct opinfo *opcode)
 {
   int ocode = opcode->code;
 
   for (; opcode->code == ocode; opcode++)
-    {
-      if (opcode->amode == amode)
-	return opcode;
-    }
+    if (opcode->amode == amode)
+      return opcode;
+
   return 0;
 }
 
 /* Now we know what sort of opcodes it is, let's build the bytes.  */
 
 static void
-build_Mytes (opcode)
-     const struct opinfo *opcode;
+build_Mytes (const struct opinfo *opcode)
 {
   int size;
   int type;
@@ -591,9 +570,8 @@ build_Mytes (opcode)
   char *output;
 
   if (opcode->amode == ADDR_IMPLIED)
-    {
-      output = frag_more (1);
-    }
+    output = frag_more (1);
+
   else if (opcode->amode == ADDR_PC_REL)
     {
       int type;
@@ -663,8 +641,7 @@ build_Mytes (opcode)
    the frags/bytes it assembles to.  */
 
 void
-md_assemble (str)
-     char *str;
+md_assemble (char *str)
 {
   const struct opinfo *opcode;
   char name[20];
@@ -673,7 +650,7 @@ md_assemble (str)
   while (*str == ' ')
     str++;
 
-  /* all opcodes are three letters */
+  /* All opcodes are three letters.  */
   name[0] = str[0];
   name[1] = str[1];
   name[2] = str[2];
@@ -712,8 +689,7 @@ md_assemble (str)
 }
 
 symbolS *
-md_undefined_symbol (name)
-     char *name ATTRIBUTE_UNUSED;
+md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
   return 0;
 }
@@ -728,10 +704,7 @@ md_undefined_symbol (name)
    returned, or NULL on OK.  */
 
 char *
-md_atof (type, litP, sizeP)
-     char type;
-     char *litP;
-     int *sizeP;
+md_atof (int type, char *litP, int *sizeP)
 {
   int prec;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
@@ -782,9 +755,7 @@ md_atof (type, litP, sizeP)
 }
 
 int
-md_parse_option (c, a)
-     int c ATTRIBUTE_UNUSED;
-     char *a ATTRIBUTE_UNUSED;
+md_parse_option (int c ATTRIBUTE_UNUSED, char *a ATTRIBUTE_UNUSED)
 {
   return 0;
 }
@@ -793,10 +764,9 @@ md_parse_option (c, a)
    are.  */
 
 void
-md_convert_frag (headers, seg, fragP)
-     object_headers *headers ATTRIBUTE_UNUSED;
-     segT seg ATTRIBUTE_UNUSED;
-     fragS *fragP;
+md_convert_frag (object_headers *headers ATTRIBUTE_UNUSED,
+		 segT seg ATTRIBUTE_UNUSED,
+		 fragS *fragP)
 {
   int disp_size = 0;
   int inst_size = 0;
@@ -823,9 +793,9 @@ md_convert_frag (headers, seg, fragP)
 	case OP_BPL:
 	case OP_BVS:
 	case OP_BVC:
-	  /* Invert the sense of the test */
+	  /* Invert the sense of the test.  */
 	  buffer[0] ^= 0x20;
-	  buffer[1] = 3;	/* Jump over following brl */
+	  buffer[1] = 3;	/* Jump over following brl.  */
 	  buffer[2] = OP_BRL;
 	  buffer[3] = 0;
 	  buffer[4] = 0;
@@ -852,7 +822,7 @@ md_convert_frag (headers, seg, fragP)
       break;
       /* Got to create a branch over a reloc here.  */
     case C (COND_BRANCH, UNDEF_WORD_DISP):
-      buffer[0] ^= 0x20;	/* invert test */
+      buffer[0] ^= 0x20;	/* Invert test.  */
       buffer[1] = 3;
       buffer[2] = OP_BRL;
       buffer[3] = 0;
@@ -902,19 +872,14 @@ md_convert_frag (headers, seg, fragP)
 }
 
 valueT
-md_section_align (seg, size)
-     segT seg;
-     valueT size;
+md_section_align (segT seg, valueT size)
 {
   return ((size + (1 << section_alignment[(int) seg]) - 1)
 	  & (-1 << section_alignment[(int) seg]));
 }
 
 void
-md_apply_fix3 (fixP, valP, seg)
-     fixS *fixP;
-     valueT * valP;
-     segT seg ATTRIBUTE_UNUSED;
+md_apply_fix3 (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 {
   long val = * (long *) valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
@@ -973,40 +938,33 @@ md_apply_fix3 (fixP, valP, seg)
 /* Put number into target byte order.  */
 
 void
-md_number_to_chars (ptr, use, nbytes)
-     char *ptr;
-     valueT use;
-     int nbytes;
+md_number_to_chars (char *ptr, valueT use, int nbytes)
 {
   number_to_chars_littleendian (ptr, use, nbytes);
 }
 
 long
-md_pcrel_from (fixP)
-     fixS *fixP;
+md_pcrel_from (fixS *fixP)
 {
   int gap = fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address - 1;
   return gap;
 }
 
 void
-tc_coff_symbol_emit_hook (x)
-     symbolS *x ATTRIBUTE_UNUSED;
+tc_coff_symbol_emit_hook (symbolS *x ATTRIBUTE_UNUSED)
 {
 }
 
 short
-tc_coff_fix2rtype (fix_ptr)
-     fixS *fix_ptr;
+tc_coff_fix2rtype (fixS *fix_ptr)
 {
   return fix_ptr->fx_r_type;
 }
 
 void
-tc_reloc_mangle (fix_ptr, intr, base)
-     fixS *fix_ptr;
-     struct internal_reloc *intr;
-     bfd_vma base;
+tc_reloc_mangle (fixS *fix_ptr,
+		 struct internal_reloc *intr,
+		 bfd_vma base)
 
 {
   symbolS *symbol_ptr;
@@ -1017,8 +975,7 @@ tc_reloc_mangle (fix_ptr, intr, base)
      to output it */
   if (fix_ptr->fx_r_type == RELOC_32)
     {
-      /* cons likes to create reloc32's whatever the size of the reloc..
-       */
+      /* Cons likes to create reloc32's whatever the size of the reloc.  */
       switch (fix_ptr->fx_size)
 	{
 	case 2:
@@ -1054,19 +1011,14 @@ tc_reloc_mangle (fix_ptr, intr, base)
 	  intr->r_symndx = dot->sy_number;
 	}
       else
-	{
-	  intr->r_symndx = symbol_ptr->sy_number;
-	}
+	intr->r_symndx = symbol_ptr->sy_number;
     }
   else
-    {
-      intr->r_symndx = -1;
-    }
+    intr->r_symndx = -1;
 }
 
 int
-tc_coff_sizemachdep (frag)
-     fragS *frag;
+tc_coff_sizemachdep (fragS *frag)
 {
   return md_relax_table[frag->fr_subtype].rlx_length;
 }
@@ -1075,9 +1027,7 @@ tc_coff_sizemachdep (frag)
    fragment must grow to reach it's destination.  */
 
 int
-md_estimate_size_before_relax (fragP, segment_type)
-     register fragS *fragP;
-     register segT segment_type;
+md_estimate_size_before_relax (fragS *fragP, segT segment_type)
 {
   int what;
 
@@ -1091,17 +1041,13 @@ md_estimate_size_before_relax (fragP, segment_type)
       what = GET_WHAT (fragP->fr_subtype);
       /* Used to be a branch to somewhere which was unknown.  */
       if (S_GET_SEGMENT (fragP->fr_symbol) == segment_type)
-	{
-	  /* Got a symbol and it's defined in this segment, become byte
-	     sized - maybe it will fix up.  */
-	  fragP->fr_subtype = C (what, BYTE_DISP);
-	}
+	/* Got a symbol and it's defined in this segment, become byte
+	   sized - maybe it will fix up.  */
+	fragP->fr_subtype = C (what, BYTE_DISP);
       else
-	{
-	  /* Its got a segment, but its not ours, so it will always be
-             long.  */
-	  fragP->fr_subtype = C (what, UNDEF_WORD_DISP);
-	}
+	/* Its got a segment, but its not ours, so it will always be
+	   long.  */
+	fragP->fr_subtype = C (what, UNDEF_WORD_DISP);
       break;
 
     case C (COND_BRANCH, BYTE_DISP):
@@ -1120,14 +1066,14 @@ md_estimate_size_before_relax (fragP, segment_type)
 }
 
 const char *md_shortopts = "";
-struct option md_longopts[] = {
+struct option md_longopts[] =
+{
 #define OPTION_RELAX (OPTION_MD_BASE)
   {NULL, no_argument, NULL, 0}
 };
 
 void
-md_show_usage (stream)
-     FILE *stream ATTRIBUTE_UNUSED;
+md_show_usage (FILE *stream ATTRIBUTE_UNUSED)
 {
 }
 

@@ -182,9 +182,6 @@ COMMON fixS **seg_fix_rootP, **seg_fix_tailP;	/* -> one of above.  */
 extern long string_byte_count;
 extern int section_alignment[];
 
-extern bit_fixS *bit_fix_new
-  (int size, int offset, long base_type, long base_adj, long min,
-   long max, long add);
 extern void append (char **charPP, char *fromP, unsigned long length);
 extern void record_alignment (segT seg, int align);
 extern int get_recorded_alignment (segT seg);

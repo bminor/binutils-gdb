@@ -30,16 +30,15 @@
 #include "opcodes/h8500-opc.h"
 #include "safe-ctype.h"
 
-const char comment_chars[] = "!";
+const char comment_chars[]        = "!";
 const char line_separator_chars[] = ";";
-const char line_comment_chars[] = "!#";
+const char line_comment_chars[]   = "!#";
 
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
    pseudo-op name without dot
    function to call to execute this pseudo-op
-   Integer arg to pass to the function
-   */
+   Integer arg to pass to the function.  */
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -59,32 +58,33 @@ const int md_reloc_size;
 
 const char EXP_CHARS[] = "eE";
 
-/* Chars that mean this number is a floating point constant */
-/* As in 0f12.456 */
-/* or    0d1.2345e12 */
+/* Chars that mean this number is a floating point constant.
+   As in 0f12.456
+   or    0d1.2345e12.  */
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
-#define C(a,b) ENCODE_RELAX(a,b)
-#define ENCODE_RELAX(what,length) (((what) << 2) + (length))
+#define C(a,b)                     ENCODE_RELAX(a, b)
+#define ENCODE_RELAX(what, length) (((what) << 2) + (length))
 
-#define GET_WHAT(x) ((x>>2))
+#define GET_WHAT(x) ((x >> 2))
 
-#define BYTE_DISP 1
-#define WORD_DISP 2
+#define BYTE_DISP       1
+#define WORD_DISP       2
 #define UNDEF_BYTE_DISP 0
 #define UNDEF_WORD_DISP 3
 
-#define BRANCH  1
-#define SCB_F   2
-#define SCB_TST 3
-#define END 4
+#define BRANCH          1
+#define SCB_F           2
+#define SCB_TST         3
+#define END             4
 
-#define BYTE_F 127
-#define BYTE_B -126
-#define WORD_F 32767
-#define WORD_B 32768
+#define BYTE_F        127
+#define BYTE_B       -126
+#define WORD_F      32767
+#define WORD_B      32768
 
-relax_typeS md_relax_table[C (END, 0)] = {
+relax_typeS md_relax_table[C (END, 0)] =
+{
   { 0, 0, 0, 0 },
   { 0, 0, 0, 0 },
   { 0, 0, 0, 0 },
@@ -110,15 +110,13 @@ relax_typeS md_relax_table[C (END, 0)] = {
 
 };
 
-static struct hash_control *opcode_hash_control;	/* Opcode mnemonics */
+static struct hash_control *opcode_hash_control;	/* Opcode mnemonics.  */
 
-/*
-  This function is called once, at assembler startup time.  This should
-  set up all the tables, etc. that the MD part of the assembler needs
-  */
+/* This function is called once, at assembler startup time.  This should
+   set up all the tables, etc. that the MD part of the assembler needs.  */
 
 void
-md_begin ()
+md_begin (void)
 {
   const h8500_opcode_info *opcode;
   char prev_buffer[100];
@@ -127,7 +125,7 @@ md_begin ()
   opcode_hash_control = hash_new ();
   prev_buffer[0] = 0;
 
-  /* Insert unique names into hash table */
+  /* Insert unique names into hash table.  */
   for (opcode = h8500_table; opcode->name; opcode++)
     {
       if (idx != opcode->idx)
@@ -138,19 +136,17 @@ md_begin ()
     }
 }
 
-static int rn;			/* register number used by RN */
-static int rs;			/* register number used by RS */
-static int rd;			/* register number used by RD */
-static int crb;			/* byte size cr */
-static int crw;			/* word sized cr */
-static int cr;			/* unknown size cr */
+static int rn;			/* Register number used by RN.  */
+static int rs;			/* Register number used by RS.  */
+static int rd;			/* Register number used by RD.  */
+static int crb;			/* Byte size cr.  */
+static int crw;			/* Word sized cr.  */
+static int cr;			/* Unknown size cr.  */
 
-static expressionS displacement;/* displacement expression */
-
+static expressionS displacement;/* Displacement expression.  */
 static int immediate_inpage;
-static expressionS immediate;	/* immediate expression */
-
-static expressionS absolute;	/* absolute expression */
+static expressionS immediate;	/* Immediate expression.  */
+static expressionS absolute;	/* Absolute expression.  */
 
 typedef struct
 {
@@ -164,13 +160,10 @@ h8500_operand_info;
 
 /* Try to parse a reg name.  Return the number of chars consumed.  */
 
-static int parse_reg PARAMS ((char *, int *, unsigned int *));
+static int parse_reg (char *, int *, unsigned int *);
 
 static int
-parse_reg (src, mode, reg)
-     char *src;
-     int *mode;
-     unsigned int *reg;
+parse_reg (char *src, int *mode, unsigned int *reg)
 {
   char *end;
   int len;
@@ -243,13 +236,8 @@ parse_reg (src, mode, reg)
   return 0;
 }
 
-static char *parse_exp PARAMS ((char *, expressionS *, int *));
-
 static char *
-parse_exp (s, op, page)
-     char *s;
-     expressionS *op;
-     int *page;
+parse_exp (char *s, expressionS *op, int *page)
 {
   char *save;
   char *new;
@@ -287,22 +275,18 @@ parse_exp (s, op, page)
 }
 
 typedef enum
-  {
-    exp_signed, exp_unsigned, exp_sandu
-  } sign_type;
-
-static char *skip_colonthing
-  PARAMS ((sign_type, char *, h8500_operand_info *, int, int, int, int));
+{
+  exp_signed, exp_unsigned, exp_sandu
+} sign_type;
 
 static char *
-skip_colonthing (sign, ptr, exp, def, size8, size16, size24)
-     sign_type sign;
-     char *ptr;
-     h8500_operand_info *exp;
-     int def;
-     int size8;
-     int size16;
-     int size24;
+skip_colonthing (sign_type sign,
+		 char *ptr,
+		 h8500_operand_info *exp,
+		 int def,
+		 int size8,
+		 int size16,
+		 int size24)
 {
   ptr = parse_exp (ptr, &exp->exp, &exp->page);
   if (*ptr == ':')
@@ -336,47 +320,37 @@ skip_colonthing (sign, ptr, exp, def, size8, size16, size24)
   else
     {
       if (exp->page == 'p')
-	{
-	  exp->type = IMM8;
-	}
+	exp->type = IMM8;
       else if (exp->page == 'h')
-	{
-	  exp->type = IMM16;
-	}
+	exp->type = IMM16;
       else
 	{
-	  /* Let's work out the size from the context */
+	  /* Let's work out the size from the context.  */
 	  int n = exp->exp.X_add_number;
+
 	  if (size8
 	      && exp->exp.X_op == O_constant
 	      && ((sign == exp_signed && (n >= -128 && n <= 127))
 		  || (sign == exp_unsigned && (n >= 0 && (n <= 255)))
 		  || (sign == exp_sandu && (n >= -128 && (n <= 255)))))
-	    {
-	      exp->type = size8;
-	    }
+	    exp->type = size8;
 	  else
-	    {
-	      exp->type = def;
-	    }
+	    exp->type = def;
 	}
     }
   return ptr;
 }
 
-static int parse_reglist PARAMS ((char *, h8500_operand_info *));
-
 static int
-parse_reglist (src, op)
-     char *src;
-     h8500_operand_info *op;
+parse_reglist (char *src, h8500_operand_info *op)
 {
   int mode;
   unsigned int rn;
   int mask = 0;
   unsigned int rm;
-  int idx = 1;			/* skip ( */
+  int idx = 1;
 
+  /* Skip (.  */  
   while (src[idx] && src[idx] != ')')
     {
       int done = parse_reg (src + idx, &mode, &rn);
@@ -391,6 +365,7 @@ parse_reglist (src, op)
 	  as_bad (_("syntax error in reg list"));
 	  return 0;
 	}
+
       if (src[idx] == '-')
 	{
 	  idx++;
@@ -405,10 +380,9 @@ parse_reglist (src, op)
 		}
 	    }
 	  else
-	    {
-	      as_bad (_("missing final register in range"));
-	    }
+	    as_bad (_("missing final register in range"));
 	}
+
       if (src[idx] == ',')
 	idx++;
     }
@@ -420,7 +394,6 @@ parse_reglist (src, op)
   op->exp.X_unsigned = 1;
   op->type = IMM8;
   return idx;
-
 }
 
 /* The many forms of operand:
@@ -431,22 +404,18 @@ parse_reglist (src, op)
    @Rn+
    @-Rn
    @aa[:size]		absolute
-   #xx[:size]		immediate data
-
-   */
-
-static void get_operand PARAMS ((char **, h8500_operand_info *, char));
+   #xx[:size]		immediate data.  */
 
 static void
-get_operand (ptr, op, ispage)
-     char **ptr;
-     h8500_operand_info *op;
-     char ispage;
+get_operand (char **ptr,
+	     h8500_operand_info *op,
+	     char ispage)
 {
   char *src = *ptr;
   int mode;
   unsigned int num;
   unsigned int len;
+
   op->page = 0;
   if (src[0] == '(' && src[1] == 'r')
     {
@@ -559,20 +528,14 @@ get_operand (ptr, op, ispage)
       return;
     }
   else
-    {
-      *ptr = skip_colonthing (exp_signed, src, op,
-			      ispage ? ABS24 : PCREL8, PCREL8, PCREL16, ABS24);
-    }
+    *ptr = skip_colonthing (exp_signed, src, op,
+			    ispage ? ABS24 : PCREL8, PCREL8, PCREL16, ABS24);
 }
 
-static char *get_operands
-  PARAMS ((h8500_opcode_info *, char *, h8500_operand_info *));
-
 static char *
-get_operands (info, args, operand)
-     h8500_opcode_info *info;
-     char *args;
-     h8500_operand_info *operand;
+get_operands (h8500_opcode_info *info,
+	      char *args,
+	      h8500_operand_info *operand)
 {
   char *ptr = args;
 
@@ -608,15 +571,11 @@ get_operands (info, args, operand)
    addressing modes, return the opcode which matches the opcodes
    provided.  */
 
-int pcrel8;			/* Set when we've seen a pcrel operand */
-
-static h8500_opcode_info *get_specific
-  PARAMS ((h8500_opcode_info *, h8500_operand_info *));
+int pcrel8;			/* Set when we've seen a pcrel operand.  */
 
 static h8500_opcode_info *
-get_specific (opcode, operands)
-     h8500_opcode_info *opcode;
-     h8500_operand_info *operands;
+get_specific (h8500_opcode_info *opcode,
+	      h8500_operand_info *operands)
 {
   h8500_opcode_info *this_try = opcode;
   int found = 0;
@@ -629,8 +588,8 @@ get_specific (opcode, operands)
 
       this_try = opcode++;
 
-      /* look at both operands needed by the opcodes and provided by
-       the user*/
+      /* Look at both operands needed by the opcodes and provided by
+	 the user.  */
       for (i = 0; i < noperands; i++)
 	{
 	  h8500_operand_info *user = operands + i;
@@ -638,7 +597,7 @@ get_specific (opcode, operands)
 	  switch (this_try->arg_type[i])
 	    {
 	    case FPIND_D8:
-	      /* Opcode needs (disp:8,fp) */
+	      /* Opcode needs (disp:8,fp).  */
 	      if (user->type == RNIND_D8 && user->reg == 6)
 		{
 		  displacement = user->exp;
@@ -673,16 +632,14 @@ get_specific (opcode, operands)
 
 	    case SPDEC:
 	      if (user->type == RNDEC && user->reg == 7)
-		{
-		  continue;
-		}
+		continue;
 	      break;
+
 	    case SPINC:
 	      if (user->type == RNINC && user->reg == 7)
-		{
-		  continue;
-		}
+		continue;
 	      break;
+
 	    case ABS16:
 	      if (user->type == ABS16)
 		{
@@ -735,10 +692,9 @@ get_specific (opcode, operands)
 	      break;
 	    case FP:
 	      if (user->type == RN && user->reg == 6)
-		{
-		  continue;
-		}
+		continue;
 	      break;
+
 	    case PCREL16:
 	      if (user->type == PCREL16)
 		{
@@ -784,8 +740,7 @@ get_specific (opcode, operands)
 	    case QIM:
 	      if (user->type == IMM8
 		  && user->exp.X_op == O_constant
-		  &&
-		  (user->exp.X_add_number == -2
+		  && (user->exp.X_add_number == -2
 		   || user->exp.X_add_number == -1
 		   || user->exp.X_add_number == 1
 		   || user->exp.X_add_number == 2))
@@ -821,7 +776,6 @@ get_specific (opcode, operands)
 	    case RNIND:
 	    case RNDEC:
 	    case RN:
-
 	      if (user->type == this_try->arg_type[i])
 		{
 		  rn = user->reg;
@@ -830,16 +784,14 @@ get_specific (opcode, operands)
 	      break;
 	    case SP:
 	      if (user->type == RN && user->reg == 7)
-		{
-		  continue;
-		}
+		continue;
 	      break;
 	    default:
 	      printf (_("unhandled %d\n"), this_try->arg_type[i]);
 	      break;
 	    }
 
-	  /* If we get here this didn't work out */
+	  /* If we get here this didn't work out.  */
 	  goto fail;
 	}
       found = 1;
@@ -853,48 +805,31 @@ get_specific (opcode, operands)
     return 0;
 }
 
-static int check PARAMS ((expressionS *, int, int));
-
 static int
-check (operand, low, high)
-     expressionS *operand;
-     int low;
-     int high;
+check (expressionS *operand,
+       int low,
+       int high)
 {
   if (operand->X_op != O_constant
       || operand->X_add_number < low
       || operand->X_add_number > high)
-    {
-      as_bad (_("operand must be absolute in range %d..%d"), low, high);
-    }
+    as_bad (_("operand must be absolute in range %d..%d"), low, high);
+
   return operand->X_add_number;
 }
-
-static void insert PARAMS ((char *, int, expressionS *, int, int));
-
+       
 static void
-insert (output, index, exp, reloc, pcrel)
-     char *output;
-     int index;
-     expressionS *exp;
-     int reloc;
-     int pcrel;
+insert (char *output, int index, expressionS *exp, int reloc, int pcrel)
 {
   fix_new_exp (frag_now,
 	       output - frag_now->fr_literal + index,
-	       4,	       	/* always say size is 4, but we know better */
-	       exp,
-	       pcrel,
-	       reloc);
+	       4,	       	/* Always say size is 4, but we know better.  */
+	       exp, pcrel, reloc);
 }
 
-static void build_relaxable_instruction
-  PARAMS ((h8500_opcode_info *, h8500_operand_info *));
-
 static void
-build_relaxable_instruction (opcode, operand)
-     h8500_opcode_info *opcode;
-     h8500_operand_info *operand ATTRIBUTE_UNUSED;
+build_relaxable_instruction (h8500_opcode_info *opcode,
+			     h8500_operand_info *operand ATTRIBUTE_UNUSED)
 {
   /* All relaxable instructions start life as two bytes but can become
      three bytes long if a lonely branch and up to 9 bytes if long
@@ -904,18 +839,12 @@ build_relaxable_instruction (opcode, operand)
   int type;
 
   if (opcode->bytes[0].contents == 0x01)
-    {
-      type = SCB_F;
-    }
+    type = SCB_F;
   else if (opcode->bytes[0].contents == 0x06
 	   || opcode->bytes[0].contents == 0x07)
-    {
-      type = SCB_TST;
-    }
+    type = SCB_TST;
   else
-    {
-      type = BRANCH;
-    }
+    type = BRANCH;
 
   p = frag_var (rs_machine_dependent,
 		md_relax_table[C (type, WORD_DISP)].rlx_length,
@@ -927,19 +856,13 @@ build_relaxable_instruction (opcode, operand)
 
   p[0] = opcode->bytes[0].contents;
   if (type != BRANCH)
-    {
-      p[1] = opcode->bytes[1].contents | rs;
-    }
+    p[1] = opcode->bytes[1].contents | rs;
 }
 
 /* Now we know what sort of opcodes it is, let's build the bytes.  */
 
-static void build_bytes PARAMS ((h8500_opcode_info *, h8500_operand_info *));
-
 static void
-build_bytes (opcode, operand)
-     h8500_opcode_info *opcode;
-     h8500_operand_info *operand;
+build_bytes (h8500_opcode_info *opcode, h8500_operand_info *operand)
 {
   int index;
 
@@ -1072,8 +995,7 @@ build_bytes (opcode, operand)
    the frags/bytes it assembles to.  */
 
 void
-md_assemble (str)
-     char *str;
+md_assemble (char *str)
 {
   char *op_start;
   char *op_end;
@@ -1092,14 +1014,9 @@ md_assemble (str)
   for (op_start = op_end = str;
        !is_end_of_line[(unsigned char) *op_end] && *op_end != ' ';
        op_end++)
-    {
-      if (			/**op_end != '.'
-	  && *op_end != ':'
-	   	   	   	  && */ nlen < 10)
-	{
-	  name[nlen++] = *op_end;
-	}
-    }
+    if (nlen < 10)
+      name[nlen++] = *op_end;
+
   name[nlen] = 0;
 
   if (op_end == op_start)
@@ -1120,7 +1037,7 @@ md_assemble (str)
 
   if (opcode == 0)
     {
-      /* Couldn't find an opcode which matched the operands */
+      /* Couldn't find an opcode which matched the operands.  */
       char *where = frag_more (2);
 
       where[0] = 0x0;
@@ -1133,22 +1050,19 @@ md_assemble (str)
 }
 
 void
-tc_crawl_symbol_chain (headers)
-     object_headers *headers ATTRIBUTE_UNUSED;
+tc_crawl_symbol_chain (object_headers *headers ATTRIBUTE_UNUSED)
 {
   printf (_("call to tc_crawl_symbol_chain \n"));
 }
 
 symbolS *
-md_undefined_symbol (name)
-     char *name ATTRIBUTE_UNUSED;
+md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
-  return 0;
+  return NULL;
 }
 
 void
-tc_headers_hook (headers)
-     object_headers *headers ATTRIBUTE_UNUSED;
+tc_headers_hook (object_headers *headers ATTRIBUTE_UNUSED)
 {
   printf (_("call to tc_headers_hook \n"));
 }
@@ -1163,10 +1077,7 @@ tc_headers_hook (headers)
    returned, or NULL on OK.  */
 
 char *
-md_atof (type, litP, sizeP)
-     char type;
-     char *litP;
-     int *sizeP;
+md_atof (int type, char *litP, int *sizeP)
 {
   int prec;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
@@ -1217,32 +1128,25 @@ md_atof (type, litP, sizeP)
 }
 
 const char *md_shortopts = "";
-struct option md_longopts[] = {
+struct option md_longopts[] =
+{
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (c, arg)
-     int c ATTRIBUTE_UNUSED;
-     char *arg ATTRIBUTE_UNUSED;
+md_parse_option (int c ATTRIBUTE_UNUSED, char *arg ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 void
-md_show_usage (stream)
-     FILE *stream ATTRIBUTE_UNUSED;
+md_show_usage (FILE *stream ATTRIBUTE_UNUSED)
 {
 }
 
-static void wordify_scb PARAMS ((char *, int *, int *));
-
 static void
-wordify_scb (buffer, disp_size, inst_size)
-     char *buffer;
-     int *disp_size;
-     int *inst_size;
+wordify_scb (char *buffer, int *disp_size, int *inst_size)
 {
   int rn = buffer[1] & 0x7;
 
@@ -1307,10 +1211,9 @@ wordify_scb (buffer, disp_size, inst_size)
    are.  */
 
 void
-md_convert_frag (headers, seg, fragP)
-     object_headers *headers ATTRIBUTE_UNUSED;
-     segT seg ATTRIBUTE_UNUSED;
-     fragS *fragP;
+md_convert_frag (object_headers *headers ATTRIBUTE_UNUSED,
+		 segT seg ATTRIBUTE_UNUSED,
+		 fragS *fragP)
 {
   int disp_size = 0;
   int inst_size = 0;
@@ -1362,7 +1265,7 @@ md_convert_frag (headers, seg, fragP)
     }
   if (inst_size)
     {
-      /* Get the address of the end of the instruction */
+      /* Get the address of the end of the instruction.  */
       int next_inst = fragP->fr_fix + fragP->fr_address + disp_size + inst_size;
       int targ_addr = (S_GET_VALUE (fragP->fr_symbol) +
 		       fragP->fr_offset);
@@ -1374,20 +1277,14 @@ md_convert_frag (headers, seg, fragP)
 }
 
 valueT
-md_section_align (seg, size)
-     segT seg ;
-     valueT size;
+md_section_align (segT seg, valueT size)
 {
   return ((size + (1 << section_alignment[(int) seg]) - 1)
 	  & (-1 << section_alignment[(int) seg]));
-
 }
 
 void
-md_apply_fix3 (fixP, valP, seg)
-     fixS *fixP;
-     valueT * valP;
-     segT seg ATTRIBUTE_UNUSED;
+md_apply_fix3 (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 {
   long val = * (long *) valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
@@ -1437,9 +1334,7 @@ md_apply_fix3 (fixP, valP, seg)
    by which a fragment must grow to reach it's destination.  */
 
 int
-md_estimate_size_before_relax (fragP, segment_type)
-     register fragS *fragP;
-     register segT segment_type;
+md_estimate_size_before_relax (fragS *fragP, segT segment_type)
 {
   int what;
 
@@ -1452,7 +1347,7 @@ md_estimate_size_before_relax (fragP, segment_type)
     case C (SCB_F, UNDEF_BYTE_DISP):
     case C (SCB_TST, UNDEF_BYTE_DISP):
       what = GET_WHAT (fragP->fr_subtype);
-      /* used to be a branch to somewhere which was unknown */
+      /* Used to be a branch to somewhere which was unknown.  */
       if (S_GET_SEGMENT (fragP->fr_symbol) == segment_type)
 	{
 	  /* Got a symbol and it's defined in this segment, become byte
@@ -1460,11 +1355,9 @@ md_estimate_size_before_relax (fragP, segment_type)
 	  fragP->fr_subtype = C (what, BYTE_DISP);
 	}
       else
-	{
-	  /* Its got a segment, but its not ours, so it will always be
-             long.  */
-	  fragP->fr_subtype = C (what, UNDEF_WORD_DISP);
-	}
+	/* Its got a segment, but its not ours, so it will always be
+	   long.  */
+	fragP->fr_subtype = C (what, UNDEF_WORD_DISP);
       break;
 
     case C (BRANCH, BYTE_DISP):
@@ -1487,35 +1380,28 @@ md_estimate_size_before_relax (fragP, segment_type)
 /* Put number into target byte order.  */
 
 void
-md_number_to_chars (ptr, use, nbytes)
-     char *ptr;
-     valueT use;
-     int nbytes;
+md_number_to_chars (char *ptr, valueT use, int nbytes)
 {
   number_to_chars_bigendian (ptr, use, nbytes);
 }
 
 long
-md_pcrel_from (fixP)
-     fixS *fixP;
+md_pcrel_from (fixS *fixP)
 {
   return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 }
 
 void
-tc_coff_symbol_emit_hook (ignore)
-     symbolS *ignore ATTRIBUTE_UNUSED;
+tc_coff_symbol_emit_hook (symbolS *ignore ATTRIBUTE_UNUSED)
 {
 }
 
 short
-tc_coff_fix2rtype (fix_ptr)
-     fixS *fix_ptr;
+tc_coff_fix2rtype (fixS *fix_ptr)
 {
   if (fix_ptr->fx_r_type == RELOC_32)
     {
-      /* cons likes to create reloc32's whatever the size of the reloc..
-     */
+      /* Cons likes to create reloc32's whatever the size of the reloc.  */
       switch (fix_ptr->fx_size)
 	{
 	case 2:
@@ -1532,11 +1418,9 @@ tc_coff_fix2rtype (fix_ptr)
 }
 
 void
-tc_reloc_mangle (fix_ptr, intr, base)
-     fixS *fix_ptr;
-     struct internal_reloc *intr;
-     bfd_vma base;
-
+tc_reloc_mangle (fixS *fix_ptr,
+		 struct internal_reloc *intr,
+		 bfd_vma base)
 {
   symbolS *symbol_ptr;
 
@@ -1546,8 +1430,7 @@ tc_reloc_mangle (fix_ptr, intr, base)
      to output it */
   if (fix_ptr->fx_r_type == RELOC_32)
     {
-      /* cons likes to create reloc32's whatever the size of the reloc..
-       */
+      /* Cons likes to create reloc32's whatever the size of the reloc.  */
       switch (fix_ptr->fx_size)
 	{
 	case 2:
@@ -1561,9 +1444,7 @@ tc_reloc_mangle (fix_ptr, intr, base)
 	}
     }
   else
-    {
-      intr->r_type = fix_ptr->fx_r_type;
-    }
+    intr->r_type = fix_ptr->fx_r_type;
 
   intr->r_vaddr = fix_ptr->fx_frag->fr_address + fix_ptr->fx_where + base;
   intr->r_offset = fix_ptr->fx_offset;
@@ -1580,21 +1461,14 @@ tc_reloc_mangle (fix_ptr, intr, base)
 	  intr->r_symndx = dot->sy_number;
 	}
       else
-	{
-	  intr->r_symndx = symbol_ptr->sy_number;
-	}
-
+	intr->r_symndx = symbol_ptr->sy_number;
     }
   else
-    {
-      intr->r_symndx = -1;
-    }
-
+    intr->r_symndx = -1;
 }
 
 int
-start_label (ptr)
-     char *ptr;
+start_label (char *ptr)
 {
   /* Check for :s.w */
   if (ISALPHA (ptr[1]) && ptr[2] == '.')
@@ -1606,8 +1480,7 @@ start_label (ptr)
 }
 
 int
-tc_coff_sizemachdep (frag)
-     fragS *frag;
+tc_coff_sizemachdep (fragS *frag)
 {
   return md_relax_table[frag->fr_subtype].rlx_length;
 }

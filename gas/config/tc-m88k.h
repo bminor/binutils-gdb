@@ -2,49 +2,49 @@
    Contributed by Devon Bowen of Buffalo University
    and Torbjorn Granlund of the Swedish Institute of Computer Science.
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 2000,
-   2002 Free Software Foundation, Inc.
+   2002, 2005 Free Software Foundation, Inc.
 
-This file is part of GAS, the GNU Assembler.
+   This file is part of GAS, the GNU Assembler.
 
-GAS is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-GAS is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GAS is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GAS; see the file COPYING.  If not, write to the Free
-Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 #define TC_M88K
 
 #define TARGET_BYTES_BIG_ENDIAN 1
 
 #ifdef M88KCOFF
-#define COFF_MAGIC MC88OMAGIC
-#define BFD_ARCH bfd_arch_m88k
-#define COFF_FLAGS F_AR32W
+#define COFF_MAGIC     MC88OMAGIC
+#define BFD_ARCH       bfd_arch_m88k
+#define COFF_FLAGS     F_AR32W
 #endif
 
 #define NEED_FX_R_TYPE
 #define TC_KEEP_FX_OFFSET
 #define TC_CONS_RELOC RELOC_32
 
-/* different type of relocation available in the m88k */
+/* Different type of relocation available in the m88k.  */
 
 enum reloc_type
 {
-  RELOC_LO16,			/* lo16(sym) */
-  RELOC_HI16,			/* hi16(sym) */
-  RELOC_PC16,			/* bb0, bb1, bcnd */
-  RELOC_PC26,			/* br, bsr */
-  RELOC_32,			/* jump tables, etc */
-  RELOC_IW16,			/* global access through linker regs 28 */
+  RELOC_LO16,			/* lo16(sym).  */
+  RELOC_HI16,			/* hi16(sym).  */
+  RELOC_PC16,			/* bb0, bb1, bcnd.  */
+  RELOC_PC26,			/* br, bsr.  */
+  RELOC_32,			/* Jump tables, etc.  */
+  RELOC_IW16,			/* Global access through linker regs 28.  */
   NO_RELOC
 };
 
@@ -101,7 +101,7 @@ struct reloc_info_m88k
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN)	max (section_alignment[(int) (SEG)], 4)
 
 /* Fill in rs_align_code fragments.  */
-extern void m88k_handle_align PARAMS ((fragS *));
+extern void m88k_handle_align (fragS *);
 #define HANDLE_ALIGN(frag)  m88k_handle_align (frag)
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (3 + 4)

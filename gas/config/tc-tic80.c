@@ -58,22 +58,18 @@ const char FLT_CHARS[] = "fF";
    function to call to execute this pseudo-op
    integer arg to pass to the function  */
 
-const pseudo_typeS md_pseudo_table[] = {
-  { "align",	s_align_bytes,		4 },	/* Do byte alignment, default is a 4 byte boundary  */
+const pseudo_typeS md_pseudo_table[] =
+{
+  { "align",	s_align_bytes,		4 },	/* Do byte alignment, default is a 4 byte boundary.  */
   { "word",	cons,			4 },	/* FIXME: Should this be machine independent?  */
   { "bss",	s_lcomm_bytes,		1 },
-  { "sect",	obj_coff_section,	0},	/* For compatibility with TI tools  */
-  { "section",	obj_coff_section,	0},	/* Standard COFF .section pseudo-op  */
+  { "sect",	obj_coff_section,	0},	/* For compatibility with TI tools.   */
+  { "section",	obj_coff_section,	0},	/* Standard COFF .section pseudo-op.   */
   { NULL,	NULL,			0 }
 };
 
 /* Opcode hash table.  */
 static struct hash_control *tic80_hash;
-
-static struct tic80_opcode * find_opcode PARAMS ((struct tic80_opcode *, expressionS []));
-static void build_insn PARAMS ((struct tic80_opcode *, expressionS *));
-static int get_operands PARAMS ((expressionS exp[]));
-static int const_overflow PARAMS ((unsigned long num, int bits, int flags));
 
 /* Replace short PC relative instructions with long form when
    necessary.  Currently this is off by default or when given the
@@ -83,21 +79,19 @@ static int const_overflow PARAMS ((unsigned long num, int bits, int flags));
 static int tic80_relax = 0;
 
 int
-md_estimate_size_before_relax (fragP, segment_type)
-     fragS *fragP ATTRIBUTE_UNUSED;
-     segT segment_type ATTRIBUTE_UNUSED;
+md_estimate_size_before_relax (fragS *fragP ATTRIBUTE_UNUSED,
+			       segT segment_type ATTRIBUTE_UNUSED)
 {
   internal_error (_("Relaxation is a luxury we can't afford"));
-  return (-1);
+  return -1;
 }
 
 /* We have no need to default values of symbols.  */
 
 symbolS *
-md_undefined_symbol (name)
-     char *name ATTRIBUTE_UNUSED;
+md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
-  return 0;
+  return NULL;
 }
 
 /* Turn a string in input_line_pointer into a floating point constant
@@ -108,10 +102,7 @@ md_undefined_symbol (name)
 #define MAX_LITTLENUMS 4
 
 char *
-md_atof (type, litP, sizeP)
-     int type;
-     char *litP;
-     int *sizeP;
+md_atof (int type, char *litP, int *sizeP)
 {
   int prec;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
@@ -141,9 +132,7 @@ md_atof (type, litP, sizeP)
 
   t = atof_ieee (input_line_pointer, type, words);
   if (t)
-    {
-      input_line_pointer = t;
-    }
+    input_line_pointer = t;
 
   *sizeP = prec * sizeof (LITTLENUM_TYPE);
 
@@ -152,17 +141,15 @@ md_atof (type, litP, sizeP)
       md_number_to_chars (litP, (valueT) (*wordP++), sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
-  return (NULL);
+
+  return NULL;
 }
 
 /* Check to see if the constant value in NUM will fit in a field of
    width BITS if it has flags FLAGS.  */
 
 static int
-const_overflow (num, bits, flags)
-     unsigned long num;
-     int bits;
-     int flags;
+const_overflow (unsigned long num, int bits, int flags)
 {
   long min, max;
   int retval = 0;
@@ -195,8 +182,7 @@ const_overflow (num, bits, flags)
    Returns the number of expressions that were placed in EXP.  */
 
 static int
-get_operands (exp)
-     expressionS exp[];
+get_operands (expressionS exp[])
 {
   char *p = input_line_pointer;
   int numexp = 0;
@@ -232,9 +218,8 @@ get_operands (exp)
 	      exp[numexp].X_add_number = TIC80_OPERAND_SCALED;
 	    }
 	  else
-	    {
-	      as_bad (_("':' not followed by 'm' or 's'"));
-	    }
+	    as_bad (_("':' not followed by 'm' or 's'"));
+
 	  numexp++;
 	  continue;
 	}
@@ -267,18 +252,13 @@ get_operands (exp)
 	}
 
       /* Begin operand parsing at the current scan point.  */
-
       input_line_pointer = p;
       expression (&exp[numexp]);
 
       if (exp[numexp].X_op == O_illegal)
-	{
-	  as_bad (_("illegal operand"));
-	}
+	as_bad (_("illegal operand"));
       else if (exp[numexp].X_op == O_absent)
-	{
-	  as_bad (_("missing operand"));
-	}
+	as_bad (_("missing operand"));
 
       numexp++;
       p = input_line_pointer;
@@ -293,7 +273,7 @@ get_operands (exp)
   /* Mark the end of the valid operands with an illegal expression.  */
   exp[numexp].X_op = O_illegal;
 
-  return (numexp);
+  return numexp;
 }
 
 /* find_opcode() gets a pointer to the entry in the opcode table that
@@ -309,38 +289,32 @@ get_operands (exp)
    choose the correct opcode.  */
 
 static struct tic80_opcode *
-find_opcode (opcode, myops)
-     struct tic80_opcode *opcode;
-     expressionS myops[];
+find_opcode (struct tic80_opcode *opcode, expressionS myops[])
 {
-  int numexp;				/* Number of expressions from parsing operands */
-  int expi;				/* Index of current expression to match */
-  int opi;				/* Index of current operand to match */
-  int match = 0;			/* Set to 1 when an operand match is found */
-  struct tic80_opcode *opc = opcode;	/* Pointer to current opcode table entry */
-  const struct tic80_opcode *end;	/* Pointer to end of opcode table */
+  int numexp;				/* Number of expressions from parsing operands.  */
+  int expi;				/* Index of current expression to match.  */
+  int opi;				/* Index of current operand to match.  */
+  int match = 0;			/* Set to 1 when an operand match is found.  */
+  struct tic80_opcode *opc = opcode;	/* Pointer to current opcode table entry.  */
+  const struct tic80_opcode *end;	/* Pointer to end of opcode table.  */
 
   /* First parse all the operands so we only have to do it once.  There may
      be more expressions generated than there are operands.  */
-
   numexp = get_operands (myops);
 
   /* For each opcode with the same name, try to match it against the parsed
      operands.  */
-
   end = tic80_opcodes + tic80_num_opcodes;
   while (!match && (opc < end) && (strcmp (opc->name, opcode->name) == 0))
     {
       /* Start off assuming a match.  If we find a mismatch, then this is
 	 reset and the operand/expr matching loop terminates with match
 	 equal to zero, which allows us to try the next opcode.  */
-
       match = 1;
 
       /* For each expression, try to match it against the current operand
 	 for the current opcode.  Upon any mismatch, we abandon further
 	 matching for the current opcode table entry.  */
-
       for (expi = 0, opi = -1; (expi < numexp) && match; expi++)
 	{
 	  int bits, flags, X_op, num;
@@ -352,11 +326,8 @@ find_opcode (opcode, myops)
 	     recent non O_absent expression.  So only increment the operand
 	     index when the current expression is not one of these special
 	     expressions.  */
-
 	  if (X_op != O_absent)
-	    {
-	      opi++;
-	    }
+	    opi++;
 
 	  flags = tic80_operands[opc->operands[opi]].flags;
 	  bits  = tic80_operands[opc->operands[opi]].bits;
@@ -371,23 +342,20 @@ find_opcode (opcode, myops)
 		  ((flags & TIC80_OPERAND_CR) != (num & TIC80_OPERAND_CR)) ||
 		  ((flags & TIC80_OPERAND_EVEN) && (num & 1)) ||
 		  const_overflow (num & ~TIC80_OPERAND_MASK, bits, flags))
-		{
-		  match = 0;
-		}
+		match = 0;
 	      break;
+
 	    case O_constant:
 	      if ((flags & TIC80_OPERAND_ENDMASK) && (num == 32))
-		{
-		  /* Endmask values of 0 and 32 give identical
-                     results.  */
-		  num = 0;
-		}
+		/* Endmask values of 0 and 32 give identical
+		   results.  */
+		num = 0;
+
 	      if ((flags & (TIC80_OPERAND_FPA | TIC80_OPERAND_GPR)) ||
 		  const_overflow (num, bits, flags))
-		{
-		  match = 0;
-		}
+		match = 0;
 	      break;
+
 	    case O_symbol:
 	      if ((bits < 32) && (flags & TIC80_OPERAND_PCREL)
 		  && !tic80_relax)
@@ -414,6 +382,7 @@ find_opcode (opcode, myops)
 		  match = 0;
 		}
 	      break;
+
 	    case O_absent:
 	      /* If this is an O_absent expression, then it may be an
 		 expression that supplies additional information about
@@ -422,16 +391,14 @@ find_opcode (opcode, myops)
 	      if (!((num & flags & TIC80_OPERAND_M_SI)
 		    || (num & flags & TIC80_OPERAND_M_LI)
 		    || (num & flags & TIC80_OPERAND_SCALED)))
-		{
-		  match = 0;
-		}
+		match = 0;
 	      break;
+
 	    case O_big:
 	      if ((num > 0) || !(flags & TIC80_OPERAND_FLOAT))
-		{
-		  match = 0;
-		}
+		match = 0;
 	      break;
+
 	    case O_illegal:
 	    case O_symbol_rva:
 	    case O_uminus:
@@ -465,7 +432,7 @@ find_opcode (opcode, myops)
 	opc++;
     }
 
-  return (match ? opc : NULL);
+  return match ? opc : NULL;
 
 }
 
@@ -477,17 +444,15 @@ find_opcode (opcode, myops)
    beginning of the next.  */
 
 static void
-build_insn (opcode, opers)
-     struct tic80_opcode *opcode;
-     expressionS *opers;
+build_insn (struct tic80_opcode *opcode, expressionS *opers)
 {
-  int expi;				/* Index of current expression to match */
-  int opi;				/* Index of current operand to match */
-  unsigned long insn[2];		/* Instruction and long immediate (if any) */
-  char *f;				/* Pointer to frag location for insn[0] */
-  fragS *ffrag;				/* Frag containing location f */
-  char *fx = NULL;			/* Pointer to frag location for insn[1] */
-  fragS *fxfrag;			/* Frag containing location fx */
+  int expi;				/* Index of current expression to match.  */
+  int opi;				/* Index of current operand to match.  */
+  unsigned long insn[2];		/* Instruction and long immediate (if any).  */
+  char *f;				/* Pointer to frag location for insn[0].  */
+  fragS *ffrag;				/* Frag containing location f.  */
+  char *fx = NULL;			/* Pointer to frag location for insn[1].  */
+  fragS *fxfrag;			/* Frag containing location fx.  */
 
   /* Start with the raw opcode bits from the opcode table.  */
   insn[0] = opcode->opcode;
@@ -495,7 +460,6 @@ build_insn (opcode, opers)
 
   /* We are going to insert at least one 32 bit opcode so get the
      frag now.  */
-
   f = frag_more (4);
   ffrag = frag_now;
 
@@ -512,11 +476,8 @@ build_insn (opcode, opers)
 	 recent non O_absent expression.  So only increment the operand
 	 index when the current expression is not one of these special
 	 expressions.  */
-
       if (X_op != O_absent)
-	{
-	  opi++;
-	}
+	opi++;
 
       flags = tic80_operands[opcode->operands[opi]].flags;
       bits  = tic80_operands[opcode->operands[opi]].bits;
@@ -528,17 +489,15 @@ build_insn (opcode, opers)
 	  num &= ~TIC80_OPERAND_MASK;
 	  insn[0] = insn[0] | (num << shift);
 	  break;
+
 	case O_constant:
 	  if ((flags & TIC80_OPERAND_ENDMASK) && (num == 32))
-	    {
-	      /* Endmask values of 0 and 32 give identical results.  */
-	      num = 0;
-	    }
+	    /* Endmask values of 0 and 32 give identical results.  */
+	    num = 0;
 	  else if ((flags & TIC80_OPERAND_BITNUM))
-	    {
-	      /* BITNUM values are stored in one's complement form.  */
-	      num = (~num & 0x1F);
-	    }
+	    /* BITNUM values are stored in one's complement form.  */
+	    num = (~num & 0x1F);
+
 	  /* Mask off upper bits, just it case it is signed and is
 	     negative.  */
 	  if (bits < 32)
@@ -553,87 +512,66 @@ build_insn (opcode, opers)
 	      insn[1] = num;
 	    }
 	  break;
+
 	case O_symbol:
 	  if (bits == 32)
 	    {
 	      fx = frag_more (4);
 	      fxfrag = frag_now;
 	      insn[1] = 0;
+
 	      if (flags & TIC80_OPERAND_PCREL)
-		{
-		  fix_new_exp (fxfrag,
-			       fx - (fxfrag->fr_literal),
-			       4,
-			       &opers[expi],
-			       1,
-			       R_MPPCR);
-		}
+		fix_new_exp (fxfrag, fx - (fxfrag->fr_literal),
+			     4, &opers[expi], 1, R_MPPCR);
 	      else
-		{
-		  fix_new_exp (fxfrag,
-			       fx - (fxfrag->fr_literal),
-			       4,
-			       &opers[expi],
-			       0,
-			       R_RELLONGX);
-		}
+		fix_new_exp (fxfrag, fx - (fxfrag->fr_literal),
+			     4, &opers[expi], 0, R_RELLONGX);
 	    }
 	  else if (flags & TIC80_OPERAND_PCREL)
-	    {
-	      fix_new_exp (ffrag,
-			   f - (ffrag->fr_literal),
-			   4,			/* FIXME! how is this used?  */
-			   &opers[expi],
-			   1,
-			   R_MPPCR15W);
-	    }
-	  else
-	    {
-	      internal_error (_("symbol reloc that is not PC relative or 32 bits"));
-	    }
+	    fix_new_exp (ffrag, f - (ffrag->fr_literal),
+			 4,			/* FIXME! how is this used?  */
+			 &opers[expi], 1, R_MPPCR15W);
+		  else
+	    internal_error (_("symbol reloc that is not PC relative or 32 bits"));
 	  break;
+
 	case O_absent:
 	  /* Each O_absent expression can indicate exactly one
              possible modifier.  */
 	  if ((num & TIC80_OPERAND_M_SI)
 	      && (flags & TIC80_OPERAND_M_SI))
-	    {
-	      insn[0] = insn[0] | (1 << 17);
-	    }
+	    insn[0] = insn[0] | (1 << 17);
 	  else if ((num & TIC80_OPERAND_M_LI)
 		   && (flags & TIC80_OPERAND_M_LI))
-	    {
-	      insn[0] = insn[0] | (1 << 15);
-	    }
+	    insn[0] = insn[0] | (1 << 15);
 	  else if ((num & TIC80_OPERAND_SCALED)
 		   && (flags & TIC80_OPERAND_SCALED))
-	    {
-	      insn[0] = insn[0] | (1 << 11);
-	    }
+	    insn[0] = insn[0] | (1 << 11);
 	  else if ((num & TIC80_OPERAND_PARENS)
 		   && (flags & TIC80_OPERAND_PARENS))
-	    {
-	      /* No code to generate, just accept and discard this
-                 expression.  */
-	    }
+	    /* No code to generate, just accept and discard this
+	       expression.  */
+	    ;
 	  else
-	    {
-	      internal_error_a (_("unhandled operand modifier"),
-				(long) opers[expi].X_add_number);
-	    }
+	    internal_error_a (_("unhandled operand modifier"),
+			      (long) opers[expi].X_add_number);
 	  break;
+
 	case O_big:
 	  fx = frag_more (4);
 	  fxfrag = frag_now;
+
 	  {
 	    int precision = 2;
 	    long exponent_bits = 8L;
 	    LITTLENUM_TYPE words[2];
+
 	    /* Value is still in generic_floating_point_number.  */
 	    gen_to_words (words, precision, exponent_bits);
 	    insn[1] = (words[0] << 16) | words[1];
 	  }
 	  break;
+
 	case O_illegal:
 	case O_symbol_rva:
 	case O_uminus:
@@ -669,9 +607,7 @@ build_insn (opcode, opers)
 
   md_number_to_chars (f, insn[0], 4);
   if (fx != NULL)
-    {
-      md_number_to_chars (fx, insn[1], 4);
-    }
+    md_number_to_chars (fx, insn[1], 4);
 }
 
 /* This is the main entry point for the machine-dependent assembler.  Gas
@@ -682,8 +618,7 @@ build_insn (opcode, opers)
   function is supposed to emit the frags/bytes it assembles to.  */
 
 void
-md_assemble (str)
-     char *str;
+md_assemble (char *str)
 {
   char *scan;
   char *input_line_save;
@@ -735,7 +670,7 @@ md_assemble (str)
    the assembler will need.  */
 
 void
-md_begin ()
+md_begin (void)
 {
   char *prev_name = "";
   register const struct tic80_opcode *op;
@@ -815,8 +750,8 @@ const char *md_shortopts = "";
 /* The assembler adds md_longopts to the machine independent long options
    that are passed to getopt.  */
 
-struct option md_longopts[] = {
-
+struct option md_longopts[] =
+{
 #define OPTION_RELAX	(OPTION_MD_BASE)
   {"relax", no_argument, NULL, OPTION_RELAX},
 
@@ -833,9 +768,7 @@ size_t md_longopts_size = sizeof (md_longopts);
    appears in md_longopts for machine specific command line options.  */
 
 int
-md_parse_option (c, arg)
-     int c;
-     char *arg ATTRIBUTE_UNUSED;
+md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 {
   switch (c)
     {
@@ -846,9 +779,9 @@ md_parse_option (c, arg)
       tic80_relax = 0;
       break;
     default:
-      return (0);
+      return 0;
     }
-  return (1);
+  return 1;
 }
 
 /* The md_show_usage function will be called whenever a usage message is
@@ -856,8 +789,7 @@ md_parse_option (c, arg)
    found in md_longopts.  */
 
 void
-md_show_usage (stream)
-     FILE *stream;
+md_show_usage (FILE *stream)
 {
   fprintf (stream, "\
 TIc80 options:\n\
@@ -870,10 +802,7 @@ TIc80 options:\n\
    To indicate that a fixup has been eliminated, set fixP->fx_done.  */
 
 void
-md_apply_fix3 (fixP, valP, seg)
-     fixS *fixP;
-     valueT * valP;
-     segT seg ATTRIBUTE_UNUSED;
+md_apply_fix3 (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 {
   long val = * (long *) valP;
   char *dest = fixP->fx_frag->fr_literal + fixP->fx_where;
@@ -886,17 +815,15 @@ md_apply_fix3 (fixP, valP, seg)
       break;
     case R_MPPCR:
       val >>= 2;
-      val += 1;	  /* Target address computed from inst start */
+      val += 1;	  /* Target address computed from inst start.  */
       md_number_to_chars (dest, (valueT) val, 4);
       break;
     case R_MPPCR15W:
       overflow = (val < -65536L) || (val > 65532L);
       if (overflow)
-	{
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("PC offset 0x%lx outside range 0x%lx-0x%lx"),
-			val, -65536L, 65532L);
-	}
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("PC offset 0x%lx outside range 0x%lx-0x%lx"),
+		      val, -65536L, 65532L);
       else
 	{
 	  val >>= 2;
@@ -905,9 +832,11 @@ md_apply_fix3 (fixP, valP, seg)
 	  *dest = (*dest & 0x80) | (val & 0x7F);
 	}
       break;
+
     case R_ABS:
       md_number_to_chars (dest, (valueT) val, fixP->fx_size);
       break;
+
     default:
       internal_error_a (_("unhandled relocation type in fixup"),
 			(long) fixP->fx_r_type);
@@ -927,42 +856,37 @@ md_apply_fix3 (fixP, valP, seg)
    the PC relative field.  */
 
 long
-md_pcrel_from (fixP)
-     fixS *fixP;
+md_pcrel_from (fixS *fixP)
 {
   return (fixP->fx_frag->fr_address + fixP->fx_where);
 }
 
 /* Called after relax() is finished.
- * In:	Address of frag.
- *	fr_type == rs_machine_dependent.
- *	fr_subtype is what the address relaxed to.
- *
- * Out:	Any fixSs and constants are set up.
- *	Caller will turn frag into a ".space 0".
- */
+   In:	Address of frag.
+  	fr_type == rs_machine_dependent.
+  	fr_subtype is what the address relaxed to.
+  
+   Out:	Any fixSs and constants are set up.
+  	Caller will turn frag into a ".space 0".  */
 
 void
-md_convert_frag (headers, seg, fragP)
-     object_headers *headers ATTRIBUTE_UNUSED;
-     segT seg ATTRIBUTE_UNUSED;
-     fragS *fragP ATTRIBUTE_UNUSED;
+md_convert_frag (object_headers *headers ATTRIBUTE_UNUSED,
+		 segT seg ATTRIBUTE_UNUSED,
+		 fragS *fragP ATTRIBUTE_UNUSED)
 {
   internal_error (_("md_convert_frag() not implemented yet"));
   abort ();
 }
 
 void
-tc_coff_symbol_emit_hook (ignore)
-     symbolS *ignore ATTRIBUTE_UNUSED;
+tc_coff_symbol_emit_hook (symbolS *ignore ATTRIBUTE_UNUSED)
 {
 }
 
 #if defined OBJ_COFF
 
 short
-tc_coff_fix2rtype (fixP)
-     fixS *fixP;
+tc_coff_fix2rtype (fixS *fixP)
 {
   return (fixP->fx_r_type);
 }

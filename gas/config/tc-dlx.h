@@ -1,5 +1,5 @@
 /* tc-dlx.h -- Assemble for the DLX
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2005 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -31,17 +31,18 @@
 #endif
 
 /* The target BFD architecture.  */
-#define TARGET_ARCH bfd_arch_dlx
-#define TARGET_FORMAT "elf32-dlx"
-#define TARGET_BYTES_BIG_ENDIAN	1
+#define TARGET_ARCH              bfd_arch_dlx
+#define TARGET_FORMAT            "elf32-dlx"
+#define TARGET_BYTES_BIG_ENDIAN	 1
 
 #define WORKING_DOT_WORD
 
 #define LEX_DOLLAR 1
 
-/* #define md_operand(x) */
-extern void dlx_pop_insert              PARAMS ((void));
-extern int set_dlx_skip_hi16_flag       PARAMS ((int));
+extern void dlx_pop_insert         (void);
+extern int set_dlx_skip_hi16_flag  (int);
+extern int dlx_unrecognized_line   (int);
+extern bfd_boolean md_dlx_fix_adjustable  (struct fix *);
 
 #define md_pop_insert()		        dlx_pop_insert ()
 
@@ -51,12 +52,10 @@ extern int set_dlx_skip_hi16_flag       PARAMS ((int));
 
 #define tc_unrecognized_line(c) dlx_unrecognized_line (c)
 
-extern int dlx_unrecognized_line PARAMS ((int));
-
-#define tc_headers_hook(a)		;	/* not used */
-#define tc_headers_hook(a)		;	/* not used */
-#define tc_crawl_symbol_chain(a)	;	/* not used */
-#define tc_coff_symbol_emit_hook(a)	;	/* not used */
+#define tc_headers_hook(a)		;	/* Not used.  */
+#define tc_headers_hook(a)		;	/* Not used.  */
+#define tc_crawl_symbol_chain(a)	;	/* Not used.  */
+#define tc_coff_symbol_emit_hook(a)	;	/* Not used.  */
 
 #define AOUT_MACHTYPE 101
 #define TC_COFF_FIX2RTYPE(fix_ptr) tc_coff_fix2rtype (fix_ptr)
@@ -65,8 +64,7 @@ extern int dlx_unrecognized_line PARAMS ((int));
 /* Should the reloc be output ?
 	on the 29k, this is true only if there is a symbol attached.
 	on the h8, this is always true, since no fixup is done
-        on dlx, I have no idea!! but lets keep it here just for fun.
-*/
+        on dlx, I have no idea!! but lets keep it here just for fun.  */
 #define TC_COUNT_RELOC(x) (x->fx_addsy)
 #define TC_CONS_RELOC BFD_RELOC_32_PCREL
 
@@ -75,7 +73,6 @@ extern int dlx_unrecognized_line PARAMS ((int));
 #define EXTERN_FORCE_RELOC 0
 
 #define tc_fix_adjustable(FIX) md_dlx_fix_adjustable (FIX)
-extern bfd_boolean md_dlx_fix_adjustable PARAMS ((struct fix *));
 
 /* Values passed to md_apply_fix3 don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
@@ -91,4 +88,5 @@ extern bfd_boolean md_dlx_fix_adjustable PARAMS ((struct fix *));
 #undef  LOCAL_LABELS_DOLLAR
 #define LOCAL_LABELS_DOLLAR 0
 
-#define DIFF_EXPR_OK		/* .-foo gets turned into PC relative relocs */
+/* .-foo gets turned into PC relative relocs.  */
+#define DIFF_EXPR_OK

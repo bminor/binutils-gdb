@@ -1,5 +1,5 @@
 /* This file is tc-tic80.h
-   Copyright 1996, 1997, 2000, 2002 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 2000, 2002, 2005 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -56,6 +56,6 @@
 
 #define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype(fixP)
 
-extern short tc_coff_fix2rtype PARAMS ((struct fix *));
+extern short tc_coff_fix2rtype (struct fix *);
 
 #endif	/* OBJ_COFF */

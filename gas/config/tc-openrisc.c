@@ -70,24 +70,18 @@ size_t md_longopts_size = sizeof (md_longopts);
 unsigned long openrisc_machine = 0; /* default */
 
 int
-md_parse_option (c, arg)
-     int    c ATTRIBUTE_UNUSED;
-     char * arg ATTRIBUTE_UNUSED;
+md_parse_option (int c ATTRIBUTE_UNUSED, char * arg ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 void
-md_show_usage (stream)
-  FILE * stream ATTRIBUTE_UNUSED;
+md_show_usage (FILE * stream ATTRIBUTE_UNUSED)
 {
 }
 
-static void ignore_pseudo PARAMS ((int));
-
 static void
-ignore_pseudo (val)
-     int val ATTRIBUTE_UNUSED;
+ignore_pseudo (int val ATTRIBUTE_UNUSED)
 {
   discard_rest_of_line ();
 }
@@ -106,7 +100,7 @@ const pseudo_typeS md_pseudo_table[] =
 
 
 void
-md_begin ()
+md_begin (void)
 {
   /* Initialize the `cgen' interface.  */
 
@@ -122,8 +116,7 @@ md_begin ()
 }
 
 void
-md_assemble (str)
-     char * str;
+md_assemble (char * str)
 {
   static int last_insn_had_delay_slot = 0;
   openrisc_insn insn;
@@ -154,8 +147,7 @@ md_assemble (str)
    We just ignore it.  */
 
 void
-md_operand (expressionP)
-     expressionS * expressionP;
+md_operand (expressionS * expressionP)
 {
   if (* input_line_pointer == '#')
     {
@@ -165,17 +157,14 @@ md_operand (expressionP)
 }
 
 valueT
-md_section_align (segment, size)
-     segT   segment;
-     valueT size;
+md_section_align (segT segment, valueT size)
 {
   int align = bfd_get_section_alignment (stdoutput, segment);
   return ((size + (1 << align) - 1) & (-1 << align));
 }
 
 symbolS *
-md_undefined_symbol (name)
-     char * name ATTRIBUTE_UNUSED;
+md_undefined_symbol (char * name ATTRIBUTE_UNUSED)
 {
   return 0;
 }
@@ -223,9 +212,7 @@ const relax_typeS md_relax_table[] =
    0 value.  */
 
 int
-md_estimate_size_before_relax (fragP, segment)
-     fragS * fragP;
-     segT    segment;
+md_estimate_size_before_relax (fragS * fragP, segT segment)
 {
   /* The only thing we have to handle here are symbols outside of the
      current segment.  They may be undefined or in a different segment in
@@ -275,10 +262,9 @@ md_estimate_size_before_relax (fragP, segment)
    fragP->fr_subtype is the subtype of what the address relaxed to.  */
 
 void
-md_convert_frag (abfd, sec, fragP)
-  bfd *   abfd ATTRIBUTE_UNUSED;
-  segT    sec  ATTRIBUTE_UNUSED;
-  fragS * fragP ATTRIBUTE_UNUSED;
+md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
+		 segT    sec  ATTRIBUTE_UNUSED,
+		 fragS * fragP ATTRIBUTE_UNUSED)
 {
   /* FIXME */
 }
@@ -290,18 +276,14 @@ md_convert_frag (abfd, sec, fragP)
    given a PC relative reloc.  */
 
 long
-md_pcrel_from_section (fixP, sec)
-     fixS * fixP;
-     segT   sec;
+md_pcrel_from_section (fixS * fixP, segT sec)
 {
   if (fixP->fx_addsy != (symbolS *) NULL
       && (! S_IS_DEFINED (fixP->fx_addsy)
 	  || S_GET_SEGMENT (fixP->fx_addsy) != sec))
-    {
-      /* The symbol is undefined (or is defined but not in this section).
-	 Let the linker figure it out.  */
-      return 0;
-    }
+    /* The symbol is undefined (or is defined but not in this section).
+       Let the linker figure it out.  */
+    return 0;
 
   return (fixP->fx_frag->fr_address + fixP->fx_where) & ~1;
 }
@@ -312,10 +294,9 @@ md_pcrel_from_section (fixP, sec)
    *FIXP may be modified if desired.  */
 
 bfd_reloc_code_real_type
-md_cgen_lookup_reloc (insn, operand, fixP)
-     const CGEN_INSN *    insn ATTRIBUTE_UNUSED;
-     const CGEN_OPERAND * operand;
-     fixS *               fixP;
+md_cgen_lookup_reloc (const CGEN_INSN *    insn ATTRIBUTE_UNUSED,
+		      const CGEN_OPERAND * operand,
+		      fixS *               fixP)
 {
   bfd_reloc_code_real_type type;
 
@@ -351,10 +332,7 @@ md_cgen_lookup_reloc (insn, operand, fixP)
 /* Write a value out to the object file, using the appropriate endianness.  */
 
 void
-md_number_to_chars (buf, val, n)
-     char * buf;
-     valueT val;
-     int    n;
+md_number_to_chars (char * buf, valueT val, int n)
 {
   number_to_chars_bigendian (buf, val, n);
 }
@@ -368,10 +346,7 @@ md_number_to_chars (buf, val, n)
 #define MAX_LITTLENUMS 6
 
 char *
-md_atof (type, litP, sizeP)
-     char   type;
-     char * litP;
-     int *  sizeP;
+md_atof (int type, char * litP, int *  sizeP)
 {
   int              i;
   int              prec;
@@ -417,16 +392,12 @@ md_atof (type, litP, sizeP)
 }
 
 bfd_boolean
-openrisc_fix_adjustable (fixP)
-   fixS * fixP;
+openrisc_fix_adjustable (fixS * fixP)
 {
-  /* We need the symbol name for the VTABLE entries */
+  /* We need the symbol name for the VTABLE entries.  */
   if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
 
   return 1;
 }
-
-
-

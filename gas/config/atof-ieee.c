@@ -24,21 +24,17 @@
 /* Flonums returned here.  */
 extern FLONUM_TYPE generic_floating_point_number;
 
-static int next_bits PARAMS ((int));
-static void unget_bits PARAMS ((int));
-static void make_invalid_floating_point_number PARAMS ((LITTLENUM_TYPE *));
-
 extern const char EXP_CHARS[];
 /* Precision in LittleNums.  */
 /* Don't count the gap in the m68k extended precision format.  */
-#define MAX_PRECISION (5)
-#define F_PRECISION (2)
-#define D_PRECISION (4)
-#define X_PRECISION (5)
-#define P_PRECISION (5)
+#define MAX_PRECISION  5
+#define F_PRECISION    2
+#define D_PRECISION    4
+#define X_PRECISION    5
+#define P_PRECISION    5
 
 /* Length in LittleNums of guard bits.  */
-#define GUARD (2)
+#define GUARD          2
 
 #ifndef TC_LARGEST_EXPONENT_IS_NORMAL
 #define TC_LARGEST_EXPONENT_IS_NORMAL(PRECISION) 0
@@ -86,13 +82,13 @@ static int littlenums_left;
 static LITTLENUM_TYPE *littlenum_pointer;
 
 static int
-next_bits (number_of_bits)
-     int number_of_bits;
+next_bits (int number_of_bits)
 {
   int return_value;
 
   if (!littlenums_left)
-    return (0);
+    return 0;
+
   if (number_of_bits >= bits_left_in_littlenum)
     {
       return_value = mask[bits_left_in_littlenum] & *littlenum_pointer;
@@ -120,8 +116,7 @@ next_bits (number_of_bits)
 /* Num had better be less than LITTLENUM_NUMBER_OF_BITS.  */
 
 static void
-unget_bits (num)
-     int num;
+unget_bits (int num)
 {
   if (!littlenums_left)
     {
@@ -141,8 +136,7 @@ unget_bits (num)
 }
 
 static void
-make_invalid_floating_point_number (words)
-     LITTLENUM_TYPE *words;
+make_invalid_floating_point_number (LITTLENUM_TYPE *words)
 {
   as_bad (_("cannot create floating-point number"));
   /* Zero the leftmost bit.  */
@@ -165,10 +159,9 @@ make_invalid_floating_point_number (words)
 /* Returns pointer past text consumed.  */
 
 char *
-atof_ieee (str, what_kind, words)
-     char *str;			/* Text to convert to binary.  */
-     int what_kind;		/* 'd', 'f', 'g', 'h'.  */
-     LITTLENUM_TYPE *words;	/* Build the binary here.  */
+atof_ieee (char *str,			/* Text to convert to binary.  */
+	   int what_kind,		/* 'd', 'f', 'g', 'h'.  */
+	   LITTLENUM_TYPE *words)	/* Build the binary here.  */
 {
   /* Extra bits for zeroed low-order bits.
      The 1st MAX_PRECISION are zeroed, the last contain flonum bits.  */
@@ -242,7 +235,7 @@ atof_ieee (str, what_kind, words)
 		    &generic_floating_point_number))
     {
       make_invalid_floating_point_number (words);
-      return (NULL);
+      return NULL;
     }
   gen_to_words (words, precision, exponent_bits);
 
@@ -256,10 +249,7 @@ atof_ieee (str, what_kind, words)
 /* Turn generic_floating_point_number into a real float/double/extended.  */
 
 int
-gen_to_words (words, precision, exponent_bits)
-     LITTLENUM_TYPE *words;
-     int precision;
-     long exponent_bits;
+gen_to_words (LITTLENUM_TYPE *words, int precision, long exponent_bits)
 {
   int return_value = 0;
 

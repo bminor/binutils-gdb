@@ -50,12 +50,10 @@ struct ecoff_sy_obj
 #define obj_frob_symbol(symp, punt) ecoff_frob_symbol (symp)
 
 /* Set section VMAs and GP.  */
-extern void ecoff_frob_file_before_fix PARAMS ((void));
 #define obj_frob_file_before_fix() ecoff_frob_file_before_fix ()
 
 /* This is used to write the symbolic data in the format that BFD
    expects it.  */
-extern void ecoff_frob_file PARAMS ((void));
 #define obj_frob_file() ecoff_frob_file ()
 
 /* We use the ECOFF functions as our hooks.  */
@@ -73,4 +71,7 @@ extern void ecoff_frob_file PARAMS ((void));
 #define obj_sec_sym_ok_for_reloc(SEC)	1
 
 #define obj_ecoff_set_ext ecoff_set_ext
-extern void obj_ecoff_set_ext PARAMS ((symbolS *, EXTR *));
+
+extern void ecoff_frob_file_before_fix (void);
+extern void ecoff_frob_file (void);
+extern void obj_ecoff_set_ext (symbolS *, EXTR *);

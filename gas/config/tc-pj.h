@@ -1,5 +1,5 @@
 /* This file is tc-pj.h
-   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
 
    Contributed by Steve Chamberlain of Transmeta, sac@pobox.com
 
@@ -31,8 +31,8 @@
    ? "Pico Java GAS Big Endian"           				\
    : "Pico Java GAS Little Endian")
 
-void pj_cons_fix_new_pj PARAMS ((struct frag *, int, int, expressionS *));
-arelent *tc_gen_reloc PARAMS((asection *, struct fix *));
+void pj_cons_fix_new_pj (struct frag *, int, int, expressionS *);
+arelent *tc_gen_reloc (asection *, struct fix *);
 
 #define md_section_align(SEGMENT, SIZE)     (SIZE)
 #define md_convert_frag(B, S, F)            (as_fatal (_("convert_frag\n")), 0)
@@ -56,5 +56,5 @@ arelent *tc_gen_reloc PARAMS((asection *, struct fix *));
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 #define tc_fix_adjustable(FIX) 					\
-          (! ((FIX)->fx_r_type == BFD_RELOC_VTABLE_INHERIT         	\
+          (! ((FIX)->fx_r_type == BFD_RELOC_VTABLE_INHERIT     	\
 	   || (FIX)->fx_r_type == BFD_RELOC_VTABLE_ENTRY))

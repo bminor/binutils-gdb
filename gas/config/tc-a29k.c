@@ -35,103 +35,72 @@
 #define	machine_ip	a29k_ip
 #define	machine_it	a29k_it
 
-#define	IMMEDIATE_BIT	0x01000000	/* Turns RB into Immediate */
-#define	ABSOLUTE_BIT	0x01000000	/* Turns PC-relative to Absolute */
-#define	CE_BIT		0x00800000	/* Coprocessor enable in LOAD */
-#define	UI_BIT		0x00000080	/* Unsigned integer in CONVERT */
+#define	IMMEDIATE_BIT	0x01000000	/* Turns RB into Immediate.  */
+#define	ABSOLUTE_BIT	0x01000000	/* Turns PC-relative to Absolute.  */
+#define	CE_BIT		0x00800000	/* Coprocessor enable in LOAD.  */
+#define	UI_BIT		0x00000080	/* Unsigned integer in CONVERT.  */
 
-/* handle of the OPCODE hash table */
+/* handle of the OPCODE hash table.  */
 static struct hash_control *op_hash = NULL;
 
 struct machine_it
-  {
-    char *error;
-    unsigned long opcode;
-    struct nlist *nlistp;
-    expressionS exp;
-    int pcrel;
-    int reloc_offset;		/* Offset of reloc within insn */
-
-    int reloc;
-  }
-the_insn;
-
-static void machine_ip PARAMS ((char *str));
-/* static void print_insn PARAMS ((struct machine_it *insn)); */
-#ifndef OBJ_COFF
-static void s_data1 PARAMS ((void));
-static void s_use PARAMS ((int));
-#endif
-static void insert_sreg PARAMS ((char *, int));
-static void define_some_regs PARAMS ((void));
-static char *parse_operand PARAMS ((char *, expressionS *, int));
-
-const pseudo_typeS
-md_pseudo_table[] =
 {
-  {"align", s_align_bytes, 4},
-  {"block", s_space, 0},
-  {"cputype", s_ignore, 0},	/* CPU as 29000 or 29050 */
-  {"reg", s_lsym, 0},		/* Register equate, same as equ */
-  {"space", s_ignore, 0},	/* Listing control */
-  {"sect", s_ignore, 0},	/* Creation of coff sections */
-#ifndef OBJ_COFF
-  /* We can do this right with coff.  */
-  {"use", s_use, 0},
-#endif
-  {"word", cons, 4},
-  {NULL, 0, 0},
-};
+  char *error;
+  unsigned long opcode;
+  struct nlist *nlistp;
+  expressionS exp;
+  int pcrel;
+  int reloc_offset;		/* Offset of reloc within insn.  */
+  int reloc;
+}
+the_insn;
 
 #if defined(BFD_HEADERS)
 #ifdef RELSZ
-const int md_reloc_size = RELSZ;	/* Coff headers */
+const int md_reloc_size = RELSZ;	/* Coff headers.  */
 #else
-const int md_reloc_size = 12;		/* something else headers */
+const int md_reloc_size = 12;		/* Something else headers.  */
 #endif
 #else
-const int md_reloc_size = 12;		/* Not bfdized*/
+const int md_reloc_size = 12;		/* Not bfdized.  */
 #endif
 
 /* This array holds the chars that always start a comment.  If the
-   pre-processor is disabled, these aren't very useful */
+   pre-processor is disabled, these aren't very useful.  */
 const char comment_chars[] = ";";
 
 /* This array holds the chars that only start a comment at the beginning of
    a line.  If the line seems to have the form '# 123 filename'
-   .line and .file directives will appear in the pre-processed output */
+   .line and .file directives will appear in the pre-processed output.  */
 /* Note that input_file.c hand checks for '#' at the beginning of the
    first line of the input file.  This is because the compiler outputs
    #NO_APP at the beginning of its output.  */
-/* Also note that comments like this one will always work */
+/* Also note that comments like this one will always work.  */
 const char line_comment_chars[] = "#";
 
 /* We needed an unused char for line separation to work around the
    lack of macros, using sed and such.  */
 const char line_separator_chars[] = "@";
 
-/* Chars that can be used to separate mant from exp in floating point nums */
+/* Chars that can be used to separate mant from exp in floating point nums.  */
 const char EXP_CHARS[] = "eE";
 
-/* Chars that mean this number is a floating point constant */
-/* As in 0f12.456 */
-/* or    0d1.2345e12 */
+/* Chars that mean this number is a floating point constant.
+   As in 0f12.456
+   or    0d1.2345e12.  */
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 /* Also be aware that MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT may have to be
    changed in read.c.  Ideally it shouldn't have to know about it at
    all, but nothing is ideal around here.  */
 
-/*
- *  anull bit - causes the branch delay slot instructions to not be executed
- */
+/* anull bit - causes the branch delay slot instructions to not be executed.  */
 #define ANNUL       (1 << 29)
 
 #ifndef OBJ_COFF
 
 static void
-s_use (ignore)
-     int ignore;
+s_use (int ignore)
 {
   if (strncmp (input_line_pointer, ".text", 5) == 0)
     {
@@ -166,7 +135,7 @@ s_use (ignore)
 }
 
 static void
-s_data1 ()
+s_data1 (void)
 {
   subseg_set (SEG_DATA, 1);
   demand_empty_rest_of_line ();
@@ -178,9 +147,7 @@ s_data1 ()
    FIXME-SOON:  These are not recognized in mixed case.  */
 
 static void
-insert_sreg (regname, regnum)
-     char *regname;
-     int regnum;
+insert_sreg (char *regname, int regnum)
 {
   /* FIXME-SOON, put something in these syms so they won't be output
      to the symbol table of the resulting object file.  */
@@ -203,11 +170,11 @@ insert_sreg (regname, regnum)
    See ASM29K Ref page 2-9.  */
 
 static void
-define_some_regs ()
+define_some_regs (void)
 {
 #define SREG	256
 
-  /* Protected special-purpose register names */
+  /* Protected special-purpose register names.  */
   insert_sreg ("vab", SREG + 0);
   insert_sreg ("ops", SREG + 1);
   insert_sreg ("cps", SREG + 2);
@@ -224,7 +191,7 @@ define_some_regs ()
   insert_sreg ("mmu", SREG + 13);
   insert_sreg ("lru", SREG + 14);
 
-  /* Additional protected special-purpose registers for the 29050 */
+  /* Additional protected special-purpose registers for the 29050.  */
   insert_sreg ("rsn",  SREG + 15);
   insert_sreg ("rma0", SREG + 16);
   insert_sreg ("rmc0", SREG + 17);
@@ -244,7 +211,7 @@ define_some_regs ()
   insert_sreg ("cir", SREG + 29);
   insert_sreg ("cdr", SREG + 30);
 
-  /* Unprotected special-purpose register names */
+  /* Unprotected special-purpose register names.  */
   insert_sreg ("ipc", SREG + 128);
   insert_sreg ("ipa", SREG + 129);
   insert_sreg ("ipb", SREG + 130);
@@ -263,14 +230,15 @@ define_some_regs ()
 /* This function is called once, at assembler startup time.  It should
    set up all the tables, etc., that the MD part of the assembler will
    need.  */
+
 void
-md_begin ()
+md_begin (void)
 {
-  register const char *retval = NULL;
+  const char *retval = NULL;
   int lose = 0;
-  register int skipnext = 0;
-  register unsigned int i;
-  register char *strend, *strend2;
+  int skipnext = 0;
+  unsigned int i;
+  char *strend, *strend2;
 
   /* Hash up all the opcodes for fast use later.  */
 
@@ -288,7 +256,6 @@ md_begin ()
 
       /* Hack to avoid multiple opcode entries.  We pre-locate all the
 	 variations (b/i field and P/A field) and handle them.  */
-
       if (!strcmp (name, machine_opcodes[i + 1].name))
 	{
 	  if ((machine_opcodes[i].opcode & 0x01000000) != 0
@@ -296,18 +263,22 @@ md_begin ()
 	      || ((machine_opcodes[i].opcode | 0x01000000)
 		  != machine_opcodes[i + 1].opcode))
 	    goto bad_table;
+
 	  strend = machine_opcodes[i].args + strlen (machine_opcodes[i].args) - 1;
 	  strend2 = machine_opcodes[i + 1].args + strlen (machine_opcodes[i + 1].args) - 1;
+
 	  switch (*strend)
 	    {
 	    case 'b':
 	      if (*strend2 != 'i')
 		goto bad_table;
 	      break;
+
 	    case 'P':
 	      if (*strend2 != 'A')
 		goto bad_table;
 	      break;
+
 	    default:
 	    bad_table:
 	      fprintf (stderr, "internal error: can't handle opcode %s\n",
@@ -321,7 +292,7 @@ md_begin ()
 	  skipnext = 1;
 	}
 
-      retval = hash_insert (op_hash, name, (PTR) &machine_opcodes[i]);
+      retval = hash_insert (op_hash, name, (void *) &machine_opcodes[i]);
       if (retval != NULL)
 	{
 	  fprintf (stderr, "internal error: can't hash `%s': %s\n",
@@ -336,39 +307,8 @@ md_begin ()
   define_some_regs ();
 }
 
-/* Assemble a single instruction.  Its label has already been handled
-   by the generic front end.  We just parse opcode and operands, and
-   produce the bytes of data and relocation.  */
-
-void
-md_assemble (str)
-     char *str;
-{
-  char *toP;
-
-  know (str);
-  machine_ip (str);
-  toP = frag_more (4);
-  /* put out the opcode */
-  md_number_to_chars (toP, the_insn.opcode, 4);
-
-  /* put out the symbol-dependent stuff */
-  if (the_insn.reloc != NO_RELOC)
-    {
-      fix_new_exp (frag_now,
-		   (toP - frag_now->fr_literal + the_insn.reloc_offset),
-		   4,		/* size */
-		   &the_insn.exp,
-		   the_insn.pcrel,
-		   the_insn.reloc);
-    }
-}
-
 static char *
-parse_operand (s, operandp, opt)
-     char *s;
-     expressionS *operandp;
-     int opt;
+parse_operand (char *s, expressionS *operandp, int opt)
 {
   char *save = input_line_pointer;
   char *new;
@@ -387,8 +327,7 @@ parse_operand (s, operandp, opt)
    Warnings or errors are generated.  */
 
 static void
-machine_ip (str)
-     char *str;
+machine_ip (char *str)
 {
   char *s;
   const char *args;
@@ -410,7 +349,7 @@ machine_ip (str)
     case '\0':
       break;
 
-    case ' ':			/* FIXME-SOMEDAY more whitespace */
+    case ' ':			/* FIXME-SOMEDAY more whitespace.  */
       *s++ = '\0';
       break;
 
@@ -433,19 +372,15 @@ machine_ip (str)
 
      If an operand matches, we modify the_insn or opcode appropriately,
      and do a "continue".  If an operand fails to match, we "break".  */
-
   if (insn->args[0] != '\0')
-    {
-      /* Prime the pump.  */
-      s = parse_operand (s, operand, insn->args[0] == 'I');
-    }
+    /* Prime the pump.  */
+    s = parse_operand (s, operand, insn->args[0] == 'I');
 
   for (args = insn->args;; ++args)
     {
       switch (*args)
 	{
-
-	case '\0':		/* end of args */
+	case '\0':
 	  if (*s == '\0')
 	    {
 	      /* We are truly done.  */
@@ -455,7 +390,7 @@ machine_ip (str)
 	  as_bad (_("Too many operands: %s"), s);
 	  break;
 
-	case ',':		/* Must match a comma */
+	case ',':
 	  if (*s++ == ',')
 	    {
 	      /* Parse next operand.  */
@@ -464,27 +399,24 @@ machine_ip (str)
 	    }
 	  break;
 
-	case 'v':		/* Trap numbers (immediate field) */
+	case 'v':
+	  /* Trap numbers (immediate field).  */
 	  if (operand->X_op == O_constant)
 	    {
 	      if (operand->X_add_number < 256)
-		{
-		  opcode |= (operand->X_add_number << 16);
-		  continue;
-		}
+		opcode |= (operand->X_add_number << 16);
 	      else
-		{
-		  as_bad (_("Immediate value of %ld is too large"),
-			  (long) operand->X_add_number);
-		  continue;
-		}
+		as_bad (_("Immediate value of %ld is too large"),
+			(long) operand->X_add_number);
+	      continue;
 	    }
 	  the_insn.reloc = RELOC_8;
-	  the_insn.reloc_offset = 1;	/* BIG-ENDIAN Byte 1 of insn */
+	  /* BIG-ENDIAN Byte 1 of insn.  */
+	  the_insn.reloc_offset = 1;
 	  the_insn.exp = *operand;
 	  continue;
 
-	case 'b':		/* A general register or 8-bit immediate */
+	case 'b': /* A general register or 8-bit immediate.  */
 	case 'i':
 	  /* We treat the two cases identically since we mashed
 	     them together in the opcode table.  */
@@ -499,33 +431,28 @@ machine_ip (str)
 	  if (operand->X_op == O_constant)
 	    {
 	      if (operand->X_add_number < 256)
-		{
-		  opcode |= operand->X_add_number;
-		  continue;
-		}
+		opcode |= operand->X_add_number;
 	      else
-		{
-		  as_bad (_("Immediate value of %ld is too large"),
-			  (long) operand->X_add_number);
-		  continue;
-		}
+		as_bad (_("Immediate value of %ld is too large"),
+			(long) operand->X_add_number);
+	      continue;
 	    }
 	  the_insn.reloc = RELOC_8;
-	  the_insn.reloc_offset = 3;	/* BIG-ENDIAN Byte 3 of insn */
+	  the_insn.reloc_offset = 3;	/* BIG-ENDIAN Byte 3 of insn.  */
 	  the_insn.exp = *operand;
 	  continue;
 
-	case 'a':		/* next operand must be a register */
+	case 'a': /* Next operand must be a register.  */
 	case 'c':
 	general_reg:
-	  /* lrNNN or grNNN or %%expr or a user-def register name */
+	  /* lrNNN or grNNN or %%expr or a user-def register name.  */
 	  if (operand->X_op != O_register)
-	    break;		/* Only registers */
+	    break;
 	  know (operand->X_add_symbol == 0);
 	  know (operand->X_op_symbol == 0);
 	  reg = operand->X_add_number;
 	  if (reg >= SREG)
-	    break;		/* No special registers */
+	    break;
 
 	  /* Got the register, now figure out where it goes in the
 	     opcode.  */
@@ -547,12 +474,12 @@ machine_ip (str)
 	  as_fatal (_("failed sanity check."));
 	  break;
 
-	case 'x':		/* 16 bit constant, zero-extended */
-	case 'X':		/* 16 bit constant, one-extended */
+	case 'x':	/* 16 bit constant, zero-extended.  */
+	case 'X':	/* 16 bit constant, one-extended.  */
 	  if (operand->X_op == O_constant)
 	    {
-	      opcode |= (operand->X_add_number & 0xFF) << 0 |
-		((operand->X_add_number & 0xFF00) << 8);
+	      opcode |= (operand->X_add_number & 0xFF) << 0
+		| ((operand->X_add_number & 0xFF00) << 8);
 	      continue;
 	    }
 	  the_insn.reloc = RELOC_CONST;
@@ -562,17 +489,17 @@ machine_ip (str)
 	case 'h':
 	  if (operand->X_op == O_constant)
 	    {
-	      opcode |= (operand->X_add_number & 0x00FF0000) >> 16 |
-		(((unsigned long) operand->X_add_number
-		  /* avoid sign ext */  & 0xFF000000) >> 8);
+	      opcode |= (operand->X_add_number & 0x00FF0000) >> 16
+		| (((unsigned long) operand->X_add_number
+		    /* Avoid sign ext.  */  & 0xFF000000) >> 8);
 	      continue;
 	    }
 	  the_insn.reloc = RELOC_CONSTH;
 	  the_insn.exp = *operand;
 	  continue;
 
-	case 'P':		/* PC-relative jump address */
-	case 'A':		/* Absolute jump address */
+	case 'P':		/* PC-relative jump address.  */
+	case 'A':		/* Absolute jump address.  */
 	  /* These two are treated together since we folded the
 	     opcode table entries together.  */
 	  if (operand->X_op == O_constant)
@@ -580,26 +507,30 @@ machine_ip (str)
 	      /* Make sure the 'A' case really exists.  */
 	      if ((insn->opcode | ABSOLUTE_BIT) != (insn + 1)->opcode)
 		break;
+
 	      {
 		bfd_vma v, mask;
+
 		mask = 0x1ffff;
 		v = operand->X_add_number & ~ mask;
 		if (v)
 		  as_bad ("call/jmp target out of range");
 	      }
-	      opcode |= ABSOLUTE_BIT |
-		(operand->X_add_number & 0x0003FC00) << 6 |
-		((operand->X_add_number & 0x000003FC) >> 2);
+
+	      opcode |= ABSOLUTE_BIT
+		| (operand->X_add_number & 0x0003FC00) << 6
+		| ((operand->X_add_number & 0x000003FC) >> 2);
 	      continue;
 	    }
+
 	  the_insn.reloc = RELOC_JUMPTARG;
 	  the_insn.exp = *operand;
-	  the_insn.pcrel = 1;	/* Assume PC-relative jump */
+	  the_insn.pcrel = 1;	/* Assume PC-relative jump.  */
 	  /* FIXME-SOON, Do we figure out whether abs later, after
-             know sym val? */
+             know sym val?  */
 	  continue;
 
-	case 'e':		/* Coprocessor enable bit for LOAD/STORE insn */
+	case 'e':	/* Coprocessor enable bit for LOAD/STORE insn.  */
 	  if (operand->X_op == O_constant)
 	    {
 	      if (operand->X_add_number == 0)
@@ -612,24 +543,24 @@ machine_ip (str)
 	    }
 	  break;
 
-	case 'n':		/* Control bits for LOAD/STORE instructions */
-	  if (operand->X_op == O_constant &&
-	      operand->X_add_number < 128)
+	case 'n':	/* Control bits for LOAD/STORE instructions.  */
+	  if (operand->X_op == O_constant
+	      && operand->X_add_number < 128)
 	    {
 	      opcode |= (operand->X_add_number << 16);
 	      continue;
 	    }
 	  break;
 
-	case 's':		/* Special register number */
+	case 's':	/* Special register number.  */
 	  if (operand->X_op != O_register)
-	    break;		/* Only registers */
+	    break;
 	  if (operand->X_add_number < SREG)
-	    break;		/* Not a special register */
+	    break;
 	  opcode |= (operand->X_add_number & 0xFF) << 8;
 	  continue;
 
-	case 'u':		/* UI bit of CONVERT */
+	case 'u':	/* UI bit of CONVERT.  */
 	  if (operand->X_op == O_constant)
 	    {
 	      if (operand->X_add_number == 0)
@@ -642,16 +573,16 @@ machine_ip (str)
 	    }
 	  break;
 
-	case 'r':		/* RND bits of CONVERT */
-	  if (operand->X_op == O_constant &&
-	      operand->X_add_number < 8)
+	case 'r':	/* RND bits of CONVERT.  */
+	  if (operand->X_op == O_constant
+	      && operand->X_add_number < 8)
 	    {
 	      opcode |= operand->X_add_number << 4;
 	      continue;
 	    }
 	  break;
 
-	case 'I':		/* ID bits of INV and IRETINV.  */
+	case 'I':	/* ID bits of INV and IRETINV.  */
 	  /* This operand is optional.  */
 	  if (operand->X_op == O_absent)
 	    continue;
@@ -663,18 +594,18 @@ machine_ip (str)
 	    }
 	  break;
 
-	case 'd':		/* FD bits of CONVERT */
-	  if (operand->X_op == O_constant &&
-	      operand->X_add_number < 4)
+	case 'd':	/* FD bits of CONVERT.  */
+	  if (operand->X_op == O_constant
+	      && operand->X_add_number < 4)
 	    {
 	      opcode |= operand->X_add_number << 2;
 	      continue;
 	    }
 	  break;
 
-	case 'f':		/* FS bits of CONVERT */
-	  if (operand->X_op == O_constant &&
-	      operand->X_add_number < 4)
+	case 'f':	/* FS bits of CONVERT.  */
+	  if (operand->X_op == O_constant
+	      && operand->X_add_number < 4)
 	    {
 	      opcode |= operand->X_add_number << 0;
 	      continue;
@@ -682,8 +613,8 @@ machine_ip (str)
 	  break;
 
 	case 'C':
-	  if (operand->X_op == O_constant &&
-	      operand->X_add_number < 4)
+	  if (operand->X_op == O_constant
+	      && operand->X_add_number < 4)
 	    {
 	      opcode |= operand->X_add_number << 16;
 	      continue;
@@ -691,8 +622,8 @@ machine_ip (str)
 	  break;
 
 	case 'F':
-	  if (operand->X_op == O_constant &&
-	      operand->X_add_number < 16)
+	  if (operand->X_op == O_constant
+	      && operand->X_add_number < 16)
 	    {
 	      opcode |= operand->X_add_number << 18;
 	      continue;
@@ -708,6 +639,28 @@ machine_ip (str)
     }
 }
 
+/* Assemble a single instruction.  Its label has already been handled
+   by the generic front end.  We just parse opcode and operands, and
+   produce the bytes of data and relocation.  */
+
+void
+md_assemble (char *str)
+{
+  char *toP;
+
+  know (str);
+  machine_ip (str);
+  toP = frag_more (4);
+  /* Put out the opcode.  */
+  md_number_to_chars (toP, the_insn.opcode, 4);
+
+  /* Put out the symbol-dependent stuff.  */
+  if (the_insn.reloc != NO_RELOC)
+    fix_new_exp (frag_now,
+		 (toP - frag_now->fr_literal + the_insn.reloc_offset),
+		 4, & the_insn.exp, the_insn.pcrel, the_insn.reloc);
+}
+
 /* This is identical to the md_atof in m68k.c.  I think this is right,
    but I'm not sure.
 
@@ -720,10 +673,7 @@ machine_ip (str)
 #define MAX_LITTLENUMS 6
 
 char *
-md_atof (type, litP, sizeP)
-     char type;
-     char *litP;
-     int *sizeP;
+md_atof (int type, char *litP, int *sizeP)
 {
   int prec;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
@@ -773,23 +723,16 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
-/*
- * Write out big-endian.
- */
+/* Write out big-endian.  */
+
 void
-md_number_to_chars (buf, val, n)
-     char *buf;
-     valueT val;
-     int n;
+md_number_to_chars (char *buf, valueT val, int n)
 {
   number_to_chars_bigendian (buf, val, n);
 }
 
 void
-md_apply_fix3 (fixP, valP, seg)
-     fixS *fixP;
-     valueT *valP;
-     segT seg ATTRIBUTE_UNUSED;
+md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   valueT val = *valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
@@ -849,7 +792,7 @@ md_apply_fix3 (fixP, valP, seg)
       buf[3] = val;
       break;
 
-    case RELOC_JUMPTARG:	/* 00XX00XX pattern in a word */
+    case RELOC_JUMPTARG:	/* 00XX00XX pattern in a word.  */
       if (!fixP->fx_done)
 	{
 	  /* The linker tries to support both AMD and old GNU style
@@ -872,17 +815,18 @@ md_apply_fix3 (fixP, valP, seg)
       else
 	/* This case was supposed to be handled in machine_ip.  */
 	abort ();
-      buf[1] = val >> 10;	/* Holds bits 0003FFFC of address */
+
+      buf[1] = val >> 10;	/* Holds bits 0003FFFC of address.  */
       buf[3] = val >> 2;
       break;
 
-    case RELOC_CONST:		/* 00XX00XX pattern in a word */
-      buf[1] = val >> 8;	/* Holds bits 0000XXXX */
+    case RELOC_CONST:		/* 00XX00XX pattern in a word.  */
+      buf[1] = val >> 8;	/* Holds bits 0000XXXX.  */
       buf[3] = val;
       break;
 
-    case RELOC_CONSTH:		/* 00XX00XX pattern in a word */
-      buf[1] = val >> 24;	/* Holds bits XXXX0000 */
+    case RELOC_CONSTH:		/* 00XX00XX pattern in a word.  */
+      buf[1] = val >> 24;	/* Holds bits XXXX0000.  */
       buf[3] = val >> 16;
       break;
 
@@ -898,47 +842,40 @@ md_apply_fix3 (fixP, valP, seg)
 
 #ifdef OBJ_COFF
 short
-tc_coff_fix2rtype (fixP)
-     fixS *fixP;
+tc_coff_fix2rtype (fixS *fixP)
 {
-
   switch (fixP->fx_r_type)
     {
-    case RELOC_32:
-      return (R_WORD);
-    case RELOC_8:
-      return (R_BYTE);
-    case RELOC_CONST:
-      return (R_ILOHALF);
-    case RELOC_CONSTH:
-      return (R_IHIHALF);
-    case RELOC_JUMPTARG:
-      return (R_IREL);
+    case RELOC_32:        return R_WORD;
+    case RELOC_8:         return R_BYTE;
+    case RELOC_CONST:     return R_ILOHALF;
+    case RELOC_CONSTH:    return R_IHIHALF;
+    case RELOC_JUMPTARG:  return R_IREL;
     default:
       printf (_("need %o3\n"), fixP->fx_r_type);
       abort ();
-    }				/* switch on type */
+    }
 
-  return (0);
+  return 0;
 }
 
 #endif /* OBJ_COFF */
 
-/* should never be called for 29k */
+/* Should never be called for 29k.  */
+
 void
-md_convert_frag (headers, seg, fragP)
-     object_headers *headers ATTRIBUTE_UNUSED;
-     segT seg ATTRIBUTE_UNUSED;
-     register fragS *fragP ATTRIBUTE_UNUSED;
+md_convert_frag (object_headers *headers ATTRIBUTE_UNUSED,
+		 segT seg ATTRIBUTE_UNUSED,
+		 fragS *fragP ATTRIBUTE_UNUSED)
 {
   as_fatal (_("a29k_convert_frag\n"));
 }
 
-/* should never be called for a29k */
+/* Should never be called for a29k.  */
+
 int
-md_estimate_size_before_relax (fragP, segtype)
-     register fragS *fragP ATTRIBUTE_UNUSED;
-     segT segtype ATTRIBUTE_UNUSED;
+md_estimate_size_before_relax (fragS *fragP ATTRIBUTE_UNUSED,
+			       segT segtype ATTRIBUTE_UNUSED)
 {
   as_fatal (_("a29k_estimate_size_before_relax\n"));
   return 0;
@@ -950,15 +887,15 @@ md_estimate_size_before_relax (fragP, segtype)
    bytes are index, most sig. byte first.  Byte 7 is broken up with
    bit 7 as external, bits 6 & 5 unused, and the lower
    five bits as relocation type.  Next 4 bytes are long addend.  */
-/* Thanx and a tip of the hat to Michael Bloom, mb@ttidca.tti.com */
+
+/* Thanx and a tip of the hat to Michael Bloom, mb@ttidca.tti.com.  */
 
 #ifdef OBJ_AOUT
 
 void
-tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
-     char *where;
-     fixS *fixP;
-     relax_addressT segment_address_in_file;
+tc_aout_fix_to_chars (char *where,
+		      fixS *fixP,
+		      relax_addressT segment_address_in_file)
 {
   long r_symbolnum;
 
@@ -977,29 +914,30 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
   where[5] = (r_symbolnum >> 8) & 0x0ff;
   where[6] = r_symbolnum & 0x0ff;
   where[7] = (((!S_IS_DEFINED (fixP->fx_addsy)) << 7) & 0x80) | (0 & 0x60) | (fixP->fx_r_type & 0x1F);
-  /* Also easy */
+
+  /* Also easy.  */
   md_number_to_chars (&where[8], fixP->fx_addnumber, 4);
 }
 
 #endif /* OBJ_AOUT */
 
 const char *md_shortopts = "";
-struct option md_longopts[] = {
+
+struct option md_longopts[] =
+{
   {NULL, no_argument, NULL, 0}
 };
+
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (c, arg)
-     int c ATTRIBUTE_UNUSED;
-     char *arg ATTRIBUTE_UNUSED;
+md_parse_option (int c ATTRIBUTE_UNUSED, char *arg ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 void
-md_show_usage (stream)
-     FILE *stream ATTRIBUTE_UNUSED;
+md_show_usage (FILE *stream ATTRIBUTE_UNUSED)
 {
 }
 
@@ -1007,8 +945,7 @@ md_show_usage (stream)
    definitions of a29k style local labels.  */
 
 int
-a29k_unrecognized_line (c)
-     int c;
+a29k_unrecognized_line (int c)
 {
   int lab;
   char *s;
@@ -1050,8 +987,7 @@ a29k_unrecognized_line (c)
    are a lot of them.  */
 
 symbolS *
-md_undefined_symbol (name)
-     char *name;
+md_undefined_symbol (char *name)
 {
   long regnum;
   char testbuf[5 + /*SLOP*/ 5];
@@ -1060,7 +996,7 @@ md_undefined_symbol (name)
       || name[0] == 'l' || name[0] == 'L'
       || name[0] == 's' || name[0] == 'S')
     {
-      /* Perhaps a global or local register name */
+      /* Perhaps a global or local register name.  */
       if (name[1] == 'r' || name[1] == 'R')
 	{
 	  long maxreg;
@@ -1078,7 +1014,7 @@ md_undefined_symbol (name)
 
 	  sprintf (testbuf, "%ld", regnum);
 	  if (strcmp (testbuf, &name[2]) != 0)
-	    return NULL;	/* gr007 or lr7foo or whatever */
+	    return NULL;	/* gr007 or lr7foo or whatever.  */
 
 	  /* We have a wiener!  Define and return a new symbol for it.  */
 	  if (name[0] == 'l' || name[0] == 'L')
@@ -1096,10 +1032,8 @@ md_undefined_symbol (name)
 /* Parse an operand that is machine-specific.  */
 
 void
-md_operand (expressionP)
-     expressionS *expressionP;
+md_operand (expressionS *expressionP)
 {
-
   if (input_line_pointer[0] == '%' && input_line_pointer[1] == '%')
     {
       /* We have a numeric register expression.  No biggy.  */
@@ -1181,15 +1115,14 @@ md_operand (expressionP)
 	  fieldlimit = 4;
 	}
       else
-	{
-	  return;
-	}
+	return;
 
       if (ISDIGIT (*s))
 	{
 	  fieldnum = *s - '0';
 	  ++s;
 	}
+
       if (fieldnum >= fieldlimit)
 	return;
 
@@ -1220,20 +1153,35 @@ md_operand (expressionP)
 }
 
 /* Round up a section size to the appropriate boundary.  */
+
 valueT
-md_section_align (segment, size)
-     segT segment ATTRIBUTE_UNUSED;
-     valueT size;
+md_section_align (segT segment ATTRIBUTE_UNUSED, valueT size)
 {
-  return size;			/* Byte alignment is fine */
+  return size;			/* Byte alignment is fine.  */
 }
 
 /* Exactly what point is a PC-relative offset relative TO?
    On the 29000, they're relative to the address of the instruction,
    which we have set up as the address of the fixup too.  */
+
 long
-md_pcrel_from (fixP)
-     fixS *fixP;
+md_pcrel_from (fixS *fixP)
 {
   return fixP->fx_where + fixP->fx_frag->fr_address;
 }
+
+const pseudo_typeS
+md_pseudo_table[] =
+{
+  {"align", s_align_bytes, 4},
+  {"block", s_space, 0},
+  {"cputype", s_ignore, 0},	/* CPU as 29000 or 29050.  */
+  {"reg", s_lsym, 0},		/* Register equate, same as equ.  */
+  {"space", s_ignore, 0},	/* Listing control.  */
+  {"sect", s_ignore, 0},	/* Creation of coff sections.  */
+#ifndef OBJ_COFF
+  {"use", s_use, 0},  		/* We can do this right with coff.  */
+#endif
+  {"word", cons, 4},
+  {NULL, 0, 0},
+};

@@ -1,5 +1,5 @@
 /* This file is tc-w65.h
-   Copyright 1995, 1997, 1998, 2000, 2001, 2002
+   Copyright 1995, 1997, 1998, 2000, 2001, 2002, 2005
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -39,8 +39,7 @@ struct fix;
 #define IGNORE_NONSTANDARD_ESCAPES
 
 #define TC_RELOC_MANGLE(s,a,b,c) tc_reloc_mangle (a,b,c)
-extern void tc_reloc_mangle
-  PARAMS ((struct fix *, struct internal_reloc *, bfd_vma));
+extern void tc_reloc_mangle (struct fix *, struct internal_reloc *, bfd_vma);
 
 #define DO_NOT_STRIP 0
 #define LISTING_HEADER "W65816 GAS "
@@ -48,10 +47,10 @@ extern void tc_reloc_mangle
 #define RELOC_32 1234
 
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep (frag)
-int tc_coff_sizemachdep PARAMS ((fragS *));
+int tc_coff_sizemachdep (fragS *);
 
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) w65_expression (EXP)
-void w65_expression PARAMS ((expressionS *));
+void w65_expression (expressionS *);
 
 #define TC_COUNT_RELOC(x) (1)
 #define TC_CONS_RELOC tc_cons_reloc

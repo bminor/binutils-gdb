@@ -1,5 +1,5 @@
 /* tc-openrisc.h -- Header file for tc-openrisc.c.
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -52,13 +52,13 @@ extern const char openrisc_comment_chars [];
 
 #define md_apply_fix3 gas_cgen_md_apply_fix3
 
-extern bfd_boolean openrisc_fix_adjustable PARAMS ((struct fix *));
+extern bfd_boolean openrisc_fix_adjustable (struct fix *);
 #define tc_fix_adjustable(FIX) openrisc_fix_adjustable (FIX)
 
 #define tc_gen_reloc gas_cgen_tc_gen_reloc
 
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */
-extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
+extern long md_pcrel_from_section (struct fix *, segT);
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section (FIX, SEC)
 
 /* For 8 vs 16 vs 32 bit branch selection.  */

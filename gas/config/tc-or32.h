@@ -1,5 +1,5 @@
 /* tc-or32.h -- Assemble for the OpenRISC 1000.
-   Copyright (C) 2002, 2003 Free Software Foundation, Inc.
+   Copyright (C) 2002, 2003. 2005 Free Software Foundation, Inc.
    Contributed by Damjan Lampret <lampret@opencores.org>.
    Based upon a29k port.
 
@@ -38,12 +38,12 @@
 
 #define tc_unrecognized_line(c) or32_unrecognized_line (c)
 
-extern int or32_unrecognized_line PARAMS ((int));
+extern int or32_unrecognized_line (int);
 
-#define tc_headers_hook(a)    ; /* not used */
-#define tc_headers_hook(a)    ; /* not used */
-#define tc_crawl_symbol_chain(a)  ; /* not used */
-#define tc_coff_symbol_emit_hook(a) ; /* not used */
+#define tc_headers_hook(a)          ; /* Not used.  */
+#define tc_headers_hook(a)          ; /* Not used.  */
+#define tc_crawl_symbol_chain(a)    ; /* Not used.  */
+#define tc_coff_symbol_emit_hook(a) ; /* Not used.  */
 
 #define AOUT_MACHTYPE               80
 #define TC_COFF_FIX2RTYPE(fix_ptr)  tc_coff_fix2rtype (fix_ptr)

@@ -1,5 +1,5 @@
 /* tc-pdp11.h -- Header file for tc-pdp11.c.
-   Copyright 2001 Free Software Foundation, Inc.
+   Copyright 2001, 2005 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -28,6 +28,6 @@
 
 #define md_operand(x)
 
-long md_chars_to_number PARAMS ((unsigned char *, int));
+long md_chars_to_number (unsigned char *, int);
 
 /* end of tc-pdp11.h */

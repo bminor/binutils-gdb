@@ -66,16 +66,14 @@ struct option md_longopts[] =
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (c, arg)
-     int    c ATTRIBUTE_UNUSED;
-     char * arg ATTRIBUTE_UNUSED;
+md_parse_option (int    c ATTRIBUTE_UNUSED,
+		 char * arg ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 void
-md_show_usage (stream)
-  FILE * stream;
+md_show_usage (FILE * stream)
 {
   fprintf (stream, _(" XSTORMY16 specific command line options:\n"));
 }
@@ -89,7 +87,7 @@ const pseudo_typeS md_pseudo_table[] =
 
 
 void
-md_begin ()
+md_begin (void)
 {
   /* Initialize the `cgen' interface.  */
 
@@ -107,8 +105,7 @@ md_begin ()
 static bfd_boolean skipping_fptr = FALSE;
 
 void
-md_assemble (str)
-     char * str;
+md_assemble (char * str)
 {
   xstormy16_insn insn;
   char *    errmsg;
@@ -135,8 +132,7 @@ md_assemble (str)
 }
 
 void
-md_operand (e)
-     expressionS * e;
+md_operand (expressionS * e)
 {
   if (*input_line_pointer != '@')
     return;
@@ -195,11 +191,10 @@ md_operand (e)
    Create BFD_RELOC_XSTORMY16_FPTR16 relocations.  */
 
 void
-xstormy16_cons_fix_new (f, where, nbytes, exp)
-     fragS *f;
-     int where;
-     int nbytes;
-     expressionS *exp;
+xstormy16_cons_fix_new (fragS *f,
+			int where,
+			int nbytes,
+			expressionS *exp)
 {
   bfd_reloc_code_real_type code;
   fixS *fix;
@@ -221,10 +216,12 @@ xstormy16_cons_fix_new (f, where, nbytes, exp)
  	  exp->X_op = O_symbol;
  	  code = BFD_RELOC_32;
  	  break;
+
  	case 2:
  	  exp->X_op = O_symbol;
  	  code = BFD_RELOC_XSTORMY16_FPTR16;
  	  break;
+
  	default:
 	  as_bad ("unsupported fptr fixup size %d", nbytes);
 	  return;
@@ -249,14 +246,13 @@ xstormy16_cons_fix_new (f, where, nbytes, exp)
    Create BFD_RELOC_XSTORMY16_FPTR16 relocations.  */
 
 fixS *
-xstormy16_cgen_record_fixup_exp (frag, where, insn, length, operand, opinfo, exp)
-     fragS *              frag;
-     int                  where;
-     const CGEN_INSN *    insn;
-     int                  length;
-     const CGEN_OPERAND * operand;
-     int                  opinfo;
-     expressionS *        exp;
+xstormy16_cgen_record_fixup_exp (fragS *              frag,
+				 int                  where,
+				 const CGEN_INSN *    insn,
+				 int                  length,
+				 const CGEN_OPERAND * operand,
+				 int                  opinfo,
+				 expressionS *        exp)
 {
   fixS *fixP;
   operatorT op = exp->X_op;
@@ -282,17 +278,15 @@ xstormy16_cgen_record_fixup_exp (frag, where, insn, length, operand, opinfo, exp
 }
 
 valueT
-md_section_align (segment, size)
-     segT   segment;
-     valueT size;
+md_section_align (segT segment, valueT size)
 {
   int align = bfd_get_section_alignment (stdoutput, segment);
+
   return ((size + (1 << align) - 1) & (-1 << align));
 }
 
 symbolS *
-md_undefined_symbol (name)
-  char * name ATTRIBUTE_UNUSED;
+md_undefined_symbol (char * name ATTRIBUTE_UNUSED)
 {
   return 0;
 }
@@ -309,9 +303,8 @@ md_undefined_symbol (name)
    0 value.  */
 
 int
-md_estimate_size_before_relax (fragP, segment)
-     fragS * fragP ATTRIBUTE_UNUSED;
-     segT    segment ATTRIBUTE_UNUSED;
+md_estimate_size_before_relax (fragS * fragP ATTRIBUTE_UNUSED,
+			       segT    segment ATTRIBUTE_UNUSED)
 {
   /* No assembler relaxation is defined (or necessary) for this port.  */
   abort ();
@@ -325,10 +318,9 @@ md_estimate_size_before_relax (fragP, segment)
    fragP->fr_subtype is the subtype of what the address relaxed to.  */
 
 void
-md_convert_frag (abfd, sec, fragP)
-  bfd *   abfd ATTRIBUTE_UNUSED;
-  segT    sec ATTRIBUTE_UNUSED;
-  fragS * fragP ATTRIBUTE_UNUSED;
+md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
+		 segT    sec ATTRIBUTE_UNUSED,
+		 fragS * fragP ATTRIBUTE_UNUSED)
 {
   /* No assembler relaxation is defined (or necessary) for this port.  */
   abort ();
@@ -340,9 +332,7 @@ md_convert_frag (abfd, sec, fragP)
    given a PC relative reloc.  */
 
 long
-md_pcrel_from_section (fixP, sec)
-     fixS * fixP;
-     segT   sec;
+md_pcrel_from_section (fixS * fixP, segT sec)
 {
   if ((fixP->fx_addsy != (symbolS *) NULL
        && (! S_IS_DEFINED (fixP->fx_addsy)
@@ -362,10 +352,9 @@ md_pcrel_from_section (fixP, sec)
    *FIXP may be modified if desired.  */
 
 bfd_reloc_code_real_type
-md_cgen_lookup_reloc (insn, operand, fixP)
-     const CGEN_INSN *    insn ATTRIBUTE_UNUSED;
-     const CGEN_OPERAND * operand;
-     fixS *               fixP;
+md_cgen_lookup_reloc (const CGEN_INSN *    insn ATTRIBUTE_UNUSED,
+		      const CGEN_OPERAND * operand,
+		      fixS *               fixP)
 {
   switch (operand->type)
     {
@@ -419,8 +408,7 @@ md_cgen_lookup_reloc (insn, operand, fixP)
    relaxing.  */
 
 int
-xstormy16_force_relocation (fix)
-     fixS * fix;
+xstormy16_force_relocation (fixS * fix)
 {
   if (fix->fx_r_type == BFD_RELOC_XSTORMY16_FPTR16)
     return 1;
@@ -432,28 +420,26 @@ xstormy16_force_relocation (fix)
    a relocation against section+offset.  */
 
 bfd_boolean
-xstormy16_fix_adjustable (fixP)
-   fixS * fixP;
+xstormy16_fix_adjustable (fixS * fixP)
 {
   /* We need the symbol name for the VTABLE entries.  */
   if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-    return 0;
+    return FALSE;
 
   if (fixP->fx_r_type == BFD_RELOC_XSTORMY16_FPTR16)
-    return 0;
+    return FALSE;
 
-  return 1;
+  return TRUE;
 }
 
 /* This is a copy of gas_cgen_md_apply_fix3, with some enhancements to
    do various things that would not be valid for all ports.  */
 
 void
-xstormy16_md_apply_fix3 (fixP, valueP, seg)
-     fixS *   fixP;
-     valueT * valueP;
-     segT     seg ATTRIBUTE_UNUSED;
+xstormy16_md_apply_fix3 (fixS *   fixP,
+			 valueT * valueP,
+			 segT     seg ATTRIBUTE_UNUSED)
 {
   char *where = fixP->fx_frag->fr_literal + fixP->fx_where;
   valueT value = *valueP;
@@ -470,8 +456,7 @@ xstormy16_md_apply_fix3 (fixP, valueP, seg)
      it must deal with turning a BFD_RELOC_{8,16,32,64} into a
      BFD_RELOC_*_PCREL for the case of
 
-	.word something-.
-  */
+	.word something-.  */
   if (fixP->fx_pcrel)
     switch (fixP->fx_r_type)
       {
@@ -546,9 +531,7 @@ xstormy16_md_apply_fix3 (fixP, valueP, seg)
 
       reloc_type = md_cgen_lookup_reloc (insn, operand, fixP);
       if (reloc_type != BFD_RELOC_NONE)
-	{
-	  fixP->fx_r_type = reloc_type;
-	}
+	fixP->fx_r_type = reloc_type;
       else
 	{
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
@@ -608,10 +591,7 @@ xstormy16_md_apply_fix3 (fixP, valueP, seg)
 /* Write a value out to the object file, using the appropriate endianness.  */
 
 void
-md_number_to_chars (buf, val, n)
-     char * buf;
-     valueT val;
-     int    n;
+md_number_to_chars (char * buf, valueT val, int n)
 {
   number_to_chars_littleendian (buf, val, n);
 }
@@ -625,10 +605,7 @@ md_number_to_chars (buf, val, n)
 #define MAX_LITTLENUMS 6
 
 char *
-md_atof (type, litP, sizeP)
-     char   type;
-     char * litP;
-     int *  sizeP;
+md_atof (int type, char * litP, int * sizeP)
 {
   int              prec;
   LITTLENUM_TYPE   words [MAX_LITTLENUMS];
