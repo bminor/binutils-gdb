@@ -2049,6 +2049,16 @@ It generally does map to one of the other relocation types. */
 not stored in the instruction. */
   BFD_RELOC_ARM_PCREL_BRANCH,
 
+/* ARM 26 bit pc-relative branch.  The lowest bit must be zero and is
+not stored in the instruction.  The 2nd lowest bit comes from a 1 bit
+field in the instruction. */
+  BFD_RELOC_ARM_PCREL_BLX,
+
+/* Thumb 22 bit pc-relative branch.  The lowest bit must be zero and is
+not stored in the instruction.  The 2nd lowest bit comes from a 1 bit
+field in the instruction. */
+  BFD_RELOC_THUMB_PCREL_BLX,
+
 /* These relocs are only used within the ARM assembler.  They are not
 (at present) written to any object files. */
   BFD_RELOC_ARM_IMMEDIATE,
@@ -2304,7 +2314,6 @@ the opcode. */
 significant 7 bits of a 23-bit extended address are placed into 
 the opcode. */
   BFD_RELOC_TIC54X_MS7_OF_23,
-
 
 /* This is a 48 bit reloc for the FR30 that stores 32 bits. */
   BFD_RELOC_FR30_48,

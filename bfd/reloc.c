@@ -25,7 +25,7 @@ SECTION
 
 	BFD maintains relocations in much the same way it maintains
 	symbols: they are left alone until required, then read in
-	en-masse and translated into an internal form.  A common
+	en-mass and translated into an internal form.  A common
 	routine <<bfd_perform_relocation>> acts upon the
 	canonical form to do the fixup.
 
@@ -2202,6 +2202,18 @@ ENUMDOC
   ARM 26 bit pc-relative branch.  The lowest two bits must be zero and are
   not stored in the instruction.
 ENUM
+  BFD_RELOC_ARM_PCREL_BLX
+ENUMDOC
+  ARM 26 bit pc-relative branch.  The lowest bit must be zero and is
+  not stored in the instruction.  The 2nd lowest bit comes from a 1 bit
+  field in the instruction.
+ENUM
+  BFD_RELOC_THUMB_PCREL_BLX
+ENUMDOC
+  Thumb 22 bit pc-relative branch.  The lowest bit must be zero and is
+  not stored in the instruction.  The 2nd lowest bit comes from a 1 bit
+  field in the instruction.
+ENUM
   BFD_RELOC_ARM_IMMEDIATE
 ENUMX
   BFD_RELOC_ARM_ADRL_IMMEDIATE
@@ -2539,7 +2551,6 @@ ENUMDOC
   significant 8 bits of a 24 bit word are placed into the least
   significant 8 bits of the opcode.
 
-COMMENT
 ENUM
   BFD_RELOC_TIC54X_PARTLS7
 ENUMDOC
@@ -2572,7 +2583,6 @@ ENUMDOC
   This is a reloc for the tms320c54x, where the most
   significant 7 bits of a 23-bit extended address are placed into 
   the opcode.
-COMMENT
 
 ENUM
   BFD_RELOC_FR30_48

@@ -775,10 +775,10 @@ error_return:
    moves the computed address into the PC, so it must be the second one
    in the sequence.  The problem, however is that whilst little endian code
    stores the instructions in HI then LOW order, big endian code does the
-   reverse.  nickc@cygnus.com  */
+   reverse.  nickc@cygnus.com.  */
 
-#define LOW_HI_ORDER 0xF800F000
-#define HI_LOW_ORDER 0xF000F800
+#define LOW_HI_ORDER      0xF800F000
+#define HI_LOW_ORDER      0xF000F800
 
 static insn32
 insert_thumb_branch (br_insn, rel_off)
@@ -791,9 +791,9 @@ insert_thumb_branch (br_insn, rel_off)
 
   BFD_ASSERT ((rel_off & 1) != 1);
 
-  rel_off >>= 1;		/* half word aligned address */
-  low_bits = rel_off & 0x000007FF;	/* the bottom 11 bits */
-  high_bits = (rel_off >> 11) & 0x000007FF;	/* the top 11 bits */
+  rel_off >>= 1;				/* Half word aligned address.  */
+  low_bits = rel_off & 0x000007FF;		/* The bottom 11 bits.  */
+  high_bits = (rel_off >> 11) & 0x000007FF;	/* The top 11 bits.  */
 
   if ((br_insn & LOW_HI_ORDER) == LOW_HI_ORDER)
     br_insn = LOW_HI_ORDER | (low_bits << 16) | high_bits;
@@ -803,7 +803,7 @@ insert_thumb_branch (br_insn, rel_off)
     abort ();			/* error - not a valid branch instruction form */
 
   /* FIXME: abort is probably not the right call. krk@cygnus.com */
-
+  
   return br_insn;
 }
 
@@ -1062,6 +1062,9 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
     case R_ARM_PC24:
     case R_ARM_ABS32:
     case R_ARM_REL32:
+#ifndef OLD_ARM_ABI
+    case R_ARM_XPC25:
+#endif
       /* When generating a shared object, these relocations are copied
 	 into the output file to be resolved at run time. */
 
@@ -1171,16 +1174,33 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	}
       else switch (r_type)
 	{
-	case R_ARM_PC24:
-	  /* Arm B/BL instruction */
-
-	  /* Check for arm calling thumb function.  */
-	  if (sym_flags == STT_ARM_TFUNC)
+#ifndef OLD_ARM_ABI
+	case R_ARM_XPC25:	  /* Arm BLX instruction.  */
+#endif
+	case R_ARM_PC24:	  /* Arm B/BL instruction */
+#ifndef OLD_ARM_ABI
+	  if (r_type == R_ARM_XPC25)
 	    {
-	      elf32_arm_to_thumb_stub (info, sym_name, input_bfd, output_bfd,
-				       input_section, hit_data, sym_sec, rel->r_offset,
-				       signed_addend, value);
-	      return bfd_reloc_ok;
+	      /* Check for Arm calling Arm function.  */
+	      /* FIXME: Should we translate the instruction into a BL
+		 instruction instead ?  */
+	      if (sym_flags != STT_ARM_TFUNC)
+		_bfd_error_handler (_("\
+%s: Warning: Arm BLX instruction targets Arm function '%s'."),
+				    bfd_get_filename (input_bfd),
+				    h->root.root.string);
+	    }
+	  else
+#endif
+	    {
+	      /* Check for Arm calling Thumb function.  */
+	      if (sym_flags == STT_ARM_TFUNC)
+		{
+		  elf32_arm_to_thumb_stub (info, sym_name, input_bfd, output_bfd,
+					   input_section, hit_data, sym_sec, rel->r_offset,
+					   signed_addend, value);
+		  return bfd_reloc_ok;
+		}
 	    }
 
 	  if (   strcmp (bfd_get_target (input_bfd), "elf32-littlearm-oabi") == 0
@@ -1321,8 +1341,11 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       bfd_put_16 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
 
+#ifndef OLD_ARM_ABI
+    case R_ARM_THM_XPC22:
+#endif
     case R_ARM_THM_PC22:
-      /* Thumb BL (branch long instruction). */
+      /* Thumb BL (branch long instruction).  */
       {
 	bfd_vma        relocation;
 	boolean        overflow = false;
@@ -1344,18 +1367,33 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	  signed_addend = addend;
 	}
 #endif
-
-        /* If it is not a call to thumb, assume call to arm.
-	   If it is a call relative to a section name, then it is not a
-	   function call at all, but rather a long jump.  */
-	if (sym_flags != STT_ARM_TFUNC && sym_flags != STT_SECTION)
+#ifndef OLD_ARM_ABI
+	if (r_type == R_ARM_THM_XPC22)
 	  {
-	    if (elf32_thumb_to_arm_stub
-		(info, sym_name, input_bfd, output_bfd, input_section,
-		 hit_data, sym_sec, rel->r_offset, signed_addend, value))
-	      return bfd_reloc_ok;
-	    else
-	      return bfd_reloc_dangerous;
+	    /* Check for Thumb to Thumb call.  */
+	    /* FIXME: Should we translate the instruction into a BL
+	       instruction instead ?  */
+	    if (sym_flags == STT_ARM_TFUNC)
+	      _bfd_error_handler (_("\
+%s: Warning: Thumb BLX instruction targets thumb function '%s'."),
+				  bfd_get_filename (input_bfd),
+				  h->root.root.string);
+	  }
+	else
+#endif
+	  {
+	    /* If it is not a call to Thumb, assume call to Arm.
+	       If it is a call relative to a section name, then it is not a
+	       function call at all, but rather a long jump.  */
+	    if (sym_flags != STT_ARM_TFUNC && sym_flags != STT_SECTION)
+	      {
+		if (elf32_thumb_to_arm_stub
+		    (info, sym_name, input_bfd, output_bfd, input_section,
+		     hit_data, sym_sec, rel->r_offset, signed_addend, value))
+		  return bfd_reloc_ok;
+		else
+		  return bfd_reloc_dangerous;
+	      }
 	  }
 
 	relocation = value + signed_addend;

@@ -43,6 +43,10 @@
 static reloc_howto_type * elf32_arm_reloc_type_lookup
   PARAMS ((bfd * abfd, bfd_reloc_code_real_type code));
 
+/* Note: code such as elf32_arm_reloc_type_lookup expect to use e.g.
+   R_ARM_PC24 as an index into this, and find the R_ARM_PC24 HOWTO 
+   in that slot. */
+
 static reloc_howto_type elf32_arm_howto_table[] =
 {
   /* No relocation */
@@ -262,35 +266,35 @@ static reloc_howto_type elf32_arm_howto_table[] =
 	 0x00000000,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* These next two relocs are defined, but I do not know what they do.  */
-  
+  /* BLX instruction for the ARM.  */
   HOWTO (R_ARM_XPC25,		/* type */
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 false,			/* pc_relative */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 25,			/* bitsize */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_ARM_XPC25",		/* name */
 	 false,			/* partial_inplace */
-	 0x00000000,		/* src_mask */
-	 0x00000000,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
+	 0x00ffffff,		/* src_mask */
+	 0x00ffffff,		/* dst_mask */
+	 true),			/* pcrel_offset */
+  
+  /* BLX instruction for the Thumb.  */
   HOWTO (R_ARM_THM_XPC22,	/* type */
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 false,			/* pc_relative */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 22,			/* bitsize */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_ARM_THM_XPC22",	/* name */
 	 false,			/* partial_inplace */
-	 0x00000000,		/* src_mask */
-	 0x00000000,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 0x07ff07ff,		/* src_mask */
+	 0x07ff07ff,		/* dst_mask */
+	 true),			/* pcrel_offset */
   
   /* These next three relocs are not defined, but we need to fill the space.  */
 
@@ -622,6 +626,8 @@ static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
 {
   {BFD_RELOC_NONE,                 R_ARM_NONE},
   {BFD_RELOC_ARM_PCREL_BRANCH,     R_ARM_PC24},
+  {BFD_RELOC_ARM_PCREL_BLX,        R_ARM_XPC25},
+  {BFD_RELOC_THUMB_PCREL_BLX,      R_ARM_THM_XPC22},
   {BFD_RELOC_32,                   R_ARM_ABS32},
   {BFD_RELOC_32_PCREL,             R_ARM_REL32},
   {BFD_RELOC_8,                    R_ARM_ABS8},
