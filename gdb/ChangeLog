@@ -1,5 +1,11 @@
 2002-08-25  Andrew Cagney  <ac131313@redhat.com>
 
+	* rs6000-tdep.c (rs6000_gdbarch_init): Set store_struct_return
+	instead of deprecated_store_return_value.  Fix fallout from
+	2002-08-23 Andrew Cagney <cagney@redhat.com>.
+
+2002-08-25  Andrew Cagney  <ac131313@redhat.com>
+
 	* regcache.c (max_register_size): New function.
 	(init_legacy_regcache_descr): Ensure that max_register_size is
 	large enough for REGISTER_VIRTUAL_SIZE.
