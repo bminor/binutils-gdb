@@ -1,3 +1,7 @@
+2002-03-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_gc_mark): Don't recurse into non-ELF sections.
+
 2002-03-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (_bfd_elf_make_section_from_shdr): Don't set lma based on

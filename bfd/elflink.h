@@ -7570,11 +7570,15 @@ elf_gc_mark (info, sec, gc_mark_hook)
 	    }
 
 	  if (rsec && !rsec->gc_mark)
-	    if (!elf_gc_mark (info, rsec, gc_mark_hook))
-	      {
-		ret = false;
-		goto out2;
-	      }
+	    {
+	      if (bfd_get_flavour (rsec->owner) != bfd_target_elf_flavour)
+		rsec->gc_mark = 1;
+	      else if (!elf_gc_mark (info, rsec, gc_mark_hook))
+		{
+		  ret = false;
+		  goto out2;
+		}
+	    }
 	}
 
     out2:
