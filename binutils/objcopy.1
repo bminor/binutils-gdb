@@ -34,6 +34,7 @@ objcopy \- copy and translate object files
 .RB "[\|" \-\-adjust\-section\-vma=\fIsection{=,+,-}val\fR "\|]"
 .RB "[\|" \-\-adjust\-warnings\fR "\|]"
 .RB "[\|" \-\-no\-adjust\-warnings\fR "\|]"
+.RB "[\|" \-\-add\-section=\fIsectionname=filename\fR "\|]"
 .RB "[\|" \-v\ |\ \-\-verbose\fR "\|]" 
 .RB "[\|" \-V\ |\ \-\-version\fR "\|]" 
 .RB "[\|" \-\-help\fR "\|]" 
@@ -186,6 +187,13 @@ not exist, issue a warning.  This is the default.
 .B \fB\-\-no\-adjust\-warnings
 Do not issue a warning if \fB\-\-adjust\-section\-vma\fP is used, even
 if the named section does not exist.
+.TP
+.B \fB\-\-add\-section=\fIsectionname=filename
+Add a new section named \fIsectionname\fR while copying the file.  The
+contents of the new section are taken from the file \fIfilename\fR.
+The size of the section will be the size of the file.  This option
+only works on file formats which can support sections with arbitrary
+names.
 .TP
 .B \-v\fR, \fB\-\-verbose
 Verbose output: list all object files modified.  In the case of

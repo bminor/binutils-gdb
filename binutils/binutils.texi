@@ -753,6 +753,7 @@ objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
         [ --adjust-vma=@var{incr} ]
         [ --adjust-section-vma=@var{section}@{=,+,-@}@var{val} ]
         [ --adjust-warnings ] [ --no-adjust-warnings ]
+        [ --add-section=@var{sectionname}=@var{filename} ]
         [ -v | --verbose ] [ -V | --version ]  [ --help ]
         @var{infile} [@var{outfile}]
 @end smallexample
@@ -895,6 +896,12 @@ exist, issue a warning.  This is the default.
 @item --no-adjust-warnings
 Do not issue a warning if @samp{--adjust-section-vma} is used, even if
 the named section does not exist.
+
+@item --add-section @var{sectionname}=@var{filename}
+Add a new section named @var{sectionname} while copying the file.  The
+contents of the new section are taken from the file @var{filename}.  The
+size of the section will be the size of the file.  This option only
+works on file formats which can support sections with arbitrary names.
 
 @item -V
 @itemx --version
