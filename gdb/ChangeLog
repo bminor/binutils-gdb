@@ -1,6 +1,11 @@
-2004-11-27  Baurjan Ismagulov  <ibr@ata.cs.hun.edu.tr>
+2004-12-13  Ben Elliston  <bje@au.ibm.com>
 
-	Committed by Andrw Cagney.
+	* f-exp.y (typename): Remove unused nonterminal.
+	(name): Likewise.
+
+2004-12-12  Baurjan Ismagulov  <ibr@ata.cs.hun.edu.tr>
+
+	Committed by Andrew Cagney.
 	* abug-rom.c, ada-lang.c, ada-typeprint.c, alpha-tdep.c: i18n
 	markup.
 	

@@ -177,9 +177,7 @@ static int parse_number (char *, int, int, YYSTYPE *);
 %token <lval> BOOLEAN_LITERAL
 %token <ssym> NAME 
 %token <tsym> TYPENAME
-%type <sval> name
 %type <ssym> name_not_typename
-%type <tsym> typename
 
 /* A NAME_OR_INT is a symbol which is not known in the symbol table,
    but which would parse as a valid number in the current input radix.
@@ -597,9 +595,6 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = builtin_type_f_complex_s32;}
 	;
 
-typename:	TYPENAME
-	;
-
 nonempty_typelist
 	:	type
 		{ $$ = (struct type **) malloc (sizeof (struct type *) * 2);
@@ -611,14 +606,6 @@ nonempty_typelist
 		  $$ = (struct type **) realloc ((char *) $1, len);
 		  $$[$<ivec>$[0]] = $3;
 		}
-	;
-
-name	:	NAME
-			{ $$ = $1.stoken; }
-	|	TYPENAME
-			{ $$ = $1.stoken; }
-	|	NAME_OR_INT
-			{ $$ = $1.stoken; }
 	;
 
 name_not_typename :	NAME
