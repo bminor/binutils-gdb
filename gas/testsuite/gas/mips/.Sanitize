@@ -39,7 +39,7 @@ else
 	done
 fi
 
-r5900_losers="r5900.s r5900.d vu0.s vu0.d"
+r5900_losers="r5900.s r5900.d vu0.s vu0.d break5900.s break5900.d"
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
 	keep_these_too="$keep_these_too $r5900_losers"
 	if [ -n "${verbose}" ] ; then
