@@ -1,5 +1,9 @@
 2003-11-11  David Carlton  <carlton@kealia.com>
 
+	* gdb.cp/namespace.exp: KFAIL various tests with respect to PR
+	gdb/1448.  Change existing setup_kfails to refer to gdb/XXX
+	instead of c++/XXX.
+
 	* gdb.cp/namespace.exp: Remove doubled comment.
 
 2003-11-11  Nick Clifton  <nickc@redhat.com>

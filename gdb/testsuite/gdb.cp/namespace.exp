@@ -256,8 +256,11 @@ gdb_test "ptype E" "type = namespace C::D::E"
 gdb_test "ptype CClass" "type = class C::CClass \{\r\n  public:\r\n    int x;\r\n\}"
 gdb_test "ptype CClass::NestedClass" "type = class C::CClass::NestedClass \{\r\n  public:\r\n    int y;\r\n\}"
 gdb_test "ptype NestedClass" "No symbol \"NestedClass\" in current context."
+setup_kfail "gdb/1448" "*-*-*"
 gdb_test "ptype ::C::CClass" "type = class C::CClass \{\r\n  public:\r\n    int x;\r\n\}"
+setup_kfail "gdb/1448" "*-*-*"
 gdb_test "ptype ::C::CClass::NestedClass" "type = class C::CClass::NestedClass \{\r\n  public:\r\n    int y;\r\n\}"
+setup_kfail "gdb/1448" "*-*-*"
 gdb_test "ptype ::C::NestedClass" "No symbol \"NestedClass\" in namespace \"C\"."
 gdb_test "ptype C::CClass" "No symbol \"CClass\" in namespace \"C::C\"."
 gdb_test "ptype C::CClass::NestedClass" "No type \"CClass\" within class or namespace \"C::C\"."
@@ -267,6 +270,7 @@ gdb_test "ptype C::NestedClass" "No symbol \"NestedClass\" in namespace \"C::C\"
 
 gdb_test "print cOtherFile" "\\$\[0-9\].* = 316"
 gdb_test "ptype OtherFileClass" "type = class C::OtherFileClass \{\r\n  public:\r\n    int z;\r\n\}"
+setup_kfail "gdb/1448" "*-*-*"
 gdb_test "ptype ::C::OtherFileClass" "type = class C::OtherFileClass \{\r\n  public:\r\n    int z;\r\n\}"
 gdb_test "ptype C::OtherFileClass" "No symbol \"OtherFileClass\" in namespace \"C::C\"."
 
@@ -285,7 +289,7 @@ gdb_test "print XOtherFile" "No symbol \"XOtherFile\" in current context."
 
 # Test namespace renaming.
 
-setup_kfail "c++/830" "*-*-*"
+setup_kfail "gdb/830" "*-*-*"
 gdb_test "print I::h" "\\$\[0-9\].* = 14"
 
 # Test using directives.
@@ -294,22 +298,22 @@ gdb_test "print I::h" "\\$\[0-9\].* = 14"
 # have unfortunate interactions with namespace scope issues.  As of
 # this writing, some of these pass, but they pass for the wrong reasons.
 
-setup_kfail "c++/829" "*-*-*"
+setup_kfail "gdb/829" "*-*-*"
 gdb_test "print j" "\\$\[0-9\].* = 15"
-setup_kfail "c++/829" "*-*-*"
+setup_kfail "gdb/829" "*-*-*"
 gdb_test "print L::k" "\\$\[0-9\].* = 16"
-setup_kfail "c++/829" "*-*-*"
+setup_kfail "gdb/829" "*-*-*"
 gdb_test "print k" "No symbol \"k\" in current context."
-setup_kfail "c++/829" "*-*-*"
+setup_kfail "gdb/829" "*-*-*"
 gdb_test "print cdm" "\\$\[0-9\].* = 17"
-setup_kfail "c++/829" "*-*-*"
+setup_kfail "gdb/829" "*-*-*"
 gdb_test "print Q::o" "\\$\[0-9\].* = 18"
-setup_kfail "c++/829" "*-*-*"
+setup_kfail "gdb/829" "*-*-*"
 gdb_test "print o" "No symbol \"o\" in current context."
 
 # Test using declarations.  I should probably test these more.
 
-setup_kfail "c++/831" "*-*-*"
+setup_kfail "gdb/831" "*-*-*"
 gdb_test "print r1" "\\$\[0-9\].* = 19"
-setup_kfail "c++/831" "*-*-*"
+setup_kfail "gdb/831" "*-*-*"
 gdb_test "print r2" "No symbol \"r2\" in current context."
