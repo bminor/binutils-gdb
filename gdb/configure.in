@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB, the GNU debugger.
-dnl Copyright 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+dnl Copyright 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
 dnl 
@@ -19,7 +19,7 @@ dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.5)dnl
+AC_PREREQ(2.12.1)dnl
 AC_INIT(main.c)
 AC_CONFIG_HEADER(config.h:config.in)
 

@@ -1,3 +1,15 @@
+1999-01-04  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* configure.in: Require autoconf 2.12.1 or higher.
+	* doc/configure.in: Ditto.
+	* nlm/configure.in: Ditto.
+	* rdi-share/configure.in: Ditto.
+	* testsuite/configure.in: Ditto.
+	* doc/Makefile.in: Don't hardcode $(SHELL).
+	* nlm/Makefile.in: Ditto.
+	* rdi-share/Makefile.in: Ditto.
+	* testsuite/Makefile.in: Ditto.
+
 Mon Jan  4 12:53:03 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote-vx.c (init_vx_ops, init_vx_run_ops): Remove unneeded

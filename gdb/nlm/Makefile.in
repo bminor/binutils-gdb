@@ -1,4 +1,4 @@
-#Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+#Copyright 1989, 1990, 91, 92, 93, 94, 95, 1999 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -43,7 +43,7 @@ man9dir = $(mandir)/man9
 infodir = @infodir@
 includedir = @includedir@
 
-SHELL = /bin/sh
+SHELL = @SHELL@
 
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
