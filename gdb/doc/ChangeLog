@@ -1,3 +1,9 @@
+Tue Nov  2 09:08:37 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Enumerations): Talk about large, negative and
+	octal values.  Clean up cross reference to type attributes.
+	(String Field): Say that GDB 4.11 supports size attribute.
+
 Sun Oct 31 13:31:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote.texi (VxWorks Remote): Clarify that rebuilding VxWorks kernel

@@ -251,7 +251,8 @@ those from the C++ type descriptor @samp{@@}.  The attributes are:
 applies to all variables of this type.
 
 @item s@var{size}
-Size in bits of a variable of this type.
+Size in bits of a variable of this type.  This is fully supported by GDB
+4.11 and later.
 
 @item p@var{integer}
 Pointer class (for checking).  Not sure what this means, or how
@@ -263,17 +264,17 @@ elements are placed more closely in memory, to save memory at the
 expense of speed.
 @end table
 
-All of this can make the string field quite long.  All
-versions of GDB, and some versions of dbx, can handle arbitrarily long
-strings.  But many versions of dbx cretinously limit the strings to
-about 80 characters, so compilers which must work with such dbx's need
-to split the @code{.stabs} directive into several @code{.stabs}
-directives.  Each stab duplicates exactly all but the
-string field.  The string field of
-every stab except the last is marked as continued with a
-double-backslash at the end.  Removing the backslashes and concatenating
-the string fields of each stab produces the original,
-long string.
+All of this can make the string field quite long.  All versions of GDB,
+and some versions of dbx, can handle arbitrarily long strings.  But many
+versions of dbx (or assemblers or linkers, I'm not sure which)
+cretinously limit the strings to about 80 characters, so compilers which
+must work with such systems need to split the @code{.stabs} directive
+into several @code{.stabs} directives.  Each stab duplicates every field
+except the string field.  The string field of every stab except the last
+is marked as continued with a backslash at the end (in the assembly code
+this may be written as a double backslash, depending on the assembler).
+Removing the backslashes and concatenating the string fields of each
+stab produces the original, long string.
 
 @node C Example
 @section A Simple Example in C Source
@@ -1848,13 +1849,17 @@ structure, enumeration, or union tag.  The type descriptor @samp{e},
 following the @samp{22=} of the type definition narrows it down to an
 enumeration type.  Following the @samp{e} is a list of the elements of
 the enumeration.  The format is @samp{@var{name}:@var{value},}.  The
-list of elements ends with @samp{;}.
+list of elements ends with @samp{;}.  The fact that @var{value} is
+specified as an integer can cause problems if the value is large.  GCC
+2.5.2 tries to output it in octal in that case with a leading zero,
+which is probably a good thing, although GDB 4.11 supports octal only in
+cases where decimal is perfectly good.  Negative decimal values are
+supported by both GDB and dbx.
 
 There is no standard way to specify the size of an enumeration type; it
 is determined by the architecture (normally all enumerations types are
-32 bits).  There should be a way to specify an enumeration type of
-another size; type attributes would be one way to do this.  @xref{Stabs
-Format}.
+32 bits).  Type attributes can be used to specify an enumeration type of
+another size for debuggers which support them; see @ref{String Field}.
 
 @node Structures
 @section Structures
