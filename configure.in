@@ -166,13 +166,6 @@ case "${host}" in
 esac
 
 case "${target}" in
-  mips-dec-bsd*)
-# We do want to build gas in this case.  So don't use the mips-*-* case
-# for this target.
-    ;;
-  mips-*-*)
-    configdirs=`echo ${configdirs} | sed -e 's/gas//'`
-    ;;
   rs6000-*-*)
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
     ;;
@@ -199,6 +192,15 @@ case "${target}" in
     ;;
 esac
 
+# Set with_gnu_as and with_gnu_ld as appropriate.
+if [ x${with_gnu_as} != xyes ] && echo ${configdirs} | grep gas > /dev/null && [ -d ${srcdir}/gas ]; then
+  with_gnu_as=yes
+  withoptions="$withoptions -with-gnu-as"
+fi
+if [ x${with_gnu_ld} != xyes ] && echo ${configdirs} | grep ld > /dev/null && [ -d ${srcdir}/ld ]; then
+  with_gnu_ld=yes
+  withoptions="$withoptions -with-gnu-ld"
+fi
 
 target_makefile_frag=config/mt-${bfd_target}
 
@@ -207,4 +209,3 @@ target_makefile_frag=config/mt-${bfd_target}
 # fill-column: 131
 # End:
 #
-
