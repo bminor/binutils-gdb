@@ -1,4 +1,13 @@
 start-sanitize-gdbtk
+Thu Jun 20 08:18:59 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdbtk.tcl (gdbtk_tcl_readline_begin): Handle backspace to
+	avoid backing up over prompt.  At every input, make sure insert
+	point is at least after command start, handle control-u to delete
+	current input line.
+	(tclsh): Handle backspace to avoid backing up over prompt.  Handle
+	control-u to delete current input line.
+
 Wed Jun 19 17:23:38 1996  Geoffrey Noer  <noer@cygnus.com>
 
 	* configure.in: disable gdbtk for *cygwin32* hosted compiles

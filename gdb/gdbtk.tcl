@@ -302,6 +302,23 @@ proc gdbtk_tcl_readline_begin {message} {
 	set readline_text [.rl.text get cmdstart {end - 1 char}]
 	.rl.text mark set cmdstart insert
     }
+    bind .rl.text <BackSpace> {
+	if [%W compare insert > cmdstart] {
+	    %W delete {insert - 1 char} insert
+	} else {
+	    bell
+	}
+	break
+    }
+    bind .rl.text <Any-Key> {
+	if [%W compare insert < cmdstart] {
+	    %W mark set insert end
+	}
+    }
+    bind .rl.text <Control-u> {
+	%W delete cmdstart "insert lineend"
+	%W see insert
+    }
     bindtags .rl.text {.rl.text Text all}
 }
 
@@ -3242,10 +3259,22 @@ proc tclsh {} {
 
     # Keybindings that limit input and evaluate things
     bind .eval.text <Return> { evaluate_tcl_command .eval.text ; break }
+    bind .eval.text <BackSpace> {
+	if [%W compare insert > cmdstart] {
+	    %W delete {insert - 1 char} insert
+	} else {
+	    bell
+	}
+	break
+    }
     bind .eval.text <Any-Key> {
 	if [%W compare insert < cmdstart] {
 	    %W mark set insert end
 	}
+    }
+    bind .eval.text <Control-u> {
+	%W delete cmdstart "insert lineend"
+	%W see insert
     }
     bindtags .eval.text {.eval.text Text all}
 }
