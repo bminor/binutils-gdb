@@ -50,12 +50,16 @@
 #include "events.c"
 #endif
 
-#if MON_INLINE
-#include "mon.c"
+#if MODEL_INLINE
+#include "model.c"
 #endif
 
 #if FUNCTION_UNIT_INLINE
 #include "function_unit.c"
+#endif
+
+#if MON_INLINE
+#include "mon.c"
 #endif
 
 #if REGISTERS_INLINE

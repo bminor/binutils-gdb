@@ -62,6 +62,12 @@ struct _cpu {
   event_queue *events;
   int cpu_nr;
 
+  /* Current functional unit information */
+  function_unit *func_unit;
+
+  /* Current CPU model information */
+  model_data *model_ptr;
+
 #if WITH_IDECODE_CACHE_SIZE
   /* a cache to store cracked instructions */
   idecode_cache icache[WITH_IDECODE_CACHE_SIZE];
@@ -93,12 +99,17 @@ cpu_create(psim *system,
   processor->virtual = vm_create(memory);
   processor->instruction_map = vm_create_instruction_map(processor->virtual);
   processor->data_map = vm_create_data_map(processor->virtual);
+  processor->model_ptr = model_create (processor);
 
   /* link back to core system */
   processor->system = system;
   processor->events = events;
   processor->cpu_nr = cpu_nr;
   processor->monitor = monitor;
+
+  /* Create function unit if desired */
+  if (WITH_FUNCTION_UNIT)
+    processor->func_unit = function_unit_create ();
 
   return processor;
 }
@@ -107,8 +118,13 @@ cpu_create(psim *system,
 INLINE_CPU void
 cpu_init(cpu *processor)
 {
-  bzero(&processor->regs, sizeof(processor->regs));
+  memset(&processor->regs, 0, sizeof(processor->regs));
   /* FIXME - should any of VM be inited also ? */
+
+  if (WITH_FUNCTION_UNIT)
+    function_unit_init (processor->func_unit);
+
+  model_init (processor, processor->model_ptr);
 }
 
 
@@ -138,13 +154,25 @@ cpu_monitor(cpu *processor)
   return processor->monitor;
 }
 
+INLINE_CPU function_unit *
+cpu_function_unit(cpu *processor)
+{
+  return processor->func_unit;
+}
+
+INLINE_CPU model_data *
+cpu_model(cpu *processor)
+{
+  return processor->model_ptr;
+}
+
 /* The processors local concept of time */
 
 INLINE_CPU signed64
 cpu_get_time_base(cpu *processor)
 {
   return (event_queue_time(processor->events)
-	  + processor->time_base_local_time);
+	  - processor->time_base_local_time);
 }
 
 INLINE_CPU void
@@ -235,6 +263,10 @@ cpu_halt(cpu *processor,
 	  signal);
   }
   else {
+    if (WITH_FUNCTION_UNIT)
+      function_unit_halt(processor, processor->func_unit);
+
+    model_halt(processor, processor->model_ptr);
     processor->program_counter = cia;
     psim_halt(processor->system, processor->cpu_nr, cia, reason, signal);
   }
@@ -301,12 +333,6 @@ cpu_synchronize_context(cpu *processor)
   /* kill of the cache */
   cpu_flush_icache(processor);
 #endif
-
-  /* don't allow the processor to change endian modes */
-  if ((cpu_registers(processor)->msr & msr_little_endian_mode)
-      && CURRENT_TARGET_BYTE_ORDER != LITTLE_ENDIAN) {
-    error("vm_synchronize_context() - unsuported change of byte order\n");
-  }
 
   /* update virtual memory */
   vm_synchronize_context(processor->virtual,

@@ -37,6 +37,7 @@
 #include "icache.h"
 #include "itable.h"
 #include "mon.h"
+#include "model.h"
 #include "function_unit.h"
 
 
@@ -178,6 +179,9 @@ INLINE_CPU void cpu_synchronize_context
 (cpu *processor);
 
 INLINE_CPU function_unit *cpu_function_unit
+(cpu *processor);
+
+INLINE_CPU model_data *cpu_model
 (cpu *processor);
 
 #define IS_PROBLEM_STATE(PROCESSOR) \

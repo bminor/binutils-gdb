@@ -31,6 +31,22 @@
 
 /* monitor/logger: counts what the simulation is up to */
 
+/* Interfact to model to return model specific information */
+typedef struct _model_print model_print;
+struct _model_print {
+  model_print *next;
+  const char *name;
+  const char *suffix_singular;
+  const char *suffix_plural;
+  unsigned count;
+};
+
+/* Additional events to monitor */
+typedef enum _mon_events {
+  mon_event_icache_miss,
+  nr_mon_events
+} mon_events;
+
 typedef struct _mon mon;
 typedef struct _cpu_mon cpu_mon;
 
@@ -65,6 +81,11 @@ INLINE_MON void mon_write
 (unsigned_word ea,
  unsigned_word ra,
  unsigned nr_bytes,
+ cpu *processor,
+ unsigned_word cia);
+
+INLINE_MON void mon_event
+(mon_events event,
  cpu *processor,
  unsigned_word cia);
 

@@ -1,15 +1,38 @@
+Wed Nov 15 17:32:13 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* cpu.h (cpu_model): Add declaration.
+
+	* cpu.c (struct _cpu): Add model_ptr to hold model specific
+	information.
+	(cpu_model): Return the model internal pointer.
+	(cpu_{create,init,halt}): Call the appropriate model function.
+
+	* inline.c (mon.c): Move include of mon.c after model.c.
+
+	* mon.c (_cpu_mon): Add fields to count unaligned memory
+	references.
+	(mon_issue): Call model_issue, not function_unit_issue.
+	(mon_{read,write}): Count # of unaligned memory accesses.
+	(mon_print_info): Switch to calling model_mon_info and
+	model_mon_info_free instead of function_unit version.  Print out
+	number of unaligned reads/writes.
+
+	* {ppc-instructions,igen.c}: More global changes to add model
+	specific features.
+
 Tue Nov 14 04:47:25 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in (devices.o, main.o): Update dependency.
 
 	* igen.c (gen_model_h): Use correct variable in loop.
 	(gen_model_c): Use strcmp, strcasecmp.
-	(gen_model_{c,h}): Use STATIC_MODEL for arrays.
+	(gen_model_c): Use EXTERN_MODEL for arrays.
+	(gen_model_h): Use STATIC_MODEL for arrays.
 	(lf_print_c_semantic_function_header): Delete unused function.
 
 	* main.c (cpu.h): Include cpu.h to get model.h.
 
-	* inline.h (STATIC_MODEL): Define.
+	* inline.h ({EXTERN,STATIC}_MODEL): Define.
 
 Mon Nov 13 09:14:13 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 

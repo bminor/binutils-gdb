@@ -53,12 +53,16 @@
 
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
+int getrusage();
 #endif
 
 struct _cpu_mon {
   unsigned issue_count[nr_itable_entries];
   unsigned read_count;
   unsigned write_count;
+  unsigned unaligned_read_count;
+  unsigned unaligned_write_count;
+  unsigned event_count[nr_mon_events];
   function_unit_print *func_unit_print;
 };
 
@@ -90,7 +94,7 @@ INLINE_MON void
 mon_init(mon *monitor,
 	 int nr_cpus)
 {
-  bzero(monitor, sizeof(*monitor));
+  memset(monitor, 0, sizeof(*monitor));
   monitor->nr_cpus = nr_cpus;
 }
 
@@ -103,9 +107,7 @@ mon_issue(itable_index index,
   cpu_mon *monitor = cpu_monitor(processor);
   ASSERT(index <= nr_itable_entries);
   monitor->issue_count[index] += 1;
-
-  if (WITH_FUNCTION_UNIT)
-    function_unit_issue(index, cpu_function_unit(processor), cia);
+  model_issue(index, cpu_model(processor), cia);
 }
 
 
@@ -118,6 +120,8 @@ mon_read(unsigned_word ea,
 {
   cpu_mon *monitor = cpu_monitor(processor);
   monitor->read_count += 1;
+  if ((nr_bytes - 1) & ea)
+    monitor->unaligned_read_count += 1;
 }
 
 
@@ -130,6 +134,18 @@ mon_write(unsigned_word ea,
 {
   cpu_mon *monitor = cpu_monitor(processor);
   monitor->write_count += 1;
+  if ((nr_bytes - 1) & ea)
+    monitor->unaligned_write_count += 1;
+}
+
+INLINE_MON void
+mon_event(mon_events event,
+	  cpu *processor,
+	  unsigned_word cia)
+{
+  cpu_mon *monitor = cpu_monitor(processor);
+  ASSERT(event >= 0 && event < nr_mon_events);
+  monitor->event_count[event] += 1;
 }
 
 STATIC_INLINE_MON unsigned
@@ -227,11 +243,11 @@ mon_print_info(psim *system,
       printf_filtered ("\n");
     }
 
-    if (WITH_FUNCTION_UNIT)
+    if (CURRENT_MODEL)
       {
-	function_unit *func_unit = cpu_function_unit(psim_cpu(system, cpu_nr));
-	function_unit_print *ptr = function_unit_mon_info(func_unit);
-	function_unit_print *orig_ptr = ptr;
+	model_data *model_ptr = cpu_model(psim_cpu(system, cpu_nr));
+	model_print *ptr = model_mon_info(model_ptr);
+	model_print *orig_ptr = ptr;
 
 	while (ptr) {
 	  if (ptr->count)
@@ -248,7 +264,7 @@ mon_print_info(psim *system,
 	  ptr = ptr->next;
 	}
 
-	function_unit_mon_free(func_unit, orig_ptr);
+	model_mon_info_free(model_ptr, orig_ptr);
       }
 
     if (monitor->cpu_monitor[cpu_nr].read_count)
@@ -266,7 +282,31 @@ mon_print_info(psim *system,
 					       sizeof(buffer),
 					       monitor->cpu_monitor[cpu_nr].write_count),
 		       (monitor->cpu_monitor[cpu_nr].write_count == 1) ? "" : "s");
+
+    if (monitor->cpu_monitor[cpu_nr].unaligned_read_count)
+      printf_filtered ("CPU #%*d executed %*s unaligned data read%s.\n",
+		       len_cpu, cpu_nr+1,
+		       len_num, mon_add_commas(buffer,
+					       sizeof(buffer),
+					       monitor->cpu_monitor[cpu_nr].read_count),
+		       (monitor->cpu_monitor[cpu_nr].read_count == 1) ? "" : "s");
+
+    if (monitor->cpu_monitor[cpu_nr].unaligned_write_count)
+      printf_filtered ("CPU #%*d executed %*s unaligned data write%s.\n",
+		       len_cpu, cpu_nr+1,
+		       len_num, mon_add_commas(buffer,
+					       sizeof(buffer),
+					       monitor->cpu_monitor[cpu_nr].write_count),
+		       (monitor->cpu_monitor[cpu_nr].write_count == 1) ? "" : "s");
     
+    if (monitor->cpu_monitor[cpu_nr].event_count[mon_event_icache_miss])
+      printf_filtered ("CPU #%*d executed %*s icache miss%s.\n",
+		       len_cpu, cpu_nr+1,
+		       len_num, mon_add_commas(buffer,
+					       sizeof(buffer),
+					       monitor->cpu_monitor[cpu_nr].event_count[mon_event_icache_miss]),
+		       (monitor->cpu_monitor[cpu_nr].event_count[mon_event_icache_miss] == 1) ? "" : "es");
+
     printf_filtered("CPU #%*d executed %*s instructions in total.\n",
 		    len_cpu, cpu_nr+1,
 		    len_num, mon_add_commas(buffer,

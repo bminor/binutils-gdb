@@ -64,20 +64,117 @@
 #	5	Specific CPU model, must be an identifier
 #
 #	6	Comma separated list of functional units
+	
+# PowerPC models
+::model:604:ppc604:PPC_FUNCTION_UNIT_UNKNOWN, PPC_FUNCTION_UNIT_UNKNOWN, 1, 1, 0
+::model:603e:ppc603e:PPC_FUNCTION_UNIT_UNKNOWN, PPC_FUNCTION_UNIT_UNKNOWN, 1, 1, 0
+::model:603:ppc603:PPC_FUNCTION_UNIT_UNKNOWN, PPC_FUNCTION_UNIT_UNKNOWN, 1, 1, 0
 
 # Flags for model.h
-::model-macro:::#define PPC_LOAD      0x00000001
-::model-macro:::#define PPC_STORE     0x00000002
-::model-macro:::#define PPC_SERIALIZE 0x00000004
+::model-data:::
+	typedef enum _ppc_function_unit {
+	  PPC_FUNCTION_UNIT_UNKNOWN,		/* unknown function unit */
+	  PPC_FUNCTION_UNIT_IU,			/* integer unit (603 style) */
+	  PPC_FUNCTION_UNIT_SRU,		/* system register unit (603 style) */
+	  PPC_FUNCTION_UNIT_SCIU1,		/* 1st single cycle integer unit (604 style) */
+	  PPC_FUNCTION_UNIT_SCIU2,		/* 2nd single cycle integer unit (604 style) */
+	  PPC_FUNCTION_UNIT_MCIU,		/* multiple cycle integer unit (604 style) */
+	  PPC_FUNCTION_UNIT_FPU,		/* floating point unit */
+	  PPC_FUNCTION_UNIT_LSU,		/* load/store unit */
+	  PPC_FUNCTION_UNIT_BPU,		/* branch unit */
+	  nr_ppc_function_units
+	} ppc_function_unit;
+	
+	/* Structure to hold timing information on a per instruction basis */
+	struct _model_time {
+	  ppc_function_unit first_unit;		/* first functional unit this insn could use */
+	  ppc_function_unit last_unit;		/* last functional unit this insn could use */
+	  unsigned16	    issue;		/* # cycles before function unit can process other insns */
+	  unsigned16	    done;		/* # cycles before insn is done */
+	  unsigned32	    flags;		/* flag bits */
+	};
+	
+	/* Flags */
+	#define PPC_LOAD      0x00000001	/* insn is a load */
+	#define PPC_STORE     0x00000002	/* insn is a store */
+	#define PPC_SERIALIZE 0x00000004	/* insn forces serialization */
+	
+	/* Structure to hold the current state information for the simulated CPU model */
+	struct _model_data {
+	  const char *name;				/* model name */
+	  const model_time *timing;			/* timing information */
+	  unsigned_word old_program_counter;		/* previous PC */
+	  unsigned nr_branches;				/* # branches */
+	  unsigned nr_units[nr_ppc_function_units];	/* function unit counts */
+	  unsigned16 busy[nr_ppc_function_units];	/* how long until free */
+	};
+	
+	STATIC_MODEL const char *const ppc_function_unit_name[ (int)nr_ppc_function_units ] = {
+	  "unknown functional unit",
+	  "integer functional unit",
+	  "system register functional unit",
+	  "1st single cycle integer functional unit",
+	  "2nd single cycle integer functional unit",
+	  "multiple cycle integer functional unit",
+	  "floating point functional unit",
+	  "load/store functional unit",
+	  "branch functional unit",
+	};
 
-# PowerPC models
-::model:604:PPC604:SCIU=2 single cycle integer,MCIU=1 multiple cycle integer,FPU=1 floating point,LSU=1 memory,BPU=1 branch
-::model:603e:PPC603e:IU=1 integer,FPU=1 floating point,LSU=1 memory,SRU=1 system register,BPU=1 branch
-::model:603:PPC603:IU=1 integer,FPU=1 floating point,LSU=1 memory,SRU=1 system register,BPU=1 branch
+model_data *::model-function::model_create:cpu *processor
+	if (CURRENT_MODEL == MODEL_NONE)
+	  return (model_data *)0;
+	else {
+	  model_data *model_ptr = ZALLOC(model_data);
+	  model_ptr->name = model_name[CURRENT_MODEL];
+	  model_ptr->timing = model_time_mapping[CURRENT_MODEL];
+	  return model_ptr;
+	}
 
-void::model-function::model_init:void
-void::model-function::model_halt:void
-void::model-function::model_print_info:void
+void::model-function::model_init:cpu *processor, model_data *model_ptr
+void::model-function::model_halt:cpu *processor, model_data *model_ptr
+
+void::model-function::model_issue:itable_index index, model_data *model_ptr, unsigned_word cia
+	if (model_ptr->old_program_counter+4 != cia)
+	  model_ptr->nr_branches++;
+	
+	model_ptr->old_program_counter = cia;
+	model_ptr->nr_units[ (int)model_ptr->timing[ (int)index ].first_unit ]++;
+
+model_print *::model-function::model_mon_info:model_data *model_ptr
+	model_print *head;
+	model_print *tail;
+	ppc_function_unit i;
+	
+	head = tail = ZALLOC(model_print);
+	tail->count = model_ptr->nr_branches;
+	tail->name = "branch";
+	tail->suffix_plural = "es";
+	tail->suffix_singular = "";
+	
+	for (i = PPC_FUNCTION_UNIT_UNKNOWN; i < nr_ppc_function_units; i++) {
+	  if (model_ptr->nr_units[i]) {
+	    tail->next = ZALLOC(model_print);
+	    tail = tail->next;
+	    tail->count = model_ptr->nr_units[i];
+	    tail->name = ppc_function_unit_name[i];
+	    tail->suffix_plural = "s";
+	    tail->suffix_singular = "";
+	  }
+	}
+	
+	tail->next = (model_print *)0;
+	return head;
+
+void::model-function::model_mon_info_free:model_data *model_ptr, model_print *ptr
+	model_print *next;
+	
+	while (ptr) {
+	  next = ptr->next;
+	  free((void *)ptr);
+	  ptr = next;
+	}
+
 
 # The following (illegal) instruction is `known' by gen and is
 # called when ever an illegal instruction is encountered
@@ -554,16 +651,16 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 # I.2.4.1 Branch Instructions
 #
 0.18,6.LI,30.AA,31.LK:I:t::Branch
-*PPC603:PPC603_BPU:1:1:0
-*PPC603e:PPC603_BPU:1:1:0
-*PPC604:PPC603_BPU:1:1:0
+*603:PPC_FUNCTION_UNIT_BPU, PPC_FUNCTION_UNIT_BPU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_BPU, PPC_FUNCTION_UNIT_BPU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_BPU, PPC_FUNCTION_UNIT_BPU, 1, 1, 0
 	if (AA) NIA = IEA(EXTS(LI_0b00));
 	else    NIA = IEA(CIA + EXTS(LI_0b00));
 	if (LK) LR = (spreg)CIA+4;
 0.16,6.BO,11.BI,16.BD,30.AA,31.LK:B:t::Branch Conditional
-*PPC603:PPC603_BPU:1:1:0
-*PPC603e:PPC603_BPU:1:1:0
-*PPC604:PPC603_BPU:1:1:0
+*603:PPC_FUNCTION_UNIT_BPU, PPC_FUNCTION_UNIT_BPU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_BPU, PPC_FUNCTION_UNIT_BPU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_BPU, PPC_FUNCTION_UNIT_BPU, 1, 1, 0
 	int M, ctr_ok, cond_ok;
 	if (is_64bit_implementation && is_64bit_mode) M = 0;
 	else                                          M = 32;
@@ -575,9 +672,9 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  else    NIA = IEA(CIA + EXTS(BD_0b00));
 	if (LK) LR = (spreg)IEA(CIA + 4);
 0.19,6.BO,11.BI,16./,21.16,31.LK:XL:t::Branch Conditional to Link Register
-*PPC603:PPC603_BPU:1:1:0
-*PPC603e:PPC603_BPU:1:1:0
-*PPC604:PPC603_BPU:1:1:0
+*603:PPC_FUNCTION_UNIT_BPU, PPC_FUNCTION_UNIT_BPU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_BPU, PPC_FUNCTION_UNIT_BPU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_BPU, PPC_FUNCTION_UNIT_BPU, 1, 1, 0
 	int M, ctr_ok, cond_ok;
 	if (is_64bit_implementation && is_64bit_mode) M = 0;
 	else                                          M = 32;
@@ -587,9 +684,9 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	if (ctr_ok && cond_ok) NIA = IEA(LR_0b00);
 	if (LK) LR = (spreg)IEA(CIA + 4);
 0.19,6.BO,11.BI,16./,21.528,31.LK:XL:t::Branch Conditional to Count Register
-*PPC603:PPC603_BPU:1:1:0
-*PPC603e:PPC603_BPU:1:1:0
-*PPC604:PPC603_BPU:1:1:0
+*603:PPC_FUNCTION_UNIT_BPU, PPC_FUNCTION_UNIT_BPU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_BPU, PPC_FUNCTION_UNIT_BPU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_BPU, PPC_FUNCTION_UNIT_BPU, 1, 1, 0
 	int cond_ok;
 	cond_ok = BO{0} || (CR{BI} == BO{1});
 	if (cond_ok) NIA = IEA(CTR_0b00);
@@ -1075,90 +1172,159 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.14,6.RT,11.RA,16.SI:D:T::Add Immediate
-*PPC603:PPC603_IU:1:1:0
-*PPC603e:PPC603e_IU|PPC603e_SRU:1:1:0
-*PPC604:PPC604_SCIU:1:1:0
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_SRU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_SCIU1, PPC_FUNCTION_UNIT_SCIU2, 1, 1, 0
 	if (RA_is_0) *rT = EXTS(SI);
 	else         *rT = *rA + EXTS(SI);
+
 0.15,6.RT,11.RA,16.SI:D:::Add Immediate Shifted
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_SRU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_SCIU1, PPC_FUNCTION_UNIT_SCIU2, 1, 1, 0
 	if (RA_is_0) *rT = EXTS(SI) << 16;
 	else         *rT = *rA + (EXTS(SI) << 16);
+
 0.31,6.RT,11.RA,16.RB,21.OE,22.266,31.Rc:XO:::Add
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_SRU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_SCIU1, PPC_FUNCTION_UNIT_SCIU2, 1, 1, 0
 	ALU_BEGIN(*rA);
 	ALU_ADD(*rB);
 	ALU_END(*rT, 0/*CA*/, OE, Rc);
+
 0.31,6.RT,11.RA,16.RB,21.OE,22.40,31.Rc:XO:::Subtract From
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_SCIU1, PPC_FUNCTION_UNIT_SCIU2, 1, 1, 0
 	ALU_BEGIN(*rA);
 	ALU_NOT;
 	ALU_ADD(*rB);
 	ALU_ADD(1);
 	ALU_END(*rT, 0/*CA*/, OE, Rc);
+
 0.12,6.RT,11.RA,16.SI:D:::Add Immediate Carrying
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_SCIU1, PPC_FUNCTION_UNIT_SCIU2, 1, 1, 0
 	ALU_BEGIN(*rA);
 	ALU_ADD(EXTS(SI));
 	ALU_END(*rT, 1/*CA*/, 0/*OE*/, 0/*Rc*/);
+
 0.13,6.RT,11.RA,16.SI:D:::Add Immediate Carrying and Record
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_SCIU1, PPC_FUNCTION_UNIT_SCIU2, 1, 1, 0
 	ALU_BEGIN(*rA);
 	ALU_ADD(EXTS(SI));
 	ALU_END(*rT, 1/*CA*/, 0/*OE*/, 1/*Rc*/);
+
 0.8,6.RT,11.RA,16.SI:D:::Subtract From Immediate Carrying
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_SCIU1, PPC_FUNCTION_UNIT_SCIU2, 1, 1, 0
 	ALU_BEGIN(*rA);
 	ALU_NOT;
 	ALU_ADD(EXTS(SI));
 	ALU_ADD(1);
 	ALU_END(*rT, 1/*CA*/, 0/*OE*/, 0/*Rc*/);
+
 0.31,6.RT,11.RA,16.RB,21.OE,22.10,31.Rc:XO:::Add Carrying
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_SCIU1, PPC_FUNCTION_UNIT_SCIU2, 1, 1, 0
 	ALU_BEGIN(*rA);
 	ALU_ADD(*rB);
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
+
 0.31,6.RT,11.RA,16.RB,21.OE,22.8,31.Rc:XO:::Subtract From Carrying
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_SCIU1, PPC_FUNCTION_UNIT_SCIU2, 1, 1, 0
 	/* RT <- ~RA + RB + 1 === RT <- RB - RA */
 	ALU_BEGIN(*rA);
 	ALU_NOT;
 	ALU_ADD(*rB);
 	ALU_ADD(1);
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
+
 0.31,6.RT,11.RA,16.RB,21.OE,22.138,31.Rc:XO:::Add Extended
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_SCIU1, PPC_FUNCTION_UNIT_SCIU2, 1, 1, 0
 	ALU_BEGIN(*rA);
 	ALU_ADD(*rB);
 	ALU_ADD_CA;
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
+
 0.31,6.RT,11.RA,16.RB,21.OE,22.136,31.Rc:XO:::Subtract From Extended
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_SCIU1, PPC_FUNCTION_UNIT_SCIU2, 1, 1, 0
 	ALU_BEGIN(*rA);
 	ALU_NOT;
 	ALU_ADD(*rB);
 	ALU_ADD_CA;
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
+
 0.31,6.RT,11.RA,16./,21.OE,22.234,31.Rc:XO:::Add to Minus One Extended
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_SCIU1, PPC_FUNCTION_UNIT_SCIU2, 1, 1, 0
 #	ALU_BEGIN(*rA);
 #	ALU_ADD_CA;
 #	ALU_SUB(1);
 #	ALU_END(*rT, 1/*CA*/, OE, Rc);
+
 0.31,6.RT,11.RA,16./,21.OE,22.232,31.Rc:XO:::Subtract From Minus One Extended
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_SCIU1, PPC_FUNCTION_UNIT_SCIU2, 1, 1, 0
 #	ALU_BEGIN(*rA);
 #	ALU_NOT;
 #	ALU_ADD_CA;
 #	ALU_SUB(1);
 #	ALU_END(*rT, 1/*CA*/, OE, Rc);
+
 0.31,6.RT,11.RA,16./,21.OE,22.202,31.Rc:XO::addze:Add to Zero Extended
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_SCIU1, PPC_FUNCTION_UNIT_SCIU2, 1, 1, 0
 	ALU_BEGIN(*rA);
 	ALU_ADD_CA;
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
+
 0.31,6.RT,11.RA,16./,21.OE,22.200,31.Rc:XO:::Subtract from Zero Extended
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_SCIU1, PPC_FUNCTION_UNIT_SCIU2, 1, 1, 0
 	ALU_BEGIN(*rA);
 	ALU_NOT;
 	ALU_ADD_CA;
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
+
 0.31,6.RT,11.RA,16./,21.OE,22.104,31.Rc:XO:::Negate
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 1, 1, 0
+*604:PPC_FUNCTION_UNIT_SCIU1, PPC_FUNCTION_UNIT_SCIU2, 1, 1, 0
 	ALU_BEGIN(*rA);
 	ALU_NOT;
 	ALU_ADD(1);
 	ALU_END(*rT,0/*CA*/,OE,Rc);
+
 0.7,6.RT,11.RA,16.SI:D::mulli:Multiply Low Immediate
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 3, 3, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 3, 3, 0
+*604:PPC_FUNCTION_UNIT_MCIU, PPC_FUNCTION_UNIT_MCIU, 3, 3, 0
 	signed_word prod = *rA * EXTS(SI);
 	*rT = prod;
+
 0.31,6.RT,11.RA,16.RB,21.OE,22.233,31.Rc:D:64::Multiply Low Doubleword
+
 0.31,6.RT,11.RA,16.RB,21.OE,22.235,31.Rc:XO::mullw:Multiply Low Word
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 5, 5, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 5, 5, 0
+*604:PPC_FUNCTION_UNIT_MCIU, PPC_FUNCTION_UNIT_MCIU, 4, 4, 0
 	signed64 a = (signed32)(*rA);
 	signed64 b = (signed32)(*rB);
 	signed64 prod = a * b;
@@ -1167,24 +1333,39 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	if (t != prod && OE)
 	  XER |= (xer_overflow | xer_summary_overflow);
 	CR0_COMPARE(t, 0, Rc);
+
 0.31,6.RT,11.RA,16.RB,21./,22.73,31.Rc:XO:64::Multiply High Doubleword
+
 0.31,6.RT,11.RA,16.RB,21./,22.75,31.Rc:XO::mulhw:Multiply High Word
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 5, 5, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 5, 5, 0
+*604:PPC_FUNCTION_UNIT_MCIU, PPC_FUNCTION_UNIT_MCIU, 4, 4, 0
 	signed64 a = (signed32)(*rA);
 	signed64 b = (signed32)(*rB);
 	signed64 prod = a * b;
 	signed_word t = EXTRACTED64(prod, 0, 31);
 	*rT = t;
 	CR0_COMPARE(t, 0, Rc);
+
 0.31,6.RT,11.RA,16.RB,21./,22.9,31.Rc:XO:64::Multiply High Doubleword Unsigned
+
 0.31,6.RT,11.RA,16.RB,21./,22.11,31.Rc:XO::milhwu:Multiply High Word Unsigned
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 6, 6, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 6, 6, 0
+*604:PPC_FUNCTION_UNIT_MCIU, PPC_FUNCTION_UNIT_MCIU, 4, 4, 0
 	unsigned64 a = (unsigned32)(*rA);
 	unsigned64 b = (unsigned32)(*rB);
 	unsigned64 prod = a * b;
 	signed_word t = EXTRACTED64(prod, 0, 31);
 	*rT = t;
 	CR0_COMPARE(t, 0, Rc);
+
 0.31,6.RT,11.RA,16.RB,21.OE,22.489,31.Rc:XO:64::Divide Doubleword
+
 0.31,6.RT,11.RA,16.RB,21.OE,22.491,31.Rc:XO::divw:Divide Word
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 37, 37, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 37, 37, 0
+*604:PPC_FUNCTION_UNIT_MCIU, PPC_FUNCTION_UNIT_MCIU, 20, 20, 0
 	signed64 dividend = (signed32)(*rA);
 	signed64 divisor = (signed32)(*rB);
 	if (divisor == 0 /* nb 0x8000..0 is sign extended */
@@ -1199,7 +1380,11 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  CR0_COMPARE((signed_word)quotent, 0, Rc);
 	}
 0.31,6.RT,11.RA,16.RB,21.OE,22.457,31.Rc:XO:64::Divide Doubleword Unsigned
+
 0.31,6.RT,11.RA,16.RB,21.OE,22.459,31.Rc:XO::divwu:Divide Word Unsigned
+*603:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 37, 37, 0
+*603e:PPC_FUNCTION_UNIT_IU, PPC_FUNCTION_UNIT_IU, 37, 37, 0
+*604:PPC_FUNCTION_UNIT_MCIU, PPC_FUNCTION_UNIT_MCIU, 20, 20, 0
 	unsigned64 dividend = (unsigned32)(*rA);
 	unsigned64 divisor = (unsigned32)(*rB);
 	if (divisor == 0) {
@@ -1561,7 +1746,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 # I.3.3.14 Move to/from System Register Instructions
 #
 
-0.31,6.RS,11.spr,21.467,31./:XFX:::Move to Special Purpose Register
+0.31,6.RS,11.spr,21.467,31./:XFX::mtspr %SPR, %RS:Move to Special Purpose Register
 	int n = (spr{5:9} << 5) | spr{0:4};
 	if (spr{0} && IS_PROBLEM_STATE(processor))
 	  program_interrupt(processor, cia,
@@ -1580,15 +1765,13 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	    switch (n) {
 	    case spr_tbu:
 	      cpu_set_time_base(processor,
-	                        (MASKED64(cpu_get_time_base(processor),
-	                                  32, 63)
-	                         | ((signed64)new_val << 32)));
+	                        (MASKED64(cpu_get_time_base(processor), 32, 63)
+	                         | INSERTED64(new_val, 0, 31)));
 	      break;
 	    case spr_tbl:
 	      cpu_set_time_base(processor,
-	                        (MASKED64(cpu_get_time_base(processor),
-	                                  32, 63)
-	                         | ((signed64)new_val << 32)));
+	                        (MASKED64(cpu_get_time_base(processor), 0, 31)
+	                         | INSERTED64(new_val, 32, 63)));
 	      break;
 	    case spr_dec:
 	      cpu_set_decrementer(processor, new_val);
@@ -1602,7 +1785,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	    SPREG(n) = new_val;
 	  }
 	}
-0.31,6.RT,11.spr,21.339,31./:XFX:uea::Move from Special Purpose Register
+0.31,6.RT,11.spr,21.339,31./:XFX::mfspr %RT, %SPR:Move from Special Purpose Register
 	int n = (spr{5:9} << 5) | spr{0:4};
 	if (spr{0} && IS_PROBLEM_STATE(processor))
 	  program_interrupt(processor, cia,
@@ -2329,7 +2512,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.31,6./,11.RA,16.RB,21.982,31./:X::icbi:Instruction Cache Block Invalidate
-	;	/* nop for now */
+	/* blindly flush all instruction cache entries */
+	#if WITH_IDECODE_CACHE_SIZE
+	cpu_flush_icache(processor);
+	#endif
 
 0.19,6./,11./,16./,21.150,31./:XL::isync:Instruction Synchronize
 	cpu_synchronize_context(processor);
@@ -2385,8 +2571,19 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 # III.2.3.1 System Linkage Instructions
 #
 
-#0.17,6./,11./,16./,30.1,31./:SC:::System Call
-0.19,6./,11./,16./,21.50,31./:XL:::Return From Interrupt
+#0.17,6./,11./,16./,30.1,31./:SC::sc:System Call
+0.19,6./,11./,16./,21.50,31./:XL::rfi:Return From Interrupt
+	if (IS_PROBLEM_STATE(processor)) {
+	  program_interrupt(processor, cia,
+	                    privileged_instruction_program_interrupt);
+	}
+	else {
+	  MSR = (MASKED(SRR1, 0, 32)
+	         | MASKED(SRR1, 37, 41)
+	         | MASKED(SRR1, 48, 63));
+	  NIA = MASKED(SRR0, 0, 61);
+	  cpu_synchronize_context(processor);
+	}
 
 #
 # III.3.4.1 Move to/from System Register Instructions
