@@ -1,3 +1,46 @@
+2001-03-21  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	Unified support for hardware breakpoints and watchpoints on
+	x86 targets:
+
+	* config/i386/nm-i386.h: New file.
+
+	* config/i386/nm-i386.h: (i386_cleanup_dregs)
+	(i386_insert_watchpoint, i386_remove_watchpoint)
+	(i386_region_ok_for_watchpoint, i386_stopped_by_hwbp)
+	(i386_stopped_data_address, i386_insert_hw_breakpoint)
+	(i386_remove_hw_breakpoint): Declare prototypes.
+	[I386_USE_GENERIC_WATCHPOINTS] (TARGET_CAN_USE_HARDWARE_WATCHPOINT):
+	Define if not already defined.
+	(TARGET_REGION_OK_FOR_HW_WATCHPOINT, HAVE_CONTINUABLE_WATCHPOINT)
+	(STOPPED_BY_WATCHPOINT, target_stopped_data_address)
+	(target_insert_watchpoint, target_remove_watchpoint)
+	(target_insert_hw_breakpoint, target_remove_hw_breakpoint): Define
+	to call the appropriate i386_* functions.
+
+	* i386-nat.c: New file.
+
+	* i386-nat.c (I386_DR_CONTROL_MASK, I386_DR_LOCAL_ENABLE)
+	(I386_DR_GLOBAL_ENABLE, I386_DR_DISABLE, I386_DR_SET_RW_LEN)
+	(I386_DR_GET_RW_LEN, I386_DR_WATCH_HIT): New macros.
+	(dr_mirror, dr_status_mirror, dr_control_mirror, dr_ref_count)
+	(maint_show_dr): New variables.
+	(i386_cleanup_dregs, i386_show_dr, i386_length_and_rw_bits)
+	(i386_insert_aligned_watchpoint, i386_remove_aligned_watchpoint)
+	(i386_handle_nonaligned_watchpoint, i386_insert_watchpoint)
+	(i386_remove_watchpoint, i386_region_ok_for_watchpoint)
+	(i386_stopped_data_address, i386_stopped_by_hwbp)
+	(i386_insert_hw_breakpoint, i386_remove_hw_breakpoint): New
+	functions.
+	(_initialize_i386_nat): New function.
+	[I386_USE_GENERIC_WATCHPOINTS]: Add new	maint command
+	`show-debug-regs', sets maint_show_dr to non-zero value and
+	activates debugging print-outs in functions which insert, remove,
+	and test watchpoints and hardware breakpoints.
+
+	* Makefile.in (i386-nat.o): New target.
+	(ALLDEPFILES): Add i386-nat.o.
+
 2001-03-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c: Add back _initialize_i386_tdep prototype with
