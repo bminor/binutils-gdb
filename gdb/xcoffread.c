@@ -32,6 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/types.h>
 #include <fcntl.h>
 #include <ctype.h>
+#include <string.h>
 
 #include "obstack.h"
 #include <sys/param.h>
@@ -185,6 +186,9 @@ free_linetab PARAMS ((void));
 
 static void
 find_linenos PARAMS ((bfd *, sec_ptr, PTR));
+
+static char *
+coff_getfilename PARAMS ((union internal_auxent *));
 
 static void
 read_symbol PARAMS ((struct internal_syment *, int));
@@ -1760,6 +1764,35 @@ process_xcoff_symbol (cs, objfile)
     }
   }
   return sym2;
+}
+
+/* Extract the file name from the aux entry of a C_FILE symbol.  Return
+   only the last component of the name.  Result is in static storage and
+   is only good for temporary use.  */
+
+static char *
+coff_getfilename (aux_entry)
+    union internal_auxent *aux_entry;
+{
+  static char buffer[BUFSIZ];
+  register char *temp;
+  char *result;
+
+  if (aux_entry->x_file.x_n.x_zeroes == 0)
+    strcpy (buffer, strtbl + aux_entry->x_file.x_n.x_offset);
+  else
+    {
+      strncpy (buffer, aux_entry->x_file.x_fname, FILNMLEN);
+      buffer[FILNMLEN] = '\0';
+    }
+  result = buffer;
+
+  /* FIXME: We should not be throwing away the information about what
+     directory.  It should go into dirname of the symtab, or some such
+     place.  */
+  if ((temp = strrchr (result, '/')) != NULL)
+    result = temp + 1;
+  return (result);
 }
 
 /* Set *SYMBOL to symbol number symno in symtbl.  */

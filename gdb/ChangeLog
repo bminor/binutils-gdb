@@ -1,3 +1,9 @@
+Fri Nov 25 13:37:10 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* coffread.c, symfile.h (coff_getfilename):  Make it static again.
+	* xcoffread.c (coff_getfilename):  Use a static copy from
+	coffread.c, modified for accessing the static xcoff strtbl.
+
 Fri Nov 25 00:51:05 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (in_solib_call_trampoline): Recognize calls through
