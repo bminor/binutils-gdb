@@ -2114,7 +2114,7 @@ remote_detach (args, from_tty)
   strcpy (buf, "D");
   remote_send (buf, PBUFSIZ);
 
-  pop_target ();
+  target_mourn_inferior ();
   if (from_tty)
     puts_filtered ("Ending remote debugging.\n");
 
@@ -2139,7 +2139,7 @@ remote_async_detach (args, from_tty)
   if (target_is_async_p ())
     SERIAL_ASYNC (remote_desc, NULL, 0);
 
-  pop_target ();
+  target_mourn_inferior ();
   if (from_tty)
     puts_filtered ("Ending remote debugging.\n");
 }

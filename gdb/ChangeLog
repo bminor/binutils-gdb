@@ -1,3 +1,10 @@
+2000-02-18  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* remote.c (remote_async_detach): Use target_mourn_inferior(), to
+ 	make sure that all is cleaned up after we disconnect from the
+ 	target.
+	(remote_detach): Ditto.
+
 2000-02-17  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	From Rodney Brown  <RodneyBrown@pmsc.com>
