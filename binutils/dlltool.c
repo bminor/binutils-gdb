@@ -214,6 +214,7 @@ int killat;
 static int verbose;
 FILE *output_def;
 FILE *base_file;
+
 #ifdef DLLTOOL_ARM
 static char *mname = "arm";
 #endif
@@ -221,6 +222,11 @@ static char *mname = "arm";
 #ifdef DLLTOOL_I386
 static char *mname = "i386";
 #endif
+
+#ifdef DLLTOOL_PPC
+static char *mname = "ppc";
+#endif
+
 #define PATHMAX 250		/* What's the right name for this ? */
 
 /* This bit of assemly does jmp * ....
@@ -231,6 +237,11 @@ unsigned char i386_jtab[] = { 0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90};
 unsigned char arm_jtab[] = { 0x00, 0xc0, 0x9f, 0xe5,
                              0x00, 0xf0, 0x9c, 0xe5,
 			        0,     0,   0,    0};
+/* If I understand what is going on here, this will need more for ppc
+   support, but this lets the program start. Kim Knuttila (krk@cygnus.com) */
+
+unsigned char ppc_jtab[] = { 0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90};
+
 char outfile[PATHMAX];
 struct mac
   {
@@ -268,6 +279,12 @@ mtable[]
    i386_jtab,sizeof(i386_jtab),2,
   }
   ,
+  {
+#define MPPC 2
+    "ppc", ".byte", ".short", ".long", ".asciz", "#", "jmp *", ".global", ".space", ".align\t2",".align\t4","pe-powerpcle",bfd_arch_powerpc,
+   ppc_jtab,sizeof(ppc_jtab),2,
+  }
+  ,
 {    0}
 };
 
@@ -281,6 +298,8 @@ rvaafter (machine)
     case MARM:
       return "";
     case M386:
+      return "";
+    case MPPC:
       return "";
     }
 return "";
@@ -296,6 +315,8 @@ rvabefore (machine)
       return ".rva\t";
     case M386:
       return ".rva\t";
+    case MPPC:
+      return ".rva\t";
     }
 return "";
 }
@@ -310,6 +331,8 @@ int machine;
       return "";
     case M386:
       return "_";
+    case MPPC:
+      return "";
     }
 return "";
 }
@@ -1694,7 +1717,7 @@ fill_ordinals (d_export_vec)
 
   ptr = (char *) malloc (65536);
 
-  memset (ptr, 65536, 0);
+  memset (ptr, 0, 65536);
 
   /* Mark in our large vector all the numbers that are taken */
   for (i = 0; i < d_nfuncs; i++)

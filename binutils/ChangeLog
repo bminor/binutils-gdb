@@ -1,3 +1,7 @@
+Tue Nov 14 17:19:11 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* dlltool.c (fill_ordinals): Correct memset call.
+
 Sun Nov 12 12:56:05 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed (DEMANGLER_PROG): Edit out attempts to do anything
