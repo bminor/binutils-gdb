@@ -185,8 +185,13 @@ netbsd_core_file_p (abfd)
    case M_SPARC64_OPENBSD:
      bfd_default_set_arch_mach (abfd, bfd_arch_sparc, bfd_mach_sparc_v9);
      break;
+
+   case M_VAX_NETBSD:
+   case M_VAX4K_NETBSD:
+     bfd_default_set_arch_mach (abfd, bfd_arch_vax, 0);
+     break;
    }
- 
+
   /* OK, we believe you.  You're a core file (sure, sure).  */
   return abfd->xvec;
 

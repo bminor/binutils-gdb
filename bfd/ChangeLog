@@ -1,3 +1,8 @@
+2004-04-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* netbsd-core.c (netbsd_core_file_p): Set architecture for VAX
+	core files.
+
 2004-04-15  Nick Clifton  <nickc@redhat.com>
 
 	* bfd.c (bfd_archive_filename): Catch NULL bfd pointers.
