@@ -1,5 +1,4 @@
 \input texinfo               @c             -*- Texinfo -*-
-@finalout
 @setfilename gasp.info
 @c
 @c This file documents the assembly preprocessor "GASP"
@@ -20,12 +19,11 @@ END-INFO-DIR-ENTRY
 @syncodeindex ky cp
 @syncodeindex fn cp
 
+@finalout
 @setchapternewpage odd
 @settitle GASP
 @titlepage
 @c FIXME boring title
-@title DRAFT EDITION
-@sp 4
 @title GASP, an assembly preprocessor
 @subtitle for GASP version 1
 @sp 1
@@ -322,7 +320,7 @@ expressions.
 
 When you compare strings, only two conditional @var{cmp} comparison
 operators are available: @samp{EQ} (true if @var{stra} and @var{strb}
-are identical), and @samp{NE} (the converse).
+are identical), and @samp{NE} (the opposite).
 
 When you compare two expressions, @emph{both expressions must be
 absolute} (@pxref{Expressions,, Arithmetic expressions in GASP}).  You
@@ -717,7 +715,7 @@ Like @code{.SRES}, but reserves space for @code{@var{count}+1} elements.
 @node Listings
 @section Assembly listing control
 
-The @sc{gasp} listing-control directives map straightforwardly to
+The @sc{gasp} listing-control directives correspond to
 related @sc{gnu} @code{as} directives.
 
 @ftable @code
