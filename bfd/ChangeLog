@@ -1,5 +1,15 @@
 2000-09-06  Philip Blundell  <philb@gnu.org>
 
+	Merge from mainline:
+	
+	2000-05-31  Ulrich Drepper  <drepper@redhat.com>
+
+	* elf.c (_bfd_elf_slurp_version_tables): Correct reading of version
+	definitions.  We must not assume they are sorted in the file
+	according to their index numbers.
+
+2000-09-06  Philip Blundell  <philb@gnu.org>
+
 	* config.bfd (arm*-*-uclinux*): New target.
 	(armeb-*-elf, arm*b-*-linux-gnu*): Likewise.
 
