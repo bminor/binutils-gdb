@@ -1044,7 +1044,7 @@ ps_lcontinue (gdb_ps_prochandle_t ph, lwpid_t lwpid)
 
 ps_err_e
 ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *ld_object_name,
-		   const char *ld_symbol_name, paddr_t * ld_symbol_addr)
+		   const char *ld_symbol_name, psaddr_t * ld_symbol_addr)
 {
   struct minimal_symbol *ms;
 
@@ -1061,7 +1061,7 @@ ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *ld_object_name,
 /* Common routine for reading and writing memory.  */
 
 static ps_err_e
-rw_common (int dowrite, const struct ps_prochandle *ph, paddr_t addr,
+rw_common (int dowrite, const struct ps_prochandle *ph, psaddr_t addr,
 	   char *buf, int size)
 {
   struct cleanup *old_chain;
@@ -1105,7 +1105,7 @@ rw_common (int dowrite, const struct ps_prochandle *ph, paddr_t addr,
 /* Copies SIZE bytes from target process .data segment to debugger memory.  */
 
 ps_err_e
-ps_pdread (gdb_ps_prochandle_t ph, paddr_t addr,
+ps_pdread (gdb_ps_prochandle_t ph, psaddr_t addr,
 	   gdb_ps_read_buf_t buf, gdb_ps_size_t size)
 {
   return rw_common (0, ph, addr, buf, size);
@@ -1114,7 +1114,7 @@ ps_pdread (gdb_ps_prochandle_t ph, paddr_t addr,
 /* Copies SIZE bytes from debugger memory .data segment to target process.  */
 
 ps_err_e
-ps_pdwrite (gdb_ps_prochandle_t ph, paddr_t addr,
+ps_pdwrite (gdb_ps_prochandle_t ph, psaddr_t addr,
 	    gdb_ps_write_buf_t buf, gdb_ps_size_t size)
 {
   return rw_common (1, ph, addr, (char *) buf, size);
@@ -1123,7 +1123,7 @@ ps_pdwrite (gdb_ps_prochandle_t ph, paddr_t addr,
 /* Copies SIZE bytes from target process .text segment to debugger memory.  */
 
 ps_err_e
-ps_ptread (gdb_ps_prochandle_t ph, paddr_t addr,
+ps_ptread (gdb_ps_prochandle_t ph, psaddr_t addr,
 	   gdb_ps_read_buf_t buf, gdb_ps_size_t size)
 {
   return rw_common (0, ph, addr, buf, size);
@@ -1132,7 +1132,7 @@ ps_ptread (gdb_ps_prochandle_t ph, paddr_t addr,
 /* Copies SIZE bytes from debugger memory .text segment to target process.  */
 
 ps_err_e
-ps_ptwrite (gdb_ps_prochandle_t ph, paddr_t addr,
+ps_ptwrite (gdb_ps_prochandle_t ph, psaddr_t addr,
 	    gdb_ps_write_buf_t buf, gdb_ps_size_t size)
 {
   return rw_common (1, ph, addr, (char *) buf, size);

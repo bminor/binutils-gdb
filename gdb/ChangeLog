@@ -1,3 +1,12 @@
+2000-03-23  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* sol-thread.c (ps_pglobal_lookup): Change argument type from
+	paddr_t to psaddr_t.  This mistake appears to date from an
+	erroneous man page in Solaris 2.5 -- the correct type from the
+	system headers has always been psaddr_t.
+	(ps_pdread, ps_pdwrite, ps_ptread, ps_ptwrite): ditto.
+	(rw_common): ditto.
+
 2000-03-22  Kevin Buettner  <kevinb@redhat.com>
 
 	* ia64-linux-nat.c: Fix copyright.
