@@ -139,6 +139,10 @@ static ARMword softvectorcode[] =
   0xe1a0f00e			/* Default handler */
 };
 
+
+/* Set to prevent aborts when emulating SWI routines.  */
+static int in_SWI_handler = 0;
+
 /* Time for the Operating System to initialise itself.  */
 
 unsigned
@@ -385,10 +389,13 @@ SWIflen (ARMul_State * state, ARMword fh)
 unsigned
 ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 {
-  ARMword addr, temp;
-  struct OSblock *OSptr = (struct OSblock *) state->OSptr;
-  ARMword saved_number = 0;
+  ARMword          addr;
+  ARMword          temp;
+  ARMword          saved_number = 0;
+  struct OSblock * OSptr = (struct OSblock *) state->OSptr;
   
+  in_SWI_handler = 1;
+
   /* Intel do not want DEMON SWI support.  */
   if (state->is_XScale)
     switch (number)
@@ -416,15 +423,15 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
     {
     case SWI_Read:
       SWIread (state, state->Reg[0], state->Reg[1], state->Reg[2]);
-      return TRUE;
+      break;
 
     case SWI_Write:
       SWIwrite (state, state->Reg[0], state->Reg[1], state->Reg[2]);
-      return TRUE;
+      break;
 
     case SWI_Open:
       SWIopen (state, state->Reg[0], state->Reg[1]);
-      return TRUE;
+      break;
 
     case SWI_Clock:
       /* Return number of centi-seconds.  */
@@ -438,46 +445,44 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	(ARMword) (clock () / 10000);
 #endif
       OSptr->ErrorNo = errno;
-      return TRUE;
+      break;
 
     case SWI_Time:
       state->Reg[0] = (ARMword) time (NULL);
       OSptr->ErrorNo = errno;
-      return TRUE;
+      break;
 
     case SWI_Close:
       state->Reg[0] = close (state->Reg[0]);
       OSptr->ErrorNo = errno;
-      return TRUE;
+      break;
 
     case SWI_Flen:
       SWIflen (state, state->Reg[0]);
-      return TRUE;
+      break;
 
     case SWI_Exit:
       state->Emulate = FALSE;
-      return TRUE;
+      break;
 
     case SWI_Seek:
-      {
-	/* We must return non-zero for failure.  */
-	state->Reg[0] = -1 >= lseek (state->Reg[0], state->Reg[1], SEEK_SET);
-	OSptr->ErrorNo = errno;
-	return TRUE;
-      }
+      /* We must return non-zero for failure.  */
+      state->Reg[0] = -1 >= lseek (state->Reg[0], state->Reg[1], SEEK_SET);
+      OSptr->ErrorNo = errno;
+      break;
 
     case SWI_WriteC:
       (void) fputc ((int) state->Reg[0], stdout);
       OSptr->ErrorNo = errno;
-      return TRUE;
+      break;
 
     case SWI_Write0:
       SWIWrite0 (state, state->Reg[0]);
-      return TRUE;
+      break;
 
     case SWI_GetErrno:
       state->Reg[0] = OSptr->ErrorNo;
-      return TRUE;
+      break;
 
     case SWI_GetEnv:
       state->Reg[0] = ADDRCMDLINE;
@@ -487,12 +492,12 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	state->Reg[1] = ADDRUSERSTACK;
 
       WriteCommandLineTo (state, state->Reg[0]);
-      return TRUE;
+      break;
 
     case SWI_Breakpoint:
       state->EndCondition = RDIError_BreakpointReached;
       state->Emulate = FALSE;
-      return TRUE;
+      break;
 
       /* Handle Angel SWIs as well as Demon ones.  */
     case AngelSWI_ARM:
@@ -512,6 +517,7 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	case AngelSWI_Reason_EnterSVC:
 	default:
 	  state->Emulate = FALSE;
+	  in_SWI_handler = 0;
 	  return FALSE;
 
 	case AngelSWI_Reason_Clock:
@@ -526,41 +532,40 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	    (ARMword) (clock () / 10000);
 #endif
 	  OSptr->ErrorNo = errno;
-	  return TRUE;
+	  break;
 
 	case AngelSWI_Reason_Time:
 	  state->Reg[0] = (ARMword) time (NULL);
 	  OSptr->ErrorNo = errno;
-	  return TRUE;
+	  break;
 
 	case AngelSWI_Reason_WriteC:
 	  (void) fputc ((int) ARMul_ReadByte (state, addr), stdout);
 	  OSptr->ErrorNo = errno;
-	  return TRUE;
 
 	case AngelSWI_Reason_Write0:
 	  SWIWrite0 (state, addr);
-	  return TRUE;
+	  break;
 
 	case AngelSWI_Reason_Close:
 	  state->Reg[0] = close (ARMul_ReadWord (state, addr));
 	  OSptr->ErrorNo = errno;
-	  return TRUE;
+	  break;
 
 	case AngelSWI_Reason_Seek:
 	  state->Reg[0] = -1 >= lseek (ARMul_ReadWord (state, addr),
 				       ARMul_ReadWord (state, addr + 4),
 				       SEEK_SET);
 	  OSptr->ErrorNo = errno;
-	  return TRUE;
+	  break;
 
 	case AngelSWI_Reason_FLen:
 	  SWIflen (state, ARMul_ReadWord (state, addr));
-	  return TRUE;
+	  break;
 
 	case AngelSWI_Reason_GetCmdLine:
 	  WriteCommandLineTo (state, ARMul_ReadWord (state, addr));
-	  return TRUE;
+	  break;
 
 	case AngelSWI_Reason_HeapInfo:
 	  /* R1 is a pointer to a pointer.  */
@@ -576,7 +581,7 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	  ARMul_WriteWord (state, addr + 4, temp);	/* Heap limit */
 	  ARMul_WriteWord (state, addr + 8, temp);	/* Stack base */
 	  ARMul_WriteWord (state, addr + 12, temp);	/* Stack limit */
-	  return TRUE;
+	  break;
 
 	case AngelSWI_Reason_ReportException:
 	  if (state->Reg[1] == ADP_Stopped_ApplicationExit)
@@ -584,79 +589,84 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	  else
 	    state->Reg[0] = -1;
 	  state->Emulate = FALSE;
-	  return TRUE;
+	  break;
 
 	case ADP_Stopped_ApplicationExit:
 	  state->Reg[0] = 0;
 	  state->Emulate = FALSE;
-	  return TRUE;
+	  break;
 
 	case ADP_Stopped_RunTimeError:
 	  state->Reg[0] = -1;
 	  state->Emulate = FALSE;
-	  return TRUE;
+	  break;
 
 	case AngelSWI_Reason_Errno:
 	  state->Reg[0] = OSptr->ErrorNo;
-	  return TRUE;
+	  break;
 
 	case AngelSWI_Reason_Open:
 	  SWIopen (state,
 		   ARMul_ReadWord (state, addr),
 		   ARMul_ReadWord (state, addr + 4));
-	  return TRUE;
+	  break;
 
 	case AngelSWI_Reason_Read:
 	  SWIread (state,
 		   ARMul_ReadWord (state, addr),
 		   ARMul_ReadWord (state, addr + 4),
 		   ARMul_ReadWord (state, addr + 8));
-	  return TRUE;
+	  break;
 
 	case AngelSWI_Reason_Write:
 	  SWIwrite (state,
 		    ARMul_ReadWord (state, addr),
 		    ARMul_ReadWord (state, addr + 4),
 		    ARMul_ReadWord (state, addr + 8));
-	  return TRUE;
+	  break;
 	}
 
     case 0x90:
     case 0x91:
     case 0x92:
       /* These are used by the FPE code.  */
-      return TRUE;
+      break;
       
     default:
-      {
-	/* If there is a SWI vector installed use it.  */
-	if (state->is_XScale && saved_number != -1)
-	  number = saved_number;
+      in_SWI_handler = 0;
+      
+      /* If there is a SWI vector installed use it.  */
+      if (state->is_XScale && saved_number != -1)
+	number = saved_number;
 	    
-	if (SWI_vector_installed && number != SWI_Breakpoint)
-	  {
-	    ARMword cpsr;
-	    ARMword i_size;
+      if (SWI_vector_installed && number != SWI_Breakpoint)
+	{
+	  ARMword cpsr;
+	  ARMword i_size;
 	    
-	    cpsr = ARMul_GetCPSR (state);
-	    i_size = INSN_SIZE;
+	  cpsr = ARMul_GetCPSR (state);
+	  i_size = INSN_SIZE;
 	    
-	    ARMul_SetSPSR (state, SVC32MODE, cpsr);
+	  ARMul_SetSPSR (state, SVC32MODE, cpsr);
 	    
-	    cpsr &= ~0xbf;
-	    cpsr |= SVC32MODE | 0x80;
-	    ARMul_SetCPSR (state, cpsr);
+	  cpsr &= ~0xbf;
+	  cpsr |= SVC32MODE | 0x80;
+	  ARMul_SetCPSR (state, cpsr);
 	    
-	    state->RegBank[SVCBANK][14] = state->Reg[14] = state->Reg[15] - i_size;
-	    state->NextInstr            = RESUME;
-	    state->Reg[15]              = state->pc = ARMSWIV;
-	    FLUSHPIPE;
-	  }
-	else
+	  state->RegBank[SVCBANK][14] = state->Reg[14] = state->Reg[15] - i_size;
+	  state->NextInstr            = RESUME;
+	  state->Reg[15]              = state->pc = ARMSWIV;
+	  FLUSHPIPE;
+	}
+      else
+	{
 	  fprintf (stderr, "unknown SWI encountered - %x - ignoring\n", number);
-	return TRUE;
-      }
+	  return FALSE;
+	}
     }
+
+  in_SWI_handler = 0;
+  return TRUE;
 }
 
 #ifndef NOOS
@@ -672,7 +682,11 @@ ARMul_OSException (ARMul_State * state  ATTRIBUTE_UNUSED,
 		   ARMword       vector ATTRIBUTE_UNUSED,
 		   ARMword       pc     ATTRIBUTE_UNUSED)
 {
-  return FALSE;
+  /* If we are inside a SWI handler routine, then ignore any exceptions.
+     They could be caused by data exceptions for misaligned reads, for
+     example, but for the purposes of emulating a SWI, we do not care.  */
+   
+  return in_SWI_handler;
 }
 
 #endif

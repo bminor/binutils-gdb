@@ -1,3 +1,10 @@
+2001-02-13  Nick Clifton  <nickc@redhat.com>
+
+	* armos.c (in_SWI_handler): New static variable.
+	(ARMul_OSHandleSWI): Set in_SWI_handler whilst emulating a SWI.
+	(ARMul_OSException): Ignore exceptions generated whilst emulating
+	a SWI.
+
 2001-02-12  Nick Clifton  <nickc@redhat.com>
 
 	* armemu.h (NEGBRANCH): Fix defintion.
