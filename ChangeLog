@@ -1,3 +1,65 @@
+Wed Nov 13 14:59:46 1996  Per Bothner  <bothner@deneb.cygnus.com>
+
+	* config.guess:  Patch for Dansk Data Elektronik servers,
+	from Niels Skou Olsen <nso@dde.dk>.
+
+	For ncr, use /bin/uname rather than uname, since GNU uname does not
+	support -p.  Suggested by Mark Mitchell <mmitchell@usa.net>.
+
+	Patch for MIPS R4000 running System V,
+	from Eric S. Raymond <esr@snark.thyrsus.com>.
+
+	Fix thinko for nextstep.
+
+	Patch for OSF1 in i?86, from Dan Murphy <dlm@osf.org> via Harlan Stenn.
+
+	Sat Jun 24 18:58:17 1995  Morten Welinder  <terra+@cs.cmu.edu>
+	* config.guess: Guess mips-dec-mach_bsd4.3.
+
+	Thu Oct 10 04:07:04 1996  Harlan Stenn <harlan@pfcs.com>
+	* config.guess (i?86-ncr-sysv*):  Emit just enough of the minor
+	release numbers.
+	* config.guess (mips-mips-riscos*):  Emit just enough of the
+	release number.
+
+	Tue Oct  8 10:37:22 1996  Frank Vance <fvance@waii.com>
+	* config.guess (sparc-auspex-sunos*):  Added.
+	(f300-fujitsu-*): Added.
+
+	Wed Sep 25 22:00:35 1996  Jeff Woolsey <woolsey@jlw.com>
+	* config.guess:  Recognize a Tadpole as a sparc.
+
+Wed Nov 13 00:53:09 1996  David J. MacKenzie  <djm@churchy.gnu.ai.mit.edu>
+
+	* config.guess: Don't assume that NextStep version is either 2 or
+	3.  NextStep 4 (aka OpenStep 4) has come out now.
+
+Mon Nov 11 23:52:03 1996  David J. MacKenzie  <djm@churchy.gnu.ai.mit.edu>
+
+	* config.guess: Support Cray T90 that reports itself as "CRAY TS".
+	From Rik Faith <faith@cs.unc.edu>.
+
+Fri Nov  8 11:34:58 1996  David J. MacKenzie  <djm@geech.gnu.ai.mit.edu>
+
+	* config.sub: Contributions from bug-gnu-utils to:
+	Support plain "hppa" (no version given) architecture, reported by
+	OpenStep.
+	OpenBSD like NetBSD.
+	LynxOs is not a hardware supplier.
+
+	* config.guess: Contributions from bug-gnu-utils to add support for:
+ 	OpenBSD like NetBSD.
+	Stratus systems.
+	More Pyramid systems.
+	i[n>4]86 Intel chips.
+	M680[n>4]0 Motorola chips.
+	Use unknown instead of lynx for hardware manufacturer.
+
+Mon Nov 11 10:09:08 1996  Brendan Kehoe  <brendan@lisa.cygnus.com>
+
+	* install.sh (chmodcmd): Set to null if the DST directory already
+	exists.
+
 Mon Nov 11 10:43:41 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (powerpc*-{eabi,elf,linux,rtem,sysv,solaris}*): Do
