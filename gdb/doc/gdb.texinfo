@@ -1270,6 +1270,7 @@ command (@pxref{Files}).
 @refill
 @end table
 
+@c FIXME explain or avoid "target" here?
 On targets that support processes, @code{run} creates an inferior
 process and makes that process run your program.  On other targets,
 @code{run} jumps to the start of the program.
@@ -1651,6 +1652,11 @@ no effect on the program until you enable it again.
 @node Set Breaks, Set Watchpoints, Breakpoints, Breakpoints
 @subsection Setting Breakpoints
 
+@c FIXME LMB what does GDB do if no code on line of breakpt?  
+@c       consider in particular declaration with/without initialization.
+@c
+@c FIXME 2 is there stuff on this already? break at fun start, already init?
+
 @kindex break
 @kindex b
 Breakpoints are set with the @code{break} command (abbreviated @code{b}).
@@ -1724,6 +1730,7 @@ is hit.  @xref{Disabling}.
 @item rbreak @var{regex}
 @kindex rbreak
 @cindex regular expression
+@c FIXME what kind of regexp?
 Set breakpoints on all functions matching the regular expression
 @var{regex}.  This command
 sets an unconditional breakpoint on all matches, printing a list of all
@@ -1963,6 +1970,8 @@ will not change the state of your other breakpoints;
 @cindex conditional breakpoints
 @cindex breakpoint conditions
 
+@c FIXME what is scope of break condition expr?  Context where wanted?
+@c      in particular for a watchpoint?  
 The simplest sort of breakpoint breaks every time the program reaches a
 specified place.  You can also specify a @dfn{condition} for a
 breakpoint.  A condition is just a Boolean expression in your
@@ -2008,7 +2017,10 @@ watchpoint number @var{bnum}.  From now on, this breakpoint will stop
 the program only if the value of @var{expression} is true (nonzero, in
 C).  When you use @code{condition}, _GDBN__ checks @var{expression}
 immediately for syntactic correctness, and to determine whether symbols
-in it have referents in the context of your breakpoint.  _GDBN__ does
+in it have referents in the context of your breakpoint.  
+@c FIXME so what does GDB do if there's no referent?  Moreover, what
+@c about watchpoints?
+_GDBN__ does
 not actually evaluate @var{expression} at the time the @code{condition}
 command is given, however.  @xref{Expressions}.
 
