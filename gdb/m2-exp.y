@@ -1233,24 +1233,26 @@ const struct language_defn m2_language_defn = {
 void
 _initialize_m2_exp ()
 {
-  /* FIXME:  The code below assumes that the sizes of the basic data
-     types are the same on the host and target machines!!!  */
-
   /* Modula-2 "pervasive" types.  NOTE:  these can be redefined!!! */
   builtin_type_m2_int =
-    init_type (TYPE_CODE_INT, sizeof(int), 0,
+    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_FUND_TYPE,
 	       "INTEGER", (struct objfile *) NULL);
   builtin_type_m2_card =
-    init_type (TYPE_CODE_INT, sizeof(int), TYPE_FLAG_UNSIGNED,
+    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_FUND_TYPE | TYPE_FLAG_UNSIGNED,
 	       "CARDINAL", (struct objfile *) NULL);
   builtin_type_m2_real =
-    init_type (TYPE_CODE_FLT, sizeof(float), 0,
+    init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_FUND_TYPE,
 	       "REAL", (struct objfile *) NULL);
   builtin_type_m2_char =
-    init_type (TYPE_CODE_CHAR, sizeof(char), TYPE_FLAG_UNSIGNED,
+    init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_FUND_TYPE | TYPE_FLAG_UNSIGNED,
 	       "CHAR", (struct objfile *) NULL);
   builtin_type_m2_bool =
-    init_type (TYPE_CODE_BOOL, sizeof(int), TYPE_FLAG_UNSIGNED,
+    init_type (TYPE_CODE_BOOL, TARGET_INT_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_FUND_TYPE | TYPE_FLAG_UNSIGNED,
 	       "BOOLEAN", (struct objfile *) NULL);
 
   TYPE_NFIELDS(builtin_type_m2_bool) = 2;

@@ -1,3 +1,29 @@
+Tue Apr 14 22:33:55 1992  Fred Fish  (fnf@cygnus.com)
+
+	* gdbtypes.h (FT_FIXED_DECIMAL, FT_FLOAT_DECIMAL):  Add defines.
+	* gdbtypes.h (TYPE_FLAG_FUND_TYPE):  Add define for bit in a
+	type's flag word that marks it as a fundamental type.
+	* c-exp.y (_initialize_c_exp): Add TYPE_FLAG_FUND_TYPE bit to
+	flags argument for all calls to init_type().
+	* m2-exp.y (_initialize_m2_exp): Add TYPE_FLAG_FUND_TYPE bit to
+	flags argument for all calls to init_type().  Also remove
+	dependency on host sizes for ints, floats, etc.
+	* mipsread.c (_initialize_mipsread): Add TYPE_FLAG_FUND_TYPE bit to
+	flags argument for all calls to init_type().  Also remove
+	dependency on host sizes for ints, floats, etc.
+	* gdbtypes.c (lookup_fundamental_type):  Add TYPE_FLAG_FUND_TYPE
+	bit to flags argument for all calls to init_type().  Add types
+	FT_FIXED_DECIMAL and FT_FLOAT_DECIMAL.
+	* valprint.c (unsigned_type_table, signed_type_table,
+	float_type_table):  Remove.
+	* valprint.c (type_print_base):  Test new TYPE_FLAG_FUND_TYPE
+	bit when printing fundamental types, and print the actual name
+	for such types, rather than inventing one.  Remove code that
+	invented fundamental type names.
+	* valprint.c (_initialize_valprint):  Remove initializations
+	for now removed unsigned_type_table, signed_type_table, and
+	float_type_table.
+
 Mon Apr 13 20:59:21 1992  Fred Fish  (fnf@cygnus.com)
 
 	* dwarfread.c (target_to_host):  New function similar to previous

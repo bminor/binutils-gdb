@@ -804,148 +804,158 @@ lookup_fundamental_type (objfile, typeid)
 	      case FT_VOID:
 	        type = init_type (TYPE_CODE_VOID,
 				  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-				  0,
+				  TYPE_FLAG_FUND_TYPE,
 				  "void", objfile);
 		break;
 	      case FT_BOOLEAN:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_INT_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_UNSIGNED,
+				  TYPE_FLAG_FUND_TYPE | TYPE_FLAG_UNSIGNED,
 				  "boolean", objfile);
 		break;
 	      case FT_STRING:
 		type = init_type (TYPE_CODE_PASCAL_ARRAY,
 				  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-				  0,
+				  TYPE_FLAG_FUND_TYPE,
 				  "string", objfile);
 		break;
 	      case FT_CHAR:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-				  0,
+				  TYPE_FLAG_FUND_TYPE,
 				  "char", objfile);
 		break;
 	      case FT_SIGNED_CHAR:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_SIGNED,
+				  TYPE_FLAG_FUND_TYPE | TYPE_FLAG_SIGNED,
 				  "signed char", objfile);
 		break;
 	      case FT_UNSIGNED_CHAR:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_UNSIGNED,
+				  TYPE_FLAG_FUND_TYPE | TYPE_FLAG_UNSIGNED,
 				  "unsigned char", objfile);
 		break;
 	      case FT_SHORT:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-				  0,
+				  TYPE_FLAG_FUND_TYPE,
 				  "short", objfile);
 		break;
 	      case FT_SIGNED_SHORT:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_SIGNED,
+				  TYPE_FLAG_FUND_TYPE | TYPE_FLAG_SIGNED,
 				  "signed short", objfile);
 		break;
 	      case FT_UNSIGNED_SHORT:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_UNSIGNED,
+				  TYPE_FLAG_FUND_TYPE | TYPE_FLAG_UNSIGNED,
 				  "unsigned short", objfile);
 		break;
 	      case FT_INTEGER:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_INT_BIT / TARGET_CHAR_BIT,
-				  0,
+				  TYPE_FLAG_FUND_TYPE,
 				  "int", objfile);
 		break;
 	      case FT_SIGNED_INTEGER:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_INT_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_SIGNED,
+				  TYPE_FLAG_FUND_TYPE | TYPE_FLAG_SIGNED,
 				  "signed int", objfile);
 		break;
 	      case FT_UNSIGNED_INTEGER:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_INT_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_UNSIGNED,
+				  TYPE_FLAG_FUND_TYPE | TYPE_FLAG_UNSIGNED,
 				  "unsigned int", objfile);
+		break;
+	      case FT_FIXED_DECIMAL:
+		type = init_type (TYPE_CODE_INT,
+				  TARGET_INT_BIT / TARGET_CHAR_BIT,
+				  TYPE_FLAG_FUND_TYPE,
+				  "fixed decimal", objfile);
 		break;
 	      case FT_LONG:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_LONG_BIT / TARGET_CHAR_BIT,
-				  0,
+				  TYPE_FLAG_FUND_TYPE,
 				  "long", objfile);
 		break;
 	      case FT_SIGNED_LONG:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_LONG_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_SIGNED,
+				  TYPE_FLAG_FUND_TYPE | TYPE_FLAG_SIGNED,
 				  "signed long", objfile);
 		break;
 	      case FT_UNSIGNED_LONG:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_LONG_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_UNSIGNED,
+				  TYPE_FLAG_FUND_TYPE | TYPE_FLAG_UNSIGNED,
 				  "unsigned long", objfile);
 		break;
 	      case FT_LONG_LONG:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-				  0,
+				  TYPE_FLAG_FUND_TYPE,
 				  "long long", objfile);
 		break;
 	      case FT_SIGNED_LONG_LONG:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_SIGNED,
+				  TYPE_FLAG_FUND_TYPE | TYPE_FLAG_SIGNED,
 				  "signed long long", objfile);
 		break;
 	      case FT_UNSIGNED_LONG_LONG:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-				  TYPE_FLAG_UNSIGNED,
-				  "unsigned long long",
-				  objfile);
+				  TYPE_FLAG_FUND_TYPE | TYPE_FLAG_UNSIGNED,
+				  "unsigned long long", objfile);
 		break;
 	      case FT_FLOAT:
 		type = init_type (TYPE_CODE_FLT,
 				  TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
-				  0,
+				  TYPE_FLAG_FUND_TYPE,
 				  "float", objfile);
 		break;
 	      case FT_DBL_PREC_FLOAT:
 		type = init_type (TYPE_CODE_FLT,
 				  TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
-				  0,
+				  TYPE_FLAG_FUND_TYPE,
 				  "double", objfile);
+		break;
+	      case FT_FLOAT_DECIMAL:
+		type = init_type (TYPE_CODE_FLT,
+				  TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+				  TYPE_FLAG_FUND_TYPE,
+				  "floating decimal", objfile);
 		break;
 	      case FT_EXT_PREC_FLOAT:
 		type = init_type (TYPE_CODE_FLT,
 				  TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
-				  0,
+				  TYPE_FLAG_FUND_TYPE,
 				  "long double", objfile);
 		break;
 	      case FT_COMPLEX:
 		type = init_type (TYPE_CODE_FLT,
 				  TARGET_COMPLEX_BIT / TARGET_CHAR_BIT,
-				  0,
+				  TYPE_FLAG_FUND_TYPE,
 				  "complex", objfile);
 		break;
 	      case FT_DBL_PREC_COMPLEX:
 		type = init_type (TYPE_CODE_FLT,
 				  TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
-				  0,
+				  TYPE_FLAG_FUND_TYPE,
 				  "double complex", objfile);
 		break;
 	      case FT_EXT_PREC_COMPLEX:
 		type = init_type (TYPE_CODE_FLT,
 				  TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
-				  0,
-				  "long double complex",
-				  objfile);
+				  TYPE_FLAG_FUND_TYPE,
+				  "long double complex", objfile);
 		break;
 	    }
 	  /* Install the newly created type in the objfile's fundamental_types

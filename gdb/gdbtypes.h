@@ -49,8 +49,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define FT_DBL_PREC_COMPLEX	21
 #define FT_EXT_PREC_COMPLEX	22
 #define FT_STRING		23
+#define FT_FIXED_DECIMAL	24
+#define FT_FLOAT_DECIMAL	25
 
-#define FT_NUM_MEMBERS		24
+#define FT_NUM_MEMBERS		26
 
 /* Different kinds of data types are distinguished by the `code' field.  */
 
@@ -87,7 +89,7 @@ enum type_code
 
 #define TYPE_FLAG_UNSIGNED	(1 << 0)
 
-/* Explicity signed integer type */
+/* Explicitly signed integer type */
 
 #define TYPE_FLAG_SIGNED	(1 << 1)
 
@@ -97,6 +99,11 @@ enum type_code
 
 #define TYPE_FLAG_STUB		(1 << 2)
 
+/* This type is a fundamental type in the current source language. */
+
+#define TYPE_FLAG_FUND_TYPE	(1 << 3)
+
+   
 struct type
 {
 

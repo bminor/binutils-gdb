@@ -3053,24 +3053,30 @@ _initialize_mipsread ()
 	add_symtab_fns (&ecoff_sym_fns);
 
 	/* Missing basic types */
+
 	builtin_type_string =
-	    init_type (TYPE_CODE_PASCAL_ARRAY,
-		       1, 0, "string",
-		       (struct objfile *) NULL);
+	    init_type(TYPE_CODE_PASCAL_ARRAY,
+		      TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+		      TYPE_FLAG_FUND_TYPE, "string",
+		      (struct objfile *) NULL);
 	builtin_type_complex =
 	    init_type(TYPE_CODE_FLT,
-		      2 * sizeof(float), 0, "complex",
+		      TARGET_COMPLEX_BIT / TARGET_CHAR_BIT,
+		      TYPE_FLAG_FUND_TYPE, "complex",
 		      (struct objfile *) NULL);
 	builtin_type_double_complex =
 	    init_type(TYPE_CODE_FLT,
-		      2 * sizeof(double), 0, "double_complex",
+		      TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
+		      TYPE_FLAG_FUND_TYPE, "double complex",
 		      (struct objfile *) NULL);
 	builtin_type_fixed_dec =
-	    init_type(TYPE_CODE_INT, sizeof(int),
-		      0, "fixed_decimal",
+	    init_type(TYPE_CODE_INT,
+		      TARGET_INT_BIT / TARGET_CHAR_BIT,
+		      TYPE_FLAG_FUND_TYPE, "fixed decimal",
 		      (struct objfile *) NULL);
 	builtin_type_float_dec =
-	    init_type(TYPE_CODE_FLT, sizeof(double),
-		      0, "floating_decimal",
+	    init_type(TYPE_CODE_FLT,
+		      TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+		      TYPE_FLAG_FUND_TYPE, "floating decimal",
 		      (struct objfile *) NULL);
 }

@@ -95,12 +95,6 @@ unsigned input_radix = 10;
 unsigned output_radix = 10;
 int output_format = 0;
 
-
-char **unsigned_type_table;
-char **signed_type_table;
-char **float_type_table;
-
-
 /* Print repeat counts if there are more than this
    many repetitions of an element in an array.  */
 #define	REPEAT_COUNT_THRESHOLD	10
@@ -662,6 +656,61 @@ cplus_val_print (type, valaddr, stream, format, recurse, pretty, dont_print)
     }
 }
 
+static void
+print_class_member (valaddr, domain, stream, prefix)
+     char *valaddr;
+     struct type *domain;
+     FILE *stream;
+     char *prefix;
+{
+  
+  /* VAL is a byte offset into the structure type DOMAIN.
+     Find the name of the field for that offset and
+     print it.  */
+  int extra = 0;
+  int bits = 0;
+  register unsigned int i;
+  unsigned len = TYPE_NFIELDS (domain);
+  /* @@ Make VAL into bit offset */
+  LONGEST val = unpack_long (builtin_type_int, valaddr) << 3;
+  for (i = TYPE_N_BASECLASSES (domain); i < len; i++)
+    {
+      int bitpos = TYPE_FIELD_BITPOS (domain, i);
+      QUIT;
+      if (val == bitpos)
+	break;
+      if (val < bitpos && i != 0)
+	{
+	  /* Somehow pointing into a field.  */
+	  i -= 1;
+	  extra = (val - TYPE_FIELD_BITPOS (domain, i));
+	  if (extra & 0x7)
+	    bits = 1;
+	  else
+	    extra >>= 3;
+	  break;
+	}
+    }
+  if (i < len)
+    {
+      char *name;
+      fprintf_filtered (stream, prefix);
+      name = type_name_no_tag (domain);
+      if (name)
+        fputs_filtered (name, stream);
+      else
+	type_print_base (domain, stream, 0, 0);
+      fprintf_filtered (stream, "::");
+      fputs_filtered (TYPE_FIELD_NAME (domain, i), stream);
+      if (extra)
+	fprintf_filtered (stream, " + %d bytes", extra);
+      if (bits)
+	fprintf_filtered (stream, " (offset in bits)");
+    }
+  else
+    fprintf_filtered (stream, "%d", val >> 3);
+}
+
 /* Print data of type TYPE located at VALADDR (within GDB),
    which came from the inferior at address ADDRESS,
    onto stdio stream STREAM according to FORMAT
@@ -871,47 +920,9 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
 	}
       else if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_MEMBER)
 	{
-	  struct type *domain = TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type));
-
-	  /* VAL is a byte offset into the structure type DOMAIN.
-	     Find the name of the field for that offset and
-	     print it.  */
-	  int extra = 0;
-	  int bits = 0;
-	  len = TYPE_NFIELDS (domain);
-	  /* @@ Make VAL into bit offset */
-	  val = unpack_long (builtin_type_int, valaddr) << 3;
-	  for (i = TYPE_N_BASECLASSES (domain); i < len; i++)
-	    {
-	      int bitpos = TYPE_FIELD_BITPOS (domain, i);
-	      QUIT;
-	      if (val == bitpos)
-		break;
-	      if (val < bitpos && i != 0)
-		{
-		  /* Somehow pointing into a field.  */
-		  i -= 1;
-		  extra = (val - TYPE_FIELD_BITPOS (domain, i));
-		  if (extra & 0x7)
-		    bits = 1;
-		  else
-		    extra >>= 3;
-		  break;
-		}
-	    }
-	  if (i < len)
-	    {
-	      fprintf_filtered (stream, "&");
-	      type_print_base (domain, stream, 0, 0);
-	      fprintf_filtered (stream, "::");
-	      fputs_filtered (TYPE_FIELD_NAME (domain, i), stream);
-	      if (extra)
-		fprintf_filtered (stream, " + %d bytes", extra);
-	      if (bits)
-		fprintf_filtered (stream, " (offset in bits)");
-	      break;
-	    }
-	  fprintf_filtered (stream, "%d", val >> 3);
+	  print_class_member (valaddr,
+			      TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type)),
+			      stream, "&");
 	}
       else
 	{
@@ -1058,6 +1069,13 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
       break;
 
     case TYPE_CODE_REF:
+      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_MEMBER)
+        {
+	  print_class_member (valaddr,
+			      TYPE_DOMAIN_TYPE (TYPE_TARGET_TYPE (type)),
+			      stream, "");
+	  break;
+	}
       if (addressprint)
         {
 	  fprintf_filtered (stream, "@0x%lx",
@@ -1449,6 +1467,7 @@ type_print_varspec_prefix (type, stream, show, passed_a_ptr)
      int show;
      int passed_a_ptr;
 {
+  char *name;
   if (type == 0)
     return;
 
@@ -1470,8 +1489,11 @@ type_print_varspec_prefix (type, stream, show, passed_a_ptr)
       type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0,
 				 0);
       fprintf_filtered (stream, " ");
-      type_print_base (TYPE_DOMAIN_TYPE (type), stream, 0,
-		       passed_a_ptr);
+      name = type_name_no_tag (TYPE_DOMAIN_TYPE (type));
+      if (name)
+	fputs_filtered (name, stream);
+      else
+        type_print_base (TYPE_DOMAIN_TYPE (type), stream, 0, passed_a_ptr);
       fprintf_filtered (stream, "::");
       break;
 
@@ -1656,7 +1678,12 @@ type_print_base (type, stream, show, level)
       return;
     }
 
-  if (TYPE_NAME (type) && show <= 0)
+  /* If the type is a fundamental type, then always print the type name
+     directly from the type.  Also print the type name directly whenever
+     SHOW drops to zero and there is a valid type name to print. */
+
+  if ((TYPE_FLAGS (type) & TYPE_FLAG_FUND_TYPE) ||
+      ((show <= 0) && (TYPE_NAME (type) != NULL)))
     {
       fputs_filtered (TYPE_NAME (type), stream);
       return;
@@ -1834,27 +1861,6 @@ type_print_base (type, stream, show, level)
 	    }
 	  fprintf_filtered (stream, "}");
 	}
-      break;
-
-    case TYPE_CODE_INT:
-      name = 0;
-      if (TYPE_LENGTH (type) <= sizeof (LONGEST))
-	{
-	  if (TYPE_UNSIGNED (type))
-	    name = unsigned_type_table[TYPE_LENGTH (type)];
-	  else
-	    name = signed_type_table[TYPE_LENGTH (type)];
-	}
-      if (name)
-	fputs_filtered (name, stream);
-      else
-	fprintf_filtered (stream, "<%d bit integer>",
-			  TYPE_LENGTH (type) * TARGET_CHAR_BIT);
-      break;
-
-    case TYPE_CODE_FLT:
-      name = float_type_table[TYPE_LENGTH (type)];
-      fputs_filtered (name, stream);
       break;
 
     case TYPE_CODE_VOID:
@@ -2069,37 +2075,6 @@ _initialize_valprint ()
   objectprint = 0;
 
   print_max = 200;
-
-  /* Initialize the names of the various types based on their lengths on
-     the target, in bits.  Note that ordering is important, so that for example,
-     if ints and longs are the same size, that size will default to "int". */
-
-  unsigned_type_table = (char **)
-    xmalloc ((1 + (TARGET_LONG_LONG_BIT/TARGET_CHAR_BIT)) * sizeof (char *));
-  bzero (unsigned_type_table, (1 + (TARGET_LONG_LONG_BIT/TARGET_CHAR_BIT)));
-  unsigned_type_table[TARGET_CHAR_BIT/TARGET_CHAR_BIT] = "unsigned char";
-  unsigned_type_table[TARGET_SHORT_BIT/TARGET_CHAR_BIT] = "unsigned short";
-  unsigned_type_table[TARGET_LONG_LONG_BIT/TARGET_CHAR_BIT] = "unsigned long long";
-  unsigned_type_table[TARGET_LONG_BIT/TARGET_CHAR_BIT] = "unsigned long";
-  unsigned_type_table[TARGET_INT_BIT/TARGET_CHAR_BIT] = "unsigned int";
-
-  signed_type_table = (char **)
-    xmalloc ((1 + (TARGET_LONG_LONG_BIT/TARGET_CHAR_BIT)) * sizeof (char *));
-  bzero (signed_type_table, (1 + (TARGET_LONG_LONG_BIT/TARGET_CHAR_BIT)));
-  signed_type_table[TARGET_CHAR_BIT/TARGET_CHAR_BIT] = "char";
-  signed_type_table[TARGET_SHORT_BIT/TARGET_CHAR_BIT] = "short";
-  signed_type_table[TARGET_LONG_LONG_BIT/TARGET_CHAR_BIT] = "long long";
-  signed_type_table[TARGET_LONG_BIT/TARGET_CHAR_BIT] = "long";
-  signed_type_table[TARGET_INT_BIT/TARGET_CHAR_BIT] = "int";
-
-  float_type_table = (char **)
-    xmalloc ((1 + (TARGET_LONG_DOUBLE_BIT/TARGET_CHAR_BIT)) * sizeof (char *));
-  bzero (float_type_table, (1 + (TARGET_LONG_DOUBLE_BIT/TARGET_CHAR_BIT)));
-  float_type_table[TARGET_FLOAT_BIT/TARGET_CHAR_BIT] = "float";
-  float_type_table[TARGET_DOUBLE_COMPLEX_BIT/TARGET_CHAR_BIT] = "double complex";
-  float_type_table[TARGET_COMPLEX_BIT/TARGET_CHAR_BIT] = "complex";
-  float_type_table[TARGET_LONG_DOUBLE_BIT/TARGET_CHAR_BIT] = "long double";
-  float_type_table[TARGET_DOUBLE_BIT/TARGET_CHAR_BIT] = "double";
 
   obstack_begin (&dont_print_obstack, 32 * sizeof (struct type *));
 }
