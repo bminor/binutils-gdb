@@ -84,7 +84,7 @@ const struct mn10300_operand mn10300_operands[] = {
 /* 16 bit pc-relative immediate which may promote to a 16bit
    pc-relative immediate.  */
 #define IMM16_PCREL    (IMM16+1)
-  {16, 0, MN10300_OPERAND_PROMOTE | MN10300_OPERAND_PCREL},
+  {16, 0, MN10300_OPERAND_PCREL | MN10300_OPERAND_RELAX | MN10300_OPERAND_SIGNED},
 
 /* 16bit unsigned dispacement in a memory operation which
    may promote to a 32bit displacement.  */
@@ -163,7 +163,7 @@ const struct mn10300_operand mn10300_operands[] = {
 
 /* 8 bit pc-relative displacement.  */
 #define SD8N_PCREL    (SD8N+1)
-  {8, 0, MN10300_OPERAND_SIGNED | MN10300_OPERAND_PCREL},
+  {8, 0, MN10300_OPERAND_SIGNED | MN10300_OPERAND_PCREL | MN10300_OPERAND_RELAX},
 
 /* 8 bit signed displacement shifted left 8 bits in the instruction.  */
 #define SD8N_SHIFT8    (SD8N_PCREL+1)
@@ -192,7 +192,7 @@ const struct mn10300_operand mn10300_operands[] = {
 /* 16bit pc-relative displacement which may promote to 32bit pc-relative
    displacement.  */
 #define D16_SHIFT (AN01+1)
-  {16, 8, MN10300_OPERAND_PROMOTE | MN10300_OPERAND_PCREL},
+  {16, 8, MN10300_OPERAND_PCREL | MN10300_OPERAND_RELAX | MN10300_OPERAND_SIGNED},
 
 /* 8 bit immediate found in the extension word.  */
 #define IMM8E    (D16_SHIFT+1)

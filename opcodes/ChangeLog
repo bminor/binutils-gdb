@@ -1,3 +1,12 @@
+Thu Mar  6 16:51:11 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-opc.c (IMM16_PCREL, SD8N_PCREL, D16_SHIFT): Mark these
+	as relaxable.
+
+Tue Mar  4 06:10:36 1997  J.T. Conklin  <jtc@cygnus.com>
+
+	* m68k-opc.c (m68k_opcodes): Fix last change for the mc68010.
+
 Mon Mar  3 07:45:20 1997  J.T. Conklin  <jtc@cygnus.com>
 
 	* m68k-opc.c (m68k_opcodes): Added entries for the tst insns on
@@ -202,7 +211,7 @@ Thu Jan 30 11:30:45 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 Wed Jan 29 09:39:17 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10200-opc.c (mn10200_operands): Make 8 and 16 bit pc-relative
-	branchs relaxable.
+	branches relaxable.
 
 Tue Jan 28 15:57:34 1997  Ian Lance Taylor  <ian@cygnus.com>
 
