@@ -1,3 +1,29 @@
+Mon Nov 18 15:12:45 1991  John Gilmore  (gnu at cygnus.com)
+
+	* blockframe.c:  Remove tdesc-related code.  Default
+	FRAME_CHAIN_COMBINE if not defined.
+	* infrun.c:  Remove tdesc-related code.
+	* m88k-tdep.c (frame_chain_combine, init_frame_pc):  Remove copies
+	of defaultable things.
+	* tm-m88k.h:  New file, common to all Moto 88k target configs.
+	Derived from tm-delta88.h.
+	* tm-delta88.h:  Use it.
+	* xm-m88k.h:  Common file for 88K hosts.  Remove obsolete stuff.
+	* xm-delta88.h:  Use it.
+	* tm-*.h:  Remove FRAME_CHAIN_COMBINE macros, since all are
+	default.
+	* coffread.c:  Remove tdesc stuff.
+
+Mon Nov 18 13:51:37 1991  Per Bothner  (bothner at cygnus.com)
+
+	* source.c (open_source_file):  If openp fails, try again
+	using just the base (non-directory) part of the filename.
+	This solves various annoying problems, such as when the
+	source was compiled with an absolute pathname - and the
+	source files have moved.  Or if the source was compiled
+	using a relative pathname, it can be more convenient
+	to just specific the source directory to the dir command.
+
 Mon Nov 18 00:04:41 1991  Fred Fish  (fnf at cygnus.com)
 
 	* cplus-dem.c (munge_function_name):  Add missing third arg to

@@ -26,11 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "symfile.h"
 
-#if defined (TDESC)
-/* Need to get C_VERSION and friends.  FIXME, should be in internalcoff.h */
-#include "coff-m88k.h"
-#endif /* not TDESC */
-
 #include <obstack.h>
 #include <string.h>
 
@@ -152,21 +147,6 @@ static unsigned	local_linesz;
 static unsigned	local_symesz;
 static unsigned	local_auxesz;
 
-
-#ifdef TDESC
-#include "tdesc.h"
-#define SEM
-int int_sem_val = 's' << 24 | 'e' << 16 | 'm' << 8 | '.';
-int temp_sem_val;
-int last_coffsem = 2;
-#if 0
-  /* This isn't used currently.  */
-int last_coffsyn = 0;
-#endif
-int debug_info = 0;	/*used by tdesc */
-extern dc_dcontext_t tdesc_handle;
-extern int safe_to_init_tdesc_context;
-#endif
 
 /* Chain of typedefs of pointers to empty struct/union types.
    They are chained thru the SYMBOL_VALUE_CHAIN.  */
@@ -466,13 +446,6 @@ start_symtab ()
   context_stack = 0;
   within_function = 0;
   last_source_file = 0;
-#ifdef TDESC
-  last_coffsem = 2;
-#if 0
-  /* This isn't used currently.  */
-  last_coffsyn = 0;
-#endif
-#endif
 
   /* Initialize the source file line number information for this file.  */
 
@@ -568,15 +541,6 @@ end_symtab (objfile)
     xrealloc (lv, (sizeof (struct linetable)
 		   + lv->nitems * sizeof (struct linetable_entry)));
 
-#ifdef TDESC
-  symtab->coffsem = last_coffsem;
-#if 0
-  /* This isn't used currently.  Besides, if this is really about "syntax",
-     it shouldn't need to stick around past symbol read-in time.  */
-  symtab->coffsyn = last_coffsyn;
-#endif
-#endif
-
   free_named_symtabs (symtab->filename);
 
   /* Link the new symtab into the list of such.  */
@@ -594,10 +558,9 @@ record_misc_function (name, address)
      char *name;
      CORE_ADDR address;
 {
-#ifdef TDESC
   /* We don't want TDESC entry points on the misc_function_vector */
   if (name[0] == '@') return;
-#endif
+
   /* mf_text isn't true, but apparently COFF doesn't tell us what it really
      is, so this guess is more useful than mf_unknown.  */
   prim_record_misc_function (savestring (name, strlen (name)),
@@ -635,10 +598,6 @@ coff_symfile_init (sf)
   /* Allocate struct to keep track of the symfile */
   /* FIXME memory leak */
   sf->sym_private = xmalloc (sizeof (struct coff_symfile_info));
-
-#if defined (TDESC)
-  safe_to_init_tdesc_context  = 0;
-#endif
 
   /* Save startup file's range of PC addresses to help blockframe.c
      decide where the bottom of the stack is.  */
@@ -698,21 +657,6 @@ find_linenos (abfd, asect, vpinfo)
   maxoff = offset + size;
   if (maxoff > info->max_lineno_offset)
     info->max_lineno_offset = maxoff;
-#ifdef TDESC
-  /* While we're at it, find the debug_info.  It's in the s_relptr
-     (or, in BFD-speak, rel_filepos) of the text segment section header.  */
-  if (strcmp (bfd_section_name (abfd, asect), ".text") == 0)
-    {
-      /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
-      debug_info = asect->rel_filepos;
-      /* End of warning */
-      if (tdesc_handle)
-	{
-	  dc_terminate (tdesc_handle);
-	  tdesc_handle = 0;
-	}
-    }
-#endif /* TDESC */
 }
 
 
@@ -1122,27 +1066,8 @@ read_coff_symtab (desc, nsyms, objfile)
 		free (new);
 	      }
 	    break;
-#ifdef TDESC
-          case C_VERSION:
-#if 0
-	    /* This isn't used currently.  */
-            if (strcmp (cs->c_name, ".coffsyn") == 0)
-		last_coffsyn = cs->c_value;
-	    else
-#endif /* 0 */
-	      if ((strcmp (cs->c_name, ".coffsem") == 0) &&
-                     (cs->c_value != 0))
-		last_coffsem = cs->c_value;
-            break;
-#endif /* TDESC */
 
 	  default:
-#ifdef TDESC
-	    if ((strcmp (cs->c_name, ".coffsem") == 0) &&
-		(cs->c_value != 0))
-	      last_coffsem = cs->c_value;
-            else
-#endif
 	    (void) process_coff_symbol (cs, &main_aux);
 	    break;
 	}
@@ -1871,6 +1796,9 @@ decode_base_type (cs, c_type, aux)
 	    type = coff_alloc_type (cs->c_symnum);
 	    TYPE_CODE (type) = TYPE_CODE_STRUCT;
 	    TYPE_NAME (type) = concat ("struct ", "<opaque>", NULL);
+	    TYPE_CPLUS_SPECIFIC (type)
+	      = (struct cplus_struct_type *) obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type));
+	    bzero (TYPE_CPLUS_SPECIFIC (type), sizeof (struct cplus_struct_type));
 	    TYPE_LENGTH (type) = 0;
 	    TYPE_FIELDS (type) = 0;
 	    TYPE_NFIELDS (type) = 0;
@@ -1963,6 +1891,9 @@ read_struct_type (index, length, lastsym)
 
   type = coff_alloc_type (index);
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
+  TYPE_CPLUS_SPECIFIC (type)
+    = (struct cplus_struct_type *) obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type));
+  bzero (TYPE_CPLUS_SPECIFIC (type), sizeof (struct cplus_struct_type));
   TYPE_LENGTH (type) = length;
 
   while (!done && symnum < lastsym && symnum < nlist_nsyms_global)
@@ -2125,19 +2056,7 @@ read_enum_type (index, length, lastsym)
 
 static struct sym_fns coff_sym_fns =
 {
-    /* This assumes that 88kbcs implies TDESC and TDESC implies 88kbcs.
-       If that's not true, this can be relaxed, but if it is true,
-       it will just cause users grief if we try to read the wrong kind
-       of symbol file.  */
-#if defined (TDESC)
-    "m88kbcs", 8,
-#else /* not TDESC */
-# ifdef i386
-    "i386coff", 8,
-# else
     "coff", 4,
-# endif /* not i386 */
-#endif /* not TDESC */
     coff_new_init, coff_symfile_init, coff_symfile_read,
 };
 

@@ -305,12 +305,8 @@ extern struct value *value_of_trapped_internalvar ();
 /* FRAME_CHAIN takes a frame_info with a frame's nominal address in fi->frame,
    and produces the frame's chain-pointer.
 
-   FRAME_CHAIN_COMBINE takes the chain pointer and the frame's nominal address
-   and produces the nominal address of the caller frame.
-
    However, if FRAME_CHAIN_VALID returns zero,
-   it means the given frame is the outermost one and has no caller.
-   In that case, FRAME_CHAIN_COMBINE is not used.  */
+   it means the given frame is the outermost one and has no caller.  */
 
 /* (caller fp is saved at 8(fp)) */
 
@@ -318,8 +314,6 @@ extern struct value *value_of_trapped_internalvar ();
 
 #define FRAME_CHAIN_VALID(chain, thisframe) \
   (chain != 0 && (outside_startup_file (FRAME_SAVED_PC (thisframe))))
-
-#define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
 

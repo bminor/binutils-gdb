@@ -17,10 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* This is currently for a 88000 running DGUX.  If other 88k ports are
-   done, OS-specific stuff should be moved (see tm-68k.h, for example).  */
-/* g++ support is not yet included.  */
-
 #define HOST_BYTE_ORDER BIG_ENDIAN
 
 #if !defined (USG)
@@ -51,17 +47,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define NBPG NBPC
 #define UPAGES USIZE
 
-#define HAVE_GETPAGESIZE
-
 /* Get rid of any system-imposed stack limit if possible.  */
 
 #define SET_STACK_LIMIT_HUGE
-
-/* number of traps that happen between exec'ing the shell
- * to run an inferior, and when we finally get to
- * the inferior code.  This is 2 on most implementations.
- */
-#define START_INFERIOR_TRAPS_EXPECTED 2
 
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
@@ -74,7 +62,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define REGISTER_U_ADDR(addr, blockend, regno) \
         (addr) = m88k_register_u_addr ((blockend),(regno));
-
-#define HAVE_WAIT_STRUCT
 
 #define FETCH_INFERIOR_REGISTERS

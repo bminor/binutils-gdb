@@ -307,12 +307,8 @@ do {								\
 /* FRAME_CHAIN takes a frame's nominal address
    and produces the frame's chain-pointer.
 
-   FRAME_CHAIN_COMBINE takes the chain pointer and the frame's nominal address
-   and produces the nominal address of the caller frame.
-
    However, if FRAME_CHAIN_VALID returns zero,
-   it means the given frame is the outermost one and has no caller.
-   In that case, FRAME_CHAIN_COMBINE is not used.  */
+   it means the given frame is the outermost one and has no caller.  */
 
 /* In the case of the pyr, the frame's nominal address is the address
    of parameter register 0.  The previous frame is found 32 words up.   */
@@ -324,8 +320,6 @@ do {								\
   (chain != 0 && (outside_startup_file (FRAME_SAVED_PC (thisframe))))
 
  /*((thisframe) >= CONTROL_STACK_ADDR))*/
-
-#define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
 

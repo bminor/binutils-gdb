@@ -326,12 +326,8 @@ extern struct type *builtin_type_np1_vector;
 /* FRAME_CHAIN takes a frame's nominal address
    and produces the frame's chain-pointer.
 
-   FRAME_CHAIN_COMBINE takes the chain pointer and the frame's nominal address
-   and produces the nominal address of the caller frame.
-
    However, if FRAME_CHAIN_VALID returns zero,
-   it means the given frame is the outermost one and has no caller.
-   In that case, FRAME_CHAIN_COMBINE is not used.  */
+   it means the given frame is the outermost one and has no caller.  */
 
 /* In the case of the NPL, the frame's norminal address is Br2 and the 
    previous routines frame is up the stack X bytes, where X is the
@@ -340,9 +336,6 @@ extern struct type *builtin_type_np1_vector;
 
 #define FRAME_CHAIN_VALID(chain, thisframe) \
         (chain != 0 && chain != (thisframe)->frame)
-
-#define FRAME_CHAIN_COMBINE(chain, thisframe) \
-	(chain)
 
 /* Define other aspects of the stack frame on NPL.  */
 #define FRAME_SAVED_PC(FRAME) \

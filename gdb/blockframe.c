@@ -27,10 +27,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "value.h"		/* for read_register */
 #include "target.h"		/* for target_has_stack */
 
-/* Required by INIT_EXTRA_FRAME_INFO on 88k.  */
-#include <setjmp.h>
-#include <obstack.h>
-
 CORE_ADDR read_pc ();		/* In infcmd.c */
 
 /* Start and end of object file containing the entry point.
@@ -54,6 +50,79 @@ outside_startup_file (addr)
      CORE_ADDR addr;
 {
   return !(addr >= startup_file_start && addr < startup_file_end);
+}
+
+/* Support an alternate method to avoid running off the bottom of
+   the stack (or top, depending upon your stack orientation).
+
+   There are two frames that are "special", the frame for the function
+   containing the process entry point, since it has no predecessor frame,
+   and the frame for the function containing the user code entry point
+   (the main() function), since all the predecessor frames are for the
+   process startup code.  Since we have no guarantee that the linked
+   in startup modules have any debugging information that gdb can use,
+   we need to avoid following frame pointers back into frames that might
+   have been built in the startup code, as we might get hopelessly 
+   confused.  However, we almost always have debugging information
+   available for main().
+
+   These variables are used to save the range of PC values which are valid
+   within the main() function and within the function containing the process
+   entry point.  If we always consider the frame for main() as the outermost
+   frame when debugging user code, and the frame for the process entry
+   point function as the outermost frame when debugging startup code, then
+   all we have to do is have FRAME_CHAIN_VALID return false whenever a
+   frame's current PC is within the range specified by these variables.
+   In essence, we set "blocks" in the frame chain beyond which we will
+   not proceed when following the frame chain.  
+
+   A nice side effect is that we can still debug startup code without
+   running off the end of the frame chain, assuming that we have usable
+   debugging information in the startup modules, and if we choose to not
+   use the block at main, or can't find it for some reason, everything
+   still works as before.  And if we have no startup code debugging
+   information but we do have usable information for main(), backtraces
+   from user code don't go wandering off into the startup code.
+
+   To use this method, define your FRAME_CHAIN_VALID macro like:
+
+	#define FRAME_CHAIN_VALID(chain, thisframe)     \
+	  (chain != 0                                   \
+	   && !(inside_main_scope ((thisframe)->pc))    \
+	   && !(inside_entry_scope ((thisframe)->pc)))
+
+   and add initializations of the four scope controlling variables inside
+   the object file / debugging information processing modules.  */
+
+CORE_ADDR entry_scope_lowpc;
+CORE_ADDR entry_scope_highpc;
+CORE_ADDR main_scope_lowpc;
+CORE_ADDR main_scope_highpc;
+
+/* Test a specified PC value to see if it is in the range of addresses
+   that correspond to the main() function.  See comments above for why
+   we might want to do this.
+
+   Typically called from FRAME_CHAIN_VALID. */
+
+int
+inside_main_scope (pc)
+CORE_ADDR pc;
+{
+  return (main_scope_lowpc <= pc && pc < main_scope_highpc);
+}
+
+/* Test a specified PC value to see if it is in the range of addresses
+   that correspond to the process entry point function.  See comments above
+   for why we might want to do this.
+
+   Typically called from FRAME_CHAIN_VALID. */
+
+int
+inside_entry_scope (pc)
+CORE_ADDR pc;
+{
+  return (entry_scope_lowpc <= pc && pc < entry_scope_highpc);
 }
 
 /* Address of innermost stack frame (contents of FP register) */
@@ -104,7 +173,7 @@ create_new_frame (addr, pc)
   fci->pc = pc;
 
 #ifdef INIT_EXTRA_FRAME_INFO
-  INIT_EXTRA_FRAME_INFO (fci);
+  INIT_EXTRA_FRAME_INFO (0, fci);
 #endif
 
   return fci;
@@ -208,10 +277,16 @@ frameless_look_for_prologue (frame)
     return 0;
 }
 
+/* Default a few macros that people seldom redefine.  */
+
 #if !defined (INIT_FRAME_PC)
 #define INIT_FRAME_PC(fromleaf, prev) \
   prev->pc = (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) : \
 	      prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
+#endif
+
+#ifndef FRAME_CHAIN_COMBINE
+#define	FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 #endif
 
 /* Return a structure containing various interesting information
@@ -281,6 +356,8 @@ get_prev_frame_info (next_frame)
 	return 0;
       address = FRAME_CHAIN_COMBINE (address, next_frame);
     }
+  if (address == 0)
+    return 0;
 
   prev = (struct frame_info *)
     obstack_alloc (&frame_cache_obstack,
@@ -294,12 +371,12 @@ get_prev_frame_info (next_frame)
   prev->next_frame = prev->next ? prev->next->frame : 0;
 
 #ifdef INIT_EXTRA_FRAME_INFO
-  INIT_EXTRA_FRAME_INFO(prev);
+  INIT_EXTRA_FRAME_INFO(fromleaf, prev);
 #endif
 
   /* This entry is in the frame queue now, which is good since
      FRAME_SAVED_PC may use that queue to figure out it's value
-     (see m-sparc.h).  We want the pc saved in the inferior frame. */
+     (see tm-sparc.h).  We want the pc saved in the inferior frame. */
   INIT_FRAME_PC(fromleaf, prev);
 
   return prev;

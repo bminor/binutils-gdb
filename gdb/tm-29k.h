@@ -437,12 +437,8 @@ void init_frame_pc ();
 /* FRAME_CHAIN takes a FRAME
    and produces the frame's chain-pointer.
 
-   FRAME_CHAIN_COMBINE takes the chain pointer and the frame's nominal address
-   and produces the nominal address of the caller frame.
-
    However, if FRAME_CHAIN_VALID returns zero,
-   it means the given frame is the outermost one and has no caller.
-   In that case, FRAME_CHAIN_COMBINE is not used.  */
+   it means the given frame is the outermost one and has no caller.  */
 
 /* On the 29k, the nominal address of a frame is the address on the
    register stack of the return address (the one next to the incoming
@@ -464,8 +460,6 @@ void init_frame_pc ();
    However, allow a pc in a call dummy.  */
 #define FRAME_CHAIN_VALID(chain, thisframe) \
   (outside_startup_file (FRAME_SAVED_PC (thisframe)))
-
-#define FRAME_CHAIN_COMBINE(chain, thisframe) (0)
 
 /* Define other aspects of the stack frame.  */
 

@@ -264,12 +264,8 @@ extern CORE_ADDR saved_pc_after_call ();
 /* FRAME_CHAIN takes a frame's nominal address
    and produces the frame's chain-pointer.
 
-   FRAME_CHAIN_COMBINE takes the chain pointer and the frame's nominal address
-   and produces the nominal address of the caller frame.
-
    However, if FRAME_CHAIN_VALID returns zero,
-   it means the given frame is the outermost one and has no caller.
-   In that case, FRAME_CHAIN_COMBINE is not used.  */
+   it means the given frame is the outermost one and has no caller.  */
 
 /* We cache information about saved registers in the frame structure,
    to save us from having to re-scan function prologues every time
@@ -294,10 +290,8 @@ extern CORE_ADDR saved_pc_after_call ();
 #define FRAME_CHAIN(thisframe) \
   (read_memory_integer (FRAME_FP(thisframe), 4) & ~0xf)
 
-#define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
-
 /* FRAME_CHAIN_VALID returns zero if the given frame is the outermost one
-   and has no caller.  In that case, FRAME_CHAIN_COMBINE is not used.
+   and has no caller.
 
    On the i960, each various target system type must define FRAME_CHAIN_VALID,
    since it differs between NINDY and VxWorks, the two currently supported

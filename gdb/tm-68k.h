@@ -301,12 +301,8 @@ extern struct ext_format ext_format_68881;
 /* FRAME_CHAIN takes a frame's nominal address
    and produces the frame's chain-pointer.
 
-   FRAME_CHAIN_COMBINE takes the chain pointer and the frame's nominal address
-   and produces the nominal address of the caller frame.
-
    However, if FRAME_CHAIN_VALID returns zero,
-   it means the given frame is the outermost one and has no caller.
-   In that case, FRAME_CHAIN_COMBINE is not used.  */
+   it means the given frame is the outermost one and has no caller.  */
 
 /* In the case of the 68000, the frame's nominal address
    is the address of a 4-byte word containing the calling frame's address.  */
@@ -333,8 +329,6 @@ extern struct ext_format ext_format_68881;
   (chain != 0 && outside_startup_file (FRAME_SAVED_PC (thisframe)))
 
 #endif	/* FRAME_CHAIN_VALID_ALTERNATE */
-
-#define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
 

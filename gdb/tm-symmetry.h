@@ -242,16 +242,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* FRAME_CHAIN takes a frame's nominal address
    and produces the frame's chain-pointer.
 
-   FRAME_CHAIN_COMBINE takes the chain pointer and the frame's nominal address
-   and produces the nominal address of the caller frame.
-
    However, if FRAME_CHAIN_VALID returns zero,
-   it means the given frame is the outermost one and has no caller.
-   In that case, FRAME_CHAIN_COMBINE is not used.  */
+   it means the given frame is the outermost one and has no caller.  */
 
 /* On Symmetry, %ebp points to caller's %ebp, and the return address
-   is right on top of that.
-*/
+   is right on top of that.  */
 
 #define FRAME_CHAIN(thisframe)  \
   (outside_startup_file ((thisframe)->pc) ? \
@@ -260,8 +255,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define FRAME_CHAIN_VALID(chain, thisframe) \
   (chain != 0)
-
-#define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
 

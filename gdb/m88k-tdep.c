@@ -96,13 +96,6 @@ frame_chain_valid (chain, thisframe)
        && outside_startup_file (FRAME_SAVED_PC (thisframe)));
 }
 
-CORE_ADDR
-frame_chain_combine (chain, thisframe)
-     CORE_ADDR chain;
-{
-  return chain;
-}
-
 void
 init_extra_frame_info (fromleaf, fi)
      int fromleaf;
@@ -111,18 +104,6 @@ init_extra_frame_info (fromleaf, fi)
   fi->fsr = 0;			/* Not yet allocated */
   fi->args_pointer = 0;		/* Unknown */
   fi->locals_pointer = 0;	/* Unknown */
-}
-
-void
-init_frame_pc (fromleaf, prev)
-     int fromleaf;
-     struct frame_info *prev;
-{
-  /* FIXME, for now it's the default from blockframe.c.   If it stays that
-     way, remove it entirely from here.  */
-  prev->pc = (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) :
-              prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
-
 }
 
 /* Examine an m88k function prologue, recording the addresses at which

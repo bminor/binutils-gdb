@@ -78,7 +78,7 @@ extern char *nindy_ttyname;	/* Name of serial port to talk to nindy */
 #define STACK_END_ADDR (0xfe000000)
 
 /* FRAME_CHAIN_VALID returns zero if the given frame is the outermost one
-   and has no caller.  In that case, FRAME_CHAIN_COMBINE is not used.
+   and has no caller.
 
    On the i960, each various target system type defines FRAME_CHAIN_VALID,
    since it differs between NINDY and VxWorks, the two currently supported
