@@ -890,7 +890,7 @@ install-dosrel-fake:
 # This is a list of inter-dependencies among modules.
 all-autoconf: all-m4
 all-bfd:
-all-binutils: all-libiberty all-opcodes all-bfd all-flex
+all-binutils: all-libiberty all-opcodes all-bfd all-flex all-byacc
 all-byacc:
 # start-sanitize-chill
 all-chillrt: all-binutils all-gas all-gcc all-newlib
