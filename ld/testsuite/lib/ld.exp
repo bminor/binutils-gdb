@@ -112,6 +112,8 @@ proc default_ld_compile { cc source object } {
 	return 0
     }
 
+    catch "exec rm -f $object" exec_output
+
     send_log "$cc -I$srcdir$subdir -c $CFLAGS $source -o $object\n"
     verbose "$cc -I$srcdir$subdir -c $CFLAGS $source -o $object"
 
