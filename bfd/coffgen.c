@@ -1644,37 +1644,47 @@ coff_find_nearest_line (abfd, section, ignore_symbols, offset, filename_ptr,
 
   if (p < pend)
     {
+      bfd_vma maxdiff;
+
       /* Look through the C_FILE symbols to find the best one.  */
       *filename_ptr = (char *) p->u.syment._n._n_n._n_offset;
-      i = 0;
+      maxdiff = (bfd_vma) 0 - (bfd_vma) 1;
       while (1)
 	{
 	  combined_entry_type *p2;
 
+	  for (p2 = p + 1 + p->u.syment.n_numaux;
+	       p2 < pend;
+	       p2 += 1 + p2->u.syment.n_numaux)
+	    {
+	      if (p2->u.syment.n_scnum > 0
+		  && (section
+		      == coff_section_from_bfd_index (abfd,
+						      p2->u.syment.n_scnum)))
+		break;
+	      if (p2->u.syment.n_sclass == C_FILE)
+		{
+		  p2 = pend;
+		  break;
+		}
+	    }
+
+	  if (p2 < pend
+	      && offset >= p2->u.syment.n_value
+	      && offset - p2->u.syment.n_value < maxdiff)
+	    {
+	      *filename_ptr = (char *) p->u.syment._n._n_n._n_offset;
+	      maxdiff = offset - p2->u.syment.n_value;
+	    }
+
 	  /* Avoid endless loops on erroneous files by ensuring that
 	     we always move forward in the file.  */
-	  if (i >= p->u.syment.n_value)
+	  if (p - cof->raw_syments >= p->u.syment.n_value)
 	    break;
 
-	  i = p->u.syment.n_value;
-	  if (i >= cof->raw_syment_count)
+	  p = cof->raw_syments + p->u.syment.n_value;
+	  if (p > pend || p->u.syment.n_sclass != C_FILE)
 	    break;
-
-	  p = cof->raw_syments + i;
-	  if (p->u.syment.n_sclass != C_FILE)
-	    break;
-	  
-	  for (p2 = p; p2 < pend; p2 += 1 + p2->u.syment.n_numaux)
-	    {
-	      if (section ==
-		  coff_section_from_bfd_index (abfd, p2->u.syment.n_scnum))
-		break;
-	    }
-	  if (p2 < pend
-	      && offset < p2->u.syment.n_value)
-	    break;
-
-	  *filename_ptr = (char *) p->u.syment._n._n_n._n_offset;
 	}
     }
 

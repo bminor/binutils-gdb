@@ -1,5 +1,8 @@
 Thu Aug 25 10:44:53 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* coffgen.c (coff_find_nearest_line): Look for the best C_FILE,
+	not merely the first.
+
 	* coffgen.c (coff_write_alien_symbol): If we are not using the
 	symbol, clear the name so that it is not put in the string table.
 	From Antti.Miettinen@ntc.nokia.com.
