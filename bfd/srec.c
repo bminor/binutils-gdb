@@ -127,7 +127,7 @@ static char hex_value[256];
 /* Initialize by filling in the hex conversion array. */
 
 static void
-DEFUN_VOID (srec_init)
+srec_init ()
 {
   unsigned int i;
   static boolean inited = false;
@@ -243,12 +243,12 @@ fillup_symbols (abfd, buf, len, val)
 }
 /*ARGSUSED*/
 static void
-DEFUN (size_srec, (abfd, section, address, raw, length),
-       bfd * abfd AND
-       asection * section AND
-       bfd_vma address AND
-       bfd_byte * raw AND
-       unsigned int length)
+size_srec (abfd, section, address, raw, length)
+     bfd *abfd;
+     asection *section;
+     bfd_vma address;
+     bfd_byte *raw;
+     unsigned int length;
 {
   if (address < low)
     low = address;
@@ -263,12 +263,12 @@ DEFUN (size_srec, (abfd, section, address, raw, length),
 
 /*ARGSUSED*/
 static void
-DEFUN (fillup, (abfd, section, address, raw, length),
-       bfd * abfd AND
-       asection * section AND
-       bfd_vma address AND
-       bfd_byte * raw AND
-       unsigned int length)
+fillup (abfd, section, address, raw, length)
+     bfd *abfd;
+     asection *section;
+     bfd_vma address;
+     bfd_byte *raw;
+     unsigned int length;
 {
   unsigned int i;
   bfd_byte *dst =
@@ -285,7 +285,7 @@ DEFUN (fillup, (abfd, section, address, raw, length),
 /* Pass over an S-Record file, calling one of the above functions on each
    record.  */
 
-static int 
+static int
 white (x)
      char x;
 {
@@ -305,8 +305,8 @@ skipwhite (src, abfd)
 }
 
 static boolean
-DEFUN (srec_mkobject, (abfd),
-       bfd * abfd)
+srec_mkobject (abfd)
+     bfd *abfd;
 {
   if (abfd->tdata.srec_data == 0)
     {
@@ -324,7 +324,7 @@ DEFUN (srec_mkobject, (abfd),
 
 }
 
-static void 
+static void
 pass_over (abfd, func, symbolfunc, section)
      bfd *abfd;
      void (*func) ();
@@ -480,8 +480,8 @@ object_p (abfd)
 }
 
 static bfd_target *
-DEFUN (srec_object_p, (abfd),
-       bfd * abfd)
+srec_object_p (abfd)
+     bfd *abfd;
 {
   char b[4];
 
@@ -501,8 +501,8 @@ DEFUN (srec_object_p, (abfd),
 
 
 static bfd_target *
-DEFUN (symbolsrec_object_p, (abfd),
-       bfd * abfd)
+symbolsrec_object_p (abfd)
+     bfd *abfd;
 {
   char b[4];
 
@@ -519,12 +519,12 @@ DEFUN (symbolsrec_object_p, (abfd),
 
 
 static boolean
-DEFUN (srec_get_section_contents, (abfd, section, location, offset, count),
-       bfd * abfd AND
-       asection * section AND
-       PTR location AND
-       file_ptr offset AND
-       bfd_size_type count)
+srec_get_section_contents (abfd, section, location, offset, count)
+     bfd *abfd;
+     asection *section;
+     PTR location;
+     file_ptr offset;
+     bfd_size_type count;
 {
   if (section->used_by_bfd == (PTR) NULL)
     {
@@ -538,18 +538,18 @@ DEFUN (srec_get_section_contents, (abfd, section, location, offset, count),
       pass_over (abfd, fillup, fillup_symbols, section);
     }
   memcpy ((PTR) location,
-		 (PTR) ((char *) (section->used_by_bfd) + offset),
-		 count);
+	  (PTR) ((char *) (section->used_by_bfd) + offset),
+	  count);
   return true;
 }
 
 
 
 boolean
-DEFUN (srec_set_arch_mach, (abfd, arch, machine),
-       bfd * abfd AND
-       enum bfd_architecture arch AND
-       unsigned long machine)
+srec_set_arch_mach (abfd, arch, machine)
+     bfd *abfd;
+     enum bfd_architecture arch;
+     unsigned long machine;
 {
   return bfd_default_set_arch_mach (abfd, arch, machine);
 }
@@ -559,16 +559,16 @@ DEFUN (srec_set_arch_mach, (abfd, arch, machine),
    also remember   */
 
 static boolean
-DEFUN (srec_set_section_contents, (abfd, section, location, offset, bytes_to_do),
-       bfd * abfd AND
-       sec_ptr section AND
-       PTR location AND
-       file_ptr offset AND
-       bfd_size_type bytes_to_do)
+srec_set_section_contents (abfd, section, location, offset, bytes_to_do)
+     bfd *abfd;
+     sec_ptr section;
+     PTR location;
+     file_ptr offset;
+     bfd_size_type bytes_to_do;
 {
   tdata_type *tdata = abfd->tdata.srec_data;
   srec_data_list_type *entry = (srec_data_list_type *)
-    bfd_alloc (abfd, sizeof (srec_data_list_type));
+  bfd_alloc (abfd, sizeof (srec_data_list_type));
 
   if (!entry)
     {
@@ -615,13 +615,13 @@ DEFUN (srec_set_section_contents, (abfd, section, location, offset, bytes_to_do)
    here
 */
 static
-void 
-DEFUN (srec_write_record, (abfd, type, address, data, end),
-       bfd * abfd AND
-       char type AND
-       bfd_vma address AND
-       CONST unsigned char *data AND
-       CONST unsigned char *end)
+void
+srec_write_record (abfd, type, address, data, end)
+     bfd *abfd;
+     char type;
+     bfd_vma address;
+     CONST unsigned char *data;
+     CONST unsigned char *end;
 
 {
   char buffer[MAXCHUNK];
@@ -679,8 +679,8 @@ DEFUN (srec_write_record, (abfd, type, address, data, end),
 
 
 static void
-DEFUN (srec_write_header, (abfd),
-       bfd * abfd)
+srec_write_header (abfd)
+     bfd *abfd;
 {
   unsigned char buffer[MAXCHUNK];
   unsigned char *dst = buffer;
@@ -695,10 +695,10 @@ DEFUN (srec_write_header, (abfd),
 }
 
 static void
-DEFUN (srec_write_section, (abfd, tdata, list),
-       bfd * abfd AND
-       tdata_type * tdata AND
-       srec_data_list_type * list)
+srec_write_section (abfd, tdata, list)
+     bfd *abfd;
+     tdata_type *tdata;
+     srec_data_list_type *list;
 {
   unsigned int bytes_written = 0;
   unsigned char *location = list->data;
@@ -729,9 +729,9 @@ DEFUN (srec_write_section, (abfd, tdata, list),
 }
 
 static void
-DEFUN (srec_write_terminator, (abfd, tdata),
-       bfd * abfd AND
-       tdata_type * tdata)
+srec_write_terminator (abfd, tdata)
+     bfd *abfd;
+     tdata_type *tdata;
 {
   unsigned char buffer[2];
 
@@ -842,16 +842,16 @@ symbolsrec_write_object_contents (abfd)
 
 /*ARGSUSED*/
 static int
-DEFUN (srec_sizeof_headers, (abfd, exec),
-       bfd * abfd AND
-       boolean exec)
+srec_sizeof_headers (abfd, exec)
+     bfd *abfd;
+     boolean exec;
 {
   return 0;
 }
 
 static asymbol *
-DEFUN (srec_make_empty_symbol, (abfd),
-       bfd * abfd)
+srec_make_empty_symbol (abfd)
+     bfd *abfd;
 {
   asymbol *new = (asymbol *) bfd_zalloc (abfd, sizeof (asymbol));
   if (new)
@@ -869,9 +869,9 @@ srec_get_symtab_upper_bound (abfd)
 }
 
 static unsigned int
-DEFUN (srec_get_symtab, (abfd, alocation),
-       bfd * abfd AND
-       asymbol ** alocation)
+srec_get_symtab (abfd, alocation)
+     bfd *abfd;
+     asymbol **alocation;
 {
   int lim = abfd->symcount;
   int i;
@@ -885,21 +885,21 @@ DEFUN (srec_get_symtab, (abfd, alocation),
 
 /*ARGSUSED*/
 void
-DEFUN (srec_get_symbol_info, (ignore_abfd, symbol, ret),
-       bfd * ignore_abfd AND
-       asymbol * symbol AND
-       symbol_info * ret)
+srec_get_symbol_info (ignore_abfd, symbol, ret)
+     bfd *ignore_abfd;
+     asymbol *symbol;
+     symbol_info *ret;
 {
   bfd_symbol_info (symbol, ret);
 }
 
 /*ARGSUSED*/
 void
-DEFUN (srec_print_symbol, (ignore_abfd, afile, symbol, how),
-       bfd * ignore_abfd AND
-       PTR afile AND
-       asymbol * symbol AND
-       bfd_print_symbol_type how)
+srec_print_symbol (ignore_abfd, afile, symbol, how)
+     bfd *ignore_abfd;
+     PTR afile;
+     asymbol *symbol;
+     bfd_print_symbol_type how;
 {
   FILE *file = (FILE *) afile;
   switch (how)

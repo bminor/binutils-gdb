@@ -282,8 +282,7 @@ bfd_constructor_entry PARAMS ((bfd *abfd,
 
 const struct reloc_howto_struct *
 bfd_default_reloc_type_lookup
- PARAMS ((bfd *abfd AND
-    bfd_reloc_code_real_type  code));
+ PARAMS ((bfd *abfd, bfd_reloc_code_real_type  code));
 
 boolean 
 bfd_generic_relax_section

@@ -1,5 +1,5 @@
 /* BFD back-end for a.out files encapsulated with COFF headers.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -38,8 +38,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 bfd_target *encap_real_callback ();
 
 bfd_target *
-DEFUN(encap_object_p,(abfd),
-     bfd *abfd)
+encap_object_p (abfd)
+     bfd *abfd;
 {
   unsigned char magicbuf[4]; /* Raw bytes of magic number from file */
   unsigned long magic;		/* Swapped magic number */
@@ -77,8 +77,8 @@ DEFUN(encap_object_p,(abfd),
 
 /* Finish up the reading of a encapsulated-coff a.out file header */
 bfd_target *
-DEFUN(encap_real_callback,(abfd),
-      bfd *abfd)
+encap_real_callback (abfd)
+     bfd *abfd;
 {
   struct internal_exec *execp = exec_hdr (abfd);
   
@@ -118,8 +118,8 @@ DEFUN(encap_real_callback,(abfd),
    file header, symbols, and relocation.  */
 
 boolean
-DEFUN(encap_write_object_contents,(abfd),
-      bfd *abfd)
+encap_write_object_contents (abfd)
+     bfd *abfd;
 {
   bfd_size_type data_pad = 0;
   struct external_exec exec_bytes;

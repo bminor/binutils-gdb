@@ -44,7 +44,7 @@ SECTION
 	output symbols, the application provides BFD with a table of
 	pointers to pointers to <<asymbol>>s. This allows applications
 	like the linker to output a symbol as it was read, since the ``behind
-	the scenes'' information will be still available. 
+	the scenes'' information will be still available.
 @menu
 @* Reading Symbols::
 @* Writing Symbols::
@@ -65,17 +65,17 @@ SUBSECTION
 |	  asymbol **symbol_table;
 |	  unsigned int number_of_symbols;
 |	  unsigned int i;
-|	
+|
 |	  storage_needed = get_symtab_upper_bound (abfd);
-|	
+|
 |	  if (storage_needed == 0) {
 |	     return ;
 |	  }
-|	  symbol_table = (asymbol **) bfd_xmalloc (storage_needed);
+|	  symbol_table = (asymbol **) xmalloc (storage_needed);
 |	    ...
-|	  number_of_symbols = 
-|	     bfd_canonicalize_symtab (abfd, symbol_table); 
-|	
+|	  number_of_symbols =
+|	     bfd_canonicalize_symtab (abfd, symbol_table);
+|
 |	  for (i = 0; i < number_of_symbols; i++) {
 |	     process_symbol (symbol_table[i]);
 |	  }
@@ -100,12 +100,12 @@ SUBSECTION
 	example showing the creation of a symbol table with only one element:
 
 |	#include "bfd.h"
-|	main() 
+|	main()
 |	{
 |	  bfd *abfd;
 |	  asymbol *ptrs[2];
 |	  asymbol *new;
-|	
+|
 |	  abfd = bfd_openw("foo","a.out-sunos-big");
 |	  bfd_set_format(abfd, bfd_object);
 |	  new = bfd_make_empty_symbol(abfd);
@@ -113,15 +113,15 @@ SUBSECTION
 |	  new->section = bfd_make_section_old_way(abfd, ".text");
 |	  new->flags = BSF_GLOBAL;
 |	  new->value = 0x12345;
-|	
+|
 |	  ptrs[0] = new;
 |	  ptrs[1] = (asymbol *)0;
-|	  
+|
 |	  bfd_set_symtab(abfd, ptrs, 1);
 |	  bfd_close(abfd);
 |	}
-|	
-|	./makesym 
+|
+|	./makesym
 |	nm foo
 |	00012345 A dummy_symbol
 
@@ -129,7 +129,7 @@ SUBSECTION
  	instance, the <<a.out>> object format does not allow an
 	arbitary number of sections. A symbol pointing to a section
 	which is not one  of <<.text>>, <<.data>> or <<.bss>> cannot
-	be described. 
+	be described.
 
 */
 
@@ -153,7 +153,7 @@ SUBSECTION
 CODE_FRAGMENT
 
 .
-.typedef struct symbol_cache_entry 
+.typedef struct symbol_cache_entry
 .{
 .	{* A pointer to the BFD which owns the symbol. This information
 .	   is necessary so that a back end can work out what additional
@@ -254,7 +254,7 @@ CODE_FRAGMENT
 .
 .  flagword flags;
 .
-.	{* A pointer to the section to which this symbol is 
+.	{* A pointer to the section to which this symbol is
 .	   relative.  This will always be non NULL, there are special
 .          sections for undefined and absolute symbols *}
 .  struct sec *section;
@@ -271,7 +271,7 @@ CODE_FRAGMENT
 
 #include "libbfd.h"
 #include "aout/stab_gnu.h"
- 
+
 /*
 DOCDD
 INODE
@@ -302,7 +302,7 @@ FUNCTION
 DESCRIPTION
 	Read the symbols from the BFD @var{abfd}, and fills in
 	the vector @var{location} with pointers to the symbols and
-	a trailing NULL. 
+	a trailing NULL.
 	Return the actual number of symbol pointers, not
 	including the NULL.
 
@@ -333,10 +333,11 @@ bfd_set_symtab (abfd, location, symcount)
      asymbol **location;
      unsigned int symcount;
 {
-  if ((abfd->format != bfd_object) || (bfd_read_p (abfd))) {
-    bfd_error = invalid_operation;
-    return false;
-  }
+  if ((abfd->format != bfd_object) || (bfd_read_p (abfd)))
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return false;
+    }
 
   bfd_get_outsymbols (abfd) = location;
   bfd_get_symcount (abfd) = symcount;
@@ -355,32 +356,32 @@ DESCRIPTION
 	stream @var{file}.
 */
 void
-DEFUN(bfd_print_symbol_vandf,(arg, symbol),
-PTR arg AND
-asymbol *symbol)
+bfd_print_symbol_vandf (arg, symbol)
+     PTR arg;
+     asymbol *symbol;
 {
   FILE *file = (FILE *) arg;
   flagword type = symbol->flags;
-  if (symbol->section != (asection *)NULL)
-      {
-	fprintf_vma(file, symbol->value+symbol->section->vma);
-      }
-  else 
-      {
-	fprintf_vma(file, symbol->value);
-      }
+  if (symbol->section != (asection *) NULL)
+    {
+      fprintf_vma (file, symbol->value + symbol->section->vma);
+    }
+  else
+    {
+      fprintf_vma (file, symbol->value);
+    }
 
   /* This presumes that a symbol can not be both BSF_DEBUGGING and
      BSF_DYNAMIC.  */
-  fprintf(file," %c%c%c%c%c%c%c",
-	  (type & BSF_LOCAL)  ? 'l':' ',
-	  (type & BSF_GLOBAL) ? 'g' : ' ',
-	  (type & BSF_WEAK) ? 'w' : ' ',
-	  (type & BSF_CONSTRUCTOR) ? 'C' : ' ',
-	  (type & BSF_WARNING) ? 'W' : ' ',
-	  (type & BSF_INDIRECT) ? 'I' : ' ',
-	  (type & BSF_DEBUGGING) ? 'd'
-	  : (type & BSF_DYNAMIC) ? 'D' : ' ');
+  fprintf (file, " %c%c%c%c%c%c%c",
+	   (type & BSF_LOCAL) ? 'l' : ' ',
+	   (type & BSF_GLOBAL) ? 'g' : ' ',
+	   (type & BSF_WEAK) ? 'w' : ' ',
+	   (type & BSF_CONSTRUCTOR) ? 'C' : ' ',
+	   (type & BSF_WARNING) ? 'W' : ' ',
+	   (type & BSF_INDIRECT) ? 'I' : ' ',
+	   (type & BSF_DEBUGGING) ? 'd'
+	   : (type & BSF_DYNAMIC) ? 'D' : ' ');
 }
 
 
@@ -423,7 +424,8 @@ struct section_to_type
 /* Map section names to POSIX/BSD single-character symbol types.
    This table is probably incomplete.  It is sorted for convenience of
    adding entries.  Since it is so short, a linear search is used.  */
-static CONST struct section_to_type stt[] = {
+static CONST struct section_to_type stt[] =
+{
   {"*DEBUG*", 'N'},
   {".bss", 'b'},
   {".data", 'd'},
@@ -468,8 +470,8 @@ SYNOPSIS
 	int bfd_decode_symclass(asymbol *symbol);
 */
 int
-DEFUN(bfd_decode_symclass,(symbol),
-asymbol *symbol)
+bfd_decode_symclass (symbol)
+     asymbol *symbol;
 {
   char c;
 
@@ -479,7 +481,7 @@ asymbol *symbol)
     return 'U';
   if (symbol->section == &bfd_ind_section)
     return 'I';
-  if (!(symbol->flags & (BSF_GLOBAL|BSF_LOCAL)))
+  if (!(symbol->flags & (BSF_GLOBAL | BSF_LOCAL)))
     return '?';
 
   if (symbol->section == &bfd_abs_section)
@@ -493,8 +495,8 @@ asymbol *symbol)
   return c;
 
   /* We don't have to handle these cases just yet, but we will soon:
-     N_SETV: 'v'; 
-     N_SETA: 'l'; 
+     N_SETV: 'v';
+     N_SETA: 'l';
      N_SETT: 'x';
      N_SETD: 'z';
      N_SETB: 's';
@@ -516,21 +518,20 @@ SYNOPSIS
 */
 
 void
-DEFUN(bfd_symbol_info,(symbol, ret),
-      asymbol *symbol AND
-      symbol_info *ret)
+bfd_symbol_info (symbol, ret)
+     asymbol *symbol;
+     symbol_info *ret;
 {
   ret->type = bfd_decode_symclass (symbol);
   if (ret->type != 'U')
-    ret->value = symbol->value+symbol->section->vma;
+    ret->value = symbol->value + symbol->section->vma;
   else
     ret->value = 0;
   ret->name = symbol->name;
 }
 
 void
-bfd_symbol_is_absolute()
+bfd_symbol_is_absolute ()
 {
-  abort();
+  abort ();
 }
-

@@ -76,8 +76,8 @@ struct trad_core_struct {
 };
 
 static bfd_target *
-DEFUN(aix386_core_file_p,(abfd),
-      bfd *abfd)
+aix386_core_file_p (abfd)
+     bfd *abfd;
 {
   int i,n;
   unsigned char longbuf[4];	/* Raw bytes of various header fields */
@@ -88,7 +88,7 @@ DEFUN(aix386_core_file_p,(abfd),
     struct corehdr internal_core;
   } *mergem;
 
-  bfd_error = system_call_error;
+  bfd_set_error (bfd_error_system_call);
 
   if (bfd_read ((PTR)longbuf, 1, sizeof (longbuf), abfd) != sizeof (longbuf))
     return 0;
@@ -100,7 +100,7 @@ DEFUN(aix386_core_file_p,(abfd),
   mergem = (struct mergem *)bfd_zalloc (abfd, sizeof (struct mergem));
   if (mergem == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return 0;
     }
 
@@ -108,7 +108,7 @@ DEFUN(aix386_core_file_p,(abfd),
 
   if ((bfd_read ((PTR) core, 1, core_size, abfd)) != core_size)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       bfd_release (abfd, (char *)mergem);
       return 0;
     }
@@ -122,7 +122,7 @@ DEFUN(aix386_core_file_p,(abfd),
   if (core_regsec (abfd) == NULL)
     {
     loser:
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       bfd_release (abfd, (char *)mergem);
       return 0;
     }
@@ -219,23 +219,23 @@ DEFUN(aix386_core_file_p,(abfd),
 }
 
 static char *
-DEFUN(aix386_core_file_failing_command,(abfd),
-      bfd *abfd)
+aix386_core_file_failing_command (abfd)
+     bfd *abfd;
 {
   return core_hdr (abfd)->cd_comm;
 }
 
 static int
-DEFUN(aix386_core_file_failing_signal,(abfd),
-      bfd *abfd)
+aix386_core_file_failing_signal (abfd)
+     bfd *abfd;
 {
   return core_hdr (abfd)->cd_cursig;
 }
 
 static boolean
-DEFUN(aix386_core_file_matches_executable_p, (core_bfd, exec_bfd),
-      bfd *core_bfd AND
-      bfd *exec_bfd)
+aix386_core_file_matches_executable_p (core_bfd, exec_bfd)
+     bfd *core_bfd;
+     bfd *exec_bfd;
 {
   return true;			/* FIXME, We have no way of telling at this
 				   point */
@@ -254,7 +254,7 @@ DEFUN(aix386_core_file_matches_executable_p, (core_bfd, exec_bfd),
 #define	aix386_close_and_cleanup		bfd_generic_close_and_cleanup
 #define	aix386_set_section_contents		(PROTO(boolean, (*),	\
          (bfd *abfd, asection *section, PTR data, file_ptr offset,	\
-         bfd_size_type count))) bfd_false
+	 bfd_size_type count))) bfd_generic_set_section_contents
 #define	aix386_get_section_contents		bfd_generic_get_section_contents
 #define	aix386_new_section_hook		(PROTO (boolean, (*),	\
 	(bfd *, sec_ptr))) bfd_true
@@ -307,9 +307,9 @@ swap_abort()
 {
   abort(); /* This way doesn't require any declaration for ANSI to fuck up */
 }
-#define	NO_GET	((PROTO(bfd_vma, (*), (         bfd_byte *))) swap_abort )
-#define NO_GETS ((PROTO(bfd_signed_vma, (*), (  bfd_byte *))) swap_abort )
-#define	NO_PUT	((PROTO(void,    (*), (bfd_vma, bfd_byte *))) swap_abort )
+#define	NO_GET	((PROTO(bfd_vma, (*), (       const bfd_byte *))) swap_abort )
+#define NO_GETS ((PROTO(bfd_signed_vma, (*), (const bfd_byte *))) swap_abort )
+#define	NO_PUT	((PROTO(void,        (*), (bfd_vma, bfd_byte *))) swap_abort )
 
 bfd_target aix386_core_vec =
   {

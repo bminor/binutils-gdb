@@ -621,9 +621,9 @@ DESCRIPTION
 */
 
 bfd_target *
-DEFUN(bfd_find_target,(target_name, abfd),
-      CONST char *target_name AND
-      bfd *abfd)
+bfd_find_target (target_name, abfd)
+     CONST char *target_name;
+     bfd *abfd;
 {
   bfd_target **target;
   extern char *getenv ();
@@ -663,7 +663,7 @@ DESCRIPTION
 */
 
 CONST char **
-DEFUN_VOID(bfd_target_list)
+bfd_target_list ()
 {
   int vec_length= 0;
 #ifdef NATIVE_HPPAHPUX_COMPILER

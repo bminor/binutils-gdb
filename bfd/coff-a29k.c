@@ -248,12 +248,13 @@ static reloc_howto_type howto_table[] =
 #define RELOC_PROCESSING(relent, reloc, symbols, abfd, section) \
  reloc_processing(relent, reloc, symbols, abfd, section)
 
-static void DEFUN(reloc_processing,(relent,reloc, symbols, abfd, section) ,
-	   arelent *relent AND
-	   struct internal_reloc *reloc AND
-	   asymbol **symbols AND
-	   bfd *abfd AND
-	   asection *section)
+static void
+reloc_processing (relent,reloc, symbols, abfd, section)
+     arelent *relent;
+     struct internal_reloc *reloc;
+     asymbol **symbols;
+     bfd *abfd;
+     asection *section;
 {
     relent->address = reloc->r_vaddr;		
     relent->howto = howto_table + reloc->r_type;

@@ -28,8 +28,8 @@ extern CONST struct reloc_howto_struct * NAME(aout,reloc_type_lookup) ();
    This routine is called from some_aout_object_p just before it returns.  */
 #ifndef MY_callback
 static bfd_target *
-DEFUN(MY(callback),(abfd),
-      bfd *abfd)
+MY(callback) (abfd)
+     bfd *abfd;
 {
   struct internal_exec *execp = exec_hdr (abfd);
 
@@ -80,8 +80,8 @@ DEFUN(MY(callback),(abfd),
 /* Finish up the reading of an a.out file header */
 
 static bfd_target *
-DEFUN(MY(object_p),(abfd),
-     bfd *abfd)
+MY(object_p) (abfd)
+     bfd *abfd;
 {
   struct external_exec exec_bytes;	/* Raw exec header from file */
   struct internal_exec exec;		/* Cleaned-up exec header */
@@ -89,7 +89,7 @@ DEFUN(MY(object_p),(abfd),
 
   if (bfd_read ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd)
       != EXEC_BYTES_SIZE) {
-    bfd_error = wrong_format;
+    bfd_set_error (bfd_error_wrong_format);
     return 0;
   }
 
@@ -134,8 +134,8 @@ DEFUN(MY(object_p),(abfd),
 
 #ifndef MY_mkobject
 static boolean
-DEFUN(MY(mkobject),(abfd),
-      bfd *abfd)
+MY(mkobject) (abfd)
+     bfd *abfd;
 {
   if (NAME(aout,mkobject)(abfd) == false)
     return false;
@@ -160,8 +160,8 @@ DEFUN(MY(mkobject),(abfd),
 
 #ifndef MY_write_object_contents
 static boolean
-DEFUN(MY(write_object_contents),(abfd),
-      bfd *abfd)
+MY(write_object_contents) (abfd)
+     bfd *abfd;
 {
   struct external_exec exec_bytes;
   struct internal_exec *execp = exec_hdr (abfd);
@@ -181,7 +181,8 @@ DEFUN(MY(write_object_contents),(abfd),
 
 #ifndef MY_set_sizes
 static boolean
-DEFUN(MY(set_sizes),(abfd), bfd *abfd)
+MY(set_sizes) (abfd)
+     bfd *abfd;
 {
   adata(abfd).page_size = PAGE_SIZE;
 #ifdef SEGMENT_SIZE
@@ -196,12 +197,22 @@ DEFUN(MY(set_sizes),(abfd), bfd *abfd)
 #endif
 
 #ifndef MY_backend_data
+
+#ifndef MY_read_dynamic_symbols
+#define MY_read_dynamic_symbols 0
+#endif
+#ifndef MY_read_dynamic_relocs
+#define MY_read_dynamic_relocs 0
+#endif
+
 static CONST struct aout_backend_data MY(backend_data) = {
   0,				/* zmagic contiguous */
   0,				/* text incl header */
   0,				/* text vma? */
   MY_set_sizes,
   0,				/* exec header is counted */
+  MY_read_dynamic_symbols,
+  MY_read_dynamic_relocs
 };
 #define MY_backend_data &MY(backend_data)
 #endif
@@ -400,7 +411,7 @@ bfd_target MY(vec) =
 #endif
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
+   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   MY_symbol_leading_char,
   AR_PAD_CHAR,			/* ar_pad_char */

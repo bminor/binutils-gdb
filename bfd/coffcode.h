@@ -405,9 +405,9 @@ sec_to_styp_flags (sec_name, sec_flags)
  *      in sec_to_styp_flags().
  */
 static flagword
-DEFUN (styp_to_sec_flags, (abfd, hdr),
-       bfd * abfd AND
-       PTR hdr)
+styp_to_sec_flags (abfd, hdr)
+     bfd * abfd;
+     PTR hdr;
 {
   struct internal_scnhdr *internal_s = (struct internal_scnhdr *) hdr;
   long styp_flags = internal_s->s_flags;
@@ -695,9 +695,9 @@ dependent COFF routines:
 /* See whether the magic number matches.  */
 
 static boolean
-DEFUN (coff_bad_format_hook, (abfd, filehdr),
-       bfd * abfd AND
-       PTR filehdr)
+coff_bad_format_hook (abfd, filehdr)
+     bfd * abfd;
+     PTR filehdr;
 {
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
 
@@ -722,9 +722,9 @@ DEFUN (coff_bad_format_hook, (abfd, filehdr),
 }
 
 static asection *
-DEFUN (coff_make_section_hook, (abfd, name),
-       bfd * abfd AND
-       char *name)
+coff_make_section_hook (abfd, name)
+     bfd * abfd;
+     char *name;
 {
 #ifdef TWO_DATA_SECS
   /* FIXME: This predates the call to bfd_make_section_anyway
@@ -743,9 +743,9 @@ DEFUN (coff_make_section_hook, (abfd, name),
 */
 
 static boolean
-DEFUN (coff_new_section_hook, (abfd, section),
-       bfd * abfd AND
-       asection * section)
+coff_new_section_hook (abfd, section)
+     bfd * abfd;
+     asection * section;
 {
   section->alignment_power = abfd->xvec->align_power_min;
   /* Allocate aux records for section symbols, to store size and
@@ -764,10 +764,10 @@ DEFUN (coff_new_section_hook, (abfd, section),
 /* Set the alignment of a BFD section.  */
 
 static void
-DEFUN (coff_set_alignment_hook, (abfd, section, scnhdr),
-       bfd * abfd AND
-       asection * section AND
-       PTR scnhdr)
+coff_set_alignment_hook (abfd, section, scnhdr)
+     bfd * abfd;
+     asection * section;
+     PTR scnhdr;
 {
   struct internal_scnhdr *hdr = (struct internal_scnhdr *) scnhdr;
   unsigned int i;
@@ -786,15 +786,15 @@ DEFUN (coff_set_alignment_hook, (abfd, section, scnhdr),
 #endif /* ! I960 */
 
 static boolean
-DEFUN (coff_mkobject, (abfd),
-       bfd * abfd)
+coff_mkobject (abfd)
+     bfd * abfd;
 {
   coff_data_type *coff;
 
   abfd->tdata.coff_obj_data = (struct coff_tdata *) bfd_zalloc (abfd, sizeof (coff_data_type));
   if (abfd->tdata.coff_obj_data == 0)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   coff = coff_data (abfd);
@@ -810,10 +810,10 @@ DEFUN (coff_mkobject, (abfd),
 /* Create the COFF backend specific information.  */
 
 static PTR
-DEFUN (coff_mkobject_hook, (abfd, filehdr, aouthdr),
-       bfd * abfd AND
-       PTR filehdr AND
-       PTR aouthdr)
+coff_mkobject_hook (abfd, filehdr, aouthdr)
+     bfd * abfd;
+     PTR filehdr;
+     PTR aouthdr;
 {
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
   coff_data_type *coff;
@@ -1015,9 +1015,9 @@ coff_set_arch_mach_hook (abfd, filehdr)
 #ifdef SYMNAME_IN_DEBUG
 
 static boolean
-DEFUN (symname_in_debug_hook, (abfd, sym),
-       bfd * abfd AND
-       struct internal_syment *sym)
+symname_in_debug_hook (abfd, sym)
+     bfd * abfd;
+     struct internal_syment *sym;
 {
   return SYMNAME_IN_DEBUG (sym) ? true : false;
 }
@@ -1046,8 +1046,8 @@ SUBSUBSECTION
 */
 
 static void
-DEFUN (coff_write_relocs, (abfd),
-       bfd * abfd)
+coff_write_relocs (abfd)
+     bfd * abfd;
 {
   asection *s;
   for (s = abfd->sections; s != (asection *) NULL; s = s->next)
@@ -1109,10 +1109,10 @@ DEFUN (coff_write_relocs, (abfd),
    type.  Result is true if we can represent the arch&type, false if not.  */
 
 static boolean
-DEFUN (coff_set_flags, (abfd, magicp, flagsp),
-       bfd * abfd AND
-       unsigned *magicp AND
-       unsigned short *flagsp)
+coff_set_flags (abfd, magicp, flagsp)
+     bfd * abfd;
+     unsigned *magicp;
+     unsigned short *flagsp;
 {
   switch (bfd_get_arch (abfd))
     {
@@ -1275,10 +1275,10 @@ DEFUN (coff_set_flags, (abfd, magicp, flagsp),
 
 
 static boolean
-DEFUN (coff_set_arch_mach, (abfd, arch, machine),
-       bfd * abfd AND
-       enum bfd_architecture arch AND
-       unsigned long machine)
+coff_set_arch_mach (abfd, arch, machine)
+     bfd * abfd;
+     enum bfd_architecture arch;
+     unsigned long machine;
 {
   unsigned dummy1;
   unsigned short dummy2;
@@ -1294,8 +1294,8 @@ DEFUN (coff_set_arch_mach, (abfd, arch, machine),
 /* Calculate the file position for each section. */
 
 static void
-DEFUN (coff_compute_section_file_positions, (abfd),
-       bfd * abfd)
+coff_compute_section_file_positions (abfd)
+     bfd * abfd;
 {
   asection *current;
   asection *previous = (asection *) NULL;
@@ -1422,7 +1422,7 @@ coff_add_missing_symbols (abfd)
   sympp2 = (asymbol **) bfd_alloc_by_size_t (abfd, nsyms * sizeof (asymbol *));
   if (!sympp2)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   memcpy (sympp2, sympp, i * sizeof (asymbol *));
@@ -1447,8 +1447,8 @@ coff_add_missing_symbols (abfd)
 /* SUPPRESS 558 */
 /* SUPPRESS 529 */
 static boolean
-DEFUN (coff_write_object_contents, (abfd),
-       bfd * abfd)
+coff_write_object_contents (abfd)
+     bfd * abfd;
 {
   asection *current;
   unsigned int count;
@@ -1470,7 +1470,7 @@ DEFUN (coff_write_object_contents, (abfd),
   struct internal_aouthdr internal_a;
 
 
-  bfd_error = system_call_error;
+  bfd_set_error (bfd_error_system_call);
   /* Number the output sections, starting from one on the first section
      with a name which doesn't start with a *.
      @@ The code doesn't make this check.  Is it supposed to be done,
@@ -1808,12 +1808,12 @@ DEFUN (coff_write_object_contents, (abfd),
 }
 
 static boolean
-DEFUN (coff_set_section_contents, (abfd, section, location, offset, count),
-       bfd * abfd AND
-       sec_ptr section AND
-       PTR location AND
-       file_ptr offset AND
-       bfd_size_type count)
+coff_set_section_contents (abfd, section, location, offset, count)
+     bfd * abfd;
+     sec_ptr section;
+     PTR location;
+     file_ptr offset;
+     bfd_size_type count;
 {
   if (abfd->output_has_begun == false)	/* set by bfd.c handler */
     coff_compute_section_file_positions (abfd);
@@ -1857,7 +1857,7 @@ coff_close_and_cleanup (abfd)
 	  return false;
 	break;
       default:
-	bfd_error = invalid_operation;
+	bfd_set_error (bfd_error_invalid_operation);
 	return false;
       }
 
@@ -1878,13 +1878,13 @@ buy_and_read (abfd, where, seek_direction, size)
   PTR area = (PTR) bfd_alloc (abfd, size);
   if (!area)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return (NULL);
     }
   bfd_seek (abfd, where, seek_direction);
   if (bfd_read (area, 1, size, abfd) != size)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return (NULL);
     }				/* on error */
   return (area);
@@ -1930,7 +1930,7 @@ coff_slurp_line_table (abfd, asect)
     (alent *) bfd_alloc (abfd, (size_t) ((asect->lineno_count + 1) * sizeof (alent)));
   if (lineno_cache == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   else
@@ -1972,8 +1972,8 @@ coff_slurp_line_table (abfd, asect)
 }
 
 static boolean
-DEFUN (coff_slurp_symbol_table, (abfd),
-       bfd * abfd)
+coff_slurp_symbol_table (abfd)
+     bfd * abfd;
 {
   combined_entry_type *native_symbols;
   coff_symbol_type *cached_area;
@@ -1997,7 +1997,7 @@ DEFUN (coff_slurp_symbol_table, (abfd),
 
   if (cached_area == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }				/* on error */
   table_ptr =
@@ -2006,7 +2006,7 @@ DEFUN (coff_slurp_symbol_table, (abfd),
 
   if (table_ptr == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   else
@@ -2277,10 +2277,10 @@ SUBSUBSECTION
 #endif
 
 static boolean
-DEFUN (coff_slurp_reloc_table, (abfd, asect, symbols),
-       bfd * abfd AND
-       sec_ptr asect AND
-       asymbol ** symbols)
+coff_slurp_reloc_table (abfd, asect, symbols)
+     bfd * abfd;
+     sec_ptr asect;
+     asymbol ** symbols;
 {
   RELOC *native_relocs;
   arelent *reloc_cache;
@@ -2307,7 +2307,7 @@ DEFUN (coff_slurp_reloc_table, (abfd, asect, symbols),
 
   if (reloc_cache == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -2376,11 +2376,11 @@ DEFUN (coff_slurp_reloc_table, (abfd, asect, symbols),
 
 /* This is stupid.  This function should be a boolean predicate.  */
 static unsigned int
-DEFUN (coff_canonicalize_reloc, (abfd, section, relptr, symbols),
-       bfd * abfd AND
-       sec_ptr section AND
-       arelent ** relptr AND
-       asymbol ** symbols)
+coff_canonicalize_reloc (abfd, section, relptr, symbols)
+     bfd * abfd;
+     sec_ptr section;
+     arelent ** relptr;
+     asymbol ** symbols;
 {
   arelent *tblptr = section->relocation;
   unsigned int count = 0;

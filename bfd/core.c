@@ -1,5 +1,5 @@
 /* Core file generic interface routines for BFD.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -45,8 +45,8 @@ DESCRIPTION
 */
 
 CONST char *
-DEFUN(bfd_core_file_failing_command,(abfd),
-      bfd *abfd)
+bfd_core_file_failing_command (abfd)
+     bfd *abfd;
 {
   if (abfd->format != bfd_core) {
     bfd_set_error (bfd_error_invalid_operation);

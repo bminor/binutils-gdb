@@ -1,3 +1,15 @@
+Tue Mar 15 04:41:13 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* Most files:
+	Replace DEFUN and DEFUN_VOID with K&R-style function definition.
+	Indent some of them to GNU standards.
+
+	* aout32.c, archures.c, core.c, cpu-h8300.c, cpu-i960.c,
+	cpu-m68k.c, cpu-m88k.c, cpu-mips.c, cpu-vax.c, ctor.c, demo64.c,
+	elf32-hppa.h, gen-aout.c, host-aout.c, init.c, libhppa.h,
+	libieee.h, liboasys.h, newsos3.c, som.h, stab-syms.c, sunos.c:
+	Update copyright years.
+
 Mon Mar 14 11:41:23 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_prep_for_fixups): A relocation involving the section

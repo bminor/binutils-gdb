@@ -658,7 +658,7 @@ bfd_create PARAMS ((CONST char *filename, bfd *templ));
 #define bfd_h_get_signed_64(abfd, ptr) \
 		 BFD_SEND(abfd, bfd_h_getx_signed_64, (ptr))
 
-typedef struct sec 
+typedef struct sec
 {
          /* The name of the section; the name isn't a copy, the pointer is
         the same as that passed to bfd_make_section. */
@@ -667,7 +667,7 @@ typedef struct sec
 
          /* Which section is it; 0..nth.      */
 
-   int index;                      
+   int index;
 
          /* The next section in the list belonging to the BFD, or NULL. */
 
@@ -675,7 +675,7 @@ typedef struct sec
 
          /* The field flags contains attributes of the section. Some
            flags are read in from the object file, and some are
-           synthesized from other information.  */         
+           synthesized from other information.  */
 
     flagword flags;
 
@@ -685,7 +685,7 @@ typedef struct sec
            This is clear for a section containing debug information
            only. */
 #define SEC_ALLOC      0x001
-          
+
          /* Tells the OS to load the section from the file when loading.
            This is clear for a .bss section. */
 #define SEC_LOAD       0x002
@@ -784,13 +784,13 @@ typedef struct sec
            contains a value even if the section has no contents (e.g., the
            size of <<.bss>>). This will be filled in after relocation */
 
-   bfd_size_type _cooked_size;    
+   bfd_size_type _cooked_size;
 
          /* The original size on disk of the section, in bytes.  Normally this
 	    value is the same as the size, but if some relaxing has
 	    been done, then this value will be bigger.  */
 
-   bfd_size_type _raw_size;    
+   bfd_size_type _raw_size;
 
          /* If this section is going to be output, then this value is the
            offset into the output section of the first byte in the input
@@ -827,8 +827,8 @@ typedef struct sec
 
          /* File position of section data    */
 
-   file_ptr filepos;      
-        
+   file_ptr filepos;
+
          /* File position of relocation info */
 
    file_ptr rel_filepos;
@@ -848,7 +848,7 @@ typedef struct sec
          /* Attached line number information */
 
    alent *lineno;
-        
+
          /* Number of line number records   */
 
    unsigned int lineno_count;
@@ -875,7 +875,7 @@ typedef struct sec
 
    boolean reloc_done;
 	  /* A symbol which points at this section only */
-   struct symbol_cache_entry *symbol;  
+   struct symbol_cache_entry *symbol;
    struct symbol_cache_entry **symbol_ptr_ptr;
 
    struct bfd_link_order *link_order_head;
@@ -935,14 +935,14 @@ bfd_set_section_size PARAMS ((bfd *abfd, asection *sec, bfd_size_type val));
 
 boolean 
 bfd_set_section_contents
- PARAMS ((bfd *abfd,        
+ PARAMS ((bfd *abfd,
     asection *section,
     PTR data,
     file_ptr offset,
     bfd_size_type count));
 
 boolean 
-bfd_get_section_contents 
+bfd_get_section_contents
  PARAMS ((bfd *abfd, asection *section, PTR location,
     file_ptr offset, bfd_size_type count));
 
@@ -1061,7 +1061,7 @@ CONST char *
 bfd_printable_arch_mach
  PARAMS ((enum bfd_architecture arch, unsigned long machine));
 
-typedef enum bfd_reloc_status 
+typedef enum bfd_reloc_status
 {
         /* No errors detected */
   bfd_reloc_ok,
@@ -1093,7 +1093,7 @@ typedef enum bfd_reloc_status
  bfd_reloc_status_type;
 
 
-typedef struct reloc_cache_entry 
+typedef struct reloc_cache_entry
 {
         /* A pointer into the canonical table of pointers  */
   struct symbol_cache_entry **sym_ptr_ptr;
@@ -1102,7 +1102,7 @@ typedef struct reloc_cache_entry
   bfd_size_type address;
 
         /* addend for relocation value */
-  bfd_vma addend;    
+  bfd_vma addend;
 
         /* Pointer to how to perform the required relocation */
   const struct reloc_howto_struct *howto;
@@ -1126,8 +1126,8 @@ enum complain_overflow
   complain_overflow_unsigned
 };
 
-typedef struct reloc_howto_struct 
-{ 
+typedef struct reloc_howto_struct
+{
         /*  The type field has mainly a documetary use - the back end can
            do what it wants with it, though normally the back end's
            external idea of what a reloc number is stored
@@ -1167,12 +1167,12 @@ typedef struct reloc_howto_struct
           called rather than the normal function. This allows really
           strange relocation methods to be accomodated (e.g., i960 callj
           instructions). */
-  bfd_reloc_status_type (*special_function) 
+  bfd_reloc_status_type (*special_function)
 				    PARAMS ((bfd *abfd,
 					     arelent *reloc_entry,
                                             struct symbol_cache_entry *symbol,
                                             PTR data,
-                                            asection *input_section, 
+                                            asection *input_section,
                                             bfd *output_bfd,
                                             char **error_message));
 
@@ -1196,7 +1196,7 @@ typedef struct reloc_howto_struct
           into the instruction. In most cases src_mask == dst_mask,
           except in the above special case, where dst_mask would be
           0x000000ff, and src_mask would be 0x00000000.   */
-  bfd_vma dst_mask;           
+  bfd_vma dst_mask;
 
         /* When some formats create PC relative instructions, they leave
           the value of the pc of the place being relocated in the offset
@@ -1221,7 +1221,7 @@ typedef struct reloc_howto_struct
       relocation = symbol->value;              \
     }                                          \
   }                                            \
-}                      
+}
 int 
 bfd_get_reloc_size  PARAMS ((const reloc_howto_type *));
 
@@ -1241,12 +1241,12 @@ bfd_perform_relocation
     bfd *output_bfd,
     char **error_message));
 
-typedef enum bfd_reloc_code_real 
+typedef enum bfd_reloc_code_real
 {
    /* Basic absolute relocations */
   BFD_RELOC_64,
   BFD_RELOC_32,
-  BFD_RELOC_16,        
+  BFD_RELOC_16,
   BFD_RELOC_14,
   BFD_RELOC_8,
 
@@ -1520,7 +1520,7 @@ const struct reloc_howto_struct *
 bfd_reloc_type_lookup  PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 
 
-typedef struct symbol_cache_entry 
+typedef struct symbol_cache_entry
 {
 	 /* A pointer to the BFD which owns the symbol. This information
 	   is necessary so that a back end can work out what additional
@@ -1621,7 +1621,7 @@ typedef struct symbol_cache_entry
 
   flagword flags;
 
-	 /* A pointer to the section to which this symbol is 
+	 /* A pointer to the section to which this symbol is
 	   relative.  This will always be non NULL, there are special
           sections for undefined and absolute symbols */
   struct sec *section;

@@ -1,5 +1,5 @@
 /* BFD library support routines for constructors
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94 Free Software Foundation, Inc.
 
    Hacked by Steve Chamberlain of Cygnus Support. With some help from
    Judy Chamberlain too.
@@ -115,10 +115,10 @@ DESCRIPTION
 
  
 boolean
-DEFUN(bfd_constructor_entry,(abfd, symbol_ptr_ptr, type),
-	   bfd *abfd AND
-	   asymbol **symbol_ptr_ptr AND
-	   CONST char *type)
+bfd_constructor_entry (abfd, symbol_ptr_ptr, type)
+     bfd *abfd;
+     asymbol **symbol_ptr_ptr;
+     CONST char *type;
 {
     /* Look up the section we're using to store the table in */
     asection *rel_section = bfd_get_section_by_name (abfd, type);
