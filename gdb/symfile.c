@@ -1226,7 +1226,7 @@ symbol_file_command (char *args, int from_tty)
 	  if (strcmp (*argv, "-mapped") == 0)
 	    flags |= OBJF_MAPPED;
 	  else 
-	    if (STREQ (*argv, "-readnow"))
+	    if (strcmp (*argv, "-readnow") == 0)
 	      flags |= OBJF_READNOW;
 	    else 
 	      if (**argv == '-')

@@ -342,10 +342,7 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 		  else if (sym->flags & BSF_LOCAL)
 		    {
 		      /* Named Local variable in a Data section.
-		         Check its name for stabs-in-elf.  The STREQ
-		         macro checks the first character inline, so
-		         we only actually do a strcmp function call on
-		         names that start with 'B' or 'D'.  */
+		         Check its name for stabs-in-elf.  */
 		      int special_local_sect;
 		      if (strcmp ("Bbss.bss", sym->name) == 0)
 			special_local_sect = SECT_OFF_BSS (objfile);
