@@ -273,6 +273,7 @@ stabsread.c
 stabsread.h
 stack.c
 standalone.c
+stop-gdb.c
 stuff.c
 sun3-nat.c
 sun386-nat.c
