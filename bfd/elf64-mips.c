@@ -160,7 +160,7 @@ static reloc_howto_type mips_elf64_howto_table_rel[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 			/* This needs complex overflow
+				/* This needs complex overflow
 				   detection, because the upper four
 				   bits must match the PC + 4.  */
 	 bfd_elf_generic_reloc,	/* special_function */
@@ -713,7 +713,7 @@ static reloc_howto_type mips_elf64_howto_table_rela[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 			/* This needs complex overflow
+				/* This needs complex overflow
 				   detection, because the upper four
 				   bits must match the PC + 4.  */
 	 bfd_elf_generic_reloc,	/* special_function */
@@ -1390,7 +1390,7 @@ static CONST struct elf_reloc_map mips_reloc_map[] =
 
 static reloc_howto_type *
 mips_elf64_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   unsigned int i;
@@ -1414,7 +1414,7 @@ mips_elf64_reloc_type_lookup (abfd, code)
 
 static long
 mips_elf64_get_reloc_upper_bound (abfd, sec)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
 {
   return (sec->reloc_count * 3 + 1) * sizeof (arelent *);

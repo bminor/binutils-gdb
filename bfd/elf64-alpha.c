@@ -867,13 +867,13 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 
 static bfd_reloc_status_type
 elf64_alpha_reloc_nil (abfd, reloc, sym, data, sec, output_bfd, error_message)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc;
-     asymbol *sym;
-     PTR data;
+     asymbol *sym ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
      asection *sec;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   if (output_bfd)
     reloc->address += sec->output_offset;
@@ -884,13 +884,13 @@ elf64_alpha_reloc_nil (abfd, reloc, sym, data, sec, output_bfd, error_message)
 
 static bfd_reloc_status_type
 elf64_alpha_reloc_bad (abfd, reloc, sym, data, sec, output_bfd, error_message)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc;
-     asymbol *sym;
-     PTR data;
+     asymbol *sym ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
      asection *sec;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   if (output_bfd)
     reloc->address += sec->output_offset;
@@ -947,7 +947,7 @@ elf64_alpha_reloc_gpdisp (abfd, reloc_entry, sym, data, input_section,
 			  output_bfd, err_msg)
      bfd *abfd;
      arelent *reloc_entry;
-     asymbol *sym;
+     asymbol *sym ATTRIBUTE_UNUSED;
      PTR data;
      asection *input_section;
      bfd *output_bfd;
@@ -1028,7 +1028,7 @@ static const struct elf_reloc_map elf64_alpha_reloc_map[] =
 
 static reloc_howto_type *
 elf64_alpha_bfd_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   const struct elf_reloc_map *i, *e;
@@ -1046,7 +1046,7 @@ elf64_alpha_bfd_reloc_type_lookup (abfd, code)
 
 static void
 elf64_alpha_info_to_howto (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf64_Internal_Rela *dst;
 {
@@ -1848,8 +1848,8 @@ elf64_alpha_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info;
      const Elf_Internal_Sym *sym;
-     const char **namep;
-     flagword *flagsp;
+     const char **namep ATTRIBUTE_UNUSED;
+     flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp;
      bfd_vma *valp;
 {
@@ -1884,7 +1884,7 @@ elf64_alpha_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 static boolean
 elf64_alpha_create_got_section(abfd, info)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
 {
   asection *s;
 
@@ -2087,7 +2087,7 @@ elf64_alpha_read_ecoff_info (abfd, section, debug)
 
 static boolean
 elf64_alpha_is_local_label_name (abfd, name)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      const char *name;
 {
   return name[0] == '$';
@@ -2739,7 +2739,7 @@ elf64_alpha_adjust_dynamic_symbol (info, h)
 static boolean
 elf64_alpha_merge_ind_symbols (hi, dummy)
      struct alpha_elf_link_hash_entry *hi;
-     PTR dummy;
+     PTR dummy ATTRIBUTE_UNUSED;
 {
   struct alpha_elf_link_hash_entry *hs;
 
@@ -4727,8 +4727,8 @@ const struct elf_size_info alpha_elf_size_info =
 #define TARGET_LITTLE_SYM	bfd_elf64_alpha_vec
 #define TARGET_LITTLE_NAME	"elf64-alpha"
 #define ELF_ARCH		bfd_arch_alpha
-#define ELF_MACHINE_CODE 	EM_ALPHA
-#define ELF_MAXPAGESIZE 	0x10000
+#define ELF_MACHINE_CODE	EM_ALPHA
+#define ELF_MAXPAGESIZE	0x10000
 
 #define bfd_elf64_bfd_link_hash_table_create \
   elf64_alpha_bfd_link_hash_table_create

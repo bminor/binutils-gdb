@@ -1,8 +1,31 @@
+2001-05-03  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-gen.c (elf_generic_info_to_howto): Add unused attribute.
+	(elf_generic_info_to_howto_rel): Likewise.
+	* coff-alpha.c (reloc_nil): Likewise.
+	(alpha_ecoff_bad_format_hook): Likewise.
+	(alpha_adjust_reloc_out): Likewise.
+	(alpha_bfd_reloc_type_lookup): Likewise.
+	(alpha_convert_external_reloc): Likewise.
+	* elf64-alpha.c (elf64_alpha_reloc_nil): Likewise.
+	(elf64_alpha_reloc_bad): Likewise.
+	(elf64_alpha_reloc_gpdisp): Likewise.
+	(elf64_alpha_bfd_reloc_type_lookup): Likewise.
+	(elf64_alpha_info_to_howto): Likewise.
+	(elf64_alpha_add_symbol_hook): Likewise.
+	(elf64_alpha_create_got_section): Likewise.
+	(elf64_alpha_is_local_label_name): Likewise.
+	(elf64_alpha_merge_ind_symbols): Likewise.
+	* elf64-mips.c (mips_elf64_reloc_type_lookup): Likewise.
+	(mips_elf64_get_reloc_upper_bound): Likewise.
+	* nlm32-alpha.c (nlm_alpha_mangle_relocs): Likewise.
+	(nlm_alpha_get_public_offset): Likewise.
+
 2001-05-02  Johan Rydberg  <jrydberg@opencores.org>
 
         * elf32-openrisc.c (openrisc_elf_howto_table): Do not complain
 	about overflow in R_OPENRISC_LO_16_IN_INSN and
-	R_OPENRISC_HI_16_IN_INSN.Index: bfd/elf32-openrisc.c 
+	R_OPENRISC_HI_16_IN_INSN.Index: bfd/elf32-openrisc.c
 
 2001-04-30  H.J. Lu  <hjl@gnu.org>
 
