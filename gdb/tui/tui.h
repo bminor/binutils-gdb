@@ -92,6 +92,9 @@ TuiPoint, *TuiPointPtr;
 /* tui.c */
 extern void tuiFree (char *);
 extern CORE_ADDR tuiGetLowDisassemblyAddress (CORE_ADDR, CORE_ADDR);
+extern void tui_show_assembly (CORE_ADDR addr);
+extern int tui_is_window_visible (TuiWinType type);
+extern int tui_get_command_dimension (int *width, int *height);
 
 /* Initialize readline and configure the keymap for the switching
    key shortcut.  */

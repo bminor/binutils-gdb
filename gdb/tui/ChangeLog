@@ -1,3 +1,11 @@
+2001-07-22  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* tui.h (tui_show_assembly): Declare.
+	(tui_is_window_visible): Declare.
+	* tui.c (tui_show_assembly): New function.
+	(tui_is_window_visible): New function.
+	(tui_get_command_dimension): New function.
+
 2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* tuiWin.c (tuiRefreshAll): Use clearok to force a refresh.

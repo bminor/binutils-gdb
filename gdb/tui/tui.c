@@ -385,3 +385,35 @@ _tuiReset (void)
 }				/* _tuiReset */
 #endif
 
+
+void
+tui_show_assembly (CORE_ADDR addr)
+{
+  tuiAddWinToLayout (DISASSEM_WIN);
+  tuiUpdateSourceWindowsWithAddr (addr);
+}
+
+int
+tui_is_window_visible (TuiWinType type)
+{
+  if (tui_version == 0)
+    return 0;
+
+  if (winList[type] == 0)
+    return 0;
+  
+  return winList[type]->generic.isVisible;
+}
+
+int
+tui_get_command_dimension (int *width, int *height)
+{
+  if (!tui_version || !m_winPtrNotNull (cmdWin))
+    {
+      return 0;
+    }
+  
+  *width = cmdWin->generic.width;
+  *height = cmdWin->generic.height;
+  return 1;
+}
