@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2001-02-06 17:52-0800\n"
+"POT-Creation-Date: 2001-02-07 15:02-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -191,7 +191,7 @@ msgstr ""
 msgid "GP relative relocation used when GP not defined"
 msgstr ""
 
-#: coff-alpha.c:1486 elf64-alpha.c:4033
+#: coff-alpha.c:1486 elf64-alpha.c:4037
 msgid "using multiple gp values"
 msgstr ""
 
@@ -970,7 +970,7 @@ msgstr ""
 msgid "static procedure (no name)"
 msgstr ""
 
-#: elf32-mips.c:5005 elf64-alpha.c:4406
+#: elf32-mips.c:5005 elf64-alpha.c:4410
 #, c-format
 msgid "%s: illegal section name `%s'"
 msgstr ""
@@ -1154,11 +1154,11 @@ msgstr ""
 msgid "v850ea architecture"
 msgstr ""
 
-#: elf64-alpha.c:974
+#: elf64-alpha.c:978
 msgid "GPDISP relocation did not find ldah and lda instructions"
 msgstr ""
 
-#: elf64-alpha.c:3043
+#: elf64-alpha.c:3047
 #, c-format
 msgid "%s: .got subsegment exceeds 64K (size %d)"
 msgstr ""

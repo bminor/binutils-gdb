@@ -1,3 +1,8 @@
+2001-02-07  Todd Vierling  <tv@wasabisystems.com>
+
+	* bucomm.c (bfd_target_vector): Change extern array to pointer.
+	* objdump.c (bfd_target_vector): Likewise.
+
 2001-02-07  David Mosberger  <davidm@hpl.hp.com>
 
 	* readelf.c (process_unwind): New function.
@@ -12,6 +17,7 @@
 	* unwind-ia64.h: New file.
 	* Makefile.am: Include unwind-ia64.c in readelf build.
 	* Makefile.in: Regenerate.
+	* po/binutils.pot: Regenerate.
 
 2001-02-04  Philip Blundell  <philb@gnu.org>
 

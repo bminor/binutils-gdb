@@ -1,3 +1,12 @@
+2001-02-07  Todd Vierling  <tv@wasabisystems.com>
+
+	* libbfd-in.h (bfd_target_vector): Change extern array to pointer.
+	* libbfd.h (bfd_target_vector): Likewise.
+	* targets.c (bfd_target_vector): Rename to _bfd_target_vector and
+        make static; create pointer reference named bfd_target_vector.
+	(_bfd_target_vector_entries): Calculate this based on the array
+	typed _bfd_target_vector.
+
 2001-02-06  H.J. Lu  <hjl@gnu.org>
 
 	* elfxx-ia64.c (elfNN_ia64_dynamic_symbol_p): Only hidden and
