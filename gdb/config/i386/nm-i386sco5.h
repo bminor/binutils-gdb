@@ -32,6 +32,14 @@
 #define SVR4_SHARED_LIBS
 #include "solib.h"		/* Pick up shared library support.  */
 
+/* SCO is unlike other SVR4 systems in that it has SVR4 style shared
+   libs, with a slight twist.  We expect 3 traps (2 for the exec and
+   one for the dynamic loader).  After the third trap we insert the
+   shared library breakpoints, then wait for the 4th trap.  */
+
+#undef START_INFERIOR_TRAPS_EXPECTED
+#define START_INFERIOR_TRAPS_EXPECTED 3
+
 /* SCO does not provide <sys/ptrace.h>.  However, infptrace.c does not
    have defaults for these values.  */
 

@@ -1,5 +1,10 @@
 2002-08-19  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/nm-i386sco5.h (START_INFERIOR_TRAPS_EXPECTED): Moved
+	here from ...
+	* config/i386/tm-i386sco5.h: ... here.  File removed.
+	* config/i386/i386sco5.mt (TM_FILE): Set to tm-i386v4.h.
+
 	* config/i386/nm-i386v.h (START_INFERIOR_TRAPS_EXPECTED): New define.
 	* config/i386/i386aout.mt (TDEPFILES): Add i387-tdep.o
 	(TM_FILE): Set to tm-i386.h.
