@@ -1,5 +1,7 @@
 Thu Nov  7 04:51:19 1991  John Gilmore  (gnu at cygnus.com)
 
+	* am29k-pinsn.c, am29k-opcode.h:  Fix decoding of mtacc, dmac, fmac.
+
 	* tm-*.h:  Remove READ_DBX_FORMAT, COFF_FORMAT, and
 	READ_MIPS_FORMAT, which have been unused since BFD.  Still
 	remaining is COFF_NO_LONG_FILE_NAMES.

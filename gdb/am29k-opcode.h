@@ -194,7 +194,7 @@ static struct am29k_opcode am29k_opcodes[] =
 { "mfacc", 0xe9, "c,d,f" },
 { "mfsr", 0xc6, "c,s" },
 { "mftlb", 0xb6, "c,a" },
-{ "mtacc", 0xe8, "c,d,f" },
+{ "mtacc", 0xe8, "a,d,f" },
 { "mtsr", 0xce, "s,b" },
 { "mtsrim", 0x04, "s,x" },
 { "mttlb", 0xbe, "a,b" },

@@ -233,11 +233,11 @@ print_insn (memaddr, stream)
 		  break;
 
 		case 'F':
-		  fprintf_filtered (stream, "%d", (insn0 >> 18) & 15);
+		  fprintf_filtered (stream, "%d", (insn16 >> 2) & 15);
 		  break;
 
 		case 'C':
-		  fprintf_filtered (stream, "%d", (insn0 >> 16) & 3);
+		  fprintf_filtered (stream, "%d", insn16 & 3);
 		  break;
 
 		default:
