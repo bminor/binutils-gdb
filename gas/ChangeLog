@@ -1,3 +1,8 @@
+1999-06-21  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c: Include struc-symbol.h so that symbol structure
+	definition is available.
+
 1999-06-19  Ian Lance Taylor  <ian@zembu.com>
 
 	* config/tc-ppc.c: Update for symbol handling changes.

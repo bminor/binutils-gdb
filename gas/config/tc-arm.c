@@ -31,6 +31,7 @@
 #include "obstack.h"
 #include "symbols.h"
 #include "listing.h"
+#include "struc-symbol.h"
 
 #ifdef OBJ_ELF
 #include "elf/arm.h"
@@ -6737,7 +6738,7 @@ arm_adjust_symtab ()
         }
 
       if (ARM_IS_INTERWORK (sym))
-	coffsymbol(sym->bsym)->native->u.syment.n_flags = 0xFF;
+	coffsymbol (sym->bsym)->native->u.syment.n_flags = 0xFF;
     }
 #endif
 #ifdef OBJ_ELF
