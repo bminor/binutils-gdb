@@ -48,8 +48,8 @@ AC_PROG_RANLIB
 # At one point there were hardcoded AC_DEFINE's if ${host} = i386-*-windows*.
 AC_CHECK_HEADERS(stdlib.h string.h strings.h unistd.h time.h)
 AC_CHECK_HEADERS(sys/time.h sys/resource.h)
-AC_CHECK_HEADERS(fcntl.h)
-AC_CHECK_FUNCS(getrusage time sigaction)
+AC_CHECK_HEADERS(fcntl.h fpu_control.h)
+AC_CHECK_FUNCS(getrusage time sigaction __setfpucw)
 
 . ${srcdir}/../../bfd/configure.host
 

@@ -1,3 +1,9 @@
+Wed Mar 25 16:17:38 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* aclocal.m4 (AC_CHECK_HEADERS): Add check for fpu_control.h.  
+	(AC_CHECK_FUNCS): Add check for __setfpucw.
+	* configure: Regenerated.
+
 Wed Mar 25 09:18:34 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* dv-pal.c (hw_pal_countdown, hw_pal_countdown_value,
