@@ -1,3 +1,7 @@
+2003-06-10  Doug Evans  <dje@sebabeach.org>
+
+	* frv.cpu: Add IDOC attribute.
+
 2003-06-06  Andrew Cagney  <cagney@redhat.com>
 
 	Contributed by Red Hat.

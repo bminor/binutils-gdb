@@ -1016,6 +1016,24 @@
   (comment "placeholder attribute")
   (attrs META) ; do not define in any generated file for now
 )
+
+; IDOC attribute for instruction documentation.
+
+(define-attr
+  (for insn)
+  (type enum)
+  (name IDOC)
+  (comment "insn kind for documentation")
+  (attrs META)
+  (values
+   (MEM - () "Memory")
+   (ALU - () "ALU")
+   (FPU - () "FPU")
+   (BR - () "Branch")
+   (PRIV - () "Priviledged")
+   (MISC - () "Miscellaneous")
+  )
+)
 
 ; Instruction fields.
 ;
