@@ -164,7 +164,8 @@ static int
 target_is_remote (void)
 {
   if (current_target.to_shortname &&
-      strcmp (current_target.to_shortname, "remote") == 0)
+      (strcmp (current_target.to_shortname, "remote") == 0
+       || strcmp (current_target.to_shortname, "extended-remote") == 0))
     return 1;
   else
     return 0;
@@ -860,6 +861,9 @@ read_actions (struct tracepoint *t)
       else
 	line = gdb_readline (0);
 
+      if (!line)
+	line = "end";
+      
       linetype = validate_actionline (&line, t);
       if (linetype == BADLINE)
 	continue;		/* already warned -- collect another line */
@@ -1074,7 +1078,7 @@ struct memrange
 
 struct collection_list
   {
-    unsigned char regs_mask[8];	/* room for up to 256 regs */
+    unsigned char regs_mask[32];	/* room for up to 256 regs */
     long listsize;
     long next_memrange;
     struct memrange *list;
@@ -1171,7 +1175,7 @@ add_memrange (struct collection_list *memranges,
       printf_filtered (",%ld)\n", len);
     }
 
-  /* type: 0 == memory, n == basereg */
+  /* type: -1 == memory, n == basereg */
   memranges->list[memranges->next_memrange].type = type;
   /* base: addr if memory, offset if reg relative.  */
   memranges->list[memranges->next_memrange].start = base;
