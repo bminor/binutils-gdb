@@ -1,11 +1,11 @@
 If you find inaccuracies in this list, please send mail to
-bug-gdb@prep.ai.mit.edu.  If you would like to work on any of these,
-you should consider sending mail to the same address, to find out
-whether anyone else is working on it.
+gdb-patches@sourceware.cygnus.com.  If you would like to work on any
+of these, you should consider sending mail to the same address, to
+find out whether anyone else is working on it.
 
 
-Known problems in GDB 5.0
-=========================
+			Known problems in GDB 5.0
+			=========================
 
 Below is a list of problems identified during the GDB 5.0 release
 cycle.  People hope to have these problems fixed in a follow-on
@@ -193,10 +193,8 @@ Robert Lipe writes:
 
 --
 
-		------------------------------------------------
-
-Code cleanups
-=============
+			Code cleanups
+			=============
 
 The following code cleanups are planned for the follow-on release to
 GDB 5.0.
@@ -314,8 +312,127 @@ options are valid.  Need to probably disable warnings by default.
 
 --
 
-General Wish List
-=================
+			General Wish List
+			=================
+
+--
+
+Register Cache Cleanup (below from Andrew Cagney)
+
+I would depict the current register architecture as something like:
+
+        High GDB  -->   Low GDB
+            |              |
+           \|/            \|/
+            --- REG NR -----
+                   |
+    register + REGISTER_BYTE(reg_nr)
+                   |
+                  \|/
+        -------------------------
+        |  extern register[]    |
+        -------------------------
+
+where neither the high (valops.c et.al.) or low gdb (*-tdep.c) are
+really clear on what mechanisms they should be using to manipulate that
+buffer.   Further, much code assumes, dangerously, that registers are
+contigious.  Having got mips-tdep.c to support multiple ABIs, believe
+me, that is a bad assumption.  Finally, that register cache layout is
+determined by the current remote/local target and _not_ the less
+specific target ISA.  In fact, in many cases it is determined by the
+somewhat arbitrary layout of the [gG] packets!
+
+
+How I would like the register file to work is more like:
+
+
+          High GDB
+             |
+            \|/
+       pseudo reg-nr
+             |
+        map pseudo <->
+        random cache
+        bytes       
+             |
+            \|/
+        ------------
+        | register |
+        |  cache   |
+        ------------
+            /|\
+             |
+        map random cache
+        bytes to target
+        dependant i-face
+            /|\
+             |
+       target dependant
+        such as [gG] packet
+        or ptrace buffer
+
+The main objectives being:
+
+        o       a clear separation between the low
+                level target and the high level GDB
+
+        o       a mechanism that solves the general
+                problem of register aliases, overlaps
+                etc instead of treating them as optional
+                extras that can be wedged in as an after
+                thought (that is a reasonable description
+                of the current code).
+
+                Identify then solve the hard case and the
+                rest just falls out.  GDB solved the easy
+                case and then tried to ignore the real
+                world :-)
+
+        o       a removal of the assumption that the
+                mapping between the register cache
+                and virtual registers is largely static.
+                If you flip the USR/SSR stack register
+                select bit in the status-register then
+                the corresponding stack registers should
+                reflect the change.
+
+        o       a mechanism that clearly separates the
+                gdb internal register cache from any
+                target (not architecture) dependant
+                specifics such as [gG] packets.
+
+Of course, like anything, it sounds good in theory.  In reality, it
+would have to contend with many<->many relationships at both the
+virt<->cache and cache<->target level.  For instance:
+
+        virt<->cache
+                Modifying an mmx register may involve
+                scattering values across both FP and
+                mmpx specific parts of a buffer
+
+        cache<->target
+                When writing back a SP it may need to
+                both be written to both SP and USP.
+
+
+Hmm,
+
+Rather than let this like the last time it was discussed, just slip, I'm
+first going to add this e-mail (+ references) to TODO.  I'd then like to
+sketch out a broad strategy I think could get us there.
+
+
+First thing I'd suggest is separating out the ``extern registers[]''
+code so that we can at least identify what is using it.  At present
+things are scattered across many files.  That way we can at least
+pretend that there is a cache instead of a global array :-)
+
+I'd then suggest someone putting up a proposal for the pseudo-reg /
+high-level side interface so that code can be adopted to it.  For old
+code, initially a blanket rename of write_register_bytes() to
+deprecated_write_register_bytes() would help.
+
+Following that would, finaly be the corresponding changes to the target.
 
 --
 
@@ -328,8 +445,20 @@ to GDB..  Anyone interested in learning how to write tests?  :-)
 
 --
 
-This list is probably not up to date, and opinions vary about the
-importance or even desirability of some of the items.
+Add support for Modula3
+
+Get DEC/Compaq to contribute their Modula-3 support.
+
+--
+
+			Legacy Wish List
+			================
+
+This list is not up to date, and opinions vary about the importance or
+even desirability of some of the items.  If you do fix something, it
+always pays to check the below.
+
+--
 
 Document trace machinery.
 
