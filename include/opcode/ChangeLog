@@ -1,3 +1,10 @@
+1999-01-05  Doug Evans  <devans@casey.cygnus.com>
+
+	* cgen.h (CGEN_ATTR_VALUE_TYPE): New typedef.
+	(CGEN_ATTR): Use it.
+	(CGEN_ATTR_TYPE,CGEN_ATTR_ENTRY): Ditto.
+	(CGEN_ATTR_TABLE): New member dfault.
+
 1998-12-30  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* mips.h (MIPS16_INSN_BRANCH): New.
