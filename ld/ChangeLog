@@ -1,3 +1,7 @@
+Sun Sep 12 16:04:40 1993  Doug Evans  (dje@cygnus.com)
+
+	* ldmain.c (main): Call set_scripts_dir after argv has been processed.
+
 Fri Sep 10 09:36:29 1993  Jeffrey Wheat  (cassidy@cygnus.com)
 
 	* Makefile.in: Changed CXX back to g++. 
