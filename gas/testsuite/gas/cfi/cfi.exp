@@ -1,0 +1,7 @@
+if [istarget "x86_64-*"] then {
+    run_dump_test "cfi-x86_64"
+}
+
+if [istarget "i?86-*"] then {
+    run_dump_test "cfi-i386"
+}

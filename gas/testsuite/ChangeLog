@@ -1,3 +1,9 @@
+2003-05-20  Michal Ludvig  <mludvig@suse.cz>
+
+	* gas/cfi/cfi.exp: Testsuite for cfi machinery.
+	* gas/cfi/cfi-x86_64.[sd]: Files for x86-64.
+	* gas/cfi/cfi-i386.[sd]: Files for i386.
+
 2003-05-19  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* gas/mips/mips.exp: mips-*-linux-*, mipsel-*-linux-* use only 32-bit
@@ -37,7 +43,7 @@
 
 	* gas/ia64/ia64.exp: Add alias.
 
-	* gas/ia64/alias.s: New. 
+	* gas/ia64/alias.s: New.
 	* gas/ia64/alias.d: Likewise.
 
 2003-05-06  Alexandre Oliva  <aoliva@redhat.com>
@@ -174,8 +180,8 @@
 2003-04-29  Nick Clifton  <nickc@redhat.com>
 
 	* gas/elf/elf.exp: Invoke symver test.
-        * gas/elf/symver.s: New test case.
-        * gas/elf/symver.d: Expected output.
+	* gas/elf/symver.s: New test case.
+	* gas/elf/symver.d: Expected output.
 
 2003-04-24  Nick Clifton  <nickc@redhat.com>
 
@@ -198,8 +204,8 @@
 2003-04-08  Nick Clifton  <nickc@redhat.com>
 
 	* gas/m32r/m32r.exp: Run signed-relocs test.
-        * gas/m32r/signed-relocs.s: New file: Test signed relocs.
-        * gas/m32r/signed-relocs.d: New file: Expected results
+	* gas/m32r/signed-relocs.s: New file: Test signed relocs.
+	* gas/m32r/signed-relocs.d: New file: Expected results
 
 	* gas/ia64/dependency-1.s: New file: Test read before write dependency.
 	* gas/ia64/dependency-1.d: New file: Expected assembly results.
@@ -253,17 +259,17 @@
 
 2003-04-01  Bob Wilson  <bob.wilson@acm.org>
 
-        * gas/xtensa/all.exp: New file.
-        * gas/xtensa/entry_align.s: Likewise.
-        * gas/xtensa/entry_misalign2.s: Likewise.
-        * gas/xtensa/entry_misalign.s: Likewise.
-        * gas/xtensa/j_too_far.s: Likewise.
-        * gas/xtensa/loop_align.s: Likewise.
-        * gas/xtensa/loop_misalign.s: Likewise.
+	* gas/xtensa/all.exp: New file.
+	* gas/xtensa/entry_align.s: Likewise.
+	* gas/xtensa/entry_misalign2.s: Likewise.
+	* gas/xtensa/entry_misalign.s: Likewise.
+	* gas/xtensa/j_too_far.s: Likewise.
+	* gas/xtensa/loop_align.s: Likewise.
+	* gas/xtensa/loop_misalign.s: Likewise.
 
 2003-03-25  Stan Cox   <scox@redhat.com>
 	    Nick Clifton  <nickc@redhat.com>
-	    
+
 	Contribute support for Intel's iWMMXt chip - an	ARM variant:
 
 	* gas/arm/arm.exp: Run iwmmxt test.
@@ -300,14 +306,14 @@
 
 	* gas/all/test-gen.c: New file: Framework for automatically
 	generating assembler test files.
-        * gas/all/test-examples.c: New file: Example of a file using
+	* gas/all/test-examples.c: New file: Example of a file using
 	test-gen.c.
 
-        * gas/arm/maverick.c: Rework to produce correct test files and
+	* gas/arm/maverick.c: Rework to produce correct test files and
 	fix formatting.
-        * gas/arm/maverick.s: Regenerate.
-        * gas/arm/maverick.d: Regenerate.
-        * gas/arm/arm.exp: Always run Maverick tests.
+	* gas/arm/maverick.s: Regenerate.
+	* gas/arm/maverick.d: Regenerate.
+	* gas/arm/arm.exp: Always run Maverick tests.
 
 2003-02-21  Richard Sandiford  <rsandifo@redhat.com>
 
@@ -486,8 +492,8 @@
 
 2002-12-20  Chris Demetriou  <cgd@broadcom.com>
 
-        * lib/gas-defs.exp (run_dump_test): Add a new optional argument,
-        "extra_options".
+	* lib/gas-defs.exp (run_dump_test): Add a new optional argument,
+	"extra_options".
 
 2002-12-18  Chris Demetriou  <cgd@broadcom.com>
 
@@ -550,8 +556,8 @@
 
 2002-12-05  Jim Wilson  <wilson@redhat.com>
 
-	* gas/ia64/opc-x.d: Regenerate.	
-	
+	* gas/ia64/opc-x.d: Regenerate.
+
 2002-12-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/arm/adrl.s: Pad end of .text.
@@ -631,7 +637,7 @@
 	* gas/xstormy16/allinsn.sh: Add sdiv, divlh, and sdivlh.
 	* gas/xstormy16/allinsn.d: Regenerate.
 	* gas/xstormy16/allinsn.s: Regenerate.
-	
+
 2002-11-18  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* gas/all/gas.exp: Setup for tic4x testcase
