@@ -127,6 +127,11 @@ fbsd_make_corefile_notes (bfd *obfd, int *note_size)
   gregset_t gregs;
   fpregset_t fpregs;
   char *note_data = NULL;
+  Elf_Internal_Ehdr *i_ehdrp;
+
+  /* Put a "FreeBSD" label in the ELF header.  */
+  i_ehdrp = elf_elfheader (obfd);
+  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_FREEBSD;
 
   fill_gregset (&gregs, -1);
   note_data = elfcore_write_prstatus (obfd, note_data, note_size,

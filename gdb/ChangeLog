@@ -1,3 +1,8 @@
+2003-10-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* fbsd-proc.c (fbsd_make_corefile_notes): Put a "FreeBSD" label in
+	the ELF header.
+
 2003-10-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/fbsd.mt (TDEPFILES): Add corelow.o.
