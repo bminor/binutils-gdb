@@ -1,3 +1,28 @@
+Wed Apr 14 20:34:54 1993  John Gilmore  (gnu@cygnus.com)
+
+	Cleanup in preparation for better 64-bit host support.
+
+	* bfd-in.h (bfd_64_type):  Remove.
+	* libbfd.c (_do_getb64, _do_putb64):  Use bfd_vma, not bfd_64_type.
+
+	* bfd-in.h (bfd_size):  Remove.
+
+	* bfd-in.h (bfd_offset):  Remove, after fixing ld/ldlang.[ch].
+
+	* bfd-in.h (bfd_word):  Remove.
+	* reloc.c (reloc_howto_type):  Replace bfd_word with bfd_vma.
+
+	* bfd-in.h (rawdata_offset):  Remove.
+	* reloc.c (arelent):  Replace rawdata_offset with bfd_size_type.
+	(bfd_perform_relocation):  Lint.
+	(enum bfd_reloc_status):  Comment cleanup.
+
+	* aout-adobe.c, cpu-h8300.c, mipsbsd.c, srec.c: lint -Wall.
+
+Tue Apr 13 11:19:52 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* aoutf1.h (swapcore_sparc): Guess the right value of USRSTACK.
+
 Mon Apr 12 14:18:00 1993  John Gilmore  (gnu@cygnus.com)
 
 	* elf32.c:  Clean up old comments.
@@ -3375,7 +3400,6 @@ Mon May 20 17:12:17 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 	from which it was split out. Now 64 bit version is built with a
 	-DHOST_64_BIT="long long" on the compile line.
 
-
 Fri May 17 19:35:26 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	Changed all the [get|put][name] routines to use  [get|put]_[size
@@ -3402,10 +3426,6 @@ Fri May 17 19:35:26 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 	be called b.out.c * coffcode.h: used to be called coff-code.h, now
 	64bit ized. * demo64.c: 64 bit a.out back end
 
-
-	
-
-
 Thu May 16 16:02:07 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 	from bothner
  	* libieee.h: Make ieee_data and ieee_ar_data macros usable
@@ -3415,7 +3435,6 @@ Thu May 16 16:02:07 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 	* newsos3.c: Fix definitions of SEGMENT_SIZE and TEXT_START_ADDR.
 	* opncls.c: Define S_IXUSR, S_IXGRP, S_IXOTH if undefined.
 	* targets.c: Add declaration of newsos3_vec.
-
 
 Mon May 13 10:03:29 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 

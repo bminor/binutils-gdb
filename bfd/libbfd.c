@@ -267,8 +267,39 @@ DEFUN(bfd_seek,(abfd, position, direction),
   if (direction == SEEK_CUR && position == 0)
     return 0;
 #ifdef FILE_OFFSET_IS_CHAR_INDEX
-  if (direction == SEEK_SET && position == abfd->where)
-    return 0;
+  if (abfd->format != bfd_archive && abfd->my_archive == 0)
+    {
+#ifndef NDEBUG
+      /* Explanation for this code: I'm only about 95+% sure that the above
+	 conditions are sufficient and that all i/o calls are properly
+	 adjusting the `where' field.  So this is sort of an `assert'
+	 that the `where' field is correct.  If we can go a while without
+	 tripping the abort, we can probably safely disable this code,
+	 so that the real optimizations happen.  */
+      file_ptr where_am_i_now;
+      where_am_i_now = ftell (bfd_cache_lookup (abfd));
+      if (abfd->my_archive)
+	where_am_i_now -= abfd->origin;
+      if (where_am_i_now != abfd->where)
+	abort ();
+#endif
+      if (direction == SEEK_SET && position == abfd->where)
+	return 0;
+    }
+  else
+    {
+      /* We need something smarter to optimize access to archives.
+	 Currently, anything inside an archive is read via the file
+	 handle for the archive.  Which means that a bfd_seek on one
+	 component affects the `current position' in the archive, as
+	 well as in any other component.
+
+	 It might be sufficient to put a spike through the cache
+	 abstraction, and look to the archive for the file position,
+	 but I think we should try for something cleaner.
+
+	 In the meantime, no optimization for archives.  */
+    }
 #endif
 
   f = bfd_cache_lookup (abfd);
@@ -473,7 +504,7 @@ DEFUN(_do_getb64,(addr),
       register bfd_byte *addr)
 {
 #ifdef HOST_64_BIT
-  bfd_64_type low, high;
+  bfd_vma low, high;
 
   high= ((((((((addr[0]) << 8) |
               addr[1]) << 8) |
@@ -499,7 +530,7 @@ DEFUN(_do_getl64,(addr),
 {
 
 #ifdef HOST_64_BIT
-  bfd_64_type low, high;
+  bfd_vma low, high;
   high= (((((((addr[7] << 8) |
               addr[6]) << 8) |
             addr[5]) << 8) |

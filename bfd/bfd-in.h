@@ -1,7 +1,7 @@
 /* Main header file for the bfd library -- portable access to object files.
    ==> The bfd.h file is generated from bfd-in.h and various .c files; if you
    ==> change it, your changes will probably be lost.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -71,22 +71,13 @@ typedef long int file_ptr;
 /* Support for different sizes of target format ints and addresses */
 
 #ifdef	HOST_64_BIT
-typedef HOST_64_BIT rawdata_offset;
 typedef HOST_64_BIT bfd_vma;
-typedef HOST_64_BIT bfd_word;
-typedef HOST_64_BIT bfd_offset;
 typedef HOST_64_BIT bfd_size_type;
 typedef HOST_64_BIT symvalue;
-typedef HOST_64_BIT bfd_64_type;
 #define fprintf_vma(s,x) \
 		fprintf(s,"%08x%08x", uint64_typeHIGH(x), uint64_typeLOW(x))
 #else
-typedef struct {int a,b;} bfd_64_type;
-typedef unsigned long rawdata_offset;
 typedef unsigned long bfd_vma;
-typedef unsigned long bfd_offset;
-typedef unsigned long bfd_word;
-typedef unsigned long bfd_size;
 typedef unsigned long symvalue;
 typedef unsigned long bfd_size_type;
 #define fprintf_vma(s,x) fprintf(s, "%08lx", x)
@@ -195,7 +186,7 @@ typedef struct sec *sec_ptr;
 
 #define bfd_is_com_section(ptr) (((ptr)->flags & SEC_IS_COMMON) != 0)
 
-#define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (val)), ((ptr)->user_set_vma = true), true)
+#define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (ptr)->lma= (val)), ((ptr)->user_set_vma = true), true)
 #define bfd_set_section_alignment(bfd, ptr, val) (((ptr)->alignment_power = (val)),true)
 #define bfd_set_section_userdata(bfd, ptr, val) (((ptr)->userdata = (val)),true)
 
@@ -290,7 +281,9 @@ CAT(NAME,_bfd_debug_info_end),\
 CAT(NAME,_bfd_debug_info_accumulate),\
 CAT(NAME,_bfd_get_relocated_section_contents),\
 CAT(NAME,_bfd_relax_section),\
-CAT(NAME,_bfd_seclet_link)
+CAT(NAME,_bfd_seclet_link),\
+CAT(NAME,_bfd_reloc_type_lookup),\
+CAT(NAME,_bfd_make_debug_symbol)
 
 #define COFF_SWAP_TABLE (PTR) &bfd_coff_std_swap_table
 
