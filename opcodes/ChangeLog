@@ -1,3 +1,9 @@
+2004-03-12  Jakub Jelinek  <jakub@redhat.com>
+
+	* i386-dis.c (grps): Use INVLPG_Fixup instead of OP_E for invlpg.
+	(INVLPG_Fixup): New function.
+	(PNI_Fixup): Remove ATTRIBUTE_UNUSED from sizeflag.
+
 2004-03-12  Michal Ludvig  <mludvig@suse.cz>
 
 	* i386-dis.c (PADLOCK_SPECIAL, PADLOCK_0): New defines.

@@ -95,6 +95,7 @@ static void OP_3DNowSuffix (int, int);
 static void OP_SIMD_Suffix (int, int);
 static void SIMD_Fixup (int, int);
 static void PNI_Fixup (int, int);
+static void INVLPG_Fixup (int, int);
 static void BadOp (void);
 
 struct dis_private {
@@ -1365,7 +1366,7 @@ static const struct dis386 grps[][8] = {
     { "smswQ",	Ev, XX, XX },
     { "(bad)",	XX, XX, XX },
     { "lmsw",	Ew, XX, XX },
-    { "invlpg",	Ew, XX, XX },
+    { "invlpg",	INVLPG_Fixup, w_mode, XX, XX },
   },
   /* GRP8 */
   {
@@ -4141,7 +4142,7 @@ SIMD_Fixup (int extrachar, int sizeflag ATTRIBUTE_UNUSED)
 }
 
 static void
-PNI_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
+PNI_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
 {
   if (mod == 3 && reg == 1)
     {
@@ -4163,6 +4164,21 @@ PNI_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
     }
   else
     OP_E (0, sizeflag);
+}
+
+static void
+INVLPG_Fixup (int bytemode, int sizeflag)
+{
+  if (*codep == 0xf8)
+    {
+      char *p = obuf + strlen (obuf);
+
+      /* Override "invlpg".  */
+      strcpy (p - 6, "swapgs");
+      codep++;
+    }
+  else
+    OP_E (bytemode, sizeflag);
 }
 
 static void
