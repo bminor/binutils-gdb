@@ -1096,6 +1096,8 @@ md_assemble (str)
 
 	  /* Assemble first instruction and save it.  */
 	  prev_insn = do_assemble (str, &prev_opcode);
+	  prev_seg = now_seg;
+	  prev_subseg = now_subseg;
 	  if (prev_insn == (unsigned long) -1)
 	    as_fatal (_("can't find opcode "));
 	  fixups = fixups->next;
