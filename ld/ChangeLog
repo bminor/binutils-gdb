@@ -1,3 +1,9 @@
+2003-06-27  Nick Clifton  <nickc@redhat.com>
+
+	* deffilep.y (def_file_add_directive): Cope with NUL seperated
+	directives.  Fix reporting of unparseable directives.
+	(def_error): Check for a NULL def_filename.
+
 2003-06-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/aix.em: Convert to C90, remove unnecessary prototypes

@@ -601,18 +601,26 @@ def_file_add_directive (my_def, param, len)
 {
   def_file *save_def = def;
   const char *pend = param + len;
-  const char *tend = param;
+  char * tend = (char *) param;
   int i;
 
   def = my_def;
 
   while (param < pend)
     {
-      while (param < pend && ISSPACE (*param))
+      while (param < pend && (ISSPACE (*param) || * param == '\n' || * param == 0))
 	param++;
 
-      for (tend = param + 1;
-	   tend < pend && !(ISSPACE (tend[-1]) && *tend == '-');
+      if (param == pend)
+	break;
+
+      /* Scan forward until we encounter any of:
+          - the end of the buffer
+	  - the start of a new option
+	  - a newline seperating options
+          - a NUL seperating options.  */
+      for (tend = (char *) (param + 1);
+	   tend < pend && !(ISSPACE (tend[-1]) && *tend == '-') && (*tend != '\n') && (*tend != 0);
 	   tend++)
 	;
 
@@ -628,15 +636,22 @@ def_file_add_directive (my_def, param, len)
 	      lex_parse_string = param + len + 1;
 	      lex_forced_token = diropts[i].token;
 	      saw_newline = 0;
-	      def_parse ();
+	      if (def_parse ())
+		continue;
 	      break;
 	    }
 	}
 
       if (!diropts[i].param)
-	/* xgettext:c-format */
-	einfo (_("Warning: .drectve `%.*s' unrecognized\n"),
-	       tend - param, param);
+	{
+	  char saved;
+
+	  saved = * tend;
+	  * tend = 0;
+	  /* xgettext:c-format */
+	  einfo (_("Warning: .drectve `%s' unrecognized\n"), param);
+	  * tend = saved;
+	}
 
       lex_parse_string = 0;
       param = tend;
@@ -843,7 +858,7 @@ static int
 def_error (err)
      const char *err;
 {
-  einfo ("%P: %s:%d: %s\n", def_filename, linenumber, err);
+  einfo ("%P: %s:%d: %s\n", def_filename ? def_filename : "<unknown-file>", linenumber, err);
 
   return 0;
 }
