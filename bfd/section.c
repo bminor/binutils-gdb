@@ -514,8 +514,8 @@ CODE_FRAGMENT
 .  bfd *owner;
 .
 .  {* A symbol which points at this section only.  *}
-.  struct symbol_cache_entry *symbol;
-.  struct symbol_cache_entry **symbol_ptr_ptr;
+.  struct bfd_symbol *symbol;
+.  struct bfd_symbol **symbol_ptr_ptr;
 .
 .  struct bfd_link_order *link_order_head;
 .  struct bfd_link_order *link_order_tail;
@@ -553,10 +553,10 @@ CODE_FRAGMENT
 .  || ((SEC) == bfd_com_section_ptr)		\
 .  || ((SEC) == bfd_ind_section_ptr))
 .
-.extern const struct symbol_cache_entry * const bfd_abs_symbol;
-.extern const struct symbol_cache_entry * const bfd_com_symbol;
-.extern const struct symbol_cache_entry * const bfd_und_symbol;
-.extern const struct symbol_cache_entry * const bfd_ind_symbol;
+.extern const struct bfd_symbol * const bfd_abs_symbol;
+.extern const struct bfd_symbol * const bfd_com_symbol;
+.extern const struct bfd_symbol * const bfd_und_symbol;
+.extern const struct bfd_symbol * const bfd_ind_symbol;
 .#define bfd_get_section_size_before_reloc(section) \
 .     ((section)->_raw_size)
 .#define bfd_get_section_size_after_reloc(section) \
@@ -650,10 +650,10 @@ static const asymbol global_syms[] =
        0,            NULL,        NULL,              NULL,		\
 									\
     /* symbol,                                                       */	\
-       (struct symbol_cache_entry *) &global_syms[IDX],			\
+       (struct bfd_symbol *) &global_syms[IDX],				\
 									\
     /* symbol_ptr_ptr,                                               */	\
-       (struct symbol_cache_entry **) &SYM,				\
+       (struct bfd_symbol **) &SYM,					\
 									\
     /* link_order_head, link_order_tail                              */	\
        NULL,            NULL						\

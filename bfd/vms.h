@@ -594,7 +594,7 @@ struct vms_private_data_struct {
   vms_section *vms_section_table[VMS_SECTION_COUNT];
 
   struct bfd_hash_table *vms_symbol_table;
-  struct symbol_cache_entry **symcache;
+  struct bfd_symbol **symcache;
   int symnum;
 
   struct location_struct *location_stack;

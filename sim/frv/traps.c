@@ -191,7 +191,7 @@ frv_itrap (SIM_CPU *current_cpu, PCADDR pc, USI base, SI offset)
 
 	    if (bfd_find_nearest_line (STATE_PROG_BFD (sd),
 				       STATE_TEXT_SECTION (sd),
-				       (struct symbol_cache_entry **) 0,
+				       (struct bfd_symbol **) 0,
 				       pc - STATE_TEXT_START (sd),
 				       &pc_filename, &pc_function, &pc_linenum)
 		&& (pc_function || pc_filename))

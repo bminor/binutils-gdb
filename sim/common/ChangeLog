@@ -1,3 +1,8 @@
+2003-10-30  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-trace.c, sim-base.h: Replace "struct symbol_cache_entry"
+	with "struct bfd_symbol".
+
 2003-10-21  Andrew Cagney  <cagney@redhat.com>
 
 	* callback.c (os_truncate): Call "truncate", and not "stat".

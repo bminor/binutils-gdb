@@ -1,3 +1,8 @@
+2003-10-30  Andrew Cagney  <cagney@redhat.com>
+
+	* emultempl/pe.em, pe-dll.c: Replace "struct symbol_cache_entry"
+	with "struct bfd_symbol".
+
 2003-10-30 Phil Edwards <phil@codesourcery.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add elf32mipswindiss.o.

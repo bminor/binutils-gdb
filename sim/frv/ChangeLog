@@ -1,3 +1,8 @@
+2003-10-30  Andrew Cagney  <cagney@redhat.com>
+
+	* traps.c: Replace "struct symbol_cache_entry" with "struct
+	bfd_symbol".
+
 2003-10-10  Dave Brolley  <brolley@redhat.com>
 
 	* cpu.h, sem.c: Regenerate.

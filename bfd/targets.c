@@ -341,20 +341,20 @@ BFD_JUMP_TABLE macros.
 .
 .  long        (*_bfd_get_symtab_upper_bound) (bfd *);
 .  long        (*_bfd_canonicalize_symtab)
-.    (bfd *, struct symbol_cache_entry **);
-.  struct symbol_cache_entry *
+.    (bfd *, struct bfd_symbol **);
+.  struct bfd_symbol *
 .              (*_bfd_make_empty_symbol) (bfd *);
 .  void        (*_bfd_print_symbol)
-.    (bfd *, void *, struct symbol_cache_entry *, bfd_print_symbol_type);
+.    (bfd *, void *, struct bfd_symbol *, bfd_print_symbol_type);
 .#define bfd_print_symbol(b,p,s,e) BFD_SEND (b, _bfd_print_symbol, (b,p,s,e))
 .  void        (*_bfd_get_symbol_info)
-.    (bfd *, struct symbol_cache_entry *, symbol_info *);
+.    (bfd *, struct bfd_symbol *, symbol_info *);
 .#define bfd_get_symbol_info(b,p,e) BFD_SEND (b, _bfd_get_symbol_info, (b,p,e))
 .  bfd_boolean (*_bfd_is_local_label_name) (bfd *, const char *);
 .
-.  alent *     (*_get_lineno) (bfd *, struct symbol_cache_entry *);
+.  alent *     (*_get_lineno) (bfd *, struct bfd_symbol *);
 .  bfd_boolean (*_bfd_find_nearest_line)
-.    (bfd *, struct bfd_section *, struct symbol_cache_entry **, bfd_vma,
+.    (bfd *, struct bfd_section *, struct bfd_symbol **, bfd_vma,
 .     const char **, const char **, unsigned int *);
 . {* Back-door to allow format-aware applications to create debug symbols
 .    while using BFD for everything else.  Currently used by the assembler
@@ -378,7 +378,7 @@ BFD_JUMP_TABLE macros.
 .
 .  long        (*_get_reloc_upper_bound) (bfd *, sec_ptr);
 .  long        (*_bfd_canonicalize_reloc)
-.    (bfd *, sec_ptr, arelent **, struct symbol_cache_entry **);
+.    (bfd *, sec_ptr, arelent **, struct bfd_symbol **);
 .  {* See documentation on reloc types.  *}
 .  reloc_howto_type *
 .              (*reloc_type_lookup) (bfd *, bfd_reloc_code_real_type);
@@ -411,7 +411,7 @@ BFD_JUMP_TABLE macros.
 .  int         (*_bfd_sizeof_headers) (bfd *, bfd_boolean);
 .  bfd_byte *  (*_bfd_get_relocated_section_contents)
 .    (bfd *, struct bfd_link_info *, struct bfd_link_order *,
-.     bfd_byte *, bfd_boolean, struct symbol_cache_entry **);
+.     bfd_byte *, bfd_boolean, struct bfd_symbol **);
 .
 .  bfd_boolean (*_bfd_relax_section)
 .    (bfd *, struct bfd_section *, struct bfd_link_info *, bfd_boolean *);
@@ -457,12 +457,12 @@ BFD_JUMP_TABLE macros.
 .  long        (*_bfd_get_dynamic_symtab_upper_bound) (bfd *);
 .  {* Read in the dynamic symbols.  *}
 .  long        (*_bfd_canonicalize_dynamic_symtab)
-.    (bfd *, struct symbol_cache_entry **);
+.    (bfd *, struct bfd_symbol **);
 .  {* Get the amount of memory required to hold the dynamic relocs.  *}
 .  long        (*_bfd_get_dynamic_reloc_upper_bound) (bfd *);
 .  {* Read in the dynamic relocs.  *}
 .  long        (*_bfd_canonicalize_dynamic_reloc)
-.    (bfd *, arelent **, struct symbol_cache_entry **);
+.    (bfd *, arelent **, struct bfd_symbol **);
 .
 
 A pointer to an alternative bfd_target in case the current one is not

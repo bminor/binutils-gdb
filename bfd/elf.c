@@ -6239,7 +6239,7 @@ _bfd_elf_close_and_cleanup (bfd *abfd)
 bfd_reloc_status_type
 _bfd_elf_rel_vtable_reloc_fn
   (bfd *abfd ATTRIBUTE_UNUSED, arelent *re ATTRIBUTE_UNUSED,
-   struct symbol_cache_entry *symbol ATTRIBUTE_UNUSED,
+   struct bfd_symbol *symbol ATTRIBUTE_UNUSED,
    void *data ATTRIBUTE_UNUSED, asection *is ATTRIBUTE_UNUSED,
    bfd *obfd ATTRIBUTE_UNUSED, char **errmsg ATTRIBUTE_UNUSED)
 {

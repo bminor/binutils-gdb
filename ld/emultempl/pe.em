@@ -835,7 +835,7 @@ pe_fixup_stdcalls (void)
 static int
 make_import_fixup (arelent *rel, asection *s)
 {
-  struct symbol_cache_entry *sym = *rel->sym_ptr_ptr;
+  struct bfd_symbol *sym = *rel->sym_ptr_ptr;
   int addend = 0;
 
   if (pe_dll_extra_pe_debug)
@@ -1067,7 +1067,7 @@ gld_${EMULATION_NAME}_after_open (void)
 
 		    for (i = 0; i < nrelocs; i++)
 		      {
-			struct symbol_cache_entry *s;
+			struct bfd_symbol *s;
 			struct bfd_link_hash_entry * blhe;
 			bfd *other_bfd;
 			char *n;

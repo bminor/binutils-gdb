@@ -100,9 +100,9 @@ static asection bfd_debug_section =
   /* target_index, used_by_bfd, constructor_chain, owner,          */
      0,            NULL,        NULL,              NULL,
   /* symbol,                                                       */
-     (struct symbol_cache_entry *) NULL,
+     (struct bfd_symbol *) NULL,
   /* symbol_ptr_ptr,                                               */
-     (struct symbol_cache_entry **) NULL,
+     (struct bfd_symbol **) NULL,
   /* link_order_head, link_order_tail                              */
      NULL,            NULL
 };

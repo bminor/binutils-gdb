@@ -98,7 +98,7 @@ CODE_FRAGMENT
 .typedef struct reloc_cache_entry
 .{
 .  {* A pointer into the canonical table of pointers.  *}
-.  struct symbol_cache_entry **sym_ptr_ptr;
+.  struct bfd_symbol **sym_ptr_ptr;
 .
 .  {* offset in section.  *}
 .  bfd_size_type address;
@@ -278,7 +278,7 @@ SUBSUBSECTION
         information that libbfd needs to know to tie up a back end's data.
 
 CODE_FRAGMENT
-.struct symbol_cache_entry;		{* Forward declaration.  *}
+.struct bfd_symbol;		{* Forward declaration.  *}
 .
 .struct reloc_howto_struct
 .{
@@ -322,7 +322,7 @@ CODE_FRAGMENT
 .     strange relocation methods to be accomodated (e.g., i960 callj
 .     instructions).  *}
 .  bfd_reloc_status_type (*special_function)
-.    (bfd *, arelent *, struct symbol_cache_entry *, void *, asection *,
+.    (bfd *, arelent *, struct bfd_symbol *, void *, asection *,
 .     bfd *, char **);
 .
 .  {* The textual name of the relocation type.  *}

@@ -175,7 +175,7 @@ typedef struct {
 #define STATE_PROG_BFD(sd) ((sd)->base.prog_bfd)
 
   /* Symbol table for prog_bfd */
-  struct symbol_cache_entry **prog_syms;
+  struct bfd_symbol **prog_syms;
 #define STATE_PROG_SYMS(sd) ((sd)->base.prog_syms)
 
   /* The program's text section.  */

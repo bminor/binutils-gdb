@@ -1031,7 +1031,7 @@ pe_walk_relocs_of_symbol (struct bfd_link_info *info,
 
 	  for (i = 0; i < nrelocs; i++)
 	    {
-	      struct symbol_cache_entry *sym = *relocs[i]->sym_ptr_ptr;
+	      struct bfd_symbol *sym = *relocs[i]->sym_ptr_ptr;
 
 	      if (!strcmp (name, sym->name))
 		cb (relocs[i], s);
@@ -1112,14 +1112,14 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      if (pe_dll_extra_pe_debug)
 		{
-		  struct symbol_cache_entry *sym = *relocs[i]->sym_ptr_ptr;
+		  struct bfd_symbol *sym = *relocs[i]->sym_ptr_ptr;
 		  printf ("rel: %s\n", sym->name);
 		}
 	      if (!relocs[i]->howto->pc_relative
 		  && relocs[i]->howto->type != pe_details->imagebase_reloc)
 		{
 		  bfd_vma sym_vma;
-		  struct symbol_cache_entry *sym = *relocs[i]->sym_ptr_ptr;
+		  struct bfd_symbol *sym = *relocs[i]->sym_ptr_ptr;
 
 		  sym_vma = (relocs[i]->addend
 			     + sym->value
@@ -1956,7 +1956,7 @@ make_import_fixup_mark (arelent *rel)
   static char *fixup_name = NULL;
   static size_t buffer_len = 0;
 
-  struct symbol_cache_entry *sym = *rel->sym_ptr_ptr;
+  struct bfd_symbol *sym = *rel->sym_ptr_ptr;
 
   bfd *abfd = bfd_asymbol_bfd (sym);
   struct bfd_link_hash_entry *bh;
@@ -2154,7 +2154,7 @@ void
 pe_create_import_fixup (arelent *rel, asection *s, int addend)
 {
   char buf[300];
-  struct symbol_cache_entry *sym = *rel->sym_ptr_ptr;
+  struct bfd_symbol *sym = *rel->sym_ptr_ptr;
   struct bfd_link_hash_entry *name_thunk_sym;
   const char *name = sym->name;
   char *fixup_name = make_import_fixup_mark (rel);

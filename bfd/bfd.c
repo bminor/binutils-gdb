@@ -129,7 +129,7 @@ CODE_FRAGMENT
 .  unsigned int symcount;
 .
 .  {* Symbol table for output BFD (with symcount entries).  *}
-.  struct symbol_cache_entry  **outsymbols;
+.  struct bfd_symbol  **outsymbols;
 .
 .  {* Used for slurped dynamic symbol tables.  *}
 .  unsigned int dynsymcount;

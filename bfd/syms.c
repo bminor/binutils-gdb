@@ -181,7 +181,7 @@ SUBSECTION
 CODE_FRAGMENT
 
 .
-.typedef struct symbol_cache_entry
+.typedef struct bfd_symbol
 .{
 .  {* A pointer to the BFD which owns the symbol. This information
 .     is necessary so that a back end can work out what additional

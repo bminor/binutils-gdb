@@ -1013,7 +1013,7 @@ struct bfd_elf_section_data
     const char *name;
 
     /* Group signature sym, if this is the SHT_GROUP section.  */
-    struct symbol_cache_entry *id;
+    struct bfd_symbol *id;
   } group;
 
   /* A linked list of sections in the group.  Circular when used by
@@ -1634,7 +1634,7 @@ extern int elf_link_record_local_dynamic_symbol
 extern bfd_boolean _bfd_elf_close_and_cleanup
   (bfd *);
 extern bfd_reloc_status_type _bfd_elf_rel_vtable_reloc_fn
-  (bfd *, arelent *, struct symbol_cache_entry *, void *,
+  (bfd *, arelent *, struct bfd_symbol *, void *,
    asection *, bfd *, char **);
 
 extern bfd_boolean _bfd_elf32_gc_sections

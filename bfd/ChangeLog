@@ -1,3 +1,12 @@
+2003-10-30  Andrew Cagney  <cagney@redhat.com>
+
+	* syms.c: Replace "struct symbol_cache_entry" with "struct
+	bfd_symbol".
+	* vms.h, targets.c, section.c, reloc.c, peicode.h: Ditto.
+	* mipsbsd.c, elf.c, linker.c, elf-bfd.h, ecoff.c: Ditto.
+	* cpu-z8k.c, cpu-ns32k.c, cpu-h8500.c, bfd.c, bfd-in.h: Ditto.
+	* bfd-in2.h: Re-generate.
+
 2003-10-30  Jakub Jelinek  <jakub@redhat.com>
 
 	* elfxx-ia64.c: Include objalloc.h, hashtab.h.

@@ -1,3 +1,8 @@
+2003-10-30  Andrew Cagney  <cagney@redhat.com>
+
+	* simops.c: Replace "struct symbol_cache_entry" with "struct
+	bfd_symbol".
+
 2003-06-22  Andrew Cagney  <cagney@redhat.com>
 
 	* interp.c (xfer_mem): Simplify.  Only do a single partial

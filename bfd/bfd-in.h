@@ -303,7 +303,7 @@ typedef struct lineno_cache_entry
   unsigned int line_number;	/* Linenumber from start of function.  */
   union
   {
-    struct symbol_cache_entry *sym;	/* Function name.  */
+    struct bfd_symbol *sym;	/* Function name.  */
     bfd_vma offset;	    		/* Offset into section.  */
   } u;
 }
@@ -554,7 +554,7 @@ void bfd_put_bits (bfd_vma, bfd_byte *, int, bfd_boolean);
 struct ecoff_debug_info;
 struct ecoff_debug_swap;
 struct ecoff_extr;
-struct symbol_cache_entry;
+struct bfd_symbol;
 struct bfd_link_info;
 struct bfd_link_hash_entry;
 struct bfd_elf_version_tree;
@@ -584,8 +584,8 @@ extern bfd_boolean bfd_ecoff_debug_accumulate_other
 extern bfd_boolean bfd_ecoff_debug_externals
   (bfd *abfd, struct ecoff_debug_info *debug,
    const struct ecoff_debug_swap *swap, bfd_boolean relocatable,
-   bfd_boolean (*get_extr) (struct symbol_cache_entry *, struct ecoff_extr *),
-   void (*set_index) (struct symbol_cache_entry *, bfd_size_type));
+   bfd_boolean (*get_extr) (struct bfd_symbol *, struct ecoff_extr *),
+   void (*set_index) (struct bfd_symbol *, bfd_size_type));
 extern bfd_boolean bfd_ecoff_debug_one_external
   (bfd *abfd, struct ecoff_debug_info *debug,
    const struct ecoff_debug_swap *swap, const char *name,
@@ -759,13 +759,13 @@ union internal_auxent;
 #endif
 
 extern bfd_boolean bfd_coff_get_syment
-  (bfd *, struct symbol_cache_entry *, struct internal_syment *);
+  (bfd *, struct bfd_symbol *, struct internal_syment *);
 
 extern bfd_boolean bfd_coff_get_auxent
-  (bfd *, struct symbol_cache_entry *, int, union internal_auxent *);
+  (bfd *, struct bfd_symbol *, int, union internal_auxent *);
 
 extern bfd_boolean bfd_coff_set_symbol_class
-  (bfd *, struct symbol_cache_entry *, unsigned int);
+  (bfd *, struct bfd_symbol *, unsigned int);
 
 extern bfd_boolean bfd_m68k_coff_create_embedded_relocs
   (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
