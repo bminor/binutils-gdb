@@ -1,3 +1,14 @@
+Tue Mar  2 00:50:43 1993  John Gilmore  (gnu@cygnus.com)
+
+	* CONTRIBUTORS:  Update Gilmore entry.
+
+Wed Feb 24 14:58:19 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* frags.c (frag_init): New function.
+	(zero_address_frag, bss_address_frag): Now initialized at run
+	time.
+	* as.c (main): Call frag_init.
+
 Wed Feb 24 10:32:42 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* app.c (do_scrub_next_char): In LEX_IS_LINE_COMMENT_START case:
@@ -132,7 +143,7 @@ Mon Feb  8 13:56:17 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/h8300.mt: Don't specify compiler here.
 
-	* config/z8k.mt: The z8k code depends on the z8k oopcode table,
+	* config/z8k.mt: The z8k code depends on the z8k opcode table,
 	not the h8300 one.
 	* config/tc-z8k.h: Comment fix.
 
