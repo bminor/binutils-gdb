@@ -74,6 +74,7 @@ frv-*-*)		gdb_target=frv ;;
 hppa*64*-*-hpux11*)	gdb_target=hppa64 ;;
 hppa*-*-hpux*)		gdb_target=hppahpux ;;
 hppa*-*-hiux*)		gdb_target=hppahpux ;;
+hppa*-*-linux*)		gdb_target=linux ;;
 hppa*-*-*)		gdb_target=hppa ;;
 
 i[34567]86-ncr-*)	gdb_target=ncr3000 ;;

@@ -48,6 +48,7 @@ hppa*-*-hpux10.20)	gdb_host=hpux1020 ;;
 hppa*64*-*-hpux11*)	gdb_host=hpux11w ;;
 hppa*-*-hpux11*)	gdb_host=hpux11 ;;
 hppa*-*-hpux*)		gdb_host=hppahpux ;;
+hppa*-*-linux*)		gdb_host=linux ;;
 
 i[34567]86-ncr-*)	gdb_host=ncr3000 ;;
 i[34567]86-*-dgux*)	gdb_host=i386v4 ;;

@@ -52,9 +52,14 @@ extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 #define PCSQ_TAIL_REGNUM 36	/* instruction space queue tail */
 #define EIEM_REGNUM 37		/* External Interrupt Enable Mask */
 #define IIR_REGNUM 38		/* Interrupt Instruction Register */
+#define ISR_REGNUM 39		/* Interrupt Space Register */
 #define IOR_REGNUM 40		/* Interrupt Offset Register */
 #define SR4_REGNUM 43		/* space register 4 */
 #define RCR_REGNUM 51		/* Recover Counter (also known as cr0) */
+#define PID0_REGNUM 52		/* Protection ID */
+#define PID1_REGNUM 53		/* Protection ID */
+#define PID2_REGNUM 55		/* Protection ID */
+#define PID3_REGNUM 56		/* Protection ID */
 #define CCR_REGNUM 54		/* Coprocessor Configuration Register */
 #define TR0_REGNUM 57		/* Temporary Registers (cr24 -> cr31) */
 #define CR27_REGNUM 60		/* Base register for thread-local storage, cr27 */

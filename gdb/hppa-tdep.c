@@ -2332,6 +2332,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, HPPA_SP_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, HPPA_FP0_REGNUM);
   set_gdbarch_cannot_store_register (gdbarch, hppa_cannot_store_register);
+  set_gdbarch_cannot_fetch_register (gdbarch, hppa_cannot_store_register);
   set_gdbarch_addr_bits_remove (gdbarch, hppa_smash_text_address);
   set_gdbarch_smash_text_address (gdbarch, hppa_smash_text_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
@@ -2384,13 +2385,13 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_unwind_dummy_id (gdbarch, hppa_unwind_dummy_id);
   set_gdbarch_unwind_pc (gdbarch, hppa_unwind_pc);
 
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch);
+
   /* Hook in the default unwinders.  */
   frame_unwind_append_sniffer (gdbarch, hppa_stub_unwind_sniffer);
   frame_unwind_append_sniffer (gdbarch, hppa_frame_unwind_sniffer);
   frame_base_append_sniffer (gdbarch, hppa_frame_base_sniffer);
-
-  /* Hook in ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch);
 
   return gdbarch;
 }

@@ -1,3 +1,21 @@
+2004-04-24  Randolph Chung  <tausq@debian.org>
+
+	* configure.host (hppa*-*-linux*): New target.
+	* configure.tgt (hppa*-*-linux*): Likewise.
+	* hppa-tdep.c (hppa_gdbarch_init): Set cannot_fetch_register, move
+	gdbarch_init_osabi() call earlier so that osabi-specific frame
+	unwinders can be registered first.
+	* config/djgpp/fnchange.lst: Add entries for hppa-linux-tdep.c and
+	hppa-linux-nat.c.
+	* config/pa/tm-hppa.h (ISR_REGNUM, PID0_REGNUM, PID1_REGNUM)
+	(PID2_REGNUM, PID3_REGNUM): Add definitions of some register numbers.
+	* config/pa/linux.mh: New file.
+	* config/pa/linux.mt: New file.
+	* config/pa/nm-linux.h: New file.
+	* config/pa/xm-linux.h: New file.
+	* hppa-linux-nat.c: New file.
+	* hppa-linux-tdep.c: New file.
+
 2004-04-28  Randolph Chung  <tausq@debian.org>
 
 	* hppa-tdep.c (hppa32_return_value): Handle both 4- and 8-byte fp

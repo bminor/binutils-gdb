@@ -1,0 +1,9 @@
+# Host: Hewlett-Packard PA-RISC machine, running Linux
+XDEPFILES=
+XM_FILE= xm-linux.h
+NAT_FILE= nm-linux.h
+NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o gcore.o \
+	core-regset.o hppa-linux-nat.o linux-proc.o \
+	proc-service.o thread-db.o lin-lwp.o linux-nat.o
+
+LOADLIBES = -ldl -rdynamic
