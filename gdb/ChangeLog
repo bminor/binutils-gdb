@@ -1,3 +1,8 @@
+2003-06-26  Elena Zannoni  <ezannoni@redhat.com>
+
+	* dwarf2read.c (dwarf2_locate_sections): Ignore empty .eh_frame
+	sections.
+
 2003-06-26  Andrew Cagney  <cagney@redhat.com>
 
 	* config/djgpp/fnchange.lst: Fix 8.3 problem with sim/ppc's
