@@ -228,6 +228,26 @@ Sun Feb  4 17:32:21 2001  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.c++/templates.cc (printf): Remove unused function definition.
 
+2001-01-26  Felix Lee  <flee@redhat.com>
+
+	* sid.exp (sid_exit): Pass host, not target, to remote_close.
+
+2001-01-25  matthew green  <mrg@redhat.com>
+
+	* config/sid.exp (sid_start): Call `remote_push_conn' after firing
+	up sid.
+	(sid_exit): Call `remote_pop_conn' after GDB is gone.
+
+2001-01-25  matthew green  <mrg@redhat.com>
+
+	* config/sid.exp (sid_start): Use `remote_spawn' instead of `spawn.'
+	Deprecate $sid_spawn_id. 
+	(sid_exit): Remove code necessary only for `spawn.'
+
+2001-01-25  matthew green  <mrg@redhat.com>
+
+	* config/sid.exp (sid_start): Handle sim,protocol of `sid.'
+
 2001-01-17  Ben Elliston  <bje@redhat.com>
 
 	* config/sid.exp: New file.
