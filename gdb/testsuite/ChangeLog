@@ -1,3 +1,7 @@
+Thu Jul  1 18:27:40 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* gdb.t06/twice.exp: Don't care about the file name GDB prints.
+
 Wed Jun 30 18:01:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t{02,13}/comp-info.c, gdb.t06/twice.exp: Add "return 0" to end.
