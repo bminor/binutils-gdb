@@ -1,3 +1,15 @@
+Thu Jul 15 07:56:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* attach.c, detach.c: Include <sys/types.h> before <fcntl.h>.
+
+Wed Jun 30 11:00:53 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in: Add mostlyclean and realclean targets.
+
+Wed Mar 24 01:58:12 1993  david d `zoo' zuhn  (zoo at poseidon.cygnus.com)
+
+	* Makefile.in: add dvi and installcheck targets
+
 Fri Mar 12 18:35:43 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* configure.in: recognize *-*-solaris2* instead of *-*-solaris* (a
