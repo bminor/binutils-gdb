@@ -1,3 +1,8 @@
+Tue Jul 22 13:25:13 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c (md_apply_fix_2): Check for PC relative reloc
+	code if BFD_ASSEMBLER.
+
 start-sanitize-v850
 Mon Jul 21 08:57:17 1997  Jeffrey A Law  (law@cygnus.com)
 
