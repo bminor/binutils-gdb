@@ -1,3 +1,8 @@
+2004-09-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-child.c (inf_child_post_wait): Remove stray whitespace in
+	comment.
+
 2004-09-18  Paul N. Hilfinger  <hilfinger@gnat.com>
 	
 	* ada-exp.y (type_int): New function to add layer of abstraction

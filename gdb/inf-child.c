@@ -56,8 +56,7 @@ void
 inf_child_post_wait (ptid_t ptid, int wait_status)
 {
   /* This version of Unix doesn't require a meaningful "post wait"
-     operation.
-   */
+     operation.  */
 }
 
 static void
