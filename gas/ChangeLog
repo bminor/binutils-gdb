@@ -1,3 +1,26 @@
+Fri Oct 10 17:48:29 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-v850.c (md_relax_table): Add support for relaxing
+	unconditional branches.  This patch is courtesy of Jim Wilson. 
+	(md_convert_frag): Fix relaxing of branches.  This patch is
+	courtesy of Jim Wilson.
+	(md_assemble): Create different fixups for conditional and
+	unconditional branches.  This patch is courtesy of Jim Wilson.
+	(md_estimate_size_before_relax): Estimate size of variable part of
+	fixup based on whether it is for a conditional or an unconditional
+	branch.  This patch is courtesy of Jim Wilson.
+	(v850_sdata, v850_tdata, v850_zdata, v850_sbss, v850_tbss,
+	v850_zbss, v850_rosdata, v850_rozdata, v850_bss): Add call to
+	obj_elf_section_change_hook(). 
+	(v850_comm): New function.
+	(md_pseudo_table): Add new pseudo ops .zcomm, .scomm and .tcomm.
+	(md_begin): Add bss flag to seg_info of bss sections.
+
+	Add support for .scommon, .tcommon and .zcommon sections.
+
+	* config/tc-v850.h (ELF_TC_SPECIAL_SECTIONS): Add .scommon,
+	.zcommon, .tbss, .call_table_data and .call_table_text.
+
 Fri Oct 10 15:01:14 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.in (sparc): Set DEFAULT_ARCH from correct target.

@@ -32,28 +32,6 @@
 /* The target BFD format.  */
 #define TARGET_FORMAT 		"elf32-v850"
 
-/* The target BFD machine number.  */
-#define TARGET_MACHINE 		0
-/* start-sanitize-v850e */
-#undef  TARGET_MACHINE
-#define TARGET_MACHINE 		bfd_mach_v850e
-/* end-sanitize-v850e */
-/* start-sanitize-v850eq */
-#undef  TARGET_MACHINE
-#define TARGET_MACHINE 		bfd_mach_v850eq
-/* end-sanitize-v850eq */
-
-/* The target processor mask.  */
-#define TARGET_PROCESSOR	PROCESSOR_V850
-/* start-sanitize-v850e */
-#undef  TARGET_PROCESSOR
-#define TARGET_PROCESSOR	PROCESSOR_V850E
-/* end-sanitize-v850e */
-/* start-sanitize-v850eq */
-#undef  TARGET_PROCESSOR
-#define TARGET_PROCESSOR	PROCESSOR_V850EQ
-/* end-sanitize-v850eq */
-
 
 #define MD_APPLY_FIX3
 #define md_operand(x)
@@ -87,8 +65,13 @@ extern const struct relax_type md_relax_table[];
   { ".sdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL	}, \
   { ".sbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL	}, \
   { ".rosdata",	SHT_PROGBITS,	SHF_ALLOC +             SHF_V850_GPREL	}, \
+  { ".scommon",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL	}, \
   { ".tdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_EPREL	}, \
+  { ".tbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_EPREL	}, \
   { ".zdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
   { ".rozdata",	SHT_PROGBITS,	SHF_ALLOC +             SHF_V850_R0REL	}, \
-  { ".zbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	},
+  { ".zcommon",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
+  { ".zbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
+  { ".call_table_data",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },	   \
+  { ".call_table_text",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_EXECINSTR },
 

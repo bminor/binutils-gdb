@@ -24,6 +24,10 @@
 #include "subsegs.h"     
 #include "opcode/v850.h"
 
+#define AREA_ZDA 0
+#define AREA_SDA 1
+#define AREA_TDA 2
+
 /* sign-extend a 16-bit number */
 #define SEXT16(x)	((((x) & 0xffff) ^ (~ 0x7fff)) + 0x8000)
 
@@ -69,9 +73,14 @@ const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
 
 
-const relax_typeS md_relax_table[] = {
-  {0xff, -0x100, 2, 1},
+const relax_typeS md_relax_table[] =
+{
+  /* Conditional branches.  */
+  {0xff,     -0x100,    2, 1},
   {0x1fffff, -0x200000, 6, 0},
+  /* Unconditional branches.  */
+  {0xff,     -0x100,    2, 3},
+  {0x1fffff, -0x200000, 4, 0},
 };
 
 
@@ -83,6 +92,9 @@ static segT tbss_section = NULL;
 static segT zbss_section = NULL;
 static segT rosdata_section = NULL;
 static segT rozdata_section = NULL;
+static segT scommon_section = NULL;
+static segT tcommon_section = NULL;
+static segT zcommon_section = NULL;
 /* start-sanitize-v850e */
 static segT call_table_data_section = NULL;
 static segT call_table_text_section = NULL;
@@ -109,14 +121,18 @@ static int fc;
 void
 v850_sdata (int ignore)
 {
-  subseg_set (sdata_section, (subsegT) get_absolute_expression ());
+  obj_elf_section_change_hook();
   
+  subseg_set (sdata_section, (subsegT) get_absolute_expression ());
+
   demand_empty_rest_of_line ();
 }
 
 void
 v850_tdata (int ignore)
 {
+  obj_elf_section_change_hook();
+  
   subseg_set (tdata_section, (subsegT) get_absolute_expression ());
   
   demand_empty_rest_of_line ();
@@ -125,6 +141,8 @@ v850_tdata (int ignore)
 void
 v850_zdata (int ignore)
 {
+  obj_elf_section_change_hook();
+  
   subseg_set (zdata_section, (subsegT) get_absolute_expression ());
   
   demand_empty_rest_of_line ();
@@ -133,6 +151,8 @@ v850_zdata (int ignore)
 void
 v850_sbss (int ignore)
 {
+  obj_elf_section_change_hook();
+  
   subseg_set (sbss_section, (subsegT) get_absolute_expression ());
   
   demand_empty_rest_of_line ();
@@ -141,6 +161,8 @@ v850_sbss (int ignore)
 void
 v850_tbss (int ignore)
 {
+  obj_elf_section_change_hook();
+  
   subseg_set (tbss_section, (subsegT) get_absolute_expression ());
   
   demand_empty_rest_of_line ();
@@ -149,6 +171,8 @@ v850_tbss (int ignore)
 void
 v850_zbss (int ignore)
 {
+  obj_elf_section_change_hook();
+  
   subseg_set (zbss_section, (subsegT) get_absolute_expression ());
   
   demand_empty_rest_of_line ();
@@ -157,6 +181,8 @@ v850_zbss (int ignore)
 void
 v850_rosdata (int ignore)
 {
+  obj_elf_section_change_hook();
+  
   subseg_set (rosdata_section, (subsegT) get_absolute_expression ());
   
   demand_empty_rest_of_line ();
@@ -165,6 +191,8 @@ v850_rosdata (int ignore)
 void
 v850_rozdata (int ignore)
 {
+  obj_elf_section_change_hook();
+  
   subseg_set (rozdata_section, (subsegT) get_absolute_expression ());
   
   demand_empty_rest_of_line ();
@@ -174,6 +202,8 @@ v850_rozdata (int ignore)
 void
 v850_call_table_data (int ignore)
 {
+  obj_elf_section_change_hook();
+  
   subseg_set (call_table_data_section, (subsegT) get_absolute_expression ());
   
   demand_empty_rest_of_line ();
@@ -182,29 +212,13 @@ v850_call_table_data (int ignore)
 void
 v850_call_table_text (int ignore)
 {
+  obj_elf_section_change_hook();
+  
   subseg_set (call_table_text_section, (subsegT) get_absolute_expression ());
   
   demand_empty_rest_of_line ();
 }
 /* end-sanitize-v850e */
-
-static void
-v850_section (int arg)
-{
-  char   saved_c;
-  char * ptr;
-  
-  for (ptr = input_line_pointer; * ptr != '\n' && * ptr != 0; ptr ++)
-    if (* ptr == ',' && ptr[1] == '.')
-      break;
-
-  saved_c = * ptr;
-  * ptr = ';';
-  
-  obj_elf_section (arg);
-
-  * ptr = saved_c;
-}
 
 void
 v850_bss (int ignore)
@@ -214,7 +228,7 @@ v850_bss (int ignore)
   obj_elf_section_change_hook();
   
   subseg_set (bss_section, (subsegT) temp);
-  
+   
   demand_empty_rest_of_line ();
 }
 
@@ -229,6 +243,225 @@ v850_offset (int ignore)
     (void) frag_more (temp);
   
   demand_empty_rest_of_line ();
+}
+
+/* Copied from obj_elf_common() in gas/config/obj-elf.c */
+static void
+v850_comm (area)
+     int area;
+{
+  char *    name;
+  char      c;
+  char *    p;
+  int       temp;
+  int       size;
+  symbolS * symbolP;
+  int       have_align;
+
+  name = input_line_pointer;
+  c = get_symbol_end ();
+  /* just after name is now '\0' */
+  p = input_line_pointer;
+  *p = c;
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+      as_bad ("Expected comma after symbol-name");
+      ignore_rest_of_line ();
+      return;
+    }
+  input_line_pointer++;		/* skip ',' */
+  if ((temp = get_absolute_expression ()) < 0)
+    {
+      as_bad (".COMMon length (%d.) <0! Ignored.", temp);
+      ignore_rest_of_line ();
+      return;
+    }
+  size = temp;
+  *p = 0;
+  symbolP = symbol_find_or_make (name);
+  *p = c;
+  if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
+    {
+      as_bad ("Ignoring attempt to re-define symbol");
+      ignore_rest_of_line ();
+      return;
+    }
+  if (S_GET_VALUE (symbolP) != 0)
+    {
+      if (S_GET_VALUE (symbolP) != size)
+	{
+	  as_warn ("Length of .comm \"%s\" is already %ld. Not changed to %d.",
+		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
+	}
+    }
+  know (symbolP->sy_frag == &zero_address_frag);
+  if (*input_line_pointer != ',')
+    have_align = 0;
+  else
+    {
+      have_align = 1;
+      input_line_pointer++;
+      SKIP_WHITESPACE ();
+    }
+  if (! have_align || *input_line_pointer != '"')
+    {
+      if (! have_align)
+	temp = 0;
+      else
+	{
+	  temp = get_absolute_expression ();
+	  if (temp < 0)
+	    {
+	      temp = 0;
+	      as_warn ("Common alignment negative; 0 assumed");
+	    }
+	}
+      if (symbolP->local)
+	{
+	  segT   old_sec;
+	  int    old_subsec;
+	  char * pfrag;
+	  int    align;
+
+	/* allocate_bss: */
+	  old_sec = now_seg;
+	  old_subsec = now_subseg;
+	  if (temp)
+	    {
+	      /* convert to a power of 2 alignment */
+	      for (align = 0; (temp & 1) == 0; temp >>= 1, ++align);
+	      if (temp != 1)
+		{
+		  as_bad ("Common alignment not a power of 2");
+		  ignore_rest_of_line ();
+		  return;
+		}
+	    }
+	  else
+	    align = 0;
+	  switch (area)
+	    {
+	    case AREA_SDA:
+	      record_alignment (sbss_section, align);
+	      obj_elf_section_change_hook();
+	      subseg_set (sbss_section, 0);
+	      break;
+
+	    case AREA_ZDA:
+	      record_alignment (zbss_section, align);
+	      obj_elf_section_change_hook();
+	      subseg_set (zbss_section, 0);
+	      break;
+
+	    case AREA_TDA:
+	      record_alignment (tbss_section, align);
+	      obj_elf_section_change_hook();
+	      subseg_set (tbss_section, 0);
+	      break;
+
+	    default:
+	      abort();
+	    }
+	  
+	  if (align)
+	    frag_align (align, 0, 0);
+
+	  switch (area)
+	    {
+	    case AREA_SDA:
+	      if (S_GET_SEGMENT (symbolP) == sbss_section)
+		symbolP->sy_frag->fr_symbol = 0;
+	      break;
+
+	    case AREA_ZDA:
+	      if (S_GET_SEGMENT (symbolP) == zbss_section)
+		symbolP->sy_frag->fr_symbol = 0;
+	      break;
+
+	    case AREA_TDA:
+	      if (S_GET_SEGMENT (symbolP) == tbss_section)
+		symbolP->sy_frag->fr_symbol = 0;
+	      break;
+
+	    default:
+	      abort();
+	    }
+	  
+	  symbolP->sy_frag = frag_now;
+	  pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
+			    (offsetT) size, (char *) 0);
+	  *pfrag = 0;
+	  S_SET_SIZE (symbolP, size);
+	  
+	  switch (area)
+	    {
+	    case AREA_SDA: S_SET_SEGMENT (symbolP, sbss_section); break;
+	    case AREA_ZDA: S_SET_SEGMENT (symbolP, zbss_section); break;
+	    case AREA_TDA: S_SET_SEGMENT (symbolP, tbss_section); break;
+	    default:
+	      abort();
+	    }
+	    
+	  S_CLEAR_EXTERNAL (symbolP);
+	  obj_elf_section_change_hook();
+	  subseg_set (old_sec, old_subsec);
+	}
+      else
+	{
+	allocate_common:
+	  S_SET_VALUE (symbolP, (valueT) size);
+	  S_SET_ALIGN (symbolP, temp);
+	  S_SET_EXTERNAL (symbolP);
+	  
+	  switch (area)
+	    {
+	    case AREA_SDA: S_SET_SEGMENT (symbolP, scommon_section); break;
+	    case AREA_ZDA: S_SET_SEGMENT (symbolP, zcommon_section); break;
+	    case AREA_TDA: S_SET_SEGMENT (symbolP, tcommon_section); break;
+	    default:
+	      abort();
+	    }
+	}
+    }
+  else
+    {
+      input_line_pointer++;
+      /* @@ Some use the dot, some don't.  Can we get some consistency??  */
+      if (*input_line_pointer == '.')
+	input_line_pointer++;
+      /* @@ Some say data, some say bss.  */
+      if (strncmp (input_line_pointer, "bss\"", 4)
+	  && strncmp (input_line_pointer, "data\"", 5))
+	{
+	  while (*--input_line_pointer != '"')
+	    ;
+	  input_line_pointer--;
+	  goto bad_common_segment;
+	}
+      while (*input_line_pointer++ != '"')
+	;
+      goto allocate_common;
+    }
+
+  symbolP->bsym->flags |= BSF_OBJECT;
+
+  demand_empty_rest_of_line ();
+  return;
+
+  {
+  bad_common_segment:
+    p = input_line_pointer;
+    while (*p && *p != '\n')
+      p++;
+    c = *p;
+    *p = '\0';
+    as_bad ("bad .common segment %s", input_line_pointer + 1);
+    *p = c;
+    input_line_pointer = p;
+    ignore_rest_of_line ();
+    return;
+  }
 }
 
 void
@@ -260,8 +493,10 @@ const pseudo_typeS md_pseudo_table[] =
   {"rozdata", v850_rozdata, 0},
   {"bss",     v850_bss,     0},
   {"offset",  v850_offset,  0},
-  {"section", v850_section, 0},
   {"word",    cons,         4},
+  {"zcomm",   v850_comm,    AREA_ZDA},
+  {"scomm",   v850_comm,    AREA_SDA},
+  {"tcomm",   v850_comm,    AREA_TDA},
   {"v850",    set_machine,  0},
 /* start-sanitize-v850e */
   {"call_table_data", v850_call_table_data, 0},
@@ -324,6 +559,7 @@ static const struct reg_name pre_defined_registers[] =
 static const struct reg_name system_registers[] = 
 {
 /* start-sanitize-v850e */
+
   { "ctbp",  20 },
   { "ctpc",  16 },
   { "ctpsw", 17 },
@@ -580,9 +816,10 @@ skip_white_space (void)
  *     insn                is the partially constructed instruction.
  *     operand             is the operand being inserted.
  *
- * out: True if the parse completed successfully, False otherwise.
- *      If the parse completes the correct bit fields in the
- *      instruction will be filled in.
+ * out: NULL if the parse completed successfully, otherwise a
+ *      pointer to an error message is returned.  If the parse
+ *      completes the correct bit fields in the instruction
+ *      will be filled in.
  *
  * Parses register lists with the syntax:
  *
@@ -627,7 +864,7 @@ parse_register_list
   skip_white_space();
 
   /* If the expression starts with a curly brace it is a register list.
-     Otherwise it is a constant expression ,whoes bits indicate which
+     Otherwise it is a constant expression, whoes bits indicate which
      registers are to be included in the list.  */
   
   if (* input_line_pointer != '{')
@@ -919,31 +1156,46 @@ md_convert_frag (abfd, sec, fragP)
   fragS *    fragP;
 {
   subseg_change (sec, 0);
-  if (fragP->fr_subtype == 0)
+  
+  /* In range conditional or unconditional branch.  */
+  if (fragP->fr_subtype == 0 || fragP->fr_subtype == 2)
     {
       fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
 	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + (int)fragP->fr_opcode);
       fragP->fr_var = 0;
       fragP->fr_fix += 2;
     }
+  /* Out of range conditional branch.  Emit a branch around a jump.  */
   else if (fragP->fr_subtype == 1)
     {
+      unsigned char *buffer = 
+	(unsigned char *) (fragP->fr_fix + fragP->fr_literal);
+
       /* Reverse the condition of the first branch.  */
-      fragP->fr_literal[0] &= 0xf7;
+      buffer[0] ^= 0x08;
       /* Mask off all the displacement bits.  */
-      fragP->fr_literal[0] &= 0x8f;
-      fragP->fr_literal[1] &= 0x07;
+      buffer[0] &= 0x8f;
+      buffer[1] &= 0x07;
       /* Now set the displacement bits so that we branch
 	 around the unconditional branch.  */
-      fragP->fr_literal[0] |= 0x30;
+      buffer[0] |= 0x30;
 
       /* Now create the unconditional branch + fixup to the final
 	 target.  */
-      md_number_to_chars (&fragP->fr_literal[2], 0x00000780, 4);
+      md_number_to_chars (buffer + 2, 0x00000780, 4);
       fix_new (fragP, fragP->fr_fix + 2, 4, fragP->fr_symbol,
 	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + (int)fragP->fr_opcode + 1);
       fragP->fr_var = 0;
       fragP->fr_fix += 6;
+    }
+  /* Out of range unconditional branch.  Emit a jump.  */
+  else if (fragP->fr_subtype == 3)
+    {
+      md_number_to_chars (fragP->fr_fix + fragP->fr_literal, 0x00000780, 4);
+      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
+	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + (int)fragP->fr_opcode + 1);
+      fragP->fr_var = 0;
+      fragP->fr_fix += 4;
     }
   else
     abort ();
@@ -1029,18 +1281,27 @@ md_begin ()
   
   sbss_section = subseg_new (".sbss", 0);
   bfd_set_section_flags (stdoutput, sbss_section, applicable & SEC_ALLOC);
+  seg_info (sbss_section)->bss = 1;
   
   tbss_section = subseg_new (".tbss", 0);
   bfd_set_section_flags (stdoutput, tbss_section, applicable & SEC_ALLOC);
+  seg_info (tbss_section)->bss = 1;
   
   zbss_section = subseg_new (".zbss", 0);
   bfd_set_section_flags (stdoutput, zbss_section, applicable & SEC_ALLOC);
+  seg_info (zbss_section)->bss = 1;
   
   rosdata_section = subseg_new (".rosdata", 0);
   bfd_set_section_flags (stdoutput, rosdata_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY));
 			 
   rozdata_section = subseg_new (".rozdata", 0);
   bfd_set_section_flags (stdoutput, rozdata_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY));
+
+  scommon_section = subseg_new (".scommon", 0);
+  bfd_set_section_flags (stdoutput, scommon_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS | SEC_IS_COMMON));
+
+  zcommon_section = subseg_new (".zcommon", 0);
+  bfd_set_section_flags (stdoutput, zcommon_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS | SEC_IS_COMMON));
 
 /* start-sanitize-v850e */
   call_table_data_section = subseg_new (".call_table_data", 0);
@@ -1162,7 +1423,7 @@ v850_reloc_prefix (const struct v850_operand * operand)
   CHECK_ ("tdaoff", handle_tdaoff (operand));
 
 /* start-sanitize-v850e */
-  CHECK_ ("hilo", BFD_RELOC_32);
+  CHECK_ ("hilo",   BFD_RELOC_32);
   CHECK_ ("ctoff",  handle_ctoff (operand));
 /* end-sanitize-v850e */
   
@@ -1193,7 +1454,7 @@ md_assemble (str)
   unsigned                  extra_data_len;
   unsigned long             extra_data;
   char *		    saved_input_line_pointer;
-  
+
   /* Get the opcode.  */
   for (s = str; *s != '\0' && ! isspace (*s); s++)
     continue;
@@ -1491,7 +1752,7 @@ md_assemble (str)
 	      if (errmsg)
 		goto error;
 	      
-/* fprintf (stderr, "insn: %x, operand %d, op: %d, add_number: %d\n", insn, opindex_ptr - opcode->operands, ex.X_op, ex.X_add_number ); */
+/* fprintf (stderr, " insn: %x, operand %d, op: %d, add_number: %d\n", insn, opindex_ptr - opcode->operands, ex.X_op, ex.X_add_number); */
 
 	      switch (ex.X_op) 
 		{
@@ -1564,22 +1825,35 @@ md_assemble (str)
 
   input_line_pointer = str;
 
-  /* Write out the instruction.
-
-     Four byte insns have an opcode with the two high bits on.  */ 
+  /* Write out the instruction. */
+  
   if (relaxable && fc > 0)
     {
-      f = frag_var (rs_machine_dependent, 6, 4, 0,
-		    fixups[0].exp.X_add_symbol,
-		    fixups[0].exp.X_add_number,
-		    (char *)fixups[0].opindex);
       insn_size = 2;
-      md_number_to_chars (f, insn, insn_size);
-      md_number_to_chars (f + 2, 0, 4);
       fc = 0;
+
+      if (!strcmp (opcode->name, "br"))
+	{
+	  f = frag_var (rs_machine_dependent, 4, 2, 2,
+			fixups[0].exp.X_add_symbol,
+			fixups[0].exp.X_add_number,
+			(char *)fixups[0].opindex);
+	  md_number_to_chars (f, insn, insn_size);
+	  md_number_to_chars (f + 2, 0, 2);
+	}
+      else
+	{
+	  f = frag_var (rs_machine_dependent, 6, 4, 0,
+			fixups[0].exp.X_add_symbol,
+			fixups[0].exp.X_add_number,
+			(char *)fixups[0].opindex);
+	  md_number_to_chars (f, insn, insn_size);
+	  md_number_to_chars (f + 2, 0, 4);
+	}
     }
   else 
     {
+      /* Four byte insns have an opcode with the two high bits on.  */
       if ((insn & 0x0600) == 0x0600)
 	insn_size = 4;
       else
@@ -1708,7 +1982,12 @@ md_estimate_size_before_relax (fragp, seg)
      fragS * fragp;
      asection * seg;
 {
-  fragp->fr_var = 4;
+  if (fragp->fr_subtype == 0)
+    fragp->fr_var = 4;
+  else if (fragp->fr_subtype == 2)
+    fragp->fr_var = 2;
+  else
+    abort ();
   return 2;
 } 
 
@@ -1806,6 +2085,7 @@ md_apply_fix3 (fixp, valuep, seg)
     {
       /* We still have to insert the value into memory!  */
       where = fixp->fx_frag->fr_literal + fixp->fx_where;
+
       if (fixp->fx_size == 1)
 	*where = value & 0xff;
       else if (fixp->fx_size == 2)
