@@ -25,17 +25,9 @@
    ** This header file supports
  */
 
-extern void tuiSetLocatorInfo (char *, char *, int, CORE_ADDR,
-			       TuiLocatorElementPtr);
 extern void tuiUpdateLocatorFilename (const char *);
-extern void tuiUpdateLocatorInfoFromFrame
-  (struct frame_info *, TuiLocatorElementPtr);
-extern void tuiSetLocatorContent (struct frame_info *);
 extern void tuiShowLocatorContent (void);
-extern void tuiClearLocatorContent (void);
-extern void tuiSwitchFilename (char *);
 extern void tuiShowFrameInfo (struct frame_info *);
-
 
 #endif
 /*_TUI_STACK_H*/

@@ -1,5 +1,23 @@
 2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tuiSourceWin.c (tuiDisplayMainFunction): Update to use
+	tuiUpdateLocatorFilename.
+	* tuiStack.c (tuiSetLocatorInfo): Make it static.
+	(tuiSetLocatorContent): Likewise.
+	(tuiUpdateLocatorInfoFromFrame): Likewise.
+	(tuiSwitchFilename): Remove.
+	(tui_set_locator_filename): New function
+	(tui_set_locator_info): Rename from tuiSetLocatorInfo to GNU-ify;
+	use tui_set_locator_filename to record the filename.
+	(tuiUpdateLocatorFilename): Likewise.
+	(tuiUpdateLocatorInfoFromFrame): Update.
+	(tuiSetLocatorContent): Likewise.
+	* tuiStack.h (tuiClearLocatorContent): Don't declare.
+	(tuiSetLocatorInfo, tuiSetLocatorContent): Likewise.
+	(tuiUpdateLocatorInfoFromFrame, tuiSwitchFilename): Likewise.
+
+2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tuiSourceWin.c (tuiSetHasBreakAt): Use filename for breakpoint
 	comparison; cleanup.
 	* tuiSource.c (tuiSetSourceContent): Set window title and filename.

@@ -86,12 +86,13 @@ tuiDisplayMainFunction (void)
 
 	  tuiUpdateSourceWindowsWithAddr (addr);
 	  sal = find_pc_line (addr, 0);
-	  tuiSwitchFilename (sal.symtab->filename);
+          if (sal.symtab)
+             tuiUpdateLocatorFilename (sal.symtab->filename);
+          else
+             tuiUpdateLocatorFilename ("??");
 	}
     }
-
-  return;
-}				/* tuiDisplayMainFunction */
+}
 
 
 
