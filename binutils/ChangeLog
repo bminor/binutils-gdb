@@ -1,3 +1,30 @@
+Fri Mar 24 11:47:42 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* strings.c: Include "bfd.h" before other headers.  Include
+	"sysdep.h".
+	* bucomm.c (print_arelt_descr): Cast st_uid and st_gid to long,
+	and print them with %ld.
+
+Fri Mar 10 13:09:42 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objcopy.c (strip_options): Add --keep-symbol.
+	(copy_options): Likewise.
+	(copy_usage): Mention --keep-symbol and -K.
+	(strip_usage): Likewise.
+	(keep_symbols): New static variable.
+	(is_strip_symbol): Adjust the return value according to
+	keep_symbols.
+	(strip_main): Handle -K.  For -N, check that -K was not given.
+	(copy_main): Likewise.
+	* binutils.texi, objcopy.1, strip.1: Document -K.
+
+Mon Mar  6 13:33:47 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* objcopy.c (copy_archive): Check result of mkdir.
+	(copy_main): Cast an xmalloc result.
+
+	* objdump.c (usage): Break long format string into shorter ones.
+
 Mon Mar  6 13:46:12 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* bucomm.c (list_supported_targets): New function.

@@ -1,5 +1,5 @@
 /* bucomm.c -- Bin Utils COMmon code.
-   Copyright (C) 1991 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -22,21 +22,17 @@
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "libiberty.h"
 #include "bucomm.h"
 
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
 #include <varargs.h>
 #endif
 
 char *target = NULL;		/* default as late as possible */
-
-/* Yes, this is what atexit is for, but that isn't guaranteed yet.
-   And yes, I know this isn't as good, but it does what is needed just fine. */
-void (*exit_handler) ();
-
-
+
 /* Error reporting */
 
 char *program_name;
@@ -45,7 +41,7 @@ void
 bfd_nonfatal (string)
      CONST char *string;
 {
-  CONST char *errmsg = bfd_errmsg (bfd_error);
+  CONST char *errmsg = bfd_errmsg (bfd_get_error ());
 
   if (string)
     fprintf (stderr, "%s: %s: %s\n", program_name, string, errmsg);
@@ -58,13 +54,10 @@ bfd_fatal (string)
      CONST char *string;
 {
   bfd_nonfatal (string);
-
-  if (NULL != exit_handler)
-    (*exit_handler) ();
-  exit (1);
+  xexit (1);
 }
 
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 void
 fatal (const char *format, ...)
 {
@@ -75,9 +68,7 @@ fatal (const char *format, ...)
   vfprintf (stderr, format, args);
   va_end (args);
   putc ('\n', stderr);
-  if (NULL != exit_handler)
-    (*exit_handler) ();
-  exit (1);
+  xexit (1);
 }
 #else
 void 
@@ -93,11 +84,42 @@ fatal (va_alist)
   vfprintf (stderr, Format, args);
   va_end (args);
   putc ('\n', stderr);
-  if (NULL != exit_handler)
-    (*exit_handler) ();
-  exit (1);
+  xexit (1);
 }
 #endif
+
+/* After a false return from bfd_check_format_matches with
+   bfd_get_error () == bfd_error_file_ambiguously_recognized, print the possible
+   matching targets.  */
+
+void
+list_matching_formats (p)
+     char **p;
+{
+  fprintf(stderr, "%s: Matching formats:", program_name);
+  while (*p)
+    fprintf(stderr, " %s", *p++);
+  fprintf(stderr, "\n");
+}
+
+/* List the supported targets.  */
+
+void
+list_supported_targets (name, f)
+     const char *name;
+     FILE *f;
+{
+  extern bfd_target *bfd_target_vector[];
+  int t;
+
+  if (name == NULL)
+    fprintf (f, "Supported targets:");
+  else
+    fprintf (f, "%s: supported targets:", name);
+  for (t = 0; bfd_target_vector[t] != NULL; t++)
+    fprintf (f, " %s", bfd_target_vector[t]->name);
+  fprintf (f, "\n");
+}
 
 /* Display the archive header for an element as if it were an ls -l listing:
 
@@ -126,10 +148,11 @@ print_arelt_descr (file, abfd, verbose)
 	  mode_string (buf.st_mode, modebuf);
 	  modebuf[10] = '\0';
 	  /* POSIX 1003.2/D11 says to skip first character (entry type).  */
-	  fprintf (file, "%s %d/%d %6ld %s ", modebuf + 1,
-		   buf.st_uid, buf.st_gid, buf.st_size, timebuf);
+	  fprintf (file, "%s %ld/%ld %6ld %s ", modebuf + 1,
+		   (long) buf.st_uid, (long) buf.st_gid,
+		   (long) buf.st_size, timebuf);
 	}
     }
 
-  fprintf (file, "%s\n", abfd->filename);
+  fprintf (file, "%s\n", bfd_get_filename (abfd));
 }
