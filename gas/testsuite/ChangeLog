@@ -1,3 +1,11 @@
+2003-05-13  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gas/macros/app1.s, gas/macros/app1.d, gas/macros/app2.s,
+	gas/macros/app2.d, gas/macros/app3.s, gas/macros/app3.d,
+	gas/macros/app4.s, gas/macros/app4b.s, gas/macros/app4.d: New
+	tests.
+	* gas/macros/macros.exp: Run them.
+
 2003-05-07  H.J. Lu <hongjiu.lu@intel.com>
 
 	* gas/ia64/ia64.exp: Add alias.
