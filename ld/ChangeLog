@@ -1,3 +1,22 @@
+Tue Jun 28 12:13:34 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* ldlex.l: Recognize \r the same as \n.
+
+Thu Jun 23 17:53:04 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	Preliminary support for generating shared libraries, from Eric
+	Youngdale <ericy@cais.cais.com>.
+	* genscripts.sh: If the emulation parameter file sets
+        GENERATE_SHLIB_SCRIPT, generate a .xs script file with
+	CREATE_SHLIB defined.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_get_script): If
+	link_info.shared is set, use the .xs script file.
+	* scripttempl/elf.sc: If CREATE_SHLIB is set, don't create a
+	.interp section, and don't include TEXT_START_ADDR in the starting
+	address of the first section.
+	* emulparams/elf_i386.sh (GENERATE_SHLIB_SCRIPT): Likewise.
+	* emulparams/elf32_sparc.sh (GENERATE_SHLIB_SCRIPT): Define.
+
 Thu Jun 23 12:52:22 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* configure.in: Change --with-targets to --enable-targets.
