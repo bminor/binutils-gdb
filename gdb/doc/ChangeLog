@@ -1,3 +1,7 @@
+2002-11-22  Elena Zannoni  <ezannoni@redhat.com>
+
+	* Makefile.in (install): Make install do some real work.
+
 2002-11-19  Andrew Cagney  <ac131313@redhat.com>
 
 	Fix POSIX problem reported by Paul Eggert.

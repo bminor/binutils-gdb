@@ -134,7 +134,7 @@ STABS_DOC_FILES = \
 #### Host, target, and site specific Makefile fragments come in here.
 ###
 
-all install:
+all:
 
 info: $(INFO_DEPS)
 dvi: gdb.dvi gdbint.dvi stabs.dvi refcard.dvi
@@ -432,3 +432,4 @@ distclean: clean
 maintainer-clean realclean: distclean
 	rm -f GDBvn.texi *.info* *.dvi *.ps *.html *.pdf
 
+install: install-info
