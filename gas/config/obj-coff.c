@@ -270,21 +270,17 @@ c_symbol_merge (debug, normal)
   S_SET_STORAGE_CLASS (normal, S_GET_STORAGE_CLASS (debug));
 
   if (S_GET_NUMBER_AUXILIARY (debug) > S_GET_NUMBER_AUXILIARY (normal))
-    /* take the most we have */
-    S_SET_NUMBER_AUXILIARY (normal, S_GET_NUMBER_AUXILIARY (debug));
+    {
+      /* take the most we have */
+      S_SET_NUMBER_AUXILIARY (normal, S_GET_NUMBER_AUXILIARY (debug));
+    }
 
   if (S_GET_NUMBER_AUXILIARY (debug) > 0)
     {
       /* Move all the auxiliary information.  */
-      /* @@ How many fields do we want to preserve?  Would it make more
-	 sense to pick and choose those we want to copy?  Should look
-	 into this further....  [raeburn:19920512.2209EST]  */
-      alent *linenos;
-      linenos = coffsymbol (normal->bsym)->lineno;
-      memcpy ((char *) &coffsymbol (normal->bsym)->native,
-	      (char *) &coffsymbol (debug->bsym)->native,
-	      S_GET_NUMBER_AUXILIARY(debug) * AUXESZ);
-      coffsymbol (normal->bsym)->lineno = linenos;
+      memcpy (coffsymbol (normal->bsym)->native + 1,
+	      coffsymbol (debug->bsym)->native + 1,
+	      S_GET_NUMBER_AUXILIARY (debug) * sizeof (combined_entry_type));
     }
 
   /* Move the debug flags. */
@@ -344,21 +340,20 @@ void
 coff_obj_symbol_new_hook (symbolP)
      symbolS *symbolP;
 {
-  char underscore = 0;		/* Symbol has leading _ */
+  long   sz = (OBJ_COFF_MAX_AUXENTRIES + 1) * sizeof (combined_entry_type);
+  char * s  = (char *) xmalloc (sz);
+  
+  memset (s, 0, sz);
+  coffsymbol (symbolP->bsym)->native = (combined_entry_type *) s;
 
-  {
-    long sz = (OBJ_COFF_MAX_AUXENTRIES + 1) * sizeof (combined_entry_type);
-    char *s = (char *) xmalloc (sz);
-    memset (s, 0, sz);
-    coffsymbol (symbolP->bsym)->native = (combined_entry_type *) s;
-  }
   S_SET_DATA_TYPE (symbolP, T_NULL);
   S_SET_STORAGE_CLASS (symbolP, 0);
   S_SET_NUMBER_AUXILIARY (symbolP, 0);
 
   if (S_IS_STRING (symbolP))
     SF_SET_STRING (symbolP);
-  if (!underscore && S_IS_LOCAL (symbolP))
+  
+  if (S_IS_LOCAL (symbolP))
     SF_SET_LOCAL (symbolP);
 }
 
@@ -514,6 +509,7 @@ obj_coff_endef (ignore)
      int ignore;
 {
   symbolS *symbolP;
+
   /* DIM BUG FIX sac@cygnus.com */
   dim_index = 0;
   if (def_symbol_in_progress == NULL)
@@ -586,6 +582,7 @@ obj_coff_endef (ignore)
       /* Valid but set somewhere else (s_comm, s_lcomm, colon) */
       break;
 
+    default:
     case C_USTATIC:
     case C_EXTDEF:
     case C_ULABEL:
