@@ -1,5 +1,12 @@
 2004-03-21  Andrew Cagney  <cagney@redhat.com>
 
+	* inferior.h (deprecated_pc_in_call_dummy_at_entry_point): Delete
+	declaration and out-of-date comment.
+	* blockframe.c (deprecated_pc_in_call_dummy_at_entry_point):
+	Delete function.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Do not set
+	deprecated_pc_in_call_dummy.
+
 	* infrun.c (handle_inferior_event): For non legacy frames, use the
 	frame ID and frame type to identify a signal trampoline.  Update
 	comments.

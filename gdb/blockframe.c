@@ -585,14 +585,6 @@ deprecated_pc_in_call_dummy_on_stack (CORE_ADDR pc, CORE_ADDR sp,
 	  && INNER_THAN ((pc), (frame_address)));
 }
 
-int
-deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
-					    CORE_ADDR frame_address)
-{
-  CORE_ADDR addr = entry_point_address ();
-  return ((pc) >= addr && (pc) <= (addr + DECR_PC_AFTER_BREAK));
-}
-
 /* Returns true for a user frame or a call_function_by_hand dummy
    frame, and false for the CRT0 start-up frame.  Purpose is to
    terminate backtrace.  */

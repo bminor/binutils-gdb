@@ -1185,7 +1185,6 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   /* Calling functions in the inferior from GDB.  */
   set_gdbarch_deprecated_call_dummy_words (gdbarch, mn10300_call_dummy_words);
   set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (mn10300_call_dummy_words));
-  set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
   set_gdbarch_deprecated_push_arguments (gdbarch, mn10300_push_arguments);
   set_gdbarch_deprecated_reg_struct_has_addr
     (gdbarch, mn10300_reg_struct_has_addr);

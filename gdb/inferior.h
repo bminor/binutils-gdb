@@ -463,15 +463,6 @@ extern int deprecated_pc_in_call_dummy_on_stack (CORE_ADDR pc,
 						 CORE_ADDR sp,
 						 CORE_ADDR frame_address);
 
-/* NOTE: cagney/2002-11-24: Targets need to both switch to generic
-   dummy frames, and use generic_pc_in_call_dummy().  The generic
-   version should be able to handle all cases since that code works by
-   saving the address of the dummy's breakpoint (where ever it is).  */
-
-extern int deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc,
-						       CORE_ADDR sp,
-						       CORE_ADDR frame_address);
-
 /* If STARTUP_WITH_SHELL is set, GDB's "run"
    will attempts to start up the debugee under a shell.
    This is in order for argument-expansion to occur. E.g.,
