@@ -1,3 +1,8 @@
+Fri May  6 13:38:39 1994  Steve Chamberlain  (sac@cygnus.com)
+
+        * config/mh-go32: New fragment.
+	* configure.in (host==go32): Use go32 fragment.
+
 Wed May  4 14:36:53 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* chardefs.h, rldefs.h:  Move decls of string funcs from chardefs.h
