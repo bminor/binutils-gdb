@@ -481,7 +481,7 @@ i386_frameless_signal_p (struct frame_info *frame)
 {
   return (frame->next
 	  && frame->next->signal_handler_caller
-	  && frameless_look_for_prologue);
+	  && frameless_look_for_prologue (frame));
 }
 
 /* Return the chain-pointer for FRAME.  In the case of the i386, the
