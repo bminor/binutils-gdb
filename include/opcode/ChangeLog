@@ -1,3 +1,32 @@
+Mon Oct 19 12:50:00 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen.h (CGEN_INSN_INT): New typedef.
+	(CGEN_INT_INSN_P): Renamed from CGEN_INT_INSN.
+	(CGEN_INSN_BYTES): Renamed from cgen_insn_t.
+	(CGEN_INSN_BYTES_PTR): New typedef.
+	(CGEN_EXTRACT_INFO): New typedef.
+	(cgen_insert_fn,cgen_extract_fn): Update.
+	(cgen_opcode_table): New member `insn_endian'.
+	(assemble_insn,lookup_insn,lookup_get_insn_operands): Update.
+	(insert_operand,extract_operand): Update.
+	(cgen_get_insn_value,cgen_put_insn_value): Add prototypes.
+
+Fri Oct  9 13:38:13 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen.h (CGEN_ATTR_BOOLS): New macro.
+	(struct CGEN_HW_ENTRY): New member `attrs'.
+	(CGEN_HW_ATTR): New macro.
+	(struct CGEN_OPERAND_INSTANCE): New member `name'.
+	(CGEN_INSN_INVALID_P): New macro.
+
+Mon Oct  5 00:21:07 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* hppa.h: Add "fid".
+start-sanitize-cygnus
+	Add PA2.0 floating point instructions, including hacked load/store
+	with 14bit offset support.
+end-sanitize-cygnus
+	
 Sun Oct  4 21:00:00 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	From Robert Andrew Dale <rob@nb.net>
