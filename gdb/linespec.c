@@ -1665,7 +1665,7 @@ decode_dollar (char **argptr, int funfirstline, struct symtab *default_symtab,
 			     sym, NULL, sym_symtab);
 
       /* If symbol was not found, look in minimal symbol tables.  */
-      msymbol = lookup_minimal_symbol (copy, NULL, NULL);
+      msymbol = lookup_minimal_symbol_linkage_or_natural (copy);
       if (msymbol != NULL)
 	return minsym_found (funfirstline, msymbol);
 
@@ -1762,7 +1762,7 @@ decode_variable (char **argptr, int funfirstline, char ***canonical,
 			   sym, file_symtab, sym_symtab);
     }
 
-  msymbol = lookup_minimal_symbol (copy, NULL, NULL);
+  msymbol = lookup_minimal_symbol_linkage_or_natural (copy);
 
   if (msymbol != NULL)
     return minsym_found (funfirstline, msymbol);

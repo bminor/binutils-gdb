@@ -76,16 +76,6 @@ static int msym_bunch_index;
 
 static int msym_count;
 
-static struct minimal_symbol *lookup_minimal_symbol_linkage (const char *name,
-							     const char *sfile,
-							     struct objfile
-							     *objf);
-
-static struct minimal_symbol *lookup_minimal_symbol_natural (const char *name,
-							     const char *sfile,
-							     struct objfile
-							     *objf);
-
 static struct minimal_symbol *lookup_minimal_symbol_aux (const char *name,
 							 int linkage,
 							 const char *sfile,

@@ -1,5 +1,14 @@
 2003-05-02  David Carlton  <carlton@bactrian.org>
 
+	* minsyms.c: Delete declarations for lookup_minimal_symbol_linkage
+	and lookup_minimal_symbol_natural.
+	* linespec.c (decode_variable): Call
+	lookup_minimal_symbol_linkage_or_natural instead of
+	lookup_minimal_symbol.
+	(decode_dollar): Ditto.
+
+2003-05-02  David Carlton  <carlton@bactrian.org>
+
 	* config/djgpp/fnchange.lst: Add testsuite/gdb.c++/rtti files.
 
 2003-04-30  David Carlton  <carlton@bactrian.org>
