@@ -2500,20 +2500,15 @@ func_desc_adjust (h, inf)
       fdh = elf_link_hash_lookup (&htab->elf, h->root.root.string + 1,
 				  false, false, true);
 
-      if (fdh == NULL && info->shared)
+      if (fdh == NULL
+	  && info->shared
+	  && (h->root.type == bfd_link_hash_undefined
+	      || h->root.type == bfd_link_hash_undefweak))
 	{
 	  bfd *abfd;
 	  asymbol *newsym;
 
-	  /* Create it as undefined.  */
-	  if (h->root.type == bfd_link_hash_undefined
-	      || h->root.type == bfd_link_hash_undefweak)
-	    abfd = h->root.u.undef.abfd;
-	  else if (h->root.type == bfd_link_hash_defined
-		   || h->root.type == bfd_link_hash_defweak)
-	    abfd = h->root.u.def.section->owner;
-	  else
-	    abort ();
+	  abfd = h->root.u.undef.abfd;
 	  newsym = bfd_make_empty_symbol (abfd);
 	  newsym->name = h->root.root.string + 1;
 	  newsym->section = bfd_und_section_ptr;
@@ -2529,6 +2524,7 @@ func_desc_adjust (h, inf)
 	    {
 	      return false;
 	    }
+	  fdh->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
 	}
 
       if (fdh != NULL
