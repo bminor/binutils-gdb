@@ -1,3 +1,7 @@
+2000-09-06  Philip Blundell  <philb@gnu.org>
+
+	* config.bfd (arm*-*-uclinux*): New target.
+
 2000-09-06  Alexandre Oliva  <aoliva@redhat.com>
 
 	* configure: Rebuilt with new libtool.m4.
