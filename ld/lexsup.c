@@ -399,7 +399,7 @@ parse_args (argc, argv)
   /* Because we permit long options to start with a single dash, and
      we have a --library option, and the -l option is conventionally
      used with an immediately following argument, we can have bad
-     results of somebody tries to use -l with a library whose name
+     results if somebody tries to use -l with a library whose name
      happens to start with "ibrary", as in -li.  We avoid problems by
      simply turning -l into --library.  This means that users will
      have to use two dashes in order to use --library, which is OK
@@ -994,6 +994,7 @@ help ()
 	}
     }
 
+  /* xgettext:c-format */
   printf (_("%s: supported targets:"), program_name);
   targets = bfd_target_list ();
   for (pp = targets; *pp != NULL; pp++)
@@ -1001,8 +1002,15 @@ help ()
   free (targets);
   printf ("\n");
 
+  /* xgettext:c-format */
   printf (_("%s: supported emulations: "), program_name);
   ldemul_list_emulations (stdout);
   printf ("\n");
+
+  /* xgettext:c-format */
+  printf (_("%s: emulation specific options:\n"), program_name);
+  ldemul_list_emulation_options (stdout);
+  printf ("\n");
+  
   printf (_("\nReport bugs to bug-gnu-utils@gnu.org\n"));
 }

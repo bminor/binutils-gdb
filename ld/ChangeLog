@@ -1,3 +1,36 @@
+Thu May 14 14:51:24 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* ldemul.h: Add new prototype: ldemul_list_emulation_options.
+	(ld_emulation_xfer_struct): Add new field: list_options.
+	* ldemul.c (ldemul_list_options): New function.  Call the
+	list_options field of the ld_emulation_xfer_struct for each
+	supported emulation, if such a function is present.
+	* lexsup.c (help): Call ldemul_list_emulation_options.
+	* emultempl/pe.em (gld_<>_list_options): New function.  Describe 
+	the pe emulation specific command line options.
+	* emultempl/armcoff.em (gld<>_list_options): New function.
+	Describe  the armcoff emulation specific command line options.
+
+	* emultempl/pe.em: Add a new command line option:
+	--support-old-code.
+	* emultempl/armcoff.em: Ditto.
+	* ld.texinfo: Document the --support-old-code option.
+
+	* Makefile.in: Add emulation files for POTFILES.in target.
+	* emultempl/pe.em: Internationalise suitable strings.
+	* emultempl/armcoff.em: Internationalise suitable strings. 
+	* po/POTFILES.in: Rebuilt.
+	
+Sun May 10 22:36:30 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * po/Make-in (install-info): New target.
+
+Tue Apr 28 19:18:30 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* ldmain.c (main): Conditionally call setlocale.
+	* ld.h: Include <locale.h> if HAVE_LOCALE_H.
+	(LC_MESSAGES): Now can be defined even when ENABLE_NLS.
+
 Mon Apr 27 11:56:21 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Change version number to 2.9.4
