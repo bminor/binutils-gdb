@@ -47,20 +47,20 @@ SECTIONS
   .init :
   { 
     __INIT_START = .; 
-    *(.init)
+    KEEP (*(.init))
     __INIT_END = .; 
   } > rom
 
   .fini :
   { 
     __FINI_START = .; 
-    *(.fini)
+    KEEP (*(.fini))
     __FINI_END = .; 
   } > rom
 
   .jcr :
   { 
-    *(.jcr)
+    KEEP (*(.jcr))
   } > rom
 
   .text : 

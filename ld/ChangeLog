@@ -1,3 +1,9 @@
+2004-09-16  Tomer Levi  <Tomer.Levi@nsc.com>
+
+        * scripttempl/elf32crx.sc (.init): Add KEEP for section's *personality*.
+        (.fini): Likewise.
+        (.jcr): Likewise.
+
 2004-09-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/armelf_oabi.em (before_allocation): Add extra zero param
