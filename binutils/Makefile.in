@@ -111,6 +111,9 @@ STAGESTUFF = $(PROGS) *.o
 # Files that can be generated, but should be in the distribution.
 DISTSTUFF=arparse.c arlex.c nlmheader.c sysinfo.c syslex.c info
 
+# Stuff that goes in tooldir/ if appropriate
+TOOL_PROGS = nm.new strip.new ar ranlib
+
 BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
 INCDIR	= $(BASEDIR)/include
@@ -495,7 +498,7 @@ install: all $(DEMANGLER_PROG).1
 	done
 	-if [ -d $(tooldir) ]; then \
 	  if [ -d $(tooldir)/bin ]; then true; else mkdir $(tooldir)/bin; fi; \
-	  for i in nm.new strip.new ar ranlib; do \
+	  for i in $(TOOL_PROGS) ; do \
 	    j=`echo $$i | sed -e 's/.new//'`; \
 	    rm -f $(tooldir)/bin/$$j; \
 	    k=`t='$(program_transform_name)'; echo $$j | sed -e s/x/x/ $$t`; \

@@ -1,3 +1,12 @@
+Mon Jun  6 21:36:43 1994  D. V. Henkel-Wallace  (gumby@cygnus.com)
+
+	* configure.in: if this is an rs6000 (and we're not building for
+	any other bfd targets) then build only nm (collect needs it on
+	rs6000-lynx).
+
+	* Makefile.in: define TOOL_PROGS which the list of programes to
+	install in $tooldir -- replaces a hard-coded list.
+
 Fri Jun  3 10:59:18 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* objdump.c (display_target_list): Remove unused local ok.

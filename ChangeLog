@@ -3,6 +3,12 @@ Tue Jun  7 12:06:24 1994  Ian Lance Taylor  (ian@cygnus.com)
 	* configure: If there is a package_makefile_frag, remove
 	${subdir}/Makefile.tem after copying it in.
 
+Mon Jun  6 21:35:02 1994  D. V. Henkel-Wallace  (gumby@cygnus.com)
+
+	* build_all.mk: support rs6000 lynx identifies itself as
+	rs6000-lynx-lynxos2.2.2.  Also, use /usr/cygnus/progressive/bin/gcc
+	since /bin/gcc is too feeble to compile a modern gcc.
+
 Mon Jun  6 16:06:34 1994  Karen Christiansen (karen@cirdan.cygnus.com)
 
 	* brought devo/test-build.mk update-to-date with progressive/

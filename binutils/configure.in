@@ -10,9 +10,72 @@ configdirs="testsuite"
 
 # per-host:
 
+. ${srcdir}/../bfd/configure.host
+
 host_makefile_frag=
 if [ -f ${srcdir}/../bfd/config/${my_host}.mh ] ; then
 	host_makefile_frag=../bfd/config/${my_host}.mh
 fi
 
 # per-target:
+
+# Canonicalize the secondary target names.
+if [ -n "$with_targets" ]; then
+    for targ in `echo $with_targets | sed 's/,/ /g'`
+    do
+	result=`$configsub $targ 2>/dev/null`
+	if [ -n "$result" ]; then
+	    canon_targets="$canon_targets $result"
+	else
+	    # Allow targets that config.sub doesn't recognize, like "all".
+	    canon_targets="$canon_targets $targ"
+	fi
+    done
+else
+# If our target is rs6000 _and nothing else_ then we build only nm!
+    case $target in
+	rs6000-*-lynx*) target_makefile_frag=config/rslynx ;;
+    esac
+fi
+
+all_targets=false
+build_nlmconv=false
+build_srconv=false
+
+for targ in $target $canon_targets
+do
+    bfd_target=`$srcdir/../bfd/config.bfd $targ`
+
+    if [ "x$bfd_target" = "xall" ]; then
+        all_targets=true
+	build_nlmconv=true
+	build_srconv=true
+    else
+	case $targ in
+	*-*-netware*) build_nlmconv=true ;;
+	esac
+
+	case $targ in
+	*-*-hms*) build_srconv=true ;;
+	esac
+    fi
+done
+
+# We don't do any links based on the target system, just makefile config.
+
+# post-target:
+
+rm -f Makefile.tmp Makefile.2
+mv Makefile Makefile.tmp
+
+if [ "x${build_nlmconv}" = "xtrue" ]; then
+    echo 'BUILD_NLMCONV = $(NLMCONV_PROG)' >> Makefile.2
+fi
+
+if [ "x${build_srconv}" = "xtrue" ]; then
+    echo 'BUILD_SRCONV = $(SRCONV_PROG)' >> Makefile.2
+fi
+
+cat Makefile.tmp >> Makefile.2
+rm -f Makefile.tmp
+mv Makefile.2 Makefile

@@ -235,7 +235,7 @@ endif
 
 ifeq ($(canonhost),rs6000-lynx)
 TARGETS = $(NATIVE)
-CC = /bin/gcc
+CC = /usr/cygnus/progressive/bin/gcc
 all: all-cygnus
 SHELL=/bin/bash
 endif
