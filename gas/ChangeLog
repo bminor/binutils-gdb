@@ -1,3 +1,9 @@
+2003-06-30  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c: Convert to ISO C90 prototypes. Remove unnecessary
+	prototypes and casts. Replace PTR with void *. Reformat.
+	* config/tc-mips.h: Likewise.
+
 2003-06-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ia64.c (note_register_values): Warning fix.
