@@ -455,10 +455,12 @@ print_scalar_formatted (char *valaddr, struct type *type, int format, int size,
       break;
 
     case 'f':
-      if (len == sizeof (float))
+      if (len == TYPE_LENGTH (builtin_type_float))
         type = builtin_type_float;
-      else if (len == sizeof (double))
+      else if (len == TYPE_LENGTH (builtin_type_double))
         type = builtin_type_double;
+      else if (len == TYPE_LENGTH (builtin_type_long_double))
+        type = builtin_type_long_double;
       print_floating (valaddr, type, stream);
       break;
 

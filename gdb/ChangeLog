@@ -1,3 +1,9 @@
+2001-12-07  Jim Blandy  <jimb@redhat.com>
+
+	* printcmd.c (print_scalar_formatted): Compare the length of the
+	value against the lengths of the target's floating-point types,
+	not the host's.  Add support for `long double'.
+
 2001-12-07  Martin M. Hunt  <hunt@redhat.com>
 
 	* configure.in: Check for sys/filio.h
