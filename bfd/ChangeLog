@@ -1,3 +1,9 @@
+2001-04-27  Sean McNeil <sean@mcneil.com>
+
+	* config.bfd: Add arm-vxworks target.
+	* coff-arm (coff_arm_relocate_section): Add in symbol value to
+	addend (fro VXworks targets).
+
 2001-04-26  H.J. Lu  <hjl@gnu.org>
 
 	* elf32-i386.c (elf_i386_check_relocs): Verify if r_symndx is

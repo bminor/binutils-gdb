@@ -140,6 +140,12 @@ case "${targ}" in
     targ_defvec=aout_arm_big_vec
     targ_selvecs=aout_arm_little_vec
     ;;
+  arm-*-vxworks*)
+    targ_defvec=armcoff_little_vec
+    targ_selvecs=armcoff_big_vec
+    targ_underscore=yes
+    targ_cflags=-DVXWORKS
+    ;;
   arm-*-coff)
     targ_defvec=armcoff_little_vec
     targ_selvecs=armcoff_big_vec

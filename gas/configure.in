@@ -197,6 +197,7 @@ changequote([,])dnl
       arm-*-wince)			fmt=coff em=wince-pe ;;
       arm-*-pe | thumb-*-pe)            fmt=coff em=pe ;;
       arm-*-riscix*)	                fmt=aout em=riscix ;;
+      arm-*-vxworks)	                fmt=coff ;;
 
       avr-*-*)		    fmt=elf bfd_gas=yes ;;
 

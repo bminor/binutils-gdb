@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2001-04-25 20:38+0100\n"
+"POT-Creation-Date: 2001-04-27 18:06+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -209,119 +209,119 @@ msgstr ""
 msgid "%s: unable to find ARM glue '%s' for `%s'"
 msgstr ""
 
-#: coff-arm.c:1336 coff-arm.c:1431 elf32-arm.h:841 elf32-arm.h:946
+#: coff-arm.c:1342 coff-arm.c:1437 elf32-arm.h:841 elf32-arm.h:946
 #, c-format
 msgid "%s(%s): warning: interworking not enabled."
 msgstr ""
 
-#: coff-arm.c:1340 elf32-arm.h:949
+#: coff-arm.c:1346 elf32-arm.h:949
 #, c-format
 msgid "  first occurrence: %s: arm call to thumb"
 msgstr ""
 
-#: coff-arm.c:1435 elf32-arm.h:844
+#: coff-arm.c:1441 elf32-arm.h:844
 #, c-format
 msgid "  first occurrence: %s: thumb call to arm"
 msgstr ""
 
-#: coff-arm.c:1438
+#: coff-arm.c:1444
 msgid "  consider relinking with --support-old-code enabled"
 msgstr ""
 
-#: coff-arm.c:1726 coff-tic80.c:682 cofflink.c:2992
+#: coff-arm.c:1732 coff-tic80.c:682 cofflink.c:2992
 #, c-format
 msgid "%s: bad reloc address 0x%lx in section `%s'"
 msgstr ""
 
-#: coff-arm.c:2063
+#: coff-arm.c:2069
 #, c-format
 msgid "%s: illegal symbol index in reloc: %d"
 msgstr ""
 
-#: coff-arm.c:2191
+#: coff-arm.c:2197
 #, c-format
 msgid "%s: ERROR: compiled for APCS-%d whereas target %s uses APCS-%d"
 msgstr ""
 
-#: coff-arm.c:2206
+#: coff-arm.c:2212
 #, c-format
 msgid ""
 "%s: ERROR: passes floats in float registers whereas target %s uses integer "
 "registers"
 msgstr ""
 
-#: coff-arm.c:2209
+#: coff-arm.c:2215
 #, c-format
 msgid ""
 "%s: ERROR: passes floats in integer registers whereas target %s uses float "
 "registers"
 msgstr ""
 
-#: coff-arm.c:2224
+#: coff-arm.c:2230
 #, c-format
 msgid ""
 "%s: ERROR: compiled as position independent code, whereas target %s is "
 "absolute position"
 msgstr ""
 
-#: coff-arm.c:2227
+#: coff-arm.c:2233
 #, c-format
 msgid ""
 "%s: ERROR: compiled as absolute position code, whereas target %s is position "
 "independent"
 msgstr ""
 
-#: coff-arm.c:2256
+#: coff-arm.c:2262
 #, c-format
 msgid "Warning: input file %s supports interworking, whereas %s does not."
 msgstr ""
 
-#: coff-arm.c:2259
+#: coff-arm.c:2265
 #, c-format
 msgid "Warning: input file %s does not support interworking, whereas %s does."
 msgstr ""
 
-#: coff-arm.c:2286
+#: coff-arm.c:2292
 #, c-format
 msgid "private flags = %x:"
 msgstr ""
 
-#: coff-arm.c:2294 elf32-arm.h:2222
+#: coff-arm.c:2300 elf32-arm.h:2222
 msgid " [floats passed in float registers]"
 msgstr ""
 
-#: coff-arm.c:2296
+#: coff-arm.c:2302
 msgid " [floats passed in integer registers]"
 msgstr ""
 
-#: coff-arm.c:2299 elf32-arm.h:2225
+#: coff-arm.c:2305 elf32-arm.h:2225
 msgid " [position independent]"
 msgstr ""
 
-#: coff-arm.c:2301
+#: coff-arm.c:2307
 msgid " [absolute position]"
 msgstr ""
 
-#: coff-arm.c:2305
+#: coff-arm.c:2311
 msgid " [interworking flag not initialised]"
 msgstr ""
 
-#: coff-arm.c:2307
+#: coff-arm.c:2313
 msgid " [interworking supported]"
 msgstr ""
 
-#: coff-arm.c:2309
+#: coff-arm.c:2315
 msgid " [interworking not supported]"
 msgstr ""
 
-#: coff-arm.c:2357
+#: coff-arm.c:2363
 #, c-format
 msgid ""
 "Warning: Not setting interworking flag of %s, since it has already been "
 "specified as non-interworking"
 msgstr ""
 
-#: coff-arm.c:2361
+#: coff-arm.c:2367
 #, c-format
 msgid "Warning: Clearing the interworking flag of %s due to outside request"
 msgstr ""
@@ -554,7 +554,7 @@ msgstr ""
 msgid "%s: Warning: Thumb BLX instruction targets thumb function '%s'."
 msgstr ""
 
-#: elf-hppa.h:1369 elf-hppa.h:1402 elf32-arm.h:1865 elf32-i386.c:1442
+#: elf-hppa.h:1369 elf-hppa.h:1402 elf32-arm.h:1865 elf32-i386.c:1456
 #: elf32-ppc.c:3093 elf32-s390.c:1442 elf32-sh.c:2997 elf64-s390.c:1431
 #: elf64-x86-64.c:1290
 #, c-format
@@ -885,12 +885,22 @@ msgstr ""
 msgid "%s: invalid relocation type %d"
 msgstr ""
 
-#: elf32-i386.c:681 elf32-i386.c:1649
+#: elf32-i386.c:507
+#, c-format
+msgid "%s(%s): bad symbol index: %d"
+msgstr ""
+
+#: elf32-i386.c:512
+#, c-format
+msgid "%s: bad symbol index: %d"
+msgstr ""
+
+#: elf32-i386.c:695 elf32-i386.c:1663
 #, c-format
 msgid "%s(%s): bad relocation section name `%s'"
 msgstr ""
 
-#: elf32-i386.c:686 elf32-i386.c:1654
+#: elf32-i386.c:700 elf32-i386.c:1668
 #, c-format
 msgid "%s: bad relocation section name `%s'"
 msgstr ""

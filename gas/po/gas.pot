@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2001-04-25 20:59+0100\n"
+"POT-Creation-Date: 2001-04-27 15:23+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2056,6 +2056,10 @@ msgstr ""
 #: config/tc-arm.c:8494
 #, c-format
 msgid "%s: unexpected function type: %d"
+msgstr ""
+
+#: config/tc-arm.c:8857
+msgid "alignments in code section > 32 not supported."
 msgstr ""
 
 #: config/tc-avr.c:185

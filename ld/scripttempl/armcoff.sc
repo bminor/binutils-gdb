@@ -20,7 +20,7 @@ SECTIONS
      present): */
   .text ${RELOCATING+ 0x8000} : {
     *(.init)
-    *(.text)
+    *(.text*)
     *(.glue_7t)
     *(.glue_7)
     *(.rdata)
@@ -30,10 +30,11 @@ SECTIONS
 			LONG (-1); *(.dtors); *(.dtor);  LONG (0); }
     *(.fini)
     ${RELOCATING+ etext  =  .;}
+    ${RELOCATING+ _etext =  .;}
   }
   .data ${RELOCATING+${DATA_ADDR-0x40000 + (. & 0xfffc0fff)}} : {
     ${RELOCATING+  __data_start__ = . ;}
-    *(.data)
+    *(.data*)
     ${RELOCATING+ __data_end__ = . ;}
     ${RELOCATING+ edata  =  .;}
     ${RELOCATING+ _edata  =  .;}

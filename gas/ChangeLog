@@ -1,3 +1,8 @@
+2001-04-27  Sean McNeil <sean@mcneil.com>
+
+	* configure.in: Add arm-vxworks.
+	* configure: Regenerate.
+
 2001-04-26  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-arm.c (arm_handle_align): New Function:  Generate
