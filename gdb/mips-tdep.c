@@ -5270,12 +5270,20 @@ gdb_print_insn_mips (bfd_vma memaddr, disassemble_info *info)
      the procedure descriptor exists and the address therein is odd,
      it's definitely a 16-bit function.  Otherwise, we have to just
      guess that if the address passed in is odd, it's 16-bits.  */
+  /* FIXME: cagney/2003-06-26: Is this even necessary?  The
+     disassembler needs to be able to locally determine the ISA, and
+     not rely on GDB.  Otherwize the stand-alone 'objdump -d' will not
+     work.  */
   if (proc_desc)
-    info->mach = pc_is_mips16 (PROC_LOW_ADDR (proc_desc)) ?
-      bfd_mach_mips16 : 0;
+    {
+      if (pc_is_mips16 (PROC_LOW_ADDR (proc_desc)))
+	info->mach =  bfd_mach_mips16;
+    }
   else
-    info->mach = pc_is_mips16 (memaddr) ?
-      bfd_mach_mips16 : 0;
+    {
+      if (pc_is_mips16 (memaddr))
+       info->mach = bfd_mach_mips16;
+    } 
 
   /* Round down the instruction address to the appropriate boundary.  */
   memaddr &= (info->mach == bfd_mach_mips16 ? ~1 : ~3);
