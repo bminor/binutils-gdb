@@ -1,4 +1,12 @@
-Sun Apr  7 13:32:41 1996  Fred Fish  <fnf@rtl.cygnus.com>
+Sun Apr  7 22:34:29 1996  Fred Fish  <fnf@cygnus.com>
+
+	From: Miles Bader  <miles@gnu.ai.mit.edu>
+	* gnu-nat.c, gnu-nat.h, msg.defs, exc_request.defs, i386gnu-nat.c,
+	msg_reply.defs, notify.defs, process_reply.defs, reply_mig_hack.awk,
+	config/nm-gnu.h, config/i386/{i386gnu.mh, i386gnu.mt, nm-gnu.h,
+	m-i386gnu.h, xm-i386gnu.h}: New files for GNU hurd.
+
+Sun Apr  7 13:32:41 1996  Fred Fish  <fnf@cygnus.com>
 
 	* configure.in (case host): Add i386sco5 host.
 	* configure: Regenerate.

@@ -168,6 +168,7 @@ environ.c
 environ.h
 eval.c
 exec.c
+exc_request.defs
 expprint.c
 expression.h
 f-exp.y
@@ -189,6 +190,8 @@ gdbcore.h
 gdbserver
 gdbtypes.c
 gdbtypes.h
+gnu-nat.c
+gnu-nat.h
 gnu-regex.c
 gnu-regex.h
 go32-xdep.c
@@ -206,6 +209,7 @@ i386-stub.c
 i386-tdep.c
 i386aix-nat.c
 i386b-nat.c
+i386gnu-nat.c
 i386ly-tdep.c
 i386m3-nat.c
 i386mach-nat.c
@@ -257,11 +261,14 @@ monitor.h
 monitor.c
 mpw-config.in
 mpw-make.sed
+msg.defs
+msg_reply.defs
 news-xdep.c
 nindy-share
 nindy-tdep.c
 nlm
 nlmread.c
+notify.defs
 ns32k-tdep.c
 ns32km3-nat.c
 objfiles.c
@@ -274,6 +281,7 @@ parser-defs.h
 partial-stab.h
 ppcbug-rom.c
 printcmd.c
+process_reply.defs
 procfs.c
 ptx4-nat.c
 pyr-tdep.c
@@ -306,6 +314,7 @@ remote-vx960.c
 remote-vxmips.c
 remote-vxsparc.c
 remote.c
+reply_mig_hack.awk
 rs6000-nat.c
 rs6000-tdep.c
 rom68k-rom.c

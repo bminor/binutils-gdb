@@ -33,6 +33,8 @@ i386aout.mt
 i386bsd.mh
 i386bsd.mt
 i386dgux.mh
+i386gnu.mh
+i386gnu.mt
 i386lynx.mh
 i386lynx.mt
 i386m3.mh
@@ -59,6 +61,7 @@ nbsd.mt
 ncr3000.mh
 ncr3000.mt
 nm-fbsd.h
+nm-gnu.h
 nm-i386aix.h
 nm-i386bsd.h
 nm-i386lynx.h
@@ -85,6 +88,7 @@ symmetry.mt
 tm-i386.h
 tm-i386aix.h
 tm-i386bsd.h
+tm-i386gnu.h
 tm-i386lynx.h
 tm-i386m3.h
 tm-i386mk.h
@@ -104,6 +108,7 @@ cygwin32.mt
 xm-go32.h
 xm-i386aix.h
 xm-i386bsd.h
+xm-i386gnu.h
 xm-i386lynx.h
 xm-i386m3.h
 xm-i386mach.h

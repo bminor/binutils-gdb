@@ -56,6 +56,7 @@ m68k
 m88k
 mips
 nm-empty.h
+nm-gnu.h
 nm-lynx.h
 nm-m3.h
 nm-nbsd.h
