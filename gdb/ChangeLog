@@ -1,3 +1,8 @@
+2001-11-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS: Update Andrew Cagney's responsibilities.  Mention
+	David Taylor and Nick Duffek in past maintainers.
+	
 2001-11-06  Elena Zannoni  <ezannoni@redhat.com>
 
         * mdebugread.c (CUR_SYMBOL_TYPE, CUR_SYMBOL_VALUE, START_PSYMTAB,

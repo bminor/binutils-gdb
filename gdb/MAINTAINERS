@@ -65,10 +65,10 @@ maintainer works with the native maintainer when resolving API issues.
 			Orjan Friberg		orjanf@axis.com
 
 	d10v		--target=d10v-elf ,-Werror
-			Andrew Cagney		cagney@redhat.com
+			Maintenance only
 
 	d30v		--target=d30v-elf ,-Werror
-			David Taylor		taylor@redhat.com
+			Maintenance only
 
 	djgpp		--target=i586-pc-msdosdjgpp ,-Werror
 			(See native and host)
@@ -135,7 +135,7 @@ maintainer works with the native maintainer when resolving API issues.
 			Elena Zannoni		ezannoni@redhat.com
 
 	sparc		--target=sparc-elf,sparc64-elf ,-Werror
-			David Taylor		taylor@redhat.com
+			Maintenance only
 
 	tic80		(--target=tic80-coff broken)
 			Maintenance only
@@ -209,7 +209,6 @@ GNU/Linux ARM native	Scott Bambrough		scottb@netwinder.org
 Solaris/x86 native & host (devolved)
 			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 Solaris/SPARC native & host (devolved)
-                        David Taylor            taylor@redhat.com
                         Michael Snyder          msnyder@redhat.com
 Mac OS X		Klee Dienes		kdienes@apple.com
 			Jim Ingham		jingham@apple.com
@@ -246,16 +245,13 @@ threads			Michael Snyder		msnyder@redhat.com
 			Mark Kettenis		kettenis@gnu.org
 breakpoints		Michael Snyder		msnyder@redhat.com
 			Jim Blandy		jimb@redhat.com
-language support	David Taylor		taylor@redhat.com
+language support	(Blanket Write Privs Maintainers)
   Java support (devolved)
 			Per Bothner		per@bothner.com
 			Anthony Green 		green@redhat.com
   Objective-C/C++	Klee Dienes		kdienes@apple.com
 			Jim Ingham		jimgham@apple.com
   Pascal support	Pierre Muller		muller@sourceware.redhat.com
-expression eval		David Taylor		taylor@redhat.com
-defs.h			David Taylor		taylor@redhat.com
-utils.c			David Taylor		taylor@redhat.com
 Scheme support		Jim Blandy		jimb@redhat.com
 
 shared libs (devolved)	Jim Blandy		jimb@redhat.com
@@ -362,6 +358,9 @@ Corinna Vinschen				vinschen@redhat.com
 Jimmy Guo (gdb.hp, tui)				guo@cup.hp.com
 Jeff Law (hppa)					law@cygnus.com
 Daniel Berlin (C++ support)			dan@cgsoftware.com
+Nick Duffek (powerpc, SCO, Sol/x86)		nick at duffek dot com
+David Taylor (d10v, sparc, utils, defs,
+  expression evaluator, language support)	taylor at candd dot org
 
 
 Folks that have been caught up in a paper trail:
