@@ -251,7 +251,6 @@ extern int ppc_fix_adjustable PARAMS ((struct fix *));
 #define tc_frob_file_before_adjust ppc_frob_file_before_adjust
 extern void ppc_frob_file_before_adjust PARAMS ((void));
 
-#define DWARF2_LINE_MIN_INSN_LENGTH 4
 #endif /* OBJ_ELF */
 
 #define TC_FORCE_RELOCATION(FIX) ppc_force_relocation (FIX)
@@ -268,3 +267,17 @@ extern int ppc_parse_name PARAMS ((const char *, struct expressionS *));
 
 #define md_cleanup() ppc_cleanup ()
  extern void ppc_cleanup PARAMS ((void));
+
+#define TARGET_USE_CFIPOP 1
+
+#define tc_cfi_frame_initial_instructions ppc_cfi_frame_initial_instructions
+extern void ppc_cfi_frame_initial_instructions PARAMS ((void));
+
+#define tc_regname_to_dw2regnum tc_ppc_regname_to_dw2regnum
+extern int tc_ppc_regname_to_dw2regnum PARAMS ((const char *regname));
+
+extern int ppc_cie_data_alignment;
+
+#define DWARF2_LINE_MIN_INSN_LENGTH     4
+#define DWARF2_DEFAULT_RETURN_COLUMN    0x41
+#define DWARF2_CIE_DATA_ALIGNMENT       ppc_cie_data_alignment

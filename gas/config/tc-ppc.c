@@ -24,7 +24,7 @@
 #include "as.h"
 #include "safe-ctype.h"
 #include "subsegs.h"
-
+#include "dw2gencfi.h"
 #include "opcode/ppc.h"
 
 #ifdef OBJ_ELF
@@ -186,6 +186,9 @@ const char FLT_CHARS[] = "dD";
 /* '+' and '-' can be used as postfix predicate predictors for conditional 
    branches.  So they need to be accepted as symbol characters.  */
 const char ppc_symbol_chars[] = "+-";
+
+/* The dwarf2 data alignment, adjusted for 32 or 64 bit.  */
+int ppc_cie_data_alignment;
 
 /* The target specific pseudo-ops which we support.  */
 
@@ -1207,6 +1210,8 @@ md_begin ()
   bfd_boolean dup_insn = FALSE;
 
   ppc_set_cpu ();
+
+  ppc_cie_data_alignment = ppc_obj64 ? -8 : -4;
 
 #ifdef OBJ_ELF
   /* Set the ELF flags if desired.  */
@@ -5918,4 +5923,50 @@ tc_gen_reloc (seg, fixp)
   reloc->addend = fixp->fx_addnumber;
 
   return reloc;
+}
+
+void
+ppc_cfi_frame_initial_instructions ()
+{
+  cfi_add_CFA_def_cfa (1, 0);
+}
+
+int
+tc_ppc_regname_to_dw2regnum (const char *regname)
+{
+  unsigned int regnum = -1;
+  unsigned int i;
+  const char *p;
+  char *q;
+  static struct { char *name; int dw2regnum; } regnames[] =
+    {
+      { "sp", 1 }, { "r.sp", 1 }, { "rtoc", 2 }, { "r.toc", 2 },
+      { "mq", 64 }, { "lr", 65 }, { "ctr", 66 }, { "ap", 67 },
+      { "cc", 68 }, { "xer", 76 }, { "vrsave", 109 }, { "vscr", 110 },
+      { "spe_acc", 111 }, { "spefscr", 112 }
+    };
+
+  for (i = 0; i < ARRAY_SIZE (regnames); ++i)
+    if (strcmp (regnames[i].name, regname) == 0)
+      return regnames[i].dw2regnum;
+
+  if (regname[0] == 'r' || regname[0] == 'f' || regname[0] == 'v')
+    {
+      p = regname + 1 + (regname[1] == '.');
+      regnum = strtoul (p, &q, 10);
+      if (p == q || *q || regnum >= 32)
+	return -1;
+      if (regname[0] == 'f')
+        regnum += 32;
+      else if (regname[0] == 'v')
+        regnum += 77;
+    }
+  else if (regname[0] == 'c' && regname[1] == 'r')
+    {
+      p = regname + 2 + (regname[2] == '.');
+      if (p[0] < '0' || p[0] > '7' || p[1])
+        return -1;
+      regnum = p[0] - '0' + 68;
+    }
+  return regnum;
 }

@@ -25,6 +25,7 @@
 #include "subsegs.h"
 #include "struc-symbol.h"
 #include "dwarf2dbg.h"
+#include "dw2gencfi.h"
 
 #include "opcode/s390.h"
 #include "elf/s390.h"
@@ -69,6 +70,9 @@ const char EXP_CHARS[] = "eE";
 /* Characters which mean that a number is a floating point constant,
    as in 0d1.0.  */
 const char FLT_CHARS[] = "dD";
+
+/* The dwarf2 data alignment, adjusted for 32 or 64 bit.  */
+int s390_cie_data_alignment;
 
 /* The target specific pseudo-ops which we support.  */
 
@@ -477,6 +481,8 @@ md_begin ()
   /* Give a warning if the combination -m64-bit and -Aesa is used.  */
   if (s390_arch_size == 64 && current_cpu < S390_OPCODE_Z900)
     as_warn ("The 64 bit file format is used without esame instructions.");
+
+  s390_cie_data_alignment = -s390_arch_size / 8;
 
   /* Set the ELF flags if desired.  */
   if (s390_flags)
@@ -2285,4 +2291,28 @@ tc_gen_reloc (seg, fixp)
   reloc->addend = fixp->fx_offset;
 
   return reloc;
+}
+
+void
+s390_cfi_frame_initial_instructions ()
+{
+  cfi_add_CFA_def_cfa (15, s390_arch_size == 64 ? 160 : 96);
+}
+
+int
+tc_s390_regname_to_dw2regnum (const char *regname)
+{
+  int regnum = -1;
+
+  if (regname[0] != 'c' && regname[0] != 'a')
+    {
+      regnum = reg_name_search (pre_defined_registers, REG_NAME_CNT, regname);
+      if (regname[0] == 'f' && regnum != -1)
+        regnum += 16;
+    }
+  else if (strcmp (regname, "ap") == 0)
+    regnum = 32;
+  else if (strcmp (regname, "cc") == 0)
+    regnum = 33;
+  return regnum;
 }

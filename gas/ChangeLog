@@ -1,3 +1,30 @@
+2003-07-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-ppc.h (DWARF2_LINE_MIN_INSN_LENGTH): Define always.
+	(TARGET_USE_CFIPOP, tc_cfi_frame_initial_instructions,
+	tc_regname_to_dw2regnum, DWARF2_DEFAULT_RETURN_COLUMN,
+	DWARF2_CIE_DATA_ALIGNMENT): Define.
+	(ppc_cfi_frame_initial_instructions, tc_ppc_regname_to_dw2regnum): New
+	prototypes.
+	(ppc_cie_data_alignment): Declare.
+	* config/tc-ppc.c: Include dw2gencfi.h.
+	(ppc_cie_data_alignment): Define.
+	(md_begin): Initialize ppc_cie_data_alignment.
+	(ppc_cfi_frame_initial_instructions, tc_ppc_regname_to_dw2regnum): New
+	functions.
+	* config/tc-s390.h (DWARF2_LINE_MIN_INSN_LENGTH): Define always.
+	(TARGET_USE_CFIPOP, tc_cfi_frame_initial_instructions,
+	tc_regname_to_dw2regnum, DWARF2_DEFAULT_RETURN_COLUMN,
+	DWARF2_CIE_DATA_ALIGNMENT): Define.
+	(s390_cfi_frame_initial_instructions, tc_s390_regname_to_dw2regnum):
+	New prototypes.
+	(s390_cie_data_alignment): Declare.
+	* config/tc-s390.c: Include dw2gencfi.h.
+	(s390_cie_data_alignment): Define.
+	(md_begin): Initialize s390_cie_data_alignment.
+	(s390_cfi_frame_initial_instructions, tc_s390_regname_to_dw2regnum):
+	New functions.
+
 2003-07-10  Alexandre Oliva  <aoliva@redhat.com>
 
 	2002-12-12  Alexandre Oliva  <aoliva@redhat.com>

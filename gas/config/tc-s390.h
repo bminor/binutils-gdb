@@ -102,3 +102,17 @@ extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 
 extern void s390_md_end PARAMS ((void));
 #define md_end() s390_md_end ()
+
+#define TARGET_USE_CFIPOP 1
+
+#define tc_cfi_frame_initial_instructions s390_cfi_frame_initial_instructions
+extern void s390_cfi_frame_initial_instructions PARAMS ((void));
+
+#define tc_regname_to_dw2regnum tc_s390_regname_to_dw2regnum
+extern int tc_s390_regname_to_dw2regnum PARAMS ((const char *regname));
+
+extern int s390_cie_data_alignment;
+
+#define DWARF2_LINE_MIN_INSN_LENGTH     1
+#define DWARF2_DEFAULT_RETURN_COLUMN    14
+#define DWARF2_CIE_DATA_ALIGNMENT       s390_cie_data_alignment

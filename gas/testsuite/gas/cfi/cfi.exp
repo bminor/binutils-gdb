@@ -27,6 +27,15 @@ if [istarget "x86_64-*"] then {
     run_dump_test "cfi-alpha-2"
     run_dump_test "cfi-alpha-3"
 
+} elseif { [istarget ppc*-*-*] || [istarget powerpc*-*-*] } then {
+    run_dump_test "cfi-ppc-1"
+
+} elseif { [istarget s390*-*-*] } then {
+    run_dump_test "cfi-s390-1"
+    if { [istarget s390x*-*-*] } then {
+	run_dump_test "cfi-s390x-1"
+    }
+
 } else {
     return
 }
