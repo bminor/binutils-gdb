@@ -205,6 +205,7 @@ changequote([,])dnl
       m88k-*-coff*)         fmt=coff targ=m88kcoff ;;
 
       # don't change em like *-*-bsd does
+      mips-dec-netbsd*)	    fmt=elf targ=mips-lit endian=little ;;
       mips-dec-bsd*)        fmt=aout targ=mips-lit ;;
       mips-sony-bsd*)       fmt=ecoff targ=mips-big ;;
       mips-*-bsd*)          AC_MSG_ERROR(Unknown vendor for mips-bsd configuration.) ;;
