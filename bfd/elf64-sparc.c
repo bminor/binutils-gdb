@@ -2053,11 +2053,11 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    case R_SPARC_DISP8:
 	    case R_SPARC_DISP16:
 	    case R_SPARC_DISP32:
+	    case R_SPARC_DISP64:
 	    case R_SPARC_WDISP30:
 	    case R_SPARC_WDISP22:
 	    case R_SPARC_WDISP19:
 	    case R_SPARC_WDISP16:
-	    case R_SPARC_DISP64:
 	      if (h == NULL)
 		break;
 	      /* Fall through.  */
@@ -2145,6 +2145,18 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    break;
 		  case R_SPARC_UA64:
 		    if (!(outrel.r_offset & 7)) r_type = R_SPARC_64;
+		    break;
+		  case R_SPARC_DISP8:
+		  case R_SPARC_DISP16:
+		  case R_SPARC_DISP32:
+		  case R_SPARC_DISP64:
+		    /* If the symbol is not dynamic, we should not keep
+		       a dynamic relocation.  But an .rela.* slot has been
+		       allocated for it, output R_SPARC_NONE.
+		       FIXME: Add code tracking needed dynamic relocs as
+		       e.g. i386 has.  */
+		    if (h->dynindx == -1)
+		      skip = true, relocate = true;
 		    break;
 		  }
 

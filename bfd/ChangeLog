@@ -1,3 +1,9 @@
+2002-04-03  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-sparc.c (elf32_sparc_relocate_section): Don't emit dynamic
+	PC relative relocs against hidden symbols.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
+
 2002-04-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (_bfd_elf_make_section_from_shdr): When setting section
