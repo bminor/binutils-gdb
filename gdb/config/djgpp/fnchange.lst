@@ -167,6 +167,10 @@
 @V@/gdb/sparcnbsd-nat.c @V@/gdb/spnb-nat.c
 @V@/gdb/sparcnbsd-tdep.c @V@/gdb/spnb-tdep.c
 @V@/gdb/testsuite/.gdbinit @V@/gdb/testsuite/gdb.ini
+@V@/gdb/testsuite/gdb.arch/altivec-abi.c @V@/gdb/testsuite/gdb.arch/av-abi.c
+@V@/gdb/testsuite/gdb.arch/altivec-abi.exp @V@/gdb/testsuite/gdb.arch/av-abi.exp
+@V@/gdb/testsuite/gdb.arch/altivec-regs.c @V@/gdb/testsuite/gdb.arch/av-regs.c
+@V@/gdb/testsuite/gdb.arch/altivec-regs.exp @V@/gdb/testsuite/gdb.arch/av-regs.exp
 @V@/gdb/testsuite/gdb.base/coremaker2.c @V@/gdb/testsuite/gdb.base/core2maker.c
 @V@/gdb/testsuite/gdb.c++ @V@/gdb/testsuite/gdb.cxx
 @V@/gdb/testsuite/gdb.c++/Makefile.in @V@/gdb/testsuite/gdb.cxx/Makefile.in

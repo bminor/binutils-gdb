@@ -1,3 +1,8 @@
+2002-06-06  Elena Zannoni  <ezannoni@redhat.com>
+
+	* config/djgpp/fnchange.lst: Add testsuite files altivec-abi.c,
+	altivec-abi.exp, altivec-regs.c, altivec-regs.exp.
+
 2002-06-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/alpha/nm-linux.h: Add "config/" prefix to tm, nm and xm
