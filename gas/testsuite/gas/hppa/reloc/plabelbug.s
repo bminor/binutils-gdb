@@ -1,26 +1,16 @@
-	.SPACE $PRIVATE$
-	.SUBSPA $DATA$,QUAD=1,ALIGN=8,ACCESS=31
-	.SUBSPA $BSS$,QUAD=1,ALIGN=8,ACCESS=31,ZERO,SORT=82
-	.SPACE $TEXT$
-	.SUBSPA $LIT$,QUAD=0,ALIGN=8,ACCESS=44
-	.SUBSPA $CODE$,QUAD=0,ALIGN=8,ACCESS=44,CODE_ONLY
 	.IMPORT $global$,DATA
 	.IMPORT $$dyncall,MILLICODE
 ; gcc_compiled.:
 	.IMPORT abort,CODE
 	.EXPORT f,DATA
-	.SPACE $PRIVATE$
-	.SUBSPA $DATA$
-
+	.data
 	.align 4
 f:
 	.word P%abort
 	.word P%abort
 	.IMPORT __main,CODE
 	.IMPORT printf,CODE
-	.SPACE $TEXT$
-	.SUBSPA $CODE$
-
+	.code
 	.align 4
 LC$0000:
 	.STRING "frob\x0a\x00"

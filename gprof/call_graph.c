@@ -76,7 +76,7 @@ DEFUN (cg_read_rec, (ifp, filename), FILE * ifp AND CONST char *filename)
   count = bfd_get_32 (core_bfd, (bfd_byte *) arc.count);
   DBG (SAMPLEDEBUG,
        printf ("[cg_read_rec] frompc 0x%lx selfpc 0x%lx count %lu\n",
-	       from_pc, self_pc, count));
+	       (unsigned long) from_pc, (unsigned long) self_pc, count));
   /* add this arc: */
   cg_tally (from_pc, self_pc, count);
 }
@@ -110,7 +110,8 @@ DEFUN (cg_write_arcs, (ofp, filename), FILE * ofp AND const char *filename)
 	    }
 	  DBG (SAMPLEDEBUG,
 	     printf ("[cg_write_arcs] frompc 0x%lx selfpc 0x%lx count %lu\n",
-		     arc->parent->addr, arc->child->addr, arc->count));
+		     (unsigned long) arc->parent->addr,
+		     (unsigned long) arc->child->addr, arc->count));
 	}
     }
 }

@@ -5,7 +5,7 @@ AC_INIT(ldmain.c)
 
 AC_CANONICAL_SYSTEM
 
-AM_INIT_AUTOMAKE(ld, 2.9.4)
+AM_INIT_AUTOMAKE(ld, 2.9.5)
 
 AM_PROG_LIBTOOL
 
@@ -68,12 +68,32 @@ BFD_NEED_DECLARATION(sbrk)
 BFD_NEED_DECLARATION(getenv)
 BFD_NEED_DECLARATION(environ)
 
+# When converting linker scripts into strings for use in emulation
+# files, use astring.sed if the compiler supports ANSI string
+# concatenation, or ostring.sed otherwise.  This is to support the
+# broken Microsoft MSVC compiler, which limits the length of string
+# constants, while still supporting pre-ANSI compilers which do not
+# support string concatenation.
+AC_MSG_CHECKING([whether ANSI C string concatenation works])
+AC_CACHE_VAL(ld_cv_string_concatenation,
+[AC_TRY_COMPILE(,[char *a = "a" "a";],
+  [ld_cv_string_concatenation=yes],
+  [ld_cv_string_concatenation=no])])
+AC_MSG_RESULT($ld_cv_string_concatenation)
+if test "$ld_cv_string_concatenation" = "yes"; then
+  STRINGIFY=astring.sed
+else
+  STRINGIFY=ostring.sed
+fi
+AC_SUBST(STRINGIFY)
+
 # target-specific stuff:
 
 all_targets=
 EMUL=
 all_emuls=
 all_emul_extras=
+all_libpath=
 
 dnl We need to get an arbitrary number of tdir definitions into
 dnl Makefile.  We can't do it using AC_SUBST, because autoconf does
@@ -87,7 +107,7 @@ do
     all_targets=true
   else
     # Canonicalize the secondary target names.
-    result=`${CONFIG_SHELL-/bin/sh} $ac_config_sub $targ_alias 2>/dev/null`
+    result=`$ac_config_sub $targ_alias 2>/dev/null`
     if test -n "$result"; then
 	targ=$result
     else
@@ -100,7 +120,7 @@ do
       EMUL=$targ_emul
     fi
 
-    for i in $targ_emul $targ_extra_emuls; do
+    for i in $targ_emul $targ_extra_emuls $targ_extra_libpath; do
 	case " $all_emuls " in
 	*" e${i}.o "*) ;;
 	*)
@@ -108,6 +128,19 @@ do
 	  eval result=\$tdir_$i
 	  test -z "$result" && result=$targ_alias
 	  echo tdir_$i=$result >> tdirs
+	  ;;
+	esac
+    done
+
+    for i in $targ_emul $targ_extra_libpath; do
+	case " $all_libpath " in
+	*" ${i} "*) ;;
+	*)
+	  if test -z "$all_libpath"; then
+	    all_libpath=${i}
+	  else
+	    all_libpath="$all_libpath ${i}"
+	  fi
 	  ;;
 	esac
     done
@@ -145,12 +178,25 @@ fi
 AC_SUBST(EMULATION_OFILES)
 AC_SUBST(EMUL_EXTRA_OFILES)
 
+EMULATION_LIBPATH=$all_libpath
+AC_SUBST(EMULATION_LIBPATH)
+
 if test x${enable_static} = xno; then
   TESTBFDLIB="--rpath ../bfd/.libs ../bfd/.libs/libbfd.so"
 else
   TESTBFDLIB="../bfd/.libs/libbfd.a"
 fi
 AC_SUBST(TESTBFDLIB)
+
+target_vendor=${target_vendor=$host_vendor}
+case "$target_vendor" in
+  hp) EXTRA_SHLIB_EXTENSION=".sl" ;;
+  *)  EXTRA_SHLIB_EXTENSION= ;;
+esac
+if test x${EXTRA_SHLIB_EXTENSION} != x ; then
+  AC_DEFINE_UNQUOTED(EXTRA_SHLIB_EXTENSION, "$EXTRA_SHLIB_EXTENSION",
+   [Additional extension a shared object might have.])
+fi
 
 AC_OUTPUT(Makefile po/Makefile.in:po/Make-in,
 [sed -e '/POTFILES =/r po/POTFILES' po/Makefile.in > po/Makefile])

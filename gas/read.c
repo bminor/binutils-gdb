@@ -1,6 +1,6 @@
 /* read.c - read a source file -
-   Copyright (C) 1986, 87, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
-   Free Software Foundation, Inc.
+   Copyright (C) 1986, 87, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99,
+   2000 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -53,6 +53,21 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #define TC_START_LABEL(x,y) (x==':')
 #endif
 
+/* Set by the object-format or the target.  */
+#ifndef TC_IMPLICIT_LCOMM_ALIGNMENT
+#define TC_IMPLICIT_LCOMM_ALIGNMENT(SIZE, P2VAR)        \
+ do {                                                   \
+  if ((SIZE) >= 8)                                      \
+    (P2VAR) = 3;                                        \
+  else if ((SIZE) >= 4)                                 \
+    (P2VAR) = 2;                                        \
+  else if ((SIZE) >= 2)                                 \
+    (P2VAR) = 1;                                        \
+  else                                                  \
+    (P2VAR) = 0;                                        \
+ } while (0)
+#endif
+
 /* The NOP_OPCODE is for the alignment fill value.
  * fill it a nop instruction so that the disassembler does not choke
  * on it
@@ -89,6 +104,10 @@ die horribly;
 #define LEX_QM 0
 #endif
 
+#ifndef LEX_HASH
+#define LEX_HASH 0
+#endif
+
 #ifndef LEX_DOLLAR
 /* The a29k assembler does not permits labels to start with $.  */
 #define LEX_DOLLAR 3
@@ -104,7 +123,7 @@ char lex_type[256] =
 {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* @ABCDEFGHIJKLMNO */
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* PQRSTUVWXYZ[\]^_ */
-  0, 0, 0, 0, LEX_DOLLAR, LEX_PCT, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, /* _!"#$%&'()*+,-./ */
+  0, 0, 0, LEX_HASH, LEX_DOLLAR, LEX_PCT, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, /* _!"#$%&'()*+,-./ */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, LEX_QM,	/* 0123456789:;<=>? */
   LEX_AT, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* @ABCDEFGHIJKLMNO */
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, LEX_BR, 0, LEX_BR, 0, 3, /* PQRSTUVWXYZ[\]^_ */
@@ -208,10 +227,18 @@ static int dwarf_file_string;
 #endif
 
 static void cons_worker PARAMS ((int, int));
-static int scrub_from_string PARAMS ((char **));
+static int scrub_from_string PARAMS ((char *, int));
 static void do_align PARAMS ((int, char *, int, int));
 static void s_align PARAMS ((int, int));
+static void s_lcomm_internal PARAMS ((int, int));
 static int hex_float PARAMS ((int, char *));
+static inline int sizeof_sleb128 PARAMS ((offsetT));
+static inline int sizeof_uleb128 PARAMS ((valueT));
+static inline int output_sleb128 PARAMS ((char *, offsetT));
+static inline int output_uleb128 PARAMS ((char *, valueT));
+static inline int output_big_sleb128 PARAMS ((char *, LITTLENUM_TYPE *, int));
+static inline int output_big_uleb128 PARAMS ((char *, LITTLENUM_TYPE *, int));
+static int output_big_leb128 PARAMS ((char *, LITTLENUM_TYPE *, int, int));
 static void do_org PARAMS ((segT, expressionS *, int));
 char *demand_copy_string PARAMS ((int *lenP));
 static segT get_segmented_expression PARAMS ((expressionS *expP));
@@ -294,6 +321,7 @@ static const pseudo_typeS potable[] =
   {"eject", listing_eject, 0},	/* Formfeed listing */
   {"else", s_else, 0},
   {"elsec", s_else, 0},
+  {"elseif", s_elseif, (int) O_ne},
   {"end", s_end, 0},
   {"endc", s_endif, 0},
   {"endfunc", s_func, 1},
@@ -407,7 +435,7 @@ static const pseudo_typeS potable[] =
   {"xstabs", s_xstab, 's'},
   {"word", cons, 2},
   {"zero", s_space, 0},
-  {NULL}			/* end sentinel */
+  {NULL, NULL, 0}			/* end sentinel */
 };
 
 static int pop_override_ok = 0;
@@ -472,15 +500,18 @@ static char *scrub_string;
 static char *scrub_string_end;
 
 static int
-scrub_from_string (from)
-     char **from;
+scrub_from_string (buf, buflen)
+     char *buf;
+     int buflen;
 {
-  int size;
+  int copy;
 
-  *from = scrub_string;
-  size = scrub_string_end - scrub_string;
-  scrub_string = scrub_string_end;
-  return size;
+  copy = scrub_string_end - scrub_string;
+  if (copy > buflen)
+    copy = buflen;
+  memcpy (buf, scrub_string, copy);
+  scrub_string += copy;
+  return copy;
 }
 
 /*	read_a_source_file()
@@ -534,11 +565,7 @@ read_a_source_file (name)
 
 	      line_label = NULL;
 
-	      if (flag_m68k_mri
-#ifdef LABELS_WITHOUT_COLONS
-		  || 1
-#endif
-		  )
+	      if (LABELS_WITHOUT_COLONS || flag_m68k_mri)
 		{
 		  /* Text at the start of a line must be a label, we
 		     run down and stick a colon in.  */
@@ -583,7 +610,12 @@ read_a_source_file (name)
 		      /* In MRI mode, we need to handle the MACRO
                          pseudo-op specially: we don't want to put the
                          symbol in the symbol table.  */
-		      if (! mri_line_macro)
+		      if (! mri_line_macro 
+#ifdef TC_START_LABEL_WITHOUT_COLON
+                          && TC_START_LABEL_WITHOUT_COLON(c, 
+                                                          input_line_pointer)
+#endif
+                          )
 			line_label = colon (line_start);
 		      else
 			line_label = symbol_create (line_start,
@@ -728,11 +760,7 @@ read_a_source_file (name)
 		  }
 #endif
 
-		  if (flag_m68k_mri
-#ifdef NO_PSEUDO_DOT
-		      || 1
-#endif
-		      )
+		  if (NO_PSEUDO_DOT || flag_m68k_mri)
 		    {
 		      /* The MRI assembler and the m88k use pseudo-ops
                          without a period.  */
@@ -780,7 +808,7 @@ read_a_source_file (name)
 			  mri_pending_align = 0;
 			  if (line_label != NULL)
 			    {
-			      line_label->sy_frag = frag_now;
+			      symbol_set_frag (line_label, frag_now);
 			      S_SET_VALUE (line_label, frag_now_fix ());
 			    }
 			}
@@ -815,6 +843,9 @@ read_a_source_file (name)
 		  else
 		    {
 		      int inquote = 0;
+#ifdef QUOTES_IN_INSN
+		      int inescape = 0;
+#endif
 
 		      /* WARNING: c has char, which may be end-of-line. */
 		      /* Also: input_line_pointer->`\0` where c was. */
@@ -828,6 +859,14 @@ read_a_source_file (name)
 			{
 			  if (flag_m68k_mri && *input_line_pointer == '\'')
 			    inquote = ! inquote;
+#ifdef QUOTES_IN_INSN
+			  if (inescape)
+			    inescape = 0;
+			  else if (*input_line_pointer == '"')
+			    inquote = ! inquote;
+			  else if (*input_line_pointer == '\\')
+			    inescape = 1;
+#endif
 			  input_line_pointer++;
 			}
 
@@ -840,17 +879,21 @@ read_a_source_file (name)
 			{
 			  sb out;
 			  const char *err;
+                          macro_entry *macro;
 
-			  if (check_macro (s, &out, '\0', &err))
+			  if (check_macro (s, &out, '\0', &err, &macro))
 			    {
 			      if (err != NULL)
-				as_bad (err);
+				as_bad ("%s", err);
 			      *input_line_pointer++ = c;
 			      input_scrub_include_sb (&out,
-						      input_line_pointer);
+						      input_line_pointer, 1);
 			      sb_kill (&out);
 			      buffer_limit =
 				input_scrub_next_buffer (&input_line_pointer);
+#ifdef md_macro_info
+                              md_macro_info (macro);
+#endif
 			      continue;
 			    }
 			}
@@ -861,7 +904,7 @@ read_a_source_file (name)
 			  mri_pending_align = 0;
 			  if (line_label != NULL)
 			    {
-			      line_label->sy_frag = frag_now;
+			      symbol_set_frag (line_label, frag_now);
 			      S_SET_VALUE (line_label, frag_now_fix ());
 			    }
 			}
@@ -1121,7 +1164,7 @@ mri_comment_end (stop, stopc)
 
 void 
 s_abort (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   as_fatal (_(".abort detected.  Abandoning ship."));
 }
@@ -1147,21 +1190,7 @@ do_align (n, fill, len, max)
 
   if (fill == NULL)
     {
-      int maybe_text;
-
-#ifdef BFD_ASSEMBLER
-      if ((bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)
-	maybe_text = 1;
-      else
-	maybe_text = 0;
-#else
-      if (now_seg != data_section && now_seg != bss_section)
-	maybe_text = 1;
-      else
-	maybe_text = 0;
-#endif
-
-      if (maybe_text)
+      if (subseg_text_p (now_seg))
 	default_fill = NOP_OPCODE;
       else
 	default_fill = 0;
@@ -1182,7 +1211,7 @@ do_align (n, fill, len, max)
  just_record_alignment:
 #endif
 
-  record_alignment (now_seg, n);
+  record_alignment (now_seg, n - OCTETS_PER_BYTE_POWER);
 }
 
 /* Handle the .align pseudo-op.  A positive ARG is a default alignment
@@ -1325,7 +1354,7 @@ s_align_ptwo (arg)
 
 void 
 s_comm (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   register char *name;
   register char c;
@@ -1407,7 +1436,7 @@ s_comm (ignore)
 
 void
 s_mri_common (small)
-     int small;
+     int small ATTRIBUTE_UNUSED;
 {
   char *name;
   char c;
@@ -1481,10 +1510,12 @@ s_mri_common (small)
 
   if (line_label != NULL)
     {
-      line_label->sy_value.X_op = O_symbol;
-      line_label->sy_value.X_add_symbol = sym;
-      line_label->sy_value.X_add_number = S_GET_VALUE (sym);
-      line_label->sy_frag = &zero_address_frag;
+      expressionS exp;
+      exp.X_op = O_symbol;
+      exp.X_add_symbol = sym;
+      exp.X_add_number = 0;
+      symbol_set_value_expression (line_label, &exp);
+      symbol_set_frag (line_label, &zero_address_frag);
       S_SET_SEGMENT (line_label, expr_section);
     }
 
@@ -1504,7 +1535,7 @@ s_mri_common (small)
 
 void
 s_data (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   segT section;
   register int temp;
@@ -1578,7 +1609,7 @@ s_app_file (appfile)
 
 void
 s_app_line (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   int l;
 
@@ -1604,7 +1635,7 @@ s_app_line (ignore)
 
 void
 s_end (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (flag_mri)
     {
@@ -1622,7 +1653,7 @@ s_end (ignore)
 
 void
 s_err (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   as_bad (_(".err encountered"));
   demand_empty_rest_of_line ();
@@ -1632,7 +1663,7 @@ s_err (ignore)
 
 void
 s_fail (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   offsetT temp;
   char *stop = NULL;
@@ -1655,7 +1686,7 @@ s_fail (ignore)
 
 void 
 s_fill (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   expressionS rep_exp;
   long size = 1;
@@ -1752,7 +1783,7 @@ s_fill (ignore)
 
 void 
 s_globl (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   int c;
@@ -1768,9 +1799,11 @@ s_globl (ignore)
       name = input_line_pointer;
       c = get_symbol_end ();
       symbolP = symbol_find_or_make (name);
+      S_SET_EXTERNAL (symbolP);
+
       *input_line_pointer = c;
       SKIP_WHITESPACE ();
-      S_SET_EXTERNAL (symbolP);
+      c = *input_line_pointer;
       if (c == ',')
 	{
 	  input_line_pointer++;
@@ -1813,7 +1846,7 @@ s_irp (irpc)
 
   sb_kill (&s);
 
-  input_scrub_include_sb (&out, input_line_pointer);
+  input_scrub_include_sb (&out, input_line_pointer, 1);
   sb_kill (&out);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }
@@ -1825,7 +1858,7 @@ s_irp (irpc)
 
 void
 s_linkonce (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   enum linkonce_type type;
 
@@ -1959,24 +1992,14 @@ s_lcomm_internal (needs_align, bytes_p)
 	}
     }
 #endif
+
    if (!needs_align)
      {
-       /* FIXME. This needs to be machine independent. */
-       if (temp >= 8)
-	 align = 3;
-       else if (temp >= 4)
-	 align = 2;
-       else if (temp >= 2)
-	 align = 1;
-       else
-	 align = 0;
+       TC_IMPLICIT_LCOMM_ALIGNMENT (temp, align);
 
-#ifdef OBJ_EVAX
-       /* FIXME: This needs to be done in a more general fashion.  */
-       align = 3;
-#endif
-
-       record_alignment(bss_seg, align);
+       /* Still zero unless TC_IMPLICIT_LCOMM_ALIGNMENT set it.  */
+       if (align)
+         record_alignment(bss_seg, align);
      }
 
   if (needs_align)
@@ -2041,12 +2064,17 @@ s_lcomm_internal (needs_align, bytes_p)
   *p = c;
 
   if (
-#if defined(OBJ_AOUT) | defined(OBJ_BOUT)
-       S_GET_OTHER (symbolP) == 0 &&
-       S_GET_DESC (symbolP) == 0 &&
-#endif /* OBJ_AOUT or OBJ_BOUT */
-       (S_GET_SEGMENT (symbolP) == bss_seg
-	|| (!S_IS_DEFINED (symbolP) && S_GET_VALUE (symbolP) == 0)))
+#if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT) \
+     || defined (OBJ_BOUT) || defined (OBJ_MAYBE_BOUT))
+#ifdef BFD_ASSEMBLER
+      (OUTPUT_FLAVOR != bfd_target_aout_flavour
+       || (S_GET_OTHER (symbolP) == 0 && S_GET_DESC (symbolP) == 0)) &&
+#else
+      (S_GET_OTHER (symbolP) == 0 && S_GET_DESC (symbolP) == 0) &&
+#endif
+#endif
+      (S_GET_SEGMENT (symbolP) == bss_seg
+       || (!S_IS_DEFINED (symbolP) && S_GET_VALUE (symbolP) == 0)))
     {
       char *pfrag;
 
@@ -2056,9 +2084,9 @@ s_lcomm_internal (needs_align, bytes_p)
 	frag_align (align, 0, 0);
 					/* detach from old frag	*/
       if (S_GET_SEGMENT (symbolP) == bss_seg)
-	symbolP->sy_frag->fr_symbol = NULL;
+	symbol_get_frag (symbolP)->fr_symbol = NULL;
 
-      symbolP->sy_frag = frag_now;
+      symbol_set_frag (symbolP, frag_now);
       pfrag = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
 			(offsetT) temp, (char *) 0);
       *pfrag = 0;
@@ -2103,7 +2131,7 @@ void s_lcomm_bytes (needs_align)
 
 void 
 s_lsym (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   register char *name;
   register char c;
@@ -2225,7 +2253,7 @@ get_line_sb (line)
 
 void
 s_macro (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *file;
   unsigned int line;
@@ -2253,14 +2281,10 @@ s_macro (ignore)
 	{
 	  S_SET_SEGMENT (line_label, undefined_section);
 	  S_SET_VALUE (line_label, 0);
-	  line_label->sy_frag = &zero_address_frag;
+	  symbol_set_frag (line_label, &zero_address_frag);
 	}
 
-      if (((flag_m68k_mri
-#ifdef NO_PSEUDO_DOT
-	    || 1
-#endif
-	    )
+      if (((NO_PSEUDO_DOT || flag_m68k_mri)
 	   && hash_find (po_hash, name) != NULL)
 	  || (! flag_m68k_mri
 	      && *name == '.'
@@ -2277,7 +2301,7 @@ s_macro (ignore)
 
 void
 s_mexit (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   cond_exit_macro (macro_nest);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
@@ -2287,7 +2311,7 @@ s_mexit (ignore)
 
 void
 s_mri (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   int on, old_flag;
 
@@ -2304,7 +2328,9 @@ s_mri (ignore)
   else
     {
       flag_mri = 0;
+#ifdef TC_M68K
       flag_m68k_mri = 0;
+#endif
       macro_mri_mode (0);
     }
 
@@ -2348,14 +2374,14 @@ do_org (segment, exp, fill)
       char *p;
 
       p = frag_var (rs_org, 1, 1, (relax_substateT) 0, exp->X_add_symbol,
-		    exp->X_add_number, (char *) NULL);
+		    exp->X_add_number * OCTETS_PER_BYTE, (char *) NULL);
       *p = fill;
     }
 }
 
 void 
 s_org (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   register segT segment;
   expressionS exp;
@@ -2411,7 +2437,7 @@ s_org (ignore)
 
 void
 s_mri_sect (type)
-     char *type;
+     char *type ATTRIBUTE_UNUSED;
 {
 #ifdef TC_M68K
 
@@ -2575,7 +2601,7 @@ s_mri_sect (type)
 
 void
 s_print (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *s;
   int len;
@@ -2589,7 +2615,7 @@ s_print (ignore)
 
 void
 s_purgem (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (is_it_end_of_statement ())
     {
@@ -2619,18 +2645,31 @@ s_purgem (ignore)
 
 void
 s_rept (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   int count;
-  sb one;
-  sb many;
 
   count = get_absolute_expression ();
 
+  do_repeat(count, "REPT", "ENDR");
+}
+
+/* This function provides a generic repeat block implementation.   It allows
+   different directives to be used as the start/end keys. */
+
+void
+do_repeat (count, start, end)
+      int count;
+      const char *start;
+      const char *end;
+{
+  sb one;
+  sb many;
+
   sb_new (&one);
-  if (! buffer_and_nest ("REPT", "ENDR", &one, get_line_sb))
+  if (! buffer_and_nest (start, end, &one, get_line_sb))
     {
-      as_bad (_("rept without endr"));
+      as_bad (_("%s without %s"), start, end);
       return;
     }
 
@@ -2640,9 +2679,26 @@ s_rept (ignore)
 
   sb_kill (&one);
 
-  input_scrub_include_sb (&many, input_line_pointer);
+  input_scrub_include_sb (&many, input_line_pointer, 1);
   sb_kill (&many);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
+}
+
+/* Skip to end of current repeat loop; EXTRA indicates how many additional
+   input buffers to skip.  Assumes that conditionals preceding the loop end
+   are properly nested. 
+
+   This function makes it easier to implement a premature "break" out of the
+   loop.  The EXTRA arg accounts for other buffers we might have inserted,
+   such as line substitutions. */
+
+void
+end_repeat (extra)
+  int extra;
+{
+  cond_exit_macro (macro_nest);
+  while (extra-- >= 0)
+    buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }
 
 /* Handle the .equ, .equiv and .set directives.  If EQUIV is 1, then
@@ -2775,9 +2831,12 @@ s_space (mult)
 	      S_SET_VALUE (mri_common_symbol, val + 1);
 	      if (line_label != NULL)
 		{
-		  know (line_label->sy_value.X_op == O_symbol);
-		  know (line_label->sy_value.X_add_symbol == mri_common_symbol);
-		  line_label->sy_value.X_add_number += 1;
+		  expressionS *symexp;
+
+		  symexp = symbol_get_value_expression (line_label);
+		  know (symexp->X_op == O_symbol);
+		  know (symexp->X_add_symbol == mri_common_symbol);
+		  symexp->X_add_number += 1;
 		}
 	    }
 	}
@@ -2786,7 +2845,7 @@ s_space (mult)
 	  do_align (1, (char *) NULL, 0, 0);
 	  if (line_label != NULL)
 	    {
-	      line_label->sy_frag = frag_now;
+	      symbol_set_frag (line_label, frag_now);
 	      S_SET_VALUE (line_label, frag_now_fix ());
 	    }
 	}
@@ -2988,7 +3047,7 @@ s_float_space (float_type)
 
 void
 s_struct (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *stop = NULL;
   char stopc;
@@ -3004,7 +3063,7 @@ s_struct (ignore)
 
 void
 s_text (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   register int temp;
 
@@ -3106,7 +3165,8 @@ pseudo_set (symbolP)
 	   && (S_GET_SEGMENT (exp.X_add_symbol)
 	       == S_GET_SEGMENT (exp.X_op_symbol))
 	   && SEG_NORMAL (S_GET_SEGMENT (exp.X_add_symbol))
-	   && exp.X_add_symbol->sy_frag == exp.X_op_symbol->sy_frag)
+	   && (symbol_get_frag (exp.X_add_symbol)
+	       == symbol_get_frag (exp.X_op_symbol)))
     {
       exp.X_op = O_constant;
       exp.X_add_number = (S_GET_VALUE (exp.X_add_symbol)
@@ -3130,19 +3190,21 @@ pseudo_set (symbolP)
 #endif /* OBJ_AOUT or OBJ_BOUT */
       S_SET_VALUE (symbolP, (valueT) exp.X_add_number);
       if (exp.X_op != O_constant)
-        symbolP->sy_frag = &zero_address_frag;
+        symbol_set_frag (symbolP, &zero_address_frag);
       break;
 
     case O_register:
       S_SET_SEGMENT (symbolP, reg_section);
       S_SET_VALUE (symbolP, (valueT) exp.X_add_number);
-      symbolP->sy_frag = &zero_address_frag;
+      symbol_set_frag (symbolP, &zero_address_frag);
       break;
 
     case O_symbol:
       if (S_GET_SEGMENT (exp.X_add_symbol) == undefined_section
 	  || exp.X_add_number != 0)
-	symbolP->sy_value = exp;
+	symbol_set_value_expression (symbolP, &exp);
+      else if (symbol_section_p (symbolP))
+	as_bad ("invalid attempt to set value of section symbol");
       else
 	{
 	  symbolS *s = exp.X_add_symbol;
@@ -3156,7 +3218,7 @@ pseudo_set (symbolP)
 #endif /* OBJ_AOUT or OBJ_BOUT */
 	  S_SET_VALUE (symbolP,
 		       exp.X_add_number + S_GET_VALUE (s));
-	  symbolP->sy_frag = s->sy_frag;
+	  symbol_set_frag (symbolP, symbol_get_frag (s));
 	  copy_symbol_attributes (symbolP, s);
 	}
       break;
@@ -3164,7 +3226,7 @@ pseudo_set (symbolP)
     default:
       /* The value is some complex expression.
 	 FIXME: Should we set the segment to anything?  */
-      symbolP->sy_value = exp;
+      symbol_set_value_expression (symbolP, &exp);
       break;
     }
 }
@@ -3194,8 +3256,10 @@ pseudo_set (symbolP)
    are defined, which is the normal case, then only simple expressions
    are permitted.  */
 
+#ifdef TC_M68K
 static void
 parse_mri_cons PARAMS ((expressionS *exp, unsigned int nbytes));
+#endif
 
 #ifndef TC_PARSE_CONS_EXPRESSION
 #ifdef BITFIELD_CONS_EXPRESSIONS
@@ -3250,9 +3314,11 @@ cons_worker (nbytes, rva)
   c = 0;
   do
     {
+#ifdef TC_M68K
       if (flag_m68k_mri)
 	parse_mri_cons (&exp, (unsigned int) nbytes);
       else
+#endif
 	TC_PARSE_CONS_EXPRESSION (&exp, (unsigned int) nbytes);
 
       if (rva)
@@ -3393,13 +3459,13 @@ emit_expr (exp, nbytes)
   /* Handle a negative bignum.  */
   if (op == O_uminus
       && exp->X_add_number == 0
-      && exp->X_add_symbol->sy_value.X_op == O_big
-      && exp->X_add_symbol->sy_value.X_add_number > 0)
+      && symbol_get_value_expression (exp->X_add_symbol)->X_op == O_big
+      && symbol_get_value_expression (exp->X_add_symbol)->X_add_number > 0)
     {
       int i;
       unsigned long carry;
 
-      exp = &exp->X_add_symbol->sy_value;
+      exp = symbol_get_value_expression (exp->X_add_symbol);
 
       /* Negate the bignum: one's complement each digit and add 1.  */
       carry = 1;
@@ -3774,6 +3840,7 @@ parse_bitfield_cons (exp, nbytes)
 
 /* Handle an MRI style string expression.  */
 
+#ifdef TC_M68K
 static void
 parse_mri_cons (exp, nbytes)
      expressionS *exp;
@@ -3836,6 +3903,7 @@ parse_mri_cons (exp, nbytes)
 	input_line_pointer++;
     }
 }
+#endif /* TC_M68K */
 
 #ifdef REPEAT_CONS_EXPRESSIONS
 
@@ -4207,7 +4275,7 @@ output_leb128 (p, value, sign)
    we don't output for NULL values of P.  It isn't really as critical as
    for "normal" values that this be streamlined.  */
 
-static int
+static inline int
 output_big_sleb128 (p, bignum, size)
      char *p;
      LITTLENUM_TYPE *bignum;
@@ -4253,7 +4321,7 @@ output_big_sleb128 (p, bignum, size)
   return p - orig;
 }
 
-static int
+static inline int
 output_big_uleb128 (p, bignum, size)
      char *p;
      LITTLENUM_TYPE *bignum;
@@ -4295,7 +4363,7 @@ output_big_uleb128 (p, bignum, size)
   return p - orig;
 }
 
-static inline int
+static int
 output_big_leb128 (p, bignum, size, sign)
      char *p;
      LITTLENUM_TYPE *bignum;
@@ -4388,7 +4456,7 @@ s_leb128 (sign)
 /*
  *			stringer()
  *
- * We read 0 or more ',' seperated, double-quoted strings.
+ * We read 0 or more ',' separated, double-quoted strings.
  *
  * Caller should have checked need_pass_2 is FALSE because we don't check it.
  */
@@ -4812,9 +4880,8 @@ equals (sym_name, reassign)
 /* ARGSUSED */
 void 
 s_include (arg)
-     int arg;
+     int arg ATTRIBUTE_UNUSED;
 {
-  char *newbuf;
   char *filename;
   int i;
   FILE *try;
@@ -4865,8 +4932,7 @@ s_include (arg)
 gotit:
   /* malloc Storage leak when file is found on path.  FIXME-SOMEDAY. */
   register_dependency (path);
-  newbuf = input_scrub_include_file (path, input_line_pointer);
-  buffer_limit = input_scrub_next_buffer (&input_line_pointer);
+  input_scrub_insert_file (path);
 }				/* s_include() */
 
 void 
@@ -5034,7 +5100,7 @@ do_s_func (end_p, default_prefix)
 
 void 
 s_ignore (arg)
-     int arg;
+     int arg ATTRIBUTE_UNUSED;
 {
   while (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
@@ -5049,6 +5115,38 @@ read_print_statistics (file)
      FILE *file;
 {
   hash_print_statistics (file, "pseudo-op table", po_hash);
+}
+
+/* Inserts the given line into the input stream.  
+   
+   This call avoids macro/conditionals nesting checking, since the contents of
+   the line are assumed to replace the contents of a line already scanned.
+
+   An appropriate use of this function would be substition of input lines when
+   called by md_start_line_hook().  The given line is assumed to already be
+   properly scrubbed.  */
+
+void
+input_scrub_insert_line (line)
+  const char *line;
+{
+  sb newline;
+  sb_new (&newline);
+  sb_add_string (&newline, line);
+  input_scrub_include_sb (&newline, input_line_pointer, 0);
+  sb_kill (&newline);
+  buffer_limit = input_scrub_next_buffer (&input_line_pointer);
+}
+
+/* Insert a file into the input stream; the path must resolve to an actual
+   file; no include path searching or dependency registering is performed.  */ 
+
+void
+input_scrub_insert_file (path)
+  char *path;
+{
+  input_scrub_include_file (path, input_line_pointer);
+  buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }
 
 /* end of read.c */

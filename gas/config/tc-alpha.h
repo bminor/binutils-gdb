@@ -85,7 +85,7 @@ extern int tc_get_register PARAMS ((int frame));
 extern void alpha_frob_ecoff_data PARAMS ((void));
 
 #define tc_frob_label(sym) alpha_define_label (sym)
-extern void alpha_define_label PARAMS ((struct symbol *));
+extern void alpha_define_label PARAMS ((symbolS *));
 
 #define md_cons_align(nbytes) alpha_cons_align (nbytes)
 extern void alpha_cons_align PARAMS ((int));
@@ -101,4 +101,48 @@ extern void alpha_frob_file_before_adjust PARAMS ((void));
 #define ELF_TC_SPECIAL_SECTIONS \
   { ".sdata",   SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL  }, \
   { ".sbss",    SHT_NOBITS,     SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL  },
+#endif
+
+/* Whether to add support for explict !relocation_op!sequence_number.  At the
+   moment, only do this for ELF, though ECOFF could use it as well.  */
+
+#ifdef OBJ_ELF
+#define RELOC_OP_P
+#endif
+
+#ifdef RELOC_OP_P
+/* Before the relocations are written, reorder them, so that user supplied
+   !lituse relocations follow the appropriate !literal relocations.  Also
+   convert the gas-internal relocations to the appropriate linker relocations.
+   */
+#define tc_adjust_symtab() alpha_adjust_symtab ()
+extern void alpha_adjust_symtab PARAMS ((void));
+
+/* New fields for supporting explicit relocations (such as !literal to mark
+   where a pointer is loaded from the global table, and !lituse_base to track
+   all of the normal uses of that pointer).  */
+
+#define TC_FIX_TYPE struct alpha_fix_tag
+
+struct alpha_fix_tag
+{
+  struct fix *next_lituse;		/* next !lituse */
+  struct alpha_literal_tag *info;	/* other members with same sequence */
+};
+
+/* Initialize the TC_FIX_TYPE field.  */
+#define TC_INIT_FIX_DATA(fixP)						\
+do {									\
+  fixP->tc_fix_data.next_lituse = (struct fix *)0;			\
+  fixP->tc_fix_data.info = (struct alpha_literal_tag *)0;		\
+} while (0)
+
+/* Work with DEBUG5 to print fields in tc_fix_type.  */
+#define TC_FIX_DATA_PRINT(stream,fixP)					\
+do {									\
+  if (fixP->tc_fix_data.info)						\
+    fprintf (stderr, "\tinfo = 0x%lx, next_lituse = 0x%lx\n", \
+	     (long)fixP->tc_fix_data.info,				\
+	     (long)fixP->tc_fix_data.next_lituse);			\
+} while (0)
 #endif

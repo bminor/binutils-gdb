@@ -32,8 +32,6 @@ Boston, MA 02111-1307, USA.  */
 #define TARGET_BIG_SYM      bfd_powerpc_pei_vec
 #define TARGET_BIG_NAME    "pei-powerpc"
 
-#define IMAGE_BASE          NT_IMAGE_BASE
-
 #define COFF_IMAGE_WITH_PE
 #define COFF_WITH_PE
 
@@ -41,7 +39,7 @@ Boston, MA 02111-1307, USA.  */
 
 /* FIXME: Verify PCRELOFFSET is always false */
 
+/* FIXME: This target no longer works.  Search for POWERPC_LE_PE in
+   coff-ppc.c and peigen.c.  */
+
 #include "coff-ppc.c"
-
-
-

@@ -1,5 +1,4 @@
 /* resres.c: read_res_file and write_res_file implementation for windres.
-
    Copyright 1998, 1999 Free Software Foundation, Inc.
    Written by Anders Norlander <anorland@hem2.passagen.se>.
 
@@ -19,6 +18,10 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
+
+/* FIXME: This file does not work correctly in a cross configuration.
+   It assumes that it can use fread and fwrite to read and write
+   integers.  It does no swapping.  */
 
 #include "bfd.h"
 #include "bucomm.h"
@@ -216,7 +219,7 @@ write_res_directory (rd, type, name, language, level)
 	  /* If we're at level 3, then this key represents a language.
 	     Use it to update the current language.  */
 	  if (!re->id.named
-	      && re->id.u.id != *language
+	      && re->id.u.id != (unsigned long) *language
 	      && (re->id.u.id & 0xffff) == re->id.u.id)
 	    {
 	      *language = re->id.u.id;
@@ -256,7 +259,7 @@ write_res_resource (type, name, res, language)
      const struct res_id *type;
      const struct res_id *name;
      const struct res_resource *res;
-     int *language;
+     int *language ATTRIBUTE_UNUSED;
 {
   int rt;
 
@@ -328,7 +331,7 @@ write_res_resource (type, name, res, language)
 
   if (rt != 0
       && type != NULL
-      && (type->named || type->u.id != rt))
+      && (type->named || type->u.id != (unsigned long) rt))
     {
       fprintf (stderr, "// Unexpected resource type mismatch: ");
       res_id_print (stderr, *type, 1);
@@ -403,8 +406,8 @@ write_res_data (data, size, count)
      size_t size;
      int count;
 {
-  if (fwrite (data, size, count, fres) != count)
-    fatal ("%s: %s: could not write to file", program_name, filename);
+  if (fwrite (data, size, count, fres) != (size_t) count)
+    fatal ("%s: could not write to file", filename);
 }
 
 /* Read data from file, abort on failure */
@@ -414,8 +417,8 @@ read_res_data (data, size, count)
      size_t size;
      int count;
 {
-  if (fread (data, size, count, fres) != count)
-    fatal ("%s: %s: unexpected end of file", program_name, filename);
+  if (fread (data, size, count, fres) != (size_t) count)
+    fatal ("%s: unexpected end of file", filename);
 }
 
 /* Write a resource id */

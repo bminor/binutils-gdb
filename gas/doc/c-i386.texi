@@ -443,14 +443,25 @@ instructions is reversed from the Intel syntax.
 @cindex i386 16-bit code
 @cindex 16-bit code, i386
 @cindex real-mode code, i386
+@cindex @code{code16gcc} directive, i386
 @cindex @code{code16} directive, i386
 @cindex @code{code32} directive, i386
 While @code{@value{AS}} normally writes only ``pure'' 32-bit i386 code,
 it also supports writing code to run in real mode or in 16-bit protected
-mode code segments.  To do this, put a @samp{.code16} directive before
-the assembly language instructions to be run in 16-bit mode.  You can
-switch @code{@value{AS}} back to writing normal 32-bit code with the
-@samp{.code32} directive.
+mode code segments.  To do this, put a @samp{.code16} or
+@samp{.code16gcc} directive before the assembly language instructions to
+be run in 16-bit mode.  You can switch @code{@value{AS}} back to writing
+normal 32-bit code with the @samp{.code32} directive.
+
+@samp{.code16gcc} provides experimental support for generating 16-bit
+code from gcc, and differs from @samp{.code16} in that @samp{call},
+@samp{ret}, @samp{enter}, @samp{leave}, @samp{push}, @samp{pop},
+@samp{pusha}, @samp{popa}, @samp{pushf}, and @samp{popf} instructions
+default to 32-bit size.  This is so that the stack pointer is
+manipulated in the same way over function calls, allowing access to
+function parameters at the same stack offsets as in 32-bit mode.
+@samp{.code16gcc} also automatically adds address size prefixes where
+necessary to use the 32-bit addressing modes that gcc generates.
 
 The code which @code{@value{AS}} generates in 16-bit mode will not
 necessarily run on a 16-bit pre-80386 processor.  To write code that

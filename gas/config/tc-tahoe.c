@@ -1611,7 +1611,7 @@ md_assemble (instruction_string)
   segT to_seg;			/* Target segment of the address.	 */
 
   register valueT this_add_number;
-  register struct symbol *this_add_symbol;	/* +ve (minuend) symbol. */
+  register symbolS *this_add_symbol;	/* +ve (minuend) symbol. */
 
   /*  tahoe_opcodeT opcode_as_number; fixme: remove this line *//* The opcode as a number. */
   char *opcodeP;		/* Where it is in a frag. */

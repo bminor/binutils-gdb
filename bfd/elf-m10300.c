@@ -1,5 +1,5 @@
 /* Matsushita 10300 specific support for 32-bit ELF
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -290,7 +290,7 @@ static const struct mn10300_reloc_map mn10300_reloc_map[] =
 
 static reloc_howto_type *
 bfd_elf32_bfd_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   unsigned int i;
@@ -310,7 +310,7 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 
 static void
 mn10300_info_to_howto (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf32_Internal_Rela *dst;
 {
@@ -385,7 +385,7 @@ mn10300_elf_check_relocs (abfd, info, sec, relocs)
 static asection *
 mn10300_elf_gc_mark_hook (abfd, info, rel, h, sym)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *rel;
      struct elf_link_hash_entry *h;
      Elf_Internal_Sym *sym;
@@ -407,6 +407,9 @@ mn10300_elf_gc_mark_hook (abfd, info, rel, h, sym)
 
 	    case bfd_link_hash_common:
 	      return h->root.u.c.p->section;
+
+	    default:
+	      break;
 	    }
 	}
     }
@@ -431,15 +434,15 @@ mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
 				 addend, info, sym_sec, is_local)
      reloc_howto_type *howto;
      bfd *input_bfd;
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      asection *input_section;
      bfd_byte *contents;
      bfd_vma offset;
      bfd_vma value;
      bfd_vma addend;
-     struct bfd_link_info *info;
-     asection *sym_sec;
-     int is_local;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     asection *sym_sec ATTRIBUTE_UNUSED;
+     int is_local ATTRIBUTE_UNUSED;
 {
   unsigned long r_type = howto->type;
   bfd_byte *hit_data = contents + offset;
@@ -620,7 +623,7 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.root.string, input_bfd,
-		      input_section, rel->r_offset)))
+		      input_section, rel->r_offset, true)))
 		return false;
 	      relocation = 0;
 	    }
@@ -659,7 +662,7 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    case bfd_reloc_undefined:
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, name, input_bfd, input_section,
-		      rel->r_offset)))
+		      rel->r_offset, true)))
 		return false;
 	      break;
 
@@ -696,7 +699,7 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 static boolean
 elf32_mn10300_finish_hash_table_entry (gen_entry, in_args)
      struct bfd_hash_entry *gen_entry;
-     PTR in_args;
+     PTR in_args ATTRIBUTE_UNUSED;
 {
   struct elf32_mn10300_link_hash_entry *entry;
   unsigned int byte_count = 0;
@@ -846,10 +849,9 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	    {
 	      struct elf32_mn10300_link_hash_entry *hash;
 	      Elf_Internal_Sym *sym;
-	      asection *sym_sec;
+	      asection *sym_sec = NULL;
 	      const char *sym_name;
 	      char *new_name;
-	      Elf_Internal_Shdr *hdr;
 
 	      /* Get cached copy of section contents if it exists.  */
 	      if (elf_section_data (section)->this_hdr.contents != NULL)
@@ -928,7 +930,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 			    sym_sec = bfd_abs_section_ptr;
 			  else if (isym.st_shndx == SHN_COMMON)
 			    sym_sec = bfd_com_section_ptr;
-
+			  
 			  sym_name = bfd_elf_string_from_elf_section (input_bfd,
 							   symtab_hdr->sh_link,
 							   isym.st_name);
@@ -1191,9 +1193,8 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		{
 		  Elf_Internal_Sym isym;
 		  struct elf32_mn10300_link_hash_entry *sym_hash;
-		  asection *sym_sec;
+		  asection *sym_sec = NULL;
 		  const char *sym_name;
-		  Elf_Internal_Shdr *hdr;
 		  char *new_name;
 
 		  bfd_elf32_swap_symbol_in (input_bfd, esym, &isym);
@@ -1210,7 +1211,9 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		    sym_sec = bfd_abs_section_ptr;
 		  else if (isym.st_shndx == SHN_COMMON)
 		    sym_sec = bfd_com_section_ptr;
-
+		  else
+		    abort ();
+		  
 		  sym_name = bfd_elf_string_from_elf_section (input_bfd,
 							symtab_hdr->sh_link,
 							isym.st_name);
@@ -1460,8 +1463,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
       if (ELF32_R_SYM (irel->r_info) < symtab_hdr->sh_info)
 	{
 	  Elf_Internal_Sym isym;
-	  asection *sym_sec;
-	  Elf_Internal_Shdr *hdr;
+	  asection *sym_sec = NULL;
 	  const char *sym_name;
 	  char *new_name;
 
@@ -1478,7 +1480,9 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	    sym_sec = bfd_abs_section_ptr;
 	  else if (isym.st_shndx == SHN_COMMON)
 	    sym_sec = bfd_com_section_ptr;
-
+	  else
+	    abort ();
+	  
 	  symval = (isym.st_value
 		    + sym_sec->output_section->vma
 		    + sym_sec->output_offset);
@@ -1903,6 +1907,79 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	  *again = true;
 	}
 
+      /* Try to turn a 24 immediate, displacement or absolute address
+	 into a 8 immediate, displacement or absolute address.  */
+      if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_24)
+	{
+	  bfd_vma value = symval;
+	  value += irel->r_addend;
+
+	  /* See if the value will fit in 8 bits.  */
+	  if ((long)value < 0x7f && (long)value > -0x80)
+	    {
+	      unsigned char code;
+
+	      /* AM33 insns which have 24 operands are 6 bytes long and
+		 will have 0xfd as the first byte.  */
+
+	      /* Get the first opcode.  */
+	      code = bfd_get_8 (abfd, contents + irel->r_offset - 3);
+
+	      if (code == 0xfd)
+		{
+	          /* Get the second opcode.  */
+	          code = bfd_get_8 (abfd, contents + irel->r_offset - 2);
+
+		  /* We can not relax 0x6b, 0x7b, 0x8b, 0x9b as no 24bit
+		     equivalent instructions exists.  */
+	          if (code != 0x6b && code != 0x7b
+		      && code != 0x8b && code != 0x9b
+		      && ((code & 0x0f) == 0x09 || (code & 0x0f) == 0x08
+			  || (code & 0x0f) == 0x0a || (code & 0x0f) == 0x0b
+			  || (code & 0x0f) == 0x0e))
+		    {
+		      /* Not safe if the high bit is on as relaxing may
+		         move the value out of high mem and thus not fit
+		         in a signed 8bit value.  This is currently over
+		         conservative.  */
+		      if ((value & 0x80) == 0)
+			{
+			  /* Note that we've changed the relocation contents,
+			     etc.  */
+			  elf_section_data (sec)->relocs = internal_relocs;
+			  free_relocs = NULL;
+
+			  elf_section_data (sec)->this_hdr.contents = contents;
+			  free_contents = NULL;
+
+			  symtab_hdr->contents = (bfd_byte *) extsyms;
+			  free_extsyms = NULL;
+
+			  /* Fix the opcode.  */
+			  bfd_put_8 (abfd, 0xfb, contents + irel->r_offset - 3);
+			  bfd_put_8 (abfd, code, contents + irel->r_offset - 2);
+
+			  /* Fix the relocation's type.  */
+			  irel->r_info
+			    = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+						         R_MN10300_8);
+
+			  /* Delete two bytes of data.  */
+			  if (!mn10300_elf_relax_delete_bytes (abfd, sec,
+							       irel->r_offset + 1, 2))
+			    goto error_return;
+
+			  /* That will change things, so, we should relax
+			     again.  Note that this is not required, and it
+			      may be slow.  */
+			  *again = true;
+			  break;
+			}
+		    }
+
+		}
+	    }
+	}
 
       /* Try to turn a 32bit immediate, displacement or absolute address
 	 into a 16bit immediate, displacement or absolute address.  */
@@ -1911,6 +1988,74 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	  bfd_vma value = symval;
 	  value += irel->r_addend;
 
+	  /* See if the value will fit in 24 bits.
+	     We allow any 16bit match here.  We prune those we can't
+	     handle below.  */
+	  if ((long)value < 0x7fffff && (long)value > -0x800000)
+	    {
+	      unsigned char code;
+
+	      /* AM33 insns which have 32bit operands are 7 bytes long and
+		 will have 0xfe as the first byte.  */
+
+	      /* Get the first opcode.  */
+	      code = bfd_get_8 (abfd, contents + irel->r_offset - 3);
+
+	      if (code == 0xfe)
+		{
+	          /* Get the second opcode.  */
+	          code = bfd_get_8 (abfd, contents + irel->r_offset - 2);
+
+		  /* All the am33 32 -> 24 relaxing possibilities.  */
+		  /* We can not relax 0x6b, 0x7b, 0x8b, 0x9b as no 24bit
+		     equivalent instructions exists.  */
+	          if (code != 0x6b && code != 0x7b
+		      && code != 0x8b && code != 0x9b
+		      && ((code & 0x0f) == 0x09 || (code & 0x0f) == 0x08
+			  || (code & 0x0f) == 0x0a || (code & 0x0f) == 0x0b
+			  || (code & 0x0f) == 0x0e))
+		    {
+		      /* Not safe if the high bit is on as relaxing may
+		         move the value out of high mem and thus not fit
+		         in a signed 16bit value.  This is currently over
+		         conservative.  */
+		      if ((value & 0x8000) == 0)
+			{
+			  /* Note that we've changed the relocation contents,
+			     etc.  */
+			  elf_section_data (sec)->relocs = internal_relocs;
+			  free_relocs = NULL;
+
+			  elf_section_data (sec)->this_hdr.contents = contents;
+			  free_contents = NULL;
+
+			  symtab_hdr->contents = (bfd_byte *) extsyms;
+			  free_extsyms = NULL;
+
+			  /* Fix the opcode.  */
+			  bfd_put_8 (abfd, 0xfd, contents + irel->r_offset - 3);
+			  bfd_put_8 (abfd, code, contents + irel->r_offset - 2);
+
+			  /* Fix the relocation's type.  */
+			  irel->r_info
+			    = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+						         R_MN10300_24);
+
+			  /* Delete one byte of data.  */
+			  if (!mn10300_elf_relax_delete_bytes (abfd, sec,
+							       irel->r_offset + 3, 1))
+			    goto error_return;
+
+			  /* That will change things, so, we should relax
+			     again.  Note that this is not required, and it
+			      may be slow.  */
+			  *again = true;
+			  break;
+			}
+		    }
+
+		}
+	    }
 
 	  /* See if the value will fit in 16 bits.
 	     We allow any 16bit match here.  We prune those we can't
@@ -2333,6 +2478,20 @@ compute_function_info (abfd, hash, addr, contents)
       if (hash->movm_args & 0x08)
 	hash->movm_stack_size += 8 * 4;
 
+      if (bfd_get_mach (abfd) == bfd_mach_am33)
+	{
+	  /* "exother" space.  e0, e1, mdrq, mcrh, mcrl, mcvf */
+	  if (hash->movm_args & 0x1)
+	    hash->movm_stack_size += 6 * 4;
+
+	  /* exreg1 space.  e4, e5, e6, e7 */
+	  if (hash->movm_args & 0x2)
+	    hash->movm_stack_size += 4 * 4;
+
+	  /* exreg0 space.  e2, e3  */
+	  if (hash->movm_args & 0x4)
+	    hash->movm_stack_size += 2 * 4;
+	}
     }
 
   /* Now look for the two stack adjustment variants.  */
@@ -2724,6 +2883,8 @@ elf_mn10300_mach (flags)
       default:
         return bfd_mach_mn10300;
 
+      case E_MN10300_MACH_AM33:
+        return bfd_mach_am33;
     }
 }
 
@@ -2735,13 +2896,9 @@ elf_mn10300_mach (flags)
 void
 _bfd_mn10300_elf_final_write_processing (abfd, linker)
      bfd *abfd;
-     boolean linker;
+     boolean linker ATTRIBUTE_UNUSED;
 {
   unsigned long val;
-  unsigned int i;
-  Elf_Internal_Shdr **hdrpp;
-  const char *name;
-  asection *sec;
 
   switch (bfd_get_mach (abfd))
     {
@@ -2750,6 +2907,9 @@ _bfd_mn10300_elf_final_write_processing (abfd, linker)
 	val = E_MN10300_MACH_MN10300;
 	break;
 
+      case bfd_mach_am33:
+	val = E_MN10300_MACH_AM33;
+	break;
     }
 
   elf_elfheader (abfd)->e_flags &= ~ (EF_MN10300_MACH);

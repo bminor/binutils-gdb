@@ -1,5 +1,5 @@
 /* Generic BFD library interface and support routines.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -618,7 +618,7 @@ DESCRIPTION
 /*ARGSUSED*/
 void
 bfd_set_reloc (ignore_abfd, asect, location, count)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      sec_ptr asect;
      arelent **location;
      unsigned int count;
@@ -679,6 +679,30 @@ bfd_assert (file, line)
   (*_bfd_error_handler) (_("bfd assertion fail %s:%d"), file, line);
 }
 
+/* A more or less friendly abort message.  In libbfd.h abort is
+   defined to call this function.  */
+
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
+
+void
+_bfd_abort (file, line, fn)
+     const char *file;
+     int line;
+     const char *fn;
+{
+  if (fn != NULL)
+    (*_bfd_error_handler)
+      (_("BFD internal error, aborting at %s line %d in %s\n"),
+       file, line, fn);
+  else
+    (*_bfd_error_handler)
+      (_("BFD internal error, aborting at %s line %d\n"),
+       file, line);
+  (*_bfd_error_handler) (_("Please report this bug.\n"));
+  xexit (EXIT_FAILURE);
+}
 
 /*
 FUNCTION

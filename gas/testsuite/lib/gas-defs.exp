@@ -1,4 +1,5 @@
-# Copyright (C) 1993, 1994, 1997 Free Software Foundation, Inc.
+# Copyright (C) 1993, 1994, 1997, 1998, 1999, 2000 Free Software
+# Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -253,6 +254,7 @@ proc run_dump_test { name } {
     }
     set opt_array [slurp_options "${file}.d"]
     if { $opt_array == -1 } {
+	perror "error reading options from $file.d"
 	unresolved $subdir/$name
 	return
     }
@@ -494,6 +496,20 @@ proc regexp_diff { file_1 file_2 } {
 		set end_2 1
 		set diff_pass 1
 		break
+	    } elseif [ string match "#..." $line_b ] {
+		if { [gets $file_b line_b] == $eof } {
+		    set end_2 1
+		    break
+		}
+		verbose "looking for \"^$line_b$\"" 3
+		while { ![regexp "^$line_b$" "$line_a"] } {
+		    verbose "skipping    \"$line_a\"" 3
+		    if { [gets $file_a line_a] == $eof } {
+			set end_1 1
+			break
+		    }
+		}
+		break
 	    }
 	    if { [gets $file_b line_b] == $eof } {
 		set end_2 1
@@ -521,7 +537,6 @@ proc regexp_diff { file_1 file_2 } {
 		send_log "regexp_diff match failure\n"
 		send_log "regexp \"^$line_b$\"\nline   \"$line_a\"\n"
 		set differences 1
-                break
             }
         }
     }

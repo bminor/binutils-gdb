@@ -8,7 +8,4 @@ foo:
 bar:
 	.long 0x87654321
 
-	.lcomm 0x12
-
-
-	
+	.lcomm dummy, 0x12

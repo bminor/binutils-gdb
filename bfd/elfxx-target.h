@@ -80,6 +80,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef elf_backend_plt_alignment
 #define elf_backend_plt_alignment 2
 #endif
+#ifndef elf_backend_want_dynbss
+#define elf_backend_want_dynbss 1
+#endif
 
 #define bfd_elfNN_bfd_debug_info_start	bfd_void
 #define bfd_elfNN_bfd_debug_info_end	bfd_void
@@ -202,6 +205,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 
 #ifndef ELF_MAXPAGESIZE
+  #error ELF_MAXPAGESIZE is not defined
 #define ELF_MAXPAGESIZE 1
 #endif
 
@@ -232,6 +236,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 #ifndef elf_backend_section_from_shdr
 #define elf_backend_section_from_shdr	0
+#endif
+#ifndef elf_backend_section_from_phdr
+#define elf_backend_section_from_phdr	0
 #endif
 #ifndef elf_backend_fake_sections
 #define elf_backend_fake_sections	0
@@ -290,6 +297,44 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef elf_backend_plt_header_size
 #define elf_backend_plt_header_size	0
 #endif
+#ifndef elf_backend_post_process_headers
+#define elf_backend_post_process_headers	NULL
+#endif
+#ifndef elf_backend_print_symbol_all
+#define elf_backend_print_symbol_all		NULL
+#endif
+#ifndef elf_backend_output_arch_syms
+#define elf_backend_output_arch_syms		NULL
+#endif
+#ifndef elf_backend_copy_indirect_symbol
+#define elf_backend_copy_indirect_symbol  _bfd_elf_link_hash_copy_indirect
+#endif
+#ifndef elf_backend_hide_symbol
+#define elf_backend_hide_symbol		_bfd_elf_link_hash_hide_symbol
+#endif
+
+
+/* Previously, backends could only use SHT_REL or SHT_RELA relocation
+   sections, but not both.  They defined USE_REL to indicate SHT_REL
+   sections, and left it undefined to indicated SHT_RELA sections.
+   For backwards compatibility, we still support this usage.  */
+#ifndef USE_REL
+#define USE_REL 0
+#else
+#undef USE_REL
+#define USE_REL 1
+#endif 
+
+/* Use these in new code.  */
+#ifndef elf_backend_may_use_rel_p 
+#define elf_backend_may_use_rel_p USE_REL
+#endif 
+#ifndef elf_backend_may_use_rela_p
+#define elf_backend_may_use_rela_p !USE_REL
+#endif
+#ifndef elf_backend_default_use_rela_p 
+#define elf_backend_default_use_rela_p !USE_REL
+#endif
 
 #ifndef ELF_MACHINE_ALT1
 #define ELF_MACHINE_ALT1 0
@@ -303,20 +348,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_backend_size_info _bfd_elfNN_size_info
 #endif
 
+#ifndef elf_backend_sign_extend_vma
+#define elf_backend_sign_extend_vma 0
+#endif
+
 extern const struct elf_size_info _bfd_elfNN_size_info;
 
 static CONST struct elf_backend_data elfNN_bed =
 {
-#ifdef USE_REL
-  0,				/* use_rela_p */
-#else
-  1,				/* use_rela_p */
-#endif
   ELF_ARCH,			/* arch */
   ELF_MACHINE_CODE,		/* elf_machine_code */
   ELF_MAXPAGESIZE,		/* maxpagesize */
-  elf_backend_collect,
-  elf_backend_type_change_ok,
   elf_info_to_howto,
   elf_info_to_howto_rel,
   elf_backend_sym_is_global,
@@ -326,6 +368,7 @@ static CONST struct elf_backend_data elfNN_bed =
   elf_backend_get_symbol_type,
   elf_backend_section_processing,
   elf_backend_section_from_shdr,
+  elf_backend_section_from_phdr,
   elf_backend_fake_sections,
   elf_backend_section_from_bfd_section,
   elf_backend_add_symbol_hook,
@@ -344,6 +387,11 @@ static CONST struct elf_backend_data elfNN_bed =
   elf_backend_modify_segment_map,
   elf_backend_gc_mark_hook,
   elf_backend_gc_sweep_hook,
+  elf_backend_post_process_headers,
+  elf_backend_print_symbol_all,
+  elf_backend_output_arch_syms,
+  elf_backend_copy_indirect_symbol,
+  elf_backend_hide_symbol,
   elf_backend_ecoff_debug_swap,
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,
@@ -351,13 +399,25 @@ static CONST struct elf_backend_data elfNN_bed =
   elf_backend_got_symbol_offset,
   elf_backend_got_header_size,
   elf_backend_plt_header_size,
+  elf_backend_collect,
+  elf_backend_type_change_ok,
+  elf_backend_may_use_rel_p,
+  elf_backend_may_use_rela_p,
+  elf_backend_default_use_rela_p,
+  elf_backend_sign_extend_vma,
   elf_backend_want_got_plt,
   elf_backend_plt_readonly,
   elf_backend_want_plt_sym,
   elf_backend_plt_not_loaded,
   elf_backend_plt_alignment,
-  elf_backend_can_gc_sections
+  elf_backend_can_gc_sections,
+  elf_backend_want_dynbss
 };
+
+/* Forward declaration for use when initialising alternative_target field.  */
+#ifdef TARGET_LITTLE_SYM
+extern const bfd_target TARGET_LITTLE_SYM;
+#endif
 
 #ifdef TARGET_BIG_SYM
 const bfd_target TARGET_BIG_SYM =
@@ -442,8 +502,15 @@ const bfd_target TARGET_BIG_SYM =
       BFD_JUMP_TABLE_LINK (bfd_elfNN),
       BFD_JUMP_TABLE_DYNAMIC (bfd_elfNN),
 
+  /* Alternative endian target.  */
+#ifdef TARGET_LITTLE_SYM
+  & TARGET_LITTLE_SYM,
+#else
+  NULL,
+#endif
+
   /* backend_data: */
-  (PTR) &elfNN_bed,
+  (PTR) &elfNN_bed
 };
 #endif
 
@@ -530,7 +597,14 @@ const bfd_target TARGET_LITTLE_SYM =
       BFD_JUMP_TABLE_LINK (bfd_elfNN),
       BFD_JUMP_TABLE_DYNAMIC (bfd_elfNN),
 
+  /* Alternative endian target.  */
+#ifdef TARGET_BIG_SYM
+  & TARGET_BIG_SYM,
+#else
+  NULL,
+#endif
+  
   /* backend_data: */
-  (PTR) &elfNN_bed,
+  (PTR) &elfNN_bed
 };
 #endif

@@ -15,9 +15,9 @@ tooldir = $(exec_prefix)/$(target_alias)
 CC_FOR_BUILD = @CC_FOR_BUILD@
 EXEEXT_FOR_BUILD = @EXEEXT_FOR_BUILD@
 
-YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L$(srcdir)/../bison/ ; else echo bison -y ; fi`
+YACC = `if [ -f ../bison/bison ]; then echo ../bison/bison -y -L$(srcdir)/../bison/; else echo @YACC@; fi`
 YFLAGS = -d
-LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo flex ; fi`
+LEX = `if [ -f ../flex/flex ]; then echo ../flex/flex; else echo @LEX@; fi`
 
 # these two are almost the same program
 AR_PROG=ar
@@ -38,7 +38,7 @@ OBJDUMP_PROG=objdump
 
 # This is the demangler, as a standalone program.
 # Note: This one is used as the installed name too, unlike the above.
-DEMANGLER_PROG=c++filt
+DEMANGLER_PROG=cxxfilt
 
 ADDR2LINE_PROG=addr2line
 
@@ -50,14 +50,15 @@ DLLWRAP_PROG=dllwrap
 SRCONV_PROG=srconv$(EXEEXT) sysdump$(EXEEXT) coffdump$(EXEEXT) 
 
 man_MANS = ar.1 nm.1 objdump.1 ranlib.1 size.1 strings.1 strip.1 objcopy.1 \
-	addr2line.1 nlmconv.1 $(DEMANGLER_PROG).1
+	addr2line.1 nlmconv.1 $(DEMANGLER_NAME).1
 
 PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG) @BUILD_DLLWRAP@ @BUILD_MISC@
 
-bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG) @BUILD_DLLWRAP@ @BUILD_MISC@
+bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG) @BUILD_DLLWRAP@ @BUILD_MISC@
 
-## We need a special rule to install the programs which are built with -new
-noinst_PROGRAMS = $(NM_PROG) $(STRIP_PROG)
+## We need a special rule to install the programs which are built with
+## -new, and to rename cxxfilt to c++filt.
+noinst_PROGRAMS = $(NM_PROG) $(STRIP_PROG) $(DEMANGLER_PROG)
 
 EXTRA_PROGRAMS = $(NLMCONV_PROG) srconv sysdump coffdump $(DLLTOOL_PROG) $(WINDRES_PROG) $(DLLWRAP_PROG)
 
@@ -68,7 +69,7 @@ BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
 INCDIR	= $(BASEDIR)/include
 
-DEP = mkdep
+MKDEP = mkdep
 
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) @HDEFINES@ -I$(srcdir)/../intl -I../intl -DLOCALEDIR="\"$(prefix)/share/locale\""
 
@@ -178,8 +179,8 @@ stamp-under: Makefile
 cplus-dem.o: $(BASEDIR)/libiberty/cplus-dem.c $(INCDIR)/getopt.h
 	$(COMPILE) -c -DMAIN -DVERSION='"$(VERSION)"' $(BASEDIR)/libiberty/cplus-dem.c
 
-c__filt_SOURCES =
-c__filt_LDADD = cplus-dem.o underscore.o $(LIBIBERTY) $(INTLLIBS)
+cxxfilt_SOURCES =
+cxxfilt_LDADD = cplus-dem.o underscore.o $(LIBIBERTY) $(INTLLIBS)
 
 ar_SOURCES = arparse.y arlex.l ar.c not-ranlib.c arsup.c rename.c $(BULIBS)
 ar_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
@@ -234,11 +235,14 @@ sysinfo.o: sysinfo.c
 
 srconv_SOURCES = srconv.c coffgrok.c $(BULIBS)
 
-dlltool_SOURCES = dlltool.c defparse.y deflex.l $(BULIBS)
+dlltool_SOURCES = dlltool.c defparse.y deflex.l dyn-string.c $(BULIBS)
 dlltool_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
 dlltool.o:dlltool.c
 	$(COMPILE) -c $(DLLTOOL_DEFS) $(srcdir)/dlltool.c
+
+rescoff.o:rescoff.c
+	$(COMPILE) -c $(DLLTOOL_DEFS) $(srcdir)/rescoff.c
 
 coffdump_SOURCES = coffdump.c coffgrok.c $(BULIBS)
 
@@ -257,7 +261,7 @@ windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l \
 windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
 dllwrap_SOURCES = dllwrap.c dyn-string.c 
-dllwrap_LDADD = $(LIBIBERTY)
+dllwrap_LDADD = $(LIBIBERTY) $(INTLLIBS)
 
 
 DISTSTUFF = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
@@ -269,18 +273,18 @@ DISTCLEANFILES = stamp-under sysinfo underscore.c sysroff.c sysroff.h \
 	site.exp site.bak
 
 # Targets to rebuild dependencies in this Makefile.
-# Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
-.dep: dep.sed $(CFILES) $(HFILES) $(GENERATED_CFILES) $(GENERATED_HFILES) config.h
-	rm -f .dep1
-	$(MAKE) DEP=$(DEP) .dep1
-	sed -f dep.sed <.dep1 >.dep
+# Have to get rid of DEP1 here so that "$?" later includes all of $(CFILES).
+DEP: dep.sed $(CFILES) $(HFILES) $(GENERATED_CFILES) $(GENERATED_HFILES) config.h
+	rm -f DEP1
+	$(MAKE) MKDEP=$(MKDEP) DEP1
+	sed -f dep.sed <DEP1 >DEP
 
 # This rule really wants a mkdep that runs "gcc -MM".
-.dep1: $(CFILES) $(GENERATED_CFILES)
-	rm -f .dep2
-	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep2
-	$(DEP) -f .dep2 $(INCLUDES) $?
-	$(SHELL) $(srcdir)/../move-if-change .dep2 .dep1
+DEP1: $(CFILES) $(GENERATED_CFILES)
+	rm -f DEP2
+	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP2
+	$(MKDEP) -f DEP2 $(INCLUDES) $?
+	$(SHELL) $(srcdir)/../move-if-change DEP2 DEP1
 
 dep.sed: dep-in.sed config.status
 	objdir=`pwd`; \
@@ -290,19 +294,19 @@ dep.sed: dep-in.sed config.status
 		-e 's!@SRCDIR@!$(srcdir)!'	\
 		-e "s!@OBJDIR@!$${objdir}!"
 
-dep: .dep
+dep: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
-	cat .dep >> tmp-Makefile
+	cat DEP >> tmp-Makefile
 	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile Makefile
 
-dep-in: .dep
+dep-in: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.in > tmp-Makefile.in
-	cat .dep >> tmp-Makefile.in
+	cat DEP >> tmp-Makefile.in
 	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.in $(srcdir)/Makefile.in
 
-dep-am: .dep
+dep-am: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.am > tmp-Makefile.am
-	cat .dep >> tmp-Makefile.am
+	cat DEP >> tmp-Makefile.am
 	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.am $(srcdir)/Makefile.am
 
 .PHONY: dep dep-in dep-am
@@ -319,24 +323,24 @@ binutils.info: $(srcdir)/binutils.texi config.texi
 
 MAINTAINERCLEANFILES = config.texi
 
-$(DEMANGLER_PROG).1: cxxfilt.man Makefile
-	sed -e 's/@PROGRAM@/$(DEMANGLER_PROG)/' < $(srcdir)/cxxfilt.man \
-		> $(DEMANGLER_PROG).1
+$(DEMANGLER_NAME).1: cxxfilt.man Makefile
+	sed -e 's/@PROGRAM@/$(DEMANGLER_NAME)/' < $(srcdir)/cxxfilt.man \
+		> $(DEMANGLER_NAME).1
 
-MOSTLYCLEANFILES = sysinfo $(DEMANGLER_PROG).1 binutils.log binutils.sum \
+MOSTLYCLEANFILES = sysinfo $(DEMANGLER_NAME).1 binutils.log binutils.sum \
 	abcdefgh*
 mostlyclean-local:
 	-rm -rf tmpdir
 
-CLEANFILES = dep.sed .dep .dep1
+CLEANFILES = dep.sed DEP DEP1
 
 .PHONY: install-exec-local
 
-install-exec-local: $(bin_PROGRAMS) $(noinst_PROGRAMS)
+install-exec-local: install-binPROGRAMS $(bin_PROGRAMS) $(noinst_PROGRAMS)
 	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//' -e 's/cxxfilt/$(DEMANGLER_NAME)/'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//' -e 's/cxxfilt/$(DEMANGLER_NAME)/'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	  else :; fi; \
 	done
 	$(mkinstalldirs) $(tooldir)/bin
@@ -378,7 +382,8 @@ debug.o: debug.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   debug.h
 dlltool.o: dlltool.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/getopt.h $(INCDIR)/demangle.h dlltool.h
+  $(INCDIR)/getopt.h $(INCDIR)/demangle.h dyn-string.h \
+  dlltool.h
 filemode.o: filemode.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h
 ieee.o: ieee.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/ieee.h \
@@ -459,8 +464,8 @@ readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/sparc.h $(INCDIR)/elf/m32r.h $(INCDIR)/elf/d10v.h \
   $(INCDIR)/elf/d30v.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/mn10200.h \
   $(INCDIR)/elf/mn10300.h $(INCDIR)/elf/hppa.h $(INCDIR)/elf/arc.h \
-  $(INCDIR)/elf/fr30.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/getopt.h
+  $(INCDIR)/elf/fr30.h $(INCDIR)/elf/mcore.h $(INCDIR)/elf/i960.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h
 resres.o: resres.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   windres.h winduni.h

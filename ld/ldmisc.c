@@ -1,5 +1,5 @@
 /* ldmisc.c
-   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
@@ -213,7 +213,7 @@ vfinfo (fp, fmt, arg)
 
 	    case 'E':
 	      /* current bfd error or errno */
-	      fprintf (fp, bfd_errmsg (bfd_get_error ()));
+	      fprintf (fp, "%s", bfd_errmsg (bfd_get_error ()));
 	      break;
 
 	    case 'I':
@@ -535,4 +535,23 @@ void
 print_nl ()
 {
   fprintf (config.map_file, "\n");
+}
+
+/* A more or less friendly abort message.  In ld.h abort is defined to
+   call this function.  */
+
+void
+ld_abort (file, line, fn)
+     const char *file;
+     int line;
+     const char *fn;
+{
+  if (fn != NULL)
+    einfo (_("%P: internal error: aborting at %s line %d in %s\n"),
+	   file, line, fn);
+  else
+    einfo (_("%P: internal error: aborting at %s line %d\n"),
+	   file, line);
+  einfo (_("%P%F: please report this bug\n"));
+  xexit (1);
 }

@@ -74,6 +74,9 @@ static int sb_index = -1;
 /* If we are reading from an sb structure, this is it.  */
 static sb from_sb;
 
+/* Should we do a conditional check on from_sb? */
+static int from_sb_is_expansion = 1;
+
 /* The number of nested sb structures we have included.  */
 int macro_nest;
 
@@ -111,6 +114,7 @@ struct input_save
     int logical_input_line;
     int sb_index;
     sb from_sb;
+    int from_sb_is_expansion;       /* Should we do a conditional check? */
     struct input_save *next_saved_file;	/* Chain of input_saves */
     char *input_file_save;	/* Saved state of input routines */
     char *saved_position;	/* Caller's saved position in buf */
@@ -147,6 +151,7 @@ input_scrub_push (saved_position)
   saved->logical_input_line = logical_input_line;
   saved->sb_index = sb_index;
   saved->from_sb = from_sb;
+  saved->from_sb_is_expansion = from_sb_is_expansion;
   memcpy (saved->save_source, save_source, sizeof (save_source));
   saved->next_saved_file = next_saved_file;
   saved->input_file_save = input_file_push ();
@@ -181,6 +186,7 @@ input_scrub_pop (saved)
   logical_input_line = saved->logical_input_line;
   sb_index = saved->sb_index;
   from_sb = saved->from_sb;
+  from_sb_is_expansion = saved->from_sb_is_expansion;
   partial_where = saved->partial_where;
   partial_size = saved->partial_size;
   next_saved_file = saved->next_saved_file;
@@ -255,17 +261,26 @@ input_scrub_include_file (filename, position)
    expanding a macro.  */
 
 void
-input_scrub_include_sb (from, position)
+input_scrub_include_sb (from, position, is_expansion)
      sb *from;
      char *position;
+     int is_expansion;
 {
   if (macro_nest > max_macro_nest)
-    as_fatal (_("macros nested too deeply"));
+    as_fatal (_("buffers nested too deeply"));
   ++macro_nest;
+
+#ifdef md_macro_start
+  if (is_expansion)
+    {
+      md_macro_start ();
+    }
+#endif
 
   next_saved_file = input_scrub_push (position);
 
   sb_new (&from_sb);
+  from_sb_is_expansion = is_expansion;
   if (from->len >= 1 && from->ptr[0] != '\n')
     {
       /* Add the sentinel required by read.c.  */
@@ -297,8 +312,15 @@ input_scrub_next_buffer (bufp)
       if (sb_index >= from_sb.len)
 	{
 	  sb_kill (&from_sb);
-	  cond_finish_check (macro_nest);
-	  --macro_nest;
+          if (from_sb_is_expansion)
+            {
+              cond_finish_check (macro_nest);
+#ifdef md_macro_end
+              /* allow the target to clean up per-macro expansion data */
+              md_macro_end ();
+#endif
+            }
+          --macro_nest;
 	  partial_where = NULL;
 	  if (next_saved_file != NULL)
 	    *bufp = input_scrub_pop (next_saved_file);

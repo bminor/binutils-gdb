@@ -1,5 +1,5 @@
 /* BFD back-end for ARM COFF files.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -47,6 +47,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define SET_INTERWORK_FLAG( abfd, flg )	(coff_data (abfd)->flags = \
 					(coff_data (abfd)->flags & ~ F_INTERWORK) \
 					 | (flg | F_INTERWORK_SET))
+
+#ifndef NUM_ELEM
+#define NUM_ELEM(a) ((sizeof (a)) / sizeof ((a)[0]))
+#endif
      
 typedef enum {bunknown, b9, b12, b23} thumb_pcrel_branchtype;
 /* some typedefs for holding instructions */
@@ -89,10 +93,12 @@ static struct coff_link_hash_entry * find_thumb_glue
   PARAMS ((struct bfd_link_info *, CONST char *, bfd *));
 static struct coff_link_hash_entry * find_arm_glue
   PARAMS ((struct bfd_link_info *, CONST char *, bfd *));
+#ifndef COFF_IMAGE_WITH_PE
 static void record_arm_to_thumb_glue
   PARAMS ((struct bfd_link_info *, struct coff_link_hash_entry *));
 static void record_thumb_to_arm_glue
   PARAMS ((struct bfd_link_info *, struct coff_link_hash_entry *));
+#endif
 static boolean coff_arm_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 static boolean coff_arm_print_private_bfd_data
@@ -126,11 +132,11 @@ coff_arm_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 		 error_message)
      bfd *abfd;
      arelent *reloc_entry;
-     asymbol *symbol;
+     asymbol *symbol ATTRIBUTE_UNUSED;
      PTR data;
-     asection *input_section;
+     asection *input_section ATTRIBUTE_UNUSED;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   symvalue diff;
   if (output_bfd == (bfd *) NULL)
@@ -193,8 +199,7 @@ coff_arm_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 #endif
 
 /* These most certainly belong somewhere else. Just had to get rid of
-   the manifest constants in the code. */
-
+   the manifest constants in the code.  */
 #define ARM_8        0
 #define ARM_16       1
 #define ARM_32       2
@@ -211,9 +216,127 @@ coff_arm_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 #define ARM_THUMB12 13
 #define ARM_THUMB23 14
 
+#ifdef ARM_WINCE
+#undef  ARM_32
+#undef  ARM_RVA32
+#undef  ARM_26
+#undef  ARM_THUMB12
+#undef  ARM_26D
+
+#define ARM_32       1
+#define ARM_RVA32    2
+#define ARM_26	     3
+#define ARM_THUMB12  4
+#define ARM_26D      5
+#define ARM_SECTION  14
+#define ARM_SECREL   15
+#endif
+
 static reloc_howto_type aoutarm_std_reloc_howto[] = 
 {
   /* type              rs size bsz  pcrel bitpos ovrf                     sf name     part_inpl readmask  setmask    pcdone */
+#ifdef ARM_WINCE
+  EMPTY_HOWTO (-1),
+  HOWTO (ARM_32, 
+	0,
+	2, 
+	32,
+	false,
+	0,
+	complain_overflow_bitfield,
+	coff_arm_reloc,
+	"ARM_32",
+        true,
+	0xffffffff,
+	0xffffffff,
+	PCRELOFFSET),
+  HOWTO (ARM_RVA32, 
+	0,
+	2, 
+	32,
+	false,
+	0,
+	complain_overflow_bitfield,
+	coff_arm_reloc,
+	"ARM_RVA32",
+        true,
+	0xffffffff,
+	0xffffffff,
+	PCRELOFFSET),
+  HOWTO (ARM_26,
+	2,
+	2,
+	24,
+	true,
+	0,
+	complain_overflow_signed,
+	aoutarm_fix_pcrel_26 ,
+	"ARM_26",
+	false,
+	0x00ffffff,
+	0x00ffffff, 
+	PCRELOFFSET),
+  HOWTO (ARM_THUMB12,
+	1,
+	1,
+	11,
+	true,
+	0,
+	complain_overflow_signed,
+	coff_thumb_pcrel_12 ,
+	"ARM_THUMB12",
+	false,
+	0x000007ff,
+	0x000007ff, 
+	PCRELOFFSET),
+  HOWTO (ARM_26D,  
+	2, 
+	2,
+	24,
+	false,
+	0,
+	complain_overflow_dont,
+	aoutarm_fix_pcrel_26_done, 
+	"ARM_26D",
+	true,
+	0x00ffffff,
+	0x0,
+	false),
+  EMPTY_HOWTO (-1),
+  EMPTY_HOWTO (-1),
+  EMPTY_HOWTO (-1),
+  EMPTY_HOWTO (-1),
+  EMPTY_HOWTO (-1),
+  EMPTY_HOWTO (-1),
+  EMPTY_HOWTO (-1),
+  EMPTY_HOWTO (-1),
+  HOWTO (ARM_SECTION,  
+	0, 
+	1, 
+	16, 
+	false,
+	0,
+	complain_overflow_bitfield,
+	coff_arm_reloc,
+	"ARM_16", 
+	true,
+	0x0000ffff,
+	0x0000ffff, 
+	PCRELOFFSET),
+  HOWTO (ARM_SECREL, 
+	0,
+	2, 
+	32,
+	false,
+	0,
+	complain_overflow_bitfield,
+	coff_arm_reloc,
+	"ARM_32",
+        true,
+	0xffffffff,
+	0xffffffff,
+	PCRELOFFSET),
+#else /* not ARM_WINCE */
   HOWTO(ARM_8,			/* type */
 	0,			/* rightshift */
 	0,			/* size */
@@ -319,7 +442,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	0x0,
 	false),
   /* 8 is unused */
-  {-1},
+  EMPTY_HOWTO (-1),
   HOWTO( ARM_NEG16,
 	0,
 	-1,
@@ -397,8 +520,11 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	false,
 	0x07ff07ff,
 	0x07ff07ff, 
-	PCRELOFFSET),
+	PCRELOFFSET)
+#endif /* not ARM_WINCE */
 };
+
+#define NUM_RELOCS NUM_ELEM (aoutarm_std_reloc_howto)
 
 #ifdef COFF_WITH_PE
 /* Return true if this relocation should
@@ -406,52 +532,54 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 
 static boolean
 in_reloc_p (abfd, howto)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      reloc_howto_type * howto;
 {
   return !howto->pc_relative && howto->type != ARM_RVA32;
 }     
 #endif
 
-
-#define RTYPE2HOWTO(cache_ptr, dst) \
-	    (cache_ptr)->howto = aoutarm_std_reloc_howto + (dst)->r_type;
+#define RTYPE2HOWTO(cache_ptr, dst)		\
+  (cache_ptr)->howto =				\
+    (dst)->r_type < NUM_RELOCS			\
+    ? aoutarm_std_reloc_howto + (dst)->r_type	\
+    : NULL
 
 #define coff_rtype_to_howto coff_arm_rtype_to_howto
 
 static reloc_howto_type *
 coff_arm_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
      struct internal_reloc *rel;
-     struct coff_link_hash_entry *h;
-     struct internal_syment *sym;
+     struct coff_link_hash_entry *h ATTRIBUTE_UNUSED;
+     struct internal_syment *sym ATTRIBUTE_UNUSED;
      bfd_vma *addendp;
 {
-  reloc_howto_type *howto;
+  reloc_howto_type * howto;
 
+  if (rel->r_type >= NUM_RELOCS)
+    return NULL;
+  
   howto = aoutarm_std_reloc_howto + rel->r_type;
 
   if (rel->r_type == ARM_RVA32)
-    {
-      *addendp -= pe_data(sec->output_section->owner)->pe_opthdr.ImageBase;
-    }
+    *addendp -= pe_data (sec->output_section->owner)->pe_opthdr.ImageBase;
 
   return howto;
-
 }
 /* Used by the assembler. */
 
 static bfd_reloc_status_type
 aoutarm_fix_pcrel_26_done (abfd, reloc_entry, symbol, data, input_section,
 			  output_bfd, error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   /* This is dead simple at present.  */
   return bfd_reloc_ok;
@@ -468,7 +596,7 @@ aoutarm_fix_pcrel_26 (abfd, reloc_entry, symbol, data, input_section,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   bfd_vma relocation;
   bfd_size_type addr = reloc_entry->address;
@@ -528,7 +656,7 @@ coff_thumb_pcrel_common (abfd, reloc_entry, symbol, data, input_section,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
      thumb_pcrel_branchtype btype;
 {
   bfd_vma relocation = 0;
@@ -696,7 +824,8 @@ coff_arm_reloc_type_lookup (abfd, code)
       bfd * abfd;
       bfd_reloc_code_real_type code;
 {
-#define ASTD(i,j)       case i: return &aoutarm_std_reloc_howto[j]
+#define ASTD(i,j)       case i: return aoutarm_std_reloc_howto + j
+  
   if (code == BFD_RELOC_CTOR)
     switch (bfd_get_arch_info (abfd)->bits_per_address)
       {
@@ -708,6 +837,12 @@ coff_arm_reloc_type_lookup (abfd, code)
 
   switch (code)
     {
+#ifdef ARM_WINCE
+      ASTD (BFD_RELOC_32,                   ARM_32);
+      ASTD (BFD_RELOC_RVA,                  ARM_RVA32);
+      ASTD (BFD_RELOC_ARM_PCREL_BRANCH,     ARM_26);
+      ASTD (BFD_RELOC_THUMB_PCREL_BRANCH12, ARM_THUMB12);
+#else
       ASTD (BFD_RELOC_8,                    ARM_8);
       ASTD (BFD_RELOC_16,                   ARM_16);
       ASTD (BFD_RELOC_32,                   ARM_32);
@@ -719,6 +854,7 @@ coff_arm_reloc_type_lookup (abfd, code)
       ASTD (BFD_RELOC_THUMB_PCREL_BRANCH9,  ARM_THUMB9);
       ASTD (BFD_RELOC_THUMB_PCREL_BRANCH12, ARM_THUMB12);
       ASTD (BFD_RELOC_THUMB_PCREL_BRANCH23, ARM_THUMB23);
+#endif      
     default: return (CONST struct reloc_howto_struct *) 0;
     }
 }
@@ -783,7 +919,7 @@ coff_arm_link_hash_table_create (abfd)
   return & ret->root.root;
 }
 
-static
+static void
 arm_emit_base_file_entry (info, output_bfd, input_section, reloc_offset)
       struct bfd_link_info *info;
       bfd *output_bfd;
@@ -934,8 +1070,6 @@ static const insn32 a2t1_ldr_insn       = 0xe59fc000;
 static const insn32 a2t2_bx_r12_insn    = 0xe12fff1c;
 static const insn32 a2t3_func_addr_insn = 0x00000001;
 
-#define A2T3_OFFSET 8
-
 /*
    Thumb->ARM:				Thumb->(non-interworking aware) ARM
 
@@ -958,8 +1092,6 @@ static const insn32 a2t3_func_addr_insn = 0x00000001;
 static const insn16 t2a1_bx_pc_insn = 0x4778;
 static const insn16 t2a2_noop_insn  = 0x46c0;
 static const insn32 t2a3_b_insn     = 0xea000000;
-
-#define T2A3_OFFSET 8
 
 static const insn16 t2a1_push_insn  = 0xb540;
 static const insn16 t2a2_ldr_insn   = 0x4e03;
@@ -1099,6 +1231,13 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
           howto = &fake_arm26_reloc;
         }
 
+#ifdef ARM_WINCE
+      /* MS ARM-CE makes the reloc relative to the opcode's pc, not
+	 the next opcode's pc, so is off by one. */
+      if (howto->pc_relative && !info->relocateable)
+	addend -= 8;
+#endif
+      
       /* If we are doing a relocateable link, then we can just ignore
          a PC relative reloc that is pcrel_offset.  It will already
          have the correct value.  If this is not a relocateable link,
@@ -1211,7 +1350,8 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 				      s->contents + my_offset + 8);
 
                           if (info->base_file)
-                            arm_emit_base_file_entry (info, output_bfd, s, A2T3_OFFSET);
+                            arm_emit_base_file_entry (info, output_bfd, s, 
+                                                            my_offset + 8);
 
 			}
 
@@ -1236,11 +1376,11 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		      
 		      bfd_put_32 (output_bfd, tmp, contents + rel->r_vaddr
 				  - input_section->vma);
-		      
 		      done = 1;
 		    }
                 }
 	      
+#ifndef ARM_WINCE
 	      /* Note: We used to check for ARM_THUMB9 and ARM_THUMB12 */
               else if (howto->type == ARM_THUMB23)
                 {
@@ -1319,6 +1459,9 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 			      /* Store the address of the function in the last word of the stub.  */
 			      bfd_put_32 (output_bfd, h_val,
 					  s->contents + my_offset + 16);
+
+                              if (info->base_file)
+                                arm_emit_base_file_entry (info, output_bfd, s, my_offset + 16);
 			    }
 			  else
 			    {
@@ -1341,8 +1484,6 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 					  t2a3_b_insn | ((ret_offset >> 2) & 0x00FFFFFF),
 					  s->contents + my_offset + 4);
 
-                              if (info->base_file)
-                                arm_emit_base_file_entry (info, output_bfd, s, T2A3_OFFSET);
 			    }
 			}
 
@@ -1365,12 +1506,10 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 				  contents + rel->r_vaddr
 				  - input_section->vma);
 		      
-                      if (info->base_file)
-                        arm_emit_base_file_entry (info, output_bfd, input_section, rel->r_vaddr);
-
 		      done = 1;
                     }
                 }
+#endif
             }
 	  
           /* If the relocation type and destination symbol does not
@@ -1396,7 +1535,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd, input_section,
-		      rel->r_vaddr - input_section->vma)))
+		      rel->r_vaddr - input_section->vma, true)))
 		return false;
 	    }
 	}
@@ -1411,6 +1550,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 #if 1 /* THUMBEXTENSION */
       if (done)
 	rstat = bfd_reloc_ok;
+#ifndef ARM_WINCE
       /* Only perform this fix during the final link, not a relocatable link.  nickc@cygnus.com  */
       else if (! info->relocateable
 	       && howto->type == ARM_THUMB23)
@@ -1525,6 +1665,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	      rstat = overflow ? bfd_reloc_overflow : bfd_reloc_ok;
             }
         }
+#endif
       else
 #endif /* THUMBEXTENSION */
         rstat = _bfd_final_link_relocate (howto, input_bfd, input_section,
@@ -1537,7 +1678,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	 Probably not, but it works, and if it works it don't need fixing!  nickc@cygnus.com */
       /* Only perform this fix during the final link, not a relocatable link.  nickc@cygnus.com  */
       if (! info->relocateable
-	  && rel->r_type == ARM_32)
+	  && (rel->r_type == ARM_32 || rel->r_type == ARM_RVA32))
 	{
 	  /* Determine if we need to set the bottom bit of a relocated address
 	     because the address is the address of a Thumb code symbol.  */
@@ -1610,7 +1751,8 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
-#ifndef COFF_WITH_PE
+#ifndef COFF_IMAGE_WITH_PE
+
 boolean
 bfd_arm_allocate_interworking_sections (info) 
      struct bfd_link_info * info;
@@ -1797,6 +1939,7 @@ record_thumb_to_arm_glue (info, h)
 /* Select a BFD to be used to hold the sections used by the glue code.
    This function is called from the linker scripts in ld/emultempl/
    {armcoff/pe}.em  */
+
 boolean
 bfd_arm_get_bfd_for_interworking (abfd, info)
      bfd * 		    abfd;
@@ -1822,7 +1965,7 @@ bfd_arm_get_bfd_for_interworking (abfd, info)
   
   if (sec == NULL) 
     {
-      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_CODE | SEC_READONLY;
       
       sec = bfd_make_section (abfd, ARM2THUMB_GLUE_SECTION_NAME);
       
@@ -1836,7 +1979,7 @@ bfd_arm_get_bfd_for_interworking (abfd, info)
 
   if (sec == NULL) 
     {
-      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_CODE | SEC_READONLY;
       
       sec = bfd_make_section (abfd, THUMB2ARM_GLUE_SECTION_NAME);
       
@@ -1911,6 +2054,14 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
 	  if (symndx == -1)
 	    continue;
 
+	  /* If the index is outside of the range of our table, something has gone wrong.  */
+	  if (symndx >= obj_conv_table_size (abfd))
+	    {
+	      _bfd_error_handler (_("%s: illegal symbol index in reloc: %d"),
+				  bfd_get_filename (abfd), symndx);
+	      continue;
+	    }
+	  
 	  h = obj_coff_sym_hashes (abfd)[symndx];
 
 	  /* If the relocation is against a static symbol it must be within
@@ -1929,6 +2080,7 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
 		record_arm_to_thumb_glue (info, h);
 	      break;
 	      
+#ifndef ARM_WINCE
 	    case ARM_THUMB23:
 	      /* This one is a call from thumb code.  We used to look
 		 for ARM_THUMB9 and ARM_THUMB12 as well.  We need to look
@@ -1949,6 +2101,7 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
 		  ;
 		}
 	      break;
+#endif
 	      
 	    default:
 	      break;
@@ -1959,7 +2112,7 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
   return true;
 }
 
-#endif /* ! COFF_WITH_PE */
+#endif /* ! defined (COFF_IMAGE_WITH_PE) */
 
 #define coff_bfd_reloc_type_lookup 		coff_arm_reloc_type_lookup
 #define coff_relocate_section 			coff_arm_relocate_section
@@ -1979,8 +2132,8 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
 
 static boolean
 coff_arm_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
-     bfd *obfd;
-     struct bfd_link_info *info;
+     bfd *obfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      bfd *ibfd;
      asection *sec;
      struct internal_reloc *irel;
@@ -2183,7 +2336,7 @@ _bfd_coff_arm_set_private_flags (abfd, flags)
   if (APCS_SET (abfd)
       && (   (APCS_26_FLAG    (abfd) != flag)
 	  || (APCS_FLOAT_FLAG (abfd) != (flags & F_APCS_FLOAT))
-	  || (PIC_FLAG        (abfd) != (flags & F_PIC_INT ? F_PIC : 0))
+	  || (PIC_FLAG        (abfd) != (flags & F_PIC))
 	  ))
     return false;
 
@@ -2289,21 +2442,16 @@ coff_arm_copy_private_bfd_data (src, dest)
 #define USER_LABEL_PREFIX "_"
 #endif
 
+/* Like _bfd_coff_is_local_label_name, but
+   a) test against USER_LABEL_PREFIX, to avoid stripping labels known to be
+      non-local.
+   b) Allow other prefixes than ".", e.g. an empty prefix would cause all
+      labels of the form Lxxx to be stripped.  */
 static boolean
 coff_arm_is_local_label_name (abfd, name)
-     bfd *        abfd;
+     bfd *        abfd ATTRIBUTE_UNUSED;
      const char * name;
 {
-#ifdef LOCAL_LABEL_PREFIX
-  /* If there is a prefix for local labels then look for this.
-     If the prefix exists, but it is empty, then ignore the test. */
-  
-  if (LOCAL_LABEL_PREFIX[0] != 0)
-    {
-      if (strncmp (name, LOCAL_LABEL_PREFIX, strlen (LOCAL_LABEL_PREFIX)) == 0)
-	return true;
-    }
-#endif
 #ifdef USER_LABEL_PREFIX
   if (USER_LABEL_PREFIX[0] != 0)
     {
@@ -2311,18 +2459,24 @@ coff_arm_is_local_label_name (abfd, name)
 	return false;
     }
 #endif
+
+#ifdef LOCAL_LABEL_PREFIX
+  /* If there is a prefix for local labels then look for this.
+     If the prefix exists, but it is empty, then ignore the test. */
   
-  /* devo/gcc/config/dbxcoff.h defines ASM_OUTPUT_SOURCE_LINE to generate
-     local line numbers as .LM<number>, so treat these as local.  */
-  
-  switch (name[0])
+  if (LOCAL_LABEL_PREFIX[0] != 0)
     {
-    case 'L': return true;
-    case '.': return (name[1] == 'L' && name[2] == 'M') ? true : false;
-    default:  return false;     /* Cannot make our minds up - default to
-				   false so that it will not be stripped
-				   by accident.  */ 
+      int len = strlen (LOCAL_LABEL_PREFIX);
+      
+      if (strncmp (name, LOCAL_LABEL_PREFIX, len) != 0)
+	return false;
+      
+      /* Perform the checks below for the rest of the name.  */
+      name += len;
     }
+#endif
+  
+  return name[0] == 'L';
 }
 
 /* This piece of machinery exists only to guarantee that the bfd that holds
@@ -2344,7 +2498,7 @@ coff_arm_link_output_has_begun (sub, info)
 
 static boolean
 coff_arm_final_link_postscript (abfd, pfinfo)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      struct coff_final_link_info * pfinfo;
 {
   struct coff_arm_link_hash_table * globals;
@@ -2364,194 +2518,35 @@ coff_arm_final_link_postscript (abfd, pfinfo)
   return true;
 }
 
-#if 0
-#define coff_SWAP_sym_in  arm_bfd_coff_swap_sym_in
-
-static void coff_swap_sym_in PARAMS ((bfd *, PTR, PTR));
-
-/* Sepcial version of symbol swapper, used to grab a bfd
-   onto which the glue sections can be attached.  */
-static void
-arm_bfd_coff_swap_sym_in (abfd, ext1, in1)
-     bfd * abfd;
-     PTR   ext1;
-     PTR   in1;
-{
-  flagword flags;
-  register asection * s;
-
-  /* Do the normal swap in.  */
-  coff_swap_sym_in (abfd, ext1, in1);
-
-  if (bfd_of_glue_owner != NULL) /* we already have a toc, so go home */
-    return;
-
-  /* Save the bfd for later allocation.  */
-  bfd_of_glue_owner = abfd;
-
-  s = bfd_get_section_by_name (bfd_of_glue_owner , 
-			       ARM2THUMB_GLUE_SECTION_NAME);
-
-  if (s == NULL) 
-    {
-      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY ;
-      
-      s = bfd_make_section (bfd_of_glue_owner, ARM2THUMB_GLUE_SECTION_NAME);
-
-      if (s == NULL
-	  || !bfd_set_section_flags (bfd_of_glue_owner, s, flags)
-	  || !bfd_set_section_alignment (bfd_of_glue_owner, s, 2))
-	{
-	  /* FIXME: set appropriate bfd error */
-	  abort();
-	}
-    }
-
-  s = bfd_get_section_by_name (bfd_of_glue_owner, THUMB2ARM_GLUE_SECTION_NAME);
-
-  if (s == NULL) 
-    {
-      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY ;
-      
-      s = bfd_make_section (bfd_of_glue_owner, THUMB2ARM_GLUE_SECTION_NAME);
-      
-      if (s == NULL
-	  || !bfd_set_section_flags (bfd_of_glue_owner, s, flags)
-	  || !bfd_set_section_alignment (bfd_of_glue_owner, s, 2))
-	{
-	  /* FIXME: set appropriate bfd error krk@cygnus.com */
-	  abort();
-	}
-    }
-  
-  return;
-}
-#endif
-
 #include "coffcode.h"
 
-const bfd_target
-#ifdef TARGET_LITTLE_SYM
-TARGET_LITTLE_SYM =
-#else
-armcoff_little_vec =
+#ifndef TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM armcoff_little_vec
 #endif
-{
-#ifdef TARGET_LITTLE_NAME
-  TARGET_LITTLE_NAME,
-#else
-  "coff-arm-little",
+#ifndef TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME "coff-arm-little"
 #endif
-  bfd_target_coff_flavour,
-  BFD_ENDIAN_LITTLE,		/* data byte order is little */
-  BFD_ENDIAN_LITTLE,		/* header byte order is little */
-
-  (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
-
-#ifndef COFF_WITH_PE
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-#else
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
-   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES),
+#ifndef TARGET_BIG_SYM
+#define TARGET_BIG_SYM armcoff_big_vec
+#endif
+#ifndef TARGET_BIG_NAME
+#define TARGET_BIG_NAME "coff-arm-big"
 #endif
 
-#ifdef TARGET_UNDERSCORE
-  TARGET_UNDERSCORE,		/* leading underscore */
-#else
-  0,				/* leading underscore */
-#endif
-  '/',				/* ar_pad_char */
-  15,				/* ar_max_namelen */
-
-  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
-     bfd_getl32, bfd_getl_signed_32, bfd_putl32,
-     bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */
-  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
-     bfd_getl32, bfd_getl_signed_32, bfd_putl32,
-     bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
-
-/* Note that we allow an object file to be treated as a core file as well. */
-    {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-       bfd_generic_archive_p, coff_object_p},
-    {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
-       bfd_false},
-    {bfd_false, coff_write_object_contents, /* bfd_write_contents */
-       _bfd_write_archive_contents, bfd_false},
-
-     BFD_JUMP_TABLE_GENERIC (coff),
-     BFD_JUMP_TABLE_COPY (coff),
-     BFD_JUMP_TABLE_CORE (_bfd_nocore),
-     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
-     BFD_JUMP_TABLE_SYMBOLS (coff),
-     BFD_JUMP_TABLE_RELOCS (coff),
-     BFD_JUMP_TABLE_WRITE (coff),
-     BFD_JUMP_TABLE_LINK (coff),
-     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
-
-  (PTR) & bfd_coff_std_swap_table,
-};
-
-const bfd_target
-#ifdef TARGET_BIG_SYM
-TARGET_BIG_SYM =
-#else
-armcoff_big_vec =
-#endif
-{
-#ifdef TARGET_BIG_NAME
-  TARGET_BIG_NAME,
-#else
-  "coff-arm-big",
-#endif
-  bfd_target_coff_flavour,
-  BFD_ENDIAN_BIG,		/* data byte order is big */
-  BFD_ENDIAN_BIG,		/* header byte order is big */
-
-  (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
-
-#ifndef COFF_WITH_PE
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-#else
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
-   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES),
+#ifndef TARGET_UNDERSCORE
+#define TARGET_UNDERSCORE 0
 #endif
 
-#ifdef TARGET_UNDERSCORE
-  TARGET_UNDERSCORE,		/* leading underscore */
+#ifdef COFF_WITH_PE
+#define EXTRA_S_FLAGS (SEC_LINK_ONCE | SEC_LINK_DUPLICATES)
 #else
-  0,				/* leading underscore */
+#define EXTRA_S_FLAGS 0
 #endif
-  '/',				/* ar_pad_char */
-  15,				/* ar_max_namelen */
 
-  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
-     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
-  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
-     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
+/* Forward declaration for use initialising alternative_target field.  */
+extern const bfd_target TARGET_BIG_SYM ;
 
-/* Note that we allow an object file to be treated as a core file as well. */
-    {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-       bfd_generic_archive_p, coff_object_p},
-    {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
-       bfd_false},
-    {bfd_false, coff_write_object_contents, /* bfd_write_contents */
-       _bfd_write_archive_contents, bfd_false},
+/* Target vectors.  */
+CREATE_LITTLE_COFF_TARGET_VEC (TARGET_LITTLE_SYM, TARGET_LITTLE_NAME, D_PAGED, EXTRA_S_FLAGS, TARGET_UNDERSCORE, & TARGET_BIG_SYM)
+CREATE_BIG_COFF_TARGET_VEC (TARGET_BIG_SYM, TARGET_BIG_NAME, D_PAGED, EXTRA_S_FLAGS, TARGET_UNDERSCORE, & TARGET_LITTLE_SYM)
 
-     BFD_JUMP_TABLE_GENERIC (coff),
-     BFD_JUMP_TABLE_COPY (coff),
-     BFD_JUMP_TABLE_CORE (_bfd_nocore),
-     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
-     BFD_JUMP_TABLE_SYMBOLS (coff),
-     BFD_JUMP_TABLE_RELOCS (coff),
-     BFD_JUMP_TABLE_WRITE (coff),
-     BFD_JUMP_TABLE_LINK (coff),
-     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
-
-  (PTR) & bfd_coff_std_swap_table,
-};

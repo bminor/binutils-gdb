@@ -1,5 +1,6 @@
 /* Generic COFF swapping routines, for BFD.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -25,10 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
    Any file which uses this must first include "coff/internal.h" and
    "coff/CPU.h".  The functions will then be correct for that CPU.  */
-
-#ifndef IMAGE_BASE
-#define IMAGE_BASE 0
-#endif
 
 #define PUTWORD bfd_h_put_32
 #define PUTHALF bfd_h_put_16
@@ -264,7 +261,7 @@ coff_swap_reloc_out (abfd, src, dst)
   SWAP_OUT_RELOC_EXTRA(abfd,reloc_src, reloc_dst);
 #endif
 
-  return RELSZ;
+  return bfd_coff_relsz (abfd);
 }
 
 #endif /* NO_COFF_RELOCS */
@@ -324,7 +321,7 @@ coff_swap_filehdr_out (abfd, in, out)
 #ifdef COFF_ADJUST_FILEHDR_OUT_POST
   COFF_ADJUST_FILEHDR_OUT_POST (abfd, in, out);
 #endif
-  return FILHSZ;
+  return bfd_coff_filhsz (abfd);
 }
 
 
@@ -360,6 +357,9 @@ coff_swap_sym_in (abfd, ext1, in1)
   }
   in->n_sclass = bfd_h_get_8(abfd, ext->e_sclass);
   in->n_numaux = bfd_h_get_8(abfd, ext->e_numaux);
+#ifdef COFF_ADJUST_SYM_IN_POST
+  COFF_ADJUST_SYM_IN_POST (abfd, ext1, in1);
+#endif
 }
 
 static unsigned int
@@ -393,6 +393,9 @@ coff_swap_sym_out (abfd, inp, extp)
       }
   bfd_h_put_8(abfd,  in->n_sclass , ext->e_sclass);
   bfd_h_put_8(abfd,  in->n_numaux , ext->e_numaux);
+#ifdef COFF_ADJUST_SYM_OUT_POST
+  COFF_ADJUST_SYM_OUT_POST (abfd, inp, extp);
+#endif
   return SYMESZ;
 }
 
@@ -422,7 +425,16 @@ coff_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
 #if FILNMLEN != E_FILNMLEN
 	    -> Error, we need to cope with truncating or extending FILNMLEN!;
 #else
-	    memcpy (in->x_file.x_fname, ext->x_file.x_fname, FILNMLEN);
+	    if (numaux > 1)
+	      {
+		if (indx == 0)
+		  memcpy (in->x_file.x_fname, ext->x_file.x_fname,
+			  numaux * sizeof (AUXENT));
+	      }
+	    else
+	      {
+		memcpy (in->x_file.x_fname, ext->x_file.x_fname, FILNMLEN);
+	      }
 #endif
 	  }
       goto end;
@@ -518,8 +530,8 @@ coff_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
      PTR 	inp;
      int   type;
      int   class;
-     int   indx;
-     int   numaux;
+     int   indx ATTRIBUTE_UNUSED;
+     int   numaux ATTRIBUTE_UNUSED;
      PTR	extp;
 {
   union internal_auxent *in = (union internal_auxent *)inp;
@@ -839,7 +851,7 @@ coff_swap_scnhdr_out (abfd, in, out)
 {
   struct internal_scnhdr *scnhdr_int = (struct internal_scnhdr *)in;
   SCNHDR *scnhdr_ext = (SCNHDR *)out;
-  unsigned int ret = SCNHSZ;
+  unsigned int ret = bfd_coff_scnhsz (abfd);
 
 #ifdef COFF_ADJUST_SCNHDR_OUT_PRE
   COFF_ADJUST_SCNHDR_OUT_PRE (abfd, in, out);

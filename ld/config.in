@@ -169,3 +169,6 @@
 /* Define if environ is not declared in system header files. */
 #undef NEED_DECLARATION_ENVIRON
 
+/* Additional extension a shared object might have. */
+#undef EXTRA_SHLIB_EXTENSION
+

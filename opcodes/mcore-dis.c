@@ -1,5 +1,5 @@
-/* Disassemble Motorolla M*Core instructions.
-   Copyright (C) 1993, 1999 Free Software Foundation, Inc.
+/* Disassemble Motorola M*Core instructions.
+   Copyright (C) 1993, 1999, 2000 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
 #define STATIC_TABLE
@@ -57,6 +57,8 @@ static const unsigned short imsk[] =
     /* OMc */ 0xFF00,
     /* SIa */ 0xFE00,
 
+  /* MULSH */ 0xFF00,    
+  /* OPSR  */ 0xFFF8,   /* psrset/psrclr */
 		 
     /* JC  */ 0,		/* JC,JU,JL don't appear in object */
     /* JU  */ 0,
@@ -96,6 +98,8 @@ print_insn_mcore (memaddr, info)
   mcore_opcode_info * op;
   int                 status;
 
+  info->bytes_per_chunk = 2;
+
   status = info->read_memory_func (memaddr, ibytes, 2, info);
 
   if (status != 0) 
@@ -104,17 +108,20 @@ print_insn_mcore (memaddr, info)
       return -1;
     }
 
-  inst = (ibytes[0] << 8) | ibytes[1];
+  if (info->endian == BFD_ENDIAN_BIG)
+    inst = (ibytes[0] << 8) | ibytes[1];
+  else if (info->endian == BFD_ENDIAN_LITTLE)
+    inst = (ibytes[1] << 8) | ibytes[0];
+  else
+    abort ();
 
   /* Just a linear search of the table.  */
   for (op = mcore_table; op->name != 0; op ++)
-    {
-      if (op->inst == (inst & imsk[op->opclass]))
-	break;
-    }
+    if (op->inst == (inst & imsk[op->opclass]))
+      break;
 
   if (op->name == 0)
-    fprintf (stream, ".word 0x%04x", inst);
+    fprintf (stream, ".short 0x%04x", inst);
   else
     {
       const char * name = grname[inst & 0x0F];
@@ -130,6 +137,7 @@ print_insn_mcore (memaddr, info)
 	case JSR: fprintf (stream, "\t%s", name); break;
 	case OC:  fprintf (stream, "\t%s, %s", name, crname[(inst >> 4) & 0x1F]); break;
 	case O1R1: fprintf (stream, "\t%s, r1", name); break;
+	case MULSH:
 	case O2: fprintf (stream, "\t%s, %s", name, grname[(inst >> 4) & 0xF]); break;
 	case X1: fprintf (stream, "\tr1, %s", name); break;
 	case OI: fprintf (stream, "\t%s, %d", name, ((inst >> 4) & 0x1F) + 1); break;
@@ -191,11 +199,15 @@ print_insn_mcore (memaddr, info)
 	    if (status != 0) 
 	      {
 		info->memory_error_func (status, memaddr, info);
-		return -1;
+		break;
 	      }
 	    
-	    val = (ibytes[0] << 24) | (ibytes[1] << 16)
-	      | (ibytes[2] << 8) | (ibytes[3]);
+	    if (info->endian == BFD_ENDIAN_LITTLE)
+	      val = (ibytes[3] << 24) | (ibytes[2] << 16)
+		| (ibytes[1] << 8) | (ibytes[0]);
+	    else
+	      val = (ibytes[0] << 24) | (ibytes[1] << 16)
+		| (ibytes[2] << 8) | (ibytes[3]);
 	    
 	    /* Removed [] around literal value to match ABI syntax 12/95.  */
 	    fprintf (stream, "\t%s, 0x%X", grname[(inst >> 8) & 0xF], val);
@@ -216,11 +228,15 @@ print_insn_mcore (memaddr, info)
 	    if (status != 0) 
 	      {
 		info->memory_error_func (status, memaddr, info);
-		return -1;
+		break;
 	      }
-	    
-	    val = (ibytes[0] << 24) | (ibytes[1] << 16)
-	      | (ibytes[2] << 8) | (ibytes[3]);
+
+	    if (info->endian == BFD_ENDIAN_LITTLE)
+	      val = (ibytes[3] << 24) | (ibytes[2] << 16)
+		| (ibytes[1] << 8) | (ibytes[0]);
+	    else
+	      val = (ibytes[0] << 24) | (ibytes[1] << 16)
+		| (ibytes[2] << 8) | (ibytes[3]);
 	    
 	    /* Removed [] around literal value to match ABI syntax 12/95.  */
 	    fprintf (stream, "\t0x%X", val);
@@ -235,6 +251,18 @@ print_insn_mcore (memaddr, info)
 		fprintf (stream, "\t// from address pool at 0x%x",
 			 (memaddr + 2 + ((inst & 0xFF) << 2)) & 0xFFFFFFFC);
 	      }
+	  }
+	  break;
+	  
+	case OPSR:
+	  {
+	    static char * fields[] = 
+	    {
+	      "af", "ie",    "fe",    "fe,ie", 
+	      "ee", "ee,ie", "ee,fe", "ee,fe,ie"
+	    };
+	    
+	    fprintf (stream, "\t%s", fields[inst & 0x7]);
 	  }
 	  break;
 	  

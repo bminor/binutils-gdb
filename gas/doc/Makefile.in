@@ -72,6 +72,7 @@ CC = @CC@
 DATADIRNAME = @DATADIRNAME@
 DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
+GDBINIT = @GDBINIT@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
 GT_NO = @GT_NO@
@@ -81,7 +82,6 @@ INSTOBJEXT = @INSTOBJEXT@
 INTLDEPS = @INTLDEPS@
 INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
-LD = @LD@
 LEX = @LEX@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
@@ -89,7 +89,7 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
-NM = @NM@
+OBJDUMP = @OBJDUMP@
 OPCODES_LIB = @OPCODES_LIB@
 PACKAGE = @PACKAGE@
 POFILES = @POFILES@
@@ -97,7 +97,6 @@ POSUB = @POSUB@
 RANLIB = @RANLIB@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
-USE_SYMBOL_UNDERSCORE = @USE_SYMBOL_UNDERSCORE@
 VERSION = @VERSION@
 YACC = @YACC@
 atof = @atof@
@@ -125,11 +124,14 @@ CPU_DOCS = \
 	c-h8300.texi \
 	c-h8500.texi \
 	c-hppa.texi \
+	c-i370.texi \
 	c-i386.texi \
 	c-i960.texi \
+	c-m32r.texi \
 	c-m68k.texi \
 	c-mips.texi \
 	c-ns32k.texi \
+	c-pj.texi \
 	c-sh.texi \
 	c-sparc.texi \
 	c-vax.texi \
@@ -161,7 +163,7 @@ DIST_COMMON =  Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 all: all-redirect
 .SUFFIXES:
@@ -342,7 +344,7 @@ distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$/$$file $(distdir)/$$file; \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
 	  else \
 	    test -f $(distdir)/$$file \
 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \

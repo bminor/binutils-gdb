@@ -1,5 +1,5 @@
 /* ld.h -- general linker header file
-   Copyright (C) 1991, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1991, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -56,13 +56,20 @@
    discarded.  */
 #define DISCARD_SECTION_NAME "/DISCARD/"
 
+/* A file name list */
+typedef struct name_list
+{
+   const char *name;
+   struct name_list *next;
+} name_list;
+
 /* A wildcard specification.  This is only used in ldgram.y, but it
    winds up in ldgram.h, so we need to define it outside.  */
 
 struct wildcard_spec
 {
   const char *name;
-  const char *exclude_name;
+  struct name_list *exclude_name_list;
   boolean sorted;
 };
 
@@ -222,5 +229,16 @@ extern int yyparse PARAMS ((void));
 extern void add_cref PARAMS ((const char *, bfd *, asection *, bfd_vma));
 extern void output_cref PARAMS ((FILE *));
 extern void check_nocrossrefs PARAMS ((void));
+
+extern void ld_abort PARAMS ((const char *, int, const char *))
+     ATTRIBUTE_NORETURN;
+
+/* If gcc, we can give a function name, too.  */
+#if !defined (__GNUC__) || __GNUC_MINOR__ <= 5
+#define __PRETTY_FUNCTION__  ((char*) NULL)
+#endif
+
+#undef abort
+#define abort() ld_abort (__FILE__, __LINE__, __PRETTY_FUNCTION__)
 
 #endif

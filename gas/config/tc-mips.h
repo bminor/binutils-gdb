@@ -1,5 +1,5 @@
 /* tc-mips.h -- header file for tc-mips.c.
-   Copyright (C) 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 1999, 2000 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF support by Ian Lance Taylor of Cygnus Support.
@@ -55,6 +55,9 @@ extern int mips_relax_frag PARAMS ((struct frag *, long));
 #define md_undefined_symbol(name)	(0)
 #define md_operand(x)
 
+extern int mips_do_align PARAMS ((int, const char *, int, int));
+#define md_do_align(n,fill,len,max,l) if (mips_do_align (n,fill,len,max)) goto l
+
 /* We permit PC relative difference expressions when generating
    embedded PIC code.  */
 #define DIFF_EXPR_OK
@@ -85,7 +88,7 @@ extern void mips_init_after_args PARAMS ((void));
 extern int mips_parse_long_option PARAMS ((const char *));
 
 #define tc_frob_label(sym) mips_define_label (sym)
-extern void mips_define_label PARAMS ((struct symbol *));
+extern void mips_define_label PARAMS ((symbolS *));
 
 #define tc_frob_file_before_adjust() mips_frob_file_before_adjust ()
 extern void mips_frob_file_before_adjust PARAMS ((void));
@@ -139,6 +142,7 @@ extern void md_mips_end PARAMS ((void));
 #define md_end()	md_mips_end()
 
 #define USE_GLOBAL_POINTER_OPT	(OUTPUT_FLAVOR == bfd_target_ecoff_flavour \
+				 || OUTPUT_FLAVOR == bfd_target_coff_flavour \
 				 || OUTPUT_FLAVOR == bfd_target_elf_flavour)
 
 extern void mips_pop_insert PARAMS ((void));

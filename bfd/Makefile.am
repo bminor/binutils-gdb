@@ -4,7 +4,7 @@ AUTOMAKE_OPTIONS = cygnus
 
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
-DEP = mkdep
+MKDEP = mkdep
 
 SUBDIRS = doc po
 
@@ -41,12 +41,14 @@ ALL_MACHINES = \
 	cpu-alpha.lo \
 	cpu-arc.lo \
 	cpu-arm.lo \
+	cpu-avr.lo \
 	cpu-d10v.lo \
 	cpu-d30v.lo \
 	cpu-fr30.lo \
 	cpu-h8300.lo \
 	cpu-h8500.lo \
 	cpu-hppa.lo \
+	cpu-i370.lo \
 	cpu-i386.lo \
 	cpu-i860.lo \
 	cpu-i960.lo \
@@ -58,6 +60,7 @@ ALL_MACHINES = \
 	cpu-mcore.lo \
 	cpu-mips.lo \
 	cpu-ns32k.lo \
+	cpu-pj.lo \
 	cpu-powerpc.lo \
 	cpu-rs6000.lo \
 	cpu-sh.lo \
@@ -75,12 +78,14 @@ ALL_MACHINES_CFILES = \
 	cpu-alpha.c \
 	cpu-arc.c \
 	cpu-arm.c \
+	cpu-avr.c \
 	cpu-d10v.c \
 	cpu-d30v.c \
 	cpu-fr30.c \
 	cpu-h8300.c \
 	cpu-h8500.c \
 	cpu-hppa.c \
+	cpu-i370.c \
 	cpu-i386.c \
 	cpu-i860.c \
 	cpu-i960.c \
@@ -92,6 +97,7 @@ ALL_MACHINES_CFILES = \
 	cpu-mcore.c \
 	cpu-mips.c \
 	cpu-ns32k.c \
+	cpu-pj.c \
 	cpu-powerpc.c \
 	cpu-rs6000.c \
 	cpu-sh.c \
@@ -114,6 +120,7 @@ BFD32_BACKENDS = \
 	aout-tic30.lo \
 	aout0.lo \
 	aout32.lo \
+	armnetbsd.lo \
 	bout.lo \
 	cf-i386lynx.lo \
 	cf-m68klynx.lo \
@@ -144,6 +151,7 @@ BFD32_BACKENDS = \
 	coff-w65.lo \
 	coff-z8k.lo \
 	cofflink.lo \
+	dwarf1.lo \
 	dwarf2.lo \
 	ecoff.lo \
 	ecofflink.lo \
@@ -151,13 +159,15 @@ BFD32_BACKENDS = \
 	elf32-arc.lo \
 	elfarm-oabi.lo \
 	elfarm-nabi.lo \
+	elf32-avr.lo \
 	elf32-d10v.lo \
 	elf32-d30v.lo \
 	elf32-fr30.lo \
 	elf32-gen.lo \
-	elf32-hppa.lo \
+	elf32-i370.lo \
 	elf32-i386.lo \
 	elf32-i860.lo \
+	elf32-i960.lo \
 	elf32-m32r.lo \
 	elf32-m68k.lo \
 	elf32-m88k.lo \
@@ -165,12 +175,15 @@ BFD32_BACKENDS = \
 	elf-m10300.lo \
 	elf32-mcore.lo \
 	elf32-mips.lo \
+	elf32-pj.lo \
 	elf32-ppc.lo \
 	elf32-sh.lo \
 	elf32-sparc.lo \
 	elf32-v850.lo \
 	elf32.lo \
 	elflink.lo \
+	epoc-pe-arm.lo \
+	epoc-pei-arm.lo \
 	hp300bsd.lo \
 	hp300hpux.lo \
 	som.lo \
@@ -208,6 +221,11 @@ BFD32_BACKENDS = \
 	pei-mcore.lo \
 	pe-ppc.lo \
 	pei-ppc.lo \
+	pe-sh.lo \
+	pei-sh.lo \
+	pe-mips.lo \
+	pei-mips.lo \
+	peigen.lo \
 	ppcboot.lo \
 	reloc16.lo \
 	riscix.lo \
@@ -232,6 +250,7 @@ BFD32_BACKENDS_CFILES = \
 	aout-tic30.c \
 	aout0.c \
 	aout32.c \
+	armnetbsd.c \
 	bout.c \
 	cf-i386lynx.c \
 	cf-m68klynx.c \
@@ -262,6 +281,7 @@ BFD32_BACKENDS_CFILES = \
 	coff-w65.c \
 	coff-z8k.c \
 	cofflink.c \
+	dwarf1.c \
 	dwarf2.c \
 	ecoff.c \
 	ecofflink.c \
@@ -269,13 +289,15 @@ BFD32_BACKENDS_CFILES = \
 	elf32-arc.c \
 	elfarm-oabi.c \
 	elfarm-nabi.c \
+	elf32-avr.c \
 	elf32-d10v.c \
 	elf32-d30v.c \
 	elf32-fr30.c \
 	elf32-gen.c \
-	elf32-hppa.c \
+	elf32-i370.c \
 	elf32-i386.c \
 	elf32-i860.c \
+	elf32-i960.c \
 	elf32-m32r.c \
 	elf32-m68k.c \
 	elf32-m88k.c \
@@ -283,12 +305,15 @@ BFD32_BACKENDS_CFILES = \
 	elf-m10300.c \
 	elf32-mcore.c \
 	elf32-mips.c \
+	elf32-pj.c \
 	elf32-ppc.c \
 	elf32-sh.c \
 	elf32-sparc.c \
 	elf32-v850.c \
 	elf32.c \
 	elflink.c \
+	epoc-pe-arm.c \
+	epoc-pei-arm.c \
 	hp300bsd.c \
 	hp300hpux.c \
 	som.c \
@@ -326,6 +351,11 @@ BFD32_BACKENDS_CFILES = \
 	pei-mcore.c \
 	pe-ppc.c \
 	pei-ppc.c \
+	pe-sh.c \
+	pei-sh.c \
+	pe-mips.c \
+	pei-mips.c \
+	peigen.c \
 	ppcboot.c \
 	reloc16.c \
 	riscix.c \
@@ -409,11 +439,11 @@ CFILES = \
 ## This is a list of all .h files which are in the source tree.
 SOURCE_HFILES = \
 	aout-target.h aoutf1.h aoutx.h coffcode.h coffswap.h \
-	ecoffswap.h elf32-hppa.h \
-	elfcode.h genlink.h go32stub.h hppa_stubs.h libaout.h \
+	ecoffswap.h elf32-arm.h elfcode.h elfcore.h \
+	elflink.h freebsd.h genlink.h go32stub.h libaout.h \
 	libbfd.h libcoff.h libecoff.h elf-bfd.h libhppa.h libieee.h \
-	libnlm.h liboasys.h netbsd.h nlm-target.h nlmcode.h ns32k.h \
-	som.h vms.h
+	libnlm.h liboasys.h libpei.h netbsd.h nlm-target.h nlmcode.h \
+	nlmswap.h ns32k.h peicode.h som.h vms.h
 
 HFILES = \
 	elf32-target.h elf64-target.h targmatch.h \
@@ -462,8 +492,9 @@ noinst_LIBRARIES = libbfd.a
 libbfd_a_SOURCES =
 
 stamp-lib: libbfd.la
-	if [ -f .libs/libbfd.a ]; then \
-	  cp .libs/libbfd.a libbfd.tmp; \
+	libtooldir=`$(LIBTOOL) --config | sed -n -e 's/^objdir=//p'`; \
+	if [ -f $$libtooldir/libbfd.a ]; then \
+	  cp $$libtooldir/libbfd.a libbfd.tmp; \
 	  $(SHELL) $(srcdir)/../move-if-change libbfd.tmp libbfd.a; \
 	else true; fi
 	touch stamp-lib
@@ -512,25 +543,25 @@ install-data-local: $(BFD_H)
 	$(INSTALL_DATA) $(INCDIR)/ansidecl.h $(includedir)/ansidecl.h
 	$(INSTALL_DATA) $(INCDIR)/bfdlink.h $(includedir)/bfdlink.h
 
-# Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
-.dep: dep.sed $(CFILES) $(HFILES) bfd.h
-	rm -f .dep1
-	$(MAKE) DEP=$(DEP) .dep1
-	sed -f dep.sed <.dep1 >.dep
+# Have to get rid of DEP1 here so that "$?" later includes all of $(CFILES).
+DEP: dep.sed $(CFILES) $(HFILES) bfd.h
+	rm -f DEP1
+	$(MAKE) MKDEP=$(MKDEP) DEP1
+	sed -f dep.sed <DEP1 >DEP
 
 # This rule really wants a mkdep that runs "gcc -MM".
 # The NetBSD mkdep overwrites any existing file contents, and doesn't insert
 # the "DO NOT DELETE" line.
 # Other mkdep versions require a file that already exists, and do insert it.
 # Hence the weirdness....
-.dep1: $(CFILES)
-	rm -f .dep2 .dep2a
-	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep2
-	echo > .dep2a
-	$(DEP) -f .dep2a $(INCLUDES) $(CFLAGS) $?
-	sed -e '/DO NOT DELETE/d' -e '/^$$/d' < .dep2a >> .dep2
-	rm -f .dep2a
-	$(SHELL) $(srcdir)/../move-if-change .dep2 .dep1
+DEP1: $(CFILES)
+	rm -f DEP2 DEP2a
+	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP2
+	echo > DEP2a
+	$(MKDEP) -f DEP2a $(INCLUDES) $(CFLAGS) $?
+	sed -e '/DO NOT DELETE/d' -e '/^$$/d' < DEP2a >> DEP2
+	rm -f DEP2a
+	$(SHELL) $(srcdir)/../move-if-change DEP2 DEP1
 
 dep.sed: dep-in.sed config.status
 	sed <$(srcdir)/dep-in.sed >dep.sed	\
@@ -538,19 +569,19 @@ dep.sed: dep-in.sed config.status
 		-e 's!@INCDIR@!$(INCDIR)!'	\
 		-e 's!@SRCDIR@!$(srcdir)!'
 
-dep: .dep
+dep: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
-	cat .dep >> tmp-Makefile
+	cat DEP >> tmp-Makefile
 	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile Makefile
 
-dep-in: .dep
+dep-in: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.in > tmp-Makefile.in
-	cat .dep >> tmp-Makefile.in
+	cat DEP >> tmp-Makefile.in
 	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.in $(srcdir)/Makefile.in
 
-dep-am: .dep
+dep-am: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.am > tmp-Makefile.am
-	cat .dep >> tmp-Makefile.am
+	cat DEP >> tmp-Makefile.am
 	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.am $(srcdir)/Makefile.am
 
 host-aout.lo: Makefile
@@ -613,7 +644,7 @@ stmp-lcoff-h: $(LIBCOFF_H_FILES)
 MOSTLYCLEANFILES = elf32-target.h elf64-target.h ofiles stamp-ofiles \
 	targmatch.h
 
-CLEANFILES = bfd.h dep.sed stmp-bfd-h .dep .dep1 libbfd.a stamp-lib \
+CLEANFILES = bfd.h dep.sed stmp-bfd-h DEP DEP1 libbfd.a stamp-lib \
 	stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
 
 # We want to rerun configure if config.bfd or configure.host change.
@@ -666,6 +697,7 @@ cpu-a29k.lo: cpu-a29k.c
 cpu-alpha.lo: cpu-alpha.c
 cpu-arc.lo: cpu-arc.c
 cpu-arm.lo: cpu-arm.c
+cpu-avr.lo: cpu-avr.c
 cpu-d10v.lo: cpu-d10v.c
 cpu-d30v.lo: cpu-d30v.c
 cpu-fr30.lo: cpu-fr30.c
@@ -683,6 +715,7 @@ cpu-m10300.lo: cpu-m10300.c
 cpu-mcore.lo: cpu-mcore.c
 cpu-mips.lo: cpu-mips.c
 cpu-ns32k.lo: cpu-ns32k.c ns32k.h
+cpu-pj.lo: cpu-pj.c
 cpu-powerpc.lo: cpu-powerpc.c
 cpu-rs6000.lo: cpu-rs6000.c
 cpu-sh.lo: cpu-sh.c
@@ -715,6 +748,9 @@ aout0.lo: aout0.c aoutf1.h $(INCDIR)/aout/sun4.h libaout.h \
 aout32.lo: aout32.c aoutx.h $(INCDIR)/bfdlink.h libaout.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
   $(INCDIR)/aout/ar.h
+armnetbsd.lo: armnetbsd.c netbsd.h libaout.h $(INCDIR)/bfdlink.h \
+  aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 bout.lo: bout.c $(INCDIR)/bfdlink.h genlink.h $(INCDIR)/bout.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def libaout.h
 cf-i386lynx.lo: cf-i386lynx.c coff-i386.c $(INCDIR)/coff/i386.h \
@@ -792,6 +828,9 @@ coff-z8k.lo: coff-z8k.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/z8k.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 cofflink.lo: cofflink.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
   libcoff.h
+dwarf1.lo: dwarf1.c $(INCDIR)/libiberty.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/dwarf.h
 dwarf2.lo: dwarf2.c $(INCDIR)/libiberty.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/dwarf2.h
@@ -817,6 +856,9 @@ elfarm-nabi.lo: elfarm-nabi.c $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h elf32-arm.h \
   elf32-target.h
+elf32-avr.lo: elf32-avr.c elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/avr.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-d10v.lo: elf32-d10v.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h
@@ -829,16 +871,18 @@ elf32-fr30.lo: elf32-fr30.c elf-bfd.h $(INCDIR)/elf/common.h \
 elf32-gen.lo: elf32-gen.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h
-elf32-hppa.lo: elf32-hppa.c $(INCDIR)/bfdlink.h elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  elf32-hppa.h libhppa.h $(INCDIR)/elf/hppa.h $(INCDIR)/elf/reloc-macros.h \
-  hppa_stubs.h elf32-target.h
+elf32-i370.lo: elf32-i370.c elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  elf32-target.h
 elf32-i386.lo: elf32-i386.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/i386.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-i860.lo: elf32-i860.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h
+elf32-i960.lo: elf32-i960.c elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/i960.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-m32r.lo: elf32-m32r.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/m32r.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
@@ -865,6 +909,9 @@ elf32-mips.lo: elf32-mips.c $(INCDIR)/bfdlink.h genlink.h \
   $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/mips.h ecoffswap.h \
   elf32-target.h
+elf32-pj.lo: elf32-pj.c $(INCDIR)/bfdlink.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/pj.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-ppc.lo: elf32-ppc.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/ppc.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
@@ -883,6 +930,13 @@ elf32.lo: elf32.c elfcode.h $(INCDIR)/bfdlink.h elf-bfd.h \
   elfcore.h elflink.h
 elflink.lo: elflink.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
+epoc-pe-arm.lo: epoc-pe-arm.c pe-arm.c coff-arm.c $(INCDIR)/coff/arm.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
+epoc-pei-arm.lo: epoc-pei-arm.c pei-arm.c coff-arm.c \
+  $(INCDIR)/coff/arm.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h \
+  libcoff.h $(INCDIR)/bfdlink.h coffcode.h peicode.h \
+  libpei.h
 hp300bsd.lo: hp300bsd.c libaout.h $(INCDIR)/bfdlink.h \
   aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
@@ -963,28 +1017,42 @@ pc532-mach.lo: pc532-mach.c libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 pe-arm.lo: pe-arm.c coff-arm.c $(INCDIR)/coff/arm.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 pei-arm.lo: pei-arm.c coff-arm.c $(INCDIR)/coff/arm.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 pe-i386.lo: pe-i386.c coff-i386.c $(INCDIR)/coff/i386.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 pei-i386.lo: pei-i386.c coff-i386.c $(INCDIR)/coff/i386.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
+pe-mips.lo: pe-mips.c $(INCDIR)/coff/mipspe.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
+  peicode.h
+pei-mips.lo: pei-mips.c pe-mips.c $(INCDIR)/coff/mipspe.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
   $(INCDIR)/bfdlink.h coffcode.h peicode.h
 pe-mcore.lo: pe-mcore.c coff-mcore.c $(INCDIR)/coff/mcore.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 pei-mcore.lo: pei-mcore.c coff-mcore.c $(INCDIR)/coff/mcore.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 pe-ppc.lo: pe-ppc.c coff-ppc.c $(INCDIR)/coff/powerpc.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 pei-ppc.lo: pei-ppc.c coff-ppc.c $(INCDIR)/coff/powerpc.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
+pe-sh.lo: pe-sh.c coff-sh.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/sh.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
+  coffcode.h peicode.h
+pei-sh.lo: pei-sh.c coff-sh.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/sh.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
+  coffcode.h peicode.h
+peigen.lo: peigen.c $(INCDIR)/coff/internal.h $(INCDIR)/coff/i386.h \
+  $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h libpei.h
 ppcboot.lo: ppcboot.c
 reloc16.lo: reloc16.c $(INCDIR)/bfdlink.h genlink.h \
   $(INCDIR)/coff/internal.h libcoff.h

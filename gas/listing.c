@@ -109,10 +109,10 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #define LISTING_WORD_SIZE 4
 #endif
 #ifndef LISTING_LHS_WIDTH
-#define LISTING_LHS_WIDTH 1
+#define LISTING_LHS_WIDTH ((LISTING_WORD_SIZE) > 4 ? 1 : 4 / (LISTING_WORD_SIZE))
 #endif
 #ifndef LISTING_LHS_WIDTH_SECOND
-#define LISTING_LHS_WIDTH_SECOND 1
+#define LISTING_LHS_WIDTH_SECOND LISTING_LHS_WIDTH
 #endif
 #ifndef LISTING_RHS_WIDTH
 #define LISTING_RHS_WIDTH 100
@@ -375,7 +375,7 @@ listing_newline (ps)
 	      
 	      while (--len)
 		{
-		  char c = * src ++;
+		  unsigned char c = * src ++;
 
 		  /* Omit control characters in the listing.  */
 		  if (isascii (c) && ! iscntrl (c))
@@ -596,7 +596,7 @@ calc_hex (list)
   unsigned int address = ~ (unsigned int) 0;
   fragS *frag;
   fragS *frag_ptr;
-  unsigned int byte_in_frag;
+  unsigned int octet_in_frag;
 
   /* Find first frag which says it belongs to this line */
   frag = list->frag;
@@ -611,33 +611,33 @@ calc_hex (list)
   while (frag_ptr != (fragS *) NULL && frag_ptr->line == first)
     {
       /* Print as many bytes from the fixed part as is sensible */
-      byte_in_frag = 0;
-      while ((offsetT) byte_in_frag < frag_ptr->fr_fix
+      octet_in_frag = 0;
+      while ((offsetT) octet_in_frag < frag_ptr->fr_fix
 	     && data_buffer_size < MAX_BYTES - 3)
 	{
 	  if (address == ~ (unsigned int) 0)
 	    {
-	      address = frag_ptr->fr_address;
+	      address = frag_ptr->fr_address / OCTETS_PER_BYTE;
 	    }
 
 	  sprintf (data_buffer + data_buffer_size,
 		   "%02X",
-		   (frag_ptr->fr_literal[byte_in_frag]) & 0xff);
+		   (frag_ptr->fr_literal[octet_in_frag]) & 0xff);
 	  data_buffer_size += 2;
-	  byte_in_frag++;
+	  octet_in_frag++;
 	}
       {
-	unsigned int var_rep_max = byte_in_frag;
-	unsigned int var_rep_idx = byte_in_frag;
+	unsigned int var_rep_max = octet_in_frag;
+	unsigned int var_rep_idx = octet_in_frag;
 
 	/* Print as many bytes from the variable part as is sensible */
-	while (((offsetT) byte_in_frag
-		< frag_ptr->fr_fix + frag_ptr->fr_var * frag_ptr->fr_offset)
+	while (((offsetT) octet_in_frag
+		< (frag_ptr->fr_fix + frag_ptr->fr_var * frag_ptr->fr_offset))
 	       && data_buffer_size < MAX_BYTES - 3)
 	  {
 	    if (address == ~ (unsigned int) 0)
 	      {
-		address = frag_ptr->fr_address;
+		address = frag_ptr->fr_address / OCTETS_PER_BYTE;
 	      }
 	    sprintf (data_buffer + data_buffer_size,
 		     "%02X",
@@ -649,7 +649,7 @@ calc_hex (list)
 	    data_buffer_size += 2;
 
 	    var_rep_idx++;
-	    byte_in_frag++;
+	    octet_in_frag++;
 
 	    if ((offsetT) var_rep_idx >= frag_ptr->fr_fix + frag_ptr->fr_var)
 	      var_rep_idx = var_rep_max;
@@ -677,8 +677,9 @@ print_lines (list, lineno, string, address)
   unsigned int idx;
   unsigned int nchars;
   unsigned int lines;
-  unsigned int byte_in_word = 0;
+  unsigned int octet_in_word = 0;
   char *src = data_buffer;
+  int cur;
 
   /* Print the stuff on the first line */
   listing_page (list);
@@ -707,18 +708,20 @@ print_lines (list, lineno, string, address)
 
   /* And the data to go along with it */
   idx = 0;
-  
-  while (*src && idx < nchars)
+  cur = 0;
+  while (src[cur] && idx < nchars)
     {
-      fprintf (list_file, "%c%c", src[0], src[1]);
-      src += 2;
-      byte_in_word++;
+      int offset;
+      offset = cur;
+      fprintf (list_file, "%c%c", src[offset], src[offset+1]);
+      cur += 2;
+      octet_in_word++;
       
-      if (byte_in_word == LISTING_WORD_SIZE)
+      if (octet_in_word == LISTING_WORD_SIZE)
 	{
 	  fprintf (list_file, " ");
 	  idx++;
-	  byte_in_word = 0;
+	  octet_in_word = 0;
 	}
       
       idx += 2;
@@ -740,7 +743,7 @@ print_lines (list, lineno, string, address)
   
   for (lines = 0;
        lines < (unsigned int) listing_lhs_cont_lines
-	 && *src;
+	 && src[cur];
        lines ++)
     {
       nchars = ((LISTING_WORD_SIZE * 2) + 1)
@@ -750,18 +753,20 @@ print_lines (list, lineno, string, address)
       /* Print any more lines of data, but more compactly */
       fprintf (list_file, "% 4d      ", lineno);
       
-      while (*src && idx < nchars)
+      while (src[cur] && idx < nchars)
 	{
-	  fprintf (list_file, "%c%c", src[0], src[1]);
-	  src += 2;
+          int offset;
+          offset = cur;
+          fprintf (list_file, "%c%c", src[offset], src[offset+1]);
+	  cur += 2;
 	  idx += 2;
-	  byte_in_word++;
+	  octet_in_word++;
 	  
-	  if (byte_in_word == LISTING_WORD_SIZE)
+	  if (octet_in_word == LISTING_WORD_SIZE)
 	    {
 	      fprintf (list_file, " ");
 	      idx++;
-	      byte_in_word = 0;
+	      octet_in_word = 0;
 	    }
 	}
       
@@ -789,7 +794,7 @@ list_symbol_table ()
 	{
 #ifdef BFD_ASSEMBLER
 	  /* Don't report section symbols.  They are not interesting.  */
-	  if (ptr->bsym->flags & BSF_SECTION_SYM)
+	  if (symbol_section_p (ptr))
 	    continue;
 #endif
 	  if (S_GET_NAME (ptr))
@@ -821,11 +826,11 @@ list_symbol_table ()
 		  got_some = 1;
 		}
 
-	      if (ptr->sy_frag && ptr->sy_frag->line)
+	      if (symbol_get_frag (ptr) && symbol_get_frag (ptr)->line)
 		{
 		  fprintf (list_file, "%20s:%-5d  %s:%s %s\n",
-			   ptr->sy_frag->line->file->filename,
-			   ptr->sy_frag->line->line,
+			   symbol_get_frag (ptr)->line->file->filename,
+			   symbol_get_frag (ptr)->line->line,
 			   segment_name (S_GET_SEGMENT (ptr)),
 			   buf, S_GET_NAME (ptr));
 		}
@@ -978,7 +983,7 @@ debugging_pseudo (list, line)
 
 static void
 listing_listing (name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
   list_info_type *list = head;
   file_info_type *current_hll_file = (file_info_type *) NULL;
@@ -1006,7 +1011,7 @@ listing_listing (name)
 
   while (list)
     {
-      int list_line;
+      unsigned int list_line;
 
       width = listing_rhs_width > paper_width ? paper_width :
 	listing_rhs_width;
@@ -1180,7 +1185,7 @@ listing_file (name)
 
 void
 listing_eject (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (listing)
     listing_tail->edict = EDICT_EJECT;
@@ -1188,7 +1193,7 @@ listing_eject (ignore)
 
 void
 listing_flags (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   while ((*input_line_pointer++) && (*input_line_pointer != '\n'))
     input_line_pointer++;
@@ -1261,7 +1266,7 @@ listing_psize (width_only)
 
 void
 listing_nopage (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   paper_height = 0;
 }

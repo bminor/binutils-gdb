@@ -1,5 +1,5 @@
 /* BFD support for handling relocation entries.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -25,7 +25,7 @@ SECTION
 
 	BFD maintains relocations in much the same way it maintains
 	symbols: they are left alone until required, then read in
-	en-mass and translated into an internal form.  A common
+	en-masse and translated into an internal form.  A common
 	routine <<bfd_perform_relocation>> acts upon the
 	canonical form to do the fixup.
 
@@ -340,13 +340,26 @@ CODE_FRAGMENT
 .       {* The textual name of the relocation type. *}
 .  char *name;
 .
-.       {* When performing a partial link, some formats must modify the
-.          relocations rather than the data - this flag signals this.*}
+.       {* Some formats record a relocation addend in the section contents
+.          rather than with the relocation.  For ELF formats this is the
+.          distinction between USE_REL and USE_RELA (though the code checks
+.          for USE_REL == 1/0).  The value of this field is TRUE if the
+.          addend is recorded with the section contents; when performing a
+.          partial link (ld -r) the section contents (the data) will be
+.          modified.  The value of this field is FALSE if addends are
+.          recorded with the relocation (in arelent.addend); when performing
+.          a partial link the relocation will be modified.
+.          All relocations for all ELF USE_RELA targets should set this field
+.          to FALSE (values of TRUE should be looked on with suspicion).
+.          However, the converse is not true: not all relocations of all ELF
+.          USE_REL targets set this field to TRUE.  Why this is so is peculiar
+.          to each particular target.  For relocs that aren't used in partial
+.          links (e.g. GOT stuff) it doesn't matter what this is set to.  *}
 .  boolean partial_inplace;
 .
 .       {* The src_mask selects which parts of the read in data
 .          are to be used in the relocation sum.  E.g., if this was an 8 bit
-.          bit of data which we read and relocated, this would be
+.          byte of data which we read and relocated, this would be
 .          0x000000ff. When we have relocs which have an addend, such as
 .          sun4 extended relocs, the value in the offset part of a
 .          relocating field is garbage so we never use it. In this case
@@ -389,6 +402,14 @@ DESCRIPTION
 
 .#define NEWHOWTO( FUNCTION, NAME,SIZE,REL,IN) HOWTO(0,0,SIZE,0,REL,0,complain_overflow_dont,FUNCTION, NAME,false,0,0,IN)
 .
+
+DESCRIPTION
+	This is used to fill in an empty howto entry in an array.
+
+.#define EMPTY_HOWTO(C) \
+.  HOWTO((C),0,0,0,false,0,complain_overflow_dont,NULL,NULL,false,0,0,false)
+.
+
 DESCRIPTION
 	Helper routine to turn a symbol into a relocation value.
 
@@ -519,17 +540,14 @@ bfd_check_overflow (how, bitsize, rightshift, addrsize, relocation)
 
     case complain_overflow_bitfield:
       /* Bitfields are sometimes signed, sometimes unsigned.  We
-         overflow if the value has some, but not all, bits set outside
-         the field, or if it has any bits set outside the field but
-         the sign bit is not set.  */
+	 explicitly allow an address wrap too, which means a bitfield
+	 of n bits is allowed to store -2**n to 2**n-1.  Thus overflow
+	 if the value has some, but not all, bits set outside the
+	 field.  */
       a >>= rightshift;
-      if ((a & ~ fieldmask) != 0)
-	{
-	  signmask = (fieldmask >> 1) + 1;
-	  ss = (signmask << rightshift) - 1;
-	  if ((ss | relocation) != ~ (bfd_vma) 0)
-	    flag = bfd_reloc_overflow;
-	}
+      ss = a & ~ fieldmask;
+      if (ss != 0 && ss != (((bfd_vma) -1 >> rightshift) & ~ fieldmask))
+	flag = bfd_reloc_overflow;
       break;
 
     default:
@@ -584,7 +602,7 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
 {
   bfd_vma relocation;
   bfd_reloc_status_type flag = bfd_reloc_ok;
-  bfd_size_type addr = reloc_entry->address;
+  bfd_size_type octets = reloc_entry->address * bfd_octets_per_byte (abfd);
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
   asection *reloc_target_output_section;
@@ -620,7 +638,8 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
     }
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > input_section->_cooked_size)
+  if (reloc_entry->address > input_section->_cooked_size /
+      bfd_octets_per_byte (abfd))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targetted at and the
@@ -863,23 +882,23 @@ space consuming.  For each target:
      R result
 
      Do this:
-     i i i i i o o o o o        from bfd_get<size>
-     and           S S S S S    to get the size offset we want
-     +   r r r r r r r r r r  to get the final value to place
+     ((  i i i i i o o o o o  from bfd_get<size>
+     and           S S S S S) to get the size offset we want
+     +   r r r r r r r r r r) to get the final value to place
      and           D D D D D  to chop to right size
      -----------------------
-     A A A A A
+     =             A A A A A
      And this:
-     ...   i i i i i o o o o o  from bfd_get<size>
-     and   N N N N N            get instruction
+     (   i i i i i o o o o o  from bfd_get<size>
+     and N N N N N          ) get instruction
      -----------------------
-     ...   B B B B B
+     =   B B B B B
 
      And then:
-     B B B B B
-     or              A A A A A
+     (   B B B B B
+     or            A A A A A)
      -----------------------
-     R R R R R R R R R R        put into bfd_put<size>
+     =   R R R R R R R R R R  put into bfd_put<size>
      */
 
 #define DOIT(x) \
@@ -889,41 +908,41 @@ space consuming.  For each target:
     {
     case 0:
       {
-	char x = bfd_get_8 (abfd, (char *) data + addr);
+	char x = bfd_get_8 (abfd, (char *) data + octets);
 	DOIT (x);
-	bfd_put_8 (abfd, x, (unsigned char *) data + addr);
+	bfd_put_8 (abfd, x, (unsigned char *) data + octets);
       }
       break;
 
     case 1:
       {
-	short x = bfd_get_16 (abfd, (bfd_byte *) data + addr);
+	short x = bfd_get_16 (abfd, (bfd_byte *) data + octets);
 	DOIT (x);
-	bfd_put_16 (abfd, x, (unsigned char *) data + addr);
+	bfd_put_16 (abfd, x, (unsigned char *) data + octets);
       }
       break;
     case 2:
       {
-	long x = bfd_get_32 (abfd, (bfd_byte *) data + addr);
+	long x = bfd_get_32 (abfd, (bfd_byte *) data + octets);
 	DOIT (x);
-	bfd_put_32 (abfd, x, (bfd_byte *) data + addr);
+	bfd_put_32 (abfd, x, (bfd_byte *) data + octets);
       }
       break;
     case -2:
       {
-	long x = bfd_get_32 (abfd, (bfd_byte *) data + addr);
+	long x = bfd_get_32 (abfd, (bfd_byte *) data + octets);
 	relocation = -relocation;
 	DOIT (x);
-	bfd_put_32 (abfd, x, (bfd_byte *) data + addr);
+	bfd_put_32 (abfd, x, (bfd_byte *) data + octets);
       }
       break;
 
     case -1:
       {
-	long x = bfd_get_16 (abfd, (bfd_byte *) data + addr);
+	long x = bfd_get_16 (abfd, (bfd_byte *) data + octets);
 	relocation = -relocation;
 	DOIT (x);
-	bfd_put_16 (abfd, x, (bfd_byte *) data + addr);
+	bfd_put_16 (abfd, x, (bfd_byte *) data + octets);
       }
       break;
 
@@ -934,9 +953,9 @@ space consuming.  For each target:
     case 4:
 #ifdef BFD64
       {
-	bfd_vma x = bfd_get_64 (abfd, (bfd_byte *) data + addr);
+	bfd_vma x = bfd_get_64 (abfd, (bfd_byte *) data + octets);
 	DOIT (x);
-	bfd_put_64 (abfd, x, (bfd_byte *) data + addr);
+	bfd_put_64 (abfd, x, (bfd_byte *) data + octets);
       }
 #else
       abort ();
@@ -986,7 +1005,7 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
 {
   bfd_vma relocation;
   bfd_reloc_status_type flag = bfd_reloc_ok;
-  bfd_size_type addr = reloc_entry->address;
+  bfd_size_type octets = reloc_entry->address * bfd_octets_per_byte (abfd);
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
   asection *reloc_target_output_section;
@@ -1006,7 +1025,7 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
   if (howto->special_function)
     {
       bfd_reloc_status_type cont;
-  
+
       /* XXX - The special_function calls haven't been fixed up to deal
 	 with creating new relocations and section contents.  */
       cont = howto->special_function (abfd, reloc_entry, symbol,
@@ -1253,29 +1272,29 @@ space consuming.  For each target:
      R result
 
      Do this:
-     i i i i i o o o o o        from bfd_get<size>
-     and           S S S S S    to get the size offset we want
-     +   r r r r r r r r r r  to get the final value to place
+     ((  i i i i i o o o o o  from bfd_get<size>
+     and           S S S S S) to get the size offset we want
+     +   r r r r r r r r r r) to get the final value to place
      and           D D D D D  to chop to right size
      -----------------------
-     A A A A A
+     =             A A A A A
      And this:
-     ...   i i i i i o o o o o  from bfd_get<size>
-     and   N N N N N            get instruction
+     (   i i i i i o o o o o  from bfd_get<size>
+     and N N N N N          ) get instruction
      -----------------------
-     ...   B B B B B
+     =   B B B B B
 
      And then:
-     B B B B B
-     or              A A A A A
+     (   B B B B B
+     or            A A A A A)
      -----------------------
-     R R R R R R R R R R        put into bfd_put<size>
+     =   R R R R R R R R R R  put into bfd_put<size>
      */
 
 #define DOIT(x) \
   x = ( (x & ~howto->dst_mask) | (((x & howto->src_mask) +  relocation) & howto->dst_mask))
 
-  data = (bfd_byte *) data_start + (addr - data_start_offset);
+  data = (bfd_byte *) data_start + (octets - data_start_offset);
 
   switch (howto->size)
     {
@@ -1405,8 +1424,8 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
      bfd_byte *location;
 {
   int size;
-  bfd_vma x;
-  boolean overflow;
+  bfd_vma x = 0;
+  bfd_reloc_status_type flag;
   unsigned int rightshift = howto->rightshift;
   unsigned int bitpos = howto->bitpos;
 
@@ -1444,7 +1463,7 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
      which we don't check for.  We must either check at every single
      operation, which would be tedious, or we must do the computations
      in a type larger than bfd_vma, which would be inefficient.  */
-  overflow = false;
+  flag = bfd_reloc_ok;
   if (howto->complain_on_overflow != complain_overflow_dont)
     {
       bfd_vma addrmask, fieldmask, signmask, ss;
@@ -1470,7 +1489,7 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
 	  signmask = ~ (fieldmask >> 1);
 	  ss = a & signmask;
 	  if (ss != 0 && ss != ((addrmask >> rightshift) & signmask))
-	    overflow = true;
+	    flag = bfd_reloc_overflow;
 
 	  /* We only need this next bit of code if the sign bit of B
              is below the sign bit of A.  This would only happen if
@@ -1482,7 +1501,7 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
 	  if ((b & signmask) != 0)
 	    {
 	      /* Set all the bits above the sign bit.  */
-	      b -= signmask <<= 1;
+	      b -= signmask << 1;
 	    }
 
 	  b = (b & addrmask) >> bitpos;
@@ -1500,7 +1519,7 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
 	     */
 	  signmask = (fieldmask >> 1) + 1;
 	  if (((~ (a ^ b)) & (a ^ sum)) & signmask)
-	    overflow = true;
+	    flag = bfd_reloc_overflow;
 
 	  break;
 
@@ -1520,55 +1539,35 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
 	  b = (b & addrmask) >> bitpos;
 	  sum = (a + b) & addrmask;
 	  if ((a | b | sum) & ~ fieldmask)
-	    overflow = true;
+	    flag = bfd_reloc_overflow;
 
 	  break;
 
 	case complain_overflow_bitfield:
-	  /* Much like unsigned, except no trimming with addrmask.  In
-             addition, the sum overflows if there is a carry out of
-             the bfd_vma, i.e., the sum is less than either input
-             operand.  */
+	  /* Much like the signed check, but for a field one bit
+	     wider, and no trimming with addrmask.  We allow a
+	     bitfield to represent numbers in the range -2**n to
+	     2**n-1, where n is the number of bits in the field.
+	     Note that when bfd_vma is 32 bits, a 32-bit reloc can't
+	     overflow, which is exactly what we want.  */
 	  a >>= rightshift;
+
+	  signmask = ~ fieldmask;
+	  ss = a & signmask;
+	  if (ss != 0 && ss != (((bfd_vma) -1 >> rightshift) & signmask))
+	    flag = bfd_reloc_overflow;
+
+	  signmask = ((~ howto->src_mask) >> 1) & howto->src_mask;
+	  if ((b & signmask) != 0)
+	    b -= signmask << 1;
+
 	  b >>= bitpos;
 
-	  /* Bitfields are sometimes used for signed numbers; for
-             example, a 13-bit field sometimes represents values in
-             0..8191 and sometimes represents values in -4096..4095.
-             If the field is signed and a is -4095 (0x1001) and b is
-             -1 (0x1fff), the sum is -4096 (0x1000), but (0x1001 +
-             0x1fff is 0x3000).  It's not clear how to handle this
-             everywhere, since there is not way to know how many bits
-             are significant in the relocation, but the original code
-             assumed that it was fully sign extended, and we will keep
-             that assumption.  */
-	  signmask = (fieldmask >> 1) + 1;
-
-	  if ((a & ~ fieldmask) != 0)
-	    {
-	      /* Some bits out of the field are set.  This might not
-                 be a problem: if this is a signed bitfield, it is OK
-                 iff all the high bits are set, including the sign
-                 bit.  We'll try setting all but the most significant
-                 bit in the original relocation value: if this is all
-                 ones, we are OK, assuming a signed bitfield.  */
-	      ss = (signmask << rightshift) - 1;
-	      if ((ss | relocation) != ~ (bfd_vma) 0)
-		overflow = true;
-	      a &= fieldmask;
-	    }
-
-	  /* We just assume (b & ~ fieldmask) == 0.  */
-
 	  sum = a + b;
-	  if (sum < a || (sum & ~ fieldmask) != 0)
-	    {
-	      /* There was a carry out, or the field overflow.  Test
-                 for signed operands again.  Here is the overflow test
-                 is as for complain_overflow_signed.  */
-	      if (((~ (a ^ b)) & (a ^ sum)) & signmask)
-		overflow = true;
-	    }
+
+	  signmask = fieldmask + 1;
+	  if (((~ (a ^ b)) & (a ^ sum)) & signmask)
+	    flag = bfd_reloc_overflow;
 
 	  break;
 
@@ -1609,7 +1608,7 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
       break;
     }
 
-  return overflow ? bfd_reloc_overflow : bfd_reloc_ok;
+  return flag;
 }
 
 /*
@@ -1944,6 +1943,25 @@ ENUMDOC
      The GNU linker currently doesn't do any of this optimizing.
 
 ENUM
+  BFD_RELOC_ALPHA_USER_LITERAL
+ENUMX
+  BFD_RELOC_ALPHA_USER_LITUSE_BASE
+ENUMX
+  BFD_RELOC_ALPHA_USER_LITUSE_BYTOFF
+ENUMX
+  BFD_RELOC_ALPHA_USER_LITUSE_JSR
+ENUMX
+  BFD_RELOC_ALPHA_USER_GPDISP
+ENUMX
+  BFD_RELOC_ALPHA_USER_GPRELHIGH
+ENUMX
+  BFD_RELOC_ALPHA_USER_GPRELLOW
+ENUMDOC
+  The BFD_RELOC_ALPHA_USER_* relocations are used by the assembler to
+     process the explicit !<reloc>!sequence relocations, and are mapped
+     into the normal relocations at the end of processing.
+
+ENUM
   BFD_RELOC_ALPHA_HINT
 ENUMDOC
   The HINT relocation indicates a value that should be filled into the
@@ -2028,6 +2046,14 @@ ENUMX
   BFD_RELOC_MIPS_CALL_HI16
 ENUMX
   BFD_RELOC_MIPS_CALL_LO16
+ENUMX
+  BFD_RELOC_MIPS_SUB
+ENUMX
+  BFD_RELOC_MIPS_GOT_PAGE
+ENUMX
+  BFD_RELOC_MIPS_GOT_OFST
+ENUMX
+  BFD_RELOC_MIPS_GOT_DISP
 COMMENT
 ENUMDOC
   MIPS ELF relocations.
@@ -2079,6 +2105,21 @@ ENUMX
   BFD_RELOC_NS32K_DISP_32_PCREL
 ENUMDOC
   ns32k relocations
+
+ENUM
+  BFD_RELOC_PJ_CODE_HI16
+ENUMX
+  BFD_RELOC_PJ_CODE_LO16
+ENUMX
+  BFD_RELOC_PJ_CODE_DIR16
+ENUMX
+  BFD_RELOC_PJ_CODE_DIR32
+ENUMX
+  BFD_RELOC_PJ_CODE_REL16
+ENUMX
+  BFD_RELOC_PJ_CODE_REL32
+ENUMDOC
+  Picojava relocs.  Not all of these appear in object files.
 
 ENUM
   BFD_RELOC_PPC_B26
@@ -2144,6 +2185,11 @@ ENUMDOC
   Power(rs6000) and PowerPC relocations.
 
 ENUM
+  BFD_RELOC_I370_D12
+ENUMDOC
+  IBM 370/390 relocations
+
+ENUM
   BFD_RELOC_CTOR
 ENUMDOC
   The type of reloc used to build a contructor table - at the moment
@@ -2157,6 +2203,8 @@ ENUMDOC
   not stored in the instruction.
 ENUM
   BFD_RELOC_ARM_IMMEDIATE
+ENUMX
+  BFD_RELOC_ARM_ADRL_IMMEDIATE
 ENUMX
   BFD_RELOC_ARM_OFFSET_IMM
 ENUMX
@@ -2305,46 +2353,46 @@ ENUMDOC
 ENUM
   BFD_RELOC_D30V_9_PCREL
 ENUMDOC
-  This is a 6-bit pc-relative reloc with 
-  the right 3 bits assumed to be 0.  
+  This is a 6-bit pc-relative reloc with
+  the right 3 bits assumed to be 0.
 ENUM
   BFD_RELOC_D30V_9_PCREL_R
 ENUMDOC
-  This is a 6-bit pc-relative reloc with 
+  This is a 6-bit pc-relative reloc with
   the right 3 bits assumed to be 0. Same
   as the previous reloc but on the right side
-  of the container.  
+  of the container.
 ENUM
   BFD_RELOC_D30V_15
 ENUMDOC
-  This is a 12-bit absolute reloc with the 
-  right 3 bitsassumed to be 0.  
+  This is a 12-bit absolute reloc with the
+  right 3 bitsassumed to be 0.
 ENUM
   BFD_RELOC_D30V_15_PCREL
 ENUMDOC
-  This is a 12-bit pc-relative reloc with 
-  the right 3 bits assumed to be 0.  
+  This is a 12-bit pc-relative reloc with
+  the right 3 bits assumed to be 0.
 ENUM
   BFD_RELOC_D30V_15_PCREL_R
 ENUMDOC
-  This is a 12-bit pc-relative reloc with 
+  This is a 12-bit pc-relative reloc with
   the right 3 bits assumed to be 0. Same
   as the previous reloc but on the right side
-  of the container.  
+  of the container.
 ENUM
   BFD_RELOC_D30V_21
 ENUMDOC
-  This is an 18-bit absolute reloc with 
+  This is an 18-bit absolute reloc with
   the right 3 bits assumed to be 0.
 ENUM
   BFD_RELOC_D30V_21_PCREL
 ENUMDOC
-  This is an 18-bit pc-relative reloc with 
+  This is an 18-bit pc-relative reloc with
   the right 3 bits assumed to be 0.
 ENUM
   BFD_RELOC_D30V_21_PCREL_R
 ENUMDOC
-  This is an 18-bit pc-relative reloc with 
+  This is an 18-bit pc-relative reloc with
   the right 3 bits assumed to be 0. Same
   as the previous reloc but on the right side
   of the container.
@@ -2526,7 +2574,7 @@ ENUM
 ENUMDOC
   This is a 16 bit reloc for the FR30 that stores a 12 bit pc relative
   short offset into 11 bits.
-  
+
 ENUM
   BFD_RELOC_MCORE_PCREL_IMM8BY4
 ENUMX
@@ -2537,15 +2585,102 @@ ENUMX
   BFD_RELOC_MCORE_PCREL_32
 ENUMX
   BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2
+ENUMX
+  BFD_RELOC_MCORE_RVA
 ENUMDOC
   Motorola Mcore relocations.
-  
+
+ENUM
+  BFD_RELOC_AVR_7_PCREL
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 8 bit pc relative
+  short offset into 7 bits.
+ENUM
+  BFD_RELOC_AVR_13_PCREL
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 13 bit pc relative
+  short offset into 12 bits.
+ENUM
+  BFD_RELOC_AVR_16_PM
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 17 bit value (usually
+  program memory address) into 16 bits.  
+ENUM
+  BFD_RELOC_AVR_LO8_LDI
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 8 bit value (usually
+  data memory address) into 8 bit immediate value of LDI insn.
+ENUM
+  BFD_RELOC_AVR_HI8_LDI
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 8 bit value (high 8 bit
+  of data memory address) into 8 bit immediate value of LDI insn.
+ENUM
+  BFD_RELOC_AVR_HH8_LDI
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 8 bit value (most high 8 bit
+  of program memory address) into 8 bit immediate value of LDI insn.
+ENUM
+  BFD_RELOC_AVR_LO8_LDI_NEG
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores negated 8 bit value
+  (usually data memory address) into 8 bit immediate value of SUBI insn.
+ENUM
+  BFD_RELOC_AVR_HI8_LDI_NEG
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores negated 8 bit value
+  (high 8 bit of data memory address) into 8 bit immediate value of
+  SUBI insn.
+ENUM
+  BFD_RELOC_AVR_HH8_LDI_NEG
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores negated 8 bit value
+  (most high 8 bit of program memory address) into 8 bit immediate value
+  of LDI or SUBI insn.
+ENUM
+  BFD_RELOC_AVR_LO8_LDI_PM
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 8 bit value (usually
+  command address) into 8 bit immediate value of LDI insn.
+ENUM
+  BFD_RELOC_AVR_HI8_LDI_PM
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 8 bit value (high 8 bit
+  of command address) into 8 bit immediate value of LDI insn.
+ENUM
+  BFD_RELOC_AVR_HH8_LDI_PM
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 8 bit value (most high 8 bit
+  of command address) into 8 bit immediate value of LDI insn.
+ENUM
+  BFD_RELOC_AVR_LO8_LDI_PM_NEG
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores negated 8 bit value
+  (usually command address) into 8 bit immediate value of SUBI insn.
+ENUM
+  BFD_RELOC_AVR_HI8_LDI_PM_NEG
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores negated 8 bit value
+  (high 8 bit of 16 bit command address) into 8 bit immediate value
+  of SUBI insn.
+ENUM
+  BFD_RELOC_AVR_HH8_LDI_PM_NEG
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores negated 8 bit value
+  (high 6 bit of 22 bit command address) into 8 bit immediate
+  value of SUBI insn.
+ENUM
+  BFD_RELOC_AVR_CALL
+ENUMDOC
+  This is a 32 bit reloc for the AVR that stores 23 bit value
+  into 22 bits.
+
 ENUM
   BFD_RELOC_VTABLE_INHERIT
 ENUMX
   BFD_RELOC_VTABLE_ENTRY
 ENUMDOC
-  These two relocations are used by the linker to determine which of 
+  These two relocations are used by the linker to determine which of
   the entries in a C++ virtual function table are actually used.  When
   the --gc-sections option is given, the linker will zero out the entries
   that are not used, so that the code for those functions need not be
@@ -2559,7 +2694,7 @@ ENUMDOC
   VTABLE_ENTRY is a zero-space relocation that describes the use of a
   virtual function table entry.  The reloc's symbol should refer to the
   table of the class mentioned in the code.  Off of that base, an offset
-  describes the entry that is being used.  For Rela hosts, this offset 
+  describes the entry that is being used.  For Rela hosts, this offset
   is stored in the reloc's addend.  For Rel hosts, we are forced to put
   this offset in the reloc's section offset.
 
@@ -2680,9 +2815,9 @@ DESCRIPTION
 /*ARGSUSED*/
 boolean
 bfd_generic_relax_section (abfd, section, link_info, again)
-     bfd *abfd;
-     asection *section;
-     struct bfd_link_info *link_info;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section ATTRIBUTE_UNUSED;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
      boolean *again;
 {
   *again = false;
@@ -2705,8 +2840,8 @@ DESCRIPTION
 /*ARGSUSED*/
 boolean
 bfd_generic_gc_sections (abfd, link_info)
-     bfd *abfd;
-     struct bfd_link_info *link_info;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
 {
   return true;
 }
@@ -2805,7 +2940,8 @@ bfd_generic_get_relocated_section_contents (abfd, link_info, link_order, data,
 		case bfd_reloc_undefined:
 		  if (!((*link_info->callbacks->undefined_symbol)
 			(link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-			 input_bfd, input_section, (*parent)->address)))
+			 input_bfd, input_section, (*parent)->address,
+			 true)))
 		    goto error_return;
 		  break;
 		case bfd_reloc_dangerous:

@@ -1,5 +1,6 @@
 /* Select disassembly routine for specified architecture.
-   Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1994, 95, 96, 97, 98, 99, 2000
+   Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,11 +24,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_alpha
 #define ARCH_arc
 #define ARCH_arm
+#define ARCH_avr
 #define ARCH_d10v
 #define ARCH_d30v
 #define ARCH_h8300
 #define ARCH_h8500
 #define ARCH_hppa
+#define ARCH_i370
 #define ARCH_i386
 #define ARCH_i960
 #define ARCH_fr30
@@ -39,6 +42,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_mn10200
 #define ARCH_mn10300
 #define ARCH_ns32k
+#define ARCH_pj
 #define ARCH_powerpc
 #define ARCH_rs6000
 #define ARCH_sh
@@ -90,6 +94,11 @@ disassembler (abfd)
 	disassemble = print_insn_little_arm;
       break;
 #endif
+#ifdef ARCH_avr
+    case bfd_arch_avr:
+      disassemble = print_insn_avr;
+      break;
+#endif
 #ifdef ARCH_d10v
     case bfd_arch_d10v:
       disassemble = print_insn_d10v;
@@ -118,6 +127,11 @@ disassembler (abfd)
 #ifdef ARCH_hppa
     case bfd_arch_hppa:
       disassemble = print_insn_hppa;
+      break;
+#endif
+#ifdef ARCH_i370
+    case bfd_arch_i370:
+      disassemble = print_insn_i370;
       break;
 #endif
 #ifdef ARCH_i386
@@ -179,6 +193,11 @@ disassembler (abfd)
 #ifdef ARCH_mn10300
     case bfd_arch_mn10300:
       disassemble = print_insn_mn10300;
+      break;
+#endif
+#ifdef ARCH_pj
+    case bfd_arch_pj:
+      disassemble = print_insn_pj;
       break;
 #endif
 #ifdef ARCH_powerpc
@@ -246,3 +265,13 @@ disassembler (abfd)
   return disassemble;
 }
 
+void
+disassembler_usage (stream)
+     FILE *stream ATTRIBUTE_UNUSED;
+{
+#ifdef ARCH_arm
+  print_arm_disassembler_options (stream);
+#endif
+  
+  return;
+}

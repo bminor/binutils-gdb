@@ -1,3 +1,59 @@
+2000-03-13  Nick Clifton  <nickc@cygnus.com>
+
+	* binutils-all/readelf.s: Adjust to match noew format of readelf
+	output. 
+	* binutils-all/readelf.ss: Adjust to match noew format of readelf 
+	output. 
+
+1999-11-01  Nick Clifton  <nickc@cygnus.com>
+
+	* binutils-all/objcopy.exp: Expect simple objcopy test for fail
+	for COFF based ARM and Thumb ports.
+
+Tue Sep 14 00:28:17 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* binutils-all/hppa/objdump.exp: Do not run for PA64.
+
+1999-09-04  Steve Chamberlain  <sac@pobox.com>
+
+	* binutils-all/objdump.exp: Add pj to cpus_expected.
+
+Sat Aug 28 00:24:27 1999  Jerry Quinn <jquinn@nortelnetworks.com>
+
+	* binutils-all/hppa/freg.s:  New file.
+	* binutils-all/hppa/objdump.exp:  Add freg.s test.
+
+1999-08-09  Ian Lance Taylor  <ian@zembu.com>
+
+	* binutils-all/objcopy.exp: Add setup_xfail for simple copy test
+	for i*86-*-msdos*.
+
+1999-07-21  H.J. Lu  <hjl@gnu.org>
+
+	* binutils-all/testprog.c: Include <stdio.h>.
+
+1999-06-29  Nick Clifton  <nickc@cygnus.com>
+
+	* binutils-all/objdump.exp: Add fr30 and MCore to expected cpus
+	list. 
+
+	* binutils-all/readelf.r: Do not assume a fixed number of spaces
+	in the output.
+
+1999-06-10  Nick Clifton  <nickc@cygnus.com>
+
+	* binutils-all/readelf.wi: Update to match latest output.
+	* binutils-all/readelf.h: Update to match latest output.
+
+Wed Jun  9 11:59:22 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* binutils-all/objdump.exp: Tighten regexp to match `objdump -i'
+	output to avoid massive exponential behaviour.
+
+1999-05-28  Ian Lance Taylor  <ian@zembu.com>
+
+	* binutils-all/readelf.h: Update for changes of 1999-04-08.
+
 1999-03-12  Nick Clifton  <nickc@cygnus.com>
 
 	* binutils-all/readelf.wi: Remove FR30 specific componnts.

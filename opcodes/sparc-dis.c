@@ -283,6 +283,7 @@ print_insn_sparc (memaddr, info)
 	  /* Nonzero means that we have found an instruction which has
 	     the effect of adding or or'ing the imm13 field to rs1.  */
 	  int imm_added_to_rs1 = 0;
+	  int imm_ored_to_rs1 = 0;
 
 	  /* Nonzero means that we have found a plus sign in the args
 	     field of the opcode table.  */
@@ -293,8 +294,9 @@ print_insn_sparc (memaddr, info)
 
 	  /* Do we have an `add' or `or' instruction combining an
              immediate with rs1?  */
-	  if (opcode->match == 0x80102000 || opcode->match == 0x80002000)
-	  /*			  (or)				 (add)  */
+	  if (opcode->match == 0x80102000) /* or */
+	    imm_ored_to_rs1 = 1;
+	  if (opcode->match == 0x80002000) /* add */
 	    imm_added_to_rs1 = 1;
 
 	  if (X_RS1 (insn) != X_RD (insn)
@@ -670,7 +672,7 @@ print_insn_sparc (memaddr, info)
 	     If so, attempt to print the result of the add or
 	     or (in this context add and or do the same thing)
 	     and its symbolic value.  */
-	  if (imm_added_to_rs1)
+	  if (imm_ored_to_rs1 || imm_added_to_rs1)
 	    {
 	      unsigned long prev_insn;
 	      int errcode;
@@ -709,8 +711,11 @@ print_insn_sparc (memaddr, info)
 		    {
 		      (*info->fprintf_func) (stream, "\t! ");
 		      info->target = 
-			(0xFFFFFFFF & (int) X_IMM22 (prev_insn) << 10)
-			| X_SIMM (insn, 13);
+			(0xFFFFFFFF & (int) X_IMM22 (prev_insn) << 10);
+		      if (imm_added_to_rs1)
+			info->target += X_SIMM (insn, 13);
+		      else
+			info->target |= X_SIMM (insn, 13);
 		      (*info->print_address_func) (info->target, info);
 		      info->insn_type = dis_dref;
 		      info->data_size = 4;  /* FIXME!!! */

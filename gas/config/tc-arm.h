@@ -1,5 +1,6 @@
 /* This file is tc-arm.h
-   Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999
+   Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
 
@@ -103,7 +104,7 @@
  extern void arm_start_line_hook PARAMS ((void));
 
 #define tc_frob_label(S) arm_frob_label (S)
- extern void arm_frob_label PARAMS ((struct symbol *));
+ extern void arm_frob_label PARAMS ((symbolS *));
 
 /* We also need to mark assembler created symbols:  */
 #define tc_frob_fake_label(S) arm_frob_label (S)
@@ -112,8 +113,13 @@
    deliberately not been updated to mark assembler created stabs
    symbols as Thumb.  */
 
+#define TC_FIX_TYPE PTR
+#define TC_INIT_FIX_DATA(FIXP) ((FIXP)->tc_fix_data = NULL)
+
 #ifdef OBJ_ELF
+#include "write.h"        /* For definition of fixS */
 #define obj_fix_adjustable(fixP) arm_fix_adjustable (fixP)
+boolean arm_fix_adjustable PARAMS ((fixS *));
 #else
 #define obj_fix_adjustable(fixP) 0
 #endif
@@ -121,9 +127,9 @@
 /* We need to keep some local information on symbols.  */
 
 #define TC_SYMFIELD_TYPE unsigned int
-#define ARM_GET_FLAG(s)   	((s)->sy_tc)
-#define ARM_SET_FLAG(s,v) 	((s)->sy_tc |= (v))
-#define ARM_RESET_FLAG(s,v) 	((s)->sy_tc &= ~(v))
+#define ARM_GET_FLAG(s)   	(*symbol_get_tc (s))
+#define ARM_SET_FLAG(s,v) 	(*symbol_get_tc (s) |= (v))
+#define ARM_RESET_FLAG(s,v) 	(*symbol_get_tc (s) &= ~(v))
 
 #define ARM_FLAG_THUMB 		(1 << 0)	/* The symbol is a Thumb symbol rather than an Arm symbol.  */
 #define ARM_FLAG_INTERWORK 	(1 << 1)	/* The symbol is attached to code that suppports interworking.  */
@@ -138,9 +144,6 @@
 #define THUMB_SET_FUNC(s,t)     ((t) ? ARM_SET_FLAG (s, THUMB_FLAG_FUNC)    : ARM_RESET_FLAG (s, THUMB_FLAG_FUNC))
 
 
-#define TC_FIX_TYPE PTR
-#define TC_INIT_FIX_DATA(FIXP) ((FIXP)->tc_fix_data = NULL)
-
 #define TC_START_LABEL(C,STR) \
   (c == ':' || (c == '/' && arm_data_in_code ()))
 int arm_data_in_code PARAMS ((void));
@@ -153,7 +156,8 @@ char * arm_canonicalize_symbol_name PARAMS ((char *));
  extern void arm_adjust_symtab PARAMS ((void));
 
 #ifdef OBJ_ELF
-#define obj_frob_symbol(sym, punt)  armelf_frob_symbol (sym, punt)
+#define obj_frob_symbol(sym, punt)  armelf_frob_symbol ((sym), & (punt))
+void armelf_frob_symbol PARAMS ((symbolS *, int *));
 #endif
 
 #define tc_aout_pre_write_hook(x)	{;}	/* not used */
@@ -170,6 +174,9 @@ char * arm_canonicalize_symbol_name PARAMS ((char *));
 
 #define LOCAL_LABEL(name) (name[0] == '.' && (name[1] == 'L'))
 #define LOCAL_LABELS_FB   1
+#ifdef OBJ_ELF
+#define LOCAL_LABEL_PREFIX '.'
+#endif
 
 /* This expression evaluates to false if the relocation is for a local object
    for which we still want to do the relocation at runtime.  True if we

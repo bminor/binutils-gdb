@@ -1,6 +1,7 @@
 /* This module handles expression trees.
-Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
-Written by Steve Chamberlain of Cygnus Support (sac@cygnus.com).
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
+   Written by Steve Chamberlain of Cygnus Support (sac@cygnus.com).
 
 This file is part of GLD, the Gnu Linker.
 
@@ -455,11 +456,12 @@ fold_name (tree, current_section, allocation_done, dot)
       case SIZEOF:
 	if (allocation_done != lang_first_phase_enum)
 	  {
+            int opb = bfd_octets_per_byte (output_bfd);
 	    lang_output_section_statement_type *os;
 
 	    os = lang_output_section_find (tree->name.name);
 	    check (os, tree->name.name, "SIZEOF");
-	    result = new_abs (os->bfd_section->_raw_size);
+	    result = new_abs (os->bfd_section->_raw_size / opb);
 	  }
 	else
 	  result = invalid ();
@@ -967,7 +969,7 @@ exp_get_value_int (tree,def,name, allocation_done)
 bfd_vma
 exp_get_abs_int (tree, def, name, allocation_done)
      etree_type *tree;
-     int def;
+     int def ATTRIBUTE_UNUSED;
      char *name;
      lang_phase_type allocation_done;
 {

@@ -1,5 +1,5 @@
 /* tc-sh.c -- Assemble code for the Hitachi Super-H
-   Copyright (C) 1993, 94, 95, 96, 97, 1998 Free Software Foundation.
+   Copyright (C) 1993, 94, 95, 96, 97, 98, 99, 2000 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -30,6 +30,11 @@
 #define DEFINE_TABLE
 #include "opcodes/sh-opc.h"
 #include <ctype.h>
+
+#ifdef OBJ_ELF
+#include "elf/sh.h"
+#endif
+
 const char comment_chars[] = "!";
 const char line_separator_chars[] = ";";
 const char line_comment_chars[] = "!#";
@@ -39,16 +44,11 @@ static void s_uses PARAMS ((int));
 static void sh_count_relocs PARAMS ((bfd *, segT, PTR));
 static void sh_frob_section PARAMS ((bfd *, segT, PTR));
 
-/* This table describes all the machine specific pseudo-ops the assembler
-   has to support.  The fields are:
-   pseudo-op name without dot
-   function to call to execute this pseudo-op
-   Integer arg to pass to the function
- */
-
 void cons ();
 void s_align_bytes ();
 static void s_uacons PARAMS ((int));
+static sh_opcode_info *find_cooked_opcode PARAMS ((char **));
+static void assemble_ppi PARAMS ((char *, sh_opcode_info *));
 
 int shl = 0;
 
@@ -59,6 +59,13 @@ little (ignore)
   shl = 1;
   target_big_endian = 0;
 }
+
+/* This table describes all the machine specific pseudo-ops the assembler
+   has to support.  The fields are:
+   pseudo-op name without dot
+   function to call to execute this pseudo-op
+   Integer arg to pass to the function
+ */
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -83,6 +90,14 @@ int sh_relax;		/* set if -relax seen */
 /* Whether -small was seen.  */
 
 int sh_small;
+
+/* Whether -dsp was seen.  */
+
+static int sh_dsp;
+
+/* The bit mask of architectures that could
+   accomodate the insns seen so far.  */
+static int valid_arch;
 
 const char EXP_CHARS[] = "eE";
 
@@ -189,9 +204,18 @@ md_begin ()
 {
   sh_opcode_info *opcode;
   char *prev_name = "";
+  int target_arch;
 
+#ifdef TE_PE
+  /* The WinCE OS only supports little endian executables.  */
+  target_big_endian = 0;
+#else
   if (! shl)
     target_big_endian = 1;
+#endif
+
+  target_arch = arch_sh1_up & ~(sh_dsp ? arch_sh3e_up : arch_sh_dsp_up);
+  valid_arch = target_arch;
 
   opcode_hash_control = hash_new ();
 
@@ -200,6 +224,8 @@ md_begin ()
     {
       if (strcmp (prev_name, opcode->name))
 	{
+	  if (! (opcode->arch & target_arch))
+	    continue;
 	  prev_name = opcode->name;
 	  hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
 	}
@@ -214,6 +240,8 @@ md_begin ()
 
 static int reg_m;
 static int reg_n;
+static int reg_x, reg_y;
+static int reg_efg;
 static int reg_b;
 
 static expressionS immediate;	/* absolute expression */
@@ -226,6 +254,8 @@ typedef struct
 
 sh_operand_info;
 
+#define IDENT_CHAR(c) (isalnum (c) || (c) == '_')
+
 /* try and parse a reg name, returns number of chars consumed */
 static int
 parse_reg (src, mode, reg)
@@ -233,27 +263,16 @@ parse_reg (src, mode, reg)
      int *mode;
      int *reg;
 {
-  /* We use !isalnum for the next character after the register name, to
+  /* We use ! IDENT_CHAR for the next character after the register name, to
      make sure that we won't accidentally recognize a symbol name such as
-     'sram' as being a reference to the register 'sr'.  */
-
-  if (src[0] == 'r')
-    {
-      if (src[1] >= '0' && src[1] <= '7' && strncmp(&src[2], "_bank", 5) == 0
-	  && ! isalnum ((unsigned char) src[7]))
-	{
-	  *mode = A_REG_B;
-	  *reg  = (src[1] - '0');
-	  return 7;
-	}
-    }
+     'sram' or sr_ram as being a reference to the register 'sr'.  */
 
   if (src[0] == 'r')
     {
       if (src[1] == '1')
 	{
 	  if (src[2] >= '0' && src[2] <= '5'
-	      && ! isalnum ((unsigned char) src[3]))
+	      && ! IDENT_CHAR ((unsigned char) src[3]))
 	    {
 	      *mode = A_REG_N;
 	      *reg = 10 + src[2] - '0';
@@ -261,81 +280,210 @@ parse_reg (src, mode, reg)
 	    }
 	}
       if (src[1] >= '0' && src[1] <= '9'
-	  && ! isalnum ((unsigned char) src[2]))
+	  && ! IDENT_CHAR ((unsigned char) src[2]))
 	{
 	  *mode = A_REG_N;
 	  *reg = (src[1] - '0');
 	  return 2;
 	}
+      if (src[1] >= '0' && src[1] <= '7' && strncmp (&src[2], "_bank", 5) == 0
+	  && ! IDENT_CHAR ((unsigned char) src[7]))
+	{
+	  *mode = A_REG_B;
+	  *reg  = (src[1] - '0');
+	  return 7;
+	}
+
+      if (src[1] == 'e' && ! IDENT_CHAR ((unsigned char) src[2]))
+	{
+	  *mode = A_RE;
+	  return 2;
+	}
+      if (src[1] == 's' && ! IDENT_CHAR ((unsigned char) src[2]))
+	{
+	  *mode = A_RS;
+	  return 2;
+	}
+    }
+
+  if (src[0] == 'a')
+    {
+      if (src[1] == '0')
+	{
+	  if (! IDENT_CHAR ((unsigned char) src[2]))
+	    {
+	      *mode = DSP_REG_N;
+	      *reg = A_A0_NUM;
+	      return 2;
+	    }
+	  if (src[2] == 'g' && ! IDENT_CHAR ((unsigned char) src[3]))
+	    {
+	      *mode = DSP_REG_N;
+	      *reg = A_A0G_NUM;
+	      return 3;
+	    }
+	}
+      if (src[1] == '1')
+	{
+	  if (! IDENT_CHAR ((unsigned char) src[2]))
+	    {
+	      *mode = DSP_REG_N;
+	      *reg = A_A1_NUM;
+	      return 2;
+	    }
+	  if (src[2] == 'g' && ! IDENT_CHAR ((unsigned char) src[3]))
+	    {
+	      *mode = DSP_REG_N;
+	      *reg = A_A1G_NUM;
+	      return 3;
+	    }
+	}
+
+      if (src[1] == 'x' && src[2] >= '0' && src[2] <= '1'
+	  && ! IDENT_CHAR ((unsigned char) src[3]))
+	{
+	  *mode = A_REG_N;
+	  *reg = 4 + (src[1] - '0');
+	  return 3;
+	}
+      if (src[1] == 'y' && src[2] >= '0' && src[2] <= '1'
+	  && ! IDENT_CHAR ((unsigned char) src[3]))
+	{
+	  *mode = A_REG_N;
+	  *reg = 6 + (src[1] - '0');
+	  return 3;
+	}
+      if (src[1] == 's' && src[2] >= '0' && src[2] <= '3'
+	  && ! IDENT_CHAR ((unsigned char) src[3]))
+	{
+	  int n = src[1] - '0';
+
+	  *mode = A_REG_N;
+	  *reg = n | ((~n & 2) << 1);
+	  return 3;
+	}
+    }
+
+  if (src[0] == 'i' && src[1] && ! IDENT_CHAR ((unsigned char) src[3]))
+    {
+      if (src[1] == 's')
+	{
+	  *mode = A_REG_N;
+	  *reg = 8;
+	  return 2;
+	}
+      if (src[1] == 'x')
+	{
+	  *mode = A_REG_N;
+	  *reg = 8;
+	  return 2;
+	}
+      if (src[1] == 'y')
+	{
+	  *mode = A_REG_N;
+	  *reg = 9;
+	  return 2;
+	}
+    }
+
+  if (src[0] == 'x' && src[1] >= '0' && src[1] <= '1'
+      && ! IDENT_CHAR ((unsigned char) src[2]))
+    {
+      *mode = DSP_REG_N;
+      *reg = A_X0_NUM + src[1] - '0';
+      return 2;
+    }
+
+  if (src[0] == 'y' && src[1] >= '0' && src[1] <= '1'
+      && ! IDENT_CHAR ((unsigned char) src[2]))
+    {
+      *mode = DSP_REG_N;
+      *reg = A_Y0_NUM + src[1] - '0';
+      return 2;
+    }
+
+  if (src[0] == 'm' && src[1] >= '0' && src[1] <= '1'
+      && ! IDENT_CHAR ((unsigned char) src[2]))
+    {
+      *mode = DSP_REG_N;
+      *reg = src[1] == '0' ? A_M0_NUM : A_M1_NUM;
+      return 2;
     }
 
   if (src[0] == 's'
       && src[1] == 's'
-      && src[2] == 'r' && ! isalnum ((unsigned char) src[3]))
+      && src[2] == 'r' && ! IDENT_CHAR ((unsigned char) src[3]))
     {
       *mode = A_SSR;
       return 3;
     }
 
   if (src[0] == 's' && src[1] == 'p' && src[2] == 'c'
-      && ! isalnum ((unsigned char) src[3]))
+      && ! IDENT_CHAR ((unsigned char) src[3]))
     {
       *mode = A_SPC;
       return 3;
     }
 
   if (src[0] == 's' && src[1] == 'g' && src[2] == 'r'
-      && ! isalnum ((unsigned char) src[3]))
+      && ! IDENT_CHAR ((unsigned char) src[3]))
     {
       *mode = A_SGR;
       return 3;
     }
 
+  if (src[0] == 'd' && src[1] == 's' && src[2] == 'r'
+      && ! IDENT_CHAR ((unsigned char) src[3]))
+    {
+      *mode = A_DSR;
+      return 3;
+    }
+
   if (src[0] == 'd' && src[1] == 'b' && src[2] == 'r'
-      && ! isalnum ((unsigned char) src[3]))
+      && ! IDENT_CHAR ((unsigned char) src[3]))
     {
       *mode = A_DBR;
       return 3;
     }
 
-  if (src[0] == 's' && src[1] == 'r' && ! isalnum ((unsigned char) src[2]))
+  if (src[0] == 's' && src[1] == 'r' && ! IDENT_CHAR ((unsigned char) src[2]))
     {
       *mode = A_SR;
       return 2;
     }
 
-  if (src[0] == 's' && src[1] == 'p' && ! isalnum ((unsigned char) src[2]))
+  if (src[0] == 's' && src[1] == 'p' && ! IDENT_CHAR ((unsigned char) src[2]))
     {
       *mode = A_REG_N;
       *reg = 15;
       return 2;
     }
 
-  if (src[0] == 'p' && src[1] == 'r' && ! isalnum ((unsigned char) src[2]))
+  if (src[0] == 'p' && src[1] == 'r' && ! IDENT_CHAR ((unsigned char) src[2]))
     {
       *mode = A_PR;
       return 2;
     }
-  if (src[0] == 'p' && src[1] == 'c' && ! isalnum ((unsigned char) src[2]))
+  if (src[0] == 'p' && src[1] == 'c' && ! IDENT_CHAR ((unsigned char) src[2]))
     {
       *mode = A_DISP_PC;
       return 2;
     }
   if (src[0] == 'g' && src[1] == 'b' && src[2] == 'r'
-      && ! isalnum ((unsigned char) src[3]))
+      && ! IDENT_CHAR ((unsigned char) src[3]))
     {
       *mode = A_GBR;
       return 3;
     }
   if (src[0] == 'v' && src[1] == 'b' && src[2] == 'r'
-      && ! isalnum ((unsigned char) src[3]))
+      && ! IDENT_CHAR ((unsigned char) src[3]))
     {
       *mode = A_VBR;
       return 3;
     }
 
   if (src[0] == 'm' && src[1] == 'a' && src[2] == 'c'
-      && ! isalnum ((unsigned char) src[4]))
+      && ! IDENT_CHAR ((unsigned char) src[4]))
     {
       if (src[3] == 'l')
 	{
@@ -348,12 +496,18 @@ parse_reg (src, mode, reg)
 	  return 4;
 	}
     }
+  if (src[0] == 'm' && src[1] == 'o' && src[2] == 'd'
+      && ! IDENT_CHAR ((unsigned char) src[4]))
+    {
+      *mode = A_MOD;
+      return 3;
+    }
   if (src[0] == 'f' && src[1] == 'r')
     {
       if (src[2] == '1')
 	{
 	  if (src[3] >= '0' && src[3] <= '5'
-	      && ! isalnum ((unsigned char) src[4]))
+	      && ! IDENT_CHAR ((unsigned char) src[4]))
 	    {
 	      *mode = F_REG_N;
 	      *reg = 10 + src[3] - '0';
@@ -361,7 +515,7 @@ parse_reg (src, mode, reg)
 	    }
 	}
       if (src[2] >= '0' && src[2] <= '9'
-	  && ! isalnum ((unsigned char) src[3]))
+	  && ! IDENT_CHAR ((unsigned char) src[3]))
 	{
 	  *mode = F_REG_N;
 	  *reg = (src[2] - '0');
@@ -373,7 +527,7 @@ parse_reg (src, mode, reg)
       if (src[2] == '1')
 	{
 	  if (src[3] >= '0' && src[3] <= '4' && ! ((src[3] - '0') & 1)
-	      && ! isalnum ((unsigned char) src[4]))
+	      && ! IDENT_CHAR ((unsigned char) src[4]))
 	    {
 	      *mode = D_REG_N;
 	      *reg = 10 + src[3] - '0';
@@ -381,7 +535,7 @@ parse_reg (src, mode, reg)
 	    }
 	}
       if (src[2] >= '0' && src[2] <= '8' && ! ((src[2] - '0') & 1)
-	  && ! isalnum ((unsigned char) src[3]))
+	  && ! IDENT_CHAR ((unsigned char) src[3]))
 	{
 	  *mode = D_REG_N;
 	  *reg = (src[2] - '0');
@@ -393,7 +547,7 @@ parse_reg (src, mode, reg)
       if (src[2] == '1')
 	{
 	  if (src[3] >= '0' && src[3] <= '4' && ! ((src[3] - '0') & 1)
-	      && ! isalnum ((unsigned char) src[4]))
+	      && ! IDENT_CHAR ((unsigned char) src[4]))
 	    {
 	      *mode = X_REG_N;
 	      *reg = 11 + src[3] - '0';
@@ -401,7 +555,7 @@ parse_reg (src, mode, reg)
 	    }
 	}
       if (src[2] >= '0' && src[2] <= '8' && ! ((src[2] - '0') & 1)
-	  && ! isalnum ((unsigned char) src[3]))
+	  && ! IDENT_CHAR ((unsigned char) src[3]))
 	{
 	  *mode = X_REG_N;
 	  *reg = (src[2] - '0') + 1;
@@ -410,14 +564,14 @@ parse_reg (src, mode, reg)
     }
   if (src[0] == 'f' && src[1] == 'v')
     {
-      if (src[2] == '1'&& src[3] == '2' && ! isalnum ((unsigned char) src[4]))
+      if (src[2] == '1'&& src[3] == '2' && ! IDENT_CHAR ((unsigned char) src[4]))
 	{
 	  *mode = V_REG_N;
 	  *reg = 12;
 	  return 4;
 	}
       if ((src[2] == '0' || src[2] == '4' || src[2] == '8')
-	  && ! isalnum ((unsigned char) src[3]))
+	  && ! IDENT_CHAR ((unsigned char) src[3]))
 	{
 	  *mode = V_REG_N;
 	  *reg = (src[2] - '0');
@@ -425,21 +579,21 @@ parse_reg (src, mode, reg)
 	}
     }
   if (src[0] == 'f' && src[1] == 'p' && src[2] == 'u' && src[3] == 'l'
-      && ! isalnum ((unsigned char) src[4]))
+      && ! IDENT_CHAR ((unsigned char) src[4]))
     {
       *mode = FPUL_N;
       return 4;
     }
 
   if (src[0] == 'f' && src[1] == 'p' && src[2] == 's' && src[3] == 'c'
-      && src[4] == 'r' && ! isalnum ((unsigned char) src[5]))
+      && src[4] == 'r' && ! IDENT_CHAR ((unsigned char) src[5]))
     {
       *mode = FPSCR_N;
       return 5;
     }
 
   if (src[0] == 'x' && src[1] == 'm' && src[2] == 't' && src[3] == 'r'
-      && src[4] == 'x' && ! isalnum ((unsigned char) src[5]))
+      && src[4] == 'x' && ! IDENT_CHAR ((unsigned char) src[5]))
     {
       *mode = XMTRX_M4;
       return 5;
@@ -605,8 +759,21 @@ parse_at (src, op)
 	}
       if (src[0] == '+')
 	{
-	  op->type = A_INC_N;
 	  src++;
+	  if ((src[0] == 'r' && src[1] == '8')
+	      || (src[0] == 'i' && (src[1] == 'x' || src[1] == 's')))
+	    {
+	      src += 2;
+	      op->type = A_PMOD_N;
+	    }
+	  if ((src[0] == 'r' && src[1] == '9')
+	      || (src[0] == 'i' && src[1] == 'y'))
+	    {
+	      src += 2;
+	      op->type = A_PMODY_N;
+	    }
+	  else
+	    op->type = A_INC_N;
 	}
       else
 	{
@@ -665,7 +832,11 @@ get_operands (info, args, operand)
   char *ptr = args;
   if (info->arg[0])
     {
-      ptr++;
+      /* The pre-processor will eliminate whitespace in front of '@'
+	 after the first argument; we may be called multiple times
+	 from assemble_ppi, so don't insist on finding whitespace here.  */
+      if (*ptr == ' ')
+	ptr++;
 
       get_operand (&ptr, operand + 0);
       if (info->arg[1])
@@ -774,13 +945,11 @@ get_specific (opcode, operands)
 	    case V_REG_N:
 	    case FPUL_N:
 	    case FPSCR_N:
+	    case A_PMOD_N:
+	    case A_PMODY_N:
+	    case DSP_REG_N:
 	      /* Opcode needs rn */
 	      if (user->type != arg)
-		goto fail;
-	      reg_n = user->reg;
-	      break;
-	    case FD_REG_N:
-	      if (user->type != F_REG_N && user->type != D_REG_N)
 		goto fail;
 	      reg_n = user->reg;
 	      break;
@@ -792,6 +961,10 @@ get_specific (opcode, operands)
 	    case A_GBR:
 	    case A_SR:
 	    case A_VBR:
+	    case A_DSR:
+	    case A_MOD:
+	    case A_RE:
+	    case A_RS:
 	    case A_SSR:
 	    case A_SPC:
 	    case A_SGR:
@@ -812,10 +985,142 @@ get_specific (opcode, operands)
 	    case A_IND_M:
 	    case A_IND_R0_REG_M:
 	    case A_DISP_REG_M:
+	    case DSP_REG_M:
 	      /* Opcode needs rn */
 	      if (user->type != arg - A_REG_M + A_REG_N)
 		goto fail;
 	      reg_m = user->reg;
+	      break;
+
+	    case DSP_REG_X:
+	      if (user->type != DSP_REG_N)
+		goto fail;
+	      switch (user->reg)
+		{
+		case A_X0_NUM:
+		  reg_x = 0;
+		  break;
+		case A_X1_NUM:
+		  reg_x = 1;
+		  break;
+		case A_A0_NUM:
+		  reg_x = 2;
+		  break;
+		case A_A1_NUM:
+		  reg_x = 3;
+		  break;
+		default:
+		  goto fail;
+		}
+	      break;
+
+	    case DSP_REG_Y:
+	      if (user->type != DSP_REG_N)
+		goto fail;
+	      switch (user->reg)
+		{
+		case A_Y0_NUM:
+		  reg_y = 0;
+		  break;
+		case A_Y1_NUM:
+		  reg_y = 1;
+		  break;
+		case A_M0_NUM:
+		  reg_y = 2;
+		  break;
+		case A_M1_NUM:
+		  reg_y = 3;
+		  break;
+		default:
+		  goto fail;
+		}
+	      break;
+
+	    case DSP_REG_E:
+	      if (user->type != DSP_REG_N)
+		goto fail;
+	      switch (user->reg)
+		{
+		case A_X0_NUM:
+		  reg_efg = 0 << 10;
+		  break;
+		case A_X1_NUM:
+		  reg_efg = 1 << 10;
+		  break;
+		case A_Y0_NUM:
+		  reg_efg = 2 << 10;
+		  break;
+		case A_A1_NUM:
+		  reg_efg = 3 << 10;
+		  break;
+		default:
+		  goto fail;
+		}
+	      break;
+
+	    case DSP_REG_F:
+	      if (user->type != DSP_REG_N)
+		goto fail;
+	      switch (user->reg)
+		{
+		case A_Y0_NUM:
+		  reg_efg |= 0 << 8;
+		  break;
+		case A_Y1_NUM:
+		  reg_efg |= 1 << 8;
+		  break;
+		case A_X0_NUM:
+		  reg_efg |= 2 << 8;
+		  break;
+		case A_A1_NUM:
+		  reg_efg |= 3 << 8;
+		  break;
+		default:
+		  goto fail;
+		}
+	      break;
+
+	    case DSP_REG_G:
+	      if (user->type != DSP_REG_N)
+		goto fail;
+	      switch (user->reg)
+		{
+		case A_M0_NUM:
+		  reg_efg |= 0 << 2;
+		  break;
+		case A_M1_NUM:
+		  reg_efg |= 1 << 2;
+		  break;
+		case A_A0_NUM:
+		  reg_efg |= 2 << 2;
+		  break;
+		case A_A1_NUM:
+		  reg_efg |= 3 << 2;
+		  break;
+		default:
+		  goto fail;
+		}
+	      break;
+
+	    case A_A0:
+	      if (user->type != DSP_REG_N || user->reg != A_A0_NUM)
+		goto fail;
+	      break;
+	    case A_X0:
+	      if (user->type != DSP_REG_N || user->reg != A_X0_NUM)
+		goto fail;
+	      break;
+	    case A_X1:
+	      if (user->type != DSP_REG_N || user->reg != A_X1_NUM)
+		goto fail;
+	      break;
+	    case A_Y0:
+	      if (user->type != DSP_REG_N || user->reg != A_Y0_NUM)
+		goto fail;
+	      break;
+	    case A_Y1:
+	      if (user->type != DSP_REG_N || user->reg != A_Y1_NUM)
+		goto fail;
 	      break;
 
 	    case F_REG_M:
@@ -845,6 +1150,9 @@ get_specific (opcode, operands)
 	      goto fail;
 	    }
 	}
+      if ( !(valid_arch & this_try->arch))
+	goto fail;
+      valid_arch &= this_try->arch;
       return this_try;
     fail:;
     }
@@ -949,6 +1257,11 @@ build_Mytes (opcode, operand)
 	    case REG_M:
 	      nbuf[index] = reg_m;
 	      break;
+	    case SDT_REG_N:
+	      if (reg_n < 2 || reg_n > 5)
+		as_bad (_("Invalid register: 'r%d'"), reg_n);
+	      nbuf[index] = (reg_n & 3) | 4;
+	      break;
 	    case REG_NM:
 	      nbuf[index] = reg_n | (reg_m >> 2);
 	      break;
@@ -997,6 +1310,259 @@ build_Mytes (opcode, operand)
   }
 }
 
+/* Find an opcode at the start of *STR_P in the hash table, and set
+   *STR_P to the first character after the last one read.  */
+
+static sh_opcode_info *
+find_cooked_opcode (str_p)
+     char **str_p;
+{
+  char *str = *str_p;
+  unsigned char *op_start;
+  unsigned char *op_end;
+  char name[20];
+  int nlen = 0;
+  /* Drop leading whitespace */
+  while (*str == ' ')
+    str++;
+
+  /* Find the op code end.
+     The pre-processor will eliminate whitespace in front of
+     any '@' after the first argument; we may be called from
+     assemble_ppi, so the opcode might be terminated by an '@'.  */
+  for (op_start = op_end = (unsigned char *) (str);
+       *op_end
+       && nlen < 20
+       && !is_end_of_line[*op_end] && *op_end != ' ' && *op_end != '@';
+       op_end++)
+    {
+      unsigned char c = op_start[nlen];
+
+      /* The machine independent code will convert CMP/EQ into cmp/EQ
+	 because it thinks the '/' is the end of the symbol.  Moreover,
+	 all but the first sub-insn is a parallel processing insn won't
+	 be capitailzed.  Instead of hacking up the machine independent
+	 code, we just deal with it here.  */
+      c = isupper (c) ? tolower (c) : c;
+      name[nlen] = c;
+      nlen++;
+    }
+  name[nlen] = 0;
+  *str_p = op_end;
+
+  if (nlen == 0)
+    {
+      as_bad (_("can't find opcode "));
+    }
+
+  return (sh_opcode_info *) hash_find (opcode_hash_control, name);
+}
+
+/* Assemble a parallel processing insn.  */
+#define DDT_BASE 0xf000 /* Base value for double data transfer insns */
+static void
+assemble_ppi (op_end, opcode)
+     char *op_end;
+     sh_opcode_info *opcode;
+{
+  int movx = 0;
+  int movy = 0;
+  int cond = 0;
+  int field_b = 0;
+  char *output;
+  int move_code;
+
+  /* Some insn ignore one or more register fields, e.g. psts machl,a0.
+     Make sure we encode a defined insn pattern.  */
+  reg_x = 0;
+  reg_y = 0;
+
+  for (;;)
+    {
+      sh_operand_info operand[3];
+
+      if (opcode->arg[0] != A_END)
+	op_end = get_operands (opcode, op_end, operand);
+      opcode = get_specific (opcode, operand);
+      if (opcode == 0)
+	{
+	  /* Couldn't find an opcode which matched the operands */
+	  char *where = frag_more (2);
+
+	  where[0] = 0x0;
+	  where[1] = 0x0;
+	  as_bad (_("invalid operands for opcode"));
+	  return;
+	}
+      if (opcode->nibbles[0] != PPI)
+	as_bad (_("insn can't be combined with parallel processing insn"));
+
+      switch (opcode->nibbles[1])
+	{
+
+	case NOPX:
+	  if (movx)
+	    as_bad (_("multiple movx specifications"));
+	  movx = DDT_BASE;
+	  break;
+	case NOPY:
+	  if (movy)
+	    as_bad (_("multiple movy specifications"));
+	  movy = DDT_BASE;
+	  break;
+
+	case MOVX:
+	  if (movx)
+	    as_bad (_("multiple movx specifications"));
+	  if (reg_n < 4 || reg_n > 5)
+	    as_bad (_("invalid movx address register"));
+	  if (opcode->nibbles[2] & 8)
+	    {
+	      if (reg_m == A_A1_NUM)
+		movx = 1 << 7;
+	      else if (reg_m != A_A0_NUM)
+		as_bad (_("invalid movx dsp register"));
+	    }
+	  else
+	    {
+	      if (reg_x > 1)
+		as_bad (_("invalid movx dsp register"));
+	      movx = reg_x << 7;
+	    }
+	  movx += ((reg_n - 4) << 9) + (opcode->nibbles[2] << 2) + DDT_BASE;
+	  break;
+
+	case MOVY:
+	  if (movy)
+	    as_bad (_("multiple movy specifications"));
+	  if (opcode->nibbles[2] & 8)
+	    {
+	      /* Bit 3 in nibbles[2] is intended for bit 4 of the opcode,
+		 so add 8 more.  */
+	      movy = 8;
+	      if (reg_m == A_A1_NUM)
+		movy += 1 << 6;
+	      else if (reg_m != A_A0_NUM)
+		as_bad (_("invalid movy dsp register"));
+	    }
+	  else
+	    {
+	      if (reg_y > 1)
+		as_bad (_("invalid movy dsp register"));
+	      movy = reg_y << 6;
+	    }
+	  if (reg_n < 6 || reg_n > 7)
+	    as_bad (_("invalid movy address register"));
+	  movy += ((reg_n - 6) << 8) + opcode->nibbles[2] + DDT_BASE;
+	  break;
+
+	case PSH:
+	  if (immediate.X_op != O_constant)
+	    as_bad (_("dsp immediate shift value not constant"));
+	  field_b = ((opcode->nibbles[2] << 12)
+		     | (immediate.X_add_number & 127) << 4
+		     | reg_n);
+	  break;
+	case PPI3:
+	  if (field_b)
+	    as_bad (_("multiple parallel processing specifications"));
+	  field_b = ((opcode->nibbles[2] << 12) + (opcode->nibbles[3] << 8)
+		     + (reg_x << 6) + (reg_y << 4) + reg_n);
+	  break;
+	case PDC:
+	  if (cond)
+	    as_bad (_("multiple condition specifications"));
+	  cond = opcode->nibbles[2] << 8;
+	  if (*op_end)
+	    goto skip_cond_check;
+	  break;
+	case PPIC:
+	  if (field_b)
+	    as_bad (_("multiple parallel processing specifications"));
+	  field_b = ((opcode->nibbles[2] << 12) + (opcode->nibbles[3] << 8)
+		     + cond + (reg_x << 6) + (reg_y << 4) + reg_n);
+	  cond = 0;
+	  break;
+	case PMUL:
+	  if (field_b)
+	    {
+	      if ((field_b & 0xef00) != 0xa100)
+		as_bad (_("insn cannot be combined with pmuls"));
+	      field_b -= 0x8100;
+	      switch (field_b & 0xf)
+		{
+		case A_X0_NUM:
+		  field_b += 0 - A_X0_NUM;
+		  break;
+		case A_Y0_NUM:
+		  field_b += 1 - A_Y0_NUM;
+		  break;
+		case A_A0_NUM:
+		  field_b += 2 - A_A0_NUM;
+		  break;
+		case A_A1_NUM:
+		  field_b += 3 - A_A1_NUM;
+		  break;
+		default:
+		  as_bad (_("bad padd / psub pmuls output operand"));
+		}
+	    }
+	  field_b += 0x4000 + reg_efg;
+	  break;
+	default:
+	  abort ();
+	}
+      if (cond)
+	{
+	  as_bad (_("condition not followed by conditionalizable insn"));
+	  cond = 0;
+	}
+      if (! *op_end)
+	break;
+    skip_cond_check:
+      opcode = find_cooked_opcode (&op_end);
+      if (opcode == NULL)
+	{
+	  (as_bad
+	   (_("unrecognized characters at end of parallel processing insn")));
+	  break;
+	}
+    }
+
+  move_code = movx | movy;
+  if (field_b)
+    {
+      /* Parallel processing insn.  */
+      unsigned long ppi_code = (movx | movy | 0xf800) << 16 | field_b;
+
+      output = frag_more (4);
+      if (! target_big_endian)
+	{
+	  output[3] = ppi_code >> 8;
+	  output[2] = ppi_code;
+	}
+      else
+	{
+	  output[2] = ppi_code >> 8;
+	  output[3] = ppi_code;
+	}
+      move_code |= 0xf800;
+    }
+  else
+    /* Just a double data transfer.  */
+    output = frag_more (2);
+  if (! target_big_endian)
+    {
+      output[1] = move_code >> 8;
+      output[0] = move_code;
+    }
+  else
+    {
+      output[0] = move_code >> 8;
+      output[1] = move_code;
+    }
+}
+
 /* This is the guts of the machine-dependent assembler.  STR points to a
    machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles to.
@@ -1006,41 +1572,12 @@ void
 md_assemble (str)
      char *str;
 {
-  unsigned char *op_start;
   unsigned char *op_end;
   sh_operand_info operand[3];
   sh_opcode_info *opcode;
-  char name[20];
-  int nlen = 0;
-  /* Drop leading whitespace */
-  while (*str == ' ')
-    str++;
 
-  /* find the op code end */
-  for (op_start = op_end = (unsigned char *) (str);
-       *op_end
-       && nlen < 20
-       && !is_end_of_line[*op_end] && *op_end != ' ';
-       op_end++)
-    {
-      unsigned char c = op_start[nlen];
-
-      /* The machine independent code will convert CMP/EQ into cmp/EQ
-	 because it thinks the '/' is the end of the symbol.  Instead of
-	 hacking up the machine independent code, we just deal with it
-	 here.  */
-      c = isupper (c) ? tolower (c) : c;
-      name[nlen] = c;
-      nlen++;
-    }
-  name[nlen] = 0;
-
-  if (nlen == 0)
-    {
-      as_bad (_("can't find opcode "));
-    }
-
-  opcode = (sh_opcode_info *) hash_find (opcode_hash_control, name);
+  opcode = find_cooked_opcode (&str);
+  op_end = str;
 
   if (opcode == NULL)
     {
@@ -1058,6 +1595,12 @@ md_assemble (str)
       seg_info (now_seg)->tc_segment_info_data.in_code = 1;
     }
 
+  if (opcode->nibbles[0] == PPI)
+    {
+      assemble_ppi (op_end, opcode);
+      return;
+    }
+
   if (opcode->arg[0] == A_BDISP12
       || opcode->arg[0] == A_BDISP8)
     {
@@ -1066,9 +1609,16 @@ md_assemble (str)
     }
   else
     {
-      if (opcode->arg[0] != A_END)
+      if (opcode->arg[0] == A_END)
 	{
-	  get_operands (opcode, op_end, operand);
+	  /* Ignore trailing whitespace.  If there is any, it has already
+	     been compressed to a single space.  */
+	  if (*op_end == ' ')
+	    op_end++;
+	}
+      else
+	{
+	  op_end = get_operands (opcode, op_end, operand);
 	}
       opcode = get_specific (opcode, operand);
 
@@ -1082,6 +1632,9 @@ md_assemble (str)
 	  as_bad (_("invalid operands for opcode"));
 	  return;
 	}
+
+      if (*op_end)
+	as_bad (_("excess operands: '%s'"), op_end);
 
       build_Mytes (opcode, operand);
     }
@@ -1136,6 +1689,7 @@ DEFUN (md_undefined_symbol, (name),
 }
 
 #ifdef OBJ_COFF
+#ifndef BFD_ASSEMBLER
 
 void
 DEFUN (tc_crawl_symbol_chain, (headers),
@@ -1151,6 +1705,7 @@ DEFUN (tc_headers_hook, (headers),
   printf (_("call to tc_headers_hook \n"));
 }
 
+#endif
 #endif
 
 /* Various routines to kill one day */
@@ -1247,10 +1802,12 @@ struct option md_longopts[] = {
 #define OPTION_RELAX  (OPTION_MD_BASE)
 #define OPTION_LITTLE (OPTION_MD_BASE + 1)
 #define OPTION_SMALL (OPTION_LITTLE + 1)
+#define OPTION_DSP (OPTION_SMALL + 1)
 
   {"relax", no_argument, NULL, OPTION_RELAX},
   {"little", no_argument, NULL, OPTION_LITTLE},
   {"small", no_argument, NULL, OPTION_SMALL},
+  {"dsp", no_argument, NULL, OPTION_DSP},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof(md_longopts);
@@ -1275,6 +1832,10 @@ md_parse_option (c, arg)
       sh_small = 1;
       break;
 
+    case OPTION_DSP:
+      sh_dsp = 1;
+      break;
+
     default:
       return 0;
     }
@@ -1290,7 +1851,8 @@ md_show_usage (stream)
 SH options:\n\
 -little			generate little endian code\n\
 -relax			alter jump instructions for long displacements\n\
--small			align sections to 4 byte boundaries, not 16\n"));
+-small			align sections to 4 byte boundaries, not 16\n\
+-dsp			enable sh-dsp insns, and disable sh3e / sh4 insns.\n"));
 }
 
 void
@@ -1450,7 +2012,8 @@ sh_frob_section (abfd, sec, ignore)
 	 We have already adjusted the value of sym to include the
 	 fragment address, so we undo that adjustment here.  */
       subseg_change (sec, 0);
-      fix_new (sym->sy_frag, S_GET_VALUE (sym) - sym->sy_frag->fr_address,
+      fix_new (symbol_get_frag (sym),
+	       S_GET_VALUE (sym) - symbol_get_frag (sym)->fr_address,
 	       4, &abs_symbol, info.count, 0, BFD_RELOC_SH_COUNT);
     }
 }
@@ -1875,6 +2438,33 @@ sh_fix_adjustable (fixP)
 
   return 1;
 }
+
+void sh_elf_final_processing()
+{
+  int val;
+
+  /* Set file-specific flags to indicate if this code needs
+     a processor with the sh-dsp / sh3e ISA to execute.  */
+  if (valid_arch & arch_sh1)
+    val = EF_SH1;
+  else if (valid_arch & arch_sh2)
+    val = EF_SH2;
+  else if (valid_arch & arch_sh_dsp)
+    val = EF_SH_DSP;
+  else if (valid_arch & arch_sh3)
+    val = EF_SH3;
+  else if (valid_arch & arch_sh3_dsp)
+    val = EF_SH_DSP;
+  else if (valid_arch & arch_sh3e)
+    val = EF_SH3E;
+  else if (valid_arch & arch_sh4)
+    val = EF_SH4;
+  else
+    abort ();
+
+  elf_elfheader (stdoutput)->e_flags &= ~EF_SH_MACH_MASK;
+  elf_elfheader (stdoutput)->e_flags |= val;
+}
 #endif
 
 /* Apply a fixup to the object file.  */
@@ -2056,7 +2646,11 @@ md_apply_fix (fixP, val)
     case BFD_RELOC_VTABLE_INHERIT:
     case BFD_RELOC_VTABLE_ENTRY:
       fixP->fx_done = 0;
+#ifdef BFD_ASSEMBLER
+      return 0;
+#else
       return;
+#endif
 
     default:
       abort ();
@@ -2187,12 +2781,7 @@ sh_do_align (n, fill, len, max)
      int max;
 {
   if (fill == NULL
-#ifdef BFD_ASSEMBLER
-      && (now_seg->flags & SEC_CODE) != 0
-#else
-      && now_seg != data_section
-      && now_seg != bss_section
-#endif
+      && subseg_text_p (now_seg)
       && n > 1)
     {
       static const unsigned char big_nop_pattern[] = { 0x00, 0x09 };
@@ -2377,7 +2966,8 @@ tc_gen_reloc (section, fixp)
   bfd_reloc_code_real_type r_type;
 
   rel = (arelent *) xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  rel->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
   r_type = fixp->fx_r_type;

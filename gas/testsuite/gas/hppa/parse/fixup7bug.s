@@ -1,18 +1,6 @@
-	.SPACE $PRIVATE$
-	.SUBSPA $DATA$,QUAD=1,ALIGN=8,ACCESS=31
-	.SUBSPA $BSS$,QUAD=1,ALIGN=8,ACCESS=31,ZERO,SORT=82
-	.SPACE $TEXT$
-	.SUBSPA $LIT$,QUAD=0,ALIGN=8,ACCESS=44
-	.SUBSPA $CODE$,QUAD=0,ALIGN=8,ACCESS=44,CODE_ONLY
 	.IMPORT $global$,DATA
 	.IMPORT $$dyncall,MILLICODE
-; gcc_compiled.:
-	.IMPORT xmalloc,CODE
-	.IMPORT _obstack_newchunk,CODE
-	.IMPORT memset,CODE
-	.SPACE $TEXT$
-	.SUBSPA $CODE$
-
+	.code
 	.align 4
 	.EXPORT alloc_type,CODE
 	.EXPORT alloc_type,ENTRY,PRIV_LEV=3,ARGW0=GR,RTNVAL=GR
@@ -2729,8 +2717,7 @@ L$0113:
 	.align 4
 LC$0020: 
 	.STRING "stub type has NULL name\x00"
-	.SPACE $PRIVATE$
-	.SUBSPA $DATA$
+	.data
 
 	.align 4
 stub_noname_complaint: 
@@ -2739,8 +2726,7 @@ stub_noname_complaint:
 	.word 0
 	.IMPORT complain,CODE
 	.IMPORT memcpy,CODE
-	.SPACE $TEXT$
-	.SUBSPA $CODE$
+	.code
 
 	.align 4
 	.EXPORT check_stub_type,CODE
@@ -3309,8 +3295,6 @@ allocate_cplus_struct_type:
 	add %r20,%r19,%r19
 	ldw 0(%r19),%r20
 	ldw 48(%r20),%r19
-	ldil L'cplus_struct_default,%r20
-	ldo R'cplus_struct_default(%r20),%r20
 	comclr,= %r19,%r20,%r0
 	bl L$0150,%r0
 	nop
@@ -3433,9 +3417,7 @@ L$0157:
 	add %r21,%r19,%r20
 	ldw 0(%r20),%r19
 	ldw 48(%r19),%r20
-	ldil L'cplus_struct_default,%r19
 	copy %r20,%r21
-	ldo R'cplus_struct_default(%r19),%r22
 	ldws,ma 4(%r22),%r19
 	ldws,ma 4(%r22),%r20
 	stws,ma %r19,4(%r21)
@@ -3585,8 +3567,6 @@ L$0160:
 	nop
 	bl,n L$0161,%r0
 L$0162: 
-	ldil L'cplus_struct_default,%r19
-	ldo R'cplus_struct_default(%r19),%r19
 	stw %r19,48(%r13)
 L$0161: 
 	copy %r13,%r28
@@ -6185,8 +6165,3 @@ L$0229:
 	ldwm -8(%r30),%r4
 	.EXIT
 	.PROCEND
-	.SPACE $PRIVATE$
-	.SUBSPA $BSS$
-
-cplus_struct_default: .comm 24
-

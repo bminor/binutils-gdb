@@ -47,18 +47,14 @@ if { ![istarget i386-*-sysv4*] \
      && ![istarget sparc*-*-elf] \
      && ![istarget sparc*-*-solaris2*] \
      && ![istarget sparc*-*-sunos4*] \
+     && ![istarget sparc*-*-linux*] \
      && ![istarget rs6000*-*-aix*] \
      && ![istarget powerpc*-*-aix*] } {
     return
 }
 
-if { [istarget i386-*-linuxaout*] \
-     || [istarget i486-*-linuxaout*] \
-     || [istarget i586-*-linuxaout*] \
-     || [istarget i386-*-linuxoldld*] \
-     || [istarget i486-*-linuxoldld*] \
-     || [istarget i586-*-linuxoldld*] \
-     || [istarget m68k-*-linuxaout*] } {
+if { [istarget *-*-linux*aout*] \
+     || [istarget *-*-linux*oldld*] } {
     return
 }
 
@@ -207,6 +203,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	# relocations for various targets are broken in the case where
 	# the load address is not zero (which is the default).
 	setup_xfail "*-*-sunos4*"
+	setup_xfail "*-*-linux*libc1"
 	shared_test shnp "shared (non PIC, load offset)" \
 		mainnp.o sh1np.o sh2np.o shared \
 		"-T $srcdir/$subdir/elf-offset.ld"

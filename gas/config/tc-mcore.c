@@ -1,6 +1,5 @@
 /* tc-mcore.c -- Assemble code for M*Core
-
-   Copyright (C) 1993,1994, 1999 Free Software Foundation.
+   Copyright (C) 1999, 2000 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -15,8 +14,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 #include <stdio.h>
 #include "as.h"
@@ -40,29 +40,33 @@ static void   mcore_s_literals PARAMS ((int));
 static void   mcore_cons PARAMS ((int));
 static void   mcore_float_cons PARAMS ((int));
 static void   mcore_stringer PARAMS ((int));
+static void   mcore_fill   PARAMS ((int));
 static int    log2 PARAMS ((unsigned int));
-static char * parse_reg PARAMS ((char *, unsigned *));
-static char * parse_creg PARAMS ((char *, unsigned *));
-static char * parse_exp PARAMS ((char *, expressionS *));
+static char * parse_reg    PARAMS ((char *, unsigned *));
+static char * parse_creg   PARAMS ((char *, unsigned *));
+static char * parse_exp    PARAMS ((char *, expressionS *));
+static char * parse_rt     PARAMS ((char *, char **, int, expressionS *));
+static char * parse_imm    PARAMS ((char *, unsigned *, unsigned, unsigned));
+static char * parse_mem    PARAMS ((char *, unsigned *, unsigned *, unsigned));
+static char * parse_psrmod PARAMS ((char *, unsigned *));
 static void   make_name PARAMS ((char *, char *, int));
 static int    enter_literal PARAMS ((expressionS *, int));
-static char * parse_rt PARAMS ((char *, char **, int, expressionS *));
-static char * parse_imm PARAMS ((char *, unsigned *, unsigned, unsigned));
-static char * parse_mem PARAMS ((char *, unsigned *, unsigned *, unsigned));
 static void   dump_literals PARAMS ((int));
 static void   check_literals PARAMS ((int, int));
 static void   mcore_s_text    PARAMS ((int));
 static void   mcore_s_data    PARAMS ((int));
-#ifdef OBJ_ELF
 static void   mcore_s_section PARAMS ((int));
+static void   mcore_s_bss     PARAMS ((int));
+#ifdef OBJ_ELF
+static void   mcore_s_comm    PARAMS ((int));
 #endif
 
 /* Several places in this file insert raw instructions into the
    object. They should use MCORE_INST_XXX macros to get the opcodes
    and then use these two macros to crack the MCORE_INST value into
    the appropriate byte values.  */
-#define	INST_BYTE0(x)	(((x) >> 8) & 0xFF)
-#define	INST_BYTE1(x)	((x) & 0xFF)
+#define	INST_BYTE0(x)  (target_big_endian ? (((x) >> 8) & 0xFF) : ((x) & 0xFF))
+#define	INST_BYTE1(x)  (target_big_endian ? ((x) & 0xFF) : (((x) >> 8) & 0xFF))
 
 const char comment_chars[] = "#/";
 const char line_separator_chars[] = ";";
@@ -70,7 +74,6 @@ const char line_comment_chars[] = "#/";
 
 const int md_reloc_size = 8;
 
-static int relax;		/* set if -relax seen */
 static int do_jsri2bsr = 0;	/* change here from 1 by Cruess 19 August 97 */
 static int sifilter_mode = 0;
 
@@ -101,6 +104,14 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #define U12_LEN	        2
 #define U32_LEN	        8	/* allow for align */
 
+typedef enum
+{
+  M210,
+  M340
+}
+cpu_type;
+
+cpu_type cpu = M340;
 
 /* Initialize the relax table */
 const relax_typeS md_relax_table[] =
@@ -165,7 +176,6 @@ const pseudo_typeS md_pseudo_table[] =
   { "import",   s_ignore,         0 },
   { "literals", mcore_s_literals, 0 },
   { "page",     listing_eject,    0 },
-  { "bss",      s_lcomm_bytes,    1 },
 
   /* The following are to intercept the placement of data into the text
      section (eg addresses for a switch table), so that the space they
@@ -177,11 +187,11 @@ const pseudo_typeS md_pseudo_table[] =
   { "byte",     mcore_cons,           1 },
   { "dc",       mcore_cons,           2 },
   { "dc.b",     mcore_cons,           1 },
-  { "dc.d",     mcore_float_cons,    'd' },
+  { "dc.d",     mcore_float_cons,    'd'},
   { "dc.l",     mcore_cons,           4 },
-  { "dc.s",     mcore_float_cons,    'f' },
+  { "dc.s",     mcore_float_cons,    'f'},
   { "dc.w",     mcore_cons,           2 },
-  { "dc.x",     mcore_float_cons,    'x' },
+  { "dc.x",     mcore_float_cons,    'x'},
   { "double",   mcore_float_cons,    'd'},
   { "float",    mcore_float_cons,    'f'},
   { "hword",    mcore_cons,           2 },
@@ -193,17 +203,20 @@ const pseudo_typeS md_pseudo_table[] =
   { "single",   mcore_float_cons,    'f'},
   { "string",   mcore_stringer,       1 },
   { "word",     mcore_cons,           2 },
+  { "fill",     mcore_fill,           0 },
 
   /* Allow for the effect of section changes.  */
   { "text",      mcore_s_text,    0 },
   { "data",      mcore_s_data,    0 },
-  
-#ifdef OBJ_ELF
+  { "bss",       mcore_s_bss,     1 },
+#ifdef OBJ_EF
+  { "comm",      mcore_s_comm,    0 },
+#endif
   { "section",   mcore_s_section, 0 },
   { "section.s", mcore_s_section, 0 },
   { "sect",      mcore_s_section, 0 },
   { "sect.s",    mcore_s_section, 0 },
-#endif  
+  
   { 0,          0,                0 }
 };
 
@@ -305,12 +318,52 @@ mcore_stringer (append_zero)
 }
 
 static void
+mcore_fill (unused)
+     int unused;
+{
+  if (now_seg == text_section)
+    {
+      char * str = input_line_pointer;
+      int    size = 1;
+      int    repeat;
+
+      repeat = atoi (str);
+      
+      /* Look to see if a size has been specified.  */
+      while (*str != '\n' && *str != 0 && *str != ',')
+	++ str;
+      
+      if (* str == ',')
+	{
+	  size = atoi (str + 1);
+
+	  if (size > 8)
+	    size = 8;
+	  else if (size < 0)
+	    size = 0;
+	}
+
+      poolspan += size * repeat;
+    }
+  
+  s_fill (unused);
+
+  check_literals (2, 0);
+}
+
+/* Handle the section changing pseudo-ops.  These call through to the
+   normal implementations, but they dump the literal pool first.  */
+static void
 mcore_s_text (ignore)
      int ignore;
 {
   dump_literals (0);
   
+#ifdef OBJ_ELF
+  obj_elf_text (ignore);
+#else
   s_text (ignore);
+#endif
 }
 
 static void
@@ -319,11 +372,64 @@ mcore_s_data (ignore)
 {
   dump_literals (0);
   
+#ifdef OBJ_ELF
+  obj_elf_data (ignore);
+#else
   s_data (ignore);
+#endif
 }
 
+static void
+mcore_s_section (ignore)
+     int ignore;
+{
+  /* Scan forwards to find the name of the section.  If the section
+     being switched to is ".line" then this is a DWARF1 debug section
+     which is arbitarily placed inside generated code.  In this case
+     do not dump the literal pool because it is a) inefficient and
+     b) would require the generation of extra code to jump around the
+     pool.  */
+  char * ilp = input_line_pointer;
+
+  while (*ilp != 0 && isspace(*ilp))
+    ++ ilp;
+
+  if (strncmp (ilp, ".line", 5) == 0
+      && (isspace (ilp[5]) || *ilp == '\n' || *ilp == '\r'))
+    ;
+  else
+    dump_literals (0);
+
+#ifdef OBJ_ELF
+  obj_elf_section (ignore);
+#endif
+#ifdef OBJ_COFF
+  obj_coff_section (ignore);
+#endif
+}
+
+static void
+mcore_s_bss (needs_align)
+     int needs_align;
+{
+  dump_literals (0);
+  
+  s_lcomm_bytes (needs_align);
+}
+
+#ifdef OBJ_ELF
+static void
+mcore_s_comm (needs_align)
+     int needs_align;
+{
+  dump_literals (0);
+  
+  obj_elf_common (needs_align);
+}
+#endif
+
 /* This function is called once, at assembler startup time.  This should
-  set up all the tables, etc that the MD part of the assembler needs.  */
+   set up all the tables, etc that the MD part of the assembler needs.  */
 void
 md_begin ()
 {
@@ -394,7 +500,7 @@ parse_reg (s, reg)
     }
   else if (   tolower (s[0]) == 's'
 	   && tolower (s[1]) == 'p'
-	   && (isspace (s[2]) || s[2] == ','))
+	   && ! isalnum (s[2]))
     {
       * reg = 0;
       return s + 2;
@@ -490,6 +596,46 @@ parse_creg (s, reg)
 }
 
 static char *
+parse_psrmod (s, reg)
+  char *     s;
+  unsigned * reg;
+{
+  int  i;
+  char buf[10];
+  static struct psrmods
+  {
+    char *       name;
+    unsigned int value;
+  }
+  psrmods[] =
+  {
+    { "ie", 1 },
+    { "fe", 2 },
+    { "ee", 4 },
+    { "af", 8 }	/* Really 0 and non-combinable.  */
+  };
+  
+  for (i = 0; i < 2; i++)
+    buf[i] = isascii (s[i]) ? tolower (s[i]) : 0;
+  
+  for (i = sizeof (psrmods) / sizeof (psrmods[0]); i--;)
+    {
+      if (! strncmp (psrmods[i].name, buf, 2))
+	{
+          * reg = psrmods[i].value;
+	  
+          return s + 2;
+	}
+    }
+  
+  as_bad (_("bad/missing psr specifier"));
+  
+  * reg = 0;
+  
+  return s;
+}
+
+static char *
 parse_exp (s, e)
      char * s;
      expressionS * e;
@@ -533,13 +679,16 @@ make_name (s, p, n)
   s[7] = 0;
 }
 
+#define POOL_END_LABEL   ".LE"
+#define POOL_START_LABEL ".LS"
+
 static void
 dump_literals (isforce)
      int isforce;
 {
   int i;
   struct literal * p;
-  struct symbol * brarsym;
+  symbolS * brarsym;
   
   if (poolsize == 0)
     return;
@@ -550,7 +699,7 @@ dump_literals (isforce)
       char * output;
       char brarname[8];
       
-      make_name (brarname, ".YP.", poolnumber);
+      make_name (brarname, POOL_END_LABEL, poolnumber);
       
       brarsym = symbol_make (brarname);
       
@@ -642,7 +791,7 @@ enter_literal (e, ispcrel)
       if (++ poolnumber > 0xFFFF)
 	as_fatal (_("more than 65K literal pools"));
       
-      make_name (poolname, ".XP.", poolnumber);
+      make_name (poolname, POOL_START_LABEL, poolnumber);
       poolsym = symbol_make (poolname);
       symbol_table_insert (poolsym);
       poolspan = 0;
@@ -877,8 +1026,8 @@ md_assemble (str)
          fixes problem of an interrupt during a jmp.. */
       if (sifilter_mode)
 	{
-	  output[0] = (inst >> 8);
-	  output[1] = (inst);
+	  output[0] = INST_BYTE0 (inst);
+	  output[1] = INST_BYTE1 (inst);
 	  output = frag_more (2);
 	}
       break;
@@ -896,20 +1045,20 @@ md_assemble (str)
 	{
 	  /* Replace with:  bsr .+2 ; addi r15,6; jmp rx ; jmp rx */
 	  inst = MCORE_INST_BSR;	/* with 0 displacement */
-	  output[0] = (inst >> 8);
-	  output[1] = (inst);
+	  output[0] = INST_BYTE0 (inst);
+	  output[1] = INST_BYTE1 (inst);
 
 	  output = frag_more (2);
 	  inst = MCORE_INST_ADDI;
 	  inst |= 15;			/* addi r15,6 */
 	  inst |= (6 - 1) << 4;		/* over the jmp's */
-	  output[0] = (inst >> 8);
-	  output[1] = (inst);
+	  output[0] = INST_BYTE0 (inst);
+	  output[1] = INST_BYTE1 (inst);
 
 	  output = frag_more (2);
 	  inst = MCORE_INST_JMP | reg;
-	  output[0] = (inst >> 8);
-	  output[1] = (inst);
+	  output[0] = INST_BYTE0 (inst);
+	  output[1] = INST_BYTE1 (inst);
 
 	  output = frag_more (2);		/* 2nd emitted in fallthru */
 	}
@@ -932,6 +1081,13 @@ md_assemble (str)
       output = frag_more (2);
       break;
 
+    case MULSH:
+      if (cpu == M210)
+	{
+	  as_bad (_("M340 specific opcode used when assembling for M210"));
+	  break;
+	}
+      /* drop through... */
     case O2:
       op_end = parse_reg (op_end + 1, & reg);
       inst |= reg;
@@ -1239,8 +1395,11 @@ md_assemble (str)
 	++ op_end;
   
       if (* op_end == ',')
-	/* parse_rt calls frag_more() for us.  */
-	input_line_pointer = parse_rt (op_end + 1, & output, 0, 0);
+	{
+	  /* parse_rt calls frag_more() for us.  */
+	  input_line_pointer = parse_rt (op_end + 1, & output, 0, 0);
+          op_end = input_line_pointer;
+	}
       else
 	{
 	  as_bad (_("second operand missing"));
@@ -1251,6 +1410,7 @@ md_assemble (str)
     case LJ:
       input_line_pointer = parse_rt (op_end + 1, & output, 1, 0);
       /* parse_rt() calls frag_more() for us.  */
+      op_end = input_line_pointer;
       break;
       
     case RM:
@@ -1363,6 +1523,7 @@ md_assemble (str)
       
     case BR:
       input_line_pointer = parse_exp (op_end + 1, & e);
+      op_end = input_line_pointer;
       
       output = frag_more (2);
       
@@ -1395,6 +1556,7 @@ md_assemble (str)
       
     case JC:
       input_line_pointer = parse_exp (op_end + 1, & e);
+      op_end = input_line_pointer;
       
       output = frag_var (rs_machine_dependent,
 			 md_relax_table[C (COND_JUMP, COND32)].rlx_length,
@@ -1405,6 +1567,8 @@ md_assemble (str)
       
     case JU:
       input_line_pointer = parse_exp (op_end + 1, & e);
+      op_end = input_line_pointer;
+
       output = frag_var (rs_machine_dependent,
 			 md_relax_table[C (UNCD_JUMP, UNCD32)].rlx_length,
 			 md_relax_table[C (UNCD_JUMP, UNCD12)].rlx_length,
@@ -1415,7 +1579,8 @@ md_assemble (str)
     case JL:
       inst = MCORE_INST_JSRI;		/* jsri */
       input_line_pointer = parse_rt (op_end + 1, & output, 1, & e);
-      /* parse_rt() calls frag_more for us */
+      /* parse_rt() calls frag_more for us.  */
+      op_end = input_line_pointer;
       
       /* Only do this if we know how to do it ... */
       if (e.X_op != O_absent && do_jsri2bsr)
@@ -1492,12 +1657,49 @@ md_assemble (str)
       output = frag_more (2);
       break;
 
+    case OPSR:
+      if (cpu == M210)
+	{
+	  as_bad (_("M340 specific opcode used when assembling for M210"));
+	  break;
+	}
+      
+      op_end = parse_psrmod (op_end + 1, & reg);
+      
+      /* Look for further selectors.  */
+      while (* op_end == ',')
+	{
+	  unsigned value;
+	    
+	  op_end = parse_psrmod (op_end + 1, & value);
+	  
+	  if (value & reg)
+	    as_bad (_("duplicated psr bit specifier"));
+	  
+	  reg |= value;
+	}
+      
+      if (reg > 8)
+	as_bad (_("`af' must appear alone"));
+	
+      inst |= (reg & 0x7);
+      output = frag_more (2);
+      break;
+ 
     default:
       as_bad (_("unimplemented opcode \"%s\""), name);
     }
+
+  /* Drop whitespace after all the operands have been parsed.  */
+  while (isspace (* op_end))
+    op_end ++;
+
+  /* Give warning message if the insn has more operands than required. */
+  if (strcmp (op_end, opcode->name) && strcmp (op_end, ""))
+    as_warn (_("ignoring operands: %s "), op_end);
   
-  output[0] = inst >> 8;
-  output[1] = inst;
+  output[0] = INST_BYTE0 (inst);
+  output[1] = INST_BYTE1 (inst);
   
   check_literals (opcode->transfer, isize);
 }
@@ -1531,7 +1733,7 @@ md_atof (type, litP, sizeP)
 {
   int prec;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
-  LITTLENUM_TYPE * wordP;
+  int    i;
   char * t;
   char * atof_ieee ();
 
@@ -1573,30 +1775,45 @@ md_atof (type, litP, sizeP)
 
   *sizeP = prec * sizeof (LITTLENUM_TYPE);
   
-  for (wordP = words; prec--;)
+  if (! target_big_endian)
     {
-      md_number_to_chars (litP, (long) (*wordP++), sizeof (LITTLENUM_TYPE));
-      litP += sizeof (LITTLENUM_TYPE);
+      for (i = prec - 1; i >= 0; i--)
+	{
+	  md_number_to_chars (litP, (valueT) words[i],
+			      sizeof (LITTLENUM_TYPE));
+	  litP += sizeof (LITTLENUM_TYPE);
+	}
     }
+  else
+    for (i = 0; i < prec; i++)
+      {
+	md_number_to_chars (litP, (valueT) words[i],
+			    sizeof (LITTLENUM_TYPE));
+	litP += sizeof (LITTLENUM_TYPE);
+      }
   
   return 0;
 }
 
 CONST char * md_shortopts = "";
 
-#define OPTION_RELAX		(OPTION_MD_BASE)
-#define OPTION_JSRI2BSR_ON	(OPTION_MD_BASE + 1)
-#define OPTION_JSRI2BSR_OFF	(OPTION_MD_BASE + 2)
-#define OPTION_SIFILTER_ON	(OPTION_MD_BASE + 3)
-#define OPTION_SIFILTER_OFF	(OPTION_MD_BASE + 4)
+#define OPTION_JSRI2BSR_ON	(OPTION_MD_BASE + 0)
+#define OPTION_JSRI2BSR_OFF	(OPTION_MD_BASE + 1)
+#define OPTION_SIFILTER_ON	(OPTION_MD_BASE + 2)
+#define OPTION_SIFILTER_OFF	(OPTION_MD_BASE + 3)
+#define OPTION_CPU		(OPTION_MD_BASE + 4)
+#define OPTION_EB		(OPTION_MD_BASE + 5)
+#define OPTION_EL		(OPTION_MD_BASE + 6)
 
 struct option md_longopts[] =
 {
-  { "relax",       no_argument, NULL, OPTION_RELAX},
   { "no-jsri2bsr", no_argument, NULL, OPTION_JSRI2BSR_OFF},
   { "jsri2bsr",    no_argument, NULL, OPTION_JSRI2BSR_ON},
   { "sifilter",    no_argument, NULL, OPTION_SIFILTER_ON},
   { "no-sifilter", no_argument, NULL, OPTION_SIFILTER_OFF},
+  { "cpu",         required_argument, NULL, OPTION_CPU},
+  { "EB",          no_argument, NULL, OPTION_EB},
+  { "EL",          no_argument, NULL, OPTION_EL},
   { NULL,          no_argument, NULL, 0}
 };
 
@@ -1612,8 +1829,20 @@ md_parse_option (c, arg)
 
   switch (c)
     {
+    case OPTION_CPU:
+      if (streq (arg, "210"))
+	{
+	  cpu = M210;
+	  target_big_endian = 1;
+	}
+      else if (streq (arg, "340"))
+	cpu = M340;
+      else
+        as_warn (_("unrecognised cpu type '%s'"), arg);
+      break;
       
-    case OPTION_RELAX:        relax = 1;         break;
+    case OPTION_EB: target_big_endian = 1; break;
+    case OPTION_EL: target_big_endian = 0; cpu = M340; break;
     case OPTION_JSRI2BSR_ON:  do_jsri2bsr = 1;   break;
     case OPTION_JSRI2BSR_OFF: do_jsri2bsr = 0;   break;
     case OPTION_SIFILTER_ON:  sifilter_mode = 1; break;
@@ -1630,9 +1859,11 @@ md_show_usage (stream)
 {
   fprintf (stream, _("\
 MCORE specific options:\n\
-  -{no-}jsri2bsr	  {dis}able jsri to bsr transformation (def: off)\n\
-  -{no-}sifilter	  {dis}able silicon filter behavior (def: off)\n\
-  -relax		  alter jump instructions for long displacements\n"));
+  -{no-}jsri2bsr	  {dis}able jsri to bsr transformation (def: dis)\n\
+  -{no-}sifilter	  {dis}able silicon filter behavior (def: dis)\n\
+  -cpu=[210|340]          select CPU type\n\
+  -EB                     assemble for a big endian system (default)\n\
+  -EL                     assemble for a little endian system\n"));
 }
 
 int md_short_jump_size;
@@ -1670,27 +1901,40 @@ md_convert_frag (abfd, sec, fragP)
   int targ_addr = S_GET_VALUE (fragP->fr_symbol) + fragP->fr_offset;
   
   buffer = (unsigned char *) (fragP->fr_fix + fragP->fr_literal);
-  targ_addr += fragP->fr_symbol->sy_frag->fr_address;
+  targ_addr += symbol_get_frag (fragP->fr_symbol)->fr_address;
 
   switch (fragP->fr_subtype)
     {
     case C (COND_JUMP, COND12):
     case C (UNCD_JUMP, UNCD12):
       {
-	/* Get the address of the end of the instruction */
+	/* Get the address of the end of the instruction.  */
 	int next_inst = fragP->fr_fix + fragP->fr_address + 2;
 	unsigned char t0;
 	int disp = targ_addr - next_inst;
 	
 	if (disp & 1)
-	    as_bad (_("odd displacement at %x"), next_inst - 2);
+	  as_bad (_("odd displacement at %x"), next_inst - 2);
 	
 	disp >>= 1;
-	t0 = buffer[0] & 0xF8;
 	
-	md_number_to_chars (buffer, disp, 2);
+	if (! target_big_endian)
+	  {
+	    t0 = buffer[1] & 0xF8;
 	
-	buffer[0] = (buffer[0] & 0x07) | t0;
+	    md_number_to_chars (buffer, disp, 2);
+	
+	    buffer[1] = (buffer[1] & 0x07) | t0;
+	  }
+	else
+	  {
+	    t0 = buffer[0] & 0xF8;
+	
+	    md_number_to_chars (buffer, disp, 2);
+	
+	    buffer[0] = (buffer[0] & 0x07) | t0;
+	  }
+	
 	fragP->fr_fix += 2;
 	fragP->fr_var = 0;
       }
@@ -1712,15 +1956,27 @@ md_convert_frag (abfd, sec, fragP)
 	int first_inst = fragP->fr_fix + fragP->fr_address;
 	int needpad = (first_inst & 3);
 
-	buffer[0] ^= 0x08;	/* Toggle T/F bit */
+	if (! target_big_endian)
+	  buffer[1] ^= 0x08;
+	else
+	  buffer[0] ^= 0x08;	/* Toggle T/F bit */
 
 	buffer[2] = INST_BYTE0 (MCORE_INST_JMPI);	/* Build jmpi */
 	buffer[3] = INST_BYTE1 (MCORE_INST_JMPI);
  
 	if (needpad)
 	  {
-	    buffer[1] = 4;	/* branch over jmpi, pad, and ptr */
-	    buffer[3] = 1;	/* jmpi offset of 1 gets the pointer */
+	    if (! target_big_endian)
+	      {
+		buffer[0] = 4;	/* branch over jmpi, pad, and ptr */
+		buffer[2] = 1;	/* jmpi offset of 1 gets the pointer */
+	      }
+	    else
+	      {
+		buffer[1] = 4;	/* branch over jmpi, pad, and ptr */
+		buffer[3] = 1;	/* jmpi offset of 1 gets the pointer */
+	      }
+	    
 	    buffer[4] = 0;	/* alignment/pad */
 	    buffer[5] = 0;
 	    buffer[6] = 0;	/* space for 32 bit address */
@@ -1740,8 +1996,17 @@ md_convert_frag (abfd, sec, fragP)
 	       shrinking the fragment. '3' is the amount of code that
 	       we inserted here, but '4' is right for the space we reserved
 	       for this fragment. */
-	    buffer[1] = 3;	/* branch over jmpi, and ptr */
-	    buffer[3] = 0;	/* jmpi offset of 0 gets the pointer */
+	    if (! target_big_endian)
+	      {
+		buffer[0] = 3;	/* branch over jmpi, and ptr */
+		buffer[2] = 0;	/* jmpi offset of 0 gets the pointer */
+	      }
+	    else
+	      {
+		buffer[1] = 3;	/* branch over jmpi, and ptr */
+		buffer[3] = 0;	/* jmpi offset of 0 gets the pointer */
+	      }
+	    
 	    buffer[4] = 0;	/* space for 32 bit address */
 	    buffer[5] = 0;
 	    buffer[6] = 0;
@@ -1752,12 +2017,15 @@ md_convert_frag (abfd, sec, fragP)
 		     fragP->fr_symbol, fragP->fr_offset, 0, BFD_RELOC_32);
 	    fragP->fr_fix += C32_LEN;
 
-	    /* frag is actually shorter (see the other side of this ifdef)
-	       but gas isn't prepared for that. We have to re-adjust
+	    /* Frag is actually shorter (see the other side of this ifdef)
+	       but gas isn't prepared for that.  We have to re-adjust
 	       the branch displacement so that it goes beyond the 
 	       full length of the fragment, not just what we actually
 	       filled in.  */
-	    buffer[1] = 4;	/* jmpi, ptr, and the 'tail pad' */
+	    if (! target_big_endian)
+	      buffer[0] = 4;	/* jmpi, ptr, and the 'tail pad' */
+	    else
+	      buffer[1] = 4;	/* jmpi, ptr, and the 'tail pad' */
 	  }
 	
 	fragP->fr_var = 0;
@@ -1782,7 +2050,10 @@ md_convert_frag (abfd, sec, fragP)
 
 	if (needpad)
 	  {
-	    buffer[1] = 1;	/* jmpi offset of 1 since padded */
+	    if (! target_big_endian)
+	      buffer[0] = 1;	/* jmpi offset of 1 since padded */
+	    else
+	      buffer[1] = 1;	/* jmpi offset of 1 since padded */
 	    buffer[2] = 0;	/* alignment */
 	    buffer[3] = 0;
 	    buffer[4] = 0;	/* space for 32 bit address */
@@ -1790,7 +2061,7 @@ md_convert_frag (abfd, sec, fragP)
 	    buffer[6] = 0;
 	    buffer[7] = 0;
 	    
-	    /* Make reloc for the long disp */
+	    /* Make reloc for the long disp.  */
 	    fix_new (fragP, fragP->fr_fix + 4, 4,
 		     fragP->fr_symbol, fragP->fr_offset, 0, BFD_RELOC_32);
 	    
@@ -1798,13 +2069,16 @@ md_convert_frag (abfd, sec, fragP)
 	  }
 	else
 	  {
-	    buffer[1] = 0;	/* jmpi offset of 0 if no pad */
+	    if (! target_big_endian)
+	      buffer[0] = 0;	/* jmpi offset of 0 if no pad */
+	    else
+	      buffer[1] = 0;	/* jmpi offset of 0 if no pad */
 	    buffer[2] = 0;	/* space for 32 bit address */
 	    buffer[3] = 0;
 	    buffer[4] = 0;
 	    buffer[5] = 0;
 	    
-	    /* Make reloc for the long disp */
+	    /* Make reloc for the long disp.  */
 	    fix_new (fragP, fragP->fr_fix + 2, 4,
 		     fragP->fr_symbol, fragP->fr_offset, 0, BFD_RELOC_32);
 	    fragP->fr_fix += U32_LEN;
@@ -1865,9 +2139,17 @@ md_apply_fix3 (fixP, valp, segment)
 	as_bad_where (file, fixP->fx_line,
 		      _("pcrel for branch to %s too far (0x%x)"),
 		      symname, val);
-      buf[0] |= ((val >> 8) & 0x7);
-      buf[1] |= (val & 0xff);
-        break;
+      if (target_big_endian)
+	{
+	  buf[0] |= ((val >> 8) & 0x7);
+	  buf[1] |= (val & 0xff);
+	}
+      else
+	{
+	  buf[0] |= ((val >> 8) & 0x7);
+	  buf[1] |= (val & 0xff);
+	}
+      break;
 
     case BFD_RELOC_MCORE_PCREL_IMM8BY4:	/* lower 8 bits of 2 byte opcode */
       val += 3;
@@ -1876,16 +2158,21 @@ md_apply_fix3 (fixP, valp, segment)
 	as_bad_where (file, fixP->fx_line,
 		      _("pcrel for lrw/jmpi/jsri to %s too far (0x%x)"),
 		      symname, val);
+      else if (! target_big_endian)
+	buf[0] |= (val & 0xff);
       else
 	buf[1] |= (val & 0xff);
-        break;
+      break;
 
     case BFD_RELOC_MCORE_PCREL_IMM4BY2:	/* loopt instruction */
       if ((val < -32) || (val > -2))
 	as_bad_where (file, fixP->fx_line,
 		      _("pcrel for loopt too far (0x%x)"), val);
       val /= 2;
-      buf[1] |= (val & 0xf);
+      if (! target_big_endian)
+	buf[0] |= (val & 0xf);
+      else
+	buf[1] |= (val & 0xf);
       break;
 
     case BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2:
@@ -1898,8 +2185,8 @@ md_apply_fix3 (fixP, valp, segment)
 	  nval |= MCORE_INST_BSR;
 	  
 	  /* REPLACE the instruction, don't just modify it.  */
-	  buf[0] = ((nval >> 8) & 0xff);
-	  buf[1] = (nval & 0xff);
+	  buf[0] = INST_BYTE0 (nval);
+	  buf[1] = INST_BYTE1 (nval);
 	}
       else
 	fixP->fx_done = 0;
@@ -1923,21 +2210,14 @@ md_apply_fix3 (fixP, valp, segment)
 #endif
 	{
 	  if (fixP->fx_size == 4)
-	    {
-	      *buf++ = val >> 24;
-	      *buf++ = val >> 16;
-	      *buf++ = val >> 8;
-	      *buf = val;
-	    }
+	    ;
 	  else if (fixP->fx_size == 2 && val >= -32768 && val <= 32767)
-	    {
-	      *buf++ = val >> 8;
-	      *buf = val;
-	    }
+	    ;
 	  else if (fixP->fx_size == 1 && val >= -256 && val <= 255)
-	    *buf = val;
+	    ;
 	  else
 	    abort ();
+	  md_number_to_chars (buf, val, fixP->fx_size);
 	}
       break;
     }
@@ -2021,22 +2301,31 @@ md_estimate_size_before_relax (fragP, segment_type)
   return fragP->fr_var;
 }
 
-/* Put number into target byte order */
-
+/* Put number into target byte order.  */
 void
 md_number_to_chars (ptr, use, nbytes)
      char * ptr;
      valueT use;
      int nbytes;
 {
-  switch (nbytes)
-    {
-    case 4: *ptr++ = (use >> 24) & 0xff; /* fall through */
-    case 3: *ptr++ = (use >> 16) & 0xff; /* fall through */
-    case 2: *ptr++ = (use >>  8) & 0xff; /* fall through */
-    case 1: *ptr++ = (use >>  0) & 0xff;    break;
-    default: abort ();
-    }
+  if (! target_big_endian)
+    switch (nbytes)
+      {
+      case 4: ptr[3] = (use >> 24) & 0xff; /* fall through */
+      case 3: ptr[2] = (use >> 16) & 0xff; /* fall through */
+      case 2: ptr[1] = (use >>  8) & 0xff; /* fall through */
+      case 1: ptr[0] = (use >>  0) & 0xff;    break;
+      default: abort ();
+      }
+  else
+    switch (nbytes)
+      {
+      case 4: *ptr++ = (use >> 24) & 0xff; /* fall through */
+      case 3: *ptr++ = (use >> 16) & 0xff; /* fall through */
+      case 2: *ptr++ = (use >>  8) & 0xff; /* fall through */
+      case 1: *ptr++ = (use >>  0) & 0xff;    break;
+      default: abort ();
+      }
 }
 
 /* Round up a section size to the appropriate boundary.  */
@@ -2095,6 +2384,7 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_MCORE_PCREL_IMM8BY4:
     case BFD_RELOC_MCORE_PCREL_IMM11BY2:
     case BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2:
+    case BFD_RELOC_RVA:      
       code = fixp->fx_r_type;
       break;
     
@@ -2117,7 +2407,8 @@ tc_gen_reloc (section, fixp)
   }
 
   rel = (arelent *) xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = & fixp->fx_addsy->bsym;
+  rel->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
   /* Always pass the addend along!  */
   rel->addend = fixp->fx_addnumber;
@@ -2147,7 +2438,8 @@ mcore_force_relocation (fix)
      fixS * fix;
 {
   if (   fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+      || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY
+      || fix->fx_r_type == BFD_RELOC_RVA)
     return 1;
 
   return 0;
@@ -2168,16 +2460,5 @@ mcore_fix_adjustable (fixP)
     return 0;
 
   return 1;
-}
-
-/* Handle the .section pseudo-op.  This is like the usual one, but it
-   dumps the literal pool before changing the section.  */
-static void
-mcore_s_section (ignore)
-     int ignore;
-{
-  dump_literals (0);
-
-  obj_elf_section (ignore);
 }
 #endif /* OBJ_ELF */

@@ -1,5 +1,5 @@
 /* Disassemble from a buffer, for GNU.
-   Copyright (C) 1993, 1994, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1998, 1999 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,14 +26,20 @@ int
 buffer_read_memory (memaddr, myaddr, length, info)
      bfd_vma memaddr;
      bfd_byte *myaddr;
-     int length;
+     unsigned int length;
      struct disassemble_info *info;
 {
+  unsigned int opb = info->octets_per_byte;
+  unsigned int end_addr_offset = length / opb;
+  unsigned int max_addr_offset = info->buffer_length / opb; 
+  unsigned int octets = (memaddr - info->buffer_vma) * opb;
+
   if (memaddr < info->buffer_vma
-      || memaddr + length > info->buffer_vma + info->buffer_length)
+      || memaddr - info->buffer_vma + end_addr_offset > max_addr_offset)
     /* Out of bounds.  Use EIO because GDB uses it.  */
     return EIO;
-  memcpy (myaddr, info->buffer + (memaddr - info->buffer_vma), length);
+  memcpy (myaddr, info->buffer + octets, length);
+
   return 0;
 }
 
@@ -67,7 +73,10 @@ generic_print_address (addr, info)
      bfd_vma addr;
      struct disassemble_info *info;
 {
-  (*info->fprintf_func) (info->stream, "0x%x", addr);
+  char buf[30];
+
+  sprintf_vma (buf, addr);
+  (*info->fprintf_func) (info->stream, "0x%s", buf);
 }
 
 /* Just concatenate the address as hex.  This is included for
@@ -85,7 +94,7 @@ generic_strcat_address (addr, buf, len)
       char tmpBuf[30];
 
       sprintf_vma (tmpBuf, addr);
-      if ((strlen (buf) + strlen (tmpBuf)) <= len)
+      if ((strlen (buf) + strlen (tmpBuf)) <= (unsigned int) len)
 	strcat (buf, tmpBuf);
       else
 	strncat (buf, tmpBuf, (len - strlen(buf)));
@@ -97,8 +106,8 @@ generic_strcat_address (addr, buf, len)
 
 int
 generic_symbol_at_address (addr, info)
-     bfd_vma addr;
-     struct disassemble_info * info;
+     bfd_vma addr ATTRIBUTE_UNUSED;
+     struct disassemble_info *info ATTRIBUTE_UNUSED;
 {
   return 1;
 }

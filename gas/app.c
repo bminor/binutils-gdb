@@ -1,5 +1,5 @@
 /* This is the Assembler Pre-Processor
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -34,10 +34,14 @@
 #endif
 #endif
 
+#ifdef TC_M68K
 /* Whether we are scrubbing in m68k MRI mode.  This is different from
    flag_m68k_mri, because the two flags will be affected by the .mri
    pseudo-op at different times.  */
 static int scrub_m68k_mri;
+#else
+#define scrub_m68k_mri 0
+#endif
 
 /* The pseudo-op which switches in and out of MRI mode.  See the
    comment in do_scrub_chars.  */
@@ -68,6 +72,9 @@ static const char symbol_chars[] =
 #define LEX_IS_DOUBLEDASH_1ST		12
 #endif
 #ifdef TC_M32R
+#define DOUBLEBAR_PARALLEL
+#endif
+#ifdef DOUBLEBAR_PARALLEL
 #define LEX_IS_DOUBLEBAR_1ST		13
 #endif
 #define IS_SYMBOL_COMPONENT(c)		(lex[c] == LEX_IS_SYMBOL_COMPONENT)
@@ -85,12 +92,10 @@ static int process_escape PARAMS ((int));
 
 void 
 do_scrub_begin (m68k_mri)
-     int m68k_mri;
+     int m68k_mri ATTRIBUTE_UNUSED;
 {
   const char *p;
   int c;
-
-  scrub_m68k_mri = m68k_mri;
 
   lex[' '] = LEX_IS_WHITESPACE;
   lex['\t'] = LEX_IS_WHITESPACE;
@@ -99,11 +104,16 @@ do_scrub_begin (m68k_mri)
   lex[';'] = LEX_IS_LINE_SEPARATOR;
   lex[':'] = LEX_IS_COLON;
 
+#ifdef TC_M68K
+  scrub_m68k_mri = m68k_mri;
+
   if (! m68k_mri)
+#endif
     {
       lex['"'] = LEX_IS_STRINGQUOTE;
 
-#ifndef TC_HPPA
+#if ! defined (TC_HPPA) && ! defined (TC_I370)
+      /* I370 uses single-quotes to delimit integer, float constants */
       lex['\''] = LEX_IS_ONECHAR_QUOTE;
 #endif
 
@@ -161,6 +171,7 @@ do_scrub_begin (m68k_mri)
       lex['/'] = LEX_IS_TWOCHAR_COMMENT_1ST;
     }
 
+#ifdef TC_M68K
   if (m68k_mri)
     {
       lex['\''] = LEX_IS_STRINGQUOTE;
@@ -170,11 +181,12 @@ do_scrub_begin (m68k_mri)
          then it can't be used in an expression.  */
       lex['!'] = LEX_IS_LINE_COMMENT_START;
     }
+#endif
 
 #ifdef TC_V850
   lex['-'] = LEX_IS_DOUBLEDASH_1ST;
 #endif
-#ifdef TC_M32R
+#ifdef DOUBLEBAR_PARALLEL
   lex['|'] = LEX_IS_DOUBLEBAR_1ST;
 #endif
 #ifdef TC_D30V
@@ -191,6 +203,7 @@ static char out_buf[20];
 static int add_newlines;
 static char *saved_input;
 static int saved_input_len;
+static char input_buffer[32 * 1024];
 static const char *mri_state;
 static char mri_last_ch;
 
@@ -208,7 +221,9 @@ struct app_save
     int          add_newlines;
     char *       saved_input;
     int          saved_input_len;
+#ifdef TC_M68K
     int          scrub_m68k_mri;
+#endif
     const char * mri_state;
     char         mri_last_ch;
 #if defined TC_ARM && defined OBJ_ELF
@@ -227,9 +242,17 @@ app_push ()
   saved->out_string = out_string;
   memcpy (saved->out_buf, out_buf, sizeof (out_buf));
   saved->add_newlines = add_newlines;
-  saved->saved_input = saved_input;
-  saved->saved_input_len = saved_input_len;
+  if (saved_input == NULL)
+    saved->saved_input = NULL;
+  else
+    {
+      saved->saved_input = xmalloc (saved_input_len);
+      memcpy (saved->saved_input, saved_input, saved_input_len);
+      saved->saved_input_len = saved_input_len;
+    }
+#ifdef TC_M68K
   saved->scrub_m68k_mri = scrub_m68k_mri;
+#endif
   saved->mri_state = mri_state;
   saved->mri_last_ch = mri_last_ch;
 #if defined TC_ARM && defined OBJ_ELF
@@ -256,9 +279,19 @@ app_pop (arg)
   out_string = saved->out_string;
   memcpy (out_buf, saved->out_buf, sizeof (out_buf));
   add_newlines = saved->add_newlines;
-  saved_input = saved->saved_input;
-  saved_input_len = saved->saved_input_len;
+  if (saved->saved_input == NULL)
+    saved_input = NULL;
+  else
+    {
+      assert (saved->saved_input_len <= (int) (sizeof input_buffer));
+      memcpy (input_buffer, saved->saved_input, saved->saved_input_len);
+      saved_input = input_buffer;
+      saved_input_len = saved->saved_input_len;
+      free (saved->saved_input);
+    }
+#ifdef TC_M68K
   scrub_m68k_mri = saved->scrub_m68k_mri;
+#endif
   mri_state = saved->mri_state;
   mri_last_ch = saved->mri_last_ch;
 #if defined TC_ARM && defined OBJ_ELF
@@ -308,7 +341,7 @@ process_escape (ch)
 
 int
 do_scrub_chars (get, tostart, tolen)
-     int (*get) PARAMS ((char **));
+     int (*get) PARAMS ((char *, int));
      char *tostart;
      int tolen;
 {
@@ -336,7 +369,7 @@ do_scrub_chars (get, tostart, tolen)
 #ifdef TC_V850
          12: After seeing a dash, looking for a second dash as a start of comment.
 #endif
-#ifdef TC_M32R
+#ifdef DOUBLEBAR_PARALLEL
 	 13: After seeing a vertical bar, looking for a second vertical bar as a parallel expression seperator.
 #endif
 	  */
@@ -357,18 +390,15 @@ do_scrub_chars (get, tostart, tolen)
 
   /* This macro gets the next input character.  */
 
-#define GET()				\
-  (from < fromend			\
-   ? * (unsigned char *) (from++)	\
-   : ((saved_input != NULL		\
-       ? (free (saved_input),		\
-	  saved_input = NULL,		\
-	  0)				\
-       : 0),				\
-      fromlen = (*get) (&from),		\
-      fromend = from + fromlen,		\
-      (fromlen == 0			\
-       ? EOF				\
+#define GET()							\
+  (from < fromend						\
+   ? * (unsigned char *) (from++)				\
+   : (saved_input = NULL,					\
+      fromlen = (*get) (input_buffer, sizeof input_buffer),	\
+      from = input_buffer,					\
+      fromend = from + fromlen,					\
+      (fromlen == 0						\
+       ? EOF							\
        : * (unsigned char *) (from++))))
 
   /* This macro pushes a character back on the input stream.  */
@@ -400,9 +430,10 @@ do_scrub_chars (get, tostart, tolen)
     }
   else
     {
-      fromlen = (*get) (&from);
+      fromlen = (*get) (input_buffer, sizeof input_buffer);
       if (fromlen == 0)
 	return 0;
+      from = input_buffer;
       fromend = from + fromlen;
     }
 
@@ -748,6 +779,21 @@ do_scrub_chars (get, tostart, tolen)
 	      break;
 	    }
 
+#ifdef KEEP_WHITE_AROUND_COLON
+          if (lex[ch] == LEX_IS_COLON)
+            {
+              /* only keep this white if there's no white *after* the colon */
+              ch2 = GET ();
+              UNGET (ch2);
+              if (!IS_WHITESPACE (ch2))
+                {
+                  state = 9;
+                  UNGET (ch);
+                  PUT (' ');
+                  break;
+                }
+            }
+#endif
 	  if (IS_COMMENT (ch)
 	      || ch == '/'
 	      || IS_LINE_SEPARATOR (ch))
@@ -818,11 +864,7 @@ do_scrub_chars (get, tostart, tolen)
 	      state = 10;	/* Sp after symbol char */
 	      goto recycle;
 	    case 11:
-	      if (flag_m68k_mri
-#ifdef LABELS_WITHOUT_COLONS
-		  || 1
-#endif
-		  )
+	      if (LABELS_WITHOUT_COLONS || flag_m68k_mri)
 		state = 1;
 	      else
 		{
@@ -957,10 +999,14 @@ do_scrub_chars (get, tostart, tolen)
 #endif
 
 	case LEX_IS_COLON:
+#ifdef KEEP_WHITE_AROUND_COLON
+          state = 9;
+#else
 	  if (state == 9 || state == 10)
 	    state = 3;
 	  else if (state != 3)
 	    state = 1;
+#endif
 	  PUT (ch);
 	  break;
 
@@ -1000,7 +1046,7 @@ do_scrub_chars (get, tostart, tolen)
 	  PUT ('\n');
 	  break;
 #endif	    
-#ifdef TC_M32R
+#ifdef DOUBLEBAR_PARALLEL
 	case LEX_IS_DOUBLEBAR_1ST:
 	  ch2 = GET();
 	  if (ch2 != '|')
@@ -1214,6 +1260,23 @@ do_scrub_chars (get, tostart, tolen)
 	    }
 	  else if (state == 10)
 	    {
+	      if (ch == '\\')
+		{
+		  /* Special handling for backslash: a backslash may
+		     be the beginning of a formal parameter (of a
+		     macro) following another symbol character, with
+		     whitespace in between.  If that is the case, we
+		     output a space before the parameter.  Strictly
+		     speaking, correct handling depends upon what the
+		     macro parameter expands into; if the parameter
+		     expands into something which does not start with
+		     an operand character, then we don't want to keep
+		     the space.  We don't have enough information to
+		     make the right choice, so here we are making the
+		     choice which is more likely to be correct.  */
+		  PUT (' ');
+		}
+
 	      state = 3;
 	    }
 	  PUT (ch);
@@ -1232,23 +1295,12 @@ do_scrub_chars (get, tostart, tolen)
      processed.  */
   if (fromend > from)
     {
-      char *save;
-
-      save = (char *) xmalloc (fromend - from);
-      memcpy (save, from, fromend - from);
-      if (saved_input != NULL)
-	free (saved_input);
-      saved_input = save;
+      saved_input = from;
       saved_input_len = fromend - from;
     }
   else
-    {
-      if (saved_input != NULL)
-	{
-	  free (saved_input);
-	  saved_input = NULL;
-	}
-    }
+    saved_input = NULL;
+
   return to - tostart;
 }
 

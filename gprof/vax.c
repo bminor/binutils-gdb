@@ -250,7 +250,8 @@ vax_find_call (parent, p_lowpc, p_highpc)
       p_highpc = s_highpc;
     }
   DBG (CALLDEBUG, printf ("[findcall] %s: 0x%lx to 0x%lx\n",
-			  parent->name, p_lowpc, p_highpc));
+			  parent->name, (unsigned long) p_lowpc,
+			  (unsigned long) p_highpc));
   for (instructp = (unsigned char *) core_text_space + p_lowpc;
        instructp < (unsigned char *) core_text_space + p_highpc;
        instructp += length)
@@ -263,8 +264,9 @@ vax_find_call (parent, p_lowpc, p_highpc)
 	   *      skip the count of the number of arguments.
 	   */
 	  DBG (CALLDEBUG,
-	       printf ("[findcall]\t0x%x:calls",
-		       instructp - (unsigned char *) core_text_space));
+	       printf ("[findcall]\t0x%lx:calls",
+		       ((unsigned long)
+			(instructp - (unsigned char *) core_text_space))));
 	  firstmode = vax_operandmode ((struct modebyte *) (instructp + length));
 	  switch (firstmode)
 	    {
@@ -314,9 +316,11 @@ vax_find_call (parent, p_lowpc, p_highpc)
 		{
 		  child = sym_lookup (&symtab, destpc);
 		  DBG (CALLDEBUG,
-		       printf ("[findcall]\tdestpc 0x%lx", destpc);
+		       printf ("[findcall]\tdestpc 0x%lx",
+			       (unsigned long) destpc);
 		       printf (" child->name %s", child->name);
-		       printf (" child->addr 0x%lx\n", child->addr);
+		       printf (" child->addr 0x%lx\n",
+			       (unsigned long) child->addr);
 		    );
 		  if (child->addr == destpc)
 		    {

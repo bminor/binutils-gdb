@@ -18,7 +18,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the @sc{gnu} linker LD version @value{VERSION}.
 
-Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -179,18 +179,21 @@ result of linking the file @code{/lib/crt0.o} with @code{hello.o} and
 the library @code{libc.a}, which will come from the standard search
 directories.  (See the discussion of the @samp{-l} option below.)
 
-The command-line options to @code{ld} may be specified in any order, and
-may be repeated at will.  Repeating most options with a different
-argument will either have no further effect, or override prior
+Some of the command-line options to @code{ld} may be specified at any
+point in the command line.  However, options which refer to files, such
+as @samp{-l} or @samp{-T}, cause the file to be read at the point at
+which the option appears in the command line, relative to the object
+files and other file options.  Repeating non-file options with a
+different argument will either have no further effect, or override prior
 occurrences (those further to the left on the command line) of that
 option.  Options which may be meaningfully specified more than once are
 noted in the descriptions below.
 
 @cindex object files
-Non-option arguments are objects files which are to be linked together.
-They may follow, precede, or be mixed in with command-line options,
-except that an object file argument may not be placed between an option
-and its argument.
+Non-option arguments are object files or archives which are to be linked
+together.  They may follow, precede, or be mixed in with command-line
+options, except that an object file argument may not be placed between
+an option and its argument.
 
 Usually the linker is invoked with at least one object file, but you can
 specify other forms of binary input files using @samp{-l}, @samp{-R},
@@ -224,6 +227,21 @@ given as separate arguments immediately following the option that
 requires them.  For example, @samp{--oformat srec} and
 @samp{--oformat=srec} are equivalent.  Unique abbreviations of the names
 of multiple-letter options are accepted.
+
+Note - if the linker is being invoked indirectly, via a compiler driver
+(eg @samp{gcc}) then all the linker command line options should be
+prefixed by @samp{-Wl,} (or whatever is appropriate for the particular
+compiler driver) like this:
+
+@smallexample
+  gcc -Wl,--startgroup foo.o bar.o -Wl,--endgroup
+@end smallexample
+
+This is important, because otherwise the compiler driver program may
+silently drop the linker options, resulting in a bad link.
+
+Here is a table of the generic command line switches accepted by the GNU
+linker:
 
 @table @code
 @kindex -a@var{keyword}
@@ -401,6 +419,14 @@ purpose: the @code{-b}, @code{--format}, @code{--oformat} options, the
 environment variable.  The @sc{gnu} linker will ignore the @code{-F}
 option when not creating an ELF shared object.
 
+@cindex finalization function
+@kindex -fini
+@item -fini @var{name}
+When creating an ELF executable or shared object, call NAME when the
+executable or shared object is unloaded, by setting DT_FINI to the
+address of the function.  By default, the linker uses @code{_fini} as
+the function to call.
+
 @kindex -g
 @item -g
 Ignored.  Provided for compatibility with other tools.
@@ -430,6 +456,14 @@ field rather than the using the file name given to the linker.
 @cindex incremental link
 @item -i
 Perform an incremental link (same as option @samp{-r}).
+
+@cindex initialization function
+@kindex -init
+@item -init @var{name}
+When creating an ELF executable or shared object, call NAME when the
+executable or shared object is loaded, by setting DT_INIT to the address
+of the function.  By default, the linker uses @code{_init} as the
+function to call.
 
 @cindex archive files, from cmd line
 @kindex -l@var{archive}
@@ -525,8 +559,8 @@ which caused the archive member to be brought in.
 @kindex --nmagic
 @item -n
 @itemx --nmagic
-Set the text segment to be read only, and mark the output as
-@code{NMAGIC} if possible.
+Turn off page alignment of sections, and mark the output as
+@code{NMAGIC} if possible. 
 
 @kindex -N
 @kindex --omagic
@@ -754,7 +788,7 @@ platforms which support shared libraries.
 @kindex --check-sections
 @kindex --no-check-sections
 @item --check-sections
-@item --no-check-sections
+@itemx --no-check-sections
 Asks the linker @emph{not} to check section addresses after they have
 been assigned to see if there any overlaps.  Normally the linker will
 perform this check, and if it finds any overlaps it will produce
@@ -1115,7 +1149,7 @@ for compatibility with other linkers, you may omit the leading
 @kindex --verbose
 @cindex verbose
 @item --dll-verbose
-@item --verbose
+@itemx --verbose
 Display the version number for @code{ld} and list the linker emulations
 supported.  Display which input files can and cannot be opened.  Display
 the linker script if using a default builtin script.
@@ -1363,7 +1397,7 @@ option is given.  Note that the symbols @code{DllMain@@12},
 exported.
 
 @kindex --exclude-symbols
-@item --exclude-symbols @var{symbol,symbol,...}
+@item --exclude-symbols @var{symbol},@var{symbol},...
 Specifies a list of symbols which should not be automatically
 exported.  The symbol names may be delimited by commas or colons.
 
@@ -2093,7 +2127,7 @@ The full description of an output section looks like this:
     @var{output-section-command}
     @var{output-section-command}
     @dots{}
-  @} [>@var{region}] [:@var{phdr} :@var{phdr} @dots{}] [=@var{fillexp}]
+  @} [>@var{region}] [AT>@var{lma_region}] [:@var{phdr} :@var{phdr} @dots{}] [=@var{fillexp}]
 @end group
 @end smallexample
 
@@ -2216,13 +2250,15 @@ include all input @samp{.text} sections, you would write:
 *(.text)
 @end smallexample
 @noindent
-Here the @samp{*} is a wildcard which matches any file name.  To exclude a file
-from matching the file name wildcard, EXCLUDE_FILE may be used to match all files
-except the one specified by EXCLUDE_FILE.  For example:
+Here the @samp{*} is a wildcard which matches any file name.  To exclude a list
+of files from matching the file name wildcard, EXCLUDE_FILE may be used to
+match all files except the ones specified in the EXCLUDE_FILE list.  For
+example:
 @smallexample
-(*(EXCLUDE_FILE (*crtend.o) .ctors))
+(*(EXCLUDE_FILE (*crtend.o *otherfile.o) .ctors))
 @end smallexample
-will cause all .ctors sections from all files except crtend.o to be included.
+will cause all .ctors sections from all files except @file{crtend.o} and
+@file{otherfile.o} to be included.
 
 There are two ways to include more than one section:
 @smallexample
@@ -2596,7 +2632,7 @@ like this:
     @var{output-section-command}
     @var{output-section-command}
     @dots{}
-  @} [>@var{region}] [:@var{phdr} :@var{phdr} @dots{}] [=@var{fillexp}]
+  @} [>@var{region}] [AT>@var{lma_region}] [:@var{phdr} :@var{phdr} @dots{}] [=@var{fillexp}]
 @end group
 @end smallexample
 We've already described @var{section}, @var{address}, and
@@ -2650,6 +2686,7 @@ SECTIONS @{
 
 @node Output Section LMA
 @subsubsection Output section LMA
+@kindex AT>@var{lma_region}
 @kindex AT(@var{lma})
 @cindex load address
 @cindex section load address
@@ -2660,7 +2697,9 @@ Address}).
 
 The linker will normally set the LMA equal to the VMA.  You can change
 that by using the @code{AT} keyword.  The expression @var{lma} that
-follows the @code{AT} keyword specifies the load address of the section.
+follows the @code{AT} keyword specifies the load address of the
+section.  Alternatively, with @samp{AT>@var{lma_region}} expression,
+you may specify a memory region for the section's load address. @xref{MEMORY}.
 
 @cindex ROM initialized data
 @cindex initialized data in ROM
@@ -3407,6 +3446,39 @@ followed by a 1000 byte gap.  Then the @samp{.text} section from
 @samp{.text} section from @file{file3}.  The notation @samp{= 0x1234}
 specifies what data to write in the gaps (@pxref{Output Section Fill}).
 
+@cindex dot inside sections
+Note: @code{.} actually refers to the byte offset from the start of the
+current containing object.  Normally this is the @code{SECTIONS}
+statement, whoes start address is 0, hence @code{.} can be used as an
+absolute address.  If @code{.} is used inside a section description
+however, it refers to the byte offset from the start of that section,
+not an absolute address.  Thus in a script like this:
+
+@smallexample
+SECTIONS
+@{
+    . = 0x100
+    .text: @{
+      *(.text)
+      . = 0x200
+    @}
+    . = 0x500
+    .data: @{
+      *(.data)
+      . += 0x600
+    @}
+@}
+@end smallexample
+
+The @samp{.text} section will be assigned a starting address of 0x100
+and a size of exactly 0x200 bytes, even if there is not enough data in
+the @samp{.text} input sections to fill this area.  (If there is too
+much data, an error will be produced because this would be an attempt to
+move @code{.} backwards).  The @samp{.data} section will start at 0x500
+and it will have an extra 0x600 bytes worth of space after the end of
+the values from the @samp{.data} input sections and before the end of
+the @samp{.data} output section itself.
+
 @need 2000
 @node Operators
 @subsection Operators
@@ -3876,7 +3948,7 @@ not itself call any subroutines).
 @section @code{ld}'s support for interworking between ARM and Thumb code
 
 @cindex ARM interworking support
-@cindex --support-old-code
+@kindex --support-old-code
 For the ARM, @code{ld} will generate code stubs to allow functions calls
 betweem ARM and Thumb code.  These stubs only work with code that has
 been compiled and assembled with the @samp{-mthumb-interwork} command
@@ -3887,6 +3959,15 @@ given to the linker.  This will make it generate larger stub functions
 which will work with non-interworking aware ARM code.  Note, however,
 the linker does not support generating stubs for function calls to
 non-interworking aware Thumb code.
+
+@cindex thumb entry point
+@cindex entry point, thumb
+@kindex --thumb-entry=@var{entry}
+The @samp{--thumb-entry} switch is a duplicate of the generic
+@samp{--entry} switch, in that it sets the program's starting address.  
+But it also sets the bottom bit of the address, so that it can be
+branched to using a BX instruction, and the program will start
+executing in Thumb mode straight away.
 
 @ifclear GENERIC
 @lowersections

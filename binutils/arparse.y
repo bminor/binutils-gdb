@@ -193,7 +193,7 @@ verbose_command:
 
 static int
 yyerror (x)
-     const char *x;
+     const char *x ATTRIBUTE_UNUSED;
 {
   extern int linenumber;
 

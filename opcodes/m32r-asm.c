@@ -216,10 +216,21 @@ m32r_cgen_parse_operand (cd, opindex, strp, fields)
      const char ** strp;
      CGEN_FIELDS * fields;
 {
-  const char * errmsg;
+  const char * errmsg = NULL;
+  /* Used by scalar operands that still need to be parsed.  */
+  long junk;
 
   switch (opindex)
     {
+    case M32R_OPERAND_ACC :
+      errmsg = cgen_parse_keyword (cd, strp, & m32r_cgen_opval_h_accums, & fields->f_acc);
+      break;
+    case M32R_OPERAND_ACCD :
+      errmsg = cgen_parse_keyword (cd, strp, & m32r_cgen_opval_h_accums, & fields->f_accd);
+      break;
+    case M32R_OPERAND_ACCS :
+      errmsg = cgen_parse_keyword (cd, strp, & m32r_cgen_opval_h_accums, & fields->f_accs);
+      break;
     case M32R_OPERAND_DCR :
       errmsg = cgen_parse_keyword (cd, strp, & m32r_cgen_opval_cr_names, & fields->f_r1);
       break;
@@ -248,10 +259,13 @@ m32r_cgen_parse_operand (cd, opindex, strp, fields)
       errmsg = cgen_parse_keyword (cd, strp, & m32r_cgen_opval_gr_names, & fields->f_r1);
       break;
     case M32R_OPERAND_HASH :
-      errmsg = parse_hash (cd, strp, M32R_OPERAND_HASH, &fields->f_nil);
+      errmsg = parse_hash (cd, strp, M32R_OPERAND_HASH, &junk);
       break;
     case M32R_OPERAND_HI16 :
       errmsg = parse_hi16 (cd, strp, M32R_OPERAND_HI16, &fields->f_hi16);
+      break;
+    case M32R_OPERAND_IMM1 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, M32R_OPERAND_IMM1, &fields->f_imm1);
       break;
     case M32R_OPERAND_SCR :
       errmsg = cgen_parse_keyword (cd, strp, & m32r_cgen_opval_cr_names, & fields->f_r2);
@@ -358,9 +372,14 @@ parse_insn_normal (cd, insn, strp, fields)
   p = CGEN_INSN_MNEMONIC (insn);
   while (*p && tolower (*p) == tolower (*str))
     ++p, ++str;
-  
-  if (* p || (* str && !isspace (* str)))
+
+  if (* p)
     return _("unrecognized instruction");
+
+#ifndef CGEN_MNEMONIC_OPERANDS
+  if (* str && !isspace (* str))
+    return _("unrecognized instruction");
+#endif
 
   CGEN_INIT_PARSE (cd);
   cgen_init_parse_operand (cd);
@@ -383,6 +402,10 @@ parse_insn_normal (cd, insn, strp, fields)
       /* Non operand chars must match exactly.  */
       if (CGEN_SYNTAX_CHAR_P (* syn))
 	{
+	  /* FIXME: While we allow for non-GAS callers above, we assume the
+	     first char after the mnemonic part is a space.  */
+	  /* FIXME: We also take inappropriate advantage of the fact that
+	     GAS's input scrubber will remove extraneous blanks.  */
 	  if (*str == CGEN_SYNTAX_CHAR (* syn))
 	    {
 #ifdef CGEN_MNEMONIC_OPERANDS
@@ -463,6 +486,7 @@ m32r_cgen_assemble_insn (cd, str, fields, buf, errmsg)
 {
   const char *start;
   CGEN_INSN_LIST *ilist;
+  const char *tmp_errmsg;
 
   /* Skip leading white space.  */
   while (isspace (* str))
@@ -479,7 +503,8 @@ m32r_cgen_assemble_insn (cd, str, fields, buf, errmsg)
     {
       const CGEN_INSN *insn = ilist->insn;
 
-#if 0 /* not needed as unsupported opcodes shouldn't be in the hash lists */
+#ifdef CGEN_VALIDATE_INSN_SUPPORTED 
+      /* not usually needed as unsupported opcodes shouldn't be in the hash lists */
       /* Is this insn supported by the selected cpu?  */
       if (! m32r_cgen_insn_supported (cd, insn))
 	continue;
@@ -496,7 +521,7 @@ m32r_cgen_assemble_insn (cd, str, fields, buf, errmsg)
       /* Allow parse/insert handlers to obtain length of insn.  */
       CGEN_FIELDS_BITSIZE (fields) = CGEN_INSN_BITSIZE (insn);
 
-      if (! CGEN_PARSE_FN (cd, insn) (cd, insn, & str, fields))
+      if (!(tmp_errmsg = CGEN_PARSE_FN (cd, insn) (cd, insn, & str, fields)))
 	{
 	  /* ??? 0 is passed for `pc' */
 	  if (CGEN_INSERT_FN (cd, insn) (cd, insn, fields, buf, (bfd_vma) 0)
@@ -510,16 +535,25 @@ m32r_cgen_assemble_insn (cd, str, fields, buf, errmsg)
       /* Try the next entry.  */
     }
 
-  /* FIXME: We can return a better error message than this.
-     Need to track why it failed and pick the right one.  */
   {
-    static char errbuf[100];
+    static char errbuf[150];
+
+#ifdef CGEN_VERBOSE_ASSEMBLER_ERRORS
+    /* if verbose error messages, use errmsg from CGEN_PARSE_FN */
+    if (strlen (start) > 50)
+      /* xgettext:c-format */
+      sprintf (errbuf, "%s `%.50s...'", tmp_errmsg, start);
+    else 
+      /* xgettext:c-format */
+      sprintf (errbuf, "%s `%.50s'", tmp_errmsg, start);
+#else
     if (strlen (start) > 50)
       /* xgettext:c-format */
       sprintf (errbuf, _("bad instruction `%.50s...'"), start);
     else 
       /* xgettext:c-format */
       sprintf (errbuf, _("bad instruction `%.50s'"), start);
+#endif
       
     *errmsg = errbuf;
     return NULL;

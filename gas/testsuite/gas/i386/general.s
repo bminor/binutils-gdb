@@ -61,9 +61,23 @@
 	inb	$255
 	inw	$2
 	inl	$4
-	outl	%eax,%dx
-	out	%al, $42
 	in	$13, %ax
+	out	%al,%dx
+	out	%ax,%dx
+	out	%eax,%dx
+	out	%al,(%dx)
+	out	%ax,(%dx)
+	out	%eax,(%dx)
+	outb	%al,%dx
+	outw	%ax,%dx
+	outl	%eax,%dx
+	outb	%dx
+	outw	%dx
+	outl	%dx
+	outb	$255
+	outw	$2
+	outl	$4
+	out	%ax, $13
 # These are used in AIX.
 	inw	(%dx)
 	outw	(%dx)
@@ -147,6 +161,42 @@
 	mov	%esi,(,%ebx,1)
 	andb	$~0x80,foo
 
+#check 16-bit code auto address prefix
+.code16gcc
+	leal	-256(%ebp),%edx
+	mov	%al,-129(%ebp)
+	mov	%ah,-128(%ebp)
+	leal	-1760(%ebp),%ebx
+	movl	%eax,140(%esp)
+
+.code32
+	jmp	1b
+	jmp	xxx
+	jmp	*xxx
+	jmp	xxx(,1)
+	jmp	*%edi
+	jmp	%edi
+	jmp	*(%edi)
+	jmp	(%edi)
+	ljmp	*xxx(,%edi,4)
+	ljmp	xxx(,%edi,4)
+	ljmp	*xxx
+	ljmp	xxx(,1)
+	ljmp	$0x1234,$xxx
+
+	call	1b
+	call	xxx
+	call	*xxx
+	call	xxx(,1)
+	call	*%edi
+	call	%edi
+	call	*(%edi)
+	call	(%edi)
+	lcall	*xxx(,%edi,4)
+	lcall	xxx(,%edi,4)
+	lcall	*xxx
+	lcall	xxx(,1)
+	lcall	$0x1234,$xxx
+
 	# Force a good alignment.
-	.word	0
-	.byte	0
+	.p2align	4,0

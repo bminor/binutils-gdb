@@ -1,6 +1,5 @@
-/* BFD back-end for Motorolla MCore COFF/PE
-   Copyright 1999
-   Free Software Foundation, Inc.
+/* BFD back-end for Motorola MCore COFF/PE
+   Copyright (C) 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -45,8 +44,6 @@ static struct bfd_link_hash_table * coff_mcore_link_hash_table_create
   PARAMS ((bfd *));
 static bfd_reloc_status_type        mcore_coff_unsupported_reloc 
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static boolean                      in_reloc_p
-  PARAMS ((bfd *, reloc_howto_type *));
 static boolean                      coff_mcore_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   struct internal_reloc *, struct internal_syment *, asection **));
@@ -55,10 +52,6 @@ static reloc_howto_type *           mcore_coff_reloc_type_lookup
 static reloc_howto_type *           coff_mcore_rtype_to_howto
   PARAMS ((bfd *, asection *, struct internal_reloc *,
 	   struct coff_link_hash_entry *, struct internal_syment *, bfd_vma *));
-static const bfd_target *           pe_object_p
-  PARAMS ((bfd *));
-
-
 
 /* The NT loader points the toc register to &toc + 32768, in order to
    use the complete range of a 16-bit displacement. We have to adjust
@@ -67,7 +60,7 @@ static const bfd_target *           pe_object_p
 #define TOC_SECTION_NAME ".private.toc"
 
 /* The main body of code is in coffcode.h.  */
-#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (3)
+#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER 2
 
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value
    from smaller values.  Start with zero, widen, *then* decrement.  */
@@ -84,7 +77,7 @@ static reloc_howto_type mcore_coff_howto_table[] =
 	 false,	                 /* pc_relative */                          
 	 0,	                 /* bitpos */                               
 	 complain_overflow_dont, /* dont complain_on_overflow */
-	 0,		         /* special_function */                     
+	 NULL,		         /* special_function */                     
 	 "ABSOLUTE",             /* name */
 	 false,	                 /* partial_inplace */                      
 	 0x00,	 	         /* src_mask */                             
@@ -98,7 +91,7 @@ static reloc_howto_type mcore_coff_howto_table[] =
 	 false,	                /* pc_relative */                          
 	 0,	                /* bitpos */                               
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 0,		        /* special_function */                     
+	 NULL,		        /* special_function */                     
 	 "ADDR32",              /* name */
 	 true,	                /* partial_inplace */                      
 	 0xffffffff,            /* src_mask */                             
@@ -114,7 +107,7 @@ static reloc_howto_type mcore_coff_howto_table[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 mcore_coff_unsupported_reloc,	/* special_function */
+	 mcore_coff_unsupported_reloc, /* special_function */
 	 "IMM8BY4",             /* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -146,7 +139,7 @@ static reloc_howto_type mcore_coff_howto_table[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 mcore_coff_unsupported_reloc,/* special_function */
+	 mcore_coff_unsupported_reloc, /* special_function */
 	 "IMM4BY2",              /* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -187,6 +180,20 @@ static reloc_howto_type mcore_coff_howto_table[] =
 	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0x7ff,			/* dst_mask */
+	 true),			/* pcrel_offset */
+  
+  HOWTO (IMAGE_REL_MCORE_RVA,   /* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 NULL,                  /* special_function */
+	 "MCORE_RVA",           /* name */
+	 true,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
 	 true)			/* pcrel_offset */
 };
 
@@ -237,17 +244,36 @@ coff_mcore_link_hash_table_create (abfd)
   return & ret->root.root;
 }
 
+/* Add an entry to the base file.  */
+static void
+mcore_emit_base_file_entry (info, output_bfd, input_section, reloc_offset)
+      struct bfd_link_info * info;
+      bfd *                  output_bfd;
+      asection *             input_section;
+      bfd_vma                reloc_offset;
+{
+  bfd_vma addr = reloc_offset
+                 - input_section->vma
+                 + input_section->output_offset
+                 + input_section->output_section->vma;
+
+  if (coff_data (output_bfd)->pe)
+     addr -= pe_data (output_bfd)->pe_opthdr.ImageBase;
+  
+  fwrite (&addr, 1, sizeof (addr), (FILE *) info->base_file);
+}
+
 /*ARGSUSED*/
 static bfd_reloc_status_type
 mcore_coff_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
 			   output_bfd, error_message)
      bfd * abfd;
      arelent * reloc_entry;
-     asymbol * symbol;
-     PTR data;
-     asection * input_section;
-     bfd * output_bfd;
-     char ** error_message;
+     asymbol * symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection * input_section ATTRIBUTE_UNUSED;
+     bfd * output_bfd ATTRIBUTE_UNUSED;
+     char ** error_message ATTRIBUTE_UNUSED;
 {
   BFD_ASSERT (reloc_entry->howto != (reloc_howto_type *)0);
   
@@ -266,7 +292,7 @@ mcore_coff_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
 
 static reloc_howto_type *
 mcore_coff_reloc_type_lookup (abfd, code)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   switch (code)
@@ -277,6 +303,7 @@ mcore_coff_reloc_type_lookup (abfd, code)
       HOW2MAP (BFD_RELOC_MCORE_PCREL_IMM4BY2,      IMAGE_REL_MCORE_PCREL_IMM4BY2);
       HOW2MAP (BFD_RELOC_32_PCREL,                 IMAGE_REL_MCORE_PCREL_32);
       HOW2MAP (BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2, IMAGE_REL_MCORE_PCREL_JSR_IMM11BY2);
+      HOW2MAP (BFD_RELOC_RVA,                      IMAGE_REL_MCORE_RVA);
    default: 
       return NULL;
     }
@@ -290,10 +317,10 @@ mcore_coff_reloc_type_lookup (abfd, code)
 
 static reloc_howto_type *
 coff_mcore_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      asection * sec;
      struct internal_reloc * rel;
-     struct coff_link_hash_entry * h;
+     struct coff_link_hash_entry * h ATTRIBUTE_UNUSED;
      struct internal_syment * sym;
      bfd_vma * addendp;
 {
@@ -304,8 +331,11 @@ coff_mcore_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
     return NULL;
   
   howto = mcore_coff_howto_table + rel->r_type;
+
+  if (rel->r_type == IMAGE_REL_MCORE_RVA)
+    * addendp -= pe_data (sec->output_section->owner)->pe_opthdr.ImageBase;
   
-  if (howto->pc_relative)
+  else if (howto->pc_relative)
     {
       * addendp = sec->vma - 2; /* XXX guess - is this right ? */
       
@@ -323,16 +353,18 @@ coff_mcore_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
   
   return howto;
 }
-
-/* Return true if this relocation should
-   appear in the output .reloc section. */
-static boolean in_reloc_p (abfd, howto)
-     bfd * abfd;
+
+/* Return true if this relocation should appear in the output .reloc section.
+   This function is referenced in pe_mkobject in peicode.h.  */
+static boolean
+in_reloc_p (abfd, howto)
+     bfd * abfd ATTRIBUTE_UNUSED;
      reloc_howto_type * howto;
 {
-  return ! howto->pc_relative;
+  return ! howto->pc_relative && howto->type != IMAGE_REL_MCORE_RVA;
 }     
 
+
 /* The reloc processing routine for the optimized COFF linker.  */
 static boolean
 coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
@@ -357,8 +389,19 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
   if (info->relocateable)
     return true;
   
-  BFD_ASSERT (input_bfd->xvec->byteorder
-	      == output_bfd->xvec->byteorder);
+  /* Check if we have the same endianess */
+  if (   input_bfd->xvec->byteorder != output_bfd->xvec->byteorder
+      && output_bfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
+    {
+      (*_bfd_error_handler)
+	(_("%s: compiled for a %s endian system and target is %s endian.\n"),
+	 bfd_get_filename (input_bfd),
+         bfd_big_endian (input_bfd) ? "big" : "little",
+         bfd_big_endian (output_bfd) ? "big" : "little");
+
+      bfd_set_error (bfd_error_wrong_format);
+      return false;
+    }
 
   hihalf = false;
   hihalf_val = 0;
@@ -368,8 +411,6 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
   
   for (; rel < relend; rel++)
     {
-      asection *                     toc_section = NULL;
-      bfd_vma                        relocation;
       long                           symndx;
       struct internal_syment *       sym;
       bfd_vma                        val;
@@ -395,6 +436,8 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
 	  sym = syms + symndx;
 	}
 
+      addend = 0;
+      
       /* Get the howto and initialise the addend.  */
       howto = bfd_coff_rtype_to_howto (input_bfd, input_section, rel, h,
 				       sym, & addend);
@@ -445,7 +488,7 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd, input_section,
-		      rel->r_vaddr - input_section->vma)))
+		      rel->r_vaddr - input_section->vma, true)))
 		return false;
 	    }
 	  
@@ -481,10 +524,25 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
 	case IMAGE_REL_MCORE_PCREL_32:
 	case IMAGE_REL_MCORE_PCREL_JSR_IMM11BY2:
 	case IMAGE_REL_MCORE_ADDR32:
+	  /* XXX fixme - shouldn't this be like the code for the RVA reloc ? */
 	  rstat = _bfd_relocate_contents (howto, input_bfd, val, loc);
+	  break;
+	  
+	case IMAGE_REL_MCORE_RVA:
+	  rstat = _bfd_final_link_relocate
+	    (howto, input_bfd,
+	     input_section, contents, rel->r_vaddr - input_section->vma,
+	     val, addend);
 	  break;
 	}
       
+      if (info->base_file)
+	{
+	  /* Emit a reloc if the backend thinks it needs it.  */
+	  if (sym && pe_data (output_bfd)->in_reloc_p (output_bfd, howto))
+            mcore_emit_base_file_entry (info, output_bfd, input_section, rel->r_vaddr);
+	}
+  
       switch (rstat)
 	{
 	default:
@@ -520,184 +578,9 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
 
 #include "coffcode.h"
 
-static const bfd_target *
-pe_object_p (abfd)
-     bfd * abfd;
-{
-#ifdef COFF_IMAGE_WITH_PE
-  /* We need to hack badly to handle a PE image correctly.  In PE
-     images created by the GNU linker, the offset to the COFF header
-     is always the size.  However, this is not the case in images
-     generated by other PE linkers.  The PE format stores a four byte
-     offset to the PE signature just before the COFF header at
-     location 0x3c of the file.  We pick up that offset, verify that
-     the PE signature is there, and then set ourselves up to read in
-     the COFF header.  */
-  {
-    bfd_byte ext_offset[4];
-    file_ptr offset;
-    bfd_byte ext_signature[4];
-    unsigned long signature;
+/* Forward declaration to initialise alterbative_target field.  */
+extern const bfd_target TARGET_LITTLE_SYM;
 
-    if (bfd_seek (abfd, 0x3c, SEEK_SET) != 0
-	|| bfd_read (ext_offset, 1, 4, abfd) != 4)
-      {
-	if (bfd_get_error () != bfd_error_system_call)
-	  bfd_set_error (bfd_error_wrong_format);
-	return NULL;
-      }
-    
-    offset = bfd_h_get_32 (abfd, ext_offset);
-    
-    if (bfd_seek (abfd, offset, SEEK_SET) != 0
-	|| bfd_read (ext_signature, 1, 4, abfd) != 4)
-      {
-	if (bfd_get_error () != bfd_error_system_call)
-	  bfd_set_error (bfd_error_wrong_format);
-	
-	return NULL;
-      }
-    
-    signature = bfd_h_get_32 (abfd, ext_signature);
-
-    if (signature != 0x4550)
-      {
-	bfd_set_error (bfd_error_wrong_format);
-	return NULL;
-      }
-
-    /* Here is the hack.  coff_object_p wants to read filhsz bytes to
-       pick up the COFF header.  We adjust so that that will work.  20
-       is the size of the mips COFF filehdr.  */
-    if (bfd_seek (abfd, (bfd_tell (abfd) - bfd_coff_filhsz (abfd) + 20),
-		  SEEK_SET) != 0)
-      {
-	if (bfd_get_error () != bfd_error_system_call)
-	  bfd_set_error (bfd_error_wrong_format);
-	
-	return NULL;
-      }
-  }
-#endif
-
-  return coff_object_p (abfd);
-}
-
 /* The transfer vectors that lead the outside world to all of the above. */
-
-const bfd_target
-TARGET_BIG_SYM =
-{
-  TARGET_BIG_NAME,
-  bfd_target_coff_flavour,	
-  BFD_ENDIAN_BIG,		/* data byte order is big */
-  BFD_ENDIAN_BIG,		/* header byte order is big */
-
-  (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
-
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
-   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES),
-
-  0,				/* leading char */
-  '/',				/* ar_pad_char */
-  15,				/* ar_max_namelen */
-
-  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-  bfd_getb32, bfd_getb_signed_32, bfd_putb32,
-  bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
-
-  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-  bfd_getb32, bfd_getb_signed_32, bfd_putb32,
-  bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
-
-  { _bfd_dummy_target,
-    pe_object_p, 		/* bfd_check_format */
-    bfd_generic_archive_p, 	/* _bfd_dummy_target */
-    pe_object_p
-  },
-  { bfd_false,
-    coff_mkobject,
-    _bfd_generic_mkarchive, 	/* bfd_set_format */
-    bfd_false
-  },
-  { bfd_false,
-    coff_write_object_contents,	/* bfd_write_contents */
-    _bfd_write_archive_contents,
-    bfd_false
-  },
-
-  BFD_JUMP_TABLE_GENERIC (coff),
-  BFD_JUMP_TABLE_COPY (coff),
-  BFD_JUMP_TABLE_CORE (_bfd_nocore),
-  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
-  BFD_JUMP_TABLE_SYMBOLS (coff),
-  BFD_JUMP_TABLE_RELOCS (coff),
-  BFD_JUMP_TABLE_WRITE (coff),
-  BFD_JUMP_TABLE_LINK (coff),
-  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
-
-  COFF_SWAP_TABLE,
-};
-
-const bfd_target
-TARGET_LITTLE_SYM =
-{
-  TARGET_LITTLE_NAME,
-  bfd_target_coff_flavour,
-  BFD_ENDIAN_LITTLE,		/* data byte order is little */
-  BFD_ENDIAN_LITTLE,		/* header byte order is little */
-
-  (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
-
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
-   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES),
-  
-  0,				/* leading underscore */
-  '/',				/* ar_pad_char */
-  15,				/* ar_max_namelen */
-
-  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
-  bfd_getl32, bfd_getl_signed_32, bfd_putl32,
-  bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */
-  
-  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
-  bfd_getl32, bfd_getl_signed_32, bfd_putl32,
-  bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
-
-/* Note that we allow an object file to be treated as a core file as well. */
-  {
-    _bfd_dummy_target,
-    pe_object_p, 		/* bfd_check_format */
-    bfd_generic_archive_p,
-    pe_object_p
-  },
-  {
-    bfd_false,
-    coff_mkobject,
-    _bfd_generic_mkarchive, 	/* bfd_set_format */
-    bfd_false
-  },
-  {
-    bfd_false,
-    coff_write_object_contents, /* bfd_write_contents */
-    _bfd_write_archive_contents,
-    bfd_false
-  },
-
-  BFD_JUMP_TABLE_GENERIC (coff),
-  BFD_JUMP_TABLE_COPY (coff),
-  BFD_JUMP_TABLE_CORE (_bfd_nocore),
-  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
-  BFD_JUMP_TABLE_SYMBOLS (coff),
-  BFD_JUMP_TABLE_RELOCS (coff),
-  BFD_JUMP_TABLE_WRITE (coff),
-  BFD_JUMP_TABLE_LINK (coff),
-  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
-
-  COFF_SWAP_TABLE,
-};
-
+CREATE_BIG_COFF_TARGET_VEC (TARGET_BIG_SYM, TARGET_BIG_NAME, D_PAGED, (SEC_LINK_ONCE | SEC_LINK_DUPLICATES), 0, & TARGET_LITTLE_SYM)
+CREATE_LITTLE_COFF_TARGET_VEC (TARGET_LITTLE_SYM, TARGET_LITTLE_NAME, D_PAGED, (SEC_LINK_ONCE | SEC_LINK_DUPLICATES), 0, & TARGET_BIG_SYM)

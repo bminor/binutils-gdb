@@ -164,6 +164,15 @@ m32r_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
 
   switch (opindex)
     {
+    case M32R_OPERAND_ACC :
+      print_keyword (cd, info, & m32r_cgen_opval_h_accums, fields->f_acc, 0);
+      break;
+    case M32R_OPERAND_ACCD :
+      print_keyword (cd, info, & m32r_cgen_opval_h_accums, fields->f_accd, 0);
+      break;
+    case M32R_OPERAND_ACCS :
+      print_keyword (cd, info, & m32r_cgen_opval_h_accums, fields->f_accs, 0);
+      break;
     case M32R_OPERAND_DCR :
       print_keyword (cd, info, & m32r_cgen_opval_cr_names, fields->f_r1, 0);
       break;
@@ -180,10 +189,13 @@ m32r_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
       print_keyword (cd, info, & m32r_cgen_opval_gr_names, fields->f_r1, 0);
       break;
     case M32R_OPERAND_HASH :
-      print_hash (cd, info, fields->f_nil, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      print_hash (cd, info, 0, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
     case M32R_OPERAND_HI16 :
       print_normal (cd, info, fields->f_hi16, 0|(1<<CGEN_OPERAND_SIGN_OPT), pc, length);
+      break;
+    case M32R_OPERAND_IMM1 :
+      print_normal (cd, info, fields->f_imm1, 0|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);
       break;
     case M32R_OPERAND_SCR :
       print_keyword (cd, info, & m32r_cgen_opval_cr_names, fields->f_r2, 0);
@@ -409,10 +421,14 @@ print_insn (cd, pc, info, buf, buflen)
       CGEN_FIELDS fields;
       int length;
 
-#if 0 /* not needed as insn shouldn't be in hash lists if not supported */
+#ifdef CGEN_VALIDATE_INSN_SUPPORTED 
+      /* not needed as insn shouldn't be in hash lists if not supported */
       /* Supported by this cpu?  */
       if (! m32r_cgen_insn_supported (cd, insn))
-	continue;
+        {
+          insn_list = CGEN_DIS_NEXT_INSN (insn_list);
+	  continue;
+        }
 #endif
 
       /* Basic bit mask must be correct.  */

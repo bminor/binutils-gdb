@@ -1,6 +1,6 @@
 /* This file is tc-mcore.h
 
-   Copyright (C) 1999 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -15,8 +15,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   along with GAS; see the file COPYING.  If not, write to the
+   Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 #ifndef	TC_MCORE
 #define TC_MCORE 1
@@ -26,7 +27,8 @@
 #endif
 
 #define TARGET_ARCH	bfd_arch_mcore
-#define TARGET_BYTES_BIG_ENDIAN 1
+/* Used to initialise target_big_endian.  */
+#define TARGET_BYTES_BIG_ENDIAN 0
 
 /* Don't write out relocs for pcrel stuff.  */
 #define TC_COUNT_RELOC(x) (((x)->fx_addsy || (x)->fx_subsy) && \
@@ -65,7 +67,16 @@ extern const struct relax_type md_relax_table[];
 
 #define TARGET_FORMAT	(target_big_endian ? "pe-mcore-big" : "pe-mcore-little")
 
-#define TARGET_SYMBOL_FIELDS  int sy_flags ;
+struct mcore_tc_sy
+{
+  int sy_flags;
+};
+
+#define TC_SYMFIELD_TYPE struct mcore_tc_sy
+
+# if defined TE_PE
+#  define TC_FORCE_RELOCATION(x) ((x)->fx_r_type == BFD_RELOC_RVA)
+# endif
 
 #endif /* OBJ_COFF */
 
@@ -93,7 +104,6 @@ extern boolean mcore_fix_adjustable PARAMS ((struct fix *));
 # error No target format specified.
 #endif
 
-#include "struc-symbol.h" /* For definition of symbolS */
 #include "write.h"        /* For definition of fixS */
   
 extern void      md_begin            PARAMS ((void));

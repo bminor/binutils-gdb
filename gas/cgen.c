@@ -649,7 +649,8 @@ gas_cgen_tc_gen_reloc (section, fixP)
 
   assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
 
-  reloc->sym_ptr_ptr = & fixP->fx_addsy->bsym;
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
 
   /* Use fx_offset for these cases */
   if (   fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY

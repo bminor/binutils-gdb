@@ -56,6 +56,11 @@ __throw ()
 }
 
 void
+__rethrow ()
+{
+}
+
+void
 __terminate ()
 {
 }
@@ -88,7 +93,7 @@ Foo::Foo ()
   i = ++foos;
 }
 
-Foo::Foo (char* msg)
+Foo::Foo (char*)
 {
   i = ++foos;
 }

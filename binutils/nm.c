@@ -1305,13 +1305,13 @@ print_archive_filename_bsd (filename)
 
 static void
 print_archive_filename_sysv (filename)
-     char *filename;
+     char *filename ATTRIBUTE_UNUSED;
 {
 }
 
 static void
 print_archive_filename_posix (filename)
-     char *filename;
+     char *filename ATTRIBUTE_UNUSED;
 {
 }
 
@@ -1319,7 +1319,7 @@ print_archive_filename_posix (filename)
 
 static void
 print_archive_member_bsd (archive, filename)
-     char *archive;
+     char *archive ATTRIBUTE_UNUSED;
      CONST char *filename;
 {
   if (!filename_per_symbol)
@@ -1427,7 +1427,7 @@ print_symbol_info_bsd (info, abfd)
      symbol_info *info;
      bfd *abfd;
 {
-  if (info->type == 'U')
+  if (bfd_is_undefined_symclass (info->type))
     {
       printf ("%*s",
 #ifdef BFD64
@@ -1458,7 +1458,7 @@ print_symbol_info_sysv (info, abfd)
      bfd *abfd;
 {
   print_symname ("%-20s|", info->name, abfd);	/* Name */
-  if (info->type == 'U')
+  if (bfd_is_undefined_symclass (info->type))
     printf ("        ");	/* Value */
   else
     print_value (info->value);
@@ -1481,7 +1481,7 @@ print_symbol_info_posix (info, abfd)
 {
   print_symname ("%s ", info->name, abfd);
   printf ("%c ", info->type);
-  if (info->type == 'U')
+  if (bfd_is_undefined_symclass (info->type))
     printf ("        ");
   else
     print_value (info->value);

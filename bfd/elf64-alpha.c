@@ -115,8 +115,6 @@ static boolean elf64_alpha_adjust_dynamic_symbol
   PARAMS((struct bfd_link_info *, struct elf_link_hash_entry *));
 static boolean elf64_alpha_size_dynamic_sections
   PARAMS((bfd *, struct bfd_link_info *));
-static boolean elf64_alpha_adjust_dynindx
-  PARAMS((struct elf_link_hash_entry *, PTR));
 static boolean elf64_alpha_relocate_section
   PARAMS((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	  Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
@@ -127,6 +125,10 @@ static boolean elf64_alpha_finish_dynamic_sections
   PARAMS((bfd *, struct bfd_link_info *));
 static boolean elf64_alpha_final_link
   PARAMS((bfd *, struct bfd_link_info *));
+static boolean elf64_alpha_merge_ind_symbols
+  PARAMS((struct alpha_elf_link_hash_entry *, PTR));
+static Elf_Internal_Rela * elf64_alpha_find_reloc_at_ofs
+  PARAMS ((Elf_Internal_Rela *, Elf_Internal_Rela *, bfd_vma, int));
 
 
 struct alpha_elf_link_hash_entry
@@ -974,6 +976,17 @@ static const struct elf_reloc_map elf64_alpha_reloc_map[] =
   {BFD_RELOC_16_PCREL,		R_ALPHA_SREL16},
   {BFD_RELOC_32_PCREL,		R_ALPHA_SREL32},
   {BFD_RELOC_64_PCREL,		R_ALPHA_SREL64},
+
+/* The BFD_RELOC_ALPHA_USER_* relocations are used by the assembler to process
+   the explicit !<reloc>!sequence relocations, and are mapped into the normal
+   relocations at the end of processing. */
+  {BFD_RELOC_ALPHA_USER_LITERAL,	R_ALPHA_LITERAL},
+  {BFD_RELOC_ALPHA_USER_LITUSE_BASE,	R_ALPHA_LITUSE},
+  {BFD_RELOC_ALPHA_USER_LITUSE_BYTOFF,	R_ALPHA_LITUSE},
+  {BFD_RELOC_ALPHA_USER_LITUSE_JSR,	R_ALPHA_LITUSE},
+  {BFD_RELOC_ALPHA_USER_GPDISP,		R_ALPHA_GPDISP},
+  {BFD_RELOC_ALPHA_USER_GPRELHIGH,	R_ALPHA_GPRELHIGH},
+  {BFD_RELOC_ALPHA_USER_GPRELLOW,	R_ALPHA_GPRELLOW},
 };
 
 /* Given a BFD reloc type, return a HOWTO structure.  */
@@ -3254,41 +3267,13 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 	}
 
       if (strip)
-	_bfd_strip_section_from_output (s);
+	_bfd_strip_section_from_output (info, s);
       else
 	{
 	  /* Allocate memory for the section contents.  */
 	  s->contents = (bfd_byte *) bfd_zalloc(dynobj, s->_raw_size);
 	  if (s->contents == NULL && s->_raw_size != 0)
 	    return false;
-	}
-    }
-
-  /* If we are generating a shared library, we generate a section
-     symbol for each output section.  These are local symbols, which
-     means that they must come first in the dynamic symbol table.
-     That means we must increment the dynamic symbol index of every
-     other dynamic symbol.  */
-  if (info->shared)
-    {
-      long c[2], i;
-      asection *p;
-
-      c[0] = 0;
-      c[1] = bfd_count_sections (output_bfd);
-
-      elf_hash_table (info)->dynsymcount += c[1];
-      elf_link_hash_traverse (elf_hash_table(info),
-			      elf64_alpha_adjust_dynindx,
-			      (PTR) c);
-
-      for (i = 1, p = output_bfd->sections;
-	   p != NULL;
-	   p = p->next, i++)
-	{
-	  elf_section_data (p)->dynindx = i;
-	  /* These symbols will have no names, so we don't need to
-	     fiddle with dynstr_index.  */
 	}
     }
 
@@ -3328,22 +3313,6 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 	    return false;
 	}
     }
-
-  return true;
-}
-
-/* Increment the index of a dynamic symbol by a given amount.  Called
-   via elf_link_hash_traverse.  */
-
-static boolean
-elf64_alpha_adjust_dynindx (h, cparg)
-     struct elf_link_hash_entry *h;
-     PTR cparg;
-{
-  long *cp = (long *)cparg;
-
-  if (h->dynindx >= cp[0])
-    h->dynindx += cp[1];
 
   return true;
 }
@@ -3423,6 +3392,12 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	     anything, unless the reloc is against a section symbol,
 	     in which case we have to adjust according to where the
 	     section symbol winds up in the output section.  */
+
+	  /* The symbol associated with GPDISP and LITUSE is 
+	     immaterial.  Only the addend is significant.  */
+	  if (r_type == R_ALPHA_GPDISP || r_type == R_ALPHA_LITUSE)
+	    continue;
+
 	  if (r_symndx < symtab_hdr->sh_info)
 	    {
 	      sym = local_syms + r_symndx;
@@ -3505,7 +3480,8 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (!((*info->callbacks->undefined_symbol)
 		    (info, h->root.root.root.string, input_bfd,
-		     input_section, rel->r_offset)))
+		     input_section, rel->r_offset,
+		     (!info->shared || info->no_undefined))))
 		return false;
 	      relocation = 0;
 	    }
@@ -3983,44 +3959,6 @@ elf64_alpha_finish_dynamic_sections (output_bfd, info)
 	  elf_section_data (splt->output_section)->this_hdr.sh_entsize =
 	    PLT_HEADER_SIZE;
 	}
-    }
-
-  if (info->shared)
-    {
-      asection *sdynsym;
-      asection *s;
-      Elf_Internal_Sym sym;
-
-      /* Set up the section symbols for the output sections.  */
-
-      sdynsym = bfd_get_section_by_name (dynobj, ".dynsym");
-      BFD_ASSERT (sdynsym != NULL);
-
-      sym.st_size = 0;
-      sym.st_name = 0;
-      sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
-      sym.st_other = 0;
-
-      for (s = output_bfd->sections; s != NULL; s = s->next)
-	{
-	  int indx;
-
-	  sym.st_value = s->vma;
-
-	  indx = elf_section_data (s)->this_idx;
-	  BFD_ASSERT (indx > 0);
-	  sym.st_shndx = indx;
-
-	  bfd_elf64_swap_symbol_out (output_bfd, &sym,
-				     (PTR) (((Elf64_External_Sym *)
-					     sdynsym->contents)
-					    + elf_section_data (s)->dynindx));
-	}
-
-      /* Set the sh_info field of the output .dynsym section to the
-         index of the first global symbol.  */
-      elf_section_data (sdynsym->output_section)->this_hdr.sh_info =
-	bfd_count_sections (output_bfd) + 1;
     }
 
   return true;

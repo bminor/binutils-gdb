@@ -1,5 +1,6 @@
 /* gasp.c - Gnu assembler preprocessor main program.
-   Copyright (C) 1994, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1994, 95, 96, 97, 98, 99, 2000
+   Free Software Foundation, Inc.
 
    Written by Steve and Judy Chamberlain of Cygnus Support,
       sac@cygnus.com
@@ -75,6 +76,11 @@ char *program_version = "1.2";
    need the function because other files linked with gasp.c might call
    it.  */
 extern void as_abort PARAMS ((const char *, int, const char *));
+
+/* The default obstack chunk size.  If we set this to zero, the
+   obstack code will use whatever will fit in a 4096 byte block.  This
+   is used by the hash table code used by macro.c.  */
+int chunksize = 0;
 
 #define MAX_INCLUDES 30		/* Maximum include depth */
 #define MAX_REASONABLE 1000	/* Maximum number of expansions */
@@ -186,37 +192,6 @@ typedef struct
     int size;
   } hash_table;
 
-
-/* Structures used to store macros. 
-
-   Each macro knows its name and included text.  It gets built with a
-   list of formal arguments, and also keeps a hash table which points
-   into the list to speed up formal search.  Each formal knows its
-   name and its default value.  Each time the macro is expanded, the
-   formals get the actual values attatched to them. */
-
-/* describe the formal arguments to a macro */
-
-typedef struct formal_struct
-  {
-    struct formal_struct *next;	/* next formal in list */
-    sb name;			/* name of the formal */
-    sb def;			/* the default value */
-    sb actual;			/* the actual argument (changed on each expansion) */
-    int index;			/* the index of the formal 0..formal_count-1 */
-  }
-formal_entry;
-
-/* describe the macro. */
-
-typedef struct macro_struct
-  {
-    sb sub;			/* substitution text. */
-    int formal_count;		/* number of formal args. */
-    formal_entry *formals;	/* pointer to list of formal_structs */
-    hash_table formal_hash;	/* hash table of formals. */
-  }
-macro_entry;
 
 /* how we nest files and expand macros etc.
 
@@ -888,7 +863,7 @@ exp_get_abs (emsg, idx, in, val)
   exp_t res;
   idx = exp_parse (idx, in, &res);
   if (res.add_symbol.len || res.sub_symbol.len)
-    ERROR ((stderr, emsg));
+    ERROR ((stderr, "%s", emsg));
   *val = res.value;
   return idx;
 }
@@ -1379,7 +1354,7 @@ do_data (idx, in, size)
 	  idx = exp_parse (idx, in, &e);
 	  exp_string (&e, &acc);
 	  sb_add_char (&acc, 0);
-	  fprintf (outfile, acc.ptr);
+	  fprintf (outfile, "%s", acc.ptr);
 	  if (idx < in->len && in->ptr[idx] == ',')
 	    {
 	      fprintf (outfile, ",");
@@ -1432,11 +1407,6 @@ do_align (idx, in)
 			 &fill);
       have_fill = 1;
     }
-
-  if (al != 1
-      && al != 2
-      && al != 4)
-    WARNING ((stderr, _("alignment must be one of 1, 2 or 4.\n")));
 
   fprintf (outfile, ".align	%d", al);
   if (have_fill)
@@ -1917,7 +1887,7 @@ process_file ()
 		   || line.ptr[0] == '!'))
 	{
 	  /* MRI line comment.  */
-	  fprintf (outfile, sb_name (&line));
+	  fprintf (outfile, "%s", sb_name (&line));
 	}
       else
 	{
@@ -2654,8 +2624,8 @@ do_irp (idx, in, irpc)
 static
 void 
 do_local (idx, line)
-     int idx;
-     sb *line;
+     int idx ATTRIBUTE_UNUSED;
+     sb *line ATTRIBUTE_UNUSED;
 {
   ERROR ((stderr, _("LOCAL outside of MACRO")));
 }
@@ -2686,7 +2656,7 @@ macro_op (idx, in)
     return 0;
 
   sb_terminate (in);
-  if (! check_macro (in->ptr + idx, &out, comment_char, &err))
+  if (! check_macro (in->ptr + idx, &out, comment_char, &err, NULL))
     return 0;
 
   if (err != NULL)

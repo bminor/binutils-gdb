@@ -1,5 +1,5 @@
 /* tc-z8k.c -- Assemble code for the Zilog Z800n
-   Copyright (C) 1992, 93, 94, 95, 96, 97, 1998 Free Software Foundation.
+   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 1999 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1520,7 +1520,7 @@ md_pcrel_from (fixP)
 
 void
 tc_coff_symbol_emit_hook (s)
-     struct symbol *s;
+     symbolS *s;
 {
 }
 

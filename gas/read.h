@@ -35,11 +35,14 @@ extern char *input_line_pointer;/* -> char we are parsing now. */
 
 #define	LEX_NAME	(1)	/* may continue a name */
 #define LEX_BEGIN_NAME	(2)	/* may begin a name */
+#define LEX_END_NAME	(4)	/* ends a name */
 
 #define is_name_beginner(c) \
   ( lex_type[(unsigned char) (c)] & LEX_BEGIN_NAME )
 #define is_part_of_name(c) \
   ( lex_type[(unsigned char) (c)] & LEX_NAME       )
+#define is_name_ender(c) \
+  ( lex_type[(unsigned char) (c)] & LEX_END_NAME   )
 
 #ifndef is_a_char
 #define CHAR_MASK	(0xff)
@@ -113,6 +116,8 @@ extern void stabs_generate_asm_file PARAMS ((void));
 extern void stabs_generate_asm_lineno PARAMS ((void));
 extern void stabs_generate_asm_func PARAMS ((const char *, const char *));
 extern void stabs_generate_asm_endfunc PARAMS ((const char *, const char *));
+extern void do_repeat PARAMS((int,const char *,const char *));
+extern void end_repeat PARAMS((int));
 
 extern void generate_lineno_debug PARAMS ((void));
 
@@ -125,6 +130,7 @@ extern void s_comm PARAMS ((int));
 extern void s_data PARAMS ((int));
 extern void s_desc PARAMS ((int));
 extern void s_else PARAMS ((int arg));
+extern void s_elseif PARAMS ((int arg));
 extern void s_end PARAMS ((int arg));
 extern void s_endif PARAMS ((int arg));
 extern void s_err PARAMS ((int));

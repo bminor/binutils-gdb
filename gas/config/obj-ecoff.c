@@ -1,5 +1,6 @@
 /* ECOFF object file format.
-   Copyright (C) 1993, 94, 95, 96, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 98, 99, 2000
+   Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    This file was put together by Ian Lance Taylor <ian@cygnus.com>.
 
@@ -260,8 +261,9 @@ obj_ecoff_set_ext (sym, ext)
     = &ecoff_backend (stdoutput)->debug_swap;
   ecoff_symbol_type *esym;
 
-  know (bfd_asymbol_flavour (sym->bsym) == bfd_target_ecoff_flavour);
-  esym = ecoffsymbol (sym->bsym);
+  know (bfd_asymbol_flavour (symbol_get_bfdsym (sym))
+	== bfd_target_ecoff_flavour);
+  esym = ecoffsymbol (symbol_get_bfdsym (sym));
   esym->local = false;
   esym->native = xmalloc (debug_swap->external_ext_size);
   (*debug_swap->swap_ext_out) (stdoutput, ext, esym->native);
@@ -291,14 +293,18 @@ ecoff_pop_insert ()
 const struct format_ops ecoff_format_ops =
 {
   bfd_target_ecoff_flavour,
-  0,
-  1,
+  0,	/* dfl_leading_underscore */
+  1,	/* emit_section_symbols */
   obj_ecoff_frob_symbol,
   ecoff_frob_file,
-  0,
-  0, 0,
-  0, 0,
-  0,
+  0,	/* frob_file_after_relocs */
+  0,	/* s_get_size */
+  0,	/* s_set_size */
+  0,	/* s_get_align */
+  0,	/* s_set_align */
+  0,	/* s_get_other */
+  0,	/* s_get_desc */
+  0,	/* copy_symbol_attributes */
   ecoff_generate_asm_lineno,
   ecoff_stab,
   ecoff_sec_sym_ok_for_reloc,

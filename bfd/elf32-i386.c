@@ -1,5 +1,5 @@
 /* Intel 80386/80486-specific support for 32-bit ELF
-   Copyright 1993-1998, 1999 Free Software Foundation, Inc.
+   Copyright 1993, 94-98, 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -67,20 +67,20 @@ static reloc_howto_type elf_howto_table[]=
   HOWTO(R_386_RELATIVE,  0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_RELATIVE", true,0xffffffff,0xffffffff,false),
   HOWTO(R_386_GOTOFF,    0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_GOTOFF",   true,0xffffffff,0xffffffff,false),
   HOWTO(R_386_GOTPC,     0,2,32,true,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_GOTPC",    true,0xffffffff,0xffffffff,true),
-  { 11 },
-  { 12 },
-  { 13 },
-  { 14 },
-  { 15 },
-  { 16 },
-  { 17 },
-  { 18 },
-  { 19 },
+  EMPTY_HOWTO (11),
+  EMPTY_HOWTO (12),
+  EMPTY_HOWTO (13),
+  EMPTY_HOWTO (14),
+  EMPTY_HOWTO (15),
+  EMPTY_HOWTO (16),
+  EMPTY_HOWTO (17),
+  EMPTY_HOWTO (18),
+  EMPTY_HOWTO (19),
   /* The remaining relocs are a GNU extension.  */
   HOWTO(R_386_16,	 0,1,16,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_16",	    true,0xffff,0xffff,false),
   HOWTO(R_386_PC16,	 0,1,16,true, 0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_PC16",	    true,0xffff,0xffff,true),
   HOWTO(R_386_8,	 0,0,8,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_8",	    true,0xff,0xff,false),
-  HOWTO(R_386_PC8,	 0,0,8,true, 0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_PC8",	    true,0xff,0xff,true),
+  HOWTO(R_386_PC8,	 0,0,8,true, 0,complain_overflow_signed, bfd_elf_generic_reloc,"R_386_PC8",	    true,0xff,0xff,true),
 };
 
 /* GNU extension to record C++ vtable hierarchy.  */
@@ -123,7 +123,7 @@ static reloc_howto_type elf32_i386_vtentry_howto =
 
 static reloc_howto_type *
 elf_i386_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   switch (code)
@@ -211,16 +211,16 @@ elf_i386_reloc_type_lookup (abfd, code)
 
 static void
 elf_i386_info_to_howto (abfd, cache_ptr, dst)
-     bfd		*abfd;
-     arelent		*cache_ptr;
-     Elf32_Internal_Rela *dst;
+     bfd		*abfd ATTRIBUTE_UNUSED;
+     arelent		*cache_ptr ATTRIBUTE_UNUSED;
+     Elf32_Internal_Rela *dst ATTRIBUTE_UNUSED;
 {
   abort ();
 }
 
 static void
 elf_i386_info_to_howto_rel (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf32_Internal_Rel *dst;
 {
@@ -231,11 +231,14 @@ elf_i386_info_to_howto_rel (abfd, cache_ptr, dst)
     cache_ptr->howto = &elf32_i386_vtinherit_howto;
   else if (type == R_386_GNU_VTENTRY)
     cache_ptr->howto = &elf32_i386_vtentry_howto;
+  else if (type < R_386_max
+	   && (type < FIRST_INVALID_RELOC || type > LAST_INVALID_RELOC))
+    cache_ptr->howto = &elf_howto_table[(int) type];
   else
     {
-      BFD_ASSERT (type < R_386_max);
-      BFD_ASSERT (type < FIRST_INVALID_RELOC || type > LAST_INVALID_RELOC);
-      cache_ptr->howto = &elf_howto_table[(int) type];
+      (*_bfd_error_handler) (_("%s: invalid relocation type %d"),
+			     bfd_get_filename (abfd), (int) type);
+      cache_ptr->howto = &elf_howto_table[(int) R_386_NONE];
     }
 }
 
@@ -591,6 +594,9 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 
 	case R_386_32:
 	case R_386_PC32:
+	  if (h != NULL)
+	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+
 	  /* If we are creating a shared library, and this is a reloc
              against a global symbol, or a non PC relative reloc
              against a local symbol, then we need to copy the reloc
@@ -714,7 +720,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 static asection *
 elf_i386_gc_mark_hook (abfd, info, rel, h, sym)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *rel;
      struct elf_link_hash_entry *h;
      Elf_Internal_Sym *sym;
@@ -760,10 +766,10 @@ elf_i386_gc_mark_hook (abfd, info, rel, h, sym)
 
 static boolean
 elf_i386_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     const Elf_Internal_Rela *relocs;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
 {
   /* ??? It would seem that the existing i386 code does no sort
      of reference counting or whatnot on its GOT and PLT entries,
@@ -887,6 +893,11 @@ elf_i386_adjust_dynamic_symbol (info, h)
      For such cases we need not do anything here; the relocations will
      be handled correctly by relocate_section.  */
   if (info->shared)
+    return true;
+
+  /* If there are no references to this symbol that do not use the
+     GOT, we don't need to generate a copy reloc.  */
+  if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0)
     return true;
 
   /* We must allocate the symbol in our .dynbss section, which will
@@ -1077,7 +1088,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 
       if (strip)
 	{
-	  _bfd_strip_section_from_output (s);
+	  _bfd_strip_section_from_output (info, s);
 	  continue;
 	}
 
@@ -1139,7 +1150,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 static boolean
 elf_i386_discard_copies (h, ignore)
      struct elf_i386_link_hash_entry *h;
-     PTR ignore;
+     PTR ignore ATTRIBUTE_UNUSED;
 {
   struct elf_i386_pcrel_relocs_copied *s;
 
@@ -1308,7 +1319,8 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset)))
+		      input_section, rel->r_offset,
+		      (!info->shared || info->no_undefined))))
 		return false;
 	      relocation = 0;
 	    }

@@ -1,5 +1,5 @@
 /* BFD back-end for PowerPC Microsoft Portable Executable files.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    Original version pieced together by Kim Knuttila (krk@cygnus.com)
@@ -906,10 +906,10 @@ static void ppc_mark_symbol_as_glue
 static boolean
 ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
      bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
      int sym;
-     enum toc_type toc_kind;
+     enum toc_type toc_kind ATTRIBUTE_UNUSED;
 {
   struct ppc_coff_link_hash_entry *h;
   const char *name;
@@ -1007,7 +1007,7 @@ ppc_mark_symbol_as_glue(abfd, sym, rel)
    appear in the output .reloc section. */
 
 static boolean in_reloc_p(abfd, howto)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      reloc_howto_type *howto;
 {
   return 
@@ -1197,7 +1197,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.root.string, input_bfd, input_section,
-		      rel->r_vaddr - input_section->vma)))
+		      rel->r_vaddr - input_section->vma, true)))
 		return false;
 	    }
 	}
@@ -1700,7 +1700,7 @@ dump_toc (vfile)
 
 boolean
 ppc_allocate_toc_section (info) 
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
 {
   asection *s;
   bfd_byte *foo;
@@ -1806,13 +1806,13 @@ ppc_refhi_reloc (abfd,
 		 input_section,
 		 output_bfd,
 		 error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   UN_IMPL("REFHI");
   DUMP_RELOC("REFHI",reloc_entry);
@@ -1860,13 +1860,13 @@ ppc_pair_reloc (abfd,
 		input_section,
 		output_bfd,
 		error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   UN_IMPL("PAIR");
   DUMP_RELOC("PAIR",reloc_entry);
@@ -1886,13 +1886,13 @@ ppc_toc16_reloc (abfd,
 		 input_section,
 		 output_bfd,
 		 error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   UN_IMPL("TOCREL16");
   DUMP_RELOC("TOCREL16",reloc_entry);
@@ -1945,13 +1945,13 @@ ppc_secrel_reloc (abfd,
 		  input_section,
 		  output_bfd,
 		  error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   UN_IMPL("SECREL");
   DUMP_RELOC("SECREL",reloc_entry);
@@ -1970,13 +1970,13 @@ ppc_section_reloc (abfd,
 		   input_section,
 		   output_bfd,
 		   error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   UN_IMPL("SECTION");
   DUMP_RELOC("SECTION",reloc_entry);
@@ -1995,13 +1995,13 @@ ppc_imglue_reloc (abfd,
 		  input_section,
 		  output_bfd,
 		  error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   UN_IMPL("IMGLUE");
   DUMP_RELOC("IMGLUE",reloc_entry);
@@ -2093,11 +2093,11 @@ ppc_coff_rtype2howto (relent, internal)
 
 static reloc_howto_type *
 coff_ppc_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
      struct internal_reloc *rel;
-     struct coff_link_hash_entry *h;
-     struct internal_syment *sym;
+     struct coff_link_hash_entry *h ATTRIBUTE_UNUSED;
+     struct internal_syment *sym ATTRIBUTE_UNUSED;
      bfd_vma *addendp;
 {
   reloc_howto_type *howto;
@@ -2175,7 +2175,7 @@ PARAMS ((bfd *, bfd_reloc_code_real_type));
 
 static reloc_howto_type *
 ppc_coff_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   switch (code)
@@ -2214,6 +2214,7 @@ static void ppc_coff_swap_sym_in_hook PARAMS ((bfd *, PTR, PTR));
 #define coff_bfd_final_link          ppc_bfd_coff_final_link 
 
 #ifndef COFF_IMAGE_WITH_PE
+/* FIXME: This no longer works.  */
 #define coff_swap_sym_in_hook        ppc_coff_swap_sym_in_hook
 #endif
 
@@ -2221,7 +2222,24 @@ static void ppc_coff_swap_sym_in_hook PARAMS ((bfd *, PTR, PTR));
 
 #define COFF_PAGE_SIZE                       0x1000
 
+/* FIXME: This controls some code that used to be in peicode.h and is
+   now in peigen.c.  It will not control the code in peigen.c.  If
+   anybody wants to get this working, you will need to fix that.  */
 #define POWERPC_LE_PE
+
+#define COFF_SECTION_ALIGNMENT_ENTRIES \
+{ COFF_SECTION_NAME_EXACT_MATCH (".idata$2"), \
+  COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 0 }, \
+{ COFF_SECTION_NAME_EXACT_MATCH (".idata$3"), \
+  COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 0 }, \
+{ COFF_SECTION_NAME_EXACT_MATCH (".idata$4"), \
+  COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 2 }, \
+{ COFF_SECTION_NAME_EXACT_MATCH (".idata$5"), \
+  COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 2 }, \
+{ COFF_SECTION_NAME_EXACT_MATCH (".idata$6"), \
+  COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 1 }, \
+{ COFF_SECTION_NAME_EXACT_MATCH (".reloc"), \
+  COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 1 }
 
 #include "coffcode.h"
 
@@ -2245,7 +2263,7 @@ static void ppc_coff_swap_sym_in_hook PARAMS ((bfd *, PTR, PTR));
 static void
 ppc_coff_swap_sym_in_hook (abfd, ext1, in1)
      bfd            *abfd;
-     PTR ext1;
+     PTR ext1 ATTRIBUTE_UNUSED;
      PTR in1;
 {
   struct internal_syment      *in = (struct internal_syment *)in1;
@@ -2316,7 +2334,6 @@ ppc_get_last()
    where the POWERPC_LE_PE macro modifies the code. It is left in as a 
    precise form of comment. krk@cygnus.com
 */
-#define POWERPC_LE_PE
 
 
 /* Do the final link step.  */
@@ -2824,11 +2841,15 @@ ppc_bfd_coff_final_link (abfd, info)
 #endif
 
 
+/* Forward declaration for use by alternative_target field.  */
+#ifdef TARGET_BIG_SYM
+extern const bfd_target TARGET_BIG_SYM;
+#endif
+
 /* The transfer vectors that lead the outside world to all of the above. */
 
 #ifdef TARGET_LITTLE_SYM
-const bfd_target
-TARGET_LITTLE_SYM =
+const bfd_target TARGET_LITTLE_SYM =
 {
   TARGET_LITTLE_NAME,		/* name or coff-arm-little */
   bfd_target_coff_flavour,
@@ -2874,14 +2895,20 @@ TARGET_LITTLE_SYM =
   BFD_JUMP_TABLE_WRITE (coff),
   BFD_JUMP_TABLE_LINK (coff),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+
+  /* Alternative_target.  */
+#ifdef TARGET_BIG_SYM
+  & TARGET_BIG_SYM,
+#else
+  NULL,
+#endif
   
-  COFF_SWAP_TABLE,
+  COFF_SWAP_TABLE
 };
 #endif
 
 #ifdef TARGET_BIG_SYM
-const bfd_target
-TARGET_BIG_SYM =
+const bfd_target TARGET_BIG_SYM =
 {
   TARGET_BIG_NAME,
   bfd_target_coff_flavour,	
@@ -2928,7 +2955,15 @@ TARGET_BIG_SYM =
   BFD_JUMP_TABLE_LINK (coff),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
-  COFF_SWAP_TABLE,
+
+  /* Alternative_target.  */
+#ifdef TARGET_LITTLE_SYM
+  & TARGET_LITTLE_SYM,
+#else
+  NULL,
+#endif
+  
+  COFF_SWAP_TABLE
 };
 
 #endif

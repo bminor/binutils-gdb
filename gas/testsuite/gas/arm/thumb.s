@@ -118,6 +118,7 @@ bar:
 	bhi	bar
 	blo	bar
 	bul	bar
+	bal	bar
 
 close:
 	lsl	r4, r5, #near - close

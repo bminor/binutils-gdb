@@ -1,5 +1,6 @@
 /* BFD back-end for AMD 29000 COFF binaries.
-   Copyright 1990, 91, 92, 93, 94, 95, 1997 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 97, 98, 1999
+   Free Software Foundation, Inc.
    Contributed by David Wood at New York University 7/8/91.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -235,9 +236,29 @@ a29k_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 static reloc_howto_type howto_table[] = 
 {
   {R_ABS,     0, 3, 32, false, 0, complain_overflow_bitfield,a29k_reloc,"ABS",     true, 0xffffffff,0xffffffff, false},
-  {1},  {2},  {3},   {4},  {5},  {6},  {7},  {8},  {9}, {10},
-  {11}, {12}, {13}, {14}, {15}, {16}, {17}, {18}, {19}, {20},
-  {21}, {22}, {23},
+  EMPTY_HOWTO (1),
+  EMPTY_HOWTO (2),
+  EMPTY_HOWTO (3),
+  EMPTY_HOWTO (4),
+  EMPTY_HOWTO (5),
+  EMPTY_HOWTO (6),
+  EMPTY_HOWTO (7),
+  EMPTY_HOWTO (8),
+  EMPTY_HOWTO (9),
+  EMPTY_HOWTO (10),
+  EMPTY_HOWTO (11),
+  EMPTY_HOWTO (12),
+  EMPTY_HOWTO (13),
+  EMPTY_HOWTO (14),
+  EMPTY_HOWTO (15),
+  EMPTY_HOWTO (16),
+  EMPTY_HOWTO (17),
+  EMPTY_HOWTO (18),
+  EMPTY_HOWTO (19),
+  EMPTY_HOWTO (20),
+  EMPTY_HOWTO (21),
+  EMPTY_HOWTO (22),
+  EMPTY_HOWTO (23),
   {R_IREL,    0, 3, 32, true,  0, complain_overflow_signed,a29k_reloc,"IREL",    true, 0xffffffff,0xffffffff, false},
   {R_IABS,    0, 3, 32, false, 0, complain_overflow_bitfield, a29k_reloc,"IABS",    true, 0xffffffff,0xffffffff, false},
   {R_ILOHALF, 0, 3, 16, true,  0, complain_overflow_signed, a29k_reloc,"ILOHALF", true, 0x0000ffff,0x0000ffff, false},
@@ -311,7 +332,7 @@ reloc_processing (relent,reloc, symbols, abfd, section)
 static boolean
 coff_a29k_relocate_section (output_bfd, info, input_bfd, input_section,
 			    contents, relocs, syms, sections)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
      bfd *input_bfd;
      asection *input_section;
@@ -395,7 +416,7 @@ coff_a29k_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  if (! ((*info->callbacks->undefined_symbol)
 			 (info, h->root.root.string, input_bfd, input_section,
-			  rel->r_vaddr - input_section->vma)))
+			  rel->r_vaddr - input_section->vma, true)))
 		    return false;
 		}
 	    }
@@ -562,10 +583,10 @@ coff_a29k_relocate_section (output_bfd, info, input_bfd, input_section,
 /*ARGSUSED*/
 static boolean
 coff_a29k_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
-     bfd *obfd;
-     struct bfd_link_info *info;
-     bfd *ibfd;
-     asection *sec;
+     bfd *obfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     bfd *ibfd ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
      struct internal_reloc *irel;
      boolean *adjustedp;
 {
@@ -580,61 +601,4 @@ coff_a29k_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
 
 #include "coffcode.h"
 
-const bfd_target a29kcoff_big_vec =
-{
-  "coff-a29k-big",		/* name */
-  bfd_target_coff_flavour,
-  BFD_ENDIAN_BIG,		/* data byte order is big */
-  BFD_ENDIAN_BIG,		/* header byte order is big */
-
-  (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT),
-
-  (SEC_HAS_CONTENTS | SEC_ALLOC /* section flags */
-   | SEC_LOAD | SEC_RELOC  
-   | SEC_READONLY ),
-  '_',				/* leading underscore */
-  '/',				/* ar_pad_char */
-  15,				/* ar_max_namelen */
-  /* data */
-  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-     bfd_getb32, bfd_getb_signed_32,   bfd_putb32,
-     bfd_getb16, bfd_getb_signed_16, bfd_putb16,
-  /* hdrs */
-  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-     bfd_getb32, bfd_getb_signed_32,   bfd_putb32,
-     bfd_getb16, bfd_getb_signed_16, bfd_putb16,
-
- {
-	    
-   _bfd_dummy_target,
-   coff_object_p,
-   bfd_generic_archive_p,
-   _bfd_dummy_target
-  },
- {
-   bfd_false,
-   coff_mkobject,
-   _bfd_generic_mkarchive,
-   bfd_false
-  },
- {
-   bfd_false,
-   coff_write_object_contents,
-   _bfd_write_archive_contents,
-   bfd_false
-  },
-
-     BFD_JUMP_TABLE_GENERIC (coff),
-     BFD_JUMP_TABLE_COPY (coff),
-     BFD_JUMP_TABLE_CORE (_bfd_nocore),
-     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
-     BFD_JUMP_TABLE_SYMBOLS (coff),
-     BFD_JUMP_TABLE_RELOCS (coff),
-     BFD_JUMP_TABLE_WRITE (coff),
-     BFD_JUMP_TABLE_LINK (coff),
-     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
-
-  COFF_SWAP_TABLE
- };
+CREATE_BIG_COFF_TARGET_VEC (a29kcoff_big_vec, "coff-a29k-big", 0, SEC_READONLY, '_', NULL)

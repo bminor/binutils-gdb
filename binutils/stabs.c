@@ -1,5 +1,5 @@
 /* stabs.c -- Parse stabs debugging information
-   Copyright (C) 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -375,7 +375,7 @@ warn_stab (p, err)
 /*ARGSUSED*/
 PTR
 start_stab (dhandle, abfd, sections, syms, symcount)
-     PTR dhandle;
+     PTR dhandle ATTRIBUTE_UNUSED;
      bfd *abfd;
      boolean sections;
      asymbol **syms;
@@ -1316,14 +1316,21 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
 	    bad_stab (orig);
 	    return DEBUG_TYPE_NULL;
 	  }
-	while (q1 != NULL && p > q1 && p[1] == ':')
+	if (q1 != NULL && p > q1 && p[1] == ':')
 	  {
-	    q2 = strchr (q1, '>');
-	    if (q2 == NULL || q2 < p)
-	      break;
-	    p += 2;
-	    p = strchr (p, ':');
-	    if (p == NULL)
+	    int nest = 0;
+
+	    for (q2 = q1; *q2 != '\0'; ++q2)
+	      {
+		if (*q2 == '<')
+		  ++nest;
+		else if (*q2 == '>')
+		  --nest;
+		else if (*q2 == ':' && nest == 0)
+		  break;
+	      }
+	    p = q2;
+	    if (*p != ':')
 	      {
 		bad_stab (orig);
 		return DEBUG_TYPE_NULL;
@@ -1632,7 +1639,7 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
   if (size != -1)
     {
       if (! debug_record_type_size (dhandle, dtype, (unsigned int) size))
-	return false;
+	return DEBUG_TYPE_NULL;
     }
 
   return dtype;
@@ -1811,7 +1818,7 @@ parse_stab_range_type (dhandle, info, typename, pp, typenums)
 	    return debug_make_int_type (dhandle, 1, true);
 	  else if (n3 == 0xffff)
 	    return debug_make_int_type (dhandle, 2, true);
-	  else if (n3 == 0xffffffff)
+	  else if (n3 == (bfd_signed_vma) 0xffffffff)
 	    return debug_make_int_type (dhandle, 4, true);
 #ifdef BFD64
 	  else if (n3 == ((((bfd_vma) 0xffffffff) << 32) | 0xffffffff))
@@ -3124,7 +3131,7 @@ parse_stab_array_type (dhandle, info, pp, stringp)
   /* If the index type is type 0, we take it as int.  */
   p = *pp;
   if (! parse_stab_type_number (&p, typenums))
-    return false;
+    return DEBUG_TYPE_NULL;
   if (typenums[0] == 0 && typenums[1] == 0 && **pp != '=')
     {
       index_type = debug_find_named_type (dhandle, "int");
@@ -3132,7 +3139,7 @@ parse_stab_array_type (dhandle, info, pp, stringp)
 	{
 	  index_type = debug_make_int_type (dhandle, 4, false);
 	  if (index_type == DEBUG_TYPE_NULL)
-	    return false;
+	    return DEBUG_TYPE_NULL;
 	}
       *pp = p;
     }
@@ -3161,7 +3168,7 @@ parse_stab_array_type (dhandle, info, pp, stringp)
   if (**pp != ';')
     {
       bad_stab (orig);
-      return false;
+      return DEBUG_TYPE_NULL;
     }
   ++*pp;
 
@@ -3175,14 +3182,14 @@ parse_stab_array_type (dhandle, info, pp, stringp)
   if (**pp != ';')
     {
       bad_stab (orig);
-      return false;
+      return DEBUG_TYPE_NULL;
     }
   ++*pp;
 
   element_type = parse_stab_type (dhandle, info, (const char *) NULL, pp,
 				  (debug_type **) NULL);
   if (element_type == DEBUG_TYPE_NULL)
-    return false;
+    return DEBUG_TYPE_NULL;
 
   if (adjustable)
     {
@@ -3432,7 +3439,7 @@ stab_find_type (dhandle, info, typenums)
 
 static boolean
 stab_record_type (dhandle, info, typenums, type)
-     PTR dhandle;
+     PTR dhandle ATTRIBUTE_UNUSED;
      struct stab_handle *info;
      const int *typenums;
      debug_type type;
@@ -4506,7 +4513,7 @@ stab_demangle_template (minfo, pp, pname)
 
 static boolean
 stab_demangle_class (minfo, pp, pstart)
-     struct stab_demangle_info *minfo;
+     struct stab_demangle_info *minfo ATTRIBUTE_UNUSED;
      const char **pp;
      const char **pstart;
 {
@@ -4785,6 +4792,7 @@ stab_demangle_type (minfo, pp, ptype)
     case 'O':
       {
 	boolean memberp, constp, volatilep;
+	debug_type class_type = DEBUG_TYPE_NULL;
 	debug_type *args;
 	boolean varargs;
 	unsigned int n;
@@ -4797,19 +4805,40 @@ stab_demangle_type (minfo, pp, ptype)
 	varargs = false;
 
 	++*pp;
-	if (! isdigit ((unsigned char) **pp))
+	if (isdigit ((unsigned char) **pp))
+	  {
+	    n = stab_demangle_count (pp);
+	    if (strlen (*pp) < n)
+	      {
+		stab_bad_demangle (orig);
+		return false;
+	      }
+	    name = *pp;
+	    *pp += n;
+
+	    if (ptype != NULL)
+	      {
+		class_type = stab_find_tagged_type (minfo->dhandle,
+						    minfo->info,
+						    name, (int) n,
+						    DEBUG_KIND_CLASS);
+		if (class_type == DEBUG_TYPE_NULL)
+		  return false;
+	      }
+	  }
+	else if (**pp == 'Q')
+	  {
+	    if (! stab_demangle_qualified (minfo, pp,
+					   (ptype == NULL
+					    ? (debug_type *) NULL
+					    : &class_type)))
+	      return false;
+	  }
+	else
 	  {
 	    stab_bad_demangle (orig);
 	    return false;
 	  }
-	n = stab_demangle_count (pp);
-	if (strlen (*pp) < n)
-	  {
-	    stab_bad_demangle (orig);
-	    return false;
-	  }
-	name = *pp;
-	*pp += n;
 
 	if (memberp)
 	  {
@@ -4851,14 +4880,6 @@ stab_demangle_type (minfo, pp, ptype)
 
 	if (ptype != NULL)
 	  {
-	    debug_type class_type;
-
-	    class_type = stab_find_tagged_type (minfo->dhandle, minfo->info,
-						name, (int) n,
-						DEBUG_KIND_CLASS);
-	    if (class_type == DEBUG_TYPE_NULL)
-	      return false;
-
 	    if (! memberp)
 	      *ptype = debug_make_offset_type (minfo->dhandle, class_type,
 					       *ptype);

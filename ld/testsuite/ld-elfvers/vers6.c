@@ -2,6 +2,12 @@
  * Testcase to make sure that if we externally reference a versioned symbol
  * that we always get the right one.
  */
+#include <stdio.h>
+
+extern int foo_1();
+extern int foo_2();
+extern int foo_3();
+extern int foo_4();
 
 int
 main()

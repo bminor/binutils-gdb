@@ -17,9 +17,11 @@ SECTIONS
 {
   .text ${RELOCATING+ ${TARGET_PAGE_SIZE}+SIZEOF_HEADERS} : {
     *(.text)
+    ${RELOCATING+*(.gnu.linkonce.t*)}
     *(.const*)
     *(.ro*)
-    ${RELOCATING+etext  =  . ; _etext = .};
+    ${RELOCATING+*(.gnu.linkonce.r*)}
+    ${RELOCATING+etext  =  . ; _etext = . ;}
     ${RELOCATING+. = ALIGN(${SEGMENT_SIZE});}
   }
   .data ${RELOCATING+ ${DATA_ALIGNMENT}} : {
@@ -30,8 +32,16 @@ SECTIONS
     *(.dtor)
     djgpp_last_dtor = . ;}
     *(.data)
-    ${RELOCATING+ edata  =  . ; _edata = .};
-    ${RELOCATING+ . = ALIGN(${SEGMENT_SIZE});}
+
+    ${RELOCATING+*(.gcc_exc*)}
+    ${RELOCATING+___EH_FRAME_BEGIN__ = . ;}
+    ${RELOCATING+*(.eh_fram*)}
+    ${RELOCATING+___EH_FRAME_END__ = . ;}
+    ${RELOCATING+LONG(0);}
+
+    ${RELOCATING+*(.gnu.linkonce.d*)}
+    ${RELOCATING+edata  =  . ; _edata = . ;}
+    ${RELOCATING+. = ALIGN(${SEGMENT_SIZE});}
   }
   ${CONSTRUCTING+${RELOCATING-$CTOR}}
   ${CONSTRUCTING+${RELOCATING-$DTOR}}
@@ -39,7 +49,7 @@ SECTIONS
   { 					
     *(.bss)
     *(COMMON)
-    ${RELOCATING+ end = . ; _end = .};
+    ${RELOCATING+ end = . ; _end = . ;}
     ${RELOCATING+ . = ALIGN(${SEGMENT_SIZE});}
   }
 }

@@ -1,4 +1,4 @@
-#as: -Av9
+#as: -64 -Av9
 #objdump: -dr
 #name: sparc64 wrpr
 

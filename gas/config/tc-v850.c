@@ -1,5 +1,5 @@
 /* tc-v850.c -- Assembler code for the NEC V850
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation.
+   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -297,7 +297,7 @@ v850_comm (area)
 	}
     }
   
-  know (symbolP->sy_frag == & zero_address_frag);
+  know (symbol_get_frag (symbolP) == & zero_address_frag);
   
   if (*input_line_pointer != ',')
     have_align = 0;
@@ -323,7 +323,7 @@ v850_comm (area)
 	    }
 	}
       
-      if (symbolP->local)
+      if (symbol_get_obj (symbolP)->local)
 	{
 	  segT   old_sec;
 	  int    old_subsec;
@@ -421,24 +421,24 @@ v850_comm (area)
 	    {
 	    case AREA_SDA:
 	      if (S_GET_SEGMENT (symbolP) == sbss_section)
-		symbolP->sy_frag->fr_symbol = 0;
+		symbol_get_frag (symbolP)->fr_symbol = 0;
 	      break;
 
 	    case AREA_ZDA:
 	      if (S_GET_SEGMENT (symbolP) == zbss_section)
-		symbolP->sy_frag->fr_symbol = 0;
+		symbol_get_frag (symbolP)->fr_symbol = 0;
 	      break;
 
 	    case AREA_TDA:
 	      if (S_GET_SEGMENT (symbolP) == tbss_section)
-		symbolP->sy_frag->fr_symbol = 0;
+		symbol_get_frag (symbolP)->fr_symbol = 0;
 	      break;
 
 	    default:
-	      abort();
+	      abort ();
 	    }
 	  
-	  symbolP->sy_frag = frag_now;
+	  symbol_set_frag (symbolP, frag_now);
 	  pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
 			    (offsetT) size, (char *) 0);
 	  *pfrag = 0;
@@ -548,7 +548,7 @@ v850_comm (area)
       goto allocate_common;
     }
 
-  symbolP->bsym->flags |= BSF_OBJECT;
+  symbol_get_bfdsym (symbolP)->flags |= BSF_OBJECT;
 
   demand_empty_rest_of_line ();
   return;
@@ -726,9 +726,9 @@ reg_name_search (regs, regcount, name, accept_numbers)
     {
       /* If the symbol is an alias for another name then use that.
 	 If the symbol is an alias for a number, then return the number.  */
-      if (symbolP->sy_value.X_op == O_symbol)
+      if (symbol_equated_p (symbolP))
 	{
-	  name = S_GET_NAME (symbolP->sy_value.X_add_symbol);
+	  name = S_GET_NAME (symbol_get_value_expression (symbolP)->X_add_symbol);
 	}
       else if (accept_numbers)
 	{
@@ -2243,7 +2243,8 @@ tc_gen_reloc (seg, fixp)
   arelent * reloc;
   
   reloc              = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = & fixp->fx_addsy->bsym;
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr= symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address     = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto       = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
 
@@ -2259,7 +2260,7 @@ tc_gen_reloc (seg, fixp)
       return NULL;
     }
   
-  if (fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
+  if (   fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
       || fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT)
     reloc->addend = fixp->fx_offset;
   else
@@ -2289,16 +2290,14 @@ v850_pcrel_from_section (fixp, section)
      segT   section;
 {
   /* If the symbol is undefined, or in a section other than our own,
+     or it is weak (in which case it may well be in another section,
      then let the linker figure it out.  */
   if (fixp->fx_addsy != (symbolS *) NULL
       && (! S_IS_DEFINED (fixp->fx_addsy)
+	  || S_IS_WEAK (fixp->fx_addsy)
 	  || (S_GET_SEGMENT (fixp->fx_addsy) != section)))
-    {
-      /* The symbol is undefined/not in our section.
-	 Let the linker figure it out.  */
-      return 0;
-    }
-
+    return 0;
+  
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
 
@@ -2311,7 +2310,7 @@ md_apply_fix3 (fixp, valuep, seg)
   valueT value;
   char * where;
 
-  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+  if (   fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     {
       fixp->fx_done = 0;
@@ -2407,7 +2406,7 @@ md_apply_fix3 (fixp, valuep, seg)
    on the v850.  */
 void
 parse_cons_expression_v850 (exp)
-  expressionS *exp;
+  expressionS * exp;
 {
   /* See if there's a reloc prefix like hi() we have to handle.  */
   hold_cons_reloc = v850_reloc_prefix (NULL);
@@ -2421,7 +2420,7 @@ parse_cons_expression_v850 (exp)
    appropriate one based on the size of the expression.  */
 void
 cons_fix_new_v850 (frag, where, size, exp)
-     fragS *frag;
+     fragS * frag;
      int where;
      int size;
      expressionS *exp;
@@ -2441,37 +2440,42 @@ cons_fix_new_v850 (frag, where, size, exp)
   else
     fix_new (frag, where, size, NULL, 0, 0, hold_cons_reloc);
 }
+
 boolean
 v850_fix_adjustable (fixP)
-    fixS *fixP;
+    fixS * fixP;
 {
- 
   if (fixP->fx_addsy == NULL)
     return 1;
  
   /* Prevent all adjustments to global symbols. */
   if (S_IS_EXTERN (fixP->fx_addsy))
     return 0;
+  
   if (S_IS_WEAK (fixP->fx_addsy))
     return 0;
+  
   /* Don't adjust function names */
   if (S_IS_FUNCTION (fixP->fx_addsy))
     return 0;
 
   /* We need the symbol name for the VTABLE entries */
-  if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+  if (   fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
- 
+  
   return 1;
 }
  
 int
-v850_force_relocation (fixp)
-      struct fix *fixp;
+v850_force_relocation (fixP)
+      struct fix * fixP;
 {
-  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+  if (fixP->fx_addsy && S_IS_WEAK (fixP->fx_addsy))
+    return 1;
+  
+  if (   fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 1;
  
   return 0;

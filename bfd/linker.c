@@ -1,5 +1,6 @@
 /* linker.c -- BFD linker routines
-   Copyright (C) 1993, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
    Written by Steve Chamberlain and Ian Lance Taylor, Cygnus Support
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -74,7 +75,7 @@ SUBSECTION
 @cindex target vector (_bfd_link_hash_table_create)
 	The linker routines must create a hash table, which must be
 	derived from <<struct bfd_link_hash_table>> described in
-	<<bfdlink.c>>.  @xref{Hash Tables} for information on how to
+	<<bfdlink.c>>.  @xref{Hash Tables}, for information on how to
 	create a derived hash table.  This entry point is called using
 	the target vector of the linker output file.
 
@@ -1748,8 +1749,8 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	case MDEF:
 	  /* Handle a multiple definition.  */
 	  {
-	    asection *msec;
-	    bfd_vma mval;
+	    asection *msec = NULL;
+	    bfd_vma mval = 0;
 
 	    switch (h->type)
 	      {
@@ -2523,7 +2524,9 @@ _bfd_generic_reloc_link_order (abfd, info, sec, link_order)
 	  break;
 	}
       ok = bfd_set_section_contents (abfd, sec, (PTR) buf,
-				     (file_ptr) link_order->offset, size);
+				     (file_ptr) 
+                                     (link_order->offset *
+                                      bfd_octets_per_byte (abfd)), size);
       free (buf);
       if (! ok)
 	return false;
@@ -2591,7 +2594,9 @@ _bfd_default_link_order (abfd, info, sec, link_order)
     case bfd_data_link_order:
       return bfd_set_section_contents (abfd, sec,
 				       (PTR) link_order->u.data.contents,
-				       (file_ptr) link_order->offset,
+				       (file_ptr) 
+                                       (link_order->offset *
+                                        bfd_octets_per_byte (abfd)),
 				       link_order->size);
     }
 }
@@ -2602,7 +2607,7 @@ _bfd_default_link_order (abfd, info, sec, link_order)
 static boolean
 default_fill_link_order (abfd, info, sec, link_order)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      asection *sec;
      struct bfd_link_order *link_order;
 {
@@ -2625,7 +2630,9 @@ default_fill_link_order (abfd, info, sec, link_order)
   for (i = 1; i < size; i += 2)
     space[i] = fill;
   result = bfd_set_section_contents (abfd, sec, space,
-				     (file_ptr) link_order->offset,
+				     (file_ptr) 
+                                     (link_order->offset * 
+                                      bfd_octets_per_byte (abfd)),
 				     link_order->size);
   free (space);
   return result;
@@ -2742,7 +2749,10 @@ default_indirect_link_order (output_bfd, info, output_section, link_order,
   /* Output the section contents.  */
   if (! bfd_set_section_contents (output_bfd, output_section,
 				  (PTR) new_contents,
-				  link_order->offset, link_order->size))
+				  (file_ptr)
+                                  (link_order->offset * 
+                                   bfd_octets_per_byte (output_bfd)), 
+                                  link_order->size))
     goto error_return;
 
   if (contents != NULL)
@@ -2797,8 +2807,8 @@ DESCRIPTION
 
 boolean
 _bfd_generic_link_split_section (abfd, sec)
-     bfd *abfd;
-     asection *sec;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
 {
   return false;
 }

@@ -177,7 +177,9 @@ fr30_cgen_parse_operand (cd, opindex, strp, fields)
      const char ** strp;
      CGEN_FIELDS * fields;
 {
-  const char * errmsg;
+  const char * errmsg = NULL;
+  /* Used by scalar operands that still need to be parsed.  */
+  long junk;
 
   switch (opindex)
     {
@@ -188,13 +190,13 @@ fr30_cgen_parse_operand (cd, opindex, strp, fields)
       errmsg = cgen_parse_keyword (cd, strp, & fr30_cgen_opval_cr_names, & fields->f_CRj);
       break;
     case FR30_OPERAND_R13 :
-      errmsg = cgen_parse_keyword (cd, strp, & fr30_cgen_opval_h_r13, & fields->f_nil);
+      errmsg = cgen_parse_keyword (cd, strp, & fr30_cgen_opval_h_r13, & junk);
       break;
     case FR30_OPERAND_R14 :
-      errmsg = cgen_parse_keyword (cd, strp, & fr30_cgen_opval_h_r14, & fields->f_nil);
+      errmsg = cgen_parse_keyword (cd, strp, & fr30_cgen_opval_h_r14, & junk);
       break;
     case FR30_OPERAND_R15 :
-      errmsg = cgen_parse_keyword (cd, strp, & fr30_cgen_opval_h_r15, & fields->f_nil);
+      errmsg = cgen_parse_keyword (cd, strp, & fr30_cgen_opval_h_r15, & junk);
       break;
     case FR30_OPERAND_RI :
       errmsg = cgen_parse_keyword (cd, strp, & fr30_cgen_opval_gr_names, & fields->f_Ri);
@@ -265,7 +267,7 @@ fr30_cgen_parse_operand (cd, opindex, strp, fields)
       errmsg = cgen_parse_signed_integer (cd, strp, FR30_OPERAND_M4, &fields->f_m4);
       break;
     case FR30_OPERAND_PS :
-      errmsg = cgen_parse_keyword (cd, strp, & fr30_cgen_opval_h_ps, & fields->f_nil);
+      errmsg = cgen_parse_keyword (cd, strp, & fr30_cgen_opval_h_ps, & junk);
       break;
     case FR30_OPERAND_REGLIST_HI_LD :
       errmsg = parse_hi_register_list_ld (cd, strp, FR30_OPERAND_REGLIST_HI_LD, &fields->f_reglist_hi_ld);
@@ -362,9 +364,14 @@ parse_insn_normal (cd, insn, strp, fields)
   p = CGEN_INSN_MNEMONIC (insn);
   while (*p && tolower (*p) == tolower (*str))
     ++p, ++str;
-  
-  if (* p || (* str && !isspace (* str)))
+
+  if (* p)
     return _("unrecognized instruction");
+
+#ifndef CGEN_MNEMONIC_OPERANDS
+  if (* str && !isspace (* str))
+    return _("unrecognized instruction");
+#endif
 
   CGEN_INIT_PARSE (cd);
   cgen_init_parse_operand (cd);
@@ -387,6 +394,10 @@ parse_insn_normal (cd, insn, strp, fields)
       /* Non operand chars must match exactly.  */
       if (CGEN_SYNTAX_CHAR_P (* syn))
 	{
+	  /* FIXME: While we allow for non-GAS callers above, we assume the
+	     first char after the mnemonic part is a space.  */
+	  /* FIXME: We also take inappropriate advantage of the fact that
+	     GAS's input scrubber will remove extraneous blanks.  */
 	  if (*str == CGEN_SYNTAX_CHAR (* syn))
 	    {
 #ifdef CGEN_MNEMONIC_OPERANDS

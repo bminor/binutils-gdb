@@ -60,3 +60,4 @@ int d10v_cleanup PARAMS ((void));
 #define TC_FORCE_RELOCATION(fixp) d10v_force_relocation(fixp)
 extern int d10v_force_relocation PARAMS ((struct fix *));
 
+#define md_flush_pending_output  d10v_cleanup

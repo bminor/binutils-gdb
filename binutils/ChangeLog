@@ -1,3 +1,894 @@
+2000-03-31  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* readelf.c: Include sys/types.h before sys/stat.h for ultrix.
+
+2000-03-27  Nick Clifton  <nickc@cygnus.com>
+
+	* rddbg.c (read_section_stabs_debugging_info): Catch out of range
+	string offsets in corrupt stabs entries.
+
+2000-03-27  Alan Modra  <alan@linuxcare.com>
+
+	* readelf.c: Include elf/avr.h
+	(dump_relocations): Add EM_AVR case.
+
+2000-03-09  Tim Waugh  <twaugh@redhat.com>
+
+	* strings.1: Correct '-bytes' to '--bytes'.
+
+2000-03-08  H.J. Lu  <hjl@gnu.org>
+
+	* Makefile.am (install-exec-local): Depend on
+	install-binPROGRAMS for parallel make.
+	* Makefile.in: Regenerated.
+
+2000-02-27  Ian Lance Taylor  <ian@zembu.com>
+
+	From Brad Lucier <lucier@math.purdue.edu>:
+	* readelf.c (process_dynamic_segment): Add cast to make sure
+	argument to %* is int.
+
+2000-02-25  H.J. Lu  <hjl@gnu.org>
+
+	* configure.in (AC_SEARCH_LIBS): Pass m, not -lm.
+
+2000-02-24  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.in: Add arm-wince, mips-pe and sh-pe targets.
+	* configure: Regenerate.
+
+	* dlltoolc.: Add support for sh-pe and mips-pe targets.
+	* rescoff.c: Add support for sh-pe and mips-pe targets.
+
+2000-02-23  H.J. Lu  <hjl@gnu.org>
+
+	* readelf.c (get_osabi_name): Handle ELFOSABI_LINUX.
+
+2000-02-22  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (process_symbol_table): Remove use of ELF_ST_OTHER.
+
+2000-02-22  Ian Lance Taylor  <ian@zembu.com>
+
+	From Brad Lucier <lucier@math.purdue.edu>:
+	* readelf.c (process_version_sections): Add casts to make sure
+	argument to %* is an int.
+	(process_mips_specific): Add casts to make printf arguments match
+	format.
+
+2000-02-21  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* objdump.c (dump_section_header): Change `opb' to unsigned.
+	(find_symbol_for_address): Same here.
+	(disassemble_data): And here.  Change `addr_offset',
+	`stop_offset', `nextstop_offset' to unsigned long.
+	(dump_data): Change opb to unsigned.
+
+2000-02-18  Frank Ch. Eigler  <fche@redhat.com>
+
+	* resrc.c: Remove unmatched #if for cygwin.
+
+2000-02-14  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* binutils.texi: Document the change of flavor name from atpcs-special
+	to special-atpcs to prevent name conflict in gdb.
+
+2000-02-08  Timothy Wall  <twall@redhat.com>
+
+	* objdump.c (show_line): Fix bug preventing printing of the very
+	first line (line zero) of a file when interlisting source and
+	assembly.  Added option to print entire context from start of file
+	when the first line from that file is encountered.
+
+2000-02-03  Timothy Wall <twall@redhat.com>
+
+	* binutils/objdump.c (dump_section_header, find_symbol_for_address,
+	show_line, disassemble_bytes, disassemble_data, dump_data):
+	distinguish between octets and bytes.
+	
+2000-01-27  Thomas de Lellis  <tdel@windriver.com>
+
+        * nm.c (print_symbol_info_bsd): Use bfd_is_undefined_symclass to
+	check to unresolved symbols.
+        (print_symbol_info_sysv):  Ditto.
+        (print_symbol_info_posix):  Ditto.
+
+        * binutils.texi: Document new 'V' symclass flag for nm.
+
+2000-01-27  Nick Clifton  <nickc@redhat.com>
+
+	* binutils.texi (objdump): Document new ARM specific
+	disassembler options.
+
+	* objdump.c (usage): Call disassembler_usage().
+
+2000-01-27  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* readelf.c (get_dynamic_flags): Return buff.
+	(process_dynamic_segment): Don't pass error strings to printf
+	as format arg.
+	(read_and_display_attr): Use lx and ld to print longs.
+	(process_corefile_note_segment): Cast bfd_vma to unsigned long
+	before printing.
+	Update copyright.
+
+2000-01-17  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (get_osabi_name): Recognise ELFOSABI_ARM.
+
+2000-01-15  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* debug.c (debug_name_type): Return DEBUG_TYPE_NULL rather than
+	false.
+	(debug_tag_type): Here too.
+	* ieee.c (ieee_builtin_type): And here.
+	* stabs.c (parse_stab_type, parse_stab_array_type): And here.
+
+2000-01-13  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (get_machine_name): Change EM_S370 to return "IBM
+	System/370".
+
+2000-01-11  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (get_dynamic_type): Remove DT_ENCODING.
+
+2000-01-10  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (get_note_type): Display NT_WIN32PSTATUS notes.
+
+2000-01-07  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* windres.c (long_options): Add --use-temp-file and 
+	--no-use-temp-file options.
+	(usage): Document.
+	(main): Handle.
+	
+	* windres.h: Update read_rc_file prototype.
+	
+	* resrc.c (cpp_temp_file): New static variable.
+	(istream_type): New static variable.
+	(close_pipe): Delete function.
+	(run_cmd): New static function.
+	(open_input_stream): New static function.
+	(close_input_stream): New static function.
+	(look_for_default): Handle DOS directory separator. Use 
+	open_input_stream instead of popen.
+	(read_rc_file): Likewise.
+	
+	* binutils.texi: Document --use-temp-file, --no-use-temp-file
+	options. 
+
+2000-01-04  Mumit Khan  <khan@xraylith.wisc.edu>
+ 
+	* dlltool.c (create_compat_implib): New variable.
+	(gen_exp_file): Use.
+	(make_one_lib_file): Use.
+	(long_options): Add --compat-implib option.
+	(usage): Handle.
+	(main): Handle.
+
+	* dllwrap.c (enum target_type): Rename MINGW32_TARGET to MINGW_TARGET.
+	(main): Use. Don't look for "32" in cygwin and mingw target names.
+
+2000-01-03  Nick Clifton  <nickc@cygnus.com>
+
+	* binutils.texi: Document new, ARM specific disassembler
+          command line switch "-M force-thumb".
+
+1999-12-28  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c: Update with new constants added by Oct 4, 1999
+	ELF ABI draft.
+	(guess_is_rela): Add new machine codes, but leave
+	rel type undetermined.
+	(get_machine_name): Add new machine codes.
+	(get_section_type_name): Add new section types.
+	(get_elf_section_flags): New funciton: Decode section flags.
+	(process_section_headers): Call get_elf_section_flags() in
+	order to decode flags in section header.
+	(get_dynamic_flags): New function: Decode dynamic section
+	flags.
+	(process_dynamic_section): Display flags (if present).
+	(get_symbol_type): Add STT_COMMON.
+	(get_symbol_visibility): New function: Decode a symbol's
+	visibility.
+	(process_symbol_table): Call get_symbol_visibility().
+	(get_note_type): Add NT_PRXFPREGS.
+
+1999-12-26  Ian Lance Taylor  <ian@zembu.com>
+
+	* strings.c (main): Correct handling of numeric argument.
+
+1999-12-23  Andrew Haley  <aph@cygnus.com>
+
+	* dlltool.c (mtable): mcore how_jtab_roff is 4 bytes into the
+	jtab; was 8.
+
+1999-12-17  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c (mtable): Stop compile time warnings about missing
+	initialisers.
+	(yyerror): Stop compile time warnings about unused paramater.
+	(INIT_SEC_DATA): New macro: initialise an entry in the secdata
+	array.
+	(secdata): Stop ccompile time warnings about uninitialised
+	fields.
+	(dtab): Stop compile time warnings about unused parameter.
+	(long_options): Stop compile time warning about missing
+	initialiser. 
+
+1999-12-10  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (print_vma): Support native 64bit ELF systems.
+
+1999-12-09  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c (mtable): Add epoc-arm specific entry.
+	Make default arm entry pass -mpacs-26 to assembler.
+	(flush_page): Do not mangle null entries.
+	
+1999-12-07  H . J . Lu  hjl@valinux.com
+
+	* readelf.c: Fix compile time warnings.  Support more than 999
+	symbols.
+
+1999-12-03  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (enum print_mode): New type.
+	(print_vma): New function.
+	(dump_relocations): Use print_vma to display bfd_vma values.
+	(process_file_header): Use print_vma to display bfd_vma values.
+	(process_program_headers): Use print_vma to display bfd_vma values.
+	(process_section_headers): Use print_vma to display bfd_vma values.
+	(dynamic_segment_parisc_val): Use print_vma to display bfd_vma values.
+	(process_dynamic_segment): Use print_vma to display bfd_vma values.
+	(process_symbol_table): Use print_vma to display bfd_vma values.
+	(process_mips_specific): Use print_vma to display bfd_vma values.
+
+1999-11-25  Fred Fish  <fnf@cygnus.com>
+
+	* readelf.c (process_note): Change arg from Elf_External_Note
+	to Elf32_Internal_Note, which also turns the function body
+	into little more than a call to printf.
+	(process_corefile_note_segment):  Substantially rewritten
+	to properly handle case where target and host are different
+	endianness, handle note sections with padding, and add some
+	cruft to handle notes with unterminated name data.
+
+1999-11-22  Nick Clifton  <nickc@cygnus.com>
+
+	* objcopy.c (copy_usage): Reformat.
+	(strip_usage): Reformat.
+
+1999-11-21  Nick Clifton  <nickc@cygnus.com>
+
+	* objdump.c (usage): Overhaul output:  One line per switch.
+	Textual description of each switch.  Distinguish between
+	optional switches and required switches.
+	(long_options): Add 'g', 'G' and 'z' short options.
+	(main): Distinguish between optional switches and required
+	switches.
+
+	* binutils.texi: Add -g -G and -z short options for
+	--debugging, --stabs and --disassemble-zeroes.
+
+1999-11-03  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c (flush_page): Clip short values to prevent warnings
+	from the assembler.
+	Change default mcore machine name to 'mcore-le' and rename
+	big-endian version to 'mcore-be'. 
+
+1999-10-27  Fred Fish  <fnf@cygnus.com>
+
+	* objdump.c (display_bfd): Break into two functions.  The
+	actual dumping code moves to dump_bfd.  If bfd is not
+	unambiguously recognized as a bfd_object, attempt to dump
+	it as a bfd_core.
+	(dump_bfd): New function.
+
+1999-10-26  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c (assemble_file): Remove spurious test of exp_name.
+
+1999-10-22  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c (struct mac): Add new field 'how_default_as_switches'.
+	(mtable): Initialise new field.  Some machines have a non empty
+	string for this field.
+	(HOW_BFD_TARGET): Undefine and replace with...
+	(HOW_BFD_READ_TARGET): New macro: bfd target to use when opening a
+	file for reading.  This is set to 0 so that any recognisable bfd
+	format can be read.
+	(HOW_BFD_WRITE_TARGET): New macro: bfd target to use when opening
+	a file for writing.  This is set to the target machine type.
+	(ASM_SWITCHES): New macro: default switches to use when assembling
+	a file.
+	(assemble_file): New function: Assemble a source file into a
+	destination object file.
+	(gen_exp_file): Use assemble_file to create the exp file.
+	(make_one_lib_file): Use assemble_file to create the lib file.
+	Open output file use HOW_BFD_WRITE_TARGET and input files using
+	HOW_BFD_READ_TARGET.
+	(make_head): Use assemble_file to create the head file.
+	(make_tail): Use assemble_file to create the tail file.
+	(gen_lib_file): Open output file use HOW_BFD_WRITE_TARGET.
+
+1999-10-15  Ian Lance Taylor  <ian@zembu.com>
+
+	* ar.c (normalize): Fix full_pathname code.
+
+1999-10-08  Ben Elliston  <bje@cygnus.com>
+
+        * binutils.texi: Some rewording and clarifications.
+
+1999-09-15  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c (dynamic_segment_parisc_val): Print 0 for DLD_FLAGS if
+	the value is zero.
+	(process_symbol_table): Don't print histogram if hash table is empty.
+
+1999-09-15  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c (get_parisc_dynamic_type): Handle DT_HP_GST_* values.
+
+1999-09-02  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c (get_symbol_type): Add support for HPUX and PARISC
+	specific symbol types.
+
+	* readelf.c: Add HPUX and PARISC extensions to dynamic and program
+	header table printing.
+
+	* readelf.c (get_machine_flags): Add handling of PARISC.
+
+1999-09-29  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* dlltool.c (scan_drectve_symbols): Handle type tags in exported
+	symbols.
+	(scan_filtered_symbols): Likewise.
+
+1999-09-19  Ian Lance Taylor  <ian@zembu.com>
+
+	* resrc.c (write_rc_rcdata): Fix local variable shadowing
+	problem.  If RCDATA_BUFFER data can be read as strings, modify
+	code to print the strings as comments.
+	* resres.c: Add casts to avoid warnings.
+	(write_res_data, read_res_data): Don't put the program name in the
+	error message; fatal already puts it there.
+
+1999-09-14  Michael Meissner  <meissner@cygnus.com>
+
+	* configure.in (Canonicalization of target names): Remove adding
+	${CONFIG_SHELL} in front of $ac_config_sub, since autoconfig 2.14
+	generates $ac_config_sub with a ${CONFIG_SHELL} already.
+	* configure: Regenerate.
+
+1999-09-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* ar.c (main): Clear output_file if we don't change the archive.
+	(delete_members, replace_members): Likewise.
+
+1999-09-12  Donn Terry  <donn@interix.com>
+
+	* objdump.c (dump_headers): If wide_output, print Flags header.
+
+	* objdump.c (dump_section_header): Print any comdat information.
+
+	* objcopy.c (parse_flags): Handle "noload", "debug", and "share".
+	* binutils.texi, objcopy.1: Document new flags.
+
+	* ar.c (counted_name_mode): New static variable.
+	(counted_name_counter): New static variable.
+	(map_over_members): Handle counted mode.
+	(usage): Mention N modifier.
+	(main): Handle N modifier.
+	(delete_members): Handle counted mode.
+	* binutils.texi, ar.1: Document N modifier.
+
+	* ar.c (print_contents): Change printing of member name for
+	POSIX.2 conformance.
+
+	* ar.c (output_filename): Make const.
+	(open_inarch): If creating a new empty archive, set
+	output_filename.
+
+1999-09-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* ar.c (full_pathname): New static variable.
+	(map_over_members): Call normalize on command line parameter.
+	(usage): Mention P modifier.
+	(normalize): If full_pathname is true, don't do anything.
+	(main): Accept P modifier.
+	(delete_members): Call normalize on command line parameter.
+	* binutils.texi, ar.1: Document P modifier.
+
+1999-09-09  Andreas Schwab  <schwab@suse.de>
+
+	* binutils.texi: Add info dir entries for all programs described
+	here.  Fix arguments of @var to not contain punctuation.
+
+1999-09-06  Donn Terry  <donn@interix.com>
+
+	* nm.c (print_symbol_info_bsd): Check for 'w' as well as 'U'.
+	(print_symbol_info_sysv): Likewise.
+	(print_symbol_info_posix): Likewise.
+
+1999-09-04  Steve Chamberlain  <sac@pobox.com>
+
+	* readelf.c: Include "elf/pj.h".
+	(dump_relocations): Handle EM_PJ.
+	(get_machine_name): Likewise.
+	(get_machine_flags): Likewise.
+
+1999-08-31  Scott Bambrough <scottb@netwinder.org>
+
+	* readelf.c (get_note_type): New function:  Decode the e_type
+	value of a note.
+	(process_note): New function: Display the contents of a core note.
+	(process_corefile_note_segment): New function.
+	(process_corefile_note_segments): New function.
+	(process_corefile_contents): New function.
+	(process_file): Add call to process_corefile_contents.
+	(parse_args): Add parsing of -n/--notes command line switch.
+	(usage): Document new command line switch.
+
+	* binutils.texi: Documemnt new command line switch to readelf.
+
+1999-08-31  Ian Lance Taylor  <ian@zembu.com>
+
+	* binutils.texi (Bug Reporting): Clarify that large files should
+	not be sent to bug-gnu-utils.
+
+1999-08-28  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* readelf.c (process_extended_line_op): New parameter pointer_size,
+	read the address according to pointer_size.
+	(debug_line_pointer_size): New global to indicate the
+	size of address in .debug_line section.
+	(debug_displays, prescan_debug_info): Prescan the .debug_info section
+	to record the size of address in `debug_line_pointer_size'.
+	(process_section_contents): Before dumping any section, execute
+	the pre-scan operation defined for some debug sections.
+
+1999-08-27  Jim Wilson  <wilson@cygnus.com>
+
+	* readelf.c (display_debug_lines): Use i-1 not i in standard_opcodes
+	access.
+	(display_debug_aranges): New local excess.  Use for calculating padding
+	and add that into ranges.  Break from loop only if length is also 0.
+
+1999-08-27  Jim Wilson  <wilson@cygnus.com>
+
+	* readelf.c (display_debug_lines, case DW_LNS_const_add_pc): Multiply
+	adv by info.li_min_insn_length.
+
+1999-08-26  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* readelf.c (get_sparc64_dynamic_type): New function.
+	(get_dynamic_type): Use it.
+
+1999-08-26  Jim Wilson  <wilson@cygnus.com>
+
+	* readelf.c (display_debug_lines, case default): Change second line
+	setting	adv to use = not +=.
+
+1999-08-19  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c: Added more examples to the comment at the start.
+
+1999-08-18  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c (make_head): Only emit interworking directive if
+	necessary.
+
+Thu Jul 15 22:44:21 1999  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* readelf.c (process_abbrev_section): Handle standard-conforming
+	single zero at the end of the section.
+
+1999-08-09  Ian Lance Taylor  <ian@zembu.com>
+
+	* objdump.c (exit_status): New static variable.
+	(nonfatal): New static function.
+	(disassemble_data): Set exit_status on error.
+	(read_section_stabs): Likewise.
+	(display_bfd): Likewise.  Call nonfatal rather than bfd_nonfatal.
+	(display_file): Call nonfatal rather than bfd_nonfatal.
+	(display_target_list, display_info_table): Likewise.
+	(main): Return exit_status rather than 0.
+
+1999-08-08  Ian Lance Taylor  <ian@zembu.com>
+
+	* objdump.c (dump_section_header): Update for renaming of
+	SEC_SHORT to SEC_SMALL_DATA.  Print SEC_SHARED flag.
+
+	From Eli Zaretskii <eliz@gnu.org>:
+	* binutils.texi: Document cxxfilt as MS-DOS name for c++filt.
+
+	* configure.in: Define and substitute DEMANGLER_NAME.
+	* Makefile.am (DEMANGLER_PROG): Set to cxxfilt.
+	(man_MANS): Use DEMANGLER_NAME rather than DEMANGLER_PROG.
+	(bin_PROGRAMS): Remove $(DEMANGLER_PROG).
+	(noinst_PROGRAMS): Add $(DEMANGLER_PROG).
+	(cxxfilt_SOURCES): Rename from c__filt_SOURCES.
+	(cxxfilt_LDADD): Rename from c__filt_LDADD.
+	($(DEMANGLER_NAME).1): Rename from $(DEMANGLER_PROG).1.  Use
+	DEMANGLER_NAME rather than DEMANGLER_PROG in substitution.
+	(MOSTLYCLEANFILES): Use DEMANGLER_NAME rather than
+	DEMANGLER_PROG.
+	(install-exec-local): When installing noinst_PROGRAMS, change
+	cxxfilt to $(DEMANGLER_NAME).
+	* configure, Makefile.in: Rebuild.
+
+	* Makefile.am: Rename .dep* files to DEP*.  Change DEP variable to
+	MKDEP.
+	* Makefile.in: Rebuild.
+
+1999-08-05  Donn Terry  <donn@interix.com>
+
+	* Makefile.am (YACC): If bison is not in the source tree, use
+	@YACC@ rather than bison -y.
+	(LEX): If flex is not in the source tree, use @LEX@ rather than
+	flex.
+	* configure.in: Build dlltool for i[3-6]86-*-interix.
+	* Makefile.in, configure: Rebuild.
+
+1999-07-21  Ian Lance Taylor  <ian@zembu.com>
+
+	From Mark Elbrecht:
+	* configure.bat: Remove; obsolete.
+
+1999-07-16  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* readelf.c (get_machine_flags): Print EF_SPARC_SUN_US3.
+
+1999-07-15  Ian Lance Taylor  <ian@zembu.com>
+
+	* configure.in: Bump version number to 2.9.5.
+	* configure: Rebuild.
+
+1999-07-14  Richard Henderson  <rth@cygnus.com>
+
+	* objdump.c (dump_section_header): Print SEC_SHORT.
+
+1999-07-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* Many files: Changes to avoid gcc warnings: Add ATTRIBUTE_UNUSED
+	as appropriate.  Add variable initializations.  Add casts.
+	* objdump.c (disassemble_bytes): Change j to bfd_vma.
+	* readelf.c (process_syminfo): Change i to unsigned int.
+	(display_debug_info): Change abbrev_number to unsigned long.
+	(process_mips_specific): Change fcnt to size_t.
+
+1999-07-09  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c: Only support decoding 64bit ELF files if the compiler
+	supports a 64 bit data type.
+	Add -I equivalent for --histogram.
+	Add -A command-line option to display architecture specific information.
+
+1999-07-08  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* readelf.c (guess_is_rela): Sparcv9 and v8plus use rela.
+	(dump_relocations): Use ELF64_R_TYPE_ID for Sparc, for R_SPARC_OLO10
+	print the secondary addend.
+	(get_machine_flags): Print Sparc machine flags.
+	(get_symbol_type): Print STT_REGISTER.
+
+1999-07-08  Ian Lance Taylor  <ian@zembu.com>
+
+	* stabs.c (parse_stab_type): Fix handling of template names with
+	template parameters containing `::'.
+	(stab_demangle_type): Handle a qualified name in a pointer to
+	member.
+
+1999-06-23  Ian Lance Taylor  <ian@zembu.com>
+
+	* Makefile.am (dlltool_SOURCES): Add dyn-string.c.
+	* Makefile.in: Rebuild.
+
+1999-06-23  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* configure.in (HAVE_EXECUTABLE_SUFFIX): Define.
+	* dlltool.c (look_for_prog): Use HAVE_EXECUTABLE_SUFFIX.
+	* dllwrap.c (look_for_prog): Likewise.
+	* resrc.c (look_for_default): Likewise.
+	* configure, config.in: Rebuild.
+
+1999-06-22  Ian Lance Taylor  <ian@zembu.com>
+
+	Based on patches from Mumit Khan <khan@xraylith.wisc.EDU>:
+	* configure.in: Define EXECUTABLE_SUFFIX.
+	* dlltool.c: Include "dyn-string.h".  Include <stdarg.h> based on
+	ANSI_PROTOTYPES, not __STDC__.
+	(outfile): Remove.
+	(gen_exp_file): Change uses of outfile to use alloca.
+	(make_one_lib_file, make_head, make_tail): Likewise.
+	(gen_lib_file): Likewise.
+	(look_for_prog): New static function.
+	(deduce_name): Rewrite to use look_for_prog.
+	(mcore_elf_gen_out_file): Use dyn_string_t rather than outfile.
+	* dllwrap.c: Don't include <stdio.h>, <errno.h>, <string.h>,
+	<stdlib.h>, or <unistd.h>.  Include <sys/stat.h> and either
+	<stdarg.h> or <varargs.h>.
+	(driver_name): Initialize to NULL, not "gcc".
+	(dlltool_name): Initialize to NULL, not "dlltool".
+	(display, inform, look_for_prog, deduce_name): New static
+	functions.
+	(usage): Mention -mno-cygwin.
+	(OPTION_MNO_CYGWIN): Define.
+	(main): Handle -mno-cygwin.  Deduce driver_name and dlltool_name.
+	* resrc.c (look_for_default): Make static.  Remove unused local
+	path.  Check using EXECUTABLE_SUFFIX.
+	(read_rc_file): Allocate enough space to hold EXECUTABLE_SUFFIX.
+	* Makefile.am: Rebuild dependencies.
+	(dllwrap_LDADD): Add $(INTLLIBS).
+	* configure, Makefile.in, config.in: Rebuild.
+
+Mon Jun 21 16:49:11 1999  Jeffrey A Law  (law@cygnus.com)
+
+        * readelf.c (dump_relocations): Use elf_hppa_reloc_type instead of
+        elf32_hppa_reloc_type.
+
+1999-06-17  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c (mcore_elf_gen_out_file): Link object files with the
+	.exp file, not the .lib file.
+
+Fri Jun 18 20:17:51 1999  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* deflex.l: Accept single-character symbol names.
+
+1999-06-16  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (get_symbol_type): Detect ARM symbols typed as Thumb
+	functions.
+
+1999-06-14  Nick Clifton  <nickc@cygnus.com>
+
+	* objdump.c (disassembler_options): New variable.
+	(usage): Document new -M/--disassembler-options option.
+	(long_options): Add --disassembler-options.
+	(disassemble_data): Initialise disassembler_options field of
+	disassembler_info structure.
+	(main): Add parsing of -M option.
+
+	* binutils.texi: Document new command line switch to objdump.
+
+	* NEWS: Describe new command line switch to objdump.
+
+
+Mon Jun 14 10:27:54 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* binutils.texi: Fix typos.
+
+1999-06-13  Ian Lance Taylor  <ian@zembu.com>
+
+	* objdump.c (disassemble_bytes): If the disassembler returns an
+	error, print out anything it may have printed to the buffer.  From
+	H.J. Lu <hjl@gnu.org>.
+
+	* defparse.y (explist): Remove separate expline to eliminate
+	shift/reduce conflict.
+
+	From Kai-Uwe Rommel <rommel@ars.de>:
+	* defparse.y: Add tokens NONSHARED, SINGLE, MULTIPLE,
+	INITINSTANCE, INITGLOBAL, TERMINSTANCE, and TERMGLOBAL.
+	(command): Add option_list after LIBRARY.
+	(attr): Accept and ignore NONSHARED, SINGLE, and MULTIPLE.
+	(option_list, option): New nonterminals.
+	* deflex.l: Recognize NONSHARED, SINGLE, MULTIPLE, INITINSTANCE,
+	INITGLOBAL, TERMINSTANCE, and TERMGLOBAL.
+
+1999-06-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* ar.c (O_BINARY): Define as 0 if not defined.
+	(ranlib_touch): Open file with O_BINARY.
+
+	* rename.c (O_BINARY): Define as 0 if not defined.
+	(simple_copy): Open files with O_BINARY.
+
+	Based on patch from H. Peter Anvin <hpa@transmeta.com>:
+	* objcopy.c (struct section_list): Add copy field.
+	(sections_copied): New static variable.
+	(copy_options): Add "only-section".
+	(copy_usage): Mention -j and --only-section.
+	(find_section_list): Initialize copy field.
+	(is_strip_section): Check for copying sections.
+	(copy_object): Check sections_copied when calling filter_symbols.
+	(setup_section): Check for copying sections.
+	(copy_section): Likewise.
+	(copy_main): Handle -j/--only-section.
+	* binutils.texi, objcopy.1: Document -j/--only-section.
+
+	* configure.in: If frexp is not available, check in -lm.
+	* configure: Rebuild.
+
+	* readelf.c (get_elf_class): Use correct printf format for type.
+	(get_data_encoding): Likewise.
+	(get_osabi_name): Likewise.
+	(process_file_header): Don't pass an extra argument to printf.
+	(process_dynamic_segment): Cast dynamic_size to long before
+	printing.
+	(decode_location_expression): Cast byte_get to long before
+	printing.
+
+Wed Jun  9 11:40:16 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* readelf.c (dump_section): Cast values from byte_get to
+ 	[unsigned] long for printing, in case it is wider than long.
+	(display_block): Likewise.
+	(read_and_display_attr): Likewise.
+	(decode_location_expression): Likewise.  Don't depend on
+ 	evaluation order.
+
+Mon Jun  7 12:14:57 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* windres.c (usage): Fix typo.
+
+1999-06-04  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c: Use 64bit wide fields in internal strcutures even if
+	targetting a 32bit architecture.
+	(dump_relocations): Take a new parameter - the number of symbols
+	in the symbol table.
+
+1999-06-04  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c: Add support for 64bit ELF files.
+
+1999-06-03  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c (mcore_elf_gen_out_file): Use constants for temporary
+	file names.
+
+Wed Jun  2 12:34:36 1999  Richard Henderson  <rth@cygnus.com>
+
+	* dlltool.c (gen_exp_file): Revert 19990411 change.
+
+Mon May 31 09:56:22 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* readelf.c (process_relocs): Determine type of reloc from
+	DT_PLTREL and from section type.
+
+1999-05-29  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (get_elf_class): Display unknown class number.
+	(get_data_encoding): Display unknown encoding number.
+	(get_osabi_name): Display unknown ABI number.
+	(process_file_header): Display unknown version number.
+
+1999-05-29  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (dump_relocations): Fix typo.
+
+1999-05-28  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (dump_relocations): Add extra parameter: is_rela to
+	specify the kind of relocations to be dumped.  Call guess_is_rela
+	if this parameter has a value of UNKNOWN.
+	(guess_is_rela): New function:  Guess the kind of reloc being used
+	baced on the machine number.
+	(process_relocs): Determine type of reloc before calling
+	dump_relocations.
+
+1999-05-28  Ian Lance Taylor  <ian@zembu.com>
+
+	* readelf.c: Include "elf/i960.h".
+	(dump_relocations): Handle EM_960.
+
+Thu May 27 11:58:33 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* objcopy.c (copy_archive): Preserve dates of archive members if
+	requested.
+
+	* readelf.c (dump_relocations): Always print the addend on RELA
+	systems even if there is no symbol.
+	(process_program_headers): Reset dynamic_size before looping
+	through the program headers.
+	(process_version_sections): Cast sh_offset to unsigned long for
+	printing in case bfd_vma is wider.
+	(process_symbol_table): Use get_symbol_index_type when printing
+	st_shndx.
+
+1999-05-17  DJ Delorie  <dj@cygnus.com>
+
+	* windres.c: add verbose option
+	(main): process verbose option
+	* resrc.c (look_for_default): new.  Look for the default
+	preprocessor in a given location.
+	(read_rc_file): for foo/bar-windres, look for foo/bar-gcc,
+	foo/gcc (in case of foo/windres), and then gcc (the old default).
+
+1999-05-16  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c (deduce_name): New function: Deduce name of program to
+	run.
+	(mcore_elf_out_file): New variable: Name of mcore-elf output file.
+	(mcore_elf_linker): New variable: Name of linker to use.
+	(mcore_elf_linker_flags): New variable: Linker flags to pass.
+	(scan_obj_file): Cache filenames if necessary.
+	(usage): Document new command line options.
+	(main): Support new command line options: -M (generate an
+	mcore-elf output file) -L (name of linker to use) -F (flags to
+	pass to linker).
+	(mcore_elf_cache_filename): Store a filename in a cache.
+	(mcore_elf_gen_out_file): New function: Generate an output file
+	per the mcore-elf spec.
+
+1999-05-15  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.in (BUILD_MISC): Build dlltool for mcore
+	* configure: Regenerate.
+	* dlltool.c: Update example in comment.
+	(DLLTOOL_MCORE): Define.
+	(DLLTOOL_MCORE_ELF): Define.
+	(DRECTVE_SECTION_NAME): Define.
+	(mcore_be_jtab, mcore_le_jtab): Binary for performing an mcore
+	jump to address.
+	(mtable): Add entries for mcore variants.
+	(rvaafter, rvabefore, asm_prefix): Add mcore suppport.
+	(scan_drectve_symbols): Use DRECTVE_SECTION_NAME.
+	(make_head, make_tail): Cope if file cannot be created.
+	(usage): Improve layout.
+
+1999-05-13  DJ Delorie  <dj@cygnus.com>
+
+	* rclex.l: add code to suppress certain output from cpp, replace
+	all returns with MAYBE_RETURN
+	(MAYBE_RETURN): new, implement the suppression by returning
+	IGNORED_TOKEN as needed.
+	(cpp_line): remember which file we're in, mark data from included
+	*.h files for suppression.
+	* rcparse.y (input): allow IGNORED_TOKEN outside of known constructs
+
+1999-05-10  DJ Delorie  <dj@cygnus.com>
+
+	* windres.c (quot): Quote shell metacharacters in a string
+	(main): quote parameters to cpp that might have metacharacters in
+	them.  Allow -D as an alias for --define to allow for sharing make
+	macros with gcc.
+
+	* objdump.c (dump_reloc_set): don't core if howto->name is NULL
+
+	* Makefile.am: Give rescoff.c a cpu-specific -D so it can set
+	the correct BFD.
+	* Makefile.in: ditto
+	* rescoff.c (write_coff_file): Set the correct BFD
+
+1999-05-06  Ian Lance Taylor  <ian@zembu.com>
+
+	* rename.c (smart_rename): Fix test of whether file exists.
+
+1999-05-06  Nick Clifton  <nickc@cygnus.com>
+
+	* objdump.c (disassemble_data): Set display_endian based on target
+	endianism.
+
+1999-05-05  Catherine Moore  <clm@cygnus.com>
+
+	* dlltool.c (interwork): Remove.
+	(arm_interwork_jtab): Use bx insn.
+	(thumb_jtab): Likewise.
+	(MARM_INTERWORK): New machine type.
+	(rvaafter): Handle it.
+	(rvabefore) Likewise.
+	(asm_prefix): Likewise.
+	(gen_exp_type): Check machine type instead of
+	interwork flag.
+	(make_one_lib_file): Likewise.
+	(make_head): Likewise.
+	(make_tail): Likewise.
+	(usage): Update machine types.
+	(main): Remove -interwork support.
+
+1999-05-05  Catherine Moore  <clm@cygnus.com>
+
+        * readelf.c (get_machine_flags):  Check for EF_CPU32.
+        (get_data_encoding): Fix typo.
+
 1999-04-26  Tom Tromey  <tromey@cygnus.com>
 
 	* aclocal.m4, configure: Updated for new version of libtool.
@@ -63,7 +954,7 @@ Tue Apr 13 21:22:00 1999  Catherine Moore  <clm@cygnus.com>
 1999-04-05  Nick Clifton  <nickc@cygnus.com>
 
 	* readelf.c (decode_location_expression): Fix DW_OP_const8{s|u}
-	decodes. 
+	decodes.
 
 1999-04-04  Ian Lance Taylor  <ian@zembu.com>
 

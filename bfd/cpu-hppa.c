@@ -54,6 +54,23 @@ static const bfd_arch_info_type bfd_hppa20_arch =
   &bfd_hppa10_arch,
 };
 
+/* PA2.0 in wide mode */
+static const bfd_arch_info_type bfd_hppa20w_arch =
+{
+  64,				/* 32 bits in a word */
+  64,				/* 32 bits in an address */
+  8,				/* 8 bits in a byte */
+  bfd_arch_hppa,
+  25,				/* ??? How best to describe wide mode here?  */
+  "hppa",
+  "hppa2.0w",
+  3,
+  false,			/* Unless we use 1.1 specific features */
+  bfd_default_compatible, 
+  bfd_default_scan ,
+  &bfd_hppa20_arch,
+};
+
 const bfd_arch_info_type bfd_hppa_arch =
 {
   32,				/* 32 bits in a word */
@@ -67,5 +84,5 @@ const bfd_arch_info_type bfd_hppa_arch =
   false,			/* 1.1 specific features used */
   bfd_default_compatible, 
   bfd_default_scan ,
-  &bfd_hppa20_arch,
+  &bfd_hppa20w_arch,
 };

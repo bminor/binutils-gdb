@@ -8,6 +8,7 @@
 #	OTHER_TEXT_SECTIONS - these get put in .text when relocating
 #	OTHER_READWRITE_SECTIONS - other than .data .bss .ctors .sdata ...
 #		(e.g., .PARISC.global)
+#	OTHER_BSS_SECTIONS - other than .bss .sbss ...
 #	OTHER_SECTIONS - at the end
 #	EXECUTABLE_SYMBOLS - symbols that must be defined for an
 #		executable (e.g., _DYNAMIC_LINK)
@@ -25,6 +26,11 @@
 #	SHLIB_TEXT_START_ADDR - if set, add to SIZEOF_HEADERS to set
 #		start address of shared library.
 #	INPUT_FILES - INPUT command of files to always include
+#	WRITABLE_RODATA - if set, the .rodata section should be writable
+#	INIT_START, INIT_END -  statements just before and just after
+# 	combination of .init sections.
+#	FINI_START, FINI_END - statements just before and just after
+# 	combination of .fini sections.
 #
 # When adding sections, do note that the names of some sections are used
 # when specifying the start address of the next.
@@ -40,7 +46,7 @@ test "$LD_FLAG" = "N" && DATA_ADDR=.
 INTERP=".interp   ${RELOCATING-0} : { *(.interp) 	}"
 PLT=".plt    ${RELOCATING-0} : { *(.plt)	}"
 DYNAMIC=".dynamic     ${RELOCATING-0} : { *(.dynamic) }"
-
+RODATA=".rodata ${RELOCATING-0} : { *(.rodata) ${RELOCATING+*(.rodata.*)} ${RELOCATING+*(.gnu.linkonce.r*)} }"
 CTOR=".ctors ${CONSTRUCTING-0} : 
   {
     ${CONSTRUCTING+${CTOR_START}}
@@ -61,7 +67,7 @@ CTOR=".ctors ${CONSTRUCTING-0} :
        The .ctor section from the crtend file contains the
        end of ctors marker and it must be last */
 
-    KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
+    KEEP (*(EXCLUDE_FILE (*crtend.o $OTHER_EXCLUDE_FILES) .ctors))
     KEEP (*(SORT(.ctors.*)))
     KEEP (*(.ctors))
     ${CONSTRUCTING+${CTOR_END}}
@@ -71,7 +77,7 @@ DTOR=" .dtors       ${CONSTRUCTING-0} :
   {
     ${CONSTRUCTING+${DTOR_START}}
     KEEP (*crtbegin.o(.dtors))
-    KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
+    KEEP (*(EXCLUDE_FILE (*crtend.o $OTHER_EXCLUDE_FILES) .dtors))
     KEEP (*(SORT(.dtors.*)))
     KEEP (*(.dtors))
     ${CONSTRUCTING+${DTOR_END}}
@@ -114,6 +120,9 @@ SECTIONS
   .gnu.version ${RELOCATING-0} : { *(.gnu.version)	}
   .gnu.version_d ${RELOCATING-0} : { *(.gnu.version_d)	}
   .gnu.version_r ${RELOCATING-0} : { *(.gnu.version_r)	}
+
+  .rel.init    ${RELOCATING-0} : { *(.rel.init)	}
+  .rela.init   ${RELOCATING-0} : { *(.rela.init)	}
   .rel.text    ${RELOCATING-0} :
     {
       *(.rel.text)
@@ -126,18 +135,8 @@ SECTIONS
       ${RELOCATING+*(.rela.text.*)}
       ${RELOCATING+*(.rela.gnu.linkonce.t*)}
     }
-  .rel.data    ${RELOCATING-0} :
-    {
-      *(.rel.data)
-      ${RELOCATING+*(.rel.data.*)}
-      ${RELOCATING+*(.rel.gnu.linkonce.d*)}
-    }
-  .rela.data   ${RELOCATING-0} :
-    {
-      *(.rela.data)
-      ${RELOCATING+*(.rela.data.*)}
-      ${RELOCATING+*(.rela.gnu.linkonce.d*)}
-    }
+  .rel.fini    ${RELOCATING-0} : { *(.rel.fini)	}
+  .rela.fini   ${RELOCATING-0} : { *(.rela.fini)	}
   .rel.rodata  ${RELOCATING-0} :
     {
       *(.rel.rodata)
@@ -150,21 +149,53 @@ SECTIONS
       ${RELOCATING+*(.rela.rodata.*)}
       ${RELOCATING+*(.rela.gnu.linkonce.r*)}
     }
-  .rel.got     ${RELOCATING-0} : { *(.rel.got)		}
-  .rela.got    ${RELOCATING-0} : { *(.rela.got)		}
+  ${OTHER_READONLY_RELOC_SECTIONS}
+  .rel.data    ${RELOCATING-0} :
+    {
+      *(.rel.data)
+      ${RELOCATING+*(.rel.data.*)}
+      ${RELOCATING+*(.rel.gnu.linkonce.d*)}
+    }
+  .rela.data   ${RELOCATING-0} :
+    {
+      *(.rela.data)
+      ${RELOCATING+*(.rela.data.*)}
+      ${RELOCATING+*(.rela.gnu.linkonce.d*)}
+    }
   .rel.ctors   ${RELOCATING-0} : { *(.rel.ctors)	}
   .rela.ctors  ${RELOCATING-0} : { *(.rela.ctors)	}
   .rel.dtors   ${RELOCATING-0} : { *(.rel.dtors)	}
   .rela.dtors  ${RELOCATING-0} : { *(.rela.dtors)	}
-  .rel.init    ${RELOCATING-0} : { *(.rel.init)	}
-  .rela.init   ${RELOCATING-0} : { *(.rela.init)	}
-  .rel.fini    ${RELOCATING-0} : { *(.rel.fini)	}
-  .rela.fini   ${RELOCATING-0} : { *(.rela.fini)	}
+  .rel.got     ${RELOCATING-0} : { *(.rel.got)		}
+  .rela.got    ${RELOCATING-0} : { *(.rela.got)		}
+  ${OTHER_GOT_RELOC_SECTIONS}
+  .rel.sdata   ${RELOCATING-0} :
+    {
+      *(.rel.sdata)
+      ${RELOCATING+*(.rel.sdata.*)}
+      ${RELOCATING+*(.rel.gnu.linkonce.s*)}
+    }
+  .rela.sdata   ${RELOCATING-0} :
+    {
+      *(.rela.sdata)
+      ${RELOCATING+*(.rela.sdata.*)}
+      ${RELOCATING+*(.rela.gnu.linkonce.s*)}
+    }
+  .rel.sbss    ${RELOCATING-0} : { *(.rel.sbss)		}
+  .rela.sbss   ${RELOCATING-0} : { *(.rela.sbss)	}
   .rel.bss     ${RELOCATING-0} : { *(.rel.bss)		}
   .rela.bss    ${RELOCATING-0} : { *(.rela.bss)		}
   .rel.plt     ${RELOCATING-0} : { *(.rel.plt)		}
   .rela.plt    ${RELOCATING-0} : { *(.rela.plt)		}
-  .init        ${RELOCATING-0} : { KEEP (*(.init))	} =${NOP-0}
+  ${OTHER_PLT_RELOC_SECTIONS}
+
+  .init        ${RELOCATING-0} : 
+  { 
+    ${INIT_START}
+    KEEP (*(.init))
+    ${INIT_END}
+  } =${NOP-0}
+
   ${DATA_PLT-${PLT}}
   .text    ${RELOCATING-0} :
   {
@@ -179,13 +210,13 @@ SECTIONS
   } =${NOP-0}
   ${RELOCATING+_etext = .;}
   ${RELOCATING+PROVIDE (etext = .);}
-  .fini    ${RELOCATING-0} : { KEEP (*(.fini))		} =${NOP-0}
-  .rodata  ${RELOCATING-0} :
+  .fini    ${RELOCATING-0} :
   {
-    *(.rodata)
-    ${RELOCATING+*(.rodata.*)}
-    ${RELOCATING+*(.gnu.linkonce.r*)}
-  }
+    ${FINI_START}
+    KEEP (*(.fini))
+    ${FINI_END}
+  } =${NOP-0}
+  ${WRITABLE_RODATA-${RODATA}}
   .rodata1 ${RELOCATING-0} : { *(.rodata1) }
   ${RELOCATING+${OTHER_READONLY_SECTIONS}}
 
@@ -205,6 +236,7 @@ SECTIONS
   .data1 ${RELOCATING-0} : { *(.data1) }
   .eh_frame : { *(.eh_frame) }
   .gcc_except_table : { *(.gcc_except_table) }
+  ${WRITABLE_RODATA+${RODATA}}
   ${RELOCATING+${OTHER_READWRITE_SECTIONS}}
   ${RELOCATING+${CTOR}}
   ${RELOCATING+${DTOR}}
@@ -215,25 +247,39 @@ SECTIONS
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
-  .sdata   ${RELOCATING-0} : { *(.sdata) *(.sdata.*) }
+  .sdata   ${RELOCATING-0} : 
+  {
+    ${RELOCATING+${SDATA_START_SYMBOLS}}
+    *(.sdata) 
+    ${RELOCATING+*(.sdata.*)}
+    ${RELOCATING+*(.gnu.linkonce.s.*)}
+  }
   ${RELOCATING+${OTHER_GOT_SECTIONS}}
-  ${RELOCATING+_edata  =  .;}
+  ${RELOCATING+_edata = .;}
   ${RELOCATING+PROVIDE (edata = .);}
   ${RELOCATING+__bss_start = .;}
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
-  .sbss    ${RELOCATING-0} : { *(.sbss) *(.scommon) }
+  .sbss    ${RELOCATING-0} :
+  {
+    *(.dynsbss)
+    *(.sbss)
+    ${RELOCATING+*(.sbss.*)}
+    *(.scommon)
+  }
   .bss     ${RELOCATING-0} :
   {
    *(.dynbss)
    *(.bss)
+   ${RELOCATING+*(.bss.*)}
    *(COMMON)
    /* Align here to ensure that the .bss section occupies space up to
       _end.  Align after .bss to ensure correct alignment even if the
       .bss section disappears because there are no input sections.  */
    ${RELOCATING+. = ALIGN(${ALIGNMENT});}
   }
+  ${RELOCATING+${OTHER_BSS_SECTIONS}}
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
-  ${RELOCATING+_end = . ;}
+  ${RELOCATING+_end = .;}
   ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
   ${RELOCATING+PROVIDE (end = .);}
 

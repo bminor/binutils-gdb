@@ -6,7 +6,7 @@ SUBDIRS = po
 
 INCDIR = $(srcdir)/../include
 BFDDIR = $(srcdir)/../bfd
-DEP = mkdep
+MKDEP = mkdep
 
 lib_LTLIBRARIES = libopcodes.la
 
@@ -30,7 +30,10 @@ CFILES = \
 	a29k-dis.c \
 	alpha-dis.c \
 	alpha-opc.c \
+	arc-dis.c \
+	arc-opc.c \
 	arm-dis.c \
+	avr-dis.c \
 	cgen-asm.c \
 	cgen-dis.c \
 	cgen-opc.c \
@@ -48,6 +51,8 @@ CFILES = \
 	h8300-dis.c \
 	h8500-dis.c \
 	hppa-dis.c \
+	i370-dis.c \
+	i370-opc.c \
 	i386-dis.c \
 	i960-dis.c \
 	m32r-asm.c \
@@ -68,6 +73,8 @@ CFILES = \
 	m10300-dis.c \
 	m10300-opc.c \
 	ns32k-dis.c \
+	pj-dis.c \
+	pj-opc.c \
 	ppc-dis.c \
 	ppc-opc.c \
 	sh-dis.c \
@@ -76,6 +83,8 @@ CFILES = \
 	tic30-dis.c \
 	tic80-dis.c \
 	tic80-opc.c \
+	v850-dis.c \
+	v850-opc.c \
 	vax-dis.c \
 	w65-dis.c \
 	z8k-dis.c \
@@ -88,6 +97,7 @@ ALL_MACHINES = \
 	arc-dis.lo \
 	arc-opc.lo \
 	arm-dis.lo \
+	avr-dis.lo \
 	cgen-asm.lo \
 	cgen-dis.lo \
 	cgen-opc.lo \
@@ -104,6 +114,8 @@ ALL_MACHINES = \
 	h8500-dis.lo \
 	hppa-dis.lo \
 	i386-dis.lo \
+	i370-dis.lo \
+	i370-opc.lo \
 	i960-dis.lo \
 	m32r-asm.lo \
 	m32r-desc.lo \
@@ -122,6 +134,8 @@ ALL_MACHINES = \
 	mips-dis.lo \
 	mips-opc.lo \
 	mips16-opc.lo \
+	pj-dis.lo \
+	pj-opc.lo \
 	ppc-dis.lo \
 	ppc-opc.lo \
 	ns32k-dis.lo \
@@ -157,8 +171,9 @@ libopcodes_la_LDFLAGS = -release $(VERSION) @WIN32LDFLAGS@
 noinst_LIBRARIES = libopcodes.a
 
 stamp-lib: libopcodes.la
-	if [ -f .libs/libopcodes.a ]; then \
-	  cp .libs/libopcodes.a libopcodes.tmp; \
+	libtooldir=`$(LIBTOOL) --config | sed -n -e 's/^objdir=//p'`; \
+	if [ -f $$libtooldir/libopcodes.a ]; then \
+	  cp $$libtooldir/libopcodes.a libopcodes.tmp; \
 	  $(SHELL) $(srcdir)/../move-if-change libopcodes.tmp libopcodes.a; \
 	else true; fi
 	touch stamp-lib
@@ -176,7 +191,7 @@ config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 	$(SHELL) ./config.status --recheck
 
 CLEANFILES = \
-	libopcodes.a stamp-lib dep.sed .dep .dep1
+	libopcodes.a stamp-lib dep.sed DEP DEP1
 
 
 
@@ -187,19 +202,19 @@ CLEANFILES = \
 
 # This dependency stuff is copied from BFD.
 
-.dep: dep.sed $(CFILES) $(HFILES) config.h
-	rm -f .dep1
-	$(MAKE) DEP=$(DEP) .dep1
-	sed -f dep.sed < .dep1 > .dep
+DEP: dep.sed $(CFILES) $(HFILES) config.h
+	rm -f DEP1
+	$(MAKE) MKDEP=$(MKDEP) DEP1
+	sed -f dep.sed < DEP1 > DEP
 
-.dep1: $(CFILES)
-	rm -f .dep2 .dep2a
-	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep2
-	echo > .dep2a
-	$(DEP) -f .dep2a $(INCLUDES) $(CFLAGS) $?
-	sed -e '/DO NOT DELETE/d' -e '/^$$/d' < .dep2a >> .dep2
-	rm -f .dep2a
-	$(srcdir)/../move-if-change .dep2 .dep1
+DEP1: $(CFILES)
+	rm -f DEP2 DEP2a
+	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP2
+	echo > DEP2a
+	$(MKDEP) -f DEP2a $(INCLUDES) $(CFLAGS) $?
+	sed -e '/DO NOT DELETE/d' -e '/^$$/d' < DEP2a >> DEP2
+	rm -f DEP2a
+	$(srcdir)/../move-if-change DEP2 DEP1
 
 dep.sed: dep-in.sed config.status
 	sed <$(srcdir)/dep-in.sed >dep.sed	\
@@ -208,19 +223,19 @@ dep.sed: dep-in.sed config.status
 		-e 's!@BFDDIR@!$(BFDDIR)!'	\
 		-e 's!@SRCDIR@!$(srcdir)!'
 
-dep: .dep
+dep: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
-	cat .dep >> tmp-Makefile
+	cat DEP >> tmp-Makefile
 	$(srcdir)/../move-if-change tmp-Makefile Makefile
 
-dep-in: .dep
+dep-in: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.in > tmp-Makefile.in
-	cat .dep >> tmp-Makefile.in
+	cat DEP >> tmp-Makefile.in
 	$(srcdir)/../move-if-change tmp-Makefile.in $(srcdir)/Makefile.in
 
-dep-am: .dep
+dep-am: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.am > tmp-Makefile.am
-	cat .dep >> tmp-Makefile.am
+	cat DEP >> tmp-Makefile.am
 	$(srcdir)/../move-if-change tmp-Makefile.am $(srcdir)/Makefile.am
 
 .PHONY: dep dep-in dep-am
@@ -235,6 +250,13 @@ alpha-dis.lo: alpha-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/alpha.h
 alpha-opc.lo: alpha-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/alpha.h \
   $(BFD_H) opintl.h
+arc-dis.lo: arc-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/opcode/arc.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h \
+  opintl.h
+arc-opc.lo: arc-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/arc.h \
+  opintl.h
 arm-dis.lo: arm-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h arm-opc.h $(INCDIR)/coff/internal.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h opintl.h $(BFDDIR)/elf-bfd.h \
@@ -323,6 +345,9 @@ m10300-opc.lo: m10300-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mn10300.h
 ns32k-dis.lo: ns32k-dis.c $(BFD_H) $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/dis-asm.h $(INCDIR)/opcode/ns32k.h \
   opintl.h
+pj-dis.lo: pj-dis.c $(INCDIR)/opcode/pj.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h
+pj-opc.lo: pj-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/pj.h
 ppc-dis.lo: ppc-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/ppc.h
 ppc-opc.lo: ppc-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/ppc.h \
@@ -333,11 +358,15 @@ sparc-dis.lo: sparc-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/opcode/sparc.h $(INCDIR)/dis-asm.h \
   $(BFD_H) $(INCDIR)/libiberty.h opintl.h
 sparc-opc.lo: sparc-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/sparc.h
-tic30-dis.lo: tic30-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/opcode/tic30.h
+tic30-dis.lo: tic30-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/opcode/tic30.h
 tic80-dis.lo: tic80-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/tic80.h \
   $(INCDIR)/dis-asm.h $(BFD_H)
 tic80-opc.lo: tic80-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/tic80.h
+v850-dis.lo: v850-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/v850.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) opintl.h
+v850-opc.lo: v850-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/v850.h \
+  opintl.h
 vax-dis.lo: vax-dis.c $(INCDIR)/opcode/vax.h $(INCDIR)/dis-asm.h \
   $(BFD_H) $(INCDIR)/ansidecl.h
 w65-dis.lo: w65-dis.c w65-opc.h $(INCDIR)/dis-asm.h \

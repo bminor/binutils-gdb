@@ -35,6 +35,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define CGEN_INSN_LSB0_P 0
 
+/* Minimum size of any insn (in bytes).  */
+#define CGEN_MIN_INSN_SIZE 2
+
 /* Maximum size of any insn (in bytes).  */
 #define CGEN_MAX_INSN_SIZE 6
 
@@ -46,6 +49,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
    e.g. In "b,a foo" the ",a" is an operand.  If mnemonics have operands
    we can't hash on everything up to the space.  */
 #define CGEN_MNEMONIC_OPERANDS
+
 /* Maximum number of operands any insn or macro-insn has.  */
 #define CGEN_MAX_INSN_OPERANDS 16
 

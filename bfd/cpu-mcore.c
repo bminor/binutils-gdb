@@ -1,4 +1,4 @@
-/* BFD library support routines for Motorolla's MCore architecture
+/* BFD library support routines for Motorola's MCore architecture
    Copyright (C) 1993, 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"

@@ -123,7 +123,7 @@ static void
 find_address_in_section (abfd, section, data)
      bfd *abfd;
      asection *section;
-     PTR data;
+     PTR data ATTRIBUTE_UNUSED;
 {
   bfd_vma vma;
   bfd_size_type size;

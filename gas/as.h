@@ -1,5 +1,5 @@
 /* as.h - global header file
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -417,15 +417,15 @@ COMMON int flag_keep_locals; /* -L */
 /* True if we are assembling in MRI mode.  */
 COMMON int flag_mri;
 
-/* True if we are assembling in m68k MRI mode.  */
-COMMON int flag_m68k_mri;
-
 /* Should the data section be made read-only and appended to the text
    section?  */
 COMMON unsigned char flag_readonly_data_in_text; /* -R */
 
 /* True if warnings should be inhibited.  */
 COMMON int flag_no_warnings; /* -W */
+
+/* True if warnings count as errors.  */
+COMMON int flag_fatal_warnings; /* --fatal-warnings */
 
 /* True if we should attempt to generate output even if non-fatal errors
    are detected.  */
@@ -457,7 +457,7 @@ COMMON int linkrelax;
 extern int listing;
 
 /* Type of debugging information we should generate.  We currently
-   only support stabs and ECOFF.  */
+   support stabs, ECOFF, and DWARF2.  */
 
 enum debug_info_type
   {
@@ -557,9 +557,11 @@ void print_version_id PARAMS ((void));
 char *app_push PARAMS ((void));
 char *atof_ieee PARAMS ((char *str, int what_kind, LITTLENUM_TYPE * words));
 char *input_scrub_include_file PARAMS ((char *filename, char *position));
+extern void input_scrub_insert_line PARAMS((const char *line));
+extern void input_scrub_insert_file PARAMS((char *path));
 char *input_scrub_new_file PARAMS ((char *filename));
 char *input_scrub_next_buffer PARAMS ((char **bufp));
-int do_scrub_chars PARAMS ((int (*get) (char **), char *to, int tolen));
+int do_scrub_chars PARAMS ((int (*get) (char *, int), char *to, int tolen));
 int gen_to_words PARAMS ((LITTLENUM_TYPE * words, int precision,
 			  long exponent_bits));
 int had_err PARAMS ((void));
@@ -585,6 +587,7 @@ void subseg_set PARAMS ((segT seg, subsegT subseg));
 #ifdef BFD_ASSEMBLER
 segT subseg_get PARAMS ((const char *, int));
 #endif
+int subseg_text_p PARAMS ((segT));
 
 void start_dependencies PARAMS ((char *));
 void register_dependency PARAMS ((char *));
@@ -592,13 +595,13 @@ void print_dependencies PARAMS ((void));
 
 struct expressionS;
 struct fix;
-struct symbol;
+typedef struct symbol symbolS;
 struct relax_type;
 typedef struct frag fragS;
 
 #ifdef BFD_ASSEMBLER
 /* literal.c */
-valueT add_to_literal_pool PARAMS ((struct symbol *, valueT, segT, int));
+valueT add_to_literal_pool PARAMS ((symbolS *, valueT, segT, int));
 #endif
 
 int check_eh_frame PARAMS ((struct expressionS *, unsigned int *));
@@ -611,7 +614,6 @@ void eh_frame_convert_frag PARAMS ((fragS *));
 /* this one starts the chain of target dependant headers */
 #include "targ-env.h"
 
-#include "struc-symbol.h"
 #include "write.h"
 #include "frags.h"
 #include "hash.h"
@@ -626,6 +628,17 @@ void eh_frame_convert_frag PARAMS ((fragS *));
 #endif
 #include "listing.h"
 
+#ifdef TC_M68K
+/* True if we are assembling in m68k MRI mode.  */
+COMMON int flag_m68k_mri;
+#else
+#define flag_m68k_mri 0
+#endif
+
+#ifndef NUMBERS_WITH_SUFFIX
+#define NUMBERS_WITH_SUFFIX 0
+#endif
+
 #ifndef LOCAL_LABELS_DOLLAR
 #define LOCAL_LABELS_DOLLAR 0
 #endif
@@ -634,10 +647,28 @@ void eh_frame_convert_frag PARAMS ((fragS *));
 #define LOCAL_LABELS_FB 0
 #endif
 
+#ifndef LABELS_WITHOUT_COLONS
+#define LABELS_WITHOUT_COLONS 0
+#endif
+
+#ifndef NO_PSEUDO_DOT
+#define NO_PSEUDO_DOT 0
+#endif
+
 #ifndef TEXT_SECTION_NAME
 #define TEXT_SECTION_NAME	".text"
 #define DATA_SECTION_NAME	".data"
 #define BSS_SECTION_NAME	".bss"
+#endif
+
+#ifndef OCTETS_PER_BYTE_POWER
+#define OCTETS_PER_BYTE_POWER 0
+#endif
+#ifndef OCTETS_PER_BYTE
+#define OCTETS_PER_BYTE (1<<OCTETS_PER_BYTE_POWER)
+#endif
+#if OCTETS_PER_BYTE != (1<<OCTETS_PER_BYTE_POWER)
+ #error "Octets per byte conflicts with its power-of-two definition!"
 #endif
 
 #endif /* GAS */

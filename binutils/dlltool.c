@@ -1,5 +1,5 @@
 /* dlltool.c -- tool to generate stuff for PE style DLLs
-   Copyright (C) 1995, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1995, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -121,16 +121,16 @@
      printf ("hello from the dll and the other entry point %s\n", s);
    }
 
-   printf()
+   int printf (void)
    {
      return 9;
    }
 
- main.c
-
-   void main()
+ themain.c:
+   int main (void)
    {
-     cdef();
+     cdef ();
+     return 0;
    }
 
  thedll.def
@@ -143,29 +143,54 @@
    SECTIONS donkey READ WRITE
    aardvark EXECUTE
 
- # compile up the parts of the dll
+ # Compile up the parts of the dll and the program
 
-   gcc -c file1.c
-   gcc -c file2.c
+   gcc -c file1.c file2.c themain.c
 
- # put them in a library (you don't have to, you
- # could name all the .os on the dlltool line)
+ # Optional: put the dll objects into a library
+ # (you don't have to, you could name all the object
+ # files on the dlltool line)
 
    ar  qcv thedll.in file1.o file2.o
    ranlib thedll.in
 
- # run this tool over the library and the def file
-   ./dlltool --def thedll.def --output-exp thedll.o --output-lib thedll.a
+ # Run this tool over the DLL's .def file and generate an exports
+ # file (thedll.o) and an imports file (thedll.a).
+ # (You may have to use -S to tell dlltool where to find the assembler).
+ 
+   dlltool --def thedll.def --output-exp thedll.o --output-lib thedll.a
 
- # build the dll with the library with file1.o, file2.o and the export table
+ # Build the dll with the library and the export table
+ 
    ld -o thedll.dll thedll.o thedll.in
 
- # build the mainline
-   gcc -c themain.c
+ # Link the executable with the import library
+ 
+   gcc -o themain.exe themain.o thedll.a
 
- # link the executable with the import library
-   ld -e main -Tthemain.ld -o themain.exe themain.o thedll.a
+ This example can be extended if relocations are needed in the DLL:
 
+ # Compile up the parts of the dll and the program
+
+   gcc -c file1.c file2.c themain.c
+
+ # Run this tool over the DLL's .def file and generate an imports file.
+ 
+   dlltool --def thedll.def --output-lib thedll.lib
+
+ # Link the executable with the import library and generate a base file
+ # at the same time
+ 
+   gcc -o themain.exe themain.o thedll.lib -Wl,--base-file -Wl,themain.base
+
+ # Run this tool over the DLL's .def file and generate an exports file
+ # which includes the relocations from the base file.
+ 
+   dlltool --def thedll.def --base-file themain.base --output-exp thedll.exp
+
+ # Build the dll with file1.o, file2.o and the export table
+ 
+   ld -o thedll.dll thedll.exp file1.o file2.o
  */
 
 /* .idata section description
@@ -221,11 +246,14 @@
 #include "bucomm.h"
 #include "getopt.h"
 #include "demangle.h"
+#include "dyn-string.h"
 #include "dlltool.h"
 
 #include <ctype.h>
 #include <time.h>
-#ifdef __STDC__
+#include <sys/stat.h>
+
+#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -236,6 +264,15 @@
 #include "coff/internal.h"
 #endif
 
+/* Forward references.  */
+static char *look_for_prog PARAMS ((const char *, const char *, int));
+static char *deduce_name PARAMS ((const char *));
+
+#ifdef DLLTOOL_MCORE_ELF
+static void mcore_elf_cache_filename (char *);
+static void mcore_elf_gen_out_file (void);
+#endif
+     
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #else /* ! HAVE_SYS_WAIT_H */
@@ -304,7 +341,7 @@ typedef struct iheadt
 
 static iheadtype *import_list = NULL;
 
-static char *as_name = "as";
+static char *as_name = NULL;
 static char * as_flags = "";
 
 static int no_idata4;
@@ -319,10 +356,6 @@ static int add_indirect = 0;
 static int add_underscore = 0;
 static int dontdeltemps = 0;
 
-#ifdef DLLTOOL_ARM
-static int interwork = 0;
-#endif 
-
 /* True if we should export all symbols.  Otherwise, we only export
    symbols listed in .drectve sections or in the def file.  */
 static boolean export_all_symbols;
@@ -334,6 +367,10 @@ static boolean do_default_excludes;
 /* Default symbols to exclude when exporting all the symbols.  */
 static const char *default_excludes = "DllMain@12,DllEntryPoint@0,impure_ptr";
 
+/* True if we should add __imp_<SYMBOL> to import libraries for backward 
+   compatibility to old Cygwin releases.  */
+static boolean create_compat_implib;
+
 static char *def_file;
 
 extern char * program_name;
@@ -344,10 +381,6 @@ static int add_stdcall_alias;
 static int verbose;
 static FILE *output_def;
 static FILE *base_file;
-
-#ifdef DLLTOOL_BEOS
-static const char *mname = "beos";
-#endif
 
 #ifdef DLLTOOL_ARM
 static const char *mname = "arm";
@@ -361,6 +394,31 @@ static const char *mname = "i386";
 static const char *mname = "ppc";
 #endif
 
+#ifdef DLLTOOL_SH
+static const char *mname = "sh";
+#endif
+
+#ifdef DLLTOOL_MIPS
+static const char *mname = "mips";
+#endif
+
+#ifdef DLLTOOL_MCORE
+static const char * mname = "mcore-le";
+#endif
+
+#ifdef DLLTOOL_MCORE_ELF
+static const char * mname = "mcore-elf";
+static char * mcore_elf_out_file = NULL;
+static char * mcore_elf_linker   = NULL;
+static char * mcore_elf_linker_flags = NULL;
+
+#define DRECTVE_SECTION_NAME ((machine == MMCORE_ELF || machine == MMCORE_ELF_LE) ? ".exports" : ".drectve")
+#endif
+
+#ifndef DRECTVE_SECTION_NAME
+#define DRECTVE_SECTION_NAME ".drectve"
+#endif
+
 #define PATHMAX 250		/* What's the right name for this ? */
 
 #define TMP_ASM		"dc.s"
@@ -370,8 +428,7 @@ static const char *mname = "ppc";
 #define TMP_TAIL_O	"dt.o"
 #define TMP_STUB	"ds"
 
-/* This bit of assemly does jmp * ....
-s set how_jtab_roff to mark where the 32bit abs branch should go */
+/* This bit of assemly does jmp * .... */
 static const unsigned char i386_jtab[] =
 {
   0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90
@@ -379,20 +436,46 @@ static const unsigned char i386_jtab[] =
 
 static const unsigned char arm_jtab[] =
 {
-  0x00, 0xc0, 0x9f, 0xe5,
-  0x00, 0xf0, 0x9c, 0xe5,
+  0x00, 0xc0, 0x9f, 0xe5,	/* ldr  ip, [pc] */
+  0x00, 0xf0, 0x9c, 0xe5,	/* ldr  pc, [ip] */
+  0,    0,    0,    0
+};
+
+static const unsigned char arm_interwork_jtab[] =
+{
+  0x04, 0xc0, 0x9f, 0xe5,	/* ldr  ip, [pc] */
+  0x00, 0xc0, 0x9c, 0xe5,	/* ldr  ip, [ip] */
+  0x1c, 0xff, 0x2f, 0xe1,	/* bx   ip       */
   0,    0,    0,    0
 };
 
 static const unsigned char thumb_jtab[] =
 {
-  0xc0, 0xb4,
-  0x02, 0x4e,
-  0x36, 0x68,
-  0x01, 0x96,
-  0x40, 0xbd,
-  0xc0, 0x46,
+  0x40, 0xb4,           /* push {r6}         */
+  0x02, 0x4e,           /* ldr  r6, [pc, #8] */
+  0x36, 0x68,           /* ldr  r6, [r6]     */
+  0xb4, 0x46,           /* mov  ip, r6       */
+  0x40, 0xbc,           /* pop  {r6}         */
+  0x60, 0x47,           /* bx   ip           */
   0,    0,    0,    0
+};
+
+static const unsigned char mcore_be_jtab[] =
+{
+  0x71, 0x02,            /* lrw r1,2       */
+  0x81, 0x01,            /* ld.w r1,(r1,0) */  
+  0x00, 0xC1,            /* jmp r1         */
+  0x12, 0x00,            /* nop            */
+  0x00, 0x00, 0x00, 0x00 /* <address>      */  
+};
+
+static const unsigned char mcore_le_jtab[] =
+{
+  0x02, 0x71,            /* lrw r1,2       */
+  0x01, 0x81,            /* ld.w r1,(r1,0) */  
+  0xC1, 0x00,            /* jmp r1         */
+  0x00, 0x12,            /* nop            */
+  0x00, 0x00, 0x00, 0x00 /* <address>      */  
 };
 
 /* This is the glue sequence for PowerPC PE. There is a  */
@@ -417,12 +500,6 @@ static const unsigned char ppc_jtab[] =
 static bfd_vma ppc_glue_insn = 0x80410004;
 #endif
 
-/* The outfile array must be big enough to contain a fully
-   qualified path name, plus an arbitary series of command
-   line switches.  We hope that PATH_MAX times two will be
-   enough.  */
-static char outfile [PATHMAX * 2];
-
 struct mac
   {
     const char *type;
@@ -436,6 +513,7 @@ struct mac
     const char *how_space;
     const char *how_align_short;
     const char *how_align_long;
+    const char *how_default_as_switches;
     const char *how_bfd_target;
     enum bfd_architecture how_bfd_arch;
     const unsigned char *how_jtab;
@@ -450,31 +528,91 @@ mtable[] =
 #define MARM 0
     "arm", ".byte", ".short", ".long", ".asciz", "@",
     "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long",
-    ".global", ".space", ".align\t2",".align\t4","pe-arm-little", bfd_arch_arm,
+    ".global", ".space", ".align\t2",".align\t4", "-mapcs-32",
+    "pe-arm-little", bfd_arch_arm,
     arm_jtab, sizeof (arm_jtab), 8
   }
   ,
   {
 #define M386 1
-    "i386", ".byte", ".short", ".long", ".asciz", "#", "jmp *", ".global", ".space", ".align\t2",".align\t4","pe-i386",bfd_arch_i386,
-   i386_jtab, sizeof (i386_jtab), 2
+    "i386", ".byte", ".short", ".long", ".asciz", "#",
+    "jmp *", ".global", ".space", ".align\t2",".align\t4", "",
+    "pe-i386",bfd_arch_i386,
+    i386_jtab, sizeof (i386_jtab), 2
   }
   ,
   {
 #define MPPC 2
-    "ppc", ".byte", ".short", ".long", ".asciz", "#", "jmp *", ".global", ".space", ".align\t2",".align\t4","pe-powerpcle",bfd_arch_powerpc,
-   ppc_jtab, sizeof (ppc_jtab), 0
+    "ppc", ".byte", ".short", ".long", ".asciz", "#",
+    "jmp *", ".global", ".space", ".align\t2",".align\t4", "",
+    "pe-powerpcle",bfd_arch_powerpc,
+    ppc_jtab, sizeof (ppc_jtab), 0
   }
   ,
   {
 #define MTHUMB 3
     "thumb", ".byte", ".short", ".long", ".asciz", "@",
-    "push\t{r6, r7}\n\tldr\tr6, [pc, #8]\n\tldr\tr6, [r6]\n\tstr\tr6, [sp, #4]\n\tpop\t{r6, pc}\n\tnop",
-    ".global", ".space", ".align\t2",".align\t4","pe-arm-little", bfd_arch_arm,
+    "push\t{r6}\n\tldr\tr6, [pc, #8]\n\tldr\tr6, [r6]\n\tmov\tip, r6\n\tpop\t{r6}\n\tbx\tip",
+    ".global", ".space", ".align\t2",".align\t4", "-mthumb-interwork",
+    "pe-arm-little", bfd_arch_arm,
     thumb_jtab, sizeof (thumb_jtab), 12
   }
   ,
-{    0}
+#define MARM_INTERWORK 4
+  {
+    "arm_interwork", ".byte", ".short", ".long", ".asciz", "@",
+    "ldr\tip,[pc]\n\tldr\tip,[ip]\n\tbx\tip\n\t.long",
+    ".global", ".space", ".align\t2",".align\t4", "-mthumb-interwork",
+    "pe-arm-little", bfd_arch_arm,
+    arm_interwork_jtab, sizeof (arm_interwork_jtab), 12
+  }
+  ,
+  {
+#define MMCORE_BE 5
+    "mcore-be", ".byte", ".short", ".long", ".asciz", "//",
+    "lrw r1,[1f]\n\tld.w r1,(r1,0)\n\tjmp r1\n\tnop\n1:.long",
+    ".global", ".space", ".align\t2",".align\t4", "",
+    "pe-mcore-big", bfd_arch_mcore,
+    mcore_be_jtab, sizeof (mcore_be_jtab), 8
+  }
+  ,
+  {
+#define MMCORE_LE 6
+    "mcore-le", ".byte", ".short", ".long", ".asciz", "//",
+    "lrw r1,[1f]\n\tld.w r1,(r1,0)\n\tjmp r1\n\tnop\n1:.long",
+    ".global", ".space", ".align\t2",".align\t4", "-EL",
+    "pe-mcore-little", bfd_arch_mcore,
+    mcore_le_jtab, sizeof (mcore_le_jtab), 8
+  }
+  ,
+  {
+#define MMCORE_ELF 7
+    "mcore-elf-be", ".byte", ".short", ".long", ".asciz", "//",
+    "lrw r1,[1f]\n\tld.w r1,(r1,0)\n\tjmp r1\n\tnop\n1:.long",
+    ".global", ".space", ".align\t2",".align\t4", "",
+    "elf32-mcore-big", bfd_arch_mcore,
+    mcore_be_jtab, sizeof (mcore_be_jtab), 8
+  }
+  ,
+  {
+#define MMCORE_ELF_LE 8
+    "mcore-elf-le", ".byte", ".short", ".long", ".asciz", "//",
+    "lrw r1,[1f]\n\tld.w r1,(r1,0)\n\tjmp r1\n\tnop\n1:.long",
+    ".global", ".space", ".align\t2",".align\t4", "-EL",
+    "elf32-mcore-little", bfd_arch_mcore,
+    mcore_le_jtab, sizeof (mcore_le_jtab), 8
+  }
+  ,
+  {
+#define MARM_EPOC 9
+    "arm", ".byte", ".short", ".long", ".asciz", "@",
+    "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long",
+    ".global", ".space", ".align\t2",".align\t4", "",
+    "epoc-pe-arm-little", bfd_arch_arm,
+    arm_jtab, sizeof (arm_jtab), 8
+  }
+  ,
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 };
 
 typedef struct dlist
@@ -621,6 +759,11 @@ rvaafter (machine)
     case M386:
     case MPPC:
     case MTHUMB:
+    case MARM_INTERWORK:
+    case MMCORE_BE:
+    case MMCORE_LE:
+    case MMCORE_ELF:
+    case MMCORE_ELF_LE:
       break;
     default:
       /* xgettext:c-format */
@@ -640,6 +783,11 @@ rvabefore (machine)
     case M386:
     case MPPC:
     case MTHUMB:
+    case MARM_INTERWORK:
+    case MMCORE_BE:
+    case MMCORE_LE:
+    case MMCORE_ELF:
+    case MMCORE_ELF_LE:
       return ".rva\t";
     default:
       /* xgettext:c-format */
@@ -658,6 +806,11 @@ asm_prefix (machine)
     case MARM:
     case MPPC:
     case MTHUMB:
+    case MARM_INTERWORK:
+    case MMCORE_BE:
+    case MMCORE_LE:
+    case MMCORE_ELF:
+    case MMCORE_ELF_LE:
       break;
     case M386:
       return "_";
@@ -681,12 +834,15 @@ asm_prefix (machine)
 #define ASM_RVA_BEFORE 	rvabefore(machine)
 #define ASM_RVA_AFTER  	rvaafter(machine)
 #define ASM_PREFIX	asm_prefix(machine)
-#define ASM_ALIGN_LONG mtable[machine].how_align_long
-#define HOW_BFD_TARGET  0  /* always default*/
-#define HOW_BFD_ARCH   mtable[machine].how_bfd_arch
-#define HOW_JTAB       mtable[machine].how_jtab
-#define HOW_JTAB_SIZE      mtable[machine].how_jtab_size
-#define HOW_JTAB_ROFF      mtable[machine].how_jtab_roff
+#define ASM_ALIGN_LONG  mtable[machine].how_align_long
+#define HOW_BFD_READ_TARGET  0  /* always default*/
+#define HOW_BFD_WRITE_TARGET mtable[machine].how_bfd_target
+#define HOW_BFD_ARCH    mtable[machine].how_bfd_arch
+#define HOW_JTAB        mtable[machine].how_jtab
+#define HOW_JTAB_SIZE   mtable[machine].how_jtab_size
+#define HOW_JTAB_ROFF   mtable[machine].how_jtab_roff
+#define ASM_SWITCHES    mtable[machine].how_default_as_switches
+
 static char **oav;
 
 void
@@ -728,7 +884,7 @@ static int d_is_exe;
 
 int
 yyerror (err)
-     const char *err;
+     const char * err ATTRIBUTE_UNUSED;
 {
   /* xgettext:c-format */
   warn (_("Syntax error in def file %s:%d\n"), def_file, linenumber);
@@ -1071,9 +1227,9 @@ scan_drectve_symbols (abfd)
   char *     buf;
   char *     p;
   char *     e;
-  
+
   /* Look for .drectve's */
-  s = bfd_get_section_by_name (abfd, ".drectve");
+  s = bfd_get_section_by_name (abfd, DRECTVE_SECTION_NAME);
   
   if (s == NULL)
     return;
@@ -1084,10 +1240,12 @@ scan_drectve_symbols (abfd)
   bfd_get_section_contents (abfd, s, buf, 0, size);
       
   /* xgettext:c-format */
-  inform (_("Sucking in info from .drective section in %s\n"),
-	  bfd_get_filename (abfd));
+  inform (_("Sucking in info from %s section in %s\n"),
+	  DRECTVE_SECTION_NAME, bfd_get_filename (abfd));
 
-  /* Search for -export: strings */
+  /* Search for -export: strings. The exported symbols can optionally
+     have type tags (eg., -export:foo,data), so handle those as well.
+     Currently only data tag is supported.  */
   p = buf;
   e = buf + size;
   while (p < e)
@@ -1097,25 +1255,35 @@ scan_drectve_symbols (abfd)
 	{
 	  char * name;
 	  char * c;
+	  flagword flags = BSF_FUNCTION;
 	  
 	  p += 8;
 	  name = p;
-	  while (p < e && *p != ' ' && *p != '-')
+	  while (p < e && *p != ',' && *p != ' ' && *p != '-')
 	    p++;
 	  c = xmalloc (p - name + 1);
 	  memcpy (c, name, p - name);
 	  c[p - name] = 0;
+	  if (p < e && *p == ',')       /* found type tag. */
+	    {
+	      char *tag_start = ++p;
+	      while (p < e && *p != ' ' && *p != '-')
+		p++;
+	      if (strncmp (tag_start, "data", 4) == 0)
+		flags &= ~BSF_FUNCTION;
+	    }
 
 	  /* FIXME: The 5th arg is for the `constant' field.
 	     What should it be?  Not that it matters since it's not
 	     currently useful.  */
-	  def_exports (c, 0, -1, 0, 0, 0);
+	  def_exports (c, 0, -1, 0, 0, ! (flags & BSF_FUNCTION));
 
 	  if (add_stdcall_alias && strchr (c, '@'))
 	    {
 	      char *exported_name = xstrdup (c);
 	      char *atsym = strchr (exported_name, '@');
 	      *atsym = '\0';
+	      /* Note: stdcall alias symbols can never be data.  */
 	      def_exports (exported_name, xstrdup (c), -1, 0, 0, 0);
 	    }
 	}
@@ -1157,13 +1325,15 @@ scan_filtered_symbols (abfd, minisyms, symcount, size)
       if (bfd_get_symbol_leading_char (abfd) == symbol_name[0])
 	++symbol_name;
 
-      def_exports (xstrdup (symbol_name) , 0, -1, 0, 0, 0);
+      def_exports (xstrdup (symbol_name) , 0, -1, 0, 0,
+		   ! (sym->flags & BSF_FUNCTION));
 
       if (add_stdcall_alias && strchr (symbol_name, '@'))
         {
 	  char *exported_name = xstrdup (symbol_name);
 	  char *atsym = strchr (exported_name, '@');
 	  *atsym = '\0';
+	  /* Note: stdcall alias symbols can never be data. */
 	  def_exports (exported_name, xstrdup (symbol_name), -1, 0, 0, 0);
 	}
     }
@@ -1327,7 +1497,7 @@ scan_open_obj_file (abfd)
   /* FIXME: we ought to read in and block out the base relocations */
 
   /* xgettext:c-format */
-  inform (_("%s: Done reading %s\n"), bfd_get_filename (abfd));
+  inform (_("Done reading %s\n"), bfd_get_filename (abfd));
 }
 
 static void
@@ -1353,10 +1523,20 @@ scan_obj_file (filename)
 	  bfd_close (arfile);
 	  arfile = bfd_openr_next_archived_file (f, arfile);
 	}
+      
+#ifdef DLLTOOL_MCORE_ELF
+      if (mcore_elf_out_file)
+	inform (_("Cannot produce mcore-elf dll from archive file: %s"), filename);
+#endif
     }
   else if (bfd_check_format (f, bfd_object))
     {
       scan_open_obj_file (f);
+
+#ifdef DLLTOOL_MCORE_ELF
+      if (mcore_elf_out_file)
+	mcore_elf_cache_filename ((char *) filename);
+#endif
     }
 
   bfd_close (f);
@@ -1416,10 +1596,17 @@ flush_page (f, need, page_addr, on_page)
 	   ASM_LONG,
 	   (on_page * 2) + (on_page & 1) * 2 + 8,
 	   ASM_C);
+  
   for (i = 0; i < on_page; i++)
     {
-      fprintf (f, "\t%s\t0x%lx\n", ASM_SHORT, (need[i] - page_addr) | 0x3000);
+      long needed = need[i];
+      
+      if (needed)
+	needed = ((needed - page_addr) | 0x3000) & 0xffff;
+  
+      fprintf (f, "\t%s\t0x%lx\n", ASM_SHORT, needed);
     }
+  
   /* And padding */
   if (on_page & 1)
     fprintf (f, "\t%s\t0x%x\n", ASM_SHORT, 0 | 0x0000);
@@ -1575,6 +1762,22 @@ generate_idata_ofile (filvar)
     }
 }
 
+/* Assemble the specified file. */
+static void
+assemble_file (source, dest)
+     const char * source;
+     const char * dest;
+{
+  char * cmd;
+  
+  cmd = (char *) alloca (strlen (ASM_SWITCHES) + strlen (as_flags)
+			 + strlen (source) + strlen (dest) + 50);
+
+  sprintf (cmd, "%s %s -o %s %s", ASM_SWITCHES, as_flags, dest, source);
+
+  run (as_name, cmd);
+}
+
 static void
 gen_exp_file ()
 {
@@ -1647,8 +1850,8 @@ gen_exp_file ()
 		}
 	    }
 	  fprintf (f, "\t%s%s%s%s\t%s %d\n", ASM_RVA_BEFORE,
-		   ASM_PREFIX,
-		   exp->internal_name, ASM_RVA_AFTER, ASM_C, exp->ordinal);
+                   ASM_PREFIX,
+                   exp->internal_name, ASM_RVA_AFTER, ASM_C, exp->ordinal);
 	  i++;
 	}
 
@@ -1678,12 +1881,13 @@ gen_exp_file ()
 
       if (a_list)
 	{
-	  fprintf (f, "\t.section .drectve\n");
+	  fprintf (f, "\t.section %s\n", DRECTVE_SECTION_NAME);
 	  for (dl = a_list; dl; dl = dl->next)
 	    {
 	      fprintf (f, "\t%s\t\"%s\"\n", ASM_TEXT, dl->text);
 	    }
 	}
+      
       if (d_list)
 	{
 	  fprintf (f, "\t.section .rdata\n");
@@ -1691,9 +1895,9 @@ gen_exp_file ()
 	    {
 	      char *p;
 	      int l;
-	      /* We dont output as ascii 'cause there can
-	         be quote characters in the string */
-
+	      
+	      /* We don't output as ascii because there can
+	         be quote characters in the string.  */
 	      l = 0;
 	      for (p = dl->text; *p; p++)
 		{
@@ -1719,7 +1923,7 @@ gen_exp_file ()
 
 
   /* Add to the output file a way of getting to the exported names
-     without using the import library. */
+     without using the import library.  */
   if (add_indirect)
     {
       fprintf (f, "\t.section\t.rdata\n");
@@ -1729,9 +1933,11 @@ gen_exp_file ()
 	    /* We use a single underscore for MS compatibility, and a
                double underscore for backward compatibility with old
                cygwin releases.  */
-	    fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
+	    if (create_compat_implib)
+	      fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
 	    fprintf (f, "\t%s\t_imp__%s\n", ASM_GLOBAL, exp->name);
-	    fprintf (f, "__imp_%s:\n", exp->name);
+	    if (create_compat_implib)
+	      fprintf (f, "__imp_%s:\n", exp->name);
 	    fprintf (f, "_imp__%s:\n", exp->name);
 	    fprintf (f, "\t%s\t%s\n", ASM_LONG, exp->name);
 	  }
@@ -1765,8 +1971,6 @@ gen_exp_file ()
 	  int src;
 	  int dst = 0;
 	  int last = -1;
-	  int totsize = 0;
-
 	  qsort (copy, num_entries, sizeof (long), sfunc);
 	  /* Delete duplcates */
 	  for (src = 0; src < num_entries; src++)
@@ -1780,31 +1984,18 @@ gen_exp_file ()
 	  on_page = 0;
 	  for (j = 0; j < num_entries; j++)
 	    {
-	      totsize += 2;
 	      addr = copy[j];
 	      if ((addr & PAGE_MASK) != page_addr)
 		{
-		  totsize += 8 + (on_page & 1)*2;
 		  flush_page (f, need, page_addr, on_page);
 		  on_page = 0;
 		  page_addr = addr & PAGE_MASK;
 		}
 	      need[on_page++] = addr;
 	    }
-
-	  /* Pad the section to an even 32-byte boundary.  This will make
-	     the BeOS loader much happier, and shouldn't matter for other
-	     OSes. */
-	  while ((totsize + 8 + (on_page & 1)*2) % 32 != 0)
-	    {
-	      /* 0x0000 is an absolute relocation that should be ignored.  */
-	      need[on_page++] = 0x0000;
-	      totsize += 2;
-	    }
-
 	  flush_page (f, need, page_addr, on_page);
 
-	  /* fprintf (f, "\t%s\t0,0\t%s End\n", ASM_LONG, ASM_C);*/
+/*	  fprintf (f, "\t%s\t0,0\t%s End\n", ASM_LONG, ASM_C);*/
 	}
     }
 
@@ -1813,15 +2004,8 @@ gen_exp_file ()
   fclose (f);
 
   /* assemble the file */
-  sprintf (outfile, "%s -o %s %s", as_flags, exp_name, TMP_ASM);
+  assemble_file (TMP_ASM, exp_name);
 
-#ifdef DLLTOOL_ARM
-  if (interwork)
-    strcat (outfile, " -mthumb-interwork");
-#endif
-  
-  run (as_name, outfile);
-  
   if (dontdeltemps == 0)
     unlink (TMP_ASM);
   
@@ -1900,15 +2084,16 @@ typedef struct
 
 #define NSECS 7
 
+#define INIT_SEC_DATA(id, name, flags, align) { id, name, flags, align, NULL, NULL, NULL, 0, NULL }
 static sinfo secdata[NSECS] =
 {
-  { TEXT,   ".text",    SEC_CODE | SEC_HAS_CONTENTS, 2},
-  { DATA,   ".data",    SEC_DATA,                    2},
-  { BSS,    ".bss",     0,                           2},
-  { IDATA7, ".idata$7", SEC_HAS_CONTENTS,            2},
-  { IDATA5, ".idata$5", SEC_HAS_CONTENTS,            2},
-  { IDATA4, ".idata$4", SEC_HAS_CONTENTS,            2},
-  { IDATA6, ".idata$6", SEC_HAS_CONTENTS,            1}
+  INIT_SEC_DATA (TEXT,   ".text",    SEC_CODE | SEC_HAS_CONTENTS, 2),
+  INIT_SEC_DATA (DATA,   ".data",    SEC_DATA,                    2),
+  INIT_SEC_DATA (BSS,    ".bss",     0,                           2),
+  INIT_SEC_DATA (IDATA7, ".idata$7", SEC_HAS_CONTENTS,            2),
+  INIT_SEC_DATA (IDATA5, ".idata$5", SEC_HAS_CONTENTS,            2),
+  INIT_SEC_DATA (IDATA4, ".idata$4", SEC_HAS_CONTENTS,            2),
+  INIT_SEC_DATA (IDATA6, ".idata$6", SEC_HAS_CONTENTS,            1)
 };
 
 #else
@@ -2001,16 +2186,22 @@ make_one_lib_file (exp, i)
 {
 #if 0
     {
+      char *name;
       FILE *f;
-      char *prefix="d";
-      sprintf (outfile, "%ss%05d.s", prefix, i);
-      f = fopen (outfile, FOPEN_WT);
+      const char *prefix = "d";
+      char *dest;
+
+      name = (char *) alloca (strlen (prefix) + 10);
+      sprintf (name, "%ss%05d.s", prefix, i);
+      f = fopen (name, FOPEN_WT);
       fprintf (f, "\t.text\n");
       fprintf (f, "\t%s\t%s%s\n", ASM_GLOBAL, ASM_PREFIX, exp->name);
-      fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
+      if (create_compat_implib)
+	fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
       fprintf (f, "\t%s\t_imp__%s\n", ASM_GLOBAL, exp->name);
-      fprintf (f, "%s%s:\n\t%s\t__imp_%s\n", ASM_PREFIX,
-	       exp->name, ASM_JUMP, exp->name);
+      if (create_compat_implib)
+	fprintf (f, "%s%s:\n\t%s\t__imp_%s\n", ASM_PREFIX,
+		 exp->name, ASM_JUMP, exp->name);
 
       fprintf (f, "\t.section\t.idata$7\t%s To force loading of head\n", ASM_C);
       fprintf (f, "\t%s\t%s\n", ASM_LONG, head_label);
@@ -2019,7 +2210,8 @@ make_one_lib_file (exp, i)
       fprintf (f,"%s Import Address Table\n", ASM_C);
 
       fprintf (f, "\t.section	.idata$5\n");
-      fprintf (f, "__imp_%s:\n", exp->name);
+      if (create_compat_implib)
+	fprintf (f, "__imp_%s:\n", exp->name);
       fprintf (f, "_imp__%s:\n", exp->name);
 
       dump_iat (f, exp);
@@ -2039,15 +2231,9 @@ make_one_lib_file (exp, i)
 
       fclose (f);
 
-      sprintf (outfile, "%s -o %ss%05d.o %ss%d.s",
-	       as_flags, prefix, i, prefix, i);
-
-#ifdef DLLTOOL_ARM
-      if (interwork)
-	strcat (outfile, " -mthumb-interwork");
-#endif
-  
-      run (as_name, outfile);
+      dest = (char *) alloca (strlen (prefix) + 10);
+      sprintf (dest, "%ss%05d.o", prefix, i);
+      assemble_file (name, dest);
     }
 #else /* if 0 */
     {
@@ -2074,7 +2260,7 @@ make_one_lib_file (exp, i)
       
       sprintf (outname, "%s%05d.o", TMP_STUB, i);
       
-      abfd = bfd_openw (outname, HOW_BFD_TARGET);
+      abfd = bfd_openw (outname, HOW_BFD_WRITE_TARGET);
       
       if (!abfd)
 	/* xgettext:c-format */
@@ -2087,7 +2273,7 @@ make_one_lib_file (exp, i)
       bfd_set_arch_mach (abfd, HOW_BFD_ARCH, 0);
 
 #ifdef DLLTOOL_ARM
-      if (interwork)
+      if (machine == MARM_INTERWORK || machine == MTHUMB)
 	bfd_set_private_flags (abfd, F_INTERWORK);
 #endif
       
@@ -2146,13 +2332,16 @@ make_one_lib_file (exp, i)
       /* Generate imp symbols with one underscore for Microsoft
          compatibility, and with two underscores for backward
          compatibility with old versions of cygwin.  */
-      iname = bfd_make_empty_symbol(abfd);
-      iname->name = make_label ("__imp_", exp->name);
-      iname->section = secdata[IDATA5].sec;
-      iname->flags = BSF_GLOBAL;
-      iname->value = 0;
+      if (create_compat_implib)
+	{
+	  iname = bfd_make_empty_symbol (abfd);
+	  iname->name = make_label ("__imp_", exp->name);
+	  iname->section = secdata[IDATA5].sec;
+	  iname->flags = BSF_GLOBAL;
+	  iname->value = 0;
+	}
 
-      iname2 = bfd_make_empty_symbol(abfd);
+      iname2 = bfd_make_empty_symbol (abfd);
       iname2->name = make_label ("_imp__", exp->name);
       iname2->section = secdata[IDATA5].sec;
       iname2->flags = BSF_GLOBAL;
@@ -2167,7 +2356,8 @@ make_one_lib_file (exp, i)
 
 
       iname_pp = ptrs + oidx;
-      ptrs[oidx++] = iname;
+      if (create_compat_implib)
+	ptrs[oidx++] = iname;
       ptrs[oidx++] = iname2;
 
       iname_lab_pp = ptrs + oidx;
@@ -2451,7 +2641,7 @@ make_one_lib_file (exp, i)
 
       bfd_set_symtab (abfd, ptrs, oidx);
       bfd_close (abfd);
-      abfd = bfd_openr (outname, HOW_BFD_TARGET);
+      abfd = bfd_openr (outname, HOW_BFD_READ_TARGET);
       return abfd;
     }
 #endif
@@ -2460,8 +2650,14 @@ make_one_lib_file (exp, i)
 static bfd *
 make_head ()
 {
-  FILE *  f = fopen (TMP_HEAD_S, FOPEN_WT);
+  FILE *f = fopen (TMP_HEAD_S, FOPEN_WT);
 
+  if (f == NULL)
+    {
+      fatal (_("failed to open temporary head file: %s"), TMP_HEAD_S);
+      return NULL;
+    }
+  
   fprintf (f, "%s IMAGE_IMPORT_DESCRIPTOR\n", ASM_C);
   fprintf (f, "\t.section	.idata$2\n");
 
@@ -2493,6 +2689,7 @@ make_head ()
       fprintf (f, "\t%s\t0\n", ASM_LONG);
       fprintf (f, "fthunk:\n");
     }
+  
   if (!no_idata4)
     {
       fprintf (f, "\t.section\t.idata$4\n");
@@ -2501,30 +2698,31 @@ make_head ()
       fprintf (f, "\t.section	.idata$4\n");
       fprintf (f, "hname:\n");
     }
+  
   fclose (f);
 
-  sprintf (outfile, "%s -o %s %s", as_flags, TMP_HEAD_O, TMP_HEAD_S);
-  
-#ifdef DLLTOOL_ARM
-  if (interwork)
-    strcat (outfile, " -mthumb-interwork");
-#endif
-  
-  run (as_name, outfile);
+  assemble_file (TMP_HEAD_S, TMP_HEAD_O);
 
-  return  bfd_openr (TMP_HEAD_O, HOW_BFD_TARGET);
+  return bfd_openr (TMP_HEAD_O, HOW_BFD_READ_TARGET);
 }
 
 static bfd *
 make_tail ()
 {
-  FILE *  f = fopen (TMP_TAIL_S, FOPEN_WT);
+  FILE *f = fopen (TMP_TAIL_S, FOPEN_WT);
 
+  if (f == NULL)
+    {
+      fatal (_("failed to open temporary tail file: %s"), TMP_TAIL_S);
+      return NULL;
+    }
+  
   if (!no_idata4)
     {
       fprintf (f, "\t.section	.idata$4\n");
       fprintf (f, "\t%s\t0\n", ASM_LONG);
     }
+  
   if (!no_idata5)
     {
       fprintf (f, "\t.section	.idata$5\n");
@@ -2562,16 +2760,9 @@ make_tail ()
 
   fclose (f);
 
-  sprintf (outfile, "%s -o %s %s", as_flags, TMP_TAIL_O, TMP_TAIL_S);
+  assemble_file (TMP_TAIL_S, TMP_TAIL_O);
   
-#ifdef DLLTOOL_ARM
-  if (interwork)
-    strcat (outfile, " -mthumb-interwork");
-#endif
-  
-  run (as_name, outfile);
-  
-  return  bfd_openr (TMP_TAIL_O, HOW_BFD_TARGET);
+  return  bfd_openr (TMP_TAIL_O, HOW_BFD_READ_TARGET);
 }
 
 static void
@@ -2586,7 +2777,7 @@ gen_lib_file ()
 
   unlink (imp_name);
 
-  outarch = bfd_openw (imp_name, HOW_BFD_TARGET);
+  outarch = bfd_openw (imp_name, HOW_BFD_WRITE_TARGET);
 
   if (!outarch)
     /* xgettext:c-format */
@@ -2644,12 +2835,15 @@ gen_lib_file ()
 
   if (dontdeltemps < 2)
     {
+      char *name;
+
+      name = (char *) alloca (sizeof TMP_STUB + 10);
       for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
 	{
-	  sprintf (outfile, "%s%05d.o", TMP_STUB, i);
-	  if (unlink (outfile) < 0)
+	  sprintf (name, "%s%05d.o", TMP_STUB, i);
+	  if (unlink (name) < 0)
 	    /* xgettext:c-format */
-	    warn (_("cannot delete %s: %s\n"), outfile, strerror (errno));
+	    warn (_("cannot delete %s: %s\n"), name, strerror (errno));
 	}
     }
   
@@ -2708,7 +2902,11 @@ remove_null_names (ptr)
 
 static void
 dtab (ptr)
-     export_type **ptr;
+     export_type ** ptr
+#ifndef SACDEBUG
+ATTRIBUTE_UNUSED
+#endif
+     ;
 {
 #ifdef SACDEBUG
   int i;
@@ -2938,17 +3136,18 @@ usage (file, status)
   /* xgetext:c-format */
   fprintf (file, _("Usage %s <options> <object-files>\n"), program_name);
   /* xgetext:c-format */
-  fprintf (file, _("   -m --machine <machine>    Create {arm, i386, ppc, thumb} DLL. [default: %s]\n"), mname);
+  fprintf (file, _("   -m --machine <machine>    Create as DLL for <machine>.  [default: %s]\n"), mname);
+  fprintf (file, _("        possible <machine>: arm[_interwork], i386, mcore[-elf]{-le|-be}, ppc, thumb\n"));
   fprintf (file, _("   -e --output-exp <outname> Generate an export file.\n"));
   fprintf (file, _("   -l --output-lib <outname> Generate an interface library.\n"));
   fprintf (file, _("   -a --add-indirect         Add dll indirects to export file.\n"));
   fprintf (file, _("   -D --dllname <name>       Name of input dll to put into interface lib.\n"));
   fprintf (file, _("   -d --input-def <deffile>  Name of .def file to be read in.\n"));
   fprintf (file, _("   -z --output-def <deffile> Name of .def file to be created.\n"));
-  fprintf (file, _("   --export-all-symbols      Export all symbols to .def\n"));
-  fprintf (file, _("   --no-export-all-symbols   Only export listed symbols\n"));
-  fprintf (file, _("   --exclude-symbols <list>  Don't export <list>\n"));
-  fprintf (file, _("   --no-default-excludes     Clear default exclude symbols\n"));
+  fprintf (file, _("      --export-all-symbols   Export all symbols to .def\n"));
+  fprintf (file, _("      --no-export-all-symbols  Only export listed symbols\n"));
+  fprintf (file, _("      --exclude-symbols <list> Don't export <list>\n"));
+  fprintf (file, _("      --no-default-excludes  Clear default exclude symbols\n"));
   fprintf (file, _("   -b --base-file <basefile> Read linker generated base file.\n"));
   fprintf (file, _("   -x --no-idata4            Don't generate idata$4 section.\n"));
   fprintf (file, _("   -c --no-idata5            Don't generate idata$5 section.\n"));
@@ -2957,14 +3156,16 @@ usage (file, status)
   fprintf (file, _("   -A --add-stdcall-alias    Add aliases without @<n>.\n"));
   fprintf (file, _("   -S --as <name>            Use <name> for assembler.\n"));
   fprintf (file, _("   -f --as-flags <flags>     Pass <flags> to the assembler.\n"));
-#ifdef DLLTOOL_ARM
-  fprintf (file, _("   -i --interwork            Support ARM/Thumb interworking.\n"));
-#endif
+  fprintf (file, _("   -C --compat-implib        Create backward compatible import library.\n"));
   fprintf (file, _("   -n --no-delete            Keep temp files (repeat for extra preservation).\n"));
   fprintf (file, _("   -v --verbose              Be verbose.\n"));
   fprintf (file, _("   -V --version              Display the program version.\n"));
   fprintf (file, _("   -h --help                 Display this information.\n"));
-  
+#ifdef DLLTOOL_MCORE_ELF
+  fprintf (file, _("   -M --mcore-elf <outname>  Process mcore-elf object files into <outname>.\n"));
+  fprintf (file, _("   -L --linker <name>        Use <name> as the linker.\n"));
+  fprintf (file, _("   -F --linker-flags <flags> Pass <flags> to the linker.\n"));
+#endif
   exit (status);
 }
 
@@ -2972,15 +3173,13 @@ usage (file, status)
 #define OPTION_NO_EXPORT_ALL_SYMS	(OPTION_EXPORT_ALL_SYMS + 1)
 #define OPTION_EXCLUDE_SYMS		(OPTION_NO_EXPORT_ALL_SYMS + 1)
 #define OPTION_NO_DEFAULT_EXCLUDES	(OPTION_EXCLUDE_SYMS + 1)
-#define OPTION_NO_IDATA4		'x'
-#define OPTION_NO_IDATA5		'c'
 
 static const struct option long_options[] =
 {
   {"no-delete", no_argument, NULL, 'n'},
   {"dllname", required_argument, NULL, 'D'},
-  {"no-idata4", no_argument, NULL, OPTION_NO_IDATA4},
-  {"no-idata5", no_argument, NULL, OPTION_NO_IDATA5},
+  {"no-idata4", no_argument, NULL, 'x'},
+  {"no-idata5", no_argument, NULL, 'c'},
   {"output-exp", required_argument, NULL, 'e'},
   {"output-def", required_argument, NULL, 'z'},
   {"export-all-symbols", no_argument, NULL, OPTION_EXPORT_ALL_SYMS},
@@ -3001,10 +3200,9 @@ static const struct option long_options[] =
   {"base-file", required_argument, NULL, 'b'},
   {"as", required_argument, NULL, 'S'},
   {"as-flags", required_argument, NULL, 'f'},
-#ifdef DLLTOOL_ARM
-  {"interwork", no_argument, NULL, 'i'},
-#endif
-  {0}
+  {"mcore-elf", required_argument, NULL, 'M'},
+  {"compat-implib", no_argument, NULL, 'C'},
+  {NULL,0,NULL,0}
 };
 
 int
@@ -3024,18 +3222,17 @@ main (ac, av)
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
-  while ((c = getopt_long (ac, av, "xcz:S:aD:l:e:nkAvVb:Uh?m:d:f:i",
+  while ((c = getopt_long (ac, av,
+#ifdef DLLTOOL_MCORE_ELF			   
+			   "m:e:l:aD:d:z:b:xcCuUkAS:f:nvVhM:L:F:",
+#else
+			   "m:e:l:aD:d:z:b:xcCuUkAS:f:nvVh",
+#endif
 			   long_options, 0))
 	 != EOF)
     {
       switch (c)
 	{
-	case OPTION_NO_IDATA4:
-	  no_idata4 = 1;
-	  break;
-	case OPTION_NO_IDATA5:
-	  no_idata5 = 1;
-	  break;
 	case OPTION_EXPORT_ALL_SYMS:
 	  export_all_symbols = true;
 	  break;
@@ -3047,6 +3244,12 @@ main (ac, av)
 	  break;
 	case OPTION_NO_DEFAULT_EXCLUDES:
 	  do_default_excludes = false;
+	  break;
+	case 'x':
+	  no_idata4 = 1;
+	  break;
+	case 'c':
+	  no_idata5 = 1;
 	  break;
 	case 'S':
 	  as_name = optarg;
@@ -3085,18 +3288,6 @@ main (ac, av)
 	case 'V':
 	  print_version (program_name);
 	  break;
-#ifdef DLLTOOL_ARM
-	case 'i':
-	  interwork = 1;
-	  break;
-#endif
-	case 'y':
-#if 0
-	  /* We don't currently define YYDEBUG when building
-             defparse.y.  */
-	  yydebug = 1;
-#endif
-	  break;
 	case 'U':
 	  add_underscore = 1;
 	  break;
@@ -3120,6 +3311,20 @@ main (ac, av)
 	    fatal (_("Unable to open base-file: %s"), optarg);
 
 	  break;
+#ifdef DLLTOOL_MCORE_ELF
+	case 'M':
+	  mcore_elf_out_file = optarg;
+	  break;
+	case 'L':
+	  mcore_elf_linker = optarg;
+	  break;
+	case 'F':
+	  mcore_elf_linker_flags = optarg;
+	  break;
+#endif
+	case 'C':
+	  create_compat_implib = 1;
+	  break;
 	default:
 	  usage (stderr, 1);
 	  break;
@@ -3127,10 +3332,8 @@ main (ac, av)
     }
 
   for (i = 0; mtable[i].type; i++)
-    {
-      if (strcmp (mtable[i].type, mname) == 0)
-	break;
-    }
+    if (strcmp (mtable[i].type, mname) == 0)
+      break;
 
   if (!mtable[i].type)
     /* xgettext:c-format */
@@ -3138,12 +3341,6 @@ main (ac, av)
 
   machine = i;
 
-#ifdef DLLTOOL_ARM
-  /* Always enable interworking for Thumb targets.  */
-  if (machine == MTHUMB && (! interwork))
-    interwork = 1;
-#endif
-  
   if (!dll_name && exp_name)
     {
       int len = strlen (exp_name) + 5;
@@ -3152,6 +3349,9 @@ main (ac, av)
       strcat (dll_name, ".dll");
     }
 
+  if (as_name == NULL)
+    as_name = deduce_name ("as");
+  
   /* Don't use the default exclude list if we're reading only the
      symbols in the .drectve section.  The default excludes are meant
      to avoid exporting DLL entry point and Cygwin32 impure_ptr.  */
@@ -3194,6 +3394,256 @@ main (ac, av)
   
   if (output_def)
     gen_def_file ();
-
+  
+#ifdef DLLTOOL_MCORE_ELF
+  if (mcore_elf_out_file)
+    mcore_elf_gen_out_file ();
+#endif
+  
   return 0;
 }
+
+/* Look for the program formed by concatenating PROG_NAME and the
+   string running from PREFIX to END_PREFIX.  If the concatenated
+   string contains a '/', try appending EXECUTABLE_SUFFIX if it is
+   appropriate.  */
+
+static char *
+look_for_prog (prog_name, prefix, end_prefix)
+     const char *prog_name;
+     const char *prefix;
+     int end_prefix;
+{
+  struct stat s;
+  char *cmd;
+
+  cmd = xmalloc (strlen (prefix) 
+                 + strlen (prog_name) 
+#ifdef HAVE_EXECUTABLE_SUFFIX
+                 + strlen (EXECUTABLE_SUFFIX) 
+#endif
+		 + 10);
+  strcpy (cmd, prefix);
+
+  sprintf (cmd + end_prefix, "%s", prog_name);
+
+  if (strchr (cmd, '/') != NULL)
+    {
+      int found;
+
+      found = (stat (cmd, &s) == 0
+#ifdef HAVE_EXECUTABLE_SUFFIX
+               || stat (strcat (cmd, EXECUTABLE_SUFFIX), &s) == 0
+#endif
+	       );
+
+      if (! found)
+        {
+	  /* xgettext:c-format */
+	  inform (_("Tried file: %s"), cmd);
+	  free (cmd);
+	  return NULL;
+	}
+    }
+
+  /* xgettext:c-format */
+  inform (_("Using file: %s"), cmd);
+
+  return cmd;
+}
+
+/* Deduce the name of the program we are want to invoke.
+   PROG_NAME is the basic name of the program we want to run,
+   eg "as" or "ld".  The catch is that we might want actually
+   run "i386-pe-as" or "ppc-pe-ld".  
+
+   If argv[0] contains the full path, then try to find the program
+   in the same place, with and then without a target-like prefix.
+
+   Given, argv[0] = /usr/local/bin/i586-cygwin32-dlltool,
+   deduce_name("as") uses the following search order: 
+
+     /usr/local/bin/i586-cygwin32-as
+     /usr/local/bin/as
+     as
+   
+   If there's an EXECUTABLE_SUFFIX, it'll use that as well; for each
+   name, it'll try without and then with EXECUTABLE_SUFFIX.
+
+   Given, argv[0] = i586-cygwin32-dlltool, it will not even try "as"
+   as the fallback, but rather return i586-cygwin32-as.
+     
+   Oh, and given, argv[0] = dlltool, it'll return "as".
+
+   Returns a dynamically allocated string.  */
+
+static char *
+deduce_name (prog_name)
+     const char *prog_name;
+{
+  char *cmd;
+  char *dash, *slash, *cp;
+
+  dash = NULL;
+  slash = NULL;
+  for (cp = program_name; *cp != '\0'; ++cp)
+    {
+      if (*cp == '-')
+	dash = cp;
+      if (
+#if defined(__DJGPP__) || defined (__CYGWIN__) || defined(__WIN32__)
+	  *cp == ':' || *cp == '\\' ||
+#endif
+	  *cp == '/')
+	{
+	  slash = cp;
+	  dash = NULL;
+	}
+    }
+
+  cmd = NULL;
+
+  if (dash != NULL)
+    {
+      /* First, try looking for a prefixed PROG_NAME in the
+         PROGRAM_NAME directory, with the same prefix as PROGRAM_NAME.  */
+      cmd = look_for_prog (prog_name, program_name, dash - program_name + 1);
+    }
+
+  if (slash != NULL && cmd == NULL)
+    {
+      /* Next, try looking for a PROG_NAME in the same directory as
+         that of this program.  */
+      cmd = look_for_prog (prog_name, program_name, slash - program_name + 1);
+    }
+
+  if (cmd == NULL)
+    {
+      /* Just return PROG_NAME as is.  */
+      cmd = xstrdup (prog_name);
+    }
+
+  return cmd;
+}
+
+#ifdef DLLTOOL_MCORE_ELF
+typedef struct fname_cache
+{
+  char *               filename;
+  struct fname_cache * next;
+}
+fname_cache;
+
+static fname_cache fnames;
+
+static void
+mcore_elf_cache_filename (char * filename)
+{
+  fname_cache * ptr;
+
+  ptr = & fnames;
+
+  while (ptr->next != NULL)
+    ptr = ptr->next;
+
+  ptr->filename = filename;
+  ptr->next     = (fname_cache *) malloc (sizeof (fname_cache));
+  if (ptr->next != NULL)
+    ptr->next->next = NULL;
+}
+
+#define MCORE_ELF_TMP_OBJ "mcoreelf.o"
+#define MCORE_ELF_TMP_EXP "mcoreelf.exp"
+#define MCORE_ELF_TMP_LIB "mcoreelf.lib"
+
+static void
+mcore_elf_gen_out_file (void)
+{
+  fname_cache * ptr;
+  dyn_string_t ds;
+
+  /* Step one.  Run 'ld -r' on the input object files in order to resolve
+     any internal references and to generate a single .exports section.  */
+  ptr = & fnames;
+
+  ds = dyn_string_new (100);
+  dyn_string_append (ds, "-r ");
+
+  if (mcore_elf_linker_flags != NULL)
+    dyn_string_append (ds, mcore_elf_linker_flags);
+  
+  while (ptr->next != NULL)
+    {
+      dyn_string_append (ds, ptr->filename);
+      dyn_string_append (ds, " ");
+
+      ptr = ptr->next;
+    }
+
+  dyn_string_append (ds, "-o ");
+  dyn_string_append (ds, MCORE_ELF_TMP_OBJ);
+
+  if (mcore_elf_linker == NULL)
+    mcore_elf_linker = deduce_name ("ld");
+  
+  run (mcore_elf_linker, ds->s);
+
+  dyn_string_delete (ds);
+
+  /* Step two. Create a .exp file and a .lib file from the temporary file. 
+     Do this by recursively invoking dlltool....*/
+  ds = dyn_string_new (100);
+
+  dyn_string_append (ds, "-S ");
+  dyn_string_append (ds, as_name);
+  
+  dyn_string_append (ds, " -e ");
+  dyn_string_append (ds, MCORE_ELF_TMP_EXP);
+  dyn_string_append (ds, " -l ");
+  dyn_string_append (ds, MCORE_ELF_TMP_LIB);
+  dyn_string_append (ds, " " );
+  dyn_string_append (ds, MCORE_ELF_TMP_OBJ);
+
+  if (verbose)
+    dyn_string_append (ds, " -v");
+  
+  if (dontdeltemps)
+    {
+      dyn_string_append (ds, " -n");
+  
+      if (dontdeltemps > 1)
+	dyn_string_append (ds, " -n");
+    }
+
+  /* XXX - FIME: ought to check/copy other command line options as well.  */
+  
+  run (program_name, ds->s);
+
+  dyn_string_delete (ds);
+
+  /* Step four. Feed the .exp and object files to ld -shared to create the dll.  */
+  ds = dyn_string_new (100);
+
+  dyn_string_append (ds, "-shared ");
+
+  if (mcore_elf_linker_flags)
+    dyn_string_append (ds, mcore_elf_linker_flags);
+
+  dyn_string_append (ds, " ");
+  dyn_string_append (ds, MCORE_ELF_TMP_EXP);
+  dyn_string_append (ds, " ");
+  dyn_string_append (ds, MCORE_ELF_TMP_OBJ);
+  dyn_string_append (ds, " -o ");
+  dyn_string_append (ds, mcore_elf_out_file);
+
+  run (mcore_elf_linker, ds->s);
+
+  dyn_string_delete (ds);
+
+  if (dontdeltemps == 0)
+    unlink (MCORE_ELF_TMP_EXP);
+
+  if (dontdeltemps < 2)
+    unlink (MCORE_ELF_TMP_OBJ);
+}
+#endif /* DLLTOOL_MCORE_ELF */

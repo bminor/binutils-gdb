@@ -1,3 +1,124 @@
+2000-03-13  Nick Clifton  <nickc@cygnus.com>
+
+	* ld-scripts/phdrs.t: Discard all unexpected sections.
+
+2000-02-27 H.J. Lu  (hjl@gnu.org)
+
+	* lib/ld-lib.exp (default_ld_link): Added "$LIBS" to libs.
+
+1999-11-01  Nick Clifton  <nickc@cygnus.com>
+
+	* ld-selective/selective.exp: Fix test to disable these checks for
+	PE based targets.
+
+1999-10-29  Catherine Moore  <clm@cygnus.com>
+
+	* ld-selective/selective.exp:  Remove test6.
+	* ld-selective/5.cc: Delete.
+
+1999-10-28  Scott Bambrough  <scottb@netwinder.org>
+
+	* ld-srec/srec.exp: Setup expected failures for
+	srec tests on ARM Linux.
+
+1999-09-17  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* ld-shared/shared.exp: xfail linux*libc1 shared (non PIC, load
+	offset) test.
+
+1999-09-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* ld-scripts/script.exp: Add --image-base 0 for PE targets.
+
+1999-08-17  H.J. Lu  <hjl@gnu.org>
+
+	* ld-cdtest/cdtest-foo.cc (Foo::init_foo): Use "%ld" for sizeof.
+
+1999-08-09  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* ld-elfvers/vers.exp: Run tests on sparc*-*-linux*.
+	* ld-shared/shared.exp: Likewise.
+
+1999-07-28  Nick Clifton  <nickc@cygnus.com>
+
+	* lib/ld-lib.exp (proc big_or_little_endian): New proc.
+	Determine if a big endian or little endian output format hass
+	been selected by any of the multilib options, and if so return
+	a suitable command line option for the linker/assembler.
+	(proc default_ld_link): Include the result of proc
+	big_or_little_endian on the command line to the linker.
+	(proc ld_simple_link): Include the result of proc
+	big_or_little_endian on the command line to the linker.
+	(proc default_ld_compile): Append multilib flags to compiler
+	switches.
+	(proc default_ld_assemble): Include the result of proc
+	big_or_little_endian on the command line to the linker.
+
+1999-07-21  H.J. Lu  <hjl@gnu.org>
+
+	* ld-elfvers/vers1.c: Add missing prototypes and include
+	<stdio.h> if necessary.
+	* ld-elfvers/vers15.c: Likewise.
+	* ld-elfvers/vers19.c: Likewise.
+	* ld-elfvers/vers2.c: Likewise.
+	* ld-elfvers/vers3.c: Likewise.
+	* ld-elfvers/vers4.c: Likewise.
+	* ld-elfvers/vers6.c: Likewise.
+	* ld-elfvers/vers7.c: Likewise.
+	* ld-elfvers/vers9.c: Likewise.
+	* ld-shared/main.c: Likewise.
+	* ld-srec/sr3.cc (Foo::Foo): Remove arg name.
+
+Thu Jul 15 18:00:30 1999  Mark P. Mitchell  <mark@codesourcery.com>
+
+	* ld-undefined/undefined.exp: XFAIL on IRIX6 for the usual as
+	with other DWARF2 targets.
+
+1999-07-13  Nick Clifton  <nickc@cygnus.com>
+
+	* ld-undefined/undefined.exp: Do not expect arm toolchains to fail
+	the undefined line test.
+
+1999-07-10  Ian Lance Taylor  <ian@zembu.com>
+
+	* ld-elfvers/vers.exp: Use -rpath in new vers19 test.
+
+1999-07-07  Ian Lance Taylor  <ian@zembu.com>
+
+	* ld-elfvers/vers.exp: Add new tests vers17 to vers19.
+	* ld/elfvers/{vers17.*, vers18.*, vers19.*}: New files.
+
+1999-06-13  Ian Lance Taylor  <ian@zembu.com>
+
+	* ld-checks/asm.s: Use a symbol name for .lcomm.
+	* ld-checks/checks.exp: Use different names for the two tests.
+	Don't add extra text when invoking fail.
+
+1999-06-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* ld-scripts/phdrs.exp: Change target check from "*-*-linuxaout*"
+	to "*-*-linux*aout*".
+	* ld-scripts/weak.exp: Likewise.
+	* ld-shared/shared.exp: Likewise.  Simplify condition a bit.
+
+Wed Jun  9 12:02:33 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* ld-cdtest/cdtest-main.cc: Avoid `implicit int' warning.
+	* ld-shared/sh1.c: Fix typo.
+
+1999-06-04  H.J. Lu  <hjl@gnu.org>
+
+	* lib/ld-lib.exp (default_ld_nm): Clear nm_output first if
+	necessary.
+
+1999-05-17  Nick Clifton  <nickc@cygnus.com>
+
+	* ld-undefined/undefined.exp: Add xfail for mcore-elf.
+
+1999-05-11  DJ Delorie  <dj@cygnus.com>
+
+	* ld-srec/srec.exp: Do not run tests for PE based ports.
+
 1999-03-05  Nick Clifton  <nickc@cygnus.com>
 
 	* ld-selective/selective.exp: Do not run tests for COFF or PE

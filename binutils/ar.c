@@ -40,6 +40,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define EXT_NAME_LEN 6		/* ditto for *NIX */
 #endif
 
+/* We need to open files in binary modes on system where that makes a
+   difference.  */
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 #define BUFSIZE 8192
 
 /* Kludge declaration from BFD!  This is ugly!  FIXME!  XXX */
@@ -141,8 +147,18 @@ enum pos
 static bfd **
 get_pos_bfd PARAMS ((bfd **, enum pos, const char *));
 
+/* For extract/delete only.  If COUNTED_NAME_MODE is true, we only
+   extract the COUNTED_NAME_COUNTER instance of that name.  */
+static boolean counted_name_mode = 0;
+static int counted_name_counter = 0;
+
 /* Whether to truncate names of files stored in the archive.  */
 static boolean ar_truncate = false;
+
+/* Whether to use a full file name match when searching an archive.
+   This is convenient for archives created by the Microsoft lib
+   program.  */
+static boolean full_pathname = false;
 
 int interactive = 0;
 
@@ -165,6 +181,7 @@ map_over_members (arch, function, files, count)
      int count;
 {
   bfd *head;
+  int match_count;
 
   if (count == 0)
     {
@@ -175,6 +192,7 @@ map_over_members (arch, function, files, count)
 	}
       return;
     }
+
   /* This may appear to be a baroque way of accomplishing what we want.
      However we have to iterate over the filenames in order to notice where
      a filename is requested but does not exist in the archive.  Ditto
@@ -185,6 +203,7 @@ map_over_members (arch, function, files, count)
     {
       boolean found = false;
 
+      match_count = 0;
       for (head = arch->next; head; head = head->next)
 	{
 	  PROGRESS (1);
@@ -196,8 +215,17 @@ map_over_members (arch, function, files, count)
 	      bfd_stat_arch_elt (head, &buf);
 	    }
 	  if ((head->filename != NULL) &&
-	      (!strcmp (*files, head->filename)))
+	      (!strcmp (normalize (*files, arch), head->filename)))
 	    {
+	      ++match_count;
+	      if (counted_name_mode
+		  && match_count != counted_name_counter) 
+		{
+		  /* Counting, and didn't match on count; go on to the
+                     next one.  */
+		  continue;
+		}
+
 	      found = true;
 	      function (head);
 	    }
@@ -221,7 +249,8 @@ usage (help)
   if (! is_ranlib)
     {
       /* xgettext:c-format */
-      fprintf (s, _("Usage: %s [-]{dmpqrstx}[abcilosSuvV] [member-name] archive-file file...\n"), program_name);
+      fprintf (s, _("Usage: %s [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n"),
+	       program_name);
       /* xgettext:c-format */
       fprintf (s, _("       %s -M [<mri-script]\n"), program_name);
       fprintf (s, _(" commands:\n"));
@@ -235,7 +264,9 @@ usage (help)
       fprintf (s, _(" command specific modifiers:\n"));
       fprintf (s, _("  [a]          - put file(s) after [member-name]\n"));
       fprintf (s, _("  [b]          - put file(s) before [member-name] (same as [i])\n"));
+      fprintf (s, _("  [N]          - use instance [count] of name\n"));
       fprintf (s, _("  [f]          - truncate inserted file names\n"));
+      fprintf (s, _("  [P]          - use full path names when matching\n"));
       fprintf (s, _("  [o]          - preserve original dates\n"));
       fprintf (s, _("  [u]          - only replace files that are newer than current archive contents\n"));
       fprintf (s, _(" generic modifiers:\n"));
@@ -267,6 +298,9 @@ normalize (file, abfd)
 {
   const char *filename;
 
+  if (full_pathname)
+    return file;
+
   filename = strrchr (file, '/');
   if (filename != (char *) NULL)
     filename++;
@@ -291,7 +325,7 @@ normalize (file, abfd)
 
 /* Remove any output file.  This is only called via xatexit.  */
 
-static char *output_filename = NULL;
+static const char *output_filename = NULL;
 static FILE *output_file = NULL;
 static bfd *output_bfd = NULL;
 
@@ -325,6 +359,7 @@ main (argc, argv)
     } operation = none;
   int arg_index;
   char **files;
+  int file_count;
   char *inarch_filename;
   int show_version;
 
@@ -492,8 +527,14 @@ main (argc, argv)
 	case 'M':
 	  mri_mode = 1;
 	  break;
+	case 'N':
+	  counted_name_mode = true;
+	  break;
 	case 'f':
 	  ar_truncate = true;
+	  break;
+	case 'P':
+	  full_pathname = true;
 	  break;
 	default:
 	  /* xgettext:c-format */
@@ -539,9 +580,19 @@ main (argc, argv)
       if (postype != pos_default)
 	posname = argv[arg_index++];
 
+      if (counted_name_mode) 
+	{
+          if (operation != extract && operation != delete) 
+	     fatal (_("`N' is only meaningful with the `x' and 'd' options."));
+	  counted_name_counter = atoi (argv[arg_index++]);
+          if (counted_name_counter <= 0)
+	    fatal (_("Value for `N' must be positive."));
+	}
+
       inarch_filename = argv[arg_index++];
 
       files = arg_index < argc ? argv + arg_index : NULL;
+      file_count = argc - arg_index;
 
 #if 0
       /* We don't use do_quick_append any more.  Too many systems
@@ -582,31 +633,37 @@ main (argc, argv)
       switch (operation)
 	{
 	case print_table:
-	  map_over_members (arch, print_descr, files, argc - 3);
+	  map_over_members (arch, print_descr, files, file_count);
 	  break;
 
 	case print_files:
-	  map_over_members (arch, print_contents, files, argc - 3);
+	  map_over_members (arch, print_contents, files, file_count);
 	  break;
 
 	case extract:
-	  map_over_members (arch, extract_file, files, argc - 3);
+	  map_over_members (arch, extract_file, files, file_count);
 	  break;
 
 	case delete:
 	  if (files != NULL)
 	    delete_members (arch, files);
+	  else
+	    output_filename = NULL;
 	  break;
 
 	case move:
 	  if (files != NULL)
 	    move_members (arch, files);
+	  else
+	    output_filename = NULL;
 	  break;
 
 	case replace:
 	case quick_append:
 	  if (files != NULL || write_armap > 0)
 	    replace_members (arch, files, operation == quick_append);
+	  else
+	    output_filename = NULL;
 	  break;
 
 	  /* Shouldn't happen! */
@@ -681,6 +738,9 @@ open_inarch (archive_filename, file)
 	  || ! bfd_set_format (arch, bfd_archive)
 	  || ! bfd_close (arch))
 	bfd_fatal (archive_filename);
+
+      /* If we die creating a new archive, don't leave it around.  */
+      output_filename = archive_filename;
     }
 
   arch = bfd_openr (archive_filename, target);
@@ -730,8 +790,7 @@ print_contents (abfd)
     fatal (_("internal stat error on %s"), bfd_get_filename (abfd));
 
   if (verbose)
-    /* xgettext:c-format */
-    printf (_("\n<member %s>\n\n"), bfd_get_filename (abfd));
+    printf ("\n<%s>\n\n", bfd_get_filename (abfd));
 
   bfd_seek (abfd, 0, SEEK_SET);
 
@@ -1069,6 +1128,8 @@ delete_members (arch, files_to_delete)
   bfd **current_ptr_ptr;
   boolean found;
   boolean something_changed = false;
+  int match_count;
+
   for (; *files_to_delete != NULL; ++files_to_delete)
     {
       /* In a.out systems, the armap is optional.  It's also called
@@ -1085,23 +1146,33 @@ delete_members (arch, files_to_delete)
 	}
 
       found = false;
+      match_count = 0;
       current_ptr_ptr = &(arch->next);
       while (*current_ptr_ptr)
 	{
-	  if (strcmp (*files_to_delete, (*current_ptr_ptr)->filename) == 0)
+	  if (strcmp (normalize (*files_to_delete, arch),
+		      (*current_ptr_ptr)->filename) == 0)
 	    {
-	      found = true;
-	      something_changed = true;
-	      if (verbose)
-		printf ("d - %s\n",
-			*files_to_delete);
-	      *current_ptr_ptr = ((*current_ptr_ptr)->next);
-	      goto next_file;
+	      ++match_count;
+	      if (counted_name_mode
+		  && match_count != counted_name_counter) 
+		{
+		  /* Counting, and didn't match on count; go on to the
+                     next one.  */
+		}
+	      else
+		{
+		  found = true;
+		  something_changed = true;
+		  if (verbose)
+		    printf ("d - %s\n",
+			    *files_to_delete);
+		  *current_ptr_ptr = ((*current_ptr_ptr)->next);
+		  goto next_file;
+		}
 	    }
-	  else
-	    {
-	      current_ptr_ptr = &((*current_ptr_ptr)->next);
-	    }
+
+	  current_ptr_ptr = &((*current_ptr_ptr)->next);
 	}
 
       if (verbose && found == false)
@@ -1114,9 +1185,9 @@ delete_members (arch, files_to_delete)
     }
 
   if (something_changed == true)
-    {
-      write_archive (arch);
-    }
+    write_archive (arch);
+  else
+    output_filename = NULL;
 }
 
 
@@ -1267,6 +1338,8 @@ replace_members (arch, files_to_move, quick)
 
   if (changed)
     write_archive (arch);
+  else
+    output_filename = NULL;
 }
 
 static void
@@ -1296,7 +1369,7 @@ ranlib_touch (archname)
   bfd *arch;
   char **matching;
 
-  f = open (archname, O_RDWR, 0);
+  f = open (archname, O_RDWR | O_BINARY, 0);
   if (f < 0)
     {
       bfd_set_error (bfd_error_system_call);

@@ -1,5 +1,5 @@
 # Expect script for ld-version tests
-#   Copyright (C) 1997, 1998 Free Software Foundation
+#   Copyright (C) 1997, 1998, 1999 Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,7 +35,8 @@ if { ![istarget i?86-*-sysv4*] \
      && ![istarget powerpc-*-linux*] \
      && ![istarget powerpc-*-sysv4*] \
      && ![istarget sparc*-*-elf] \
-     && ![istarget sparc*-*-solaris2*]
+     && ![istarget sparc*-*-solaris2*] \
+     && ![istarget sparc*-*-linux*] \
      && ![istarget alpha*-*-linux*] } {
     return
 }
@@ -806,3 +807,8 @@ build_exec "vers15" vers15.c vers15 "" vers1.so vers15.ver vers15.dsym vers15.sy
 #
 build_vers_lib "vers16a" vers16a.c vers16a "" vers16.map vers16a.ver vers16a.dsym ""
 build_exec "vers16" vers16.c vers16 "" vers16a.so "" vers16.dsym ""
+
+# Test a weak versioned symbol.
+build_vers_lib "vers17" vers17.c vers17 "" vers17.map vers17.ver vers17.dsym ""
+build_vers_lib "vers18" vers18.c vers18 vers17.so vers18.map vers18.ver vers18.dsym vers18.sym
+build_exec "vers19" vers19.c vers19 "-rpath ." vers18.so vers19.ver vers19.dsym ""

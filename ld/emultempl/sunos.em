@@ -100,7 +100,8 @@ gld${EMULATION_NAME}_set_symbols ()
 {
 EOF
 if [ "x${host}" = "x${target}" ] ; then
-  if [ "x${DEFAULT_EMULATION}" = "x${EMULATION_NAME}" ] ; then
+  case " ${EMULATION_LIBPATH} " in
+  *" ${EMULATION_NAME} "*)
 cat >>e${EMULATION_NAME}.c <<EOF
   const char *env;
 
@@ -125,7 +126,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	}
     }
 EOF
-  fi
+  ;;
+  esac
 fi
 cat >>e${EMULATION_NAME}.c <<EOF
 }
@@ -464,7 +466,8 @@ gld${EMULATION_NAME}_after_open ()
 	}
 EOF
 if [ "x${host}" = "x${target}" ] ; then
-  if [ "x${DEFAULT_EMULATION}" = "x${EMULATION_NAME}" ] ; then
+  case " ${EMULATION_LIBPATH} " in
+  *" ${EMULATION_NAME} "*)
 cat >>e${EMULATION_NAME}.c <<EOF
       {
 	const char *lib_path;
@@ -474,7 +477,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	  continue;
       }
 EOF
-  fi
+  ;;
+  esac
 fi
 cat >>e${EMULATION_NAME}.c <<EOF
       if (command_line.rpath != NULL)
@@ -967,28 +971,25 @@ then
 # Scripts compiled in.
 
 # sed commands to quote an ld script as a C string.
-sc='s/["\\]/\\&/g
-s/$/\\n\\/
-1s/^/"/
-$s/$/n"/
-'
+sc="-f stringify.sed"
 
 cat >>e${EMULATION_NAME}.c <<EOF
 {			     
   *isfile = 0;
 
   if (link_info.relocateable == true && config.build_constructors == true)
-    return `sed "$sc" ldscripts/${EMULATION_NAME}.xu`;
-  else if (link_info.relocateable == true)
-    return `sed "$sc" ldscripts/${EMULATION_NAME}.xr`;
-  else if (!config.text_read_only)
-    return `sed "$sc" ldscripts/${EMULATION_NAME}.xbn`;
-  else if (!config.magic_demand_paged)
-    return `sed "$sc" ldscripts/${EMULATION_NAME}.xn`;
-  else
-    return `sed "$sc" ldscripts/${EMULATION_NAME}.x`;
-}
+    return
 EOF
+sed $sc ldscripts/${EMULATION_NAME}.xu                     >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.relocateable == true) return' >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xr                     >> e${EMULATION_NAME}.c
+echo '  ; else if (!config.text_read_only) return'         >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xbn                    >> e${EMULATION_NAME}.c
+echo '  ; else if (!config.magic_demand_paged) return'     >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xn                     >> e${EMULATION_NAME}.c
+echo '  ; else return'                                     >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.x                      >> e${EMULATION_NAME}.c
+echo '; }'                                                 >> e${EMULATION_NAME}.c
 
 else
 # Scripts read from the filesystem.
@@ -1028,10 +1029,15 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  NULL, /* finish */
+  NULL,	/* finish */
   gld${EMULATION_NAME}_create_output_section_statements,
-  NULL, /* open_dynamic_library */
-  NULL, /* place_orphan */
-  gld${EMULATION_NAME}_set_symbols
+  NULL,	/* open dynamic archive */
+  NULL,	/* place orphan */
+  gld${EMULATION_NAME}_set_symbols,
+  NULL,	/* parse args */
+  NULL,	/* unrecognized file */
+  NULL,	/* list options */
+  NULL,	/* recognized file */
+  NULL 	/* find_potential_libraries */
 };
 EOF

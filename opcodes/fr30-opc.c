@@ -1182,11 +1182,11 @@ static const CGEN_IFMT ifmt_ldi8m = {
 };
 
 static const CGEN_IFMT ifmt_ldi20m = {
-  16, 32, 0xff00, { F (F_OP1), F (F_I20), F (F_OP2), F (F_RI), 0 }
+  16, 32, 0xff00, { F (F_OP1), F (F_OP2), F (F_RI), F (F_I20), 0 }
 };
 
 static const CGEN_IFMT ifmt_ldi32m = {
-  16, 48, 0xfff0, { F (F_OP1), F (F_I32), F (F_OP2), F (F_OP3), F (F_RI), 0 }
+  16, 48, 0xfff0, { F (F_OP1), F (F_OP2), F (F_OP3), F (F_RI), F (F_I32), 0 }
 };
 
 #undef F

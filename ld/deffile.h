@@ -19,6 +19,9 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
+#ifndef DEFFILE_H
+#define DEFFILE_H
+
 #include "ansidecl.h"
 
 /* DEF storage definitions.  Note that any ordinal may be zero, and
@@ -121,3 +124,5 @@ extern void def_file_add_directive PARAMS ((def_file * _def,
 extern void def_file_print PARAMS ((FILE * _file,
 				    def_file * _def));
 #endif
+
+#endif /* DEFFILE_H */

@@ -1,6 +1,5 @@
 /* tc-d30v.c -- Assembler code for the Mitsubishi D30V
-
-   Copyright (C) 1997, 1998 Free Software Foundation.
+   Copyright (C) 1997, 1998, 1999, 2000 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -31,6 +30,14 @@ const char line_separator_chars[] = "";
 const char *md_shortopts = "OnNcC";
 const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
+
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
 
 #define NOP_MULTIPLY 1
 #define NOP_ALL 2
@@ -216,7 +223,7 @@ register_name (expressionP)
     {
       expressionP->X_op = O_register;
       /* temporarily store a pointer to the string here */
-      expressionP->X_op_symbol = (struct symbol *)input_line_pointer;
+      expressionP->X_op_symbol = (symbolS *)input_line_pointer;
       expressionP->X_add_number = reg_number;
       input_line_pointer = p;
       return 1;
@@ -234,38 +241,44 @@ check_range (num, bits, flags)
      int flags;
 {
   long min, max;
-  int retval=0;
 
-  /* don't bother checking 32-bit values */
+  /* Don't bother checking 32-bit values.  */
   if (bits == 32)
-    return 0;
+    {
+      if (sizeof(unsigned long) * CHAR_BIT == 32)
+        return 0;
+
+      /* We don't record signed or unsigned for 32-bit quantities.
+	 Allow either.  */
+      min = -((unsigned long)1 << (bits - 1));
+      max = ((unsigned long)1 << bits) - 1;
+      return (long)num < min || (long)num > max;
+    }
 
   if (flags & OPERAND_SHIFT)
     {
       /* We know that all shifts are right by three bits.... */
       
       if (flags & OPERAND_SIGNED)
-	num = (unsigned long) (((/*signed*/ long) num) >> 3);
+	num = (unsigned long) ( (long) num >= 0) 
+		? ( ((long) num) >> 3 )
+		: ( (num >> 3) | ~(~(unsigned long)0 >> 3) );
       else
 	num >>= 3;
     }
 
   if (flags & OPERAND_SIGNED)
     {
-      max = (1 << (bits - 1))-1; 
-      min = - (1 << (bits - 1));
-      if (((long)num > max) || ((long)num < min))
-	retval = 1;
+      max = ((unsigned long)1 << (bits - 1)) - 1; 
+      min = - ((unsigned long)1 << (bits - 1));
+      return (long)num > max || (long)num < min;
     }
   else
     {
-      max = (1 << bits) - 1;
+      max = ((unsigned long)1 << bits) - 1;
       min = 0;
-      if ((num > max) || (num < min))
-	retval = 1;
+      return num > max || num < min;
     }
-  
-  return retval;
 }
 
 
@@ -569,7 +582,7 @@ build_insn (opcode, opers)
      expressionS *opers;
 {
   int i, length, bits, shift, flags;
-  unsigned int number, id=0;
+  unsigned long number, id=0;
   long long insn;
   struct d30v_opcode *op = opcode->op;
   struct d30v_format *form = opcode->form;
@@ -644,10 +657,10 @@ build_insn (opcode, opers)
       if (bits == 32)
 	{
 	  /* it's a LONG instruction */
-	  insn |= (number >> 26);	/* top 6 bits */
+	  insn |= ((number & 0xffffffff) >> 26);	/* top 6 bits */
 	  insn <<= 32;			/* shift the first word over */
-	  insn |= ((number & 0x03FC0000) << 2);  /* next 8 bits */ 
-	  insn |= number & 0x0003FFFF;		/* bottom 18 bits */
+	  insn |= ((number & 0x03FC0000) << 2);		/* next 8 bits */ 
+	  insn |= number & 0x0003FFFF;			/* bottom 18 bits */
 	}
       else
 	insn |= number << shift;
@@ -800,12 +813,16 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	      fx = fx->next;
 	    }
 	}
-      else if (opcode1->op->flags_used & (FLAG_JMP | FLAG_JSR)
-	       && ((opcode1->op->flags_used & FLAG_DELAY) == 0)
-	       && ((opcode1->ecc == ECC_AL) || ! Optimizing))
+      else if ((opcode1->op->flags_used & (FLAG_JMP | FLAG_JSR)
+		&& ((opcode1->op->flags_used & FLAG_DELAY) == 0)
+		&& ((opcode1->ecc == ECC_AL) || ! Optimizing))
+	       || opcode1->op->flags_used & FLAG_RP)
 	{
 	  /* We must emit (non-delayed) branch type instructions
 	     on their own with nothing in the right container.  */
+	  /* We must treat repeat instructions likewise, since the
+	     following instruction has to be separate from the repeat
+	     in order to be repeated.  */
 	  write_1_short (opcode1, insn1, fx->next, false);
 	  return 1;
 	}
@@ -1129,10 +1146,10 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
   flags_used1 = op1->op->flags_used;
   flags_used2 = op2->op->flags_used;
 
-  /* ST2W/ST4HB combined with ADDppp/SUBppp is illegal.  */
-  if (((flags_set1 & (FLAG_MEM | FLAG_2WORD)) == (FLAG_MEM | FLAG_2WORD)
+  /* Check for illegal combinations with ADDppp/SUBppp.  */
+  if (((flags_set1 & FLAG_NOT_WITH_ADDSUBppp) != 0
        && (flags_used2 & FLAG_ADDSUBppp) != 0)
-      || ((flags_set2 & (FLAG_MEM | FLAG_2WORD)) == (FLAG_MEM | FLAG_2WORD)
+      || ((flags_set2 & FLAG_NOT_WITH_ADDSUBppp) != 0
 	  && (flags_used1 & FLAG_ADDSUBppp) != 0))
     return 0;
 
@@ -1745,7 +1762,8 @@ tc_gen_reloc (seg, fixp)
 {
   arelent *reloc;
   reloc = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
   if (reloc->howto == (reloc_howto_type *) NULL)
@@ -2028,7 +2046,7 @@ d30v_frob_label (lab)
   d30v_cleanup (false);
 
   /* Update the label's address with the current output pointer.  */
-  lab->sy_frag = frag_now;
+  symbol_set_frag (lab, frag_now);
   S_SET_VALUE (lab, (valueT) frag_now_fix ());
 
   /* Record this label for future adjustment after we find out what
@@ -2110,7 +2128,7 @@ d30v_align (n, pfill, label)
       
       assert (S_GET_SEGMENT (label) == now_seg);
 
-      old_frag  = label->sy_frag;
+      old_frag  = symbol_get_frag (label);
       old_value = S_GET_VALUE (label);
       new_value = (valueT) frag_now_fix ();
       
@@ -2125,15 +2143,16 @@ d30v_align (n, pfill, label)
 	 in the target fragment.  Note, this search is guaranteed to
 	 find at least one match when sym == label, so no special case
 	 code is necessary.  */
-      for (sym = symbol_lastP; sym != NULL; sym = sym->sy_previous)
+      for (sym = symbol_lastP; sym != NULL; sym = symbol_previous (sym))
 	{
-	  if (sym->sy_frag == old_frag && S_GET_VALUE (sym) == old_value)
+	  if (symbol_get_frag (sym) == old_frag
+	      && S_GET_VALUE (sym) == old_value)
 	    {
 	      label_seen = true;
-	      sym->sy_frag = frag_now;
+	      symbol_set_frag (sym, frag_now);
 	      S_SET_VALUE (sym, new_value);
 	    }
-	  else if (label_seen && sym->sy_frag != old_frag)
+	  else if (label_seen && symbol_get_frag (sym) != old_frag)
 	    break;
 	}
     }

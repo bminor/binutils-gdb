@@ -114,7 +114,7 @@ frag_new (old_frags_var_max_size)
   assert (frchain_now->frch_last == frag_now);
 
   /* Fix up old frag's fr_fix.  */
-  frag_now->fr_fix = frag_now_fix () - old_frags_var_max_size;
+  frag_now->fr_fix = frag_now_fix_octets () - old_frags_var_max_size;
   /* Make sure its type is valid.  */
   assert (frag_now->fr_type != 0);
 
@@ -336,12 +336,19 @@ frag_align_pattern (alignment, fill_pattern, n_fill, max)
 }
 
 addressT
-frag_now_fix ()
+frag_now_fix_octets ()
 {
   if (now_seg == absolute_section)
     return abs_section_offset;
-  return (addressT) ((char*) obstack_next_free (&frchain_now->frch_obstack)
-		     - frag_now->fr_literal);
+
+  return ((char*) obstack_next_free (&frchain_now->frch_obstack)
+          - frag_now->fr_literal);
+}
+
+addressT
+frag_now_fix ()
+{
+  return frag_now_fix_octets() / OCTETS_PER_BYTE;
 }
 
 void

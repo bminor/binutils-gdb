@@ -122,6 +122,7 @@ static unsigned long class;
 %token <s> QUOTEDSTRING STRING
 %token <i> NUMBER
 %token <ss> SIZEDSTRING
+%token IGNORED_TOKEN
 
 %type <pacc> acc_entries
 %type <acc> acc_entry acc_event
@@ -167,6 +168,7 @@ input:
 	| input newcmd stringtable
 	| input newcmd user
 	| input newcmd versioninfo
+	| input newcmd IGNORED_TOKEN
 	;
 
 newcmd:

@@ -3,7 +3,7 @@
 THIS FILE IS MACHINE GENERATED WITH CGEN: Cpu tools GENerator.
 - the resultant file is machine generated, cgen-ibld.in isn't
 
-Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and GDB, the GNU debugger.
 
@@ -203,6 +203,7 @@ insert_normal (cd, value, attrs, word_offset, start, length, word_length,
   if (! CGEN_BOOL_ATTR (attrs, CGEN_IFLD_SIGNED))
     {
       unsigned long maxval = mask;
+      
       if ((unsigned long) value > maxval)
 	{
 	  /* xgettext:c-format */
@@ -214,15 +215,19 @@ insert_normal (cd, value, attrs, word_offset, start, length, word_length,
     }
   else
     {
-      long minval = - (1L << (length - 1));
-      long maxval = (1L << (length - 1)) - 1;
-      if (value < minval || value > maxval)
+      if (! cgen_signed_overflow_ok_p (cd))
 	{
-	  sprintf
-	    /* xgettext:c-format */
-	    (errbuf, _("operand out of range (%ld not between %ld and %ld)"),
-	     value, minval, maxval);
-	  return errbuf;
+	  long minval = - (1L << (length - 1));
+	  long maxval =   (1L << (length - 1)) - 1;
+	  
+	  if (value < minval || value > maxval)
+	    {
+	      sprintf
+		/* xgettext:c-format */
+		(errbuf, _("operand out of range (%ld not between %ld and %ld)"),
+		 value, minval, maxval);
+	      return errbuf;
+	    }
 	}
     }
 
@@ -579,11 +584,20 @@ m32r_cgen_insert_operand (cd, opindex, fields, buffer, pc)
      CGEN_INSN_BYTES_PTR buffer;
      bfd_vma pc;
 {
-  const char * errmsg;
+  const char * errmsg = NULL;
   unsigned int total_length = CGEN_FIELDS_BITSIZE (fields);
 
   switch (opindex)
     {
+    case M32R_OPERAND_ACC :
+      errmsg = insert_normal (cd, fields->f_acc, 0, 0, 8, 1, 32, total_length, buffer);
+      break;
+    case M32R_OPERAND_ACCD :
+      errmsg = insert_normal (cd, fields->f_accd, 0, 0, 4, 2, 32, total_length, buffer);
+      break;
+    case M32R_OPERAND_ACCS :
+      errmsg = insert_normal (cd, fields->f_accs, 0, 0, 12, 2, 32, total_length, buffer);
+      break;
     case M32R_OPERAND_DCR :
       errmsg = insert_normal (cd, fields->f_r1, 0, 0, 4, 4, 32, total_length, buffer);
       break;
@@ -612,10 +626,16 @@ m32r_cgen_insert_operand (cd, opindex, fields, buffer, pc)
       errmsg = insert_normal (cd, fields->f_r1, 0, 0, 4, 4, 32, total_length, buffer);
       break;
     case M32R_OPERAND_HASH :
-      errmsg = insert_normal (cd, fields->f_nil, 0, 0, 0, 0, 0, total_length, buffer);
       break;
     case M32R_OPERAND_HI16 :
       errmsg = insert_normal (cd, fields->f_hi16, 0|(1<<CGEN_IFLD_SIGN_OPT), 0, 16, 16, 32, total_length, buffer);
+      break;
+    case M32R_OPERAND_IMM1 :
+      {
+        long value = fields->f_imm1;
+        value = ((value) - (1));
+        errmsg = insert_normal (cd, value, 0, 0, 15, 1, 32, total_length, buffer);
+      }
       break;
     case M32R_OPERAND_SCR :
       errmsg = insert_normal (cd, fields->f_r2, 0, 0, 12, 4, 32, total_length, buffer);
@@ -665,6 +685,8 @@ m32r_cgen_insert_operand (cd, opindex, fields, buffer, pc)
 }
 
 /* Main entry point for operand extraction.
+   The result is <= 0 for error, >0 for success.
+   ??? Actual values aren't well defined right now.
 
    This function is basically just a big switch statement.  Earlier versions
    used tables to look up the function to use, but
@@ -687,11 +709,21 @@ m32r_cgen_extract_operand (cd, opindex, ex_info, insn_value, fields, pc)
      CGEN_FIELDS * fields;
      bfd_vma pc;
 {
-  int length;
+  /* Assume success (for those operands that are nops).  */
+  int length = 1;
   unsigned int total_length = CGEN_FIELDS_BITSIZE (fields);
 
   switch (opindex)
     {
+    case M32R_OPERAND_ACC :
+      length = extract_normal (cd, ex_info, insn_value, 0, 0, 8, 1, 32, total_length, pc, & fields->f_acc);
+      break;
+    case M32R_OPERAND_ACCD :
+      length = extract_normal (cd, ex_info, insn_value, 0, 0, 4, 2, 32, total_length, pc, & fields->f_accd);
+      break;
+    case M32R_OPERAND_ACCS :
+      length = extract_normal (cd, ex_info, insn_value, 0, 0, 12, 2, 32, total_length, pc, & fields->f_accs);
+      break;
     case M32R_OPERAND_DCR :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 4, 4, 32, total_length, pc, & fields->f_r1);
       break;
@@ -723,10 +755,17 @@ m32r_cgen_extract_operand (cd, opindex, ex_info, insn_value, fields, pc)
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 4, 4, 32, total_length, pc, & fields->f_r1);
       break;
     case M32R_OPERAND_HASH :
-      length = extract_normal (cd, ex_info, insn_value, 0, 0, 0, 0, 0, total_length, pc, & fields->f_nil);
       break;
     case M32R_OPERAND_HI16 :
       length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGN_OPT), 0, 16, 16, 32, total_length, pc, & fields->f_hi16);
+      break;
+    case M32R_OPERAND_IMM1 :
+      {
+        long value;
+        length = extract_normal (cd, ex_info, insn_value, 0, 0, 15, 1, 32, total_length, pc, & value);
+        value = ((value) + (1));
+        fields->f_imm1 = value;
+      }
       break;
     case M32R_OPERAND_SCR :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 12, 4, 32, total_length, pc, & fields->f_r2);
@@ -800,6 +839,15 @@ m32r_cgen_get_int_operand (cd, opindex, fields)
 
   switch (opindex)
     {
+    case M32R_OPERAND_ACC :
+      value = fields->f_acc;
+      break;
+    case M32R_OPERAND_ACCD :
+      value = fields->f_accd;
+      break;
+    case M32R_OPERAND_ACCS :
+      value = fields->f_accs;
+      break;
     case M32R_OPERAND_DCR :
       value = fields->f_r1;
       break;
@@ -816,10 +864,13 @@ m32r_cgen_get_int_operand (cd, opindex, fields)
       value = fields->f_r1;
       break;
     case M32R_OPERAND_HASH :
-      value = fields->f_nil;
+      value = 0;
       break;
     case M32R_OPERAND_HI16 :
       value = fields->f_hi16;
+      break;
+    case M32R_OPERAND_IMM1 :
+      value = fields->f_imm1;
       break;
     case M32R_OPERAND_SCR :
       value = fields->f_r2;
@@ -878,6 +929,15 @@ m32r_cgen_get_vma_operand (cd, opindex, fields)
 
   switch (opindex)
     {
+    case M32R_OPERAND_ACC :
+      value = fields->f_acc;
+      break;
+    case M32R_OPERAND_ACCD :
+      value = fields->f_accd;
+      break;
+    case M32R_OPERAND_ACCS :
+      value = fields->f_accs;
+      break;
     case M32R_OPERAND_DCR :
       value = fields->f_r1;
       break;
@@ -894,10 +954,13 @@ m32r_cgen_get_vma_operand (cd, opindex, fields)
       value = fields->f_r1;
       break;
     case M32R_OPERAND_HASH :
-      value = fields->f_nil;
+      value = 0;
       break;
     case M32R_OPERAND_HI16 :
       value = fields->f_hi16;
+      break;
+    case M32R_OPERAND_IMM1 :
+      value = fields->f_imm1;
       break;
     case M32R_OPERAND_SCR :
       value = fields->f_r2;
@@ -960,6 +1023,15 @@ m32r_cgen_set_int_operand (cd, opindex, fields, value)
 {
   switch (opindex)
     {
+    case M32R_OPERAND_ACC :
+      fields->f_acc = value;
+      break;
+    case M32R_OPERAND_ACCD :
+      fields->f_accd = value;
+      break;
+    case M32R_OPERAND_ACCS :
+      fields->f_accs = value;
+      break;
     case M32R_OPERAND_DCR :
       fields->f_r1 = value;
       break;
@@ -976,10 +1048,12 @@ m32r_cgen_set_int_operand (cd, opindex, fields, value)
       fields->f_r1 = value;
       break;
     case M32R_OPERAND_HASH :
-      fields->f_nil = value;
       break;
     case M32R_OPERAND_HI16 :
       fields->f_hi16 = value;
+      break;
+    case M32R_OPERAND_IMM1 :
+      fields->f_imm1 = value;
       break;
     case M32R_OPERAND_SCR :
       fields->f_r2 = value;
@@ -1035,6 +1109,15 @@ m32r_cgen_set_vma_operand (cd, opindex, fields, value)
 {
   switch (opindex)
     {
+    case M32R_OPERAND_ACC :
+      fields->f_acc = value;
+      break;
+    case M32R_OPERAND_ACCD :
+      fields->f_accd = value;
+      break;
+    case M32R_OPERAND_ACCS :
+      fields->f_accs = value;
+      break;
     case M32R_OPERAND_DCR :
       fields->f_r1 = value;
       break;
@@ -1051,10 +1134,12 @@ m32r_cgen_set_vma_operand (cd, opindex, fields, value)
       fields->f_r1 = value;
       break;
     case M32R_OPERAND_HASH :
-      fields->f_nil = value;
       break;
     case M32R_OPERAND_HI16 :
       fields->f_hi16 = value;
+      break;
+    case M32R_OPERAND_IMM1 :
+      fields->f_imm1 = value;
       break;
     case M32R_OPERAND_SCR :
       fields->f_r2 = value;

@@ -1,5 +1,5 @@
 /* wrstabs.c -- Output stabs debugging information
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -984,7 +984,7 @@ static boolean
 stab_function_type (p, argcount, varargs)
      PTR p;
      int argcount;
-     boolean varargs;
+     boolean varargs ATTRIBUTE_UNUSED;
 {
   struct stab_write_handle *info = (struct stab_write_handle *) p;
   int i;
@@ -2383,7 +2383,7 @@ stab_end_block (p, addr)
 /*ARGSUSED*/
 static boolean
 stab_end_function (p)
-     PTR p;
+     PTR p ATTRIBUTE_UNUSED;
 {
   return true;
 }

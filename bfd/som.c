@@ -148,6 +148,7 @@ struct som_misc_symbol_info
   unsigned int symbol_info;
   unsigned int symbol_value;
   unsigned int priv_level;
+  unsigned int secondary_def;
 };
 
 /* Forward declarations */
@@ -440,9 +441,7 @@ static const struct fixup_format som_fixup_formats[256] =
   1,    "Lb4*=Mb1+L*=",	/* 0x2b */
   2,    "Lb4*=Md1+4*=",	/* 0x2c */
   3,    "Ld1+=Me1+=",	/* 0x2d */
-  /* R_SHORT_PCREL_MODE */
   0,   	"",	        /* 0x2e */
-  /* R_LONG_PCREL_MODE */
   0,   	"",	        /* 0x2f */
   /* R_PCREL_CALL */
   0,    "L4=RD=Sb=",	/* 0x30 */
@@ -459,8 +458,9 @@ static const struct fixup_format som_fixup_formats[256] =
   1,    "L4=RD8<b+=Sb=",/* 0x3b */
   0,    "L4=RD8<b+=Sd=",/* 0x3c */
   1,    "L4=RD8<b+=Sd=",/* 0x3d */
-  /* R_RESERVED */
+  /* R_SHORT_PCREL_MODE */
   0,    "",	        /* 0x3e */
+  /* R_LONG_PCREL_MODE */
   0,    "",	        /* 0x3f */
   /* R_ABS_CALL */
   0,    "L4=RD=Sb=",	/* 0x40 */
@@ -635,8 +635,8 @@ static const struct fixup_format som_fixup_formats[256] =
   4,    "Ve=",	        /* 0xcd */
   /* R_TRANSLATED */
   0,    "",	        /* 0xce */
-  /* R_RESERVED */
-  0,    "",	        /* 0xcf */
+  /* R_AUX_UNWIND */
+  0,    "Sd=Vf=Ef=",    /* 0xcf */
   /* R_COMP1 */
   0,    "Ob=",	        /* 0xd0 */
   /* R_COMP2 */
@@ -655,13 +655,13 @@ static const struct fixup_format som_fixup_formats[256] =
   /* R_N1SEL */
   0,	"",		/* 0xd9 */
   /* R_LINETAB */
-  0,	"",		/* 0xda */
+  0,	"Eb=Sd=Ve=",	/* 0xda */
   /* R_LINETAB_ESC */
-  0,	"",		/* 0xdb */
+  0,	"Eb=Mb=",	/* 0xdb */
   /* R_LTP_OVERRIDE */
   0,	"",		/* 0xdc */
   /* R_COMMENT */
-  0,	"",		/* 0xdd */
+  0,    "Ob=Ve=",	/* 0xdd */
   /* R_RESERVED */
   0,	"",		/* 0xde */
   0,	"",		/* 0xdf */
@@ -752,6 +752,7 @@ static const int comp3_opcodes[] =
 
 /* And these first appeared in hpux10.  */
 #ifndef R_SHORT_PCREL_MODE
+#define NO_PCREL_MODES
 #define R_SHORT_PCREL_MODE 0x3e
 #endif
 
@@ -782,6 +783,9 @@ static const int comp3_opcodes[] =
 #ifndef R_COMMENT
 #define R_COMMENT 0xdd
 #endif
+
+#define SOM_HOWTO(TYPE, NAME)	\
+  HOWTO(TYPE, 0, 0, 32, false, 0, 0, hppa_som_reloc, NAME, false, 0, 0, false)
 
 static reloc_howto_type som_hppa_howto_table[] =
 {
@@ -1685,9 +1689,28 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff, sym)
 
     case R_HPPA_NONE:
     case R_HPPA_ABS_CALL:
-    case R_HPPA_PCREL_CALL:
       /* Right now we can default all these.  */
       break;
+
+    case R_HPPA_PCREL_CALL:
+      {
+#ifndef NO_PCREL_MODES
+	/* If we have short and long pcrel modes, then generate the proper
+	   mode selector, then the pcrel relocation.  Redundant selectors
+	   will be eliminted as the relocs are sized and emitted.  */
+	final_types[0] = (int *) bfd_alloc (abfd, sizeof (int));
+	if (!final_types[0])
+	  return NULL;
+	if (format == 17)
+	  *final_types[0] = R_SHORT_PCREL_MODE;
+	else
+	  *final_types[0] = R_LONG_PCREL_MODE;
+	final_types[1] = final_type;
+	final_types[2] = NULL;
+	*final_type = base_type;
+#endif
+	break;
+      }
     }
   return final_types;
 }
@@ -2666,6 +2689,9 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 	   subsection = subsection->next)
 	{
 	  int reloc_offset, current_rounding_mode;
+#ifndef NO_PCREL_MODES
+ 	  int current_call_mode;
+#endif
 
 	  /* Find a subspace of this space.  */
 	  if (!som_is_subspace (subsection)
@@ -2700,6 +2726,9 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 	  reloc_offset = 0;
 	  som_initialize_reloc_queue (reloc_queue);
 	  current_rounding_mode = R_N_MODE;
+#ifndef NO_PCREL_MODES
+	  current_call_mode = R_SHORT_PCREL_MODE;
+#endif
 
 	  /* Translate each BFD relocation into one or more SOM 
 	     relocations.  */
@@ -2764,6 +2793,10 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		case R_END_TRY:
 		case R_N0SEL:
 		case R_N1SEL:
+#ifndef NO_PCREL_MODES
+		case R_SHORT_PCREL_MODE:
+		case R_LONG_PCREL_MODE:
+#endif
 		  reloc_offset = bfd_reloc->address;
 		  break;
 
@@ -2887,6 +2920,19 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		      current_rounding_mode = bfd_reloc->howto->type;
 		    }
 		  break;
+
+#ifndef NO_PCREL_MODES
+		case R_LONG_PCREL_MODE:
+		case R_SHORT_PCREL_MODE:
+		  if (bfd_reloc->howto->type != current_call_mode)
+		    {
+		      bfd_put_8 (abfd, bfd_reloc->howto->type, p);
+		      subspace_reloc_size += 1;
+		      p += 1;
+		      current_call_mode = bfd_reloc->howto->type;
+		    }
+		  break;
+#endif
 
 		case R_EXIT:
 		case R_ALT_ENTRY:
@@ -4010,6 +4056,13 @@ som_bfd_derive_misc_symbol_info (abfd, sym, info)
 
   /* Set the symbol's value.  */
   info->symbol_value = sym->value + sym->section->vma;
+
+  /* The secondary_def field is for weak symbols.  */
+  if (sym->flags & BSF_WEAK)
+    info->secondary_def = true;
+  else
+    info->secondary_def = false;
+
 }
 
 /* Build and write, in one big chunk, the entire symbol table for
@@ -4053,6 +4106,7 @@ som_build_and_write_symbol_table (abfd)
       som_symtab[i].symbol_info = info.symbol_info;
       som_symtab[i].xleast = 3;
       som_symtab[i].symbol_value = info.symbol_value | info.priv_level;
+      som_symtab[i].secondary_def = info.secondary_def;
     }
 
   /* Everything is ready, seek to the right location and
@@ -4292,7 +4346,7 @@ som_slurp_symbol_table (abfd)
 	  som_symbol_data (sym)->tc_data.ap.hppa_priv_level =
 	    sym->symbol.value & 0x3;
 	  sym->symbol.value &= ~0x3;
-	  /* If the symbol's scope is ST_UNSAT, then these are
+	  /* If the symbol's scope is SS_UNSAT, then these are
 	     undefined function symbols.  */
 	  if (bufp->symbol_scope == SS_UNSAT)
 	    sym->symbol.flags |= BSF_FUNCTION;
@@ -4339,6 +4393,10 @@ som_slurp_symbol_table (abfd)
 	  sym->symbol.value -= sym->symbol.section->vma;
 	  break;
 	}
+
+      /* Check for a weak symbol.  */
+      if (bufp->secondary_def)
+        sym->symbol.flags |= BSF_WEAK;
 
       /* Mark section symbols and symbols used by the debugger.
 	 Note $START$ is a magic code symbol, NOT a section symbol.  */
@@ -5882,7 +5940,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst, elength)
 
 	  /* Fill in the lst symbol record.  */
 	  curr_lst_sym->hidden = 0;
-	  curr_lst_sym->secondary_def = 0;
+	  curr_lst_sym->secondary_def = info.secondary_def;
 	  curr_lst_sym->symbol_type = info.symbol_type;
 	  curr_lst_sym->symbol_scope = info.symbol_scope;
 	  curr_lst_sym->check_level = 0;
@@ -6258,6 +6316,8 @@ const bfd_target som_vec =
   BFD_JUMP_TABLE_LINK (som),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  NULL,
+  
   (PTR) 0
 };
 

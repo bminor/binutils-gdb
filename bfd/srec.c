@@ -171,7 +171,7 @@ srec_init ()
 /* The maximum number of bytes on a line is FF */
 #define MAXCHUNK 0xff
 /* The number of bytes we fit onto a line on output */
-#define CHUNK 21
+#define CHUNK 16
 
 /* When writing an S-record file, the S-records can not be output as
    they are seen.  This structure is used to hold them in memory.  */
@@ -1000,31 +1000,28 @@ srec_write_section (abfd, tdata, list)
      tdata_type *tdata;
      srec_data_list_type *list;
 {
-  unsigned int bytes_written = 0;
+  unsigned int octets_written = 0;
   bfd_byte *location = list->data;
 
-  while (bytes_written < list->size)
+  while (octets_written < list->size)
     {
       bfd_vma address;
+      unsigned int octets_this_chunk = list->size - octets_written;
 
-      unsigned int bytes_this_chunk = list->size - bytes_written;
+      if (octets_this_chunk > CHUNK)
+	octets_this_chunk = CHUNK;
 
-      if (bytes_this_chunk > CHUNK)
-	{
-	  bytes_this_chunk = CHUNK;
-	}
-
-      address = list->where + bytes_written;
+      address = list->where + octets_written / bfd_octets_per_byte (abfd);
 
       if (! srec_write_record (abfd,
 			       tdata->type,
 			       address,
 			       location,
-			       location + bytes_this_chunk))
+			       location + octets_this_chunk))
 	return false;
 
-      bytes_written += bytes_this_chunk;
-      location += bytes_this_chunk;
+      octets_written += octets_this_chunk;
+      location += octets_this_chunk;
     }
 
   return true;
@@ -1139,8 +1136,8 @@ symbolsrec_write_object_contents (abfd)
 /*ARGSUSED*/
 static int
 srec_sizeof_headers (abfd, exec)
-     bfd *abfd;
-     boolean exec;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     boolean exec ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -1209,7 +1206,7 @@ srec_get_symtab (abfd, alocation)
 /*ARGSUSED*/
 static void
 srec_get_symbol_info (ignore_abfd, symbol, ret)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      asymbol *symbol;
      symbol_info *ret;
 {
@@ -1219,7 +1216,7 @@ srec_get_symbol_info (ignore_abfd, symbol, ret)
 /*ARGSUSED*/
 static void
 srec_print_symbol (ignore_abfd, afile, symbol, how)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      PTR afile;
      asymbol *symbol;
      bfd_print_symbol_type how;
@@ -1318,6 +1315,8 @@ const bfd_target srec_vec =
   BFD_JUMP_TABLE_LINK (srec),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  NULL,
+  
   (PTR) 0
 };
 
@@ -1373,5 +1372,7 @@ const bfd_target symbolsrec_vec =
   BFD_JUMP_TABLE_LINK (srec),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  NULL,
+  
   (PTR) 0
 };

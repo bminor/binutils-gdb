@@ -5,7 +5,7 @@ AC_INIT(ar.c)
 
 AC_CANONICAL_SYSTEM
 
-AM_INIT_AUTOMAKE(binutils, 2.9.4)
+AM_INIT_AUTOMAKE(binutils, 2.9.5)
 
 AM_PROG_LIBTOOL
 
@@ -44,6 +44,12 @@ CY_GNU_GETTEXT
 
 AM_MAINTAINER_MODE
 AC_EXEEXT
+if test -n "$EXEEXT"; then
+  AC_DEFINE(HAVE_EXECUTABLE_SUFFIX, 1,
+	    [Does the platform use an executable suffix?])
+fi
+AC_DEFINE_UNQUOTED(EXECUTABLE_SUFFIX, "${EXEEXT}",
+		   [Suffix used for executables, if any.])
 
 # host-specific stuff:
 
@@ -59,10 +65,20 @@ AC_PROG_INSTALL
 
 BFD_CC_FOR_BUILD
 
+DEMANGLER_NAME=c++filt
+case "${host}" in
+  *-*-go32* | *-*-msdos*)
+    DEMANGLER_NAME=cxxfilt
+esac
+AC_SUBST(DEMANGLER_NAME)
+
 AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h fcntl.h sys/file.h)
 AC_HEADER_SYS_WAIT
 AC_FUNC_ALLOCA
 AC_CHECK_FUNCS(sbrk utimes)
+
+# Some systems have frexp only in -lm, not in -lc.
+AC_SEARCH_LIBS(frexp, m)
 
 AC_MSG_CHECKING(for time_t in time.h)
 AC_CACHE_VAL(bu_cv_decl_time_t_time_h,
@@ -114,7 +130,7 @@ BFD_BINARY_FOPEN
 if test -n "$enable_targets"; then
     for targ in `echo $enable_targets | sed 's/,/ /g'`
     do
-	result=`${CONFIG_SHELL-/bin/sh} $ac_config_sub $targ 2>/dev/null`
+	result=`$ac_config_sub $targ 2>/dev/null`
 	if test -n "$result"; then
 	    canon_targets="$canon_targets $result"
 	else
@@ -166,16 +182,16 @@ changequote([,])dnl
 	*-*-hms*) BUILD_SRCONV='$(SRCONV_PROG)' ;;
 	esac
 	case $targ in
-	arm-*pe*)
+	arm-*pe* | arm-*-wince)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_ARM"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
-	 ;;
+	  ;;
 	thumb-*pe*)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_ARM"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
-	 ;;
+	  ;;
 changequote(,)dnl
 	i[3-6]86-*pe* | i[3-6]86-*-cygwin* | i[3-6]86-*-mingw32*)
 changequote([,])dnl
@@ -183,12 +199,35 @@ changequote([,])dnl
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_I386"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
 	  BUILD_DLLWRAP='$(DLLWRAP_PROG)$(EXEEXT)'
-	 ;;
+	  ;;
+	i[3-6]86-*-interix)
+	  BUILD_DLLTOOL='$(DLLTOOL_PROG)'
+	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_I386"
+	  ;;
 	powerpc*-*-*pe* | powerpc*-*-cygwin*)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_PPC"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
-	 ;;
+	  ;;
+	sh*-*-*pe)
+  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
+	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_SH"
+	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
+	  ;;
+	mips*-*-*pe)
+  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
+	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_MIPS"
+	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
+	  ;;
+	mcore-*pe)
+  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
+	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_MCORE"
+	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
+	  ;;
+	mcore-*elf)
+  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
+	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_MCORE_ELF"
+	  ;;
 	esac
     fi
 done

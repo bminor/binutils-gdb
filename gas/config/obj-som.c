@@ -26,11 +26,11 @@
 #include "aout/stab_gnu.h"
 #include "obstack.h"
 
-/* SOM does not need any pseudo-ops.  */
+static void obj_som_weak PARAMS ((int));
 
 const pseudo_typeS obj_pseudo_table[] =
 {
-  {NULL}
+  {"weak", obj_som_weak, 0}
 };
 
 static int version_seen = 0;
@@ -305,3 +305,35 @@ som_frob_file ()
 {
   bfd_map_over_sections (stdoutput, adjust_stab_sections, (PTR) 0);
 }
+
+static void
+obj_som_weak (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  char *name;
+  int c;
+  symbolS *symbolP;
+ 
+  do
+    {
+      name = input_line_pointer;
+      c = get_symbol_end ();
+      symbolP = symbol_find_or_make (name);
+      *input_line_pointer = c;
+      SKIP_WHITESPACE ();
+      S_SET_WEAK (symbolP);
+#if 0
+      symbol_get_obj (symbolP)->local = 1;
+#endif
+      if (c == ',')
+        {
+          input_line_pointer++;
+          SKIP_WHITESPACE ();
+          if (*input_line_pointer == '\n')
+            c = '\n';
+        }
+    }
+  while (c == ',');
+  demand_empty_rest_of_line ();
+}
+

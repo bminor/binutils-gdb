@@ -1,5 +1,6 @@
 /* SPARC-specific support for 32-bit ELF
-   Copyright (C) 1993, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 98, 99, 2000
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -33,8 +34,6 @@ static boolean elf32_sparc_check_relocs
 	   const Elf_Internal_Rela *));
 static boolean elf32_sparc_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
-static boolean elf32_sparc_adjust_dynindx
-  PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf32_sparc_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf32_sparc_relocate_section
@@ -182,7 +181,7 @@ static CONST struct elf_reloc_map sparc_reloc_map[] =
 
 static reloc_howto_type *
 elf32_sparc_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   unsigned int i;
@@ -211,12 +210,24 @@ elf32_sparc_reloc_type_lookup (abfd, code)
 
 static void
 elf32_sparc_info_to_howto (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf_Internal_Rela *dst;
 {
-  BFD_ASSERT (ELF32_R_TYPE(dst->r_info) < (unsigned int) R_SPARC_max);
-  cache_ptr->howto = &_bfd_sparc_elf_howto_table[ELF32_R_TYPE(dst->r_info)];
+  switch (ELF32_R_TYPE(dst->r_info))
+    {
+    case R_SPARC_GNU_VTINHERIT:
+      cache_ptr->howto = &elf32_sparc_vtinherit_howto;
+      break;
+
+    case R_SPARC_GNU_VTENTRY:
+      cache_ptr->howto = &elf32_sparc_vtentry_howto;
+      break;
+
+    default:
+      BFD_ASSERT (ELF32_R_TYPE(dst->r_info) < (unsigned int) R_SPARC_max_std);
+      cache_ptr->howto = &_bfd_sparc_elf_howto_table[ELF32_R_TYPE(dst->r_info)];
+    }
 }
 
 /* For unsupported relocs.  */
@@ -229,13 +240,13 @@ sparc_elf_notsupported_reloc (abfd,
 			     input_section,
 			     output_bfd,
 			     error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   return bfd_reloc_notsupported;
 }
@@ -256,7 +267,7 @@ sparc_elf_wdisp16_reloc (abfd,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   bfd_vma relocation;
   bfd_vma x;
@@ -500,6 +511,9 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 
 	case R_SPARC_PC10:
 	case R_SPARC_PC22:
+	  if (h != NULL)
+	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+
 	  if (h != NULL
 	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
 	    break;
@@ -511,6 +525,9 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 	case R_SPARC_WDISP22:
 	case R_SPARC_WDISP19:
 	case R_SPARC_WDISP16:
+	  if (h != NULL)
+	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+
 	  /* If we are linking with -Bsymbolic, we do not need to copy
              a PC relative reloc against a global symbol which is
              defined in an object we are including in the link (i.e.,
@@ -533,6 +550,9 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 	case R_SPARC_13:
 	case R_SPARC_LO10:
 	case R_SPARC_UA32:
+	  if (h != NULL)
+	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+
 	  if (info->shared)
 	    {
 	      /* When creating a shared object, we must copy these
@@ -596,7 +616,7 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 static asection *
 elf32_sparc_gc_mark_hook (abfd, info, rel, h, sym)
        bfd *abfd;
-       struct bfd_link_info *info;
+       struct bfd_link_info *info ATTRIBUTE_UNUSED;
        Elf_Internal_Rela *rel;
        struct elf_link_hash_entry *h;
        Elf_Internal_Sym *sym;
@@ -619,6 +639,9 @@ elf32_sparc_gc_mark_hook (abfd, info, rel, h, sym)
 
           case bfd_link_hash_common:
             return h->root.u.c.p->section;
+
+	  default:
+	    break;
           }
        }
      }
@@ -640,7 +663,7 @@ elf32_sparc_gc_mark_hook (abfd, info, rel, h, sym)
 static boolean
 elf32_sparc_gc_sweep_hook (abfd, info, sec, relocs)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      asection *sec;
      const Elf_Internal_Rela *relocs;
 {
@@ -821,6 +844,11 @@ elf32_sparc_adjust_dynamic_symbol (info, h)
   if (info->shared)
     return true;
 
+  /* If there are no references to this symbol that do not use the
+     GOT, we don't need to generate a copy reloc.  */
+  if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0)
+    return true;
+
   /* We must allocate the symbol in our .dynbss section, which will
      become part of the .bss section of the executable.  There will be
      an entry for this symbol in the .dynsym section.  The dynamic
@@ -983,7 +1011,7 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
 
       if (strip)
 	{
-	  _bfd_strip_section_from_output (s);
+	  _bfd_strip_section_from_output (info, s);
 	  continue;
 	}
 
@@ -1028,51 +1056,6 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
 	}
     }
 
-  /* If we are generating a shared library, we generate a section
-     symbol for each output section for which we might need to copy
-     relocs.  These are local symbols, which means that they must come
-     first in the dynamic symbol table.  That means we must increment
-     the dynamic symbol index of every other dynamic symbol.  */
-  if (info->shared)
-    {
-      int c;
-
-      c = 0;
-      for (s = output_bfd->sections; s != NULL; s = s->next)
-	{
-	  if ((s->flags & SEC_LINKER_CREATED) != 0
-	      || (s->flags & SEC_ALLOC) == 0)
-	    continue;
-
-	  elf_section_data (s)->dynindx = c + 1;
-
-	  /* These symbols will have no names, so we don't need to
-             fiddle with dynstr_index.  */
-
-	  ++c;
-	}
-
-      elf_link_hash_traverse (elf_hash_table (info),
-			      elf32_sparc_adjust_dynindx,
-			      (PTR) &c);
-      elf_hash_table (info)->dynsymcount += c;
-    }
-
-  return true;
-}
-
-/* Increment the index of a dynamic symbol by a given amount.  Called
-   via elf_link_hash_traverse.  */
-
-static boolean
-elf32_sparc_adjust_dynindx (h, cparg)
-     struct elf_link_hash_entry *h;
-     PTR cparg;
-{
-  int *cp = (int *) cparg;
-
-  if (h->dynindx != -1)
-    h->dynindx += *cp;
   return true;
 }
 
@@ -1134,7 +1117,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
           || r_type == R_SPARC_GNU_VTENTRY)
         continue;
 
-      if (r_type < 0 || r_type >= (int) R_SPARC_max)
+      if (r_type < 0 || r_type >= (int) R_SPARC_max_std)
 	{
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
@@ -1236,7 +1219,8 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset)))
+		      input_section, rel->r_offset,
+		      (!info->shared || info->no_undefined))))
 		return false;
 	      relocation = 0;
 	    }
@@ -1507,15 +1491,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 			}
 
 		      outrel.r_info = ELF32_R_INFO (indx, r_type);
-
-		      /* For non-RELATIVE dynamic relocations, we keep the
-			 same symbol, and so generally the same addend.  But
-			 we do need to adjust those relocations referencing
-			 sections.  */
-		      outrel.r_addend = rel->r_addend;
-		      if (r_symndx < symtab_hdr->sh_info
-			  && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		        outrel.r_addend += sec->output_offset+sym->st_value;
+		      outrel.r_addend = relocation + rel->r_addend;
 		    }
 		}
 
@@ -1835,50 +1811,6 @@ elf32_sparc_finish_dynamic_sections (output_bfd, info)
 
   elf_section_data (sgot->output_section)->this_hdr.sh_entsize = 4;
 
-  if (info->shared)
-    {
-      asection *sdynsym;
-      asection *s;
-      Elf_Internal_Sym sym;
-      int c;
-
-      /* Set up the section symbols for the output sections.  */
-
-      sdynsym = bfd_get_section_by_name (dynobj, ".dynsym");
-      BFD_ASSERT (sdynsym != NULL);
-
-      sym.st_size = 0;
-      sym.st_name = 0;
-      sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
-      sym.st_other = 0;
-
-      c = 0;
-      for (s = output_bfd->sections; s != NULL; s = s->next)
-	{
-	  int indx;
-
-	  if (elf_section_data (s)->dynindx == 0)
-	    continue;
-
-	  sym.st_value = s->vma;
-
-	  indx = elf_section_data (s)->this_idx;
-	  BFD_ASSERT (indx > 0);
-	  sym.st_shndx = indx;
-
-	  bfd_elf32_swap_symbol_out (output_bfd, &sym,
-				     (PTR) (((Elf32_External_Sym *)
-					     sdynsym->contents)
-					    + elf_section_data (s)->dynindx));
-
-	  ++c;
-	}
-
-      /* Set the sh_info field of the output .dynsym section to the
-         index of the first global symbol.  */
-      elf_section_data (sdynsym->output_section)->this_hdr.sh_info = c + 1;
-    }
-
   return true;
 }
 
@@ -1898,7 +1830,8 @@ elf32_sparc_merge_private_bfd_data (ibfd, obfd)
      bfd *obfd;
 {
   boolean error;
-  static int previous_ibfd_e_flags = -1;
+  /* FIXME: This should not be static.  */
+  static unsigned long previous_ibfd_e_flags = (unsigned long) -1;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
@@ -1940,13 +1873,16 @@ elf32_sparc_merge_private_bfd_data (ibfd, obfd)
 	(_("%s: compiled for a 64 bit system and target is 32 bit"),
 	 bfd_get_filename (ibfd));
     }
-  else if (bfd_get_mach (obfd) < bfd_get_mach (ibfd))
-    bfd_set_arch_mach (obfd, bfd_arch_sparc, bfd_get_mach (ibfd));
+  else if ((ibfd->flags & DYNAMIC) == 0)
+    {
+      if (bfd_get_mach (obfd) < bfd_get_mach (ibfd))
+	bfd_set_arch_mach (obfd, bfd_arch_sparc, bfd_get_mach (ibfd));
+    }
 #endif
 
   if (((elf_elfheader (ibfd)->e_flags & EF_SPARC_LEDATA)
        != previous_ibfd_e_flags)
-      && previous_ibfd_e_flags >= 0)
+      && previous_ibfd_e_flags != (unsigned long) -1)
     {
       (*_bfd_error_handler)
 	(_("%s: linking little endian files with big endian files"),
@@ -1994,7 +1930,7 @@ elf32_sparc_object_p (abfd)
 static void
 elf32_sparc_final_write_processing (abfd, linker)
      bfd *abfd;
-     boolean linker;
+     boolean linker ATTRIBUTE_UNUSED;
 {
   switch (bfd_get_mach (abfd))
     {

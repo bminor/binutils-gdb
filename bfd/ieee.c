@@ -1,5 +1,5 @@
 /* BFD back-end for ieee-695 objects.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    Written by Steve Chamberlain of Cygnus Support.
@@ -685,7 +685,7 @@ get_symbol (abfd,
 	    max_index,
 	    this_type
 )
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      ieee_data_type *ieee;
      ieee_symbol_type *last_symbol;
      unsigned int *symbol_count;
@@ -1010,7 +1010,7 @@ ieee_get_symtab (abfd, location)
   static bfd dummy_bfd;
   static asymbol empty_symbol =
   /* the_bfd, name, value, attr, section */
-  {&dummy_bfd, " ieee empty", (symvalue) 0, BSF_DEBUGGING, bfd_abs_section_ptr};
+  {&dummy_bfd, " ieee empty", (symvalue) 0, BSF_DEBUGGING, bfd_abs_section_ptr, { 0 }};
 
   if (abfd->symcount)
     {
@@ -1280,6 +1280,7 @@ ieee_slurp_debug (abfd)
 {
   ieee_data_type *ieee = IEEE_DATA (abfd);
   asection *sec;
+  file_ptr debug_end;
 
   if (ieee->w.r.debug_information_part == 0)
     return true;
@@ -1289,7 +1290,13 @@ ieee_slurp_debug (abfd)
     return false;
   sec->flags |= SEC_DEBUGGING | SEC_HAS_CONTENTS;
   sec->filepos = ieee->w.r.debug_information_part;
-  sec->_raw_size = ieee->w.r.data_part - ieee->w.r.debug_information_part;
+
+  debug_end = ieee->w.r.data_part;
+  if (debug_end == 0)
+    debug_end = ieee->w.r.trailer_part;
+  if (debug_end == 0)
+    debug_end = ieee->w.r.me_record;
+  sec->_raw_size = debug_end - ieee->w.r.debug_information_part;
 
   return true;
 }
@@ -1329,7 +1336,7 @@ ieee_archive_p (abfd)
   if (this_byte (&(ieee->h)) != Module_Beginning)
     {
       abfd->tdata.ieee_ar_data = save;
-      goto error_return;
+      goto got_wrong_format_error;
     }
 
   next_byte (&(ieee->h));
@@ -1338,7 +1345,7 @@ ieee_archive_p (abfd)
     {
       bfd_release (abfd, ieee);
       abfd->tdata.ieee_ar_data = save;
-      goto error_return;
+      goto got_wrong_format_error;
     }
   /* Throw away the filename */
   read_id (&(ieee->h));
@@ -1441,6 +1448,8 @@ ieee_archive_p (abfd)
 
   return abfd->xvec;
 
+ got_wrong_format_error:
+  bfd_set_error (bfd_error_wrong_format);
  error_return:
   if (elts != NULL)
     free (elts);
@@ -1652,7 +1661,7 @@ fail:
 
 void
 ieee_get_symbol_info (ignore_abfd, symbol, ret)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      asymbol *symbol;
      symbol_info *ret;
 {
@@ -1665,7 +1674,7 @@ ieee_get_symbol_info (ignore_abfd, symbol, ret)
 
 void
 ieee_print_symbol (ignore_abfd, afile, symbol, how)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      PTR afile;
      asymbol *symbol;
      bfd_print_symbol_type how;
@@ -3163,7 +3172,7 @@ block ()
 
 static void
 relocate_debug (output, input)
-     bfd *output;
+     bfd *output ATTRIBUTE_UNUSED;
      bfd *input;
 {
 #define IBS 400
@@ -3762,13 +3771,13 @@ ieee_find_nearest_line (abfd,
 			filename_ptr,
 			functionname_ptr,
 			line_ptr)
-     bfd *abfd;
-     asection *section;
-     asymbol **symbols;
-     bfd_vma offset;
-     const char **filename_ptr;
-     const char **functionname_ptr;
-     unsigned int *line_ptr;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section ATTRIBUTE_UNUSED;
+     asymbol **symbols ATTRIBUTE_UNUSED;
+     bfd_vma offset ATTRIBUTE_UNUSED;
+     const char **filename_ptr ATTRIBUTE_UNUSED;
+     const char **functionname_ptr ATTRIBUTE_UNUSED;
+     unsigned int *line_ptr ATTRIBUTE_UNUSED;
 {
   return false;
 }
@@ -3807,8 +3816,8 @@ ieee_generic_stat_arch_elt (abfd, buf)
 
 static int
 ieee_sizeof_headers (abfd, x)
-     bfd *abfd;
-     boolean x;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     boolean x ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -3966,5 +3975,7 @@ const bfd_target ieee_vec =
   BFD_JUMP_TABLE_LINK (ieee),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  NULL,
+  
   (PTR) 0
 };

@@ -1,5 +1,5 @@
 /* D30V-specific support for 32-bit ELF
-   Copyright (C) 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998, 1999 Free Software Foundation, Inc.
    Contributed by Martin Hunt (hunt@cygnus.com).
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -540,7 +540,7 @@ static const struct d30v_reloc_map d30v_reloc_map[] =
 
 static reloc_howto_type *
 bfd_elf32_bfd_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   unsigned int i;
@@ -560,7 +560,7 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 
 static void
 d30v_info_to_howto_rel (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf32_Internal_Rel *dst;
 {
@@ -575,7 +575,7 @@ d30v_info_to_howto_rel (abfd, cache_ptr, dst)
 
 static void
 d30v_info_to_howto_rela (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf32_Internal_Rela *dst;
 {

@@ -27,7 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define TARGET_BIG_NAME    "pei-arm-big"
 #endif
 
-#define IMAGE_BASE         NT_IMAGE_BASE
 #define COFF_IMAGE_WITH_PE
 #define COFF_WITH_PE
 #define PCRELOFFSET        true

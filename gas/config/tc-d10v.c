@@ -1,6 +1,5 @@
 /* tc-d10v.c -- Assembler code for the Mitsubishi D10V
-
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation.
+   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -37,8 +36,8 @@ int Optimizing = 0;
 
 #define AT_WORD_P(X) ((X)->X_op == O_right_shift \
 		      && (X)->X_op_symbol != NULL \
-		      && (X)->X_op_symbol->sy_value.X_op == O_constant \
-		      && (X)->X_op_symbol->sy_value.X_add_number == AT_WORD_RIGHT_SHIFT)
+		      && symbol_constant_p ((X)->X_op_symbol) \
+		      && S_GET_VALUE ((X)->X_op_symbol) == AT_WORD_RIGHT_SHIFT)
 #define AT_WORD_RIGHT_SHIFT 2
 
 
@@ -62,6 +61,8 @@ typedef struct _fixups
 
 static Fixups FixUps[2];
 static Fixups *fixups;
+
+static int do_not_ignore_hash = 0;
 
 /* True if instruction swapping warnings should be inhibited.  */
 static unsigned char flag_warn_suppress_instructionswap; /* --nowarnswap */
@@ -159,7 +160,7 @@ register_name (expressionP)
     {
       expressionP->X_op = O_register;
       /* temporarily store a pointer to the string here */
-      expressionP->X_op_symbol = (struct symbol *)input_line_pointer;
+      expressionP->X_op_symbol = (symbolS *)input_line_pointer;
       expressionP->X_add_number = reg_number;
       input_line_pointer = p;
       return 1;
@@ -195,10 +196,19 @@ check_range (num, bits, flags)
 
   if (flags & OPERAND_SIGNED)
     {
-      max = (1 << (bits - 1))-1; 
-      min = - (1 << (bits - 1));  
-      if (((long)num > max) || ((long)num < min))
-	retval = 1;
+      /* Signed 3-bit integers are restricted to the (-2, 3) range */
+      if (flags & RESTRICTED_NUM3)
+	{
+	  if ((long) num < -2 || (long) num > 3)
+	    retval = 1;
+	}
+      else
+	{
+	  max = (1 << (bits - 1)) - 1; 
+	  min = - (1 << (bits - 1));  
+	  if (((long) num > max) || ((long) num < min))
+	    retval = 1;
+	}
     }
   else
     {
@@ -393,7 +403,8 @@ get_operands (exp)
   char *p = input_line_pointer;
   int numops = 0;
   int post = 0;
-
+  int uses_at = 0;
+  
   while (*p)  
     {
       while (*p == ' ' || *p == '\t' || *p == ',') 
@@ -403,6 +414,8 @@ get_operands (exp)
       
       if (*p == '@') 
 	{
+	  uses_at = 1;
+	  
 	  p++;
 	  exp[numops].X_op = O_absent;
 	  if (*p == '(') 
@@ -437,7 +450,20 @@ get_operands (exp)
       if (!register_name (&exp[numops]))
 	{
 	  /* parse as an expression */
-	  expression (&exp[numops]);
+	  if (uses_at)
+	    {
+	      /* Any expression that involves the indirect addressing
+		 cannot also involve immediate addressing.  Therefore
+		 the use of the hash character is illegal.  */
+	      int save = do_not_ignore_hash;
+	      do_not_ignore_hash = 1;
+	      
+	      expression (&exp[numops]);
+	      
+	      do_not_ignore_hash = save;
+	    }
+	  else
+	    expression (&exp[numops]);
 	}
 
       if (strncasecmp (input_line_pointer, "@word", 5) == 0)
@@ -1227,7 +1253,7 @@ find_opcode (opcode, myops)
 		    value = S_GET_VALUE(myops[opnum].X_add_symbol) - value -
 		      (obstack_next_free(&frchain_now->frch_obstack) - frag_now->fr_literal);
 		  else
-		    value = S_GET_VALUE(myops[opnum].X_add_symbol);
+		    value += S_GET_VALUE(myops[opnum].X_add_symbol);
 
 		  if (AT_WORD_P (&myops[opnum]))
 		    {
@@ -1288,7 +1314,7 @@ find_opcode (opcode, myops)
 		  ((flags & OPERAND_PLUS)    && ((X_op != O_absent) || (num != OPERAND_PLUS))) ||
 		  ((flags & OPERAND_ATMINUS) && ((X_op != O_absent) || (num != OPERAND_ATMINUS))) ||
 		  ((flags & OPERAND_ATPAR)   && ((X_op != O_absent) || (num != OPERAND_ATPAR))) ||
-		  ((flags & OPERAND_ATSIGN)  && ((X_op != O_absent) || (num != OPERAND_ATSIGN))))
+		  ((flags & OPERAND_ATSIGN)  && ((X_op != O_absent) || ((num != OPERAND_ATSIGN) && (num != OPERAND_ATPAR)))))
 		{
 		  match = 0;
 		  break;
@@ -1376,7 +1402,8 @@ tc_gen_reloc (seg, fixp)
 {
   arelent *reloc;
   reloc = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
   if (reloc->howto == (reloc_howto_type *) NULL)
@@ -1595,7 +1622,7 @@ void
 md_operand (expressionP)
      expressionS *expressionP;
 {
-  if (*input_line_pointer == '#')
+  if (*input_line_pointer == '#' && ! do_not_ignore_hash)
     {
       input_line_pointer++;
       expression (expressionP);

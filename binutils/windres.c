@@ -46,6 +46,10 @@
 #include <ctype.h>
 #include <time.h>
 
+/* used by resrc.c at least */
+
+int verbose = 0;
+
 /* An enumeration of format types.  */
 
 enum res_format
@@ -109,7 +113,9 @@ static struct include_dir *include_dirs;
 #define OPTION_INCLUDE_DIR (OPTION_HELP + 1)
 #define OPTION_LANGUAGE (OPTION_INCLUDE_DIR + 1)
 #define OPTION_PREPROCESSOR (OPTION_LANGUAGE + 1)
-#define OPTION_VERSION (OPTION_PREPROCESSOR + 1)
+#define OPTION_USE_TEMP_FILE (OPTION_PREPROCESSOR + 1)
+#define OPTION_NO_USE_TEMP_FILE (OPTION_USE_TEMP_FILE + 1)
+#define OPTION_VERSION (OPTION_NO_USE_TEMP_FILE + 1)
 #define OPTION_YYDEBUG (OPTION_VERSION + 1)
 
 static const struct option long_options[] =
@@ -122,6 +128,9 @@ static const struct option long_options[] =
   {"output-format", required_argument, 0, 'O'},
   {"preprocessor", required_argument, 0, OPTION_PREPROCESSOR},
   {"target", required_argument, 0, 'F'},
+  {"use-temp-file", no_argument, 0, OPTION_USE_TEMP_FILE},
+  {"no-use-temp-file", no_argument, 0, OPTION_NO_USE_TEMP_FILE},
+  {"verbose", no_argument, 0, 'v'},
   {"version", no_argument, 0, OPTION_VERSION},
   {"yydebug", no_argument, 0, OPTION_YYDEBUG},
   {0, no_argument, 0, 0}
@@ -705,8 +714,13 @@ Options:\n\
   -F TARGET, --target TARGET  Specify COFF target\n\
   --preprocessor PROGRAM      Program to use to preprocess rc file\n\
   --include-dir DIR           Include directory when preprocessing rc file\n\
-  --define SYM[=VAL]          Define SYM when preprocessing rc file\n\
-  --language VAL              Set language when reading rc file\n"));
+  -DSYM[=VAL], --define SYM[=VAL]\n\
+                              Define SYM when preprocessing rc file\n\
+  -v                          Verbose - tells you what it's doing\n\
+  --language VAL              Set language when reading rc file\n\
+  --use-temp-file             Use a temporary file instead of popen to read\n\
+                              the preprocessor output\n\
+  --no-use-temp-file          Use popen (default)\n"));
 #ifdef YYDEBUG
   fprintf (stream, _("\
   --yydebug                   Turn on parser debugging\n"));
@@ -724,6 +738,34 @@ No input-file is stdin, default rc.  No output-file is stdout, default rc.\n"));
   exit (status);
 }
 
+/* Quote characters that will confuse the shell when we run the preprocessor */
+static const char *quot (string)
+     const char *string;
+{
+  static char *buf = 0;
+  static int buflen = 0;
+  int slen = strlen (string);
+  const char *src;
+  char *dest;
+
+  if ((buflen < slen * 2 + 2) || !buf)
+    {
+      buflen = slen * 2 + 2;
+      if (buf)
+	free (buf);
+      buf = (char *) xmalloc (buflen);
+    }
+
+  for (src=string, dest=buf; *src; src++, dest++)
+    {
+      if (*src == '(' || *src == ')' || *src == ' ')
+	*dest++ = '\\';
+      *dest = *src;
+    }
+  *dest = 0;
+  return buf;
+}
+
 /* The main function.  */
 
 int
@@ -739,8 +781,10 @@ main (argc, argv)
   char *target;
   char *preprocessor;
   char *preprocargs;
+  const char *quotedarg;
   int language;
   struct res_directory *resources;
+  int use_temp_file;
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
@@ -764,8 +808,9 @@ main (argc, argv)
   preprocessor = NULL;
   preprocargs = NULL;
   language = -1;
+  use_temp_file = 0;
 
-  while ((c = getopt_long (argc, argv, "i:o:I:O:F:", long_options,
+  while ((c = getopt_long (argc, argv, "i:o:I:O:F:D:v", long_options,
 			   (int *) 0)) != EOF)
     {
       switch (c)
@@ -794,35 +839,44 @@ main (argc, argv)
 	  preprocessor = optarg;
 	  break;
 
+	case 'D':
 	case OPTION_DEFINE:
 	  if (preprocargs == NULL)
 	    {
-	      preprocargs = xmalloc (strlen (optarg) + 3);
-	      sprintf (preprocargs, "-D%s", optarg);
+	      quotedarg = quot (optarg);
+	      preprocargs = xmalloc (strlen (quotedarg) + 3);
+	      sprintf (preprocargs, "-D%s", quotedarg);
 	    }
 	  else
 	    {
 	      char *n;
 
-	      n = xmalloc (strlen (preprocargs) + strlen (optarg) + 4);
-	      sprintf (n, "%s -D%s", preprocargs, optarg);
+	      quotedarg = quot (optarg);
+	      n = xmalloc (strlen (preprocargs) + strlen (quotedarg) + 4);
+	      sprintf (n, "%s -D%s", preprocargs, quotedarg);
 	      free (preprocargs);
 	      preprocargs = n;
 	    }
 	  break;
 
+	case 'v':
+	  verbose ++;
+	  break;
+
 	case OPTION_INCLUDE_DIR:
 	  if (preprocargs == NULL)
 	    {
-	      preprocargs = xmalloc (strlen (optarg) + 3);
-	      sprintf (preprocargs, "-I%s", optarg);
+	      quotedarg = quot (optarg);
+	      preprocargs = xmalloc (strlen (quotedarg) + 3);
+	      sprintf (preprocargs, "-I%s", quotedarg);
 	    }
 	  else
 	    {
 	      char *n;
 
-	      n = xmalloc (strlen (preprocargs) + strlen (optarg) + 4);
-	      sprintf (n, "%s -I%s", preprocargs, optarg);
+	      quotedarg = quot (optarg);
+	      n = xmalloc (strlen (preprocargs) + strlen (quotedarg) + 4);
+	      sprintf (n, "%s -I%s", preprocargs, quotedarg);
 	      free (preprocargs);
 	      preprocargs = n;
 	    }
@@ -843,6 +897,14 @@ main (argc, argv)
 
 	case OPTION_LANGUAGE:
 	  language = strtol (optarg, (char **) NULL, 16);
+	  break;
+
+	case OPTION_USE_TEMP_FILE:
+	  use_temp_file = 1;
+	  break;
+
+	case OPTION_NO_USE_TEMP_FILE:
+	  use_temp_file = 0;
 	  break;
 
 #ifdef YYDEBUG
@@ -904,7 +966,7 @@ main (argc, argv)
       abort ();
     case RES_FORMAT_RC:
       resources = read_rc_file (input_filename, preprocessor, preprocargs,
-				language);
+				language, use_temp_file);
       break;
     case RES_FORMAT_RES:
       resources = read_res_file (input_filename);

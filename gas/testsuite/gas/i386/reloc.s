@@ -6,3 +6,6 @@ foo:	mov	$foo, %bl
 	imul	$foo, %edx
 	lcall	$0, $foo
 	pushw	$foo
+
+# Pad out to a good alignment
+ .byte 0x90,0x90,0x90,0x90,0x90

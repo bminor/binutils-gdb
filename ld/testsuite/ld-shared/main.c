@@ -17,6 +17,7 @@ extern int shlib_checkfunptr2 ();
 extern int (*shlib_getfunptr1 ()) ();
 extern int (*shlib_getfunptr2 ()) ();
 extern int shlib_check ();
+extern int shlib_shlibcall2 ();
 
 /* This function is called by the shared library.  */
 

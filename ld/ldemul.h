@@ -1,5 +1,5 @@
 /* ld-emul.h - Linker emulation header file
-   Copyright 1991, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright 1991, 92, 93, 94, 95, 96, 97, 1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
@@ -55,6 +55,8 @@ extern void before_allocation_default PARAMS ((void));
 extern void set_output_arch_default PARAMS ((void));
 extern void syslib_default PARAMS ((char*));
 extern void hll_default PARAMS ((char*));
+extern int  ldemul_find_potential_libraries
+  PARAMS ((char *, struct lang_input_statement_struct *));
 
 typedef struct ld_emulation_xfer_struct
 {
@@ -135,6 +137,13 @@ typedef struct ld_emulation_xfer_struct
   boolean (*recognized_file)
     PARAMS ((struct lang_input_statement_struct *));
 
+  /* Called when looking for libraries in a directory specified
+     via a linker command line option or linker script option.
+     Files that match the pattern "lib*.a" have already been scanned.
+     (For VMS files matching ":lib*.a" have also been scanned).  */
+  int (* find_potential_libraries)
+    PARAMS ((char *, struct lang_input_statement_struct *));
+  
 } ld_emulation_xfer_type;
 
 typedef enum 

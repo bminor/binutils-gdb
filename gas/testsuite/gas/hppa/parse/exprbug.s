@@ -1,5 +1,4 @@
-        .space	$TEXT$
-        .subspa	$CODE$
+	.code
 
 	.align	8
 	.export	icode,data

@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 386 COFF files (go32 variant with a stub).
-   Copyright 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999 Free Software Foundation, Inc.
    Written by Robert Hoehne.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -39,6 +39,14 @@
 #define TARGET_NAME		"coff-go32-exe"
 #define TARGET_UNDERSCORE	'_'
 #define COFF_GO32_EXE
+#define COFF_LONG_SECTION_NAMES
+#define COFF_SUPPORT_GNU_LINKONCE
+
+#define COFF_SECTION_ALIGNMENT_ENTRIES \
+{ COFF_SECTION_NAME_EXACT_MATCH (".data"), \
+  COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 4 }, \
+{ COFF_SECTION_NAME_EXACT_MATCH (".text"), \
+  COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 4 }
 
 #include "bfd.h"
 
@@ -102,58 +110,6 @@ static boolean
 /* This macro is used, because I cannot assume the endianess of the
    host system */
 #define _H(index) (bfd_h_get_16(abfd, (bfd_byte *)(header+index*2)))
-
-/* This function checks if the bfd is a stubbed coff image */
-static const bfd_target *
-go32_stubbed_coff_object_p (abfd)
-     bfd *abfd;
-{
-  unsigned char header[10];
-  char magic[8];
-  unsigned long coff_start, exe_start;
-
-  if (bfd_read (&header, 1, sizeof (header), abfd) != sizeof (header))
-    {
-      if (bfd_get_error () != bfd_error_system_call)
-	bfd_set_error (bfd_error_wrong_format);
-      return 0;
-    }
-  if (_H (0) != 0x5a4d)		/* it is not an exe file. maybe a coff-image */
-    {
-      if (bfd_get_error () != bfd_error_system_call)
-	bfd_set_error (bfd_error_wrong_format);
-      return 0;
-    }
-  coff_start = (long) _H (2) * 512L;
-  if (_H (1))
-    coff_start += (long) _H (1) - 512L;
-
-  /* We can handle only a stub with a length of STUBSIZE */
-  if (coff_start != STUBSIZE)
-    {
-      bfd_set_error (bfd_error_wrong_format);
-      return 0;
-    }
-  exe_start = _H (4) * 16;
-  if (bfd_seek (abfd, exe_start, SEEK_SET) != 0)
-    return 0;
-  if (bfd_read (&magic, 1, 8, abfd) != 8)
-    {
-      if (bfd_get_error () != bfd_error_system_call)
-	bfd_set_error (bfd_error_wrong_format);
-      return 0;
-    }
-  if (memcmp (magic, "go32stub", 8) != 0)
-    {
-      bfd_set_error (bfd_error_wrong_format);
-      return 0;
-    }
-  if (bfd_seek (abfd, 0, SEEK_SET) != 0)
-    return 0;
-
-  /* Call the normal COFF detection routine */
-  return coff_object_p (abfd);
-}
 
 /* These bytes are a 2048-byte DOS executable, which loads the COFF
    image into memory and then runs it. It is called 'stub' */
@@ -223,9 +179,9 @@ adjust_filehdr_out_pre  (abfd, in, out)
 
 static void
 adjust_filehdr_out_post  (abfd, in, out)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      PTR in;
-     PTR out;
+     PTR out ATTRIBUTE_UNUSED;
 {
   struct internal_filehdr *filehdr_in = (struct internal_filehdr *) in;
   /* undo the above change */
@@ -234,8 +190,8 @@ adjust_filehdr_out_post  (abfd, in, out)
 
 static void
 adjust_scnhdr_in_post  (abfd, ext, in)
-     bfd *abfd;
-     PTR ext;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     PTR ext ATTRIBUTE_UNUSED;
      PTR in;
 {
   struct internal_scnhdr *scnhdr_int = (struct internal_scnhdr *) in;
@@ -247,9 +203,9 @@ adjust_scnhdr_in_post  (abfd, ext, in)
 
 static void
 adjust_scnhdr_out_pre  (abfd, in, out)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      PTR in;
-     PTR out;
+     PTR out ATTRIBUTE_UNUSED;
 {
   struct internal_scnhdr *scnhdr_int = (struct internal_scnhdr *) in;
 
@@ -260,9 +216,9 @@ adjust_scnhdr_out_pre  (abfd, in, out)
 
 static void
 adjust_scnhdr_out_post (abfd, in, out)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      PTR in;
-     PTR out;
+     PTR out ATTRIBUTE_UNUSED;
 {
   struct internal_scnhdr *scnhdr_int = (struct internal_scnhdr *) in;
 
@@ -273,12 +229,12 @@ adjust_scnhdr_out_post (abfd, in, out)
 
 static void
 adjust_aux_in_post  (abfd, ext1, type, class, indx, numaux, in1)
-     bfd *abfd;
-     PTR ext1;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     PTR ext1 ATTRIBUTE_UNUSED;
      int type;
      int class;
-     int indx;
-     int numaux;
+     int indx ATTRIBUTE_UNUSED;
+     int numaux ATTRIBUTE_UNUSED;
      PTR in1;
 {
   union internal_auxent *in = (union internal_auxent *) in1;
@@ -291,13 +247,13 @@ adjust_aux_in_post  (abfd, ext1, type, class, indx, numaux, in1)
 
 static void
 adjust_aux_out_pre  (abfd, inp, type, class, indx, numaux, extp)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      PTR inp;
      int type;
      int class;
-     int indx;
-     int numaux;
-     PTR extp;
+     int indx ATTRIBUTE_UNUSED;
+     int numaux ATTRIBUTE_UNUSED;
+     PTR extp ATTRIBUTE_UNUSED;
 {
   union internal_auxent *in = (union internal_auxent *) inp;
 
@@ -309,13 +265,13 @@ adjust_aux_out_pre  (abfd, inp, type, class, indx, numaux, extp)
 
 static void
 adjust_aux_out_post (abfd, inp, type, class, indx, numaux, extp)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      PTR inp;
      int type;
      int class;
-     int indx;
-     int numaux;
-     PTR extp;
+     int indx ATTRIBUTE_UNUSED;
+     int numaux ATTRIBUTE_UNUSED;
+     PTR extp ATTRIBUTE_UNUSED;
 {
   union internal_auxent *in = (union internal_auxent *) inp;
 

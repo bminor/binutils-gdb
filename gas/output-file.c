@@ -86,9 +86,9 @@ output_file_close (filename)
 #ifndef BFD_ASSEMBLER
 void
 output_file_append (where, length, filename)
-     char *where;
-     long length;
-     char *filename;
+     char *where ATTRIBUTE_UNUSED;
+     long length ATTRIBUTE_UNUSED;
+     char *filename ATTRIBUTE_UNUSED;
 {
   abort ();
 }

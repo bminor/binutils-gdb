@@ -1,5 +1,6 @@
 /* arsup.c - Archive support for MRI compatibility
-   Copyright (C) 1992, 93, 94, 95, 96, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -95,7 +96,7 @@ FILE *outfile;
 static void
 ar_directory_doer (abfd, ignore)
      bfd *abfd;
-     bfd *ignore;
+     bfd *ignore ATTRIBUTE_UNUSED;
 {
     print_arelt_descr(outfile, abfd, verbose);
 }

@@ -1,5 +1,5 @@
 /* tc-i960.c - All the i80960-specific stuff
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -101,7 +101,22 @@
 #define TC_S_FORCE_TO_SYSPROC(s)	(S_SET_STORAGE_CLASS((s), C_SCALL))
 
 #else /* ! OBJ_COFF */
-you lose;
+#ifdef OBJ_ELF
+#define TC_S_IS_SYSPROC(s)	0
+
+#define TC_S_IS_BALNAME(s)	0
+#define TC_S_IS_CALLNAME(s)	0
+#define TC_S_IS_BADPROC(s)	0
+
+#define TC_S_SET_SYSPROC(s, p)
+#define TC_S_GET_SYSPROC(s) 0
+
+#define TC_S_FORCE_TO_BALNAME(s)
+#define TC_S_FORCE_TO_CALLNAME(s)
+#define TC_S_FORCE_TO_SYSPROC(s)
+#else
+ #error COFF, a.out, b.out, and ELF are the only supported formats.
+#endif /* ! OBJ_ELF */
 #endif /* ! OBJ_COFF */
 #endif /* ! OBJ_A/BOUT */
 
@@ -1009,7 +1024,6 @@ md_show_usage (stream)
 }
 
 
-#ifndef BFD_ASSEMBLER
 /*****************************************************************************
    md_convert_frag:
   	Called by base assembler after address relaxation is finished:  modify
@@ -1023,11 +1037,19 @@ md_show_usage (stream)
   	Replace the cobr with a two instructions (a compare and a branch).
 
   *************************************************************************** */
+#ifndef BFD_ASSEMBLER
 void
 md_convert_frag (headers, seg, fragP)
      object_headers *headers;
      segT seg;
      fragS *fragP;
+#else
+void
+md_convert_frag (abfd, sec, fragP)
+     bfd *abfd;
+     segT sec;
+     fragS *fragP;
+#endif
 {
   fixS *fixP;			/* Structure describing needed address fix */
 
@@ -1082,6 +1104,7 @@ md_estimate_size_before_relax (fragP, segment_type)
   return 0;
 }				/* md_estimate_size_before_relax() */
 
+#if defined(OBJ_AOUT) | defined(OBJ_BOUT)
 
 /*****************************************************************************
    md_ri_to_chars:
@@ -1096,7 +1119,8 @@ md_estimate_size_before_relax (fragP, segment_type)
   	does do the reordering (Ian Taylor 28 Aug 92).
 
   *************************************************************************** */
-void
+
+static void
 md_ri_to_chars (where, ri)
      char *where;
      struct relocation_info *ri;
@@ -1114,7 +1138,8 @@ md_ri_to_chars (where, ri)
 	      | (ri->r_callj << 6));
 }
 
-#endif /* BFD_ASSEMBLER */
+#endif /* defined(OBJ_AOUT) | defined(OBJ_BOUT) */
+
 
 /* FOLLOWING ARE THE LOCAL ROUTINES, IN ALPHABETICAL ORDER  */
 
@@ -2613,7 +2638,9 @@ s_leafproc (n_ops, args)
 	}
       TC_S_FORCE_TO_BALNAME (balP);
 
+#ifndef OBJ_ELF
       tc_set_bal_of_call (callP, balP);
+#endif
     }				/* if only one arg, or the args are the same */
 }
 
@@ -2819,25 +2846,42 @@ md_pcrel_from (fixP)
   return fixP->fx_where + fixP->fx_frag->fr_address;
 }
 
+#ifdef BFD_ASSEMBLER
+int
+md_apply_fix (fixP, valp)
+     fixS *fixP;
+     valueT *valp;
+#else
 void
 md_apply_fix (fixP, val)
      fixS *fixP;
      long val;
+#endif
 {
+#ifdef BFD_ASSEMBLER
+  long val = *valp;
+#endif
   char *place = fixP->fx_where + fixP->fx_frag->fr_literal;
 
   if (!fixP->fx_bit_fixP)
     {
+#ifndef BFD_ASSEMBLER
       /* For callx, we always want to write out zero, and emit a
 	 symbolic relocation.  */
       if (fixP->fx_bsr)
 	val = 0;
 
       fixP->fx_addnumber = val;
+#endif
+
       md_number_to_imm (place, val, fixP->fx_size, fixP);
     }
   else
     md_number_to_field (place, val, fixP->fx_bit_fixP);
+
+#ifdef BFD_ASSEMBLER
+  return 0;
+#endif
 }
 
 #if defined(OBJ_AOUT) | defined(OBJ_BOUT)
@@ -2937,8 +2981,14 @@ md_section_align (seg, addr)
      segT seg;
      valueT addr;		/* Address to be rounded up */
 {
-  return ((addr + (1 << section_alignment[(int) seg]) - 1) & (-1 << section_alignment[(int) seg]));
-}				/* md_section_align() */
+  int align;
+#ifdef BFD_ASSEMBLER
+  align = bfd_get_section_alignment (stdoutput, seg);
+#else
+  align = section_alignment[(int) seg];
+#endif
+  return (addr + (1 << align) - 1) & (-1 << align);
+}
 
 extern int coff_flags;
 
@@ -3007,6 +3057,8 @@ tc_headers_hook (headers)
 
 #endif /* OBJ_COFF */
 
+#ifndef BFD_ASSEMBLER
+
 /* Things going on here:
 
    For bout, We need to assure a couple of simplifying
@@ -3066,6 +3118,8 @@ tc_crawl_symbol_chain (headers)
     }				/* walk the symbol chain */
 }
 
+#endif /* ! BFD_ASSEMBLER */
+
 /* For aout or bout, the bal immediately follows the call.
 
    For coff, we cheat and store a pointer to the bal symbol in the
@@ -3105,7 +3159,7 @@ tc_set_bal_of_call (callP, balP)
     }				/* if not in order */
 
 #else /* ! OBJ_ABOUT */
-  (as yet unwritten.);
+  as_fatal ("Only supported for a.out, b.out, or COFF");
 #endif /* ! OBJ_ABOUT */
 #endif /* ! OBJ_COFF */
 }
@@ -3124,7 +3178,7 @@ tc_get_bal_of_call (callP)
 #ifdef OBJ_ABOUT
   retval = symbol_next (callP);
 #else
-  (as yet unwritten.);
+  as_fatal ("Only supported for a.out, b.out, or COFF");
 #endif /* ! OBJ_ABOUT */
 #endif /* ! OBJ_COFF */
 
@@ -3227,5 +3281,69 @@ i960_validate_fix (fixP, this_segment_type, add_symbolPP)
 #undef add_symbolP
   return 0;
 }
+
+#ifdef BFD_ASSEMBLER
+
+/* From cgen.c:  */
+
+static short
+tc_bfd_fix2rtype (fixP)
+     fixS *fixP;
+{
+#if 0
+  if (fixP->fx_bsr)
+    abort ();
+#endif
+
+  if (fixP->fx_pcrel == 0 && fixP->fx_size == 4)
+    return BFD_RELOC_32;
+
+  if (fixP->fx_pcrel != 0 && fixP->fx_size == 4)
+    return BFD_RELOC_24_PCREL;
+
+  abort ();
+  return 0;
+}
+
+/* Translate internal representation of relocation info to BFD target
+   format.
+
+   FIXME: To what extent can we get all relevant targets to use this?  */
+
+arelent *
+tc_gen_reloc (section, fixP)
+     asection *section;
+     fixS *fixP;
+{
+  arelent * reloc;
+
+  reloc = (arelent *) xmalloc (sizeof (arelent));
+
+  /* HACK: Is this right? */
+  fixP->fx_r_type = tc_bfd_fix2rtype (fixP);
+
+  reloc->howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
+  if (reloc->howto == (reloc_howto_type *) NULL)
+    {
+      as_bad_where (fixP->fx_file, fixP->fx_line,
+		    "internal error: can't export reloc type %d (`%s')",
+		    fixP->fx_r_type,
+		    bfd_get_reloc_code_name (fixP->fx_r_type));
+      return NULL;
+    }
+
+  assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
+
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
+  reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
+  reloc->addend = fixP->fx_addnumber;
+
+  return reloc;
+}
+
+/* end from cgen.c */
+
+#endif /* BFD_ASSEMBLER */
 
 /* end of tc-i960.c */

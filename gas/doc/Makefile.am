@@ -22,11 +22,14 @@ CPU_DOCS = \
 	c-h8300.texi \
 	c-h8500.texi \
 	c-hppa.texi \
+	c-i370.texi \
 	c-i386.texi \
 	c-i960.texi \
+	c-m32r.texi \
 	c-m68k.texi \
 	c-mips.texi \
 	c-ns32k.texi \
+	c-pj.texi \
 	c-sh.texi \
 	c-sparc.texi \
 	c-vax.texi \

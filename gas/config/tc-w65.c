@@ -1081,7 +1081,7 @@ md_pcrel_from (fixP)
 
 void
 tc_coff_symbol_emit_hook (x)
-    struct symbol *x;
+    symbolS *x;
 {
 }
 

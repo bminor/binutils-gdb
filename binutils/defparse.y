@@ -1,6 +1,6 @@
 %{ /* defparse.y - parser for .def files */
 
-/*   Copyright (C) 1995, 1997, 1998 Free Software Foundation, Inc.
+/*   Copyright (C) 1995, 1997, 1998, 1999 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -30,7 +30,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 %token NAME, LIBRARY, DESCRIPTION, STACKSIZE, HEAPSIZE, CODE, DATA
 %token SECTIONS, EXPORTS, IMPORTS, VERSIONK, BASE, CONSTANT
-%token READ WRITE EXECUTE SHARED NONAME
+%token READ WRITE EXECUTE SHARED NONSHARED NONAME
+%token SINGLE MULTIPLE INITINSTANCE INITGLOBAL TERMINSTANCE TERMGLOBAL
 %token <id> ID
 %token <number> NUMBER
 %type  <number> opt_base opt_ordinal opt_NONAME opt_CONSTANT opt_DATA
@@ -45,7 +46,7 @@ start: start command
 
 command: 
 		NAME opt_name opt_base { def_name ($2, $3); }
-	|	LIBRARY opt_name opt_base { def_library ($2, $3); }
+	|	LIBRARY opt_name opt_base option_list { def_library ($2, $3); }
 	|	EXPORTS explist 
 	|	DESCRIPTION ID { def_description ($2);}
 	|	STACKSIZE NUMBER opt_number { def_stacksize ($2, $3);}
@@ -61,7 +62,6 @@ command:
 
 explist:
 		/* EMPTY */
-	|	expline
 	|	explist expline
 	;
 
@@ -108,10 +108,13 @@ opt_number: ',' NUMBER { $$=$2;}
 	;
 	
 attr:
-		READ { $$ = 1;}
-	|	WRITE { $$ = 2;}	
-	|	EXECUTE { $$=4;}
-	|	SHARED { $$=8;}
+		READ { $$ = 1; }
+	|	WRITE { $$ = 2; }
+	|	EXECUTE { $$ = 4; }
+	|	SHARED { $$ = 8; }
+	|	NONSHARED { $$ = 0; }
+	|	SINGLE { $$ = 0; }
+	|	MULTIPLE { $$ = 0; }
 	;
 
 opt_CONSTANT:
@@ -153,5 +156,14 @@ opt_base: BASE	'=' NUMBER	{ $$= $3;}
 	|	{ $$=-1;}
 	;
 
-	
+option_list:
+		/* empty */
+	|	option_list opt_comma option
+	;
 
+option:
+		INITINSTANCE
+	|	INITGLOBAL
+	|	TERMINSTANCE
+	|	TERMGLOBAL
+	;

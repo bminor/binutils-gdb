@@ -111,6 +111,7 @@ struct section_list
   const char *          name;      /* Section name.  */
   boolean               used;      /* Whether this entry was used.  */
   boolean               remove;    /* Whether to remove this section.  */
+  boolean		copy;      /* Whether to copy this section.  */
   enum change_action    change_vma;/* Whether to change or set VMA.  */
   bfd_vma 		vma_val;   /* Amount to change by or set to.  */
   enum change_action    change_lma;/* Whether to change or set LMA.  */
@@ -121,6 +122,7 @@ struct section_list
 
 static struct section_list *change_sections;
 static boolean sections_removed;
+static boolean sections_copied;
 
 /* Changes to the start address.  */
 static bfd_vma change_start = 0;
@@ -246,6 +248,7 @@ static struct option copy_options[] =
   {"debugging", no_argument, 0, OPTION_DEBUGGING},
   {"discard-all", no_argument, 0, 'x'},
   {"discard-locals", no_argument, 0, 'X'},
+  {"only-section", required_argument, 0, 'j'},
   {"format", required_argument, 0, 'F'}, /* Obsolete */
   {"gap-fill", required_argument, 0, OPTION_GAP_FILL},
   {"help", no_argument, 0, 'h'},
@@ -290,29 +293,52 @@ copy_usage (stream, exit_status)
      FILE *stream;
      int exit_status;
 {
+  fprintf (stream, _("Usage: %s <switches> in-file [out-file]\n"), program_name);
+  fprintf (stream, _(" The switches are:\n"));
   fprintf (stream, _("\
-Usage: %s [-vVSpgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-b byte]\n\
-       [-R section] [-i interleave] [--interleave=interleave] [--byte=byte]\n\
-       [--input-target=bfdname] [--output-target=bfdname] [--target=bfdname]\n\
-       [--strip-all] [--strip-debug] [--strip-unneeded] [--discard-all]\n\
-       [--discard-locals] [--debugging] [--remove-section=section]\n"),
-	   program_name);
-  fprintf (stream, _("\
-       [--gap-fill=val] [--pad-to=address] [--preserve-dates]\n\
-       [--set-start=val] \n\
-       [--change-start=incr] [--change-addresses=incr] \n\
-       (--adjust-start   and  --adjust-vma are aliases for these two) \n\
-       [--change-section-address=section{=,+,-}val]\n\
-       (--adjust-section-vma is an alias for --change-section-address)\n\
-       [--change-section-lma=section{=,+,-}val]\n\
-       [--change-section-vma=section{=,+,-}val]\n\
-       [--adjust-warnings] [--no-adjust-warnings]\n\
-       [--change-warnings] [--no-change-warnings]\n\
-       [--set-section-flags=section=flags] [--add-section=sectionname=filename]\n\
-       [--keep-symbol symbol] [-K symbol] [--strip-symbol symbol] [-N symbol]\n\
-       [--localize-symbol symbol] [-L symbol] [--weaken-symbol symbol]\n\
-       [-W symbol] [--change-leading-char] [--remove-leading-char] [--weaken]\n\
-       [--verbose] [--version] [--help] in-file [out-file]\n"));
+  -I --input-target <bfdname>      Assume input file is in format <bfdname>\n\
+  -O --output-target <bfdname>     Create an output file in format <bfdname>\n\
+  -F --target <bfdname>            Set both input and output format to <bfdname>\n\
+     --debugging                   Convert debugging information, if possible\n\
+  -p --preserve-dates              Copy modified/access timestamps to the output\n\
+  -j --only-section <name>         Only copy section <name> into the output\n\
+  -R --remove-section <name>       Remove section <name> from the output\n\
+  -S --strip-all                   Remove all symbol and relocation information\n\
+  -g --strip-debug                 Remove all debugging symbols\n\
+     --strip-unneeded              Remove all symbols not needed by relocations\n\
+  -N --strip-symbol <name>         Do not copy symbol <name>\n\
+  -K --keep-symbol <name>          Only copy symbol <name>\n\
+  -L --localize-symbol <name>      Force symbol <name> to be marked as a local\n\
+  -W --weaken-symbol <name>        Force symbol <name> to be marked as a weak\n\
+     --weaken                      Force all global symbols to be marked as weak\n\
+  -x --discard-all                 Remove all non-global symbols\n\
+  -X --discard-locals              Remove any compiler-generated symbols\n\
+  -i --interleave <number>         Only copy one out of every <number> bytes\n\
+  -b --byte <num>                  Select byte <num> in every interleaved block\n\
+     --gap-fill <val>              Fill gaps between sections with <val>\n\
+     --pad-to <addr>               Pad the last section up to address <addr>\n\
+     --set-start <addr>            Set the start address to <addr>\n\
+    {--change-start|--adjust-start} <incr>\n\
+                                   Add <incr> to the start address\n\
+    {--change-addresses|--adjust-vma} <incr>\n\
+                                   Add <incr> to LMA, VMA and start addresses\n\
+    {--change-section-address|--adjust-section-vma} <name>{=|+|-}<val>\n\
+                                   Change LMA and VMA of section <name> by <val>\n\
+     --change-section-lma <name>{=|+|-}<val>\n\
+                                   Change the LMA of section <name> by <val>\n\
+     --change-section-vma <name>{=|+|-}<val>\n\
+                                   Change the VMA of section <name> by <val>\n\
+    {--[no-]change-warnings|--[no-]adjust-warnings}\n\
+                                   Warn if a named section does not exist\n\
+     --set-section-flags <name>=<flags>\n\
+                                   Set section <name>'s properties to <flags>\n\
+     --add-section <name>=<file>   Add section <name> found in <file> to output\n\
+     --change-leading-char         Force output format's leading character style\n\
+     --remove-leading-char         Remove leading character from global symbols\n\
+  -v --verbose                     List all object files modified\n\
+  -V --version                     Display this program's version number\n\
+  -h --help                        Display this output\n\
+"));
   list_supported_targets (program_name, stream);
   if (exit_status == 0)
     fprintf (stream, _("Report bugs to bug-gnu-utils@gnu.org\n"));
@@ -324,14 +350,27 @@ strip_usage (stream, exit_status)
      FILE *stream;
      int exit_status;
 {
+  fprintf (stream, _("Usage: %s <switches> in-file(s)\n"), program_name);
+  fprintf (stream, _(" The switches are:\n"));
   fprintf (stream, _("\
-Usage: %s [-vVsSpgxX] [-I bfdname] [-O bfdname] [-F bfdname] [-R section]\n\
-       [--input-target=bfdname] [--output-target=bfdname] [--target=bfdname]\n\
-       [--strip-all] [--strip-debug] [--strip-unneeded] [--discard-all]\n\
-       [--discard-locals] [--keep-symbol symbol] [-K symbol]\n\
-       [--strip-symbol symbol] [-N symbol] [--remove-section=section]\n\
-       [-o file] [--preserve-dates] [--verbose] [--version] [--help] file...\n"),
-	   program_name);
+  -I --input-target <bfdname>      Assume input file is in format <bfdname>\n\
+  -O --output-target <bfdname>     Create an output file in format <bfdname>\n\
+  -F --target <bfdname>            Set both input and output format to <bfdname>\n\
+  -p --preserve-dates              Copy modified/access timestamps to the output\n\
+  -R --remove-section <name>       Remove section <name> from the output\n\
+  -s --strip-all                   Remove all symbol and relocation information\n\
+  -g -S --strip-debug              Remove all debugging symbols\n\
+     --strip-unneeded              Remove all symbols not needed by relocations\n\
+  -N --strip-symbol <name>         Do not copy symbol <name>\n\
+  -K --keep-symbol <name>          Only copy symbol <name>\n\
+  -x --discard-all                 Remove all non-global symbols\n\
+  -X --discard-locals              Remove any compiler-generated symbols\n\
+  -v --verbose                     List all object files modified\n\
+  -V --version                     Display this program's version number\n\
+  -h --help                        Display this output\n\
+  -o <file>                        Place stripped output into <file>\n\
+"));
+
   list_supported_targets (program_name, stream);
   if (exit_status == 0)
     fprintf (stream, _("Report bugs to bug-gnu-utils@gnu.org\n"));
@@ -367,10 +406,13 @@ parse_flags (s)
   else if (strncasecmp (fname, s, len) == 0) ret |= fval
       PARSE_FLAG ("alloc", SEC_ALLOC);
       PARSE_FLAG ("load", SEC_LOAD);
+      PARSE_FLAG ("noload", SEC_NEVER_LOAD);
       PARSE_FLAG ("readonly", SEC_READONLY);
+      PARSE_FLAG ("debug", SEC_DEBUGGING);
       PARSE_FLAG ("code", SEC_CODE);
       PARSE_FLAG ("data", SEC_DATA);
       PARSE_FLAG ("rom", SEC_ROM);
+      PARSE_FLAG ("share", SEC_SHARED);
       PARSE_FLAG ("contents", SEC_HAS_CONTENTS);
 #undef PARSE_FLAG
       else
@@ -381,7 +423,7 @@ parse_flags (s)
 	  strncpy (copy, s, len);
 	  copy[len] = '\0';
 	  non_fatal (_("unrecognized section flag `%s'"), copy);
-	  fatal (_("supported flags: alloc, load, readonly, code, data, rom, contents"));
+	  fatal (_("supported flags: alloc, load, noload, readonly, debug, code, data, rom, share, contents"));
 	}
 
       s = snext;
@@ -411,6 +453,7 @@ find_section_list (name, add)
   p->name = name;
   p->used = false;
   p->remove = false;
+  p->copy = false;
   p->change_vma = CHANGE_IGNORE;
   p->change_lma = CHANGE_IGNORE;
   p->vma_val = 0;
@@ -461,7 +504,7 @@ is_specified_symbol (name, list)
 
 static boolean
 is_strip_section (abfd, sec)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
 {
   struct section_list *p;
@@ -474,10 +517,15 @@ is_strip_section (abfd, sec)
 	  || convert_debugging))
     return true;
 
-  if (! sections_removed)
+  if (! sections_removed && ! sections_copied)
     return false;
+
   p = find_section_list (bfd_get_section_name (abfd, sec), false);
-  return p != NULL && p->remove ? true : false;
+  if (sections_removed && p != NULL && p->remove)
+    return true;
+  if (sections_copied && (p == NULL || ! p->copy))
+    return true;
+  return false;
 }
 
 /* Choose which symbol entries to copy; put the result in OSYMS.
@@ -594,7 +642,7 @@ filter_bytes (memhunk, size)
 
   for (; from < end; from += interleave)
     *to++ = *from;
-  if (*size % interleave > copy_byte)
+  if (*size % interleave > (bfd_size_type) copy_byte)
     *size = (*size / interleave) + 1;
   else
     *size /= interleave;
@@ -816,6 +864,7 @@ copy_object (ibfd, obfd)
       || localize_specific_list != NULL
       || weaken_specific_list != NULL
       || sections_removed
+      || sections_copied
       || convert_debugging
       || change_leading_char
       || remove_leading_char
@@ -962,6 +1011,16 @@ copy_archive (ibfd, obfd, output_target)
 				  (char *) NULL);
       bfd *output_bfd = bfd_openw (output_name, output_target);
       bfd *last_element;
+      struct stat buf;
+      int stat_status = 0;
+
+      if (preserve_dates)
+	{
+	  stat_status = bfd_stat_arch_elt (this_element, &buf);
+	  if (stat_status != 0)
+	    non_fatal (_("internal stat error on %s"),
+		       bfd_get_filename (this_element));
+	}
 
       l = (struct name_list *) xmalloc (sizeof (struct name_list));
       l->name = output_name;
@@ -983,6 +1042,9 @@ copy_archive (ibfd, obfd, output_target)
 	  /* Error in new object file. Don't change archive. */
 	  status = 1;
 	}
+
+      if (preserve_dates && stat_status == 0)
+	set_times (output_name, &buf);
 
       /* Open the newly output file and attach to our list.  */
       output_bfd = bfd_openr (output_name, output_target);
@@ -1114,7 +1176,9 @@ setup_section (ibfd, isection, obfdarg)
   if (p != NULL)
     p->used = true;
 
-  if (p != NULL && p->remove)
+  if (sections_removed && p != NULL && p->remove)
+    return;
+  if (sections_copied && (p == NULL || ! p->copy))
     return;
 
   osection = bfd_make_section_anyway (obfd, bfd_section_name (ibfd, isection));
@@ -1243,7 +1307,9 @@ copy_section (ibfd, isection, obfdarg)
 
   p = find_section_list (bfd_section_name (ibfd, isection), false);
 
-  if (p != NULL && p->remove)
+  if (sections_removed && p != NULL && p->remove)
+    return;
+  if (sections_copied && (p == NULL || ! p->copy))
     return;
 
   osection = isection->output_section;
@@ -1331,7 +1397,7 @@ copy_section (ibfd, isection, obfdarg)
 
 static void
 get_sections (obfd, osection, secppparg)
-     bfd *obfd;
+     bfd *obfd ATTRIBUTE_UNUSED;
      asection *osection;
      PTR secppparg;
 {
@@ -1438,8 +1504,8 @@ static boolean
 write_debugging_info (obfd, dhandle, symcountp, symppp)
      bfd *obfd;
      PTR dhandle;
-     long *symcountp;
-     asymbol ***symppp;
+     long *symcountp ATTRIBUTE_UNUSED;
+     asymbol ***symppp ATTRIBUTE_UNUSED;
 {
   if (bfd_get_flavour (obfd) == bfd_target_ieee_flavour)
     return write_ieee_debugging_info (obfd, dhandle);
@@ -1644,7 +1710,7 @@ copy_main (argc, argv)
   struct section_list *p;
   struct stat statbuf;
 
-  while ((c = getopt_long (argc, argv, "b:i:I:K:N:s:O:d:F:L:R:SpgxXVvW:",
+  while ((c = getopt_long (argc, argv, "b:i:I:j:K:N:s:O:d:F:L:R:SpgxXVvW:",
 			   copy_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -1670,8 +1736,17 @@ copy_main (argc, argv)
 	case 'F':
 	  input_target = output_target = optarg;
 	  break;
+	case 'j':
+	  p = find_section_list (optarg, true);
+	  if (p->remove)
+	    fatal (_("%s both copied and removed"), optarg);
+	  p->copy = true;
+	  sections_copied = true;
+	  break;
 	case 'R':
 	  p = find_section_list (optarg, true);
+	  if (p->copy)
+	    fatal (_("%s both copied and removed"), optarg);
 	  p->remove = true;
 	  sections_removed = true;
 	  break;
@@ -1769,15 +1844,21 @@ copy_main (argc, argv)
 	    const char *s;
 	    int len;
 	    char *name;
-	    char *option;
+	    char *option = NULL;
 	    bfd_vma val;
-	    enum change_action what;
+	    enum change_action what = CHANGE_IGNORE;
 	    
 	    switch (c)
 	      {
-	      case OPTION_CHANGE_SECTION_ADDRESS: option = "--change-section-address"; break;
-	      case OPTION_CHANGE_SECTION_LMA: option = "--change-section-lma"; break;
-	      case OPTION_CHANGE_SECTION_VMA: option = "--change-section-vma"; break;
+	      case OPTION_CHANGE_SECTION_ADDRESS:
+		option = "--change-section-address";
+		break;
+	      case OPTION_CHANGE_SECTION_LMA:
+		option = "--change-section-lma";
+		break;
+	      case OPTION_CHANGE_SECTION_VMA:
+		option = "--change-section-vma";
+		break;
 	      }
 	    
 	    s = strchr (optarg, '=');

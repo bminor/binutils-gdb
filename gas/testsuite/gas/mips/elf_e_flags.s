@@ -28,11 +28,11 @@ main:
 	.mask	0x80000000,-8
 	.fmask	0x00000000,0
 	subu	$sp,$sp,40
-	sd	$31,32($sp)
+	sw	$31,32($sp)
 	jal	__gccmain
 	move	$2,$0
-	ld	$31,32($sp)
-	#nop
+	lw	$31,32($sp)
+	nop
 	.set	noreorder
 	.set	nomacro
 	j	$31

@@ -71,7 +71,7 @@ gld${EMULATION_NAME}_before_allocation ()
   {
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
-	if (!bfd_elf32_arm_process_before_allocation (is->the_bfd, &link_info))
+	if (!bfd_elf32_arm_process_before_allocation (is->the_bfd, &link_info, 0))
 	  {
 	    /* xgettext:c-format */
 	    einfo (_("Errors encountered processing file %s"), is->filename);
@@ -105,7 +105,7 @@ then
 # Scripts compiled in.
 
 # sed commands to quote an ld script as a C string.
-sc="-f ${srcdir}/emultempl/stringify.sed"
+sc="-f stringify.sed"
 
 cat >>e${EMULATION_NAME}.c <<EOF
 {			     
@@ -163,13 +163,15 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  NULL, /* finish */
-  NULL, /* create output section statements */
-  NULL, /* open dynamic archive */
-  NULL, /* place orphan */
-  NULL, /* set_symbols */
-  NULL,
-  NULL, /* unrecognised file */
-  NULL
+  NULL,	/* finish */
+  NULL,	/* create output section statements */
+  NULL,	/* open dynamic archive */
+  NULL,	/* place orphan */
+  NULL,	/* set symbols */
+  NULL,	/* parse args */
+  NULL,	/* unrecognized file */
+  NULL,	/* list options */
+  NULL,	/* recognized file */
+  NULL 	/* find_potential_libraries */
 };
 EOF

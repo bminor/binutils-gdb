@@ -55,7 +55,8 @@ i386_find_call (parent, p_lowpc, p_highpc)
       p_highpc = s_highpc;
     }
   DBG (CALLDEBUG, printf ("[findcall] %s: 0x%lx to 0x%lx\n",
-			  parent->name, p_lowpc, p_highpc));
+			  parent->name, (unsigned long) p_lowpc,
+			  (unsigned long) p_highpc));
 
   delta = (bfd_vma) core_text_space - core_text_sect->vma;
 
@@ -66,8 +67,8 @@ i386_find_call (parent, p_lowpc, p_highpc)
       if (i386_iscall (instructp))
 	{
 	  DBG (CALLDEBUG,
-	       printf ("[findcall]\t0x%x:call",
-		       instructp - (unsigned char *) delta));
+	       printf ("[findcall]\t0x%lx:call",
+		       (unsigned long) (instructp - (unsigned char *) delta)));
 	  /*
 	   *  regular pc relative addressing
 	   *    check that this is the address of 
@@ -85,7 +86,8 @@ i386_find_call (parent, p_lowpc, p_highpc)
 		   *      a hit
 		   */
 		  DBG (CALLDEBUG,
-		       printf ("\tdestpc 0x%lx (%s)\n", destpc, child->name));
+		       printf ("\tdestpc 0x%lx (%s)\n",
+			       (unsigned long) destpc, child->name));
 		  arc_add (parent, child, (unsigned long) 0);
 		  instructp += 4;	/* call is a 5 byte instruction */
 		  continue;
