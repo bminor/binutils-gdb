@@ -1,3 +1,8 @@
+2005-03-09  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* vax-dis.c (entry_mask_bit): New array.
+	(print_insn_vax): Decode function entry mask.
+
 2005-03-07  Aldy Hernandez  <aldyh@redhat.com>
 
 	* ppc-opc.c (powerpc_opcodes): Fix encoding of efscfd.
@@ -8,7 +13,7 @@
 
 2005-03-03  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
 
-	* opcodes/arc-dis.c: Add enum a4_decoding_class.
+	* arc-dis.c (a4_decoding_class): New enum.
 	(dsmOneArcInst): Use the enum values for the decoding class.
 	Remove redundant case in the switch for decodingClass value 11.
 
