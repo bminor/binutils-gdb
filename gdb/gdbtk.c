@@ -113,6 +113,7 @@ static int gdb_listfiles PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int gdb_listfuncs PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int call_wrapper PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int gdb_cmd PARAMS ((ClientData, Tcl_Interp *, int, char *argv[]));
+static int gdb_immediate_command PARAMS ((ClientData, Tcl_Interp *, int, char *argv[]));
 static int gdb_fetch_registers PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static void gdbtk_readline_end PARAMS ((void));
 static int gdb_changed_register_list PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
@@ -977,6 +978,36 @@ gdb_changed_register_list (clientData, interp, argc, argv)
   return map_arg_registers (argc, argv, register_changed_p, NULL);
 }
 
+/* This implements the tcl command "gdb_immediate", which does exactly
+   the same thing as gdb_cmd, except NONE of its outut is buffered. */
+static int
+gdb_immediate_command (clientData, interp, argc, argv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int argc;
+     char *argv[];
+{
+  Tcl_DString *save_ptr = NULL;
+
+  if (argc != 2)
+    error ("wrong # args");
+
+  if (running_now)
+    return TCL_OK;
+
+  Tcl_DStringAppend (result_ptr, "", -1);
+  save_ptr = result_ptr;
+  result_ptr = NULL;
+
+  execute_command (argv[1], 1);
+
+  bpstat_do_actions (&stop_bpstat);
+  
+  result_ptr = save_ptr;
+
+  return TCL_OK;
+}
+
 /* This implements the TCL command `gdb_cmd', which sends its argument into
    the GDB command scanner.  */
 
@@ -1851,6 +1882,8 @@ gdbtk_init ( argv0 )
 #endif
 
   Tcl_CreateCommand (interp, "gdb_cmd", call_wrapper, gdb_cmd, NULL);
+  Tcl_CreateCommand (interp, "gdb_immediate", call_wrapper,
+                     gdb_immediate_command, NULL);
   Tcl_CreateCommand (interp, "gdb_loc", call_wrapper, gdb_loc, NULL);
   Tcl_CreateCommand (interp, "gdb_path_conv", call_wrapper, gdb_path_conv, NULL);
   Tcl_CreateCommand (interp, "gdb_sourcelines", call_wrapper, gdb_sourcelines,

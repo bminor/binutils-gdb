@@ -1,3 +1,9 @@
+Thu Jan 15 12:42:28 1998  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* gdbtk.c (gdb_immediate_command): New function which does not buffer any
+	output. (Contrast to gdb_cmd.)
+	(gdbtk_init): Install "gdb_immediate" command into interpreter.
+
 Wed Jan 14 16:38:44 1998  Keith Seitz  <keiths@pizza.cygnus.com>
 
 	* configure.in (--enable-gdbtk): If tcl was built with --enable-shared,
