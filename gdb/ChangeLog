@@ -1,5 +1,8 @@
 Sat Sep 18 10:13:18 1993  Jim Kingdon  (kingdon@poseidon.cygnus.com)
 
+	* mipsread.c (parse_type): Don't complain() if we guessed struct
+	and it was a union, or vice versa.
+
 	* defs.h (make_cleanup): Change PTR to void * when inside PARAMS.
 
 	Some of the following is in #ifdef CALL_DUMMY_BREAKPOINT_OFFSET.

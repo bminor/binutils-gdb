@@ -1466,12 +1466,22 @@ parse_type (fd, ax, bs, bigend, sym_name)
 	{
 
 	  /* Usually, TYPE_CODE(tp) is already type_code.  The main
-	     exception is if we guessed wrong re struct/union/enum. */
-	  if (TYPE_CODE (tp) != type_code)
+	     exception is if we guessed wrong re struct/union/enum.
+	     But for struct vs. union a wrong guess is harmless, so
+	     don't complain().  */
+	  if ((TYPE_CODE (tp) == TYPE_CODE_ENUM
+	       && type_code != TYPE_CODE_ENUM)
+	      || (TYPE_CODE (tp) != TYPE_CODE_ENUM
+		  && type_code == TYPE_CODE_ENUM))
 	    {
 	      complain (&bad_tag_guess_complaint, sym_name);
+	    }
+
+	  if (TYPE_CODE (tp) != type_code)
+	    {
 	      TYPE_CODE (tp) = type_code;
 	    }
+
 	  /* Do not set the tag name if it is a compiler generated tag name
 	      (.Fxx or .xxfake or empty) for unnamed struct/union/enums.  */
 	  if (name[0] == '.' || name[0] == '\0')
