@@ -1,3 +1,19 @@
+2003-11-04  Andrew Cagney  <cagney@redhat.com>
+
+	* symtab.c (find_active_alias): Delete function.
+	(lookup_block_symbol): Delete alias code.
+	* stabsread.c (resolve_live_range): Delete function.
+	(add_live_range): Delete function.
+	(resolve_symbol_reference): Delete function.
+	(define_symbol): Delete live range and alias code.
+	(scan_file_globals): Delete alias code.
+	* symtab.h (SYMBOL_RANGES): Delete macro.
+	(struct range_list): Delete structure.
+	(struct symbol): Delete field "ranges".
+	(SYMBOL_ALIASES): Delete macro.
+	(struct alias_list): Delete structure.
+	(struct symbol): Delete field "aliases".
+
 2003-11-04  Michael Snyder  <msnyder@redhat.com>
 
 	* MAINTAINERS: Remove myself as owner of breakpoints and 

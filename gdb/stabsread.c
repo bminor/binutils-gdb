@@ -156,17 +156,9 @@ read_cpp_abbrev (struct field_info *, char **, struct type *,
 
 static char *find_name_end (char *name);
 
-static void add_live_range (struct objfile *, struct symbol *, CORE_ADDR,
-			    CORE_ADDR);
-
-static int resolve_live_range (struct objfile *, struct symbol *, char *);
-
 static int process_reference (char **string);
 
 static CORE_ADDR ref_search_value (int refnum);
-
-static int resolve_symbol_reference (struct objfile *, struct symbol *,
-				     char *);
 
 void stabsread_clear_cache (void);
 
@@ -475,109 +467,6 @@ read_type_number (char **pp, int *typenums)
 #define VISIBILITY_PUBLIC	'2'	/* Stabs character for public field */
 #define VISIBILITY_IGNORE	'9'	/* Optimized out or zero length */
 
-/* This routine fixes up symbol references/aliases to point to the original
-   symbol definition.  Returns 0 on failure, non-zero on success.  */
-
-static int
-resolve_symbol_reference (struct objfile *objfile, struct symbol *sym, char *p)
-{
-  int refnum;
-  struct symbol *ref_sym = 0;
-  struct alias_list *alias;
-
-  /* If this is not a symbol reference return now.  */
-  if (*p != '#')
-    return 0;
-
-  /* Use "#<num>" as the name; we'll fix the name later.
-     We stored the original symbol name as "#<id>=<name>"
-     so we can now search for "#<id>" to resolving the reference.
-     We'll fix the names later by removing the "#<id>" or "#<id>=" */
-
-/*---------------------------------------------------------*/
-  /* Get the reference id number, and 
-     advance p past the names so we can parse the rest. 
-     eg: id=2 for p : "2=", "2=z:r(0,1)" "2:r(0,1);l(#5,#6),l(#7,#4)" */
-/*---------------------------------------------------------*/
-
-  /* This gets reference name from string.  sym may not have a name. */
-
-  /* Get the reference number associated with the reference id in the
-     gdb stab string.  From that reference number, get the main/primary
-     symbol for this alias.  */
-  refnum = process_reference (&p);
-  ref_sym = ref_search (refnum);
-  if (!ref_sym)
-    {
-      lrs_general_complaint ("symbol for reference not found");
-      return 0;
-    }
-
-  /* Parse the stab of the referencing symbol
-     now that we have the referenced symbol.
-     Add it as a new symbol and a link back to the referenced symbol.
-     eg: p : "=", "=z:r(0,1)" ":r(0,1);l(#5,#6),l(#7,#4)" */
-
-
-  /* If the stab symbol table and string contain:
-     RSYM   0      5      00000000 868    #15=z:r(0,1)
-     LBRAC  0      0      00000000 899    #5=
-     SLINE  0      16     00000003 923    #6=
-     Then the same symbols can be later referenced by:
-     RSYM   0      5      00000000 927    #15:r(0,1);l(#5,#6)
-     This is used in live range splitting to:
-     1) specify that a symbol (#15) is actually just a new storage 
-     class for a symbol (#15=z) which was previously defined.
-     2) specify that the beginning and ending ranges for a symbol 
-     (#15) are the values of the beginning (#5) and ending (#6) 
-     symbols. */
-
-  /* Read number as reference id.
-     eg: p : "=", "=z:r(0,1)" ":r(0,1);l(#5,#6),l(#7,#4)" */
-  /* FIXME! Might I want to use SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
-     in case of "l(0,0)"? */
-
-/*--------------------------------------------------*/
-  /* Add this symbol to the reference list.           */
-/*--------------------------------------------------*/
-
-  alias = (struct alias_list *) obstack_alloc (&objfile->type_obstack,
-					       sizeof (struct alias_list));
-  if (!alias)
-    {
-      lrs_general_complaint ("Unable to allocate alias list memory");
-      return 0;
-    }
-
-  alias->next = 0;
-  alias->sym = sym;
-
-  if (!SYMBOL_ALIASES (ref_sym))
-    {
-      SYMBOL_ALIASES (ref_sym) = alias;
-    }
-  else
-    {
-      struct alias_list *temp;
-
-      /* Get to the end of the list.  */
-      for (temp = SYMBOL_ALIASES (ref_sym);
-	   temp->next;
-	   temp = temp->next)
-	;
-      temp->next = alias;
-    }
-
-  /* Want to fix up name so that other functions (eg. valops)
-     will correctly print the name.
-     Don't add_symbol_to_list so that lookup_symbol won't find it.
-     nope... needed for fixups. */
-  DEPRECATED_SYMBOL_NAME (sym) = DEPRECATED_SYMBOL_NAME (ref_sym);
-
-  /* Done!  */
-  return 1;
-}
-
 /* Structure for storing pointers to reference definitions for fast lookup 
    during "process_later". */
 
@@ -803,41 +692,6 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 		     string);
 	  goto normal;		/* Do *something* with it */
 	}
-    }
-  else if (string[0] == '#')
-    {
-      /* Special GNU C extension for referencing symbols.  */
-      char *s;
-      int refnum, nlen;
-
-      /* If STRING defines a new reference id, then add it to the
-         reference map.  Else it must be referring to a previously
-         defined symbol, so add it to the alias list of the previously
-         defined symbol.  */
-      s = string;
-      refnum = symbol_reference_defined (&s);
-      if (refnum >= 0)
-	ref_add (refnum, sym, string, SYMBOL_VALUE (sym));
-      else if (!resolve_symbol_reference (objfile, sym, string))
-	return NULL;
-
-      /* S..P contains the name of the symbol.  We need to store
-         the correct name into DEPRECATED_SYMBOL_NAME.  */
-      nlen = p - s;
-      if (refnum >= 0)
-	{
-	  if (nlen > 0)
-	    SYMBOL_SET_NAMES (sym, s, nlen, objfile);
-	  else
-	    /* FIXME! Want DEPRECATED_SYMBOL_NAME (sym) = 0;
-	       Get error if leave name 0.  So give it something. */
-	    {
-	      nlen = p - string;
-	      SYMBOL_SET_NAMES (sym, string, nlen, objfile);
-	    }
-	}
-      /* Advance STRING beyond the reference id.  */
-      string = s;
     }
   else
     {
@@ -1521,135 +1375,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	SYMBOL_CLASS (sym) = LOC_REF_ARG;
     }
 
-  /* Is there more to parse?  For example LRS/alias information?  */
-  while (*p && *p == ';')
-    {
-      p++;
-      if (*p && p[0] == 'l' && p[1] == '(')
-	{
-	  /* GNU extensions for live range splitting may be appended to 
-	     the end of the stab string.  eg. "l(#1,#2);l(#3,#5)" */
-
-	  /* Resolve the live range and add it to SYM's live range list.  */
-	  if (!resolve_live_range (objfile, sym, p))
-	    return NULL;
-
-	  /* Find end of live range info. */
-	  p = strchr (p, ')');
-	  if (!*p || *p != ')')
-	    {
-	      lrs_general_complaint ("live range format not recognized");
-	      return NULL;
-	    }
-	  p++;
-	}
-    }
   return sym;
 }
-
-/* Add the live range found in P to the symbol SYM in objfile OBJFILE.  Returns
-   non-zero on success, zero otherwise.  */
-
-static int
-resolve_live_range (struct objfile *objfile, struct symbol *sym, char *p)
-{
-  int refnum;
-  CORE_ADDR start, end;
-
-  /* Sanity check the beginning of the stabs string.  */
-  if (!*p || *p != 'l')
-    {
-      lrs_general_complaint ("live range string 1");
-      return 0;
-    }
-  p++;
-
-  if (!*p || *p != '(')
-    {
-      lrs_general_complaint ("live range string 2");
-      return 0;
-    }
-  p++;
-
-  /* Get starting value of range and advance P past the reference id.
-
-     ?!? In theory, the process_reference should never fail, but we should
-     catch that case just in case the compiler scrogged the stabs.  */
-  refnum = process_reference (&p);
-  start = ref_search_value (refnum);
-  if (!start)
-    {
-      lrs_general_complaint ("Live range symbol not found 1");
-      return 0;
-    }
-
-  if (!*p || *p != ',')
-    {
-      lrs_general_complaint ("live range string 3");
-      return 0;
-    }
-  p++;
-
-  /* Get ending value of range and advance P past the reference id.
-
-     ?!? In theory, the process_reference should never fail, but we should
-     catch that case just in case the compiler scrogged the stabs.  */
-  refnum = process_reference (&p);
-  end = ref_search_value (refnum);
-  if (!end)
-    {
-      lrs_general_complaint ("Live range symbol not found 2");
-      return 0;
-    }
-
-  if (!*p || *p != ')')
-    {
-      lrs_general_complaint ("live range string 4");
-      return 0;
-    }
-
-  /* Now that we know the bounds of the range, add it to the
-     symbol.  */
-  add_live_range (objfile, sym, start, end);
-
-  return 1;
-}
-
-/* Add a new live range defined by START and END to the symbol SYM
-   in objfile OBJFILE.  */
-
-static void
-add_live_range (struct objfile *objfile, struct symbol *sym, CORE_ADDR start,
-		CORE_ADDR end)
-{
-  struct range_list *r, *rs;
-
-  if (start >= end)
-    {
-      lrs_general_complaint ("end of live range follows start");
-      return;
-    }
-
-  /* Alloc new live range structure. */
-  r = (struct range_list *)
-    obstack_alloc (&objfile->type_obstack,
-		   sizeof (struct range_list));
-  r->start = start;
-  r->end = end;
-  r->next = 0;
-
-  /* Append this range to the symbol's range list. */
-  if (!SYMBOL_RANGES (sym))
-    SYMBOL_RANGES (sym) = r;
-  else
-    {
-      /* Get the last range for the symbol. */
-      for (rs = SYMBOL_RANGES (sym); rs->next; rs = rs->next)
-	;
-      rs->next = r;
-    }
-}
-
 
 /* Skip rest of this symbol and return an error type.
 
@@ -4510,7 +4237,7 @@ scan_file_globals (struct objfile *objfile)
 {
   int hash;
   struct minimal_symbol *msymbol;
-  struct symbol *sym, *prev, *rsym;
+  struct symbol *sym, *prev;
   struct objfile *resolve_objfile;
 
   /* SVR4 based linkers copy referenced global symbols from shared
@@ -4564,9 +4291,6 @@ scan_file_globals (struct objfile *objfile)
 	      if (DEPRECATED_SYMBOL_NAME (msymbol)[0] == DEPRECATED_SYMBOL_NAME (sym)[0] &&
 		  STREQ (DEPRECATED_SYMBOL_NAME (msymbol) + 1, DEPRECATED_SYMBOL_NAME (sym) + 1))
 		{
-
-		  struct alias_list *aliases;
-
 		  /* Splice this symbol out of the hash chain and
 		     assign the value we have to it. */
 		  if (prev)
@@ -4581,37 +4305,20 @@ scan_file_globals (struct objfile *objfile)
 		  /* Check to see whether we need to fix up a common block.  */
 		  /* Note: this code might be executed several times for
 		     the same symbol if there are multiple references.  */
-
-		  /* If symbol has aliases, do minimal symbol fixups for each.
-		     These live aliases/references weren't added to 
-		     global_sym_chain hash but may also need to be fixed up. */
-		  /* FIXME: Maybe should have added aliases to the global chain,                     resolved symbol name, then treated aliases as normal 
-		     symbols?  Still, we wouldn't want to add_to_list. */
-		  /* Now do the same for each alias of this symbol */
-		  rsym = sym;
-		  aliases = SYMBOL_ALIASES (sym);
-		  while (rsym)
+		  if (sym)
 		    {
-		      if (SYMBOL_CLASS (rsym) == LOC_BLOCK)
+		      if (SYMBOL_CLASS (sym) == LOC_BLOCK)
 			{
-			  fix_common_block (rsym,
+			  fix_common_block (sym,
 					    SYMBOL_VALUE_ADDRESS (msymbol));
 			}
 		      else
 			{
-			  SYMBOL_VALUE_ADDRESS (rsym)
+			  SYMBOL_VALUE_ADDRESS (sym)
 			    = SYMBOL_VALUE_ADDRESS (msymbol);
 			}
-		      SYMBOL_SECTION (rsym) = SYMBOL_SECTION (msymbol);
-		      if (aliases)
-			{
-			  rsym = aliases->sym;
-			  aliases = aliases->next;
-			}
-		      else
-			rsym = NULL;
+		      SYMBOL_SECTION (sym) = SYMBOL_SECTION (msymbol);
 		    }
-
 
 		  if (prev)
 		    {

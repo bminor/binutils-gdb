@@ -114,8 +114,6 @@ struct symbol *lookup_symbol_aux_minsyms (const char *name,
 					  struct symtab **symtab);
 #endif
 
-static struct symbol *find_active_alias (struct symbol *sym, CORE_ADDR addr);
-
 /* This flag is used in hppa-tdep.c, and set in hp-symtab-read.c */
 /* Signals the presence of objects compiled by HP compilers */
 int hp_som_som_object_present = 0;
@@ -1668,29 +1666,6 @@ lookup_block_symbol (const struct block *block, const char *name,
 	      && (linkage_name != NULL
 		  ? strcmp (SYMBOL_LINKAGE_NAME (sym), linkage_name) == 0 : 1))
 	    {
-	      /* If SYM has aliases, then use any alias that is active
-	         at the current PC.  If no alias is active at the current
-	         PC, then use the main symbol.
-
-	         ?!? Is checking the current pc correct?  Is this routine
-	         ever called to look up a symbol from another context?
-
-	         FIXME: No, it's not correct.  If someone sets a
-	         conditional breakpoint at an address, then the
-	         breakpoint's `struct expression' should refer to the
-	         `struct symbol' appropriate for the breakpoint's
-	         address, which may not be the PC.
-
-	         Even if it were never called from another context,
-	         it's totally bizarre for lookup_symbol's behavior to
-	         depend on the value of the inferior's current PC.  We
-	         should pass in the appropriate PC as well as the
-	         block.  The interface to lookup_symbol should change
-	         to require the caller to provide a PC.  */
-
-	      if (SYMBOL_ALIASES (sym))
-		sym = find_active_alias (sym, read_pc ());
-
 	      sym_found = sym;
 	      if (SYMBOL_CLASS (sym) != LOC_ARG &&
 		  SYMBOL_CLASS (sym) != LOC_LOCAL_ARG &&
@@ -1707,38 +1682,6 @@ lookup_block_symbol (const struct block *block, const char *name,
       return (sym_found);	/* Will be NULL if not found. */
     }
 }
-
-/* Given a main symbol SYM and ADDR, search through the alias
-   list to determine if an alias is active at ADDR and return
-   the active alias.
-
-   If no alias is active, then return SYM.  */
-
-static struct symbol *
-find_active_alias (struct symbol *sym, CORE_ADDR addr)
-{
-  struct range_list *r;
-  struct alias_list *aliases;
-
-  /* If we have aliases, check them first.  */
-  aliases = SYMBOL_ALIASES (sym);
-
-  while (aliases)
-    {
-      if (!SYMBOL_RANGES (aliases->sym))
-	return aliases->sym;
-      for (r = SYMBOL_RANGES (aliases->sym); r; r = r->next)
-	{
-	  if (r->start <= addr && r->end > addr)
-	    return aliases->sym;
-	}
-      aliases = aliases->next;
-    }
-
-  /* Nothing found, return the main symbol.  */
-  return sym;
-}
-
 
 /* Find the symtab associated with PC and SECTION.  Look through the
    psymtabs and read in another symtab if necessary. */
