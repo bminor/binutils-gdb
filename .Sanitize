@@ -80,6 +80,8 @@ config.sub
 configure
 configure.in
 etc
+configure.bat
+makeall.bat
 
 Things-to-lose:
 
