@@ -427,7 +427,7 @@ long read_register_stack_integer ();
 /* Because INIT_FRAME_PC gets passed fromleaf, that's where we init
    not only ->pc and ->frame, but all the extra stuff, when called from
    get_prev_frame_info, that is.  */
-#define INIT_EXTRA_FRAME_INFO(fci) \
+#define INIT_EXTRA_FRAME_INFO(fromleaf, fci) \
   init_extra_frame_info(fci);
 void init_extra_frame_info ();
 #define INIT_FRAME_PC(fromleaf, fci) \

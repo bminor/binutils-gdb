@@ -339,7 +339,7 @@ CORE_ADDR sparc_extract_struct_value_address (
    Otherwise the bottom of this frame is the top of the next frame.  */
 
 #define EXTRA_FRAME_INFO	FRAME_ADDR bottom;
-#define INIT_EXTRA_FRAME_INFO(fci)  \
+#define INIT_EXTRA_FRAME_INFO(fromleaf, fci)  \
   (fci)->bottom =					\
    ((fci)->next ?					\
     ((fci)->frame == (fci)->next_frame ?		\

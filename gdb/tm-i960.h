@@ -285,7 +285,8 @@ extern CORE_ADDR saved_pc_after_call ();
    Set the arg_pointer to -1, which is not valid; 0 and other values
    indicate real, cached values.  */
 
-#define INIT_EXTRA_FRAME_INFO(fi) ((fi)->fsr = 0, (fi)->arg_pointer = -1)
+#define INIT_EXTRA_FRAME_INFO(fromleaf, fi) \
+	((fi)->fsr = 0, (fi)->arg_pointer = -1)
 
 /* On the i960, we get the chain pointer by reading the PFP saved
    on the stack and clearing the status bits.  */

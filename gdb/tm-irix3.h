@@ -335,4 +335,4 @@ typedef struct mips_extra_func_info {
   int num_args;\
   struct frame_saved_regs *saved_regs;
 
-#define INIT_EXTRA_FRAME_INFO(fci) init_extra_frame_info(fci)
+#define INIT_EXTRA_FRAME_INFO(fromleaf, fci) init_extra_frame_info(fci)

@@ -293,7 +293,7 @@ extern unsigned int last_frame_offset;
 	CORE_ADDR frame_cfp;	\
 	CORE_ADDR frame_window_addr;
 
-#define INIT_EXTRA_FRAME_INFO(fci)  \
+#define INIT_EXTRA_FRAME_INFO(fromleaf, fci)  \
 do {								\
   (fci)->frame_window_addr = (fci)->frame;			\
   (fci)->bottom =						\

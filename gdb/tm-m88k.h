@@ -49,7 +49,7 @@ dc_dcontext_t get_prev_context ();
 extern int stack_error;
 
 #define EXTRA_FRAME_INFO dc_dcontext_t frame_context;
-#define INIT_EXTRA_FRAME_INFO(fci) \
+#define INIT_EXTRA_FRAME_INFO(fromleaf, fci) \
   {									 \
     if (fci->next_frame != NULL)					 \
       {								 \
