@@ -1,3 +1,8 @@
+Tue Dec 10 12:23:19 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10200.c (md_assemble): Opcode 0x0 is valid!
+	* config/tc-mn10300.c (md_assemble): Likewise.
+
 Tue Dec 10 11:37:14 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (mips16_extended_frag): Give an error for an

@@ -736,7 +736,7 @@ keep_going:
       if (match == 0)
         {
 	  next_opcode = opcode + 1;
-	  if (next_opcode->opcode != 0 && !strcmp(next_opcode->name, opcode->name))
+	  if (!strcmp(next_opcode->name, opcode->name))
 	    {
 	      opcode = next_opcode;
 	      continue;
