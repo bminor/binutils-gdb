@@ -1,3 +1,8 @@
+Wed Jun 23 15:04:54 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* config/ns32k/merlin.mh (M_UNINSTALL): new macro to undo what
+	M_INSTALL does.
+
 Wed Jun 23 00:25:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/ns32k/{merlin.mh,xm-merlin.h}: Be consistent about name.

@@ -5,3 +5,4 @@ XM_FILE= xm-merlin.h
 # FIXME: This should use $prefix, but only if SHELL_FILE does too.
 M_INSTALL=cp /bin/sh /usr/local/lib/gdb-sh; \
 chmod ogu+rw /usr/local/lib/gdb-sh
+M_UNINSTALL = rm -f /usr/local/lib/gdb-sh
