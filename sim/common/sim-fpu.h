@@ -42,7 +42,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
    For unpacked structures (passed by value and reference), the code
    quality of GCC-2.7 (on x86) for each alternative was compared.
-   Needless to say the results, while better then for a packed 64 bit
+   Needless to say the results, while better than for a packed 64 bit
    object, were still poor (GCC had only limited support for the
    optimization of references to structure members).  Regardless, the
    struct-by-ref alternative achieved better results when compiled

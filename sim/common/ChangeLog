@@ -1,3 +1,9 @@
+2002-02-24  Andrew Cagney  <ac131313@redhat.com>
+
+	From wiz at danbala:
+	* sim-fpu.h: Fix grammar and typos.
+	Fix PR gdb/287.
+
 2002-02-10  Chris Demetriou  <cgd@broadcom.com>
 
 	* callback.c: Fix some spelling errors.

@@ -1,5 +1,11 @@
 2002-02-24  Andrew Cagney  <ac131313@redhat.com>
 
+	From wiz at danbala:
+	* config/sparc/tm-sp64.h: Fix grammar and typos.
+	Fix PR gdb/287.
+
+2002-02-24  Andrew Cagney  <ac131313@redhat.com>
+
 	* lin-lwp.c, thread-db.c, defs.h, cris-tdep.c: Replace ``Linux''
 	with either ``GNU/Linux'' or ``Linux kernel''.  Update copyright.
 	* m68klinux-nat.c, sparc-linux-nat.c, x86-64-linux-nat.c: Ditto.

@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
+    Copyright 1994, 1995, 2002 Andrew Cagney <cagney@highland.com.au>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -438,7 +438,7 @@ extern int current_stdio;
    local function.
 
    Because of the way that GCC parses __attribute__(), the macro's
-   need to be adjacent to the functioin name rather then at the start
+   need to be adjacent to the function name rather than at the start
    of the line vis:
 
    	int STATIC_INLINE_MODULE f(void);

@@ -1,3 +1,9 @@
+2002-02-24  Andrew Cagney  <ac131313@redhat.com>
+
+	From wiz at danbala:
+	* std-config.h: Fix grammar and typos.  Update copyright.
+	Fix PR gdb/287.
+
 2002-01-12  matthew green  <mrg@redhat.com>
 
 	* Makefile.in (tmp-igen): Pass -I $(srcdir) to igen.

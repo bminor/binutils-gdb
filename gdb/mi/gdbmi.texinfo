@@ -1470,7 +1470,7 @@ An offset to add to the @var{address} before fetching memory.
 This command displays memory contents as a table of @var{nr-rows} by
 @var{nr-cols} words, each word being @var{word-size} bytes.  In total,
 @code{@var{nr-rows} * @var{nr-cols} * @var{word-size}} bytes are read
-(returned as @samp{total-bytes}).  Should less then the requested number
+(returned as @samp{total-bytes}).  Should less than the requested number
 of bytes be returned by the target, the missing words are identified
 using @samp{N/A}.  The number of bytes read from the target is returned
 in @samp{nr-bytes} and the starting address used to read memory in

@@ -1,3 +1,9 @@
+2002-02-24  Andrew Cagney  <ac131313@redhat.com>
+
+	From wiz at danbala:
+	* gdbmi.texinfo: Fix grammar and typos.
+	Fix PR gdb/287.
+
 2002-02-03  Jim Blandy  <jimb@redhat.com>
 
 	* mi-cmd-stack.c (list_args_or_locals): Move declaration of
