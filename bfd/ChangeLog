@@ -1,5 +1,15 @@
 Tue Apr  2 00:33:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf-bfd.h (struct elf_link_hash_table): Add hgot field.
+	* elf.c (_bfd_elf_link_hash_table_init): Initialize hgot field.
+	* elflink.c (_bfd_elf_create_got_section): Store the
+	_GLOBAL_OFFSET_TABLE_ hash table entry in the hgot field.
+	* elf32-sparc.c (elf32_sparc_check_relocs): If the size of the
+	global offset table goes over 0x1000, set the value of
+	_GLOBAL_OFFSET_TABLE_ to 0x1000 into the section.
+	(elf32_sparc_relocate_section): Subtract the offset of
+	_GLOBAL_OFFSET_TABLE_ when handling GOT relocations.
+
 	* elfcode.h: Don't include <string.h>.
 
 Mon Apr  1 10:39:24 1996  Jeffrey A Law  (law@cygnus.com)

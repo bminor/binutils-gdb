@@ -583,6 +583,7 @@ _bfd_elf_link_hash_table_init (table, abfd, newfunc)
   table->dynstr = NULL;
   table->bucketcount = 0;
   table->needed = NULL;
+  table->hgot = NULL;
   return _bfd_link_hash_table_init (&table->root, abfd, newfunc);
 }
 
@@ -2078,11 +2079,9 @@ assign_file_positions_for_segments (abfd)
 		      if (i == 0)
 			abort ();
 		      p->p_memsz += adjust;
+		      off += adjust;
 		      if ((flags & SEC_LOAD) != 0)
-			{
-			  p->p_filesz += adjust;
-			  off += adjust;
-			}
+			p->p_filesz += adjust;
 		    }
 		}
 
