@@ -1865,7 +1865,7 @@ build_mips16_operands (bitmap)
       if ((op->flags & MIPS16_JUMP_ADDR) != 0)
 	{
 	  printf ("  {\n");
-	  printf ("    uword64 paddr;\n");
+	  printf ("    address_word paddr;\n");
 	  printf ("    int uncached;\n");
 	  printf ("    if (AddressTranslation (PC &~ (uword64) 1, isINSTRUCTION, isLOAD, &paddr, &uncached, isTARGET, isREAL))\n");
 	  printf ("      {\n");
@@ -2766,8 +2766,8 @@ build_instruction (doisa, features, mips16, insn)
      /* 16-bit offset is sign-extended and added to the base register to make a virtual address */
      /* The virtual address is translated to a physical address using the TLB */
      /* The hint specifies a cache operation for that address */
-     printf("    uword64 vaddr = (op1 + offset);\n");
-     printf("    uword64 paddr;\n");
+     printf("    address_word vaddr = (op1 + offset);\n");
+     printf("    address_word paddr;\n");
      printf("    int uncached;\n");
      /* NOTE: We are assuming that the AddressTranslation is a load: */
      printf("    if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))\n");
@@ -2928,10 +2928,10 @@ build_instruction (doisa, features, mips16, insn)
       }
 
       if (insn->flags & REG)
-       printf("   uword64 vaddr = ((uword64)op1 + op2);\n");
+       printf("   address_word vaddr = ((uword64)op1 + op2);\n");
       else
-       printf("   uword64 vaddr = ((uword64)op1 + offset);\n");
-      printf("   uword64 paddr;\n");
+       printf("   address_word vaddr = ((uword64)op1 + offset);\n");
+      printf("   address_word paddr;\n");
       printf("   int uncached;\n");
 
       /* The following check should only occur on normal (non-shifted) memory loads */
@@ -3265,8 +3265,8 @@ build_instruction (doisa, features, mips16, insn)
 
     case FPPREFX:
      /* This code could be merged with the PREFIX generation above: */
-     printf("   uword64 vaddr = ((uword64)op1 + (uword64)op2);\n");
-     printf("   uword64 paddr;\n");
+     printf("   address_word vaddr = ((uword64)op1 + (uword64)op2);\n");
+     printf("   address_word paddr;\n");
      printf("   int uncached;\n");
      printf("   if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))\n");
      printf("    Prefetch(uncached,paddr,vaddr,isDATA,fs);\n");

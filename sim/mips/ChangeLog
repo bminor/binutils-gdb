@@ -1,3 +1,23 @@
+Wed Oct 22 12:52:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (NULLIFY_NEXT_INSTRUCTION, DELAY_SLOT): Define.
+
+	* interp.c (ColdReset): Remove #ifdef HASFPU, check
+ 	CURRENT_FLOATING_POINT instead.
+
+	* interp.c (ifetch32): New function. Fetch 32 bit instruction.
+	(address_translation): Raise exception InstructionFetch when
+ 	translation fails and isINSTRUCTION.
+	
+	* interp.c (sim_open, sim_write, sim_monitor, store_word,
+ 	sim_engine_run): Change type of of vaddr and paddr to
+ 	address_word.
+	(address_translation, prefetch, load_memory, store_memory,
+ 	cache_op): Change type of vAddr and pAddr to address_word.
+
+	* gencode.c (build_instruction): Change type of vaddr and paddr to
+ 	address_word.
+
 Mon Oct 20 15:29:04 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-main.h (ALU64_END, ALU32_END): Use ALU*_OVERFLOW_RESULT

@@ -441,8 +441,8 @@ sim_open (kind, cb, abfd, argv)
        the MIPS TRAP system, we place our own (simulator specific)
        "undefined" instructions into the relevant vector slots. */
     for (loop = 0; (loop < monitor_size); loop += 4) {
-      uword64 vaddr = (monitor_base + loop);
-      uword64 paddr;
+      address_word vaddr = (monitor_base + loop);
+      address_word paddr;
       int cca;
       if (AddressTranslation(vaddr, isDATA, isSTORE, &paddr, &cca, isTARGET, isRAW))
 	StoreMemory(cca, AccessLength_WORD,
@@ -457,8 +457,8 @@ sim_open (kind, cb, abfd, argv)
        entry points.*/
     for (loop = 0; (loop < 24); loop++)
       {
-        uword64 vaddr = (monitor_base + 0x500 + (loop * 4));
-        uword64 paddr;
+        address_word vaddr = (monitor_base + 0x500 + (loop * 4));
+        address_word paddr;
         int cca;
         unsigned int value = ((0x500 - 8) / 8); /* default UNDEFINED reason code */
         switch (loop)
@@ -587,7 +587,7 @@ sim_write (sd,addr,buffer,size)
      way. We can then perform doubleword transfers to and from the
      simulator memory for optimum performance. */
   if (index && (index & 1)) {
-    uword64 paddr;
+    address_word paddr;
     int cca;
     if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW)) {
       uword64 value = ((uword64)(*buffer++));
@@ -597,7 +597,7 @@ sim_write (sd,addr,buffer,size)
     index &= ~1; /* logical operations usually quicker than arithmetic on RISC systems */
   }
   if (index && (index & 2)) {
-    uword64 paddr;
+    address_word paddr;
     int cca;
     if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW)) {
       uword64 value;
@@ -617,7 +617,7 @@ sim_write (sd,addr,buffer,size)
     index &= ~2;
   }
   if (index && (index & 4)) {
-    uword64 paddr;
+    address_word paddr;
     int cca;
     if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW)) {
       uword64 value;
@@ -638,7 +638,7 @@ sim_write (sd,addr,buffer,size)
     index &= ~4;
   }
   for (;index; index -= 8) {
-    uword64 paddr;
+    address_word paddr;
     int cca;
     if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW)) {
       uword64 value;
@@ -688,9 +688,11 @@ sim_read (sd,addr,buffer,size)
      to ensure that the source physical address is doubleword aligned
      before, and then deal with trailing bytes. */
   for (index = 0; (index < size); index++) {
-    uword64 vaddr,paddr,value;
+    address_word vaddr;
+    address_word paddr;
+    unsigned64 value;
     int cca;
-    vaddr = (uword64)addr + index;
+    vaddr = (address_word)addr + index;
     if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&cca,isTARGET,isRAW)) {
       LoadMemory(&value,NULL,cca,AccessLength_BYTE,paddr,vaddr,isDATA,isRAW);
       buffer[index] = (unsigned char)(value&0xFF);
@@ -819,38 +821,24 @@ sim_create_inferior (sd, abfd, argv,env)
 #endif /* DEBUG */
 
   ColdReset(sd);
-  /* If we were providing a more complete I/O, co-processor or memory
-     simulation, we should perform any "device" initialisation at this
-     point. This can include pre-loading memory areas with particular
-     patterns (e.g. simulating ROM monitors). */
 
-#if 1
   if (abfd != NULL)
-    PC = (unsigned64) bfd_get_start_address(abfd);
-  else
-    PC = 0; /* ???? */
-#else
-  /* TODO: Sort this properly. SIM_ADDR may already be a 64bit value: */
-  PC = SIGNEXTEND(bfd_get_start_address(abfd),32);
-#endif
+    /* override PC value set by ColdReset () */
+    PC = (unsigned64) bfd_get_start_address (abfd);
 
-  /* Prepare to execute the program to be simulated */
-  /* argv and env are NULL terminated lists of pointers */
-
-  if (argv || env) {
 #if 0 /* def DEBUG */
-    sim_io_printf(sd,"sim_create_inferior() : passed arguments ignored\n");
+  if (argv || env)
     {
-     char **cptr;
-     for (cptr = argv; (cptr && *cptr); cptr++)
-      printf("DBG: arg \"%s\"\n",*cptr);
+      /* We should really place the argv slot values into the argument
+	 registers, and onto the stack as required. However, this
+	 assumes that we have a stack defined, which is not
+	 necessarily true at the moment. */
+      char **cptr;
+      sim_io_printf(sd,"sim_create_inferior() : passed arguments ignored\n");
+      for (cptr = argv; (cptr && *cptr); cptr++)
+	printf("DBG: arg \"%s\"\n",*cptr);
     }
 #endif /* DEBUG */
-    /* We should really place the argv slot values into the argument
-       registers, and onto the stack as required. However, this
-       assumes that we have a stack defined, which is not necessarily
-       true at the moment. */
-  }
 
   return SIM_RC_OK;
 }
@@ -984,7 +972,7 @@ sim_monitor(sd,reason)
   switch (reason) {
     case 6: /* int open(char *path,int flags) */
       {
-        uword64 paddr;
+        address_word paddr;
         int cca;
         if (AddressTranslation(A0,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL))
          V0 = sim_io_open(sd,(char *)((int)paddr),(int)A1);
@@ -995,7 +983,7 @@ sim_monitor(sd,reason)
 
     case 7: /* int read(int file,char *ptr,int len) */
       {
-        uword64 paddr;
+        address_word paddr;
         int cca;
         if (AddressTranslation(A1,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL))
          V0 = sim_io_read(sd,(int)A0,(char *)((int)paddr),(int)A2);
@@ -1006,7 +994,7 @@ sim_monitor(sd,reason)
 
     case 8: /* int write(int file,char *ptr,int len) */
       {
-        uword64 paddr;
+        address_word paddr;
         int cca;
         if (AddressTranslation(A1,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL))
          V0 = sim_io_write(sd,(int)A0,(const char *)((int)paddr),(int)A2);
@@ -1053,8 +1041,8 @@ sim_monitor(sd,reason)
       /*      [A0 + 4] = instruction cache size */
       /*      [A0 + 8] = data cache size */
       {
-        uword64 vaddr = A0;
-        uword64 paddr, value;
+        address_word vaddr = A0;
+        address_word paddr, value;
         int cca;
         int failed = 0;
 
@@ -1095,7 +1083,7 @@ sim_monitor(sd,reason)
       /* out: void */
       /* The following is based on the PMON printf source */
       {
-        uword64 paddr;
+        address_word paddr;
         int cca;
         /* This isn't the quickest way, since we call the host print
            routine for every character almost. But it does avoid
@@ -1210,7 +1198,7 @@ store_word (sd, vaddr, val)
      uword64 vaddr;
      t_reg val;
 {
-  uword64 paddr;
+  address_word paddr;
   int uncached;
 
   if ((vaddr & 3) != 0)
@@ -1244,7 +1232,7 @@ load_word (sd, vaddr)
     SignalExceptionAddressLoad ();
   else
     {
-      uword64 paddr;
+      address_word paddr;
       int uncached;
 
       if (AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &uncached,
@@ -1475,20 +1463,20 @@ void dotrace(SIM_DESC sd,FILE *tracefh,int type,SIM_ADDR address,int width,char 
 /*---------------------------------------------------------------------------*/
 
 static void
-ColdReset(sd)
+ColdReset (sd)
      SIM_DESC sd;
 {
   /* RESET: Fixed PC address: */
-  PC = (((uword64)0xFFFFFFFF<<32) | 0xBFC00000);
+  PC = UNSIGNED64 (0xFFFFFFFFBFC00000);
   /* The reset vector address is in the unmapped, uncached memory space. */
 
   SR &= ~(status_SR | status_TS | status_RP);
   SR |= (status_ERL | status_BEV);
 
-#if defined(HASFPU) && (GPRLEN == (64))
-  /* Cheat and allow access to the complete register set immediately: */
-  SR |= status_FR; /* 64bit registers */
-#endif /* HASFPU and 64bit FP registers */
+  /* Cheat and allow access to the complete register set immediately */
+  if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT
+      && WITH_TARGET_WORD_BITSIZE == 64)
+    SR |= status_FR; /* 64bit registers */
 
   /* Ensure that any instructions with pending register updates are
      cleared: */
@@ -1499,19 +1487,19 @@ ColdReset(sd)
     PENDING_IN = PENDING_OUT = PENDING_TOTAL = 0;
   }
 
-#if defined(HASFPU)
   /* Initialise the FPU registers to the unknown state */
-  {
-    int rn;
-    for (rn = 0; (rn < 32); rn++)
-     FPR_STATE[rn] = fmt_uninterpreted;
-  }
-#endif /* HASFPU */
+  if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
+    {
+      int rn;
+      for (rn = 0; (rn < 32); rn++)
+	FPR_STATE[rn] = fmt_uninterpreted;
+    }
 
   return;
 }
 
-/* Description from page A-22 of the "MIPS IV Instruction Set" manual (revision 3.1) */
+/* Description from page A-22 of the "MIPS IV Instruction Set" manual
+   (revision 3.1) */
 /* Translate a virtual address to a physical address and cache
    coherence algorithm describing the mechanism used to resolve the
    memory reference. Given the virtual address vAddr, and whether the
@@ -1525,17 +1513,16 @@ ColdReset(sd)
    translation is not present in the TLB or the desired access is not
    permitted the function fails and an exception is taken.
 
-   NOTE: This function is extended to return an exception state. This,
-   along with the exception generation is used to notify whether a
-   valid address translation occured */
+   NOTE: Normally (RAW == 0), when address translation fails, this
+   function raises an exception and does not return. */
 
 int
 address_translation(sd,vAddr,IorD,LorS,pAddr,CCA,host,raw)
      SIM_DESC sd;
-     uword64 vAddr;
+     address_word vAddr;
      int IorD;
      int LorS;
-     uword64 *pAddr;
+     address_word *pAddr;
      int *CCA;
      int host;
      int raw;
@@ -1583,17 +1570,21 @@ address_translation(sd,vAddr,IorD,LorS,pAddr,CCA,host,raw)
     res = 0; /* AddressTranslation has failed */
     *pAddr = (SIM_ADDR)-1;
     if (!raw) /* only generate exceptions on real memory transfers */
-      if (LorS == isSTORE)
-	SignalExceptionAddressStore ();
-      else
-	SignalExceptionAddressLoad ();
+      {
+	if (IorD == isINSTRUCTION)
+	  SignalExceptionInstructionFetch ();
+	else if (LorS == isSTORE)
+	  SignalExceptionAddressStore ();
+	else
+	  SignalExceptionAddressLoad ();
+      }
 #ifdef DEBUG
     else
-     /* This is a normal occurance during gdb operation, for instance trying
-	to print parameters at function start before they have been setup,
-	and hence we should not print a warning except when debugging the
-	simulator.  */
-     sim_io_eprintf(sd,"AddressTranslation for %s %s from 0x%s failed\n",(IorD ? "data" : "instruction"),(LorS ? "store" : "load"),pr_addr(vAddr));
+      /* This is a normal occurance during gdb operation, for instance
+	 trying to print parameters at function start before they have
+	 been setup, and hence we should not print a warning except
+	 when debugging the simulator.  */
+      sim_io_eprintf(sd,"AddressTranslation for %s %s from 0x%s failed\n",(IorD ? "data" : "instruction"),(LorS ? "store" : "load"),pr_addr(vAddr));
 #endif
   }
 
@@ -1610,8 +1601,8 @@ void
 prefetch(sd,CCA,pAddr,vAddr,DATA,hint)
      SIM_DESC sd;
      int CCA;
-     uword64 pAddr;
-     uword64 vAddr;
+     address_word pAddr;
+     address_word vAddr;
      int DATA;
      int hint;
 {
@@ -1645,8 +1636,8 @@ load_memory(sd,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw)
      uword64* memval1p;
      int CCA;
      int AccessLength;
-     uword64 pAddr;
-     uword64 vAddr;
+     address_word pAddr;
+     address_word vAddr;
      int IorD;
      int raw;
 {
@@ -1841,8 +1832,8 @@ store_memory(sd,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw)
      int AccessLength;
      uword64 MemElem;
      uword64 MemElem1;   /* High order 64 bits */
-     uword64 pAddr;
-     uword64 vAddr;
+     address_word pAddr;
+     address_word vAddr;
      int raw;
 {
 #ifdef DEBUG
@@ -2000,6 +1991,26 @@ store_memory(sd,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw)
   }
 
   return;
+}
+
+
+unsigned32
+ifetch32 (SIM_DESC sd, address_word vaddr)
+{
+  /* Copy the action of the LW instruction */
+  address_word reverse = (ReverseEndian ? (LOADDRMASK >> 2) : 0);
+  address_word bigend = (BigEndianCPU ? (LOADDRMASK >> 2) : 0);
+  unsigned64 value;
+  address_word paddr;
+  unsigned32 instruction;
+  unsigned byte;
+  int cca;
+  AddressTranslation (vaddr, isINSTRUCTION, isLOAD, &paddr, &cca, isTARGET, isREAL);
+  paddr = ((paddr & ~LOADDRMASK) | ((paddr & LOADDRMASK) ^ (reverse << 2)));
+  LoadMemory (&value, NULL, cca, AccessLength_WORD, paddr, vaddr, isINSTRUCTION, isREAL);
+  byte = ((vaddr & LOADDRMASK) ^ (bigend << 2));
+  instruction = ((value >> (8 * byte)) & 0xFFFFFFFF);
+  return instruction;
 }
 
 
@@ -2269,8 +2280,8 @@ void
 cache_op(sd,op,pAddr,vAddr,instruction)
      SIM_DESC sd;
      int op;
-     uword64 pAddr;
-     uword64 vAddr;
+     address_word pAddr;
+     address_word vAddr;
      unsigned int instruction;
 {
 #if 1 /* stop warning message being displayed (we should really just remove the code) */
@@ -3546,8 +3557,14 @@ decode_coproc(sd,instruction)
 
 /*-- instruction simulation -------------------------------------------------*/
 
+#if defined (WITH_IGEN)
+void old_engine_run PARAMS ((SIM_DESC sd, int next_cpu_nr, int siggnal));
+void
+old_engine_run (sd, next_cpu_nr, siggnal)
+#else
 void
 sim_engine_run (sd, next_cpu_nr, siggnal)
+#endif
      SIM_DESC sd;
      int next_cpu_nr; /* ignore */
      int siggnal; /* ignore */
@@ -3573,23 +3590,16 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
   /* main controlling loop */
   while (1) {
     /* Fetch the next instruction from the simulator memory: */
-    uword64 vaddr = (uword64)PC;
-    uword64 paddr;
+    address_word vaddr = (uword64)PC;
+    address_word paddr;
     int cca;
     unsigned int instruction;	/* uword64? what's this used for?  FIXME! */
 
 #ifdef DEBUG
     {
       printf("DBG: state = 0x%08X :",state);
-#if 0
-      if (state & simSTOP) printf(" simSTOP");
-      if (state & simSTEP) printf(" simSTEP");
-#endif
       if (state & simHALTEX) printf(" simHALTEX");
       if (state & simHALTIN) printf(" simHALTIN");
-#if 0
-      if (state & simBE) printf(" simBE");
-#endif
       printf("\n");
     }
 #endif /* DEBUG */

@@ -35,21 +35,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "sim-basics.h"
 
-
-#if 0
-/* These are generated files.  */
-#include "itable.h"
-#include "idecode.h"
-#include "idecode.h"
-
-/* dummy - not used */
-typedef instruction_address sim_cia;
-static const sim_cia null_cia = {0}; /* dummy */
-#define NULL_CIA null_cia
-#else
-typedef int sim_cia;
-#endif
-
+typedef address_word sim_cia;
 
 #include "sim-base.h"
 
@@ -303,13 +289,31 @@ struct _sim_cpu {
 
   /* The following are internal simulator state variables: */
   sim_cia cia;
-#define CPU_CIA(CPU) ((CPU)->cia)
+#define CPU_CIA(CPU) (PC)
   address_word ipc; /* internal Instruction PC */
   address_word dspc;  /* delay-slot PC */
 #define IPC ((STATE_CPU (sd,0))->ipc)
 #define DSPC ((STATE_CPU (sd,0))->dspc)
 
-#define NULLIFY_NIA() { nia.ip = cia.dp + 4; nia.dp = nia.ip += 4; }
+  /* Issue a delay slot instruction immediatly by re-calling
+     idecode_issue */
+#define DELAY_SLOT(TARGET) \
+  do { \
+    address_word target = (TARGET); \
+    instruction_word delay_insn; \
+    sim_events_slip (sd, 1); \
+    PC = CIA + 4; \
+    STATE |= simDELAYSLOT; \
+    delay_insn = IMEM (PC); \
+    idecode_issue (sd, delay_insn, (PC)); \
+    STATE &= !simDELAYSLOT; \
+    PC = target; \
+  } while (0)
+#define NULLIFY_NEXT_INSTRUCTION() \
+  do { \
+    sim_events_slip (sd, 1); \
+    NIA = CIA + 4; \
+  } while (0)
 
 
 
@@ -680,28 +684,29 @@ void decode_coproc PARAMS ((SIM_DESC sd,unsigned int instruction));
 #define AccessLength_DOUBLEWORD (7)
 #define AccessLength_QUADWORD   (15)
 
-int address_translation PARAMS ((SIM_DESC sd, uword64 vAddr, int IorD, int LorS, uword64 *pAddr, int *CCA, int host, int raw));
+int address_translation PARAMS ((SIM_DESC sd, address_word vAddr, int IorD, int LorS, address_word *pAddr, int *CCA, int host, int raw));
 #define AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw) \
 address_translation(sd, vAddr,IorD,LorS,pAddr,CCA,host,raw)
 
-void load_memory PARAMS ((SIM_DESC sd, uword64* memvalp, uword64* memval1p, int CCA, int AccessLength, uword64 pAddr, uword64 vAddr, int IorD, int raw));
+void load_memory PARAMS ((SIM_DESC sd, uword64* memvalp, uword64* memval1p, int CCA, int AccessLength, address_word pAddr, address_word vAddr, int IorD, int raw));
 #define LoadMemory(memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw) \
 load_memory(sd,memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw)
 
-void store_memory PARAMS ((SIM_DESC sd, int CCA, int AccessLength, uword64 MemElem,     uword64 MemElem1, uword64 pAddr, uword64 vAddr, int raw));
+void store_memory PARAMS ((SIM_DESC sd, int CCA, int AccessLength, uword64 MemElem,     uword64 MemElem1, address_word pAddr, address_word vAddr, int raw));
 #define StoreMemory(CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw) \
 store_memory(sd,CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw)
 
-void cache_op PARAMS ((SIM_DESC sd, int op, uword64 pAddr, uword64 vAddr, unsigned int instruction));
+void cache_op PARAMS ((SIM_DESC sd, int op, address_word pAddr, address_word vAddr, unsigned int instruction));
 #define CacheOp(op,pAddr,vAddr,instruction) cache_op(sd,op,pAddr,vAddr,instruction)
 
 void sync_operation PARAMS ((SIM_DESC sd, int stype));
 #define SyncOperation(stype) sync_operation (sd, (stype))
 
-void prefetch PARAMS ((SIM_DESC sd, int CCA, uword64 pAddr, uword64 vAddr, int DATA, int hint));
+void prefetch PARAMS ((SIM_DESC sd, int CCA, address_word pAddr, address_word vAddr, int DATA, int hint));
 #define Prefetch(CCA,pAddr,vAddr,DATA,hint) prefetch(sd,CCA,pAddr,vAddr,DATA,hint)
 
-#define IMEM(CIA) 0 /* FIXME */
+unsigned32 ifetch32 PARAMS ((SIM_DESC sd, address_word cia));
+#define IMEM(CIA) ifetch32 (SD, (CIA))
 
 
 #endif
