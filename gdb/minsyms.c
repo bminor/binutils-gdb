@@ -547,14 +547,14 @@ find_stab_function_addr (char *namestring, char *filename,
     {
       /* Try again without the filename. */
       p[n] = 0;
-      msym = lookup_minimal_symbol (p, 0, objfile);
+      msym = lookup_minimal_symbol (p, NULL, objfile);
     }
   if (msym == NULL && filename != NULL)
     {
       /* And try again for Sun Fortran, but without the filename. */
       p[n] = '_';
       p[n + 1] = 0;
-      msym = lookup_minimal_symbol (p, 0, objfile);
+      msym = lookup_minimal_symbol (p, NULL, objfile);
     }
 
   return msym == NULL ? 0 : SYMBOL_VALUE_ADDRESS (msym);

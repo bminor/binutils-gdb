@@ -3026,7 +3026,7 @@ simple_read_overlay_table (void)
   struct minimal_symbol *novlys_msym, *ovly_table_msym;
 
   simple_free_overlay_table ();
-  novlys_msym = lookup_minimal_symbol ("_novlys", 0, 0);
+  novlys_msym = lookup_minimal_symbol ("_novlys", NULL, NULL);
   if (! novlys_msym)
     {
       error ("Error reading inferior's overlay table: "
@@ -3035,7 +3035,7 @@ simple_read_overlay_table (void)
       return 0;
     }
 
-  ovly_table_msym = lookup_minimal_symbol ("_ovly_table", 0, 0);
+  ovly_table_msym = lookup_minimal_symbol ("_ovly_table", NULL, NULL);
   if (! ovly_table_msym)
     {
       error ("Error reading inferior's overlay table: couldn't find "
@@ -3064,7 +3064,7 @@ simple_read_overlay_region_table (void)
   struct minimal_symbol *msym;
 
   simple_free_overlay_region_table ();
-  msym = lookup_minimal_symbol ("_novly_regions", 0, 0);
+  msym = lookup_minimal_symbol ("_novly_regions", NULL, NULL);
   if (msym != NULL)
     cache_novly_regions = read_memory_integer (SYMBOL_VALUE_ADDRESS (msym), 4);
   else
@@ -3072,7 +3072,7 @@ simple_read_overlay_region_table (void)
   cache_ovly_region_table = (void *) xmalloc (cache_novly_regions * 12);
   if (cache_ovly_region_table != NULL)
     {
-      msym = lookup_minimal_symbol ("_ovly_region_table", 0, 0);
+      msym = lookup_minimal_symbol ("_ovly_region_table", NULL, NULL);
       if (msym != NULL)
 	{
 	  cache_ovly_region_table_base = SYMBOL_VALUE_ADDRESS (msym);
@@ -3142,7 +3142,7 @@ simple_overlay_update (struct obj_section *osect)
     if (cache_ovly_table != NULL)
       /* Does its cached location match what's currently in the symtab? */
       if (cache_ovly_table_base ==
-	  SYMBOL_VALUE_ADDRESS (lookup_minimal_symbol ("_ovly_table", 0, 0)))
+	  SYMBOL_VALUE_ADDRESS (lookup_minimal_symbol ("_ovly_table", NULL, NULL)))
 	/* Then go ahead and try to look up this single section in the cache */
 	if (simple_overlay_update_1 (osect))
 	  /* Found it!  We're done. */

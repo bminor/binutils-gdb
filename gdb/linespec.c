@@ -1115,7 +1115,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	    goto symbol_found;
 
 	  /* If symbol was not found, look in minimal symbol tables */
-	  msymbol = lookup_minimal_symbol (copy, 0, 0);
+	  msymbol = lookup_minimal_symbol (copy, NULL, NULL);
 	  /* Min symbol was found --> jump to minsym processing. */
 	  if (msymbol)
 	    goto minimal_symbol_found;

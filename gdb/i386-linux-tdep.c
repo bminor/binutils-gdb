@@ -458,7 +458,7 @@ skip_hurd_resolver (CORE_ADDR pc)
   if (resolver)
     {
       struct minimal_symbol *fixup
-	= lookup_minimal_symbol ("fixup", 0, objfile);
+	= lookup_minimal_symbol ("fixup", NULL, objfile);
 
       if (fixup && SYMBOL_VALUE_ADDRESS (fixup) == pc)
 	return (SAVED_PC_AFTER_CALL (get_current_frame ()));

@@ -1,3 +1,13 @@
+2001-12-10  Fred Fish  <fnf@redhat.com>
+
+	* arm-linux-tdep.c (skip_hurd_resolver): Use NULL rather than
+	zero in args to lookup_minimal_symbol.
+	* linespec.c (decode_line_1): Ditto.
+	* i386-linux-tdep.c (skip_hurd_resolver): Ditto.
+	* minsyms.c (find_stab_function_addr): Ditto.
+	* symfile.c (simple_read_overlay_table): Ditto.
+	(simple_read_overlay_region_table): Ditto.
+
 2001-12-09  Fred Fish  <fnf@redhat.com>
 
 	* gdbtypes.c (TYPE_FLAG_UNSIGNED, TYPE_FLAG_STUB): Use
