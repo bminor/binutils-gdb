@@ -1,5 +1,8 @@
 2004-04-25  Mark Kettenis  <kettenis@gnu.org>
 
+	* ppcobsd-nat.c: Include "ppc-tdep.h".
+	* Makefile.in (ppcobsd-nat.o): Update dependencies.
+
 	* stack.c (return_command): Use CHECK_TYPEDEF on the return type.
 	Fixes PR tdep/1623 and PR tdep/1624.
 

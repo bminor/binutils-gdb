@@ -28,6 +28,7 @@
 #include <sys/ptrace.h>
 #include <machine/reg.h>
 
+#include "ppc-tdep.h"
 #include "ppcobsd-tdep.h"
 
 /* OpenBSD/powerpc doesn't have PT_GETFPREGS/PT_SETFPREGS like
