@@ -1,3 +1,13 @@
+Mon Oct 16 10:49:43 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Fix sed loop which substitutes for CC and CXX to
+	avoid bug found in various sed implementations.
+
+Wed Oct 11 16:16:20 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* cfg-ml-com.in (powerpc-*-eabisim): Delete separate rule for
+	simulator.  Use standard powerpc-*-eabi*.
+
 Mon Oct  9 17:21:56 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Stop putting gas and binutils in noconfigdirs for
