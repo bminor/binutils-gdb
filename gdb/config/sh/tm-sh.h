@@ -23,6 +23,17 @@
 
 #define GDB_MULTI_ARCH 1
 
+/* ABI variants that we know about.  If you add to this enum, please
+   update the table of names in sh-tdep.c.  */
+enum sh_osabi
+{
+  SH_OSABI_UNKNOWN = 0,
+  SH_OSABI_LINUX,
+  SH_OSABI_NETBSD_ELF,
+
+  SH_OSABI_INVALID	/* Keep this last.  */
+};
+
 /* Information that is dependent on the processor variant. */
 
 struct gdbarch_tdep
@@ -56,6 +67,9 @@ struct gdbarch_tdep
     int ARGLAST_REGNUM;
     int FLOAT_ARGLAST_REGNUM;
     int RETURN_REGNUM;
+
+    enum sh_osabi sh_osabi;	/* OS/ABI of the inferior */
+    const char *osabi_name;	/* Name of the above */
   };
 
 /* Registers common to all the SH variants. */
@@ -81,4 +95,3 @@ enum
 #define LITTLE_REMOTE_BREAKPOINT { 0x20, 0xc3 } /* Used in remote.c */
 
 /*#define NOP   {0x20, 0x0b}*/ /* Who uses this???*/
-

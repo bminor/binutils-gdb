@@ -1,3 +1,15 @@
+2002-05-08  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* sh-tdep.c (sh_osabi_names): Declare.
+	(process_note_abi_tag_sections): New function.
+	(get_elfosabi): Ditto.
+	(sh_gdbarch_register_os_abi): Ditto.
+	(sh_dump_tdep): Ditto.
+	_initialize_sh_tdep): Use gdbarch_register to register
+	sh_gdbarch_init and sh_dump_tdep.
+	* config/sh/tm-sh.h (sh_osabi): Declare.
+	(gdbarch_tdep): Add sh_osabi and osabi_name members.
+
 2002-05-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* arm-tdep.c (arm_skip_prologue): Handle generic dummy frames.
