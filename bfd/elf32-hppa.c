@@ -3282,7 +3282,7 @@ elf32_hppa_final_link (abfd, info)
     return false;
 
   /* If we're producing a final executable, sort the contents of the
-     unwind section. */
+     unwind section.  */
   return elf_hppa_sort_unwind (abfd);
 }
 

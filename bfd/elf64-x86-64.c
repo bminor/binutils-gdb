@@ -246,7 +246,7 @@ static const bfd_byte elf64_x86_64_plt_entry[PLT_ENTRY_SIZE] =
 };
 
 /* The x86-64 linker needs to keep track of the number of relocs that
-   decides to copy as dynamic relocs in check_relocs for each symbol.
+   it decides to copy as dynamic relocs in check_relocs for each symbol.
    This is so that it can later discard them if they are found to be
    unnecessary.  We store the information in a field extending the
    regular ELF linker hash table.  */
