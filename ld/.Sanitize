@@ -61,6 +61,8 @@ ldglda29k.sc
 ldgld68k.sc
 h8300hds.c
 h8300hds.sc
+h8300hms.c
+h8300hms.sc
 ebmon29k.sc
 ldgram.y
 ldlang.c
@@ -94,7 +96,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.27  1992/01/29 16:44:08  sac
+# Revision 1.28  1992/02/07 22:32:29  hgs
+# added h8300hms.c and h8300hms.sc
+#
+# Revision 1.27  1992/01/29  16:44:08  sac
 # ldlnk960.c: Special #ifdef to choose little endian ony
 # ldgram.y: allow forward ref of section
 #
