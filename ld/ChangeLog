@@ -6,10 +6,12 @@ Mon Nov  9 16:41:30 1998  DJ Delorie  <dj@cygnus.com>
 	* emultempl/pe.em: add direct support for PE DLLs
 	* configure.tgt: allow target-specific extra files
 	* configure.in: allow target-specific extra files
-	* ldlang.c (lang_add_assignment): return the assignment so
-	that one can change the value later (pe-dll DEF files do this)
+	* ldlang.c (lang_add_assignment): return the assignment so that
+ 	one can change the value later based on the object files (pe-dll
+ 	DEF files do this)
 	* ldint.texinfo: add section for emulation walkthrough
-
+	* Makefile.am: add new files and target-specific extra files
+	
 Wed Nov  4 16:39:18 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* Makefile.am: Add support for FR30 target.
