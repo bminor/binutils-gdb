@@ -1,3 +1,14 @@
+2002-06-08  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c: Add define for $zero register.
+	(md_begin): Add $zero as alias name for $0.
+	(insn_uses_reg): Use ZERO define.
+	(mips_ip): Add $zero as alias name for $0.
+	(mips16_ip): Likewise.
+	(s_cplocal): Demand empty rest of input line.
+	(tc_get_register): Likewise. Add support for $kt0, kt1 register
+	names. Use ZERO define. Fix input_line_pointer progress.
+
 2002-06-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* symbols.c: Replace CONST by const throughout.

@@ -82,6 +82,7 @@ static int mips_output_flavor () { return OUTPUT_FLAVOR; }
 static char *mips_regmask_frag;
 #endif
 
+#define ZERO 0
 #define AT  1
 #define TREG 24
 #define PIC_CALL_REG 25
@@ -1121,6 +1122,8 @@ md_begin ()
 				   &zero_address_frag));
   symbol_table_insert (symbol_new ("$kt1", reg_section, KT1,
 				   &zero_address_frag));
+  symbol_table_insert (symbol_new ("$zero", reg_section, ZERO,
+				   &zero_address_frag));
   symbol_table_insert (symbol_new ("$pc", reg_section, -1,
 				   &zero_address_frag));
 
@@ -1304,8 +1307,8 @@ insn_uses_reg (ip, reg, class)
       class = MIPS_GR_REG;
     }
 
-  /* Don't report on general register 0, since it never changes.  */
-  if (class == MIPS_GR_REG && reg == 0)
+  /* Don't report on general register ZERO, since it never changes.  */
+  if (class == MIPS_GR_REG && reg == ZERO)
     return 0;
 
   if (class == MIPS_FP_REG)
@@ -8001,6 +8004,11 @@ mips_ip (str, ip)
 			  s += 4;
 			  regno = KT1;
 			}
+		      else if (s[1] == 'z' && s[2] == 'e' && s[3] == 'r' && s[4] == 'o')
+			{
+			  s += 5;
+			  regno = ZERO;
+			}
 		      else if (itbl_have_entries)
 			{
 			  char *p, *n;
@@ -8958,6 +8966,11 @@ mips16_ip (str, ip)
 		    {
 		      s += 4;
 		      regno = KT1;
+		    }
+		  else if (s[1] == 'z' && s[2] == 'e' && s[3] == 'r' && s[4] == 'o')
+		    {
+		      s += 5;
+		      regno = ZERO;
 		    }
 		  else
 		    break;
@@ -11954,6 +11967,7 @@ s_cplocal (ignore)
     }
 
   mips_gp_register = tc_get_register (0);
+  demand_empty_rest_of_line ();
 }
 
 /* Handle the .cprestore pseudo-op.  This stores $gp into a given
@@ -12212,7 +12226,7 @@ tc_get_register (frame)
   if (*input_line_pointer++ != '$')
     {
       as_warn (_("expected `$'"));
-      reg = 0;
+      reg = ZERO;
     }
   else if (ISDIGIT (*input_line_pointer))
     {
@@ -12220,27 +12234,58 @@ tc_get_register (frame)
       if (reg < 0 || reg >= 32)
 	{
 	  as_warn (_("Bad register number"));
-	  reg = 0;
+	  reg = ZERO;
 	}
     }
   else
     {
       if (strncmp (input_line_pointer, "ra", 2) == 0)
-	reg = RA;
+	{
+	  reg = RA;
+	  input_line_pointer += 2;
+	}
       else if (strncmp (input_line_pointer, "fp", 2) == 0)
-	reg = FP;
+	{
+	  reg = FP;
+	  input_line_pointer += 2;
+	}
       else if (strncmp (input_line_pointer, "sp", 2) == 0)
-	reg = SP;
+	{
+	  reg = SP;
+	  input_line_pointer += 2;
+	}
       else if (strncmp (input_line_pointer, "gp", 2) == 0)
-	reg = GP;
+	{
+	  reg = GP;
+	  input_line_pointer += 2;
+	}
       else if (strncmp (input_line_pointer, "at", 2) == 0)
-	reg = AT;
+	{
+	  reg = AT;
+	  input_line_pointer += 2;
+	}
+      else if (strncmp (input_line_pointer, "kt0", 3) == 0)
+	{
+	  reg = KT0;
+	  input_line_pointer += 3;
+	}
+      else if (strncmp (input_line_pointer, "kt1", 3) == 0)
+	{
+	  reg = KT1;
+	  input_line_pointer += 3;
+	}
+      else if (strncmp (input_line_pointer, "zero", 4) == 0)
+	{
+	  reg = ZERO;
+	  input_line_pointer += 4;
+	}
       else
 	{
 	  as_warn (_("Unrecognized register name"));
-	  reg = 0;
+	  reg = ZERO;
+	  while (ISALNUM(*input_line_pointer))
+	   input_line_pointer++;
 	}
-      input_line_pointer += 2;
     }
   if (frame)
     {
