@@ -1,3 +1,8 @@
+2003-10-10  Dave Brolley  <brolley@redhat.com>
+
+	* gas/frv/allinsn.s: Use preoperly aligned registers.
+	* gas/frv/allinsn.d: Update expected results.
+
 2003-10-08  Chris Demetriou  <cgd@broadcom.com>
 
 	* lib/gas-defs.exp (gas_run): Always log the command being run.
