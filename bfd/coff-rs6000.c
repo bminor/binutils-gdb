@@ -694,6 +694,7 @@ struct xcoff_ar_hdr
 /* XCOFF archives do not have a timestamp.  */
 
 #define xcoff_update_armap_timestamp bfd_true
+#define xcoff_allow_commons_in_armap bfd_true
 
 /* Read in the armap of an XCOFF archive.  */
 

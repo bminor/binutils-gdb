@@ -485,6 +485,13 @@ const bfd_target TARGET_BIG_SYM =
 #ifdef bfd_elfNN_archive_functions
       BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
 #else
+  /* For ELF based targets we do not want to put common symbols into the
+     archive map.  This is a change from the old behaviour, and it is
+     being done because of a corresponding change in the linker, whereby
+     it will link in any archive element that contains a symbol which is
+     currently common.  (See elflink.h:elf_link_add_archive_symbol).  */
+#undef  _bfd_archive_coff_allow_commons_in_armap
+#define _bfd_archive_coff_allow_commons_in_armap bfd_false
       BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
 #endif
       BFD_JUMP_TABLE_SYMBOLS (bfd_elfNN),
@@ -580,6 +587,8 @@ const bfd_target TARGET_LITTLE_SYM =
 #ifdef bfd_elfNN_archive_functions
       BFD_JUMP_TABLE_ARCHIVE (bfd_elfNN_archive),
 #else
+#undef  _bfd_archive_coff_allow_commons_in_armap
+#define _bfd_archive_coff_allow_commons_in_armap bfd_false
       BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
 #endif
       BFD_JUMP_TABLE_SYMBOLS (bfd_elfNN),

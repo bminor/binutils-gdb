@@ -851,6 +851,9 @@ tic30_aout_set_arch_mach (abfd, arch, machine)
 #ifndef MY_update_armap_timestamp
 #define MY_update_armap_timestamp _bfd_archive_bsd_update_armap_timestamp
 #endif
+#ifndef MY_allow_commons_in_armap
+#define MY_allow_commons_in_armap _bfd_archive_bsd_allow_commons_in_armap
+#endif
 
 /* No core file defined here -- configure in trad-core.c separately.  */
 #ifndef	MY_core_file_failing_command

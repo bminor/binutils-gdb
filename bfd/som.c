@@ -6229,6 +6229,7 @@ som_bfd_link_split_section (abfd, sec)
 #define som_construct_extended_name_table \
   _bfd_archive_coff_construct_extended_name_table
 #define som_update_armap_timestamp	bfd_true
+#define som_allow_commons_in_armap	bfd_true
 #define som_bfd_print_private_bfd_data  _bfd_generic_bfd_print_private_bfd_data
 
 #define som_get_lineno                  _bfd_nosymbols_get_lineno

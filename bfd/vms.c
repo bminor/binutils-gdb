@@ -127,6 +127,7 @@ static boolean vms_bfd_merge_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));
 static boolean vms_bfd_set_private_flags PARAMS ((bfd *abfd, flagword flags));
 
 #define vms_make_empty_symbol _bfd_vms_make_empty_symbol
+#define vms_allow_commons_in_armap bfd_true
 
 /*===========================================================================*/
 

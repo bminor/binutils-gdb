@@ -1063,6 +1063,9 @@ DESCRIPTION
 .#define bfd_update_armap_timestamp(abfd) \
 .        BFD_SEND (abfd, _bfd_update_armap_timestamp, (abfd))
 .
+.#define bfd_allow_commons_in_armap(abfd) \
+.        BFD_SEND (abfd, _bfd_allow_commons_in_armap, (abfd))
+.
 .#define bfd_set_arch_mach(abfd, arch, mach)\
 .        BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
 .

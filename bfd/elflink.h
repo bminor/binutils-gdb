@@ -200,7 +200,26 @@ elf_link_add_archive_symbols (abfd, info)
 	  if (h == NULL)
 	    continue;
 
-	  if (h->root.type != bfd_link_hash_undefined)
+	  /* We have changed the GNU archiver so that it will only place
+	     non-common symbols into its archive map.  Thus if we come across
+	     a symbol in the archive map, which is currently considered to be
+	     a common symbol, we can safely assume that we should link the
+	     element in, in order to get in the definition of the symbol.
+	     
+	     Previous versions of the archiver would place common symbols into
+	     the archive map.  This meant that in order to only link in an
+	     element if it contained a *definition* of a common symbol, it
+	     would be necessary to read in the element and scan its symbol
+	     table - a slow and wasteful process.
+
+	     In fact previous versions of this code did not even do that,
+	     instead it just unilaterally ignored any symbols in the archive
+	     map which were currently marked as common.  So in order to link
+	     in an archive element containing the definition of a common
+	     symbol it was necessary to have that element also contain the
+	     defintion of a currently undefined symbol.  */
+	  if (h->root.type != bfd_link_hash_undefined
+	      && h->root.type != bfd_link_hash_common)
 	    {
 	      if (h->root.type != bfd_link_hash_undefweak)
 		defined[i] = true;

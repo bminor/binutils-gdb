@@ -211,6 +211,7 @@ extern boolean _bfd_nocore_core_file_matches_executable_p
   ((bfd *(*) PARAMS ((bfd *, symindex))) bfd_nullvoidptr)
 #define _bfd_noarchive_generic_stat_arch_elt bfd_generic_stat_arch_elt
 #define _bfd_noarchive_update_armap_timestamp bfd_false
+#define _bfd_noarchive_allow_commons_in_armap bfd_true
 
 /* Routines to use for BFD_JUMP_TABLE_ARCHIVE to get BSD style
    archives.  Use BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd).  */
@@ -229,6 +230,7 @@ extern boolean _bfd_archive_bsd_construct_extended_name_table
 #define _bfd_archive_bsd_generic_stat_arch_elt \
   bfd_generic_stat_arch_elt
 extern boolean _bfd_archive_bsd_update_armap_timestamp PARAMS ((bfd *));
+#define _bfd_archive_bsd_allow_commons_in_armap bfd_true
 
 /* Routines to use for BFD_JUMP_TABLE_ARCHIVE to get COFF style
    archives.  Use BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff).  */
@@ -247,6 +249,7 @@ extern boolean _bfd_archive_coff_construct_extended_name_table
 #define _bfd_archive_coff_generic_stat_arch_elt \
   bfd_generic_stat_arch_elt
 #define _bfd_archive_coff_update_armap_timestamp bfd_true
+#define _bfd_archive_coff_allow_commons_in_armap bfd_true
 
 /* Routines to use for BFD_JUMP_TABLE_SYMBOLS where there is no symbol
    support.  Use BFD_JUMP_TABLE_SYMBOLS (_bfd_nosymbols).  */

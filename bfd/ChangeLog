@@ -1,3 +1,38 @@
+1999-12-09  Nick Clifton  <nickc@cygnus.com>
+
+	* elflink.h (elf_link_add_archive_symbols): Add an archive
+        element even if contains a symbol which is currently only
+        considered to be a common.
+
+	* targets.c (struct bfd_target): Add new field
+	_bfd_allow_commons_in_armap.
+	* bfd-in2.h:Regenerate.
+
+	* libbfd-in2.h (_bfd_noarchive_allow_commons_in_armap):
+	Define.
+	 (_bfd_archive_bsd_allow_commons_in_armap): Define.
+	* libbfd.h: Regenerate.
+
+	* elfxx-target.h: If using COFF archive map, override
+	definition of allow_commons_in_armap and replace with
+	bfd_false.
+
+	* archive.c (bfd_compute_and_write_armap): Do not place common
+	symbols into the archive map unless _bfd_allow_commons_in_armap
+	returns true.
+
+	* aout-target.h (MY_allow_commons_in_armap): Define.
+	* aout-tic30.h (MY_allow_commons_in_armap): Define.
+	* bfd.c (bfd_allow_commons_in_armap): Define.
+	* coff-alpha.h (alpha_ecoff_allow_commons_in_armap): Define.
+	* coff-rs6000.h (xcoff_allow_commons_in_armap): Define.
+	* elf64-mips.c (bfd_elf64_allow_commons_in_armap): Define.
+	* ieee.c (ieee_ecoff_allow_commons_in_armap): Define.
+	* libecoff.h (_bfd_ecoff_allow_commons_in_armap): Define.
+	* oasys.c (oasys_allow_commons_in_armap): Define.
+	* som.c (som_allow_commons_in_armap): Define.
+	* vms.c (vms_allow_commons_in_armap): Define.
+
 1999-12-07  Jim Blandy  <jimb@cygnus.com>
 
 	Add support for SSE registers in ELF core files.
