@@ -1,5 +1,8 @@
 # Source file used to test the drol and dror macros.
 
+	# generate warnings for all uses of AT.
+	.set noat
+
 foo:
 	drol	$4,$5
 	drol	$4,$5,$6
@@ -22,6 +25,18 @@ foo:
 	dror	$4,$5,33
 	dror	$4,$5,63
 	dror	$4,$5,64
+
+	drol	$4,$5,65
+	drol	$4,$5,95
+	drol	$4,$5,96
+	drol	$4,$5,97
+	drol	$4,$5,127
+
+	dror	$4,$5,65
+	dror	$4,$5,95
+	dror	$4,$5,96
+	dror	$4,$5,97
+	dror	$4,$5,127
 
 # Force at least 8 (non-delay-slot) zero bytes, to make 'objdump' print ...
 	.space	8

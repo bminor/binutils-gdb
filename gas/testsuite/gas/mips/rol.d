@@ -1,6 +1,7 @@
 #objdump: -dr --prefix-addresses -mmips:3000
 #as: -march=r3000 -mtune=r3000
-#name: MIPS R3000 rol
+#name: MIPS macro rol (r3000)
+#stderr: rol.l
 
 # Test the rol and ror macros.
 
@@ -37,4 +38,18 @@ Disassembly of section .text:
 0+006c <[^>]*> sll	a0,a1,0x1f
 0+0070 <[^>]*> or	a0,a0,at
 0+0074 <[^>]*> srl	a0,a1,0x0
+0+0078 <[^>]*> srl	a0,a1,0x0
+0+007c <[^>]*> sll	at,a1,0x1
+0+0080 <[^>]*> srl	a0,a1,0x1f
+0+0084 <[^>]*> or	a0,a0,at
+0+0088 <[^>]*> sll	at,a1,0x1f
+0+008c <[^>]*> srl	a0,a1,0x1
+0+0090 <[^>]*> or	a0,a0,at
+0+0094 <[^>]*> srl	a0,a1,0x0
+0+0098 <[^>]*> srl	at,a1,0x1
+0+009c <[^>]*> sll	a0,a1,0x1f
+0+00a0 <[^>]*> or	a0,a0,at
+0+00a4 <[^>]*> srl	at,a1,0x1f
+0+00a8 <[^>]*> sll	a0,a1,0x1
+0+00ac <[^>]*> or	a0,a0,at
 	...

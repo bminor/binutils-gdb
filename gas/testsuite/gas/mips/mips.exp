@@ -125,7 +125,9 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "mul"
     }
     run_dump_test "rol"
+    run_dump_test "rol-hw"
     run_dump_test "rol64"
+    run_dump_test "rol64-hw"
     if !$aout { run_dump_test "sb" }
     run_dump_test "trunc"
     if !$aout { run_dump_test "ulh" }

@@ -1,3 +1,8 @@
+2002-12-18  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Remove one "ror" and two
+	"dror" entries, and reorder the remaining "dror" and "ror" entries.
+
 2002-12-16  DJ Delorie  <dj@delorie.com>
 
 	* xstormy16-asm.c (parse_immediate16): Add prototype.

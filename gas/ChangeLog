@@ -1,3 +1,11 @@
+2002-12-18  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (macro): In M_DROL, M_DROR, M_ROL, and M_ROR,
+	use hardware rotate ops as appropriate.  In M_DROL_I, M_DROR_I,
+	M_ROL_I, and M_ROR_I, simplify code, clean up warnings, and
+	arrange not to issue warnings about use of AT when AT is not
+	actually used.
+
 2002-12-17  Nick Clifton  <nickc@redhat.com>
 
 	* as.c (std_longopts): Duplicate --keep-locals entry in order to

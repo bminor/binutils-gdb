@@ -1,6 +1,7 @@
 #objdump: -dr --prefix-addresses -mmips:4000
 #as: -march=r4000 -mtune=r4000
-#name: MIPS R4000 drol
+#name: MIPS macro drol (r4000)
+#stderr: rol64.l
 
 # Test the drol and dror macros.
 
@@ -63,4 +64,34 @@ Disassembly of section .text:
 0+00d4 <[^>]*> dsll	a0,a1,0x1
 0+00d8 <[^>]*> or	a0,a0,at
 0+00dc <[^>]*> dsrl	a0,a1,0x0
+0+00e0 <[^>]*> dsll	at,a1,0x1
+0+00e4 <[^>]*> dsrl32	a0,a1,0x1f
+0+00e8 <[^>]*> or	a0,a0,at
+0+00ec <[^>]*> dsll	at,a1,0x1f
+0+00f0 <[^>]*> dsrl32	a0,a1,0x1
+0+00f4 <[^>]*> or	a0,a0,at
+0+00f8 <[^>]*> dsll32	at,a1,0x0
+0+00fc <[^>]*> dsrl32	a0,a1,0x0
+0+0100 <[^>]*> or	a0,a0,at
+0+0104 <[^>]*> dsll32	at,a1,0x1
+0+0108 <[^>]*> dsrl	a0,a1,0x1f
+0+010c <[^>]*> or	a0,a0,at
+0+0110 <[^>]*> dsll32	at,a1,0x1f
+0+0114 <[^>]*> dsrl	a0,a1,0x1
+0+0118 <[^>]*> or	a0,a0,at
+0+011c <[^>]*> dsrl	at,a1,0x1
+0+0120 <[^>]*> dsll32	a0,a1,0x1f
+0+0124 <[^>]*> or	a0,a0,at
+0+0128 <[^>]*> dsrl	at,a1,0x1f
+0+012c <[^>]*> dsll32	a0,a1,0x1
+0+0130 <[^>]*> or	a0,a0,at
+0+0134 <[^>]*> dsrl32	at,a1,0x0
+0+0138 <[^>]*> dsll32	a0,a1,0x0
+0+013c <[^>]*> or	a0,a0,at
+0+0140 <[^>]*> dsrl32	at,a1,0x1
+0+0144 <[^>]*> dsll	a0,a1,0x1f
+0+0148 <[^>]*> or	a0,a0,at
+0+014c <[^>]*> dsrl32	at,a1,0x1f
+0+0150 <[^>]*> dsll	a0,a1,0x1
+0+0154 <[^>]*> or	a0,a0,at
 	...

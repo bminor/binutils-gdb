@@ -6940,6 +6940,26 @@ macro2 (ip)
       break;
 
     case M_DROL:
+      if (CPU_HAS_DROR (mips_arch))
+	{
+	  if (dreg == sreg)
+	    {
+	      tempreg = AT;
+	      used_at = 1;
+	    }
+	  else
+	    {
+	      tempreg = dreg;
+	      used_at = 0;
+	    }
+	  macro_build ((char *) NULL, &icnt, NULL, "dnegu",
+		       "d,w", tempreg, treg);
+	  macro_build ((char *) NULL, &icnt, NULL, "drorv",
+		       "d,t,s", dreg, sreg, tempreg);
+	  if (used_at)
+	    break;
+	  return;
+	}
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "dsubu",
 		   "d,v,t", AT, 0, treg);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "dsrlv",
@@ -6951,6 +6971,26 @@ macro2 (ip)
       break;
 
     case M_ROL:
+      if (CPU_HAS_ROR (mips_arch))
+	{
+	  if (dreg == sreg)
+	    {
+	      tempreg = AT;
+	      used_at = 1;
+	    }
+	  else
+	    {
+	      tempreg = dreg;
+	      used_at = 0;
+	    }
+	  macro_build ((char *) NULL, &icnt, NULL, "negu",
+		       "d,w", tempreg, treg);
+	  macro_build ((char *) NULL, &icnt, NULL, "rorv",
+		       "d,t,s", dreg, sreg, tempreg);
+	  if (used_at)
+	    break;
+	  return;
+	}
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "subu",
 		   "d,v,t", AT, 0, treg);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srlv",
@@ -6964,9 +7004,10 @@ macro2 (ip)
     case M_DROL_I:
       {
 	unsigned int rot;
+	char *l, *r;
 
 	if (imm_expr.X_op != O_constant)
-	  as_bad (_("rotate count too large"));
+	  as_bad (_("Improper rotate count"));
 	rot = imm_expr.X_add_number & 0x3f;
 	if (CPU_HAS_DROR (mips_arch))
 	  {
@@ -6977,25 +7018,23 @@ macro2 (ip)
 	    else
 	      macro_build ((char *) NULL, &icnt, NULL, "dror",
 			   "d,w,<", dreg, sreg, rot);
-	    break;
+	    return;
 	  }
 	if (rot == 0)
-	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "dsrl",
-		       "d,w,<", dreg, sreg, 0);
-	else
 	  {
-	    char *l, *r;
-
-	    l = (rot < 0x20) ? "dsll" : "dsll32";
-	    r = ((0x40 - rot) < 0x20) ? "dsrl" : "dsrl32";
-	    rot &= 0x1f;
-	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, l,
-			 "d,w,<", AT, sreg, rot);
-	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, r,
-			 "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
-	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or",
-			 "d,v,t", dreg, dreg, AT);
+	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "dsrl",
+			 "d,w,<", dreg, sreg, 0);
+	    return;
 	  }
+	l = (rot < 0x20) ? "dsll" : "dsll32";
+	r = ((0x40 - rot) < 0x20) ? "dsrl" : "dsrl32";
+	rot &= 0x1f;
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, l,
+		     "d,w,<", AT, sreg, rot);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, r,
+		     "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or",
+		     "d,v,t", dreg, dreg, AT);
       }
       break;
 
@@ -7004,30 +7043,36 @@ macro2 (ip)
 	unsigned int rot;
 
 	if (imm_expr.X_op != O_constant)
-	  as_bad (_("rotate count too large"));
+	  as_bad (_("Improper rotate count"));
 	rot = imm_expr.X_add_number & 0x1f;
 	if (CPU_HAS_ROR (mips_arch))
 	  {
 	    macro_build ((char *) NULL, &icnt, NULL, "ror",
 			 "d,w,<", dreg, sreg, (32 - rot) & 0x1f);
-	    break;
+	    return;
 	  }
 	if (rot == 0)
-	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srl",
-		       "d,w,<", dreg, sreg, 0);
-	else
 	  {
-	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sll",
-			 "d,w,<", AT, sreg, rot);
 	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srl",
-			 "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
-	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or",
-			 "d,v,t", dreg, dreg, AT);
+			 "d,w,<", dreg, sreg, 0);
+	    return;
 	  }
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sll",
+		     "d,w,<", AT, sreg, rot);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srl",
+		     "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or",
+		     "d,v,t", dreg, dreg, AT);
       }
       break;
 
     case M_DROR:
+      if (CPU_HAS_DROR (mips_arch))
+	{
+	  macro_build ((char *) NULL, &icnt, NULL, "drorv",
+		       "d,t,s", dreg, sreg, treg);
+	  return;
+	}
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "dsubu",
 		   "d,v,t", AT, 0, treg);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "dsllv",
@@ -7039,6 +7084,12 @@ macro2 (ip)
       break;
 
     case M_ROR:
+      if (CPU_HAS_ROR (mips_arch))
+	{
+	  macro_build ((char *) NULL, &icnt, NULL, "rorv",
+		       "d,t,s", dreg, sreg, treg);
+	  return;
+	}
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "subu",
 		   "d,v,t", AT, 0, treg);
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sllv",
@@ -7052,27 +7103,36 @@ macro2 (ip)
     case M_DROR_I:
       {
 	unsigned int rot;
+	char *l, *r;
 
 	if (imm_expr.X_op != O_constant)
-	  as_bad (_("rotate count too large"));
+	  as_bad (_("Improper rotate count"));
 	rot = imm_expr.X_add_number & 0x3f;
-	if (rot == 0)
-	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "dsrl",
-		       "d,w,<", dreg, sreg, 0);
-	else
+	if (CPU_HAS_DROR (mips_arch))
 	  {
-	    char *l, *r;
-
-	    r = (rot < 0x20) ? "dsrl" : "dsrl32";
-	    l = ((0x40 - rot) < 0x20) ? "dsll" : "dsll32";
-	    rot &= 0x1f;
-	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, r,
-			 "d,w,<", AT, sreg, rot);
-	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, l,
-			 "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
-	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or",
-			 "d,v,t", dreg, dreg, AT);
+	    if (rot >= 32)
+	      macro_build ((char *) NULL, &icnt, NULL, "dror32",
+			   "d,w,<", dreg, sreg, rot - 32);
+	    else
+	      macro_build ((char *) NULL, &icnt, NULL, "dror",
+			   "d,w,<", dreg, sreg, rot);
+	    return;
 	  }
+	if (rot == 0)
+	  {
+	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "dsrl",
+			 "d,w,<", dreg, sreg, 0);
+	    return;
+	  }
+	r = (rot < 0x20) ? "dsrl" : "dsrl32";
+	l = ((0x40 - rot) < 0x20) ? "dsll" : "dsll32";
+	rot &= 0x1f;
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, r,
+		     "d,w,<", AT, sreg, rot);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, l,
+		     "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or",
+		     "d,v,t", dreg, dreg, AT);
       }
       break;
 
@@ -7081,20 +7141,26 @@ macro2 (ip)
 	unsigned int rot;
 
 	if (imm_expr.X_op != O_constant)
-	  as_bad (_("rotate count too large"));
+	  as_bad (_("Improper rotate count"));
 	rot = imm_expr.X_add_number & 0x1f;
+	if (CPU_HAS_ROR (mips_arch))
+	  {
+	    macro_build ((char *) NULL, &icnt, NULL, "ror",
+			 "d,w,<", dreg, sreg, rot);
+	    return;
+	  }
 	if (rot == 0)
-	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srl",
-		       "d,w,<", dreg, sreg, 0);
-	else
 	  {
 	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srl",
-			 "d,w,<", AT, sreg, rot);
-	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sll",
-			 "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
-	    macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or",
-			 "d,v,t", dreg, dreg, AT);
+			 "d,w,<", dreg, sreg, 0);
+	    return;
 	  }
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srl",
+		     "d,w,<", AT, sreg, rot);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sll",
+		     "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or",
+		     "d,v,t", dreg, dreg, AT);
       }
       break;
 
