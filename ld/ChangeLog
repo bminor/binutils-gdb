@@ -1,4 +1,4 @@
-2003-05-02  Nick Clifton  <nickc@redhat.com>
+2003-05-09  Nick Clifton  <nickc@redhat.com>
 	
 	* ldlang.c (lang_size_sections_1): Default to generating a
 	fatal error message if a loadable section is not allocated
