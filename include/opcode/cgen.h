@@ -145,7 +145,7 @@ typedef struct
    where it varies.
 */
 
-struct cgen_fields;
+typedef struct cgen_fields CGEN_FIELDS;
 
 /* Total length of the insn, as recorded in the `fields' struct.  */
 /* ??? The field insert handler has lots of opportunities for optimization
@@ -171,7 +171,7 @@ typedef struct cgen_insn CGEN_INSN;
    The result is NULL if success or an error message.  */
 typedef const char * (cgen_parse_fn) PARAMS ((const struct cgen_insn *,
 					      const char **,
-					      struct cgen_fields *));
+					      CGEN_FIELDS *));
 
 /* Print handler.
    The first argument is a pointer to the disassembly info.
@@ -185,7 +185,7 @@ typedef const char * (cgen_parse_fn) PARAMS ((const struct cgen_insn *,
 /* Don't require bfd.h unnecessarily.  */
 #ifdef BFD_VERSION
 typedef void (cgen_print_fn) PARAMS ((PTR, const struct cgen_insn *,
-				      struct cgen_fields *, bfd_vma, int));
+				      CGEN_FIELDS *, bfd_vma, int));
 #else
 typedef void (cgen_print_fn) ();
 #endif
@@ -197,7 +197,7 @@ typedef void (cgen_print_fn) ();
    from which the values are fetched.
    The third argument is a pointer to a buffer in which to place the insn.  */
 typedef void (cgen_insert_fn) PARAMS ((const struct cgen_insn *,
-				       struct cgen_fields *, cgen_insn_t *));
+				       CGEN_FIELDS *, cgen_insn_t *));
 
 /* Extract handler.
    The first argument is a pointer to a struct describing the insn being
@@ -210,7 +210,7 @@ typedef void (cgen_insert_fn) PARAMS ((const struct cgen_insn *,
    The result is the length of the insn or zero if not recognized.  */
 typedef int (cgen_extract_fn) PARAMS ((const struct cgen_insn *,
 				       void *, cgen_insn_t,
-				       struct cgen_fields *));
+				       CGEN_FIELDS *));
 
 /* The `parse' and `insert' fields are indices into these tables.
    The elements are pointer to specialized handler functions.
@@ -234,8 +234,8 @@ extern cgen_print_fn * CGEN_SYM (print_handlers) [];
    It's a collection of the common elements needed to parse, insert, extract,
    and print each of them.  */
 
-#ifndef CGEN_MAX_INSN_ATTRS
-#define CGEN_MAX_INSN_ATTRS 1
+#ifndef CGEN_INSN_MAX_ATTRS
+#define CGEN_INSN_MAX_ATTRS 1
 #endif
 
 struct cgen_base
@@ -311,9 +311,9 @@ void cgen_asm_init_parse PARAMS ((void));
 /* The result is an error message or NULL for success.
    The parsed value is stored in the bfd_vma *.  */
 const char * cgen_parse_operand PARAMS ((enum cgen_parse_operand_type,
-					const char **, int, int,
-					enum cgen_parse_operand_result *,
-					bfd_vma *));
+					 const char **, int, int,
+					 enum cgen_parse_operand_result *,
+					 bfd_vma *));
 #endif
 
 void cgen_save_fixups PARAMS ((void));
@@ -345,18 +345,19 @@ enum cgen_asm_type
 
 typedef struct cgen_hw_entry
 {
-  struct cgen_hw_entry * next;
-  char *                 name;
-  enum cgen_asm_type     asm_type;
-  PTR                    asm_data;
+  /* The type of this entry, one of `enum hw_type'.
+     This is an int and not the enum as the latter may not be declared yet.  */
+  int                          type;
+  const struct cgen_hw_entry * next;
+  char *                       name;
+  enum cgen_asm_type           asm_type;
+  PTR                          asm_data;
 } CGEN_HW_ENTRY;
 
-extern CGEN_HW_ENTRY * CGEN_SYM (hw_list);
+const CGEN_HW_ENTRY * cgen_hw_lookup PARAMS ((const char *));
 
-CGEN_HW_ENTRY * cgen_hw_lookup PARAMS ((const char *));
-
-#ifndef CGEN_MAX_KEYWORD_ATTRS
-#define CGEN_MAX_KEYWORD_ATTRS 1
+#ifndef CGEN_KEYWORD_MAX_ATTRS
+#define CGEN_KEYWORD_MAX_ATTRS 1
 #endif
 
 /* This struct is used to describe things like register names, etc.  */
@@ -379,7 +380,7 @@ typedef struct cgen_keyword_entry
   /* ??? Moving this last should be done by treating keywords like insn lists
      and moving the `next' fields into a CGEN_KEYWORD_LIST struct.  */
   /* FIXME: Not used yet.  */
-  CGEN_ATTR_TYPE (CGEN_MAX_KEYWORD_ATTRS) attrs;
+  CGEN_ATTR_TYPE (CGEN_KEYWORD_MAX_ATTRS) attrs;
 
   /* Next name hash table entry.  */
   struct cgen_keyword_entry *next_name;
@@ -464,16 +465,45 @@ const char * cgen_validate_unsigned_integer PARAMS ((unsigned long,
 						     unsigned long,
 						     unsigned long));
 
+/* Operand modes.  */
+
+/* ??? This duplicates the values in arch.h.  Revisit.
+   These however need the CGEN_ prefix [as does everything in this file].  */
+/* ??? Targets may need to add their own modes so we may wish to move this
+   to <arch>-opc.h, or add a hook.  */
+
+enum cgen_mode {
+  CGEN_MODE_VOID, /* FIXME: rename simulator's VM to VOID */
+  CGEN_MODE_BI, CGEN_MODE_QI, CGEN_MODE_HI, CGEN_MODE_SI, CGEN_MODE_DI,
+  CGEN_MODE_UBI, CGEN_MODE_UQI, CGEN_MODE_UHI, CGEN_MODE_USI, CGEN_MODE_UDI,
+  CGEN_MODE_SF, CGEN_MODE_DF, CGEN_MODE_XF, CGEN_MODE_TF,
+  CGEN_MODE_MAX
+};
+
+/* FIXME: Until simulator is updated.  */
+#define CGEN_MODE_VM CGEN_MODE_VOID
+
 /* This struct defines each entry in the operand table.  */
 
-#ifndef CGEN_MAX_OPERAND_ATTRS
-#define CGEN_MAX_OPERAND_ATTRS 1
+#ifndef CGEN_OPERAND_MAX_ATTRS
+#define CGEN_OPERAND_MAX_ATTRS 1
 #endif
 
 typedef struct cgen_operand
 {
   /* Name as it appears in the syntax string.  */
   char * name;
+
+  /* The hardware element associated with this operand.  */
+  const CGEN_HW_ENTRY *hw;
+
+  /* FIXME: We don't yet record ifield definitions, which we should.
+     When we do it might make sense to delete start/length (since they will
+     be duplicated in the ifield's definition) and replace them with a
+     pointer to the ifield entry.  Note that as more complicated situations
+     need to be handled, going more and more with an OOP paradigm will help
+     keep the complication under control.  Of course, this was the goal from
+     the start, but getting there in one step was too much too soon.  */
 
   /* Bit position (msb of first byte = bit 0).
      This is just a hint, and may be unused in more complex operands.
@@ -496,7 +526,7 @@ typedef struct cgen_operand
      array in that one architecture may have 1 nonbool attribute and another
      may have more.  Having this last means the non-architecture specific code
      needn't care, now or tomorrow.  */
-  CGEN_ATTR_TYPE (CGEN_MAX_OPERAND_ATTRS) attrs;
+  CGEN_ATTR_TYPE (CGEN_OPERAND_MAX_ATTRS) attrs;
 #define CGEN_OPERAND_ATTRS(operand) (&(operand)->attrs)
 } CGEN_OPERAND;
 
@@ -513,6 +543,42 @@ enum cgen_operand_type;
 /* FIXME: Rename, cpu-opc.h defines this as the typedef of the enum.  */
 #define CGEN_OPERAND_TYPE(operand) ((enum cgen_operand_type) CGEN_OPERAND_INDEX (operand))
 #define CGEN_OPERAND_ENTRY(n) (& CGEN_SYM (operand_table) [n])
+
+/* Instruction operand instances.
+
+   For each instruction, a list of the hardware elements that are read and
+   written are recorded.  */
+
+/* The type of the instance.  */
+enum cgen_operand_instance_type {
+  /* End of table marker.  */
+  CGEN_OPERAND_INSTANCE_END = 0,
+  CGEN_OPERAND_INSTANCE_INPUT, CGEN_OPERAND_INSTANCE_OUTPUT
+};
+
+typedef struct
+{
+  /* The type of this operand.  */
+  enum cgen_operand_instance_type type;
+#define CGEN_OPERAND_INSTANCE_TYPE(opinst) ((opinst)->type)
+
+  /* The hardware element referenced.  */
+  const CGEN_HW_ENTRY *hw;
+#define CGEN_OPERAND_INSTANCE_HW(opinst) ((opinst)->hw)
+
+  /* The mode in which the operand is being used.  */
+  enum cgen_mode mode;
+#define CGEN_OPERAND_INSTANCE_MODE(opinst) ((opinst)->mode)
+
+  /* The operand table entry or NULL if there is none (i.e. an explicit
+     hardware reference).  */
+  const CGEN_OPERAND *operand;
+#define CGEN_OPERAND_INSTANCE_OPERAND(opinst) ((opinst)->operand)
+
+  /* If `operand' is NULL, the index (e.g. into array of registers).  */
+  int index;
+#define CGEN_OPERAND_INSTANCE_INDEX(opinst) ((opinst)->index)
+} CGEN_OPERAND_INSTANCE;
 
 /* Syntax string.
 
@@ -613,12 +679,17 @@ struct cgen_insn
 #define CGEN_INSN_VALUE(insn) ((insn)->value)
 #define CGEN_INSN_MASK(insn) (((CGEN_FORMAT *) (insn)->format)->mask)
 
+  /* Pointer to NULL entry terminated table of operands used,
+     or NULL if none.  */
+  const CGEN_OPERAND_INSTANCE *operands;
+#define CGEN_INSN_OPERANDS(insn) ((insn)->operands)
+
   /* Attributes.
      This must appear last.  It is a variable sized array in that one
      architecture may have 1 nonbool attribute and another may have more.
      Having this last means the non-architecture specific code needn't
      care.  */
-  CGEN_ATTR_TYPE (CGEN_MAX_INSN_ATTRS) attrs;
+  CGEN_ATTR_TYPE (CGEN_INSN_MAX_ATTRS) attrs;
 #define CGEN_INSN_ATTRS(insn) (&(insn)->attrs)
 /* Return value of attribute ATTR in INSN.  */
 #define CGEN_INSN_ATTR(insn, attr) \
@@ -718,7 +789,7 @@ CGEN_INSN_LIST * cgen_dis_lookup_insn PARAMS ((const char *, unsigned long));
 
 typedef struct
 {
-  CGEN_HW_ENTRY *        hw_list;
+  const CGEN_HW_ENTRY *  hw_list;
   /*CGEN_OPERAND_TABLE * operand_table; - FIXME:wip */
   CGEN_INSN_TABLE *      insn_table;
 } CGEN_OPCODE_DATA;
@@ -738,7 +809,7 @@ extern enum cgen_endian cgen_current_endian;
 
 /* Prototypes of major functions.  */
 
-/* Set the current cpu (+ mach number, endian, etc.).  *?
+/* Set the current cpu (+ mach number, endian, etc.).  */
 void cgen_set_cpu PARAMS ((CGEN_OPCODE_DATA *, int, enum cgen_endian));
 
 /* Initialize the assembler, disassembler.  */
@@ -753,8 +824,13 @@ void CGEN_SYM (init_parse) PARAMS ((void));
 void CGEN_SYM (init_print) PARAMS ((void));
 void CGEN_SYM (init_insert) PARAMS ((void));
 void CGEN_SYM (init_extract) PARAMS ((void));
+
+/* FIXME: This prototype is wrong ifndef CGEN_INT_INSN.
+   Furthermore, ifdef CGEN_INT_INSN, the insn is created in
+   target byte order (in which case why use int's at all).
+   Perhaps replace cgen_insn_t * with char *?  */
 const struct cgen_insn *
-CGEN_SYM (assemble_insn) PARAMS ((const char *, struct cgen_fields *,
+CGEN_SYM (assemble_insn) PARAMS ((const char *, CGEN_FIELDS *,
 				  cgen_insn_t *, char **));
 #if 0 /* old */
 int CGEN_SYM (insn_supported) PARAMS ((const struct cgen_insn *));
@@ -764,17 +840,24 @@ int CGEN_SYM (opval_supported) PARAMS ((const struct cgen_opval *));
 extern const CGEN_KEYWORD  CGEN_SYM (operand_mach);
 int CGEN_SYM (get_mach) PARAMS ((const char *));
 
+const CGEN_INSN *
+CGEN_SYM (get_insn_operands) PARAMS ((const CGEN_INSN *, cgen_insn_t,
+				      int, int *));
+const CGEN_INSN *
+CGEN_SYM (lookup_insn) PARAMS ((const CGEN_INSN *, cgen_insn_t,
+				int, CGEN_FIELDS *));
+
 CGEN_INLINE void
 CGEN_SYM (put_operand) PARAMS ((int, const long *,
-				struct cgen_fields *));
+				CGEN_FIELDS *));
 CGEN_INLINE long
-CGEN_SYM (get_operand) PARAMS ((int, const struct cgen_fields *));
+CGEN_SYM (get_operand) PARAMS ((int, const CGEN_FIELDS *));
 
 CGEN_INLINE const char *
-CGEN_SYM (parse_operand) PARAMS ((int, const char **, struct cgen_fields *));
+CGEN_SYM (parse_operand) PARAMS ((int, const char **, CGEN_FIELDS *));
 
 CGEN_INLINE const char *
-CGEN_SYM (validate_operand) PARAMS ((int, const struct cgen_fields *));
+CGEN_SYM (validate_operand) PARAMS ((int, const CGEN_FIELDS *));
 
 /* Default insn parser, printer.  */
 extern cgen_parse_fn CGEN_SYM (parse_insn);
