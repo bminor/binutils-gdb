@@ -1,5 +1,12 @@
 2005-02-15  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/ia64/dv-raw-err.s: Don't use r0 or f0 as output operand.
+	* gas/ia64/dv-waw-err.s: Likewise.
+	* gas/ia64/reg-err.[ls]: New.
+	* gas/ia64/ia64.exp: Run new test.
+
+2005-02-15  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/ia64/reloc.[ds]: New.
 	* gas/ia64/reloc-bad.[ls]: New.
 	* gas/ia64/ia64.exp: Run new tests.

@@ -6012,6 +6012,8 @@ parse_operands (idesc)
 {
   int i = 0, highest_unmatched_operand, num_operands = 0, num_outputs = 0;
   int error_pos, out_of_range_pos, curr_out_of_range_pos, sep = 0;
+  int reg1, reg2;
+  char reg_class;
   enum ia64_opnd expected_operand = IA64_OPND_NIL;
   enum operand_match_result result;
   char mnemonic[129];
@@ -6193,6 +6195,127 @@ parse_operands (idesc)
 	as_bad ("Operand mismatch");
       return 0;
     }
+
+  /* Check that the instruction doesn't use
+     - r0, f0, or f1 as output operands
+     - the same predicate twice as output operands
+     - r0 as address of a base update load or store
+     - the same GR as output and address of a base update load
+     - two even- or two odd-numbered FRs as output operands of a floating
+       point parallel load.
+     At most two (conflicting) output (or output-like) operands can exist,
+     (floating point parallel loads have three outputs, but the base register,
+     if updated, cannot conflict with the actual outputs).  */
+  reg2 = reg1 = -1;
+  for (i = 0; i < num_operands; ++i)
+    {
+      int regno = 0;
+
+      reg_class = 0;
+      switch (idesc->operands[i])
+	{
+	case IA64_OPND_R1:
+	case IA64_OPND_R2:
+	case IA64_OPND_R3:
+	  if (i < num_outputs)
+	    {
+	      if (CURR_SLOT.opnd[i].X_add_number == REG_GR)
+		reg_class = 'r';
+	      else if (reg1 < 0)
+		reg1 = CURR_SLOT.opnd[i].X_add_number;
+	      else if (reg2 < 0)
+		reg2 = CURR_SLOT.opnd[i].X_add_number;
+	    }
+	  break;
+	case IA64_OPND_P1:
+	case IA64_OPND_P2:
+	  if (i < num_outputs)
+	    {
+	      if (reg1 < 0)
+		reg1 = CURR_SLOT.opnd[i].X_add_number;
+	      else if (reg2 < 0)
+		reg2 = CURR_SLOT.opnd[i].X_add_number;
+	    }
+	  break;
+	case IA64_OPND_F1:
+	case IA64_OPND_F2:
+	case IA64_OPND_F3:
+	case IA64_OPND_F4:
+	  if (i < num_outputs)
+	    {
+	      if (CURR_SLOT.opnd[i].X_add_number >= REG_FR
+		  && CURR_SLOT.opnd[i].X_add_number <= REG_FR + 1)
+		{
+		  reg_class = 'f';
+		  regno = CURR_SLOT.opnd[i].X_add_number - REG_FR;
+		}
+	      else if (reg1 < 0)
+		reg1 = CURR_SLOT.opnd[i].X_add_number;
+	      else if (reg2 < 0)
+		reg2 = CURR_SLOT.opnd[i].X_add_number;
+	    }
+	  break;
+	case IA64_OPND_MR3:
+	  if (idesc->flags & IA64_OPCODE_POSTINC)
+	    {
+	      if (CURR_SLOT.opnd[i].X_add_number == REG_GR)
+		reg_class = 'm';
+	      else if (reg1 < 0)
+		reg1 = CURR_SLOT.opnd[i].X_add_number;
+	      else if (reg2 < 0)
+		reg2 = CURR_SLOT.opnd[i].X_add_number;
+	    }
+	  break;
+	default:
+	  break;
+	}
+      switch (reg_class)
+	{
+	case 0:
+	  break;
+	default:
+	  as_warn ("Invalid use of `%c%d' as output operand", reg_class, regno);
+	  break;
+	case 'm':
+	  as_warn ("Invalid use of `r%d' as base update address operand", regno);
+	  break;
+	}
+    }
+  if (reg1 == reg2)
+    {
+      if (reg1 >= REG_GR && reg1 <= REG_GR + 127)
+	{
+	  reg1 -= REG_GR;
+	  reg_class = 'r';
+	}
+      else if (reg1 >= REG_P && reg1 <= REG_P + 63)
+	{
+	  reg1 -= REG_P;
+	  reg_class = 'p';
+	}
+      else if (reg1 >= REG_FR && reg1 <= REG_FR + 127)
+	{
+	  reg1 -= REG_FR;
+	  reg_class = 'f';
+	}
+      else
+	reg_class = 0;
+      if (reg_class)
+	as_warn ("Invalid duplicate use of `%c%d'", reg_class, reg1);
+    }
+  else if (((reg1 >= REG_FR && reg1 <= REG_FR + 31
+	     && reg2 >= REG_FR && reg2 <= REG_FR + 31)
+	    || (reg1 >= REG_FR + 32 && reg1 <= REG_FR + 127
+	     && reg2 >= REG_FR + 32 && reg2 <= REG_FR + 127))
+	   && ! ((reg1 ^ reg2) & 1))
+    as_warn ("Invalid simultaneous use of `f%d' and `f%d'",
+	     reg1 - REG_FR, reg2 - REG_FR);
+  else if ((reg1 >= REG_FR && reg1 <= REG_FR + 31
+	    && reg2 >= REG_FR + 32 && reg2 <= REG_FR + 127)
+	   || (reg1 >= REG_FR + 32 && reg1 <= REG_FR + 127
+	    && reg2 >= REG_FR && reg2 <= REG_FR + 31))
+    as_warn ("Dangerous simultaneous use of `f%d' and `f%d'",
+	     reg1 - REG_FR, reg2 - REG_FR);
   return idesc;
 }
 

@@ -1,5 +1,11 @@
 2005-02-15  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.c (parse_operands): New local variables reg1, reg2,
+	reg_class. Check operands and emit diagnostics for illegal use of
+	registers.
+
+2005-02-15  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (ia64_gen_real_reloc_type): Define and initialize
 	new variables type, suffix, and width. Handle
 	BFD_RELOC_IA64_DIR(32|64)[LM]SB in FUNC_LT_FPTR_RELATIVE case.
