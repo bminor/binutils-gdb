@@ -1,3 +1,10 @@
+2004-03-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* config.bfd: Add x86_64-*-openbsd*.
+	* configure.in (x86_64-*-openbsd*): Set COREFILE to
+	netbsd-core.lo.
+	* configure: Regenerate.
+
 2004-03-09  Steve Ellcey  <sje@cup.hp.com>
 
 	* elfxx-ia64.c (plt_full_entry): Change ld8 to ld8.acq.
