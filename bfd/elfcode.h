@@ -1,6 +1,6 @@
 /* ELF executable support for BFD.
-   Copyright 1991, 92, 93, 94, 95, 96, 97, 98, 1999 Free Software
-   Foundation, Inc.
+   Copyright 1991, 92, 93, 94, 95, 96, 97, 98, 1999, 2000 Free
+   Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -246,11 +246,15 @@ elf_swap_ehdr_in (abfd, src, dst)
      const Elf_External_Ehdr *src;
      Elf_Internal_Ehdr *dst;
 {
+  int signed_vma = get_elf_backend_data (abfd)->sign_extend_vma;
   memcpy (dst->e_ident, src->e_ident, EI_NIDENT);
   dst->e_type = bfd_h_get_16 (abfd, (bfd_byte *) src->e_type);
   dst->e_machine = bfd_h_get_16 (abfd, (bfd_byte *) src->e_machine);
   dst->e_version = bfd_h_get_32 (abfd, (bfd_byte *) src->e_version);
-  dst->e_entry = get_word (abfd, (bfd_byte *) src->e_entry);
+  if (signed_vma)
+    dst->e_entry = get_signed_word (abfd, (bfd_byte *) src->e_entry);
+  else
+    dst->e_entry = get_word (abfd, (bfd_byte *) src->e_entry);
   dst->e_phoff = get_word (abfd, (bfd_byte *) src->e_phoff);
   dst->e_shoff = get_word (abfd, (bfd_byte *) src->e_shoff);
   dst->e_flags = bfd_h_get_32 (abfd, (bfd_byte *) src->e_flags);
@@ -271,12 +275,16 @@ elf_swap_ehdr_out (abfd, src, dst)
      const Elf_Internal_Ehdr *src;
      Elf_External_Ehdr *dst;
 {
+  int signed_vma = get_elf_backend_data (abfd)->sign_extend_vma;
   memcpy (dst->e_ident, src->e_ident, EI_NIDENT);
   /* note that all elements of dst are *arrays of unsigned char* already... */
   bfd_h_put_16 (abfd, src->e_type, dst->e_type);
   bfd_h_put_16 (abfd, src->e_machine, dst->e_machine);
   bfd_h_put_32 (abfd, src->e_version, dst->e_version);
-  put_word (abfd, src->e_entry, dst->e_entry);
+  if (signed_vma)
+    put_signed_word (abfd, src->e_entry, dst->e_entry);
+  else
+    put_word (abfd, src->e_entry, dst->e_entry);
   put_word (abfd, src->e_phoff, dst->e_phoff);
   put_word (abfd, src->e_shoff, dst->e_shoff);
   bfd_h_put_32 (abfd, src->e_flags, dst->e_flags);
@@ -613,7 +621,7 @@ elf_object_p (abfd)
     }
 
   /* Remember the entry point specified in the ELF file header. */
-  bfd_get_start_address (abfd) = i_ehdrp->e_entry;
+  bfd_set_start_address (abfd, i_ehdrp->e_entry);
 
   /* Allocate space for a copy of the section header table in
      internal form, seek to the section header table in the file,
