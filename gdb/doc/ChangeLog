@@ -1,3 +1,8 @@
+Sun Oct 31 13:31:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote.texi (VxWorks Remote): Clarify that rebuilding VxWorks kernel
+	is a mandatory step.  Make the stuff about that more concise.
+
 Wed Oct 27 00:25:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Class Names): New node.

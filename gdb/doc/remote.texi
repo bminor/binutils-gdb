@@ -909,23 +909,21 @@ The following information on connecting to VxWorks was current when
 this manual was produced; newer releases of VxWorks may use revised
 procedures.
 
-The remote debugging interface (RDB) routines are installed and executed
-on the VxWorks target.  These routines are included in the VxWorks library
-@file{rdb.a} and are incorporated into the system image when source-level
-debugging is enabled in the VxWorks configuration.
-
 @kindex INCLUDE_RDB
-If you wish, you can define @code{INCLUDE_RDB} in the VxWorks
-configuration file @file{configAll.h} to include the RDB interface
-routines and spawn the source debugging task @code{tRdbTask} when
-VxWorks is booted.  For more information on configuring and remaking
-VxWorks, see the manufacturer's manual.
+To use @value{GDBN} with VxWorks, you must rebuild your VxWorks kernel
+to include the remote debugging interface routines in the VxWorks
+library @file{rdb.a}.  To do this, define @code{INCLUDE_RDB} in the
+VxWorks configuration file @file{configAll.h} and rebuild your VxWorks
+kernel.  The resulting kernel will contain @file{rdb.a} and spawn the
+source debugging task @code{tRdbTask} when VxWorks is booted.  For more
+information on configuring and remaking VxWorks, see the manufacturer's
+manual.
 @c VxWorks, see the @cite{VxWorks Programmer's Guide}.
 
-Once you have included the RDB interface in your VxWorks system image
-and set your Unix execution search path to find @value{GDBN}, you are ready
-to run @value{GDBN}.  From your Unix host, run @code{gdb} (or
-@code{vxgdb}, depending on your installation).
+Once you have included @file{rdb.a} in your VxWorks system image and set
+your Unix execution search path to find @value{GDBN}, you are ready to
+run @value{GDBN}.  From your Unix host, run @code{gdb} (or @code{vxgdb},
+depending on your installation).
 
 @value{GDBN} comes up showing the prompt:
 
