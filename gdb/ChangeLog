@@ -1,3 +1,15 @@
+Sat Mar 18 02:02:24 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mdebugread.c (parse_symbol):  If finishing a function without
+	known parameter type info, set that from parameter symbols.
+	Remove commented-out add_param_to_type support.
+
+Thu Mar 16 16:38:03 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* xcoffread.c (process_linenos): Make sure filename we pass to
+	start_subfile will cause deduce_language_from_filename to return
+	the correct thing.  Reindent function to GNU standards.
+
 Thu Mar 16 15:54:00 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* nlm/gdbserve.c (handle_exception): #if out call to StopBell,

@@ -1,5 +1,5 @@
 /* Read a symbol table in ECOFF format (Third-Eye).
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995
    Free Software Foundation, Inc.
    Original version contributed by Alessandro Forin (af@cs.cmu.edu) at
    CMU.  Major work by Per Bothner, John Gilmore and Ian Lance Taylor
@@ -825,15 +825,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       add_symbol (s, b);
 
       /* Make a type for the procedure itself */
-#if 0
-      /* FIXME:  This has not been tested yet!  See dbxread.c */
-      /* Generate a template for the type of this function.  The
-	 types of the arguments will be added as we read the symbol
-	 table. */
-      memcpy (lookup_function_type (t), SYMBOL_TYPE (s), sizeof (struct type));
-#else
       SYMBOL_TYPE (s) = lookup_function_type (t);
-#endif
 
       /* Create and enter a new lexical context */
       b = new_block (top_stack->maxsyms);
@@ -1145,6 +1137,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 	  struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
 	  struct mips_extra_func_info *e;
 	  struct block *b;
+	  struct type *ftype = top_stack->cur_type;
 	  int i;
 
 	  BLOCK_END (top_stack->cur_block) += sh->value;	/* size */
@@ -1176,6 +1169,39 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 		{
 		  BLOCK_START (b_bad) = BLOCK_START (b);
 		  BLOCK_END (b_bad) = BLOCK_END (b);
+		}
+	    }
+
+	  if (TYPE_NFIELDS (ftype) <= 0)
+	    {
+	      /* No parameter type information is recorded with the function's
+		 type.  Set that from the type of the parameter symbols. */
+	      int nparams = top_stack->numargs;
+	      int iparams;
+	      struct symbol *sym;
+
+	      if (nparams > 0)
+		{
+		  TYPE_NFIELDS (ftype) = nparams;
+		  TYPE_FIELDS (ftype) = (struct field *)
+		    TYPE_ALLOC (ftype, nparams * sizeof (struct field));
+						    
+		  for (i = iparams = 0; iparams < nparams; i++)
+		    {
+		      sym = BLOCK_SYM (b, i);
+		      switch (SYMBOL_CLASS (sym))
+			{
+			case LOC_ARG:
+			case LOC_REF_ARG:
+			case LOC_REGPARM:
+			case LOC_REGPARM_ADDR:
+			  TYPE_FIELD_TYPE (ftype, iparams) = SYMBOL_TYPE (sym);
+			  iparams++;
+			  break;
+			default:
+			  break;
+			}
+		    }
 		}
 	    }
 	}
