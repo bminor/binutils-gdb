@@ -138,6 +138,8 @@ te-linux.h
 te-lynx.h
 te-mach.h
 te-netbsd.h
+te-netbsd532.h
+te-pc532mach.h
 te-sco386.h
 te-sun3.h
 te-sysv32.h
@@ -147,5 +149,26 @@ z8k.mt
 Things-to-lose:
 
 Do-last:
+
+i960xl_files=tc-i960.c
+if ( echo $* | grep keep\-i960xl > /dev/null ) ; then
+	if [ -n "${verbose}" ] ; then
+		echo Keeping i960xl stuff in $i960xl_files.
+	fi
+else
+	if [ -n "${verbose}" ]; then
+		echo -n Cleaning i960xl in `pwd`:
+	fi
+	for f in $i960xl_files ; do
+		if [ -n "${verbose}" ] ; then
+			echo -n " " $f
+		fi
+		grep -v XL < $f > new
+		if [ -n "${safe}" ] ; then
+			mv $f .Recover
+		fi
+		mv new $f
+	done
+fi
 
 # End of file.
