@@ -5713,7 +5713,10 @@ tc_gen_reloc (section, fixp)
  if (code == BFD_RELOC_32_PCREL
      && GOT_symbol
      && fixp->fx_addsy == GOT_symbol)
-   code = BFD_RELOC_ARM_GOTPC;
+   {
+     code = BFD_RELOC_ARM_GOTPC;
+     reloc->addend = fixp->fx_offset = reloc->address;
+   }
 #endif
    
   reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
