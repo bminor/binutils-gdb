@@ -33,7 +33,7 @@
 const char comment_chars[] = ";";
 
 /* Characters which start a comment at the beginning of a line.  */
-const char line_comment_chars[] = ";*";
+const char line_comment_chars[] = ";*#";
 
 /* Characters which may be used to separate multiple commands on a single
    line. The semicolon is such a character by default and should not be

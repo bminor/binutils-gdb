@@ -1,3 +1,16 @@
+start-sanitize-tic80
+Tue Apr  1 11:25:56 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* config/tc-tic80.c (line_comment_char): Make '#' start comments
+	at the beginning of a line for compatibility with .S files where
+	cpp leaves the filename transitions beginning with '#'.
+
+end-sanitize-tic80
+Tue Apr  1 00:07:30 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c: Only compile tc_coff_symbol_emit_hook and
+	tc_coff_sizemachdep if OBJ_COFF.
+
 Mon Mar 31 23:53:44 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 	* config/tc-ppc.c (register_name): Declare.
