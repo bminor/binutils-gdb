@@ -1269,7 +1269,8 @@ typedef struct bfd_section
   /* Nonzero if this section uses RELA relocations, rather than REL.  */
   unsigned int use_rela_p:1;
 
-  /* Bits used by various backends.  */
+  /* Bits used by various backends.  The generic code doesn't touch
+     these fields.  */
 
   /* Nonzero if this section has TLS related relocations.  */
   unsigned int has_tls_reloc:1;

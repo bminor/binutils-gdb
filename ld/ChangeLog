@@ -1,8 +1,16 @@
+2005-01-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/ppc64elf.em (no_multi_toc): New var.
+	(gld${EMULATION_NAME}_finish): Pass to ppc64_elf_setup_section_lists.
+	(OPTION_NO_MULTI_TOC): Define.
+	(PARSE_AND_LIST_LONGOPTS): Add --no-multi-toc support.
+	(PARSE_AND_LIST_OPTIONS, PARSE_AND_LIST_ARGS_CASES): Likewise.
+
 2005-01-05  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/614
 	* ldmisc.c (vfinfo): Alter output to conform to the GNU Coding
-	Standard's specification for parsable error messages. 
+	Standard's specification for parsable error messages.
 
 2005-01-04  Paul Brook  <paul@codesourcery.com>
 
@@ -89,7 +97,7 @@
 
 	* ld/ldlex.l: Allow ORIGIN and LENGTH in EXPRESSION.
 	* ld/ldgram.y: Add ORIGIN and LENGTH expressions.
-	* ld/ldexp.c (fold_name): Implement LENGTH() and ORIGIN() functions 
+	* ld/ldexp.c (fold_name): Implement LENGTH() and ORIGIN() functions
 	which return the length and origin of a memory.
 	* ld/ld.texinfo: Document LENGTH() and ORIGIN() functions.
 	* NEWS: Mention support for ORIGIN and LENGTH operators.

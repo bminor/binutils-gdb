@@ -52,6 +52,9 @@ static int no_opd_opt = 0;
 /* Whether to run toc optimization.  */
 static int no_toc_opt = 0;
 
+/* Whether to allow multiple toc sections.  */
+static int no_multi_toc = 0;
+
 /* Whether to emit symbols for stubs.  */
 static int emit_stub_syms = 0;
 
@@ -337,7 +340,8 @@ gld${EMULATION_NAME}_finish (void)
      stubs.  */
   if (stub_file != NULL && !link_info.relocatable)
     {
-      int ret = ppc64_elf_setup_section_lists (output_bfd, &link_info);
+      int ret = ppc64_elf_setup_section_lists (output_bfd, &link_info,
+					       no_multi_toc);
       if (ret != 0)
 	{
 	  if (ret < 0)
@@ -484,7 +488,8 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_NO_TLS_OPT		(OPTION_NO_DOTSYMS + 1)
 #define OPTION_NO_OPD_OPT		(OPTION_NO_TLS_OPT + 1)
 #define OPTION_NO_TOC_OPT		(OPTION_NO_OPD_OPT + 1)
-#define OPTION_NON_OVERLAPPING_OPD	(OPTION_NO_TOC_OPT + 1)
+#define OPTION_NO_MULTI_TOC		(OPTION_NO_TOC_OPT + 1)
+#define OPTION_NON_OVERLAPPING_OPD	(OPTION_NO_MULTI_TOC + 1)
 '
 
 PARSE_AND_LIST_LONGOPTS='
@@ -495,6 +500,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
   { "no-opd-optimize", no_argument, NULL, OPTION_NO_OPD_OPT },
   { "no-toc-optimize", no_argument, NULL, OPTION_NO_TOC_OPT },
+  { "no-multi-toc", no_argument, NULL, OPTION_NO_MULTI_TOC },
   { "non-overlapping-opd", no_argument, NULL, OPTION_NON_OVERLAPPING_OPD },
 '
 
@@ -528,6 +534,9 @@ PARSE_AND_LIST_OPTIONS='
 		   ));
   fprintf (file, _("\
   --no-toc-optimize     Don'\''t optimize the TOC section.\n"
+		   ));
+  fprintf (file, _("\
+  --no-multi-toc        Disallow automatic multiple toc sections.\n"
 		   ));
   fprintf (file, _("\
   --non-overlapping-opd Canonicalize .opd, so that there are no overlapping\n\
@@ -567,6 +576,10 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_NO_TOC_OPT:
       no_toc_opt = 1;
+      break;
+
+    case OPTION_NO_MULTI_TOC:
+      no_multi_toc = 1;
       break;
 
     case OPTION_NON_OVERLAPPING_OPD:

@@ -1,5 +1,23 @@
 2005-01-06  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (struct ppc_link_hash_table): Add no_multi_toc and
+	multi_toc_needed.
+	(has_toc_reloc, makes_toc_func_call, call_check_in_progress): Define.
+	(ppc64_elf_check_relocs): Update references to has_gp_reloc.
+	(ppc64_elf_setup_section_lists): Add no_multi_toc parm, set htab bit.
+	(ppc64_elf_next_toc_section): Heed no_multi_toc.
+	(ppc64_elf_reinit_toc): Set multi_toc_needed.
+	(toc_adjusting_stub_needed): Rewrite.
+	(ppc64_elf_next_input_section): Use multi_toc_needed to shortcut
+	toc tests.  Adjust for toc_adjusting_stub_needed changes.
+	(ppc64_elf_size_stubs): Update references to has_gp_reloc.
+	* elf64-ppc.h (ppc64_elf_setup_section_lists): Update prototype.
+	* section.c: Expand comment on backend bits.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2005-01-06  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (ppc64_elf_size_stubs): When determining need for
 	toc adjusting stub, do not test source section flags.
 
@@ -36,7 +54,7 @@
 	Add 'base' argument for constructing register sections.  Reformat.
 	(elfcore_grok_nto_note): Call elfcore_grok_nto_regs for both
 	gp and fp regs.  Reformat.
-	
+
 2004-12-22  Klaus Rudolph  <lts-rudolph@gmx.de>
 
 	* reloc.c: Add new relocs R_AVR_LDI, R_AVR_6, R_AVR_6_ADIW.

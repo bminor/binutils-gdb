@@ -30,7 +30,7 @@ bfd_boolean ppc64_elf_edit_toc
 bfd_vma ppc64_elf_toc
   (bfd *);
 int ppc64_elf_setup_section_lists
-  (bfd *, struct bfd_link_info *);
+  (bfd *, struct bfd_link_info *, int);
 void ppc64_elf_next_toc_section
   (struct bfd_link_info *, asection *);
 void ppc64_elf_reinit_toc
