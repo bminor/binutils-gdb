@@ -1,3 +1,16 @@
+Sun Nov  7 00:30:11 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* hppa.h: Immediate field in probei instructions is unsigned,
+	not low-sign extended.
+
+Wed Nov  3 10:30:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* m88k.h (RRI10MASK): Change from 0xfc00ffe0 to 0xfc00fc00.
+
+Tue Nov  2 12:41:30 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
+
+	* i386.h: Add "fxch" without operand.
+
 Mon Nov  1 18:13:03 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mips.h (M_JAL_1, M_JAL_2, M_JAL_A): Added.
