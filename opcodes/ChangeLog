@@ -1,3 +1,10 @@
+start-sanitize-v850
+Tue Dec 31 15:09:16 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* v850-opc.c (D8_{6,7}): Set V850_OPERAND_ADJUST_SHORT_MEMORY
+	flag.
+
+end-sanitize-v850
 Mon Dec 30 17:02:11 1996  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (m68k-opc.o, alpha-opc.o): Remove dis-asm.h dependency.

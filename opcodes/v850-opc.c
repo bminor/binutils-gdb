@@ -88,11 +88,11 @@ const struct v850_operand v850_operands[] = {
 
 /* The unsigned DISP8_7 field in a format 4 insn. */
 #define D8_7	(CCCC+1)
-  { 8, 0, insert_d8_7, extract_d8_7, 0 },
+  { 8, 0, insert_d8_7, extract_d8_7, V850_OPERAND_ADJUST_SHORT_MEMORY },
 
 /* The unsigned DISP8_6 field in a format 4 insn. */
 #define D8_6	(D8_7+1)
-  { 8, 0, insert_d8_6, extract_d8_6, 0 },
+  { 8, 0, insert_d8_6, extract_d8_6, V850_OPERAND_ADJUST_SHORT_MEMORY },
 
 /* System register operands.  */
 #define SR1	(D8_6+1)
@@ -296,6 +296,7 @@ const struct v850_opcode v850_opcodes[] = {
 { "jz",		BOP(0x2),		BOP_MASK,	IF3, 0 },
 { "jnz",	BOP(0xa),		BOP_MASK,	IF3, 0 },
 { "jsa",	BOP(0xd),		BOP_MASK,	IF3, 0 },
+{ "jbr",	BOP(0x5),		BOP_MASK,	IF3, 0 },
 
 { "jmp",	one(0x0060),		one(0xffe0),	{ R1}, 1 },
 { "jr",		one(0x0780),		two(0xffc0,0x0001),{ D22 }, 0 },
