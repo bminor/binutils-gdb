@@ -1,9 +1,15 @@
+Thu Dec  8 17:48:25 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* configure.in (ns32k-pc532-mach*): Select correct emulation.
+	(mips-sony-bsd*): Use ecoff.
+	* configure: Regenerated.
+
 start-sanitize-arc
 Tue Nov 29 18:12:22 1994  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.in (arc-*-elf*): Recognize.
 	* configure: "regenerated".
-	* config/tc-arc.c, config/tc-arc.h: New files.
+	* config/tc-arc.c, config/tc-arc.h, config/arc.mt: New files.
 end-sanitize-arc
 
 Tue Nov 29 13:58:10 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
@@ -43,13 +49,13 @@ Tue Nov 29 13:58:10 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	(SIGTY): Macro deleted.
 	(main): Deleted disabled code for establishing signal handler.
 
-	start-sanitize-rce
+start-sanitize-rce
 	Tiemann should've noted something like this:
 	* config/tc-rce.c, config/tc-rce.h: New files.
 	* as.c (main) [TC_RCE]: Call dump_literals.
 	* configure.in: Handle rce-*-aout.
 	* configure: Regenerated.
-	end-sanitize-rce
+end-sanitize-rce
 
 Mon Nov 28 11:37:35 1994  Doug Evans  <dje@canuck.cygnus.com>
 

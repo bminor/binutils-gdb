@@ -71,6 +71,10 @@ case ${generic_target} in
   alpha-*-netware*)	obj_format=ecoff ;;
   alpha-*-osf*)		obj_format=ecoff ;;
 
+# start-sanitize-arc
+  arc-*-elf*)		obj_format=elf bfd_gas=yes ;;
+# end-sanitize-arc
+
   arm-*-riscix*)	obj_format=aout ;;
 
   hppa-*-*elf*)		obj_format=elf emulation=hppa ;;
@@ -123,6 +127,7 @@ case ${generic_target} in
 
   m88k-*-coff*)		obj_format=coff gas_target=m88kcoff ;;
 
+  mips-sony-bsd*)	obj_format=ecoff gas_target=mips-big ;;
   # don't change emulation like *-*-bsd does
   mips-*-bsd*)		obj_format=aout gas_target=mips-lit ;;
   mips-*-ultrix*)	obj_format=ecoff gas_target=mips-lit ;;
@@ -154,7 +159,7 @@ case ${generic_target} in
   rce-*-aout)		obj_format=aout ;;
 # end-sanitize-rce
 
-  ns32k-pc532-mach*)	obj_format=aout emulation=pc532 ;;
+  ns32k-pc532-mach*)	obj_format=aout emulation=pc532mach ;;
   ns32k-pc532-netbsd*)	obj_format=aout emulation=nbsd532 ;;
 
   sparc-*-sunos4*)	obj_format=aout emulation=sun3 ;;
