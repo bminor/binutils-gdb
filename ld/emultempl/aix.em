@@ -134,6 +134,9 @@ static lang_input_statement_type *initfini_file;
 /* Whether to do run time linking */
 static boolean rtld;
 
+/* Explicit command line library path, -blibpath */
+static char *command_line_blibpath = NULL;
+
 /* This routine is called before anything else is done.  */
 
 static void
@@ -196,6 +199,8 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     OPTION_UNIX,
     OPTION_32,
     OPTION_64,
+    OPTION_LIBPATH,
+    OPTION_NOLIBPATH,
   };
 
   /* -binitfini has special handling in the linker backend.  The native linker
@@ -252,6 +257,8 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     {"b64", no_argument, NULL, OPTION_64},
     {"static", no_argument, NULL, OPTION_NOAUTOIMP},
     {"unix", no_argument, NULL, OPTION_UNIX},
+    {"blibpath", required_argument, NULL, OPTION_LIBPATH},
+    {"bnolibpath", required_argument, NULL, OPTION_NOLIBPATH},
     {NULL, no_argument, NULL, 0}
   };
 
@@ -518,6 +525,14 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
       symbol_mode_mask = 0x0e;
       break;
 
+    case OPTION_LIBPATH:
+      command_line_blibpath=optarg;
+      break;
+
+    case OPTION_NOLIBPATH:
+      command_line_blibpath=NULL;
+      break;
+
     }
 
   return 1;
@@ -638,10 +653,13 @@ gld${EMULATION_NAME}_before_allocation ()
      .loader relocs for them.  */
   lang_for_each_statement (gld${EMULATION_NAME}_find_relocs);
 
-  /* We need to build LIBPATH from the -L arguments.  If any -rpath
-     arguments were used, though, we use -rpath instead, as a GNU
-     extension.  */
-  if (command_line.rpath != NULL)
+  /* Precedence of LIBPATH
+     -blibpath:  native support always first
+     -rpath:     gnu extension
+     -L          build from command line -L's */
+  if (command_line_blibpath != NULL)
+    libpath = command_line_blibpath;
+  else if (command_line.rpath != NULL)
     libpath = command_line.rpath;
   else if (search_head == NULL)
     libpath = (char *) "";

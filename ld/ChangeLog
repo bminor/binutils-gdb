@@ -1,3 +1,8 @@
+2002-04-30  Tom Rix  <trix@redhat.com>
+
+	* emultempl/aix.em (gld*_parse_arge, gld*_before_allocation): Add 
+	-blibpath, -bnolibpath support. 
+ 
 2002-04-30  Mark Mitchell  <mark@codesourcery.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add elf32ppcwindiss.o.
