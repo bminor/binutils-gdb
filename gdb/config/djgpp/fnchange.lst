@@ -128,6 +128,8 @@
 @V@/gdb/osf-share/cma_stack_int.h @V@/gdb/osf-share/cma_stkint.h
 @V@/gdb/p-exp.tab.c @V@/gdb/p-exp_tab.c
 @V@/gdb/ppc-linux-tdep.c @V@/gdb/ppc-linx-tdep.c
+@V@/gdb/regformats/reg-i386-linux.dat @V@/gdb/regformats/r-i386-lnx.dat
+@V@/gdb/regformats/reg-s390x.dat @V@/gdb/regformats/r-s390x.dat
 @V@/gdb/remote-adapt.c @V@/gdb/rmt-adapt.c
 @V@/gdb/remote-array.c @V@/gdb/rmt-array.c
 @V@/gdb/remote-e7000.c @V@/gdb/rmt-e7000.c

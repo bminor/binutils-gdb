@@ -1,3 +1,8 @@
+2002-03-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/djgpp/fnchange.lst: Add regformats/reg-i386-linux.dat and
+	regformats/reg-s390x.dat.
+
 2002-03-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* utils.c: Add FIXME explaining true/false problem.
