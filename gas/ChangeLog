@@ -1,3 +1,11 @@
+2003-06-10  Doug Evans  <dje@sebabeach.org>
+
+	* cgen.c (gas_cgen_finish_insn): CGEN_INSN_RELAX renamed to
+	CGEN_INSN_RELAXED.
+	* config/tc-fr30.c (md_estimate_size_before_relax): Ditto.
+	* config/tc-m32r.c (md_estimate_size_before_relax): Ditto.
+	* config/tc-openrisc.c (md_estimate_size_before_relax): Ditto.
+
 2003-06-10  Alan Modra  <amodra@bigpond.net.au>
 	    Gary Hade <garyhade@us.ibm.com>
 

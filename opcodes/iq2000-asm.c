@@ -794,10 +794,10 @@ iq2000_cgen_assemble_insn (cd, str, fields, buf, errmsg)
       if (! iq2000_cgen_insn_supported (cd, insn))
 	continue;
 #endif
-      /* If the RELAX attribute is set, this is an insn that shouldn't be
+      /* If the RELAXED attribute is set, this is an insn that shouldn't be
 	 chosen immediately.  Instead, it is used during assembler/linker
 	 relaxation if possible.  */
-      if (CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_RELAX) != 0)
+      if (CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_RELAXED) != 0)
 	continue;
 
       str = start;
