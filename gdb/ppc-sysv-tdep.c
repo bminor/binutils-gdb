@@ -339,6 +339,10 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
         }
     }
 
+  /* Point the inferior function call's return address at the dummy's
+     breakpoint.  */
+  regcache_raw_write_signed (regcache, tdep->ppc_lr_regnum, bp_addr);
+
   target_store_registers (-1);
   return sp;
 }

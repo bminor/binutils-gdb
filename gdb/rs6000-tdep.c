@@ -1302,6 +1302,10 @@ ran_out_of_registers_for_arguments:
   store_unsigned_integer (tmp_buffer, 4, saved_sp);
   write_memory (sp, tmp_buffer, 4);
 
+  /* Point the inferior function call's return address at the dummy's
+     breakpoint.  */
+  regcache_raw_write_signed (regcache, tdep->ppc_lr_regnum, bp_addr);
+
   /* Set the TOC register, get the value from the objfile reader
      which, in turn, gets it from the VMAP table.  */
   if (rs6000_find_toc_address_hook != NULL)
@@ -1311,17 +1315,6 @@ ran_out_of_registers_for_arguments:
     }
 
   target_store_registers (-1);
-  return sp;
-}
-
-/* Function: ppc_push_return_address (pc, sp)
-   Set up the return address for the inferior function call.  */
-
-static CORE_ADDR
-ppc_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
-{
-  write_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum,
-		  entry_point_address ());
   return sp;
 }
 
@@ -2935,7 +2928,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     /* PowerOpen / AIX 32 bit.  */
     set_gdbarch_frame_red_zone_size (gdbarch, 220);
   set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
-  set_gdbarch_deprecated_push_return_address (gdbarch, ppc_push_return_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
   set_gdbarch_deprecated_register_convertible (gdbarch, rs6000_register_convertible);
