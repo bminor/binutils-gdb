@@ -1,5 +1,7 @@
 2004-07-14  Jim Blandy  <jimb@redhat.com>
 
+	* rs6000-tdep.c (COMMON_UISA_NOFP_REGS): Delete; unused.
+
 	* ppc-tdep.h (ppc_num_vrs): New enum constant.
 
 	* ppc-tdep.h (ppc_num_srs): New enum constant.
