@@ -1,5 +1,10 @@
 2002-06-06  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.base/overlays.exp: Record addresses of overlay
+	functions in TCL variables rather than in GDB variables,
+	to avoid having GDB convert them to pointers (with loss
+	of information).
+
 	* gdb.base/d10v.ld: Merge in several years worth of 
 	default linker script changes.
 	* gdb.base/long_long.exp: Add check for sizeof (long double).
