@@ -1,3 +1,10 @@
+2002-04-11  Richard Sandiford  <rsandifo@redhat.com>
+
+	* doc/invoke.texi (TC_LARGEST_EXPONENT_IS_NORMAL): Document.
+	* config/atof-ieee.c (TC_LARGEST_EXPONENT_IS_NORMAL): Add an
+	argument for the precision.
+	(gen_to_words): Update accordingly.
+
 2002-04-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* as.c (parse_args <OPTION_VERSION>): Use VERSION is
