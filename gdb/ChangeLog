@@ -1,3 +1,19 @@
+Fri Aug  1 15:21:44 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbtk.c (Tcl_Alloc): Don't provide our own version of this if
+	_WIN32.
+	(Tcl_Realloc, Tcl_Free): Likewise.
+	* configure.in: Check for cygwin32 environment.  Define and
+	substitute WIN32LIBS and WIN32LDAPP.  Always set configdir to
+	unix; setting it to win was for an old Tcl/Tk configuration
+	scheme.
+	* aclocal.m4 (CY_AC_LOAD_TKCONFIG): Substitute TK_BUILD_INCLUDES.
+	* Makefile.in (TK_CFLAGS): Add @TK_BUILD_INCLUDES@.
+	(WIN32LDAPP, WIN32LIBS): Define.
+	(CLIBS): Add $(WIN32LIBS).
+	(gdb): Use $(WIN32LDAPP).
+	* configure: Rebuild.
+
 Thu Jul 31 15:40:19 1997  Per Bothner  <bothner@cygnus.com>
 
 	* symtab.h (SYMBOL_INIT_LANGUAGE_SPECIFIC, SYMBOL_INIT_DEMANGLED_NAME,

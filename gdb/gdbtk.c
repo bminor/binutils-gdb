@@ -134,7 +134,11 @@ static int running_now;
 
 static int disassemble_from_exec = -1;
 
-/* Supply malloc calls for tcl/tk.  */
+#ifndef _WIN32
+
+/* Supply malloc calls for tcl/tk.  We do not want to do this on
+   Windows, because Tcl_Alloc is probably in a DLL which will not call
+   the mmalloc routines.  */
 
 char *
 Tcl_Alloc (size)
@@ -157,6 +161,8 @@ Tcl_Free(ptr)
 {
   free (ptr);
 }
+
+#endif /* _WIN32 */
 
 static void
 null_routine(arg)

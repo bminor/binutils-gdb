@@ -473,6 +473,7 @@ dnl    AC_SUBST(TK_PREFIX)
 dnl not used, don't export to save symbols
 dnl    AC_SUBST(TK_EXEC_PREFIX)
 
+    AC_SUBST(TK_BUILD_INCLUDES)
     AC_SUBST(TK_XINCLUDES)
     AC_SUBST(TK_XLIBSW)
     AC_SUBST(TK_BUILD_LIB_SPEC)
