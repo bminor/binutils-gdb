@@ -1,3 +1,9 @@
+Wed Mar 13 14:54:11 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/signals.exp: Remove "alpha-*-osf2*" setup_xfail for
+	"bt in signals.exp".  This problem only appears when running
+	the testsuite, and then only intermittently.
+
 Tue Mar 12 15:00:16 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.base/return.exp (return_tests): Differentiate between
