@@ -1,3 +1,8 @@
+Thu Jun 24 14:43:22 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* gprof.c (main): Get whoami from argv, instead of hardcoding.
+	Use it in usage message.  Split usage message to fit in 80 cols.
+
 Sun Jun 20 20:58:02 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
 
 	* Makefile.in: Undo 15 June change.

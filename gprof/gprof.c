@@ -31,7 +31,7 @@ static char sccsid[] = "@(#)gprof.c	5.6 (Berkeley) 6/1/90";
 
 bfd	*abfd;
 
-char	*whoami = "gprof";
+char	*whoami;
 
     /*
      *	things which get -E excluded by default.
@@ -48,6 +48,7 @@ main(argc, argv)
     char	**sp;
     nltype	**timesortnlp;
 
+    whoami = argv[0];
     --argc;
     argv++;
     debug = 0;
@@ -112,11 +113,10 @@ main(argc, argv)
 	    zflag = TRUE;
 	    break;
 	default:
-	    fprintf (stderr, "usage:  gprof [-a] [-b] [-c] [-d[num]] \
-[-E function-name] [-e function-name] \
-[-F function-name] [-f function-name] \
-[-k from to] [-s] [-T] [-z] [image-file] \
-[profile file(s)]\n");
+	    fprintf (stderr, "\
+Usage: %s [-a] [-b] [-c] [-d[num]] [-E function-name] [-e function-name]\n\
+       [-F function-name] [-f function-name] [-k from to] [-s] [-T] [-z]\n\
+       [image-file] [profile-file...]\n", whoami);
 	    exit (1);
 	}
 	argv++;
