@@ -297,7 +297,7 @@ maintenance_translate_address (arg, from_tty)
   sect = NULL;
   p = arg;
 
-  if (!isdigit (p))
+  if (!isdigit (*p))
     {				/* See if we have a valid section name */
       while (*p && !isspace (*p)) /* Find end of section name */
 	p++;
