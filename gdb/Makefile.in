@@ -603,10 +603,16 @@ kdb:	$(NTSSTART) $(OBS) $(NTSOBS) ${ADD_DEPS} ${CDEPS}
 
 # Put the proper machine-specific files first, so M-. on a machine
 # specific routine gets the one for the correct machine.
+# The xyzzy stuff below deals with empty DEPFILES
 TAGS:	${TAGFILES}
 	etags `find ${srcdir}/config -name $(TM_FILE) -print` \
 	  `find ${srcdir}/config -name ${XM_FILE} -print` \
 	  `find ${srcdir}/config -name ${NAT_FILE} -print` \
+	  `for i in yzzy ${DEPFILES}; do \
+	     if [ x$$i != xyzzy ]; then \
+	       echo ${srcdir}/$$i | sed -e 's/\.o$$/\.c/' ; \
+	     fi; \
+	   done` \
 	  ${TAGFILES}
 tags: TAGS
 
