@@ -3163,34 +3163,33 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 
 static struct bfd_elf_special_section const v850_elf_special_sections[]=
 {
-  { ".sdata",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL },
-  { ".rosdata",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_V850_GPREL },
-  { ".sbss",		0,	NULL,	0,
-    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL },
-  { ".scommon",		0,	NULL,	0,
-    SHT_V850_SCOMMON, 	SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL },
-  { ".tdata",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_EPREL },
-  { ".tbss",		0,	NULL,	0,
-    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE + SHF_V850_EPREL },
-  { ".tcommon",		0,	NULL,	0,
-    SHT_V850_TCOMMON,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL },
-  { ".zdata",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL },
-  { ".rozdata",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_V850_R0REL },
-  { ".zbss",		0,	NULL,	0,
-    SHT_NOBITS,	  	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL },
-  { ".zcommon",		0,	NULL,	0,
-    SHT_V850_ZCOMMON, 	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL },
-  { ".call_table_data",	0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
-  { ".call_table_text",	0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_EXECINSTR },
-  { NULL,		0,	NULL,	0,
-    0,			0 }
+  { ".sdata",            6, -2, SHT_PROGBITS,     (SHF_ALLOC + SHF_WRITE
+                                                   + SHF_V850_GPREL) },
+  { ".rosdata",          8, -2, SHT_PROGBITS,     (SHF_ALLOC
+                                                   + SHF_V850_GPREL) },
+  { ".sbss",             5, -2, SHT_NOBITS,       (SHF_ALLOC + SHF_WRITE
+                                                   + SHF_V850_GPREL) },
+  { ".scommon",          8, -2, SHT_V850_SCOMMON, (SHF_ALLOC + SHF_WRITE
+                                                   + SHF_V850_GPREL) },
+  { ".tdata",            6, -2, SHT_PROGBITS,     (SHF_ALLOC + SHF_WRITE
+                                                   + SHF_V850_EPREL) },
+  { ".tbss",             5, -2, SHT_NOBITS,       (SHF_ALLOC + SHF_WRITE
+                                                   + SHF_V850_EPREL) },
+  { ".tcommon",          8, -2, SHT_V850_TCOMMON, (SHF_ALLOC + SHF_WRITE
+                                                   + SHF_V850_R0REL) },
+  { ".zdata",            6, -2, SHT_PROGBITS,     (SHF_ALLOC + SHF_WRITE
+                                                   + SHF_V850_R0REL) },
+  { ".rozdata",          8, -2, SHT_PROGBITS,     (SHF_ALLOC
+                                                   + SHF_V850_R0REL) },
+  { ".zbss",             5, -2, SHT_NOBITS,       (SHF_ALLOC + SHF_WRITE
+                                                   + SHF_V850_R0REL) },
+  { ".zcommon",          8, -2, SHT_V850_ZCOMMON, (SHF_ALLOC + SHF_WRITE
+                                                   + SHF_V850_R0REL) },
+  { ".call_table_data", 16,  0, SHT_PROGBITS,     (SHF_ALLOC
+                                                   + SHF_WRITE) },
+  { ".call_table_text", 16,  0, SHT_PROGBITS,     (SHF_ALLOC + SHF_WRITE
+                                                   + SHF_EXECINSTR) },
+  { NULL,               0,   0, 0,                0 }
 };
 
 #define TARGET_LITTLE_SYM			bfd_elf32_v850_vec

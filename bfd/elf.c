@@ -2019,82 +2019,44 @@ bfd_section_from_elf_index (bfd *abfd, unsigned int index)
 
 static struct bfd_elf_special_section const special_sections[] =
 {
-  { ".bss",		0,	NULL,	0,
-    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE },
-  { ".comment",		0,	NULL,	0,
-    SHT_PROGBITS,	0 },
-  { ".data",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
-  { ".data1",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
-  { ".debug",		0,	NULL,	0,
-    SHT_PROGBITS,	0 },
-  { ".fini",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR },
-  { ".init",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR },
-  { ".line",		0,	NULL,	0,
-    SHT_PROGBITS,	0 },
-  { ".rodata",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC },
-  { ".rodata1",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC },
-  { ".tbss",		0,	NULL,	0,
-    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE + SHF_TLS },
-  { ".tdata",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_TLS },
-  { ".text",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR },
-  { ".init_array",	0,	NULL,	0,
-    SHT_INIT_ARRAY,	SHF_ALLOC + SHF_WRITE },
-  { ".fini_array",	0,	NULL,	0,
-    SHT_FINI_ARRAY,	SHF_ALLOC + SHF_WRITE },
-  { ".preinit_array",	0,	NULL,	0,
-    SHT_PREINIT_ARRAY,	SHF_ALLOC + SHF_WRITE },
-  { ".debug_line",	0,	NULL,	0,
-    SHT_PROGBITS,	0 },
-  { ".debug_info",	0,	NULL,	0,
-    SHT_PROGBITS,	0 },
-  { ".debug_abbrev",	0,	NULL,	0,
-    SHT_PROGBITS,	0 },
-  { ".debug_aranges",	0,	NULL,	0,
-    SHT_PROGBITS,	0 },
-  { ".dynamic",		0,	NULL,	0,
-    SHT_DYNAMIC,	SHF_ALLOC },
-  { ".dynstr",		0,	NULL,	0,
-    SHT_STRTAB,		SHF_ALLOC },
-  { ".dynsym",		0,	NULL,	0,
-    SHT_DYNSYM,		SHF_ALLOC },
-  { ".got",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
-  { ".hash",		0,	NULL,	0,
-    SHT_HASH,		SHF_ALLOC },
-  { ".interp",		0,	NULL,	0,
-    SHT_PROGBITS,	0 },
-  { ".plt",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR },
-  { ".shstrtab",	0,	NULL,	0,
-    SHT_STRTAB,		0 },
-  { ".strtab",		0,	NULL,	0,
-    SHT_STRTAB,		0 },
-  { ".symtab",		0,	NULL,	0,
-    SHT_SYMTAB,		0 },
-  { ".gnu.version",	0,	NULL,	0,
-    SHT_GNU_versym,	0 },
-  { ".gnu.version_d",	0,	NULL,	0,
-    SHT_GNU_verdef,	0 },
-  { ".gnu.version_r",	0,	NULL,	0,
-    SHT_GNU_verneed,	0 },
-  { ".note",		5,	NULL,	0,
-    SHT_NOTE,		0 },
-  { ".rela",		5,	NULL,	0,
-    SHT_RELA,		0 },
-  { ".rel",		4,	NULL,	0,
-    SHT_REL,		0 },
-  { ".stab",		5,	"str",	3,
-    SHT_STRTAB,		0 },
-  { NULL,		0,	NULL,	0,
-    0,		 0 }
+  { ".bss",            4, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
+  { ".comment",        8,  0, SHT_PROGBITS, 0 },
+  { ".data",           5, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { ".data1",          6,  0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { ".debug",          6,  0, SHT_PROGBITS, 0 },
+  { ".fini",           5,  0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
+  { ".init",           5,  0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
+  { ".line",           5,  0, SHT_PROGBITS, 0 },
+  { ".rodata",         7, -2, SHT_PROGBITS, SHF_ALLOC },
+  { ".rodata1",        8,  0, SHT_PROGBITS, SHF_ALLOC },
+  { ".tbss",           5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_TLS },
+  { ".tdata",          6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_TLS },
+  { ".text",           5, -2, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
+  { ".init_array",    11,  0, SHT_INIT_ARRAY, SHF_ALLOC + SHF_WRITE },
+  { ".fini_array",    11,  0, SHT_FINI_ARRAY, SHF_ALLOC + SHF_WRITE },
+  { ".preinit_array", 14,  0, SHT_PREINIT_ARRAY, SHF_ALLOC + SHF_WRITE },
+  { ".debug_line",    11,  0, SHT_PROGBITS, 0 },
+  { ".debug_info",    11,  0, SHT_PROGBITS, 0 },
+  { ".debug_abbrev",  13,  0, SHT_PROGBITS, 0 },
+  { ".debug_aranges", 14,  0, SHT_PROGBITS, 0 },
+  { ".dynamic",        8,  0, SHT_DYNAMIC,  SHF_ALLOC },
+  { ".dynstr",         7,  0, SHT_STRTAB,   SHF_ALLOC },
+  { ".dynsym",         7,  0, SHT_DYNSYM,   SHF_ALLOC },
+  { ".got",            4,  0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { ".hash",           5,  0, SHT_HASH,     SHF_ALLOC },
+  { ".interp",         7,  0, SHT_PROGBITS, 0 },
+  { ".plt",            4,  0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
+  { ".shstrtab",       9,  0, SHT_STRTAB,   0 },
+  { ".strtab",         7,  0, SHT_STRTAB,   0 },
+  { ".symtab",         7,  0, SHT_SYMTAB,   0 },
+  { ".gnu.version",   12,  0, SHT_GNU_versym, 0 },
+  { ".gnu.version_d", 14,  0, SHT_GNU_verdef, 0 },
+  { ".gnu.version_r", 14,  0, SHT_GNU_verneed, 0 },
+  { ".note",           5, -1, SHT_NOTE,     0 },
+  { ".rela",           5, -1, SHT_RELA,     0 },
+  { ".rel",            4, -1, SHT_REL,      0 },
+  { ".stabstr",        5,  3, SHT_STRTAB,   0 },
+  { NULL,              0,  0, 0,            0 }
 };
 
 static const struct bfd_elf_special_section *
@@ -2103,32 +2065,55 @@ get_special_section (const char *name,
 		     unsigned int rela)
 {
   int i;
+  int len = strlen (name);
 
   for (i = 0; special_sections[i].prefix != NULL; i++)
-    if (((special_sections[i].prefix_length
-	  && strncmp (name, special_sections[i].prefix,
-		      special_sections[i].prefix_length) == 0
-	  && (! special_sections[i].suffix_length
-	      || strcmp ((name + strlen (name)
-			  - special_sections[i].suffix_length),
-			 special_sections[i].suffix) == 0))
-	 || strcmp (name, special_sections[i].prefix) == 0)
-	&& (rela || special_sections[i].type != SHT_RELA))
+    {
+      int suffix_len;
+      int prefix_len = special_sections[i].prefix_length;
+
+      if (len < prefix_len)
+	continue;
+      if (memcmp (name, special_sections[i].prefix, prefix_len) != 0)
+	continue;
+
+      suffix_len = special_sections[i].suffix_length;
+      if (suffix_len <= 0)
+	{
+	  if (name[prefix_len] != 0)
+	    {
+	      if (suffix_len == 0)
+		continue;
+	      if (name[prefix_len] != '.'
+		  && (suffix_len == -2
+		      || (rela && special_sections[i].type == SHT_REL)))
+		continue;
+	    }
+	}
+      else
+	{
+	  if (len < prefix_len + suffix_len)
+	    continue;
+	  if (memcmp (name + len - suffix_len,
+		      special_sections[i].prefix + prefix_len,
+		      suffix_len) != 0)
+	    continue;
+	}
       return &special_sections[i];
+    }
 
   return NULL;
 }
 
-bfd_boolean
-_bfd_elf_get_sec_type_attr (bfd *abfd, const char *name, int *type, int *attr)
+const struct bfd_elf_special_section *
+_bfd_elf_get_sec_type_attr (bfd *abfd, const char *name)
 {
-  bfd_boolean found = FALSE;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct bfd_elf_special_section *ssect = NULL;
 
   /* See if this is one of the special sections.  */
   if (name)
     {
-      const struct bfd_elf_special_section *ssect = NULL;
       unsigned int rela = bed->default_use_rela_p;
 
       if (bed->special_sections)
@@ -2136,23 +2121,16 @@ _bfd_elf_get_sec_type_attr (bfd *abfd, const char *name, int *type, int *attr)
 
       if (! ssect)
 	ssect = get_special_section (name, special_sections, rela);
-
-      if (ssect)
-	{
-	  *type = ssect->type;
-	  *attr = ssect->attributes;
-	  found = TRUE;
-	}
     }
 
-  return found;
+  return ssect;
 }
 
 bfd_boolean
 _bfd_elf_new_section_hook (bfd *abfd, asection *sec)
 {
   struct bfd_elf_section_data *sdata;
-  int type, attr;
+  const struct bfd_elf_special_section *ssect;
 
   sdata = (struct bfd_elf_section_data *) sec->used_by_bfd;
   if (sdata == NULL)
@@ -2164,11 +2142,11 @@ _bfd_elf_new_section_hook (bfd *abfd, asection *sec)
     }
 
   elf_section_type (sec) = SHT_NULL;
-  if (sec->name && _bfd_elf_get_sec_type_attr (abfd, sec->name,
-					       &type, &attr))
+  ssect = _bfd_elf_get_sec_type_attr (abfd, sec->name);
+  if (ssect != NULL)
     {
-      elf_section_type (sec) = type;
-      elf_section_flags (sec) = attr;
+      elf_section_type (sec) = ssect->type;
+      elf_section_flags (sec) = ssect->attr;
     }
 
   /* Indicate whether or not this section should use RELA relocations.  */

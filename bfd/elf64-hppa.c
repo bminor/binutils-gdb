@@ -2675,12 +2675,9 @@ elf64_hppa_elf_get_symbol_type (elf_sym, type)
 
 static struct bfd_elf_special_section const elf64_hppa_special_sections[]=
 {
-  { ".fini",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
-  { ".init",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
-  { NULL,		0,	NULL,	0,
-    0,			0 }
+  { ".fini",    5, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { ".init",    5, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { NULL,       0, 0, 0,            0 }
 };
 
 /* The hash bucket size is the standard one, namely 4.  */

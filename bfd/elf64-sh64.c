@@ -4118,10 +4118,8 @@ sh64_elf64_finish_dynamic_sections (bfd *output_bfd,
 
 static struct bfd_elf_special_section const sh64_elf64_special_sections[]=
 {
-  { ".cranges",		0,	NULL,	0,
-    SHT_PROGBITS,	0 },
-  { NULL,		0,	NULL,	0,
-    0,			0 }
+  { ".cranges", 8, 0, SHT_PROGBITS, 0 },
+  { NULL,       0, 0, 0,            0 }
 };
 
 #define TARGET_BIG_SYM		bfd_elf64_sh64_vec

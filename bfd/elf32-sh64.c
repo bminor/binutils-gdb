@@ -737,10 +737,8 @@ sh64_elf_final_write_processing (bfd *abfd,
 
 static struct bfd_elf_special_section const sh64_elf_special_sections[]=
 {
-  { ".cranges",		0,	NULL,	0,
-    SHT_PROGBITS,	0 },
-  { NULL,		0,	NULL,	0,
-    0,			0 }
+  { ".cranges", 8, 0, SHT_PROGBITS, 0 },
+  { NULL,       0, 0, 0,            0 }
 };
 
 #undef	TARGET_BIG_SYM

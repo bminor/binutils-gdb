@@ -6186,26 +6186,16 @@ ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
 
 static struct bfd_elf_special_section const ppc_elf_special_sections[]=
 {
-  { ".tags",		0,	NULL,	0,
-    SHT_ORDERED,	SHF_ALLOC },
-  { ".sdata",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
-  { ".sbss",		0,	NULL,	0,
-    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE },
-  { ".sdata2",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC },
-  { ".sbss2",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC },
-  { ".PPC.EMB.apuinfo",	0,	NULL,	0,
-    SHT_NOTE,		0 },
-  { ".PPC.EMB.sdata0",	0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC },
-  { ".PPC.EMB.sbss0",	0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC },
-  { ".plt",		0,	NULL,	0,
-    SHT_NOBITS,		0 },
-  { NULL,		0,	NULL,	0,
-    0,			0 }
+  { ".tags",             5,  0, SHT_ORDERED,  SHF_ALLOC },
+  { ".sdata",            6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { ".sbss",             5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
+  { ".sdata2",           7, -2, SHT_PROGBITS, SHF_ALLOC },
+  { ".sbss2",            6, -2, SHT_PROGBITS, SHF_ALLOC },
+  { ".PPC.EMB.apuinfo", 16,  0, SHT_NOTE,     0 },
+  { ".PPC.EMB.sdata0",  15,  0, SHT_PROGBITS, SHF_ALLOC },
+  { ".PPC.EMB.sbss0",   14,  0, SHT_PROGBITS, SHF_ALLOC },
+  { ".plt",              4,  0, SHT_NOBITS,   SHF_ALLOC + SHF_EXECINSTR },
+  { NULL,                0,  0, 0,            0 }
 };
 
 #define TARGET_LITTLE_SYM	bfd_elf32_powerpcle_vec

@@ -5449,12 +5449,9 @@ elf64_alpha_reloc_type_class (rela)
 
 static struct bfd_elf_special_section const elf64_alpha_special_sections[]=
 {
-  { ".sdata",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
-  { ".sbss",		0,	NULL,	0,
-    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
-  { NULL,		0,	NULL,	0,
-    0,			0 }
+  { ".sdata", 6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
+  { ".sbss",  5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
+  { NULL,     0,  0, 0,            0 }
 };
 
 /* ECOFF swapping routines.  These are used when dealing with the

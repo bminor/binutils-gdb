@@ -5841,14 +5841,10 @@ xtensa_callback_required_dependence (abfd, sec, link_info, callback, closure)
    module loader so that the literals are not placed after the text.  */
 static struct bfd_elf_special_section const elf_xtensa_special_sections[]=
 {
-  { ".literal",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR },
-  { ".init.literal",	0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR },
-  { ".fini.literal",	0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR },
-  { NULL,		0,	NULL,	0,
-    0,			0 }
+  { ".literal",       8, 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
+  { ".init.literal", 13, 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
+  { ".fini.literal", 13, 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
+  { NULL,             0, 0, 0,            0 }
 };
 
 

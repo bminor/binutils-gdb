@@ -4748,12 +4748,9 @@ elfNN_ia64_reloc_type_class (rela)
 
 static struct bfd_elf_special_section const elfNN_ia64_special_sections[]=
 {
-  { ".sbss",		5,	NULL,	0,
-    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT },
-  { ".sdata",		6,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT },
-  { NULL,		0,	NULL,	0,
-    0,			0 }
+  { ".sbss",  5, -1, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT },
+  { ".sdata", 6, -1, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT },
+  { NULL,     0,  0, 0,            0 }
 };
 
 static bfd_boolean

@@ -1,3 +1,30 @@
+2003-09-23  Alan Modra  <alan@modra.org>
+
+	* elf-bfd.h (struct bfd_elf_special_section): Remove "suffix".  Change
+	type of prefix_length and suffix_length to int.  Rename "attributes"
+	to "attr".  Comment.
+	(_bfd_elf_get_sec_type_attr): Update prototype.
+	* elf.c (get_special_section): Rewrite.
+	(_bfd_elf_get_sec_type_attr): Return struct rather than passing in
+	attr and type pointers.
+	(_bfd_elf_new_section_hook): Adjust for above.
+	(special_sections): Merge suffix with prefix.  Set
+	prefix_length for all entries.  Set suffix_length appropriately.
+	* elf32-m32r.c (m32r_elf_special_sections): Likewise.
+	* elf32-m68hc11.c (elf32_m68hc11_special_sections): Likewise.
+	* elf32-m68hc12.c (elf32_m68hc12_special_sections): Likewise.
+	* elf32-mcore.c (mcore_elf_special_sections): Likewise.
+	* elf32-sh64.c (sh64_elf_special_sections): Likewise.
+	* elf32-v850.c (v850_elf_special_sections): Likewise.
+	* elf32-xtensa.c (elf_xtensa_special_sections): Likewise.
+	* elf64-alpha.c (elf64_alpha_special_sections): Likewise.
+	* elf64-hppa.c (elf64_hppa_special_sections): Likewise.
+	* elf64-ppc.c (ppc64_elf_special_sections): Likewise.
+	* elf64-sh64.c (sh64_elf64_special_sections): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_special_sections): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_special_sections): Likewise.
+	* elf32-ppc.c (ppc_elf_special_sections): Likewise.  Fix .plt flags.
+
 2003-09-21  Daniel Jacobowitz  <drow@mvista.com>
 
 	* elf64-alpha.c (elf64_alpha_create_got_section): Initialize

@@ -545,16 +545,11 @@ m68hc12_elf_set_mach_from_flags (abfd)
      vectors.  */
 static struct bfd_elf_special_section const elf32_m68hc12_special_sections[]=
 {
-  { ".eeprom",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
-  { ".softregs",	0,	NULL,	0,
-    SHT_NOBITS,	SHF_ALLOC + SHF_WRITE },
-  { ".page0",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
-  { ".vectors",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC },
-  { NULL,		0,	NULL,	0,
-    0,			0 }
+  { ".eeprom",   7, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { ".softregs", 9, 0, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
+  { ".page0",    6, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { ".vectors",  8, 0, SHT_PROGBITS, SHF_ALLOC },
+  { NULL,        0, 0, 0,            0 }
 };
 
 #define ELF_ARCH		bfd_arch_m68hc12

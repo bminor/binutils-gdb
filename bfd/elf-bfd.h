@@ -511,11 +511,16 @@ typedef enum {
 struct bfd_elf_special_section
 {
   const char *prefix;
-  size_t prefix_length;
-  const char *suffix;
-  size_t suffix_length;
+  int prefix_length;
+  /* 0 means name must match PREFIX exactly.
+     -1 means name must start with PREFIX followed by an arbitrary string.
+     -2 means name must match PREFIX exactly or consist of PREFIX followed
+     by a dot then anything.
+     > 0 means name must start with the first PREFIX_LENGTH chars of
+     PREFIX and finish with the last SUFFIX_LENGTH chars of PREFIX.  */
+  int suffix_length;
   int type;
-  int attributes;
+  int attr;
 };
 
 struct elf_backend_data
@@ -1384,8 +1389,8 @@ extern bfd_boolean _bfd_elf_new_section_hook
   (bfd *, asection *);
 extern bfd_boolean _bfd_elf_init_reloc_shdr
   (bfd *, Elf_Internal_Shdr *, asection *, bfd_boolean);
-extern bfd_boolean _bfd_elf_get_sec_type_attr
-  (bfd *, const char *, int *, int *);
+extern const struct bfd_elf_special_section *_bfd_elf_get_sec_type_attr
+  (bfd *, const char *);
 
 /* If the target doesn't have reloc handling written yet:  */
 extern void _bfd_elf_no_info_to_howto
