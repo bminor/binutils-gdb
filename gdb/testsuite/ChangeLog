@@ -1,3 +1,14 @@
+Mon Nov  1 10:36:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in, gdb.t2*/Makefile.in: Add -O to CXXFLAGS.
+
+Fri Oct 29 17:58:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t00/default.exp: Avoid tests with a lot of .* in them.
+	They made pattern matching so slow that timeouts happened on
+	heavily loaded systems.  Now any output from "show print" which
+	gets us back to the GDB prompt is a PASS.
+
 Mon Oct 25 14:36:50 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* gdb.disasm/hppa.mt:  Use $(srcdir) in hppa.o make rule.
