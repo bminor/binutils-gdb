@@ -49,10 +49,10 @@ proc test_at_main {} {
     # main, so the first next may only get us to the init call.
     send "next\n"
     expect {
-	-re "$decimal.*foo \[)(\]+;\r\n$prompt $" {
+	-re "$decimal.*foo \\(\\);\r\n$prompt $" {
 	    pass "next over init() in main"
 	}
-	-re "$decimal.*init \[)(\]+;\r\n$prompt $"\
+	-re "$decimal.*init \\(\\);\r\n$prompt $"\
 		{ send "next\n" ; exp_continue }
 	-re "$prompt $" { fail "next over init() in main" ; return }
 	timeout { fail "(timeout) next over init() in main" ; return }
@@ -103,15 +103,18 @@ proc test_at_main {} {
     send "print 'scope0.c'::filelocal_bss\n"
     expect {
 	-re "\\\$$decimal = 101\r\n$prompt $" {
-	    pass "print 'scope0.c'::filelocal_bss"
+	    pass "print 'scope0.c'::filelocal_bss in test_at_main"
 	}
 	-re "No symbol \"scope0.c\" in current context.*$prompt $" {
 	    send "print '$srcdir/$subdir/scope0.c'::filelocal_bss\n"
 	    exp_continue
 	}
-	-re "$prompt $" { fail "print 'scope0.c'::filelocal_bss" ; return }
+	-re "$prompt $" { 
+	    fail "print 'scope0.c'::filelocal_bss in test_at_main" ; return 
+	}
 	timeout {
-	    fail "(timeout) print 'scope0.c'::filelocal_bss" ; return
+	    fail "(timeout) print 'scope0.c'::filelocal_bss in test_at_main"
+	    return
 	}
     }
 
@@ -288,7 +291,7 @@ proc test_at_foo {} {
 
     send "next\n"
     expect {
-	-re ".*bar \[)(\]+;\r\n$prompt $" {}
+	-re ".*bar \\(\\);\r\n$prompt $" {}
 	-re "$prompt $" { fail "continue to foo()" ; return }
 	timeout { fail "(timeout) continue to foo()" ; return }
     }
@@ -316,14 +319,20 @@ proc test_at_foo {} {
     setup_xfail "rs6000-*-*"
     send "print 'scope0.c'::filelocal_bss\n"
     expect {
-	-re "\\\$$decimal = 101\r\n$prompt $" { pass "print 'scope0.c'::filelocal_bss" }
+	-re "\\\$$decimal = 101\r\n$prompt $" {
+	    pass "print 'scope0.c'::filelocal_bss in test_at_foo"
+	}
 	-re "No symbol \"scope0.c\" in current context.*$prompt $" {
 	    send "print '$srcdir/$subdir/scope0.c'::filelocal_bss\n"
 	    exp_continue
 	}
-	-re "$prompt $" { fail "print 'scope0.c'::filelocal_bss" ; return }
+	-re "$prompt $" {
+	    fail "print 'scope0.c'::filelocal_bss in test_at_foo"
+	    return
+	}
 	timeout {
-	    fail "(timeout) print 'scope0.c'::filelocal_bss" ; return
+	    fail "(timeout) print 'scope0.c'::filelocal_bss in test_at_foo"
+	    return
 	}
     }
 
@@ -582,14 +591,20 @@ proc test_at_bar {} {
     setup_xfail "rs6000-*-*"
     send "print 'scope0.c'::filelocal_bss\n"
     expect {
-	-re "\\\$$decimal = 101\r\n$prompt $" { pass "print 'scope0.c'::filelocal_bss" }
+	-re "\\\$$decimal = 101\r\n$prompt $" {
+	    pass "print 'scope0.c'::filelocal_bss in test_at_bar"
+	}
 	-re "No symbol \"scope0.c\" in current context.*$prompt $" {
 	    send "print '$srcdir/$subdir/scope0.c'::filelocal_bss\n"
 	    exp_continue
 	}
-	-re "$prompt $" { fail "print 'scope0.c'::filelocal_bss" ; return }
+	-re "$prompt $" {
+	    fail "print 'scope0.c'::filelocal_bss in test_at_bar"
+	    return
+	}
 	timeout {
-	    fail "(timeout) print 'scope0.c'::filelocal_bss" ; return
+	    fail "(timeout) print 'scope0.c'::filelocal_bss in test_at_bar"
+	    return
 	}
     }
 
@@ -843,7 +858,7 @@ proc test_at_autovars {} {
 
     send "cont\n"
     expect {
-	-re "Break.* marker1 \[)(\]+ at .*:$decimal.*$prompt $" {
+	-re "Break.* marker1 \\(\\) at .*:$decimal.*$prompt $" {
 	    send "up\n"
 	    expect {
 		-re ".*$prompt $" {}
@@ -887,7 +902,7 @@ proc test_at_localscopes {} {
 
     send "cont\n"
     expect {
-	-re "Break.* marker2 \[)(\]+ at .*:$decimal.*$prompt $" {
+	-re "Break.* marker2 \\(\\) at .*:$decimal.*$prompt $" {
 	    send "up\n"
 	    expect {
 		-re ".*$prompt $" {}
@@ -933,7 +948,7 @@ proc test_at_localscopes {} {
 
     send "cont\n"
     expect {
-	-re "Break.* marker3 \[)(\]+ at .*:$decimal.*$prompt $" {
+	-re "Break.* marker3 \\(\\) at .*:$decimal.*$prompt $" {
 	    send "up\n"
 	    expect {
 		-re ".*$prompt $" {}
@@ -1048,18 +1063,18 @@ gdb_test "print 'scope0.c'::filelocal_ro" "= 201"
 # is not running.
 send "print 'scope0.c'::filelocal_bss\n"
 expect {
-    -re "= 0.*$prompt $" {
-	pass "print 'scope0.c'::filelocal_bss"
+    -re " = 0\r\n$prompt $" {
+	pass "print 'scope0.c'::filelocal_bss before run"
     }
     -re "Cannot access memory.*$prompt $" {
 	setup_xfail "*-*-*"
-	fail "print 'scope0.c'::filelocal_bss"
+	fail "print 'scope0.c'::filelocal_bss before run"
     }
     -re ".*$prompt $" {
-	fail "print 'scope0.c'::filelocal_bss"
+	fail "print 'scope0.c'::filelocal_bss before run"
     }
     default {
-	fail "print 'scope0.c'::filelocal_bss"
+	fail "print 'scope0.c'::filelocal_bss before run"
     }
 }
 
