@@ -1,3 +1,8 @@
+Thu May 25 22:53:20 2000  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* m10300-dis.c (disassemble): Don't assume 32-bit longs when
+	sign-extending operands.
+
 Mon May 15 15:18:07 2000  Donald Lindsay  <dlindsay@cygnus.com>
 
 	* d10v-opc.c (d10v_opcodes): add ALONE tag to all short branches
