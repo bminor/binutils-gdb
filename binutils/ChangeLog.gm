@@ -1,3 +1,7 @@
+Tue Apr 26 18:10:40 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-xconfig.in (archname): Only set ARCH_mips if targeting Mips.
+
 Sat Feb 26 13:27:07 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-xconfig.in: New file, GM-specific configuration fragment.

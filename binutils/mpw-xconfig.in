@@ -1,3 +1,6 @@
 # Extra configuration fragment for binutils.
 
-Set archname ARCH_mips
+If "{target_canonical}" =~ /mips-idt-ecoff/
+	Set archname ARCH_mips
+End If
+
