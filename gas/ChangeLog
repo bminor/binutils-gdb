@@ -17,6 +17,14 @@ Tue Oct 31 16:34:28 1995  David Mosberger-Tang  <davidm@azstarnet.com>
 
 Tue Oct 31 13:29:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-ppc.c (ppc_bb): Call SF_SET_PROCESS.
+	(ppc_eb): Likewise.  Set the storage class to C_BLOCK, not C_FCN.
+	(ppc_frob_symbol): Don't change C_BLOCK symbols to C_HIDEXT.
+	* config/obj-coff.c (coff_frob_symbol): Don't call
+	SA_SET_SYM_ENDNDX with the current symbol; call it with the next
+	one.  If OBJ_XCOFF, try to figure out whether the symbol is going
+	to be dropped.
+
 	* config/tc-ppc.c (md_pseudo_table): Add "bc" and "ec".
 	(ppc_stab_symbol): New static variable.
 	(ppc_change_csect): Check that ppc_toc_csect is not NULL.

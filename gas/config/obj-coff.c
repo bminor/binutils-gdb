@@ -414,7 +414,7 @@ obj_symbol_new_hook (symbolP)
 static symbolS *current_lineno_sym;
 static struct line_no *line_nos;
 /* @@ Blindly assume all .ln directives will be in the .text section...  */
-static int n_line_nos;
+int coff_n_line_nos;
 
 static void
 add_lineno (frag, offset, num)
@@ -433,7 +433,7 @@ add_lineno (frag, offset, num)
   new_line->l.line_number = num;
   new_line->l.u.offset = offset;
   line_nos = new_line;
-  n_line_nos++;
+  coff_n_line_nos++;
 }
 
 void
@@ -443,7 +443,7 @@ coff_add_linesym (sym)
   if (line_nos)
     {
       coffsymbol (current_lineno_sym->bsym)->lineno = (alent *) line_nos;
-      n_line_nos++;
+      coff_n_line_nos++;
       line_nos = 0;
     }
   current_lineno_sym = sym;
@@ -938,6 +938,7 @@ coff_frob_symbol (symp, punt)
   static symbolS *last_tagP;
   static stack *block_stack;
   static symbolS *set_end;
+  symbolS *next_set_end = NULL;
 
   if (symp == &abs_symbol)
     {
@@ -990,7 +991,7 @@ coff_frob_symbol (symp, punt)
 		  if (begin == 0)
 		    as_warn ("mismatched .eb");
 		  else
-		    set_end = begin;
+		    next_set_end = begin;
 		}
 	    }
 	  if (coff_last_function == 0 && SF_GET_FUNCTION (symp))
@@ -1010,14 +1011,14 @@ coff_frob_symbol (symp, punt)
 	      SA_SET_SYM_FSIZE (coff_last_function,
 				(long) (S_GET_VALUE (symp)
 					- S_GET_VALUE (coff_last_function)));
-	      set_end = coff_last_function;
+	      next_set_end = coff_last_function;
 	      coff_last_function = 0;
 	    }
 	}
       else if (SF_GET_TAG (symp))
 	last_tagP = symp;
       else if (S_GET_STORAGE_CLASS (symp) == C_EOS)
-	set_end = last_tagP;
+	next_set_end = last_tagP;
       else if (S_GET_STORAGE_CLASS (symp) == C_FILE)
 	{
 	  if (S_GET_VALUE (symp))
@@ -1037,12 +1038,27 @@ coff_frob_symbol (symp, punt)
       /* more ... */
     }
 
+#ifdef OBJ_XCOFF
+  /* This is pretty horrible, but we have to set *punt correctly in
+     order to call SA_SET_SYM_ENDNDX correctly.  */
+  if (! symp->sy_used_in_reloc
+      && ((symp->bsym->flags & BSF_SECTION_SYM) != 0
+	  || (! S_IS_EXTERNAL (symp)
+	      && ! symp->sy_tc.output
+	      && S_GET_STORAGE_CLASS (symp) != C_FILE)))
+    *punt = 1;
+#endif
+
   if (set_end != (symbolS *) NULL
       && ! *punt)
     {
       SA_SET_SYM_ENDNDX (set_end, symp);
       set_end = NULL;
     }
+
+  if (next_set_end != NULL
+      && ! *punt)
+    set_end = next_set_end;
 
   if (coffsymbol (symp->bsym)->lineno)
     {
@@ -1088,7 +1104,7 @@ coff_adjust_section_syms (abfd, sec, x)
     return;
 
   if (!strcmp (sec->name, ".text"))
-    nlnno = n_line_nos;
+    nlnno = coff_n_line_nos;
   else
     nlnno = 0;
   {
@@ -1142,6 +1158,14 @@ obj_coff_section (ignore)
   unsigned int exp;
   flagword flags;
   asection *sec;
+
+  if (flag_mri)
+    {
+      char type;
+
+      s_mri_sect (&type);
+      return;
+    }
 
   section_name = input_line_pointer;
   c = get_symbol_end ();
@@ -3186,6 +3210,21 @@ obj_coff_section (ignore)
   unsigned int exp;
   long flags;
 
+  if (flag_mri)
+    {
+      char type;
+
+      s_mri_sect (&type);
+      flags = 0;
+      if (type == 'C')
+	flags = STYP_TEXT;
+      else if (type == 'D')
+	flags = STYP_DATA;
+      segment_info[now_seg].scnhdr.s_flags |= flags;
+
+      return;
+    }
+
   section_name = input_line_pointer;
   c = get_symbol_end ();
   section_name_end = input_line_pointer;
@@ -3657,25 +3696,37 @@ fixup_segment (segP, this_segment_type)
 
       if (sub_symbolP)
 	{
-	  if (!add_symbolP)
+	  if (add_symbolP == NULL || add_symbol_segment == absolute_section)
 	    {
-	      /* Its just -sym */
-	      if (S_GET_SEGMENT (sub_symbolP) != absolute_section)
+	      if (add_symbolP != NULL)
 		{
+		  add_number += S_GET_VALUE (add_symbolP);
+		  add_symbolP = NULL;
+		  fixP->fx_addsy = NULL;
+		}
+
+	      /* It's just -sym.  */
+	      if (S_GET_SEGMENT (sub_symbolP) == absolute_section)
+		{
+		  add_number -= S_GET_VALUE (sub_symbolP);
+		  fixP->fx_subsy = 0;
+		  fixP->fx_done = 1;
+		}
+	      else
+		{
+#ifndef TC_M68K
 		  as_bad_where (fixP->fx_file, fixP->fx_line,
 				"Negative of non-absolute symbol %s",
 				S_GET_NAME (sub_symbolP));
+#endif
+		  add_number -= S_GET_VALUE (sub_symbolP);
 		}		/* not absolute */
 
-	      add_number -= S_GET_VALUE (sub_symbolP);
-	      fixP->fx_subsy = 0;
-
 	      /* if sub_symbol is in the same segment that add_symbol
-			   and add_symbol is either in DATA, TEXT, BSS or ABSOLUTE */
+		 and add_symbol is either in DATA, TEXT, BSS or ABSOLUTE */
 	    }
-	  else if ((S_GET_SEGMENT (sub_symbolP) == add_symbol_segment)
-		   && (SEG_NORMAL (add_symbol_segment)
-		       || (add_symbol_segment == absolute_section)))
+	  else if (S_GET_SEGMENT (sub_symbolP) == add_symbol_segment
+		   && SEG_NORMAL (add_symbol_segment))
 	    {
 	      /* Difference of 2 symbols from same segment.  Can't
 		 make difference of 2 undefineds: 'value' means
@@ -3985,9 +4036,12 @@ const pseudo_typeS obj_pseudo_table[] =
   {"type", obj_coff_type, 0},
   {"val", obj_coff_val, 0},
   {"section", obj_coff_section, 0},
+  {"sect", obj_coff_section, 0},
+  /* FIXME: We ignore the MRI short attribute.  */
+  {"section.s", obj_coff_section, 0},
+  {"sect.s", obj_coff_section, 0},
 #ifndef BFD_ASSEMBLER
   {"use", obj_coff_section, 0},
-  {"sect", obj_coff_section, 0},
   {"text", obj_coff_text, 0},
   {"data", obj_coff_data, 0},
   {"bss", obj_coff_bss, 0},

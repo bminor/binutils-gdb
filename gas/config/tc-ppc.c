@@ -2515,6 +2515,8 @@ ppc_bb (ignore)
 
   sym->sy_tc.output = 1;
 
+  SF_SET_PROCESS (sym);
+
   ppc_frob_label (sym);
 
   demand_empty_rest_of_line ();
@@ -2533,10 +2535,12 @@ ppc_eb (ignore)
   S_SET_SEGMENT (sym, text_section);
   sym->sy_frag = frag_now;
   S_SET_VALUE (sym, frag_now_fix ());
-  S_SET_STORAGE_CLASS (sym, C_FCN);
+  S_SET_STORAGE_CLASS (sym, C_BLOCK);
   S_SET_NUMBER_AUXILIARY (sym, 1);
   SA_SET_SYM_LNNO (sym, get_absolute_expression ());
   sym->sy_tc.output = 1;
+
+  SF_SET_PROCESS (sym);
 
   ppc_frob_label (sym);
 
@@ -3547,6 +3551,7 @@ ppc_frob_symbol (sym)
       && (sym->bsym->flags & BSF_SECTION_SYM) == 0
       && S_GET_STORAGE_CLASS (sym) != C_FILE
       && S_GET_STORAGE_CLASS (sym) != C_FCN
+      && S_GET_STORAGE_CLASS (sym) != C_BLOCK
       && S_GET_STORAGE_CLASS (sym) != C_BSTAT
       && S_GET_STORAGE_CLASS (sym) != C_ESTAT
       && S_GET_STORAGE_CLASS (sym) != C_BINCL
