@@ -1,3 +1,8 @@
+Sun Jul 31 14:27:04 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* elf32-hppa.c, elf32-hppa.h: Update comment reflecting which
+	HPPA ELF spec the code implements.
+
 Tue Jul 26 17:38:01 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* cpu-i960.c (MAX_ARCH): New macro.
