@@ -650,9 +650,9 @@ i386v4_sigtramp_saved_pc (frame)
     {
       if (STREQ (name, "_sigreturn"))
 	saved_pc_offset = 132 + 14 * 4;
-      if (STREQ (name, "_sigacthandler"))
+      else if (STREQ (name, "_sigacthandler"))
 	saved_pc_offset = 80 + 14 * 4;
-      if (STREQ (name, "sigvechandler"))
+      else if (STREQ (name, "sigvechandler"))
 	saved_pc_offset = 120 + 14 * 4;
     }
 

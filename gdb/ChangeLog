@@ -1,3 +1,8 @@
+Tue Mar  1 13:16:10 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/sparc/tm-sun4sol2.h (IN_SIGTRAMP):  Handle ucbsigvechandler.
+	* sparc-tdep.c (sparc_frame_saved_pc):  Handle ucbsigvechandler.
+
 Tue Mar  1 11:54:11 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* target.c, target.h (target_read_string): Provide error detection to
