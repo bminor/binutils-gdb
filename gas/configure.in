@@ -127,7 +127,7 @@ case ${generic_target} in
 			 emulation=i386aix ;;
   i386-*-bsd*)		obj_format=aout emulation=386bsd ;;
   i386-*-linux*)	obj_format=aout emulation=linux ;;
-  i386-*-coff | i386-*-sysv* | i386-*-sco* | i386-*-isc*)
+  i386-*-lynxos* | i386-*-coff | i386-*-sysv* | i386-*-sco* | i386-*-isc*)
 			obj_format=coffbfd gas_target=i386coff ;; 
   i386-*-go32)		obj_format=aout ;;
 

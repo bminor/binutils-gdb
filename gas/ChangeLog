@@ -1,3 +1,7 @@
+Tue Jul 20 12:17:16 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* configure.in: i386-lynx is the same as i386-coff
+
 Mon Jul 19 15:21:20 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
 
 	* config/obj-elf.c (obj_elf_previous): New function.
