@@ -1394,6 +1394,13 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 	      bfd_put_16 (abfd, insn, contents + nraddr);
 	      break;
 
+	    case R_SH_SWITCH8:
+	      voff += adjust;
+	      if (voff < 0 || voff >= 0xff)
+		overflow = true;
+	      bfd_put_8 (abfd, voff, contents + nraddr);
+	      break;
+
 	    case R_SH_SWITCH16:
 	      voff += adjust;
 	      if (voff < - 0x8000 || voff >= 0x8000)
