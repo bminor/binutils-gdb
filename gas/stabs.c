@@ -498,7 +498,7 @@ generate_asm_file (type, file)
   static char *last_file;
   static int label_count;
   char *hold;
-  char buf[100];
+  char *buf = xmalloc (2 * strlen (file) + 10);
   char sym[30];
 
   /* Rather than try to do this in some efficient fashion, we just
@@ -511,10 +511,28 @@ generate_asm_file (type, file)
   if (last_file == NULL
       || strcmp (last_file, file) != 0)
     {
+      char *tmp = file;
+      char *endp = file + strlen(file);
+      char *bufp = buf;
+
       sprintf (sym, "%sF%d", FAKE_LABEL_NAME, label_count);
       ++label_count;
 
-      sprintf (buf, "\"%s\",%d,0,0,%s\n", file, type, sym);
+      *bufp++ = '"';
+      while (tmp < endp)
+        {
+          char *bslash = strchr (tmp, '\\');
+          int len = (bslash ? (bslash - tmp + 1) : strlen (tmp));
+          /* double all backslashes, since demand_copy_C_string (used by
+             s_stab to extract the part in quotes) will try to replace them as
+             escape sequences.  backslash may appear in a filespec. */
+          strncpy (bufp, tmp, len);
+          tmp += len;
+          bufp += len;
+          if (bslash != NULL)
+            *bufp++ = '\\';
+        } 
+      sprintf (bufp, "\",%d,0,0,%s\n", type, sym);
       input_line_pointer = buf;
       s_stab ('s');
       colon (sym);
@@ -525,6 +543,7 @@ generate_asm_file (type, file)
     }
 
   input_line_pointer = hold;
+  free (buf);
 }
 
 /* Generate stabs debugging information for the current line.  This is
