@@ -39,7 +39,7 @@ extern int c_value_print (struct value *, struct ui_file *,
 			  int, enum val_prettyprint);
 
 extern CORE_ADDR lookup_objc_class     (char *classname);
-extern int       lookup_child_selector (char *methodname);
+extern CORE_ADDR lookup_child_selector (char *methodname);
 
 extern char *objc_demangle (const char *mangled, int options);
 

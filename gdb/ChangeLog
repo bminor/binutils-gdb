@@ -2,6 +2,12 @@
 
 	Committed by Jim Blandy  <jimb@redhat.com>.
 
+	* eval.c (evaluate_subexp_standard, case OP_OBJC_MSGCALL): Use 
+	CORE_ADDR as type for selectors.  Correct types for GNU run time
+	message lookup function to use double indirection.
+	* objc-lang.c (lookup_child_selector): Use CORE_ADDR as return type.
+	* objc-lang.h (lookup_child_selector): Adapt prototype.
+
 	* s390-nat.c (SUBOFF): New macro.
 	(supply_gregset, fill_gregset): Use it to handle debugging
 	of 32-bit exectuables running under a 64-bit kernel.
