@@ -1,3 +1,7 @@
+2000-12-04  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* utils.c (internal_verror): Fix typo in error msg.
+
 2000-12-03  Mark Kettenis  <kettenis@gnu.org>
 
 	* Makefile.in (symfile.o): Add gdb-stabs.h to dependencies list.

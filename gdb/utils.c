@@ -699,7 +699,7 @@ internal_verror (const char *fmt, va_list ap)
   /* Default (no case) is to quit GDB.  When in batch mode this
      lessens the likelhood of GDB going into an infinate loop. */
   continue_p = query ("\
-An internal GDB error was detected.  This may make make further\n\
+An internal GDB error was detected.  This may make further\n\
 debugging unreliable.  Continue this debugging session? ");
 
   /* Default (no case) is to not dump core.  Lessen the chance of GDB
