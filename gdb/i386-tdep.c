@@ -51,8 +51,8 @@ void _initialize_i386_tdep PARAMS ((void));
    i386_register_raw_size.  */
 int i386_register_byte[MAX_NUM_REGS];
 
-/* i386_register_raw_size[i] is the number of bytes of storage in the
-   actual machine representation for register i.  */
+/* i386_register_raw_size[i] is the number of bytes of storage in
+   GDB's register array occupied by register i.  */
 int i386_register_raw_size[MAX_NUM_REGS] = {
    4,  4,  4,  4,
    4,  4,  4,  4,
