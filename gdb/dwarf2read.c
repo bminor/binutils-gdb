@@ -6030,9 +6030,18 @@ determine_prefix (struct die_info *die)
       case DW_TAG_class_type:
       case DW_TAG_structure_type:
 	{
-
 	  if (parent_prefix != NULL)
-	    return typename_concat (parent_prefix, dwarf2_name (parent));
+	    {
+	      const char *parent_name = dwarf2_name (parent);
+
+	      if (parent_name != NULL)
+		return typename_concat (parent_prefix, dwarf2_name (parent));
+	      else
+		/* FIXME: carlton/2003-05-28: I'm not sure what the
+		   best thing to do here is.  */
+		return typename_concat (parent_prefix,
+					"<<anonymous class>>");
+	    }
 	  else
 	    return class_name (parent);
 	}
