@@ -32,6 +32,8 @@
 # 	combination of .init sections.
 #	FINI_START, FINI_END - statements just before and just after
 # 	combination of .fini sections.
+#	DYNAMIC_PAD - script to insert pad at end of .dynamic section.
+#		Setting this to " " will result in no .dynamic padding.
 #
 # When adding sections, do note that the names of some sections are used
 # when specifying the start address of the next.
@@ -66,7 +68,14 @@ test -z "${ALIGNMENT}" && ALIGNMENT="${ELFSIZE} / 8"
 test "$LD_FLAG" = "N" && DATA_ADDR=.
 INTERP=".interp   ${RELOCATING-0} : { *(.interp) 	}"
 PLT=".plt    ${RELOCATING-0} : { *(.plt)	}"
-DYNAMIC=".dynamic     ${RELOCATING-0} : { *(.dynamic) }"
+test -z "$DYNAMIC_PAD" && test -n "$RELOCATING" && DYNAMIC_PAD="
+    /* Leave some space in .dynamic section, so that
+       post-linking utilities can add new dynamic tags.  */
+    FILL(0) . += 6 * ${ELFSIZE} / 4;"
+DYNAMIC=".dynamic     ${RELOCATING-0} :
+  {
+    *(.dynamic) $DYNAMIC_PAD
+  }"
 RODATA=".rodata ${RELOCATING-0} : { *(.rodata) ${RELOCATING+*(.rodata.*)} ${RELOCATING+*(.gnu.linkonce.r.*)} }"
 SBSS2=".sbss2 ${RELOCATING-0} : { *(.sbss2) ${RELOCATING+*(.sbss2.*)} ${RELOCATING+*(.gnu.linkonce.sb2.*)} }"
 SDATA2=".sdata2 ${RELOCATING-0} : { *(.sdata2) ${RELOCATING+*(.sdata2.*)} ${RELOCATING+*(.gnu.linkonce.s2.*)} }"
