@@ -404,6 +404,11 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	    {
 	    case e_fsel:
 	      final_type = R_PARISC_DIR32;
+	      /* When in 64bit mode, a 32bit relocation is supposed to
+		 be a section relative relocation.  Dwarf2 (for example)
+		 uses 32bit section relative relocations.  */
+	      if (bfd_get_arch_info (abfd)->bits_per_address != 32)
+	        final_type = R_PARISC_SECREL32;
 	      break;
 	    case e_psel:
 	      final_type = R_PARISC_PLABEL32;
@@ -604,3 +609,14 @@ elf_hppa_final_write_processing (abfd, linker)
     }
 
 }
+
+/* Return true if SYM represents a local label symbol.  */
+
+static boolean
+elf_hppa_is_local_label_name (abfd, name)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     const char *name;
+{
+  return (name[0] == 'L' && name[1] == '$');
+}
+

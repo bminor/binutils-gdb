@@ -1,3 +1,12 @@
+Mon Aug  9 17:37:30 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-hppa.h (_bfd_elf_hppa_gen_reloc_type, case 32): When in
+	64bit mode, generate a section relative relocation for a 32bit
+	wide relocation.
+	(elf_hppa_is_local_label_name): New function.
+	* elf32-hppa.c (elf_hppa_is_local_label_name): Deleted.  To be
+	shared between 32bit and 64bit port.
+
 1999-08-09  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (elf_mips_howto_table): Fix src_mask for

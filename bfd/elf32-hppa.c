@@ -114,8 +114,6 @@ static unsigned long hppa_elf_relocate_insn
   PARAMS ((bfd *, asection *, unsigned long, unsigned long, long,
 	   long, unsigned long, unsigned long, unsigned long));
 
-static boolean hppa_elf_is_local_label_name PARAMS ((bfd *, const char *));
-
 static boolean elf32_hppa_add_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
@@ -792,16 +790,6 @@ do_basic_type_1:
   return (bfd_reloc_ok);
 }
 
-/* Return true if SYM represents a local label symbol.  */
-
-static boolean
-hppa_elf_is_local_label_name (abfd, name)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     const char *name;
-{
-  return (name[0] == 'L' && name[1] == '$');
-}
-
 /* Undo the generic ELF code's subtraction of section->vma from the
    value of each external symbol.  */
 
@@ -1320,7 +1308,7 @@ error_return:
 
 /* Misc BFD support code.  */
 #define bfd_elf32_bfd_reloc_type_lookup		elf_hppa_reloc_type_lookup
-#define bfd_elf32_bfd_is_local_label_name	hppa_elf_is_local_label_name
+#define bfd_elf32_bfd_is_local_label_name	elf_hppa_is_lcoal_label_name
 #define elf_info_to_howto               	elf_hppa_info_to_howto
 #define elf_info_to_howto_rel           	elf_hppa_info_to_howto_rel
 
