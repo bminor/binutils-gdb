@@ -791,12 +791,12 @@ exec_files_info() {
 }
 
 #ifdef DAMON
-  Damon's implementation of set_section_command! It is based on the sex member
+/*  Damon's implementation of set_section_command! It is based on the sex member
   (which is a section pointer from vmap) of vmap.
   We will not have multiple vmap entries (one for each section), rather transmit
   text and data base offsets and fix them at the same time. Elimination of sex
   entry in vmap make this function obsolute, use the one from exec.c. 
-  Need further testing!!	FIXMEmgo.
+  Need further testing!!	FIXMEmgo.  */
 
 static void
 set_section_command(args, from_tty)
