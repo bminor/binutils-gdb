@@ -1,3 +1,9 @@
+Wed Mar  1 17:30:46 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* elf32-ppc.c (elf_powerpc_howto_table): For relocation
+	R_PPC_GOT16, change complain_on_overflow to be
+	complain_overflow_signed.
+
 Wed Mar  1 11:52:55 1995  Jason Molenda  <crash@phydeaux.cygnus.com>
 
 	* configure.host: Recognize powerpc-*-aix*.
