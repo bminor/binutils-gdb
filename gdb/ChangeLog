@@ -1,3 +1,9 @@
+Tue Aug 18 14:48:24 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+ 	* Makefile.in: added FLAGS_TO_PASS variable, and passed it to
+	recursive invocations of make.  Always create installation
+	directories.
+
 Mon Aug 17 18:29:58 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* m68k-pinsn.c:  Minor fix in style of output (don't use
