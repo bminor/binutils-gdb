@@ -997,7 +997,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
       putchar ('\n');
     }
 
-  free (relas);
+  if (is_rela)
+    free (relas);
+  else
+    free (rels);
 
   return 1;
 }
@@ -3412,7 +3415,7 @@ process_unwind (file)
 	printf ("'%s'", SECTION_NAME (unwsec));
 
       printf (_(" at offset 0x%lx contains %lu entries:\n"),
-	      unwsec->sh_offset, unwsec->sh_size / (3 * addr_size));
+	      unwsec->sh_offset, (unsigned long) (unwsec->sh_size / (3 * addr_size)));
 
       (void) slurp_ia64_unwind_table (file, & aux, unwsec);
 

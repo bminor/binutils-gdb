@@ -1,3 +1,9 @@
+2001-02-11  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (dump_relocations): Free corrected allocated
+	array.
+	(process_unwind): Fix compile time warning.
+
 2001-02-10  Nick Clifton  <nickc@redhat.com>
 
 	* binutils.texi: Document new --unwind option to readelf.
