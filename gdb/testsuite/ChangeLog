@@ -1,3 +1,7 @@
+2003-10-22  Michael Chastain  <mec@shout.net>
+
+	* gdb.threads/pthreads.c: Add copyright notice.
+
 2003-10-20  Michael Chastain  <mec@shout.net>
 
 	* gdb.base/gdb1056.exp: New test script.
