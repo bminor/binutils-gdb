@@ -1,3 +1,8 @@
+2004-11-05  Mark Kettenis  <kettenis@jive.nl>
+
+	* dwarf2-frame.c (decode_frame_entry_1): Correctly skip
+	personality routine in a CIE augmentation.
+
 2004-11-05  Felix Lee  <felix+log1@specifixinc.com>
 
 	* stack.c (set_current_sal_from_frame): New function.

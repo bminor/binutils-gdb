@@ -1381,7 +1381,9 @@ decode_frame_entry_1 (struct comp_unit *unit, char *start, int eh_frame_p)
 	  else if (*augmentation == 'P')
 	    {
 	      /* Skip.  */
-	      buf += size_of_encoded_value (*buf++);
+	      unsigned char encoding = *buf++;
+	      read_encoded_value (unit, encoding, buf, &bytes_read);
+	      buf += bytes_read;
 	      augmentation++;
 	    }
 
