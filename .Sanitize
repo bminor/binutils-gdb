@@ -46,7 +46,7 @@
 
 Do-first:
 
-keep_these_too="${keep_these_too} .cvsignore autoconf
+keep_these_too="${keep_these_too} .cvsignore autoconf automake
 	apache bash 
 	bfd binutils bison byacc cvs deja-gnu dejagnu diff dosrel dvips
 	emacs emacs19 examples expect fileutils findutils flex
@@ -54,7 +54,7 @@ keep_these_too="${keep_these_too} .cvsignore autoconf
 	guile gzip
 	include inet install-sh ispell
 	ld less libg++ libgcc libgloss libiberty libio
-	librx libstdc++
+	librx libstdc++ libtool
 	m4 make mkinstalldirs mmalloc move-if-change newlib ncurses opcodes
 	pagas patch perl prms
 	rcs readline sed send-pr shellutils sim tar textutils time
