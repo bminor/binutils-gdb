@@ -1,3 +1,8 @@
+2003-11-28  Christian Groessler  <chris@groessler.org>
+
+	* cpu-z8k.c: Convert to ISO C90.
+	* coff-z8k.c: Likewise.
+
 2003-11-27  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf-bfd.h (elf_backend_data::elf_backend_modify_segment_map):
