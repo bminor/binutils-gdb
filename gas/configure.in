@@ -174,11 +174,13 @@ changequote([,])dnl
 			    fmt=coff targ=i386coff ;;
       i386-*-vsta)          fmt=aout ;;
       i386-*-go32)          fmt=coff targ=i386coff ;;
-      i386-*-gnu*elf*)      fmt=elf ;;
-      i386-*-mach* | i386-*-gnu*)
+      i386-*-gnu*)          fmt=elf ;;
+      i386-*-mach*)
 			    fmt=aout em=mach bfd_gas=yes ;;
       i386-*-msdos*)        fmt=aout ;;
+      i386-*-moss*)	    fmt=elf ;;
       i386-*-pe)            fmt=coff targ=i386coff em=pe ;;
+      i386-*-win32)         fmt=coff targ=i386coff em=pe ;;
       i386-*-*nt)           fmt=coff targ=i386coff em=pe ;;
       i960-*-bout)          fmt=bout ;;
       i960-*-coff)          fmt=coff em=ic960 targ=ic960coff ;;

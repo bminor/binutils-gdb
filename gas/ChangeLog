@@ -1,3 +1,7 @@
+Mon Jul  3 14:22:59 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* configure[.in] (i386-*-win32): New host and target.
+
 Thu Jun 29 17:25:43 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	Support for long filenames non-bfd coff. bfd/7288
