@@ -1,3 +1,8 @@
+Tue Oct 22 18:04:32 1991  Stu Grossman  (grossman at cygnus.com)
+
+	* infrun.c (wait_for_inferior):  Check return value from
+	find_pc_line.
+
 Mon Oct 21 17:47:03 1991  Stu Grossman  (grossman at cygnus.com)
 
 	* infrun.c (wait_for_inferior):  fix stepi/nexti that was broken
