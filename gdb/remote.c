@@ -1,5 +1,6 @@
 /* Remote target communications for serial-line targets in custom GDB protocol
-   Copyright 1988, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1988, 91, 92, 93, 94, 95, 96, 97, 1998 
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -257,8 +258,6 @@ static void remote_detach PARAMS ((char *args, int from_tty));
 
 static void remote_interrupt PARAMS ((int signo));
 
-static void remote_interrupt_twice PARAMS ((int signo));
-
 static void interrupt_query PARAMS ((void));
 
 static void set_thread PARAMS ((int, int));
@@ -279,15 +278,39 @@ static void init_remote_ops PARAMS ((void));
 
 static void init_extended_remote_ops PARAMS ((void));
 
+static void remote_stop PARAMS ((void));
+
+static int hexnumstr PARAMS ((char *, ULONGEST));
+
+static CORE_ADDR remote_address_masked PARAMS ((CORE_ADDR));
+
+static void print_packet PARAMS ((char *));
+
+static unsigned long crc32 PARAMS ((unsigned char *, int, unsigned int));
+
+static void compare_sections_command PARAMS ((char *, int));
+
+static void packet_command PARAMS ((char *, int));
+
 /* exported functions */
 
 extern int fromhex PARAMS ((int a));
+
 extern void getpkt PARAMS ((char *buf, int forever));
+
 extern int putpkt PARAMS ((char *buf));
 
-static struct target_ops remote_ops ;
+void remote_console_output PARAMS ((char *));
 
-static struct target_ops extended_remote_ops ;
+void open_remote_target PARAMS ((char *, int, struct target_ops *, int));
+
+void _initialize_remote PARAMS ((void));
+
+/* */
+
+static struct target_ops remote_ops;
+
+static struct target_ops extended_remote_ops;
 
 /* This was 5 seconds, which is a long time to sit and wait.
    Unless this is going though some terminal server or multiplexer or
@@ -304,6 +327,11 @@ extern int remote_timeout;
    preferable instead.  */
 
 static int remote_break;
+
+/* Has the user attempted to interrupt the target? If so, then offer
+   the user the opportunity to bail out completely if he interrupts
+   again. */
+static int interrupted_already = 0;
 
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
    remote_open knows that we don't have a file open when the program
@@ -336,6 +364,19 @@ static serial_t remote_desc = NULL;
    is slow).  */
 
 static int remote_write_size = PBUFSIZ;
+
+/* This variable sets the number of bits in an address that are to be
+   sent in a memory ("M" or "m") packet.  Normally, after stripping
+   leading zeros, the entire address would be sent. This variable
+   restricts the address to REMOTE_ADDRESS_SIZE bits.  HISTORY: The
+   initial implementation of remote.c restricted the address sent in
+   memory packets to ``host::sizeof long'' bytes - (typically 32
+   bits).  Consequently, for 64 bit targets, the upper 32 bits of an
+   address was never sent.  Since fixing this bug may cause a break in
+   some remote targets this variable is principly provided to
+   facilitate backward compatibility. */
+
+static int remote_address_size;
 
 /* This is the size (in chars) of the first response to the `g' command.  This
    is used to limit the size of the memory read and write commands to prevent
@@ -744,36 +785,39 @@ remote_resume (pid, step, siggnal)
 
 /* Send ^C to target to halt it.  Target will respond, and send us a
    packet.  */
+static void (*ofunc) PARAMS ((int));
 
 static void
 remote_interrupt (signo)
      int signo;
 {
-  /* If this doesn't work, try more severe steps.  */
-  signal (signo, remote_interrupt_twice);
-  
-  if (remote_debug)
-    printf_unfiltered ("remote_interrupt called\n");
-
-  /* Send a break or a ^C, depending on user preference.  */
-  if (remote_break)
-    SERIAL_SEND_BREAK (remote_desc);
-  else
-    SERIAL_WRITE (remote_desc, "\003", 1);
-}
-
-static void (*ofunc)();
-
-/* The user typed ^C twice.  */
-static void
-remote_interrupt_twice (signo)
-     int signo;
-{
-  signal (signo, ofunc);
-  
-  interrupt_query ();
-
+  remote_stop ();
   signal (signo, remote_interrupt);
+}
+  
+static void
+remote_stop ()
+{
+  if (!interrupted_already)
+    {
+      /* Send a break or a ^C, depending on user preference.  */
+      interrupted_already = 1;
+
+      if (remote_debug)
+        printf_unfiltered ("remote_stop called\n");
+
+      if (remote_break)
+        SERIAL_SEND_BREAK (remote_desc);
+      else
+        SERIAL_WRITE (remote_desc, "\003", 1);
+    }
+  else
+    {
+      signal (SIGINT, ofunc);
+      interrupt_query ();
+      signal (SIGINT, remote_interrupt);
+      interrupted_already = 0;
+    }
 }
 
 /* Ask the user what to do when an interrupt is received.  */
@@ -835,7 +879,8 @@ remote_wait (pid, status)
     {
       unsigned char *p;
 
-      ofunc = (void (*)()) signal (SIGINT, remote_interrupt);
+      interrupted_already = 0;
+      ofunc = signal (SIGINT, remote_interrupt);
       getpkt ((char *) buf, 1);
       signal (SIGINT, ofunc);
 
@@ -1004,7 +1049,8 @@ remote_fetch_registers (regno)
      in the buffer is not a hex character, assume that has happened
      and try to fetch another packet to read.  */
   while ((buf[0] < '0' || buf[0] > '9')
-	 && (buf[0] < 'a' || buf[0] > 'f'))
+	 && (buf[0] < 'a' || buf[0] > 'f')
+	 && buf[0] != 'x')	/* New: unavailable register value */
     {
       if (remote_debug)
 	printf_unfiltered ("Bad register packet; fetching a new packet\n");
@@ -1027,7 +1073,10 @@ remote_fetch_registers (regno)
 	     print a second warning.  */
 	  goto supply_them;
 	}
-      regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
+      if (p[0] == 'x' && p[1] == 'x')
+	regs[i] = 0;	/* 'x' */
+      else
+	regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
       p += 2;
     }
 
@@ -1039,10 +1088,14 @@ remote_fetch_registers (regno)
 	warning ("Remote reply is too short: %s", buf);
 #endif
     }
-
- supply_them:
+  
+  supply_them:
   for (i = 0; i < NUM_REGS; i++)
+  {
     supply_register (i, &regs[REGISTER_BYTE(i)]);
+    if (buf[REGISTER_BYTE(i) * 2] == 'x')
+      register_valid[i] = -1;	/* register value not available */
+  }
 }
 
 /* Prepare to store registers.  Since we may send them all (using a
@@ -1165,6 +1218,45 @@ hexnumlen (num)
   return max (i, 1);
 }
 
+/* Set BUF to the hex digits representing NUM */
+
+static int
+hexnumstr (buf, num)
+     char *buf;
+     ULONGEST num;
+{
+  int i;
+  int len = hexnumlen (num);
+
+  buf[len] = '\0';
+
+  for (i = len - 1; i >= 0; i--)
+    {
+      buf[i] = "0123456789abcdef" [(num & 0xf)];
+      num >>= 4;
+    }
+
+  return len;
+}
+
+/* Mask all but the least significant REMOTE_ADDRESS_SIZE bits */
+
+static CORE_ADDR
+remote_address_masked (addr)
+     CORE_ADDR addr;
+{
+  if (remote_address_size > 0
+      && remote_address_size < (sizeof (ULONGEST) * 8))
+    {
+      /* Only create a mask when that mask can safely be constructed
+         in a ULONGEST variable. */
+      ULONGEST mask = 1;
+      mask = (mask << remote_address_size) - 1;
+      addr &= mask;
+    }
+  return addr;
+}
+
 /* Write memory data directly to the remote machine.
    This does not inform the data cache; the data cache uses this.
    MEMADDR is the address in the remote memory space.
@@ -1201,14 +1293,20 @@ remote_write_bytes (memaddr, myaddr, len)
 
       todo = min (len, max_buf_size / 2); /* num bytes that will fit */
 
-      /* FIXME-32x64: Need a version of print_address_numeric which puts the
-	 result in a buffer like sprintf.  */
-      sprintf (buf, "M%lx,%x:", (unsigned long) memaddr, todo);
+      /* construct "M"<memaddr>","<len>":" */
+      /* sprintf (buf, "M%lx,%x:", (unsigned long) memaddr, todo); */
+      memaddr = remote_address_masked (memaddr);
+      p = buf;
+      *p++ = 'M';
+      p += hexnumstr (p, (ULONGEST) memaddr);
+      *p++ = ',';
+      p += hexnumstr (p, (ULONGEST) todo);
+      *p++ = ':';
+      *p = '\0';
 
       /* We send target system values byte by byte, in increasing byte addresses,
 	 each byte encoded as two hex characters.  */
 
-      p = buf + strlen (buf);
       for (i = 0; i < todo; i++)
 	{
 	  *p++ = tohex ((myaddr[i] >> 4) & 0xf);
@@ -1268,9 +1366,16 @@ remote_read_bytes (memaddr, myaddr, len)
 
       todo = min (len, max_buf_size / 2); /* num bytes that will fit */
 
-      /* FIXME-32x64: Need a version of print_address_numeric which puts the
-	 result in a buffer like sprintf.  */
-      sprintf (buf, "m%lx,%x", (unsigned long) memaddr, todo);
+      /* construct "m"<memaddr>","<len>" */
+      /* sprintf (buf, "m%lx,%x", (unsigned long) memaddr, todo); */
+      memaddr = remote_address_masked (memaddr);
+      p = buf;
+      *p++ = 'm';
+      p += hexnumstr (p, (ULONGEST) memaddr);
+      *p++ = ',';
+      p += hexnumstr (p, (ULONGEST) todo);
+      *p = '\0';
+
       putpkt (buf);
       getpkt (buf, 0);
 
@@ -1978,6 +2083,13 @@ crc32 (buf, len, crc)
   return crc;
 }
 
+/* compare-sections command
+
+   With no arguments, compares each loadable section in the exec bfd
+   with the same memory range on the target, and reports mismatches.
+   Useful for verifying the image on the target against the exec file.
+   Depends on the target understanding the new "qCRC:" request.  */
+
 static void
 compare_sections_command (args, from_tty)
      char *args;
@@ -2099,6 +2211,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_ops.to_load = generic_load;		
   remote_ops.to_mourn_inferior = remote_mourn;
   remote_ops.to_thread_alive = remote_thread_alive;
+  remote_ops.to_stop = remote_stop;
   remote_ops.to_stratum = process_stratum;
   remote_ops.to_has_all_memory = 1;	
   remote_ops.to_has_memory = 1;	
@@ -2158,5 +2271,11 @@ terminating `#' character and checksum.",
   add_show_from_set (add_set_cmd ("remotewritesize", no_class,
 				  var_integer, (char *)&remote_write_size,
 				  "Set the maximum number of bytes in each memory write packet.\n", &setlist),
+		     &showlist);
+
+  remote_address_size = TARGET_PTR_BIT;
+  add_show_from_set (add_set_cmd ("remoteaddresssize", class_obscure,
+				  var_integer, (char *)&remote_address_size,
+				  "Set the maximum size of the address (in bits) in a memory packet.\n", &setlist),
 		     &showlist);
 }

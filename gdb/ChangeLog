@@ -1,3 +1,25 @@
+Thu Oct 29 10:04:20 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	[Support for trace debugging: registers that were not collected.]
+	* remote.c (remote_fetch_registers): accept 'xxxx' in the register
+	packet, with the meaning "register value is not available".
+	Set register_valid to -1, which will connote "no value available".
+	* findvar.c (read_relative_register_raw_bytes): return failure if
+	register_valid == -1.  (value_of_register): return failure if 
+	register_valid == -1.  (read_var_value): return error if 
+	value_of_register fails for a register variable.
+	(value_from_register): return failure if register_valid == -1.
+	* eval.c (evaluate_subexp_standard): return error if 
+	value_of_register fails for a register used in an expression.
+	* infcmd.c (do_registers_info): display "value not available"
+	for registers for which register_valid == -1.
+
+	* tracepoint.c (set_raw_tracepoint): just save the filename as is
+	from the symbol table, rather than trying to prepend the dir name.
+	Also save the bfd section.  (tracepoints_info): use the section
+	when looking up the function name.
+	* tracepoint.h: add section field to tracepoint struct.
+
 start-sanitize-sky
 Wed Oct 28 12:33:52 EST 1998  Frank Ch. Eigler <fche@cygnus.com>
 
@@ -131,7 +153,7 @@ Tue Oct 13 18:56:51 1998  Felix Lee  <flee@cygnus.com>
 	* configure.in (gdb_cv_proc_service_is_old): new test.
 	* acconfig.h (PROC_SERVICE_IS_OLD): new define.
 	* configure, config.in: regenerate.
-	
+
 1998-10-13  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* blockframe.c (find_pc_sect_partial_function): Add braces to avoid
@@ -143,7 +165,7 @@ Tue Oct 13 18:56:51 1998  Felix Lee  <flee@cygnus.com>
 	* gnu-regex.c: Define _REGEX_RE_COMP only if it isn't already defined.
 	* gnu-regex.h: Define _REGEX_RE_COMP to pick up old compatability 
 	prototypes.
-	
+
 	* symtab.h: Add prototype for _initialize_source.
 	* value.h: Add prototype for _initialize_value.
 
@@ -152,7 +174,7 @@ Tue Oct 13 18:56:51 1998  Felix Lee  <flee@cygnus.com>
         a prototype for this function.
 	(mfree): Add prototypes for mmalloc, mrealloc, mfree if we aren't
 	using mmalloc.
-	
+
 	* ax-gdb.c breakpoint.c coffread.c corelow.c dbxread.c dwarf2read.c 
         dwarfread.c elfread.c eval.c exec.c gdbtk-cmds.c gdbtk.c infcmd.c 
         infrun.c mipsread.c nlmread.c os9kread.c parse.c printcmd.c symfile.c 
@@ -218,10 +240,10 @@ start-sanitize-cygnus
  	sets gdb_target + gdb_target_cpu to carp. XXX - this is tempoary.
 end-sanitize-cygnus
 	* configure: Re-generate.
-	
+
 	* Makefile.in (DEPFILES): Add TARGET_OBS.
 	(TARGET_OBS): Defined by configure.
-	
+
 start-sanitize-cygnus
 	* config/carp/carp.mt, config/carp/tm-carp.h: Pseudo configuration
  	for carp target. XXX - this is tempoary.
@@ -270,15 +292,15 @@ Fri Oct  2 19:42:31 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 	to allow handling of wchar_t/Unicode strings.  Fix c_printstr to handle
 	wide characters.  Supply width argument to LA_PRINT_STRING and
 	val_print_string.
-	
+
 	* jv-lang.c (java_object_type dynamics_objfile java_link_class_type
 	get_dynamics_objfile get_java_object_type) jv-lang.h
 	(get_java_object_type):  Make lots of things static.
-	
+
 	* expprint.c (dump_prefix_expression dump_subexp):  Move opcode name
 	printing to common routine (op_name).
 	* (dump_subexp):  Add support for OP_SCOPE.
-	
+
 Fri Oct  2 16:25:54 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* configure.host (i[3456]86-*-windows): Remove, no longer used.
@@ -343,8 +365,8 @@ Thu Oct  1 20:52:39 1998  Andrew Cagney  <cagney@b1.cygnus.com>
         start with "com", not "/dev/tty".
         (Unix_OpenSerial): Do not use O_NONBLOCK on cygwin32.
 
-        * rdi-share/devsw.c (DevSW_Close): Free the device's state (SwitcherState)
-        so that the device may be reopened.
+        * rdi-share/devsw.c (DevSW_Close): Free the device's state 
+        (SwitcherState) so that the device may be reopened.
 
         * remote-rdi.c (mywritec): Send all output through gdb's *_unfiltered
         functions, ignoring non-ASCII chars, so that non-tty UI's can snarf
@@ -391,7 +413,7 @@ Wed Sep 23 18:21:03 1998  Andrew Cagney  <cagney@b1.cygnus.com>
  	REMOTE_ADDRESS_SIZE variable.
 
 	* NEWS: Update.
-	
+
 Wed Sep 23 18:08:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.c (_initialize_remote, packet_command, print_packet):
@@ -401,7 +423,7 @@ Wed Sep 23 12:32:54 1998    <cagney@amy.cygnus.com>
 
 	* remote.c (packet_command): Test REMOTE_DESC to determine if
  	remote connection is open.
-	
+
 Tue Sep 22 22:27:24 1998  Mark Alexander  <marka@cygnus.com>
 
 	Patch from Dawn Perchik <dawn@cygnus.com>:
@@ -419,7 +441,7 @@ Mon Sep 21 19:29:32 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 	* jv-lang.c (java_printchar):  Fix output of chars > 0xff.  Fold
 	java_emit_char into java_printchar.
 	* language.h (PRINT_LITERAL_FORM):  Reformat for readability.
-	
+
 Mon Sep 21 14:38:03 1998  Catherine Moore <clm@cygnus.com>
 
 	* config/arm/tm-arm.h (*_BREAKPOINT): Define both little endian
@@ -464,7 +486,7 @@ Tue Sep 15 15:24:16 1998  Stu Grossman  <grossman@fencer.cygnus.com>
 	when using xrealloc().  Fix pointer arithmetic problem when clearing
 	memory.  This and the previous patch prevent random SEGV's when there
 	are lots of live range symbols.
-	
+
 Tue Sep 15 14:02:01 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* remote-rdi.c: Prevent multiple attempts to close the remote
@@ -496,7 +518,7 @@ Fri Sep 11 12:38:34 EDT 1998  Zdenek Radouch   (radouch@cygnus.com)
 Thu Sep 10 20:51:23 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* mn10300-tdep.c (mn10300_analyze_prologue): guard against NULL.
-	
+
 Wed Sep  9 19:37:36 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* dbxread.c (IGNORE_SYMBOL): Remove definition, is never used.
@@ -516,7 +538,7 @@ start-sanitize-sky
 	* tm-txvu.h: add COP0 registers
 	* mips-tdep.c: use NUM_CORE_REGS
 end-sanitize-sky
-	
+
 1998-09-08  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* breakpoint.c (bpstat_stop_status):  Declare a bp match if the
@@ -625,7 +647,7 @@ Wed Aug 19 03:07:53 1998  Richard Henderson  <rth@cygnus.com>
 	* stack.c: Define new hook, selected_frame_level_changed_hook, which
 	will be called whenever the selected stack level changes.
 	(select_frame): Call the selected_frame_level_changed_hook.
-	
+
 Tue Aug 18 18:03:42 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote-rdi.c (arm_rdi_open): Pass serial device name to
@@ -685,8 +707,8 @@ Wed Aug 12 16:30:01 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 Wed Aug 12 09:00:26 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
-	* expprint.c (dump_prefix/postfix_expression):  Don't try to print type
-	expressions.
+	* expprint.c (dump_prefix/postfix_expression):  Don't try to print
+	type expressions.
 
 Tue Aug 11 11:33:25 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
@@ -699,7 +721,7 @@ Tue Aug 11 11:33:25 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 	with indentation and better formatting and interpretation.
 	* parse.c (parse_exp_1):  Put calls to dump expressions under ifdef
 	MAINTENANCE_CMDS and expressiondebug variable.
-	
+
 Thu Aug 6 13:20:02 1998  Ron Unrau  <runrau@cygnus.com>
 
 	* infrun.c (wait_for_inferior): use stop_func_name instead of 
@@ -710,7 +732,7 @@ Thu Aug 6 13:15:05 1998  Ron Unrau  <runrau@cygnus.com>
 
 	* txvu-tdep.c: add VU0/1 control registers
 	* config/mips/tm-txvu.h: ditto
-	
+
 Tue Aug 4 11:02:50 1998  Ron Unrau  <runrau@cygnus.com>
 
 	* txvu-tdep.c (txvu_insert_breakpoint): make sure CPU context is
@@ -844,7 +866,7 @@ end-sanitize-sky
 	* source.c (print_source_lines): Print "No such file or directory"
 	just once.
 	(directory_command): same as above; resets if user issues dir.
-	
+
 Sun Jul 19 02:11:45 1998  Martin M. Hunt  <hunt@cygnus.com>
 
 	* symtab.c (decode_line_2): Instead of printing a prompt
@@ -878,7 +900,7 @@ Wed Jul 15 11:51:33 1998  Keith Seitz  <keiths@cygnus.com>
 	* Makefile.in: Add target for v850ice.o.
 
 	* configure.tgt: Add cygwin32 dependencies for v850 ice.
-	
+
 Wed Jul 15 10:58:29 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* tracepoint.c (set_raw_tracepoint): Cope with symbols that do not
@@ -1018,7 +1040,7 @@ Wed Jun 17 15:50:00 1998  Ron Unrau  (runrau@cygnus.com)
 
 	* parse.c (target_map_name_to_register): Check target specific 
 	  aliases *first* so that it can over-ride architectural names
-	
+
 Wed Jun 17 17:13:38 1998  Said Ziouani  (saidz@park-street.cygnus.com)
 
 	* remote-sds.c (sds_start_remote): Fix printf call.
@@ -1043,7 +1065,7 @@ Sun Jun 14 08:46:25 1998  Ron Unrau  (runrau@cygnus.com)
 
 Sat Jun 13 13:02:32 1998  Dawn Perchik (dawn@cygnus.com)
 
-	* remote.c : Fix remote help string to match that of help.exp.
+	* remote.c: Fix remote help string to match that of help.exp.
 
 Fri Jun 12 14:22:55 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
@@ -1060,8 +1082,8 @@ Thu Jun 11 15:05:10 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 Wed Jun 10 15:39:14 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
-	* c-exp.y:  Fix problems with parsing "'foo.bar'::func".  Some languages
-	allow symbols with dots.
+	* c-exp.y:  Fix problems with parsing "'foo.bar'::func".  
+	Some languages allow symbols with dots.
 
 	* gdbtypes.c (check_stub_method):  Cosmetic.  Use more descriptive
 	names for parameters.
@@ -1075,8 +1097,8 @@ end-sanitize-java
 	* language.c language.h (set_language):  Now returns previous language.
 
 	* symtab.c (find_methods):  Make static.  Cosmetic changes, including
-	indentation, and adding descriptive comments.  Move local variable defs
-	into the block they are used in.
+	indentation, and adding descriptive comments.  Move local variable 
+	defs into the block they are used in.
 	* Don't call check_stub_method any more.  Use gdb_mangle_name to
 	generate the full method name.  find_method doesn't need all the other
 	goobldegook that check_stub_method does.
@@ -1088,7 +1110,7 @@ start-sanitize-java
 end-sanitize-java
 	* (decode_line_1):  Move local variable defs into the block they are
 	used in.  (Improves code readability.)
-	
+
 Wed Jun 10 18:04:35 1998  Frank Ch. Eigler  <fche@cygnus.com>
  
 	* gdbtypes.c (get_discrete_bounds): Assign unsigned type flag for
@@ -1408,12 +1430,12 @@ Mon May 18 13:04:27 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	(tdump_command): check to see if we're connected to a trace-
 	capable target (currently only "remote") before doing anything 
 	else.
-	
+
 Sat May 16 22:21:48 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* config/d30v/tm-d30v.h (INIT_FRAME_PC_FIRST): Fill in PC into
  	frame struct before extracting saved register offsets.
-	
+
 Fri May 15 22:47:45 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* tracepoint.c (encode_actions): fix typo in printf format string.
@@ -1432,10 +1454,10 @@ Fri May 15 22:47:45 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* ax-gdb.c (gen_conversion): Reworked to avoid some unnecessary
 	sign extension.
-	
+
 	* ax-gdb.c (gen_usual_arithmetic): Renamed from gen_usual_binary,
 	to match the ANSI C standard better.  Callers changed.
-	
+
 	* ax-gdb.c (gen_traced_pop): Add prototyped declaration.
 
 Fri May 15 18:18:38 1998  David Taylor  <taylor@texas.cygnus.com>
@@ -1523,7 +1545,7 @@ Tue May 12 13:17:35 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	(gen_expr): Factor out common code in binary arithmetic operators.
 	Add support for `%'.
 	(gen_mul, gen_div): Removed.
-	
+
 Thu May  7 14:49:38 1998  Bob Manson  <manson@charmed.cygnus.com>
 
 	* config/sparc/tm-sp64.h (CALL_DUMMY): Store and retrieve
@@ -1583,8 +1605,8 @@ Mon May  4 07:08:25 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 Sat May  2 09:35:07 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
-	* ocd.h:  Add new flags, function codes, and processor types to support
-	new Wiggler capabilities.
+	* ocd.h:  Add new flags, function codes, and processor types to 
+	support new Wiggler capabilities.
 	* (ocd_write_bytes_size):  New function to allow atomic writes of
  	memory in sizes larger than a byte.
 
@@ -1699,7 +1721,7 @@ Tue Apr 28 17:41:20 1998  Philippe De Muyter  <phdm@macqel.be>
 Tue Apr 28 11:08:25 1998  John Metzler  <jmetzler@cygnus.com>
 
 	* rom68k-rom.c (_initialize_rom68k): Fix unresolved init_rom_68kcmds.
-	
+
 Mon Apr 27 14:32:21 1998  Mark Alexander  <marka@cygnus.com>
 
 	* config/sparc/tm-sparc.h (CALL_DUMMY): Shorten it drastically,
@@ -1776,7 +1798,7 @@ Thu Apr 23 12:52:21 1998  Philippe De Muyter  <phdm@macqel.be>
         * acconfig.h (NEED_DECLARATION_STRERROR): New define slot.
         * gdb_string.h (strerror): Function declaration issued if
         NEED_DECLARATION_STRERROR.
-        * configure, config.in : Files regenerated.
+        * configure, config.in: Files regenerated.
 
 Thu Apr 23 12:27:43 1998  Philippe De Muyter  <phdm@macqel.be>
 
@@ -1895,7 +1917,7 @@ Mon Apr 20 14:12:30 1998 Peter Schauer (pes@regent.e-technik.tu-muenchen.de)
 Sat Apr 18 15:21:04 1998  Stan Cox  <scox@cygnus.com>
 
 	* configure.tgt: Added sparc86x support.
-	
+
 Thu Apr 16 13:13:24 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* rdi-share/etherdrv.c (EthernetWrite): Use strerror to get
@@ -1995,7 +2017,7 @@ Fri Apr 10 10:35:35 1998  John Metzler  <jmetzler@cygnus.com>
 
 	* utils.c (fmthex): A formatting function for hexdumps
 
-	*  mips-tdep.c (unpack_mips16): Fixed instruction decoding, lots of
+	* mips-tdep.c (unpack_mips16): Fixed instruction decoding, lots of
  	bit pattern interpretations. mips_fetch_instruction does not work
  	for 16 bit instructions. Some confusion remains about sign
  	extension in backward branches.
@@ -2006,8 +2028,8 @@ Fri Apr 10 10:35:35 1998  John Metzler  <jmetzler@cygnus.com>
 	(mips16_next_16): Initial major debugging of this function. Lots
  	of bit pattern mistakes.
 	(mips_next_pc): key on low bit of PC, not symbol table.
-	* symfile.c(generic_load) : Added a download verification which
- 	reads back the loade code. Download chunk size is now a defined
+	* symfile.c (generic_load): Added a download verification which
+ 	reads back the loaded code. Download chunk size is now a defined
  	macro. Fixed a bug in which downloading slips into loading one
  	byte at a time. Lower level functions in monitor.c can load long
  	sequences of bytes and make use of these fixups.  Referencing
@@ -2106,15 +2128,6 @@ Tue Mar 31 21:30:39 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* dbxread.c (process_one_symbol): Call SMASH_TEXT_ADDRESS (if it
 	is defined) for function symbols.  
-
-Mon Feb 16 14:05:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
-
-	* d10v-tdep.c (d10v_extract_return_value): Wierd.  GCC wants to
- 	return odd sized register quantities with only half of the first
- 	register used!
-
-	* config/d10v/tm-d10v.h (USE_STRUCT_CONVENTION): Use stack when
- 	size > 8.
 
 Tue Mar 31 16:39:28 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
@@ -2240,7 +2253,7 @@ Tue Mar 24 16:22:40 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
 	* Makefile.in:  Derive SHELL from configure.
 	* config/d10v/d10v.mt config/m32r/m32r.mt
 	config/mn10200/mn10200.mt config/mn10300/mn10300.mt
-	config/d30v/d30v.mt :  Remove -lm from SIM.  This prevents
+	config/d30v/d30v.mt:  Remove -lm from SIM.  This prevents
 	dependency checking of -lm (under NT native builds).  (It is
 	automatically added by configure if it exists.)
 	* doc/configure mswin/configure nlm/configure
@@ -2273,7 +2286,7 @@ end-sanitize-sky
 Sat Mar 21 19:34:49 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	merged changes from Foundry (list follows by file/author):
-	
+
         - Tom Tromey  <tromey@cygnus.com>
         * Makefile.in (gdbres.o): New target.
         (WINDRES): New define.
@@ -2373,7 +2386,7 @@ Fri Mar 20 14:45:36 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	to avoid being killed by async SIGIO signals.
 	* config/m32r/m32r.mt: define GDBSERVER_(LIBS and DEPFILES),
 	so that gdbserver can be built with the m32r simulator.
-	
+
 Fri Mar 20 09:04:06 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 start-sanitize-r5900
@@ -2389,7 +2402,7 @@ end-sanitize-r5900
 start-sanitize-r5900
 	(builtin_type_{,u}int128): Ditto.
 end-sanitize-r5900
-	
+
 	* gdbtypes.c (_initialize_gdbtypes): Initialize new types.
 
 	* mips-tdep.c (do_gp_register_row): Pad register value when GP
@@ -2437,7 +2450,7 @@ Fri Mar 13 15:37:02 1998  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 start-sanitize-vr4320
 Tue Mar 10 16:15:13 1998  Gavin Koch  <gavin@cygnus.com>
 
-	* configure.tgt (mips64*vr4320*el-*-elf*) : Removed spurious case.
+	* configure.tgt (mips64*vr4320*el-*-elf*): Removed spurious case.
 
 end-sanitize-vr4320
 Fri Mar  6 13:10:27 1998  Fred Fish  <fnf@cygnus.com>
@@ -2500,7 +2513,7 @@ start-sanitize-vr4111
 end-sanitize-vr4111
 	* dwarfread.c (read_tag_pointer_type): Pointer sizes now come from
 	TARGET_PTR_BIT rather from sizeof(char *) on host.
-	
+
 Tue Mar  3 14:37:02 1998  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
         * alpha-nat.c (fetch_osf_core_registers):  Renamed from
@@ -2511,7 +2524,7 @@ Tue Mar  3 14:37:02 1998  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 start-sanitize-vr4320
 Tue Mar  3 11:12:39 1998  Gavin Koch  <gavin@cygnus.com>
 
-	* configure.tgt (mips64*vr4320*el-*-elf*,mips64*vr4320*-*-elf*) : 
+	* configure.tgt (mips64*vr4320*el-*-elf*,mips64*vr4320*-*-elf*): 
 	Added.
 
 end-sanitize-vr4320
@@ -2599,7 +2612,7 @@ Tue Feb 17 14:28:33 1998  Peter Schauer <pes@regent.e-technik.tu-muenchen.de>
 Tue Feb 17 14:07:34 1998  Peter Schauer <pes@regent.e-technik.tu-muenchen.de>
 
         * gdbtypes.c (check_typedef): Do not try to resolve the length of      
-        a type which has TYPE_FLAG_TARGET_STUB set, if the target type has      
+        a type which has TYPE_FLAG_TARGET_STUB set, if the target type has
         set TYPE_FLAG_TARGET_STUB as well.
 
 Tue Feb 17 14:32:18 1998  Andrew Cagney  <cagney@b1.cygnus.com>
@@ -2616,15 +2629,19 @@ Mon Feb 16 14:05:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	* remote.c (remote_xfer_memory): Use REMOTE_TRANSLATE_XFER_ADDRESS
  	to translate addr/size when defined.
 	(open_remote_target): Delete.
-	
+
 	* target.h (open_remote_target): Delete.
-	
+
 	* config/d10v/tm-d10v.h (REMOTE_TRANSLATE_XFER_ADDRESS): Define.
-	
+
 Mon Feb 16 14:05:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* config/d10v/tm-d10v.h (USE_STRUCT_CONVENTION): Define. True when
- 	sizeof type > 1.
+	* d10v-tdep.c (d10v_extract_return_value): Wierd.  GCC wants to
+ 	return odd sized register quantities with only half of the first
+ 	register used!
+
+	* config/d10v/tm-d10v.h (USE_STRUCT_CONVENTION): Use stack when
+ 	size > 8.
 
 Mon Feb 16 14:05:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -2785,7 +2802,7 @@ Thu Feb  5 13:16:36 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	* config/d10v/tm-d10v.h (EXTRA_FRAME_INFO): Delete dummy from
  	struct.
 	(POP_FRAME): Point at generic_pop_current_frame.
-	
+
 	* d10v-tdep.c (d10v_pop_frame): Delete code handling dummy frames,
  	handled earlier.
 	(d10v_push_return_address): New function.
@@ -2822,7 +2839,7 @@ Thu Feb  5 13:16:36 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	(STORE_RETURN_VALUE): Specify return register using RET1_REGNUM.
 	(STORE_STRUCT_RETURN): Specify ARG1_REGNUM as the struct ptr
  	location.
-	
+
 Thu Feb  5 13:16:36 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* blockframe.c (generic_pop_dummy_frame): Flush the frame, no
@@ -3116,7 +3133,7 @@ Thu Jan  8 11:03:59 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* Makefile.in: Add build rules for remote-rdi.c and
 	rdi-share/libangsd.a.
-	
+
 	* configure.tgt: Updated from source on branch.
 	* config/arm/tm-arm.h: Updated from source on branch.
 	* arm-tdep.c: Updated from source on branch.

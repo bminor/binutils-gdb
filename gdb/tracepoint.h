@@ -86,8 +86,12 @@ struct tracepoint
      aborting, so you can back up to just before the abort.  */
   int hit_count;
 
-  /* Thread number for thread-specific breakpoint, or -1 if don't care */ 
+  /* Thread number for thread-specific tracepoint, or -1 if don't care */ 
   int thread;
+
+  /* BFD section, in case of overlays: 
+     no, I don't know if tracepoints are really gonna work with overlays.  */
+  asection *section;
 };
 
 enum actionline_type

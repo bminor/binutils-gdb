@@ -332,30 +332,11 @@ set_raw_tracepoint (sal)
   if (sal.symtab == NULL)
     t->source_file = NULL;
   else
-    {
-      if (sal.symtab->dirname == NULL)
-	{
-	  t->source_file = (char *) xmalloc (strlen (sal.symtab->filename) + 1);
-	  strcpy (t->source_file, sal.symtab->filename);
-	}
-      else
-	{
-	  char *p;
+    t->source_file = savestring (sal.symtab->filename, 
+				 strlen (sal.symtab->filename));
 
-	  t->source_file = (char *) xmalloc (strlen (sal.symtab->filename) +
-					     strlen (sal.symtab->dirname) + 2);
-	  
-	  strcpy (t->source_file, sal.symtab->dirname);
-	  p = t->source_file;
-	  while (*p)
-	    p++;
-	  if (*(--p) != '/')            /* Will this work on Windows? */
-	    strcat (t->source_file, "/");
-	  strcat (t->source_file, sal.symtab->filename);
-	}
-    }
-
-  t->language = current_language->la_language;
+  t->section     = sal.section;
+  t->language    = current_language->la_language;
   t->input_radix = input_radix;
   t->line_number = sal.line;
   t->enabled     = enabled;
@@ -503,7 +484,7 @@ tracepoints_info (tpnum_exp, from_tty)
 
 	if (t->source_file)
 	  {
-	    sym = find_pc_function (t->address);
+	    sym = find_pc_sect_function (t->address, t->section);
 	    if (sym)
 	      {
 		fputs_filtered ("in ", gdb_stdout);
