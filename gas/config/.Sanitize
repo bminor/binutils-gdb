@@ -132,6 +132,7 @@ te-i386aix.h
 te-ic960.h
 te-irix.h
 te-linux.h
+te-lynx.h
 te-sco386.h
 te-sun3.h
 te-sysv32.h
