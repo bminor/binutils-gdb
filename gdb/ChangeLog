@@ -1,3 +1,8 @@
+1999-01-12  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* monitor.c (init_monitor_ops): Initialize the monitor_ops
+	structure if it hasn't already been done.
+
 Tue Jan 12 14:50:10 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* inftarg.c (child_ops): Don't initialize statically.

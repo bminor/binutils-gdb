@@ -2268,6 +2268,9 @@ void
 init_monitor_ops (ops)
      struct target_ops *ops;
 {
+  if (monitor_ops.to_magic != OPS_MAGIC)
+    init_base_monitor_ops ();
+
   memcpy (ops, &monitor_ops, sizeof monitor_ops);
 }
 
