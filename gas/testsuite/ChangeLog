@@ -1,3 +1,8 @@
+Fri Sep 13 15:28:04 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/h8300/macs.s: Add "stmac" instructions.
+	* gas/h8300/basic.exp: Test them.
+
 Thu Sep 12 10:28:44 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* gas/arm/thumb.s (back): Check assembly of Thumb BL.
