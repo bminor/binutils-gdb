@@ -1,3 +1,8 @@
+Fri Sep  1 08:12:50 1995  James G. Smith  <jsmith@beauty.cygnus.com>
+
+	* config.bfd: Add mips*vr4300-*-elf* target.
+	* config/mipsbvr4300.mt: Added.
+
 Thu Aug 31 16:00:53 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* Makefile.in: Update dependencies.

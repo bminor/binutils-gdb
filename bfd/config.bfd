@@ -123,6 +123,9 @@ case "${canon}" in
   mips*-*-sysv*)	bfd_name=riscos ;;
   mips*-*-riscos*)	bfd_name=riscos ;;
   mips*-*-bsd*)		bfd_name=bigmips ;; # Sony News
+# CYGNUS LOCAL jsmith/vr4300 : we use the existing definition for little-endian
+  mips*vr4300-*-elf*)	bfd_name=mipsbvr4300 ;; # NEC VR4300 ELF only
+# END CYGNUS LOCAL
   mips*el-*-elf*)	bfd_name=mipslelf ;;
   mips*-*-elf*)		bfd_name=mipsbelf ;;
   ns32k-pc532-mach*)	bfd_name=pc532-mach strip_underscore=yes;;
@@ -154,6 +157,7 @@ case "${canon}" in
 
   *-*-aout*)		bfd_name=${cpu}-aout strip_underscore=yes ;;
   *-*-bsd*)		bfd_name=${cpu}-aout strip_underscore=yes ;;
+  *-*-ieee*)		bfd_name=ieee ;;
   *-*-netware*)		bfd_name=${cpu}-nlm ;;
   *-*-sysv4*)		bfd_name=${cpu}-elf ;;
   *-*-solaris2*)	bfd_name=${cpu}-elf ;;
