@@ -53,6 +53,7 @@ intel-coff.h
 m68k-opcode.h
 m68kcoff.h
 m88k-bcs.h
+internalcoff.h
 m88k-opcode.h
 mips-opcode.h
 np1-opcode.h
@@ -90,7 +91,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.2  1991/05/31 11:26:52  gnu
+# Revision 1.3  1991/06/14 22:14:07  steve
+# *** empty log message ***
+#
+# Revision 1.2  1991/05/31  11:26:52  gnu
 # Add i386coff.h.  Print msg when sanitizing sparc-opcode.h.
 #
 # Revision 1.1  1991/05/23  17:00:59  rich
