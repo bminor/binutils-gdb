@@ -453,8 +453,8 @@ assemble_vif (str)
 	  frag_align (3, 0, 0);
 	  record_alignment (now_seg, 3);
 	  /* FIXME: The data must be aligned on a 64 bit boundary.
-	     Not sure how to do this yet so punt by making the mpg insn
-	     8 bytes (vifnop,mpg).  */
+	     Not sure how to do this yet, other than by performing relaxing,
+	     so punt by making the mpg insn 8 bytes (vifnop,mpg).  */
 	  f = frag_more (4);
 	  memset (f, 0, 4);
 	}
@@ -516,11 +516,27 @@ assemble_vif (str)
       vif_get_var_data (&file, &data_len);
       if (file)
 	{
-	  int byte_len = insert_file (file);
+	  int byte_len;
+
+	  /* Emit a label to set the mach type for the data we're
+	     inserting.  */
+	  if (opcode->flags & VIF_OPCODE_MPG)
+	    record_mach (DVP_VUUP, 1);
+	  else if (opcode->flags & VIF_OPCODE_DIRECT)
+	    record_mach (DVP_GIF, 1);
+	  else if (opcode->flags & VIF_OPCODE_UNPACK)
+	    ; /* nothing to do */
+	  else
+	    as_fatal ("unknown cpu type for variable length vif insn");
+
+	  byte_len = insert_file (file);
 	  if (output_vif)
 	    install_vif_length (f, byte_len);
-	  /* Update $.MpgLoc.  */
-	  vif_set_mpgloc (vif_get_mpgloc () + byte_len);
+	  if (opcode->flags & VIF_OPCODE_MPG)
+	    {
+	      /* Update $.MpgLoc.  */
+	      vif_set_mpgloc (vif_get_mpgloc () + byte_len);
+	    }
 	}
       else
 	{
