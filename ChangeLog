@@ -1,3 +1,70 @@
+Mon Apr 10 11:42:22 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	Merge in support for Mac MPW as a host.
+	(Old change descriptions retained for informational value.)
+
+	* mpw-config.in: Add generic include forwards for cpu-specific
+	include files in aout and elf directories.
+
+	* mpw-configure: Added copyright.
+	* mpw-config.in: Check for presence of required build tools.
+	(target_libs): Add newlib.
+	(target_tools): Add examples.
+	(Read Me): Generate as "Read Me for MPW" instead.
+	* mpw-build.in: Base sub-builds on all-foo instead of do-foo.
+	(all-byacc, do-byacc, all-flex, do-flex, do-newlib): New actions.
+	(do-gas, do-gcc, do-gdb, do-ld): Build Version.r first.
+
+	* mpw-configure: Remove subdir-specific makefile hackery,
+	delete mk.tmp after using it.
+
+	* mpw-build.in (all): Display start and end times.
+
+	* mpw-configure (host_canonical): Set.
+	(target_cpu): Always add to makefiles.
+	(ARCHDEFS, EMUL): Add to makefile only if nonempty.
+	(TM_FILE, XM_FILE, NM_FILE): No longer add to makefile.
+	(mpw-mh-mpw): Look for in srcdir and srcroot.
+	Use sed instead of mpw-edit-prefix to edit prefix definitions.
+
+	* mpw-build.in: (install-only): New target.
+
+	* mpw-configure (host_alias, target_alias): Rename from hostalias
+	and targetalias, add into generated Makefile.
+	(mk.tmp): If present, add into generated Makefile.
+	* mpw-build.in (all-gas): Build config.h first before gas proper.
+
+	* mpw-configure (config.status): Write only if changed.
+	* mpw-config.in (readline): Configure it (not built, just used for
+	definitions).
+
+	* mpw-config.in (elf/mips.h): Add a forward include.
+
+	* mpw-config.in: Forward-include most .h files in include into
+	extra-include.
+	(readline): Don't build.
+	mpw-build.in (install): Install GDB.
+
+	* mpw-configure (prefix, mpw_prefix): Handle it.
+	* mpw-config.in (mmalloc, readline): Don't configure.
+	* mpw-build.in (thisscript): Rename to ThisScript.
+	Use mpw-build instead of BuildProgram everywhere.
+	(mmalloc, readline): Don't build.
+	* mpw-README: New file, basic documentation about the MPW port.
+
+	* mpw-config.in: Use forward-include to create include files.
+
+	* mpw-configure: Add more things to the top of each configured
+	Makefile, including contents of config/mpw-mh-mpw.
+	* mpw-config.in (extra-include): Create this directory and fill it
+	with Posix-like include files when configuring.
+
+	* config.sub (apple, mac, mpw): Add various aliases.
+
+	* mpw-build.in: New file, top-level build script fragment for MPW.
+	* mpw-configure: New file, configure script for MPW.
+	* mpw-config.in: New file, config fragment for MPW.
+
 Fri Apr  7 19:33:16 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* configure.in (host_libs): Remove glob, since it is gone from the
