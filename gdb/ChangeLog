@@ -1,5 +1,7 @@
 2003-10-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* fbsd-proc.c (fbsd_make_corefile_notes): Remove unecessary casts.
+
 	* corelow.c: Include "arch-utils.h", "regset.h" and
 	"gdb_assert.h".
 	(core_gdbarch): New variable.

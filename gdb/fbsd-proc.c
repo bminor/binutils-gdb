@@ -129,19 +129,13 @@ fbsd_make_corefile_notes (bfd *obfd, int *note_size)
   char *note_data = NULL;
 
   fill_gregset (&gregs, -1);
-  note_data = (char *) elfcore_write_prstatus (obfd,
-					       note_data,
-					       note_size,
-					       ptid_get_pid (inferior_ptid),
-					       stop_signal,
-					       &gregs);
+  note_data = elfcore_write_prstatus (obfd, note_data, note_size,
+				      ptid_get_pid (inferior_ptid),
+				      stop_signal, &gregs);
 
   fill_fpregset (&fpregs, -1);
-  note_data = (char *) elfcore_write_prfpreg (obfd,
-					      note_data,
-					      note_size,
-					      &fpregs,
-					      sizeof (fpregs));
+  note_data = elfcore_write_prfpreg (obfd, note_data, note_size,
+				     &fpregs, sizeof (fpregs));
 
   if (get_exec_file (0))
     {
@@ -151,11 +145,8 @@ fbsd_make_corefile_notes (bfd *obfd, int *note_size)
       if (get_inferior_args ())
 	psargs = reconcat (psargs, psargs, " ", get_inferior_args (), NULL);
 
-      note_data = (char *) elfcore_write_prpsinfo (obfd,
-						   note_data,
-						   note_size,
-						   fname,
-						   psargs);
+      note_data = elfcore_write_prpsinfo (obfd, note_data, note_size,
+					  fname, psargs);
     }
 
   make_cleanup (xfree, note_data);
