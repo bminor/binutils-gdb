@@ -40,6 +40,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/ecoff.h"
 #include "coff/mips.h"
 
+#include "hashtab.h"
+
+/* This structure is used to hold .got entries while estimating got
+   sizes.  */
+struct mips_got_entry
+{
+  /* The input bfd in which the symbol is defined.  */
+  bfd *abfd;
+  /* The index of the symbol, as stored in the relocation r_info.  If
+     it's -1, the addend is a complete address into the
+     executable/shared library.  */
+  unsigned long symndx;
+  /* The addend of the relocation that should be added to the symbol
+     value.  */
+  bfd_vma addend;
+  /* The offset from the beginning of the .got section to the entry
+     corresponding to this symbol+addend.  */
+  unsigned long gotidx;
+};
+
 /* This structure is used to hold .got information when linking.  It
    is stored in the tdata field of the bfd_elf_section_data structure.  */
 
@@ -54,6 +74,8 @@ struct mips_got_info
   unsigned int local_gotno;
   /* The number of local .got entries we have used.  */
   unsigned int assigned_gotno;
+  /* A hash table holding members of the got.  */
+  struct htab *got_entries;
 };
 
 /* This structure is passed to mips_elf_sort_hash_table_f when sorting
@@ -316,7 +338,7 @@ static bfd_vma mips_elf_got16_entry
   PARAMS ((bfd *, struct bfd_link_info *, bfd_vma, bfd_boolean));
 static bfd_vma mips_elf_got_offset_from_index
   PARAMS ((bfd *, bfd *, bfd_vma));
-static bfd_vma mips_elf_create_local_got_entry
+static struct mips_got_entry *mips_elf_create_local_got_entry
   PARAMS ((bfd *, struct mips_got_info *, asection *, bfd_vma));
 static bfd_boolean mips_elf_sort_hash_table
   PARAMS ((struct bfd_link_info *, unsigned long));
@@ -365,6 +387,8 @@ static INLINE char* elf_mips_abi_name PARAMS ((bfd *));
 static void mips_elf_irix6_finish_dynamic_symbol
   PARAMS ((bfd *, const char *, Elf_Internal_Sym *));
 static bfd_boolean _bfd_mips_elf_mach_extends_p PARAMS ((flagword, flagword));
+static hashval_t mips_elf_got_entry_hash PARAMS ((const PTR));
+static int mips_elf_got_entry_eq PARAMS ((const PTR, const PTR));
 
 /* This will be used when we sort the dynamic relocation records.  */
 static bfd *reldyn_sorting_bfd;
@@ -1392,6 +1416,32 @@ gptab_compare (p1, p2)
   return a1->gt_entry.gt_g_value - a2->gt_entry.gt_g_value;
 }
 
+/* Functions to manage the got entry hash table.  */
+static hashval_t
+mips_elf_got_entry_hash (entry_)
+     const PTR entry_;
+{
+  const struct mips_got_entry *entry = (struct mips_got_entry *)entry_;
+
+  return htab_hash_pointer (entry->abfd) + entry->symndx
+#ifdef BFD64
+    + (entry->addend >> 32)
+#endif
+    + entry->addend;
+}
+
+static int
+mips_elf_got_entry_eq (entry1, entry2)
+     const PTR entry1;
+     const PTR entry2;
+{
+  const struct mips_got_entry *e1 = (struct mips_got_entry *)entry1;
+  const struct mips_got_entry *e2 = (struct mips_got_entry *)entry2;
+
+  return e1->abfd == e2->abfd && e1->symndx == e2->symndx
+    && e1->addend == e2->addend;
+}
+
 /* Returns the GOT section for ABFD.  */
 
 static asection *
@@ -1436,22 +1486,15 @@ mips_elf_local_got_index (abfd, info, value)
 {
   asection *sgot;
   struct mips_got_info *g;
-  bfd_byte *entry;
+  struct mips_got_entry *entry;
 
   g = mips_elf_got_info (elf_hash_table (info)->dynobj, &sgot);
 
-  /* Look to see if we already have an appropriate entry.  */
-  for (entry = (sgot->contents
-		+ MIPS_ELF_GOT_SIZE (abfd) * MIPS_RESERVED_GOTNO);
-       entry != sgot->contents + MIPS_ELF_GOT_SIZE (abfd) * g->assigned_gotno;
-       entry += MIPS_ELF_GOT_SIZE (abfd))
-    {
-      bfd_vma address = MIPS_ELF_GET_WORD (abfd, entry);
-      if (address == value)
-	return entry - sgot->contents;
-    }
-
-  return mips_elf_create_local_got_entry (abfd, g, sgot, value);
+  entry = mips_elf_create_local_got_entry (abfd, g, sgot, value);
+  if (entry)
+    return entry->gotidx;
+  else
+    return MINUS_ONE;
 }
 
 /* Returns the GOT index for the global symbol indicated by H.  */
@@ -1497,40 +1540,22 @@ mips_elf_got_page (abfd, info, value, offsetp)
 {
   asection *sgot;
   struct mips_got_info *g;
-  bfd_byte *entry;
-  bfd_byte *last_entry;
-  bfd_vma index = 0;
-  bfd_vma address;
+  bfd_vma index;
+  struct mips_got_entry *entry;
 
   g = mips_elf_got_info (elf_hash_table (info)->dynobj, &sgot);
 
-  /* Look to see if we already have an appropriate entry.  */
-  last_entry = sgot->contents + MIPS_ELF_GOT_SIZE (abfd) * g->assigned_gotno;
-  for (entry = (sgot->contents
-		+ MIPS_ELF_GOT_SIZE (abfd) * MIPS_RESERVED_GOTNO);
-       entry != last_entry;
-       entry += MIPS_ELF_GOT_SIZE (abfd))
-    {
-      address = MIPS_ELF_GET_WORD (abfd, entry);
+  entry = mips_elf_create_local_got_entry (abfd, g, sgot,
+					   (value + 0x8000)
+					   & (~(bfd_vma)0xffff));
 
-      if (!mips_elf_overflow_p (value - address, 16))
-	{
-	  /* This entry will serve as the page pointer.  We can add a
-	     16-bit number to it to get the actual address.  */
-	  index = entry - sgot->contents;
-	  break;
-	}
-    }
-
-  /* If we didn't have an appropriate entry, we create one now.  */
-  if (entry == last_entry)
-    index = mips_elf_create_local_got_entry (abfd, g, sgot, value);
+  if (!entry)
+    return MINUS_ONE;
+  
+  index = entry->gotidx;
 
   if (offsetp)
-    {
-      address = MIPS_ELF_GET_WORD (abfd, entry);
-      *offsetp = value - address;
-    }
+    *offsetp = value - entry->addend;
 
   return index;
 }
@@ -1547,10 +1572,7 @@ mips_elf_got16_entry (abfd, info, value, external)
 {
   asection *sgot;
   struct mips_got_info *g;
-  bfd_byte *entry;
-  bfd_byte *last_entry;
-  bfd_vma index = 0;
-  bfd_vma address;
+  struct mips_got_entry *entry;
 
   if (! external)
     {
@@ -1563,28 +1585,11 @@ mips_elf_got16_entry (abfd, info, value, external)
 
   g = mips_elf_got_info (elf_hash_table (info)->dynobj, &sgot);
 
-  /* Look to see if we already have an appropriate entry.  */
-  last_entry = sgot->contents + MIPS_ELF_GOT_SIZE (abfd) * g->assigned_gotno;
-  for (entry = (sgot->contents
-		+ MIPS_ELF_GOT_SIZE (abfd) * MIPS_RESERVED_GOTNO);
-       entry != last_entry;
-       entry += MIPS_ELF_GOT_SIZE (abfd))
-    {
-      address = MIPS_ELF_GET_WORD (abfd, entry);
-      if (address == value)
-	{
-	  /* This entry has the right high-order 16 bits, and the low-order
-	     16 bits are set to zero.  */
-	  index = entry - sgot->contents;
-	  break;
-	}
-    }
-
-  /* If we didn't have an appropriate entry, we create one now.  */
-  if (entry == last_entry)
-    index = mips_elf_create_local_got_entry (abfd, g, sgot, value);
-
-  return index;
+  entry = mips_elf_create_local_got_entry (abfd, g, sgot, value);
+  if (entry)
+    return entry->gotidx;
+  else
+    return MINUS_ONE;
 }
 
 /* Returns the offset for the entry at the INDEXth position
@@ -1608,26 +1613,47 @@ mips_elf_got_offset_from_index (dynobj, output_bfd, index)
 /* Create a local GOT entry for VALUE.  Return the index of the entry,
    or -1 if it could not be created.  */
 
-static bfd_vma
+static struct mips_got_entry *
 mips_elf_create_local_got_entry (abfd, g, sgot, value)
      bfd *abfd;
      struct mips_got_info *g;
      asection *sgot;
      bfd_vma value;
 {
+  struct mips_got_entry entry, **loc;
+
+  entry.abfd = abfd;
+  entry.symndx = (unsigned long)-1;
+  entry.addend = value;
+
+  loc = (struct mips_got_entry **) htab_find_slot (g->got_entries, &entry,
+						   INSERT);
+  if (*loc)
+    return *loc;
+      
+  entry.gotidx = MIPS_ELF_GOT_SIZE (abfd) * g->assigned_gotno++;
+
+  *loc = (struct mips_got_entry *)bfd_alloc (abfd, sizeof entry);
+
+  if (! *loc)
+    return NULL;
+	      
+  memcpy (*loc, &entry, sizeof entry);
+
   if (g->assigned_gotno >= g->local_gotno)
     {
+      (*loc)->gotidx = (unsigned long)-1;
       /* We didn't allocate enough space in the GOT.  */
       (*_bfd_error_handler)
 	(_("not enough GOT space for local GOT entries"));
       bfd_set_error (bfd_error_bad_value);
-      return (bfd_vma) -1;
+      return NULL;
     }
 
   MIPS_ELF_PUT_WORD (abfd, value,
-		     (sgot->contents
-		      + MIPS_ELF_GOT_SIZE (abfd) * g->assigned_gotno));
-  return MIPS_ELF_GOT_SIZE (abfd) * g->assigned_gotno++;
+		     (sgot->contents + entry.gotidx));
+
+  return *loc;
 }
 
 /* Sort the dynamic symbol table so that symbols that need GOT entries
@@ -1873,7 +1899,7 @@ mips_elf_highest (value)
      bfd_vma value ATTRIBUTE_UNUSED;
 {
 #ifdef BFD64
-  return ((value + (bfd_vma) 0x800080008000) >> 48) & 0xffff;
+  return ((value + (((bfd_vma) 0x8000 << 32) | 0x80008000)) >> 48) & 0xffff;
 #else
   abort ();
   return (bfd_vma) -1;
@@ -1964,6 +1990,11 @@ mips_elf_create_got_section (abfd, info)
   g->global_gotsym = NULL;
   g->local_gotno = MIPS_RESERVED_GOTNO;
   g->assigned_gotno = MIPS_RESERVED_GOTNO;
+  g->got_entries = htab_try_create (1, mips_elf_got_entry_hash,
+				    mips_elf_got_entry_eq,
+				    (htab_del) NULL);
+  if (g->got_entries == NULL)
+    return FALSE;
   if (elf_section_data (s) == NULL)
     {
       amt = sizeof (struct bfd_elf_section_data);
@@ -4358,20 +4389,35 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 		 || r_type == R_MIPS_GOT_LO16
 		 || r_type == R_MIPS_GOT_DISP))
 	{
+	  struct mips_got_entry entry, **loc;
+
 	  /* We may need a local GOT entry for this relocation.  We
 	     don't count R_MIPS_GOT_PAGE because we can estimate the
 	     maximum number of pages needed by looking at the size of
 	     the segment.  Similar comments apply to R_MIPS_GOT16 and
 	     R_MIPS_CALL16.  We don't count R_MIPS_GOT_HI16, or
 	     R_MIPS_CALL_HI16 because these are always followed by an
-	     R_MIPS_GOT_LO16 or R_MIPS_CALL_LO16.
+	     R_MIPS_GOT_LO16 or R_MIPS_CALL_LO16.  */
 
-	     This estimation is very conservative since we can merge
-	     duplicate entries in the GOT.  In order to be less
-	     conservative, we could actually build the GOT here,
-	     rather than in relocate_section.  */
-	  g->local_gotno++;
-	  sgot->_raw_size += MIPS_ELF_GOT_SIZE (dynobj);
+	  entry.abfd = abfd;
+	  entry.symndx = r_symndx;
+	  entry.addend = rel->r_addend;
+	  loc = (struct mips_got_entry **)
+	    htab_find_slot (g->got_entries, &entry, INSERT);
+
+	  if (*loc == NULL)
+	    {
+	      entry.gotidx = g->local_gotno++;
+
+	      *loc = (struct mips_got_entry *)bfd_alloc (abfd, sizeof entry);
+
+	      if (! *loc)
+		return FALSE;
+	      
+	      memcpy (*loc, &entry, sizeof entry);
+
+	      sgot->_raw_size += MIPS_ELF_GOT_SIZE (dynobj);
+	    }
 	}
 
       switch (r_type)
@@ -4804,11 +4850,6 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
 	  /* Assume there are two loadable segments consisting of
 	     contiguous sections.  Is 5 enough?  */
 	  local_gotno = (loadable_size >> 16) + 5;
-	  if (NEWABI_P (output_bfd))
-	    /* It's possible we will need GOT_PAGE entries as well as
-	       GOT16 entries.  Often, these will be able to share GOT
-	       entries, but not always.  */
-	    local_gotno *= 2;
 
 	  g->local_gotno += local_gotno;
 	  s->_raw_size += local_gotno * MIPS_ELF_GOT_SIZE (dynobj);

@@ -1,3 +1,19 @@
+2002-12-12  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (struct mips_got_entry): New.
+	(struct mips_got_info): Added got_entries field.
+	(mips_elf_got_entry_hash, mips_elf_got_entry_eq): New functions.
+	(mips_elf_local_got_index, mips_elf_got_page,
+	mips_elf_got16_entry): Re-implement in terms of new...
+	(mips_elf_create_local_got_entry): Rewrite to use got_entries.
+	Change return type.
+	(mips_elf_highest): Warning clean-up.
+	(mips_elf_create_got_section): Initialize got_entries.
+	(_bfd_mips_elf_check_relocs): Use got_entries to estimate
+	local got size.
+	(_bfd_mips_elf_size_dynamic_sections): Do not account for
+	GOT_PAGE entries, since we now reuse GOT16 entries.
+
 2002-12-10  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* aoutx.h (set_section_contents): Allow an otherwise unrepresentable
