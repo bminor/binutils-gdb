@@ -675,6 +675,46 @@ nindy_open_stub (arg)
   return 1;
 }
 
+static void
+nindy_load( filename, from_tty )
+    char *filename;
+    int from_tty;
+{
+  asection *s;
+  /* Can't do unix style forking on a VMS system, so we'll use bfd to do
+     all the work for us
+     */
+
+  bfd *file = bfd_openr(filename,0);
+  if (!file)
+  {
+    perror_with_name(filename);
+    return;
+  }
+
+  if (!bfd_check_format(file, bfd_object))
+  {
+    error("can't prove it's an object file\n");
+    return;
+  }
+ 
+  for ( s = file->sections; s; s=s->next)
+  {
+    if (s->flags & SEC_LOAD)
+    {
+      char *buffer = xmalloc(s->_raw_size);
+      bfd_get_section_contents(file, s, buffer, 0, s->_raw_size);
+      printf("Loading section %s, size %x vma %x\n",
+             s->name,
+             s->_raw_size,
+             s->vma);
+      ninMemPut(s->vma, buffer, s->_raw_size);
+      free(buffer);
+    }
+  }
+  bfd_close(file);
+}
+
 static int
 load_stub (arg)
      char *arg;
@@ -754,7 +794,7 @@ specified when you started GDB.",
 	memory_remove_breakpoint,
 	0, 0, 0, 0, 0,	/* Terminal crud */
 	nindy_kill,
-	generic_load,
+	nindy_load,
 	0, /* lookup_symbol */
 	nindy_create_inferior,
 	nindy_mourn_inferior,

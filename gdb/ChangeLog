@@ -1,3 +1,8 @@
+Fri Jun 23 11:51:58 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* remote-nindy (nindy_load): Put in target specific load, it's 
+	20 times faster.
+
 Thu Jun 22 20:21:59 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* utils.c (error): Move local `args' outside conditional,
