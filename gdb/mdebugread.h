@@ -34,4 +34,9 @@ struct mdebug_extra_func_info
   PDR pdr;			/* Procedure descriptor record */
 };
 
+/* Special symbol found in blocks associated with routines.  We can
+   hang mdebug_extra_func_info's off of this.  */
+
+#define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
+
 #endif /* MDEBUGREAD_H */

@@ -1,5 +1,10 @@
 2004-10-31  Andrew Cagney  <cagney@gnu.org>
 
+	* mdebugread.h (MDEBUG_EFI_SYMBOL_NAME): Define.
+	* mdebugread.c (MDEBUG_EFI_SYMBOL_NAME): Delete.
+	* config/alpha/tm-alpha.h (MDEBUG_EFI_SYMBOL_NAME): Delete.
+	* config/mips/tm-mips.h (MDEBUG_EFI_SYMBOL_NAME): Delete.
+
 	* mdebugread.h (ecoff_relocate_efi): Delete declaration.
 	* mdebugread.c (ecoff_relocate_efi): Delete function.
 	* objfiles.c (objfile_relocate): Delete #ifdef

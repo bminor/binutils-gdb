@@ -57,14 +57,6 @@
 #include "block.h"
 #include "dictionary.h"
 #include "mdebugread.h"
-
-/* These are needed if the tm.h file does not contain the necessary
-   mips specific definitions.  */
-
-#ifndef MDEBUG_EFI_SYMBOL_NAME
-#define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
-#endif
-
 #include "gdb_stat.h"
 #include "gdb_string.h"
 

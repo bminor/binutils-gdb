@@ -33,9 +33,4 @@ struct symbol;
 struct type;
 struct value;
 
-/* Special symbol found in blocks associated with routines.  We can
-   hang mdebug_extra_func_info's off of this.  */
-
-#define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
-
 #endif /* TM_MIPS_H */

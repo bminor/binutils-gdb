@@ -24,11 +24,6 @@
 #ifndef TM_ALPHA_H
 #define TM_ALPHA_H
 
-/* Special symbol found in blocks associated with routines.  We can hang
-   alpha_extra_func_info_t's off of this.  */
-
-#define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
-
 #define RA_REGNUM 26		/* XXXJRT needed by mdebugread.c */
 
 #endif /* TM_ALPHA_H */
