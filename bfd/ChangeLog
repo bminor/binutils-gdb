@@ -1,3 +1,9 @@
+Mon Nov 11 19:07:32 1991  Fred Fish  (fnf at cygnus.com)
+
+	* elf.c:  Additions to support ELF format core files.
+	* config/mh-amix:  Add -DHAVE_PROCFS to HDEFINES, since host
+	has support for /proc (all the include files in particular).
+
 Mon Nov 11 18:36:47 1991  Per Bothner  (bothner at cygnus.com)
 
 	* aoutx.h (NAME(aout,find_nearest_line)):  Handle the case
