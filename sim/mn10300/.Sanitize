@@ -15,11 +15,11 @@
 
 Do-first:
 
-am33_files="am33.igen"
-if ( echo $* | grep keep\-am33 > /dev/null ) ; then
-        keep_these_too="${am33_files} ${keep_these_too}"
+cygnus_files="am33.igen"
+if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
+        keep_these_too="${cygnus_files} ${keep_these_too}"
 else
-        lose_these_too="${am33_files} ${lose_these_too}"
+        lose_these_too="${cygnus_files} ${lose_these_too}"
 fi
 
 
@@ -57,23 +57,23 @@ Things-to-lose:
 
 Do-last:
 
-am33_files="ChangeLog mn10300_sim.h mn10300.igen Makefile.in"
-if ( echo $* | grep keep\-am33 > /dev/null ) ; then
-        for i in $am33_files ; do
-                if test ! -d $i && (grep sanitize-am33 $i > /dev/null) ; then
+cygnus_files="ChangeLog mn10300_sim.h mn10300.igen Makefile.in"
+if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
+        for i in $cygnus_files ; do
+                if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
                         if [ -n "${verbose}" ] ; then
                                 echo Keeping am33 stuff in $i
                         fi
                 fi
         done
 else
-        for i in $am33_files ; do
-                if test ! -d $i && (grep sanitize-am33 $i > /dev/null) ; then
+        for i in $cygnus_files ; do
+                if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
                         if [ -n "${verbose}" ] ; then
                                 echo Removing traces of \"am33\" from $i...
                         fi
                         cp $i new
-                        sed '/start\-sanitize\-am33/,/end-\sanitize\-am33/d' < $i > new
+                        sed '/start\-sanitize\-cygnus/,/end-\sanitize\-cygnus/d' < $i > new
                         if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
                                 if [ -n "${verbose}" ] ; then
                                         echo Caching $i in .Recover...
