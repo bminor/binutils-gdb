@@ -1,3 +1,7 @@
+o - strip
+	Implement various options
+	Make faster by using ftruncate if available (and format is suitable).
+
 OLD:
 
 o - merge:
