@@ -5,4 +5,5 @@ if [istarget m32r*-*-*] {
     run_dump_test "relax-1"
     run_dump_test "uppercase"
     run_dump_test "fslot"
+    run_dump_test "signed-relocs"
 }

@@ -1,5 +1,9 @@
 2003-04-08  Nick Clifton  <nickc@redhat.com>
 
+	* gas/m32r/m32r.exp: Run signed-relocs test.
+        * gas/m32r/signed-relocs.s: New file: Test signed relocs.
+        * gas/m32r/signed-relocs.d: New file: Expected results
+
 	* gas/ia64/dependency-1.s: New file: Test read before write dependency.
 	* gas/ia64/dependency-1.d: New file: Expected assembly results.
 	* gas/ia64/ia64.exp: Run the new test.

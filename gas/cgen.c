@@ -716,3 +716,15 @@ gas_cgen_tc_gen_reloc (section, fixP)
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
   return reloc;
 }
+
+/* Perform any cgen specific initialisation.
+   Called after gas_cgen_cpu_desc has been created.  */
+
+void
+gas_cgen_begin ()
+{
+  if (flag_signed_overflow_ok)
+    cgen_set_signed_overflow_ok (gas_cgen_cpu_desc);
+  else
+    cgen_clear_signed_overflow_ok (gas_cgen_cpu_desc);
+}

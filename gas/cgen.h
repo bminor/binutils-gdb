@@ -98,4 +98,7 @@ md_cgen_record_fixup_exp PARAMS ((fragS *, int, const CGEN_INSN *, int,
 
 extern void gas_cgen_md_operand PARAMS ((expressionS *));
 
+/* Perform any cgen specific initialisation for gas.  */
+extern void gas_cgen_begin PARAMS ((void));
+
 #endif /* GAS_CGEN_H */

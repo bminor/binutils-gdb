@@ -65,6 +65,10 @@ static void parse_args PARAMS ((int *, char ***));
 static void dump_statistics PARAMS ((void));
 static void perform_an_assembly_pass PARAMS ((int argc, char **argv));
 static int macro_expr PARAMS ((const char *, int, sb *, int *));
+#ifdef USING_CGEN
+/* Perform any cgen specific initialisation for gas.  */
+extern void gas_cgen_begin PARAMS ((void));
+#endif
 
 /* True if a listing is wanted.  */
 int listing;
@@ -1064,6 +1068,9 @@ perform_an_assembly_pass (argc, argv)
      and sections already created, in BFD_ASSEMBLER mode.  */
   md_begin ();
 
+#ifdef USING_CGEN
+  gas_cgen_begin ();
+#endif
 #ifdef obj_begin
   obj_begin ();
 #endif

@@ -1,3 +1,12 @@
+2003-04-08  Nick Clifton  <nickc@redhat.com>
+
+	* as.c (perform_an_assembly_pass): If using cgen, call
+	gas_cgen_begin.
+	* cgen.c (gas_cgen_begin): New function.  If
+	flag_signed_overflow_ok is set call cgen_set_signed_overflow_ok
+	otherwise call cgen_clear_signed_overflow_ok.
+	* cgen.h: Prototype gas_cgen_begin.
+
 2003-04-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* write.c (write_relocs): Remove unused variable.
