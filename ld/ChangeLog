@@ -1,3 +1,8 @@
+2002-04-03  Jakub Jelinek  <jakub@redhat.com>
+
+	* ldexp.c (fold_binary) [DATA_SEGMENT_ALIGN]: If common page size
+	is smaller than maximum, round dot up to common page boundary.
+
 2002-03-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.host: Set up for generic hosts first, then tweak as

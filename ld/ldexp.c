@@ -356,7 +356,8 @@ fold_binary (tree, current_section, allocation_done, dot, dotp)
 			}
 		    }
 		  else if (other.value < maxpage)
-		    result.value += dot & (maxpage - other.value);
+		    result.value += (dot + other.value - 1)
+				    & (maxpage - other.value);
 		}
 	      else
 		result.valid_p = false;
