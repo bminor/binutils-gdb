@@ -1,5 +1,9 @@
 2001-12-19  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c (s390_readinstruction): Don't call
+	info->read_memory_func to read zero bytes.  Some targets'
+	xfer_memory functions can't cope with that.
+
 	* gdbarch.sh (TARGET_CHAR_SIGNED): New macro.
 	* gdbarch.c, gdbarch.h: Regenerated.
 	* gdbtypes.c (build_gdbtypes): If TARGET_CHAR_SIGNED is zero,

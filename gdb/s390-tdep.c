@@ -132,8 +132,11 @@ s390_readinstruction (bfd_byte instr[], CORE_ADDR at,
   if ((*info->read_memory_func) (at, &instr[0], 2, info))
     return -1;
   instrlen = s390_instrlen[instr[0] >> 6];
-  if ((*info->read_memory_func) (at + 2, &instr[2], instrlen - 2, info))
-    return -1;
+  if (instrlen > 2)
+    {
+      if ((*info->read_memory_func) (at + 2, &instr[2], instrlen - 2, info))
+        return -1;
+    }
   return instrlen;
 }
 
