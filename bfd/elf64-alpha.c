@@ -133,6 +133,8 @@ static boolean elf64_alpha_merge_ind_symbols
   PARAMS((struct alpha_elf_link_hash_entry *, PTR));
 static Elf_Internal_Rela * elf64_alpha_find_reloc_at_ofs
   PARAMS ((Elf_Internal_Rela *, Elf_Internal_Rela *, bfd_vma, int));
+static enum elf_reloc_type_class elf64_alpha_reloc_type_class
+  PARAMS ((int));
 
 struct alpha_elf_link_hash_entry
 {
@@ -182,7 +184,10 @@ struct alpha_elf_link_hash_entry
     asection *srel;
 
     /* what kind of relocation? */
-    unsigned long rtype;
+    unsigned int rtype;
+
+    /* is this against read-only section? */
+    unsigned int reltext : 1;
 
     /* how many did we find?  */
     unsigned long count;
@@ -2627,6 +2632,7 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 		  rent->srel = sreloc;
 		  rent->rtype = r_type;
 		  rent->count = 1;
+		  rent->reltext = (sec->flags & SEC_READONLY) != 0;
 
 		  rent->next = h->reloc_entries;
 		  h->reloc_entries = rent;
@@ -2639,6 +2645,8 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 	      /* If this is a shared library, and the section is to be
 		 loaded into memory, we need a RELATIVE reloc.  */
 	      sreloc->_raw_size += sizeof (Elf64_External_Rela);
+	      if (sec->flags & SEC_READONLY)
+		info->flags |= DF_TEXTREL;
 	    }
 	  break;
 	}
@@ -3181,6 +3189,8 @@ elf64_alpha_calc_dynrel_sizes (h, info)
 	  {
 	    relent->srel->_raw_size +=
 	      sizeof (Elf64_External_Rela) * relent->count;
+	    if (relent->reltext)
+	      info->flags |= DT_TEXTREL;
 	  }
 
       dynobj = elf_hash_table(info)->dynobj;
@@ -3214,7 +3224,6 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 {
   bfd *dynobj;
   asection *s;
-  boolean reltext;
   boolean relplt;
 
   dynobj = elf_hash_table(info)->dynobj;
@@ -3263,7 +3272,6 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
      memory for them.  */
-  reltext = false;
   relplt = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
@@ -3293,19 +3301,6 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 
 	  if (!strip)
 	    {
-	      const char *outname;
-	      asection *target;
-
-	      /* If this relocation section applies to a read only
-		 section, then we probably need a DT_TEXTREL entry.  */
-	      outname = bfd_get_section_name (output_bfd,
-					      s->output_section);
-	      target = bfd_get_section_by_name (output_bfd, outname + 5);
-	      if (target != NULL
-		  && (target->flags & SEC_READONLY) != 0
-		  && (target->flags & SEC_ALLOC) != 0)
-		reltext = true;
-
 	      if (strcmp(name, ".rela.plt") == 0)
 		relplt = true;
 
@@ -3361,11 +3356,10 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 					    sizeof (Elf64_External_Rela)))
 	return false;
 
-      if (reltext)
+      if (info->flags & DF_TEXTREL)
 	{
 	  if (! bfd_elf64_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return false;
-	  info->flags |= DF_TEXTREL;
 	}
     }
 
@@ -4650,6 +4644,23 @@ elf64_alpha_final_link (abfd, info)
 
   return true;
 }
+
+static enum elf_reloc_type_class
+elf64_alpha_reloc_type_class (type)
+     int type;
+{
+  switch (type)
+    {
+    case R_ALPHA_RELATIVE:
+      return reloc_class_relative;
+    case R_ALPHA_JMP_SLOT:
+      return reloc_class_plt;
+    case R_ALPHA_COPY:
+      return reloc_class_copy;
+    default:
+      return reloc_class_normal;
+    }
+}
 
 /* ECOFF swapping routines.  These are used when dealing with the
    .mdebug section, which is in the ECOFF debugging format.  Copied
@@ -4777,6 +4788,8 @@ const struct elf_size_info alpha_elf_size_info =
   elf64_alpha_finish_dynamic_sections
 #define bfd_elf64_bfd_final_link \
   elf64_alpha_final_link
+#define elf_backend_reloc_type_class \
+  elf64_alpha_reloc_type_class
 
 #define elf_backend_ecoff_debug_swap \
   &elf64_alpha_ecoff_debug_swap

@@ -1,3 +1,20 @@
+2001-08-24  Jakub Jelinek  <jakub@redhat.com>
+
+	* elflink.h (elf_link_sort_cmp1): Sort RELATIVE relocs first, not
+	last.
+	(elf_link_sort_relocs): Adjust accordingly.
+
+	* elf64-alpha.c (struct alpha_elf_link_hash_entry): Add reltext flag.
+	(elf64_alpha_check_relocs): Set it if section this reloc is against
+	is read-only.  Set DF_TEXTREL if a RELATIVE reloc is needed against
+	read-only section.
+	(elf64_alpha_calc_dynrel_sizes): Set DF_TEXTREL flag if relocation
+	is is against read-only section.
+	(elf64_alpha_size_dynamic_sections): Use DF_TEXTREL flag, don't
+	check section names.
+	(elf64_alpha_reloc_type_class): New.
+	(elf_backend_reloc_type_class): Define.
+
 2001-08-24  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* linker.c (_bfd_generic_link_add_archive_symbols): Replace alloca()
@@ -40,7 +57,7 @@
 
 	* aoutf1.h (sunos_write_object_contents): Silence compile time
 	warning.
-        * libaout.h (N_SET_DYNAMIC): Silence compile time warning.
+	* libaout.h (N_SET_DYNAMIC): Silence compile time warning.
 
 	* bout.c: Add missing function prototypes.  Fix formatting.
 	* coff-z8k.c: Add missing function prototypes.  Fix formatting.
@@ -276,7 +293,7 @@
 	* elfxx-target.h (elf_backend_sprintf_vma): Initialise if not
 	already defined.
 	(elf_backend_fprintf_vma): Initialise if not already defined.
-        (struct elf_backend_data): Initialise the
+	(struct elf_backend_data): Initialise the
 	elf_backend_sprintf_vma and elf_backend_fprintf_vma fields.
 
 2001-08-10  Andreas Jaeger  <aj@suse.de>

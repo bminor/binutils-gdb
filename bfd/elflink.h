@@ -4300,9 +4300,9 @@ elf_link_sort_cmp1 (A, B)
   relativeb = b->type == reloc_class_relative;
 
   if (relativea < relativeb)
-    return -1;
-  if (relativea > relativeb)
     return 1;
+  if (relativea > relativeb)
+    return -1;
   if (ELF_R_SYM (a->u.rel.r_info) < ELF_R_SYM (b->u.rel.r_info))
     return -1;
   if (ELF_R_SYM (a->u.rel.r_info) > ELF_R_SYM (b->u.rel.r_info))
@@ -4429,14 +4429,15 @@ elf_link_sort_relocs (abfd, info, psec)
       }
 
   qsort (rela, count, sizeof (*rela), elf_link_sort_cmp1);
-  for (i = 0, j = 0; i < count && rela[i].type != reloc_class_relative; i++)
+  for (ret = 0; ret < count && rela[ret].type == reloc_class_relative; ret++)
+    ;
+  for (i = ret, j = ret; i < count; i++)
     {
       if (ELF_R_SYM (rela[i].u.rel.r_info) != ELF_R_SYM (rela[j].u.rel.r_info))
 	j = i;
       rela[i].offset = rela[j].u.rel.r_offset;
     }
-  ret = count - i;
-  qsort (rela, i, sizeof (*rela), elf_link_sort_cmp2);
+  qsort (rela + ret, count - ret, sizeof (*rela), elf_link_sort_cmp2);
   
   for (o = dynobj->sections; o != NULL; o = o->next)
     if ((o->flags & (SEC_HAS_CONTENTS|SEC_LINKER_CREATED))
