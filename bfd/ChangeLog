@@ -1,3 +1,15 @@
+Thu Aug 12 10:32:47 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* config/u68k-coff.mt: Fix typo, DEFAULT_TARGET for
+	DEFAULT_VECTOR. 
+
+	* config/h8300-coff.mt, h8500-coff.mt, sh-coff.mt, st2000.mt,
+	z8k-coff.mt (DEFAULT_VECTOR): Define.  Don't explicitly add
+	S-records via SELECT_VECS.
+
+	* targets.c (target_vector), Makefile.in (BFD_LIBS): Always
+	support S-records, for convenience.
+
 Thu Aug 12 08:30:05 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* bfd.c (_bfd_host_big_endian): Removed.
@@ -6,6 +18,10 @@ Thu Aug 12 08:30:05 1993  Ian Lance Taylor  (ian@cygnus.com)
 	* bfd-in2.h: Regenerated.
 
 Wed Aug 11 12:11:23 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* config.bfd: New file, broken out of configure.in.
+	* configure.in: Use it, and use standard target names for
+	--with-targets, replacing --with-bfd-targets.
 
 	* archures.c (archures_init_table): Add bfd_sh_arch.
 
