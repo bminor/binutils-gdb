@@ -1881,6 +1881,8 @@ md_apply_fix3 (fixP, valueP, seg)
 	    {
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    "can't handle mpg loaded vu code with branch relocations");
+	      fixP->fx_done = 1;
+	      return 1;
 	    }
 	  else
 	    {

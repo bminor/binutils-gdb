@@ -1,3 +1,10 @@
+start-sanitize-sky
+Mon Apr 13 12:18:53 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (md_apply_fix3): Mark fixup for mpg loaded vu
+	branch error as being done so we don't try to emit a reloc.
+
+end-sanitize-sky
 Thu Apr  9 10:29:42 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* symbols.c (max_indent_level): New global.
