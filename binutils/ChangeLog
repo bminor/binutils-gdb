@@ -1,4 +1,8 @@
-Fri Nov  9 17:55:39 2001  Jeffrey A Law  (law@cygnus.com)
+2001-11-12  * Steven J. Hill <sjhill@realitydiluted.com>
+
+	* bucomm.c (make_tempname): Use mkstemp in place of mktemp.
+
+2001-11-09  Jeffrey A Law  (law@cygnus.com)
 
 	* unwind-ia64.c (unw_print_brmask): Fix ISO C portability glitch.
 	(unw_print_grmask, unw_print_frmask, unw_print_abreg): Likewise.
@@ -61,7 +65,7 @@ Fri Nov  9 17:55:39 2001  Jeffrey A Law  (law@cygnus.com)
 	* readelf.c (get_section_type_name): Don't print SHT_ prefix for
 	LOPROC, LOOS and LOUSER.
 
-Thu Oct 11 21:45:17 2001  J"orn Rennecke <amylaar@onetel.net.uk>
+2001-10-11  J"orn Rennecke <amylaar@onetel.net.uk>
 
 	* MAINTAINERS: Update my email address.
 
@@ -233,14 +237,14 @@ Thu Oct 11 21:45:17 2001  J"orn Rennecke <amylaar@onetel.net.uk>
 	* doc/binutils.texi: Document new command line option.
 	* NEWS: Announce new command line option.
 
-Wed Sep 12 20:07:16 2001  Alexandre Oliva  <aoliva@redhat.com>
+2001-09-12  Alexandre Oliva  <aoliva@redhat.com>
 
 	* readelf.c (guess_is_rela, dump_relocations, get_machine_name,
 	get_machine_flags): Added EM_M32R, EM_D10V, EM_V850, EM_D30V,
 	EM_MN10200, EM_MN10300, EM_FR30, EM_AVR_OLD and EM_PJ_OLD.
 	Removed EM_CYGNUS_ARC.
 
-Tue Sep  4 20:26:08 2001  Jeffrey A Law  (law@cygnus.com)
+2001-09-04  Jeffrey A Law  (law@cygnus.com)
 
 	* readelf.c: Include elf/h8 for H8 series definitions.
 	(guess_is_rela): H8 series if RELA.
@@ -882,7 +886,7 @@ Tue Sep  4 20:26:08 2001  Jeffrey A Law  (law@cygnus.com)
 
 	* readelf.c: Fix formatting.
 
-Mon Dec 11 14:30:21 MET 2000  Jan Hubicka  <jh@suse.cz>
+2000-12-11  Jan Hubicka  <jh@suse.cz>
 
 	* MAINTAINERS: Add myself and Andreas Jaeger as x86_64 maintainer.
 
@@ -1415,13 +1419,13 @@ Mon Dec 11 14:30:21 MET 2000  Jan Hubicka  <jh@suse.cz>
 	* srconv.c: Likewise.
 	* sysdump.c: Likewise.
 
-Sun Apr 23 14:23:26 2000  Denis Chertykov  <denisc@overta.ru>
+2000-04-23  Denis Chertykov  <denisc@overta.ru>
 
 	* readelf.c (guess_is_rela): AVR uses RELA relocations.
 	(get_machine_name): machine name for EM_AVR added.
 
-Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
-			  David Mosberger  <davidm@hpl.hp.com>
+2000-04-21  Richard Henderson  <rth@cygnus.com>
+	    David Mosberger  <davidm@hpl.hp.com>
 
 	* Makefile.am (readelf.o): Add elf/ia64.h.
 	* Makefile.in: Rebuild.
@@ -1446,7 +1450,7 @@ Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
 	`strftime' since strftime is not available on all systems.
 	(process_mips_specific): Ditto.
 
-Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+2000-04-07  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (WARN_CFLAGS): Set to -W -Wall by default.  Add
 	--enable-build-warnings option.

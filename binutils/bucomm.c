@@ -233,14 +233,14 @@ make_tempname (filename)
 #endif
       strcat (tmpname, "/");
       strcat (tmpname, template);
-      mktemp (tmpname);
+      close (mkstemp (tmpname));
       *slash = c;
     }
   else
     {
       tmpname = xmalloc (sizeof (template));
       strcpy (tmpname, template);
-      mktemp (tmpname);
+      close (mkstemp (tmpname));
     }
   return tmpname;
 }
