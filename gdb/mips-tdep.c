@@ -2979,145 +2979,6 @@ mips_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
   return align_down (addr, 16);
 }
 
-/* Determine how a return value is stored within the MIPS register
-   file, given the return type `valtype'. */
-
-struct return_value_word
-{
-  int len;
-  int reg;
-  int reg_offset;
-  int buf_offset;
-};
-
-static void
-return_value_location (struct type *valtype,
-		       struct return_value_word *hi,
-		       struct return_value_word *lo)
-{
-  int len = TYPE_LENGTH (valtype);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  if (TYPE_CODE (valtype) == TYPE_CODE_FLT
-      && ((MIPS_FPU_TYPE == MIPS_FPU_DOUBLE && (len == 4 || len == 8))
-	  || (MIPS_FPU_TYPE == MIPS_FPU_SINGLE && len == 4)))
-    {
-      if (mips_abi_regsize (current_gdbarch) < 8 && len == 8)
-	{
-	  /* We need to break a 64bit float in two 32 bit halves and
-	     spread them across a floating-point register pair.  */
-	  lo->buf_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
-	  hi->buf_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 0 : 4;
-	  lo->reg_offset = ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-			     && register_size (current_gdbarch,
-					       mips_regnum (current_gdbarch)->
-					       fp0) == 8) ? 4 : 0);
-	  hi->reg_offset = lo->reg_offset;
-	  lo->reg = mips_regnum (current_gdbarch)->fp0 + 0;
-	  hi->reg = mips_regnum (current_gdbarch)->fp0 + 1;
-	  lo->len = 4;
-	  hi->len = 4;
-	}
-      else
-	{
-	  /* The floating point value fits in a single floating-point
-	     register. */
-	  lo->reg_offset = ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-			     && register_size (current_gdbarch,
-					       mips_regnum (current_gdbarch)->
-					       fp0) == 8
-			     && len == 4) ? 4 : 0);
-	  lo->reg = mips_regnum (current_gdbarch)->fp0;
-	  lo->len = len;
-	  lo->buf_offset = 0;
-	  hi->len = 0;
-	  hi->reg_offset = 0;
-	  hi->buf_offset = 0;
-	  hi->reg = 0;
-	}
-    }
-  else
-    {
-      /* Locate a result possibly spread across two registers. */
-      int regnum = 2;
-      lo->reg = regnum + 0;
-      hi->reg = regnum + 1;
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-	  && len < mips_abi_regsize (current_gdbarch))
-	{
-	  /* "un-left-justify" the value in the low register */
-	  lo->reg_offset = mips_abi_regsize (current_gdbarch) - len;
-	  lo->len = len;
-	  hi->reg_offset = 0;
-	  hi->len = 0;
-	}
-      else if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG && len > mips_abi_regsize (current_gdbarch)	/* odd-size structs */
-	       && len < mips_abi_regsize (current_gdbarch) * 2
-	       && (TYPE_CODE (valtype) == TYPE_CODE_STRUCT ||
-		   TYPE_CODE (valtype) == TYPE_CODE_UNION))
-	{
-	  /* "un-left-justify" the value spread across two registers. */
-	  lo->reg_offset = 2 * mips_abi_regsize (current_gdbarch) - len;
-	  lo->len = mips_abi_regsize (current_gdbarch) - lo->reg_offset;
-	  hi->reg_offset = 0;
-	  hi->len = len - lo->len;
-	}
-      else
-	{
-	  /* Only perform a partial copy of the second register. */
-	  lo->reg_offset = 0;
-	  hi->reg_offset = 0;
-	  if (len > mips_abi_regsize (current_gdbarch))
-	    {
-	      lo->len = mips_abi_regsize (current_gdbarch);
-	      hi->len = len - mips_abi_regsize (current_gdbarch);
-	    }
-	  else
-	    {
-	      lo->len = len;
-	      hi->len = 0;
-	    }
-	}
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-	  && register_size (current_gdbarch, regnum) == 8
-	  && mips_abi_regsize (current_gdbarch) == 4)
-	{
-	  /* Account for the fact that only the least-signficant part
-	     of the register is being used */
-	  lo->reg_offset += 4;
-	  hi->reg_offset += 4;
-	}
-      lo->buf_offset = 0;
-      hi->buf_offset = lo->len;
-    }
-}
-
-/* Should call_function allocate stack space for a struct return?  */
-
-static int
-mips_eabi_use_struct_convention (int gcc_p, struct type *type)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  return (TYPE_LENGTH (type) > 2 * mips_abi_regsize (current_gdbarch));
-}
-
-/* Should call_function pass struct by reference? 
-   For each architecture, structs are passed either by
-   value or by reference, depending on their size.  */
-
-static int
-mips_eabi_reg_struct_has_addr (int gcc_p, struct type *type)
-{
-  enum type_code typecode = TYPE_CODE (check_typedef (type));
-  int len = TYPE_LENGTH (check_typedef (type));
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  if (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
-    return (len > mips_abi_regsize (current_gdbarch));
-
-  return 0;
-}
-
 static CORE_ADDR
 mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			   struct regcache *regcache, CORE_ADDR bp_addr,
@@ -3386,54 +3247,20 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   return sp;
 }
 
-/* Given a return value in `regbuf' with a type `valtype', extract and
-   copy its value into `valbuf'. */
+/* Determin the return value convention being used.  */
 
-static void
-mips_eabi_extract_return_value (struct type *valtype,
-				char regbuf[], char *valbuf)
+static enum return_value_convention
+mips_eabi_return_value (struct gdbarch *gdbarch,
+			struct type *type, struct regcache *regcache,
+			void *readbuf, const void *writebuf)
 {
-  struct return_value_word lo;
-  struct return_value_word hi;
-  return_value_location (valtype, &hi, &lo);
-
-  memcpy (valbuf + lo.buf_offset,
-	  regbuf + DEPRECATED_REGISTER_BYTE (NUM_REGS + lo.reg) +
-	  lo.reg_offset, lo.len);
-
-  if (hi.len > 0)
-    memcpy (valbuf + hi.buf_offset,
-	    regbuf + DEPRECATED_REGISTER_BYTE (NUM_REGS + hi.reg) +
-	    hi.reg_offset, hi.len);
+  if (TYPE_LENGTH (type) > 2 * mips_abi_regsize (gdbarch))
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  if (readbuf)
+    memset (readbuf, 0, TYPE_LENGTH (type));
+  return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
-/* Given a return value in `valbuf' with a type `valtype', write it's
-   value into the appropriate register. */
-
-static void
-mips_eabi_store_return_value (struct type *valtype, char *valbuf)
-{
-  char raw_buffer[MAX_REGISTER_SIZE];
-  struct return_value_word lo;
-  struct return_value_word hi;
-  return_value_location (valtype, &hi, &lo);
-
-  memset (raw_buffer, 0, sizeof (raw_buffer));
-  memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
-  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (lo.reg),
-				   raw_buffer, register_size (current_gdbarch,
-							      lo.reg));
-
-  if (hi.len > 0)
-    {
-      memset (raw_buffer, 0, sizeof (raw_buffer));
-      memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
-      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (hi.reg),
-				       raw_buffer,
-				       register_size (current_gdbarch,
-						      hi.reg));
-    }
-}
 
 /* N32/N64 ABI stuff.  */
 
@@ -4541,47 +4368,12 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   return sp;
 }
 
-static void
-mips_o64_extract_return_value (struct type *valtype,
-			       char regbuf[], char *valbuf)
+static enum return_value_convention
+mips_o64_return_value (struct gdbarch *gdbarch,
+		       struct type *type, struct regcache *regcache,
+		       void *readbuf, const void *writebuf)
 {
-  struct return_value_word lo;
-  struct return_value_word hi;
-  return_value_location (valtype, &hi, &lo);
-
-  memcpy (valbuf + lo.buf_offset,
-	  regbuf + DEPRECATED_REGISTER_BYTE (NUM_REGS + lo.reg) +
-	  lo.reg_offset, lo.len);
-
-  if (hi.len > 0)
-    memcpy (valbuf + hi.buf_offset,
-	    regbuf + DEPRECATED_REGISTER_BYTE (NUM_REGS + hi.reg) +
-	    hi.reg_offset, hi.len);
-}
-
-static void
-mips_o64_store_return_value (struct type *valtype, char *valbuf)
-{
-  char raw_buffer[MAX_REGISTER_SIZE];
-  struct return_value_word lo;
-  struct return_value_word hi;
-  return_value_location (valtype, &hi, &lo);
-
-  memset (raw_buffer, 0, sizeof (raw_buffer));
-  memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
-  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (lo.reg),
-				   raw_buffer, register_size (current_gdbarch,
-							      lo.reg));
-
-  if (hi.len > 0)
-    {
-      memset (raw_buffer, 0, sizeof (raw_buffer));
-      memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
-      deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (hi.reg),
-				       raw_buffer,
-				       register_size (current_gdbarch,
-						      hi.reg));
-    }
+  return RETURN_VALUE_STRUCT_CONVENTION;
 }
 
 /* Floating point register management.
@@ -5800,49 +5592,33 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     case MIPS_ABI_O64:
       set_gdbarch_push_dummy_call (gdbarch, mips_o64_push_dummy_call);
-      set_gdbarch_deprecated_store_return_value (gdbarch,
-						 mips_o64_store_return_value);
-      set_gdbarch_deprecated_extract_return_value (gdbarch,
-						   mips_o64_extract_return_value);
+      set_gdbarch_return_value (gdbarch, mips_o64_return_value);
       tdep->mips_last_arg_regnum = MIPS_A0_REGNUM + 4 - 1;
       tdep->mips_last_fp_arg_regnum = tdep->regnum->fp0 + 12 + 4 - 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
-      set_gdbarch_deprecated_use_struct_convention (gdbarch, always_use_struct_convention);
       break;
     case MIPS_ABI_EABI32:
       set_gdbarch_push_dummy_call (gdbarch, mips_eabi_push_dummy_call);
-      set_gdbarch_deprecated_store_return_value (gdbarch,
-						 mips_eabi_store_return_value);
-      set_gdbarch_deprecated_extract_return_value (gdbarch,
-						   mips_eabi_extract_return_value);
+      set_gdbarch_return_value (gdbarch, mips_eabi_return_value);
       tdep->mips_last_arg_regnum = MIPS_A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = tdep->regnum->fp0 + 12 + 8 - 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
-      set_gdbarch_deprecated_reg_struct_has_addr
-	(gdbarch, mips_eabi_reg_struct_has_addr);
-      set_gdbarch_deprecated_use_struct_convention (gdbarch, mips_eabi_use_struct_convention);
       break;
     case MIPS_ABI_EABI64:
       set_gdbarch_push_dummy_call (gdbarch, mips_eabi_push_dummy_call);
-      set_gdbarch_deprecated_store_return_value (gdbarch,
-						 mips_eabi_store_return_value);
-      set_gdbarch_deprecated_extract_return_value (gdbarch,
-						   mips_eabi_extract_return_value);
+      set_gdbarch_return_value (gdbarch, mips_eabi_return_value);
       tdep->mips_last_arg_regnum = MIPS_A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = tdep->regnum->fp0 + 12 + 8 - 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 64);
       set_gdbarch_ptr_bit (gdbarch, 64);
       set_gdbarch_long_long_bit (gdbarch, 64);
-      set_gdbarch_deprecated_reg_struct_has_addr
-	(gdbarch, mips_eabi_reg_struct_has_addr);
-      set_gdbarch_deprecated_use_struct_convention (gdbarch, mips_eabi_use_struct_convention);
       break;
     case MIPS_ABI_N32:
       set_gdbarch_push_dummy_call (gdbarch, mips_n32n64_push_dummy_call);
