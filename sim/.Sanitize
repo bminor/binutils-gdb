@@ -15,13 +15,6 @@
 
 Do-first:
 
-m32r_files="m32r"
-if ( echo $* | grep keep\-m32r > /dev/null ) ; then
-        keep_these_too="${m32r_files} ${keep_these_too}"
-else
-        lose_these_too="${m32r_files} ${lose_these_too}"
-fi
-
 v850_files="v850"
 if ( echo $* | grep keep\-v850 > /dev/null ) ; then
         keep_these_too="${v850_files} ${keep_these_too}"
@@ -55,6 +48,7 @@ d10v
 erc32
 h8300
 h8500
+m32r
 mips
 mn10200
 mn10300
@@ -67,34 +61,6 @@ Things-to-lose:
 
 
 Do-last:
-
-m32r_files="configure configure.in ChangeLog"
-if ( echo $* | grep keep\-m32r > /dev/null ) ; then
-        for i in $m32r_files ; do
-                if test ! -d $i && (grep sanitize-m32r $i > /dev/null) ; then
-                        if [ -n "${verbose}" ] ; then
-                                echo Keeping m32r stuff in $i
-                        fi
-                fi
-        done
-else
-        for i in $m32r_files ; do
-                if test ! -d $i && (grep sanitize-m32r $i > /dev/null) ; then
-                        if [ -n "${verbose}" ] ; then
-                                echo Removing traces of \"m32r\" from $i...
-                        fi
-                        cp $i new
-                        sed '/start\-sanitize\-m32r/,/end-\sanitize\-m32r/d' < $i > new
-                        if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-                                if [ -n "${verbose}" ] ; then
-                                        echo Caching $i in .Recover...
-                                fi
-                                mv $i .Recover
-                        fi
-                        mv new $i
-                fi
-        done
-fi
 
 v850_files="configure configure.in ChangeLog"
 if ( echo $* | grep keep\-v850 > /dev/null ) ; then
