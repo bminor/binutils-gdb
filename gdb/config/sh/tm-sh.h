@@ -59,11 +59,12 @@ extern CORE_ADDR sh_skip_prologue ();
    detection */
 
 #define BREAKPOINT {0xc3, 0xff}  /* 0xc3ff is trapa #ff */
-
+#undef BREAKPOINT
+#define BREAKPOINT {0x00, 0x1b} /* SLEEP */
 
 /* If your kernel resets the pc after the trap happens you may need to
    define this before including this file.  */
-#define DECR_PC_AFTER_BREAK 2
+#define DECR_PC_AFTER_BREAK 0
 
 /* Nonzero if instruction at PC is a return instruction.  */
 #define ABOUT_TO_RETURN(pc) (read_memory_integer(pc,2) == 0x000b)
