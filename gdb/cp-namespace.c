@@ -783,14 +783,20 @@ check_one_possible_namespace_symbol (const char *name, int len,
 				     struct objfile *objfile)
 {
   struct block *block = get_possible_namespace_block (objfile);
-  char *name_copy = obsavestring (name, len, &objfile->objfile_obstack);
-  struct symbol *sym = lookup_block_symbol (block, name_copy, NULL,
-					    VAR_DOMAIN);
+  char *name_copy = alloca (len + 1);
+  struct symbol *sym;
+
+  memcpy (name_copy, name, len);
+  name_copy[len] = '\0';
+  sym = lookup_block_symbol (block, name_copy, NULL, VAR_DOMAIN);
 
   if (sym == NULL)
     {
-      struct type *type = init_type (TYPE_CODE_NAMESPACE, 0, 0,
-				     name_copy, objfile);
+      struct type *type;
+      name_copy = obsavestring (name, len, &objfile->objfile_obstack);
+
+      type = init_type (TYPE_CODE_NAMESPACE, 0, 0, name_copy, objfile);
+
       TYPE_TAG_NAME (type) = TYPE_NAME (type);
 
       sym = obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
@@ -806,11 +812,7 @@ check_one_possible_namespace_symbol (const char *name, int len,
       return 0;
     }
   else
-    {
-      obstack_free (&objfile->objfile_obstack, name_copy);
-
-      return 1;
-    }
+    return 1;
 }
 
 /* Look for a symbol named NAME in all the possible namespace blocks.

@@ -1,3 +1,8 @@
+2004-02-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cp-namespace.c (check_one_possible_namespace_symbol): Don't use
+	obstack_free.
+
 2004-02-09  Andrew Cagney  <cagney@redhat.com>
 
 	* blockframe.c (find_pc_partial_function): If find_pc_overlay
