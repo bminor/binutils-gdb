@@ -1,5 +1,8 @@
 2002-09-30  Alan Modra  <amodra@bigpond.net.au>
 
+	* ld-powerpc/reloc.s, ld-powerpc/reloc.d: New.
+	* ld-powerpc/powerpc.exp: New.
+
 	* ld-i386/reloc.s, ld-i386/reloc.d: New.
 	* ld-i386/i386.exp: Run new test.
 
