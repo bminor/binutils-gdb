@@ -1585,7 +1585,7 @@ cons (nbytes)
 
   input_line_pointer--;		/* Put terminator back into stream. */
   demand_empty_rest_of_line ();
-}				/* cons() */
+}
 
 /* Put the contents of expression EXP into the object file using
    NBYTES bytes.  If need_pass_2 is 1, this does nothing.  */
@@ -2547,7 +2547,7 @@ s_include (arg)
       strcpy (path, include_dirs[i]);
       strcat (path, "/");
       strcat (path, filename);
-      if (0 != (try = fopen (path, "r")))
+      if (0 != (try = fopen (path, FOPEN_RT)))
 	{
 	  fclose (try);
 	  goto gotit;
