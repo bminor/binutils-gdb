@@ -1,3 +1,13 @@
+Thu Feb 19 16:49:48 1998 John Metzler  <jmetzler@cygnus.com>
+
+	* target.c - tracing 64 bit targets crashed long long printfs
+
+Tue Feb 17 16:36:22 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* symfile.c (read_target_int_array): rename read_target_long_array
+        and force the sizeof an ovly_table element to sizeof(long),
+        instead of sizeof(int).
+
 Tue Feb 17 18:05:05 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* remote-mips.c (mips_request): Use unsigned long during parsing
