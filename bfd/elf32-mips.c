@@ -800,6 +800,16 @@ mips_elf_gprel32_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   bfd_reloc_status_type ret;
   bfd_vma gp;
 
+  /* R_MIPS_GPREL32 relocations are defined for local symbols only.  */
+  if (output_bfd != NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (symbol->flags & BSF_LOCAL) != 0)
+    {
+      *error_message = (char *)
+	_("32bits gp relative relocation occurs for an external symbol");
+      return bfd_reloc_outofrange;
+    }
+
   if (output_bfd != NULL)
     relocatable = TRUE;
   else

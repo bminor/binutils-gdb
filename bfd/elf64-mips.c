@@ -1586,8 +1586,7 @@ mips_elf64_gprel32_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   bfd_vma relocation;
   bfd_vma val;
 
-  /* If we're relocating, and this is an external symbol, we don't want
-     to change anything.  */
+  /* R_MIPS_GPREL32 relocations are defined for local symbols only.  */
   if (output_bfd != NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (symbol->flags & BSF_LOCAL) != 0)

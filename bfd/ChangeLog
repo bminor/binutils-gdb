@@ -1,3 +1,10 @@
+2005-02-07  Maciej W. Rozycki  <macro@mips.com>
+
+	* elf32-mips.c (mips_elf_gprel32_reloc): Reject
+	R_MIPS_GPREL32 relocations against external symbols.
+	* elf64-mips.c (mips_elf64_gprel32_reloc): Replace an incorrect
+	comment.
+
 2005-02-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (elf_string_from_elf_strtab): Delete macro.
