@@ -31,6 +31,15 @@ Mon Jan  5 20:21:59 1998  Mark Alexander  <marka@cygnus.com>
 	* dve3900-rom.c (_initialize_r3900_rom): Remove MO_HANDLE_NL flag,
 	add MO_PRINT_PROGRAM_OUTPUT flag.
 
+Mon Jan  5 18:21:11 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	* top.h (HAVE_SIGSETJMP): define SIGJMP_BUF, SIGSETJMP, and
+	SIGLONGJMP appropriately based on whether HAVE_SIGSETJMP is
+	defined.
+	* top.c (return_to_top_level, catch_errors): use the new macros
+	* main.c (SET_TOP_LEVEL): ditto.
+	* config/xm-sysv4.h (HAVE_SIGSETJMP): Define.
+
 Fri Jan  2 18:48:58 1998  Mark Alexander  <marka@cygnus.com>
 
 	* configure.in: Double up brackets in shell case pattern.
