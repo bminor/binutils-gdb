@@ -1,8 +1,10 @@
+start-sanitize-armelf
 Wed Aug  5 15:54:14 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (md_begin): Set BFD private flags depending upon
 	command line switches passed to assembler.
 
+end-sanitize-armelf
 Mon Aug  3 14:02:52 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.h (GAS_CGEN_MAX_FIXUPS): GAS_ prepended, all uses updated.
