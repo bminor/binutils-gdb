@@ -25,6 +25,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 
+extern printf();
+
 int
 main (ac, av)
      int ac;
