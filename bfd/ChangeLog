@@ -1,3 +1,8 @@
+2002-04-16  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* ihex.c (ihex_write_object_contents): Fix check for records
+	crossing 64K boundaries.
+
 2002-04-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-m32r.c (m32r_elf_add_symbol_hook): Check the hash table
