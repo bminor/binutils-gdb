@@ -1,5 +1,9 @@
 2004-04-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64-tdep.c (amd64_supply_fxsave): Only fiddle with
+	I387_FISEG_REGNUM and I387_FOSEG_REGNUM in 64-bit mode.
+	(amd64_collect_fxsave): Likewise.
+
 	* i386-sol2-tdep.c: Include "gdb_string.h".
 	(i386_sol2_sigtramp_p): Recognize signal trampoline based on its
 	name.

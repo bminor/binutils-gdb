@@ -1171,7 +1171,7 @@ amd64_supply_fxsave (struct regcache *regcache, int regnum,
 {
   i387_supply_fxsave (regcache, regnum, fxsave);
 
-  if (fxsave)
+  if (fxsave && gdbarch_ptr_bit (get_regcache_arch (regcache)) == 64)
     {
       const char *regs = fxsave;
 
@@ -1195,8 +1195,11 @@ amd64_collect_fxsave (const struct regcache *regcache, int regnum,
 
   i387_collect_fxsave (regcache, regnum, fxsave);
 
-  if (regnum == -1 || regnum == I387_FISEG_REGNUM)
-    regcache_raw_collect (regcache, I387_FISEG_REGNUM, regs + 12);
-  if (regnum == -1 || regnum == I387_FOSEG_REGNUM)
-    regcache_raw_collect (regcache, I387_FOSEG_REGNUM, regs + 20);
+  if (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 64)
+    {
+      if (regnum == -1 || regnum == I387_FISEG_REGNUM)
+	regcache_raw_collect (regcache, I387_FISEG_REGNUM, regs + 12);
+      if (regnum == -1 || regnum == I387_FOSEG_REGNUM)
+	regcache_raw_collect (regcache, I387_FOSEG_REGNUM, regs + 20);
+    }
 }
