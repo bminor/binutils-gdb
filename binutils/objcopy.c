@@ -1616,32 +1616,6 @@ copy_section (ibfd, isection, obfdarg)
 	  free (relpp);
 	  relpp = temp_relpp;
 	}
-      else if (sections_removed)
-	{
-	  /* Remove relocations which are against symbols
-	     in sections that have been removed, unless
-	     the symbols are going to be preserved.  */
-	  arelent ** temp_relpp;
-	  asymbol *  sym;
-	  long temp_relcount = 0;
-	  long i;
-
-	  temp_relpp = (arelent **) xmalloc (relsize);
-	  for (i = 0; i < relcount; i++)
-	    {
-	      sym = *relpp [i]->sym_ptr_ptr;
-
-	      /* FIXME: Should we warn about deleted relocs ?  */
-	      if (is_specified_symbol (bfd_asymbol_name (sym),
-				       keep_specific_list)
-		  || bfd_get_output_section (sym) != NULL)
-		temp_relpp [temp_relcount++] = relpp [i];
-	    }
-
-	  relcount = temp_relcount;
-	  free (relpp);
-	  relpp = temp_relpp;
-	}
 
       bfd_set_reloc (obfd, osection,
 		     (relcount == 0 ? (arelent **) NULL : relpp), relcount);
