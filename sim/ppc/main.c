@@ -21,6 +21,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <fcntl.h>
 
 #include "psim.h"
 #include "options.h"
@@ -42,21 +43,24 @@
 #endif
 #endif
 
+#if !defined(O_NDELAY) || !defined(F_GETFL) || !defined(F_SETFL)
+#undef WITH_STDIO
+#define WITH_STDIO DO_USE_STDIO
+#endif
+
+
 extern char **environ;
 
+static psim *simulation = NULL;
+
+
 void
-printf_filtered(const char *msg, ...)
+sim_io_printf_filtered(const char *msg, ...)
 {
   va_list ap;
   va_start(ap, msg);
   vprintf(msg, ap);
   va_end(ap);
-}
-
-void
-flush_stdoutput(void)
-{
-  fflush (stdout);
 }
 
 void
@@ -66,8 +70,124 @@ error (char *msg, ...)
   va_start(ap, msg);
   vprintf(msg, ap);
   va_end(ap);
+
+  /* any final clean up */
+  if (ppc_trace[trace_print_info] && simulation != NULL)
+    psim_print_info (simulation, ppc_trace[trace_print_info]);
+
   exit (1);
 }
+
+int
+sim_io_write_stdout(const char *buf,
+		    int sizeof_buf)
+{
+  switch (CURRENT_STDIO) {
+  case DO_USE_STDIO:
+    {
+      int i;
+      for (i = 0; i < sizeof_buf; i++) {
+	putchar(buf[i]);
+      }
+      return i;
+    }
+    break;
+  case DONT_USE_STDIO:
+    return write(1, buf, sizeof_buf);
+    break;
+  default:
+    error("sim_io_write_stdout: invalid switch\n");
+  }
+}
+
+int
+sim_io_write_stderr(const char *buf,
+		    int sizeof_buf)
+{
+  switch (CURRENT_STDIO) {
+  case DO_USE_STDIO:
+    {
+      int i;
+      for (i = 0; i < sizeof_buf; i++) {
+	fputc(buf[i], stderr);
+      }
+      return i;
+    }
+    break;
+  case DONT_USE_STDIO:
+    return write(2, buf, sizeof_buf);
+    break;
+  default:
+    error("sim_io_write_stdout: invalid switch\n");
+  }
+}
+
+int
+sim_io_read_stdin(char *buf,
+		  int sizeof_buf)
+{
+  switch (CURRENT_STDIO) {
+  case DO_USE_STDIO:
+    if (fgets(buf, sizeof_buf, stdin) == NULL)
+      return sim_io_eof;
+    else
+      return strlen(buf);
+    break;
+  case DONT_USE_STDIO:
+    {
+      /* check for input */
+      int flags;
+      int status;
+      int nr_read;
+      /* get the old status */
+      flags = fcntl(0, F_GETFL, 0);
+      if (flags == -1) {
+	perror("sim_io_read_stdin");
+	return sim_io_eof;
+      }
+      /* temp, disable blocking IO */
+      status = fcntl(0, F_SETFL, flags | O_NDELAY);
+      if (status == -1) {
+	perror("sim_io_read_stdin");
+	return sim_io_eof;
+      }
+      /* try for input */
+      nr_read = read(0, &buf, sizeof_buf);
+      /* return to regular vewing */
+      status = fcntl(0, F_SETFL, flags);
+      if (status == -1) {
+	perror("sim_io_read_stdin");
+	return sim_io_eof;
+      }
+      if (status > 0)
+	return 1;
+      else if (status < 0)
+	return sim_io_eof;
+      else
+	return sim_io_not_ready;
+    }
+    break;
+  default:
+    error("sim_io_read_stdin: invalid switch\n");
+    break;
+  }
+}
+
+void
+sim_io_flush_stdoutput(void)
+{
+  switch (CURRENT_STDIO) {
+  case DO_USE_STDIO:
+    fflush (stdout);
+    break;
+  case DONT_USE_STDIO:
+    break;
+  default:
+    error("sim_io_flush_stdoutput: invalid switch\n");
+    break;
+  }
+}
+
 
 void *
 zalloc(long size)
@@ -88,7 +208,6 @@ zfree(void *chunk)
 int
 main(int argc, char **argv)
 {
-  psim *system;
   const char *name_of_file;
   char *arg_;
   psim_status status;
@@ -104,7 +223,7 @@ main(int argc, char **argv)
     print_options ();
 
   /* create the simulator */
-  system = psim_create(name_of_file, root);
+  simulation = psim_create(name_of_file, root);
 
   /* fudge the environment so that _=prog-name */
   arg_ = (char*)zalloc(strlen(argv[0]) + strlen("_=") + 1);
@@ -113,17 +232,17 @@ main(int argc, char **argv)
   putenv(arg_);
 
   /* initialize it */
-  psim_init(system);
-  psim_stack(system, argv, environ);
+  psim_init(simulation);
+  psim_stack(simulation, argv, environ);
 
-  psim_run(system);
+  psim_run(simulation);
 
   /* any final clean up */
   if (ppc_trace[trace_print_info])
-    psim_print_info (system, ppc_trace[trace_print_info]);
+    psim_print_info (simulation, ppc_trace[trace_print_info]);
 
   /* why did we stop */
-  status = psim_get_status(system);
+  status = psim_get_status(simulation);
   switch (status.reason) {
   case was_continuing:
     error("psim: continuing while stoped!\n");

@@ -44,7 +44,7 @@ AC_ARG_ENABLE(sim-line-nr,
 esac
 if test x"$silent" != x"yes" && test x"$sim_line_nr" != x""; then
   echo "Setting warning flags = $sim_line_nr" 6>&1
-fi],[sim_line-nr=""])dnl
+fi],[sim_line_nr=""])dnl
 
 AC_ARG_ENABLE(sim-config,
 [  --enable-sim-config=file		Override default config file],
@@ -144,8 +144,8 @@ fi])dnl
 
 AC_ARG_ENABLE(sim-icache,
 [  --enable-sim-icache=size		Specify instruction cache size.],
-icache=""
-[case "${enableval}" in
+[icache=""
+ case "${enableval}" in
   yes)		icache="1024"; sim_icache="-I $icache";;
   no)		sim_icache="";;
   *) icache=1024
@@ -154,6 +154,7 @@ icache=""
        case "$x" in
          define)	sim_icache="${sim_icache}R";;
          semantic)	sim_icache="${sim_icache}C";;
+	 insn)		sim_icache="${sim_icache}S";;
 	 0*|1*|2*|3*|4*|5*|6*|7*|8*|9*)	icache=$x;;
          *)		AC_MSG_ERROR("Unknown value $x for --enable-sim-icache"); sim_icache="";;
        esac
@@ -162,9 +163,50 @@ icache=""
 esac
 if test x"$silent" != x"yes" && test x"$icache" != x""; then
   echo "Setting instruction cache size to $icache ($sim_icache)"
-fi],[sim_icache="-CI 1024"
+fi],[sim_icache="-CSI 1024"
 if test x"$silent" != x"yes"; then
   echo "Setting instruction cache size to 1024 ($sim_icache)"
+fi])dnl
+
+AC_ARG_ENABLE(sim-hardware,
+[  --enable-sim-hardware=list		Specify the hardware to be included in the build.],
+[hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal"
+case "${enableval}" in
+  yes)	;;
+  no)	AC_MSG_ERROR("List of hardware must be specified for --enable-sim-hardware"); hardware="";;
+  ,*)   hardware="${hardware}${enableval}";;
+  *)	hardware="${enableval}";;
+esac
+sim_hw_src=`echo $hardware | sed -e 's/,/.c hw_/g' -e 's/^/hw_/' -e s'/$/.c/'`
+sim_hw_obj=`echo $sim_hw_src | sed -e 's/\.c/.o/g'`
+if test x"$silent" != x"yes" && test x"$hardware" != x""; then
+  echo "Setting hardware to $sim_hw_src, $sim_hw_obj"
+fi],[hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal"
+sim_hw_src=`echo $hardware | sed -e 's/,/.c hw_/g' -e 's/^/hw_/' -e s'/$/.c/'`
+sim_hw_obj=`echo $sim_hw_src | sed -e 's/\.c/.o/g'`
+if test x"$silent" != x"yes"; then
+  echo "Setting hardware to $sim_hw_src, $sim_hw_obj"
+fi])dnl
+
+
+AC_ARG_ENABLE(sim-packages,
+[  --enable-sim-packages=list		Specify the packages to be included in the build.],
+[packages=disklabel
+case "${enableval}" in
+  yes)	;;
+  no)	AC_MSG_ERROR("List of packages must be specified for --enable-sim-packages"); packages="";;
+  ,*)   packages="${packages}${enableval}";;
+  *)	packages="${enableval}"''
+esac
+sim_pk_src=`echo $packages | sed -e 's/,/.c pk_/g' -e 's/^/pk_/' -e 's/$/.c/'`
+sim_pk_obj=`echo $sim_pk_src | sed -e 's/\.c/.o/g'`
+if test x"$silent" != x"yes" && test x"$packages" != x""; then
+  echo "Setting packages to $sim_pk_src, $sim_pk_obj"
+fi],[packages=disklabel
+sim_pk_src=`echo $packages | sed -e 's/,/.c pk_/g' -e 's/^/pk_/' -e 's/$/.c/'`
+sim_pk_obj=`echo $sim_pk_src | sed -e 's/\.c/.o/g'`
+if test x"$silent" != x"yes"; then
+  echo "Setting packages to $sim_pk_src, $sim_pk_obj"
 fi])dnl
 
 AC_ARG_ENABLE(sim-inline,
@@ -179,8 +221,8 @@ case "$enableval" in
        new_flag=""
        case "$x" in
 	 *_INLINE=*)	new_flag="-D$x";;
-	 *_INLINE)	new_flag="-D$x=ALL_INLINE";;
 	 *=*)		new_flag=`echo "$x" | sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
+	 *_INLINE)	new_flag="-D$x=ALL_INLINE";;
 	 *)		new_flag="-D$x""_INLINE=ALL_INLINE";;
        esac
        if test x"$sim_inline" = x""; then
@@ -228,6 +270,30 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
   echo "Setting endian flags = $sim_endian" 6>&1
 fi],[sim_endian=""])dnl
+
+AC_ARG_ENABLE(sim-regparm,
+[  --enable-sim-regparm=nr-parm		Pass parameters in registers instead of on the stack - x86/GCC specific.],
+[case "${enableval}" in
+  0*|1*|2*|3*|4*|5*|6*|7*|8*|9*) sim_regparm="-DWITH_REGPARM=${enableval}";;
+  no)                            sim_regparm="" ;;
+  yes)                           sim_regparm="-DWITH_REGPARM=3";;
+  *)   AC_MSG_ERROR("Unknown value $enableval for --enable-sim-regparm"); sim_regparm="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_regparm" != x""; then
+  echo "Setting regparm flags = $sim_regparm" 6>&1
+fi],[sim_regparm=""])dnl
+
+AC_ARG_ENABLE(sim-stdcall,
+[  --enable-sim-stdcall=type		Use an alternative function call/return mechanism - x86/GCC specific.],
+[case "${enableval}" in
+  no)		sim_stdcall="" ;;
+  std*)		sim_stdcall="-DWITH_STDCALL=1";;
+  yes)		sim_stdcall="-DWITH_STDCALL=1";;
+  *)   AC_MSG_ERROR("Unknown value $enableval for --enable-sim-stdcall"); sim_stdcall="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_stdcall" != x""; then
+  echo "Setting function call flags = $sim_stdcall" 6>&1
+fi],[sim_stdcall=""])dnl
 
 AC_ARG_ENABLE(sim-hostendian,
 [  --enable-sim-hostendain=end		Specify host byte endian orientation.],
@@ -543,9 +609,15 @@ AC_SUBST(sim_dup)
 AC_SUBST(sim_jump)
 AC_SUBST(sim_filter)
 AC_SUBST(sim_icache)
+AC_SUBST(sim_hw_src)
+AC_SUBST(sim_hw_obj)
+AC_SUBST(sim_pk_src)
+AC_SUBST(sim_pk_obj)
 AC_SUBST(sim_inline)
 AC_SUBST(sim_bswap)
 AC_SUBST(sim_endian)
+AC_SUBST(sim_regparm)
+AC_SUBST(sim_stdcall)
 AC_SUBST(sim_xor_endian)
 AC_SUBST(sim_hostendian)
 AC_SUBST(sim_smp)

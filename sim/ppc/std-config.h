@@ -289,12 +289,20 @@ extern int current_model_issue;
 
 /* Whether or not input/output just uses stdio, or uses printf_filtered for
    output, and polling input for input.  */
-#define DONT_USE_STDIO			0
+
+#define DONT_USE_STDIO			2
 #define DO_USE_STDIO			1
 
 #ifndef WITH_STDIO
-#define WITH_STDIO			DONT_USE_STDIO
+#define WITH_STDIO			DO_USE_STDIO
 #endif
+
+extern int current_stdio;
+#define CURRENT_STDIO (WITH_STDIO	\
+		       ? WITH_STDIO     \
+		       : current_stdio)
+
+
 
 /* INLINE CODE SELECTION:
 
@@ -454,13 +462,32 @@ extern int current_model_issue;
 #endif
 #endif
 
+
 /* Your compilers pass parameters in registers reserved word */
 
+#ifndef WITH_REGPARM
+#define WITH_REGPARM                   0
+#endif
+
+#ifndef WITH_STDCALL
+#define WITH_STDCALL                   0
+#endif
+
 #if !defined REGPARM
-#if (defined(i386) || defined(i486) || defined(i586) || defined(__i386__) || defined(__i486__) || defined(__i586__)) && WITH_REGPARM
+#if (defined(i386) || defined(i486) || defined(i586) || defined(__i386__) || defined(__i486__) || defined(__i586__))
+#if (WITH_REGPARM && WITH_STDCALL)
+#define REGPARM __attribute__((__regparm__(WITH_REGPARM),__stdcall__))
+#else
+#if (WITH_REGPARM && !WITH_STDCALL)
 #define REGPARM __attribute__((__regparm__(WITH_REGPARM)))
 #else
+#if (!WITH_REGPARM && WITH_STDCALL)
+#define REGPARM __attribute__((__stdcall__))
+#else
 #define REGPARM
+#endif
+#endif
+#endif
 #endif
 #endif
 
@@ -572,7 +599,7 @@ extern int current_model_issue;
    inline all of their called functions */
 
 #ifndef SEMANTICS_INLINE
-#define SEMANTICS_INLINE		DEFAULT_INLINE
+#define SEMANTICS_INLINE		(DEFAULT_INLINE & ~INLINE_MODULE)
 #endif
 
 /* When using the instruction cache, code to decode an instruction and
@@ -580,7 +607,7 @@ extern int current_model_issue;
    miss in the instruction cache. */
 
 #ifndef ICACHE_INLINE
-#define ICACHE_INLINE			DEFAULT_INLINE
+#define ICACHE_INLINE			(DEFAULT_INLINE & ~INLINE_MODULE)
 #endif
 
 /* General functions called by semantics functions but part of the

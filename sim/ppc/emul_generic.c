@@ -282,10 +282,13 @@ emul_add_tree_options(device *tree,
   device_tree_add_parsed(tree, "/openprom/options/env %s", env);
   device_tree_add_parsed(tree, "/openprom/options/os-emul %s", emul);
   device_tree_add_parsed(tree, "/openprom/options/strict-alignment? %s",
-			 (WITH_ALIGNMENT == STRICT_ALIGNMENT || little_endian)
+			 ((WITH_ALIGNMENT == 0 && little_endian)
+			  || (WITH_ALIGNMENT == STRICT_ALIGNMENT))
 			 ? "true" : "false");
   device_tree_add_parsed(tree, "/openprom/options/floating-point? %s",
 			 WITH_FLOATING_POINT ? "true" : "false");
+  device_tree_add_parsed(tree, "/openprom/options/use-stdio? %s",
+			 WITH_STDIO == DO_USE_STDIO ? "true" : "false");
   device_tree_add_parsed(tree, "/openprom/options/model \"%s",
 			 model_name[WITH_DEFAULT_MODEL]);
   device_tree_add_parsed(tree, "/openprom/options/model-issue %d",

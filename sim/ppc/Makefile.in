@@ -69,6 +69,8 @@ SIM_CFLAGS = @sim_cflags@
 INLINE_CFLAGS = @sim_inline@
 BSWAP_CFLAGS = @sim_bswap@
 ENDIAN_CFLAGS = @sim_endian@
+REGPARM_CFLAGS = @sim_regparm@
+STDCALL_CFLAGS = @sim_stdcall@
 HOSTENDIAN_CFLAGS = @sim_hostendian@
 SMP_CFLAGS = @sim_smp@
 XOR_ENDIAN_CFLAGS = @sim_xor_endian@
@@ -88,6 +90,8 @@ TERMIO_CFLAGS = @sim_termio@
 WARNING_CFLAGS = @sim_warnings@
 CONFIG_CFLAGS = $(BSWAP_CFLAGS) \
   $(ENDIAN_CFLAGS) \
+  $(REGPARM_CFLAGS) \
+  $(STDCALL_CFLAGS) \
   $(HOSTENDIAN_CFLAGS) \
   $(SMP_CFLAGS) \
   $(XOR_ENDIAN_CFLAGS) \
@@ -107,7 +111,7 @@ CONFIG_CFLAGS = $(BSWAP_CFLAGS) \
 
 STD_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARNING_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES)
 NOWARN_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES)
-BUILD_CFLAGS	= -O $(INCLUDES) $(WARNING_CFLAGS)
+BUILD_CFLAGS	= -g -O $(INCLUDES) $(WARNING_CFLAGS)
 
 BUILD_LDFLAGS	=
 
@@ -292,39 +296,11 @@ LIB_OBJ = \
 
 GDB_OBJ = sim_calls.o 
 
-HW_SRC = \
-	hw_cpu.c \
-	hw_memory.c \
-	hw_nvram.c \
-	hw_iobus.c \
-	hw_htab.c \
-	hw_disk.c \
-	hw_trace.c \
-	hw_register.c \
-	hw_vm.c \
-	hw_init.c \
-	hw_core.c \
-	hw_pal.c
+HW_SRC = @sim_hw_src@
+HW_OBJ = @sim_hw_obj@
 
-HW_OBJ = \
-	hw_cpu.o \
-	hw_memory.o \
-	hw_nvram.o \
-	hw_iobus.o \
-	hw_htab.o \
-	hw_disk.o \
-	hw_trace.o \
-	hw_register.o \
-	hw_vm.o \
-	hw_init.o \
-	hw_core.o \
-	hw_pal.o
-
-PACKAGE_SRC = \
-	pk_disklabel.c
-
-PACKAGE_OBJ = \
-	pk_disklabel.o
+PACKAGE_SRC = @sim_pk_src@
+PACKAGE_OBJ = @sim_pk_obj@
 
 
 psim: $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBS)
@@ -531,12 +507,14 @@ misc.o: misc.c misc.h filter_filename.h
 
 # real hardware
 tmp-hw: Makefile $(HW_SRC) $(srcdir)/../../move-if-change
-	(cd $(srcdir); ls $(HW_SRC)) \
+	for hw in $(HW_SRC) ; do echo $$hw ; done \
+	| sort -u \
 	| sed -e 's/^.*\(hw_.*\)\.c/\1/' \
 		-e 's/^/extern const device_descriptor /' \
 		-e 's/$$/_device_descriptor\[\];/' \
 		> tmp-hw.h
-	(cd $(srcdir); ls $(HW_SRC)) \
+	for hw in $(HW_SRC) ; do echo $$hw ; done \
+	| sort -u \
 	| sed -e 's/^.*\(hw_.*\)\.c/\1/' \
 		-e 's/^/    /' \
 		-e 's/$$/_device_descriptor,/' \
@@ -563,7 +541,8 @@ hw_init.o: hw_init.c $(DEVICE_TABLE_H)
 
 # real packages
 tmp-pk: Makefile $(PACKAGE_SRC) $(srcdir)/../../move-if-change
-	(cd $(srcdir); ls $(PACKAGE_SRC)) \
+	for pk in $(PACKAGE_SRC) ; do echo $$pk ; done \
+	| sort -u \
 	| sed -e 's/^pk_\(.*\)\.c/\1/' \
 		-e 's/^/extern package_create_instance_callback pk_/' \
 		-e 's/$$/_create_instance;/' \

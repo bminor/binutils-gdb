@@ -23,10 +23,10 @@ cache:RA:RA_BITMASK:unsigned32:(1 << RA)
 cache:RT:RT::
 cache:RT:rT:signed_word *:(cpu_registers(processor)->gpr + RT)
 cache:RT:RT_BITMASK:unsigned32:(1 << RT)
-compute:RS:RS::
+cache:RS:RS::
 cache:RS:rS:signed_word *:(cpu_registers(processor)->gpr + RS)
 cache:RS:RS_BITMASK:unsigned32:(1 << RS)
-compute:RB:RB::
+cache:RB:RB::
 cache:RB:rB:signed_word *:(cpu_registers(processor)->gpr + RB)
 cache:RB:RB_BITMASK:unsigned32:(1 << RB)
 compute:FRA:FRA::

@@ -1,3 +1,241 @@
+Tue Aug  6 09:28:22 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (--enable-sim-{hardware,packages}): Fix typos.
+	* configure: Regenerate.
+
+	* device.c (device_instance_call_method): Fixup format message in
+	error case.  Return 0 in case of error to shut up compiler
+	warnings.
+
+Wed Jul 31 00:02:30 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* device_table.h (device_instance_callbacks): Relace the claim and
+        release methods with a more general table mapping from method-name
+        to method-function.
+
+	* device.c (device_instance_call_method): New function.  Implement
+        the OpenBoot call-method client interface.  Attempts to locate the
+        instances method in the callback table.
+	(device_instance_claim, device_instance_release): Delete.
+        Replaced with call-method and a lookup table.
+
+	* emul_chirp.c (chirp_emul_call_method): Use the new device
+        instance call method and let that handle a client claim call.
+
+	* hw_htab.c (claim_memory): Wrapper function to call the memory
+        devices "claim" method using the new device-instance call-method
+        interface.  Replaces the previous direct calls to claim.
+	(htab_map_region): Use claim_memory.
+	(htab_init_data_callback): Ditto.
+
+	* hw_memory.c (hw_memory_instance_claim): Update function
+        interface so that it is compatible with call-method.
+	(hw_memory_instance_release): Ditto.
+	(hw_memory_instance_methods): New table of memory specific
+        methods claim and release.  Add to the hw_memory_callback
+	table.
+
+Tue Jul 30 21:26:14 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* psim.c (psim_init): Back out of change to initial value of
+        system->last_cpu.
+
+Tue Jul 30 21:12:24 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* sim_callbacks.h (sim_io_printf_filtered): Replace
+	printf_filtered with a local simulator specific version.  Add
+	#define printf_filtered to simplify updating of existing code.
+
+	* sim_callbacks.h (sim_io_write_stdout, sim_io_read_stdin,
+        sim_io_write_stderr): New functions.  Read / write to the
+        simulations stdin and stdout and stderr interfaces.  Merge in code
+        from hw_pal that previously handled async I/O.
+	(sim_io_flush_stdoutput): Rename flush_stdoutput.  Add #define
+	flush_stdoutput to simplify updating of existing code.
+
+	* hw_pal.c (scan_hw_pal, write_hw_pal,
+        hw_pal_instance_write_callback): Use the new sim_io functions.
+
+	* main.c: Implement standalone versions of the new sim_io
+        functions.  Include support for async I/O.
+	* sim_calls.c: Ditto.  This time using the gdb callback table.
+
+	* std-config.h (CURRENT_STDIO, current_stdio): New macro. Set up
+        stdio configuration so that it works in the same way as the rest
+        of the simulation.
+	* psim.c (psim_create): Initialize current_stdio from the device
+        tree.
+	* emul_generic.c (emul_add_tree_options): Enter a default value
+        for use-stdio in the device tree.
+
+Fri Jul 26 19:43:03 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* gen-idecode.c (print_jump): Was always generating a jump back to
+ 	idecode.  Only necessary at tail of semantic code.
+	(print_jump): Was always setting the processor's cia, even during
+ 	startup when the processor was still undefined.
+	(print_jump): For safety, restart smp loop when cpu_nr >= nr_cpus,
+ 	not just equal.
+	
+	* options.c (print_options): Add printing of WITH_REGPARM and
+ 	WITH_STDCALL.
+
+	* std-config.h (WITH_REGPARM, WITH_STDCALL): Provide default
+ 	(disabled) values if not defined.
+
+Fri Jul 26 00:36:35 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* ppc-cache-rules (cache): Change RS and RB to cache instead of
+        compute.  The block move instructions use them.
+
+	* idecode_expression.h (FPSCR_SET): New macro, set specific FPSCR
+        register.
+	(CR_FIELD): New macro, extract specific CR register.
+	(FPSCR_FIELD): New macro, extract specific FPSCR register.
+
+	* registers.h (GPR): New macro, simplify accesses to GPR[i].
+
+	* bits.c (INSERTED): Covert INSERTED macro into a function.
+	(EXTRACTED): Conditionally compile on correct bit size macro.
+
+	* bits.h (BIT8): New macro, set a single bit in an 8 bit byte.
+
+	* ppc-instructions: With hints from Paul Martin, type in missing
+	some instruction semantics.  Leave disabled for the moment.
+	(Load Multiple Word): Ditto.
+	(Store Multiple Word): Ditto.
+	(Load String Word Immediate): Ditto.
+	(Load String Word Indexed): Ditto.
+	(Store String Word Immedate): Ditto.
+	(Store String Word Indexed): Ditto.
+	(Move to Condition Register from XER): Ditto.
+	(Move From Condition Register): Ditto.
+	(Move From FPSCR): Ditto.
+	(Move to Condition Register from FPSCR): Ditto.
+	(Move To FPSCR Field Immediate): Ditto.
+	(Move To FPSCR Fields): Ditto.
+	(Move To FPSCR Bit 0): Ditto.
+	(Move To FPSCR Bit 1): Ditto.
+
+Thu Jul 25 22:10:40 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* std-config.h (SEMANTICS_INLINE): By default, mask out the
+        inlining of semantic functions from DEFAULT_INLINE.  Almost all
+        configurations call the semantic code via a pointer so there is
+        little benefit.
+
+	* std-config.h (ICACHE_INLINE): Ditto.
+
+Thu Jul 25 20:07:30 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* configure.in (sim_regparm): Add configuration option for
+        enabling GCC's regparm attribute.
+	* (sim_stdcall): Add configuration option for enabling GCC's
+        stdcall attribute.
+
+	* Makefile.in (REGPARM_CFLAGS): Pass regparam configuration onto
+        compilations.
+	* (STDCALL_CFLAGS): Pass stdcall configuration onto compilations.
+
+	* std-config.h (REGPARM): Extend construction of REGPARM macro so
+        that it can include __stdcall__ function attribute.
+
+Wed Jul 24 19:04:20 1996  Andrew Cagney  <cagney@sawnoff>
+
+	* options.c (print_options): Include SUPPORT_INLINE in information
+ 	dump.
+
+	* gen-idecode.c (print_run_until_stop_body): Only generate loop
+ 	termination test if creating idecode_run_until_stop.  Push the
+ 	loop termination test back into each alternative branch.
+
+Wed Jul 24 15:47:09 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* gen-icache.c (print_icache_function): Have the cache function
+ 	always update the cache_entries semantic and address fields.
+
+	* gen-idecode.c (print_idecode_switch_illegal): Include a break
+ 	when generating illegal instructions.  This was commented out
+ 	which is a hangover from looking a at switch statements generated
+ 	using indirect jumps.
+
+Tue Jul 23 20:57:01 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* igen.c (print_my_defines): Replaces print_define_my_index.
+        Print both a definition for MY_INDEX and MY_PREFIX.
+	* gen-icache.c (print_icache_function): Adjust.
+	* gen-idecode.c (print_jump_insn): Adjust.
+	* gen-semantics.c (print_c_semantic): Adjust.
+
+	* gen-support.c (gen_support_h): Add optional include to created
+        support.h so that, like cpu, it is optionally inlined for all
+        modules that include it.
+	* inline.h, inline.c: Adjust so that support.[hc] is handled the
+        same as cpu.[hc].
+
+	* idecode_fields.h (LABEL, GOTO): Macro's that create a unique
+        name for a lable and then branch to it.
+
+	* ppc-instructions (convert_to_integer, Floating Round to
+        Single-Precision, Floating Convert from Integer Doubleword): Use
+        LABEL and GOTO instead of the recently added switch statements.
+
+Wed Jul 24 14:02:42 1996  Andrew Cagney  <cagney@sawnoff.highland.com.au>
+
+	* gen-idecode.c (print_run_until_stop_body): Too many rparen in
+ 	generated code.
+
+Tue Jul 23 20:57:01 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* configure.in (--enable-sim-line-nr): Typo - sim_line-nr.
+	* (--enable-sim-inline): Reorder patern matching of arguments so
+        that SUPPORT=ALL_INLINE is reconized as *=* and not *_INLINE.
+
+	* configure: rebuild.
+
+Mon Jul 22 23:25:08 1996  Andrew Cagney  <cagney@highland.com.au>
+
+	* configure.in (--enable-sim-hardware, --enable-sim-packages): New
+        configuration options.  Let the user specify the packages or
+        hardware devices that are to be included in the build.  Makes it
+        possible for user packages to be specified.
+
+	* Makefile.in (tmp-pk, tmp-hw): Just use the list of packages and
+	hardware instead of checking it using ls.  configure.in should
+	have taken care of any problems.
+	(HW_SRC, HW_OBJ, PACKAGE_SRC, PACKAGE_OBJ): Set by configure.
+
+Mon Jul 22 22:38:59 1996  Andrew Cagney  <cagney@highland.com.au>
+
+	* psim.c (psim_options): Enter the argument to the memory size
+        option directly into the device tree.  Was using atol() which is
+        dangerously non portable.
+
+Mon Jul 22 22:17:08 1996  Andrew Cagney  <cagney@highland.com.au>
+
+	* configure.in (icache): Extend icache flag to include an insn
+        option.  If specifyed the insn - aka instruction - is included in
+        the instruction cache.  Make this the default.
+	* configure: re-generate.
+
+	* igen.c (main), igen.h: Add option -S - inSn - for specifying
+        that the instruction should be included in the icache.
+
+	* gen-icache.c (print_icache_body): If enabled, output code to put
+        the instruction into the icache.
+	(print_icache_struct): If enabled, add insn to the icache struct.
+
+Mon Jul 22 20:46:12 1996  Andrew Cagney  <cagney@highland.com.au>
+
+	* Makefile.in (BUILD_CFLAGS): Include -g when building the
+        generators.
+
+Mon Jul 22 20:00:25 1996  Andrew Cagney  <cagney@highland.com.au>
+
+	* emul_generic.c (emul_add_tree_options): Was incorrectly setting
+        the strict-alignment option when hardwired for non-strict
+        alignment.
+
 Sun Jul 21 21:18:05 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
 
 	* gen-semantics.c: Make the my_index variable a macro MY_INDEX.

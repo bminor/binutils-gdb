@@ -24,7 +24,8 @@
 #include "cpu.h"
 #include "options.h"
 
-STATIC_INLINE const char *
+STATIC_INLINE_OPTIONS\
+(const char *)
 options_byte_order (int order)
 {
   switch (order) {
@@ -36,7 +37,8 @@ options_byte_order (int order)
   return "UNKNOWN";
 }
 
-STATIC_INLINE const char *
+STATIC_INLINE_OPTIONS\
+(const char *)
 options_env (int env)
 {
   switch (env) {
@@ -49,7 +51,8 @@ options_env (int env)
   return "UNKNOWN";
 }
 
-STATIC_INLINE const char *
+STATIC_INLINE_OPTIONS\
+(const char *)
 options_align (int align)
 {
   switch (align) {
@@ -61,7 +64,8 @@ options_align (int align)
   return "UNKNOWN";
 }
 
-STATIC_INLINE const char *
+STATIC_INLINE_OPTIONS\
+(const char *)
 options_float (int float_type)
 {
   switch (float_type) {
@@ -72,7 +76,8 @@ options_float (int float_type)
   return "UNKNOWN";
 }
 
-STATIC_INLINE const char *
+STATIC_INLINE_OPTIONS\
+(const char *)
 options_mon (int mon)
 {
   switch (mon) {
@@ -85,7 +90,26 @@ options_mon (int mon)
   return "UNKNOWN";
 }
 
-INLINE_OPTIONS void
+STATIC_INLINE_OPTIONS\
+(const char *)
+options_inline (int in)
+{
+  switch (in) {
+  case /*0*/ 0:					return "0";
+  case /*1*/ REVEAL_MODULE:			return "REVEAL_MODULE";
+  case /*2*/ INLINE_MODULE:			return "INLINE_MODULE";
+  case /*3*/ REVEAL_MODULE|INLINE_MODULE:	return "REVEAL_MODULE|INLINE_MODULE";
+  case /*4*/ INLINE_LOCALS:			return "LOCALS_INLINE";
+  case /*5*/ INLINE_LOCALS|REVEAL_MODULE:	return "INLINE_LOCALS|REVEAL_MODULE";
+  case /*6*/ INLINE_LOCALS|INLINE_MODULE:	return "INLINE_LOCALS|INLINE_MODULE";
+  case /*7*/ ALL_INLINE:			return "ALL_INLINE";
+  }
+  return "0";
+}
+
+
+INLINE_OPTIONS\
+(void)
 print_options (void)
 {
 #if defined(_GNUC_) && defined(__VERSION__)
@@ -110,27 +134,30 @@ print_options (void)
   printf_filtered ("WITH_TRACE               = %d\n", WITH_TRACE);
   printf_filtered ("WITH_ASSERT              = %d\n", WITH_ASSERT);
   printf_filtered ("WITH_MON                 = %s\n", options_mon (WITH_MON));
-  printf_filtered ("WITH_FUNCTION_UNIT       = %d\n", WITH_FUNCTION_UNIT);
   printf_filtered ("WITH_DEFAULT_MODEL       = %s\n", model_name[WITH_DEFAULT_MODEL]);
   printf_filtered ("WITH_MODEL               = %s\n", model_name[WITH_MODEL]);
+  printf_filtered ("WITH_MODEL_ISSUE         = %d\n", WITH_MODEL_ISSUE);
   printf_filtered ("WITH_RESERVED_BITS       = %d\n", WITH_RESERVED_BITS);
-  printf_filtered ("DEFAULT_INLINE           = %d\n", DEFAULT_INLINE);
-  printf_filtered ("SIM_ENDIAN_INLINE        = %d\n", SIM_ENDIAN_INLINE);
-  printf_filtered ("BITS_INLINE              = %d\n", BITS_INLINE);
-  printf_filtered ("CPU_INLINE               = %d\n", CPU_INLINE);
-  printf_filtered ("VM_INLINE                = %d\n", VM_INLINE);
-  printf_filtered ("CORE_INLINE              = %d\n", CORE_INLINE);
-  printf_filtered ("EVENTS_INLINE            = %d\n", EVENTS_INLINE);
-  printf_filtered ("MON_INLINE               = %d\n", MON_INLINE);
-  printf_filtered ("INTERRUPTS_INLINE        = %d\n", INTERRUPTS_INLINE);
-  printf_filtered ("REGISTERS_INLINE         = %d\n", REGISTERS_INLINE);
-  printf_filtered ("DEVICE_TREE_INLINE       = %d\n", DEVICE_TREE_INLINE);
-  printf_filtered ("DEVICES_INLINE           = %d\n", DEVICES_INLINE);
-  printf_filtered ("SPREG_INLINE             = %d\n", SPREG_INLINE);
-  printf_filtered ("SEMANTICS_INLINE         = %d\n", SEMANTICS_INLINE);
-  printf_filtered ("IDECODE_INLINE           = %d\n", IDECODE_INLINE);
-  printf_filtered ("FUNCTION_UNIT_INLINE     = %d\n", FUNCTION_UNIT_INLINE);
-  printf_filtered ("OPTIONS_INLINE           = %d\n", FUNCTION_UNIT_INLINE);
+  printf_filtered ("WITH_STDIO               = %d\n", WITH_STDIO);
+  printf_filtered ("WITH_REGPARM             = %d\n", WITH_REGPARM);
+  printf_filtered ("WITH_STDCALL             = %d\n", WITH_STDCALL);
+  printf_filtered ("DEFAULT_INLINE           = %s\n", options_inline (DEFAULT_INLINE));
+  printf_filtered ("SIM_ENDIAN_INLINE        = %s\n", options_inline (SIM_ENDIAN_INLINE));
+  printf_filtered ("BITS_INLINE              = %s\n", options_inline (BITS_INLINE));
+  printf_filtered ("CPU_INLINE               = %s\n", options_inline (CPU_INLINE));
+  printf_filtered ("VM_INLINE                = %s\n", options_inline (VM_INLINE));
+  printf_filtered ("CORE_INLINE              = %s\n", options_inline (CORE_INLINE));
+  printf_filtered ("EVENTS_INLINE            = %s\n", options_inline (EVENTS_INLINE));
+  printf_filtered ("MON_INLINE               = %s\n", options_inline (MON_INLINE));
+  printf_filtered ("INTERRUPTS_INLINE        = %s\n", options_inline (INTERRUPTS_INLINE));
+  printf_filtered ("REGISTERS_INLINE         = %s\n", options_inline (REGISTERS_INLINE));
+  printf_filtered ("DEVICE_INLINE            = %s\n", options_inline (DEVICE_INLINE));
+  printf_filtered ("SPREG_INLINE             = %s\n", options_inline (SPREG_INLINE));
+  printf_filtered ("SEMANTICS_INLINE         = %s\n", options_inline (SEMANTICS_INLINE));
+  printf_filtered ("IDECODE_INLINE           = %s\n", options_inline (IDECODE_INLINE));
+  printf_filtered ("OPTIONS_INLINE           = %s\n", options_inline (OPTIONS_INLINE));
+  printf_filtered ("OS_EMUL_INLINE           = %s\n", options_inline (OS_EMUL_INLINE));
+  printf_filtered ("SUPPORT_INLINE           = %s\n", options_inline (SUPPORT_INLINE));
 
 #ifdef OPCODE_RULES
   printf_filtered ("OPCODE rules             = %s\n", OPCODE_RULES);
