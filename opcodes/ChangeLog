@@ -1,3 +1,16 @@
+2005-01-19  Fred Fish  <fnf@specifixinc.com>
+
+	* mips-dis.c (no_aliases): New disassembly option flag.
+	(set_default_mips_dis_options): Init no_aliases to zero.
+	(parse_mips_dis_option): Handle no-aliases option.
+	(print_insn_mips): Ignore table entries that are aliases
+	if no_aliases is set.
+	(print_insn_mips16): Ditto.
+	* mips-opc.c (mips_builtin_opcodes): Add initializer column for
+	new pinfo2 member and add INSN_ALIAS initializers as needed.  Also
+	move WR_MACC and RD_MACC initializers from pinfo to pinfo2.
+	* mips16-opc.c (mips16_opcodes): Ditto.
+
 2005-01-17  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* sh-opc.h (arch_sh2a_or_sh3e,arch_sh2a_or_sh4): Correct definition.
