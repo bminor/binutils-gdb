@@ -687,7 +687,10 @@ openp (const char *path, int try_cwd_first, const char *string,
 	    goto done;
 	}
       else
-	fd = -1;
+	{
+	  filename = NULL;
+	  fd = -1;
+	}
 
       for (i = 0; string[i]; i++)
 	if (IS_DIR_SEPARATOR (string[i]))

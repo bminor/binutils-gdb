@@ -1,5 +1,9 @@
 2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
+	* source.c (openp): Squelch warning about "filename".
+
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
 	* source.c (openp): If the file does not exist don't necessarily
 	search the path.
 
