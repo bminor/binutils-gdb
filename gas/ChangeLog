@@ -1,3 +1,32 @@
+2001-06-13  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	Merge from mainline:
+	2001-05-11  Nick Clifton  <nickc@cambridge.redhat.com>
+	* config/tc-arm.c (arm_handle_align): When truncating an aligned
+	block, ensure that the low order bits of the alignment are
+	preserved.
+	2001-05-06  Nick Clifton  <nickc@cambridge.redhat.com>
+	* config/tc-arm.h (MAX_MEM_FOR_RS_ALIGN_CODE): Define.
+	* config/tc-arm.c (arm_handle_align): Do not insert more than
+	MAX_MEM_FOR_RS_ALIGN_CODE bytes.
+	(arm_frag_align_code): Use MAX_MEM_FOR_RS_ALIGN_CODE.
+	2001-04-26  Nick Clifton  <nickc@cambridge.redhat.com>
+	* config/tc-arm.c (arm_handle_align): New Function:  Generate
+	no-op filled alignment frags.
+	(arm_frag_align_code): New Function: Create a code alignment frag.
+	(arm_init_frag): New Function: Initialse the target dependent
+	parts of a frag.
+	* config/tc-arm.h (TC_FRAG_TYPE): Define.
+	(TC_FRAG_INIT): Define.
+	(HANDLE_ALIGN): Define.
+	(md_do_align): Define.
+	2001-03-12  Nick Clifton  <nickc@redhat.com>
+	* config/tc-arm.c (md_begin): Always set machine type based on
+	cpu_variant.
+	2001-03-06  Nick Clifton  <nickc@redhat.com>
+	* config/tc-arm.c (md_apply_fix3): Clear bit zero of offset in
+	BLX(1) instruction.
+
 2001-06-12  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* doc/as.texinfo (Infix Ops): Document that comparison and
