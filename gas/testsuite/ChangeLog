@@ -1,5 +1,37 @@
 2003-05-20  Jason Eckhardt  <jle@rice.edu>
 
+	* gas/i860/bitwise.{s,d}: New files.
+	* gas/i860/bte.{s,d}: New files.
+	* gas/i860/fldst01.{s,d}: New files.
+	* gas/i860/fldst02.{s,d}: New files.
+	* gas/i860/fldst03.{s,d}: New files.
+	* gas/i860/fldst04.{s,d}: New files.
+	* gas/i860/fldst05.{s,d}: New files.
+	* gas/i860/fldst06.{s,d}: New files.
+	* gas/i860/fldst07.{s,d}: New files.
+	* gas/i860/fldst08.{s,d}: New files.
+	* gas/i860/float01.{s,d}: New files.
+	* gas/i860/float02.{s,d}: New files.
+	* gas/i860/float03.{s,d}: New files.
+	* gas/i860/float04.{s,d}: New files.
+	* gas/i860/form.{s,d}: New files.
+	* gas/i860/iarith.{s,d}: New files.
+	* gas/i860/ldst01.{s,d}: New files.
+	* gas/i860/ldst02.{s,d}: New files.
+	* gas/i860/ldst03.{s,d}: New files.
+	* gas/i860/ldst04.{s,d}: New files.
+	* gas/i860/ldst05.{s,d}: New files.
+	* gas/i860/ldst06.{s,d}: New files.
+	* gas/i860/pfam.{s,d}: New files.
+	* gas/i860/pfmam.{s,d}: New files.
+	* gas/i860/pfmsm.{s,d}: New files.
+	* gas/i860/pfsm.{s,d}: New files.
+	* gas/i860/regress01.{s,d}: New files.
+	* gas/i860/shift.{s,d}: New files.
+	* gas/i860/simd.{s,d}: New files.
+
+2003-05-20  Jason Eckhardt  <jle@rice.edu>
+
 	* gas/i860: New directory.
 	* gas/i860/i860.exp: New file.
 
