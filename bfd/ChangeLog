@@ -1,3 +1,11 @@
+Tue Dec 12 17:42:06 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* peicode.h (pe_print_reloc): New function to dump the .reloc section.
+	(pe_print_private_bfd_data): call pe_print_reloc.
+	* coffcode.h (coff_set_alignment_hook): .reloc section alignment.
+	* coff-ppc.c (in_reloc_p): Added missing non-eligible relocs. Spiffed
+	up some debugging as well.
+
 Tue Dec 12 11:34:23 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.bfd: Handle sparc-*-elf*.  From Ronald F. Guilmette
