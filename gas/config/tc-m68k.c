@@ -392,7 +392,7 @@ static int reverse_8_bits(int in);
 static int try_index(char **s, struct m68k_op *opP);
 static void install_gen_operand(int mode, int val);
 static void install_operand(int mode, int val);
-static void s_bss(void);
+ void s_bss(void);
 static void s_data1(void);
 static void s_data2(void);
 static void s_even(void);
@@ -408,7 +408,7 @@ static int reverse_8_bits();
 static int try_index();
 static void install_gen_operand();
 static void install_operand();
-static void s_bss();
+ void s_bss();
 static void s_data1();
 static void s_data2();
 static void s_even();
@@ -586,7 +586,7 @@ register struct m68k_op *opP;
 	char	*strend;
 	long	i;
 	char	*parse_index();
-	
+	int needp;
 	if (*str==' ') {
 		str++;
 	} /* Find the beginning of the string */
@@ -745,16 +745,21 @@ register struct m68k_op *opP;
 		return(OK);
 	}
 	/* Next thing had better be another @ */
-	if(*str!='@' || str[1]!='(') {
-		opP->error = "junk after indirect";
-		return(FAIL);
+	if (*str == '@') {
+	  if (str[1] == '(') {
+	    needp = 1;
+	    str+=2;
+	  }
+	  else {
+	    needp = 0;
+	    str++;
+	  }
 	}
 	
 	if ((current_architecture & m68020up) == 0) {
 		return(FAIL);
 	} /* if target is not a '20 or better */
 	
-	str+=2;
 	
 	if(opP->ireg != FAIL) {
 		opP->mode = APRDX;
@@ -776,8 +781,10 @@ register struct m68k_op *opP;
 		for (i = 1; i; ) {
 			switch(*str++) {
 			case '\0':
+			  if (needp)
 				opP->error="Missing )";
 				return(FAIL);
+			  break;
 			case ',': i=0; break;
 			case '(': i++; break;
 			case ')': --i; break;
@@ -2430,6 +2437,144 @@ char *s;
    machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles to.
    */
+
+void
+insert_reg(regname, regnum)
+char *regname;
+int regnum;
+{
+  char buf[100];
+  int i;
+  symbol_table_insert(symbol_new(regname, SEG_REGISTER, regnum, &zero_address_frag));
+
+  for (i = 0; regname[i]; i++)
+   buf[i] = islower (regname[i]) ? toupper (regname[i]) : regname[i];
+  buf[i] = '\0';
+	
+  symbol_table_insert(symbol_new(buf, SEG_REGISTER, regnum, &zero_address_frag));
+}
+
+static struct {
+char *name; 
+int number;
+} init_table[] = 
+{
+  "d0",	    	DATA0,
+  "d1",		DATA1,
+  "d2",		DATA2,
+  "d3",		DATA3,
+  "d4",		DATA4,
+  "d5",		DATA5,
+  "d6",		DATA6,
+  "d7",		DATA7,
+  "a0",		ADDR0,
+  "a1",		ADDR1,
+  "a2",		ADDR2,
+  "a3",		ADDR3,
+  "a4",		ADDR4,
+  "a5",		ADDR5,
+  "a6",		ADDR6,
+  "fp",		ADDR6,
+  "a7",		ADDR7,
+  "sp",		ADDR7,
+  "fp0",	FP0,
+  "fp1",	FP1,
+  "fp2",	FP2,
+  "fp3",	FP3,
+  "fp4",	FP4,
+  "fp5",	FP5,
+  "fp6",	FP6,
+  "fp7",	FP7,
+  "fpi",	FPI,
+  "fpiar",	FPI,
+  "fpc",	FPI,
+  "fps",	FPS,
+  "fpsr",	FPS,
+  "fpc",	FPC,
+  "fpcr",	FPC,
+
+  "cop0",	COP0,
+  "cop1",	COP1,
+  "cop2",	COP2,
+  "cop3",	COP3,
+  "cop4",	COP4,
+  "cop5",	COP5,
+  "cop6",	COP6,
+  "cop7",	COP7,
+  "pc",	        PC,	
+  "zpc",	ZPC, 
+  "sr",	        SR,	
+
+  "ccr",	CCR, 
+  "cc",   	CCR, 
+
+  "usp",	USP,	
+  "isp",	ISP,	
+  "sfc",	SFC,
+  "dfc",	DFC,
+  "cacr",	CACR,
+  "caar",	CAAR,
+
+  "vbr",	VBR,
+
+  "msp",	MSP,
+  "itt0",	ITT0,
+  "itt1",	ITT1,
+  "dtt0",	DTT0,
+  "dtt1",	DTT1,
+  "mmusr",      MMUSR,
+  "tc",	        TC,
+  "srp",	SRP,
+  "urp",	URP,
+
+#ifndef NO_68851
+  "ac",	        AC,
+  "bc",	        BC,
+  "cal",	CAL,
+  "crp",	CRP,
+  "drp",	DRP,
+  "pcsr",	PCSR,
+  "psr",	PSR,
+  "scc",	SCC,
+  "val",	VAL,
+  "bad0",	BAD0,
+  "bad1",	BAD1,
+  "bad2",	BAD2,
+  "bad3",	BAD3,
+  "bad4",	BAD4,
+  "bad5",	BAD5,
+  "bad6",	BAD6,
+  "bad7",	BAD7,
+  "bac0",	BAC0,
+  "bac1",	BAC1,
+  "bac2",	BAC2,
+  "bac3",	BAC3,
+  "bac4",	BAC4,
+  "bac5",	BAC5,
+  "bac6",	BAC6,
+  "bac7",	BAC7,
+#endif
+
+  "ic",	        IC,
+  "dc",	        DC,
+  "nc",	        NC,
+
+  0,
+
+};
+
+
+void
+init_regtable()
+{
+  int i;
+  for (i = 0; init_table[i].name; i++) 
+  {
+    insert_reg(init_table[i].name, init_table[i].number);
+  }
+}
+	
+
 void
     md_assemble(str)
 char *str;
@@ -3236,6 +3381,8 @@ segT segment;
 			fragP->fr_fix += 6;	  /* account for bra/jmp instruction */
 			subseg_change(SEG_TEXT,0);
 			fix_new(fragP, fragP->fr_fix, 2, fragP->fr_symbol, 0, 
+
+
 				fragP->fr_offset, 0, NO_RELOC);
 			fragP->fr_fix += 2;
 		} else {
