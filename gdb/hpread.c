@@ -3959,26 +3959,9 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	      /* But mark it as NULL if the method was incompletely processed
 	         We'll fix this up later when the method is fully processed */
 	      if (TYPE_INCOMPLETE (memtype))
-		{
-		  fn_p->field.fn_fields[ix].type = NULL;
-		}
+		fn_p->field.fn_fields[ix].type = NULL;
 	      else
-		{
-		  fn_p->field.fn_fields[ix].type = memtype;
-
-		  /* The argument list */
-		  TYPE_TYPE_SPECIFIC (fn_p->field.fn_fields[ix].type).arg_types
-		    = (struct type **) obstack_alloc (&objfile->type_obstack,
-						      (sizeof (struct type *)
-						       * (TYPE_NFIELDS (memtype)
-							  + 1)));
-		  for (i = 0; i < TYPE_NFIELDS (memtype); i++)
-		    TYPE_TYPE_SPECIFIC (fn_p->field.fn_fields[ix].type)
-		      .arg_types[i] = TYPE_FIELDS (memtype)[i].type;
-		  /* void termination */
-		  TYPE_TYPE_SPECIFIC (fn_p->field.fn_fields[ix].type)
-		    .arg_types[TYPE_NFIELDS (memtype)] = builtin_type_void;
-		}
+		fn_p->field.fn_fields[ix].type = memtype;
 
 	      /* For virtual functions, fill in the voffset field with the
 	       * virtual table offset. (This is just copied over from the
@@ -4455,14 +4438,6 @@ fixup_class_method_type (struct type *class, struct type *method,
 	{
 	  /* Set the method type */
 	  TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j) = method;
-	  /* The argument list */
-	  TYPE_TYPE_SPECIFIC (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j)).arg_types
-	    = (struct type **) obstack_alloc (&objfile->type_obstack,
-			    sizeof (struct type *) * (TYPE_NFIELDS (method) + 1));
-	  for (k = 0; k < TYPE_NFIELDS (method); k++)
-	    TYPE_TYPE_SPECIFIC (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j)).arg_types[k] = TYPE_FIELDS (method)[k].type;
-	  /* void termination */
-	  TYPE_TYPE_SPECIFIC (TYPE_FN_FIELD_TYPE (TYPE_FN_FIELDLIST1 (class, i), j)).arg_types[TYPE_NFIELDS (method)] = builtin_type_void;
 
 	  /* Break out of both loops -- only one method to fix up in a class */
 	  goto finish;
@@ -4916,21 +4891,18 @@ hpread_type_lookup (dnttpointer hp_type, struct objfile *objfile)
 	struct type *retvaltype;
 	int nargs;
 	int i;
-	struct type **args_type;
 	class_type = hpread_type_lookup (dn_bufp->dptrmem.pointsto,
 					 objfile);
 	functype = hpread_type_lookup (dn_bufp->dptrmem.memtype,
 				       objfile);
 	retvaltype = TYPE_TARGET_TYPE (functype);
 	nargs = TYPE_NFIELDS (functype);
-	args_type = (struct type **) xmalloc ((nargs + 1) * sizeof (struct type *));
-	for (i = 0; i < nargs; i++)
-	  {
-	    args_type[i] = TYPE_FIELD_TYPE (functype, i);
-	  }
-	args_type[nargs] = NULL;
 	ptrmemtype = alloc_type (objfile);
-	smash_to_method_type (ptrmemtype, class_type, retvaltype, args_type);
+
+	smash_to_method_type (ptrmemtype, class_type, retvaltype,
+			      TYPE_FIELDS (functype),
+			      TYPE_NFIELDS (functype),
+			      0);
 	return make_pointer_type (ptrmemtype, NULL);
       }
       break;

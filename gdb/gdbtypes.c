@@ -130,7 +130,7 @@ static void add_mangled_type (struct extra *, struct type *);
 static void cfront_mangle_name (struct type *, int, int);
 #endif
 static void print_bit_vector (B_TYPE *, int);
-static void print_arg_types (struct type **, int);
+static void print_arg_types (struct field *, int, int);
 static void dump_fn_fieldlists (struct type *, int);
 static void print_cplus_stuff (struct type *, int);
 static void virtual_base_list_aux (struct type *dclass);
@@ -579,7 +579,6 @@ allocate_stub_method (struct type *type)
 		     TYPE_OBJFILE (type));
   TYPE_TARGET_TYPE (mtype) = type;
   /*  _DOMAIN_TYPE (mtype) = unknown yet */
-  /*  _ARG_TYPES (mtype) = unknown yet */
   return (mtype);
 }
 
@@ -900,7 +899,8 @@ smash_to_member_type (struct type *type, struct type *domain,
 
 void
 smash_to_method_type (struct type *type, struct type *domain,
-		      struct type *to_type, struct type **args)
+		      struct type *to_type, struct field *args,
+		      int nargs, int varargs)
 {
   struct objfile *objfile;
 
@@ -910,7 +910,10 @@ smash_to_method_type (struct type *type, struct type *domain,
   TYPE_OBJFILE (type) = objfile;
   TYPE_TARGET_TYPE (type) = to_type;
   TYPE_DOMAIN_TYPE (type) = domain;
-  TYPE_ARG_TYPES (type) = args;
+  TYPE_FIELDS (type) = args;
+  TYPE_NFIELDS (type) = nargs;
+  if (varargs)
+    TYPE_FLAGS (type) |= TYPE_FLAG_VARARGS;
   TYPE_LENGTH (type) = 1;	/* In practice, this is never needed.  */
   TYPE_CODE (type) = TYPE_CODE_METHOD;
 }
@@ -1614,7 +1617,7 @@ check_stub_method (struct type *type, int method_id, int signature_id)
 					 DMGL_PARAMS | DMGL_ANSI);
   char *argtypetext, *p;
   int depth = 0, argcount = 1;
-  struct type **argtypes;
+  struct field *argtypes;
   struct type *mtype;
 
   /* Make sure we got back a function string that we can use.  */
@@ -1647,11 +1650,14 @@ check_stub_method (struct type *type, int method_id, int signature_id)
       p += 1;
     }
 
-  /* We need two more slots: one for the THIS pointer, and one for the
-     NULL [...] or void [end of arglist].  */
+  /* If we read one argument and it was ``void'', don't count it.  */
+  if (strncmp (argtypetext, "(void)", 6) == 0)
+    argcount -= 1;
 
-  argtypes = (struct type **)
-    TYPE_ALLOC (type, (argcount + 2) * sizeof (struct type *));
+  /* We need one extra slot, for the THIS pointer.  */
+
+  argtypes = (struct field *)
+    TYPE_ALLOC (type, (argcount + 1) * sizeof (struct field));
   p = argtypetext;
 
   /* Add THIS pointer for non-static methods.  */
@@ -1660,7 +1666,7 @@ check_stub_method (struct type *type, int method_id, int signature_id)
     argcount = 0;
   else
     {
-      argtypes[0] = lookup_pointer_type (type);
+      argtypes[0].type = lookup_pointer_type (type);
       argcount = 1;
     }
 
@@ -1671,10 +1677,12 @@ check_stub_method (struct type *type, int method_id, int signature_id)
 	{
 	  if (depth <= 0 && (*p == ',' || *p == ')'))
 	    {
-	      /* Avoid parsing of ellipsis, they will be handled below.  */
-	      if (strncmp (argtypetext, "...", p - argtypetext) != 0)
+	      /* Avoid parsing of ellipsis, they will be handled below.
+	         Also avoid ``void'' as above.  */
+	      if (strncmp (argtypetext, "...", p - argtypetext) != 0
+		  && strncmp (argtypetext, "void", p - argtypetext) != 0)
 		{
-		  argtypes[argcount] =
+		  argtypes[argcount].type =
 		    safe_parse_type (argtypetext, p - argtypetext);
 		  argcount += 1;
 		}
@@ -1694,25 +1702,19 @@ check_stub_method (struct type *type, int method_id, int signature_id)
 	}
     }
 
-  if (p[-2] != '.')		/* Not '...' */
-    {
-      argtypes[argcount] = builtin_type_void;	/* List terminator */
-    }
-  else
-    {
-      argtypes[argcount] = NULL;	/* Ellist terminator */
-    }
-
-  xfree (demangled_name);
-
   TYPE_FN_FIELD_PHYSNAME (f, signature_id) = mangled_name;
 
   /* Now update the old "stub" type into a real type.  */
   mtype = TYPE_FN_FIELD_TYPE (f, signature_id);
   TYPE_DOMAIN_TYPE (mtype) = type;
-  TYPE_ARG_TYPES (mtype) = argtypes;
+  TYPE_FIELDS (mtype) = argtypes;
+  TYPE_NFIELDS (mtype) = argcount;
   TYPE_FLAGS (mtype) &= ~TYPE_FLAG_STUB;
   TYPE_FN_FIELD_STUB (f, signature_id) = 0;
+  if (p[-2] == '.')
+    TYPE_FLAGS (mtype) |= TYPE_FLAG_VARARGS;
+
+  xfree (demangled_name);
 }
 
 const struct cplus_struct_type cplus_struct_default;
@@ -2703,25 +2705,18 @@ print_bit_vector (B_TYPE *bits, int nbits)
     }
 }
 
-/* The args list is a strange beast.  It is either terminated by a NULL
-   pointer for varargs functions, or by a pointer to a TYPE_CODE_VOID
-   type for normal fixed argcount functions.  (FIXME someday)
-   Also note the first arg should be the "this" pointer, we may not want to
-   include it since we may get into a infinitely recursive situation. */
+/* Note the first arg should be the "this" pointer, we may not want to
+   include it since we may get into a infinitely recursive situation.  */
 
 static void
-print_arg_types (struct type **args, int spaces)
+print_arg_types (struct field *args, int nargs, int spaces)
 {
   if (args != NULL)
     {
-      while (*args != NULL)
-	{
-	  recursive_dump_type (*args, spaces + 2);
-	  if (TYPE_CODE (*args++) == TYPE_CODE_VOID)
-	    {
-	      break;
-	    }
-	}
+      int i;
+
+      for (i = 0; i < nargs; i++)
+	recursive_dump_type (args[i].type, spaces + 2);
     }
 }
 
@@ -2766,7 +2761,9 @@ dump_fn_fieldlists (struct type *type, int spaces)
 	  gdb_print_host_address (TYPE_FN_FIELD_ARGS (f, overload_idx), gdb_stdout);
 	  printf_filtered ("\n");
 
-	  print_arg_types (TYPE_FN_FIELD_ARGS (f, overload_idx), spaces);
+	  print_arg_types (TYPE_FN_FIELD_ARGS (f, overload_idx),
+			   TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (f, overload_idx)),
+			   spaces);
 	  printfi_filtered (spaces + 8, "fcontext ");
 	  gdb_print_host_address (TYPE_FN_FIELD_FCONTEXT (f, overload_idx),
 				  gdb_stdout);
@@ -3108,14 +3105,6 @@ recursive_dump_type (struct type *type, int spaces)
   printfi_filtered (spaces, "vptr_fieldno %d\n", TYPE_VPTR_FIELDNO (type));
   switch (TYPE_CODE (type))
     {
-    case TYPE_CODE_METHOD:
-    case TYPE_CODE_FUNC:
-      printfi_filtered (spaces, "arg_types ");
-      gdb_print_host_address (TYPE_ARG_TYPES (type), gdb_stdout);
-      puts_filtered ("\n");
-      print_arg_types (TYPE_ARG_TYPES (type), spaces);
-      break;
-
     case TYPE_CODE_STRUCT:
       printfi_filtered (spaces, "cplus_stuff ");
       gdb_print_host_address (TYPE_CPLUS_SPECIFIC (type), gdb_stdout);

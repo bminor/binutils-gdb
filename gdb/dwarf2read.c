@@ -799,8 +799,7 @@ static void dwarf2_attach_fields_to_type (struct field_info *,
 					  struct type *, struct objfile *);
 
 static void dwarf2_add_member_fn (struct field_info *,
-				  struct die_info *, struct type *,
-				  struct objfile *objfile,
+				  struct die_info *, struct objfile *objfile,
 				  const struct comp_unit_head *);
 
 static void dwarf2_attach_fn_fields_to_type (struct field_info *,
@@ -2233,7 +2232,7 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 
 static void
 dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
-		      struct type *type, struct objfile *objfile,
+		      struct objfile *objfile,
 		      const struct comp_unit_head *cu_header)
 {
   struct attribute *attr;
@@ -2299,23 +2298,13 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   if (die->type && TYPE_CODE (die->type) == TYPE_CODE_FUNC)
     {
       struct type *return_type = TYPE_TARGET_TYPE (die->type);
-      struct type **arg_types;
       int nparams = TYPE_NFIELDS (die->type);
-      int iparams;
 
-      /* Copy argument types from the subroutine type.  */
-      arg_types = (struct type **)
-	TYPE_ALLOC (fnp->type, (nparams + 1) * sizeof (struct type *));
-      for (iparams = 0; iparams < nparams; iparams++)
-	arg_types[iparams] = TYPE_FIELD_TYPE (die->type, iparams);
-
-      /* Set last entry in argument type vector.  */
-      if (TYPE_VARARGS (die->type))
-	arg_types[nparams] = NULL;
-      else
-	arg_types[nparams] = dwarf2_fundamental_type (objfile, FT_VOID);
-
-      smash_to_method_type (fnp->type, type, return_type, arg_types);
+      smash_to_method_type (fnp->type, die->type,
+			    TYPE_TARGET_TYPE (die->type),
+			    TYPE_FIELDS (die->type),
+			    TYPE_NFIELDS (die->type),
+			    TYPE_VARARGS (die->type));
 
       /* Handle static member functions.
          Dwarf2 has no clean way to discern C++ static and non-static
@@ -2485,7 +2474,7 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
 	    {
 	      /* C++ member function. */
 	      process_die (child_die, objfile, cu_header);
-	      dwarf2_add_member_fn (&fi, child_die, type, objfile, cu_header);
+	      dwarf2_add_member_fn (&fi, child_die, objfile, cu_header);
 	    }
 	  else if (child_die->tag == DW_TAG_inheritance)
 	    {

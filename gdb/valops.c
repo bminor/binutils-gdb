@@ -45,7 +45,8 @@ extern int hp_som_som_object_present;
 extern int overload_debug;
 /* Local functions.  */
 
-static int typecmp (int staticp, struct type *t1[], struct value *t2[]);
+static int typecmp (int staticp, int varargs, int nargs,
+		    struct field t1[], struct value *t2[]);
 
 static CORE_ADDR find_function_addr (struct value *, struct type **);
 static struct value *value_arg_coerce (struct value *, struct type *, int);
@@ -1438,42 +1439,25 @@ hand_function_call (struct value *function, int nargs, struct value **args)
   sp = old_sp;			/* It really is used, for some ifdef's... */
 #endif
 
-  if (TYPE_CODE (ftype) == TYPE_CODE_METHOD)
-    {
-      i = 0;
-      while (TYPE_CODE (TYPE_ARG_TYPES (ftype)[i]) != TYPE_CODE_VOID)
-	i++;
-      n_method_args = i;
-      if (nargs < i)
-	error ("too few arguments in method call");
-    }
-  else if (nargs < TYPE_NFIELDS (ftype))
+  if (nargs < TYPE_NFIELDS (ftype))
     error ("too few arguments in function call");
 
   for (i = nargs - 1; i >= 0; i--)
     {
-      /* Assume that methods are always prototyped, unless they are off the
-	 end (which we should only be allowing if there is a ``...'').  
-         FIXME.  */
+      int prototyped;
+
+      /* FIXME drow/2002-05-31: Should just always mark methods as
+	 prototyped.  Can we respect TYPE_VARARGS?  Probably not.  */
       if (TYPE_CODE (ftype) == TYPE_CODE_METHOD)
-	{
-	  if (i < n_method_args)
-	    args[i] = value_arg_coerce (args[i], TYPE_ARG_TYPES (ftype)[i], 1);
-	  else
-	    args[i] = value_arg_coerce (args[i], NULL, 0);
-	}
-
-      /* If we're off the end of the known arguments, do the standard
-         promotions.  FIXME: if we had a prototype, this should only
-         be allowed if ... were present.  */
-      if (i >= TYPE_NFIELDS (ftype))
-	args[i] = value_arg_coerce (args[i], NULL, 0);
-
+	prototyped = 1;
       else
-	{
-	  param_type = TYPE_FIELD_TYPE (ftype, i);
-	  args[i] = value_arg_coerce (args[i], param_type, TYPE_PROTOTYPED (ftype));
-	}
+	prototyped = TYPE_PROTOTYPED (ftype);
+
+      if (i < TYPE_NFIELDS (ftype))
+	args[i] = value_arg_coerce (args[i], TYPE_FIELD_TYPE (ftype, i),
+				    prototyped);
+      else
+	args[i] = value_arg_coerce (args[i], NULL, 0);
 
       /*elz: this code is to handle the case in which the function to be called
          has a pointer to function as parameter and the corresponding actual argument
@@ -1485,7 +1469,7 @@ hand_function_call (struct value *function, int nargs, struct value **args)
          In cc this is not a problem. */
 
       if (using_gcc == 0)
-	if (param_type)
+	if (param_type && TYPE_CODE (ftype) != TYPE_CODE_METHOD)
 	  /* if this parameter is a pointer to function */
 	  if (TYPE_CODE (param_type) == TYPE_CODE_PTR)
 	    if (TYPE_CODE (TYPE_TARGET_TYPE (param_type)) == TYPE_CODE_FUNC)
@@ -1938,13 +1922,14 @@ value_bitstring (char *ptr, int len)
 }
 
 /* See if we can pass arguments in T2 to a function which takes arguments
-   of types T1.  Both t1 and t2 are NULL-terminated vectors.  If some
-   arguments need coercion of some sort, then the coerced values are written
-   into T2.  Return value is 0 if the arguments could be matched, or the
-   position at which they differ if not.
+   of types T1.  T1 is a list of NARGS arguments, and T2 is a NULL-terminated
+   vector.  If some arguments need coercion of some sort, then the coerced
+   values are written into T2.  Return value is 0 if the arguments could be
+   matched, or the position at which they differ if not.
 
    STATICP is nonzero if the T1 argument list came from a
-   static member function.
+   static member function.  T2 will still include the ``this'' pointer,
+   but it will be skipped.
 
    For non-static member functions, we ignore the first argument,
    which is the type of the instance variable.  This is because we want
@@ -1953,30 +1938,30 @@ value_bitstring (char *ptr, int len)
    requested operation is type secure, shouldn't we?  FIXME.  */
 
 static int
-typecmp (int staticp, struct type *t1[], struct value *t2[])
+typecmp (int staticp, int varargs, int nargs,
+	 struct field t1[], struct value *t2[])
 {
   int i;
 
   if (t2 == 0)
-    return 1;
-  if (staticp && t1 == 0)
-    return t2[1] != 0;
-  if (t1 == 0)
-    return 1;
-  if (t1[!staticp] == 0)
-    return 0;
-  if (TYPE_CODE (t1[0]) == TYPE_CODE_VOID)
-    return 0;
+    internal_error (__FILE__, __LINE__, "typecmp: no argument list");
+
   /* Skip ``this'' argument if applicable.  T2 will always include THIS.  */
   if (staticp)
-    t2++;
-  for (i = !staticp; t1[i] && TYPE_CODE (t1[i]) != TYPE_CODE_VOID; i++)
+    t2 ++;
+
+  for (i = 0;
+       (i < nargs) && TYPE_CODE (t1[i].type) != TYPE_CODE_VOID;
+       i++)
     {
       struct type *tt1, *tt2;
+
       if (!t2[i])
 	return i + 1;
-      tt1 = check_typedef (t1[i]);
+
+      tt1 = check_typedef (t1[i].type);
       tt2 = check_typedef (VALUE_TYPE (t2[i]));
+
       if (TYPE_CODE (tt1) == TYPE_CODE_REF
       /* We should be doing hairy argument matching, as below.  */
 	  && (TYPE_CODE (check_typedef (TYPE_TARGET_TYPE (tt1))) == TYPE_CODE (tt2)))
@@ -2012,12 +1997,12 @@ typecmp (int staticp, struct type *t1[], struct value *t2[])
       /* We should be doing much hairier argument matching (see section 13.2
          of the ARM), but as a quick kludge, just check for the same type
          code.  */
-      if (TYPE_CODE (t1[i]) != TYPE_CODE (VALUE_TYPE (t2[i])))
+      if (TYPE_CODE (t1[i].type) != TYPE_CODE (VALUE_TYPE (t2[i])))
 	return i + 1;
     }
-  if (!t1[i])
+  if (varargs || t2[i] == NULL)
     return 0;
-  return t2[i] ? i + 1 : 0;
+  return i + 1;
 }
 
 /* Helper function used by value_struct_elt to recurse through baseclasses.
@@ -2303,6 +2288,8 @@ search_struct_method (char *name, struct value **arg1p,
 		if (TYPE_FN_FIELD_STUB (f, j))
 		  check_stub_method (type, i, j);
 		if (!typecmp (TYPE_FN_FIELD_STATIC_P (f, j),
+			      TYPE_VARARGS (TYPE_FN_FIELD_TYPE (f, j)),
+			      TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (f, j)),
 			      TYPE_FN_FIELD_ARGS (f, j), args))
 		  {
 		    if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
@@ -2754,13 +2741,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 	{
 	  if (TYPE_FN_FIELD_STATIC_P (fns_ptr, ix))
 	    static_offset = 1;
-	  nparms=0;
-
-	  if (TYPE_FN_FIELD_ARGS(fns_ptr,ix))
-	    {
-	      while (TYPE_CODE(TYPE_FN_FIELD_ARGS(fns_ptr,ix)[nparms]) != TYPE_CODE_VOID)
-		nparms++;
-	    }
+	  nparms = TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (fns_ptr, ix));
 	}
       else
 	{
@@ -2772,7 +2753,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
       parm_types = (struct type **) xmalloc (nparms * (sizeof (struct type *)));
       for (jj = 0; jj < nparms; jj++)
 	parm_types[jj] = (method
-			  ? (TYPE_FN_FIELD_ARGS (fns_ptr, ix)[jj])
+			  ? (TYPE_FN_FIELD_ARGS (fns_ptr, ix)[jj].type)
 			  : TYPE_FIELD_TYPE (SYMBOL_TYPE (oload_syms[ix]), jj));
 
       /* Compare parameter types to supplied argument types.  Skip THIS for

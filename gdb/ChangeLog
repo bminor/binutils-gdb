@@ -1,3 +1,39 @@
+2002-06-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbtypes.h (TYPE_FLAG_VARARGS): Update comment.
+	(struct main_type): Remove arg_types member.  Update comments for
+	struct field.
+	(TYPE_ARG_TYPES): Remove.
+	(TYPE_FN_FIELD_ARGS): Update.
+	(smash_to_method_type): Update prototype.
+
+	* c-typeprint.c (cp_type_print_method_args): Take method type
+	instead of argument list.  Use new argument layout.  Simplify.
+	(c_type_print_args): Use new argument layout.  Simplify.
+	(c_type_print_base): Update call to cp_type_print_method_args.
+	* dwarf2read.c (dwarf2_add_member_fn): Remove unneeded type
+	argument; use die->type instead.  Update call to
+	smash_to_method_type.
+	(read_structure_scope): Update call to dwarf2_add_member_fn.
+	* gdbtypes.c (allocate_stub_method): Update comment.
+	(smash_to_method_type): Take new NARGS and VARARGS arguments.
+	Use new argument layout.
+	(check_stub_method): Use new argument layout.  Don't count
+	void as an argument.
+	(print_arg_types): Update comments.  Use new argument layout.
+	(recursive_dump_type): Don't print arg_types member.
+	* hpread.c (hpread_read_struct_type): Use new argument layout.
+	(fixup_class_method_type): Likewise.
+	(hpread_type_lookup): Likewise.
+	* stabsread.c (read_type): Update calls to read_args and
+	smash_to_method_type.
+	(read_args): Use new argument layout.  Simplify.
+	* valops.c (typecmp): Use new argument layout.  Update parameters
+	and comments.  Simplify.
+	(hand_function_call): Use new argument layout.
+	(search_struct_method): Update call to typecmp.
+	(find_overload_match): Use new argument layout.
+
 2002-06-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* NEWS: Mention multithreaded debug support for gdbserver.
