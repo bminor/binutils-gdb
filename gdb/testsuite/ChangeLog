@@ -1,3 +1,9 @@
+Mon Mar 27 08:00:34 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* lib/gdb.exp (default_gdb_version): A version number must start
+	with a digit, but other than that contains all characters up to
+	the first whitespace character.
+
 Sun Mar 26 13:19:32 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/commands.exp (breakpoint_command_test): New tests.

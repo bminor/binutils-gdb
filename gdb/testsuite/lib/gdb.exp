@@ -63,7 +63,7 @@ proc default_gdb_version {} {
     global GDBFLAGS
     if {[which $GDB] != 0} then {
 	set tmp [exec echo "q" | $GDB -nw $GDBFLAGS]
-	regexp " \[0-9.\]+" $tmp version
+	regexp " \[0-9\]\[^ \t\n\]+" $tmp version
 	clone_output "[which $GDB] version$version -nw $GDBFLAGS \n"
     } else {
 	warning "$GDB does not exist"
