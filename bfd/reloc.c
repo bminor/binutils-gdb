@@ -130,11 +130,11 @@ $} arelent;
 /*doc*
 @table @code
 @item sym_ptr_ptr
-The symbol table pointer points to a pointer to the symbol ascociated with the
+The symbol table pointer points to a pointer to the symbol associated with the
 relocation request. This would naturally be the pointer into the table
 returned by the back end's get_symtab action. @xref{Symbols}. The
 symbol is referenced through a pointer to a pointer so that tools like
-the linker can fixup all the symbols of the same name by modifying
+the linker can fix up all the symbols of the same name by modifying
 only one pointer. The relocation routine looks in the symbol and uses
 the base of the section the symbol is attached to and the value of
 the symbol as the initial relocation offset. If the symbol pointer is
