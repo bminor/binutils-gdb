@@ -1,3 +1,15 @@
+Wed Sep 22 07:34:09 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in (OPTIONAL_BACKENDS):  Add lynx-core.o.
+	* bfd-in2.h (tdata):  Add lynx_core_data;
+	* config.bfd configure.host:  Get rid of superfluous netbsd and
+	lynxos entries.
+	* configure.in:  Add lynx-core.o to Lynx config.
+	* i386lynx.c:  Add defs for core file support.
+	* lynx-core.c:  New file with Lynx core file support.
+	* hosts/i386lynx.h:  Move lots of host specific includes to here.
+	Add def of HOST_LYNX.  Remove unnecessary defs.
+
 Mon Sep 20 19:18:10 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elfcode.h (bfd_section_from_shdr): Only set SEC_DATA for a
