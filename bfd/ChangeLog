@@ -1,3 +1,8 @@
+Thu Oct  5 14:04:07 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* peicode.c (coff_swap_filehdr_in): If symptr is
+	zero, there aren't any symbols, even if nsyms is set.
+
 Thu Oct  5 11:45:02 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libecoff.h (struct ecoff_backend_data): Add adjust_headers
