@@ -33,7 +33,7 @@ void usage();
 extern int optind;
 extern char *optarg;
 
-bfd *sim_bfd;
+bfd *exec_bfd;
 
 int target_byte_order;
 
@@ -87,7 +87,7 @@ main (ac, av)
       printf ("run %s\n", name);
     }
 
-  sim_bfd = abfd = bfd_openr (name, 0);
+  exec_bfd = abfd = bfd_openr (name, 0);
   if (!abfd) 
     {
       fprintf (stderr, "run: can't open %s: %s\n", 
@@ -153,6 +153,18 @@ main (ac, av)
   sim_stop_reason (&reason, &sigrc);
 
   sim_close(0);
+
+  /* Why did we stop? */
+  switch (reason)
+    {
+    case sim_signalled:
+    case sim_stopped:
+      fprintf (stderr, "program stopped with signal %d.\n", sigrc);
+      break;
+
+    case sim_exited:
+      break;
+    }
 
   /* If reason is sim_exited, then sigrc holds the exit code which we want
      to return.  If reason is sim_stopped or sim_signalled, then sigrc holds

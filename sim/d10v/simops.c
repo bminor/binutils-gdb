@@ -2637,6 +2637,139 @@ OP_5F00 ()
 	    trace_output (OP_R2);
 	    break;
 
+	  case SYS_getpid:
+	    trace_input ("<getpid>", OP_VOID, OP_VOID, OP_VOID);
+	    RETVAL = getpid ();
+	    trace_output (OP_R2);
+	    break;
+
+	  case SYS_kill:
+	    trace_input ("<kill>", OP_REG, OP_REG, OP_VOID);
+	    if (PARM1 == getpid ())
+	      {
+		trace_output (OP_VOID);
+		State.exception = PARM2;
+	      }
+	    else
+	      {
+		int os_sig = -1;
+		switch (PARM2)
+		  {
+#ifdef SIGHUP
+		  case 1: os_sig = SIGHUP;	break;
+#endif
+#ifdef SIGINT
+		  case 2: os_sig = SIGINT;	break;
+#endif
+#ifdef SIGQUIT
+		  case 3: os_sig = SIGQUIT;	break;
+#endif
+#ifdef SIGILL
+		  case 4: os_sig = SIGILL;	break;
+#endif
+#ifdef SIGTRAP
+		  case 5: os_sig = SIGTRAP;	break;
+#endif
+#ifdef SIGABRT
+		  case 6: os_sig = SIGABRT;	break;
+#elif defined(SIGIOT)
+		  case 6: os_sig = SIGIOT;	break;
+#endif
+#ifdef SIGEMT
+		  case 7: os_sig = SIGEMT;	break;
+#endif
+#ifdef SIGFPE
+		  case 8: os_sig = SIGFPE;	break;
+#endif
+#ifdef SIGKILL
+		  case 9: os_sig = SIGKILL;	break;
+#endif
+#ifdef SIGBUS
+		  case 10: os_sig = SIGBUS;	break;
+#endif
+#ifdef SIGSEGV
+		  case 11: os_sig = SIGSEGV;	break;
+#endif
+#ifdef SIGSYS
+		  case 12: os_sig = SIGSYS;	break;
+#endif
+#ifdef SIGPIPE
+		  case 13: os_sig = SIGPIPE;	break;
+#endif
+#ifdef SIGALRM
+		  case 14: os_sig = SIGALRM;	break;
+#endif
+#ifdef SIGTERM
+		  case 15: os_sig = SIGTERM;	break;
+#endif
+#ifdef SIGURG
+		  case 16: os_sig = SIGURG;	break;
+#endif
+#ifdef SIGSTOP
+		  case 17: os_sig = SIGSTOP;	break;
+#endif
+#ifdef SIGTSTP
+		  case 18: os_sig = SIGTSTP;	break;
+#endif
+#ifdef SIGCONT
+		  case 19: os_sig = SIGCONT;	break;
+#endif
+#ifdef SIGCHLD
+		  case 20: os_sig = SIGCHLD;	break;
+#elif defined(SIGCLD)
+		  case 20: os_sig = SIGCLD;	break;
+#endif
+#ifdef SIGTTIN
+		  case 21: os_sig = SIGTTIN;	break;
+#endif
+#ifdef SIGTTOU
+		  case 22: os_sig = SIGTTOU;	break;
+#endif
+#ifdef SIGIO
+		  case 23: os_sig = SIGIO;	break;
+#elif defined (SIGPOLL)
+		  case 23: os_sig = SIGPOLL;	break;
+#endif
+#ifdef SIGXCPU
+		  case 24: os_sig = SIGXCPU;	break;
+#endif
+#ifdef SIGXFSZ
+		  case 25: os_sig = SIGXFSZ;	break;
+#endif
+#ifdef SIGVTALRM
+		  case 26: os_sig = SIGVTALRM;	break;
+#endif
+#ifdef SIGPROF
+		  case 27: os_sig = SIGPROF;	break;
+#endif
+#ifdef SIGWINCH
+		  case 28: os_sig = SIGWINCH;	break;
+#endif
+#ifdef SIGLOST
+		  case 29: os_sig = SIGLOST;	break;
+#endif
+#ifdef SIGUSR1
+		  case 30: os_sig = SIGUSR1;	break;
+#endif
+#ifdef SIGUSR2
+		  case 31: os_sig = SIGUSR2;	break;
+#endif
+		  }
+
+		if (os_sig == -1)
+		  {
+		    trace_output (OP_VOID);
+		    (*d10v_callback->printf_filtered) (d10v_callback, "Unknown signal %d\n", PARM2);
+		    State.exception = SIGILL;
+		  }
+		else
+		  {
+		    RETVAL = kill (PARM1, PARM2);
+		    trace_output (OP_R2);
+		  }
+	      }
+	    break;
+
 	  case SYS_execve:
 	    RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2),
 			     (char **)MEMPTR (PARM3));
@@ -2676,6 +2809,18 @@ OP_5F00 ()
 	      trace_output (OP_R2);
 	    }
 	  break;
+#else
+	  case SYS_getpid:
+	    trace_input ("<getpid>", OP_VOID, OP_VOID, OP_VOID);
+	    RETVAL = 1;
+	    trace_output (OP_R2);
+	    break;
+
+	  case SYS_kill:
+	    trace_input ("<kill>", OP_REG, OP_REG, OP_VOID);
+	    trace_output (OP_VOID);
+	    State.exception = PARM2;
+	    break;
 #endif
 
 	  case SYS_read:

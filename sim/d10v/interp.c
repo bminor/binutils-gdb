@@ -180,7 +180,7 @@ do_2_short (ins1, ins2, leftright)
   (h->ops->func)();
 
   /* If the PC has changed (ie, a jump), don't do the second instruction */
-  if (orig_pc == PC)
+  if (orig_pc == PC && !State.exception)
     {
       h = lookup_hash (ins2, 0);
       get_operands (h->ops, ins2);
@@ -234,10 +234,13 @@ do_parallel (ins1, ins2)
       State.ins_type = INS_LEFT_PARALLEL;
       ins_type_counters[ (int)State.ins_type ]++;
       (h1->ops->func)();
-      get_operands (h2->ops, ins2);
-      State.ins_type = INS_RIGHT_PARALLEL;
-      ins_type_counters[ (int)State.ins_type ]++;
-      (h2->ops->func)();
+      if (!State.exception)
+	{
+	  get_operands (h2->ops, ins2);
+	  State.ins_type = INS_RIGHT_PARALLEL;
+	  ins_type_counters[ (int)State.ins_type ]++;
+	  (h2->ops->func)();
+	}
     }
 }
  
@@ -261,6 +264,9 @@ sim_size (power)
       exit(1);
     }
 
+  State.mem_min = 1<<IMEM_SIZE;
+  State.mem_max = 0;
+
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_MEMSIZE) != 0)
     {
@@ -283,14 +289,21 @@ sim_write (addr, buffer, size)
      unsigned char *buffer;
      int size;
 {
-  int i;
   init_system ();
 
-  /* (*d10v_callback->printf_filtered) (d10v_callback, "sim_write %d bytes to 0x%x\n",size,addr); */
-  for (i = 0; i < size; i++)
-    {
-      State.imem[i+addr] = buffer[i]; 
-    }
+#ifdef DEBUG
+  if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
+    (*d10v_callback->printf_filtered) (d10v_callback, "sim_write %d bytes to 0x%x, min = 0x%x, max = 0x%x\n",
+				       size, addr, State.mem_min, State.mem_max);
+#endif
+
+  if (State.mem_min > addr)
+    State.mem_min = addr;
+
+  if (State.mem_max < addr+size-1)
+    State.mem_max = addr+size-1;
+
+  memcpy (State.imem+addr, buffer, size);
   return size;
 }
 
@@ -374,39 +387,50 @@ sim_resume (step, siggnal)
  
  do
    {
-     inst = RLW (PC << 2); 
-     oldpc = PC;
-     switch (inst & 0xC0000000)
+     uint32 byte_pc = ((uint32)PC) << 2;
+     if ((byte_pc < State.mem_min) || (byte_pc > State.mem_max))
        {
-       case 0xC0000000:
-	 /* long instruction */
-	 do_long (inst & 0x3FFFFFFF);
-	 break;
-       case 0x80000000:
-	 /* R -> L */
-	 do_2_short ( inst & 0x7FFF, (inst & 0x3FFF8000) >> 15, 0);
-	 break;
-       case 0x40000000:
-	 /* L -> R */
-	 do_2_short ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF, 1);
-	 break;
-       case 0:
-	 do_parallel ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF);
-	 break;
+	 (*d10v_callback->printf_filtered) (d10v_callback,
+					    "PC (0x%lx) out of range, oldpc = 0x%lx, min = 0x%lx, max = 0x%lx\n",
+					    (long)byte_pc, (long)oldpc, (long)State.mem_min, (long)State.mem_max);
+	 State.exception = SIGILL;
        }
-     
-     if (State.RP && PC == RPT_E)
+     else
        {
-	 RPT_C -= 1;
-	 if (RPT_C == 0)
-	   State.RP = 0;
-	 else
-	   PC = RPT_S;
-       }
+	 inst = RLW (byte_pc); 
+	 oldpc = PC;
+	 switch (inst & 0xC0000000)
+	   {
+	   case 0xC0000000:
+	     /* long instruction */
+	     do_long (inst & 0x3FFFFFFF);
+	     break;
+	   case 0x80000000:
+	     /* R -> L */
+	     do_2_short ( inst & 0x7FFF, (inst & 0x3FFF8000) >> 15, 0);
+	     break;
+	   case 0x40000000:
+	     /* L -> R */
+	     do_2_short ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF, 1);
+	     break;
+	   case 0:
+	     do_parallel ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF);
+	     break;
+	   }
      
-     /* FIXME */
-     if (PC == oldpc)
-       PC++;
+	 if (State.RP && PC == RPT_E)
+	   {
+	     RPT_C -= 1;
+	     if (RPT_C == 0)
+	       State.RP = 0;
+	     else
+	       PC = RPT_S;
+	   }
+
+	 /* FIXME */
+	 if (PC == oldpc)
+	   PC++;
+       }
    } 
  while (!State.exception);
 }
@@ -463,10 +487,25 @@ sim_create_inferior (start_address, argv, env)
      char **argv;
      char **env;
 {
+  uint8 *imem, *dmem;
+  uint32 mem_min, mem_max;
 #ifdef DEBUG
   if (d10v_debug)
     (*d10v_callback->printf_filtered) (d10v_callback, "sim_create_inferior:  PC=0x%x\n", start_address);
 #endif
+  /* save memory pointers */
+  imem = State.imem;
+  dmem = State.dmem;
+  mem_min = State.mem_min;
+  mem_max = State.mem_max;
+  /* reset all state information */
+  memset (&State, 0, sizeof(State));
+  /* restore memory pointers */
+  State.imem = imem;
+  State.dmem = dmem;
+  State.mem_min = mem_min;
+  State.mem_max = mem_max;
+  /* set PC */
   PC = start_address >> 2;
 }
 

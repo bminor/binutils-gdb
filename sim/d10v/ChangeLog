@@ -1,3 +1,10 @@
+Tue Oct 15 10:57:50 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* simops.c (OP_5F00): Add support for getpid, kill system calls.
+
+	* interp.c (do_{2_short,parallel}): If an exception is raised,
+	don't execute the second instruction.
+
 Sat Oct 12 22:17:43 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* simops.c (OP_{31000000,6601,6201,6200}): Store address in a
