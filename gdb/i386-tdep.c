@@ -1,5 +1,5 @@
 /* Intel 386 target-dependent stuff.
-   Copyright (C) 1988, 1989, 1991, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1988, 1989, 1991, 1994, 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -15,26 +15,27 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include "gdb_string.h"
 #include "defs.h"
+#include "gdb_string.h"
 #include "frame.h"
 #include "inferior.h"
 #include "gdbcore.h"
 #include "target.h"
 #include "floatformat.h"
 #include "symtab.h"
+#include "gdbcmd.h"
 
-static long i386_get_frame_setup PARAMS ((int));
+static long i386_get_frame_setup PARAMS ((CORE_ADDR));
 
 static void i386_follow_jump PARAMS ((void));
 
 static void codestream_read PARAMS ((unsigned char *, int));
 
-static void codestream_seek PARAMS ((int));
+static void codestream_seek PARAMS ((CORE_ADDR));
 
-static unsigned char  codestream_fill PARAMS ((int));
+static unsigned char codestream_fill PARAMS ((int));
 
 /* Stdio style buffering was used to minimize calls to ptrace, but this
    buffering did not take into account that the code section being accessed
@@ -84,7 +85,7 @@ codestream_fill (peek_flag)
 
 static void
 codestream_seek (place)
-    int place;
+    CORE_ADDR place;
 {
   codestream_next_addr = place / CODESTREAM_BUFSIZ;
   codestream_next_addr *= CODESTREAM_BUFSIZ;
@@ -168,7 +169,7 @@ i386_follow_jump ()
 
 static long
 i386_get_frame_setup (pc)
-     int pc;
+     CORE_ADDR pc;
 {
   unsigned char op;
 
@@ -603,15 +604,14 @@ get_longjmp_target(pc)
 
 #endif /* GET_LONGJMP_TARGET */
 
-#ifdef I386_AIX_TARGET
-/* On AIX, floating point values are returned in floating point registers.  */
-
 void
 i386_extract_return_value(type, regbuf, valbuf)
      struct type *type;
      char regbuf[REGISTER_BYTES];
      char *valbuf;
 {
+/* On AIX, floating point values are returned in floating point registers.  */
+#ifdef I386_AIX_TARGET
   if (TYPE_CODE_FLT == TYPE_CODE(type))
     {
       double d;
@@ -622,11 +622,11 @@ i386_extract_return_value(type, regbuf, valbuf)
       store_floating (valbuf, TYPE_LENGTH (type), d);
     }
   else
+#endif /* I386_AIX_TARGET */
     { 
       memcpy (valbuf, regbuf, TYPE_LENGTH (type)); 
     }
 }
-#endif /* I386_AIX_TARGET */
 
 #ifdef I386V4_SIGTRAMP_SAVED_PC
 /* Get saved user PC for sigtramp from the pushed ucontext on the stack
@@ -656,8 +656,60 @@ i386v4_sigtramp_saved_pc (frame)
 }
 #endif /* I386V4_SIGTRAMP_SAVED_PC */
 
+
+
+/* Stuff for WIN32 PE style DLL's but is pretty generic really. */
+
+CORE_ADDR
+skip_trampoline_code (pc, name)
+     CORE_ADDR pc;
+     char *name;
+{
+  if (pc && read_memory_unsigned_integer (pc, 2) == 0x25ff) /* jmp *(dest) */
+    {
+      unsigned long indirect = read_memory_unsigned_integer (pc+2, 4);
+      struct minimal_symbol *indsym =
+	indirect ? lookup_minimal_symbol_by_pc (indirect) : 0;
+      char *symname = indsym ? SYMBOL_NAME(indsym) : 0;
+
+      if (symname) 
+	{
+	  if (strncmp (symname,"__imp_", 6) == 0
+	      || strncmp (symname,"_imp_", 5) == 0)
+	    return name ? 1 : read_memory_unsigned_integer (indirect, 4);
+	}
+    }
+  return 0;			/* not a trampoline */
+}
+
+static char *x86_assembly_types[] = {"i386", "i8086", NULL};
+static char *x86_assembly_result = "i386";
+
+static void
+set_assembly_language_command (ignore, from_tty, c)
+     char *ignore;
+     int from_tty;
+     struct cmd_list_element *c;
+{
+  if (strcmp (x86_assembly_result, "i386") == 0)
+    tm_print_insn = print_insn_i386;
+  else
+    tm_print_insn = print_insn_i8086;
+}
+
 void
 _initialize_i386_tdep ()
 {
+  struct cmd_list_element *cmd;
+
   tm_print_insn = print_insn_i386;
+
+  cmd = add_set_enum_cmd ("assembly-language", class_obscure,
+			  x86_assembly_types, (char *)&x86_assembly_result,
+			  "Set x86 instruction set to use for disassembly.\n\
+This value can be set to either i386 or i8086 to change how instructions are disassembled.",
+			  &setlist);
+  add_show_from_set (cmd, &showlist);
+
+  cmd->function.sfunc = set_assembly_language_command;
 }
