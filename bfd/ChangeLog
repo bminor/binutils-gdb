@@ -1,3 +1,8 @@
+2004-12-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elfcode.h (elf_slurp_reloc_table_from_section): Don't canonicalize
+	ELF section symbols.
+
 2004-12-09  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): For R_MIPS_JALR,
