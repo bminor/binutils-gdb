@@ -1,6 +1,7 @@
-Fri Apr  9 11:21:00 1993  Ian Lance Taylor  (ian@cygnus.com)
+Mon Apr 19 14:06:59 1993  Rob Savoye  (rob@cygnus.com)
 
-	* objdump.c: Removed useless fprintf declaration.
+	* Makefile.in: Added FLAGS_TO_PASS so tests get run on freshly
+	built binaries if they exist. (otherwise the path)
 
 Wed Apr  7 22:22:50 1993  Rob Savoye  (rob@cygnus.com)
 
