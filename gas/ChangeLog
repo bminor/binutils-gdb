@@ -1,5 +1,10 @@
 Thu Mar 28 15:27:47 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* stabs.c (s_stab_generic): Call the listing functions before
+	doing the rest of the processing, which may involve freeing the
+	string.  Pass string, not string + stroff, to OBJ_PROCESS_STAB in
+	SEPARATE_STAB_SECTIONS case.
+
 	* config/tc-hppa.c: Remove nested comment.
 	(tc_gen_reloc): Move label done inside the ifdef in which it is
 	used.
