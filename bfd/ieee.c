@@ -1,7 +1,6 @@
+/* bfd back-end for ieee-695 objects.
 
- /* bfd backend for ieee-695 objects.
-
-   IEEE 695 format is a stream of records, which we parse using a simple one
+   IEEE 695 format is a stream of records, which we parse using a simple one-
    token (which is one byte in this lexicon) lookahead recursive decent
    parser.  */
 
@@ -30,16 +29,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ieee.h"
 #include "libieee.h"
 
-
-
-typedef void generic_symbol_type;
-
-
-/***************************************************************************
-   Functions for writing to ieee files in the strange way that the
-   standard requires:
-*/
-
+/* Functions for writing to ieee files in the strange way that the
+   standard requires. */
 
 static void
 DEFUN(ieee_write_byte,(abfd, byte),
@@ -85,7 +76,7 @@ DEFUN(ieee_write_int,(abfd, value),
     }
     else length = 1;
 
-    ieee_write_byte(abfd, ieee_number_repeat_start_enum + length);
+    ieee_write_byte(abfd, (int)ieee_number_repeat_start_enum + length);
     switch (length) {
     case 4:
       ieee_write_byte(abfd, value >> 24);
@@ -446,8 +437,8 @@ DEFUN(parse_expression,(ieee, value, section, symbol, pcrel, extra),
 	default: 
 	    {
 	      bfd_vma va;
-	      BFD_ASSERT(this_byte(ieee) < ieee_variable_A_enum 
-			 || this_byte(ieee) > ieee_variable_Z_enum);
+	      BFD_ASSERT(this_byte(ieee) < (int)ieee_variable_A_enum 
+			 || this_byte(ieee) > (int)ieee_variable_Z_enum);
 	      if (parse_int(ieee, &va)) 
 		  {
 		    PUSH(NOSYMBOL,0, va);
