@@ -48,7 +48,7 @@ static struct {
 static int remote_fio_system_call_allowed = 0;
 
 static int
-remote_fileio_init_fd_map ()
+remote_fileio_init_fd_map (void)
 {
   int i;
 
@@ -66,7 +66,7 @@ remote_fileio_init_fd_map ()
 }
 
 static int
-remote_fileio_resize_fd_map ()
+remote_fileio_resize_fd_map (void)
 {
   if (!remote_fio_data.fd_map)
     return remote_fileio_init_fd_map ();
@@ -78,7 +78,7 @@ remote_fileio_resize_fd_map ()
 }
 
 static int
-remote_fileio_next_free_fd ()
+remote_fileio_next_free_fd (void)
 {
   int i;
 
@@ -175,7 +175,7 @@ remote_fileio_mode_to_host (long mode, int open_call)
   return hmode;
 }
 
-static long long
+static LONGEST
 remote_fileio_mode_to_target (mode_t mode)
 {
   mode_t tmode = 0;
@@ -281,7 +281,7 @@ remote_fileio_seek_flag_to_host (long num, int *flag)
 }
 
 static int
-remote_fileio_extract_long (char **buf, long long *retlong)
+remote_fileio_extract_long (char **buf, LONGEST *retlong)
 {
   char *c;
   int sign = 1;
@@ -320,11 +320,12 @@ static int
 remote_fileio_extract_int (char **buf, long *retint)
 {
   int ret;
-  long long retlong;
+  LONGEST retlong;
 
   if (!retint)
     return -1;
-  if (!(ret = remote_fileio_extract_long (buf, &retlong)))
+  ret = remote_fileio_extract_long (buf, &retlong);
+  if (!ret)
     *retint = (long) retlong;
   return ret;
 }
@@ -333,7 +334,7 @@ static int
 remote_fileio_extract_ptr_w_len (char **buf, CORE_ADDR *ptrval, int *length)
 {
   char *c;
-  long long retlong;
+  LONGEST retlong;
 
   if (!buf || !*buf || !**buf || !ptrval || !length)
     return -1;
@@ -353,7 +354,7 @@ remote_fileio_extract_ptr_w_len (char **buf, CORE_ADDR *ptrval, int *length)
 
 /* Convert to big endian */
 static void
-remote_fileio_to_be (long long num, char *buf, int bytes)
+remote_fileio_to_be (LONGEST num, char *buf, int bytes)
 {
   int i;
 
@@ -364,13 +365,13 @@ remote_fileio_to_be (long long num, char *buf, int bytes)
 static void
 remote_fileio_to_fio_int (long num, fio_int_t fnum)
 {
-  remote_fileio_to_be ((long long) num, (char *) fnum, 4);
+  remote_fileio_to_be ((LONGEST) num, (char *) fnum, 4);
 }
 
 static void
 remote_fileio_to_fio_uint (long num, fio_uint_t fnum)
 {
-  remote_fileio_to_be ((long long) num, (char *) fnum, 4);
+  remote_fileio_to_be ((LONGEST) num, (char *) fnum, 4);
 }
 
 static void
@@ -382,17 +383,17 @@ remote_fileio_to_fio_mode (mode_t num, fio_mode_t fnum)
 static void
 remote_fileio_to_fio_time (time_t num, fio_time_t fnum)
 {
-  remote_fileio_to_be ((long long) num, (char *) fnum, 4);
+  remote_fileio_to_be ((LONGEST) num, (char *) fnum, 4);
 }
 
 static void
-remote_fileio_to_fio_long (long long num, fio_long_t fnum)
+remote_fileio_to_fio_long (LONGEST num, fio_long_t fnum)
 {
   remote_fileio_to_be (num, (char *) fnum, 8);
 }
 
 static void
-remote_fileio_to_fio_ulong (long long num, fio_ulong_t fnum)
+remote_fileio_to_fio_ulong (LONGEST num, fio_ulong_t fnum)
 {
   remote_fileio_to_be (num, (char *) fnum, 8);
 }
@@ -407,9 +408,9 @@ remote_fileio_to_fio_stat (struct stat *st, struct fio_stat *fst)
   remote_fileio_to_fio_uint ((long) st->st_uid, fst->fst_uid);
   remote_fileio_to_fio_uint ((long) st->st_gid, fst->fst_gid);
   remote_fileio_to_fio_uint ((long) st->st_rdev, fst->fst_rdev);
-  remote_fileio_to_fio_ulong ((long long) st->st_size, fst->fst_size);
-  remote_fileio_to_fio_ulong ((long long) st->st_blksize, fst->fst_blksize);
-  remote_fileio_to_fio_ulong ((long long) st->st_blocks, fst->fst_blocks);
+  remote_fileio_to_fio_ulong ((LONGEST) st->st_size, fst->fst_size);
+  remote_fileio_to_fio_ulong ((LONGEST) st->st_blksize, fst->fst_blksize);
+  remote_fileio_to_fio_ulong ((LONGEST) st->st_blocks, fst->fst_blocks);
   remote_fileio_to_fio_time (st->st_atime, fst->fst_atime);
   remote_fileio_to_fio_time (st->st_mtime, fst->fst_mtime);
   remote_fileio_to_fio_time (st->st_ctime, fst->fst_ctime);
@@ -433,7 +434,7 @@ static void (*remote_fio_ofunc)(int);
 #endif
 
 static void
-remote_fileio_sig_init ()
+remote_fileio_sig_init (void)
 {
 #if defined (HAVE_SIGACTION) && defined (SA_RESTART)
   remote_fio_sa.sa_handler = SIG_IGN;
@@ -459,7 +460,7 @@ remote_fileio_sig_set (void (*sigint_func)(int))
 }
 
 static void
-remote_fileio_sig_exit ()
+remote_fileio_sig_exit (void)
 {
 #if defined (HAVE_SIGACTION) && defined (SA_RESTART)
   sigaction (SIGINT, &remote_fio_osa, NULL);
@@ -509,13 +510,13 @@ remote_fileio_reply (int retcode, int error)
 }
 
 static void
-remote_fileio_ioerror ()
+remote_fileio_ioerror (void)
 {
   remote_fileio_reply (-1, FILEIO_EIO);
 }
 
 static void
-remote_fileio_badfd ()
+remote_fileio_badfd (void)
 {
   remote_fileio_reply (-1, FILEIO_EBADF);
 }
@@ -634,7 +635,8 @@ remote_fileio_func_close (char *buf)
       remote_fileio_ioerror ();
       return;
     }
-  if ((fd = remote_fileio_map_fd ((int) num)) == FIO_FD_INVALID)
+  fd = remote_fileio_map_fd ((int) num);
+  if (fd == FIO_FD_INVALID)
     {
       remote_fileio_badfd ();
       return;
@@ -651,7 +653,7 @@ static void
 remote_fileio_func_read (char *buf)
 {
   long target_fd, num;
-  long long lnum;
+  LONGEST lnum;
   CORE_ADDR ptrval;
   int fd, ret, retlength;
   char *buffer;
@@ -664,7 +666,8 @@ remote_fileio_func_read (char *buf)
       remote_fileio_ioerror ();
       return;
     }
-  if ((fd = remote_fileio_map_fd ((int) target_fd)) == FIO_FD_INVALID)
+  fd = remote_fileio_map_fd ((int) target_fd);
+  if (fd == FIO_FD_INVALID)
     {
       remote_fileio_badfd ();
       return;
@@ -768,7 +771,7 @@ static void
 remote_fileio_func_write (char *buf)
 {
   long target_fd, num;
-  long long lnum;
+  LONGEST lnum;
   CORE_ADDR ptrval;
   int fd, ret, retlength;
   char *buffer;
@@ -780,7 +783,8 @@ remote_fileio_func_write (char *buf)
       remote_fileio_ioerror ();
       return;
     }
-  if ((fd = remote_fileio_map_fd ((int) target_fd)) == FIO_FD_INVALID)
+  fd = remote_fileio_map_fd ((int) target_fd);
+  if (fd == FIO_FD_INVALID)
     {
       remote_fileio_badfd ();
       return;
@@ -840,7 +844,7 @@ static void
 remote_fileio_func_lseek (char *buf)
 {
   long num;
-  long long lnum;
+  LONGEST lnum;
   int fd, flag;
   off_t offset, ret;
 
@@ -850,7 +854,8 @@ remote_fileio_func_lseek (char *buf)
       remote_fileio_ioerror ();
       return;
     }
-  if ((fd = remote_fileio_map_fd ((int) num)) == FIO_FD_INVALID)
+  fd = remote_fileio_map_fd ((int) num);
+  if (fd == FIO_FD_INVALID)
     {
       remote_fileio_badfd ();
       return;
@@ -928,10 +933,10 @@ remote_fileio_func_rename (char *buf)
     }
   
   /* Only operate on regular files and directories */
-  if ((!(of = stat (oldpath, &ost))
-       && !S_ISREG (ost.st_mode) && !S_ISDIR (ost.st_mode))
-      || (!(nf = stat (newpath, &nst))
-          && !S_ISREG (nst.st_mode) && !S_ISDIR (nst.st_mode)))
+  of = stat (oldpath, &ost);
+  nf = stat (newpath, &nst);
+  if ((!of && !S_ISREG (ost.st_mode) && !S_ISDIR (ost.st_mode))
+      || (!nf && !S_ISREG (nst.st_mode) && !S_ISDIR (nst.st_mode)))
     {
       remote_fileio_reply (-1, FILEIO_EACCES);
       return;
@@ -1027,7 +1032,7 @@ remote_fileio_func_stat (char *buf)
   CORE_ADDR ptrval;
   int ret, length, retlength;
   char *pathname;
-  long long lnum;
+  LONGEST lnum;
   struct stat st;
   struct fio_stat fst;
 
@@ -1089,7 +1094,7 @@ remote_fileio_func_fstat (char *buf)
   CORE_ADDR ptrval;
   int fd, ret, retlength;
   long target_fd;
-  long long lnum;
+  LONGEST lnum;
   struct stat st;
   struct fio_stat fst;
   struct timeval tv;
@@ -1100,7 +1105,8 @@ remote_fileio_func_fstat (char *buf)
       remote_fileio_ioerror ();
       return;
     }
-  if ((fd = remote_fileio_map_fd ((int) target_fd)) == FIO_FD_INVALID)
+  fd = remote_fileio_map_fd ((int) target_fd);
+  if (fd == FIO_FD_INVALID)
     {
       remote_fileio_badfd ();
       return;
@@ -1156,7 +1162,7 @@ remote_fileio_func_fstat (char *buf)
 static void
 remote_fileio_func_gettimeofday (char *buf)
 {
-  long long lnum;
+  LONGEST lnum;
   CORE_ADDR ptrval;
   int ret, retlength;
   struct timeval tv;
