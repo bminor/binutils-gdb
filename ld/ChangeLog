@@ -1,3 +1,8 @@
+2000-09-15  Alan Modra  <alan@linuxcare.com.au>
+
+	* emulparams/hppalinux.sh (DATA_START_SYMBOLS): Provide $global$
+	only as needed.
+
 2000-09-13  Nick Clifton  <nickc@redhat.com>
 
 	* ldmain.c (multiple_definition): Disable relaxation if
