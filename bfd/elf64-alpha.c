@@ -2308,8 +2308,10 @@ elf64_alpha_calc_dynrel_sizes (h, info)
     }
 
   /* If the symbol is dynamic, we'll need all the relocations in their
-     natural form.  */
-  if (alpha_elf_dynamic_symbol_p (&h->root, info))
+     natural form.  If it has been forced local, we'll need the same 
+     number of RELATIVE relocations.  */
+  if (alpha_elf_dynamic_symbol_p (&h->root, info) 
+      || (info->shared && h->root.dynindx == -1))
     {
       struct alpha_elf_reloc_entry *relent;
 
@@ -2808,8 +2810,26 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		    bfd_put_64 (output_bfd, relocation+addend,
 				sgot->contents + gotent->got_offset);
 
-		    /* The dynamic relocations for the .got entries are
-		       done in finish_dynamic_symbol.  */
+		    /* If the symbol has been forced local, output a
+		       RELATIVE reloc, otherwise it will be handled in
+		       finish_dynamic_symbol.  */
+		    if (info->shared && h->root.dynindx == -1)
+		      {
+			Elf_Internal_Rela outrel;
+
+			BFD_ASSERT(srelgot != NULL);
+
+			outrel.r_offset = (sgot->output_section->vma
+					   + sgot->output_offset
+					   + gotent->got_offset);
+			outrel.r_info = ELF64_R_INFO(0, R_ALPHA_RELATIVE);
+			outrel.r_addend = 0;
+
+			bfd_elf64_swap_reloca_out (output_bfd, &outrel,
+						   ((Elf64_External_Rela *)
+						    srelgot->contents)
+						   + srelgot->reloc_count++);
+		      }
 
 		    gotent->flags |= ALPHA_ELF_GOT_ENTRY_RELOCS_DONE;
 		  }

@@ -1,6 +1,12 @@
+Mon Oct 13 23:10:08 1997  Richard Henderson  <rth@cygnus.com>
+
+	* elf64-alpha.c (elf64_alpha_calc_dynrel_sizes): Allow for RELATIVE
+	relocs for symbols in shlibs that have been forced local.
+	(elf64_alpha_relocate_section): Output RELATIVEs in .got for same.
+
 Mon Oct 13 21:24:04 1997  Richard Henderson  <rth@cygnus.com>
 
-	* bfd/elf64-alpha.c (elf64_alpha_relocate_section): Use the
+	* elf64-alpha.c (elf64_alpha_relocate_section): Use the
 	got_enties of the default symbol for the default versioned
 	symbol.  Patch from hjl@gnu.ai.mit.edu, modified not to use
 	alloca in the loop.
