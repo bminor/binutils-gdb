@@ -54,7 +54,6 @@
 	* symfile.c (reread_symbols): Ditto.
 	* gdb_obstack.h: Add comment.
 
->>>>>>> 1.5354
 2004-02-09  Elena Zannoni  <ezannoni@redhat.com>
 
 	* linespec.c (decode_line_1, locate_first_half)
