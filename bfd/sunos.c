@@ -518,7 +518,7 @@ sunos_canonicalize_dynamic_reloc (abfd, storage, syms)
 
 #define SPARC_PLT_ENTRY_SIZE (12)
 
-static bfd_byte sparc_plt_first_entry[SPARC_PLT_ENTRY_SIZE] =
+static const bfd_byte sparc_plt_first_entry[SPARC_PLT_ENTRY_SIZE] =
 {
   /* sethi %hi(0),%g1; address filled in by runtime linker.  */
   0x3, 0, 0, 0,
@@ -542,7 +542,7 @@ static bfd_byte sparc_plt_first_entry[SPARC_PLT_ENTRY_SIZE] =
 
 #define M68K_PLT_ENTRY_SIZE (8)
 
-static bfd_byte m68k_plt_first_entry[M68K_PLT_ENTRY_SIZE] =
+static const bfd_byte m68k_plt_first_entry[M68K_PLT_ENTRY_SIZE] =
 {
   /* jmps @# */
   0x4e, 0xf9,
@@ -891,32 +891,35 @@ sunos_add_one_symbol (info, abfd, name, flags, section, value, string,
 					  hashp))
     return false;
 
-  /* Set a flag in the hash table entry indicating the type of
-     reference or definition we just found.  Keep a count of the
-     number of dynamic symbols we find.  A dynamic symbol is one which
-     is referenced or defined by both a regular object and a shared
-     object.  */
-  if ((abfd->flags & DYNAMIC) == 0)
+  if (abfd->xvec == info->hash->creator)
     {
-      if (bfd_is_und_section (section))
-	new_flag = SUNOS_REF_REGULAR;
+      /* Set a flag in the hash table entry indicating the type of
+	 reference or definition we just found.  Keep a count of the
+	 number of dynamic symbols we find.  A dynamic symbol is one
+	 which is referenced or defined by both a regular object and a
+	 shared object.  */
+      if ((abfd->flags & DYNAMIC) == 0)
+	{
+	  if (bfd_is_und_section (section))
+	    new_flag = SUNOS_REF_REGULAR;
+	  else
+	    new_flag = SUNOS_DEF_REGULAR;
+	}
       else
-	new_flag = SUNOS_DEF_REGULAR;
-    }
-  else
-    {
-      if (bfd_is_und_section (section))
-	new_flag = SUNOS_REF_DYNAMIC;
-      else
-	new_flag = SUNOS_DEF_DYNAMIC;
-    }
-  h->flags |= new_flag;
+	{
+	  if (bfd_is_und_section (section))
+	    new_flag = SUNOS_REF_DYNAMIC;
+	  else
+	    new_flag = SUNOS_DEF_DYNAMIC;
+	}
+      h->flags |= new_flag;
 
-  if (h->dynindx == -1
-      && (h->flags & (SUNOS_DEF_REGULAR | SUNOS_REF_REGULAR)) != 0)
-    {
-      ++sunos_hash_table (info)->dynsymcount;
-      h->dynindx = -2;
+      if (h->dynindx == -1
+	  && (h->flags & (SUNOS_DEF_REGULAR | SUNOS_REF_REGULAR)) != 0)
+	{
+	  ++sunos_hash_table (info)->dynsymcount;
+	  h->dynindx = -2;
+	}
     }
 
   return true;

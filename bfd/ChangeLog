@@ -1,3 +1,15 @@
+Fri Jan 20 11:44:45 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* sunos.c (sunos_add_one_symbol): Only set the sunos specific
+	fields if we are doing a sunos link.
+
+Wed Jan 18 12:28:17 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* cpu-h8300.c (h8300_info_struct): Change name from "H8/300" to
+	"h8300" for consistency with other cpu-* files.
+	(h8300h_info_struct): Change name from "H8/300H" to "h8300h".
+	* coff-h8300.c (special): Remove unused variable diff.
+
 Tue Jan 17 10:52:32 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* bfd-in.h (bfd_byte, reloc_howto_type): Define here, not...
