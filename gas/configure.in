@@ -605,8 +605,9 @@ changequote([,])dnl
       i386-*-coff)	emulation="i386coff" ;;
       i386-*-elf)	emulation="i386elf" ;;
 
-      # Always all formats.  Having a.out first makes it the default.
-      cris-*-*)		emulation="crisaout criself" ;;
+      # Always all formats.  The first stated emulation becomes the default.
+      cris-*-*aout*)	emulation="crisaout criself" ;;
+      cris-*-*)		emulation="criself crisaout" ;;
     esac
 
     emulations="$emulations $emulation"
