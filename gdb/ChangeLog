@@ -1,3 +1,12 @@
+Wed Mar  1 13:42:49 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* remote.c (remote_wait): Make calls to strtol be type correct by
+	passing the address of a char * pointer instead of an unsigned
+	char *.
+
+	* rs6000-tdep.c (push_dummy_frame): Cast sp to char * when calling
+	write_memory to make things type correct.
+
 Wed Mar  1 12:17:31 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* ch-exp.y, c-exp.y, f-exp.y, m2-exp.y (yy defines): Support the

@@ -383,7 +383,7 @@ push_dummy_frame ()
   }
 
   /* Save sp or so called back chain right here. */
-  write_memory (sp-DUMMY_FRAME_SIZE, &sp, 4);
+  write_memory (sp-DUMMY_FRAME_SIZE, (char *)&sp, 4);
   sp -= DUMMY_FRAME_SIZE;
 
   /* And finally, this is the back chain. */
@@ -852,7 +852,7 @@ ran_out_of_registers_for_arguments:
   read_memory (saved_sp, tmp_buffer, 24);
   write_memory (sp, tmp_buffer, 24);
 
-    write_memory (sp, &saved_sp, 4);	/* set back chain properly */
+    write_memory (sp, (char *)&saved_sp, 4);	/* set back chain properly */
 
   target_store_registers (-1);
   return sp;

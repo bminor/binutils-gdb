@@ -1,3 +1,12 @@
+Wed Mar  1 13:33:43 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* rltty.c (outchar): Provide prototype for outchar, to silence
+	type warnings in passing outchar to tputs on systems like Linux
+	that have full prototypes.
+
+	* signals.c (_rl_output_character_function): Provide prototype to
+	silence type warnings.
+
 Sun Jan 15 14:10:37 1995  Steve Chamberlain  <sac@splat>
 
 	* rldefs.h: Define MINIMAL for __GO32__ and WIN32.
