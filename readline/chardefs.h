@@ -4,11 +4,19 @@
 
 #include <ctype.h>
 
+#if 0
+/* Getting the correct definition of HAVE_STRING_H is harder than just
+   declaring them ourselves.  CYGNUS LOCAL.  */
 #if defined (HAVE_STRING_H)
 #  include <string.h>
 #else
 #  include <strings.h>
 #endif /* HAVE_STRING_H */
+#else /* not 0 */
+/* We don't worry about declaring functions where we don't use the return
+   value (e.g. strcpy) or which return int.  */
+extern char *strrchr ();
+#endif /* not 0 */
 
 #ifndef savestring
 #if 0

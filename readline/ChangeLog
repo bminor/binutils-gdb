@@ -1,3 +1,8 @@
+Fri Jan 21 17:31:26 1994  Jim Kingdon  (kingdon@lisa.cygnus.com)
+
+	* chardefs.h, tilde.c: Just declare strrchr rather than trying to
+	include a system header.
+
 Fri Jan 21 14:40:43 1994  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (distclean, realclean):  Expand local-distclean
