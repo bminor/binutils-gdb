@@ -1,3 +1,10 @@
+2001-01-01  Philip Blundell  <philb@gnu.org>
+
+	* gas/arm/adrl.s, gas/arm/pic.s, gas/arm/msr-bad.s: New tests.
+	* gas/arm/arm.exp: Run them.
+	* gas/arm/adrl.d, gas/arm/pic.d: Expected results for above.
+	* gas/arm/arm6.s: Also test uppercase `CPSR' and `SPSR'.
+
 2000-12-22  H.J. Lu  <hjl@gnu.org>
 
 	* gas/i386/intel.s: Replace "nop" with ".p2align 4,0".
