@@ -2055,7 +2055,7 @@ trace_find_tracepoint_command (char *args, int from_tty)
 	else
 	  tdp = tracepoint_number;	/* default is current TDP */
       else
-	tdp = parse_and_eval_address (args);
+	tdp = parse_and_eval_long (args);
 
       sprintf (target_buf, "QTFrame:tdp:%x", tdp);
       finish_tfind_command (target_buf, sizeof (target_buf), from_tty);

@@ -3852,7 +3852,7 @@ extern HIST_ENTRY *history_get (int);
 	;
       else
 	/* "info editing <exp>" should print around command number <exp>.  */
-	num = (parse_and_eval_address (args) - history_base) - Hist_print / 2;
+	num = (parse_and_eval_long (args) - history_base) - Hist_print / 2;
     }
   /* "show commands" means print the last Hist_print commands.  */
   else

@@ -1,3 +1,10 @@
+Thu Nov 16 09:47:57 2000  David Taylor  <taylor@redhat.com>
+
+	* tracepoint.c (trace_find_tracepoint_command): Replace call to
+	parse_and_eval_address with a call to parse_and_eval_long as
+	we are evaluating an integer, not an address.
+	* top.c (show_commands): Ditto.
+
 2000-11-15  Kevin Buettner  <kevinb@redhat.com>
 
 	* xcoffread.c (arrange_linetable, xcoff_initial_scan): Protoize.
