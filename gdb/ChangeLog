@@ -1,5 +1,8 @@
 Fri Sep 20 16:10:52 1991  John Gilmore  (gnu at cygnus.com)
 
+	GDB-4.1 release!
+
+	* Makefile.in (VERSION):  Set to 4.1.	
 	* language.c (set_language_command):  Print useful help message,
 	and restore the language string after giving help.
 	* valprint.c (typedef_print):  Print typedef in C or M2.
