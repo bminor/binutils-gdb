@@ -1,3 +1,8 @@
+2000-07-20  DJ Delorie  <dj@redhat.com>
+
+	* config/obj-coff.c (obj_frob_symbol): revert previous change,
+	it breaks linking against DLLs.
+
 2000-07-20  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure.in: Add CRIS support.

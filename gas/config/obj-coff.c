@@ -1139,30 +1139,24 @@ coff_frob_symbol (symp, punt)
       symbolS *real;
       if (!SF_GET_LOCAL (symp)
 	  && !SF_GET_STATICS (symp)
-	  && S_GET_STORAGE_CLASS (symp) != C_LABEL
-	  && symbol_constant_p(symp)
 	  && (real = symbol_find_base (S_GET_NAME (symp), DO_NOT_STRIP))
 	  && real != symp)
 	{
 	  c_symbol_merge (symp, real);
 	  *punt = 1;
 	}
-	if (S_GET_STORAGE_CLASS (symp) == C_NULL)
+      if (!S_IS_DEFINED (symp) && !SF_GET_LOCAL (symp))
 	{
-	  if (!S_IS_DEFINED (symp) && !SF_GET_LOCAL (symp))
-	    {
-	      assert (S_GET_VALUE (symp) == 0);
-	      S_SET_EXTERNAL (symp);
-	    }
-	  else if (S_GET_SEGMENT (symp) == text_section
-	           && symp != seg_info (text_section)->sym)
-	    {
-	      S_SET_STORAGE_CLASS (symp, C_LABEL);
-	    }
+	  assert (S_GET_VALUE (symp) == 0);
+	  S_SET_EXTERNAL (symp);
+	}
+      else if (S_GET_STORAGE_CLASS (symp) == C_NULL)
+	{
+	  if (S_GET_SEGMENT (symp) == text_section
+	      && symp != seg_info (text_section)->sym)
+	    S_SET_STORAGE_CLASS (symp, C_LABEL);
 	  else
-	    {
-	      S_SET_STORAGE_CLASS (symp, C_STAT);
-	    }
+	    S_SET_STORAGE_CLASS (symp, C_STAT);
 	}
       if (SF_GET_PROCESS (symp))
 	{
