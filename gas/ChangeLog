@@ -1,5 +1,10 @@
 Thu Jan 13 16:15:15 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* ecoff.c (ecoff_set_gp_prolog_size): New function.
+	(current_file_idx): New static variable.
+	(add_file): Use and increment current_file_idx instead of indx
+	parameter.
+
 	* struc-symbol.h (struct symbol): Make all bitfields unsigned.
 
 	* config/tc-i960.c (i960_validate_fix): Added argument
@@ -17,6 +22,7 @@ Thu Jan 13 16:15:15 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	* as.h: Include config.h.
 	(struct symbol): Added forward declaration.
 	(add_to_literal_pool): Fix declaration.
+	* as.c: Don't include config.h.
 
 	* literal.c (add_to_literal_pool): Take symbol and addend as
 	arguments, instead of expression, for now.  Fix calculation of
