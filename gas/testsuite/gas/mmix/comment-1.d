@@ -8,12 +8,12 @@ There are 10 section headers, starting at offset 0x...:
        0+8  0+   W       0     0     1
 #...
 Relocation section '\.rela\.text' at offset 0x... contains 5 entries:
-[ 	]+Offset[ 	]+Info[ 	]+Type[ 	]+Symbol's Value[ 	]+Symbol's Name[ 	]+Addend
-0+34  0+90000001e R_MMIX_ADDR19         0+  target                    \+ 2c
-0+46  0+a00000002 R_MMIX_16             0+  target2                   \+ 30
-0+48  0+b0000001f R_MMIX_ADDR27         0+  target3                   \+ 38
-0+54  0+b0000001e R_MMIX_ADDR19         0+  target3                   \+ 0
-0+78  0+23 R_MMIX_LOCAL                                   0+30
+.*
+0+34  0+90000001e R_MMIX_ADDR19 +0+ +target +\+ 2c
+0+46  0+a00000002 R_MMIX_16 +0+ +target2 +\+ 30
+0+48  0+b0000001f R_MMIX_ADDR27 +0+ +target3 +\+ 38
+0+54  0+b0000001e R_MMIX_ADDR19 +0+ +target3 +\+ 0
+0+78  0+23 R_MMIX_LOCAL +0+30
 
 Symbol table '\.symtab' contains 12 entries:
    Num:    Value          Size Type    Bind   Vis      Ndx Name

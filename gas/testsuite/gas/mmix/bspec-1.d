@@ -7,8 +7,8 @@ There are 9 section headers, starting at offset 0x..:
        0+18  0+18           7     4     8
 #...
 Relocation section '\.rela\.MMIX\.spec_data\.2' at offset 0x... contains 1 entries:
-[ 	]+Offset[ 	]+Info[ 	]+Type[ 	]+Symbol's Value[ 	]+Symbol's Name[ 	]+Addend
-0+  0+500000004 R_MMIX_32             0+  forw                      \+ 0
+.*
+0+  0+500000004 R_MMIX_32 +0+ +forw +\+ 0
 
 Symbol table '\.symtab' contains 6 entries:
    Num:    Value          Size Type    Bind   Vis      Ndx Name

@@ -1,3 +1,26 @@
+2002-04-27  Alan Modra  <amodra@bigpond.net.au>
+
+	Merge from mainline.
+	2002-04-23  H.J. Lu <hjl@gnu.org>
+	* gas/hppa/parse/parse.exp: Don't expect failure on line separator
+	test on hppa*-*-linux* nor hppa*-*-netbsd*.
+
+	2002-03-19  Bo Thorsen  <bo@suse.de>
+	* gas/i386/x86-64-opcode.d: More test cases for x86-64 opcodes.
+	* gas/i386/x86-64-opcode.s: Likewise
+
+	2002-02-24  Hans-Peter Nilsson  <hp@bitrange.com>
+	* gas/mmix/bspec-1.d, gas/mmix/bspec-2.d, gas/mmix/comment-1.d:
+	Adjust to changes in readelf output.
+
+	2002-02-22  Bo Thorsen  <bo@suse.de>
+	* i386.exp: Add x86-64-opcode (checks valid opcodes) and x86-64-inval
+	(checks invalid opcodes) checks
+	* x86-64-inval.l: New file.
+	* x86-64-inval.s: New file.
+	* x86-64-opcode.d: New file.
+	* x86-64-opcode.s: New file.
+
 2002-03-17  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* gas/mmix/weak1.d, gas/mmix/weak1.d: New test.
