@@ -102,8 +102,8 @@ void mn10300_cons_fix_new PARAMS ((fragS *, int, int, expressionS *));
 #define md_number_to_chars number_to_chars_littleendian
 
 /* Don't bother to adjust relocs.  */
-#define tc_fix_adjustable(FIX) 0
-/* #define tc_fix_adjustable(FIX) mn10300_fix_adjustable (FIX) */
+/* #define tc_fix_adjustable(FIX) 0 */
+#define tc_fix_adjustable(FIX) mn10300_fix_adjustable (FIX)
 extern bfd_boolean mn10300_fix_adjustable PARAMS ((struct fix *));
 
 /* We do relaxing in the assembler as well as the linker.  */

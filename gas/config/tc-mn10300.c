@@ -2542,6 +2542,15 @@ mn10300_fix_adjustable (fixp)
   if (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_CODE)
     return 0;
 
+  /* Likewise, do not adjust symbols that won't be merged, or debug
+     symbols, because they too break relaxation.  We do want to adjust
+     other mergable symbols, like .rodata, because code relaxations
+     need section-relative symbols to properly relax them.  */
+  if (! (S_GET_SEGMENT(fixp->fx_addsy)->flags & SEC_MERGE))
+    return 0;
+  if (strncmp (S_GET_SEGMENT (fixp->fx_addsy)->name, ".debug", 6) == 0)
+    return 0;
+
   return 1;
 }
 
