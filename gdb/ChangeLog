@@ -1,3 +1,8 @@
+Tue Sep  7 13:06:44 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* dbxread.c (process_one_symbol): If the value of an N_FUN for a
+	function is zero, use minimal symbols to get the address.
+
 Mon Sep  6 15:01:57 1993  Jeffrey Wheat  (cassidy@cygnus.com)
 
 	* elfread.c: change elf32_symbol_type to elf_symbol_type

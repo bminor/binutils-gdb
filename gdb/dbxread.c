@@ -1911,7 +1911,15 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 		 previous function. This means that we can use the
 		 minimal symbol table to get the address.  */
 
-	      if (type == N_GSYM || type == N_STSYM)
+	      /* On solaris up to 2.2, the N_FUN stab gets relocated.
+		 On Solaris 2.3, ld no longer relocates stabs (which
+		 is good), and the N_FUN's value is now always zero.
+		 We only provide this correction for functions, not for
+		 all N_FUN symbols, because that is easiest and all
+		 readonly variables seem to go in the .rodata on Solaris.  */
+
+	      if (type == N_GSYM || type == N_STSYM
+		  || (type == N_FUN && valu == 0))
 		{
 		  struct minimal_symbol *m;
 		  int l = colon_pos - name;
