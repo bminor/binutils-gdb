@@ -53,6 +53,9 @@ case "${target}" in
   mips*-*-*)		sim_target=mips ;;
   sh*-*-*)		sim_target=sh ;; 
   powerpc*-*-eabi* | powerpc*-*-solaris* | powerpc*-*-sysv4* | powerpc*-*-elf* )
+# start-sanitize-v850
+  v850-*-*)		sim_target=v850 ;;
+# end-sanitize-v850
 			if test x"$powerpc_sim" = x"yes"; then sim_target=ppc; fi ;;
   w65-*-*)		sim_target=w65 ;;
   z8k*-*-*)		sim_target=z8k ;;
