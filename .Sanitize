@@ -16,7 +16,7 @@
 Do-first:
 
 if ( echo $* | grep keep\-chill > /dev/null ) ; then
-	keep_these_too="chillrt"
+	keep_these_too="chillrt test-chill"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
