@@ -1,3 +1,8 @@
+Tue Oct 10 10:17:22 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_parse_args): Fix
+	fatal typos.
+
 Tue Oct 10 01:01:51 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.h (args_type): Add rpath_link field.
