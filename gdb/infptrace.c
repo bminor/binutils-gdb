@@ -1,6 +1,6 @@
 /* Low level Unix child interface to ptrace, for GDB when running under Unix.
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1998, 1999, 2000, 2001, 2002
+   1998, 1999, 2000, 2001, 2002, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -374,8 +374,7 @@ fetch_register (int regno)
 
   if (CANNOT_FETCH_REGISTER (regno))
     {
-      memset (buf, '\0', DEPRECATED_REGISTER_RAW_SIZE (regno));	/* Supply zeroes */
-      regcache_raw_supply (current_regcache, regno, buf);
+      regcache_raw_supply (current_regcache, regno, NULL);
       return;
     }
 

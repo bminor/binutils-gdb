@@ -1,5 +1,9 @@
 2004-07-31  Mark Kettenis  <kettenis@gnu.org>
 
+	* infptrace.c: Update copyright year.
+	(fetch_register): Pass NULL in regcache_raw_supply call instead of
+	explicitly setting the buffer to all zeroes.
+
 	* sparc64obsd-tdep.c (sparc64obsd_sigreturn_offset): New variable.
 	(sparc64obsd_pc_in_sigtramp): Reorganize to avoid goto.
 
