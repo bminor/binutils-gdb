@@ -1,3 +1,11 @@
+Thu Jan 30 11:31:52 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/sunos.em: Include <ctype.h>.
+	(gld${EMULATION_NAME}_find_so): Skip the directory name when
+	searching for ".so.".
+	(gld${EMULATION_NAME}_search_dir): Make sure that the library name
+	has a version number, and that only version numbers follow .so.
+
 Wed Jan 29 18:15:00 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	* scripttempl/pe.sc:
