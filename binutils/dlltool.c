@@ -367,7 +367,7 @@ static boolean export_all_symbols;
 
 /* True if we should exclude the symbols in DEFAULT_EXCLUDES when
    exporting all symbols.  */
-static boolean do_default_excludes;
+static boolean do_default_excludes=true;
 
 /* Default symbols to exclude when exporting all the symbols.  */
 static const char *default_excludes = "DllMain@12,DllEntryPoint@0,impure_ptr";

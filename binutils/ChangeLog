@@ -1,3 +1,7 @@
+2001-04-17  Danny Smith  <dannysmith@users.sourceforge.net>
+ 
+	* dlltool.c (do_default_excludes): Initialise to true. 
+ 
 2001-04-10  Alan Modra  <amodra@one.net.au>
 
 	* MAINTAINERS: Update my email address
