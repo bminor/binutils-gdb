@@ -15,7 +15,7 @@ man1dir = $(mandir)/man1
 infodir	= $(prefix)/info
 datadir = $(prefix)/lib
 
-INSTALL 	= $(srcdir)/../install -c
+INSTALL 	= install -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA 	= $(INSTALL)
 MAKEINFO	= makeinfo
