@@ -1,5 +1,5 @@
 /* Generic symbol file reading for the GNU debugger, GDB.
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
 This file is part of GDB.
@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
@@ -100,10 +100,6 @@ find_sym_fns PARAMS ((struct objfile *));
 
 static struct sym_fns *symtab_fns = NULL;
 
-/* Structures with which to manage partial symbol allocation.  */
-
-struct psymbol_allocation_list global_psymbols = {0}, static_psymbols = {0};
-
 /* Flag for whether user will be reloading symbols multiple times.
    Defaults to ON for VxWorks, otherwise OFF.  */
 
@@ -112,6 +108,17 @@ int symbol_reloading = SYMBOL_RELOADING_DEFAULT;
 #else
 int symbol_reloading = 0;
 #endif
+
+/* If true, then shared library symbols will be added automatically
+   when the inferior is created.  This is almost always what users
+   will want to have happen; but for very large programs, the startup
+   time will be excessive, and so if this is a problem, the user can
+   clear this flag and then add the shared library symbols as needed.
+   Note that there is a potential for confusion, since if the shared
+   library symbols are not loaded, commands like "info fun" will *not*
+   report all the functions that are actually present.  */
+
+int auto_solib_add_at_startup = 1;
 
 
 /* Since this function is called from within qsort, in an ANSI environment
@@ -301,9 +308,13 @@ init_entry_point_info (objfile)
     {
       /* Examination of non-executable.o files.  Short-circuit this stuff.  */
       objfile -> ei.entry_point = INVALID_ENTRY_POINT;
-      objfile -> ei.entry_file_lowpc = INVALID_ENTRY_LOWPC;
-      objfile -> ei.entry_file_highpc = INVALID_ENTRY_HIGHPC;
     }
+  objfile -> ei.entry_file_lowpc = INVALID_ENTRY_LOWPC;
+  objfile -> ei.entry_file_highpc = INVALID_ENTRY_HIGHPC;
+  objfile -> ei.entry_func_lowpc = INVALID_ENTRY_LOWPC;
+  objfile -> ei.entry_func_highpc = INVALID_ENTRY_HIGHPC;
+  objfile -> ei.main_func_lowpc = INVALID_ENTRY_LOWPC;
+  objfile -> ei.main_func_highpc = INVALID_ENTRY_HIGHPC;
 }
 
 /* Get current entry point address.  */
@@ -495,6 +506,13 @@ syms_from_objfile (objfile, addr, mainline, verbo)
   /* Discard cleanups as symbol reading was successful.  */
 
   discard_cleanups (old_chain);
+
+/* Call this after reading in a new symbol table to give target dependant code
+   a crack at the new symbols.  For instance, this could be used to update the
+   values of target-specific symbols GDB needs to keep track of (such as
+   _sigtramp, or whatever).  */
+
+  TARGET_SYMFILE_POSTREAD (objfile);
 }
 
 /* Perform required actions after either reading in the initial
@@ -1231,6 +1249,13 @@ reread_symbols ()
 	     again now.  */
 	  objfile->mtime = new_modtime;
 	  reread_one = 1;
+
+	  /* Call this after reading in a new symbol table to give target
+	     dependant code a crack at the new symbols.  For instance, this
+	     could be used to update the values of target-specific symbols GDB
+	     needs to keep track of (such as _sigtramp, or whatever).  */
+
+	  TARGET_SYMFILE_POSTREAD (objfile);
 	}
     }
   }
@@ -1622,6 +1647,7 @@ add_psymbol_to_list (name, namelength, namespace, class, list, val, language,
   memcpy (SYMBOL_NAME (psym), name, namelength);
   SYMBOL_NAME (psym)[namelength] = '\0';
   SYMBOL_VALUE (psym) = val;
+  SYMBOL_SECTION (psym) = 0;
   SYMBOL_LANGUAGE (psym) = language;
   PSYMBOL_NAMESPACE (psym) = namespace;
   PSYMBOL_CLASS (psym) = class;
@@ -1656,6 +1682,7 @@ add_psymbol_addr_to_list (name, namelength, namespace, class, list, val,
   memcpy (SYMBOL_NAME (psym), name, namelength);
   SYMBOL_NAME (psym)[namelength] = '\0';
   SYMBOL_VALUE_ADDRESS (psym) = val;
+  SYMBOL_SECTION (psym) = 0;
   SYMBOL_LANGUAGE (psym) = language;
   PSYMBOL_NAMESPACE (psym) = namespace;
   PSYMBOL_CLASS (psym) = class;
