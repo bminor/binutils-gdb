@@ -15,11 +15,11 @@ TREE	= devo
 
 NATIVE  = native
 
-DATE	= 930104
+DATE	= 930106
 
 TAG	= latest-$(DATE)
 
-INSTALLDIR = /cirdan/taxes/devo-test/$(TAG)
+INSTALLDIR = /cirdan/justice/devo-test/$(TAG)
 
 GCC = gcc -O -g
 CFLAGS = -g
