@@ -442,7 +442,7 @@ add_dump_command (char *name, void (*func) (char *args, char *mode),
   c->completer =  filename_completer;
   d = XMALLOC (struct dump_context);
   d->func = func;
-  d->mode = "w";
+  d->mode = "wb";
   set_cmd_context (c, d);
   c->func = call_dump_func;
 
@@ -450,7 +450,7 @@ add_dump_command (char *name, void (*func) (char *args, char *mode),
   c->completer =  filename_completer;
   d = XMALLOC (struct dump_context);
   d->func = func;
-  d->mode = "a";
+  d->mode = "ab";
   set_cmd_context (c, d);
   c->func = call_dump_func;
 

@@ -1,3 +1,8 @@
+2002-08-06  Corinna Vinschen  <vinschen@redhat.com>
+
+	* cli/cli-dump.c (add_dump_command): Explicitely use "b" flag to
+	write dump file binary.
+
 2002-08-05  Michael Snyder  <msnyder@redhat.com>
 
 	*  mips-tdep.c (mips_find_saved_regs): Adjust stack according
