@@ -63,6 +63,9 @@ static int sparc64_elf_get_symbol_type
 static boolean sparc64_elf_add_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
+static boolean sparc64_elf_output_arch_syms
+  PARAMS ((bfd *, struct bfd_link_info *, PTR,
+	   boolean (*) (PTR, const char *, Elf_Internal_Sym *, asection *)));
 static void sparc64_elf_symbol_processing
   PARAMS ((bfd *, asymbol *));
 

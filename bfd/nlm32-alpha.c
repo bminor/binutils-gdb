@@ -822,7 +822,7 @@ nlm_alpha_write_external (abfd, count, sym, relocs)
      asymbol *sym;
      struct reloc_and_sec *relocs;
 {
-  int i;
+  bfd_size_type i;
   bfd_byte len;
   unsigned char temp[NLM_TARGET_LONG_SIZE];
   arelent r;

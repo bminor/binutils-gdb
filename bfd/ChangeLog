@@ -1,5 +1,9 @@
 2001-08-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-sparc.c (sparc64_elf_output_arch_syms): Add missing
+	prototype.
+	* nlm32-alpha.c (nlm_alpha_write_external): Fix warning.
+
 	* elf64-mips.c (UNUSED_RELOC): Define.
 	(mips_elf64_howto_table_rel): Use it.
 	(mips_elf64_howto_table_rela): Here too.
