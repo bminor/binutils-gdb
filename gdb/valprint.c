@@ -61,6 +61,20 @@ char **float_type_table;
 /* Print repeat counts if there are more than this
    many repetitions of an element in an array.  */
 #define	REPEAT_COUNT_THRESHOLD	10
+
+/* Define a mess of print controls.  */
+
+int prettyprint;	/* Controls pretty printing of structures */
+int vtblprint;		/* Controls printing of vtbl's */
+int unionprint;		/* Controls printing of nested unions.  */
+int arrayprint;		/* Controls pretty printing of arrays.  */
+int addressprint;	/* Controls pretty printing of addresses.  */
+int objectprint;	/* Controls looking up an object's derived type
+			   using what we find in its vtables.  */
+
+struct obstack dont_print_obstack;
+
+static void cplus_val_print ();
 
 /* Print the character string STRING, printing at most LENGTH characters.
    Printing stops early if the number hits print_max; repeat counts
@@ -354,34 +368,34 @@ value_print (val, stream, format, pretty)
     }
   else
     {
+      struct type *type = VALUE_TYPE (val);
+
       /* If it is a pointer, indicate what it points to.
 
 	 Print type also if it is a reference.
 
          C++: if it is a member pointer, we will take care
 	 of that when we print it.  */
-      if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_PTR
-	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_REF)
+      if (TYPE_CODE (type) == TYPE_CODE_PTR
+	  || TYPE_CODE (type) == TYPE_CODE_REF)
 	{
 	  /* Hack:  remove (char *) for char strings.  Their
 	     type is indicated by the quoted string anyway. */
-          if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_PTR
-	    && TYPE_LENGTH   (TYPE_TARGET_TYPE (VALUE_TYPE (val)))
-			 == sizeof(char)
-	    && TYPE_CODE     (TYPE_TARGET_TYPE (VALUE_TYPE (val)))
-			 == TYPE_CODE_INT
-	    && !TYPE_UNSIGNED (TYPE_TARGET_TYPE (VALUE_TYPE (val))))
+          if (TYPE_CODE (type) == TYPE_CODE_PTR
+	      && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) == sizeof(char)
+	      && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_INT
+	      && !TYPE_UNSIGNED (TYPE_TARGET_TYPE (type)))
 	    {
 		/* Print nothing */
 	    }
 	  else
 	    {
 	      fprintf_filtered (stream, "(");
-	      type_print (VALUE_TYPE (val), "", stream, -1);
+	      type_print (type, "", stream, -1);
 	      fprintf_filtered (stream, ") ");
 	    }
 	}
-      return val_print (VALUE_TYPE (val), VALUE_CONTENTS (val),
+      return val_print (type, VALUE_CONTENTS (val),
 			VALUE_ADDRESS (val), stream, format, 1, 0, pretty);
     }
 }
@@ -405,26 +419,18 @@ static int
 is_vtbl_member(type)
      struct type *type;
 {
-  if (TYPE_CODE (type) == TYPE_CODE_PTR
-      && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_ARRAY
-      && TYPE_CODE (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (type))) == TYPE_CODE_STRUCT)
+  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+    type = TYPE_TARGET_TYPE (type);
+  else
+    return 0;
+
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY
+      && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT)
     /* Virtual functions tables are full of pointers to virtual functions.  */
-    return is_vtbl_ptr_type (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (type)));
+    return is_vtbl_ptr_type (TYPE_TARGET_TYPE (type));
   return 0;
 }
 
-/* Define a mess of print controls.  */
-
-int prettyprint;	/* Controls pretty printing of structures */
-int vtblprint;		/* Controls printing of vtbl's */
-int unionprint;		/* Controls printing of nested unions.  */
-int arrayprint;		/* Controls pretty printing of arrays.  */
-int addressprint;	/* Controls pretty printing of addresses.  */
-
-struct obstack dont_print_obstack;
-
-static void cplus_val_print ();
-
 /* Mutually recursive subroutines of cplus_val_print and val_print to print out
    a structure's fields: val_print_fields and cplus_val_print.
 
@@ -562,6 +568,7 @@ cplus_val_print (type, valaddr, stream, format, recurse, pretty, dont_print)
   for (i = 0; i < n_baseclasses; i++)
     {
       char *baddr;
+      int err;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -578,8 +585,8 @@ cplus_val_print (type, valaddr, stream, format, recurse, pretty, dont_print)
 	  obstack_ptr_grow (&dont_print_obstack, TYPE_BASECLASS (type, i));
 	}
 
-      baddr = baseclass_addr (type, i, valaddr, 0);
-      if (baddr == 0)
+      baddr = baseclass_addr (type, i, valaddr, 0, &err);
+      if (err == 0 && baddr == 0)
 	error ("could not find virtual baseclass `%s'\n",
 	       type_name_no_tag (TYPE_BASECLASS (type, i)));
 
@@ -589,9 +596,12 @@ cplus_val_print (type, valaddr, stream, format, recurse, pretty, dont_print)
       fputs_filtered ("<", stream);
       fputs_filtered (type_name_no_tag (TYPE_BASECLASS (type, i)), stream);
       fputs_filtered ("> = ", stream);
-      val_print_fields (TYPE_BASECLASS (type, i), baddr, stream, format,
-			recurse, pretty,
-			(struct type **)obstack_base (&dont_print_obstack));
+      if (err != 0)
+	fprintf_filtered (stream, "<invalid address 0x%x>", baddr);
+      else
+	val_print_fields (TYPE_BASECLASS (type, i), baddr, stream, format,
+			  recurse, pretty,
+			  (struct type **)obstack_base (&dont_print_obstack));
     flush_it:
       ;
     }
@@ -676,7 +686,17 @@ val_print (type, valaddr, address, stream, format,
 	    {
 	      unsigned int things_printed = 0;
 	      
-	      for (i = 0; i < len && things_printed < print_max; i++)
+	      /* If this is a virtual function table, print the 0th
+		 entry specially, and the rest of the members normally.  */
+	      if (is_vtbl_ptr_type (elttype))
+		{
+		  fprintf_filtered (stream, "%d vtable entries", len-1);
+		  i = 1;
+		}
+	      else
+		i = 0;
+
+	      for (; i < len && things_printed < print_max; i++)
 		{
 		  /* Position of the array element we are examining to see
 		     whether it is repeated.  */
@@ -1355,10 +1375,13 @@ type_print_varspec_prefix (type, stream, show, passed_a_ptr)
 	fprintf (stream, "(");
       type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0,
 				 0);
-      fprintf_filtered (stream, " ");
-      type_print_base (TYPE_DOMAIN_TYPE (type), stream, 0,
-		       passed_a_ptr);
-      fprintf_filtered (stream, "::");
+      if (passed_a_ptr)
+	{
+	  fprintf_filtered (stream, " ");
+	  type_print_base (TYPE_DOMAIN_TYPE (type), stream, 0,
+			   passed_a_ptr);
+	  fprintf_filtered (stream, "::");
+	}
       break;
 
     case TYPE_CODE_REF:
@@ -1867,6 +1890,12 @@ _initialize_valprint ()
      &showprintlist);
 
   add_show_from_set
+    (add_set_cmd ("object", class_support, var_boolean, (char *)&objectprint,
+	  "Set printing of object's derived type based on vtable info.",
+		  &setprintlist),
+     &showprintlist);
+
+  add_show_from_set
     (add_set_cmd ("address", class_support, var_boolean, (char *)&addressprint,
 		  "Set printing of addresses.",
 		  &setprintlist),
@@ -1904,6 +1933,7 @@ _initialize_valprint ()
   vtblprint = 0;
   arrayprint = 0;
   addressprint = 1;
+  objectprint = 0;
 
   print_max = 200;
 
