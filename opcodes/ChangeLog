@@ -1,3 +1,9 @@
+start-sanitize-am33
+Fri Jun 19 16:47:06 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* m10300-opc.c: Support 6 and 7 byte am33 instructions.
+
+end-sanitize-am33
 Fri Jun 19 09:16:42 1998  Mark Alexander  <marka@cygnus.com>
 
 	* m10200-dis.c (print_insn_mn10200): Recognize 'break' pseudo-op.
