@@ -1,3 +1,46 @@
+2004-04-16  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c: Include "hashtab.h".
+	(struct dwarf2_cu): Add partial_dies, comp_unit_obstack,
+	has_namespace_info.
+	(struct partial_die_info): Add comments.  Use bitfields to reduce
+	memory footprint.  Add scope, scope_set, has_specification,
+	spec_offset, die_parent, die_child, and die_sibling.
+	(peek_die_abbrev): Add prototype.
+	(partial_read_comp_unit_head): New function, broken out from
+	dwarf2_build_psymtabs_hard.
+	(dwarf2_build_psymtabs_hard): Remove unused variable abbrev_ptr.
+	Use partial_read_comp_unit_head.  Initialize the CU and
+	comp_unit_obstack.  Update calls to read_partial_die and
+	scan_partial_symbols.  Use free_stack_comp_unit and
+	load_partial_dies.
+	(scan_partial_symbols): Change PDI to a pointer.  Use the child and
+	sibling pointers to walk partial DIEs.  Call fixup_partial_die.
+	Update calls to helper functions.  Remove NAMESPACE argument.
+	Update comments.
+	(partial_die_parent_scope, partial_die_full_name): New functions.
+	(add_partial_symbol): Remove namespace argument.  Update call to
+	pdi_needs_namespace.  Use partial_die_full_name.  Handle
+	DW_TAG_namespace.  Check has_namespace_info flag.
+	(pdi_needs_namespace): Remove NAMESPACE argument.  Just check the
+	tag.  Handle namespaces.
+	(add_partial_namespace, add_partial_enumeration): Simplify.
+	(guess_structure_name): New function, derived from
+	add_partial_structure.
+	(add_partial_structure): Remove.
+	(determine_class_name): Update comment.
+	(dwarf2_read_abbrevs): Set has_namespace_info flag.
+	(is_type_tag_for_partial, load_partial_dies): New functions.
+	(read_partial_die): Pass abbrev and abbrev_len as arguments.
+	Record specifications instead of following them immediately.
+	(find_partial_die_in_comp_unit, find_partial_die)
+	(fixup_partial_die, free_stack_comp_unit)
+	(hashtab_obstack_allocate, dummy_obstack_deallocate)
+	(partial_die_hash, partial_die_eq): New functions.
+	* Makefile.in (hashtab_h): Define.
+	(dwarf2read.o): Update dependencies.
+	(observer_inc, observer_h): Move to the correct section.
+
 2004-04-15  Joel Brobecker  <brobecker@gnat.com>
 
 	* dwarf2read.c (dwarf2_attribute_true_p): New function.
