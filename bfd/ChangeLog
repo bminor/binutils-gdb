@@ -1,3 +1,8 @@
+2002-01-03  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* elf32-arm.h (elf32_arm_final_link_relocate): Handle
+	R_ARM_THM_PC11 reloc.
+
 2002-01-02  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* configure.in (LINGUAS): Add ja.
