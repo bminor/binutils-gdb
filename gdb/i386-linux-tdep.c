@@ -25,19 +25,15 @@
 #include "value.h"
 #include "regcache.h"
 #include "inferior.h"
-#include "reggroups.h"
-
-/* For i386_linux_skip_solib_resolver.  */
-#include "symtab.h"
-#include "symfile.h"
-#include "objfiles.h"
-
-#include "solib-svr4.h"		/* For struct link_map_offsets.  */
-
 #include "osabi.h"
+#include "reggroups.h"
+#include "solib-svr4.h"
+
+#include "gdb_string.h"
 
 #include "i386-tdep.h"
 #include "i386-linux-tdep.h"
+#include "glibc-tdep.h"
 
 /* Return the name of register REG.  */
 
@@ -312,89 +308,10 @@ i386_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
 
 /* Calling functions in shared libraries.  */
 
-/* Find the minimal symbol named NAME, and return both the minsym
-   struct and its objfile.  This probably ought to be in minsym.c, but
-   everything there is trying to deal with things like C++ and
-   SOFUN_ADDRESS_MAYBE_TURQUOISE, ...  Since this is so simple, it may
-   be considered too special-purpose for general consumption.  */
-
-static struct minimal_symbol *
-find_minsym_and_objfile (char *name, struct objfile **objfilep)
-{
-  struct objfile *objfile;
-
-  ALL_OBJFILES (objfile)
-    {
-      struct minimal_symbol *msym;
-
-      ALL_OBJFILE_MSYMBOLS (objfile, msym)
-	{
-	  if (SYMBOL_LINKAGE_NAME (msym)
-	      && strcmp (SYMBOL_LINKAGE_NAME (msym), name) == 0)
-	    {
-	      *objfilep = objfile;
-	      return msym;
-	    }
-	}
-    }
-
-  return 0;
-}
-
-static CORE_ADDR
-skip_gnu_resolver (CORE_ADDR pc)
-{
-  /* The GNU dynamic linker is part of the GNU C library, so many
-     GNU/Linux distributions use it.  (All ELF versions, as far as I
-     know.)  An unresolved PLT entry points to "_dl_runtime_resolve",
-     which calls "fixup" to patch the PLT, and then passes control to
-     the function.
-
-     We look for the symbol `_dl_runtime_resolve', and find `fixup' in
-     the same objfile.  If we are at the entry point of `fixup', then
-     we set a breakpoint at the return address (at the top of the
-     stack), and continue.
-  
-     It's kind of gross to do all these checks every time we're
-     called, since they don't change once the executable has gotten
-     started.  But this is only a temporary hack --- upcoming versions
-     of GNU/Linux will provide a portable, efficient interface for
-     debugging programs that use shared libraries.  */
-
-  struct objfile *objfile;
-  struct minimal_symbol *resolver 
-    = find_minsym_and_objfile ("_dl_runtime_resolve", &objfile);
-
-  if (resolver)
-    {
-      struct minimal_symbol *fixup
-	= lookup_minimal_symbol ("fixup", NULL, objfile);
-
-      if (fixup && SYMBOL_VALUE_ADDRESS (fixup) == pc)
-	return frame_pc_unwind (get_current_frame ()); 
-    }
-
-  return 0;
-}      
-
-/* See the comments for SKIP_SOLIB_RESOLVER at the top of infrun.c.
-   This function:
-   1) decides whether a PLT has sent us into the linker to resolve
-      a function reference, and 
-   2) if so, tells us where to set a temporary breakpoint that will
-      trigger when the dynamic linker is done.  */
-
 CORE_ADDR
 i386_linux_skip_solib_resolver (CORE_ADDR pc)
 {
-  CORE_ADDR result;
-
-  /* Plug in functions for other kinds of resolvers here.  */
-  result = skip_gnu_resolver (pc);
-  if (result)
-    return result;
-
-  return 0;
+  return glibc_skip_solib_resolver (pc);
 }
 
 /* Fetch (and possibly build) an appropriate link_map_offsets
