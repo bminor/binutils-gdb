@@ -27,6 +27,8 @@ Do-first:
 Things-to-keep:
 
 gas.exp
+cofftag.d
+cofftag.s
 comment.s
 diff1.s
 float.s
