@@ -22,6 +22,13 @@ else
         lose_these_too="${tic80_files} ${lose_these_too}"
 fi
 
+gxsim_files="m32r-gx"
+if ( echo $* | grep keep\-gxsim > /dev/null ) ; then
+        keep_these_too="${gxsim_files} ${keep_these_too}"
+else
+        lose_these_too="${gxsim_files} ${lose_these_too}"
+fi
+
 lose_these_too="${lose_these_too}"
 
 # All files listed between the "Things-to-keep:" line and the
@@ -79,6 +86,34 @@ else
                         fi
                         cp $i new
                         sed '/start\-sanitize\-tic80/,/end-\sanitize\-tic80/d' < $i > new
+                        if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+                                if [ -n "${verbose}" ] ; then
+                                        echo Caching $i in .Recover...
+                                fi
+                                mv $i .Recover
+                        fi
+                        mv new $i
+                fi
+        done
+fi
+
+gxsim_files="configure configure.in ChangeLog"
+if ( echo $* | grep keep\-gxsim > /dev/null ) ; then
+        for i in $gxsim_files ; do
+                if test ! -d $i && (grep sanitize-gxsim $i > /dev/null) ; then
+                        if [ -n "${verbose}" ] ; then
+                                echo Keeping gxsim stuff in $i
+                        fi
+                fi
+        done
+else
+        for i in $gxsim_files ; do
+                if test ! -d $i && (grep sanitize-gxsim $i > /dev/null) ; then
+                        if [ -n "${verbose}" ] ; then
+                                echo Removing traces of \"gxsim\" from $i...
+                        fi
+                        cp $i new
+                        sed '/start\-sanitize\-gxsim/,/end-\sanitize\-gxsim/d' < $i > new
                         if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
                                 if [ -n "${verbose}" ] ; then
                                         echo Caching $i in .Recover...

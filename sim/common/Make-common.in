@@ -318,6 +318,9 @@ sim-n-core_h = $(srccom)/sim-n-core.h
 sim-engine_h = $(srccom)/sim-engine.h
 sim-events_h = $(srccom)/sim-events.h
 sim-fpu_h = $(srccom)/sim-fpu.h
+# start-sanitize-gxsim
+sim-gx_h = $(srccom)/sim-gx.h
+# end-sanitize-gxsim
 sim-io_h = $(srccom)/sim-io.h
 sim-options_h = $(srccom)/sim-options.h
 sim-break_h = $(srccom)/sim-break.h
@@ -382,6 +385,18 @@ sim-events.o: $(srccom)/sim-events.c $(sim-events_h) \
 sim-fpu.o: $(srccom)/sim-fpu.c $(sim-fpu_h) \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-fpu.c $(ALL_CFLAGS)
+
+# start-sanitize-gxsim
+sim-gx.o: $(srccom)/sim-gx.c $(sim_main_headers) \
+	  $(sim-gx_h) \
+	  $(SIM_EXTRA_DEPS)
+	$(CC) -c $(srccom)/sim-gx.c $(ALL_CFLAGS)
+
+sim-gx-run.o: $(srccom)/sim-gx-run.c $(sim_main_headers) \
+	  $(sim-gx_h) \
+	  $(SIM_EXTRA_DEPS)
+	$(CC) -c $(srccom)/sim-gx-run.c $(ALL_CFLAGS)
+# end-sanitize-gxsim
 
 sim-hload.o: $(srccom)/sim-hload.c $(sim-assert_h) \
 	  $(srcroot)/include/remote-sim.h \

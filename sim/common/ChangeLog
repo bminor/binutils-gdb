@@ -1,3 +1,15 @@
+1998-11-13  Frank Ch. Eigler  <fche@elastic.org>
+	
+start-sanitize-gxsim
+	* Make-common.im: Build sim-gx.o and sim-gx-run.o.
+	* sim-gx.c: New file: target-independent gx routines.
+	* sim-gx.h: Declarations for gx structs and routines.
+	* sim-gx-run.c: New file: target-independent gx driver.
+	* sim-base.h: Add gx block vector to state struct.
+end-sanitize-gxsim
+	* aclocal.m4: Add tests for dlopen family.
+	* config.in: Regenerated.
+	
 Wed Nov 11 14:02:25 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* sim-hload.c (sim_load): Pass `prog_name' to sim_load_file, not NULL.

@@ -1,0 +1,104 @@
+# Makefile template for Configure for the m32r simulator
+# Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+# Contributed by Cygnus Support.
+#
+# This file is part of GDB, the GNU debugger.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+## COMMON_PRE_CONFIG_FRAG
+
+M32R_OBJS = gx-translate.o
+
+CONFIG_DEVICES = dv-sockser.o
+CONFIG_DEVICES =
+
+SIM_OBJS = \
+	sim-bits.o \
+	sim-break.o \
+	sim-config.o \
+	sim-core.o \
+	sim-endian.o \
+	sim-events.o \
+	sim-fpu.o \
+	sim-io.o \
+	sim-if.o \
+	sim-info.o \
+	sim-load.o \
+	sim-memopt.o \
+	sim-module.o \
+	sim-options.o \
+	sim-signal.o \
+	sim-trace.o \
+	sim-utils.o \
+	sim-watch.o \
+	sim-cpu.o \
+	sim-engine.o \
+	sim-core.o \
+	sim-hload.o \
+	sim-hrw.o \
+	sim-reason.o \
+	$(M32R_OBJS) \
+	sim-gx.o \
+	sim-gx-run.o \
+	$(CONFIG_DEVICES)
+
+# Extra headers included by sim-main.h.
+SIM_EXTRA_DEPS = \
+	arch.h cpuall.h m32r-sim.h cpu-opc.h
+
+SIM_EXTRA_CFLAGS = -DSIM_GX=1
+SIM_EXTRA_ALL = gxtool
+SIM_EXTRA_INSTALL = install-gxtool
+SIM_RUN_OBJS = nrun.o
+SIM_EXTRA_CLEAN = m32r-clean
+
+# This selects the m32r newlib/libgloss syscall definitions.
+NL_TARGET = -DNL_TARGET_m32r
+
+## COMMON_POST_CONFIG_FRAG
+
+arch = m32r
+
+MAIN_INCLUDE_DEPS = \
+	sim-main.h \
+	$(srcdir)/../common/sim-config.h \
+	$(srcdir)/../common/sim-base.h \
+	$(srcdir)/../common/sim-basics.h \
+	$(srcdir)/../common/sim-module.h \
+	$(srcdir)/../common/sim-trace.h \
+	tconfig.h
+INCLUDE_DEPS = $(MAIN_INCLUDE_DEPS) $(SIM_EXTRA_DEPS) cpu-sim.h
+OPS_INCLUDE_DEPS = \
+	$(srcdir)/../common/cgen-mem.h \
+	$(srcdir)/../common/cgen-ops.h
+
+sim-if.o: sim-if.c $(INCLUDE_DEPS) $(srcdir)/../common/sim-core.h
+
+arch.o: arch.c $(INCLUDE_DEPS)
+
+# M32R objs
+
+m32r.o: m32r.c $(INCLUDE_DEPS) $(OPS_INCLUDE_DEPS) cpu.h
+
+m32r-clean:
+	rm -f mloop.c stamp-arch stamp-cpu stamp-decode
+	rm -f tmp-*
+
+gxtool: ltconfig ltmain.sh
+	$(SHELL) $(srcdir)/ltconfig --disable-static -o $@ $(srcdir)/ltmain.sh
+
+install-gxtool: gxtool
+	$(INSTALL_PROGRAM) gxtool $(bindir)
