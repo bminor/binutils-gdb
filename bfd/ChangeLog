@@ -1,3 +1,11 @@
+1999-06-13  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf-bfd.h (_bfd_elf_link_adjust_dynindx): New function.
+	* elflink.c (_bfd_elf_link_adjust_dynindx): Define it.
+	* elflink.h (elf_link_remove_section_and_adjust_dynindices): New
+	function.
+	(bfd_elf_size_dynamic_sections): Use it.
+
 1999-06-13  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* elf32-i386.c (elf_howto_table): Change R_386_PC8 from

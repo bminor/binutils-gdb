@@ -259,6 +259,21 @@ _bfd_elf_link_record_dynamic_symbol (info, h)
 
   return true;
 }
+
+/* Increase the index at which H will appear in the dynamic symbol
+   table by INCREMENT (which is really an `int *').  Called via
+   elf_link_hash_traverse.  */
+
+boolean
+_bfd_elf_link_adjust_dynindx (h, increment)
+     struct elf_link_hash_entry *h;
+     PTR increment;
+{
+  if (h->dynindx != -1)
+    h->dynindx += *((int *) increment);
+    
+  return true;
+}
 
 /* Create a special linker section, or return a pointer to a linker section already created  */
 

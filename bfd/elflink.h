@@ -54,6 +54,8 @@ static boolean elf_collect_hash_codes
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_link_read_relocs_from_section 
   PARAMS ((bfd *, Elf_Internal_Shdr *, PTR, Elf_Internal_Rela *));
+static void elf_link_remove_section_and_adjust_dynindices 
+  PARAMS ((bfd *, struct bfd_link_info *, asection *));
 
 /* Given an ELF BFD, add symbols to the global hash table as
    appropriate.  */
@@ -2401,6 +2403,50 @@ compute_bucket_count (info)
   return best_size;
 }
 
+/* Remove SECTION from the BFD.  If a symbol for SECTION was going to
+   be put into the dynamic symbol table, remove it, and renumber
+   subsequent entries.  */
+
+static void
+elf_link_remove_section_and_adjust_dynindices (abfd, info, section)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     asection *section;
+{
+  asection **spp;
+
+  /* Remove the section from the output list.  */
+  for (spp = &abfd->sections;
+       *spp != section->output_section;
+       spp = &(*spp)->next)
+    ;
+  *spp = section->output_section->next;
+  --abfd->section_count;
+
+  if (elf_section_data (section->output_section)->dynindx)
+    {
+      asection *s;
+      int increment = -1;
+
+      /* We were going to output an entry in the dynamic symbol table
+	 for the symbol corresponding to this section.  Now, the
+	 section is gone.  So, we must renumber the dynamic indices of
+	 all subsequent sections and all other entries in the dynamic
+	 symbol table.  */
+      elf_section_data (section->output_section)->dynindx = 0;
+      for (s = section->output_section->next; s; s = s->next)
+	if (elf_section_data (s)->dynindx)
+	  --elf_section_data (s)->dynindx;
+      
+      elf_link_hash_traverse (elf_hash_table (info),
+			      _bfd_elf_link_adjust_dynindx,
+			      &increment);
+
+      /* There is one less dynamic symbol than there was before.  */
+      --elf_hash_table (info)->dynsymcount;
+    }
+}
+
 /* Set up the sizes and contents of the ELF dynamic sections.  This is
    called by the ELF linker emulation before_allocation routine.  We
    must set the sizes of the sections before the linker sets the
@@ -2602,17 +2648,9 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       verdefs = asvinfo.verdefs;
 
       if (verdefs == NULL)
-	{
-	  asection **spp;
-
-	  /* Don't include this section in the output file.  */
-	  for (spp = &output_bfd->sections;
-	       *spp != s->output_section;
-	       spp = &(*spp)->next)
-	    ;
-	  *spp = s->output_section->next;
-	  --output_bfd->section_count;
-	}
+	elf_link_remove_section_and_adjust_dynindices (output_bfd,
+						       info,
+						       s);
       else
 	{
 	  unsigned int cdefs;
@@ -2805,19 +2843,9 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 				(PTR) &sinfo);
 
 	if (elf_tdata (output_bfd)->verref == NULL)
-	  {
-	    asection **spp;
-
-	    /* We don't have any version definitions, so we can just
-               remove the section.  */
-
-	    for (spp = &output_bfd->sections;
-		 *spp != s->output_section;
-		 spp = &(*spp)->next)
-	      ;
-	    *spp = s->output_section->next;
-	    --output_bfd->section_count;
-	  }
+	  elf_link_remove_section_and_adjust_dynindices (output_bfd,
+							 info,
+							 s);
 	else
 	  {
 	    Elf_Internal_Verneed *t;
@@ -2917,16 +2945,12 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       if (dynsymcount == 0
 	  || (verdefs == NULL && elf_tdata (output_bfd)->verref == NULL))
 	{
-	  asection **spp;
-
-	  /* We don't need any symbol versions; just discard the
-             section.  */
-	  for (spp = &output_bfd->sections;
-	       *spp != s->output_section;
-	       spp = &(*spp)->next)
-	    ;
-	  *spp = s->output_section->next;
-	  --output_bfd->section_count;
+	  elf_link_remove_section_and_adjust_dynindices (output_bfd,
+							 info,
+							 s);
+	  /* The DYNSYMCOUNT might have changed if we were going to
+	     output a dynamic symbol table entry for S.  */
+	  dynsymcount = elf_hash_table (info)->dynsymcount;
 	}
       else
 	{

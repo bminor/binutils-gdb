@@ -927,6 +927,8 @@ boolean _bfd_elf_create_dynamic_sections PARAMS ((bfd *,
 						  struct bfd_link_info *));
 boolean _bfd_elf_create_got_section PARAMS ((bfd *,
 					     struct bfd_link_info *));
+boolean _bfd_elf_link_adjust_dynindx PARAMS ((struct elf_link_hash_entry *,
+					      PTR));
 
 elf_linker_section_t *_bfd_elf_create_linker_section
   PARAMS ((bfd *abfd,
