@@ -1,3 +1,8 @@
+Tue Oct 19 09:28:52 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* sparclite/Makefile.in:  Fixup so that this works with Sun make
+	and VPATH.
+
 Tue Oct 19 10:43:16 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* breakpoint.h (struct bpstat_what): Don't use bitfields.
