@@ -1,4 +1,12 @@
+Tue Aug 17 19:02:31 1993  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* Makefile.in:  Add support for new libio.
+
 Sun Aug 15 20:48:55 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* install.sh: If one command fails, don't try the rest.  Don't try
+	to remove $dsttmp (via trap) unless we have already created it.
+	If $src doesn't exist, detect it and exit with an error.
 
 	* config.guess: Recognize BSD on hp300.
 

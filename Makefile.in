@@ -479,6 +479,7 @@ ALL_TARGET_MODULES = \
 	$(start-sanitize-chill) \
 	all-chillrt \
 	$(end-sanitize-chill) \
+	all-libio \
 	all-libg++ \
 	all-newlib \
 	all-xiberty
@@ -489,6 +490,7 @@ CHECK_TARGET_MODULES = \
 	$(start-sanitize-chill) \
 	check-chillrt \
 	$(end-sanitize-chill) \
+	check-libio \
 	check-libg++ \
 	check-newlib \
 	check-xiberty
@@ -499,15 +501,16 @@ INSTALL_TARGET_MODULES = \
 	$(start-sanitize-chill) \
 	install-chillrt \
 	$(end-sanitize-chill) \
+	install-libio \
 	install-libg++ \
 	install-newlib \
 	install-xiberty
 
 # This is a shell case of all modules which are compiled using
 # $(TARGET_FLAGS_TO_PASS), used in the do-X rule.
-TARGET_LIBS = libg++ | newlib | xiberty
+TARGET_LIBS = libio | libg++ | newlib | xiberty
 # start-sanitize-chill
-TARGET_LIBS = chillrt | libg++ | newlib | xiberty
+TARGET_LIBS = chillrt | libio | libg++ | newlib | xiberty
 # end-sanitize-chill
 
 # The first rule in the file had better be this one.  Don't put any above it.
@@ -836,13 +839,13 @@ all-gcc: all-libiberty all-byacc all-binutils all-gas
 all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-glob all-byacc all-sim
 all-glob:
 all-gprof: all-libiberty all-bfd
-all-grep:
+all-grep: all-libiberty
 all-gzip: all-libiberty
 all-hello: all-libiberty
 all-indent:
 all-ispell: all-emacs
 all-ld: all-libiberty all-bfd all-byacc all-flex
-all-libg++: all-gas all-ld all-gcc all-xiberty all-newlib
+all-libg++: all-gas all-ld all-gcc all-xiberty all-newlib all-libio
 all-libiberty:
 all-m4: all-libiberty
 all-make: all-libiberty
