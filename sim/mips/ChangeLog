@@ -1,3 +1,16 @@
+Thu Sep 25 11:15:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (tmp.igen): Add target. Generate igen input from
+ 	gencode file.
+
+	* gencode.c (FEATURE_IGEN): Define.
+	(main): Add --igen option.  Generate output in igen format.
+	(process_instructions): Format output according to igen option.
+	(print_igen_insn_format): New function.
+	(print_igen_insn_models): New function.
+	(process_instructions): Only issue warnings and ignore
+ 	instructions when no FEATURE_IGEN.
+
 Wed Sep 24 17:38:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (COP_SD, COP_LD): Add UNUSED to pacify GCC for some

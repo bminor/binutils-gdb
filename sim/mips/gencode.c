@@ -116,6 +116,7 @@
 #define FEATURE_WARN_MEM    (1 << 27)   /* 0 = nothing; 1 = generate warnings when memory problems are noticed */
 #define FEATURE_WARN_R31    (1 << 28)   /* 0 = nothing; 1 = generate warnings if r31 used dangerously */
 #define FEATURE_WARN_RESULT (1 << 29)   /* 0 = nothing; 1 = generate warnings when undefined results may occur */
+#define FEATURE_IGEN        (1 << 20)   /* 0 = nothing; 1 = generate igen formatted output file */
 
 /* We used to enable FEATURE_WARN_ZERO, but it is perfectly legitimate to
    have the zero register as a destination -- the zero register just doesn't
@@ -375,7 +376,9 @@ typedef enum {
 #define DOUBLEWORD      (3)     /* 64bit */
 #define SINGLE          (4)     /* single precision FP */
 #define DOUBLE          (5)     /* double precision FP */
+/* start-sanitize-r5900 */
 #define QUADWORD        (6)     /* 128bit */
+/* end-sanitize-r5900 */
 
 /* Shorthand to get the size field from the flags value: */
 #define GETDATASIZEINSN(i) (((i)->flags >> SIM_SH_SIZE) & SIM_MASK_SIZE)
@@ -965,6 +968,168 @@ static const struct instruction MIPS16_DECODE[] = {
 {"XOR",     1, "11101wwwyyy01110",  RR,      XOR,     NONE }
 };
 
+/*---------------------------------------------------------------------------*/
+
+static void print_igen_insn_format PARAMS ((const char *bitmap,
+					    inst_type mark,
+					    int data_size,
+					    const char *options,
+					    const char *name));
+
+static void
+print_igen_insn_format (bitmap, mark, data_size, options, name)
+     const char *bitmap;
+     inst_type mark;
+     int data_size;
+     const char *options;
+     const char *name;
+{
+  const char *chp;
+  char lch = *bitmap;
+  for (chp = bitmap; *chp != '\0'; chp++)
+    {
+      if ((isdigit (lch) && !isdigit (*chp))
+	  || (!isdigit (lch) && isdigit (*chp))
+	  || (!isdigit (lch) && !isdigit (*chp) && lch != *chp))
+	{
+	  lch = *chp;
+	  printf (",");
+	}
+      switch (*chp)
+	{
+	case '?':
+	  printf ("*");
+	  break;
+	case '<':
+	  printf ("s"); /* good guess */
+	  break;
+	default:
+	  printf ("%c", *chp);
+	  break;
+	}
+    }
+  printf (":");
+  switch (mark)
+    {
+    case NORMAL:
+      printf ("NORMAL");
+      break;
+    case SPECIAL:
+      printf ("SPECIAL");
+      break;
+    case REGIMM:
+      printf ("REGIMM");
+      break;
+    case COP1:
+      printf ("COP1");
+      break;
+    case COP1X:
+      printf ("COP1X");
+      break;
+    case COP1S: /* These instructions live in the reserved FP format values: 0..15,18-19,22-31 */
+      printf ("COP1S");
+      break;
+
+    case MMINORM:
+      printf ("MMINORM");
+      break;
+    case MMI0:
+      printf ("MMI0");
+      break;
+    case MMI1:
+      printf ("MMI1");
+      break;
+    case MMI2:
+      printf ("MMI2");
+      break;
+    case MMI3:
+      printf ("MMI3");
+      break;
+
+      /* mips16 encoding types.  */
+    case I:
+      printf ("I");
+      break;
+    case RI:
+      printf ("RI");
+      break;
+    case RR:
+      printf ("RR");
+      break;
+    case RRI:
+      printf ("RRI");
+      break;
+    case RRR:
+      printf ("RRR");
+      break;
+    case RRI_A:
+      printf ("RRI_A");
+      break;
+    case ISHIFT:
+      printf ("ISHIFT");
+      break;
+    case I8:
+      printf ("I8");
+      break;
+    case I8_MOVR32:
+      printf ("I8_MOVR32");
+      break;
+    case I8_MOV32R:
+      printf ("I8_MOV32R");
+      break;
+    case I64:
+      printf ("I64");
+      break;
+    case RI64:
+      printf ("RI64");
+      break;
+    }
+  printf (":");
+  switch (data_size)
+    {
+    case DOUBLEWORD:
+      printf ("64");
+      break;
+      /* start-sanitize-r5900 */
+    case QUADWORD:
+      printf ("128");
+      break;
+      /* end-sanitize-r5900 */
+    default:
+      printf ("32");
+    }
+  printf (":%s:%s\n", options, name);
+}
+
+static void print_igen_insn_models PARAMS ((unsigned int isa));
+
+static void
+print_igen_insn_models (isa)
+     unsigned int isa;
+{
+  /* common mips ISAs */
+  switch ((isa & MASK_ISA))
+    {
+    case 1:
+      printf ("*mipsI:\n");
+    case 2:
+      printf ("*mipsII:\n");
+    case 3:
+      printf ("*mipsIII:\n");
+    }
+  /* processor specific ISAs */
+  if ((isa & ARCH_VR4100))
+    printf ("*vr4100:\n");
+  /* start-sanitize-r5900 */
+  if ((isa & ARCH_R5900))
+    printf ("*r5900:\n");
+  /* end-sanitize-r5900 */
+  if ((isa & ARCH_R3900))
+    printf ("*r3900:\n");
+}
+
+/*---------------------------------------------------------------------------*/
+
 static int bitmap_val PARAMS ((const char *, int, int));
 static void build_mips16_operands PARAMS ((const char *));
 static void build_instruction
@@ -988,9 +1153,11 @@ name_for_data_len( insn )
     else if (GETDATASIZEINSN(insn) == DOUBLEWORD)
       return "DOUBLEWORD";
 
+    /* start-sanitize-r5900 */
     else if (GETDATASIZEINSN(insn) == QUADWORD)
       return "QUADWORD";
 
+    /* end-sanitize-r5900 */
     else
       return 0;
   }
@@ -1011,9 +1178,11 @@ letter_for_data_len( insn )
     else if (GETDATASIZEINSN(insn) == DOUBLEWORD)
       return "D";
 
+    /* start-sanitize-r5900 */
     else if (GETDATASIZEINSN(insn) == QUADWORD)
       return "Q";
 
+    /* end-sanitize-r5900 */
     else
       return 0;
   }
@@ -1035,9 +1204,11 @@ type_for_data_len( insn , is_signed )
     else if (GETDATASIZEINSN(insn) == DOUBLEWORD)
       return 0;
 
+    /* start-sanitize-r5900 */
     else if (GETDATASIZEINSN(insn) == QUADWORD)
       return 0;
 
+    /* end-sanitize-r5900 */
     else
       return 0;
   }
@@ -1058,9 +1229,11 @@ max_for_data_len( insn )
     else if (GETDATASIZEINSN(insn) == DOUBLEWORD)
       return 0;
 
+    /* start-sanitize-r5900 */
     else if (GETDATASIZEINSN(insn) == QUADWORD)
       return 0;
 
+    /* end-sanitize-r5900 */
     else
       return 0;
   }
@@ -1081,9 +1254,11 @@ min_for_data_len( insn )
     else if (GETDATASIZEINSN(insn) == DOUBLEWORD)
       return 0;
 
+    /* start-sanitize-r5900 */
     else if (GETDATASIZEINSN(insn) == QUADWORD)
       return 0;
 
+    /* end-sanitize-r5900 */
     else
       return 0;
   }
@@ -1104,9 +1279,11 @@ umax_for_data_len( insn )
     else if (GETDATASIZEINSN(insn) == DOUBLEWORD)
       return 0;
 
+    /* start-sanitize-r5900 */
     else if (GETDATASIZEINSN(insn) == QUADWORD)
       return 0;
 
+    /* end-sanitize-r5900 */
     else
       return 0;
   }
@@ -1127,9 +1304,11 @@ bits_for_data_len( insn )
     else if (GETDATASIZEINSN(insn) == DOUBLEWORD)
       return "64";
 
+    /* start-sanitize-r5900 */
     else if (GETDATASIZEINSN(insn) == QUADWORD)
       return "128";
 
+    /* end-sanitize-r5900 */
     else
       return 0;
   }
@@ -1756,125 +1935,128 @@ process_instructions(doarch,features)
   if (doisa == 0)
    doisa = maxisa;
 
-  printf("#if defined(SIM_MANIFESTS)\n");
-  printf("#define MIPSISA (%d)\n",doisa);
-  if (proc64)
-   printf("#define PROCESSOR_64BIT (1 == 1)\n");
-  else
-   printf("#define PROCESSOR_64BIT (1 == 0)\n");
+  if (!(features & FEATURE_IGEN))
+    {
+      printf("#if defined(SIM_MANIFESTS)\n");
+      printf("#define MIPSISA (%d)\n",doisa);
+      if (proc64)
+	printf("#define PROCESSOR_64BIT (1 == 1)\n");
+      else
+	printf("#define PROCESSOR_64BIT (1 == 0)\n");
 #if 1 /* cheat: We only have a 64bit LoadMemory and StoreMemory routines at the moment */
-  printf("#define LOADDRMASK (0x%08X)\n",0x7);
+      printf("#define LOADDRMASK (0x%08X)\n",0x7);
 #else
-  printf("#define LOADDRMASK (0x%08X)\n",(proc64 ? 0x7 : 0x3));
+      printf("#define LOADDRMASK (0x%08X)\n",(proc64 ? 0x7 : 0x3));
 #endif
-  /* The FP registers are the same width as the CPU registers: */
-  printf("#define GPRLEN (%d)\n",gprlen);
-  printf("typedef %s t_reg;\n",((gprlen == 64) ? "word64" : "int"));
-  printf("typedef %s ut_reg;\n",((gprlen == 64) ? "uword64" : "unsigned int"));
-  printf("typedef %s t_fpreg;\n",((gprlen == 64) ? "word64" : "int"));
-  if (dofp)
-   printf("#define HASFPU (1 == 1)\n");
-  if (features & FEATURE_FAST)
-   printf("#define FASTSIM (1 == 1)\n");
-  if (features & FEATURE_WARN_STALL)
-   printf("#define WARN_STALL (1 == 1)\n");
-  if (features & FEATURE_WARN_LOHI)
-   printf("#define WARN_LOHI (1 == 1)\n");
-  if (features & FEATURE_WARN_ZERO)
-   printf("#define WARN_ZERO (1 == 1)\n");
-  if (features & FEATURE_WARN_MEM)
-   printf("#define WARN_MEM (1 == 1)\n");
-  if (features & FEATURE_WARN_R31)
-   printf("#define WARN_R31 (1 == 1)\n");
-  if (features & FEATURE_WARN_RESULT)
-   printf("#define WARN_RESULT (1 == 1)\n");
-
-  printf("#else /* simulator engine */\n");
-
-  printf("/* Engine generated by \"%s\" at %s */\n","<SHOW PROGRAM ARGS>","<SHOW CURRENT DATE AND TIME>");
-  printf("/* Main instruction decode for %d-bit MIPS ISA %d (Table entry limit = %d) */\n",(proc64 ? 64 : 32),doisa,limit);
-  if (dofp)
-   printf("/* %sFP instructions included */\n",(fpsingle ? "Single precision " : ""));
-  printf("/* NOTE: \"DSPC\" is the delay slot PC address */\n");
-
- if (proc64) {
-   printf("#if !defined(PROCESSOR_64BIT)\n");
-   printf("#error \"Automatically constructed decoder has been built for a 64bit processor\"\n");
-   printf("#endif\n");
- }
-
- printf("/* Actual instruction decoding block */\n");
- printf("if ((vaddr & 1) == 0){\n");
-  {
-    int limit;
-    printf("int num = ((instruction >> %d) & 0x%08X);\n",OP_SH_OP,OP_MASK_OP);
-    limit = (OP_MASK_OP + 1);
-
-    printf("#ifdef DEBUG\n");
-    printf("printf(\"DBG: instruction = 0x%%08X\\n\",instruction);\n");
-    printf("#endif\n");
-
-    printf("if (num == 0x00) num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_SPEC,OP_MASK_SPEC);
-    limit += (OP_MASK_SPEC + 1);
-
-    printf("else if (num == 0x01) num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_RT,OP_MASK_RT);
-    limit += (OP_MASK_RT + 1);
-
-    printf("else if (num == 0x11) {\n");
-    printf(" if ((instruction & (0x%08X << %d)) == 0x%08X)\n",OP_MASK_COP1NORM,OP_SH_COP1NORM,(OP_MASK_COP1NORM << OP_SH_COP1NORM));
-    printf("  if ((instruction & (0x%08X << %d)) == 0x%08X)\n",OP_MASK_COP1CMP,OP_SH_COP1CMP,(OP_MASK_COP1CMP << OP_SH_COP1CMP));
-    printf("   num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_SPEC,(OP_MASK_SPEC & (OP_MASK_COP1CMP << OP_SH_COP1CMP)));
-    printf("  else\n");
-    printf("   num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_SPEC,OP_MASK_SPEC);
-    limit += (OP_MASK_SPEC + 1);
-
-    printf(" else\n");
-    /* To keep this code quick, we just clear out the "to" bit
-       here. The proper (though slower) code would be to have another
-       conditional, checking whether this instruction is a branch or
-       not, before limiting the range to the bottom two bits of the
-       move operation. */
-    printf("  num = (%d + (((instruction >> %d) & 0x%08X) & ~0x%08X));\n",limit,OP_SH_COP1SPEC,OP_MASK_COP1SPEC,OP_MASK_COP1SCLR);
-    limit += (OP_MASK_COP1SPEC + 1);
-
-    printf("} else if (num == 0x13) num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_SPEC,OP_MASK_SPEC);
-    limit += (OP_MASK_SPEC + 1);
-
-    printf("else if (num == 0x1C) {\n");
-    printf("  int mmi_func = ((instruction >> %d) & 0x%08X);\n",OP_SH_MMI,OP_MASK_MMI);
-
-    printf("  if (mmi_func == 0x08) \n");
-    printf("    num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_MMISUB,OP_MASK_MMISUB);
-    limit += (OP_MASK_MMISUB + 1);
-
-    printf("  else if (mmi_func == 0x28) \n");
-    printf("    num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_MMISUB,OP_MASK_MMISUB);
-    limit += (OP_MASK_MMISUB + 1);
-
-    printf("  else if (mmi_func == 0x09) \n");
-    printf("    num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_MMISUB,OP_MASK_MMISUB);
-    limit += (OP_MASK_MMISUB + 1);
-
-    printf("  else if (mmi_func == 0x29) \n");
-    printf("    num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_MMISUB,OP_MASK_MMISUB);
-    limit += (OP_MASK_MMISUB + 1);
-
-    printf("  else \n");
-    printf("    num = (%d + mmi_func);\n",limit);
-    limit += (OP_MASK_MMI + 1);
-
-    printf("}\n");
-
-    printf("/* Total possible switch entries: %d */\n",limit) ;
-  }
-
- printf("#ifdef DEBUG\n");
- printf("printf(\"DBG: num = %%d\\n\",num);\n");
- printf("#endif\n");
-
- printf("switch (num)\n") ;
- printf("{\n");
-
+      /* The FP registers are the same width as the CPU registers: */
+      printf("#define GPRLEN (%d)\n",gprlen);
+      printf("typedef %s t_reg;\n",((gprlen == 64) ? "word64" : "int"));
+      printf("typedef %s ut_reg;\n",((gprlen == 64) ? "uword64" : "unsigned int"));
+      printf("typedef %s t_fpreg;\n",((gprlen == 64) ? "word64" : "int"));
+      if (dofp)
+	printf("#define HASFPU (1 == 1)\n");
+      if (features & FEATURE_FAST)
+	printf("#define FASTSIM (1 == 1)\n");
+      if (features & FEATURE_WARN_STALL)
+	printf("#define WARN_STALL (1 == 1)\n");
+      if (features & FEATURE_WARN_LOHI)
+	printf("#define WARN_LOHI (1 == 1)\n");
+      if (features & FEATURE_WARN_ZERO)
+	printf("#define WARN_ZERO (1 == 1)\n");
+      if (features & FEATURE_WARN_MEM)
+	printf("#define WARN_MEM (1 == 1)\n");
+      if (features & FEATURE_WARN_R31)
+	printf("#define WARN_R31 (1 == 1)\n");
+      if (features & FEATURE_WARN_RESULT)
+	printf("#define WARN_RESULT (1 == 1)\n");
+      
+      printf("#else /* simulator engine */\n");
+      
+      printf("/* Engine generated by \"%s\" at %s */\n","<SHOW PROGRAM ARGS>","<SHOW CURRENT DATE AND TIME>");
+      printf("/* Main instruction decode for %d-bit MIPS ISA %d (Table entry limit = %d) */\n",(proc64 ? 64 : 32),doisa,limit);
+      if (dofp)
+	printf("/* %sFP instructions included */\n",(fpsingle ? "Single precision " : ""));
+      printf("/* NOTE: \"DSPC\" is the delay slot PC address */\n");
+      
+      if (proc64) {
+	printf("#if !defined(PROCESSOR_64BIT)\n");
+	printf("#error \"Automatically constructed decoder has been built for a 64bit processor\"\n");
+	printf("#endif\n");
+      }
+      
+      printf("/* Actual instruction decoding block */\n");
+      printf("if ((vaddr & 1) == 0){\n");
+      {
+	int limit;
+	printf("int num = ((instruction >> %d) & 0x%08X);\n",OP_SH_OP,OP_MASK_OP);
+	limit = (OP_MASK_OP + 1);
+	
+	printf("#ifdef DEBUG\n");
+	printf("printf(\"DBG: instruction = 0x%%08X\\n\",instruction);\n");
+	printf("#endif\n");
+	
+	printf("if (num == 0x00) num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_SPEC,OP_MASK_SPEC);
+	limit += (OP_MASK_SPEC + 1);
+	
+	printf("else if (num == 0x01) num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_RT,OP_MASK_RT);
+	limit += (OP_MASK_RT + 1);
+	
+	printf("else if (num == 0x11) {\n");
+	printf(" if ((instruction & (0x%08X << %d)) == 0x%08X)\n",OP_MASK_COP1NORM,OP_SH_COP1NORM,(OP_MASK_COP1NORM << OP_SH_COP1NORM));
+	printf("  if ((instruction & (0x%08X << %d)) == 0x%08X)\n",OP_MASK_COP1CMP,OP_SH_COP1CMP,(OP_MASK_COP1CMP << OP_SH_COP1CMP));
+	printf("   num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_SPEC,(OP_MASK_SPEC & (OP_MASK_COP1CMP << OP_SH_COP1CMP)));
+	printf("  else\n");
+	printf("   num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_SPEC,OP_MASK_SPEC);
+	limit += (OP_MASK_SPEC + 1);
+	
+	printf(" else\n");
+	/* To keep this code quick, we just clear out the "to" bit
+	   here. The proper (though slower) code would be to have another
+	   conditional, checking whether this instruction is a branch or
+	   not, before limiting the range to the bottom two bits of the
+	   move operation. */
+	printf("  num = (%d + (((instruction >> %d) & 0x%08X) & ~0x%08X));\n",limit,OP_SH_COP1SPEC,OP_MASK_COP1SPEC,OP_MASK_COP1SCLR);
+	limit += (OP_MASK_COP1SPEC + 1);
+	
+	printf("} else if (num == 0x13) num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_SPEC,OP_MASK_SPEC);
+	limit += (OP_MASK_SPEC + 1);
+	
+	printf("else if (num == 0x1C) {\n");
+	printf("  int mmi_func = ((instruction >> %d) & 0x%08X);\n",OP_SH_MMI,OP_MASK_MMI);
+	
+	printf("  if (mmi_func == 0x08) \n");
+	printf("    num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_MMISUB,OP_MASK_MMISUB);
+	limit += (OP_MASK_MMISUB + 1);
+	
+	printf("  else if (mmi_func == 0x28) \n");
+	printf("    num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_MMISUB,OP_MASK_MMISUB);
+	limit += (OP_MASK_MMISUB + 1);
+	
+	printf("  else if (mmi_func == 0x09) \n");
+	printf("    num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_MMISUB,OP_MASK_MMISUB);
+	limit += (OP_MASK_MMISUB + 1);
+	
+	printf("  else if (mmi_func == 0x29) \n");
+	printf("    num = (%d + ((instruction >> %d) & 0x%08X));\n",limit,OP_SH_MMISUB,OP_MASK_MMISUB);
+	limit += (OP_MASK_MMISUB + 1);
+	
+	printf("  else \n");
+	printf("    num = (%d + mmi_func);\n",limit);
+	limit += (OP_MASK_MMI + 1);
+	
+	printf("}\n");
+	
+	printf("/* Total possible switch entries: %d */\n",limit) ;
+      }
+      
+      printf("#ifdef DEBUG\n");
+      printf("printf(\"DBG: num = %%d\\n\",num);\n");
+      printf("#endif\n");
+      
+      printf("switch (num)\n") ;
+      printf("{\n");
+    }      
+      
  for (loop = 0; (loop < limit); loop++) {
    /* First check if the insn is in a requested isa# independent set,
       then check that the ISA number we are constructing for is
@@ -1885,7 +2067,8 @@ process_instructions(doarch,features)
    if (((isa & doarch & MASK_ISA_INDEP)
         || (((isa & MASK_ISA) <= doisa) 
             && (((isa & MASK_ISA_DEP) == 0) || ((isa & MASK_ISA_DEP) & doarch) != 0)))
-       && (!(MIPS_DECODE[loop].flags & FP) || ((MIPS_DECODE[loop].flags & FP) && dofp))) {
+       && (!(MIPS_DECODE[loop].flags & FP) || ((MIPS_DECODE[loop].flags & FP) && dofp))
+       || (features & FEATURE_IGEN)) {
      unsigned int onemask;
      unsigned int zeromask;
      unsigned int dontmask;
@@ -1895,7 +2078,8 @@ process_instructions(doarch,features)
      convert_bitmap(MIPS_DECODE[loop].bitmap,&onemask,&zeromask,&dontmask);
 
      if (!(MIPS_DECODE[loop].flags & COPROC) 
-         && ((GETDATASIZEINSN(&MIPS_DECODE[loop]) == DOUBLEWORD) && !proc64)) {
+         && ((GETDATASIZEINSN(&MIPS_DECODE[loop]) == DOUBLEWORD) && !proc64)
+         && !(features & FEATURE_IGEN)) {
        fprintf(stderr,"DOUBLEWORD width specified for non 64-bit processor for instruction \"%s\"\n",MIPS_DECODE[loop].name);
        exit(4);
      }
@@ -1985,25 +2169,45 @@ process_instructions(doarch,features)
         fprintf(stderr,"Unrecognised opcode mark %d in table slot %d \"%s\"\n",MIPS_DECODE[loop].mark,loop,MIPS_DECODE[loop].name) ;
         exit(5) ;
       }
-
-     printf("case %d : /* \"%s\" %s */\n",number,MIPS_DECODE[loop].name,MIPS_DECODE[loop].bitmap) ;
-
+     
+     if (!(features & FEATURE_IGEN))
+       {
+	 printf("case %d : /* \"%s\" %s */\n",number,MIPS_DECODE[loop].name,MIPS_DECODE[loop].bitmap) ;
+	 
 #if defined(DEBUG)
-     printf("/* DEBUG: mask 0x%08X */\n",mask) ;
-     printf(" printf(\"\\\"%s\\\"\\n\");\n",MIPS_DECODE[loop].name);
+	 printf("/* DEBUG: mask 0x%08X */\n",mask) ;
+	 printf(" printf(\"\\\"%s\\\"\\n\");\n",MIPS_DECODE[loop].name);
 #endif
-
-     /* Check if there are any other explicit bits in the instruction: */
-     if ((~mask & (onemask | zeromask)) != 0x00000000) {
-       printf(" if ((instruction & 0x%08X) != 0x%08X)\n",(onemask | zeromask),onemask) ;
-       printf(" {\n") ;
-       printf("  SignalException(ReservedInstruction,instruction);\n") ;
-       printf(" }\n") ;
-       printf(" else\n") ;
-     }
-
-     printf(" {\n") ;
-
+	 
+	 /* Check if there are any other explicit bits in the instruction: */
+	 if ((~mask & (onemask | zeromask)) != 0x00000000) {
+	   printf(" if ((instruction & 0x%08X) != 0x%08X)\n",(onemask | zeromask),onemask) ;
+	   printf(" {\n") ;
+	   printf("  SignalException(ReservedInstruction,instruction);\n") ;
+	   printf(" }\n") ;
+	   printf(" else\n") ;
+	 }
+	 
+	 printf(" {\n") ;
+       }
+     else
+       {
+	 /* start-sanitize-cygnus-never */
+	 /* If any sanitization occures, this line should be printed */
+	 if ((MIPS_DECODE[loop].isa & ARCH_R5900))
+	   printf ("// %s-%s-%s\n", "start", "sanitize", "r5900");
+	 /* end-sanitize-cygnus-never */
+	 printf ("\n");
+	 print_igen_insn_format (MIPS_DECODE[loop].bitmap,
+				 MIPS_DECODE[loop].mark, /* format-name */
+				 GETDATASIZEINSN (&MIPS_DECODE[loop]), /* filter-flags */
+				 "", /* options */
+				 MIPS_DECODE[loop].name);
+	 print_igen_insn_models (MIPS_DECODE[loop].isa);
+	 printf ("{\n") ;
+	 printf ("  unsigned32 instruction = instruction_0;\n");
+       }
+     
      /* Get hold of the operands */
      /* NOTE: If we wanted to make the simulator code smaller, we
       * could pull these into a common sequence before we perform
@@ -2016,24 +2220,42 @@ process_instructions(doarch,features)
       * compilation of the produced code.
       */
      build_operands(doisa, features, &MIPS_DECODE[loop]);
-
+     
      printf("  {\n") ;
-
+     
      build_instruction (doisa, features, 0, &MIPS_DECODE[loop]);
-
+     
      printf("  }\n") ;
-     printf(" }\n") ;
-     printf(" break ;\n") ;
+     if (!(features & FEATURE_IGEN))
+       {
+	 printf(" }\n") ;
+	 printf(" break ;\n") ;
+       }
+     else
+       {
+	 printf ("}\n");
+	 printf ("\n");
+	 /* start-sanitize-cygnus-never */
+	 /* When sanitized, this output should never be produced */
+	 if ((MIPS_DECODE[loop].isa & ARCH_R5900))
+	   printf ("// %s-%s-%s\n", "end", "sanitize", "r5900");
+	 /* end-sanitize-cygnus-never */
+       }
+   
    }
-  }
+ }
 
- printf("default : /* Unrecognised instruction */\n") ;
- printf(" SignalException(ReservedInstruction,instruction);\n") ;
- printf(" break ;\n") ;
- printf("}\n}\n") ;
-
+ 
+ if (!(features & FEATURE_IGEN))
+   {
+     printf("default : /* Unrecognised instruction */\n") ;
+     printf(" SignalException(ReservedInstruction,instruction);\n") ;
+     printf(" break ;\n") ;
+     printf("}\n}\n") ;
+   }
+ 
  /* Handle mips16 instructions.  The switch table looks like this:
-     0 - 31: I, RI, and RRI instructions by major.
+    0 - 31: I, RI, and RRI instructions by major.
     32 - 35: ISHIFT instructions by function + 32
     36 - 37: RRI_A instructions by function + 36
     38 - 45: I8, I8_MOV32R, and I8_MOVR32 instructions by function + 38
@@ -2042,31 +2264,34 @@ process_instructions(doarch,features)
     82 - 89: I64 and RI64 instructions by funct + 82
     90 - 97: jalr (RR minor 0) by y + 90
     */
- printf ("else {\n");
- printf ("static int extendval;\n");
- printf ("static int have_extendval;\n");
- printf ("int num = ((instruction >> %d) & 0x%08X);\n",
-	 MIPS16OP_SH_OP, MIPS16OP_MASK_OP);
- printf ("switch (num)\n{\n");
- printf ("case 0x6: num = 32 + (instruction & 3); break;\n");
- printf ("case 0x8: num = 36 + ((instruction & 0x10) >> 4); break;\n");
- printf ("case 0xc: num = 38 + ((instruction & 0x700) >> 8); break;\n");
- printf ("case 0x1c: num = 46 + (instruction & 3); break;\n");
- printf ("case 0x1d: num = 50 + (instruction & 0x1f);\n");
- printf ("           if (num == 50) num = 90 + ((instruction & 0xe0) >> 5);\n");
- printf ("           break;\n");
- printf ("case 0x1f: num = 82 + ((instruction & 0x700) >> 8); break;\n");
- printf ("default: break;\n}\n");
- printf ("switch (num)\n{\n");
-
+ if (!(features & FEATURE_IGEN))
+   {
+     printf ("else {\n");
+     printf ("static int extendval;\n");
+     printf ("static int have_extendval;\n");
+     printf ("int num = ((instruction >> %d) & 0x%08X);\n",
+	     MIPS16OP_SH_OP, MIPS16OP_MASK_OP);
+     printf ("switch (num)\n{\n");
+     printf ("case 0x6: num = 32 + (instruction & 3); break;\n");
+     printf ("case 0x8: num = 36 + ((instruction & 0x10) >> 4); break;\n");
+     printf ("case 0xc: num = 38 + ((instruction & 0x700) >> 8); break;\n");
+     printf ("case 0x1c: num = 46 + (instruction & 3); break;\n");
+     printf ("case 0x1d: num = 50 + (instruction & 0x1f);\n");
+     printf ("           if (num == 50) num = 90 + ((instruction & 0xe0) >> 5);\n");
+     printf ("           break;\n");
+     printf ("case 0x1f: num = 82 + ((instruction & 0x700) >> 8); break;\n");
+     printf ("default: break;\n}\n");
+     printf ("switch (num)\n{\n");
+   }
+ 
  for (loop = 0; loop < sizeof MIPS16_DECODE / sizeof MIPS16_DECODE[0]; loop++)
    {
      const char *bitmap;
      int num;
-
+     
      if (! proc64 && GETDATASIZEINSN (&MIPS16_DECODE[loop]) == DOUBLEWORD)
        continue;
-
+     
      bitmap = MIPS16_DECODE[loop].bitmap;
      switch (MIPS16_DECODE[loop].mark)
        {
@@ -2092,7 +2317,7 @@ process_instructions(doarch,features)
        case RR:
 	 {
 	   int minor;
-
+	   
 	   minor = bitmap_val (bitmap, 0, 5);
 	   if (minor != 0)
 	     num = 50 + minor;
@@ -2108,10 +2333,25 @@ process_instructions(doarch,features)
 	 abort ();
        }
 
-     printf ("case %d: /* \"%s\" %s */\n", num, MIPS16_DECODE[loop].name,
-	     bitmap);
 
-     printf (" {\n");
+     if (!(features & FEATURE_IGEN))
+       {
+	 printf ("case %d: /* \"%s\" %s */\n", num, MIPS16_DECODE[loop].name,
+		 bitmap);
+	 printf (" {\n");
+       }
+     else
+       {
+	 printf ("\n");
+	 print_igen_insn_format (bitmap,
+				 MIPS16_DECODE[loop].mark, /* format-name */
+				 GETDATASIZEINSN (&MIPS16_DECODE[loop]), /* filter-flags */
+				 "", /* options */
+				 MIPS16_DECODE[loop].name);
+	 printf ("*mips16:\n");
+	 printf ("{\n");
+	 printf ("  unsigned32 instruction = instruction_0;\n");
+       }
 
      build_mips16_operands (bitmap);
 
@@ -2127,17 +2367,28 @@ process_instructions(doarch,features)
        }
 
      printf ("  }\n");
-     printf (" }\n") ;
-     printf (" break ;\n") ;
+     if (!(features & FEATURE_IGEN))
+       {
+	 printf (" }\n") ;
+	 printf (" break ;\n") ;
+       }
+     else
+       {
+	 printf ("}\n");
+	 printf ("\n");
+       }
    }
 
- printf ("default : /* Unrecognised instruction */\n") ;
- printf (" SignalException(ReservedInstruction,instruction);\n") ;
- printf (" break ;\n") ;
- printf ("}\n}\n") ;
-
- printf("#endif /* simulator engine */\n");
-
+ if (!(features & FEATURE_IGEN))
+   {
+     printf ("default : /* Unrecognised instruction */\n") ;
+     printf (" SignalException(ReservedInstruction,instruction);\n") ;
+     printf (" break ;\n") ;
+     printf ("}\n}\n") ;
+     
+     printf("#endif /* simulator engine */\n");
+   }
+     
  return ;
 }
 
@@ -2643,11 +2894,13 @@ build_instruction (doisa, features, mips16, insn)
 	 datalen = 8;
 	 accesslength = "AccessLength_DOUBLEWORD";
 	 break ;
+	 /* start-sanitize-r5900 */
 
 	case QUADWORD :
 	 datalen = 16;
 	 accesslength = "AccessLength_QUADWORD";
 	 break ;
+	 /* end-sanitize-r5900 */
       }
 
       if (insn->flags & REG)
@@ -2687,11 +2940,14 @@ build_instruction (doisa, features, mips16, insn)
 
 	  switch (datalen) {
 	   case 8:
-	    if (!proc64) {
-	      fprintf(stderr,"DOUBLEWORD shifted memory transfers only valid for 64-bit processors \"%s\"\n",insn->name);
-	      exit(4);
-	    }
-	    /* fall through to... */
+	     if (!(features & FEATURE_IGEN))
+	       {
+		 if (!proc64) {
+		   fprintf(stderr,"DOUBLEWORD shifted memory transfers only valid for 64-bit processors \"%s\"\n",insn->name);
+		   exit(4);
+		 }
+	       }
+	     /* fall through to... */
 	   case 4:
 	    {
 	      printf("     uword64 mask = %d;\n",((datalen == 8) ? 0x7 : 0x3));
@@ -2786,16 +3042,19 @@ build_instruction (doisa, features, mips16, insn)
 	    exit(6);
 	  }
 	} else { /* normal memory transfer */
-	  if (!(insn->flags & COPROC) && ((datalen == 8) || ((datalen == 4) & (insn->flags & UNSIGNED))) && !proc64) {
-	    fprintf(stderr,"Operation not available with 32bit wide memory access \"%s\"\n",insn->name);
-	    exit(4);
-	    /* TODO: The R4000 documentation states that a LWU
-	       instruction executed when in a 32bit processor mode
-	       should cause a ReservedInstruction exception. This
-	       will mean adding a run-time check into the code
-	       sequence. */
-	  }
-
+	  if (!(features & FEATURE_IGEN))
+	    {
+	      if (!(insn->flags & COPROC) && ((datalen == 8) || ((datalen == 4) & (insn->flags & UNSIGNED))) && !proc64) {
+		fprintf(stderr,"Operation not available with 32bit wide memory access \"%s\"\n",insn->name);
+		exit(4);
+		/* TODO: The R4000 documentation states that a LWU
+		   instruction executed when in a 32bit processor mode
+		   should cause a ReservedInstruction exception. This
+		   will mean adding a run-time check into the code
+		   sequence. */
+	      }
+	    }
+	  
 	  if (isload) {
 #if 1 /* see the comments attached to LOADDRMASK above */
 	    printf("     uword64 mask = 0x7;\n");
@@ -2808,14 +3067,22 @@ build_instruction (doisa, features, mips16, insn)
 	    printf("     unsigned int byte UNUSED;\n");
 
 /* TODO: This should really also check for 32bit world performing 32bit access */
-	    if (datalen < 8) /* not for DOUBLEWORD or QUADWORD*/
-	     printf("     paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));\n");
+	    if (datalen < 8)
+	      /* not for DOUBLEWORD */
+	      /* start-sanitize-r5900 */
+	      /* not for QUADWORD */
+	      /* end-sanitize-r5900 */
+	      printf("     paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));\n");
 
 	    printf("     LoadMemory(&memval,&memval1,uncached,%s,paddr,vaddr,isDATA,isREAL);\n",accesslength);
               
 	    /* The following will only make sense if the
 	       "LoadMemory" above returns a DOUBLEWORD entity */
-	    if (datalen < 8) { /* not for DOUBLEWORD or QUADWORD*/
+	    if (datalen < 8) {
+	      /* not for DOUBLEWORD */
+	      /* start-sanitize-r5900 */
+	      /* not for QUADWORD */
+	      /* end-sanitize-r5900 */
 	      int valmask;
 	      switch (datalen) {
 	       case 1:
@@ -2905,10 +3172,13 @@ build_instruction (doisa, features, mips16, insn)
 	       else
 		printf("     memval = ((uword64) op2 << (8 * byte));\n");
 	     } else if (datalen <= 8) { /* SD and SCD */
-	       if (!(insn->flags & COPROC) && ((datalen == 8) || ((datalen == 4) & (insn->flags & UNSIGNED))) && !proc64) {
-		 fprintf(stderr,"Operation not available with 32bit wide memory access \"%s\"\n",insn->name);
-		 exit(4);
-	       }
+	       if (! (features & FEATURE_IGEN))
+		 {
+		   if (!(insn->flags & COPROC) && ((datalen == 8) || ((datalen == 4) & (insn->flags & UNSIGNED))) && !proc64) {
+		     fprintf(stderr,"Operation not available with 32bit wide memory access \"%s\"\n",insn->name);
+		     exit(4);
+		   }
+		 }
 	       if (insn->flags & COPROC)
 		printf("     memval = (uword64)COP_SD(%s,%s);\n",
 		       ((insn->flags & REG)
@@ -4226,6 +4496,7 @@ main(argc,argv)
       {"fast",    0,0,'f'},
       {"help",    0,0,'h'},
       {"warnings",0,0,'w'},
+      {"igen",    0,0,'i'},
       {0,         0,0,0}
     };
    
@@ -4240,6 +4511,10 @@ main(argc,argv)
 
       case 'f' : /* fast */
        features |= FEATURE_FAST;
+       break;
+
+      case 'i' : /* igen formatted output */
+       features |= FEATURE_IGEN;
        break;
 
       case 'w' : /* warnings */
