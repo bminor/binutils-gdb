@@ -45,16 +45,8 @@ struct gdbarch_tdep
     int RS_REGNUM;    /* sh-dsp,      sh3-dsp            */
     int RE_REGNUM;    /* sh-dsp,      sh3-dsp            */
     int DR0_REGNUM;   /*                             sh4 */
-    int DR2_REGNUM;   /*                             sh4 */
-    int DR4_REGNUM;   /*                             sh4 */
-    int DR6_REGNUM;   /*                             sh4 */
-    int DR8_REGNUM;   /*                             sh4 */
-    int DR10_REGNUM;  /*                             sh4 */
-    int DR12_REGNUM;  /*                             sh4 */
     int DR14_REGNUM;  /*                             sh4 */
     int FV0_REGNUM;   /*                             sh4 */
-    int FV4_REGNUM;   /*                             sh4 */
-    int FV8_REGNUM;   /*                             sh4 */
     int FV12_REGNUM;  /*                             sh4 */
   };
 

@@ -1889,16 +1889,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->SSR_REGNUM = -1;
   tdep->SPC_REGNUM = -1;
   tdep->DR0_REGNUM = -1;
-  tdep->DR2_REGNUM = -1;
-  tdep->DR4_REGNUM = -1;
-  tdep->DR6_REGNUM = -1;
-  tdep->DR8_REGNUM = -1;
-  tdep->DR10_REGNUM = -1;
-  tdep->DR12_REGNUM = -1;
   tdep->DR14_REGNUM = -1;
   tdep->FV0_REGNUM = -1;
-  tdep->FV4_REGNUM = -1;
-  tdep->FV8_REGNUM = -1;
   tdep->FV12_REGNUM = -1;
   set_gdbarch_fp0_regnum (gdbarch, -1);
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
@@ -2027,16 +2019,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->SSR_REGNUM = 41;
       tdep->SPC_REGNUM = 42;
       tdep->DR0_REGNUM = 59;
-      tdep->DR2_REGNUM = 60;
-      tdep->DR4_REGNUM = 61;
-      tdep->DR6_REGNUM = 62;
-      tdep->DR8_REGNUM = 63;
-      tdep->DR10_REGNUM = 64;
-      tdep->DR12_REGNUM = 65;
       tdep->DR14_REGNUM = 66;
       tdep->FV0_REGNUM = 67;
-      tdep->FV4_REGNUM = 68;
-      tdep->FV8_REGNUM = 69;
       tdep->FV12_REGNUM = 70;
       break;
     default:

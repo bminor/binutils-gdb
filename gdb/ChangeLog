@@ -1,3 +1,11 @@
+2000-12-05  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* config/sh/tm-sh.h (struct gdbarch_tdep): Get rid of
+ 	DR{2,4,6,8,10,12}_REGNUM, FV{4,8}_REGNUM, they are not used
+ 	anywhere.
+	* sh-tdep.c (sh_gdbarch_init): Don't initialize
+ 	DR{2,4,6,8,10,12}_REGNUM, FV{4,8}_REGNUM.
+
 2000-12-04  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* utils.c (internal_verror): Fix typo in error msg.
