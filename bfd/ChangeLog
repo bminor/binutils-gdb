@@ -1,5 +1,8 @@
 1999-06-26  Ian Lance Taylor  <ian@zembu.com>
 
+	* elflink.h (elf_link_output_extsym): It's OK for a -Bsymbolic
+	shared library to have an undefined symbol.
+
 	From Franz Sirl <Franz.Sirl-kernel@lauterbach.com>:
 	* elf32-ppc.c (ppc_elf_relocate_section): Fix last patch.
 
