@@ -1,3 +1,8 @@
+2001-12-01  Andrew Cagney  <ac131313@redhat.com>
+
+	From Mark Peek.
+	* ppc-spr-table: Add SDA and PIR.
+
 2001-10-29  Andrew Cagney  <ac131313@redhat.com>
 
 	* tree.c (parse_size): Assert #size-cells > 0.
