@@ -53,7 +53,6 @@ if [istarget "sparc-*-*"] then {
 if [istarget "xstormy16-*-*"] then {
     set asm-arch xstormy16
     set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
-    set link-flags "-L${objdir}/../../gcc"
 }
 if { "${asm-arch}" == "" } {
     gdb_suppress_entire_file "Assembly source test -- not implemented for this target."
@@ -76,7 +75,11 @@ if {[target_assemble ${src2} asmsrc2.o "${asm-flags}"] != ""} then {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
-if  { [target_link "asmsrc1.o asmsrc2.o" ${binfile} "${link-flags}"] != "" } {
+set opts "debug ldflags=-nostartfiles"
+foreach i ${link-flags} {
+    append opts " ldflags=$i"
+}
+if { [gdb_compile "asmsrc1.o asmsrc2.o" "${binfile}" executable $opts] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 

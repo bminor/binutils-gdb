@@ -1,3 +1,8 @@
+2001-12-19  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.asm/asm-source.exp: Drop setting link-flags for xstormy16.
+	Substitute call to target_link by call to gdb_compile.
+
 Wed Dec 19 14:10:57 2001  Jeffrey A Law  (law@redhat.com)
 
         * gdb.base/break.exp: Fix HP specific search string when testing
