@@ -1,3 +1,9 @@
+2003-05-17  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* bfd.c (_bfd_get_gp_value): Prevent illegal access for abfd null
+	pointers.
+	(_bfd_set_gp_value): Likewise.
+
 2003-05-16  Michael Snyder  <msnyder@redhat.com>
 	From Bernd Schmidt  <bernds@redhat.com>
 	* archures.c (bfd_mach_h8300sx): New.
