@@ -1297,10 +1297,10 @@ s_align (arg, bytes_p)
 	}
     }
 
+  demand_empty_rest_of_line ();
+
   if (flag_mri)
     mri_comment_end (stop, stopc);
-
-  demand_empty_rest_of_line ();
 }
 
 /* Handle the .align pseudo-op on machines where ".align 4" means
@@ -1347,18 +1347,18 @@ s_comm (ignore)
   if (*input_line_pointer != ',')
     {
       as_bad (_("Expected comma after symbol-name: rest of line ignored."));
+      ignore_rest_of_line ();
       if (flag_mri)
 	mri_comment_end (stop, stopc);
-      ignore_rest_of_line ();
       return;
     }
   input_line_pointer++;		/* skip ',' */
   if ((temp = get_absolute_expression ()) < 0)
     {
       as_warn (_(".COMMon length (%ld.) <0! Ignored."), (long) temp);
+      ignore_rest_of_line ();
       if (flag_mri)
 	mri_comment_end (stop, stopc);
-      ignore_rest_of_line ();
       return;
     }
   *p = 0;
@@ -1368,9 +1368,9 @@ s_comm (ignore)
     {
       as_bad (_("Ignoring attempt to re-define symbol `%s'."),
 	      S_GET_NAME (symbolP));
+      ignore_rest_of_line ();
       if (flag_mri)
 	mri_comment_end (stop, stopc);
-      ignore_rest_of_line ();
       return;
     }
   if (S_GET_VALUE (symbolP))
@@ -1395,10 +1395,10 @@ s_comm (ignore)
 #endif /* not OBJ_VMS */
   know (symbolP->sy_frag == &zero_address_frag);
 
+  demand_empty_rest_of_line ();
+
   if (flag_mri)
     mri_comment_end (stop, stopc);
-
-  demand_empty_rest_of_line ();
 }				/* s_comm() */
 
 /* The MRI COMMON pseudo-op.  We handle this by creating a common
@@ -1466,8 +1466,8 @@ s_mri_common (small)
   if (S_IS_DEFINED (sym) && ! S_IS_COMMON (sym))
     {
       as_bad (_("attempt to re-define symbol `%s'"), S_GET_NAME (sym));
-      mri_comment_end (stop, stopc);
       ignore_rest_of_line ();
+      mri_comment_end (stop, stopc);
       return;
     }
 
@@ -1497,9 +1497,9 @@ s_mri_common (small)
   if (*input_line_pointer == ',')
     input_line_pointer += 2;
 
-  mri_comment_end (stop, stopc);
-
   demand_empty_rest_of_line ();
+
+  mri_comment_end (stop, stopc);
 }
 
 void
@@ -1647,10 +1647,10 @@ s_fail (ignore)
   else
     as_bad (_(".fail %ld encountered"), (long) temp);
 
+  demand_empty_rest_of_line ();
+
   if (flag_mri)
     mri_comment_end (stop, stopc);
-
-  demand_empty_rest_of_line ();
 }
 
 void 
@@ -1781,10 +1781,10 @@ s_globl (ignore)
     }
   while (c == ',');
 
+  demand_empty_rest_of_line ();
+
   if (flag_mri)
     mri_comment_end (stop, stopc);
-
-  demand_empty_rest_of_line ();
 }
 
 /* Handle the MRI IRP and IRPC pseudo-ops.  */
@@ -2895,10 +2895,10 @@ s_space (mult)
   if (flag_mri && (bytes & 1) != 0)
     mri_pending_align = 1;
 
+  demand_empty_rest_of_line ();
+
   if (flag_mri)
     mri_comment_end (stop, stopc);
-
-  demand_empty_rest_of_line ();
 }
 
 /* This is like s_space, but the value is a floating point number with
@@ -2924,9 +2924,9 @@ s_float_space (float_type)
   if (*input_line_pointer != ',')
     {
       as_bad (_("missing value"));
+      ignore_rest_of_line ();
       if (flag_mri)
 	mri_comment_end (stop, stopc);
-      ignore_rest_of_line ();
       return;
     }
 
@@ -2947,9 +2947,9 @@ s_float_space (float_type)
       flen = hex_float (float_type, temp);
       if (flen < 0)
 	{
+	  ignore_rest_of_line ();
 	  if (flag_mri)
 	    mri_comment_end (stop, stopc);
-	  ignore_rest_of_line ();
 	  return;
 	}
     }
@@ -2963,9 +2963,9 @@ s_float_space (float_type)
       if (err)
 	{
 	  as_bad (_("Bad floating literal: %s"), err);
+	  ignore_rest_of_line ();
 	  if (flag_mri)
 	    mri_comment_end (stop, stopc);
-	  ignore_rest_of_line ();
 	  return;
 	}
     }
@@ -2978,10 +2978,10 @@ s_float_space (float_type)
       memcpy (p, temp, (unsigned int) flen);
     }
 
+  demand_empty_rest_of_line ();
+
   if (flag_mri)
     mri_comment_end (stop, stopc);
-
-  demand_empty_rest_of_line ();
 }
 
 /* Handle the .struct pseudo-op, as found in MIPS assemblers.  */
@@ -2997,9 +2997,9 @@ s_struct (ignore)
     stop = mri_comment_field (&stopc);
   abs_section_offset = get_absolute_expression ();
   subseg_set (absolute_section, 0);
+  demand_empty_rest_of_line ();
   if (flag_mri)
     mri_comment_end (stop, stopc);
-  demand_empty_rest_of_line ();
 }
 
 void
@@ -3225,9 +3225,9 @@ cons_worker (nbytes, rva)
 
   if (is_it_end_of_statement ())
     {
+      demand_empty_rest_of_line ();
       if (flag_mri)
 	mri_comment_end (stop, stopc);
-      demand_empty_rest_of_line ();
       return;
     }
 
@@ -3263,10 +3263,10 @@ cons_worker (nbytes, rva)
 
   input_line_pointer--;		/* Put terminator back into stream. */
 
+  demand_empty_rest_of_line ();
+
   if (flag_mri)
     mri_comment_end (stop, stopc);
-
-  demand_empty_rest_of_line ();
 }
 
 
@@ -4789,7 +4789,10 @@ equals (sym_name, reassign)
     }
 
   if (flag_mri)
-    mri_comment_end (stop, stopc);
+     {
+       ignore_rest_of_line (); /* check garbage after the expression */
+       mri_comment_end (stop, stopc);
+     }
 }				/* equals() */
 
 /* .include -- include a file at this point. */
@@ -4894,30 +4897,30 @@ generate_file_debug ()
 static void
 generate_lineno_debug ()
 {
-  if (debug_type == DEBUG_STABS)
-    stabs_generate_asm_lineno ();
-
-#ifdef OBJ_GENERATE_ASM_LINENO
 #ifdef ECOFF_DEBUGGING
-  /* ECOFF assemblers automatically generate
-     debugging information.  FIXME: This should
-     probably be handled elsewhere.  */
-  if (debug_type == DEBUG_NONE)
+  /* ECOFF assemblers automatically generate debugging information. 
+     FIXME: This should probably be handled elsewhere.  */
+  if (debug_type == DEBUG_UNSPECIFIED)
     {
-      if (ecoff_no_current_file ())
-	debug_type = DEBUG_ECOFF;
-    }
-
-  if (debug_type == DEBUG_ECOFF)
-    {
-      unsigned int lineno;
-      char *s;
-
-      as_where (&s, &lineno);
-      OBJ_GENERATE_ASM_LINENO (s, lineno);
+      if (ECOFF_DEBUGGING && ecoff_no_current_file ())
+        debug_type = DEBUG_ECOFF;
+      else
+	debug_type = DEBUG_NONE;
     }
 #endif
-#endif
+
+  switch (debug_type)
+    {
+      case DEBUG_UNSPECIFIED:
+      case DEBUG_NONE:
+	break;
+      case DEBUG_STABS:
+	stabs_generate_asm_lineno ();
+	break;
+      case DEBUG_ECOFF:
+	ecoff_generate_asm_lineno ();
+	break;
+    }
 }
 
 /* Output debugging information to mark a function entry point or end point.

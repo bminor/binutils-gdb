@@ -1,3 +1,11 @@
+1998-08-13  Vladimir N. Makarov  <vmakarov@cygnus.com>
+
+	* read.c (s_align, s_comm, s_mri_common, s_fail, s_globl, s_space,
+	s_float_space, s_struct, cons_worker): Move ignore_rest_of_line or
+	demand_empty_rest_of_line before mri_comment_end.
+	(equals): Check garbage after expression before
+	mri_comment_end in MRI mode.
+
 Thu Aug 13 15:08:42 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (macro): Correct M_SGE_I/M_SGEUI_I case for a
