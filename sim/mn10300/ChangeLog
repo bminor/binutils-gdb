@@ -1,5 +1,7 @@
 Sun Dec  1 16:05:42 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* simops.c: Fix "movdm, an", "movbu dm, (an)", and "movhu dm, (an)".
+
 	* simops.c: Fix "mov am, dn".
 
 	* simops.c: Fix more bugs in "add imm,an" and

@@ -77,7 +77,7 @@ void OP_80 ()
 /* mov dm, an */
 void OP_F1E0 ()
 {
-  State.regs[REG_A0 + (insn & 0x3)] = State.regs[REG_D0 + ((insn & 0xc) >> 3)];
+  State.regs[REG_A0 + (insn & 0x3)] = State.regs[REG_D0 + ((insn & 0xc) >> 2)];
 }
 
 /* mov am, dn */
@@ -551,8 +551,8 @@ void OP_FCA80000 ()
 /* movbu dm, (an) */
 void OP_F050 ()
 {
-  store_mem (State.regs[REG_A0 + ((insn & 0xc) >> 2)], 1,
-	     State.regs[REG_D0 + (insn & 0x3)]);
+  store_mem (State.regs[REG_A0 + (insn & 0x3)], 1,
+	     State.regs[REG_D0 + ((insn & 0xc) >> 2)]);
 }
 
 /* movbu dm, (d8,an) */
@@ -696,8 +696,8 @@ void OP_FCAC0000 ()
 /* movhu dm, (an) */
 void OP_F070 ()
 {
-  store_mem (State.regs[REG_A0 + ((insn & 0xc) >> 2)], 2,
-	     State.regs[REG_D0 + (insn & 0x3)]);
+  store_mem (State.regs[REG_A0 + (insn & 0x3)], 2,
+	     State.regs[REG_D0 + ((insn & 0xc) >> 2)]);
 }
 
 /* movhu dm, (d8,an) */
