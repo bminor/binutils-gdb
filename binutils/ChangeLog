@@ -1,5 +1,9 @@
 2003-04-01  Bob Wilson  <bob.wilson@acm.org>
 
+	* MAINTAINERS: Add myself as Xtensa maintainer.
+
+2003-04-01  Bob Wilson  <bob.wilson@acm.org>
+
         * readelf.c: Include "elf/xtensa.h".
         (guess_is_rela): Add EM_XTENSA and EM_XTENSA_OLD to list of
         targets that use RELA relocations.

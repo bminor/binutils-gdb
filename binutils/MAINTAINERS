@@ -91,6 +91,7 @@ responsibility among the other maintainers.
   VAX		   Jason R Thorpe <thorpej@wasabisystems.com>
   x86_64	   Jan Hubicka <jh@suse.cz>
   x86_64	   Andreas Jaeger <aj@suse.de>
+  Xtensa	   Bob Wilson <bob.wilson@acm.org>
   z8k		   Christian Groessler <chris@groessler.org>
 
 
