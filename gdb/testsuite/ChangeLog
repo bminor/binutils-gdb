@@ -1,3 +1,7 @@
+2004-03-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/openbsd.inc: Fix typo.
+
 2004-03-03  Fred Fish  <fnf@redhat.com>
 
 	* gdb.base/pc-fp.exp (get_valueofx): Fix apparent typo to now set
