@@ -1,3 +1,8 @@
+Wed Dec  8 14:30:14 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/m68k/disperr.s: New test.
+	* gas/m68k/all.exp: Run it.
+
 Sun Dec  5 19:24:57 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/reloc/roundmode.s: New test.
