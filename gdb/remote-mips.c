@@ -48,7 +48,7 @@ static int mips_cksum PARAMS ((const unsigned char *hdr,
 			       int len));
 
 static void
-mips_send_packet PARAMS ((const char *s));
+mips_send_packet PARAMS ((const char *s, int get_ack));
 
 static int
 mips_receive_packet PARAMS ((char *buff));
@@ -56,6 +56,9 @@ mips_receive_packet PARAMS ((char *buff));
 static int
 mips_request PARAMS ((char cmd, unsigned int addr, unsigned int data,
 		      int *perr));
+
+static void
+mips_initialize PARAMS ((void));
 
 static void
 mips_open PARAMS ((char *name, int from_tty));
@@ -246,6 +249,9 @@ extern struct target_ops mips_ops;
 /* Set to 1 if the target is open.  */
 static int mips_is_open;
 
+/* Set to 1 while the connection is being initialized.  */
+static int mips_initializing;
+
 /* The next sequence number to send.  */
 static int mips_send_seq;
 
@@ -263,7 +269,7 @@ static int mips_send_retries = 10;
 static int mips_syn_garbage = 1050;
 
 /* The time to wait for a packet, in seconds.  */
-static int mips_receive_wait = 30;
+static int mips_receive_wait = 5;
 
 /* Set if we have sent a packet to the board but have not yet received
    a reply.  */
@@ -273,13 +279,25 @@ static int mips_need_reply = 0;
 static int mips_debug = 0;
 
 /* Read a character from the remote, aborting on error.  Returns -2 on
-   timeout (since that's what serial_readchar returns).  */
+   timeout (since that's what serial_readchar returns).  FIXME: If we
+   see the string "<IDT>" from the board, then we are debugging on the
+   main console port, and we have somehow dropped out of remote
+   debugging mode.  In this case, we automatically go back in to
+   remote debugging mode.  This is a hack, put in because I can't find
+   any way for a program running on the remote board to terminate
+   without also ending remote debugging mode.  I assume users won't
+   have any trouble with this; for one thing, the IDT documentation
+   generally assumes that the remote debugging port is not the console
+   port.  This is, however, very convenient for DejaGnu when you only
+   have one connected serial port.  */
 
 static int
 mips_readchar (timeout)
      int timeout;
 {
   int ch;
+  static int state = 0;
+  static char nextstate[5] = { '<', 'I', 'D', 'T', '>' };
 
   ch = serial_readchar (timeout);
   if (ch == EOF)
@@ -293,6 +311,34 @@ mips_readchar (timeout)
       else
 	printf_filtered ("Timed out in read\n");
     }
+
+  /* If we have seen <IDT> and we either time out, or we see a @
+     (which was echoed from a packet we sent), reset the board as
+     described above.  The first character in a packet after the SYN
+     (which is not echoed) is always an @ unless the packet is more
+     than 64 characters long, which ours never are.  */
+  if ((ch == -2 || ch == '@')
+      && state == 5
+      && ! mips_initializing)
+    {
+      if (mips_debug > 0)
+	printf_filtered ("Reinitializing MIPS debugging mode\n");
+      serial_write ("\rdb tty0\r", sizeof "\rdb tty0\r" - 1);
+      sleep (1);
+
+      mips_need_reply = 0;
+      mips_initialize ();
+
+      state = 0;
+
+      error ("Remote board reset");
+    }
+
+  if (ch == nextstate[state])
+    ++state;
+  else
+    state = 0;
+
   return ch;
 }
 
@@ -327,7 +373,11 @@ mips_receive_header (hdr, pgarbage, ch, timeout)
 		 what the program is outputting, if the debugging is
 		 being done on the console port.  FIXME: Perhaps this
 		 should be filtered?  */
-	      putchar (ch);
+	      if (! mips_initializing || mips_debug > 0)
+		{
+		  putchar (ch);
+		  fflush (stdout);
+		}
 
 	      ++*pgarbage;
 	      if (*pgarbage > mips_syn_garbage)
@@ -416,8 +466,9 @@ mips_cksum (hdr, data, len)
 /* Send a packet containing the given ASCII string.  */
 
 static void
-mips_send_packet (s)
+mips_send_packet (s, get_ack)
      const char *s;
+     int get_ack;
 {
   unsigned int len;
   unsigned char *packet;
@@ -445,6 +496,9 @@ mips_send_packet (s)
   /* Increment the sequence number.  This will set mips_send_seq to
      the sequence number we expect in the acknowledgement.  */
   mips_send_seq = (mips_send_seq + 1) % SEQ_MODULOS;
+
+  if (! get_ack)
+    return;
 
   /* We can only have one outstanding data packet, so we just wait for
      the acknowledgement here.  Keep retransmitting the packet until
@@ -728,7 +782,7 @@ mips_request (cmd, addr, data, perr)
       if (mips_need_reply)
 	fatal ("mips_request: Trying to send command before reply");
       sprintf (buff, "0x0 %c 0x%x 0x%x", cmd, addr, data);
-      mips_send_packet (buff);
+      mips_send_packet (buff, 1);
       mips_need_reply = 1;
     }
 
@@ -766,6 +820,64 @@ mips_request (cmd, addr, data, perr)
   return rresponse;
 }
 
+/* Initialize a new connection to the MIPS board, and make sure we are
+   really connected.  */
+
+static void
+mips_initialize ()
+{
+  char cr;
+  int hold_wait;
+  int tries;
+  char buff[DATA_MAXLEN + 1];
+  int err;
+
+  if (mips_initializing)
+    return;
+
+  mips_initializing = 1;
+
+  mips_send_seq = 0;
+  mips_receive_seq = 0;
+
+  /* The board seems to want to send us a packet.  I don't know what
+     it means.  The packet seems to be triggered by a carriage return
+     character, although perhaps any character would do.  */
+  cr = '\r';
+  serial_write (&cr, 1);
+
+  hold_wait = mips_receive_wait;
+  mips_receive_wait = 3;
+
+  tries = 0;
+  while (catch_errors (mips_receive_packet, buff, (char *) NULL) == 0)
+    {
+      char cc;
+
+      if (tries > 0)
+	error ("Could not connect to target");
+      ++tries;
+
+      /* We did not receive the packet we expected; try resetting the
+	 board and trying again.  */
+      printf_filtered ("Failed to initialize; trying to reset board\n");
+      cc = '\003';
+      serial_write (&cc, 1);
+      sleep (2);
+      serial_write ("\rdb tty0\r", sizeof "\rdb tty0\r" - 1);
+      sleep (1);
+      cr = '\r';
+      serial_write (&cr, 1);
+    }
+
+  mips_receive_wait = hold_wait;
+  mips_initializing = 0;
+
+  /* If this doesn't call error, we have connected; we don't care if
+     the request itself succeeds or fails.  */
+  mips_request ('r', (unsigned int) 0, (unsigned int) 0, &err);
+}
+
 /* Open a connection to the remote board.  */
 
 static void
@@ -773,10 +885,6 @@ mips_open (name, from_tty)
      char *name;
      int from_tty;
 {
-  int err;
-  char cr;
-  char buff[DATA_MAXLEN + 1];
-
   if (name == 0)
     error (
 "To open a MIPS remote debugging connection, you need to specify what serial\n\
@@ -785,28 +893,20 @@ device is attached to the target board (e.g., /dev/ttya).");
   target_preopen (from_tty);
 
   if (mips_is_open)
-    mips_close (0);
+    unpush_target (&mips_ops);
 
   if (serial_open (name) == 0)
     perror_with_name (name);
 
   mips_is_open = 1;
 
-  /* The board seems to want to send us a packet.  I don't know what
-     it means.  */
-  cr = '\r';
-  serial_write (&cr, 1);
-  mips_receive_packet (buff);
-
-  /* If this doesn't call error, we have connected; we don't care if
-     the request itself succeeds or fails.  */
-  mips_request ('r', (unsigned int) 0, (unsigned int) 0, &err);
+  mips_initialize ();
 
   if (from_tty)
     printf ("Remote MIPS debugging using %s\n", name);
   push_target (&mips_ops);	/* Switch to using remote target now */
 
-  start_remote ();		/* Initialize gdb process mechanisms */
+  /* FIXME: Should we call start_remote here?  */
 }
 
 /* Close a connection to the remote board.  */
@@ -817,11 +917,14 @@ mips_close (quitting)
 {
   if (mips_is_open)
     {
-      /* Get the board out of remote debugging mode.  */
-      mips_request ('x', (unsigned int) 0, (unsigned int) 0,
-		    (int *) NULL);
-      serial_close ();
+      int err;
+
       mips_is_open = 0;
+
+      /* Get the board out of remote debugging mode.  */
+      mips_request ('x', (unsigned int) 0, (unsigned int) 0, &err);
+
+      serial_close ();
     }
 }
 
@@ -852,7 +955,7 @@ mips_resume (step, siggnal)
 	   siggnal);
 
   mips_request (step ? 's' : 'c',
-		(unsigned int) read_register (PC_REGNUM),
+		(unsigned int) 1,
 		(unsigned int) 0,
 		(int *) NULL);
 }
@@ -1099,6 +1202,28 @@ mips_files_info (ignore)
   printf ("Debugging a MIPS board over a serial line.\n");
 }
 
+/* Kill the process running on the board.  This will actually only
+   work if we are doing remote debugging over the console input.  I
+   think that if IDT/sim had the remote debug interrupt enabled on the
+   right port, we could interrupt the process with a break signal.  */
+
+static void
+mips_kill ()
+{
+#if 0
+  if (mips_is_open)
+    {
+      char cc;
+
+      /* Send a ^C.  */
+      cc = '\003';
+      serial_write (&cc, 1);
+      sleep (1);
+      target_mourn_inferior ();
+    }
+#endif
+}
+
 /* Load an executable onto the board.  */
 
 static void
@@ -1109,6 +1234,7 @@ mips_load (args, from_tty)
   bfd *abfd;
   asection *s;
   int err;
+  CORE_ADDR text;
 
   abfd = bfd_openr (args, 0);
   if (abfd == (bfd *) NULL)
@@ -1117,6 +1243,7 @@ mips_load (args, from_tty)
   if (bfd_check_format (abfd, bfd_object) == 0)
     error ("%s: Not an object file", args);
 
+  text = UINT_MAX;
   for (s = abfd->sections; s != (asection *) NULL; s = s->next)
     {
       if ((s->flags & SEC_LOAD) != 0)
@@ -1140,6 +1267,10 @@ mips_load (args, from_tty)
 	      mips_xfer_memory (vma, buffer, size, 1, &mips_ops);
 
 	      do_cleanups (old_chain);
+
+	      if ((bfd_get_section_flags (abfd, s) & SEC_CODE) != 0
+		  && vma < text)
+		text = vma;
 	    }
 	}
     }
@@ -1152,7 +1283,13 @@ mips_load (args, from_tty)
 
   bfd_close (abfd);
 
-  /* FIXME: Should we call symbol_file_add here?  */
+  /* FIXME: Should we call symbol_file_add here?  The local variable
+     text exists just for this call.  Making the call seems to confuse
+     gdb if more than one file is loaded in.  Perhaps passing MAINLINE
+     as 1 would fix this, but it's not clear that that is correct
+     either since it is possible to load several files onto the board.
+
+     symbol_file_add (args, from_tty, text, 0, 0, 0);  */
 }
 
 /* Start running on the target board.  */
@@ -1165,7 +1302,6 @@ mips_create_inferior (execfile, args, env)
 {
   CORE_ADDR entry_pt;
 
-  /* FIXME: Actually, we probably could pass arguments.  */
   if (args && *args)
     error ("Can't pass arguments to remote MIPS board.");
 
@@ -1175,6 +1311,8 @@ mips_create_inferior (execfile, args, env)
   entry_pt = (CORE_ADDR) bfd_get_start_address (exec_bfd);
 
   init_wait_for_inferior ();
+
+  /* FIXME: Should we set inferior_pid here?  */
 
   proceed (entry_pt, -1, 0);
 }
@@ -1213,7 +1351,7 @@ Specify the serial device it is connected to (e.g., /dev/ttya).",  /* to_doc */
   NULL,				/* to_terminal_ours_for_output */
   NULL,				/* to_terminal_ours */
   NULL,				/* to_terminal_info */
-  NULL,				/* to_kill */
+  mips_kill,			/* to_kill */
   mips_load,			/* to_load */
   NULL,				/* to_lookup_symbol */
   mips_create_inferior,		/* to_create_inferior */

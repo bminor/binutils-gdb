@@ -206,6 +206,7 @@ remote-adapt.c
 remote-eb.c
 remote-es1800.c
 remote-hms.c
+remote-mips.c
 remote-mm.c
 remote-nindy.c
 remote-sim.c

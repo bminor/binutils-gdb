@@ -34,6 +34,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Floating point is IEEE compliant */
 #define IEEE_FLOAT
 
+/* Some MIPS boards are provided both with and without a floating
+   point coprocessor; we provide a user settable variable to tell gdb
+   whether there is one or not.  */
+extern int mips_fpu;
+
 /* Define this if the C compiler puts an underscore at the front
    of external names before giving them to the linker.  */
 
@@ -205,13 +210,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    into VALBUF.  XXX floats */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  bcopy (REGBUF+REGISTER_BYTE (TYPE_CODE (TYPE) == TYPE_CODE_FLT ? FP0_REGNUM : 2), VALBUF, TYPE_LENGTH (TYPE))
+  bcopy (REGBUF + REGISTER_BYTE ((TYPE_CODE (TYPE) == TYPE_CODE_FLT && mips_fpu) ? FP0_REGNUM : 2), VALBUF, TYPE_LENGTH (TYPE))
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  write_register_bytes (REGISTER_BYTE (TYPE_CODE (TYPE) == TYPE_CODE_FLT ? FP0_REGNUM : 2), VALBUF, TYPE_LENGTH (TYPE))
+  write_register_bytes (REGISTER_BYTE ((TYPE_CODE (TYPE) == TYPE_CODE_FLT && mips_fpu) ? FP0_REGNUM : 2), VALBUF, TYPE_LENGTH (TYPE))
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
@@ -294,11 +299,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
  0,				/* nop 	  #  ... to stop raw backtrace*/\
  0x27bd0000,			/* addu	sp,?0 # Pseudo prologue */\
 /* Start here: */\
- MK_OP(061,SP_REGNUM,12,0),	/* lwc1 $f12,0(sp) # Reload first 4 args*/\
+ MK_OP(061,SP_REGNUM,12,0),	/* lwc1 $f12,0(sp) # Reload FP regs*/\
  MK_OP(061,SP_REGNUM,13,4),	/* lwc1 $f13,4(sp) */\
  MK_OP(061,SP_REGNUM,14,8),	/* lwc1 $f14,8(sp) */\
  MK_OP(061,SP_REGNUM,15,12),	/* lwc1 $f15,12(sp) */\
- MK_OP(043,SP_REGNUM,4,0),	/* lw $r4,0(sp) # Re-load FP regs*/\
+ MK_OP(043,SP_REGNUM,4,0),	/* lw $r4,0(sp) # Reload first 4 args*/\
  MK_OP(043,SP_REGNUM,5,4),	/* lw $r5,4(sp) */\
  MK_OP(043,SP_REGNUM,6,8),	/* lw $r6,8(sp) */\
  MK_OP(043,SP_REGNUM,7,12),	/* lw $r7,12(sp) */\
@@ -315,8 +320,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    into a call sequence of the above form stored at DUMMYNAME.  */
 
 #define FIX_CALL_DUMMY(dummyname, start_sp, fun, nargs,	args, rettype, gcc_p)\
-  (((int*)dummyname)[11] |= (((unsigned long)(fun)) >> 16), \
-   ((int*)dummyname)[12] |= (unsigned short)(fun))
+  do \
+    { \
+      ((int*)(dummyname))[11] |= ((unsigned long)(fun)) >> 16; \
+      ((int*)(dummyname))[12] |= (unsigned short)(fun); \
+      if (! mips_fpu) \
+	{ \
+	  ((int *) (dummyname))[3] = 0; \
+	  ((int *) (dummyname))[4] = 0; \
+	  ((int *) (dummyname))[5] = 0; \
+	  ((int *) (dummyname))[6] = 0; \
+	} \
+    } \
+  while (0)
 
 /* There's a mess in stack frame creation.  See comments in blockframe.c
    near reference to INIT_FRAME_PC_FIRST.  */

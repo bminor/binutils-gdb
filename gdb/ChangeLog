@@ -1,3 +1,23 @@
+Mon Feb 22 15:21:54 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* remote-mips.c: New file; implements MIPS remote debugging
+	protocol.
+	* config/idt.mt: New file; uses remote-mips.c
+	* configure.in (mips-idt-ecoff): New target; uses idt.mt.
+
+	* mips-tdep.c (mips_fpu): New variable; controls use of MIPS
+	floating point coprocessor.
+	(mips_push_dummy_frame): If not mips_fpu, don't save floating
+	point registers.
+	(mips_pop_frame): If not mips_fpu, don't restore floating point
+	registers.
+	(_initialize_mips_tdep): New function; let the user reset mips_fpu
+	variable.
+	* tm-mips.h (EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE): If not
+	mips_fpu, don't use fp0 as floating point return register.
+	(FIX_CALL_DUMMY): If not mips_fpu, don't save floating point
+	registers.
+
 Mon Feb 22 07:54:03 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 
         * gdb/testsuite: made modifications to testcases, etc., to allow

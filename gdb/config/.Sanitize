@@ -66,6 +66,7 @@ i386v.mt
 i386v32.mh
 i386v4.mh
 i386v4.mt
+idt.mt
 irix3.mh
 irix3.mt
 irix4.mh

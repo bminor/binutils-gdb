@@ -1,5 +1,5 @@
 /* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
-   Copyright 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
 
@@ -55,6 +55,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/stat.h>
 
 
+/* Some MIPS boards don't support floating point, so we permit the
+   user to turn it off.  */
+int mips_fpu = 1;
+
 #define PROC_LOW_ADDR(proc) ((proc)->pdr.adr) /* least address */
 #define PROC_HIGH_ADDR(proc) ((proc)->pdr.iline) /* upper address bound */
 #define PROC_FRAME_OFFSET(proc) ((proc)->pdr.frameoffset)
@@ -316,16 +320,13 @@ init_extra_frame_info(fci)
       /* r0 bit means kernel trap */
       int kernel_trap = PROC_REG_MASK(proc_desc) & 1;
 
-      if (fci->frame == 0)
-      {
-        /* Fixup frame-pointer - only needed for top frame */
-        /* This may not be quite right, if proc has a real frame register */
-        if (fci->pc == PROC_LOW_ADDR(proc_desc))
-          fci->frame = read_register (SP_REGNUM);
-        else
-	  fci->frame = READ_FRAME_REG(fci, PROC_FRAME_REG(proc_desc))
-		       + PROC_FRAME_OFFSET(proc_desc);
-      }
+      /* Fixup frame-pointer - only needed for top frame */
+      /* This may not be quite right, if proc has a real frame register */
+      if (fci->pc == PROC_LOW_ADDR(proc_desc))
+	fci->frame = read_register (SP_REGNUM);
+      else
+	fci->frame = READ_FRAME_REG(fci, PROC_FRAME_REG(proc_desc))
+		      + PROC_FRAME_OFFSET(proc_desc);
 
       if (proc_desc == &temp_proc_desc)
 	  *fci->saved_regs = temp_saved_regs;
@@ -381,11 +382,14 @@ init_extra_frame_info(fci)
    arguments without difficulty.  */
 
 FRAME
-setup_arbitrary_frame (stack, pc)
-     FRAME_ADDR stack;
-     CORE_ADDR pc;
+setup_arbitrary_frame (argc, argv)
+     int argc;
+     FRAME_ADDR *argv;
 {
-  return create_new_frame (stack, pc);
+  if (argc != 2)
+    error ("MIPS frame specifications require two arguments: sp and pc");
+
+  return create_new_frame (argv[0], argv[1]);
 }
 
 
@@ -470,12 +474,12 @@ mips_push_dummy_frame()
    *    Saved D18 (i.e. F19, F18)
    *    ...
    *    Saved D0 (i.e. F1, F0)
-   *	CALL_DUMMY (subroutine stub; see m-mips.h)
+   *	CALL_DUMMY (subroutine stub; see tm-mips.h)
    *	Parameter build area (not yet implemented)
    *  (low memory)
    */
   PROC_REG_MASK(proc_desc) = GEN_REG_SAVE_MASK;
-  PROC_FREG_MASK(proc_desc) = FLOAT_REG_SAVE_MASK;
+  PROC_FREG_MASK(proc_desc) = mips_fpu ? FLOAT_REG_SAVE_MASK : 0;
   PROC_REG_OFFSET(proc_desc) = /* offset of (Saved R31) from FP */
       -sizeof(long) - 4 * SPECIAL_REG_SAVE_COUNT;
   PROC_FREG_OFFSET(proc_desc) = /* offset of (Saved D18) from FP */
@@ -507,9 +511,11 @@ mips_push_dummy_frame()
   write_memory (sp - 8, (char *)&buffer, sizeof(REGISTER_TYPE));
   buffer = read_register (LO_REGNUM);
   write_memory (sp - 12, (char *)&buffer, sizeof(REGISTER_TYPE));
-  buffer = read_register (FCRCS_REGNUM);
+  buffer = read_register (mips_fpu ? FCRCS_REGNUM : ZERO_REGNUM);
   write_memory (sp - 16, (char *)&buffer, sizeof(REGISTER_TYPE));
-  sp -= 4 * (GEN_REG_SAVE_COUNT+FLOAT_REG_SAVE_COUNT+SPECIAL_REG_SAVE_COUNT);
+  sp -= 4 * (GEN_REG_SAVE_COUNT
+	     + (mips_fpu ? FLOAT_REG_SAVE_COUNT : 0)
+	     + SPECIAL_REG_SAVE_COUNT);
   write_register (SP_REGNUM, sp);
   PROC_LOW_ADDR(proc_desc) = sp - CALL_DUMMY_SIZE + CALL_DUMMY_START_OFFSET;
   PROC_HIGH_ADDR(proc_desc) = sp;
@@ -568,7 +574,8 @@ mips_pop_frame()
 
       write_register (HI_REGNUM, read_memory_integer(new_sp - 8, 4));
       write_register (LO_REGNUM, read_memory_integer(new_sp - 12, 4));
-      write_register (FCRCS_REGNUM, read_memory_integer(new_sp - 16, 4));
+      if (mips_fpu)
+	write_register (FCRCS_REGNUM, read_memory_integer(new_sp - 16, 4));
     }
 }
 
@@ -686,7 +693,11 @@ isa_NAN(p, len)
     }
   else if (len == 8)
     {
+#if TARGET_BYTE_ORDER == BIG_ENDIAN
+      exponent = *p;
+#else
       exponent = *(p+1);
+#endif
       exponent = exponent << 1 >> (32 - DOUBLE_EXP_BITS - 1);
       return ((exponent == -1) || (! exponent && *p * *(p+1)));
     }
@@ -738,4 +749,18 @@ mips_skip_prologue(pc)
 	return pc + 4;
 
     return pc;
+}
+
+/* Let the user turn off floating point.  */
+
+void
+_initialize_mips_tdep ()
+{
+  add_show_from_set
+    (add_set_cmd ("mips_fpu", class_support, var_boolean,
+		  (char *) &mips_fpu,
+		  "Set use of floating point coprocessor.\n\
+Turn off to avoid using floating point instructions when calling functions\n\
+or dealing with return values.", &setlist),
+     &showlist);
 }
