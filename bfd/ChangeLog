@@ -1,3 +1,12 @@
+Wed Apr  7 11:33:06 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c (PAGESIZE): Correct value.
+
+Tue Apr  6 12:05:44 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c (ecoff_find_nearest_line): Address of first PDR is
+	an offset (patch from Jean-Daniel Fekete <jdf@lri.lri.fr>).
+
 Mon Apr  5 12:07:12 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coffcode.h (styp_to_sec_flags): Set SEC_SHARED_LIBRARY for a
