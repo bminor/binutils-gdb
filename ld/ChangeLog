@@ -1,3 +1,20 @@
+Tue Feb 28 10:27:54 1995  Rob Savoye  <rob@darkstar.cygnus.com>
+
+	* configure.in: Match on mips-ecoff, and default to the IDT
+	configuration.
+
+Fri Feb 17 13:06:47 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* scripttempl/elfppc.sc: Add support for .got1 and .got2 sections.
+	Offset _GLOBAL_OFFSET_TABLE_ 32768 from the start of the GOT area
+	to double the size of the table.
+
+start-sanitize-arc
+Thu Feb  9 19:03:25 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* emulparms/arcelf.sh (TEMPLATE_NAME): Comment out.
+end-sanitize-arc
+
 Thu Feb  9 18:29:43 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in (distclean): Do recursive deletion, since ldscripts

@@ -110,8 +110,8 @@ case "${targ}" in
   mips*-dec-ultrix*)	ld_target=mips-lit ;;
   mips*-sgi-irix5*)	ld_target=mipsb-elf32 ;;
   mips*-sgi-irix*)	ld_target=mips-big ;;
-  mips*el-idt-ecoff*)	ld_target=mipsl-idt ;;
-  mips*-idt-ecoff*)	ld_target=mips-idt ;;
+  mips*el-*-ecoff*)	ld_target=mipsl-idt ;;
+  mips*-*-ecoff*)	ld_target=mips-idt ;;
   mips*-dec-bsd*)	ld_target=mipsbsd ;;
   mips*el-*-elf*)	ld_target=mipsl-elf32 ;;
   mips*-*-elf*)		ld_target=mipsb-elf32 ;;
@@ -121,6 +121,7 @@ case "${targ}" in
   ns32k-pc532-mach)	ld_target=pc532mach ;;
   ns32k-pc532-netbsd*)  ld_target=ns32k-nbsd ;;
   powerpc-*-elf*)	ld_target=ppc-elf32 ;;
+  powerpc-*-eabi*)	ld_target=ppc-elf32 ;;
   powerpc-*-netware*)	ld_target=ppc-nw ;;
   w65-*-*)              ld_target=coff-w65 ;;
   *-*-aout)		ld_target=${target_cpu}-${target_vendor} ;;
