@@ -94,11 +94,6 @@ extern void set_architecture_from_arch_mach (enum bfd_architecture, unsigned lon
 
 extern int (*target_architecture_hook) (const struct bfd_arch_info *);
 
-
-/* Default raw->sim register re-numbering - does nothing. */
-
-extern int default_register_sim_regno (int reg_nr);
-
 /* Identity function on a CORE_ADDR.  Just returns its parameter.  */
 
 extern CORE_ADDR core_addr_identity (CORE_ADDR addr);

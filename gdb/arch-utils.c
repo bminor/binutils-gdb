@@ -267,13 +267,6 @@ generic_cannot_extract_struct_value_address (char *dummy)
   return 0;
 }
 
-int
-default_register_sim_regno (int num)
-{
-  return num;
-}
-
-
 CORE_ADDR
 core_addr_identity (CORE_ADDR addr)
 {

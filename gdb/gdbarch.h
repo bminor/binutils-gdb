@@ -40,6 +40,7 @@
 /* Pull in function declarations refered to, indirectly, via macros.  */
 #include "value.h" /* For default_coerce_float_to_double which is referenced by a macro.  */
 #include "inferior.h"		/* For unsigned_address_to_pointer().  */
+#include "sim-regno.h"		/* For legacy_register_sim_regno().  */
 #endif
 
 struct frame_info;
@@ -811,7 +812,7 @@ extern void set_gdbarch_print_float_info (struct gdbarch *gdbarch, gdbarch_print
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_SIM_REGNO)
-#define REGISTER_SIM_REGNO(reg_nr) (default_register_sim_regno (reg_nr))
+#define REGISTER_SIM_REGNO(reg_nr) (legacy_register_sim_regno (reg_nr))
 #endif
 
 typedef int (gdbarch_register_sim_regno_ftype) (int reg_nr);

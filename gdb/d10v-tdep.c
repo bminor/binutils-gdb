@@ -41,6 +41,7 @@
 
 #include "floatformat.h"
 #include "gdb/sim-d10v.h"
+#include "sim-regno.h"
 
 struct frame_extra_info
   {
@@ -296,6 +297,8 @@ d10v_imap_register (int reg_nr)
 static int
 d10v_ts2_register_sim_regno (int nr)
 {
+  if (legacy_register_sim_regno (nr) < 0)
+    return legacy_register_sim_regno (nr);
   if (nr >= TS2_IMAP0_REGNUM
       && nr < TS2_IMAP0_REGNUM + NR_IMAP_REGS)
     return nr - TS2_IMAP0_REGNUM + SIM_D10V_IMAP0_REGNUM;
@@ -310,6 +313,8 @@ d10v_ts2_register_sim_regno (int nr)
 static int
 d10v_ts3_register_sim_regno (int nr)
 {
+  if (legacy_register_sim_regno (nr) < 0)
+    return legacy_register_sim_regno (nr);
   if (nr >= TS3_IMAP0_REGNUM
       && nr < TS3_IMAP0_REGNUM + NR_IMAP_REGS)
     return nr - TS3_IMAP0_REGNUM + SIM_D10V_IMAP0_REGNUM;

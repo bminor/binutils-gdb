@@ -471,7 +471,7 @@ f:2:DO_REGISTERS_INFO:void:do_registers_info:int reg_nr, int fpregs:reg_nr, fpre
 f:2:PRINT_FLOAT_INFO:void:print_float_info:void::::default_print_float_info::0
 # MAP a GDB RAW register number onto a simulator register number.  See
 # also include/...-sim.h.
-f:2:REGISTER_SIM_REGNO:int:register_sim_regno:int reg_nr:reg_nr:::default_register_sim_regno::0
+f:2:REGISTER_SIM_REGNO:int:register_sim_regno:int reg_nr:reg_nr:::legacy_register_sim_regno::0
 F:2:REGISTER_BYTES_OK:int:register_bytes_ok:long nr_bytes:nr_bytes::0:0
 f:2:CANNOT_FETCH_REGISTER:int:cannot_fetch_register:int regnum:regnum:::cannot_register_not::0
 f:2:CANNOT_STORE_REGISTER:int:cannot_store_register:int regnum:regnum:::cannot_register_not::0
@@ -759,6 +759,7 @@ cat <<EOF
 /* Pull in function declarations refered to, indirectly, via macros.  */
 #include "value.h" /* For default_coerce_float_to_double which is referenced by a macro.  */
 #include "inferior.h"		/* For unsigned_address_to_pointer().  */
+#include "sim-regno.h"		/* For legacy_register_sim_regno().  */
 #endif
 
 struct frame_info;
@@ -1220,6 +1221,7 @@ cat <<EOF
 #if GDB_MULTI_ARCH
 #include "gdbcmd.h"
 #include "inferior.h" /* enum CALL_DUMMY_LOCATION et.al. */
+#include "sim-regno.h"		/* For legacy_register_sim_regno().  */
 #else
 /* Just include everything in sight so that the every old definition
    of macro is visible. */

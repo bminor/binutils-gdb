@@ -39,6 +39,7 @@
 #if GDB_MULTI_ARCH
 #include "gdbcmd.h"
 #include "inferior.h" /* enum CALL_DUMMY_LOCATION et.al. */
+#include "sim-regno.h"		/* For legacy_register_sim_regno().  */
 #else
 /* Just include everything in sight so that the every old definition
    of macro is visible. */
@@ -488,7 +489,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->max_register_virtual_size = -1;
   current_gdbarch->do_registers_info = do_registers_info;
   current_gdbarch->print_float_info = default_print_float_info;
-  current_gdbarch->register_sim_regno = default_register_sim_regno;
+  current_gdbarch->register_sim_regno = legacy_register_sim_regno;
   current_gdbarch->cannot_fetch_register = cannot_register_not;
   current_gdbarch->cannot_store_register = cannot_register_not;
   current_gdbarch->use_generic_dummy_frames = -1;

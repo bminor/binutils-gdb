@@ -652,6 +652,7 @@ remote_utils_h =  remote-utils.h $(target_h)
 ser_unix_h =	ser-unix.h
 serial_h =	serial.h
 sh_tdep_h =	sh-tdep.h osabi.h
+sim_regno_h =	sim-regno.h
 solist_h =	solist.h
 source_h =	source.h
 stabsread_h =	stabsread.h
@@ -1405,7 +1406,8 @@ dcache.o: dcache.c $(dcache_h) $(defs_h) $(gdbcmd_h) $(gdb_string_h) \
 d10v-tdep.o: d10v-tdep.c $(defs_h) $(frame_h) $(obstack_h) $(symtab_h) \
 	$(gdbtypes_h) $(gdbcmd_h) $(gdbcore_h) $(gdb_string_h) $(value_h) \
 	$(inferior_h) $(dis-asm_h) $(symfile_h) $(objfiles_h) $(language_h) \
-	$(arch_utils_h) $(regcache_h) $(floatformat_h) $(sim_d10v_h)
+	$(arch_utils_h) $(regcache_h) $(floatformat_h) $(sim_d10v_h) \
+	$(sim_regno_h)
 
 dbxread.o: dbxread.c $(breakpoint_h) $(buildsym_h) $(command_h) \
 	$(complaints_h) $(defs_h) $(expression_h) $(gdb_stabs_h) $(gdbcore_h) \
@@ -1998,7 +2000,8 @@ remote-sds.o: remote-sds.c $(bfd_h) $(defs_h) $(gdbcmd_h) \
 
 remote-sim.o: remote-sim.c $(defs_h) $(inferior_h) $(value_h) $(gdb_string_h) \
 	$(terminal_h) $(target_h) $(gdbcore_h) $(INCLUDE_DIR)/callback.h \
-	$(remote_sim_h) $(remote_utils_h) $(command_h) $(regcache_h) 
+	$(remote_sim_h) $(remote_utils_h) $(command_h) $(regcache_h) \
+	$(sim_regno_h)
 
 remote-st.o: remote-st.c $(defs_h) $(gdbcore_h) $(serial_h) \
 	$(target_h) $(gdb_string_h) $(regcache_h)

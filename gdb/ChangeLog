@@ -1,3 +1,23 @@
+2002-05-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* sim-regno.h: New file.
+	* Makefile.in (sim_regno_h): Define.
+	(d10v-tdep.o, remote-sim.o): Add dependency on $(sim_regno_h).
+	* remote-sim.c: Include "sim-regno.h" and "gdb_assert.h".
+	(legacy_register_sim_regno): New function.
+	(one2one_register_sim_regno): New function.
+	(gdbsim_fetch_register): Rewrite.
+	(gdbsim_store_register): Only store a register when
+	REGISTER_SIM_REGNO is valid.
+	* d10v-tdep.c: Include "sim-regno.h".
+	(d10v_ts2_register_sim_regno): Add legacy_regiter_sim_regno check.
+	(d10v_ts3_register_sim_regno): Ditto.
+	* gdbarch.sh: Include "sim-regno.h".
+	(REGISTER_SIM_REGNO): Set default to legacy_register_sim_regno.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* arch-utils.h (default_register_sim_regno): Delete declaration.
+	* arch-utils.c (default_register_sim_regno): Delete function.
+
 2002-05-28  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* ppcnbsd-nat.c: Rewrite.

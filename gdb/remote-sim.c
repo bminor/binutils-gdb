@@ -40,6 +40,8 @@
 #include "remote-utils.h"
 #include "command.h"
 #include "regcache.h"
+#include "gdb_assert.h"
+#include "sim-regno.h"
 
 /* Prototypes */
 
@@ -276,46 +278,88 @@ gdb_os_error (host_callback * p, const char *format,...)
     }
 }
 
+int
+legacy_register_sim_regno (int regnum)
+{
+  /* Only makes sense to supply raw registers.  */
+  gdb_assert (regnum >= 0 && regnum < NUM_REGS);
+  /* NOTE: cagney/2002-05-13: The old code did it this way and it is
+     suspected that some GDB/SIM combinations may rely on this
+     behavour.  The default should be one2one_register_sim_regno
+     (below).  */
+  if (REGISTER_NAME (regnum) != NULL
+      && REGISTER_NAME (regnum)[0] != '\0')
+    return regnum;
+  else
+    return LEGACY_SIM_REGNO_IGNORE;
+}
+
+int
+one2one_register_sim_regno (int regnum)
+{
+  /* Only makes sense to supply raw registers.  */
+  gdb_assert (regnum >= 0 && regnum < NUM_REGS);
+  return regnum;
+}
+
 static void
 gdbsim_fetch_register (int regno)
 {
-  static int warn_user = 1;
   if (regno == -1)
     {
       for (regno = 0; regno < NUM_REGS; regno++)
 	gdbsim_fetch_register (regno);
+      return;
     }
-  else if (REGISTER_NAME (regno) != NULL
-	   && *REGISTER_NAME (regno) != '\0')
+
+  switch (REGISTER_SIM_REGNO (regno))
     {
-      char buf[MAX_REGISTER_RAW_SIZE];
-      int nr_bytes;
-      if (REGISTER_SIM_REGNO (regno) >= 0)
+    case LEGACY_SIM_REGNO_IGNORE:
+      break;
+    case SIM_REGNO_DOES_NOT_EXIST:
+      {
+	/* For moment treat a `does not exist' register the same way
+           as an ``unavailable'' register.  */
+	char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+	int nr_bytes;
+	memset (buf, 0, MAX_REGISTER_RAW_SIZE);
+	supply_register (regno, buf);
+	set_register_cached (regno, -1);
+	break;
+      }
+    default:
+      {
+	static int warn_user = 1;
+	char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+	int nr_bytes;
+	gdb_assert (regno >= 0 && regno < NUM_REGS);
+	memset (buf, 0, MAX_REGISTER_RAW_SIZE);
 	nr_bytes = sim_fetch_register (gdbsim_desc,
 				       REGISTER_SIM_REGNO (regno),
 				       buf, REGISTER_RAW_SIZE (regno));
-      else
-	nr_bytes = 0;
-      if (nr_bytes == 0)
-	/* register not applicable, supply zero's */
-	memset (buf, 0, MAX_REGISTER_RAW_SIZE);
-      else if (nr_bytes > 0 && nr_bytes != REGISTER_RAW_SIZE (regno)
-	       && warn_user)
-	{
-	  fprintf_unfiltered (gdb_stderr,
-			      "Size of register %s (%d/%d) incorrect (%d instead of %d))",
-			      REGISTER_NAME (regno),
-			      regno, REGISTER_SIM_REGNO (regno),
-			      nr_bytes, REGISTER_RAW_SIZE (regno));
-	  warn_user = 0;
-	}
-      supply_register (regno, buf);
-      if (sr_get_debug ())
-	{
-	  printf_filtered ("gdbsim_fetch_register: %d", regno);
-	  /* FIXME: We could print something more intelligible.  */
-	  dump_mem (buf, REGISTER_RAW_SIZE (regno));
-	}
+	if (nr_bytes > 0 && nr_bytes != REGISTER_RAW_SIZE (regno) && warn_user)
+	  {
+	    fprintf_unfiltered (gdb_stderr,
+				"Size of register %s (%d/%d) incorrect (%d instead of %d))",
+				REGISTER_NAME (regno),
+				regno, REGISTER_SIM_REGNO (regno),
+				nr_bytes, REGISTER_RAW_SIZE (regno));
+	    warn_user = 0;
+	  }
+	/* FIXME: cagney/2002-05-27: Should check `nr_bytes == 0'
+	   indicatingthat GDB and the SIM have different ideas about
+	   which registers are fetchable.  */
+	/* Else if (nr_bytes < 0): an old simulator, that doesn't
+	   think to return the register size.  Just assume all is ok.  */
+	supply_register (regno, buf);
+	if (sr_get_debug ())
+	  {
+	    printf_filtered ("gdbsim_fetch_register: %d", regno);
+	    /* FIXME: We could print something more intelligible.  */
+	    dump_mem (buf, REGISTER_RAW_SIZE (regno));
+	  }
+	break;
+      }
     }
 }
 
@@ -327,10 +371,9 @@ gdbsim_store_register (int regno)
     {
       for (regno = 0; regno < NUM_REGS; regno++)
 	gdbsim_store_register (regno);
+      return;
     }
-  else if (REGISTER_NAME (regno) != NULL
-	   && *REGISTER_NAME (regno) != '\0'
-	   && REGISTER_SIM_REGNO (regno) >= 0)
+  else if (REGISTER_SIM_REGNO (regno) >= 0)
     {
       char tmp[MAX_REGISTER_RAW_SIZE];
       int nr_bytes;
@@ -341,6 +384,9 @@ gdbsim_store_register (int regno)
       if (nr_bytes > 0 && nr_bytes != REGISTER_RAW_SIZE (regno))
 	internal_error (__FILE__, __LINE__,
 			"Register size different to expected");
+      /* FIXME: cagney/2002-05-27: Should check `nr_bytes == 0'
+	 indicatingthat GDB and the SIM have different ideas about
+	 which registers are fetchable.  */
       if (sr_get_debug ())
 	{
 	  printf_filtered ("gdbsim_store_register: %d", regno);
