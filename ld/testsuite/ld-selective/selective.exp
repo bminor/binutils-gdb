@@ -27,6 +27,11 @@ if {[istarget "*-*-pe"]} {
     return
 }
 
+# selective linking is not yet implemented for 68hc11/68hc12
+if {[istarget "m6811-*-*"] || [istarget "m6812-*-*"]} {
+    return
+}
+
 # List contains test-items with three items followed by four lists:
 # 1:name 2:test-type (CC or C++; add as needed) 3:filename 4:ld-flags
 # 5:must-have-symbols 6:must-not-have-symbols 7:xfail-targets.

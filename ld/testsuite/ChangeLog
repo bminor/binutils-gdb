@@ -1,3 +1,8 @@
+2001-03-18  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* ld-selective/selective.exp: Don't run test for 68hc11 and 68hc12
+	because selective linking is not yet implemented.
+
 2001-02-08  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* ld-srec/srec.exp (run_srec_test): m6811 code has references
