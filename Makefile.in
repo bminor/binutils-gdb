@@ -442,6 +442,7 @@ ALL_MODULES = \
 	all-flex \
 	all-gas \
 	all-gawk \
+	all-gnuserv \
 	all-gprof \
 	all-grep \
 	all-grez \
@@ -510,6 +511,7 @@ CROSS_CHECK_MODULES = \
 	check-find \
 	check-gas \
 	check-gawk \
+	check-gnuserv \
 	check-gprof \
 	check-grep \
 	check-gzip \
@@ -573,6 +575,7 @@ INSTALL_MODULES = \
 	install-flex \
 	install-gas \
 	install-gawk \
+	install-gnuserv \
 	install-gprof \
 	install-grep \
 	install-grez \
@@ -715,6 +718,7 @@ CLEAN_MODULES = \
 	clean-flex \
 	clean-gas \
 	clean-gawk \
+	clean-gnuserv \
 	clean-gprof \
 	clean-grep \
 	clean-grez \
@@ -1341,6 +1345,7 @@ all-gcc: all-libiberty all-byacc all-binutils all-gas all-ld
 all-bootstrap: all-libiberty all-byacc all-binutils all-gas all-ld
 GDB_TK = all-tk all-tcl
 all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-byacc all-sim $(gdbnlmrequirements) $(GDB_TK)
+all-gnuserv:
 all-gprof: all-libiberty all-bfd all-opcodes
 all-grep: all-libiberty
 all-grez: all-libiberty all-bfd all-opcodes

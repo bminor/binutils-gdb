@@ -80,7 +80,7 @@ target_tools="target-examples target-groff"
 #
 # This must be a single line because of the way it is searched by grep in
 # the code below.
-native_only="autoconf cvs emacs emacs19 fileutils find gawk grep gzip hello indent ispell m4 rcs recode sed shellutils tar textutils gash uudecode wdiff gprof target-groff guile perl apache inet time bash prms sn"
+native_only="autoconf cvs emacs emacs19 fileutils find gawk grep gzip hello indent ispell m4 rcs recode sed shellutils tar textutils gash uudecode wdiff gprof target-groff guile perl apache inet time bash prms sn gnuserv"
 
 # directories to be built in a cross environment only
 #
@@ -371,13 +371,13 @@ noconfigdirs=""
 
 case "${host}" in
   i[3456]86-*-vsta)
-    noconfigdirs="tcl expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl db sn libide vmake"
+    noconfigdirs="tcl expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl db sn gnuserv libide vmake"
     ;;
   i[3456]86-*-go32)
-    noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl db sn libide vmake"
+    noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl db sn gnuserv libide vmake"
 	;;
   *-*-cygwin32)
-     noconfigdirs="expect dejagnu cvs autoconf bison send-pr gprof rcs guile perl texinfo apache inet itcl db sn libide vmake"
+     noconfigdirs="expect dejagnu cvs autoconf bison send-pr gprof rcs guile perl texinfo apache inet itcl db sn gnuserv libide vmake"
     ;;
   *-*-windows*)
 # This is only used to build WinGDB...
@@ -385,7 +385,7 @@ case "${host}" in
      target_configdirs=
     ;;
   ppc*-*-pe)
-     noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache inet itcl db sn libidea vmake"
+     noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache inet itcl db sn gnuserv libide vmake"
     ;;
 esac
 
@@ -429,7 +429,7 @@ case "${target}" in
     ;;
 # start-sanitize-d30v
   d30v-*-*)
-    noconfigdirs="$noconfigdirs tcl tk expect gcc gdb newlib target-librx target-libg++ target-libstdc++ target-libio target-libgloss itcl db sn target-libiberty target-newlib target-examples libide vmake"
+    noconfigdirs="$noconfigdirs tcl tk expect gcc gdb newlib target-librx target-libg++ target-libstdc++ target-libio target-libgloss itcl db sn gnuserv target-libiberty target-newlib target-examples libide vmake"
     ;;
 # end-sanitize-d30v
   h8300*-*-* | \
@@ -457,7 +457,7 @@ case "${target}" in
     ;;
   *-*-cygwin32)
     target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs expect target-libgloss itcl db sn libide vmake"
+    noconfigdirs="$noconfigdirs expect target-libgloss itcl db sn gnuserv libide vmake"
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
 
@@ -507,13 +507,13 @@ case "${target}" in
     ;;
   powerpc*-*-winnt* | powerpc*-*-pe* | ppc*-*-pe)
     target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs gdb tcl tk make expect target-libgloss itcl db sn libide vmake"
+    noconfigdirs="$noconfigdirs gdb tcl tk make expect target-libgloss itcl db sn gnuserv libide vmake"
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
     ;;
     # This is temporary until we can link against shared libraries
   powerpcle-*-solaris*)
-    noconfigdirs="$noconfigdirs gdb sim make tcl tk expect itcl db sn libide vmake"
+    noconfigdirs="$noconfigdirs gdb sim make tcl tk expect itcl db sn gnuserv libide vmake"
     ;;
   rs6000-*-lynxos*)
     # The CVS server code doesn't work on the RS/6000
@@ -610,7 +610,7 @@ esac
 # If we are building a Canadian Cross, discard tools that can not be built
 # using a cross compiler.  FIXME: These tools should be fixed.
 if [ "${build}" != "${host}" ]; then
-  noconfigdirs="$noconfigdirs expect dejagnu itcl db sn libide vmake"
+  noconfigdirs="$noconfigdirs expect dejagnu itcl db sn gnuserv libide vmake"
 fi
 
 # Make sure we don't let GNU ld be added if we didn't want it.
