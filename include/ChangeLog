@@ -1,3 +1,15 @@
+Thu Dec 17 00:42:35 1992  John Gilmore  (gnu@cygnus.com)
+
+	* bfd.h:  Update to get tekhex tdata name change from bfd.
+
+Mon Nov  9 23:55:42 1992  John Gilmore  (gnu@cygnus.com)
+
+	* ansidecl.h:  Update comments to discourage use of EXFUN.
+
+Thu Nov  5 16:35:44 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* bfd.h: Update to bring in SEC_SHARED_LIBRARY.
+
 Thu Nov  5 03:21:32 1992  John Gilmore  (gnu@cygnus.com)
 
 	* bfd.h:  Update to match EXFUN, bfd_seclet_struct, and SDEF

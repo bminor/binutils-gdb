@@ -825,7 +825,6 @@ typedef CONST struct reloc_howto_struct
            being relocated. */
   boolean pc_relative;
 
-        /*  Now obsolete.  Still used by bfd_perform_relocation though. */
   unsigned int bitpos;
 
 #if 1
@@ -1223,7 +1222,7 @@ struct _bfd
       struct ieee_data_struct *ieee_data;
       struct ieee_ar_data_struct *ieee_ar_data;
       struct srec_data_struct *srec_data;
-      struct srec_data_struct *tekhex_data;
+      struct tekhex_data_struct *tekhex_data;
       struct elf_obj_tdata *elf_obj_data;
       struct bout_data_struct *bout_data;
       struct sun_core_struct *sun_core_data;
