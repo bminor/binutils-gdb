@@ -1,5 +1,8 @@
 Mon May  8 12:11:38 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
+	* nlm/configure.in (gdb_host, gdb_host_cpu, gdb_target): Removed.
+	  These variables not used.
+
 	* config/m68k/monitor.mt (TDEPFILES): Added cpu32bug-rom.o.
 
 Wed May  3 17:54:47 1995  Stan Shebs  <shebs@andros.cygnus.com>
