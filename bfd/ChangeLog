@@ -1,3 +1,8 @@
+2000-09-02  Jason Eckhardt  <jle@cygnus.com>
+
+	* elf32-i860.c (bfd_elf32_bfd_is_local_label_name): Define macro.
+	(elf32_i860_is_local_label_name): New function and prototype.
+
 2000-09-02  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in: Increase version number to 2.10.91.

@@ -53,6 +53,9 @@ static bfd_reloc_status_type i860_final_link_relocate
   PARAMS ((reloc_howto_type *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, bfd_vma));
 
+static boolean elf32_i860_is_local_label_name
+  PARAMS ((bfd *, const char *));
+
 
 
 /* This howto table is preliminary.  */
@@ -1044,6 +1047,23 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
 }
 
 
+/* Return whether a symbol name implies a local label.  SVR4/860 compilers
+   generate labels of the form ".ep.function_name" to denote the end of a
+   function prolog. These should be local.
+   ??? Do any other SVR4 compilers have this convention? If so, this should
+   be added to the generic routine.  */
+static boolean
+elf32_i860_is_local_label_name (abfd, name)
+     bfd *abfd;
+     const char *name;
+{
+  if (name[0] == '.' && name[1] == 'e' && name[2] == 'p' && name[3] == '.')
+    return true;
+
+  return _bfd_elf_is_local_label_name (abfd, name);
+}
+
+
 
 #define TARGET_BIG_SYM		bfd_elf32_i860_vec
 #define TARGET_BIG_NAME		"elf32-i860"
@@ -1057,5 +1077,6 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
 #define elf_info_to_howto			elf32_i860_info_to_howto_rela
 #define elf_backend_relocate_section		elf32_i860_relocate_section
 #define bfd_elf32_bfd_reloc_type_lookup		elf32_i860_reloc_type_lookup
+#define bfd_elf32_bfd_is_local_label_name	elf32_i860_is_local_label_name
 
 #include "elf32-target.h"
