@@ -238,13 +238,13 @@ i386)
 	sco)	gdb_target=i386sco ;;
 	sun)	gdb_target=sun386 ;;
 	sequent)	gdb_target=symmetry ;;
-	coff)	gdb_target=i386v ;;
-	aout)	gdb_target=i386aout ;;
 	*)
 		case "${target_os}" in
 		sysv)	gdb_target=i386v ;;
 		sysv32)	gdb_target=i386v32 ;;
 		mach)	gdb_target=i386mach ;;
+		coff)	gdb_target=i386v ;;
+		aout)	gdb_target=i386aout ;;
 		esac
 	esac
 	;;

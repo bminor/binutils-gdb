@@ -3,6 +3,7 @@ Fri Nov 22 08:27:40 1991  John Gilmore  (gnu at cygnus.com)
 	* buildsym.c, coredep.c, mem-break.c, xcoffread.c:  Put <stdio.h>
 	first, before defs.h.
 	* config/mh-i386sco: Override compiler to gcc, print warning.
+	* configure.in:  Handle i386-none-aout rather than i386-aout-none.
 	* infptrace.c, language.h, utils.c:  Lint.
 	* m2-exp.y:  #undef MAX and MIN in case system includes set them.
 	* xm-tahoe.h:  Set HOST_BYTE_ORDER.  Include system versions of

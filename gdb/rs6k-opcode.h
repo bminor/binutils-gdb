@@ -54,7 +54,7 @@ struct rs6000_insn {
 operator      ext     format  opcode   opcode   operand format
 -------	    -------   ------  -------  ------   ---------------   */
 
-OPCODE rs6k_ops [] = {
+struct rs6000_insn rs6k_ops [] = {
 
 {"ti",		0,	"d",	3,	-1,	{TO,RA,SI,0}	},
 {"muli",	0,	"d",	7,	-1,	{RT,RA,SI,0}	},
@@ -233,4 +233,4 @@ OPCODE rs6k_ops [] = {
 {"mtfsf",	".",	"xfl",	63,	711,	{FLM,FRB,0}	},
 };
 
-#define	NOPCODES	(sizeof (rs6k_ops) / sizeof (OPCODE))
+#define	NOPCODES	(sizeof (rs6k_ops) / sizeof (struct rs6000_insn))
