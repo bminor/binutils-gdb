@@ -284,17 +284,17 @@ GDBTK_LIBRARY = $(datadir)/insight$(GDBTK_VERSION)
 GDBTK_SRC_DIR = @GDBTK_SRC_DIR@
 
 SUBDIR_GDBTK_OBS = \
-	gdbtk.o gdbtk-bp.o gdbtk-cmds.o gdbtk-hooks.o \
+	gdbtk.o gdbtk-bp.o gdbtk-cmds.o gdbtk-hooks.o gdbtk-interp.o \
 	gdbtk-register.o gdbtk-stack.o gdbtk-varobj.o gdbtk-wrapper.o
 SUBDIR_GDBTK_SRCS = \
 	gdbtk/generic/gdbtk.c gdbtk/generic/gdbtk-bp.c \
-	gdbtk/generic/gdbtk-cmds.c gdbtk/generic/gdbtk-hooks.c \
+	gdbtk/generic/gdbtk-cmds.c gdbtk/generic/gdbtk-hooks.c gdbtk-interp.c \
 	gdbtk/generic/gdbtk-register.c gdbtk/generic/gdbtk-stack.c \
 	gdbtk/generic/gdbtk-varobj.c gdbtk/generic/gdbtk-wrapper.c \
 	gdbtk/generic/gdbtk-main.c
 SUBDIR_GDBTK_DEPS = \
 	$(LIBGUI) $(ITCL_DEPS) $(ITK_DEPS) $(TK_DEPS) $(TCL_DEPS)
-SUBDIR_GDBTK_INITS = gdbtk/generic/gdbtk.c
+SUBDIR_GDBTK_INITS = gdbtk/generic/gdbtk.c gdbtk/generic/gdbtk-interp.c
 SUBDIR_GDBTK_LDFLAGS=
 SUBDIR_GDBTK_CFLAGS= -DGDBTK
 SUBDIR_GDBTK_ALL= all-gdbtk
@@ -2447,6 +2447,14 @@ gdbtk-hooks.o: $(srcdir)/gdbtk/generic/gdbtk-hooks.c \
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS)  \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/gdbtk/generic/gdbtk-hooks.c -DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
+
+gdbtk-interp.o: $(srcdir)/gdbtk/generic/gdbtk-interp.c \
+	$(defs_h) $(interps_h) $(ui_out_h) $(ui_file_h) \
+	$(cli_out_h) $(gdb_string_h) $(cli_cmds_h) $(cli_decode_h) \
+	$(srcdir)/gdbtk/generic/gdbtk.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
+	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS) \
+		$(srcdir)/gdbtk/generic/gdbtk-interp.c
 
 gdbtk-main.o: $(srcdir)/gdbtk/generic/gdbtk-main.c $(defs_h) $(main_h) \
 	$(gdb_string_h)

@@ -1,3 +1,7 @@
+2003-02-18  Keith Seitz  <keiths@redhat.com>
+
+	* Makefile.in: Add gdbtk-interps.c.
+
 2003-02-18  Kevin Buettner  <kevinb@redhat.com>
 
 	* sparc-tdep.c (sparc_frame_chain): Adjust return value.
