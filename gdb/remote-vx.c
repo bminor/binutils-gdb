@@ -1252,37 +1252,14 @@ vx_attach (args, from_tty)
     }
 
   /* It worked... */
-  push_target (&vx_run_ops);
-  /* The unsigned long pid will get turned into a signed int here,
-     but it doesn't seem to matter.  inferior_pid must be signed
-     in order for other parts of GDB to work correctly.  */
+
   inferior_pid = pid;
+  push_target (&vx_run_ops);
+
+  if (vx_running)
+    free (vx_running);
   vx_running = 0;
-#if defined (START_INFERIOR_HOOK)
-  START_INFERIOR_HOOK ();
-#endif
-
-  mark_breakpoints_out ();
-
-  /* Set up the "saved terminal modes" of the inferior
-     based on what modes we are starting it with.  */
-
-  target_terminal_init ();
-
-  /* Install inferior's terminal modes.  */
-
-  target_terminal_inferior ();
-
-  /* We will get a task spawn event immediately.  */
-
-  init_wait_for_inferior ();
-  clear_proceed_status ();
-  stop_soon_quietly = 1;
-  wait_for_inferior ();
-  stop_soon_quietly = 0;
-  normal_stop ();
 }
-
 
 /* detach_command --
    takes a program previously attached to and detaches it.

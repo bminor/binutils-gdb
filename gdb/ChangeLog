@@ -1,3 +1,8 @@
+Sat Feb 15 17:43:46 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* remote-vx.c (vx_attach):  Fix for PR 11356.  Remove code added
+	by kung.  It made no sense.
+
 Fri Feb 14 13:00:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* main.c (print_gdb_help): Make static to match declaration.
