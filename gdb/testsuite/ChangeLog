@@ -1,3 +1,9 @@
+2004-02-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/call-ar-st.exp: Call get_debug_format.  Remove xfail on
+	sparc*-*-solaris* into a kfail PR gdb/1539 on sparc-*-* for stabs
+	only on the "print_small_structs from print_long_arg_list" test.
+
 2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/completion.exp: Kill a stray backslash.
