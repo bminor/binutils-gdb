@@ -313,6 +313,10 @@ enum reloc_type
   /* These relocs are used for the mips16.  */
   R_MIPS16_26 = 100,
   R_MIPS16_GPREL = 101
+/* start-sanitize-sky */
+  /* These relocs are for the dvp.  */
+  , R_MIPS_DVP_11_PCREL = 120
+/* end-sanitize-sky */
 };
 
 static reloc_howto_type elf_mips_howto_table[] =
@@ -752,6 +756,24 @@ static reloc_howto_type elf_mips16_gprel_howto =
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false);		/* pcrel_offset */
+
+/* start-sanitize-sky */
+/* DVP relocations.  */
+static  reloc_howto_type elf_mips_dvp_11_pcrel_howto =
+  HOWTO (R_MIPS_DVP_11_PCREL,	/* type */
+	 3,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 11,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS_DVP_11_PCREL",	/* name */
+	 true,			/* partial_inplace */
+	 0x7ff,			/* src_mask */
+	 0x7ff,			/* dst_mask */
+	 false);		/* pcrel_offset */
+/* end-sanitize-sky */
 
 /* Do a R_MIPS_HI16 relocation.  This has to be done in combination
    with a R_MIPS_LO16 reloc, because there is a carry from the LO16 to
@@ -1550,6 +1572,10 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
     return &elf_mips16_jump_howto;
   else if (code == BFD_RELOC_MIPS16_GPREL)
     return &elf_mips16_gprel_howto;
+/* start-sanitize-sky */
+  else if (code == BFD_RELOC_MIPS_DVP_11_PCREL)
+    return &elf_mips_dvp_11_pcrel_howto;
+/* end-sanitize-sky */
 
   return NULL;
 }
@@ -1569,6 +1595,10 @@ mips_info_to_howto_rel (abfd, cache_ptr, dst)
     cache_ptr->howto = &elf_mips16_jump_howto;
   else if (r_type == R_MIPS16_GPREL)
     cache_ptr->howto = &elf_mips16_gprel_howto;
+/* start-sanitize-sky */
+  else if (r_type == R_MIPS_DVP_11_PCREL)
+    cache_ptr->howto = &elf_mips_dvp_11_pcrel_howto;
+/* end-sanitize-sky */
   else
     {
       BFD_ASSERT (r_type < (unsigned int) R_MIPS_max);
@@ -3012,6 +3042,11 @@ _bfd_mips_elf_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
      unsigned int *line_ptr;
 {
   asection *msec;
+
+  if (_bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
+				     filename_ptr, functionname_ptr, 
+				     line_ptr))
+    return true;
 
   msec = bfd_get_section_by_name (abfd, ".mdebug");
   if (msec != NULL)
@@ -6370,7 +6405,9 @@ mips_elf_size_dynamic_sections (output_bfd, info)
 	      outname = bfd_get_section_name (output_bfd,
 					      s->output_section);
 	      target = bfd_get_section_by_name (output_bfd, outname + 4);
-	      if ((target != NULL && (target->flags & SEC_READONLY) != 0)
+	      if ((target != NULL
+		   && (target->flags & SEC_READONLY) != 0
+		   && (target->flags & SEC_ALLOC) != 0)
 		  || strcmp (outname, ".rel.dyn") == 0)
 		reltext = true;
 

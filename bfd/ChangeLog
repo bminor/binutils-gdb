@@ -1,3 +1,9 @@
+start-sanitize-sky
+Thu Jan 29 17:44:53 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* elf32-mips.c: Add dvp support.
+
+end-sanitize-sky
 Thu Jan 29 15:55:35 1998  J.J. van der Heijden  <J.J.vanderHeijden@student.utwente.nl>
 
 	* config.bfd (i[3456]-*-mingw32*): New target.
