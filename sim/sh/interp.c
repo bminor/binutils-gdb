@@ -1102,6 +1102,9 @@ trap (i, regs, memory, maskl, maskw, endianw)
 	      strnswap (regs[5], len);
 	      break;
 	    }
+	  case SYS_time:
+	    regs[0] = get_now ();
+	    break;
 	  default:
 	    abort ();
 	  }

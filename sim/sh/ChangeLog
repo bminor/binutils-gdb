@@ -1,3 +1,7 @@
+2001-01-24  Alexandre Oliva  <aoliva@redhat.com>
+
+	* interp.c (trap): Implement time.
+
 2000-10-24  Ben Elliston  <bje@redhat.com>
 
 	* gencode.c (tab): Delimit strings with commas where applicable.
