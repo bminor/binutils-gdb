@@ -1,3 +1,13 @@
+Tue Aug  1 22:52:53 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (VERSION): Bump to 4.14.2
+
+Tue Aug  1 16:04:36 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* xcoffread.c (process_linenos): The value in include file symbol
+	should point to line number table. Currently this value is not
+	set correctly by AIX ld. A fix to get around this bug.
+
 Tue Aug  1 11:44:53 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* configure.in: Check for working mmap, ansi headers, string.h,
