@@ -1,3 +1,10 @@
+Wed Feb  9 09:42:45 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* config/obj-coffbfd.c (obj_coff_init_stab_section): Use memset
+	instead of memcpy to zero the initial stab symbol, duh.
+	* config/obj-elf.c (obj_elf_init_stab_section): Ditto.
+	* config/obj-som.c (obj_som_init_stab_section): Ditto.
+
 Tue Feb  8 17:25:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* write.c (fixup_segment): Use as_bad_where, not as_bad.
