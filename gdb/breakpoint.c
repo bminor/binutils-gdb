@@ -1194,6 +1194,7 @@ breakpoint_1 (bnum, allflag)
 			      "longjmp", "longjmp resume"};
   static char *bpdisps[] = {"del", "dis", "keep"};
   static char bpenables[] = "ny";
+  char wrap_indent[80];
 
   if (!breakpoint_chain)
     {
@@ -1220,6 +1221,9 @@ breakpoint_1 (bnum, allflag)
 			 bptypes[(int)b->type],
 			 bpdisps[(int)b->disposition],
 			 bpenables[(int)b->enable]);
+	strcpy (wrap_indent, "                           ");
+	if (addressprint)
+	  strcat (wrap_indent, "           ");
 	switch (b->type)
 	  {
 	  case bp_watchpoint:
@@ -1241,6 +1245,7 @@ breakpoint_1 (bnum, allflag)
 		  {
 		    fputs_filtered ("in ", stdout);
 		    fputs_filtered (SYMBOL_SOURCE_NAME (sym), stdout);
+		    wrap_here (wrap_indent);
 		    fputs_filtered (" at ", stdout);
 		  }
 		fputs_filtered (b->symtab->filename, stdout);
