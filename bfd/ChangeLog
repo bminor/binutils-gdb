@@ -1,3 +1,11 @@
+Mon Jul 10 11:09:58 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/m68k-coff.mt (SELECT_VECS): Rename from SELECT_VECTORS.
+	Correct elements to be actual BFD vector names.
+
+	* Makefile.in (Makefile): Don't depend upon @frags@.
+	(config.status): Depend upon @frags@.
+
 Fri Jul  7 17:36:44 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffgen.c (coff_renumber_symbols): Sort defined symbols that are
