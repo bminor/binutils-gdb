@@ -1,3 +1,9 @@
+Tue Jul 12 12:22:32 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* gdb.base/Makefile.in: Added support for systems that name core
+	  files by appending "core" to the program name.
+	* gdb.base/a1-selftest.exp: Likewise.
+
 Mon Jul 11 23:59:18 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/return.exp:  Add comment and message for `return double'

@@ -429,8 +429,10 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$prompt $"\
     # force GDB to dump core.  On Solaris expect seems to not see the
     # final message, even if gdb did dump core, so we check for the
     # core dump explicitly if we time out.
-    # bsd 386 systems append the name of the program to the corefile name.
-    system rm -f core core.gdb
+    #
+    # Some systems append "core" to the name of the program; others 
+    # append the name of the program to "core".
+    system rm -f core core.gdb gdb.core
     send "maint dump-me\n"
     expect {
 	-re "maint dump-me.*Should GDB dump core.*y or n. $" {
@@ -446,7 +448,7 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$prompt $"\
 		}
 		-re "$prompt $" { fail "GDB dumped core" }
 		default { 
-		    if {[file exists core] || [file exists core.gdb]} then {
+		    if {[file exists core] || [file exists core.gdb] || [file exists gdb.core]} then {
 			pass "GDB dumped core"
 		    } else {
 			fail "GDB dumped core"
@@ -457,7 +459,7 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$prompt $"\
 	-re ".*$prompt $"       { fail "GDB dumped core" }
 	timeout	            { fail "(timeout) GDB dumped core" }
     }
-    system rm -f core core.gdb
+    system rm -f core core.gdb gdb.core
 
     # Set the timeout back to the value it had when we were called.
     set timeout $oldtimeout
