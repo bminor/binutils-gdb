@@ -1,3 +1,7 @@
+Mon Dec 16 13:00:15 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10200-opc.c: Add pseudo-ops for "mov (an),am" and "mov an,(am)".
+
 Sat Dec 14 22:36:20 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-dis.c (print_mips16_insn_arg): The base address of a PC
