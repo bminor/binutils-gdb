@@ -354,6 +354,7 @@ sim_cgen_disassemble_insn (SIM_CPU *cpu, const CGEN_INSN *insn,
 			   const ARGBUF *abuf, IADDR pc, char *buf)
 {
   unsigned int length;
+  unsigned int base_length;
   unsigned long insn_value;
   struct disassemble_info disasm_info;
   SFILE sfile;
@@ -380,7 +381,13 @@ sim_cgen_disassemble_insn (SIM_CPU *cpu, const CGEN_INSN *insn,
   length = sim_core_read_buffer (sd, cpu, read_map, &insn_buf, pc,
 				 insn_length);
 
-  switch (min (cd->base_insn_bitsize, insn_bit_length))
+  /* If the entire insn will fit into an integer, then do it. Otherwise, just
+     use the bits of the base_insn.  */
+  if (insn_bit_length <= 32)
+    base_length = insn_bit_length;
+  else
+    base_length = min (cd->base_insn_bitsize, insn_bit_length);
+  switch (base_length)
     {
     case 0 : return; /* fake insn, typically "compile" (aka "invalid") */
     case 8 : insn_value = insn_buf.bytes[0]; break;

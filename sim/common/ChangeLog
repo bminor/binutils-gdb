@@ -1,3 +1,8 @@
+2000-08-28  Dave Brolley  <brolley@redhat.com>
+
+	* cgen-trace.c (sim_cgen_disassemble_insn): Make sure entire insn is
+	in insn_value if it will fit.
+
 2000-08-21  Frank Ch. Eigler  <fche@redhat.com>
 
 	* Make-common.in, cgen.sh: Contribute CGEN-related build targets/rules.
