@@ -1,3 +1,12 @@
+2004-08-08  Joel Brobecker  <brobecker@gnat.com>
+
+	* mips-tdep.c: Include "floatformat.h".
+	(n32n64_floatformat_always_valid): New function.
+	(floatformat_n32n64_long_double_big): New constant.
+	(mips_gdbarch_init): Set size and format of long double
+	for N32 and N64 ABIs.
+	* Makefile.in (mips-tdep.o): Update dependencies.
+
 2004-08-08  Andrew Cagney  <cagney@gnu.org>
 
 	* gdbarch.sh: Delete "fmt" and "attrib" fields.  Always use %s to
