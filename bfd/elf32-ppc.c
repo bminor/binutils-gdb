@@ -930,11 +930,11 @@ ppc_elf_set_private_flags (abfd, flags)
      bfd *abfd;
      flagword flags;
 {
-  BFD_ASSERT (!elf_ppc_flags_init (abfd)
+  BFD_ASSERT (!elf_flags_init (abfd)
 	      || elf_elfheader (abfd)->e_flags == flags);
 
   elf_elfheader (abfd)->e_flags = flags;
-  elf_ppc_flags_init (abfd) = true;
+  elf_flags_init (abfd) = true;
   return true;
 }
 
@@ -950,11 +950,11 @@ ppc_elf_copy_private_bfd_data (ibfd, obfd)
   if (bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return true;
 
-  BFD_ASSERT (!elf_ppc_flags_init (obfd)
+  BFD_ASSERT (!elf_flags_init (obfd)
 	      || elf_elfheader (obfd)->e_flags == elf_elfheader (ibfd)->e_flags);
 
   elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-  elf_ppc_flags_init (obfd) = true;
+  elf_flags_init (obfd) = true;
   return true;
 }
 
@@ -991,9 +991,9 @@ ppc_elf_merge_private_bfd_data (ibfd, obfd)
 
   new_flags = elf_elfheader (ibfd)->e_flags;
   old_flags = elf_elfheader (obfd)->e_flags;
-  if (!elf_ppc_flags_init (obfd))	/* First call, no flags set */
+  if (!elf_flags_init (obfd))	/* First call, no flags set */
     {
-      elf_ppc_flags_init (obfd) = true;
+      elf_flags_init (obfd) = true;
       elf_elfheader (obfd)->e_flags = new_flags;
     }
 

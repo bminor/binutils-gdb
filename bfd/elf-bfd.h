@@ -441,7 +441,8 @@ struct elf_backend_data
 /* Information stored for each BFD section in an ELF file.  This
    structure is allocated by elf_new_section_hook.  */
 
-struct bfd_elf_section_data {
+struct bfd_elf_section_data
+{
   /* The ELF header for this section.  */
   Elf_Internal_Shdr this_hdr;
   /* The ELF header for the reloc section associated with this
@@ -464,6 +465,8 @@ struct bfd_elf_section_data {
      record the dynamic symbol index for a section symbol
      corresponding to this section.  */
   long dynindx;
+  /* A pointer available for the processor specific ELF backend.  */
+  PTR tdata;
 };
 
 #define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)
@@ -532,8 +535,8 @@ struct elf_obj_tdata
      find_nearest_line.  */
   struct mips_elf_find_line *find_line_info;
 
-  /* Used by PowerPC to determine if the e_flags field has been intiialized */
-  boolean ppc_flags_init;
+  /* Used to determine if the e_flags field has been initialized */
+  boolean flags_init;
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
@@ -553,11 +556,12 @@ struct elf_obj_tdata
 #define elf_local_got_offsets(bfd) (elf_tdata(bfd) -> local_got_offsets)
 #define elf_dt_needed_name(bfd)	(elf_tdata(bfd) -> dt_needed_name)
 #define elf_bad_symtab(bfd)	(elf_tdata(bfd) -> bad_symtab)
-#define elf_ppc_flags_init(bfd)	(elf_tdata(bfd) -> ppc_flags_init)
+#define elf_flags_init(bfd)	(elf_tdata(bfd) -> flags_init)
 
 extern char * bfd_elf_string_from_elf_section PARAMS ((bfd *, unsigned, unsigned));
 extern char * bfd_elf_get_str_section PARAMS ((bfd *, unsigned));
 
+extern boolean _bfd_elf_print_private_bfd_data PARAMS ((bfd *, PTR));
 extern void bfd_elf_print_symbol PARAMS ((bfd *, PTR, asymbol *,
 					  bfd_print_symbol_type));
 #define elf_string_from_elf_strtab(abfd,strindex) \
