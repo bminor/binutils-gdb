@@ -13,6 +13,9 @@ Mon Dec 27 11:07:05 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* minsyms.c (prim_record_minimal_symbol_and_info): . . . to here.
 	* minsyms.c (prim_record_minimal_symbol): Call
 	prim_record_minimal_symbol_and_info rather than duplicating code.
+	* minsyms.c, symtab.h (prim_record_minimal_symbol{,_and_info}),
+	coffread.c (record_minimal_symbol),
+	xcoffread.c (RECORD_MINIMAL_SYMBOL), callers: Add objfile parameter.
 
 Sun Dec 26 20:44:02 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 

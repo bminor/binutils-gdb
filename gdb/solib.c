@@ -326,7 +326,7 @@ solib_add_common_symbols (rtc_symp, objfile)
 	      name = obsavestring (name, strlen (name),
 				   &objfile -> symbol_obstack);
 	      prim_record_minimal_symbol (name, inferior_rtc_nlist.n_value,
-					  mst_bss);
+					  mst_bss, objfile);
 	    }
 	  free (origname);
 	}
@@ -442,7 +442,7 @@ look_for_base (fd, baseaddr)
      mapped memory segment, so skip it.  Also, if the fd corresponds
      to the exec file, skip it as well. */
 
-  if ((fd == -1) || fdmatch (fileno ((FILE *)(exec_bfd -> iostream)), fd))
+  if ((fd == -1) || fdmatch (fileno ((GDB_FILE *)(exec_bfd -> iostream)), fd))
     {
       return (0);
     }
@@ -785,7 +785,7 @@ solib_add (arg_string, from_tty, target)
 	    {
 	      if (from_tty)
 		{
-		  printf ("Symbols already loaded for %s\n", so -> so_name);
+		  printf_unfiltered ("Symbols already loaded for %s\n", so -> so_name);
 		}
 	    }
 	  else if (catch_errors
@@ -887,7 +887,7 @@ info_sharedlibrary_command (ignore, from_tty)
   
   if (exec_bfd == NULL)
     {
-      printf ("No exec file.\n");
+      printf_unfiltered ("No exec file.\n");
       return;
     }
   while ((so = find_solib (so)) != NULL)
@@ -896,23 +896,23 @@ info_sharedlibrary_command (ignore, from_tty)
 	{
 	  if (!header_done)
 	    {
-	      printf("%-12s%-12s%-12s%s\n", "From", "To", "Syms Read",
+	      printf_unfiltered("%-12s%-12s%-12s%s\n", "From", "To", "Syms Read",
 		     "Shared Object Library");
 	      header_done++;
 	    }
-	  printf ("%-12s",
+	  printf_unfiltered ("%-12s",
 		  local_hex_string_custom ((unsigned long) LM_ADDR (so),
 					   "08l"));
-	  printf ("%-12s",
+	  printf_unfiltered ("%-12s",
 		  local_hex_string_custom ((unsigned long) so -> lmend,
 					   "08l"));
-	  printf ("%-12s", so -> symbols_loaded ? "Yes" : "No");
-	  printf ("%s\n",  so -> so_name);
+	  printf_unfiltered ("%-12s", so -> symbols_loaded ? "Yes" : "No");
+	  printf_unfiltered ("%s\n",  so -> so_name);
 	}
     }
   if (so_list_head == NULL)
     {
-      printf ("No shared libraries loaded at this time.\n");	
+      printf_unfiltered ("No shared libraries loaded at this time.\n");	
     }
 }
 
@@ -1268,7 +1268,7 @@ solib_create_inferior_hook()
   stop_signal = 0;
   do
     {
-      target_resume (inferior_pid, 0, stop_signal);
+      target_resume (-1, 0, stop_signal);
       wait_for_inferior ();
     }
   while (stop_signal != SIGTRAP);

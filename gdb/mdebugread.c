@@ -2161,7 +2161,7 @@ parse_partial_symbols (objfile, section_offsets)
 	  ms_type = mst_unknown;
 	  complain (&unknown_ext_complaint, name);
 	}
-      prim_record_minimal_symbol (name, ext_in->asym.value, ms_type);
+      prim_record_minimal_symbol (name, ext_in->asym.value, ms_type, objfile);
     }
 
   /* Pass 3 over files, over local syms: fill in static symbols */
@@ -2333,7 +2333,8 @@ parse_partial_symbols (objfile, section_offsets)
 		  /* I believe this is used only for file-local functions.
 		     The comment in symconst.h ("load time only static procs")
 		     isn't particularly clear on this point.  */
-		  prim_record_minimal_symbol (name, sh.value, mst_file_text);
+		  prim_record_minimal_symbol (name, sh.value, mst_file_text,
+					      objfile);
 		  /* FALLTHROUGH */
 
 		case stProc:	/* Asm labels apparently */
@@ -2378,9 +2379,11 @@ parse_partial_symbols (objfile, section_offsets)
 
 		case stStatic:	/* Variable */
 		  if (sh.sc == scData || sh.sc == scSData || sh.sc == scRData)
-		    prim_record_minimal_symbol (name, sh.value, mst_file_data);
+		    prim_record_minimal_symbol (name, sh.value, mst_file_data,
+						objfile);
 		  else
-		    prim_record_minimal_symbol (name, sh.value, mst_file_bss);
+		    prim_record_minimal_symbol (name, sh.value, mst_file_bss,
+						objfile);
 		  class = LOC_STATIC;
 		  break;
 

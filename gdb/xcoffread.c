@@ -926,7 +926,7 @@ retrieve_traceback (abfd, textsec, cs, size)
 /* Reading symbol table has to be fast! Keep the followings as macros, rather
    than functions. */
 
-#define	RECORD_MINIMAL_SYMBOL(NAME, ADDR, TYPE, ALLOCED, SECTION)	\
+#define	RECORD_MINIMAL_SYMBOL(NAME, ADDR, TYPE, ALLOCED, SECTION, OBJFILE) \
 {						\
   char *namestr;				\
   if (ALLOCED) 					\
@@ -937,7 +937,7 @@ retrieve_traceback (abfd, textsec, cs, size)
     (ALLOCED) = 1;						\
   }								\
   prim_record_minimal_symbol_and_info (namestr, (ADDR), (TYPE), \
-				       (char *)NULL, (SECTION));	\
+				       (char *)NULL, (SECTION), (OBJFILE)); \
   misc_func_recorded = 1;					\
 }
 
@@ -1182,7 +1182,8 @@ read_xcoff_symtab (objfile, nsyms)
 		  if (!misc_func_recorded) {
 		     int alloced = 0;
 		     RECORD_MINIMAL_SYMBOL (last_csect_name, last_csect_val,
-					    mst_text, alloced, last_csect_sec);
+					    mst_text, alloced, last_csect_sec,
+					    objfile);
 		  }
 		    
 
@@ -1241,7 +1242,7 @@ read_xcoff_symtab (objfile, nsyms)
 
 function_entry_point:
 	    RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value, mst_text, 
-				   symname_alloced, cs->c_secnum);
+				   symname_alloced, cs->c_secnum, objfile);
 
 	    fcn_line_offset = main_aux->x_sym.x_fcnary.x_fcn.x_lnnoptr;
 	    fcn_start_addr = cs->c_value;
@@ -1330,14 +1331,14 @@ function_entry_point:
 
 	    prim_record_minimal_symbol_and_info
 	      ("<trampoline>", cs->c_value, mst_unknown,
-	       (char *)NULL, cs->c_secnum);
+	       (char *)NULL, cs->c_secnum, objfile);
 #else
 
 	    /* record trampoline code entries as mst_unknown symbol. When we
 	       lookup mst symbols, we will choose mst_text over mst_unknown. */
 
 	    RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value, mst_unknown,
-				   symname_alloced);
+				   symname_alloced, objfile);
 #endif
 	    continue;
 	  }
@@ -1361,7 +1362,7 @@ function_entry_point:
 
 	  int alloced = 0;
 	  RECORD_MINIMAL_SYMBOL (last_csect_name, last_csect_val,
-				mst_text, alloced, last_csect_sec);
+				mst_text, alloced, last_csect_sec, objfile);
       }
 
       /* c_value field contains symnum of next .file entry in table

@@ -205,7 +205,8 @@ record_minimal_symbol_and_info (name, address, ms_type, info, objfile)
     }
 
   name = obsavestring (name, strlen (name), &objfile -> symbol_obstack);
-  prim_record_minimal_symbol_and_info (name, address, ms_type, info, section);
+  prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
+				       objfile);
 }
 
 /*

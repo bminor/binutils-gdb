@@ -89,7 +89,7 @@ record_minimal_symbol (name, address, ms_type, objfile)
      struct objfile *objfile;
 {
   name = obsavestring (name, strlen (name), &objfile -> symbol_obstack);
-  prim_record_minimal_symbol (name, address, ms_type);
+  prim_record_minimal_symbol (name, address, ms_type, objfile);
 }
 
 
