@@ -27,6 +27,9 @@ tlog    = 1> $(canonhost)-x-$$i-build-log 2>&1
 canonhost := $(shell $(TREE)/config.sub $(host))
 
 # Convert config.guess results to a simpler form.
+ifeq ($(canonhost),sparc-sun-solaris2.1)
+canonhost := sparc-sun-solaris2
+endif
 ifeq ($(canonhost),mips-dec-ultrix4.2)
 canonhost := mips-dec-ultrix
 endif
