@@ -4,6 +4,7 @@ Thu Feb 19 02:07:15 1998  Doug Evans  <devans@charmed.cygnus.com>
 	* dvp.h (DVP_OPERAND_DMA_*): Rewrite.
 	(DVP_OPERAND_AUTOCOUNT): New modifier.
 	(dma_operand_{count,addr}): Declare.
+	(DVP_OPCODE_IGNORE_DIS): New macro.
 
 Wed Feb 18 15:48:50 1998  Doug Evans  <devans@canuck.cygnus.com>
 
