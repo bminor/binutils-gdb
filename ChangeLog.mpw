@@ -1,9 +1,13 @@
+Wed Jun 29 17:09:56 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-build.in: (install-only): New target.
+
 Sun Jun 26 15:47:58 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-configure (host_alias, target_alias): Rename from hostalias
 	and targetalias, add into generated Makefile.
 	(mk.tmp): If present, add into generated Makefile.
-	* mpw-build (all-gas): Build config.h first before gas proper.
+	* mpw-build.in (all-gas): Build config.h first before gas proper.
 
 Sun Jun 12 16:25:36 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
