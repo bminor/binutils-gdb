@@ -471,12 +471,14 @@ fi
 all_targets=false
 defvec=
 selvecs=
+assocvecs=
 selarchs=
 TDEFINES=
 for targ in $target $canon_targets
 do
     if test "x$targ" = "xall"; then
         all_targets=true
+	assocvecs="$assocvecs $targ_defvec $targ_selvecs"
     else
 	. $srcdir/config.bfd
 	if test "x$targ" = "x$target"; then
@@ -505,6 +507,17 @@ for i in $selvecs ; do
     esac
 done
 selvecs="$f"
+
+
+# uniq the associated vectors in all the configured targets.
+f=""
+for i in $assocvecs ; do
+    case " $f " in
+    *" $i "*) ;;
+    *) f="$f $i" ;;
+    esac
+done
+assocvecs="$f"
 
 
 # uniq the architectures in all the configured targets.
@@ -816,9 +829,12 @@ if test x${all_targets} = xtrue ; then
   selvecs=
   havevecs=
   selarchs=
+  test -n "$assocvecs" &&
+    assocvecs=`echo $assocvecs | sed -e 's/^/\&/' -e 's/ \(.\)/,\&\1/g'`
 else	# all_targets is true
   # Only set these if they will be nonempty, for the clever echo.
   havevecs=
+  assocvecs=
   test -n "$selvecs" &&
     havevecs=`echo $selvecs | sed -e 's/^/-DHAVE_/' -e 's/ \(.\)/ -DHAVE_\1/g'`
   test -n "$selvecs" &&
@@ -866,6 +882,7 @@ AC_SUBST(bfd_default_target_size)
 tdefaults=""
 test -n "${defvec}" && tdefaults="${tdefaults} -DDEFAULT_VECTOR=${defvec}"
 test -n "${selvecs}" && tdefaults="${tdefaults} -DSELECT_VECS='${selvecs}'"
+test -n "${assocvecs}" && tdefaults="${tdefaults} -DASSOCIATED_VECS='${assocvecs}'"
 test -n "${selarchs}" && tdefaults="${tdefaults} -DSELECT_ARCHITECTURES='${selarchs}'"
 test -n "${havevecs}" && tdefaults="${tdefaults} ${havevecs}"
 AC_SUBST(tdefaults)

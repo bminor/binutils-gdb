@@ -5975,12 +5975,14 @@ fi
 all_targets=false
 defvec=
 selvecs=
+assocvecs=
 selarchs=
 TDEFINES=
 for targ in $target $canon_targets
 do
     if test "x$targ" = "xall"; then
         all_targets=true
+	assocvecs="$assocvecs $targ_defvec $targ_selvecs"
     else
 	. $srcdir/config.bfd
 	if test "x$targ" = "x$target"; then
@@ -6009,6 +6011,17 @@ for i in $selvecs ; do
     esac
 done
 selvecs="$f"
+
+
+# uniq the associated vectors in all the configured targets.
+f=""
+for i in $assocvecs ; do
+    case " $f " in
+    *" $i "*) ;;
+    *) f="$f $i" ;;
+    esac
+done
+assocvecs="$f"
 
 
 # uniq the architectures in all the configured targets.
@@ -6320,9 +6333,12 @@ if test x${all_targets} = xtrue ; then
   selvecs=
   havevecs=
   selarchs=
+  test -n "$assocvecs" &&
+    assocvecs=`echo $assocvecs | sed -e 's/^/\&/' -e 's/ \(.\)/,\&\1/g'`
 else	# all_targets is true
   # Only set these if they will be nonempty, for the clever echo.
   havevecs=
+  assocvecs=
   test -n "$selvecs" &&
     havevecs=`echo $selvecs | sed -e 's/^/-DHAVE_/' -e 's/ \(.\)/ -DHAVE_\1/g'`
   test -n "$selvecs" &&
@@ -6343,10 +6359,10 @@ case ${host64}-${target64}-${want64} in
     if test -n "$GCC" ; then
        bad_64bit_gcc=no;
        echo $ac_n "checking for gcc version with buggy 64-bit support""... $ac_c" 1>&6
-echo "configure:6347: checking for gcc version with buggy 64-bit support" >&5
+echo "configure:6363: checking for gcc version with buggy 64-bit support" >&5
        # Add more tests for gcc versions with non-working 64-bit support here.
        cat > conftest.$ac_ext <<EOF
-#line 6350 "configure"
+#line 6366 "configure"
 #include "confdefs.h"
 :__GNUC__:__GNUC_MINOR__:__i386__:
 EOF
@@ -6383,6 +6399,7 @@ esac
 tdefaults=""
 test -n "${defvec}" && tdefaults="${tdefaults} -DDEFAULT_VECTOR=${defvec}"
 test -n "${selvecs}" && tdefaults="${tdefaults} -DSELECT_VECS='${selvecs}'"
+test -n "${assocvecs}" && tdefaults="${tdefaults} -DASSOCIATED_VECS='${assocvecs}'"
 test -n "${selarchs}" && tdefaults="${tdefaults} -DSELECT_ARCHITECTURES='${selarchs}'"
 test -n "${havevecs}" && tdefaults="${tdefaults} ${havevecs}"
 
@@ -6391,17 +6408,17 @@ for ac_hdr in stdlib.h unistd.h sys/stat.h sys/types.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:6395: checking for $ac_hdr" >&5
+echo "configure:6412: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 6400 "configure"
+#line 6417 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:6405: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:6422: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -6430,12 +6447,12 @@ done
 for ac_func in getpagesize
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:6434: checking for $ac_func" >&5
+echo "configure:6451: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 6439 "configure"
+#line 6456 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -6458,7 +6475,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:6462: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:6479: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -6483,7 +6500,7 @@ fi
 done
 
 echo $ac_n "checking for working mmap""... $ac_c" 1>&6
-echo "configure:6487: checking for working mmap" >&5
+echo "configure:6504: checking for working mmap" >&5
 if eval "test \"`echo '$''{'ac_cv_func_mmap_fixed_mapped'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6491,7 +6508,7 @@ else
   ac_cv_func_mmap_fixed_mapped=no
 else
   cat > conftest.$ac_ext <<EOF
-#line 6495 "configure"
+#line 6512 "configure"
 #include "confdefs.h"
 
 /* Thanks to Mike Haertel and Jim Avera for this test.
@@ -6644,7 +6661,7 @@ main()
 }
 
 EOF
-if { (eval echo configure:6648: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:6665: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   ac_cv_func_mmap_fixed_mapped=yes
 else
@@ -6669,12 +6686,12 @@ fi
 for ac_func in madvise mprotect
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:6673: checking for $ac_func" >&5
+echo "configure:6690: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 6678 "configure"
+#line 6695 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -6697,7 +6714,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:6701: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:6718: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else

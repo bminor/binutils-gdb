@@ -420,7 +420,7 @@ _bfd_vms_slurp_gsd (abfd, objtype)
 			{
 			  bfd_set_error (bfd_error_no_memory);
 			  return -1;
-		        }
+			}
 		    }
 		}
 	      else
@@ -661,13 +661,13 @@ _bfd_vms_slurp_gsd (abfd, objtype)
 	      }
 	    else	/* symbol reference */
 	      {
-	        symbol->name =
+		symbol->name =
 		  _bfd_vms_save_counted_string (vms_rec+8);
 #if VMS_DEBUG
 		vms_debug(4, "egsd sym ref #%d (%s, %04x=%s)\n", abfd->symcount,
 			   symbol->name, old_flags, flag2str(gsyflagdesc, old_flags));
 #endif
-	        symbol->section = bfd_make_section (abfd, BFD_UND_SECTION_NAME);
+		symbol->section = bfd_make_section (abfd, BFD_UND_SECTION_NAME);
 	      }
 
 	    symbol->flags = new_flags;
@@ -901,7 +901,7 @@ _bfd_vms_write_gsd (abfd, objtype)
 	  unsigned long ca_psindx = 0;
 	  unsigned long psindx;
 
-	  if (old_flags & BSF_FUNCTION)
+	  if ((old_flags & BSF_FUNCTION) && symbol->udata.p != NULL)
 	    {
 	      code_address = ((asymbol *) (symbol->udata.p))->value;
 	      ca_psindx = ((asymbol *) (symbol->udata.p))->section->index;

@@ -2671,18 +2671,17 @@ assign_section_numbers (abfd)
   /* Set up the list of section header pointers, in agreement with the
      indices.  */
   amt = section_number * sizeof (Elf_Internal_Shdr *);
-  i_shdrp = (Elf_Internal_Shdr **) bfd_alloc (abfd, amt);
+  i_shdrp = (Elf_Internal_Shdr **) bfd_zalloc (abfd, amt);
   if (i_shdrp == NULL)
     return false;
 
   amt = sizeof (Elf_Internal_Shdr);
-  i_shdrp[0] = (Elf_Internal_Shdr *) bfd_alloc (abfd, amt);
+  i_shdrp[0] = (Elf_Internal_Shdr *) bfd_zalloc (abfd, amt);
   if (i_shdrp[0] == NULL)
     {
       bfd_release (abfd, i_shdrp);
       return false;
     }
-  memset (i_shdrp[0], 0, sizeof (Elf_Internal_Shdr));
 
   elf_elfsections (abfd) = i_shdrp;
 

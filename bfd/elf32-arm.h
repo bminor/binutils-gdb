@@ -367,13 +367,6 @@ static const insn16 t2a1_bx_pc_insn = 0x4778;
 static const insn16 t2a2_noop_insn = 0x46c0;
 static const insn32 t2a3_b_insn = 0xea000000;
 
-static const insn16 t2a1_push_insn = 0xb540;
-static const insn16 t2a2_ldr_insn = 0x4e03;
-static const insn16 t2a3_mov_insn = 0x46fe;
-static const insn16 t2a4_bx_insn = 0x4730;
-static const insn32 t2a5_pop_insn = 0xe8bd4040;
-static const insn32 t2a6_bx_insn = 0xe12fff1e;
-
 #ifndef ELFARM_NABI_C_INCLUDED
 boolean
 bfd_elf32_arm_allocate_interworking_sections (info)

@@ -862,7 +862,9 @@ value_change_enclosing_type (struct value *val, struct type *new_encl_type)
       struct value *prev;
       
       new_val = (struct value *) xrealloc (val, sizeof (struct value) + TYPE_LENGTH (new_encl_type));
-      
+
+      VALUE_ENCLOSING_TYPE (new_val) = new_encl_type;
+ 
       /* We have to make sure this ends up in the same place in the value
 	 chain as the original copy, so it's clean-up behavior is the same. 
 	 If the value has been released, this is a waste of time, but there

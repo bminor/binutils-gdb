@@ -929,7 +929,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 
 	      if (symtab != NULL)
 		*symtab = s;
-	      return fixup_symbol_section (sym, objfile);
+	      return fixup_symbol_section (sym, s->objfile);
 	    }
 	  else if (MSYMBOL_TYPE (msymbol) != mst_text
 		   && MSYMBOL_TYPE (msymbol) != mst_file_text
@@ -937,7 +937,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	    {
 	      /* This is a mangled variable, look it up by its
 	         mangled name.  */
-	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), mangled_name, block,
+	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), mangled_name, NULL,
 					namespace, is_a_field_of_this, symtab);
 	    }
 	  /* There are no debug symbols for this file, or we are looking
@@ -1120,7 +1120,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 		   && !STREQ (name, SYMBOL_NAME (msymbol)))
 	    {
 	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), mangled_name,
-					block, namespace, is_a_field_of_this,
+					NULL, namespace, is_a_field_of_this,
 					symtab);
 	    }
 	}

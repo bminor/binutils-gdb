@@ -1,3 +1,83 @@
+2002-11-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-arm.h (t2a1_push_insn, t2a2_ldr_insn, t2a3_mov_insn,
+	t2a4_bx_insn, t2a5_pop_insn, t2a6_bx_insn): Remove.
+
+2002-11-05  Graeme Peterson  <gp@qnx.com>
+
+	* Makefile.am: Remove entries for elf32-qnx.[ch].
+	* Makefile.in: Regenerate.
+	* config.bfd: Change arm-nto to use bfd_elf32_{big|little}arm_vec,
+	ppc-nto to use bfd_elf32_powerpc{le}_vec, sh-nto to use
+	bfd_elf32_sh{l}_vec, and i386-nto to use bfd_elf32_i386_vec.
+	* configure.in: Remove support for bfd_elf32_sh{l}qnx_vec,
+	bfd_elf32_powerpc{le}qnx_vec, bfd_elf32_{big|little}armqnx_vec,
+	and bfd_elf32_i386qnx_vec, and removed elf32-qnx.lo from other targets.
+	bfd_elf32_sh{l}_vec, and i386-nto to use bfd_elf32_i386_vec.
+	* configure: Regenerate.
+	* elf32-qnx.c: Remove.
+	* elf32-qnx.h: Remove.
+	* elf.c: Remove calls to QNX specific set_nonloadable_filepos,
+	is_contained_by_filepos, and copy_private_bfd_data_p.
+	* elf32-i386.c: Remove QNX extended bfd support.
+	* elf32-ppc.c: Remove QNX extended bfd support.
+	* elf32-sh.c: Remove QNX extended bfd support.
+	* elfarm-nabi.c: Remove QNX extended bfd support.
+	* targets.c: Remove qnx vectors.
+	* elfxx-target.h (elf_backend_set_nonloadable_filepos): Remove
+	(elf_backend_is_contained_by_filepos): Remove.
+	(elf_backend_copy_private_bfd_data_p): Remove.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2002-11-05  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* config.bfd (sh-*-linux*): Use bfd_elf*_sh64*lin_vec as sh64
+	vectors in target_selvecs.
+	(shle-*-netbsdelf*): Use bfd_elf*_sh64*nbsd_vec as sh64 vectors
+	in target_selvecs.
+	(sh-*-netbsdelf*): Likewise.
+	* configure.in (assocvecs): New variable.  Handle assocvecs like
+	selvecs.
+	* configure: Regenerate.
+	* format.c (bfd_check_format_matches): Store bfd_target pointers
+	in matching_vector instead of target names.  Select first target
+	from bfd_associated_vector that matches a list of ambiguous targets.
+	* targets.c (_bfd_associated_vector): New array.
+	(bfd_associated_vector): New variable.
+	(_bfd_target_vector): Add bfd_elf*_sh64*lin_vec.
+	* libbfd-in.h (bfd_associated_vector): Declare.
+	* libbfd.h: Regenerate.
+
+2002-11-05  Elias Athanasopoulos  <eathan@otenet.gr>
+
+	* vms-gsd.c (_bfd_vms_write_gsd): Check that symbol->udata.p is
+	non-NULL before dereferencing.
+
+2002-11-04  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* vms.c (vms_object_p): Restore the start address when returning
+	NULL.
+
+2002-11-04  Alan Modra  <amodra@bigpond.net.au>
+	    Hans-Peter Nilsson  <hp@axis.com>
+
+	* elflink.h (struct elf_final_link_info): Add shndxbuf_size.
+	(elf_bfd_final_link): Don't bother zeroing symtab_hdr fields.
+	Set up a larger symshndxbuf, and write it out.  Free it on
+	exit rather than freeing symbuf twice.  Correct section index
+	on output section symbol loop.
+	(elf_link_output_sym): Accumulate symbol extension section
+	indices, reallocating symshndxbuf rather than writing it out.
+	(elf_link_flush_output_syms): Don't flush symshndxbuf.
+	* elf.c (assign_section_numbers): Init i_shdrp to all zero.
+	Use bfd_zalloc to clear i_shdrp[0] too.
+
+2002-11-03  Stephen Clarke <stephen.clarke@earthling.net>
+
+	 * elf32-sh64-com.c (sh64_address_in_cranges): Use
+	_raw_size of cranges section if _cooked_size not yet set.
+
 2002-11-03  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-v850.c (v850_elf_relax_delete_bytes): Correct parameters

@@ -294,6 +294,17 @@
 	(mi_execute_command): Don't print the prompt if the command return
 	is MI_CMD_QUIET.
 
+2002-11-05  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (lookup_symbol_aux): In minsym sections, don't use the
+	previous values of 'objfile' and 'block'.
+
+2002-11-05  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* values.c (value_change_enclosing_type): Set 
+	enclosing_type field correctly also for the case where 
+	more memory needs to be allocated.
+
 2002-11-03  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-tdep.c (i387_print_float_info): Call fputs_filtered instead
@@ -863,7 +874,7 @@
 
 2002-10-11  Klee Dienes  <kdienes@apple.com>
 
-        * findvar.c (read_memory_typed_address): New function.
+        * corefile.c (read_memory_typed_address): New function.
         * gdbcore.h (read_memory_typed_address): Add prototype.
         * blockframe.c (sigtramp_saved_pc): Use read_memory_typed_address
 	to read a value destined for a CORE_ADDR, not read_memory_integer.
