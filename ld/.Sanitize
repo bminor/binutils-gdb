@@ -88,6 +88,7 @@ lnk960.em
 lnk960.sh
 m88kbcs.sc-sh
 m88kbcs.sh
+mri.c
 go32.sh
 mkscript.c
 news.sh
@@ -106,7 +107,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.33  1992/04/05 01:46:05  sac
+# Revision 1.34  1992/04/15 23:11:53  sac
+# added mri.c
+#
+# Revision 1.33  1992/04/05  01:46:05  sac
 # New lexer.
 #
 # New targets for h8/300 simulator and DOS
