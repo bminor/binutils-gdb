@@ -1,3 +1,8 @@
+2003-04-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-mips.c (bfd_elf32_bfd_reloc_type_lookup): Detect (ctor)
+	pointer size from ABI, not arch_bits_per_address.
+
 2003-04-07  Kevin Buettner  <kevinb@redhat.com>
 
 	* elfn32-mips.c (elf32_mips_grok_prstatus): Adjust core file related
