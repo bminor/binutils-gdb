@@ -1,5 +1,8 @@
 Tue Jun 22 03:15:38 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* solib.c (solib_add_common_symbols): Don't call lookup_minimal_symbol.
+	(solib_add): Call special_symbol_handling once, not once per library.
+
 	* procfs.c (procfs_resume): Don't pass a SIGTSTP whose action
 	is SIG_DFL.
 
