@@ -165,7 +165,7 @@ CORE_ADDR hppa_frame_saved_pc (struct frame_info *frame);
 CORE_ADDR hppa_frame_args_address (struct frame_info *fi);
 CORE_ADDR hppa_frame_locals_address (struct frame_info *fi);
 int hppa_frame_num_args (struct frame_info *frame);
-void hppa_push_dummy_frame (struct inferior_status *inf_status);
+void hppa_push_dummy_frame (void);
 void hppa_pop_frame (void);
 CORE_ADDR hppa_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
                                int nargs, struct value **args,
@@ -1426,14 +1426,13 @@ hppa_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
   return 0;
 }
 
-/*
-   These functions deal with saving and restoring register state
-   around a function call in the inferior. They keep the stack
-   double-word aligned; eventually, on an hp700, the stack will have
-   to be aligned to a 64-byte boundary. */
+/* These functions deal with saving and restoring register state
+   around a function call in the inferior.  They keep the stack
+   double-word aligned;  eventually, on an hp700, the stack will have
+   to be aligned to a 64-byte boundary.  */
 
 void
-hppa_push_dummy_frame (struct inferior_status *inf_status)
+hppa_push_dummy_frame (void)
 {
   CORE_ADDR sp, pc, pcspace;
   register int regnum;

@@ -452,13 +452,8 @@ extern void hppa_frame_find_saved_regs (struct frame_info *,
 
 /* Push an empty stack frame, to record the current PC, etc. */
 
-/* FIXME: brobecker 2002-12-26.  This macro definition takes advantage
-   of the fact that DEPRECATED_PUSH_DUMMY_FRAME is called within a
-   function where a variable inf_status of type struct inferior_status
-   * is defined.  Ugh!  Until this is fixed, we will not be able to
-   move to multiarch partial.  */
-#define DEPRECATED_PUSH_DUMMY_FRAME hppa_push_dummy_frame (inf_status)
-extern void hppa_push_dummy_frame (struct inferior_status *);
+#define DEPRECATED_PUSH_DUMMY_FRAME hppa_push_dummy_frame ()
+extern void hppa_push_dummy_frame (void);
 
 /* Discard from the stack the innermost frame, 
    restoring all saved registers.  */

@@ -1,5 +1,14 @@
 2003-03-18  J. Brobecker  <brobecker@gnat.com>
 
+	Continuing work to convert the hppa targets to multiarch partial.
+	* hppa-tdep.c (hppa_push_dummy_frame): Remove unused function
+	parameter. Reformat comment.
+	* config/pa/tm-hppa.h (hppa_push_dummy_frame): Update profile.
+	(DEPRECATED_PUSH_DUMMY_FRAME): Update call to hppa_push_dummy_frame()
+	to match new profile.
+
+2003-03-18  J. Brobecker  <brobecker@gnat.com>
+
 	* hppa-tdep.c (hppa_push_dummy_frame): Remove hack which does not
 	appear to be working in any case.
 
