@@ -218,6 +218,7 @@ enum machine_type {
   M_ARM = 103,		/* Advanced Risc Machines ARM */
   M_386_NETBSD = 134,	/* NetBSD/i386 binary */
   M_68K_NETBSD = 135,	/* NetBSD/m68k binary */
+  M_68K4K_NETBSD = 136,	/* NetBSD/m68k4k binary */
   M_532_NETBSD = 137,	/* NetBSD/ns32k binary */
   M_SPARC_NETBSD = 138,	/* NetBSD/sparc binary */
   M_MIPS1 = 151,        /* MIPS R2000/R3000 binary */
@@ -335,6 +336,9 @@ struct aoutdata {
       o_magic,
       n_magic
     } magic;
+
+  /* A buffer for find_nearest_line.  */
+  char *line_buf;
 
   /* The external symbol information.  */
   struct external_nlist *external_syms;
