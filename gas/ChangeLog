@@ -1,3 +1,16 @@
+Mon Sep  8 23:08:04 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	Support -alh and -ald for DWARF 1:
+	* listing.c (struct list_info_struct): Add debugging field.
+	(listing_newline): Initialize the debugging field.  If ELF, if the
+	section starts with .debug or .line, set the debugging field in
+	the listing structure.
+	(debugging_pseudo): Add list parameter.  Change all callers.  If
+	the debugging field is set, consider it to be a debugging pseudo.
+	If ELF, skip blank lines between debugging lines.
+	* read.c (emit_expr): If ELF, look for line numbers.
+	(stringer): If ELF, look for file names.
+
 Mon Sep  8 12:33:40 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (v850_insert_operand): Only test for overflow
