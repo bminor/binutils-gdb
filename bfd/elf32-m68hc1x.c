@@ -512,11 +512,12 @@ elf32_m68hc11_size_stubs (output_bfd, stub_bfd, info, add_stub_section)
                   bfd_boolean is_far;
 
                   sym = local_syms + r_indx;
-                  hdr = elf_elfsections (input_bfd)[sym->st_shndx];
-                  sym_sec = hdr->bfd_section;
                   is_far = (sym && (sym->st_other & STO_M68HC12_FAR));
                   if (!is_far)
                     continue;
+
+                  hdr = elf_elfsections (input_bfd)[sym->st_shndx];
+                  sym_sec = hdr->bfd_section;
                   stub_name = (bfd_elf_string_from_elf_section
                                (input_bfd, symtab_hdr->sh_link,
                                 sym->st_name));

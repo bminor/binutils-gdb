@@ -1,3 +1,8 @@
+2003-07-23  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* elf32-m68hc1x.c (elf32_m68hc11_size_stubs): Avoid crash when
+	we have a local symbol in common section.
+
 2003-07-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elfcode.h (elf_object_p): Allocate tdata via _bfd_set_format.
