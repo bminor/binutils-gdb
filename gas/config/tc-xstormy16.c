@@ -25,6 +25,7 @@
 #include "opcodes/xstormy16-desc.h"
 #include "opcodes/xstormy16-opc.h"
 #include "cgen.h"
+#include "dwarf2dbg.h"
 
 /* Structure to hold all of the different components describing
    an individual instruction.  */
@@ -84,6 +85,8 @@ md_show_usage (stream)
 const pseudo_typeS md_pseudo_table[] =
 {
   { "word",	cons,		4 },
+  { "file",     (void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
+  { "loc",      dwarf2_directive_loc,  0 },
   { NULL, 	NULL, 		0 }
 };
 
@@ -141,7 +144,7 @@ md_operand (e)
   if (*input_line_pointer != '@')
     return;
 
-  if (strncmp (input_line_pointer+1, "fptr", 4) == 0)
+  if (strncmp (input_line_pointer + 1, "fptr", 4) == 0)
     {
       input_line_pointer += 5;
       SKIP_WHITESPACE ();

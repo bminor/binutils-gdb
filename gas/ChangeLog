@@ -1,3 +1,8 @@
+2003-05-20  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-xstormy16.c: Include dwarf2dbg.h.
+	(md_pseudo_table): Add entries for .loc and .line.
+
 2003-05-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* dw2gencfi.c (cfi_parse_arg): Only use tc_regname_to_dw2regnum if
