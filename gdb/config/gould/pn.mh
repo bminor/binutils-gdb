@@ -1,0 +1,3 @@
+# OBSOLETE # Host: Gould Powernode
+# OBSOLETE XDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o core-aout.o
+# OBSOLETE XM_FILE= xm-pn.h

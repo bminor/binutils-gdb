@@ -1,0 +1,110 @@
+# Copyright (C) 1998 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# tests for local variables
+# Written by Satish Pai <pai@apollo.hp.com> 1997-07-08
+
+
+# This file is part of the gdb testsuite
+
+if $tracelevel then {
+        strace $tracelevel
+        }
+
+#
+# test running programs
+#
+set prms_id 0
+set bug_id 0
+
+set testfile "local"
+set srcfile ${testfile}.cc
+set binfile ${objdir}/${subdir}/${testfile}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+
+
+#
+# set it up at a breakpoint so we can play with the variable values
+#
+if ![runto_main] then {
+    perror "couldn't run to breakpoint"
+    continue
+}
+
+send_gdb "break marker1\n" ; gdb_expect -re ".*$gdb_prompt $"
+
+    send_gdb "cont\n"
+    gdb_expect {
+        -re "Break.* marker1 \\(\\) at .*:$decimal.*$gdb_prompt $" {
+            send_gdb "up\n"
+            gdb_expect {
+                -re ".*$gdb_prompt $" {}
+                timeout { fail "up from marker1" }
+            }
+        }
+        -re "$gdb_prompt $" { fail "continue to marker1"  }
+        timeout { fail "(timeout) continue to marker1"  }
+    }
+
+send_gdb "ptype Local\n"
+gdb_expect {
+    -re "type = class Local \{\r\n\[\t \]*public:\r\n\[\t \]*int loc1;\r\n\r\n\[\t \]*.char loc_foo\\(char\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.C:10\\).*$gdb_prompt $" { pass "ptype Local" }
+    -re "type = class Local \{\r\n\[\t \]*public:\r\n\[\t \]*int loc1;\r\n\r\n\[\t \]*.char loc_foo\\(char\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.C:\[0-9\]*\\).*$gdb_prompt $" { pass "ptype Local (incorrect line number?)" }
+    -re ".*$gdb_prompt $"   {  fail "ptype Local" }
+    timeout             { fail "(timeout) ptype Local" }
+}
+
+send_gdb "ptype InnerLocal\n"
+gdb_expect {
+    -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*InnerLocal::NestedInnerLocal nest1;\r\n\r\n\[\t \]*.int il_foo\\(const unsigned char &\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.C:36\\).*$gdb_prompt $" { pass "ptype InnerLocal" }
+    -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*class InnerLocal::NestedInnerLocal nest1;\r\n\r\n\[\t \]*.int il_foo\\(const unsigned char &\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.C:36\\).*$gdb_prompt $" { pass "ptype InnerLocal" }
+    -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*InnerLocal::NestedInnerLocal nest1;\r\n\r\n\[\t \]*.int il_foo\\(const unsigned char &\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.C:\[0-9\]*\\).*$gdb_prompt $" { pass "ptype InnerLocal (incorrect line number?" }
+    -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*class InnerLocal::NestedInnerLocal nest1;\r\n\r\n\[\t \]*.int il_foo\\(const unsigned char &\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.C:\[0-9\]*\\).*$gdb_prompt $" { pass "ptype InnerLocal (incorrect line number?" }
+    -re ".*$gdb_prompt $"   {  fail "ptype InnerLocal" }
+    timeout             { fail "(timeout) ptype InnerLocal" }
+}
+
+
+send_gdb "ptype NestedInnerLocal\n"
+gdb_expect {
+    -re "type = class InnerLocal::NestedInnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*int nil;\r\n\r\n\[\t \]*.int nil_foo\\(int\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.C:44\\).*$gdb_prompt $" { pass "ptype NestedInnerLocal" }
+    -re "type = class InnerLocal::NestedInnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*int nil;\r\n\r\n\[\t \]*.int nil_foo\\(int\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.C:\[0-9\]*\\).*$gdb_prompt $" { pass "ptype NestedInnerLocal (incorrect line number?)" }
+    -re "No symbol.*in current context.*$gdb_prompt $" { pass "ptype NestedInnerLocal (known aCC limitation)" }
+    -re ".*$gdb_prompt $"   {  fail "ptype NestedInnerLocal" }
+    timeout             { fail "(timeout) ptype NestedInnerLocal" }
+}     
+
+send_gdb "ptype InnerLocal::NestedInnerLocal\n"
+gdb_expect {
+    -re "type = class InnerLocal::NestedInnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*int nil;\r\n\r\n\[\t \]*.int nil_foo\\(int\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.C:44\\).*$gdb_prompt $" { pass "ptype InnerLocal::NestedInnerLocal" }
+    -re "type = class InnerLocal::NestedInnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*int nil;\r\n\r\n\[\t \]*.int nil_foo\\(int\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.C:\[0-9\]*\\).*$gdb_prompt $" { pass "ptype InnerLocal::NestedInnerLocal (incorrect line number?)" }
+    -re ".*$gdb_prompt $"   {  fail "ptype InnerLocal::NestedInnerLocal" }
+    timeout             { fail "(timeout) ptype InnerLocal::NestedInnerLocal" }
+}
+
+

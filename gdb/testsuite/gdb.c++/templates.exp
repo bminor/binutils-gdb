@@ -1,0 +1,202 @@
+# Copyright (C) 1992, 1996, 1997 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# This file was written by Fred Fish. (fnf@cygnus.com)
+
+set ws "\[\r\n\t \]+"
+
+if $tracelevel then {
+	strace $tracelevel
+}
+
+set testfile "templates"
+set srcfile ${testfile}.cc
+set binfile ${objdir}/${subdir}/${testfile}
+
+# Create and source the file that provides information about the compiler
+# used to compile the test case.
+if [get_compiler_info ${binfile} "c++"] {
+    return -1
+}
+source ${binfile}.ci
+
+# if we are on HPUX and we are not compiled with gcc, then skip these tests.
+
+if [istarget hppa*-*-hpux*] {
+    if {!$gcc_compiled} {
+	continue 
+    }
+}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+source ${binfile}.ci
+
+#
+#  Test printing of the types of templates.
+#
+
+proc test_ptype_of_templates {} {
+    global gdb_prompt
+    global ws
+
+    send_gdb "ptype T5<int>\n"
+    gdb_expect {
+	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}T5\\<int> & operator=\\(T5<int> const &\\);${ws}T5\\(int\\);${ws}T5\\(T5<int> const &\\);${ws}~T5\\(void\\);${ws}static void \\* operator new\\(unsigned (int|long)\\);${ws}static void operator delete\\(void \\*\\);${ws}int value\\(void\\);${ws}\}\r\n$gdb_prompt $" {
+	    pass "ptype T5<int>"
+	}
+	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;((${ws}T5\\<int> & operator=\\(T5<int> const &\\);)|(${ws}T5\\(int\\);)|(${ws}T5\\(T5<int> const &\\);)|(${ws}~T5\\(void\\);)|(${ws}static void \\* operator new\\(unsigned (int|long)\\);)|(${ws}static void operator delete\\(void \\*\\);)|(${ws}int value\\(void\\);))*${ws}\}\r\n$gdb_prompt $" {
+	    pass "ptype T5<int> (obsolescent gcc or gdb)"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "ptype T5<int>"
+	}
+	timeout {
+	    fail "ptype T5<int> (timeout)"
+	}
+    }
+
+    send_gdb "ptype t5i\n"
+    gdb_expect {
+	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}T5<int> & operator=\\(T5<int> const &\\);${ws}T5\\(int\\);${ws}T5\\(T5<int> const &\\);${ws}~T5\\(void\\);${ws}static void \\* operator new\\(unsigned (int|long)\\);${ws}static void operator delete\\(void \\*\\);${ws}int value\\(void\\);${ws}\}\r\n$gdb_prompt $" {
+	    pass "ptype t5i"
+	}
+	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;((${ws}T5<int> & operator=\\(T5<int> const &\\);)|(${ws}T5\\(int\\);)|(${ws}T5\\(T5<int> const &\\);)|(${ws}~T5\\(void\\);)|(${ws}static void \\* operator new\\(unsigned (int|long)\\);)|(${ws}static void operator delete\\(void \\*\\);)|(${ws}int value\\(void\\);))*${ws}\}\r\n$gdb_prompt $" {
+	    pass "ptype t5i (obsolescent gcc or gdb)"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "ptype t5i"
+	}
+	timeout {
+	    fail "ptype t5i (timeout)"
+	}
+    }
+}
+
+#
+#  Test breakpoint setting on template methods.
+#
+
+proc test_template_breakpoints {} {
+    global gdb_prompt
+    global testfile
+    global srcdir
+
+    send_gdb "break T5<int>::T5\n"
+    gdb_expect {
+	-re "0. cancel.*\[\r\n\]*.1. all.*\[\r\n\]*.2. T5<int>::T5\\(int\\) at .*\[\r\n\]*.3. T5<int>::T5\\(T5<int> const &\\) at .*\[\r\n\]*> $" {
+	    gdb_test "0" \
+		"cancelled" \
+		"constructor breakpoint (obsolete format!)"
+	}
+	-re ".0. cancel\[\r\n\]*.1. all\[\r\n\]*.2. T5<int>::T5\\(T5<int> const &\\) at .*templates.cc:.*\[\r\n\]*.3. T5<int>::T5\\(int\\) at .*templates.cc:.*\[\r\n\]*> $" {
+	    gdb_test "0" \
+		"cancelled" \
+		"constructor breakpoint"
+	}
+	-re ".*$gdb_prompt $" { fail "constructor breakpoint" }
+	default { fail "constructor breakpoint (timeout)" }
+    }
+    
+   gdb_test "break T5<int>::~T5" \
+	"Breakpoint.*at.* file .*${testfile}.cc, line.*" \
+	"destructor breakpoint"    
+    
+    gdb_test "break T5<int>::value" \
+	"Breakpoint.*at.* file .*${testfile}.cc, line.*" \
+	"value method breakpoint"
+
+    delete_breakpoints
+}
+
+#
+#  Test calling of template methods.
+#
+
+proc test_template_calls {} {
+    global gdb_prompt
+
+    if [target_info exists gdb,cannot_call_functions] {
+	setup_xfail "*-*-*" 2416
+	fail "This target can not call functions"
+	return
+    }
+
+    send_gdb "print t5i.value()\n"
+    gdb_expect {
+	-re ".* = 2\[\r\n\]*$gdb_prompt $" { pass "print t5i.value()" }
+	-re "Cannot invoke functions on this machine.*$gdb_prompt $" {
+	    fail "print t5i.value()"
+	}
+	-re ".*$gdb_prompt $" { fail "print t5i.value()" }
+	default { fail "print t5i.value() (timeout)" }
+    }
+}
+
+
+proc do_tests {} {
+    global prms_id
+    global bug_id
+    global subdir
+    global objdir
+    global srcdir
+    global binfile
+    global gdb_prompt
+    global supports_template_debugging
+
+    set prms_id 0
+    set bug_id 0
+
+    # Start with a fresh gdb.
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load $binfile
+
+    if { !$supports_template_debugging } {
+	warning "compiler lacks debugging info for templates; tests suppressed." 0
+	return
+    }
+
+    # Get the debug format for the compiled test case.  If that
+    # format is DWARF 1 then just skip all the tests since none of
+    # them will pass.
+
+    if [ runto_main] then {
+	get_debug_format
+	if [ setup_xfail_format "DWARF 1" ] then {
+	    fail "C++ tests skipped due to limited C++ support in DWARF 1 debug format"
+	    return
+	}
+	clear_xfail "*-*-*"
+    }
+
+    test_ptype_of_templates
+    test_template_breakpoints
+
+    if [ runto_main] {
+	test_template_calls
+    }
+}
+
+do_tests
+

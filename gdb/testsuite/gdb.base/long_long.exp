@@ -1,0 +1,163 @@
+# Copyright (C) 1997, 1998 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+
+# long_long.exp   Test printing of 64-bit things in 32-bit gdb.
+#                 Also test differnet kinds of formats.
+#
+if $tracelevel then {
+	strace $tracelevel
+}
+
+set testfile long_long
+set srcfile ${srcdir}/${subdir}/${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+
+# What compiler are we using?
+#
+if [get_compiler_info ${binfile}] {
+    return -1
+}
+
+if {$gcc_compiled == 0} {
+    if [istarget "hppa*-hp-hpux*"] then {
+	### FIXME +e only works with HP's compiler
+	set additional_flags "additional_flags=+e -w"
+    } else {
+	# don't know what the compiler is, hope it supports long long!
+	set additional_flags "additional_flags=-w"
+    }
+} else {
+    set additional_flags "additional_flags=-w"
+}
+
+if  { [gdb_compile "${srcfile}" "${binfile}" executable [list debug $additional_flags]] != "" } {
+    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+# use this to debug:
+#log_user 1
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+
+if { ![runto known_types] } then { 
+   fail "run to known_types" 
+   return 
+}
+
+gdb_test "n 4"   ".*34.*" "get to known place"
+
+# Check the hack for long long prints.
+#
+gdb_test "p/x hex" ".*0x0.*" "default print hex"
+gdb_test "p/x dec" ".*0xab54a98ceb1f0ad2.*" "default print dec"
+gdb_test "p/x bin" ".*0x123456789abcdef.*" "default print bin"
+gdb_test "p/x oct" ".*0xa72ee53977053977.*" "default print oct"
+
+gdb_test "p/x hex" ".*0x0.*" "hex print"
+gdb_test "p/u dec" ".*12345678901234567890.*" "decimal print"
+gdb_test "p/t bin" ".*100100011010001010110011110001001101010111100110111101111.*" "binary print"
+gdb_test "p/o oct" ".*01234567123456701234567.*" "octal print"
+
+# Try all the combinations to bump up coverage.
+#
+gdb_test "p/d oct" ".*12046818088235383159.*" ""
+gdb_test "p/u oct" ".*0xa72ee53977053977.*" ""
+gdb_test "p/o oct" ".*.*" ""
+gdb_test "p/t oct" ".*1010011100101110111001010011100101110111000001010011100101110111.*" ""
+gdb_test "p/a oct" ".*That operation is not available.*" ""
+gdb_test "p/c oct" ".*0xa72ee53977053977.*" ""
+gdb_test "p/f oct" ".*-5.9822653797615723e-120.*" ""
+
+gdb_test "p/d *(int *)&oct" ".*-1490098887.*" ""
+gdb_test "p/u *(int *)&oct" ".*2804868409.*" ""
+gdb_test "p/o *(int *)&oct" ".*024713562471.*" ""
+gdb_test "p/t *(int *)&oct" ".*10100111001011101110010100111001.*" ""
+gdb_test "p/a *(int *)&oct" ".*0xa72ee539.*" ""
+gdb_test "p/c *(int *)&oct" ".*57 '9'.*" ""
+gdb_test "p/f *(int *)&oct" ".*-2.42716126e-15.*" ""
+
+gdb_test "p/d *(short *)&oct" ".*-22738.*" ""
+gdb_test "p/u *(short *)&oct" ".*42798.*" ""
+gdb_test "p/o *(short *)&oct" ".*0123456.*" ""
+gdb_test "p/t *(short *)&oct" ".*1010011100101110.*" ""
+gdb_test "p/a *(short *)&oct" ".*0xffffa72e.*" ""
+gdb_test "p/c *(short *)&oct" ".* 46 '.'.*" ""
+gdb_test "p/a **short *)&oct" ".*0xffffa72e <.*" ""
+gdb_test "p/f *(short *)&oct" ".*-22738.*" ""
+
+gdb_test "x/x &oct" ".*0xa72ee539.*" ""
+gdb_test "x/d &oct" ".*.-1490098887*" ""
+gdb_test "x/u &oct" ".*2804868409.*" ""
+gdb_test "x/o &oct" ".*024713562471.*" ""
+gdb_test "x/t &oct" ".*10100111001011101110010100111001.*" ""
+gdb_test "x/a &oct" ".*0xa72ee539 <.*" ""
+gdb_test "x/c &oct" ".*-89 'M-''.*" ""
+gdb_test "x/f &oct" ".*-5.9822653797615723e-120.*" ""
+
+gdb_test "x/2x &oct" ".*.*" ""
+gdb_test "x/2d &oct" ".*.*" ""
+gdb_test "x/2u &oct" ".*.*" ""
+gdb_test "x/2o &oct" ".*.*" ""
+gdb_test "x/2t &oct" ".*.*" ""
+gdb_test "x/2a &oct" ".*.*" ""
+gdb_test "x/2c &oct" ".*.*" ""
+gdb_test "x/2f &oct" ".*.*" ""
+
+gdb_test "x/2bx &oct" ".*.*" ""
+gdb_test "x/2bd &oct" ".*.*" ""
+gdb_test "x/2bu &oct" ".*.*" ""
+gdb_test "x/2bo &oct" ".*.*" ""
+gdb_test "x/2bt &oct" ".*.*" ""
+gdb_test "x/2ba &oct" ".*.*" ""
+gdb_test "x/2bc &oct" ".*.*" ""
+gdb_test "x/2bf &oct" ".*.*" ""
+
+gdb_test "x/2hx &oct" ".*.*" ""
+gdb_test "x/2hd &oct" ".*.*" ""
+gdb_test "x/2hu &oct" ".*.*" ""
+gdb_test "x/2ho &oct" ".*.*" ""
+gdb_test "x/2ht &oct" ".*.*" ""
+gdb_test "x/2ha &oct" ".*.*" ""
+gdb_test "x/2hc &oct" ".*.*" ""
+gdb_test "x/2hf &oct" ".*.*" ""
+
+gdb_test "x/2wx &oct" ".*.*" ""
+gdb_test "x/2wd &oct" ".*.*" ""
+gdb_test "x/2wu &oct" ".*.*" ""
+gdb_test "x/2wo &oct" ".*.*" ""
+gdb_test "x/2wt &oct" ".*.*" ""
+gdb_test "x/2wa &oct" ".*.*" ""
+gdb_test "x/2wc &oct" ".*.*" ""
+gdb_test "x/2wf &oct" ".*.*" ""
+
+gdb_test "x/2gx &oct" ".*.*" ""
+gdb_test "x/2gd &oct" ".*.*" ""
+gdb_test "x/2gu &oct" ".*.*" ""
+gdb_test "x/2go &oct" ".*.*" ""
+gdb_test "x/2gt &oct" ".*.*" ""
+gdb_test "x/2ga &oct" ".*.*" ""
+gdb_test "x/2gc &oct" ".*.*" ""
+gdb_test "x/2gf &oct" ".*.*" ""
+
+gdb_exit
+return 0

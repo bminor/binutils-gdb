@@ -1,0 +1,153 @@
+# Copyright (C) 1997, 1998 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# use this to debug:
+#
+#log_user 1
+
+# step-test.exp -- Expect script to test stepping in gdb
+
+if $tracelevel then {
+    strace $tracelevel
+}
+
+set testfile step-test
+set srcfile ${srcdir}/${subdir}/${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+
+remote_exec build "rm -f ${binfile}"
+if { [gdb_compile "${srcfile}" "${binfile}" executable {debug}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+
+if ![runto_main] then {
+   fail "Can't run to main"
+   return 0
+}
+
+# Vanilla step/next
+#
+gdb_test "next" ".*${decimal}.*x = 1;.*" "next 1"
+gdb_test "step" ".*${decimal}.*y = 2;.*" "step 1"
+
+# With count
+#
+gdb_test "next 2" ".*${decimal}.*w = w.*2;.*" "next 2"
+gdb_test "step 3" ".*${decimal}.*z = z.*5;.*" "step 3"
+gdb_test "next" ".*${decimal}.*callee.*OVER.*" "next 3"
+
+# Step over call
+#
+gdb_test "next" ".*${decimal}.*callee.*INTO.*" "next over"
+
+# Step into call
+#
+gdb_test "step" ".*${decimal}.*glob.*"   "step into"
+
+# Step out of call
+#
+# I wonder if this is really portable.  Are there any caller-saves
+# platforms, on which `finish' will return you to some kind of pop
+# instruction, which is attributed to the line containing the function
+# call?
+gdb_test "finish" ".*${decimal}.*a.*5.*= a.*3.*" "step out"
+
+### Testing nexti and stepi.
+###
+### test_i NAME COMMAND HERE THERE
+###
+### Send COMMAND to gdb over and over, while the output matches the
+### regexp HERE, followed by the gdb prompt.  Pass if the output
+### eventually matches the regexp THERE, followed by the gdb prompt;
+### fail if we have to iterate more than a hundred times, we time out
+### talking to gdb, or we get output which is neither HERE nor THERE.  :)
+###
+### Use NAME as the name of the test.
+###
+### The exact regexps used are "$HERE.*$gdb_prompt $"
+###                        and "$THERE.*$gdb_prompt $"
+### 
+proc test_i {name command here there} {
+    global gdb_prompt
+    
+    set i 0
+    while 1 {
+	send_gdb "${command}\n"
+	gdb_expect {
+	    -re "$here.*$gdb_prompt $" {
+		# Okay, we're still on the same line.  Just step again.
+	    }
+	    -re "$there.*$gdb_prompt $" {
+		# We've reached the next line.  Rah.
+		pass "$name"
+		return
+	    }
+	    -re "$gdb_prompt $" {
+		# We got something else.  Fail.
+		fail "$name"
+		return
+	    }
+	    timeout {
+		fail "$name (timeout)"
+		return
+	    }
+	}
+
+	# Have we gone for too many steps without seeing any progress?
+	if {[incr i] >= 100} {
+	    fail "$name (no progress after 100 steps)"
+	    return
+	}
+    }
+}
+
+test_i "stepi to next line" "stepi" \
+       ".*${decimal}.*a.*5.* = a.*3" \
+       ".*${decimal}.*callee.*STEPI"
+test_i "stepi into function" "stepi" \
+       ".*${decimal}.*callee.*STEPI" \
+       ".*callee \\(\\) at .*step-test\\.c"
+gdb_test "finish"  ".*${decimal}.*callee.*NEXTI.*" "stepi: finish call"
+test_i "nexti over function" "nexti" \
+       ".*${decimal}.*callee.*NEXTI" \
+       ".*${decimal}.*y = w \\+ z;"
+
+# On some platforms, if we try to step into a function call that
+# passes a large structure by value, then we actually end up stepping
+# into memcpy, bcopy, or some such --- GCC emits the call to pass the
+# argument.  Opinion is bitterly divided about whether this is the
+# right behavior for GDB or not, but we'll catch it here, so folks
+# won't forget about it.
+
+send_gdb "break [gdb_get_line_number "step-test.exp: large struct by value"]\n"
+gdb_test "continue" \
+         ".*Breakpoint ${decimal},.*large_struct_by_value.*" \
+	 "run to pass large struct"
+gdb_test "step" \
+         ".*step-test.exp: arrive here 1.*" \
+         "large struct by value"
+
+gdb_test "continue" ".*Program exited normally.*" "run to finish"
+
+return 0

@@ -1,0 +1,5 @@
+# Linker options for so-thresh test
+-l00-so-thresh
+-l01-so-thresh
+-l02-so-thresh
+

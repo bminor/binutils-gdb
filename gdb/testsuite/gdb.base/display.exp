@@ -1,0 +1,147 @@
+#   Copyright (C) 1997, 1998
+#   Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# display.exp   Test display commands
+#               Also do some printing stuff for coverage's sake.
+#
+if $tracelevel then {
+	strace $tracelevel
+}
+
+set testfile display
+set srcfile  ${srcdir}/${subdir}/${testfile}.c
+set binfile  ${objdir}/${subdir}/${testfile}
+
+
+
+if  { [gdb_compile "${srcfile}" "${binfile}" executable {debug additional_flags=-w}] != "" } {
+    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+if [target_info exists gdb_stub] {
+    gdb_step_for_stub;
+}
+
+
+# use this to debug:
+#log_user 1
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+
+# Ok, on to real life
+#
+gdb_test "b main"     ".*Breakpoint 1.*" "break main"
+gdb_test "r"          ".*Breakpoint 1, main.*" "get to main"
+gdb_test "b 14" ".*Breakpoint 2.*" "break do_loops"
+gdb_test "c"          ".*Breakpoint 2, do_loops.*" "get to do_loops"
+
+# Create stopping points.
+#
+gdb_test "wat sum"    ".*\[Ww\]atchpoint 3: sum.*" "set watch"
+gdb_test "b 19"       ".*Breakpoint 4.*" "break 19"
+
+# Create displays for those points
+#
+gdb_test "info disp" ".*There are no auto-display expressions now..*" "inf disp"
+gdb_test "disp i" ".*1: i = 0.*" "display i"
+gdb_test "disp/x j" ".*2: /x j = 0x0.*" "display j"
+gdb_test "disp/i &k" ".*3: x/i &k  $hex:.*" "display &k"
+gdb_test "disp/f sum" ".*4: /f sum = 0.*" "display/f sum"
+gdb_test "disp/s &sum" ".*5: x/s &sum  $hex.*sum.:.*" "display/s &sum"
+
+# Hit the displays
+#
+gdb_test "c" ".*\[Ww\]atchpoint 3: sum.*\[1-9\]*: x/s &sum.*\[1-9\]*: /f sum = 1.40129846e.45\r\n\[1-9\]*: x/i &k.*\r\n\[1-9\]*: /x j = 0x0\r\n\[1-9\]*: i = 0.*" "first disp"
+gdb_test "c" ".*\[Ww\]atchpoint 3: sum.*\[1-9\]*: x/s &sum.*\[1-9\]*: /f sum = 2.80259693e.45\r\n\[1-9\]*: x/i &k.*\r\n\[1-9\]*: /x j = 0x0.*\[1-9\]*: i = 0.*" "second disp"
+
+gdb_test "enab  disp 6" ".*No display number 6..*" "catch err"
+gdb_test "disab disp 1" ".*" "disab"
+gdb_test "disab disp 2" ".*" ""
+gdb_test "enab disp 1"  ".*" "re-enab"
+gdb_test "enab disp 1"  ".*" "re-enab of enab"
+gdb_test "undisp 5"     ".*" "undisp"
+gdb_test "i disp"       ".*Auto-display expressions now in effect.*y  /f sum.*y  /1bi &k.*n  /x j.*y  i.*" "info disp"
+
+gdb_test "c" ".*\[Ww\]atch.*4.20389539e-45.*.*i = 0.*" "next hit"
+
+send_gdb "undisp\n"
+gdb_expect {
+    -re ".*Delete all auto-display expressions.*y or n. $" {
+        send_gdb "y\n"
+        gdb_expect {
+            -re "y\r\n$gdb_prompt $" {
+                pass "undisp all"
+            }
+            -re ".*$gdb_prompt $" {
+                fail "some un-helpful response"
+            }
+            -re ".*Delete all.*$" {
+                fail "re-ask question"
+            }
+            timeout { fail "timeout" }
+        }
+    }
+    -re ".*$gdb_prompt $" {
+        fail "undisp all"
+    }
+    timeout { fail "timeout" }
+}
+
+gdb_test "disab 3" ".*.*" ""
+gdb_test "c" ".*Breakpoint 4.*" "watch off"
+
+# Now the printf tests
+#
+gdb_test "fin" ".*Run till exit.*Value returned is.*= 10.*" "finish"
+gdb_test "s" ".*do_vars.*.*25" ""
+gdb_test "tb 35" ".*Breakpoint 5 a.*" ""
+gdb_test "c" ".*do_vars.*35.*35.*" ""
+
+# Beat on printf a bit
+#
+gdb_test "printf" ".*Argument required.*" ""
+gdb_test "printf %d" ".*Bad format string, missing.*" ""
+gdb_test "printf \"%d" ".*Bad format string, non-terminated.*" ""
+gdb_test "printf \"%d%d\",i" ".*Wrong number of arguments.*" ""
+gdb_test "printf \"\\\\!\\a\\f\\r\\t\\v\\b\"" ".*!.*" ""
+gdb_test "printf \"\"" ".*" "re-set term"
+gdb_test "printf \"\\w\"" ".*Unrecognized escape character.*" ""
+gdb_test "printf \"%d\" j" ".*Invalid argument syntax.*" ""
+
+# play with "p", too
+#
+gdb_test "p/r j" ".*Undefined output format.*" ""
+#gdb_test "x/rx j" ".*Cannot access memory.*" "no error!"
+gdb_test "x/0 j" ".*" "x/0 j"
+gdb_test "p/0 j" ".*Item count other than 1 is meaningless.*" "p/0 j"
+gdb_test "p/s sum" ".*Format letter.*is meaningless.*" " no s"
+gdb_test "p/i sum" ".*Format letter.*is meaningless.*.*" "no i"
+gdb_test "p/a &sum" ".*= 0x.*<sum>.*" ""
+gdb_test "p/a main+1000" ".*= 0x.*<.*>.*" ""
+gdb_test "p/a \\\$pc" ".*= 0x.*<do_vars+.*>.*" ""
+gdb_test "p/a &j" ".*= 0x.*<.*>.*" ""
+gdb_test "p/a &&j" ".*A syntax error.*" ""
+
+# Done!
+#
+gdb_exit
+return 0

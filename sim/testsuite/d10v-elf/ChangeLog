@@ -1,0 +1,84 @@
+1999-01-13  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* t-sadd.s: New file.
+	* Makefile.in (TESTS): Add t-sadd.
+
+Mon Feb 16 09:20:57 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-macros.i (VEC_*): Define.
+	(DMAP_REG, DMAP_BASE, DMAP_MASK): Define.
+	(IMAP[01]_REG): Define.
+
+	* t-rdt.s (test_tdt): New file.
+
+	* t-dbt.s (test_dbt): New file.
+
+	* Makefile.in (TESTS): Add t-rdt and t-dbt.
+	
+
+Fri Feb 13 16:21:13 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-sp.s: New test.
+	* Makefile.in (TESTS): Update.
+
+Wed Feb 11 17:58:50 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-macros.i: Update trap calls, func in r4, args in
+ 	r0...
+	(start): Force r0 to zero.
+
+	* t-sub2w.s: Ditto.
+
+Tue Dec  9 10:41:44 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-rte.s (success): New file.
+	* Makefile.in: Update.
+
+	* t-rep.s: Check rep repeats correct number of times.
+
+Fri Dec  5 10:11:18 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-mvtc.s: Check for stuck-zero in MOD_E, MOD_S.
+
+	* t-trap.s: New file.
+	* Makefile.in (TESTS): Update.
+
+Thu Dec  4 16:56:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-macros.i: Add definitions for PSW bits.
+
+	* t-mvtc.s: New file.
+	* Makefile.in (TESTS): Update.
+
+Wed Dec  3 16:35:24 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-rac.s: New files.
+	
+	* t-macros.i: Add macros for checking psw and 2w quantities.
+
+	* Makefile.in (TESTS): Update.
+
+Tue Dec  2 11:01:36 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-sub2w.s, t-mulxu.s, t-mac.s, t-mvtac.s, t-msbu.s, t-sub.s: New
+ 	files.
+  	
+	* Makefile.in: Update.
+
+Mon Nov 17 20:14:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-subi.s (test_subi): New file.
+	* Makefile.in: Update.
+
+Fri Nov 14 14:06:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-rep.s: New file. Test case of branch to RPT_E address.
+
+Mon Nov 10 19:21:26 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-macros.i (_start): New file.
+	* t-rachi.s: New file.
+
+	* Makefile.in (RUN_FOR_TARGET): Look for simulator in d10v
+ 	directory.
+

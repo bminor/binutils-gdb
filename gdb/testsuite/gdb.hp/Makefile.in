@@ -1,0 +1,25 @@
+VPATH = @srcdir@
+srcdir = @srcdir@
+
+PROGS = ambiguous ctti-add exception gen-so-thresh namespace \
+	optimize pxdb so-thresh templ-hp watch-hp xdb 
+
+MISCELLANEOUS = \
+	lib00-so-thresh.c lib00-so-thresh.sl \
+	lib01-so-thresh.c lib01-so-thresh.sl \
+	lib02-so-thresh.c lib02-so-thresh.sl \
+	so-thresh.c so-thresh.linkopts
+
+all: 
+	@echo "Nothing to be done for all..."
+
+#### host, target, and site specific Makefile frags come in here.
+
+clean mostlyclean:
+	-rm -f *.ci *.o $(OBJS) $(PROGS) $(MISCELLANEOUS) *~ core
+
+distclean maintainer-clean realclean: clean
+	-rm -f Makefile config.status config.log
+
+Makefile: $(srcdir)/Makefile.in $(srcdir)/configure.in
+	$(SHELL) ./config.status --recheck

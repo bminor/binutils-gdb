@@ -1,0 +1,255 @@
+# thread_local_stg.exp -- Expect script to test thread-local storage
+# Copyright (C) 1992 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# use this to debug:
+#
+#log_user 1
+
+# Thread stuff is _slow_; prepare for long waits.
+#
+# Further, this test has some "null" lines designed
+# to consume output from gdb that was too late to be
+# matched (sequence is "gdb_test" sends; timeout and
+# on to next send; result finally comes in; mismatch).
+#
+# The null command is 'gdb_test "p \$pc" ".*" ""'
+# NOTE: this command undoes any up/down stuff!
+#
+proc pre_timeout {} {
+    global timeout
+
+    set timeout [expr "$timeout + 100"]
+}
+
+proc post_timeout {} {
+    global timeout
+    global oldtimeout
+
+    set timeout $oldtimeout
+    gdb_test "p \$pc" ".*" ""
+}
+
+if $tracelevel then {
+    strace $tracelevel
+}
+
+if { ![istarget "hppa*-*-hpux10.30"] && ![istarget "hppa*-*-hpux11.*"] } {
+    verbose "HPUX thread test ignored for non-hppa or pre-HP/UX-10.30 targets."
+    return 0
+}
+
+set testfile start-stop
+set srcfile ${srcdir}/${subdir}/${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+
+if [get_compiler_info ${binfile}] {
+    return -1
+}
+
+# To build the executable we need to link against the thread library.
+#
+#     cc -Ae -g -o start_stop -lpthread start_stop.c
+#
+#compile "${srcfile} -Ae -g -lpthread -o ${binfile}"
+
+if {$gcc_compiled == 0} {
+    set additional_flags "additional_flags=-Ae"
+} else {
+    set additional_flags ""
+}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${testfile}.c" "${binfile}.o" object [list debug $additional_flags]] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+remote_exec build "ld /usr/ccs/lib/crt0.o ${binfile}.o -lcl -lpthread  -lc /opt/langtools/lib/end.o -o ${binfile}"
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+
+gdb_load ${binfile}
+if ![runto_main] then {
+   fail "Can't run to main"
+   return 0
+}
+
+set oldtimeout $timeout
+#set timeout [expr "$timeout + 200"]
+set oldverbose $verbose
+#set verbose 40
+
+gdb_test "b do_pass" ".*"  "set do_pass bp"
+gdb_test "c" ".*do_pass.*" "run to do_pass"
+gdb_test "cle" ".*" ""
+
+# Set a breakpoint at the "spin" routine and
+# collect the thread local's value.  
+#
+gdb_test "b 67" ".*Breakpoint 3.*67.*"   "Set bp"
+
+# Can't use "gdb_test", as it uses "$gdb_prompt $" in
+# testing the result.  Our new prompt is ">", with
+# no trailing space, so we can't do this just by
+# changing "prompt". 
+#
+# Anyway, I couldn't get expect to see the ">" prompt,
+# during the command addition, so I just punted.
+# _You_ are welcome to try, if you want!
+#
+send_gdb "commands 3\n"
+gdb_expect {
+    -re "(.*Type commands.*\"end\"\.\r\n\>)" {
+        pass "start commands"
+    }
+    -re ".*$gdb_prompt $" {
+        fail "start commands"
+    }
+}
+
+# Assume we're in commands-input mode.
+#
+send_gdb "silent\n"
+send_gdb "set val_debugger_saw\[me\] = a_thread_local\n"
+send_gdb "continue\n"
+send_gdb "end\n"
+
+gdb_expect {
+    -re ".*set.*cont.*$gdb_prompt $" {
+        pass "add commands"
+    }
+    -re ".*$gdb_prompt $" {
+        fail "add commands"
+    }
+}
+
+# Check out of paranoia.
+#
+send_gdb "info break 3\n"
+gdb_expect {
+    -re ".*breakpoint.*set val_debugger.*continue.*$gdb_prompt $" {
+        pass "Commands added"
+    }
+    -re ".*$gdb_prompt $" {
+        fail "Commands not added."
+    }
+}
+
+# Set a bp to inspect the results
+#
+gdb_test "b 134" ".*Breakpoint 4.*" ""
+
+# We now expect to run through a whole pass, seeing 
+# specific results as noted below (actual gotten by
+# running application with debugging print statements
+# turned on.
+#
+# Since this'll run for while, set a generous timeout.
+#
+set timeout [expr "$timeout + 30"]
+send_gdb "c\n"
+gdb_expect {
+    -re ".*Program exited normally.*$gdb_prompt $" {
+        fail "program runaway"
+    }
+    -re ".*Pass 0 done.*Pass 1 done.*$gdb_prompt $" {
+        fail "program runaway 2"
+    }
+    -re ".*Pass 0 done.*Breakpoint 4.*134.*$gdb_prompt $" {
+        pass "get to end of first pass"
+    }
+    -re ".*$gdb_prompt $" {
+        fail "No progress?"
+    }
+    timeout { fail "timeout" }
+}
+
+gdb_test "p val_debugger_saw" ".*0, 1, 3.*"   "first pass"
+
+send_gdb "i th\n" 
+gdb_expect {
+    -re ".* 1.*system thread.* 2.*system thread.*$gdb_prompt $" {
+        fail "Too many threads left"
+    }
+    -re ".*\\\* 1 system thread.*$gdb_prompt $" {
+        pass "Expect only base thread"
+    }
+    -re ".*No stack.*$gdb_prompt $" {
+        fail "runaway"
+    }
+    -re ".*$gdb_prompt $" {
+        fail "Hunh?"
+    }
+    timeout { fail "timeout" }
+}
+
+gdb_test "i b"  ".*4.*breakpoint.*134.*hit.*1 time.*" "Expect 134 bp to exist"
+
+gdb_test "c" ".*Breakpoint 4.*134.*" "get to end of second pass"
+gdb_test "p val_debugger_saw" ".*6, 10, 15.*" "second pass"
+
+gdb_test "c" ".*Breakpoint 4.*134.*" "get to end of third pass"
+gdb_test "p val_debugger_saw" ".*21, 28, 36.*" "third pass"
+
+gdb_test "info bre 3" ".*already hit 9 times.*" "count of silent bp hits"
+
+# Start over and do some "info address" stuff
+#
+send_gdb "d\n"
+gdb_expect {
+   -re ".*Delete all breakpoints.*$" {
+       send_gdb "y\n"
+       gdb_expect {
+           -re ".*$gdb_prompt $" {
+               pass "del bps"
+           }
+       }
+   }
+   -re ".*$gdb_prompt $" { fail "no question" }
+}
+
+gdb_test "b spin" ".*Breakpoint 5.*" ""
+
+send_gdb "r\n"
+gdb_expect {
+   -re ".*Start it from the beginning.*$" {
+       send_gdb "y\n"
+       gdb_expect {
+           -re ".*$gdb_prompt $" { pass "restart" }
+       }
+   }
+   -re ".*Starting program.*$gdb_prompt $" {
+       pass "restart after previous fails"
+   }
+   -re ".*$gdb_prompt $" { fail "Can't restart" }
+}
+gdb_test "i ad a_global" ".*a_global.*static storage at address.*" "i ad a_global"
+gdb_test "i add me"      ".*me.*local variable at frame offset.*"  "i ad me"
+gdb_test "i ad a_thread_local" ".*a_thread_local.*a thread-local variable at offset.*" "i ad a_thread_local"
+
+# Done!
+#
+gdb_exit
+
+set timeout $oldtimeout
+set verbose $oldverbose
+
+# execute_anywhere "rm -f ${binfile}"
+#
+return 0
