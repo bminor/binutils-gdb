@@ -1,3 +1,13 @@
+Fri Aug  2 14:57:49 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldgram.y (LOADADDR): New terminal.
+	(exp): Handle LOADADDR.
+	* ldlex.l: Recognize LOADADDR.
+	* ldexp.c (exp_print_token): Add LOADADDR.
+	(fold_name): Implement LOADADDR.
+	* ldlang.c (exp_init_os): Treat LOADADDR like ADDR.
+	* ld.texinfo (Arithmetic Functions): Document LOADADDR.
+
 Thu Aug  1 12:52:19 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.h (check_nocrossrefs): Declare.

@@ -113,7 +113,7 @@ static int error_index;
 %token MEMORY DEFSYMEND
 %token NOLOAD DSECT COPY INFO OVERLAY
 %token NAME LNAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY
-%token <integer> SIZEOF NEXT ADDR
+%token <integer> SIZEOF NEXT ADDR LOADADDR
 %token STARTUP HLL SYSLIB FLOAT NOFLOAT NOCROSSREFS
 %token ORIGIN FILL
 %token LENGTH CREATE_OBJECT_SYMBOLS INPUT GROUP OUTPUT CONSTRUCTORS
@@ -668,6 +668,8 @@ exp	:
 			{ $$ = exp_nameop(SIZEOF,$3); }
 	|	ADDR '(' NAME ')'
 			{ $$ = exp_nameop(ADDR,$3); }
+	|	LOADADDR '(' NAME ')'
+			{ $$ = exp_nameop(LOADADDR,$3); }
 	|	ABSOLUTE '(' exp ')'
 			{ $$ = exp_unop(ABSOLUTE, $3); }
 	|	ALIGN_K '(' exp ')'

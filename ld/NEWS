@@ -7,6 +7,8 @@ Changes since version 2.7:
 
 * The NOCROSSREFS command was added to the linker script language.
 
+* The LOADADDR expression was added to the linker script language.
+
 Changes since version 2.6:
 
 * New option --cref to print out a cross reference table.

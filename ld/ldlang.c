@@ -618,6 +618,7 @@ exp_init_os (exp)
       switch (exp->type.node_code)
 	{
 	case ADDR:
+	case LOADADDR:
 	case SIZEOF:
 	  {
 	    lang_output_section_statement_type *os;

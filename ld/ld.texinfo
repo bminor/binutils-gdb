@@ -1582,6 +1582,14 @@ SECTIONS@{ @dots{}
 @end group
 @end smallexample
 
+@kindex LOADADDR(@var{section})
+@cindex section load address
+@item LOADADDR(@var{section})
+Return the absolute load address of the named @var{section}.  This is
+normally the same as @code{ADDR}, but it may be different if the
+@code{AT} keyword is used in the section definition (@pxref{Section
+Options}).
+
 @kindex ALIGN(@var{exp})
 @cindex rounding up location counter
 @item ALIGN(@var{exp})
