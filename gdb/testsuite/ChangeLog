@@ -1,3 +1,22 @@
+Thu Nov 21 09:17:19 1996  Fred Fish  <fnf@cygnus.com>
+
+	* lib/gdb.exp (CFLAGS): Remove, unreferenced.
+	(CXXFLAGS): Remove, unreferenced.
+	(B_OPTIONS): Add for -B options and add code to initialize with previous
+	-B options and also add -B option to pick up cross compiled runtime.
+	(TARGET_INCLUDES): Add for -I options and add code to initialize when
+	doing cross compiles.
+	(target_alias): Declare global.
+	(xgcc): Set variable to full path of gcc in build tree.  Use findfile
+	to verify that gcc exists in build tree, and if so set CC to that
+	gcc and to use B_OPTIONS and TARGET_INCLUDES.
+	
+Tue Nov 12 16:20:13 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.c++/inherit.exp (test_print_anon_union): Reenable
+	ptype test for anonymous union.  Fixup testcase to match
+	current gcc debug output.
+
 Mon Nov 11 14:12:06 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.base/funcargs.c: Use cast rather than "UL" suffix to
