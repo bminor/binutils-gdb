@@ -119,14 +119,20 @@ static enum dual dual_mode = DUAL_OFF;
 static void
 s_dual (int ignore ATTRIBUTE_UNUSED)
 {
-  dual_mode = DUAL_ON;
+  if (target_intel_syntax)
+    dual_mode = DUAL_ON;
+  else
+    as_bad (_("Directive .dual available only with -mintel-syntax option"));
 }
 
 /* Handle ".enddual" directive.  */
 static void
 s_enddual (int ignore ATTRIBUTE_UNUSED)
 {
-  dual_mode = DUAL_OFF;
+  if (target_intel_syntax)
+    dual_mode = DUAL_OFF;
+  else
+    as_bad (_("Directive .enddual available only with -mintel-syntax option"));
 }
 
 /* Temporary register used when expanding assembler pseudo operations.  */
@@ -135,7 +141,15 @@ static int atmp = 31;
 static void
 s_atmp (int ignore ATTRIBUTE_UNUSED)
 {
-  register int temp;
+  int temp;
+
+  if (! target_intel_syntax)
+    {
+      as_bad (_("Directive .atmp available only with -mintel-syntax option"));
+      demand_empty_rest_of_line ();
+      return;
+    }
+
   if (strncmp (input_line_pointer, "sp", 2) == 0)
     {
       input_line_pointer += 2;

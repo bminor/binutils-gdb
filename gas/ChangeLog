@@ -1,3 +1,10 @@
+2003-08-05  Jason Eckhardt  <jle@rice.edu>
+
+        * config/tc-i860.c (s_dual): Accept .dual directive only in
+        the Intel syntax mode.
+        (s_enddual): Likewise for .enddual.
+        (s_atmp): Likewise for .atmp.
+
 2003-08-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-i386.c (i386_intel_operand): Always call i386_index_check
