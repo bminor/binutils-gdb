@@ -1,4 +1,3 @@
-/* start-sanitize-armelf */
 #
 # Unusual variables checked by this code:
 #	NOP - two byte opcode for no-op (defaults to 0)
@@ -131,7 +130,7 @@ SECTIONS
   .rela.plt    ${RELOCATING-0} : { *(.rela.plt)		}
   .init        ${RELOCATING-0} : { KEEP (*(.init))	} =${NOP-0}
   ${DATA_PLT-${PLT}}
-  .text    ${RELOCATING+ 0x8000} :
+  .text    ${RELOCATING-0} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
     *(.text)
@@ -265,4 +264,3 @@ SECTIONS
   ${OTHER_SECTIONS}
 }
 EOF
-/* end-sanitize-armelf */
