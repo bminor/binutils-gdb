@@ -1,3 +1,15 @@
+2000-04-06  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-arm.h (elf32_arm_set_private_flags): Only check for
+	EF_INTERWORK if this is an unknown EABI.
+	(elf32_arm_merge_private_bfd_data): Check EABI version
+	numbers.  Only check EF_xxx flags if the EABI version number
+	is unknown.
+	(elf32_arm_check_private_bfd_data): Only check EF_xxx flags
+	if the EABI version number is unknown.
+	(elf32_arm_print_private_bfd_data): Only decode EF_xxx flags
+	if the EABI version number is unknown.
+
 Wed Apr  5 22:04:20 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* reloc.c (_bfd_relocate_contents): Add BFD_RELOC_SH_LOOP_START and

@@ -1878,7 +1878,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
-/* Function to keep ARM specific flags in the ELF header. */
+/* Function to keep ARM specific flags in the ELF header.  */
 static boolean
 elf32_arm_set_private_flags (abfd, flags)
      bfd *abfd;
@@ -1887,14 +1887,17 @@ elf32_arm_set_private_flags (abfd, flags)
   if (elf_flags_init (abfd)
       && elf_elfheader (abfd)->e_flags != flags)
     {
-      if (flags & EF_INTERWORK)
-	_bfd_error_handler (_ ("\
+      if (EF_ARM_EABI_VERSION (flags) == EF_ARM_EABI_UNKNOWN)
+	{
+	  if (flags & EF_INTERWORK)
+	    _bfd_error_handler (_ ("\
 Warning: Not setting interwork flag of %s since it has already been specified as non-interworking"),
-			    bfd_get_filename (abfd));
-      else
-	_bfd_error_handler (_ ("\
+				bfd_get_filename (abfd));
+	  else
+	    _bfd_error_handler (_ ("\
 Warning: Clearing the interwork flag of %s due to outside request"),
-			    bfd_get_filename (abfd));
+				bfd_get_filename (abfd));
+	}
     }
   else
     {
@@ -1905,7 +1908,7 @@ Warning: Clearing the interwork flag of %s due to outside request"),
   return true;
 }
 
-/* Copy backend specific data from one object module to another */
+/* Copy backend specific data from one object module to another.  */
 static boolean
 elf32_arm_copy_private_bfd_data (ibfd, obfd)
      bfd *ibfd;
@@ -1914,14 +1917,16 @@ elf32_arm_copy_private_bfd_data (ibfd, obfd)
   flagword in_flags;
   flagword out_flags;
 
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return true;
 
-  in_flags = elf_elfheader (ibfd)->e_flags;
+  in_flags  = elf_elfheader (ibfd)->e_flags;
   out_flags = elf_elfheader (obfd)->e_flags;
 
-  if (elf_flags_init (obfd) && in_flags != out_flags)
+  if (elf_flags_init (obfd)
+      && EF_ARM_EABI_VERSION (out_flags) == EF_ARM_EABI_UNKNOWN
+      && in_flags != out_flags)
     {
       /* Cannot mix PIC and non-PIC code.  */
       if ((in_flags & EF_PIC) != (out_flags & EF_PIC))
@@ -1958,8 +1963,8 @@ Warning: Clearing the interwork flag in %s because non-interworking code in %s h
    object file when linking.  */
 static boolean
 elf32_arm_merge_private_bfd_data (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
+     bfd * ibfd;
+     bfd * obfd;
 {
   flagword out_flags;
   flagword in_flags;
@@ -2018,6 +2023,18 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
     return true;
 
   /* Complain about various flag mismatches.  */
+  if (EF_ARM_EABI_VERSION (in_flags) != EF_ARM_EABI_VERSION (out_flags))
+    {
+      _bfd_error_handler (_("\
+Error: %s compiled for EABI version %d, whereas %s is compiled for version %d"),
+			 bfd_get_filename (ibfd),
+			 (in_flags & EF_ARM_EABIMASK) >> 24,
+			 bfd_get_filename (obfd),
+			 (out_flags & EF_ARM_EABIMASK) >> 24);
+    }
+  else if (EF_ARM_EABI_VERSION (in_flags) != EF_ARM_EABI_UNKNOWN)
+    /* Not sure what needs to be checked for EABI versions >= 1.  */
+    return true;
 
   if ((in_flags & EF_APCS_26) != (out_flags & EF_APCS_26))
     _bfd_error_handler (_ ("\
@@ -2063,38 +2080,82 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
      bfd *abfd;
      PTR ptr;
 {
-  FILE *file = (FILE *) ptr;
+  FILE * file = (FILE *) ptr;
+  unsigned long flags;
 
   BFD_ASSERT (abfd != NULL && ptr != NULL);
 
   /* Print normal ELF private data.  */
   _bfd_elf_print_private_bfd_data (abfd, ptr);
 
+  flags = elf_elfheader (abfd)->e_flags;
   /* Ignore init flag - it may not be set, despite the flags field containing valid data.  */
 
   /* xgettext:c-format */
   fprintf (file, _ ("private flags = %lx:"), elf_elfheader (abfd)->e_flags);
 
-  if (elf_elfheader (abfd)->e_flags & EF_INTERWORK)
-    fprintf (file, _ (" [interworking enabled]"));
-  else
-    fprintf (file, _ (" [interworking not enabled]"));
+  switch (EF_ARM_EABI_VERSION (flags))
+    {
+    case EF_ARM_EABI_UNKNOWN:
+      /* The following flag bits are GNU extenstions and not part of the
+	 official ARM ELF extended ABI.  Hence they are only decoded if
+	 the EABI version is not set.  */
+      if (flags & EF_INTERWORK)
+	fprintf (file, _ (" [interworking enabled]"));
+      
+      if (flags & EF_APCS_26)
+	fprintf (file, _ (" [APCS-26]"));
+      else
+	fprintf (file, _ (" [APCS-32]"));
+      
+      if (flags & EF_APCS_FLOAT)
+	fprintf (file, _ (" [floats passed in float registers]"));
+      
+      if (flags & EF_PIC)
+	fprintf (file, _ (" [position independent]"));
 
-  if (elf_elfheader (abfd)->e_flags & EF_APCS_26)
-    fprintf (file, _ (" [APCS-26]"));
-  else
-    fprintf (file, _ (" [APCS-32]"));
+      if (flags & EF_NEW_ABI)
+	fprintf (file, _ (" [new ABI]"));
+		 
+      if (flags & EF_OLD_ABI)
+	fprintf (file, _ (" [old ABI]"));
+		 
+      if (flags & EF_SOFT_FLOAT)
+	fprintf (file, _ (" [software FP]"));
+		 
+      flags &= ~(EF_INTERWORK | EF_APCS_26 | EF_APCS_FLOAT | EF_PIC
+		 | EF_NEW_ABI | EF_OLD_ABI | EF_SOFT_FLOAT);
+      break;
+      
+    case EF_ARM_EABI_VER1:
+      fprintf (file, _ (" [Version1 EABI]"));
+      
+      if (flags & EF_ARM_SYMSARESORTED)
+	fprintf (file, _ (" [sorted symbol table]"));
+      else
+	fprintf (file, _ (" [unsorted symbol table]"));
+      
+      flags &= ~ EF_ARM_SYMSARESORTED;
+      break;
+      
+    default:
+      fprintf (file, _ (" <EABI version unrecognised>"));
+      break;
+    }
 
-  if (elf_elfheader (abfd)->e_flags & EF_APCS_FLOAT)
-    fprintf (file, _ (" [floats passed in float registers]"));
-  else
-    fprintf (file, _ (" [floats passed in integer registers]"));
+  flags &= ~ EF_ARM_EABIMASK;
 
-  if (elf_elfheader (abfd)->e_flags & EF_PIC)
-    fprintf (file, _ (" [position independent]"));
-  else
-    fprintf (file, _ (" [absolute position]"));
+  if (flags & EF_ARM_RELEXEC)
+    fprintf (file, _ (" [relocatable executable]"));
 
+  if (flags & EF_ARM_HASENTRY)
+    fprintf (file, _ (" [has entry point]"));
+
+  flags &= ~ (EF_ARM_RELEXEC | EF_ARM_HASENTRY);
+
+  if (flags)
+    fprintf (file, _ ("<Unrecognised flag bits set>"));
+  
   fputc ('\n', file);
 
   return true;
