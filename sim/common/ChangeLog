@@ -1,3 +1,8 @@
+Fri Dec 11 16:58:36 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* hw-handles.c (hw_handle_add_ihandle, hw_handle_add_phandle):
+ 	Compare with ZERO not NULL.
+
 Thu Dec 10 14:14:39 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-properties.c, hw-instances.c, hw-tree.c: Include
