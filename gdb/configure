@@ -3454,7 +3454,7 @@ done
 ac_given_srcdir=$srcdir
 ac_given_INSTALL="$INSTALL"
 
-trap 'rm -fr `echo "Makefile config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+trap 'rm -fr `echo "Makefile config.h:config.in" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -3605,7 +3605,7 @@ ac_eB='$%\1#\2define\3'
 ac_eC=' '
 ac_eD='%g'
 
-CONFIG_HEADERS=${CONFIG_HEADERS-"config.h"}
+CONFIG_HEADERS=${CONFIG_HEADERS-"config.h:config.in"}
 for ac_file in .. $CONFIG_HEADERS; do if test "x$ac_file" != x..; then
   # Support "outfile[:infile]", defaulting infile="outfile.in".
   case "$ac_file" in
@@ -3757,7 +3757,7 @@ echo "source ${srcdir}/.gdbinit" >> .gdbinit
 esac
 
 case x$CONFIG_HEADERS in
-xconfig.h:config.h.in)
+xconfig.h:config.in)
 echo > stamp-h ;;
 esac
 

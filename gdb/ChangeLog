@@ -1,3 +1,12 @@
+Thu Mar 21 10:56:41 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.in: Rename from config.h.in.
+	* configure.in: Call AC_CONFIG_HEADER with config.h:config.in.
+	Change CONFIG_HEADERS test in AC_OUTPUT accordingly.
+	* configure: Rebuild.
+	* Makefile.in (stamp-h): Depend upon config.in, not config.h.in.
+	Set CONFIG_HEADERS to config.h:config.in.
+
 Tue Mar 19 12:47:51 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* partial-stab.h (case N_ENDM):  Finish current partial symbol

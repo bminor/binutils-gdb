@@ -136,7 +136,7 @@ command.h
 complaints.c
 complaints.h
 config
-config.h.in
+config.in
 configure
 configure.in
 convex-tdep.c
