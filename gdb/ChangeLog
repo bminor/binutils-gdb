@@ -1,3 +1,10 @@
+2000-10-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote-bug.c (bug_xfer_memory, bug_insert_breakpoint,
+	bug_remove_breakpoint): Protoize.
+	* remote-e7000.c (fetch_regs_from_dump, e7000_xfer_inferior_memory):
+	Protoize.
+
 2000-10-01  Kevin Buettner  <kevinb@redhat.com>
 
 	* remote-adapt.c (adapt_insert_breakpoint, adapt_remove_breakpoint):

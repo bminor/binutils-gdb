@@ -795,9 +795,7 @@ gbyte (void)
 }
 
 void
-fetch_regs_from_dump (nextchar, want)
-     int (*nextchar) ();
-     char *want;
+fetch_regs_from_dump (int (*nextchar) (), char *want)
 {
   int regno;
   char buf[MAX_REGISTER_RAW_SIZE];
@@ -1468,13 +1466,15 @@ fast_but_for_the_pause_e7000_read_inferior_memory (CORE_ADDR memaddr,
 
 #endif
 
+/* Transfer LEN bytes between GDB address MYADDR and target address
+   MEMADDR.  If WRITE is non-zero, transfer them to the target,
+   otherwise transfer them from the target.  TARGET is unused.
+
+   Returns the number of bytes transferred. */
+
 static int
-e7000_xfer_inferior_memory (memaddr, myaddr, len, write, target)
-     CORE_ADDR memaddr;
-     unsigned char *myaddr;
-     int len;
-     int write;
-     struct target_ops *target;	/* ignored */
+e7000_xfer_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr,
+			    int len, int write, struct target_ops *target)
 {
   if (write)
     return e7000_write_inferior_memory (memaddr, myaddr, len);

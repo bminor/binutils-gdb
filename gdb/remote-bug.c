@@ -553,13 +553,15 @@ bug_store_register (int regno)
   return;
 }
 
+/* Transfer LEN bytes between GDB address MYADDR and target address
+   MEMADDR.  If WRITE is non-zero, transfer them to the target,
+   otherwise transfer them from the target.  TARGET is unused.
+
+   Returns the number of bytes transferred. */
+
 int
-bug_xfer_memory (memaddr, myaddr, len, write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-     struct target_ops *target;	/* ignored */
+bug_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		 struct target_ops *target)
 {
   if (len <= 0)
     return 0;
@@ -823,10 +825,14 @@ done:
 
 #define MAX_BREAKS	16
 static int num_brkpts = 0;
+
+/* Insert a breakpoint at ADDR.  SAVE is normally the address of the
+   pattern buffer where the instruction that the breakpoint overwrites
+   is saved.  It is unused here since the bug is responsible for
+   saving/restoring the original instruction. */
+
 static int
-bug_insert_breakpoint (addr, save)
-     CORE_ADDR addr;
-     char *save;		/* Throw away, let bug save instructions */
+bug_insert_breakpoint (CORE_ADDR addr, char *save)
 {
   sr_check_open ();
 
@@ -848,10 +854,13 @@ bug_insert_breakpoint (addr, save)
     }
 
 }
+
+/* Remove a breakpoint at ADDR.  SAVE is normally the previously
+   saved pattern, but is unused here since the bug is responsible
+   for saving/restoring instructions. */
+
 static int
-bug_remove_breakpoint (addr, save)
-     CORE_ADDR addr;
-     char *save;		/* Throw away, let bug save instructions */
+bug_remove_breakpoint (CORE_ADDR addr, char *save)
 {
   if (num_brkpts > 0)
     {
