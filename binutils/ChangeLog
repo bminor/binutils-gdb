@@ -1,3 +1,7 @@
+2003-10-28  Segher Boessenkool  <segher@kernel.crashing.org>
+
+	* readelf.c (dump_section): Don't display DEL characters.
+
 2003-10-27  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* ChangeLog: Fix typos.

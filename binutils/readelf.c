@@ -6115,7 +6115,7 @@ dump_section (Elf_Internal_Shdr *section, FILE *file)
       for (j = 0; j < lbytes; j++)
 	{
 	  k = data[j];
-	  if (k >= ' ' && k < 0x80)
+	  if (k >= ' ' && k < 0x7f)
 	    printf ("%c", k);
 	  else
 	    printf (".");
