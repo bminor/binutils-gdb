@@ -1,3 +1,8 @@
+2001-03-06  DJ Delorie  <dj@redhat.com>
+
+	* ld-scripts/cross2.t: Support any type of text/data sections, not
+	just the canonical ones.
+
 2001-02-14  H.J. Lu  <hjl@gnu.org>
 
 	* ld-bootstrap/bootstrap.exp: Rebuild tmpdir/ld2 with tmpdir/ld3
