@@ -1,5 +1,8 @@
 Fri Dec  1 14:46:51 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-sparc.c (elf32_sparc_relocate_section): Remove bogus
+	BFD_ASSERT.
+
 	* libbfd.c (bfd_malloc, bfd_realloc): New functions.
 	(bfd_zmalloc): Return PTR, not char *.  Take size_t, not
 	bfd_size_type.
