@@ -1,3 +1,7 @@
+Thu Feb 18 01:19:49 1993  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo:  Update PTRACE_ARG3_TYPE doc, pull PT_*.
+
 Wed Feb 17 08:15:24 1993  John Gilmore  (gnu@cygnus.com)
 
 	* gdbint.texinfo:  Remove SET_STACK_LIMIT_HUGE from target defines.
