@@ -1,3 +1,15 @@
+2001-05-28  Alan Modra  <amodra@one.net.au>
+
+	* elf32-hppa.c (elf32_hppa_relocate_section): Set up .plt entries
+	for symbols forced local that need plabels.
+	(elf32_hppa_adjust_dynamic_symbol): Don't allocate space in
+	.plt.rela for local syms if non-shared.
+	(hppa_build_one_stub): Mask lsb of plt.offset.
+	(elf32_hppa_finish_dynamic_symbol): Abort if lsb of plt.offset set.
+	(clobber_millicode_symbols): Correct comment.
+	(elf32_hppa_relocate_section): Likewise.
+	(elf32_hppa_finish_dynamic_symbol): Likewise.
+
 2001-05-28  Jeff Sturm  <jsturm@one-point.com>
 
 	* reloc.c: Add BFD_RELOC_SPARC_UA16 and BFD_RELOC_SPARC_UA64.
