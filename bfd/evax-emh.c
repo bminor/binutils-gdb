@@ -124,28 +124,6 @@ _bfd_evax_slurp_emh (abfd)
 }
 
 
-#if 0
-
-/* register a file name  */
-
-int
-_bfd_evax_register_filename (abfd, name)
-     bfd *abfd;
-     char *name;
-{
-  if (PRIV(filename) != NULL)
-    {
-#if EVAX_DEBUG
-      evax_debug(3, "Second filename %s, first was %s\n", name, PRIV(filename));
-#endif
-      return -1;
-    }
-  PRIV(filename) = strdup (name);
-  return 0;
-}
-
-#endif /* 0 */
-
 /* write object header for bfd abfd  */
 
 int

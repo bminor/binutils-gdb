@@ -428,6 +428,7 @@ bfd_get_reloc_size (howto)
     case 2: return 4;
     case 3: return 0;
     case 4: return 8;
+    case 8: return 16;
     case -2: return 4;
     default: abort ();
     }
@@ -1801,15 +1802,6 @@ decided relatively late.
 
 
 ENUM
-  BFD_RELOC_SWREL32
-ENUMX
-  BFD_RELOC_SWREL64
-ENUMDOC
-  For openVMS/Alpha systems, these are displacements for switch
-tables.
-
-
-ENUM
   BFD_RELOC_I960_CALLJ
 ENUMDOC
   Reloc types used for i960/b.out.
@@ -1950,13 +1942,8 @@ ENUMDOC
 ENUM
   BFD_RELOC_ALPHA_LINKAGE
 ENUMDOC
-  The LINKAGE relocation outputs a special code in the object file,
-     the rest is handled by the linker.
-
-ENUM
-  BFD_RELOC_ALPHA_BASEREG
-ENUMDOC
-  The BASEREG relocation calculates differences to basereg.
+  The LINKAGE relocation outputs a linkage pair in the object file,
+     which is filled by the linker.
 
 ENUM
   BFD_RELOC_MIPS_JMP

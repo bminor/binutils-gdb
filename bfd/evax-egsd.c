@@ -261,7 +261,7 @@ _bfd_evax_slurp_egsd (abfd)
 	      return -1;
 	    old_flags = bfd_getl16 (evax_rec + 6);
 	    section->_raw_size = bfd_getl32 (evax_rec + 8);	/* allocation */
-	    new_flags = evax_secflag_by_name (name, section->_raw_size);
+	    new_flags = evax_secflag_by_name (name, (int) section->_raw_size);
 	    if (old_flags & EGPS_S_V_REL)
 	      new_flags |= SEC_RELOC;
 	    if (!bfd_set_section_flags (abfd, section, new_flags))
@@ -271,14 +271,13 @@ _bfd_evax_slurp_egsd (abfd)
 	    if ((base_addr % align_addr) != 0)
 	      base_addr += (align_addr - (base_addr % align_addr));
 	    section->vma = (bfd_vma)base_addr;
-	    base_addr += section->_raw_size;	/* FIXME: should be cooked size */
-	    section->contents = (unsigned char *) malloc (section->_raw_size);
+	    base_addr += section->_raw_size;
+	    section->contents = ((unsigned char *)
+				 bfd_malloc (section->_raw_size));
 	    if (section->contents == NULL)
-	      {
-		bfd_set_error (bfd_error_no_memory);
-		return -1;
-	      }
-	    memset (section->contents, 0, section->_raw_size);
+	      return -1;
+	    memset (section->contents, 0, (size_t) section->_raw_size);
+	    section->_cooked_size = section->_raw_size;
 #if EVAX_DEBUG
 	    evax_debug(3, "egsd psc %d (%s, flags %04x=%s) ",
 		       section->index, name, old_flags, flag2str(gpsflagdesc, old_flags));

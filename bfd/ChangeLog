@@ -1,3 +1,31 @@
+Thu Aug  8 12:21:56 1996  Klaus Kaempf  <kkaempf@progis.de>
+
+	* evax-alpha.c (evax_alpha_vec): Corrected flags, cleanup.
+	(evax_initialize): Remove evax_reloc_table.
+	(evax_close_and_cleanup): Ditto.
+	(reloc_nil): Ditto.
+	(alpha_howto_table): Remove ALPHA_R_SWREL32 and ALPHA_R_SWREL64
+	entries.
+	(evax_bfd_reloc_type_lookup): Ditto.
+	* evax-egsd.c (_bfd_evax_slurp_egsd): Add a few casts; set
+	cooked_size == raw_size.
+	* evax-emh.c (_bfd_evax_register_filename): Remove.
+	* evax-etir.c (etir_stc): Allow ETIR_S_C_STC_xx commands.
+	* evax-misc.c (add_new_contents): Malloc section at full size.
+	(_bfd_save_evax_section): Memcpy section contents directly.
+	* evax.h (ALPHA_R_SWREL32, ALPHA_R_SWREL64): Remove.
+	(evax_reloc_table): Remove.
+
+	* hosts/alphavms.h (O_ACCMODE): Define if needed.
+
+	* makefile.vms: Add better support for DEC C compilation
+	Add evax.h dependencies
+
+	* reloc.c (bfd_get_reloc_size): Add case for 16 byte reloc.
+	(BFD_RELOC_SWREL32,BFD_RELOC_SWREL64): Remove.
+	(BFD_RELOC_ALPHA_BASEREG): Remove.
+	* bfd-in2.h, libbfd.h: Rebuild.
+
 Thu Aug  8 08:17:32 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* archive.c (bsd_write_armap):  Ifdef around calls to getuid and

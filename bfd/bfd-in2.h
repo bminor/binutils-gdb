@@ -1556,11 +1556,6 @@ decided relatively late. */
   BFD_RELOC_GPREL16,
   BFD_RELOC_GPREL32,
 
-/* For openVMS/Alpha systems, these are displacements for switch
-tables. */
-  BFD_RELOC_SWREL32,
-  BFD_RELOC_SWREL64,
-
 /* Reloc types used for i960/b.out. */
   BFD_RELOC_I960_CALLJ,
 
@@ -1650,12 +1645,9 @@ The GNU linker currently doesn't do any of this optimizing. */
 prediction logic which may be provided on some processors. */
   BFD_RELOC_ALPHA_HINT,
 
-/* The LINKAGE relocation outputs a special code in the object file,
-the rest is handled by the linker. */
+/* The LINKAGE relocation outputs a linkage pair in the object file,
+which is filled by the linker. */
   BFD_RELOC_ALPHA_LINKAGE,
-
-/* The BASEREG relocation calculates differences to basereg. */
-  BFD_RELOC_ALPHA_BASEREG,
 
 /* Bits 27..2 of the relocation address shifted right 2 bits;
 simple reloc otherwise. */

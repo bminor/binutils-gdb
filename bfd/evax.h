@@ -178,9 +178,7 @@ extern int _bfd_evax_write_edbg PARAMS ((bfd *abfd));
 #define ALPHA_R_OP_PSUB		9
 #define ALPHA_R_OP_PRSHIFT	10
 #define ALPHA_R_LINKAGE		11
-#define ALPHA_R_SWREL32		12
-#define ALPHA_R_SWREL64		13
-#define ALPHA_R_REFLONG		14
+#define ALPHA_R_REFLONG		12
 
 /* Object language definitions.  */
 
@@ -305,7 +303,6 @@ struct evax_private_data_struct {
   int stackptr;
 
   evax_section *evax_section_table[EVAX_SECTION_COUNT];
-  evax_reloc *evax_reloc_table[EVAX_SECTION_COUNT];
 
   struct bfd_hash_table *evax_symbol_table;
   struct symbol_cache_entry **symcache;

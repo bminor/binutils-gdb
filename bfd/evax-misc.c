@@ -558,23 +558,20 @@ add_new_contents (abfd, section)
 {
   evax_section *sptr, *newptr;
 
-  newptr = (evax_section *) bfd_zalloc (abfd, sizeof (evax_section));
-  if (newptr == (evax_section *)NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
   sptr = PRIV(evax_section_table)[section->index];
-  if (sptr == NULL)
-    {
-      PRIV(evax_section_table)[section->index] = (evax_section *)newptr;
-    }
-  else
-    {
-      while (sptr->next != NULL)
-	sptr = sptr->next;
-      sptr->next = newptr;
-    }
+  if (sptr != NULL)
+    return sptr;
+
+  newptr = (evax_section *) bfd_malloc (sizeof (evax_section));
+  if (newptr == (evax_section *) NULL)
+    return NULL;
+  newptr->contents = (unsigned char *) bfd_alloc (abfd, section->_raw_size);
+  if (newptr->contents == (unsigned char *)NULL)
+    return NULL;
+  newptr->offset = 0;
+  newptr->size = section->_raw_size;
+  newptr->next = 0;
+  PRIV(evax_section_table)[section->index] = newptr;
   return newptr;
 }
 
@@ -602,20 +599,7 @@ _bfd_save_evax_section (abfd, section, data, offset, count)
   sptr = add_new_contents (abfd, section);
   if (sptr == NULL)
     return false;
-  sptr->contents = (unsigned char *) bfd_alloc (abfd, (int)count);
-  if (sptr->contents == (unsigned char *)NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
-  memcpy (sptr->contents, data, (int)count);
-  sptr->offset = (bfd_vma)offset;
-  sptr->size = count;
-
-#if EVAX_DEBUG
-  evax_debug (6, "_bfd_save_evax_section sptr = %08lx\n", sptr);
-  _bfd_hexdump (6, data, count, (int)offset);
-#endif
+  memcpy (sptr->contents + offset, data, (size_t) count);
 
   return true;
 }

@@ -875,7 +875,7 @@ etir_stc (abfd, cmd, ptr)
 	 arg:  */
 
     case ETIR_S_C_STC_NBH_PS:
-      (*_bfd_error_handler) ("ETIR_S_C_STC_xx: (%d) not supported", cmd);
+/* FIXME     (*_bfd_error_handler) ("ETIR_S_C_STC_xx: (%d) not supported", cmd); */
       break;
 
     default:
