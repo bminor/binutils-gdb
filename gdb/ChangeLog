@@ -1,4 +1,9 @@
-2004-01-28  Roland McGrath  <roland@redhat.com>
+2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (mips-linux-nat.o): Update dependencies.
+	* mips-linux-nat.c: Include mips-tdep.h.
+
+2004-02-01  Roland McGrath  <roland@redhat.com>
 
 	* sol-thread.c (sol_thread_xfer_partial): New function.
 	(init_sol_thread_ops): Use that for to_xfer_partial hook.
