@@ -1,3 +1,9 @@
+Mon Sep  4 14:28:46 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: ../bfd/config.bfd now just sets shell variables.
+	Use them rather than looking through target Makefile fragments.
+	* configure: Rebuild.
+
 start-sanitize-sh3e
 Thu Aug 31 12:35:32 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
