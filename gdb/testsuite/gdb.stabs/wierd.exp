@@ -123,10 +123,8 @@ proc do_tests {} {
 	gdb_test "ptype inttype" "type = (unsigned int|inttype)" "ptype on inttype"
 	gdb_test "p sizeof (float72type)" " = 9" "unrecognized floating point type"
 
-	# Haven't investigated
-	setup_xfail "*-*-*"
-	gdb_test "p/x int256var" " = 0x0000002a0000002b0000002c0000002d\
-	0000002d0000002c0000002b0000002a" "print very big integer"
+	gdb_test "p/x int256var" " = 0x0*2a0000002b0000002c0000002d\
+0000002d0000002c0000002b0000002a" "print very big integer"
 
 	gdb_test "whatis consth" "type = inttype" "whatis consth"
 	gdb_test "whatis consth2" "type = inttype" "whatis consth2"
@@ -134,7 +132,7 @@ proc do_tests {} {
 	# GDB does not yet understand S constants
 	setup_xfail "*-*-*"
 	gdb_test "p/x bad_neg0const" " = \{field0 = 0x11222211, field2 =.*\
-	field3 = 0x77888877\}" "print struct constant"
+field3 = 0x77888877\}" "print struct constant"
 
 	gdb_test "ptype bad_type0" "type = " "print bad_type0"
 	gdb_test "ptype bad_type1" "type = " "print bad_type1"

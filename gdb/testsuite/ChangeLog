@@ -1,5 +1,9 @@
 Mon May 31 11:36:08 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* gdb.stabs/wierd.exp: Remove xfail for printing big integer.
+	Make leading 0's optional and don't expect a tab in the middle
+	of the number.
+
 	* gdb.t00/teststrategy.exp: Remove xgdb before trying the copy.
 
 	* gdb.stabs/wierd.def: Type attributes must be preceded by number=.
