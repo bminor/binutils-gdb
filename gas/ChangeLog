@@ -1,3 +1,65 @@
+Mon Jun  8 12:20:30 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c: REPNE renamed to REPNE_PREFIX_OPCODE, and
+	likewise for REPE.
+
+	* config/tc-i386.c (reloc): Add braces.
+
+	* config/tc-i386.c (struct _i386_insn): Rename bi to sib to be
+	consistent with Intel naming.
+	* config/tc-i386.h (base_index_byte): Rename to sib_byte.  Don't
+	use bitfields in sib_byte.
+	(modrm_byte): Don't use bitfields here either.
+
+	* config/tc-i386.c (current_templates): Add const.
+	(parse_register): Add const to return, param, and char *s.
+	(i386_operand): Add const to reg_entry *r.
+	* config/tc-i386.h (templates): Add const to start, end.
+
+	Inspired by code for 16 bit gas support from Martynas Kunigelis
+	<martynas@nm3.ktu.lt>:
+	* config/tc-i386.c (md_assemble): Add full support for 16 bit
+	modrm, and Jump, JumpByte, JumpDword, JumpInterSegment insns.
+	(uses_mem_addrmode): Remove.
+	(md_estimate_size_before_relax): Add support here too.
+	(md_relax_table): Rewrite interface to md_relax for 16 bit
+	support.
+	(BYTE, WORD, DWORD, UNKNOWN_SIZE): Remove.
+	(opcode_suffix_to_type): Remove.
+	(CODE16, SMALL, SMALL16, BIG, BIG16): Define.
+	(SIZE_FROM_RELAX_STATE): Modify to suit above.
+	(md_convert_frag): Likewise.
+	(i386_operand): Add support for 16 bit base/index regs,
+	immediates, and displacements.  Remove some unnecessary casts, and
+	localise end_of_operand_string, displacement_string_start,
+	displacement_string_end variables.  Add GCC_ASM_O_HACK.
+	* config/tc-i386.h (NO_BASE_REGISTER_16): Define.
+
+	* config/tc-i386.c (prefix_hash): Remove.
+	(md_begin): Rewrite without obstacks.  Remove prefix hash table
+	handling.  Rewrite lexical table handling.
+	(i386_print_statistics): Don't print prefix statistics.
+	(md_assemble): Rewrite instruction parser so that line is not
+	converted to lower case.  Don't do a hash_find for prefixes,
+	instead recognise them via opcode modifier.
+	(expecting_operand, paren_not_balanced): Localise variables.
+	* config/tc-i386.h (IsPrefix): Define.
+	(prefix_entry): Remove.
+
+	* config/tc-i386.h (PREFIX_SEPERATOR): Don't define.
+	* config/tc-i386.c (PREFIX_SEPARATOR): Define here instead, using
+	'\\' in case where comment_chars contains '/'.
+
+	* config/tc-i386.c (MATCH): Ensure given operand and template
+	match for JumpAbsolute.  Makes e.g. `ljmp table(%ebx)' invalid;
+	you must write `ljmp *table(%ebx)'.
+
+	From H.J. Lu <hjl@gnu.org>:
+	* config/tc-i386.c (BFD_RELOC_16, BFD_RELOC_16_PCREL): Define
+	as 0 ifndef BFD_ASSEMBLER.
+	(md_assemble): Allow immediate operands without suffix or
+	other reg operand to default in size to the current code size.
+
 start-sanitize-v850e
 Mon Jun  8 09:45:00 1998  Catherine Moore  <clm@cygnus.com>
  
