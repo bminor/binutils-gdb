@@ -1,5 +1,13 @@
 2004-07-16  Jim Blandy  <jimb@redhat.com>
 
+	* ppc-tdep.h (ppc_spr_asr): Add missing OEA SPR.
+        (ppc_spr_mi_dbcam, ppc_spr_mi_dbram0, ppc_spr_mi_dbram1)
+	(ppc_spr_md_cam, ppc_spr_md_ram0, ppc_spr_md_ram1): Add
+	missing MPC823 SPRs.
+	(ppc_spr_m_twb): Renamed from ppc_spr_md_twb; the old name was
+	incorrect.  (This was corrected in GDB's register name tables on
+	2004-07-14.)
+
 	* rs6000-tdep.c (registers_602): Correct register name: "esassr"
 	should be "esasrr" ("ESA Save and Restore Register").
 
