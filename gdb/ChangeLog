@@ -1,3 +1,7 @@
+2004-05-25  Andrew Cagney  <cagney@gnu.com>
+
+	* MAINTAINERS: Update e-mail address.
+
 2004-05-24  Randolph Chung  <tausq@debian.org>
 
 	* thread.c (info_threads_command, thread_apply_all_command)

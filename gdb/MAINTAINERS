@@ -6,7 +6,7 @@
 
 Jim Blandy			jimb@redhat.com
 Kevin Buettner			kevinb@redhat.com
-Andrew Cagney			ac131313@redhat.com
+Andrew Cagney			cagney@gnu.org
 J.T. Conklin			jtc@acorntoolworks.com
 Fred Fish			fnf@ninemoons.com
 Daniel Jacobowitz		dan@debian.org
@@ -315,7 +315,7 @@ Joel Brobecker					brobecker@gnat.com
 Dave Brolley					brolley@redhat.com
 Paul Brook					paul@codesourcery.com
 Kevin Buettner					kevinb@redhat.com
-Andrew Cagney					ac131313@redhat.com
+Andrew Cagney					cagney@gnu.org
 David Carlton					carlton@bactrian.org
 Stephane Carrez					stcarrez@nerim.fr
 Michael Chastain				mec.gnu@mindspring.com
