@@ -1,3 +1,18 @@
+2002-09-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* maint.c (maintenance_internal_error): Print the parameter as the
+	error message.
+	(maintenance_internal_warning): New function.
+	(_initialize_maint_cmds): Add command `maint internal-warning'.
+
+	* defs.h (internal_warning, internal_vwarning): Declare.
+	* utils.c (struct internal_problem): Define.
+	(internal_vproblem): New function.
+	(internal_warning): New function.
+	(internal_vwarning): New function.
+	(internal_warning_problem, internal_error_problem): New variables.
+	(internal_verror): Just call internal_vproblem.
+
 2002-09-18  Michael Snyder  <msnyder@redhat.com>
 
 	* objc-lang.c: New file, support for Objective-C.

@@ -889,6 +889,12 @@ extern NORETURN void internal_verror (const char *file, int line,
 extern NORETURN void internal_error (const char *file, int line,
 				     const char *, ...) ATTR_NORETURN ATTR_FORMAT (printf, 3, 4);
 
+extern void internal_vwarning (const char *file, int line,
+			       const char *, va_list ap);
+
+extern void internal_warning (const char *file, int line,
+			      const char *, ...) ATTR_FORMAT (printf, 3, 4);
+
 extern NORETURN void nomem (long) ATTR_NORETURN;
 
 /* Reasons for calling throw_exception().  NOTE: all reason values

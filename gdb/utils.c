@@ -674,19 +674,34 @@ error_init (void)
   gdb_lasterr = mem_fileopen ();
 }
 
-/* Print a message reporting an internal error. Ask the user if they
-   want to continue, dump core, or just exit. */
+/* Print a message reporting an internal error/warning. Ask the user
+   if they want to continue, dump core, or just exit.  Return
+   something to indicate a quit.  */
 
-NORETURN void
-internal_verror (const char *file, int line,
-		 const char *fmt, va_list ap)
+struct internal_problem
 {
-  static char msg[] = "Internal GDB error: recursive internal error.\n";
-  static int dejavu = 0;
+  const char *name;
+  /* FIXME: cagney/2002-08-15: There should be ``maint set/show''
+     commands available for controlling these variables.  */
+  enum auto_boolean should_quit;
+  enum auto_boolean should_dump_core;
+};
+
+/* Report a problem, internal to GDB, to the user.  Once the problem
+   has been reported, and assuming GDB didn't quit, the caller can
+   either allow execution to resume or throw an error.  */
+
+static void
+internal_vproblem (struct internal_problem *problem,
+const char *file, int line,
+		  const char *fmt, va_list ap)
+{
+  static char msg[] = "Recursive internal problem.\n";
+  static int dejavu;
   int quit_p;
   int dump_core_p;
 
-  /* don't allow infinite error recursion. */
+  /* Don't allow infinite error/warning recursion.  */
   switch (dejavu)
     {
     case 0:
@@ -702,23 +717,58 @@ internal_verror (const char *file, int line,
       exit (1);
     }
 
-  /* Try to get the message out */
+  /* Try to get the message out and at the start of a new line.  */
   target_terminal_ours ();
-  fprintf_unfiltered (gdb_stderr, "%s:%d: gdb-internal-error: ", file, line);
+  begin_line ();
+
+  /* The error/warning message.  Format using a style similar to a
+     compiler error message.  */
+  fprintf_unfiltered (gdb_stderr, "%s:%d: %s: ", file, line, problem->name);
   vfprintf_unfiltered (gdb_stderr, fmt, ap);
   fputs_unfiltered ("\n", gdb_stderr);
 
-  /* Default (yes/batch case) is to quit GDB.  When in batch mode this
-     lessens the likelhood of GDB going into an infinate loop. */
-  quit_p = query ("\
-An internal GDB error was detected.  This may make further\n\
-debugging unreliable.  Quit this debugging session? ");
+  /* Provide more details so that the user knows that they are living
+     on the edge.  */
+  fprintf_unfiltered (gdb_stderr, "\
+A problem internal to GDB has been detected.  Further\n\
+debugging may prove unreliable.\n");
 
-  /* Default (yes/batch case) is to dump core.  This leaves a GDB
-     dropping so that it is easier to see that something went wrong to
-     GDB. */
-  dump_core_p = query ("\
-Create a core file containing the current state of GDB? ");
+  switch (problem->should_quit)
+    {
+    case AUTO_BOOLEAN_AUTO:
+      /* Default (yes/batch case) is to quit GDB.  When in batch mode
+	 this lessens the likelhood of GDB going into an infinate
+	 loop.  */
+      quit_p = query ("Quit this debugging session? ");
+      break;
+    case AUTO_BOOLEAN_TRUE:
+      quit_p = 1;
+      break;
+    case AUTO_BOOLEAN_FALSE:
+      quit_p = 0;
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
+    }
+
+  switch (problem->should_dump_core)
+    {
+    case AUTO_BOOLEAN_AUTO:
+      /* Default (yes/batch case) is to dump core.  This leaves a GDB
+	 `dropping' so that it is easier to see that something went
+	 wrong in GDB.  */
+      dump_core_p = query ("Create a core file of GDB? ");
+      break;
+      break;
+    case AUTO_BOOLEAN_TRUE:
+      dump_core_p = 1;
+      break;
+    case AUTO_BOOLEAN_FALSE:
+      dump_core_p = 0;
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
+    }
 
   if (quit_p)
     {
@@ -737,6 +787,17 @@ Create a core file containing the current state of GDB? ");
     }
 
   dejavu = 0;
+}
+
+static struct internal_problem internal_error_problem = {
+  "internal-error", AUTO_BOOLEAN_AUTO, AUTO_BOOLEAN_AUTO
+};
+
+NORETURN void
+internal_verror (const char *file, int line,
+		 const char *fmt, va_list ap)
+{
+  internal_vproblem (&internal_error_problem, file, line, fmt, ap);
   throw_exception (RETURN_ERROR);
 }
 
@@ -745,8 +806,27 @@ internal_error (const char *file, int line, const char *string, ...)
 {
   va_list ap;
   va_start (ap, string);
-
   internal_verror (file, line, string, ap);
+  va_end (ap);
+}
+
+static struct internal_problem internal_warning_problem = {
+  "internal-error", AUTO_BOOLEAN_AUTO, AUTO_BOOLEAN_AUTO
+};
+
+void
+internal_vwarning (const char *file, int line,
+		   const char *fmt, va_list ap)
+{
+  internal_vproblem (&internal_warning_problem, file, line, fmt, ap);
+}
+
+void
+internal_warning (const char *file, int line, const char *string, ...)
+{
+  va_list ap;
+  va_start (ap, string);
+  internal_vwarning (file, line, string, ap);
   va_end (ap);
 }
 
