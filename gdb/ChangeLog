@@ -1,3 +1,8 @@
+2002-06-18  Michal Ludvig  <mludvig@suse.cz>
+
+	* frame.h (struct frame_info): Change type of context to 
+	'struct context'.
+
 2002-06-17  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (REGISTER_NAME): Change return type a constant string

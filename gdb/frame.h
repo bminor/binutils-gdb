@@ -133,7 +133,7 @@ struct frame_info
 
     /* If dwarf2 unwind frame informations is used, this structure holds all
        related unwind data.  */
-    struct unwind_contect *context;
+    struct context *context;
 
     /* See description above.  Return the register value for the
        previous frame.  */
