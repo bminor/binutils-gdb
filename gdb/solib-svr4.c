@@ -1228,13 +1228,40 @@ svr4_free_so (struct so_list *so)
   xfree (so->lm_info);
 }
 
+
+/* Clear any bits of ADDR that wouldn't fit in a target-format
+   data pointer.  "Data pointer" here refers to whatever sort of
+   address the dynamic linker uses to manage its sections.  At the
+   moment, we don't support shared libraries on any processors where
+   code and data pointers are different sizes.
+
+   This isn't really the right solution.  What we really need here is
+   a way to do arithmetic on CORE_ADDR values that respects the
+   natural pointer/address correspondence.  (For example, on the MIPS,
+   converting a 32-bit pointer to a 64-bit CORE_ADDR requires you to
+   sign-extend the value.  There, simply truncating the bits above
+   TARGET_PTR_BIT, as we do below, is no good.)  This should probably
+   be a new gdbarch method or something.  */
+static CORE_ADDR
+svr4_truncate_ptr (CORE_ADDR addr)
+{
+  if (TARGET_PTR_BIT == sizeof (CORE_ADDR) * 8)
+    /* We don't need to truncate anything, and the bit twiddling below
+       will fail due to overflow problems.  */
+    return addr;
+  else
+    return addr & (((CORE_ADDR) 1 << TARGET_PTR_BIT) - 1);
+}
+
+
 static void
 svr4_relocate_section_addresses (struct so_list *so,
                                  struct section_table *sec)
 {
-  sec->addr += LM_ADDR (so);
-  sec->endaddr += LM_ADDR (so);
+  sec->addr    = svr4_truncate_ptr (sec->addr    + LM_ADDR (so));
+  sec->endaddr = svr4_truncate_ptr (sec->endaddr + LM_ADDR (so));
 }
+
 
 /* Fetch a link_map_offsets structure for native targets using struct
    definitions from link.h.  See solib-legacy.c for the function

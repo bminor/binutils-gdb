@@ -1,3 +1,10 @@
+2002-02-05  Jim Blandy  <jimb@redhat.com>
+
+	* solib-svr4.c (svr4_truncate_ptr): New function.
+	(svr4_relocate_section_addresses): Do the address arithmetic with
+	the appropriate truncation for target addresses, even when
+	CORE_ADDR is larger than a target address.
+
 2002-02-05  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/linux-low.c (mywait): Cast second argument of waitpid
