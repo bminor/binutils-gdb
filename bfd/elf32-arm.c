@@ -40,7 +40,7 @@ static boolean elf32_arm_merge_private_bfd_data
 static boolean elf32_arm_print_private_bfd_data
   PARAMS ((bfd *, PTR));
 static int elf32_arm_get_symbol_type 
-  PARAMS (( Elf_Internal_Sym *));
+  PARAMS (( Elf_Internal_Sym *, int));
 static struct bfd_link_hash_table *elf32_arm_link_hash_table_create
   PARAMS ((bfd *));
 
@@ -823,8 +823,36 @@ static reloc_howto_type elf32_arm_howto_table[] =
 	 0x000000ff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
-/* FILL ME IN  (#13-249) */
+  /* GNU extension to record C++ vtable hierarchy */
+  HOWTO (R_ARM_GNU_VTINHERIT, /* type */
+         0,                     /* rightshift */
+         2,                     /* size (0 = byte, 1 = short, 2 = long) */
+         0,                     /* bitsize */
+         false,                 /* pc_relative */
+         0,                     /* bitpos */
+         complain_overflow_dont, /* complain_on_overflow */
+         NULL,                  /* special_function */
+         "R_ARM_GNU_VTINHERIT", /* name */
+         false,                 /* partial_inplace */
+         0,                     /* src_mask */
+         0,                     /* dst_mask */
+         false),                /* pcrel_offset */
 
+  /* GNU extension to record C++ vtable member usage */
+  HOWTO (R_ARM_GNU_VTENTRY,     /* type */
+         0,                     /* rightshift */
+         2,                     /* size (0 = byte, 1 = short, 2 = long) */
+         0,                     /* bitsize */
+         false,                 /* pc_relative */
+         0,                     /* bitpos */
+         complain_overflow_dont, /* complain_on_overflow */
+         _bfd_elf_rel_vtable_reloc_fn,  /* special_function */
+         "R_ARM_GNU_VTENTRY",   /* name */
+         false,                 /* partial_inplace */
+         0,                     /* src_mask */
+         0,                     /* dst_mask */
+         false),                /* pcrel_offset */
+ 
 
   HOWTO (R_ARM_RREL32,		/* type */
 	 0,			/* rightshift */
@@ -900,6 +928,8 @@ static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
   {BFD_RELOC_ARM_OFFSET_IMM, R_ARM_ABS12,},
   {BFD_RELOC_ARM_THUMB_OFFSET, R_ARM_THM_ABS5,},
   {BFD_RELOC_THUMB_PCREL_BRANCH23, R_ARM_THM_PC22,},
+  {BFD_RELOC_VTABLE_INHERIT, R_ARM_GNU_VTINHERIT },
+  {BFD_RELOC_VTABLE_ENTRY, R_ARM_GNU_VTENTRY },
   {BFD_RELOC_NONE, R_ARM_SBREL32,},
   {BFD_RELOC_NONE, R_ARM_AMP_VCALL9,},
   {BFD_RELOC_THUMB_PCREL_BRANCH12, R_ARM_THM_PC11,},
@@ -1377,6 +1407,10 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       }
       break;
 
+    case R_ARM_GNU_VTINHERIT:
+    case R_ARM_GNU_VTENTRY:
+      return bfd_reloc_ok;
+
     case R_ARM_SBREL32:
       return bfd_reloc_notsupported;
 
@@ -1443,6 +1477,11 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
+
+      if (r_type == R_ARM_GNU_VTENTRY
+          || r_type == R_ARM_GNU_VTINHERIT )
+        continue;
+
       howto = elf32_arm_howto_table + r_type;
 
       if (info->relocateable)
@@ -1777,15 +1816,128 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
 }
 
 static int
-elf32_arm_get_symbol_type (elf_sym)
+elf32_arm_get_symbol_type (elf_sym, type)
      Elf_Internal_Sym * elf_sym;
+     int type;
 {
-  return ELF_ST_TYPE (elf_sym->st_info);
+  if (ELF_ST_TYPE (elf_sym->st_info) == STT_ARM_TFUNC)
+    return ELF_ST_TYPE (elf_sym->st_info);
+  else
+    return type;
 }
     
+static asection *
+elf32_arm_gc_mark_hook (abfd, info, rel, h, sym)
+       bfd *abfd;
+       struct bfd_link_info *info;
+       Elf_Internal_Rela *rel;
+       struct elf_link_hash_entry *h;
+       Elf_Internal_Sym *sym;
+{
+  if (h != NULL)
+    {
+      switch (ELF32_R_TYPE (rel->r_info))
+      {
+      case R_ARM_GNU_VTINHERIT:
+      case R_ARM_GNU_VTENTRY:
+        break;
 
+      default:
+        printf("h is %s\n", h->root.root.string);
+        switch (h->root.type)
+          {
+          case bfd_link_hash_defined:
+          case bfd_link_hash_defweak:
+            return h->root.u.def.section;
 
+          case bfd_link_hash_common:
+            return h->root.u.c.p->section;
+          }
+       }
+     }
+   else
+     {
+       if (!(elf_bad_symtab (abfd)
+           && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
+         && ! ((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
+                && sym->st_shndx != SHN_COMMON))
+          {
+            return bfd_section_from_elf_index (abfd, sym->st_shndx);
+          }
+      }
+  return NULL;
+}
 
+static boolean
+elf32_arm_gc_sweep_hook (abfd, info, sec, relocs)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     asection *sec;
+     const Elf_Internal_Rela *relocs;
+{
+  /* we don't use got and plt entries for armelf */
+  return true;
+}
+
+/* Look through the relocs for a section during the first phase.
+   Since we don't do .gots or .plts, we just need to consider the
+   virtual table relocs for gc.  */
+ 
+static boolean
+elf32_arm_check_relocs (abfd, info, sec, relocs)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     asection *sec;
+     const Elf_Internal_Rela *relocs;
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  struct elf_link_hash_entry **sym_hashes, **sym_hashes_end;
+  const Elf_Internal_Rela *rel;
+  const Elf_Internal_Rela *rel_end;
+ 
+  if (info->relocateable)
+    return true;
+ 
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  sym_hashes = elf_sym_hashes (abfd);
+  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof(Elf32_External_Sym);
+  if (!elf_bad_symtab (abfd))
+    sym_hashes_end -= symtab_hdr->sh_info;
+ 
+  rel_end = relocs + sec->reloc_count;
+  for (rel = relocs; rel < rel_end; rel++)
+    {
+      struct elf_link_hash_entry *h;
+      unsigned long r_symndx;
+ 
+      r_symndx = ELF32_R_SYM (rel->r_info);
+      if (r_symndx < symtab_hdr->sh_info)
+        h = NULL;
+      else
+        h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+ 
+      switch (ELF32_R_TYPE (rel->r_info))
+        {
+        /* This relocation describes the C++ object vtable hierarchy.
+           Reconstruct it for later use during GC.  */
+        case R_ARM_GNU_VTINHERIT:
+          if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+            return false;
+          break;
+ 
+        /* This relocation describes which C++ vtable entries are actually
+           used.  Record for later use during GC.  */
+        case R_ARM_GNU_VTENTRY:
+          if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+            return false;
+          break;
+        }
+    }
+ 
+  return true;
+}
+
+       
 /* Find the nearest line to a particular section and offset, for error
    reporting.   This code is a duplicate of the code in elf.c, except
    that it also accepts STT_ARM_TFUNC as a symbol that names a function. */
@@ -1887,6 +2039,11 @@ elf32_arm_find_nearest_line
 #define bfd_elf32_bfd_link_hash_table_create    elf32_arm_link_hash_table_create
 #define bfd_elf32_find_nearest_line	        elf32_arm_find_nearest_line
 #define elf_backend_get_symbol_type             elf32_arm_get_symbol_type
+#define elf_backend_gc_mark_hook                elf32_arm_gc_mark_hook
+#define elf_backend_gc_sweep_hook               elf32_arm_gc_sweep_hook
+#define elf_backend_check_relocs                elf32_arm_check_relocs
+
+#define elf_backend_can_gc_sections 1
 #define elf_symbol_leading_char '_'
 
 #include "elf32-target.h"

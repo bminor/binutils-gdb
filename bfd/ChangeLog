@@ -1,3 +1,18 @@
+Tue Sep 15 08:34:40 CDT 1998  Catherine Moore  <clm@cygnus.com>
+
+       * bfd-in.h: Add argument to elf_backend_get_symbol_type.
+       * bfd-in2.h: Rebuild.
+       * elf.c (swap_out_syms):  Pass type to elf_backend_get_symbol_type.
+       * elf32-arm.c:  Add HOWTO entries for R_ARM_GNU_VTINHERIT and
+       R_ARM_GNU_VTENTRY.
+       (elf32_arm_gc_mark_hook): New.
+       (elf32_arm_gc_sweep_hook): New.
+       (elf32_arm_check_relocs): New.
+       (elf32_arm_final_link_relocate):  Handle VTINHERIT and VTENTRY
+       relocations.
+       (elf32_arm_relocate_section): Handle VTINHERIT and VTENTRY
+       relocations.
+
 1998-09-10  Geoff Keating  <geoffk@ozemail.com.au>
 
         * elf32-ppc.c (ppc_elf_relocate_section): If dynobj is NULL,
