@@ -9,6 +9,11 @@ Thu Oct 24 02:03:24 1991  Fred Fish  (fnf at cygnus.com)
 	RANLIB is defined as echo, send the output to /dev/null to help
 	reduce clutter in the output from doing a make.
 
+Mon Oct 21 17:48:48 1991  John Gilmore  (gnu at cygnus.com)
+
+	* hosts/h-vaxult.h:  Remove malloc/free decls covered in stdlib.h.
+	Fix HOST_PAGE_SIZE and HOST_SEGMENT_SIZE.  From David Taylor.
+
 Mon Oct 21 09:34:11 1991  Steve Chamberlain  (steve at rtl.cygnus.com)
 
 	* coffcode.h (coff_compute_section_file_positions): make it pad
