@@ -217,6 +217,8 @@ static segT get_segmented_expression PARAMS ((expressionS *expP));
 static segT get_known_segmented_expression PARAMS ((expressionS * expP));
 static void pobegin PARAMS ((void));
 static int get_line_sb PARAMS ((sb *));
+static void generate_file_debug PARAMS ((void));
+static void generate_lineno_debug PARAMS ((void));
 
 
 void
@@ -498,6 +500,11 @@ read_a_source_file (name)
   listing_file (name);
   listing_newline (NULL);
   register_dependency (name);
+
+  /* Generate debugging information before we've read anything in to denote
+     this file as the "main" source file and not a subordinate one
+     (e.g. N_SO vs N_SOL in stabs).  */
+  generate_file_debug ();
 
   while ((buffer_limit = input_scrub_next_buffer (&input_line_pointer)) != 0)
     {				/* We have another line to parse. */
@@ -825,30 +832,7 @@ read_a_source_file (name)
 		      c = *input_line_pointer;
 		      *input_line_pointer = '\0';
 
-		      if (debug_type == DEBUG_STABS)
-			stabs_generate_asm_lineno ();
-
-#ifdef OBJ_GENERATE_ASM_LINENO
-#ifdef ECOFF_DEBUGGING
-		      /* ECOFF assemblers automatically generate
-                         debugging information.  FIXME: This should
-                         probably be handled elsewhere.  */
-		      if (debug_type == DEBUG_NONE)
-			{
-			  if (ecoff_no_current_file ())
-			    debug_type = DEBUG_ECOFF;
-			}
-
-		      if (debug_type == DEBUG_ECOFF)
-		        {
-			  unsigned int lineno;
-			  char *s;
-
-			  as_where (&s, &lineno);
-			  OBJ_GENERATE_ASM_LINENO (s, lineno);
-			}
-#endif
-#endif
+		      generate_lineno_debug ();
 
 		      if (macro_defined)
 			{
@@ -4117,7 +4101,7 @@ sizeof_uleb128 (value)
   return size;
 }
 
-inline int
+int
 sizeof_leb128 (value, sign)
      valueT value;
      int sign;
@@ -4881,6 +4865,46 @@ add_include_dir (path)
   if (i > include_dir_maxlen)
     include_dir_maxlen = i;
 }				/* add_include_dir() */
+
+/* Output debugging information to denote the source file.  */
+
+static void
+generate_file_debug ()
+{
+  if (debug_type == DEBUG_STABS)
+    stabs_generate_asm_file ();
+}
+
+/* Output line number debugging information for the current source line.  */
+
+static void
+generate_lineno_debug ()
+{
+  if (debug_type == DEBUG_STABS)
+    stabs_generate_asm_lineno ();
+
+#ifdef OBJ_GENERATE_ASM_LINENO
+#ifdef ECOFF_DEBUGGING
+  /* ECOFF assemblers automatically generate
+     debugging information.  FIXME: This should
+     probably be handled elsewhere.  */
+  if (debug_type == DEBUG_NONE)
+    {
+      if (ecoff_no_current_file ())
+	debug_type = DEBUG_ECOFF;
+    }
+
+  if (debug_type == DEBUG_ECOFF)
+    {
+      unsigned int lineno;
+      char *s;
+
+      as_where (&s, &lineno);
+      OBJ_GENERATE_ASM_LINENO (s, lineno);
+    }
+#endif
+#endif
+}
 
 void 
 s_ignore (arg)

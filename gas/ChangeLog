@@ -1,3 +1,13 @@
+Wed May 13 10:16:37 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* read.c (generate_file_debug,generate_lineno_debug): New functions.
+	(read_a_source_file): Call them.
+	* read.h (stabs_generate_asm_file): Declare.
+	* stabs.c (stabs_generate_asm_file): New function.
+	(generate_asm_file): New function.
+	(stabs_generate_asm_lineno): Move file name handling into
+	generate_asm_file.
+
 start-sanitize-m32rx
 Tue May 12 13:34:12 1998  Nick Clifton  <nickc@cygnus.com>
 
