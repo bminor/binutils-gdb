@@ -3900,9 +3900,12 @@ elf_fix_symbol_flags (h, eif)
     {
       struct elf_link_hash_entry *weakdef;
 
+      weakdef = h->weakdef;
+      if (h->root.type == bfd_link_hash_indirect)
+	h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
       BFD_ASSERT (h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak);
-      weakdef = h->weakdef;
       BFD_ASSERT (weakdef->root.type == bfd_link_hash_defined
 		  || weakdef->root.type == bfd_link_hash_defweak);
       BFD_ASSERT (weakdef->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC);

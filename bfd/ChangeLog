@@ -1,3 +1,12 @@
+2002-11-11  Nick Clifton  <nickc@redhat.com>
+	
+	Import this patch from mainline:
+	
+	2002-09-19  Nick Clifton  <nickc@redhat.com>
+	
+	* elflink.h (elf_fix_symbol_flags): When examining weak symbols,
+	follow indirect links.
+
 2002-11-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	* configure.in: Clear is_release on the branch after release.
