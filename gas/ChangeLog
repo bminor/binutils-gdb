@@ -1,3 +1,9 @@
+2000-11-26  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* config/tc-m68hc11.c (build_indexed_byte): Print the offset in
+	the error message.
+	(get_operand): Fix analysis for movw/movb instructions.
+
 2000-11-24  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (xscale-elf): Add target.

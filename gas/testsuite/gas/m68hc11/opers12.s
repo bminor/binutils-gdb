@@ -69,4 +69,14 @@ L1:	ldy	,x
 	trap	#0x80
 	trap	#255
 L2:	
+	movw 1,x,2,x
+	movw -1,-1
+	movw -1,1,x
+	movw #-1,1,x
+	movw 3,8
+	movw #3,3
+	movw #3,1,x
+	movw 3,1,x
+	movw 3,+2,x
+	movw 4,-2,x
 	rts

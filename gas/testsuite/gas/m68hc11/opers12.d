@@ -67,4 +67,15 @@ Disassembly of section .text:
 0+0b6 <L1\+0xad> trap	#64
 0+0b8 <L1\+0xaf> trap	#128
 0+0ba <L1\+0xb1> trap	#255
-0+0bc <L2> rts
+0+0bc <L2> movw	1,X, 2,X
+0+0c0 <L2\+0x4> movw	0+0ffff <L2\+0xff43>, 0000ffff <L2\+0xff43>
+0+0c6 <L2\+0xa> movw	0+0ffff <L2\+0xff43>, 1,X
+0+0cb <L2\+0xf> movw	#0+0ffff <L2\+0xff43>, 1,X
+0+0d0 <L2\+0x14> movw	0+03 <start\+0x3>, 0+08 <start\+0x8>
+0+0d6 <L2\+0x1a> movw	#0+03 <start\+0x3>, 0+03 <start\+0x3>
+0+0dc <L2\+0x20> movw	#0+03 <start\+0x3>, 1,X
+0+0e1 <L2\+0x25> movw	0+03 <start\+0x3>, 1,X
+0+0e6 <L2\+0x2a> movw	0+03 <start\+0x3>, 2,X
+0+0eb <L2\+0x2f> movw	0+04 <start\+0x4>, -2,X
+0+0f0 <L2\+0x34> rts
+

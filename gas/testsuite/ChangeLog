@@ -1,3 +1,8 @@
+2000-11-26  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* gas/m68hc11/opers12.s: New test for movw operands.
+	* gas/m68hc11/opers12.d: Likewise.
+
 2000-11-24  Nick Clifton  <nickc@redhat.com>
 
 	* arm.exp: Run tests for xscale as well as arm.

@@ -1073,6 +1073,8 @@ get_operand (oper, which, opmode)
 
       if (*p == ',')
 	{
+          int possible_mode = M6811_OP_NONE;
+          char *old_input_line;
 	  p++;
 
 	  /* 68HC12 pre increment or decrement.  */
@@ -1080,23 +1082,37 @@ get_operand (oper, which, opmode)
 	    {
 	      if (*p == '-')
 		{
-		  mode = M6812_PRE_DEC;
+		  possible_mode = M6812_PRE_DEC;
 		  p++;
-		  if (current_architecture & cpu6811)
-		    as_bad (_("Pre-decrement mode is not valid for 68HC11"));
 		}
 	      else if (*p == '+')
 		{
-		  mode = M6812_PRE_INC;
+		  possible_mode = M6812_PRE_INC;
 		  p++;
-		  if (current_architecture & cpu6811)
-		    as_bad (_("Pre-increment mode is not valid for 68HC11"));
 		}
 	      p = skip_whites (p);
 	    }
+          old_input_line = input_line_pointer;
 	  input_line_pointer = p;
 	  reg = register_name ();
 
+          /* Backtrack if we have a valid constant expression and
+             it does not correspond to the offset of the 68HC12 indexed
+             addressing mode (as in N,x).  */
+          if (reg == REG_NONE && mode == M6811_OP_NONE
+              && possible_mode != M6811_OP_NONE)
+            {
+              oper->mode = M6811_OP_IND16 | M6811_OP_JUMP_REL;
+              input_line_pointer = skip_whites (old_input_line);
+              return 1;
+            }
+
+          if (possible_mode != M6811_OP_NONE)
+            mode = possible_mode;
+          
+          if ((current_architecture & cpu6811)
+              && possible_mode != M6811_OP_NONE)
+            as_bad (_("Pre-increment mode is not valid for 68HC11"));            
 	  /* Backtrack.  */
 	  if (which == 0 && opmode & M6812_OP_IDX_P2
 	      && reg != REG_X && reg != REG_Y
@@ -1700,7 +1716,8 @@ build_indexed_byte (op, format, move_insn)
 
 	  if (move_insn && !(val >= -16 && val <= 15))
 	    {
-	      as_bad (_("Offset out of 5-bit range for movw/movb insn."));
+	      as_bad (_("Offset out of 5-bit range for movw/movb insn: %ld."),
+                      val);
 	      return -1;
 	    }
 
