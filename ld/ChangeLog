@@ -1,3 +1,8 @@
+Thu Oct 26 14:11:26 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* scripttempl/aix.sc: Move special symbols inside sections.
+	Always start .data at 0.
+
 Wed Oct 25 11:52:12 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* Makefile.in (diststuff):  Also make info.
