@@ -1,3 +1,7 @@
+2000-10-12  Roger Sayle  <roger@metaphorics.com>
+
+	* Make comma after string after icon/control optional.
+
 2000-09-13  Anders Norlander  <anorland@acc.umu.se>
 
 	* readelf.c (get_machine_flags): Also print EF_MIPS_MACH field.
