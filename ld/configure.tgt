@@ -438,9 +438,11 @@ mips*-*-vxworks*)	targ_emul=elf32ebmip
 mips*-*-windiss)	targ_emul=elf32mipswindiss ;;
 mips64*el-*-linux-gnu*)	targ_emul=elf32ltsmipn32
 			targ_extra_emuls="elf32btsmipn32 elf32ltsmip elf32btsmip elf64ltsmip elf64btsmip"
+			targ_extra_libpath="elf32ltsmip elf64ltsmip"
 			;;
 mips64*-*-linux-gnu*)	targ_emul=elf32btsmipn32
 			targ_extra_emuls="elf32ltsmipn32 elf32btsmip elf32ltsmip elf64btsmip elf64ltsmip"
+			targ_extra_libpath="elf32btsmip elf64btsmip"
 			;;
 mips*el-*-linux-gnu*)	targ_emul=elf32ltsmip
 			targ_extra_emuls="elf32btsmip elf32ltsmipn32 elf64ltsmip elf32btsmipn32 elf64btsmip"

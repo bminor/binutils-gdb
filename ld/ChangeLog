@@ -1,3 +1,9 @@
+2005-02-08  Richard Sandiford  <rsandifo@redhat.com>
+
+	* configure.tgt (mips64*el-*-linux-gnu*): Define targ_extra_libpath
+	to include o32 and n64 emulations.
+	(mips64*-*-linux-gnu*): Likewise.
+
 2005-02-08  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ldmain.c (warning_callback, warning_find_reloc): Prepend
