@@ -256,7 +256,7 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 		./configure +destdir=$(destdir) \
 		+norecurse \
 		`if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
-		$(host) +target=$(target)) ; $(MAKE) dep
+		$(host) +target=$(target))
 
 ### Local Variables: ***
 ### mode:fundamental ***
