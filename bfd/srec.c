@@ -1,5 +1,5 @@
 /* BFD back-end for s-record objects.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -142,7 +142,7 @@ static asymbol *srec_make_empty_symbol PARAMS ((bfd *));
 static long srec_get_symtab_upper_bound PARAMS ((bfd *));
 static long srec_get_symtab PARAMS ((bfd *, asymbol **));
 
-/* Macros for converting between hex and binary. */
+/* Macros for converting between hex and binary.  */
 
 static CONST char digs[] = "0123456789ABCDEF";
 
@@ -154,7 +154,7 @@ static CONST char digs[] = "0123456789ABCDEF";
 	ch += ((x) & 0xff);
 #define	ISHEX(x)  hex_p(x)
 
-/* Initialize by filling in the hex conversion array. */
+/* Initialize by filling in the hex conversion array.  */
 
 static void
 srec_init ()
@@ -168,9 +168,9 @@ srec_init ()
     }
 }
 
-/* The maximum number of bytes on a line is FF */
+/* The maximum number of bytes on a line is FF.  */
 #define MAXCHUNK 0xff
-/* The number of bytes we fit onto a line on output */
+/* The number of bytes we fit onto a line on output.  */
 #define CHUNK 16
 
 /* When writing an S-record file, the S-records can not be output as
@@ -467,7 +467,8 @@ srec_scan (abfd)
 	      if (! srec_new_symbol (abfd, symname, symval))
 		goto error_return;
 	    }
-	  while (c == ' ' || c == '\t');
+	  while (c == ' ' || c == '\t')
+	    ;
 
 	  if (c == '\n')
 	    ++lineno;
@@ -478,7 +479,7 @@ srec_scan (abfd)
 	    }
 
 	  break;
-    
+
 	case 'S':
 	  {
 	    file_ptr pos;
@@ -839,7 +840,7 @@ srec_set_arch_mach (abfd, arch, mach)
   return bfd_default_set_arch_mach (abfd, arch, mach);
 }
 
-/* we have to save up all the Srecords for a splurge before output */
+/* We have to save up all the Srecords for a splurge before output.  */
 
 static boolean
 srec_set_section_contents (abfd, section, location, offset, bytes_to_do)
@@ -912,8 +913,8 @@ srec_set_section_contents (abfd, section, location, offset, bytes_to_do)
 
 /* Write a record of type, of the supplied number of bytes. The
    supplied bytes and length don't have a checksum. That's worked out
-   here
-*/
+   here.  */
+
 static boolean
 srec_write_record (abfd, type, address, data, end)
      bfd *abfd;
@@ -933,7 +934,7 @@ srec_write_record (abfd, type, address, data, end)
   *dst++ = '0' + type;
 
   length = dst;
-  dst += 2;			/* leave room for dst*/
+  dst += 2;			/* Leave room for dst.  */
 
   switch (type)
     {
@@ -961,7 +962,7 @@ srec_write_record (abfd, type, address, data, end)
       dst += 2;
     }
 
-  /* Fill in the length */
+  /* Fill in the length.  */
   TOHEX (length, (dst - length) / 2, check_sum);
   check_sum &= 0xff;
   check_sum = 255 - check_sum;
@@ -976,8 +977,6 @@ srec_write_record (abfd, type, address, data, end)
   return true;
 }
 
-
-
 static boolean
 srec_write_header (abfd)
      bfd *abfd;
@@ -986,11 +985,10 @@ srec_write_header (abfd)
   bfd_byte *dst = buffer;
   unsigned int i;
 
-  /* I'll put an arbitary 40 char limit on header size */
+  /* I'll put an arbitary 40 char limit on header size.  */
   for (i = 0; i < 40 && abfd->filename[i]; i++)
-    {
-      *dst++ = abfd->filename[i];
-    }
+    *dst++ = abfd->filename[i];
+
   return srec_write_record (abfd, 0, 0, buffer, dst);
 }
 
@@ -1038,14 +1036,12 @@ srec_write_terminator (abfd, tdata)
 			    abfd->start_address, buffer, buffer);
 }
 
-
-
 static boolean
 srec_write_symbols (abfd)
      bfd *abfd;
 {
   char buffer[MAXCHUNK];
-  /* Dump out the symbols of a bfd */
+  /* Dump out the symbols of a bfd.  */
   int i;
   int count = bfd_get_symcount (abfd);
 
@@ -1065,7 +1061,7 @@ srec_write_symbols (abfd)
 	  if (! bfd_is_local_label (abfd, s)
 	      && (s->flags & BSF_DEBUGGING) == 0)
 	    {
-	      /* Just dump out non debug symbols */
+	      /* Just dump out non debug symbols.  */
 	      bfd_size_type l;
 	      char buf2[40], *p;
 
@@ -1107,7 +1103,7 @@ internal_srec_write_object_contents (abfd, symbols)
   if (! srec_write_header (abfd))
     return false;
 
-  /* Now wander though all the sections provided and output them */
+  /* Now wander though all the sections provided and output them.  */
   list = tdata->head;
 
   while (list != (srec_data_list_type *) NULL)
@@ -1133,7 +1129,6 @@ symbolsrec_write_object_contents (abfd)
   return internal_srec_write_object_contents (abfd, 1);
 }
 
-/*ARGSUSED*/
 static int
 srec_sizeof_headers (abfd, exec)
      bfd *abfd ATTRIBUTE_UNUSED;
@@ -1195,7 +1190,7 @@ srec_get_symtab (abfd, alocation)
 	  c->udata.p = NULL;
 	}
     }
-	
+
   for (i = 0; i < symcount; i++)
     *alocation++ = csymbols++;
   *alocation = NULL;
@@ -1203,7 +1198,6 @@ srec_get_symtab (abfd, alocation)
   return symcount;
 }
 
-/*ARGSUSED*/
 static void
 srec_get_symbol_info (ignore_abfd, symbol, ret)
      bfd *ignore_abfd ATTRIBUTE_UNUSED;
@@ -1213,7 +1207,6 @@ srec_get_symbol_info (ignore_abfd, symbol, ret)
   bfd_symbol_info (symbol, ret);
 }
 
-/*ARGSUSED*/
 static void
 srec_print_symbol (ignore_abfd, afile, symbol, how)
      bfd *ignore_abfd ATTRIBUTE_UNUSED;
@@ -1316,11 +1309,9 @@ const bfd_target srec_vec =
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   NULL,
-  
+
   (PTR) 0
 };
-
-
 
 const bfd_target symbolsrec_vec =
 {
@@ -1373,6 +1364,6 @@ const bfd_target symbolsrec_vec =
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   NULL,
-  
+
   (PTR) 0
 };

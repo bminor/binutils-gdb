@@ -1,3 +1,7 @@
+2000-07-06  Kazu Hirata  <kazu@hxi.com>
+
+	* srec.c: Fix formatting.
+
 2000-06-05  DJ Delorie  <dj@redhat.com>
 
 	* MAINTAINERS: new
