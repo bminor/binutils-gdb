@@ -29,6 +29,10 @@ case "${canon}" in
   arc-*-elf*)		bfd_name=arc-elf ;;
 # end-sanitize-arc
   arm-*-riscix*)	bfd_name=riscix ;;
+  arm-*-pe*)		bfd_name=arm-pe  strip_underscore=yes ;;
+  arm-*-aout | armel-*-aout)	
+			bfd_name=arml-aout ;;
+  armeb-*-aout)		bfd_name=armb-aout ;;
   a29k-*-ebmon*)	bfd_name=a29k-coff strip_underscore=yes ;;
   a29k-*-udi*)		bfd_name=a29k-coff strip_underscore=yes ;;
   a29k-*-aout*)		bfd_name=a29k-aout strip_underscore=yes ;;
@@ -64,12 +68,15 @@ case "${canon}" in
   i[345]86-*-linuxaout*) bfd_name=i386-laout strip_underscore=yes ;;
   i[345]86-*-linux*)	bfd_name=i386-linux strip_underscore=yes ;;
   i[345]86-*-lynxos*)	bfd_name=i386-lynx ;;
-  i[345]86-*-gnuelf*)	bfd_name=i386-gelf strip_underscore=yes ;;
-  i[345]86-*-gnu*)	bfd_name=i386-gnu strip_underscore=yes ;;
+  i[345]86-*-gnu*)	bfd_name=i386-gelf strip_underscore=yes ;;
   i[345]86-*-mach*)	bfd_name=i386-mach3 strip_underscore=yes ;;
   i[345]86-*-osf1mk*)	bfd_name=i386-mach3 strip_underscore=yes ;;
   i[345]86-*-os9k)	bfd_name=i386-os9k ;;
-  i[345]86-*-msdos)	bfd_name=i386-msdos ;;
+  i[345]86-*-msdos*)	bfd_name=i386-msdos ;;
+  i[345]86-*-moss*)	bfd_name=i386-moss ;;
+  i[345]86-*-win32)	bfd_name=i386-pe ;;
+  i[345]86-*-winnt)	bfd_name=i386-pe ;;
+  i[345]86-*-pe)	bfd_name=i386-pe ;;
   i[345]86-none-*)	bfd_name=i386-coff ;;
   i960-*-vxworks4*)	bfd_name=i960-bout strip_underscore=yes ;;
   i960-*-vxworks5.0)	bfd_name=i960-bout strip_underscore=yes ;;
@@ -80,9 +87,8 @@ case "${canon}" in
   i960-*-coff*)		bfd_name=i960-coff strip_underscore=yes ;;
   i960-*-nindy*)	bfd_name=i960-bout strip_underscore=yes ;;
   m68*-apollo-*)	bfd_name=apollo ;;
-  m68*-bull-sysv*)	bfd_name=u68k-coff ;;
+  m68*-bull-sysv*)	bfd_name=u68k-coff strip_underscore=yes ;;
   m68*-hp-bsd*)		bfd_name=hp300bsd strip_underscore=yes ;;
-  m68*-est-coff)	bfd_name=m68k-coff ;;
   m68*-*-aout*)		bfd_name=m68k-0aout strip_underscore=yes ;;
   m68*-*-coff*)		bfd_name=m68k-coff ;;
   m68*-*-elf*)		bfd_name=m68k-elf ;;

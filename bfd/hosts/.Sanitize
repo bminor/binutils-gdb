@@ -48,10 +48,10 @@ i386lynx.h
 i386mach3.h
 i386nbsd.h
 i386osf1mk.h
-i386pe.h
 i386sco.h
 i386v.h
 i386v4.h
+i386win32.h
 irix3.h
 irix4.h
 lynx.h
