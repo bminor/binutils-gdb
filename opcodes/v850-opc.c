@@ -35,10 +35,13 @@ const struct v850_operand v850_operands[] = {
 
 /* The IMM5 field in a format 2 insn. */
 #define I5	(R2+1)
-  { 5, 0, 0, 0, 0 }, 
+  { 5, 0, 0, 0, V850_OPERAND_SIGNED }, 
+
+#define I5U	(I5+1)
+  { 5, 0, 0, 0, 0 },
 
 /* The IMM16 field in a format 6 insn. */
-#define I16	(I5+1)
+#define I16	(I5U+1)
   { 16, 0, 0, 0, 0 }, 
 
 /* The DISP6 field in a format 4 insn. */
@@ -47,11 +50,11 @@ const struct v850_operand v850_operands[] = {
 
 /* The DISP9 field in a format 3 insn. */
 #define D9	(D6+1)
-  { 0, 0, insert_d9, extract_d9, 0 },
+  { 0, 0, insert_d9, extract_d9, V850_OPERAND_SIGNED },
 
 /* The DISP16 field in a format 6 insn. */
 #define D16	(D9+1)
-  { 16, 0, 0, 0, 0 }, 
+  { 16, 0, 0, 0, V850_OPERAND_SIGNED }, 
 
 /* The DISP22 field in a format 4 insn. */
 #define D22	(D16+1)
@@ -59,7 +62,7 @@ const struct v850_operand v850_operands[] = {
 
 #define B3	(D22+1)
 /* The 3 bit immediate field in format 8 insn.  */
-  { 3, 11, 0, 0, 0 },
+  { 3, 11, 0, 0, V850_OPERAND_SIGNED },
 
 #define CCCC	(B3+1)
 /* The 4 bit condition code in a setf instruction */
@@ -161,11 +164,11 @@ const struct v850_opcode v850_opcodes[] = {
 { "xor",	OP(0x09),		OP_MASK,	IF1 },
 { "xori",	OP(0x35),		OP_MASK,	IF6 },
 { "not",	OP(0x01),		OP_MASK,	IF1 },
-{ "sar",	OP(0x15),		OP_MASK,	IF2 },
+{ "sar",	OP(0x15),		OP_MASK,	{I5U, R2} },
 { "sar",	two(0x07e0,0x00a0),	two(0x07e0,0xffff),	{R1,R2} },
-{ "shl",	OP(0x16),		OP_MASK,		IF2 },
+{ "shl",	OP(0x16),		OP_MASK,		{I5U, R2} },
 { "shl",	two(0x07e0,0x00c0),	two(0x07e0,0xffff),	{R1,R2} },
-{ "shr",	OP(0x14),		OP_MASK,		IF2 },
+{ "shr",	OP(0x14),		OP_MASK,		{I5U, R2} },
 { "shr",	two(0x07e0,0x0080),	two(0x07e0,0xffff),	{R1,R2} },
 
 /* branch instructions */
