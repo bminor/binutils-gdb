@@ -78,6 +78,7 @@ elf32-m68k.c
 elf32-sparc.c
 elf32-target.h
 elf32.c
+elfcode.h
 filemode.c
 format.c
 gen-aout.c
