@@ -87,7 +87,7 @@ FLAGS_TO_PASS = \
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 
 
-all:	endian.h $(ALL)
+all:	$(ALL)
 	
 clean:  $(CLEAN)
 	rm -f endian e.h endian.h
@@ -96,6 +96,7 @@ install: $(DO_INSTALL)
 
 info:
 install-info:
+dvi:
 
 ### build endian.h via a temporary so that interrupted builds will not
 ### leave an incomplete endian.h lying around.
@@ -103,7 +104,8 @@ endian.h: endian
 	./endian > e.h
 	mv -f e.h endian.h
 
-endian: endian.c
+endian: $(srcdir)/endian.c
+	$(CC) $(CFLAGS) -o endian $(srcdir)/endian.c
 
 ### none
 
@@ -116,7 +118,7 @@ install-nothing: force
 
 ### z8k
 
-all-z8k: force
+all-z8k: endian.h force
 	if [ -f ./z8k/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		( cd ./z8k ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
@@ -143,7 +145,7 @@ clean-z8k: force
 
 ### h8300
 
-all-h8300: force
+all-h8300: endian.h force
 	if [ -f ./h8300/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		( cd ./h8300 ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
@@ -171,7 +173,7 @@ clean-h8300: force
 
 ### h8500
 
-all-h8500: force
+all-h8500: endian.h force
 	if [ -f ./h8500/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		( cd ./h8500 ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
@@ -199,7 +201,7 @@ clean-h8500: force
 
 ### sh
 
-all-sh: force
+all-sh: endian.h force
 	if [ -f ./sh/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		( cd ./sh ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
