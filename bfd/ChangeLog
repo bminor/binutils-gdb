@@ -1,3 +1,7 @@
+2005-03-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (elfcore_grok_win32pstatus): Warning fixes.
+
 2005-03-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/bfd.pot: Regenerate.

@@ -7080,7 +7080,7 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 
     case NOTE_INFO_THREAD:
       /* Make a ".reg/999" section.  */
-      sprintf (buf, ".reg/%d", pstatus.data.thread_info.tid);
+      sprintf (buf, ".reg/%ld", (long) pstatus.data.thread_info.tid);
 
       len = strlen (buf) + 1;
       name = bfd_alloc (abfd, len);
@@ -7107,7 +7107,8 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 
     case NOTE_INFO_MODULE:
       /* Make a ".module/xxxxxxxx" section.  */
-      sprintf (buf, ".module/%08x", pstatus.data.module_info.base_address);
+      sprintf (buf, ".module/%08lx",
+	       (long) pstatus.data.module_info.base_address);
 
       len = strlen (buf) + 1;
       name = bfd_alloc (abfd, len);
