@@ -1,5 +1,12 @@
 Thu Jan 30 16:49:25 1997  Bob Manson  <manson@charmed.cygnus.com>
 
+	* lib/gdb.exp: Fix runto.
+
+	* gdb.base/signals.exp: Check for a gdb,nosignals feature of
+	the target.
+
+	* gdb.base/watchpoint.exp: Fix regexp.
+
 	* lib/gdb.exp(default_gdb_exit): Add a catch to the
 	close and wait commands, as the descriptor may now be
 	invalid. Always call "remote_close host".
