@@ -844,7 +844,7 @@ DEFUN_VOID (cg_print_function_ordering)
 
   /* Now sort a temporary symbol table based on the number of
      times each function was used in the highest used arcs.  */
-  bcopy (used_syms, scratch_syms, used * sizeof (Sym *));
+  memcpy (scratch_syms, used_syms, used * sizeof (Sym *));
   qsort (scratch_syms, used, sizeof (Sym *), cmp_fun_nuses);
 
   /* Now pick out those symbols we're going to emit as

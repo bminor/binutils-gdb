@@ -1,3 +1,18 @@
+Thu Mar 21 17:18:25 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* core.c (core_create_function_syms): Move filename and func_name
+	inside ifdef where they are used.
+
+	* core.c (core_sym_class): Parenthesize && within ||.
+	* symtab.c (symtab_finalize): Correct parenthesization.
+
+	* cg_print.h (cg_print_file_ordering): Declare.
+	(cg_print_function_ordering): Declare.
+
+	* __bb_exit_func.c (__bb_exit_func): Replace bcopy with memcpy.
+	* cg_arcs.c (arc_add): Likewise.
+	* cg_print.c (cg_print_function_ordering): Likewise.
+
 Thu Mar 21 17:02:02 1996  David Mosberger-Tang  <davidm@azstarnet.com>
 
 	* gprof.c (default_excluded_list): Add "__mcount".

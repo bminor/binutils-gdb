@@ -270,7 +270,7 @@ DEFUN (core_sym_class, (sym), asymbol * sym)
    * other systems.  Perhaps it should be made configurable.
    */
   sym_prefix = bfd_get_symbol_leading_char (core_bfd);
-  if (sym_prefix && sym_prefix != sym->name[0]
+  if ((sym_prefix && sym_prefix != sym->name[0])
   /*
    * GCC may add special symbols to help gdb figure out the file
    * language.  We want to ignore these, since sometimes they mask
@@ -332,7 +332,6 @@ void
 DEFUN (core_create_function_syms, (core_bfd), bfd * core_bfd)
 {
   bfd_vma min_vma = ~0, max_vma = 0;
-  const char *filename, *func_name;
   int class;
   long i, j, found, skip;
 
@@ -431,24 +430,28 @@ DEFUN (core_create_function_syms, (core_bfd), bfd * core_bfd)
        * labels do not appear in the symbol table info, so this isn't
        * necessary.
        */
-      if (get_src_info (symtab.limit->addr, &filename, &func_name,
-			&symtab.limit->line_num))
-	{
-	  symtab.limit->file = source_file_lookup_path (filename);
+      {
+	const char *filename, *func_name;
+	
+	if (get_src_info (symtab.limit->addr, &filename, &func_name,
+			  &symtab.limit->line_num))
+	  {
+	    symtab.limit->file = source_file_lookup_path (filename);
 
-	  if (strcmp (symtab.limit->name, func_name) != 0)
-	    {
-	      /*
-	       * The symbol's address maps to a different name, so
-	       * it can't be a function-entry point.  This happens
-	       * for labels, for example.
-	       */
-	      DBG (AOUTDEBUG,
-		printf ("[core_create_function_syms: rej %s (maps to %s)\n",
-			symtab.limit->name, func_name));
-	      continue;
-	    }
-	}
+	    if (strcmp (symtab.limit->name, func_name) != 0)
+	      {
+		/*
+		 * The symbol's address maps to a different name, so
+		 * it can't be a function-entry point.  This happens
+		 * for labels, for example.
+		 */
+		DBG (AOUTDEBUG,
+		     printf ("[core_create_function_syms: rej %s (maps to %s)\n",
+			     symtab.limit->name, func_name));
+		continue;
+	      }
+	  }
+      }
 #endif
 
       symtab.limit->is_func = TRUE;

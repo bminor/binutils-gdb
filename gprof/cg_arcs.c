@@ -106,7 +106,7 @@ DEFUN (arc_add, (parent, child, count),
 	  newarcs = (Arc **)xmalloc(sizeof (Arc *) * maxarcs);
 
 	  /* Copy the old array's contents into the new array.  */
-	  bcopy (arcs, newarcs, numarcs * sizeof (Arc *));
+	  memcpy (newarcs, arcs, numarcs * sizeof (Arc *));
 
 	  /* Free up the old array.  */
 	  free (arcs);
