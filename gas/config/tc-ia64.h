@@ -254,7 +254,8 @@ typedef struct unwind_record
 
 #define TC_RELOC_RTSYM_LOC_FIXUP(FIX)				\
   ((FIX)->fx_addsy == NULL					\
+   || (FIX)->fx_r_type == 0					\
    || (! S_IS_EXTERNAL ((FIX)->fx_addsy)			\
        && ! S_IS_WEAK ((FIX)->fx_addsy)				\
-       && S_IS_DEFINED ((FIX)->fx_addsy)                        \
+       && S_IS_DEFINED ((FIX)->fx_addsy)			\
        && ! S_IS_COMMON ((FIX)->fx_addsy)))
