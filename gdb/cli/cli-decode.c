@@ -419,19 +419,15 @@ add_setshow_enum_cmd (char *name,
 		      cmd_sfunc_ftype *set_func,
 		      cmd_sfunc_ftype *show_func,
 		      struct cmd_list_element **set_list,
-		      struct cmd_list_element **show_list,
-		      struct cmd_list_element **set_result,
-		      struct cmd_list_element **show_result)
+		      struct cmd_list_element **show_list)
 {
   struct cmd_list_element *c;
   add_setshow_cmd_full (name, class, var_enum, var,
 			set_doc, show_doc, help_doc, print,
 			set_func, show_func,
 			set_list, show_list,
-			&c, show_result);
+			&c, NULL);
   c->enums = enumlist;
-  if (set_result)
-    *set_result = c;
 }
 
 /* Add an auto-boolean command named NAME to both the set and show

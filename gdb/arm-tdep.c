@@ -2886,7 +2886,7 @@ _initialize_arm_tdep (void)
 		       helptext,
 		       _("The disassembly style is \"%s\"."),
 		       set_disassembly_style_sfunc, NULL,
-		       &setarmcmdlist, &showarmcmdlist, NULL, NULL);
+		       &setarmcmdlist, &showarmcmdlist);
 
   add_setshow_boolean_cmd ("apcs32", no_class, &arm_apcs_32,
 			   _("Set usage of ARM 32-bit mode."),
@@ -2907,7 +2907,7 @@ softvfp - Software FP with pure-endian doubles.\n\
 vfp - VFP co-processor."),
 			_("The floating point type is \"%s\"."),
 			set_fp_model_sfunc, show_fp_model,
-			&setarmcmdlist, &showarmcmdlist, NULL, NULL);
+			&setarmcmdlist, &showarmcmdlist);
 
   /* Debugging flag.  */
   add_setshow_boolean_cmd ("arm", class_maintenance, &arm_debug,

@@ -1,5 +1,12 @@
 2005-02-09  Andrew Cagney  <cagney@gnu.org>
 
+	* cli/cli-decode.c (add_setshow_enum_cmd): Drop set_result and
+	show_result parameters.
+	* mips-tdep.c (_initialize_mips_tdep): Update calls.
+	* command.h: Update declaration.
+	* arm-tdep.c (_initialize_arm_tdep, _initialize_arm_tdep): Update
+	calls.
+
 	* NEWS: Mention removed commands.
 	* m68hc11-tdep.c (show_regs): Delete, unused.
 	(_initialize_m68hc11_tdep): Delete deprecated "regs" command.

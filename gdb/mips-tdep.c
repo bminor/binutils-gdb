@@ -5189,8 +5189,7 @@ This option can be set to one of:\n\
           saved GP register size from information contained in the executable.\n\
           (default: auto)", "\
 Size of general purpose registers saved on the stack is %s.\n",
-			NULL, NULL, &setmipscmdlist, &showmipscmdlist,
-			NULL, NULL);
+			NULL, NULL, &setmipscmdlist, &showmipscmdlist);
 
   /* Allow the user to override the argument stack size. */
   add_setshow_enum_cmd ("stack-arg-size", class_obscure,
@@ -5203,8 +5202,7 @@ This option can be set to one of:\n\
   auto  - Allow GDB to determine the correct setting from the current\n\
           target and executable (default)", "\
 The amount of stack space reserved for each argument is %s.\n",
-			NULL, NULL, &setmipscmdlist, &showmipscmdlist,
-			NULL, NULL);
+			NULL, NULL, &setmipscmdlist, &showmipscmdlist);
 
   /* Allow the user to override the ABI. */
   c = add_set_enum_cmd
