@@ -2351,7 +2351,7 @@ ERROR: %s uses Maverick instructions, whereas %s does not"),
 				bfd_get_filename (obfd));
 	  else
 	    _bfd_error_handler (_("\
-ERROR: %s uses Maverick instructions, whereas %s does not"),
+ERROR: %s does not use Maverick instructions, whereas %s does"),
 				bfd_archive_filename (ibfd),
 				bfd_get_filename (obfd));
 

@@ -1,3 +1,9 @@
+2003-10-21  Wouter van Heyst <wouter@vidicode.nl>
+
+	* config/tc-arm.c (all_reg_maps): Correct text describing Maverick
+	register requirements.
+	(md_begin): Remove F_SOFT_FLOAT if enabling MAVERICK FP.
+
 2003-10-21  Peter Barada  <pbarada@mail.wm.sps.mot.com>
             Bernardo Innocenti  <bernie@develer.com>
 

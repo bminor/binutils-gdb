@@ -1,3 +1,8 @@
+2003-10-21  Wouter van Heyst <wouter@vidicode.nl>
+
+	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Correct text
+	describing mismatched formats involving the Maverick FP type.
+
 2003-10-21  Anil Paranjpe  <anilp1@KPITCummins.com>
 
 	* binary.c (binary_object_p): Pass machine flag along with

@@ -769,7 +769,7 @@ struct reg_map all_reg_maps[] =
   {mav_mvf_table,   15, NULL, N_("Maverick MVF register expected")},
   {mav_mvd_table,   15, NULL, N_("Maverick MVD register expected")},
   {mav_mvfx_table,  15, NULL, N_("Maverick MVFX register expected")},
-  {mav_mvdx_table,  15, NULL, N_("Maverick MVFX register expected")},
+  {mav_mvdx_table,  15, NULL, N_("Maverick MVDX register expected")},
   {mav_mvax_table,   3, NULL, N_("Maverick MVAX register expected")},
   {mav_dspsc_table,  0, NULL, N_("Maverick DSPSC register expected")},
   {iwmmxt_table,    23, NULL, N_("Intel Wireless MMX technology register expected")},
@@ -10320,7 +10320,7 @@ md_begin ()
 #if defined OBJ_ELF
     if (cpu_variant & ARM_CEXT_MAVERICK)
       {
-	flags ^= F_SOFT_FLOAT;
+	flags &= ~ F_SOFT_FLOAT;
 	flags |= EF_ARM_MAVERICK_FLOAT;
       }
 #endif
