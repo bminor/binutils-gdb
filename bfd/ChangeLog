@@ -1,5 +1,16 @@
 1999-07-16  Jakub Jelinek  <jj@ultra.linux.cz>
 
+	* elf64-sparc.c (sparc64_elf_info_to_howto): Use ELF64_R_TYPE_ID.
+	(sparc64_elf_get_reloc_upper_bound,
+	sparc64_elf_get_dynamic_reloc_upper_bound,
+	sparc64_elf_slurp_one_reloc_table, sparc64_elf_slurp_reloc_table,
+	sparc64_elf_canonicalize_dynamic_reloc, sparc64_elf_write_relocs):
+	New functions.
+	(sparc64_elf_check_relocs, sparc64_elf_relocate_section): Use
+	ELF64_R_TYPE_ID/DATA where appropriate.
+
+1999-07-16  Jakub Jelinek  <jj@ultra.linux.cz>
+
 	* elf64-sparc.c (sparc64_elf_size_dynamic_sections): Remove
 	DT_SPARC_PLTFMT.
 
