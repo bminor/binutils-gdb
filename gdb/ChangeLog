@@ -1,3 +1,21 @@
+Tue Jan  5 11:13:36 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* remote.c (record_curthread): Must not modify inferior_pid when
+	called from wait_for_inferior.  Instead, if a new thread-id is
+	detected, call add_thread.  (MAGIC_NULL_PID): new macro, use 
+	instead of the magic number "42000".  (remote_find_new_threads):
+	if inferior_pid is unknown, get and use the current thread id.
+	(remote_start_remote): on connecting, attempt to get the current
+	thread id for inferior_pid.  (remote_resume): If pid == -1, 
+	then resume any-thread (not the current thread specifically).
+	Also some cosmetic fixups.
+	
+	* thread.c (info_threads_command): don't initialize current_pid 
+	until after call to FIND_NEW_THREADS (which may change inferior_pid).
+	Also some cosmetic fixups.
+	* infrun.c: cosmetic fixups and casts to avoid warnings.
+	* infcmd.c: cosmetic fixups, mainly long lines.
+	
 Tue Jan  5 11:55:57 1999  David Taylor  <taylor@texas.cygnus.com>
 
 	* target.c (noprocess): terminate sentence with a period.

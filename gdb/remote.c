@@ -542,8 +542,8 @@ init_remote_threadtests PARAMS ((void));
 
 /* These are the threads which we last sent to the remote system.
    -1 for all or -2 for not sent yet.  */
-int general_thread;
-int cont_thread;
+static int general_thread;
+static int cont_thread;
 
 /* Call this function as a result of
    1) A halt indication (T packet) containing a thread id
@@ -555,10 +555,21 @@ static void
 record_currthread (currthread)
      int currthread;
 {
+#if 0	/* target_wait must not modify inferior_pid! */
   inferior_pid = currthread;
+#endif
   general_thread = currthread;
+#if 0	/* setting cont_thread has a different meaning 
+	   from having the target report its thread id.  */
   cont_thread = currthread;
+#endif
+  /* If this is a new thread, add it to GDB's thread list.
+     If we leave it up to WFI to do this, bad things will happen.  */
+  if (!in_thread_list (currthread))
+    add_thread (currthread);
 }
+
+#define MAGIC_NULL_PID 42000
 
 static void
 set_thread (th, gen)
@@ -573,7 +584,7 @@ set_thread (th, gen)
 
   buf[0] = 'H';
   buf[1] = gen ? 'g' : 'c';
-  if (th == 42000)
+  if (th == MAGIC_NULL_PID)
     {
       buf[2] = '0';
       buf[3] = '\0';
@@ -1289,12 +1300,27 @@ remote_newthread_step (ref, context)
 #define CRAZY_MAX_THREADS 1000
 
 int
+remote_current_thread (int oldpid)
+{
+  char buf[PBUFSIZ];
+
+  putpkt ("qC");
+  getpkt (buf, 0);
+  if (buf[0] == 'Q' && buf[1] == 'C')
+    return strtol (&buf[2], NULL, 16);
+  else
+    return oldpid;
+}
+
+int
 remote_find_new_threads  (void)
 {
   int ret;
 
   ret = remote_threadlist_iterator (remote_newthread_step, 0, 
 				    CRAZY_MAX_THREADS);
+  if (inferior_pid == MAGIC_NULL_PID)	/* ack ack ack */
+    inferior_pid = remote_current_thread (inferior_pid);
   return ret;
 } /* remote_find_new_threads */
 
@@ -1597,6 +1623,8 @@ remote_start_remote (dummy)
   /* Let the stub know that we want it to return the thread.  */
   set_thread (-1, 0);
 
+  inferior_pid = remote_current_thread (inferior_pid);
+
   get_offsets ();		/* Get text, data & bss offsets */
 
   putpkt ("?");			/* initiate a query from remote machine */
@@ -1694,7 +1722,7 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
      variables, especially since GDB will someday have a notion of debugging
      several processes.  */
 
-  inferior_pid = 42000;
+  inferior_pid = MAGIC_NULL_PID;
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it
      (we'd be in an inconsistent state otherwise).  */
@@ -1780,9 +1808,9 @@ remote_resume (pid, step, siggnal)
   char buf[PBUFSIZ];
 
   if (pid == -1)
-    set_thread (inferior_pid, 0);
+    set_thread (0, 0);		/* run any thread */
   else
-    set_thread (pid, 0);
+    set_thread (pid, 0);	/* run this thread */
 
   dcache_flush (remote_dcache);
 
@@ -2038,7 +2066,7 @@ Packet: '%s'\n",
       /* Initial thread value can only be acquired via wait, so deal with
 	 this marker which is used before the first thread value is
 	 acquired.  */
-      if (inferior_pid == 42000)
+      if (inferior_pid == MAGIC_NULL_PID)
 	{
 	  inferior_pid = thread_num;
 	  add_thread (inferior_pid);

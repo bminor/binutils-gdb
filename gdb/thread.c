@@ -465,7 +465,7 @@ info_threads_command (arg, from_tty)
      int from_tty;
 {
   struct thread_info *tp;
-  int                current_pid = inferior_pid;
+  int                current_pid;
   struct frame_info  *cur_frame;
   int                saved_frame_level = selected_frame_level;
   int                counter;
@@ -478,7 +478,7 @@ info_threads_command (arg, from_tty)
 #if defined(FIND_NEW_THREADS)
   FIND_NEW_THREADS ();
 #endif
-
+  current_pid = inferior_pid;
   for (tp = thread_list; tp; tp = tp->next)
     {
       if (tp->pid == current_pid)
