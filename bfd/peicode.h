@@ -52,9 +52,15 @@ Most of this hacked by  Steve Chamberlain,
    wasting too much time.
 */
 
-#undef coff_bfd_print_private_bfd_data
+#ifdef  coff_bfd_print_private_bfd_data
+static  boolean (* pe_saved_coff_bfd_print_private_bfd_data) (bfd *, PTR) = coff_bfd_print_private_bfd_data;
+#undef  coff_bfd_print_private_bfd_data
+#else
+static  boolean (* pe_saved_coff_bfd_print_private_bfd_data) (bfd *, PTR) = NULL;
+#endif
 #define coff_bfd_print_private_bfd_data pe_print_private_bfd_data
-#define coff_mkobject pe_mkobject
+
+#define coff_mkobject      pe_mkobject
 #define coff_mkobject_hook pe_mkobject_hook
 
 #ifndef GET_FCN_LNNOPTR
@@ -1966,13 +1972,19 @@ pe_print_private_bfd_data (abfd, vfile)
       fprintf (file, "%s\n", dir_names[j]);
     }
 
-  pe_print_idata(abfd, vfile);
-  pe_print_edata(abfd, vfile);
-  pe_print_pdata(abfd, vfile);
-  pe_print_reloc(abfd, vfile);
+  pe_print_idata (abfd, vfile);
+  pe_print_edata (abfd, vfile);
+  pe_print_pdata (abfd, vfile);
+  pe_print_reloc (abfd, vfile);
 
-  fputc ('\n', file);
-  return coff_arm_bfd_print_private_bfd_data (abfd, vfile);
+  if (pe_saved_coff_bfd_print_private_bfd_data != NULL)
+    {
+      fputc ('\n', file);
+  
+      return pe_saved_bfd_print_private_bfd_data (abfd, vfile);
+    }
+
+  return true;
 }
 
 static boolean
@@ -2030,13 +2042,13 @@ pe_mkobject_hook (abfd, filehdr, aouthdr)
 
 #ifdef COFF_IMAGE_WITH_PE
   if (aouthdr) 
-    {
-      pe->pe_opthdr = ((struct internal_aouthdr *)aouthdr)->pe;
-    }
+    pe->pe_opthdr = ((struct internal_aouthdr *)aouthdr)->pe;
 #endif
 
+#ifdef ARM 
   if (! coff_arm_bfd_set_private_flags (abfd, internal_f->f_flags))
     coff_data (abfd) ->flags = 0;
+#endif
   
   return (PTR) pe;
 }
@@ -2046,7 +2058,12 @@ pe_mkobject_hook (abfd, filehdr, aouthdr)
 /* Copy any private info we understand from the input bfd
    to the output bfd.  */
 
-#undef coff_bfd_copy_private_bfd_data
+#ifdef  coff_bfd_copy_private_bfd_data
+static  boolean (* pe_saved_coff_bfd_copy_private_bfd_data)(bfd *, bfd *) = coff_bfd_copy_private_bfd_data;
+#undef  coff_bfd_copy_private_bfd_data
+#else
+static  boolean (* pe_saved_coff_bfd_copy_private_bfd_data)(bfd *, bfd *) = NULL;
+#endif
 #define coff_bfd_copy_private_bfd_data pe_bfd_copy_private_bfd_data
 
 static boolean
@@ -2061,7 +2078,10 @@ pe_bfd_copy_private_bfd_data (ibfd, obfd)
   pe_data (obfd)->pe_opthdr = pe_data (ibfd)->pe_opthdr;
   pe_data (obfd)->dll = pe_data (ibfd)->dll;
 
-  return coff_arm_bfd_copy_private_bfd_data (ibfd, obfd);
+  if (pe_saved_coff_bfd_copy_private_bfd_data)
+    return pe_saved_coff_bfd_copy_private_bfd_data (ibfd, obfd);
+  
+  return true;
 }
 
 #ifdef COFF_IMAGE_WITH_PE

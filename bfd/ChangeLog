@@ -1,3 +1,13 @@
+Thu Mar 26 10:13:41 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* peicode.h: Chain together calls to
+	coff_bfd_copy_private_bfd_data and
+	coff_bfd_print_private_bfd_data. 
+
+	* coff-arm.c: Add prototypes for
+	coff_arm_bfd_print_private_bfd_data and
+	coff_arm_bfd_copy_private_bfd_data. 
+
 Wed Mar 25 15:45:55 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* coffcode.h (coff_mkobject_hook): Set private falgs even for a PE
