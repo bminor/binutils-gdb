@@ -215,8 +215,8 @@ dvi \Option-f  binutils.dvi
 {STRIP_PROG} \Option-f  {ADDL_LIBS} "{o}"objcopy.c.o "{o}"is-strip.c.o {BFD}
 	Link    {LDFLAGS} -o {STRIP_PROG} "{o}"objcopy.c.o "{o}"is-strip.c.o {ADDL_LIBS} {EXTRALIBS}
 
-{NM_PROG} \Option-f  {ADDL_LIBS} "{o}"nm.c.o "{o}"demangle.c.o {BFD}
-	Link    {LDFLAGS} -o {NM_PROG} "{o}"nm.c.o "{o}"demangle.c.o {ADDL_LIBS} {EXTRALIBS}
+{NM_PROG} \Option-f  {ADDL_LIBS} "{o}"nm.c.o {BFD}
+	Link    {LDFLAGS} -o {NM_PROG} "{o}"nm.c.o {ADDL_LIBS} {EXTRALIBS}
 
 {OBJDUMP_PROG} \Option-f  {ADDL_LIBS} "{o}"objdump.c.o {BFD} {OPCODES}
 	Link    {LDFLAGS} -o {OBJDUMP_PROG} "{o}"objdump.c.o {OPCODES} {ADDL_LIBS} {EXTRALIBS}
@@ -230,25 +230,22 @@ dvi \Option-f  binutils.dvi
 "{o}"version.c.o \Option-f  "{s}"version.c
 	{CC} {INCLUDES} {HDEFINES} {TDEFINES} -d VERSION='"{VERSION}"' {CFLAGS} "{srcdir}"version.c -o "{o}"version.c.o
 
-"{o}"demangle.c.o \Option-f  "{BASEDIR}"libiberty:cplus-dem.c
-	{CC} {INCLUDES} {HDEFINES} {TDEFINES} {CFLAGS} "{BASEDIR}"libiberty:cplus-dem.c -o "{o}"cplus-dem.c.o
-	Rename -y "{o}"cplus-dem.c.o "{o}"demangle.c.o
-
-# For parallel compiling, depend on "{o}"demangle.c.o so that one gets done first.
-"{o}"cplus-dem.c.o \Option-f  "{BASEDIR}"libiberty:cplus-dem.c "{INCDIR}":getopt.h "{o}"demangle.c.o
-	{CC} -d MAIN {INCLUDES} {HDEFINES} {TDEFINES} {CFLAGS} "{BASEDIR}"libiberty:cplus-dem.c -o "{o}"cplus-dem.c.o
+"{o}"cplus-dem.c.o \Option-f  "{BASEDIR}"libiberty:cplus-dem.c
+	{CC} -d MAIN -d VERSION='"{VERSION}"' {INCLUDES} {HDEFINES} {TDEFINES} {CFLAGS} "{BASEDIR}"libiberty:cplus-dem.c -o "{o}"cplus-dem.c.o
 
 {DEMANGLER_PROG} \Option-f  "{o}"cplus-dem.c.o {LIBIBERTY} "{o}"underscore.c.o "{o}"version.c.o
-	Link    {LDFLAGS}  -o {DEMANGLER_PROG} "{o}"cplus-dem.c.o {LIBIBERTY} {EXTRALIBS} "{o}"underscore.c.o "{o}"version.c.o
+	Link    {LDFLAGS}  -o {DEMANGLER_PROG} "{o}"cplus-dem.c.o {LIBIBERTY} {EXTRALIBS} "{o}"underscore.c.o
 
-:arparse.h :arparse.c \Option-f  "{s}"arparse.y
+"{o}"arparse.c \Option-f  "{s}"arparse.y
 	{BISON} {BISONFLAGS}  "{srcdir}"arparse.y
-	Rename -y y.tab.c :arparse.c
-	Rename -y y.tab.h :arparse.h
+	Rename -y y.tab.c "{o}"arparse.c
+	Rename -y y.tab.h "{o}"arparse.h
 
-:arlex.c \Option-f  "{s}"arlex.l
+"{o}"arparse.h \Option-f  "{o}"arparse.c
+
+"{o}"arlex.c \Option-f  "{s}"arlex.l
 	{LEX} {LEX_OPTIONS} "{srcdir}"arlex.l
-	Rename -y :lex.yy.c :arlex.c
+	Rename -y :lex.yy.c "{o}"arlex.c
 
 {AR_PROG} \Option-f  {ADDL_LIBS} "{o}"ar.c.o "{o}"arparse.c.o "{o}"arlex.c.o "{o}"not-ranlib.c.o {BFD} "{o}"arsup.c.o
 	Link    {LDFLAGS} -o {AR_PROG} "{o}"ar.c.o "{o}"arparse.c.o "{o}"arlex.c.o "{o}"arsup.c.o "{o}"not-ranlib.c.o {ADDL_LIBS} {EXTRALIBS}
@@ -316,9 +313,9 @@ nlmheader.c \Option-f  "{s}"nlmheader.y
   "{INCDIR}":obstack.h ::bfd:sysdep.h "{BFDDIR}":hosts:std-host.h \Option-d
   "{INCDIR}":fopen-same.h "{s}"bucomm.h "{INCDIR}":aout:ar.h \Option-d
   "{BFDDIR}":libbfd.h "{s}"arsup.h 
-"{o}"arparse.c.o \Option-f  :arparse.c ::bfd:bfd.h "{INCDIR}":ansidecl.h \Option-d
+"{o}"arparse.c.o \Option-f  "{o}"arparse.c ::bfd:bfd.h "{INCDIR}":ansidecl.h \Option-d
   "{INCDIR}":obstack.h "{s}"arsup.h 
-"{o}"arlex.c.o \Option-f  :arlex.c :arparse.h 
+"{o}"arlex.c.o \Option-f  :arlex.c "{o}"arparse.h 
 "{o}"not-ranlib.c.o \Option-f  "{s}"not-ranlib.c 
 "{o}"arsup.c.o \Option-f  "{s}"arsup.c ::bfd:bfd.h "{INCDIR}":ansidecl.h \Option-d
   "{INCDIR}":obstack.h "{s}"arsup.h "{s}"bucomm.h 
