@@ -1,5 +1,24 @@
 Thu Feb  5 12:39:08 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ehopt.c: New file.
+	* as.h (enum _relax_state): Add rs_cfa.
+	(check_eh_frame, eh_frame_estimate_size_before_relax): Declare.
+	(eh_frame_relax_frag, eh_frame_convert_frag): Declare.
+	* read.c (emit_expr): Call check_eh_frame.
+	* write.c (cvt_frag_to_fill): Handle rs_cfa.
+	(relax_segment): Likewise.
+	* Makefile.am: Rebuild dependencies.
+ 	(GAS_CFILES): Add ehopt.c.
+	(GENERIC_OBJS): Add ehopt.o.
+	* doc/internals.texi (Frags): Document rs_cfa.
+
+	* as.c (show_usage): Mention --traditional-format.
+	(parse_args): Accept --traditional-format.
+	* as.h (flag_traditional_format): Declare.
+	* output-file.c (output_file_create): If flag_traditional_format,
+	set BFD_TRADITIONAL_FORMAT on stdoutput.
+	* doc/as.texinfo, doc/as.1: Document --traditional-format.
+
 	* config/tc-mips.c (append_insn): Make sure that if we have a
 	fixup for an unmatched %hi reloc, it does not associated with a
 	variant frag.

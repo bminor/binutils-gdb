@@ -1,4 +1,4 @@
-.\" Copyright (c) 1991, 1992, 1996, 1997 Free Software Foundation
+.\" Copyright (c) 1991, 1992, 1996, 1997, 1998 Free Software Foundation
 .\" See section COPYING for conditions for redistribution
 .TH as 1 "29 March 1996" "cygnus support" "GNU Development Tools"
 
@@ -26,6 +26,7 @@ GNU as \- the portable GNU assembler.
 .I objfile\c
 \&\|]
 .RB "[\|" \-R "\|]"
+.RB "[\|" \-\-traditional\-format "\|]"
 .RB "[\|" \-v "\|]"
 .RB "[\|" \-w "\|]"
 .RB "[\|" \-\^\- "\ |\ " \c
@@ -185,6 +186,9 @@ Name the object-file output from \c
 .TP
 .B \-R
 Fold data section into text section
+.TP
+.B \-\-traditional\-format
+Use same format as native assembler, when possible.
 .TP
 .B \-v
 Announce \c

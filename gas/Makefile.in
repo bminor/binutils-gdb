@@ -203,6 +203,7 @@ GAS_CFILES = \
 	cond.c \
 	depend.c \
 	ecoff.c \
+	ehopt.c \
 	expr.c \
 	flonum-copy.c \
 	flonum-konst.c \
@@ -390,6 +391,7 @@ GENERIC_OBJS = \
 	bignum-copy.o \
 	cond.o \
 	depend.o \
+	ehopt.o \
 	expr.o \
 	flonum-konst.o \
 	flonum-copy.o \
@@ -1191,10 +1193,10 @@ itbl_test_DEPENDENCIES =  itbl-test-ops.o itbl-test.o \
 ../libiberty/libiberty.a
 itbl_test_LDFLAGS = 
 as_new_OBJECTS =  app.o as.o atof-generic.o bignum-copy.o cond.o \
-depend.o ecoff.o expr.o flonum-copy.o flonum-konst.o flonum-mult.o \
-frags.o hash.o input-file.o input-scrub.o listing.o literal.o macro.o \
-messages.o output-file.o read.o sb.o stabs.o subsegs.o symbols.o \
-write.o
+depend.o ecoff.o ehopt.o expr.o flonum-copy.o flonum-konst.o \
+flonum-mult.o frags.o hash.o input-file.o input-scrub.o listing.o \
+literal.o macro.o messages.o output-file.o read.o sb.o stabs.o \
+subsegs.o symbols.o write.o
 as_new_LDFLAGS = 
 gasp_new_OBJECTS =  gasp.o macro.o sb.o hash.o
 gasp_new_DEPENDENCIES =  ../libiberty/libiberty.a

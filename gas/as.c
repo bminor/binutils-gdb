@@ -1,5 +1,5 @@
 /* as.c - GAS main program.
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -159,6 +159,7 @@ Options:\n\
 -R			fold data section into text section\n\
 --statistics		print various measured statistics from execution\n\
 --strip-local-absolute	strip local absolute symbols\n\
+--traditional-format	Use same format as native assembler when possible\n\
 --version		print assembler version number and exit\n\
 -W			suppress warnings\n\
 --itbl INSTTBL		extend instruction set to include instructions\n\
@@ -356,7 +357,9 @@ parse_args (pargc, pargv)
 #define OPTION_GSTABS (OPTION_STD_BASE + 14)
     {"gstabs", no_argument, NULL, OPTION_GSTABS},
 #define OPTION_STRIP_LOCAL_ABSOLUTE (OPTION_STD_BASE + 15)
-    {"strip-local-absolute", no_argument, NULL, OPTION_STRIP_LOCAL_ABSOLUTE}
+    {"strip-local-absolute", no_argument, NULL, OPTION_STRIP_LOCAL_ABSOLUTE},
+#define OPTION_TRADITIONAL_FORMAT (OPTION_STD_BASE + 16)
+    {"traditional-format", no_argument, NULL, OPTION_TRADITIONAL_FORMAT}
   };
 
   /* Construct the option lists from the standard list and the
@@ -439,6 +442,10 @@ parse_args (pargc, pargv)
 
 	case OPTION_STRIP_LOCAL_ABSOLUTE:
 	  flag_strip_local_absolute = 1;
+	  break;
+
+	case OPTION_TRADITIONAL_FORMAT:
+	  flag_traditional_format = 1;
 	  break;
 
 	case OPTION_VERSION:

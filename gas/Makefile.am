@@ -128,6 +128,7 @@ GAS_CFILES = \
 	cond.c \
 	depend.c \
 	ecoff.c \
+	ehopt.c \
 	expr.c \
 	flonum-copy.c \
 	flonum-konst.c \
@@ -315,6 +316,7 @@ GENERIC_OBJS = \
 	bignum-copy.o \
 	cond.o \
 	depend.o \
+	ehopt.o \
 	expr.o \
 	flonum-konst.o \
 	flonum-copy.o \

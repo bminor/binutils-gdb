@@ -381,7 +381,10 @@ enum _relax_state
 
     /* A DWARF leb128 value; only ELF uses this.  The subtype is 0 for
        unsigned, 1 for signed.  */
-    rs_leb128
+    rs_leb128,
+
+    /* Exception frame information which we may be able to optimize.  */
+    rs_cfa
   };
 
 typedef enum _relax_state relax_stateT;
@@ -431,6 +434,9 @@ COMMON unsigned char flag_print_statistics;
 
 /* True if local absolute symbols are to be stripped.  */
 COMMON int flag_strip_local_absolute;
+
+/* True if we should generate a traditional format object file.  */
+COMMON int flag_traditional_format;
 
 /* name of emitted object file */
 COMMON char *out_file_name;
@@ -584,6 +590,11 @@ typedef struct frag fragS;
 /* literal.c */
 valueT add_to_literal_pool PARAMS ((struct symbol *, valueT, segT, int));
 #endif
+
+int check_eh_frame PARAMS ((struct expressionS *, unsigned int *));
+int eh_frame_estimate_size_before_relax PARAMS ((fragS *));
+int eh_frame_relax_frag PARAMS ((fragS *));
+void eh_frame_convert_frag PARAMS ((fragS *));
 
 #include "expr.h"		/* Before targ-*.h */
 

@@ -63,6 +63,7 @@ depend.c
 doc
 ecoff.c
 ecoff.h
+ehopt.c
 emul-target.h
 emul.h
 expr.c
