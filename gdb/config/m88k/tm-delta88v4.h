@@ -21,3 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "m88k/tm-m88k.h"
 #include "tm-sysv4.h"
+
+/* If we don't define this, backtraces go on forever.  */
+#define FRAME_CHAIN_VALID_ALTERNATE 1

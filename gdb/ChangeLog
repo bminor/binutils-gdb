@@ -1,5 +1,7 @@
 Thu Sep  2 00:07:36 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/m88k/delta88v4.h (NATDEPFILES): Remove infptrace.o inftarg.o.
+
 	* config/m88k/xm-dgux.h: Renamed from config/m88k/xm-m88k.h.
 	* config/m88k/m88k.mh: Use xm-dgux.h.
 	* config/m88k/xm-m88k.h: New file, with HOST_BYTE_ORDER,
