@@ -1,3 +1,8 @@
+Thu Sep 28 17:39:56 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* configure.in (host i[345]86-*-win32): Reduce the 
+	noconfigdirs again.
+
 Wed Sep 27 12:24:00 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Don't configure ld and gdb for powerpc*-*-winnt*
