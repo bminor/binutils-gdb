@@ -16,4 +16,4 @@ noinst_HEADERS = adp.h adperr.h angel.h ardi.h armdbg.h buffers.h bytesex.h \
 
 EXTRA_DIST = README.CYGNUS
 
-INCLUDES =  -DRETRANS DARM_RELEASE='"Berkeley Licence for Cygnus"'
+INCLUDES =  -DRETRANS -DARM_RELEASE='"Berkeley Licence for Cygnus"'

@@ -81,7 +81,7 @@ noinst_HEADERS = adp.h adperr.h angel.h ardi.h armdbg.h buffers.h bytesex.h \
 
 EXTRA_DIST = README.CYGNUS
 
-INCLUDES =  -DRETRANS DARM_RELEASE='"Berkeley Licence for Cygnus"'
+INCLUDES =  -DRETRANS -DARM_RELEASE='"Berkeley Licence for Cygnus"'
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/../../mkinstalldirs
 CONFIG_CLEAN_FILES = 

@@ -1,3 +1,8 @@
+1998-08-20  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+        * rdi-share/Makefile.am (INCLUDES): Fix typeo.
+        * rdi-share/Makefile.in: Regenerated.
+
 1998-08-19  Jason Molenda  (jsm@bugshack.cygnus.com)
 
         * rdi-share/Makefile.am: Use just `INCLUDES' not `libname_INCLUDES'.
