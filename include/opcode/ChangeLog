@@ -1,4 +1,23 @@
+Thu Oct  5 18:03:36 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* i386.h: Add Pentium instructions wrmsr, rdtsc, rdmsr, cmpxchg8b,
+	and register cr4.
+
+Tue Sep 19 15:26:43 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* m68k.h: Change comment: split type P into types 0, 1 and 2.
+
+Wed Aug 30 13:50:55 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc.h (sparc_{encode,decode}_prefetch): Declare.
+
+Tue Aug 29 15:34:58 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc.h (sparc_{encode,decode}_{asi,membar}): Declare.
+
 Wed Aug  2 18:32:19 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* m68kmri.h: Remove.
 
 	* m68k.h: Move tables into opcodes/m68k-opc.c, leaving just the
 	declarations.  Remove F_ALIAS and flag field of struct

@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static const template i386_optab[] = {
 
@@ -101,6 +101,8 @@ static const template i386_optab[] = {
 {"sahf", 0, 0x9e, _, NoModrm, { 0, 0, 0} },
 {"pushf", 0, 0x9c, _, NoModrm|Data32, { 0, 0, 0} },
 {"popf", 0, 0x9d, _, NoModrm|Data32, { 0, 0, 0} },
+{"pushfl", 0, 0x9c, _, NoModrm|Data32, { 0, 0, 0} },
+{"popfl", 0, 0x9d, _, NoModrm|Data32, { 0, 0, 0} },
 {"pushfw", 0, 0x9c, _, NoModrm|Data16, { 0, 0, 0} },
 {"popfw", 0, 0x9d, _, NoModrm|Data16, { 0, 0, 0} },
 {"stc", 0, 0xf9, _, NoModrm, { 0, 0, 0} },
@@ -280,8 +282,10 @@ static const template i386_optab[] = {
 {"lret", 1, 0xca, _, NoModrm|Data32, { Imm16, 0, 0} },
 {"lretw", 0, 0xcb, _, NoModrm|Data16, { 0, 0, 0} },
 {"lretw", 1, 0xca, _, NoModrm|Data16, { Imm16, 0, 0} },
-{"enter", 2, 0xc8, _, NoModrm, { Imm16, Imm8, 0} },
-{"leave", 0, 0xc9, _, NoModrm, { 0, 0, 0} },
+{"enter", 2, 0xc8, _, NoModrm|Data32, { Imm16, Imm8, 0} },
+{"leave", 0, 0xc9, _, NoModrm|Data32, { 0, 0, 0} },
+{"enterw", 2, 0xc8, _, NoModrm|Data16, { Imm16, Imm8, 0} },
+{"leavew", 0, 0xc9, _, NoModrm|Data16, { 0, 0, 0} },
 
 /* conditional jumps */
 {"jo", 1, 0x70, _, Jump, { Disp, 0, 0} },
@@ -444,7 +448,7 @@ static const template i386_optab[] = {
 {"into", 0, 0xce, _, NoModrm, { 0, 0, 0} },
 {"iret", 0, 0xcf, _, NoModrm|Data32, { 0, 0, 0} },
 {"iretw", 0, 0xcf, _, NoModrm|Data16, { 0, 0, 0} },
-/* i386sl (and i486sl?) only */
+/* i386sl, i486sl, later 486, and Pentium */
 {"rsm", 0, 0x0faa, _, NoModrm,{ 0, 0, 0} },
 
 {"boundl", 2, 0x62, _, Modrm|Data32, { Reg32, Mem, 0} },
@@ -744,6 +748,15 @@ static const template i386_optab[] = {
 {"wbinvd", 0, 0x0f09, _, NoModrm, { 0, 0, 0} },
 {"invlpg", 1, 0x0f01, 7, Modrm, { Mem, 0, 0} },
 
+/* 586 and late 486 extensions */
+{"cpuid", 0, 0x0fa2, _, NoModrm, { 0, 0, 0} },
+
+/* Pentium extensions */
+{"wrmsr", 0, 0x0f30, _, NoModrm, { 0, 0, 0} },
+{"rdtsc", 0, 0x0f31, _, NoModrm, { 0, 0, 0} },
+{"rdmsr", 0, 0x0f32, _, NoModrm, { 0, 0, 0} },
+{"cmpxchg8b", 1, 0x0fc7, _, Modrm, { Mem, 0, 0} },
+
 {"", 0, 0, 0, 0, { 0, 0, 0} }	/* sentinel */
 };
 #undef _
@@ -769,9 +782,12 @@ static const reg_entry i386_regtab[] = {
   {"ds", SReg2, 3}, {"fs", SReg3, 4}, {"gs", SReg3, 5},
   /* control registers */
   {"cr0", Control, 0},   {"cr2", Control, 2},   {"cr3", Control, 3},
+  {"cr4", Control, 4},
   /* debug registers */
   {"db0", Debug, 0},   {"db1", Debug, 1},   {"db2", Debug, 2},
   {"db3", Debug, 3},   {"db6", Debug, 6},   {"db7", Debug, 7},
+  {"dr0", Debug, 0},   {"dr1", Debug, 1},   {"dr2", Debug, 2},
+  {"dr3", Debug, 3},   {"dr6", Debug, 6},   {"dr7", Debug, 7},
   /* test registers */
   {"tr6", Test, 6}, {"tr7", Test, 7},
   /* float registers */
