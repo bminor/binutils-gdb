@@ -92,7 +92,7 @@ static int process_escape PARAMS ((int));
 
 void 
 do_scrub_begin (m68k_mri)
-     int m68k_mri;
+     int m68k_mri ATTRIBUTE_UNUSED;
 {
   const char *p;
   int c;

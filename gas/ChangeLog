@@ -1,3 +1,10 @@
+2000-04-01  Ian Lance Taylor  <ian@zembu.com>
+
+	* app.c: Add ATTRIBUTE_UNUSED as needed.
+	* config/tc-ppc.c: Likewise.
+	(ppc_size): Make unsigned long.
+	(ppc_insert_operand): Add casts to avoid warnings.
+
 2000-03-31  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d10v.h (md_flush_pending_output): Define.

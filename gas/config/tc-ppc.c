@@ -589,7 +589,7 @@ static int ppc_cpu = 0;
 
 /* The size of the processor we are assembling for.  This is either
    PPC_OPCODE_32 or PPC_OPCODE_64.  */
-static int ppc_size = PPC_OPCODE_32;
+static unsigned long ppc_size = PPC_OPCODE_32;
 
 /* Opcode hash table.  */
 static struct hash_control *ppc_hash;
@@ -1077,8 +1077,8 @@ ppc_insert_operand (insn, operand, val, file, line)
 		 valid, but, to permit this code to assemble on a 64
 		 bit host, we sign extend the 32 bit value.  */
 	      if (val > 0
-		  && (val & 0x80000000) != 0
-		  && (val & 0xffffffff) == val)
+		  && (val & (offsetT) 0x80000000) != 0
+		  && (val & (offsetT) 0xffffffff) == val)
 		{
 		  val -= 0x80000000;
 		  val -= 0x80000000;
@@ -1312,7 +1312,7 @@ ppc_elf_rdata (xxx)
 /* Pseudo op to make file scope bss items */
 static void
 ppc_elf_lcomm(xxx)
-     int xxx;
+     int xxx ATTRIBUTE_UNUSED;
 {
   register char *name;
   register char c;
@@ -2174,7 +2174,7 @@ ppc_section_flags (flags, attr, type)
 
 static void
 ppc_byte (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (*input_line_pointer != '\"')
     {
@@ -3192,7 +3192,7 @@ ppc_vbyte (dummy)
 
 static void
 ppc_tc (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
 #ifdef OBJ_XCOFF
 
@@ -4441,8 +4441,8 @@ md_section_align (seg, addr)
 
 int
 md_estimate_size_before_relax (fragp, seg)
-     fragS *fragp;
-     asection *seg;
+     fragS *fragp ATTRIBUTE_UNUSED;
+     asection *seg ATTRIBUTE_UNUSED;
 {
   abort ();
   return 0;
@@ -4452,9 +4452,9 @@ md_estimate_size_before_relax (fragp, seg)
 
 void
 md_convert_frag (abfd, sec, fragp)
-     bfd *abfd;
-     asection *sec;
-     fragS *fragp;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     fragS *fragp ATTRIBUTE_UNUSED;
 {
   abort ();
 }
@@ -4464,7 +4464,7 @@ md_convert_frag (abfd, sec, fragp)
 /*ARGSUSED*/
 symbolS *
 md_undefined_symbol (name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -4477,7 +4477,7 @@ md_undefined_symbol (name)
 long
 md_pcrel_from_section (fixp, sec)
      fixS *fixp;
-     segT sec;
+     segT sec ATTRIBUTE_UNUSED;
 {
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
@@ -5003,7 +5003,7 @@ md_apply_fix3 (fixp, valuep, seg)
 
 arelent *
 tc_gen_reloc (seg, fixp)
-     asection *seg;
+     asection *seg ATTRIBUTE_UNUSED;
      fixS *fixp;
 {
   arelent *reloc;
