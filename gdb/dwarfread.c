@@ -474,9 +474,6 @@ static void
 add_partial_symbol PARAMS ((struct dieinfo *, struct objfile *));
 
 static void
-init_psymbol_list PARAMS ((struct objfile *, int));
-
-static void
 basicdieinfo PARAMS ((struct dieinfo *, char *, struct objfile *));
 
 static void
@@ -2469,54 +2466,6 @@ dwarf_psymtab_to_symtab (pst)
 	    }
 	}
     }
-}
-
-/*
-
-LOCAL FUNCTION
-
-	init_psymbol_list -- initialize storage for partial symbols
-
-SYNOPSIS
-
-	static void init_psymbol_list (struct objfile *objfile, int total_symbols)
-
-DESCRIPTION
-
-	Initializes storage for all of the partial symbols that will be
-	created by dwarf_build_psymtabs and subsidiaries.
- */
-
-static void
-init_psymbol_list (objfile, total_symbols)
-     struct objfile *objfile;
-     int total_symbols;
-{
-  /* Free any previously allocated psymbol lists.  */
-  
-  if (objfile -> global_psymbols.list)
-    {
-      mfree (objfile -> md, (PTR)objfile -> global_psymbols.list);
-    }
-  if (objfile -> static_psymbols.list)
-    {
-      mfree (objfile -> md, (PTR)objfile -> static_psymbols.list);
-    }
-  
-  /* Current best guess is that there are approximately a twentieth
-     of the total symbols (in a debugging file) are global or static
-     oriented symbols */
-  
-  objfile -> global_psymbols.size = total_symbols / 10;
-  objfile -> static_psymbols.size = total_symbols / 10;
-  objfile -> global_psymbols.next =
-    objfile -> global_psymbols.list = (struct partial_symbol *)
-      xmmalloc (objfile -> md, objfile -> global_psymbols.size
-			     * sizeof (struct partial_symbol));
-  objfile -> static_psymbols.next =
-    objfile -> static_psymbols.list = (struct partial_symbol *)
-      xmmalloc (objfile -> md, objfile -> static_psymbols.size
-			     * sizeof (struct partial_symbol));
 }
 
 /*

@@ -1,3 +1,12 @@
+Sat May 13 13:34:18 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* rs6000-tdep.c (find_toc_address): Revise comment.
+	* symfile.c, symfile.h (init_psymbol_list): New function;
+	consolidate duplicated copies from os9kread.c, dbxread.c
+	and dwarfread.c.
+	* defs.h: Declare info_verbose.
+	* xcoffread.c: Extensive changes to support psymtabs.
+
 Fri May 12 13:48:41 1995  Stu Grossman  (grossman@andros.cygnus.com)
 
 	* cpu32bug-rom.c remote-est.c rom68k-rom.c:  Update line_term element.

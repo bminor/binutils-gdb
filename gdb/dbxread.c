@@ -246,9 +246,6 @@ add_bincl_to_list PARAMS ((struct partial_symtab *, char *, int));
 static void
 init_bincl_list PARAMS ((int, struct objfile *));
 
-static void
-init_psymbol_list PARAMS ((struct objfile *));
-
 static char *
 dbx_next_symbol_text PARAMS ((void));
 
@@ -558,8 +555,10 @@ dbx_symfile_read (objfile, section_offsets, mainline)
     perror_with_name (objfile->name);
 
   /* If we are reinitializing, or if we have never loaded syms yet, init */
-  if (mainline || objfile->global_psymbols.size == 0 || objfile->static_psymbols.size == 0)
-    init_psymbol_list (objfile);
+  if (mainline
+      || objfile->global_psymbols.size == 0
+      || objfile->static_psymbols.size == 0)
+    init_psymbol_list (objfile, DBX_SYMCOUNT (objfile));
 
   symbol_size = DBX_SYMBOL_SIZE (objfile);
   symbol_table_offset = DBX_SYMTAB_OFFSET (objfile);
@@ -749,9 +748,11 @@ static char *last_function_name;
 
 /* The address in memory of the string table of the object file we are
    reading (which might not be the "main" object file, but might be a
-   shared library or some other dynamically loaded thing).  This is set
-   by read_dbx_symtab when building psymtabs, and by read_ofile_symtab 
-   when building symtabs, and is used only by next_symbol_text.  */
+   shared library or some other dynamically loaded thing).  This is
+   set by read_dbx_symtab when building psymtabs, and by
+   read_ofile_symtab when building symtabs, and is used only by
+   next_symbol_text.  FIXME: If that is true, we don't need it when
+   building psymtabs, right?  */
 static char *stringtab_global;
 
 /* Refill the symbol table input buffer
@@ -803,30 +804,6 @@ dbx_next_symbol_text ()
 	  + file_string_table_offset;
 }
 
-/* Initializes storage for all of the partial symbols that will be
-   created by read_dbx_symtab and subsidiaries.  */
-
-static void
-init_psymbol_list (objfile)
-     struct objfile *objfile;
-{
-  /* Free any previously allocated psymbol lists.  */
-  if (objfile -> global_psymbols.list)
-    mfree (objfile -> md, (PTR)objfile -> global_psymbols.list);
-  if (objfile -> static_psymbols.list)
-    mfree (objfile -> md, (PTR)objfile -> static_psymbols.list);
-
-  /* Current best guess is that there are approximately a twentieth
-     of the total symbols (in a debugging file) are global or static
-     oriented symbols */
-  objfile -> global_psymbols.size = DBX_SYMCOUNT (objfile) / 10;
-  objfile -> static_psymbols.size = DBX_SYMCOUNT (objfile) / 10;
-  objfile -> global_psymbols.next = objfile -> global_psymbols.list = (struct partial_symbol *)
-    xmmalloc (objfile -> md, objfile -> global_psymbols.size * sizeof (struct partial_symbol));
-  objfile -> static_psymbols.next = objfile -> static_psymbols.list = (struct partial_symbol *)
-    xmmalloc (objfile -> md, objfile -> static_psymbols.size * sizeof (struct partial_symbol));
-}
-
 /* Initialize the list of bincls to contain none and have some
    allocated.  */
 

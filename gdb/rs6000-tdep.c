@@ -1199,10 +1199,12 @@ add_text_to_loadinfo (textaddr, dataaddr)
 }
 
 
-/* FIXME:  This assumes that the "textorg" and "dataorg" elements
+/* Note that this assumes that the "textorg" and "dataorg" elements
    of a member of this array are correlated with the "toc_offset"
-   element of the same member.  But they are sequentially assigned in wildly
-   different places, and probably there is no correlation.  FIXME!  */
+   element of the same member.  This is taken care of because the loops
+   which assign the former (in xcoff_relocate_symtab or xcoff_relocate_core)
+   and the latter (in scan_xcoff_symtab, via vmap_symtab, in vmap_ldinfo
+   or xcoff_relocate_core) traverse the same objfiles in the same order.  */
 
 static CORE_ADDR
 find_toc_address (pc)

@@ -143,9 +143,6 @@ static void
 read_os9k_psymtab PARAMS ((struct section_offsets *, struct objfile *,
                          CORE_ADDR, int));
 
-static void
-init_psymbol_list PARAMS ((struct objfile *));
-
 static int
 fill_sym PARAMS ((FILE *, bfd *));
 
@@ -340,7 +337,7 @@ os9k_symfile_read (objfile, section_offsets, mainline)
   /* If we are reinitializing, or if we have never loaded syms yet, init */
   if (mainline || objfile->global_psymbols.size == 0 || 
     objfile->static_psymbols.size == 0)
-    init_psymbol_list (objfile);
+    init_psymbol_list (objfile, DBX_SYMCOUNT (objfile));
 
   pending_blocks = 0;
   back_to = make_cleanup (really_free_pendings, 0);
@@ -550,30 +547,6 @@ char *p;
     return 1;
 }
 
-/* Initializes storage for all of the partial symbols that will be
-   created by read_dbx_symtab and subsidiaries.  */
-
-static void
-init_psymbol_list (objfile)
-     struct objfile *objfile;
-{
-  /* Free any previously allocated psymbol lists.  */
-  if (objfile -> global_psymbols.list)
-    mfree (objfile -> md, (PTR)objfile -> global_psymbols.list);
-  if (objfile -> static_psymbols.list)
-    mfree (objfile -> md, (PTR)objfile -> static_psymbols.list);
-
-  /* Current best guess is that there are approximately a twentieth
-     of the total symbols (in a debugging file) are global or static
-     oriented symbols */
-  objfile -> global_psymbols.size = DBX_SYMCOUNT (objfile) / 10;
-  objfile -> static_psymbols.size = DBX_SYMCOUNT (objfile) / 10;
-  objfile -> global_psymbols.next = objfile -> global_psymbols.list = (struct partial_symbol *)
-    xmmalloc (objfile -> md, objfile -> global_psymbols.size * sizeof (struct partial_symbol));
-  objfile -> static_psymbols.next = objfile -> static_psymbols.list = (struct partial_symbol *)
-    xmmalloc (objfile -> md, objfile -> static_psymbols.size * sizeof (struct partial_symbol));
-}
-
 /* Given pointers to an a.out symbol table in core containing dbx
    style data, setup partial_symtab's describing each source file for
    which debugging information is available.
