@@ -40,13 +40,13 @@ arm*-*-linux*)		gdb_host=linux ;;
 arm*-*-netbsdelf*)	gdb_host=nbsdelf ;;
 arm*-*-netbsd*)		gdb_host=nbsdaout ;;
 
-hppa*-*-bsd*)		gdb_host=hppabsd ;;
+# OBSOLETE hppa*-*-bsd*)		gdb_host=hppabsd ;;
 hppa*-*-hiux*)		gdb_host=hppahpux ;;
 hppa*-*-hpux10.20)	gdb_host=hpux1020 ;;
 hppa*64*-*-hpux11*)	gdb_host=hpux11w ;;
 hppa*-*-hpux11*)	gdb_host=hpux11 ;;
 hppa*-*-hpux*)		gdb_host=hppahpux ;;
-hppa*-*-osf*)		gdb_host=hppaosf ;;
+# OBSOLETE hppa*-*-osf*)		gdb_host=hppaosf ;;
 
 i[3456]86-ncr-*)	gdb_host=ncr3000 ;;
 i[3456]86-sequent-bsd*)	gdb_host=symmetry ;;  # dynix

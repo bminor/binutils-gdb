@@ -73,12 +73,12 @@ h8300-*-*)		gdb_target=h8300 ;;
 
 frv-*-*)		gdb_target=frv ;;
 
-hppa*-*-bsd*)		gdb_target=hppabsd ;;
-hppa*-*-pro*)		gdb_target=hppapro ;;
+# OBSOLETE hppa*-*-bsd*)		gdb_target=hppabsd ;;
+# OBSOLETE hppa*-*-pro*)		gdb_target=hppapro ;;
 hppa*64*-*-hpux11*)	gdb_target=hppa64 ;;
 hppa*-*-hpux*)		gdb_target=hppahpux ;;
 hppa*-*-hiux*)		gdb_target=hppahpux ;;
-hppa*-*-osf*)		gdb_target=hppaosf ;;
+# OBSOLETE hppa*-*-osf*)		gdb_target=hppaosf ;;
 hppa*-*-*)		gdb_target=hppa ;;
 
 i[3456]86-sequent-bsd*)	gdb_target=symmetry ;;

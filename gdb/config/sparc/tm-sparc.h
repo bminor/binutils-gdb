@@ -688,7 +688,7 @@ void sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 void sparc_push_dummy_frame (void);
 void sparc_pop_frame (void);
 
-#define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
+#define DEPRECATED_PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
      sparc32_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
 
 extern CORE_ADDR sparc32_push_arguments (int, struct value **, CORE_ADDR, int,

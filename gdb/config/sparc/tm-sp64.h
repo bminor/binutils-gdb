@@ -208,8 +208,8 @@ void sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 
 CORE_ADDR sparc64_push_arguments (int,
 				  struct value **, CORE_ADDR, int, CORE_ADDR);
-#undef PUSH_ARGUMENTS
-#define PUSH_ARGUMENTS(A,B,C,D,E) \
+#undef DEPRECATED_PUSH_ARGUMENTS
+#define DEPRECATED_PUSH_ARGUMENTS(A,B,C,D,E) \
      (sparc64_push_arguments ((A), (B), (C), (D), (E)))
 
 /* Store the address of the place in which to copy the structure the
@@ -274,7 +274,7 @@ extern void sparc64_write_sp (CORE_ADDR);
 
 #define TARGET_READ_SP() (sparc64_read_sp ())
 #define TARGET_READ_FP() (sparc64_read_fp ())
-#define TARGET_WRITE_SP(X) (sparc64_write_sp (X))
+#define DEPRECATED_DUMMY_WRITE_SP(X) (sparc64_write_sp (X))
 
 #undef DEPRECATED_EXTRACT_RETURN_VALUE
 #define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \

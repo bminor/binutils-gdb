@@ -1032,6 +1032,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
       struct elfNN_ia64_allocate_data data;
       data.info = link_info;
       data.ofs = 0;
+      ia64_info->self_dtpmod_offset = (bfd_vma) -1;
 
       elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_global_data_got, &data);
       elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_global_fptr_got, &data);

@@ -1084,9 +1084,9 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    * Call Dummies
    * 
    * These values and methods are used when gdb calls a target function.  */
-  set_gdbarch_push_return_address (gdbarch, xstormy16_push_return_address);
+  set_gdbarch_deprecated_push_return_address (gdbarch, xstormy16_push_return_address);
   set_gdbarch_deprecated_extract_return_value (gdbarch, xstormy16_extract_return_value);
-  set_gdbarch_push_arguments (gdbarch, xstormy16_push_arguments);
+  set_gdbarch_deprecated_push_arguments (gdbarch, xstormy16_push_arguments);
   set_gdbarch_deprecated_pop_frame (gdbarch, xstormy16_pop_frame);
   set_gdbarch_deprecated_store_struct_return (gdbarch, xstormy16_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, xstormy16_store_return_value);
@@ -1121,6 +1121,9 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_in_solib_call_trampoline (gdbarch,
 					xstormy16_in_solib_call_trampoline);
+
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   return gdbarch;
 }

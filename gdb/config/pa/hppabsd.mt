@@ -1,3 +1,3 @@
-# Target: HP PA-RISC running bsd
-TDEPFILES= hppa-tdep.o
-TM_FILE= tm-hppab.h
+# OBSOLETE # Target: HP PA-RISC running bsd
+# OBSOLETE TDEPFILES= hppa-tdep.o
+# OBSOLETE TM_FILE= tm-hppab.h

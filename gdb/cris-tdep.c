@@ -4154,7 +4154,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (tdep->cris_abi == CRIS_ABI_ORIGINAL)
     {
       set_gdbarch_double_bit (gdbarch, 32);
-      set_gdbarch_push_arguments (gdbarch, cris_abi_original_push_arguments);
+      set_gdbarch_deprecated_push_arguments (gdbarch, cris_abi_original_push_arguments);
       set_gdbarch_deprecated_store_return_value (gdbarch, 
                                       cris_abi_original_store_return_value);
       set_gdbarch_deprecated_extract_return_value 
@@ -4165,7 +4165,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else if (tdep->cris_abi == CRIS_ABI_V2)
     {
       set_gdbarch_double_bit (gdbarch, 64);
-      set_gdbarch_push_arguments (gdbarch, cris_abi_v2_push_arguments);
+      set_gdbarch_deprecated_push_arguments (gdbarch, cris_abi_v2_push_arguments);
       set_gdbarch_deprecated_store_return_value (gdbarch, cris_abi_v2_store_return_value);
       set_gdbarch_deprecated_extract_return_value
 	(gdbarch, cris_abi_v2_extract_return_value);
@@ -4283,7 +4283,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* No register requires conversion from raw format to virtual format.  */
   set_gdbarch_register_convertible (gdbarch, generic_register_convertible_not);
 
-  set_gdbarch_push_return_address (gdbarch, cris_push_return_address);
+  set_gdbarch_deprecated_push_return_address (gdbarch, cris_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, cris_pop_frame);
 
   set_gdbarch_deprecated_store_struct_return (gdbarch, cris_store_struct_return);
@@ -4322,6 +4322,9 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   
   /* Helpful for backtracing and returning in a call dummy.  */
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   /* Use target_specific function to define link map offsets.  */
   set_solib_svr4_fetch_link_map_offsets 

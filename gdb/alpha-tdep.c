@@ -67,7 +67,6 @@ static gdbarch_frame_locals_address_ftype alpha_frame_locals_address;
 static gdbarch_skip_prologue_ftype alpha_skip_prologue;
 static gdbarch_saved_pc_after_call_ftype alpha_saved_pc_after_call;
 
-static gdbarch_push_arguments_ftype alpha_push_arguments;
 static gdbarch_fix_call_dummy_ftype alpha_fix_call_dummy;
 
 static gdbarch_get_longjmp_target_ftype alpha_get_longjmp_target;
@@ -1853,7 +1852,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Settings for calling functions in the inferior.  */
   set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_push_arguments (gdbarch, alpha_push_arguments);
+  set_gdbarch_deprecated_push_arguments (gdbarch, alpha_push_arguments);
   set_gdbarch_deprecated_pop_frame (gdbarch, alpha_pop_frame);
 
   /* On the Alpha, the call dummy code is never copied to user space,
@@ -1876,6 +1875,8 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, alpha_push_dummy_frame);
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
   set_gdbarch_fix_call_dummy (gdbarch, alpha_fix_call_dummy);
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);
   set_gdbarch_deprecated_init_frame_pc_first (gdbarch, alpha_init_frame_pc_first);

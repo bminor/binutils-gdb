@@ -23,6 +23,9 @@
    Written by the Center for Software Science at the Univerity of Utah
    and by Cygnus Support.  */
 
+#ifndef SOMSOLIB_H
+#define SOMSOLIB_H
+
 /* Forward decl's for prototypes */
 struct target_ops;
 struct objfile;
@@ -164,3 +167,12 @@ extern char *som_solib_address (CORE_ADDR);	/* somsolib.c */
 /* If ADDR lies in a shared library, return its name.  */
 
 #define PC_SOLIB(addr)	som_solib_address (addr)
+
+extern CORE_ADDR som_solib_get_solib_by_pc (CORE_ADDR addr);
+
+struct so_list;
+extern CORE_ADDR so_lib_thread_start_addr (struct so_list *so);
+
+extern void no_shared_libraries (char *ignored, int from_tty);
+
+#endif

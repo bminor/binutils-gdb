@@ -19,6 +19,7 @@
 #include "armdefs.h"
 #include "armemu.h"
 #include "armos.h"
+#include "iwmmxt.h"
 
 static ARMword  GetDPRegRHS         (ARMul_State *, ARMword);
 static ARMword  GetDPSRegRHS        (ARMul_State *, ARMword);
@@ -374,11 +375,22 @@ ARMul_Emulate26 (ARMul_State * state)
 
       if (state->EventSet)
 	ARMul_EnvokeEvent (state);
-#if 0
-      /* Enable this for a helpful bit of debugging when tracing is needed.  */
+#if 0 /* Enable this for a helpful bit of debugging when tracing is needed.  */
       fprintf (stderr, "pc: %x, instr: %x\n", pc & ~1, instr);
       if (instr == 0)
 	abort ();
+#endif
+#if 0 /* Enable this code to help track down stack alignment bugs.  */
+      {
+	static ARMword old_sp = -1;
+
+	if (old_sp != state->Reg[13])
+	  {
+	    old_sp = state->Reg[13];
+	    fprintf (stderr, "pc: %08x: SP set to %08x%s\n",
+		     pc & ~1, old_sp, (old_sp % 8) ? " [UNALIGNED!]" : "");
+	  }
+      }
 #endif
 
       if (state->Exception)
@@ -492,6 +504,10 @@ ARMul_Emulate26 (ARMul_State * state)
 	      else if ((instr & 0xFC70F000) == 0xF450F000)
 		/* The PLD instruction.  Ignored.  */
 		goto donext;
+	      else if (   ((instr & 0xfe500f00) == 0xfc100100)
+		       || ((instr & 0xfe500f00) == 0xfc000100))
+		/* wldrw and wstrw are unconditional.  */
+		goto mainswitch;
 	      else
 		/* UNDEFINED in v5, UNPREDICTABLE in v3, v4, non executed in v1, v2.  */
 		ARMul_UndefInstr (state, instr);
@@ -689,6 +705,9 @@ check_PMUintr:
 		      goto donext;
 		    }
 		}
+
+	      if (ARMul_HandleIwmmxt (state, instr))
+		goto donext;
 	    }
 
 	  switch ((int) BITS (20, 27))

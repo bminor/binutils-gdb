@@ -148,7 +148,7 @@ struct gdbarch
   gdbarch_write_pc_ftype *write_pc;
   gdbarch_read_fp_ftype *read_fp;
   gdbarch_read_sp_ftype *read_sp;
-  gdbarch_write_sp_ftype *write_sp;
+  gdbarch_deprecated_dummy_write_sp_ftype *deprecated_dummy_write_sp;
   gdbarch_virtual_frame_pointer_ftype *virtual_frame_pointer;
   gdbarch_pseudo_register_read_ftype *pseudo_register_read;
   gdbarch_pseudo_register_write_ftype *pseudo_register_write;
@@ -212,9 +212,10 @@ struct gdbarch
   gdbarch_address_to_pointer_ftype *address_to_pointer;
   gdbarch_integer_to_address_ftype *integer_to_address;
   gdbarch_return_value_on_stack_ftype *return_value_on_stack;
-  gdbarch_push_arguments_ftype *push_arguments;
+  gdbarch_deprecated_push_arguments_ftype *deprecated_push_arguments;
+  gdbarch_push_dummy_call_ftype *push_dummy_call;
   gdbarch_deprecated_push_dummy_frame_ftype *deprecated_push_dummy_frame;
-  gdbarch_push_return_address_ftype *push_return_address;
+  gdbarch_deprecated_push_return_address_ftype *deprecated_push_return_address;
   gdbarch_deprecated_pop_frame_ftype *deprecated_pop_frame;
   gdbarch_deprecated_store_struct_return_ftype *deprecated_store_struct_return;
   gdbarch_extract_return_value_ftype *extract_return_value;
@@ -433,6 +434,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  0,
   generic_in_function_epilogue_p,
   construct_inferior_arguments,
   0,
@@ -502,7 +504,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->write_pc = generic_target_write_pc;
   current_gdbarch->read_fp = generic_target_read_fp;
   current_gdbarch->read_sp = generic_target_read_sp;
-  current_gdbarch->write_sp = generic_target_write_sp;
   current_gdbarch->virtual_frame_pointer = legacy_virtual_frame_pointer;
   current_gdbarch->num_regs = -1;
   current_gdbarch->sp_regnum = -1;
@@ -543,7 +544,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->pointer_to_address = unsigned_pointer_to_address;
   current_gdbarch->address_to_pointer = unsigned_address_to_pointer;
   current_gdbarch->return_value_on_stack = generic_return_value_on_stack_not;
-  current_gdbarch->push_arguments = default_push_arguments;
   current_gdbarch->extract_return_value = legacy_extract_return_value;
   current_gdbarch->store_return_value = legacy_store_return_value;
   current_gdbarch->use_struct_convention = generic_use_struct_convention;
@@ -631,7 +631,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of write_pc, invalid_p == 0 */
   /* Skip verify of read_fp, invalid_p == 0 */
   /* Skip verify of read_sp, invalid_p == 0 */
-  /* Skip verify of write_sp, invalid_p == 0 */
+  /* Skip verify of deprecated_dummy_write_sp, has predicate */
   /* Skip verify of virtual_frame_pointer, invalid_p == 0 */
   /* Skip verify of pseudo_register_read, has predicate */
   /* Skip verify of pseudo_register_write, has predicate */
@@ -713,9 +713,10 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of address_to_pointer, invalid_p == 0 */
   /* Skip verify of integer_to_address, has predicate */
   /* Skip verify of return_value_on_stack, invalid_p == 0 */
-  /* Skip verify of push_arguments, invalid_p == 0 */
+  /* Skip verify of deprecated_push_arguments, has predicate */
+  /* Skip verify of push_dummy_call, has predicate */
   /* Skip verify of deprecated_push_dummy_frame, has predicate */
-  /* Skip verify of push_return_address, has predicate */
+  /* Skip verify of deprecated_push_return_address, has predicate */
   /* Skip verify of deprecated_pop_frame, has predicate */
   /* Skip verify of deprecated_store_struct_return, has predicate */
   /* Skip verify of extract_return_value, invalid_p == 0 */
@@ -1125,6 +1126,29 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->deprecated_do_registers_info
                         /*DEPRECATED_DO_REGISTERS_INFO ()*/);
 #endif
+#ifdef DEPRECATED_DUMMY_WRITE_SP_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_DUMMY_WRITE_SP_P()",
+                      XSTRING (DEPRECATED_DUMMY_WRITE_SP_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_DUMMY_WRITE_SP_P() = %d\n",
+                      DEPRECATED_DUMMY_WRITE_SP_P ());
+#endif
+#ifdef DEPRECATED_DUMMY_WRITE_SP
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_DUMMY_WRITE_SP(val)",
+                      XSTRING (DEPRECATED_DUMMY_WRITE_SP (val)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_DUMMY_WRITE_SP = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_dummy_write_sp
+                        /*DEPRECATED_DUMMY_WRITE_SP ()*/);
+#endif
 #ifdef DEPRECATED_EXTRACT_RETURN_VALUE
 #if GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
@@ -1413,6 +1437,26 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->deprecated_pop_frame
                         /*DEPRECATED_POP_FRAME ()*/);
 #endif
+#ifdef DEPRECATED_PUSH_ARGUMENTS_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_PUSH_ARGUMENTS_P()",
+                      XSTRING (DEPRECATED_PUSH_ARGUMENTS_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_PUSH_ARGUMENTS_P() = %d\n",
+                      DEPRECATED_PUSH_ARGUMENTS_P ());
+#endif
+#ifdef DEPRECATED_PUSH_ARGUMENTS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr)",
+                      XSTRING (DEPRECATED_PUSH_ARGUMENTS (nargs, args, sp, struct_return, struct_addr)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_PUSH_ARGUMENTS = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_push_arguments
+                        /*DEPRECATED_PUSH_ARGUMENTS ()*/);
+#endif
 #ifdef DEPRECATED_PUSH_DUMMY_FRAME_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1435,6 +1479,26 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: DEPRECATED_PUSH_DUMMY_FRAME = <0x%08lx>\n",
                         (long) current_gdbarch->deprecated_push_dummy_frame
                         /*DEPRECATED_PUSH_DUMMY_FRAME ()*/);
+#endif
+#ifdef DEPRECATED_PUSH_RETURN_ADDRESS_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_PUSH_RETURN_ADDRESS_P()",
+                      XSTRING (DEPRECATED_PUSH_RETURN_ADDRESS_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_PUSH_RETURN_ADDRESS_P() = %d\n",
+                      DEPRECATED_PUSH_RETURN_ADDRESS_P ());
+#endif
+#ifdef DEPRECATED_PUSH_RETURN_ADDRESS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_PUSH_RETURN_ADDRESS(pc, sp)",
+                      XSTRING (DEPRECATED_PUSH_RETURN_ADDRESS (pc, sp)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_PUSH_RETURN_ADDRESS = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_push_return_address
+                        /*DEPRECATED_PUSH_RETURN_ADDRESS ()*/);
 #endif
 #ifdef DEPRECATED_STORE_RETURN_VALUE
 #if GDB_MULTI_ARCH
@@ -1898,37 +1962,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: PS_REGNUM = %d\n",
                       PS_REGNUM);
 #endif
-#ifdef PUSH_ARGUMENTS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr)",
-                      XSTRING (PUSH_ARGUMENTS (nargs, args, sp, struct_return, struct_addr)));
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
-                        "gdbarch_dump: PUSH_ARGUMENTS = <0x%08lx>\n",
-                        (long) current_gdbarch->push_arguments
-                        /*PUSH_ARGUMENTS ()*/);
-#endif
-#ifdef PUSH_RETURN_ADDRESS_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "PUSH_RETURN_ADDRESS_P()",
-                      XSTRING (PUSH_RETURN_ADDRESS_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: PUSH_RETURN_ADDRESS_P() = %d\n",
-                      PUSH_RETURN_ADDRESS_P ());
-#endif
-#ifdef PUSH_RETURN_ADDRESS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "PUSH_RETURN_ADDRESS(pc, sp)",
-                      XSTRING (PUSH_RETURN_ADDRESS (pc, sp)));
+                        "gdbarch_dump: gdbarch_push_dummy_call_p() = %d\n",
+                        gdbarch_push_dummy_call_p (current_gdbarch));
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
-                        "gdbarch_dump: PUSH_RETURN_ADDRESS = <0x%08lx>\n",
-                        (long) current_gdbarch->push_return_address
-                        /*PUSH_RETURN_ADDRESS ()*/);
-#endif
+                        "gdbarch_dump: push_dummy_call = 0x%08lx\n",
+                        (long) current_gdbarch->push_dummy_call);
 #ifdef REGISTER_BYTE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2236,8 +2277,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: SIZEOF_CALL_DUMMY_WORDS # %s\n",
                       XSTRING (SIZEOF_CALL_DUMMY_WORDS));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: SIZEOF_CALL_DUMMY_WORDS = 0x%08lx\n",
-                      (long) SIZEOF_CALL_DUMMY_WORDS);
+                      "gdbarch_dump: SIZEOF_CALL_DUMMY_WORDS = %d\n",
+                      SIZEOF_CALL_DUMMY_WORDS);
 #endif
 #ifdef SKIP_PROLOGUE
   fprintf_unfiltered (file,
@@ -2556,20 +2597,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: TARGET_WRITE_PC = <0x%08lx>\n",
                         (long) current_gdbarch->write_pc
                         /*TARGET_WRITE_PC ()*/);
-#endif
-#ifdef TARGET_WRITE_SP
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "TARGET_WRITE_SP(val)",
-                      XSTRING (TARGET_WRITE_SP (val)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: TARGET_WRITE_SP = <0x%08lx>\n",
-                        (long) current_gdbarch->write_sp
-                        /*TARGET_WRITE_SP ()*/);
 #endif
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
@@ -2919,23 +2946,30 @@ set_gdbarch_read_sp (struct gdbarch *gdbarch,
   gdbarch->read_sp = read_sp;
 }
 
-void
-gdbarch_write_sp (struct gdbarch *gdbarch, CORE_ADDR val)
+int
+gdbarch_deprecated_dummy_write_sp_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->write_sp == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_write_sp invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_write_sp called\n");
-  gdbarch->write_sp (val);
+  return gdbarch->deprecated_dummy_write_sp != 0;
 }
 
 void
-set_gdbarch_write_sp (struct gdbarch *gdbarch,
-                      gdbarch_write_sp_ftype write_sp)
+gdbarch_deprecated_dummy_write_sp (struct gdbarch *gdbarch, CORE_ADDR val)
 {
-  gdbarch->write_sp = write_sp;
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->deprecated_dummy_write_sp == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_deprecated_dummy_write_sp invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_dummy_write_sp called\n");
+  gdbarch->deprecated_dummy_write_sp (val);
+}
+
+void
+set_gdbarch_deprecated_dummy_write_sp (struct gdbarch *gdbarch,
+                                       gdbarch_deprecated_dummy_write_sp_ftype deprecated_dummy_write_sp)
+{
+  gdbarch->deprecated_dummy_write_sp = deprecated_dummy_write_sp;
 }
 
 void
@@ -4218,23 +4252,56 @@ set_gdbarch_return_value_on_stack (struct gdbarch *gdbarch,
   gdbarch->return_value_on_stack = return_value_on_stack;
 }
 
-CORE_ADDR
-gdbarch_push_arguments (struct gdbarch *gdbarch, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
+int
+gdbarch_deprecated_push_arguments_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->push_arguments == 0)
+  return gdbarch->deprecated_push_arguments != 0;
+}
+
+CORE_ADDR
+gdbarch_deprecated_push_arguments (struct gdbarch *gdbarch, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->deprecated_push_arguments == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_push_arguments invalid");
+                    "gdbarch: gdbarch_deprecated_push_arguments invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_push_arguments called\n");
-  return gdbarch->push_arguments (nargs, args, sp, struct_return, struct_addr);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_push_arguments called\n");
+  return gdbarch->deprecated_push_arguments (nargs, args, sp, struct_return, struct_addr);
 }
 
 void
-set_gdbarch_push_arguments (struct gdbarch *gdbarch,
-                            gdbarch_push_arguments_ftype push_arguments)
+set_gdbarch_deprecated_push_arguments (struct gdbarch *gdbarch,
+                                       gdbarch_deprecated_push_arguments_ftype deprecated_push_arguments)
 {
-  gdbarch->push_arguments = push_arguments;
+  gdbarch->deprecated_push_arguments = deprecated_push_arguments;
+}
+
+int
+gdbarch_push_dummy_call_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->push_dummy_call != 0;
+}
+
+CORE_ADDR
+gdbarch_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR dummy_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->push_dummy_call == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_push_dummy_call invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_push_dummy_call called\n");
+  return gdbarch->push_dummy_call (gdbarch, regcache, dummy_addr, nargs, args, sp, struct_return, struct_addr);
+}
+
+void
+set_gdbarch_push_dummy_call (struct gdbarch *gdbarch,
+                             gdbarch_push_dummy_call_ftype push_dummy_call)
+{
+  gdbarch->push_dummy_call = push_dummy_call;
 }
 
 int
@@ -4264,29 +4331,29 @@ set_gdbarch_deprecated_push_dummy_frame (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_push_return_address_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_push_return_address_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->push_return_address != 0;
+  return gdbarch->deprecated_push_return_address != 0;
 }
 
 CORE_ADDR
-gdbarch_push_return_address (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp)
+gdbarch_deprecated_push_return_address (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->push_return_address == 0)
+  if (gdbarch->deprecated_push_return_address == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_push_return_address invalid");
+                    "gdbarch: gdbarch_deprecated_push_return_address invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_push_return_address called\n");
-  return gdbarch->push_return_address (pc, sp);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_push_return_address called\n");
+  return gdbarch->deprecated_push_return_address (pc, sp);
 }
 
 void
-set_gdbarch_push_return_address (struct gdbarch *gdbarch,
-                                 gdbarch_push_return_address_ftype push_return_address)
+set_gdbarch_deprecated_push_return_address (struct gdbarch *gdbarch,
+                                            gdbarch_deprecated_push_return_address_ftype deprecated_push_return_address)
 {
-  gdbarch->push_return_address = push_return_address;
+  gdbarch->deprecated_push_return_address = deprecated_push_return_address;
 }
 
 int

@@ -3534,7 +3534,7 @@ fi
 done
 
 
-COPRO="armcopro.o maverick.o"
+COPRO="armcopro.o maverick.o iwmmxt.o"
 
 
 

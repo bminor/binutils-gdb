@@ -518,6 +518,8 @@ static int
 do_target_signal_to_host (enum target_signal oursig,
 			  int *oursig_ok)
 {
+  int retsig;
+
   *oursig_ok = 1;
   switch (oursig)
     {
@@ -742,36 +744,31 @@ do_target_signal_to_host (enum target_signal oursig,
 
     default:
 #if defined (REALTIME_LO)
-      if (oursig < REALTIME_LO || oursig >= REALTIME_HI)
-	{
-	  *oursig_ok = 0;
-	  return 0;
-	}
+      retsig = 0;
 
       if (oursig >= TARGET_SIGNAL_REALTIME_33
 	  && oursig <= TARGET_SIGNAL_REALTIME_63)
 	{
 	  /* This block of signals is continuous, and
              TARGET_SIGNAL_REALTIME_33 is 33 by definition.  */
-	  int retsig =
-	    (int) oursig - (int) TARGET_SIGNAL_REALTIME_33 + 33;
-	  return retsig;
+	  retsig = (int) oursig - (int) TARGET_SIGNAL_REALTIME_33 + 33;
 	}
       else if (oursig == TARGET_SIGNAL_REALTIME_32)
 	{
 	  /* TARGET_SIGNAL_REALTIME_32 isn't contiguous with
              TARGET_SIGNAL_REALTIME_33.  It is 32 by definition.  */
-	  return 32;
+	  retsig = 32;
 	}
       else if (oursig >= TARGET_SIGNAL_REALTIME_64
 	  && oursig <= TARGET_SIGNAL_REALTIME_127)
 	{
 	  /* This block of signals is continuous, and
              TARGET_SIGNAL_REALTIME_64 is 64 by definition.  */
-	  int retsig =
-	    (int) oursig - (int) TARGET_SIGNAL_REALTIME_64 + 64;
-	  return retsig;
+	  retsig = (int) oursig - (int) TARGET_SIGNAL_REALTIME_64 + 64;
 	}
+
+      if (retsig >= REALTIME_LO && retsig < REALTIME_HI)
+	return retsig;
 #endif
 
       *oursig_ok = 0;

@@ -1196,13 +1196,16 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
-  set_gdbarch_push_arguments (gdbarch, mn10300_push_arguments);
+  set_gdbarch_deprecated_push_arguments (gdbarch, mn10300_push_arguments);
   set_gdbarch_reg_struct_has_addr (gdbarch, mn10300_reg_struct_has_addr);
-  set_gdbarch_push_return_address (gdbarch, mn10300_push_return_address);
+  set_gdbarch_deprecated_push_return_address (gdbarch, mn10300_push_return_address);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_use_struct_convention (gdbarch, mn10300_use_struct_convention);
 
   tdep->am33_mode = am33_mode;
+
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   return gdbarch;
 }

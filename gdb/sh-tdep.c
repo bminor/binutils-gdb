@@ -4375,7 +4375,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, sh_init_extra_frame_info);
   set_gdbarch_deprecated_extract_return_value (gdbarch, sh_extract_return_value);
-  set_gdbarch_push_arguments (gdbarch, sh_push_arguments);
+  set_gdbarch_deprecated_push_arguments (gdbarch, sh_push_arguments);
   set_gdbarch_deprecated_store_struct_return (gdbarch, sh_store_struct_return);
   set_gdbarch_use_struct_convention (gdbarch, sh_use_struct_convention);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
@@ -4617,7 +4617,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_deprecated_frame_chain (gdbarch, sh64_frame_chain);
       set_gdbarch_deprecated_get_saved_register (gdbarch, sh64_get_saved_register);
       set_gdbarch_deprecated_extract_return_value (gdbarch, sh64_extract_return_value);
-      set_gdbarch_push_arguments (gdbarch, sh64_push_arguments);
+      set_gdbarch_deprecated_push_arguments (gdbarch, sh64_push_arguments);
       /*set_gdbarch_deprecated_store_struct_return (gdbarch, sh64_store_struct_return);*/
       set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sh64_extract_struct_value_address);
       set_gdbarch_use_struct_convention (gdbarch, sh64_use_struct_convention);
@@ -4641,7 +4641,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
   set_gdbarch_read_fp (gdbarch, generic_target_read_fp);
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
-  set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   set_gdbarch_register_name (gdbarch, sh_register_name);
   set_gdbarch_register_virtual_type (gdbarch, sh_register_virtual_type);
@@ -4663,7 +4663,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
-  set_gdbarch_push_return_address (gdbarch, sh_push_return_address);
+  set_gdbarch_deprecated_push_return_address (gdbarch, sh_push_return_address);
 
   set_gdbarch_deprecated_store_return_value (gdbarch, sh_store_return_value);
   set_gdbarch_skip_prologue (gdbarch, sh_skip_prologue);

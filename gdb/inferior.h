@@ -178,8 +178,6 @@ extern CORE_ADDR read_sp (void);
 
 extern CORE_ADDR generic_target_read_sp (void);
 
-extern void write_sp (CORE_ADDR);
-
 extern void generic_target_write_sp (CORE_ADDR);
 
 extern CORE_ADDR read_fp (void);

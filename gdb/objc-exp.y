@@ -247,9 +247,11 @@ exp1	:	exp
 /* Expressions, not including the comma operator.  */
 exp	:	'*' exp    %prec UNARY
 			{ write_exp_elt_opcode (UNOP_IND); }
+	;
 
 exp	:	'&' exp    %prec UNARY
 			{ write_exp_elt_opcode (UNOP_ADDR); }
+	;
 
 exp	:	'-' exp    %prec UNARY
 			{ write_exp_elt_opcode (UNOP_NEG); }
@@ -569,6 +571,7 @@ exp	:	SELECTOR
 			  write_exp_elt_opcode (OP_OBJC_SELECTOR);
 			  write_exp_string ($1);
 			  write_exp_elt_opcode (OP_OBJC_SELECTOR); }
+	;
 
 exp	:	SIZEOF '(' type ')'	%prec UNARY
 			{ write_exp_elt_opcode (OP_LONG);
