@@ -348,8 +348,8 @@ void elf_hppa_tc_symbol
 elf32_hppa_reloc_type **hppa_elf_gen_reloc_type
   PARAMS ((bfd *, elf32_hppa_reloc_type, int, int));
 
-asymbol * hppa_look_for_stub_in_section
-  PARAMS ((bfd *, bfd *, bfd *, asection *, asymbol **,
+asymbol * hppa_look_for_stubs_in_section
+  PARAMS ((bfd *, bfd *, bfd *, asection *,
 	   int *, struct bfd_link_info *));
 
 void elf_hppa_final_processing PARAMS ((void));

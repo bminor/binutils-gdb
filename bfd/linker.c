@@ -1619,15 +1619,19 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
   asymbol **sym_ptr;
   asymbol **sym_end;
 
-  symsize = get_symtab_upper_bound (input_bfd);
-  input_bfd->outsymbols = (asymbol **) bfd_alloc (input_bfd, symsize);
-  if (!input_bfd->outsymbols)
+  /* Do not clobber outsymbols if they have already been created.  */
+  if (input_bfd->outsymbols == NULL)
     {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
+      symsize = get_symtab_upper_bound (input_bfd);
+      input_bfd->outsymbols = (asymbol **) bfd_alloc (input_bfd, symsize);
+      if (!input_bfd->outsymbols)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+      input_bfd->symcount = bfd_canonicalize_symtab (input_bfd,
+						     input_bfd->outsymbols);
     }
-  input_bfd->symcount = bfd_canonicalize_symtab (input_bfd,
-						 input_bfd->outsymbols);
 
   /* Create a filename symbol if we are supposed to.  */
   if (info->create_object_symbols_section != (asection *) NULL)

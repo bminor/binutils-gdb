@@ -1,3 +1,19 @@
+Sun Feb 27 16:30:55 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+        * elf32-hppa.h (hppa_look_for_stub_in_section): Fix typo.  Delete
+	unused symbols argument.
+
+	* elf32-hppa.c (hppa_elf_stub_reloc): Accept asymbol ** rather
+	than asymbol * for original target symbol.  All callers changed.
+	Set reloc->sym_ptr_ptr appropriately.
+	(hppa_elf_build_linker_stub): Set reloc->sym_ptr_ptr correctly.
+	(hppa_elf_look_for_stubs_in_section): No longer need symbols
+	argument.  Use the output symbols when canonicalizing the relocs,
+	creating them if necessary.
+
+	* linker.c (_bfd_generic_link_output_symbols): Do not
+	rebuild/clobber the output symbols if they already exist.
+
 Sun Feb 27 15:22:36 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* targets.c (BFD_SEND, BFD_SEND_FMT): Add debugging versions that

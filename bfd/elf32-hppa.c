@@ -231,7 +231,7 @@ static elf32_hppa_stub_name_list * add_stub_by_name
 static void hppa_elf_stub_finish PARAMS ((bfd *));
 
 static void hppa_elf_stub_reloc
-  PARAMS ((elf32_hppa_stub_description *, bfd *, asymbol *, int,
+  PARAMS ((elf32_hppa_stub_description *, bfd *, asymbol **, int,
 	   elf32_hppa_reloc_type));
 
 static int hppa_elf_arg_reloc_needed_p
@@ -2007,7 +2007,7 @@ static void
 hppa_elf_stub_reloc (stub_desc, output_bfd, target_sym, offset, type)
      elf32_hppa_stub_description *stub_desc;
      bfd *output_bfd;
-     asymbol *target_sym;
+     asymbol **target_sym;
      int offset;
      elf32_hppa_reloc_type type;
 {
@@ -2047,7 +2047,7 @@ hppa_elf_stub_reloc (stub_desc, output_bfd, target_sym, offset, type)
   /* Fill in the details. */
   relent.address = offset;
   relent.addend = 0;
-  relent.sym_ptr_ptr = &target_sym;
+  relent.sym_ptr_ptr = target_sym;
   relent.howto = bfd_reloc_type_lookup (stub_desc->this_bfd, type);
 
   /* Save it in the array of relocations for the stub section.  */
@@ -2191,7 +2191,13 @@ hppa_elf_build_linker_stub (abfd, output_bfd, link_info, reloc_entry,
 	 old symbol (a function symbol) to the stub (the stub will call
 	 the original function).  */
       stub_sym = stub_entry->sym;
-      reloc_entry->sym_ptr_ptr = &stub_sym;
+      reloc_entry->sym_ptr_ptr = bfd_zalloc (abfd, sizeof (asymbol **));
+      if (reloc_entry->sym_ptr_ptr == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  abort ();
+	}
+      reloc_entry->sym_ptr_ptr[0] = stub_sym;
       if (linker_stub_type == HPPA_STUB_LONG_CALL
 	  || (reloc_entry->howto->type != R_HPPA_PLABEL_32
 	      && (get_opcode(insn) == BLE
@@ -2223,7 +2229,13 @@ hppa_elf_build_linker_stub (abfd, output_bfd, link_info, reloc_entry,
 
       /* Redirect the original relocation from the old symbol (a function)
 	 to the stub (the stub calls the function).  */
-      reloc_entry->sym_ptr_ptr = &stub_sym;
+      reloc_entry->sym_ptr_ptr = bfd_zalloc (abfd, sizeof (asymbol **));
+      if (reloc_entry->sym_ptr_ptr == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  abort ();
+	}
+      reloc_entry->sym_ptr_ptr[0] = stub_sym;
       if (linker_stub_type == HPPA_STUB_LONG_CALL
 	  || (reloc_entry->howto->type != R_HPPA_PLABEL_32
 	      && (get_opcode (insn) == BLE
@@ -2403,12 +2415,12 @@ hppa_elf_build_linker_stub (abfd, output_bfd, link_info, reloc_entry,
       /* Long branch to the target function.  */
       NEW_INSTRUCTION (stub_entry, LDIL_XXX_31)
       hppa_elf_stub_reloc (stub_entry->stub_desc,
-			   abfd, target_sym,
+			   abfd, reloc_entry->sym_ptr_ptr,
 			   CURRENT_STUB_OFFSET (stub_entry),
 			   R_HPPA_L21);
       NEW_INSTRUCTION (stub_entry, BLE_XXX_0_31)
       hppa_elf_stub_reloc (stub_entry->stub_desc,
-			   abfd, target_sym,
+			   abfd, reloc_entry->sym_ptr_ptr,
 			   CURRENT_STUB_OFFSET (stub_entry),
 			   R_HPPA_ABS_CALL_R17);
 
@@ -2678,12 +2690,11 @@ hppa_elf_long_branch_needed_p (abfd, asec, reloc_entry, symbol, insn)
    
 asymbol *
 hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
-				syms, new_sym_cnt, link_info)
+				new_sym_cnt, link_info)
      bfd *stub_bfd;
      bfd *abfd;
      bfd *output_bfd;
      asection *asec;
-     asymbol **syms;
      int *new_sym_cnt;
      struct bfd_link_info *link_info;
 {
@@ -2702,7 +2713,25 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
       arelent **reloc_vector
 	= (arelent **) alloca (asec->reloc_count * (sizeof (arelent *) + 1));
 
-      bfd_canonicalize_reloc (abfd, asec, reloc_vector, syms);
+      /* Make sure the canonical symbols are hanging around in a convient
+	 location.  */
+      if (bfd_get_outsymbols (abfd) == NULL)
+	{
+	  size_t symsize;
+
+	  symsize = get_symtab_upper_bound (abfd);
+	  abfd->outsymbols = (asymbol **) bfd_alloc (abfd, symsize);
+	  if (!abfd->outsymbols)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      return false;
+	    }
+	  abfd->symcount = bfd_canonicalize_symtab (abfd, abfd->outsymbols);
+	}
+
+      /* Now get the relocations.  */
+      bfd_canonicalize_reloc (abfd, asec, reloc_vector,
+			      bfd_get_outsymbols (abfd));
 
       /* Examine each relocation entry in this section.  */
       for (i = 0; i < asec->reloc_count; i++)
