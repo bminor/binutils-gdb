@@ -1,3 +1,16 @@
+Fri Nov 15 13:00:18 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* Makefile.in (emn10300.c): Add dependencies.
+	* configure.tgt: Handle mn10300.
+	* emulparms/mn10300.sh: New file.
+
+start-sanitize-d10v
+Tue Nov  5 10:57:50 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* emulparams/d10velf.sh (READONLY_START_ADDR): Changed to 0x2000004.
+	(EMBEDDED): Define.
+	
+end-sanitize-d10v	
 Fri Nov  1 10:01:27 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.texinfo: Add section on reporting bugs.

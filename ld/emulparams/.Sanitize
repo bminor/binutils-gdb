@@ -121,6 +121,7 @@ mipsbsd.sh
 mipsidt.sh
 mipsidtl.sh
 mipslit.sh
+mn10300.sh
 news.sh
 ns32knbsd.sh
 pc532macha.sh
