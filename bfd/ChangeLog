@@ -1,3 +1,33 @@
+Wed Jul 19 15:52:01 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* coff-arm.c (TARGET_LITTLE_SYM, TARGET_BIG_SYM): Replaces TARGET_SYM.
+	* configure.in (armpe_vec, armpei_vec): Add bi-endian support.
+	* configure: "regenerated".
+	* pe-arm.c (TARGET_LITTLE_SYM, TARGET_BIG_SYM): Replaces TARGET_SYM.
+	(TARGET_LITTLE_NAME, TARGET_BIG_NAME): Replaces TARGET_NAME.
+	* pei-arm.c (TARGET_LITTLE_SYM, TARGET_BIG_SYM): Replaces TARGET_SYM.
+	(TARGET_LITTLE_NAME, TARGET_BIG_NAME): Replaces TARGET_NAME.
+	* targets.c (armpe_vec, armpei_vec): Deleted.
+	(armpe_little_vec, armpe_big_vec, armpei_little_vec, armpei_big_vec):
+	Added.
+	* config/arm-pe.mt (DEFAULT_VECTOR): Default is armpe_little_vec.
+	(SELECT_VECS): Add bi-endian support.
+
+Wed Jul 19 10:47:25 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-sh.c: Clean up and comment.
+	(r_imm32): Remove.
+	(sh_coff_howtos): New static array.
+	(SH_COFF_HOWTO_COUNT): Define.
+	(get_symbol_value): Make relocation bfd_vma rather than long.
+	(RTYPE2HOWTO): Rewrite to use sh_coff_howtos.
+	(coff_relocate_section): Define to sh_relocate_section.
+	(sh_relocate_section): New static function.
+
+Sat Jul 15 01:02:53 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* configure.host:  Add support for generic m68k SVR4 host.
+
 Fri Jul 14 13:13:55 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aoutx.h (KEEPIT): Change definition to udata.i.

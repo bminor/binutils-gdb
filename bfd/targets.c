@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -328,7 +328,9 @@ The general target vector.
 .CAT(NAME,_bfd_is_local_label),\
 .CAT(NAME,_get_lineno),\
 .CAT(NAME,_find_nearest_line),\
-.CAT(NAME,_bfd_make_debug_symbol)
+.CAT(NAME,_bfd_make_debug_symbol),\
+.CAT(NAME,_read_minisymbols),\
+.CAT(NAME,_minisymbol_to_symbol)
 .  long  (*_bfd_get_symtab_upper_bound) PARAMS ((bfd *));
 .  long  (*_bfd_canonicalize_symtab) PARAMS ((bfd *,
 .                                             struct symbol_cache_entry **));
@@ -352,10 +354,18 @@ The general target vector.
 . {* Back-door to allow format-aware applications to create debug symbols
 .    while using BFD for everything else.  Currently used by the assembler
 .    when creating COFF files.  *}
-. asymbol *  (*_bfd_make_debug_symbol) PARAMS ((
+.  asymbol *  (*_bfd_make_debug_symbol) PARAMS ((
 .       bfd *abfd,
 .       void *ptr,
 .       unsigned long size));
+.#define bfd_read_minisymbols(b, d, m, s) \
+.  BFD_SEND (b, _read_minisymbols, (b, d, m, s))
+.  long  (*_read_minisymbols) PARAMS ((bfd *, boolean, PTR *,
+.                                      unsigned int *));
+.#define bfd_minisymbol_to_symbol(b, d, m, f) \
+.  BFD_SEND (b, _minisymbol_to_symbol, (b, d, m, f))
+.  asymbol *(*_minisymbol_to_symbol) PARAMS ((bfd *, boolean, const PTR,
+.                                             asymbol *));
 .
 .  {* Routines for relocs.  *}
 .#define BFD_JUMP_TABLE_RELOCS(NAME)\
@@ -449,8 +459,10 @@ extern const bfd_target aout_mips_big_vec;
 extern const bfd_target aout_mips_little_vec;
 extern const bfd_target aout0_big_vec;
 extern const bfd_target apollocoff_vec;
-extern const bfd_target armpe_vec;
-extern const bfd_target armpei_vec;
+extern const bfd_target armpe_little_vec;
+extern const bfd_target armpe_big_vec;
+extern const bfd_target armpei_little_vec;
+extern const bfd_target armpei_big_vec;
 extern const bfd_target b_out_vec_big_host;
 extern const bfd_target b_out_vec_little_host;
 /* start-sanitize-arc */
