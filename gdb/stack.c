@@ -850,7 +850,7 @@ select_frame (frame, level)
   {
     s = find_pc_symtab (get_frame_info (frame)->pc);
     if (s 
-	&& working_lang != s->language
+	&& s->language != current_language->la_language
 	&& s->language != language_unknown
 	&& language_mode == language_mode_auto) {
       set_language(s->language);
