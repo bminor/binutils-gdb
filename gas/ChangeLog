@@ -1,5 +1,8 @@
 Tue Sep 13 20:05:47 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* expr.c (expr): Don't reduce the difference of two symbols in the
+	same frag if the symbols are not in normal sections.
+
 	* config/obj-som.h (S_SET_OTHER, S_SET_TYPE): Delete a.out crud.
 	(S_SET_DESC, S_GET_OTHER, S_GET_TYPE, S_GET_DESC): Likewise.
 	(obj_attach_unwind_info): Do not define.  Not needed anymore.

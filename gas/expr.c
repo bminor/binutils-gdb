@@ -991,7 +991,9 @@ expr (rank, resultP)
 	       && right.X_op == O_symbol
 	       && resultP->X_op == O_symbol
 	       && (right.X_add_symbol->sy_frag
-		   == resultP->X_add_symbol->sy_frag))
+		   == resultP->X_add_symbol->sy_frag)
+	       && SEG_NORMAL (S_GET_SEGMENT (right.X_add_symbol)))
+
 	{
 	  resultP->X_add_number += right.X_add_number;
 	  resultP->X_add_number += (S_GET_VALUE (resultP->X_add_symbol)
