@@ -1,3 +1,8 @@
+Tue Nov 22 23:31:20 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (tc_gen_reloc, ELF variant): Add section->vma
+	to the relocation's offset.
+
 Tue Nov 22 14:37:58 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* Makefile.in (INSTALL_XFORM): Fix typo.

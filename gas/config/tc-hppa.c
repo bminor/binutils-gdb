@@ -2568,7 +2568,15 @@ tc_gen_reloc (section, fixp)
 
       reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
       reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
-      reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+      /* Ugh.  Yet another case where the generic ELF code's
+	 handling of section vmas makes life a living hell.
+
+	 The generic ELF code will subtract out section->vma from
+	 the relocation offset before the relocs are written.  So
+	 we have to add section->vma into the offset here so the
+	 net sum is zero.  */
+      reloc->address = (fixp->fx_frag->fr_address + fixp->fx_where
+			+ section->vma);
       reloc->addend = 0;	/* default */
 
       assert (reloc->howto && code == reloc->howto->type);
