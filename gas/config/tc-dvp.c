@@ -28,6 +28,8 @@
 #include "opcode/dvp.h"
 #include "elf/mips.h"
 
+static long parse_float PARAMS ((char **, const char **));
+
 static long parse_dma_ild_autocount ();
 static long parse_dma_ptr_autocount ();
 
@@ -55,7 +57,7 @@ const char FLT_CHARS[] = "dD";
    be provided.  (e.g. mpg is followed by vu insns until a .EndMpg is
    seen).  */
 typedef enum {
-  ASM_INIT, ASM_MPG, ASM_DIRECT, ASM_UNPACK, ASM_GIF, ASM_VU
+  ASM_INIT, ASM_MPG, ASM_DIRECT, ASM_UNPACK, ASM_VU
 } asm_state;
 static asm_state cur_asm_state = ASM_INIT;
 
@@ -144,9 +146,8 @@ const pseudo_typeS md_pseudo_table[] =
     { "endgif", s_endgif, 0 },
     { "endmpg", s_endmpg, 0 },
     { "endunpack", s_endunpack, 0 },
-    /* .vu,.gif added to simplify debugging */
+    /* .vu added to simplify debugging and creation of input files */
     { "vu", s_state, ASM_VU },
-    { "gif", s_state, ASM_GIF },
     { NULL, NULL, 0 }
 };
 
@@ -224,11 +225,11 @@ md_assemble (str)
     {
       if (strncasecmp (str, "dma", 3) == 0)
 	assemble_dma (str);
+      if (strncasecmp (str, "gif", 3) == 0)
+	assemble_gif (str);
       else
 	assemble_vif (str);
     }
-  else if (cur_asm_state == ASM_GIF)
-    assemble_gif (str);
   else if (cur_asm_state == ASM_VU
 	   || cur_asm_state == ASM_MPG)
     assemble_vu (str);
@@ -453,22 +454,22 @@ assemble_vu (str)
 			     vu_upper_opcode_lookup_asm (str), vu_operands,
 			     &str, f + 4);
   *p = '|';
-  if (opcode == NULL)
-    return;
   str = p + 1;
-  assemble_vu_insn (DVP_VULO,
-		    vu_lower_opcode_lookup_asm (str), vu_operands,
-		    &str, f);
 #else
   opcode = assemble_vu_insn (DVP_VUUP,
 			     vu_upper_opcode_lookup_asm (str), vu_operands,
 			     &str, f + 4);
-  /* Don't assemble next one if we couldn't assemble the first.  */
-  if (opcode)
-    assemble_vu_insn (DVP_VULO,
-		      vu_lower_opcode_lookup_asm (str), vu_operands,
-		      &str, f);
 #endif
+
+  /* Don't assemble next one if we couldn't assemble the first.  */
+  if (opcode == NULL)
+    return;
+  opcode = assemble_vu_insn (DVP_VULO,
+			     vu_lower_opcode_lookup_asm (str), vu_operands,
+			     &str, f);
+  /* If this was the "loi" pseudo-insn, we need to set the `i' bit.  */
+  if (strcmp (opcode->mnemonic, "loi") == 0)
+    f[7] |= 0x80;
 }
 
 static const dvp_opcode *
@@ -617,9 +618,6 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 	  /* Are we finished with suffixes?  */
 	  else if (!past_opcode_p)
 	    {
-	      int found;
-	      char c;
-	      char *s,*t;
 	      long suf_value;
 
 	      if (!(operand->flags & DVP_OPERAND_SUFFIX))
@@ -634,21 +632,10 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 		  continue;
 		}
 
-	      s = str;
-
-	      /* Pick the suffix out and parse it.  */
-	      /* ??? Hmmm ... there may not be any need to nul-terminate the
-		 string, and it may in fact complicate things.  */
-	      for (t = (*s == '.' || *s == '/' || *s == '[') ? s + 1 : s;
-		   *t && (isalnum (*t) || *t == ']');
-		   ++t)
-		continue;
-	      c = *t;
-	      *t = '\0';
+	      /* Parse the suffix.  */
 	      errmsg = NULL;
-	      suf_value = (*operand->parse) (opcode, operand, mods, &s,
+	      suf_value = (*operand->parse) (opcode, operand, mods, &str,
 					     &errmsg);
-	      *t = c;
 	      if (errmsg)
 		{
 		  /* This can happen, for example, in ARC's in "blle foo" and
@@ -662,10 +649,6 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 	      insert_operand (cpu, opcode, operand, mods, insn_buf,
 			      (offsetT) suf_value, &errmsg);
 
-	      /* FIXME: For suffixes that have a null "" value,
-		 this next line is wrong as we will skip over something
-		 we're not supposed to.  */
-	      str = t;
 	      ++syn;
 	    }
 	  else
@@ -690,12 +673,12 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 		}
 #endif
 
-	      if( operand->flags & DVP_OPERAND_DMA_ILD)
-	      {
-		  s_dmadata_implied( 0);
+	      if (operand->flags & DVP_OPERAND_DMA_ILD)
+		{
+		  s_dmadata_implied (0);
 		  ++syn;
 		  break;
-	      }
+		}
 
 	      /* Is there anything left to parse?
 		 We don't check for this at the top because we want to parse
@@ -705,18 +688,29 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 		break;
 
 	      /* Parse the operand.  */
-	      if( operand->flags & DVP_OPERAND_DMA_ILD_AUTOCOUNT)
-	      {
+	      if (operand->flags & DVP_OPERAND_FLOAT)
+		{
 		  errmsg = 0;
-		  value = parse_dma_ild_autocount( opcode, operand, mods, insn_buf, &str, &errmsg);
-		  if( errmsg) break;
-	      }
-	      else if( operand->flags & DVP_OPERAND_DMA_PTR_AUTOCOUNT)
-	      {
+		  value = parse_float (&str, &errmsg);
+		  if (errmsg)
+		    break;
+		}
+	      else if (operand->flags & DVP_OPERAND_DMA_ILD_AUTOCOUNT)
+		{
 		  errmsg = 0;
-		  value = parse_dma_ptr_autocount( opcode, operand, mods, insn_buf, &str, &errmsg);
-		  if( errmsg) break;
-	      }
+		  value = parse_dma_ild_autocount (opcode, operand, mods,
+						   insn_buf, &str, &errmsg);
+		  if (errmsg)
+		    break;
+		}
+	      else if (operand->flags & DVP_OPERAND_DMA_PTR_AUTOCOUNT)
+		{
+		  errmsg = 0;
+		  value = parse_dma_ptr_autocount (opcode, operand, mods,
+						   insn_buf, &str, &errmsg);
+		  if (errmsg)
+		    break;
+		}
 	      else if (operand->parse)
 		{
 		  errmsg = NULL;
@@ -1129,9 +1123,24 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
-/*
-Compute the auto-count value for a DMA tag with inline data.
-*/
+/* Parse a 32 bit floating point number.
+   The result is those 32 bits as an integer.  */
+
+static long
+parse_float (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+  LITTLENUM_TYPE words[MAX_LITTLENUMS];
+  char *p;
+
+  p = atof_ieee (*pstr, 'f', words);
+  *pstr = p;
+  return (words[0] << 16) | words[1];
+}
+
+/* Compute the auto-count value for a DMA tag with inline data.  */
+
 static long
 parse_dma_ild_autocount( opcode, operand, mods, insn_buf, pstr, errmsg)
     const dvp_opcode *opcode;
@@ -1167,9 +1176,8 @@ scan_symbol( sym)
     return sym;
 }
 
-/*
-Compute the auto-count value for a DMA tag with out-of-line data.
-*/
+/* Compute the auto-count value for a DMA tag with out-of-line data.  */
+
 static long
 parse_dma_ptr_autocount( opcode, operand, mods, insn_buf, pstr, errmsg)
     const dvp_opcode *opcode;

@@ -1,3 +1,12 @@
+start-sanitize-sky
+Wed Feb 18 15:49:56 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (parse_float): New function.
+	(assemble_vu): Handle loi insns.
+	(assemble_one_insn): Simplify suffix parsing.
+	Handle DVP_OPERAND_FLOAT.
+
+end-sanitize-sky
 start-sanitize-m32rx
 Wed Feb 18 14:30:26 1998  Nick Clifton  <nickc@cygnus.com>
 
@@ -14,10 +23,11 @@ Wed Feb 18 14:30:26 1998  Nick Clifton  <nickc@cygnus.com>
 Wed Feb 18 11:00:18 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* app.c: Parse || as a seperator between assembler statements.
+
 end-sanitize-m32rx
 Tue Feb 17 18:58:51 1998  Doug Evans  <devans@seba.cygnus.com>
 
-	* cen.c (cgen_md_apply_fix3): Delete call to validate_operand.
+	* cgen.c (cgen_md_apply_fix3): Delete call to validate_operand.
 	Test result of insert_operand for error.
 
 start-sanitize-m32rx
