@@ -1,3 +1,7 @@
+2000-04-26  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* utils.c (internal_verror): Call target_terminal_ours.
+	
 2000-04-26  Kevin Buettner  <kevinb@redhat.com>
 
 	* config/djgpp/fnchange.lst (ia64-linux-nat.c): Map to

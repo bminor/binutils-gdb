@@ -680,6 +680,7 @@ internal_verror (const char *fmt, va_list ap)
     }
 
   /* Try to get the message out */
+  target_terminal_ours ();
   fputs_unfiltered ("gdb-internal-error: ", gdb_stderr);
   vfprintf_unfiltered (gdb_stderr, fmt, ap);
   fputs_unfiltered ("\n", gdb_stderr);
@@ -720,6 +721,7 @@ internal_error (char *string, ...)
 {
   va_list ap;
   va_start (ap, string);
+
   internal_verror (string, ap);
   va_end (ap);
 }
@@ -2364,6 +2366,7 @@ initialize_utils ()
 		  var_boolean, (char *) &pagination_enabled,
 		  "Set state of pagination.", &setlist),
      &showlist);
+
   if (xdb_commands)
     {
       add_com ("am", class_support, pagination_on_command,
