@@ -22,6 +22,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* 1 if debugging H8/300H application */
 extern int h8300hmode;
+/* start-sanitize-h8s */
+extern int h8300smode;
+/* end-sanitize-h8s */
 
 /* Number of bytes in a word */
 

@@ -15,6 +15,33 @@
 
 Do-first:
 
+h8s_files="tm-h8300.h"
+if ( echo $* | grep keep\-h8s > /dev/null ) ; then
+	for i in $h8s_files ; do
+		if test ! -d $i && (grep sanitize-h8s $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping h8s stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $h8s_files ; do
+		if test ! -d $i && (grep sanitize-h8s $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"h8s\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-h8s/,/end-\sanitize\-h8s/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
