@@ -592,7 +592,7 @@ gdb_expect {
 #
 send_gdb "bt\n"
 gdb_expect {
-    -re "#0\[ \t\]*$hex in marker2.*:4\[49\]\r\n#1.*_sr4export.*$gdb_prompt $"\
+    -re "#0\[ \t\]*($hex in )?marker2.*:4\[49\]\r\n#1.*_sr4export.*$gdb_prompt $"\
             {pass "backtrace while in called function"}
     -re "#0\[ \t\]*($hex in )?marker2.*:4\[49\]\r\n#1.*function called from gdb.*$gdb_prompt $"\
 	    {pass "backtrace while in called function"}

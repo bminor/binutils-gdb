@@ -1,3 +1,12 @@
+Wed Dec 19 14:10:57 2001  Jeffrey A Law  (law@redhat.com)
+
+        * gdb.base/break.exp: Fix HP specific search string when testing
+        backtracing in a called function.
+
+        * gdb.base/constvars.exp: Only set lang to C++ if we're 
+        compiling the test with HP's compilers.
+        * gdb.base/volatile.exp: Similarly.
+
 2001-12-19  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/printcmds.exp: Expect the null character to be printed
