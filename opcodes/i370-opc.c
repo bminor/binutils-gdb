@@ -229,7 +229,6 @@ const struct i370_operand i370_operands[] =
 
 /* The functions used to insert and extract complicated operands.  */
 
-/*ARGSUSED*/
 static i370_insn_t
 insert_ss_b2 (i370_insn_t insn, long value,
 	      const char **errmsg ATTRIBUTE_UNUSED)

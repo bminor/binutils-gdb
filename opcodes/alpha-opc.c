@@ -214,7 +214,6 @@ const unsigned alpha_num_operands = sizeof(alpha_operands)/sizeof(*alpha_operand
    the RA field into the RB field, and the extraction function just
    checks that the fields are the same. */
 
-/*ARGSUSED*/
 static unsigned
 insert_rba(insn, value, errmsg)
      unsigned insn;
@@ -238,7 +237,6 @@ extract_rba(insn, invalid)
 
 /* The same for the RC field */
 
-/*ARGSUSED*/
 static unsigned
 insert_rca(insn, value, errmsg)
      unsigned insn;
@@ -262,7 +260,6 @@ extract_rca(insn, invalid)
 
 /* Fake arguments in which the registers must be set to ZERO */
 
-/*ARGSUSED*/
 static unsigned
 insert_za(insn, value, errmsg)
      unsigned insn;
@@ -282,7 +279,6 @@ extract_za(insn, invalid)
   return 0;
 }
 
-/*ARGSUSED*/
 static unsigned
 insert_zb(insn, value, errmsg)
      unsigned insn;
@@ -302,7 +298,6 @@ extract_zb(insn, invalid)
   return 0;
 }
 
-/*ARGSUSED*/
 static unsigned
 insert_zc(insn, value, errmsg)
      unsigned insn;
@@ -336,7 +331,6 @@ insert_bdisp(insn, value, errmsg)
   return insn | ((value / 4) & 0x1FFFFF);
 }
 
-/*ARGSUSED*/
 static int
 extract_bdisp(insn, invalid)
      unsigned insn;
@@ -359,7 +353,6 @@ insert_jhint(insn, value, errmsg)
   return insn | ((value / 4) & 0x3FFF);
 }
 
-/*ARGSUSED*/
 static int
 extract_jhint(insn, invalid)
      unsigned insn;
@@ -381,7 +374,6 @@ insert_ev6hwjhint(insn, value, errmsg)
   return insn | ((value / 4) & 0x1FFF);
 }
 
-/*ARGSUSED*/
 static int
 extract_ev6hwjhint(insn, invalid)
      unsigned insn;

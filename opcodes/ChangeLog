@@ -1,3 +1,9 @@
+2003-12-02  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* alpha-opc.c: Remove ARGSUSED.
+	* i370-opc.c: Likewise.
+	* ppc-opc.c: Likewise.
+
 2003-12-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
