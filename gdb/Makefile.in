@@ -553,6 +553,7 @@ floatformat_h =	$(INCLUDE_DIR)/floatformat.h
 bfd_h =		$(BFD_DIR)/bfd.h
 dis-asm_h =	$(INCLUDE_DIR)/dis-asm.h 
 remote-sim_h =	$(INCLUDE_DIR)/remote-sim.h
+demangle_h =    $(INCLUDE_DIR)/demangle.h
 
 dcache_h = dcache.h
 remote_utils_h = $(dcache_h) serial.h target.h remote-utils.h $(remote-sim_h)
@@ -1554,11 +1555,11 @@ jv-lang.o: jv-lang.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	gdb_string.h $(value_h) c-lang.h jv-lang.h $(gdbcore_h)
 
 jv-typeprint.o: jv-typeprint.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
-	$(value_h) $(INCLUDE_DIR)/demangle.h jv-lang.h gdb_string.h \
+	$(value_h) $(demangle_h) jv-lang.h gdb_string.h \
 	typeprint.h c-lang.h
 
 jv-valprint.o: jv-valprint.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
-	$(expression_h) $(value_h) $(INCLUDE_DIR)/demangle.h valprint.h \
+	$(expression_h) $(value_h) $(demangle_h) valprint.h \
 	language.h jv-lang.h c-lang.h gdbcore.h annotate.h
 
 kod.o: kod.c $(defs_h) $(command_h) $(gdbcmd_h) target.h gdb_string.h kod.h
@@ -1966,7 +1967,7 @@ symtab.o: symtab.c call-cmds.h $(defs_h) $(expression_h) $(frame_h) \
 
 linespec.o: linespec.c linespec.h $(defs_h) $(frame_h) $(value_h) \
 	objfiles.h symfile.h completer.h $(symtab_h) \
-	$(INCLUDE_DIR)/demangle.h command.h
+	$(demangle_h) command.h
 
 tic80-tdep.o: tic80-tdep.c $(defs_h) $(regcache_h)
 
