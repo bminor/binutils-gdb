@@ -1,3 +1,8 @@
+Mon Aug  8 13:42:16 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/tc-sparc.c (md_apply_fix): If we are going to generate a
+	non PC relative reloc, don't put the addend in the object file.
+
 Sat Aug  6 01:15:02 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* as.h: If FOPEN_WB is not defined, do the right thing in a go32
