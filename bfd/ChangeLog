@@ -1,5 +1,12 @@
 Mon Aug 15 12:16:56 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* libcoff-in.h (obj_symbol_slew): Don't define.
+	(struct coff_tdata): Remove unused fields index_slew, raw_linenos,
+	and flags.
+	* libcoff.h: Rebuilt.
+	* coffcode.h (coff_mkobject): Don't initialize raw_linenos.
+	(coff_mkobject_hook): Don't initialize flags.
+
 	* aout-target.h (MY_zmagic_contiguous): Define as 0 if not already
 	defined.
 	(MY(backend_data)): Use MY_zmagic_contiguous, not hardcoded 0.
