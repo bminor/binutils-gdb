@@ -1,5 +1,11 @@
 2004-09-25  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/fbsd.mh (NATDEPFILES): Remove infptrace.o.
+	* config/i386/nbsdaout.mh (NATDEPFILES): Remove infptrace.o.
+	* config/i386/nbsdelf.mh (NATDEPFILES): Remove infptrace.o.
+	* config/i386/obsd.mh (NATDEPFILES): Remove infptrace.o.
+	* config/i386/obsdaout.mh (NATDEPFILES): Remove infptrace.o.
+
 	* inf-ptrace.c (inf_ptrace_attach): Remove redundant parenthesis.
 	Inline attach call.
 	(inf_ptrace_detach): Inline detach call.
