@@ -1,5 +1,26 @@
 Thu Jan  6 00:13:10 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* ldmain.c (add_to_set): Add bitsize argument.
+	(constructor_callback): New function.
+	(link_callbacks): Add constructor_callback.
+	* ldctor.c (struct set_info): Add bitsize field.
+	(ldctor_add_set_entry): Add bitsize argument.
+	(ldctor_build_sets): Base the size of the elements of the set on
+	the bitsize, rather than always using LONG.
+	* ldctor.h (ldctor_add_set_entry): Add bitsize to declaration.
+
+	* ld.h (QUAD_SIZE): Define.
+	* ldgram.y (QUAD): New token.
+	(length): Handle it.
+	* ldlex.l: Return QUAD.
+	* lexsup.c (keywords): Add QUAD.
+	* ldwrite.c (build_link_order): Handle QUAD.
+	* ldlang.c (print_data_statement): Handle QUAD.
+	(lang_size_sections): Likewise.
+	(lang_do_assignments): Likewise.
+	* ldexp.c (exp_print_token): Add QUAD to table.
+	* ld.texinfo: Describe QUAD.
+
 	* scripttempl/alpha.sc: Don't create .lit4 or .sdata sections,
 	since the Alpha doesn't use them.
 

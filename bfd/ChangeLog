@@ -1,3 +1,72 @@
+Thu Jan  6 14:37:42 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* linker.c (_bfd_generic_link_add_one_symbol): Add constructor and
+	bitsize arguments.  Changed all callers (aoutx.h).
+	* libbfd-in.h (_bfd_generic_link_add_one_symbol): Add constructor
+	and bitsize arguments to declaration.
+	* libbfd.h: Rebuilt.
+
+	* ecoff.c: First cut at new style of linker backend for
+	ECOFF--added a bunch of functions.  Also:
+	(ecoff_sec_to_styp_flags): Set flags for .pdata and .xdata.
+	(ecoff_slurp_symbolic_header): New function.
+	(ecoff_slurp_symbolic_info): Call ecoff_slurp_symbolic_header.
+	(ecoff_compute_reloc_file_positions): New function.
+	(ecoff_set_section_contents): Get out quickly if count is zero.
+	Check errors better.
+	(ecoff_write_object_contents): Put .xdata section in data segment.
+	Call ecoff_compute_reloc_file_positions.  Don't output relocs or
+	external symbols if outsymbols is NULL.
+	(ecoff_bfd_final_link): Completely rewritten.
+	* libecoff.h: Include bfdlink.h.
+	(struct ecoff_backend_data): Add relocate_section field.
+	(ecoff_data_type): Add sym_hashes and symndx_to_section fields.
+	(struct ecoff_link_hash_entry): Define.
+	(struct ecoff_link_hash_table): Define.
+	(ecoff_bfd_link_add_symbols): Declare as function, not macro.
+	(ecoff_bfd_link_hash_table_create): Likewise.
+	* ecofflink.c (bfd_ecoff_debug_one_external): New function.
+	(bfd_ecoff_debug_externals): Call bfd_ecoff_debug_one_external.
+	* bfd-in.h (bfd_ecoff_debug_one_external): Declare.
+	* bfd-in2.h: Rebuilt.
+	* coff-alpha.c (alpha_howto_table): Mark BRADDR as
+	partial_inplace, and set the src_mask to 0x1fffff.
+	(alpha_ecoff_get_relocated_section_contents): Remove unused
+	variable gp_warned.
+	(alpha_convert_external_reloc): New static function.
+	(alpha_relocate_section): New static function.
+	(alpha_ecoff_backend_data): Initialize relocate_section field.
+	* coff-mips.c (mips_relocate_refhi): New static function.
+	(mips_relocate_section): New static function.
+	(mips_ecoff_backend_data): Initialize relocate_section field.
+
+	* reloc.c (_bfd_relocate_contents): Corrected signed overflow
+	checking when there is an addend.
+
+	* aoutx.h (NAME(aout,final_link)): Don't abort when trying to link
+	a non a.out file, just pass it to _bfd_default_link_order.
+	(aout_link_input_section_std): When doing a final PC relative link
+	against a section symbol, subtract the VMA of the input section.
+	(aout_link_input_section_ext): Likewise.
+
+	* linker.c (default_indirect_link_order): Renamed from
+	_bfd_generic_indirect_link_order and made static.
+	(_bfd_generic_final_link): Don't switch on link_order type, just
+	call _bfd_default_link_order.
+	(_bfd_default_link_order): Handle bfd_indirect_link_order type.
+	* genlink.h: Removed declaration of
+	_bfd_generic_indirect_link_order.
+	* elf32-mips.c (mips_elf_final_link): Don't switch on link_order
+	type, just call _bfd_default_link_order.
+
+Tue Jan  4 21:23:37 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* linker.c (generic_link_check_archive_element): Base the name of
+	the created common section on the name of the section the symbol
+	came from.
+	(_bfd_generic_link_add_one_symbol): (case BIG): A common symbol
+	must have a section, so don't bother to create one.
+
 Mon Jan  3 15:32:16 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* aout-target.h (MY(vec)): Add DYNAMIC to mask of object flags.
@@ -9,6 +78,9 @@ Mon Jan  3 15:32:16 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 	(N_DYNAMIC): Add missing 0 in mask.
 
 Mon Jan  3 11:41:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.c (ecoff_get_extr): Don't output section symbols as
+	external symbols.
 
 	* bfd-in.h, hash.c: Change bfd_hash_allocate argument from size_t
 	to unsigned int, because size_t may not be defined in bfd.h.
