@@ -1,3 +1,7 @@
+2002-01-21  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris: New testsuite directory.
+
 2002-01-15  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* ld-sh/sh.exp: Copy start.s file into test directory.
