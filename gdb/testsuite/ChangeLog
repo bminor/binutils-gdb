@@ -1,3 +1,8 @@
+2004-06-08  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.ada/null_record.exp: Use "start" instead of "begin" to
+	start the execution of the program.
+
 2004-06-07  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.arch/i386-sse.exp, gdb.arch/i386-sse.c: New tests.
