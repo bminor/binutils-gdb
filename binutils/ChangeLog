@@ -1,5 +1,13 @@
 Thu Sep  7 12:12:17 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config.in: Rename from config.h.in.
+	* configure.in: Call AC_CONFIG_HEADER with config.h:config.in.
+	Check for config.h:config.in when creating stamp-h.
+	* configure: Rebuild.
+	* Makefile.in (stamp-h): Depend upon config.in rather than
+	config.h.in.  Set CONFIG_HEADERS to config.h:config.in when
+	calling config.status.
+
 	* Makefile.in (distclean): Remove config.h, stamp-h, and
         config.log.
 

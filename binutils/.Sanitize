@@ -44,7 +44,7 @@ coffdump.c
 coffgrok.c
 coffgrok.h
 config
-config.h.in
+config.in
 configure
 configure.bat
 configure.in

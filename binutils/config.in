@@ -1,4 +1,4 @@
-/* config.h.in.  Generated automatically from configure.in by autoheader.  */
+/* config.in.  Generated automatically from configure.in by autoheader.  */
 
 /* Is the type time_t defined in <time.h>?  */
 #undef HAVE_TIME_T_IN_TIME_H
