@@ -595,14 +595,14 @@ gr_prepare_to_store (void)
 void
 _initialize_sr_support (void)
 {
-/* FIXME-now: if target is open... */
-  deprecated_add_show_from_set
-    (add_set_cmd ("remotedevice", no_class,
-		  var_filename, (char *) &sr_settings.device,
-		  "Set device for remote serial I/O.\n\
-This device is used as the serial port when debugging using remote\n\
-targets.", &setlist),
-     &showlist);
+  /* FIXME-now: if target is open... */
+  add_setshow_filename_cmd ("remotedevice", no_class, &sr_settings.device, _("\
+Set device for remote serial I/O."), _("\
+Show device for remote serial I/O."), _("\
+This device is used as the serial port when debugging using remote targets."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 
   add_com ("remote <command>", class_obscure, sr_com,
 	   _("Send a command to the remote monitor."));

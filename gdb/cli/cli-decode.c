@@ -23,7 +23,7 @@
 #include <ctype.h>
 #include "gdb_regex.h"
 #include "gdb_string.h"
-
+#include "completer.h"
 #include "ui-out.h"
 
 #include "cli/cli-cmds.h"
@@ -488,11 +488,13 @@ add_setshow_filename_cmd (char *name, enum command_class class,
 			  struct cmd_list_element **set_list,
 			  struct cmd_list_element **show_list)
 {
+  struct cmd_list_element *set_result;
   add_setshow_cmd_full (name, class, var_filename, var,
 			set_doc, show_doc, help_doc,
 			set_func, show_func,
 			set_list, show_list,
-			NULL, NULL);
+			&set_result, NULL);
+  set_cmd_completer (set_result, filename_completer);
 }
 
 /* Add element named NAME to both the set and show command LISTs (the

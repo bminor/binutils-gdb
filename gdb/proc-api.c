@@ -788,10 +788,10 @@ _initialize_proc_api (void)
   set_cmd_sfunc (c, set_procfs_trace_cmd);
   set_cmd_completer (c, filename_completer);
 
-  c = add_set_cmd ("procfs-file", no_class, var_filename,
-		   (char *) &procfs_filename, 
-		   "Set filename for /proc tracefile.\n", &setlist);
-
-  deprecated_add_show_from_set (c, &showlist);
-  set_cmd_sfunc (c, set_procfs_file_cmd);
+  add_setshow_filename_cmd ("procfs-file", no_class, &procfs_filename, _("\
+Set filename for /proc tracefile."), _("\
+Show filename for /proc tracefile."), NULL,
+			    set_procfs_file_cmd,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 }

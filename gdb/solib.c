@@ -879,7 +879,8 @@ no_shared_libraries (char *ignored, int from_tty)
 }
 
 static void
-reload_shared_libraries (char *ignored, int from_tty)
+reload_shared_libraries (char *ignored, int from_tty,
+			 struct cmd_list_element *e)
 {
   no_shared_libraries (NULL, from_tty);
   solib_add (NULL, from_tty, NULL, auto_solib_add);
@@ -910,14 +911,14 @@ inferior.  Otherwise, symbols must be loaded manually, using `sharedlibrary'.",
 		  &setlist),
      &showlist);
 
-  c = add_set_cmd ("solib-absolute-prefix", class_support, var_filename,
-		   (char *) &solib_absolute_prefix,
-		   "Set prefix for loading absolute shared library symbol files.\n\
-For other (relative) files, you can add values using `set solib-search-path'.",
-		   &setlist);
-  deprecated_add_show_from_set (c, &showlist);
-  set_cmd_cfunc (c, reload_shared_libraries);
-  set_cmd_completer (c, filename_completer);
+  add_setshow_filename_cmd ("solib-absolute-prefix", class_support,
+			    &solib_absolute_prefix, _("\
+Set prefix for loading absolute shared library symbol files."), _("\
+Show prefix for loading absolute shared library symbol files."), _("\
+For other (relative) files, you can add values using `set solib-search-path'."),
+			    reload_shared_libraries,
+			    NULL,
+			    &setlist, &showlist);
 
   /* Set the default value of "solib-absolute-prefix" from the sysroot, if
      one is set.  */
@@ -929,6 +930,6 @@ For other (relative) files, you can add values using `set solib-search-path'.",
 This takes precedence over the environment variables PATH and LD_LIBRARY_PATH.",
 		   &setlist);
   deprecated_add_show_from_set (c, &showlist);
-  set_cmd_cfunc (c, reload_shared_libraries);
+  set_cmd_sfunc (c, reload_shared_libraries);
   set_cmd_completer (c, filename_completer);
 }

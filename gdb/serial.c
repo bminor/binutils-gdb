@@ -686,14 +686,14 @@ Show default serial/parallel port configuration."),
 		  0/*allow-unknown*/,
 		  &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("remotelogfile", no_class,
-		  var_filename, (char *) &serial_logfile,
-		  "Set filename for remote session recording.\n\
+  add_setshow_filename_cmd ("remotelogfile", no_class, &serial_logfile, _("\
+Set filename for remote session recording."), _("\
+Show filename for remote session recording."), _("\
 This file is used to record the remote session for future playback\n\
-by gdbserver.",
-		  &setlist),
-     &showlist);
+by gdbserver."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 
   deprecated_add_show_from_set
     (add_set_enum_cmd ("remotelogbase", no_class,
