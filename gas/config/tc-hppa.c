@@ -43,13 +43,14 @@
 #define UNWIND_SECTION_NAME ".hppa_unwind"
 /* Nonzero if CODE is a fixup code needing further processing.  */
 
-#define NEEDS_FIXUP(CODE) ((CODE) != R_HPPA_NONE)
-
 /* Object file formats specify relocation types.  */
 typedef elf32_hppa_reloc_type reloc_type;
 
 /* Object file formats specify BFD symbol types.  */
 typedef elf_symbol_type obj_symbol_type;
+
+/* How to generate a relocation.  */
+#define hppa_gen_reloc_type hppa_elf_gen_reloc_type
 
 /* Who knows.  */
 #define obj_version obj_elf_version
@@ -72,8 +73,8 @@ typedef int reloc_type;
 /* Who knows.  */
 #define obj_version obj_som_version
 
-/* Nonzero if CODE is a fixup code needing further processing.  */
-#define NEEDS_FIXUP(CODE) ((CODE) != R_NO_RELOCATION)
+/* How to generate a relocation.  */
+#define hppa_gen_reloc_type hppa_som_gen_reloc_type
 
 /* Object file formats specify BFD symbol types.  */
 typedef som_symbol_type obj_symbol_type;
@@ -315,9 +316,6 @@ struct subspace_dictionary_chain
     /* The size of the last alignment request for this subspace.  */
     int ssd_last_align;
 
-    /* The symbol associated with the start of this subspace.  */
-    struct symbol *ssd_start_sym;
-
     /* Next space in the subspace dictionary chain.  */
     struct subspace_dictionary_chain *ssd_next;
   };
@@ -470,9 +468,6 @@ struct default_space_dict
 /* Extra information needed to perform fixups (relocations) on the PA.  */
 struct hppa_fix_struct
 {
-    /* A pointer to the GAS fixup.  */
-    fixS *fx_fixP;
-
     /* The field selector.  */
     int fx_r_field;
 
@@ -487,9 +482,6 @@ struct hppa_fix_struct
 
     /* The unwind descriptor associated with this fixup.  */
     char fx_unwind[8];
-
-    /* Next entry in the chain.  */
-    struct hppa_fix_struct *fx_next;
 };
 
 /* Structure to hold information about predefined registers.  */
@@ -519,7 +511,6 @@ struct selector_entry
 /* Prototypes for functions local to tc-hppa.c.  */
 
 static fp_operand_format pa_parse_fp_format PARAMS ((char **s));
-static void pa_big_cons PARAMS ((int));
 static void pa_cons PARAMS ((int));
 static void pa_data PARAMS ((int));
 static void pa_desc PARAMS ((int));
@@ -588,13 +579,11 @@ static ssd_chain_struct * pa_subsegment_to_subspace PARAMS ((asection *,
 							     subsegT));
 static sd_chain_struct *pa_find_space_by_number PARAMS ((int));
 static unsigned int pa_subspace_start PARAMS ((sd_chain_struct *, int));
-static symbolS *pa_set_start_symbol PARAMS ((asection *, subsegT));
 static void pa_ip PARAMS ((char *));
 static void fix_new_hppa PARAMS ((fragS *, int, short int, symbolS *,
 				  long, expressionS *, int,
 				  bfd_reloc_code_real_type, long,
 				  int, long, char *));
-static struct hppa_fix_struct *hppa_find_hppa_fix PARAMS ((fixS *));
 static void md_apply_fix_1 PARAMS ((fixS *, long));
 static int is_end_of_statement PARAMS ((void));
 static int reg_name_search PARAMS ((char *));
@@ -604,7 +593,7 @@ static void pa_build_unwind_subspace PARAMS ((struct call_info *));
 static void process_exit PARAMS ((void));
 static sd_chain_struct *pa_parse_space_stmt PARAMS ((char *, int));
 static void pa_align_subseg PARAMS ((asection *, subsegT));
-static int is_power_of_2 PARAMS ((int));
+static int log2 PARAMS ((int));
 static int pa_next_subseg PARAMS ((sd_chain_struct *));
 static unsigned int pa_stringer_aux PARAMS ((char *));
 static void pa_spaces_begin PARAMS ((void));
@@ -708,8 +697,8 @@ const pseudo_typeS md_pseudo_table[] =
   {"LONG", pa_cons, 4},
   {"lsym", pa_lsym, 0},
   {"LSYM", pa_lsym, 0},
-  {"octa", pa_big_cons, 16},
-  {"OCTA", pa_big_cons, 16},
+  {"octa", pa_cons, 16},
+  {"OCTA", pa_cons, 16},
   {"org", pa_origin, 0},
   {"ORG", pa_origin, 0},
   {"origin", pa_origin, 0},
@@ -720,8 +709,8 @@ const pseudo_typeS md_pseudo_table[] =
   {"PROC", pa_proc, 0},
   {"procend", pa_procend, 0},
   {"PROCEND", pa_procend, 0},
-  {"quad", pa_big_cons, 8},
-  {"QUAD", pa_big_cons, 8},
+  {"quad", pa_cons, 8},
+  {"QUAD", pa_cons, 8},
   {"reg", pa_equ, 1},
   {"REG", pa_equ, 1},
   {"short", pa_cons, 2},
@@ -795,9 +784,6 @@ static int within_procedure;
 /* Handle on strucutre which keep track of the last symbol
    seen in each subspace.  */
 static label_symbol_struct *label_symbols_rootp = NULL;
-
-/* Root of the hppa fixup information.  */
-static struct hppa_fix_struct *hppa_fix_root;
 
 /* Holds the last field selector.  */
 static int hppa_field_selector;
@@ -1129,18 +1115,18 @@ static const struct selector_entry selector_table[] =
 
 static struct default_subspace_dict pa_def_subspaces[] =
 {
-  {"$CODE$", 0, 1, 0, 0, 0, 0, 24, 0x2c, 0, 8, 0, 0, ".text", SUBSEG_CODE},
-  {"$DATA$", 0, 1, 0, 0, 0, 0, 24, 0x1f, 0, 8, 1, 1, ".data", SUBSEG_DATA},
-  {"$LIT$", 0, 1, 0, 0, 0, 0, 16, 0x0c, 0, 8, 0, 0, ".text", SUBSEG_LIT},
-  {"$BSS$", 0, 1, 0, 0, 0, 1, 80, 0x1f, 0, 8, 1, 1, ".bss", SUBSEG_BSS},
-  {"$UNWIND$", 0, 1, 0, 0, 0, 0, 64, 0x0c, 0, 4, 0, 0, ".hppa_unwind", SUBSEG_UNWIND},
+  {"$CODE$", 1, 1, 1, 0, 0, 0, 24, 0x2c, 0, 8, 0, 0, ".text", SUBSEG_CODE},
+  {"$DATA$", 1, 1, 0, 0, 0, 0, 24, 0x1f, 1, 8, 1, 1, ".data", SUBSEG_DATA},
+  {"$LIT$", 1, 1, 0, 0, 0, 0, 16, 0x2c, 0, 8, 0, 0, ".text", SUBSEG_LIT},
+  {"$BSS$", 1, 1, 0, 0, 0, 1, 80, 0x1f, 1, 8, 1, 1, ".bss", SUBSEG_BSS},
+  {"$UNWIND$", 1, 1, 0, 0, 0, 0, 64, 0x2c, 0, 4, 0, 0, ".hppa_unwind", SUBSEG_UNWIND},
   {NULL, 0, 1, 0, 0, 0, 0, 255, 0x1f, 0, 4, 0, 0, 0}
 };
 
 static struct default_space_dict pa_def_spaces[] =
 {
-  {"$TEXT$", 0, 1, 0, 0, 8, ASEC_NULL, ".text"},
-  {"$PRIVATE$", 0, 1, 0, 0, 16, ASEC_NULL, ".data"},
+  {"$TEXT$", 0, 1, 1, 0, 8, ASEC_NULL, ".text"},
+  {"$PRIVATE$", 1, 1, 1, 1, 16, ASEC_NULL, ".data"},
   {NULL, 0, 0, 0, 0, 0, ASEC_NULL, NULL}
 };
 
@@ -1268,7 +1254,8 @@ pa_undefine_label ()
    code needs to keep track of some extra stuff.  Each call to fix_new_hppa
    results in the creation of an instance of an hppa_fix_struct.  An
    hppa_fix_struct stores the extra information along with a pointer to the
-   original fixS.  */
+   original fixS.  This is attached to the original fixup via the 
+   tc_fix_data field.  */
 
 static void
 fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
@@ -1295,19 +1282,14 @@ fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
     new_fix = fix_new_exp (frag, where, size, exp, pcrel, r_type);
   else
     new_fix = fix_new (frag, where, size, add_symbol, offset, pcrel, r_type);
-  hppa_fix->fx_fixP = new_fix;
+  new_fix->tc_fix_data = hppa_fix;
   hppa_fix->fx_r_type = r_type;
   hppa_fix->fx_r_field = r_field;
   hppa_fix->fx_r_format = r_format;
   hppa_fix->fx_arg_reloc = arg_reloc;
-  hppa_fix->fx_next = NULL;
   if (unwind_desc)
     bcopy (unwind_desc, hppa_fix->fx_unwind, 8);
 
-  if (hppa_fix_root)
-    hppa_fix->fx_next = hppa_fix_root;
-
-  hppa_fix_root = hppa_fix;
 }
 
 /* Parse a .byte, .word, .long expression for the HPPA.  Called by
@@ -1333,10 +1315,6 @@ cons_fix_new_hppa (frag, where, size, exp)
 {
   unsigned int reloc_type;
 
-#ifdef OBJ_SOM
-  abort ();
-#else
-
   if (is_DP_relative (*exp))
     reloc_type = R_HPPA_GOTOFF;
   else if (is_complex (*exp))
@@ -1350,24 +1328,6 @@ cons_fix_new_hppa (frag, where, size, exp)
   fix_new_hppa (frag, where, size,
 		(symbolS *) NULL, (offsetT) 0, exp, 0, reloc_type,
 		hppa_field_selector, 32, 0, (char *) 0);
-#endif
-}
-
-/* Given a FixS, find the hppa_fix_struct associated with it. */
-
-static struct hppa_fix_struct *
-hppa_find_hppa_fix (fix)
-     fixS *fix;
-{
-  struct hppa_fix_struct *hppa_fix;
-
-  for (hppa_fix = hppa_fix_root; hppa_fix; hppa_fix = hppa_fix->fx_next)
-    {
-      if (hppa_fix->fx_fixP == fix)
-	return hppa_fix;
-    }
-
-  return NULL;
 }
 
 /* This function is called once, at assembler startup time.  It should
@@ -1445,7 +1405,7 @@ md_assemble (str)
   md_number_to_chars (to, the_insn.opcode, 4);
 
   /* If necessary output more stuff.  */
-  if (NEEDS_FIXUP (the_insn.reloc))
+  if (the_insn.reloc != R_HPPA_NONE)
     fix_new_hppa (frag_now, (to - frag_now->fr_literal), 4, NULL,
 		  (offsetT) 0, &the_insn.exp, the_insn.pcrel,
 		  the_insn.reloc, the_insn.field_selector,
@@ -1528,12 +1488,7 @@ pa_ip (str)
       opcode = insn->match;
       bzero (&the_insn, sizeof (the_insn));
 
-      /* FIXME.  */
-#ifdef OBJ_SOM
-      the_insn.reloc = R_NO_RELOCATION;
-#else
       the_insn.reloc = R_HPPA_NONE;
-#endif
 
       /* Build the opcode, checking as we go to make
          sure that the operands match.  */
@@ -2142,10 +2097,6 @@ pa_ip (str)
 		}
 	      else
 		{
-#ifdef OBJ_SOM
-		  the_insn.reloc = R_CODE_ONE_SYMBOL;
-		  the_insn.format = 'i';
-#else
 		  if (is_DP_relative (the_insn.exp))
 		    the_insn.reloc = R_HPPA_GOTOFF;
 		  else if (is_PC_relative (the_insn.exp))
@@ -2155,7 +2106,6 @@ pa_ip (str)
 		  else
 		    the_insn.reloc = R_HPPA;
 		  the_insn.format = 11;
-#endif
 		}
 	      s = expr_end;
 	      continue;
@@ -2176,10 +2126,6 @@ pa_ip (str)
 		}
 	      else
 		{
-#ifdef OBJ_SOM
-		  the_insn.reloc = R_CODE_ONE_SYMBOL;
-		  the_insn.format = 'j';
-#else
 		  if (is_DP_relative (the_insn.exp))
 		    the_insn.reloc = R_HPPA_GOTOFF;
 		  else if (is_PC_relative (the_insn.exp))
@@ -2189,7 +2135,6 @@ pa_ip (str)
 		  else
 		    the_insn.reloc = R_HPPA;
 		  the_insn.format = 14;
-#endif
 		}
 	      s = expr_end;
 	      continue;
@@ -2207,10 +2152,6 @@ pa_ip (str)
 		}
 	      else
 		{
-#ifdef OBJ_SOM
-		  the_insn.reloc = R_CODE_ONE_SYMBOL;
-		  the_insn.format = 'k';
-#else
 		  if (is_DP_relative (the_insn.exp))
 		    the_insn.reloc = R_HPPA_GOTOFF;
 		  else if (is_PC_relative (the_insn.exp))
@@ -2220,7 +2161,6 @@ pa_ip (str)
 		  else
 		    the_insn.reloc = R_HPPA;
 		  the_insn.format = 21;
-#endif
 		}
 	      s = expr_end;
 	      continue;
@@ -2247,16 +2187,11 @@ pa_ip (str)
 		}
 	      else
 		{
-#ifdef OBJ_SOM
-		  the_insn.reloc = R_PCREL_CALL;
-		  the_insn.format = 'w';
-#else
 		  if (is_complex (the_insn.exp))
 		    the_insn.reloc = R_HPPA_COMPLEX_PCREL_CALL;
 		  else
 		    the_insn.reloc = R_HPPA_PCREL_CALL;
 		  the_insn.format = 12;
-#endif
 		  the_insn.arg_reloc = last_call_desc.arg_reloc;
 		  bzero (&last_call_desc, sizeof (struct call_desc));
 		}
@@ -2282,16 +2217,11 @@ pa_ip (str)
 		    }
 		  else
 		    {
-#ifdef OBJ_SOM
-		      the_insn.reloc = R_PCREL_CALL;
-		      the_insn.format = 'W';
-#else
 		      if (is_complex (the_insn.exp))
 			the_insn.reloc = R_HPPA_COMPLEX_PCREL_CALL;
 		      else
 			the_insn.reloc = R_HPPA_PCREL_CALL;
 		      the_insn.format = 17;
-#endif
 		      the_insn.arg_reloc = last_call_desc.arg_reloc;
 		      bzero (&last_call_desc, sizeof (struct call_desc));
 		    }
@@ -2326,16 +2256,11 @@ pa_ip (str)
 		    }
 		  else
 		    {
-#ifdef OBJ_SOM
-		      the_insn.reloc = R_PCREL_CALL;
-		      the_insn.format = 'W';
-#else
 		      if (is_complex (the_insn.exp))
 			the_insn.reloc = R_HPPA_COMPLEX_ABS_CALL;
 		      else
 			the_insn.reloc = R_HPPA_ABS_CALL;
 		      the_insn.format = 17;
-#endif
 		    }
 		}
 	      else
@@ -2728,7 +2653,7 @@ md_atof (type, litP, sizeP)
       md_number_to_chars (litP, (valueT) (*wordP++), sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
-  return "";
+  return NULL;
 }
 
 /* Write out big-endian.  */
@@ -2766,7 +2691,7 @@ tc_gen_reloc (section, fixp)
      fixS *fixp;
 {
   arelent *reloc;
-  struct hppa_fix_struct *hppa_fixp = hppa_find_hppa_fix (fixp);
+  struct hppa_fix_struct *hppa_fixp = fixp->tc_fix_data;
   bfd_reloc_code_real_type code;
   static int unwind_reloc_fixp_cnt = 0;
   static arelent *unwind_reloc_entryP = NULL;
@@ -2830,10 +2755,10 @@ tc_gen_reloc (section, fixp)
   assert (reloc != 0);
 
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
-  codes = hppa_elf_gen_reloc_type (stdoutput,
-				   fixp->fx_r_type,
-				   hppa_fixp->fx_r_format,
-				   hppa_fixp->fx_r_field);
+  codes = hppa_gen_reloc_type (stdoutput,
+			       fixp->fx_r_type,
+			       hppa_fixp->fx_r_format,
+			       hppa_fixp->fx_r_field);
 
   for (n_relocs = 0; codes[n_relocs]; n_relocs++)
     ;
@@ -3090,17 +3015,6 @@ md_operand (expressionP)
 {
 }
 
-#ifdef OBJ_SOM
-/* FIXME.  Documentation missing.  Needs to be implemented.  */
-static void
-md_apply_fix_1 (fixP, val)
-     fixS *fixP;
-     long val;
-{
-  abort ();
-}
-#else
-
 /* Helper function for md_apply_fix.  Actually determine if the fix
    can be applied, and if so, apply it.
 
@@ -3113,7 +3027,7 @@ md_apply_fix_1 (fixP, val)
      long val;
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-  struct hppa_fix_struct *hppa_fixP = hppa_find_hppa_fix (fixP);
+  struct hppa_fix_struct *hppa_fixP = fixP->tc_fix_data;
   long new_val, result;
   unsigned int w1, w2, w;
 
@@ -3122,11 +3036,12 @@ md_apply_fix_1 (fixP, val)
   if (hppa_fixP)
     {
       unsigned long buf_wd = bfd_get_32 (stdoutput, buf);
-      unsigned char fmt = hppa_elf_insn2fmt (fixP->fx_r_type, buf_wd);
+      unsigned char fmt = bfd_hppa_insn2fmt (buf_wd);
 
       /* Sanity check the fixup type.  */
-      assert (fixP->fx_r_type < R_HPPA_UNIMPLEMENTED);
-      assert (fixP->fx_r_type >= R_HPPA_NONE);
+      /* Is this really necessary?  */
+      if (fixP->fx_r_type == R_HPPA_NONE)
+	fmt = 0;
 
       /* Remember this value for emit_reloc.  FIXME, is this braindamage
 	 documented anywhere!?!  */
@@ -3201,7 +3116,7 @@ md_apply_fix_1 (fixP, val)
 	     needed, then we can not apply this relocation, instead
 	     the linker must handle it.  */
 	  if (too_far (val, 18)
-	      || stub_needed (((elf_symbol_type *)
+	      || stub_needed (((obj_symbol_type *)
 			       fixP->fx_addsy->bsym)->tc_data.hppa_arg_reloc,
 			      hppa_fixP->fx_arg_reloc))
 	    return;
@@ -3223,10 +3138,12 @@ md_apply_fix_1 (fixP, val)
 #undef stub_needed
 
 	case 32:
+#ifdef OBJ_ELF
 	  if (hppa_fixP->fx_r_type == R_HPPA_UNWIND_ENTRY
 	      || hppa_fixP->fx_r_type == R_HPPA_UNWIND_ENTRIES)
 	    result = fixP->fx_addnumber;
 	  else
+#endif
 	    {
 	      result = 0;
 	      fixP->fx_addnumber = fixP->fx_offset;
@@ -3254,7 +3171,6 @@ md_apply_fix_1 (fixP, val)
     printf ("no hppa_fixup entry for this fixup (fixP = 0x%x, type = 0x%x)\n",
 	    (unsigned int) fixP, fixP->fx_r_type);
 }
-#endif
 
 /* Apply a fix into a frag's data (if possible).  */
 
@@ -4304,17 +4220,10 @@ pa_build_unwind_subspace (call_info)
   call_info->start_frag_where = p - frag_now->fr_literal;
 
   /* Relocation info. for start offset of the function.  */
-#ifdef OBJ_SOM
-  fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
-		call_info->start_symbol, (offsetT) 0,
-		(expressionS *) NULL, 0, R_DATA_ONE_SYMBOL, e_fsel, 0, 0,
-		(char *) 0);
-#else
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
 		call_info->start_symbol, (offsetT) 0,
 		(expressionS *) NULL, 0, R_HPPA_UNWIND, e_fsel, 32, 0,
 		(char *) 0);
-#endif
 
   /* We need to search for the first relocation involving the start_symbol of
      this call_info descriptor.  */
@@ -4338,18 +4247,10 @@ pa_build_unwind_subspace (call_info)
   call_info->end_frag_where = p - frag_now->fr_literal;
 
   /* Relocation info. for end offset of the function.  */
-#ifdef OBJ_SOM
-  fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
-		call_info->start_symbol, (offsetT) 0,
-		(expressionS *) NULL, 0, R_DATA_ONE_SYMBOL, e_fsel, 0, 0,
-		(char *) 0);
-
-#else
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
 		call_info->end_symbol, (offsetT) 0,
 		(expressionS *) NULL, 0, R_HPPA_UNWIND, e_fsel, 32, 0,
 		(char *) 0);
-#endif
 
   /* We need to search for the first relocation involving the end_symbol of
      this call_info descriptor.  */
@@ -4430,7 +4331,12 @@ pa_callinfo (unused)
 	  *p = c;
 	  input_line_pointer++;
 	  temp = get_absolute_expression ();
-	  last_call_info->ci_unwind.descriptor.entry_gr = temp;
+	  /* The HP assembler accepts 19 as the high bound for ENTRY_GR
+	     even though %r19 is caller saved.  I think this is a bug in 
+	     the HP assembler, and we are not going to emulate it.  */
+	  if (temp < 3 || temp > 18)
+	    as_bad ("Value for ENTRY_GR must be in the range 3..18\n");
+	  last_call_info->ci_unwind.descriptor.entry_gr = temp - 2;
 	}
       else if ((strncasecmp (name, "entry_fr", 8) == 0))
 	{
@@ -4438,7 +4344,11 @@ pa_callinfo (unused)
 	  *p = c;
 	  input_line_pointer++;
 	  temp = get_absolute_expression ();
-	  last_call_info->ci_unwind.descriptor.entry_fr = temp;
+	  /* Similarly the HP assembler takes 31 as the high bound even 
+	     though %fr21 is the last callee saved floating point register.  */
+	  if (temp < 12 || temp > 21)
+	    as_bad ("Value for ENTRY_FR must be in the range 12..21\n");
+	  last_call_info->ci_unwind.descriptor.entry_fr = temp - 11;
 	}
       else if ((strncasecmp (name, "entry_sr", 8) == 0))
 	{
@@ -4446,7 +4356,9 @@ pa_callinfo (unused)
 	  *p = c;
 	  input_line_pointer++;
 	  temp = get_absolute_expression ();
-	  last_call_info->entry_sr = temp;
+	  if (temp != 3)
+	    as_bad ("Value for ENTRY_SR must be 3\n");
+	  last_call_info->entry_sr = temp - 2;
 	}
       /* Note whether or not this function performs any calls.  */
       else if ((strncasecmp (name, "calls", 5) == 0) ||
@@ -4577,7 +4489,7 @@ pa_comm (unused)
       else
 	{
 	  S_SET_VALUE (symbol, size);
-	  S_SET_SEGMENT (symbol, bss_section);
+	  S_SET_SEGMENT (symbol, &bfd_und_section);
 	  S_SET_EXTERNAL (symbol);
 	}
     }
@@ -4661,12 +4573,6 @@ pa_entry (unused)
      It will not be on if no .EXPORT pseudo-op exists (static function).  */
   last_call_info->start_symbol->bsym->flags |= BSF_FUNCTION;
 
-#ifdef OBJ_SOM
-  fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
-		last_call_info->start_symbol, (offsetT) 0,
-		(expressionS *) NULL, 0, R_ENTRY, e_fsel, 0, 0,
-		(char *) &last_call_info->ci_unwind.descriptor);
-#endif
   return;
 }
 
@@ -4708,13 +4614,7 @@ process_exit ()
   char *where;
 
   where = frag_more (0);
-#ifdef OBJ_SOM
-  fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
-		last_call_info->start_symbol, (offsetT) 0,
-		(expressionS *) NULL, 0, R_EXIT, e_fsel, 0, 0,
-		(char *) NULL);
-#endif
-#ifdef OBJ_ELF
+
   /* ELF does not have EXIT relocations.  All we do is create a
      temporary symbol marking the end of the function.  */
   {
@@ -4753,7 +4653,6 @@ process_exit ()
     else
       as_bad ("No memory for symbol name.");
   }
-#endif
 
   /* Stuff away the location of the frag for the end of the function,
      and call pa_build_unwind_subspace to add an entry in the unwind
@@ -5282,7 +5181,7 @@ static void
 pa_space (unused)
      int unused;
 {
-  char *name, c, *space_name;
+  char *name, c, *space_name, *save_s;
   int temp;
   sd_chain_struct *sd_chain;
 
@@ -5372,7 +5271,8 @@ pa_space (unused)
 	}
 
       /* It could be a space specified by number.  */
-
+      print_errors = 0;
+      save_s = input_line_pointer;
       if ((temp = pa_parse_number (&input_line_pointer, 0)) >= 0)
 	{
 	  if (sd_chain = pa_find_space_by_number (temp))
@@ -5391,7 +5291,8 @@ pa_space (unused)
 	}
 
       /* Not a number, attempt to create a new space.  */
-
+      print_errors = 1;
+      input_line_pointer = save_s;
       name = input_line_pointer;
       c = get_symbol_end ();
       space_name = xmalloc (strlen (name) + 1);
@@ -5439,10 +5340,10 @@ pa_spnum (unused)
 }
 
 /* If VALUE is an exact power of two between zero and 2^31, then 
-   return nonzero.  Else return 0.  */
+   return log2 (VALUE).  Else return -1.  */
 
 static int
-is_power_of_2 (value)
+log2 (value)
      int value;
 {
   int shift = 0;
@@ -5451,9 +5352,9 @@ is_power_of_2 (value)
     shift++;
 
   if (shift >= 32)
-    return 0;
+    return -1;
   else
-    return 1;
+    return shift;
 }
 
 /* Handle a .SPACE pseudo-op; this switches the current subspace to the
@@ -5551,7 +5452,7 @@ pa_subspace (unused)
 		  *input_line_pointer = c;
 		  input_line_pointer++;
 		  alignment = get_absolute_expression ();
-		  if (!is_power_of_2 (alignment))
+		  if (log2 (alignment) == -1)
 		    {
 		      as_bad ("Alignment must be a power of 2");
 		      alignment = 1;
@@ -5855,9 +5756,6 @@ create_new_subspace (space, name, loadable, code_only, common,
 	}
     }
 
-  start_symbol = pa_set_start_symbol (seg, space->sd_last_subseg);
-  chain_entry->ssd_start_sym = start_symbol;
-
   return chain_entry;
 
 }
@@ -6068,52 +5966,6 @@ pa_next_subseg (space)
   return space->sd_last_subseg;
 }
 
-/* Function to define a symbol whose address is the beginning of a subspace.
-   This function assumes the symbol is to be defined for the current
-   subspace.  */
-
-static symbolS *
-pa_set_start_symbol (seg, subseg)
-     asection *seg;
-     subsegT subseg;
-{
-  symbolS *start_symbol;
-  ssd_chain_struct *ssd;
-  char *symbol_name;
-
-  symbol_name = (char *)
-    xmalloc (strlen ("LS$START__000000$") + strlen (seg->name) + 1);
-
-  sprintf (symbol_name, "LS$START_%s_%03d$", seg->name, subseg);
-
-  start_symbol
-    = symbol_new (symbol_name, seg, 0, frag_now);
-
-  start_symbol->bsym->flags = BSF_LOCAL;
-
-  /* each time a new space is created, build a symbol called 
-     LS$START_seg_subseg$ where <space-name> is the name of the space
-     the start symbol will be SS_LOCAL and ST_CODE
-     This function assumes that (seg,subseg) is a new subsegment(subspace) */
-  if (seg == bfd_make_section_old_way (stdoutput, ".text") ||
-      seg == bfd_make_section_old_way (stdoutput, ".data") ||
-      seg == bfd_make_section_old_way (stdoutput, GDB_DEBUG_SPACE_NAME))
-    {
-      ssd = pa_subsegment_to_subspace (seg, subseg);
-      if (ssd)
-	{
-	  ssd->ssd_start_sym = start_symbol;
-	}
-      else
-	as_fatal ("Internal error: missing subspace for %s", seg->name);
-    }
-  else
-    as_fatal ("Internal error: attempt to define start symbol for unloadable segment: '%s'",
-	      seg->name);
-
-  return start_symbol;
-}
-
 /* Helper function for pa_stringer.  Used to find the end of 
    a string.  */
 
@@ -6290,16 +6142,6 @@ pa_lsym (unused)
   pa_undefine_label ();
 }
 
-/* Like big_cons, but delete our label when finished.  */
-
-static void
-pa_big_cons (nbytes)
-     int nbytes;
-{
-  big_cons (nbytes);
-  pa_undefine_label ();
-}
-
 /* Switch to the text space.  Like s_text, but delete our 
    label when finished.  */
 static void
@@ -6310,6 +6152,34 @@ pa_text (unused)
   pa_undefine_label ();
 }
 
+/* On the PA relocations which involve function symbols must not be 
+   adjusted.  This so that the linker can know when/how to create argument
+   relocation stubs for indirect calls and calls to static functions.
+
+   FIXME.  Also reject R_HPPA relocations which are 32 bits
+   wide.  Helps with code lables in arrays for SOM.  (SOM BFD code
+   needs to generate relocations to push the addend and symbol value
+   onto the stack, add them, then pop the value off the stack and
+   use it in a relocation -- yuk.  */
+
+int
+hppa_fix_adjustable (fixp) 
+     fixS *fixp;
+{
+  struct hppa_fix_struct *hppa_fix;
+
+  hppa_fix = fixp->tc_fix_data;
+
+  if (fixp->fx_r_type == R_HPPA && hppa_fix->fx_r_format == 32)
+    return 0;
+
+  if (fixp->fx_addsy == 0 
+      || (fixp->fx_addsy->bsym->flags & BSF_FUNCTION) == 0)
+    return 1;
+
+  return 0;
+}
+  
 /* Now for some ELF specific code.  FIXME.  */
 #ifdef OBJ_ELF
 static symext_chainS *symext_rootP;
