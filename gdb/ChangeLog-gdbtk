@@ -1,3 +1,7 @@
+Tue Apr  7 12:49:45 1998  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* gdbtk.c (gdb_cmd): NEVER call the busy, update, and idle hooks.
+
 Tue Mar 31 15:42:06 1998  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* gdbtk.c (gdb_loadfile): Don't use the return result from sprintf, which

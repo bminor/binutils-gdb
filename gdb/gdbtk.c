@@ -162,7 +162,6 @@ static int gdb_get_tracepoint_info PARAMS ((ClientData, Tcl_Interp *, int, Tcl_O
 static int gdb_actions_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_prompt_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_find_file_command PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
-static char *find_file_in_dir PARAMS ((char *));
 static int gdb_get_tracepoint_list PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static void gdbtk_create_tracepoint PARAMS ((struct tracepoint *));
 static void gdbtk_delete_tracepoint PARAMS ((struct tracepoint *));
@@ -1067,6 +1066,8 @@ gdb_changed_register_list (clientData, interp, argc, argv)
 
 /* This implements the tcl command "gdb_immediate", which does exactly
    the same thing as gdb_cmd, except NONE of its outut is buffered. */
+/* This will also ALWAYS cause the busy,update, and idle hooks to be
+   called, contrasted with gdb_cmd, which NEVER calls them. */
 static int
 gdb_immediate_command (clientData, interp, argc, argv)
      ClientData clientData;
@@ -1099,7 +1100,8 @@ gdb_immediate_command (clientData, interp, argc, argv)
 
 /* This implements the TCL command `gdb_cmd', which sends its argument into
    the GDB command scanner.  */
-
+/* This command will never cause the update, idle and busy hooks to be called
+   within the GUI. */
 static int
 gdb_cmd (clientData, interp, argc, argv)
      ClientData clientData;
@@ -1115,12 +1117,7 @@ gdb_cmd (clientData, interp, argc, argv)
   if (running_now || load_in_progress)
     return TCL_OK;
 
-  /* If there is a third argument, it'll mean that we do NOT want to run
-     the idle and busy hooks when we call execute_command. */
-  if (argc > 2)
-    No_Update = 1;
-  else
-    No_Update = 0;
+  No_Update = 1;
 
   /* for the load instruction (and possibly others later) we
      set result_ptr to NULL so gdbtk_fputs() will not buffer
