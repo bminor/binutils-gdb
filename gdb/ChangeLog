@@ -1,5 +1,8 @@
 2005-01-27  Andrew Cagney  <cagney@gnu.org>
 
+	* value.h (struct value): Change type of contents to bfd_byte.
+	(VALUE_CONTENTS_RAW): Simplify.
+
 	* gdbarch.sh (integer_to_address): Change buf parameter to a const
 	bfd_byte, make pure-multi-arch.
 	* gdbarch.h, gdbarch.c: Regenerate.

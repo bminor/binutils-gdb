@@ -162,7 +162,7 @@ struct value
      declared here.  */
   union
   {
-    long contents[1];
+    bfd_byte contents[1];
     DOUBLEST force_doublest_align;
     LONGEST force_longest_align;
     CORE_ADDR force_core_addr_align;
@@ -195,7 +195,7 @@ extern int value_offset (struct value *);
    something embedded in a larger run-time object.  */
 
 #define VALUE_CONTENTS_RAW(val) \
- ((char *) (val)->aligner.contents + (val)->embedded_offset)
+ ((val)->aligner.contents + (val)->embedded_offset)
 #define VALUE_CONTENTS(val) \
  ((void)(VALUE_LAZY(val) && value_fetch_lazy(val)), VALUE_CONTENTS_RAW(val))
 
