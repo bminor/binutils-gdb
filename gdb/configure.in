@@ -170,7 +170,7 @@ a29k-*-sym1*)		gdb_target=ultra3 ;;
 a29k-*-udi*)		gdb_target=a29k-udi ;;
 
 alpha-*-osf*)		gdb_target=alpha-osf1 ;;
-alpha-*-netware*)	gdb_target=alpha-netware ;;
+alpha-*-netware*)	gdb_target=alpha-nw ;;
 
 arm-*-*)		gdb_target=arm ;;
 

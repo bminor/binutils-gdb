@@ -1,3 +1,9 @@
+Mon Jan 10 20:08:23 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* config/alpha/alpha-netware.mt: Rename to alpha-nw.mt for 14
+	character filenames.
+	* configure.in: Change accordingly.
+
 Mon Jan 10 15:48:36 1994  Tom Lord  (lord@rtl.cygnus.com)
 
 	* m68k-stub.c, sparc-stub.c: removed spurious introduction of 
