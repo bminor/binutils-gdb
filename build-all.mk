@@ -35,13 +35,15 @@ endif
 ifeq ($(canonhost),sparc-sun-sunos4.1.1)
 TARGETS	= $(NATIVE) m68k-aout	i386-aout	a29k-amd-udi \
 	i960-vxworks		m68k-coff	m68k-vxworks \
-	i960-intel-nindy	sparc-aout	sparc-vxworks
+	i960-intel-nindy	sparc-aout	sparc-vxworks \
+	sparclite-aout          sparclitefrwcompat-aout
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),m68k-sun-sunos4.1.1)
 TARGETS	= $(NATIVE) m68k-vxworks m68k-aout i386-aout
 GCC = gcc -O -g -msoft-float
+CC = cc -J
 all: all-cygnus
 endif
 
@@ -74,7 +76,10 @@ endif
 
 ifeq ($(canonhost),hppa1.1-hp-hpux)
 #TARGETS	= m68k-aout m68k-coff m68k-vxworks i960-vxworks a29k-amd-udi
-TARGETS	= m68k-aout m68k-coff m68k-vxworks a29k-amd-udi
+TARGETS	= m68k-aout		i386-aout	a29k-amd-udi \
+	i960-vxworks		m68k-coff	m68k-vxworks \
+	i960-intel-nindy	sparc-aout	sparc-vxworks \
+	sparclite-aout          sparclitefrwcompat-aout
 CC = cc 
 all: all-native
 endif
@@ -86,6 +91,7 @@ endif
 
 FLAGS_TO_PASS := \
 	"GCC=$(GCC)" \
+	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
 	"host=$(canonhost)"
 
