@@ -1,3 +1,9 @@
+2000-07-05  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c (write_2_short): Further changes to warning
+	messages produced when combining EITHER_BUT_PREFER_MU attributed
+	opcodes.
+
 2000-06-05  DJ Delorie  <dj@redhat.com>
 
 	* MAINTAINERS: new
