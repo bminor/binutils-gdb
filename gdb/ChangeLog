@@ -1,3 +1,14 @@
+2001-10-24  Corinna Vinschen  <vinschen@redhat.com>
+
+	* win32-nat.c (DebugSetProcessKillOnExit): New static function
+	pointer to Windows' DebugSetProcessKillOnExit() function.
+	(DebugActiveProcessStop): Ditto for DebugActiveProcessStop().
+	(has_detach_ability): New function.
+	(child_attach): If system has detach ability, enable it.
+	(child_detach): If system has detach ability, actually  
+	detach from process.
+	Change tty output to Linux format.
+
 2001-10-23  Jim Blandy  <jimb@redhat.com>
 
 	Isolate STABS readers' use of the `textlow' and `texthigh' fields

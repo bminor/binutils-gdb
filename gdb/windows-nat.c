@@ -1022,8 +1022,36 @@ do_initial_child_stuff (DWORD pid)
   return;
 }
 
-/* Attach to process PID, then initialize for debugging it.  */
+/* Since Windows XP, detaching from a process is supported by Windows.
+   The following code tries loading the appropriate functions dynamically.
+   If loading these functions succeeds use them to actually detach from
+   the inferior process, otherwise behave as usual, pretending that
+   detach has worked. */
+static BOOL WINAPI (*DebugSetProcessKillOnExit)(BOOL);
+static BOOL WINAPI (*DebugActiveProcessStop)(DWORD);
 
+static int
+has_detach_ability ()
+{
+  static HMODULE kernel32 = NULL;
+
+  if (!kernel32)
+    kernel32 = LoadLibrary ("kernel32.dll");
+  if (kernel32)
+    {
+      if (!DebugSetProcessKillOnExit)
+	DebugSetProcessKillOnExit = GetProcAddress (kernel32,
+						 "DebugSetProcessKillOnExit");
+      if (!DebugActiveProcessStop)
+	DebugActiveProcessStop = GetProcAddress (kernel32,
+						 "DebugActiveProcessStop");
+      if (DebugSetProcessKillOnExit && DebugActiveProcessStop)
+	return 1;
+    }
+  return 0;
+}
+
+/* Attach to process PID, then initialize for debugging it.  */
 static void
 child_attach (char *args, int from_tty)
 {
@@ -1038,6 +1066,12 @@ child_attach (char *args, int from_tty)
 
   if (!ok)
     error ("Can't attach to process.");
+
+  if (has_detach_ability ())
+    {
+      attach_flag = 1;
+      DebugSetProcessKillOnExit (FALSE);
+    }
 
   if (from_tty)
     {
@@ -1060,13 +1094,27 @@ child_attach (char *args, int from_tty)
 static void
 child_detach (char *args ATTRIBUTE_UNUSED, int from_tty)
 {
-  if (from_tty)
+  int detached = 1;
+
+  if (has_detach_ability ())
+    {
+      delete_command (NULL, 0);
+      child_continue (DBG_CONTINUE, -1);
+      if (!DebugActiveProcessStop (current_event.dwProcessId))
+        {
+	  error ("Can't detach process %lu (error %lu)",
+		 current_event.dwProcessId, GetLastError ());
+	  detached = 0;
+        }
+      DebugSetProcessKillOnExit (FALSE);
+    }
+  if (detached && from_tty)
     {
       char *exec_file = get_exec_file (0);
       if (exec_file == 0)
 	exec_file = "";
-      printf_unfiltered ("Detaching from program: %s %s\n", exec_file,
-			 target_pid_to_str (inferior_ptid));
+      printf_unfiltered ("Detaching from program: %s, Pid %lu\n", exec_file,
+			 current_event.dwProcessId);
       gdb_flush (gdb_stdout);
     }
   inferior_ptid = null_ptid;
