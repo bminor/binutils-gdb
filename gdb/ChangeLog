@@ -1,5 +1,11 @@
 2003-06-30  Andrew Cagney  <cagney@redhat.com>
 
+	* remote.c (remote_write_bytes): Explicitly compute and then use
+	the payload size.  Update comments to reflect.  Fixes problem of
+	GDB not sending small packets as found by Fred Fish.
+
+2003-06-30  Andrew Cagney  <cagney@redhat.com>
+
 	* remote.c (remote_async_wait): Fix -Wformat problem.
 
 2003-06-29  Andrew Cagney  <cagney@redhat.com>
