@@ -1,3 +1,12 @@
+Tue Mar 14 21:36:34 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (load_register): Don't use addiu for dli of an
+	unsigned seemingly negative number.  Don't bother shifting a zero
+	value.
+	(mips_ip): For case 'j', if there are more alternatives, and the
+	ISA level is at least 3, don't accept an unsigned seemingly
+	negative number.
+
 Tue Mar 14 19:16:43 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* read.c (s_app_line): Fix last patch to deal with a line number
