@@ -1,5 +1,10 @@
 2004-08-08  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386gnu-nat.c: Update copyright year.
+	(gnu_store_registers): Don't use deprecated_registers and
+	deprecated_registers_valid.  Use regcache_valid_p and
+	regcache_raw_supply instead.
+
 	* vax-tdep.c (vax_frame_this_id): Use frame_func_unwind instead of
 	frame_pc_unwind.
 
