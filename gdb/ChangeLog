@@ -1,3 +1,8 @@
+Mon Jan 18 15:19:13 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	* procfs.c (procfs_ops): delete compile time initialization.
+	(_initialize_procfs): initialize procfs_ops at run time.
+
 Mon Jan 18 12:51:44 1999  Christopher Faylor <cgf@cygnus.com>
 
 	* configure.in: Ensure that -luser32 is always linked in
