@@ -49,15 +49,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    the ptrace_user offsets are sufficient and KERNEL_U_ADDRESS can be 0 */
 
 #define KERNEL_U_ADDR 0
-
-/* Like vprintf, but takes a a pointer to the args, laid out in order,
-   rather than a va_list.  */
-/* Does this really work, or is it just enough to get this to compile?  */
-#define VPRINTF(string, args) \
-  { \
-    __gnuc_va_list list; \
-    list.__va_arg = 0; \
-    list.__va_stk = (int *) args; \
-    list.__va_reg = (int *) args; \
-    vprintf (string, list); \
-  }
