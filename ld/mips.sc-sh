@@ -22,7 +22,7 @@ SECTIONS
   .data ${RELOCATING+ .} : {
     *(.data)
   }
-  ${RELOCATING+ _gp = . + 0x8000};
+  ${RELOCATING+ _gp = . + 0x8000;}
   .lit8 ${RELOCATING+ .} : {
     *(.lit8)
   }
@@ -32,7 +32,7 @@ SECTIONS
   .sdata ${RELOCATING+ .} : {
     *(.sdata)
   }
-  ${RELOCATING+ edata  =  .};
+  ${RELOCATING+ edata  =  .;}
   .sbss ${RELOCATING+ .} : {
     *(.sbss)
   }
@@ -40,6 +40,6 @@ SECTIONS
     *(.bss)
     *(COMMON)
   }
-  ${RELOCATING+ end = .};
+  ${RELOCATING+ end = .;}
 }
 EOF
