@@ -1,3 +1,13 @@
+Wed May 21 17:44:15 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldmain.c (main): Correct check of fclose return value when
+	handling --force-exe-suffix.
+
+Thu May 15 11:35:29 1997  Nick Clifton  <nickc@cygnus.com>
+
+	*  ldlang.c (lang_check):  Add test of the return value from the
+	call to bfd_merge_private_bfd_data().
+
 Mon May 12 23:22:58 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* scripttempl/elfmips.sc: Remove.
