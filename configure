@@ -67,6 +67,8 @@ progname=
 program_prefix=
 program_prefix_option=
 silent=
+site=
+site_option=
 site_makefile_frag=
 srcdir=
 srctrigger=
@@ -107,7 +109,7 @@ do
 		exec_prefix=${arg}
 		exec_prefixoption="-exec_prefix=${exec_prefix}"
 		next_exec_prefix=
-	elif [ -n "${next_site}" ] ; then site=${arg} ; next_site=
+	elif [ -n "${next_site}" ] ; then site=${arg} ; site_option=-site=${site} ; next_site=
 	# remove any possible trailing slash from srcdir.  See note below.
 	elif [ -n "${next_srcdir}" ] ; then srcdir=`echo ${arg} | sed -e 's:/$::'` ; next_srcdir=
 	elif [ -n "${next_program_prefix}" ] ; then
@@ -181,6 +183,7 @@ do
 			arguments=`echo ${arguments} | sed "s:${arg}::"`
 			;;
 		-site=* | --site=* | --sit=* | --si=*)
+			site_option=${arg}
 			site=`echo ${arg} | sed 's/^[-a-z]*=//'`
 			;;
 		-site | --site | --sit)
@@ -347,14 +350,14 @@ case "${srcdir}" in
 ".") ;;
 *)
 	if [ -f ${srcdir}/config.status ] ; then
-		echo '***' Cannot configure for ${PWD} when ${srcdir}/config.status exists.  1>&2
+		echo '***' Cannot configure here in \"${PWD}\" when \"${srcdir}\" is currently configured. 1>&2
 		exit 1
 	fi
 esac
 
 # default exec_prefix
 case "${exec_prefix}" in
-"") exec_prefix="${prefix}" ;;
+"") exec_prefix="$(prefix)" ;;
 *) ;;
 esac
 
@@ -691,7 +694,7 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
 ### The recursion line is here.
 			if ${recprog} -s ${host_alias} -target=${target_alias} \
 				${verbose} ${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
-				${srcdiroption} ${program_prefixoption} ; then
+				${srcdiroption} ${program_prefixoption} ${site_option} ; then
 				true
 			else
 				exit 1

@@ -1,3 +1,7 @@
+Mon Mar 23 19:43:35 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* configure: pass down site_option during recursion.
+
 Thu Mar 19 16:49:36 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in (all.cross):  Add .stmp-bfd .stmp-readline.
