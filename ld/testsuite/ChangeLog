@@ -1,5 +1,10 @@
 2003-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-checks/checks.exp (section_check): Skip ia64-*-* instead
+	of ia64-*-linux*.
+
+2003-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-ia64/ia64.exp: Remove -melf64_ia64.
 
 	* ld-ia64/tlsbin.dd: Remove -melf64_ia64. Match elf..-ia64-.*
