@@ -1,4 +1,21 @@
+Fri Oct 13 11:22:01 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* coff-arm.c (in_reloc_p): New.
+	* coff-i386.c (in_reloc_p): New.
+	* coffcode.h: Allways include peicode.h if COFF_WITH_PE.
+	(coff_write_object_contents): Only set has_reloc_section
+	if PE_IMAGE.
+	* cofflink.c (_bfd_coff_generic_relocate_section): Call
+	in_reloc_p to decide if reloc should be emitted.
+	* libcoff.h (pe_data_type.in_reloc_p): New.
+	* peicode.h (pe_mkobject): Initialize in_reloc_p.
+
 Wed Oct 11 00:49:29 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cofflink.c (_bfd_coff_internal_syment_name): Move to coffgen.c.
+	(_bfd_coff_read_internal_relocs): Likewise.
+	* coffgen.c (_bfd_coff_internal_syment_name): Copy from coffgen.c.
+	(_bfd_coff_read_internal_relocs): Likewise.
 
 	* elflink.h (elf_link_add_object_symbols): Correct conditions
 	under which type and size change warnings are issued.
