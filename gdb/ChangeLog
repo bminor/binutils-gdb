@@ -1,3 +1,49 @@
+2004-10-05  Daniel Jacobowitz  <dan@debian.org>
+
+	* dwarf2read.c (REF_HASH_SIZE): Move earlier.
+	(die_ref_table): Remove.
+	(struct dwarf2_cu): Add DIES, DEPENDENCIES, and DIE_REF_TABLE.
+	(struct dwarf2_per_cu_data): Add PSYMTAB.  Add a comment describing
+	the usage of this type.
+	(struct dwarf2_per_objfile): Update comment for ALL_COMP_UNITS.
+	(struct dwarf2_pinfo, PST_PRIVATE, DWARF_INFO_OFFSET): Remove.
+	(struct dwarf2_queue_item, dwarf2_queue, dwarf2_queue_tail): New.
+	(dwarf2_create_include_psymtab): Update comment.
+	(find_partial_die): Remove third argument.  Remove unreachable call
+	to error ().
+	(dwarf2_find_containing_comp_unit): Update comments.  Change one
+	assertion to an error.  Remove an unreachable error.
+	(dwarf2_find_comp_unit): Update comments.
+	(type_at_offset): Remove dead code.
+	(make_cleanup_free_die_list, dwarf2_empty_hash_tables): Remove.
+	(store_in_ref_table): Add CU argument.
+	(follow_die_ref): Take DIE, attribute, and CU arguments.  Handle
+	inter-compilation-unit references.
+	(load_full_comp_unit, process_full_comp_unit): New functions, based
+	on psymtab_to_symtab_1.
+	(psymtab_to_symtab_1): Use them.
+	(dwarf2_add_dependence): New function.
+	(dwarf2_build_psymtabs_hard): Set the psymtab in per_cu.  Always create
+	a per_cu structure, and save it in READ_PSYMTAB_PRIVATE.
+	(partial_die_parent_scope, guess_structure_name): Update for changes
+	to find_partial_die.
+	(dwarf2_psymtab_to_symtab): Initialize dwarf2_per_objfile here.
+	(queue_comp_unit, process_queue, dwarf2_release_queue): New.
+	(read_comp_unit): Don't call dwarf2_empty_hash_tables.
+	(read_die_and_children): Update call to store_in_ref_table.
+	(do_free_die_list_cleanup): Remove.
+	(fixup_partial_die): Update for changes to find_partial_die.
+	(read_full_die): Handle queueing absolute references.
+	(read_attribute_value): Use DW_ADDR for all DW_FORM_ref* forms.
+	(dwarf2_attr, die_specification, die_type)
+	(die_containing_type, dwarf2_extension): Update calls to
+	follow_die_ref.
+	(dump_die): Update DW_FORM_ref* handling.
+	(dwarf2_get_ref_die_offset): Likewise.
+	(free_one_comp_unit): Release the dies list.
+	(dwarf2_mark_helper): New function.
+	(dwarf2_mark): Use it.
+
 2004-10-05  Mark Kettenis  <kettenis@jive.nl>
 
 	* procfs.c (procfs_xfer_partial): Use WRITEBUF instead of READBUF
