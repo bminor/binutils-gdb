@@ -1,5 +1,5 @@
-/* Target macro definitions for i386 running FreeBSD
-   Copyright (C) 1997 Free Software Foundation, Inc.
+/* Target-dependent definitions for FreeBSD/i386.
+   Copyright (C) 1997, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,16 +18,54 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "i386/tm-i386bsd.h"
+#ifndef TM_FBSD_H
+#define TM_FBSD_H
 
+#define HAVE_I387_REGS
+#include "i386/tm-i386.h"
 
-#undef NUM_REGS
-#define NUM_REGS 14
+/* FreeBSD uses the old gcc convention for struct returns.  */
 
+#define USE_STRUCT_CONVENTION(gcc_p, type) \
+  generic_use_struct_convention (1, type)
+
 
-#undef IN_SOLIB_CALL_TRAMPOLINE
-#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) STREQ (name, "_DYNAMIC")
+/* Support for longjmp.  */
 
+/* Details about jmp_buf.  It's supposed to be an array of integers.  */
 
-extern i386_float_info ();
-#define FLOAT_INFO  i386_float_info ()
+#define JB_ELEMENT_SIZE 4	/* Size of elements in jmp_buf.  */
+#define JB_PC		0	/* Array index of saved PC.  */
+
+/* Figure out where the longjmp will land.  Store the address that
+   longjmp will jump to in *ADDR, and return non-zero if successful.  */
+
+extern int get_longjmp_target (CORE_ADDR *addr);
+#define GET_LONGJMP_TARGET(addr) get_longjmp_target (addr)
+
+
+/* Support for signal handlers.  */
+
+/* The sigtramp is above the user stack and immediately below
+   the user area.  Using constants here allows for cross debugging.
+   These are tested for FreeBSD 3.4.  */
+
+#define SIGTRAMP_START(pc)	0xbfbfdf20
+#define SIGTRAMP_END(pc)	0xbfbfdff0
+
+/* Offset to saved PC in sigcontext, from <sys/signal.h>.  */
+#define SIGCONTEXT_PC_OFFSET 20
+
+
+/* Shared library support.  */
+
+#ifndef SVR4_SHARED_LIBS
+
+/* Return non-zero if we are in a shared library trampoline code stub.  */
+
+#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
+  (name && !strcmp(name, "_DYNAMIC"))
+
+#endif /* !SVR4_SHARED_LIBS */
+
+#endif /* TM_FBSD_H */

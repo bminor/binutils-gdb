@@ -1,3 +1,35 @@
+2000-05-25  Mark Kettenis  <kettenis@gnu.org>
+
+	Add support for FreeBSD/i386 ELF.
+	* i386bsd-nat.c: New file.
+	* config/i386/tm-fbsd.h (HAVE_I387_REGS): Define.
+	Include "i386/tm-i386.h" instead of "i386/tm-i386b.h".
+	(NUM_REGS): Remove redefinition.
+	(USE_STRUCT_CONVENTION): Define.
+	(i386_float_info): Remove prototype.
+	(FLOAT_INFO): Remove define.
+	(JB_ELEMENT_SIZE): Define to 4.
+	(JB_PC): Define to 0.
+	(GET_LONGJMP_TARGET): Define.
+	(SIGTRAMP_START, SIGTRAMP_END): Define.
+	(SIGCONTEXT_PC_OFFSET): Define.
+	(IN_SOLIB_CALL_TRAMPOLINE): Only define if !SVR4_SHARED_LIBS
+	* config/i386/nm-fbsd.h (PTRACE_ARG3_TYPE): Define to caddr_t.
+	(FETCH_INFERIOR_REGISTERS): Define.
+	(ATTACH_DETACH): Define.
+	(kernel_u_size): Remove PARAMS.
+	(register_u_addr): Use CORE_ADDR in prototype where appropriate.
+	Remove PARAMS.
+	(SVR4_SHARED_LIBS) [FREEBSD_ELF || __ELF__ && !FREEBSD_AOUT]:
+	Define.
+	[SVR4_SHARED_LIBS]: Include "elf/common.h".
+	Only define aliases for struct members from <link.h> if
+	!SVR4_SHARED_LIBS.
+	* config/i386/xm-fbsd.h: New file.
+	* config/i386/fbsd.mt (TDEPFILES): Remove solib.o.
+	* config/i386/fbsd.mh (NATDEPFILES): Remove i386b-nat.o.  Add
+	core-regset.o i387-nat.o i386bsd-nat.o.
+
 2000-05-24  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* findvar.c (value_from_register): Factor code, simplify logic.
