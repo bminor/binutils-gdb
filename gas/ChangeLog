@@ -1,3 +1,8 @@
+2001-10-09  Christian Groessler <cpg@aladdin.de>
+
+	* config/tc-z8k.c: Include opcodes/z8k-opc.h after bfd.h
+	since z8k-opc.h now uses the PARAMS macro.
+
 2001-10-09  Aldy Hernandez  <aldyh@redhat.com>
 
 	* config/tc-arm.c: Change MAVERIK to MAVERICK.

@@ -1,3 +1,9 @@
+2001-09-24  Christian Groessler <cpg@aladdin.de>
+
+	* z8k-dis.c (unparse_intstr): Fixed formatting. Change
+	disassembly of indirect register memory accesses to be same
+	format the assembler accepts.
+
 2001-10-09  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* sh-opc.h: Fix encoding of least significant nibble of the

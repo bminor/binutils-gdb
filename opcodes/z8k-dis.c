@@ -540,7 +540,10 @@ unparse_instr (instr_data, is_segmented)
 	  strcat (out_str, tmp_str);
 	  break;
 	case CLASS_IR:
-	  sprintf (tmp_str, "@R%ld", instr_data->arg_reg[datum_value]);
+	  if (is_segmented)
+	    sprintf (tmp_str, "@rr%ld", instr_data->arg_reg[datum_value]);
+	  else
+	    sprintf (tmp_str, "@r%ld", instr_data->arg_reg[datum_value]);
 	  strcat (out_str, tmp_str);
 	  break;
 	case CLASS_FLAGS:
@@ -549,14 +552,10 @@ unparse_instr (instr_data, is_segmented)
 	  break;
 	case CLASS_REG_BYTE:
 	  if (instr_data->arg_reg[datum_value] >= 0x8)
-	    {
-	      sprintf (tmp_str, "rl%ld",
-		       instr_data->arg_reg[datum_value] - 0x8);
-	    }
+	    sprintf (tmp_str, "rl%ld",
+		     instr_data->arg_reg[datum_value] - 0x8);
 	  else
-	    {
-	      sprintf (tmp_str, "rh%ld", instr_data->arg_reg[datum_value]);
-	    }
+	    sprintf (tmp_str, "rh%ld", instr_data->arg_reg[datum_value]);
 	  strcat (out_str, tmp_str);
 	  break;
 	case CLASS_REG_WORD:

@@ -24,11 +24,10 @@
 #define DEFINE_TABLE
 #include <stdio.h>
 
-#include "opcodes/z8k-opc.h"
-
 #include "as.h"
 #include "bfd.h"
 #include "safe-ctype.h"
+#include "opcodes/z8k-opc.h"
 
 const char comment_chars[] = "!";
 const char line_comment_chars[] = "#";
