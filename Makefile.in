@@ -1130,11 +1130,11 @@ ETC_SUPPORT_PFX=configure.info standards.info cfg-paper.info
 # this macro.
 SUPPORT_FILES = list-of-support-files-for-tool-in-question
 # Directories that might want `make diststuff' run.
-DISTSTUFFDIRS= ld gprof gdb libg++ binutils gnats gas
+DISTSTUFFDIRS= ld gprof gdb libg++ binutils gnats gas bfd
 # Files where "byacc" (Cygnus version) should be changed to "bison -y" (FSF).
 DISTBISONFILES= binutils/Makefile.in gas/Makefile.in gdb/Makefile.in
 # Directories where "info" should be built.
-DISTDOCDIRS= ld gprof binutils gas bfd libg++ libio gdb gnats send-pr etc
+DISTDOCDIRS=libio send-pr etc
 
 .PHONY: taz
 

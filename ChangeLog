@@ -1,3 +1,9 @@
+Wed Oct 25 14:43:55 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* Makefile.in (DISTDOCDIRS):  Remove ld gprof bnutils gas libg++ gdb
+	and gnats, because they are now subsumed by DISTSTUFFDIRS.
+	Move bfd to DISTSTUFFDIRS.
+
 Tue Oct 24 18:19:09 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* Makefile.in (X11_LIB): Removed.
