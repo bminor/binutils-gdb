@@ -35,15 +35,23 @@ configure
 configure.in
 cpu.h
 cpuall.h
+cpux.h
 decode.c
 decode.h
+decodex.c
+decodex.h
 extract.c
 m32r-sim.h
 m32r.c
+m32rx.c
 mloop.in
+mloopx.in
 model.c
+modelx.c
+readx.c
 sem-switch.c
 sem.c
+semx.c
 sim-if.c
 sim-main.h
 tconfig.in
@@ -80,7 +88,7 @@ else
         done
 fi
 
-m32rx_files="ChangeLog Makefile.in sim-if.c sim-main.h"
+m32rx_files="ChangeLog Makefile.in sim-if.c sim-main.h arch.h arch.c cpuall.h"
 if ( echo $* | grep keep\-m32rx > /dev/null ) ; then
         for i in $m32rx_files ; do
                 if test ! -d $i && (grep sanitize-m32rx $i > /dev/null) ; then
