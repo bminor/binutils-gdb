@@ -1,3 +1,13 @@
+Wed Jul 14 09:45:52 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* configure.in: Recognize h8300h (variant of h8300).
+
+start-sanitize-v9
+Wed Jul 14 09:45:52 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* configure.in: Recognize sparc64-*-*.
+end-sanitize-v9
+
 Tue Jul 13 14:03:48 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabsread.c (define_symbol): Make the caddr_t hack apply to `function

@@ -158,6 +158,7 @@ c1-*-*)			gdb_target=convex ;;
 c2-*-*)			gdb_target=convex ;;
 
 h8300-*-*)		gdb_target=h8300hms ;;
+h8300h-*-*)		gdb_target=h8300hms gdb_target_cpu=h8300 ;;
 h8500-*-*)		gdb_target=h8500hms ;;
 
 sh-*-*)			gdb_target=sh ;;
@@ -259,6 +260,9 @@ sparc-*-sunos4*)	gdb_target=sun4os4 ;;
 sparc-*-vxworks*)	gdb_target=vxsparc ;;
 sparc-*-*)		gdb_target=sun4os4 ;;
 sparclite*-*-*)		gdb_target=sparclite ;;
+# start-sanitize-v9
+sparc64-*-*)		gdb_target_cpu=sparc gdb_target=sp64 ;;
+# end-sanitize-v9
 
 tahoe-*-*)		gdb_target=tahoe ;;
 vax-*-*)		gdb_target=vax ;;
