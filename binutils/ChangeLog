@@ -1,3 +1,8 @@
+2003-05-12  Salvador Eduardo Tropea  <salvador@inti.gov.ar>
+
+	* debug.c (debug_get_real_type): Extend test for circular debug
+	references.
+
 2003-05-12  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (ALL_LINGUAS): Add zh_CN.
