@@ -41,11 +41,6 @@ Tue Feb  6 12:28:54 1996  Ian Lance Taylor  <ian@cygnus.com>
 Mon Feb  5 16:14:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i960-dis.c (mem): Add HX dcinva instruction.
-	(reg): Add HX instructions.
-	start-sanitize-i960xl
-	The HX instructions are the XL instructions, so this just involves
-	arranges for them to not be sanitized.
-	end-sanitize-i960xl
 
 	Support for building as a shared library, based on patches from
 	Alan Modra <alan@spri.levels.unisa.edu.au>:
@@ -1002,10 +997,8 @@ Tue Jul 26 16:36:03 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	sparse_tabent.
 	(ea): Local static array scale_tab now const.
 
-	start-sanitize-i960xl
-	* i960-dis.c (reg): Added i960XL instructions to reg_init table.
+	* i960-dis.c (reg): Added i960JX instructions to reg_init table.
 	(REG_MAX): Updated.
-	end-sanitize-i960xl
 
 Tue Jul 19 21:00:00 1994  DJ Delorie (dj@ctron.com)
 
