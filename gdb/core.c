@@ -32,6 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern int xfer_memory ();
 extern void child_attach (), child_create_inferior ();
+extern void print_section_info ();
 
 extern int sys_nerr;
 extern char *sys_errlist[];
@@ -276,22 +277,7 @@ static void
 core_files_info (t)
   struct target_ops *t;
 {
-  struct section_table *p;
-
-  printf_filtered ("\t`%s', ", bfd_get_filename(core_bfd));
-  wrap_here ("        ");
-  printf_filtered ("file type %s.\n", bfd_get_target(core_bfd));
-
-  for (p = t->sections; p < t->sections_end; p++) {
-    printf_filtered ("\t%s", local_hex_string_custom (p->addr, "08"));
-    printf_filtered (" - %s is %s",
-	local_hex_string_custom (p->endaddr, "08"),
-	bfd_section_name (p->bfd, p->sec_ptr));
-    if (p->bfd != core_bfd) {
-      printf_filtered (" in %s", bfd_get_filename (p->bfd));
-    }
-    printf_filtered ("\n");
-  }
+  print_section_info (t, core_bfd);
 }
 
 void
