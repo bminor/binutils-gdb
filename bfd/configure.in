@@ -112,7 +112,7 @@ hp)
 none)
 	case "${target_cpu}" in
 	i386) bfd_target=i386-coff ;;
-	a29k) case "${target_os} in
+	a29k) case "${target_os}" in
 		aout) bfd_target=a29k-aout ;;
 		coff) bfd_target=a29k-coff ;;
 		sym1) bfd_target=a29k-coff ;;
