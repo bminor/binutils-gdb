@@ -1,3 +1,11 @@
+Tue Sep 19 15:28:36 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* m68k-opc.c: Split pmove patterns which use 'P' into patterns
+	which use '0', '1', and '2' instead.  Specify the proper size for
+	a pmove immediate operand.  Correct the pmovefd patterns to be
+	moves to a register, not from a register.
+	* m68k-dis.c (print_insn_arg): Replace 'P' with '0', '1', '2'.
+
 Thu Sep 14 11:58:22 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-opc.c (sparc_opcodes): Mark all insns that reference
