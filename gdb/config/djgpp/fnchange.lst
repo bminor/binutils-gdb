@@ -194,7 +194,7 @@
 @V@/tcl/cygwin/tclConfig.sh.in @V@/tcl/cygwin/tclConfig.sh-in
 @V@/tcl/mac/tclMacProjects.sea.hqx @V@/tcl/mac/tclMacProjects.shqx
 @V@/tcl/unix/tclConfig.sh.in @V@/tcl/unix/tclConfig.sh-in
-@V@/tk/doc/tk4.0.ps @V@/tk/doc/tk4-0.ps - too many dots
+@V@/tk/doc/tk4.0.ps @V@/tk/doc/tk4-0.ps
 @V@/tk/mac/tkMacProjects.sit.hqx @V@/tk/mac/tkMacProjects.shqx
 @V@/tk/unix/tkConfig.sh.in @V@/tk/unix/tkConfig.sh-in
 @V@/itcl/itcl/itclConfig.sh.in @V@/itcl/itcl/itclConfig.sh-in
