@@ -1,3 +1,7 @@
+Mon Jun  8 16:08:27 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/m32r/trap.cgs: Test trap 2.
+
 Mon Jun  1 18:54:22 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* lib/sim-defs.exp (sim_run): Add possible environment variable
