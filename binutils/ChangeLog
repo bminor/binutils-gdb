@@ -1,3 +1,19 @@
+Wed Jan 29 13:21:21 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (objdump_print_value): Add skip_zeroes parameter.
+	Change all callers.
+	(objdump_print_addr_with_sym): Likewise.  Call objdump_print_value
+	to print address.
+	(objdump_print_addr): New static function.
+	(objdump_print_address): Just call objdump_print_addr.
+	(disassemble_bytes): Print real address, not function offset.
+	Skip a certain number of leading zeroes.
+
+	* objdump.c (disassemble_zeroes): New static variable.
+	(usage): Mention --disassemble-zeroes.
+	(long_options): Add "disassemble-zeroes".
+	(disassemble_bytes): Check disassemble_zeroes.
+
 Tue Jan 28 16:47:26 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c (disassemble_bytes): Don't skip zeroes if the

@@ -1038,6 +1038,7 @@ Show a summary of the options to @code{objcopy}.
 objdump [ -a | --archive-headers ] 
         [ -b @var{bfdname} | --target=@var{bfdname} ] [ --debugging ]
         [ -d | --disassemble ]  [ -D | --disassemble-all ] 
+        [ --disassemble-zeroes ]
         [ -EB | -EL | --endian=@{big | little @} ]
         [ -f | --file-headers ]
         [ -h | --section-headers | --headers ]  [ -i | --info ]
@@ -1112,6 +1113,15 @@ expected to contain instructions.
 Like @samp{-d}, but disassemble the contents of all sections, not just
 those expected to contain instructions.
 
+@item --prefix-addresses
+When disassembling, print the complete address on each line.  This is
+the older disassembly format.
+
+@item --disassemble-zeroes
+Normally the disassembly output will skip blocks of zeroes.  This
+option directs the disassembler to disassemble those blocks, just like
+any other data.
+
 @item -EB
 @itemx -EL
 @itemx --endian=@{big|little@}
@@ -1173,10 +1183,6 @@ Specify the architecture to use when disassembling object files.  This
 can be useful when disasembling object files which do not describe
 architecture information, such as S-records.  You can list the available
 architectures with the @samp{-i} option.
-
-@item --prefix-addresses
-When disassembling, print the complete address on each line.  This is
-the older disassembly format.
 
 @item -r
 @itemx --reloc

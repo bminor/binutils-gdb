@@ -61,6 +61,7 @@ static int show_raw_insn;		/* --show-raw-insn */
 static int dump_stab_section_info;	/* --stabs */
 static boolean disassemble;		/* -d */
 static boolean disassemble_all;		/* -D */
+static int disassemble_zeroes;		/* --disassemble-zeroes */
 static boolean formats_info;		/* -i */
 static char *only;			/* -j secname */
 static int wide_output;			/* -w */
@@ -123,14 +124,17 @@ static void
 display_bfd PARAMS ((bfd *abfd));
 
 static void
-objdump_print_value PARAMS ((bfd_vma, struct disassemble_info *));
+objdump_print_value PARAMS ((bfd_vma, struct disassemble_info *, boolean));
 
 static asymbol *
 find_symbol_for_address PARAMS ((bfd *, asection *, bfd_vma, boolean, long *));
 
 static void
 objdump_print_addr_with_sym PARAMS ((bfd *, asection *, asymbol *, bfd_vma,
-				     struct disassemble_info *));
+				     struct disassemble_info *, boolean));
+
+static void
+objdump_print_addr PARAMS ((bfd_vma, struct disassemble_info *, boolean));
 
 static void
 objdump_print_address PARAMS ((bfd_vma, struct disassemble_info *));
@@ -157,7 +161,8 @@ usage (stream, status)
   fprintf (stream, "\
 Usage: %s [-ahifdDprRtTxsSlw] [-b bfdname] [-m machine] [-j section-name]\n\
        [--archive-headers] [--target=bfdname] [--debugging] [--disassemble]\n\
-       [--disassemble-all] [--file-headers] [--section-headers] [--headers]\n\
+       [--disassemble-all] [--disassemble-zeroes] [--file-headers]\n\
+       [--section-headers] [--headers]\n\
        [--info] [--section=section-name] [--line-numbers] [--source]\n",
 	   program_name);
   fprintf (stream, "\
@@ -189,6 +194,7 @@ static struct option long_options[]=
   {"debugging", no_argument, &dump_debugging, 1},
   {"disassemble", no_argument, NULL, 'd'},
   {"disassemble-all", no_argument, NULL, 'D'},
+  {"disassemble-zeroes", no_argument, &disassemble_zeroes, 1},
   {"dynamic-reloc", no_argument, NULL, 'R'},
   {"dynamic-syms", no_argument, NULL, 'T'},
   {"endian", required_argument, NULL, OPTION_ENDIAN},
@@ -527,21 +533,27 @@ compare_relocs (ap, bp)
     return 0;
 }
 
-/* Print VMA to STREAM with no leading zeroes.  */
+/* Print VMA to STREAM.  If SKIP_ZEROES is true, omit leading zeroes.  */
 
 static void
-objdump_print_value (vma, info)
+objdump_print_value (vma, info, skip_zeroes)
      bfd_vma vma;
      struct disassemble_info *info;
+     boolean skip_zeroes;
 {
   char buf[30];
   char *p;
 
   sprintf_vma (buf, vma);
-  for (p = buf; *p == '0'; ++p)
-    ;
-  if (*p == '\0')
-    --p;
+  if (! skip_zeroes)
+    p = buf;
+  else
+    {
+      for (p = buf; *p == '0'; ++p)
+	;
+      if (*p == '\0')
+	--p;
+    }
   (*info->fprintf_func) (info->stream, "%s", p);
 }
 
@@ -673,17 +685,15 @@ find_symbol_for_address (abfd, sec, vma, require_sec, place)
 /* Print an address to INFO symbolically.  */
 
 static void
-objdump_print_addr_with_sym (abfd, sec, sym, vma, info)
+objdump_print_addr_with_sym (abfd, sec, sym, vma, info, skip_zeroes)
      bfd *abfd;
      asection *sec;
      asymbol *sym;
      bfd_vma vma;
      struct disassemble_info *info;
+     boolean skip_zeroes;
 {
-  char buf[30];
-
-  sprintf_vma (buf, vma);
-  (*info->fprintf_func) (info->stream, "%s", buf);
+  objdump_print_value (vma, info, skip_zeroes);
 
   if (sym == NULL)
     {
@@ -695,12 +705,12 @@ objdump_print_addr_with_sym (abfd, sec, sym, vma, info)
       if (vma < secaddr)
 	{
 	  (*info->fprintf_func) (info->stream, "-");
-	  objdump_print_value (secaddr - vma, info);
+	  objdump_print_value (secaddr - vma, info, true);
 	}
       else if (vma > secaddr)
 	{
 	  (*info->fprintf_func) (info->stream, "+");
-	  objdump_print_value (vma - secaddr, info);
+	  objdump_print_value (vma - secaddr, info, true);
 	}
       (*info->fprintf_func) (info->stream, ">");
     }
@@ -710,40 +720,51 @@ objdump_print_addr_with_sym (abfd, sec, sym, vma, info)
       if (bfd_asymbol_value (sym) > vma)
 	{
 	  (*info->fprintf_func) (info->stream, "-");
-	  objdump_print_value (bfd_asymbol_value (sym) - vma, info);
+	  objdump_print_value (bfd_asymbol_value (sym) - vma, info, true);
 	}
       else if (vma > bfd_asymbol_value (sym))
 	{
 	  (*info->fprintf_func) (info->stream, "+");
-	  objdump_print_value (vma - bfd_asymbol_value (sym), info);
+	  objdump_print_value (vma - bfd_asymbol_value (sym), info, true);
 	}
       (*info->fprintf_func) (info->stream, ">");
     }
 }
 
-/* Print VMA symbolically to INFO if possible.  */
+/* Print VMA to INFO, symbolically if possible.  If SKIP_ZEROES is
+   true, don't output leading zeroes.  */
 
 static void
-objdump_print_address (vma, info)
+objdump_print_addr (vma, info, skip_zeroes)
      bfd_vma vma;
      struct disassemble_info *info;
+     boolean skip_zeroes;
 {
   struct objdump_disasm_info *aux;
   asymbol *sym;
 
   if (sorted_symcount < 1)
     {
-      char buf[30];
-
-      sprintf_vma (buf, vma);
-      (*info->fprintf_func) (info->stream, "%s", buf);
+      objdump_print_value (vma, info, skip_zeroes);
       return;
     }
 
   aux = (struct objdump_disasm_info *) info->application_data;
   sym = find_symbol_for_address (aux->abfd, aux->sec, vma, aux->require_sec,
 				 (long *) NULL);
-  objdump_print_addr_with_sym (aux->abfd, aux->sec, sym, vma, info);
+  objdump_print_addr_with_sym (aux->abfd, aux->sec, sym, vma, info,
+			       skip_zeroes);
+}
+
+/* Print VMA to INFO.  This function is passed to the disassembler
+   routine.  */
+
+static void
+objdump_print_address (vma, info)
+     bfd_vma vma;
+     struct disassemble_info *info;
+{
+  objdump_print_addr (vma, info, ! prefix_addresses);
 }
 
 /* Hold the last function name and the last line number we displayed
@@ -1018,6 +1039,7 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
   asection *section;
   int bytes_per_line;
   boolean done_dot;
+  int skip_addr_chars;
   long i;
 
   aux = (struct objdump_disasm_info *) info->application_data;
@@ -1027,6 +1049,27 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
     bytes_per_line = 4;
   else
     bytes_per_line = 16;
+
+  /* Figure out how many characters to skip at the start of an
+     address, to make the disassembly look nicer.  We discard leading
+     zeroes in chunks of 4, ensuring that there is always a leading
+     zero remaining.  */
+  skip_addr_chars = 0;
+  if (! prefix_addresses)
+    {
+      char buf[30];
+      char *s;
+
+      sprintf_vma (buf,
+		   section->vma + bfd_section_size (section->owner, section));
+      s = buf;
+      while (s[0] == '0' && s[1] == '0' && s[2] == '0' && s[3] == '0'
+	     && s[4] == '0')
+	{
+	  skip_addr_chars += 4;
+	  s += 4;
+	}
+    }
 
   info->insn_info_valid = 0;
 
@@ -1043,8 +1086,9 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
       for (z = i; z < stop; z++)
 	if (data[z] != 0)
 	  break;
-      if ((info->insn_info_valid == 0
-	   || info->branch_delay_insns == 0)
+      if (! disassemble_zeroes
+	  && (info->insn_info_valid == 0
+	      || info->branch_delay_insns == 0)
 	  && (z - i >= SKIP_ZEROES
 	      || (z == stop && z - i < SKIP_ZEROES_AT_END)))
 	{
@@ -1071,7 +1115,16 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	    show_line (aux->abfd, section, i);
 
 	  if (! prefix_addresses)
-	    printf ("%6lx:\t", (unsigned long) (i - start));
+	    {
+	      char *s;
+
+	      sprintf_vma (buf, section->vma + i);
+	      for (s = buf + skip_addr_chars; *s == '0'; s++)
+		*s = ' ';
+	      if (*s == '\0')
+		*--s = '0';
+	      printf ("%s:\t", buf + skip_addr_chars);
+	    }
 	  else
 	    {
 	      aux->require_sec = true;
@@ -1183,7 +1236,7 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	      else
 		printf ("\t\t\t");
 
-	      objdump_print_value (section->vma + q->address - start, info);
+	      objdump_print_value (section->vma + q->address, info, true);
 
 	      printf (": %s\t", q->howto->name);
 
@@ -1209,7 +1262,7 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	      if (q->addend)
 		{
 		  printf ("+0x");
-		  objdump_print_value (q->addend, info);
+		  objdump_print_value (q->addend, info, true);
 		}
 
 	      printf ("\n");
@@ -1397,7 +1450,8 @@ disassemble_data (abfd)
 	      printf ("\n");
 	      objdump_print_addr_with_sym (abfd, section, sym,
 					   section->vma + i,
-					   &disasm_info);
+					   &disasm_info,
+					   false);
 	      printf (":\n");
 
 	      if (sym == NULL)

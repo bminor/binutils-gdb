@@ -24,6 +24,7 @@ objdump \- display information from object files.
 .RB "[\|" \-\-debugging "\|]" 
 .RB "[\|" \-d | \-\-disassemble "\|]" 
 .RB "[\|" \-D | \-\-disassemble-all "\|]" 
+.RB "[\|" \-\-disassemble\-zeroes "\|]" 
 .RB "[\|" \-EB | \-EL | \-\-endian=\c
 .I {big|little}\c
 \&\|]
@@ -156,6 +157,17 @@ Like \fB\-d\fP, but disassemble the contents of all sections, not just
 those expected to contain instructions.
 
 .TP
+.B \-\-prefix\-addresses
+When disassembling, print the complete address on each line.  This is
+the older disassembly format.
+
+.TP
+.B \-\-disassemble\-zeroes
+Normally the disassembly output will skip blocks of zeroes.  This
+option directs the disassembler to disassemble those blocks, just like
+any other data.
+
+.TP
 .B \-EB
 .TP
 .B \-EL
@@ -224,11 +236,6 @@ Specify the architecture to use when disassembling object files.  This
 can be useful when disasembling object files which do not describe
 architecture information, such as S-records.  You can list the available
 architectures with the \fB\-i\fP option. 
-
-.TP
-.B \-\-prefix\-addresses
-When disassembling, print the complete address on each line.  This is
-the older disassembly format.
 
 .TP
 .B \-r
