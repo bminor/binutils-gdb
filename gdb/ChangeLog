@@ -1,5 +1,12 @@
 2001-07-04  Jim Blandy  <jimb@redhat.com>
 
+	* dwarf2read.c (struct partial_die_info): New member: has_pc_info.
+	(read_partial_die): Delete fourth argument; we return this info in
+	the struct partial_die_info object itself now.
+	(dwarf2_build_psymtabs_hard, scan_partial_symbols): Use the
+	has_pc_info field of the partial die struct, rather than passing a
+	variable by reference to read_partial_die.
+
 	* dwarf2read.c (dwarf2_build_psymtabs_hard): Remove extraneous
 	code in loop condition.
 

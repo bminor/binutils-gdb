@@ -194,6 +194,7 @@ struct partial_die_info
     unsigned int offset;
     unsigned int abbrev;
     char *name;
+    int has_pc_info;
     CORE_ADDR lowpc;
     CORE_ADDR highpc;
     struct dwarf_block *locdesc;
@@ -586,7 +587,7 @@ static void dwarf2_empty_abbrev_table (PTR);
 static struct abbrev_info *dwarf2_lookup_abbrev (unsigned int);
 
 static char *read_partial_die (struct partial_die_info *,
-			       bfd *, char *, int *,
+			       bfd *, char *,
 			       const struct comp_unit_head *);
 
 static char *read_full_die (struct die_info **, bfd *, char *,
@@ -971,7 +972,6 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
   struct partial_die_info comp_unit_die;
   struct partial_symtab *pst;
   struct cleanup *back_to;
-  int comp_unit_has_pc_info;
   CORE_ADDR lowpc, highpc;
 
   info_ptr = dwarf_info_buffer;
@@ -1012,7 +1012,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
       /* Read the compilation unit die */
       info_ptr = read_partial_die (&comp_unit_die, abfd, info_ptr,
-				   &comp_unit_has_pc_info, &cu_header);
+				   &cu_header);
 
       /* Set the language we're debugging */
       set_cu_language (comp_unit_die.language);
@@ -1047,7 +1047,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
 	  /* If the compilation unit didn't have an explicit address range,
 	     then use the information extracted from its child dies.  */
-	  if (!comp_unit_has_pc_info)
+	  if (! comp_unit_die.has_pc_info)
 	    {
 	      comp_unit_die.lowpc = lowpc;
 	      comp_unit_die.highpc = highpc;
@@ -1090,22 +1090,20 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
      back to that level. */
 
   int nesting_level = 1;
-  int has_pc_info;
 
   *lowpc = ((CORE_ADDR) -1);
   *highpc = ((CORE_ADDR) 0);
 
   while (nesting_level)
     {
-      info_ptr = read_partial_die (&pdi, abfd, info_ptr,
-				   &has_pc_info, cu_header);
+      info_ptr = read_partial_die (&pdi, abfd, info_ptr, cu_header);
 
       if (pdi.name)
 	{
 	  switch (pdi.tag)
 	    {
 	    case DW_TAG_subprogram:
-	      if (has_pc_info)
+	      if (pdi.has_pc_info)
 		{
 		  if (pdi.lowpc < *lowpc)
 		    {
@@ -3123,8 +3121,7 @@ dwarf2_lookup_abbrev (unsigned int number)
 
 static char *
 read_partial_die (struct partial_die_info *part_die, bfd *abfd,
-		  char *info_ptr, int *has_pc_info,
-		  const struct comp_unit_head *cu_header)
+		  char *info_ptr, const struct comp_unit_head *cu_header)
 {
   unsigned int abbrev_number, bytes_read, i;
   struct abbrev_info *abbrev;
@@ -3135,7 +3132,6 @@ read_partial_die (struct partial_die_info *part_die, bfd *abfd,
   int has_high_pc_attr = 0;
 
   *part_die = zeroed_partial_die;
-  *has_pc_info = 0;
   abbrev_number = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
   info_ptr += bytes_read;
   if (!abbrev_number)
@@ -3221,7 +3217,7 @@ read_partial_die (struct partial_die_info *part_die, bfd *abfd,
       int dummy;
 
       spec_ptr = dwarf_info_buffer + dwarf2_get_ref_die_offset (&spec_attr);
-      read_partial_die (&spec_die, abfd, spec_ptr, &dummy, cu_header);
+      read_partial_die (&spec_die, abfd, spec_ptr, cu_header);
       if (spec_die.name)
 	{
 	  part_die->name = spec_die.name;
@@ -3244,7 +3240,7 @@ read_partial_die (struct partial_die_info *part_die, bfd *abfd,
       && part_die->lowpc < part_die->highpc
       && (part_die->lowpc != 0
 	  || (bfd_get_file_flags (abfd) & HAS_RELOC)))
-    *has_pc_info = 1;
+    part_die->has_pc_info = 1;
   return info_ptr;
 }
 
