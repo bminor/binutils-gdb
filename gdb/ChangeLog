@@ -3,6 +3,8 @@
 	* ppc-linux-nat.c (store_register, fetch_register): Rename 'mess'
 	to 'message', and make it local to the lone block that uses it.
 
+	* ppc-linux-nat.c (store_register): Remove unused local 'offset'.
+
 2004-06-02  Paul N. Hilfinger  <hilfinger@gnat.com>
 
 	* ada-exp.y: Synchronize with current ACT sources.

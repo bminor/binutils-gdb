@@ -407,7 +407,6 @@ store_register (int tid, int regno)
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr = ppc_register_u_addr (regno);
   int i;
-  unsigned int offset;         /* Offset of registers within the u area.  */
   char buf[MAX_REGISTER_SIZE];
 
   if (altivec_register_p (regno))
