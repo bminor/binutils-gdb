@@ -109,13 +109,13 @@
 # 
 # Mask ME1 (ER1 stall) this time
 ! 0x10003c20 0x00000004
-# A bad PKEcode with ER1 masked
-1 0x00000000_00000000_00000000_08000000 0x00000000 PPPP
+# Some bad PKEcodes (UNPACK with bad vn/vl) with ER1 masked [test.unpack.bad]
+1 0x01000001_6b000000_77000000_63000000 0x00000000 PPPP
 # should not put PKE into stalled mode, should execute following PKENOPs
-# Read STAT register; confirm ER1 bit not set
-? 0x10003c00 0x00000000 0x00002000
+# Read STAT register; confirm ER1 bit still set
+? 0x10003c00 0x00002000 0x00002000
 # Read CODE register; confirm PKE went past bad code
-? 0x10003c80 0x00000000 0xffffffff
+? 0x10003c80 0x01000001 0xffffffff
 # Reset PKE
 ! 0x10003c10 0x00000001
 #
@@ -168,7 +168,7 @@
 # Read STAT register; confirm PPS field set at WAIT
 ? 0x10003800 0x00000001 0x00000003
 # Add operand for STMASK instruction
-0 0x00000000_00000000_00000000_1234abcd 0x00000000 PPPP
+0 0x00000000_00000000_00000000_1234abcd 0x00000000 PPP.
 # Erroneous write to MASK register
 ! 0x10003870 0x98765432
 # Read MASK register
@@ -561,56 +561,173 @@
 ? 0x10003cc0 0x00000300 0xffffffff
 #
 #
-# ---- MPG/UNPACK address overflow tests ---- [test.ext.mpgaddr]
+# ---- MPG/UNPACK address overflow tests ---- 
 #
-# MPG to PKE0 near top of address range
+# RESET PKE0
+! 0x10003810 0x00000001
+# UNPACK to PKE0 near top of address range
 # [test.unpack.V3_32] [test.code.stcycl] [test.unpack.endian] [test.unpack.unsigned]
-# [test.unpack.no-r]
-0 0x6804ffff_01000000_77777777_55555555 0x00000000 PPDD
-0 0x33330333_22222022_11111101_ccccccc0 0x00000000 ....
-0 0x07777777_60666666_55055555_44404444 0x00000000 ....
-0 0xbbbb0bbb_aaaaa0aa_99999909_88888880 0x00000000 ....
+# [test.unpack.no-r] [test.ext.unpackaddr] [test.track.unpack]
+0 0x6804ffff_01000101_77777777_55555555 0x00000ff0 PPDD
+0 0x33330333_22222022_11111101_ccccccc0 0x0000ff00 ....
+0 0x07777777_60666666_55055555_44404444 0x000ff000 ....
+0 0xbbbb0bbb_aaaaa0aa_99999909_88888880 0x00ff0000 ....
 # Assert that all words were written correctly
 ? 0x11004ff0 0xccccccc0 0xffffffff
 ? 0x11004ff4 0x11111101 0xffffffff
 ? 0x11004ff8 0x22222022 0xffffffff
 ? 0x11004ffc 0x00000000 0xffffffff
+? 0x210043fc 0x0000ff00 0xffffffff
 ? 0x11004000 0x33330333 0xffffffff
 ? 0x11004004 0x44404444 0xffffffff
 ? 0x11004008 0x55055555 0xffffffff
 ? 0x1100400c 0x00000000 0xffffffff
+? 0x21004000 0x000ff000 0xffffffff
 ? 0x11004010 0x60666666 0xffffffff
 ? 0x11004014 0x07777777 0xffffffff
 ? 0x11004018 0x88888880 0xffffffff
 ? 0x1100401c 0x00000000 0xffffffff
+? 0x21004004 0x00ff0000 0xffffffff
 ? 0x11004020 0x99999909 0xffffffff
 ? 0x11004024 0xaaaaa0aa 0xffffffff
 ? 0x11004028 0xbbbb0bbb 0xffffffff
 ? 0x1100402c 0x00000000 0xffffffff
+? 0x21004008 0x00ff0000 0xffffffff
 #
-# MPG to PKE1 near top of PKE1 address range [test.unpack.V4_5]
-# [test.unpack.signed] [test.unpack.r]
-1 0x02000100_00000100_99999999_33333333 0x00000000 PPDD
-1 0x6f058eff_01000000_77777777_55555555 0x00000000 PPDD
-1 0x00000000_77779999_deadbeef_aaaa5555 0x00000000 P...
+# RESET PKE1
+! 0x10003c10 0x00000001
+# UNPACK to PKE1 near top of PKE1 address range [test.unpack.V4_5]
+# [test.unpack.signed] [test.unpack.r] [test.ext.unpackaddr]
+1 0x02000100_00000100_99999999_33333333 0x0ff00000 PPDD
+1 0x6f05bfff_01000101_77777777_55555555 0x00ff0000 PPDD
+1 0x00000000_77779999_deadbeef_aaaa5555 0x000ff000 P...
 # Assert that all words were written correctly
 ? 0x1100fff0 0xfffffff5 0xffffffff
 ? 0x1100fff4 0x0000000a 0xffffffff
 ? 0x1100fff8 0xfffffff5 0xffffffff
 ? 0x1100fffc 0x00000000 0xffffffff
+? 0x2100cffc 0x000ff000 0xffffffff
 ? 0x1100c000 0x0000000a 0xffffffff
 ? 0x1100c004 0xfffffff5 0xffffffff
 ? 0x1100c008 0x0000000a 0xffffffff
 ? 0x1100c00c 0x00000001 0xffffffff
+? 0x2100c000 0x000ff000 0xffffffff
 ? 0x1100c010 0x0000000f 0xffffffff
 ? 0x1100c014 0xfffffff7 0xffffffff
 ? 0x1100c018 0x0000000f 0xffffffff
 ? 0x1100c01c 0x00000001 0xffffffff
+? 0x2100c004 0x000ff000 0xffffffff
 ? 0x1100c020 0x0000000d 0xffffffff
 ? 0x1100c024 0xfffffff5 0xffffffff
 ? 0x1100c028 0xfffffff7 0xffffffff
 ? 0x1100c02c 0x00000001 0xffffffff
+? 0x2100c008 0x000ff000 0xffffffff
 ? 0x1100c030 0xfffffff9 0xffffffff
 ? 0x1100c034 0x0000000c 0xffffffff
 ? 0x1100c038 0x00000006 0xffffffff
 ? 0x1100c03c 0x00000001 0xffffffff
+? 0x2100c00c 0x000ff000 0xffffffff
+#
+#
+# MPG to PKE0 near top of address range
+# [test.mpg] [test.mpg.endian] [test.ext.mpgaddr] [test.track.mpg]
+#
+0 0x4a04ffff_01000000_77777777_55555555 0x0000ee00 PPDD
+0 0x33330333_22222022_11111101_ccccccc0 0x000ee000 ....
+0 0x07777777_60666666_55055555_44404444 0x00ee0000 ....
+# Assert that all words were written correctly
+? 0x11000ff8 0xccccccc0 0xffffffff
+? 0x11000ffc 0x11111101 0xffffffff
+? 0x210007fc 0x000ee000 0xffffffff
+? 0x11000000 0x22222022 0xffffffff
+? 0x11000004 0x33330333 0xffffffff
+? 0x21000000 0x000ee000 0xffffffff
+? 0x11000008 0x44404444 0xffffffff
+? 0x1100000c 0x55055555 0xffffffff
+? 0x21000004 0x00ee0000 0xffffffff
+? 0x11000010 0x60666666 0xffffffff
+? 0x11000014 0x07777777 0xffffffff
+? 0x21000008 0x00ee0000 0xffffffff
+#
+# MPG to PKE1 near top of address range
+# [test.mpg] [test.mpg.endian] [test.ext.mpgaddr] [test.track.mpg]
+#
+1 0x4a04ffff_01000000_77777777_55555555 0x0000ee00 PPDD
+1 0x33330333_22222022_11111101_ccccccc0 0x000ee000 ....
+1 0x07777777_60666666_55055555_44404444 0x00ee0000 ....
+# Assert that all words were written correctly
+? 0x1100bff8 0xccccccc0 0xffffffff
+? 0x1100bffc 0x11111101 0xffffffff
+? 0x21009ffc 0x000ee000 0xffffffff
+? 0x11008000 0x22222022 0xffffffff
+? 0x11008004 0x33330333 0xffffffff
+? 0x21008000 0x000ee000 0xffffffff
+? 0x11008008 0x44404444 0xffffffff
+? 0x1100800c 0x55055555 0xffffffff
+? 0x21008004 0x00ee0000 0xffffffff
+? 0x11008010 0x60666666 0xffffffff
+? 0x11008014 0x07777777 0xffffffff
+? 0x21008008 0x00ee0000 0xffffffff
+#
+#
+# UNPACK with MASK & MODE processing
+# [test.unpack.mask] [test.unpack.mode.2] [test.unpack.cycle.0.1]
+#
+# RESET PKE0
+! 0x10003810 0x00000001
+#
+# Preset VU0 data memory to funky words
+# Set registers COL / ROW / MASK=10 for rows>0 / MODE=2 / CYCLE=0001
+0 0xaaffaa00_20000000_05000002_01000001 0x00000000 .PPP
+# STROW: initial values for accumulator
+0 0x30000000_00000000_00000000_00000000 0x00000000 PPPP
+0 0x00000040_00000030_00000020_00000010 0x00000000 ....
+# STCOL: initial values for accumulator
+0 0x31000000_00000000_00000000_00000000 0x00000000 PPPP
+0 0x00004000_00003000_00002000_00001000 0x00000000 ....
+# Unpack 256 V4_8 vectors, w/ values from ROWS regs
+0 0xffffffff_7e000000_00000000_00000000 0x00000000 .PPP
+# Confirm appropriate values filled: ROW0 - 1
+? 0x11004000 0x0000000f 0xffffffff
+? 0x11004004 0x0000001f 0xffffffff
+? 0x11004008 0x0000002f 0xffffffff
+? 0x1100400c 0x0000003f 0xffffffff
+# this should be COL1
+? 0x11004010 0x00002000 0xffffffff
+? 0x11004014 0x00002000 0xffffffff
+? 0x11004018 0x00002000 0xffffffff
+? 0x1100401c 0x00002000 0xffffffff
+# this should be the old data (write-inhibited) [test.mask.write-inhibit]
+? 0x11004020 0x99999909 0xffffffff
+? 0x11004024 0xaaaaa0aa 0xffffffff
+? 0x11004028 0xbbbb0bbb 0xffffffff
+? 0x1100402c 0x00000000 0xffffffff
+# these should be COL3 [test.mask.col3clamp]
+? 0x11004030 0x00004000 0xffffffff
+? 0x11004034 0x00004000 0xffffffff
+? 0x11004038 0x00004000 0xffffffff
+? 0x1100403c 0x00004000 0xffffffff
+? 0x11004050 0x00004000 0xffffffff
+? 0x11004054 0x00004000 0xffffffff
+? 0x11004058 0x00004000 0xffffffff
+? 0x1100405c 0x00004000 0xffffffff
+#
+# Set registers ROW / MASK / MODE=1 / CYCLE=0101
+0 0x00000000_20000000_05000001_01000101 0x00000000 .PPP
+# STROW: initial values for accumulator
+0 0x30000000_00000000_00000000_00000000 0x00000000 PPPP
+0 0x0000ff00_0000ee00_0000dd00_0000cc00 0x00000000 ....
+# Unpack one V1_8 vector [test.unpack.1.8] [test.unpack.unsigned]
+0 0x00000000_00000000_000000cc_72014000 0x00000000 PP.P
+# Confirm
+? 0x11004000 0x0000cccc 0xffffffff
+? 0x11004004 0x0000ddcc 0xffffffff
+? 0x11004008 0x0000eecc 0xffffffff
+? 0x1100400c 0x0000ffcc 0xffffffff
+# Unpack one V2_8 vector [test.unpack.2.8] [test.unpack.unsigned]
+0 0x00000000_00000000_000077cc_76014010 0x00000000 PP.P
+# Confirm
+? 0x11004100 0x0000cccc 0xffffffff
+? 0x11004104 0x0000dd77 0xffffffff
+? 0x11004108 0x0000ee00 0xffffffff
+? 0x1100410c 0x0000ff00 0xffffffff

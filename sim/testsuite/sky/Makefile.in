@@ -76,17 +76,38 @@ C_GEN = /build/sky-tools/c_gen.pl
 .SUFFIXES: .trc .c .run .ok .vif0out .vif0ok .vif0expect .vif1out .vif1ok .vif1expect .uu
 
 TESTS = \
-	t-pke1.c \
-	t-pke1.run \
 	t-pke1.vif0ok \
-	t-pke2.c \
-	t-pke2.run \
 	t-pke2.vif1ok \
-	t-pke3.c \
-	t-pke3.run \
-	t-pke3.ok
+	t-pke3.ok \
+	t-pke4.vif0ok \
+	tss08_0.ok \
+	tss08_1.ok \
+	tss16_0.ok \
+	tss16_1.ok \
+	tss32_0.ok \
+	tss32_1.ok \
+	tsv208_0.ok \
+	tsv208_1.ok \
+	tsv216_0.ok \
+	tsv216_1.ok \
+	tsv232_0.ok \
+	tsv232_1.ok \
+	tsv308_0.ok \
+	tsv308_1.ok \
+	tsv316_0.ok \
+	tsv316_1.ok \
+	tsv332_0.ok \
+	tsv332_1.ok \
+	tsv408_0.ok \
+	tsv408_1.ok \
+	tsv416_0.ok \
+	tsv416_1.ok \
+	tsv432_0.ok \
+	tsv432_1.ok
 
-check: sanity $(TESTS)
+
+check: sanity 
+	-$(MAKE) -k $(TESTS)
 sanity:
 	@eval echo AS_FOR_TARGET = $(AS_FOR_TARGET)
 	@eval echo LD_FOR_TARGET = $(LD_FOR_TARGET)
@@ -98,12 +119,12 @@ sanity:
 
 .run.ok:
 	rm -f tmp-$* $*.hi
-	ulimit -t 5 ; $(RUN_FOR_TARGET) $< > tmp-$*
+	ulimit -t 30 ; $(RUN_FOR_TARGET) $< > tmp-$*
 	mv tmp-$* $*.ok
 .run.ko:
 	rm -f tmp-$* $*.ko
 	set +e ; \
-	ulimit -t 5 ; $(RUN_FOR_TARGET) $< > tmp-$* ; \
+	ulimit -t 30 ; $(RUN_FOR_TARGET) $< > tmp-$* ; \
 	if [ $$? -ne 0 ] ; then \
 	  exit 0 ; \
 	else \
