@@ -473,11 +473,22 @@ udi_wait (status)
 	  fwrite (sbuf, 1, CountDone, stderr);
 	  fflush(stderr);
 	  continue;
+
 	case UDIStdinNeeded:
-	  scanf ("%s", sbuf);
-	  i = strlen (sbuf);
-	  UDIPutStdin (sbuf, (UDISizeT)i, &CountDone);
-	  continue;
+	  {
+	    int ch;
+	    i = 0;
+	    do
+	      {
+		ch = getchar ();
+		if (ch == EOF)
+		  break;
+		sbuf[i++] = ch;
+	      } while (i < SBUF_MAX && ch != '\n');
+	    UDIPutStdin (sbuf, (UDISizeT)i, &CountDone);
+	    continue;
+	  }
+
 	case UDIRunning:
 	  /* In spite of the fact that we told UDIWait to wait forever, it will
 	     return spuriously sometimes.  */
