@@ -1,5 +1,10 @@
 2003-04-21  J. Brobecker  <brobecker@gnat.com>
 
+	* config/pa/tm-hppa.h: Obsolete a section that was only used
+	for hppa-pro.
+
+2003-04-21  J. Brobecker  <brobecker@gnat.com>
+
 	Ongoing multi-arch conversion for HP/UX.
 	* config/pa/tm-hppa.h (GDB_MULTI_ARCH): Set to 1. Do not define
 	if already defined (allows hppa64 to stay non-multiarched for now).

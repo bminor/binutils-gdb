@@ -463,7 +463,7 @@ extern void hppa_pop_frame (void);
 
 #define INSTRUCTION_SIZE 4
 
-#ifndef PA_LEVEL_0
+//OBSOLETE #ifndef PA_LEVEL_0
 
 /* Non-level zero PA's have space registers (but they don't always have
    floating-point, do they????  */
@@ -551,42 +551,42 @@ extern void hppa_pop_frame (void);
 #endif
 #define REG_PARM_STACK_SPACE 16
 
-#else /* defined PA_LEVEL_0 */
-
-/* FIXME: brobecker 2002-12-26.  PA_LEVEL_0 is only defined for the
-   hppa-pro target, which should be obsoleted soon.  The following
-   section will therefore not be included in the multiarch conversion.  */
-/* This is the call dummy for a level 0 PA.  Level 0's don't have space
-   registers (or floating point?), so we skip all that inter-space call stuff,
-   and avoid touching the fp regs.
-
-   call_dummy
-
-   ldw -36(%sp), %arg0
-   ldw -40(%sp), %arg1
-   ldw -44(%sp), %arg2
-   ldw -48(%sp), %arg3
-   ldil 0, %r31                 ; FUNC_LDIL_OFFSET must point here
-   ldo 0(%r31), %r31            ; FUNC_LDO_OFFSET must point here
-   ble 0(%sr0, %r31)
-   copy %r31, %r2
-   break 4, 8 
-   nop                          ; restore_pc_queue expects these
-   bv,n 0(%r22)                 ; instructions to be here...
-   nop
- */
-
-/* Define offsets into the call dummy for the target function address */
-#define FUNC_LDIL_OFFSET (INSTRUCTION_SIZE * 4)
-#define FUNC_LDO_OFFSET (INSTRUCTION_SIZE * 5)
-
-#define CALL_DUMMY {0x4bda3fb9, 0x4bd93fb1, 0x4bd83fa9, 0x4bd73fa1,\
-		    0x23e00000, 0x37ff0000, 0xe7e00000, 0x081f0242,\
-		    0x00010004, 0x08000240, 0xeac0c002, 0x08000240}
-
-#define CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 12)
-
-#endif /* defined PA_LEVEL_0 */
+//OBSOLETE #else /* defined PA_LEVEL_0 */
+//OBSOLETE 
+//OBSOLETE /* FIXME: brobecker 2002-12-26.  PA_LEVEL_0 is only defined for the
+//OBSOLETE    hppa-pro target, which should be obsoleted soon.  The following
+//OBSOLETE    section will therefore not be included in the multiarch conversion.  */
+//OBSOLETE /* This is the call dummy for a level 0 PA.  Level 0's don't have space
+//OBSOLETE    registers (or floating point?), so we skip all that inter-space call stuff,
+//OBSOLETE    and avoid touching the fp regs.
+//OBSOLETE 
+//OBSOLETE    call_dummy
+//OBSOLETE 
+//OBSOLETE    ldw -36(%sp), %arg0
+//OBSOLETE    ldw -40(%sp), %arg1
+//OBSOLETE    ldw -44(%sp), %arg2
+//OBSOLETE    ldw -48(%sp), %arg3
+//OBSOLETE    ldil 0, %r31                 ; FUNC_LDIL_OFFSET must point here
+//OBSOLETE    ldo 0(%r31), %r31            ; FUNC_LDO_OFFSET must point here
+//OBSOLETE    ble 0(%sr0, %r31)
+//OBSOLETE    copy %r31, %r2
+//OBSOLETE    break 4, 8 
+//OBSOLETE    nop                          ; restore_pc_queue expects these
+//OBSOLETE    bv,n 0(%r22)                 ; instructions to be here...
+//OBSOLETE    nop
+//OBSOLETE  */
+//OBSOLETE 
+//OBSOLETE /* Define offsets into the call dummy for the target function address */
+//OBSOLETE #define FUNC_LDIL_OFFSET (INSTRUCTION_SIZE * 4)
+//OBSOLETE #define FUNC_LDO_OFFSET (INSTRUCTION_SIZE * 5)
+//OBSOLETE 
+//OBSOLETE #define CALL_DUMMY {0x4bda3fb9, 0x4bd93fb1, 0x4bd83fa9, 0x4bd73fa1,\
+//OBSOLETE 		    0x23e00000, 0x37ff0000, 0xe7e00000, 0x081f0242,\
+//OBSOLETE 		    0x00010004, 0x08000240, 0xeac0c002, 0x08000240}
+//OBSOLETE 
+//OBSOLETE #define CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 12)
+//OBSOLETE 
+//OBSOLETE #endif /* defined PA_LEVEL_0 */
 
 #if !GDB_MULTI_ARCH
 #define CALL_DUMMY_START_OFFSET 0
