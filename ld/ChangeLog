@@ -1,3 +1,9 @@
+Tue Aug 18 13:41:36 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in: accept all m68K family members.
+
+	* Makefile.in: always create installation directories.
+
 Thu Aug 13 11:49:34 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ldlex.l: now parses comment correctly, added ~ to acceptable

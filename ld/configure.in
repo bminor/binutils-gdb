@@ -14,6 +14,17 @@ case "${host_cpu}" in
 rs6000)	my_host=rs6000
 	;;
 
+hppa*)
+	case "${host_vendor}" in
+	hp)
+		case "${host_os}" in
+		hpux)	my_host=hppahpux ;;
+		bsd)	my_host=hppabsd ;;
+		esac
+		;;
+	esac
+	;;
+
 mips)
 	case "${host_vendor}" in
 	dec)	my_host=decstation ;;
@@ -32,7 +43,7 @@ m88k)
 	esac
 	;;
 
-m68k)
+m68*)
 	case "${host_vendor}" in
 	cbm)
 		case ${host_os} in
@@ -102,9 +113,9 @@ links="sysdep.h"
 
 if [ ! -f ${srcdir}/${files} ] ; then
 	if [ -n "${my_host}" ] ; then
-		echo '***' No file ${srcdir}/${files}
+		echo '***' No file ${srcdir}/${files} 1>&2
 	fi
-	echo '***' ${srcname} does not support host ${host}
+	echo '***' ${srcname} does not support host ${host} 1>&2
 	exit 1
 fi
 host_makefile_frag=
@@ -127,11 +138,12 @@ wrs)
 	i960) my_target=vxworks960 ;;
 	m68k) my_target=vxworks68;;
 	m680[01234]0) my_target=vxworks68;;
+	m683?2) my_target=vxworks68;;
+	sparc) my_target=vxsparc;;
 	esac
 	;;
-tandem)
-	my_target=st2000
-	;;
+ericsson) my_target=OSE68 ;;
+tandem) my_target=st2000 ;;
 *)
 	case ${target_cpu} in
 	i386)	my_target=go32 ;;
@@ -147,14 +159,18 @@ tandem)
 		xray) my_target=ieee-h8300 ;;
 		esac
 		;;
-	m68k)	
+	m68*)	
 		case ${target_vendor} in
 		sony)	my_target=news ;;
 		hp)	my_target=hp300bsd ;;
-
 		*)
-			echo "Unknown m68k target vendor:" ${target_vendor}
-			exit 1
+			case "${target_os}" in
+			aout)	my_target=m68k-aout ;;
+			coff)	my_target=m68k-coff ;;
+			*)	echo "Unknown m68k target vendor:" ${target_vendor} 1>&2
+				exit 1
+				;;
+			esac
 			;;
 		esac
 		;;

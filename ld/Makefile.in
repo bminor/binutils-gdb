@@ -435,6 +435,12 @@ objdump:objdump.c
 
 .PHONY: install
 install: $(LD_PROG)
+	-parent=`echo $(bindir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	-if [ -d $(bindir) ] ; then true ; else mkdir $(bindir) ; fi
+	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
 	-rm -f $(bindir)/$(program_prefix)ld$(program_suffix)
 	$(INSTALL_PROGRAM) ld.new $(bindir)/$(program_prefix)ld$(program_suffix)
 	-rm -f $(tooldir)/ld
@@ -443,6 +449,9 @@ install: $(LD_PROG)
 	$(INSTALL_DATA) $(srcdir)/ld.1 $(man1dir)/$(program_prefix)ld$(program_suffix).1
 
 install-info: info
+	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
 	for i in ld.info* ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
