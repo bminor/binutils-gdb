@@ -1,3 +1,8 @@
+Mon Jul 12 07:22:28 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/tc-mips.c (mips_ip): Don't warn on 'i' or 'j' mismatch if
+	there is another alternative for the instruction.
+
 Fri Jul  9 17:31:34 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* doc/as.texinfo: updates for H8/300H

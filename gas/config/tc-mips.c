@@ -2244,13 +2244,23 @@ mips_ip (str, ip)
 	      if (*args == 'i')
 		{
 		  if ((unsigned long) imm_expr.X_add_number > 65535)
-		    as_bad ("16 bit expression not in range 0..65535");
+		    {
+		      if (insn + 1 < &mips_opcodes[NUMOPCODES] &&
+			  !strcmp (insn->name, insn[1].name))
+			break;
+		      as_bad ("16 bit expression not in range 0..65535");
+		    }
 		}
 	      else
 		{
 		  if (imm_expr.X_add_number < -32768 ||
 		      imm_expr.X_add_number > 32767)
-		    as_bad ("16 bit expression not in range -32768..32767");
+		    {
+		      if (insn + 1 < &mips_opcodes[NUMOPCODES] &&
+			  !strcmp (insn->name, insn[1].name))
+			break;
+		      as_bad ("16 bit expression not in range -32768..32767");
+		    }
 		}
 	      s = expr_end;
 	      continue;
