@@ -335,6 +335,7 @@ else
 fi
 
 v850_files="ChangeLog ChangeLog.2 Makefile.in Makefile.am archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h elf32-v850.c"
+v850e_files="ChangeLog ChangeLog.2 Makefile.in Makefile.am archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h"
 if ( echo $* | grep keep\-v850 > /dev/null ) ; then
 	for i in $v850_files ; do
 		if test ! -d $i && (grep sanitize-v850 $i > /dev/null) ; then
@@ -345,12 +346,12 @@ if ( echo $* | grep keep\-v850 > /dev/null ) ; then
 	done
 else
   if ( echo $* | grep keep\-v850e > /dev/null ) ; then
-    ;
+    true
   else
     if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
-      ;
+      true
     else
-	for i in $v850_files ; do
+	for i in $v850e_files ; do
 		if test ! -d $i && (grep sanitize-v850 $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
 				echo Removing traces of \"v850\" from $i...
