@@ -42,7 +42,7 @@ man9dir = $(mandir)/man9
 infodir = $(prefix)/info
 includedir = $(prefix)/include
 oldincludedir =
-docdir = $(srcdir)/doc
+docdir = doc
 
 SHELL = /bin/sh
 
@@ -75,12 +75,12 @@ BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 	archures.o core.o section.o format.o syms.o reloc.o init.o ctor.o seclet.o
 
 BFD_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
-	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o
+	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o cpu-hppa.o
 
 BFD_BACKENDS = oasys.o ieee.o srec.o elf.o stab-syms.o\
 	aout64.o aout32.o demo64.o sunos.o newsos3.o i386aout.o bout.o \
 	coff-i960.o coff-a29k.o coff-m68k.o coff-i386.o coff-m88k.o \
-	coff-mips.o coff-rs6000.o coff-h8300.o coff-msym.o 
+	coff-mips.o coff-rs6000.o coff-h8300.o coff-msym.o hppa.o
 
 OPTIONAL_BACKENDS = trad-core.o
 
@@ -98,8 +98,9 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
 	 oasys.c ieee.c coff-m68k.c coff-a29k.c coff-rs6000.c coff-msym.c \
 	 format.c section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c seclet.c \
 	 coff-m88k.c coff-mips.c trad-core.c newsos3.c i386aout.c bout.c elf.c \
-	cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c cpu-m88k.c \
- 	cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c cpu-rs6000.c coff-h8300.c
+	 cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c cpu-m88k.c cpu-vax.c \
+	 cpu-mips.c cpu-a29k.c cpu-i386.c cpu-rs6000.c coff-h8300.c hppa.c \
+	 cpu-hppa.c
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 

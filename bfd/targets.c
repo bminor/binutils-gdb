@@ -143,7 +143,8 @@ of a file.
 .    bfd_target_ieee_flavour,
 .    bfd_target_oasys_flavour,
 .    bfd_target_tekhex_flavour,
-.    bfd_target_srec_flavour} flavour;
+.    bfd_target_srec_flavour,
+.    bfd_target_hppa_flavour} flavour;
 
 The order of bytes within the data area of a file.
 
@@ -392,6 +393,9 @@ extern bfd_target a29kcoff_big_vec;
 extern bfd_target trad_core_vec;
 extern bfd_target rs6000coff_vec;
 extern bfd_target h8300coff_vec;
+#ifdef hp9000s800
+extern bfd_target hppa_vec;
+#endif
 
 #ifdef DEFAULT_VECTOR
 extern bfd_target DEFAULT_VECTOR;
@@ -440,6 +444,9 @@ bfd_target *target_vector[] = {
 	&m68kcoff_vec,
 	&a29kcoff_big_vec,
 	&rs6000coff_vec,
+#ifdef hp9000s800
+        &hppa_vec,
+#endif
 
 #ifdef	TRAD_CORE
 	&trad_core_vec,

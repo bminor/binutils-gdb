@@ -114,6 +114,16 @@ vax)
 	*) my_host=vaxbsd ;;
 	esac
 	;;
+hppa)
+	case "${host_vendor}" in
+	hp)
+		case "${host_os}" in
+		hpux)	my_host=hppahpux ;;
+		bsd)	my_host=hppabsd ;;
+		esac
+		;;
+	esac
+	;;
 esac
 
 # Set up to make a link between the host's include file and "sysdep.h".
@@ -182,6 +192,9 @@ m88k-motorola-*		) bfd_target=m88k-coff ;;
 
 vax-*-*			) bfd_target=vax ;;
 tahoe-*-*		) bfd_target=tahoe ;;
+
+hppa-hp-hpux		) bfd_target=hppahpux ;;
+hppa-hp-bsd		) bfd_target=hppabsd ;;
 
 *-*-aout		) bfd_target=${target_cpu}-aout ;;
 *-*-bsd			) bfd_target=${target_cpu}-aout ;;

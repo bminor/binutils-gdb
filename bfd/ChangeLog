@@ -1,3 +1,8 @@
+Fri Jun 19 15:21:56 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in, archures.c, configure.in, cpu-hppa.c, hppa.c, libhppa.h,
+	targets.c:  HPPA merge.
+
 Fri Jun 19 12:21:38 1992  John Gilmore  (gnu at cygnus.com)
 
 	* configure.in:  Separate Solaris2 from SYSV4 on SPARC.

@@ -96,6 +96,7 @@ DESCRIPTION
 .  bfd_arch_pyramid,   {* Pyramid Technology *}
 .  bfd_arch_h8300,     {* Hitachi H8/300 *}
 .  bfd_arch_rs6000,    {* IBM RS/6000 *}
+.  bfd_arch_hppa,      {* HP PA RISC *}
 .  bfd_arch_last
 .  };
 
@@ -412,6 +413,7 @@ extern void EXFUN(bfd_a29k_arch,(void));
 extern void EXFUN(bfd_mips_arch,(void));
 extern void EXFUN(bfd_i386_arch,(void));
 extern void EXFUN(bfd_rs6000_arch,(void));
+extern void EXFUN(bfd_hppa_arch,(void));
 
 
 
@@ -430,6 +432,7 @@ static void EXFUN((*archures_init_table[]),()) =
   bfd_m68k_arch,
   bfd_vax_arch,
   bfd_rs6000_arch,
+  bfd_hppa_arch,
 #endif
   0
   };
