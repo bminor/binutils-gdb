@@ -29,10 +29,12 @@ Boston, MA 02111-1307, USA.  */
 
 /* List of instruction sets variations.
    These values are such that each element is either a superset of a
-   preceding one or they conflict in which case SPARC_OPCODE_CONFLICT_P
+   preceding each one or they conflict in which case SPARC_OPCODE_CONFLICT_P
    returns non-zero.
    The values are indices into `sparc_opcode_archs' defined in sparc-opc.c.
    Don't change this without updating sparc-opc.c.  */
+/* ??? May wish to allow for anonymous architectures for variants that have
+   a common but unnamed subset.  */
 
 enum sparc_opcode_arch_val {
   SPARC_OPCODE_ARCH_V6 = 0,
@@ -57,7 +59,7 @@ struct sparc_opcode_arch {
 
 extern const struct sparc_opcode_arch sparc_opcode_archs[];
 
-extern enum sparc_opcode_arch_val sparc_opcode_lookup_arch ();
+extern const enum sparc_opcode_arch_val sparc_opcode_lookup_arch ();
 
 /* Non-zero if ARCH1 conflicts with ARCH2.  */
 

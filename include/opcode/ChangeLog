@@ -1,3 +1,8 @@
+Fri Feb 16 12:23:34 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* sparc.h (sparc_opcode_lookup_arch) Make return type in
+	declaration consistent with return type in definition.
+
 Wed Feb 14 18:14:11 1996  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386.h (i386_optab): Remove Data32 from pushf and popf.
