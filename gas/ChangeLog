@@ -1,5 +1,10 @@
 2003-07-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/obj-elf.c (obj_elf_change_section): Always set section
+	type and flags.
+
+2003-07-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/obj-elf.c (special_sections): Removed.
 	(obj_elf_change_section): Call _bfd_elf_get_sec_type_attr. Set
 	elf_section_type and elf_section_flags.

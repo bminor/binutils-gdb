@@ -681,10 +681,10 @@ obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
 		     name);
 	}
       attr |= def_attr;
-
-      elf_section_type (sec) = type;
-      elf_section_flags (sec) = attr;
     }
+
+  elf_section_type (sec) = type;
+  elf_section_flags (sec) = attr;
 
   /* Convert ELF type and flags to BFD flags.  */
   flags = (SEC_RELOC
