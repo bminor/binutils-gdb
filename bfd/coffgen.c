@@ -329,6 +329,147 @@ coff_get_symtab (abfd, alocation)
   return bfd_get_symcount (abfd);
 }
 
+/* Get the name of a symbol.  The caller must pass in a buffer of size
+   >= SYMNMLEN + 1.  */
+
+const char *
+_bfd_coff_internal_syment_name (abfd, sym, buf)
+     bfd *abfd;
+     const struct internal_syment *sym;
+     char *buf;
+{
+  /* FIXME: It's not clear this will work correctly if sizeof
+     (_n_zeroes) != 4.  */
+  if (sym->_n._n_n._n_zeroes != 0
+      || sym->_n._n_n._n_offset == 0)
+    {
+      memcpy (buf, sym->_n._n_name, SYMNMLEN);
+      buf[SYMNMLEN] = '\0';
+      return buf;
+    }
+  else
+    {
+      const char *strings;
+
+      BFD_ASSERT (sym->_n._n_n._n_offset >= STRING_SIZE_SIZE);
+      strings = obj_coff_strings (abfd);
+      if (strings == NULL)
+	{
+	  strings = _bfd_coff_read_string_table (abfd);
+	  if (strings == NULL)
+	    return NULL;
+	}
+      return strings + sym->_n._n_n._n_offset;
+    }
+}
+
+/* Read in and swap the relocs.  This returns a buffer holding the
+   relocs for section SEC in file ABFD.  If CACHE is true and
+   INTERNAL_RELOCS is NULL, the relocs read in will be saved in case
+   the function is called again.  If EXTERNAL_RELOCS is not NULL, it
+   is a buffer large enough to hold the unswapped relocs.  If
+   INTERNAL_RELOCS is not NULL, it is a buffer large enough to hold
+   the swapped relocs.  If REQUIRE_INTERNAL is true, then the return
+   value must be INTERNAL_RELOCS.  The function returns NULL on error.  */
+
+struct internal_reloc *
+_bfd_coff_read_internal_relocs (abfd, sec, cache, external_relocs,
+				require_internal, internal_relocs)
+     bfd *abfd;
+     asection *sec;
+     boolean cache;
+     bfd_byte *external_relocs;
+     boolean require_internal;
+     struct internal_reloc *internal_relocs;
+{
+  bfd_size_type relsz;
+  bfd_byte *free_external = NULL;
+  struct internal_reloc *free_internal = NULL;
+  bfd_byte *erel;
+  bfd_byte *erel_end;
+  struct internal_reloc *irel;
+
+  if (coff_section_data (abfd, sec) != NULL
+      && coff_section_data (abfd, sec)->relocs != NULL)
+    {
+      if (! require_internal)
+	return coff_section_data (abfd, sec)->relocs;
+      memcpy (internal_relocs, coff_section_data (abfd, sec)->relocs,
+	      sec->reloc_count * sizeof (struct internal_reloc));
+      return internal_relocs;
+    }
+
+  relsz = bfd_coff_relsz (abfd);
+
+  if (external_relocs == NULL)
+    {
+      free_external = (bfd_byte *) malloc (sec->reloc_count * relsz);
+      if (free_external == NULL && sec->reloc_count > 0)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  goto error_return;
+	}
+      external_relocs = free_external;
+    }
+
+  if (bfd_seek (abfd, sec->rel_filepos, SEEK_SET) != 0
+      || (bfd_read (external_relocs, relsz, sec->reloc_count, abfd)
+	  != relsz * sec->reloc_count))
+    goto error_return;
+
+  if (internal_relocs == NULL)
+    {
+      free_internal = ((struct internal_reloc *)
+		       malloc (sec->reloc_count
+			       * sizeof (struct internal_reloc)));
+      if (free_internal == NULL && sec->reloc_count > 0)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  goto error_return;
+	}
+      internal_relocs = free_internal;
+    }
+
+  /* Swap in the relocs.  */
+  erel = external_relocs;
+  erel_end = erel + relsz * sec->reloc_count;
+  irel = internal_relocs;
+  for (; erel < erel_end; erel += relsz, irel++)
+    bfd_coff_swap_reloc_in (abfd, (PTR) erel, (PTR) irel);
+
+  if (free_external != NULL)
+    {
+      free (free_external);
+      free_external = NULL;
+    }
+
+  if (cache && free_internal != NULL)
+    {
+      if (coff_section_data (abfd, sec) == NULL)
+	{
+	  sec->used_by_bfd =
+	    (PTR) bfd_zalloc (abfd,
+			      sizeof (struct coff_section_tdata));
+	  if (sec->used_by_bfd == NULL)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      goto error_return;
+	    }
+	  coff_section_data (abfd, sec)->contents = NULL;
+	}
+      coff_section_data (abfd, sec)->relocs = free_internal;
+    }
+
+  return internal_relocs;
+
+ error_return:
+  if (free_external != NULL)
+    free (free_external);
+  if (free_internal != NULL)
+    free (free_internal);
+  return NULL;
+}
+
 /* Set lineno_count for the output sections of a COFF file.  */
 
 int
@@ -1688,6 +1829,15 @@ coff_get_symbol_info (abfd, symbol, ret)
      symbol_info *ret;
 {
   bfd_symbol_info (symbol, ret);
+  if (coffsymbol (symbol)->native != NULL
+      && coffsymbol (symbol)->native->fix_value)
+    {
+      combined_entry_type *psym;
+
+      psym = ((combined_entry_type *)
+	      coffsymbol (symbol)->native->u.syment.n_value);
+      ret->value = (bfd_vma) (psym - obj_raw_syments (abfd));
+    }
 }
 
 /* Print out information about COFF symbol.  */
@@ -1974,7 +2124,7 @@ coff_find_nearest_line (abfd, section, ignore_symbols, offset, filename_ptr,
       section->used_by_bfd =
 	((PTR) bfd_zalloc (abfd,
 			   sizeof (struct coff_section_tdata)));
-      sec_data = section->used_by_bfd;
+      sec_data = (struct coff_section_tdata *) section->used_by_bfd;
     }
   if (sec_data != NULL)
     {

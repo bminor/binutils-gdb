@@ -25,10 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/internal.h"
 #include "libcoff.h"
 
-/* This file holds the XCOFF linker code.  A lot of it is very similar
-   to the COFF linker code.  However, it is different enough that I
-   chose to avoid trying to hack up the COFF code to support XCOFF.
-   That leads to a certain amount of duplicated code, alas.  */
+/* This file holds the XCOFF linker code.  */
 
 #define STRING_SIZE_SIZE (4)
 
@@ -1216,34 +1213,47 @@ xcoff_link_add_symbols (abfd, info)
 								relbuf);
 		      if (relname == NULL)
 			goto error_return;
-		      copy = (! info->keep_memory
-			      || relsym._n._n_n._n_zeroes != 0
-			      || relsym._n._n_n._n_offset == 0);
-		      h = xcoff_link_hash_lookup (xcoff_hash_table (info),
-						  relname, true, copy, false);
-		      if (h == NULL)
-			goto error_return;
 
-		      /* At this point h->root.type could be
-			 bfd_link_hash_new.  That should be OK, since
-			 we know for sure that we will come across
-			 this symbol as we step through the file.  */
-
-		      /* We store h in *sym_hash for the convenience
-			 of the relocate_section function.  */
-		      *sym_hash = h;
-
-		      if (h->toc_section != NULL)
+		      /* We only merge TOC entries if the TC name is
+                         the same as the symbol name.  This handles
+                         the normal case, but not common cases like
+                         SYM.P4 which gcc generates to store SYM + 4
+                         in the TOC.  FIXME.  */
+		      if (strcmp (name, relname) == 0)
 			{
-			  /* We already have a TOC entry for this
-			     symbol, so we can just ignore this one.  */
-			  *rel_csect = bfd_und_section_ptr;
-			  break;
-			}
+			  copy = (! info->keep_memory
+				  || relsym._n._n_n._n_zeroes != 0
+				  || relsym._n._n_n._n_offset == 0);
+			  h = xcoff_link_hash_lookup (xcoff_hash_table (info),
+						      relname, true, copy,
+						      false);
+			  if (h == NULL)
+			    goto error_return;
 
-		      /* We are about to create a TOC entry for this
-			 symbol.  */
-		      set_toc = h;
+			  /* At this point h->root.type could be
+			     bfd_link_hash_new.  That should be OK,
+			     since we know for sure that we will come
+			     across this symbol as we step through the
+			     file.  */
+
+			  /* We store h in *sym_hash for the
+			     convenience of the relocate_section
+			     function.  */
+			  *sym_hash = h;
+
+			  if (h->toc_section != NULL)
+			    {
+			      /* We already have a TOC entry for this
+				 symbol, so we can just ignore this
+				 one.  */
+			      *rel_csect = bfd_und_section_ptr;
+			      break;
+			    }
+
+			  /* We are about to create a TOC entry for
+			     this symbol.  */
+			  set_toc = h;
+			}
 		    }
 		}
 	    }
@@ -1431,7 +1441,7 @@ xcoff_link_add_symbols (abfd, info)
 	  csect = bfd_make_section_anyway (abfd, ".bss");
 	  if (csect == NULL)
 	    goto error_return;
-	  csect->vma = 0;
+	  csect->vma = sym.n_value;
 	  csect->_raw_size = aux.x_csect.x_scnlen.l;
 	  csect->flags |= SEC_ALLOC;
 	  csect->alignment_power = SMTYP_ALIGN (aux.x_csect.x_smtyp);
@@ -1524,6 +1534,21 @@ xcoff_link_add_symbols (abfd, info)
 		  (struct bfd_link_hash_entry **) sym_hash)))
 	    goto error_return;
 
+	  if (smtyp == XTY_CM)
+	    {
+	      if ((*sym_hash)->root.type != bfd_link_hash_common
+		  || (*sym_hash)->root.u.c.p->section != csect)
+		{
+		  /* We don't need the common csect we just created.  */
+		  csect->_raw_size = 0;
+		}
+	      else
+		{
+		  (*sym_hash)->root.u.c.p->alignment_power
+		     = csect->alignment_power;
+		}
+	    }
+
 	  if (info->hash->creator == abfd->xvec)
 	    {
 	      int flag;
@@ -1574,75 +1599,49 @@ xcoff_link_add_symbols (abfd, info)
 		  goto error_return;
 		}
 
-	      /* We need to copy all relocs which are not PC relative
-		 and not TOC relative into the .loader section.
-
-		 We also identify all symbols which are called, so
-		 that we can create glue code for calls to functions
-		 imported from dynamic objects.  */
-
+	      /* We identify all symbols which are called, so that we
+		 can create glue code for calls to functions imported
+		 from dynamic objects.  */
 	      if (info->hash->creator == abfd->xvec
-		  && *rel_csect != bfd_und_section_ptr)
+		  && *rel_csect != bfd_und_section_ptr
+		  && (rel->r_type == R_BR
+		      || rel->r_type == R_RBR)
+		  && obj_xcoff_sym_hashes (abfd)[rel->r_symndx] != NULL)
 		{
 		  struct xcoff_link_hash_entry *h;
 
-		  switch (rel->r_type)
+		  h = obj_xcoff_sym_hashes (abfd)[rel->r_symndx];
+		  h->flags |= XCOFF_CALLED;
+		  /* If the symbol name starts with a period, it is
+                     the code of a function.  If the symbol is
+                     currently undefined, then add an undefined symbol
+                     for the function descriptor.  This should do no
+                     harm, because any regular object that defines the
+                     function should also define the function
+                     descriptor.  It helps, because it means that we
+                     will identify the function descriptor with a
+                     dynamic object if a dynamic object defines it.  */
+		  if (h->root.root.string[0] == '.'
+		      && h->descriptor == NULL)
 		    {
-		    default:
-		      break;
-		    case R_POS:
-		    case R_NEG:
-		    case R_RL:
-		    case R_RLA:
-		      ++xcoff_hash_table (info)->ldrel_count;
-		      ++xcoff_section_data (abfd, *rel_csect)->ldrel_count;
-		      h = obj_xcoff_sym_hashes (abfd)[rel->r_symndx];
-		      if (h != NULL)
-			h->flags |= XCOFF_LDREL;
-		      break;
-		    case R_BR:
-		    case R_RBR:
-		      h = obj_xcoff_sym_hashes (abfd)[rel->r_symndx];
-		      if (h != NULL)
-			{
-			  h->flags |= XCOFF_CALLED;
-			  /* If the symbol name starts with a period,
-                             it is the code of a function.  If the
-                             symbol is currently undefined, then add
-                             an undefined symbol for the function
-                             descriptor.  This should do no harm,
-                             because any regular object that defines
-                             the function should also define the
-                             function descriptor.  It helps, because
-                             it means that we will identify the
-                             function descriptor with a dynamic object
-                             if a dynamic object defines it.  */
-			  if (h->root.root.string[0] == '.'
-			      && h->descriptor == NULL)
-			    {
-			      struct xcoff_link_hash_entry *hds;
+		      struct xcoff_link_hash_entry *hds;
 
-			      hds = (xcoff_link_hash_lookup
-				     (xcoff_hash_table (info),
-				      h->root.root.string + 1, true, false,
-				      true));
-			      if (hds == NULL)
-				goto error_return;
-			      if (hds->root.type == bfd_link_hash_new)
-				{
-				  if (! (_bfd_generic_link_add_one_symbol
-					 (info, abfd, hds->root.root.string,
-					  (flagword) 0, bfd_und_section_ptr,
-					  (bfd_vma) 0, (const char *) NULL,
-					  false, false,
-					  ((struct bfd_link_hash_entry **)
-					   NULL))))
-				    goto error_return;
-				}
-			      h->descriptor = hds;
-			    }
+		      hds = xcoff_link_hash_lookup (xcoff_hash_table (info),
+						    h->root.root.string + 1,
+						    true, false, true);
+		      if (hds == NULL)
+			goto error_return;
+		      if (hds->root.type == bfd_link_hash_new)
+			{
+			  if (! (_bfd_generic_link_add_one_symbol
+				 (info, abfd, hds->root.root.string,
+				  (flagword) 0, bfd_und_section_ptr,
+				  (bfd_vma) 0, (const char *) NULL, false,
+				  false,
+				  (struct bfd_link_hash_entry **) NULL)))
+			    goto error_return;
 			}
-		      break;
+		      h->descriptor = hds;
 		    }
 		}
 	    }
@@ -1773,10 +1772,12 @@ xcoff_link_add_dynamic_symbols (abfd, info)
 
 	      /* If the symbol is undefined, and the current BFD is
 		 not a dynamic object, change the BFD to this dynamic
-		 object, so that we can get the import file ID
-		 correctly.  */
-	      if (h->root.u.undef.abfd == NULL
-		  || (h->root.u.undef.abfd->flags & DYNAMIC) == 0)
+		 object, so that we can get the correct import file
+		 ID.  */
+	      if ((h->root.type == bfd_link_hash_undefined
+		   || h->root.type == bfd_link_hash_undefweak)
+		  && (h->root.u.undef.abfd == NULL
+		      || (h->root.u.undef.abfd->flags & DYNAMIC) == 0))
 		h->root.u.undef.abfd = abfd;
 
 	      if (h->smclas == XMC_UA
@@ -2024,7 +2025,13 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
   hentry = xcoff_link_hash_lookup (xcoff_hash_table (info), entry,
 				   false, false, true);
   if (hentry != NULL)
-    hentry->flags |= XCOFF_ENTRY;
+    {
+      hentry->flags |= XCOFF_ENTRY;
+      if (hentry->root.type == bfd_link_hash_defined
+	  || hentry->root.type == bfd_link_hash_defweak)
+	xcoff_data (output_bfd)->entry_section =
+	  hentry->root.u.def.section->output_section;
+    }
 
   /* Garbage collect unused sections.  */
   if (info->relocateable
@@ -2035,6 +2042,22 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
     {
       gc = false;
       xcoff_hash_table (info)->gc = false;
+
+      /* We still need to call xcoff_mark, in order to set ldrel_count
+         correctly.  */
+      for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+	{
+	  asection *o;
+
+	  for (o = sub->sections; o != NULL; o = o->next)
+	    {
+	      if ((o->flags & SEC_MARK) == 0)
+		{
+		  if (! xcoff_mark (info, o))
+		    goto error_return;
+		}
+	    }
+	}
     }
   else
     {
@@ -2284,7 +2307,10 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
 }
 
 /* The mark phase of garbage collection.  For a given section, mark
-   it, and all the sections which define symbols to which it refers.  */
+   it, and all the sections which define symbols to which it refers.
+   Because this function needs to look at the relocs, we also count
+   the number of relocs which need to be copied into the .loader
+   section.  */
 
 static boolean
 xcoff_mark (info, sec)
@@ -2393,6 +2419,35 @@ xcoff_mark (info, sec)
 		  if (! xcoff_mark (info, rsec))
 		    return false;
 		}
+
+	      /* See if this reloc needs to be copied into the .loader
+                 section.  */
+	      switch (rel->r_type)
+		{
+		default:
+		  if (h == NULL
+		      || h->root.type == bfd_link_hash_defined
+		      || h->root.type == bfd_link_hash_defweak
+		      || h->root.type == bfd_link_hash_common)
+		    break;
+		  /* Fall through.  */
+		case R_POS:
+		case R_NEG:
+		case R_RL:
+		case R_RLA:
+		  ++xcoff_hash_table (info)->ldrel_count;
+		  if (h != NULL)
+		    h->flags |= XCOFF_LDREL;
+		  break;
+		case R_TOC:
+		case R_GL:
+		case R_TCL:
+		case R_TRL:
+		case R_TRLA:
+		  /* We should never need a .loader reloc for a TOC
+		     relative reloc.  */
+		  break;
+		}
 	    }
 
 	  if (! info->keep_memory
@@ -2441,10 +2496,6 @@ xcoff_sweep (info)
 		  o->_raw_size = 0;
 		  o->reloc_count = 0;
 		  o->lineno_count = 0;
-		  if (coff_section_data (sub, o) != NULL
-		      && xcoff_section_data (sub, o) != NULL)
-		    xcoff_hash_table (info)->ldrel_count -=
-		      xcoff_section_data (sub, o)->ldrel_count;
 		}
 	    }
 	}
@@ -2520,11 +2571,12 @@ xcoff_build_ldsyms (h, p)
 
   /* We need to add a symbol to the .loader section if it is mentioned
      in a reloc which we are copying to the .loader section and it was
-     not defined, or if it is the entry point.  */
+     not defined or common, or if it is the entry point.  */
 
   if (((h->flags & XCOFF_LDREL) == 0
        || h->root.type == bfd_link_hash_defined
-       || h->root.type == bfd_link_hash_defweak)
+       || h->root.type == bfd_link_hash_defweak
+       || h->root.type == bfd_link_hash_common)
       && (h->flags & XCOFF_ENTRY) == 0)
     {
       h->ldsym = NULL;
@@ -2660,6 +2712,7 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 		  + xcoff_hash_table (info)->ldhdr.l_nsyms * LDSYMSZ));
 
   xcoff_data (abfd)->coff.link_info = info;
+  xcoff_data (abfd)->full_aouthdr = true;
 
   finfo.strtab = _bfd_stringtab_init ();
   if (finfo.strtab == NULL)
@@ -2728,13 +2781,7 @@ _bfd_xcoff_bfd_final_link (abfd, info)
              code knows what compute_section_file_positions is going
              to do.  */
 	  sofar = bfd_coff_filhsz (abfd);
-	  if ((abfd->flags & EXEC_P) != 0)
-	    sofar += bfd_coff_aoutsz (abfd);
-	  else
-	    {
-	      /* FIXME.  */
-	      sofar += 28;
-	    }
+	  sofar += bfd_coff_aoutsz (abfd);
 	  sofar += abfd->section_count * bfd_coff_scnhsz (abfd);
 
 	  for (o = abfd->sections; o != NULL; o = o->next)
@@ -3420,6 +3467,8 @@ xcoff_link_input_bfd (finfo, input_bfd)
 		 + (*csectpp)->output_offset
 		 + isym.n_value
 		 - (*csectpp)->vma);
+	      xcoff_data (finfo->output_bfd)->toc_section =
+		(*csectpp)->output_section;
 	      require = true;
 	    }
 	}
@@ -3441,7 +3490,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
       if (! skip
 	  && isym.n_sclass == C_EXT
 	  && smtyp == XTY_CM
-	  && ((*sym_hash)->flags & XCOFF_DEF_REGULAR) != 0)
+	  && (*sym_hash)->root.type != bfd_link_hash_common)
 	skip = true;
 
       /* Skip local symbols if we are discarding them.  */
@@ -3531,26 +3580,9 @@ xcoff_link_input_bfd (finfo, input_bfd)
 		}
 	    }
 
-	  if (isym.n_sclass == C_BSTAT)
-	    {
-	      unsigned long indx;
-
-	      /* The value of a C_BSTAT symbol is the symbol table
-                 index of the containing csect.  */
-
-	      indx = isym.n_value;
-	      if (indx < obj_raw_syment_count (input_bfd))
-		{
-		  long symindx;
-
-		  symindx = finfo->sym_indices[indx];
-		  if (symindx < 0)
-		    isym.n_value = 0;
-		  else
-		    isym.n_value = symindx;
-		}
-	    }
-	  else if (isym.n_scnum > 0)
+	  if (isym.n_sclass != C_BSTAT
+	      && isym.n_sclass != C_ESTAT
+	      && isym.n_scnum > 0)
 	    {
 	      isym.n_scnum = (*csectpp)->output_section->target_index;
 	      isym.n_value += ((*csectpp)->output_section->vma
@@ -3635,9 +3667,10 @@ xcoff_link_input_bfd (finfo, input_bfd)
 	*indexp++ = -1;
     }
 
-  /* Fix up the aux entries.  This must be done in a separate pass,
-     because we don't know the correct symbol indices until we have
-     already decided which symbols we are going to keep.  */
+  /* Fix up the aux entries and the C_BSTAT symbols.  This must be
+     done in a separate pass, because we don't know the correct symbol
+     indices until we have already decided which symbols we are going
+     to keep.  */
 
   esym = (bfd_byte *) obj_coff_external_syms (input_bfd);
   esym_end = esym + obj_raw_syment_count (input_bfd) * isymesz;
@@ -3656,6 +3689,27 @@ xcoff_link_input_bfd (finfo, input_bfd)
       else
 	{
 	  int i;
+
+	  if (isymp->n_sclass == C_BSTAT)
+	    {
+	      unsigned long indx;
+
+	      /* The value of a C_BSTAT symbol is the symbol table
+                 index of the containing csect.  */
+	      indx = isymp->n_value;
+	      if (indx < obj_raw_syment_count (input_bfd))
+		{
+		  long symindx;
+
+		  symindx = finfo->sym_indices[indx];
+		  if (symindx < 0)
+		    isymp->n_value = 0;
+		  else
+		    isymp->n_value = symindx;
+		  bfd_coff_swap_sym_out (output_bfd, (PTR) isymp,
+					 (PTR) outsym);
+		}
+	    }
 
 	  esym += isymesz;
 	  outsym += osymesz;
@@ -4066,7 +4120,12 @@ xcoff_link_input_bfd (finfo, input_bfd)
 	      switch (irel->r_type)
 		{
 		default:
-		  break;
+		  if (h == NULL
+		      || h->root.type == bfd_link_hash_defined
+		      || h->root.type == bfd_link_hash_defweak
+		      || h->root.type == bfd_link_hash_common)
+		    break;
+		  /* Fall through.  */
 		case R_POS:
 		case R_NEG:
 		case R_RL:
@@ -4076,30 +4135,36 @@ xcoff_link_input_bfd (finfo, input_bfd)
 		  ldrel.l_vaddr = irel->r_vaddr;
 		  if (r_symndx == -1)
 		    ldrel.l_symndx = -1;
-		  else if (h == NULL)
+		  else if (h == NULL
+			   || (h->root.type == bfd_link_hash_defined
+			       || h->root.type == bfd_link_hash_defweak
+			       || h->root.type == bfd_link_hash_common))
 		    {
 		      asection *sec;
 
-		      sec = xcoff_data (input_bfd)->csects[r_symndx];
-		      if ((sec->flags & SEC_CODE) != 0)
-			ldrel.l_symndx = 0;
-		      else if ((sec->flags & SEC_HAS_CONTENTS) != 0)
-			ldrel.l_symndx = 1;
+		      if (h == NULL)
+			sec = xcoff_data (input_bfd)->csects[r_symndx];
+		      else if (h->root.type == bfd_link_hash_common)
+			sec = h->root.u.c.p->section;
 		      else
-			ldrel.l_symndx = 2;
-		    }
-		  else if (h->root.type == bfd_link_hash_defined
-			   || h->root.type == bfd_link_hash_defweak)
-		    {
-		      asection *sec;
+			sec = h->root.u.def.section;
+		      sec = sec->output_section;
 
-		      sec = h->root.u.def.section->output_section;
-		      if ((sec->flags & SEC_CODE) != 0)
+		      if (strcmp (sec->name, ".text") == 0)
 			ldrel.l_symndx = 0;
-		      else if ((sec->flags & SEC_HAS_CONTENTS) != 0)
+		      else if (strcmp (sec->name, ".data") == 0)
 			ldrel.l_symndx = 1;
-		      else
+		      else if (strcmp (sec->name, ".bss") == 0)
 			ldrel.l_symndx = 2;
+		      else
+			{
+			  (*_bfd_error_handler)
+			    ("%s: loader reloc in unrecognized section `%s'",
+			     bfd_get_filename (input_bfd),
+			     sec->name);
+			  bfd_set_error (bfd_error_nonrepresentable_section);
+			  return false;
+			}
 		    }
 		  else
 		    {
@@ -4117,7 +4182,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
 		  ldrel.l_rtype = (irel->r_size << 8) | irel->r_type;
 		  ldrel.l_rsecnm = o->output_section->target_index;
 		  if (xcoff_hash_table (finfo->info)->textro
-		      && (o->output_section->flags & SEC_CODE) != 0)
+		      && strcmp (o->output_section->name, ".text") == 0)
 		    {
 		      (*_bfd_error_handler)
 			("%s: loader reloc in read-only section %s",
@@ -4131,6 +4196,16 @@ xcoff_link_input_bfd (finfo, input_bfd)
 					finfo->ldrel);
 		  BFD_ASSERT (sizeof (struct external_ldrel) == LDRELSZ);
 		  ++finfo->ldrel;
+		  break;
+
+		case R_TOC:
+		case R_GL:
+		case R_TCL:
+		case R_TRL:
+		case R_TRLA:
+		  /* We should never need a .loader reloc for a TOC
+		     relative reloc.  */
+		  break;
 		}
 	    }
 

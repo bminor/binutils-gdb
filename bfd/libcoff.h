@@ -105,8 +105,17 @@ struct xcoff_tdata
   /* Basic COFF information.  */
   coff_data_type coff;
 
+  /* True if a large a.out header should be generated.  */
+  boolean full_aouthdr;
+
   /* TOC value.  */
   bfd_vma toc;
+
+  /* Section holding TOC.  */
+  asection *toc_section;
+
+  /* Section holding entry point.  */
+  asection *entry_section;
 
   /* .text alignment from optional header.  */
   int text_align_power;
@@ -178,8 +187,6 @@ struct xcoff_section_tdata
      by this csect.  */
   unsigned long first_symndx;
   unsigned long last_symndx;
-  /* The number of .loader relocs in this csect.  */
-  size_t ldrel_count;
 };
 
 /* An accessor macro the xcoff_section_tdata structure.  */

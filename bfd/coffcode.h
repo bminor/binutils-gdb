@@ -1002,7 +1002,18 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
       struct xcoff_tdata *xcoff;
 
       xcoff = xcoff_data (abfd);
+      xcoff->full_aouthdr = true;
       xcoff->toc = internal_a->o_toc;
+      if (internal_a->o_sntoc == 0)
+	xcoff->toc_section = NULL;
+      else
+	xcoff->toc_section =
+	  coff_section_from_bfd_index (abfd, internal_a->o_sntoc);
+      if (internal_a->o_snentry == 0)
+	xcoff->entry_section = NULL;
+      else
+	xcoff->entry_section =
+	  coff_section_from_bfd_index (abfd, internal_a->o_snentry);
       xcoff->text_align_power = internal_a->o_algntext;
       xcoff->data_align_power = internal_a->o_algndata;
       xcoff->modtype = internal_a->o_modtype;
@@ -1764,6 +1775,8 @@ coff_compute_section_file_positions (abfd)
   if (abfd->flags & EXEC_P)
     sofar += AOUTSZ;
 #ifdef RS6000COFF_C
+  else if (xcoff_data (abfd)->full_aouthdr)
+    sofar += AOUTSZ;
   else
     sofar += SMALL_AOUTSZ;
 #endif
@@ -2003,7 +2016,10 @@ coff_write_object_contents (abfd)
     {
       scn_base = FILHSZ;
 #ifdef RS6000COFF_C
-      scn_base += SMALL_AOUTSZ;
+      if (xcoff_data (abfd)->full_aouthdr)
+	scn_base += AOUTSZ;
+      else
+	scn_base += SMALL_AOUTSZ;
 #endif
     }
 
@@ -2135,8 +2151,10 @@ coff_write_object_contents (abfd)
     {
       internal_f.f_opthdr = 0;
 #ifdef RS6000COFF_C
-      /* XCOFF seems to always write at least a small a.out header.  */
-      internal_f.f_opthdr = SMALL_AOUTSZ;
+      if (xcoff_data (abfd)->full_aouthdr)
+	internal_f.f_opthdr = AOUTSZ;
+      else
+	internal_f.f_opthdr = SMALL_AOUTSZ;
 #endif
     }
 
@@ -2311,22 +2329,20 @@ coff_write_object_contents (abfd)
   internal_f.f_nsyms = obj_raw_syment_count (abfd);
 
 #ifdef RS6000COFF_C
-  if ((abfd->flags & EXEC_P) != 0)
+  if (xcoff_data (abfd)->full_aouthdr)
     {
-      bfd_vma entry, toc;
+      bfd_vma toc;
       asection *loader_sec;
 
-      entry = bfd_get_start_address (abfd);
-      if (text_sec != NULL
-	  && entry >= text_sec->vma
-	  && entry < text_sec->vma + bfd_section_size (abfd, text_sec))
-	internal_a.o_snentry = text_sec->target_index;
-      else if (data_sec != NULL
-	       && entry >= data_sec->vma
-	       && entry < data_sec->vma + bfd_section_size (abfd, data_sec))
-	internal_a.o_snentry = data_sec->target_index;
+      if (xcoff_data (abfd)->entry_section != NULL)
+	internal_a.o_snentry = xcoff_data (abfd)->entry_section->target_index;
       else
-	internal_a.o_snentry = 0;
+	{
+	  internal_a.o_snentry = 0;
+	  if (internal_a.entry == 0)
+	    internal_a.entry = (bfd_vma) -1;
+	}
+
       if (text_sec != NULL)
 	{
 	  internal_a.o_sntext = text_sec->target_index;
@@ -2359,16 +2375,10 @@ coff_write_object_contents (abfd)
 
       toc = xcoff_data (abfd)->toc;
       internal_a.o_toc = toc;
-      if (text_sec != NULL
-	  && toc >= text_sec->vma
-	  && toc < text_sec->vma + bfd_section_size (abfd, text_sec))
-	internal_a.o_sntoc = text_sec->target_index;
-      else if (data_sec != NULL
-	       && toc >= data_sec->vma
-	       && toc < data_sec->vma + bfd_section_size (abfd, data_sec))
-	internal_a.o_sntoc = data_sec->target_index;
-      else
+      if (xcoff_data (abfd)->toc_section == NULL)
 	internal_a.o_sntoc = 0;
+      else
+	internal_a.o_sntoc = xcoff_data (abfd)->toc_section->target_index;
 
       internal_a.o_modtype = xcoff_data (abfd)->modtype;
       if (xcoff_data (abfd)->cputype != -1)
@@ -2415,9 +2425,15 @@ coff_write_object_contents (abfd)
   else
     {
       AOUTHDR buff;
+      size_t size;
+
       /* XCOFF seems to always write at least a small a.out header.  */
       coff_swap_aouthdr_out (abfd, (PTR) &internal_a, (PTR) &buff);
-      if (bfd_write ((PTR) &buff, 1, SMALL_AOUTSZ, abfd) != SMALL_AOUTSZ)
+      if (xcoff_data (abfd)->full_aouthdr)
+	size = AOUTSZ;
+      else
+	size = SMALL_AOUTSZ;
+      if (bfd_write ((PTR) &buff, 1, size, abfd) != size)
 	return false;
     }
 #endif

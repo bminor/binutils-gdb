@@ -102,7 +102,16 @@ xcoff_copy_private_bfd_data (ibfd, obfd)
     return true;
   ix = xcoff_data (ibfd);
   ox = xcoff_data (obfd);
+  ox->full_aouthdr = ix->full_aouthdr;
   ox->toc = ix->toc;
+  if (ix->toc_section == NULL)
+    ox->toc_section = NULL;
+  else
+    ox->toc_section = ix->toc_section->output_section;
+  if (ix->entry_section == NULL)
+    ox->entry_section = NULL;
+  else
+    ox->entry_section = ix->entry_section->output_section;
   ox->text_align_power = ix->text_align_power;
   ox->data_align_power = ix->data_align_power;
   ox->modtype = ix->modtype;

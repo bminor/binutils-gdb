@@ -1,3 +1,22 @@
+Thu Oct 26 14:16:47 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* xcofflink.c: Numerous changes to get closer to a working XCOFF
+	linker.
+	* libcoff-in.h (struct xcoff_tdata): Add full_aouthdr,
+	toc_section, and entry_section fields.
+	(struct xcoff_section_tdata): Remove ldrel_count field.
+	* libcoff.h: Rebuild.
+	* coffcode.h (coff_mkobject_hook): Initialize new xcoff_data
+	fields.
+	(coff_compute_section_file_positions): If RS6000COFF_C, generate
+	full a.out header if full_aouthdr is set in xcoff_data.
+	(coff_write_object_contents): Likewise.  Set o_snentry and o_sntoc
+	based on sections stored in xcoff_data.
+	* coff-rs6000.c (xcoff_copy_private_bfd_data): Copy new xcoff_data
+	fields.
+	* coffgen.c (coff_get_symbol_info): If fix_value is set, fix the
+	value stored in ret rather than returning a pointer value.
+	
 Wed Oct 25 23:10:39 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config.bfd (powerpc{,le}-{elf,sysv4,eabi,solaris2}): Remove MAC
