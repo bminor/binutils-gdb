@@ -1,8 +1,6 @@
-# Sanitize.in for devo.
-# $Id$
-#
+# .Sanitize for devo/gas/testsuite/gas/i386
 
-# Each directory to survive it's way into a release will need a file
+# Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
 # and must exist in the order specified by this file.  Each directory
 # in the tree will be processed, top down, in the following order.
@@ -13,26 +11,45 @@
 
 # The lines between the "Do-first:" line and the "Things-to-keep:"
 # line are executed as a /bin/sh shell script before anything else is
-# done in this 
+# done in this directory.
 
 Do-first:
 
 
 # All files listed between the "Things-to-keep:" line and the
-# "Files-to-sed:" line will be kept.  All other files will be removed.
+# "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
 # called.  Directories not listed will be removed in their entirety
 # with rm -rf.
 
 Things-to-keep:
 
-all.exp
-inout.s
-pushw.l
-pushw.s
+float.l
+float.s
+general.l
+general.s
+i386.exp
+inval.l
+inval.s
+modrm.l
+modrm.s
+opcode.d
+opcode.s
+prefix.d
+prefix.s
+reloc.d
+reloc.s
+white.l
+white.s
 
 Things-to-lose:
 
+
+
+# The lines between the "Do-last:" line and the end of the file
+# are executed as a /bin/sh shell script after everything else is
+# done.
+
 Do-last:
 
-# End of file.
+# eof
