@@ -1,5 +1,10 @@
 2001-11-06  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbarch.sh (CALL_DUMMY_LOCATION): Require a value.
+	* gdbarch.c: Regenerate.
+
+2001-11-06  Andrew Cagney  <ac131313@redhat.com>
+
 	* blockframe.c (get_prev_frame): Replace #ifdef
 	INIT_EXTRA_FRAME_INFO with run-time test.
 

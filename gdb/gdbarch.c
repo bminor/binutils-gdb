@@ -619,7 +619,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->use_generic_dummy_frames == -1))
     fprintf_unfiltered (log, "\n\tuse_generic_dummy_frames");
-  if ((GDB_MULTI_ARCH >= 2)
+  if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->call_dummy_location == 0))
     fprintf_unfiltered (log, "\n\tcall_dummy_location");
   if ((GDB_MULTI_ARCH >= 2)
