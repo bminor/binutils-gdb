@@ -985,8 +985,7 @@ for which shared libraries are supported.  This option is normally the
 default on such platforms.  The different variants of this option are
 for compatibility with various systems.  You may use this option
 multiple times on the command line: it affects library searching for
-@option{-l} options which follow it.  This
-option also implies @option{--unresolved-symbols=ignore-all}.
+@option{-l} options which follow it.
 
 @kindex -Bgroup
 @item -Bgroup
@@ -1495,12 +1494,10 @@ values for @samp{method}:
 
 @table @samp
 @item ignore-all
-Do not report any unresolved symbols.  This is the default when
-creating shared libraries or dynamic executables.
+Do not report any unresolved symbols.
 
 @item report-all
-Report all unresolved symbols.  This is the default when creating
-static binaries.
+Report all unresolved symbols.  This is the default.
 
 @item ignore-in-object-files
 Report unresolved symbols that are contained in shared libraries, but
