@@ -147,7 +147,7 @@ else
 	done
 fi
 
-r5900_files="ChangeLog configure.tgt"
+r5900_files="ChangeLog configure.tgt Makefile.in"
 
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
 	for i in $r5900_files ; do

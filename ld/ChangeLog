@@ -1,3 +1,12 @@
+start-sanitize-r5900
+Tue Feb 10 11:52:33 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* Makefile.in (ALL_EMULATIONS): Add eelf32l5900.o
+	(eelf32l5900.c): Add rule for building.
+	* configure.tgt: Use r5900 specific emulation script.
+	* emulparams/elf32l5900.sh: 5900 specific emulation script.
+
+end-sanitize-r5900
 Mon Feb  9 13:44:40 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* scripttempl/elfd10v.sc (.stack): Move stack to 0x00..7FFE.

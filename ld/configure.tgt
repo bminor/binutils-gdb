@@ -163,7 +163,7 @@ mips*tx49el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*tx49-*-elf*)	targ_emul=elf32b4300 ;;
 # end-sanitize-tx49
 # start-sanitize-r5900 
-mips*r5900*-*-elf*)	targ_emul=elf32l4300 ;;
+mips*r5900*-*-elf*)	targ_emul=elf32l5900 ;;
 # end-sanitize-r5900 
 mips*el-*-elf*)		targ_emul=elf32elmip ;;
 mips*-*-elf*)		targ_emul=elf32ebmip ;;
