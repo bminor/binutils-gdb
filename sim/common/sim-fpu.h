@@ -1,5 +1,5 @@
 /* Simulator Floating-point support.
-   Copyright (C) 1997-1998 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998, 2002 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -371,7 +371,7 @@ INLINE_SIM_FPU (int) sim_fpu_cmp (const sim_fpu *l, const sim_fpu *r);
 
 
 
-/* A constant of useful numbers */
+/* A number of useful constants.  */
 
 extern const sim_fpu sim_fpu_zero;
 extern const sim_fpu sim_fpu_one;

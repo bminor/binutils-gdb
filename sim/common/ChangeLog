@@ -1,3 +1,7 @@
+2002-01-14  Ben Elliston  <bje@redhat.com>
+
+	* sim-fpu.h: Fix comment about sim_fpu_* constants.
+
 2001-12-20  Kazu Hirata  <kazu@hxi.com>
 
 	* run.c (usage): Fix a typo.
