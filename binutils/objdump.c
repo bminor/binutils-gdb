@@ -1305,7 +1305,12 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	      if (info->bytes_per_line != 0)
 		bytes_per_line = info->bytes_per_line;
 	      if (bytes < 0)
-		break;
+		{
+		  if (sfile.current != sfile.buffer)
+		    printf ("%s\n", sfile.buffer);
+		  free (sfile.buffer);
+		  break;
+		}
 	    }
 	  else
 	    {

@@ -1,5 +1,9 @@
 1999-06-13  Ian Lance Taylor  <ian@zembu.com>
 
+	* objdump.c (disassemble_bytes): If the disassembler returns an
+	error, print out anything it may have printed to the buffer.  From
+	H.J. Lu <hjl@gnu.org>.
+
 	* defparse.y (explist): Remove separate expline to eliminate
 	shift/reduce conflict.
 
