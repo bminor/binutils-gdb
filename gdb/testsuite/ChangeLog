@@ -1,3 +1,10 @@
+Tue Sep 21 17:28:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in: Remove definition of CC and remove the second
+	definition of CXX (the "CXX = gcc" one remains).  These definitions
+	were causing backquotes to be expanded within backquotes, which
+	doesn't work.
+
 Sat Sep 18 09:43:21 1993  Jim Kingdon  (kingdon@poseidon.cygnus.com)
 
 	* gdb.t17/callfuncs.exp: Add "return 0" to end.
