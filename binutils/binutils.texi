@@ -1,4 +1,4 @@
-\input texinfo
+\input texinfo       @c                    -*- Texinfo -*-
 @setfilename binutils.info
 
 @ifinfo
@@ -114,14 +114,21 @@ into another language, under the above conditions for modified versions.
 @end ifinfo
 
 @menu
-* ar::                          Create, modify, and extract from archives
-* ld::                          See ld.info
-* nm::                          List symbols from object files
-* objdump::                     Display information from object files
-* ranlib::                      Generate index to archive contents
-* size::                        List section sizes and total size
-* strip::                       Discard symbols
-* Index::
+* ar::                          ar
+* ld::                          ld
+* nm::                          nm
+* objdump::                     objdump
+* ranlib::                      ranlib
+* size::                        size
+* strip::                       strip
+* Index::                       Index
+
+ --- The Detailed Node Listing ---
+
+ar
+
+* ar-cmdline::                  Controlling @code{ar} on the command line
+* ar-scripts::                  Controlling @code{ar} with a script
 @end menu
 
 @node ar, ld, Top, Top
@@ -132,6 +139,7 @@ into another language, under the above conditions for modified versions.
 @cindex collections of files
 @smallexample
   ar [-]@var{p}@var{mod} [ @var{membername} ] @var{archive} @var{files}@dots{}
+  ar -M [ <mri-script ]
 @end smallexample
 
 The GNU @code{ar} program creates, modifies, and extracts from
@@ -169,9 +177,33 @@ You may use @samp{nm -s} or @samp{nm +print-armap} to list this index
 table.  If an archive lacks the table, another form of @code{ar} called
 @code{ranlib} can be used to add just the table.
 
-@code{ar} insists on at least two arguments to execute: one
-keyletter specifying the @emph{operation} (optionally accompanied by other
-keyletters specifying @emph{modifiers}), and the archive name to act on.
+@cindex compatibility, @code{ar}
+@cindex @code{ar} compatibility
+GNU @code{ar} is designed to be compatible with two different
+facilities.  You can control its activity using command-line options,
+like the different varieties of @code{ar} on Unix systems; or, if you
+specify the single command-line option @samp{-M}, you can control it
+with a script supplied via standard input, like the MRI ``librarian''
+program.
+
+@menu
+* ar-cmdline::                  Controlling @code{ar} on the command line
+* ar-scripts::                  Controlling @code{ar} with a script
+@end menu
+
+@page
+@node ar-cmdline, ar-scripts, ar, ar
+@section Controlling @code{ar} on the command line
+
+@smallexample
+  ar [-]@var{p}@var{mod} [ @var{membername} ] @var{archive} @var{files}@dots{}
+@end smallexample
+
+@cindex Unix compatibility, @code{ar}
+When you use @code{ar} in the Unix style, @code{ar} insists on at least two
+arguments to execute: one keyletter specifying the @emph{operation}
+(optionally accompanied by other keyletters specifying
+@emph{modifiers}), and the archive name to act on.
 
 Most operations can also accept further @var{files} arguments,
 specifying particular files to operate on.
@@ -343,8 +375,171 @@ advantage from the operation @samp{q}.
 This modifier requests the @emph{verbose} version of an operation.  Many
 operations display additional information, such as filenames processed,
 when the modifier @samp{v} is appended.
+@end table
+
+@node ar-scripts,  , ar-cmdline, ar
+@section Controlling @code{ar} with a script
+
+@smallexample
+ar -M [ <@var{script} ]
+@end smallexample
+
+@cindex MRI compatibility, @code{ar}
+@cindex scripts, @code{ar}
+If you use the single command-line option @samp{-M} with @code{ar}, you
+can control its operation with a rudimentary command language.  This
+form of @code{ar} will operate interactively if standard input is coming
+directly from a terminal.  During interactive use, @code{ar} prompts for
+input (the prompt is @samp{AR >}), and continues executing even after
+errors.  If you redirect standard input to a script file, no prompts are
+issued, and @code{ar} will abandon execution (with a nonzero exit code)
+on any error.
+
+The @code{ar} command language is @emph{not} designed to be equivalent
+to the command-line options; in fact, it provides somewhat less control
+over archives.  The only purpose of the command language is to ease the
+transition to GNU @code{ar} for developers who already have scripts
+written for the MRI ``librarian'' program.
+
+The syntax for the @code{ar} command language is straightforward:
+@itemize @bullet
+@item
+commands are recognized in upper or lower case; for example, @code{LIST}
+is the same as @code{list}.  In the following descriptions, commands are
+shown in upper case for clarity.
+
+@item
+a single command may appear on each line; it is the first word on the
+line.
+
+@item
+empty lines are allowed, and have no effect.
+
+@item
+comments are allowed; text after either of the characters @samp{*}
+or @samp{;} is ignored.
+
+@item
+Whenever you use a list of names as part of the argument to an @code{ar}
+command, you can separate the individual names with either commas or
+blanks.  Commas are shown in the explanations below, for clarity.
+
+@item
+@samp{+} is used as a line continuation character; if @samp{+} appears
+at the end of a line, the text on the following line is considered part
+of the current command.
+@end itemize
+
+Here are the commands you can use in @code{ar} scripts, or when using
+@code{ar} interactively.  Three of them have special significance:
+
+@code{OPEN} or @code{CREATE} specify a @dfn{current archive}, which is
+a temporary file required for most of the other commands.
+
+@code{SAVE} commits the changes so far specified by the script.  Prior
+to @code{SAVE}, commands affect only the temporary copy of the current
+archive.
+
+@table @code
+@item ADDLIB @var{archive} 
+@itemx ADDLIB @var{archive} (@var{module}, @var{module}, @dots{} @var{module})
+Add all the contents of @var{archive} (or, if specified, each named
+@var{module} from @var{archive}) to the current archive.
+
+Requires prior use of @code{OPEN} or @code{CREATE}.
+
+@item ADDMOD @var{file}, @var{file}, @dots{} @var{file}
+@c FIXME! w/Replacement??  If so, like "ar r @var{archive} @var{names}"
+@c        else like "ar q..."
+Add each named @var{file} as a module in the current archive.
+
+Requires prior use of @code{OPEN} or @code{CREATE}.
+
+@item CLEAR
+Discard the contents of the current archive, cancelling the effect of
+any operations since the last @code{SAVE}.  May be executed (with no
+effect) even if  no current archive is specified.
+
+@item CREATE @var{archive}
+Creates an archive, and makes it the current archive (required for many
+other commands).  The new archive is created with a temporary name; it
+is not actually saved as @var{archive} until you use @code{SAVE}.
+You can overwrite existing archives; similarly, the contents of any
+existing file named @var{archive} will not be destroyed until @code{SAVE}.
+
+@item DELETE @var{module}, @var{module}, @dots{} @var{module}
+Delete each listed @var{module} from the current archive; equivalent to
+@samp{ar -d @var{archive} @var{module} @dots{} @var{module}}.
+
+Requires prior use of @code{OPEN} or @code{CREATE}.
+
+@item DIRECTORY @var{archive} (@var{module}, @dots{} @var{module})
+@itemx DIRECTORY @var{archive} (@var{module}, @dots{} @var{module}) @var{outputfile}
+List each named @var{module} present in @var{archive}.  The separate
+command @code{VERBOSE} specifies the form of the output: when verbose
+output is off, output is like that of @samp{ar -t @var{archive}
+@var{module}@dots{}}.  When verbose output is on, the listing is like
+@samp{ar -tv @var{archive} @var{module}@dots{}}.
+
+Output normally goes to the standard output stream; however, if you
+specify @var{outputfile} as a final argument, @code{ar} directs the
+output to that file.
+
+@item END
+Exit from @code{ar}, with a @code{0} exit code to indicate successful
+completion.  This command does not save the output file; if you have
+changed the current archive since the last @code{SAVE} command, those
+changes are lost.
+
+@item EXTRACT @var{module}, @var{module}, @dots{} @var{module}
+Extract each named @var{module} from the current archive, writing them
+into the current directory as separate files.  Equivalent to @samp{ar -x
+@var{archive} @var{module}@dots{}}.
+
+Requires prior use of @code{OPEN} or @code{CREATE}.
+
+@ignore
+@c FIXME Tokens but no commands???
+@item FULLDIR
+
+@item HELP
+@end ignore
+
+@item LIST
+Display full contents of the current archive, in ``verbose'' style
+regardless of the state of @code{VERBOSE}.  The effect is like @samp{ar
+tv @var{archive}}).  (This single command is a GNU @code{ld}
+enhancement, rather than present for MRI compatibility.)
+
+Requires prior use of @code{OPEN} or @code{CREATE}.
+
+@item OPEN @var{archive}
+Opens an existing archive for use as the current archive (required for
+many other commands).  Any changes as the result of subsequent commands
+will not actually affect @var{archive} until you next use @code{SAVE}.
+
+@item REPLACE @var{module}, @var{module}, @dots{} @var{module}
+In the current archive, replace each existing @var{module} (named in
+the @code{REPLACE} arguments) from files in the current working directory.
+To execute this command without errors, both the file, and the module in
+the current archive, must exist. 
+
+Requires prior use of @code{OPEN} or @code{CREATE}.
+
+@item VERBOSE
+Toggle an internal flag governing the output from @code{DIRECTORY}.
+When the flag is on, @code{DIRECTORY} output matches output from
+@samp{ar -tv @dots{}}.
+
+@item SAVE
+Commit your changes to the current archive, and actually save it as a
+file with the name specified in the last @code{CREATE} or @code{OPEN}
+command. 
+
+Requires prior use of @code{OPEN} or @code{CREATE}.
 
 @end table
+
 
 @node ld, nm, ar, Top
 @chapter ld
@@ -734,7 +929,7 @@ recognize many formats.  @xref{objdump}, for information on listing
 available formats.
 @end table
 
-@node Index, , strip, Top
+@node Index,  , strip, Top
 @unnumbered Index
 
 @printindex cp
