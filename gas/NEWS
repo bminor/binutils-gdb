@@ -1,4 +1,6 @@
 -*- text -*-
+Support for DLX processor added.
+
 GASP has now been deprecated and will be removed in a future release.  Use the
 macro facilities in GAS instead.
 

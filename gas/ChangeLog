@@ -6,6 +6,7 @@
 	* Makefile.in: Regenerate.
 	* config/tc-dlx.c: New file.
 	* config/tc-dlx.h: New files.
+	* NEWS: Mention new support.
 
 2002-05-27  Nick Clifton  <nickc@cambridge.redhat.com>
 
