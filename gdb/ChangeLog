@@ -1,3 +1,8 @@
+2000-05-17  Andrew Cagney  <cagney@sourceware.cygnus.com>
+
+	* GDB 5.0 released.
+	* Makefile.in (VERSION): Set to 5.0.
+
 2000-05-17  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdb/config/djgpp/README: Fine-tune installation instructions
