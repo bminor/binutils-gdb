@@ -1337,6 +1337,7 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
 
 
   if (cache_ptr->flags & (BSF_WARNING)) {
+    sym_pointer->e_type[0] = N_WARNING;
     (sym_pointer+1)->e_type[0] = 1;
   }
 

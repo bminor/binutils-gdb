@@ -1,3 +1,8 @@
+Wed Jan 19 00:02:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* aoutx.h (translate_to_native_sym_flags): Set the type of a
+	BSF_WARNING symbol to N_WARNING.
+
 Tue Jan 18 16:43:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* aoutx.h (aout_link_add_symbols): Increment sym_hash as well as p
