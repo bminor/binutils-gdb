@@ -324,7 +324,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-O}|@b{-n}|@b{-N}]
 @end ifset
 @ifset H8
-@c Hitachi family chips have no machine-dependent assembler options
+@c Renesas family chips have no machine-dependent assembler options
 @end ifset
 @ifset HPPA
 @c HPPA has no machine-dependent assembler options (yet).
@@ -1148,16 +1148,16 @@ machine architecture manual for this information.
 @ifclear GENERIC
 @ifset H8/300
 For information on the H8/300 machine instruction set, see @cite{H8/300
-Series Programming Manual} (Hitachi ADE--602--025).  For the H8/300H,
-see @cite{H8/300H Series Programming Manual} (Hitachi).
+Series Programming Manual}.  For the H8/300H, see @cite{H8/300H Series
+Programming Manual} (Renesas).
 @end ifset
 @ifset H8/500
 For information on the H8/500 machine instruction set, see @cite{H8/500
-Series Programming Manual} (Hitachi M21T001).
+Series Programming Manual} (Renesas M21T001).
 @end ifset
 @ifset SH
-For information on the Hitachi SH machine instruction set, see
-@cite{SH-Microcomputer User's Manual} (Hitachi Micro Systems, Inc.).
+For information on the Renesas (formerly Hitachi) SH machine instruction set,
+see @cite{SH-Microcomputer User's Manual} (Renesas).
 @end ifset
 @ifset Z8000
 For information on the Z8000 machine instruction set, see @cite{Z8000 CPU Technical Manual}
@@ -2086,7 +2086,7 @@ is considered a comment and is ignored.  The line comment character is
 @samp{;} for Motorola PowerPC;
 @end ifset
 @ifset SH
-@samp{!} for the Hitachi SH;
+@samp{!} for the Renesas SH;
 @end ifset
 @ifset SPARC
 @samp{!} on the SPARC;
@@ -2213,7 +2213,7 @@ constants are an exception: they do not end statements.
 @ifset H8
 A @dfn{statement} ends at a newline character (@samp{\n}); or (for the
 H8/300) a dollar sign (@samp{$}); or (for the
-Hitachi-SH or the
+Renesas-SH or the
 H8/500) a semicolon
 (@samp{;}).  The newline or separator character is considered part of
 the preceding statement.  Newlines and separators within character
@@ -2438,8 +2438,7 @@ grave accent.  A newline
 @end ifset
 @ifset H8
 (or dollar sign @samp{$}, for the H8/300; or semicolon @samp{;} for the
-Hitachi SH or
-H8/500)
+Renesas SH or H8/500)
 @end ifset
 @end ifset
 @end ifclear
@@ -2543,7 +2542,7 @@ A letter, to tell @command{@value{AS}} the rest of the number is a flonum.
 @end ignore
 
 On the H8/300, H8/500,
-Hitachi SH,
+Renesas SH,
 and AMD 29K architectures, the letter must be
 one of the letters @samp{DFPRSX} (in upper or lower case).
 
@@ -2680,7 +2679,7 @@ the task of adjusting mentions of object-file addresses so they refer to
 the proper run-time addresses.
 @ifset H8
 For the H8/300 and H8/500,
-and for the Hitachi SH,
+and for the Renesas SH,
 @command{@value{AS}} pads sections if needed to
 ensure they end on a word (sixteen bit) boundary.
 @end ifset
@@ -2974,7 +2973,7 @@ of @command{@value{AS}}.)
 @ifset H8
 On the H8/300 and H8/500 platforms, each subsection is zero-padded to a word
 boundary (two bytes).
-The same is true on the Hitachi SH.
+The same is true on the Renesas SH.
 @end ifset
 @ifset I960
 @c FIXME section padding (alignment)?
@@ -3131,10 +3130,9 @@ body of a symbol name, though not at its beginning.
 @ifset SPECIAL-SYMS
 @ifset H8
 Symbol names begin with a letter or with one of @samp{._}.  On the
-Hitachi SH or the
-H8/500, you can also use @code{$} in symbol names.  That character may
-be followed by any string of digits, letters, dollar signs (save on the
-H8/300), and underscores.
+Renesas SH or the H8/500, you can also use @code{$} in symbol names.  That
+character may be followed by any string of digits, letters, dollar signs (save
+on the H8/300), and underscores.
 @end ifset
 @end ifset
 
@@ -3884,7 +3882,7 @@ required alignment; this can be useful if you want the alignment to be filled
 with no-op instructions when appropriate.
 
 The way the required alignment is specified varies from system to system.
-For the a29k, hppa, m68k, m88k, w65, sparc, Xtensa, and Hitachi SH, and i386 using ELF
+For the a29k, hppa, m68k, m88k, w65, sparc, Xtensa, and Renesas SH, and i386 using ELF
 format,
 the first expression is the
 alignment request in bytes.  For example @samp{.align 8} advances
@@ -4461,7 +4459,7 @@ of target the assembly is for.
 @ifclear GENERIC
 @ifset H8
 On the H8/500 and most forms of the H8/300, @code{.int} emits 16-bit
-integers.  On the H8/300H and the Hitachi SH, however, @code{.int} emits
+integers.  On the H8/300H and the Renesas SH, however, @code{.int} emits
 32-bit integers.
 @end ifset
 @end ifclear
@@ -5849,10 +5847,10 @@ subject, see the hardware manufacturer's manual.
 * D30V-Dependent::              D30V Dependent Features
 @end ifset
 @ifset H8/300
-* H8/300-Dependent::            Hitachi H8/300 Dependent Features
+* H8/300-Dependent::            Renesas H8/300 Dependent Features
 @end ifset
 @ifset H8/500
-* H8/500-Dependent::            Hitachi H8/500 Dependent Features
+* H8/500-Dependent::            Renesas H8/500 Dependent Features
 @end ifset
 @ifset HPPA
 * HPPA-Dependent::              HPPA Dependent Features
@@ -5894,8 +5892,8 @@ subject, see the hardware manufacturer's manual.
 * MSP430-Dependent::		MSP430 Dependent Features
 @end ifset
 @ifset SH
-* SH-Dependent::                Hitachi SH Dependent Features
-* SH64-Dependent::              Hitachi SH64 Dependent Features
+* SH-Dependent::                Renesas SH Dependent Features
+* SH64-Dependent::              Renesas SH64 Dependent Features
 @end ifset
 @ifset PDP11
 * PDP-11-Dependent::            PDP-11 Dependent Features
@@ -5957,20 +5955,20 @@ subject, see the hardware manufacturer's manual.
 @include c-cris.texi
 @end ifset
 
-@ifset Hitachi-all
+@ifset Renesas-all
 @ifclear GENERIC
 @node Machine Dependencies
 @chapter Machine Dependent Features
 
-The machine instruction sets are different on each Hitachi chip family,
+The machine instruction sets are different on each Renesas chip family,
 and there are also some syntax differences among the families.  This
 chapter describes the specific @command{@value{AS}} features for each
 family.
 
 @menu
-* H8/300-Dependent::            Hitachi H8/300 Dependent Features
-* H8/500-Dependent::            Hitachi H8/500 Dependent Features
-* SH-Dependent::                Hitachi SH Dependent Features
+* H8/300-Dependent::            Renesas H8/300 Dependent Features
+* H8/500-Dependent::            Renesas H8/500 Dependent Features
+* SH-Dependent::                Renesas SH Dependent Features
 @end menu
 @lowersections
 @end ifclear
@@ -6345,7 +6343,7 @@ Keith Knowles at the Open Software Foundation wrote the original MIPS back end
 (which hasn't been merged in yet).  Ralph Campbell worked with the MIPS code to
 support a.out format.
 
-Support for the Zilog Z8k and Hitachi H8/300 and H8/500 processors (tc-z8k,
+Support for the Zilog Z8k and Renesas H8/300 and H8/500 processors (tc-z8k,
 tc-h8300, tc-h8500), and IEEE 695 object file format (obj-ieee), was written by
 Steve Chamberlain of Cygnus Support.  Steve also modified the COFF back end to
 use BFD for some low-level operations, for use with the H8/300 and AMD 29k

@@ -6,7 +6,7 @@ ELF Header:
   OS/ABI:                            UNIX - System V
   ABI Version:                       0
   Type:                              EXEC \(Executable file\)
-  Machine:                           Hitachi SH
+  Machine:                           Renesas SH
   Version:                           0x1
   Entry point address:               0x10c4
   Start of program headers:          52 \(bytes into file\)

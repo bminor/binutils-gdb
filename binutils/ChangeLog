@@ -1,3 +1,7 @@
+2003-04-15  Rohit Kumar Srivastava <rohits@kpitcummins.com>
+
+	* readelf.c: Replace occurrances of 'Hitachi' with 'Renesas'.
+
 2003-04-09  Alexandre Oliva  <aoliva@redhat.com>
 
 	* doc/binutils.texi (objdump) [--debugging]: Suggest readelf -w

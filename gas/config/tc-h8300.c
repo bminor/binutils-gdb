@@ -1,6 +1,6 @@
-/* tc-h8300.c -- Assemble code for the Hitachi H8/300
+/* tc-h8300.c -- Assemble code for the Renesas H8/300
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000,
-   2001, 2002 Free Software Foundation, Inc.
+   2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -51,7 +51,7 @@ int Smode;
 #define DMODE (L_16)
 #define DSYMMODE (Hmode ? L_24 : L_16)
 
-int bsize = L_8;		/* default branch displacement */
+int bsize = L_8;		/* Default branch displacement.  */
 
 struct h8_instruction
 {

@@ -1,3 +1,9 @@
+2003-04-15  Rohit Kumar Srivastava <rohits@kpitcummins.com>
+
+	* ld-sh/sh64/crange3-cmpct.rd: Replace occurrances of 'Hitachi'
+	with 'Renesas'.
+	* ld-sh/sh64/crange3-media.rd: Likewise.
+
 2002-04-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ld-discard/extern.s, ld-discard/start.s, ld-discard/static.s,

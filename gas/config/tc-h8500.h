@@ -1,5 +1,5 @@
 /* This file is tc-h8500.h
-   Copyright 1993, 1995, 1997, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1993, 1995, 1997, 1998, 2000, 2003 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -41,7 +41,7 @@ extern void tc_reloc_mangle
   PARAMS ((struct fix *, struct internal_reloc *, bfd_vma));
 
 #define DO_NOT_STRIP 0
-#define LISTING_HEADER "Hitachi H8/500 GAS "
+#define LISTING_HEADER "Renesas H8/500 GAS "
 #define NEED_FX_R_TYPE 1
 #define RELOC_32 1234
 

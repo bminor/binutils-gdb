@@ -4,7 +4,7 @@
 @c For copying conditions, see the file as.texinfo.
 @page
 @node SH-Dependent
-@chapter Hitachi SH Dependent Features
+@chapter Renesas SH Dependent Features
 
 @cindex SH support
 @menu
@@ -20,8 +20,8 @@
 
 @cindex SH options
 @cindex options, SH
-@code{@value{AS}} has following command-line options for the Hitachi
-SH family.
+@code{@value{AS}} has following command-line options for the Renesas
+(formerly Hitachi) SH family.
 
 @table @code
 @kindex -little
@@ -183,7 +183,7 @@ with other development tools.
 @cindex mnemonics, SH
 @cindex instruction summary, SH
 For detailed information on the SH machine instruction set, see
-@cite{SH-Microcomputer User's Manual} (Hitachi Micro Systems, Inc.).
+@cite{SH-Microcomputer User's Manual} (Renesas).
 
 @code{@value{AS}} implements all the standard SH opcodes.  No additional
 pseudo-instructions are needed on this family.  Note, however, that
@@ -289,7 +289,7 @@ stc SR,Rn
 @end smallexample
 @end ifset
 
-@ifset Hitachi-all
+@ifset Renesas-all
 @ifclear GENERIC
 @raisesections
 @end ifclear

@@ -1,6 +1,6 @@
 /* This file is tc-h8300.h
    Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 2000, 2002
+   1997, 1998, 2000, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -84,7 +84,7 @@ extern void tc_reloc_mangle
 #define TC_CONS_RELOC          (Hmode ? R_RELLONG: R_RELWORD)
 
 #define DO_NOT_STRIP 0
-#define LISTING_HEADER "Hitachi H8/300 GAS "
+#define LISTING_HEADER "Renesas H8/300 GAS "
 #define NEED_FX_R_TYPE 1
 #ifndef OBJ_ELF
 #define RELOC_32 1234

@@ -1,3 +1,20 @@
+2003-04-15  Rohit Kumar Srivastava <rohits@kpitcummins.com>
+
+	* doc/c-h8300.texi: Replace occurrances of 'Hitachi' with
+	'Renesas'.
+	* doc/c-h8500.texi: Likewise.
+	* doc/c-sh.texi: Likewise.
+	* doc/c-sh64.texi: Likewise.
+	* doc/h8.texi: Likewise.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-h8300.h: Likewise.
+	* config/tc-h8500.c: Likewise.
+	* config/tc-h8500.h: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-sh.h: Likewise.
+	* config/tc-sh64.c: Likewise.
+	* config/tc-sh64.h: Likewise.
+
 2003-04-10  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-mips.h (tc_frag_data_type, TC_FRAG_TYPE): New.

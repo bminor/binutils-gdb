@@ -1,4 +1,4 @@
-/* tc-sh64.c -- Assemble code for the Hitachi Super-H SHcompact and SHmedia.
+/* tc-sh64.c -- Assemble code for the Renesas Super-H SHcompact and SHmedia.
    Copyright 2000, 2001, 2002, 2003 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.

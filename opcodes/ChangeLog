@@ -1,3 +1,7 @@
+2003-04-15  Rohit Kumar Srivastava <rohits@kpitcummins.com>
+
+	* h8500-opc.c: Replace occurrances of 'Hitachi' with 'Renesas'.
+
 2003-04-07  James E Wilson  <wilson@tuliptree.org>
 
 	* ia64-ic.tbl (fr-readers): Add mem-writers-fp.

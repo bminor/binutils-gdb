@@ -140,8 +140,8 @@ section entitled ``GNU Free Documentation License''.
 @ifset H8300
 * H8/300::                      ld and the H8/300
 @end ifset
-@ifset Hitachi
-* Hitachi::                     ld and other Hitachi micros
+@ifset Renesas
+* Renesas::                     ld and other Renesas micros
 @end ifset
 @ifset I960
 * i960::                        ld and the Intel 960 family
@@ -4525,15 +4525,15 @@ top page of memory).
 @end ifset
 
 @ifclear GENERIC
-@ifset Hitachi
+@ifset Renesas
 @c This stuff is pointless to say unless you're especially concerned
-@c with Hitachi chips; don't enable it for generic case, please.
-@node Hitachi
-@chapter @command{ld} and Other Hitachi Chips
+@c with Renesas chips; don't enable it for generic case, please.
+@node Renesas
+@chapter @command{ld} and Other Renesas Chips
 
-@command{ld} also supports the H8/300H, the H8/500, and the Hitachi SH.  No
-special features, commands, or command-line options are required for
-these chips.
+@command{ld} also supports the Renesas (formerly Hitachi) H8/300H,
+H8/500, and SH chips.  No special features, commands, or command-line
+options are required for these chips.
 @end ifset
 @end ifclear
 

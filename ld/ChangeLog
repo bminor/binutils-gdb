@@ -1,3 +1,8 @@
+2003-04-15  Rohit Kumar Srivastava <rohits@kpitcummins.com>
+
+	* h8-doc.texi: Replace occurrances of 'Hitachi' with 'Renesas'.
+	* ld.texinfo: Likewise.
+
 2003-04-14  Alan Modra  <amodra@bigpond.net.au>
 
 	From Prashanth Tamraparni <prashanth_t@in.ibm.com>
