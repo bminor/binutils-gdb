@@ -257,7 +257,7 @@ run-cgen:
 
 # For now, require developers to configure with --enable-cgen-maint.
 $(srcdir)/m32r-desc.h $(srcdir)/m32r-desc.c $(srcdir)/m32r-opc.h $(srcdir)/m32r-opc.c $(srcdir)/m32r-ibld.c $(srcdir)/m32r-opinst.c $(srcdir)/m32r-asm.c $(srcdir)/m32r-dis.c: $(M32R_DEPS)
-	@true	
+	@true
 stamp-m32r: $(CGENDEPS) $(CGENDIR)/m32r.cpu $(CGENDIR)/m32r.opc
 	$(MAKE) run-cgen arch=m32r prefix=m32r options=opinst extrafiles=opinst
 
@@ -265,10 +265,6 @@ $(srcdir)/fr30-desc.h $(srcdir)/fr30-desc.c $(srcdir)/fr30-opc.h $(srcdir)/fr30-
 	@true
 stamp-fr30: $(CGENDEPS) $(CGENDIR)/fr30.cpu $(CGENDIR)/fr30.opc
 	$(MAKE) run-cgen arch=fr30 prefix=fr30 options= extrafiles=
-
-
-# The start marker is written this way to pass through automake unscathed.
-
 
 
 ia64-ic.tbl: $(srcdir)/ia64-ic.tbl

@@ -6,6 +6,19 @@
 	* configure.in: Add --enable-cgen-maint option.
 	* configure: Regenerate.
 
+2000-07-26  Dave Brolley  <brolley@redhat.com>
+
+	* cgen-opc.c (cgen_hw_lookup_by_name): 'i' is now unsigned.
+	(cgen_hw_lookup_by_num): Ditto.
+	(cgen_operand_lookup_by_name): Ditto.
+	(print_address): Ditto.
+	(print_keyword): Ditto.
+	* cgen-dis.c (hash_insn_array): Mark unused parameters with
+	ATTRIBUTE_UNUSED.
+	* cgen-asm.c (hash_insn_array): Mark unused parameters with
+	ATTRIBUTE_UNUSED.
+	(cgen_parse_keyword): Ditto.
+
 2000-07-22  Jason Eckhardt  <jle@cygnus.com>
 
 	* i860-dis.c: New file.
@@ -27,19 +40,6 @@
 	* configure.in: New bits for bfd_i860_arch.
 
 	* configure: Regenerated.
-
-2000-07-26  Dave Brolley  <brolley@redhat.com>
-
-	* cgen-opc.c (cgen_hw_lookup_by_name): 'i' is now unsigned.
-	(cgen_hw_lookup_by_num): Ditto.
-	(cgen_operand_lookup_by_name): Ditto.
-	(print_address): Ditto.
-	(print_keyword): Ditto.
-	* cgen-dis.c (hash_insn_array): Mark unused parameters with
-	ATTRIBUTE_UNUSED.
-	* cgen-asm.c (hash_insn_array): Mark unused parameters with
-	ATTRIBUTE_UNUSED.
-	(cgen_parse_keyword): Ditto.
 
 2000-07-20  Hans-Peter Nilsson  <hp@axis.com>
 
