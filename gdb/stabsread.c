@@ -2937,7 +2937,7 @@ read_enum_type (pp, type, objfile)
 
   /* Now fill in the fields of the type-structure.  */
 
-  TYPE_LENGTH (type) = sizeof (int);
+  TYPE_LENGTH (type) = TARGET_INT_BIT / HOST_CHAR_BIT;
   TYPE_CODE (type) = TYPE_CODE_ENUM;
   TYPE_FLAGS (type) &= ~TYPE_FLAG_STUB;
   TYPE_NFIELDS (type) = nsyms;
