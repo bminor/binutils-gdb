@@ -1,6 +1,6 @@
 /* symbols.c -symbol table-
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002
+   1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -320,7 +320,7 @@ colon (sym_name)		/* Just seen "x:" - rattle symbols & frags.  */
 	  as_bad (_("cannot define symbol `%s' in absolute section"), sym_name);
 	  return NULL;
 	}
-      
+
       possible_bytes = (md_short_jump_size
 			+ new_broken_words * md_long_jump_size);
 
@@ -491,7 +491,7 @@ colon (sym_name)		/* Just seen "x:" - rattle symbols & frags.  */
   if (mri_common_symbol != NULL)
     {
       /* This symbol is actually being defined within an MRI common
-         section.  This requires special handling.  */
+	 section.  This requires special handling.  */
       if (LOCAL_SYMBOL_CHECK (symbolP))
 	symbolP = local_symbol_convert ((struct local_symbol *) symbolP);
       symbolP->sy_value.X_op = O_symbol;
@@ -847,7 +847,7 @@ report_op_error (symp, left, right)
   unsigned int line;
   segT seg_left = S_GET_SEGMENT (left);
   segT seg_right = right ? S_GET_SEGMENT (right) : 0;
-  
+
   if (expr_symbol_where (symp, &file, &line))
     {
       if (seg_left == undefined_section)
@@ -870,7 +870,7 @@ report_op_error (symp, left, right)
 			  _("invalid section for operation on `%s'"),
 			  S_GET_NAME (left));
 	}
-      
+
     }
   else
     {
@@ -1067,10 +1067,10 @@ resolve_symbol_value (symp)
 	  if (op != O_logical_not && seg_left != absolute_section
 	      && finalize_syms)
 	    report_op_error (symp, add_symbol, NULL);
-	    
+
 	  if (final_seg == expr_section || final_seg == undefined_section)
 	    final_seg = absolute_section;
-	  
+
 	  if (op == O_uminus)
 	    left = -left;
 	  else if (op == O_logical_not)
@@ -1154,7 +1154,7 @@ resolve_symbol_value (symp)
 		   && (seg_left != undefined_section
 		       || add_symbol == op_symbol)))
 	    report_op_error (symp, add_symbol, op_symbol);
-	  
+
 	  if (final_seg == expr_section || final_seg == undefined_section)
 	    final_seg = absolute_section;
 
@@ -1681,8 +1681,8 @@ S_GET_VALUE (s)
       static symbolS *recur;
 
       /* FIXME: In non BFD assemblers, S_IS_DEFINED and S_IS_COMMON
-         may call S_GET_VALUE.  We use a static symbol to avoid the
-         immediate recursion.  */
+	 may call S_GET_VALUE.  We use a static symbol to avoid the
+	 immediate recursion.  */
       if (recur == s)
 	return (valueT) s->sy_value.X_add_number;
       recur = s;

@@ -1,5 +1,6 @@
 /* tc-d10v.h -- Header file for tc-d10v.c.
-   Copyright 1996, 1997, 1998, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
    Written by Martin Hunt, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -45,7 +46,7 @@ long md_pcrel_from_section PARAMS ((struct fix *, segT));
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
 
-#define md_number_to_chars           number_to_chars_bigendian
+#define md_number_to_chars	     number_to_chars_bigendian
 
 int d10v_cleanup PARAMS ((void));
 #define md_after_pass_hook()	     d10v_cleanup ()

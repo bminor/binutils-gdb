@@ -1,5 +1,12 @@
 2003-01-24  Alan Modra  <amodra@bigpond.net.au>
 
+	* as.h: Update copyright date.
+	* symbols.c: Likewise.
+	* config/tc-d10v.h: Likewise.
+	* config/tc-fr30.h: Likewise.
+	* config/tc-i960.h: Likewise.
+	* config/tc-mips.h: Likewise.
+
 	* config/tc-hppa.h (DIFF_EXPR_OK): Define.
 	(MD_APPLY_SYM_VALUE): Move.
 
