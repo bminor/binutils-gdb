@@ -1,4 +1,10 @@
 start-sanitize-sky
+Tue Jan 27 14:11:04 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* txvu-dis.c (*): Update to use new arguments in
+	parse/insert/extract/print fns.
+	* txvu-opc.c (*): Likewise.
+
 Mon Jan 26 16:25:51 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* txvu-dis.c (print_insn): Extract/print fns take pointer to

@@ -79,7 +79,7 @@ print_insn (pc, info, insn, lower_p)
      TXVU_INSN insn;
      int lower_p;
 {
-  const struct txvu_opcode *opcode;
+  const txvu_opcode *opcode;
   void *stream = info->stream;
   fprintf_ftype func = info->fprintf_func;
 
@@ -95,7 +95,7 @@ print_insn (pc, info, insn, lower_p)
       const unsigned char *syn;
       int mods,invalid,num_operands;
       long value;
-      const struct txvu_operand *operand;
+      const txvu_operand *operand;
 
       /* Basic bit mask must be correct.  */
       if ((insn & opcode->mask) != opcode->value)
@@ -125,7 +125,7 @@ print_insn (pc, info, insn, lower_p)
 	    }
 	  operand = txvu_operands + index;
 	  if (operand->extract)
-	    (*operand->extract) (&insn, operand, mods, &invalid);
+	    (*operand->extract) (opcode, operand, mods, &insn, &invalid);
 	}
       if (invalid)
 	continue;
@@ -158,7 +158,8 @@ print_insn (pc, info, insn, lower_p)
 	  /* Extract the value from the instruction.  */
 	  if (operand->extract)
 	    {
-	      value = (*operand->extract) (&insn, operand, mods, (int *) NULL);
+	      value = (*operand->extract) (opcode, operand, mods,
+					   &insn, (int *) NULL);
 	    }
 	  else
 	    {
@@ -176,7 +177,7 @@ print_insn (pc, info, insn, lower_p)
 
 	  /* Print the operand as directed by the flags.  */
 	  if (operand->print)
-	    (*operand->print) (info, &insn, value);
+	    (*operand->print) (opcode, operand, mods, &insn, info, value);
 	  else if (operand->flags & TXVU_OPERAND_FAKE)
 	    ; /* nothing to do (??? at least not yet) */
 	  else if (operand->flags & TXVU_OPERAND_RELATIVE_BRANCH)
