@@ -103,7 +103,7 @@ INCLUDE_CFLAGS = -I. -I${srcdir} -I$(INCLUDE_DIR) -I$(READLINE_DIR) -I${srcdir}/
 # {X,T}M_CFLAGS, if defined, has system-dependent CFLAGS.
 # CFLAGS for GDB
 MINUS_G=-g
-GLOBAL_CFLAGS = $(MINUS_G) ${TM_CFLAGS} ${XM_CFLAGS}
+GLOBAL_CFLAGS = ${MINUS_G} ${TM_CFLAGS} ${XM_CFLAGS}
 #PROFILE_CFLAGS = -pg
 
 CFLAGS = ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} ${MALLOC_CFLAGS} ${INCLUDE_CFLAGS}
@@ -119,7 +119,7 @@ LIBIBERTY = $(unsubdir)/../libiberty${subdir}/libiberty.a
 # You may need to make other arrangements for USG.
 TERMCAP = -ltermcap
 
-# The xconfig file must define REGEX and REGEX1 on USG machines.
+# The config/mh-* file must define REGEX and REGEX1 on USG machines.
 # If your sysyem is missing alloca(), or, more likely, it's there but
 # it doesn't work, define ALLOCA & ALLOCA1 too.
 # If your system is missing putenv(), add putenv.c to XM_ADD_FILES.
@@ -140,7 +140,7 @@ LINT=/usr/5bin/lint
 LINTFLAGS= -I${BFD_DIR}
 
 # Source files in the main directory.
-# Files which are included via a tconfig/* or xconfig/* file 
+# Files which are included via a config/* Makefile fragment
 # should *not* be specified here; they're in "ALLDEPFILES".
 SFILES_MAINDIR = \
 	 blockframe.c breakpoint.c command.c core.c \
@@ -154,7 +154,7 @@ SFILES_MAINDIR = \
 
 # Source files in subdirectories (which will be handled separately by
 #  'make gdb.tar.Z').
-# Files which are included via a tconfig/* or xconfig/* file 
+# Files which are included via a config/* Makefile fragment
 # should *not* be specified here; they're in "ALLDEPFILES".
 SFILES_SUBDIR = \
 	 ${srcdir}/vx-share/dbgRpcLib.h \
@@ -191,7 +191,7 @@ LINTFILES = $(SFILES) $(YYFILES) init.c
 SFILES_STAND = $(SFILES) standalone.c
 SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 
-# Header files that are not named in tconfig/* or xconfig/* go here.
+# Header files that are not named in config/* Makefile fragments go here.
 HFILES=	breakpoint.h command.h defs.h environ.h \
 	expression.h frame.h gdbcmd.h gdbcore.h getpagesize.h \
 	ieee-float.h inferior.h minimon.h param-no-tm.h param.h \
@@ -338,13 +338,11 @@ rapp: $(RAPP_OBS)
 # generated dependencies, etc.  alldeps.mak is a file that contains
 # "make" variable definitions for all ALLDEPFILES, ALLDEPFILES_MAINDIR,
 # ALLDEPFILES_SUBDIR, ALLPARAM, and ALLCONFIG, all cadged from the current
-# contents of the xconfig and tconfig subdirectories.
+# contents of the config subdirectory.
 
-alldeps.mak: ${srcdir}/tconfig ${srcdir}/xconfig
+alldeps.mak: ${srcdir}/config
 	rm -f alldeps.mak alldeps.tmp allparam.tmp allconfig.tmp
-	for i in `ls -d ${srcdir}/tconfig/*[0-9A-Za-z] \
-            ${srcdir}/xconfig/*[0-9A-Za-z] | \
-	    grep -v RCS | grep -v CVS.adm | grep -v SCCS` ; do \
+	for i in `ls -d ${srcdir}/config/m[ht]-*` ; do \
 	  echo $$i >>allconfig.tmp; \
 	  awk <$$i ' \
 	    $$1 == "TDEPFILES=" || $$1 == "XDEPFILES=" { \
@@ -505,11 +503,11 @@ make-proto-gdb-1: ${TARFILES} ${TARDIRS} gdb.info
 	  (mkdir $$i; cd $$i; \
 	  ln -s ../../$$i/* .; \
 	  rm -rf SCCS CVS.adm RCS); done
-	mkdir proto-gdb.dir/xconfig proto-gdb.dir/tconfig
-	cd proto-gdb.dir/tconfig ; \
+	mkdir proto-gdb.dir/config
+	cd proto-gdb.dir/config ; \
 	  for i in $(ALLCONFIG) ; do ln -s ../../$$i ../$$i ; done
 	mkdir proto-gdb.dir/vx-share proto-gdb.dir/nindy-share
-	cd proto-gdb.dir/tconfig ; \
+	cd proto-gdb.dir/config ; \
 	  for i in $(SFILES_SUBDIR) $(NONSRC_SUBDIR) $(ALLDEPFILES_SUBDIR); \
 	    do ln -s ../../$$i ../$$i ; done
 	chmod og=u `find . -print`
