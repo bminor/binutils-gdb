@@ -23,6 +23,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define REGISTER_U_ADDR(addr, blockend, regno)				\
 { addr = (int)(blockend) + REGISTER_BYTE (regno);}
 
+/* fetch_inferior_registers is in hppah-nat.c.  */
+#define FETCH_INFERIOR_REGISTERS
+
+/* child_xfer_memory is in hppah-nat.c.  */
+#define CHILD_XFER_MEMORY
+
+/* So we can cleanly use code in infptrace.c.  */
+#define PT_KILL		PT_EXIT
+#define PT_STEP		PT_SINGLE
+#define PT_CONTINUE	PT_CONTIN
+#define PT_READ_U	PT_RDUAREA
+#define PT_WRITE_U	PT_WUAREA
+#define PT_READ_I	PT_RIUSER
+#define PT_READ_D	PT_RDUSER
+#define PT_WRITE_I	PT_WIUSER
+#define PT_WRITE_D	PT_WDUSER
+
 /* attach/detach works to some extent under BSD and HPUX.  So long
    as the process you're attaching to isn't blocked waiting on io,
    blocked waiting on a signal, or in a system call things work 

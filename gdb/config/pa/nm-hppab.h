@@ -27,6 +27,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	PTRACE_ARG3_TYPE caddr_t
 
+/* fetch_inferior_registers is in hppab-nat.c.  */
+#define FETCH_INFERIOR_REGISTERS
+
 /* attach/detach works to some extent under BSD and HPUX.  So long
    as the process you're attaching to isn't blocked waiting on io,
    blocked waiting on a signal, or in a system call things work 
