@@ -1,3 +1,11 @@
+Thu Jul 20 19:01:07 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* libaout.h (set_aout_section_data): New macro.
+	* sunos.c (sunos_scan_relocs): Use it.
+
+	* aout-ns32k.c (MY_swap_std_reloc_out): Undef KEEPIT before
+	defining it.
+
 Thu Jul 20 13:48:00 1995  Fred Fish  <fnf@cygnus.com>
 
 	* hosts/i386v4.h (getgid, getuid):  Change prototypes to be
