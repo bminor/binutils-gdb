@@ -110,6 +110,7 @@ store_inferior_registers (regno)
     }
 }
 
+#if 0
 void
 fetch_core_registers ()
 {
@@ -130,3 +131,4 @@ fetch_core_registers ()
     supply_register (regno, buf);
   }
 }
+#endif /* 0 */

@@ -294,6 +294,89 @@ End with a line saying just \"end\".\n", bnum);
   error ("No breakpoint number %d.", bnum);
 }
 
+extern int memory_breakpoint_size; /* from mem-break.c */
+
+/* Like target_read_memory() but if breakpoints are inserted, return
+   the shadow contents instead of the breakpoints themselves.  */
+int
+read_memory_nobpt (memaddr, myaddr, len)
+     CORE_ADDR memaddr;
+     char *myaddr;
+     unsigned len;
+{
+  int status;
+  struct breakpoint *b;
+
+  if (memory_breakpoint_size < 0)
+    /* No breakpoints on this machine.  */
+    return target_read_memory (memaddr, myaddr, len);
+  
+  ALL_BREAKPOINTS (b)
+    {
+      if (b->address == NULL || !b->inserted)
+	continue;
+      else if (b->address + memory_breakpoint_size <= memaddr)
+	/* The breakpoint is entirely before the chunk of memory
+	   we are reading.  */
+	continue;
+      else if (b->address >= memaddr + len)
+	/* The breakpoint is entirely after the chunk of memory we
+	   are reading.  */
+	continue;
+      else
+	{
+	  /* Copy the breakpoint from the shadow contents, and recurse
+	     for the things before and after.  */
+	  
+	  /* Addresses and length of the part of the breakpoint that
+	     we need to copy.  */
+	  CORE_ADDR membpt = b->address;
+	  unsigned int bptlen = memory_breakpoint_size;
+	  /* Offset within shadow_contents.  */
+	  int bptoffset = 0;
+	  
+	  if (membpt < memaddr)
+	    {
+	      /* Only copy the second part of the breakpoint.  */
+	      bptlen -= memaddr - membpt;
+	      bptoffset = memaddr - membpt;
+	      membpt = memaddr;
+	    }
+
+	  if (membpt + bptlen > memaddr + len)
+	    {
+	      /* Only copy the first part of the breakpoint.  */
+	      bptlen -= (membpt + bptlen) - (memaddr + len);
+	    }
+
+	  bcopy (b->shadow_contents + bptoffset,
+		 myaddr + membpt - memaddr, bptlen);
+
+	  if (membpt > memaddr)
+	    {
+	      /* Copy the section of memory before the breakpoint.  */
+	      status = read_memory_nobpt (memaddr, myaddr, membpt - memaddr);
+	      if (status != 0)
+		return status;
+	    }
+
+	  if (membpt + bptlen < memaddr + len)
+	    {
+	      /* Copy the section of memory after the breakpoint.  */
+	      status = read_memory_nobpt
+		(membpt + bptlen,
+		 myaddr + membpt + bptlen - memaddr,
+		 memaddr + len - (membpt + bptlen));
+	      if (status != 0)
+		return status;
+	    }
+	  return 0;
+	}
+    }
+  /* Nothing overlaps.  Just call read_memory_noerr.  */
+  return target_read_memory (memaddr, myaddr, len);
+}
+
 /* insert_breakpoints is used when starting or continuing the program.
    remove_breakpoints is used when the program stops.
    Both return zero if successful,

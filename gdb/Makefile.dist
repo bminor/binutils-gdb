@@ -212,7 +212,7 @@ OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     symtab.o symfile.o symmisc.o infcmd.o infrun.o remote.o \
     command.o utils.o expread.o expprint.o environ.o version.o \
     copying.o $(DEPFILES) signame.o cplus-dem.o mem-break.o target.o \
-    inftarg.o ieee-float.o \
+    inftarg.o ieee-float.o putenv.o \
     dbxread.o coffread.o # mipsread.o
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)

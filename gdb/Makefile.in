@@ -54,7 +54,7 @@ CC-LD=${CC}
 # system malloc, uncomment the following two lines.
 #GNU_MALLOC =
 #MALLOC_CFLAGS = -DNO_MALLOC_CHECK
-GNU_MALLOC = gmalloc.o mcheck.o
+GNU_MALLOC = gmalloc.o mcheck.o mtrace.o
 MALLOC_CFLAGS =
 
 # Where is the "include" directory?  Traditionally ../include or ./include
@@ -107,7 +107,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_DIR}/libbfd.a
 ADD_FILES = ${OBSTACK} ${REGEX} ${ALLOCA} ${GNU_MALLOC} ${GETOPT}
 ADD_DEPS = ${OBSTACK} ${REGEX1} ${ALLOCA1} ${GNU_MALLOC} ${GETOPT}
 
-VERSION = 3.94.2
+VERSION = 3.94.3
 DIST=gdb-$(VERSION)
 
 LINT=/usr/5bin/lint
@@ -171,12 +171,13 @@ HFILES=	breakpoint.h command.h defs.h environ.h \
 	value.h
 
 OPCODES = pn-opcode.h np1-opcode.h sparc-opcode.h vax-opcode.h m68k-opcode.h \
-	  ns32k-opcode.h convex-opcode.h pyr-opcode.h mips-opcode.h \
+	  ns32k-opcode.h convx-opcode.h pyr-opcode.h mips-opcode.h \
 	  am29k-opcode.h
 
-REMOTE_EXAMPLES = remote-sa.m68k.shar remote-multi.shar
+REMOTE_EXAMPLES = rem-m68k.shar rem-multi.shar
 
-MALLOCSRC = gmalloc.c mcheck.c ansidecl.h stdlib.h gmalloc.h stddef.h
+MALLOCSRC = gmalloc.c mcheck.c mtrace.c mtrace.awk \
+	    ansidecl.h stdlib.h gmalloc.h stddef.h
 GETOPTSRC = $(GETOPT_DIR)/getopt.c $(GETOPT_DIR)/getopt1.c
 
 POSSLIBS_MAINDIR = obstack.h obstack.c regex.c regex.h alloca.c \
@@ -188,11 +189,11 @@ TESTS = testbpt.c testfun.c testrec.c testreg.c testregs.c
 # tdesc-lib cannot be named simply tdesc, because if if it were GNU make
 # would try to make it from tdesc.c.
 # tdesc-lib removed from the list due to Motorola copyrights...gnu@cygnus.com
-OTHERS = Makefile.dist depend alldeps.mak Makefile.srcdir \
+OTHERS = Makefile.dist depend alldeps.mak Makefile.sdir \
 	 createtags munch config.gdb config.status \
 	 ChangeLog ChangeLog-3.x \
 	 README TODO TAGS WHATS.NEW \
-	 gdb.texinfo gdb-int.texinfo gdbrc.tex threecol.tex \
+	 gdb.texinfo gdbint.texinfo gdbrc.tex threecol.tex \
 	.gdbinit COPYING expread.tab.c stab.def \
 	 copying.c Projects Convex.notes copying.awk \
 	 saber.suppress standalone.c stuff.c kdb-start.c \
@@ -211,7 +212,7 @@ OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     symtab.o symfile.o symmisc.o infcmd.o infrun.o remote.o \
     command.o utils.o expread.o expprint.o environ.o version.o \
     copying.o $(DEPFILES) signame.o cplus-dem.o mem-break.o target.o \
-    inftarg.o ieee-float.o \
+    inftarg.o ieee-float.o putenv.o \
     dbxread.o coffread.o # mipsread.o
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
@@ -276,7 +277,7 @@ rapp: $(RAPP_OBS)
 	${srcdir}/munch ${RAPP_OBS} > rapp_init.c
 	${CC-LD} $(LDFLAGS) -o $@ rapp_init.c $(RAPP_OBS)
 	
-Makefiles= Makefile.srcdir $(M_MAKEFILE) \
+Makefiles= Makefile.sdir $(M_MAKEFILE) \
 	${srcdir}/alldeps.mak ${srcdir}/Makefile.dist
 
 MAKE_MAKEFILE= echo "M_MAKEFILE=$(M_MAKEFILE)" | \
@@ -503,4 +504,4 @@ force_update :
 # When used with GDB, the demangler should never look for leading underscores
 # because GDB strips them off during symbol read-in.  Thus -Dnounderscore.
 cplus-dem.o : cplus-dem.c
-	${CC} -c -Dnounderscore `echo ${srcdir}/cplus-dem.c | sed 's,^\./,,'`
+	${CC} -c ${CFLAGS} -Dnounderscore `echo ${srcdir}/cplus-dem.c | sed 's,^\./,,'`

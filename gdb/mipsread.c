@@ -30,7 +30,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #ifdef	CMUCS
 #include <mips/syms.h>
-#endif	CMUCS
+#else /* not CMUCS */
+#include <syms.h>
+#endif /* not CMUCS */
 
 /* Since these things are defined differently on various systems I'll
    (re)define here what I really need in this module.  I only assume the
