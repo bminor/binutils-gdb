@@ -1,5 +1,9 @@
 2000-10-25  Fernando Nasser  <fnasser@cygnus.com>
 
+	* ser-unix.c (do_unix_readchar): Coding style improvement only.
+
+2000-10-25  Fernando Nasser  <fnasser@cygnus.com>
+
         * target.c (generic_mourn_inferior): Notify GUI that inferior is gone
         by calling detach_hook, if defined.
 
