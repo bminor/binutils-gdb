@@ -24,15 +24,32 @@
 #include "gdb_string.h"
 
 #include "osabi.h"
+#include "arch-utils.h"
+#include "gdbcmd.h"
+#include "command.h"
 
 #include "elf-bfd.h"
 
+#ifndef GDB_OSABI_DEFAULT
+#define GDB_OSABI_DEFAULT GDB_OSABI_UNKNOWN
+#endif
+
+/* State for the "set osabi" command.  */
+static enum { osabi_auto, osabi_default, osabi_user } user_osabi_state;
+static enum gdb_osabi user_selected_osabi;
+static const char *gdb_osabi_available_names[GDB_OSABI_INVALID + 3] = {
+  "auto",
+  "default",
+  "none",
+  NULL
+};
+static const char *set_osabi_string;
 
 /* This table matches the indices assigned to enum gdb_osabi.  Keep
    them in sync.  */
 static const char * const gdb_osabi_names[] =
 {
-  "<unknown>",
+  "none",
 
   "SVR4",
   "GNU/Hurd",
@@ -88,6 +105,7 @@ gdbarch_register_osabi (enum bfd_architecture arch, unsigned long machine,
 {
   struct gdb_osabi_handler **handler_p;
   const struct bfd_arch_info *arch_info = bfd_lookup_arch (arch, machine);
+  const char **name_ptr;
 
   /* Registering an OS ABI handler for "unknown" is not allowed.  */
   if (osabi == GDB_OSABI_UNKNOWN)
@@ -128,6 +146,16 @@ gdbarch_register_osabi (enum bfd_architecture arch, unsigned long machine,
   (*handler_p)->arch_info = arch_info;
   (*handler_p)->osabi = osabi;
   (*handler_p)->init_osabi = init_osabi;
+
+  /* Add this OS ABI to the list of enum values for "set osabi", if it isn't
+     already there.  */
+  for (name_ptr = gdb_osabi_available_names; *name_ptr; name_ptr ++)
+    {
+      if (*name_ptr == gdbarch_osabi_name (osabi))
+	return;
+    }
+  *name_ptr++ = gdbarch_osabi_name (osabi);
+  *name_ptr = NULL;
 }
 
 
@@ -171,8 +199,19 @@ gdbarch_lookup_osabi (bfd *abfd)
   enum gdb_osabi osabi, match;
   int match_specific;
 
-  if (abfd == NULL)
-    return GDB_OSABI_UNINITIALIZED;
+  /* If we aren't in "auto" mode, return the specified OS ABI.  */
+  if (user_osabi_state == osabi_user)
+    return user_selected_osabi;
+
+  /* If we don't have a binary, return the default OS ABI (if set) or
+     an inconclusive result (otherwise).  */
+  if (abfd == NULL) 
+    {
+      if (GDB_OSABI_DEFAULT != GDB_OSABI_UNKNOWN)
+	return GDB_OSABI_DEFAULT;
+      else
+	return GDB_OSABI_UNINITIALIZED;
+    }
 
   match = GDB_OSABI_UNKNOWN;
   match_specific = 0;
@@ -233,7 +272,12 @@ gdbarch_lookup_osabi (bfd *abfd)
 	}
     }
 
-  return match;
+  /* If we didn't find a match, but a default was specified at configure
+     time, return the default.  */
+  if (GDB_OSABI_DEFAULT != GDB_OSABI_UNKNOWN && match == GDB_OSABI_UNKNOWN)
+    return GDB_OSABI_DEFAULT;
+  else
+    return match;
 }
 
 void
@@ -444,10 +488,66 @@ generic_elf_osabi_sniffer (bfd *abfd)
   return osabi;
 }
 
+static void
+set_osabi (char *args, int from_tty, struct cmd_list_element *c)
+{
+  struct gdbarch_info info;
 
+  if (strcmp (set_osabi_string, "auto") == 0)
+    user_osabi_state = osabi_auto;
+  else if (strcmp (set_osabi_string, "default") == 0)
+    {
+      user_selected_osabi = GDB_OSABI_DEFAULT;
+      user_osabi_state = osabi_user;
+    }
+  else if (strcmp (set_osabi_string, "none") == 0)
+    {
+      user_selected_osabi = GDB_OSABI_UNKNOWN;
+      user_osabi_state = osabi_user;
+    }
+  else
+    {
+      int i;
+      for (i = 1; i < GDB_OSABI_INVALID; i++)
+	if (strcmp (set_osabi_string, gdbarch_osabi_name (i)) == 0)
+	  {
+	    user_selected_osabi = i;
+	    user_osabi_state = osabi_user;
+	    break;
+	  }
+      if (i == GDB_OSABI_INVALID)
+	internal_error (__FILE__, __LINE__,
+			"Invalid OS ABI \"%s\" passed to command handler.",
+			set_osabi_string);
+    }
+
+  /* NOTE: At some point (true multiple architectures) we'll need to be more
+     graceful here.  */
+  gdbarch_info_init (&info);
+  if (! gdbarch_update_p (info))
+    internal_error (__FILE__, __LINE__, "Updating OS ABI failed.");
+}
+
+void
+show_osabi (char *args, int from_tty)
+{
+  if (user_osabi_state == osabi_auto)
+    printf_filtered ("The current OS ABI is \"auto\" (currently \"%s\").\n",
+		     gdbarch_osabi_name (gdbarch_osabi (current_gdbarch)));
+  else
+    printf_filtered ("The current OS ABI is \"%s\".\n",
+		     gdbarch_osabi_name (user_selected_osabi));
+
+  if (GDB_OSABI_DEFAULT != GDB_OSABI_UNKNOWN)
+    printf_filtered ("The default OS ABI is \"%s\".\n",
+		     gdbarch_osabi_name (GDB_OSABI_DEFAULT));
+}
+
 void
 _initialize_gdb_osabi (void)
 {
+  struct cmd_list_element *c;
+
   if (strcmp (gdb_osabi_names[GDB_OSABI_INVALID], "<invalid>") != 0)
     internal_error
       (__FILE__, __LINE__,
@@ -457,4 +557,16 @@ _initialize_gdb_osabi (void)
   gdbarch_register_osabi_sniffer (bfd_arch_unknown,
 				  bfd_target_elf_flavour,
 				  generic_elf_osabi_sniffer);
+
+  if (!GDB_MULTI_ARCH)
+    return;
+
+  /* Register the "set osabi" command.  */
+  c = add_set_enum_cmd ("osabi", class_support, gdb_osabi_available_names,
+			&set_osabi_string, "Set OS ABI of target.", &setlist);
+
+  set_cmd_sfunc (c, set_osabi);
+  add_cmd ("osabi", class_support, show_osabi, "Show OS/ABI of target.",
+	   &showlist);
+  user_osabi_state = osabi_auto;
 }

@@ -1,3 +1,22 @@
+2002-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (acconfig_h): Remove incorrect macro.
+	(config_h): Define.
+	(osabi.o): Update dependencies.
+	* configure.tgt: Set gdb_osabi based on target triplet.
+	* configure.in: Define GDB_OSABI_DEFAULT based on gdb_osabi.
+	* configure: Regenerated.
+	* config.in: Regenerated.
+	* osabi.c: Include "arch-utils.h", "gdbcmd.h", and "command.h".
+	(GDB_OSABI_DEFAULT): Define if not already defined.
+	(user_osabi_state, user_selected_osabi, gdb_osabi_available_names)
+	(set_osabi_string): New variables.
+	(gdbarch_register_osabi): Add new OS ABI to
+	gdb_osabi_available_names.
+	(gdbarch_lookup_osabi): Honor specified and default OS ABIs.
+	(set_osabi, show_osabi): New functions.
+	(_initialize_gdb_osabi): Add "set osabi" and "show osabi" commands.
+
 2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* arch-utils.c (gdbarch_info_init): Set osabi to

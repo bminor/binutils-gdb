@@ -581,7 +581,6 @@ nm_h =		@nm_h@
 # gdb/ header files
 #
 
-acconfig_h = acconfig.h
 ada_lang_h = ada-lang.h $(value_h) $(gdbtypes_h)
 alpha_tdep_h = alpha-tdep.h
 alphabsd_tdep_h = alphabsd-tdep.h
@@ -602,6 +601,7 @@ coff_solib_h = coff-solib.h
 command_h = command.h
 complaints_h = complaints.h
 completer_h = completer.h
+config_h = config.h
 cp_abi_h = cp-abi.h
 cp_support_h = cp-support.h
 dcache_h = dcache.h
@@ -1961,7 +1961,8 @@ ocd.o: ocd.c $(defs_h) $(gdbcore_h) $(gdb_string_h) $(frame_h) $(inferior_h) \
 	$(gdb_stabs_h) $(serial_h) $(ocd_h) $(regcache_h)
 op50-rom.o: op50-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h)
-osabi.o: osabi.c $(defs_h) $(gdb_string_h) $(osabi_h) $(elf_bfd_h)
+osabi.o: osabi.c $(defs_h) $(gdb_string_h) $(osabi_h) $(elf_bfd_h) \
+	$(gdbcmd_h) $(command_h) $(arch_utils_h)
 p-lang.o: p-lang.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(parser_defs_h) $(language_h) $(p_lang_h) \
 	$(valprint_h)

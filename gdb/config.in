@@ -498,6 +498,9 @@
 /* Define if <thread_db.h> has the TD_NOTALLOC error code. */
 #undef THREAD_DB_HAS_TD_NOTALLOC
 
+/* Define to the default OS ABI for this configuration. */
+#undef GDB_OSABI_DEFAULT
+
 /* Define to be a string naming the default host character set. */
 #undef GDB_DEFAULT_HOST_CHARSET
 

@@ -1223,6 +1223,11 @@ case "${GDB_MULTI_ARCH}" in
     *)  AC_MSG_ERROR("GDB: Unknown GDB_MULTI_ARCH value ${GDB_MULTI_ARCH}");;
 esac
 
+if test x"${gdb_osabi}" != x ; then
+    AC_DEFINE_UNQUOTED(GDB_OSABI_DEFAULT, $gdb_osabi,
+		       [Define to the default OS ABI for this configuration.])
+fi
+
 # Enable multi-ice-gdb-server.
 AC_ARG_ENABLE(multi-ice,
 [  --enable-multi-ice      build the multi-ice-gdb-server],
