@@ -1,6 +1,9 @@
 Fri Jul 24 11:24:29 1998  Jeffrey A Law  (law@cygnus.com)
 
 start-sanitize-am33
+	* elf-m10300.c (mn10300_elf_relax_section): Fix typo when relaxing
+	from 24bit operand to an 8bit operand.
+
 	* elf-m10300.c (mn10300_elf_relax_section): Do not relax "dmul",
 	"dmulu", "dmach", "dmachu" with 32bit operands.
 end-sanitize-am33
