@@ -132,6 +132,7 @@ foreach $C ( "cmp", "cmp4" ) {
   foreach $i (@cmp6) {
     foreach $c (@ctype) {
       print "\t${C}${i}${c} p2, p3 = r0, r4\n";
+      print "\t${C}${i}${c} p2, p3 = r4, r0\n";
     }
     print "\n";
   }

@@ -170,46 +170,82 @@ _start:
 	cmp.ne.and.orcm p2, p3 = 3, r4
 
 	cmp.eq.and p2, p3 = r0, r4
+	cmp.eq.and p2, p3 = r4, r0
 	cmp.eq.or p2, p3 = r0, r4
+	cmp.eq.or p2, p3 = r4, r0
 	cmp.eq.or.andcm p2, p3 = r0, r4
+	cmp.eq.or.andcm p2, p3 = r4, r0
 	cmp.eq.orcm p2, p3 = r0, r4
+	cmp.eq.orcm p2, p3 = r4, r0
 	cmp.eq.andcm p2, p3 = r0, r4
+	cmp.eq.andcm p2, p3 = r4, r0
 	cmp.eq.and.orcm p2, p3 = r0, r4
+	cmp.eq.and.orcm p2, p3 = r4, r0
 
 	cmp.ne.and p2, p3 = r0, r4
+	cmp.ne.and p2, p3 = r4, r0
 	cmp.ne.or p2, p3 = r0, r4
+	cmp.ne.or p2, p3 = r4, r0
 	cmp.ne.or.andcm p2, p3 = r0, r4
+	cmp.ne.or.andcm p2, p3 = r4, r0
 	cmp.ne.orcm p2, p3 = r0, r4
+	cmp.ne.orcm p2, p3 = r4, r0
 	cmp.ne.andcm p2, p3 = r0, r4
+	cmp.ne.andcm p2, p3 = r4, r0
 	cmp.ne.and.orcm p2, p3 = r0, r4
+	cmp.ne.and.orcm p2, p3 = r4, r0
 
 	cmp.lt.and p2, p3 = r0, r4
+	cmp.lt.and p2, p3 = r4, r0
 	cmp.lt.or p2, p3 = r0, r4
+	cmp.lt.or p2, p3 = r4, r0
 	cmp.lt.or.andcm p2, p3 = r0, r4
+	cmp.lt.or.andcm p2, p3 = r4, r0
 	cmp.lt.orcm p2, p3 = r0, r4
+	cmp.lt.orcm p2, p3 = r4, r0
 	cmp.lt.andcm p2, p3 = r0, r4
+	cmp.lt.andcm p2, p3 = r4, r0
 	cmp.lt.and.orcm p2, p3 = r0, r4
+	cmp.lt.and.orcm p2, p3 = r4, r0
 
 	cmp.le.and p2, p3 = r0, r4
+	cmp.le.and p2, p3 = r4, r0
 	cmp.le.or p2, p3 = r0, r4
+	cmp.le.or p2, p3 = r4, r0
 	cmp.le.or.andcm p2, p3 = r0, r4
+	cmp.le.or.andcm p2, p3 = r4, r0
 	cmp.le.orcm p2, p3 = r0, r4
+	cmp.le.orcm p2, p3 = r4, r0
 	cmp.le.andcm p2, p3 = r0, r4
+	cmp.le.andcm p2, p3 = r4, r0
 	cmp.le.and.orcm p2, p3 = r0, r4
+	cmp.le.and.orcm p2, p3 = r4, r0
 
 	cmp.gt.and p2, p3 = r0, r4
+	cmp.gt.and p2, p3 = r4, r0
 	cmp.gt.or p2, p3 = r0, r4
+	cmp.gt.or p2, p3 = r4, r0
 	cmp.gt.or.andcm p2, p3 = r0, r4
+	cmp.gt.or.andcm p2, p3 = r4, r0
 	cmp.gt.orcm p2, p3 = r0, r4
+	cmp.gt.orcm p2, p3 = r4, r0
 	cmp.gt.andcm p2, p3 = r0, r4
+	cmp.gt.andcm p2, p3 = r4, r0
 	cmp.gt.and.orcm p2, p3 = r0, r4
+	cmp.gt.and.orcm p2, p3 = r4, r0
 
 	cmp.ge.and p2, p3 = r0, r4
+	cmp.ge.and p2, p3 = r4, r0
 	cmp.ge.or p2, p3 = r0, r4
+	cmp.ge.or p2, p3 = r4, r0
 	cmp.ge.or.andcm p2, p3 = r0, r4
+	cmp.ge.or.andcm p2, p3 = r4, r0
 	cmp.ge.orcm p2, p3 = r0, r4
+	cmp.ge.orcm p2, p3 = r4, r0
 	cmp.ge.andcm p2, p3 = r0, r4
+	cmp.ge.andcm p2, p3 = r4, r0
 	cmp.ge.and.orcm p2, p3 = r0, r4
+	cmp.ge.and.orcm p2, p3 = r4, r0
 
 	cmp4.eq p2, p3 = r3, r4
 	cmp4.eq p2, p3 = 3, r4
@@ -280,45 +316,81 @@ _start:
 	cmp4.ne.and.orcm p2, p3 = 3, r4
 
 	cmp4.eq.and p2, p3 = r0, r4
+	cmp4.eq.and p2, p3 = r4, r0
 	cmp4.eq.or p2, p3 = r0, r4
+	cmp4.eq.or p2, p3 = r4, r0
 	cmp4.eq.or.andcm p2, p3 = r0, r4
+	cmp4.eq.or.andcm p2, p3 = r4, r0
 	cmp4.eq.orcm p2, p3 = r0, r4
+	cmp4.eq.orcm p2, p3 = r4, r0
 	cmp4.eq.andcm p2, p3 = r0, r4
+	cmp4.eq.andcm p2, p3 = r4, r0
 	cmp4.eq.and.orcm p2, p3 = r0, r4
+	cmp4.eq.and.orcm p2, p3 = r4, r0
 
 	cmp4.ne.and p2, p3 = r0, r4
+	cmp4.ne.and p2, p3 = r4, r0
 	cmp4.ne.or p2, p3 = r0, r4
+	cmp4.ne.or p2, p3 = r4, r0
 	cmp4.ne.or.andcm p2, p3 = r0, r4
+	cmp4.ne.or.andcm p2, p3 = r4, r0
 	cmp4.ne.orcm p2, p3 = r0, r4
+	cmp4.ne.orcm p2, p3 = r4, r0
 	cmp4.ne.andcm p2, p3 = r0, r4
+	cmp4.ne.andcm p2, p3 = r4, r0
 	cmp4.ne.and.orcm p2, p3 = r0, r4
+	cmp4.ne.and.orcm p2, p3 = r4, r0
 
 	cmp4.lt.and p2, p3 = r0, r4
+	cmp4.lt.and p2, p3 = r4, r0
 	cmp4.lt.or p2, p3 = r0, r4
+	cmp4.lt.or p2, p3 = r4, r0
 	cmp4.lt.or.andcm p2, p3 = r0, r4
+	cmp4.lt.or.andcm p2, p3 = r4, r0
 	cmp4.lt.orcm p2, p3 = r0, r4
+	cmp4.lt.orcm p2, p3 = r4, r0
 	cmp4.lt.andcm p2, p3 = r0, r4
+	cmp4.lt.andcm p2, p3 = r4, r0
 	cmp4.lt.and.orcm p2, p3 = r0, r4
+	cmp4.lt.and.orcm p2, p3 = r4, r0
 
 	cmp4.le.and p2, p3 = r0, r4
+	cmp4.le.and p2, p3 = r4, r0
 	cmp4.le.or p2, p3 = r0, r4
+	cmp4.le.or p2, p3 = r4, r0
 	cmp4.le.or.andcm p2, p3 = r0, r4
+	cmp4.le.or.andcm p2, p3 = r4, r0
 	cmp4.le.orcm p2, p3 = r0, r4
+	cmp4.le.orcm p2, p3 = r4, r0
 	cmp4.le.andcm p2, p3 = r0, r4
+	cmp4.le.andcm p2, p3 = r4, r0
 	cmp4.le.and.orcm p2, p3 = r0, r4
+	cmp4.le.and.orcm p2, p3 = r4, r0
 
 	cmp4.gt.and p2, p3 = r0, r4
+	cmp4.gt.and p2, p3 = r4, r0
 	cmp4.gt.or p2, p3 = r0, r4
+	cmp4.gt.or p2, p3 = r4, r0
 	cmp4.gt.or.andcm p2, p3 = r0, r4
+	cmp4.gt.or.andcm p2, p3 = r4, r0
 	cmp4.gt.orcm p2, p3 = r0, r4
+	cmp4.gt.orcm p2, p3 = r4, r0
 	cmp4.gt.andcm p2, p3 = r0, r4
+	cmp4.gt.andcm p2, p3 = r4, r0
 	cmp4.gt.and.orcm p2, p3 = r0, r4
+	cmp4.gt.and.orcm p2, p3 = r4, r0
 
 	cmp4.ge.and p2, p3 = r0, r4
+	cmp4.ge.and p2, p3 = r4, r0
 	cmp4.ge.or p2, p3 = r0, r4
+	cmp4.ge.or p2, p3 = r4, r0
 	cmp4.ge.or.andcm p2, p3 = r0, r4
+	cmp4.ge.or.andcm p2, p3 = r4, r0
 	cmp4.ge.orcm p2, p3 = r0, r4
+	cmp4.ge.orcm p2, p3 = r4, r0
 	cmp4.ge.andcm p2, p3 = r0, r4
+	cmp4.ge.andcm p2, p3 = r4, r0
 	cmp4.ge.and.orcm p2, p3 = r0, r4
+	cmp4.ge.and.orcm p2, p3 = r4, r0
 
 nop.i 0; nop.i 0
