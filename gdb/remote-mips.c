@@ -574,7 +574,7 @@ mips_send_packet (s, get_ack)
 	      hdr[HDR_LENGTH] = '\0';
 	      trlr[TRLR_LENGTH] = '\0';
 	      printf_filtered ("Got ack %d \"%s%s\"\n",
-			       HDR_GET_SEQ (hdr), hdr, trlr);
+			       HDR_GET_SEQ (hdr), hdr + 1, trlr);
 	    }
 
 	  /* If this ack is for the current packet, we're done.  */
@@ -805,7 +805,6 @@ mips_request (cmd, addr, data, perr)
 
   if (sscanf (buff, "0x%x %c 0x%x 0x%x",
 	      &rpid, &rcmd, &rerrflg, &rresponse) != 4
-      || rpid != 0
       || (cmd != '\0' && rcmd != cmd))
     error ("Bad response from remote board");
 
