@@ -50,6 +50,22 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list
     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
+
+# The code used by the tests here encodes some breakpoints by using
+# inline assembler.  This will generate a SIGTRAP which will be caught
+# by GDB.  At that point the instruction pointer will point at the
+# next instruction, and execution can continue without any problems.
+# Some systems however (QNX Neutrino, Solaris) will adjust the
+# instruction pointer to point at the breakpoint instruction instead.
+# On these systems we cannot continue unless we skip it.  This
+# procedure takes care of that.
+
+proc skip_breakpoint { msg } {
+    gdb_test "if (*(unsigned char *)\$pc == 0xcc)\nset \$pc = \$pc + 1\nend" \
+	    "" "skip breakpoint in ${msg}"
+}
+
+
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
@@ -67,6 +83,8 @@ if ![runto_main] then {
 
 gdb_test "continue" "Program received signal SIGTRAP.*" "continue to standard"
 
+skip_breakpoint standard
+
 gdb_test "backtrace 10" \
 	"#0\[ \t\]*$hex in standard.*\r\n#1\[ \t\]*$hex in main.*" \
 	"backtrace in standard"
@@ -78,6 +96,8 @@ gdb_test "info frame" \
 # Testcase from symtab/1253.
 
 gdb_test "continue" "Program received signal SIGTRAP.*" "continue to gdb1253"
+
+skip_breakpoint gdb1253
 
 gdb_test "backtrace 10" \
 	"#0\[ \t\]*$hex in gdb1253.*\r\n#1\[ \t\]*$hex in main.*" \
@@ -91,6 +111,8 @@ gdb_test "info frame" \
 
 gdb_test "continue" "Program received signal SIGTRAP.*" "continue to gdb1718"
 
+skip_breakpoint gdb1718
+
 gdb_test "backtrace 10" \
 	"#0\[ \t\]*$hex in gdb1718.*\r\n#1\[ \t\]*$hex in main.*" \
 	"backtrace in gdb1718"
@@ -103,6 +125,8 @@ gdb_test "info frame" \
 # Testcase from backtrace/1338.
 
 gdb_test "continue" "Program received signal SIGTRAP.*" "continue to gdb1338"
+
+skip_breakpoint gdb1338
 
 gdb_test "backtrace 10" \
 	"#0\[ \t\]*$hex in gdb1338.*\r\n#1\[ \t\]*$hex in main.*" \

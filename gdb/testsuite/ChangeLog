@@ -1,3 +1,8 @@
+2004-08-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.arch/i386-prologue.exp (skip_breakpoint): New function.  Use
+	it to skip the breakpoints encoded in the inline assembly.
+
 2004-08-20  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* Makefile.in: Add gdb.fortran.
