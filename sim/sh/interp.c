@@ -73,7 +73,9 @@
 #define PC pc
 #define C cycles
 
-extern int target_byte_order;
+static SIM_OPEN_KIND sim_kind;
+static char *myname;
+static int little_endian_p;
 
 int 
 fail ()
@@ -819,7 +821,7 @@ set_static_little_endian (x)
 static void
 init_pointers ()
 {
-  int little_endian = (target_byte_order == 1234);
+  int little_endian = little_endian_p;
 
   set_static_little_endian (little_endian);
 
@@ -897,7 +899,7 @@ sim_resume (sd, step, siggnal)
 #if defined(__GO32__) || defined(WIN32)
   register int pollcount = 0;
 #endif
-  register int little_endian = target_byte_order == 1234;
+  register int little_endian = little_endian_p;
 
   int tick_start = get_now ();
   void (*prev) ();
@@ -1170,14 +1172,23 @@ sim_set_profile_size (n)
 }
 
 SIM_DESC
-sim_open (argv)
+sim_open (kind,argv)
+     SIM_OPEN_KIND kind;
      char **argv;
 {
-  /* FIXME: Better argument checking is needed here.  */
-  if (argv[1] != NULL)
+  char **p;
+
+  sim_kind = kind;
+  myname = argv[0];
+
+  for (p = argv + 1; *p != NULL; ++p)
     {
-      parse_and_set_memory_size (argv[1]);
+      if (strcmp (*p, "-E") == 0)
+	little_endian_p = strcmp (*++p, "big") != 0;
+      else if (isdigit (**p))
+	parse_and_set_memory_size (*p);
     }
+
   /* fudge our descriptor for now */
   return (SIM_DESC) 1;
 }
@@ -1203,24 +1214,33 @@ sim_close (sd, quitting)
   /* nothing to do */
 }
 
-int
-sim_load (sd, prog, from_tty)
+SIM_RC
+sim_load (sd, prog, abfd, from_tty)
      SIM_DESC sd;
      char *prog;
+     bfd *abfd;
      int from_tty;
 {
-  /* Return nonzero so GDB will handle it.  */
-  return 1;
+  extern bfd *sim_load_file (); /* ??? Don't know where this should live.  */
+  bfd *prog_bfd;
+
+  prog_bfd = sim_load_file (sd, myname, callback, prog, abfd,
+			    sim_kind == SIM_OPEN_DEBUG);
+  if (prog_bfd == NULL)
+    return SIM_RC_FAIL;
+  saved_state.asregs.pc = bfd_get_start_address (prog_bfd);
+  if (abfd == NULL)
+    bfd_close (prog_bfd);
+  return SIM_RC_OK;
 }
 
-void
-sim_create_inferior (sd, start_address, argv, env)
+SIM_RC
+sim_create_inferior (sd, argv, env)
      SIM_DESC sd;
-     SIM_ADDR start_address;
      char **argv;
      char **env;
 {
-  saved_state.asregs.pc = start_address;
+  return SIM_RC_OK;
 }
 
 void
@@ -1236,20 +1256,28 @@ sim_do_command (sd, cmd)
      char *cmd;
 {
   char *sms_cmd = "set-memory-size";
+  int cmdsize;
 
-  if (strncmp (cmd, sms_cmd, strlen (sms_cmd)) == 0
-      && strchr (" 	", cmd[strlen(sms_cmd)]))
-    parse_and_set_memory_size (cmd + strlen(sms_cmd) + 1);
+  if (cmd == NULL || *cmd == '\0')
+    {
+      cmd = "help";
+    }
 
+  cmdsize = strlen (sms_cmd);
+  if (strncmp (cmd, sms_cmd, cmdsize) == 0 && strchr (" \t", cmd[cmdsize]) != NULL)
+    {
+      parse_and_set_memory_size (cmd + cmdsize + 1);
+    }
   else if (strcmp (cmd, "help") == 0)
     {
-      callback->printf_filtered (callback, "List of SH simulator commands:\n\n");
-      callback->printf_filtered (callback, "set-memory-size <n> -- Set the number of address bits to use\n");
-      callback->printf_filtered (callback, "\n");
+      (callback->printf_filtered) (callback, "List of SH simulator commands:\n\n");
+      (callback->printf_filtered) (callback, "set-memory-size <n> -- Set the number of address bits to use\n");
+      (callback->printf_filtered) (callback, "\n");
     }
   else
-    fprintf (stderr, "Error: \"%s\" is not a valid SH simulator command.\n",
-	     cmd);
+    {
+      (callback->printf_filtered) (callback, "Error: \"%s\" is not a valid SH simulator command.\n", cmd);
+    }
 }
 
 void

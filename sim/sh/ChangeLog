@@ -1,3 +1,20 @@
+Thu Apr 17 03:32:04 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (SIM_OBJS): Add sim-load.o.
+	* interp.c (target_byte_order): Delete.
+	(sim_kind, myname, little_endian_p): New static locals.
+	(init_pointers): Use little_endian_p instead of target_byte_order.
+	(sim_resume): Likewise.
+	(sim_open): Set sim_kind, myname.  Set little_endian_p from -E arg.
+	(sim_load): Return SIM_RC.  New arg abfd.  Call sim_load_file to
+	load file into simulator.  Set start address from bfd.
+	(sim_create_inferior): Return SIM_RC.  Delete arg start_address.
+
+Mon Apr  7 15:45:02 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
 Wed Apr  2 15:06:28 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* interp.c (sim_open): New arg `kind'.
