@@ -13,16 +13,6 @@ struct external_filehdr {
 	char f_flags[2];	/* flags			*/
 };
 
-struct internal_filehdr 
-{
-  unsigned short	f_magic; /* magic number			*/
-  unsigned short	f_nscns; /* number of sections		*/
-  long		f_timdat;	 /* time & date stamp		*/
-  long		f_symptr;	 /* file pointer to symtab	*/
-  long		f_nsyms;	 /* number of symtab entries	*/
-  unsigned short	f_opthdr; /* sizeof(optional hdr)		*/
-  unsigned short	f_flags;  /* flags			*/
-};
 
 /* Bits for f_flags:
  *	F_RELFLG	relocation info stripped from file
@@ -36,7 +26,7 @@ struct internal_filehdr
 #define F_EXEC		(0x0002)
 #define F_LNNO		(0x0004)
 #define F_LSYMS		(0x0008)
-#define F_AR32WR	(0400)
+
 
 
 #define	I386MAGIC	0x14c
@@ -48,17 +38,6 @@ struct internal_filehdr
 
 
 /********************** AOUT "OPTIONAL HEADER" **********************/
-struct internal_aouthdr {
-	short		magic;	/* type of file				*/
-	short		vstamp;	/* version stamp			*/
-	unsigned long	tsize;	/* text size in bytes, padded to FW bdry*/
-	unsigned long	dsize;	/* initialized data "  "		*/
-	unsigned long	bsize;	/* uninitialized data "   "		*/
-	unsigned long	entry;	/* entry pt.				*/
-	unsigned long	text_start;	/* base of text used for this file */
-	unsigned long	data_start;	/* base of data used for this file */
-	unsigned long	tagentries;	/* number of tag entries to follow */
-} ;
 
 
 typedef struct 
@@ -111,18 +90,6 @@ AOUTHDR;
 
 /********************** SECTION HEADER **********************/
 
-struct internal_scnhdr {
-	char		s_name[8];	/* section name			*/
-	long		s_paddr;	/* physical address, aliased s_nlib */
-	long		s_vaddr;	/* virtual address		*/
-	long		s_size;		/* section size			*/
-	long		s_scnptr;	/* file ptr to raw data for section */
-	long		s_relptr;	/* file ptr to relocation	*/
-	long		s_lnnoptr;	/* file ptr to line numbers	*/
-	unsigned short	s_nreloc;	/* number of relocation entries	*/
-	unsigned short	s_nlnno;	/* number of line number entries*/
-	long		s_flags;	/* flags			*/
-};
 
 struct external_scnhdr {
 	char		s_name[8];	/* section name			*/
@@ -187,13 +154,6 @@ struct external_lineno {
 	char l_lnno[2];	/* line number		*/
 };
 
-struct internal_lineno {
-	union {
-		long l_symndx;	/* function name symbol index, iff l_lnno == 0*/
-		long l_paddr;	/* (physical) address of line number	*/
-	} l_addr;
-	unsigned short	l_lnno;	/* line number		*/
-};
 
 #define	LINENO	struct external_lineno
 #define	LINESZ	sizeof(LINENO) 
@@ -221,22 +181,6 @@ struct external_syment
   char e_numaux[1];
 };
 
-struct internal_syment {
-	union {
-		char	_n_name[SYMNMLEN];	/* old COFF version	*/
-		struct {
-			long	_n_zeroes;	/* new == 0		*/
-			long	_n_offset;	/* offset into string table */
-		} _n_n;
-		char	*_n_nptr[2];	/* allows for overlaying	*/
-	} _n;
-	long		n_value;	/* value of symbol		*/
-	short		n_scnum;	/* section number		*/
-	unsigned short	n_flags;	/* copy of flags from filhdr	*/
-	unsigned short	n_type;		/* type and derived type	*/
-	char		n_sclass;	/* storage class		*/
-	char		n_numaux;	/* number of aux. entries	*/
-};
 
 /*#define n_name		_n._n_name
 #define n_ptr		_n._n_nptr[1]
@@ -340,68 +284,6 @@ union external_auxent {
 
 
 };
-union internal_auxent {
-	struct {
-		long x_tagndx;	/* str, un, or enum tag indx */
-		union {
-			struct {
-			    unsigned short x_lnno; /* declaration line number */
-			    unsigned short x_size; /* str/union/array size */
-			} x_lnsz;
-			long x_fsize;	/* size of function */
-		} x_misc;
-		union {
-			struct {		/* if ISFCN, tag, or .bb */
-			    long x_lnnoptr;	/* ptr to fcn line # */
-			    long x_endndx;	/* entry ndx past block end */
-			} x_fcn;
-			struct {		/* if ISARY, up to 4 dimen. */
-			    unsigned short x_dimen[DIMNUM];
-			} x_ary;
-		} x_fcnary;
-		unsigned short x_tvndx;		/* tv index */
-	} x_sym;
-
-	union {
-		char x_fname[FILNMLEN];
-		struct {
-			long x_zeroes;
-			long x_offset;
-		} x_n;
-	} x_file;
-
-	struct {
-		long x_scnlen;			/* section length */
-		unsigned short x_nreloc;	/* # relocation entries */
-		unsigned short x_nlinno;	/* # line numbers */
-	} x_scn;
-
-        struct {
-		long		x_tvfill;	/* tv fill value */
-		unsigned short	x_tvlen;	/* length of .tv */
-		unsigned short	x_tvran[2];	/* tv range */
-	} x_tv;		/* info about .tv section (in auxent of symbol .tv)) */
-
-	/******************************************
-	 *  I960-specific *2nd* aux. entry formats
-	 ******************************************/
-	struct {
-/* This is a very old typo that keeps getting propagated. */
-#define x_stdindx x_stindx
-		long x_stindx;	/* sys. table entry */
-	} x_sc;	/* system call entry */
-
-	struct {
-		unsigned long x_balntry; /* BAL entry point */
-	} x_bal; /* BAL-callable function */
-
-        struct {
-		unsigned long	x_timestamp;	        /* time stamp */
-		char 	x_idstring[20];	        /* producer identity string */
-	} x_ident;	                        /* Producer ident info */
-
-
-};
 
 #define	SYMENT	struct external_syment
 #define	SYMESZ	18	
@@ -414,11 +296,6 @@ union internal_auxent {
 
 /********************** RELOCATION DIRECTIVES **********************/
 
-struct internal_reloc {
-	long r_vaddr;		/* Virtual address of reference */
-	long r_symndx;		/* Index into symbol table	*/
-	unsigned short r_type;	/* Relocation type		*/
-};
 
 
 struct external_reloc {
@@ -427,14 +304,6 @@ struct external_reloc {
   char r_type[2];
 };
 
-#define R_DIR32		06
-#define	R_PCLONG	020
-#define R_RELBYTE	017
-#define R_RELWORD	020
-#define R_RELLONG	021
-#define R_PCRBYTE	022
-#define R_PCRWORD	023
-#define R_PCRLONG	024
 
 #define RELOC struct external_reloc
 #define RELSZ 10

@@ -35,7 +35,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #	endif
 #endif
 
-#define BFD_VERSION "1.10"
+#define BFD_VERSION "1.15"
 
 /* forward declaration */
 typedef struct _bfd bfd;
@@ -471,6 +471,7 @@ typedef struct bfd_target
   char ar_pad_char;		/* filenames in archives padded w/this char */
   unsigned short ar_max_namelen; /* this could be a char too! */
 
+  unsigned int align_power_min;	/* alignment for sections */
   /* Byte swapping for data */
   /* Note that these don't take bfd as first arg.  Certain other handlers
      could do the same. */
