@@ -1,3 +1,14 @@
+Sat Nov 27 22:49:07 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* read.c (read_a_source_file): Fix test for when to stick a colon
+	on the end of a label.  Make code conditional on either MRI or
+	LABELS_WITHOUT_COLONS.
+
+	* app.c (do_scrub_next_char): If a line begins with whitespace, leave
+	the single whitespace character alone.  Eat all others.
+
+	* config/tc-hppa.h (LABELS_WITHOUT_COLONS): Define.
+
 Wed Nov 24 01:22:54 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_procend): Do not call process_exit.

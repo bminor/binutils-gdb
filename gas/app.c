@@ -53,6 +53,8 @@ static const char symbol_chars[] =
 #define IS_LINE_COMMENT(c)		(lex[c] == LEX_IS_LINE_COMMENT_START)
 #define	IS_NEWLINE(c)			(lex[c] == LEX_IS_NEWLINE)
 
+static int process_escape PARAMS ((int));
+
 /* FIXME-soon: The entire lexer/parser thingy should be
    built statically at compile time rather than dynamically
    each and every time the assembler is run.  xoxorich. */
@@ -210,9 +212,9 @@ app_pop (arg)
 
 /* @@ This assumes that \n &c are the same on host and target.  This is not
    necessarily true.  */
-int 
+static int 
 process_escape (ch)
-     char ch;
+     int ch;
 {
   switch (ch)
     {
@@ -261,6 +263,7 @@ do_scrub_next_char (get, unget)
      Taylor, ian@cygnus.com.  */
 
   register int ch, ch2 = 0;
+  int not_cpp_line = 0;
 
   switch (state)
     {
@@ -359,9 +362,6 @@ do_scrub_next_char (get, unget)
 
 	case '"':
 	case '\\':
-#ifdef TC_HPPA
-	case 'x':	/* '\\x' introduces escaped sequences on the PA */
-#endif
 	case 'b':
 	case 'f':
 	case 'n':
@@ -370,6 +370,8 @@ do_scrub_next_char (get, unget)
 #ifdef BACKSLASH_V
 	case 'v':
 #endif /* BACKSLASH_V */
+	case 'x':
+	case 'X':
 	case '0':
 	case '1':
 	case '2':
@@ -425,13 +427,24 @@ recycle:
     {
     case LEX_IS_WHITESPACE:
       do
-	ch = (*get) ();
+	/* Preserve a single whitespace character at the beginning of
+	   a line.  */
+	if (state == 0)
+	  {
+	    state = 1;
+	    return ch;
+	  }
+	else
+	  ch = (*get) ();
       while (ch != EOF && IS_WHITESPACE (ch));
       if (ch == EOF)
 	return ch;
 
       if (IS_COMMENT (ch) || (state == 0 && IS_LINE_COMMENT (ch)) || ch == '/' || IS_LINE_SEPARATOR (ch))
 	{
+	  /* cpp never outputs a leading space before the #, so try to
+	     avoid being confused.  */
+	  not_cpp_line = 1;
 	  goto recycle;
 	}
 #ifdef MRI
@@ -455,7 +468,9 @@ recycle:
 	  state++;
 	  goto recycle;		/* Punted leading sp */
 	case 1:
-	  BAD_CASE (state);	/* We can't get here */
+	  /* We can arrive here if we leave a leading whitespace character
+	     at the beginning of a line.  */
+	  goto recycle;
 	case 2:
 	  state = 3;
 	  (*unget) (ch);
@@ -600,6 +615,9 @@ recycle:
 		}
 	    }			/* bad hack */
 
+	  if (ch != '#')
+	    not_cpp_line = 1;
+
 	  do
 	    ch = (*get) ();
 	  while (ch != EOF && IS_WHITESPACE (ch));
@@ -608,7 +626,7 @@ recycle:
 	      as_warn ("EOF in comment:  Newline inserted");
 	      return '\n';
 	    }
-	  if (ch < '0' || ch > '9')
+	  if (ch < '0' || ch > '9' || not_cpp_line)
 	    {
 	      /* Non-numerics:  Eat whole comment line */
 	      while (ch != EOF && !IS_NEWLINE (ch))
