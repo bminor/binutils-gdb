@@ -59,6 +59,7 @@ hppa-dis.c
 i386-dis.c
 i960-dis.c
 m68k-dis.c
+m68k-opc.c
 m88k-dis.c
 mips-dis.c
 mips-opc.c
