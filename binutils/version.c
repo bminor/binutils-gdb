@@ -2,4 +2,4 @@
      They all change in lockstep -- it's easier that way
 */
 
-char *program_version = "1.10 (Cygnus BFD)";
+char *program_version = "1.90";

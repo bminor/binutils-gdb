@@ -1,12 +1,12 @@
 /* Print m68k instructions for objdump
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
 
 
 This file is part of the binutils.
 
 The binutils are free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 The binutils are distributed in the hope that they will be useful,
@@ -20,9 +20,17 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$
    $Log$
-   Revision 1.3  1991/10/11 11:22:00  gnu
-   Include bfd.h before sysdep.h, so ansidecl and PROTO() get defined first.
+   Revision 1.4  1991/10/16 18:56:56  bothner
+   	* Makefile.in, ar.c, bucomm.c, copy.c, cplus-dem.c, filemode.c,
+   	i960-pinsn.c, m68k-pinsn.c, nm.c, objdump.c, size.c, sparc-pinsn.c,
+   	* strip.c: Add or update Copyright notice.
+   	* TODO:  Add note on 'nm -a'.
+   	* version.c: Update version number to 1.90.
+   	* Makefile.in: Fix making of documentation for dist.
 
+ * Revision 1.3  1991/10/11  11:22:00  gnu
+ * Include bfd.h before sysdep.h, so ansidecl and PROTO() get defined first.
+ *
  * Revision 1.2  1991/06/14  22:54:44  steve
  * *** empty log message ***
  *

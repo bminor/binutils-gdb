@@ -1,12 +1,12 @@
 /* disassemble sparc instructions for objdump
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
 
 
 This file is part of the binutils.
 
 The binutils are free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 The binutils are distributed in the hope that they will be useful,

@@ -1,3 +1,7 @@
+o 'nm -a' should print stab code names.
+
+OLD:
+
 o - merge:
 	copy and strip
 	ar and ranlib

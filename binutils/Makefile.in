@@ -1,4 +1,21 @@
-### Makefile for GNU binary-file utilities
+# Makefile for GNU binary-file utilities
+# Copyright (C) 1989-1991 Free Software Foundation, Inc.
+
+# This file is part of GNU binutils.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #$Id$
 
@@ -12,7 +29,7 @@ DIST_NAME=binutils-beta-${VERSION}
 
 version=`$(unsubdir)/../gcc$(subdir)/gcc -dumpversion`
 prefix = $(destdir)
-bindir = $(prefix)/H-$(host_alias)/T-independent/bin
+bindir = $(prefix)/bin
 
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../texinfo/fsf
@@ -206,10 +223,12 @@ install: $(PROGS)
 
 dist: $(DIST_NAME).tar.Z
 
-$(DIST_NAME).tar.Z: proto-dir
-	ln -s proto-dir $(DIST_NAME)
-	tar chf - $(DIST_NAME) | compress >$(DIST_NAME).tar.Z
-	rm -rf $(DIST_NAME)
+$(DIST_NAME).tar.Z:
+	cd ../..; rm -f $(DISTNAME); ln -s devo $(DIST_NAME)
+	cd ..; Sanitize test
+	cd binutils; make binutils.mm -f Makefile.in
+	cd ../ld; make ld.mm -f Makefile.in
+	cd ../..; tar chf - $(DIST_NAME) | compress >$(DIST_NAME).tar.Z
 
 # These get around a bug in Sun Make in SunOS 4.1.1
 alloca.o:alloca.c
