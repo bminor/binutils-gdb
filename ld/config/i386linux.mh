@@ -1,0 +1,2 @@
+# Linux apparently puts crt0.o in /usr/lib, not /lib.
+HOSTING_CRT0=/usr/lib/crt0.o

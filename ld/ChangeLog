@@ -1,3 +1,10 @@
+Thu Nov 17 14:39:48 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	Patches from pirker@eiunix.tuwien.ac.at (Martin Pirker).
+	* config/i386linux.mh: New file; set HOSTING_CRT0.
+	* genscripts.sh: Don't put ${libdir} in LIB_PATH if it is
+	/usr/lib, since that is already in LIB_PATH.
+
 Wed Nov 16 10:03:03 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* scripttempl/hppaelf.sc (.text): Handle a use rdefined text start
