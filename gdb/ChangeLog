@@ -1,3 +1,16 @@
+Tue Feb  2 18:40:29 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* hp-psymtab-read.c (hpread_build_psymtabs): Coerce first arg
+	passed to make_cleanup to the correct type.
+	(hpread_quick_traverse): Change fifth arg to call to 
+	hpread_end_psymtab to be 0. 
+	Compare CURR_MODULE_END to 0 rather than NULL.
+	Get rid of ifdef'ed out code.
+	(scan_procs): Get rid of ifdef'ed out code.
+
+	* somread.c (som_symfile_read): Coerce first argument passed to
+	make_cleanup to the correct type.
+
 Tue Feb  2 17:36:29 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* hp-psymtab-read.c (do_pxdb): New function. Check whether the

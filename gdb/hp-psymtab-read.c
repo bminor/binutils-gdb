@@ -584,49 +584,6 @@ scan_procs (curr_pd_p, qPD, max_procs, start_adr, end_adr, pst, vt_bits, objfile
 	  warning ("Procedure \"%s\" [0x%x] spans file or module boundaries.", rtn_name, curr_pd);
 	}
 
-/* I asked for this in the hope it would fix bug CHFts22228, but
-   later decided it's not the right fix. I'm leaving the code
-   commented out for now in case we decide we actually want to do this.
-   - RT */
-#if 0
-      /* Check this routine--if it's a class member function,
-         add the class to the psymtab.  We only need to add
-         the class once in each module, so check. */
-      if (qPD[curr_pd].member)
-	{
-
-	  class = qPD[curr_pd].icd;
-	  if (!B_TST (class_entered, class))
-	    {			/* pai: (temp)  class_entered not a parameter */
-
-	      class_name = &vt_bits[(long) qCD[class].sbClass];
-
-	      /* Add to both the struct and var namespace */
-
-	      add_psymbol_to_list (class_name,
-				   strlen (class_name),
-				   STRUCT_NAMESPACE,
-				   LOC_UNDEF,	/* "I have no storage"     */
-				   &objfile->global_psymbols,	/* assume classname is global */
-				   0, 0,
-				   trans_lang ((enum hp_language) qPD[curr_pd].language),
-				   objfile);
-
-	      add_psymbol_to_list (class_name,
-				   strlen (class_name),
-				   VAR_NAMESPACE,
-				   LOC_UNDEF,	/* "I have no storage"     */
-				   &objfile->global_psymbols,	/* assume classname is global */
-				   0, 0,
-				   trans_lang ((enum hp_language) qPD[curr_pd].language),
-				   objfile);
-
-	      B_SET (class_entered, class);	/* pai: (temp)  class_entered not a parameter */
-	      symbol_count++;
-	    }
-	}
-#endif
-
       /* Add this routine symbol to the list in the objfile. 
          Unfortunately we have to go to the LNTT to determine the
          correct list to put it on. An alternative (which the
@@ -849,18 +806,6 @@ hpread_quick_traverse (objfile,	section_offsets, gntt_bits, vt_bits, pxdb_header
   global_syms = objfile->global_psymbols.list;
   static_syms = objfile->static_psymbols.list;
 
-#if 0				/* pai: (temp) we don't need this any more */
-  /* elz: if the first module we see in the table is for
-     end.c, then return immediately with false. This happens
-     for F77 programs, for which there is no MODULE information
-     produced in the debug info. 
-     Returning false from this function will make the caller
-     (build_psymbols) scan the table from the beginning and 
-     not use the quick lookup tables.
-     F90 has modules so this poses no problem. */
-  if (!strcmp (&vt_bits[(long) qMD[0].sbMod], "end.c"))
-    return 0;
-#endif
 
   /* First skip over pseudo-entries with address 0.  These represent inlined
      routines and abstract (uninstantiated) template routines.
@@ -901,7 +846,7 @@ hpread_quick_traverse (objfile,	section_offsets, gntt_bits, vt_bits, pxdb_header
          in them but still have qMD entries.  They also have no qFD or
          qPD entries.  Their start address is -1 and their end address
          is 0.  */
-      if (VALID_CURR_MODULE && (CURR_MODULE_START == -1) && (CURR_MODULE_END == NULL))
+      if (VALID_CURR_MODULE && (CURR_MODULE_START == -1) && (CURR_MODULE_END == 0))
 	{
 
 	  mod_name_string = &vt_bits[(long) qMD[curr_md].sbMod];
@@ -932,9 +877,9 @@ hpread_quick_traverse (objfile,	section_offsets, gntt_bits, vt_bits, pxdb_header
 				                /* byte index in LNTT of end 
 				                   = capping symbol offset  
 				                   = LDSYMOFF of nextfile */
-				     NULL,	/* text high            */
-				     NULL,	/* dependency_list      */
-				     0);	/* dependencies_used    */
+				    0,	        /* text high            */
+				    NULL,	/* dependency_list      */
+				    0);	        /* dependencies_used    */
 
 	  global_syms = objfile->global_psymbols.next;
 	  static_syms = objfile->static_psymbols.next;
@@ -1676,7 +1621,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 
   /* Just in case the stabs reader left turds lying around.  */
   free_pending_blocks ();
-  make_cleanup (really_free_pendings, 0);
+  make_cleanup ((make_cleanup_func) really_free_pendings, 0);
 
   pst = (struct partial_symtab *) 0;
 
@@ -1695,7 +1640,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
     (struct partial_symtab **) alloca (dependencies_allocated *
 				       sizeof (struct partial_symtab *));
 
-  old_chain = make_cleanup (free_objfile, objfile);
+  old_chain = make_cleanup ((make_cleanup_func) free_objfile, objfile);
 
   last_source_file = 0;
 
