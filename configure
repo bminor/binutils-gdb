@@ -152,6 +152,17 @@ do
                         fatal=yes
                         ;;
                 esac
+        elif [ -n "${next_host}" ] ; then
+                next_host=
+                case "${host_alias}" in
+                "")
+                        host_alias="${arg}"
+                        ;;
+                *)
+                        echo '***' Can only configure for one host at a time.  1>&2
+                        fatal=yes
+                        ;;
+                esac
         elif [ -n "${next_tmpdir}" ] ; then
                 next_tmpdir=
                 tmpdiroption="--tmpdir=${arg}"
@@ -176,6 +187,17 @@ do
                         case "${host_alias}" in
                         "")
                                 host_alias="`echo ${arg} | sed 's/^[-a-z]*=//'`"
+                                ;;
+                        *)
+                                echo '***' Can only configure for one host at a time.  1>&2
+                                fatal=yes
+                                ;;
+                        esac
+                        ;;
+                -host=* | --host | --hos | --ho)
+                        case "${host_alias}" in
+                        "")
+                                next_host=yes
                                 ;;
                         *)
                                 echo '***' Can only configure for one host at a time.  1>&2
@@ -902,7 +924,7 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
                                 *)      recprog=../${progname} ;;
                                 esac
 			else
-				echo No configuration information in ${configdir} ${redirect}
+				eval echo No configuration information in ${configdir} ${redirect}
 				recprog=
                         fi
 
