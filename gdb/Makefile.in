@@ -745,9 +745,7 @@ maintainer-clean realclean: clean
 	rm -f Makefile
 
 diststuff: $(DISTSTUFF)
-	(cd doc; $(MAKE) $(MFLAGS) GDBvn.texi)
-	$(MAKE) $(MFLAGS) gdb.info
-	$(MAKE) $(MFLAGS) refcard.ps
+	cd doc; $(MAKE) $(MFLAGS) diststuff
 
 subdir_do: force
 	@for i in $(DODIRS); do \
@@ -768,24 +766,20 @@ force:
 
 # Documentation!
 # GDB QUICK REFERENCE (TeX dvi file, CM fonts)
-refcard.dvi:
-	( cd doc; $(MAKE) refcard.dvi $(FLAGS_TO_PASS) )
-	mv doc/refcard.dvi .
+doc/refcard.dvi:
+	cd doc; $(MAKE) refcard.dvi $(FLAGS_TO_PASS)
 
 # GDB QUICK REFERENCE (PostScript output, common PS fonts)
-refcard.ps:
-	( cd doc; $(MAKE) refcard.ps $(FLAGS_TO_PASS) )
-	mv doc/refcard.ps .
+doc/refcard.ps:
+	cd doc; $(MAKE) refcard.ps $(FLAGS_TO_PASS)
 
 # GDB MANUAL: TeX dvi file
-gdb.dvi:
-	( cd doc; $(MAKE) gdb.dvi $(FLAGS_TO_PASS) )
-	mv doc/gdb.dvi .
+doc/gdb.dvi:
+	cd doc; $(MAKE) gdb.dvi $(FLAGS_TO_PASS)
 
 # GDB MANUAL: info file
-gdb.info:
-	( cd doc; $(MAKE) gdb.info $(FLAGS_TO_PASS) )
-	mv doc/gdb.info* .
+doc/gdb.info:
+	cd doc; $(MAKE) gdb.info $(FLAGS_TO_PASS)
 
 # Make copying.c from COPYING
 copying.c: COPYING copying.awk

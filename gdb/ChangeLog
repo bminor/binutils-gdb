@@ -1,3 +1,7 @@
+Wed Nov 29 13:35:18 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* Makefile.in:  Clean up so doc stuff stays in doc sub-dir.
+
 Wed Nov 29 16:39:50 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* monitor.c (monitor_debug): New function to print monitor debug
