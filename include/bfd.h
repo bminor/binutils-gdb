@@ -177,8 +177,6 @@ typedef struct lineno_cache_entry {
 /* object and core file sections */
 
 
-/* Align an address upward to a power of two.  Argument is the power
-   of two, e.g. 8-byte alignment uses argument of 3 (8 == 2^3).  */
 #define	align_power(addr, align)	\
 	( ((addr) + ((1<<(align))-1)) & (-1 << (align)))
 
@@ -271,7 +269,14 @@ CAT(NAME,_bfd_debug_info_start),\
 CAT(NAME,_bfd_debug_info_end),\
 CAT(NAME,_bfd_debug_info_accumulate)
 
-#define COFF_SWAP_TABLE coff_swap_aux_in, coff_swap_sym_in, coff_swap_lineno_in,
+#define COFF_SWAP_TABLE \
+ coff_swap_aux_in, coff_swap_sym_in, coff_swap_lineno_in, \
+ coff_swap_aux_out, coff_swap_sym_out, \
+ coff_swap_lineno_out, coff_swap_reloc_out, \
+ coff_swap_filehdr_out, coff_swap_aouthdr_out, \
+ coff_swap_scnhdr_out
+
+
 
 /* User program access to BFD facilities */
 
@@ -1827,6 +1832,27 @@ before); else determine modify time, cache it, and return it.
 #define bfd_set_arch_mach(abfd, arch, mach)\
         BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
 
+#define bfd_coff_swap_reloc_out(abfd, i, o) \
+        BFD_SEND (abfd, _bfd_coff_swap_reloc_out, (abfd, i, o))
+
+#define bfd_coff_swap_lineno_out(abfd, i, o) \
+        BFD_SEND (abfd, _bfd_coff_swap_lineno_out, (abfd, i, o))
+
+#define bfd_coff_swap_aux_out(abfd, i, t,c,o) \
+        BFD_SEND (abfd, _bfd_coff_swap_aux_out, (abfd, i,t,c, o))
+
+#define bfd_coff_swap_sym_out(abfd, i,o) \
+        BFD_SEND (abfd, _bfd_coff_swap_sym_out, (abfd, i, o))
+
+#define bfd_coff_swap_scnhdr_out(abfd, i,o) \
+        BFD_SEND (abfd, _bfd_coff_swap_scnhdr_out, (abfd, i, o))
+
+#define bfd_coff_swap_filehdr_out(abfd, i,o) \
+        BFD_SEND (abfd, _bfd_coff_swap_filehdr_out, (abfd, i, o))
+
+#define bfd_coff_swap_aouthdr_out(abfd, i,o) \
+        BFD_SEND (abfd, _bfd_coff_swap_aouthdr_out, (abfd, i, o))
+
 /*
 */
 
@@ -1903,7 +1929,7 @@ or else @code{false}.
 
 /*:targets.c*/
 /* bfd_target
-@node bfd_target
+@node bfd_target,  , Targets, Targets
 @subsection bfd_target
 This structure contains everything that BFD knows about a target.
 It includes things like its byte order, name, what routines to call
@@ -2150,6 +2176,47 @@ Special entry points for gdb to swap in coff symbol table parts
        bfd            *abfd,
        PTR            ext,
        PTR             in));
+
+/*
+Special entry points for gas to swap coff parts
+*/
+
+ SDEF(unsigned int, _bfd_coff_swap_aux_out,(
+       bfd   	*abfd,
+       PTR	in,
+       int    	type,
+       int    	class,
+       PTR    	ext));
+
+ SDEF(unsigned int, _bfd_coff_swap_sym_out,(
+      bfd      *abfd,
+      PTR	in,
+      PTR	ext));
+
+ SDEF(unsigned int, _bfd_coff_swap_lineno_out,(
+      	bfd   	*abfd,
+      	PTR	in,
+	PTR	ext));
+
+ SDEF(unsigned int, _bfd_coff_swap_reloc_out,(
+      	bfd     *abfd,
+     	PTR	src,
+	PTR	dst));
+
+ SDEF(unsigned int, _bfd_coff_swap_filehdr_out,(
+      	bfd  	*abfd,
+	PTR 	in,
+	PTR 	out));
+
+ SDEF(unsigned int, _bfd_coff_swap_aouthdr_out,(
+      	bfd 	*abfd,
+	PTR 	in,
+	PTR	out));
+
+ SDEF(unsigned int, _bfd_coff_swap_scnhdr_out,(
+      	bfd  	*abfd,
+      	PTR	in,
+	PTR	out));
 
 } bfd_target;
 

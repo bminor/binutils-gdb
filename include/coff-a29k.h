@@ -36,12 +36,13 @@ struct external_filehdr
 #define SIPFBOMAGIC     0572    /* Am29000 (Byte 0 is MSB) */
 #define SIPRBOMAGIC     0573    /* Am29000 (Byte 0 is LSB) */
 
+
 #define A29K_MAGIC_BIG 		SIPFBOMAGIC	
 #define A29K_MAGIC_LITTLE	SIPRBOMAGIC	
 #define A29KBADMAG(x) 	(((x).f_magic!=A29K_MAGIC_BIG) && \
 			  ((x).f_magic!=A29K_MAGIC_LITTLE))
 
-
+#define OMAGIC A29K_MAGIC_BIG
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
 
 /*
@@ -70,6 +71,7 @@ typedef	struct external_aouthdr
 } AOUTHDR;
 
 #define AOUTSZ (sizeof(AOUTHDR))
+#define AOUTHDRSZ (sizeof(AOUTHDR))
 
 /* aouthdr magic numbers */
 #define NMAGIC		0410	/* separate i/d executable */

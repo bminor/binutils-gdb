@@ -174,6 +174,10 @@ struct internal_syment {
 	char		n_sclass;	/* storage class		*/
 	char		n_numaux;	/* number of aux. entries	*/
 };
+#define n_name		_n._n_name
+#define n_zeroes	_n._n_n._n_zeroes
+#define n_offset	_n._n_n._n_offset
+
 
 /* Relocatable symbols have number of the section in which they are defined,
    or one of the following: */
@@ -225,11 +229,11 @@ struct internal_syment {
 union internal_auxent 
 {
   struct {
+
     union {
       long l;			/* str, un, or enum tag indx */
       struct coff_ptr_struct *p;
     } x_tagndx;
-
     union {
       struct {
 	unsigned short x_lnno;	/* declaration line number */
