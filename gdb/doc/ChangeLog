@@ -1,3 +1,8 @@
+Sun Aug 16 01:16:18 1992  John Gilmore  (gnu@cygnus.com)
+
+	* stabs.texinfo:  Minor updates from running TeX over it.
+	* Makefile.in (stabs.dvi, stabs.ps):  Add.
+
 Sat Aug 15 20:52:24 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* stabs.texinfo:  Stabs documentation, written by Julia Menapace.

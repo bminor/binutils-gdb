@@ -4,15 +4,15 @@
 @ifinfo
 @format
 START-INFO-DIR-ENTRY
-* Stabs.  The "stabs" representation of debugging infromation.
+* Stabs: (stabs).  		The "stabs" debugging information format.
 END-INFO-DIR-ENTRY
 @end format
 @end ifinfo
 
 @ifinfo
-This document describes GNU stabs in a.out
+This document describes GNU stabs (debugging symbol tables) in a.out files.
 
-Copyright (C) 1992 by ???.
+Copyright 1992 Free Software Foundation, Inc.
 Contributed by Cygnus Support.  Written by Julia Menapace.
 
 Permission is granted to make and distribute verbatim copies of
@@ -34,7 +34,7 @@ regarded as a program in the language TeX).
 @setchapternewpage off
 @settitle STABS
 @titlepage
-@title{The "stabs" representation of debugging infromation.}
+@title{The "stabs" representation of debugging information.}
 @author Julia Menapace
 @author Cygnus Support
 @page
@@ -59,26 +59,28 @@ are preserved on all copies.
 
 @node Top, Overview, (dir), (dir)
 
-This document describes GNU stabs in a.out
+This document describes the GNU stabs debugging format in a.out files.
 
 @menu
-* Overview:: Overview of stabs
-* Program structure:: Encoding of the structure of the program
+* Overview:: 			Overview of stabs
+* Program structure::		Encoding of the structure of the program
 * Simple types::
-* Example:: A comprehensive example in C 
+* Example::			A comprehensive example in C 
 * Variables::
 * Aggregate types::
-* Symbol tables:: Symbol information in symbol tables
+* Symbol tables::		Symbol information in symbol tables
 * GNU C++ stabs::
 
 Appendixes:
-* Example2.c:: source code for extended example
-* Example2.s:: assembly code for extended example
-* Quick reference:: Various refernce tables
-* Expanded reference:: by stab type
-* Questions:: Questions and anomolies
-* xcoff-differences:: Differences between GNU stabs in a.out and GNU stabs in xcoff
-* Sun-differences:: Differences between GNU stabs and Sun native stabs
+* Example2.c::			Source code for extended example
+* Example2.s::			Assembly code for extended example
+* Quick reference::		Various refernce tables
+* Expanded reference::		Reference information by stab type
+* Questions::			Questions and anomolies
+* xcoff-differences::		Differences between GNU stabs in a.out
+				and GNU stabs in xcoff
+* Sun-differences::		Differences between GNU stabs and Sun
+				native stabs
 @end menu
 
 
@@ -576,7 +578,9 @@ body of main.
 @end example
 
    Second code range for source line 23, 'for' loop increment and return
+
    <68> N_SLINE - source line number associated with this code
+
    .stabn, SLINE, NIL, line_number, code_address_of_line_continuation.
 
 @example
@@ -883,7 +887,7 @@ for argv contains nested type_definitions.  Type 21 is ptr to type 2
 @node Aggregate Types, Symbol tables, Variables, Top
 @chapter Aggregate Types 
 
-Now lets look at some variable definitions involving complex types.
+Now let's look at some variable definitions involving complex types.
 This involves understanding better how types are described.  In the
 examples so far types have been described as references to previously
 defined types or defined in terms of subranges of or pointers to
@@ -1015,6 +1019,7 @@ offset from the start of the struct, and number of bits in the
 element.
 
 
+@example
    <128> N_LSYM - type definition 
    .stabs "name:sym_desc(struct tag) Type_def(16)=type_desc(struct type) 
 	struct_bytes
@@ -1026,6 +1031,7 @@ element.
 
 30 .stabs "s_tag:T16=s20s_int:1,0,32;s_float:12,32,32;
 	   s_char_vec:17=ar1;0;7;2,64,64;s_next:18=*16,128,32;;",128,0,0,0
+@end example
  
 In this example, two of the structure elements are previously defined
 types.  For these, the type following the name: part of the element
@@ -1073,7 +1079,7 @@ debugging information.
 .stabs, stab type N_LSYM,
  symbol descriptor T, type descriptor u
 
-Next lets look at unions.  In example2 this union type is declared
+Next let's look at unions.  In example2 this union type is declared
 locally to a procedure and an instance of the union is defined.
 
 @example
@@ -1251,8 +1257,8 @@ entry now holds an absolute address.
 215 0000e008 D _g_foo
 
 
-@node Gnu C++ stabs, , Symbol tables, Top
-@chapter Gnu C++ stabs
+@node GNU C++ stabs, , Symbol tables, Top
+@chapter GNU C++ stabs
 
 @menu
 * Basic C++ types::
@@ -1283,7 +1289,7 @@ cross-reference
 @end table
 
 
-@node Basic C++ types, , , Gnu C++ stabs
+@node Basic C++ types, , , GNU C++ stabs
 @section Basic types for C++
 
 << the examples that follow are based on a01.C >>
@@ -1319,7 +1325,7 @@ virtual methods defined.
 
 .stabs "$vtbl_ptr_type:T17",128,0,0,0
 
-@node Simple classes, , , Gnu C++ stabs
+@node Simple classes, , , GNU C++ stabs
 @section Simple class definition 
 
 The stabs describing C++ language features are an extension of the
@@ -1377,7 +1383,8 @@ semi-colon.
 
 The format of an overloaded operator method name differs from that
 of other methods.  It is "op$::XXXX." where XXXX is the operator name
-such as + or += 
+such as + or +=.  The name ends with a period, and any characters except
+the period can occur in the XXXX string.
 
 The next part of the method description represents the arguments to
 the method, preceeded by a colon and ending with a semi-colon.  The
@@ -1395,6 +1402,7 @@ elaborate further on these fields and describe the additional
 information present for virtual methods.
 
 
+@example
 .stabs "class_name:sym_desc(type)type_def(20)=type_desc(struct)struct_bytes(4)
 	field_name(Adat):type(int),bit_offset(0),field_bits(32);
 
@@ -1408,8 +1416,9 @@ information present for virtual methods.
 .stabs "class_name:sym_desc(struct tag)",N_LSYM,NIL,NIL,NIL
 
 .stabs "baseA:T20",128,0,0,0
+@end example
 
-@node Class instance, , , Gnu C++ stabs
+@node Class instance, , , GNU C++ stabs
 @section Class instance
 
 As shown above, describing even a simple C++ class definition is
@@ -1431,7 +1440,7 @@ different from a standard C stab describing a local variable.
 
 .stabs "AbaseA:20",128,0,0,-20
 
-@node Methods, , , Gnu C++ stabs
+@node Methods, , , GNU C++ stabs
 @section Method defintion
 
 The class definition shown above declares Ameth.  The C++ source below
@@ -1455,10 +1464,12 @@ called.  Note that the method name is mangled to encode the class name
 and argument types.  << Name mangling is not described by this
 document - Is there already such a doc? >>
 
+@example
 .stabs "name:symbol_desriptor(global function)return_type(int)",
 	N_FUN, NIL, NIL, code_addr_of_method_start 
 
 .stabs "Ameth__5baseAic:F1",36,0,0,_Ameth__5baseAic
+@end example
 
 Here is the stab for the `this' pointer implicit argument.  The name
 of the `this' pointer is always $t.  Type 19, the `this' pointer is
@@ -1467,25 +1478,29 @@ not yet been emited.  Since the compiler knows it will be emited
 shortly, here it just outputs a cross reference to the undefined
 symbol, by prefixing the symbol name with xs.
 
+@example
 .stabs "name:sym_desc(register param)type_def(19)=
 	type_desc(ptr to)type_ref(baseA)=
         type_desc(cross-reference to)baseA:",N_RSYM,NIL,NIL,register_number 
 
 .stabs "$t:P19=*20=xsbaseA:",64,0,0,8
+@end example
 
 The stab for the explicit integer argument looks just like a parameter
 to a C function.  The last field of the stab is the offset from the
 argument pointer, which in most systems is the same as the frame
 pointer.
 
+@example
 .stabs "name:sym_desc(value parameter)type_ref(int)",
 	N_PSYM,NIL,NIL,offset_from_arg_ptr 
 
 .stabs "in:p1",160,0,0,72
+@end example
 
 << The examples that follow are based on A1.C >>
 
-@node Protections, , , Gnu C++ stabs
+@node Protections, , , GNU C++ stabs
 @section Protections
 
 
@@ -1513,6 +1528,7 @@ public:
 
 generates the following stab to describe the class type all_data.
 
+@example
 .stabs "class_name:sym_desc(type)type_def(19)=type_desc(struct)struct_bytes
 	data_name:/protection(private)type_ref(int),bit_offset,num_bits;
 	data_name:/protection(protected)type_ref(char),bit_offset,num_bits;
@@ -1521,6 +1537,7 @@ generates the following stab to describe the class type all_data.
 
 .stabs "all_data:t19=s12
 	priv_dat:/01,0,32;prot_dat:/12,32,8;pub_dat:12,64,32;;",128,0,0,0
+@end example
 
 Protections for member functions are signified by one digit embeded in
 the field part of the stab describing the method.  The digit is 0 if
@@ -1542,6 +1559,7 @@ It generates the following stab.  The digit in question is to the left
 of an `A' in each case.  Notice also that in this case two symbol
 descriptors apply to the class name struct tag and struct type.
 
+@example
 .stabs "class_name:sym_desc(struct tag&type)type_def(21)=
 	sym_desc(struct)struct_bytes(1)
 	meth_name::type_def(22)=sym_desc(method)returning(int);
@@ -1554,9 +1572,9 @@ descriptors apply to the class name struct tag and struct type.
 	
 .stabs "all_methods:Tt21=s1priv_meth::22=##1;:i;0A.;protMeth::23=##2;:c;1A.;
 	pubMeth::24=##12;:f;2A.;;",128,0,0,0
+@end example
 
-
-@node Method Modifiers, , , Gnu C++ stabs
+@node Method Modifiers, , , GNU C++ stabs
 Method Modifiers (const, volatile, const volatile)
 
 << based on a6.C >>
@@ -1579,6 +1597,7 @@ public:
 
 This class is described by the following stab:
 
+@example
 .stabs "class(A):sym_desc(struct)type_def(20)=type_desc(struct)struct_bytes(1)
 	meth_name(ConstMeth)::type_def(21)sym_desc(method)
 	returning(int);:arg(int);protection(public)modifier(const)virtual(no);
@@ -1586,14 +1605,14 @@ This class is described by the following stab:
 	returning(char);:arg(char);protection(public)modifier(volatile)virt(no)
 	meth_name(ConstVolMeth)::type_def(23)=sym_desc(method)
 	returning(float);:arg(float);protection(public)modifer(const volatile)
-	virutal(no);;", etc...
+	virtual(no);;", etc...
 	
 
 .stabs "A:T20=s1ConstMeth::21=##1;:i;2B.;VolatileMeth::22=##2;:c;2C.;
 	     ConstVolMeth::23=##12;:f;2D.;;",128,0,0,0
+@end example
 
-
-@node Virtual Methods, , , Gnu C++ stabs
+@node Virtual Methods, , , GNU C++ stabs
 @section Virtual Methods
 
 << The following examples are based on a4.C >> 
@@ -1661,6 +1680,7 @@ For classes containing virtual functions the very last section of the
 string part of the stab holds a type reference to the first base
 class.  This is preceeded by `~%' and followed by a final semi-colon.
 
+@example
 .stabs "class_name(A):type_def(20)=sym_desc(struct)struct_bytes(8)
 	field_name(Adat):type_ref(int),bit_offset(0),field_bits(32);
 	field_name(A virt func ptr):type_def(21)=type_desc(ptr to)type_def(22)=
@@ -1672,9 +1692,10 @@ class.  This is preceeded by `~%' and followed by a final semi-colon.
 	N_LSYM,NIL,NIL,NIL
 
 .stabs "A:t20=s8Adat:1,0,32;$vf20:21=*22=ar1;0;1;17,32;A_virt::23=##1;:i;2A*-2147483647;20;;;~%20;",128,0,0,0
+@end example
 
 
-@node Inheritence, , , Gnu C++ stabs
+@node Inheritence, , , GNU C++ stabs
 @section Inheritence
 
 Stabs describing C++ derived classes include additional sections that
@@ -1737,15 +1758,18 @@ public:
 Class stabs similar to the ones described earlier are generated for
 each base class.  
 
+@example
 .stabs "A:T20=s8Adat:1,0,32;$vf20:21=*22=ar1;0;1;17,32;A_virt::23=##1;:i;2A*-2147483647;20;;;~%20;",128,0,0,0
 
 .stabs "B:Tt25=s8Bdat:1,0,32;$vf25:21,32;B_virt::26=##1;:i;2A*-2147483647;25;;;~%25;",128,0,0,0
 
 .stabs "C:Tt28=s8Cdat:1,0,32;$vf28:21,32;C_virt::29=##1;:i;2A*-2147483647;28;;;~%28;",128,0,0,0
+@end example
 
 In the stab describing derived class D below, the information about
 the derivation of this class is encoded as follows.
 
+@example
 .stabs "derived_class_name:symbol_descriptors(struct tag&type)=
 	type_descriptor(struct)struct_bytes(32)!num_bases(3),
 	base_virtual(no)inheritence_public(no)base_offset(0),
@@ -1756,9 +1780,9 @@ the derivation of this class is encoded as follows.
 	base_class_type_ref(C); etc...
 	
 .stabs "D:Tt31=s32!3,000,20;100,25;0264,28;$vb25:24,128;Ddat:1,160,32;A_virt::32=##1;:i;2A*-2147483647;20;;B_virt::32:i;2A*-2147483647;25;;C_virt::32:i;2A*-2147483647;28;;D_virt::32:i;2A*-2147483646;31;;;~%20;",128,0,0,0
+@end example
 
-
-@node Virtual Base Classes, , , Gnu C++ stabs
+@node Virtual Base Classes, , , GNU C++ stabs
 @section Virtual Base Classes
 
 A derived class object consists of a concatination in memory of the
@@ -1781,7 +1805,9 @@ name is $vb followed by a type reference to the virtual base class.
 Since the type id for B in this example is 25, the vbase pointer name
 is $vb25.
 
+@example
 .stabs "D:Tt31=s32!3,000,20;100,25;0264,28;$vb25:24,128;Ddat:1,160,32;A_virt::32=##1;:i;2A*-2147483647;20;;B_virt::32:i;2A*-2147483647;25;;C_virt::32:i;2A*-2147483647;28;;D_virt::32:i;2A*-2147483646;31;;;~%20;",128,0,0,0
+@end example
 
 Following the name and a semicolon is a type reference describing the
 type of the virtual base class pointer, in this case 24.  Type 24 was
@@ -1798,7 +1824,7 @@ at 64, the vtable pointer for C at 96, the virtual ase pointer for B
 at 128, and Ddat at 160.
 
 
-@node Static Members, , , Gnu C++ stabs
+@node Static Members, , , GNU C++ stabs
 @section Static Members
 
 The data area for a class is a concatination of the space used by the
@@ -2042,12 +2068,12 @@ dec    hex      name      source program feature
 72     0x48	N_BSLINE  line number in bss segment
 72     0x48	N_BROWS	  Sun source code browser, path to .cb file
 
-74     0x4a	N_DEFD	  Gnu Modula2 definition module dependency
+74     0x4a	N_DEFD	  GNU Modula2 definition module dependency
 
-80     0x50	N_EHDECL  Gnu C++ exception variable
+80     0x50	N_EHDECL  GNU C++ exception variable
 80     0x50	N_MOD2	  Modula2 info "for imc" (according to Ultrix V4.0)
 
-84     0x54	N_CATCH	  Gnu C++ "catch" clause
+84     0x54	N_CATCH	  GNU C++ "catch" clause
 96     0x60	N_SSYM	  structure of union element
 100    0x64	N_SO	  path and name of source file 
 128    0x80	N_LSYM	  automatic var in the stack (also used for type desc.)
@@ -2316,7 +2342,7 @@ Note: type field value overlaps with N_BSLINE
 
 -------------------------------------------------------------------------
 74     0x4a	N_DEFD	  
-Gnu Modula2 definition module dependency
+GNU Modula2 definition module dependency
 
 GNU Modula-2 definition module dependency.  Value is the modification
 time of the definition file.  Other is non-zero if it is imported with
@@ -2325,7 +2351,7 @@ are enough empty fields?
 
 -------------------------------------------------------------------------
 80     0x50	N_EHDECL  
-Gnu C++ exception variable <<?>>
+GNU C++ exception variable <<?>>
 
 "name is variable name"
 
@@ -2337,7 +2363,7 @@ Note: conflicts with N_MOD2.
 Note: conflicts with N_EHDECL  <<?>>
 
 -------------------------------------------------------------------------
-84     0x54	N_CATCH	  Gnu C++ "catch" clause
+84     0x54	N_CATCH	  GNU C++ "catch" clause
 
 GNU C++ `catch' clause.  Value is its address.  Desc is nonzero if
 this entry is immediately followed by a CAUGHT stab saying what
@@ -2542,7 +2568,7 @@ var can be a variable defined in the program and gdb says `function
 var not defined'
 
 @item
-In Gnu C stabs there seems to be no way to differentiate tag types:
+In GNU C stabs there seems to be no way to differentiate tag types:
 structures, unions, and enums (symbol descriptor T) and typedefs
 (symbol descriptor t) defined at file scope from types defined locally
 to a procedure or other more local scope.  They all use the N_LSYM
@@ -2703,11 +2729,11 @@ N_LENG		unknown
 
 @itemize @bullet
 @item
-Gnu C stabs define *all* types, file or procedure scope, as
+GNU C stabs define *all* types, file or procedure scope, as
 N_LSYM.  Sun doc talks about using N_GSYM too.
 
 @item
-Gnu C stabs use `ar' as type descriptor when defining arrays vs. just
+GNU C stabs use `ar' as type descriptor when defining arrays vs. just
 `a' in Sun doc.
 
 @item
@@ -2719,7 +2745,7 @@ GNU stabs always have 0 in that field.
 Sun C stabs use type number pairs in the format (a,b) where a is a
 number starting with 1 and incremented for each sub-source file in the
 compilation.  b is a number starting with 1 and incremented for each
-new type defined in the compilation.  Gnu C stabs use the type number
+new type defined in the compilation.  GNU C stabs use the type number
 alone, with no source file number.  
 @end itemize
 

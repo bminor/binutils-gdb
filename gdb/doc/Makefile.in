@@ -85,7 +85,7 @@ CONFIG=all
 
 all install:
 
-info: gdb.info gdbint.info
+info: gdb.info gdbint.info stabs.info
 all-doc: gdb.info gdb.dvi refcard.dvi gdb-internals gdbint.dvi
 clean-info:
 	-rm -f *.info*
@@ -296,6 +296,17 @@ gdbint.info: gdbint.texinfo
 
 stabs.info: stabs.texinfo
 	$(MAKEINFO) -o stabs.info $(srcdir)/stabs.texinfo
+
+# STABS DOCUMENTATION: TeX dvi file
+stabs.dvi : stabs.texinfo
+	TEXINPUTS=${TEXIDIR}:.:$(srcdir):$$TEXINPUTS tex stabs.texinfo
+	texindex stabs.??
+	TEXINPUTS=${TEXIDIR}:.:$(srcdir):$$TEXINPUTS tex stabs.texinfo
+	rm -f stabs.?? stabs.aux stabs.cps stabs.fns stabs.kys \
+		stabs.log stabs.pgs stabs.toc stabs.tps stabs.vrs
+
+stabs.ps: stabs.dvi
+	dvips -o stabs.ps stabs
 
 force:
 
