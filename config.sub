@@ -26,7 +26,7 @@ case "$1" in
 # cpu alone is a valid alias for cpu-none-none.
 vax | tahoe | i386 | i860 | m68k | m68000 | m88k | sparc | ns32k \
 	| alliant | arm | c1 | c2 | mips | pyramid | tron | a29k \
-	| romp | rs6000 | i960 | h8300)
+	| romp | i960 | h8300)
 	cpu=$1
 	vendor=none
 	os=none
@@ -174,7 +174,7 @@ hp9k31[0-9] | hp9k2[0-9][0-9])
 i386sco)
 	cpu=i386
 	vendor=sco
-	os=sysv # maybe?
+	os=sysv32 # maybe?
 	;;
 i386v)
 	cpu=i386
@@ -277,7 +277,7 @@ pn)
 	vendor=gould
 	os=sysv # maybe?
 	;;
-powersys)
+rs6000)
 	cpu=rs6000
 	vendor=ibm
 	os=aix
@@ -460,7 +460,7 @@ aix* | aout | bout | bsd* | coff | ctix* | dgux* | dynix* | esix* \
 	| ebmon | hpux* \
 	| hds | irix* | isc* | kern | mach* | msdos* | newsos* | nindy* | none \
 	| osf* | sco* | sunos* | sysv* | ultrix* | unos* | v88r* \
-	| vms* | vxworks* | sym[1-9]* | unicos* | uts | svr4 \
+	| vms* | vxworks* | sym[1-9]* | unicos* | uts | svr4 | m88kbcs \
 	| amigados) 
 	;;
 
