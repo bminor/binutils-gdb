@@ -1,3 +1,9 @@
+2000-04-19  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	K&R compiler fixes.
+	* dwarf2.c (concat_filename): Avoid string literal concatenation.
+	* ieee.c (ieee_get_symtab): Don't initialise union in struct.
+
 Mon Apr 17 19:14:36 2000  David Mosberger  <davidm@hpl.hp.com>
 
 	* Makefile.am (BFD64_BACKENDS): Mention coff-ia64.lo.

@@ -1009,8 +1009,17 @@ ieee_get_symtab (abfd, location)
   ieee_symbol_type *symp;
   static bfd dummy_bfd;
   static asymbol empty_symbol =
-  /* the_bfd, name, value, attr, section */
-  {&dummy_bfd, " ieee empty", (symvalue) 0, BSF_DEBUGGING, bfd_abs_section_ptr, { 0 }};
+  {
+    &dummy_bfd,
+    " ieee empty",
+    (symvalue) 0,
+    BSF_DEBUGGING,
+    bfd_abs_section_ptr
+#ifdef __STDC__
+    /* K&R compilers can't initialise unions.  */
+    , { 0 }
+#endif
+  };
 
   if (abfd->symcount)
     {
