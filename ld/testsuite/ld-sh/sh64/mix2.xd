@@ -12,7 +12,7 @@ Program Header:
          filesz 0x0+10 memsz 0x0+10 flags rw-
 
 Sections:
-Idx Name          Size      VMA               LMA               File off  Algn
+Idx Name          Size      VMA       LMA       File off  Algn
   0 \.text         00000032  0+1000  0+1000  00000080  2\*\*0
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
   1 \.rodata       00000010  0+1032  0+1032  000000b2  2\*\*0
@@ -52,14 +52,14 @@ SYMBOL TABLE:
 0+1024 g       \.text	0+ compactlabel2
 0+1028 g       \.text	0+ compactlabel3
 0+1010 g       \.text	0+ 0x04 medialabel1
-0+10d8 g     O \.dtors	0+ ___dtors
+0+10d8 g       \.dtors	0+ ___dtors
 0+10cc g       \.data	0+ medialabel4
-0+10d8 g     O \*ABS\*	0+ __bss_start
-0+10d8 g     O \.ctors	0+ ___ctors_end
+0+10d8 g       \*ABS\*	0+ __bss_start
+0+10d8 g       \.ctors	0+ ___ctors_end
 0+10d4 g       \.data	0+ compactlabel5
-0+10d8 g     O \.ctors	0+ ___ctors
-0+10d8 g     O \*ABS\*	0+ _edata
-0+10d8 g     O \*ABS\*	0+ _end
+0+10d8 g       \.ctors	0+ ___ctors
+0+10d8 g       \*ABS\*	0+ _edata
+0+10d8 g       \*ABS\*	0+ _end
 0+1000 g       \.text	0+ 0x04 start
-0+80000 g     O \.stack	0+ _stack
-0+10d8 g     O \.dtors	0+ ___dtors_end
+0+80000 g       \.stack	0+ _stack
+0+10d8 g       \.dtors	0+ ___dtors_end

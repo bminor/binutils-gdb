@@ -12,7 +12,7 @@ Program Header:
          filesz 0x0+18 memsz 0x0+18 flags rw-
 
 Sections:
-Idx Name          Size      VMA               LMA               File off  Algn
+Idx Name          Size      VMA       LMA       File off  Algn
   0 \.text         00000064  0+1000  0+1000  00000080  2\*\*0
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
   1 \.data         00000018  0+10e8  0+10e8  000000e8  2\*\*0

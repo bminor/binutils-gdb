@@ -1,5 +1,9 @@
 2002-08-12  Stephen Clarke <stephen.clarke@superh.com>
 
+	* ld-sh/sh64/abi32.xd: Adjust whitespace in elf32 section
+	listing.
+	* ld-sh/sh64/cmpct1.xd, ld-sh/sh64/mix1.xd, ld-sh/sh64/mix2.xd,
+	ld-sh/sh64/rel32.xd, ld-sh/sh64/shdl32.xd: Likewise.
 	* ld-sh/sh64/abi32.xd: Adjust as type of linker-script-symbols
 	is no longer set to object.
 	* ld-sh/sh64/abi64.xd, ld-sh/sh64/cmpct1.xd, ld-sh/sh64/crange1.rd,
