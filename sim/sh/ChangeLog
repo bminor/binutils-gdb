@@ -1,3 +1,24 @@
+Thu Sep  7 15:02:31 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	(Try to) Update to new bfd autoconf scheme.
+	* run.c: Don't include sysdep.h.
+	* Makefile.in (INSTALL{,_PROGRAM,_DATA}): Use autoconf computed value.
+	(CC, CFLAGS, AR, RANLIB): Likewise.
+	(HDEFINES, TDEFINES): Define.
+	(CC_FOR_BUILD): Delete.
+	(host_makefile_frag): Delete.
+	(Makefile): Don't depend on frags.
+	* configure.in (sysdep.h): Don't create symlink.
+	(host_makefile_frag, frags): Deleted.
+	(CC, CFLAGS, AR, RANLIB, INSTALL): Compute values.
+	* configure: Regenerated.
+
+start-sanitize-sh3e
+Thu Aug 31 12:39:07 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* interp.c: Include <math.h>.
+
+end-sanitize-sh3e
 Wed Aug 30 22:05:17 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* Makefile.in (run): Link in math library too.

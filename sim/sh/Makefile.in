@@ -14,7 +14,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 VPATH = @srcdir@
 srcdir = @srcdir@
@@ -27,6 +27,7 @@ host_alias = @host_alias@
 target_alias = @target_alias@
 program_transform_name = @program_transform_name@
 bindir = $(exec_prefix)/bin
+
 libdir = $(exec_prefix)/lib
 tooldir = $(libdir)/$(target_alias)
 
@@ -47,24 +48,24 @@ docdir = $(datadir)/doc
 
 SHELL = /bin/sh
 
-# FIXME: use autoconf's AC_PROG_INSTALL
-INSTALL = $(srcroot)/install.sh -c
-INSTALL_PROGRAM = $(INSTALL)
-INSTALL_DATA = $(INSTALL)
-INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
-INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
 
-AR = ar
+AR = @AR@
 AR_FLAGS = rc
-CFLAGS = -g
+CC = @CC@
+CFLAGS = @CFLAGS@
 BISON = bison
 MAKEINFO = makeinfo
-RANLIB = ranlib
+RANLIB = @RANLIB@
+
+HDEFINES = @HDEFINES@
+TDEFINES =
 
 .NOEXPORT:
 MAKEOVERRIDES=
 
-CC_FOR_BUILD = cc
 X=xstuff.o
 XL=-lX11
 X=
@@ -75,14 +76,10 @@ CSEARCH = -I. -I$(srcdir)  -I../../include  \
   -I../../bfd -I$(INCDIR) -I$(srcdir)/../../bfd -I$(srcdir)/../../gdb -I$(srcdir)/../../newlib/libc/sys/sh
 DEP = mkdep
 
-#### Makefile fragments come in here.
-# @host_makefile_frag@
-###
-
 all:	run libsim.a
 
 run:	interp.o $(X) run.o table.o
-	$(CC) $(CFLAGS) -o run $(X) interp.o table.o run.o ../../bfd/libbfd.a ../../libiberty/libiberty.a $(XL)
+	$(CC) $(CFLAGS) -o run $(X) interp.o table.o run.o ../../bfd/libbfd.a ../../libiberty/libiberty.a $(XL) -lm
 
 interp.o:interp.c code.c table.c
 run.o:run.c 
@@ -100,7 +97,7 @@ table.c:gencode
 #	indent table.c
 
 gencode:gencode.c
-	$(CC_FOR_BUILD) -o gencode $(srcdir)/gencode.c
+	$(CC) -o gencode $(srcdir)/gencode.c
 
 .c.o:
 	$(CC) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) $<
@@ -118,6 +115,7 @@ TAGS: force
 
 clean:
 	rm -f *.[oa] *~ core *.E *.p *.ip aout-params.h gen-aout
+	rm -f run libsim.a
 
 distclean mostlyclean realclean: clean
 	rm -f TAGS
@@ -130,20 +128,16 @@ force:
 # Copy the files into directories where they will be run.
 install:
 	srcroot=`cd $(srcroot); pwd`; export srcroot; \
-	$(INSTALL_XFORM) run $(bindir)/run ;  \
 	n=`t='$(program_transform_name)'; echo run | sed -e "" $$t`; \
-	if [ -d $(tooldir) ] ; then \
-	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
-	  rm -f $(tooldir)/bin/run;  \
-	  ln $(bindir)/$$n $(tooldir)/bin/run \
-	   || $(INSTALL_PROGRAM) run $(tooldir)/bin/run; \
-	else true; fi
+	$(INSTALL_PROGRAM) run $(bindir)/$$n ;  \
+	rm -f $(tooldir)/bin/run; \
+	ln $(bindir)/$$n $(tooldir)/bin/run \
+		|| (INSTALL_PROGRAM) run $(tooldir)/bin/run; \
 
 install-man: run.1
 	$(INSTALL_XFORM1) $(srcdir)/run.1 $(man1dir)/run.1
 
-
-Makefile: Makefile.in config.status @frags@
+Makefile: Makefile.in config.status
 	$(SHELL) ./config.status
 
 config.status: configure
