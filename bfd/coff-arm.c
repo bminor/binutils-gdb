@@ -1734,10 +1734,13 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 #endif
       else
 #endif /* THUMBEXTENSION */
-        rstat = _bfd_final_link_relocate (howto, input_bfd, input_section,
-                                          contents,
-                                          rel->r_vaddr - input_section->vma,
-                                          val, addend);
+        if (info->relocatable && ! howto->partial_inplace)
+            rstat = bfd_reloc_ok;
+        else
+	  rstat = _bfd_final_link_relocate (howto, input_bfd, input_section,
+					    contents,
+					    rel->r_vaddr - input_section->vma,
+					    val, addend);
 #if 1 /* THUMBEXTENSION */
       /* FIXME:
 	 Is this the best way to fix up thumb addresses? krk@cygnus.com

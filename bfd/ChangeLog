@@ -1,3 +1,8 @@
+2004-01-08  Dmitry Semyonov  <Dmitry.Semyonov@oktet.ru>
+
+	* coff-arm.c (coff_arm_relocate_section): Do not alter relocs that
+	are not partial_inplace during a relocatable link.
+
 2004-01-08  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* elf32-m68k.c (elf_m68k_gc_sweep_hook): Terminate early
