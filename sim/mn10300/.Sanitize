@@ -42,6 +42,7 @@ simops.c
 mn10300.igen
 mn10300.dc
 sim-main.h
+sim-main.c
 op_utils.c
 
 Things-to-lose:
