@@ -1,0 +1,2692 @@
+//
+// MIPS Architecture:
+//
+//        CPU Instruction Set (mips16)
+//
+
+// The instructions in this section are ordered according
+// to http://www.sgi.com/MIPS/arch/MIPS16/mips16.pdf.
+
+
+// FIXME: Instead of having the code for mips16 instructions here.
+// these instructions should instead call the corresponding 32bit
+// instruction (or a function implementing that instructions code).
+
+
+
+011101,26.INSTR_INDEX:NORMAL:32::JALX
+*r3900:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
+{
+  unsigned32 instruction = instruction_0;
+  unsigned_word op1 = (((instruction >> 0) & 0x03FFFFFF) << 2);
+  op1 |= (PC & ~0x0FFFFFFF); /* address of instruction in delay slot for the jump */
+  {
+    int destreg = 31;
+    GPR[destreg] = (PC + 4); /* NOTE: The PC is already 4 ahead within the simulator */
+    op1 ^= 1;
+    /* NOTE: ??? Gdb gets confused if the PC is sign-extended,
+       so we just truncate it to 32 bits here.  */
+    op1 = VL4_8(op1);
+    /* NOTE: The jump occurs AFTER the next instruction has been executed */
+    DELAY_SLOT (op1);
+    /* JALDELAYSLOT(); FIXME */
+  }
+}
+
+
+// Load and Store Instructions
+
+
+10000,xxx,ddd,55555:RRI:16::LB
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int destreg = (instruction >> 5) & 0x7;
+  int offset = (instruction >> 0) & 0x1f;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    {
+      if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
+	{
+	  unsigned64 memval = 0;
+	  unsigned64 memval1 = 0;
+	  unsigned64 mask = 0x7;
+	  unsigned int shift = 0;
+	  unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	  unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	  unsigned int byte;
+	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
+	  LoadMemory(&memval,&memval1,uncached,AccessLength_BYTE,paddr,vaddr,isDATA,isREAL);
+	  byte = ((vaddr & mask) ^ (bigend << shift));
+	  GPR[destreg] = (SIGNEXTEND(((memval >> (8 * byte)) & 0x000000FF),8));
+	}
+    }
+  }
+}
+
+
+10100,xxx,ddd,55555:RRI:16::LBU
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int destreg = (instruction >> 5) & 0x7;
+  int offset = (instruction >> 0) & 0x1f;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    {
+      if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
+	{
+	  unsigned64 memval = 0;
+	  unsigned64 memval1 = 0;
+	  unsigned64 mask = 0x7;
+	  unsigned int shift = 0;
+	  unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	  unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	  unsigned int byte;
+	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
+	  LoadMemory(&memval,&memval1,uncached,AccessLength_BYTE,paddr,vaddr,isDATA,isREAL);
+	  byte = ((vaddr & mask) ^ (bigend << shift));
+	  GPR[destreg] = (((memval >> (8 * byte)) & 0x000000FF));
+	}
+    }
+  }
+}
+
+
+10001,xxx,ddd,HHHHH:RRI:16::LH
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int destreg = (instruction >> 5) & 0x7;
+  int offset = (instruction >> 0) & 0x1f;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      offset <<= 1;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 1) != 0)
+      SignalExceptionAddressLoad();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    unsigned64 mask = 0x7;
+	    unsigned int shift = 1;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
+	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
+	    LoadMemory(&memval,&memval1,uncached,AccessLength_HALFWORD,paddr,vaddr,isDATA,isREAL);
+	    byte = ((vaddr & mask) ^ (bigend << shift));
+	    GPR[destreg] = (SIGNEXTEND(((memval >> (8 * byte)) & 0x0000FFFF),16));
+	  }
+      }
+  }
+}
+
+
+10101,xxx,ddd,HHHHH:RRI:16::LHU
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int destreg = (instruction >> 5) & 0x7;
+  int offset = (instruction >> 0) & 0x1f;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      offset <<= 1;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 1) != 0)
+      SignalExceptionAddressLoad();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    unsigned64 mask = 0x7;
+	    unsigned int shift = 1;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
+	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
+	    LoadMemory(&memval,&memval1,uncached,AccessLength_HALFWORD,paddr,vaddr,isDATA,isREAL);
+	    byte = ((vaddr & mask) ^ (bigend << shift));
+	    GPR[destreg] = (((memval >> (8 * byte)) & 0x0000FFFF));
+	  }
+      }
+  }
+}
+
+
+10011,xxx,ddd,WWWWW:RRI:16::LW
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int destreg = (instruction >> 5) & 0x7;
+  int offset = (instruction >> 0) & 0x1f;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      offset <<= 2;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 3) != 0)
+      SignalExceptionAddressLoad();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    unsigned64 mask = 0x7;
+	    unsigned int shift = 2;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
+	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
+	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
+	    byte = ((vaddr & mask) ^ (bigend << shift));
+	    GPR[destreg] = (SIGNEXTEND(((memval >> (8 * byte)) & 0xFFFFFFFF),32));
+	  }
+      }
+  }
+}
+
+
+10110,ddd,VVVVVVVV,P:RI:16::LWPC
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 8) & 0x7;
+  int offset = (instruction >> 0) & 0xff;
+  signed_word op1 = ((INDELAYSLOT () ? (INJALDELAYSLOT () ? IPC - 4 : IPC - 2) : (have_extendval ? IPC - 2 : IPC)) & ~ (unsigned64) 1) & ~ (unsigned64) 0x3;
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      offset <<= 2;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 3) != 0)
+      SignalExceptionAddressLoad();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    unsigned64 mask = 0x7;
+	    unsigned int shift = 2;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
+	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
+	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
+	    byte = ((vaddr & mask) ^ (bigend << shift));
+	    GPR[destreg] = (SIGNEXTEND(((memval >> (8 * byte)) & 0xFFFFFFFF),32));
+	  }
+      }
+  }
+}
+
+
+10010,ddd,VVVVVVVV,s:RI:16::LWSP
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 8) & 0x7;
+  int offset = (instruction >> 0) & 0xff;
+  signed_word op1 = 29;
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      offset <<= 2;
+    }
+  op1 = GPR[op1];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 3) != 0)
+      SignalExceptionAddressLoad();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    unsigned64 mask = 0x7;
+	    unsigned int shift = 2;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
+	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
+	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
+	    byte = ((vaddr & mask) ^ (bigend << shift));
+	    GPR[destreg] = (SIGNEXTEND(((memval >> (8 * byte)) & 0xFFFFFFFF),32));
+	  }
+      }
+  }
+}
+
+
+10111,xxx,ddd,WWWWW:RRI:16::LWU
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int destreg = (instruction >> 5) & 0x7;
+  int offset = (instruction >> 0) & 0x1f;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      offset <<= 2;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 3) != 0)
+      SignalExceptionAddressLoad();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    unsigned64 mask = 0x7;
+	    unsigned int shift = 2;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
+	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
+	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
+	    byte = ((vaddr & mask) ^ (bigend << shift));
+	    GPR[destreg] = (((memval >> (8 * byte)) & 0xFFFFFFFF));
+	  }
+      }
+  }
+}
+
+
+00111,xxx,ddd,DDDDD:RRI:16::LD
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int destreg = (instruction >> 5) & 0x7;
+  int offset = (instruction >> 0) & 0x1f;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      offset <<= 3;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 7) != 0)
+      SignalExceptionAddressLoad();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    unsigned64 mask = 0x7;
+	    unsigned int shift = 4;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
+	    LoadMemory(&memval,&memval1,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
+	    GPR[destreg] = memval;
+	  }
+      }
+  }
+}
+
+
+11111100,ddd,5.RD,P:RI64:16::LDPC
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 5) & 0x7;
+  int offset = (instruction >> 0) & 0x1f;
+  signed_word op1 = ((INDELAYSLOT () ? (INJALDELAYSLOT () ? IPC - 4 : IPC - 2) : (have_extendval ? IPC - 2 : IPC)) & ~ (unsigned64) 1) & ~ (unsigned64) 0x7;
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      offset <<= 3;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 7) != 0)
+      SignalExceptionAddressLoad();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    unsigned64 mask = 0x7;
+	    unsigned int shift = 4;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
+	    LoadMemory(&memval,&memval1,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
+	    GPR[destreg] = memval;
+	  }
+      }
+  }
+}
+
+
+11111000,ddd,5.RD,s:RI64:16::LDSP
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 5) & 0x7;
+  int offset = (instruction >> 0) & 0x1f;
+  signed_word op1 = 29;
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      offset <<= 3;
+    }
+  op1 = GPR[op1];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 7) != 0)
+      SignalExceptionAddressLoad();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    unsigned64 mask = 0x7;
+	    unsigned int shift = 4;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
+	    LoadMemory(&memval,&memval1,uncached,AccessLength_DOUBLEWORD,paddr,vaddr,isDATA,isREAL);
+	    GPR[destreg] = memval;
+	  }
+      }
+  }
+}
+
+
+11000,xxx,yyy,55555:RRI:16::SB
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int offset = (instruction >> 0) & 0x1f;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    {
+      if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
+	{
+	  unsigned64 memval = 0;
+	  unsigned64 memval1 = 0;
+	  unsigned64 mask = 0x7;
+	  unsigned int shift = 0;
+	  unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	  unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	  unsigned int byte;
+	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
+	  byte = ((vaddr & mask) ^ (bigend << shift));
+	  memval = ((unsigned64) op2 << (8 * byte));
+	  {
+	    StoreMemory(uncached,AccessLength_BYTE,memval,memval1,paddr,vaddr,isREAL);
+	  }
+	}
+    }
+  }
+}
+
+
+11001,xxx,yyy,HHHHH:RRI:16::SH
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int offset = (instruction >> 0) & 0x1f;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      offset <<= 1;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 1) != 0)
+      SignalExceptionAddressStore();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    unsigned64 mask = 0x7;
+	    unsigned int shift = 1;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
+	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
+	    byte = ((vaddr & mask) ^ (bigend << shift));
+	    memval = ((unsigned64) op2 << (8 * byte));
+	    {
+	      StoreMemory(uncached,AccessLength_HALFWORD,memval,memval1,paddr,vaddr,isREAL);
+	    }
+	  }
+      }
+  }
+}
+
+
+11011,xxx,yyy,WWWWW:RRI:16::SW
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int offset = (instruction >> 0) & 0x1f;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      offset <<= 2;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 3) != 0)
+      SignalExceptionAddressStore();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    unsigned64 mask = 0x7;
+	    unsigned int byte;
+	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2)));
+	    byte = ((vaddr & mask) ^ (BigEndianCPU << 2));
+	    memval = ((unsigned64) op2 << (8 * byte));
+	    {
+	      StoreMemory(uncached,AccessLength_WORD,memval,memval1,paddr,vaddr,isREAL);
+	    }
+	  }
+      }
+  }
+}
+
+
+11010,yyy,VVVVVVVV,s:RI:16::SWSP
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op2 = (instruction >> 8) & 0x7;
+  int offset = (instruction >> 0) & 0xff;
+  signed_word op1 = 29;
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      offset <<= 2;
+    }
+  op1 = GPR[op1];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 3) != 0)
+      SignalExceptionAddressStore();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    unsigned64 mask = 0x7;
+	    unsigned int byte;
+	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2)));
+	    byte = ((vaddr & mask) ^ (BigEndianCPU << 2));
+	    memval = ((unsigned64) op2 << (8 * byte));
+	    {
+	      StoreMemory(uncached,AccessLength_WORD,memval,memval1,paddr,vaddr,isREAL);
+	    }
+	  }
+      }
+  }
+}
+
+
+01100010,VVVVVVVV,Q,s:I8:16::SWRASP
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int offset = (instruction >> 0) & 0xff;
+  signed_word op2 = 31;
+  signed_word op1 = 29;
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      offset <<= 2;
+    }
+  op2 = GPR[op2];
+  op1 = GPR[op1];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 3) != 0)
+      SignalExceptionAddressStore();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    unsigned64 mask = 0x7;
+	    unsigned int byte;
+	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2)));
+	    byte = ((vaddr & mask) ^ (BigEndianCPU << 2));
+	    memval = ((unsigned64) op2 << (8 * byte));
+	    {
+	      StoreMemory(uncached,AccessLength_WORD,memval,memval1,paddr,vaddr,isREAL);
+	    }
+	  }
+      }
+  }
+}
+
+
+01111,xxx,yyy,DDDDD:RRI:16::SD
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int offset = (instruction >> 0) & 0x1f;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      offset <<= 3;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 7) != 0)
+      SignalExceptionAddressStore();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    memval = op2;
+	    {
+	      StoreMemory(uncached,AccessLength_DOUBLEWORD,memval,memval1,paddr,vaddr,isREAL);
+	    }
+	  }
+      }
+  }
+}
+
+
+11111001,yyy,5.RD,s:RI64:16::SDSP
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int offset = (instruction >> 0) & 0x1f;
+  signed_word op1 = 29;
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      offset <<= 3;
+    }
+  op1 = GPR[op1];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 7) != 0)
+      SignalExceptionAddressStore();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    memval = op2;
+	    {
+	      StoreMemory(uncached,AccessLength_DOUBLEWORD,memval,memval1,paddr,vaddr,isREAL);
+	    }
+	  }
+      }
+  }
+}
+
+
+11111010,CCCCCCCC,s,Q:I64:16::SDRASP
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int offset = (instruction >> 0) & 0xff;
+  signed_word op1 = 29;
+  signed_word op2 = 31;
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      offset <<= 3;
+    }
+  op1 = GPR[op1];
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 7) != 0)
+      SignalExceptionAddressStore();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    memval = op2;
+	    {
+	      StoreMemory(uncached,AccessLength_DOUBLEWORD,memval,memval1,paddr,vaddr,isREAL);
+	    }
+	  }
+      }
+  }
+}
+
+
+// ALU Immediate Instructions
+
+
+01101,ddd,UUUUUUUU,Z:RI:16::LI
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 8) & 0x7;
+  int op2 = (instruction >> 0) & 0xff;
+  signed_word op1 = 0;
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      op2 |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      have_extendval = 0;
+    }
+  else
+    {
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    if (destreg != 0)
+      GPR[destreg] = (op1 | op2);
+  }
+}
+
+
+01000,xxx,ddd,04444:RRI_A:16::ADDIU
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int destreg = (instruction >> 5) & 0x7;
+  int op2 = (instruction >> 0) & 0xf;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      op2 |= ((extendval & 0xf) << 11) | (extendval & 0x7f0);
+      if (op2 >= 0x4000)
+        op2 -= 0x8000;
+      have_extendval = 0;
+    }
+  else
+    {
+      if (op2 >= 0x8)
+        op2 -= 0x10;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned int temp = (unsigned int)(op1 + op2);
+    signed int tempS = (signed int)temp;
+    GPR[destreg] = SIGNEXTEND(((unsigned64)temp),32);
+  }
+}
+
+
+01001,www,kkkkkkkk:RI:16::ADDIU8
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int destreg;
+  int op2 = (instruction >> 0) & 0xff;
+  if (op1 < 2)
+    op1 += 16;
+  destreg = op1;
+  op1 = GPR[op1];
+  if (have_extendval)
+    {
+      op2 |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (op2 >= 0x8000)
+        op2 -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      if (op2 >= 0x80)
+        op2 -= 0x100;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned int temp = (unsigned int)(op1 + op2);
+    signed int tempS = (signed int)temp;
+    GPR[destreg] = SIGNEXTEND(((unsigned64)temp),32);
+  }
+}
+
+
+01100011,KKKKKKKK,S:I8:16::ADJSP
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int op2 = (instruction >> 0) & 0xff;
+  signed_word op1 = 29;
+  int destreg;
+  if (have_extendval)
+    {
+      op2 |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (op2 >= 0x8000)
+        op2 -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      if (op2 >= 0x80)
+        op2 -= 0x100;
+      op2 <<= 3;
+    }
+  destreg = op1;
+  op1 = GPR[op1];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned int temp = (unsigned int)(op1 + op2);
+    signed int tempS = (signed int)temp;
+    GPR[destreg] = SIGNEXTEND(((unsigned64)temp),32);
+  }
+}
+
+
+00001,ddd,AAAAAAAA,P:RI:16::ADDIUPC
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 8) & 0x7;
+  int op2 = (instruction >> 0) & 0xff;
+  signed_word op1 = ((INDELAYSLOT () ? (INJALDELAYSLOT () ? IPC - 4 : IPC - 2) : (have_extendval ? IPC - 2 : IPC)) & ~ (unsigned64) 1) & ~ (unsigned64) 0x3;
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      op2 |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (op2 >= 0x8000)
+        op2 -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      op2 <<= 2;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned int temp = (unsigned int)(op1 + op2);
+    signed int tempS = (signed int)temp;
+    GPR[destreg] = SIGNEXTEND(((unsigned64)temp),32);
+  }
+}
+
+
+00000,ddd,AAAAAAAA,s:RI:16::ADDIUSP
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 8) & 0x7;
+  int op2 = (instruction >> 0) & 0xff;
+  signed_word op1 = 29;
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      op2 |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (op2 >= 0x8000)
+        op2 -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      op2 <<= 2;
+    }
+  op1 = GPR[op1];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned int temp = (unsigned int)(op1 + op2);
+    signed int tempS = (signed int)temp;
+    GPR[destreg] = SIGNEXTEND(((unsigned64)temp),32);
+  }
+}
+
+
+01000,xxx,ddd,14444:RRI_A:16::DADDIU
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int destreg = (instruction >> 5) & 0x7;
+  int op2 = (instruction >> 0) & 0xf;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      op2 |= ((extendval & 0xf) << 11) | (extendval & 0x7f0);
+      if (op2 >= 0x4000)
+        op2 -= 0x8000;
+      have_extendval = 0;
+    }
+  else
+    {
+      if (op2 >= 0x8)
+        op2 -= 0x10;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned64 temp = (unsigned64)(op1 + op2);
+    word64 tempS = (word64)temp;
+    GPR[destreg] = (unsigned64)temp;
+  }
+}
+
+
+11111101,www,jjjjj:RI64:16::DADDIU5
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 5) & 0x7;
+  int destreg;
+  int op2 = (instruction >> 0) & 0x1f;
+  if (op1 < 2)
+    op1 += 16;
+  destreg = op1;
+  op1 = GPR[op1];
+  if (have_extendval)
+    {
+      op2 |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (op2 >= 0x8000)
+        op2 -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      if (op2 >= 0x10)
+        op2 -= 0x20;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned64 temp = (unsigned64)(op1 + op2);
+    word64 tempS = (word64)temp;
+    GPR[destreg] = (unsigned64)temp;
+  }
+}
+
+
+11111011,KKKKKKKK,S:I64:16::DADJSP
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int op2 = (instruction >> 0) & 0xff;
+  signed_word op1 = 29;
+  int destreg;
+  if (have_extendval)
+    {
+      op2 |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (op2 >= 0x8000)
+        op2 -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      if (op2 >= 0x80)
+        op2 -= 0x100;
+      op2 <<= 3;
+    }
+  destreg = op1;
+  op1 = GPR[op1];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned64 temp = (unsigned64)(op1 + op2);
+    word64 tempS = (word64)temp;
+    GPR[destreg] = (unsigned64)temp;
+  }
+}
+
+
+11111110,ddd,EEEEE,P:RI64:16::DADDIUPC
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 5) & 0x7;
+  int op2 = (instruction >> 0) & 0x1f;
+  signed_word op1 = ((INDELAYSLOT () ? (INJALDELAYSLOT () ? IPC - 4 : IPC - 2) : (have_extendval ? IPC - 2 : IPC)) & ~ (unsigned64) 1) & ~ (unsigned64) 0x3;
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      op2 |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (op2 >= 0x8000)
+        op2 -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      op2 <<= 2;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned64 temp = (unsigned64)(op1 + op2);
+    word64 tempS = (word64)temp;
+    GPR[destreg] = (unsigned64)temp;
+  }
+}
+
+
+11111111,ddd,EEEEE,s:RI64:16::DADDIUSP
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 5) & 0x7;
+  int op2 = (instruction >> 0) & 0x1f;
+  signed_word op1 = 29;
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    {
+      op2 |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (op2 >= 0x8000)
+        op2 -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      op2 <<= 2;
+    }
+  op1 = GPR[op1];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned64 temp = (unsigned64)(op1 + op2);
+    word64 tempS = (word64)temp;
+    GPR[destreg] = (unsigned64)temp;
+  }
+}
+
+
+01010,xxx,88888888,T:RI:16::SLTI
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int op2 = (instruction >> 0) & 0xff;
+  int destreg = 24;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (have_extendval)
+    {
+      op2 |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (op2 >= 0x8000)
+        op2 -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    if ((word64)op1 < (word64)op2)
+      GPR[destreg] = 1;
+    else
+      GPR[destreg] = 0;
+  }
+}
+
+
+01011,xxx,88888888,T:RI:16::SLTIU
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int op2 = (instruction >> 0) & 0xff;
+  int destreg = 24;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (have_extendval)
+    {
+      op2 |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (op2 >= 0x8000)
+        op2 -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    if ((unsigned64)op1 < (unsigned64)op2)
+      GPR[destreg] = 1;
+    else
+      GPR[destreg] = 0;
+  }
+}
+
+
+11101,xxx,yyy,01010,T:RR:16::CMP
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int destreg = 24;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    GPR[destreg] = (op1 ^ op2);
+  }
+}
+
+
+01110,xxx,UUUUUUUU,T:RI:16::CMPI
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int op2 = (instruction >> 0) & 0xff;
+  int destreg = 24;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (have_extendval)
+    {
+      op2 |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      have_extendval = 0;
+    }
+  else
+    {
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    GPR[destreg] = (op1 ^ op2);
+  }
+}
+
+
+// Two/Three Operand, Register-Type
+
+
+11100,xxx,yyy,ddd,01:RRR:16::ADDU
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int destreg = (instruction >> 2) & 0x7;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned int temp = (unsigned int)(op1 + op2);
+    signed int tempS = (signed int)temp;
+    GPR[destreg] = SIGNEXTEND(((unsigned64)temp),32);
+  }
+}
+
+
+11100,xxx,yyy,ddd,11:RRR:16::SUBU
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int destreg = (instruction >> 2) & 0x7;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned int temp = (unsigned int)(op1 - op2);
+    signed int tempS = (signed int)temp;
+    GPR[destreg] = SIGNEXTEND(((unsigned64)temp),32);
+  }
+}
+
+
+11100,xxx,yyy,ddd,00:RRR:16::DADDU
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int destreg = (instruction >> 2) & 0x7;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned64 temp = (unsigned64)(op1 + op2);
+    word64 tempS = (word64)temp;
+    GPR[destreg] = (unsigned64)temp;
+  }
+}
+
+
+11100,xxx,yyy,ddd,10:RRR:16::DSUBU
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int destreg = (instruction >> 2) & 0x7;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned64 temp = (unsigned64)(op1 - op2);
+    word64 tempS = (word64)temp;
+    GPR[destreg] = (unsigned64)temp;
+  }
+}
+
+
+11101,xxx,yyy,00010,T:RR:16::SLT
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int destreg = 24;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    if ((word64)op1 < (word64)op2)
+      GPR[destreg] = 1;
+    else
+      GPR[destreg] = 0;
+  }
+}
+
+
+11101,xxx,yyy,00011,T:RR:16::SLTU
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int destreg = 24;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    if ((unsigned64)op1 < (unsigned64)op2)
+      GPR[destreg] = 1;
+    else
+      GPR[destreg] = 0;
+  }
+}
+
+
+11101,ddd,yyy,01011,Z:RR:16::NEG
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = 0;
+  if (destreg < 2)
+    destreg += 16;
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned int temp = (unsigned int)(op1 - op2);
+    signed int tempS = (signed int)temp;
+    GPR[destreg] = SIGNEXTEND(((unsigned64)temp),32);
+  }
+}
+
+
+11101,www,yyy,01100:RR:16::AND
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int destreg;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  if (op1 < 2)
+    op1 += 16;
+  destreg = op1;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    GPR[destreg] = (op1 & op2);
+  }
+}
+
+
+11101,www,yyy,01101:RR:16::OR
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int destreg;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  if (op1 < 2)
+    op1 += 16;
+  destreg = op1;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    if (destreg != 0)
+      GPR[destreg] = (op1 | op2);
+  }
+}
+
+
+11101,www,yyy,01110:RR:16::XOR
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int destreg;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  if (op1 < 2)
+    op1 += 16;
+  destreg = op1;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    GPR[destreg] = (op1 ^ op2);
+  }
+}
+
+
+11101,ddd,yyy,01111,Z:RR:16::NOT
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  signed_word op1 = 0;
+  if (destreg < 2)
+    destreg += 16;
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    if (destreg != 0)
+      GPR[destreg] = ~(op1 | op2);
+  }
+}
+
+
+01100111,ddd,XXXXX,z:I8_MOVR32:16::MOVR32
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 5) & 0x7;
+  signed_word op1 = (instruction >> 0) & 0x1f;
+  signed_word op2 = 0;
+  if (destreg < 2)
+    destreg += 16;
+  op1 = GPR[op1];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    if (destreg != 0)
+      GPR[destreg] = (op1 | op2);
+  }
+}
+
+
+01100101,YYYYY,xxx,z:I8_MOV32R:16::MOV32R
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 3) & 0x1f;
+  signed_word op1 = (instruction >> 0) & 0x7;
+  signed_word op2 = 0;
+  destreg = (destreg >> 2) | ((destreg & 3) << 3);
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    if (destreg != 0)
+      GPR[destreg] = (op1 | op2);
+  }
+}
+
+
+00110,ddd,yyy,sss,00:ISHIFT:16::SLL
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int op1 = (instruction >> 2) & 0x7;
+  if (destreg < 2)
+    destreg += 16;
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    {
+      op1 = (extendval >> 6) & 0x1f;
+      have_extendval = 0;
+    }
+  else
+    {
+      if (op1 == 0)
+        op1 = 8;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    GPR[destreg] = ((unsigned64)op2 << op1);
+    GPR[destreg] = SIGNEXTEND(GPR[destreg],32);
+  }
+}
+
+
+00110,ddd,yyy,sss,10:ISHIFT:16::SRL
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int op1 = (instruction >> 2) & 0x7;
+  if (destreg < 2)
+    destreg += 16;
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    {
+      op1 = (extendval >> 6) & 0x1f;
+      have_extendval = 0;
+    }
+  else
+    {
+      if (op1 == 0)
+        op1 = 8;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    GPR[destreg] = ((unsigned64)(op2 & 0xFFFFFFFF) >> op1);
+    GPR[destreg] = SIGNEXTEND(GPR[destreg],32);
+  }
+}
+
+
+00110,ddd,yyy,sss,11:ISHIFT:16::SRA
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int op1 = (instruction >> 2) & 0x7;
+  if (destreg < 2)
+    destreg += 16;
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    {
+      op1 = (extendval >> 6) & 0x1f;
+      have_extendval = 0;
+    }
+  else
+    {
+      if (op1 == 0)
+        op1 = 8;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned int highbit = (unsigned int)1 << 31;
+    GPR[destreg] = ((unsigned64)(op2 & 0xFFFFFFFF) >> op1);
+    GPR[destreg] |= (op1 != 0 && (op2 & highbit) ? ((((unsigned int)1 << op1) - 1) << (32 - op1)) : 0);
+    GPR[destreg] = SIGNEXTEND(GPR[destreg],32);
+  }
+}
+
+
+11101,xxx,vvv,00100:RR:16::SLLV
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int destreg;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  destreg = op2;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    op1 &= 0x1F;
+    GPR[destreg] = ((unsigned64)op2 << op1);
+    GPR[destreg] = SIGNEXTEND(GPR[destreg],32);
+  }
+}
+
+
+11101,xxx,vvv,00110:RR:16::SRLV
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int destreg;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  destreg = op2;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    op1 &= 0x1F;
+    GPR[destreg] = ((unsigned64)(op2 & 0xFFFFFFFF) >> op1);
+    GPR[destreg] = SIGNEXTEND(GPR[destreg],32);
+  }
+}
+
+
+11101,xxx,vvv,00111:RR:16::SRAV
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int destreg;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  destreg = op2;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned int highbit = (unsigned int)1 << 31;
+    op1 &= 0x1F;
+    GPR[destreg] = ((unsigned64)(op2 & 0xFFFFFFFF) >> op1);
+    GPR[destreg] |= (op1 != 0 && (op2 & highbit) ? ((((unsigned int)1 << op1) - 1) << (32 - op1)) : 0);
+    GPR[destreg] = SIGNEXTEND(GPR[destreg],32);
+  }
+}
+
+
+00110,ddd,yyy,[[[,01:ISHIFT:16::DSLL
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int op1 = (instruction >> 2) & 0x7;
+  if (destreg < 2)
+    destreg += 16;
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    {
+      op1 = ((extendval >> 6) & 0x1f) | (extendval & 0x20);
+      have_extendval = 0;
+    }
+  else
+    {
+      if (op1 == 0)
+        op1 = 8;
+    }
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    GPR[destreg] = ((unsigned64)op2 << op1);
+  }
+}
+  
+  
+11101,XXX,vvv,01000:RR:16::DSRL
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int destreg;
+  if (have_extendval)
+    {
+      op1 = ((extendval >> 6) & 0x1f) | (extendval & 0x20);
+      have_extendval = 0;
+    }
+  else
+    {
+      if (op1 == 0)
+        op1 = 8;
+    }
+  if (op2 < 2)
+    op2 += 16;
+  destreg = op2;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    GPR[destreg] = ((unsigned64)(op2) >> op1);
+  }
+}
+
+
+11101,xxx,vvv,10011:RR:16::DSRA
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int destreg;
+  if (have_extendval)
+    {
+      op1 = ((extendval >> 6) & 0x1f) | (extendval & 0x20);
+      have_extendval = 0;
+    }
+  else
+    {
+      if (op1 == 0)
+        op1 = 8;
+    }
+  if (op2 < 2)
+    op2 += 16;
+  destreg = op2;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned64 highbit = (unsigned64)1 << 63;
+    GPR[destreg] = ((unsigned64)(op2) >> op1);
+    GPR[destreg] |= (op1 != 0 && (op2 & highbit) ? ((((unsigned64)1 << op1) - 1) << (64 - op1)) : 0);
+  }
+}
+
+
+11101,xxx,vvv,10100:RR:16::DSLLV
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int destreg;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  destreg = op2;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    op1 &= 0x3F;
+    GPR[destreg] = ((unsigned64)op2 << op1);
+  }
+}
+
+
+11101,xxx,vvv,10110:RR:16::DSRLV
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int destreg;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  destreg = op2;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    op1 &= 0x3F;
+    GPR[destreg] = ((unsigned64)(op2) >> op1);
+  }
+}
+
+
+11101,xxx,vvv,10111:RR:16::DSRAV
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  int destreg;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  destreg = op2;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    unsigned64 highbit = (unsigned64)1 << 63;
+    op1 &= 0x3F;
+    GPR[destreg] = ((unsigned64)(op2) >> op1);
+    GPR[destreg] |= (op1 != 0 && (op2 & highbit) ? ((((unsigned64)1 << op1) - 1) << (64 - op1)) : 0);
+  }
+}
+
+
+// Multiply /Divide Instructions
+
+
+11101,xxx,yyy,11000:RR:16::MULT
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    CHECKHILO("Multiplication");
+    {
+      unsigned64 temp = ((word64) op1 * (word64) op2);
+      LO = SIGNEXTEND((unsigned64)VL4_8(temp),32);
+      HI = SIGNEXTEND((unsigned64)VH4_8(temp),32);
+    }
+  }
+}
+
+
+11101,xxx,yyy,11001:RR:16::MULTU
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    CHECKHILO("Multiplication");
+    {
+      unsigned64 temp = ((unsigned64)(op1 & 0xffffffff) * (unsigned64)(op2 & 0xffffffff));
+      LO = SIGNEXTEND((unsigned64)VL4_8(temp),32);
+      HI = SIGNEXTEND((unsigned64)VH4_8(temp),32);
+    }
+  }
+}
+
+
+11101,xxx,yyy,11010:RR:16::DIV
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    CHECKHILO("Division");
+    {
+      int d1 = op1;
+      int d2 = op2;
+      if (d2 == 0)
+	{
+	  LO = SIGNEXTEND(0x80000000,32);
+	  HI = SIGNEXTEND(0,32);
+	}
+      else if (d2 == -1 && d1 == 0x80000000)
+	{
+	  LO = SIGNEXTEND(0x80000000,32);
+	  HI = SIGNEXTEND(0,32);
+	}
+      else
+	{
+	  LO = SIGNEXTEND((d1 / d2),32);
+	  HI = SIGNEXTEND((d1 % d2),32);
+	}
+    }
+  }
+}
+
+
+11101,xxx,yyy,11011:RR:16::DIVU
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    CHECKHILO("Division");
+    {
+      unsigned int d1 = op1;
+      unsigned int d2 = op2;
+      if (d2 == 0)
+	{
+	  LO = SIGNEXTEND(0x80000000,32);
+	  HI = SIGNEXTEND(0,32);
+	}
+      else if (d2 == -1 && d1 == 0x80000000)
+	{
+	  LO = SIGNEXTEND(0x80000000,32);
+	  HI = SIGNEXTEND(0,32);
+	}
+      else
+	{
+	  LO = SIGNEXTEND((d1 / d2),32);
+	  HI = SIGNEXTEND((d1 % d2),32);
+	}
+    }
+  }
+}
+
+
+11101,ddd,00010000:RR:16::MFHI
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 8) & 0x7;
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    GPR[destreg] = HI;
+    HIACCESS = 3; /* 3rd instruction will be safe */
+  }
+}
+
+
+11101,ddd,00010010:RR:16::MFLO
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = (instruction >> 8) & 0x7;
+  if (destreg < 2)
+    destreg += 16;
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    GPR[destreg] = LO;
+    LOACCESS = 3; /* 3rd instruction will be safe */
+  }
+}
+
+
+11101,xxx,yyy,11100:RR:16::DMULT
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    CHECKHILO("Multiplication");
+    {
+      unsigned64 mid;
+      unsigned64 midhi;
+      unsigned64 temp;
+      int sign = 0;
+      if (op1 < 0) { op1 = - op1; ++sign; }
+      if (op2 < 0) { op2 = - op2; ++sign; }
+      LO = ((unsigned64)VL4_8(op1) * VL4_8(op2));
+      HI = ((unsigned64)VH4_8(op1) * VH4_8(op2));
+      mid = ((unsigned64)VH4_8(op1) * VL4_8(op2));
+      midhi = SET64HI(VL4_8(mid));
+      temp = (LO + midhi);
+      if ((temp == midhi) ? (LO != 0) : (temp < midhi))
+	HI += 1;
+      HI += VH4_8(mid);
+      mid = ((unsigned64)VL4_8(op1) * VH4_8(op2));
+      midhi = SET64HI(VL4_8(mid));
+      LO = (temp + midhi);
+      if ((LO == midhi) ? (temp != 0) : (LO < midhi))
+	HI += 1;
+      HI += VH4_8(mid);
+      if (sign & 1) { LO = - LO; HI = (LO == 0 ? 0 : -1) - HI; }
+    }
+  }
+}
+
+
+11101,xxx,yyy,11101:RR:16::DMULTU
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    CHECKHILO("Multiplication");
+    {
+      unsigned64 mid;
+      unsigned64 midhi;
+      unsigned64 temp;
+      LO = ((unsigned64)VL4_8(op1) * VL4_8(op2));
+      HI = ((unsigned64)VH4_8(op1) * VH4_8(op2));
+      mid = ((unsigned64)VH4_8(op1) * VL4_8(op2));
+      midhi = SET64HI(VL4_8(mid));
+      temp = (LO + midhi);
+      if ((temp == midhi) ? (LO != 0) : (temp < midhi))
+	HI += 1;
+      HI += VH4_8(mid);
+      mid = ((unsigned64)VL4_8(op1) * VH4_8(op2));
+      midhi = SET64HI(VL4_8(mid));
+      LO = (temp + midhi);
+      if ((LO == midhi) ? (temp != 0) : (LO < midhi))
+	HI += 1;
+      HI += VH4_8(mid);
+    }
+  }
+}
+
+
+11101,xxx,yyy,11110:RR:16::DDIV
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    CHECKHILO("Division");
+    {
+      word64 d1 = op1;
+      word64 d2 = op2;
+      if (d2 == 0)
+	{
+	  LO = SIGNED64 (0x8000000000000000);
+	  HI = 0;
+	}
+      else if (d2 == -1 && d1 == SIGNED64 (0x8000000000000000))
+	{
+	  LO = SIGNED64 (0x8000000000000000);
+	  HI = 0;
+	}
+      else
+	{
+	  LO = (d1 / d2);
+	  HI = (d1 % d2);
+	}
+    }
+  }
+}
+
+
+11101,xxx,yyy,11111:RR:16::DDIVU
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  signed_word op2 = (instruction >> 5) & 0x7;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (op2 < 2)
+    op2 += 16;
+  op2 = GPR[op2];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    CHECKHILO("Division");
+    {
+      unsigned64 d1 = op1;
+      unsigned64 d2 = op2;
+      if (d2 == 0)
+	{
+	  LO = SIGNED64 (0x8000000000000000);
+	  HI = 0;
+	}
+      else if (d2 == -1 && d1 == SIGNED64 (0x8000000000000000))
+	{
+	  LO = SIGNED64 (0x8000000000000000);
+	  HI = 0;
+	}
+      else
+	{
+	  LO = (d1 / d2);
+	  HI = (d1 % d2);
+	}
+    }
+  }
+}
+
+
+// Jump and Branch Instructions
+
+
+// JALX
+// JAL
+00011,aaaaaaaaaaa:I:16::JAL
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  unsigned_word op1 = (instruction >> 0) & 0x7ff;
+  {
+    address_word paddr;
+    int uncached;
+    if (AddressTranslation (PC &~ (unsigned64) 1, isINSTRUCTION, isLOAD, &paddr, &uncached, isTARGET, isREAL))
+      {
+        unsigned64 memval;
+        unsigned int reverse = (ReverseEndian ? 3 : 0);
+        unsigned int bigend = (BigEndianCPU ? 3 : 0);
+        unsigned int byte;
+        paddr = ((paddr & ~0x7) | ((paddr & 0x7) ^ (reverse << 1)));
+        LoadMemory (&memval,0,uncached, AccessLength_HALFWORD, paddr, PC, isINSTRUCTION, isREAL);
+        byte = (((PC &~ (unsigned64) 1) & 0x7) ^ (bigend << 1));
+        memval = (memval >> (8 * byte)) & 0xffff;
+        op1 = (((op1 & 0x1f) << 23)
+	       | ((op1 & 0x3e0) << 13)
+	       | (memval << 2));
+        if ((instruction & 0x400) == 0)
+          op1 |= 1;
+        PC += 2;
+      }
+  }
+  op1 |= PC & ~ (unsigned64) 0x0fffffff;
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    int destreg = 31;
+    GPR[destreg] = (PC + 2); /* NOTE: The PC is already 2 ahead within the simulator */
+    /* NOTE: ??? Gdb gets confused if the PC is sign-extended,
+       so we just truncate it to 32 bits here.  */
+    op1 = VL4_8(op1);
+    /* NOTE: The jump occurs AFTER the next instruction has been executed */
+    DELAY_SLOT op1;
+    JALDELAYSLOT();
+  }
+}
+
+
+11101,xxx,00000000:RR:16::JR
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    /* NOTE: ??? Gdb gets confused if the PC is sign-extended,
+       so we just truncate it to 32 bits here.  */
+    op1 = VL4_8(op1);
+    /* NOTE: The jump occurs AFTER the next instruction has been executed */
+    DELAY_SLOT op1;
+    DELAYSLOT();
+  }
+}
+
+
+1110100000100000,r:RR:16::JRRA
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = 31;
+  op1 = GPR[op1];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    /* NOTE: ??? Gdb gets confused if the PC is sign-extended,
+       so we just truncate it to 32 bits here.  */
+    op1 = VL4_8(op1);
+    /* NOTE: The jump occurs AFTER the next instruction has been executed */
+    DELAY_SLOT op1;
+    DELAYSLOT();
+  }
+}
+
+
+11101,xxx,01000000,R:RR:16::JALR
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int destreg = 31;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    GPR[destreg] = (PC + 2); /* NOTE: The PC is already 2 ahead within the simulator */
+    /* NOTE: ??? Gdb gets confused if the PC is sign-extended,
+       so we just truncate it to 32 bits here.  */
+    op1 = VL4_8(op1);
+    /* NOTE: The jump occurs AFTER the next instruction has been executed */
+    DELAY_SLOT op1;
+    DELAYSLOT();
+  }
+}
+
+
+00100,xxx,pppppppp,z:RI:16::BEQZ
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int offset = (instruction >> 0) & 0xff;
+  signed_word op2 = 0;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      if (offset >= 0x80)
+        offset -= 0x100;
+    }
+  offset *= 2;
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    int condition = (op1 == op2);
+    if (condition)
+      PC = PC + offset;
+  }
+}
+
+
+00101,xxx,pppppppp,z:RI:16::BNEZ
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = (instruction >> 8) & 0x7;
+  int offset = (instruction >> 0) & 0xff;
+  signed_word op2 = 0;
+  if (op1 < 2)
+    op1 += 16;
+  op1 = GPR[op1];
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      if (offset >= 0x80)
+        offset -= 0x100;
+    }
+  offset *= 2;
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    int condition = (op1 != op2);
+    if (condition)
+      PC = PC + offset;
+  }
+}
+
+
+01100000,pppppppp,t,z:I8:16::BTEQZ
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int offset = (instruction >> 0) & 0xff;
+  signed_word op1 = 24;
+  signed_word op2 = 0;
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      if (offset >= 0x80)
+        offset -= 0x100;
+    }
+  offset *= 2;
+  op1 = GPR[op1];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    int condition = (op1 == op2);
+    if (condition)
+      PC = PC + offset;
+  }
+}
+
+
+01100001,pppppppp,t,z:I8:16::BTNEZ
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int offset = (instruction >> 0) & 0xff;
+  signed_word op1 = 24;
+  signed_word op2 = 0;
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      if (offset >= 0x80)
+        offset -= 0x100;
+    }
+  offset *= 2;
+  op1 = GPR[op1];
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    int condition = (op1 != op2);
+    if (condition)
+      PC = PC + offset;
+  }
+}
+
+
+00010,qqqqqqqqqqq,z,Z:I:16::B
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int offset = (instruction >> 0) & 0x7ff;
+  signed_word op2 = 0;
+  signed_word op1 = 0;
+  if (have_extendval)
+    {
+      offset |= ((extendval & 0x1f) << 11) | (extendval & 0x7e0);
+      if (offset >= 0x8000)
+        offset -= 0x10000;
+      have_extendval = 0;
+    }
+  else
+    {
+      if (offset >= 0x400)
+        offset -= 0x800;
+    }
+  offset *= 2;
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    int condition = (op1 == op2);
+    if (condition)
+      PC = PC + offset;
+  }
+}
+
+
+// Special Instructions
+
+
+// See the front of the mips16 doc
+11110,eeeeeeeeeee:I:16::EXTEND
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  int ext = (instruction >> 0) & 0x7ff;
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    extendval = ext;
+    have_extendval = 1;
+  }
+}
+
+
+01100,******,00101:RR:16::BREAK
+*mips16:
+{
+  unsigned32 instruction = instruction_0;
+  if (have_extendval)
+    SignalException (ReservedInstruction, instruction);
+  {
+    SignalException(BreakPoint,instruction);
+  }
+}
+

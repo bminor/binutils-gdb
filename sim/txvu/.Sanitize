@@ -25,6 +25,38 @@ Do-first:
 Things-to-keep:
 
 ChangeLog
+interp.c
+configure.in
+Makefile.in
+config.in
+tconfig.in
+README.Cygnus
+configure
+gencode.c
+m16.igen
+mdmx.igen
+mips.dc
+mips.igen
+r5900.igen
+sim-main.h
+vr5400.igen
+engine-sky.c
+gpuif.h
+dma.h
+device.c
+gpuif.c
+device.h
+dma.c
+vu0.h
+pke0.h
+vu1.h
+pke1.h
+vu1.c
+vu0.c
+pke0.c
+pke1.c
+hardware.c
+hardware.h
 
 Things-to-lose:
 

@@ -1,0 +1,2463 @@
+// start-sanitize-r5900
+
+// FIXME: The instructions below which are typically r5900 specific
+//        need to be merged back into the above.
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,0000000000011010:MMINORM:32::DIV1
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    CHECKHILO("Division");
+    {
+      int d1 = op1;
+      int d2 = op2;
+      if (d2 == 0)
+	{
+	  LO1 = SIGNEXTEND(0x80000000,32);
+	  HI1 = SIGNEXTEND(0,32);
+	}
+      else if (d2 == -1 && d1 == 0x80000000)
+	{
+	  LO1 = SIGNEXTEND(0x80000000,32);
+	  HI1 = SIGNEXTEND(0,32);
+	}
+      else
+	{
+	  LO1 = SIGNEXTEND((d1 / d2),32);
+	  HI1 = SIGNEXTEND((d1 % d2),32);
+	}
+    }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,0000000000011011:MMINORM:32::DIVU1
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    CHECKHILO("Division");
+    {
+      unsigned int d1 = op1;
+      unsigned int d2 = op2;
+      if (d2 == 0)
+	{
+	  LO1 = SIGNEXTEND(0x80000000,32);
+	  HI1 = SIGNEXTEND(0,32);
+	}
+      else if (d2 == -1 && d1 == 0x80000000)
+	{
+	  LO1 = SIGNEXTEND(0x80000000,32);
+	  HI1 = SIGNEXTEND(0,32);
+	}
+      else
+	{
+	  LO1 = SIGNEXTEND((d1 / d2),32);
+	  HI1 = SIGNEXTEND((d1 % d2),32);
+	}
+    }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011110,5.RS,5.RT,16.OFFSET:NORMAL:128::LQ
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  int destreg = ((instruction >> 16) & 0x0000001F);
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 15) != 0)
+      SignalExceptionAddressLoad();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    unsigned64 mask = 0x7;
+	    unsigned int shift = 8;
+	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
+	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
+	    unsigned int byte;
+	    LoadMemory(&memval,&memval1,uncached,AccessLength_QUADWORD,paddr,vaddr,isDATA,isREAL);
+	    GPR[destreg] = memval;
+	    GPR1[destreg] = memval1;
+	  }
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00000000000:MMINORM:32::MADD
+*r5900:
+*r3900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    word64 prod = (word64)WORD64(VL4_8(HI),VL4_8(LO)) + ((word64)SIGNEXTEND(op1,32) * (word64)SIGNEXTEND(op2,32));
+    LO = SIGNEXTEND(prod,32);
+    HI = SIGNEXTEND( VH4_8(prod), 32);
+    if( destreg != 0 ) GPR[destreg] = LO;
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00000000001:MMINORM:32::MADDU
+*r5900:
+*r3900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    unsigned64 prod = (unsigned64)WORD64(VL4_8(HI),VL4_8(LO)) + ((unsigned64)VL4_8(op1) * (unsigned64)VL4_8(op2));
+    LO = SIGNEXTEND(prod,32);
+    HI = SIGNEXTEND( VH4_8(prod), 32);
+    if( destreg != 0 ) GPR[destreg] = LO;
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00000100000:MMINORM:32::MADD1
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    word64 prod = (word64)WORD64(VL4_8(HI1),VL4_8(LO1)) + ((word64)SIGNEXTEND(op1,32) * (word64)SIGNEXTEND(op2,32));
+    LO1 = SIGNEXTEND(prod,32);
+    HI1 = SIGNEXTEND( VH4_8(prod), 32);
+    if( destreg != 0 ) GPR[destreg] = LO1;
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00000100001:MMINORM:32::MADDU1
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    unsigned64 prod = (unsigned64)WORD64(VL4_8(HI1),VL4_8(LO1)) + ((unsigned64)VL4_8(op1) * (unsigned64)VL4_8(op2));
+    LO1 = SIGNEXTEND(prod,32);
+    HI1 = SIGNEXTEND( VH4_8(prod), 32);
+    if( destreg != 0 ) GPR[destreg] = LO1;
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+0111000000000000,5.RD,00000010000:MMINORM:32::MFHI1
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  {
+    GPR[destreg] = HI1;
+    HI1ACCESS = 3; /* 3rd instruction will be safe */
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+0111000000000000,5.RD,00000010010:MMINORM:32::MFLO1
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  {
+    GPR[destreg] = LO1;
+    LO1ACCESS = 3; /* 3rd instruction will be safe */
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+0000000000000000,5.RD,00000101000:SPECIAL:32::MFSA
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  {
+    GPR[destreg] = SA;
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,000000000000000010001:MMINORM:32::MTHI1
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    if (HI1ACCESS != 0)
+      sim_io_error(sd,"MT (move-to) over-writing HI register value\n");
+    HI1 = op1;
+    HI1ACCESS = 3; /* 3rd instruction will be safe */
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,000000000000000010011:MMINORM:32::MTLO1
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    if (LO1ACCESS != 0)
+      sim_io_error(sd,"MT (move-to) over-writing LO register value");
+    LO1 = op1;
+    LO1ACCESS = 3; /* 3rd instruction will be safe */
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+000000,5.RS,000000000000000101001:SPECIAL:32::MTSA
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    SA = op1;
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+000001,5.RS,11000,16.IMMEDIATE:REGIMM:32::MTSAB
+*r5900:
+{
+  SA = ((GPR[RA] & 0xF) ^ (IMMEDIATE & 0xF)) * 8;
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+000001,5.RS,11001,16.IMMEDIATE:REGIMM:32::MTSAH
+*r5900:
+{
+  SA = ((GPR[RS] & 0x7) ^ (IMMEDIATE & 0x7)) * 16;
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00000011000:MMINORM:32::MULT1
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    CHECKHILO("Multiplication");
+    {
+      unsigned64 temp = ((word64) op1 * (word64) op2);
+      LO1 = SIGNEXTEND((unsigned64)VL4_8(temp),32);
+      HI1 = SIGNEXTEND((unsigned64)VH4_8(temp),32);
+      if ( destreg != 0 )
+	GPR[destreg] = LO1;
+    }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00000011001:MMINORM:32::MULTU1
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  {
+    CHECKHILO("Multiplication");
+    {
+      unsigned64 temp = ((unsigned64)(op1 & 0xffffffff) * (unsigned64)(op2 & 0xffffffff));
+      LO1 = SIGNEXTEND((unsigned64)VL4_8(temp),32);
+      HI1 = SIGNEXTEND((unsigned64)VH4_8(temp),32);
+      if ( destreg != 0 )
+	GPR[destreg] = LO1;
+    }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+01110000000,5.RT,5.RD,00101101000:MMI1:32::PABSH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<HALFWORDS_IN_MMI_REGS;i++)
+      {
+	if (RT_SH(i) >= 0)
+	  GPR_SH(destreg,i) =  RT_SH(i);
+	else if (RT_SH(i) == -32768)
+	  GPR_SH(destreg,i) = 32767;
+	else
+	  GPR_SH(destreg,i) = -RT_SH(i);
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+01110000000,5.RT,5.RD,00001101000:MMI1:32::PABSW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<WORDS_IN_MMI_REGS;i++)
+      {
+	if (RT_SW(i) >= 0)
+	  GPR_SW(destreg,i) =  RT_SW(i);
+	else if (RT_SW(i) == (int)0x80000000)
+	  GPR_SW(destreg,i) = (int)0x7FFFFFFF;
+	else
+	  GPR_SW(destreg,i) = -RT_SW(i);
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,01000001000:MMI0:32::PADDB
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < BYTES_IN_MMI_REGS; i++)
+      {
+	int s = RS_SB(i);
+	int t = RT_SB(i);
+	int r = s + t;
+	GPR_SB(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00100001000:MMI0:32::PADDH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < HALFWORDS_IN_MMI_REGS; i++)
+      {
+	int s = RS_SH(i);
+	int t = RT_SH(i);
+	int r = s + t;
+	GPR_SH(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00000001000:MMI0:32::PADDW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < WORDS_IN_MMI_REGS; i++)
+      {
+	signed64 s = RS_SW(i);
+	signed64 t = RT_SW(i);
+	signed64 r = s + t;
+	GPR_SW(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,11000001000:MMI0:32::PADDSB
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < BYTES_IN_MMI_REGS; i++)
+      {
+	int s = RS_SB(i);
+	int t = RT_SB(i);
+	int r = s + t;
+	if (r > 127)
+	  GPR_SB(destreg,i) = 127;
+	else if (r < -128)
+	  GPR_SB(destreg,i) = -128;
+	else
+	  GPR_SB(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10100001000:MMI0:32::PADDSH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < HALFWORDS_IN_MMI_REGS; i++)
+      {
+	int s = RS_SH(i);
+	int t = RT_SH(i);
+	int r = s + t;
+	if (r > 32767)
+	  GPR_SH(destreg,i) = 32767;
+	else if (r < -32768)
+	  GPR_SH(destreg,i) = -32768;
+	else
+	  GPR_SH(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10000001000:MMI0:32::PADDSW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < WORDS_IN_MMI_REGS; i++)
+      {
+	signed64 s = RS_SW(i);
+	signed64 t = RT_SW(i);
+	signed64 r = s + t;
+	if (r > (int)0x7FFFFFFF)
+	  GPR_SW(destreg,i) = (int)0x7FFFFFFF;
+	else if (r < (int)0x80000000)
+	  GPR_SW(destreg,i) = (int)0x80000000;
+	else
+	  GPR_SW(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,11000101000:MMI1:32::PADDUB
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < BYTES_IN_MMI_REGS; i++)
+      {
+	unsigned int s = RS_UB(i);
+	unsigned int t = RT_UB(i);
+	unsigned int r = s + t;
+	if (r > 0xFF)
+	  GPR_UB(destreg,i) = 0xFF;
+	else
+	  GPR_UB(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10100101000:MMI1:32::PADDUH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < HALFWORDS_IN_MMI_REGS; i++)
+      {
+	unsigned int s = RS_UH(i);
+	unsigned int t = RT_UH(i);
+	unsigned int r = s + t;
+	if (r > 0xFFFF)
+	  GPR_UH(destreg,i) = 0xFFFF;
+	else
+	  GPR_UH(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10000101000:MMI1:32::PADDUW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < WORDS_IN_MMI_REGS; i++)
+      {
+	unsigned64 s = RS_UW(i);
+	unsigned64 t = RT_UW(i);
+	unsigned64 r = s + t;
+	if (r > 0xFFFFFFFF)
+	  GPR_UW(destreg,i) = 0xFFFFFFFF;
+	else
+	  GPR_UW(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00100101000:MMI1:32::PADSBH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<HALFWORDS_IN_MMI_REGS/2;i++)
+      GPR_SH(destreg,i) = RS_SH(i) - RT_SH(i);
+    for(;i<HALFWORDS_IN_MMI_REGS;i++)
+      GPR_SH(destreg,i) = RS_SH(i) + RT_SH(i);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10010001001:MMI2:32::PAND
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<WORDS_IN_MMI_REGS;i++)
+      GPR_UW(destreg,i) = (RS_UW(i) & RT_UW(i));
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,01010101000:MMI1:32::PCEQB
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<BYTES_IN_MMI_REGS;i++)
+      {
+	if (RS_SB(i) == RT_SB(i)) GPR_SB(destreg,i) = 0xFF;
+	else                        GPR_SB(destreg,i) = 0;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00110101000:MMI1:32::PCEQH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<HALFWORDS_IN_MMI_REGS;i++)
+      {
+	if (RS_SH(i) == RT_SH(i)) GPR_SH(destreg,i) = 0xFFFF;
+	else                        GPR_SH(destreg,i) = 0;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00010101000:MMI1:32::PCEQW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<WORDS_IN_MMI_REGS;i++)
+      {
+	if (RS_SW(i) == RT_SW(i)) GPR_SW(destreg,i) = 0xFFFFFFFF;
+	else                        GPR_SW(destreg,i) = 0;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,01010001000:MMI0:32::PCGTB
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<BYTES_IN_MMI_REGS;i++)
+      {
+	if (RS_SB(i) > RT_SB(i)) GPR_SB(destreg,i) = 0xFF;
+	else                        GPR_SB(destreg,i) = 0;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00110001000:MMI0:32::PCGTH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<HALFWORDS_IN_MMI_REGS;i++)
+      {
+	if (RS_SH(i) > RT_SH(i)) GPR_SH(destreg,i) = 0xFFFF;
+	else                        GPR_SH(destreg,i) = 0;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00010001000:MMI0:32::PCGTW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<WORDS_IN_MMI_REGS;i++)
+      {
+	if (RS_SW(i) > RT_SW(i)) GPR_SW(destreg,i) = 0xFFFFFFFF;
+	else                        GPR_SW(destreg,i) = 0;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+01110000000,5.RT,5.RD,11011101001:MMI3:32::PCPYH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UH(destreg,7) = GPR_UH(destreg,6) = GPR_UH(destreg,5) = GPR_UH(destreg,4) = RT_UH(4);
+    GPR_UH(destreg,3) = GPR_UH(destreg,2) = GPR_UH(destreg,1) = GPR_UH(destreg,0) = RT_UH(0);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,01110001001:MMI2:32::PCPYLD
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UD(destreg,0) = RT_UD(0);
+    GPR_UD(destreg,1) = RS_UD(0);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,01110101001:MMI3:32::PCPYUD
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UD(destreg,0) = RS_UD(1);
+    GPR_UD(destreg,1) = RT_UD(1);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,0000011101001001:MMI2:32::PDIVBW
+*r5900:
+{
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    signed32 devisor = RT_SH(0);
+    if (devisor == -1)
+      {
+	LO_SW(0) = -RS_SW(0);
+	HI_SW(0) = 0;
+	LO_SW(1) = -RS_SW(1);
+	HI_SW(1) = 0;
+	LO_SW(2) = -RS_SW(2);
+	HI_SW(2) = 0;
+	LO_SW(3) = -RS_SW(3);
+	HI_SW(3) = 0;
+      }
+    else if (devisor != 0)
+      {
+	LO_SW(0) = RS_SW(0) / devisor;
+	HI_SW(0) = SIGNEXTEND( (RS_SW(0) % devisor), 16 );
+	LO_SW(1) = RS_SW(1) / devisor;
+	HI_SW(1) = SIGNEXTEND( (RS_SW(1) % devisor), 16 );
+	LO_SW(2) = RS_SW(2) / devisor;
+	HI_SW(2) = SIGNEXTEND( (RS_SW(2) % devisor), 16 );
+	LO_SW(3) = RS_SW(3) / devisor;
+	HI_SW(3) = SIGNEXTEND( (RS_SW(3) % devisor), 16 );
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,0000001101101001:MMI3:32::PDIVUW
+*r5900:
+{
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    if (RT_UW(0) != 0)
+      {
+	LO  = (signed32)(RS_UW(0) / RT_UW(0));
+	HI  = (signed32)(RS_UW(0) % RT_UW(0));
+      }
+    if (RT_UW(2) != 0)
+      {
+	LO1 = (signed32)(RS_UW(2) / RT_UW(2));
+	HI1 = (signed32)(RS_UW(2) % RT_UW(2));
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,0000001101001001:MMI2:32::PDIVW
+*r5900:
+{
+  signed_word rs_reg = GPR[RS];
+  signed_word rs_reg1 = GPR1[RS];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    if (RT_SW(0) == -1)
+      {
+	LO  = -RS_SW(0);
+	HI  = 0;
+      }
+    else if (RT_UW(0) != 0)
+      {
+	LO  = (signed32)(RS_SW(0) / RT_SW(0));
+	HI  = (signed32)(RS_SW(0) % RT_SW(0));
+      }
+    if (RT_SW(2) == -1)
+      {
+	LO1 = -RS_SW(2);
+	HI1 = 0;
+      }
+    else if (RT_UW(2) != 0)
+      {
+	LO1 = (signed32)(RS_SW(2) / RT_SW(2));
+	HI1 = (signed32)(RS_SW(2) % RT_SW(2));
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+01110000000,5.RT,5.RD,11010101001:MMI3:32::PEXCH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UH(destreg,0) = RT_UH(0);
+    GPR_UH(destreg,1) = RT_UH(2);
+    GPR_UH(destreg,2) = RT_UH(1);
+    GPR_UH(destreg,3) = RT_UH(3);
+    GPR_UH(destreg,4) = RT_UH(4);
+    GPR_UH(destreg,5) = RT_UH(6);
+    GPR_UH(destreg,6) = RT_UH(5);
+    GPR_UH(destreg,7) = RT_UH(7);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+01110000000,5.RT,5.RD,11110101001:MMI3:32::PEXCW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UW(destreg,0) = RT_UW(0);
+    GPR_UW(destreg,1) = RT_UW(2);
+    GPR_UW(destreg,2) = RT_UW(1);
+    GPR_UW(destreg,3) = RT_UW(3);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+01110000000,5.RT,5.RD,11010001001:MMI2:32::PEXOH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UH(destreg,0) = RT_UH(2);
+    GPR_UH(destreg,1) = RT_UH(1);
+    GPR_UH(destreg,2) = RT_UH(0);
+    GPR_UH(destreg,3) = RT_UH(3);
+    GPR_UH(destreg,4) = RT_UH(6);
+    GPR_UH(destreg,5) = RT_UH(5);
+    GPR_UH(destreg,6) = RT_UH(4);
+    GPR_UH(destreg,7) = RT_UH(7);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+01110000000,5.RT,5.RD,11110001001:MMI2:32::PEXOW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UW(destreg,0) = RT_UW(2);
+    GPR_UW(destreg,1) = RT_UW(1);
+    GPR_UW(destreg,2) = RT_UW(0);
+    GPR_UW(destreg,3) = RT_UW(3);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+01110000000,5.RT,5.RD,11110001000:MMI0:32::PEXT5
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<WORDS_IN_MMI_REGS;i++)
+      {
+	unsigned32 x = RT_UW(i);
+	GPR_UW(destreg,i) = ((x & (1  << 15)) << (31 - 15))  
+	  | ((x & (31 << 10)) << (19 - 10))  
+	  | ((x & (31 << 5))  << (11 - 5))   
+	  | ((x & (31 << 0))  << (3  - 0));  
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,11010001000:MMI0:32::PEXTLB
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UB(destreg,0)  = RT_UB(0);
+    GPR_UB(destreg,1)  = RS_UB(0);
+    GPR_UB(destreg,2)  = RT_UB(1);
+    GPR_UB(destreg,3)  = RS_UB(1);
+    GPR_UB(destreg,4)  = RT_UB(2);
+    GPR_UB(destreg,5)  = RS_UB(2);
+    GPR_UB(destreg,6)  = RT_UB(3);
+    GPR_UB(destreg,7)  = RS_UB(3);
+    GPR_UB(destreg,8)  = RT_UB(4);
+    GPR_UB(destreg,9)  = RS_UB(4);
+    GPR_UB(destreg,10) = RT_UB(5);
+    GPR_UB(destreg,11) = RS_UB(5);
+    GPR_UB(destreg,12) = RT_UB(6);
+    GPR_UB(destreg,13) = RS_UB(6);
+    GPR_UB(destreg,14) = RT_UB(7);
+    GPR_UB(destreg,15) = RS_UB(7);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10110001000:MMI0:32::PEXTLH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UH(destreg,0)  = RT_UH(0);
+    GPR_UH(destreg,1)  = RS_UH(0);
+    GPR_UH(destreg,2)  = RT_UH(1);
+    GPR_UH(destreg,3)  = RS_UH(1);
+    GPR_UH(destreg,4)  = RT_UH(2);
+    GPR_UH(destreg,5)  = RS_UH(2);
+    GPR_UH(destreg,6)  = RT_UH(3);
+    GPR_UH(destreg,7)  = RS_UH(3);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10010001000:MMI0:32::PEXTLW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UW(destreg,0)  = RT_UW(0);
+    GPR_UW(destreg,1)  = RS_UW(0);
+    GPR_UW(destreg,2)  = RT_UW(1);
+    GPR_UW(destreg,3)  = RS_UW(1);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,11010101000:MMI1:32::PEXTUB
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UB(destreg,0)  = RT_UB(8);
+    GPR_UB(destreg,1)  = RS_UB(8);
+    GPR_UB(destreg,2)  = RT_UB(9);
+    GPR_UB(destreg,3)  = RS_UB(9);
+    GPR_UB(destreg,4)  = RT_UB(10);
+    GPR_UB(destreg,5)  = RS_UB(10);
+    GPR_UB(destreg,6)  = RT_UB(11);
+    GPR_UB(destreg,7)  = RS_UB(11);
+    GPR_UB(destreg,8)  = RT_UB(12);
+    GPR_UB(destreg,9)  = RS_UB(12);
+    GPR_UB(destreg,10) = RT_UB(13);
+    GPR_UB(destreg,11) = RS_UB(13);
+    GPR_UB(destreg,12) = RT_UB(14);
+    GPR_UB(destreg,13) = RS_UB(14);
+    GPR_UB(destreg,14) = RT_UB(15);
+    GPR_UB(destreg,15) = RS_UB(15);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10110101000:MMI1:32::PEXTUH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UH(destreg,0)  = RT_UH(4);
+    GPR_UH(destreg,1)  = RS_UH(4);
+    GPR_UH(destreg,2)  = RT_UH(5);
+    GPR_UH(destreg,3)  = RS_UH(5);
+    GPR_UH(destreg,4)  = RT_UH(6);
+    GPR_UH(destreg,5)  = RS_UH(6);
+    GPR_UH(destreg,6)  = RT_UH(7);
+    GPR_UH(destreg,7)  = RS_UH(7);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10010101000:MMI1:32::PEXTUW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UW(destreg,0)  = RT_UW(2);
+    GPR_UW(destreg,1)  = RS_UW(2);
+    GPR_UW(destreg,2)  = RT_UW(3);
+    GPR_UW(destreg,3)  = RS_UW(3);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10001001001:MMI2:32::PHMADDH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_SW(destreg,0) = LO_SW(0) = (RS_SH(1) * RT_SH(1)) + (RS_SH(0) * RT_SH(0));
+    GPR_SW(destreg,1) = HI_SW(0) = (RS_SH(3) * RT_SH(3)) + (RS_SH(2) * RT_SH(2));
+    GPR_SW(destreg,2) = LO_SW(2) = (RS_SH(5) * RT_SH(5)) + (RS_SH(4) * RT_SH(4));
+    GPR_SW(destreg,3) = HI_SW(2) = (RS_SH(7) * RT_SH(7)) + (RS_SH(6) * RT_SH(6));
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10101001001:MMI2:32::PHMSUBH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_SW(destreg,0) = LO_SW(0) = (RS_SH(1) * RT_SH(1)) - (RS_SH(0) * RT_SH(0));
+    GPR_SW(destreg,1) = HI_SW(0) = (RS_SH(3) * RT_SH(3)) - (RS_SH(2) * RT_SH(2));
+    GPR_SW(destreg,2) = LO_SW(2) = (RS_SH(5) * RT_SH(5)) - (RS_SH(4) * RT_SH(4));
+    GPR_SW(destreg,3) = HI_SW(2) = (RS_SH(7) * RT_SH(7)) - (RS_SH(6) * RT_SH(6));
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,01010001001:MMI2:32::PINTH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UH(destreg,0)  = RT_UH(0);
+    GPR_UH(destreg,1)  = RS_UH(4);
+    GPR_UH(destreg,2)  = RT_UH(1);
+    GPR_UH(destreg,3)  = RS_UH(5);
+    GPR_UH(destreg,4)  = RT_UH(2);
+    GPR_UH(destreg,5)  = RS_UH(6);
+    GPR_UH(destreg,6)  = RT_UH(3);
+    GPR_UH(destreg,7)  = RS_UH(7);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,01010101001:MMI3:32::PINTOH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UH(destreg,0) = RT_UH(0);
+    GPR_UH(destreg,1) = RS_UH(0);
+    GPR_UH(destreg,2) = RT_UH(2);
+    GPR_UH(destreg,3) = RS_UH(2);
+    GPR_UH(destreg,4) = RT_UH(4);
+    GPR_UH(destreg,5) = RS_UH(4);
+    GPR_UH(destreg,6) = RT_UH(6);
+    GPR_UH(destreg,7) = RS_UH(6);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,00000,5.RD,00000000100:MMINORM:32::PLZCW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  {
+    unsigned long value;
+    int test;
+    int count;
+    int i;
+    value = RS_UW(0);
+    count = 0;
+    test = !!(value & (1 << 31));
+    for(i=30; i>=0 && (test == !!(value & (1 << i))); i--)
+      count++;
+    GPR_UW(destreg,0) = count;
+    value = RS_UW(1);
+    count = 0;
+    test = !!(value & (1 << 31));
+    for(i=30; i>=0 && (test == !!(value & (1 << i))); i--)
+      count++;
+    GPR_UW(destreg,1) = count;
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10000001001:MMI2:32::PMADDH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_SW(destreg,0) = LO_SW(0) += (RS_SH(0) * RT_SH(0));
+    LO_SW(1) += (RS_SH(1) * RT_SH(1));
+    GPR_SW(destreg,1) = HI_SW(0) += (RS_SH(2) * RT_SH(2));
+    HI_SW(1) += (RS_SH(3) * RT_SH(3));
+    GPR_SW(destreg,2) = LO_SW(2) += (RS_SH(4) * RT_SH(4));
+    LO_SW(3) += (RS_SH(5) * RT_SH(5));
+    GPR_SW(destreg,3) = HI_SW(2) += (RS_SH(6) * RT_SH(6));
+    HI_SW(3) += (RS_SH(7) * RT_SH(7));
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00000101001:MMI3:32::PMADDUW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    unsigned64 sum0 = U8_4 (HI_SW(0), LO_SW(0));
+    unsigned64 sum1 = U8_4 (HI_SW(2), LO_SW(2));
+    unsigned64 prod0 = (unsigned64)RS_UW(0) * (unsigned64)RT_UW(0);
+    unsigned64 prod1 = (unsigned64)RS_UW(2) * (unsigned64)RT_UW(2);
+    sum0 += prod0;
+    sum1 += prod1;
+    GPR_UD(destreg,0) = sum0;
+    GPR_UD(destreg,1) = sum1;
+    LO  = SIGNEXTEND( sum0, 32 );
+    HI  = SIGNEXTEND( VH4_8(sum0), 32 );
+    LO1 = SIGNEXTEND( sum1, 32 );
+    HI1 = SIGNEXTEND( VH4_8(sum1), 32 );
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00000001001:MMI2:32::PMADDW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    signed64 sum0 = WORD64( HI_SW(0), LO_SW(0) );
+    signed64 sum1 = WORD64( HI_SW(2), LO_SW(2) );
+    signed64 prod0 = (signed64)RS_SW(0) * (signed64)RT_SW(0);
+    signed64 prod1 = (signed64)RS_SW(2) * (signed64)RT_SW(2);
+    sum0 += prod0;
+    sum1 += prod1;
+    GPR_SD(destreg,0) = sum0;
+    GPR_SD(destreg,1) = sum1;
+    LO  = SIGNEXTEND( sum0, 32 );
+    HI  = SIGNEXTEND( VH4_8(sum0), 32 );
+    LO1 = SIGNEXTEND( sum1, 32 );
+    HI1 = SIGNEXTEND( VH4_8(sum1), 32 );
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00111001000:MMI0:32::PMAXH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<HALFWORDS_IN_MMI_REGS;i++)
+      {
+	if (RS_SH(i) > RT_SH(i)) GPR_SH(destreg,i) = RS_SH(i);
+	else                        GPR_SH(destreg,i) = RT_SH(i);
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00011001000:MMI0:32::PMAXW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<WORDS_IN_MMI_REGS;i++)
+      {
+	if (RS_SW(i) > RT_SW(i)) GPR_SW(destreg,i) = RS_SW(i);
+	else                        GPR_SW(destreg,i) = RT_SW(i);
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+0111000000000000,5.RD,01000001001:MMI2:32::PMFHI
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  {
+    GPR_SD(destreg,0) = HI;
+    GPR_SD(destreg,1) = HI1;
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+0111000000000000,5.RD,01001001001:MMI2:32::PMFLO
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  {
+    GPR_SD(destreg,0) = LO;
+    GPR_SD(destreg,1) = LO1;
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+0111000000000000,5.RD,5.SHIFT,110000:MMINORM:32::PMFHL
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int op1 = ((instruction >> 6) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  {
+    if (op1 == 0)
+      {
+	GPR_UW(destreg,0) = LO_UW(0);
+	GPR_UW(destreg,1) = HI_UW(0);
+	GPR_UW(destreg,2) = LO_UW(2);
+	GPR_UW(destreg,3) = HI_UW(2);
+      }
+    else if (op1 == 1)
+      {
+	GPR_UW(destreg,0) = LO_UW(1);
+	GPR_UW(destreg,1) = HI_UW(1);
+	GPR_UW(destreg,2) = LO_UW(3);
+	GPR_UW(destreg,3) = HI_UW(3);
+      }
+    else if (op1 == 2)
+      {
+	/* NOTE: This code implements a saturate according to the
+           figure on page B-115 and not according to the
+           definition on page B-113 */
+	signed64 t = ((unsigned64)HI_UW(0) << 32) | (unsigned64)LO_UW(0);
+	signed64 u = ((unsigned64)HI_UW(2) << 32) | (unsigned64)LO_UW(2);
+	if ( t > SIGNED64 (0x000000007FFFFFFF) )
+	  GPR_SD(destreg,0) = SIGNED64 (0x000000007FFFFFFF);
+	else if ( t < - SIGNED64 (0x0000000080000000) )
+	  GPR_SD(destreg,0) = - SIGNED64 (0x0000000080000000);
+	else
+	  GPR_SD(destreg,0) = t;
+	if ( u > SIGNED64 (0x000000007FFFFFFF) )
+	  GPR_SD(destreg,1) = SIGNED64 (0x000000007FFFFFFF);
+	else if ( u < - SIGNED64 (0x0000000080000000) )
+	  GPR_SD(destreg,1) = - SIGNED64 (0x0000000080000000);
+	else
+	  GPR_SD(destreg,1) = u;
+      }
+    else if (op1 == 3)
+      {
+	GPR_UH(destreg,0) = LO_UH(0);
+	GPR_UH(destreg,1) = LO_UH(2);
+	GPR_UH(destreg,2) = HI_UH(0);
+	GPR_UH(destreg,3) = HI_UH(2);
+	GPR_UH(destreg,4) = LO_UH(4);
+	GPR_UH(destreg,5) = LO_UH(6);
+	GPR_UH(destreg,6) = HI_UH(4);
+	GPR_UH(destreg,7) = HI_UH(6);
+      }
+    else if (op1 == 4)
+      {
+	if (LO_SW(0) > 0x7FFF)
+	  GPR_UH(destreg,0) = 0x7FFF;
+	else if (LO_SW(0) < -0x8000)
+	  GPR_UH(destreg,0) = 0x8000;
+	else
+	  GPR_UH(destreg,0) = LO_UH(0);
+	if (LO_SW(1) > 0x7FFF)
+	  GPR_UH(destreg,1) = 0x7FFF;
+	else if (LO_SW(1) < -0x8000)
+	  GPR_UH(destreg,1) = 0x8000;
+	else
+	  GPR_UH(destreg,1) = LO_UH(2);
+	if (HI_SW(0) > 0x7FFF)
+	  GPR_UH(destreg,2) = 0x7FFF;
+	else if (HI_SW(0) < -0x8000)
+	  GPR_UH(destreg,2) = 0x8000;
+	else
+	  GPR_UH(destreg,2) = HI_UH(0);
+	if (HI_SW(1) > 0x7FFF)
+	  GPR_UH(destreg,3) = 0x7FFF;
+	else if (HI_SW(1) < -0x8000)
+	  GPR_UH(destreg,3) = 0x8000;
+	else
+	  GPR_UH(destreg,3) = HI_UH(2);
+	if (LO_SW(2) > 0x7FFF)
+	  GPR_UH(destreg,4) = 0x7FFF;
+	else if (LO_SW(2) < -0x8000)
+	  GPR_UH(destreg,4) = 0x8000;
+	else
+	  GPR_UH(destreg,4) = LO_UH(4);
+	if (LO_SW(3) > 0x7FFF)
+	  GPR_UH(destreg,5) = 0x7FFF;
+	else if (LO_SW(3) < -0x8000)
+	  GPR_UH(destreg,5) = 0x8000;
+	else
+	  GPR_UH(destreg,5) = LO_UH(6);
+	if (HI_SW(2) > 0x7FFF)
+	  GPR_UH(destreg,6) = 0x7FFF;
+	else if (HI_SW(2) < -0x8000)
+	  GPR_UH(destreg,6) = 0x8000;
+	else
+	  GPR_UH(destreg,6) = HI_UH(4);
+	if (HI_SW(3) > 0x7FFF)
+	  GPR_UH(destreg,7) = 0x7FFF;
+	else if (HI_SW(3) < -0x8000)
+	  GPR_UH(destreg,7) = 0x8000;
+	else
+	  GPR_UH(destreg,7) = HI_UH(6);
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00111101000:MMI1:32::PMINH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<HALFWORDS_IN_MMI_REGS;i++)
+      {
+	if (RS_SH(i) < RT_SH(i)) GPR_SH(destreg,i) = RS_SH(i);
+	else                        GPR_SH(destreg,i) = RT_SH(i);
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00011101000:MMI1:32::PMINW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<WORDS_IN_MMI_REGS;i++)
+      {
+	if (RS_SW(i) < RT_SW(i)) GPR_SW(destreg,i) = RS_SW(i);
+	else                        GPR_SW(destreg,i) = RT_SW(i);
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10100001001:MMI2:32::PMSUBH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_SW(destreg,0) = LO_SW(0) -= (RS_SH(0) * RT_SH(0));
+    LO_SW(1) -= (RS_SH(1) * RT_SH(1));
+    GPR_SW(destreg,1) = HI_SW(0) -= (RS_SH(2) * RT_SH(2));
+    HI_SW(1) -= (RS_SH(3) * RT_SH(3));
+    GPR_SW(destreg,2) = LO_SW(2) -= (RS_SH(4) * RT_SH(4));
+    LO_SW(3) -= (RS_SH(5) * RT_SH(5));
+    GPR_SW(destreg,3) = HI_SW(2) -= (RS_SH(6) * RT_SH(6));
+    HI_SW(3) -= (RS_SH(7) * RT_SH(7));
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00100001001:MMI2:32::PMSUBW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    signed64 sum0 = WORD64( HI_SW(0), LO_SW(0) );
+    signed64 sum1 = WORD64( HI_SW(2), LO_SW(2) );
+    signed64 prod0 = (signed64)RS_SW(0) * (signed64)RT_SW(0);
+    signed64 prod1 = (signed64)RS_SW(2) * (signed64)RT_SW(2);
+    sum0 -= prod0;
+    sum1 -= prod1;
+    GPR_SD(destreg,0) = sum0;
+    GPR_SD(destreg,1) = sum1;
+    LO  = SIGNEXTEND( sum0, 32 );
+    HI  = SIGNEXTEND( VH4_8(sum0), 32 );
+    LO1 = SIGNEXTEND( sum1, 32 );
+    HI1 = SIGNEXTEND( VH4_8(sum1), 32 );
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,000000000001000101001:MMI3:32::PMTHI
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  {
+    HI  = RS_SD(0);
+    HI1 = RS_SD(1);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,000000000001001101001:MMI3:32::PMTLO
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  {
+    LO  = RS_SD(0);
+    LO1 = RS_SD(1);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,000000000000000110001:MMINORM:32::PMTHL.LW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  {
+    LO_UW(0) = RS_UW(0);
+    HI_UW(0) = RS_UW(1);
+    LO_UW(2) = RS_UW(2);
+    HI_UW(2) = RS_UW(3);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,11100001001:MMI2:32::PMULTH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_SW(destreg,0) = LO_SW(0) = (RS_SH(0) * RT_SH(0));
+    LO_SW(1) = (RS_SH(1) * RT_SH(1));
+    GPR_SW(destreg,1) = HI_SW(0) = (RS_SH(2) * RT_SH(2));
+    HI_SW(1) = (RS_SH(3) * RT_SH(3));
+    GPR_SW(destreg,2) = LO_SW(2) = (RS_SH(4) * RT_SH(4));
+    LO_SW(3) = (RS_SH(5) * RT_SH(5));
+    GPR_SW(destreg,3) = HI_SW(2) = (RS_SH(6) * RT_SH(6));
+    HI_SW(3) = (RS_SH(7) * RT_SH(7));
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,01100101001:MMI3:32::PMULTUW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    unsigned64 sum0 = 0;
+    unsigned64 sum1 = 0;
+    unsigned64 prod0 = (unsigned64)RS_UW(0) * (unsigned64)RT_UW(0);
+    unsigned64 prod1 = (unsigned64)RS_UW(2) * (unsigned64)RT_UW(2);
+    sum0 = prod0;
+    sum1 = prod1;
+    GPR_UD(destreg,0) = sum0;
+    GPR_UD(destreg,1) = sum1;
+    LO  = SIGNEXTEND( sum0, 32 );
+    HI  = SIGNEXTEND( VH4_8(sum0), 32 );
+    LO1 = SIGNEXTEND( sum1, 32 );
+    HI1 = SIGNEXTEND( VH4_8(sum1), 32 );
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,01100001001:MMI2:32::PMULTW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    signed64 sum0 = 0;
+    signed64 sum1 = 0;
+    signed64 prod0 = (signed64)RS_SW(0) * (signed64)RT_SW(0);
+    signed64 prod1 = (signed64)RS_SW(2) * (signed64)RT_SW(2);
+    sum0 = prod0;
+    sum1 = prod1;
+    GPR_SD(destreg,0) = sum0;
+    GPR_SD(destreg,1) = sum1;
+    LO  = SIGNEXTEND( sum0, 32 );
+    HI  = SIGNEXTEND( VH4_8(sum0), 32 );
+    LO1 = SIGNEXTEND( sum1, 32 );
+    HI1 = SIGNEXTEND( VH4_8(sum1), 32 );
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10011101001:MMI3:32::PNOR
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<WORDS_IN_MMI_REGS;i++)
+      GPR_UW(destreg,i) = ~(RS_UW(i) | RT_UW(i));
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10010101001:MMI3:32::POR
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<WORDS_IN_MMI_REGS;i++)
+      GPR_UW(destreg,i) = (RS_UW(i) | RT_UW(i));
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+01110000000,5.RT,5.RD,11111001000:MMI0:32::PPAC5
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<WORDS_IN_MMI_REGS;i++)
+      {
+	unsigned32 x = RT_UW(i);
+	GPR_UW(destreg,i) = ((x & (1  << 31)) >> (31 - 15))  
+	  | ((x & (31 << 19)) >> (19 - 10))  
+	  | ((x & (31 << 11)) >> (11 - 5))   
+	  | ((x & (31 <<  3)) >> (3  - 0));  
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,11011001000:MMI0:32::PPACB
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UB(destreg,0)  = RT_UB(0);
+    GPR_UB(destreg,1)  = RT_UB(2);
+    GPR_UB(destreg,2)  = RT_UB(4);
+    GPR_UB(destreg,3)  = RT_UB(6);
+    GPR_UB(destreg,4)  = RT_UB(8);
+    GPR_UB(destreg,5)  = RT_UB(10);
+    GPR_UB(destreg,6)  = RT_UB(12);
+    GPR_UB(destreg,7)  = RT_UB(14);
+    GPR_UB(destreg,8)  = RS_UB(0);
+    GPR_UB(destreg,9)  = RS_UB(2);
+    GPR_UB(destreg,10) = RS_UB(4);
+    GPR_UB(destreg,11) = RS_UB(6);
+    GPR_UB(destreg,12) = RS_UB(8);
+    GPR_UB(destreg,13) = RS_UB(10);
+    GPR_UB(destreg,14) = RS_UB(12);
+    GPR_UB(destreg,15) = RS_UB(14);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10111001000:MMI0:32::PPACH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UH(destreg,0)  = RT_UH(0);
+    GPR_UH(destreg,1)  = RT_UH(2);
+    GPR_UH(destreg,2)  = RT_UH(4);
+    GPR_UH(destreg,3)  = RT_UH(6);
+    GPR_UH(destreg,4)  = RS_UH(0);
+    GPR_UH(destreg,5)  = RS_UH(2);
+    GPR_UH(destreg,6)  = RS_UH(4);
+    GPR_UH(destreg,7)  = RS_UH(6);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10011001000:MMI0:32::PPACW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UW(destreg,0)  = RT_UW(0);
+    GPR_UW(destreg,1)  = RT_UW(2);
+    GPR_UW(destreg,2)  = RS_UW(0);
+    GPR_UW(destreg,3)  = RS_UW(2);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+01110000000,5.RT,5.RD,11011001001:MMI2:32::PREVH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UH(destreg,0)  = RT_UH(3);
+    GPR_UH(destreg,1)  = RT_UH(2);
+    GPR_UH(destreg,2)  = RT_UH(1);
+    GPR_UH(destreg,3)  = RT_UH(0);
+    GPR_UH(destreg,4)  = RT_UH(7);
+    GPR_UH(destreg,5)  = RT_UH(6);
+    GPR_UH(destreg,6)  = RT_UH(5);
+    GPR_UH(destreg,7)  = RT_UH(4);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+01110000000,5.RT,5.RD,11111001001:MMI2:32::PROT3W
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UW(destreg,0)  = RT_UW(0);
+    GPR_UW(destreg,1)  = RT_UW(3);
+    GPR_UW(destreg,2)  = RT_UW(1);
+    GPR_UW(destreg,3)  = RT_UW(2);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+01110000000,5.RT,5.RD,5.SHIFT,110100:MMINORM:32::PSLLH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int op1 = ((instruction >> 6) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int shift_by = op1 & (16-1);
+    int i;
+    for(i=0;i<HALFWORDS_IN_MMI_REGS;i++)
+      GPR_UH(destreg,i) = (RT_UH(i) << shift_by);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00010001001:MMI2:32::PSLLVW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int s0 = (RS_UB(0) & 0x1F);
+    int s1 = (RS_UB(8) & 0x1F);
+    signed32 temp0 = RT_UW(0) << s0;
+    signed32 temp1 = RT_UW(2) << s1;
+    GPR_SD(destreg,0) = (signed64)temp0;
+    GPR_SD(destreg,1) = (signed64)temp1;
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+01110000000,5.RT,5.RD,5.SHIFT,111100:MMINORM:32::PSLLW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int op1 = ((instruction >> 6) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int shift_by = op1 & (32-1);
+    int i;
+    for(i=0;i<WORDS_IN_MMI_REGS;i++)
+      GPR_UW(destreg,i) = (RT_UW(i) << shift_by);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+01110000000,5.RT,5.RD,5.SHIFT,110111:MMINORM:32::PSRAH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int op1 = ((instruction >> 6) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int shift_by = op1 & (16-1);
+    int i;
+    for(i=0;i<HALFWORDS_IN_MMI_REGS;i++)
+      GPR_SH(destreg,i) = SIGNEXTEND( (RT_SH(i) >> shift_by), (16-shift_by) );
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00011101001:MMI3:32::PSRAVW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_SD(destreg,0) = SIGNEXTEND( (RT_SW (0) >> (RS_UB(0) & 0x1F)), 32-(RS_UB(0) & 0x1F) );
+    GPR_SD(destreg,1) = SIGNEXTEND( (RT_SW (2) >> (RS_UB(8) & 0x1F)), 32-(RS_UB(8) & 0x1F) );
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+01110000000,5.RT,5.RD,5.SHIFT,111111:MMINORM:32::PSRAW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int op1 = ((instruction >> 6) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int shift_by = op1 & (32-1);
+    int i;
+    for(i=0;i<WORDS_IN_MMI_REGS;i++)
+      GPR_SW(destreg,i) = SIGNEXTEND( (RT_SW(i) >> shift_by), (32-shift_by) );
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+01110000000,5.RT,5.RD,5.SHIFT,110110:MMINORM:32::PSRLH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int op1 = ((instruction >> 6) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int shift_by = op1 & (16-1);
+    int i;
+    for(i=0;i<HALFWORDS_IN_MMI_REGS;i++)
+      GPR_UH(destreg,i) = (RT_UH(i) >> shift_by);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00011001001:MMI2:32::PSRLVW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    GPR_UD(destreg,0) = SIGNEXTEND ( RT_UW(0) >> (RS_UB(0) & 0x1F), 31);
+    GPR_UD(destreg,1) = SIGNEXTEND ( RT_UW(2) >> (RS_UB(8) & 0x1F), 31);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+01110000000,5.RT,5.RD,5.SHIFT,111110:MMINORM:32::PSRLW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int op1 = ((instruction >> 6) & 0x0000001F);
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int shift_by = op1 & (32-1);
+    int i;
+    for(i=0;i<WORDS_IN_MMI_REGS;i++)
+      GPR_UW(destreg,i) = (RT_UW(i) >> shift_by);
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,01001001000:MMI0:32::PSUBB
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < BYTES_IN_MMI_REGS; i++)
+      {
+	int s = RS_SB(i);
+	int t = RT_SB(i);
+	int r = s - t;
+	GPR_SB(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00101001000:MMI0:32::PSUBH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < HALFWORDS_IN_MMI_REGS; i++)
+      {
+	int s = RS_SH(i);
+	int t = RT_SH(i);
+	int r = s - t;
+	GPR_SH(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,11001001000:MMI0:32::PSUBSB
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < BYTES_IN_MMI_REGS; i++)
+      {
+	int s = RS_SB(i);
+	int t = RT_SB(i);
+	int r = s - t;
+	if (r > 127)
+	  GPR_SB(destreg,i) = 127;
+	else if (r < -128)
+	  GPR_SB(destreg,i) = -128;
+	else
+	  GPR_SB(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10101001000:MMI0:32::PSUBSH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < HALFWORDS_IN_MMI_REGS; i++)
+      {
+	int s = RS_SH(i);
+	int t = RT_SH(i);
+	int r = s - t;
+	if (r > 32767)
+	  GPR_SH(destreg,i) = 32767;
+	else if (r < -32768)
+	  GPR_SH(destreg,i) = -32768;
+	else
+	  GPR_SH(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10001001000:MMI0:32::PSUBSW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < WORDS_IN_MMI_REGS; i++)
+      {
+	signed64 s = RS_SW(i);
+	signed64 t = RT_SW(i);
+	signed64 r = s - t;
+	if (r > (int)0x7FFFFFFF)
+	  GPR_SW(destreg,i) = (int)0x7FFFFFFF;
+	else if (r < (int)0x80000000)
+	  GPR_SW(destreg,i) = (int)0x80000000;
+	else
+	  GPR_SW(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,11001101000:MMI1:32::PSUBUB
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < BYTES_IN_MMI_REGS; i++)
+      {
+	unsigned int s = RS_UB(i);
+	unsigned int t = RT_UB(i);
+	unsigned int r = s - t;
+	if (r > 0xFF)
+	  GPR_UB(destreg,i) = 0;
+	else
+	  GPR_UB(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10101101000:MMI1:32::PSUBUH
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < HALFWORDS_IN_MMI_REGS; i++)
+      {
+	unsigned int s = RS_UH(i);
+	unsigned int t = RT_UH(i);
+	unsigned int r = s - t;
+	if (r > 0xFFFF)
+	  GPR_UH(destreg,i) = 0;
+	else
+	  GPR_UH(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10001101000:MMI1:32::PSUBUW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < WORDS_IN_MMI_REGS; i++)
+      {
+	unsigned64 s = RS_UW(i);
+	unsigned64 t = RT_UW(i);
+	unsigned64 r = s - t;
+	if (r > 0xFFFFFFFF)
+	  GPR_UW(destreg,i) = 0;
+	else
+	  GPR_UW(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,00001001000:MMI0:32::PSUBW
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for (i=0; i < WORDS_IN_MMI_REGS; i++)
+      {
+	signed64 s = RS_SW(i);
+	signed64 t = RT_SW(i);
+	signed64 r = s - t;
+	GPR_SW(destreg,i) = r;
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,10011001001:MMI2:32::PXOR
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int i;
+    for(i=0;i<WORDS_IN_MMI_REGS;i++)
+      GPR_UW(destreg,i) = (RS_UW(i) ^ RT_UW(i));
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011100,5.RS,5.RT,5.RD,11011101000:MMI1:32::QFSRV
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  int destreg = ((instruction >> 11) & 0x0000001F);
+  signed_word rs_reg = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rs_reg1 = GPR1[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    int bytes = (SA / 8) % 16;
+    if (SA % 8)
+      SignalException(ReservedInstruction,instruction);
+    else
+      {
+	int i;
+	for(i=0;i<(16-bytes);i++)
+	  GPR_SB(destreg,i) = RT_SB(bytes+i);
+	for(;i<16;i++)
+	  GPR_SB(destreg,i) = RS_SB(i-(16-bytes));
+      }
+  }
+}
+
+// end-sanitize-r5900
+// start-sanitize-r5900
+
+011111,5.RS,5.RT,16.OFFSET:NORMAL:128::SQ
+*r5900:
+{
+  unsigned32 instruction = instruction_0;
+  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
+  signed_word rsigned_word = GPR[((instruction >> 16) & 0x0000001F)];
+  signed_word rsigned_word1 = GPR1[((instruction >> 16) & 0x0000001F)];
+  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
+  signed_word rt_reg = GPR[RT];
+  signed_word rt_reg1 = GPR1[RT];
+  {
+    address_word vaddr = ((unsigned64)op1 + offset);
+    address_word paddr;
+    int uncached;
+    if ((vaddr & 15) != 0)
+      SignalExceptionAddressStore();
+    else
+      {
+	if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
+	  {
+	    unsigned64 memval = 0;
+	    unsigned64 memval1 = 0;
+	    memval  = rsigned_word;
+	    memval1 = rsigned_word1;
+	    {
+	      StoreMemory(uncached,AccessLength_QUADWORD,memval,memval1,paddr,vaddr,isREAL);
+	    }
+	  }
+      }
+  }
+}
+
+// end-sanitize-r5900

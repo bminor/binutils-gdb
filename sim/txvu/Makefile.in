@@ -1,0 +1,260 @@
+# template for Configure for the MIPS simulator.
+#    Written by Cygnus Support.
+
+## COMMON_PRE_CONFIG_FRAG
+
+srcdir=@srcdir@
+srcroot=$(srcdir)/../../
+
+SIM_NO_OBJ =
+
+SIM_IGEN_OBJ = \
+	support.o \
+	itable.o \
+	semantics.o \
+	idecode.o \
+	icache.o \
+	irun.o
+
+SIM_M16_OBJ = \
+	$(SIM_IGEN_OBJ) = \
+	m16_support.o \
+	m16_itable.o \
+	m16_semantics.o \
+	m16_idecode.o \
+	m16_icache.o \
+	m16_engine.o \
+	m16_irun.o
+
+SIM_OBJS = \
+	$(SIM_@sim_gen@_OBJ) \
+	$(SIM_NEW_COMMON_OBJS) \
+	engine-sky.o \
+	interp.o \
+	hardware.o \
+	device.o \
+	gpuif.o \
+	dma.o \
+	vu0.o \
+	vu1.o \
+	pke0.o \
+	pke1.o \
+	sim-hload.o \
+	sim-engine.o \
+	sim-stop.o \
+	sim-resume.o \
+	sim-reason.o
+
+
+# List of flags to always pass to $(CC).
+SIM_SUBTARGET=@SIM_SUBTARGET@
+
+SIM_NO_CFLAGS = -DWITH_IGEN=0
+SIM_IGEN_CFLAGS = -DWITH_IGEN=1
+SIM_M16_CFLAGS = -DWITH_IGEN=1
+
+# FIXME: Hack to find syscall.h?  Better support for syscall.h
+# is in progress.
+SIM_EXTRA_CFLAGS = \
+	$(SIM_SUBTARGET) \
+	-I$(srcdir)/../../newlib/libc/sys/idt \
+	$(SIM_@sim_gen@_CFLAGS)
+
+SIM_EXTRA_CLEAN = clean-igen clean-m16 clean-extra
+
+SIM_EXTRA_ALL = $(SIM_@sim_gen@_ALL)
+
+# List of main object files for `run'.
+SIM_RUN_OBJS = nrun.o
+
+
+
+## COMMON_POST_CONFIG_FRAG
+
+interp.o: $(srcdir)/interp.c config.h sim-main.h oengine.c
+
+oengine.c: gencode
+	./gencode @SIMCONF@ > tmp-oengine
+	mv tmp-oengine oengine.c
+
+gencode: gencode.o getopt.o getopt1.o
+	$(CC_FOR_BUILD) -o $@ gencode.o getopt.o getopt1.o
+
+gencode.o: $(srcdir)/gencode.c
+	$(CC_FOR_BUILD) -c -g -I${srcroot}/include $(srcdir)/gencode.c
+
+getopt.o: $(srcdir)/../../libiberty/getopt.c
+	$(CC_FOR_BUILD) -c -g -I${srcroot}/include $(srcdir)/../../libiberty/getopt.c
+getopt1.o: $(srcdir)/../../libiberty/getopt1.c
+	$(CC_FOR_BUILD) -c -g -I${srcroot}/include $(srcdir)/../../libiberty/getopt1.c
+
+
+../igen/igen:
+	cd ../igen && $(MAKE)
+
+IGEN_TRACE= # -G omit-line-numbers # -G trace-rule-selection -G trace-rule-rejection -G trace-entries
+IGEN_INSN=$(srcdir)/mips.igen
+IGEN_DC=$(srcdir)/mips.dc
+IGEN_INCLUDE=\
+	$(start-sanitize-r5900) \
+	$(srcdir)/r5900.igen \
+	$(end-sanitize-r5900) \
+	$(start-sanitize-vr5400) \
+	$(srcdir)/vr5400.igen \
+	$(srcdir)/mdmx.igen \
+	$(end-sanitize-vr5400) \
+	$(srcdir)/m16.igen
+
+SIM_IGEN_ALL = tmp-igen
+
+BUILT_SRC_FROM_IGEN = \
+	icache.h \
+	icache.c \
+	idecode.h \
+	idecode.c \
+	semantics.h \
+	semantics.c \
+	model.h \
+	model.c \
+	support.h \
+	support.c \
+	itable.h \
+	itable.c \
+	engine.h \
+	engine.c \
+	irun.c
+
+$(BUILT_SRC_FROM_IGEN): tmp-igen
+
+.PHONY: clean-igen
+clean-igen:
+	rm -f $(BUILT_SRC_FROM_IGEN)
+	rm -f tmp-igen
+
+tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
+	cd ../igen && $(MAKE)
+	../igen/igen \
+		$(IGEN_TRACE) \
+		-I $(srcdir) \
+		-Werror \
+		-Wnodiscard \
+		@sim_igen_flags@ \
+		-G gen-direct-access \
+		-G gen-zero-r0 \
+		-i $(IGEN_INSN) \
+		-o $(IGEN_DC) \
+		-x \
+		-n icache.h    -hc tmp-icache.h \
+		-n icache.c    -c  tmp-icache.c \
+		-n semantics.h -hs tmp-semantics.h \
+		-n semantics.c -s  tmp-semantics.c \
+		-n idecode.h   -hd tmp-idecode.h \
+		-n idecode.c   -d  tmp-idecode.c \
+		-n model.h     -hm tmp-model.h \
+		-n model.c     -m  tmp-model.c \
+		-n support.h   -hf tmp-support.h \
+		-n support.c   -f  tmp-support.c \
+		-n itable.h    -ht tmp-itable.h \
+		-n itable.c    -t  tmp-itable.c \
+		-n engine.h    -he tmp-engine.h \
+		-n engine.c    -e  tmp-engine.c \
+		-n irun.c      -r  tmp-irun.c
+	$(srcdir)/../../move-if-change tmp-icache.h icache.h
+	$(srcdir)/../../move-if-change tmp-icache.c icache.c
+	$(srcdir)/../../move-if-change tmp-idecode.h idecode.h
+	$(srcdir)/../../move-if-change tmp-idecode.c idecode.c
+	$(srcdir)/../../move-if-change tmp-semantics.h semantics.h
+	$(srcdir)/../../move-if-change tmp-semantics.c semantics.c
+	$(srcdir)/../../move-if-change tmp-model.h model.h
+	$(srcdir)/../../move-if-change tmp-model.c model.c
+	$(srcdir)/../../move-if-change tmp-support.h support.h
+	$(srcdir)/../../move-if-change tmp-support.c support.c
+	$(srcdir)/../../move-if-change tmp-itable.h itable.h
+	$(srcdir)/../../move-if-change tmp-itable.c itable.c
+	$(srcdir)/../../move-if-change tmp-engine.h engine.h
+	$(srcdir)/../../move-if-change tmp-engine.c engine.c
+	$(srcdir)/../../move-if-change tmp-irun.c irun.c
+	touch tmp-igen
+
+semantics.o: sim-main.h $(SIM_EXTRA_DEPS)
+engine.o: sim-main.h $(SIM_EXTRA_DEPS)
+support.o: sim-main.h $(SIM_EXTRA_DEPS)
+idecode.o: sim-main.h $(SIM_EXTRA_DEPS)
+itable.o: sim-main.h $(SIM_EXTRA_DEPS)
+
+
+
+SIM_M16_ALL = tmp-igen $(SIM_M16_ALL) 
+
+BUILT_SRC_FROM_M16 = \
+	m16_icache.h \
+	m16_icache.c \
+	m16_idecode.h \
+	m16_idecode.c \
+	m16_semantics.h \
+	m16_semantics.c \
+	m16_model.h \
+	m16_model.c \
+	m16_support.h \
+	m16_support.c \
+	m16_itable.h \
+	m16_itable.c \
+	m16_engine.h \
+	m16_engine.c \
+	m16_irun.c
+
+$(BUILT_SRC_FROM_M16): tmp-m16
+
+.PHONY: clean-m16
+clean-m16:
+	rm -f $(BUILT_SRC_FROM_M16)
+	rm -f tmp-m16
+
+tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
+	cd ../igen && $(MAKE)
+	../igen/igen \
+		$(IGEN_TRACE) \
+		-I $(srcdir) \
+		-Werror \
+		-Wnodiscard \
+		-F 16 \
+		-M mips16 \
+		-G gen-direct-access \
+		-i $(IGEN_INSN) \
+		-o $(IGEN_DC) \
+		-x \
+		-n m16_icache.h    -hc tmp-icache.h \
+		-n m16_icache.c    -c  tmp-icache.c \
+		-n m16_semantics.h -hs tmp-semantics.h \
+		-n m16_semantics.c -s  tmp-semantics.c \
+		-n m16_idecode.h   -hd tmp-idecode.h \
+		-n m16_idecode.c   -d  tmp-idecode.c \
+		-n m16_model.h     -hm tmp-model.h \
+		-n m16_model.c     -m  tmp-model.c \
+		-n m16_support.h   -hf tmp-support.h \
+		-n m16_support.c   -f  tmp-support.c \
+		-n m16_itable.h    -ht tmp-itable.h \
+		-n m16_itable.c    -t  tmp-itable.c \
+		-n m16_engine.h    -he tmp-engine.h \
+		-n m16_engine.c    -e  tmp-engine.c \
+		-n m16_irun.c      -r  tmp-irun.c
+	$(srcdir)/../../move-if-change tmp-icache.h m16_icache.h
+	$(srcdir)/../../move-if-change tmp-icache.c m16_icache.c
+	$(srcdir)/../../move-if-change tmp-idecode.h m16_idecode.h
+	$(srcdir)/../../move-if-change tmp-idecode.c m16_idecode.c
+	$(srcdir)/../../move-if-change tmp-semantics.h m16_semantics.h
+	$(srcdir)/../../move-if-change tmp-semantics.c m16_semantics.c
+	$(srcdir)/../../move-if-change tmp-model.h m16_model.h
+	$(srcdir)/../../move-if-change tmp-model.c m16_model.c
+	$(srcdir)/../../move-if-change tmp-support.h m16_support.h
+	$(srcdir)/../../move-if-change tmp-support.c m16_support.c
+	$(srcdir)/../../move-if-change tmp-itable.h m16_itable.h
+	$(srcdir)/../../move-if-change tmp-itable.c m16_itable.c
+	$(srcdir)/../../move-if-change tmp-engine.h m16_engine.h
+	$(srcdir)/../../move-if-change tmp-engine.c m16_engine.c
+	$(srcdir)/../../move-if-change tmp-irun.c m16_irun.c
+	touch tmp-m16
+
+
+clean-extra:
+	rm -f gencode oengine.c tmp.igen

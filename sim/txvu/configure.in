@@ -1,0 +1,185 @@
+dnl Process this file with autoconf to produce a configure script.
+sinclude(../common/aclocal.m4)
+AC_PREREQ(2.5)dnl
+AC_INIT(Makefile.in)
+
+SIM_AC_COMMON
+
+dnl Options available in this module
+SIM_AC_OPTION_INLINE(0)
+SIM_AC_OPTION_ALIGNMENT(NONSTRICT_ALIGNMENT)
+SIM_AC_OPTION_HOSTENDIAN
+SIM_AC_OPTION_WARNINGS
+
+
+# Ensure a reasonable default simulator is constructed:
+case "${target}" in
+# start-sanitize-tx19
+  mipstx19*-*-*)        SIMCONF="-mips1 -mcpu=r1900 -mno-fp --warnings";;
+# end-sanitize-tx19
+# start-sanitize-tx49
+  mips64tx49*-*-*)      SIMCONF="-mips3 --warnings -mcpu=r4900";;
+# end-sanitize-tx49
+# start-sanitize-r5900
+  mips64r59*-*-*)      SIMCONF="-mips3 --warnings -mcpu=r5900";;
+# end-sanitize-r5900
+# start-sanitize-sky
+  txvu-*-*)      SIMCONF="-mips3 --warnings -mcpu=r5900";;
+# end-sanitize-sky
+  mips64*-*-*)          SIMCONF="-mips0 --warnings";;
+  mips16*-*-*)          SIMCONF="-mips0 --warnings";;
+  mips*-*-*)            SIMCONF="-mips2 --warnings";;
+  *)                    SIMCONF="-mips0 --warnings";;
+esac
+AC_SUBST(SIMCONF)
+
+case "${target}" in
+# start-sanitize-tx19
+  mipstx19*-*-*)        SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
+# end-sanitize-tx19
+  *)                    SIM_SUBTARGET="";;
+esac
+AC_SUBST(SIM_SUBTARGET)
+
+
+#
+# Select the byte order of the target
+#
+case "${target}" in
+# start-sanitize-tx19
+  mipstx19*-*-*)        mips_endian=0 ;;
+# end-sanitize-tx19
+# start-sanitize-r5900
+  mips64r59*-*-*)	mips_endian=LITTLE_ENDIAN ;;
+# end-sanitize-r5900
+# start-sanitize-sky
+  txvu-*-*)		mips_endian=LITTLE_ENDIAN ;;
+# end-sanitize-sky
+  mips64*-*-*)          mips_endian=0 ;;
+  mips16*-*-*)          mips_endian=0 ;;
+  mips*-*-*)            mips_endian=0 ;;
+  *)                    mips_endian=0 ;;
+esac
+SIM_AC_OPTION_ENDIAN($mips_endian)
+
+
+#
+# Select the bitsize of the target
+#
+case "${target}" in
+# start-sanitize-tx19
+  mipstx19*-*-*)        mips_bitsize=32 ; mips_msb=31 ;;
+# end-sanitize-tx19
+# start-sanitize-r5900
+  mips64r59*-*-*)	mips_bitsize=64 ; mips_msb=63 ;;
+# end-sanitize-r5900
+# start-sanitize-sky
+  txvu-*-*)		mips_bitsize=64 ; mips_msb=63 ;;
+# end-sanitize-sky
+  mips64*-*-*)          mips_bitsize=64 ; mips_msb=63 ;;
+  mips16*-*-*)          mips_bitsize=64 ; mips_msb=63 ;;
+  mips*-*-*)            mips_bitsize=32 ; mips_msb=31 ;;
+  *)                    mips_bitsize=64 ; mips_msb=63 ;;
+esac
+SIM_AC_OPTION_BITSIZE($mips_bitsize,$mips_msb)
+
+
+#
+# Select the floating hardware support of the target
+#
+mips_fpu=HARDWARE_FLOATING_POINT
+case "${target}" in
+# start-sanitize-tx19
+  mipstx19*-*-*)        mips_fpu=SOFT_FLOATING_POINT ;;
+# end-sanitize-tx19
+# start-sanitize-r5900
+  mips64r59*-*-*)       mips_fpu=HARD_FLOATING_POINT ;;
+# end-sanitize-r5900
+# start-sanitize-sky
+  txvu-*-*)       	mips_fpu=HARD_FLOATING_POINT ;;
+# end-sanitize-sky
+  mips64*-*-*)          mips_fpu=HARD_FLOATING_POINT ;;
+  mips16*-*-*)          mips_fpu=HARD_FLOATING_POINT ;;
+  mips*-*-*)            mips_fpu=HARD_FLOATING_POINT ;;
+  *)                    mips_fpu=HARD_FLOATING_POINT ;;
+esac
+SIM_AC_OPTION_FLOAT($mips_fpu)
+
+
+#
+# Select the IGEN architecture
+#
+sim_use_gen=NO
+sim_igen_machine="-M mipsIV"
+sim_m16_machine="-M mips16"
+sim_igen_filter="32,64,f"
+sim_m16_filter="16"
+
+case "${target}" in
+# start-sanitize-tx19
+  mipstx19*-*-*)	sim_default_gen=M16
+			sim_igen_machine="-M tx19"
+			sim_m16_machine="-M tx19"
+			sim_igen_filter="32"
+			sim_m16_filter="16"
+			;;
+# end-sanitize-tx19
+# start-sanitize-r5900
+  mips64r59*-*-*)	sim_default_gen=IGEN
+			sim_igen_machine="-M r5900"
+			;;
+# end-sanitize-r5900
+# start-sanitize-sky
+  txvu-*-*)		sim_default_gen=IGEN
+			sim_igen_machine="-M r5900"
+			;;
+# end-sanitize-sky
+# start-sanitize-vr5400
+  mips64vr54*-*-*)	sim_default_gen=IGEN
+			sim_use_gen=IGEN
+			sim_igen_machine="-M vr5000,vr5400 -G gen-multi-sim=vr5400"
+			;;
+# end-sanitize-vr5400
+  mips64vr5*-*-*)	sim_default_gen=IGEN
+			sim_use_gen=IGEN
+			sim_igen_machine="-M vr5000"
+# start-sanitize-vr5400
+			sim_igen_machine="-M vr5000,vr5400 -G gen-multi-sim=vr5000"
+# end-sanitize-vr5400
+			;;
+  mips16*-*-*)		sim_default_gen=M16
+			;;
+  mips32*-*-*)		sim_default_gen=IGEN
+			sim_igen_filter="32,f"
+			;;
+  *)                    sim_default_gen=IGEN
+			;;
+esac
+sim_igen_flags="-F ${sim_igen_filter} ${sim_igen_machine}"
+sim_m16_flags=" -F ${sim_m16_filter}  ${sim_m16_machine}"
+AC_SUBST(sim_igen_flags)
+AC_SUBST(sim_m16_flags)
+
+#
+# Enable igen
+#
+AC_ARG_ENABLE(sim-igen,
+[  --enable-sim-igen=opts		Enable IGEN simulator],
+[case "${enableval}" in
+  yes) sim_gen="${sim_default_gen}";;
+  no)  sim_gen=NO;;
+  16)  sim_gen=M16;;
+  *)   AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-stdio"); sim_gen="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_gen" != x""; then
+  echo "Setting sim_igen = $sim_gen" 6>&1
+fi],[sim_gen="${sim_use_gen}"])dnl
+AC_SUBST(sim_gen)
+
+
+
+AC_CHECK_HEADERS(string.h strings.h stdlib.h stdlib.h)
+AC_CHECK_LIB(m, fabs)
+AC_CHECK_FUNCS(aint anint sqrt)
+
+SIM_AC_OUTPUT
