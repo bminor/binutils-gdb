@@ -1,3 +1,8 @@
+2004-08-16  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: Sort architecture based tables alphabetically.
+	* configure: Regenerate.
+
 2004-08-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (tc_ppc_regname_to_dw2regnum <regnames>): Replace

@@ -118,7 +118,8 @@ changequote(,)dnl
     eval `echo $this_target | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/cpu=\1 vendor=\2 os=\3/'`
 changequote([,])dnl
 
-    # check for architecture variants
+    # Check for architecture variants.
+    # Note: This table is alpha-sorted, please try to keep it that way.
     arch=
     endian=
     case ${cpu} in
@@ -128,13 +129,15 @@ changequote([,])dnl
       arm*b|xscale*b|strongarm*b) cpu_type=arm endian=big ;;
       arm*|xscale*|strongarm*)    cpu_type=arm endian=little ;;
       c4x*)		cpu_type=tic4x ;;
+      crx*)		cpu_type=crx endian=little ;;
       hppa*)		cpu_type=hppa ;;
 changequote(,)dnl
       i[3-7]86)		cpu_type=i386 arch=i386;;
-      x86_64)		cpu_type=i386 arch=x86_64;;
       ia64)		cpu_type=ia64 ;;
       ip2k)             cpu_type=ip2k endian=big ;; 
       iq2000)           cpu_type=iq2000 endian=big ;; 
+      m32r)             cpu_type=m32r target_cpu=m32r endian=big ;;
+      m32rle)           cpu_type=m32r target_cpu=m32r endian=little ;;
       m6811|m6812|m68hc12) cpu_type=m68hc11 ;;
       m680[012346]0)	cpu_type=m68k ;;
 changequote([,])dnl
@@ -164,10 +167,8 @@ changequote([,])dnl
       sparc86x*)	cpu_type=sparc arch=sparc86x  ;;
       sparc*)		cpu_type=sparc arch=sparclite ;; # ??? See tc-sparc.c.
       v850*)		cpu_type=v850 ;;
-      crx*)		cpu_type=crx endian=little ;;
+      x86_64)		cpu_type=i386 arch=x86_64;;
       xtensa*)		cpu_type=xtensa arch=xtensa ;;
-      m32r)             cpu_type=m32r target_cpu=m32r endian=big ;;
-      m32rle)           cpu_type=m32r target_cpu=m32r endian=little ;;
       *)		cpu_type=${cpu} ;;
     esac
 
@@ -182,7 +183,8 @@ changequote([,])dnl
     bfd_gas=no
     em=generic
 
-    # assign object format
+    # Assign object format.
+    # Note: This table is alpha-sorted, please try to keep it that way.
     case ${generic_target} in
       a29k-*-coff)			fmt=coff ;;
       a29k-amd-udi)			fmt=coff ;;
@@ -197,9 +199,6 @@ changequote([,])dnl
       alpha*-*-linux-gnu*)		fmt=elf em=linux ;;
       alpha*-*-netbsd*)			fmt=elf em=nbsd ;;
       alpha*-*-openbsd*)		fmt=elf em=obsd ;;
-
-      # cpu_type for am33_2.0 is set to mn10300
-      mn10300-*-linux*)			fmt=elf bfd_gas=yes em=linux ;;
 
       arc-*-elf*)			fmt=elf ;;
 
@@ -401,12 +400,22 @@ changequote([,])dnl
 
       mmix-*-*)				fmt=elf ;;
       mn10200-*-*)			fmt=elf ;;
+      # cpu_type for am33_2.0 is set to mn10300
+      mn10300-*-linux*)			fmt=elf bfd_gas=yes em=linux ;;
       mn10300-*-*)			fmt=elf ;;
+
       msp430-*-*)			fmt=elf ;;
+
+      ns32k-pc532-mach*)		fmt=aout em=pc532mach ;;
+      ns32k-pc532-ux*)			fmt=aout em=pc532mach ;;
+      ns32k-pc532-lites*)		fmt=aout em=nbsd532 ;;
+      ns32k-*-*n*bsd*)			fmt=aout em=nbsd532 ;;
+
       openrisc-*-*)			fmt=elf ;;
       or32-*-rtems*)			fmt=elf ;;
       or32-*-coff)			fmt=coff ;;
       or32-*-elf)			fmt=elf ;;
+
       pj*)				fmt=elf ;;
 
       ppc-*-pe | ppc-*-cygwin*)		fmt=coff em=pe ;;
@@ -465,11 +474,6 @@ changequote([,])dnl
       shle*-*-kaos*)			fmt=elf ;;
       sh64-*-elf*)			fmt=elf ;;
 
-      ns32k-pc532-mach*)		fmt=aout em=pc532mach ;;
-      ns32k-pc532-ux*)			fmt=aout em=pc532mach ;;
-      ns32k-pc532-lites*)		fmt=aout em=nbsd532 ;;
-      ns32k-*-*n*bsd*)			fmt=aout em=nbsd532 ;;
-
       sparc-*-rtemsaout*)		fmt=aout ;;
       sparc-*-rtemself*)		fmt=elf ;;
       sparc-*-rtems*)			fmt=elf ;;
@@ -491,8 +495,6 @@ changequote([,])dnl
       strongarm-*-coff)			fmt=coff ;;
       strongarm-*-elf)			fmt=elf ;;
       strongarm-*-kaos*)		fmt=elf ;;
-      xscale-*-coff)			fmt=coff ;;
-      xscale-*-elf)			fmt=elf ;;
 
       tic30-*-*aout*)			fmt=aout bfd_gas=yes ;;
       tic30-*-*coff*)			fmt=coff bfd_gas=yes ;;
@@ -511,6 +513,9 @@ changequote([,])dnl
       vax-*-vms)			fmt=vms ;;
 
       w65-*-*)				fmt=coff ;;
+
+      xscale-*-coff)			fmt=coff ;;
+      xscale-*-elf)			fmt=elf ;;
 
       xstormy16-*-*)			fmt=elf ;;
 
