@@ -1,3 +1,27 @@
+2004-05-28  Jim Blandy  <jimb@redhat.com>
+
+	* rs6000-tdep.c: Use the modern gdbarch methods for handling the
+	register set, so our regcache isn't declared "legacy" and our E500
+	pseudoregister read and write functions aren't ignored.
+	(rs6000_register_byte, rs6000_register_raw_size,
+	rs6000_register_virtual_type, rs6000_register_convertible,
+	rs6000_register_convert_to_virtual,
+	rs6000_register_convert_to_raw): Deleted.
+	(rs6000_register_type, rs6000_convert_register_p,
+	rs6000_register_to_value, rs6000_value_to_register): New
+	functions.
+	(rs6000_gdbarch_init): Don't register
+	gdbarch_deprecated_register_size,
+	gdbarch_deprecated_register_bytes,
+	gdbarch_deprecated_register_byte,
+	gdbarch_deprecated_register_raw_size,
+	gdbarch_deprecated_register_virtual_type,
+	gdbarch_deprecated_register_convertible,
+	gdbarch_deprecated_register_convert_to_virtual, or
+	gdbarch_deprecated_register_convert_to_raw methods.  Instead,
+	register gdbarch_register_type, gdbarch_convert_register_p,
+	gdbarch_register_to_value, and gdbarch_value_to_register methods.
+
 2004-05-26  Jim Blandy  <jimb@redhat.com>
 
 	* rs6000-tdep.c (rs6000_dwarf2_stab_reg_to_regnum): Deleted.

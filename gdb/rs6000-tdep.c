@@ -1677,33 +1677,13 @@ rs6000_register_name (int n)
   return reg->name;
 }
 
-/* Index within `registers' of the first byte of the space for
-   register N.  */
-
-static int
-rs6000_register_byte (int n)
-{
-  return gdbarch_tdep (current_gdbarch)->regoff[n];
-}
-
-/* Return the number of bytes of storage in the actual machine representation
-   for register N if that register is available, else return 0.  */
-
-static int
-rs6000_register_raw_size (int n)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  const struct reg *reg = tdep->regs + n;
-  return regsize (reg, tdep->wordsize);
-}
-
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
 static struct type *
-rs6000_register_virtual_type (int n)
+rs6000_register_type (struct gdbarch *gdbarch, int n)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const struct reg *reg = tdep->regs + n;
 
   if (reg->fpr)
@@ -1733,49 +1713,49 @@ rs6000_register_virtual_type (int n)
     }
 }
 
-/* Return whether register N requires conversion when moving from raw format
-   to virtual format.
-
-   The register format for RS/6000 floating point registers is always
+/* The register format for RS/6000 floating point registers is always
    double, we need a conversion if the memory format is float.  */
 
 static int
-rs6000_register_convertible (int n)
+rs6000_convert_register_p (int regnum, struct type *type)
 {
-  const struct reg *reg = gdbarch_tdep (current_gdbarch)->regs + n;
-  return reg->fpr;
+  const struct reg *reg = gdbarch_tdep (current_gdbarch)->regs + regnum;
+  
+  return (reg->fpr
+          && TYPE_CODE (type) == TYPE_CODE_FLT
+          && TYPE_LENGTH (type) != TYPE_LENGTH (builtin_type_double));
 }
 
-/* Convert data from raw format for register N in buffer FROM
-   to virtual format with type TYPE in buffer TO.  */
-
 static void
-rs6000_register_convert_to_virtual (int n, struct type *type,
-				    char *from, char *to)
+rs6000_register_to_value (struct frame_info *frame,
+                          int regnum,
+                          struct type *type,
+                          void *to)
 {
-  if (TYPE_LENGTH (type) != DEPRECATED_REGISTER_RAW_SIZE (n))
-    {
-      double val = deprecated_extract_floating (from, DEPRECATED_REGISTER_RAW_SIZE (n));
-      deprecated_store_floating (to, TYPE_LENGTH (type), val);
-    }
-  else
-    memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (n));
+  const struct reg *reg = gdbarch_tdep (current_gdbarch)->regs + regnum;
+  char from[MAX_REGISTER_SIZE];
+  
+  gdb_assert (reg->fpr);
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
+
+  get_frame_register (frame, regnum, from);
+  convert_typed_floating (from, builtin_type_double, to, type);
 }
 
-/* Convert data from virtual format with type TYPE in buffer FROM
-   to raw format for register N in buffer TO.  */
-
 static void
-rs6000_register_convert_to_raw (struct type *type, int n,
-				const char *from, char *to)
+rs6000_value_to_register (struct frame_info *frame,
+                          int regnum,
+                          struct type *type,
+                          const void *from)
 {
-  if (TYPE_LENGTH (type) != DEPRECATED_REGISTER_RAW_SIZE (n))
-    {
-      double val = deprecated_extract_floating (from, TYPE_LENGTH (type));
-      deprecated_store_floating (to, DEPRECATED_REGISTER_RAW_SIZE (n), val);
-    }
-  else
-    memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (n));
+  const struct reg *reg = gdbarch_tdep (current_gdbarch)->regs + regnum;
+  char to[MAX_REGISTER_SIZE];
+
+  gdb_assert (reg->fpr);
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
+
+  convert_typed_floating (from, type, to, builtin_type_double);
+  put_frame_register (frame, regnum, to);
 }
 
 static void
@@ -2971,11 +2951,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, v->nregs);
   set_gdbarch_num_pseudo_regs (gdbarch, v->npregs);
   set_gdbarch_register_name (gdbarch, rs6000_register_name);
-  set_gdbarch_deprecated_register_size (gdbarch, wordsize);
-  set_gdbarch_deprecated_register_bytes (gdbarch, off);
-  set_gdbarch_deprecated_register_byte (gdbarch, rs6000_register_byte);
-  set_gdbarch_deprecated_register_raw_size (gdbarch, rs6000_register_raw_size);
-  set_gdbarch_deprecated_register_virtual_type (gdbarch, rs6000_register_virtual_type);
+  set_gdbarch_register_type (gdbarch, rs6000_register_type);
 
   set_gdbarch_ptr_bit (gdbarch, wordsize * TARGET_CHAR_BIT);
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
@@ -3001,9 +2977,10 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        224.  */
     set_gdbarch_frame_red_zone_size (gdbarch, 224);
 
-  set_gdbarch_deprecated_register_convertible (gdbarch, rs6000_register_convertible);
-  set_gdbarch_deprecated_register_convert_to_virtual (gdbarch, rs6000_register_convert_to_virtual);
-  set_gdbarch_deprecated_register_convert_to_raw (gdbarch, rs6000_register_convert_to_raw);
+  set_gdbarch_convert_register_p (gdbarch, rs6000_convert_register_p);
+  set_gdbarch_register_to_value (gdbarch, rs6000_register_to_value);
+  set_gdbarch_value_to_register (gdbarch, rs6000_value_to_register);
+
   set_gdbarch_stab_reg_to_regnum (gdbarch, rs6000_stab_reg_to_regnum);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, rs6000_dwarf2_reg_to_regnum);
   /* Note: kevinb/2002-04-12: I'm not convinced that rs6000_push_arguments()
