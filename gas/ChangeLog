@@ -1,3 +1,16 @@
+2005-03-28  Sterling Augustine  <sterling@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (do_align_targets): Update comment.
+	(xtensa_frob_label): Compute "freq" before possibly switching frags.
+	Insert a LOOP_END frag before every loop target, and do not overload
+	DESIRE_ALIGN_IF_TARGET frags with loop end information.
+	(xg_assemble_vliw_tokens): Use do_align_targets.
+	(xtensa_fix_target_frags): Remove code to convert a
+	DESIRE_ALIGN_IF_TARGET frag to a LOOP_END frag when there is a
+	negatable branch at the end of a loop.
+	(frag_can_negate_branch): Delete.
+
 2005-03-28  David Mosberger  <davidm@hpl.hp.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -307,7 +320,8 @@
 	* configure: Regenerate.
 	* config/obj-vms.h, config/obj-vms.c, config/vms-conf.h: Remove.
 
-2005-03-10  Bob Wilson  <bob.wilson@acm.org>
+2005-03-10  Sterling Augustine  <sterling@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (finish_vinsn): Include the last instruction slot
 	when checking if xg_resolve_literals needs to be called.
