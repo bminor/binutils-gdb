@@ -4371,7 +4371,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   if (info.abfd == NULL && arches != NULL)
     mips_abi = gdbarch_tdep (arches->gdbarch)->found_abi;
 
-  /* Try the architecture for any hint of the corect ABI */
+  /* Try the architecture for any hint of the correct ABI.  */
   if (mips_abi == MIPS_ABI_UNKNOWN
       && info.bfd_arch_info != NULL
       && info.bfd_arch_info->arch == bfd_arch_mips)
@@ -4387,6 +4387,9 @@ mips_gdbarch_init (struct gdbarch_info info,
 	  break;
 	case bfd_mach_mips8000:
 	case bfd_mach_mips10000:
+	  /* On Irix, ELF64 executables use the N64 ABI.  The
+	     pseudo-sections which describe the ABI aren't present
+	     on IRIX.  (Even for executables created by gcc.)  */
 	  if (bfd_get_flavour (info.abfd) == bfd_target_elf_flavour
 	      && elf_elfheader (info.abfd)->e_ident[EI_CLASS] == ELFCLASS64)
 	    mips_abi = MIPS_ABI_N64;
@@ -4665,6 +4668,8 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_address_to_pointer (gdbarch, address_to_signed_pointer);
   set_gdbarch_integer_to_address (gdbarch, mips_integer_to_address);
 
+  /* There are MIPS targets which do not yet use this since they still
+     define REGISTER_VIRTUAL_TYPE.  */
   set_gdbarch_register_virtual_type (gdbarch, mips_register_virtual_type);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
