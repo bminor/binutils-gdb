@@ -1586,13 +1586,12 @@ default_print_registers_info (struct gdbarch *gdbarch,
          specific reg.  */
       if (regnum == -1)
 	{
-	  if (!print_all)
-	    {
-	      if (gdbarch_register_reggroup_p (gdbarch, i, float_reggroup))
-		continue;
-	      if (gdbarch_register_reggroup_p (gdbarch, i, vector_reggroup))
-		continue;
-	    }
+	  if (print_all && !gdbarch_register_reggroup_p (gdbarch, i,
+							 all_reggroup))
+	    continue;
+	  if (!print_all && !gdbarch_register_reggroup_p (gdbarch, i,
+							  general_reggroup))
+	    continue;
 	}
       else
 	{
@@ -1696,7 +1695,7 @@ registers_info (char *addr_exp, int fpregs)
 
   while (*addr_exp != '\0')
     {
-      const char *start;
+      char *start;
       const char *end;
       /* Keep skipping leading white space until something interesting
          is found.  */
@@ -1722,7 +1721,7 @@ registers_info (char *addr_exp, int fpregs)
 
       /* A register name?  */
       {
-	int regnum = target_map_name_to_register (addr_exp, end - start);
+	int regnum = target_map_name_to_register (start, end - start);
 	if (regnum >= 0)
 	  {
 	    gdbarch_print_registers_info (current_gdbarch, gdb_stdout,

@@ -1445,11 +1445,11 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 {
   if (group == all_reggroup)
     return 1;
-  if (mmx_regnum_p (regnum) || regnum == MXCSR_REGNUM)
+  if (mmx_regnum_p (regnum))
     return (group == i368_mmx_reggroup || group == vector_reggroup);
   if (FP_REGNUM_P (regnum) || FPC_REGNUM_P (regnum))
     return (group == float_reggroup || group == all_reggroup);
-  if (SSE_REGNUM_P (regnum))
+  if (SSE_REGNUM_P (regnum) || regnum == MXCSR_REGNUM)
     return (group == i368_sse_reggroup || group == vector_reggroup);
   if (group == general_reggroup)
     return 1;

@@ -1,3 +1,12 @@
+2002-08-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* infcmd.c (registers_info): Pass start, instead of addr_exp, to
+	target_map_name_to_register.
+	(default_print_registers_info): Use all_reggroup and
+	general_reggroup to decide if all, general registers should be
+	displayed.
+	* i386-tdep.c (i386_register_reggroup_p): Move mxcsr to SSE group.
+
 2002-08-26  Andrew Cagney  <ac131313@redhat.com>
 
 	* arch-utils.c (next_raw_register): Rename next_cooked_register.
