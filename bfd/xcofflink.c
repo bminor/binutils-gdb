@@ -390,6 +390,8 @@ struct xcoff_final_link_info
   struct external_ldsym *ldsym;
   /* Next .loader reloc to swap out.  */
   struct external_ldrel *ldrel;
+  /* File position of start of line numbers.  */
+  file_ptr line_filepos;
   /* Buffer large enough to hold swapped symbols of any input file.  */
   struct internal_syment *internal_syms;
   /* Buffer large enough to hold output indices of symbols of any
@@ -423,6 +425,8 @@ static boolean xcoff_link_check_archive_element
   PARAMS ((bfd *, struct bfd_link_info *, boolean *));
 static boolean xcoff_link_check_ar_symbols
   PARAMS ((bfd *, struct bfd_link_info *, boolean *));
+static bfd_size_type xcoff_find_reloc
+  PARAMS ((struct internal_reloc *, bfd_size_type, bfd_vma));
 static boolean xcoff_link_add_symbols PARAMS ((bfd *, struct bfd_link_info *));
 static boolean xcoff_link_add_dynamic_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
@@ -784,6 +788,51 @@ xcoff_link_check_ar_symbols (abfd, info, pneeded)
 
   /* We do not need this object file.  */
   return true;
+}
+
+/* Returns the index of reloc in RELOCS with the least address greater
+   than or equal to ADDRESS.  The relocs are sorted by address.  */
+
+static bfd_size_type
+xcoff_find_reloc (relocs, count, address)
+     struct internal_reloc *relocs;
+     bfd_size_type count;
+     bfd_vma address;
+{
+  bfd_size_type min, max, this;
+
+  if (count < 2)
+    return 0;
+
+  min = 0;
+  max = count;
+
+  /* Do a binary search over (min,max].  */
+  while (min + 1 < max)
+    {
+      bfd_vma raddr;
+
+      this = (max + min) / 2;
+      raddr = relocs[this].r_vaddr;
+      if (raddr > address)
+	max = this;
+      else if (raddr < address)
+	min = this;
+      else
+	{
+	  min = this;
+	  break;
+	}
+    }
+
+  if (relocs[min].r_vaddr < address)
+    return min + 1;
+
+  while (min > 0
+	 && relocs[min - 1].r_vaddr == address)
+    --min;
+
+  return min;
 }
 
 /* Add all the symbols from an object file to the hash table.
@@ -1197,29 +1246,22 @@ xcoff_link_add_symbols (abfd, info)
 	      && info->hash->creator == abfd->xvec)
 	    {
 	      asection *enclosing;
+	      struct internal_reloc *relocs;
 	      bfd_size_type relindx;
 	      struct internal_reloc *rel;
-	      asection **rel_csect;
 
 	      enclosing = coff_section_from_bfd_index (abfd, sym.n_scnum);
 	      if (enclosing == NULL)
 		goto error_return;
 
-	      /* XCOFF requires that relocs be sorted by address, so
-                 we could do a binary search here.  FIXME.  */
-	      rel = reloc_info[enclosing->target_index].relocs;
-	      rel_csect = reloc_info[enclosing->target_index].csects;
-	      for (relindx = 0;
-		   relindx < enclosing->reloc_count;
-		   relindx++, rel++, rel_csect++)
-		{
-		  if (*rel_csect == NULL
-		      && rel->r_vaddr == (bfd_vma) sym.n_value
-		      && rel->r_size == 31
-		      && rel->r_type == R_POS)
-		    break;
-		}
-	      if (relindx < enclosing->reloc_count)
+	      relocs = reloc_info[enclosing->target_index].relocs;
+	      relindx = xcoff_find_reloc (relocs, enclosing->reloc_count,
+					  sym.n_value);
+	      rel = relocs + relindx;
+	      if (relindx < enclosing->reloc_count
+		  && rel->r_vaddr == (bfd_vma) sym.n_value
+		  && rel->r_size == 31
+		  && rel->r_type == R_POS)
 		{
 		  bfd_byte *erelsym;
 		  struct internal_syment relsym;
@@ -1270,10 +1312,14 @@ xcoff_link_add_symbols (abfd, info)
 
 			  if (h->toc_section != NULL)
 			    {
+			      asection **rel_csects;
+
 			      /* We already have a TOC entry for this
 				 symbol, so we can just ignore this
 				 one.  */
-			      *rel_csect = bfd_und_section_ptr;
+			      rel_csects =
+				reloc_info[enclosing->target_index].csects;
+			      rel_csects[relindx] = bfd_und_section_ptr;
 			      break;
 			    }
 
@@ -1297,9 +1343,6 @@ xcoff_link_add_symbols (abfd, info)
 	      };
 	    const char *csect_name;
 	    asection *enclosing;
-	    struct internal_reloc *rel;
-	    bfd_size_type relindx;
-	    asection **rel_csect;
 
 	    if ((aux.x_csect.x_smclas >=
 		 sizeof csect_name_by_class / sizeof csect_name_by_class[0])
@@ -1359,31 +1402,23 @@ xcoff_link_add_symbols (abfd, info)
 	    xcoff_section_data (abfd, csect)->lineno_count =
 	      enclosing->lineno_count;
 
-	    /* XCOFF requires that relocs be sorted by address, so we
-               could do a binary search here.  FIXME.  (XCOFF
-               unfortunately does not require that symbols be sorted
-               by address, or this would be a simple merge).  */
 	    if (enclosing->owner == abfd)
 	      {
-		rel = reloc_info[enclosing->target_index].relocs;
-		rel_csect = reloc_info[enclosing->target_index].csects;
-		for (relindx = 0;
-		     relindx < enclosing->reloc_count;
-		     relindx++, rel++, rel_csect++)
-		  {
-		    if (*rel_csect == NULL
-			&& rel->r_vaddr >= csect->vma
-			&& rel->r_vaddr < csect->vma + csect->_raw_size)
-		      {
-			csect->rel_filepos = (enclosing->rel_filepos
-					      + (relindx
-						 * bfd_coff_relsz (abfd)));
-			break;
-		      }
-		  }
+		struct internal_reloc *relocs;
+		bfd_size_type relindx;
+		struct internal_reloc *rel;
+		asection **rel_csect;
+
+		relocs = reloc_info[enclosing->target_index].relocs;
+		relindx = xcoff_find_reloc (relocs, enclosing->reloc_count,
+					    csect->vma);
+		rel = relocs + relindx;
+		rel_csect = (reloc_info[enclosing->target_index].csects
+			     + relindx);
+		csect->rel_filepos = (enclosing->rel_filepos
+				      + relindx * bfd_coff_relsz (abfd));
 		while (relindx < enclosing->reloc_count
 		       && *rel_csect == NULL
-		       && rel->r_vaddr >= csect->vma
 		       && rel->r_vaddr < csect->vma + csect->_raw_size)
 		  {
 		    *rel_csect = csect;
@@ -3044,6 +3079,7 @@ _bfd_xcoff_bfd_final_link (abfd, info)
   /* We now know the size of the relocs, so we can determine the file
      positions of the line numbers.  */
   line_filepos = rel_filepos;
+  finfo.line_filepos = line_filepos;
   linesz = bfd_coff_linesz (abfd);
   max_output_reloc_count = 0;
   for (o = abfd->sections; o != NULL; o = o->next)
@@ -3444,6 +3480,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
   long *indexp;
   unsigned long output_index;
   bfd_byte *outsym;
+  unsigned int incls;
   asection *oline;
   boolean keep_syms;
   asection *o;
@@ -3489,6 +3526,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
   indexp = finfo->sym_indices;
   output_index = syment_base;
   outsym = finfo->outsyms;
+  incls = 0;
   oline = NULL;
 
   while (esym < esym_end)
@@ -3750,6 +3788,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
 
 	  if (isym.n_sclass != C_BSTAT
 	      && isym.n_sclass != C_ESTAT
+	      && isym.n_sclass != C_DECL
 	      && isym.n_scnum > 0)
 	    {
 	      isym.n_scnum = (*csectpp)->output_section->target_index;
@@ -3800,6 +3839,16 @@ xcoff_link_input_bfd (finfo, input_bfd)
 
 	      finfo->last_file_index = output_index;
 	      finfo->last_file = isym;
+	    }
+
+	  /* The value of a C_BINCL or C_EINCL symbol is a file offset
+             into the line numbers.  We update the symbol values when
+             we handle the line numbers.  */
+	  if (isym.n_sclass == C_BINCL
+	      || isym.n_sclass == C_EINCL)
+	    {
+	      isym.n_value = finfo->line_filepos;
+	      ++incls;
 	    }
 
 	  /* Output the symbol.  */
@@ -3872,21 +3921,23 @@ xcoff_link_input_bfd (finfo, input_bfd)
 
 	  if (isymp->n_sclass == C_BSTAT)
 	    {
+	      struct internal_syment isym;
 	      unsigned long indx;
 
 	      /* The value of a C_BSTAT symbol is the symbol table
                  index of the containing csect.  */
-	      indx = isymp->n_value;
+	      bfd_coff_swap_sym_in (output_bfd, (PTR) outsym, (PTR) &isym);
+	      indx = isym.n_value;
 	      if (indx < obj_raw_syment_count (input_bfd))
 		{
 		  long symindx;
 
 		  symindx = finfo->sym_indices[indx];
 		  if (symindx < 0)
-		    isymp->n_value = 0;
+		    isym.n_value = 0;
 		  else
-		    isymp->n_value = symindx;
-		  bfd_coff_swap_sym_out (output_bfd, (PTR) isymp,
+		    isym.n_value = symindx;
+		  bfd_coff_swap_sym_out (output_bfd, (PTR) &isym,
 					 (PTR) outsym);
 		}
 	    }
@@ -4091,6 +4142,52 @@ xcoff_link_input_bfd (finfo, input_bfd)
 			    return false;
 
 			  o->output_section->lineno_count += count;
+
+			  if (incls > 0)
+			    {
+			      struct internal_syment *iisp, *iispend;
+			      long *iindp;
+			      bfd_byte *oos;
+
+			      /* Update any C_BINCL or C_EINCL symbols
+                                 that refer to a line number in the
+                                 range we just output.  */
+			      iisp = finfo->internal_syms;
+			      iispend = (iisp
+					 + obj_raw_syment_count (input_bfd));
+			      iindp = finfo->sym_indices;
+			      oos = finfo->outsyms;
+			      while (iisp < iispend)
+				{
+				  if ((iisp->n_sclass == C_BINCL
+				       || iisp->n_sclass == C_EINCL)
+				      && ((bfd_size_type) iisp->n_value
+					  >= enclosing->line_filepos + linoff)
+				      && ((bfd_size_type) iisp->n_value
+					  < (enclosing->line_filepos
+					     + enc_count * linesz)))
+				    {
+				      struct internal_syment iis;
+
+				      bfd_coff_swap_sym_in (output_bfd,
+							    (PTR) oos,
+							    (PTR) &iis);
+				      iis.n_value =
+					(iisp->n_value
+					 - enclosing->line_filepos
+					 - linoff
+					 + aux.x_sym.x_fcnary.x_fcn.x_lnnoptr);
+				      bfd_coff_swap_sym_out (output_bfd,
+							     (PTR) &iis,
+							     (PTR) oos);
+				      --incls;
+				    }
+
+				  iisp += iisp->n_numaux + 1;
+				  iindp += iisp->n_numaux + 1;
+				  oos += (iisp->n_numaux + 1) * osymesz;
+				}
+			    }
 			}
 		    }
 		}

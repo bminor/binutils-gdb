@@ -1,5 +1,13 @@
 Mon Oct 30 14:53:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* xcofflink.c (struct xcoff_final_link_info): Add new line_filepos
+	field.
+	(xcoff_find_reloc): New static function.
+	(xcoff_link_add_symbols): Use it.
+	(_bfd_xcoff_bfd_final_link): Set finfo.line_filepos.
+	(xcoff_link_input_bfd): Handle C_BINCL and C_EINCL.  Don't
+	relocate the value of C_DECL.
+
 	* elf.c (elf_fake_sections): Remove bogus BFD_ASSERT.
 
 Sat Oct 28 01:25:34 1995  steve chamberlain  <sac@slash.cygnus.com>
