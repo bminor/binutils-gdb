@@ -19,6 +19,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+# Make certain that the script is running in an internationalized
+# environment.
+LANG=c ; export LANG
+LC_ALL=c ; export LC_ALL
+
+
 compare_new ()
 {
     file=$1
@@ -415,7 +421,6 @@ v::TARGET_CHAR_SIGNED:int:char_signed::::1:-1:1::::
 f::TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid::0:generic_target_read_pc::0
 f::TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid::0:generic_target_write_pc::0
 f::TARGET_READ_FP:CORE_ADDR:read_fp:void:::0:generic_target_read_fp::0
-f::TARGET_WRITE_FP:void:write_fp:CORE_ADDR val:val::0:generic_target_write_fp::0
 f::TARGET_READ_SP:CORE_ADDR:read_sp:void:::0:generic_target_read_sp::0
 f::TARGET_WRITE_SP:void:write_sp:CORE_ADDR val:val::0:generic_target_write_sp::0
 # Function for getting target's idea of a frame pointer.  FIXME: GDB's
@@ -432,9 +437,14 @@ v:2:NUM_REGS:int:num_regs::::0:-1
 # These pseudo-registers may be aliases for other registers,
 # combinations of other registers, or they may be computed by GDB.
 v:2:NUM_PSEUDO_REGS:int:num_pseudo_regs::::0:0::0:::
-v:2:SP_REGNUM:int:sp_regnum::::0:-1
-v:2:FP_REGNUM:int:fp_regnum::::0:-1
-v:2:PC_REGNUM:int:pc_regnum::::0:-1
+
+# GDB's standard (or well known) register numbers.  These can map onto
+# a real register or a pseudo (computed) register or not be defined at
+# all (-1).
+v:2:SP_REGNUM:int:sp_regnum::::-1:-1::0
+v:2:FP_REGNUM:int:fp_regnum::::-1:-1::0
+v:2:PC_REGNUM:int:pc_regnum::::-1:-1::0
+v:2:PS_REGNUM:int:ps_regnum::::-1:-1::0
 v:2:FP0_REGNUM:int:fp0_regnum::::0:-1::0
 v:2:NPC_REGNUM:int:npc_regnum::::0:-1::0
 v:2:NNPC_REGNUM:int:nnpc_regnum::::0:-1::0
@@ -535,7 +545,7 @@ F:2:INIT_EXTRA_FRAME_INFO:void:init_extra_frame_info:int fromleaf, struct frame_
 f:2:SKIP_PROLOGUE:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip::0:0
 f:2:PROLOGUE_FRAMELESS_P:int:prologue_frameless_p:CORE_ADDR ip:ip::0:generic_prologue_frameless_p::0
 f:2:INNER_THAN:int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs::0:0
-f:2:BREAKPOINT_FROM_PC:unsigned char *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr:::legacy_breakpoint_from_pc::0
+f:2:BREAKPOINT_FROM_PC:const unsigned char *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr:::legacy_breakpoint_from_pc::0
 f:2:MEMORY_INSERT_BREAKPOINT:int:memory_insert_breakpoint:CORE_ADDR addr, char *contents_cache:addr, contents_cache::0:default_memory_insert_breakpoint::0
 f:2:MEMORY_REMOVE_BREAKPOINT:int:memory_remove_breakpoint:CORE_ADDR addr, char *contents_cache:addr, contents_cache::0:default_memory_remove_breakpoint::0
 v:2:DECR_PC_AFTER_BREAK:CORE_ADDR:decr_pc_after_break::::0:-1
@@ -599,6 +609,27 @@ f:2:SKIP_TRAMPOLINE_CODE:CORE_ADDR:skip_trampoline_code:CORE_ADDR pc:pc:::generi
 # trampoline code in the ".plt" section.  IN_SOLIB_CALL_TRAMPOLINE evaluates
 # to nonzero if we are current stopped in one of these.
 f:2:IN_SOLIB_CALL_TRAMPOLINE:int:in_solib_call_trampoline:CORE_ADDR pc, char *name:pc, name:::generic_in_solib_call_trampoline::0
+# Sigtramp is a routine that the kernel calls (which then calls the
+# signal handler).  On most machines it is a library routine that is
+# linked into the executable.
+#
+# This macro, given a program counter value and the name of the
+# function in which that PC resides (which can be null if the name is
+# not known), returns nonzero if the PC and name show that we are in
+# sigtramp.
+#
+# On most machines just see if the name is sigtramp (and if we have
+# no name, assume we are not in sigtramp).
+#
+# FIXME: cagney/2002-04-21: The function find_pc_partial_function
+# calls find_pc_sect_partial_function() which calls PC_IN_SIGTRAMP.
+# This means PC_IN_SIGTRAMP function can't be implemented by doing its
+# own local NAME lookup.
+#
+# FIXME: cagney/2002-04-21: PC_IN_SIGTRAMP is something of a mess.
+# Some code also depends on SIGTRAMP_START and SIGTRAMP_END but other
+# does not.
+f:2:PC_IN_SIGTRAMP:int:pc_in_sigtramp:CORE_ADDR pc, char *name:pc, name:::legacy_pc_in_sigtramp::0
 # A target might have problems with watchpoints as soon as the stack
 # frame of the current function has been destroyed.  This mostly happens
 # as the first action in a funtion's epilogue.  in_function_epilogue_p()
@@ -722,7 +753,9 @@ cat <<EOF
 
 #include "dis-asm.h" /* Get defs for disassemble_info, which unfortunately is a typedef. */
 #if !GDB_MULTI_ARCH
+/* Pull in function declarations refered to, indirectly, via macros.  */
 #include "value.h" /* For default_coerce_float_to_double which is referenced by a macro.  */
+#include "inferior.h"		/* For unsigned_address_to_pointer().  */
 #endif
 
 struct frame_info;
@@ -944,9 +977,16 @@ extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
    architecture; ARCHES which is a list of the previously created
    \`\`struct gdbarch'' for this architecture.
 
-   The INIT function parameter INFO shall, as far as possible, be
-   pre-initialized with information obtained from INFO.ABFD or
-   previously selected architecture (if similar).
+   The INFO parameter is, as far as possible, be pre-initialized with
+   information obtained from INFO.ABFD or the previously selected
+   architecture.
+
+   The ARCHES parameter is a linked list (sorted most recently used)
+   of all the previously created architures for this architecture
+   family.  The (possibly NULL) ARCHES->gdbarch can used to access
+   values from the previously selected architecture for this
+   architecture family.  The global \`\`current_gdbarch'' shall not be
+   used.
 
    The INIT function shall return any of: NULL - indicating that it
    doesn't recognize the selected architecture; an existing \`\`struct
@@ -1212,13 +1252,6 @@ static void init_gdbarch_swap (struct gdbarch *);
 static void swapout_gdbarch_swap (struct gdbarch *);
 static void swapin_gdbarch_swap (struct gdbarch *);
 
-/* Convenience macro for allocting typesafe memory. */
-
-#ifndef XMALLOC
-#define XMALLOC(TYPE) (TYPE*) xmalloc (sizeof (TYPE))
-#endif
-
-
 /* Non-zero if we want to trace architecture code.  */
 
 #ifndef GDBARCH_DEBUG
@@ -1340,6 +1373,7 @@ void
 initialize_non_multiarch ()
 {
   alloc_gdbarch_data (&startup_gdbarch);
+  init_gdbarch_swap (&startup_gdbarch);
   init_gdbarch_data (&startup_gdbarch);
 }
 EOF
@@ -1594,6 +1628,7 @@ do
 	printf "int\n"
 	printf "gdbarch_${function}_p (struct gdbarch *gdbarch)\n"
 	printf "{\n"
+        printf "  gdb_assert (gdbarch != NULL);\n"
 	if [ -n "${valid_p}" ]
 	then
 	    printf "  return ${valid_p};\n"
@@ -1613,6 +1648,7 @@ do
 	  printf "gdbarch_${function} (struct gdbarch *gdbarch, ${formal})\n"
 	fi
 	printf "{\n"
+        printf "  gdb_assert (gdbarch != NULL);\n"
         printf "  if (gdbarch->${function} == 0)\n"
         printf "    internal_error (__FILE__, __LINE__,\n"
 	printf "                    \"gdbarch: gdbarch_${function} invalid\");\n"
@@ -1654,6 +1690,7 @@ do
 	printf "${returntype}\n"
 	printf "gdbarch_${function} (struct gdbarch *gdbarch)\n"
 	printf "{\n"
+        printf "  gdb_assert (gdbarch != NULL);\n"
 	if [ "x${invalid_p}" = "x0" ]
 	then
 	    printf "  /* Skip verify of ${function}, invalid_p == 0 */\n"
@@ -1685,6 +1722,7 @@ do
 	printf "${returntype}\n"
 	printf "gdbarch_${function} (struct gdbarch *gdbarch)\n"
 	printf "{\n"
+        printf "  gdb_assert (gdbarch != NULL);\n"
 	printf "  if (gdbarch_debug >= 2)\n"
 	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\\\\n\");\n"
 	printf "  return gdbarch->${function};\n"
@@ -2045,7 +2083,6 @@ int
 gdbarch_update_p (struct gdbarch_info info)
 {
   struct gdbarch *new_gdbarch;
-  struct gdbarch_list **list;
   struct gdbarch_registration *rego;
 
   /* Fill in missing parts of the INFO struct using a number of
@@ -2138,29 +2175,46 @@ gdbarch_update_p (struct gdbarch_info info)
   /* Swap all data belonging to the old target out */
   swapout_gdbarch_swap (current_gdbarch);
 
-  /* Is this a pre-existing architecture?  Yes. Swap it in.  */
-  for (list = &rego->arches;
-       (*list) != NULL;
-       list = &(*list)->next)
-    {
-      if ((*list)->gdbarch == new_gdbarch)
-	{
-	  if (gdbarch_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-                                "gdbarch_update: Previous architecture 0x%08lx (%s) selected\\n",
-				(long) new_gdbarch,
-				new_gdbarch->bfd_arch_info->printable_name);
-	  current_gdbarch = new_gdbarch;
-	  swapin_gdbarch_swap (new_gdbarch);
-	  architecture_changed_event ();
-	  return 1;
-	}
-    }
+  /* Is this a pre-existing architecture?  Yes. Move it to the front
+     of the list of architectures (keeping the list sorted Most
+     Recently Used) and then copy it in.  */
+  {
+    struct gdbarch_list **list;
+    for (list = &rego->arches;
+	 (*list) != NULL;
+	 list = &(*list)->next)
+      {
+	if ((*list)->gdbarch == new_gdbarch)
+	  {
+	    struct gdbarch_list *this;
+	    if (gdbarch_debug)
+	      fprintf_unfiltered (gdb_stdlog,
+				  "gdbarch_update: Previous architecture 0x%08lx (%s) selected\n",
+				  (long) new_gdbarch,
+				  new_gdbarch->bfd_arch_info->printable_name);
+	    /* Unlink this.  */
+	    this = (*list);
+	    (*list) = this->next;
+	    /* Insert in the front.  */
+	    this->next = rego->arches;
+	    rego->arches = this;
+	    /* Copy the new architecture in.  */
+	    current_gdbarch = new_gdbarch;
+	    swapin_gdbarch_swap (new_gdbarch);
+	    architecture_changed_event ();
+	    return 1;
+	  }
+      }
+  }
 
-  /* Append this new architecture to this targets list. */
-  (*list) = XMALLOC (struct gdbarch_list);
-  (*list)->next = NULL;
-  (*list)->gdbarch = new_gdbarch;
+  /* Prepend this new architecture to the architecture list (keep the
+     list sorted Most Recently Used).  */
+  {
+    struct gdbarch_list *this = XMALLOC (struct gdbarch_list);
+    this->next = rego->arches;
+    this->gdbarch = new_gdbarch;
+    rego->arches = this;
+  }    
 
   /* Switch to this new architecture.  Dump it out. */
   current_gdbarch = new_gdbarch;

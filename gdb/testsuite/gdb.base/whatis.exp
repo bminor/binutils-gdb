@@ -1,5 +1,5 @@
-#   Copyright 1988, 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1999
-#   Free Software Foundation, Inc.
+# Copyright 1988, 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1999, 2002
+# Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -85,7 +85,6 @@ if $signed_keyword_not_used then {
 } else {
     set signed_char "signed char"
 }
-# OBSOLETE setup_xfail "a29k-*-*"
 if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix*" }
 gdb_test "whatis v_signed_char" \
     "type = $signed_char" \

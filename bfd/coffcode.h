@@ -341,6 +341,11 @@ static PTR coff_mkobject_hook PARAMS ((bfd *, PTR,  PTR));
 #ifdef COFF_WITH_PE
 static flagword handle_COMDAT PARAMS ((bfd *, flagword, PTR, const char *, asection *));
 #endif
+#ifdef COFF_IMAGE_WITH_PE
+static boolean coff_read_word PARAMS ((bfd *, unsigned int *));
+static unsigned int coff_compute_checksum PARAMS ((bfd *));
+static boolean coff_apply_checksum PARAMS ((bfd *));
+#endif
 
 /* void warning(); */
 
@@ -1493,12 +1498,12 @@ coff_new_section_hook (abfd, section)
   section->alignment_power = COFF_DEFAULT_SECTION_ALIGNMENT_POWER;
 
 #ifdef RS6000COFF_C
-  if (xcoff_data (abfd)->text_align_power != 0
+  if (bfd_xcoff_text_align_power (abfd) != 0
       && strcmp (bfd_get_section_name (abfd, section), ".text") == 0)
-    section->alignment_power = xcoff_data (abfd)->text_align_power;
-  if (xcoff_data (abfd)->data_align_power != 0
+    section->alignment_power = bfd_xcoff_text_align_power (abfd);
+  if (bfd_xcoff_data_align_power (abfd) != 0
       && strcmp (bfd_get_section_name (abfd, section), ".data") == 0)
-    section->alignment_power = xcoff_data (abfd)->data_align_power;
+    section->alignment_power = bfd_xcoff_data_align_power (abfd);
 #endif
 
   /* Allocate aux records for section symbols, to store size and
@@ -1964,6 +1969,7 @@ coff_set_arch_mach_hook (abfd, filehdr)
 
 #ifdef RS6000COFF_C
 #ifdef XCOFF64
+    case U64_TOCMAGIC:
     case U803XTOCMAGIC:
 #else
     case U802ROMAGIC:
@@ -2768,14 +2774,8 @@ coff_set_flags (abfd, magicp, flagsp)
 #ifndef PPCMAGIC
     case bfd_arch_powerpc:
 #endif
-#ifdef XCOFF64
-      if (bfd_get_mach (abfd) == bfd_mach_ppc_620
-	  && !strncmp (abfd->xvec->name,"aix", 3))
-	*magicp = U803XTOCMAGIC;
-      else
-#else
-    	*magicp = U802TOCMAGIC;
-#endif
+      BFD_ASSERT (bfd_get_flavour (abfd) == bfd_target_xcoff_flavour);
+      *magicp = bfd_xcoff_magic_number (abfd);
       return true;
       break;
 #endif
@@ -3014,6 +3014,7 @@ coff_compute_section_file_positions (abfd)
 	else
 	  current->target_index = target_index++;
       }
+    abfd->section_tail = &current->next;
 
     free (section_list);
   }
@@ -3274,6 +3275,100 @@ coff_add_missing_symbols (abfd)
 }
 
 #endif /* 0 */
+
+#ifdef COFF_IMAGE_WITH_PE
+
+static unsigned int pelength;
+static unsigned int peheader;
+
+static boolean
+coff_read_word (abfd, value)
+  bfd *abfd;
+  unsigned int *value;
+{
+  unsigned char b[2];
+  int status;
+
+  status = bfd_bread (b, (bfd_size_type) 2, abfd);
+  if (status < 1)
+    {
+      *value = 0;
+      return false;
+    }
+
+  if (status == 1)
+    *value = (unsigned int) b[0];
+  else
+    *value = (unsigned int) (b[0] + (b[1] << 8));
+
+  pelength += (unsigned int) status;
+
+  return true;
+}
+
+static unsigned int
+coff_compute_checksum (abfd)
+  bfd *abfd;
+{
+  boolean more_data;
+  file_ptr filepos;
+  unsigned int value;
+  unsigned int total;
+
+  total = 0;
+  pelength = 0;
+  filepos = (file_ptr) 0;
+
+  do
+    {
+      if (bfd_seek (abfd, filepos, SEEK_SET) != 0)
+	return 0;
+
+      more_data = coff_read_word (abfd, &value);
+      total += value;
+      total = 0xffff & (total + (total >> 0x10));
+      filepos += 2;
+    }
+  while (more_data);
+
+  return (0xffff & (total + (total >> 0x10)));
+}
+
+static boolean
+coff_apply_checksum (abfd)
+  bfd *abfd;
+{
+  unsigned int computed;
+  unsigned int checksum = 0;
+
+  if (bfd_seek (abfd, 0x3c, SEEK_SET) != 0)
+    return false;
+
+  if (!coff_read_word (abfd, &peheader))
+    return false;
+
+  if (bfd_seek (abfd, peheader + 0x58, SEEK_SET) != 0)
+    return false;
+
+  checksum = 0;
+  bfd_bwrite (&checksum, (bfd_size_type) 4, abfd);
+
+  if (bfd_seek (abfd, peheader, SEEK_SET) != 0)
+    return false;
+
+  computed = coff_compute_checksum (abfd);
+
+  checksum = computed + pelength;
+
+  if (bfd_seek (abfd, peheader + 0x58, SEEK_SET) != 0)
+    return false;
+
+  bfd_bwrite (&checksum, (bfd_size_type) 4, abfd);
+
+  return true;
+}
+
+#endif /* COFF_IMAGE_WITH_PE */
 
 /* SUPPRESS 558 */
 /* SUPPRESS 529 */
@@ -4065,6 +4160,11 @@ coff_write_object_contents (abfd)
 
       if (amount != bfd_coff_aoutsz (abfd))
 	return false;
+
+#ifdef COFF_IMAGE_WITH_PE
+      if (! coff_apply_checksum (abfd))
+	return false;
+#endif
     }
 #ifdef RS6000COFF_C
   else
@@ -4443,16 +4543,14 @@ coff_slurp_symbol_table (abfd)
 
 #ifdef COFF_WITH_PE
 	      if (src->u.syment.n_sclass == C_NT_WEAK)
-		dst->symbol.flags = BSF_WEAK;
+		dst->symbol.flags |= BSF_WEAK;
+
 	      if (src->u.syment.n_sclass == C_SECTION
 		  && src->u.syment.n_scnum > 0)
-		{
-		  dst->symbol.flags = BSF_LOCAL;
-		}
+		dst->symbol.flags = BSF_LOCAL;
 #endif
-
 	      if (src->u.syment.n_sclass == C_WEAKEXT)
-		dst->symbol.flags = BSF_WEAK;
+		dst->symbol.flags |= BSF_WEAK;
 
 	      break;
 
@@ -5048,6 +5146,10 @@ dummy_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 {
   abort ();
 }
+#endif
+
+#ifndef coff_bfd_link_hash_table_free
+#define coff_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #endif
 
 /* If coff_relocate_section is defined, we can use the optimized COFF

@@ -904,7 +904,7 @@ get_bf_for_fcn (long the_function)
     if (current_head_bf_list->symnum_fcn == the_function)
       {
 	if (global_remote_debug)
-	  fprintf (stderr, "*");
+	  fprintf_unfiltered (gdb_stderr, "*");
 
 	tmp = current_head_bf_list;
 	current_head_bf_list = current_head_bf_list->next;
@@ -916,7 +916,7 @@ get_bf_for_fcn (long the_function)
      the ugly linear scan */
 
   if (global_remote_debug)
-    fprintf (stderr, "\ndefaulting to linear scan\n");
+    fprintf_unfiltered (gdb_stderr, "\ndefaulting to linear scan\n");
 
   nprobes = 0;
   tmp = saved_bf_list;
@@ -926,7 +926,7 @@ get_bf_for_fcn (long the_function)
       if (tmp->symnum_fcn == the_function)
 	{
 	  if (global_remote_debug)
-	    fprintf (stderr, "Found in %d probes\n", nprobes);
+	    fprintf_unfiltered (gdb_stderr, "Found in %d probes\n", nprobes);
 	  current_head_bf_list = tmp->next;
 	  return (tmp->symnum_bf);
 	}

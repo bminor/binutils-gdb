@@ -1,6 +1,7 @@
 /* Target-dependent code for Mitsubishi D30V, for GDB.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -725,7 +726,7 @@ d30v_print_register (int regnum, int tabular)
     {
       char regbuf[MAX_REGISTER_RAW_SIZE];
 
-      read_relative_register_raw_bytes (regnum, regbuf);
+      frame_register_read (selected_frame, regnum, regbuf);
 
       val_print (REGISTER_VIRTUAL_TYPE (regnum), regbuf, 0, 0,
 		 gdb_stdout, 'x', 1, 0, Val_pretty_default);

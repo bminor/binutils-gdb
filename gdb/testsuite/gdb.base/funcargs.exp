@@ -1,4 +1,4 @@
-# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2002
 # Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -58,9 +58,6 @@ proc integral_args {} {
     gdb_breakpoint call0e
 
     # Run; should stop at call0a and print actual arguments.
-    # OBSOLETE # The a29k fails all of these tests, perhaps because the prologue
-    # OBSOLETE # code is broken.
-    # OBSOLETE setup_xfail "a29k-*-udi"
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     gdb_run_cmd
     gdb_expect {
@@ -118,9 +115,6 @@ proc unsigned_integral_args {} {
     gdb_breakpoint call1e;
 
     # Run; should stop at call1a and print actual arguments.
-    # OBSOLETE # The a29k fails all of these tests, perhaps because the prologue
-    # OBSOLETE # code is broken.
-    # OBSOLETE setup_xfail "a29k-*-udi"
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     gdb_run_cmd
     gdb_expect {
@@ -184,9 +178,6 @@ proc float_and_integral_args {} {
     # Run; should stop at call2a and print actual arguments.
 
     setup_xfail "i960-*-*" 1813
-    # OBSOLETE # The a29k fails all of these tests, perhaps because the prologue
-    # OBSOLETE # code is broken.
-    # OBSOLETE setup_xfail "a29k-*-udi"
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" "mips-sgi-irix5*" }
     # The debug info. for "f" is not correct. It's a known bug.
     if {$hp_cc_compiler} {setup_xfail hppa2.0w-*-*}
@@ -285,9 +276,6 @@ proc pointer_args {} {
     # Run; should stop at call3a and print actual arguments.
     # Try dereferencing the arguments.
 
-    # OBSOLETE # The a29k fails all of these tests, perhaps because the prologue
-    # OBSOLETE # code is broken.
-    # OBSOLETE setup_xfail "a29k-*-udi"
     gdb_run_cmd
     gdb_expect {
 	 -re ".* call3a \\(cp=$hex \"a.*\", sp=$hex, ip=$hex, lp=$hex\\) .*$gdb_prompt $" { pass "run to call3a" }
@@ -344,9 +332,6 @@ proc structs_by_reference {} {
     # Run; should stop at call4a and print actual arguments.
     # Try dereferencing the arguments.
 
-    # OBSOLETE # The a29k fails all of these tests, perhaps because the prologue
-    # OBSOLETE # code is broken.
-    # OBSOLETE setup_xfail "a29k-*-udi"
     gdb_run_cmd
     gdb_expect {
 	 -re ".* call4a \\(stp=$hex\\) .*$gdb_prompt $" {
@@ -403,9 +388,6 @@ proc structs_by_value {} {
     # Run; should stop at call5a and print actual arguments.
     # Try dereferencing the arguments.
 
-    # OBSOLETE # The a29k fails all of these tests, perhaps because the prologue
-    # OBSOLETE # code is broken.
-    # OBSOLETE setup_xfail "a29k-*-udi"
     gdb_run_cmd
     gdb_expect {
 	 -re ".* call5a \\(st=\{s1 = 101, s2 = 102\}\\) .*$gdb_prompt $" {
@@ -480,9 +462,6 @@ proc discard_and_shuffle {} {
     # Run; should stop at call6a and print actual arguments.
     # Print backtrace.
 
-    # OBSOLETE # The a29k fails all of these tests, perhaps because the prologue
-    # OBSOLETE # code is broken.
-    # OBSOLETE setup_xfail "a29k-*-udi"
     gdb_run_cmd
     gdb_expect {
 	 -re ".*Breakpoint $decimal, call6a .*$gdb_prompt $" { pass "run to call6a" }
@@ -754,9 +733,6 @@ proc shuffle_round_robin {} {
     # Run; should stop at call7a and print actual arguments.
     # Print backtrace.
 
-    # OBSOLETE # The a29k fails all of these tests, perhaps because the prologue
-    # OBSOLETE # code is broken.
-    # OBSOLETE setup_xfail "a29k-*-udi"
     gdb_run_cmd
     gdb_expect {
 	 -re ".*Breakpoint $decimal, call7a .*$gdb_prompt $" {
@@ -983,9 +959,6 @@ proc recursive_structs_by_value {} {
     }
 
     if ![istarget sparclet-*-*] {
-	# OBSOLETE # The a29k fails all of these tests, perhaps because the prologue
-	# OBSOLETE # code is broken.
-	# OBSOLETE setup_xfail "a29k-*-udi"
 	send_gdb "backtrace 100\n"
 	gdb_expect_list "recursive passing of structs by value" ".*$gdb_prompt $" {
 	    ".*\[\r\n\]#0 .* hitbottom \\(\\) "

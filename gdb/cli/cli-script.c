@@ -213,7 +213,49 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
     }				/* while (list) */
 }
 
+/* Handle pre-post hooks.  */
+
+void
+clear_hook_in_cleanup (void *data)
+{
+  struct cmd_list_element *c = data;
+  c->hook_in = 0; /* Allow hook to work again once it is complete */
+}
+
+void
+execute_cmd_pre_hook (struct cmd_list_element *c)
+{
+  if ((c->hook_pre) && (!c->hook_in))
+    {
+      struct cleanup *cleanups = make_cleanup (clear_hook_in_cleanup, c);
+      c->hook_in = 1; /* Prevent recursive hooking */
+      execute_user_command (c->hook_pre, (char *) 0);
+      do_cleanups (cleanups);
+    }
+}
+
+void
+execute_cmd_post_hook (struct cmd_list_element *c)
+{
+  if ((c->hook_post) && (!c->hook_in))
+    {
+      struct cleanup *cleanups = make_cleanup (clear_hook_in_cleanup, c);
+      c->hook_in = 1; /* Prevent recursive hooking */
+      execute_user_command (c->hook_post, (char *) 0);
+      do_cleanups (cleanups);
+    }
+}
+
 /* Execute the command in CMD.  */
+void
+do_restore_user_call_depth (void * call_depth)
+{	
+  int * depth = call_depth;
+  /* We will be returning_to_top_level() at this point, so we want to
+     reset our depth. */
+  (*depth) = 0;
+}
+
 
 void
 execute_user_command (struct cmd_list_element *c, char *args)
@@ -221,6 +263,8 @@ execute_user_command (struct cmd_list_element *c, char *args)
   register struct command_line *cmdlines;
   struct cleanup *old_chain;
   enum command_control_type ret;
+  static int user_call_depth = 0;
+  extern int max_user_call_depth;
 
   old_chain = setup_user_args (args);
 
@@ -228,6 +272,11 @@ execute_user_command (struct cmd_list_element *c, char *args)
   if (cmdlines == 0)
     /* Null command */
     return;
+
+  if (++user_call_depth > max_user_call_depth)
+    error ("Max user call depth exceeded -- command aborted\n");
+
+  old_chain = make_cleanup (do_restore_user_call_depth, &user_call_depth);
 
   /* Set the instream to 0, indicating execution of a
      user-defined function.  */
@@ -244,6 +293,8 @@ execute_user_command (struct cmd_list_element *c, char *args)
       cmdlines = cmdlines->next;
     }
   do_cleanups (old_chain);
+
+  user_call_depth--;
 }
 
 enum command_control_type

@@ -6333,6 +6333,7 @@ som_bfd_link_split_section (abfd, sec)
  bfd_generic_get_relocated_section_contents
 #define som_bfd_relax_section bfd_generic_relax_section
 #define som_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
+#define som_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define som_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define som_bfd_final_link _bfd_generic_final_link
 

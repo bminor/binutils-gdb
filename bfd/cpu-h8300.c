@@ -1,5 +1,5 @@
 /* BFD library support routines for the Hitachi H8/300 architecture.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 2000, 2001
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Hacked by Steve Chamberlain of Cygnus Support.
 
@@ -91,7 +91,7 @@ compatible (in, out)
      const bfd_arch_info_type *out;
 {
   /* It's really not a good idea to mix and match modes.  */
-  if (in->mach != out->mach)
+  if (in->arch != out->arch || in->mach != out->mach)
     return 0;
   else
     return in;

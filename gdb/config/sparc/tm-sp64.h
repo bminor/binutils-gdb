@@ -268,12 +268,10 @@ CORE_ADDR sparc64_push_arguments (int,
 extern CORE_ADDR sparc64_read_sp ();
 extern CORE_ADDR sparc64_read_fp ();
 extern void sparc64_write_sp (CORE_ADDR);
-extern void sparc64_write_fp (CORE_ADDR);
 
 #define TARGET_READ_SP() (sparc64_read_sp ())
 #define TARGET_READ_FP() (sparc64_read_fp ())
 #define TARGET_WRITE_SP(X) (sparc64_write_sp (X))
-#define TARGET_WRITE_FP(X) (sparc64_write_fp (X))
 
 #undef EXTRACT_RETURN_VALUE
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \

@@ -1,3 +1,77 @@
+2002-04-09  Richard Henderson  <rth@redhat.com>
+
+	* hashtab.c (higher_prime_number): Use 7 as minimum.
+	(find_empty_slot_for_expand): Don't compute hash2 unless needed.
+	(htab_find_slot_with_hash): Likewise.
+
+2002-04-01  Phil Edwards  <pme@gcc.gnu.org>
+
+	* cp-demangle.c (__cxa_demangle):  Also protect with IN_GLIBCPP_V3.
+	(is_gnu_v3_mangled_ctor, is_gnu_v3_mangled_ctor):  Conditionally
+	not compile if IN_GLIBCPP_V3 defined.
+	* dyn-string.c:  Also allow IN_GLIBCPP_V3 to change allocation scheme.
+
+2002-03-30  Bryce McKinlay  <bryce@waitaki.otago.ac.nz>
+
+	* cp-demangle.c (java_demangle_v3): Don't try to release "demangled"
+	if it is NULL.
+
+2002-03-27  DJ Delorie  <dj@redhat.com>
+
+	* hex.c: Add documentation.
+	(_hex_value): Provide non-ASCII empty table.
+	(hex_init): Initialize the non-ASCII table.
+	* functions.texi: Regenerate.
+
+2002-03-27  Mark Mitchell  <mark@codesourcery.com>
+
+	* dyn-string.c: Add libgcc exception to copyright notice.
+
+2002-03-26  H.J. Lu  (hjl@gnu.org)
+
+	* config.table: Support --with-build-subdir.
+	* configure.in: Likewise.
+	* configure: Rebuild.
+
+2002-03-18  Stuart Griffith  <Stuart_Griffith@credence.com>
+
+	* strtod.c (strtod): Increment 8 chars, not 7, when `infinity'
+	seen.
+
+2002-03-12  Mark Mitchell  <mark@codesourcery.com>
+
+	* cp-demangle.c: Add libgcc exception to cp-demangle.c copyright
+	notice.
+
+2002-03-11  Douglas B Rupp  <rupp@gnat.com>
+
+	* xatexit.c [VMS]: Include stdlib.h and unixlib.h.
+
+2002-03-06  Jim Blandy  <jimb@redhat.com>
+
+	* splay-tree.c (splay_tree_xmalloc_allocate,
+	splay_tree_xmalloc_deallocate): Use K&R-style definitions, not
+	prototyped definitions.  Mark `data' arguments as unused.
+
+2002-03-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* floatformat.c (floatformat_arm_ext_big): Delete definition.
+
+2002-03-04  Phil Edwards  <pme@gcc.gnu.org>
+
+	* configure.in:  Add --enable-install-libiberty option.
+	* Makefile.in (INSTALLED_HEADERS):  New variable.
+	(install_to_libdir):  Possibly also copy headers.
+	* configure:  Regenerated.
+
+2002-03-04  Neil Booth  <neil@daikokuya.demon.co.uk>
+
+	* xmalloc.c (xmalloc_fail): Clarify error message further.
+
+2002-03-03  Neil Booth  <neil@daikokuya.demon.co.uk>
+
+	* xmalloc.c (xmalloc_fail): Clarify error message.
+
 2002-02-21  Jim Blandy  <jimb@redhat.com>
 
 	* splay-tree.c (splay_tree_xmalloc_allocate,

@@ -500,6 +500,9 @@ xstormy16_relax_plt_check (h, xdata)
 {
   struct relax_plt_data *data = (struct relax_plt_data *) xdata;
 
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
   if (h->plt.offset != (bfd_vma) -1)
     {
       bfd_vma address;
@@ -532,6 +535,9 @@ xstormy16_relax_plt_realloc (h, xdata)
      PTR xdata;
 {
   bfd_vma *entry = (bfd_vma *) xdata;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   if (h->plt.offset != (bfd_vma) -1)
     {

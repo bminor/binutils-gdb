@@ -12,18 +12,4 @@ AC_SUBST(CC)
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../../..)
 AC_CANONICAL_SYSTEM
 
-dnl In default case we need to link with some file so use common.inc.
-archinc=common.inc
-case ${target} in
-*arm-*-*) archinc=arm.inc ;;
-xscale-*-*) archinc=arm.inc ;;
-d10v-*-*) archinc=d10v.inc ;;
-s390-*-*) archinc=s390.inc ;;
-i[[3456]]86*) archinc=i386.inc ;;
-m32r*-*) archinc=m32r.inc ;;
-sparc-*-*) archinc=sparc.inc ;;
-xstormy16-*-*) archinc=xstormy16.inc ;;
-esac
-AC_LINK_FILES($archinc,arch.inc)
-
 AC_OUTPUT(Makefile)

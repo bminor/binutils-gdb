@@ -338,6 +338,30 @@ c_create_fundamental_type (struct objfile *objfile, int typeid)
 			TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
 			0, "long double", objfile);
       break;
+    case FT_COMPLEX:
+      type = init_type (TYPE_CODE_FLT,
+			2 * TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+			0, "complex float", objfile);
+      TYPE_TARGET_TYPE (type)
+	= init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+		     0, "float", objfile);
+      break;
+    case FT_DBL_PREC_COMPLEX:
+      type = init_type (TYPE_CODE_FLT,
+			2 * TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+			0, "complex double", objfile);
+      TYPE_TARGET_TYPE (type)
+	= init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+		     0, "double", objfile);
+      break;
+    case FT_EXT_PREC_COMPLEX:
+      type = init_type (TYPE_CODE_FLT,
+			2 * TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
+			0, "complex long double", objfile);
+      TYPE_TARGET_TYPE (type)
+	= init_type (TYPE_CODE_FLT, TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
+		     0, "long double", objfile);
+      break;
     case FT_TEMPLATE_ARG:
       type = init_type (TYPE_CODE_TEMPLATE_ARG,
 			0,

@@ -872,7 +872,7 @@ inferior.  Otherwise, symbols must be loaded manually, using `sharedlibrary'.",
 For other (relative) files, you can add values using `set solib-search-path'.",
 		   &setlist);
   add_show_from_set (c, &showlist);
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   c = add_set_cmd ("solib-search-path", class_support, var_string,
 		   (char *) &solib_search_path,
@@ -880,5 +880,5 @@ For other (relative) files, you can add values using `set solib-search-path'.",
 This takes precedence over the environment variables PATH and LD_LIBRARY_PATH.",
 		   &setlist);
   add_show_from_set (c, &showlist);
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 }

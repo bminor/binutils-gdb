@@ -1559,13 +1559,13 @@ _initialize_language (void)
   set_cmd_cfunc (show, show_language_command);
 
   add_prefix_cmd ("check", no_class, set_check,
-		  "Set the status of the type/range checker",
+		  "Set the status of the type/range checker.",
 		  &setchecklist, "set check ", 0, &setlist);
   add_alias_cmd ("c", "check", no_class, 1, &setlist);
   add_alias_cmd ("ch", "check", no_class, 1, &setlist);
 
   add_prefix_cmd ("check", no_class, show_check,
-		  "Show the status of the type/range checker",
+		  "Show the status of the type/range checker.",
 		  &showchecklist, "show check ", 0, &showlist);
   add_alias_cmd ("c", "check", no_class, 1, &showlist);
   add_alias_cmd ("ch", "check", no_class, 1, &showlist);

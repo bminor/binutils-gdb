@@ -308,7 +308,18 @@ new_opcode_bits (opcode_bits *old_bits,
     }
 }
 
-
+/* Same as strcmp().  */
+static int
+format_name_cmp (const char *l, const char *r)
+{
+  if (l == NULL && r == NULL)
+    return 0;
+  if (l != NULL && r == NULL)
+    return -1;
+  if (l == NULL && r != NULL)
+    return +1;
+  return strcmp (l, r);
+}
 
 
 typedef enum {
@@ -346,6 +357,18 @@ insn_list_insert (insn_list **cur_insn_ptr,
 
       /* key#3 sort according to the non-constant fields of each instruction */
       cmp = insn_field_cmp (insn->words, (*cur_insn_ptr)->insn->words);
+      if (cmp < 0)
+	break;
+      else if (cmp > 0)
+	continue;
+
+      /* key#4 sort according to the format-name.  If two apparently
+	 identical instructions have unique format-names, then the
+	 instructions are different.  This is because the
+	 format-name's use is overloaded, it not only indicates the
+	 format name but also provides a unique semantic name for the
+	 function.  */
+      cmp = format_name_cmp (insn->format_name, (*cur_insn_ptr)->insn->format_name);
       if (cmp < 0)
 	break;
       else if (cmp > 0)

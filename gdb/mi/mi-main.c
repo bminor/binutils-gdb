@@ -42,11 +42,6 @@
 #include <ctype.h>
 #include <sys/time.h>
 
-/* Convenience macro for allocting typesafe memory. */
-
-#undef XMALLOC
-#define XMALLOC(TYPE) (TYPE*) xmalloc (sizeof (TYPE))
-
 enum
   {
     FROM_TTY = 0
@@ -170,7 +165,7 @@ mi_cmd_exec_return (char *args, int from_tty)
   /* Because we have called return_command with from_tty = 0, we need
      to print the frame here. */
   show_and_print_stack_frame (selected_frame,
-			      selected_frame_level,
+			      frame_relative_level (selected_frame),
 			      LOC_AND_ADDRESS);
 
   return MI_CMD_DONE;
@@ -373,7 +368,7 @@ register_changed_p (int regnum)
 {
   char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
 
-  if (read_relative_register_raw_bytes (regnum, raw_buffer))
+  if (! frame_register_read (selected_frame, regnum, raw_buffer))
     return -1;
 
   if (memcmp (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
@@ -486,10 +481,6 @@ get_register (int regnum, int format)
   if (format == 'N')
     format = 0;
 
-  /* read_relative_register_raw_bytes returns a virtual frame pointer
-     (FRAME_FP (selected_frame)) if regnum == FP_REGNUM instead
-     of the real contents of the register. To get around this,
-     use get_saved_register instead. */
   get_saved_register (raw_buffer, &optim, (CORE_ADDR *) NULL, selected_frame,
 		      regnum, (enum lval_type *) NULL);
   if (optim)

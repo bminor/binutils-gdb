@@ -1,7 +1,8 @@
 /* Implement a cached obstack.
    Written by Fred Fish <fnf@cygnus.com>
    Rewritten by Jim Blandy <jimb@cygnus.com>
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+
+   Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,13 +21,13 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include <stddef.h>
-#include <stdlib.h>
-
 #include "defs.h"
 #include "obstack.h"
 #include "bcache.h"
 #include "gdb_string.h"		/* For memcpy declaration */
+
+#include <stddef.h>
+#include <stdlib.h>
 
 /* The old hash function was stolen from SDBM. This is what DB 3.0 uses now,
  * and is better than the old one. 

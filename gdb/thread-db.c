@@ -239,7 +239,7 @@ thread_from_lwp (ptid_t ptid)
 
   err = td_ta_map_lwp2thr_p (thread_agent, GET_LWP (ptid), &th);
   if (err != TD_OK)
-    error ("Cannot find user-level thread for LWP %d: %s",
+    error ("Cannot find user-level thread for LWP %ld: %s",
 	   GET_LWP (ptid), thread_db_err_str (err));
 
   err = td_thr_get_info_p (&th, &ti);

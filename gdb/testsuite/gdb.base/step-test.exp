@@ -1,4 +1,4 @@
-# Copyright 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+# Copyright 1997, 1998, 1999, 2000, 2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -204,6 +204,12 @@ test_i "nexti over function" "nexti" \
 # argument.  Opinion is bitterly divided about whether this is the
 # right behavior for GDB or not, but we'll catch it here, so folks
 # won't forget about it.
+# Update 4/4/2002 - Regardless of which opinion you have, you would
+# probably have to agree that gdb is currently behaving as designed,
+# in the absence of additional code to not stop in functions used
+# internally by the compiler.  Since the testsuite should be checking
+# for conformance to the design, the correct behavior is to accept the
+# cases where gdb stops in memcpy/bcopy.
 
 gdb_test \
   "break [gdb_get_line_number "step-test.exp: large struct by value"]" \
@@ -212,9 +218,23 @@ gdb_test \
 gdb_test "continue" \
          ".*Breakpoint ${decimal},.*large_struct_by_value.*" \
 	 "run to pass large struct"
-gdb_test "step" \
-         ".*step-test.exp: arrive here 1.*" \
-         "large struct by value"
+send_gdb "step\n"
+gdb_expect {
+    -re ".*step-test.exp: arrive here 1.*$gdb_prompt $" {
+	pass "large struct by value"
+    }
+    -re ".*(memcpy|bcopy).*$gdb_prompt $" {
+	send_gdb "finish\n" ; gdb_expect -re "$gdb_prompt $"
+	send_gdb "step\n"
+	exp_continue
+    }
+    -re ".*$gdb_prompt $" {
+	fail "large struct by value"
+    }
+    timeout {
+	fail "large struct by value (timeout)"
+    }
+}
 
 gdb_continue_to_end "step-test.exp"
 

@@ -27,8 +27,6 @@
    This file combines the core register fetching from core-regset.c
    and sparc-nat.c to be able to read both flavours.  */
 
-/* for Sparc64 cross Sparc32 */
-#define _SYSCALL32
 #include "defs.h"
 
 #if defined (__sparcv9)

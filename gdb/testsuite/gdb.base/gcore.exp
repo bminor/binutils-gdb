@@ -85,7 +85,7 @@ proc capture_command_output { command prefix } {
 gdb_test "break terminal_func" "Breakpoint .* at .*${srcfile}, line .*" \
 	"set breakpoint at terminal_func"
 
-gdb_test "continue" "Breakpoint .*, terminal_func.*" \
+gdb_test "continue" "Breakpoint .* terminal_func.*" \
 	"continue to terminal_func"
 
 set print_prefix ".\[0123456789\]* = "

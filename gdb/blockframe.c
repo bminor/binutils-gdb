@@ -1,7 +1,9 @@
-/* Get info from stack frames;
-   convert between frames, blocks, functions and pc values.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+/* Get info from stack frames; convert between frames, blocks,
+   functions and pc values.
+
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -225,7 +227,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
   fi->frame = addr;
   fi->pc = pc;
   find_pc_partial_function (pc, &name, (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-  fi->signal_handler_caller = IN_SIGTRAMP (fi->pc, name);
+  fi->signal_handler_caller = PC_IN_SIGTRAMP (fi->pc, name);
 
   if (INIT_EXTRA_FRAME_INFO_P ())
     INIT_EXTRA_FRAME_INFO (0, fi);
@@ -252,7 +254,7 @@ flush_cached_frames (void)
   obstack_init (&frame_cache_obstack);
 
   current_frame = NULL;		/* Invalidate cache */
-  select_frame (NULL, -1);
+  select_frame (NULL);
   annotate_frames_invalid ();
 }
 
@@ -266,7 +268,7 @@ reinit_frame_cache (void)
   /* FIXME: The inferior_ptid test is wrong if there is a corefile.  */
   if (PIDGET (inferior_ptid) != 0)
     {
-      select_frame (get_current_frame (), 0);
+      select_frame (get_current_frame ());
     }
 }
 
@@ -300,12 +302,6 @@ frameless_look_for_prologue (struct frame_info *frame)
        circumstances) backtrace by saying that it isn't.  */
     return 0;
 }
-
-/* Default a few macros that people seldom redefine.  */
-
-#ifndef FRAME_CHAIN_COMBINE
-#define	FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
-#endif
 
 /* Return a structure containing various interesting information
    about the frame that called NEXT_FRAME.  Returns NULL
@@ -377,7 +373,6 @@ get_prev_frame (struct frame_info *next_frame)
       address = FRAME_CHAIN (next_frame);
       if (!FRAME_CHAIN_VALID (address, next_frame))
 	return 0;
-      address = FRAME_CHAIN_COMBINE (address, next_frame);
     }
   if (address == 0)
     return 0;
@@ -393,6 +388,7 @@ get_prev_frame (struct frame_info *next_frame)
     next_frame->prev = prev;
   prev->next = next_frame;
   prev->frame = address;
+  prev->level = next_frame->level + 1;
 
 /* This change should not be needed, FIXME!  We should
    determine whether any targets *need* INIT_FRAME_PC to happen
@@ -462,7 +458,7 @@ get_prev_frame (struct frame_info *next_frame)
 
   find_pc_partial_function (prev->pc, &name,
 			    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-  if (IN_SIGTRAMP (prev->pc, name))
+  if (PC_IN_SIGTRAMP (prev->pc, name))
     prev->signal_handler_caller = 1;
 
   return prev;
@@ -504,10 +500,23 @@ get_frame_saved_regs (struct frame_info *frame,
 #endif
 
 /* Return the innermost lexical block in execution
-   in a specified stack frame.  The frame address is assumed valid.  */
+   in a specified stack frame.  The frame address is assumed valid.
+
+   If ADDR_IN_BLOCK is non-zero, set *ADDR_IN_BLOCK to the exact code
+   address we used to choose the block.  We use this to find a source
+   line, to decide which macro definitions are in scope.
+
+   The value returned in *ADDR_IN_BLOCK isn't necessarily the frame's
+   PC, and may not really be a valid PC at all.  For example, in the
+   caller of a function declared to never return, the code at the
+   return address will never be reached, so the call instruction may
+   be the very last instruction in the block.  So the address we use
+   to choose the block is actually one byte before the return address
+   --- hopefully pointing us at the call instruction, or its delay
+   slot instruction.  */
 
 struct block *
-get_frame_block (struct frame_info *frame)
+get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
 {
   CORE_ADDR pc;
 
@@ -520,13 +529,22 @@ get_frame_block (struct frame_info *frame)
        after the call insn, we probably want to make frame->pc point after
        the call insn anyway.  */
     --pc;
+
+  if (addr_in_block)
+    *addr_in_block = pc;
+
   return block_for_pc (pc);
 }
 
 struct block *
-get_current_block (void)
+get_current_block (CORE_ADDR *addr_in_block)
 {
-  return block_for_pc (read_pc ());
+  CORE_ADDR pc = read_pc ();
+
+  if (addr_in_block)
+    *addr_in_block = pc;
+
+  return block_for_pc (pc);
 }
 
 CORE_ADDR
@@ -559,7 +577,7 @@ get_pc_function_start (CORE_ADDR pc)
 struct symbol *
 get_frame_function (struct frame_info *frame)
 {
-  register struct block *bl = get_frame_block (frame);
+  register struct block *bl = get_frame_block (frame, 0);
   if (bl == 0)
     return 0;
   return block_function (bl);
@@ -729,7 +747,7 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
   /* If sigtramp is in the u area, it counts as a function (especially
      important for step_1).  */
 #if defined SIGTRAMP_START
-  if (IN_SIGTRAMP (mapped_pc, (char *) NULL))
+  if (PC_IN_SIGTRAMP (mapped_pc, (char *) NULL))
     {
       cache_pc_function_low = SIGTRAMP_START (mapped_pc);
       cache_pc_function_high = SIGTRAMP_END (mapped_pc);
@@ -1052,42 +1070,59 @@ struct dummy_frame
   CORE_ADDR sp;
   CORE_ADDR top;
   char *registers;
+
+  /* Address range of the call dummy code.  Look for PC in the range
+     [LO..HI) (after allowing for DECR_PC_AFTER_BREAK).  */
+  CORE_ADDR call_lo;
+  CORE_ADDR call_hi;
 };
 
 static struct dummy_frame *dummy_frame_stack = NULL;
 
 /* Function: find_dummy_frame(pc, fp, sp)
-   Search the stack of dummy frames for one matching the given PC, FP and SP.
-   This is the work-horse for pc_in_call_dummy and read_register_dummy     */
+
+   Search the stack of dummy frames for one matching the given PC, FP
+   and SP.  Unlike PC_IN_CALL_DUMMY, this function doesn't need to
+   adjust for DECR_PC_AFTER_BREAK.  This is because it is only legal
+   to call this function after the PC has been adjusted.  */
 
 char *
 generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 {
   struct dummy_frame *dummyframe;
 
-  if (pc != entry_point_address ())
-    return 0;
-
   for (dummyframe = dummy_frame_stack; dummyframe != NULL;
        dummyframe = dummyframe->next)
-    if (fp == dummyframe->fp
-	|| fp == dummyframe->sp
-	|| fp == dummyframe->top)
+    if ((pc >= dummyframe->call_lo && pc < dummyframe->call_hi)
+	&& (fp == dummyframe->fp
+	    || fp == dummyframe->sp
+	    || fp == dummyframe->top))
       /* The frame in question lies between the saved fp and sp, inclusive */
       return dummyframe->registers;
 
   return 0;
 }
 
-/* Function: pc_in_call_dummy (pc, fp)
-   Return true if this is a dummy frame created by gdb for an inferior call */
+/* Function: pc_in_call_dummy (pc, sp, fp)
+
+   Return true if the PC falls in a dummy frame created by gdb for an
+   inferior call.  The code below which allows DECR_PC_AFTER_BREAK is
+   for infrun.c, which may give the function a PC without that
+   subtracted out.  */
 
 int
 generic_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
 {
-  /* if find_dummy_frame succeeds, then PC is in a call dummy */
-  /* Note: SP and not FP is passed on. */
-  return (generic_find_dummy_frame (pc, sp) != 0);
+  struct dummy_frame *dummyframe;
+  for (dummyframe = dummy_frame_stack;
+       dummyframe != NULL;
+       dummyframe = dummyframe->next)
+    {
+      if ((pc >= dummyframe->call_lo)
+	  && (pc < dummyframe->call_hi + DECR_PC_AFTER_BREAK))
+	return 1;
+    }
+  return 0;
 }
 
 /* Function: read_register_dummy 
@@ -1150,6 +1185,15 @@ void
 generic_save_dummy_frame_tos (CORE_ADDR sp)
 {
   dummy_frame_stack->top = sp;
+}
+
+/* Record the upper/lower bounds on the address of the call dummy.  */
+
+void
+generic_save_call_dummy_addr (CORE_ADDR lo, CORE_ADDR hi)
+{
+  dummy_frame_stack->call_lo = lo;
+  dummy_frame_stack->call_hi = hi;
 }
 
 /* Restore the machine state from either the saved dummy stack or a

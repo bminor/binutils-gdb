@@ -31,6 +31,8 @@ void ppc_linux_init_extra_frame_info (int fromleaf, struct frame_info *);
 int ppc_linux_frameless_function_invocation (struct frame_info *);
 void ppc_linux_frame_init_saved_regs (struct frame_info *);
 CORE_ADDR ppc_linux_frame_chain (struct frame_info *);
+int ppc_sysv_abi_use_struct_convention (int, struct type *);
+int ppc_sysv_abi_broken_use_struct_convention (int, struct type *);
 CORE_ADDR ppc_sysv_abi_push_arguments (int, struct value **, CORE_ADDR, int,
 				       CORE_ADDR);
 int ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache);
@@ -61,9 +63,13 @@ struct gdbarch_tdep
     int ppc_lr_regnum;		/* Link register */
     int ppc_ctr_regnum;		/* Count register */
     int ppc_xer_regnum;		/* Integer exception register */
+    int ppc_fpscr_regnum;	/* Floating point status and condition
+    				   register */
     int ppc_mq_regnum;		/* Multiply/Divide extension register */
     int ppc_vr0_regnum;		/* First AltiVec register */
     int ppc_vrsave_regnum;	/* Last AltiVec register */
+    int lr_frame_offset;	/* Offset to ABI specific location where
+                                   link register is saved.  */
 };
 
 #endif

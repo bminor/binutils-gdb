@@ -1,6 +1,6 @@
 /* Define a target vector and some small routines for a variant of a.out.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -527,6 +527,9 @@ MY_bfd_final_link (abfd, info)
 #endif
 #ifndef MY_bfd_link_hash_table_create
 #define MY_bfd_link_hash_table_create NAME(aout,link_hash_table_create)
+#endif
+#ifndef MY_bfd_link_hash_table_free
+#define MY_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #endif
 #ifndef MY_bfd_link_add_symbols
 #define MY_bfd_link_add_symbols NAME(aout,link_add_symbols)

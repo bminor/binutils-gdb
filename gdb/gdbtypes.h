@@ -248,6 +248,13 @@ enum type_code
 #define TYPE_FLAG_VARARGS	(1 << 11)
 #define TYPE_VARARGS(t)		((t)->flags & TYPE_FLAG_VARARGS)
 
+/* Identify a vector type.  Gcc is handling this by adding an extra
+   attribute to the array type.  We slurp that in as a new flag of a
+   type.  This is used only in dwarf2read.c.  */
+#define TYPE_FLAG_VECTOR	(1 << 12)
+#define TYPE_VECTOR(t)		((t)->flags & TYPE_FLAG_VECTOR)
+
+
 struct type
   {
 
@@ -1053,6 +1060,16 @@ extern struct type *alloc_type (struct objfile *);
 
 extern struct type *init_type (enum type_code, int, int, char *,
 			       struct objfile *);
+
+/* Helper functions to construct a struct or record type.  An
+   initially empty type is created using init_composite_type().
+   Fields are then added using append_struct_type_field().  A union
+   type has its size set to the largest field.  A struct type has each
+   field packed against the previous.  */
+
+extern struct type *init_composite_type (char *name, enum type_code code);
+extern void append_composite_type_field (struct type *t, char *name,
+					 struct type *field);
 
 extern struct type *lookup_reference_type (struct type *);
 

@@ -22,6 +22,8 @@
 #include "inferior.h"
 #include "regcache.h"
 
+#include "alpha-tdep.h"
+
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <machine/reg.h>
@@ -103,7 +105,7 @@ supply_fpregset (fpregset_t *fpregsetp)
 	supply_register (i, (char *) &fpregsetp->fpr_regs[i - FP0_REGNUM]);
     }
 
-  supply_register (FPCR_REGNUM, (char *) &fpregsetp->fpr_cr);
+  supply_register (ALPHA_FPCR_REGNUM, (char *) &fpregsetp->fpr_cr);
 }
 
 /* Fill register REGNO (if it is a floating-point register) in
@@ -119,8 +121,8 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
     if ((regno == -1 || regno == i) && ! CANNOT_STORE_REGISTER (i))
       regcache_collect (i, (char *) &fpregsetp->fpr_regs[i - FP0_REGNUM]);
 
-  if (regno == -1 || regno == FPCR_REGNUM)
-    regcache_collect (FPCR_REGNUM, (char *) &fpregsetp->fpr_cr);
+  if (regno == -1 || regno == ALPHA_FPCR_REGNUM)
+    regcache_collect (ALPHA_FPCR_REGNUM, (char *) &fpregsetp->fpr_cr);
 }
 
 
@@ -130,7 +132,7 @@ static int
 getregs_supplies (int regno)
 {
 
-  return ((regno >= V0_REGNUM && regno <= ZERO_REGNUM)
+  return ((regno >= ALPHA_V0_REGNUM && regno <= ALPHA_ZERO_REGNUM)
 	  || regno >= PC_REGNUM);
 }
 

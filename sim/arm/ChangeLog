@@ -1,3 +1,7 @@
+2002-03-17  Anthony Green  <green@redhat.com>
+
+	* wrapper.c (mem_size): Increase the default target memory to 8MB.
+
 2002-02-21  Keith Seitz  <keiths@redhat.com>
 
 	* armos.c (SWIWrite0): Use generic host_callback mechanism

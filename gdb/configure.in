@@ -130,6 +130,7 @@ AC_CHECK_HEADERS(ctype.h nlist.h link.h thread_db.h proc_service.h \
 AC_HEADER_STAT
 
 AC_C_CONST
+AC_C_INLINE
 
 AC_CHECK_FUNCS(bcopy btowc bzero canonicalize_file_name isascii poll \
 	realpath sbrk setpgid setpgrp sigaction sigprocmask sigsetmask )
@@ -241,7 +242,7 @@ BFD_NEED_DECLARATION(free)
 BFD_NEED_DECLARATION(strerror)
 BFD_NEED_DECLARATION(strdup)
 BFD_NEED_DECLARATION(strstr)
-
+BFD_NEED_DECLARATION(canonicalize_file_name)
 
 # The following save_state_t checkery is only necessary for HPUX 
 # versions earlier than 10.20.  When those fade from memory, this 
@@ -408,6 +409,7 @@ if test ${host} = ${target} ; then
   AC_MSG_RESULT($gdb_cv_have_struct_link_map32)
   if test $gdb_cv_have_struct_link_map32 = yes; then
     AC_DEFINE(HAVE_STRUCT_LINK_MAP32)
+    AC_DEFINE(_SYSCALL32)
   fi
 fi
 

@@ -655,9 +655,9 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
 
 		 Note - we used to check the p_paddr field as well, and
 		 refuse to set the LMA if it was 0.  This is wrong
-		 though as a perfectly valid, initialised segment can
+		 though, as a perfectly valid initialised segment can
 		 have a p_paddr of zero.  Some architectures, eg ARM,
-	         place special significance one the address 0 and
+	         place special significance on the address 0 and
 	         executables need to be able to have a segment which
 	         covers this address.  */
 	      if (phdr->p_type == PT_LOAD
@@ -665,19 +665,31 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
 		  && (hdr->sh_offset + hdr->sh_size
 		      <= phdr->p_offset + phdr->p_memsz)
 		  && ((flags & SEC_LOAD) == 0
-		      || (phdr->p_offset + phdr->p_filesz
-			  >= hdr->sh_offset + hdr->sh_size)))
+		      || (hdr->sh_offset + hdr->sh_size
+			  <= phdr->p_offset + phdr->p_filesz)))
 		{
-		  /* We used to do a relative adjustment here, but
-		     that doesn't work if the segment is packed with
-		     code from multiple VMAs.  Instead we calculate
-		     the LMA absoultely, based on the LMA of the
-		     segment (it is assumed that the segment will
-		     contain sections with contiguous LMAs, even if
-		     the VMAs are not).  */
-		  newsect->lma = phdr->p_paddr
-		    + hdr->sh_offset - phdr->p_offset;
-		  break;
+		  if ((flags & SEC_LOAD) == 0)
+		    newsect->lma = (phdr->p_paddr
+				    + hdr->sh_addr - phdr->p_vaddr);
+		  else
+		    /* We used to use the same adjustment for SEC_LOAD
+		       sections, but that doesn't work if the segment
+		       is packed with code from multiple VMAs.
+		       Instead we calculate the section LMA based on
+		       the segment LMA.  It is assumed that the
+		       segment will contain sections with contiguous
+		       LMAs, even if the VMAs are not.  */
+		    newsect->lma = (phdr->p_paddr
+				    + hdr->sh_offset - phdr->p_offset);
+
+		  /* With contiguous segments, we can't tell from file
+		     offsets whether a section with zero size should
+		     be placed at the end of one segment or the
+		     beginning of the next.  Decide based on vaddr.  */
+		  if (hdr->sh_addr >= phdr->p_vaddr
+		      && (hdr->sh_addr + hdr->sh_size
+			  <= phdr->p_vaddr + phdr->p_memsz))
+		    break;
 		}
 	    }
 	}
@@ -1348,13 +1360,13 @@ _bfd_elf_link_hash_table_create (abfd)
   struct elf_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf_link_hash_table);
 
-  ret = (struct elf_link_hash_table *) bfd_alloc (abfd, amt);
+  ret = (struct elf_link_hash_table *) bfd_malloc (amt);
   if (ret == (struct elf_link_hash_table *) NULL)
     return NULL;
 
   if (! _bfd_elf_link_hash_table_init (ret, abfd, _bfd_elf_link_hash_newfunc))
     {
-      bfd_release (abfd, ret);
+      free (ret);
       return NULL;
     }
 
@@ -1563,6 +1575,9 @@ bfd_section_from_shdr (abfd, shindex)
     case SHT_NOBITS:	/* .bss section.  */
     case SHT_HASH:	/* .hash section.  */
     case SHT_NOTE:	/* .note section.  */
+    case SHT_INIT_ARRAY:	/* .init_array section.  */
+    case SHT_FINI_ARRAY:	/* .fini_array section.  */
+    case SHT_PREINIT_ARRAY:	/* .preinit_array section.  */
       return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
 
     case SHT_SYMTAB:		/* A symbol table */
@@ -2177,6 +2192,12 @@ elf_fake_sections (abfd, asect, failedptrarg)
       this_hdr->sh_type = SHT_REL;
       this_hdr->sh_entsize = bed->s->sizeof_rel;
     }
+  else if (strcmp (asect->name, ".init_array") == 0)
+    this_hdr->sh_type = SHT_INIT_ARRAY;
+  else if (strcmp (asect->name, ".fini_array") == 0)
+    this_hdr->sh_type = SHT_FINI_ARRAY;
+  else if (strcmp (asect->name, ".preinit_array") == 0)
+    this_hdr->sh_type = SHT_PREINIT_ARRAY;
   else if (strncmp (asect->name, ".note", 5) == 0)
     this_hdr->sh_type = SHT_NOTE;
   else if (strncmp (asect->name, ".stab", 5) == 0
@@ -3860,7 +3881,6 @@ prep_headers (abfd)
   Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
   Elf_Internal_Phdr *i_phdrp = 0; /* Program header table, internal form */
   Elf_Internal_Shdr **i_shdrp;	/* Section header table, internal form */
-  int count;
   struct elf_strtab_hash *shstrtab;
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
@@ -3882,12 +3902,6 @@ prep_headers (abfd)
   i_ehdrp->e_ident[EI_DATA] =
     bfd_big_endian (abfd) ? ELFDATA2MSB : ELFDATA2LSB;
   i_ehdrp->e_ident[EI_VERSION] = bed->s->ev_current;
-
-  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_NONE;
-  i_ehdrp->e_ident[EI_ABIVERSION] = 0;
-
-  for (count = EI_PAD; count < EI_NIDENT; count++)
-    i_ehdrp->e_ident[count] = 0;
 
   if ((abfd->flags & DYNAMIC) != 0)
     i_ehdrp->e_type = ET_DYN;
@@ -5101,7 +5115,9 @@ _bfd_elf_get_symtab_upper_bound (abfd)
   Elf_Internal_Shdr *hdr = &elf_tdata (abfd)->symtab_hdr;
 
   symcount = hdr->sh_size / get_elf_backend_data (abfd)->s->sizeof_sym;
-  symtab_size = (symcount - 1 + 1) * (sizeof (asymbol *));
+  symtab_size = (symcount + 1) * (sizeof (asymbol *));
+  if (symcount > 0)
+    symtab_size -= sizeof (asymbol *);
 
   return symtab_size;
 }
@@ -5121,7 +5137,9 @@ _bfd_elf_get_dynamic_symtab_upper_bound (abfd)
     }
 
   symcount = hdr->sh_size / get_elf_backend_data (abfd)->s->sizeof_sym;
-  symtab_size = (symcount - 1 + 1) * (sizeof (asymbol *));
+  symtab_size = (symcount + 1) * (sizeof (asymbol *));
+  if (symcount > 0)
+    symtab_size -= sizeof (asymbol *);
 
   return symtab_size;
 }
@@ -6425,7 +6443,7 @@ elfcore_netbsd_get_lwpid (note, lwpidp)
   cp = strchr (note->namedata, '@');
   if (cp != NULL)
     {
-      *lwpidp = atoi(cp);
+      *lwpidp = atoi(cp + 1);
       return true;
     }
   return false;

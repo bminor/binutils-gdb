@@ -3529,14 +3529,14 @@ sh_elf_link_hash_table_create (abfd)
   struct elf_sh_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf_sh_link_hash_table);
 
-  ret = (struct elf_sh_link_hash_table *) bfd_alloc (abfd, amt);
+  ret = (struct elf_sh_link_hash_table *) bfd_malloc (amt);
   if (ret == (struct elf_sh_link_hash_table *) NULL)
     return NULL;
 
   if (! _bfd_elf_link_hash_table_init (&ret->root, abfd,
 				       sh_elf_link_hash_newfunc))
     {
-      bfd_release (abfd, ret);
+      free (ret);
       return NULL;
     }
 
@@ -3899,8 +3899,8 @@ sh_elf_size_dynamic_sections (output_bfd, info)
      will not fill them in in the relocate_section routine.  */
   if (info->shared && info->symbolic)
     sh_elf_link_hash_traverse (sh_elf_hash_table (info),
-				 sh_elf_discard_copies,
-				 (PTR) NULL);
+			       sh_elf_discard_copies,
+			       (PTR) NULL);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
@@ -4037,6 +4037,9 @@ sh_elf_discard_copies (h, ignore)
      PTR ignore ATTRIBUTE_UNUSED;
 {
   struct elf_sh_pcrel_relocs_copied *s;
+
+  if (h->root.root.type == bfd_link_hash_warning)
+    h = (struct elf_sh_link_hash_entry *) h->root.root.u.i.link;
 
   /* We only discard relocs for symbols defined in a regular object.  */
   if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)

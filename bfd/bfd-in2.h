@@ -340,6 +340,7 @@ typedef struct sec *sec_ptr;
 
 #define bfd_get_section_name(bfd, ptr) ((ptr)->name + 0)
 #define bfd_get_section_vma(bfd, ptr) ((ptr)->vma + 0)
+#define bfd_get_section_lma(bfd, ptr) ((ptr)->lma + 0)
 #define bfd_get_section_alignment(bfd, ptr) ((ptr)->alignment_power + 0)
 #define bfd_section_name(bfd, ptr) ((ptr)->name)
 #define bfd_section_size(bfd, ptr) (bfd_get_section_size_before_reloc(ptr))
@@ -351,7 +352,7 @@ typedef struct sec *sec_ptr;
 
 #define bfd_is_com_section(ptr) (((ptr)->flags & SEC_IS_COMMON) != 0)
 
-#define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (ptr)->lma= (val)), ((ptr)->user_set_vma = (boolean)true), true)
+#define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (ptr)->lma = (val)), ((ptr)->user_set_vma = (boolean)true), true)
 #define bfd_set_section_alignment(bfd, ptr, val) (((ptr)->alignment_power = (val)),true)
 #define bfd_set_section_userdata(bfd, ptr, val) (((ptr)->userdata = (val)),true)
 
@@ -754,6 +755,9 @@ extern boolean bfd_xcoff_size_dynamic_sections
 	   int, boolean, boolean, struct sec **, boolean));
 extern boolean bfd_xcoff_link_generate_rtinit
   PARAMS ((bfd *, const char *, const char *, boolean));
+
+/* XCOFF support routines for ar.  */
+extern boolean bfd_xcoff_ar_archive_set_magic PARAMS ((bfd *, char *));
 
 /* Externally visible COFF routines.  */
 
@@ -1657,7 +1661,9 @@ typedef struct bfd_arch_info
   const char *arch_name;
   const char *printable_name;
   unsigned int section_align_power;
-  /* True if this is the default machine for the architecture.  */
+  /* True if this is the default machine for the architecture.
+     The default arch should be the first entry for an arch so that
+     all the entries for that arch can be accessed via <<next>>.  */
   boolean the_default;
   const struct bfd_arch_info * (*compatible)
        PARAMS ((const struct bfd_arch_info *a,
@@ -2194,55 +2200,6 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_MIPS_REL16,
   BFD_RELOC_MIPS_RELGOT,
   BFD_RELOC_MIPS_JALR,
-  BFD_RELOC_SH_GOT_LOW16,
-  BFD_RELOC_SH_GOT_MEDLOW16,
-  BFD_RELOC_SH_GOT_MEDHI16,
-  BFD_RELOC_SH_GOT_HI16,
-  BFD_RELOC_SH_GOTPLT_LOW16,
-  BFD_RELOC_SH_GOTPLT_MEDLOW16,
-  BFD_RELOC_SH_GOTPLT_MEDHI16,
-  BFD_RELOC_SH_GOTPLT_HI16,
-  BFD_RELOC_SH_PLT_LOW16,
-  BFD_RELOC_SH_PLT_MEDLOW16,
-  BFD_RELOC_SH_PLT_MEDHI16,
-  BFD_RELOC_SH_PLT_HI16,
-  BFD_RELOC_SH_GOTOFF_LOW16,
-  BFD_RELOC_SH_GOTOFF_MEDLOW16,
-  BFD_RELOC_SH_GOTOFF_MEDHI16,
-  BFD_RELOC_SH_GOTOFF_HI16,
-  BFD_RELOC_SH_GOTPC_LOW16,
-  BFD_RELOC_SH_GOTPC_MEDLOW16,
-  BFD_RELOC_SH_GOTPC_MEDHI16,
-  BFD_RELOC_SH_GOTPC_HI16,
-  BFD_RELOC_SH_COPY64,
-  BFD_RELOC_SH_GLOB_DAT64,
-  BFD_RELOC_SH_JMP_SLOT64,
-  BFD_RELOC_SH_RELATIVE64,
-  BFD_RELOC_SH_GOT10BY4,
-  BFD_RELOC_SH_GOT10BY8,
-  BFD_RELOC_SH_GOTPLT10BY4,
-  BFD_RELOC_SH_GOTPLT10BY8,
-  BFD_RELOC_SH_GOTPLT32,
-  BFD_RELOC_SH_SHMEDIA_CODE,
-  BFD_RELOC_SH_IMMU5,
-  BFD_RELOC_SH_IMMS6,
-  BFD_RELOC_SH_IMMS6BY32,
-  BFD_RELOC_SH_IMMU6,
-  BFD_RELOC_SH_IMMS10,
-  BFD_RELOC_SH_IMMS10BY2,
-  BFD_RELOC_SH_IMMS10BY4,
-  BFD_RELOC_SH_IMMS10BY8,
-  BFD_RELOC_SH_IMMS16,
-  BFD_RELOC_SH_IMMU16,
-  BFD_RELOC_SH_IMM_LOW16,
-  BFD_RELOC_SH_IMM_LOW16_PCREL,
-  BFD_RELOC_SH_IMM_MEDLOW16,
-  BFD_RELOC_SH_IMM_MEDLOW16_PCREL,
-  BFD_RELOC_SH_IMM_MEDHI16,
-  BFD_RELOC_SH_IMM_MEDHI16_PCREL,
-  BFD_RELOC_SH_IMM_HI16,
-  BFD_RELOC_SH_IMM_HI16_PCREL,
-  BFD_RELOC_SH_PT_16,
 
 
 /* i386/elf relocations  */
@@ -2423,6 +2380,55 @@ field in the instruction.  */
   BFD_RELOC_SH_JMP_SLOT,
   BFD_RELOC_SH_RELATIVE,
   BFD_RELOC_SH_GOTPC,
+  BFD_RELOC_SH_GOT_LOW16,
+  BFD_RELOC_SH_GOT_MEDLOW16,
+  BFD_RELOC_SH_GOT_MEDHI16,
+  BFD_RELOC_SH_GOT_HI16,
+  BFD_RELOC_SH_GOTPLT_LOW16,
+  BFD_RELOC_SH_GOTPLT_MEDLOW16,
+  BFD_RELOC_SH_GOTPLT_MEDHI16,
+  BFD_RELOC_SH_GOTPLT_HI16,
+  BFD_RELOC_SH_PLT_LOW16,
+  BFD_RELOC_SH_PLT_MEDLOW16,
+  BFD_RELOC_SH_PLT_MEDHI16,
+  BFD_RELOC_SH_PLT_HI16,
+  BFD_RELOC_SH_GOTOFF_LOW16,
+  BFD_RELOC_SH_GOTOFF_MEDLOW16,
+  BFD_RELOC_SH_GOTOFF_MEDHI16,
+  BFD_RELOC_SH_GOTOFF_HI16,
+  BFD_RELOC_SH_GOTPC_LOW16,
+  BFD_RELOC_SH_GOTPC_MEDLOW16,
+  BFD_RELOC_SH_GOTPC_MEDHI16,
+  BFD_RELOC_SH_GOTPC_HI16,
+  BFD_RELOC_SH_COPY64,
+  BFD_RELOC_SH_GLOB_DAT64,
+  BFD_RELOC_SH_JMP_SLOT64,
+  BFD_RELOC_SH_RELATIVE64,
+  BFD_RELOC_SH_GOT10BY4,
+  BFD_RELOC_SH_GOT10BY8,
+  BFD_RELOC_SH_GOTPLT10BY4,
+  BFD_RELOC_SH_GOTPLT10BY8,
+  BFD_RELOC_SH_GOTPLT32,
+  BFD_RELOC_SH_SHMEDIA_CODE,
+  BFD_RELOC_SH_IMMU5,
+  BFD_RELOC_SH_IMMS6,
+  BFD_RELOC_SH_IMMS6BY32,
+  BFD_RELOC_SH_IMMU6,
+  BFD_RELOC_SH_IMMS10,
+  BFD_RELOC_SH_IMMS10BY2,
+  BFD_RELOC_SH_IMMS10BY4,
+  BFD_RELOC_SH_IMMS10BY8,
+  BFD_RELOC_SH_IMMS16,
+  BFD_RELOC_SH_IMMU16,
+  BFD_RELOC_SH_IMM_LOW16,
+  BFD_RELOC_SH_IMM_LOW16_PCREL,
+  BFD_RELOC_SH_IMM_MEDLOW16,
+  BFD_RELOC_SH_IMM_MEDLOW16_PCREL,
+  BFD_RELOC_SH_IMM_MEDHI16,
+  BFD_RELOC_SH_IMM_MEDHI16_PCREL,
+  BFD_RELOC_SH_IMM_HI16,
+  BFD_RELOC_SH_IMM_HI16_PCREL,
+  BFD_RELOC_SH_PT_16,
 
 /* Thumb 23-, 12- and 9-bit pc-relative branches.  The lowest bit must
 be zero and is not stored in the instruction.  */
@@ -3498,6 +3504,9 @@ bfd_set_private_flags PARAMS ((bfd *abfd, flagword flags));
 #define bfd_link_hash_table_create(abfd) \
        BFD_SEND (abfd, _bfd_link_hash_table_create, (abfd))
 
+#define bfd_link_hash_table_free(abfd, hash) \
+       BFD_SEND (abfd, _bfd_link_hash_table_free, (hash))
+
 #define bfd_link_add_symbols(abfd, info) \
        BFD_SEND (abfd, _bfd_link_add_symbols, (abfd, info))
 
@@ -3823,6 +3832,7 @@ CONCAT2 (NAME,_sizeof_headers), \
 CONCAT2 (NAME,_bfd_get_relocated_section_contents), \
 CONCAT2 (NAME,_bfd_relax_section), \
 CONCAT2 (NAME,_bfd_link_hash_table_create), \
+CONCAT2 (NAME,_bfd_link_hash_table_free), \
 CONCAT2 (NAME,_bfd_link_add_symbols), \
 CONCAT2 (NAME,_bfd_final_link), \
 CONCAT2 (NAME,_bfd_link_split_section), \
@@ -3839,6 +3849,9 @@ CONCAT2 (NAME,_bfd_merge_sections)
   /* Create a hash table for the linker.  Different backends store
      different information in this table.  */
   struct bfd_link_hash_table *(*_bfd_link_hash_table_create) PARAMS ((bfd *));
+
+  /* Release the memory associated with the linker hash table.  */
+  void (*_bfd_link_hash_table_free) PARAMS ((struct bfd_link_hash_table *));
 
   /* Add symbols from this object file into the hash table.  */
   boolean  (*_bfd_link_add_symbols) PARAMS ((bfd *, struct bfd_link_info *));

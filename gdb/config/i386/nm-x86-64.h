@@ -65,10 +65,8 @@ extern int kernel_u_size (void);
    to get the offset in the core file of the register values.  */
 #define KERNEL_U_ADDR 0x0
 
-/* FIXME use special child_xfer_memory.  */
-#define CHILD_XFER_MEMORY
-
 #define PTRACE_ARG3_TYPE void*
+#define PTRACE_XFER_TYPE unsigned long
 
 
 /* We define this if link.h is available, because with ELF we use SVR4 style
@@ -81,9 +79,6 @@ extern int kernel_u_size (void);
 
 /* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
 #define FETCH_INFERIOR_REGISTERS
-
-/* Override child_resume in `infptrace.c'.  */
-#define CHILD_RESUME
 
 #undef PREPARE_TO_PROCEED
 

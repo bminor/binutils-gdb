@@ -1230,6 +1230,52 @@ read_dbx_dynamic_symtab (struct objfile *objfile)
   do_cleanups (back_to);
 }
 
+#ifdef SOFUN_ADDRESS_MAYBE_MISSING
+CORE_ADDR
+find_stab_function_addr (char *namestring, char *filename,
+			 struct objfile *objfile)
+{
+  struct minimal_symbol *msym;
+  char *p;
+  int n;
+
+  p = strchr (namestring, ':');
+  if (p == NULL)
+    p = namestring;
+  n = p - namestring;
+  p = alloca (n + 2);
+  strncpy (p, namestring, n);
+  p[n] = 0;
+
+  msym = lookup_minimal_symbol (p, filename, objfile);
+  if (msym == NULL)
+    {
+      /* Sun Fortran appends an underscore to the minimal symbol name,
+         try again with an appended underscore if the minimal symbol
+         was not found.  */
+      p[n] = '_';
+      p[n + 1] = 0;
+      msym = lookup_minimal_symbol (p, filename, objfile);
+    }
+
+  if (msym == NULL && filename != NULL)
+    {
+      /* Try again without the filename. */
+      p[n] = 0;
+      msym = lookup_minimal_symbol (p, NULL, objfile);
+    }
+  if (msym == NULL && filename != NULL)
+    {
+      /* And try again for Sun Fortran, but without the filename. */
+      p[n] = '_';
+      p[n + 1] = 0;
+      msym = lookup_minimal_symbol (p, NULL, objfile);
+    }
+
+  return msym == NULL ? 0 : SYMBOL_VALUE_ADDRESS (msym);
+}
+#endif /* SOFUN_ADDRESS_MAYBE_MISSING */
+
 /* Setup partial_symtab's describing each source file for which
    debugging information is available. */
 
@@ -2707,6 +2753,15 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
      used to relocate these symbol types rather than SECTION_OFFSETS.  */
   static CORE_ADDR function_start_offset;
 
+  /* This holds the address of the start of a function, without the system
+     peculiarities of function_start_offset.  */
+  static CORE_ADDR last_function_start;
+
+  /* If this is nonzero, we've seen an N_SLINE since the start of the current
+     function.  Initialized to nonzero to assure that last_function_start
+     is never used uninitialized.  */
+  static int sline_found_in_function = 1;
+
   /* If this is nonzero, we've seen a non-gcc N_OPT symbol for this source
      file.  Used to detect the SunPRO solaris compiler.  */
   static int n_opt_found;
@@ -2758,9 +2813,13 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	  break;
 	}
 
+      sline_found_in_function = 0;
+
       /* Relocate for dynamic loading */
       valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
       valu = SMASH_TEXT_ADDRESS (valu);
+      last_function_start = valu;
+
       goto define_a_symbol;
 
     case N_LBRAC:
@@ -2953,7 +3012,15 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 #ifdef SUN_FIXED_LBRAC_BUG
       last_pc_address = valu;	/* Save for SunOS bug circumcision */
 #endif
-      record_line (current_subfile, desc, valu);
+      /* If this is the first SLINE note in the function, record it at
+	 the start of the function instead of at the listed location.  */
+      if (within_function && sline_found_in_function == 0)
+	{
+	  record_line (current_subfile, desc, last_function_start);
+	  sline_found_in_function = 1;
+	}
+      else
+	record_line (current_subfile, desc, valu);
       break;
 
     case N_BCOMM:

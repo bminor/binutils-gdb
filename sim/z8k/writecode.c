@@ -139,6 +139,8 @@ lookup_inst (what)
 		    nibl_matched = 0;
 		  break;
 
+		case CLASS_IGNORE:
+		  break;
 		case CLASS_BIT:
 		  if (datum_value != instr_nibl)
 		    nibl_matched = 0;
@@ -539,6 +541,7 @@ info_args (p)
 	case CLASS_BIT_1OR2:
 	  emit ("register unsigned int imm_src=(<insn_4>& 2)?2:1;\n");
 	  break;
+	case CLASS_IGNORE:
 	case CLASS_BIT:
 	  /* Just ignore these, we've already decoded this bit */
 	  nibs++;
@@ -587,6 +590,10 @@ break;
 		break;
 	      case ARG_IMM4:
 		emit ("register unsigned int imm_src=<insn_4>;\n");
+		nibs++;
+		break;
+	      case ARG_NIM4:
+		emit ("register unsigned int imm_src = - <insn_4>;\n");
 		nibs++;
 		break;
 	      case ARG_IMM2:
@@ -1938,6 +1945,7 @@ info_len_in_words (o)
     {
       switch (*p & CLASS_MASK)
 	{
+	case CLASS_IGNORE:
 	case CLASS_BIT:
 	case CLASS_REGN0:
 	case CLASS_REG:
@@ -1959,6 +1967,7 @@ info_len_in_words (o)
 	      break;
 	    case ARG_IMM2:
 	    case ARG_IMM4:
+	    case ARG_NIM4:
 	    case ARG_IMM4M1:
 	    case ARG_IMM_1:
 	    case ARG_IMM_2:

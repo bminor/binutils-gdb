@@ -1,6 +1,6 @@
 /* Evaluate expressions for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001
+   1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -78,7 +78,7 @@ parse_and_eval_address (char *exp)
   struct expression *expr = parse_expression (exp);
   register CORE_ADDR addr;
   register struct cleanup *old_chain =
-  make_cleanup (free_current_contents, &expr);
+    make_cleanup (free_current_contents, &expr);
 
   addr = value_as_address (evaluate_expression (expr));
   do_cleanups (old_chain);
@@ -94,7 +94,7 @@ parse_and_eval_address_1 (char **expptr)
   struct expression *expr = parse_exp_1 (expptr, (struct block *) 0, 0);
   register CORE_ADDR addr;
   register struct cleanup *old_chain =
-  make_cleanup (free_current_contents, &expr);
+    make_cleanup (free_current_contents, &expr);
 
   addr = value_as_address (evaluate_expression (expr));
   do_cleanups (old_chain);
@@ -121,8 +121,8 @@ parse_and_eval (char *exp)
 {
   struct expression *expr = parse_expression (exp);
   struct value *val;
-  register struct cleanup *old_chain
-  = make_cleanup (free_current_contents, &expr);
+  register struct cleanup *old_chain =
+    make_cleanup (free_current_contents, &expr);
 
   val = evaluate_expression (expr);
   do_cleanups (old_chain);
@@ -138,8 +138,8 @@ parse_to_comma_and_eval (char **expp)
 {
   struct expression *expr = parse_exp_1 (expp, (struct block *) 0, 1);
   struct value *val;
-  register struct cleanup *old_chain
-  = make_cleanup (free_current_contents, &expr);
+  register struct cleanup *old_chain =
+    make_cleanup (free_current_contents, &expr);
 
   val = evaluate_expression (expr);
   do_cleanups (old_chain);
@@ -447,8 +447,7 @@ evaluate_subexp_standard (struct type *expect_type,
     case OP_REGISTER:
       {
 	int regno = longest_to_int (exp->elts[pc + 1].longconst);
-	struct value *val = value_of_register (regno);
-
+	struct value *val = value_of_register (regno, selected_frame);
 	(*pos) += 2;
 	if (val == NULL)
 	  error ("Value of register %s not available.", REGISTER_NAME (regno));
@@ -821,15 +820,10 @@ evaluate_subexp_standard (struct type *expect_type,
       if (op == STRUCTOP_STRUCT || op == STRUCTOP_PTR)
 	{
 	  int static_memfuncp;
-	  struct value *temp = arg2;
 	  char tstr[256];
 
 	  /* Method invocation : stuff "this" as first parameter */
-	  /* pai: this used to have lookup_pointer_type for some reason,
-	   * but temp is already a pointer to the object */
-	  argvec[1]
-	    = value_from_pointer (VALUE_TYPE (temp),
-				  VALUE_ADDRESS (temp) + VALUE_OFFSET (temp));
+	  argvec[1] = arg2;
 	  /* Name of method from expression */
 	  strcpy (tstr, &exp->elts[pc2 + 2].string);
 
@@ -855,11 +849,17 @@ evaluate_subexp_standard (struct type *expect_type,
 	  else
 	    /* Non-C++ case -- or no overload resolution */
 	    {
-	      temp = arg2;
+	      struct value *temp = arg2;
 	      argvec[0] = value_struct_elt (&temp, argvec + 1, tstr,
 					    &static_memfuncp,
 					    op == STRUCTOP_STRUCT
 				       ? "structure" : "structure pointer");
+	      /* value_struct_elt updates temp with the correct value
+	 	 of the ``this'' pointer if necessary, so modify argvec[1] to
+		 reflect any ``this'' changes.  */
+	      arg2 = value_from_longest (lookup_pointer_type(VALUE_TYPE (temp)),
+			     VALUE_ADDRESS (temp) + VALUE_OFFSET (temp)
+			     + VALUE_EMBEDDED_OFFSET (temp));
 	      argvec[1] = arg2;	/* the ``this'' pointer */
 	    }
 

@@ -441,7 +441,7 @@ _initialize_core (void)
 	       "Use FILE as core dump for examining memory and registers.\n\
 No arg means have no core file.  This command has been superseded by the\n\
 `target core' and `detach' commands.", &cmdlist);
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   c = add_set_cmd ("gnutarget", class_files, var_string_noescape,
 		   (char *) &gnutarget_string,

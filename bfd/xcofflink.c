@@ -3,21 +3,21 @@
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>, Cygnus Support.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -482,12 +482,12 @@ _bfd_xcoff_bfd_link_hash_table_create (abfd)
   struct xcoff_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct xcoff_link_hash_table);
 
-  ret = (struct xcoff_link_hash_table *) bfd_alloc (abfd, amt);
+  ret = (struct xcoff_link_hash_table *) bfd_malloc (amt);
   if (ret == (struct xcoff_link_hash_table *) NULL)
     return (struct bfd_link_hash_table *) NULL;
   if (! _bfd_link_hash_table_init (&ret->root, abfd, xcoff_link_hash_newfunc))
     {
-      bfd_release (abfd, ret);
+      free (ret);
       return (struct bfd_link_hash_table *) NULL;
     }
 
@@ -513,6 +513,18 @@ _bfd_xcoff_bfd_link_hash_table_create (abfd)
   return &ret->root;
 }
 
+/* Free a XCOFF link hash table.  */
+
+void
+_bfd_xcoff_bfd_link_hash_table_free (hash)
+     struct bfd_link_hash_table *hash;
+{
+  struct xcoff_link_hash_table *ret = (struct xcoff_link_hash_table *) hash;
+
+  _bfd_stringtab_free (ret->debug_strtab);
+  bfd_hash_table_free (&ret->root.table);
+  free (ret);
+}
 
 /* Read internal relocs for an XCOFF csect.  This is a wrapper around
    _bfd_coff_read_internal_relocs which tries to take advantage of any
@@ -588,11 +600,11 @@ _bfd_xcoff_bfd_link_add_symbols (abfd, info)
 
     case bfd_archive:
       /* If the archive has a map, do the usual search.  We then need
-         to check the archive for stripped dynamic objects, because
-         they will not appear in the archive map even though they
-         should, perhaps, be included.  If the archive has no map, we
-         just consider each object file in turn, since that apparently
-         is what the AIX native linker does.  */
+         to check the archive for dynamic objects, because they may not 
+	 appear in the archive map even though they should, perhaps, be 
+	 included.  If the archive has no map, we just consider each object 
+	 file in turn, since that apparently is what the AIX native linker 
+	 does.  */
       if (bfd_has_map (abfd))
 	{
 	  if (! (_bfd_generic_link_add_archive_symbols
@@ -602,18 +614,18 @@ _bfd_xcoff_bfd_link_add_symbols (abfd, info)
 
       {
 	bfd *member;
-
+	
 	member = bfd_openr_next_archived_file (abfd, (bfd *) NULL);
 	while (member != NULL)
 	  {
 	    if (bfd_check_format (member, bfd_object)
-		&& (! bfd_has_map (abfd)
-		    || ((member->flags & DYNAMIC) != 0
-			&& (member->flags & HAS_SYMS) == 0)))
+		&& (info->hash->creator == member->xvec)
+		&& (! bfd_has_map (abfd) || (member->flags & DYNAMIC) != 0))
 	      {
 		boolean needed;
-
-		if (! xcoff_link_check_archive_element (member, info, &needed))
+		
+		if (! xcoff_link_check_archive_element (member, info, 
+							&needed))
 		  return false;
 		if (needed)
 		  member->archive_pass = -1;
@@ -1766,12 +1778,19 @@ xcoff_link_add_symbols (abfd, info)
  	  if (info->hash->creator == abfd->xvec)
 	    {
 	      if (! bfd_is_und_section (section))
-		*sym_hash = xcoff_link_hash_lookup (xcoff_hash_table (info),
-						    name, true, copy, false);
+		{
+		  *sym_hash = xcoff_link_hash_lookup (xcoff_hash_table (info),
+						      name, true, copy, false);
+		}
 	      else
-		*sym_hash = ((struct xcoff_link_hash_entry *)
-			     bfd_wrapped_link_hash_lookup (abfd, info, name,
-							   true, copy, false));
+		{
+		  /* Make a copy of the symbol name to prevent problems with
+		     merging symbols.  */
+		  *sym_hash = ((struct xcoff_link_hash_entry *)
+			       bfd_wrapped_link_hash_lookup (abfd, info, name,
+							     true, true, 
+							     false));
+		}
 	      if (*sym_hash == NULL)
 		goto error_return;
 	      if (((*sym_hash)->root.type == bfd_link_hash_defined
@@ -2109,7 +2128,7 @@ xcoff_link_add_dynamic_symbols (abfd, info)
 
   /* Remove the sections from this object, so that they do not get
      included in the link.  */
-  abfd->sections = NULL;
+  bfd_section_list_clear (abfd);
 
   bfd_xcoff_swap_ldhdr_in (abfd, contents, &ldhdr);
 
@@ -3141,37 +3160,42 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
 
       csectpp = xcoff_data (sub)->csects;
 
-      symesz = bfd_coff_symesz (sub);
-      esym = (bfd_byte *) obj_coff_external_syms (sub);
-      esymend = esym + symcount * symesz;
-      while (esym < esymend)
+      /* Dynamic object do not have csectpp's.  */
+      if (NULL != csectpp) 
 	{
-	  struct internal_syment sym;
+	  symesz = bfd_coff_symesz (sub);
+	  esym = (bfd_byte *) obj_coff_external_syms (sub);
+	  esymend = esym + symcount * symesz;
 
-	  bfd_coff_swap_sym_in (sub, (PTR) esym, (PTR) &sym);
-
-	  *debug_index = (unsigned long) -1;
-
-	  if (sym._n._n_n._n_zeroes == 0
-	      && *csectpp != NULL
-	      && (! gc
-		  || ((*csectpp)->flags & SEC_MARK) != 0
-		  || *csectpp == bfd_abs_section_ptr)
-	      && bfd_coff_symname_in_debug (sub, &sym))
+	  while (esym < esymend)
 	    {
-	      char *name;
-	      bfd_size_type indx;
+	      struct internal_syment sym;
 
-	      name = (char *) debug_contents + sym._n._n_n._n_offset;
-	      indx = _bfd_stringtab_add (debug_strtab, name, true, true);
-	      if (indx == (bfd_size_type) -1)
-		goto error_return;
-	      *debug_index = indx;
+	      bfd_coff_swap_sym_in (sub, (PTR) esym, (PTR) &sym);
+
+	      *debug_index = (unsigned long) -1;
+
+	      if (sym._n._n_n._n_zeroes == 0
+		  && *csectpp != NULL
+		  && (! gc
+		      || ((*csectpp)->flags & SEC_MARK) != 0
+		      || *csectpp == bfd_abs_section_ptr)
+		  && bfd_coff_symname_in_debug (sub, &sym))
+		{
+		  char *name;
+		  bfd_size_type indx;
+
+		  name = (char *) debug_contents + sym._n._n_n._n_offset;
+		  indx = _bfd_stringtab_add (debug_strtab, name, true, true);
+		  if (indx == (bfd_size_type) -1)
+		    goto error_return;
+		  *debug_index = indx;
+		}
+
+	      esym += (sym.n_numaux + 1) * symesz;
+	      csectpp += sym.n_numaux + 1;
+	      debug_index += sym.n_numaux + 1;
 	    }
-
-	  esym += (sym.n_numaux + 1) * symesz;
-	  csectpp += sym.n_numaux + 1;
-	  debug_index += sym.n_numaux + 1;
 	}
 
       free (debug_contents);
@@ -3247,6 +3271,9 @@ xcoff_build_ldsyms (h, p)
 {
   struct xcoff_loader_info *ldinfo = (struct xcoff_loader_info *) p;
   bfd_size_type amt;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct xcoff_link_hash_entry *) h->root.u.i.link;
 
   /* __rtinit, this symbol has special handling. */
   if (h->flags & XCOFF_RTINIT)
@@ -5368,6 +5395,13 @@ xcoff_write_global_symbol (h, inf)
 
   output_bfd = finfo->output_bfd;
   outsym = finfo->outsyms;
+
+  if (h->root.type == bfd_link_hash_warning)
+    {
+      h = (struct xcoff_link_hash_entry *) h->root.u.i.link;
+      if (h->root.type == bfd_link_hash_new)
+	return true;
+    }
 
   /* If this symbol was garbage collected, just skip it.  */
   if (xcoff_hash_table (finfo->info)->gc

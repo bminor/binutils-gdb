@@ -2929,7 +2929,8 @@ sh64_elf64_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd_vma *valp;
 {
   /* We want to do this for relocatable as well as final linking.  */
-  if (ELF_ST_TYPE (sym->st_info) == STT_DATALABEL)
+  if (ELF_ST_TYPE (sym->st_info) == STT_DATALABEL
+      && info->hash->creator->flavour == bfd_target_elf_flavour)
     {
       struct elf_link_hash_entry *h;
 
@@ -3227,14 +3228,14 @@ sh64_elf64_link_hash_table_create (abfd)
   struct elf_sh64_link_hash_table *ret;
 
   ret = ((struct elf_sh64_link_hash_table *)
-	 bfd_alloc (abfd, sizeof (struct elf_sh64_link_hash_table)));
+	 bfd_malloc (sizeof (struct elf_sh64_link_hash_table)));
   if (ret == (struct elf_sh64_link_hash_table *) NULL)
     return NULL;
 
   if (! _bfd_elf_link_hash_table_init (&ret->root, abfd,
 				       sh64_elf64_link_hash_newfunc))
     {
-      bfd_release (abfd, ret);
+      free (ret);
       return NULL;
     }
 
@@ -3606,6 +3607,9 @@ sh64_elf64_discard_copies (h, ignore)
      PTR ignore ATTRIBUTE_UNUSED;
 {
   struct elf_sh64_pcrel_relocs_copied *s;
+
+  if (h->root.root.type == bfd_link_hash_warning)
+    h = (struct elf_sh64_link_hash_entry *) h->root.root.u.i.link;
 
   /* We only discard relocs for symbols defined in a regular object.  */
   if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)

@@ -1,5 +1,6 @@
 /* User Interface Events.
-   Copyright 1999, 2001 Free Software Foundation, Inc.
+
+   Copyright 1999, 2001, 2002 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.
 
@@ -37,9 +38,6 @@
 #include "defs.h"
 #include "gdb-events.h"
 #include "gdbcmd.h"
-
-#undef XMALLOC
-#define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
 #if WITH_GDB_EVENTS
 static struct gdb_events null_event_hooks;

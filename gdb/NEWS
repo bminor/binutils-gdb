@@ -1,6 +1,56 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
+*** Changes since GDB 5.2:
+
+* New targets.
+
+Atmel AVR					avr*-*-*
+
+* New native configurations
+
+Alpha NetBSD					alpha*-*-netbsd*
+
+* OBSOLETE configurations and files
+
+Configurations that have been declared obsolete in this release have
+been commented out.  Unless there is activity to revive these
+configurations, the next release of GDB will have their sources
+permanently REMOVED.
+
+* REMOVED configurations and files
+
+AMD 29k family via UDI				a29k-amd-udi, udi29k
+A29K VxWorks					a29k-*-vxworks
+AMD 29000 embedded, using EBMON			a29k-none-none
+AMD 29000 embedded with COFF			a29k-none-coff
+AMD 29000 embedded with a.out			a29k-none-aout
+
+testsuite/gdb.hp/gdb.threads-hp/		directory
+
+* Changes in VAX configurations.
+
+Multi-arch support is enabled for all VAX configurations.
+
+* Changes in Alpha configurations. 
+
+Multi-arch support is enabled for all Alpha configurations.
+
+* New command "set max-user-call-depth <nnn>"
+
+This command allows the user to limit the call depth of user-defined
+commands.  The default is 1024.
+
+* Changes in FreeBSD/i386 native debugging.
+
+Support for the "generate-core-file" has been added.
+
+* New commands "dump", "append", and "restore".
+
+These commands allow data to be copied from target memory
+to a bfd-format or binary file (dump and append), and back
+from a file into memory (restore).
+
 *** Changes in GDB 5.2:
 
 * New command "set trust-readonly-sections on[off]".

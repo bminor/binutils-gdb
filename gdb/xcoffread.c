@@ -38,6 +38,8 @@
 
 #include "coff/internal.h"
 #include "libcoff.h"		/* FIXME, internal data from BFD */
+#include "coff/xcoff.h"
+#include "libxcoff.h"
 #include "coff/rs6000.h"
 
 #include "symtab.h"
@@ -908,7 +910,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
   char *strtbl = ((struct coff_symfile_info *) objfile->sym_private)->strtbl;
   char *debugsec =
   ((struct coff_symfile_info *) objfile->sym_private)->debugsec;
-  char *debugfmt = xcoff_data (abfd)->xcoff64 ? "XCOFF64" : "XCOFF";
+  char *debugfmt = bfd_xcoff_is_xcoff64 (abfd) ? "XCOFF64" : "XCOFF";
 
   struct internal_syment symbol[1];
   union internal_auxent main_aux;
@@ -1632,7 +1634,7 @@ static int
 read_symbol_lineno (int symno)
 {
   struct objfile *objfile = this_symtab_psymtab->objfile;
-  boolean xcoff64 = xcoff_data (objfile->obfd)->xcoff64;
+  boolean xcoff64 = bfd_xcoff_is_xcoff64 (objfile->obfd);
 
   struct coff_symfile_info *info =
     (struct coff_symfile_info *)objfile->sym_private;

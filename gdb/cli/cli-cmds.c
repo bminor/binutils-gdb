@@ -80,6 +80,9 @@ static void shell_escape (char *, int);
 
 void apropos_command (char *, int);
 
+/* Limit the call depth of user-defined commands */
+int max_user_call_depth;
+
 /* Define all cmd_list_elements.  */
 
 /* Chain containing all defined commands.  */
@@ -606,6 +609,8 @@ show_debug (char *args, int from_tty)
 void
 init_cmd_lists (void)
 {
+  max_user_call_depth = 1024;
+
   cmdlist = NULL;
   infolist = NULL;
   enablelist = NULL;
@@ -673,7 +678,7 @@ The commands below can be used to select other frames by number or address.",
 	       "Set working directory to DIR for debugger and program being debugged.\n\
 The change does not take effect for the program being debugged\n\
 until the next time it is started.", &cmdlist);
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   add_com ("echo", class_support, echo_command,
 	   "Print a constant string.  Give string as argument.\n\
@@ -698,11 +703,11 @@ Commands defined in this way may have up to ten arguments.");
 	       "Read commands from a file named FILE.\n\
 Note that the file \"" GDBINIT_FILENAME "\" is read automatically in this way\n\
 when gdb is started.", &cmdlist);
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   add_com ("quit", class_support, quit_command, "Exit gdb.");
   c = add_com ("help", class_support, help_command, "Print list of commands.");
-  c->completer = command_completer;
+  set_cmd_completer (c, command_completer);
   add_com_alias ("q", "quit", class_support, 1);
   add_com_alias ("h", "help", class_support, 1);
 
@@ -802,9 +807,9 @@ from the target.", &setlist),
 		  &showdebuglist, "show debug ", 0, &showlist);
 
   c = add_com ("shell", class_support, shell_escape,
-	       "Execute the rest of the line as a shell command.  \n\
+	       "Execute the rest of the line as a shell command.\n\
 With no arguments, run an inferior shell.");
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   /* NOTE: cagney/2000-03-20: Being able to enter ``(gdb) !ls'' would
      be a really useful feature.  Unfortunately, the below wont do
@@ -817,10 +822,17 @@ With no arguments, run an inferior shell.");
 
   c = add_com ("make", class_support, make_command,
           "Run the ``make'' program using the rest of the line as arguments.");
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
   add_cmd ("user", no_class, show_user,
 	   "Show definitions of user defined commands.\n\
 Argument is the name of the user defined command.\n\
 With no argument, show definitions of all user defined commands.", &showlist);
   add_com ("apropos", class_support, apropos_command, "Search for commands matching a REGEXP");
+
+  add_show_from_set (
+		      add_set_cmd ("max-user-call-depth", no_class, var_integer, 
+				   (char *) &max_user_call_depth,
+				   "Set the max call depth for user-defined commands.\n", 
+				   &setlist),
+		      &showlist);
 }

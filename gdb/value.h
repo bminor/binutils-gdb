@@ -125,14 +125,6 @@ struct value
        list.  */
     struct value *next;
 
-    /* ??? When is this used?  */
-    union
-      {
-	CORE_ADDR memaddr;
-	char *myaddr;
-      }
-    substring_addr;
-
     /* Register number if the value is from a register.  Is not kept
        if you take a field of a structure that is stored in a
        register.  Shouldn't it be?  */
@@ -166,9 +158,10 @@ struct value
     union
       {
 	long contents[1];
-	double force_double_align;
-	LONGEST force_longlong_align;
-	char *literal_data;
+	DOUBLEST force_doublest_align;
+	LONGEST force_longest_align;
+	CORE_ADDR force_core_addr_align;
+	void *force_pointer_align;
       }
     aligner;
     /* Do not add any new members here -- contents above will trash them */
@@ -317,7 +310,8 @@ extern struct value *value_from_register (struct type *type, int regnum,
 
 extern struct value *value_of_variable (struct symbol *var, struct block *b);
 
-extern struct value *value_of_register (int regnum);
+extern struct value *value_of_register (int regnum,
+					struct frame_info *frame);
 
 extern int symbol_read_needs_frame (struct symbol *);
 

@@ -120,6 +120,8 @@ static void cashier_psymtab (struct partial_symtab *);
 
 bfd *symfile_bfd_open (char *);
 
+int get_section_index (struct objfile *, char *);
+
 static void find_sym_fns (struct objfile *);
 
 static void decrement_reading_symtab (void *);
@@ -577,6 +579,9 @@ syms_from_objfile (struct objfile *objfile, struct section_addr_info *addrs,
   init_entry_point_info (objfile);
   find_sym_fns (objfile);
 
+  if (objfile->sf == NULL)
+    return;	/* No symbols. */
+
   /* Make sure that partially constructed symbol tables will be cleaned up
      if an error occurs during symbol reading.  */
   old_chain = make_cleanup_free_objfile (objfile);
@@ -891,6 +896,9 @@ symbol_file_add (char *name, int from_tty, struct section_addr_info *addrs,
 	}
     }
 
+  if (objfile->sf == NULL)
+    return objfile;	/* No symbols. */
+
   new_symfile_objfile (objfile, mainline, from_tty);
 
   if (target_new_objfile_hook)
@@ -1109,6 +1117,18 @@ symfile_bfd_open (char *name)
   return (sym_bfd);
 }
 
+/* Return the section index for the given section name. Return -1 if
+   the section was not found. */
+int
+get_section_index (struct objfile *objfile, char *section_name)
+{
+  asection *sect = bfd_get_section_by_name (objfile->obfd, section_name);
+  if (sect)
+    return sect->index;
+  else
+    return -1;
+}
+
 /* Link a new symtab_fns into the global symtab_fns list.  Called on gdb
    startup by the _initialize routine in each object file format reader,
    to register information about each format the the reader is prepared
@@ -1133,6 +1153,11 @@ find_sym_fns (struct objfile *objfile)
   struct sym_fns *sf;
   enum bfd_flavour our_flavour = bfd_get_flavour (objfile->obfd);
   char *our_target = bfd_get_target (objfile->obfd);
+
+  if (our_flavour == bfd_target_srec_flavour
+      || our_flavour == bfd_target_ihex_flavour
+      || our_flavour == bfd_target_tekhex_flavour)
+    return;	/* No symbols. */
 
   /* Special kludge for apollo.  See dstread.c.  */
   if (STREQN (our_target, "apollo", 6))
@@ -1806,8 +1831,9 @@ add_filename_language (char *ext, enum language lang)
   if (fl_table_next >= fl_table_size)
     {
       fl_table_size += 10;
-      filename_language_table = xrealloc (filename_language_table,
-					  fl_table_size);
+      filename_language_table = 
+	xrealloc (filename_language_table,
+		  fl_table_size * sizeof (*filename_language_table));
     }
 
   filename_language_table[fl_table_next].ext = xstrdup (ext);
@@ -3214,7 +3240,7 @@ _initialize_symfile (void)
 	       "Load symbol table from executable file FILE.\n\
 The `file' command can also load symbol tables, as well as setting the file\n\
 to execute.", &cmdlist);
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   c = add_cmd ("add-symbol-file", class_files, add_symbol_file_command,
 	       "Usage: add-symbol-file FILE ADDR [-s <SECT> <SECT_ADDR> -s <SECT> <SECT_ADDR> ...]\n\
@@ -3222,9 +3248,9 @@ Load the symbols from FILE, assuming FILE has been dynamically loaded.\n\
 ADDR is the starting address of the file's text.\n\
 The optional arguments are section-name section-address pairs and\n\
 should be specified if the data and bss segments are not contiguous\n\
-with the text. SECT is a section name to be loaded at SECT_ADDR.",
+with the text.  SECT is a section name to be loaded at SECT_ADDR.",
 	       &cmdlist);
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   c = add_cmd ("add-shared-symbol-files", class_files,
 	       add_shared_symbol_files_command,
@@ -3236,7 +3262,7 @@ with the text. SECT is a section name to be loaded at SECT_ADDR.",
   c = add_cmd ("load", class_files, load_command,
 	       "Dynamically load FILE into the running program, and record its symbols\n\
 for access from GDB.", &cmdlist);
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   add_show_from_set
     (add_set_cmd ("symbol-reloading", class_support, var_boolean,

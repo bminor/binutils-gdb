@@ -2542,7 +2542,7 @@ find_memory(unsigned char *mem, long count,
 		 mem, mem_block, mem_addr, mem_size, mem_stamp);
 #endif
 	  *location = mem_block + (mem - mem_addr);
-	  length = mem_size - (mem - mem_addr);;
+	  length = mem_size - (mem - mem_addr);
 
 	  if (length < count)
 	    *incr = length;

@@ -14,6 +14,7 @@ case "${target_cpu}" in
 
 alpha*)			gdb_target_cpu=alpha ;;
 arm*)			gdb_target_cpu=arm ;;
+avr*)			gdb_target_cpu=avr ;;
 hppa*)			gdb_target_cpu=pa ;;
 i[3456]86*)		gdb_target_cpu=i386 ;;
 m68hc11*|m6811*)	gdb_target_cpu=m68hc11 ;;
@@ -36,18 +37,10 @@ esac
 
 case "${target}" in
 
-# OBSOLETE a29k-*-aout*)		gdb_target=a29k ;;
-# OBSOLETE a29k-*-coff*)		gdb_target=a29k ;;
-# OBSOLETE a29k-*-elf*)		gdb_target=a29k ;;
-# OBSOLETE a29k-*-ebmon*)		gdb_target=a29k ;;
-# OBSOLETE a29k-*-kern*)		gdb_target=a29k-kern ;;
-# OBSOLETE a29k-*-none*)		gdb_target=a29k ;;
-# OBSOLETE a29k-*-udi*)		gdb_target=a29k-udi ;;
-# OBSOLETE a29k-*-vxworks*)        gdb_target=vx29k ;;
-
 alpha*-*-osf*)		gdb_target=alpha-osf1 ;;
 alpha*-*-linux*)	gdb_target=alpha-linux ;;
 alpha*-*-freebsd*)	gdb_target=fbsd ;;
+alpha*-*-netbsd*)	gdb_target=nbsd ;;
 
 arc-*-*)		gdb_target=arc ;;
 
@@ -64,6 +57,10 @@ arm*-*-* | thumb*-*-* | strongarm*-*-*)
 xscale-*-*)		gdb_target=embed
                         configdirs="$configdirs rdi-share"
                         ;;
+
+avr-*-*)		gdb_target=avr
+			gdb_multi_arch=yes
+			;;
 
 cris*)                  gdb_target=cris ;;
 

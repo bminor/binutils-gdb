@@ -6,7 +6,7 @@
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -329,6 +329,8 @@ extern boolean _bfd_generic_set_section_contents
    bfd_false)
 #define _bfd_nolink_bfd_link_hash_table_create \
   ((struct bfd_link_hash_table *(*) PARAMS ((bfd *))) bfd_nullvoidptr)
+#define _bfd_nolink_bfd_link_hash_table_free \
+  ((void (*) PARAMS ((struct bfd_link_hash_table *))) bfd_void)
 #define _bfd_nolink_bfd_link_add_symbols \
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
 #define _bfd_nolink_bfd_final_link \
@@ -393,6 +395,10 @@ extern boolean _bfd_link_hash_table_init
 /* Generic link hash table creation routine.  */
 extern struct bfd_link_hash_table *_bfd_generic_link_hash_table_create
   PARAMS ((bfd *));
+
+/* Generic link hash table destruction routine.  */
+extern void _bfd_generic_link_hash_table_free
+  PARAMS ((struct bfd_link_hash_table *));
 
 /* Generic add symbol routine.  */
 extern boolean _bfd_generic_link_add_symbols
@@ -586,7 +592,7 @@ extern boolean _bfd_sh_align_load_span
 
 /* And more follows */
 
-void
+boolean
 bfd_write_bigendian_4byte_int PARAMS ((bfd *, unsigned int));
 
 unsigned int
@@ -752,55 +758,6 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_MIPS_REL16",
   "BFD_RELOC_MIPS_RELGOT",
   "BFD_RELOC_MIPS_JALR",
-  "BFD_RELOC_SH_GOT_LOW16",
-  "BFD_RELOC_SH_GOT_MEDLOW16",
-  "BFD_RELOC_SH_GOT_MEDHI16",
-  "BFD_RELOC_SH_GOT_HI16",
-  "BFD_RELOC_SH_GOTPLT_LOW16",
-  "BFD_RELOC_SH_GOTPLT_MEDLOW16",
-  "BFD_RELOC_SH_GOTPLT_MEDHI16",
-  "BFD_RELOC_SH_GOTPLT_HI16",
-  "BFD_RELOC_SH_PLT_LOW16",
-  "BFD_RELOC_SH_PLT_MEDLOW16",
-  "BFD_RELOC_SH_PLT_MEDHI16",
-  "BFD_RELOC_SH_PLT_HI16",
-  "BFD_RELOC_SH_GOTOFF_LOW16",
-  "BFD_RELOC_SH_GOTOFF_MEDLOW16",
-  "BFD_RELOC_SH_GOTOFF_MEDHI16",
-  "BFD_RELOC_SH_GOTOFF_HI16",
-  "BFD_RELOC_SH_GOTPC_LOW16",
-  "BFD_RELOC_SH_GOTPC_MEDLOW16",
-  "BFD_RELOC_SH_GOTPC_MEDHI16",
-  "BFD_RELOC_SH_GOTPC_HI16",
-  "BFD_RELOC_SH_COPY64",
-  "BFD_RELOC_SH_GLOB_DAT64",
-  "BFD_RELOC_SH_JMP_SLOT64",
-  "BFD_RELOC_SH_RELATIVE64",
-  "BFD_RELOC_SH_GOT10BY4",
-  "BFD_RELOC_SH_GOT10BY8",
-  "BFD_RELOC_SH_GOTPLT10BY4",
-  "BFD_RELOC_SH_GOTPLT10BY8",
-  "BFD_RELOC_SH_GOTPLT32",
-  "BFD_RELOC_SH_SHMEDIA_CODE",
-  "BFD_RELOC_SH_IMMU5",
-  "BFD_RELOC_SH_IMMS6",
-  "BFD_RELOC_SH_IMMS6BY32",
-  "BFD_RELOC_SH_IMMU6",
-  "BFD_RELOC_SH_IMMS10",
-  "BFD_RELOC_SH_IMMS10BY2",
-  "BFD_RELOC_SH_IMMS10BY4",
-  "BFD_RELOC_SH_IMMS10BY8",
-  "BFD_RELOC_SH_IMMS16",
-  "BFD_RELOC_SH_IMMU16",
-  "BFD_RELOC_SH_IMM_LOW16",
-  "BFD_RELOC_SH_IMM_LOW16_PCREL",
-  "BFD_RELOC_SH_IMM_MEDLOW16",
-  "BFD_RELOC_SH_IMM_MEDLOW16_PCREL",
-  "BFD_RELOC_SH_IMM_MEDHI16",
-  "BFD_RELOC_SH_IMM_MEDHI16_PCREL",
-  "BFD_RELOC_SH_IMM_HI16",
-  "BFD_RELOC_SH_IMM_HI16_PCREL",
-  "BFD_RELOC_SH_PT_16",
 
   "BFD_RELOC_386_GOT32",
   "BFD_RELOC_386_PLT32",
@@ -947,6 +904,55 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_SH_JMP_SLOT",
   "BFD_RELOC_SH_RELATIVE",
   "BFD_RELOC_SH_GOTPC",
+  "BFD_RELOC_SH_GOT_LOW16",
+  "BFD_RELOC_SH_GOT_MEDLOW16",
+  "BFD_RELOC_SH_GOT_MEDHI16",
+  "BFD_RELOC_SH_GOT_HI16",
+  "BFD_RELOC_SH_GOTPLT_LOW16",
+  "BFD_RELOC_SH_GOTPLT_MEDLOW16",
+  "BFD_RELOC_SH_GOTPLT_MEDHI16",
+  "BFD_RELOC_SH_GOTPLT_HI16",
+  "BFD_RELOC_SH_PLT_LOW16",
+  "BFD_RELOC_SH_PLT_MEDLOW16",
+  "BFD_RELOC_SH_PLT_MEDHI16",
+  "BFD_RELOC_SH_PLT_HI16",
+  "BFD_RELOC_SH_GOTOFF_LOW16",
+  "BFD_RELOC_SH_GOTOFF_MEDLOW16",
+  "BFD_RELOC_SH_GOTOFF_MEDHI16",
+  "BFD_RELOC_SH_GOTOFF_HI16",
+  "BFD_RELOC_SH_GOTPC_LOW16",
+  "BFD_RELOC_SH_GOTPC_MEDLOW16",
+  "BFD_RELOC_SH_GOTPC_MEDHI16",
+  "BFD_RELOC_SH_GOTPC_HI16",
+  "BFD_RELOC_SH_COPY64",
+  "BFD_RELOC_SH_GLOB_DAT64",
+  "BFD_RELOC_SH_JMP_SLOT64",
+  "BFD_RELOC_SH_RELATIVE64",
+  "BFD_RELOC_SH_GOT10BY4",
+  "BFD_RELOC_SH_GOT10BY8",
+  "BFD_RELOC_SH_GOTPLT10BY4",
+  "BFD_RELOC_SH_GOTPLT10BY8",
+  "BFD_RELOC_SH_GOTPLT32",
+  "BFD_RELOC_SH_SHMEDIA_CODE",
+  "BFD_RELOC_SH_IMMU5",
+  "BFD_RELOC_SH_IMMS6",
+  "BFD_RELOC_SH_IMMS6BY32",
+  "BFD_RELOC_SH_IMMU6",
+  "BFD_RELOC_SH_IMMS10",
+  "BFD_RELOC_SH_IMMS10BY2",
+  "BFD_RELOC_SH_IMMS10BY4",
+  "BFD_RELOC_SH_IMMS10BY8",
+  "BFD_RELOC_SH_IMMS16",
+  "BFD_RELOC_SH_IMMU16",
+  "BFD_RELOC_SH_IMM_LOW16",
+  "BFD_RELOC_SH_IMM_LOW16_PCREL",
+  "BFD_RELOC_SH_IMM_MEDLOW16",
+  "BFD_RELOC_SH_IMM_MEDLOW16_PCREL",
+  "BFD_RELOC_SH_IMM_MEDHI16",
+  "BFD_RELOC_SH_IMM_MEDHI16_PCREL",
+  "BFD_RELOC_SH_IMM_HI16",
+  "BFD_RELOC_SH_IMM_HI16_PCREL",
+  "BFD_RELOC_SH_PT_16",
   "BFD_RELOC_THUMB_PCREL_BRANCH9",
   "BFD_RELOC_THUMB_PCREL_BRANCH12",
   "BFD_RELOC_THUMB_PCREL_BRANCH23",

@@ -270,7 +270,7 @@ m68hc11_register_name (int reg_nr)
   return m68hc11_register_names[reg_nr];
 }
 
-static unsigned char *
+static const unsigned char *
 m68hc11_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char breakpoint[] = {0x0};
@@ -1087,7 +1087,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
   set_gdbarch_read_fp (gdbarch, generic_target_read_fp);
-  set_gdbarch_write_fp (gdbarch, generic_target_write_fp);
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
   set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
 

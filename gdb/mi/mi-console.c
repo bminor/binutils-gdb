@@ -1,5 +1,7 @@
 /* MI Console code.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -22,11 +24,6 @@
 #include "defs.h"
 #include "mi-console.h"
 #include "gdb_string.h"
-
-/* Convenience macro for allocting typesafe memory. */
-
-#undef XMALLOC
-#define XMALLOC(TYPE) (TYPE*) xmalloc (sizeof (TYPE))
 
 /* MI-console: send output to std-out but correcty encapsulated */
 

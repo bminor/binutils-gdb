@@ -1,3 +1,141 @@
+2002-05-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c: Add "tlbsx." and "tlbsxe." for booke.
+
+2002-04-24  Christian Groessler <chris@groessler.org>
+
+	* z8k-dis.c (print_insn_z8k): Set disassemble_info to 2
+	bytes_per_chunk, 6 bytes_per_line for nicer display of the hex
+	codes.
+	(z8k_lookup_instr): CLASS_IGNORE case added.
+	(output_instr): Don't print hex codes, they are already
+	printed.
+	(unpack_instr): ARG_NIM4 case added.  ARG_NIM8 case
+	fixed. Support CLASS_BIT_1OR2 and CLASS_IGNORE cases.
+	(unparse_instr): Fix base and indexed addressing disassembly:
+	The index is inside the brackets.
+	* z8kgen.c (gas): Add ARG_NIM4 and CLASS_IGNORE defines.
+	(opt): Fix shift left/right arithmetic/logical byte defines:
+	The high byte of the immediate word is ignored by the
+	processor.
+	Fix n parameter of ldm opcodes: The opcode contains (n-1).
+	(args): Fix "n" entry.
+	(toks): Add "nim4" and "iiii" entries.
+	* z8k-opc.h: Regenerated with new z8kgen.c.
+
+2002-04-24  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* po/id.po: New Indonesian translation.
+	* configure.in (ALL_LIGUAS): Add id.po
+	* configure: Regenerate.
+
+2002-04-17  matthew green  <mrg@redhat.com>
+
+	* ppc-opc.c (powerpc_opcode): Fix dssall operand list.
+
+2002-04-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* dep-in.sed: Cope with absolute paths.
+	* Makefile.am (dep.sed): Subst TOPDIR.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* ppc-opc.c: Whitespace.
+	* s390-dis.c: Fix copyright date.
+
+2002-03-23  matthew green  <mrg@redhat.com>
+
+	* ppc-opc.c (vmaddfp): Fix operand order.
+
+2002-03-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2002-03-21  Anton Blanchard  <anton@samba.org>
+
+	* ppc-opc.c: Add optional field to mtmsrd.
+	(MTMSRD_L, XRLARB_MASK): Define.
+
+Mon Mar 18 21:10:43 CET 2002  Jan Hubicka  <jh@suse.cz>
+
+	* i386-dis.c (prefix_name): Fix handling of 32bit address prefix
+	in 64bit mode.
+	(print_insn) Likewise.
+	(putop): Fix handling of 'E'
+	(OP_E, OP_OFF): handle 32bit addressing mode in 64bit.
+	(ptr_reg): Likewise.
+
+2002-03-18  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* po/fr.po: Updated version.
+
+2002-03-16  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips-opc.c (M3D): Tweak comment.
+	(mips_builtin_op): Add comment indicating that opcodes of the
+	same name must be placed together in the table, and sort
+	the "recip.fmt", "recip1.fmt", "recip2.fmt", "rsqrt.fmt",
+	"rsqrt1.fmt", and "rsqrt2.fmt" opcodes by name.
+
+2002-03-16  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* Makefile.am: Tidy up sh64 rules.
+        * Makefile.in: Regenerate.
+
+2002-03-15  Chris G. Demetriou  <cgd@broadcom.com>
+
+	* mips-dis.c: Update copyright years.
+
+2002-03-15  Chris G. Demetriou  <cgd@broadcom.com>
+
+	* mips-dis.c (mips_isa_type): Add MIPS3D instructions to the ISA
+	bit masks for bfd_mach_mips_sb1 and bfd_mach_mipsisa64.  Add
+	comments for bfd_mach_mipsisa32 and bfd_mach_mipsisa64 that
+	indicate that they should dissassemble all applicable
+	MIPS-specified ASEs.
+	* mips-opc.c: Add support for MIPS-3D instructions.
+	(M3D): New definition.
+
+	* mips-opc.c: Update copyright years.
+
+2002-03-15  Chris G. Demetriou  <cgd@broadcom.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Sort bc<N> opcodes by name.
+
+2002-03-15  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips-dis.c (is_newabi): Fix ABI decoding.
+
+2002-03-14  Chris G. Demetriou  <cgd@broadcom.com>
+
+	* mips-dis.c (mips_isa_type): Fix formatting of bfd_mach_mipsisa32
+	and bfd_mach_mipsisa64 cases to match the rest.
+
+2002-03-13  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* po/fr.po: Updated version.
+
+2002-03-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c: Add optional `L' field to tlbie.
+	(XRTLRA_MASK): Define.
+
+2002-03-06  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Mark "pref" as being
+	present on I4.
+
+	* mips-opc.c (mips_builtin_opcodes): Add "movn.ps" and "movz.ps".
+
+2002-03-05  Paul Koning  <pkoning@equallogic.com>
+
+	* pdp11-opc.c: Fix "mark" operand type.  Fix operand types
+	for float opcodes that take float operands.  Add alternate
+	names (xxxD vs. xxxF) for float opcodes.
+	* pdp11-dis.c (print_operand): Clean up formatting for mode 67.
+	(print_foperand): New function to handle float opcode operands.
+	(print_insn_pdp11): Use print_foperand to disassemble float ops.
+
 2002-02-27  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/de.po: Updated.
@@ -786,7 +924,7 @@
 	* arc-opc.c: Include "sysdep.h" to get stdio.h as include file.
 	* arc-ext.c: Likewise.
 
-2001-08-28  matthew gren  <mrg@redhat.com>
+2001-08-28  matthew green  <mrg@redhat.com>
 
 	* ppc-opc.c (icbt): Order correctly.
 

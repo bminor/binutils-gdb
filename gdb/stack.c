@@ -119,7 +119,17 @@ struct frame_info *selected_frame;
    0 for innermost, 1 for its caller, ...
    or -1 for frame specified by address with no defined level.  */
 
-int selected_frame_level;
+/* Level of the selected frame: 0 for innermost, 1 for its caller, ...
+   or -1 for NULL frame.  */
+
+int
+frame_relative_level (struct frame_info *fi)
+{
+  if (fi == NULL)
+    return -1;
+  else
+    return fi->level;
+}
 
 /* Zero means do things normally; we are interacting directly with the
    user.  One means print the full filename and linenumber when a
@@ -704,7 +714,7 @@ parse_frame_specification (char *frame_exp)
 	   really should be used instead of spaces to delimit; using spaces
 	   normally works in an expression).  */
 #ifdef SETUP_ARBITRARY_FRAME
-	error ("No frame %d", args[0]);
+	error ("No frame %s", paddr_d (args[0]));
 #endif
 
 	/* If (s)he specifies the frame with an address, he deserves what
@@ -817,9 +827,10 @@ frame_info (char *addr_exp, int from_tty)
     }
   calling_frame_info = get_prev_frame (fi);
 
-  if (!addr_exp && selected_frame_level >= 0)
+  if (!addr_exp && frame_relative_level (selected_frame) >= 0)
     {
-      printf_filtered ("Stack level %d, frame at ", selected_frame_level);
+      printf_filtered ("Stack level %d, frame at ",
+		       frame_relative_level (selected_frame));
       print_address_numeric (fi->frame, 1, gdb_stdout);
       printf_filtered (":\n");
     }
@@ -1238,7 +1249,7 @@ static void
 print_frame_local_vars (register struct frame_info *fi, register int num_tabs,
 			register struct ui_file *stream)
 {
-  register struct block *block = get_frame_block (fi);
+  register struct block *block = get_frame_block (fi, 0);
   register int values_printed = 0;
 
   if (block == 0)
@@ -1272,7 +1283,7 @@ print_frame_label_vars (register struct frame_info *fi, int this_level_only,
 			register struct ui_file *stream)
 {
   register struct blockvector *bl;
-  register struct block *block = get_frame_block (fi);
+  register struct block *block = get_frame_block (fi, 0);
   register int values_printed = 0;
   int index, have_default = 0;
   char *blocks_printed;
@@ -1448,18 +1459,18 @@ args_plus_locals_info (char *ignore, int from_tty)
 }
 
 
-/* Select frame FI, and note that its stack level is LEVEL.
-   LEVEL may be -1 if an actual level number is not known.  */
+/* Select frame FI (or NULL - to invalidate the current frame).  */
 
 void
-select_frame (struct frame_info *fi, int level)
+select_frame (struct frame_info *fi)
 {
   register struct symtab *s;
 
   selected_frame = fi;
-  selected_frame_level = level;
+  /* NOTE: cagney/2002-05-04: FI can be NULL.  This occures when the
+     frame is being invalidated.  */
   if (selected_frame_level_changed_hook)
-    selected_frame_level_changed_hook (level);
+    selected_frame_level_changed_hook (frame_relative_level (fi));
 
   /* Ensure that symbols for this frame are read in.  Also, determine the
      source language of this frame, and switch to it if desired.  */
@@ -1477,15 +1488,15 @@ select_frame (struct frame_info *fi, int level)
 }
 
 
-/* Select frame FI, noting that its stack level is LEVEL.  Also print
-   the stack frame and show the source if this is the tui version.  */
-void
-select_and_print_frame (struct frame_info *fi, int level)
+/* Select frame FI.  Also print the stack frame and show the source if
+   this is the tui version.  */
+static void
+select_and_print_frame (struct frame_info *fi)
 {
-  select_frame (fi, level);
+  select_frame (fi);
   if (fi)
     {
-      print_stack_frame (fi, level, 1);
+      print_stack_frame (fi, frame_relative_level (fi), 1);
     }
 }
 
@@ -1497,21 +1508,25 @@ void
 record_selected_frame (CORE_ADDR *frameaddrp, int *levelp)
 {
   *frameaddrp = selected_frame ? selected_frame->frame : 0;
-  *levelp = selected_frame_level;
+  *levelp = frame_relative_level (selected_frame);
 }
 
 /* Return the symbol-block in which the selected frame is executing.
-   Can return zero under various legitimate circumstances.  */
+   Can return zero under various legitimate circumstances.
+
+   If ADDR_IN_BLOCK is non-zero, set *ADDR_IN_BLOCK to the relevant
+   code address within the block returned.  We use this to decide
+   which macros are in scope.  */
 
 struct block *
-get_selected_block (void)
+get_selected_block (CORE_ADDR *addr_in_block)
 {
   if (!target_has_stack)
     return 0;
 
   if (!selected_frame)
-    return get_current_block ();
-  return get_frame_block (selected_frame);
+    return get_current_block (addr_in_block);
+  return get_frame_block (selected_frame, addr_in_block);
 }
 
 /* Find a frame a certain number of levels away from FRAME.
@@ -1579,21 +1594,7 @@ select_frame_command (char *level_exp, int from_tty)
 
   frame = parse_frame_specification (level_exp);
 
-  /* Try to figure out what level this frame is.  But if there is
-     no current stack, don't error out -- let the user set one.  */
-  frame1 = 0;
-  if (get_current_frame ())
-    {
-      for (frame1 = get_prev_frame (0);
-	   frame1 && frame1 != frame;
-	   frame1 = get_prev_frame (frame1))
-	level++;
-    }
-
-  if (!frame1)
-    level = 0;
-
-  select_frame (frame, level);
+  select_frame (frame);
 }
 
 /* The "frame" command.  With no arg, print selected frame briefly.
@@ -1604,7 +1605,8 @@ void
 frame_command (char *level_exp, int from_tty)
 {
   select_frame_command (level_exp, from_tty);
-  show_and_print_stack_frame (selected_frame, selected_frame_level, 1);
+  show_and_print_stack_frame (selected_frame,
+			      frame_relative_level (selected_frame), 1);
 }
 
 /* The XDB Compatibility command to print the current frame. */
@@ -1614,7 +1616,8 @@ current_frame_command (char *level_exp, int from_tty)
 {
   if (target_has_stack == 0 || selected_frame == 0)
     error ("No stack.");
-  print_only_stack_frame (selected_frame, selected_frame_level, 1);
+  print_only_stack_frame (selected_frame,
+			  frame_relative_level (selected_frame), 1);
 }
 
 /* Select the frame up one or COUNT stack levels
@@ -1636,7 +1639,7 @@ up_silently_base (char *count_exp)
   fi = find_relative_frame (selected_frame, &count1);
   if (count1 != 0 && count_exp == 0)
     error ("Initial frame selected; you cannot go up.");
-  select_frame (fi, selected_frame_level + count - count1);
+  select_frame (fi);
 }
 
 static void
@@ -1649,7 +1652,8 @@ static void
 up_command (char *count_exp, int from_tty)
 {
   up_silently_base (count_exp);
-  show_and_print_stack_frame (selected_frame, selected_frame_level, 1);
+  show_and_print_stack_frame (selected_frame,
+			      frame_relative_level (selected_frame), 1);
 }
 
 /* Select the frame down one or COUNT stack levels
@@ -1680,7 +1684,7 @@ down_silently_base (char *count_exp)
       error ("Bottom (i.e., innermost) frame selected; you cannot go down.");
     }
 
-  select_frame (frame, selected_frame_level + count - count1);
+  select_frame (frame);
 }
 
 /* ARGSUSED */
@@ -1694,7 +1698,8 @@ static void
 down_command (char *count_exp, int from_tty)
 {
   down_silently_base (count_exp);
-  show_and_print_stack_frame (selected_frame, selected_frame_level, 1);
+  show_and_print_stack_frame (selected_frame,
+			      frame_relative_level (selected_frame), 1);
 }
 
 void
@@ -1846,7 +1851,7 @@ func_command (char *arg, int from_tty)
   if (!found)
     printf_filtered ("'%s' not within current stack frame.\n", arg);
   else if (fp != selected_frame)
-    select_and_print_frame (fp, level);
+    select_and_print_frame (fp);
 }
 
 /* Gets the language of the current frame.  */

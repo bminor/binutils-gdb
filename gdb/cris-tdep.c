@@ -3925,8 +3925,17 @@ cris_version_update (char *ignore_args, int from_tty,
 {
   struct gdbarch_info info;
 
+  /* NOTE: cagney/2002-03-17: The add_show_from_set() function clones
+     the set command passed as a parameter.  The clone operation will
+     include (BUG?) any ``set'' command callback, if present.
+     Commands like ``info set'' call all the ``show'' command
+     callbacks.  Unfortunatly, for ``show'' commands cloned from
+     ``set'', this includes callbacks belonging to ``set'' commands.
+     Making this worse, this only occures if add_show_from_set() is
+     called after add_cmd_sfunc() (BUG?).  */
+
   /* From here on, trust the user's CRIS version setting.  */
-  if (c->type == set_cmd)
+  if (cmd_type (c) == set_cmd)
     {
       usr_cmd_cris_version_valid = 1;
   
@@ -3943,8 +3952,17 @@ cris_mode_update (char *ignore_args, int from_tty,
 {
   struct gdbarch_info info;
   
+  /* NOTE: cagney/2002-03-17: The add_show_from_set() function clones
+     the set command passed as a parameter.  The clone operation will
+     include (BUG?) any ``set'' command callback, if present.
+     Commands like ``info set'' call all the ``show'' command
+     callbacks.  Unfortunatly, for ``show'' commands cloned from
+     ``set'', this includes callbacks belonging to ``set'' commands.
+     Making this worse, this only occures if add_show_from_set() is
+     called after add_cmd_sfunc() (BUG?).  */
+
   /* From here on, trust the user's CRIS mode setting.  */
-  if (c->type == set_cmd)
+  if (cmd_type (c) == set_cmd)
     {
       usr_cmd_cris_mode_valid = 1;
   
@@ -3961,8 +3979,17 @@ cris_abi_update (char *ignore_args, int from_tty,
 {
   struct gdbarch_info info;
   
+  /* NOTE: cagney/2002-03-17: The add_show_from_set() function clones
+     the set command passed as a parameter.  The clone operation will
+     include (BUG?) any ``set'' command callback, if present.
+     Commands like ``info set'' call all the ``show'' command
+     callbacks.  Unfortunatly, for ``show'' commands cloned from
+     ``set'', this includes callbacks belonging to ``set'' commands.
+     Making this worse, this only occures if add_show_from_set() is
+     called after add_cmd_sfunc() (BUG?).  */
+
   /* From here on, trust the user's CRIS ABI setting.  */
-  if (c->type == set_cmd)
+  if (cmd_type (c) == set_cmd)
     {
       usr_cmd_cris_abi_valid = 1;
   
@@ -4073,17 +4100,19 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
           cris_abi = CRIS_ABI_V2;
         }
     }
-  else if (gdbarch_tdep (current_gdbarch))
+  else if (arches != NULL)
     {
-      /* No bfd available.  Stick with whatever ABI we're currently using.  
-         (This is to avoid changing the ABI when the user updates the 
-         architecture with the 'set cris-version' command.)  */
-      cris_abi = gdbarch_tdep (current_gdbarch)->cris_abi;
+      /* No bfd available.  Stick with the ABI from the most recently
+         selected architecture of this same family (the head of arches
+         always points to this).  (This is to avoid changing the ABI
+         when the user updates the architecture with the 'set
+         cris-version' command.)  */
+      cris_abi = gdbarch_tdep (arches->gdbarch)->cris_abi;
     }
   else
     {
-      /* No bfd, and no current architecture available.  Assume it's the 
-         new ABI.  */
+      /* No bfd, and no previously selected architecture available.
+         Assume it's the new ABI.  */
       cris_abi = CRIS_ABI_V2;
     }
 

@@ -1,6 +1,6 @@
 /* Print mips instructions for GDB, the GNU debugger, or for objdump.
    Copyright 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
    Contributed by Nobuyuki Hikichi(hikichi@sra.co.jp).
 
@@ -373,15 +373,21 @@ mips_isa_type (mach, isa, cputype)
       break;
     case bfd_mach_mips_sb1:
       *cputype = CPU_SB1;
-      *isa = ISA_MIPS64 | INSN_SB1;
+      *isa = ISA_MIPS64 | INSN_MIPS3D | INSN_SB1;
       break;
     case bfd_mach_mipsisa32:
-      * cputype = CPU_MIPS32;
-      * isa = ISA_MIPS32;
+      *cputype = CPU_MIPS32;
+      /* For stock MIPS32, disassemble all applicable MIPS-specified ASEs.
+	 Note that MIPS-3D is not applicable to MIPS32.  (See _MIPS32
+	 Architecture For Programmers Volume I: Introduction to the
+	 MIPS32 Architecture_ (MIPS Document Number MD00082, Revision 0.95),
+	 page 1.  */
+      *isa = ISA_MIPS32;
       break;
     case bfd_mach_mipsisa64:
-      * cputype = CPU_MIPS64;
-      * isa = ISA_MIPS64;
+      *cputype = CPU_MIPS64;
+      /* For stock MIPS64, disassemble all applicable MIPS-specified ASEs.  */
+      *isa = ISA_MIPS64 | INSN_MIPS3D;
       break;
 
     default:
@@ -397,10 +403,14 @@ static int
 is_newabi (header)
      Elf_Internal_Ehdr *header;
 {
-  if ((header->e_flags
-       & (E_MIPS_ABI_EABI32 | E_MIPS_ABI_EABI64 | EF_MIPS_ABI2)) != 0
-      || (header->e_ident[EI_CLASS] == ELFCLASS64
-	  && (header->e_flags & E_MIPS_ABI_O64) == 0))
+  /* There are no old-style ABIs which use 64-bit ELF.  */
+  if (header->e_ident[EI_CLASS] == ELFCLASS64)
+    return 1;
+
+  /* If a 32-bit ELF file, N32, EABI32, and EABI64 are new-style ABIs.  */
+  if ((header->e_flags & EF_MIPS_ABI2) != 0
+      || (header->e_flags & EF_MIPS_ABI) == E_MIPS_ABI_EABI32
+      || (header->e_flags & EF_MIPS_ABI) == E_MIPS_ABI_EABI64)
     return 1;
 
   return 0;

@@ -21,8 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef TM_SPARC_LIN64_H
 #define TM_SPARC_LIN64_H
 
-#define GDB_MULTI_ARCH 0
-
 #include "sparc/tm-sp64.h"
 
 #define SIGCONTEXT_PC_OFFSET 16  /* See asm-sparc64/sigcontext.h */

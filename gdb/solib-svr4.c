@@ -92,6 +92,7 @@ static char *bkpt_names[] =
   SOLIB_BKPT_NAME,		/* Prefer configured name if it exists. */
 #endif
   "_start",
+  "__start",
   "main",
   NULL
 };

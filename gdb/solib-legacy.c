@@ -19,7 +19,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define _SYSCALL32	/* for Sparc64 cross Sparc32 */
 #include "defs.h"
 #include "gdbcore.h"
 #include "solib-svr4.h"

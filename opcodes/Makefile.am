@@ -24,14 +24,14 @@ HFILES = \
 	arm-opc.h \
 	fr30-desc.h fr30-opc.h \
 	h8500-opc.h \
+	ia64-asmtab.h \
+	ia64-opc.h \
 	m32r-desc.h m32r-opc.h \
 	mcore-opc.h \
 	openrisc-desc.h openrisc-opc.h \
 	sh-opc.h \
+	sh64-opc.h \
 	sysdep.h \
-	ia64-asmtab.h \
-	ia64-opc.h \
-	  sh64-opc.h \
 	w65-opc.h \
 	xstormy16-desc.h xstormy16-opc.h \
 	z8k-opc.h
@@ -119,6 +119,8 @@ CFILES = \
 	s390-opc.c \
 	s390-dis.c \
 	sh-dis.c \
+	sh64-dis.c \
+	sh64-opc.c \
 	sparc-dis.c \
 	sparc-opc.c \
 	tic30-dis.c \
@@ -129,8 +131,6 @@ CFILES = \
 	v850-dis.c \
 	v850-opc.c \
 	vax-dis.c \
-	  sh64-dis.c \
-	  sh64-opc.c \
 	w65-dis.c \
 	xstormy16-asm.c \
 	xstormy16-desc.c \
@@ -211,6 +211,8 @@ ALL_MACHINES = \
 	s390-dis.lo \
 	s390-opc.lo \
 	sh-dis.lo \
+	sh64-dis.lo \
+	sh64-opc.lo \
 	sparc-dis.lo \
 	sparc-opc.lo \
 	tic30-dis.lo \
@@ -221,8 +223,6 @@ ALL_MACHINES = \
 	v850-dis.lo \
 	v850-opc.lo \
 	vax-dis.lo \
-	  sh64-dis.lo \
-	  sh64-opc.lo \
 	w65-dis.lo \
 	xstormy16-asm.lo \
 	xstormy16-desc.lo \
@@ -325,10 +325,6 @@ $(srcdir)/fr30-desc.h $(srcdir)/fr30-desc.c $(srcdir)/fr30-opc.h $(srcdir)/fr30-
 stamp-fr30: $(CGENDEPS) $(CPUDIR)/fr30.cpu $(CPUDIR)/fr30.opc
 	$(MAKE) run-cgen arch=fr30 prefix=fr30 options= extrafiles=
 
-sh64-opc.lo: sh64-opc.c sh64-opc.h
-sh64-dis.lo: sh64-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  sh64-opc.h $(INCDIR)/dis-asm.h $(BFD_H) opintl.h
-
 $(srcdir)/openrisc-desc.h $(srcdir)/openrisc-desc.c $(srcdir)/openrisc-opc.h $(srcdir)/openrisc-opc.c $(srcdir)/openrisc-ibld.c $(srcdir)/openrisc-asm.c $(srcdir)/openrisc-dis.c: $(OPENRISC_DEPS)
 	@true
 stamp-openrisc: $(CGENDEPS) $(CPUDIR)/openrisc.cpu $(CPUDIR)/openrisc.opc
@@ -380,7 +376,8 @@ dep.sed: dep-in.sed config.status
 		-e 's!@BFD_H@!$(BFD_H)!'	\
 		-e 's!@INCDIR@!$(INCDIR)!'	\
 		-e 's!@BFDDIR@!$(BFDDIR)!'	\
-		-e 's!@SRCDIR@!$(srcdir)!'
+		-e 's!@SRCDIR@!$(srcdir)!'	\
+		-e 's!@TOPDIR@!'`echo $(srcdir) | sed -e s,/opcodes$$,,`'!'
 
 dep: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
@@ -410,11 +407,11 @@ alpha-dis.lo: alpha-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 alpha-opc.lo: alpha-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/alpha.h $(BFD_H) $(INCDIR)/symcat.h \
   opintl.h
-arc-dis.lo: arc-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/symcat.h $(INCDIR)/opcode/arc.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h \
-  opintl.h arc-dis.h arc-ext.h
+arc-dis.lo: arc-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/arc.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/arc.h \
+  $(INCDIR)/elf/reloc-macros.h opintl.h arc-dis.h arc-ext.h
 arc-opc.lo: arc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/arc.h
 arc-ext.lo: arc-ext.c sysdep.h config.h $(INCDIR)/ansidecl.h \
@@ -492,19 +489,25 @@ i960-dis.lo: i960-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h
 ia64-dis.lo: ia64-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/opcode/ia64.h
-ia64-opc-a.lo: ia64-opc-a.c ia64-opc.h $(INCDIR)/opcode/ia64.h
-ia64-opc-b.lo: ia64-opc-b.c ia64-opc.h $(INCDIR)/opcode/ia64.h
-ia64-opc-f.lo: ia64-opc-f.c ia64-opc.h $(INCDIR)/opcode/ia64.h
-ia64-opc-i.lo: ia64-opc-i.c ia64-opc.h $(INCDIR)/opcode/ia64.h
-ia64-opc-m.lo: ia64-opc-m.c ia64-opc.h $(INCDIR)/opcode/ia64.h
+ia64-opc-a.lo: ia64-opc-a.c ia64-opc.h $(INCDIR)/opcode/ia64.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h
+ia64-opc-b.lo: ia64-opc-b.c ia64-opc.h $(INCDIR)/opcode/ia64.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h
+ia64-opc-f.lo: ia64-opc-f.c ia64-opc.h $(INCDIR)/opcode/ia64.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h
+ia64-opc-i.lo: ia64-opc-i.c ia64-opc.h $(INCDIR)/opcode/ia64.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h
+ia64-opc-m.lo: ia64-opc-m.c ia64-opc.h $(INCDIR)/opcode/ia64.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h
 ia64-opc-d.lo: ia64-opc-d.c
 ia64-opc.lo: ia64-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
   sysdep.h config.h ia64-asmtab.h $(INCDIR)/opcode/ia64.h \
-  ia64-asmtab.c
+  $(BFD_H) $(INCDIR)/symcat.h ia64-asmtab.c
 ia64-gen.lo: ia64-gen.c $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
   $(INCDIR)/safe-ctype.h sysdep.h config.h ia64-opc.h \
-  $(INCDIR)/opcode/ia64.h ia64-opc-a.c ia64-opc-i.c ia64-opc-m.c \
-  ia64-opc-b.c ia64-opc-f.c ia64-opc-x.c ia64-opc-d.c
+  $(INCDIR)/opcode/ia64.h $(BFD_H) $(INCDIR)/symcat.h \
+  ia64-opc-a.c ia64-opc-i.c ia64-opc-m.c ia64-opc-b.c \
+  ia64-opc-f.c ia64-opc-x.c ia64-opc-d.c
 ia64-asmtab.lo: ia64-asmtab.c
 m32r-asm.lo: m32r-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h m32r-desc.h $(INCDIR)/opcode/cgen.h \
@@ -532,7 +535,7 @@ m68hc11-opc.lo: m68hc11-opc.c $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/m68hc11.h
 m68k-dis.lo: m68k-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/floatformat.h \
-  opintl.h $(INCDIR)/opcode/m68k.h
+  $(INCDIR)/libiberty.h opintl.h $(INCDIR)/opcode/m68k.h
 m68k-opc.lo: m68k-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/m68k.h
 m88k-dis.lo: m88k-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
@@ -608,6 +611,12 @@ s390-dis.lo: s390-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   $(INCDIR)/opcode/s390.h
 sh-dis.lo: sh-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   sh-opc.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h
+sh64-dis.lo: sh64-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h sysdep.h config.h \
+  sh64-opc.h $(INCDIR)/libiberty.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h
+sh64-opc.lo: sh64-opc.c sh64-opc.h
 sparc-dis.lo: sparc-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/sparc.h $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/symcat.h $(INCDIR)/libiberty.h opintl.h
@@ -633,12 +642,6 @@ v850-opc.lo: v850-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 vax-dis.lo: vax-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/vax.h $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/symcat.h
-sh64-dis.lo: sh64-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h sysdep.h config.h \
-  sh64-opc.h $(INCDIR)/libiberty.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h
-sh64-opc.lo: sh64-opc.c sh64-opc.h
 w65-dis.lo: w65-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   w65-opc.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h
 xstormy16-asm.lo: xstormy16-asm.c sysdep.h config.h \

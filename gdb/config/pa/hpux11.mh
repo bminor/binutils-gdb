@@ -1,6 +1,10 @@
 # Host: Hewlett-Packard PA-RISC machine, running HPUX 11.00
 
-MH_CFLAGS = -D__HP_CURSES
+# FIXME: cagney/2002-04-07: gdb/366: The -Dvfork=fork hack below is
+# stop GDB hanging on HP/UX.  For some reason vfork() hangs yet fork()
+# doesn't ....
+
+MH_CFLAGS = -D__HP_CURSES -Dvfork=fork
 
 XM_FILE= xm-hppah.h
 

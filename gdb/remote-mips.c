@@ -1495,7 +1495,7 @@ mips_initialize (void)
 
   mips_request ('r', 0, 0, &err, mips_receive_wait, NULL);
   set_current_frame (create_new_frame (read_fp (), read_pc ()));
-  select_frame (get_current_frame (), 0);
+  select_frame (get_current_frame ());
 }
 
 /* Open a connection to the remote board.  */
@@ -1621,7 +1621,7 @@ device is attached to the target board (e.g., /dev/ttya).\n"
   registers_changed ();
   stop_pc = read_pc ();
   set_current_frame (create_new_frame (read_fp (), stop_pc));
-  select_frame (get_current_frame (), 0);
+  select_frame (get_current_frame ());
   print_stack_frame (selected_frame, -1, 1);
   xfree (serial_port_name);
 }

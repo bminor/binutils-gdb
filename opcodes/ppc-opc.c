@@ -510,6 +510,10 @@ const struct powerpc_operand powerpc_operands[] =
 #define WS_MASK (0x7 << 11)
   { 3, 11, 0, 0, 0 },
 
+  /* The L field in an mtmsrd instruction */
+#define MTMSRD_L WS + 1
+  { 1, 16, 0, 0, PPC_OPERAND_OPTIONAL },
+
 };
 
 /* The functions used to insert and extract complicated operands.  */
@@ -1412,8 +1416,14 @@ extract_tbr (insn, dialect, invalid)
 /* An X_MASK with the RA and RB fields fixed.  */
 #define XRARB_MASK (X_MASK | RA_MASK | RB_MASK)
 
+/* An XRARB_MASK, but with the L bit clear. */
+#define XRLARB_MASK (XRARB_MASK & ~((unsigned long) 1 << 16))
+
 /* An X_MASK with the RT and RA fields fixed.  */
 #define XRTRA_MASK (X_MASK | RT_MASK | RA_MASK)
+
+/* An XRTRA_MASK, but with L bit clear.  */
+#define XRTLRA_MASK (XRTRA_MASK & ~((unsigned long) 1 << 21))
 
 /* An X form comparison instruction.  */
 #define XCMPL(op, xop, l) (X ((op), (xop)) | ((((unsigned long)(l)) & 1) << 21))
@@ -1803,7 +1813,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "vctuxs",    VX(4,  906), VX_MASK,	PPCVEC,		{ VD, VB, UIMM } },
 { "vexptefp",  VX(4,  394), VX_MASK,	PPCVEC,		{ VD, VB } },
 { "vlogefp",   VX(4,  458), VX_MASK,	PPCVEC,		{ VD, VB } },
-{ "vmaddfp",   VXA(4,  46), VXA_MASK,	PPCVEC,		{ VD, VA, VB, VC } },
+{ "vmaddfp",   VXA(4,  46), VXA_MASK,	PPCVEC,		{ VD, VA, VC, VB } },
 { "vmaxfp",    VX(4, 1034), VX_MASK,	PPCVEC,		{ VD, VA, VB } },
 { "vmaxsb",    VX(4,  258), VX_MASK,	PPCVEC,		{ VD, VA, VB } },
 { "vmaxsh",    VX(4,  322), VX_MASK,	PPCVEC,		{ VD, VA, VB } },
@@ -2947,7 +2957,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "wrteei",  X(31,163),	XE_MASK,	PPC403,		{ E } },
 { "wrteei",  X(31,163),	XE_MASK,	BOOKE,		{ E } },
 
-{ "mtmsrd",  X(31,178),	XRARB_MASK,	PPC64,		{ RS } },
+{ "mtmsrd",  X(31,178),	XRLARB_MASK,	PPC64,		{ RS, MTMSRD_L } },
 
 { "stdux",   X(31,181),	X_MASK,		PPC64,		{ RS, RAS, RB } },
 
@@ -3071,7 +3081,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "lhzxe",   X(31,287),	X_MASK,		BOOKE64,	{ RT, RA, RB } },
 
-{ "tlbie",   X(31,306),	XRTRA_MASK,	PPC,		{ RB } },
+{ "tlbie",   X(31,306),	XRTLRA_MASK,	PPC,		{ RB, L } },
 { "tlbi",    X(31,306),	XRT_MASK,	POWER,		{ RA, RB } },
 
 { "eciwx",   X(31,310), X_MASK,		PPC,		{ RT, RA, RB } },
@@ -3662,7 +3672,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "rac",     X(31,818),	X_MASK,		PWRCOM,		{ RT, RA, RB } },
 
 { "dss",     XDSS(31,822,0), XDSS_MASK,	PPCVEC,		{ STRM } },
-{ "dssall",  XDSS(31,822,1), XDSS_MASK,	PPCVEC,		{ STRM } },
+{ "dssall",  XDSS(31,822,1), XDSS_MASK,	PPCVEC,		{ 0 } },
 
 { "srawi",   XRC(31,824,0), X_MASK,	PPCCOM,		{ RA, RS, SH } },
 { "srai",    XRC(31,824,0), X_MASK,	PWRCOM,		{ RA, RS, SH } },
@@ -3678,7 +3688,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "tlbsx.",  XRC(31,914,1), X_MASK, 	PPC403,		{ RT, RA, RB } },
 
 { "tlbsx",   XRC(31,914,0), X_MASK,	BOOKE,		{ RA, RB } },
+{ "tlbsx.",  XRC(31,914,1), X_MASK,	BOOKE,		{ RA, RB } },
 { "tlbsxe",  XRC(31,915,0), X_MASK,	BOOKE,		{ RA, RB } },
+{ "tlbsxe.", XRC(31,915,1), X_MASK,	BOOKE,		{ RA, RB } },
 
 { "slbmfee", X(31,915), XRA_MASK,	PPC64,		{ RT, RB } },
 

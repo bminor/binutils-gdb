@@ -37,7 +37,9 @@
 
 #include "dis-asm.h" /* Get defs for disassemble_info, which unfortunately is a typedef. */
 #if !GDB_MULTI_ARCH
+/* Pull in function declarations refered to, indirectly, via macros.  */
 #include "value.h" /* For default_coerce_float_to_double which is referenced by a macro.  */
+#include "inferior.h"		/* For unsigned_address_to_pointer().  */
 #endif
 
 struct frame_info;
@@ -358,23 +360,6 @@ extern void set_gdbarch_read_fp (struct gdbarch *gdbarch, gdbarch_read_fp_ftype 
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (TARGET_WRITE_FP)
-#define TARGET_WRITE_FP(val) (generic_target_write_fp (val))
-#endif
-
-typedef void (gdbarch_write_fp_ftype) (CORE_ADDR val);
-extern void gdbarch_write_fp (struct gdbarch *gdbarch, CORE_ADDR val);
-extern void set_gdbarch_write_fp (struct gdbarch *gdbarch, gdbarch_write_fp_ftype *write_fp);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (TARGET_WRITE_FP)
-#error "Non multi-arch definition of TARGET_WRITE_FP"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_WRITE_FP)
-#define TARGET_WRITE_FP(val) (gdbarch_write_fp (current_gdbarch, val))
-#endif
-#endif
-
-/* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (TARGET_READ_SP)
 #define TARGET_READ_SP() (generic_target_read_sp ())
 #endif
@@ -473,6 +458,15 @@ extern void set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch, int num_pseudo
 #endif
 #endif
 
+/* GDB's standard (or well known) register numbers.  These can map onto
+   a real register or a pseudo (computed) register or not be defined at
+   all (-1). */
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (SP_REGNUM)
+#define SP_REGNUM (-1)
+#endif
+
 extern int gdbarch_sp_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_sp_regnum (struct gdbarch *gdbarch, int sp_regnum);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SP_REGNUM)
@@ -482,6 +476,11 @@ extern void set_gdbarch_sp_regnum (struct gdbarch *gdbarch, int sp_regnum);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SP_REGNUM)
 #define SP_REGNUM (gdbarch_sp_regnum (current_gdbarch))
 #endif
+#endif
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (FP_REGNUM)
+#define FP_REGNUM (-1)
 #endif
 
 extern int gdbarch_fp_regnum (struct gdbarch *gdbarch);
@@ -495,6 +494,11 @@ extern void set_gdbarch_fp_regnum (struct gdbarch *gdbarch, int fp_regnum);
 #endif
 #endif
 
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (PC_REGNUM)
+#define PC_REGNUM (-1)
+#endif
+
 extern int gdbarch_pc_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_pc_regnum (struct gdbarch *gdbarch, int pc_regnum);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (PC_REGNUM)
@@ -503,6 +507,22 @@ extern void set_gdbarch_pc_regnum (struct gdbarch *gdbarch, int pc_regnum);
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PC_REGNUM)
 #define PC_REGNUM (gdbarch_pc_regnum (current_gdbarch))
+#endif
+#endif
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (PS_REGNUM)
+#define PS_REGNUM (-1)
+#endif
+
+extern int gdbarch_ps_regnum (struct gdbarch *gdbarch);
+extern void set_gdbarch_ps_regnum (struct gdbarch *gdbarch, int ps_regnum);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (PS_REGNUM)
+#error "Non multi-arch definition of PS_REGNUM"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PS_REGNUM)
+#define PS_REGNUM (gdbarch_ps_regnum (current_gdbarch))
 #endif
 #endif
 
@@ -1670,8 +1690,8 @@ extern void set_gdbarch_inner_than (struct gdbarch *gdbarch, gdbarch_inner_than_
 #define BREAKPOINT_FROM_PC(pcptr, lenptr) (legacy_breakpoint_from_pc (pcptr, lenptr))
 #endif
 
-typedef unsigned char * (gdbarch_breakpoint_from_pc_ftype) (CORE_ADDR *pcptr, int *lenptr);
-extern unsigned char * gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr);
+typedef const unsigned char * (gdbarch_breakpoint_from_pc_ftype) (CORE_ADDR *pcptr, int *lenptr);
+extern const unsigned char * gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr);
 extern void set_gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (BREAKPOINT_FROM_PC)
 #error "Non multi-arch definition of BREAKPOINT_FROM_PC"
@@ -2248,6 +2268,44 @@ extern void set_gdbarch_in_solib_call_trampoline (struct gdbarch *gdbarch, gdbar
 #endif
 #endif
 
+/* Sigtramp is a routine that the kernel calls (which then calls the
+   signal handler).  On most machines it is a library routine that is
+   linked into the executable.
+  
+   This macro, given a program counter value and the name of the
+   function in which that PC resides (which can be null if the name is
+   not known), returns nonzero if the PC and name show that we are in
+   sigtramp.
+  
+   On most machines just see if the name is sigtramp (and if we have
+   no name, assume we are not in sigtramp).
+  
+   FIXME: cagney/2002-04-21: The function find_pc_partial_function
+   calls find_pc_sect_partial_function() which calls PC_IN_SIGTRAMP.
+   This means PC_IN_SIGTRAMP function can't be implemented by doing its
+   own local NAME lookup.
+  
+   FIXME: cagney/2002-04-21: PC_IN_SIGTRAMP is something of a mess.
+   Some code also depends on SIGTRAMP_START and SIGTRAMP_END but other
+   does not. */
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (PC_IN_SIGTRAMP)
+#define PC_IN_SIGTRAMP(pc, name) (legacy_pc_in_sigtramp (pc, name))
+#endif
+
+typedef int (gdbarch_pc_in_sigtramp_ftype) (CORE_ADDR pc, char *name);
+extern int gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc, char *name);
+extern void set_gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch, gdbarch_pc_in_sigtramp_ftype *pc_in_sigtramp);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (PC_IN_SIGTRAMP)
+#error "Non multi-arch definition of PC_IN_SIGTRAMP"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PC_IN_SIGTRAMP)
+#define PC_IN_SIGTRAMP(pc, name) (gdbarch_pc_in_sigtramp (current_gdbarch, pc, name))
+#endif
+#endif
+
 /* A target might have problems with watchpoints as soon as the stack
    frame of the current function has been destroyed.  This mostly happens
    as the first action in a funtion's epilogue.  in_function_epilogue_p()
@@ -2386,9 +2444,16 @@ extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
    architecture; ARCHES which is a list of the previously created
    ``struct gdbarch'' for this architecture.
 
-   The INIT function parameter INFO shall, as far as possible, be
-   pre-initialized with information obtained from INFO.ABFD or
-   previously selected architecture (if similar).
+   The INFO parameter is, as far as possible, be pre-initialized with
+   information obtained from INFO.ABFD or the previously selected
+   architecture.
+
+   The ARCHES parameter is a linked list (sorted most recently used)
+   of all the previously created architures for this architecture
+   family.  The (possibly NULL) ARCHES->gdbarch can used to access
+   values from the previously selected architecture for this
+   architecture family.  The global ``current_gdbarch'' shall not be
+   used.
 
    The INIT function shall return any of: NULL - indicating that it
    doesn't recognize the selected architecture; an existing ``struct

@@ -1,4 +1,4 @@
-static int foox __attribute__ ((section (".data00"))) = 'f' + 'o' + 'o';
+static int foox = 'f' + 'o' + 'o';
 
 int foo (int x)
 {

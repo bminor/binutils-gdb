@@ -1,6 +1,7 @@
 /* Definitions for dealing with stack frames, for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997,
-   1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996,
+   1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -62,6 +63,17 @@ struct frame_info
        For the innermost frame, it's the current pc.
        For other frames, it is a pc saved in the next frame.  */
     CORE_ADDR pc;
+
+    /* Level of this frame.  The inner-most (youngest) frame is at
+       level 0.  As you move towards the outer-most (oldest) frame,
+       the level increases.  This is a cached value.  It could just as
+       easily be computed by counting back from the selected frame to
+       the inner most frame.  */
+    /* NOTE: cagney/2002-04-05: Perhaphs a level of ``-1'' should be
+       reserved to indicate a bogus frame - one that has been created
+       just to keep GDB happy (GDB always needs a frame).  For the
+       moment leave this as speculation.  */
+    int level;
 
     /* Nonzero if this is a frame associated with calling a signal handler.
 
@@ -148,6 +160,11 @@ extern void frame_saved_regs_zalloc (struct frame_info *);
 
 #define FRAME_FP(fi) ((fi)->frame)
 
+/* Level of the frame: 0 for innermost, 1 for its caller, ...; or -1
+   for an invalid frame.  */
+
+extern int frame_relative_level (struct frame_info *fi);
+
 /* Define a default FRAME_CHAIN_VALID, in the form that is suitable for most
    targets.  If FRAME_CHAIN_VALID returns zero it means that the given frame
    is the outermost one and has no caller.
@@ -172,8 +189,6 @@ extern struct frame_info *selected_frame;
    0 for innermost, 1 for its caller, ...
    or -1 for frame specified by address with no defined level.  */
 
-extern int selected_frame_level;
-
 extern struct frame_info *create_new_frame (CORE_ADDR, CORE_ADDR);
 
 extern void flush_cached_frames (void);
@@ -196,11 +211,12 @@ extern struct frame_info *get_current_frame (void);
 
 extern struct frame_info *get_next_frame (struct frame_info *);
 
-extern struct block *get_frame_block (struct frame_info *);
+extern struct block *get_frame_block (struct frame_info *,
+                                      CORE_ADDR *addr_in_block);
 
-extern struct block *get_current_block (void);
+extern struct block *get_current_block (CORE_ADDR *addr_in_block);
 
-extern struct block *get_selected_block (void);
+extern struct block *get_selected_block (CORE_ADDR *addr_in_block);
 
 extern struct symbol *get_frame_function (struct frame_info *);
 
@@ -228,11 +244,9 @@ extern void print_only_stack_frame (struct frame_info *, int, int);
 
 extern void show_stack_frame (struct frame_info *);
 
-extern void select_frame (struct frame_info *, int);
+extern void select_frame (struct frame_info *);
 
 extern void record_selected_frame (CORE_ADDR *, int *);
-
-extern void select_and_print_frame (struct frame_info *, int);
 
 extern void print_frame_info (struct frame_info *, int, int, int);
 
@@ -264,9 +278,16 @@ extern void generic_get_saved_register (char *, int *, CORE_ADDR *,
 					struct frame_info *, int,
 					enum lval_type *);
 
+extern void generic_save_call_dummy_addr (CORE_ADDR lo, CORE_ADDR hi);
+
 extern void get_saved_register (char *raw_buffer, int *optimized,
 				CORE_ADDR * addrp,
 				struct frame_info *frame,
 				int regnum, enum lval_type *lval);
+
+/* Return the register as found on the FRAME.  Return zero if the
+   register could not be found.  */
+extern int frame_register_read (struct frame_info *frame, int regnum,
+				void *buf);
 
 #endif /* !defined (FRAME_H)  */

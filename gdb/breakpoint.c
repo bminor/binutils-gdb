@@ -217,6 +217,9 @@ extern int addressprint;	/* Print machine addresses? */
 /* Are we executing breakpoint commands?  */
 static int executing_breakpoint_commands;
 
+/* Are overlay event breakpoints enabled? */
+static int overlay_events_enabled;
+
 /* Walk the following statement or block through all breakpoints.
    ALL_BREAKPOINTS_SAFE does so even if the statment deletes the current
    breakpoint.  */
@@ -735,33 +738,65 @@ insert_breakpoints (void)
 	&& !b->inserted
 	&& !b->duplicate)
       {
-	if (b->type == bp_hardware_breakpoint)
-	  val = target_insert_hw_breakpoint (b->address, b->shadow_contents);
+	/* "Normal" instruction breakpoint: either the standard
+	   trap-instruction bp (bp_breakpoint), or a
+	   bp_hardware_breakpoint.  */
+
+	/* First check to see if we have to handle an overlay.  */
+	if (overlay_debugging == ovly_off
+	    || b->section == NULL
+	    || !(section_is_overlay (b->section)))
+	  {
+	    /* No overlay handling: just set the breakpoint.  */
+
+	    if (b->type == bp_hardware_breakpoint)
+	      val = target_insert_hw_breakpoint (b->address, 
+						 b->shadow_contents);
+	    else
+	      val = target_insert_breakpoint (b->address, b->shadow_contents);
+	  }
 	else
 	  {
-	    /* Check to see if breakpoint is in an overlay section;
-	       if so, we should set the breakpoint at the LMA address.
-	       Only if the section is currently mapped should we ALSO
-	       set a break at the VMA address. */
-	    if (overlay_debugging && b->section 
-		&& section_is_overlay (b->section))
+	    /* This breakpoint is in an overlay section.  
+	       Shall we set a breakpoint at the LMA?  */
+	    if (!overlay_events_enabled)
 	      {
-		CORE_ADDR addr;
-
-		addr = overlay_unmapped_address (b->address, b->section);
-		val = target_insert_breakpoint (addr, b->shadow_contents);
-		/* This would be the time to check val, to see if the
-		   breakpoint write to the load address succeeded.  
-		   However, this might be an ordinary occurrance, eg. if 
-		   the unmapped overlay is in ROM.  */
-		val = 0;	/* in case unmapped address failed */
-		if (section_is_mapped (b->section))
+		/* Yes -- overlay event support is not active, 
+		   so we must try to set a breakpoint at the LMA.
+		   This will not work for a hardware breakpoint.  */
+		if (b->type == bp_hardware_breakpoint)
+		  warning ("hardware breakpoint %d not supported in overlay!\n",
+			   b->number);
+		else
+		  {
+		    CORE_ADDR addr = overlay_unmapped_address (b->address, 
+							       b->section);
+		    /* Set a software (trap) breakpoint at the LMA.  */
+		    val = target_insert_breakpoint (addr, b->shadow_contents);
+		    if (val != 0)
+		      warning ("overlay breakpoint %d failed: in ROM?", 
+			       b->number);
+		  }
+	      }
+	    /* Shall we set a breakpoint at the VMA? */
+	    if (section_is_mapped (b->section))
+	      {
+		/* Yes.  This overlay section is mapped into memory.  */
+		if (b->type == bp_hardware_breakpoint)
+		  val = target_insert_hw_breakpoint (b->address, 
+						     b->shadow_contents);
+		else
 		  val = target_insert_breakpoint (b->address,
 						  b->shadow_contents);
 	      }
-	    else		/* ordinary (non-overlay) address */
-	      val = target_insert_breakpoint (b->address, b->shadow_contents);
+	    else
+	      {
+		/* No.  This breakpoint will not be inserted.  
+		   No error, but do not mark the bp as 'inserted'.  */
+		continue;
+	      }
 	  }
+
 	if (val)
 	  {
 	    /* Can't set the breakpoint.  */
@@ -866,7 +901,7 @@ insert_breakpoints (void)
 	/* Save the current frame and level so we can restore it after
 	   evaluating the watchpoint expression on its own frame.  */
 	saved_frame = selected_frame;
-	saved_level = selected_frame_level;
+	saved_level = frame_relative_level (selected_frame);
 
 	/* Determine if the watchpoint is within scope.  */
 	if (b->exp_valid_block == NULL)
@@ -883,7 +918,7 @@ insert_breakpoints (void)
 	    fi = find_frame_addr_in_frame_chain (b->watchpoint_frame);
 	    within_current_scope = (fi != NULL);
 	    if (within_current_scope)
-	      select_frame (fi, -1);
+	      select_frame (fi);
 	  }
 
 	if (within_current_scope)
@@ -967,8 +1002,8 @@ insert_breakpoints (void)
 
 	/* Restore the frame and level.  */
 	if ((saved_frame != selected_frame) ||
-	    (saved_level != selected_frame_level))
-	  select_frame (saved_frame, saved_level);
+	    (saved_level != frame_relative_level (selected_frame)))
+	  select_frame (saved_frame);
 
 	if (val)
 	  return_val = val;	/* remember failure */
@@ -1266,32 +1301,61 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
       && b->type != bp_catch_catch
       && b->type != bp_catch_throw)
     {
-      if (b->type == bp_hardware_breakpoint)
-	val = target_remove_hw_breakpoint (b->address, b->shadow_contents);
+      /* "Normal" instruction breakpoint: either the standard
+	 trap-instruction bp (bp_breakpoint), or a
+	 bp_hardware_breakpoint.  */
+
+      /* First check to see if we have to handle an overlay.  */
+      if (overlay_debugging == ovly_off
+	  || b->section == NULL
+	  || !(section_is_overlay (b->section)))
+	{
+	  /* No overlay handling: just remove the breakpoint.  */
+
+	  if (b->type == bp_hardware_breakpoint)
+	    val = target_remove_hw_breakpoint (b->address, 
+					       b->shadow_contents);
+	  else
+	    val = target_remove_breakpoint (b->address, b->shadow_contents);
+	}
       else
 	{
-	  /* Check to see if breakpoint is in an overlay section;
-	     if so, we should remove the breakpoint at the LMA address.
-	     If that is not equal to the raw address, then we should 
-	     presumably remove the breakpoint there as well.  */
-	  if (overlay_debugging && b->section 
-	      && section_is_overlay (b->section))
+	  /* This breakpoint is in an overlay section.  
+	     Did we set a breakpoint at the LMA?  */
+	  if (!overlay_events_enabled)
+	      {
+		/* Yes -- overlay event support is not active, so we
+		   should have set a breakpoint at the LMA.  Remove it.  
+		*/
+		CORE_ADDR addr = overlay_unmapped_address (b->address, 
+							   b->section);
+		/* Ignore any failures: if the LMA is in ROM, we will
+		   have already warned when we failed to insert it.  */
+		if (b->type != bp_hardware_breakpoint)
+		  target_remove_hw_breakpoint (addr, b->shadow_contents);
+		else
+		  target_remove_breakpoint (addr, b->shadow_contents);
+	      }
+	  /* Did we set a breakpoint at the VMA? 
+	     If so, we will have marked the breakpoint 'inserted'.  */
+	  if (b->inserted)
 	    {
-	      CORE_ADDR addr;
-
-	      addr = overlay_unmapped_address (b->address, b->section);
-	      val = target_remove_breakpoint (addr, b->shadow_contents);
-	      /* This would be the time to check val, to see if the
-	         shadow breakpoint write to the load address succeeded.  
-	         However, this might be an ordinary occurrance, eg. if 
-	         the unmapped overlay is in ROM.  */
-	      val = 0;		/* in case unmapped address failed */
-	      if (section_is_mapped (b->section))
+	      /* Yes -- remove it.  Previously we did not bother to
+		 remove the breakpoint if the section had been
+		 unmapped, but let's not rely on that being safe.  We
+		 don't know what the overlay manager might do.  */
+	      if (b->type == bp_hardware_breakpoint)
+		val = target_remove_hw_breakpoint (b->address, 
+						   b->shadow_contents);
+	      else
 		val = target_remove_breakpoint (b->address,
 						b->shadow_contents);
 	    }
-	  else			/* ordinary (non-overlay) address */
-	    val = target_remove_breakpoint (b->address, b->shadow_contents);
+	  else
+	    {
+	      /* No -- not inserted, so no need to remove.  No error.  */
+	      val = 0;
+	    }
 	}
       if (val)
 	return val;
@@ -2270,7 +2334,7 @@ watchpoint_check (PTR p)
 	/* If we end up stopping, the current frame will get selected
 	   in normal_stop.  So this call to select_frame won't affect
 	   the user.  */
-	select_frame (fr, -1);
+	select_frame (fr);
     }
 
   if (within_current_scope)
@@ -2398,9 +2462,15 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
 	  continue;
       }
 
-    if (b->type == bp_hardware_breakpoint
-	&& b->address != (*pc - DECR_PC_AFTER_HW_BREAK))
-      continue;
+    if (b->type == bp_hardware_breakpoint)
+      {
+	if (b->address != (*pc - DECR_PC_AFTER_HW_BREAK))
+	  continue;
+	if (overlay_debugging		/* unmapped overlay section */
+	    && section_is_overlay (b->section) 
+	    && !section_is_mapped (b->section))
+	  continue;
+      }
 
     /* Is this a catchpoint of a load or unload?  If so, did we
        get a load or unload of the specified library?  If not,
@@ -2595,7 +2665,7 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
 	  {
 	    /* Need to select the frame, with all that implies
 	       so that the conditions will have the right context.  */
-	    select_frame (get_current_frame (), 0);
+	    select_frame (get_current_frame ());
 	    value_is_zero
 	      = catch_errors (breakpoint_cond_eval, (b->cond),
 			      "Error in testing breakpoint condition:\n",
@@ -2780,7 +2850,7 @@ bpstat_what (bpstat bs)
 
   /* step_resume entries: a step resume breakpoint overrides another
      breakpoint of signal handling (see comment in wait_for_inferior
-     at first IN_SIGTRAMP where we set the step_resume breakpoint).  */
+     at first PC_IN_SIGTRAMP where we set the step_resume breakpoint).  */
   /* We handle the through_sigtramp_breakpoint the same way; having both
      one of those and a step_resume_breakpoint is probably very rare (?).  */
 
@@ -3824,9 +3894,15 @@ create_overlay_event_breakpoint (char *func_name)
   b->addr_string = xstrdup (func_name);
 
   if (overlay_debugging == ovly_auto)
-    b->enable_state = bp_enabled;
+    {
+      b->enable_state = bp_enabled;
+      overlay_events_enabled = 1;
+    }
   else 
-    b->enable_state = bp_disabled;
+    {
+      b->enable_state = bp_disabled;
+      overlay_events_enabled = 0;
+    }
 }
 
 void
@@ -3839,6 +3915,7 @@ enable_overlay_breakpoints (void)
     {
       b->enable_state = bp_enabled;
       check_duplicates (b);
+      overlay_events_enabled = 1;
     }
 }
 
@@ -3852,6 +3929,7 @@ disable_overlay_breakpoints (void)
     {
       b->enable_state = bp_disabled;
       check_duplicates (b);
+      overlay_events_enabled = 0;
     }
 }
 
@@ -5621,7 +5699,7 @@ get_catch_sals (int this_level_only)
      but it's better than a core dump.  */
   if (selected_frame == NULL)
     error ("No selected frame.");
-  block = get_frame_block (selected_frame);
+  block = get_frame_block (selected_frame, 0);
   pc = selected_frame->pc;
 
   sals.nelts = 0;
@@ -6364,15 +6442,15 @@ tcatch_command (char *arg, int from_tty)
   catch_command_1 (arg, 1, from_tty);
 }
 
+/* Delete breakpoints by address or line.  */
 
 static void
 clear_command (char *arg, int from_tty)
 {
-  register struct breakpoint *b, *b1;
+  struct breakpoint *b, *tmp, *prev, *found;
   int default_match;
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
-  register struct breakpoint *found;
   int i;
 
   if (arg)
@@ -6384,6 +6462,7 @@ clear_command (char *arg, int from_tty)
     {
       sals.sals = (struct symtab_and_line *)
 	xmalloc (sizeof (struct symtab_and_line));
+      make_cleanup (xfree, sals.sals);
       INIT_SAL (&sal);		/* initialize to zeroes */
       sal.line = default_breakpoint_line;
       sal.symtab = default_breakpoint_symtab;
@@ -6398,13 +6477,11 @@ clear_command (char *arg, int from_tty)
     }
 
   /* For each line spec given, delete bps which correspond
-     to it.  We do this in two loops: the first loop looks at
-     the initial bp(s) in the chain which should be deleted,
-     the second goes down the rest of the chain looking ahead
-     one so it can take those bps off the chain without messing
-     up the chain. */
+     to it.  Do it in two passes, solely to preserve the current
+     behavior that from_tty is forced true if we delete more than
+     one breakpoint.  */
 
-
+  found = NULL;
   for (i = 0; i < sals.nelts; i++)
     {
       /* If exact pc given, clear bpts at that pc.
@@ -6420,81 +6497,75 @@ clear_command (char *arg, int from_tty)
          1              0             <can't happen> */
 
       sal = sals.sals[i];
-      found = (struct breakpoint *) 0;
+      prev = NULL;
 
-
-      while (breakpoint_chain
-      /* Why don't we check here that this is not
-         a watchpoint, etc., as we do below?
-         I can't make it fail, but don't know
-         what's stopping the failure: a watchpoint
-         of the same address as "sal.pc" should
-         wind up being deleted. */
-
-	     && (((sal.pc && (breakpoint_chain->address == sal.pc)) 
-		  && (!overlay_debugging 
-		      || breakpoint_chain->section == sal.section))
-		 || ((default_match || (0 == sal.pc))
-		     && breakpoint_chain->source_file != NULL
-		     && sal.symtab != NULL
-	      && STREQ (breakpoint_chain->source_file, sal.symtab->filename)
-		     && breakpoint_chain->line_number == sal.line)))
-
+      /* Find all matching breakpoints, remove them from the
+	 breakpoint chain, and add them to the 'found' chain.  */
+      ALL_BREAKPOINTS_SAFE (b, tmp)
 	{
-	  b1 = breakpoint_chain;
-	  breakpoint_chain = b1->next;
-	  b1->next = found;
-	  found = b1;
-	}
-
-      ALL_BREAKPOINTS (b)
-	while (b->next
-	       && b->next->type != bp_none
-	       && b->next->type != bp_watchpoint
-	       && b->next->type != bp_hardware_watchpoint
-	       && b->next->type != bp_read_watchpoint
-	       && b->next->type != bp_access_watchpoint
-	       && (((sal.pc && (b->next->address == sal.pc)) 
-		    && (!overlay_debugging || b->next->section == sal.section))
-		   || ((default_match || (0 == sal.pc))
-		       && b->next->source_file != NULL
-		       && sal.symtab != NULL
-		       && STREQ (b->next->source_file, sal.symtab->filename)
-		       && b->next->line_number == sal.line)))
-
-
-	{
-	  b1 = b->next;
-	  b->next = b1->next;
-	  b1->next = found;
-	  found = b1;
-	}
-
-      if (found == 0)
-	{
-	  if (arg)
-	    error ("No breakpoint at %s.", arg);
+	  /* Are we going to delete b? */
+	  if (b->type != bp_none
+	      && b->type != bp_watchpoint
+	      && b->type != bp_hardware_watchpoint
+	      && b->type != bp_read_watchpoint
+	      && b->type != bp_access_watchpoint
+	      /* Not if b is a watchpoint of any sort... */
+	      && (((sal.pc && (b->address == sal.pc)) 
+		   && (!section_is_overlay (b->section)
+		       || b->section == sal.section))
+		  /* Yes, if sal.pc matches b (modulo overlays).  */
+		  || ((default_match || (0 == sal.pc))
+		      && b->source_file != NULL
+		      && sal.symtab != NULL
+		      && STREQ (b->source_file, sal.symtab->filename)
+		      && b->line_number == sal.line)))
+	    /* Yes, if sal source file and line matches b.  */
+	    {
+	      /* Remove it from breakpoint_chain...  */
+	      if (b == breakpoint_chain)
+		{
+		  /* b is at the head of the list */
+		  breakpoint_chain = b->next;
+		}
+	      else
+		{
+		  prev->next = b->next;
+		}
+	      /* And add it to 'found' chain.  */
+	      b->next = found;
+	      found = b;
+	    }
 	  else
-	    error ("No breakpoint at this line.");
+	    {
+	      /* Keep b, and keep a pointer to it.  */
+	      prev = b;
+	    }
 	}
-
-      if (found->next)
-	from_tty = 1;		/* Always report if deleted more than one */
-      if (from_tty)
-	printf_unfiltered ("Deleted breakpoint%s ", found->next ? "s" : "");
-      breakpoints_changed ();
-      while (found)
-	{
-	  if (from_tty)
-	    printf_unfiltered ("%d ", found->number);
-	  b1 = found->next;
-	  delete_breakpoint (found);
-	  found = b1;
-	}
-      if (from_tty)
-	putchar_unfiltered ('\n');
     }
-  xfree (sals.sals);
+  /* Now go thru the 'found' chain and delete them.  */
+  if (found == 0)
+    {
+      if (arg)
+	error ("No breakpoint at %s.", arg);
+      else
+	error ("No breakpoint at this line.");
+    }
+
+  if (found->next)
+    from_tty = 1;		/* Always report if deleted more than one */
+  if (from_tty)
+    printf_unfiltered ("Deleted breakpoint%s ", found->next ? "s" : "");
+  breakpoints_changed ();
+  while (found)
+    {
+      if (from_tty)
+	printf_unfiltered ("%d ", found->number);
+      tmp = found->next;
+      delete_breakpoint (found);
+      found = tmp;
+    }
+  if (from_tty)
+    putchar_unfiltered ('\n');
 }
 
 /* Delete breakpoint in BS if they are `delete' breakpoints and
@@ -7211,8 +7282,8 @@ is valid is not currently in scope.\n", bpt->number);
 	    }
 
 	  save_selected_frame = selected_frame;
-	  save_selected_frame_level = selected_frame_level;
-	  select_frame (fr, -1);
+	  save_selected_frame_level = frame_relative_level (selected_frame);
+	  select_frame (fr);
 	}
 
       value_free (bpt->val);
@@ -7247,7 +7318,7 @@ have been allocated for other watchpoints.\n", bpt->number);
 	}
 
       if (save_selected_frame_level >= 0)
-	select_frame (save_selected_frame, save_selected_frame_level);
+	select_frame (save_selected_frame);
       value_free_to_mark (mark);
     }
   if (modify_breakpoint_hook)
@@ -7374,26 +7445,26 @@ then no output is printed when it is hit, except what the commands print.");
   add_com ("condition", class_breakpoint, condition_command,
 	   "Specify breakpoint number N to break only if COND is true.\n\
 Usage is `condition N COND', where N is an integer and COND is an\n\
-expression to be evaluated whenever breakpoint N is reached.  ");
+expression to be evaluated whenever breakpoint N is reached.");
 
   c = add_com ("tbreak", class_breakpoint, tbreak_command,
 	       "Set a temporary breakpoint.  Args like \"break\" command.\n\
 Like \"break\" except the breakpoint is only temporary,\n\
 so it will be deleted when hit.  Equivalent to \"break\" followed\n\
 by using \"enable delete\" on the breakpoint number.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   c = add_com ("hbreak", class_breakpoint, hbreak_command,
 	       "Set a hardware assisted  breakpoint. Args like \"break\" command.\n\
 Like \"break\" except the breakpoint requires hardware support,\n\
 some target hardware may not have this support.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   c = add_com ("thbreak", class_breakpoint, thbreak_command,
 	       "Set a temporary hardware assisted breakpoint. Args like \"break\" command.\n\
 Like \"hbreak\" except the breakpoint is only temporary,\n\
 so it will be deleted when hit.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   add_prefix_cmd ("enable", class_breakpoint, enable_command,
 		  "Enable some breakpoints.\n\
@@ -7507,7 +7578,7 @@ This is useful for breaking on return to a stack frame.\n\
 Multiple breakpoints at one place are permitted, and useful if conditional.\n\
 \n\
 Do \"help breakpoints\" for info on other commands dealing with breakpoints.", NULL));
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   add_com_alias ("b", "break", class_run, 1);
   add_com_alias ("br", "break", class_run, 1);
@@ -7638,19 +7709,19 @@ by using \"enable delete\" on the catchpoint number.");
 	       "Set a watchpoint for an expression.\n\
 A watchpoint stops execution of your program whenever the value of\n\
 an expression changes.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   c = add_com ("rwatch", class_breakpoint, rwatch_command,
 	       "Set a read watchpoint for an expression.\n\
 A watchpoint stops execution of your program whenever the value of\n\
 an expression is read.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   c = add_com ("awatch", class_breakpoint, awatch_command,
 	       "Set a watchpoint for an expression.\n\
 A watchpoint stops execution of your program whenever the value of\n\
 an expression is either read or written.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   add_info ("watchpoints", breakpoints_info,
 	    "Synonym for ``info breakpoints''.");

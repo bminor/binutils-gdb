@@ -1,5 +1,7 @@
 /* MI Command Set - output generating routines.
-   Copyright 2000 Free Software Foundation, Inc.
+
+   Copyright 2000, 2002 Free Software Foundation, Inc.
+
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -22,12 +24,6 @@
 #include "defs.h"
 #include "ui-out.h"
 #include "mi-out.h"
-
-/* Convenience macro for allocting typesafe memory. */
-
-#ifndef XMALLOC
-#define XMALLOC(TYPE) (TYPE*) xmalloc (sizeof (TYPE))
-#endif
 
 struct ui_out_data
   {

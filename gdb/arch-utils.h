@@ -1,5 +1,6 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
-   Copyright 1998, 1999, 2000 Free Software Foundation, Inc.
+
+   Copyright 1998, 1999, 2000, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -155,6 +156,9 @@ extern int generic_register_raw_size (int regnum);
 /* Assume the virtual size of registers corresponds to the virtual type.  */
 
 extern int generic_register_virtual_size (int regnum);
+
+/* Prop up old targets that use various IN_SIGTRAMP() macros.  */
+extern int legacy_pc_in_sigtramp (CORE_ADDR pc, char *name);
 
 /* Initialize a ``struct info''.  Can't use memset(0) since some
    default values are not zero.  */

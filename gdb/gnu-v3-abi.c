@@ -241,22 +241,33 @@ gnuv3_rtti_type (struct value *value,
   vtable_symbol_name = SYMBOL_DEMANGLED_NAME (vtable_symbol);
   if (vtable_symbol_name == NULL
       || strncmp (vtable_symbol_name, "vtable for ", 11))
-    error ("can't find linker symbol for virtual table for `%s' value",
-           TYPE_NAME (value_type));
+    {
+      warning ("can't find linker symbol for virtual table for `%s' value",
+	       TYPE_NAME (value_type));
+      if (vtable_symbol_name)
+	warning ("  found `%s' instead", vtable_symbol_name);
+      return NULL;
+    }
   class_name = vtable_symbol_name + 11;
 
   /* Try to look up the class name as a type name.  */
   class_symbol = lookup_symbol (class_name, 0, STRUCT_NAMESPACE, 0, 0);
   if (! class_symbol)
-    error ("can't find class named `%s', as given by C++ RTTI", class_name);
+    {
+      warning ("can't find class named `%s', as given by C++ RTTI", class_name);
+      return NULL;
+    }
 
   /* Make sure the type symbol is sane.  (An earlier version of this
      code would find constructor functions, who have the same name as
      the class.)  */
   if (SYMBOL_CLASS (class_symbol) != LOC_TYPEDEF
       || TYPE_CODE (SYMBOL_TYPE (class_symbol)) != TYPE_CODE_CLASS)
-    error ("C++ RTTI gives a class name of `%s', but that isn't a type name",
-           class_name);
+    {
+      warning ("C++ RTTI gives a class name of `%s', but that isn't a type name",
+	       class_name);
+      return NULL;
+    }
 
   /* This is the object's run-time type!  */
   run_time_type = SYMBOL_TYPE (class_symbol);

@@ -25,7 +25,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-static char *registers;
+struct inferior_regcache_data
+{
+  char *registers;
+};
+
 static int register_bytes;
 
 static struct reg *reg_defs;
@@ -33,10 +37,45 @@ static int num_registers;
 
 const char **gdbserver_expedite_regs;
 
+static struct inferior_regcache_data *
+get_regcache (struct inferior_info *inf)
+{
+  struct inferior_regcache_data *regcache;
+
+  regcache = (struct inferior_regcache_data *) inferior_regcache_data (inf);
+
+  if (regcache == NULL)
+    fatal ("no register cache");
+
+  return regcache;
+}
+
 int
 registers_length (void)
 {
   return 2 * register_bytes;
+}
+
+void
+create_register_cache (struct inferior_info *inferior)
+{
+  struct inferior_regcache_data *regcache;
+
+  regcache = malloc (sizeof (*regcache));
+
+  regcache->registers = malloc (register_bytes);
+  if (regcache->registers == NULL)
+    fatal ("Could not allocate register cache.");
+
+  set_inferior_regcache_data (inferior, regcache);
+}
+
+void
+free_register_cache (struct inferior_info *inferior)
+{
+  free (get_regcache (current_inferior)->registers);
+  free (get_regcache (current_inferior));
+  set_inferior_regcache_data (inferior, NULL);
 }
 
 void
@@ -55,14 +94,13 @@ set_register_cache (struct reg *regs, int n)
     }
 
   register_bytes = offset / 8;
-  registers = malloc (offset / 8);
-  if (!registers)
-    fatal ("Could not allocate register cache.");
 }
 
 void
 registers_to_string (char *buf)
 {
+  char *registers = get_regcache (current_inferior)->registers;
+
   convert_int_to_ascii (registers, buf, register_bytes);
 }
 
@@ -70,6 +108,7 @@ void
 registers_from_string (char *buf)
 {
   int len = strlen (buf);
+  char *registers = get_regcache (current_inferior)->registers;
 
   if (len != register_bytes * 2)
     {
@@ -119,29 +158,31 @@ register_size (int n)
 char *
 register_data (int n)
 {
+  char *registers = get_regcache (current_inferior)->registers;
+
   return registers + (reg_defs[n].offset / 8);
 }
 
 void
-supply_register (int n, const char *buf)
+supply_register (int n, const void *buf)
 {
   memcpy (register_data (n), buf, register_size (n));
 }
 
 void
-supply_register_by_name (const char *name, const char *buf)
+supply_register_by_name (const char *name, const void *buf)
 {
   supply_register (find_regno (name), buf);
 }
 
 void
-collect_register (int n, char *buf)
+collect_register (int n, void *buf)
 {
   memcpy (buf, register_data (n), register_size (n));
 }
 
 void
-collect_register_by_name (const char *name, char *buf)
+collect_register_by_name (const char *name, void *buf)
 {
   collect_register (find_regno (name), buf);
 }

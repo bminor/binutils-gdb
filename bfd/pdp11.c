@@ -1,5 +1,5 @@
 /* BFD back-end for PDP-11 a.out binaries.
-   Copyright 2001 Free Software Foundation, Inc.
+   Copyright 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -4304,6 +4304,13 @@ aout_link_write_other_symbol (h, data)
   struct external_nlist outsym;
   bfd_size_type indx;
   bfd_size_type amt;
+
+  if (h->root.type == bfd_link_hash_warning)
+    {
+      h = (struct aout_link_hash_entry *) h->root.u.i.link;
+      if (h->root.type == bfd_link_hash_new)
+	return true;
+    }
 
   output_bfd = finfo->output_bfd;
 

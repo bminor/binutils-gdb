@@ -269,7 +269,7 @@ default_derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
   for (sec = abfd->sections; sec; sec = sec->next)
     {
       if (bfd_get_section_flags (abfd, sec) & SEC_DATA ||
-	  strcmp (".bss", bfd_get_section_name (abfd, sec)) == 0)
+	  strcmp (".bss", bfd_section_name (abfd, sec)) == 0)
 	{
 	  sec_vaddr = bfd_get_section_vma (abfd, sec);
 	  sec_size = bfd_get_section_size_before_reloc (sec);
@@ -278,8 +278,19 @@ default_derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
 	}
     }
   /* Now get the top-of-heap by calling sbrk in the inferior.  */
-  if ((sbrk = find_function_in_inferior ("sbrk")) == NULL)
+  if (lookup_minimal_symbol ("sbrk", NULL, NULL) != NULL)
+    {
+      if ((sbrk = find_function_in_inferior ("sbrk")) == NULL)
+	return 0;
+    }
+  else if (lookup_minimal_symbol ("_sbrk", NULL, NULL) != NULL)
+    {
+      if ((sbrk = find_function_in_inferior ("_sbrk")) == NULL)
+	return 0;
+    }
+  else
     return 0;
+
   if ((zero = value_from_longest (builtin_type_int, (LONGEST) 0)) == NULL)
     return 0;
   if ((sbrk = call_function_by_hand (sbrk, 1, &zero)) == NULL)
@@ -314,7 +325,7 @@ make_output_phdrs (bfd *obfd, asection *osec, void *ignored)
   int p_type;
 
   /* FIXME: these constants may only be applicable for ELF.  */
-  if (strncmp (osec->name, "load", 4) == 0)
+  if (strncmp (bfd_section_name (obfd, osec), "load", 4) == 0)
     p_type = PT_LOAD;
   else
     p_type = PT_NOTE;
@@ -452,7 +463,7 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
   if (size == 0)
     return;	/* Read-only sections are marked as zero-size.
 		   We don't have to copy their contents. */
-  if (strncmp ("load", bfd_get_section_name (obfd, osec), 4) != 0)
+  if (strncmp ("load", bfd_section_name (obfd, osec), 4) != 0)
     return;	/* Only interested in "load" sections. */
 
   if ((memhunk = xmalloc (size)) == NULL)

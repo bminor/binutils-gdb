@@ -37,8 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    too messy, particularly when such includes can be inserted at random
    times by the parser generator.  */
 
-/* FIXME: there are still 21 shift/reduce conflicts
-   Other known bugs or limitations:
+/* Known bugs or limitations:
     - pascal string operations are not supported at all.
     - there are some problems with boolean types.
     - Pascal type hexadecimal constants are not supported
@@ -212,6 +211,7 @@ parse_number (char *, int, int, YYSTYPE *);
 %left '*' '/'
 %right UNARY INCREMENT DECREMENT
 %right ARROW '.' '[' '('
+%left '^'
 %token <ssym> BLOCKNAME
 %type <bval> block
 %left COLONCOLON
@@ -947,6 +947,8 @@ yylex ()
 
  retry:
 
+  prev_lexptr = lexptr;
+
   tokstart = lexptr;
   explen = strlen (lexptr);
   /* See if it is a special token of length 3.  */
@@ -1300,7 +1302,7 @@ yylex ()
 			 &is_a_field_of_this,
 			 (struct symtab **) NULL);
     /* second chance uppercased (as Free Pascal does).  */
-    if (!sym)
+    if (!sym && !is_a_field_of_this)
       {
        for (i = 0; i <= namelen; i++)
          {
@@ -1311,7 +1313,7 @@ yylex ()
                         VAR_NAMESPACE,
                         &is_a_field_of_this,
                         (struct symtab **) NULL);
-       if (sym)
+       if (sym || is_a_field_of_this)
          for (i = 0; i <= namelen; i++)
            {
              if ((tokstart[i] >= 'a' && tokstart[i] <= 'z'))
@@ -1319,7 +1321,7 @@ yylex ()
            }
       }
     /* Third chance Capitalized (as GPC does).  */
-    if (!sym)
+    if (!sym && !is_a_field_of_this)
       {
        for (i = 0; i <= namelen; i++)
          {
@@ -1336,7 +1338,7 @@ yylex ()
                          VAR_NAMESPACE,
                          &is_a_field_of_this,
                          (struct symtab **) NULL);
-        if (sym)
+        if (sym || is_a_field_of_this)
           for (i = 0; i <= namelen; i++)
             {
               if (i == 0)
@@ -1481,5 +1483,8 @@ void
 yyerror (msg)
      char *msg;
 {
+  if (prev_lexptr)
+    lexptr = prev_lexptr;
+
   error ("A %s in expression, near `%s'.", (msg ? msg : "error"), lexptr);
 }

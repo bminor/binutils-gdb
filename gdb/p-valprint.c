@@ -190,8 +190,8 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 	     as GDB does not recognize stabs pascal strings
 	     Pascal strings are mapped to records
 	     with lowercase names PM  */
-          if (is_pascal_string_type (elttype, &length_pos,
-                                     &length_size, &string_pos, &char_size)
+          if (is_pascal_string_type (elttype, &length_pos, &length_size,
+                                     &string_pos, &char_size, NULL)
 	      && addr != 0)
 	    {
 	      ULONGEST string_length;
@@ -320,7 +320,7 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
       else
 	{
           if (is_pascal_string_type (type, &length_pos, &length_size,
-                                     &string_pos, &char_size))
+                                     &string_pos, &char_size, NULL))
 	    {
 	      len = extract_unsigned_integer (valaddr + embedded_offset + length_pos, length_size);
 	      LA_PRINT_STRING (stream, valaddr + embedded_offset + string_pos, len, char_size, 0);

@@ -1,4 +1,5 @@
 aix386-core.c
+aix5ppc-core.c
 aout-adobe.c
 aout-arm.c
 aout-cris.c
@@ -170,6 +171,7 @@ elfcode.h
 elfcore.h
 elflink.c
 elflink.h
+elfxx-mips.c
 epoc-pe-arm.c
 epoc-pei-arm.c
 format.c

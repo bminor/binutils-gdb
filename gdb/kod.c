@@ -132,7 +132,16 @@ kod_set_os (char *arg, int from_tty, struct cmd_list_element *command)
 {
   char *p;
 
-  if (command->type != set_cmd)
+  /* NOTE: cagney/2002-03-17: The add_show_from_set() function clones
+     the set command passed as a parameter.  The clone operation will
+     include (BUG?) any ``set'' command callback, if present.
+     Commands like ``info set'' call all the ``show'' command
+     callbacks.  Unfortunatly, for ``show'' commands cloned from
+     ``set'', this includes callbacks belonging to ``set'' commands.
+     Making this worse, this only occures if add_show_from_set() is
+     called after add_cmd_sfunc() (BUG?).  */
+
+  if (cmd_type (command) != set_cmd)
     return;
 
   /* If we had already had an open OS, close it.  */
@@ -145,7 +154,6 @@ kod_set_os (char *arg, int from_tty, struct cmd_list_element *command)
       delete_cmd (old_operating_system, &infolist);
       xfree (old_operating_system);
     }
-  old_operating_system = xstrdup (operating_system);
 
   if (! operating_system || ! *operating_system)
     {
@@ -159,6 +167,8 @@ kod_set_os (char *arg, int from_tty, struct cmd_list_element *command)
   else
     {
       char *kodlib;
+
+      old_operating_system = xstrdup (operating_system);
 
       load_kod_library (operating_system);
 

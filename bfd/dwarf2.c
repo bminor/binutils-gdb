@@ -42,7 +42,7 @@ struct line_head
 {
   bfd_vma total_length;
   unsigned short version;
-  unsigned int prologue_length;
+  bfd_vma prologue_length;
   unsigned char minimum_instruction_length;
   unsigned char default_is_stmt;
   int line_base;
@@ -225,7 +225,7 @@ static bfd_vma read_address PARAMS ((struct comp_unit *, char *));
 static struct abbrev_info *lookup_abbrev
   PARAMS ((unsigned int, struct abbrev_info **));
 static struct abbrev_info **read_abbrevs
-  PARAMS ((bfd *, unsigned int, struct dwarf2_debug *));
+  PARAMS ((bfd *, bfd_vma, struct dwarf2_debug *));
 static char *read_attribute
   PARAMS ((struct attribute *, struct attr_abbrev *,
 	   struct comp_unit *, char *));
@@ -240,9 +240,10 @@ static void arange_add PARAMS ((struct comp_unit *, bfd_vma, bfd_vma));
 static struct line_info_table *decode_line_info
   PARAMS ((struct comp_unit *, struct dwarf2_debug *));
 static boolean lookup_address_in_line_info_table
-  PARAMS ((struct line_info_table *, bfd_vma, const char **, unsigned int *));
+  PARAMS ((struct line_info_table *, bfd_vma, struct funcinfo *,
+	   const char **, unsigned int *));
 static boolean lookup_address_in_function_table
-  PARAMS ((struct funcinfo *, bfd_vma, const char **));
+  PARAMS ((struct funcinfo *, bfd_vma, struct funcinfo **, const char **));
 static boolean scan_unit_for_functions PARAMS ((struct comp_unit *));
 static bfd_vma find_rela_addend
   PARAMS ((bfd *, asection *, bfd_size_type, asymbol**));
@@ -395,8 +396,8 @@ read_indirect_string (unit, buf, bytes_read_ptr)
 
   if (offset >= stash->dwarf_str_size)
     {
-      (*_bfd_error_handler) (_("Dwarf Error: DW_FORM_strp offset (%u) greater than or equal to .debug_str size (%u)."),
-			     offset, stash->dwarf_str_size);
+      (*_bfd_error_handler) (_("Dwarf Error: DW_FORM_strp offset (%lu) greater than or equal to .debug_str size (%lu)."),
+			     (unsigned long) offset, stash->dwarf_str_size);
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }
@@ -522,7 +523,7 @@ lookup_abbrev (number,abbrevs)
 static struct abbrev_info**
 read_abbrevs (abfd, offset, stash)
      bfd * abfd;
-     unsigned int offset;
+     bfd_vma offset;
      struct dwarf2_debug *stash;
 {
   struct abbrev_info **abbrevs;
@@ -556,8 +557,8 @@ read_abbrevs (abfd, offset, stash)
 
   if (offset >= stash->dwarf_abbrev_size)
     {
-      (*_bfd_error_handler) (_("Dwarf Error: Abbrev offset (%u) greater than or equal to .debug_abbrev size (%u)."),
-			     offset, stash->dwarf_abbrev_size);
+      (*_bfd_error_handler) (_("Dwarf Error: Abbrev offset (%lu) greater than or equal to .debug_abbrev size (%lu)."),
+			     (unsigned long) offset, stash->dwarf_abbrev_size);
       bfd_set_error (bfd_error_bad_value);
       return 0;
     }
@@ -753,7 +754,7 @@ read_attribute_value (attr, form, unit, info_ptr)
       info_ptr = read_attribute_value (attr, form, unit, info_ptr);
       break;
     default:
-      (*_bfd_error_handler) (_("Dwarf Error: Invalid or unhandled FORM value: %d."),
+      (*_bfd_error_handler) (_("Dwarf Error: Invalid or unhandled FORM value: %u."),
 			     form);
       bfd_set_error (bfd_error_bad_value);
     }
@@ -806,6 +807,14 @@ struct line_info_table
   char** dirs;
   struct fileinfo* files;
   struct line_info* last_line;
+};
+
+struct funcinfo
+{
+  struct funcinfo *prev_func;
+  char* name;
+  bfd_vma low;
+  bfd_vma high;
 };
 
 static void
@@ -949,7 +958,7 @@ decode_line_info (unit, stash)
      below.  */
   if (unit->line_offset >= stash->dwarf_line_size)
     {
-      (*_bfd_error_handler) (_("Dwarf Error: Line offset (%u) greater than or equal to .debug_line size (%u)."),
+      (*_bfd_error_handler) (_("Dwarf Error: Line offset (%lu) greater than or equal to .debug_line size (%lu)."),
 			     unit->line_offset, stash->dwarf_line_size);
       bfd_set_error (bfd_error_bad_value);
       return 0;
@@ -1215,10 +1224,12 @@ decode_line_info (unit, stash)
 static boolean
 lookup_address_in_line_info_table (table,
 				   addr,
+				   function,
 				   filename_ptr,
 				   linenumber_ptr)
      struct line_info_table* table;
      bfd_vma addr;
+     struct funcinfo *function;
      const char **filename_ptr;
      unsigned int *linenumber_ptr;
 {
@@ -1235,12 +1246,36 @@ lookup_address_in_line_info_table (table,
       if (!each_line->end_sequence
 	  && addr >= each_line->address && addr < next_line->address)
 	{
-	  *filename_ptr = each_line->filename;
-	  *linenumber_ptr = each_line->line;
+	  /* If this line appears to span functions, and addr is in the
+	     later function, return the first line of that function instead
+	     of the last line of the earlier one.  This check is for GCC
+	     2.95, which emits the first line number for a function late.  */
+	  if (function != NULL
+	      && each_line->address < function->low
+	      && next_line->address > function->low)
+	    {
+	      *filename_ptr = next_line->filename;
+	      *linenumber_ptr = next_line->line;
+	    }
+	  else
+	    {
+	      *filename_ptr = each_line->filename;
+	      *linenumber_ptr = each_line->line;
+	    }
 	  return true;
 	}
       next_line = each_line;
       each_line = each_line->prev_line;
+    }
+
+  /* At this point each_line is NULL but next_line is not.  If we found the
+     containing function in this compilation unit, return the first line we
+     have a number for.  This is also for compatibility with GCC 2.95.  */
+  if (function != NULL)
+    {
+      *filename_ptr = next_line->filename;
+      *linenumber_ptr = next_line->line;
+      return true;
     }
 
   return false;
@@ -1248,22 +1283,16 @@ lookup_address_in_line_info_table (table,
 
 /* Function table functions.  */
 
-struct funcinfo
-{
-  struct funcinfo *prev_func;
-  char* name;
-  bfd_vma low;
-  bfd_vma high;
-};
-
 /* If ADDR is within TABLE, set FUNCTIONNAME_PTR, and return true.  */
 
 static boolean
 lookup_address_in_function_table (table,
 				  addr,
+				  function_ptr,
 				  functionname_ptr)
      struct funcinfo* table;
      bfd_vma addr;
+     struct funcinfo** function_ptr;
      const char **functionname_ptr;
 {
   struct funcinfo* each_func;
@@ -1275,6 +1304,7 @@ lookup_address_in_function_table (table,
       if (addr >= each_func->low && addr < each_func->high)
 	{
 	  *functionname_ptr = each_func->name;
+	  *function_ptr = each_func;
 	  return true;
 	}
     }
@@ -1315,7 +1345,7 @@ scan_unit_for_functions (unit)
       abbrev = lookup_abbrev (abbrev_number,unit->abbrevs);
       if (! abbrev)
 	{
-	  (*_bfd_error_handler) (_("Dwarf Error: Could not find abbrev number %d."),
+	  (*_bfd_error_handler) (_("Dwarf Error: Could not find abbrev number %u."),
 			     abbrev_number);
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
@@ -1456,9 +1486,9 @@ parse_comp_unit (abfd, stash, unit_length, offset_size)
      unsigned int offset_size;
 {
   struct comp_unit* unit;
-  unsigned short version;
-  unsigned int abbrev_offset = 0;
-  unsigned char addr_size;
+  unsigned int version;
+  bfd_vma abbrev_offset = 0;
+  unsigned int addr_size;
   struct abbrev_info** abbrevs;
   unsigned int abbrev_number, bytes_read, i;
   struct abbrev_info *abbrev;
@@ -1487,7 +1517,7 @@ parse_comp_unit (abfd, stash, unit_length, offset_size)
 
   if (version != 2)
     {
-      (*_bfd_error_handler) (_("Dwarf Error: found dwarf version '%hu', this reader only handles version 2 information."), version);
+      (*_bfd_error_handler) (_("Dwarf Error: found dwarf version '%u', this reader only handles version 2 information."), version);
       bfd_set_error (bfd_error_bad_value);
       return 0;
     }
@@ -1496,7 +1526,7 @@ parse_comp_unit (abfd, stash, unit_length, offset_size)
     {
       (*_bfd_error_handler) (_("Dwarf Error: found address size '%u', this reader can not handle sizes greater than '%u'."),
 			 addr_size,
-			 sizeof (bfd_vma));
+			 (unsigned int) sizeof (bfd_vma));
       bfd_set_error (bfd_error_bad_value);
       return 0;
     }
@@ -1517,7 +1547,7 @@ parse_comp_unit (abfd, stash, unit_length, offset_size)
   info_ptr += bytes_read;
   if (! abbrev_number)
     {
-      (*_bfd_error_handler) (_("Dwarf Error: Bad abbrev number: %d."),
+      (*_bfd_error_handler) (_("Dwarf Error: Bad abbrev number: %u."),
 			 abbrev_number);
       bfd_set_error (bfd_error_bad_value);
       return 0;
@@ -1526,7 +1556,7 @@ parse_comp_unit (abfd, stash, unit_length, offset_size)
   abbrev = lookup_abbrev (abbrev_number, abbrevs);
   if (! abbrev)
     {
-      (*_bfd_error_handler) (_("Dwarf Error: Could not find abbrev number %d."),
+      (*_bfd_error_handler) (_("Dwarf Error: Could not find abbrev number %u."),
 			 abbrev_number);
       bfd_set_error (bfd_error_bad_value);
       return 0;
@@ -1636,6 +1666,7 @@ comp_unit_find_nearest_line (unit, addr,
 {
   boolean line_p;
   boolean func_p;
+  struct funcinfo *function;
 
   if (unit->error)
     return false;
@@ -1664,13 +1695,16 @@ comp_unit_find_nearest_line (unit, addr,
 	}
     }
 
-  line_p = lookup_address_in_line_info_table (unit->line_table,
-					      addr,
-					      filename_ptr,
-					      linenumber_ptr);
+  function = NULL;
   func_p = lookup_address_in_function_table (unit->function_table,
 					     addr,
+					     &function,
 					     functionname_ptr);
+  line_p = lookup_address_in_line_info_table (unit->line_table,
+					      addr,
+					      function,
+					      filename_ptr,
+					      linenumber_ptr);
   return line_p || func_p;
 }
 

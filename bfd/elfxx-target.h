@@ -1,5 +1,5 @@
 /* Target definitions for NN-bit ELF
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -167,6 +167,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef bfd_elfNN_canonicalize_dynamic_reloc
 #define bfd_elfNN_canonicalize_dynamic_reloc \
   _bfd_elf_canonicalize_dynamic_reloc
+#endif
+
+#ifndef bfd_elfNN_bfd_link_hash_table_free
+#define bfd_elfNN_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #endif
 
 #ifdef elf_backend_relocate_section
@@ -367,6 +371,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef elf_backend_write_section
 #define elf_backend_write_section		NULL
 #endif
+#ifndef elf_backend_mips_irix_compat
+#define elf_backend_mips_irix_compat		NULL
+#endif
+#ifndef elf_backend_mips_rtype_to_howto
+#define elf_backend_mips_rtype_to_howto		NULL
+#endif
 
 /* Previously, backends could only use SHT_REL or SHT_RELA relocation
    sections, but not both.  They defined USE_REL to indicate SHT_REL
@@ -458,6 +468,8 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_discard_info,
   elf_backend_ignore_discarded_relocs,
   elf_backend_write_section,
+  elf_backend_mips_irix_compat,
+  elf_backend_mips_rtype_to_howto,
   elf_backend_ecoff_debug_swap,
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,
@@ -523,9 +535,9 @@ const bfd_target TARGET_BIG_SYM =
 
   /* ar_max_namelen: maximum number of characters in an archive header
      FIXME:  this really has nothing to do with ELF, this is a characteristic
-     of the archiver and should be independently tunable.  This value is
-     a WAG (wild a** guess) */
-  14,
+     of the archiver and should be independently tunable.  The System V ABI,
+     Chapter 7 (Formats & Protocols), Archive section sets this as 15.  */
+  15,
 
   /* Routines to byte-swap various sized integers from the data sections */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
@@ -619,9 +631,9 @@ const bfd_target TARGET_LITTLE_SYM =
 
   /* ar_max_namelen: maximum number of characters in an archive header
      FIXME:  this really has nothing to do with ELF, this is a characteristic
-     of the archiver and should be independently tunable.  This value is
-     a WAG (wild a** guess) */
-  14,
+     of the archiver and should be independently tunable.  The System V ABI,
+     Chapter 7 (Formats & Protocols), Archive section sets this as 15.  */
+  15,
 
   /* Routines to byte-swap various sized integers from the data sections */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,

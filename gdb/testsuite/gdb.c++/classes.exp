@@ -907,7 +907,7 @@ proc do_tests {} {
 	    -re "= 82.*$gdb_prompt $" {
 		pass "calling method for small class"
 	    }
-	    -re "Address requested for identifier .v. which is in a register.*$gdb_prompt $" {
+	    -re "Address requested for identifier .v. which is in register.*$gdb_prompt $" {
 		setup_xfail "*-*-*" 2972
 		fail "calling method for small class"
 	    }

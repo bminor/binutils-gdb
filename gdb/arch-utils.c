@@ -1,5 +1,7 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -55,7 +57,7 @@
    and optionally adjust the pc to point to the correct memory location
    for inserting the breakpoint.  */
 
-unsigned char *
+const unsigned char *
 legacy_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
 {
   /* {BIG_,LITTLE_}BREAKPOINT is the sequence of bytes we insert for a
@@ -152,11 +154,7 @@ generic_remote_translate_xfer_address (CORE_ADDR gdb_addr, int gdb_len,
 int
 generic_prologue_frameless_p (CORE_ADDR ip)
 {
-#ifdef SKIP_PROLOGUE_FRAMELESS_P
-  return ip == SKIP_PROLOGUE_FRAMELESS_P (ip);
-#else
   return ip == SKIP_PROLOGUE (ip);
-#endif
 }
 
 /* New/multi-arched targets should use the correct gdbarch field
@@ -340,7 +338,7 @@ generic_prepare_to_proceed (int select_it)
 	      flush_cached_frames ();
 	      registers_changed ();
 	      stop_pc = wait_pc;
-	      select_frame (get_current_frame (), 0);
+	      select_frame (get_current_frame ());
 	    }
           /* We return 1 to indicate that there is a breakpoint here,
              so we need to step over it before continuing to avoid
@@ -419,6 +417,24 @@ int
 generic_register_virtual_size (int regnum)
 {
   return TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (regnum));
+}
+
+#if !defined (IN_SIGTRAMP)
+#if defined (SIGTRAMP_START)
+#define IN_SIGTRAMP(pc, name) \
+       ((pc) >= SIGTRAMP_START(pc)   \
+        && (pc) < SIGTRAMP_END(pc) \
+        )
+#else
+#define IN_SIGTRAMP(pc, name) \
+       (name && STREQ ("_sigtramp", name))
+#endif
+#endif
+
+int
+legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)
+{
+  return IN_SIGTRAMP(pc, name);
 }
 
 

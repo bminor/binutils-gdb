@@ -2,5 +2,3 @@
 XM_FILE= xm-hppab.h
 NAT_FILE= nm-hppab.h
 NATDEPFILES= hppab-nat.o corelow.o core-aout.o inftarg.o fork-child.o somread.o infptrace.o hpread.o somsolib.o
-
-## OBSOLETE ## GDBSERVER_DEPFILES= low-hppabsd.o

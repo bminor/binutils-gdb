@@ -1,3 +1,168 @@
+2002-05-01  Chris Demetriou  <cgd@broadcom.com>
+
+	* interp.c: Use 'deprecated' rather than 'depreciated.'
+	* sim-main.h: Likewise.
+
+2002-05-01  Chris Demetriou  <cgd@broadcom.com>
+
+	* cp1.c (store_fpr): Remove #ifdef'd out call to UndefinedResult
+	which wouldn't compile anyway.
+	* sim-main.h (unpredictable_action): New function prototype.
+	(Unpredictable): Define to call igen function unpredictable().
+	(NotWordValue): New macro to call igen function not_word_value().
+	(UndefinedResult): Remove.
+	* interp.c (undefined_result): Remove.
+	(unpredictable_action): New function.
+	* mips.igen (not_word_value, unpredictable): New functions.
+	(ADD, ADDI, do_addiu, do_addu, BGEZAL, BGEZALL, BLTZAL, BLTZALL)
+	(CLO, CLZ, MADD, MADDU, MSUB, MSUBU, MUL, do_mult, do_multu)
+	(do_sra, do_srav, do_srl, do_srlv, SUB, do_subu): Invoke
+	NotWordValue() to check for unpredictable inputs, then
+	Unpredictable() to handle them.
+
+2002-02-24  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen: Fix formatting of calls to Unpredictable().
+
+2002-04-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* interp.c (sim_open): Revert previous change.
+
+2002-04-18  Alexandre Oliva  <aoliva@redhat.com>
+
+	* interp.c (sim_open): Disable chunk of code that wrote code in
+	vector table entries.
+
+2002-03-19  Chris Demetriou  <cgd@broadcom.com>
+
+	* cp1.c (FP_S_s, FP_D_s, FP_S_be, FP_D_be, FP_S_e, FP_D_e, FP_S_f)
+	(FP_D_f, FP_S_fb, FP_D_fb, FPINF_SINGLE, FPINF_DOUBLE): Remove
+	unused definitions.
+
+2002-03-19  Chris Demetriou  <cgd@broadcom.com>
+
+	* cp1.c: Fix many formatting issues.
+
+2002-03-19  Chris G. Demetriou  <cgd@broadcom.com>
+
+	* cp1.c (fpu_format_name): New function to replace...
+	(DOFMT): This.  Delete, and update all callers.
+	(fpu_rounding_mode_name): New function to replace...
+	(RMMODE): This.  Delete, and update all callers.
+
+2002-03-19  Chris G. Demetriou  <cgd@broadcom.com>
+
+	* interp.c: Move FPU support routines from here to...
+	* cp1.c: Here.  New file.
+	* Makefile.in (SIM_OBJS): Add cp1.o to object list.
+	(cp1.o): New target.
+
+2002-03-12  Chris Demetriou  <cgd@broadcom.com>
+
+	* configure.in (mipsisa32*-*-*, mipsisa64*-*-*): New targets.
+	* mips.igen (mips32, mips64): New models, add to all instructions
+	and functions as appropriate.
+	(loadstore_ea, check_u64): New variant for model mips64.
+	(check_fmt_p): New variant for models mipsV and mips64, remove
+	mipsV model marking fro other variant.
+	(SLL) Rename to...
+	(SLLa) this.
+	(CLO, CLZ, MADD, MADDU, MSUB, MSUBU, MUL, SLLb): New instructions
+	for mips32 and mips64.
+	(DCLO, DCLZ): New instructions for mips64.
+
+2002-03-07  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (BREAK, LUI, ORI, SYSCALL, XORI): Print
+	immediate or code as a hex value with the "%#lx" format.
+	(ANDI): Likewise, and fix printed instruction name.
+
+2002-03-05  Chris Demetriou  <cgd@broadcom.com>
+
+	* sim-main.h (UndefinedResult, Unpredictable): New macros
+	which currently do nothing.
+
+2002-03-05  Chris Demetriou  <cgd@broadcom.com>
+
+	* sim-main.h (status_UX, status_SX, status_KX, status_TS)
+	(status_PX, status_MX, status_CU0, status_CU1, status_CU2)
+	(status_CU3): New definitions.
+
+	* sim-main.h (ExceptionCause): Add new values for MIPS32
+	and MIPS64: MDMX, MCheck, CacheErr.  Update comments
+	for DebugBreakPoint and NMIReset to note their status in
+	MIPS32 and MIPS64.
+	(SignalExceptionMDMX, SignalExceptionWatch, SignalExceptionMCheck)
+	(SignalExceptionCacheErr): New exception macros.
+
+2002-03-05  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (check_fpu): Enable check for coprocessor 1 usability.
+	* sim-main.h (COP_Usable): Define, but for now coprocessor 1
+	is always enabled.
+	(SignalExceptionCoProcessorUnusable): Take as argument the
+	unusable coprocessor number.
+
+2002-03-05  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen: Fix formatting of all SignalException calls.
+
+2002-03-05  Chris Demetriou  <cgd@broadcom.com>
+
+	* sim-main.h (SIGNEXTEND): Remove.
+
+2002-03-04  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen: Remove gencode comment from top of file, fix
+	spelling in another comment.
+
+2002-03-04  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (check_fmt, check_fmt_p): New functions to check
+	whether specific floating point formats are usable.
+	(ABS.fmt, ADD.fmt, CEIL.L.fmt, CEIL.W, DIV.fmt, FLOOR.L.fmt)
+	(FLOOR.W.fmt, MOV.fmt, MUL.fmt, NEG.fmt, RECIP.fmt, ROUND.L.fmt)
+	(ROUND.W.fmt, RSQRT.fmt, SQRT.fmt, SUB.fmt, TRUNC.L.fmt, TRUNC.W):
+	Use the new functions.
+	(do_c_cond_fmt): Remove format checks...
+	(C.cond.fmta, C.cond.fmtb): And move them into all callers.
+
+2002-03-03  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen: Fix formatting of check_fpu calls.
+
+2002-03-03  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (FLOOR.L.fmt): Store correct destination register.
+
+2002-03-03  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen: Remove whitespace at end of lines.
+
+2002-03-02  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (loadstore_ea): New function to do effective
+	address calculations.
+	(do_load, do_load_left, do_load_right, LL, LDD, PREF, do_store,
+	do_store_left, do_store_right, SC, SCD, PREFX, SWC1, SWXC1,
+	CACHE): Use loadstore_ea to do effective address computations.
+
+2002-03-02  Chris Demetriou  <cgd@broadcom.com>
+
+	* interp.c (load_word): Use EXTEND32 rather than SIGNEXTEND.
+	* mips.igen (LL, CxC1, MxC1): Likewise.
+
+2002-03-02  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (LL, LLD, PREF, SC, SCD, ABS.fmt, ADD.fmt, CEIL.L.fmt,
+	CEIL.W, CVT.D.fmt, CVT.L.fmt, CVT.S.fmt, CVT.W.fmt, DIV.fmt,
+	FLOOR.L.fmt, FLOOR.W.fmt, MADD.D, MADD.S, MOV.fmt, MOVtf.fmt,
+	MSUB.D, MSUB.S, MUL.fmt, NEG.fmt, NMADD.D, NMADD.S, NMSUB.D,
+	NMSUB.S, PREFX, RECIP.fmt, ROUND.L.fmt, ROUND.W.fmt, RSQRT.fmt,
+	SQRT.fmt, SUB.fmt, SWC1, SWXC1, TRUNC.L.fmt, TRUNC.W, CACHE):
+	Don't split opcode fields by hand, use the opcode field values
+	provided by igen.
+
 2002-03-01  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips.igen (do_divu): Fix spacing.

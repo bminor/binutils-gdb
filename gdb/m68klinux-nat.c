@@ -383,7 +383,7 @@ fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
   /* Fill in the floating-point control registers.  */
   for (i = FPC_REGNUM; i <= FPI_REGNUM; i++)
     if (regno == -1 || regno == i)
-      regcache_collect (regno, fpregsetp->fpcntl[regno - FPC_REGNUM]);
+      regcache_collect (regno, (char *) &fpregsetp->fpcntl[regno - FPC_REGNUM]);
 }
 
 #ifdef HAVE_PTRACE_GETREGS

@@ -275,7 +275,6 @@ extern CORE_ADDR h8500_read_sp (void);
 extern void h8500_write_sp (CORE_ADDR);
 
 extern CORE_ADDR h8500_read_fp (void);
-extern void h8500_write_fp (CORE_ADDR);
 
 extern CORE_ADDR h8500_read_pc (ptid_t);
 extern void h8500_write_pc (CORE_ADDR, ptid_t);
@@ -287,4 +286,3 @@ extern void h8500_write_pc (CORE_ADDR, ptid_t);
 #define TARGET_WRITE_PC(x,pid) h8500_write_pc(x,pid)
 
 #define TARGET_READ_FP() h8500_read_fp()
-#define TARGET_WRITE_FP(x) h8500_write_fp(x)

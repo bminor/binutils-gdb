@@ -27,13 +27,14 @@ int thread_from_wait;
 int old_thread_from_wait;
 int extended_protocol;
 jmp_buf toplevel;
-int inferior_pid;
 
 static unsigned char
 start_inferior (char *argv[], char *statusptr)
 {
-  inferior_pid = create_inferior (argv[0], argv);
-  fprintf (stderr, "Process %s created; pid = %d\n", argv[0], inferior_pid);
+  /* FIXME Check error? Or turn to void.  */
+  create_inferior (argv[0], argv);
+  /* FIXME Print pid properly.  */
+  fprintf (stderr, "Process %s created; pid = %d\n", argv[0], signal_pid);
 
   /* Wait till we are at 1st instruction in program, return signal number.  */
   return mywait (statusptr);
@@ -47,14 +48,32 @@ attach_inferior (int pid, char *statusptr, unsigned char *sigptr)
   if (myattach (pid) != 0)
     return -1;
 
-  inferior_pid = pid;
-
   *sigptr = mywait (statusptr);
 
   return 0;
 }
 
 extern int remote_debug;
+
+/* Handle all of the extended 'q' packets.  */
+void
+handle_query (char *own_buf)
+{
+  if (strcmp ("qSymbol::", own_buf) == 0)
+    {
+      if (the_target->look_up_symbols != NULL)
+	(*the_target->look_up_symbols) ();
+
+      strcpy (own_buf, "OK");
+      return;
+    }
+
+  /* Otherwise we didn't know what packet it was.  Say we didn't
+     understand it.  */
+  own_buf[0] = 0;
+}
+
+static int attached;
 
 int
 main (int argc, char *argv[])
@@ -64,9 +83,8 @@ main (int argc, char *argv[])
   unsigned char signal;
   unsigned int len;
   CORE_ADDR mem_addr;
-  int bad_attach = 0;
-  int pid = 0;
-  int attached = 0;
+  int bad_attach;
+  int pid;
   char *arg_end;
 
   if (setjmp (toplevel))
@@ -75,6 +93,9 @@ main (int argc, char *argv[])
       exit (1);
     }
 
+  bad_attach = 0;
+  pid = 0;
+  attached = 0;
   if (argc >= 3 && strcmp (argv[2], "--attach") == 0)
     {
       if (argc == 4
@@ -129,6 +150,9 @@ main (int argc, char *argv[])
 	  ch = own_buf[i++];
 	  switch (ch)
 	    {
+	    case 'q':
+	      handle_query (own_buf);
+	      break;
 	    case 'd':
 	      remote_debug = !remote_debug;
 	      break;
@@ -190,13 +214,21 @@ main (int argc, char *argv[])
 	      break;
 	    case 'C':
 	      convert_ascii_to_int (own_buf + 1, &sig, 1);
-	      myresume (0, sig);
+	      if (target_signal_to_host_p (sig))
+		signal = target_signal_to_host (sig);
+	      else
+		signal = 0;
+	      myresume (0, signal);
 	      signal = mywait (&status);
 	      prepare_resume_reply (own_buf, status, signal);
 	      break;
 	    case 'S':
 	      convert_ascii_to_int (own_buf + 1, &sig, 1);
-	      myresume (1, sig);
+	      if (target_signal_to_host_p (sig))
+		signal = target_signal_to_host (sig);
+	      else
+		signal = 0;
+	      myresume (1, signal);
 	      signal = mywait (&status);
 	      prepare_resume_reply (own_buf, status, signal);
 	      break;

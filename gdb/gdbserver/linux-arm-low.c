@@ -26,22 +26,28 @@
 #include <sys/reg.h>
 #endif
 
-int num_regs = 16;
+#define arm_num_regs 16
 
-int regmap[] = {
+static int arm_regmap[] = {
   0, 4, 8, 12, 16, 20, 24, 28,
   32, 36, 40, 44, 48, 52, 56, 60,
 };
 
-int
-cannot_store_register (int regno)
+static int
+arm_cannot_store_register (int regno)
 {
-  return (regno >= num_regs);
+  return (regno >= arm_num_regs);
 }
 
-int
-cannot_fetch_register (int regno)
+static int
+arm_cannot_fetch_register (int regno)
 {
-  return (regno >= num_regs);
+  return (regno >= arm_num_regs);
 }
 
+struct linux_target_ops the_low_target = {
+  arm_num_regs,
+  arm_regmap,
+  arm_cannot_fetch_register,
+  arm_cannot_store_register,
+};

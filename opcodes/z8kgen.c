@@ -1,23 +1,23 @@
-/*
-  Copyright 2001 Free Software Foundation, Inc.
+/* Copyright 2001, 2002 Free Software Foundation, Inc.
 
-  This file is part of GNU Binutils.
+   This file is part of GNU Binutils.
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+   USA.  */
 
-/* This program generates z8k-opc.h */
+/* This program generates z8k-opc.h.  */
 
 #include <stdio.h>
 #include "sysdep.h"
@@ -285,12 +285,12 @@ struct op opt[] =
 
   "------", 5, 16, "1011 1101 dddd imm4", "ldk rd,imm4", 0,
 
-  "------", 11, 16, "0001 1100 ddN0 1001 0000 ssss 0000 nminus1", "ldm @rd,rs,n", 0,
-  "------", 15, 16, "0101 1100 ddN0 1001 0000 ssss 0000 nminus1 address_dst", "ldm address_dst(rd),rs,n", 0,
-  "------", 14, 16, "0101 1100 0000 1001 0000 ssss 0000 nminus1 address_dst", "ldm address_dst,rs,n", 0,
-  "------", 11, 16, "0001 1100 ssN0 0001 0000 dddd 0000 nminus1", "ldm rd,@rs,n", 0,
-  "------", 15, 16, "0101 1100 ssN0 0001 0000 dddd 0000 nminus1 address_src", "ldm rd,address_src(rs),n", 0,
-  "------", 14, 16, "0101 1100 0000 0001 0000 dddd 0000 nminus1 address_src", "ldm rd,address_src,n", 0,
+  "------", 11, 16, "0001 1100 ddN0 1001 0000 ssss 0000 imm4m1", "ldm @rd,rs,n", 0,
+  "------", 15, 16, "0101 1100 ddN0 1001 0000 ssss 0000 imm4m1 address_dst", "ldm address_dst(rd),rs,n", 0,
+  "------", 14, 16, "0101 1100 0000 1001 0000 ssss 0000 imm4m1 address_dst", "ldm address_dst,rs,n", 0,
+  "------", 11, 16, "0001 1100 ssN0 0001 0000 dddd 0000 imm4m1", "ldm rd,@rs,n", 0,
+  "------", 15, 16, "0101 1100 ssN0 0001 0000 dddd 0000 imm4m1 address_src", "ldm rd,address_src(rs),n", 0,
+  "------", 14, 16, "0101 1100 0000 0001 0000 dddd 0000 imm4m1 address_src", "ldm rd,address_src,n", 0,
 
   "CZSVDH", 12, 16, "0011 1001 ssN0 0000", "ldps @rs", 0,
   "CZSVDH", 16, 16, "0111 1001 0000 0000 address_src", "ldps address_src", 0,
@@ -434,11 +434,11 @@ struct op opt[] =
   "------", 0, 16, "0011 1010 ssN0 0001 0000 aaaa ddN0 0000", "sinibr @rd,@rs,ra", 0,
 
   "CZSV--", 13, 16, "1011 0011 dddd 1001 0000 0000 imm8", "sla rd,imm8", 0,
-  "CZSV--", 13, 8, "1011 0010 dddd 1001  0000 0000 imm8", "slab rbd,imm8", 0,
+  "CZSV--", 13, 8, "1011 0010 dddd 1001 iiii iiii 0000 imm4", "slab rbd,imm4", 0,
   "CZSV--", 13, 32, "1011 0011 dddd 1101 0000 0000 imm8", "slal rrd,imm8", 0,
 
   "CZS---", 13, 16, "1011 0011 dddd 0001 0000 0000 imm8", "sll rd,imm8", 0,
-  "CZS---", 13, 8, "1011 0010 dddd 0001  0000 0000 imm8", "sllb rbd,imm8", 0,
+  "CZS---", 13, 8, "1011 0010 dddd 0001 iiii iiii 0000 imm4", "sllb rbd,imm4", 0,
   "CZS---", 13, 32, "1011 0011 dddd 0101 0000 0000 imm8", "slll rrd,imm8", 0,
 
   "------", 0, 16, "0011 1011 ssss 0111 imm16", "sout imm16,rs", 0,
@@ -449,11 +449,11 @@ struct op opt[] =
   "------", 0, 16, "0011 1010 ssN0 0011 0000 aaaa ddN0 0000", "soutibr @rd,@rs,ra", 0,
 
   "CZSV--", 13, 16, "1011 0011 dddd 1001 1111 1111 nim8", "sra rd,imm8", 0,
-  "CZSV--", 13, 8, "1011 0010 dddd 1001 0000 0000 nim8", "srab rbd,imm8", 0,
+  "CZSV--", 13, 8, "1011 0010 dddd 1001 iiii iiii 1111 nim4", "srab rbd,imm4", 0,
   "CZSV--", 13, 32, "1011 0011 dddd 1101 1111 1111 nim8", "sral rrd,imm8", 0,
 
   "CZSV--", 13, 16, "1011 0011 dddd 0001 1111 1111 nim8", "srl rd,imm8", 0,
-  "CZSV--", 13, 8, "1011 0010 dddd 0001 0000 0000 nim8", "srlb rbd,imm8", 0,
+  "CZSV--", 13, 8, "1011 0010 dddd 0001 iiii iiii 1111 nim4", "srlb rbd,imm4", 0,
   "CZSV--", 13, 32, "1011 0011 dddd 0101 1111 1111 nim8", "srll rrd,imm8", 0,
 
   "CZSV--", 7, 16, "0000 0011 ssN0 dddd", "sub rd,@rs", 0,
@@ -595,7 +595,7 @@ struct tok_struct args[] =
   {"imm32", "CLASS_IMM+(ARG_IMM32)",},
   {"imm4m1", "CLASS_IMM +(ARG_IMM4M1)",},
   {"imm4", "CLASS_IMM +(ARG_IMM4)",},
-  {"n", "CLASS_IMM + (ARG_IMMN)",},
+  {"n", "CLASS_IMM + (ARG_IMM4M1)",},
   {"ctrl", "CLASS_CTRL",},
   {"rba", "CLASS_REG_BYTE+(ARG_RA)",},
   {"rbb", "CLASS_REG_BYTE+(ARG_RB)",},
@@ -695,6 +695,7 @@ struct tok_struct toks[] =
   "imm8", "CLASS_IMM+(ARG_IMM8)", 2,
   "imm16", "CLASS_IMM+(ARG_IMM16)", 4,
   "imm32", "CLASS_IMM+(ARG_IMM32)", 8,
+  "nim4", "CLASS_IMM+(ARG_NIM4)", 2,
   "nim8", "CLASS_IMM+(ARG_NIM8)", 2,
   "0ccc", "CLASS_0CCC", 1,
   "1ccc", "CLASS_1CCC", 1,
@@ -703,6 +704,8 @@ struct tok_struct toks[] =
   "1disp7", "CLASS_1DISP7", 2,
   "01ii", "CLASS_01II", 1,
   "00ii", "CLASS_00II", 1,
+
+  "iiii", "CLASS_IGNORE", 1,
   0, 0
 };
 
@@ -992,6 +995,7 @@ gas ()
   printf ("#define ARG_IMM1OR2 0x0b\n");
 
   printf ("#define ARG_DISP12 0x0b\n");
+  printf ("#define ARG_NIM4 0x0c\n");
   printf ("#define ARG_DISP8 0x0c\n");
   printf ("#define ARG_IMM4M1 0x0d\n");
   printf ("#define CLASS_MASK 0x1fff0\n");
@@ -1003,6 +1007,7 @@ gas ()
   printf ("#define CLASS_IMM 0x60\n");
   printf ("#define CLASS_CC 0x70\n");
   printf ("#define CLASS_CTRL 0x80\n");
+  printf ("#define CLASS_IGNORE 0x90\n");
   printf ("#define CLASS_ADDRESS 0xd0\n");
   printf ("#define CLASS_0CCC 0xe0\n");
   printf ("#define CLASS_1CCC 0xf0\n");

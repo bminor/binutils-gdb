@@ -1,5 +1,5 @@
 /* Motorola 68k series support for 32-bit ELF
-   Copyright 1993, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1993, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -340,14 +340,14 @@ elf_m68k_link_hash_table_create (abfd)
   struct elf_m68k_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf_m68k_link_hash_table);
 
-  ret = (struct elf_m68k_link_hash_table *) bfd_alloc (abfd, amt);
+  ret = (struct elf_m68k_link_hash_table *) bfd_malloc (amt);
   if (ret == (struct elf_m68k_link_hash_table *) NULL)
     return NULL;
 
   if (! _bfd_elf_link_hash_table_init (&ret->root, abfd,
 				       elf_m68k_link_hash_newfunc))
     {
-      bfd_release (abfd, ret);
+      free (ret);
       return NULL;
     }
 
@@ -1270,6 +1270,9 @@ elf_m68k_discard_copies (h, ignore)
      PTR ignore ATTRIBUTE_UNUSED;
 {
   struct elf_m68k_pcrel_relocs_copied *s;
+
+  if (h->root.root.type == bfd_link_hash_warning)
+    h = (struct elf_m68k_link_hash_entry *) h->root.root.u.i.link;
 
   /* We only discard relocs for symbols defined in a regular object.  */
   if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)

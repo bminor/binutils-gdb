@@ -1,3 +1,18 @@
+2002-05-01  Chris Demetriou  <cgd@broadcom.com>
+
+	* igen.c: Use 'deprecated' rather than 'depreciated.'
+
+2002-03-23  Andrew Cagney  <ac131313@redhat.com>
+
+ 	* gen.c (format_name_cmp): New function.
+	(insn_list_insert): Use the instruction field name as an
+	additional key.  Different field names indicate different
+	semantics.
+
+2002-03-07  Chris Demetriou  <cgd@broadcom.com>
+
+	* igen.c (print_itrace_format): Add support for a new "%#lx" format.
+
 Tue May 23 21:39:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

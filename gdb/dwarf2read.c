@@ -175,19 +175,49 @@ struct comp_unit_head
                                          4 or 12 */
   };
 
-/* The data in the .debug_line statement prologue looks like this.  */
-struct line_head
+/* The line number information for a compilation unit (found in the
+   .debug_line section) begins with a "statement program header",
+   which contains the following information.  */
+struct line_header
+{
+  unsigned int total_length;
+  unsigned short version;
+  unsigned int header_length;
+  unsigned char minimum_instruction_length;
+  unsigned char default_is_stmt;
+  int line_base;
+  unsigned char line_range;
+  unsigned char opcode_base;
+
+  /* standard_opcode_lengths[i] is the number of operands for the
+     standard opcode whose value is i.  This means that
+     standard_opcode_lengths[0] is unused, and the last meaningful
+     element is standard_opcode_lengths[opcode_base - 1].  */
+  unsigned char *standard_opcode_lengths;
+
+  /* The include_directories table.  NOTE!  These strings are not
+     allocated with xmalloc; instead, they are pointers into
+     debug_line_buffer.  If you try to free them, `free' will get
+     indigestion.  */
+  unsigned int num_include_dirs, include_dirs_size;
+  char **include_dirs;
+
+  /* The file_names table.  NOTE!  These strings are not allocated
+     with xmalloc; instead, they are pointers into debug_line_buffer.
+     Don't try to free them directly.  */
+  unsigned int num_file_names, file_names_size;
+  struct file_entry
   {
-    unsigned int total_length;
-    unsigned short version;
-    unsigned int prologue_length;
-    unsigned char minimum_instruction_length;
-    unsigned char default_is_stmt;
-    int line_base;
-    unsigned char line_range;
-    unsigned char opcode_base;
-    unsigned char *standard_opcode_lengths;
-  };
+    char *name;
+    unsigned int dir_index;
+    unsigned int mod_time;
+    unsigned int length;
+  } *file_names;
+
+  /* The start and end of the statement program following this
+     header.  These point into dwarf_line_buffer.  */
+  char *statement_program_start, *statement_program_end;
+};
 
 /* When we construct a partial symbol table entry we only
    need this much information. */
@@ -255,6 +285,16 @@ struct attribute
       }
     u;
   };
+
+struct function_range
+{
+  const char *name;
+  CORE_ADDR lowpc, highpc;
+  int seen_line;
+  struct function_range *next;
+};
+
+static struct function_range *cu_first_fn, *cu_last_fn, *cu_cached_fn;
 
 /* Get at parts of an attribute structure */
 
@@ -492,6 +532,10 @@ static struct complaint dwarf2_missing_line_number_section =
 {
   "missing .debug_line section", 0, 0
 };
+static struct complaint dwarf2_statement_list_fits_in_line_number_section =
+{
+  "statement list doesn't fit in .debug_line section", 0, 0
+};
 static struct complaint dwarf2_mangled_line_number_section =
 {
   "mangled .debug_line section", 0, 0
@@ -559,6 +603,14 @@ static struct complaint dwarf2_const_value_length_mismatch =
 static struct complaint dwarf2_unsupported_const_value_attr =
 {
   "unsupported const value attribute form: '%s'", 0, 0
+};
+static struct complaint dwarf2_misplaced_line_number =
+{
+  "misplaced first line number at 0x%lx for '%s'", 0, 0
+};
+static struct complaint dwarf2_line_header_too_long =
+{
+  "line number info header doesn't fit in `.debug_line' section", 0, 0
 };
 
 /* local function prototypes */
@@ -639,7 +691,14 @@ static struct attribute *dwarf_attr (struct die_info *, unsigned int);
 
 static int die_is_declaration (struct die_info *);
 
-static void dwarf_decode_lines (unsigned int, char *, bfd *,
+static void free_line_header (struct line_header *lh);
+
+static struct line_header *(dwarf_decode_line_header
+                            (unsigned int offset,
+                             bfd *abfd,
+                             const struct comp_unit_head *cu_header));
+
+static void dwarf_decode_lines (struct line_header *, char *, bfd *,
 				const struct comp_unit_head *);
 
 static void dwarf2_start_subfile (char *, char *);
@@ -793,6 +852,10 @@ static struct dwarf_block *dwarf_alloc_block (void);
 static struct abbrev_info *dwarf_alloc_abbrev (void);
 
 static struct die_info *dwarf_alloc_die (void);
+
+static void initialize_cu_func_list (void);
+
+static void add_to_cu_func_list (const char *, CORE_ADDR, CORE_ADDR);
 
 /* Try to locate the sections we need for DWARF 2 debugging
    information and return true if we have enough to do something.  */
@@ -1542,10 +1605,16 @@ process_die (struct die_info *die, struct objfile *objfile,
 }
 
 static void
+initialize_cu_func_list (void)
+{
+  cu_first_fn = cu_last_fn = cu_cached_fn = NULL;
+}
+
+static void
 read_file_scope (struct die_info *die, struct objfile *objfile,
 		 const struct comp_unit_head *cu_header)
 {
-  unsigned int line_offset = 0;
+  struct cleanup *back_to = make_cleanup (null_cleanup, 0);
   CORE_ADDR lowpc = ((CORE_ADDR) -1);
   CORE_ADDR highpc = ((CORE_ADDR) 0);
   struct attribute *attr;
@@ -1553,6 +1622,7 @@ read_file_scope (struct die_info *die, struct objfile *objfile,
   char *comp_dir = NULL;
   struct die_info *child_die;
   bfd *abfd = objfile->obfd;
+  struct line_header *line_header = 0;
 
   if (!dwarf2_get_pc_bounds (die, &lowpc, &highpc, objfile))
     {
@@ -1633,13 +1703,7 @@ read_file_scope (struct die_info *die, struct objfile *objfile,
   start_symtab (name, comp_dir, lowpc);
   record_debugformat ("DWARF 2");
 
-  /* Decode line number information if present.  */
-  attr = dwarf_attr (die, DW_AT_stmt_list);
-  if (attr)
-    {
-      line_offset = DW_UNSND (attr);
-      dwarf_decode_lines (line_offset, comp_dir, abfd, cu_header);
-    }
+  initialize_cu_func_list ();
 
   /* Process all dies in compilation unit.  */
   if (die->has_children)
@@ -1651,6 +1715,44 @@ read_file_scope (struct die_info *die, struct objfile *objfile,
 	  child_die = sibling_die (child_die);
 	}
     }
+
+  /* Decode line number information if present.  */
+  attr = dwarf_attr (die, DW_AT_stmt_list);
+  if (attr)
+    {
+      unsigned int line_offset = DW_UNSND (attr);
+      line_header = dwarf_decode_line_header (line_offset,
+                                              abfd, cu_header);
+      if (line_header)
+        {
+          make_cleanup ((make_cleanup_ftype *) free_line_header,
+                        (void *) line_header);
+          dwarf_decode_lines (line_header, comp_dir, abfd, cu_header);
+        }
+    }
+
+  do_cleanups (back_to);
+}
+
+static void
+add_to_cu_func_list (const char *name, CORE_ADDR lowpc, CORE_ADDR highpc)
+{
+  struct function_range *thisfn;
+
+  thisfn = (struct function_range *)
+    obstack_alloc (&dwarf2_tmp_obstack, sizeof (struct function_range));
+  thisfn->name = name;
+  thisfn->lowpc = lowpc;
+  thisfn->highpc = highpc;
+  thisfn->seen_line = 0;
+  thisfn->next = NULL;
+
+  if (cu_last_fn == NULL)
+      cu_first_fn = thisfn;
+  else
+      cu_last_fn->next = thisfn;
+
+  cu_last_fn = thisfn;
 }
 
 static void
@@ -1673,6 +1775,9 @@ read_func_scope (struct die_info *die, struct objfile *objfile,
 
   lowpc += baseaddr;
   highpc += baseaddr;
+
+  /* Record the function range for dwarf_decode_lines.  */
+  add_to_cu_func_list (name, lowpc, highpc);
 
   if (objfile->ei.entry_point >= lowpc &&
       objfile->ei.entry_point < highpc)
@@ -2538,7 +2643,8 @@ read_array_type (struct die_info *die, struct objfile *objfile,
 	      else if (attr->form == DW_FORM_udata
 		       || attr->form == DW_FORM_data1
 		       || attr->form == DW_FORM_data2
-		       || attr->form == DW_FORM_data4)
+		       || attr->form == DW_FORM_data4
+		       || attr->form == DW_FORM_data8)
 		{
 		  low = DW_UNSND (attr);
 		}
@@ -2564,7 +2670,8 @@ read_array_type (struct die_info *die, struct objfile *objfile,
 	      else if (attr->form == DW_FORM_udata
 		       || attr->form == DW_FORM_data1
 		       || attr->form == DW_FORM_data2
-		       || attr->form == DW_FORM_data4)
+		       || attr->form == DW_FORM_data4
+		       || attr->form == DW_FORM_data8)
 		{
 		  high = DW_UNSND (attr);
 		}
@@ -2609,6 +2716,16 @@ read_array_type (struct die_info *die, struct objfile *objfile,
   type = element_type;
   while (ndim-- > 0)
     type = create_array_type (NULL, type, range_types[ndim]);
+
+  /* Understand Dwarf2 support for vector types (like they occur on
+     the PowerPC w/ AltiVec).  Gcc just adds another attribute to the
+     array type.  This is not part of the Dwarf2/3 standard yet, but a
+     custom vendor extension.  The main difference between a regular
+     array and the vector variant is that vectors are passed by value
+     to functions.  */
+  attr = dwarf_attr (die, DW_AT_GNU_vector);
+  if (attr)
+    TYPE_FLAGS (type) |= TYPE_FLAG_VECTOR;
 
   do_cleanups (back_to);
 
@@ -2977,6 +3094,18 @@ read_base_type (struct die_info *die, struct objfile *objfile)
       type = init_type (code, size, type_flags, DW_STRING (attr), objfile);
       if (encoding == DW_ATE_address)
 	TYPE_TARGET_TYPE (type) = dwarf2_fundamental_type (objfile, FT_VOID);
+      else if (encoding == DW_ATE_complex_float)
+	{
+	  if (size == 32)
+	    TYPE_TARGET_TYPE (type)
+	      = dwarf2_fundamental_type (objfile, FT_EXT_PREC_FLOAT);
+	  else if (size == 16)
+	    TYPE_TARGET_TYPE (type)
+	      = dwarf2_fundamental_type (objfile, FT_DBL_PREC_FLOAT);
+	  else if (size == 8)
+	    TYPE_TARGET_TYPE (type)
+	      = dwarf2_fundamental_type (objfile, FT_FLOAT);
+	}
     }
   else
     {
@@ -3871,87 +4000,153 @@ die_is_declaration (struct die_info *die)
 	  && ! dwarf_attr (die, DW_AT_specification));
 }
 
-/* Decode the line number information for the compilation unit whose
-   line number info is at OFFSET in the .debug_line section.
-   The compilation directory of the file is passed in COMP_DIR.  */
 
-struct filenames
-{
-  unsigned int num_files;
-  struct fileinfo
-    {
-      char *name;
-      unsigned int dir;
-      unsigned int time;
-      unsigned int size;
-    }
-   *files;
-};
-
-struct directories
-  {
-    unsigned int num_dirs;
-    char **dirs;
-  };
-
+/* Free the line_header structure *LH, and any arrays and strings it
+   refers to.  */
 static void
-dwarf_decode_lines (unsigned int offset, char *comp_dir, bfd *abfd,
-		    const struct comp_unit_head *cu_header)
+free_line_header (struct line_header *lh)
 {
-  char *line_ptr;
-  char *line_end;
-  struct line_head lh;
+  if (lh->standard_opcode_lengths)
+    free (lh->standard_opcode_lengths);
+
+  /* Remember that all the lh->file_names[i].name pointers are
+     pointers into debug_line_buffer, and don't need to be freed.  */
+  if (lh->file_names)
+    free (lh->file_names);
+
+  /* Similarly for the include directory names.  */
+  if (lh->include_dirs)
+    free (lh->include_dirs);
+
+  free (lh);
+}
+
+
+/* Add an entry to LH's include directory table.  */
+static void
+add_include_dir (struct line_header *lh, char *include_dir)
+{
+  /* Grow the array if necessary.  */
+  if (lh->include_dirs_size == 0)
+    {
+      lh->include_dirs_size = 1; /* for testing */
+      lh->include_dirs = xmalloc (lh->include_dirs_size
+                                  * sizeof (*lh->include_dirs));
+    }
+  else if (lh->num_include_dirs >= lh->include_dirs_size)
+    {
+      lh->include_dirs_size *= 2;
+      lh->include_dirs = xrealloc (lh->include_dirs,
+                                   (lh->include_dirs_size
+                                    * sizeof (*lh->include_dirs)));
+    }
+
+  lh->include_dirs[lh->num_include_dirs++] = include_dir;
+}
+ 
+
+/* Add an entry to LH's file name table.  */
+static void
+add_file_name (struct line_header *lh,
+               char *name,
+               unsigned int dir_index,
+               unsigned int mod_time,
+               unsigned int length)
+{
+  struct file_entry *fe;
+
+  /* Grow the array if necessary.  */
+  if (lh->file_names_size == 0)
+    {
+      lh->file_names_size = 1; /* for testing */
+      lh->file_names = xmalloc (lh->file_names_size
+                                * sizeof (*lh->file_names));
+    }
+  else if (lh->num_file_names >= lh->file_names_size)
+    {
+      lh->file_names_size *= 2;
+      lh->file_names = xrealloc (lh->file_names,
+                                 (lh->file_names_size
+                                  * sizeof (*lh->file_names)));
+    }
+
+  fe = &lh->file_names[lh->num_file_names++];
+  fe->name = name;
+  fe->dir_index = dir_index;
+  fe->mod_time = mod_time;
+  fe->length = length;
+}
+ 
+
+/* Read the statement program header starting at OFFSET in
+   dwarf_line_buffer, according to the endianness of ABFD.  Return a
+   pointer to a struct line_header, allocated using xmalloc.
+
+   NOTE: the strings in the include directory and file name tables of
+   the returned object point into debug_line_buffer, and must not be
+   freed.  */
+static struct line_header *
+dwarf_decode_line_header (unsigned int offset, bfd *abfd,
+                          const struct comp_unit_head *cu_header)
+{
   struct cleanup *back_to;
-  unsigned int i, bytes_read;
-  char *cur_file, *cur_dir;
-  unsigned char op_code, extended_op, adj_opcode;
-
-#define FILE_ALLOC_CHUNK 5
-#define DIR_ALLOC_CHUNK 5
-
-  struct filenames files;
-  struct directories dirs;
+  struct line_header *lh;
+  char *line_ptr;
+  int bytes_read;
+  int i;
+  char *cur_dir, *cur_file;
 
   if (dwarf_line_buffer == NULL)
     {
       complain (&dwarf2_missing_line_number_section);
-      return;
+      return 0;
     }
 
-  files.num_files = 0;
-  files.files = NULL;
+  /* Make sure that at least there's room for the total_length field.  That
+     could be 12 bytes long, but we're just going to fudge that.  */
+  if (offset + 4 >= dwarf_line_size)
+    {
+      complain (&dwarf2_statement_list_fits_in_line_number_section);
+      return 0;
+    }
 
-  dirs.num_dirs = 0;
-  dirs.dirs = NULL;
+  lh = xmalloc (sizeof (*lh));
+  memset (lh, 0, sizeof (*lh));
+  back_to = make_cleanup ((make_cleanup_ftype *) free_line_header,
+                          (void *) lh);
 
   line_ptr = dwarf_line_buffer + offset;
 
-  /* read in the prologue */
-  lh.total_length = read_initial_length (abfd, line_ptr, NULL, &bytes_read);
+  /* read in the header */
+  lh->total_length = read_initial_length (abfd, line_ptr, NULL, &bytes_read);
   line_ptr += bytes_read;
-  line_end = line_ptr + lh.total_length;
-  lh.version = read_2_bytes (abfd, line_ptr);
-  line_ptr += 2;
-  lh.prologue_length = read_offset (abfd, line_ptr, cu_header, &bytes_read);
-  line_ptr += bytes_read;
-  lh.minimum_instruction_length = read_1_byte (abfd, line_ptr);
-  line_ptr += 1;
-  lh.default_is_stmt = read_1_byte (abfd, line_ptr);
-  line_ptr += 1;
-  lh.line_base = read_1_signed_byte (abfd, line_ptr);
-  line_ptr += 1;
-  lh.line_range = read_1_byte (abfd, line_ptr);
-  line_ptr += 1;
-  lh.opcode_base = read_1_byte (abfd, line_ptr);
-  line_ptr += 1;
-  lh.standard_opcode_lengths = (unsigned char *)
-    xmalloc (lh.opcode_base * sizeof (unsigned char));
-  back_to = make_cleanup (free_current_contents, &lh.standard_opcode_lengths);
-
-  lh.standard_opcode_lengths[0] = 1;
-  for (i = 1; i < lh.opcode_base; ++i)
+  if (line_ptr + lh->total_length > dwarf_line_buffer + dwarf_line_size)
     {
-      lh.standard_opcode_lengths[i] = read_1_byte (abfd, line_ptr);
+      complain (&dwarf2_statement_list_fits_in_line_number_section);
+      return 0;
+    }
+  lh->statement_program_end = line_ptr + lh->total_length;
+  lh->version = read_2_bytes (abfd, line_ptr);
+  line_ptr += 2;
+  lh->header_length = read_offset (abfd, line_ptr, cu_header, &bytes_read);
+  line_ptr += bytes_read;
+  lh->minimum_instruction_length = read_1_byte (abfd, line_ptr);
+  line_ptr += 1;
+  lh->default_is_stmt = read_1_byte (abfd, line_ptr);
+  line_ptr += 1;
+  lh->line_base = read_1_signed_byte (abfd, line_ptr);
+  line_ptr += 1;
+  lh->line_range = read_1_byte (abfd, line_ptr);
+  line_ptr += 1;
+  lh->opcode_base = read_1_byte (abfd, line_ptr);
+  line_ptr += 1;
+  lh->standard_opcode_lengths
+    = (unsigned char *) xmalloc (lh->opcode_base * sizeof (unsigned char));
+
+  lh->standard_opcode_lengths[0] = 1;  /* This should never be used anyway.  */
+  for (i = 1; i < lh->opcode_base; ++i)
+    {
+      lh->standard_opcode_lengths[i] = read_1_byte (abfd, line_ptr);
       line_ptr += 1;
     }
 
@@ -3959,44 +4154,96 @@ dwarf_decode_lines (unsigned int offset, char *comp_dir, bfd *abfd,
   while ((cur_dir = read_string (abfd, line_ptr, &bytes_read)) != NULL)
     {
       line_ptr += bytes_read;
-      if ((dirs.num_dirs % DIR_ALLOC_CHUNK) == 0)
-	{
-	  dirs.dirs = (char **)
-	    xrealloc (dirs.dirs,
-		      (dirs.num_dirs + DIR_ALLOC_CHUNK) * sizeof (char *));
-	  if (dirs.num_dirs == 0)
-	    make_cleanup (free_current_contents, &dirs.dirs);
-	}
-      dirs.dirs[dirs.num_dirs++] = cur_dir;
+      add_include_dir (lh, cur_dir);
     }
   line_ptr += bytes_read;
 
   /* Read file name table */
   while ((cur_file = read_string (abfd, line_ptr, &bytes_read)) != NULL)
     {
+      unsigned int dir_index, mod_time, length;
+
       line_ptr += bytes_read;
-      if ((files.num_files % FILE_ALLOC_CHUNK) == 0)
-	{
-	  files.files = (struct fileinfo *)
-	    xrealloc (files.files,
-		      (files.num_files + FILE_ALLOC_CHUNK)
-		      * sizeof (struct fileinfo));
-	  if (files.num_files == 0)
-	    make_cleanup (free_current_contents, &files.files);
-	}
-      files.files[files.num_files].name = cur_file;
-      files.files[files.num_files].dir =
-	read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+      dir_index = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
       line_ptr += bytes_read;
-      files.files[files.num_files].time =
-	read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+      mod_time = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
       line_ptr += bytes_read;
-      files.files[files.num_files].size =
-	read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+      length = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
       line_ptr += bytes_read;
-      files.num_files++;
+
+      add_file_name (lh, cur_file, dir_index, mod_time, length);
     }
   line_ptr += bytes_read;
+  lh->statement_program_start = line_ptr; 
+
+  if (line_ptr > dwarf_line_buffer + dwarf_line_size)
+    complain (&dwarf2_line_header_too_long);
+
+  discard_cleanups (back_to);
+  return lh;
+}
+
+/* This function exists to work around a bug in certain compilers
+   (particularly GCC 2.95), in which the first line number marker of a
+   function does not show up until after the prologue, right before
+   the second line number marker.  This function shifts ADDRESS down
+   to the beginning of the function if necessary, and is called on
+   addresses passed to record_line.  */
+
+static CORE_ADDR
+check_cu_functions (CORE_ADDR address)
+{
+  struct function_range *fn;
+
+  /* Find the function_range containing address.  */
+  if (!cu_first_fn)
+    return address;
+
+  if (!cu_cached_fn)
+    cu_cached_fn = cu_first_fn;
+
+  fn = cu_cached_fn;
+  while (fn)
+    if (fn->lowpc <= address && fn->highpc > address)
+      goto found;
+    else
+      fn = fn->next;
+
+  fn = cu_first_fn;
+  while (fn && fn != cu_cached_fn)
+    if (fn->lowpc <= address && fn->highpc > address)
+      goto found;
+    else
+      fn = fn->next;
+
+  return address;
+
+ found:
+  if (fn->seen_line)
+    return address;
+  if (address != fn->lowpc)
+    complain (&dwarf2_misplaced_line_number,
+	      (unsigned long) address, fn->name);
+  fn->seen_line = 1;
+  return fn->lowpc;
+}
+
+/* Decode the line number information for the compilation unit whose
+   line number info is at OFFSET in the .debug_line section.
+   The compilation directory of the file is passed in COMP_DIR.  */
+
+static void
+dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
+		    const struct comp_unit_head *cu_header)
+{
+  char *line_ptr;
+  char *line_end;
+  unsigned int i, bytes_read;
+  char *cur_dir;
+  unsigned char op_code, extended_op, adj_opcode;
+
+  line_ptr = lh->statement_program_start;
+  line_end = lh->statement_program_end;
 
   /* Read the statement sequences until there's nothing left.  */
   while (line_ptr < line_end)
@@ -4006,19 +4253,23 @@ dwarf_decode_lines (unsigned int offset, char *comp_dir, bfd *abfd,
       unsigned int file = 1;
       unsigned int line = 1;
       unsigned int column = 0;
-      int is_stmt = lh.default_is_stmt;
+      int is_stmt = lh->default_is_stmt;
       int basic_block = 0;
       int end_sequence = 0;
 
       /* Start a subfile for the current file of the state machine.  */
-      if (files.num_files >= file)
+      if (lh->num_file_names >= file)
 	{
-	  /* The file and directory tables are 0 based, the references
-	     are 1 based.  */
-	  dwarf2_start_subfile (files.files[file - 1].name,
-				(files.files[file - 1].dir
-				 ? dirs.dirs[files.files[file - 1].dir - 1]
-				 : comp_dir));
+	  /* lh->include_dirs and lh->file_names are 0-based, but the
+	     directory and file name numbers in the statement program
+	     are 1-based.  */
+          struct file_entry *fe = &lh->file_names[file - 1];
+          char *dir;
+          if (fe->dir_index)
+            dir = lh->include_dirs[fe->dir_index - 1];
+          else
+            dir = comp_dir;
+	  dwarf2_start_subfile (fe->name, dir);
 	}
 
       /* Decode the table. */
@@ -4027,13 +4278,14 @@ dwarf_decode_lines (unsigned int offset, char *comp_dir, bfd *abfd,
 	  op_code = read_1_byte (abfd, line_ptr);
 	  line_ptr += 1;
 
-	  if (op_code >= lh.opcode_base)
+	  if (op_code >= lh->opcode_base)
 	    {		/* Special operand.  */
-	      adj_opcode = op_code - lh.opcode_base;
-	      address += (adj_opcode / lh.line_range)
-		* lh.minimum_instruction_length;
-	      line += lh.line_base + (adj_opcode % lh.line_range);
+	      adj_opcode = op_code - lh->opcode_base;
+	      address += (adj_opcode / lh->line_range)
+		* lh->minimum_instruction_length;
+	      line += lh->line_base + (adj_opcode % lh->line_range);
 	      /* append row to matrix using current values */
+	      address = check_cu_functions (address);
 	      record_line (current_subfile, line, address);
 	      basic_block = 1;
 	    }
@@ -4047,12 +4299,7 @@ dwarf_decode_lines (unsigned int offset, char *comp_dir, bfd *abfd,
 		{
 		case DW_LNE_end_sequence:
 		  end_sequence = 1;
-		  /* Don't call record_line here.  The end_sequence
-		     instruction provides the address of the first byte
-		     *after* the last line in the sequence; it's not the
-		     address of any real source line.  However, the GDB
-		     linetable structure only records the starts of lines,
-		     not the ends.  This is a weakness of GDB.  */
+		  record_line (current_subfile, 0, address);
 		  break;
 		case DW_LNE_set_address:
 		  address = read_address (abfd, line_ptr, cu_header, &bytes_read);
@@ -4060,40 +4307,36 @@ dwarf_decode_lines (unsigned int offset, char *comp_dir, bfd *abfd,
 		  address += baseaddr;
 		  break;
 		case DW_LNE_define_file:
-		  cur_file = read_string (abfd, line_ptr, &bytes_read);
-		  line_ptr += bytes_read;
-		  if ((files.num_files % FILE_ALLOC_CHUNK) == 0)
-		    {
-		      files.files = (struct fileinfo *)
-			xrealloc (files.files,
-				  (files.num_files + FILE_ALLOC_CHUNK)
-				  * sizeof (struct fileinfo));
-		      if (files.num_files == 0)
-			make_cleanup (free_current_contents, &files.files);
-		    }
-		  files.files[files.num_files].name = cur_file;
-		  files.files[files.num_files].dir =
-		    read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
-		  line_ptr += bytes_read;
-		  files.files[files.num_files].time =
-		    read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
-		  line_ptr += bytes_read;
-		  files.files[files.num_files].size =
-		    read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
-		  line_ptr += bytes_read;
-		  files.num_files++;
+                  {
+                    char *cur_file;
+                    unsigned int dir_index, mod_time, length;
+                    
+                    cur_file = read_string (abfd, line_ptr, &bytes_read);
+                    line_ptr += bytes_read;
+                    dir_index =
+                      read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+                    line_ptr += bytes_read;
+                    mod_time =
+                      read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+                    line_ptr += bytes_read;
+                    length =
+                      read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+                    line_ptr += bytes_read;
+                    add_file_name (lh, cur_file, dir_index, mod_time, length);
+                  }
 		  break;
 		default:
 		  complain (&dwarf2_mangled_line_number_section);
-		  goto done;
+		  return;
 		}
 	      break;
 	    case DW_LNS_copy:
+	      address = check_cu_functions (address);
 	      record_line (current_subfile, line, address);
 	      basic_block = 0;
 	      break;
 	    case DW_LNS_advance_pc:
-	      address += lh.minimum_instruction_length
+	      address += lh->minimum_instruction_length
 		* read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
 	      line_ptr += bytes_read;
 	      break;
@@ -4102,15 +4345,21 @@ dwarf_decode_lines (unsigned int offset, char *comp_dir, bfd *abfd,
 	      line_ptr += bytes_read;
 	      break;
 	    case DW_LNS_set_file:
-	      /* The file and directory tables are 0 based, the references
-	         are 1 based.  */
-	      file = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
-	      line_ptr += bytes_read;
-	      dwarf2_start_subfile
-		(files.files[file - 1].name,
-		 (files.files[file - 1].dir
-		  ? dirs.dirs[files.files[file - 1].dir - 1]
-		  : comp_dir));
+              {
+                /* lh->include_dirs and lh->file_names are 0-based,
+                   but the directory and file name numbers in the
+                   statement program are 1-based.  */
+                struct file_entry *fe;
+                char *dir;
+                file = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+                line_ptr += bytes_read;
+                fe = &lh->file_names[file - 1];
+                if (fe->dir_index)
+                  dir = lh->include_dirs[fe->dir_index - 1];
+                else
+                  dir = comp_dir;
+                dwarf2_start_subfile (fe->name, dir);
+              }
 	      break;
 	    case DW_LNS_set_column:
 	      column = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
@@ -4128,8 +4377,8 @@ dwarf_decode_lines (unsigned int offset, char *comp_dir, bfd *abfd,
 	       length since special opcode 255 would have scaled the
 	       the increment.  */
 	    case DW_LNS_const_add_pc:
-	      address += (lh.minimum_instruction_length
-			  * ((255 - lh.opcode_base) / lh.line_range));
+	      address += (lh->minimum_instruction_length
+			  * ((255 - lh->opcode_base) / lh->line_range));
 	      break;
 	    case DW_LNS_fixed_advance_pc:
 	      address += read_2_bytes (abfd, line_ptr);
@@ -4138,7 +4387,7 @@ dwarf_decode_lines (unsigned int offset, char *comp_dir, bfd *abfd,
 	    default:
 	      {  /* Unknown standard opcode, ignore it.  */
 		int i;
-		for (i = 0; i < lh.standard_opcode_lengths[op_code]; i++)
+		for (i = 0; i < lh->standard_opcode_lengths[op_code]; i++)
 		  {
 		    (void) read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
 		    line_ptr += bytes_read;
@@ -4147,8 +4396,6 @@ dwarf_decode_lines (unsigned int offset, char *comp_dir, bfd *abfd,
 	    }
 	}
     }
-done:
-  do_cleanups (back_to);
 }
 
 /* Start a subfile for DWARF.  FILENAME is the name of the file and
@@ -5161,6 +5408,8 @@ dwarf_attr_name (register unsigned attr)
       return "DW_AT_body_begin";
     case DW_AT_body_end:
       return "DW_AT_body_end";
+    case DW_AT_GNU_vector:
+      return "DW_AT_GNU_vector";
     default:
       return "DW_AT_<unknown>";
     }

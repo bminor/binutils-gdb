@@ -24,24 +24,9 @@
 #define X86_64_TDEP_H
 
 #include "i386-tdep.h"
-#include <sys/reg.h>
 
-/* Mapping between the general-purpose registers in `struct user'
-   format and GDB's register array layout.  */
-
-static int x86_64_regmap[] = {
-  RAX, RDX, RCX, RBX,
-  RSI, RDI, RBP, RSP,
-  R8, R9, R10, R11,
-  R12, R13, R14, R15,
-  RIP, EFLAGS
-};
-
-/* Number of all registers */
-#define X86_64_NUM_REGS (51)
-
-/* Number of general registers.  */
-#define X86_64_NUM_GREGS (18)
+extern int x86_64_num_regs;
+extern int x86_64_num_gregs;
 
 gdbarch_frame_saved_pc_ftype x86_64_linux_frame_saved_pc;
 gdbarch_saved_pc_after_call_ftype x86_64_linux_saved_pc_after_call;

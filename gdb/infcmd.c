@@ -1289,7 +1289,8 @@ finish_command (char *arg, int from_tty)
   if (from_tty)
     {
       printf_filtered ("Run till exit from ");
-      print_stack_frame (selected_frame, selected_frame_level, 0);
+      print_stack_frame (selected_frame,
+			 frame_relative_level (selected_frame), 0);
     }
 
   /* If running asynchronously and the target support asynchronous
@@ -1590,7 +1591,7 @@ do_registers_info (int regnum, int fpregs)
       print_spaces_filtered (15 - strlen (REGISTER_NAME (i)), gdb_stdout);
 
       /* Get the data in raw format.  */
-      if (read_relative_register_raw_bytes (i, raw_buffer))
+      if (! frame_register_read (selected_frame, i, raw_buffer))
 	{
 	  printf_filtered ("*value not available*\n");
 	  continue;
@@ -1680,7 +1681,7 @@ registers_info (char *addr_exp, int fpregs)
       if (*addr_exp >= '0' && *addr_exp <= '9')
 	regnum = atoi (addr_exp);	/* Take a number */
       if (regnum >= numregs)	/* Bad name, or bad number */
-	error ("%.*s: invalid register", end - addr_exp, addr_exp);
+	error ("%.*s: invalid register", (int) (end - addr_exp), addr_exp);
 
     found:
       DO_REGISTERS_INFO (regnum, fpregs);
@@ -1865,14 +1866,14 @@ _initialize_infcmd (void)
 
   c = add_com ("tty", class_run, tty_command,
 	       "Set terminal for future runs of program being debugged.");
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   c = add_set_cmd ("args", class_run, var_string_noescape,
 		   (char *) &inferior_args,
 		   "Set argument list to give program being debugged when it is started.\n\
 Follow this command with any number of args, to be passed to the program.",
 		   &setlist);
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
   set_cmd_sfunc (c, notice_args_set);
   c = add_show_from_set (c, &showlist);
   set_cmd_sfunc (c, notice_args_read);
@@ -1883,17 +1884,17 @@ Follow this command with any number of args, to be passed to the program.",
 With an argument VAR, prints the value of environment variable VAR to\n\
 give the program being debugged.  With no arguments, prints the entire\n\
 environment to be given to the program.", &showlist);
-  c->completer = noop_completer;
+  set_cmd_completer (c, noop_completer);
 
   add_prefix_cmd ("unset", no_class, unset_command,
-		  "Complement to certain \"set\" commands",
+		  "Complement to certain \"set\" commands.",
 		  &unsetlist, "unset ", 0, &cmdlist);
 
   c = add_cmd ("environment", class_run, unset_environment_command,
 	       "Cancel environment variable VAR for the program.\n\
 This does not affect the program until the next \"run\" command.",
 	       &unsetlist);
-  c->completer = noop_completer;
+  set_cmd_completer (c, noop_completer);
 
   c = add_cmd ("environment", class_run, set_environment_command,
 	       "Set environment variable value to give the program.\n\
@@ -1901,7 +1902,7 @@ Arguments are VAR VALUE where VAR is variable name and VALUE is value.\n\
 VALUES of environment variables are uninterpreted strings.\n\
 This does not affect the program until the next \"run\" command.",
 	       &setlist);
-  c->completer = noop_completer;
+  set_cmd_completer (c, noop_completer);
 
   c = add_com ("path", class_files, path_command,
 	       "Add directory DIR(s) to beginning of search path for object files.\n\
@@ -1909,7 +1910,7 @@ $cwd in the path means the current working directory.\n\
 This path is equivalent to the $PATH shell variable.  It is a list of\n\
 directories, separated by colons.  These directories are searched to find\n\
 fully linked executable files and separately compiled object files as needed.");
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   c = add_cmd ("paths", no_class, path_info,
 	       "Current search path for finding object files.\n\
@@ -1918,7 +1919,7 @@ This path is equivalent to the $PATH shell variable.  It is a list of\n\
 directories, separated by colons.  These directories are searched to find\n\
 fully linked executable files and separately compiled object files as needed.",
 	       &showlist);
-  c->completer = noop_completer;
+  set_cmd_completer (c, noop_completer);
 
   add_com ("attach", class_run, attach_command,
 	   "Attach to a process or file outside of GDB.\n\
@@ -1974,14 +1975,14 @@ Argument N means do this N times (or till program stops for another reason).");
 	       "Execute until the program reaches a source line greater than the current\n\
 or a specified line or address or function (same args as break command).\n\
 Execution will also stop upon exit from the current stack frame.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
   add_com_alias ("u", "until", class_run, 1);
 
   c = add_com ("jump", class_run, jump_command,
 	       "Continue program being debugged at specified line or address.\n\
 Give as argument either LINENUM or *ADDR, where ADDR is an expression\n\
 for an address to start at.");
-  c->completer = location_completer;
+  set_cmd_completer (c, location_completer);
 
   if (xdb_commands)
     {
@@ -1992,7 +1993,7 @@ address.\n\
 Give as argument either LINENUM or *ADDR, where ADDR is an \n\
 expression for an address to start at.\n\
 This command is a combination of tbreak and jump.");
-      c->completer = location_completer;
+      set_cmd_completer (c, location_completer);
     }
 
   if (xdb_commands)
@@ -2013,7 +2014,7 @@ Input and output redirection with \">\", \"<\", or \">>\" are also allowed.\n\n\
 With no arguments, uses arguments last specified (with \"run\" or \"set args\").\n\
 To cancel previous arguments and run with no arguments,\n\
 use \"set args\" without arguments.");
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
   add_com_alias ("r", "run", class_run, 1);
   if (xdb_commands)
     add_com ("R", class_run, run_no_args_command,

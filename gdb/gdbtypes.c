@@ -71,6 +71,17 @@ struct type *builtin_type_uint64;
 struct type *builtin_type_int128;
 struct type *builtin_type_uint128;
 struct type *builtin_type_bool;
+
+/* 128 bit long vector types */
+struct type *builtin_type_v4_float;
+struct type *builtin_type_v4_int32;
+struct type *builtin_type_v8_int16;
+struct type *builtin_type_v16_int8;
+/* 64 bit long vector types */
+struct type *builtin_type_v2_int32;
+struct type *builtin_type_v4_int16;
+struct type *builtin_type_v8_int8;
+
 struct type *builtin_type_v4sf;
 struct type *builtin_type_v4si;
 struct type *builtin_type_v16qi;
@@ -521,10 +532,16 @@ finish_cv_type (struct type *type)
 
 /* Replace the contents of ntype with the type *type.
 
-   This function should not be necessary, but is due to quirks in the stabs
-   reader.  This should go away.  It does not handle the replacement type
-   being cv-qualified; it could be easily fixed to, but it should go away,
-   remember?  */
+   In order to build recursive types, it's inevitable that we'll need
+   to update types in place --- but this sort of indiscriminate
+   smashing is ugly, and needs to be replaced with something more
+   controlled.  For example, Daniel Jacobowitz has suggested moving
+   the fields common to a set of c/v variants into their own object,
+   which the variants would share.
+
+   This function does not handle the replacement type being
+   cv-qualified; it could be easily fixed to, but it would be better
+   to just change the whole approach.  */
 void
 replace_type (struct type *ntype, struct type *type)
 {
@@ -777,7 +794,6 @@ create_set_type (struct type *result_type, struct type *domain_type)
   return (result_type);
 }
 
-
 /* Construct and return a type of the form:
 	struct NAME { ELT_TYPE ELT_NAME[N]; }
    We use these types for SIMD registers.  For example, the type of
@@ -793,25 +809,27 @@ init_simd_type (char *name,
 		char *elt_name,
 		int n)
 {
-  struct type *t;
-  struct field *f;
+  struct type *simd_type;
+  struct type *array_type;
+  
+  simd_type = init_composite_type (name, TYPE_CODE_STRUCT);
+  array_type = create_array_type (0, elt_type,
+				  create_range_type (0, builtin_type_int,
+						     0, n-1));
+  append_composite_type_field (simd_type, elt_name, array_type);
+  return simd_type;
+}
 
-  /* Build the field structure.  */
-  f = xmalloc (sizeof (*f));
-  memset (f, 0, sizeof (*f));
-  f->loc.bitpos = 0;
-  f->type = create_array_type (0, elt_type,
-			       create_range_type (0, builtin_type_int,
-						  0, n-1));
-  f->name = elt_name;
-
-  /* Build a struct type with that field.  */
-  t = init_type (TYPE_CODE_STRUCT, n * TYPE_LENGTH (elt_type), 0, 0, 0);
-  t->nfields = 1;
-  t->fields = f;
-  TYPE_TAG_NAME (t) = name;
-
-  return t;
+static struct type *
+init_vector_type (struct type *elt_type, int n)
+{
+  struct type *array_type;
+ 
+  array_type = create_array_type (0, elt_type,
+				  create_range_type (0, builtin_type_int,
+						     0, n-1));
+  TYPE_FLAGS (array_type) |= TYPE_FLAG_VECTOR;
+  return array_type;
 }
 
 static struct type *
@@ -820,41 +838,24 @@ build_builtin_type_vec128 (void)
   /* Construct a type for the 128 bit registers.  The type we're
      building is this: */
 #if 0
-  union __gdb_builtin_type_vec128
+ union __gdb_builtin_type_vec128 
   {
-    struct __builtin_v16qi v16qi;
-    struct __builtin_v8hi v8hi;
-    struct __builtin_v4si v4si;
-    struct __builtin_v4sf v4sf;
-    uint128_t uint128;
+    int128_t uint128;
+    float v4_float[4];
+    int32_t v4_int32[4];
+    int16_t v8_int16[8];
+    int8_t v16_int8[16];
   };
 #endif
 
   struct type *t;
-  struct field *f;
 
-  f = (struct field *) xcalloc (5, sizeof (*f));
-
-  FIELD_TYPE (f[0]) = builtin_type_int128;
-  FIELD_NAME (f[0]) = "uint128";
-
-  FIELD_TYPE (f[1]) = builtin_type_v4sf;
-  FIELD_NAME (f[1]) = "v4sf";
-
-  FIELD_TYPE (f[2]) = builtin_type_v4si;
-  FIELD_NAME (f[2]) = "v4si";
-
-  FIELD_TYPE (f[3]) = builtin_type_v8hi;
-  FIELD_NAME (f[3]) = "v8hi";
-
-  FIELD_TYPE (f[4]) = builtin_type_v16qi;
-  FIELD_NAME (f[4]) = "v16qi";
-
-  /* Build a union type with those fields.  */
-  t = init_type (TYPE_CODE_UNION, 16, 0, 0, 0);
-  TYPE_NFIELDS (t) = 5;
-  TYPE_FIELDS (t) = f;
-  TYPE_TAG_NAME (t) = "__gdb_builtin_type_vec128";
+  t = init_composite_type ("__gdb_builtin_type_vec128", TYPE_CODE_UNION);
+  append_composite_type_field (t, "uint128", builtin_type_int128);
+  append_composite_type_field (t, "v4_float", builtin_type_v4_float);
+  append_composite_type_field (t, "v4_int32", builtin_type_v4_int32);
+  append_composite_type_field (t, "v8_int16", builtin_type_v8_int16);
+  append_composite_type_field (t, "v16_int8", builtin_type_v16_int8);
 
   return t;
 }
@@ -1751,6 +1752,48 @@ init_type (enum type_code code, int length, int flags, char *name,
       INIT_CPLUS_SPECIFIC (type);
     }
   return (type);
+}
+
+/* Helper function.  Create an empty composite type.  */
+
+struct type *
+init_composite_type (char *name, enum type_code code)
+{
+  struct type *t;
+  gdb_assert (code == TYPE_CODE_STRUCT
+	      || code == TYPE_CODE_UNION);
+  t = init_type (code, 0, 0, NULL, NULL);
+  TYPE_TAG_NAME (t) = name;
+  return t;
+}
+
+/* Helper function.  Append a field to a composite type.  */
+
+void
+append_composite_type_field (struct type *t, char *name, struct type *field)
+{
+  struct field *f;
+  TYPE_NFIELDS (t) = TYPE_NFIELDS (t) + 1;
+  TYPE_FIELDS (t) = xrealloc (TYPE_FIELDS (t),
+			      sizeof (struct field) * TYPE_NFIELDS (t));
+  f = &(TYPE_FIELDS (t)[TYPE_NFIELDS (t) - 1]);
+  memset (f, 0, sizeof f[0]);
+  FIELD_TYPE (f[0]) = field;
+  FIELD_NAME (f[0]) = name;
+  if (TYPE_CODE (t) == TYPE_CODE_UNION)
+    {
+      if (TYPE_LENGTH (t) < TYPE_LENGTH (field))
+	TYPE_LENGTH (t) = TYPE_LENGTH (field);
+    }
+  else if (TYPE_CODE (t) == TYPE_CODE_STRUCT)
+    {
+      TYPE_LENGTH (t) = TYPE_LENGTH (t) + TYPE_LENGTH (field);
+      if (TYPE_NFIELDS (t) > 1)
+	{
+	  FIELD_BITPOS (f[0]) = (FIELD_BITPOS (f[-1])
+				 + TYPE_LENGTH (field) * TARGET_CHAR_BIT);
+	}
+    }
 }
 
 /* Look up a fundamental type for the specified objfile.
@@ -3017,6 +3060,13 @@ recursive_dump_type (struct type *type, int spaces)
     {
       puts_filtered (" TYPE_FLAG_VARARGS");
     }
+  /* This is used for things like AltiVec registers on ppc.  Gcc emits
+     an attribute for the array type, which tells whether or not we
+     have a vector, instead of a regular array.  */
+  if (TYPE_VECTOR (type))
+    {
+      puts_filtered (" TYPE_FLAG_VECTOR");
+    }
   puts_filtered ("\n");
   printfi_filtered (spaces, "nfields %d ", TYPE_NFIELDS (type));
   gdb_print_host_address (TYPE_FIELDS (type), gdb_stdout);
@@ -3261,9 +3311,18 @@ build_gdbtypes (void)
   builtin_type_v2si
     = init_simd_type ("__builtin_v2si", builtin_type_int32, "f", 2);
 
+  /* 128 bit vectors.  */
+  builtin_type_v4_float = init_vector_type (builtin_type_float, 4);
+  builtin_type_v4_int32 = init_vector_type (builtin_type_int32, 4);
+  builtin_type_v8_int16 = init_vector_type (builtin_type_int16, 8);
+  builtin_type_v16_int8 = init_vector_type (builtin_type_int8, 16);
+  /* 64 bit vectors.  */
+  builtin_type_v2_int32 = init_vector_type (builtin_type_int32, 2);
+  builtin_type_v4_int16 = init_vector_type (builtin_type_int16, 4);
+  builtin_type_v8_int8 = init_vector_type (builtin_type_int8, 8);
+
   /* Vector types. */
-  builtin_type_vec128
-    = build_builtin_type_vec128 ();
+  builtin_type_vec128 = build_builtin_type_vec128 ();
 
   /* Pointer/Address types. */
 
@@ -3352,6 +3411,13 @@ _initialize_gdbtypes (void)
   register_gdbarch_swap (&builtin_type_v8hi, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v4hi, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v2si, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v4_float, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v4_int32, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v8_int16, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v16_int8, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v2_int32, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v8_int8, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_v4_int16, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_vec128, sizeof (struct type *), NULL);
   REGISTER_GDBARCH_SWAP (builtin_type_void_data_ptr);
   REGISTER_GDBARCH_SWAP (builtin_type_void_func_ptr);

@@ -36,6 +36,12 @@
 #include "libhppa.h"
 #include "elf/hppa.h"
 
+int elf32_hppa_setup_section_lists
+  PARAMS ((bfd *, struct bfd_link_info *));
+
+void elf32_hppa_next_input_section
+  PARAMS ((struct bfd_link_info *, asection *));
+
 boolean elf32_hppa_size_stubs
   PARAMS ((bfd *, bfd *, struct bfd_link_info *, boolean, bfd_signed_vma,
 	   asection * (*) PARAMS ((const char *, asection *)),

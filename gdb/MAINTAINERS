@@ -54,11 +54,10 @@ variants.  *-tdep.c. The Target/Architecture maintainer works with the
 host maintainer when resolving build issues.  The Target/Architecture
 maintainer works with the native maintainer when resolving API issues.
 
-	a29k		OBSOLETE
+	a29k		Deleted.
 
 	alpha		--target=alpha-dec-osf4.0a -Werror
 			Maintenance only
-			OBSOLETE candidate, not multi-arch
 
 	arc		--target=arc-elf ,-Werror
 			Maintenance only
@@ -69,6 +68,9 @@ maintainer works with the native maintainer when resolving API issues.
 			Scott Bambrough		scottb@netwinder.org
 			Richard Earnshaw	rearnsha@arm.com
 			Not multi-arch
+
+	avr		--target=avr ,-Werror
+			Theodore A. Roth	troth@verinet.com
 
 	cris		--target=cris-elf -w
 			Orjan Friberg		orjanf@axis.com
@@ -166,7 +168,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	vax		--target=vax-dec-vms5.5 ,-Werror
 			Maintenance only
-			OBSOLETE candidate, not multi-arch
 
 	w65		Deleted.
 
@@ -204,7 +205,7 @@ The GAWK segment:
   }'
 
 can be used to generate a full list of --target=
---enable-gdb-build-warning= pairs.
+--enable-gdb-build-warnings= pairs.
 
 
 
@@ -235,6 +236,7 @@ GNU/Linux m68k		Andreas Schwab		schwab@suse.de
 FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 			David O'Brien		obrien@freebsd.org
 hurd native		Mark Kettenis		kettenis@gnu.org
+NetBSD native & host	Jason Thorpe		thorpej@wasabisystems.com
 SCO/Unixware		Robert Lipe		rjl@sco.com
 GNU/Linux ARM native	Scott Bambrough		scottb@netwinder.org
 Solaris/x86 native & host (devolved)
@@ -324,6 +326,8 @@ tui			(vacant)
 
 Misc:
 
+gdb/gdbserver		Daniel Jacobowitz	dan@debian.org
+
 Web pages.		Jim Kingdon		jkingdon@engr.sgi.com  ++
 			(anyone can edit; kingdon is just lead maintainer)
 
@@ -356,6 +360,7 @@ Richard Earnshaw				rearnsha@arm.com
 Matthew Green					mrg@eterna.com.au
 Orjan Friberg					orjanf@axis.com
 Ben Harris					bjh21@netbsd.org
+Richard Henderson				rth@redhat.com
 Paul Hilfinger					hilfinger@gnat.com
 Matt Hiller					hiller@redhat.com
 Kazu Hirata					kazu@hxi.com
@@ -376,6 +381,7 @@ Jason Molenda					jmolenda@apple.com
 Pierre Muller					muller@sources.redhat.com
 Alexandre Oliva					aoliva@redhat.com
 Tom Rix						trix@redhat.com
+Theodore A. Roth				troth@verinet.com
 Mark Salter					msalter@redhat.com
 Andreas Schwab					schwab@suse.de
 Keith Seitz					keiths@redhat.com
@@ -389,6 +395,8 @@ Jason Thorpe					thorpej@wasabisystems.com
 Tom Tromey					tromey@redhat.com
 Corinna Vinschen				vinschen@redhat.com
 Keith Walker					keith.walker@arm.com
+Michal Ludvig                                   mludvig@suse.cz
+David S. Miller					davem@redhat.com
 
 
 

@@ -1,3 +1,96 @@
+2002-05-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Releasing GDB): Revise `Create a Release'.
+
+2002-05-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo: Delete obsolete references to a29k.
+
+2002-04-24  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Replace
+	IN_SIGTRAMP with PC_IN_SIGTRAMP.
+
+2002-04-24  David S. Miller  <davem@redhat.com>
+
+	* gdbint.texinfo (REGISTER_IN_WINDOW): Delete definition.
+
+2002-04-21  David S. Miller  <davem@redhat.com>
+
+	* gdbint.texinfo (SKIP_PROLOGUE_FRAMELESS_P): Delete definition.
+
+2002-04-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	definition of HAVE_REGISTER_WINDOWS.
+
+2002-04-19  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdbint.texinfo (Releasing GDB, Coding): Fix typos.  Reported by
+	"Theodore A. Roth" <troth@verinet.com>.
+
+2002-04-15  Don Howard  <dhoward@redhat.com>
+
+	From Eli Zaretskii <eliz@is.elta.co.il>
+	* gdb.texinfo (show max-user-call-depth): Correct formatting.
+	Provide a better explaination of this feature. 
+
+2002-04-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Remove
+	FRAME_CHAIN_COMBINE.
+
+2002-04-12  Michael Chastain  <mec@shout.net>
+
+	* gdbint.texinfo (Obsolete Conditionals): Remove reference to
+	REG_STACK_SEGMENT.
+
+2002-04-09  Michael Chastain  <mec@shout.net>
+
+	* gdbint.texinfo (Obsolete Conditionals): Remove references to
+	PYRAMID_* macros.
+
+2002-04-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Bug Reporting): Document that the web is the
+	prefered way of submitting bug reports.
+	(Bug Reporting): Delete the s-mail address as the last resort.
+
+2002-04-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	references to TARGET_WRITE_FP and write_fp.
+
+2002-03-27  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.texinfo: Document new commands dump, append, and restore.
+
+2002-03-27  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Releasing GDB): Revise the section `Before the
+	Branch'.
+
+2002-03-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo: Change all examples to @smallexample.
+	* gdbint.texinfo: Ditto.
+	
+2002-03-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Releasing GDB): Add section ``Versions and
+	Branches''.
+
+2002-03-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Releasing GDB): Add the section``Branch Commit
+	Policy''.
+
+2002-03-04  Fred Fish  <fnf@redhat.com>
+
+	* gdbint.texinfo: Fix a bunch of typos (alsways, mirrorred,
+	expresson, suports, dependant, trhe, perhaphs, situtations,
+	explictily, taged, oportunity, unfortunatly).
+
 2002-02-24  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (gdb.info): Add explicit path to gdb.texinfo.

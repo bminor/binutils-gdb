@@ -1,5 +1,5 @@
 /* BFD back-end for linux flavored m68k a.out binaries.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1999, 2000, 2001
+   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -230,7 +230,7 @@ linux_link_hash_table_create (abfd)
   struct linux_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct linux_link_hash_table);
 
-  ret = (struct linux_link_hash_table *) bfd_alloc (abfd, amt);
+  ret = (struct linux_link_hash_table *) bfd_malloc (amt);
   if (ret == (struct linux_link_hash_table *) NULL)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -441,6 +441,9 @@ linux_tally_symbols (h, data)
   int is_plt;
   struct linux_link_hash_entry *h1, *h2;
   boolean exists;
+
+  if (h->root.root.type == bfd_link_hash_warning)
+    h = (struct linux_link_hash_entry *) h->root.root.u.i.link;
 
   if (h->root.root.type == bfd_link_hash_undefined
       && strncmp (h->root.root.root.string, NEEDS_SHRLIB,

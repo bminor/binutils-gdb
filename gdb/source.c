@@ -503,6 +503,23 @@ source_info (char *ignore, int from_tty)
 }
 
 
+/* Return True if the file NAME exists and is a regular file */
+static int
+is_regular_file (const char *name)
+{
+  struct stat st;
+  const int status = stat (name, &st);
+
+  /* Stat should never fail except when the file does not exist.
+     If stat fails, analyze the source of error and return True
+     unless the file does not exist, to avoid returning false results
+     on obscure systems where stat does not work as expected.
+   */
+  if (status != 0)
+    return (errno != ENOENT);
+
+  return S_ISREG (st.st_mode);
+}
 
 /* Open a file named STRING, searching path PATH (dir names sep by some char)
    using mode MODE and protection bits PROT in the calls to open.
@@ -514,7 +531,7 @@ source_info (char *ignore, int from_tty)
    get that particular version of foo or an error message).
 
    If FILENAME_OPENED is non-null, set it to a newly allocated string naming
-   the actual file opened (this string will always start with a "/".  We
+   the actual file opened (this string will always start with a "/").  We
    have to take special pains to avoid doubling the "/" between the directory
    and the file, sigh!  Emacs gets confuzzed by this when we print the
    source file name!!! 
@@ -523,7 +540,7 @@ source_info (char *ignore, int from_tty)
    Otherwise, return -1, with errno set for the last name we tried to open.  */
 
 /*  >>>> This should only allow files of certain types,
-   >>>>  eg executable, non-directory */
+    >>>>  eg executable, non-directory */
 int
 openp (const char *path, int try_cwd_first, const char *string,
        int mode, int prot,
@@ -543,7 +560,7 @@ openp (const char *path, int try_cwd_first, const char *string,
   mode |= O_BINARY;
 #endif
 
-  if (try_cwd_first || IS_ABSOLUTE_PATH (string))
+  if ((try_cwd_first || IS_ABSOLUTE_PATH (string)) && is_regular_file (string))
     {
       int i;
       filename = alloca (strlen (string) + 1);
@@ -601,18 +618,26 @@ openp (const char *path, int try_cwd_first, const char *string,
       strcat (filename + len, SLASH_STRING);
       strcat (filename, string);
 
-      fd = open (filename, mode);
-      if (fd >= 0)
-	break;
+      if (is_regular_file (filename))
+      {
+        fd = open (filename, mode);
+        if (fd >= 0)
+          break;
+      }
     }
 
 done:
   if (filename_opened)
     {
+      /* If a file was opened, canonicalize its filename. Use xfullpath
+         rather than gdb_realpath to avoid resolving the basename part
+         of filenames when the associated file is a symbolic link. This
+         fixes a potential inconsistency between the filenames known to
+         GDB and the filenames it prints in the annotations.  */
       if (fd < 0)
 	*filename_opened = NULL;
       else if (IS_ABSOLUTE_PATH (filename))
-	*filename_opened = gdb_realpath (filename);
+	*filename_opened = xfullpath (filename);
       else
 	{
 	  /* Beware the // my son, the Emacs barfs, the botch that catch... */
@@ -621,7 +646,7 @@ done:
            IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1])
 				     ? "" : SLASH_STRING,
 				     filename, NULL);
-	  *filename_opened = gdb_realpath (f);
+	  *filename_opened = xfullpath (f);
 	  xfree (f);
 	}
     }
@@ -1586,7 +1611,7 @@ With no argument, reset the search path to $cdir:$cwd, the default.",
   if (dbx_commands)
     add_com_alias ("use", "directory", class_files, 0);
 
-  c->completer = filename_completer;
+  set_cmd_completer (c, filename_completer);
 
   add_cmd ("directories", no_class, show_directories,
 	   "Current search path for finding source files.\n\

@@ -1,6 +1,7 @@
 /* Target-dependent code for Mitsubishi D10V, for GDB.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -40,9 +41,6 @@
 
 #include "floatformat.h"
 #include "sim-d10v.h"
-
-#undef XMALLOC
-#define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
 struct frame_extra_info
   {
@@ -152,7 +150,7 @@ d10v_use_struct_convention (int gcc_p, struct type *type)
 }
 
 
-static unsigned char *
+static const unsigned char *
 d10v_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char breakpoint[] =
@@ -358,18 +356,6 @@ d10v_register_virtual_type (int reg_nr)
     return builtin_type_int16;
 }
 
-static CORE_ADDR
-d10v_make_daddr (CORE_ADDR x)
-{
-  return ((x) | DMEM_START);
-}
-
-static CORE_ADDR
-d10v_make_iaddr (CORE_ADDR x)
-{
-  return (((x) << 2) | IMEM_START);
-}
-
 static int
 d10v_daddr_p (CORE_ADDR x)
 {
@@ -382,6 +368,20 @@ d10v_iaddr_p (CORE_ADDR x)
   return (((x) & 0x3000000) == IMEM_START);
 }
 
+static CORE_ADDR
+d10v_make_daddr (CORE_ADDR x)
+{
+  return ((x) | DMEM_START);
+}
+
+static CORE_ADDR
+d10v_make_iaddr (CORE_ADDR x)
+{
+  if (d10v_iaddr_p (x))
+    return x;	/* Idempotency -- x is already in the IMEM space. */
+  else
+    return (((x) << 2) | IMEM_START);
+}
 
 static CORE_ADDR
 d10v_convert_iaddr_to_raw (CORE_ADDR x)
@@ -968,12 +968,6 @@ d10v_write_sp (CORE_ADDR val)
   write_register (SP_REGNUM, d10v_convert_daddr_to_raw (val));
 }
 
-static void
-d10v_write_fp (CORE_ADDR val)
-{
-  write_register (FP_REGNUM, d10v_convert_daddr_to_raw (val));
-}
-
 static CORE_ADDR
 d10v_read_fp (void)
 {
@@ -1479,7 +1473,6 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_read_pc (gdbarch, d10v_read_pc);
   set_gdbarch_write_pc (gdbarch, d10v_write_pc);
   set_gdbarch_read_fp (gdbarch, d10v_read_fp);
-  set_gdbarch_write_fp (gdbarch, d10v_write_fp);
   set_gdbarch_read_sp (gdbarch, d10v_read_sp);
   set_gdbarch_write_sp (gdbarch, d10v_write_sp);
 

@@ -33,6 +33,7 @@
 #include "floatformat.h"
 #include "symfile.h"		/* for overlay functions */
 #include "regcache.h"
+#include "builtin-regs.h"
 
 /* Basic byte-swapping routines.  GDB has needed these for a long time...
    All extract a target-format integer at ADDR which is LEN bytes long.  */
@@ -56,7 +57,7 @@ extract_signed_integer (void *addr, int len)
   if (len > (int) sizeof (LONGEST))
     error ("\
 That operation is not available on integers of more than %d bytes.",
-	   sizeof (LONGEST));
+	   (int) sizeof (LONGEST));
 
   /* Start at the most significant end of the integer, and work towards
      the least significant.  */
@@ -90,7 +91,7 @@ extract_unsigned_integer (void *addr, int len)
   if (len > (int) sizeof (ULONGEST))
     error ("\
 That operation is not available on integers of more than %d bytes.",
-	   sizeof (ULONGEST));
+	   (int) sizeof (ULONGEST));
 
   /* Start at the most significant end of the integer, and work towards
      the least significant.  */
@@ -283,15 +284,15 @@ store_typed_address (void *buf, struct type *type, CORE_ADDR addr)
 
 
 
-/* Return a `value' with the contents of register REGNUM
-   in its virtual format, with the type specified by
-   REGISTER_VIRTUAL_TYPE.  
+/* Return a `value' with the contents of (virtual or cooked) register
+   REGNUM as found in the specified FRAME.  The register's type is
+   determined by REGISTER_VIRTUAL_TYPE.
 
-   NOTE: returns NULL if register value is not available.
-   Caller will check return value or die!  */
+   NOTE: returns NULL if register value is not available.  Caller will
+   check return value or die!  */
 
 struct value *
-value_of_register (int regnum)
+value_of_register (int regnum, struct frame_info *frame)
 {
   CORE_ADDR addr;
   int optim;
@@ -299,8 +300,13 @@ value_of_register (int regnum)
   char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
   enum lval_type lval;
 
+  /* Builtin registers lie completly outside of the range of normal
+     registers.  Catch them early so that the target never sees them.  */
+  if (regnum >= NUM_REGS + NUM_PSEUDO_REGS)
+    return value_of_builtin_reg (regnum, selected_frame);
+
   get_saved_register (raw_buffer, &optim, &addr,
-		      selected_frame, regnum, &lval);
+		      frame, regnum, &lval);
 
   if (register_cached (regnum) < 0)
     return NULL;		/* register value not available */
@@ -551,7 +557,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 
 	if (frame == NULL)
 	  return 0;
-	b = get_frame_block (frame);
+	b = get_frame_block (frame, 0);
 
 	if (SYMBOL_CLASS (var) == LOC_REGPARM_ADDR)
 	  {

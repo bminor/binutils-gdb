@@ -1,5 +1,5 @@
 /* Demangler for IA64 / g++ V3 ABI.
-   Copyright (C) 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Alex Samuel <samuel@codesourcery.com>. 
 
    This file is part of GNU CC.
@@ -8,6 +8,15 @@
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
+
+   In addition to the permissions in the GNU General Public License, the
+   Free Software Foundation gives you unlimited permission to link the
+   compiled version of this file into combinations with other programs,
+   and to distribute those combinations without any restriction coming
+   from the use of this file.  (The General Public License restrictions
+   do apply in other respects; for example, they cover modification of
+   the file, and distribution when not linked into a combined
+   executable.)
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -3568,7 +3577,7 @@ cp_demangle_type (type_name, result)
   return status;
 }
 
-#ifdef IN_LIBGCC2
+#if defined(IN_LIBGCC2) || defined(IN_GLIBCPP_V3)
 extern char *__cxa_demangle PARAMS ((const char *, char *, size_t *, int *));
 
 /* ia64 ABI-mandated entry point in the C++ runtime library for performing
@@ -3676,7 +3685,7 @@ __cxa_demangle (mangled_name, output_buffer, length, status)
     }
 }
 
-#else /* !IN_LIBGCC2 */
+#else /* ! (IN_LIBGCC2 || IN_GLIBCPP_V3) */
 
 /* Variant entry point for integration with the existing cplus-dem
    demangler.  Attempts to demangle MANGLED.  If the demangling
@@ -3837,11 +3846,15 @@ java_demangle_v3 (mangled)
 
   free (cplus_demangled);
   
-  return_value = dyn_string_release (demangled);
+  if (demangled)
+    return_value = dyn_string_release (demangled);
+  else
+    return_value = NULL;
+
   return return_value;
 }
 
-#endif /* IN_LIBGCC2 */
+#endif /* IN_LIBGCC2 || IN_GLIBCPP_V3 */
 
 
 /* Demangle NAME in the G++ V3 ABI demangling style, and return either
@@ -3881,6 +3894,7 @@ demangle_v3_with_details (name)
 }
 
 
+#ifndef IN_GLIBCPP_V3
 /* Return non-zero iff NAME is the mangled form of a constructor name
    in the G++ V3 ABI demangling style.  Specifically, return:
    - '1' if NAME is a complete object constructor,
@@ -3923,6 +3937,7 @@ is_gnu_v3_mangled_dtor (name)
   else
     return 0;
 }
+#endif /* IN_GLIBCPP_V3 */
 
 
 #ifdef STANDALONE_DEMANGLER

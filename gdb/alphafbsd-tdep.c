@@ -1,5 +1,5 @@
 /* Target-dependent code for FreeBSD/Alpha.
-   Copyright 2001 Free Software Foundation, Inc.
+   Copyright 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,7 +21,9 @@
 #include "defs.h"
 #include "value.h"
 
-int
+#include "alpha-tdep.h"
+
+static int
 alphafbsd_use_struct_convention (int gcc_p, struct type *type)
 {
   enum type_code code;
@@ -50,4 +52,31 @@ alphafbsd_use_struct_convention (int gcc_p, struct type *type)
     }
 
   return 0;
+}
+
+static int
+alphafbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
+{
+  /* FIXME */
+  return 0;
+}
+
+static void
+alphafbsd_init_abi (struct gdbarch_info info,
+                    struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  set_gdbarch_pc_in_sigtramp (gdbarch, alphafbsd_pc_in_sigtramp);
+
+  set_gdbarch_use_struct_convention (gdbarch, alphafbsd_use_struct_convention);
+
+  tdep->jb_pc = 2;
+  tdep->jb_elt_size = 8;
+}
+
+void
+_initialize_alphafbsd_tdep (void)
+{
+  alpha_gdbarch_register_os_abi (ALPHA_ABI_FREEBSD, alphafbsd_init_abi);
 }

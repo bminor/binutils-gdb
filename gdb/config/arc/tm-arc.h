@@ -29,14 +29,13 @@
 #define FUNCTION_START_OFFSET 0
 
 /* Advance PC across any function entry prologue instructions
-   to reach some "real" code.  SKIP_PROLOGUE_FRAMELESS_P advances
-   the PC past some of the prologue, but stops as soon as it
-   knows that the function has a frame.  Its result is equal
-   to its input PC if the function is frameless, unequal otherwise.  */
+   to reach some "real" code.  */
 
 #define SKIP_PROLOGUE(pc) (arc_skip_prologue (pc, 0))
-#define SKIP_PROLOGUE_FRAMELESS_P(pc) (arc_skip_prologue (pc, 1))
 extern CORE_ADDR arc_skip_prologue (CORE_ADDR, int);
+
+#define PROLOGUE_FRAMELESS_P(pc) arc_prologue_frameless_p(pc)
+extern int arc_prologue_frameless_p (CORE_ADDR);
 
 /* Sequence of bytes for breakpoint instruction.
    ??? The current value is "sr -1,[-1]" and is for the simulator only.

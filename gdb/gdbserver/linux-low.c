@@ -35,6 +35,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+static CORE_ADDR linux_bp_reinsert;
+
+static void linux_resume (int step, int signal);
+
 #define PTRACE_ARG3_TYPE long
 #define PTRACE_XFER_TYPE long
 
@@ -44,17 +48,20 @@ static int use_regsets_p = 1;
 
 extern int errno;
 
-#ifdef HAVE_LINUX_USRREGS
-extern int num_regs;
-extern int regmap[];
-#endif
+static int inferior_pid;
+
+struct inferior_linux_data
+{
+  int pid;
+};
 
 /* Start an inferior process and returns its pid.
    ALLARGS is a vector of program-name and args. */
 
-int
-create_inferior (char *program, char **allargs)
+static int
+linux_create_inferior (char *program, char **allargs)
 {
+  struct inferior_linux_data *tdata;
   int pid;
 
   pid = fork ();
@@ -73,14 +80,23 @@ create_inferior (char *program, char **allargs)
       _exit (0177);
     }
 
-  return pid;
+  add_inferior (pid);
+  tdata = (struct inferior_linux_data *) malloc (sizeof (*tdata));
+  tdata->pid = pid;
+  set_inferior_target_data (current_inferior, tdata);
+
+  /* FIXME remove */
+  inferior_pid = pid;
+  return 0;
 }
 
 /* Attach to an inferior process.  */
 
-int
-myattach (int pid)
+static int
+linux_attach (int pid)
 {
+  struct inferior_linux_data *tdata;
+
   if (ptrace (PTRACE_ATTACH, pid, 0, 0) != 0)
     {
       fprintf (stderr, "Cannot attach to process %d: %s (%d)\n", pid,
@@ -90,50 +106,113 @@ myattach (int pid)
       _exit (0177);
     }
 
+  add_inferior (pid);
+  tdata = (struct inferior_linux_data *) malloc (sizeof (*tdata));
+  tdata->pid = pid;
+  set_inferior_target_data (current_inferior, tdata);
   return 0;
 }
 
 /* Kill the inferior process.  Make us have no inferior.  */
 
-void
-kill_inferior (void)
+static void
+linux_kill (void)
 {
   if (inferior_pid == 0)
     return;
   ptrace (PTRACE_KILL, inferior_pid, 0, 0);
   wait (0);
+  clear_inferiors ();
 }
 
 /* Return nonzero if the given thread is still alive.  */
-int
-mythread_alive (int pid)
+static int
+linux_thread_alive (int pid)
 {
   return 1;
 }
 
+static int
+linux_wait_for_one_inferior (struct inferior_info *child)
+{
+  struct inferior_linux_data *child_data = inferior_target_data (child);
+  int pid, wstat;
+
+  while (1)
+    {
+      pid = waitpid (child_data->pid, &wstat, 0);
+
+      if (pid != child_data->pid)
+	perror_with_name ("wait");
+
+      /* If this target supports breakpoints, see if we hit one.  */
+      if (the_low_target.stop_pc != NULL
+	  && WIFSTOPPED (wstat)
+	  && WSTOPSIG (wstat) == SIGTRAP)
+	{
+	  CORE_ADDR stop_pc;
+
+	  if (linux_bp_reinsert != 0)
+	    {
+	      reinsert_breakpoint (linux_bp_reinsert);
+	      linux_bp_reinsert = 0;
+	      linux_resume (0, 0);
+	      continue;
+	    }
+
+	  fetch_inferior_registers (0);
+	  stop_pc = (*the_low_target.stop_pc) ();
+
+	  if (check_breakpoints (stop_pc) != 0)
+	    {
+	      if (the_low_target.set_pc != NULL)
+		(*the_low_target.set_pc) (stop_pc);
+
+	      if (the_low_target.breakpoint_reinsert_addr == NULL)
+		{
+		  linux_bp_reinsert = stop_pc;
+		  uninsert_breakpoint (stop_pc);
+		  linux_resume (1, 0);
+		}
+	      else
+		{
+		  reinsert_breakpoint_by_bp
+		    (stop_pc, (*the_low_target.breakpoint_reinsert_addr) ());
+		  linux_resume (0, 0);
+		}
+
+	      continue;
+	    }
+	}
+
+      return wstat;
+    }
+  /* NOTREACHED */
+  return 0;
+}
+
 /* Wait for process, returns status */
 
-unsigned char
-mywait (char *status)
+static unsigned char
+linux_wait (char *status)
 {
-  int pid;
   int w;
 
   enable_async_io ();
-  pid = waitpid (inferior_pid, &w, 0);
+  w = linux_wait_for_one_inferior (current_inferior);
   disable_async_io ();
-  if (pid != inferior_pid)
-    perror_with_name ("wait");
 
   if (WIFEXITED (w))
     {
       fprintf (stderr, "\nChild exited with retcode = %x \n", WEXITSTATUS (w));
       *status = 'W';
+      clear_inferiors ();
       return ((unsigned char) WEXITSTATUS (w));
     }
   else if (!WIFSTOPPED (w))
     {
       fprintf (stderr, "\nChild terminated with signal = %x \n", WTERMSIG (w));
+      clear_inferiors ();
       *status = 'X';
       return ((unsigned char) WTERMSIG (w));
     }
@@ -148,8 +227,8 @@ mywait (char *status)
    If STEP is nonzero, single-step it.
    If SIGNAL is nonzero, give it that signal.  */
 
-void
-myresume (int step, int signal)
+static void
+linux_resume (int step, int signal)
 {
   errno = 0;
   ptrace (step ? PTRACE_SINGLESTEP : PTRACE_CONT, inferior_pid, 1, signal);
@@ -167,10 +246,10 @@ register_addr (int regnum)
 {
   int addr;
 
-  if (regnum < 0 || regnum >= num_regs)
+  if (regnum < 0 || regnum >= the_low_target.num_regs)
     error ("Invalid register number %d.", regnum);
 
-  addr = regmap[regnum];
+  addr = the_low_target.regmap[regnum];
   if (addr == -1)
     addr = 0;
 
@@ -184,9 +263,9 @@ fetch_register (int regno)
   CORE_ADDR regaddr;
   register int i;
 
-  if (regno >= num_regs)
+  if (regno >= the_low_target.num_regs)
     return;
-  if (cannot_fetch_register (regno))
+  if ((*the_low_target.cannot_fetch_register) (regno))
     return;
 
   regaddr = register_addr (regno);
@@ -217,7 +296,7 @@ static void
 usr_fetch_inferior_registers (int regno)
 {
   if (regno == -1 || regno == 0)
-    for (regno = 0; regno < num_regs; regno++)
+    for (regno = 0; regno < the_low_target.num_regs; regno++)
       fetch_register (regno);
   else
     fetch_register (regno);
@@ -234,10 +313,10 @@ usr_store_inferior_registers (int regno)
 
   if (regno >= 0)
     {
-      if (regno >= num_regs)
+      if (regno >= the_low_target.num_regs)
 	return;
 
-      if (cannot_store_register (regno))
+      if ((*the_low_target.cannot_store_register) (regno) == 1)
 	return;
 
       regaddr = register_addr (regno);
@@ -251,20 +330,21 @@ usr_store_inferior_registers (int regno)
 		  *(int *) (register_data (regno) + i));
 	  if (errno != 0)
 	    {
-	      /* Warning, not error, in case we are attached; sometimes the
-		 kernel doesn't let us at the registers.  */
-	      char *err = strerror (errno);
-	      char *msg = alloca (strlen (err) + 128);
-	      sprintf (msg, "writing register %d: %s",
-		       regno, err);
-	      error (msg);
-	      return;
+	      if ((*the_low_target.cannot_store_register) (regno) == 0)
+		{
+		  char *err = strerror (errno);
+		  char *msg = alloca (strlen (err) + 128);
+		  sprintf (msg, "writing register %d: %s",
+			   regno, err);
+		  error (msg);
+		  return;
+		}
 	    }
 	  regaddr += sizeof (int);
 	}
     }
   else
-    for (regno = 0; regno < num_regs; regno++)
+    for (regno = 0; regno < the_low_target.num_regs; regno++)
       store_inferior_registers (regno);
 }
 #endif /* HAVE_LINUX_USRREGS */
@@ -292,7 +372,7 @@ regsets_fetch_inferior_registers (void)
 	}
 
       buf = malloc (regset->size);
-      res = ptrace (regset->get_request, inferior_pid, 0, (int) buf);
+      res = ptrace (regset->get_request, inferior_pid, 0, buf);
       if (res < 0)
 	{
 	  if (errno == EIO)
@@ -318,6 +398,7 @@ regsets_fetch_inferior_registers (void)
       regset->store_function (buf);
       regset ++;
     }
+  return 0;
 }
 
 static int
@@ -340,7 +421,7 @@ regsets_store_inferior_registers (void)
 
       buf = malloc (regset->size);
       regset->fill_function (buf);
-      res = ptrace (regset->set_request, inferior_pid, 0, (int) buf);
+      res = ptrace (regset->set_request, inferior_pid, 0, buf);
       if (res < 0)
 	{
 	  if (errno == EIO)
@@ -360,18 +441,19 @@ regsets_store_inferior_registers (void)
 	    }
 	  else
 	    {
-	      perror ("Warning: ptrace(regsets_fetch_inferior_registers)");
+	      perror ("Warning: ptrace(regsets_store_inferior_registers)");
 	    }
 	}
       regset ++;
     }
+  return 0;
 }
 
 #endif /* HAVE_LINUX_REGSETS */
 
 
 void
-fetch_inferior_registers (int regno)
+linux_fetch_registers (int regno)
 {
 #ifdef HAVE_LINUX_REGSETS
   if (use_regsets_p)
@@ -386,7 +468,7 @@ fetch_inferior_registers (int regno)
 }
 
 void
-store_inferior_registers (int regno)
+linux_store_registers (int regno)
 {
 #ifdef HAVE_LINUX_REGSETS
   if (use_regsets_p)
@@ -404,8 +486,8 @@ store_inferior_registers (int regno)
 /* Copy LEN bytes from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.  */
 
-void
-read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
+static void
+linux_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   register int i;
   /* Round starting address down to longword boundary.  */
@@ -433,8 +515,8 @@ read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
    On failure (cannot write the inferior)
    returns the value of errno.  */
 
-int
-write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
+static int
+linux_write_memory (CORE_ADDR memaddr, const char *myaddr, int len)
 {
   register int i;
   /* Round starting address down to longword boundary.  */
@@ -476,9 +558,33 @@ write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
   return 0;
 }
+
+static void
+linux_look_up_symbols (void)
+{
+  /* Don't need to look up any symbols yet.  */
+}
+
 
+static struct target_ops linux_target_ops = {
+  linux_create_inferior,
+  linux_attach,
+  linux_kill,
+  linux_thread_alive,
+  linux_resume,
+  linux_wait,
+  linux_fetch_registers,
+  linux_store_registers,
+  linux_read_memory,
+  linux_write_memory,
+  linux_look_up_symbols,
+};
+
 void
 initialize_low (void)
 {
+  set_target_ops (&linux_target_ops);
+  set_breakpoint_data (the_low_target.breakpoint,
+		       the_low_target.breakpoint_len);
   init_registers ();
 }

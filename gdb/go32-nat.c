@@ -491,7 +491,7 @@ static void
 store_register (int regno)
 {
   if (regno < FP0_REGNUM)
-    regcache_collect (regno, (void *) &a_tss + regno_mapping[regno].tss_ofs);
+    regcache_collect (regno, (char *) &a_tss + regno_mapping[regno].tss_ofs);
   else if (FP_REGNUM_P (regno) || FPC_REGNUM_P (regno))
     i387_fill_fsave ((char *) &npx, regno);
   else
@@ -804,7 +804,7 @@ go32_terminal_inferior (void)
   {
     redir_to_debugger (&child_cmd);
     error ("Cannot redirect standard handles for program: %s.",
-	   strerror (errno));
+	   safe_strerror (errno));
   }
   /* set the console device of the inferior to whatever mode
      (raw or cooked) we found it last time */
@@ -838,7 +838,7 @@ go32_terminal_ours (void)
     {
       redir_to_child (&child_cmd);
       error ("Cannot redirect standard handles for debugger: %s.",
-	     strerror (errno));
+	     safe_strerror (errno));
     }
   }
 }

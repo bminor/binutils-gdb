@@ -749,7 +749,15 @@ static const char *scheduler_enums[] =
 static void
 set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
 {
-  if (c->type == set_cmd)
+  /* NOTE: cagney/2002-03-17: The add_show_from_set() function clones
+     the set command passed as a parameter.  The clone operation will
+     include (BUG?) any ``set'' command callback, if present.
+     Commands like ``info set'' call all the ``show'' command
+     callbacks.  Unfortunatly, for ``show'' commands cloned from
+     ``set'', this includes callbacks belonging to ``set'' commands.
+     Making this worse, this only occures if add_show_from_set() is
+     called after add_cmd_sfunc() (BUG?).  */
+  if (cmd_type (c) == set_cmd)
     if (!target_can_lock_scheduler)
       {
 	scheduler_mode = schedlock_off;
@@ -2632,8 +2640,8 @@ handle_inferior_event (struct execution_control_state *ecs)
     ecs->update_step_sp = 1;
 
     /* Did we just take a signal?  */
-    if (IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
-	&& !IN_SIGTRAMP (prev_pc, prev_func_name)
+    if (PC_IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
+	&& !PC_IN_SIGTRAMP (prev_pc, prev_func_name)
 	&& INNER_THAN (read_sp (), step_sp))
       {
 	/* We've just taken a signal; go until we are back to
@@ -2744,7 +2752,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  {
 	    /* We're doing a "next".  */
 
-	    if (IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
+	    if (PC_IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
 		&& INNER_THAN (step_frame_address, read_sp()))
 	      /* We stepped out of a signal handler, and into its
                  calling trampoline.  This is misdetected as a
@@ -2953,8 +2961,8 @@ static void
 check_sigtramp2 (struct execution_control_state *ecs)
 {
   if (trap_expected
-      && IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
-      && !IN_SIGTRAMP (prev_pc, prev_func_name)
+      && PC_IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
+      && !PC_IN_SIGTRAMP (prev_pc, prev_func_name)
       && INNER_THAN (read_sp (), step_sp))
     {
       /* What has happened here is that we have just stepped the
@@ -3414,13 +3422,11 @@ and/or watchpoints.\n");
 
   target_terminal_ours ();
 
-  /* Look up the hook_stop and run it if it exists.  */
-
-  if (stop_command && stop_command->hook_pre)
-    {
-      catch_errors (hook_stop_stub, stop_command->hook_pre,
-		    "Error while running hook_stop:\n", RETURN_MASK_ALL);
-    }
+  /* Look up the hook_stop and run it (CLI internally handles problem
+     of stop_command's pre-hook not existing).  */
+  if (stop_command)
+    catch_errors (hook_stop_stub, stop_command,
+		  "Error while running hook_stop:\n", RETURN_MASK_ALL);
 
   if (!target_has_stack)
     {
@@ -3435,7 +3441,7 @@ and/or watchpoints.\n");
 
   if (!stop_stack_dummy)
     {
-      select_frame (get_current_frame (), 0);
+      select_frame (get_current_frame ());
 
       /* Print current location without a level number, if
          we have changed functions or hit a breakpoint.
@@ -3511,7 +3517,7 @@ and/or watchpoints.\n");
          Can't rely on restore_inferior_status because that only gets
          called if we don't stop in the called function.  */
       stop_pc = read_pc ();
-      select_frame (get_current_frame (), 0);
+      select_frame (get_current_frame ());
     }
 
 done:
@@ -3521,7 +3527,7 @@ done:
 static int
 hook_stop_stub (void *cmd)
 {
-  execute_user_command ((struct cmd_list_element *) cmd, 0);
+  execute_cmd_pre_hook ((struct cmd_list_element *) cmd);
   return (0);
 }
 
@@ -4018,7 +4024,7 @@ restore_selected_frame (void *args)
       return 0;
     }
 
-  select_frame (frame, fr->level);
+  select_frame (frame);
 
   return (1);
 }
@@ -4073,7 +4079,7 @@ restore_inferior_status (struct inferior_status *inf_status)
 	   frame.  */
 
 
-	select_frame (get_current_frame (), 0);
+	select_frame (get_current_frame ());
 
     }
 

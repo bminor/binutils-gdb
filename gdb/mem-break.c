@@ -1,6 +1,8 @@
 /* Simulate breakpoints by patching locations in the target system, for GDB.
-   Copyright 1990, 1991, 1992, 1993, 1995, 1997, 1998, 1999, 2000
-   Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1995, 1997, 1998, 1999, 2000,
+   2002 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support.  Written by John Gilmore.
 
    This file is part of GDB.
@@ -40,7 +42,7 @@
    and optionally adjust the pc to point to the correct memory location
    for inserting the breakpoint.  */
 
-unsigned char *
+const unsigned char *
 memory_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   /* {BIG_,LITTLE_}BREAKPOINT is the sequence of bytes we insert for a
@@ -86,7 +88,7 @@ int
 default_memory_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   int val;
-  unsigned char *bp;
+  const unsigned char *bp;
   int bplen;
 
   /* Determine appropriate breakpoint contents and size for this address.  */
@@ -108,7 +110,7 @@ default_memory_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 int
 default_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
-  unsigned char *bp;
+  const unsigned char *bp;
   int bplen;
 
   /* Determine appropriate breakpoint contents and size for this address.  */

@@ -376,15 +376,8 @@ extern void init_extra_frame_info (int, struct frame_info *);
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
-/* FRAME_CHAIN takes a frame's nominal address
-   and produces the frame's chain-pointer.
-
-   FRAME_CHAIN_COMBINE takes the chain pointer and the frame's nominal address
-   and produces the nominal address of the caller frame.
-
-   However, if FRAME_CHAIN_VALID returns zero,
-   it means the given frame is the outermost one and has no caller.
-   In that case, FRAME_CHAIN_COMBINE is not used.  */
+/* FRAME_CHAIN takes a frame's nominal address and produces the
+   frame's chain-pointer.  */
 
 /* In the case of the PA-RISC, the frame's nominal address
    is the address of a 4-byte word containing the calling frame's
@@ -395,8 +388,6 @@ extern CORE_ADDR frame_chain (struct frame_info *);
 
 extern int hppa_frame_chain_valid (CORE_ADDR, struct frame_info *);
 #define FRAME_CHAIN_VALID(chain, thisframe) hppa_frame_chain_valid (chain, thisframe)
-
-#define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
 /* Define other aspects of the stack frame.  */
 

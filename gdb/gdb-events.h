@@ -1,5 +1,6 @@
 /* User Interface Events.
-   Copyright 1999, 2001 Free Software Foundation, Inc.
+
+   Copyright 1999, 2001, 2002 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.
 

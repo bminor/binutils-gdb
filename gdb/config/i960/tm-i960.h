@@ -1,6 +1,8 @@
 /* Parameters for target machine Intel 960, for GDB, the GNU debugger.
-   Copyright 1990, 1991, 1993, 1994, 1996, 1998, 1999, 2000
-   Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1993, 1994, 1996, 1998, 1999, 2000, 2002 Free
+   Software Foundation, Inc.
+
    Contributed by Intel Corporation.
    This file is part of GDB.
 
@@ -114,21 +116,16 @@ extern CORE_ADDR saved_pc_after_call ();
 
 /* The i960 has register windows, sort of.  */
 
-#define HAVE_REGISTER_WINDOWS
+extern void i960_get_saved_register (char *raw_buffer,
+				     int *optimized,
+				     CORE_ADDR *addrp,
+				     struct frame_info *frame,
+				     int regnum,
+				     enum lval_type *lval);
 
-/* Is this register part of the register window system?  A yes answer
-   implies that 1) The name of this register will not be the same in
-   other frames, and 2) This register is automatically "saved" upon
-   subroutine calls and thus there is no need to search more than one
-   stack frame for it.
+#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
+  i960_get_saved_register(raw_buffer, optimized, addrp, frame, regnum, lval)
 
-   On the i960, in fact, the name of this register in another frame is
-   "mud" -- there is no overlap between the windows.  Each window is
-   simply saved into the stack (true for our purposes, after having been
-   flushed; normally they reside on-chip and are restored from on-chip
-   without ever going to memory).  */
-
-#define REGISTER_IN_WINDOW_P(regnum)	((regnum) <= R15_REGNUM)
 
 /* Number of bytes of storage in the actual machine representation
    for register N.  On the i960, all regs are 4 bytes except for floating

@@ -23,6 +23,8 @@
 #ifndef TM_SPARCLINUX_H
 #define TM_SPARCLINUX_H
 
+#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
+
 #include "sparc/tm-sparc.h"
 
 #define SIGCONTEXT_PC_OFFSET 12

@@ -30,6 +30,12 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
 
 /* Sort of a hack... */
 #define EOL (EOF - 1)
@@ -83,8 +89,6 @@ remote_close (void)
 void
 remote_open (char *name)
 {
-  extern char *strchr ();
-
   if (!strchr (name, ':'))
     {
       fprintf (stderr, "%s: Must specify tcp connection as host:addr\n", name);
@@ -97,7 +101,6 @@ remote_open (char *name)
       int port;
       struct sockaddr_in sockaddr;
       int tmp;
-      struct protoent *protoent;
       int tmp_desc;
 
       port_str = strchr (name, ':');
@@ -126,10 +129,6 @@ remote_open (char *name)
       if (remote_desc == -1)
 	perror_with_name ("Accept failed");
 
-      protoent = getprotobyname ("tcp");
-      if (!protoent)
-	perror_with_name ("getprotobyname");
-
       /* Enable TCP keep alive process. */
       tmp = 1;
       setsockopt (tmp_desc, SOL_SOCKET, SO_KEEPALIVE, (char *) &tmp, sizeof (tmp));
@@ -137,7 +136,7 @@ remote_open (char *name)
       /* Tell TCP not to delay small packets.  This greatly speeds up
          interactive response. */
       tmp = 1;
-      setsockopt (remote_desc, protoent->p_proto, TCP_NODELAY,
+      setsockopt (remote_desc, IPPROTO_TCP, TCP_NODELAY,
 		  (char *) &tmp, sizeof (tmp));
 
       close (tmp_desc);		/* No longer need this */

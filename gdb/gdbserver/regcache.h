@@ -21,6 +21,16 @@
 #ifndef REGCACHE_H
 #define REGCACHE_H
 
+struct inferior_info;
+
+/* Create a new register cache for INFERIOR.  */
+
+void create_register_cache (struct inferior_info *inferior);
+
+/* Release all memory associated with the register cache for INFERIOR.  */
+
+void free_register_cache (struct inferior_info *inferior);
+
 /* Convert all registers to a string in the currently specified remote
    format.  */
 
@@ -45,5 +55,13 @@ int register_size (int n);
 int find_regno (const char *name);
 
 extern const char **gdbserver_expedite_regs;
+
+void supply_register (int n, const void *buf);
+
+void supply_register_by_name (const char *name, const void *buf);
+
+void collect_register (int n, void *buf);
+
+void collect_register_by_name (const char *name, void *buf);
 
 #endif /* REGCACHE_H */

@@ -788,6 +788,14 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 			 show - 1, level);
       break;
 
+    case TYPE_CODE_BITSTRING:
+      fputs_filtered ("BitString", stream);
+      break;
+
+    case TYPE_CODE_STRING:
+      fputs_filtered ("String", stream);
+      break;
+
     default:
       /* Handle types not explicitly handled by the other cases,
          such as fundamental types.  For these, just print whatever

@@ -28,12 +28,15 @@
 #include <sys/procfs.h>
 #include <sys/ptrace.h>
 
-static int regmap[] = {
-  RAX, RDX, RCX, RBX,
+#define	X86_64_NUM_GREGS 22
+
+static int x86_64_regmap[X86_64_NUM_GREGS] = {
+  RAX, RBX, RCX, RDX,
   RSI, RDI, RBP, RSP,
   R8, R9, R10, R11,
   R12, R13, R14, R15,
-  RIP, EFLAGS
+  RIP, EFLAGS,
+  DS, ES, FS, GS
 };
 
 static void
@@ -41,8 +44,8 @@ x86_64_fill_gregset (void *buf)
 {
   int i;
 
-  for (i = 0; i < 18; i++)
-    collect_register (i, ((char *) buf) + regmap[i]);
+  for (i = 0; i < X86_64_NUM_GREGS; i++)
+    collect_register (i, ((char *) buf) + x86_64_regmap[i]);
 }
 
 static void
@@ -50,8 +53,8 @@ x86_64_store_gregset (void *buf)
 {
   int i;
 
-  for (i = 0; i < 18; i++)
-    supply_register (i, ((char *) buf) + regmap[i]);
+  for (i = 0; i < X86_64_NUM_GREGS; i++)
+    supply_register (i, ((char *) buf) + x86_64_regmap[i]);
 }
 
 static void
@@ -66,11 +69,17 @@ x86_64_store_fpregset (void *buf)
   i387_fxsave_to_cache (buf);
 }
 
-
 struct regset_info target_regsets[] = {
   { PTRACE_GETREGS, PTRACE_SETREGS, sizeof (elf_gregset_t),
     x86_64_fill_gregset, x86_64_store_gregset },
   { PTRACE_GETFPREGS, PTRACE_SETFPREGS, sizeof (elf_fpregset_t),
     x86_64_fill_fpregset, x86_64_store_fpregset },
   { 0, 0, -1, NULL, NULL }
+};
+
+struct linux_target_ops the_low_target = {
+  -1,
+  NULL,
+  NULL,
+  NULL,
 };

@@ -273,8 +273,162 @@ unsigned long long	(*v_unsigned_long_long_func) (int, int*);
 float		(*v_float_func) (int, int*);
 double		(*v_double_func) (int, int*);
 
-
+void use (void *p)
+{
+}
 
 int main ()
 {
+  use (&v_char);
+  use (&v_signed_char);
+  use (&v_unsigned_char);
+
+  use (&v_short);
+  use (&v_signed_short);
+  use (&v_unsigned_short);
+
+  use (&v_int);
+  use (&v_signed_int);
+  use (&v_unsigned_int);
+
+  use (&v_long);
+  use (&v_signed_long);
+  use (&v_unsigned_long);
+
+  use (&v_long_long);
+  use (&v_signed_long_long);
+  use (&v_unsigned_long_long);
+
+  use (&v_float);
+  use (&v_double);
+
+  use (v_char_array);
+  use (v_signed_char_array);
+  use (v_unsigned_char_array);
+
+  use (v_short_array);
+  use (v_signed_short_array);
+  use (v_unsigned_short_array);
+
+  use (v_int_array);
+  use (v_signed_int_array);
+  use (v_unsigned_int_array);
+
+  use (v_long_array);
+  use (v_signed_long_array);
+  use (v_unsigned_long_array);
+
+  use (v_float_array);
+  use (v_double_array);
+
+  use (v_char_pointer);
+  use (v_signed_char_pointer);
+  use (v_unsigned_char_pointer);
+
+  use (v_short_pointer);
+  use (v_signed_short_pointer);
+  use (v_unsigned_short_pointer);
+
+  use (v_int_pointer);
+  use (v_signed_int_pointer);
+  use (v_unsigned_int_pointer);
+
+  use (v_long_pointer);
+  use (v_signed_long_pointer);
+  use (v_unsigned_long_pointer);
+
+  use (v_float_pointer);
+  use (v_double_pointer);
+
+  use (v_char_pointer_pointer);
+  use (v_signed_char_pointer_pointer);
+  use (v_unsigned_char_pointer_pointer);
+
+  use (v_short_pointer_pointer);
+  use (v_signed_short_pointer_pointer);
+  use (v_unsigned_short_pointer_pointer);
+
+  use (v_int_pointer_pointer);
+  use (v_signed_int_pointer_pointer);
+  use (v_unsigned_int_pointer_pointer);
+
+  use (v_long_pointer_pointer);
+  use (v_signed_long_pointer_pointer);
+  use (v_unsigned_long_pointer_pointer);
+
+  use (v_float_pointer_pointer);
+  use (v_double_pointer_pointer);
+
+  use (v_char_array_pointer);
+  use (v_signed_char_array_pointer);
+  use (v_unsigned_char_array_pointer);
+
+  use (v_short_array_pointer);
+  use (v_signed_short_array_pointer);
+  use (v_unsigned_short_array_pointer);
+
+  use (v_int_array_pointer);
+  use (v_signed_int_array_pointer);
+  use (v_unsigned_int_array_pointer);
+
+  use (v_long_array_pointer);
+  use (v_signed_long_array_pointer);
+  use (v_unsigned_long_array_pointer);
+
+  use (v_float_array_pointer);
+  use (v_double_array_pointer);
+
+  use (v_char_pointer_array);
+  use (v_signed_char_pointer_array);
+  use (v_unsigned_char_pointer_array);
+
+  use (v_short_pointer_array);
+  use (v_signed_short_pointer_array);
+  use (v_unsigned_short_pointer_array);
+
+  use (v_int_pointer_array);
+  use (v_signed_int_pointer_array);
+  use (v_unsigned_int_pointer_array);
+
+  use (v_long_pointer_array);
+  use (v_signed_long_pointer_array);
+  use (v_unsigned_long_pointer_array);
+
+  use (v_float_pointer_array);
+  use (v_double_pointer_array);
+
+  use (&v_struct1);
+  use (&v_struct2);
+  use (&v_struct3);
+
+  use (&v_union);
+  use (&v_union2);
+  use (&v_union3);
+
+  use (&v_boolean);
+  use (&v_boolean2);
+  use (&v_misordered);
+
+  use (v_char_func);
+  use (v_signed_char_func);
+  use (v_unsigned_char_func);
+
+  use (v_short_func);
+  use (v_signed_short_func);
+  use (v_unsigned_short_func);
+
+  use (v_int_func);
+  use (v_signed_int_func);
+  use (v_unsigned_int_func);
+
+  use (v_long_func);
+  use (v_signed_long_func);
+  use (v_unsigned_long_func);
+
+  use (v_long_long_func);
+  use (v_signed_long_long_func);
+  use (v_unsigned_long_long_func);
+
+  use (v_float_func);
+  use (v_double_func);
 }

@@ -116,23 +116,26 @@ i387_fill_fsave (char *fsave, int regnum)
 	if (i >= FPC_REGNUM
 	    && i != FIOFF_REGNUM && i != FOOFF_REGNUM)
 	  {
+	    char buf[4];
+
+	    regcache_collect (i, buf);
+
 	    if (i == FOP_REGNUM)
 	      {
 		unsigned short oldval, newval;
 
 		/* The opcode occupies only 11 bits.  */
 		oldval = (*(unsigned short *) (FSAVE_ADDR (fsave, i)));
-		newval = *(unsigned short *) &registers[REGISTER_BYTE (i)];
+		newval = *(unsigned short *) buf;
 		newval &= ((1 << 11) - 1);
 		newval |= oldval & ~((1 << 11) - 1);
 		memcpy (FSAVE_ADDR (fsave, i), &newval, 2);
 	      }
 	    else
-	      memcpy (FSAVE_ADDR (fsave, i), &registers[REGISTER_BYTE (i)], 2);
+	      memcpy (FSAVE_ADDR (fsave, i), buf, 2);
 	  }
 	else
-	  memcpy (FSAVE_ADDR (fsave, i), &registers[REGISTER_BYTE (i)],
-		  REGISTER_RAW_SIZE (i));
+	  regcache_collect (i, FSAVE_ADDR (fsave, i));
       }
 }
 
@@ -255,13 +258,17 @@ i387_fill_fxsave (char *fxsave, int regnum)
 	if (i >= FPC_REGNUM && i < XMM0_REGNUM
 	    && i != FIOFF_REGNUM && i != FDOFF_REGNUM)
 	  {
+	    char buf[4];
+
+	    regcache_collect (i, buf);
+
 	    if (i == FOP_REGNUM)
 	      {
 		unsigned short oldval, newval;
 
 		/* The opcode occupies only 11 bits.  */
 		oldval = (*(unsigned short *) (FXSAVE_ADDR (fxsave, i)));
-		newval = *(unsigned short *) &registers[REGISTER_BYTE (i)];
+		newval = *(unsigned short *) buf;
 		newval &= ((1 << 11) - 1);
 		newval |= oldval & ~((1 << 11) - 1);
 		memcpy (FXSAVE_ADDR (fxsave, i), &newval, 2);
@@ -274,7 +281,7 @@ i387_fill_fxsave (char *fxsave, int regnum)
 		unsigned short ftag;
 		int fpreg;
 
-		ftag = *(unsigned short *) &registers[REGISTER_BYTE (i)];
+		ftag = *(unsigned short *) buf;
 
 		for (fpreg = 7; fpreg >= 0; fpreg--)
 		  {
@@ -287,12 +294,10 @@ i387_fill_fxsave (char *fxsave, int regnum)
 		memcpy (FXSAVE_ADDR (fxsave, i), &val, 2);
 	      }
 	    else
-	      memcpy (FXSAVE_ADDR (fxsave, i),
-		      &registers[REGISTER_BYTE (i)], 2);
+	      memcpy (FXSAVE_ADDR (fxsave, i), buf, 2);
 	  }
 	else
-	  memcpy (FXSAVE_ADDR (fxsave, i), &registers[REGISTER_BYTE (i)],
-		  REGISTER_RAW_SIZE (i));
+	  regcache_collect (i, FXSAVE_ADDR (fxsave, i));
       }
 }
 

@@ -27,6 +27,7 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-script.h"
 #include "cli/cli-setshow.h"
+#include "cli/cli-decode.h"
 #include "symtab.h"
 #include "inferior.h"
 #include <signal.h>
@@ -693,12 +694,7 @@ execute_command (char *p, int from_tty)
 	}
 
       /* If this command has been pre-hooked, run the hook first. */
-      if ((c->hook_pre) && (!c->hook_in))
-      {
-        c->hook_in = 1; /* Prevent recursive hooking */
-        execute_user_command (c->hook_pre, (char *) 0);
-        c->hook_in = 0; /* Allow hook to work again once it is complete */
-      }
+      execute_cmd_pre_hook (c);
 
       if (c->flags & DEPRECATED_WARN_USER)
 	deprecated_cmd_warning (&line);
@@ -715,12 +711,7 @@ execute_command (char *p, int from_tty)
 	(*c->func) (c, arg, from_tty & caution);
        
       /* If this command has been post-hooked, run the hook last. */
-      if ((c->hook_post) && (!c->hook_in))
-      {
-        c->hook_in = 1; /* Prevent recursive hooking */
-        execute_user_command (c->hook_post, (char *) 0);
-        c->hook_in = 0; /* allow hook to work again once it is complete */
-      }
+      execute_cmd_post_hook (c);
 
     }
 
@@ -1444,7 +1435,7 @@ get_prompt_1 (void *data)
 
 		  if (*promptp != gdb_prompt_escape)
 		    error ("Syntax error at prompt position %d",
-			   promptp - local_prompt);
+			   (int) (promptp - local_prompt));
 		  else
 		    {
 		      promptp++;	/* skip second escape char */
@@ -1590,7 +1581,7 @@ get_prompt_1 (void *data)
 		  break;	/* void type -- no output */
 		default:
 		  error ("bad data type at prompt position %d",
-			 promptp - local_prompt);
+			 (int) (promptp - local_prompt));
 		  break;
 		}
 	      outp += strlen (outp);
@@ -1999,7 +1990,7 @@ Without an argument, saving is enabled.", &sethistlist),
      &showhistlist);
 
   c = add_set_cmd ("size", no_class, var_integer, (char *) &history_size,
-		   "Set the size of the command history, \n\
+		   "Set the size of the command history,\n\
 ie. the number of previous commands to keep a record of.", &sethistlist);
   add_show_from_set (c, &showhistlist);
   set_cmd_sfunc (c, set_history_size_command);
@@ -2007,8 +1998,8 @@ ie. the number of previous commands to keep a record of.", &sethistlist);
   c = add_set_cmd ("filename", no_class, var_filename,
 		   (char *) &history_filename,
 		   "Set the filename in which to record the command history\n\
- (the list of previous commands of which a record is kept).", &sethistlist);
-  c->completer = filename_completer;
+(the list of previous commands of which a record is kept).", &sethistlist);
+  set_cmd_completer (c, filename_completer);
   add_show_from_set (c, &showhistlist);
 
   add_show_from_set

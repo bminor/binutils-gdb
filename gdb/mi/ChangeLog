@@ -1,3 +1,54 @@
+2002-04-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-main.c (mi_cmd_exec_return): 
+
+2002-04-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-main.c (register_changed_p): Use frame_register_read instead
+	of read_relative_register_raw_bytes.
+	(get_register): Delete out-of-date comment.
+
+2002-04-07  Elena Zannoni  <ezannoni@redhat.com>
+
+        * mi-cmd-disas.c: Run through indent.
+
+2002-04-07  Elena Zannoni  <ezannoni@redhat.com>
+
+        * mi-cmd-disas.c (dump_insns): New function.
+        (do_mixed_source_and_assembly): New function.
+        (do_assembly_only): New function.
+        (do_disassembly): New function.
+        (mi_cmd_disassemble): Rewrite using smaller, more modular
+        functions.
+
+2002-04-05  Jim Blandy  <jimb@redhat.com>
+
+	* mi-cmd-stack.c (list_args_or_locals): Pass new arg to
+	get_frame_block.  (See entry in gdb/ChangeLog.)
+
+2002-04-05  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi-cmd-disas.c (mi_cmd_disassemble): Use TARGET_PRINT_INSN
+	instead of tm_print_insn.
+	Update copyright year.
+
+2002-04-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mi-cmd-disas.c (mi_cmd_disassemble): Skip end-of-function
+	markers in the line table.
+
+2002-03-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-main.c (XMALLOC): Delete macro.
+	* mi-out.c (XMALLOC): Ditto.
+	* mi-parse.c (XMALLOC): Ditto.
+	* mi-console.c (XMALLOC): Ditto.
+	* mi-cmd-var.c (XMALLOC): Ditto.
+	* mi-cmd-break.c (XMALLOC): Ditto.
+	
+	* mi/mi-cmd-var.c, mi/mi-console.c, mi/mi-out.c: Update copyright
+	* mi/mi-parse.c: Ditto.
+
 2002-02-24  Andrew Cagney  <ac131313@redhat.com>
 
 	From wiz at danbala:

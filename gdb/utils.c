@@ -61,6 +61,7 @@
 #include "expression.h"
 #include "language.h"
 #include "annotate.h"
+#include "filenames.h"
 
 #include "inferior.h" /* for signed_pointer_to_address */
 
@@ -81,9 +82,11 @@ extern PTR realloc ();
 #ifdef NEED_DECLARATION_FREE
 extern void free ();
 #endif
-
-#undef XMALLOC
-#define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
+/* Actually, we'll never have the decl, since we don't define _GNU_SOURCE.  */
+#if defined(HAVE_CANONICALIZE_FILE_NAME) \
+    && defined(NEED_DECLARATION_CANONICALIZE_FILE_NAME)
+extern char *canonicalize_file_name (const char *);
+#endif
 
 /* readline defines this.  */
 #undef savestring
@@ -2532,21 +2535,76 @@ string_to_core_addr (const char *my_string)
 char *
 gdb_realpath (const char *filename)
 {
-#ifdef HAVE_CANONICALIZE_FILE_NAME
-  return canonicalize_file_name (filename);
-#elif defined (HAVE_REALPATH)
-#if defined (PATH_MAX)
+#if defined(HAVE_REALPATH)
+# if defined (PATH_MAX)
   char buf[PATH_MAX];
-#elif defined (MAXPATHLEN)
+#  define USE_REALPATH
+# elif defined (MAXPATHLEN)
   char buf[MAXPATHLEN];
-#elif defined (HAVE_UNISTD_H) && defined(HAVE_ALLOCA)
+#  define USE_REALPATH
+# elif defined (HAVE_UNISTD_H) && defined(HAVE_ALLOCA)
   char *buf = alloca ((size_t)pathconf ("/", _PC_PATH_MAX));
-#else
-#error "Neither PATH_MAX nor MAXPATHLEN defined"
-#endif
+#  define USE_REALPATH
+# endif
+#endif /* HAVE_REALPATH */
+
+#if defined(USE_REALPATH)
   char *rp = realpath (filename, buf);
   return xstrdup (rp ? rp : filename);
+#elif defined(HAVE_CANONICALIZE_FILE_NAME)
+  char *rp = canonicalize_file_name (filename);
+  if (rp == NULL)
+    return xstrdup (filename);
+  else
+    return rp;
 #else
   return xstrdup (filename);
 #endif
+}
+
+/* Return a copy of FILENAME, with its directory prefix canonicalized
+   by gdb_realpath.  */
+
+char *
+xfullpath (const char *filename)
+{
+  const char *base_name = lbasename (filename);
+  char *dir_name;
+  char *real_path;
+  char *result;
+
+  /* Extract the basename of filename, and return immediately 
+     a copy of filename if it does not contain any directory prefix. */
+  if (base_name == filename)
+    return xstrdup (filename);
+
+  dir_name = alloca ((size_t) (base_name - filename + 2));
+  /* Allocate enough space to store the dir_name + plus one extra
+     character sometimes needed under Windows (see below), and
+     then the closing \000 character */
+  strncpy (dir_name, filename, base_name - filename);
+  dir_name[base_name - filename] = '\000';
+
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+  /* We need to be careful when filename is of the form 'd:foo', which
+     is equivalent of d:./foo, which is totally different from d:/foo.  */
+  if (strlen (dir_name) == 2 &&
+      isalpha (dir_name[0]) && dir_name[1] == ':')
+    {
+      dir_name[2] = '.';
+      dir_name[3] = '\000';
+    }
+#endif
+
+  /* Canonicalize the directory prefix, and build the resulting
+     filename. If the dirname realpath already contains an ending
+     directory separator, avoid doubling it.  */
+  real_path = gdb_realpath (dir_name);
+  if (IS_DIR_SEPARATOR (real_path[strlen (real_path) - 1]))
+    result = concat (real_path, base_name, NULL);
+  else
+    result = concat (real_path, SLASH_STRING, base_name, NULL);
+
+  xfree (real_path);
+  return result;
 }

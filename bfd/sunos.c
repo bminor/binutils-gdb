@@ -717,13 +717,13 @@ sunos_link_hash_table_create (abfd)
   struct sunos_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct sunos_link_hash_table);
 
-  ret = (struct sunos_link_hash_table *) bfd_alloc (abfd, amt);
+  ret = (struct sunos_link_hash_table *) bfd_malloc (amt);
   if (ret == (struct sunos_link_hash_table *) NULL)
     return (struct bfd_link_hash_table *) NULL;
   if (! NAME(aout,link_hash_table_init) (&ret->root, abfd,
 					 sunos_link_hash_newfunc))
     {
-      bfd_release (abfd, ret);
+      free (ret);
       return (struct bfd_link_hash_table *) NULL;
     }
 
@@ -2051,6 +2051,9 @@ sunos_scan_dynamic_symbol (h, data)
      PTR data;
 {
   struct bfd_link_info *info = (struct bfd_link_info *) data;
+
+  if (h->root.root.type == bfd_link_hash_warning)
+    h = (struct sunos_link_hash_entry *) h->root.root.u.i.link;
 
   /* Set the written flag for symbols we do not want to write out as
      part of the regular symbol table.  This is all symbols which are

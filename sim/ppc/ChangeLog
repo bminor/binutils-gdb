@@ -1,3 +1,19 @@
+2002-04-15  Elena Zannoni  <ezannoni@redhat.com>
+
+        * sim_calls.c (sim_fetch_register, sim_store_register): Return -1 for
+        AltiVec registers as a temporary stopgap.
+
+2002-03-24  David O'Brien  <obrien@FreeBSD.org>
+
+	* ppc/hw_disk.c: Export a disk device property.
+
+2002-03-23  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2001-12-09 Julien Ducourthial <jducourt@noos.fr>:
+	* ppc-instructions (lswx): Do the register control with the
+	register count.  Initialize the right register in the loop.
+	(mtfsfi) : Correct prefix for the instruction.
+
 2002-02-24  Andrew Cagney  <ac131313@redhat.com>
 
 	From wiz at danbala:

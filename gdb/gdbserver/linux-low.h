@@ -18,13 +18,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifdef HAVE_LINUX_USR_REGISTERS
-extern int regmap[];
-extern int num_regs;
-int cannot_fetch_register (int regno);
-int cannot_store_register (int regno);
-#endif
-
 #ifdef HAVE_LINUX_REGSETS
 typedef void (*regset_func) (void *);
 struct regset_info
@@ -35,3 +28,22 @@ struct regset_info
 };
 extern struct regset_info target_regsets[];
 #endif
+
+struct linux_target_ops
+{
+  int num_regs;
+  int *regmap;
+  int (*cannot_fetch_register) (int);
+
+  /* Returns 0 if we can store the register, 1 if we can not
+     store the register, and 2 if failure to store the register
+     is acceptable.  */
+  int (*cannot_store_register) (int);
+  CORE_ADDR (*stop_pc) (void);
+  void (*set_pc) (CORE_ADDR newpc);
+  const char *breakpoint;
+  int breakpoint_len;
+  CORE_ADDR (*breakpoint_reinsert_addr) (void);
+};
+
+extern struct linux_target_ops the_low_target;

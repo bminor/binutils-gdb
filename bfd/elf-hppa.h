@@ -64,6 +64,12 @@ static boolean elf_hppa_fake_sections
 static void elf_hppa_final_write_processing
   PARAMS ((bfd *, boolean));
 
+static int hppa_unwind_entry_compare
+  PARAMS ((const PTR, const PTR));
+
+static boolean elf_hppa_sort_unwind
+  PARAMS ((bfd *));
+
 #if ARCH_SIZE == 64
 static boolean elf_hppa_add_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
@@ -75,6 +81,9 @@ static boolean elf_hppa_unmark_useless_dynamic_symbols
 static boolean elf_hppa_remark_useless_dynamic_symbols
   PARAMS ((struct elf_link_hash_entry *, PTR));
 
+static boolean elf_hppa_is_dynamic_loader_symbol
+  PARAMS ((const char *));
+
 static void elf_hppa_record_segment_addrs
   PARAMS ((bfd *, asection *, PTR));
 
@@ -83,12 +92,12 @@ static boolean elf_hppa_final_link
 
 static boolean elf_hppa_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *,
-           bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+	   bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 
 static bfd_reloc_status_type elf_hppa_final_link_relocate
   PARAMS ((Elf_Internal_Rela *, bfd *, bfd *, asection *,
-           bfd_byte *, bfd_vma, struct bfd_link_info *,
-           asection *, struct elf_link_hash_entry *,
+	   bfd_byte *, bfd_vma, struct bfd_link_info *,
+	   asection *, struct elf_link_hash_entry *,
 	   struct elf64_hppa_dyn_hash_entry *));
 
 static int elf_hppa_relocate_insn
@@ -706,7 +715,7 @@ elf_hppa_reloc_final_type (abfd, base_type, format, field)
 		 be a section relative relocation.  Dwarf2 (for example)
 		 uses 32bit section relative relocations.  */
 	      if (bfd_get_arch_info (abfd)->bits_per_address != 32)
-	        final_type = R_PARISC_SECREL32;
+		final_type = R_PARISC_SECREL32;
 	      break;
 	    case e_psel:
 	      final_type = R_PARISC_PLABEL32;
@@ -1034,6 +1043,64 @@ elf_hppa_final_write_processing (abfd, linker)
 				      | EF_PARISC_TRAPNIL);
 }
 
+/* Comparison function for qsort to sort unwind section during a
+   final link.  */
+
+static int
+hppa_unwind_entry_compare (a, b)
+     const PTR a;
+     const PTR b;
+{
+  const bfd_byte *ap, *bp;
+  unsigned long av, bv;
+
+  ap = (const bfd_byte *) a;
+  av = (unsigned long) ap[0] << 24;
+  av |= (unsigned long) ap[1] << 16;
+  av |= (unsigned long) ap[2] << 8;
+  av |= (unsigned long) ap[3];
+
+  bp = (const bfd_byte *) b;
+  bv = (unsigned long) bp[0] << 24;
+  bv |= (unsigned long) bp[1] << 16;
+  bv |= (unsigned long) bp[2] << 8;
+  bv |= (unsigned long) bp[3];
+
+  return av < bv ? -1 : av > bv ? 1 : 0;
+}
+
+static boolean elf_hppa_sort_unwind (abfd)
+     bfd *abfd;
+{
+  asection *s;
+
+  /* Magic section names, but this is much safer than having
+     relocate_section remember where SEGREL32 relocs occurred.
+     Consider what happens if someone inept creates a linker script
+     that puts unwind information in .text.  */
+  s = bfd_get_section_by_name (abfd, ".PARISC.unwind");
+  if (s != NULL)
+    {
+      bfd_size_type size;
+      char *contents;
+
+      size = s->_raw_size;
+      contents = bfd_malloc (size);
+      if (contents == NULL)
+	return false;
+
+      if (! bfd_get_section_contents (abfd, s, contents, (file_ptr) 0, size))
+	return false;
+
+      qsort (contents, (size_t) (size / 16), 16, hppa_unwind_entry_compare);
+
+      if (! bfd_set_section_contents (abfd, s, contents, (file_ptr) 0, size))
+	return false;
+    }
+
+  return true;
+}
+
 #if ARCH_SIZE == 64
 /* Hook called by the linker routine which adds symbols from an object
    file.  HP's libraries define symbols with HP specific section
@@ -1076,6 +1143,9 @@ elf_hppa_unmark_useless_dynamic_symbols (h, data)
 {
   struct bfd_link_info *info = (struct bfd_link_info *)data;
 
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
   /* If we are not creating a shared library, and this symbol is
      referenced by a shared library but is not defined anywhere, then
      the generic code will warn that it is undefined.
@@ -1109,6 +1179,9 @@ elf_hppa_remark_useless_dynamic_symbols (h, data)
 {
   struct bfd_link_info *info = (struct bfd_link_info *)data;
 
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
   /* If we are not creating a shared library, and this symbol is
      referenced by a shared library but is not defined anywhere, then
      the generic code will warn that it is undefined.
@@ -1134,6 +1207,23 @@ elf_hppa_remark_useless_dynamic_symbols (h, data)
     }
 
   return true;
+}
+
+static boolean
+elf_hppa_is_dynamic_loader_symbol (name)
+     const char * name;
+{
+  return (! strcmp (name, "__CPU_REVISION")
+	  || ! strcmp (name, "__CPU_KEYBITS_1")
+	  || ! strcmp (name, "__SYSTEM_ID_D")
+	  || ! strcmp (name, "__FPU_MODEL")
+	  || ! strcmp (name, "__FPU_REVISION")
+	  || ! strcmp (name, "__ARGC")
+	  || ! strcmp (name, "__ARGV")
+	  || ! strcmp (name, "__ENVP")
+	  || ! strcmp (name, "__TLS_SIZE_D")
+	  || ! strcmp (name, "__LOAD_INFO")
+	  || ! strcmp (name, "__systab"));
 }
 
 /* Record the lowest address for the data and text segments.  */
@@ -1257,6 +1347,11 @@ elf_hppa_final_link (abfd, info)
   elf_link_hash_traverse (elf_hash_table (info),
 			  elf_hppa_remark_useless_dynamic_symbols,
 			  info);
+
+  /* If we're producing a final executable, sort the contents of the
+     unwind section. */
+  if (retval)
+    retval = elf_hppa_sort_unwind (abfd);
 
   return retval;
 }
@@ -1390,7 +1485,7 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		relocation = 0;
 	    }
 	  /* Allow undefined symbols in shared libraries.  */
-          else if (info->shared && !info->no_undefined
+	  else if (info->shared && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    {
 	      if (info->symbolic)
@@ -1419,11 +1514,17 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	    relocation = 0;
 	  else
 	    {
-	      if (!((*info->callbacks->undefined_symbol)
-		    (info, h->root.root.string, input_bfd,
-		     input_section, rel->r_offset, true)))
-		return false;
-	      break;
+	      /* Ignore dynamic loader defined symbols.  */
+	      if (elf_hppa_is_dynamic_loader_symbol (h->root.root.string))
+		relocation = 0;
+	      else
+		{
+		  if (!((*info->callbacks->undefined_symbol)
+			(info, h->root.root.string, input_bfd,
+			 input_section, rel->r_offset, true)))
+		    return false;
+		  break;
+		}
 	    }
 	}
 
@@ -1620,11 +1721,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	   a local function which had its address taken.  */
 	if (dyn_h->h == NULL)
 	  {
-	    bfd_put_64 (hppa_info->dlt_sec->owner,
-			value,
-			hppa_info->dlt_sec->contents + dyn_h->dlt_offset);
-
-	    /* Now handle .opd creation if needed.  */
+	    /* Now do .opd creation if needed.  */
 	    if (r_type == R_PARISC_LTOFF_FPTR14R
 		|| r_type == R_PARISC_LTOFF_FPTR14DR
 		|| r_type == R_PARISC_LTOFF_FPTR14WR
@@ -1638,7 +1735,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 			0, 16);
 
 		/* The next word is the address of the function.  */
-		bfd_put_64 (hppa_info->opd_sec->owner, value,
+		bfd_put_64 (hppa_info->opd_sec->owner, value + addend,
 			    (hppa_info->opd_sec->contents
 			     + dyn_h->opd_offset + 16));
 
@@ -1648,7 +1745,17 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 		bfd_put_64 (hppa_info->opd_sec->owner, value,
 			    (hppa_info->opd_sec->contents
 			     + dyn_h->opd_offset + 24));
+
+		/* The DLT value is the address of the .opd entry.  */
+		value = (dyn_h->opd_offset
+			 + hppa_info->opd_sec->output_offset
+			 + hppa_info->opd_sec->output_section->vma);
+		addend = 0;
 	      }
+
+	    bfd_put_64 (hppa_info->dlt_sec->owner,
+			value + addend,
+			hppa_info->dlt_sec->contents + dyn_h->dlt_offset);
 	  }
 
 	/* We want the value of the DLT offset for this symbol, not
@@ -1666,7 +1773,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	if (r_type == R_PARISC_DLTIND21L
 	    || r_type == R_PARISC_LTOFF_FPTR21L
 	    || r_type == R_PARISC_LTOFF_TP21L)
-	  value = hppa_field_adjust (value, addend, e_lrsel);
+	  value = hppa_field_adjust (value, 0, e_lsel);
 	else if (r_type == R_PARISC_DLTIND14F
 		 || r_type == R_PARISC_LTOFF_FPTR16F
 		 || r_type == R_PARISC_LTOFF_FPTR16WF
@@ -1677,9 +1784,9 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 		 || r_type == R_PARISC_LTOFF_TP16F
 		 || r_type == R_PARISC_LTOFF_TP16WF
 		 || r_type == R_PARISC_LTOFF_TP16DF)
-	  value = hppa_field_adjust (value, addend, e_fsel);
+	  value = hppa_field_adjust (value, 0, e_fsel);
 	else
-	  value = hppa_field_adjust (value, addend, e_rrsel);
+	  value = hppa_field_adjust (value, 0, e_rsel);
 
 	insn = elf_hppa_relocate_insn (insn, (int) value, r_type);
 	break;
@@ -1804,7 +1911,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	    memset (hppa_info->opd_sec->contents + dyn_h->opd_offset, 0, 16);
 
 	    /* The next word is the address of the function.  */
-	    bfd_put_64 (hppa_info->opd_sec->owner, value,
+	    bfd_put_64 (hppa_info->opd_sec->owner, value + addend,
 			(hppa_info->opd_sec->contents
 			 + dyn_h->opd_offset + 16));
 
@@ -1813,6 +1920,15 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 		      (hppa_info->opd_sec->output_section->owner);
 	    bfd_put_64 (hppa_info->opd_sec->owner, value,
 			hppa_info->opd_sec->contents + dyn_h->opd_offset + 24);
+
+	    /* The DLT value is the address of the .opd entry.  */
+	    value = (dyn_h->opd_offset
+		     + hppa_info->opd_sec->output_offset
+		     + hppa_info->opd_sec->output_section->vma);
+
+	    bfd_put_64 (hppa_info->dlt_sec->owner,
+			value,
+			hppa_info->dlt_sec->contents + dyn_h->dlt_offset);
 	  }
 
 	/* We want the value of the DLT offset for this symbol, not
@@ -1838,7 +1954,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	    memset (hppa_info->opd_sec->contents + dyn_h->opd_offset, 0, 16);
 
 	    /* The next word is the address of the function.  */
-	    bfd_put_64 (hppa_info->opd_sec->owner, value,
+	    bfd_put_64 (hppa_info->opd_sec->owner, value + addend,
 			(hppa_info->opd_sec->contents
 			 + dyn_h->opd_offset + 16));
 
@@ -1847,6 +1963,15 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 		      (hppa_info->opd_sec->output_section->owner);
 	    bfd_put_64 (hppa_info->opd_sec->owner, value,
 			hppa_info->opd_sec->contents + dyn_h->opd_offset + 24);
+
+	    /* The DLT value is the address of the .opd entry.  */
+	    value = (dyn_h->opd_offset
+		     + hppa_info->opd_sec->output_offset
+		     + hppa_info->opd_sec->output_section->vma);
+
+	    bfd_put_64 (hppa_info->dlt_sec->owner,
+			value,
+			hppa_info->dlt_sec->contents + dyn_h->dlt_offset);
 	  }
 
 	/* We want the value of the DLT offset for this symbol, not
@@ -1938,7 +2063,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	    memset (hppa_info->opd_sec->contents + dyn_h->opd_offset, 0, 16);
 
 	    /* The next word is the address of the function.  */
-	    bfd_put_64 (hppa_info->opd_sec->owner, value,
+	    bfd_put_64 (hppa_info->opd_sec->owner, value + addend,
 			(hppa_info->opd_sec->contents
 			 + dyn_h->opd_offset + 16));
 
@@ -1950,12 +2075,12 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	  }
 
 	/* We want the value of the OPD offset for this symbol, not
-           the symbol's actual address.  */
+	   the symbol's actual address.  */
 	value = (dyn_h->opd_offset
 		 + hppa_info->opd_sec->output_offset
 		 + hppa_info->opd_sec->output_section->vma);
 
-	bfd_put_64 (input_bfd, value + addend, hit_data);
+	bfd_put_64 (input_bfd, value, hit_data);
 	return bfd_reloc_ok;
       }
 
@@ -1991,7 +2116,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	  bfd_put_32 (input_bfd, value, hit_data);
 	else
 	  bfd_put_64 (input_bfd, value, hit_data);
-        return bfd_reloc_ok;
+	return bfd_reloc_ok;
       }
 
     /* Something we don't know how to handle.  */

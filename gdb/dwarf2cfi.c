@@ -1,7 +1,7 @@
 /* Stack unwinding code based on dwarf2 frame info for GDB, the GNU debugger.
-   Copyright 2001
-   Free Software Foundation, Inc.
+   Copyright 2001, 2002 Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
+   Based on code written by Daniel Berlin (dan@dberlin.org).
 
    This file is part of GDB.
 
@@ -1506,7 +1506,8 @@ cfi_read_fp ()
   return cfa;
 }
 
-/* Store the frame address.  */
+/* Store the frame address.  This function is not used.  */
+
 void
 cfi_write_fp (CORE_ADDR val)
 {

@@ -32,44 +32,132 @@
 #include "dwarf2cfi.h"
 #include "gdb_assert.h"
 
-
 /* Register numbers of various important registers.  */
 #define RAX_REGNUM 0
-#define RDX_REGNUM 1
+#define RDX_REGNUM 3
 #define RDI_REGNUM 5
 #define EFLAGS_REGNUM 17
-#define XMM1_REGNUM  35
+#define ST0_REGNUM 22
+#define XMM1_REGNUM  39
+
+struct register_info
+{
+  int size;
+  char *name;
+  struct type **type;
+};
 
 /* x86_64_register_raw_size_table[i] is the number of bytes of storage in
    GDB's register array occupied by register i.  */
-int x86_64_register_raw_size_table[X86_64_NUM_REGS] = {
-  8, 8, 8, 8,
-  8, 8, 8, 8,
-  8, 8, 8, 8,
-  8, 8, 8, 8,
-  8, 4,
-  10, 10, 10, 10,
-  10, 10, 10, 10,
-  4, 4, 4, 4,
-  4, 4, 4, 4,
-  16, 16, 16, 16,
-  16, 16, 16, 16,
-  16, 16, 16, 16,
-  16, 16, 16, 16,
-  4
+static struct register_info x86_64_register_info_table[] = {
+  /*  0 */ {8, "rax", &builtin_type_int64},
+  /*  1 */ {8, "rbx", &builtin_type_int64},
+  /*  2 */ {8, "rcx", &builtin_type_int64},
+  /*  3 */ {8, "rdx", &builtin_type_int64},
+  /*  4 */ {8, "rsi", &builtin_type_int64},
+  /*  5 */ {8, "rdi", &builtin_type_int64},
+  /*  6 */ {8, "rbp", &builtin_type_void_func_ptr},
+  /*  7 */ {8, "rsp", &builtin_type_void_func_ptr},
+  /*  8 */ {8, "r8", &builtin_type_int64},
+  /*  9 */ {8, "r9", &builtin_type_int64},
+  /* 10 */ {8, "r10", &builtin_type_int64},
+  /* 11 */ {8, "r11", &builtin_type_int64},
+  /* 12 */ {8, "r12", &builtin_type_int64},
+  /* 13 */ {8, "r13", &builtin_type_int64},
+  /* 14 */ {8, "r14", &builtin_type_int64},
+  /* 15 */ {8, "r15", &builtin_type_int64},
+  /* 16 */ {8, "rip", &builtin_type_void_func_ptr},
+  /* 17 */ {4, "eflags", &builtin_type_int32},
+  /* 18 */ {4, "ds", &builtin_type_int32},
+  /* 19 */ {4, "es", &builtin_type_int32},
+  /* 20 */ {4, "fs", &builtin_type_int32},
+  /* 21 */ {4, "gs", &builtin_type_int32},
+  /* 22 */ {10, "st0", &builtin_type_i387_ext},
+  /* 23 */ {10, "st1", &builtin_type_i387_ext},
+  /* 24 */ {10, "st2", &builtin_type_i387_ext},
+  /* 25 */ {10, "st3", &builtin_type_i387_ext},
+  /* 26 */ {10, "st4", &builtin_type_i387_ext},
+  /* 27 */ {10, "st5", &builtin_type_i387_ext},
+  /* 28 */ {10, "st6", &builtin_type_i387_ext},
+  /* 29 */ {10, "st7", &builtin_type_i387_ext},
+  /* 30 */ {4, "fctrl", &builtin_type_int32},
+  /* 31 */ {4, "fstat", &builtin_type_int32},
+  /* 32 */ {4, "ftag", &builtin_type_int32},
+  /* 33 */ {4, "fiseg", &builtin_type_int32},
+  /* 34 */ {4, "fioff", &builtin_type_int32},
+  /* 35 */ {4, "foseg", &builtin_type_int32},
+  /* 36 */ {4, "fooff", &builtin_type_int32},
+  /* 37 */ {4, "fop", &builtin_type_int32},
+  /* 38 */ {16, "xmm0", &builtin_type_v4sf},
+  /* 39 */ {16, "xmm1", &builtin_type_v4sf},
+  /* 40 */ {16, "xmm2", &builtin_type_v4sf},
+  /* 41 */ {16, "xmm3", &builtin_type_v4sf},
+  /* 42 */ {16, "xmm4", &builtin_type_v4sf},
+  /* 43 */ {16, "xmm5", &builtin_type_v4sf},
+  /* 44 */ {16, "xmm6", &builtin_type_v4sf},
+  /* 45 */ {16, "xmm7", &builtin_type_v4sf},
+  /* 46 */ {16, "xmm8", &builtin_type_v4sf},
+  /* 47 */ {16, "xmm9", &builtin_type_v4sf},
+  /* 48 */ {16, "xmm10", &builtin_type_v4sf},
+  /* 49 */ {16, "xmm11", &builtin_type_v4sf},
+  /* 50 */ {16, "xmm12", &builtin_type_v4sf},
+  /* 51 */ {16, "xmm13", &builtin_type_v4sf},
+  /* 52 */ {16, "xmm14", &builtin_type_v4sf},
+  /* 53 */ {16, "xmm15", &builtin_type_v4sf},
+  /* 54 */ {4, "mxcsr", &builtin_type_int32}
 };
+
+/* This array is a mapping from Dwarf-2 register 
+   numbering to GDB's one. Dwarf-2 numbering is 
+   defined in x86-64 ABI, section 3.6.  */
+static int x86_64_dwarf2gdb_regno_map[] = {
+  0, 1, 2, 3,			/* RAX - RDX */
+  4, 5, 6, 7,			/* RSI, RDI, RBP, RSP */
+  8, 9, 10, 11,			/* R8 - R11 */
+  12, 13, 14, 15,		/* R12 - R15 */
+  -1,				/* RA - not mapped */
+  XMM1_REGNUM - 1, XMM1_REGNUM,	/* XMM0 ... */
+  XMM1_REGNUM + 1, XMM1_REGNUM + 2,
+  XMM1_REGNUM + 3, XMM1_REGNUM + 4,
+  XMM1_REGNUM + 5, XMM1_REGNUM + 6,
+  XMM1_REGNUM + 7, XMM1_REGNUM + 8,
+  XMM1_REGNUM + 9, XMM1_REGNUM + 10,
+  XMM1_REGNUM + 11, XMM1_REGNUM + 12,
+  XMM1_REGNUM + 13, XMM1_REGNUM + 14,	/* ... XMM15 */
+  ST0_REGNUM + 0, ST0_REGNUM + 1,	/* ST0 ... */
+  ST0_REGNUM + 2, ST0_REGNUM + 3,
+  ST0_REGNUM + 4, ST0_REGNUM + 5,
+  ST0_REGNUM + 6, ST0_REGNUM + 7	/* ... ST7 */
+};
+
+static int x86_64_dwarf2gdb_regno_map_length =
+  sizeof (x86_64_dwarf2gdb_regno_map) /
+  sizeof (x86_64_dwarf2gdb_regno_map[0]);
+
+/* Number of all registers */
+#define X86_64_NUM_REGS (sizeof (x86_64_register_info_table) / \
+  sizeof (x86_64_register_info_table[0]))
+
+/* Number of general registers.  */
+#define X86_64_NUM_GREGS (22)
+
+int x86_64_num_regs = X86_64_NUM_REGS;
+int x86_64_num_gregs = X86_64_NUM_GREGS;
+
+/* Did we already print a note about frame pointer?  */
+int omit_fp_note_printed = 0;
 
 /* Number of bytes of storage in the actual machine representation for
    register REGNO.  */
 int
 x86_64_register_raw_size (int regno)
 {
-  return x86_64_register_raw_size_table[regno];
+  return x86_64_register_info_table[regno].size;
 }
 
 /* x86_64_register_byte_table[i] is the offset into the register file of the
    start of register number i.  We initialize this from
-   x86_64_register_raw_size_table.  */
+   x86_64_register_info_table.  */
 int x86_64_register_byte_table[X86_64_NUM_REGS];
 
 /* Index within `registers' of the first byte of the space for register REGNO.  */
@@ -84,16 +172,7 @@ x86_64_register_byte (int regno)
 static struct type *
 x86_64_register_virtual_type (int regno)
 {
-  if (regno == PC_REGNUM || regno == SP_REGNUM)
-    return builtin_type_void_func_ptr;
-  if (IS_FP_REGNUM (regno))
-    return builtin_type_i387_ext;
-  if (IS_SSE_REGNUM (regno))
-    return builtin_type_v4sf;
-  if (IS_FPU_CTRL_REGNUM (regno) || regno == MXCSR_REGNUM
-      || regno == EFLAGS_REGNUM)
-    return builtin_type_int32;
-  return builtin_type_int64;
+  return *x86_64_register_info_table[regno].type;
 }
 
 /* x86_64_register_convertible is true if register N's virtual format is
@@ -145,6 +224,19 @@ x86_64_register_convert_to_raw (struct type *type, int regnum,
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT && TYPE_LENGTH (type) == 12);
   /* Simply omit the two unused bytes.  */
   memcpy (to, from, FPU_REG_RAW_SIZE);
+}
+
+/* Dwarf-2 <-> GDB register numbers mapping.  */
+int
+x86_64_dwarf2_reg_to_regnum (int dw_reg)
+{
+  if (dw_reg < 0 || dw_reg > x86_64_dwarf2gdb_regno_map_length)
+    {
+      warning ("Dwarf-2 uses unmapped register #%d\n", dw_reg);
+      return dw_reg;
+    }
+
+  return x86_64_dwarf2gdb_regno_map[dw_reg];
 }
 
 /* This is the variable that is set with "set disassembly-flavour", and
@@ -556,20 +648,20 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   int ssereg = 0;
   int i;
   static int int_parameter_registers[INT_REGS] = {
-    5 /*RDI*/, 4 /*RSI*/,
-    1 /*RDX*/, 2 /*RCX*/,
-    8 /*R8 */ , 9		/*R9 */
+    5 /* RDI */ , 4 /* RSI */ ,
+    3 /* RDX */ , 2 /* RCX */ ,
+    8 /* R8  */ , 9		/* R9  */
   };
   /* XMM0 - XMM15  */
   static int sse_parameter_registers[SSE_REGS] = {
-    34, 35, 36, 37,
-    38, 39, 40, 41,
-    42, 43, 44, 45,
-    46, 47, 48, 49
+    XMM1_REGNUM - 1, XMM1_REGNUM, XMM1_REGNUM + 1, XMM1_REGNUM + 2,
+    XMM1_REGNUM + 3, XMM1_REGNUM + 4, XMM1_REGNUM + 5, XMM1_REGNUM + 6,
+    XMM1_REGNUM + 7, XMM1_REGNUM + 8, XMM1_REGNUM + 9, XMM1_REGNUM + 10,
+    XMM1_REGNUM + 11, XMM1_REGNUM + 12, XMM1_REGNUM + 13, XMM1_REGNUM + 14
   };
   int stack_values_count = 0;
   int *stack_values;
-  stack_values = alloca (naregs * sizeof (int));
+  stack_values = alloca (nargs * sizeof (int));
   for (i = 0; i < nargs; i++)
     {
       enum x86_64_reg_class class[MAX_CLASSES];
@@ -639,7 +731,7 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
     }
   while (--stack_values_count >= 0)
     {
-      value_ptr arg = args[stack_values[stack_values_count]];
+      struct value *arg = args[stack_values[stack_values_count]];
       int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
       len += 7;
       len -= len % 8;
@@ -704,27 +796,9 @@ x86_64_store_return_value (struct type *type, char *valbuf)
 static char *
 x86_64_register_name (int reg_nr)
 {
-  static char *register_names[] = {
-    "rax", "rdx", "rcx", "rbx",
-    "rsi", "rdi", "rbp", "rsp",
-    "r8", "r9", "r10", "r11",
-    "r12", "r13", "r14", "r15",
-    "rip", "eflags",
-    "st0", "st1", "st2", "st3",
-    "st4", "st5", "st6", "st7",
-    "fctrl", "fstat", "ftag", "fiseg",
-    "fioff", "foseg", "fooff", "fop",
-    "xmm0", "xmm1", "xmm2", "xmm3",
-    "xmm4", "xmm5", "xmm6", "xmm7",
-    "xmm8", "xmm9", "xmm10", "xmm11",
-    "xmm12", "xmm13", "xmm14", "xmm15",
-    "mxcsr"
-  };
-  if (reg_nr < 0)
+  if (reg_nr < 0 || reg_nr >= X86_64_NUM_REGS)
     return NULL;
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
-  return register_names[reg_nr];
+  return x86_64_register_info_table[reg_nr].name;
 }
 
 
@@ -759,16 +833,75 @@ x86_64_frameless_function_invocation (struct frame_info *frame)
   return 0;
 }
 
-/* On x86_64 there are no reasonable prologs.  */
+/* If a function with debugging information and known beginning
+   is detected, we will return pc of the next line in the source 
+   code. With this approach we effectively skip the prolog.  */
+
+#define PROLOG_BUFSIZE 4
 CORE_ADDR
 x86_64_skip_prologue (CORE_ADDR pc)
 {
+  int i, firstline, currline;
+  struct symtab_and_line v_sal;
+  struct symbol *v_function;
+  CORE_ADDR salendaddr = 0, endaddr = 0;
+
+  /* We will handle only functions beginning with:
+     55          pushq %rbp
+     48 89 e5    movq %rsp,%rbp 
+   */
+  unsigned char prolog_expect[PROLOG_BUFSIZE] = { 0x55, 0x48, 0x89, 0xe5 },
+    prolog_buf[PROLOG_BUFSIZE];
+
+  read_memory (pc, (char *) prolog_buf, PROLOG_BUFSIZE);
+
+  /* First check, whether pc points to pushq %rbp. If not, 
+   * print a recommendation to enable frame pointer.  */
+  if (prolog_expect[0] != prolog_buf[0])
+    {
+      if (!omit_fp_note_printed)
+	{
+	  printf_filtered
+	    ("NOTE: This function doesn't seem to have a valid prologue.\n"
+	     "      Consider adding -fno-omit-frame-pointer to your gcc's CFLAGS.\n");
+	  omit_fp_note_printed++;
+	}
+      return pc;
+    }
+  /* Valid prolog continues with movq %rsp,%rbp.  */
+  for (i = 1; i < PROLOG_BUFSIZE; i++)
+    if (prolog_expect[i] != prolog_buf[i])
+      return pc + 1;		/* First instruction after pushq %rbp.  */
+
+  v_function = find_pc_function (pc);
+  v_sal = find_pc_line (pc, 0);
+
+  /* If pc doesn't point to a function with debuginfo, 
+     some of the following may be NULL.  */
+  if (!v_function || !v_function->ginfo.value.block || !v_sal.symtab)
+    return pc;
+
+  firstline = v_sal.line;
+  currline = firstline;
+  salendaddr = v_sal.end;
+  endaddr = v_function->ginfo.value.block->endaddr;
+
+  for (i = 0; i < v_sal.symtab->linetable->nitems; i++)
+    if (v_sal.symtab->linetable->item[i].line > firstline
+	&& v_sal.symtab->linetable->item[i].pc >= salendaddr
+	&& v_sal.symtab->linetable->item[i].pc < endaddr)
+      {
+	pc = v_sal.symtab->linetable->item[i].pc;
+	currline = v_sal.symtab->linetable->item[i].line;
+	break;
+      }
+
   return pc;
 }
 
 /* Sequence of bytes for breakpoint instruction.  */
 static unsigned char *
-x86_64_breakpoint_from_pc (CORE_ADDR *pc, int *lenptr)
+x86_64_breakpoint_from_pc (CORE_ADDR * pc, int *lenptr)
 {
   static unsigned char breakpoint[] = { 0xcc };
   *lenptr = 1;
@@ -776,10 +909,11 @@ x86_64_breakpoint_from_pc (CORE_ADDR *pc, int *lenptr)
 }
 
 static struct gdbarch *
-i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
+  int i, sum;
 
   /* Find a candidate among the list of pre-declared architectures. */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -801,7 +935,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	      break;
 	    default:
 	      internal_error (__FILE__, __LINE__,
-			      "i386_gdbarch_init: unknown machine type");
+			      "x86_64_gdbarch_init: unknown machine type");
 	    }
 	  break;
 	case bfd_mach_i386_i386:
@@ -818,12 +952,12 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	      return arches->gdbarch;
 	    default:
 	      internal_error (__FILE__, __LINE__,
-			      "i386_gdbarch_init: unknown machine type");
+			      "x86_64_gdbarch_init: unknown machine type");
 	    }
 	  break;
 	default:
 	  internal_error (__FILE__, __LINE__,
-			  "i386_gdbarch_init: unknown machine type");
+			  "x86_64_gdbarch_init: unknown machine type");
 	}
     }
 
@@ -843,7 +977,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     default:
       internal_error (__FILE__, __LINE__,
-		      "i386_gdbarch_init: unknown machine type");
+		      "x86_64_gdbarch_init: unknown machine type");
     }
 
   set_gdbarch_long_bit (gdbarch, 64);
@@ -858,10 +992,12 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_raw_size (gdbarch, x86_64_register_raw_size);
   set_gdbarch_max_register_raw_size (gdbarch, 16);
   set_gdbarch_register_byte (gdbarch, x86_64_register_byte);
+
   /* Total amount of space needed to store our copies of the machine's register
      (SIZEOF_GREGS + SIZEOF_FPU_REGS + SIZEOF_FPU_CTRL_REGS + SIZEOF_SSE_REGS) */
-  set_gdbarch_register_bytes (gdbarch,
-			      (18 * 8) + (8 * 10) + (8 * 4) + (16 * 16 + 4));
+  for (i = 0, sum = 0; i < X86_64_NUM_REGS; i++)
+    sum += x86_64_register_info_table[i].size;
+  set_gdbarch_register_bytes (gdbarch, sum);
   set_gdbarch_register_virtual_size (gdbarch, generic_register_virtual_size);
   set_gdbarch_max_register_virtual_size (gdbarch, 16);
 
@@ -878,10 +1014,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fp_regnum (gdbarch, 6);	/* (rbp) */
   set_gdbarch_pc_regnum (gdbarch, 16);	/* (rip) Contains program counter.  */
 
-  set_gdbarch_fp0_regnum (gdbarch, 18);	/* First FPU floating-point register.  */
+  set_gdbarch_fp0_regnum (gdbarch, X86_64_NUM_GREGS);	/* First FPU floating-point register.  */
 
   set_gdbarch_read_fp (gdbarch, cfi_read_fp);
-  set_gdbarch_write_fp (gdbarch, cfi_write_fp);
 
 /* Discard from the stack the innermost frame, restoring all registers.  */
   set_gdbarch_pop_frame (gdbarch, x86_64_pop_frame);
@@ -970,7 +1105,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  set_gdbarch_breakpoint_from_pc (gdbarch, x86_64_breakpoint_from_pc);
+  set_gdbarch_breakpoint_from_pc (gdbarch,
+				  (gdbarch_breakpoint_from_pc_ftype *)
+				  x86_64_breakpoint_from_pc);
 
 
 /* Amount PC must be decremented by after a breakpoint.  This is often the
@@ -979,13 +1116,15 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 /* Use dwarf2 debug frame informations.  */
   set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, x86_64_dwarf2_reg_to_regnum);
+
   return gdbarch;
 }
 
 void
 _initialize_x86_64_tdep (void)
 {
-  register_gdbarch_init (bfd_arch_i386, i386_gdbarch_init);
+  register_gdbarch_init (bfd_arch_i386, x86_64_gdbarch_init);
 
   /* Initialize the table saying where each register starts in the
      register file.  */
@@ -996,7 +1135,7 @@ _initialize_x86_64_tdep (void)
     for (i = 0; i < X86_64_NUM_REGS; i++)
       {
 	x86_64_register_byte_table[i] = offset;
-	offset += x86_64_register_raw_size_table[i];
+	offset += x86_64_register_info_table[i].size;
       }
   }
 

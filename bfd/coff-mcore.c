@@ -1,5 +1,5 @@
 /* BFD back-end for Motorola MCore COFF/PE
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -229,14 +229,14 @@ coff_mcore_link_hash_table_create (abfd)
 {
   mcore_hash_table * ret;
 
-  ret = (mcore_hash_table *) bfd_alloc (abfd, (bfd_size_type) sizeof (* ret));
+  ret = (mcore_hash_table *) bfd_malloc ((bfd_size_type) sizeof (* ret));
   if (ret == (mcore_hash_table *) NULL)
     return NULL;
 
   if (! _bfd_coff_link_hash_table_init
       (& ret->root, abfd, _bfd_coff_link_hash_newfunc))
     {
-      bfd_release (abfd, ret);
+      free (ret);
       return (struct bfd_link_hash_table *) NULL;
     }
 

@@ -246,7 +246,7 @@ static const bfd_byte elf64_x86_64_plt_entry[PLT_ENTRY_SIZE] =
 };
 
 /* The x86-64 linker needs to keep track of the number of relocs that
-   decides to copy as dynamic relocs in check_relocs for each symbol.
+   it decides to copy as dynamic relocs in check_relocs for each symbol.
    This is so that it can later discard them if they are found to be
    unnecessary.  We store the information in a field extending the
    regular ELF linker hash table.  */
@@ -340,13 +340,13 @@ elf64_x86_64_link_hash_table_create (abfd)
   struct elf64_x86_64_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf64_x86_64_link_hash_table);
 
-  ret = (struct elf64_x86_64_link_hash_table *) bfd_alloc (abfd, amt);
+  ret = (struct elf64_x86_64_link_hash_table *) bfd_malloc (amt);
   if (ret == NULL)
     return NULL;
 
   if (! _bfd_elf_link_hash_table_init (&ret->elf, abfd, link_hash_newfunc))
     {
-      bfd_release (abfd, ret);
+      free (ret);
       return NULL;
     }
 
@@ -1075,9 +1075,11 @@ allocate_dynrelocs (h, inf)
   struct elf64_x86_64_link_hash_entry *eh;
   struct elf64_x86_64_dyn_relocs *p;
 
-  if (h->root.type == bfd_link_hash_indirect
-      || h->root.type == bfd_link_hash_warning)
+  if (h->root.type == bfd_link_hash_indirect)
     return true;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   info = (struct bfd_link_info *) inf;
   htab = elf64_x86_64_hash_table (info);
@@ -1244,6 +1246,9 @@ readonly_dynrelocs (h, inf)
 {
   struct elf64_x86_64_link_hash_entry *eh;
   struct elf64_x86_64_dyn_relocs *p;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   eh = (struct elf64_x86_64_link_hash_entry *) h;
   for (p = eh->dyn_relocs; p != NULL; p = p->next)

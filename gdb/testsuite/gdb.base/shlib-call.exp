@@ -70,7 +70,12 @@ if {$gcc_compiled == 0} {
 	set additional_flags ""
     }
 } else {
-    set additional_flags "additional_flags=-fpic"
+    if { ([istarget "powerpc*-*-aix*"]
+       || [istarget "rs6000*-*-aix*"]) } {
+	set additional_flags ""
+    } else {
+	set additional_flags "additional_flags=-fpic"
+    }
 }
 
 if {[gdb_compile "${srcdir}/${subdir}/${libfile}1.c" "${objdir}/${subdir}/${libfile}1.o" object [list debug $additional_flags]] != ""} {
@@ -93,7 +98,15 @@ if [istarget "hppa*-*-hpux*"] {
 	gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
     }
 }
-if {[gdb_compile "${objdir}/${subdir}/${testfile}.o ${objdir}/${subdir}/${libfile}1.sl ${objdir}/${subdir}/${libfile}2.sl" "${binfile}" executable {debug}] != ""} {
+
+if { ($gcc_compiled 
+      &&  ([istarget "powerpc*-*-aix*"]
+	|| [istarget "rs6000*-*-aix*"] )) } {
+    set additional_flags "additional_flags=-L${objdir}/${subdir}"
+} else {
+    set additional_flags ""
+}
+if {[gdb_compile "${objdir}/${subdir}/${testfile}.o ${objdir}/${subdir}/${libfile}1.sl ${objdir}/${subdir}/${libfile}2.sl" "${binfile}" executable [list debug $additional_flags]] != ""} {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 

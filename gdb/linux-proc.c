@@ -77,7 +77,14 @@ read_mapping (FILE *mapfile,
 
   if (ret > 0 && ret != EOF && *inode != 0)
     {
-      ret += fscanf (mapfile, "%s\n", filename);
+      /* Eat everything up to EOL for the filename.  This will prevent
+       weird filenames (such as one with embedded whitespace) from
+       confusing this code.  It also makes this code more robust
+       in respect to annotations the kernel may add after the
+       filename.
+
+       Note the filename is used for informational purposes only.  */
+      ret += fscanf (mapfile, "%[^\n]\n", filename);
     }
   else
     {
@@ -160,6 +167,9 @@ linux_do_thread_registers (bfd *obfd, ptid_t ptid,
 {
   gdb_gregset_t gregs;
   gdb_fpregset_t fpregs;
+#ifdef FILL_FPXREGSET
+  gdb_fpxregset_t fpxregs;
+#endif
   unsigned long merged_pid = ptid_get_tid (ptid) << 16 | ptid_get_pid (ptid);
 
   fill_gregset (&gregs, -1);
@@ -176,6 +186,14 @@ linux_do_thread_registers (bfd *obfd, ptid_t ptid,
 					      note_size, 
 					      &fpregs, 
 					      sizeof (fpregs));
+#ifdef FILL_FPXREGSET
+  fill_fpxregset (&fpxregs, -1);
+  note_data = (char *) elfcore_write_prxfpreg (obfd, 
+					       note_data, 
+					       note_size, 
+					       &fpxregs, 
+					       sizeof (fpxregs));
+#endif
   return note_data;
 }
 

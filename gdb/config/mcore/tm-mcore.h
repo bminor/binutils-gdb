@@ -1,5 +1,6 @@
 /* Parameters for execution on a Motorola MCore.
-   Copyright 1995, 1999, 2000 Free Software Foundation, Inc.
+
+   Copyright 1995, 1999, 2000, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,6 +20,8 @@
    Boston, MA 02111-1307, USA. */
 
 #include "regcache.h"
+#include "symtab.h"		/* For namespace_enum.  */
+#include "symfile.h"		/* For entry_point_address().  */
 
 /* All registers are 32 bits */
 #define REGISTER_SIZE 4
@@ -62,7 +65,8 @@ extern char *mcore_register_names[];
 
 /* BREAKPOINT_FROM_PC uses the program counter value to determine
    the breakpoint that should be used. */
-extern breakpoint_from_pc_fn mcore_breakpoint_from_pc;
+extern const unsigned char *mcore_breakpoint_from_pc (CORE_ADDR *pcptr,
+						      int *lenptr);
 #define BREAKPOINT_FROM_PC(PCPTR, LENPTR) mcore_breakpoint_from_pc (PCPTR, LENPTR)
 
 #define INNER_THAN(LHS,RHS) ((LHS) < (RHS))

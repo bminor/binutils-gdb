@@ -607,7 +607,7 @@ value_assign (struct value *toval, struct value *fromval)
 
 	    if (changed_len > (int) sizeof (LONGEST))
 	      error ("Can't handle bitfields which don't fit in a %d bit word.",
-		     sizeof (LONGEST) * HOST_CHAR_BIT);
+		     (int) sizeof (LONGEST) * HOST_CHAR_BIT);
 
 	    read_memory (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
 			 buffer, changed_len);
@@ -644,7 +644,7 @@ value_assign (struct value *toval, struct value *fromval)
 
 	  if (len > (int) sizeof (LONGEST))
 	    error ("Can't handle bitfields in registers larger than %d bits.",
-		   sizeof (LONGEST) * HOST_CHAR_BIT);
+		   (int) sizeof (LONGEST) * HOST_CHAR_BIT);
 
 	  if (VALUE_BITPOS (toval) + VALUE_BITSIZE (toval)
 	      > len * HOST_CHAR_BIT)
@@ -1190,8 +1190,12 @@ value_arg_coerce (struct value *arg, struct type *param_type,
       type = lookup_pointer_type (type);
       break;
     case TYPE_CODE_ARRAY:
+      /* Arrays are coerced to pointers to their first element, unless
+         they are vectors, in which case we want to leave them alone,
+         because they are passed by value.  */
       if (current_language->c_style_arrays)
-	type = lookup_pointer_type (TYPE_TARGET_TYPE (type));
+	if (!TYPE_VECTOR (type))
+	  type = lookup_pointer_type (TYPE_TARGET_TYPE (type));
       break;
     case TYPE_CODE_UNDEF:
     case TYPE_CODE_PTR:
@@ -1385,6 +1389,8 @@ hand_function_call (struct value *function, int nargs, struct value **args)
   if (CALL_DUMMY_LOCATION == ON_STACK)
     {
       write_memory (start_sp, (char *) dummy1, sizeof_dummy1);
+      if (USE_GENERIC_DUMMY_FRAMES)
+	generic_save_call_dummy_addr (start_sp, start_sp + sizeof_dummy1);
     }
 
   if (CALL_DUMMY_LOCATION == BEFORE_TEXT_END)
@@ -1401,6 +1407,8 @@ hand_function_call (struct value *function, int nargs, struct value **args)
       sp = old_sp;
       real_pc = text_end - sizeof_dummy1;
       write_memory (real_pc, (char *) dummy1, sizeof_dummy1);
+      if (USE_GENERIC_DUMMY_FRAMES)
+	generic_save_call_dummy_addr (real_pc, real_pc + sizeof_dummy1);
     }
 
   if (CALL_DUMMY_LOCATION == AFTER_TEXT_END)
@@ -1412,11 +1420,18 @@ hand_function_call (struct value *function, int nargs, struct value **args)
       errcode = target_write_memory (real_pc, (char *) dummy1, sizeof_dummy1);
       if (errcode != 0)
 	error ("Cannot write text segment -- call_function failed");
+      if (USE_GENERIC_DUMMY_FRAMES)
+	generic_save_call_dummy_addr (real_pc, real_pc + sizeof_dummy1);
     }
 
   if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
     {
       real_pc = funaddr;
+      if (USE_GENERIC_DUMMY_FRAMES)
+	/* NOTE: cagney/2002-04-13: The entry point is going to be
+           modified with a single breakpoint.  */
+	generic_save_call_dummy_addr (CALL_DUMMY_ADDRESS (),
+				      CALL_DUMMY_ADDRESS () + 1);
     }
 
 #ifdef lint
@@ -3250,7 +3265,7 @@ value_of_this (int complain)
 
   /* Calling lookup_block_symbol is necessary to get the LOC_REGISTER
      symbol instead of the LOC_ARG one (if both exist).  */
-  sym = lookup_block_symbol (b, funny_this, VAR_NAMESPACE);
+  sym = lookup_block_symbol (b, funny_this, NULL, VAR_NAMESPACE);
   if (sym == NULL)
     {
       if (complain)

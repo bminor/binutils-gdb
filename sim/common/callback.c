@@ -435,7 +435,7 @@ os_init (p)
   return 1;
 }
 
-/* DEPRECIATED */
+/* DEPRECATED */
 
 /* VARARGS */
 static void

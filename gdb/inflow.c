@@ -171,7 +171,7 @@ gdb_has_a_terminal (void)
 #define	OOPSY(what)	\
   if (result == -1)	\
     fprintf_unfiltered(gdb_stderr, "[%s failed in terminal_inferior: %s]\n", \
-	    what, strerror (errno))
+	    what, safe_strerror (errno))
 
 static void terminal_ours_1 (int);
 
@@ -374,7 +374,7 @@ terminal_ours_1 (int output_only)
 	     such situations as well.  */
 	  if (result == -1)
 	    fprintf_unfiltered (gdb_stderr, "[tcsetpgrp failed in terminal_ours: %s]\n",
-				strerror (errno));
+				safe_strerror (errno));
 #endif
 #endif /* termios */
 
@@ -594,7 +594,8 @@ kill_command (char *arg, int from_tty)
       if (selected_frame == NULL)
 	fputs_filtered ("No selected stack frame.\n", gdb_stdout);
       else
-	print_stack_frame (selected_frame, selected_frame_level, 1);
+	print_stack_frame (selected_frame,
+			   frame_relative_level (selected_frame), 1);
     }
 }
 

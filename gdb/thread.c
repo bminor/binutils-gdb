@@ -421,7 +421,7 @@ info_threads_command (char *arg, int from_tty)
   struct thread_info *tp;
   ptid_t current_ptid;
   struct frame_info *cur_frame;
-  int saved_frame_level = selected_frame_level;
+  int saved_frame_level = frame_relative_level (selected_frame);
   int counter;
   char *extra_info;
 
@@ -476,7 +476,7 @@ info_threads_command (char *arg, int from_tty)
     }
   else
     {
-      select_frame (cur_frame, saved_frame_level);
+      select_frame (cur_frame);
     }
 
   /* re-show current frame. */
@@ -495,7 +495,7 @@ switch_to_thread (ptid_t ptid)
   flush_cached_frames ();
   registers_changed ();
   stop_pc = read_pc ();
-  select_frame (get_current_frame (), 0);
+  select_frame (get_current_frame ());
 }
 
 static void
@@ -713,7 +713,7 @@ do_captured_thread_select (struct ui_out *uiout,
 #endif
   ui_out_text (uiout, ")]");
 
-  print_stack_frame (selected_frame, selected_frame_level, 1);
+  print_stack_frame (selected_frame, frame_relative_level (selected_frame), 1);
   return GDB_RC_OK;
 }
 

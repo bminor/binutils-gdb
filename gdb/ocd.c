@@ -255,7 +255,7 @@ ocd_start_remote (PTR dummy)
   registers_changed ();
   stop_pc = read_pc ();
   set_current_frame (create_new_frame (read_fp (), stop_pc));
-  select_frame (get_current_frame (), 0);
+  select_frame (get_current_frame ());
   print_stack_frame (selected_frame, -1, 1);
 
   buf[0] = OCD_LOG_FILE;

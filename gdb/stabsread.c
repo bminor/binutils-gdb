@@ -136,6 +136,7 @@ static int
 attach_fields_to_type (struct field_info *, struct type *, struct objfile *);
 
 static struct type *read_struct_type (char **, struct type *,
+                                      enum type_code,
 				      struct objfile *);
 
 static struct type *read_array_type (char **, struct type *,
@@ -2536,7 +2537,24 @@ again:
 	       the related problems with unnecessarily stubbed types;
 	       someone motivated should attempt to clean up the issue
 	       here as well.  Once a type pointed to has been created it
-	       should not be modified.  */
+	       should not be modified.
+
+               Well, it's not *absolutely* wrong.  Constructing recursive
+               types (trees, linked lists) necessarily entails modifying
+               types after creating them.  Constructing any loop structure
+               entails side effects.  The Dwarf 2 reader does handle this
+               more gracefully (it never constructs more than once
+               instance of a type object, so it doesn't have to copy type
+               objects wholesale), but it still mutates type objects after
+               other folks have references to them.
+
+               Keep in mind that this circularity/mutation issue shows up
+               at the source language level, too: C's "incomplete types",
+               for example.  So the proper cleanup, I think, would be to
+               limit GDB's type smashing to match exactly those required
+               by the source language.  So GDB could have a
+               "complete_this_type" function, but never create unnecessary
+               copies of a type otherwise.  */
 	    replace_type (type, xtype);
 	    TYPE_NAME (type) = NULL;
 	    TYPE_TAG_NAME (type) = NULL;
@@ -2801,18 +2819,21 @@ again:
 
     case 's':			/* Struct type */
     case 'u':			/* Union type */
-      type = dbx_alloc_type (typenums, objfile);
-      switch (type_descriptor)
-	{
-	case 's':
-	  TYPE_CODE (type) = TYPE_CODE_STRUCT;
-	  break;
-	case 'u':
-	  TYPE_CODE (type) = TYPE_CODE_UNION;
-	  break;
-	}
-      type = read_struct_type (pp, type, objfile);
-      break;
+      {
+        enum type_code type_code = TYPE_CODE_UNDEF;
+        type = dbx_alloc_type (typenums, objfile);
+        switch (type_descriptor)
+          {
+          case 's':
+            type_code = TYPE_CODE_STRUCT;
+            break;
+          case 'u':
+            type_code = TYPE_CODE_UNION;
+            break;
+          }
+        type = read_struct_type (pp, type, type_code, objfile);
+        break;
+      }
 
     case 'a':			/* Array type */
       if (**pp != 'r')
@@ -2978,10 +2999,14 @@ rs6000_builtin_type (int typenum)
     case 25:
       /* Complex type consisting of two IEEE single precision values.  */
       rettype = init_type (TYPE_CODE_COMPLEX, 8, 0, "complex", NULL);
+      TYPE_TARGET_TYPE (rettype) = init_type (TYPE_CODE_FLT, 4, 0, "float",
+					      NULL);
       break;
     case 26:
       /* Complex type consisting of two IEEE double precision values.  */
       rettype = init_type (TYPE_CODE_COMPLEX, 16, 0, "double complex", NULL);
+      TYPE_TARGET_TYPE (rettype) = init_type (TYPE_CODE_FLT, 8, 0, "double",
+					      NULL);
       break;
     case 27:
       rettype = init_type (TYPE_CODE_INT, 1, 0, "integer*1", NULL);
@@ -3037,7 +3062,6 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 {
   int nfn_fields = 0;
   int length = 0;
-  int skip_method;
   /* Total number of member functions defined in this class.  If the class
      defines two `f' functions, and one `g' function, then this will have
      the value 3.  */
@@ -3076,36 +3100,6 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
       sublist = NULL;
       look_ahead_type = NULL;
       length = 0;
-
-      skip_method = 0;
-      if (p - *pp == strlen ("__base_ctor")
-	  && strncmp (*pp, "__base_ctor", strlen ("__base_ctor")) == 0)
-	skip_method = 1;
-      else if (p - *pp == strlen ("__base_dtor")
-	       && strncmp (*pp, "__base_dtor", strlen ("__base_dtor")) == 0)
-	skip_method = 1;
-      else if (p - *pp == strlen ("__deleting_dtor")
-	       && strncmp (*pp, "__deleting_dtor",
-			   strlen ("__deleting_dtor")) == 0)
-	skip_method = 1;
-
-      if (skip_method)
-	{
-	  /* Skip past '::'.  */
-	  *pp = p + 2;
-	  /* Read the type.  */
-	  read_type (pp, objfile);
-	  /* Skip past the colon, mangled name, semicolon, flags, and final
-	     semicolon.  */
-	  while (**pp != ';')
-	    (*pp) ++;
-	  (*pp) ++;
-	  while (**pp != ';')
-	    (*pp) ++;
-	  (*pp) ++;
-
-	  continue;
-	}
 
       new_fnlist = (struct next_fnfieldlist *)
 	xmalloc (sizeof (struct next_fnfieldlist));
@@ -3287,13 +3281,30 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 	      }
 	    case '?':
 	      /* static member function.  */
-	      new_sublist->fn_field.voffset = VOFFSET_STATIC;
-	      if (strncmp (new_sublist->fn_field.physname,
-			   main_fn_name, strlen (main_fn_name)))
-		{
-		  new_sublist->fn_field.is_stub = 1;
-		}
-	      break;
+	      {
+		int slen = strlen (main_fn_name);
+
+		new_sublist->fn_field.voffset = VOFFSET_STATIC;
+
+		/* For static member functions, we can't tell if they
+		   are stubbed, as they are put out as functions, and not as
+		   methods.
+		   GCC v2 emits the fully mangled name if
+		   dbxout.c:flag_minimal_debug is not set, so we have to
+		   detect a fully mangled physname here and set is_stub
+		   accordingly.  Fully mangled physnames in v2 start with
+		   the member function name, followed by two underscores.
+		   GCC v3 currently always emits stubbed member functions,
+		   but with fully mangled physnames, which start with _Z.  */
+		if (!(strncmp (new_sublist->fn_field.physname,
+			       main_fn_name, slen) == 0
+		      && new_sublist->fn_field.physname[slen] == '_'
+		      && new_sublist->fn_field.physname[slen + 1] == '_'))
+		  {
+		    new_sublist->fn_field.is_stub = 1;
+		  }
+		break;
+	      }
 
 	    default:
 	      /* error */
@@ -3315,23 +3326,34 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
       while (**pp != ';' && **pp != '\0');
 
       (*pp)++;
-
-      new_fnlist->fn_fieldlist.fn_fields = (struct fn_field *)
-	obstack_alloc (&objfile->type_obstack,
-		       sizeof (struct fn_field) * length);
-      memset (new_fnlist->fn_fieldlist.fn_fields, 0,
-	      sizeof (struct fn_field) * length);
-      for (i = length; (i--, sublist); sublist = sublist->next)
-	{
-	  new_fnlist->fn_fieldlist.fn_fields[i] = sublist->fn_field;
-	}
-
-      new_fnlist->fn_fieldlist.length = length;
-      new_fnlist->next = fip->fnlist;
-      fip->fnlist = new_fnlist;
-      nfn_fields++;
-      total_length += length;
       STABS_CONTINUE (pp, objfile);
+
+      /* Skip GCC 3.X member functions which are duplicates of the callable
+	 constructor/destructor.  */
+      if (strcmp (main_fn_name, "__base_ctor") == 0
+	  || strcmp (main_fn_name, "__base_dtor") == 0
+	  || strcmp (main_fn_name, "__deleting_dtor") == 0)
+	{
+	  xfree (main_fn_name);
+	}
+      else
+	{
+	  new_fnlist->fn_fieldlist.fn_fields = (struct fn_field *)
+	    obstack_alloc (&objfile->type_obstack,
+			   sizeof (struct fn_field) * length);
+	  memset (new_fnlist->fn_fieldlist.fn_fields, 0,
+		  sizeof (struct fn_field) * length);
+	  for (i = length; (i--, sublist); sublist = sublist->next)
+	    {
+	      new_fnlist->fn_fieldlist.fn_fields[i] = sublist->fn_field;
+	    }
+
+	  new_fnlist->fn_fieldlist.length = length;
+	  new_fnlist->next = fip->fnlist;
+	  fip->fnlist = new_fnlist;
+	  nfn_fields++;
+	  total_length += length;
+	}
     }
 
   if (nfn_fields)
@@ -4155,6 +4177,45 @@ attach_fields_to_type (struct field_info *fip, register struct type *type,
   return 1;
 }
 
+
+static struct complaint multiply_defined_struct =
+{"struct/union type gets multiply defined: %s%s", 0, 0};
+
+
+/* Complain that the compiler has emitted more than one definition for the
+   structure type TYPE.  */
+static void 
+complain_about_struct_wipeout (struct type *type)
+{
+  char *name = "";
+  char *kind = "";
+
+  if (TYPE_TAG_NAME (type))
+    {
+      name = TYPE_TAG_NAME (type);
+      switch (TYPE_CODE (type))
+        {
+        case TYPE_CODE_STRUCT: kind = "struct "; break;
+        case TYPE_CODE_UNION:  kind = "union ";  break;
+        case TYPE_CODE_ENUM:   kind = "enum ";   break;
+        default: kind = "";
+        }
+    }
+  else if (TYPE_NAME (type))
+    {
+      name = TYPE_NAME (type);
+      kind = "";
+    }
+  else
+    {
+      name = "<unknown>";
+      kind = "";
+    }
+
+  complain (&multiply_defined_struct, kind, name);
+}
+
+
 /* Read the description of a structure (or union type) and return an object
    describing the type.
 
@@ -4170,7 +4231,8 @@ attach_fields_to_type (struct field_info *fip, register struct type *type,
  */
 
 static struct type *
-read_struct_type (char **pp, struct type *type, struct objfile *objfile)
+read_struct_type (char **pp, struct type *type, enum type_code type_code,
+                  struct objfile *objfile)
 {
   struct cleanup *back_to;
   struct field_info fi;
@@ -4178,9 +4240,30 @@ read_struct_type (char **pp, struct type *type, struct objfile *objfile)
   fi.list = NULL;
   fi.fnlist = NULL;
 
+  /* When describing struct/union/class types in stabs, G++ always drops
+     all qualifications from the name.  So if you've got:
+       struct A { ... struct B { ... }; ... };
+     then G++ will emit stabs for `struct A::B' that call it simply
+     `struct B'.  Obviously, if you've got a real top-level definition for
+     `struct B', or other nested definitions, this is going to cause
+     problems.
+
+     Obviously, GDB can't fix this by itself, but it can at least avoid
+     scribbling on existing structure type objects when new definitions
+     appear.  */
+  if (! (TYPE_CODE (type) == TYPE_CODE_UNDEF
+         || TYPE_STUB (type)))
+    {
+      complain_about_struct_wipeout (type);
+
+      /* It's probably best to return the type unchanged.  */
+      return type;
+    }
+
   back_to = make_cleanup (null_cleanup, 0);
 
   INIT_CPLUS_SPECIFIC (type);
+  TYPE_CODE (type) = type_code;
   TYPE_FLAGS (type) &= ~TYPE_FLAG_STUB;
 
   /* First comes the total size in bytes.  */
@@ -4494,6 +4577,7 @@ read_sun_floating_type (char **pp, int typenums[2], struct objfile *objfile)
   int nbits;
   int details;
   int nbytes;
+  struct type *rettype;
 
   /* The first number has more details about the type, for example
      FN_COMPLEX.  */
@@ -4508,9 +4592,12 @@ read_sun_floating_type (char **pp, int typenums[2], struct objfile *objfile)
 
   if (details == NF_COMPLEX || details == NF_COMPLEX16
       || details == NF_COMPLEX32)
-    /* This is a type we can't handle, but we do know the size.
-       We also will be able to give it a name.  */
-    return init_type (TYPE_CODE_COMPLEX, nbytes, 0, NULL, objfile);
+    {
+      rettype = init_type (TYPE_CODE_COMPLEX, nbytes, 0, NULL, objfile);
+      TYPE_TARGET_TYPE (rettype)
+	= init_type (TYPE_CODE_FLT, nbytes / 2, 0, NULL, objfile);
+      return rettype;
+    }
 
   return init_type (TYPE_CODE_FLT, nbytes, 0, NULL, objfile);
 }
@@ -5052,10 +5139,7 @@ cleanup_undefined_types (void)
 			    && (TYPE_CODE (SYMBOL_TYPE (sym)) ==
 				TYPE_CODE (*type))
 			    && STREQ (SYMBOL_NAME (sym), typename))
-			  {
-			    memcpy (*type, SYMBOL_TYPE (sym),
-				    sizeof (struct type));
-			  }
+                          replace_type (*type, SYMBOL_TYPE (sym));
 		      }
 		  }
 	      }

@@ -23,37 +23,64 @@
 #define SERVER_H
 
 #include "config.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <setjmp.h>
 
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
 
-/* FIXME:  Both of these should be autoconf'd for.  */
-#define NORETURN
+#ifndef ATTR_NORETURN
+#if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7))
+#define ATTR_NORETURN __attribute__ ((noreturn))
+#else
+#define ATTR_NORETURN           /* nothing */
+#endif
+#endif
+
+#ifndef ATTR_FORMAT
+#if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 4))
+#define ATTR_FORMAT(type, x, y) __attribute__ ((format(type, x, y)))
+#else
+#define ATTR_FORMAT(type, x, y) /* nothing */
+#endif
+#endif
+
+/* FIXME: This should probably be autoconf'd for.  It's an integer type at
+   least the size of a (void *).  */
 typedef long long CORE_ADDR;
 
-#include "regcache.h"
+/* Opaque inferior process information.  */
+struct inferior_info;
 
-#include <setjmp.h>
+#include "regcache.h"
+#include "gdb/signals.h"
+
+#include "target.h"
+#include "mem-break.h"
 
 /* Target-specific functions */
 
-int create_inferior (char *program, char **allargs);
-void kill_inferior (void);
-void fetch_inferior_registers (int regno);
-void store_inferior_registers (int regno);
-int mythread_alive (int pid);
-void myresume (int step, int signo);
-unsigned char mywait (char *status);
-void read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len);
-int write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len);
-int create_inferior ();
 void initialize_low ();
 
 /* Target-specific variables */
 
 extern char *registers;
+
+/* From inferiors.c.  */
+
+extern struct inferior_info *current_inferior;
+extern int signal_pid;
+void add_inferior (int pid);
+void clear_inferiors (void);
+void *inferior_target_data (struct inferior_info *);
+void set_inferior_target_data (struct inferior_info *, void *);
+void *inferior_regcache_data (struct inferior_info *);
+void set_inferior_regcache_data (struct inferior_info *, void *);
 
 /* Public variables in server.c */
 
@@ -63,7 +90,6 @@ extern int thread_from_wait;
 extern int old_thread_from_wait;
 
 extern jmp_buf toplevel;
-extern int inferior_pid;
 
 /* Functions from remote-utils.c */
 
@@ -84,15 +110,26 @@ void decode_m_packet (char *from, CORE_ADDR * mem_addr_ptr,
 void decode_M_packet (char *from, CORE_ADDR * mem_addr_ptr,
 		      unsigned int *len_ptr, char *to);
 
+int unhexify (char *bin, const char *hex, int count);
+int hexify (char *hex, const char *bin, int count);
+
+int look_up_one_symbol (const char *name, CORE_ADDR *addrp);
+
+/* Functions from ``signals.c''.  */
+enum target_signal target_signal_from_host (int hostsig);
+int target_signal_to_host_p (enum target_signal oursig);
+int target_signal_to_host (enum target_signal oursig);
 
 /* Functions from utils.c */
 
 void perror_with_name (char *string);
-void error (const char *string,...);
-void fatal (const char *string,...);
+void error (const char *string,...) ATTR_NORETURN;
+void fatal (const char *string,...) ATTR_NORETURN;
 void warning (const char *string,...);
 
+/* Functions from the register cache definition.  */
 
+void init_registers (void);
 
 /* Maximum number of bytes to read/write at once.  The value here
    is chosen to fill up a packet (the headers account for the 32).  */

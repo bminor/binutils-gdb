@@ -1,6 +1,8 @@
 /* Target-dependent code for the SPARC for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+   1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -683,10 +685,36 @@ examine_prologue (CORE_ADDR start_pc, int frameless_p, struct frame_info *fi,
   return pc;
 }
 
+/* Advance PC across any function entry prologue instructions to reach
+   some "real" code.  */
+
 CORE_ADDR
-sparc_skip_prologue (CORE_ADDR start_pc, int frameless_p)
+sparc_skip_prologue (CORE_ADDR start_pc)
 {
-  return examine_prologue (start_pc, frameless_p, NULL, NULL);
+  struct symtab_and_line sal;
+  CORE_ADDR func_start, func_end;
+
+  /* This is the preferred method, find the end of the prologue by
+     using the debugging information.  */
+  if (find_pc_partial_function (start_pc, NULL, &func_start, &func_end))
+    {
+      sal = find_pc_line (func_start, 0);
+
+      if (sal.end < func_end
+	  && start_pc <= sal.end)
+	return sal.end;
+    }
+
+  /* Oh well, examine the code by hand.  */
+  return examine_prologue (start_pc, 0, NULL, NULL);
+}
+
+/* Is the prologue at IP frameless?  */
+
+int
+sparc_prologue_frameless_p (CORE_ADDR ip)
+{
+  return ip == examine_prologue (ip, 1, NULL, NULL);
 }
 
 /* Check instruction at ADDR to see if it is a branch.
@@ -827,11 +855,21 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	    addr = frame1->frame + (regnum - G0_REGNUM) * SPARC_INTREG_SIZE
 	      - (FP_REGISTER_BYTES + 8 * SPARC_INTREG_SIZE);
 	  else if (regnum >= I0_REGNUM && regnum < I0_REGNUM + 8)
-	    addr = (frame1->prev->extra_info->bottom
+	    /* NOTE: cagney/2002-05-04: The call to get_prev_frame()
+               is safe/cheap - there will always be a prev frame.
+               This is because frame1 is initialized to frame->next
+               (frame1->prev == frame) and is then advanced towards
+               the innermost (next) frame.  */
+	    addr = (get_prev_frame (frame1)->extra_info->bottom
 		    + (regnum - I0_REGNUM) * SPARC_INTREG_SIZE
 		    + FRAME_SAVED_I0);
 	  else if (regnum >= L0_REGNUM && regnum < L0_REGNUM + 8)
-	    addr = (frame1->prev->extra_info->bottom
+	    /* NOTE: cagney/2002-05-04: The call to get_prev_frame()
+               is safe/cheap - there will always be a prev frame.
+               This is because frame1 is initialized to frame->next
+               (frame1->prev == frame) and is then advanced towards
+               the innermost (next) frame.  */
+	    addr = (get_prev_frame (frame1)->extra_info->bottom
 		    + (regnum - L0_REGNUM) * SPARC_INTREG_SIZE
 		    + FRAME_SAVED_L0);
 	  else if (regnum >= O0_REGNUM && regnum < O0_REGNUM + 8)
@@ -873,11 +911,11 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	{
 	  /* Normal frame.  Local and In registers are saved on stack.  */
 	  if (regnum >= I0_REGNUM && regnum < I0_REGNUM + 8)
-	    addr = (frame1->prev->extra_info->bottom
+	    addr = (get_prev_frame (frame1)->extra_info->bottom
 		    + (regnum - I0_REGNUM) * SPARC_INTREG_SIZE
 		    + FRAME_SAVED_I0);
 	  else if (regnum >= L0_REGNUM && regnum < L0_REGNUM + 8)
-	    addr = (frame1->prev->extra_info->bottom
+	    addr = (get_prev_frame (frame1)->extra_info->bottom
 		    + (regnum - L0_REGNUM) * SPARC_INTREG_SIZE
 		    + FRAME_SAVED_L0);
 	  else if (regnum >= O0_REGNUM && regnum < O0_REGNUM + 8)
@@ -986,8 +1024,26 @@ sparc_push_dummy_frame (void)
 
   if (strcmp (target_shortname, "sim") != 0)
     {
-      write_fp (old_sp);
-
+      /* NOTE: cagney/2002-04-04: The code below originally contained
+         GDB's _only_ call to write_fp().  That call was eliminated by
+         inlining the corresponding code.  For the 64 bit case, the
+         old function (sparc64_write_fp) did the below although I'm
+         not clear why.  The same goes for why this is only done when
+         the underlying target is a simulator.  */
+      if (GDB_TARGET_IS_SPARC64)
+	{
+	  /* Target is a 64 bit SPARC.  */
+	  CORE_ADDR oldfp = read_register (FP_REGNUM);
+	  if (oldfp & 1)
+	    write_register (FP_REGNUM, old_sp - 2047);
+	  else
+	    write_register (FP_REGNUM, old_sp);
+	}
+      else
+	{
+	  /* Target is a 32 bit SPARC.  */
+	  write_register (FP_REGNUM, old_sp);
+	}
       /* Set return address register for the call dummy to the current PC.  */
       write_register (I7_REGNUM, read_pc () - 8);
     }
@@ -1234,7 +1290,7 @@ sparc_pop_frame (void)
 
       char *reg_temp;
 
-      reg_temp = alloca (REGISTER_BYTES);
+      reg_temp = alloca (SPARC_INTREG_SIZE * 16);
 
       read_memory (fsr[I0_REGNUM], raw_buffer, 8 * SPARC_INTREG_SIZE);
 
@@ -1811,8 +1867,8 @@ sparc_print_register_hook (int regno)
     {
       char value[16];
 
-      if (!read_relative_register_raw_bytes (regno, value)
-	  && !read_relative_register_raw_bytes (regno + 1, value + 4))
+      if (frame_register_read (selected_frame, regno, value)
+	  && frame_register_read (selected_frame, regno + 1, value + 4))
 	{
 	  printf_unfiltered ("\t");
 	  print_floating (value, builtin_type_double, gdb_stdout);
@@ -1820,8 +1876,8 @@ sparc_print_register_hook (int regno)
 #if 0				/* FIXME: gdb doesn't handle long doubles */
       if ((regno & 3) == 0)
 	{
-	  if (!read_relative_register_raw_bytes (regno + 2, value + 8)
-	      && !read_relative_register_raw_bytes (regno + 3, value + 12))
+	  if (frame_register_read (selected_frame, regno + 2, value + 8)
+	      && frame_register_read (selected_frame, regno + 3, value + 12))
 	    {
 	      printf_unfiltered ("\t");
 	      print_floating (value, builtin_type_long_double, gdb_stdout);
@@ -1840,8 +1896,8 @@ sparc_print_register_hook (int regno)
     {
       char value[16];
 
-      if (!read_relative_register_raw_bytes (regno, value)
-	  && !read_relative_register_raw_bytes (regno + 1, value + 8))
+      if (frame_register_read (selected_frame, regno, value)
+	  && frame_register_read (selected_frame, regno + 1, value + 8))
 	{
 	  printf_unfiltered ("\t");
 	  print_floating (value, builtin_type_long_double, gdb_stdout);
@@ -2259,16 +2315,6 @@ sparc64_write_sp (CORE_ADDR val)
     write_register (SP_REGNUM, val - 2047);
   else
     write_register (SP_REGNUM, val);
-}
-
-void
-sparc64_write_fp (CORE_ADDR val)
-{
-  CORE_ADDR oldfp = read_register (FP_REGNUM);
-  if (oldfp & 1)
-    write_register (FP_REGNUM, val - 2047);
-  else
-    write_register (FP_REGNUM, val);
 }
 
 /* The SPARC 64 ABI passes floating-point arguments in FP0 to FP31,
@@ -2766,18 +2812,6 @@ sparc64_register_byte (int regno)
     return 64 * 8 + (regno - 80) * 8;
 }
 
-/* Advance PC across any function entry prologue instructions to reach
-   some "real" code.  SKIP_PROLOGUE_FRAMELESS_P advances the PC past
-   some of the prologue, but stops as soon as it knows that the
-   function has a frame.  Its result is equal to its input PC if the
-   function is frameless, unequal otherwise.  */
-
-static CORE_ADDR
-sparc_gdbarch_skip_prologue (CORE_ADDR ip)
-{
-  return examine_prologue (ip, 0, NULL, NULL);
-}
-
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines
    the new frame is not set up until the new function executes
@@ -2976,8 +3010,9 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_reg_struct_has_addr (gdbarch, sparc_reg_struct_has_addr);
   set_gdbarch_return_value_on_stack (gdbarch, sparc_return_value_on_stack);
   set_gdbarch_saved_pc_after_call (gdbarch, sparc_saved_pc_after_call);
+  set_gdbarch_prologue_frameless_p (gdbarch, sparc_prologue_frameless_p);
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
-  set_gdbarch_skip_prologue (gdbarch, sparc_gdbarch_skip_prologue);
+  set_gdbarch_skip_prologue (gdbarch, sparc_skip_prologue);
   set_gdbarch_sp_regnum (gdbarch, SPARC_SP_REGNUM);
   set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
@@ -3001,6 +3036,50 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_call_dummy_address (gdbarch, sparc_call_dummy_address);
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0x30);
       set_gdbarch_call_dummy_length (gdbarch, 0x38);
+
+      /* NOTE: cagney/2002-04-26: Based from info posted by Peter
+	 Schauer around Oct '99.  Briefly, due to aspects of the SPARC
+	 ABI, it isn't possible to use ON_STACK with a strictly
+	 compliant compiler.
+
+	 Peter Schauer writes ...
+
+	 No, any call from GDB to a user function returning a
+	 struct/union will fail miserably. Try this:
+
+	 *NOINDENT*
+	 struct x
+	 {
+           int a[4];
+         };
+
+	 struct x gx;
+
+	 struct x
+	 sret ()
+	 {
+	   return gx;
+	 }
+
+	 main ()
+	 {
+	   int i;
+	   for (i = 0; i < 4; i++)
+	     gx.a[i] = i + 1;
+	   gx = sret ();
+	 }
+	 *INDENT*
+
+	 Set a breakpoint at the gx = sret () statement, run to it and
+	 issue a `print sret()'. It will not succed with your
+	 approach, and I doubt that continuing the program will work
+	 as well.
+
+	 For details of the ABI see the Sparc Architecture Manual.  I
+	 have Version 8 (Prentice Hall ISBN 0-13-825001-4) and the
+	 calling conventions for functions returning aggregate values
+	 are explained in Appendix D.3.  */
+
       set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_32);
 #else
@@ -3038,7 +3117,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_store_struct_return (gdbarch, sparc32_store_struct_return);
       set_gdbarch_use_struct_convention (gdbarch, 
 					 generic_use_struct_convention);
-      set_gdbarch_write_fp (gdbarch, generic_target_write_fp);
       set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
       tdep->y_regnum = SPARC32_Y_REGNUM;
       tdep->fp_max_regnum = SPARC_FP0_REGNUM + 32;
@@ -3097,7 +3175,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_store_struct_return (gdbarch, sparc64_store_struct_return);
       set_gdbarch_use_struct_convention (gdbarch, 
 					 sparc64_use_struct_convention);
-      set_gdbarch_write_fp (gdbarch, sparc64_write_fp);
       set_gdbarch_write_sp (gdbarch, sparc64_write_sp);
       tdep->y_regnum = SPARC64_Y_REGNUM;
       tdep->fp_max_regnum = SPARC_FP0_REGNUM + 48;

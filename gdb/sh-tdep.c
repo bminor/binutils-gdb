@@ -43,9 +43,6 @@
 
 #include "solib-svr4.h"
 
-#undef XMALLOC
-#define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
-
 void (*sh_show_regs) (void);
 CORE_ADDR (*skip_prologue_hard_way) (CORE_ADDR);
 void (*do_pseudo_register) (int);
@@ -484,7 +481,7 @@ sh_find_callers_reg (struct frame_info *fi, int regnum)
 static void
 sh_nofp_frame_init_saved_regs (struct frame_info *fi)
 {
-  int where[NUM_REGS + NUM_PSEUDO_REGS];
+  int *where = (int *) alloca (NUM_REGS + NUM_PSEUDO_REGS);
   int rn;
   int have_fp = 0;
   int depth;
@@ -626,7 +623,7 @@ dr_reg_base_num (int dr_regnum)
 static void
 sh_fp_frame_init_saved_regs (struct frame_info *fi)
 {
-  int where[NUM_REGS + NUM_PSEUDO_REGS];
+  int *where = (int *) alloca (NUM_REGS + NUM_PSEUDO_REGS);
   int rn;
   int have_fp = 0;
   int depth;
@@ -1735,7 +1732,7 @@ sh_do_fp_register (int regnum)
   raw_buffer = (char *) alloca (REGISTER_RAW_SIZE (FP0_REGNUM));
 
   /* Get the data in raw format.  */
-  if (read_relative_register_raw_bytes (regnum, raw_buffer))
+  if (!frame_register_read (selected_frame, regnum, raw_buffer))
     error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
 
   /* Get the register as a number */ 
@@ -1772,7 +1769,7 @@ sh_do_register (int regnum)
   print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), gdb_stdout);
 
   /* Get the data in raw format.  */
-  if (read_relative_register_raw_bytes (regnum, raw_buffer))
+  if (!frame_register_read (selected_frame, regnum, raw_buffer))
     printf_filtered ("*value not available*\n");
       
   val_print (REGISTER_VIRTUAL_TYPE (regnum), raw_buffer, 0, 0,
@@ -2122,7 +2119,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
   set_gdbarch_read_fp (gdbarch, generic_target_read_fp);
-  set_gdbarch_write_fp (gdbarch, generic_target_write_fp);
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
   set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
 

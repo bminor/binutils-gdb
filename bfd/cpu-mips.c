@@ -1,5 +1,5 @@
 /* bfd back-end for mips support
-   Copyright 1990, 1991, 1993, 1994, 1995, 1996, 1997, 1998, 2000
+   Copyright 1990, 1991, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2002
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
@@ -23,6 +23,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 
+static const bfd_arch_info_type *mips_compatible
+  PARAMS ((const bfd_arch_info_type *, const bfd_arch_info_type *));
+
+/* The default routine tests bits_per_word, which is wrong on mips as
+   mips word size doesn't correlate with reloc size.  */
+
+static const bfd_arch_info_type *
+mips_compatible (a, b)
+     const bfd_arch_info_type *a;
+     const bfd_arch_info_type *b;
+{
+  if (a->arch != b->arch)
+    return NULL;
+
+  if (a->mach > b->mach)
+    return a;
+
+  if (b->mach > a->mach)
+    return b;
+
+  return a;
+}
+
 #define N(BITS_WORD, BITS_ADDR, NUMBER, PRINT, DEFAULT, NEXT)		\
   {							\
     BITS_WORD, /*  bits in a word */			\
@@ -34,7 +57,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
     PRINT,						\
     3,							\
     DEFAULT,						\
-    bfd_default_compatible, 				\
+    mips_compatible,					\
     bfd_default_scan,					\
     NEXT,						\
   }

@@ -1,6 +1,7 @@
 /* Cache and manage the values of registers for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000,
+   2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -42,39 +43,6 @@ find_saved_register (struct frame_info *frame, int regnum)
   if (frame == NULL)		/* No regs saved if want current frame */
     return 0;
 
-#ifdef HAVE_REGISTER_WINDOWS
-  /* We assume that a register in a register window will only be saved
-     in one place (since the name changes and/or disappears as you go
-     towards inner frames), so we only call get_frame_saved_regs on
-     the current frame.  This is directly in contradiction to the
-     usage below, which assumes that registers used in a frame must be
-     saved in a lower (more interior) frame.  This change is a result
-     of working on a register window machine; get_frame_saved_regs
-     always returns the registers saved within a frame, within the
-     context (register namespace) of that frame. */
-
-  /* However, note that we don't want this to return anything if
-     nothing is saved (if there's a frame inside of this one).  Also,
-     callers to this routine asking for the stack pointer want the
-     stack pointer saved for *this* frame; this is returned from the
-     next frame.  */
-
-  if (REGISTER_IN_WINDOW_P (regnum))
-    {
-      frame1 = get_next_frame (frame);
-      if (!frame1)
-	return 0;		/* Registers of this frame are active.  */
-
-      /* Get the SP from the next frame in; it will be this
-         current frame.  */
-      if (regnum != SP_REGNUM)
-	frame1 = frame;
-
-      FRAME_INIT_SAVED_REGS (frame1);
-      return frame1->saved_regs[regnum];	/* ... which might be zero */
-    }
-#endif /* HAVE_REGISTER_WINDOWS */
-
   /* Note that this next routine assumes that registers used in
      frame x will be saved only in the frame that x calls and
      frames interior to it.  This is not true on the sparc, but the
@@ -82,9 +50,10 @@ find_saved_register (struct frame_info *frame, int regnum)
   while (1)
     {
       QUIT;
-      frame1 = get_prev_frame (frame1);
-      if (frame1 == 0 || frame1 == frame)
+      frame1 = get_next_frame (frame);
+      if (frame1 == 0)
 	break;
+      frame = frame1;
       FRAME_INIT_SAVED_REGS (frame1);
       if (frame1->saved_regs[regnum])
 	addr = frame1->saved_regs[regnum];
@@ -174,52 +143,26 @@ get_saved_register (char *raw_buffer,
   GET_SAVED_REGISTER (raw_buffer, optimized, addrp, frame, regnum, lval);
 }
 
-/* READ_RELATIVE_REGISTER_RAW_BYTES_FOR_FRAME
+/* frame_register_read ()
 
-   Copy the bytes of register REGNUM, relative to the input stack frame,
-   into our memory at MYADDR, in target byte order.
+   Find and return the value of REGNUM for the specified stack frame.
    The number of bytes copied is REGISTER_RAW_SIZE (REGNUM).
 
-   Returns 1 if could not be read, 0 if could.  */
+   Returns 0 if the register value could not be found.  */
 
-/* FIXME: This function increases the confusion between FP_REGNUM
-   and the virtual/pseudo-frame pointer.  */
-
-static int
-read_relative_register_raw_bytes_for_frame (int regnum,
-					    char *myaddr,
-					    struct frame_info *frame)
+int
+frame_register_read (struct frame_info *frame, int regnum, void *myaddr)
 {
   int optim;
-  if (regnum == FP_REGNUM && frame)
-    {
-      /* Put it back in target format. */
-      store_address (myaddr, REGISTER_RAW_SIZE (FP_REGNUM),
-		     (LONGEST) FRAME_FP (frame));
-
-      return 0;
-    }
-
   get_saved_register (myaddr, &optim, (CORE_ADDR *) NULL, frame,
 		      regnum, (enum lval_type *) NULL);
 
+  /* FIXME: cagney/2002-04-10: This test is just bogus.  It is no
+     indication of the validity of the register.  The value could
+     easily be found (on the stack) even though the corresponding
+     register isn't available.  */
   if (register_cached (regnum) < 0)
-    return 1;			/* register value not available */
+    return 0;			/* register value not available */
 
-  return optim;
-}
-
-/* READ_RELATIVE_REGISTER_RAW_BYTES
-
-   Copy the bytes of register REGNUM, relative to the current stack
-   frame, into our memory at MYADDR, in target byte order.  
-   The number of bytes copied is REGISTER_RAW_SIZE (REGNUM).
-
-   Returns 1 if could not be read, 0 if could.  */
-
-int
-read_relative_register_raw_bytes (int regnum, char *myaddr)
-{
-  return read_relative_register_raw_bytes_for_frame (regnum, myaddr,
-						     selected_frame);
+  return !optim;
 }

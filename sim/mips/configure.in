@@ -19,6 +19,8 @@ SIM_AC_OPTION_WARNINGS
 #
 case "${target}" in
   mips*tx39*)           SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
+  mipsisa32*-*-*)       SIM_SUBTARGET="-DTARGET_ENABLE_FR=1";;
+  mipsisa64*-*-*)       SIM_SUBTARGET="-DTARGET_ENABLE_FR=1";;
   *)                    SIM_SUBTARGET="";;
 esac
 AC_SUBST(SIM_SUBTARGET)
@@ -35,6 +37,8 @@ case "${target}" in
   mips64vr*el-*-*)      default_endian=LITTLE_ENDIAN ;;
   mips64*-*-*)          default_endian=BIG_ENDIAN ;;
   mips16*-*-*)          default_endian=BIG_ENDIAN ;;
+  mipsisa32*-*-*)       default_endian=BIG_ENDIAN ;;
+  mipsisa64*-*-*)       default_endian=BIG_ENDIAN ;;
   mips*-*-*)            default_endian=BIG_ENDIAN ;;
   *)                    default_endian=BIG_ENDIAN ;;
 esac
@@ -49,6 +53,8 @@ mips_addr_bitsize=
 case "${target}" in
   mips64*-*-*)          mips_bitsize=64 ; mips_msb=63 ;;
   mips16*-*-*)          mips_bitsize=64 ; mips_msb=63 ;;
+  mipsisa32*-*-*)       mips_bitsize=32 ; mips_msb=31 ;;
+  mipsisa64*-*-*)       mips_bitsize=64 ; mips_msb=63 ;;
   mips*-*-*)            mips_bitsize=32 ; mips_msb=31 ;;
   *)                    mips_bitsize=64 ; mips_msb=63 ;;
 esac
@@ -67,6 +73,8 @@ case "${target}" in
 			;;
   mips64*-*-*)          mips_fpu=HARD_FLOATING_POINT ;;
   mips16*-*-*)          mips_fpu=HARD_FLOATING_POINT ;;
+  mipsisa32*-*-*)       mips_fpu=HARD_FLOATING_POINT ; mips_fpu_bitsize=64 ;;
+  mipsisa64*-*-*)       mips_fpu=HARD_FLOATING_POINT ; mips_fpu_bitsize=64 ;;
   mips*-*-*)            mips_fpu=HARD_FLOATING_POINT ; mips_fpu_bitsize=32 ;;
   *)                    mips_fpu=HARD_FLOATING_POINT ;;
 esac
@@ -115,6 +123,14 @@ case "${target}" in
   mips16*-*-*)		sim_gen=M16
 			sim_igen_filter="32,64,f"
 			sim_m16_filter="16"
+			;;
+  mipsisa32*-*-*)	sim_gen=IGEN
+		        sim_igen_machine="-M mips32"
+			sim_igen_filter="32,f"
+			;;
+  mipsisa64*-*-*)	sim_gen=IGEN
+		        sim_igen_machine="-M mips64"
+			sim_igen_filter="32,64,f"
 			;;
   mips*lsi*)	        sim_gen=M16
 			sim_igen_machine="-M mipsIII,mips16"
