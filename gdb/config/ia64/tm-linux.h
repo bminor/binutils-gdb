@@ -22,8 +22,6 @@
 #ifndef TM_LINUX_H
 #define TM_LINUX_H
 
-#define IA64_GNULINUX_TARGET
-
 #include "ia64/tm-ia64.h"
 #include "config/tm-linux.h"
 

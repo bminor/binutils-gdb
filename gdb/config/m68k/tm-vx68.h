@@ -71,8 +71,3 @@
    This routine returns true on success */
 
 #define GET_LONGJMP_TARGET(ADDR) m68k_get_longjmp_target(ADDR)
-
-/* Number of registers in a ptrace_getfpregs call. */
-
-#define VX_SIZE_FPREGS (8 * DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM) \
-			+ (3 * DEPRECATED_REGISTER_SIZE))

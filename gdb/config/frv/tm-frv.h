@@ -20,9 +20,6 @@
 
 /* This target uses an architecture vector for most architecture methods.  */
 
-#define TARGET_HW_BREAK_LIMIT 4
-#define TARGET_HW_WATCH_LIMIT 4
-
 #define TARGET_HAS_HARDWARE_WATCHPOINTS
 
 #define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) \

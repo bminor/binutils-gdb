@@ -38,6 +38,5 @@ extern char *gnu_target_pid_to_str (int pid);
 /* Use SVR4 style shared library support */
 #define SVR4_SHARED_LIBS
 #include "solib.h"
-#define NO_CORE_OPS
 
 #endif /* __NM_GNU_H__ */

@@ -1,5 +1,24 @@
 2004-08-01  Andrew Cagney  <cagney@gnu.org>
 
+	* config/ia64/tm-linux.h (IA64_GNULINUX_TARGET): Delete.
+	* config/alpha/nm-osf2.h (PROCFS_SIGPEND_OFFSET): Delete.
+	* config/nm-gnu.h (NO_CORE_OPS): Delete.
+	* config/pa/nm-hppah.h (MAY_SWITCH_FROM_INFERIOR_PID): Delete.
+	* config/i386/nm-i386v4.h (LOSING_POLL): Delete.
+	* config/alpha/nm-osf2.h (LOSING_POLL): Delete.
+	* config/tm-nto.h (RAW_SIGNAL_LO, RAW_SIGNAL_HI): Delete.
+	* config/m68k/tm-vx68.h (VX_SIZE_FPREGS): Delete.
+	* config/nm-linux.h (USE_THREAD_STEP_NEEDED): Delete.
+	* config/pa/nm-hppah.h (USE_THREAD_STEP_NEEDED): Delete.
+	* config/tm-nto.h (TARGET_SIGNAL_RAW_TABLE) Delete.
+	(TARGET_SIGNAL_RAW_VALUES): Delete.
+	* config/pa/nm-hppah.h (TARGET_RANGE_PROFITABLE_FOR_HW_WATCHPOINT):
+	Delete.
+	* config/frv/tm-frv.h (TARGET_HW_BREAK_LIMIT) 
+	(TARGET_HW_WATCH_LIMIT): Delete.
+	* Makefile.in (minimon_h, HFILES_NO_SRCDIR): Remove minimon.h.
+	* minimon.h: Delete file.
+
 	* trad-frame.c (trad_frame_get_this_base)
 	(trad_frame_set_this_base, trad_frame_set_reg_realreg): New
 	functions.

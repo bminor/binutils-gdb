@@ -54,10 +54,6 @@ extern void lin_lwp_attach_lwp (ptid_t ptid, int verbose);
 extern void lin_thread_get_thread_signals (sigset_t *mask);
 #define GET_THREAD_SIGNALS(mask) lin_thread_get_thread_signals (mask)
 
-/* Defined to make stepping-over-breakpoints be thread-atomic.  */
-#define USE_THREAD_STEP_NEEDED 1
-
-
 /* Use elf_gregset_t and elf_fpregset_t, rather than
    gregset_t and fpregset_t.  */
 
