@@ -1,3 +1,9 @@
+2002-08-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Maintenance Commands): Document "maint print
+	registers", "maint print raw-registers" and "maint print
+	cooked-registers".
+
 2002-08-08  Grace Sainsbury  <graces@redhat.com>
 
 	From Mark Salter:            

@@ -14195,6 +14195,21 @@ Shared library events.
 
 @end table
 
+@kindex maint print registers
+@kindex maint print raw-registers
+@kindex maint print cooked-registers
+@item maint print registers
+@itemx maint print raw-registers
+@itemx maint print cooked-registers
+Print @value{GDBN}'s internal register data structures.
+
+The command @samp{maint print raw-registers} includes the contents of
+the raw register cache; and the command @samp{maint print
+cooked-registers} includes the (cooked) value of all registers.
+@xref{Registers,, Registers, gdbint, @value{GDBN} Internals}.
+
+Takes an optional file parameter.
+
 @end table
 
 
