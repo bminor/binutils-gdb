@@ -89,6 +89,7 @@ tc-mips.h
 tc-ns32k.c
 tc-ns32k.h
 tc-sparc.h
+tc-sparc.c
 tc-vax.c
 tc-vax.h
 te-dpx2.h
@@ -123,7 +124,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.8  1991/11/06 11:53:16  sac
+# Revision 1.9  1991/11/11 23:36:39  sac
+# Added tc-sparc.c
+#
+# Revision 1.8  1991/11/06  11:53:16  sac
 # Wouldn't it be nice if Sanitize ignored spaces ?
 #
 # Revision 1.7  1991/11/06  09:14:33  sac
