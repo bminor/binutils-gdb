@@ -628,7 +628,7 @@ case "${target}" in
   v850e-*-*)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
-  v850eq-*-*)
+  v850ea-*-*)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
 # end-sanitize-v850e

@@ -1,3 +1,14 @@
+Mon Dec  1 12:24:44 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* m68k.h: Fix comment describing operand types.
+
+start-sanitize-d30v
+Sun Nov 23 22:31:27 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* d30v.h (SHORT_CMPU): Add case for cmpu instruction, and move
+	everything else after down.
+
+end-sanitize-d30v
 Tue Nov 18 18:45:14 1997  J"orn Rennecke  <amylaar@cygnus.co.uk>
 
 	* d10v.h (OPERAND_FLAG): Split into:
@@ -47,7 +58,7 @@ Mon Sep 15 18:28:37 1997  Nick Clifton  <nickc@cygnus.com>
 	(PROCESSOR_V850, PROCESSOR_ALL): New bit constants.
 start-sanitize-v850e
 	(PROCESSOR_V850E, PROCESSOR_NOT_V850): New bit constants.
-	(PROCESSOR_V850EQ): New bit constants.
+	(PROCESSOR_V850EA): New bit constants.
 end-sanitize-v850e
 
 start-sanitize-d30v
@@ -110,7 +121,7 @@ Wed Aug 13 18:45:48 1997  Nick Clifton  <nickc@cygnus.com>
 	fields. 
 
 start-sanitize-v850e
-	(V850E_INSTRUCTION, V850EQ_INSTRUCTION): New flags.
+	(V850E_INSTRUCTION, V850EA_INSTRUCTION): New flags.
 	(V850E_PUSH_POP, V850E_IMMEDIATE16, V850E_IMMEDIATE32): New flags.
 end-sanitize-v850e
 

@@ -1,3 +1,15 @@
+Fri Dec  5 11:20:08 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* v850.h: New constants: SHN_V850_SCOMMON, SHN_V850_TCOMMON,
+	SHN_V850_ZCOMMON, SHT_V850_SCOMMON, SHT_V850_TCOMMON,
+	SHT_V850_ZCOMMON to handle v850 common sections.
+	enum reloc_type renamed to v850_reloc_type to avoid name
+	conflict. 
+	
+Thu Oct 23 13:55:24 1997  Richard Henderson  <rth@cygnus.com>
+
+	* sparc.h (enum elf_sparc_reloc_type): Add UA64 & UA16.
+
 Thu Oct 23 00:42:04 1997  Richard Henderson  <rth@dot.cygnus.com>
 
 	* sparc.h (DT_SPARC_REGISTER): New macro.
@@ -38,7 +50,7 @@ Tue Sep  2 17:41:05 1997  Nick Clifton  <nickc@cygnus.com>
 
 start-sanitize-v850e
 	* common.h: Remove magic number for V850E.
-	* common.h: Remove magic number for V850EQ.
+	* common.h: Remove magic number for V850EA.
 end-sanitize-v850e
 
 	* v850.h: Add new flags for e_flags field in elf header.
@@ -47,7 +59,7 @@ start-sanitize-v850e
 Mon Aug 25 16:06:47 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* common.h (EM_CYGNUS_V850E): backend magic number for v850e.
-	* common.h (EM_CYGNUS_V850EQ): backend magic number for v850eq.
+	* common.h (EM_CYGNUS_V850EA): backend magic number for v850ea.
 end-sanitize-v850e
 
 Mon Aug 18 11:05:23 1997  Nick Clifton  <nickc@cygnus.com>
