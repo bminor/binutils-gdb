@@ -1,3 +1,8 @@
+2004-09-28  Mark Kettenis  <kettenis@chello.nl>
+
+	* alphanbsd-tdep.c (_initialize_alphanbsd_tdep): Register OS/ABI
+	for OpenBSD ELF.
+
 2004-09-28  Andrew Cagney  <cagney@gnu.org>
 
 	Problem identified by Paul Hilfinger.
