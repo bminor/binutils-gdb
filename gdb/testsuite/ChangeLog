@@ -1,5 +1,7 @@
 Thu Jun 10 11:04:04 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* gdb.t06/{signals.exp,signals.c,Makefile.in}: New test.
+
 	* gdb.t16/printcmd.exp: Don't print variables before running program.
 
 	* gdb.t06/break.exp: Don't require envp argument to main.
@@ -9,8 +11,8 @@ Thu Jun 10 11:04:04 1993  Jim Kingdon  (kingdon@cygnus.com)
 	* gdb.t02/whatis.exp, gdb.t11/list.exp:
 	Add xfails for rs6000.
 
-	* gdb.t02/whatis.exp: Re-write other tests
-	not to re-test something we already tested.
+	* gdb.t02/whatis.exp: Change other tests not to re-test something
+	we already tested.
 
 	* gdb.t{03,15,16}/gdbme.c: Reference all variables and make sure
 	each type used has a variable of that type.
