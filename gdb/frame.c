@@ -742,13 +742,10 @@ get_prev_frame (struct frame_info *next_frame)
       return current_frame;
     }
 
-  /* If we have the prev one, return it.  */
-  if (next_frame->prev)
-    /* FIXME: cagney/2002-11-09: Rather than relying on ->PREV being
-       non-NULL, there should be a predicate (->prev_p?).  That would
-       stop this function constantly trying to chain beyond the
-       outermost frame.  */
+  /* Only try to do the unwind once.  */
+  if (next_frame->prev_p)
     return next_frame->prev;
+  next_frame->prev_p = 1;
 
   /* On some machines it is possible to call a function without
      setting up a stack frame for it.  On these machines, we

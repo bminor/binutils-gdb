@@ -1,5 +1,12 @@
 2002-11-09  Andrew Cagney  <ac131313@redhat.com>
 
+	* frame.c (get_prev_frame): Test prev_p to identify a previously
+	unwound frame.  Initialize prev_p.
+	* frame.h (struct frame_info): Add field prev_p.  Expand prev/next
+	comment.
+
+2002-11-09  Andrew Cagney  <ac131313@redhat.com>
+
 	* frame.c (get_prev_frame): Cleanups.  Eliminate redundant tests
 	for a NULL NEXT_FRAME.  Simplify fromleaf initialization.  Add
 	more comments.  Zap dead code.

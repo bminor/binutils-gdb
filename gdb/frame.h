@@ -140,10 +140,11 @@ struct frame_info
     frame_register_unwind_ftype *register_unwind;
     void *register_unwind_cache;
 
-    /* Pointers to the next (down, inner) and previous (up, outer)
-       frame_info's in the frame cache.  */
-    struct frame_info *next; /* down, inner */
-    struct frame_info *prev; /* up, outer */
+    /* Pointers to the next (down, inner, younger) and previous (up,
+       outer, older) frame_info's in the frame cache.  */
+    struct frame_info *next; /* down, inner, younger */
+    int prev_p;
+    struct frame_info *prev; /* up, outer, older */
   };
 
 /* Values for the source flag to be used in print_frame_info_base(). */
