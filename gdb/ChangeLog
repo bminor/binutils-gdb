@@ -1,3 +1,11 @@
+2002-08-21  Keith Seitz  <keiths@redhat.com>
+
+	* gdb-events.sh: Replace register_update with target-changed event.
+	* gdb-events.c: Regenerated.
+	* gdb-events.c: Regenerated.
+	* valops.c (value_assign): Use target_changed_event instead
+	of register_update_event and memory_changed.
+
 2002-08-19  Keith Seitz  <keiths@redhat.com>
 
 	* stack.c (select_frame_command): Send selected-frame-level-changed

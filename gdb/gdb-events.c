@@ -120,13 +120,13 @@ architecture_changed_event (void)
 }
 
 void
-register_update_event (int regno)
+target_changed_event (void)
 {
   if (gdb_events_debug)
-    fprintf_unfiltered (gdb_stdlog, "register_update_event\n");
-  if (!current_event_hooks->register_update)
+    fprintf_unfiltered (gdb_stdlog, "target_changed_event\n");
+  if (!current_event_hooks->target_changed)
     return;
-  current_event_hooks->register_update (regno);
+  current_event_hooks->target_changed ();
 }
 
 void
@@ -181,7 +181,7 @@ enum gdb_event
   tracepoint_delete,
   tracepoint_modify,
   architecture_changed,
-  register_update,
+  target_changed,
   selected_frame_level_changed,
   context_changed,
   nr_gdb_events
@@ -217,11 +217,6 @@ struct tracepoint_modify
     int number;
   };
 
-struct register_update
-  {
-    int regno;
-  };
-
 struct selected_frame_level_changed
   {
     int level;
@@ -244,7 +239,6 @@ struct event
 	struct tracepoint_create tracepoint_create;
 	struct tracepoint_delete tracepoint_delete;
 	struct tracepoint_modify tracepoint_modify;
-	struct register_update register_update;
 	struct selected_frame_level_changed selected_frame_level_changed;
 	struct context_changed context_changed;
       }
@@ -326,11 +320,10 @@ queue_architecture_changed (void)
 }
 
 static void
-queue_register_update (int regno)
+queue_target_changed (void)
 {
   struct event *event = XMALLOC (struct event);
-  event->type = register_update;
-  event->data.register_update.regno = regno;
+  event->type = target_changed;
   append (event);
 }
 
@@ -400,9 +393,8 @@ gdb_events_deliver (struct gdb_events *vector)
 	case architecture_changed:
 	  vector->architecture_changed ();
 	  break;
-	case register_update:
-	  vector->register_update
-	    (event->data.register_update.regno);
+	case target_changed:
+	  vector->target_changed ();
 	  break;
 	case selected_frame_level_changed:
 	  vector->selected_frame_level_changed
@@ -431,7 +423,7 @@ _initialize_gdb_events (void)
   queue_event_hooks.tracepoint_delete = queue_tracepoint_delete;
   queue_event_hooks.tracepoint_modify = queue_tracepoint_modify;
   queue_event_hooks.architecture_changed = queue_architecture_changed;
-  queue_event_hooks.register_update = queue_register_update;
+  queue_event_hooks.target_changed = queue_target_changed;
   queue_event_hooks.selected_frame_level_changed = queue_selected_frame_level_changed;
   queue_event_hooks.context_changed = queue_context_changed;
 #endif

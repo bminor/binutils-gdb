@@ -65,7 +65,7 @@ f:void:tracepoint_create:int number:number
 f:void:tracepoint_delete:int number:number
 f:void:tracepoint_modify:int number:number
 f:void:architecture_changed:void
-f:void:register_update:int regno:regno
+f:void:target_changed:void
 f:void:selected_frame_level_changed:int level:level
 f:void:context_changed:int num:num
 #*:void:annotate_starting_hook:void
@@ -86,11 +86,9 @@ f:void:context_changed:int num:num
 #*:void:warning_hook:const char *string, va_list args:string, args
 #*:void:target_output_hook:char *b:b
 #*:void:interactive_hook:void
-#*:void:registers_changed_hook:void
 #*:void:readline_begin_hook:char *format, ...:format
 #*:char *:readline_hook:char *prompt:prompt
 #*:void:readline_end_hook:void
-#*:void:memory_changed_hook:CORE_ADDR addr, int len:addr, len
 #*:int:target_wait_hook:int pid, struct target_waitstatus *status:pid, status
 #*:void:call_command_hook:struct cmd_list_element *c, char *cmd, int from_tty:c, cmd, from_tty
 #*:NORETURN void:error_hook:void:: ATTR_NORETURN

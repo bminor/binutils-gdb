@@ -633,6 +633,7 @@ value_assign (struct value *toval, struct value *fromval)
 	write_memory (changed_addr, dest_buffer, changed_len);
 	if (memory_changed_hook)
 	  memory_changed_hook (changed_addr, changed_len);
+	target_changed_event ();
       }
       break;
 
@@ -679,7 +680,7 @@ value_assign (struct value *toval, struct value *fromval)
 #endif
 	}
 
-      register_update_event (VALUE_REGNO (toval));
+      target_changed_event ();
 
       /* Assigning to the stack pointer, frame pointer, and other
          (architecture and calling convention specific) registers may
@@ -770,7 +771,7 @@ value_assign (struct value *toval, struct value *fromval)
 	  regno = -1;
 	if (register_changed_hook)
 	  register_changed_hook (regno);
-	register_update_event (regno);
+	target_changed_event ();
       }
       break;
 
