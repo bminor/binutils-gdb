@@ -27,8 +27,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define TARGET_BYTE_ORDER BIG_ENDIAN
 
+#undef TARGET_INT_BIT
 #define TARGET_INT_BIT 16
+
+#undef TARGET_LONG_BIT
 #define TARGET_LONG_BIT 32
+
+#undef TARGET_PTR_BIT
 #define TARGET_PTR_BIT (minimum_mode ? 16 : 32)
 
 
@@ -75,11 +80,9 @@ extern CORE_ADDR h8500_skip_prologue ();
 
 #define INVALID_FLOAT(p, len) 0   /* Just a first guess; not checked */
 
-/* Say how long (ordinary) registers are.  This is a piece of bogosity
-   used in push_word and a few other places; REGISTER_RAW_SIZE is the
-   real way to know how big a register is.  */
+/* Say how long registers are.  */
 
-#define REGISTER_SIZE 4
+#define REGISTER_TYPE  unsigned long
 
 /* Say how much memory is needed to store a copy of the register set */
 
@@ -95,6 +98,8 @@ extern CORE_ADDR h8500_skip_prologue ();
 
 #define REGISTER_RAW_SIZE(N) h8500_register_size(N)
 int h8500_register_size PARAMS ((int regno));
+
+#define REGISTER_SIZE 4
 
 #define REGISTER_VIRTUAL_SIZE(N) h8500_register_size(N)
 
@@ -117,7 +122,7 @@ struct type *h8500_register_virtual_type PARAMS ((int regno));
 
 #define REGISTER_NAMES \
   {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",   \
-  "pr0", "pr1", "pr2","pr3","pr4","pr5","pr6","pr7","cp","dp","ep","tp","ccr","pc"}
+  "pr0", "pr1", "pr2","pr3","pr4","pr5","pr6","pr7","cp","dp","ep","tp","sr","pc"}
 
 
 /* Register numbers of various important registers.
@@ -316,3 +321,4 @@ void target_write_pc PARAMS ((CORE_ADDR ));
 
 #define TARGET_READ_FP() target_read_fp()
 #define TARGET_WRITE_FP(x) target_write_fp(x)
+#define GDB_TARGET_IS_H8500
