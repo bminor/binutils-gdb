@@ -93,13 +93,13 @@ save_npx (void)
   asm ("inb    $0xa0, %%al  \n\
        testb $0x20, %%al    \n\
        jz 1f 	    	    \n\
-       xorb %% al, %%al	    \n\
-       outb %% al, $0xf0    \n\
+       xorb %%al, %%al	    \n\
+       outb %%al, $0xf0     \n\
        movb $0x20, %%al	    \n\
-       outb %% al, $0xa0    \n\
-       outb %% al, $0x20    \n\
+       outb %%al, $0xa0     \n\
+       outb %%al, $0x20     \n\
 1:     	       	   	    \n\
-       fnsave % 0	    \n\
+       fnsave %0	    \n\
        fwait "
 :     "=m" (npx)
 :				/* No input */
@@ -107,9 +107,6 @@ save_npx (void)
 }
 
 /* *INDENT-ON* */
-
-
-
 
 
 /* ------------------------------------------------------------------------- */
