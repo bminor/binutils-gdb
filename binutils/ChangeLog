@@ -12,7 +12,9 @@
 	* resrc.c: Print style even if it is 0.
 
 	* resbin.c: Use signature to identify DIALOGEX.
-	
+
+	* windres.c: Set default LANGUAGE to english/us.
+
 2002-04-09  Gunnar Degnbol <degnbol@danbbs.dk>
 
 	* resrc.c: print CLASS names in quotes

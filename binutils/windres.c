@@ -145,6 +145,8 @@ static enum res_format format_from_filename PARAMS ((const char *, int));
 static void usage PARAMS ((FILE *, int));
 static int cmp_res_entry PARAMS ((const PTR, const PTR));
 static struct res_directory *sort_resources PARAMS ((struct res_directory *));
+static void reswr_init PARAMS ((void));
+static const char * quot PARAMS ((const char *));
 
 /* When we are building a resource tree, we allocate everything onto
    an obstack, so that we can free it all at once if we want.  */
@@ -765,6 +767,9 @@ quot (string)
   return buf;
 }
 
+/* This keeps gcc happy when using -Wmissing-prototypes -Wstrict-prototypes.  */
+int main PARAMS ((int, char **));
+
 /* The main function.  */
 
 int
@@ -809,7 +814,7 @@ main (argc, argv)
   target = NULL;
   preprocessor = NULL;
   preprocargs = NULL;
-  language = -1;
+  language = 0x409;   /* LANG_ENGLISH, SUBLANG_ENGLISH_US.  */
   use_temp_file = 0;
 
   while ((c = getopt_long (argc, argv, "i:o:I:O:F:D:hHvV", long_options,

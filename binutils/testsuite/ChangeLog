@@ -1,5 +1,13 @@
 2002-04-09  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* binutils-all/windres/deflang.rc: New test case: Check default
+	language.
+	* binutils-all/windres/deflang.rsd: Expected output.
+
+	* binutils-all/windres/dialogsignature.rc: New test case for
+	decoding the dialog signature.
+	* binutils-all/windres/dialogsignature.rsd: Expected output.
+
 	* binutils-all/windres/escapea.rc: New test case for encoding \a
 	escape sequence.
 	* binutils-all/windres/escapea.rsd: Expected output.
