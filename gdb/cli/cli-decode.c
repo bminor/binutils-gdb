@@ -340,8 +340,19 @@ add_setshow_cmd_full (char *name,
 {
   struct cmd_list_element *set;
   struct cmd_list_element *show;
-  char *full_set_doc = xstrprintf ("%s\n%s", set_doc, help_doc);
-  char *full_show_doc = xstrprintf ("%s\n%s", show_doc, help_doc);
+  char *full_set_doc;
+  char *full_show_doc;
+
+  if (help_doc != NULL)
+    {
+      full_set_doc = xstrprintf ("%s\n%s", set_doc, help_doc);
+      full_show_doc = xstrprintf ("%s\n%s", show_doc, help_doc);
+    }
+  else
+    {
+      full_set_doc = xstrdup (set_doc);
+      full_show_doc = xstrdup (show_doc);
+    }
   set = add_set_or_show_cmd (name, set_cmd, class, var_type, var,
 			     full_set_doc, set_list);
   if (set_func != NULL)

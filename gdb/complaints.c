@@ -313,8 +313,7 @@ _initialize_complaints (void)
 {
   add_setshow_zinteger_cmd ("complaints", class_support, &stop_whining, "\
 Set max number of complaints about incorrect symbols.", "\
-Show max number of complaints about incorrect symbols.", "\
-Set to zero to disable incorrect symbol complaints.", "\
+Show max number of complaints about incorrect symbols.", NULL, "\
 Max number of complaints about incorrect symbols is %s.",
 			    NULL, NULL,
 			    &setlist, &showlist);
