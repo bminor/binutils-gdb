@@ -1,3 +1,9 @@
+Thu Dec 16 21:13:11 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (md_begin): Initialize "dummy_label".
+	(tc_gen_reloc, SOM version): For relocations which have no symbol,
+	set sym_ptr_ptr to dummy_label.  Avoids lossage in generic BFD code.
+
 Thu Dec 16 16:07:56 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* read.c (lex_type): No longer make '[' a valid character for
