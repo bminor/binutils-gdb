@@ -1,3 +1,7 @@
+2003-01-09  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c: Update copyright.
+
 2003-01-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* lin-lwp.c (child_wait): Ignore exit statuses for processes other
