@@ -1,3 +1,8 @@
+Mon Feb 23 11:29:06 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen.c: #include symcat.h.
+	* config/tc-m32r.c: Likewise.
+
 Mon Feb 23 10:27:40 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mips.c (mips_ip, case 'P'): Make 'P' arguments be

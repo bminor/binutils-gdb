@@ -22,12 +22,14 @@
 #include <ctype.h>
 #include "as.h"
 #include "subsegs.h"     
+#include "symcat.h"
 #include "cgen-opc.h"
 
 /* Structure to hold all of the different components describing an individual instruction.  */
 typedef struct
 {
   const CGEN_INSN *	insn;
+  const CGEN_INSN *	orig_insn;
   CGEN_FIELDS		fields;
 #ifdef CGEN_INT_INSN
   cgen_insn_t       	buffer [CGEN_MAX_INSN_SIZE / sizeof (cgen_insn_t)];
@@ -125,8 +127,10 @@ struct option md_longopts[] =
   {"m32rx", no_argument, NULL, OPTION_M32RX},
 #define OPTION_WARN	(OPTION_MD_BASE + 1)
   {"warn-explicit-parallel-conflicts", no_argument, NULL, OPTION_WARN},
+  {"Wp", no_argument, NULL, OPTION_WARN},
 #define OPTION_NO_WARN	(OPTION_MD_BASE + 2)
   {"no-warn-explicit-parallel-conflicts", no_argument, NULL, OPTION_NO_WARN},
+  {"Wnp", no_argument, NULL, OPTION_NO_WARN},
 /* end-sanitize-m32rx */
 
 #if 0 /* not supported yet */
@@ -188,6 +192,10 @@ md_show_usage (stream)
 --warn-explicit-parallel-conflicts	Warn when parallel instrucitons violate contraints\n");
   fprintf (stream, "\
 --no-warn-explicit-parallel-conflicts	Do not warn when parallel instrucitons violate contraints\n");
+  fprintf (stream, "\
+--Wp					Synonym for --warn-explicit-parallel-conflicts\n");
+  fprintf (stream, "\
+--Wnp					Synonym for --no-warn-explicit-parallel-conflicts\n");
 /* end-sanitize-m32rx */
 
 #if 0
@@ -387,6 +395,11 @@ md_begin ()
 
 /* start-sanitize-m32rx */
 
+#define OPERAND_IS_COND_BIT(operand, indices, index) 			\
+	(CGEN_OPERAND_INSTANCE_HW (operand)->type == HW_H_COND		\
+	 || (CGEN_OPERAND_INSTANCE_HW (operand)->type == HW_H_CR	\
+	     && (indices [index] == 0 || indices [index] == 1)))
+     
 /* Returns true if an output of instruction 'a' is referenced by an operand
    of instruction 'b'.  If 'check_outputs' is true then b's outputs are
    checked, otherwise its inputs are examined.  */
@@ -414,18 +427,41 @@ first_writes_to_seconds_operands (a, b, check_outputs)
       if (CGEN_OPERAND_INSTANCE_TYPE (a_operands) == CGEN_OPERAND_INSTANCE_OUTPUT)
 	{
 	  int b_index;
-	    
-	  /* Scan operand list of 'b' looking for an operand that references
-	     the same hardware element, and which goes in the right direction.  */
-	  for (b_index = 0;
-	       CGEN_OPERAND_INSTANCE_TYPE (b_operands) != CGEN_OPERAND_INSTANCE_END;
-	       b_index ++, b_operands ++)
+
+	  /* Special Case:
+	     The Condition bit 'C' is a shadow of the CBR register (control
+	     register 1) and also a shadow of bit 31 of the program status
+	     word (control register 0).  For now this is handled here, rather
+	     than by cgen.... */
+	  
+	  if (OPERAND_IS_COND_BIT (a_operands, a->indices, a_index))
 	    {
-	      if ((CGEN_OPERAND_INSTANCE_TYPE (b_operands) ==
-		  (check_outputs ? CGEN_OPERAND_INSTANCE_OUTPUT : CGEN_OPERAND_INSTANCE_INPUT))
-		  && (CGEN_OPERAND_INSTANCE_HW (b_operands) == CGEN_OPERAND_INSTANCE_HW (a_operands))
-		  && (a->indices [a_index] == b->indices [b_index]))
-		return 1;
+	      /* Scan operand list of 'b' looking for another reference to the
+		 condition bit, which goes in the right direction.  */
+	      for (b_index = 0;
+		   CGEN_OPERAND_INSTANCE_TYPE (b_operands) != CGEN_OPERAND_INSTANCE_END;
+		   b_index ++, b_operands ++)
+		{
+		  if ((CGEN_OPERAND_INSTANCE_TYPE (b_operands) ==
+		       (check_outputs ? CGEN_OPERAND_INSTANCE_OUTPUT : CGEN_OPERAND_INSTANCE_INPUT))
+		      && OPERAND_IS_COND_BIT (b_operands, b->indices, b_index))
+		    return 1;
+		}
+	    }
+	  else
+	    {
+	      /* Scan operand list of 'b' looking for an operand that references
+		 the same hardware element, and which goes in the right direction.  */
+	      for (b_index = 0;
+		   CGEN_OPERAND_INSTANCE_TYPE (b_operands) != CGEN_OPERAND_INSTANCE_END;
+		   b_index ++, b_operands ++)
+		{
+		  if ((CGEN_OPERAND_INSTANCE_TYPE (b_operands) ==
+		       (check_outputs ? CGEN_OPERAND_INSTANCE_OUTPUT : CGEN_OPERAND_INSTANCE_INPUT))
+		      && (CGEN_OPERAND_INSTANCE_HW (b_operands) == CGEN_OPERAND_INSTANCE_HW (a_operands))
+		      && (a->indices [a_index] == b->indices [b_index]))
+		    return 1;
+		}
 	    }
 	}
     }
@@ -438,7 +474,7 @@ static int
 writes_to_pc (a)
      m32r_insn * a;
 {
-#if 0
+#if 0  /* Once PC operands are working.... */
   const CGEN_OPERAND_INSTANCE * a_operands == CGEN_INSN_OPERANDS (a->insn);
 
   if (a_operands == NULL)
@@ -569,6 +605,37 @@ assemble_parallel_insn (str, str2)
       return;
     }
   
+  /* Temporary Hack:
+     If the instruciton is relaxable, reparse it looking for a non-relaxable variant.
+     (We do not want to relax instructions inside a parallel construction, and if it
+     turns out that the branch is too far for the displacement field available to the
+     non-relaxed instruction, then this is the programmer's fault.
+     A better solution would be to pass attribute requirements to assemble_insn() so
+     that the relaxable variant would not be accepted as a valid parse of the instruction.  */
+  
+  if (CGEN_INSN_ATTR (first.insn, CGEN_INSN_RELAXABLE) != 0)
+    {
+      char buf[128];
+      char * p;
+      /* Oh dear - the insn is relaxable, so it might be replaced with a longer,
+	 non-parallel version.  Try appending ".s" to the instruction and reparsing it.  */
+
+      p = strchr (str, ' ');
+      if (p == NULL)
+	abort();
+      * p = 0;
+      sprintf (buf, "%s.s %s", str, p + 1);
+      * p = ' ';
+
+      /* Reset fixup list to empty.  */
+      cgen_save_fixups();
+      
+      first.insn = CGEN_SYM (assemble_insn) (buf, & first.fields, first.buffer, & errmsg);
+
+      if (first.insn == NULL)
+	abort();
+    }
+  
   *str2 = '|';       /* Restore the original assembly text, just in case it is needed.  */
   str3  = str;       /* Save the original string pointer.  */
   str   = str2 + 2;  /* Advanced past the parsed string.  */
@@ -582,7 +649,11 @@ assemble_parallel_insn (str, str2)
      doesn't seem right.  Perhaps allow passing fields like we do insn.  */
   /* FIXME: ALIAS insns do not have operands, so we use this function
      to find the equivalent insn and overwrite the value stored in our
-     structure.  When aliases behave differently this may have to change.  */
+     structure.  We still need the original insn, however, since this
+     may have certain attributes that are not present in the unaliased
+     version (eg relaxability).  When aliases behave differently this
+     may have to change.  */
+  first.orig_insn = first.insn;
   first.insn = m32r_cgen_get_insn_operands (first.insn, bfd_getb16 ((char *) first.buffer), 16,
 					    first.indices);
   if (first.insn == NULL)
@@ -614,7 +685,33 @@ assemble_parallel_insn (str, str2)
 	}
     }
 
+  /* See comment above.  */
+  if (CGEN_INSN_ATTR (second.insn, CGEN_INSN_RELAXABLE) != 0)
+    {
+      char   buf[128];
+      char * p;
+      /* Oh dear - the insn is relaxable, so it might be replaced with a longer,
+	 non-parallel version.  Try appending ".s" to the instruction and reparsing it.  */
+
+      p = strchr (str, ' ');
+      if (p == NULL)
+	abort();
+      * p = 0;
+      sprintf (buf, "%s.s %s", str, p + 1);
+      * p = ' ';
+
+      /* Reset fixup list to empty, preserving saved fixups.  */
+      cgen_restore_fixups();
+      cgen_save_fixups();
+      
+      second.insn = CGEN_SYM (assemble_insn) (buf, & second.fields, second.buffer, & errmsg);
+
+      if (second.insn == NULL)
+	abort();
+    }
+  
   /* Get the indicies of the operands of the instruction.  */
+  second.orig_insn = second.insn;
   second.insn = m32r_cgen_get_insn_operands (second.insn, bfd_getb16 ((char *) second.buffer), 16,
 					     second.indices);
   if (second.insn == NULL)
@@ -643,7 +740,7 @@ assemble_parallel_insn (str, str2)
       cgen_swap_fixups ();
 
       /* Write it out.  */
-      (void) cgen_asm_finish_insn (first.insn, first.buffer,
+      (void) cgen_asm_finish_insn (first.orig_insn, first.buffer,
 				   CGEN_FIELDS_BITSIZE (& first.fields));
       
       /* Force the top bit of the second insn to be set.  */
@@ -653,14 +750,14 @@ assemble_parallel_insn (str, str2)
       cgen_restore_fixups ();
 
       /* Write it out.  */
-      (void) cgen_asm_finish_insn (second.insn, second.buffer,
+      (void) cgen_asm_finish_insn (second.orig_insn, second.buffer,
 				   CGEN_FIELDS_BITSIZE (& second.fields));
     }
   /* Try swapping the instructions to see if they work that way.  */
   else if (can_make_parallel (& second, & first) == NULL)
     {
       /* Write out the second instruction first.  */
-      (void) cgen_asm_finish_insn (second.insn, second.buffer,
+      (void) cgen_asm_finish_insn (second.orig_insn, second.buffer,
 				   CGEN_FIELDS_BITSIZE (& second.fields));
       
       /* Force the top bit of the first instruction to be set.  */
@@ -670,7 +767,7 @@ assemble_parallel_insn (str, str2)
       cgen_restore_fixups ();
 
       /* Write out the first instruction.  */
-      (void) cgen_asm_finish_insn (first.insn, first.buffer,
+      (void) cgen_asm_finish_insn (first.orig_insn, first.buffer,
 				   CGEN_FIELDS_BITSIZE (& first.fields));
     }
   else
