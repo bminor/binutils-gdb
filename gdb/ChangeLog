@@ -1,3 +1,7 @@
+Sat Jul 23 00:58:15 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* target.c (unpush_target):  Fix handling of removal of top target.
+
 Fri Jul 22 17:30:39 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* Makefile.in: Add stuff to build nlmstub.

@@ -443,6 +443,8 @@ unpush_target (t)
 {
   struct target_stack_item *cur, *prev;
 
+  t->to_close (0);		/* Let it clean up */
+
   /* Look for the specified target.  Note that we assume that a target
      can only occur once in the target stack. */
 
@@ -456,13 +458,14 @@ unpush_target (t)
   /* Unchain the target */
 
   if (!prev)
-    target_stack = NULL;
+    target_stack = cur->next;
   else
     prev->next = cur->next;
 
   free (cur);			/* Release the target_stack_item */
 
-  (t->to_close) (0);		/* Let it clean up */
+  update_current_target ();
+  cleanup_target (&current_target);
 
   return 1;
 }
