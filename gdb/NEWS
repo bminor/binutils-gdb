@@ -10,6 +10,7 @@ Atmel AVR					avr*-*-*
 * New native configurations
 
 Alpha NetBSD					alpha*-*-netbsd*
+SH NetBSD					sh*-*-netbsdelf*
 
 * OBSOLETE configurations and files
 
