@@ -39,6 +39,7 @@ extern int is_strip;
 
 /* IMPORTS */
 extern char    *program_name;
+extern char    *program_version;
 
 
 static
@@ -46,16 +47,8 @@ void
 usage()
 {
     fprintf(stderr,
-    "Usage %s [-S][-s srcfmt] [-d dtfmt] [-b bothfmts] infile [outfile]\n",
+    "Usage %s [-S][-s srcfmt] [-d dtfmt] [-b bothfmts] infile [outfile] [-V]\n",
 	    program_name);
-    exit(1);
-}
-
-static
-void            
-strip_usage()
-{
-    fprintf(stderr, "Usage %s [-v] filename ...\n", program_name);
     exit(1);
 }
 
@@ -392,8 +385,9 @@ main(argc, argv)
     char           *argv[];
 {
   int             i;
-
+  int		  show_version;
   program_name = argv[0];
+  show_version = 0;
 
   bfd_init();
 
@@ -402,36 +396,13 @@ main(argc, argv)
       is_strip = (i >= 5 && strcmp(program_name+i-5,"strip"));
   }
 
-  if (is_strip)
-    {
-      for (i = 1; i < argc; i++) 
-        {
-          if (argv[i][0] != '-')
-	    break;
-	  if (argv[i][1] == '-') {
-	    i++;
-	    break;
-	  }
-	  switch (argv[i][1]) {
-	    case 'v':
-	      verbose = true;
-	      break;
-	    default:
-	      strip_usage();
-	  }
-        }
-      for ( ; i < argc; i++) {
-	    char *tmpname = make_tempname(argv[i]);
-	    copy_file(argv[i], tmpname);
-	    rename(tmpname, argv[i]);
-      }
-      return 0;
-    }
-
   for (i = 1; i < argc; i++) 
     {
       if (argv[i][0] == '-') {
 	switch (argv[i][1]) {
+	case 'V':
+	  show_version = true;
+	  break;
 	case 'v':
 	  verbose = true;
 	  break;
@@ -463,6 +434,9 @@ main(argc, argv)
 	}
       }
     }
+
+  if (show_version)
+    printf ("%s version %s\n", program_name, program_version);
 
   if (input_filename == (char *) NULL)
     usage();
