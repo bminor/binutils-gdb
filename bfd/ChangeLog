@@ -1,3 +1,13 @@
+Wed Jan 12 13:36:43 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	Enable gdb to write to core files on more core file readers.
+	* libbfd.c (bfd_generic_set_section_contents):  Remove range check
+	for section size, it is already done in bfd_set_section_contents
+	with bfd_get_section_size_now.
+	* aix386-core.c, hppabsd-core.c, hpux-core.c, irix-core.c,
+	osf-core.c, ptrace-core.c, trad-core.c (*_set_section_contents):
+	Use bfd_generic_set_section_contents instead of bfd_false.
+
 Wed Jan 12 15:31:57 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* linker.c (default_indirect_link_order): Don't expect space for
