@@ -3,7 +3,7 @@
 
 .*: +file format elf64-powerpc
 .*
-architecture: powerpc:common, flags 0x00000011:
+architecture: powerpc:common64, flags 0x00000011:
 HAS_RELOC, HAS_SYMS
 start address 0x0000000000000000
 

@@ -1543,6 +1543,7 @@ enum bfd_architecture
   bfd_arch_pdp11,     /* DEC PDP-11 */
   bfd_arch_powerpc,   /* PowerPC */
 #define bfd_mach_ppc           0
+#define bfd_mach_ppc64         1
 #define bfd_mach_ppc_403       403
 #define bfd_mach_ppc_403gc     4030
 #define bfd_mach_ppc_505       505

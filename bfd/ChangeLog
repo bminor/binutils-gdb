@@ -1,5 +1,16 @@
 2002-02-05  Alan Modra  <amodra@bigpond.net.au>
 
+	From Jimi X <jimix@watson.ibm.com>
+	* archures (bfd_mach_ppc64): Define.
+	(bfd_powerpc_arch): Rename to bfd_powerpc_archs.
+	(bfd_powerpc_arch): Define.
+	* bfd-in2.h: Regenerate.
+	* cpu-powerpc.c (arch_info_struct): Rename to bfd_powerpc_archs.
+	(bfd_powerpc_arch): Move to tail of bfd_powerpc_archs.
+	(bfd_powerpc_archs): Add default powerpc64 arch.
+
+2002-02-05  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (ppc64_elf_size_dynamic_sections): Check for relocs
 	against section syms in readonly sections.  Don't do the global
 	sym check if we find one.
