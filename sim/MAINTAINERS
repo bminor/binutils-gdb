@@ -1,7 +1,8 @@
 Maintiners for particular sims:
 ppc		Andrew Cagney <ac131313@cygnus.com>
-ppc		Geoff Keating <geoffk@cygnus.com>
+ppc		Geoff Keating <geoffk@redhat.com>
 mips		Andrew Cagney <ac131313@cygnus.com>
 mips		Chris Demetriou <cgd@broadcom.com>
+common		Ben Elliston <bje@redhat.com>
 
 The remainder of this file is intentionally left blank.
