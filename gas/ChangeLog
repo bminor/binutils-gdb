@@ -1,3 +1,9 @@
+2004-11-29  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
+
+	* config/tc-m32r.c (md_pcrel_from_section): Fixed a pcrel relocte
+	miss between different section in the same module.
+	(tc_gen_reloc): Likewise.
+
 2004-11-25  Theodore A. Roth  <troth@openavr.org>
 
 	* gas/config/tc-avr.c (mcu_types): Add support for atmega165,

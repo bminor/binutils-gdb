@@ -1999,6 +1999,12 @@ md_pcrel_from_section (fixP, sec)
           || S_IS_EXTERNAL (fixP->fx_addsy)
           || S_IS_WEAK (fixP->fx_addsy)))
     {
+      if (S_GET_SEGMENT (fixP->fx_addsy) != sec
+          && S_IS_DEFINED (fixP->fx_addsy)
+          && ! S_IS_EXTERNAL (fixP->fx_addsy)
+          && ! S_IS_WEAK (fixP->fx_addsy))
+        return fixP->fx_offset;
+
       /* The symbol is undefined (or is defined but not in this section).
 	 Let the linker figure it out.  */
       return 0;
@@ -2488,7 +2494,7 @@ printf(" => %s\n",reloc->howto->name);
            && ! S_IS_EXTERNAL(fixP->fx_addsy)
            && ! S_IS_WEAK(fixP->fx_addsy))
     /* Already used fx_offset in the opcode field itseld.  */
-    reloc->addend  = 0;
+    reloc->addend  = fixP->fx_offset;
   else
     reloc->addend  = fixP->fx_addnumber;
  

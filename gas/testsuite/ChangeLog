@@ -1,3 +1,11 @@
+2004-11-29  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
+
+	* testsuite/gas/m32r/rela-1.s: New test.
+	* testsuite/gas/m32r/rela-1.d: Expected disassembly.
+	* testsuite/gas/m32r/m32r.exp: Run the new test.
+	* testsuite/gas/m32r/relax-1.d: Update for fixed pcrel reloc
+	generation.
+
 2004-11-27  Richard Earnshaw  <rearnsha@arm.com>
 
 	* gas/testsuite/arm/thumbv6.d (setend): Remove stray tab at end
