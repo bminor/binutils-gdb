@@ -1,3 +1,7 @@
+2001-06-10  Michael Chastain  <chastain@redhat.com>
+
+	* gdb.base/exprs.exp: Remove a duplicate test.
+
 2001-06-06  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/return2.exp (main): Use values to test float and double
