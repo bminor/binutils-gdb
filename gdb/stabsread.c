@@ -177,7 +177,7 @@ struct complaint range_type_base_complaint =
   {"base type %d of range type is not defined", 0, 0};
 
 struct complaint reg_value_complaint =
-  {"register number too large in symbol %s", 0, 0};
+  {"register number %d too large (max %d) in symbol %s", 0, 0};
 
 struct complaint vtbl_notfound_complaint =
   {"virtual function table pointer not found when defining class `%s'", 0, 0};
@@ -955,7 +955,8 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
       if (SYMBOL_VALUE (sym) >= NUM_REGS)
 	{
-	  complain (&reg_value_complaint, SYMBOL_SOURCE_NAME (sym));
+	  complain (&reg_value_complaint, SYMBOL_VALUE (sym), NUM_REGS,
+		    SYMBOL_SOURCE_NAME (sym));
 	  SYMBOL_VALUE (sym) = SP_REGNUM;  /* Known safe, though useless */
 	}
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -969,7 +970,8 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
       if (SYMBOL_VALUE (sym) >= NUM_REGS)
 	{
-	  complain (&reg_value_complaint, SYMBOL_SOURCE_NAME (sym));
+	  complain (&reg_value_complaint, SYMBOL_VALUE (sym), NUM_REGS,
+		    SYMBOL_SOURCE_NAME (sym));
 	  SYMBOL_VALUE (sym) = SP_REGNUM;  /* Known safe, though useless */
 	}
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -1191,7 +1193,8 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
       if (SYMBOL_VALUE (sym) >= NUM_REGS)
 	{
-	  complain (&reg_value_complaint, SYMBOL_SOURCE_NAME (sym));
+	  complain (&reg_value_complaint, SYMBOL_VALUE (sym), NUM_REGS,
+		    SYMBOL_SOURCE_NAME (sym));
 	  SYMBOL_VALUE (sym) = SP_REGNUM;  /* Known safe, though useless */
 	}
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;

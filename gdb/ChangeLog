@@ -1,3 +1,14 @@
+Wed Jan 10 11:25:37 1996  Fred Fish  <fnf@fishpond.amigalib.com>
+
+	From Wilfried Moser <wilfried.moser@aut.alcatel.at>:
+	* gdbserver/low-linux.c: New file.
+	* remote.c (remote_read_bytes): Fix aborts on larger packets.
+
+	* config/i386/linux.mh (GDBSERVER_DEPFILES, GDBSERVER_LIBS):
+	Define.
+	* stabsread.c (define_symbol): If register value is too large,
+	tell what it is and what max is.
+
 Tue Jan  9 09:33:53 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* hpread.c (hpread_build_psymtabs): Finish Jan 4th 
