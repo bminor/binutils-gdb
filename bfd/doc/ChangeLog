@@ -1,3 +1,7 @@
+2001-10-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.in: Regenerate.
+
 2001-10-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* header.sed: New file, adds header to generated files.
