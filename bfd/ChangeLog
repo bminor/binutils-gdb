@@ -1,5 +1,9 @@
 Wed Apr 10 00:23:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ihex.c (ihex_scan): Accept a length of 4 for record type 5.
+	(ihex_write_object_contents): For a large start address, output
+	the full 32 bit address in record type 5.
+
 	* ieee.c (ieee_write_byte): Change second parameter from bfd_byte
 	to int to avoid promotion problems in prototype.
 
