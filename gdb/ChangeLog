@@ -1,3 +1,10 @@
+Tue Mar 29 12:38:45 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote.c (remote_store_registers): Add 'P' request to set an
+	individual register.
+	(remote_write_bytes, remote_read_bytes): Use %lx, not %x, to print
+	a target address.
+
 Sat Mar 26 07:05:18 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/sparc/tm-sparc.h: Define USE_REGISTER_NOT_ARG.

@@ -54,6 +54,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	reply		OK		for success
 			ENN		for an error
 
+        write reg	Pn...:r...	Write register n... with value r...,
+					which contains two hex digits for each
+					byte in the register (target byte
+					order).
+	reply		OK		for success
+			ENN		for an error
+	(not supported by all stubs).
+
 	read mem	mAA..AA,LLLL	AA..AA is address, LLLL is length.
 	reply		XX..XX		XX..XX is mem contents
 					Can be fewer bytes than requested
@@ -104,33 +112,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 					we can extend the protocol and GDB
 					can tell whether the stub it is
 					talking to uses the old or the new.
-<<<<<<< remote.c
 	search		tAA:PP,MM	Search backwards starting at address
-||||||| 1.81
-	search		tAA:PP,MM	Search backword starting at address
-=======
-	search		tAA:PP,MM	Search backward starting at address
->>>>>>> 1.82
 					AA for a match with pattern PP and
 					mask MM.  PP and MM are 4 bytes.
 					Not supported by all stubs.
 
-<<<<<<< remote.c
 	general query	qXXXX		Request info about XXXX.
 	general set	QXXXX=yyyy	Set value of XXXX to yyyy.
 	query sect offs	qOffsets	Get section offsets.  Reply is
 					Text=xxx;Data=yyy;Bss=zzz
-*/
 
-||||||| 1.81
-=======
 	Responses can be run-length encoded to save space.  A '*' means that
 	the next two characters are hex digits giving a repeat count which
 	stands for that many repititions of the character preceding the '*'.
 	Note that this means that responses cannot contain '*'.  Example:
-        "0*03" means the same as "0000".  */
+	"0*03" means the same as "0000".  */
 
->>>>>>> 1.82
 #include "defs.h"
 #include <string.h>
 #include <fcntl.h>
@@ -256,6 +253,11 @@ serial_t remote_desc = NULL;
 #undef	PBUFSIZ
 #define	PBUFSIZ	(REGISTER_BYTES * 2 + 32)
 #endif
+
+/* Should we try the 'P' request?  If this is set to one when the stub
+   doesn't support 'P', the only consequence is some unnecessary traffic.  */
+static int stub_supports_P = 1;
+
 
 /* Clean up connection to a remote debugger.  */
 
@@ -304,6 +306,12 @@ get_offsets ()
 	  sizeof (struct section_offsets)
 	  + symfile_objfile->num_sections
 	  * sizeof (offs->offsets));
+
+  /* FIXME: This code assumes gdb-stabs.h is being used; it's broken
+     for xcoff, dwarf, sdb-coff, etc.  But there is no simple
+     canonical representation for this stuff.  (Just what does "text"
+     as seen by the stub mean, anyway?  I think it means all sections
+     with SEC_CODE set, but we currently have no way to deal with that).  */
 
   ANOFFSET (offs, SECT_OFF_TEXT) = text_addr;
   ANOFFSET (offs, SECT_OFF_DATA) = data_addr;
@@ -381,6 +389,11 @@ device is attached to the remote system (e.g. /dev/ttya).");
       puts_filtered ("\n");
     }
   push_target (&remote_ops);	/* Switch to using remote target now */
+
+  /* Start out by trying the 'P' request to set registers.  We set this each
+     time that we open a new target so that if the user switches from one
+     stub to another, we can (if the target is closed and reopened) cope.  */
+  stub_supports_P = 1;
 
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it
@@ -672,8 +685,9 @@ remote_fetch_registers (regno)
     supply_register (i, &regs[REGISTER_BYTE(i)]);
 }
 
-/* Prepare to store registers.  Since we send them all, we have to
-   read out the ones we don't want to change first.  */
+/* Prepare to store registers.  Since we may send them all (using a
+   'G' request), we have to read out the ones we don't want to change
+   first.  */
 
 static void 
 remote_prepare_to_store ()
@@ -682,10 +696,9 @@ remote_prepare_to_store ()
   read_register_bytes (0, (char *)NULL, REGISTER_BYTES);
 }
 
-/* Store the remote registers from the contents of the block REGISTERS. 
-   FIXME, eventually just store one register if that's all that is needed.  */
+/* Store register REGNO, or all registers if REGNO == -1, from the contents
+   of REGISTERS.  FIXME: ignores errors.  */
 
-/* ARGSUSED */
 static void
 remote_store_registers (regno)
      int regno;
@@ -694,8 +707,35 @@ remote_store_registers (regno)
   int i;
   char *p;
 
+  if (regno >= 0 && stub_supports_P)
+    {
+      /* Try storing a single register.  */
+      char *regp;
+
+      sprintf (buf, "P%x:", regno);
+      p = buf + strlen (buf);
+      regp = &registers[REGISTER_BYTE (regno)];
+      for (i = 0; i < REGISTER_RAW_SIZE (regno); ++i)
+	{
+	  *p++ = tohex ((regp[i] >> 4) & 0xf);
+	  *p++ = tohex (regp[i] & 0xf);
+	}
+      *p = '\0';
+      remote_send (buf);
+      if (buf[0] != '\0')
+	{
+	  /* The stub understands the 'P' request.  We are done.  */
+	  return;
+	}
+
+      /* The stub does not support the 'P' request.  Use 'G' instead,
+	 and don't try using 'P' in the future (it will just waste our
+	 time).  */
+      stub_supports_P = 0;
+    }
+
   buf[0] = 'G';
-  
+
   /* Command describes registers byte by byte,
      each byte encoded as two hex characters.  */
 
@@ -775,7 +815,9 @@ remote_write_bytes (memaddr, myaddr, len)
   int i;
   char *p;
 
-  sprintf (buf, "M%x,%x:", memaddr, len);
+  /* FIXME-32x64: Need a version of print_address_numeric which doesn't
+     set use_local (and also puts the result in a buffer like sprintf).  */
+  sprintf (buf, "M%lx,%x:", (unsigned long) memaddr, len);
 
   /* We send target system values byte by byte, in increasing byte addresses,
      each byte encoded as two hex characters.  */
@@ -824,7 +866,9 @@ remote_read_bytes (memaddr, myaddr, len)
   if (len > PBUFSIZ / 2 - 1)
     abort ();
 
-  sprintf (buf, "m%x,%x", memaddr, len);
+  /* FIXME-32x64: Need a version of print_address_numeric which doesn't
+     set use_local (and also puts the result in a buffer like sprintf).  */
+  sprintf (buf, "m%lx,%x", (unsigned long) memaddr, len);
   putpkt (buf);
   getpkt (buf, 0);
 
