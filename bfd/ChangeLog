@@ -1,3 +1,7 @@
+2001-10-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure, op/SRC-POTFILES.in, po/bfd.pot: Regenerate.
+
 2001-07-30  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
 
 	* libecoff.h (_bfd_ecoff_styp_to_sec_flags): Changed return type

@@ -1,3 +1,7 @@
+2001-10-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* po/POTFILES.in: Regenerate.
+
 2001-07-28  Matthias Kramm <kramm@quiss.org>
 
 	* i386-dis.c: Change formatting conventions for architecture 
