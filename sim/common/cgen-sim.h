@@ -42,6 +42,20 @@ enum sim_signal_type {
 void engine_halt PARAMS ((struct _sim_cpu *, enum exec_state, int));
 void engine_signal PARAMS ((struct _sim_cpu *, enum sim_signal_type));
 
+/* Instruction field support macros.  */
+
+#define EXTRACT_SIGNED(val, total, start, length) \
+(((((val) >> ((total) - ((start) + (length)))) & ((1 << (length)) - 1)) \
+  ^ (1 << ((length) - 1))) \
+ - (1 << ((length) - 1)))
+
+#define EXTRACT_UNSIGNED(val, total, start, length) \
+(((val) >> ((total) - ((start) + (length)))) & ((1 << (length)) - 1))
+
+/* Compute number of longs required to hold N bits.  */
+#define HOST_LONGS_FOR_BITS(n) \
+  (((n) + sizeof (long) * 8 - 1) / sizeof (long) * 8)
+
 /* Decode,extract,semantics.  */
 
 typedef void (EXTRACT_FN) PARAMS ((SIM_CPU *, PCADDR, insn_t, struct argbuf *));
