@@ -1,3 +1,10 @@
+Thu Oct 23 00:57:45 1997  Richard Henderson  <rth@dot.cygnus.com>
+
+	* Makefile.in (ALL_EMULATIONS): Move eelf64_sparc.o ...
+	(ALL_64_EMULATIONS): ... here.
+	(eelf64_sparc.c): Template should be elf32 not generic.
+	* emulparams/elf64_sparc.sh (TEMPLATE_NAME): New definition.
+
 Thu Oct 23 00:44:20 1997  Richard Henderson  <rth@dot.cygnus.com>
 
 	* configure.tgt: Add sparc64-*-linux*.
