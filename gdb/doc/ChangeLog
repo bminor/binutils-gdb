@@ -1,3 +1,12 @@
+2001-06-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): GDBARCH is a C
+	structure and not macros.
+	(Host Definition): Document that much of this chapter is obsolete.
+	(Target Architecture Definition): Update list of files that make
+	up a target architecture.
+	(Coding): Update.
+
 2001-06-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Update

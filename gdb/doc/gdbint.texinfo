@@ -1886,6 +1886,11 @@ distribution!
 
 @chapter Host Definition
 
+@emph{Maintainer's note: In theory, new targets no longer need to use
+the host framework described below.  Instead it should be possible to
+handle everything using autoconf.  Patches eliminating this framework
+welcome.}
+
 With the advent of Autoconf, it's rarely necessary to have host
 definition machinery anymore.
 
@@ -2199,8 +2204,9 @@ Define this to override the defaults of @code{__volatile__} or
 machine-language programs @value{GDBN} can work with, and how it works
 with them.
 
-At present, the target architecture definition consists of a number of C
-macros.
+The target architecture object is implemented as the C structure
+@code{struct gdbarch *}.  The structure, and its methods, are generated
+using the Bourn shell script @file{gdbarch.sh}.
 
 @section Registers and Memory
 
@@ -2383,6 +2389,11 @@ C@t{++} reference type.
 @cindex representations, raw and virtual
 @cindex register data formats, converting
 @cindex @code{struct value}, converting register contents to
+
+@emph{Maintainer's note: The way GDB manipulates registers is undergoing
+significant change.  Many of the macros and functions refered to in the
+sections below are likely to be made obsolete.  See the file @file{TODO}
+for more up-to-date information.}
 
 Some architectures use one representation for a value when it lives in a
 register, but use a different representation when it lives in memory.
@@ -3453,7 +3464,7 @@ Defaults to @code{1}.
 @section Adding a New Target
 
 @cindex adding a target
-The following files define a target to @value{GDBN}:
+The following files add a target to @value{GDBN}:
 
 @table @file
 @vindex TDEPFILES
@@ -3468,11 +3479,6 @@ You can also define @samp{TM_CFLAGS}, @samp{TM_CLIBS}, @samp{TM_CDEPS},
 but these are now deprecated, replaced by autoconf, and may go away in
 future versions of @value{GDBN}.
 
-@item gdb/config/@var{arch}/tm-@var{ttt}.h
-(@file{tm.h} is a link to this file, created by @code{configure}).  Contains
-macro definitions about the target machine's registers, stack frame
-format and instructions.
-
 @item gdb/@var{ttt}-tdep.c
 Contains any miscellaneous code required for this target machine.  On
 some machines it doesn't exist at all.  Sometimes the macros in
@@ -3481,15 +3487,28 @@ as functions here instead, and the macro is simply defined to call the
 function.  This is vastly preferable, since it is easier to understand
 and debug.
 
+@item gdb/@var{arch}-tdep.c
+@itemx gdb/@var{arch}-tdep.h
+This often exists to describe the basic layout of the target machine's
+processor chip (registers, stack, etc.).  If used, it is included by
+@file{@var{ttt}-tdep.h}.  It can be shared among many targets that use
+the same processor.
+
+@item gdb/config/@var{arch}/tm-@var{ttt}.h
+(@file{tm.h} is a link to this file, created by @code{configure}).  Contains
+macro definitions about the target machine's registers, stack frame
+format and instructions.
+
+New targets do not need this file and should not create it.
+
 @item gdb/config/@var{arch}/tm-@var{arch}.h
 This often exists to describe the basic layout of the target machine's
 processor chip (registers, stack, etc.).  If used, it is included by
 @file{tm-@var{ttt}.h}.  It can be shared among many targets that use the
 same processor.
 
-@item gdb/@var{arch}-tdep.c
-Similarly, there are often common subroutines that are shared by all
-target machines that use this particular architecture.
+New targets do not need this file and should not create it.
+
 @end table
 
 If you are adding a new operating system for an existing CPU chip, add a
@@ -4039,20 +4058,112 @@ print warnings are a good example.
 
 @value{GDBN} follows the GNU coding standards, as described in
 @file{etc/standards.texi}.  This file is also available for anonymous
-FTP from GNU archive sites.  @value{GDBN} takes a strict interpretation of the
-standard; in general, when the GNU standard recommends a practice but
-does not require it, @value{GDBN} requires it.
+FTP from GNU archive sites.  @value{GDBN} takes a strict interpretation
+of the standard; in general, when the GNU standard recommends a practice
+but does not require it, @value{GDBN} requires it.
 
 @value{GDBN} follows an additional set of coding standards specific to
 @value{GDBN}, as described in the following sections.
 
+
+@subsection ISO-C
+
+@value{GDBN} assumes an ISO-C compliant compiler.
+
+@value{GDBN} does not assume an ISO-C or POSIX compliant C library.
+
+
+@subsection Memory Management
+
+@value{GDBN} does not use the functions @code{malloc}, @code{realloc},
+@code{calloc}, @code{free} and @code{asprintf}.
+
+@value{GDBN} uses the functions @code{xmalloc}, @code{xrealloc} and
+@code{xcalloc} when allocating memory.  Unlike @code{malloc} et.al.@:
+these functions do not return when the memory pool is empty.  Instead,
+they unwind the stack using cleanups.  These functions return
+@code{NULL} when requested to allocate a chunk of memory of size zero.
+
+@emph{Pragmatics: By using these functions, the need to check every
+memory allocation is removed.  These functions provide portable
+behavior.}
+
+@value{GDBN} does not use the function @code{free}.
+
+@value{GDBN} uses the function @code{xfree} to return memory to the
+memory pool.  Consistent with ISO-C, this function ignores a request to
+free a @code{NULL} pointer.
+
+@emph{Pragmatics: On some systems @code{free} fails when passed a
+@code{NULL} pointer.}
+
+@value{GDBN} can use the non-portable function @code{alloca} for the
+allocation of small temporary values (such as strings).
+
+@emph{Pragmatics: This function is very non-portable.  Some systems
+restrict the memory being allocated to no more than a few kilobytes.}
+
+@value{GDBN} uses the string function @code{xstrdup} and the print
+function @code{xasprintf}.
+
+@emph{Pragmatics: @code{asprintf} and @code{strdup} can fail.  Print
+functions such as @code{sprintf} are very prone to buffer overflow
+errors.}
+
+
+@subsection Compiler Warnings
 @cindex compiler warnings
-You can configure with @samp{--enable-build-warnings} or
-@samp{--enable-gdb-build-warnings} to get GCC to check on a number of
-these rules.  @value{GDBN} sources ought not to engender any complaints,
-unless they are caused by bogus host systems.  (The exact set of enabled
-warnings is currently @samp{-Wimplicit -Wreturn-type -Wcomment
--Wtrigraphs -Wformat -Wparentheses -Wpointer-arith -Wuninitialized}.
+
+With few exceptions, developers should include the configuration option
+@samp{--enable-gdb-build-warnings=,-Werror} when building @value{GDBN}.
+The exceptions are listed in the file @file{gdb/MAINTAINERS}.
+
+This option causes @value{GDBN} (when built using GCC) to be compiled
+with a carefully selected list of compiler warning flags.  Any warnings
+from those flags being treated as errors.
+
+The current list of warning flags includes:
+
+@table @samp
+@item -Wimplicit
+Since @value{GDBN} coding standard requires all functions to be declared
+using a prototype, the flag has the side effect of ensuring that
+prototyped functions are always visible with out resorting to
+@samp{-Wstrict-prototypes}.
+
+@item -Wreturn-type
+Such code often appears to work except on instruction set architectures
+that use register windows.
+
+@item -Wcomment
+
+@item -Wtrigraphs
+
+@item -Wformat
+Since @value{GDBN} uses the @code{format printf} attribute on all
+@code{printf} like functions this checks not just @code{printf} calls
+but also calls to functions such as @code{fprintf_unfiltered}.
+
+@item -Wparentheses
+This warning includes uses of the assignment operator within an
+@code{if} statement.
+
+@item -Wpointer-arith
+
+@item -Wuninitialized
+@end table
+
+@emph{Pragmatics: Due to the way that @value{GDBN} is implemented most
+functions have unused parameters.  Consequently the warning
+@samp{-Wunused-parameter} is precluded from the list.  The macro
+@code{ATTRIBUTE_UNUSED} is not used as it leads to false negatives ---
+it is not an error to have @code{ATTRIBUTE_UNUSED} on a parameter that
+is being used.  The options @samp{-Wall} and @samp{-Wunused} are also
+precluded because they both include @samp{-Wunused-parameter}.}
+
+@emph{Pragmatics: @value{GDBN} has not simply accepted the warnings
+enabled by @samp{-Wall -Werror -W...}.  Instead it is selecting warnings
+when and where their benefits can be demonstrated.}
 
 @subsection Formatting
 
@@ -4060,28 +4171,54 @@ warnings is currently @samp{-Wimplicit -Wreturn-type -Wcomment
 The standard GNU recommendations for formatting must be followed
 strictly.
 
-Note that while in a definition, the function's name must be in column
-zero; in a function declaration, the name must be on the same line as
-the return type.
+A function declaration should not have its name in column zero.  A
+function definition should have its name in column zero.
 
-In addition, there must be a space between a function or macro name and
-the opening parenthesis of its argument list (except for macro
-definitions, as required by C).  There must not be a space after an open
-paren/bracket or before a close paren/bracket.
+@example
+/* Declaration */
+static void foo (void);
+/* Definition */
+void
+foo (void)
+@{
+@}
+@end example
+
+@emph{Pragmatics: This simplifies scripting.  Function definitions can
+be found using @samp{^function-name}.}
+
+There must be a space between a function or macro name and the opening
+parenthesis of its argument list (except for macro definitions, as
+required by C).  There must not be a space after an open paren/bracket
+or before a close paren/bracket.
 
 While additional whitespace is generally helpful for reading, do not use
 more than one blank line to separate blocks, and avoid adding whitespace
-after the end of a program line (as of 1/99, some 600 lines had whitespace
-after the semicolon).  Excess whitespace causes difficulties for
-@code{diff} and @code{patch} utilities.
+after the end of a program line (as of 1/99, some 600 lines had
+whitespace after the semicolon).  Excess whitespace causes difficulties
+for @code{diff} and @code{patch} utilities.
+
+Pointers are declared using the traditional K&R C style:
+
+@example
+void *foo;
+@end example
+
+@noindent
+and not:
+
+@example
+void * foo;
+void* foo;
+@end example
 
 @subsection Comments
 
 @cindex comment formatting
 The standard GNU requirements on comments must be followed strictly.
 
-Block comments must appear in the following form, with no @samp{/*}- or
-@samp{*/}-only lines, and no leading @samp{*}:
+Block comments must appear in the following form, with no @code{/*}- or
+@code{*/}-only lines, and no leading @code{*}:
 
 @example
 /* Wait for control to return from inferior to debugger.  If inferior
@@ -4118,21 +4255,99 @@ limited by the target interface (whether serial line or system call).
 However, use functions with moderation.  A thousand one-line functions
 are just as hard to understand as a single thousand-line function.
 
-@subsection Function Prototypes
+@emph{Macros are bad, M'kay.}
 
+@cindex types
+
+Declarations like @samp{struct foo *} should be used in preference to
+declarations like @samp{typedef struct foo @{ @dots{} @} *foo_ptr}.
+
+
+@subsection Function Prototypes
 @cindex function prototypes
-Prototypes must be used to @emph{declare} functions, and may be used
-to @emph{define} them.  Prototypes for @value{GDBN} functions must
-include both the argument type and name, with the name matching that
-used in the actual function definition.
+
+Prototypes must be used when both @emph{declaring} and @emph{defining}
+a function.  Prototypes for @value{GDBN} functions must include both the
+argument type and name, with the name matching that used in the actual
+function definition.
 
 All external functions should have a declaration in a header file that
 callers include, except for @code{_initialize_*} functions, which must
 be external so that @file{init.c} construction works, but shouldn't be
 visible to random source files.
 
-All static functions must be declared in a block near the top of the
-source file.
+Where a source file needs a forward declaration of a static function,
+that declaration must appear in a block near the top of the source file.
+
+
+@subsection Internal Error Recovery
+
+During its execution, @value{GDBN} can encounter two types of errors.
+User errors and internal errors.  User errors include not only a user
+entering an incorrect command but also problems arising from corrupt
+object files and system errors when interacting with the target.
+Internal errors include situtations where @value{GDBN} has detected, at
+run time, a corrupt or erroneous situtation.
+
+When reporting an internal error, @value{GDBN} uses
+@code{internal_error} and @code{gdb_assert}.
+
+@value{GDBN} must not call @code{abort} or @code{assert}.
+
+@emph{Pragmatics: There is no @code{internal_warning} function.  Either
+the code detected a user error, recovered from it and issued a
+@code{warning} or the code failed to correctly recover from the user
+error and issued an @code{internal_error}.}
+
+@subsection File Names
+
+Any file used when building the core of @value{GDBN} must be in lower
+case. Any file used when building the core of @value{GDBN} must be 8.3
+unique.  These requirements apply to both source and generated files.
+
+@emph{Pragmatics: The core of @value{GDBN} must be buildable on many
+platforms including DJGPP and MacOS/HFS.  Every time an unfriendly file
+is introduced to the build process both @file{Makefile.in} and
+@file{configure.in} need to be modified accordingly.  Compare the
+convoluted conversion process needed to transform @file{COPYING} into
+@file{copying.c} with the conversion needed to transform
+@file{version.in} into @file{version.c}.}
+
+Any file non 8.3 compliant file (that is not used when building the core
+of @value{GDBN}) must be added to @file{gdb/config/djgpp/fnchange.lst}.
+
+@emph{Pragmatics: This is clearly a compromise.}
+
+When @value{GDBN} has a local version of a system header file (ex
+@file{string.h}) the file name based on the POSIX header prefixed with
+@file{gdb_} (@file{gdb_string.h}).
+
+For other files @samp{-} is used as the separator.
+
+
+@subsection Include Files
+
+All @file{.c} files should include @file{defs.h} first.
+
+All @file{.c} files should explicitly include the headers for any
+declarations they refer to.  They should not rely on files being
+included indirectly.
+
+With the exception of the global definitions supplied by @file{defs.h},
+a header file should explictily include the header declaring any
+@code{typedefs} et.al.@: it refers to.
+
+@code{extern} declarations should never appear in @code{.c} files.
+
+All include files should be wrapped in:
+
+@example
+#ifndef INCLUDE_FILE_NAME_H
+#define INCLUDE_FILE_NAME_H
+header body
+#endif
+@end example
+
 
 @subsection Clean Design and Portable Implementation
 
@@ -4177,48 +4392,7 @@ time, as new versions of your system come out that behave differently
 with regard to this feature.
 
 Adding code that handles specific architectures, operating systems,
-target interfaces, or hosts, is not acceptable in generic code.  If a
-hook is needed at that point, invent a generic hook and define it for
-your configuration, with something like:
-
-@example
-#ifdef	WRANGLE_SIGNALS
-   WRANGLE_SIGNALS (signo);
-#endif
-@end example
-
-In your host, target, or native configuration file, as appropriate,
-define @code{WRANGLE_SIGNALS} to do the machine-dependent thing.  Take a
-bit of care in defining the hook, so that it can be used by other ports
-in the future, if they need a hook in the same place.
-
-If the hook is not defined, the code should do whatever ``most'' machines
-want.  Using @code{#ifdef}, as above, is the preferred way to do this,
-but sometimes that gets convoluted, in which case use
-
-@example
-#ifndef SPECIAL_FOO_HANDLING
-#define SPECIAL_FOO_HANDLING(pc, sp) (0)
-#endif
-@end example
-
-@noindent
-where the macro is used or in an appropriate header file.
-
-Whether to include a @dfn{small} hook, a hook around the exact pieces of
-code which are system-dependent, or whether to replace a whole function
-with a hook, depends on the case.  A good example of this dilemma can be
-found in @code{get_saved_register}.  All machines that @value{GDBN} 2.8 ran on
-just needed the @code{FRAME_FIND_SAVED_REGS} hook to find the saved
-registers.  Then the SPARC and Pyramid came along, and
-@code{HAVE_REGISTER_WINDOWS} and @code{REGISTER_IN_WINDOW_P} were
-introduced.  Then the 29k and 88k required the @code{GET_SAVED_REGISTER}
-hook.  The first three are examples of small hooks; the latter replaces
-a whole function.  In this specific case, it is useful to have both
-kinds; it would be a bad idea to replace all the uses of the small hooks
-with @code{GET_SAVED_REGISTER}, since that would result in much
-duplicated code.  Other times, duplicating a few lines of code here or
-there is much cleaner than introducing a large number of small hooks.
+target interfaces, or hosts, is not acceptable in generic code.
 
 @cindex portable file name handling
 @cindex file names, portability
@@ -4304,7 +4478,11 @@ with variations between systems the same way any system-independent
 file would (hooks, @code{#if defined}, etc.), and machines which are
 radically different don't need to use @file{infptrace.c} at all.
 
-Don't put debugging @code{printf}s in the code.
+All debugging code must be controllable using the @samp{set debug
+@var{module}} command.  Do not use @code{printf} to print trace
+messages.  Use @code{fprintf_unfiltered(gdb_stdlog, ...}.  Do not use
+@code{#ifdef DEBUG}.
+
 
 @node Porting GDB
 

@@ -10,20 +10,6 @@ find out whether anyone else is working on it.
 Below is a list of problems identified during the GDB 5.0 release
 cycle.  People hope to have these problems fixed in 5.1.
 
--- 2001-03-08
-
-Update GDB's coding standard documentation.  Known topics:
-
-       o     alloca/malloc et.al.
-
-       o     typedef and structs
-
-       o	ISO-C
-
-and most likely also:
-
-       o	 include conventions
-
 --
 
 Wow, three bug reports for the same problem in one day!  We should
