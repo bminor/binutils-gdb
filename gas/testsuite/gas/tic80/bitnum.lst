@@ -1,0 +1,44 @@
+MVP MP Macro Assembler     Version 1.13     Mon Feb 10 17:00:33 1997
+Copyright (c) 1993-1995    Texas Instruments Incorporated 
+
+bitnum.s                                                             PAGE    1
+
+        1                     ;; Test that all the predefined symbol names for the BITNUM field
+        2                     ;; are properly accepted and translated to numeric values.  Also
+        3                     ;; verifies that they are disassembled correctly as symbolics.
+        4                     
+        5 00000000   FA39400A         bbo     r10,r8,eq.b
+        6 00000004   F239400A         bbo     r10,r8,ne.b
+        7 00000008   EA39400A         bbo     r10,r8,gt.b
+        8 0000000C   E239400A         bbo     r10,r8,le.b
+        9 00000010   DA39400A         bbo     r10,r8,lt.b
+       10 00000014   D239400A         bbo     r10,r8,ge.b
+       11 00000018   CA39400A         bbo     r10,r8,hi.b
+       12 0000001C   C239400A         bbo     r10,r8,ls.b
+       13 00000020   BA39400A         bbo     r10,r8,lo.b
+       14 00000024   B239400A         bbo     r10,r8,hs.b
+       15                     
+       16 00000028   AA39400A         bbo     r10,r8,eq.h
+       17 0000002C   A239400A         bbo     r10,r8,ne.h
+       18 00000030   9A39400A         bbo     r10,r8,gt.h
+       19 00000034   9239400A         bbo     r10,r8,le.h
+       20 00000038   8A39400A         bbo     r10,r8,lt.h
+       21 0000003C   8239400A         bbo     r10,r8,ge.h
+       22 00000040   7A39400A         bbo     r10,r8,hi.h
+       23 00000044   7239400A         bbo     r10,r8,ls.h
+       24 00000048   6A39400A         bbo     r10,r8,lo.h
+       25 0000004C   6239400A         bbo     r10,r8,hs.h
+       26                     
+       27 00000050   5A39400A         bbo     r10,r8,eq.w
+       28 00000054   5239400A         bbo     r10,r8,ne.w
+       29 00000058   4A39400A         bbo     r10,r8,gt.w
+       30 0000005C   4239400A         bbo     r10,r8,le.w
+       31 00000060   3A39400A         bbo     r10,r8,lt.w
+       32 00000064   3239400A         bbo     r10,r8,ge.w
+       33 00000068   2A39400A         bbo     r10,r8,hi.w
+       34 0000006C   2239400A         bbo     r10,r8,ls.w
+       35 00000070   1A39400A         bbo     r10,r8,lo.w
+       36 00000074   1239400A         bbo     r10,r8,hs.w
+       37                     
+
+ No Errors,  No Warnings

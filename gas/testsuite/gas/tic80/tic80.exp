@@ -1,0 +1,12 @@
+#
+# TI TMS320C80 tests.
+#
+if [istarget tic80*-*-*] then {
+
+    run_dump_test "regops"
+    run_dump_test "cregops"
+    run_dump_test "endmask"
+    run_dump_test "bitnum"
+    run_dump_test "ccode"
+    run_dump_test "add"
+}

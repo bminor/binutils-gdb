@@ -1,3 +1,12 @@
+start-sanitize-tic80
+Tue Feb 11 14:45:39 1997  Fred Fish  <fnf@cygnus.com>
+
+	* gas/tic80/{add.d, add.lst, add.s, bitnum.d, bitnum.lst, bitnum.s,
+ 	ccode.d, ccode.lst, ccode.s, cregops.d, cregops.lst, cregops.s,
+	endmask.d, endmask.lst, endmask.s, regops.d, regops.lst, regops.s,
+	tic80.exp}: New files for TIc80 test cases.
+
+end-sanitize-tic80
 Tue Feb 11 15:46:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mips/mips16.d: Update for change in disassembly output.
