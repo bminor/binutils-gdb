@@ -1,5 +1,12 @@
 2003-02-24  Kris Warkentin  <kewarken@qnx.com>
 
+	* solib.c (solib_open): call target defined search function after
+	failing with solib-search-path
+	* solist.h (target_so_ops): add find_and_open_solib function hook,
+	create define TARGET_SO_FIND_AND_OPEN_SOLIB
+
+2003-02-24  Kris Warkentin  <kewarken@qnx.com>
+
 	* MAINTAINERS: Add myself to Write After section
 
 2003-02-23  Stephane Carrez  <stcarrez@nerim.fr>

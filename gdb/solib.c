@@ -160,6 +160,11 @@ solib_open (char *in_pathname, char **found_pathname)
                         1, lbasename (in_pathname), O_RDONLY, 0,
                         &temp_pathname);
 
+  /* If not found, try to use target supplied solib search method */
+  if (found_file < 0 && TARGET_SO_FIND_AND_OPEN_SOLIB != NULL)
+    found_file = TARGET_SO_FIND_AND_OPEN_SOLIB
+                 (in_pathname, O_RDONLY, &temp_pathname);
+
   /* If not found, next search the inferior's $PATH environment variable. */
   if (found_file < 0 && solib_search_path != NULL)
     found_file = openp (get_in_environ (inferior_environ, "PATH"),
