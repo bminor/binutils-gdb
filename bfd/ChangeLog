@@ -7,6 +7,11 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* pe-i386.c (COFF_LONG_FILENAMES): Define.
+	(COFF_SECTION_ALIGNMENT_ENTRIES): Define.
+	* pei-i386.c (COFF_LONG_FILENAMES): Define.
+	(COFF_SECTION_ALIGNMENT_ENTRIES): Define.
+
 	* coffswap.h (IMAGE_BASE): Don't define.
 	* pei-arm.c (IMAGE_BASE): Don't define.
 	* pei-i386.c (IMAGE_BASE): Don't define.
