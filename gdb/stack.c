@@ -580,15 +580,20 @@ print_frame (struct frame_info *fi,
   if (args)
     {
       struct print_args_args args;
+#ifdef UI_OUT
+      struct cleanup *args_list_chain;
+#endif
       args.fi = fi;
       args.func = func;
       args.stream = gdb_stdout;
 #ifdef UI_OUT
       ui_out_list_begin (uiout, "args");
+      args_list_chain = make_cleanup_ui_out_list_end (uiout);
       catch_errors (print_args_stub, &args, "", RETURN_MASK_ALL);
       /* FIXME: args must be a list. If one argument is a string it will
 		 have " that will not be properly escaped.  */
-      ui_out_list_end (uiout);
+      /* Invoke ui_out_list_end.  */
+      do_cleanups (args_list_chain);
 #else
       catch_errors (print_args_stub, &args, "", RETURN_MASK_ALL);
 #endif

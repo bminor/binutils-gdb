@@ -1790,7 +1790,7 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
   /* Number of ints of arguments that we have printed so far.  */
   int args_printed = 0;
 #ifdef UI_OUT
-  struct cleanup *old_chain;
+  struct cleanup *old_chain, *list_chain;
   struct ui_stream *stb;
 
   stb = ui_out_stream_new (uiout);
@@ -1909,6 +1909,7 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
       annotate_arg_begin ();
 
       ui_out_list_begin (uiout, NULL);
+      list_chain = make_cleanup_ui_out_list_end (uiout);
       fprintf_symbol_filtered (stb->stream, SYMBOL_SOURCE_NAME (sym),
 			    SYMBOL_LANGUAGE (sym), DMGL_PARAMS | DMGL_ANSI);
       ui_out_field_stream (uiout, "name", stb);
@@ -1951,7 +1952,8 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
       else
 	ui_out_text (uiout, "???");
 
-      ui_out_list_end (uiout);
+      /* Invoke ui_out_list_end.  */
+      do_cleanups (list_chain);
 #else
 	  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,
 		     VALUE_ADDRESS (val),

@@ -1,3 +1,10 @@
+2001-04-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* printcmd.c (print_frame_args): Use a cleanup to invoke
+	ui_out_list_end() so that the list count nesting flag will
+	be decremented properly when an error occurs.
+	* stack.c (print_frame): Likewise.
+
 2001-04-06  J.T. Conklin  <jtc@redback.com>
 
 	* dcache.c (dcache_write_line): Fixed bugs where cache line was
