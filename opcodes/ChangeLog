@@ -1,3 +1,10 @@
+2001-05-07  Frank Ch. Eigler  <fche@redhat.com>
+
+	* cgen-dis.in (default_print_insn): Tolerate min<base instructions
+	even at end of a section.
+	* cgen-ibld.in (extract_normal): Tolerate min!=base!=max instructions
+	by ignoring precariously-unpacked insn_value in favor of raw buffer.
+
 2001-05-03  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* disassemble.c (disassembler_usage): Remove unused attribute.

@@ -428,9 +428,9 @@ extract_normal (cd, ex_info, insn_value, attrs, word_offset, start, length,
 	word_length = total_length;
     }
 
-  /* Does the value reside in INSN_VALUE?  */
+  /* Does the value reside in INSN_VALUE, and at the right alignment?  */
 
-  if (CGEN_INT_INSN_P || word_offset == 0)
+  if (CGEN_INT_INSN_P || (word_offset == 0 && word_length == total_length))
     {
       if (CGEN_INSN_LSB0_P)
 	value = insn_value >> ((word_offset + start + 1) - length);

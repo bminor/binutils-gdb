@@ -334,18 +334,27 @@ default_print_insn (cd, pc, info)
      disassemble_info *info;
 {
   char buf[CGEN_MAX_INSN_SIZE];
+  int buflen;
   int status;
 
-  /* Read the base part of the insn.  */
+  /* Attempt to read the base part of the insn.  */
+  buflen = cd->base_insn_bitsize / 8;
+  status = (*info->read_memory_func) (pc, buf, buflen, info);
 
-  status = (*info->read_memory_func) (pc, buf, cd->base_insn_bitsize / 8, info);
+  /* Try again with the minimum part, if min < base.  */
+  if (status != 0 && (cd->min_insn_bitsize < cd->base_insn_bitsize))
+    {
+      buflen = cd->min_insn_bitsize / 8;
+      status = (*info->read_memory_func) (pc, buf, buflen, info);
+    }
+
   if (status != 0)
     {
       (*info->memory_error_func) (status, pc, info);
       return -1;
     }
 
-  return print_insn (cd, pc, info, buf, cd->base_insn_bitsize / 8);
+  return print_insn (cd, pc, info, buf, buflen);
 }
 
 /* Main entry point.
