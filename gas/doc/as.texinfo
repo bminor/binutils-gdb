@@ -12,9 +12,8 @@ _if__(!_GENERIC__)
 @settitle Using _AS__ (_HOST__)
 _fi__(!_GENERIC__)
 @setchapternewpage odd
-@input smpklug.texi
-@smallbook
-@cropmarks
+@c @smallbook
+@c @cropmarks
 @c %**end of header
 
 @ifinfo
