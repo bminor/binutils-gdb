@@ -219,7 +219,7 @@ psim_options(device *root,
 	break;
       case 'm':
 	param = find_arg("Missing <model> option for -m\n", &argp, argv);
-	device_add_string_property(root, "/openprom/options/model", param);
+	device_tree_add_parsed(root, "/openprom/options/model \"%s", param);
 	break;
       case 'o':
 	param = find_arg("Missing <device> option for -o\n", &argp, argv);
@@ -751,7 +751,7 @@ psim_read_register(psim *system,
 		   transfer_mode mode)
 {
   register_descriptions description;
-  char cooked_buf[sizeof(natural_word)];
+  char cooked_buf[sizeof(unsigned_8)];
   cpu *processor;
 
   /* find our processor */
@@ -842,7 +842,7 @@ psim_write_register(psim *system,
 {
   cpu *processor;
   register_descriptions description;
-  char cooked_buf[sizeof(natural_word)];
+  char cooked_buf[sizeof(unsigned_8)];
 
   /* find our processor */
   if (which_cpu == MAX_NR_PROCESSORS)

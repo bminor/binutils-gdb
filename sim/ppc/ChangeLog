@@ -1,3 +1,12 @@
+Tue Mar 26 14:57:58 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* igen.c (idecode_switch_end): Fix 2/26 change so that an extra
+	default is not written out if a default was already written.
+
+	* psim.c (psim_{read,write}_register): Use sizeof unsigned_8 to
+	size cooked_buf, not sizeof natural_word, since floating point
+	registers are 8 bytes.
+
 Thu Mar 21 00:06:09 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
 
         * main.c (error): Be careful to not try to print out statistics
