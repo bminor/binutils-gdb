@@ -248,31 +248,31 @@ proc test_float_literals_accepted {} {
 proc test_convenience_variables {} {
     global prompt
 
-    gdb_test "set \\\$foo := 101"	" := 101" \
+    gdb_test "set \$foo := 101"	" := 101" \
 	"Set a new convenience variable"
 
-    gdb_test "print \\\$foo"		" = 101" \
+    gdb_test "print \$foo"		" = 101" \
 	"Print contents of new convenience variable"
 
-    gdb_test "set \\\$foo := 301"	" := 301" \
+    gdb_test "set \$foo := 301"	" := 301" \
 	"Set convenience variable to a new value"
 
-    gdb_test "print \\\$foo"		" = 301" \
+    gdb_test "print \$foo"		" = 301" \
 	"Print new contents of convenience variable"
 
-    gdb_test "set \\\$_ := 11"		" := 11" \
+    gdb_test "set \$_ := 11"		" := 11" \
 	"Set convenience variable \$_"
 
-    gdb_test "print \\\$_"		" = 11" \
+    gdb_test "print \$_"		" = 11" \
 	"Print contents of convenience variable \$_"
 
-    gdb_test "print \\\$foo + 10"	" = 311" \
+    gdb_test "print \$foo + 10"	" = 311" \
 	"Use convenience variable in arithmetic expression"
 
-    gdb_test "print (\\\$foo := 32) + 4"	" = 36" \
+    gdb_test "print (\$foo := 32) + 4"	" = 36" \
 	"Use convenience variable assignment in arithmetic expression"
 
-    gdb_test "print \\\$bar"		" = void" \
+    gdb_test "print \$bar"		" = void" \
 	"Print contents of uninitialized convenience variable"
 }
 
@@ -288,39 +288,39 @@ proc test_value_history {} {
     gdb_test "print 103"	"\\\$3 = 103" \
 	"Set value-history\[3\] using \$3"
 
-    gdb_test "print \\\$\\\$"	"\\\$4 = 102" \
+    gdb_test "print \$\$"	"\\\$4 = 102" \
 	"Print value-history\[MAX-1\] using inplicit index \$\$"
 
-    gdb_test "print \\\$\\\$"	"\\\$5 = 103" \
+    gdb_test "print \$\$"	"\\\$5 = 103" \
 	"Print value-history\[MAX-1\] again using implicit index \$\$"
 
-    gdb_test "print \\\$"	"\\\$6 = 103" \
+    gdb_test "print \$"	"\\\$6 = 103" \
 	"Print value-history\[MAX\] using implicit index \$"
 
-    gdb_test "print \\\$\\\$2"	"\\\$7 = 102" \
+    gdb_test "print \$\$2"	"\\\$7 = 102" \
 	"Print value-history\[MAX-2\] using explicit index \$\$2"
 
-    gdb_test "print \\\$0"	"\\\$8 = 102" \
+    gdb_test "print \$0"	"\\\$8 = 102" \
 	"Print value-history\[MAX\] using explicit index \$0"
 
     gdb_test "print 108"	"\\\$9 = 108" ""
 
-    gdb_test "print \\\$\\\$0"	"\\\$10 = 108" \
+    gdb_test "print \$\$0"	"\\\$10 = 108" \
 	"Print value-history\[MAX\] using explicit index \$\$0"
 
-    gdb_test "print \\\$1"	"\\\$11 = 101" \
+    gdb_test "print \$1"	"\\\$11 = 101" \
 	"Print value-history\[1\] using explicit index \$1"
 
-    gdb_test "print \\\$2"	"\\\$12 = 102" \
+    gdb_test "print \$2"	"\\\$12 = 102" \
 	"Print value-history\[2\] using explicit index \$2"
 
-    gdb_test "print \\\$3"	"\\\$13 = 103" \
+    gdb_test "print \$3"	"\\\$13 = 103" \
 	"Print value-history\[3\] using explicit index \$3"
 
-    gdb_test "print \\\$-3"	"\\\$14 = 100" \
+    gdb_test "print \$-3"	"\\\$14 = 100" \
 	"Print (value-history\[MAX\] - 3) using implicit index \$"
 
-    gdb_test "print \\\$1 + 3"	"\\\$15 = 104" \
+    gdb_test "print \$1 + 3"	"\\\$15 = 104" \
 	"Use value-history element in arithmetic expression"
 }
 

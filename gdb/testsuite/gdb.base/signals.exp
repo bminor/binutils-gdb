@@ -224,60 +224,61 @@ if {[ istarget "m68*-motorola-*" ] || [ istarget "hppa*-*-bsd*" ] ||
   return 0
 }
 
-{
-    gdb_load $binfile
-    signal_tests_1
+gdb_exit
+gdb_start
+gdb_load $binfile
+signal_tests_1
 
-    # Force a resync, so we're looking at the right prompt.  On SCO we
-    # were getting out of sync (I don't understand why).
-    send "p 1+1\n"
-    expect {
-	-re "= 2.*$prompt $" {}
-	-re ".*$prompt $" { perror "sync trouble in signals.exp" }
-	default { perror "sync trouble in signals.exp" }
-    }
+# Force a resync, so we're looking at the right prompt.  On SCO we
+# were getting out of sync (I don't understand why).
+send "p 1+1\n"
+expect {
+    -re "= 2.*$prompt $" {}
+    -re ".*$prompt $" { perror "sync trouble in signals.exp" }
+    default { perror "sync trouble in signals.exp" }
+}
 
-    if [runto main] then {
-	gdb_test "break handler if 0" "Breakpoint \[0-9\]*"
-	gdb_test "set \\\$handler_breakpoint_number = \\\$bpnum" ""
+if [runto main] then {
+    gdb_test "break handler if 0" "Breakpoint \[0-9\]*"
+    gdb_test "set \$handler_breakpoint_number = \$bpnum" ""
 
-	# Get to the point where a signal is waiting to be delivered
-	gdb_test "next" "signal \[(\]+SIGUSR1"
-	gdb_test "next" "alarm \[(\]+"
-	gdb_test "next" "\[+\]+count"
-	# Give the signal time to get delivered
-	exec sleep 2
+    # Get to the point where a signal is waiting to be delivered
+    gdb_test "next" "signal \[(\]+SIGUSR1"
+    gdb_test "next" "alarm \[(\]+"
+    gdb_test "next" "\[+\]+count"
+    # Give the signal time to get delivered
+    exec sleep 2
 
-	# Now call a function.  When GDB tries to run the stack dummy,
-	# it will hit the breakpoint at handler.  Provided it doesn't
-	# lose its cool, this is not a problem, it just has to note
-	# that the breakpoint condition is false and keep going.
+    # Now call a function.  When GDB tries to run the stack dummy,
+    # it will hit the breakpoint at handler.  Provided it doesn't
+    # lose its cool, this is not a problem, it just has to note
+    # that the breakpoint condition is false and keep going.
 
-	gdb_test "p func1 ()" "^p func1 \[)(\]+\r\n.\[0-9\]* = void"
+    gdb_test "p func1 ()" "^p func1 \[)(\]+\r\n.\[0-9\]* = void"
 
-	# Make sure the count got incremented.
+    # Make sure the count got incremented.
 
-	# Haven't investigated this xfail
-	setup_xfail "rs6000-*-*"
-	gdb_test "p count" "= 2"
-	if [istarget "rs6000-*-*"] { return 0 }
+    # Haven't investigated this xfail
+    setup_xfail "rs6000-*-*"
+    gdb_test "p count" "= 2"
+    if [istarget "rs6000-*-*"] { return 0 }
 
-	gdb_test "condition \\\$handler_breakpoint_number" "now unconditional"
-	gdb_test "next" "alarm \[(\]+"
-	gdb_test "next" "\[+\]+count"
-	exec sleep 2
+    gdb_test "condition \$handler_breakpoint_number" "now unconditional"
+    gdb_test "next" "alarm \[(\]+"
+    gdb_test "next" "\[+\]+count"
+    exec sleep 2
 
-	# This time we stop when GDB tries to run the stack dummy.
-	# So it is OK that we do not print the return value from the function.
-	gdb_test "p func1 ()" \
+    # This time we stop when GDB tries to run the stack dummy.
+    # So it is OK that we do not print the return value from the function.
+    gdb_test "p func1 ()" \
 "Breakpoint \[0-9\]*, handler.*
 The program being debugged stopped while in a function called from GDB"
-	# But we should be able to backtrace...
-	gdb_test "bt" "#0.*handler.*#1.*#2.*main"
-	# ...and continue...
-	gdb_test "continue" "Continuing"
-	# ...and then count should have been incremented
-	gdb_test "p count" "= 5"
-    }
+    # But we should be able to backtrace...
+    gdb_test "bt" "#0.*handler.*#1.*#2.*main"
+    # ...and continue...
+    gdb_test "continue" "Continuing"
+    # ...and then count should have been incremented
+    gdb_test "p count" "= 5"
 }
+
 return 0

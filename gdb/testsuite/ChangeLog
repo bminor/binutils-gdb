@@ -1,3 +1,15 @@
+Tue Jan 24 07:58:44 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* lib/gdb.exp (gdb_test): Remove catch from around the send.  The
+	code following the catch silently ignored some errors; without the
+	catch they should be thrown like any other tcl error.  Also, the
+	catch used "" instead of {} which meant all the callers who wanted
+	to include one of the characters "[]$ had to quote it an extra time.
+	* gdb.base/{callfuncs.exp,commands.exp,gdbvars.exp,printcmds.exp,
+	ptype.exp,signals.exp,watchpoint.exp}, gdb.c++/{cplusfuncs.exp,
+	demangle.exp}, gdb.chill/chexp.exp, gdb.fortran/exprs.exp:
+	Remove extra quoting.
+
 Mon Jan 23 21:57:54 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gdb.base/commands.exp: Make test names unique; every test either
