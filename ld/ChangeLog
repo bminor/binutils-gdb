@@ -1,3 +1,7 @@
+2000-01-21  Nick Clifton  <nickc@cygnus.com>
+
+	* ldlang.c (lang_size_sections): Fix typo in comment.
+
 2000-01-18  H.J. Lu  <hjl@gnu.org>
 
 	* ldlang.c (lang_size_sections): Also update the current

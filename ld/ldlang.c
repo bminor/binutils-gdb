@@ -2823,6 +2823,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	    /* Update dot in the region ?
 	       We only do this if the section is going to be allocated,
 	       since unallocated sections do not contribute to the region's
+	       overall size in memory.
 	       
 	       If the SEC_NEVER_LOAD bit is not set, it will affect the
 	       addresses of sections after it. We have to update
