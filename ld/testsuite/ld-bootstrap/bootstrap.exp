@@ -13,7 +13,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 # Written by Jeffrey Wheat (cassidy@cygnus.com)
 # Rewritten by Ian Lance Taylor (ian@cygnus.com)
@@ -48,6 +48,21 @@ foreach flags {"" "--static" "--traditional-format" "--no-keep-memory"} {
     if ![ld_relocate $ld tmpdir/ld-partial.o "$flags $OFILES"] {
 	fail $testname
 	continue
+    }
+
+    # On AIX, you need to specify an import list when using --static.
+    # You only want the import list when creating the final
+    # executable.
+    if [istarget "*-*-aix*"] {
+	if {"$flags" == "--static"} {
+	    set flags "--static -bI:/lib/syscalls.exp"
+	}
+    }
+
+    # On Irix 5, linking with --static only works if all the files are
+    # compiled using -non_shared.
+    if {"$flags" == "--static"} {
+	setup_xfail "mips*-*-irix5*"
     }
 
     if ![ld_link $ld tmpdir/ld1 "$flags tmpdir/ld-partial.o $BFDLIB $LIBIBERTY"] {

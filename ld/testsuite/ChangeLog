@@ -1,3 +1,14 @@
+Mon Jan 15 15:05:53 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-bootstrap/bootstrap.exp: Expect failure for mips*-*-irix5*
+	when doing the --static test.
+	* ld-shared/shared.exp: Run tests on mips*-*-irix5*.
+
+Fri Dec 29 12:33:09 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-bootstrap/bootstrap.exp: On AIX, don't pass the -bI option
+	when creating ld-partial.o.
+
 Tue Dec 26 17:37:23 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-srec/srec.exp: If powerpc*-*-eabi*, use --defsym to define
