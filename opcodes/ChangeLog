@@ -1,3 +1,8 @@
+2000-09-11  Catherine Moore <clm@redhat.com>
+
+	* d30v-opc.c (d30v_operand_t): New operand type Rb2.
+	(d30v_format_tab): Use Rb2 for modinc and moddec.
+ 
 2000-09-07  Catherine Moore  <clm@redhat.com>
  
         * d30v-opc.c (d30v_format_tab): Use format Ra for
