@@ -34,6 +34,7 @@ objcopy \- copy and translate object files
 .RB "[\|" \-\-adjust\-section\-vma=\fIsection{=,+,-}val\fR "\|]"
 .RB "[\|" \-\-adjust\-warnings\fR "\|]"
 .RB "[\|" \-\-no\-adjust\-warnings\fR "\|]"
+.RB "[\|" \-\-set\-section\-flags=\fIsection=flags\fR "\|]"
 .RB "[\|" \-\-add\-section=\fIsectionname=filename\fR "\|]"
 .RB "[\|" \-v\ |\ \-\-verbose\fR "\|]" 
 .RB "[\|" \-V\ |\ \-\-version\fR "\|]" 
@@ -187,6 +188,13 @@ not exist, issue a warning.  This is the default.
 .B \fB\-\-no\-adjust\-warnings
 Do not issue a warning if \fB\-\-adjust\-section\-vma\fP is used, even
 if the named section does not exist.
+.TP
+.B \fB\-\-set\-section\-flags=\fIsection=flags
+Set the flags for the named section.  The \fIflags\fP argument is a
+comma separated string of flag names.  The recognized names are
+\fIalloc\fP, \fIload\fP, \fIreadonly\fP, \fIcode\fP, \fIdata\fP, and
+\fIrom\fP.  Not all flags are meaningful for all object file
+formats.
 .TP
 .B \fB\-\-add\-section=\fIsectionname=filename
 Add a new section named \fIsectionname\fR while copying the file.  The

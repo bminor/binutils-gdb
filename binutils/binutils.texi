@@ -753,6 +753,7 @@ objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
         [ --adjust-vma=@var{incr} ]
         [ --adjust-section-vma=@var{section}@{=,+,-@}@var{val} ]
         [ --adjust-warnings ] [ --no-adjust-warnings ]
+        [ --set-section-flags=@var{section}=@var{flags} ]
         [ --add-section=@var{sectionname}=@var{filename} ]
         [ -v | --verbose ] [ -V | --version ]  [ --help ]
         @var{infile} [@var{outfile}]
@@ -896,6 +897,13 @@ exist, issue a warning.  This is the default.
 @item --no-adjust-warnings
 Do not issue a warning if @samp{--adjust-section-vma} is used, even if
 the named section does not exist.
+
+@item --set-section-flags @var{section}=@var{flags}
+Set the flags for the named section.  The @var{flags} argument is a
+comma separated string of flag names.  The recognized names are
+@samp{alloc}, @samp{load}, @samp{readonly}, @samp{code}, @samp{data},
+and @samp{rom}.  Not all flags are meaningful for all object file
+formats.
 
 @item --add-section @var{sectionname}=@var{filename}
 Add a new section named @var{sectionname} while copying the file.  The
