@@ -1,3 +1,11 @@
+2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/completion.exp: Kill a stray backslash.
+
+	From Jim Ingham <jingham@apple.com>:
+	* gdb.base/completion.exp: Test that "complete file ./gdb.base/compl"
+	agrees with the result from sending a tab.
+
 2004-01-31  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/chng-syms.exp: Remove stray newline.
