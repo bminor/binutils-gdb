@@ -1079,11 +1079,12 @@ gld${EMULATION_NAME}_place_orphan (file, s)
       os = lang_output_section_find (secname);
 
       if (os != NULL
-	  && os->bfd_section != NULL
-	  && ((s->flags ^ os->bfd_section->flags)
-	      & (SEC_LOAD | SEC_ALLOC)) == 0)
+	  && (os->bfd_section == NULL
+	      || ((s->flags ^ os->bfd_section->flags)
+		  & (SEC_LOAD | SEC_ALLOC)) == 0))
 	{
-	  /* We have already placed a section with this name.  */
+	  /* We already have an output section statement with this
+	     name, and its bfd section has compatible flags.  */
 	  wild_doit (&os->children, s, os, file);
 	  return true;
 	}
@@ -1112,7 +1113,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 (hold.os != NULL || (hold.os = lang_output_section_find (name)) != NULL)
 
   if (s->flags & SEC_EXCLUDE)
-    return false;
+    return true;
 
   place = NULL;
   if ((s->flags & SEC_ALLOC) == 0)

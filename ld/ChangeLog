@@ -1,3 +1,10 @@
+2001-08-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Return
+	`true' for SEC_EXCLUDE sections so that the generic code doesn't
+	needlessly create an output_section_statement.  Treat a correctly
+	named output_section_statement with NULL bfd_section as compatible.
+
 2001-08-13  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* emultempl/generic.em: Support EXTRA_EM_FILE.
