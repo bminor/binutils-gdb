@@ -12,10 +12,13 @@ if [ -z "${with_multisubdir}" ]; then
   multisubdir=
 else
   multisubdir="/${with_multisubdir}"
-  dotdot=`echo ${multisubdir} | sed -e 's:/[^/]*:../:g'`
+  dotdot=`echo ${with_multisubdir} | sed -e 's:[^/]*:..:g'`
   # TOP is used by newlib and should not be used elsewhere for this purpose.
-  sed -e "s:^TOP[ 	]*=[ 	]*\([./]*\)[ 	]*$:TOP = ${dotdot}\1:" \
-      -e "s:^MULTITOP[ 	]*=[ 	]*\([./]*\)[ 	]*$:MULTITOP = ${dotdot}\1:" \
+  # MULTITOP is the proper one to use.
+  # FIXME: newlib needs to be updated to use MULTITOP so we can delete TOP.
+  # Newlib may wish to continue to use TOP for its own purposes of course.
+  sed -e "s:^TOP[ 	]*=[ 	]*\([./]*\)[ 	]*$:TOP = ${dotdot}/\1:" \
+      -e "s:^MULTITOP[ 	]*=.*$:MULTITOP = ${dotdot}:" \
 	${Makefile} > Makefile.tem
   rm -f ${Makefile}
   mv Makefile.tem ${Makefile}
@@ -25,7 +28,7 @@ fi
 # and lists the subdirectories to recurse into.
 # MULTISUBDIR is non-empty in each cpu subdirectory's Makefile
 # (eg: newlib/h8300h/Makefile) and is the installed subdirectory name with
-# a trailing '/'.
+# a leading '/'.
 # MULTIDO is used for targets like all, install, and check where
 # $(FLAGS_TO_PASS) augmented with the subdir's compiler option is needed.
 # MULTICLEAN is used for the *clean targets.
