@@ -1,3 +1,8 @@
+2001-03-23  Mark Elbrecht <snowball3@bigfoot.com>
+
+	* scripttempl/i386go32.sc: Support the GCC flags '-ffunction-sections'
+	  and '-fdata-sections'. Set the VMA of STABS sections to zero.
+
 2001-03-17  Ulrich Drepper  <drepper@redhat.com>
 
 	* emultmpl/elf32.em (gld${EMULATION_NAME}_search_needed): If NAME
