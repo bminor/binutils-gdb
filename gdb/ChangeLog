@@ -1,3 +1,8 @@
+Thu May 28 00:27:35 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* mips-tdep.c (mips_push_dummy_frame):  Fix calculation of
+	PROC_REG_OFFSET and PROC_FREG_OFFSET.
+
 Mon Apr 27 14:37:49 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/v850/tm-v850.h (REGISTER_BYTE): FP_REGNUM and
@@ -11,6 +16,11 @@ Mon Apr 27 14:37:49 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	(NUM_REGS): Update.
 	(FP_REGNUM): Update.
 	(FP_RAW_REGNUM): Define.
+
+Wed May 27 14:22:31 1998  Keith Seitz  <keiths@cygnus.com>
+
+	* main.c (main): Convert the path returned from getenv to a posix
+	path on cygwin32 hosts.
 
 Mon May 25 13:31:27 1998  Keith Seitz  <keiths@cygnus.com>
 
@@ -1027,9 +1037,11 @@ Wed Mar  4 01:39:08 1998  Ron Unrau  <runrau@cygnus.com>
 
 Tue Mar  3 17:19:08 1998  John Metzler  <jmetzler@cygnus.com>
 
+start-sanitize-vr4111
 	* config/mips/tm-vr4xxx.h:  implements vr4111 as separate from 4300
 	* config/mips/vr4xxx.tm:    implements vr4111 as separate from 4300
 	* configure.tgt:  Recognise mips64vr4111-*-elf as vr4xxx
+end-sanitize-vr4111
 	* dwarfread.c (read_tag_pointer_type): Pointer sizes now come from
 	TARGET_PTR_BIT rather from sizeof(char *) on host.
 	
