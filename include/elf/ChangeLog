@@ -1,3 +1,7 @@
+Mon Oct 19 20:24:11 1998  Catherine Moore  <clm@cygnus.com>
+
+        * sh.h:  Add vtable relocs.
+
 Mon Oct 19 01:44:42 1998  Felix Lee  <flee@cygnus.com>
 
 	* common.h (NT_PSTATUS, NT_FPREGS, NT_PSINFO,
