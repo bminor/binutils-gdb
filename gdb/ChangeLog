@@ -1,3 +1,8 @@
+2001-02-02  John Moore  <jmoore@redhat.com>
+
+        * cli/cli-cmds.c (apropos_command): Changed occurance of free() to 
+	xfree(). Also changed Copyright to include 2001.
+
 2001-02-02  J.T. Conklin  <jtc@redback.com>
 
 	* monitor.c (#include "gdb_wait.h"): Removed.

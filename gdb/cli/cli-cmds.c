@@ -1,5 +1,5 @@
 /* GDB CLI commands.
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -557,7 +557,7 @@ apropos_command (char *searchstr, int from_tty)
       regerror(regcomp(&pattern,searchstr,REG_ICASE),NULL,errorbuffer,512);
       error("Error in regular expression:%s",errorbuffer);
     }
-  free(pattern_fastmap);
+  xfree (pattern_fastmap);
 }
 
 static void
