@@ -1,5 +1,5 @@
 /* Generic remote debugging interface for simulators.
-   Copyright 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1996 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Steve Chamberlain (sac@cygnus.com).
 
@@ -32,13 +32,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "terminal.h"
 #include "target.h"
 #include "gdbcore.h"
+#include "callback.h"
 #include "remote-sim.h"
 #include "remote-utils.h"
-#include "callback.h"
 
 /* Prototypes */
 
 static void dump_mem PARAMS ((char *buf, int len));
+
+static void init_callbacks PARAMS ((void));
+
+static void end_callbacks PARAMS ((void));
+
+static int gdb_os_write_stdout PARAMS ((host_callback *, const char *, int));
+
+static void gdb_os_printf_filtered PARAMS ((host_callback *, const char *, ...));
 
 static void gdbsim_fetch_register PARAMS ((int regno));
 
@@ -76,7 +84,6 @@ static void simulator_command PARAMS ((char *args, int from_tty));
 /* Naming convention:
 
    sim_* are the interface to the simulator (see remote-sim.h).
-   sim_callback_* are the stuff which the simulator can see inside GDB.
    gdbsim_* are stuff which is internal to gdb.  */
 
 /* Forward data declarations */
@@ -107,6 +114,87 @@ dump_mem (buf, len)
 	  printf_filtered ("\n");
 	}
     }
+}
+
+static host_callback gdb_callback;
+static int callbacks_initialized = 0;
+
+/* Initialize gdb_callback.  */
+
+static void
+init_callbacks ()
+{
+  if (! callbacks_initialized)
+    {
+      gdb_callback = default_callback;
+      default_callback.init (&gdb_callback);
+      default_callback.write_stdout = gdb_os_write_stdout;
+      default_callback.printf_filtered = gdb_os_printf_filtered;
+      sim_set_callbacks (&gdb_callback);
+      callbacks_initialized = 1;
+    }
+}
+
+/* Release callbacks (free resources used by them).  */
+
+static void
+end_callbacks ()
+{
+  if (callbacks_initialized)
+    {
+      gdb_callback.shutdown (&gdb_callback);
+      callbacks_initialized = 0;
+    }
+}
+
+/* GDB version of os_write_stdout callback.  */
+
+static int 
+gdb_os_write_stdout (p, buf, len)
+     host_callback *p;
+     const char *buf;
+     int len;
+{
+  int i;
+  char b[2];
+
+  for (i = 0; i < len; i++) 
+    {
+      b[0] = buf[i];
+      b[1] = 0;
+      if (target_output_hook)
+	target_output_hook (b);
+      else
+	fputs_filtered (b, gdb_stdout);
+    }
+  return len;
+}
+
+/* GDB version of printf_filtered callback.  */
+
+/* VARARGS */
+static void
+#ifdef ANSI_PROTOTYPES
+gdb_os_printf_filtered (host_callback *p, const char *format, ...)
+#else
+gdb_os_printf_filtered (p, va_alist)
+     host_callback *p;
+     va_dcl
+#endif
+{
+  va_list args;
+#ifdef ANSI_PROTOTYPES
+  va_start (args, format);
+#else
+  char *format;
+
+  va_start (args);
+  format = va_arg (args, char *);
+#endif
+
+  vfprintf_filtered (stdout, format, args);
+
+  va_end (args);
 }
 
 static void
@@ -255,8 +343,7 @@ gdbsim_open (args, from_tty)
   if (sr_get_debug ())
     printf_filtered ("gdbsim_open: args \"%s\"\n", args ? args : "(null)");
 
-  sim_set_callbacks (&default_callback);
-  default_callback.init (&default_callback);
+  init_callbacks ();
 
   sim_open (args);
 
@@ -284,6 +371,8 @@ gdbsim_close (quitting)
   program_loaded = 0;
 
   sim_close (quitting);
+
+  end_callbacks ();
 }
 
 /* Takes a program previously attached to and detaches it.
@@ -451,8 +540,7 @@ simulator_command (args, from_tty)
 {
   /* The user may give a command before the simulator is opened, so
      ensure that the callbacks have been set up.  */
-  sim_set_callbacks (&default_callback);
-  default_callback.init (&default_callback);
+  init_callbacks ();
 
   sim_do_command (args);
 }

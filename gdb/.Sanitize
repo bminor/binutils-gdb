@@ -158,8 +158,6 @@ breakpoint.c
 breakpoint.h
 buildsym.c
 buildsym.h
-callback.c
-callback.h
 c-exp.y
 c-lang.c
 c-lang.h

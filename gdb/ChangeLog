@@ -1,3 +1,18 @@
+Wed Nov 20 00:43:09 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* callback.h: Deleted, moved to ../include.
+	* callback.c: Deleted, moved to ../sim/common.
+	* Makefile.in (SFILES,COMMON_OBJS): Delete callback.[co].
+	(callback.o): Delete rule.
+	* remote-sim.h: No longer include callback.h
+	(sim_callback_write_stdout): Delete prototype.
+	* remote-sim.c (init_callbacks,end_callbacks): New functions.
+	(gdb_os_write_stdout, gdb_os_printf_filtered): New functions.
+	(gdb_callback, callbacks_initialized): New static globals.
+	(gdbsim_open): Call init_callbacks.
+	(gdbsim_close): Call end_callbacks.
+	(simulator_command): Call init_callbacks.
+
 start-sanitize-gdbtk
 Tue Nov 19 09:26:14 1996  Tom Tromey  <tromey@cygnus.com>
 
