@@ -1,3 +1,7 @@
+Sun Jan  9 04:32:25 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* config/i386-netbsd.mt (SELECT_VECS): Include i386bsd_vec.
+
 Fri Jan  7 10:27:27 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* aoutx.h (adjust_z_magic): Don't merge the start of bss with the
