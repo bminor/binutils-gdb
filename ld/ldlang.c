@@ -2074,7 +2074,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	     einfo ("%F%S: non constant address expression for section %s\n",
 		    os->name);
 	   }
-	   dot = r.value;
+	   dot = r.value + r.section->bfd_section->vma;
 	 }
 	 /* The section starts here */
 	 /* First, align to what the section needs */

@@ -1,5 +1,8 @@
 Tue Jul 30 14:46:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldlang.c (lang_size_sections): Add the section VMA to the result
+	value when computing the address of a section.
+
 	* ld.h (args_type): Add cref field.
 	* lexsup.c (parse_args): Set command_line.cref.
 	* ldmain.c (main): Check command_line.cref rather than
