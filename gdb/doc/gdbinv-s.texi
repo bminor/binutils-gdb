@@ -443,6 +443,29 @@ a break is detected.
 @end ifset
 
 @ifset AMDxxixK
+@node UDI29K Remote
+@subsection @value{GDBN} and the UDI protocol for AMD29K
+
+@cindex UDI
+@cindex AMD29K via UDI
+@value{GDBN} supports AMD's UDI (``Universal Debugger Interface'')
+protocol for debugging the 29k processor family.  To use this
+configuration with AMD targets running the MiniMON monitor, you need the
+program @code{MONTIP}, available from AMD at no charge.  You can also
+use @value{GDBN} with the UDI conformant 29k simulator program
+@code{ISSTIP}, also available from AMD.
+
+@table @code
+@item target udi @var{keyword}
+@kindex udi
+Select the UDI interface to a remote 29K board or simulator, where
+@var{keyword} is an entry in the AMD configuration file @file{udi_soc}.
+This file contains keyword entries which specify parameters used to
+connect to 29k targets.  If the @file{udi_soc} file is not in your
+working directory, you must set the environment variable @samp{UDICONF}
+to its pathname.
+@end table
+
 @node EB29K Remote
 @subsection @value{GDBN} with a remote EB29K
 
@@ -508,7 +531,7 @@ tip -9600 /dev/ttya
 @end example
 
 @noindent
-Your system may define a different name where our example uses
+Your system may require a different name where we show
 @file{/dev/ttya} as the argument to @code{tip}.  The communications
 parameters, including which port to use, are associated with the
 @code{tip} argument in the ``remote'' descriptions file---normally the
@@ -941,33 +964,63 @@ In either case, @value{GDBN} will see the effect of a @sc{reset} on the
 H8/300 board as a ``normal exit'' of your program.
 @end ifset
 
-@ifset ZviiiK
-@node Z8000 Simulator
-@subsection @value{GDBN} and its Zilog Z8000 simulator
+@ifset SIMS
+@node Simulator
+@subsection Simulated CPU target
 
+@ifset GENERIC
+@cindex simulator
+@cindex simulator, Z8000
+@cindex simulator, H8/300
+@cindex Z8000 simulator
+@cindex H8/300 simulator
+@cindex CPU simulator
+For some configurations, @value{GDBN} includes a CPU simulator that you
+can use instead of a hardware CPU to debug your programs.  Currently,
+a simulator is available when @value{GDBN} is configured to debug Zilog
+Z8000 or Hitachi H8/300 targets.
+@end ifset
+
+@ifclear GENERIC
+@ifset Hviii
+@cindex simulator, H8/300
+@cindex Hitachi H8/300 simulator
+When configured for debugging Hitachi H8/300 targets, @value{GDBN} includes
+an H8/300 CPU simulator.
+@end ifset
+
+@ifset ZviiiK
 @cindex simulator, Z8000
 @cindex Zilog Z8000 simulator
 When configured for debugging Zilog Z8000 targets, @value{GDBN} includes
 a Z8000 simulator.
+@end ifset
+@end ifclear
+
+@ifset ZviiiK
+For the Z8000 family, @samp{target sim} simulates either the Z8002 (the
+unsegmented variant of the Z8000 architecture) or the Z8001 (the
+segmented variant).  The simulator recognizes which architecture is
+appropriate by inspecting the object code.
+@end ifset
 
 @table @code
 @item target sim
 @kindex sim
 @kindex target sim
-This debugging target is a machine simulator; when @value{GDBN} is
-configured for the Z8000 family, @samp{target sim} simulates either the
-Z8002 (the unsegmented variant of the Z8000 architecture) or the Z8001
-(the segmented variant).  The simulator recognizes which architecture is
-appropriate by inspecting the object code.
+Debug programs on a simulated CPU 
+@ifset GENERIC
+(which CPU depends on the @value{GDBN} configuration)
+@end ifset
 @end table
 
 @noindent
-After specifying this target, you can debug Z8000 programs in the same
-style as programs for your host computer; use the @code{file} command to
-load a new program image, the @code{run} command to run your program,
-and so on.
+After specifying this target, you can debug programs for the simulated
+CPU in the same style as programs for your host computer; use the
+@code{file} command to load a new program image, the @code{run} command
+to run your program, and so on.
 
-As well as making available all the usual Z8000 registers (see
+As well as making available all the usual machine registers (see
 @code{info reg}), this debugging target provides three additional items
 of information as specially named registers:
 

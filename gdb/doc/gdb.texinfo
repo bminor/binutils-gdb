@@ -18,8 +18,8 @@
 @c %**end of header
 
 @iftex
-@c smallbook
-@c cropmarks
+@c @smallbook
+@c @cropmarks
 @end iftex
 
 @c Include the readline documentation in the TeX output, 
@@ -43,6 +43,9 @@
 
 @finalout
 @syncodeindex ky cp
+
+@c readline appendices use @vindex
+@syncodeindex vr cp
 
 @c ===> NOTE! <==
 @c Determine the edition number in *three* places by hand:
@@ -1351,6 +1354,7 @@ in sequential order.  The order makes a difference when the
 * i960-Nindy Remote::		@value{GDBN} with a remote i960 (Nindy)
 @end ifset
 @ifset AMDxxixK
+* UDI29K Remote::               @value{GDBN} and the UDI protocol for AMD29K
 * EB29K Remote::		@value{GDBN} with a remote EB29K
 @end ifset
 @ifset VXWORKS
@@ -1362,8 +1366,8 @@ in sequential order.  The order makes a difference when the
 @ifset Hviii
 * Hitachi H8/300 Remote::       @value{GDBN} and the Hitachi H8/300
 @end ifset
-@ifset ZviiiK
-* Z8000 Simulator::             @value{GDBN} and its Zilog Z8000 Simulator
+@ifset SIMS
+* Simulator::                   Simulated CPU target
 @end ifset
 @end ifclear
 * File Options::                Choosing files
@@ -1395,6 +1399,7 @@ in sequential order.  The order makes a difference when the
 @ifclear ZviiiK
 @menu
 * Hitachi H8/300 Remote::       @value{GDBN} and the Hitachi H8/300
+* Simulator::                   Simulated CPU target
 * File Options::                Choosing files
 * Mode Options::                Choosing modes
 @end menu
@@ -1651,12 +1656,12 @@ show you the alternatives available, if there is more than one possibility).
 @node Command Syntax
 @section Command syntax
 
-A @value{GDBN} command is a single line of input.  There is no limit on how long
-it can be.  It starts with a command name, which is followed by arguments
-whose meaning depends on the command name.  For example, the command
-@code{step} accepts an argument which is the number of times to step,
-as in @samp{step 5}.  You can also use the @code{step} command with
-no arguments.  Some command names do not allow any arguments.
+A @value{GDBN} command is a single line of input.  There is no limit on
+how long it can be.  It starts with a command name, which is followed by
+arguments whose meaning depends on the command name.  For example, the
+command @code{step} accepts an argument which is the number of times to
+step, as in @samp{step 5}.  You can also use the @code{step} command
+with no arguments.  Some command names do not allow any arguments.
 
 @cindex abbreviation
 @value{GDBN} command names may always be truncated if that abbreviation is
@@ -1687,8 +1692,9 @@ repetition after any command that generates this sort of display.
 
 @kindex #
 @cindex comment
-A line of input starting with @kbd{#} is a comment; it does nothing.
-This is useful mainly in command files (@pxref{Command Files,,Command files}).
+Any text from a @kbd{#} to the end of the line is a comment; it does
+nothing.  This is useful mainly in command files (@pxref{Command
+Files,,Command files}).
 
 @node Completion
 @section Command completion
@@ -2529,6 +2535,10 @@ watchpoints}), but aside from that, you can manage a watchpoint like
 any other breakpoint: you enable, disable, and delete both breakpoints
 and watchpoints using the same commands.
 
+You can arrange to have values from your program displayed automatically
+whenever @value{GDBN} stops at a breakpoint.  @xref{Auto Display,
+,Automatic display}.
+
 @cindex breakpoint numbers
 @cindex numbers for breakpoints
 @value{GDBN} assigns a number to each breakpoint or watchpoint when you
@@ -3096,16 +3106,21 @@ disabled within a @var{command-list}.
 
 You can use breakpoint commands to start your program up again.  Simply
 use the @code{continue} command, or @code{step}, or any other command
-that resumes execution.  Subsequent commands in the command list are
-ignored.
+that resumes execution.
+
+Any other commands in the command list, after a command that resumes
+execution, are ignored.  This is because any time you resume execution
+(even with a simple @code{next} or @code{step}), you may encounter
+another breakpoint---which could have its own command list, leading to
+ambiguities about which list to execute.
 
 @kindex silent
-If the first command specified is @code{silent}, the usual message
-about stopping at a breakpoint is not printed.  This may be desirable
-for breakpoints that are to print a specific message and then continue.
-If none of the remaining commands print anything, you will see no sign
-that the breakpoint was reached.  @code{silent} is meaningful only at
-the beginning of a breakpoint command list.
+If the first command you specify in a command list is @code{silent}, the
+usual message about stopping at a breakpoint is not printed.  This may
+be desirable for breakpoints that are to print a specific message and
+then continue.  If none of the remaining commands print anything, you
+will see no sign that the breakpoint was reached.  @code{silent} is
+meaningful only at the beginning of a breakpoint command list.
 
 The commands @code{echo} and @code{output} that allow you to print
 precisely controlled output are often useful in silent breakpoints.
@@ -4244,7 +4259,7 @@ command rather than @code{print}. @xref{Symbols, ,Examining the Symbol Table}.
 @cindex expressions
 @code{print} and many other @value{GDBN} commands accept an expression and
 compute its value.  Any kind of constant, variable or operator defined
-by the programming language you are using is legal in an expression in
+by the programming language you are using is valid in an expression in
 @value{GDBN}.  This includes conditional expressions, function calls, casts
 and string constants.  It unfortunately does not include symbols defined
 by preprocessor @code{#define} commands.
@@ -4277,6 +4292,10 @@ languages:
 function where it is defined.  @xref{Variables, ,Program variables}.
 
 @item @{@var{type}@} @var{addr}
+@cindex @{@var{type}@}
+@cindex type casting memory
+@cindex memory, viewing as typed object
+@cindex casts, to view memory
 Refers to an object of type @var{type} stored at address @var{addr} in
 memory.  @var{addr} may be any expression whose value is an integer or
 pointer (but parentheses are required around binary operators, just as in
@@ -4378,14 +4397,15 @@ same type in memory; a section of an array, or an array of
 dynamically determined size for which only a pointer exists in the
 program.
 
-This can be done by constructing an @dfn{artificial array} with the
-binary operator @samp{@@}.  The left operand of @samp{@@} should be
-the first element of the desired array, as an individual object.
-The right operand should be the desired length of the array.  The result is
-an array value whose elements are all of the type of the left argument.
-The first element is actually the left argument; the second element
-comes from bytes of memory immediately following those that hold the
-first element, and so on.  Here is an example.  If a program says
+You can do this by referring to a contiguous span of memory as an
+@dfn{artificial array}, using the binary operator @samp{@@}.  The left
+operand of @samp{@@} should be the first element of the desired array,
+as an individual object.  The right operand should be the desired length
+of the array.  The result is an array value whose elements are all of
+the type of the left argument.  The first element is actually the left
+argument; the second element comes from bytes of memory immediately
+following those that hold the first element, and so on.  Here is an
+example.  If a program says
 
 @example
 int *array = (int *) malloc (len * sizeof (int));
@@ -4455,6 +4475,9 @@ Print as integer in octal.
 
 @item t
 Print as integer in binary.  The letter @samp{t} stands for ``two''.
+@footnote{@samp{b} cannot be used because these format letters are also
+used with the @code{x} command, where @samp{b} stands for ``byte'';
+@pxref{Memory,,Examining memory}.}
 
 @item a
 Print as an address, both absolute in hex and as an offset from the
@@ -4732,6 +4755,11 @@ this is the same stack frame displayed with @code{set print address off}:
 @end group
 @end example
 
+You can use @samp{set print address off} to eliminate all machine
+dependent displays from the @value{GDBN} interface.  For example, with
+@code{print address off}, you should get the same text for backtraces on
+all machines---whether or not they involve pointer arguments.
+
 @item show print address
 @kindex show print address
 Show whether or not addresses are to be printed.
@@ -4742,7 +4770,7 @@ Show whether or not addresses are to be printed.
 @value{GDBN} will pretty print arrays.  This format is more convenient to read,
 but uses more space.  The default is off.
 
-@item set print array off.
+@item set print array off
 Return to compressed format for arrays.
 
 @item show print array
@@ -4865,9 +4893,9 @@ These settings are of interest when debugging C++ programs:
 @item set print demangle
 @itemx set print demangle on
 @kindex set print demangle
-Print C++ names in their source form rather than in the mangled form
-in which they are passed to the assembler and linker for type-safe linkage.
-The default is on.
+Print C++ names in their source form rather than in the encoded
+(``mangled'') form passed to the assembler and linker for type-safe
+linkage.  The default is @samp{on}.
 
 @item show print demangle
 @kindex show print demangle
@@ -4884,6 +4912,34 @@ The default is off.
 @kindex show print asm-demangle
 Show whether C++ names in assembly listings will be printed in mangled
 or demangled form.
+
+@item set demangle-style @var{style}
+@kindex set demangle-style
+@cindex C++ symbol decoding style
+@cindex symbol decoding style, C++
+Choose among several encoding schemes used by different compilers to
+represent C++ names.  The choices for @var{style} are currently:
+
+@table @code
+@item auto
+Allow @value{GDBN} to choose a decoding style by inspecting your program.
+
+@item gnu
+Decode based on the GNU C++ compiler (@code{g++}) encoding algorithm.
+
+@item lucid
+Decode based on the Lucid C++ compiler (@code{lcc}) encoding algorithm.
+
+@item cfront
+Decode using the algorithm in the @cite{C++ Annotated Reference Manual}.
+@strong{Warning:} despite the name, this setting alone is not sufficient
+to allow debugging @code{cfront}-generated executables.  @value{GDBN}
+would require further enhancement to permit that.
+@end table
+
+@item show demangle-style
+@kindex show demangle-style
+Display the encoding style currently in use for decoding C++ symbols.
 
 @item set print object
 @itemx set print object on
@@ -5782,7 +5838,14 @@ String constants are a sequence of character constants surrounded
 by double quotes (@code{"}).
 
 @item
-Pointer constants are an integral value.
+Pointer constants are an integral value.  You can also write pointers
+to constants using the C operator @samp{&}.
+
+@item
+Array constants are comma-separated lists surrounded by braces @samp{@{}
+and @samp{@}}; for example, @samp{@{1,2,3@}} is a three-element array of
+integers, @samp{@{@{1,2@}, @{3,4@}, @{5,6@}@}} is a three-by-two array,
+and @samp{@{&"hi", &"there", &"fred"@}} is a three-element array of pointers.
 @end itemize
 
 @ifclear CONLY
@@ -7365,10 +7428,10 @@ Here are some common targets (available, or not, depending on the GDB
 configuration):
 
 @table @code
-@item target exec @var{prog}
+@item target exec @var{program}
 @kindex target exec
-An executable file.  @samp{target exec @var{prog}} is the same as
-@samp{exec-file @var{prog}}.
+An executable file.  @samp{target exec @var{program}} is the same as
+@samp{exec-file @var{program}}.
 
 @item target core @var{filename}
 @kindex target core
@@ -7383,7 +7446,19 @@ specifies what serial device to use for the connection (e.g.
 @file{/dev/ttya}). @xref{Remote, ,Remote debugging}.
 @end ifset
 
+@ifset SIMS
+@item target sim
+@kindex target sim
+CPU simulator.  @xref{Simulator,,Simulated CPU Target}.
+@end ifset
+
 @ifset AMDxxixK
+@item target udi @var{keyword}
+@kindex target udi
+Remote AMD29K target, using the AMD UDI protocol.  The @var{keyword}
+argument specifies which 29K board or simulator to use.  @xref{UDI29K
+Remote,,@value{GDBN} and the UDI protocol for AMD29K}.
+
 @item target amd-eb @var{dev} @var{speed} @var{PROG}
 @kindex target amd-eb
 @cindex AMD EB29K
@@ -7469,6 +7544,7 @@ configuration of GDB; use @code{help targets} to list them.
 * i960-Nindy Remote::		@value{GDBN} with a remote i960 (Nindy)
 @end ifset
 @ifset AMDxxixK
+* UDI29K Remote::               @value{GDBN} and the UDI protocol for AMD29K
 * EB29K Remote::		@value{GDBN} with a remote EB29K
 @end ifset
 @ifset VXWORKS
@@ -7480,8 +7556,8 @@ configuration of GDB; use @code{help targets} to list them.
 @ifset Hviii
 * Hitachi H8/300 Remote::       @value{GDBN} and the Hitachi H8/300
 @end ifset
-@ifset ZviiiK
-* Z8000 Simulator::             @value{GDBN} and its Zilog Z8000 Simulator
+@ifset SIMS
+* Simulator::                   Simulated CPU target
 @end ifset
 @end menu
 @end ignore
@@ -7493,11 +7569,12 @@ configuration of GDB; use @code{help targets} to list them.
 @menu
 * Remote Serial::               @value{GDBN} remote serial protocol
 * i960-Nindy Remote::		@value{GDBN} with a remote i960 (Nindy)
+* UDI29K Remote::               @value{GDBN} and the UDI protocol for AMD29K
 * EB29K Remote::		@value{GDBN} with a remote EB29K
 * VxWorks Remote::		@value{GDBN} and VxWorks
 * ST2000 Remote::               @value{GDBN} with a Tandem ST2000
 * Hitachi H8/300 Remote::       @value{GDBN} and the Hitachi H8/300
-* Z8000 Simulator::             @value{GDBN} and its Zilog Z8000 Simulator
+* Simulator::                   Simulated CPUs
 @end menu
 
 @include gdbinv-s.texi
@@ -8098,7 +8175,7 @@ stop.
 Each time @value{GDBN} displays a stack frame, Emacs automatically finds the
 source file for that frame and puts an arrow (@samp{=>}) at the
 left margin of the current line.  Emacs uses a separate buffer for
-source display, and splits the window to show both your @value{GDBN} session
+source display, and splits the screen to show both your @value{GDBN} session
 and the source.
 
 Explicit @value{GDBN} @code{list} or search commands still produce output as
@@ -8608,7 +8685,7 @@ unset                     &&\rm(No longer an alias for delete)\cr
 
 @ifclear PRECONFIGURED
 @node Formatting Documentation
-@appendix Formatting the Documentation
+@appendix Formatting Documentation
 
 @cindex GDB reference card
 @cindex reference card
@@ -8662,17 +8739,17 @@ cd gdb
 make gdb.info
 @end example
 
-If you want to typeset and print copies of this manual, you need
-@TeX{}, a printing program such as @code{lpr}, and @file{texinfo.tex},
-the Texinfo definitions file.
+If you want to typeset and print copies of this manual, you need @TeX{},
+a program to print its @sc{dvi} output files, and @file{texinfo.tex}, the
+Texinfo definitions file.
 
 @TeX{} is a typesetting program; it does not print files directly, but
 produces output files called @sc{dvi} files.  To print a typeset
 document, you need a program to print @sc{dvi} files.  If your system
 has @TeX{} installed, chances are it has such a program.  The precise
 command to use depends on your system; @kbd{lpr -d} is common; another
-is @kbd{dvips}.  The @sc{dvi} print command may require a file name
-without any extension or a @samp{.dvi} extension.
+(for PostScript devices) is @kbd{dvips}.  The @sc{dvi} print command may
+require a file name without any extension or a @samp{.dvi} extension.
 
 @TeX{} also requires a macro definitions file called
 @file{texinfo.tex}.  This file tells @TeX{} how to typeset a document
@@ -8856,7 +8933,7 @@ When you run @code{make} to build a program or library, you must run
 it in a configured directory---whatever directory you were in when you
 called @code{configure} (or one of its subdirectories).
 
-The @code{Makefile} generated by @code{configure} for each source
+The @code{Makefile} that @code{configure} generates in each source
 directory also runs recursively.  If you type @code{make} in a source
 directory such as @file{gdb-@value{GDBVN}} (or in a separate configured
 directory configured with @samp{--srcdir=@var{path}/gdb-@value{GDBVN}}), you
@@ -8880,7 +8957,7 @@ of information in the following pattern:
 @end example
 
 For example, you can use the alias @code{sun4} as a @var{host} argument
-or in a @code{--target=@var{target}} option, but the equivalent full name
+or in a @code{--target=@var{target}} option.  The equivalent full name
 is @samp{sparc-sun-sunos4}.
 
 The @code{configure} script accompanying GDB does not provide

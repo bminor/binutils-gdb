@@ -1,3 +1,7 @@
+Tue Feb  9 18:26:21 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdb.texinfo, gdbinv-s.texi: misc updates
+
 Sat Feb  6 10:25:47 1993  John Gilmore  (gnu@cygnus.com)
 
 	* gdbint.texinfo:  Brief documentation for longjmp support,

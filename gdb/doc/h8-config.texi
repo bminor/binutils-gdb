@@ -4,6 +4,7 @@
 @set BARETARGET
 @set CONLY
 @set DOSHOST
+@set SIMS
 @set AGGLOMERATION
 @clear SERIAL
 @clear VXWORKS

@@ -59,6 +59,9 @@
 @c Specifically for host machine running DOS?
 @clear DOSHOST
 @c
+@c Talk about CPU simulator targets?
+@set SIMS
+@c
 @c Is manual stand-alone, or part of an agglomeration, with overall GPL?
 @clear AGGLOMERATION
 @c
