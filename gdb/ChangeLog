@@ -1,3 +1,12 @@
+Fri Jan  5 17:46:01 1996  Stu Grossman  (grossman@cygnus.com)
+
+	* stack.c (print_stack_frame print_frame_info) symmisc.c
+	(dump_symtab):  Change RETURN_MASK_ERROR to RETURN_MASK_ALL so
+	that catch_errors doesn't get blindsided by QUIT and lose the
+	cleanup chain.  This fixes a problem where ^C while in a
+	user-defined command sometimes leaves instream NULL and causes a
+	segfault in command_loop.
+
 Fri Jan  5 13:59:16 1996  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
 	* configure.in, configure: Add `-ldl -lw' for Solaris linking.
