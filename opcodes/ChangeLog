@@ -1,5 +1,8 @@
 Thu Oct  3 17:17:02 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* mn10300-opc.c (mn10300_opcodes): Add opcode & masks for
+	all opcodes.  Very rough cut at operands for all opcodes.
+
 	* mn10300-opc.c (mn10300_opcodes): Start fleshing out the
 	opcode table.
 
