@@ -166,6 +166,11 @@ extern use_struct_convention_fn mn10300_use_struct_convention;
    one that takes account of generic CALL_DUMMY frames */
 #define GET_SAVED_REGISTER
 
+/* Cons up virtual frame pointer for trace */
+extern void mn10300_virtual_frame_pointer PARAMS ((CORE_ADDR, long *, long *));
+#define TARGET_VIRTUAL_FRAME_POINTER(PC, REGP, OFFP) \
+	mn10300_virtual_frame_pointer ((PC), (REGP), (OFFP))
+
 /* Define this for Wingdb */
 
 #define TARGET_MN10300

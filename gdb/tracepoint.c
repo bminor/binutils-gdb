@@ -1157,9 +1157,11 @@ add_memrange (memranges, type, base, len)
 
 /* Add a symbol to a collection list */
 static void
-collect_symbol (collect, sym)
+collect_symbol (collect, sym, frame_regno, frame_offset)
      struct collection_list *collect;
      struct symbol *sym;
+     long frame_regno;
+     long frame_offset;
 {
   unsigned long  len;
   unsigned long  reg;
@@ -1200,8 +1202,8 @@ collect_symbol (collect, sym)
 		     SYMBOL_NAME (sym));
     break;
   case LOC_ARG:
-    offset = SYMBOL_VALUE (sym);
-    reg = FP_REGNUM;
+    reg    = frame_regno;
+    offset = frame_offset + SYMBOL_VALUE (sym);
     if (info_verbose)
       {
 	printf_filtered ("LOC_LOCAL %s: Collect %d bytes at offset",
@@ -1223,8 +1225,8 @@ collect_symbol (collect, sym)
     break;
   case LOC_LOCAL:
   case LOC_LOCAL_ARG:
-    offset = SYMBOL_VALUE (sym);
-    reg = FP_REGNUM;
+    reg    = frame_regno;
+    offset = frame_offset + SYMBOL_VALUE (sym);
     if (info_verbose)
       {
 	printf_filtered ("LOC_LOCAL %s: Collect %d bytes at offset",
@@ -1256,9 +1258,11 @@ collect_symbol (collect, sym)
 
 /* Add all locals (or args) symbols to collection list */
 static void
-add_local_symbols (collect, pc, type)
+add_local_symbols (collect, pc, frame_regno, frame_offset, type)
      struct collection_list *collect;
      CORE_ADDR pc;
+     long frame_regno;
+     long frame_offset;
      int type;
 {
   struct symbol *sym;
@@ -1281,7 +1285,7 @@ add_local_symbols (collect, pc, type)
 	    if (type == 'L')	/* collecting Locals */
 	      {
 		count++;
-		collect_symbol (collect, sym);
+		collect_symbol (collect, sym, frame_regno, frame_offset);
 	      }
 	    break;
 	  case LOC_ARG:
@@ -1293,7 +1297,7 @@ add_local_symbols (collect, pc, type)
 	    if (type == 'A')	/* collecting Arguments */
 	      {
 		count++;
-		collect_symbol (collect, sym);
+		collect_symbol (collect, sym, frame_regno, frame_offset);
 	      }
 	  }
 	}
@@ -1434,6 +1438,18 @@ free_actions_list(actions_list)
   free(actions_list);
 }
 
+#ifndef TARGET_VIRTUAL_FRAME_POINTER
+/* If anybody else ever uses this macro, then move this 
+   default definition into some global header file such as defs.h.
+
+   FIXME: GDB's whole scheme for dealing with "frames" and
+   "frame pointers" needs a serious shakedown.
+ */
+
+#define TARGET_VIRTUAL_FRAME_POINTER(ADDR, REGP, OFFP) \
+  do { *(REGP) = FP_REGNUM; *(OFFP) =  0; } while (0)
+#endif
+
 /* render all actions into gdb protocol */
 static void
 encode_actions (t, tdp_actions, stepping_actions)
@@ -1451,6 +1467,8 @@ encode_actions (t, tdp_actions, stepping_actions)
   struct collection_list  *collect;
   struct cmd_list_element *cmd;
   struct agent_expr *aexpr;
+  long                frame_reg, frame_offset;
+
 
   clear_collection_list (&tracepoint_list);
   clear_collection_list (&stepping_list);
@@ -1458,6 +1476,8 @@ encode_actions (t, tdp_actions, stepping_actions)
 
   *tdp_actions = NULL;
   *stepping_actions = NULL;
+
+  TARGET_VIRTUAL_FRAME_POINTER (t->address, &frame_reg, &frame_offset);
 
   for (action = t->actions; action; action = action->next)
     {
@@ -1488,12 +1508,20 @@ encode_actions (t, tdp_actions, stepping_actions)
 	      }
 	    else if (0 == strncasecmp ("$arg", action_exp, 4))
 	      {
-		add_local_symbols (collect, t->address, 'A');
+		add_local_symbols (collect, 
+				   t->address, 
+				   frame_reg,
+				   frame_offset,
+				   'A');
 		action_exp = strchr (action_exp, ','); /* more? */
 	      }
 	    else if (0 == strncasecmp ("$loc", action_exp, 4))
 	      {
-		add_local_symbols (collect, t->address, 'L');
+		add_local_symbols (collect, 
+				   t->address, 
+				   frame_reg,
+				   frame_offset,
+				   'L');
 		action_exp = strchr (action_exp, ','); /* more? */
 	      }
 	    else
@@ -1524,7 +1552,10 @@ encode_actions (t, tdp_actions, stepping_actions)
 		  break;
 
 		case OP_VAR_VALUE:
-		  collect_symbol (collect, exp->elts[2].symbol);
+		  collect_symbol (collect, 
+				  exp->elts[2].symbol,
+				  frame_reg,
+				  frame_offset);
 		  break;
 
 		default:	/* full-fledged expression */
