@@ -8742,8 +8742,8 @@ my_getExpression (ep, str)
 }
 
 /* Turn a string in input_line_pointer into a floating point constant
-   of type type, and store the appropriate bytes in *litP.  The number
-   of LITTLENUMS emitted is stored in *sizeP .  An error message is
+   of type TYPE, and store the appropriate bytes in *LITP.  The number
+   of LITTLENUMS emitted is stored in *SIZEP.  An error message is
    returned, or NULL on OK.  */
 
 char *

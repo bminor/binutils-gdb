@@ -253,7 +253,9 @@ whatreg (reg, src)
 
   */
 
-/* try and parse a reg name, returns number of chars consumed */
+/* Try to parse a reg name.  Return a pointer to the first character
+   in SRC after the reg name.  */
+
 char *
 parse_reg (src, mode, reg)
      char *src;

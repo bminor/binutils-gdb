@@ -2046,7 +2046,7 @@ VMS_local_stab_Parse (sp)
 		str1++;
 	      }
 	    if (*str1 == ':' && *pnt2 == ':')
-	      return;	/* they are the same!  lets skip this one */
+	      return;	/* They are the same!  Let's skip this one.  */
 	  }			/* for */
 	pnt++;			/* skip p in case no register */
       }			/* if */

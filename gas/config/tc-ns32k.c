@@ -1561,9 +1561,10 @@ md_begin ()
 #define MAX_LITTLENUMS 6
 
 /* Turn the string pointed to by litP into a floating point constant
-   of type type, and emit the appropriate bytes.  The number of
-   LITTLENUMS emitted is stored in *sizeP .  An error message is
+   of type TYPE, and emit the appropriate bytes.  The number of
+   LITTLENUMS emitted is stored in *SIZEP.  An error message is
    returned, or NULL on OK.  */
+
 char *
 md_atof (type, litP, sizeP)
      char type;

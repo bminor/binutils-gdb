@@ -9138,8 +9138,8 @@ tc_gen_reloc (sec, fixp)
 }
 
 /* Turn a string in input_line_pointer into a floating point constant
-   of type type, and store the appropriate bytes in *lit.  The number
-   of LITTLENUMS emitted is stored in *size.  An error message is
+   of type TYPE, and store the appropriate bytes in *LIT.  The number
+   of LITTLENUMS emitted is stored in *SIZE.  An error message is
    returned, or NULL on OK.  */
 
 #define MAX_LITTLENUMS 5

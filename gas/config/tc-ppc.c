@@ -4480,8 +4480,8 @@ ppc_frob_section (sec)
 #endif /* OBJ_XCOFF */
 
 /* Turn a string in input_line_pointer into a floating point constant
-   of type type, and store the appropriate bytes in *litp.  The number
-   of LITTLENUMS emitted is stored in *sizep .  An error message is
+   of type TYPE, and store the appropriate bytes in *LITP.  The number
+   of LITTLENUMS emitted is stored in *SIZEP.  An error message is
    returned, or NULL on OK.  */
 
 char *

@@ -180,7 +180,8 @@ typedef struct
 
 h8500_operand_info;
 
-/* try and parse a reg name, returns number of chars consumed */
+/* Try to parse a reg name.  Return the number of chars consumed.  */
+
 static int
 parse_reg (src, mode, reg)
      char *src;
@@ -1174,10 +1175,11 @@ tc_headers_hook (headers)
 /* Equal to MAX_PRECISION in atof-ieee.c */
 #define MAX_LITTLENUMS 6
 
-/* Turn a string in input_line_pointer into a floating point constant of type
-   type, and store the appropriate bytes in *LITP.  The number of LITTLENUMS
-   emitted is stored in *SIZEP .  An error message is returned, or NULL on OK.
-   */
+/* Turn a string in input_line_pointer into a floating point constant
+   of type type, and store the appropriate bytes in *LITP.  The number
+   of LITTLENUMS emitted is stored in *SIZEP.  An error message is
+   returned, or NULL on OK.  */
+
 char *
 md_atof (type, litP, sizeP)
      char type;

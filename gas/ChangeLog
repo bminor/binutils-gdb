@@ -1,6 +1,19 @@
 2000-07-07  Kazu Hirata <kazu@hxi.com>
 
 	* config/tc-sh.c: Fix comments.
+	* config/obj-vms.c: Fix comments.
+	* config/tc-a29k.c: Likewise.
+	* config/tc-alpha.c: Likewise.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-h8500.c: Likewise.
+	* config/tc-i370.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-m68hc11.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-ns32k.c: Likewise.
+	* config/tc-ppc.c: Likewise.
+	* config/tc-z8k.c: Likewise.
 
 2000-07-06  Mark Elbrecht  <snowball3@bigfoot.com>
 

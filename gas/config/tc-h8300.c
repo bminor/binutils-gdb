@@ -19,10 +19,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*
-  Written By Steve Chamberlain
-  sac@cygnus.com
-  */
+/* Written By Steve Chamberlain <sac@cygnus.com>.  */
 
 #include <stdio.h>
 #include "as.h"
@@ -194,7 +191,8 @@ struct h8_op
   ccr
 */
 
-/* Try and parse a reg name, returns number of chars consumed.  */
+/* Try to parse a reg name.  Return the number of chars consumed.  */
+
 static int
 parse_reg (src, mode, reg, direction)
      char *src;
@@ -1329,8 +1327,9 @@ tc_headers_hook (headers)
 
 /* Turn a string in input_line_pointer into a floating point constant
    of type TYPE, and store the appropriate bytes in *LITP.  The number
-   of LITTLENUMS emitted is stored in *SIZEP .  An error message is
+   of LITTLENUMS emitted is stored in *SIZEP.  An error message is
    returned, or NULL on OK.  */
+
 char *
 md_atof (type, litP, sizeP)
      char type;
