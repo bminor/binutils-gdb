@@ -1,15 +1,8 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
 cat >e${EMULATION_NAME}.c <<EOF
-/* For WINDOWS_NT */
-/* The original file generated returned different default scripts depending
-   on whether certain switches were set, but these switches pertain to the
-   Linux system and that particular version of coff.  In the NT case, we
-   only determine if the subsystem is console or windows in order to select
-   the correct entry point by default. */ 
-  
-
 /* This file is part of GLD, the Gnu Linker.
+   Copyright 1995, 96, 97, 1998 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,11 +18,18 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+/* For WINDOWS_NT */
+/* The original file generated returned different default scripts depending
+   on whether certain switches were set, but these switches pertain to the
+   Linux system and that particular version of coff.  In the NT case, we
+   only determine if the subsystem is console or windows in order to select
+   the correct entry point by default. */ 
+  
 #include "bfd.h"
 #include "sysdep.h"
 #include "bfdlink.h"
 #include "getopt.h"
-#include "ld.h"
+#include "libiberty.h"
 #include "ld.h"
 #include "ldmain.h"
 #include "ldgram.h"
@@ -66,9 +66,12 @@ static void sort_sections PARAMS ((lang_statement_union_type *));
 static struct internal_extra_pe_aouthdr pe;
 static int dll;
 
+extern const char *output_filename;
+
 static void
 gld_${EMULATION_NAME}_before_parse()
 {
+  output_filename = "a.exe";
   ldfile_output_architecture = bfd_arch_${ARCH};
 }
 
@@ -144,7 +147,7 @@ static definfo init[] =
   D(SizeOfHeapReserve,"__size_of_heap_reserve__", 0x100000),
   D(SizeOfHeapCommit,"__size_of_heap_commit__", 0x1000),
   D(LoaderFlags,"__loader_flags__", 0x0),
-  0
+  { NULL, 0, 0, NULL, 0 }
 };
 
 
@@ -171,25 +174,49 @@ set_pe_name (name, val)
 static void
 set_pe_subsystem ()
 {
+  const char *sver;
+  int len;
   int i;
-  static struct 
+  static const struct 
     {
-      char *name ;
-      int value;
+      const char *name;
+      const int value;
+      const char *entry;
     }
   v[] =
     {
-      {"native", 1},
-      {"windows",2},
-      {"console",3},
-      {"os2",5},
-      {"posix", 7},
-      {0,0}
+      { "native", 1, "_NtProcessStartup" },
+      { "windows", 2, "_WinMainCRTStartup" },
+      { "console", 3, "_mainCRTStartup" },
+#if 0
+      /* The Microsoft linker does not recognize this.  */
+      { "os2", 5, "" },
+#endif
+      { "posix", 7, "___PosixProcessStartup"},
+      { 0, 0, 0 }
     };
+
+  sver = strchr (optarg, ':');
+  if (sver == NULL)
+    len = strlen (optarg);
+  else
+    {
+      char *end;
+
+      len = sver - optarg;
+      set_pe_name ("__major_subsystem_version__",
+		   strtoul (sver + 1, &end, 0));
+      if (*end == '.')
+	set_pe_name ("__minor_subsystem_version__",
+		     strtoul (end + 1, &end, 0));
+      if (*end != '\0')
+	einfo ("%P: warning: bad version number in -subsystem option\n");
+    }
 
   for (i = 0; v[i].name; i++)
     {
-      if (!strcmp (optarg, v[i].name)) 
+      if (strncmp (optarg, v[i].name, len) == 0
+	  && v[i].name[len] == '\0')
 	{
 	  set_pe_name ("__subsystem__", v[i].value);
 
@@ -209,11 +236,8 @@ set_pe_subsystem ()
 	     name specified forces the correct .obj to be used.  We
 	     can avoid making the user do this by always adding the
 	     entry point name as an undefined symbol.  */
-	  if (v[i].value == 2)
-	    {
-	      lang_add_entry ("_WinMainCRTStartup", 1);
-	      ldlang_add_undef ("_WinMainCRTStartup");
-	    }
+	  lang_add_entry (v[i].entry, 1);
+	  ldlang_add_undef (v[i].entry);
 
 	  return;
 	}
@@ -243,9 +267,6 @@ set_pe_stack_heap (resname, comname)
      char *resname;
      char *comname;
 {
-  char *begin_commit;
-  char *end;
-
   set_pe_value (resname);
   if (*optarg == ',')
     {
@@ -343,6 +364,9 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
   return 1;
 }
 
+/* Assign values to the special symbols before the linker script is
+   read.  */
+
 static void
 gld_${EMULATION_NAME}_set_symbols()
 {
@@ -352,8 +376,18 @@ gld_${EMULATION_NAME}_set_symbols()
   lang_statement_list_type *save;
 
   if (!init[IMAGEBASEOFF].inited)
-    init[IMAGEBASEOFF].value = init[DLLOFF].value
-      ? NT_DLL_IMAGE_BASE : NT_EXE_IMAGE_BASE;
+    {
+      if (link_info.relocateable)
+	init[IMAGEBASEOFF].value = 0;
+      else if (init[DLLOFF].value)
+	init[IMAGEBASEOFF].value = NT_DLL_IMAGE_BASE;
+      else
+	init[IMAGEBASEOFF].value = NT_EXE_IMAGE_BASE;
+    }
+
+  /* Don't do any symbol assignments if this is a relocateable link.  */
+  if (link_info.relocateable)
+    return;
 
   /* Glue the assignments into the abs section */
   save = stat_ptr;
@@ -370,6 +404,9 @@ gld_${EMULATION_NAME}_set_symbols()
 	*(int *)init[j].ptr = val;
       else if (init[j].size == sizeof(long))
 	*(long *)init[j].ptr = val;
+      /* This might be a long long or other special type.  */
+      else if (init[j].size == sizeof(bfd_vma))
+	*(bfd_vma *)init[j].ptr = val;
       else	abort();
     }
   /* Restore the pointer. */
@@ -385,8 +422,9 @@ gld_${EMULATION_NAME}_set_symbols()
 static void
 gld_${EMULATION_NAME}_after_open()
 {
-  /* Pass the wacky PE command line options into the output bfd */
-  struct internal_extra_pe_aouthdr *i;
+  /* Pass the wacky PE command line options into the output bfd.
+     FIXME: This should be done via a function, rather than by
+     including an internal BFD header.  */
   if (!coff_data(output_bfd)->pe)
     {
       einfo ("%F%P: PE operations on non PE file.\n");
@@ -406,6 +444,13 @@ sort_by_file_name (a, b)
 {
   lang_statement_union_type **ra = a;
   lang_statement_union_type **rb = b;
+  int i;
+
+  i = strcmp ((*ra)->input_section.ifile->the_bfd->my_archive->filename,
+	      (*rb)->input_section.ifile->the_bfd->my_archive->filename);
+  if (i != 0)
+    return i;
+
   return strcmp ((*ra)->input_section.ifile->filename,
 		 (*rb)->input_section.ifile->filename);
 }
@@ -434,12 +479,13 @@ sort_sections_1 (startptr, next_after, count, sort_func)
   lang_statement_union_type **vec;
   lang_statement_union_type *p;
   int i;
+  lang_statement_union_type **ret;
 
   if (count == 0)
     return startptr;
 
-  vec = (lang_statement_union_type **)
-    alloca (count * sizeof (lang_statement_union_type *));
+  vec = ((lang_statement_union_type **)
+	 xmalloc (count * sizeof (lang_statement_union_type *)));
 
   for (p = *startptr, i = 0; i < count; i++, p = p->next)
     vec[i] = p;
@@ -451,7 +497,9 @@ sort_sections_1 (startptr, next_after, count, sort_func)
   for (i = 0; i < count - 1; i++)
     vec[i]->header.next = vec[i + 1];
   vec[i]->header.next = next_after;
-  return &(vec[i]->header.next);
+  ret = &vec[i]->header.next;
+  free (vec);
+  return ret;
 }
 
 /* Sort the .idata\$foo input sections of archives into filename order.
@@ -486,12 +534,12 @@ sort_sections (s)
 	  if (s->wild_statement.section_name != NULL
 	      && strncmp (s->wild_statement.section_name, ".idata", 6) == 0)
 	    {
-	      /* Sort any children in the same archive.  Run through all
-		 the children of this wild statement, when an
-		 input_section in an archive is found, scan forward to
-		 find all input_sections which are in the same archive.
-		 Sort them by their filename and then re-thread the
-		 pointer chain. */
+	      /* Sort the children.  We want to sort any objects in
+                 the same archive.  In order to handle the case of
+                 including a single archive multiple times, we sort
+                 all the children by archive name and then by object
+                 name.  After sorting them, we re-thread the pointer
+                 chain.  */
 
 	      while (*p)
 		{
@@ -505,9 +553,7 @@ sort_sections (s)
 		      int count;
 
 		      for (end = start, count = 0;
-			   end && end->header.type == lang_input_section_enum
-			   && (end->input_section.ifile->the_bfd->my_archive
-			       == start->input_section.ifile->the_bfd->my_archive);
+			   end && end->header.type == lang_input_section_enum;
 			   end = end->next)
 			count++;
 
@@ -518,15 +564,18 @@ sort_sections (s)
 	    }
 
 	  /* If this is a collection of grouped sections, sort them.
-	     The linker script must explicitly mention "*(.foo\$)".
-	     Don't sort them if \$ is not the last character (not sure if
-	     this is really useful, but it allows explicitly mentioning
-	     some \$ sections and letting the linker handle the rest).  */
+	     The linker script must explicitly mention "*(.foo\$)" or
+	     "*(.foo\$*)".  Don't sort them if \$ is not the last
+	     character (not sure if this is really useful, but it
+	     allows explicitly mentioning some \$ sections and letting
+	     the linker handle the rest).  */
 	  if (s->wild_statement.section_name != NULL)
 	    {
 	      char *q = strchr (s->wild_statement.section_name, '\$');
 
-	      if (q && q[1] == 0)
+	      if (q != NULL
+		  && (q[1] == '\0'
+		      || (q[1] == '*' && q[2] == '\0')))
 		{
 		  lang_statement_union_type *end;
 		  int count;
@@ -560,13 +609,29 @@ gld_${EMULATION_NAME}_before_allocation()
       {
 	if (!ppc_process_before_allocation(is->the_bfd, &link_info))
 	  {
-	    einfo("Errors encountered processing file %s", is->filename);
+	    einfo("Errors encountered processing file %s\n", is->filename);
 	  }
       }
   }
 
   /* We have seen it all. Allocate it, and carry on */
   ppc_allocate_toc_section (&link_info);
+#else
+  /* FIXME: we should be able to set the size of the interworking stub section */
+  /* Here we rummage through the found bfds to collect glue information. */
+  /* FIXME: should this be based on a command line option? krk@cygnus.com */
+  {
+    LANG_FOR_EACH_INPUT_STATEMENT (is)
+      {
+	if (!arm_process_before_allocation (is->the_bfd, & link_info))
+	  {
+	    einfo ("Errors encountered processing file %s", is->filename);
+	  }
+      }
+  }
+
+  /* We have seen it all. Allocate it, and carry on */
+  arm_allocate_interworking_sections (& link_info);
 #endif
 
   sort_sections (stat_ptr->head);
@@ -577,7 +642,11 @@ gld_${EMULATION_NAME}_before_allocation()
    gets mapped to the output section with everything from the '\$' on stripped
    (e.g. .text).
    See the Microsoft Portable Executable and Common Object File Format
-   Specification 4.1, section 4.2, Grouped Sections.  */
+   Specification 4.1, section 4.2, Grouped Sections.
+
+   FIXME: This is now handled by the linker script using wildcards,
+   but I'm leaving this here in case we want to enable it for sections
+   which are not mentioned in the linker script.  */
 
 /*ARGSUSED*/
 static boolean
@@ -588,7 +657,6 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   const char *secname;
   char *output_secname, *ps;
   lang_output_section_statement_type *os;
-  lang_statement_list_type *ptr;
   lang_statement_union_type *l;
 
   if ((s->flags & SEC_ALLOC) == 0)

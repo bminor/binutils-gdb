@@ -8,6 +8,15 @@ Wed Mar 25 11:34:13 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* scripttempl/pe.sc: Only include .idata\$[0-7] in .idata when
 	relocating.
 
+Tue Mar 24 15:59:29 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* scripttempl/pe.sc (.text): Add .glue_7 and .glue_7t sections to
+	hold Arm/Thumb stubs.
+
+	* emultempl/pe.em (gld_pe_before_allocation): Call
+	arm_process_before_allocation (for ARM/Thumb targets) in order to
+	gather interworking stb information.
+
 Mon Mar 23 18:54:15 1998  Joel Sherrill  <joel@OARcorp.com>
 
 	* configure.tgt: (sh*-*-rtems*): Switched from ELF to COFF.
