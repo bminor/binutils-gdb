@@ -542,7 +542,7 @@ x86_64_frame_init_saved_regs (struct frame_info *fi)
    it to be an argument to a function.  */
 
 static CORE_ADDR
-value_push (register CORE_ADDR sp, value_ptr arg)
+value_push (register CORE_ADDR sp, struct value *arg)
 {
   register int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
   register int container_len = len;
@@ -559,7 +559,7 @@ value_push (register CORE_ADDR sp, value_ptr arg)
 }
 
 CORE_ADDR
-x86_64_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		       int struct_return, CORE_ADDR struct_addr)
 {
   int intreg = 0;
