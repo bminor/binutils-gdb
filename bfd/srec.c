@@ -107,11 +107,13 @@ DESCRIPTION
 #include "sysdep.h"
 #include "libbfd.h"
 
-/* Macros for converting between hex and binary */
+/* Macros for converting between hex and binary. */
 
 static CONST char digs[] = "0123456789ABCDEF";
 
-static char hex_value[1 + (unsigned char) ~0];
+/* Table that gets filled in with numbers corresponding to hex chars. */
+
+static char hex_value[256];
 
 #define NOT_HEX 20
 #define NIBBLE(x) hex_value[(unsigned char)(x)]
@@ -122,7 +124,7 @@ static char hex_value[1 + (unsigned char) ~0];
 	ch += ((x) & 0xff);
 #define	ISHEX(x)  (hex_value[(unsigned char)(x)] != NOT_HEX)
 
-
+/* Initialize by filling in the hex conversion array. */
 
 static void
 DEFUN_VOID (srec_init)
@@ -132,18 +134,15 @@ DEFUN_VOID (srec_init)
 
   if (inited == false)
     {
-
       inited = true;
 
       for (i = 0; i < sizeof (hex_value); i++)
 	{
 	  hex_value[i] = NOT_HEX;
 	}
-
       for (i = 0; i < 10; i++)
 	{
 	  hex_value[i + '0'] = i;
-
 	}
       for (i = 0; i < 6; i++)
 	{

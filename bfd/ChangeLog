@@ -1,3 +1,8 @@
+Sun Feb 27 15:22:36 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* srec.c (hex_value): Always set to a size of 256 bytes.
+	(srec_init): Cosmetic changes.
+
 Sun Feb 27 11:18:47 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* elf32-hppa.c: Second half of major cleanup.  More comments,
