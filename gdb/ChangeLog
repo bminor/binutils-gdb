@@ -1,5 +1,10 @@
 Thu Jan 28 19:09:02 1993  John Gilmore  (gnu@cygnus.com)
 
+	M88K fixes reported by Carl Greco, <cgreco@Creighton.Edu>:
+	* tm-m88k.h (REGISTER_CONVERT_TO_RAW):  Fix typo.
+	* m88k-tdep.c (next_insn):  Lint, cleanup.
+	(store_parm_word):  Lint.
+
 	* README:  Fix typo (reported by karl@hq.ileaf.com).
 
 Wed Jan 27 21:34:21 1993  Fred Fish  (fnf@cygnus.com)

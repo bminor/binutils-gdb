@@ -45,6 +45,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "setjmp.h"
 #include "value.h"
 
+/* Size of an instruction */
+#define	BYTES_PER_88K_INSN	4
+
 void frame_find_saved_regs ();
 
 
@@ -178,11 +181,8 @@ next_insn (memaddr, pword1)
 {
   unsigned long buf[1];
 
-  read_memory (memaddr, buf, sizeof (buf));
-  *pword1 = buf[0];
-  SWAP_TARGET_AND_HOST (pword1, sizeof (long));
-
-  return memaddr + 4;
+  *pword1 = read_memory_integer (memaddr, BYTES_PER_88K_INSN);
+  return memaddr + BYTES_PER_88K_INSN;
 }
 
 /* Read a register from frames called by us (or from the hardware regs).  */
@@ -642,7 +642,7 @@ store_parm_word (address, val)
      CORE_ADDR address;
      int val;
 {
-  write_memory (address, &val, 4);
+  write_memory (address, (char *)&val, 4);
 }
 
 static int

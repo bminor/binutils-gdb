@@ -279,7 +279,7 @@ extern CORE_ADDR skip_prologue ();
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 
-#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)
+#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO) \
   {bcopy ((FROM), (TO), REGISTER_RAW_SIZE (REGNUM));}
 
 /* Return the GDB type object for the "standard" data type
