@@ -1,3 +1,12 @@
+1999-08-01  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-mips.c (mips_elf_calculate_relocation): Undefined weak
+	symbols are considered to have the value zero.
+	(_bfd_mips_elf_relocate_section): Don't try to perform a
+	relocation for an undefined symbol.
+	(_bfd_mips_elf_check_relocs): Allocate locate GOT space for local
+	GOT16 relocations.
+
 1999-07-30  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* elf64-sparc.c (sparc64_elf_build_plt): Cosmetic change - ABI

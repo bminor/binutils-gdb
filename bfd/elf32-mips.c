@@ -5870,6 +5870,12 @@ mips_elf_calculate_relocation (abfd,
 	  else
 	    symbol = h->root.root.u.def.value;
 	}
+      else if (h->root.root.type == bfd_link_hash_undefweak)
+	/* We allow relocations against undefined weak symbols, giving
+	   it the value zero, so that you can undefined weak functions
+	   and check to see if they exist by looking at their
+	   addresses.  */
+	symbol = 0;
       else
 	{
 	  (*info->callbacks->undefined_symbol)
@@ -6637,8 +6643,10 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	case bfd_reloc_undefined:
 	  /* mips_elf_calculate_relocation already called the
-             undefined_symbol callback.  */
-	  break;
+             undefined_symbol callback.  There's no real point in
+	     trying to perform the relocation at this point, so we
+	     just skip ahead to the next relocation.  */
+	  continue;
 
 	case bfd_reloc_notsupported:
 	  abort ();
@@ -7331,14 +7339,15 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 
       if (!h && (r_type == R_MIPS_CALL_LO16
 		 || r_type == R_MIPS_GOT_LO16
-		 || r_type == R_MIPS_GOT_DISP))
+		 || r_type == R_MIPS_GOT_DISP
+		 || r_type == R_MIPS_GOT16))
 	{
 	  /* We may need a local GOT entry for this relocation.  We
-	     don't count R_MIPS_HI16 or R_MIPS_GOT16 relocations
-	     because they are always followed by a R_MIPS_LO16
-	     relocation for the value.  We don't R_MIPS_GOT_PAGE
-	     because we can estimate the maximum number of pages
-	     needed by looking at the size of the segment.
+	     don't count R_MIPS_GOT_PAGE because we can estimate the
+	     maximum number of pages needed by looking at the size of
+	     the segment.  We don't count R_MIPS_GOT_HI16, or
+	     R_MIPS_CALL_HI16 because these are always followed by an
+	     R_MIPS_GOT_LO16 or R_MIPS_CALL_LO16.
 
 	     This estimation is very conservative since we can merge
 	     duplicate entries in the GOT.  In order to be less
