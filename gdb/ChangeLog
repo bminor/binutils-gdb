@@ -163,7 +163,6 @@ Thu Mar 30 12:09:50 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in: -linux-gnu*, not -linux-gnu.
 
->>>>>>> 1.227
 Tue Mar 28 18:28:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.c (remote_threads_extra_info): Replace qfThreadExtraInfo
