@@ -29,18 +29,7 @@
 
 #include "bfd.h"
 #include "elf/common.h"
-#include "elf/alpha.h"
-#include "elf/arm.h"
-#include "elf/d10v.h"
-/* start-sanitize-d30v */
-#include "elf/d30v.h"
-/* end-sanitize-d30v */
 #include "elf/i386.h"
-#include "elf/m32r.h"
-#include "elf/m68k.h"
-#include "elf/mn10200.h"
-#include "elf/sh.h"
-#include "elf/sparc.h"
 #include "elf/v850.h"
 #include "elf/external.h"
 #include "elf/internal.h"
@@ -91,22 +80,22 @@ char 			dump_sects [NUM_DUMP_SECTS];
 /* Forward declarations for dumb compilers.  */
 static const char * get_mips_dynamic_type PARAMS ((unsigned long type));
 static const char * get_dynamic_type PARAMS ((unsigned long type));
-static const char * get_i386_rel_type    PARAMS ((unsigned long rtype));
-static const char * get_m68k_rel_type    PARAMS ((unsigned long rtype));
-static const char * get_sparc_rel_type   PARAMS ((unsigned long rtype));
-static const char * get_m32r_rel_type    PARAMS ((unsigned long rtype));
-static const char * get_v850_rel_type    PARAMS ((unsigned long rtype));
-static const char * get_d10v_rel_type    PARAMS ((unsigned long rtype));
+static const char * elf_i386_reloc_type    PARAMS ((unsigned long rtype));
+static const char * elf_m68k_reloc_type    PARAMS ((unsigned long rtype));
+static const char * elf_sparc_reloc_type   PARAMS ((unsigned long rtype));
+static const char * elf_m32r_reloc_type    PARAMS ((unsigned long rtype));
+static const char * elf_v850_reloc_type    PARAMS ((unsigned long rtype));
+static const char * elf_d10v_reloc_type    PARAMS ((unsigned long rtype));
 /* start-sanitize-d30v */
-static const char * get_d30v_rel_type    PARAMS ((unsigned long rtype));
+static const char * elf_d30v_reloc_type    PARAMS ((unsigned long rtype));
 /* end-sanitize-d30v */
-static const char * get_sh_rel_type      PARAMS ((unsigned long rtype));
-static const char * get_mn10300_rel_type PARAMS ((unsigned long rtype));
-static const char * get_mn10200_rel_type PARAMS ((unsigned long rtype));
-static const char * get_ppc_rel_type	 PARAMS ((unsigned long rtype));
-static const char * get_mips_rel_type	 PARAMS ((unsigned long rtype));
-static const char * get_alpha_rel_type	 PARAMS ((unsigned long rtype));
-static const char * get_arm_rel_type     PARAMS ((unsigned long rtype));
+static const char * elf_sh_reloc_type      PARAMS ((unsigned long rtype));
+static const char * elf_mn10300_reloc_type PARAMS ((unsigned long rtype));
+static const char * elf_mn10200_reloc_type PARAMS ((unsigned long rtype));
+static const char * elf_ppc_reloc_type	   PARAMS ((unsigned long rtype));
+static const char * elf_mips_reloc_type	   PARAMS ((unsigned long rtype));
+static const char * elf_alpha_reloc_type   PARAMS ((unsigned long rtype));
+static const char * elf_arm_reloc_type     PARAMS ((unsigned long rtype));
 static int    dump_relocations
   PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *, char *));
 static char * get_file_type     PARAMS ((unsigned e_type));
@@ -292,8 +281,25 @@ byte_get_big_endian (field, size)
     }
 }
 
+
+/* Define the macros we need to define the relocation recognition functions. */
+#define START_RELOC_NUMBERS(name)  static const char *			      \
+				   name (rtype)				      \
+				        unsigned long rtype;		      \
+				   {					      \
+				     switch (rtype) {
+#ifdef __STDC__
+# define RELOC_NUMBER(name, number)    case number: return #name;
+#else
+# define RELOC_NUMBER(name, number)    case number: return "name";
+#endif
+#define END_RELOC_NUMBERS              default: return NULL;		      \
+				     }					      \
+				   }
+
+/* Define the i386 relocations.  */
 static const char *
-get_i386_rel_type (rtype)
+elf_i386_reloc_type (rtype)
      unsigned long rtype;
 {
   switch (rtype)
@@ -312,129 +318,22 @@ get_i386_rel_type (rtype)
     case R_386_16:       return "R_386_16";
     case R_386_PC16:     return "R_386_PC16";
     case R_386_PC8:      return "R_386_PC8";
-    default:		 return NULL;
+    default:             return NULL;
     }
 }
 
-static const char *
-get_m68k_rel_type (rtype)
-     unsigned long rtype;
-{
-  switch (rtype)
-    {
-    case R_68K_NONE: return "R_68K_NONE";
-    case R_68K_32: return "R_68K_32";
-    case R_68K_16: return "R_68K_16";
-    case R_68K_8: return "R_68K_8";
-    case R_68K_PC32: return "R_68K_PC32";
-    case R_68K_PC16: return "R_68K_PC16";
-    case R_68K_PC8: return "R_68K_PC8";
-    case R_68K_GOT32: return "R_68K_GOT32";
-    case R_68K_GOT16: return "R_68K_GOT16";
-    case R_68K_GOT8: return "R_68K_GOT8";
-    case R_68K_GOT32O: return "R_68K_GOT32O";
-    case R_68K_GOT16O: return "R_68K_GOT16O";
-    case R_68K_GOT8O: return "R_68K_GOT8O";
-    case R_68K_PLT32: return "R_68K_PLT32";
-    case R_68K_PLT16: return "R_68K_PLT16";
-    case R_68K_PLT8: return "R_68K_PLT8";
-    case R_68K_PLT32O: return "R_68K_PLT32O";
-    case R_68K_PLT16O: return "R_68K_PLT16O";
-    case R_68K_PLT8O: return "R_68K_PLT8O";
-    case R_68K_COPY: return "R_68K_COPY";
-    case R_68K_GLOB_DAT: return "R_68K_GLOB_DAT";
-    case R_68K_JMP_SLOT: return "R_68K_JMP_SLOT";
-    case R_68K_RELATIVE: return "R_68K_RELATIVE";
-    default:		 return NULL;
-    }
-}
+/* Define the m68k relocations.  */
+#include "elf/m68k.h"
+
+/* Define the SPARC relocations.  */
+#include "elf/sparc.h"
+
+/* Define the m32r relocations.  */
+#include "elf/m32r.h"
 
 
 static const char *
-get_sparc_rel_type (rtype)
-     unsigned long rtype;
-{
-  switch (rtype)
-    {
-    case R_SPARC_NONE: return "R_SPARC_NONE";
-    case R_SPARC_8: return "R_SPARC_8";
-    case R_SPARC_16: return "R_SPARC_16";
-    case R_SPARC_32: return "R_SPARC_32";
-    case R_SPARC_DISP8: return "R_SPARC_DISP8";
-    case R_SPARC_DISP16: return "R_SPARC_DISP16";
-    case R_SPARC_DISP32: return "R_SPARC_DISP32";
-    case R_SPARC_WDISP30: return "R_SPARC_WDISP30";
-    case R_SPARC_WDISP22: return "R_SPARC_WDISP22";
-    case R_SPARC_HI22: return "R_SPARC_HI22";
-    case R_SPARC_22: return "R_SPARC_22";
-    case R_SPARC_13: return "R_SPARC_13";
-    case R_SPARC_LO10: return "R_SPARC_LO10";
-    case R_SPARC_GOT10: return "R_SPARC_GOT10";
-    case R_SPARC_GOT13: return "R_SPARC_GOT13";
-    case R_SPARC_GOT22: return "R_SPARC_GOT22";
-    case R_SPARC_PC10: return "R_SPARC_PC10";
-    case R_SPARC_PC22: return "R_SPARC_PC22";
-    case R_SPARC_WPLT30: return "R_SPARC_WPLT30";
-    case R_SPARC_COPY: return "R_SPARC_COPY";
-    case R_SPARC_GLOB_DAT: return "R_SPARC_GLOB_DAT";
-    case R_SPARC_JMP_SLOT: return "R_SPARC_JMP_SLOT";
-    case R_SPARC_RELATIVE: return "R_SPARC_RELATIVE";
-    case R_SPARC_UA32: return "R_SPARC_UA32";
-    case R_SPARC_10: return "R_SPARC_10";
-    case R_SPARC_11: return "R_SPARC_11";
-    case R_SPARC_64: return "R_SPARC_64";
-    case R_SPARC_OLO10: return "R_SPARC_OLO10";
-    case R_SPARC_HH22: return "R_SPARC_HH22";
-    case R_SPARC_HM10: return "R_SPARC_HM10";
-    case R_SPARC_LM22: return "R_SPARC_LM22";
-    case R_SPARC_PC_HH22: return "R_SPARC_PC_HH22";
-    case R_SPARC_PC_HM10: return "R_SPARC_PC_HM10";
-    case R_SPARC_PC_LM22: return "R_SPARC_PC_LM22";
-    case R_SPARC_WDISP16: return "R_SPARC_WDISP16";
-    case R_SPARC_WDISP19: return "R_SPARC_WDISP19";
-    case R_SPARC_UNUSED_42: return "R_SPARC_UNUSED_42";
-    case R_SPARC_7: return "R_SPARC_7";
-    case R_SPARC_5: return "R_SPARC_5";
-    case R_SPARC_6: return "R_SPARC_6";
-    case R_SPARC_DISP64: return "R_SPARC_DISP64";
-    case R_SPARC_PLT64: return "R_SPARC_PLT64";
-    case R_SPARC_HIX22: return "R_SPARC_HIX22";
-    case R_SPARC_LOX10: return "R_SPARC_LOX10";
-    case R_SPARC_H44: return "R_SPARC_H44";
-    case R_SPARC_M44: return "R_SPARC_M44";
-    case R_SPARC_L44: return "R_SPARC_L44";
-    case R_SPARC_REGISTER: return "R_SPARC_REGISTER";
-    case R_SPARC_UA64: return "R_SPARC_UA64";
-    case R_SPARC_UA16: return "R_SPARC_UA16";
-    default:		 return NULL;
-    }
-}
-
-
-static const char *
-get_m32r_rel_type (rtype)
-     unsigned long rtype;
-{
-  switch (rtype)
-    {
-    case R_M32R_NONE: return "R_M32R_NONE";
-    case R_M32R_16: return "R_M32R_16";
-    case R_M32R_32: return "R_M32R_32";
-    case R_M32R_24: return "R_M32R_24";
-    case R_M32R_10_PCREL: return "R_M32R_10_PCREL";
-    case R_M32R_18_PCREL: return "R_M32R_18_PCREL";
-    case R_M32R_26_PCREL: return "R_M32R_26_PCREL";
-    case R_M32R_HI16_ULO: return "R_M32R_HI16_ULO";
-    case R_M32R_HI16_SLO: return "R_M32R_HI16_SLO";
-    case R_M32R_LO16: return "R_M32R_LO16";
-    case R_M32R_SDA16: return "R_M32R_SDA16";
-    default:		 return NULL;
-    }
-}
-
-
-static const char *
-get_v850_rel_type (rtype)
+elf_v850_reloc_type (rtype)
      unsigned long rtype;
 {
   switch (rtype)
@@ -468,217 +367,34 @@ get_v850_rel_type (rtype)
     }
 }
 
-
-static const char *
-get_d10v_rel_type (rtype)
-     unsigned long rtype;
-{
-  switch (rtype)
-    {
-    case R_D10V_NONE: return "R_D10V_NONE";
-    case R_D10V_10_PCREL_R: return "R_D10V_10_PCREL_R";
-    case R_D10V_10_PCREL_L: return "R_D10V_10_PCREL_L";
-    case R_D10V_16: return "R_D10V_16";
-    case R_D10V_18: return "R_D10V_18";
-    case R_D10V_18_PCREL: return "R_D10V_18_PCREL";
-    case R_D10V_32: return "R_D10V_32";
-    default:		 return NULL;
-    }
-}
+/* Define the function to get ARM relocations.  */
+#include "elf/d10v.h"
 
 /* start-sanitize-d30v */
-static const char *
-get_d30v_rel_type (rtype)
-     unsigned long rtype;
-{
-  switch (rtype)
-    {
-    case R_D30V_NONE: return "R_D30V_NONE";
-    case R_D30V_6: return "R_D30V_6";
-    case R_D30V_9_PCREL: return "R_D30V_9_PCREL";
-    case R_D30V_9_PCREL_R: return "R_D30V_9_PCREL_R";
-    case R_D30V_15: return "R_D30V_15";
-    case R_D30V_15_PCREL: return "R_D30V_15_PCREL";
-    case R_D30V_15_PCREL_R: return "R_D30V_15_PCREL_R";
-    case R_D30V_21: return "R_D30V_21";
-    case R_D30V_21_PCREL: return "R_D30V_21_PCREL";
-    case R_D30V_21_PCREL_R: return "R_D30V_21_PCREL_R";
-    case R_D30V_32: return "R_D30V_32";
-    case R_D30V_32_PCREL: return "R_D30V_32_PCREL";
-    case R_D30V_32_NORMAL: return "R_D30V_32_NORMAL";
-    default:		 return NULL;
-    }
-}
+/* Define the function to get ARM relocations.  */
+#include "elf/d30v.h"
 
 /* end-sanitize-d30v */
-static const char *
-get_sh_rel_type (rtype)
-     unsigned long rtype;
-{
-  switch (rtype)
-    {
-    case R_SH_NONE: return "R_SH_NONE";
-    case R_SH_DIR32: return "R_SH_DIR32";
-    case R_SH_REL32: return "R_SH_REL32";
-    case R_SH_DIR8WPN: return "R_SH_DIR8WPN";
-    case R_SH_IND12W: return "R_SH_IND12W";
-    case R_SH_DIR8WPL: return "R_SH_DIR8WPL";
-    case R_SH_DIR8WPZ: return "R_SH_DIR8WPZ";
-    case R_SH_DIR8BP: return "R_SH_DIR8BP";
-    case R_SH_DIR8W: return "R_SH_DIR8W";
-    case R_SH_DIR8L: return "R_SH_DIR8L";
-    case R_SH_SWITCH16: return "R_SH_SWITCH16";
-    case R_SH_SWITCH32: return "R_SH_SWITCH32";
-    case R_SH_USES: return "R_SH_USES";
-    case R_SH_COUNT: return "R_SH_COUNT";
-    case R_SH_ALIGN: return "R_SH_ALIGN";
-    case R_SH_CODE: return "R_SH_CODE";
-    case R_SH_DATA: return "R_SH_DATA";
-    case R_SH_LABEL: return "R_SH_LABEL";
-    default:		 return NULL;
-    }
-}
-
+/* Define the function to get SH relocations.  */
+#include "elf/sh.h"
 
 /* Define the function to get MN10300 relocations.  */
-#define START_RELOC_NUMBERS(name)  static const char *			      \
-				   get_mn10300_rel_type (rtype)		      \
-				        unsigned long rtype;		      \
-				   {					      \
-				     switch (rtype) {
-#ifdef __STDC__
-# define RELOC_NUMBER(name, number)    case number: return #name;
-#else
-# define RELOC_NUMBER(name, number)    case number: return "name";
-#endif
-#define END_RELOC_NUMBERS              default: return NULL;		      \
-				     }					      \
-				   }
 #include "elf/mn10300.h"
-#undef START_RELOC_NUMBERS
-#undef RELOC_NUMBER
-#undef END_RELOC_NUMBERS
 
-
-static const char *
-get_mn10200_rel_type (rtype)
-     unsigned long rtype;
-{
-  switch (rtype)
-    {
-    case R_MN10200_NONE: return "R_MN10200_NONE";
-    case R_MN10200_32: return "R_MN10200_32";
-    case R_MN10200_16: return "R_MN10200_16";
-    case R_MN10200_8: return "R_MN10200_8";
-    case R_MN10200_24: return "R_MN10200_24";
-    case R_MN10200_PCREL8: return "R_MN10200_PCREL8";
-    case R_MN10200_PCREL16: return "R_MN10200_PCREL16";
-    case R_MN10200_PCREL24: return "R_MN10200_PCREL24";
-    default:		 return NULL;
-    }
-}
-
+/* Define the function to get MN10200 relocations.  */
+#include "elf/mn10200.h"
 
 /* Define the function to get PPC relocations.  */
-#define START_RELOC_NUMBERS(name)  static const char *			      \
-				   get_ppc_rel_type (rtype)		      \
-				        unsigned long rtype;		      \
-				   {					      \
-				     switch (rtype) {
-#ifdef __STDC__
-# define RELOC_NUMBER(name, number)    case number: return #name;
-#else
-# define RELOC_NUMBER(name, number)    case number: return "name";
-#endif
-#define END_RELOC_NUMBERS              default: return NULL;		      \
-				     }					      \
-				   }
 #include "elf/ppc.h"
-#undef START_RELOC_NUMBERS
-#undef RELOC_NUMBER
-#undef END_RELOC_NUMBERS
-
 
 /* Define the function to get MIPS relocations.  */
-#define START_RELOC_NUMBERS(name)  static const char *			      \
-				   get_mips_rel_type (rtype)		      \
-				        unsigned long rtype;		      \
-				   {					      \
-				     switch (rtype) {
-#ifdef __STDC__
-# define RELOC_NUMBER(name, number)    case number: return #name;
-#else
-# define RELOC_NUMBER(name, number)    case number: return "name";
-#endif
-#define END_RELOC_NUMBERS              default: return NULL;		      \
-				     }					      \
-				   }
 #include "elf/mips.h"
-#undef START_RELOC_NUMBERS
-#undef RELOC_NUMBER
-#undef END_RELOC_NUMBERS
 
+/* Define the function to get MIPS relocations.  */
+#include "elf/alpha.h"
 
-static const char *
-get_alpha_rel_type (rtype)
-     unsigned long rtype;
-{
-  switch (rtype)
-    {
-    case R_ALPHA_NONE: return "R_ALPHA_NONE";
-    case R_ALPHA_REFLONG: return "R_ALPHA_REFLONG";
-    case R_ALPHA_REFQUAD: return "R_ALPHA_REFQUAD";
-    case R_ALPHA_GPREL32: return "R_ALPHA_GPREL32";
-    case R_ALPHA_LITERAL: return "R_ALPHA_LITERAL";
-    case R_ALPHA_LITUSE: return "R_ALPHA_LITUSE";
-    case R_ALPHA_GPDISP: return "R_ALPHA_GPDISP";
-    case R_ALPHA_BRADDR: return "R_ALPHA_BRADDR";
-    case R_ALPHA_HINT: return "R_ALPHA_HINT";
-    case R_ALPHA_SREL16: return "R_ALPHA_SREL16";
-    case R_ALPHA_SREL32: return "R_ALPHA_SREL32";
-    case R_ALPHA_SREL64: return "R_ALPHA_SREL64";
-    case R_ALPHA_OP_PUSH: return "R_ALPHA_OP_PUSH";
-    case R_ALPHA_OP_STORE: return "R_ALPHA_OP_STORE";
-    case R_ALPHA_OP_PSUB: return "R_ALPHA_OP_PSUB";
-    case R_ALPHA_OP_PRSHIFT: return "R_ALPHA_OP_PRSHIFT";
-    case R_ALPHA_GPVALUE: return "R_ALPHA_GPVALUE";
-    case R_ALPHA_GPRELHIGH: return "R_ALPHA_GPRELHIGH";
-    case R_ALPHA_GPRELLOW: return "R_ALPHA_GPRELLOW";
-    case R_ALPHA_IMMED_GP_16: return "R_ALPHA_IMMED_GP_16";
-    case R_ALPHA_IMMED_GP_HI32: return "R_ALPHA_IMMED_GP_HI32";
-    case R_ALPHA_IMMED_SCN_HI32: return "R_ALPHA_IMMED_SCN_HI32";
-    case R_ALPHA_IMMED_BR_HI32: return "R_ALPHA_IMMED_BR_HI32";
-    case R_ALPHA_IMMED_LO32: return "R_ALPHA_IMMED_LO32";
-    case R_ALPHA_COPY: return "R_ALPHA_COPY";
-    case R_ALPHA_GLOB_DAT: return "R_ALPHA_GLOB_DAT";
-    case R_ALPHA_JMP_SLOT: return "R_ALPHA_JMP_SLOT";
-    case R_ALPHA_RELATIVE: return "R_ALPHA_RELATIVE";
-    default:		 return NULL;
-    }
-}
-
-
-static const char *
-get_arm_rel_type (rtype)
-     unsigned long rtype;
-{
-  switch (rtype)
-    {
-    case R_ARM_NONE: return "R_ARM_NONE";
-    case R_ARM_PC24: return "R_ARM_PC24";
-    case R_ARM_ABS32: return "R_ARM_ABS32";
-    case R_ARM_REL32: return "R_ARM_REL32";
-    case R_ARM_COPY: return "R_ARM_COPY";
-    case R_ARM_GLOB_DAT: return "R_ARM_GLOB_DAT";
-    case R_ARM_JUMP_SLOT: return "R_ARM_JUMP_SLOT";
-    case R_ARM_RELATIVE: return "R_ARM_RELATIVE";
-    case R_ARM_GOTOFF: return "R_ARM_GOTOFF";
-    case R_ARM_GOTPC: return "R_ARM_GOTPC";
-    case R_ARM_GOT32: return "R_ARM_GOT32";
-    case R_ARM_PLT32: return "R_ARM_PLT32";
-    default:		 return NULL;
-    }
-}
+/* Define the function to get ARM relocations.  */
+#include "elf/arm.h"
 
 
 /* Display the contents of the relocation data
@@ -806,63 +522,63 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 	  break;
 
 	case EM_CYGNUS_M32R:
-	  rtype = get_m32r_rel_type (ELF32_R_TYPE (info));
+	  rtype = elf_m32r_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	case EM_386:
 	case EM_486:
-	  rtype = get_i386_rel_type (ELF32_R_TYPE (info));
+	  rtype = elf_i386_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	case EM_68K:
-	  rtype = get_m68k_rel_type (ELF32_R_TYPE (info));
+	  rtype = elf_m68k_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	case EM_SPARC:
-	  rtype = get_sparc_rel_type (ELF32_R_TYPE (info));
+	  rtype = elf_sparc_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	case EM_CYGNUS_V850:
-	  rtype = get_v850_rel_type (ELF32_R_TYPE (info));
+	  rtype = elf_v850_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	case EM_CYGNUS_D10V:
-	  rtype = get_d10v_rel_type (ELF32_R_TYPE (info));
+	  rtype = elf_d10v_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	  /* start-sanitize-d30v */
 	case EM_CYGNUS_D30V:
-	  rtype = get_d30v_rel_type (ELF32_R_TYPE (info));
+	  rtype = elf_d30v_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	  /* end-sanitize-d30v */
 	case EM_SH:
-	  rtype = get_sh_rel_type (ELF32_R_TYPE (info));
+	  rtype = elf_sh_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	case EM_CYGNUS_MN10300:
-	  rtype = get_mn10300_rel_type (ELF32_R_TYPE (info));
+	  rtype = elf_mn10300_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	case EM_CYGNUS_MN10200:
-	  rtype = get_mn10200_rel_type (ELF32_R_TYPE (info));
+	  rtype = elf_mn10200_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	case EM_PPC:
-	  rtype = get_ppc_rel_type (ELF32_R_TYPE (info));
+	  rtype = elf_ppc_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	case EM_MIPS:
 	case EM_MIPS_RS4_BE:
-	  rtype = get_mips_rel_type (ELF32_R_TYPE (info));
+	  rtype = elf_mips_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	case EM_ALPHA:
-	  rtype = get_alpha_rel_type (ELF32_R_TYPE (info));
+	  rtype = elf_alpha_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	case EM_ARM:
-	  rtype = get_arm_rel_type (ELF32_R_TYPE (info));
+	  rtype = elf_arm_reloc_type (ELF32_R_TYPE (info));
 	  break;
 	}
 
