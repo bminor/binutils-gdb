@@ -1,3 +1,35 @@
+1999-01-27  Nick Clifton  <nickc@cygnus.com>
+
+	* version.c: Add 1999 copyright.
+
+	* binutils.texi (readelf): Document new command line options
+	--debug-dump and --histogram.
+
+	* readelf.c: Add ability to display contents of some or all of the
+	Dwarf2 debug sections.  {Work only partially completed}.  
+	(display_debug_section): New function.
+	(display_debug_info): New function.
+	(display_debug_not_supported): New function.
+	(display_debug_line): New function.
+	(display_debug_abbrev): New function.
+	(process_abbrev_section): New function.
+	(read_leb128): New function.
+	(process_extended_line_op): New function.
+	(get_TAG_name): New function.
+	(get_AT_name): New function.
+	(get_FORM_name): New function.
+	(free_abbrevs): New function.
+	(add_abbrev): New function.
+	(add_abbrev_attr): New function.
+	(read_and_display_attr): New function.
+	(display_block): New function.
+
+Thu Jan 14 23:36:11 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* coffdump.c (xcalloc): Remove, in libiberty now.
+	* srconv.c (xcalloc): Likewise.
+	* sysdump.c (xcalloc): Likewise.
+
 1999-01-14  Nick Clifton  <nickc@cygnus.com>
 
 	* readelf.c (process_section_headers): Omit trailing space at end

@@ -13,7 +13,7 @@ END-INFO-DIR-ENTRY
 @end ifinfo
 
 @ifinfo
-Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -41,7 +41,7 @@ into another language, under the above conditions for modified versions.
 @c This file documents the GNU binary utilities "ar", "ld", "objcopy",
 @c  "objdump", "nm", "size", "strings", "strip", "readelf" and "ranlib".
 @c
-@c Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+@c Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
 @c 
 @c This text may be freely distributed under the terms of the GNU
 @c General Public License.
@@ -2314,12 +2314,15 @@ readelf [ -a | --all ]
         [ -h | --file-header]
         [ -l | --program-headers | --segments]
         [ -S | --section-headers | --sections]
-        [ -s | --symbols]
+        [ -e | --headers]
+        [ -s | --syms | --symbols]
         [ -r | --relocs]
         [ -d | --dynamic]
         [ -V | --version-info]
         [ -D | --use-dynamic]
         [ -x <number> | --hex-dump=<number>]
+        [ -w{liap} | --debug-dump{=info,=line,=abbrev,=pubnames}]
+        [      --histogram]
         [ -v | --version]
         [ -H | --help]
         @var{elffile}@dots{}
@@ -2359,14 +2362,20 @@ has any.
 
 @item -S
 @itemx --sections
+@itemx --section-headers
 @cindex ELF section information
 Displays the information contained in the file's section headers, if it
 has any.
 
 @item -s
 @itemx --symbols
+@itemx --syms
 @cindex ELF symbol table information
 Displays the entries in symbol table section of the file, if it has one.
+
+@item -e
+@itemx --headers
+Display all the headers in the file.  Equivalent to @samp{-h -l -S}.
 
 @item -r
 @itemx --relocs
@@ -2393,6 +2402,16 @@ symbols section.
 @item -x <number>
 @itemx --hex-dump=<number>
 Displays the contents of the indicated section as a hexadecimal dump.
+
+@item -w{lia}
+@itemx --debug-dump{=line,=info,=abbrev}
+Displays the contents of the debug sections in the file, if any are
+present.  If one of the optional letters or words follows the switch
+then only data found in those specific sections will be dumped.
+
+@item --histogram
+Display a histogram of bucket list lengths when displaying the contents
+of the symbol tables.
 
 @item -v
 @itemx --version
