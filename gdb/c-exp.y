@@ -812,6 +812,10 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = builtin_type_unsigned_long_long; }
 	|	UNSIGNED LONG LONG INT_KEYWORD
 			{ $$ = builtin_type_unsigned_long_long; }
+	|	SIGNED_KEYWORD LONG LONG
+			{ $$ = lookup_signed_typename ("long long"); }
+	|	SIGNED_KEYWORD LONG LONG INT_KEYWORD
+			{ $$ = lookup_signed_typename ("long long"); }
 	|	SHORT INT_KEYWORD
 			{ $$ = builtin_type_short; }
 	|	UNSIGNED SHORT INT_KEYWORD

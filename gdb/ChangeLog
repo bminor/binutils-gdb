@@ -102,6 +102,10 @@
 	8-byte wide watchpoints.
 	(i386_show_dr): Debug message format string change.
 
+2001-09-21  Michael Snyder  <msnyder@redhat.com>
+
+	* c-exp.y (typebase): Accept (signed long long) as a type expr.
+
 2001-09-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-svr4.c (fetch_link_map_offsets): Add comment.
