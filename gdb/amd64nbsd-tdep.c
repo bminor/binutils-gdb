@@ -43,7 +43,7 @@ amd64nbsd_sigcontext_addr (struct frame_info *next_frame)
 
   /* The stack pointer points at `struct sigcontext' upon entry of a
      signal trampoline.  */
-  sp = frame_unwind_register_unsigned (next_frame, X86_64_RSP_REGNUM);
+  sp = frame_unwind_register_unsigned (next_frame, AMD64_RSP_REGNUM);
   return sp;
 }
 
@@ -93,7 +93,7 @@ amd64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset_num_regs = ARRAY_SIZE (amd64nbsd_r_reg_offset);
   tdep->sizeof_gregset = 26 * 8;
 
-  x86_64_init_abi (info, gdbarch);
+  amd64_init_abi (info, gdbarch);
 
   tdep->jb_pc_offset = 7 * 8;
 
@@ -128,7 +128,7 @@ void
 _initialize_amd64nbsd_ndep (void)
 {
   /* The NetBSD/amd64 native dependent code makes this assumption.  */
-  gdb_assert (ARRAY_SIZE (amd64nbsd_r_reg_offset) == X86_64_NUM_GREGS);
+  gdb_assert (ARRAY_SIZE (amd64nbsd_r_reg_offset) == AMD64_NUM_GREGS);
 
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
 			  GDB_OSABI_NETBSD_ELF, amd64nbsd_init_abi);

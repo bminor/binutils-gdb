@@ -80,7 +80,7 @@ amd64_linux_supply_gregset (char *regp)
 {
   int i;
 
-  for (i = 0; i < X86_64_NUM_GREGS; i++)
+  for (i = 0; i < AMD64_NUM_GREGS; i++)
     supply_register (i, regp + (user_to_gdb_regmap[i] * 8));
 }
 
@@ -93,7 +93,7 @@ amd64_linux_fill_gregset (char *regp, int regno)
 {
   int i;
 
-  for (i = 0; i < X86_64_NUM_GREGS; i++)
+  for (i = 0; i < AMD64_NUM_GREGS; i++)
     if (regno == -1 || regno == i)
       regcache_collect (i, regp + (user_to_gdb_regmap[i] * 8));
 }
@@ -123,7 +123,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       if (core_reg_size != 512)
 	warning ("Wrong size XMM register set in core file.");
       else
-	x86_64_supply_fxsave (current_regcache, -1, core_reg_sect);
+	amd64_supply_fxsave (current_regcache, -1, core_reg_sect);
       break;
 
     default:
@@ -271,7 +271,7 @@ static void
 amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  x86_64_init_abi (info, gdbarch);
+  amd64_init_abi (info, gdbarch);
 
   set_gdbarch_pc_in_sigtramp (gdbarch, amd64_linux_pc_in_sigtramp);
 

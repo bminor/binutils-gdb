@@ -1,4 +1,4 @@
-/* Target-dependent code for the x86-64.
+/* Target-dependent definitions for AMD64.
 
    Copyright 2001, 2003, 2004 Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
@@ -31,36 +31,44 @@ struct regcache;
 
 /* Register numbers of various important registers.  */
 
-#define X86_64_RAX_REGNUM	0 /* %rax */
-#define X86_64_RDX_REGNUM	3 /* %rdx */
-#define X86_64_RDI_REGNUM	5 /* %rdi */
-#define X86_64_RBP_REGNUM	6 /* %rbp */
-#define X86_64_RSP_REGNUM	7 /* %rsp */
-#define X86_64_RIP_REGNUM	16 /* %rip */
-#define X86_64_EFLAGS_REGNUM	17 /* %eflags */
-#define X86_64_ST0_REGNUM	24 /* %st0 */
-#define X86_64_XMM0_REGNUM	40 /* %xmm0 */
-#define X86_64_XMM1_REGNUM	41 /* %xmm1 */
+enum amd64_regnum
+{
+  AMD64_RAX_REGNUM,		/* %rax */
+  AMD64_RBX_REGNUM,		/* %rbx */
+  AMD64_RCX_REGNUM,		/* %rcx */
+  AMD64_RDX_REGNUM,		/* %rdx */
+  AMD64_RSI_REGNUM,		/* %rsi */
+  AMD64_RDI_REGNUM,		/* %rdi */
+  AMD64_RBP_REGNUM,		/* %rbp */
+  AMD64_RSP_REGNUM,		/* %rsp */
+  AMD64_R8_REGNUM = 8,		/* %r8 */
+  AMD64_R15_REGNUM = 15,	/* %r15 */
+  AMD64_RIP_REGNUM,		/* %rip */
+  AMD64_EFLAGS_REGNUM,		/* %eflags */
+  AMD64_ST0_REGNUM = 24,	/* %st0 */
+  AMD64_XMM0_REGNUM = 40,	/* %xmm0 */
+  AMD64_XMM1_REGNUM		/* %xmm1 */
+};
 
 /* Number of general purpose registers.  */
-#define X86_64_NUM_GREGS	24
+#define AMD64_NUM_GREGS		24
 
-void x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);
+extern void amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);
 
 /* Fill register REGNUM in REGCACHE with the appropriate
    floating-point or SSE register value from *FXSAVE.  If REGNUM is
    -1, do this for all registers.  This function masks off any of the
    reserved bits in *FXSAVE.  */
 
-extern void x86_64_supply_fxsave (struct regcache *regcache, int regnum,
-				  const void *fxsave);
+extern void amd64_supply_fxsave (struct regcache *regcache, int regnum,
+				 const void *fxsave);
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in
    *FXSAVE with the value in GDB's register cache.  If REGNUM is -1, do
    this for all registers.  This function doesn't touch any of the
    reserved bits in *FXSAVE.  */
 
-void x86_64_fill_fxsave (char *fxsave, int regnum);
+extern void amd64_fill_fxsave (char *fxsave, int regnum);
 
 
 /* Variables exported from amd64nbsd-tdep.c.  */

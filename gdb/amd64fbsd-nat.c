@@ -131,7 +131,7 @@ fill_gregset (gregset_t *gregsetp, int regnum)
 void
 supply_fpregset (fpregset_t *fpregsetp)
 {
-  x86_64_supply_fxsave (current_regcache, -1, fpregsetp);
+  amd64_supply_fxsave (current_regcache, -1, fpregsetp);
 }
 
 /* Fill register REGNUM (if it is a floating-point register) in
@@ -141,7 +141,7 @@ supply_fpregset (fpregset_t *fpregsetp)
 void
 fill_fpregset (fpregset_t *fpregsetp, int regnum)
 {
-  x86_64_fill_fxsave ((char *) fpregsetp, regnum);
+  amd64_fill_fxsave ((char *) fpregsetp, regnum);
 }
 
 
@@ -168,9 +168,9 @@ _initialize_amd64fbsd_nat (void)
      pointer since these members of `struct sigcontext' are essential
      for providing backtraces.  */
 
-#define SC_RIP_OFFSET SC_REG_OFFSET[X86_64_RIP_REGNUM]
-#define SC_RSP_OFFSET SC_REG_OFFSET[X86_64_RSP_REGNUM]
-#define SC_RBP_OFFSET SC_REG_OFFSET[X86_64_RBP_REGNUM]
+#define SC_RIP_OFFSET SC_REG_OFFSET[AMD64_RIP_REGNUM]
+#define SC_RSP_OFFSET SC_REG_OFFSET[AMD64_RSP_REGNUM]
+#define SC_RBP_OFFSET SC_REG_OFFSET[AMD64_RBP_REGNUM]
 
   /* Override the default value for the offset of the program counter
      in the sigcontext structure.  */

@@ -46,7 +46,7 @@ int amd64_native_gregset32_num_regs = I386_NUM_GREGS;
 
 /* General-purpose register mapping for native 64-bit code.  */
 int *amd64_native_gregset64_reg_offset;
-int amd64_native_gregset64_num_regs = X86_64_NUM_GREGS;
+int amd64_native_gregset64_num_regs = AMD64_NUM_GREGS;
 
 /* Return the offset of REGNUM within the appropriate native
    general-purpose register set.  */

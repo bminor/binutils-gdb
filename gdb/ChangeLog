@@ -1,3 +1,55 @@
+2004-02-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* x86-64-tdep.h: Tewak comment.
+	(enum amd64_regnum): New.
+	(X86_64_RAX_REGNUM, X86_64_RDX_REGNUM, X86_64_RDI_REGNUM)
+	(X86_64_RBP_REGNUM, X86_64_RSP_REGNUM, X86_64_RIP_REGNUM)
+	(X86_64_EFLAGS_REGNUM, X86_64_ST0_REGNUM, X86_64_XMM0_REGNUM)
+	(X86_64_XMM1_REGNUM): Removed.
+	(AMD64_NUM_GREGS): Renamed from X86_64_NUM_GREGS.
+	(amd64_init_abi, amd64_supply_fxsave, amd64_fill_fxsave): Adjust
+	prototypes for renamed functions.
+	* x86-64-tdep.c: Fix typo.
+	(amd64_dwarf_regmap): Use constants from `enum amd64_regnum' for
+	register numbers.
+	(amd64_return_value, amd64_push_arguments, amd64_push_dummy_call):
+	Use constants from `enum amd64_regnum' for register numbers.
+	(AMD64_NUM_SAVED_REGS): Adjust for renamed macros.
+	(amd64_analyze_prologue, amd64_frame_cache,
+	amd64_sigtramp_frame_cache): Use constants from `enum
+	amd64_regnum' for register numbers.
+	(amd64_supply_fpregset): Adjust for renamed functions.
+	(amd64_init_abi): Rename from x86_64_init_abi.  Use constants from
+	`enum amd64_regnum' for register numbers.
+	(I387_ST0_REGNUM): Use constant from `enum amd64_regnum'.
+	(amd64_supply_fxsave): Rename from x86_64_supply_fxsave.
+	(amd64_fill_fxsave): Rename fro x86_64_fill_fxsave.
+	* x86-64-linux-tdep.c (amd64_linux_supply_gregset)
+	(amd64_linux_fill_gregset): Adjust for renamed macros.
+	(fetch_core_registers): Adjust for renamed functions.
+	(amd64_linux_init_abi): Adjust for renamed functions.
+	* x86-64-linux-nat.c (supply_gregset, fill_gregset): Adjust for
+	renamed functions.
+	* amd64-nat.c: Adjust for renamed macros.
+	* amd64bsd-nat.c (fetch_inferior_registers)
+	(store_inferior_registers): Use constants from `enum amd64_regnum'
+	for register numbers.  Adjust for renamed variables.
+	* amd64fbsd-nat.c (supply_gregset, fill_gregset): Adjust for
+	renamed variables.
+	(_initialize_amd64fbsd_nat): Use constants from `enum
+	amd64_regnum' for register numbers.
+	* amd64fbsd-tdep.c (amd64fbsd_sigcontext_addr): Use constants from
+	`enum amd64_regnum' for register numbers.
+	(amd64fbsd_init_abi): Adjust for renamed functions.
+	* amd64nbsd-tdep.c (amd64nbsd_sigcontext_addr): Use constants from
+	`enum amd64_regnum' for register numbers.
+	(amd64nbsd_init_abi): Adjust for renamed functions.
+	(_initialize_amd64nbsd_ndep): Adjust for renamed macros.
+	* amd64obsd-tdep.c (amd64obsd_sigcontext_addr): Use constants from
+	`enum amd64_regnum' for register numbers.
+	(amd64obsd_init_abi): Adjust for renamed functions.
+	(_initialize_amd64obsd_ndep): Adjust for renamed macros.
+
 2004-02-23  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* breakpoint.c (print_one_breakpoint): Do not output spaces

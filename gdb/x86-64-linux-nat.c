@@ -166,7 +166,7 @@ store_regs (int tid, int regnum)
 void
 supply_fpregset (elf_fpregset_t *fpregsetp)
 {
-  x86_64_supply_fxsave (current_regcache, -1, fpregsetp);
+  amd64_supply_fxsave (current_regcache, -1, fpregsetp);
 }
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in
@@ -176,7 +176,7 @@ supply_fpregset (elf_fpregset_t *fpregsetp)
 void
 fill_fpregset (elf_fpregset_t *fpregsetp, int regnum)
 {
-  x86_64_fill_fxsave ((char *) fpregsetp, regnum);
+  amd64_fill_fxsave ((char *) fpregsetp, regnum);
 }
 
 /* Fetch all floating-point registers from process/thread TID and store

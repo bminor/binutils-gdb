@@ -45,7 +45,7 @@ amd64obsd_supply_regset (const struct regset *regset,
   gdb_assert (len >= tdep->sizeof_gregset + I387_SIZEOF_FXSAVE);
 
   i386_supply_gregset (regset, regcache, regnum, regs, tdep->sizeof_gregset);
-  x86_64_supply_fxsave (regcache, regnum, (char *)regs + tdep->sizeof_gregset);
+  amd64_supply_fxsave (regcache, regnum, (char *)regs + tdep->sizeof_gregset);
 }
 
 static const struct regset *
@@ -112,7 +112,7 @@ amd64obsd_sigcontext_addr (struct frame_info *next_frame)
 {
   /* The %rsp register points at `struct sigcontext' upon entry of a
      signal trampoline.  */
-  return frame_unwind_register_unsigned (next_frame, X86_64_RSP_REGNUM);
+  return frame_unwind_register_unsigned (next_frame, AMD64_RSP_REGNUM);
 }
 
 /* OpenBSD 3.5 or later.  */
@@ -183,7 +183,7 @@ amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  x86_64_init_abi (info, gdbarch);
+  amd64_init_abi (info, gdbarch);
 
   /* Initialize general-purpose register set details.  */
   tdep->gregset_reg_offset = amd64obsd_r_reg_offset;
@@ -213,7 +213,7 @@ void
 _initialize_amd64obsd_tdep (void)
 {
   /* The OpenBSD/amd64 native dependent code makes this assumption.  */
-  gdb_assert (ARRAY_SIZE (amd64obsd_r_reg_offset) == X86_64_NUM_GREGS);
+  gdb_assert (ARRAY_SIZE (amd64obsd_r_reg_offset) == AMD64_NUM_GREGS);
 
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
 			  GDB_OSABI_OPENBSD_ELF, amd64obsd_init_abi);

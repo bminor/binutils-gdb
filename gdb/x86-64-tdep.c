@@ -42,7 +42,7 @@
 
 /* Note that the AMD64 architecture was previously known as x86-64.
    The latter is (forever) engraved into the canonical system name as
-   returned bu config.guess, and used as the name for the AMD64 port
+   returned by config.guess, and used as the name for the AMD64 port
    of GNU/Linux.  The BSD's have renamed their ports to amd64; they
    don't like to shout.  For GDB we prefer the amd64_-prefix over the
    x86_64_-prefix since it's so much easier to type.  */
@@ -154,38 +154,39 @@ amd64_register_type (struct gdbarch *gdbarch, int regnum)
 static int amd64_dwarf_regmap[] =
 {
   /* General Purpose Registers RAX, RDX, RCX, RBX, RSI, RDI.  */
-  X86_64_RAX_REGNUM, X86_64_RDX_REGNUM, 2, 1,
-  4, X86_64_RDI_REGNUM,
+  AMD64_RAX_REGNUM, AMD64_RDX_REGNUM,
+  AMD64_RCX_REGNUM, AMD64_RBX_REGNUM,
+  AMD64_RSI_REGNUM, AMD64_RDI_REGNUM,
 
   /* Frame Pointer Register RBP.  */
-  X86_64_RBP_REGNUM,
+  AMD64_RBP_REGNUM,
 
   /* Stack Pointer Register RSP.  */
-  X86_64_RSP_REGNUM,
+  AMD64_RSP_REGNUM,
 
   /* Extended Integer Registers 8 - 15.  */
   8, 9, 10, 11, 12, 13, 14, 15,
 
   /* Return Address RA.  Mapped to RIP.  */
-  X86_64_RIP_REGNUM,
+  AMD64_RIP_REGNUM,
 
   /* SSE Registers 0 - 7.  */
-  X86_64_XMM0_REGNUM + 0, X86_64_XMM1_REGNUM,
-  X86_64_XMM0_REGNUM + 2, X86_64_XMM0_REGNUM + 3,
-  X86_64_XMM0_REGNUM + 4, X86_64_XMM0_REGNUM + 5,
-  X86_64_XMM0_REGNUM + 6, X86_64_XMM0_REGNUM + 7,
+  AMD64_XMM0_REGNUM + 0, AMD64_XMM1_REGNUM,
+  AMD64_XMM0_REGNUM + 2, AMD64_XMM0_REGNUM + 3,
+  AMD64_XMM0_REGNUM + 4, AMD64_XMM0_REGNUM + 5,
+  AMD64_XMM0_REGNUM + 6, AMD64_XMM0_REGNUM + 7,
 
   /* Extended SSE Registers 8 - 15.  */
-  X86_64_XMM0_REGNUM + 8, X86_64_XMM0_REGNUM + 9,
-  X86_64_XMM0_REGNUM + 10, X86_64_XMM0_REGNUM + 11,
-  X86_64_XMM0_REGNUM + 12, X86_64_XMM0_REGNUM + 13,
-  X86_64_XMM0_REGNUM + 14, X86_64_XMM0_REGNUM + 15,
+  AMD64_XMM0_REGNUM + 8, AMD64_XMM0_REGNUM + 9,
+  AMD64_XMM0_REGNUM + 10, AMD64_XMM0_REGNUM + 11,
+  AMD64_XMM0_REGNUM + 12, AMD64_XMM0_REGNUM + 13,
+  AMD64_XMM0_REGNUM + 14, AMD64_XMM0_REGNUM + 15,
 
   /* Floating Point Registers 0-7.  */
-  X86_64_ST0_REGNUM + 0, X86_64_ST0_REGNUM + 1,
-  X86_64_ST0_REGNUM + 2, X86_64_ST0_REGNUM + 3,
-  X86_64_ST0_REGNUM + 4, X86_64_ST0_REGNUM + 5,
-  X86_64_ST0_REGNUM + 6, X86_64_ST0_REGNUM + 7
+  AMD64_ST0_REGNUM + 0, AMD64_ST0_REGNUM + 1,
+  AMD64_ST0_REGNUM + 2, AMD64_ST0_REGNUM + 3,
+  AMD64_ST0_REGNUM + 4, AMD64_ST0_REGNUM + 5,
+  AMD64_ST0_REGNUM + 6, AMD64_ST0_REGNUM + 7
 };
 
 static const int amd64_dwarf_regmap_len =
@@ -406,8 +407,8 @@ amd64_return_value (struct gdbarch *gdbarch, struct type *type,
 {
   enum amd64_reg_class class[2];
   int len = TYPE_LENGTH (type);
-  static int integer_regnum[] = { X86_64_RAX_REGNUM, X86_64_RDX_REGNUM };
-  static int sse_regnum[] = { X86_64_XMM0_REGNUM, X86_64_XMM1_REGNUM };
+  static int integer_regnum[] = { AMD64_RAX_REGNUM, AMD64_RDX_REGNUM };
+  static int sse_regnum[] = { AMD64_XMM0_REGNUM, AMD64_XMM1_REGNUM };
   int integer_reg = 0;
   int sse_reg = 0;
   int i;
@@ -457,7 +458,7 @@ amd64_return_value (struct gdbarch *gdbarch, struct type *type,
 	case AMD64_X87:
 	  /* 6. If the class is X87, the value is returned on the X87
              stack in %st0 as 80-bit x87 number.  */
-	  regnum = X86_64_ST0_REGNUM;
+	  regnum = AMD64_ST0_REGNUM;
 	  if (writebuf)
 	    i387_return_value (gdbarch, regcache);
 	  break;
@@ -466,7 +467,7 @@ amd64_return_value (struct gdbarch *gdbarch, struct type *type,
 	  /* 7. If the class is X87UP, the value is returned together
              with the previous X87 value in %st0.  */
 	  gdb_assert (i > 0 && class[0] == AMD64_X87);
-	  regnum = X86_64_ST0_REGNUM;
+	  regnum = AMD64_ST0_REGNUM;
 	  offset = 8;
 	  len = 2;
 	  break;
@@ -498,17 +499,20 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
 {
   static int integer_regnum[] =
   {
-    X86_64_RDI_REGNUM, 4,	/* %rdi, %rsi */
-    X86_64_RDX_REGNUM, 2,	/* %rdx, %rcx */
-    8, 9			/* %r8, %r9 */
+    AMD64_RDI_REGNUM,		/* %rdi */
+    AMD64_RSI_REGNUM,		/* %rsi */
+    AMD64_RDX_REGNUM,		/* %rdx */
+    AMD64_RCX_REGNUM,		/* %rcx */
+    8,				/* %r8 */
+    9				/* %r9 */
   };
   static int sse_regnum[] =
   {
     /* %xmm0 ... %xmm7 */
-    X86_64_XMM0_REGNUM + 0, X86_64_XMM1_REGNUM,
-    X86_64_XMM0_REGNUM + 2, X86_64_XMM0_REGNUM + 3,
-    X86_64_XMM0_REGNUM + 4, X86_64_XMM0_REGNUM + 5,
-    X86_64_XMM0_REGNUM + 6, X86_64_XMM0_REGNUM + 7,
+    AMD64_XMM0_REGNUM + 0, AMD64_XMM1_REGNUM,
+    AMD64_XMM0_REGNUM + 2, AMD64_XMM0_REGNUM + 3,
+    AMD64_XMM0_REGNUM + 4, AMD64_XMM0_REGNUM + 5,
+    AMD64_XMM0_REGNUM + 6, AMD64_XMM0_REGNUM + 7,
   };
   struct value **stack_args = alloca (nargs * sizeof (struct value *));
   int num_stack_args = 0;
@@ -617,7 +621,7 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
      varargs or stdargs (prototype-less calls or calls to functions
      containing ellipsis (...) in the declaration) %al is used as
      hidden argument to specify the number of SSE registers used.  */
-  regcache_raw_write_unsigned (regcache, X86_64_RAX_REGNUM, sse_reg);
+  regcache_raw_write_unsigned (regcache, AMD64_RAX_REGNUM, sse_reg);
   return sp; 
 }
 
@@ -636,7 +640,7 @@ amd64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   if (struct_return)
     {
       store_unsigned_integer (buf, 8, struct_addr);
-      regcache_cooked_write (regcache, X86_64_RDI_REGNUM, buf);
+      regcache_cooked_write (regcache, AMD64_RDI_REGNUM, buf);
     }
 
   /* Store return address.  */
@@ -646,17 +650,17 @@ amd64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 
   /* Finally, update the stack pointer...  */
   store_unsigned_integer (buf, 8, sp);
-  regcache_cooked_write (regcache, X86_64_RSP_REGNUM, buf);
+  regcache_cooked_write (regcache, AMD64_RSP_REGNUM, buf);
 
   /* ...and fake a frame pointer.  */
-  regcache_cooked_write (regcache, X86_64_RBP_REGNUM, buf);
+  regcache_cooked_write (regcache, AMD64_RBP_REGNUM, buf);
 
   return sp + 16;
 }
 
 
 /* The maximum number of saved registers.  This should include %rip.  */
-#define AMD64_NUM_SAVED_REGS	X86_64_NUM_GREGS
+#define AMD64_NUM_SAVED_REGS	AMD64_NUM_GREGS
 
 struct amd64_frame_cache
 {
@@ -729,7 +733,7 @@ amd64_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
     {
       /* Take into account that we've executed the `pushq %rbp' that
          starts this instruction sequence.  */
-      cache->saved_regs[X86_64_RBP_REGNUM] = 0;
+      cache->saved_regs[AMD64_RBP_REGNUM] = 0;
       cache->sp_offset += 8;
 
       /* If that's all, return now.  */
@@ -794,12 +798,12 @@ amd64_frame_cache (struct frame_info *next_frame, void **this_cache)
 	 frame by looking at the stack pointer.  For truly "frameless"
 	 functions this might work too.  */
 
-      frame_unwind_register (next_frame, X86_64_RSP_REGNUM, buf);
+      frame_unwind_register (next_frame, AMD64_RSP_REGNUM, buf);
       cache->base = extract_unsigned_integer (buf, 8) + cache->sp_offset;
     }
   else
     {
-      frame_unwind_register (next_frame, X86_64_RBP_REGNUM, buf);
+      frame_unwind_register (next_frame, AMD64_RBP_REGNUM, buf);
       cache->base = extract_unsigned_integer (buf, 8);
     }
 
@@ -810,7 +814,7 @@ amd64_frame_cache (struct frame_info *next_frame, void **this_cache)
   /* For normal frames, %rip is stored at 8(%rbp).  If we don't have a
      frame we find it at the same offset from the reconstructed base
      address.  */
-  cache->saved_regs[X86_64_RIP_REGNUM] = 8;
+  cache->saved_regs[AMD64_RIP_REGNUM] = 8;
 
   /* Adjust all the saved registers such that they contain addresses
      instead of offsets.  */
@@ -913,7 +917,7 @@ amd64_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   cache = amd64_alloc_frame_cache ();
 
-  frame_unwind_register (next_frame, X86_64_RSP_REGNUM, buf);
+  frame_unwind_register (next_frame, AMD64_RSP_REGNUM, buf);
   cache->base = extract_unsigned_integer (buf, 8) - 8;
 
   addr = tdep->sigcontext_addr (next_frame);
@@ -999,7 +1003,7 @@ amd64_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
   char buf[8];
   CORE_ADDR fp;
 
-  frame_unwind_register (next_frame, X86_64_RBP_REGNUM, buf);
+  frame_unwind_register (next_frame, AMD64_RBP_REGNUM, buf);
   fp = extract_unsigned_integer (buf, 8);
 
   return frame_id_build (fp + 16, frame_pc_unwind (next_frame));
@@ -1025,7 +1029,7 @@ amd64_supply_fpregset (const struct regset *regset, struct regcache *regcache,
   const struct gdbarch_tdep *tdep = regset->descr;
 
   gdb_assert (len == tdep->sizeof_fpregset);
-  x86_64_supply_fxsave (regcache, regnum, fpregs);
+  amd64_supply_fxsave (regcache, regnum, fpregs);
 }
 
 /* Return the appropriate register set for the core section identified
@@ -1054,7 +1058,7 @@ amd64_regset_from_core_section (struct gdbarch *gdbarch,
 
 
 void
-x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
@@ -1063,7 +1067,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sizeof_fpregset = I387_SIZEOF_FXSAVE;
 
   /* AMD64 has an FPU and 16 SSE registers.  */
-  tdep->st0_regnum = X86_64_ST0_REGNUM;
+  tdep->st0_regnum = AMD64_ST0_REGNUM;
   tdep->num_xmm_regs = 16;
 
   /* This is what all the fuss is about.  */
@@ -1081,10 +1085,10 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_register_type (gdbarch, amd64_register_type);
 
   /* Register numbers of various important registers.  */
-  set_gdbarch_sp_regnum (gdbarch, X86_64_RSP_REGNUM); /* %rsp */
-  set_gdbarch_pc_regnum (gdbarch, X86_64_RIP_REGNUM); /* %rip */
-  set_gdbarch_ps_regnum (gdbarch, X86_64_EFLAGS_REGNUM); /* %eflags */
-  set_gdbarch_fp0_regnum (gdbarch, X86_64_ST0_REGNUM); /* %st(0) */
+  set_gdbarch_sp_regnum (gdbarch, AMD64_RSP_REGNUM); /* %rsp */
+  set_gdbarch_pc_regnum (gdbarch, AMD64_RIP_REGNUM); /* %rip */
+  set_gdbarch_ps_regnum (gdbarch, AMD64_EFLAGS_REGNUM); /* %eflags */
+  set_gdbarch_fp0_regnum (gdbarch, AMD64_ST0_REGNUM); /* %st(0) */
 
   /* The "default" register numbering scheme for AMD64 is referred to
      as the "DWARF Register Number Mapping" in the System V psABI.
@@ -1134,7 +1138,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 
-#define I387_ST0_REGNUM X86_64_ST0_REGNUM
+#define I387_ST0_REGNUM AMD64_ST0_REGNUM
 
 /* The 64-bit FXSAVE format differs from the 32-bit format in the
    sense that the instruction pointer and data pointer are simply
@@ -1149,7 +1153,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
    reserved bits in *FXSAVE.  */
 
 void
-x86_64_supply_fxsave (struct regcache *regcache, int regnum,
+amd64_supply_fxsave (struct regcache *regcache, int regnum,
 		      const void *fxsave)
 {
   i387_supply_fxsave (regcache, regnum, fxsave);
@@ -1171,7 +1175,7 @@ x86_64_supply_fxsave (struct regcache *regcache, int regnum,
    reserved bits in *FXSAVE.  */
 
 void
-x86_64_fill_fxsave (char *fxsave, int regnum)
+amd64_fill_fxsave (char *fxsave, int regnum)
 {
   i387_fill_fxsave (fxsave, regnum);
 

@@ -44,7 +44,7 @@ amd64fbsd_sigcontext_addr (struct frame_info *next_frame)
   /* The `struct sigcontext' (which really is an `ucontext_t' on
      FreeBSD/amd64) lives at a fixed offset in the signal frame.  See
      <machine/sigframe.h>.  */
-  sp = frame_unwind_register_unsigned (next_frame, X86_64_RSP_REGNUM);
+  sp = frame_unwind_register_unsigned (next_frame, AMD64_RSP_REGNUM);
   return sp + 16;
 }
 
@@ -130,7 +130,7 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset_num_regs = ARRAY_SIZE (amd64fbsd_r_reg_offset);
   tdep->sizeof_gregset = 22 * 8;
 
-  x86_64_init_abi (info, gdbarch);
+  amd64_init_abi (info, gdbarch);
 
   tdep->sigtramp_start = amd64fbsd_sigtramp_start_addr;
   tdep->sigtramp_end = amd64fbsd_sigtramp_end_addr;
