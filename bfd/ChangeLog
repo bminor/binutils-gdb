@@ -1,3 +1,8 @@
+2004-03-23  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 51.
+	* linker.c (bfd_wrapped_link_hash_lookup): Handle info->wrap_char.
+
 2004-03-22  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_relocate_section) <case R_CRIS_16_GOTPLT,
@@ -10,7 +15,7 @@
 	(elf_cris_try_fold_plt_to_got): Improve head comment.  Do not fold
 	a PLT reloc to GOT for an executable.
 	(elf_cris_adjust_dynamic_symbol): Only fold a .got.plt entry with
-	.got for a DSO and explain why. 
+	.got for a DSO and explain why.
 	(elf_cris_discard_excess_program_dynamics): Also lose GOT-relocs
 	and unreferenced symbols for which a PLT is defined.  Adjust
 	dynamic-symbol pruning correspondingly, to make sure we don't lose

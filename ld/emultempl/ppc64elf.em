@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2002, 2003 Free Software Foundation, Inc.
+#   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 #
 # This file is part of GLD, the Gnu Linker.
 #
@@ -64,6 +64,8 @@ ppc_create_output_section_statements (void)
   if (link_info.hash->creator != &bfd_elf64_powerpc_vec
       && link_info.hash->creator != &bfd_elf64_powerpcle_vec)
     return;
+
+  link_info.wrap_char = '.';
 
   stub_file = lang_add_input_file ("linker stubs",
 				   lang_input_file_is_fake_enum,

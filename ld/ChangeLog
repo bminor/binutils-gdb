@@ -1,3 +1,9 @@
+2004-03-23  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 51.
+	* emultempl/ppc64elf.em (ppc_create_output_section_statements): Set
+	link_info.wrap_char.
+
 2004-03-17  Ralf Corsepius <corsepiu@faw.uni-ulm.de>
 
 	* configure.tgt: Switch sh-*-rtems* to ELF.  Add sh-*-rtemscoff*.
@@ -25,7 +31,7 @@
 2004-02-23  Alan Modra <amodra@bigpond.net.au>
 
 	* ldexp.c (fold_tree): Follow indirect symbols.
-	
+
 2004-02-20  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ldgram.y (exp): Add two operand ALIGN.
