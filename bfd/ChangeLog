@@ -1,3 +1,10 @@
+start-sanitize-tic80
+Mon May 19 14:26:36 1997  Mark Alexander  <marka@cygnus.com>
+
+	* coff-tic80.c (NAMES_HAVE_UNDERSCORE): Define (fixes problem
+	with unresolved external symbols in GDB).
+
+end-sanitize-tic80
 Fri May 16 10:23:03 1997  Jeffrey A Law  (law@cygnus.com)
 
         * elf-m10300.c (elf32_mn10300_relax_section): Read in all

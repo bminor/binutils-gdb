@@ -1,5 +1,5 @@
 /* BFD back-end for Texas Instruments TMS320C80 Multimedia Video Processor (MVP).
-   Copyright 1996 Free Software Foundation, Inc.
+   Copyright 1996, 1997 Free Software Foundation, Inc.
 
    Written by Fred Fish (fnf@cygnus.com)
 
@@ -25,10 +25,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
-#include "obstack.h"
 #include "coff/tic80.h"
 #include "coff/internal.h"
 #include "libcoff.h"
+
+#define NAMES_HAVE_UNDERSCORE
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
 
@@ -66,11 +67,25 @@ static reloc_howto_type tic80_howto_table[] =
 	 0xffffffff,			/* src_mask */
 	 0xffffffff,			/* dst_mask */
 	 true),				/* pcrel_offset */
+
+  HOWTO (R_ABS,				/* type */
+	 0,				/* rightshift */
+	 2,				/* size (0 = byte, 1 = short, 2 = long) */
+	 32,				/* bitsize */
+	 false,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 NULL,				/* special_function */
+	 "ABS",				/* name */
+	 true,				/* partial_inplace */
+	 0xffffffff,			/* src_mask */
+	 0xffffffff,			/* dst_mask */
+	 false),				/* pcrel_offset */
 };
 
 /* Code to turn an external r_type into a pointer to an entry in the howto_table.
-   If passed an r_type we don't recognize, just set the howto field to NULL and
-   the caller will print an appropriate error message. */
+   If passed an r_type we don't recognize the abort rather than silently failing
+   to generate an output file. */
 
 static void
 rtype2howto (cache_ptr, dst)
@@ -79,9 +94,10 @@ rtype2howto (cache_ptr, dst)
 {
   switch (dst -> r_type)
     {
-    default:		cache_ptr -> howto = NULL; break;
+    default:		abort (); break;
     case R_RELLONG:	cache_ptr -> howto = tic80_howto_table + 0; break;
     case R_MPPCR:	cache_ptr -> howto = tic80_howto_table + 1; break;
+    case R_ABS:		cache_ptr -> howto = tic80_howto_table + 2; break;
     }
 }
 
