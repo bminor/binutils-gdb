@@ -41,6 +41,7 @@ arm target		Fernando Nasser		fnasser@cygnus.com
 m32r target		Michael Snyder		msnyder@cygnus.com
 IA-64 target		Kevin Buettner		kevinb@cygnus.com
 x86			Mark Kettenis           kettenis@gnu.org
+sparc target		David Taylor		taylor@cygnus.com
 
 
 
@@ -71,6 +72,8 @@ GNU/Linux ARM native	Scott Bambrough		scottb@netwinder.org
 Solaris/x86 native & host
 			Nick Duffek		nsd@cygnus.com
 			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
+Solaris/SPARC native & host
+			David Taylor		taylor@cygnus.com
 
 Core: Generic components used by all of GDB
 
@@ -86,6 +89,7 @@ tracing bytecode stuff  Jim Blandy              jimb@cygnus.com
 tracing			Michael Snyder		msnyder@cygnus.com
 threads			Michael Snyder		msnyder@cygnus.com
 breakpoint.c		Michael Snyder		msnyder@cygnus.com
+			Jim Blandy		jimb@cygnus.com
 language support	David Taylor		taylor@cygnus.com
   C++ support		Daniel Berlin		dan@cgsoftware.com
   Java support		Anthony Green 		green@cygnus.com
@@ -147,6 +151,7 @@ Jim Kingdon					kingdon@redhat.com
 Jason Molenda					jsm@cygnus.com
 H.J. Lu						hjl@lucon.org
 Nick Clifton					nickc@cygnus.com
+Jonathan Larmour				jlarmour@redhat.co.uk
 
 
 * Indicates folks we need to get Kerberos/ssh accounts ready so they
