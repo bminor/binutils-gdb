@@ -1,3 +1,7 @@
+Tue Mar 26 18:19:12 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* as.c (main): Call bfd_set_error_program_name.
+
 Fri Mar 22 11:13:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* as.h (strdup): Don't declare.
