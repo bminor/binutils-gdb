@@ -289,6 +289,24 @@ GDB 5.1.
 
 --
 
+Re: Various C++ things
+
+value_headof/value_from_vtable_info are worthless, and should be removed.
+The one place in printcmd.c that uses it should use the RTTI functions.
+
+RTTI for g++ should be using the typeinfo functions rather than the vtables.
+The typeinfo functions are always at offset 4 from the beginning of the vtable,
+and are always right. The vtables will have weird names like E::VB sometimes.
+The typeinfo function will always be "E type_info function", or somesuch.
+
+value_virtual_fn_field needs to be fixed so there are no failures for virtual
+functions for C++ using g++.
+
+Testsuite cases are the major priority right now for C++ support, since i have
+to make a lot of changes that could potentially break each other.
+
+
+--
 GDB 5.0: Test results
 ---------------------
 
