@@ -780,6 +780,7 @@ distclean: clean
 	rm -f nm.h tm.h xm.h config.status config.h stamp-h .gdbinit
 	rm -f y.output yacc.acts yacc.tmp y.tab.h
 	rm -f config.log config.cache
+	rm -f $(YYFILES)
 	rm -f Makefile
 
 maintainer-clean realclean: distclean clean

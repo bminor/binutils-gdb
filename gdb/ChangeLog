@@ -1,3 +1,7 @@
+Mon Mar  2 16:47:11 1998  Philippe De Muyter  <phdm@macqel.be>
+
+        * Makefile.in (distclean): Add `rm $(YYFILES)'.
+
 Mon Mar  2 16:45:48 1998  Philippe De Muyter  <phdm@macqel.be>
 
 	* coffread.c (coff_read_enum_type): Set TYPE_FLAG_UNSIGNED if enum
