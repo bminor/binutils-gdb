@@ -56,4 +56,5 @@ extern void mi_create_tracepoint (int bpnum);
 extern void mi_modify_tracepoint (int bpnum);
 extern void mi_delete_tracepoint (int bpnum);
 extern void mi_architecture_changed (void);
+extern void mi_register_update(int regno);
 #endif /* MI_H */

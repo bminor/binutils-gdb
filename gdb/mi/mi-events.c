@@ -204,3 +204,9 @@ mi_architecture_changed (void)
 {
   event_notify ("architecture-changed");
 }
+
+void
+mi_register_update(int regno)
+{
+  event_notify ("register-update,number=\"%d\"", regno);
+}

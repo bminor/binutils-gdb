@@ -77,7 +77,8 @@ static struct gdb_events mi_event_handlers =
     mi_create_tracepoint,
     mi_delete_tracepoint,
     mi_modify_tracepoint,
-    mi_architecture_changed
+    mi_architecture_changed,
+    mi_register_update
   };
 
 static int

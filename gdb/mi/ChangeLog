@@ -1,3 +1,10 @@
+2002-07-22  Keith Seitz  <keiths@redhat.com>
+
+	* mi-events.c (mi_register_update): New function.
+	* mi-interp.c (mi_event_handlers): Add mi_register_update
+	event handler.
+	* mi.h (mi_register_update): Add declaration.
+	
 2002-06-24  Keith Seitz  <keiths@redhat.com>
 
 	* mi-cmds.h (mi_execute_command): Add "extern".
