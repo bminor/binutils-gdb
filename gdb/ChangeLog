@@ -1,3 +1,9 @@
+2002-03-03  Michal Ludvig <mludvig@suse.cz>
+
+	* MAINTAINERS (x86-64): Add myself.
+	* x86-64-tdep.c (x86_64_push_arguments): Fixed typo naregs->nregs,
+	changed value_ptr -> struct value *
+
 2002-03-01  David O'Brien  <obrien@FreeBSD.org>
 
 	* configure.host (sparc64-*-freebsd): Add.

@@ -569,7 +569,7 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   };
   int stack_values_count = 0;
   int *stack_values;
-  stack_values = alloca (naregs * sizeof (int));
+  stack_values = alloca (nargs * sizeof (int));
   for (i = 0; i < nargs; i++)
     {
       enum x86_64_reg_class class[MAX_CLASSES];
@@ -639,7 +639,7 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
     }
   while (--stack_values_count >= 0)
     {
-      value_ptr arg = args[stack_values[stack_values_count]];
+      struct value *arg = args[stack_values[stack_values_count]];
       int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
       len += 7;
       len -= len % 8;
