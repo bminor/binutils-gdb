@@ -142,7 +142,7 @@ if test "${enable_gdbtk}" = "yes"; then
             sparc-sun-solaris2*)
                 if test "x$GCC" = "xyes";
                 then
-                    X_LIBS="-Wl,-Bstatic -lX11 -lXext -lX11 -Wl,-Bdynamic"
+                    X_LIBS="-Wl,-Bstatic -lX11 -lXext -lX11 -Wl,-Bdynamic -ldl -lw"
                 else
                     if test "x$x_libraries" != "x" ;
                     then
