@@ -1,3 +1,10 @@
+2004-02-26  Fred Fish  <fnf@redhat.com>
+  
+	* gdb.arch/gdb1431.c: Remove.
+	* gdb.arch/gdb1431.s: New file, copy of gdb1291.s
+	* gdb.arch/gdb1431.exp: Use "advance" correctly instead
+	of "until" incorrectly.
+
 2004-02-26  J. Brobecker  <brobecker@gnat.com>
 
 	* gdb.cp/class2.cc (empty): New class.
