@@ -1,3 +1,9 @@
+Wed Apr 28 11:39:18 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* doc/gdb.texinfo: make node "Shell Commands" unconditional;
+	describe `set demangle-style arm' (not cfront); 
+	mention can type `q' to discard output, when gdb pages
+
 Wed Apr 28 11:32:39 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* valops.c (search_struct_field): Fix gdb core dump with incomplete
