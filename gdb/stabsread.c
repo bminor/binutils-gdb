@@ -2134,14 +2134,13 @@ read_cpp_abbrev (fip, pp, type, objfile)
       fip->list->field.bitsize = 0;
       fip->list->visibility = VISIBILITY_PRIVATE;
     }
-  else if (*p == '_')
-    {
-      /* GNU C++ anonymous type.  */
-      complain (&stabs_general_complaint, "g++ anonymous type $_ not handled");
-    }
   else
     {
       complain (&invalid_cpp_abbrev_complaint, *pp);
+      /* We have no idea what syntax an unrecognized abbrev would have, so
+	 better return 0.  If we returned 1, we would need to at least advance
+	 *pp to avoid an infinite loop.  */
+      return 0;
     }
   return 1;
 }
@@ -2341,7 +2340,11 @@ read_struct_fields (fip, pp, type, objfile)
 
       /* Get the field name.  */
       p = *pp;
-      if (*p == CPLUS_MARKER)
+      /* If is starts with CPLUS_MARKER it is a special abbreviation, unless
+	 the CPLUS_MARKER is followed by an underscore, in which case it is
+	 just the name of an anonymous type, which we should handle like any
+	 other type name.  */
+      if (*p == CPLUS_MARKER && p[1] != '_')
 	{
 	  if (!read_cpp_abbrev (fip, pp, type, objfile))
 	    return 0;
