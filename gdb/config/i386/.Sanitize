@@ -32,6 +32,7 @@ i386aix.mt
 i386aout.mt
 i386bsd.mh
 i386bsd.mt
+i386dgux.mh
 i386lynx.mh
 i386lynx.mt
 i386m3.mh

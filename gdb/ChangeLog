@@ -1,3 +1,13 @@
+Fri Dec 22 11:05:59 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (gdb_host): Add support for DG/UX running on x86 as
+	a host.
+  	(all x86 targets and hosts): Add support for pentium-pro machines.
+
+	* configure: Rebuild.
+
+	* config/i386/i386dgux.mh: New file for DG/UX running on x86 host.
+
 Thu Dec 21 19:09:20 1995  Rob Savoye  <rob@chinadoll.cygnus.com>
 
 	* remote-array.c (array_wait): Poll the keyboard along with the
