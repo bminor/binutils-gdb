@@ -1344,7 +1344,11 @@ case "${target}" in
 	only_if_gcc=yes
 	;;
 # end-sanitize-v850eq
-  w65-*-*)		sim_target=w65 ;;
+  w65-*-*)
+	sim_target=w65
+	# The w65 is suffering from gradual decay.
+	only_if_enabled=yes
+	;;
   z8k*-*-*)		sim_target=z8k ;;
   sparc64-*-*)
 	sim_target=none # Don't build erc32 if sparc64.

@@ -1,3 +1,8 @@
+Tue Aug 26 15:14:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (w65-*-*, only_if_enabled): Set.
+	* configure: Re-generate.
+	
 Mon Aug 25 16:26:53 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (sparc*-*-*, only_if_enabled): Set
