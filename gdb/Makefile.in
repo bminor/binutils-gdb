@@ -1333,7 +1333,7 @@ corelow.o: corelow.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 cp-abi.o: cp-abi.c $(defs_h) $(value_h) $(cp_abi_h)
 
 cp-valprint.o: cp-valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
-	$(gdbtypes_h) $(symtab_h) $(value_h) $(gdb_string_h)
+	$(gdbtypes_h) $(symtab_h) $(value_h) $(gdb_string_h) $(cp_abi_h)
 
 dcache.o: dcache.c $(dcache_h) $(defs_h) $(gdbcmd_h) $(gdb_string_h) \
 	$(gdbcore_h) $(target_h)

@@ -1,3 +1,7 @@
+2001-12-08  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (cp-valprint.o): Add dependency on $(cp_abi_h).
+
 2001-12-08  Jim Blandy  <jimb@redhat.com>
 
 	* config/s390/s390.mh: Don't use the linux-thread.o module;
