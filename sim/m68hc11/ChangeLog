@@ -1,3 +1,9 @@
+2003-03-02  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* Makefile.in (SIM_EXTRA_CFLAGS): Set WITH_TARGET_ADDRESS_BITSIZE
+	to 32 to support memory bank switching; temporarily use 32-bit for
+	WORD_BITSIZE to avoid a bug in sim-common.
+
 2003-03-01  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* interp.c (sim_fetch_register): Only store a single byte for
