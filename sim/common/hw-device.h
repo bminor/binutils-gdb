@@ -150,6 +150,9 @@ struct _sim_cpu *hw_system_cpu (struct hw *hw);
 
 #define hw_data(hw) ((hw)->data_of_hw)
 
+#define set_hw_data(hw, value) \
+((hw)->data_of_hw = (value))
+
 
 
 /* Perform a soft reset of the device */
@@ -158,6 +161,9 @@ typedef unsigned (hw_reset_callback)
      (struct hw *me);
 
 #define hw_reset(hw) ((hw)->to_reset (hw))
+
+#define set_hw_reset(hw, method) \
+((hw)->to_reset = method)
 
 
 /* Hardware operations:
@@ -195,6 +201,8 @@ typedef void (hw_attach_address_callback)
 #define hw_attach_address(me, level, space, addr, nr_bytes, client) \
 ((me)->to_attach_address (me, level, space, addr, nr_bytes, client))
 
+#define set_hw_attach_address(hw, method) \
+((hw)->to_attach_address = (method))
 
 typedef void (hw_detach_address_callback)
      (struct hw *me,
@@ -206,6 +214,9 @@ typedef void (hw_detach_address_callback)
 
 #define hw_detach_address(me, level, space, addr, nr_bytes, client) \
 ((me)->to_detach_address (me, level, space, addr, nr_bytes, client))
+
+#define set_hw_detach_address(hw, method) \
+((hw)->to_detach_address = (method))
 
 
 /* An IO operation from a parent to a child via the conecting bus.
@@ -223,6 +234,9 @@ typedef unsigned (hw_io_read_buffer_callback)
 #define hw_io_read_buffer(hw, dest, space, addr, nr_bytes) \
 ((hw)->to_io_read_buffer (hw, dest, space, addr, nr_bytes))
 
+#define set_hw_io_read_buffer(hw, method) \
+((hw)->to_io_read_buffer = (method))
+
 typedef unsigned (hw_io_write_buffer_callback)
      (struct hw *me,
       const void *source,
@@ -233,6 +247,8 @@ typedef unsigned (hw_io_write_buffer_callback)
 #define hw_io_write_buffer(hw, src, space, addr, nr_bytes) \
 ((hw)->to_io_write_buffer (hw, src, space, addr, nr_bytes))
 
+#define set_hw_io_write_buffer(hw, method) \
+((hw)->to_io_write_buffer = (method))
 
 
 /* Conversly, the device pci1000,1@1 may need to perform a dma transfer
@@ -254,6 +270,9 @@ typedef unsigned (hw_dma_read_buffer_callback)
 #define hw_dma_read_buffer(bus, dest, space, addr, nr_bytes) \
 ((bus)->to_dma_read_buffer (bus, dest, space, addr, nr_bytes))
 
+#define set_hw_dma_read_buffer(me, method) \
+((me)->to_dma_read_buffer = (method))
+
 typedef unsigned (hw_dma_write_buffer_callback)
      (struct hw *bus,
       const void *source,
@@ -264,6 +283,9 @@ typedef unsigned (hw_dma_write_buffer_callback)
 
 #define hw_dma_write_buffer(bus, src, space, addr, nr_bytes, violate_ro) \
 ((bus)->to_dma_write_buffer (bus, src, space, addr, nr_bytes, violate_ro))
+
+#define set_hw_dma_write_buffer(me, method) \
+((me)->to_dma_write_buffer = (method))
 
 /* Address/size specs for devices are encoded following a convention
    similar to that used by OpenFirmware.  In particular, an
@@ -310,6 +332,8 @@ typedef int (hw_unit_decode_callback)
 #define hw_unit_decode(bus, encoded, unit) \
 ((bus)->to_unit_decode (bus, encoded, unit))
 
+#define set_hw_unit_decode(hw, method) \
+((hw)->to_unit_decode = (method))
 
 typedef int (hw_unit_encode_callback)
      (struct hw *bus,
@@ -320,6 +344,8 @@ typedef int (hw_unit_encode_callback)
 #define hw_unit_encode(bus, unit, encoded, sizeof_encoded) \
 ((bus)->to_unit_encode (bus, unit, encoded, sizeof_encoded))
 
+#define set_hw_unit_encode(hw, method) \
+((hw)->to_unit_encode = (method))
 
 
 /* As the bus that the device is attached too, to translate a devices
@@ -339,6 +365,8 @@ typedef int (hw_unit_address_to_attach_address_callback)
 #define hw_unit_address_to_attach_address(bus, unit_addr, attach_space, attach_addr, client) \
 ((bus)->to_unit_address_to_attach_address (bus, unit_addr, attach_space, attach_addr, client))
 
+#define set_hw_unit_address_to_attach_address(hw, method) \
+((hw)->to_unit_address_to_attach_address = (method))
 
 typedef int (hw_unit_size_to_attach_size_callback)
      (struct hw *bus,
@@ -349,6 +377,8 @@ typedef int (hw_unit_size_to_attach_size_callback)
 #define hw_unit_size_to_attach_size(bus, unit_size, attach_size, client) \
 ((bus)->to_unit_size_to_attach_size (bus, unit_size, attach_size, client))
 
+#define set_hw_unit_size_to_attach_size(hw, method) \
+((hw)->to_unit_size_to_attach_size = (method))
 
 
 extern char *hw_strdup (struct hw *me, const char *str);

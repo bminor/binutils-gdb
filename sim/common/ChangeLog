@@ -1,7 +1,13 @@
+Mon May 25 18:41:18 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* hw-base.h (set_*): Move set method macros from here.
+	* hw-device.h: To here.
+
 Mon May 25 18:21:38 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-base.h (create_hw_property_data, delete_hw_property_data):
  	Declare.
+
 	* hw-base.c (hw_create, hw_delete): Call
 	* hw-properties.c (create_hw_property_data,
  	delete_hw_property_data): Define.

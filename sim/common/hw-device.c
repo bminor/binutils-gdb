@@ -26,7 +26,6 @@
 #include <stdlib.h>
 #endif
 
-
 /* Address methods */
 
 const hw_unit *
@@ -36,7 +35,6 @@ hw_unit_address (struct hw *me)
 }
 
 
-
 /* IOCTL: */
 
 int

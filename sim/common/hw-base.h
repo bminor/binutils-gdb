@@ -70,37 +70,6 @@ void hw_delete
 
 /* Override device methods */
 
-#define set_hw_data(hw, value) \
-((hw)->data_of_hw = (value))
-
-#define set_hw_reset(hw, method) \
-((hw)->to_reset = method)
-
-#define set_hw_io_read_buffer(hw, method) \
-((hw)->to_io_read_buffer = (method))
-#define set_hw_io_write_buffer(hw, method) \
-((hw)->to_io_write_buffer = (method))
-
-#define set_hw_dma_read_buffer(me, method) \
-((me)->to_dma_read_buffer = (method))
-#define set_hw_dma_write_buffer(me, method) \
-((me)->to_dma_write_buffer = (method))
-
-#define set_hw_attach_address(hw, method) \
-((hw)->to_attach_address = (method))
-#define set_hw_detach_address(hw, method) \
-((hw)->to_detach_address = (method))
-
-#define set_hw_unit_decode(hw, method) \
-((hw)->to_unit_decode = (method))
-#define set_hw_unit_encode(hw, method) \
-((hw)->to_unit_encode = (method))
-
-#define set_hw_unit_address_to_attach_address(hw, method) \
-((hw)->to_unit_address_to_attach_address = (method))
-#define set_hw_unit_size_to_attach_size(hw, method) \
-((hw)->to_unit_size_to_attach_size = (method))
-
 typedef void (hw_delete_callback)
      (struct hw *me);
 

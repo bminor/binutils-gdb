@@ -57,6 +57,8 @@ genmloop.sh
 gennltvals.sh
 gentmap.c
 gentvals.sh
+hw-alloc.c
+hw-alloc.h
 hw-base.c
 hw-base.h
 hw-device.c
