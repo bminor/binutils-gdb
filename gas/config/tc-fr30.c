@@ -557,64 +557,94 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
+static char
+restore_colon (advance_i_l_p_by)
+     int advance_i_l_p_by;
+{
+  char c;
+  
+  /* Restore the colon, and advance input_line_pointer to
+     the end of the new symbol.  */
+  * input_line_pointer = ':';
+  input_line_pointer += advance_i_l_p_by;
+  c = * input_line_pointer;
+  * input_line_pointer = 0;
+  
+  return c;
+}
+
 /* Determines if the symbol starting at START and ending in
    a colon that was at the location pointed to by INPUT_LINE_POINTER
    (but which has now been replaced bu a NUL) is in fact an
-   LDI:8, LDI:20 or LDI:32 instruction.  If it is, then it
-   restores the colon, adbvances INPUT_LINE_POINTER to the real end
-   of the instruction/symbol, and returns the character that really
-   terminated the symbol.  Otherwise it returns 0.  */
+   LDI:8, LDI:20, LDI:32, CALL:D. JMP:D, RET:D or Bcc:D instruction.
+   If it is, then it restores the colon, adbvances INPUT_LINE_POINTER
+   to the real end of the instruction/symbol, and returns the character
+   that really terminated the symbol.  Otherwise it returns 0.  */
 char
-fr30_is_label_start (start)
+fr30_is_colon_insn (start)
      char *  start;
 {
   char * i_l_p = input_line_pointer;
-  char   c;
-  
+
   /* Check to see if the symbol parsed so far is 'ldi'  */
   if (   (start[0] != 'l' && start[0] != 'L')
       || (start[1] != 'd' && start[1] != 'D')
       || (start[2] != 'i' && start[2] != 'I')
       || start[3] != 0)
-    return 0;
+    {
+      /* Nope - check to see a 'd' follows the colon.  */
+      if (   (i_l_p[1] == 'd' || i_l_p[1] == 'D')
+	  && (i_l_p[2] == ' ' || i_l_p[2] == '\t' || i_l_p[2] == '\n'))
+	{
+	  /* Yup - it might be delay slot instruction.  */
+	  int           i;
+	  static char * delay_insns [] =
+	  {
+	    "call", "jmp", "ret", "bra", "bno",
+	    "beq", "bne", "bc", "bnc", "bn", "bp",
+	    "bv", "bnv", "blt", "bge", "ble", "bgt",
+	    "bls", "bhi"
+	  };
+
+	  for (i = sizeof (delay_insns) / sizeof (delay_insns[0]); i--;)
+	    {
+	      char * insn = delay_insns[i];
+	      int    len  = strlen (insn);
+
+	      if (start [len] != 0)
+		continue;
+	      
+	      while (len --)
+		{
+		  if (tolower (start [len]) != insn [len])
+		    break;
+		}
+	      
+	      if (len == -1)
+		return restore_colon (1);
+	    }
+	}
+
+      /* Nope - it is a normal label.  */
+      return 0;
+    }
 
   /* Check to see if the text following the colon is '8' */
   if (i_l_p[1] == '8' && (i_l_p[2] == ' ' || i_l_p[2] == '\t'))
     {
-      /* Restore the colon, and advance input_line_pointer to
-	 the end of the new symbol.  */
-      * i_l_p = ':';
-      input_line_pointer += 2;
-      c = * input_line_pointer;
-      * input_line_pointer = 0;
-
-      return c;
+      return restore_colon (2);
     }
 
   /* Check to see if the text following the colon is '20' */
-  if (i_l_p[1] == '2' && i_l_p[2] =='0' && (i_l_p[3] == ' ' || i_l_p[3] == '\t'))
+  else if (i_l_p[1] == '2' && i_l_p[2] =='0' && (i_l_p[3] == ' ' || i_l_p[3] == '\t'))
     {
-      /* Restore the colon, and advance input_line_pointer to
-	 the end of the new symbol.  */
-      * i_l_p = ':';
-      input_line_pointer += 3;
-      c = * input_line_pointer;
-      * input_line_pointer = 0;
-
-      return c;
+      return restore_colon (3);
     }
 
   /* Check to see if the text following the colon is '32' */
-  if (i_l_p[1] == '3' && i_l_p[2] =='2' && (i_l_p[3] == ' ' || i_l_p[3] == '\t'))
+  else if (i_l_p[1] == '3' && i_l_p[2] =='2' && (i_l_p[3] == ' ' || i_l_p[3] == '\t'))
     {
-      /* Restore the colon, and advance input_line_pointer to
-	 the end of the new symbol.  */
-      * i_l_p = ':';
-      input_line_pointer += 3;
-      c = * input_line_pointer;
-      * input_line_pointer = 0;
-
-      return c;
+      return restore_colon (3);
     }
 
   return 0;

@@ -5,6 +5,9 @@ Thu Nov 12 19:21:24 1998  Dave Brolley  <brolley@cygnus.com>
 
 Thu Nov 12 10:54:16 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* config/tc-fr30.c (fr30_is_colon_insn): New name for
+	fr30_is_label_start().  Also checks for delay slot insns.
+
 	* config/tc-fr30.c (fr30_is_label_start): New function: Handle
 	FR30 instructions which contain a colon in the mnemonic.
 
