@@ -421,8 +421,11 @@ frame_func_unwind (struct frame_info *fi)
 {
   if (!fi->prev_func.p)
     {
+      /* Make certain that this, and not the adjacent, function is
+         found.  */
+      CORE_ADDR addr_in_block = frame_unwind_address_in_block (fi);
       fi->prev_func.p = 1;
-      fi->prev_func.addr = get_pc_function_start (frame_pc_unwind (fi));
+      fi->prev_func.addr = get_pc_function_start (addr_in_block);
       if (frame_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "{ frame_func_unwind (fi=%d) -> 0x%s }\n",

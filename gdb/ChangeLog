@@ -1,3 +1,7 @@
+2003-08-04  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (frame_func_unwind): Use frame_unwind_address_in_block.
+
 2003-08-02  Andrew Cagney  <cagney@redhat.com>
 
 	* config/djgpp/fnchange.lst: Fix up testsuite/gdb.c++/annota3.cc,
