@@ -26,6 +26,8 @@
 #include "../bfd/sysdep.h"
 
 #include <a.out.h>
+#include <lst.h>
+#include <ar.h>
 
 
 #ifdef HOST_HPPABSD
@@ -76,6 +78,8 @@ som_symbol_type;
 struct somdata
   {
     struct header *file_hdr;
+    struct copyright_aux_hdr *copyright_aux_hdr;
+    struct user_string_aux_hdr *version_aux_hdr;
     som_symbol_type *symtab;
     char *stringtab;
 
@@ -120,6 +124,8 @@ struct som_section_data_struct
 
 #define somdata(bfd)			((bfd)->tdata.som_data->a)
 #define obj_som_file_hdr(bfd)		(somdata(bfd).file_hdr)
+#define obj_som_copyright_hdr(bfd)	(somdata(bfd).copyright_aux_hdr)
+#define obj_som_version_hdr(bfd)	(somdata(bfd).version_aux_hdr)
 #define obj_som_symtab(bfd)		(somdata(bfd).symtab)
 #define obj_som_stringtab(bfd)		(somdata(bfd).stringtab)
 #define obj_som_sym_filepos(bfd)	(somdata(bfd).sym_filepos)
@@ -151,5 +157,13 @@ struct som_section_data_struct
 #define	R_HPPA_COMPLEX_ABS_CALL		R_COMP3
 #define R_HPPA_ENTRY			R_ENTRY
 #define R_HPPA_EXIT			R_EXIT
+
+/* Exported functions, mostly for use by GAS.  */
+void bfd_som_set_section_attributes PARAMS ((asection *, int, int,
+					     unsigned char, int));
+void bfd_som_set_subsection_attributes PARAMS ((asection *, asection *,
+						int, unsigned int, int));
+void bfd_som_set_symbol_type PARAMS ((asymbol *, unsigned int));
+void bfd_som_attach_unwind_info PARAMS ((asymbol *, char *));
 
 #endif /* _SOM_H */

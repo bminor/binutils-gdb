@@ -1,3 +1,7 @@
+Sun Feb 13 14:30:00 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.h: Include <lst.h> and <ar.h>.
+
 Sat Feb 12 22:34:14 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* elfcode.h (elf_map_symbols): Fix typo.
