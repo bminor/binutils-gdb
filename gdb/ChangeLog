@@ -1,5 +1,11 @@
 2001-03-01  Andrew Cagney  <ac131313@redhat.com>
 
+	* Makefile.in (gdbtk-cmds.o): Add $(regcache_h) to dependency
+	lists.
+	(mi-main.o): Ditto.
+
+2001-03-01  Andrew Cagney  <ac131313@redhat.com>
+
 	* Makefile.in (regcache_h): Define. Add $(regcache_h) to
 	dependency lists.
 

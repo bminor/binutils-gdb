@@ -1411,7 +1411,7 @@ gdbtk-cmds.o: $(srcdir)/gdbtk/generic/gdbtk-cmds.c \
 	$(srcdir)/gdbtk/generic/gdbtk.h \
 	$(defs_h) $(symtab_h) $(inferior_h)	\
 	$(command_h) $(bfd_h) $(top_h) symfile.h objfiles.h target.h	\
-	gdb_string.h $(tracepoint_h) $(frame_h) source.h
+	gdb_string.h $(tracepoint_h) $(frame_h) source.h $(regcache_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS)	\
 	$(TIX_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)		\
 	$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-cmds.c				\
@@ -2143,7 +2143,7 @@ mi-cmd-disas.o: $(srcdir)/mi/mi-cmd-disas.c $(defs_h) $(mi_cmds_h) \
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-disas.c
 mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(top_h) $(mi_cmds_h) $(ui_out_h) \
 		$(mi_console_h) $(mi_getopt_h) $(event_loop_h) $(event_top_h) \
-		$(mi_getopt_h)
+		$(mi_getopt_h) $(regcache_h)
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/mi/mi-main.c
 mi-out.o: $(srcdir)/mi/mi-out.c $(defs_h) $(mi_out_h) $(ui_out_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-out.c
