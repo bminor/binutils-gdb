@@ -95,7 +95,7 @@ char **argv;
 		signal(sig[a], got_sig);
 	
 	myname=argv[0];
-	bzero (flagseen, sizeof(flagseen)); /* aint seen nothing yet */
+	memset(flagseen, '\0', sizeof(flagseen)); /* aint seen nothing yet */
 #ifndef OBJ_DEFAULT_OUTPUT_FILE_NAME
 #define OBJ_DEFAULT_OUTPUT_FILE_NAME "a.out"
 #endif /* OBJ_DEFAULT_OUTPUT_FILE_NAME */
@@ -223,7 +223,7 @@ char **argv;
 			}
 				
 #ifndef WORKING_DOT_WORD
-			case 'k':
+			case 'K':
 				break;
 #endif
 				
@@ -336,10 +336,11 @@ int argc;
 char **argv;
 {
 	int saw_a_file = 0;
+	unsigned int i;
 	need_pass_2		= 0;
 	
 #ifdef MANY_SEGMENTS
-	unsigned int i;
+
 	
 	for (i= SEG_E0; i < SEG_UNKNOWN; i++) 
 	    {
@@ -354,12 +355,14 @@ char **argv;
 	strcpy(segment_info[SEG_E2].scnhdr.s_name,".bss");
 	
 	subseg_new (SEG_E0, 0);
-#else
+#else /* not MANY_SEGMENTS */
 	text_fix_root		= NULL;
 	data_fix_root		= NULL;
+	bss_fix_root		= NULL;
 	
 	subseg_new (SEG_TEXT, 0);
-#endif
+#endif /* not MANY_SEGMENTS */
+
 	argv++; /* skip argv[0] */
 	argc--; /* skip argv[0] */
 	while (argc--) {
