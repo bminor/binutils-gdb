@@ -374,7 +374,7 @@ case "${host}" in
     noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet"
 	;;
   *-*-cygwin32)
-     noconfigdirs="patch diff tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache inet"
+     noconfigdirs="tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache inet"
     ;;
   ppc*-*-pe)
      noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache inet"

@@ -1,3 +1,18 @@
+Mon Jun 24 23:26:07 1996  Geoffrey Noer  <noer@cygnus.com>
+
+	* configure.in: build diff and patch for cygwin32-hosted
+	toolchains.
+
+Mon Jun 24 15:01:12 1996  Joel Sherrill  <joel@merlin.gcs.redstone.army.mil>
+
+	* config.sub: Accept -rtems*.
+
+Sun Jun 23 22:41:54 1996  Geoffrey Noer  <noer@cygnus.com>
+
+        * configure.in: enable dosrel for cygwin32-hosted builds,
+                remove diff from the list of things not buildable
+                via Canadian Cross
+
 Sat Jun 22 11:39:01 1996  Jason Merrill  <jason@yorick.cygnus.com>
 
 	* Makefile.in (TARGET_SUBDIR): Move comment to previous line so we
