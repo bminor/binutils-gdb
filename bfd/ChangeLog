@@ -1,3 +1,8 @@
+2005-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (elf_mark_used_section): Remove check for special
+	sections.
+
 2005-03-18  Andreas Schwab  <schwab@suse.de>
 
 	* elfxx-ia64.c (elfNN_ia64_install_value): Change type of insn
