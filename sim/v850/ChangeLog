@@ -1,3 +1,25 @@
+Fri Apr 24 14:16:40 1998  Tom Tromey  <tromey@creche>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Fri Apr 24 11:18:08 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* configure.in: Don't call sinclude.
+
+Sat Apr  4 20:36:25 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* sim-main.h (SIM_MAIN_H): Wrap header.
+
+Fri Mar 27 16:15:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Wed Mar 25 12:35:29 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Tue Mar 10 15:54:50 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_stop): Delete, second attempt.
@@ -577,7 +599,7 @@ Fri Aug 22 10:39:28 1997  Nick Clifton  <nickc@cygnus.com>
 	* simops.c (unsigned divide instructions): S bit set if result has
 	top bit set.
 	
-start-sanitize-v850e
+end-sanitize-v850e
 	* simops.c (pushml, pushmh, popml, popmh): Lower numbered
 	registers go to higher numbered address.
 	
@@ -587,6 +609,7 @@ Wed Aug 20 13:56:35 1997  Nick Clifton  <nickc@cygnus.com>
 	interpretation of SR bit in list18 structure.
 	(divn, divun): New functions to perform N step divide functions.
 
+start-sanitize-v850e
 Mon Aug 18 10:59:02 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* simops.c (OP_300, OP_400, OP_60, OP_70): Support variant opcodes
