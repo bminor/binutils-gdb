@@ -212,7 +212,7 @@ static CONST struct elf_reloc_map sparc_reloc_map[] =
 
 static reloc_howto_type *
 sparc64_elf_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   unsigned int i;
@@ -226,7 +226,7 @@ sparc64_elf_reloc_type_lookup (abfd, code)
 
 static void
 sparc64_elf_info_to_howto (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf64_Internal_Rela *dst;
 {
@@ -240,7 +240,7 @@ sparc64_elf_info_to_howto (abfd, cache_ptr, dst)
    
 static long
 sparc64_elf_get_reloc_upper_bound (abfd, sec)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
 {
   return (sec->reloc_count * 2 + 1) * sizeof (arelent *);
@@ -266,7 +266,6 @@ sparc64_elf_slurp_one_reloc_table (abfd, asect, rel_hdr, symbols, dynamic)
      asymbol **symbols;
      boolean dynamic;
 {
-  struct elf_backend_data * const ebd = get_elf_backend_data (abfd);
   PTR allocated = NULL;
   bfd_byte *native_relocs;
   arelent *relent;
@@ -501,7 +500,6 @@ sparc64_elf_write_relocs (abfd, sec, data)
   for (idx = 0; idx < sec->reloc_count; idx++)
     {
       bfd_vma addr;
-      unsigned int i;
 
       ++count;
 
@@ -723,13 +721,13 @@ sparc_elf_notsup_reloc (abfd,
 			input_section,
 			output_bfd,
 			error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   return bfd_reloc_notsupported;
 }
@@ -745,7 +743,7 @@ sparc_elf_wdisp16_reloc (abfd, reloc_entry, symbol, data, input_section,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   bfd_vma relocation;
   bfd_vma insn;
@@ -783,7 +781,7 @@ sparc_elf_hix22_reloc (abfd,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   bfd_vma relocation;
   bfd_vma insn;
@@ -820,7 +818,7 @@ sparc_elf_lox10_reloc (abfd,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   bfd_vma relocation;
   bfd_vma insn;
@@ -1265,9 +1263,9 @@ sparc64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      struct bfd_link_info *info;
      const Elf_Internal_Sym *sym;
      const char **namep;
-     flagword *flagsp;
-     asection **secp;
-     bfd_vma *valp;
+     flagword *flagsp ATTRIBUTE_UNUSED;
+     asection **secp ATTRIBUTE_UNUSED;
+     bfd_vma *valp ATTRIBUTE_UNUSED;
 {
   static char *stt_types[] = { "NOTYPE", "OBJECT", "FUNCTION" };
 
@@ -1387,7 +1385,7 @@ sparc64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 
 static boolean
 sparc64_elf_output_arch_syms (output_bfd, info, finfo, func)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
      PTR finfo;
      boolean (*func) PARAMS ((PTR, const char *,
@@ -1460,7 +1458,7 @@ sparc64_elf_get_symbol_type (elf_sym, type)
 
 static void
 sparc64_elf_symbol_processing (abfd, asym)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asymbol *asym;
 {
   elf_symbol_type *elfsym;
@@ -1898,7 +1896,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
     {
       int r_type;
       reloc_howto_type *howto;
-      long r_symndx;
+      unsigned long r_symndx;
       struct elf_link_hash_entry *h;
       Elf_Internal_Sym *sym;
       asection *sec;
@@ -2809,8 +2807,8 @@ sparc64_elf_merge_private_bfd_data (ibfd, obfd)
 	  /* We don't want dynamic objects memory ordering and
 	     architecture to have any role. That's what dynamic linker
 	     should do.  */
-	  old_flags &= ~(EF_SPARCV9_MM | EF_SPARC_SUN_US1 | EF_SPARC_HAL_R1);
-	  old_flags |= (new_flags
+	  new_flags &= ~(EF_SPARCV9_MM | EF_SPARC_SUN_US1 | EF_SPARC_HAL_R1);
+	  new_flags |= (old_flags
 			& (EF_SPARCV9_MM
 			   | EF_SPARC_SUN_US1
 			   | EF_SPARC_HAL_R1));
@@ -2863,7 +2861,7 @@ sparc64_elf_merge_private_bfd_data (ibfd, obfd)
 
 static const char *
 sparc64_elf_print_symbol_all (abfd, filep, symbol)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      PTR filep;
      asymbol *symbol;
 {
