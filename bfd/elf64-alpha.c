@@ -4381,8 +4381,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		    _bfd_merged_section_offset (output_bfd, &msec,
 						elf_section_data (sec)->
 						  sec_info,
-						sym->st_value + ent->addend,
-						(bfd_vma) 0);
+						sym->st_value + ent->addend);
 		  ent->addend -= sym->st_value;
 		  ent->addend += msec->output_section->vma
 				 + msec->output_offset

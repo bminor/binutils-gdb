@@ -780,7 +780,7 @@ _bfd_write_merged_section (bfd *output_bfd, asection *sec, void *psecinfo)
 
 bfd_vma
 _bfd_merged_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED, asection **psec,
-			    void *psecinfo, bfd_vma offset, bfd_vma addend)
+			    void *psecinfo, bfd_vma offset)
 {
   struct sec_merge_sec_info *secinfo;
   struct sec_merge_hash_entry *entry;
@@ -789,13 +789,13 @@ _bfd_merged_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED, asection **psec,
 
   secinfo = (struct sec_merge_sec_info *) psecinfo;
 
-  if (offset + addend >= sec->_raw_size)
+  if (offset >= sec->_raw_size)
     {
-      if (offset + addend > sec->_raw_size)
+      if (offset > sec->_raw_size)
 	{
 	  (*_bfd_error_handler)
-	    (_("%s: access beyond end of merged section (%ld + %ld)"),
-	     bfd_get_filename (sec->owner), (long) offset, (long) addend);
+	    (_("%s: access beyond end of merged section (%ld)"),
+	     bfd_get_filename (sec->owner), (long) offset);
 	}
       return (secinfo->first ? sec->_cooked_size : 0);
     }
@@ -804,15 +804,14 @@ _bfd_merged_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED, asection **psec,
     {
       if (sec->entsize == 1)
 	{
-	  p = secinfo->contents + offset + addend - 1;
+	  p = secinfo->contents + offset - 1;
 	  while (p >= secinfo->contents && *p)
 	    --p;
 	  ++p;
 	}
       else
 	{
-	  p = secinfo->contents
-	      + ((offset + addend) / sec->entsize) * sec->entsize;
+	  p = secinfo->contents + (offset / sec->entsize) * sec->entsize;
 	  p -= sec->entsize;
 	  while (p >= secinfo->contents)
 	    {
@@ -830,8 +829,7 @@ _bfd_merged_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED, asection **psec,
     }
   else
     {
-      p = secinfo->contents
-	  + ((offset + addend) / sec->entsize) * sec->entsize;
+      p = secinfo->contents + (offset / sec->entsize) * sec->entsize;
     }
   entry = sec_merge_hash_lookup (secinfo->htab, p, 0, FALSE);
   if (!entry)
@@ -845,9 +843,8 @@ _bfd_merged_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED, asection **psec,
       if (! secinfo->htab->first)
 	abort ();
       entry = secinfo->htab->first;
-      p = secinfo->contents
-	  + ((offset + addend) / sec->entsize + 1) * sec->entsize
-	  - entry->len;
+      p = (secinfo->contents + (offset / sec->entsize + 1) * sec->entsize
+	   - entry->len);
     }
 
   *psec = entry->secinfo->sec;

@@ -1811,7 +1811,7 @@ ppc_elf_relax_section (bfd *abfd,
       if (tsec->sec_info_type == ELF_INFO_TYPE_MERGE)
 	toff = _bfd_merged_section_offset (abfd, &tsec,
 					   elf_section_data (tsec)->sec_info,
-					   toff, 0);
+					   toff);
 
       symaddr = tsec->output_section->vma + tsec->output_offset + toff;
 

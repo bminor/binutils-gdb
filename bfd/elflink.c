@@ -2362,7 +2362,7 @@ _bfd_elf_link_sec_merge_syms (struct elf_link_hash_entry *h, void *data)
 	_bfd_merged_section_offset (output_bfd,
 				    &h->root.u.def.section,
 				    elf_section_data (sec)->sec_info,
-				    h->root.u.def.value, 0);
+				    h->root.u.def.value);
     }
 
   return TRUE;
@@ -6392,7 +6392,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	    isym->st_value =
 	      _bfd_merged_section_offset (output_bfd, &isec,
 					  elf_section_data (isec)->sec_info,
-					  isym->st_value, 0);
+					  isym->st_value);
 	}
       else if (isym->st_shndx == SHN_ABS)
 	isec = bfd_abs_section_ptr;

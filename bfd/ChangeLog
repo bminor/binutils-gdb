@@ -1,3 +1,17 @@
+2004-05-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* merge.c (_bfd_merged_section_offset): Remove "addend" param.
+	* libbfd-in.h (_bfd_merged_section_offset): Adjust prototype.
+	* libbfd.h: Regenerate.
+	* elf.c (_bfd_elf_rela_local_sym): Adjust call.
+	(_bfd_elf_rel_local_sym): Likewise.
+	* elflink.c (_bfd_elf_link_sec_merge_syms): Likewise.
+	(elf_link_input_bfd): Likewise.
+	* elf32-ppc.c (ppc_elf_relax_section): Likewise.
+	* elf64-alpha.c (elf64_alpha_relocate_section): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Likewise.
+	(elfNN_ia64_relocate_section): Likewise.
+
 2004-05-21  Andy Chittenden  <achittenden@bluearc.com>
 
 	* hash.c (bfd_default_hash_table_size): New variable.

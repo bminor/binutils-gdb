@@ -543,7 +543,7 @@ extern bfd_boolean _bfd_write_merged_section
 /* Find an offset within a modified SEC_MERGE section.  */
 
 extern bfd_vma _bfd_merged_section_offset
-  (bfd *, asection **, void *, bfd_vma, bfd_vma);
+  (bfd *, asection **, void *, bfd_vma);
 
 /* Create a string table.  */
 extern struct bfd_strtab_hash *_bfd_stringtab_init

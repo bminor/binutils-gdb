@@ -7537,9 +7537,18 @@ _bfd_elf_rela_local_sym (bfd *abfd,
       rel->r_addend =
 	_bfd_merged_section_offset (abfd, psec,
 				    elf_section_data (sec)->sec_info,
-				    sym->st_value + rel->r_addend,
-				    0);
-      sec = *psec;
+				    sym->st_value + rel->r_addend);
+      if (sec != *psec)
+	{
+	  /* If we have changed the section, and our original section is
+	     marked with SEC_EXCLUDE, it means that the original
+	     SEC_MERGE section has been completely subsumed in some
+	     other SEC_MERGE section.  In this case, we need to leave
+	     some info around for --emit-relocs.  */
+	  if ((sec->flags & SEC_EXCLUDE) != 0)
+	    sec->kept_section = *psec;
+	  sec = *psec;
+	}
       rel->r_addend -= relocation;
       rel->r_addend += sec->output_section->vma + sec->output_offset;
     }
@@ -7559,7 +7568,7 @@ _bfd_elf_rel_local_sym (bfd *abfd,
 
   return _bfd_merged_section_offset (abfd, psec,
 				     elf_section_data (sec)->sec_info,
-				     sym->st_value + addend, 0);
+				     sym->st_value + addend);
 }
 
 bfd_vma
