@@ -49,8 +49,8 @@ proc do_tests {} {
     send "set language chill\n" ; expect -re "$prompt $"
 
     runto dump
-    # Linux thinks type is "_cint" and so does sparc-sun-sunos4
-    setup_xfail "i*86-*-linux*" "sparc-sun-sunos4*"
+    # Linux thinks type is "_cint" (and so does sparc-sun-sunos4, alpha-dec-osf2.0)
+    setup_xfail "i*86-*-linux*" "sparc-sun-sunos4*" "alpha-dec-osf2*"
     gdb_test "whatis i" "type = m_index" "whatis int-range"
     gdb_test_exact "ptype m_index" "type = RANGE (1:10)" "ptype m_index"
     gdb_test_exact "whatis a" "type = /*LOC*/ vector"
