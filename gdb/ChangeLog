@@ -1,3 +1,9 @@
+2004-07-23  Martin Hunt  <hunt@redhat.com>
+	Kevin Buettner <kevinb@redhat.com>
+
+	* dwarf2-frame.c (execute_cfa_program): Fix typo in which the
+	alignment was being added to the offset instead of multiplied.
+
 2004-07-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64obsd-tdep.c (sparc64obsd_pc_in_sigtramp): Adjust for
