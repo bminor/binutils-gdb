@@ -1,3 +1,8 @@
+2001-03-31  Alan Modra  <alan@linuxcare.com.au>
+
+	* cond.c (s_endif): Correct handling of "if .. elseif .." trees.
+	Don't abort on NULL current_cframe.
+
 2001-03-30  Richard Henderson  <rth@redhat.com>
 
 	* write.c (relax_seg, size_seg): Split from relax_and_size_seg.
