@@ -1,3 +1,11 @@
+Mon May  4 11:02:23 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-arm.c (coff_arm_relocate_section): Cast to bfd_signed_vma,
+	not signed.
+	* peicode.h (pe_saved_coff_bfd_print_private_bfd_data): Use PARAMS
+	when declaring parameter types.
+	(pe_saved_coff_bfd_copy_private_bfd_data): Likewise.
+
 Wed Apr 29 15:35:03 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.bfd: If we include any ELF targets in targ_defvec and/or
