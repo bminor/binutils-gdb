@@ -709,6 +709,10 @@ char *str;
 				the_insn.reloc = RELOC_11;
 				goto immediate;
 				
+			case 'j':
+			  	the_insn.reloc = RELOC_10;
+			  	goto immediate;
+
 			case 'k':
 				the_insn.reloc = RELOC_WDISP2_14;
 				the_insn.pcrel = 1;
@@ -729,13 +733,6 @@ char *str;
 			case 'T':
 				if (*s == 'p' && s[1] == 't') {
 					s += 2;
-					continue;
-				}
-				break;
-				
-			case 'Y':
-				if (strncmp(s, "%amr", 4) == 0) {
-					s += 4;
 					continue;
 				}
 				break;
@@ -803,13 +800,6 @@ char *str;
 			case 'P':
 				if (strncmp(s, "%pc", 3) == 0) {
 					s += 3;
-					continue;
-				}
-				break;
-				
-			case 'E':
-				if (strncmp(s, "%modes", 6) == 0) {
-					s += 6;
 					continue;
 				}
 				break;
@@ -987,13 +977,6 @@ char *str;
 				}
 				break;
 				
-				/* start-sanitize-v9 */
-#ifndef NO_V9
-			case 'j':
-			case 'u':
-			case 'U':
-#endif /* NO_V9 */
-				/* end-sanitize-v9 */
 			case 'e': /* next operand is a floating point register */
 			case 'v':
 			case 'V':
@@ -1029,16 +1012,14 @@ char *str;
 						mask = 10 * mask + (*s - '0');
 					} /* read the number */
 					
-					if ((*args == 'u'
-					     || *args == 'v'
+					if ((*args == 'v'
 					     || *args == 'B'
 					     || *args == 'H')
 					    && (mask & 1)) {
 						break;
 					} /* register must be even numbered */
 					
-					if ((*args == 'U'
-					     || *args == 'V'
+					if ((*args == 'V'
 					     || *args == 'R'
 					     || *args == 'J')
 					    && (mask & 3)) {
@@ -1085,15 +1066,6 @@ char *str;
 				} /* on error */
 				
 				switch (*args) {
-					/* start-sanitize-v9 */
-#ifndef NO_V9
-				case 'j':
-				case 'u':
-				case 'U':
-					opcode |= (mask & 0x1f) << 9;
-					continue;
-#endif /* NO_V9 */
-					/* end-sanitize-v9 */
 					
 				case 'v':
 				case 'V':
@@ -1271,16 +1243,22 @@ char *str;
 				
 /* start-sanitize-v9 */
 #ifndef NO_V9
-			case 's':
-			  if (strncmp (s, "%usr", 4) != 0)
-			    break;
-			  s += 4;
-			  continue;
-
 			case 'o':
 			  if (strncmp (s, "%asi", 4) != 0)
 			    break;
 			  s += 4;
+			  continue;
+
+			case 's':
+			  if (strncmp (s, "%fprs", 5) != 0)
+			    break;
+			  s+= 5;
+			  continue;
+
+			case 'E':
+			  if (strncmp (s, "%ccr", 4) != 0)
+			    break;
+			  s+= 4;
 			  continue;
 #endif /* NO_V9 */
 		/* end-sanitize-v9 */
@@ -1540,6 +1518,16 @@ long val;
 		buf[3] = val & 0xff;
 		break;
 		
+	case RELOC_10:
+		if (((val > 0) && (val & ~0x3ff))
+		    || ((val < 0) && (~(val - 1) & ~0x3ff))) {
+			as_bad("relocation overflow.");
+		} /* on overflow */
+		
+		buf[2] = (val >> 8) & 0x3;
+		buf[3] = val & 0xff;
+		break;
+
 	case RELOC_WDISP2_14:
 		if (((val > 0) && (val & ~0x3fffc))
 		    || ((val < 0) && (~(val - 1) & ~0x3fffc))) {

@@ -1,3 +1,7 @@
+Mon Aug 31 10:11:37 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* sparc-opc.c: Rigorously updated to match architecture manual.
+
 Mon Aug 31 08:07:58 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* aoutx.h (aout<n>swap_ext_reloc_out), bout.c
