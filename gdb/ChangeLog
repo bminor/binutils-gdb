@@ -1,3 +1,8 @@
+1999-01-04  Manuel Bouyer <bouyer@antioche.lip6.fr>
+
+	* main.c: Add --write command line option, document -w.
+	* gdb.1: Document --write.
+
 1999-01-04  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* configure.in: Require autoconf 2.12.1 or higher.
