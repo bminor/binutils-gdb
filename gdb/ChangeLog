@@ -1,3 +1,11 @@
+Mon Oct  3 05:11:47 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* corelow.c (core_open):  Copy the modified to_sections_end
+	vector from current_target to core_ops too.
+
+	* gdbserver/server.c (main):  Silently accept query requests
+	and send back a zero length acknowledge.
+
 Fri Sep 30 17:17:21 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
         * nlm/Makefile.in: Get rid of NWINCLUDES.

@@ -202,8 +202,10 @@ core_open (filename, from_tty)
 
     /* solib_add_stub usually modifies current_target.to_sections, which
        has to be reflected in core_ops to enable proper freeing of
-       of the to_sections vector in core_close.  */
+       the to_sections vector in core_close and correct section
+       mapping in xfer_memory and core_files_info.  */
     core_ops.to_sections = current_target.to_sections;
+    core_ops.to_sections_end = current_target.to_sections_end;
 #endif
 
     /* Now, set up the frame cache, and print the top of stack */
