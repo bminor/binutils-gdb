@@ -1,3 +1,16 @@
+Mon Mar 31 16:35:51 1997  Joel Sherrill  <joel@oarcorp.com>
+
+        * configure.tgt (hppa*-*-rtems*): New target, like hppa-*-*elf*.
+
+Fri Mar 28 15:29:23 1997  H.J. Lu <hjl@gnu.ai.mit.edu>
+
+	Contributed by David S. Miller <davem@caip.rutgers.edu>:
+	* configure.tgt (sparc*-*-linuxaout*): New target.
+	(sparc*-*-linux*): New target.
+	* emulparams/sparclinux.sh: New file.
+	* Makefile.in (ALL_EMULATIONS): Add esparclinux.o.
+	(esparclinux.c): New target.
+
 Fri Mar 28 14:30:12 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Ralf Baechle <ralf@gnu.ai.mit.edu>:
