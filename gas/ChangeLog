@@ -1,5 +1,8 @@
 Wed Aug  7 11:50:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (md_section_align): Do align if OBJ_ELF, but
+	not to more than a 16 byte boundary.
+
 	* config/tc-i386.c (tc_gen_reloc): Accept all relocs; remove
 	#ifndef OBJ_ELF lines.  From Eric Valette <valette@crf.canon.fr>.
 	(tc_gen_reloc): If out of memory call as_fatal rather than
