@@ -30,7 +30,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the BFD library.
 
-Copyright (C) 1991, 2000 Free Software Foundation, Inc.
+Copyright (C) 1991, 2000, 2001 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.1
@@ -56,8 +56,8 @@ notice identical to this one except for the removal of this paragraph
 @title{libbfd}
 @subtitle{The Binary File Descriptor Library}
 @sp 1
-@subtitle First Edition---BFD version < 3.0
-@subtitle April 1991
+@subtitle First Edition---BFD version < 3.0  % Since no product is stable berfore version 3.0 :-)
+@subtitle Original Document Created: April 1991
 @author {Steve Chamberlain}
 @author {Cygnus Support}
 @page
@@ -66,8 +66,8 @@ notice identical to this one except for the removal of this paragraph
 \def\$#1${{#1}}  % Kluge: collect RCS revision info without $...$
 \xdef\manvers{\$Revision$}  % For use in headers, footers too
 {\parskip=0pt
-\hfill Cygnus Support\par
-\hfill sac\@cygnus.com\par
+\hfill Free Software Foundation\par
+\hfill sac\@www.gnu.org\par
 \hfill {\it BFD}, \manvers\par
 \hfill \TeX{}info \texinfoversion\par
 }
@@ -75,7 +75,7 @@ notice identical to this one except for the removal of this paragraph
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 2001 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.1
