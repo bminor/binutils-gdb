@@ -1,3 +1,12 @@
+2001-05-03  H.J. Lu  <hjl@gnu.org>
+
+	* emultempl/elf32.em: Include "libiberty.h".
+	(gld${EMULATION_NAME}_vercheck): Call basename () to get the
+	basename of the bfd filename.
+	(gld${EMULATION_NAME}_stat_needed): Likewise.
+	(gld${EMULATION_NAME}_try_needed): Likewise.
+	(gld${EMULATION_NAME}_open_dynamic_archive): Likewise.
+
 2001-05-02  H.J. Lu  <hjl@gnu.org>
 
 	* emultempl/pe.em: Include <ctype.h>.

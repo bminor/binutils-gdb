@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "libiberty.h"
 
 #include <ctype.h>
 
@@ -130,7 +131,7 @@ static void
 gld${EMULATION_NAME}_vercheck (s)
      lang_input_statement_type *s;
 {
-  const char *soname, *f;
+  const char *soname;
   struct bfd_link_needed_list *l;
 
   if (global_vercheck_failed)
@@ -141,19 +142,13 @@ gld${EMULATION_NAME}_vercheck (s)
 
   soname = bfd_elf_get_dt_soname (s->the_bfd);
   if (soname == NULL)
-    soname = bfd_get_filename (s->the_bfd);
-
-  f = strrchr (soname, '/');
-  if (f != NULL)
-    ++f;
-  else
-    f = soname;
+    soname = basename (bfd_get_filename (s->the_bfd));
 
   for (l = global_vercheck_needed; l != NULL; l = l->next)
     {
       const char *suffix;
 
-      if (strcmp (f, l->name) == 0)
+      if (strcmp (soname, l->name) == 0)
 	{
 	  /* Probably can't happen, but it's an easy check.  */
 	  continue;
@@ -168,7 +163,7 @@ gld${EMULATION_NAME}_vercheck (s)
 
       suffix += sizeof ".so." - 1;
 
-      if (strncmp (f, l->name, suffix - l->name) == 0)
+      if (strncmp (soname, l->name, suffix - l->name) == 0)
 	{
 	  /* Here we know that S is a dynamic object FOO.SO.VER1, and
              the object we are considering needs a dynamic object
@@ -192,7 +187,6 @@ gld${EMULATION_NAME}_stat_needed (s)
   struct stat st;
   const char *suffix;
   const char *soname;
-  const char *f;
 
   if (global_found)
     return;
@@ -230,17 +224,12 @@ gld${EMULATION_NAME}_stat_needed (s)
 
   soname = bfd_elf_get_dt_soname (s->the_bfd);
   if (soname == NULL)
-    soname = s->filename;
+    soname = basename (s->filename);
 
-  f = strrchr (soname, '/');
-  if (f != NULL)
-    ++f;
-  else
-    f = soname;
-
-  if (strncmp (f, global_needed->name, suffix - global_needed->name) == 0)
+  if (strncmp (soname, global_needed->name,
+	       suffix - global_needed->name) == 0)
     einfo ("%P: warning: %s, needed by %B, may conflict with %s\n",
-	   global_needed->name, global_needed->by, f);
+	   global_needed->name, global_needed->by, soname);
 }
 
 
@@ -340,11 +329,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
     einfo ("%F%P:%B: bfd_stat failed: %E\n", abfd);
 
   /* First strip off everything before the last '/'.  */
-  soname = strrchr (abfd->filename, '/');
-  if (soname)
-    soname++;
-  else
-    soname = abfd->filename;
+  soname = basename (abfd->filename);
 
   if (trace_file_tries)
     info_msg (_("found %s at %s\n"), soname, name);
@@ -949,20 +934,13 @@ gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
   if (bfd_check_format (entry->the_bfd, bfd_object)
       && (entry->the_bfd->flags & DYNAMIC) != 0)
     {
-      char *needed_name;
-
       ASSERT (entry->is_archive && entry->search_dirs_flag);
 
       /* Rather than duplicating the logic above.  Just use the
-	 filename we recorded earlier.
+	 filename we recorded earlier.  */
 
-	 First strip off everything before the last '/'.  */
-      filename = strrchr (entry->filename, '/');
-      filename++;
-
-      needed_name = (char *) xmalloc (strlen (filename) + 1);
-      strcpy (needed_name, filename);
-      bfd_elf_set_dt_needed_name (entry->the_bfd, needed_name);
+      filename = xstrdup (basename (entry->filename));
+      bfd_elf_set_dt_needed_name (entry->the_bfd, filename);
     }
 
   return true;
