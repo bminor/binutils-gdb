@@ -60,16 +60,12 @@ struct type *builtin_type_char;
 struct type *builtin_type_short;
 struct type *builtin_type_int;
 struct type *builtin_type_long;
-#ifdef LONG_LONG
 struct type *builtin_type_long_long;
-#endif
 struct type *builtin_type_unsigned_char;
 struct type *builtin_type_unsigned_short;
 struct type *builtin_type_unsigned_int;
 struct type *builtin_type_unsigned_long;
-#ifdef LONG_LONG
 struct type *builtin_type_unsigned_long_long;
-#endif
 struct type *builtin_type_float;
 struct type *builtin_type_double;
 struct type *builtin_type_error;
@@ -385,12 +381,14 @@ lookup_enum (name, block)
 }
 
 /* Given a type TYPE, lookup the type of the component of type named
-   NAME.  */
+   NAME.  
+   If NOERR is nonzero, return zero if NAME is not suitably defined.  */
 
 struct type *
-lookup_struct_elt_type (type, name)
+lookup_struct_elt_type (type, name, noerr)
      struct type *type;
      char *name;
+     int noerr;
 {
   int i;
 
@@ -404,10 +402,27 @@ lookup_struct_elt_type (type, name)
       error (" is not a structure or union type.");
     }
 
-  for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
-    if (!strcmp (TYPE_FIELD_NAME (type, i), name))
-      return TYPE_FIELD_TYPE (type, i);
+  check_stub_type (type);
 
+  for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
+    {
+      char *t_field_name = TYPE_FIELD_NAME (type, i);
+
+      if (t_field_name && !strcmp (t_field_name, name))
+	return TYPE_FIELD_TYPE (type, i);
+    }
+  /* OK, it's not in this class.  Recursively check the baseclasses.  */
+  for (i = TYPE_N_BASECLASSES (type) - 1; i >= 0; i--)
+    {
+      struct type *t = lookup_struct_elt_type (TYPE_BASECLASS (type, i),
+					       name, 0);
+      if (t != NULL)
+	return t;
+    }
+
+  if (noerr)
+    return NULL;
+  
   target_terminal_ours ();
   fflush (stdout);
   fprintf (stderr, "Type ");
@@ -537,6 +552,29 @@ lookup_member_type (type, domain)
 
   return mtype;
 }
+
+/* Allocate a stub method whose return type is
+   TYPE.  We will fill in arguments later.  This always
+   returns a fresh type.  If we unify this type with
+   an existing type later, the storage allocated
+   here can be freed.  */
+struct type *
+allocate_stub_method (type)
+     struct type *type;
+{
+  struct type *mtype = (struct type *)xmalloc (sizeof (struct type));
+  bzero (mtype, sizeof (struct type));
+  TYPE_MAIN_VARIANT (mtype) = mtype;
+  TYPE_TARGET_TYPE (mtype) = type;
+  TYPE_FLAGS (mtype) = TYPE_FLAG_STUB;
+  TYPE_CODE (mtype) = TYPE_CODE_METHOD;
+  TYPE_LENGTH (mtype) = 1;
+  return mtype;
+}
+
+/* Lookup a method type returning type TYPE, belonging
+   to class DOMAIN, and taking a list of arguments ARGS.
+   If one is not found, allocate a new one.  */
 
 struct type *
 lookup_method_type (type, domain, args)
@@ -1613,6 +1651,81 @@ find_pc_line_pc_range (pc, startptr, endptr)
   return sal.symtab != 0;
 }
 
+/* If P is of the form "operator[ \t]+..." where `...' is
+   some legitimate operator text, return a pointer to the
+   beginning of the substring of the operator text.
+   Otherwise, return "".  */
+static char *
+operator_chars (p, end)
+     char *p;
+     char **end;
+{
+  *end = "";
+  if (strncmp (p, "operator", 8))
+    return *end;
+  p += 8;
+
+  /* Don't get faked out by `operator' being part of a longer
+     identifier.  */
+  if ((*p >= 'A' && *p <= 'Z') || (*p >= 'a' && *p <= 'z')
+      || *p == '_' || *p == '$' || *p == '\0')
+    return *end;
+
+  /* Allow some whitespace between `operator' and the operator symbol.  */
+  while (*p == ' ' || *p == '\t')
+    p++;
+
+  switch (*p)
+    {
+    case '!':
+    case '=':
+    case '*':
+    case '/':
+    case '%':
+    case '^':
+      if (p[1] == '=')
+	*end = p+2;
+      else
+	*end = p+1;
+      return p;
+    case '<':
+    case '>':
+    case '+':
+    case '-':
+    case '&':
+    case '|':
+      if (p[1] == '=' || p[1] == p[0])
+	*end = p+2;
+      else
+	*end = p+1;
+      return p;
+    case '~':
+    case ',':
+      *end = p+1;
+      return p;
+    case '(':
+      if (p[1] != ')')
+	error ("`operator ()' must be specified without whitespace in `()'");
+      *end = p+2;
+      return p;
+    case '?':
+      if (p[1] != ':')
+	error ("`operator ?:' must be specified without whitespace in `?:'");
+      *end = p+2;
+      return p;
+    case '[':
+      if (p[1] != ']')
+	error ("`operator []' must be specified without whitespace in `[]'");
+      *end = p+2;
+      return p;
+    default:
+      error ("`operator %s' not supported", p);
+      break;
+    }
+  *end = "";
+  return *end;
+}
+
 /* Recursive helper function for decode_line_1.
  * Look for methods named NAME in type T.
  * Return number of matches.
@@ -1740,6 +1853,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
   struct symtabs_and_lines values;
   struct symtab_and_line val;
   register char *p, *p1;
+  char *q, *q1;
   register struct symtab *s;
 
   register struct symbol *sym;
@@ -1788,6 +1902,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
     }
   while (p[0] == ' ' || p[0] == '\t') p++;
 
+  q = operator_chars (*argptr, &q1);
   if (p[0] == ':')
     {
 
@@ -1817,9 +1932,23 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 		 Find the next token (everything up to end or next whitespace). */
 	      p = *argptr;
 	      while (*p && *p != ' ' && *p != '\t' && *p != ',' && *p !=':') p++;
-	      copy = (char *) alloca (p - *argptr + 1);
-	      bcopy (*argptr, copy, p - *argptr);
-	      copy[p - *argptr] = '\0';
+	      q = operator_chars (*argptr, &q1);
+	      
+	      copy = (char *) alloca (p - *argptr + 1 + (q1 - q));
+	      if (q1 - q)
+		{
+		  copy[0] = 'o';
+		  copy[1] = 'p';
+		  copy[2] = CPLUS_MARKER;
+		  bcopy (q, copy + 3, q1 - q);
+		  copy[3 + (q1 - q)] = '\0';
+		  p = q1;
+		}
+	      else
+		{
+		  bcopy (*argptr, copy, p - *argptr);
+		  copy[p - *argptr] = '\0';
+		}
 
 	      /* no line number may be specified */
 	      while (*p == ' ' || *p == '\t') p++;
@@ -1875,7 +2004,19 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 		  return decode_line_2 (sym_arr, i1, funfirstline);
 		}
 	      else
-		error ("that class does not have any method named %s",copy);
+		{
+		  char *tmp;
+
+		  if (OPNAME_PREFIX_P (copy))
+		    {
+		      tmp = (char *)alloca (strlen (copy+3) + 9);
+		      strcpy (tmp, "operator ");
+		      strcat (tmp, copy+3);
+		    }
+		  else
+		    tmp = copy;
+		  error ("that class does not have any method named %s", tmp);
+		}
 	    }
 	  else
 	    /* The quotes are important if copy is empty.  */
@@ -1887,9 +2028,21 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
       /* Extract the file name.  */
       p1 = p;
       while (p != *argptr && p[-1] == ' ') --p;
-      copy = (char *) alloca (p - *argptr + 1);
-      bcopy (*argptr, copy, p - *argptr);
-      copy[p - *argptr] = 0;
+      copy = (char *) alloca (p - *argptr + 1 + (q1 - q));
+      if (q1 - q)
+	{
+	  copy[0] = 'o';
+	  copy[1] = 'p';
+	  copy[2] = CPLUS_MARKER;
+	  bcopy (q, copy + 3, q1-q);
+	  copy[3 + (q1-q)] = 0;
+	  p = q1;
+	}
+      else
+	{
+	  bcopy (*argptr, copy, p - *argptr);
+	  copy[p - *argptr] = 0;
+	}
 
       /* Find that file's data.  */
       s = lookup_symtab (copy);
@@ -2746,12 +2899,14 @@ are listed.");
   builtin_type_unsigned_short = init_type (TYPE_CODE_INT, sizeof (short), 1, "unsigned short");
   builtin_type_unsigned_long = init_type (TYPE_CODE_INT, sizeof (long), 1, "unsigned long");
   builtin_type_unsigned_int = init_type (TYPE_CODE_INT, sizeof (int), 1, "unsigned int");
-#ifdef LONG_LONG
+
   builtin_type_long_long =
-    init_type (TYPE_CODE_INT, sizeof (long long), 0, "long long");
+    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
+	       0, "long long");
   builtin_type_unsigned_long_long = 
-    init_type (TYPE_CODE_INT, sizeof (long long), 1, "unsigned long long");
-#endif
+    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
+	       1, "unsigned long long");
+
   builtin_type_error = init_type (TYPE_CODE_ERROR, 0, 0, "<unknown type>");
 }
 
