@@ -1,3 +1,8 @@
+Sat Jul 15 00:26:35 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* emulparams/elf32ppc.sh (TEMPLATE_NAME): Define as elf32.
+	(GENERATE_SHLIB_SCRIPT): Define as yes.
+
 Fri Jul 14 12:11:46 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/mipsecoff.em (check_sections): Use %P, not %F.
