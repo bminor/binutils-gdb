@@ -1,3 +1,8 @@
+1998-12-11  Ulrich Drepper  <drepper@cygnus.com>
+
+	* elf32-i386.c: Remove leaked development code from patch
+	1998-12-10 by Richard Henderson.
+
 1998-12-10  Richard Henderson  <rth@cygnus.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Don't fail relocations
