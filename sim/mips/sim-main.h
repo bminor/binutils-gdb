@@ -568,10 +568,10 @@ struct _sim_cpu {
 #define NUM_VIF_REGS	26
 
 #define FIRST_VEC_REG	25
-#define NUM_R5900_REGS	128
+#define NUM_CORE_REGS	128
 
 #undef NUM_REGS
-#define NUM_REGS (NUM_R5900_REGS + 2*(NUM_VU_REGS) + 2*(NUM_VIF_REGS))
+#define NUM_REGS (NUM_CORE_REGS + 2*(NUM_VU_REGS) + 2*(NUM_VIF_REGS))
 #endif /* no tm-txvu.h */
 #endif /* TARGET_SKY */
 /* end-sanitize-sky */
@@ -1027,15 +1027,20 @@ char* pr_uword64 PARAMS ((uword64 addr));
 #endif
 
 void sky_sim_engine_halt PARAMS ((SIM_DESC sd, sim_cpu *last, sim_cia cia));
-#define SIM_ENGINE_HALT_HOOK(sd, last, cia) sky_sim_engine_halt(sd, last, cia);
+#define SIM_ENGINE_HALT_HOOK(sd, last, cia) sky_sim_engine_halt(sd, last, cia)
 
 #ifdef SIM_ENGINE_RESTART_HOOK
 #undef SIM_ENGINE_RESTART_HOOK
 #endif
 
 void sky_sim_engine_restart PARAMS ((SIM_DESC sd, sim_cpu *last, sim_cia cia));
-#define SIM_ENGINE_RESTART_HOOK(sd, L, pc) sky_sim_engine_restart(sd, L, pc);
+#define SIM_ENGINE_RESTART_HOOK(sd, L, pc) sky_sim_engine_restart(sd, L, pc)
 
+/* for resume/suspend modules */
+SIM_RC sky_sim_module_install PARAMS ((SIM_DESC sd));
+
+#define MODULE_LIST	sky_sim_module_install,
+  
 #ifndef TM_TXVU_H /* In case GDB hasn't been configured yet */
 enum txvu_cpu_context
 {
@@ -1049,7 +1054,7 @@ enum txvu_cpu_context
 };
 
 /* memory segment for communication with GDB */
-#define GDB_COMM_AREA	0x21010000
+#define GDB_COMM_AREA	0x21010000	/* Random choice */
 #define GDB_COMM_SIZE	0x4000
 
 /* Memory address containing last device to execute */
@@ -1059,8 +1064,11 @@ enum txvu_cpu_context
 #define FIFO_BPT_CNT	(GDB_COMM_AREA + 4)
 #define FIFO_BPT_TBL	(GDB_COMM_AREA + 8)
 
+/* Each element of the breakpoint table is three four-byte integers. */
+#define BPT_ELEM_SZ	4*3
+
 #define TXVU_VU_BRK_MASK 0x02	/* Breakpoint bit is #57 for VU insns */
-#define TXVU_VIF_BRK_MASK 0x0f	/* Breakpoint opcode for VIF insns */
+#define TXVU_VIF_BRK_MASK 0x80	/* Use interrupt bit for VIF insns */
 
 #endif /* !TM_TXVU_H */
 #endif /* TARGET_SKY */

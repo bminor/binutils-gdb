@@ -594,7 +594,6 @@ pke_issue(SIM_DESC sd, struct pke_device* me)
   /* store word in PKECODE register */
   me->regs[PKE_REG_CODE][0] = fw;
 
-
   /* 2 -- test go / no-go for PKE execution */
 
   /* switch on STAT:PSS if PSS-pending and in idle state */
@@ -633,6 +632,15 @@ pke_issue(SIM_DESC sd, struct pke_device* me)
   /* handle interrupts */
   if(intr)
     {
+      /* check to see if the interrupt bit is being used for a breakpoint */
+      if (is_vif_breakpoint ((fqw->source_address & ~15) | (me->qw_pc << 2)))
+	{
+	  sim_cpu *cpu = STATE_CPU (sd, 0);
+	  unsigned_4 pc_addr = (fqw->source_address & ~15) | (me->qw_pc << 2);
+              
+	  sim_engine_halt (sd, cpu, NULL, pc_addr, sim_stopped, SIM_SIGTRAP);
+	}
+
       /* are we resuming an interrupt-stalled instruction? */
       if(me->flags & PKE_FLAG_INT_NOLOOP)
         {
@@ -735,13 +743,6 @@ pke_issue(SIM_DESC sd, struct pke_device* me)
     pke_code_mpg(me, fw);
   else if(me->pke_number == 1 && IS_PKE_CMD(cmd, MSKPATH3))
     pke_code_mskpath3(me, fw);
-  else if(cmd == TXVU_VIF_BRK_MASK)
-    {
-      sim_cpu *cpu = STATE_CPU (sd, 0);
-      unsigned_4 pc_addr = (fqw->source_address & ~15) | (me->qw_pc << 2);
-              
-      sim_engine_halt (sd, cpu, NULL, pc_addr, sim_stopped, SIM_SIGTRAP);
-    }
   /* ... no other commands ... */
   else
     pke_code_error(me, fw);

@@ -46,9 +46,7 @@ code on the hardware.
 #include "sky-libvpe.h"
 #include "sky-pke.h"
 #include "idecode.h"
-#include "support.h"
 #include "sky-gdb.h"
-#undef SD
 #endif
 /* end-sanitize-sky */
 
@@ -179,6 +177,9 @@ static DECLARE_OPTION_HANDLER (mips_option_handler);
 enum {
   OPTION_DINERO_TRACE = OPTION_START,
   OPTION_DINERO_FILE,
+  /* start-stanitize-branchbug4011 */
+  OPTION_BRANCH_BUG_4011,
+  /* end-stanitize-branchbug4011 */
   OPTION_BOARD
 };
 
@@ -194,6 +195,32 @@ mips_option_handler (sd, cpu, opt, arg, is_command)
   int cpu_nr;
   switch (opt)
     {
+      /* start-sanitize-branchbug4011 */
+    case OPTION_BRANCH_BUG_4011:
+      {
+	for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; cpu_nr++)
+	  {
+	    sim_cpu *cpu = STATE_CPU (sd, cpu_nr);
+	    if (arg == NULL)
+	      BRANCHBUG4011_OPTION = 1;
+	    else if (strcmp (arg, "yes") == 0)
+	      BRANCHBUG4011_OPTION = 1;
+	    else if (strcmp (arg, "no") == 0)
+	      BRANCHBUG4011_OPTION = 0;
+	    else if (strcmp (arg, "on") == 0)
+	      BRANCHBUG4011_OPTION = 1;
+	    else if (strcmp (arg, "off") == 0)
+	      BRANCHBUG4011_OPTION = 0;
+	    else
+	      {
+		fprintf (stderr, "Unrecognized check-4011-branch-bug option `%s'\n", arg);
+		return SIM_RC_FAIL;
+	      }
+	  }
+	return SIM_RC_OK;
+      }
+
+    /* end-sanitize-branchbug4011 */
     case OPTION_DINERO_TRACE: /* ??? */
 #if defined(TRACE)
       /* Eventually the simTRACE flag could be treated as a toggle, to
@@ -266,6 +293,11 @@ static const OPTION mips_options[] =
   { {"dinero-trace", optional_argument, NULL, OPTION_DINERO_TRACE},
       '\0', "on|off", "Enable dinero tracing",
       mips_option_handler },
+  /* start-sanitize-branchbug4011 */
+  { {"check-4011-branch-bug", optional_argument, NULL, OPTION_BRANCH_BUG_4011},
+      '\0', "on|off", "Enable checking for 4011 branch bug",
+      mips_option_handler },
+  /* end-sanitize-branchbug4011 */
   { {"dinero-file", required_argument, NULL, OPTION_DINERO_FILE},
       '\0', "FILE", "Write dinero trace to FILE",
       mips_option_handler },
@@ -329,7 +361,6 @@ sim_open (kind, cb, abfd, argv)
   sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-
 
   /* FIXME: watchpoints code shouldn't need this */
   STATE_WATCHPOINTS (sd)->pc = &(PC);
@@ -539,18 +570,18 @@ sim_open (kind, cb, abfd, argv)
 #ifdef TARGET_SKY
     /* Now the VU registers */
     for( rn = 0; rn < NUM_VU_INTEGER_REGS; rn++ ) { 
-      cpu->register_widths[rn + NUM_R5900_REGS] = 16;
-      cpu->register_widths[rn + NUM_R5900_REGS + NUM_VU_REGS] = 16;
+      cpu->register_widths[rn + NUM_CORE_REGS] = 16;
+      cpu->register_widths[rn + NUM_CORE_REGS + NUM_VU_REGS] = 16;
     }
 
     for( rn = NUM_VU_INTEGER_REGS; rn < NUM_VU_REGS; rn++ ) { 
-      cpu->register_widths[rn + NUM_R5900_REGS] = 32;
-      cpu->register_widths[rn + NUM_R5900_REGS + NUM_VU_REGS] = 32;
+      cpu->register_widths[rn + NUM_CORE_REGS] = 32;
+      cpu->register_widths[rn + NUM_CORE_REGS + NUM_VU_REGS] = 32;
     }
 
     /* Finally the VIF registers */
     for( rn = 2*NUM_VU_REGS; rn < 2*NUM_VU_REGS + 2*NUM_VIF_REGS; rn++ )
-      cpu->register_widths[rn + NUM_R5900_REGS] = 32;
+      cpu->register_widths[rn + NUM_CORE_REGS] = 32;
 
     cpu->cur_device = 0;
 #endif
@@ -794,9 +825,9 @@ sim_store_register (sd,rn,memory,length)
 
   /* start-sanitize-sky */
 #ifdef TARGET_SKY
-  if (rn >= NUM_R5900_REGS) 
+  if (rn >= NUM_CORE_REGS) 
     {
-      rn = rn - NUM_R5900_REGS;
+      rn = rn - NUM_CORE_REGS;
 
       if( rn < NUM_VU_REGS )
 	{
@@ -969,9 +1000,9 @@ sim_fetch_register (sd,rn,memory,length)
 
   /* start-sanitize-sky */
 #ifdef TARGET_SKY
-  if (rn >= NUM_R5900_REGS) 
+  if (rn >= NUM_CORE_REGS) 
     {
-      rn = rn - NUM_R5900_REGS;
+      rn = rn - NUM_CORE_REGS;
 
       if (rn < NUM_VU_REGS)
 	{
@@ -3207,8 +3238,12 @@ decode_coproc (SIM_DESC sd,
     case 0: /* standard CPU control and cache registers */
       {
         int code = ((instruction >> 21) & 0x1F);
+	int rt = ((instruction >> 16) & 0x1F);
+	int rd = ((instruction >> 11) & 0x1F);
+	int tail = instruction & 0x3ff;
         /* R4000 Users Manual (second edition) lists the following CP0
            instructions:
+	                                                           CODE><-RT><RD-><--TAIL--->
 	   DMFC0   Doubleword Move From CP0        (VR4100 = 01000000001tttttddddd00000000000)
 	   DMTC0   Doubleword Move To CP0          (VR4100 = 01000000101tttttddddd00000000000)
 	   MFC0    word Move From CP0              (VR4100 = 01000000000tttttddddd00000000000)
@@ -3220,10 +3255,9 @@ decode_coproc (SIM_DESC sd,
 	   CACHE   Cache operation                 (VR4100 = 101111bbbbbpppppiiiiiiiiiiiiiiii)
 	   ERET    Exception return                (VR4100 = 01000010000000000000000000011000)
 	   */
-        if (((code == 0x00) || (code == 0x04)) && ((instruction & 0x7FF) == 0))
+        if (((code == 0x00) || (code == 0x04)) && tail == 0)
 	  {
-	    int rt = ((instruction >> 16) & 0x1F);
-	    int rd = ((instruction >> 11) & 0x1F);
+	    /* M[TF]C0 - 32 bit word */
 	    
 	    switch (rd)  /* NOTEs: Standard CP0 registers */
 	      {
@@ -3312,12 +3346,36 @@ decode_coproc (SIM_DESC sd,
 		/* CPR[0,rd] = GPR[rt]; */
 	      default:
 		if (code == 0x00)
+		  GPR[rt] = (signed_word) (signed32) COP0_GPR[rd];
+		else
+		  COP0_GPR[rd] = GPR[rt];
+#if 0
+		if (code == 0x00)
 		  sim_io_printf(sd,"Warning: MFC0 %d,%d ignored (architecture specific)\n",rt,rd);
 		else
 		  sim_io_printf(sd,"Warning: MTC0 %d,%d ignored (architecture specific)\n",rt,rd);
+#endif
 	      }
 	  }
-	else if (code == 0x10 && (instruction & 0x3f) == 0x18)
+	/* start-sanitize-r5900 */
+        else if (((code == 0x00) || (code == 0x04)) && rd == 0x18 && tail > 0 && tail < NR_COP0_BP)
+	  /* Break-point registers */
+	  {
+	    if (code == 0x00)
+	      GPR[rt] = (signed_word) (signed32) COP0_BP[tail];
+	    else
+	      COP0_BP[tail] = GPR[rt];
+	  }
+        else if (((code == 0x00) || (code == 0x04)) && rd == 0x19 && tail > 0 && tail < NR_COP0_P)
+	  /* Performance registers */
+	  {
+	    if (code == 0x00)
+	      GPR[rt] = (signed_word) (signed32) COP0_P[tail];
+	    else
+	      COP0_P[tail] = GPR[rt];
+	  }
+	/* end-sanitize-r5900 */
+	else if (code == 0x10 && (tail & 0x3f) == 0x18)
 	  {
 	    /* ERET */
 	    if (SR & status_ERL)
@@ -3333,7 +3391,7 @@ decode_coproc (SIM_DESC sd,
 		SR &= ~status_EXL;
 	      }
 	  }
-        else if (code == 0x10 && (instruction & 0x3f) == 0x10)
+        else if (code == 0x10 && (tail & 0x3f) == 0x10)
           {
             /* RFE */
 #ifdef SUBTARGET_R3900
@@ -3345,7 +3403,7 @@ decode_coproc (SIM_DESC sd,
 	    /* TODO: CACHE register */
 #endif /* SUBTARGET_R3900 */
           }
-        else if (code == 0x10 && (instruction & 0x3f) == 0x1F)
+        else if (code == 0x10 && (tail & 0x3f) == 0x1F)
           {
             /* DERET */
             Debug &= ~Debug_DM;
@@ -3378,10 +3436,6 @@ decode_coproc (SIM_DESC sd,
 	int i_10_6 = (instruction >> 6) & 0x1f;
 	int i_5_0 = instruction & 0x03f;
 	int interlock = instruction & 0x01;
-	/* setup for semantic.c-like actions below */
-	typedef unsigned_4 instruction_word;
-	int CIA = cia;
-	int NIA = cia + 4;
 
 	handle = 1;
 
@@ -3392,33 +3446,8 @@ decode_coproc (SIM_DESC sd,
 	    /* NOTREACHED */
 	  }
 
-#define MY_INDEX  itable_COPz_NORMAL
-#define MY_PREFIX COPz_NORMAL
-#define MY_NAME "COPz_NORMAL"
+	/* BC2T/BC2F/BC2TL/BC2FL handled in r5900.igen */
 
-	/* classify & execute basic COP2 instructions */
-	if(i_25_21 == 0x08 && i_20_16 == 0x00) /* BC2F */
-	  {
-	    address_word offset = EXTEND16(i_15_0) << 2;
-	    if(! vu0_busy()) DELAY_SLOT(cia + 4 + offset);
-	  }
-	else if(i_25_21 == 0x08 && i_20_16==0x02) /* BC2FL */
-	  {
-	    address_word offset = EXTEND16(i_15_0) << 2;
-	    if(! vu0_busy()) DELAY_SLOT(cia + 4 + offset);
-	    else NULLIFY_NEXT_INSTRUCTION();
-	  }
-	else if(i_25_21 == 0x08 && i_20_16 == 0x01) /* BC2T */
-	  {
-	    address_word offset = EXTEND16(i_15_0) << 2;
-	    if(vu0_busy()) DELAY_SLOT(cia + 4 + offset);
-	  }
-	else if(i_25_21 == 0x08 && i_20_16 == 0x03) /* BC2TL */
-	  {
-	    address_word offset = EXTEND16(i_15_0) << 2;
-	    if(vu0_busy()) DELAY_SLOT(cia + 4 + offset);
-	    else NULLIFY_NEXT_INSTRUCTION();
-	  }
 	else if((i_25_21 == 0x02 && i_10_1 == 0x000) || /* CFC2 */
 		(i_25_21 == 0x01)) /* QMFC2 */
 	  {
@@ -3430,17 +3459,19 @@ decode_coproc (SIM_DESC sd,
 	    while(vu0_busy() && interlock)
 	      vu0_issue(sd);
 
-	    /* perform VU register address */
+	    /* perform VU register access */
 	    if(i_25_21 == 0x01) /* QMFC2 */
 	      {
-		unsigned_16 xyzw;
+		unsigned_4 x,y,z,w;
+
 		/* one word at a time, argh! */
-		read_vu_vec_reg(&(vu0_device.regs), id, 0, A4_16(& xyzw, 3));
-		read_vu_vec_reg(&(vu0_device.regs), id, 1, A4_16(& xyzw, 2));
-		read_vu_vec_reg(&(vu0_device.regs), id, 2, A4_16(& xyzw, 1));
-		read_vu_vec_reg(&(vu0_device.regs), id, 3, A4_16(& xyzw, 0));
-		GPR[rt] = T2H_8(* A8_16(& xyzw, 1));
-		GPR1[rt] = T2H_8(* A8_16(& xyzw, 0));
+		read_vu_vec_reg(&(vu0_device.regs), id, 3, &w);
+		read_vu_vec_reg(&(vu0_device.regs), id, 2, &z);
+		read_vu_vec_reg(&(vu0_device.regs), id, 1, &y);
+		read_vu_vec_reg(&(vu0_device.regs), id, 0, &x);
+		
+		GPR[rt] = U8_4(T2H_4(y), T2H_4(x));
+		GPR1[rt] = U8_4(T2H_4(w), T2H_4(z));
 	      }
 	    else /* CFC2 */
 	      {
@@ -3466,17 +3497,21 @@ decode_coproc (SIM_DESC sd,
 		vu0_issue(sd);
 	      }
 	    
-	    /* perform VU register address */
+	    /* perform VU register access */
 	    if(i_25_21 == 0x05) /* QMTC2 */
 	      {
-		unsigned_16 xyzw = U16_8(GPR1[rt], GPR[rt]);
+		unsigned_4 x,y,z,w;
 
-		xyzw = H2T_16(xyzw);
+		x = H2T_4(V4_8(GPR[rt], 1));
+		y = H2T_4(V4_8(GPR[rt], 0));
+		z = H2T_4(V4_8(GPR1[rt], 1));
+		w = H2T_4(V4_8(GPR1[rt], 0));
+
 		/* one word at a time, argh! */
-		write_vu_vec_reg(&(vu0_device.regs), id, 0, A4_16(& xyzw, 3));
-		write_vu_vec_reg(&(vu0_device.regs), id, 1, A4_16(& xyzw, 2));
-		write_vu_vec_reg(&(vu0_device.regs), id, 2, A4_16(& xyzw, 1));
-		write_vu_vec_reg(&(vu0_device.regs), id, 3, A4_16(& xyzw, 0));
+		write_vu_vec_reg(&(vu0_device.regs), id, 3, & w);
+		write_vu_vec_reg(&(vu0_device.regs), id, 2, & z);
+		write_vu_vec_reg(&(vu0_device.regs), id, 1, & y);
+		write_vu_vec_reg(&(vu0_device.regs), id, 0, & x);
 	      }
 	    else /* CTC2 */
 	      {
@@ -3560,9 +3595,6 @@ decode_coproc (SIM_DESC sd,
 	    /* NOTREACHED */
 	  }
 	
-	/* cleanup for semantic.c-like actions above */
-	PC = NIA;
-
 #undef MY_INDEX
 #undef MY_PREFIX
 #undef MY_NAME
