@@ -1,3 +1,9 @@
+2003-06-17  Nick Clifton  <nickc@redhat.com>
+
+	* elflink.h (elf_gc_record_vtentry): Allocate an extra element
+        in the vtable_entries_used array to allow for the accessing
+        the largest element.
+
 2003-06-12  Daniel Jacobowitz  <drow@mvista.com>
 
 	* configure.in: Bump version to 2.14.

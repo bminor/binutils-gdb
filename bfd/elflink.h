@@ -8314,7 +8314,7 @@ elf_gc_record_vtentry (abfd, sec, h, addend)
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
   int file_align = bed->s->file_align;
 
-  if (addend >= h->vtable_entries_size)
+  if (addend > h->vtable_entries_size)
     {
       size_t size, bytes;
       bfd_boolean *ptr = h->vtable_entries_used;
@@ -8335,8 +8335,9 @@ elf_gc_record_vtentry (abfd, sec, h, addend)
 	}
 
       /* Allocate one extra entry for use as a "done" flag for the
-	 consolidation pass.  */
-      bytes = (size / file_align + 1) * sizeof (bfd_boolean);
+	 consolidation pass and another extra entry because we are
+	 going to write up to and including 'size' entries.  */
+      bytes = (size / file_align + 2) * sizeof (bfd_boolean);
 
       if (ptr)
 	{
