@@ -1,3 +1,9 @@
+2004-03-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mips-tdep.c (mips_pdr_data): New.
+	(non_heuristic_proc_desc): Use objfile_data and set_objfile_data.
+	(_initialize_mips_tdep): Initialize mips_pdr_data.
+
 2004-03-29  Corinna Vinschen  <vinschen@redhat.com>
 
 	* minsyms.c (install_minimal_symbols): Move dropping leading
