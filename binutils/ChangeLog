@@ -1,3 +1,8 @@
+2000-12-07  Andrew Haley  <aph@redhat.com>
+
+	* readelf.c (display_debug_frames): Only display columns that are
+	referenced by the frame debug info.
+
 2000-12-05  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Add Jason Merrill as DWARF2 maintainer.
