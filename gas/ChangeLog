@@ -1,3 +1,27 @@
+2002-05-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-i386.c (md_estimate_size_before_relax) Don't lose
+	reloc when no_cond_jump_promotion.
+
+	Merge from mainline
+	2002-05-08  Jim Wilson  <wilson@redhat.com>
+	* config/tc-i960.c (md_estimate_size_before_relax): Return size of
+	current variable part of frag.
+
+	2002-05-02  Alan Modra  <amodra@bigpond.net.au>
+	* config/tc-ppc.c (mapping): Map sectoff to BFD_RELOC_16_BASEREL.
+	(ppc_elf_validate_fix): Replace BFD_RELOC_32_BASEREL with
+	BFD_RELOC_16_BASEREL.
+	(md_assemble): Likewise.
+	(md_apply_fix3): Likewise.
+
+	2002-05-01  Andrew Macleod  <amacleod@cygnus.com>
+	* config/tc-i386.c (extra_symbol_chars): Add '[' to the list.
+
+	2002-04-28  Alan Modra  <amodra@bigpond.net.au>
+	* config/tc-i386.c: Formatting fixes, add missing space in error
+	message.
+
 2002-05-03  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-s390.c (md_gather_operands): Emit dwarf2 line-number

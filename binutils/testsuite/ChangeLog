@@ -1,3 +1,54 @@
+2002-05-09  Alan Modra  <amodra@bigpond.net.au>
+
+	Merge from mainline.
+	2002-04-16  Eric Kohl <ekohl@rz-online.de>
+	* binutils-all/windres/dialog0.rc: New test case: Check default
+	attributes for dialogs
+	* binutils-all/windres/dialog0.rsd: New file: Expected output.
+	* binutils-all/windres/dialog1.rc: New test case: Check
+	DISCARDABLE flag is propogated.
+	* binutils-all/windres/dialog1.rsd: New file: Expected output.
+
+	2002-04-15  Eric Kohl <ekohl@rz-online.de>
+	* binutils-all/windres/dlgfont.rc: New test case: Checks FONT
+	statement in DIALOG and DIALOGEX resources.
+        * binutils-all/windres/dlgfont.rsd: Expected output.
+
+	2002-04-10  Nick Clifton  <nickc@cambridge.redhat.com>
+	* binutils-all/windres/capstyle.rsd: Regenerate using MSVC.
+	* binutils-all/windres/deflang.rsd: Regenerate using MSVC.
+	* binutils-all/windres/dialogsignature.rsd: Regenerate using MSVC.
+	* binutils-all/windres/escapea.rsd: Regenerate using MSVC.
+	* binutils-all/windres/escapex.rsd: Regenerate using MSVC.
+	* binutils-all/windres/nocaption.rsd: Regenerate using MSVC.
+	* binutils-all/windres/printstyle.rsd: Regenerate using MSVC.
+	* binutils-all/windres/sublang.rsd: Regenerate using MSVC.
+
+	2002-04-09  Nick Clifton  <nickc@cambridge.redhat.com>
+	* binutils-all/windres/capstyle.rc: New test case: Set default
+	style for captions.
+	* binutils-all/windres/capstyle.rsd: Expected output.
+	* binutils-all/windres/deflang.rc: New test case: Check default
+	language.
+	* binutils-all/windres/deflang.rsd: Expected output.
+	* binutils-all/windres/dialogsignature.rc: New test case for
+	decoding the dialog signature.
+	* binutils-all/windres/dialogsignature.rsd: Expected output.
+	* binutils-all/windres/escapea.rc: New test case for encoding \a
+	escape sequence.
+	* binutils-all/windres/escapea.rsd: Expected output.
+	* binutils-all/windres/escapex.rc: New test case for hex constants
+	in strings.
+	* binutils-all/windres/escapex.rsd: Expected output
+	* binutils-all/windres/nocaption.rc: New test case dialogs without
+	captions.
+	* binutils-all/windres/nocaption.rsd: Expected output
+	* binutils-all/windres/quoteclass.rc: New test case for quoted
+	CLASS definitions in DIALOG resources.
+	* binutils-all/windres/sublang.rc: New test case: Check assignment
+	of sub-language.
+	* binutils-all/windres/sublang.rsd: Expected output.
+
 2002-04-27  Alan Modra  <amodra@bigpond.net.au>
 
 	Merge from mainline.

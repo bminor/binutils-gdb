@@ -1,6 +1,6 @@
 /* tc-i960.c - All the i80960-specific stuff
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001
+   1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -1085,7 +1085,8 @@ md_estimate_size_before_relax (fragP, segment_type)
       relax_cobr (fragP);
       return 4;
     }
-  return 0;
+
+  return md_relax_table[fragP->fr_subtype].rlx_length;
 }				/* md_estimate_size_before_relax() */
 
 #if defined(OBJ_AOUT) | defined(OBJ_BOUT)

@@ -1,3 +1,10 @@
+2002-05-09  Alan Modra  <amodra@bigpond.net.au>
+
+	Merge from mainline.
+	2002-04-17  matthew green  <mrg@redhat.com>
+	* gas/ppc/altivec.d: Fix dssall test.
+	* gas/ppc/altivec.s: Likewise.
+
 2002-04-30  Chris Demetriou  <cgd@broadcom.com>
 
 	Merge from mainline:

@@ -1,5 +1,6 @@
 /* Motorola MCore specific support for 32-bit ELF
-   Copyright 1994, 1995, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1999, 2000, 2001, 2002
+   Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -414,6 +415,9 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	   (info->relocateable) ? " (relocatable)" : "");
 #endif
 
+  if (info->relocateable)
+    return true;
+
   if (! mcore_elf_howto_table [R_MCORE_PCRELIMM8BY4])	/* Initialize howto table if needed */
     mcore_elf_howto_init ();
 
@@ -446,32 +450,6 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
       howto = mcore_elf_howto_table [(int) r_type];
       r_symndx = ELF32_R_SYM (rel->r_info);
-
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-	     anything, unless the reloc is against a section symbol,
-	     in which case we have to adjust according to where the
-	     section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-
-	      if ((unsigned)ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections[r_symndx];
-		  addend = rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-#ifdef DEBUG
-	  fprintf (stderr, "\ttype = %s (%d), symbol index = %ld, offset = %ld, addend = %ld\n",
-		   howto->name, (int) r_type, r_symndx, (long) offset, (long) addend);
-#endif
-	  continue;
-	}
-
-      /* This is a final link.  */
 
       /* Complain about known relocation that are not yet supported.  */
       if (howto->special_function == mcore_elf_unsupported_reloc)
@@ -726,5 +704,6 @@ mcore_elf_check_relocs (abfd, info, sec, relocs)
 #define elf_backend_check_relocs                mcore_elf_check_relocs
 
 #define elf_backend_can_gc_sections		1
+#define elf_backend_rela_normal			1
 
 #include "elf32-target.h"

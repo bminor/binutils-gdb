@@ -981,6 +981,11 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   /* Assume success.  */
   boolean ret = true;
 
+#ifndef USE_REL
+  if (info->relocateable)
+    return true;
+#endif
+
   rel = relocs;
   relend = relocs + input_section->reloc_count;
   for (; rel < relend; rel++)
@@ -1020,6 +1025,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       howto = m32r_elf_howto_table + r_type;
       r_symndx = ELF32_R_SYM (rel->r_info);
 
+#ifdef USE_REL
       if (info->relocateable)
 	{
 	  /* This is a relocateable link.  We don't have to change
@@ -1045,16 +1051,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  sec = local_sections[r_symndx];
 	  addend += sec->output_offset + sym->st_value;
-#ifndef USE_REL
-	  /* This can't be done for USE_REL because it doesn't mean anything
-	     and elf_link_input_bfd asserts this stays zero.  */
-	  rel->r_addend = addend;
-#endif
 
-#ifndef USE_REL
-	  /* Addends are stored with relocs.  We're done.  */
-	  continue;
-#else /* USE_REL */
 	  /* If partial_inplace, we need to store any additional addend
 	     back in the section.  */
 	  if (! howto->partial_inplace)
@@ -1088,9 +1085,9 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		r = _bfd_relocate_contents (howto, input_bfd,
 					    addend, contents + offset);
 	    }
-#endif /* USE_REL */
 	}
       else
+#endif /* USE_REL */
 	{
 	  bfd_vma relocation;
 
@@ -2161,6 +2158,9 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
 #define elf_backend_check_relocs                m32r_elf_check_relocs
 
 #define elf_backend_can_gc_sections             1
+#ifndef USE_REL
+#define elf_backend_rela_normal			1
+#endif
 #if 0 /* not yet */
 /* relax support */
 #define bfd_elf32_bfd_relax_section		m32r_elf_relax_section

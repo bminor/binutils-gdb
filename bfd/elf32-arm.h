@@ -1830,6 +1830,11 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *           relend;
   const char *                  name;
 
+#ifndef USE_REL
+  if (info->relocateable)
+    return true;
+#endif
+
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
 
@@ -1862,6 +1867,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 #endif
       howto = bfd_reloc.howto;
 
+#ifdef USE_REL
       if (info->relocateable)
 	{
 	  /* This is a relocateable link.  We don't have to change
@@ -1874,19 +1880,16 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
 		{
 		  sec = local_sections[r_symndx];
-#ifdef USE_REL
 		  arm_add_to_rel (input_bfd, contents + rel->r_offset,
 				  howto,
 				  (bfd_signed_vma) (sec->output_offset
 						    + sym->st_value));
-#else
-		  rel->r_addend += (sec->output_offset + sym->st_value);
-#endif
 		}
 	    }
 
 	  continue;
 	}
+#endif
 
       /* This is a final link.  */
       h = NULL;
@@ -3637,6 +3640,9 @@ elf32_arm_reloc_type_class (rela)
 #define elf_backend_plt_readonly    1
 #define elf_backend_want_got_plt    1
 #define elf_backend_want_plt_sym    0
+#ifndef USE_REL
+#define elf_backend_rela_normal     1
+#endif
 
 #define elf_backend_got_header_size	12
 #define elf_backend_plt_header_size	PLT_ENTRY_SIZE

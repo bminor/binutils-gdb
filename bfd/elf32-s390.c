@@ -1632,6 +1632,9 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
+  if (info->relocateable)
+    return true;
+
   htab = elf_s390_hash_table (info);
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -1661,30 +1664,9 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
 	}
+
       howto = elf_howto_table + r_type;
-
       r_symndx = ELF32_R_SYM (rel->r_info);
-
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-	     anything, unless the reloc is against a section symbol,
-	     in which case we have to adjust according to where the
-	     section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections[r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-	  continue;
-	}
-
-      /* This is a final link.  */
       h = NULL;
       sym = NULL;
       sec = NULL;
@@ -2467,6 +2449,7 @@ elf_s390_grok_prstatus (abfd, note)
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size	12
 #define elf_backend_plt_header_size	PLT_ENTRY_SIZE
+#define elf_backend_rela_normal		1
 
 #define elf_info_to_howto                     elf_s390_info_to_howto
 

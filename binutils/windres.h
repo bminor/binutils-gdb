@@ -1,5 +1,5 @@
 /* windres.h -- header file for windres program.
-   Copyright 1997, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 2000, 2002 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.
@@ -315,7 +315,9 @@ struct dialog_ex
   /* Font weight.  */
   unsigned short weight;
   /* Whether the font is italic.  */
-  unsigned short italic;
+  unsigned char italic;
+  /* Character set.  */
+  unsigned char charset;
 };
 
 /* Window style flags, from the winsup Defines.h header file.  These
@@ -519,7 +521,7 @@ struct fontdir
   short index;
   /* Length of font information.  */
   unsigned long length;
-  /* Font information. */
+  /* Font information.  */
   const unsigned char *data;
 };
 
