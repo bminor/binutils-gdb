@@ -1,3 +1,7 @@
+Mon Jan 31 16:10:41 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* sparc-stub.c:  Remove unnecessary #include of memory.h.
+
 Mon Jan 31 12:12:34 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* mips-tdep.c: Remove code which sets saved_regs from
