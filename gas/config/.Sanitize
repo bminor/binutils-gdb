@@ -17,6 +17,8 @@ Do-first:
 
 if ( echo $* | grep keep\-mpw > /dev/null ) ; then
 	keep_these_too="ho-mpw.h"
+else
+	lose_these_too="ho-mpw.h"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
