@@ -1,3 +1,9 @@
+2000-03-24  Kevin Buettner  <kevinb@redhat.com>
+
+	* linux-thread.c, lin-thread.c (save_inferior_pid,
+	restore_inferior_pid): Don't do compile time comparison
+	of TARGET_PTR_BIT and TARGET_INT_BIT.
+
 Thu Mar 23 13:18:26 2000  Philippe De Muyter  <phdm@macqel.be>
 
 	* m68k-tdep.c (P_LINKL_FP, P_LINKW_FP): Macros renamed from P_LINK_L

@@ -378,25 +378,22 @@ linuxthreads_find_trap (pid, stop)
 
 /* Cleanup stub for save_inferior_pid.  */
 static void
-restore_inferior_pid (arg)
-    void *arg;
+restore_inferior_pid (void *arg)
 {
-#if TARGET_PTR_BIT > TARGET_INT_BIT
-  inferior_pid = (int) ((long) arg);
-#else
-  inferior_pid = (int) arg;
-#endif
+  int *saved_pid_ptr = arg;
+  inferior_pid = *saved_pid_ptr;
+  free (arg);
 }
 
 /* Register a cleanup to restore the value of inferior_pid.  */
 static struct cleanup *
-save_inferior_pid ()
+save_inferior_pid (void)
 {
-#if TARGET_PTR_BIT > TARGET_INT_BIT
-  return make_cleanup (restore_inferior_pid, (void *) ((long) inferior_pid));
-#else
-  return make_cleanup (restore_inferior_pid, (void *) inferior_pid);
-#endif
+  int *saved_pid_ptr;
+  
+  saved_pid_ptr = xmalloc (sizeof (int));
+  *saved_pid_ptr = inferior_pid;
+  return make_cleanup (restore_inferior_pid, saved_pid_ptr);
 }
 
 static void
