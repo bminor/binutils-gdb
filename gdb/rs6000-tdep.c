@@ -1,5 +1,5 @@
 /* Target-dependent code for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -37,9 +37,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/core.h>
+#include <sys/ldr.h>
 
 extern int errno;
-extern int attach_flag;
 
 /* Nonzero if we just simulated a single step break. */
 int one_stepped;
@@ -52,16 +52,33 @@ static struct sstep_breaks {
 	int data;
 } stepBreaks[2];
 
+/* Static function prototypes */
+
+static void
+add_text_to_loadinfo PARAMS ((CORE_ADDR textaddr, CORE_ADDR dataaddr));
+
+static CORE_ADDR
+find_toc_address PARAMS ((CORE_ADDR pc));
+
+static CORE_ADDR
+branch_dest PARAMS ((int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety));
+
+static void
+frame_get_cache_fsr PARAMS ((struct frame_info *fi,
+			     struct aix_framedata *fdatap));
 
 /*
  * Calculate the destination of a branch/jump.  Return -1 if not a branch.
  */
-static int
+static CORE_ADDR
 branch_dest (opcode, instr, pc, safety)
- int opcode, instr, pc, safety;
+     int opcode;
+     int instr;
+     CORE_ADDR pc;
+     CORE_ADDR safety;
 {
   register long offset;
-  unsigned dest;
+  CORE_ADDR dest;
   int immediate;
   int absolute;
   int ext_op;
@@ -70,7 +87,7 @@ branch_dest (opcode, instr, pc, safety)
 
   switch (opcode) {
      case 18	:
-	immediate = ((instr & ~3) << 6) >> 6;	/* br unconditionl */
+	immediate = ((instr & ~3) << 6) >> 6;	/* br unconditional */
 
      case 16	:  
 	if (opcode != 18)		        /* br conditional */
@@ -113,7 +130,6 @@ int signal;
   int breaks[2], opcode;
 
   if (!one_stepped) {
-    extern CORE_ADDR text_start;
     loc = read_pc ();
 
     ret = read_memory (loc, &insn, sizeof (int));
@@ -163,10 +179,10 @@ int signal;
 /* return pc value after skipping a function prologue. */
 
 skip_prologue (pc)
-int pc;
+CORE_ADDR pc;
 {
   unsigned int tmp;
-  unsigned int op;
+  unsigned int op;    /* FIXME, assumes instruction size matches host int!!! */
 
   if (target_read_memory (pc, (char *)&op, sizeof (op)))
     return pc;			/* Can't access it -- assume no prologue. */
@@ -269,12 +285,6 @@ int pc;
 }
 
 
-/* text start and end addresses in virtual memory. */
-
-CORE_ADDR text_start;
-CORE_ADDR text_end;
-
-
 /*************************************************************************
   Support for creating pushind a dummy frame into the stack, and popping
   frames, etc. 
@@ -305,6 +315,7 @@ extern int stop_stack_dummy;
 /* push a dummy frame into stack, save all register. Currently we are saving
    only gpr's and fpr's, which is not good enough! FIXMEmgo */
    
+void
 push_dummy_frame ()
 {
   int sp, pc;				/* stack pointer and link register */
@@ -383,6 +394,12 @@ push_dummy_frame ()
    addresses of dummy frames as such.  When poping happens and when we
    detect that was a dummy frame, we pop it back to its parent by using
    dummy frame stack (`dummy_frame_addr' array). 
+
+FIXME:  This whole concept is broken.  You should be able to detect
+a dummy stack frame *on the user's stack itself*.  When you do,
+then you know the format of that stack frame -- including its
+saved SP register!  There should *not* be a separate stack in the
+GDB process that keeps track of these dummy frames!  -- gnu@cygnus.com Aug92 */
  */
    
 pop_dummy_frame ()
@@ -425,6 +442,7 @@ pop_dummy_frame ()
 
 /* pop the innermost frame, go back to the caller. */
 
+void
 pop_frame ()
 {
   int pc, lr, sp, prev_sp;		/* %pc, %lr, %sp */
@@ -481,20 +499,20 @@ pop_frame ()
 /* fixup the call sequence of a dummy function, with the real function address.
    its argumets will be passed by gdb. */
 
+void
 fix_call_dummy(dummyname, pc, fun, nargs, type)
   char *dummyname;
-  int pc;
-  int fun;
+  CORE_ADDR pc;
+  CORE_ADDR fun;
   int nargs;					/* not used */
   int type;					/* not used */
-
 {
 #define	TOC_ADDR_OFFSET		20
 #define	TARGET_ADDR_OFFSET	28
 
   int ii;
-  unsigned long target_addr;
-  unsigned long tocvalue;
+  CORE_ADDR target_addr;
+  CORE_ADDR tocvalue;
 
   target_addr = fun;
   tocvalue = find_toc_address (target_addr);
@@ -517,7 +535,6 @@ fix_call_dummy(dummyname, pc, fun, nargs, type)
 }
 
 
-
 /* return information about a function frame.
    in struct aix_frameinfo fdata:
     - frameless is TRUE, if function does not save %pc value in its frame.
@@ -527,6 +544,7 @@ fix_call_dummy(dummyname, pc, fun, nargs, type)
     - alloca_reg is the number of the register used for alloca() handling.
       Otherwise -1.
  */
+void
 function_frame_info (pc, fdata)
   int pc;
   struct aix_framedata *fdata;
@@ -803,6 +821,7 @@ ran_out_of_registers_for_arguments:
 /* a given return value in `regbuf' with a type `valtype', extract and copy its
    value into `valbuf' */
 
+void
 extract_return_value (valtype, regbuf, valbuf)
   struct type *valtype;
   char regbuf[REGISTER_BYTES];
@@ -831,12 +850,16 @@ extract_return_value (valtype, regbuf, valbuf)
 }
 
 
-/* keep keep structure return address in this variable. */
+/* keep structure return address in this variable.
+   FIXME:  This is a horrid kludge which should not be allowed to continue
+   living.  This only allows a single nested call to a structure-returning
+   function.  Come on, guys!  -- gnu@cygnus.com, Aug 92  */
 
 CORE_ADDR rs6000_struct_return_address;
 
 
 /* Throw away this debugging code. FIXMEmgo. */
+void
 print_frame(fram)
 int fram;
 {
@@ -858,8 +881,9 @@ int fram;
    Result is desired PC to step until, or NULL if we are not in
    trampoline code.  */
 
+CORE_ADDR
 skip_trampoline_code (pc)
-int pc;
+CORE_ADDR pc;
 {
   register unsigned int ii, op;
 
@@ -884,3 +908,283 @@ int pc;
   return pc;
 }
 
+
+/* Determines whether the function FI has a frame on the stack or not.
+   Called from the FRAMELESS_FUNCTION_INVOCATION macro in tm.h.  */
+
+int
+frameless_function_invocation (fi)
+struct frame_info *fi;
+{
+  CORE_ADDR func_start;
+  struct aix_framedata fdata;
+
+  func_start = get_pc_function_start (fi->pc) + FUNCTION_START_OFFSET;
+
+  /* If we failed to find the start of the function, it is a mistake
+     to inspect the instructions. */
+
+  if (!func_start)
+    return 0;
+
+  function_frame_info (func_start, &fdata);
+  return fdata.frameless;
+}
+
+
+/* If saved registers of frame FI are not known yet, read and cache them.
+   &FDATAP contains aix_framedata; TDATAP can be NULL,
+   in which case the framedata are read.  */
+
+static void
+frame_get_cache_fsr (fi, fdatap)
+     struct frame_info *fi;
+     struct aix_framedata *fdatap;
+{
+  int ii;
+  CORE_ADDR frame_addr; 
+  struct aix_framedata work_fdata;
+
+  if (fi->cache_fsr)
+    return;
+  
+  if (fdatap == NULL) {
+    fdatap = &work_fdata;
+    function_frame_info (get_pc_function_start (fi->pc), fdatap);
+  }
+
+  fi->cache_fsr = (struct frame_saved_regs *)
+      obstack_alloc (&frame_cache_obstack, sizeof (struct frame_saved_regs));
+  bzero (fi->cache_fsr, sizeof (struct frame_saved_regs));
+
+  if (fi->prev && fi->prev->frame)
+    frame_addr = fi->prev->frame;
+  else
+    frame_addr = read_memory_integer (fi->frame, 4);
+  
+  /* if != -1, fdatap->saved_fpr is the smallest number of saved_fpr.
+     All fpr's from saved_fpr to fp31 are saved right underneath caller
+     stack pointer, starting from fp31 first. */
+
+  if (fdatap->saved_fpr >= 0) {
+    for (ii=31; ii >= fdatap->saved_fpr; --ii)
+      fi->cache_fsr->regs [FP0_REGNUM + ii] = frame_addr - ((32 - ii) * 8);
+    frame_addr -= (32 - fdatap->saved_fpr) * 8;
+  }
+
+  /* if != -1, fdatap->saved_gpr is the smallest number of saved_gpr.
+     All gpr's from saved_gpr to gpr31 are saved right under saved fprs,
+     starting from r31 first. */
+  
+  if (fdatap->saved_gpr >= 0)
+    for (ii=31; ii >= fdatap->saved_gpr; --ii)
+      fi->cache_fsr->regs [ii] = frame_addr - ((32 - ii) * 4);
+}
+
+/* Return the address of a frame. This is the inital %sp value when the frame
+   was first allocated. For functions calling alloca(), it might be saved in
+   an alloca register. */
+
+CORE_ADDR
+frame_initial_stack_address (fi)
+     struct frame_info *fi;
+{
+  CORE_ADDR tmpaddr;
+  struct aix_framedata fdata;
+  struct frame_info *callee_fi;
+
+  /* if the initial stack pointer (frame address) of this frame is known,
+     just return it. */
+
+  if (fi->initial_sp)
+    return fi->initial_sp;
+
+  /* find out if this function is using an alloca register.. */
+
+  function_frame_info (get_pc_function_start (fi->pc), &fdata);
+
+  /* if saved registers of this frame are not known yet, read and cache them. */
+
+  if (!fi->cache_fsr)
+    frame_get_cache_fsr (fi, &fdata);
+
+  /* If no alloca register used, then fi->frame is the value of the %sp for
+     this frame, and it is good enough. */
+
+  if (fdata.alloca_reg < 0) {
+    fi->initial_sp = fi->frame;
+    return fi->initial_sp;
+  }
+
+  /* This function has an alloca register. If this is the top-most frame
+     (with the lowest address), the value in alloca register is good. */
+
+  if (!fi->next)
+    return fi->initial_sp = read_register (fdata.alloca_reg);     
+
+  /* Otherwise, this is a caller frame. Callee has usually already saved
+     registers, but there are exceptions (such as when the callee
+     has no parameters). Find the address in which caller's alloca
+     register is saved. */
+
+  for (callee_fi = fi->next; callee_fi; callee_fi = callee_fi->next) {
+
+    if (!callee_fi->cache_fsr)
+      frame_get_cache_fsr (fi, NULL);
+
+    /* this is the address in which alloca register is saved. */
+
+    tmpaddr = callee_fi->cache_fsr->regs [fdata.alloca_reg];
+    if (tmpaddr) {
+      fi->initial_sp = read_memory_integer (tmpaddr, 4); 
+      return fi->initial_sp;
+    }
+
+    /* Go look into deeper levels of the frame chain to see if any one of
+       the callees has saved alloca register. */
+  }
+
+  /* If alloca register was not saved, by the callee (or any of its callees)
+     then the value in the register is still good. */
+
+  return fi->initial_sp = read_register (fdata.alloca_reg);     
+}
+
+/* xcoff_relocate_symtab -	hook for symbol table relocation.
+   also reads shared libraries.. */
+
+xcoff_relocate_symtab (pid)
+unsigned int pid;
+{
+#define	MAX_LOAD_SEGS 64		/* maximum number of load segments */
+
+    struct ld_info *ldi;
+    int temp;
+
+    ldi = (void *) alloca(MAX_LOAD_SEGS * sizeof (*ldi));
+
+    /* According to my humble theory, AIX has some timing problems and
+       when the user stack grows, kernel doesn't update stack info in time
+       and ptrace calls step on user stack. That is why we sleep here a little,
+       and give kernel to update its internals. */
+
+    usleep (36000);
+
+    errno = 0;
+    ptrace(PT_LDINFO, pid, (PTRACE_ARG3_TYPE) ldi,
+	   MAX_LOAD_SEGS * sizeof(*ldi), ldi);
+    if (errno) {
+      perror_with_name ("ptrace ldinfo");
+      return 0;
+    }
+
+    vmap_ldinfo(ldi);
+
+   do {
+     add_text_to_loadinfo (ldi->ldinfo_textorg, ldi->ldinfo_dataorg);
+    } while (ldi->ldinfo_next
+	     && (ldi = (void *) (ldi->ldinfo_next + (char *) ldi)));
+
+#if 0
+  /* Now that we've jumbled things around, re-sort them.  */
+  sort_minimal_symbols ();
+#endif
+
+  /* relocate the exec and core sections as well. */
+  vmap_exec ();
+}
+
+/* Keep an array of load segment information and their TOC table addresses.
+   This info will be useful when calling a shared library function by hand. */
+   
+struct loadinfo {
+  CORE_ADDR textorg, dataorg;
+  unsigned long toc_offset;
+};
+
+#define	LOADINFOLEN	10
+
+/* FIXME Warning -- loadinfotextindex is used for a nefarious purpose by
+   tm-rs6000.h.  */
+
+static	struct loadinfo *loadinfo = NULL;
+static	int	loadinfolen = 0;
+static	int	loadinfotocindex = 0;
+int	loadinfotextindex = 0;
+
+
+void
+xcoff_init_loadinfo ()
+{
+  loadinfotocindex = 0;
+  loadinfotextindex = 0;
+
+  if (loadinfolen == 0) {
+    loadinfo = (struct loadinfo *)
+               xmalloc (sizeof (struct loadinfo) * LOADINFOLEN);
+    loadinfolen = LOADINFOLEN;
+  }
+}
+
+
+/* FIXME -- this is never called!  */
+void
+free_loadinfo ()
+{
+  if (loadinfo)
+    free (loadinfo);
+  loadinfo = NULL;
+  loadinfolen = 0;
+  loadinfotocindex = 0;
+  loadinfotextindex = 0;
+}
+
+/* this is called from xcoffread.c */
+
+void
+xcoff_add_toc_to_loadinfo (unsigned long tocoff)
+{
+  while (loadinfotocindex >= loadinfolen) {
+    loadinfolen += LOADINFOLEN;
+    loadinfo = (struct loadinfo *)
+               xrealloc (loadinfo, sizeof(struct loadinfo) * loadinfolen);
+  }
+  loadinfo [loadinfotocindex++].toc_offset = tocoff;
+}
+
+
+static void
+add_text_to_loadinfo (textaddr, dataaddr)
+     CORE_ADDR textaddr;
+     CORE_ADDR dataaddr;
+{
+  while (loadinfotextindex >= loadinfolen) {
+    loadinfolen += LOADINFOLEN;
+    loadinfo = (struct loadinfo *)
+               xrealloc (loadinfo, sizeof(struct loadinfo) * loadinfolen);
+  }
+  loadinfo [loadinfotextindex].textorg = textaddr;
+  loadinfo [loadinfotextindex].dataorg = dataaddr;
+  ++loadinfotextindex;
+}
+
+
+/* FIXME:  This assumes that the "textorg" and "dataorg" elements
+   of a member of this array are correlated with the "toc_offset"
+   element of the same member.  But they are sequentially assigned in wildly
+   different places, and probably there is no correlation.  FIXME!  */
+
+static CORE_ADDR
+find_toc_address (pc)
+     CORE_ADDR pc;
+{
+  int ii, toc_entry, tocbase = 0;
+
+  for (ii=0; ii < loadinfotextindex; ++ii)
+    if (pc > loadinfo[ii].textorg && loadinfo[ii].textorg > tocbase) {
+      toc_entry = ii;
+      tocbase = loadinfo[ii].textorg;
+    }
+
+  return loadinfo[toc_entry].dataorg + loadinfo[toc_entry].toc_offset;
+}
