@@ -170,7 +170,7 @@ struct fix;
 # define md_elf_section_type(str, len)	arm_elf_section_type (str, len)
 # define GLOBAL_OFFSET_TABLE_NAME	"_GLOBAL_OFFSET_TABLE_"
 # define LOCAL_LABEL_PREFIX 		'.'
-# define TC_SEGMENT_INFO_TYPE 		enum mstate
+# define TC_SEGMENT_INFO_TYPE 		struct arm_segment_info_type
 
 enum mstate
 {
@@ -178,6 +178,12 @@ enum mstate
   MAP_DATA,
   MAP_ARM,
   MAP_THUMB
+};
+
+struct arm_segment_info_type
+{
+  enum mstate mapstate;
+  unsigned int marked_pr_dependency;
 };
 
 /* We want .cfi_* pseudo-ops for generating unwind info.  */

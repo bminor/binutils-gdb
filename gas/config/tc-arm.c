@@ -83,6 +83,11 @@ static struct
   unsigned        sp_restored:1;
 } unwind;
 
+/* Bit N indicates that an R_ARM_NONE relocation has been output for
+   __aeabi_unwind_cpp_prN already if set. This enables dependencies to be
+   emitted only once per section, to save unnecessary bloat.  */
+static unsigned int marked_pr_dependency = 0;
+
 #endif /* OBJ_ELF */
 
 enum arm_float_abi
@@ -1347,7 +1352,7 @@ mapping_state (enum mstate state)
       abort ();
     }
 
-  seg_info (now_seg)->tc_segment_info_data = state;
+  seg_info (now_seg)->tc_segment_info_data.mapstate = state;
 
   symbolP = symbol_new (symname, now_seg, (valueT) frag_now_fix (), frag_now);
   symbol_table_insert (symbolP);
@@ -1379,6 +1384,7 @@ void
 arm_elf_change_section (void)
 {
   flagword flags;
+  segment_info_type *seginfo;
 
   /* Link an unlinked unwind index table section to the .text section.  */
   if (elf_section_type (now_seg) == SHT_ARM_EXIDX
@@ -1394,7 +1400,9 @@ arm_elf_change_section (void)
   if ((flags & SEC_ALLOC) == 0)
     return;
 
-  mapstate = seg_info (now_seg)->tc_segment_info_data;
+  seginfo = seg_info (now_seg);
+  mapstate = seginfo->tc_segment_info_data.mapstate;
+  marked_pr_dependency = seginfo->tc_segment_info_data.marked_pr_dependency;
 }
 
 int
@@ -14350,13 +14358,6 @@ create_unwind_entry (int have_data)
       fix_new (frag_now, where, 4, unwind.personality_routine, 0, 1,
 	       BFD_RELOC_ARM_PREL31);
 
-      /* Indicate dependency to linker.  */
-        {
-          char *name = "__aeabi_unwind_cpp_pr0";
-	  symbolS *pr = symbol_find_or_make (name);
-	  fix_new (frag_now, where, 4, pr, 0, 1, BFD_RELOC_NONE);
-	}
-
       where += 4;
       ptr += 4;
 
@@ -14370,24 +14371,13 @@ create_unwind_entry (int have_data)
       /* Three opcodes bytes are packed into the first word.  */
       data = 0x80;
       n = 3;
-      goto emit_reloc;
+      break;
 
     case 1:
     case 2:
       /* The size and first two opcode bytes go in the first word.  */
       data = ((0x80 + unwind.personality_index) << 8) | size;
       n = 2;
-      goto emit_reloc;
-
-    emit_reloc:
-      {
-	/* Indicate dependency to linker.  */
-	char *name[] = { "__aeabi_unwind_cpp_pr0",
-	                 "__aeabi_unwind_cpp_pr1",
-			 "__aeabi_unwind_cpp_pr2" };
-	symbolS *pr = symbol_find_or_make (name[unwind.personality_index]);
-	fix_new (frag_now, where, 4, pr, 0, 1, BFD_RELOC_NONE);
-      }
       break;
 
     default:
@@ -14495,6 +14485,23 @@ s_arm_unwind_fnend (int ignored ATTRIBUTE_UNUSED)
   /* Self relative offset of the function start.  */
   fix_new (frag_now, where, 4, unwind.proc_start, 0, 1,
 	   BFD_RELOC_ARM_PREL31);
+
+  /* Indicate dependency on EHABI-defined personality routines to the
+     linker, if it hasn't been done already.  */
+  if (unwind.personality_index >= 0 && unwind.personality_index < 3)
+    {
+      char *name[] = { "__aeabi_unwind_cpp_pr0",
+		       "__aeabi_unwind_cpp_pr1",
+		       "__aeabi_unwind_cpp_pr2" };
+      if (!(marked_pr_dependency & (1 << unwind.personality_index)))
+	{
+	  symbolS *pr = symbol_find_or_make (name[unwind.personality_index]);
+	  fix_new (frag_now, where, 0, pr, 0, 1, BFD_RELOC_NONE);
+	  marked_pr_dependency |= 1 << unwind.personality_index;
+	  seg_info (now_seg)->tc_segment_info_data.marked_pr_dependency
+	    = marked_pr_dependency;
+        }
+    }
 
   if (val)
     /* Inline exception table entry.  */
