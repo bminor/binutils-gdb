@@ -1124,8 +1124,12 @@ extern void floatformat_to_doublest (const struct floatformat *,
 				     char *, DOUBLEST *);
 extern void floatformat_from_doublest (const struct floatformat *,
 				       DOUBLEST *, char *);
-extern DOUBLEST extract_floating (void *, int);
 
+extern int floatformat_is_negative (const struct floatformat *, char *);
+extern int floatformat_is_nan (const struct floatformat *, char *);
+extern char *floatformat_mantissa (const struct floatformat *, char *);
+
+extern DOUBLEST extract_floating (void *, int);
 extern void store_floating (void *, int, DOUBLEST);
 
 /* On some machines there are bits in addresses which are not really

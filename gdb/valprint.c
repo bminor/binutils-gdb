@@ -32,6 +32,7 @@
 #include "language.h"
 #include "annotate.h"
 #include "valprint.h"
+#include "floatformat.h"
 
 #include <errno.h>
 
@@ -538,92 +539,39 @@ longest_to_int (LONGEST arg)
   return (rtnval);
 }
 
-
-/* Print a floating point value of type TYPE, pointed to in GDB by VALADDR,
-   on STREAM.  */
+/* Print a floating point value of type TYPE, pointed to in GDB by
+   VALADDR, on STREAM.  */
 
 void
 print_floating (char *valaddr, struct type *type, struct ui_file *stream)
 {
   DOUBLEST doub;
   int inv;
+  const struct floatformat *fmt = &floatformat_unknown;
   unsigned len = TYPE_LENGTH (type);
 
-  /* Check for NaN's.  Note that this code does not depend on us being
-     on an IEEE conforming system.  It only depends on the target
-     machine using IEEE representation.  This means (a)
-     cross-debugging works right, and (2) IEEE_FLOAT can (and should)
-     be non-zero for systems like the 68881, which uses IEEE
-     representation, but is not IEEE conforming.  */
-  if (IEEE_FLOAT)
+  /* FIXME: kettenis/2001-01-20: The check for IEEE_FLOAT is probably
+     still necessary since GDB by default assumes that the target uses
+     the IEEE 754 representation for its floats and doubles.  Of
+     course this is all crock and should be cleaned up.  */
+
+  if (len == TARGET_FLOAT_BIT / TARGET_CHAR_BIT && IEEE_FLOAT)
+    fmt = TARGET_FLOAT_FORMAT;
+  else if (len == TARGET_DOUBLE_BIT / TARGET_CHAR_BIT && IEEE_FLOAT)
+    fmt = TARGET_DOUBLE_FORMAT;
+  else if (len == TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT)
+    fmt = TARGET_LONG_DOUBLE_FORMAT;
+
+  if (floatformat_is_nan (fmt, valaddr))
     {
-      unsigned long low, high;
-      /* Is the sign bit 0?  */
-      int nonnegative;
-      /* Is it is a NaN (i.e. the exponent is all ones and
-	 the fraction is nonzero)?  */
-      int is_nan;
-
-      /* For lint, initialize these two variables to suppress warning: */
-      low = high = nonnegative = 0;
-      if (len == 4)
-	{
-	  /* It's single precision.  */
-	  /* Assume that floating point byte order is the same as
-	     integer byte order.  */
-	  low = extract_unsigned_integer (valaddr, 4);
-	  nonnegative = ((low & 0x80000000) == 0);
-	  is_nan = ((((low >> 23) & 0xFF) == 0xFF)
-		    && 0 != (low & 0x7FFFFF));
-	  low &= 0x7fffff;
-	  high = 0;
-	}
-      else if (len == 8)
-	{
-	  /* It's double precision.  Get the high and low words.  */
-
-	  /* Assume that floating point byte order is the same as
-	     integer byte order.  */
-	  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-	    {
-	      low = extract_unsigned_integer (valaddr + 4, 4);
-	      high = extract_unsigned_integer (valaddr, 4);
-	    }
-	  else
-	    {
-	      low = extract_unsigned_integer (valaddr, 4);
-	      high = extract_unsigned_integer (valaddr + 4, 4);
-	    }
-	  nonnegative = ((high & 0x80000000) == 0);
-	  is_nan = (((high >> 20) & 0x7ff) == 0x7ff
-		    && !((((high & 0xfffff) == 0)) && (low == 0)));
-	  high &= 0xfffff;
-	}
-      else
-	{
-#ifdef TARGET_ANALYZE_FLOATING
-	  TARGET_ANALYZE_FLOATING;
-#else
-	  /* Extended.  We can't detect extended NaNs for this target.
-	     Also note that currently extendeds get nuked to double in
-	     REGISTER_CONVERTIBLE.  */
-	  is_nan = 0;
-#endif 
-	}
-
-      if (is_nan)
-	{
-	  /* The meaning of the sign and fraction is not defined by IEEE.
-	     But the user might know what they mean.  For example, they
-	     (in an implementation-defined manner) distinguish between
-	     signaling and quiet NaN's.  */
-	  if (high)
-	    fprintf_filtered (stream, "-NaN(0x%lx%.8lx)" + !!nonnegative,
-			      high, low);
-	  else
-	    fprintf_filtered (stream, "-NaN(0x%lx)" + nonnegative, low);
-	  return;
-	}
+      if (floatformat_is_negative (fmt, valaddr))
+	fprintf_filtered (stream, "-");
+      fprintf_filtered (stream, "nan(");
+      fprintf_filtered (stream, local_hex_format_prefix ());
+      fprintf_filtered (stream, floatformat_mantissa (fmt, valaddr));
+      fprintf_filtered (stream, local_hex_format_suffix ());
+      fprintf_filtered (stream, ")");
+      return;
     }
 
   doub = unpack_double (type, valaddr, &inv);
@@ -633,6 +581,9 @@ print_floating (char *valaddr, struct type *type, struct ui_file *stream)
       return;
     }
 
+  /* FIXME: kettenis/2001-01-20: The following code makes too much
+     assumptions about the host and target floating point format.  */
+
   if (len < sizeof (double))
       fprintf_filtered (stream, "%.9g", (double) doub);
   else if (len == sizeof (double))
@@ -641,7 +592,8 @@ print_floating (char *valaddr, struct type *type, struct ui_file *stream)
 #ifdef PRINTF_HAS_LONG_DOUBLE
     fprintf_filtered (stream, "%.35Lg", doub);
 #else
-    /* This at least wins with values that are representable as doubles */
+    /* This at least wins with values that are representable as
+       doubles.  */
     fprintf_filtered (stream, "%.17g", (double) doub);
 #endif
 }

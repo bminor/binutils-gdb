@@ -1,3 +1,17 @@
+2001-03-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* defs.h: Provide prototypes for floatformat_is_negative,
+	floatformat_is_nan and floatformat_mantissa.
+	* utils.c: Include "gdb_assert.h".
+	(floatformat_is_negative): New function.
+	(floatformat_is_nan): New function.
+	(floatformat_mantissa): New function.
+	* valprint.c: Include "floatformat.h".
+	(print_floating): Get rid of the Linux-specific
+	TARGET_ANALYZE_FLOATING macro and rewrite NaN detection with the
+	help these new functions.  Print NaN's in a format conforming to
+	ISO C99.
+
 2001-03-07  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* top.c (init_main): Make `set history file name' complete on file

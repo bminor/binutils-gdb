@@ -21,6 +21,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "gdb_assert.h"
 #include <ctype.h>
 #include "gdb_string.h"
 #include "event-top.h"
@@ -2739,6 +2740,106 @@ floatformat_from_doublest (CONST struct floatformat *fmt, DOUBLEST *from,
 	  *swaphigh++ = tmp;
 	}
     }
+}
+
+/* Check if VAL (which is assumed to be a floating point number whose
+   format is described by FMT) is negative.  */
+
+int
+floatformat_is_negative (const struct floatformat *fmt, char *val)
+{
+  unsigned char *uval = (unsigned char *) val;
+
+  return get_field (uval, fmt->byteorder, fmt->totalsize, fmt->sign_start, 1);
+}
+
+/* Check if VAL is "not a number" (NaN) for FMT.  */
+
+int
+floatformat_is_nan (const struct floatformat *fmt, char *val)
+{
+  unsigned char *uval = (unsigned char *) val;
+  long exponent;
+  unsigned long mant;
+  unsigned int mant_bits, mant_off;
+  int mant_bits_left;
+
+  if (! fmt->exp_nan)
+    return 0;
+
+  exponent = get_field (uval, fmt->byteorder, fmt->totalsize,
+			fmt->exp_start, fmt->exp_len);
+
+  if (exponent != fmt->exp_nan)
+    return 0;
+
+  mant_bits_left = fmt->man_len;
+  mant_off = fmt->man_start;
+
+  while (mant_bits_left > 0)
+    {
+      mant_bits = min (mant_bits_left, 32);
+
+      mant = get_field (uval, fmt->byteorder, fmt->totalsize,
+			mant_off, mant_bits);
+
+      /* If there is an explicit integer bit, mask it off.  */
+      if (mant_off == fmt->man_start
+	  && fmt->intbit == floatformat_intbit_yes)
+	mant &= ~(1 << (mant_bits - 1));
+
+      if (mant)
+	return 1;
+
+      mant_off += mant_bits;
+      mant_bits_left -= mant_bits;
+    }
+
+  return 0;
+}
+
+/* Convert the mantissa of VAL (which is assumed to be a floating
+   point number whose format is described by FMT) into a hexadecimal
+   and store it in a static string.  Return a pointer to that string.  */
+
+char *
+floatformat_mantissa (const struct floatformat *fmt, char *val)
+{
+  unsigned char *uval = (unsigned char *) val;
+  unsigned long mant;
+  unsigned int mant_bits, mant_off;
+  int mant_bits_left;
+  static char res[50];
+  char buf[9];
+
+  /* Make sure we have enough room to store the mantissa.  */
+  gdb_assert (sizeof res > ((fmt->man_len + 7) / 8) * 2);
+
+  mant_off = fmt->man_start;
+  mant_bits_left = fmt->man_len;
+  mant_bits = (mant_bits_left % 32) > 0 ? mant_bits_left % 32 : 32;
+
+  mant = get_field (uval, fmt->byteorder, fmt->totalsize,
+		    mant_off, mant_bits);
+
+  sprintf (res, "%lx", mant);
+
+  mant_off += mant_bits;
+  mant_bits_left -= mant_bits;
+  
+  while (mant_bits_left > 0)
+    {
+      mant = get_field (uval, fmt->byteorder, fmt->totalsize,
+			mant_off, 32);
+
+      sprintf (buf, "%08lx", mant);
+      strcat (res, buf);
+
+      mant_off += 32;
+      mant_bits_left -= 32;
+    }
+
+  return res;
 }
 
 /* print routines to handle variable size regs, etc. */
