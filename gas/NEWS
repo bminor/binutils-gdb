@@ -1,5 +1,8 @@
 -*- text -*-
 
+New psuedo op: .incbin to include a set of binary data at a given point
+in the assembly.  Contributed by Anders Norlander.
+
 The MIPS assembler now accepts -march/-mtune. -mcpu has been deprecated
 but still works for compatability.
 

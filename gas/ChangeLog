@@ -1,3 +1,11 @@
+2001-07-08  Anders Norlander <anorland@synergenix.se>
+
+	* read.c (s_incbin): New .incbin function.
+	* read.c (potable): Add "incbin" pseudo-op.
+	* read.h: Add s_incbin prototype.
+	* doc/as.texinfo (incbin): Document .incbin pseudo-op.
+	* NEWS: Mention new feature.
+
 2001-07-07  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* ecoff.c (add_file): Only set debug_type to DEBUG_NONE if it is

@@ -3452,6 +3452,7 @@ Some machine configurations provide additional directives.
 * hword::                       @code{.hword @var{expressions}}
 * Ident::                       @code{.ident}
 * If::                          @code{.if @var{absolute expression}}
+* Incbin::                      @code{.incbin "@var{file}"[,@var{skip}[,@var{count}]]}
 * Include::                     @code{.include "@var{file}"}
 * Int::                         @code{.int @var{expressions}}
 @ifset ELF
@@ -4123,6 +4124,21 @@ Assembles the following section of code if the argument is not equal to zero
 Like @code{.ifeqs}, but the sense of the test is reversed: this assembles the
 following section of code if the two strings are not the same.
 @end table
+
+@node Incbin
+@section @code{.incbin "@var{file}"[,@var{skip}[,@var{count}]]}
+
+@cindex @code{incbin} directive
+@cindex binary files, including
+The @code{incbin} directive includes @var{file} verbatim at the current
+location. You can control the search paths used with the @samp{-I} command-line
+option (@pxref{Invoking,,Command-Line Options}).  Quotation marks are required
+around @var{file}.
+
+The @var{skip} argument skips a number of bytes from the start of the
+@var{file}.  The @var{count} argument indicates the maximum number of bytes to
+read. Note that the data from is not aligned in any way, make sure to proper
+alignment is provided before and after the @code{incbin} directive.
 
 @node Include
 @section @code{.include "@var{file}"}
