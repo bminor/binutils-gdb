@@ -1,3 +1,9 @@
+2002-04-23  J. Brobecker  <brobecker@gnat.com>
+
+	* source.c (is_regular_file): New function.
+	(openp): Check wether file to open is a regular file
+	to avoid opening directories.
+
 2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* findvar.c (extract_signed_integer): Cast printf argument

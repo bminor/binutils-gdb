@@ -503,6 +503,23 @@ source_info (char *ignore, int from_tty)
 }
 
 
+/* Return True if the file NAME exists and is a regular file */
+static int
+is_regular_file (const char *name)
+{
+  struct stat st;
+  const int status = stat (name, &st);
+
+  /* Stat should never fail except when the file does not exist.
+     If stat fails, analyze the source of error and return True
+     unless the file does not exist, to avoid returning false results
+     on obscure systems where stat does not work as expected.
+   */
+  if (status != 0)
+    return (errno != ENOENT);
+
+  return S_ISREG (st.st_mode);
+}
 
 /* Open a file named STRING, searching path PATH (dir names sep by some char)
    using mode MODE and protection bits PROT in the calls to open.
@@ -543,7 +560,7 @@ openp (const char *path, int try_cwd_first, const char *string,
   mode |= O_BINARY;
 #endif
 
-  if (try_cwd_first || IS_ABSOLUTE_PATH (string))
+  if ((try_cwd_first || IS_ABSOLUTE_PATH (string)) && is_regular_file (string))
     {
       int i;
       filename = alloca (strlen (string) + 1);
@@ -601,9 +618,12 @@ openp (const char *path, int try_cwd_first, const char *string,
       strcat (filename + len, SLASH_STRING);
       strcat (filename, string);
 
-      fd = open (filename, mode);
-      if (fd >= 0)
-	break;
+      if (is_regular_file (filename))
+      {
+        fd = open (filename, mode);
+        if (fd >= 0)
+          break;
+      }
     }
 
 done:
