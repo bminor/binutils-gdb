@@ -1,21 +1,21 @@
 /* Symbol table lookup for the GNU debugger, GDB.
-   Copyright (C) 1986, 1987, 1988, 1989, 1990 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
@@ -28,6 +28,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "gdbcmd.h"
 #include "regex.h"
+#include "language.h"
 
 #include <obstack.h>
 #include <assert.h>
@@ -51,22 +52,7 @@ static struct partial_symbol *lookup_partial_symbol ();
 static struct partial_symbol *lookup_demangled_partial_symbol ();
 static struct symbol *lookup_demangled_block_symbol ();
 
-/* These variables point to the objects
-   representing the predefined C data types.  */
-
-struct type *builtin_type_void;
-struct type *builtin_type_char;
-struct type *builtin_type_short;
-struct type *builtin_type_int;
-struct type *builtin_type_long;
-struct type *builtin_type_long_long;
-struct type *builtin_type_unsigned_char;
-struct type *builtin_type_unsigned_short;
-struct type *builtin_type_unsigned_int;
-struct type *builtin_type_unsigned_long;
-struct type *builtin_type_unsigned_long_long;
-struct type *builtin_type_float;
-struct type *builtin_type_double;
+/* The single non-language-specific builtin type */
 struct type *builtin_type_error;
 
 /* Block in which the most recently searched-for symbol was found.
@@ -271,21 +257,12 @@ struct type *
 lookup_primitive_typename (name)
      char *name;
 {
-  if (!strcmp (name, "int"))
-    return builtin_type_int;
-  if (!strcmp (name, "long"))
-    return builtin_type_long;
-  if (!strcmp (name, "short"))
-    return builtin_type_short;
-  if (!strcmp (name, "char"))
-    return builtin_type_char;
-  if (!strcmp (name, "float"))
-    return builtin_type_float;
-  if (!strcmp (name, "double"))
-    return builtin_type_double;
-  if (!strcmp (name, "void"))
-    return builtin_type_void;
-  return 0;
+   struct type ***p;
+
+   for (p = current_language->la_builtin_type_vector; *p; p++)
+      if(!strcmp((**p)->name, name))
+	 return **p;
+   return 0; 
 }
 
 /* Lookup a typedef or primitive type named NAME,
@@ -304,9 +281,12 @@ lookup_typename (name, block, noerr)
     {
       struct type *tmp;
       tmp = lookup_primitive_typename (name);
-      if (!tmp && noerr)
+      if(tmp)
+	 return tmp;
+      else if (!tmp && noerr)
 	return 0;
-      error ("No type named %s.", name);
+      else
+	 error ("No type named %s.", name);
     }
   return SYMBOL_TYPE (sym);
 }
@@ -315,16 +295,11 @@ struct type *
 lookup_unsigned_typename (name)
      char *name;
 {
-  if (!strcmp (name, "int"))
-    return builtin_type_unsigned_int;
-  if (!strcmp (name, "long"))
-    return builtin_type_unsigned_long;
-  if (!strcmp (name, "short"))
-    return builtin_type_unsigned_short;
-  if (!strcmp (name, "char"))
-    return builtin_type_unsigned_char;
-  error ("No type named unsigned %s.", name);
-  return (struct type *)-1;  /* for lint */
+  char *uns = alloca (strlen(name) + 10);
+
+  strcpy (uns, "unsigned ");
+  strcpy (uns+9, name);
+  return lookup_typename (uns, (struct block *)0, 0);
 }
 
 /* Lookup a structure type named "struct NAME",
@@ -752,6 +727,7 @@ create_array_type (element_type, number)
 {
   struct type *result_type = (struct type *)
     obstack_alloc (symbol_obstack, sizeof (struct type));
+  struct type *range_type;
 
   bzero (result_type, sizeof (struct type));
 
@@ -761,7 +737,27 @@ create_array_type (element_type, number)
   TYPE_NFIELDS (result_type) = 1;
   TYPE_FIELDS (result_type) =
     (struct field *) obstack_alloc (symbol_obstack, sizeof (struct field));
-  TYPE_FIELD_TYPE (result_type, 0) = builtin_type_int;
+
+  {
+    /* Create range type.  */
+    range_type = (struct type *) obstack_alloc (symbol_obstack,
+						sizeof (struct type));
+    TYPE_CODE (range_type) = TYPE_CODE_RANGE;
+    TYPE_TARGET_TYPE (range_type) = builtin_type_int;  /* FIXME */
+
+    /* This should never be needed.  */
+    TYPE_LENGTH (range_type) = sizeof (int);
+
+    TYPE_NFIELDS (range_type) = 2;
+    TYPE_FIELDS (range_type) =
+      (struct field *) obstack_alloc (symbol_obstack,
+				      2 * sizeof (struct field));
+    TYPE_FIELD_BITPOS (range_type, 0) = 0; /* FIXME */
+    TYPE_FIELD_BITPOS (range_type, 1) = number-1; /* FIXME */
+    TYPE_FIELD_TYPE (range_type, 0) = builtin_type_int; /* FIXME */
+    TYPE_FIELD_TYPE (range_type, 1) = builtin_type_int; /* FIXME */
+  }
+  TYPE_FIELD_TYPE(result_type,0)=range_type;
   TYPE_VPTR_FIELDNO (result_type) = -1;
 
   return result_type;
@@ -1004,6 +1000,8 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
       if (ind != -1)
 	{
 	  s = find_pc_symtab (misc_function_vector[ind].address);
+	  /* If S is zero, there are no debug symbols for this file.
+	     Skip this stuff and check for matching static symbols below. */
 	  if (s)
 	    {
 	      bv = BLOCKVECTOR (s);
@@ -1381,7 +1379,8 @@ find_pc_symtab (pc)
     {
       ps = find_pc_psymtab (pc);
       if (ps && ps->readin)
-	fatal ("Internal error: pc in read in psymtab, but not in symtab.");
+	printf_filtered (
+	  "(Internal error: pc in read in psymtab, but not in symtab.)\n");
 
       if (ps)
 	s = PSYMTAB_TO_SYMTAB (ps);
@@ -2081,8 +2080,6 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 
       if (s == 0 && default_symtab == 0)
 	{
-	  if (symtab_list == 0 && partial_symtab_list == 0)
-	    error (no_symtab_msg);
 	  select_source_symtab (0);
 	  default_symtab = current_source_symtab;
 	  default_line = current_source_line;
@@ -2188,9 +2185,6 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 	error ("Line number not known for symbol \"%s\"", copy);
     }
 
-  if (symtab_list == 0 && partial_symtab_list == 0)
-    error (no_symtab_msg);
-
   if ((i = lookup_misc_func (copy)) >= 0)
     {
       val.symtab = 0;
@@ -2203,6 +2197,9 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
       values.nelts = 1;
       return values;
     }
+
+  if (symtab_list == 0 && partial_symtab_list == 0 && misc_function_count == 0)
+    error (no_symtab_msg);
 
   error ("Function %s not defined.", copy);
   return values;	/* for lint */
@@ -2439,6 +2436,7 @@ sources_info ()
    If CLASS is zero, list all symbols except functions and type names.
    If CLASS is 1, list only functions.
    If CLASS is 2, list only type names.
+   If CLASS is 3, list only method names.
 
    BPT is non-zero if we should set a breakpoint at the functions
    we find.  */
@@ -2461,6 +2459,13 @@ list_symbols (regexp, class, bpt)
   static char *classnames[]
     = {"variable", "function", "type", "method"};
   int found_in_file = 0;
+  int found_misc = 0;
+  static enum misc_function_type types[]
+    = {mf_data, mf_text, mf_abs, mf_unknown};
+  static enum misc_function_type types2[]
+    = {mf_bss,  mf_text, mf_abs, mf_unknown};
+  enum misc_function_type ourtype = types[class];
+  enum misc_function_type ourtype2 = types2[class];
 
   if (regexp)
     if (0 != (val = re_comp (regexp)))
@@ -2504,7 +2509,7 @@ list_symbols (regexp, class, bpt)
 		 load the file and go on to the next one */
 	      if ((regexp == 0 || re_exec (SYMBOL_NAME (psym)))
 		  && ((class == 0 && SYMBOL_CLASS (psym) != LOC_TYPEDEF
-		       && SYMBOL_CLASS (psym) != LOC_BLOCK)
+				  && SYMBOL_CLASS (psym) != LOC_BLOCK)
 		      || (class == 1 && SYMBOL_CLASS (psym) == LOC_BLOCK)
 		      || (class == 2 && SYMBOL_CLASS (psym) == LOC_TYPEDEF)
 		      || (class == 3 && SYMBOL_CLASS (psym) == LOC_BLOCK)))
@@ -2517,20 +2522,23 @@ list_symbols (regexp, class, bpt)
 	}
     }
 
-  /* Here, *if* the class is correct (function only, right now), we
-     search through the misc function vector for symbols that
+  /* Here, we search through the misc function vector for functions that
      match, and call find_pc_symtab on them to force their symbols to
      be read.  The symbol will then be found during the scan of symtabs
-     below.  */
+     below.  If find_pc_symtab fails, set found_misc so that we will
+     rescan to print any matching symbols without debug info.  */
 
-  if (class == 1)
-    {
-      for (i = 0; i < misc_function_count; i++)
-	if (regexp == 0 || re_exec (misc_function_vector[i].name))
-	  {
-	    (void) find_pc_symtab (misc_function_vector[i].address);
-	  }
+  if (class == 1) {
+    for (i = 0; i < misc_function_count; i++) {
+      if (misc_function_vector[i].type != ourtype
+       && misc_function_vector[i].type != ourtype2)
+	continue;
+      if (regexp == 0 || re_exec (misc_function_vector[i].name)) {
+	  if (0 == find_pc_symtab (misc_function_vector[i].address))
+	    found_misc = 1;
+      }
     }
+  }
 
   /* Printout here so as to get after the "Reading in symbols"
      messages which will be generated above.  */
@@ -2563,7 +2571,7 @@ list_symbols (regexp, class, bpt)
 		sym = BLOCK_SYM (b, j);
 		if ((regexp == 0 || re_exec (SYMBOL_NAME (sym)))
 		    && ((class == 0 && SYMBOL_CLASS (sym) != LOC_TYPEDEF
-			 && SYMBOL_CLASS (sym) != LOC_BLOCK)
+				    && SYMBOL_CLASS (sym) != LOC_BLOCK)
 			|| (class == 1 && SYMBOL_CLASS (sym) == LOC_BLOCK)
 			|| (class == 2 && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
 			|| (class == 3 && SYMBOL_CLASS (sym) == LOC_BLOCK)))
@@ -2584,28 +2592,27 @@ list_symbols (regexp, class, bpt)
 
 		    if (class != 2 && i == STATIC_BLOCK)
 		      printf_filtered ("static ");
+
+		    /* Typedef that is not a C++ class */
 		    if (class == 2
 			&& SYMBOL_NAMESPACE (sym) != STRUCT_NAMESPACE)
-		      printf_filtered ("typedef ");
-
-		    if (class < 3)
+#ifndef FIXME
+		       /* We haven't integrated this from A. Beers yet */
+		       error ("typedef_print(SYMBOL_TYPE(sym),sym,stdout);");
+#else
+		       typedef_print(SYMBOL_TYPE(sym),sym,stdout);
+#endif
+		    /* variable, func, or typedef-that-is-c++-class */
+		    else if (class < 2 || 
+			     (class == 2 && 
+				SYMBOL_NAMESPACE(sym) == STRUCT_NAMESPACE))
 		      {
-			type_print (SYMBOL_TYPE (sym),
-				    (SYMBOL_CLASS (sym) == LOC_TYPEDEF
-				     ? "" : SYMBOL_NAME (sym)),
-				    stdout, 0);
-
-			if (class == 2
-			    && SYMBOL_NAMESPACE (sym) != STRUCT_NAMESPACE
-			    && (TYPE_NAME ((SYMBOL_TYPE (sym))) == 0
-				|| 0 != strcmp (TYPE_NAME ((SYMBOL_TYPE (sym))),
-						SYMBOL_NAME (sym))))
-			  {
-			    fputs_filtered (" ", stdout);
-			    fprint_symbol (stdout, SYMBOL_NAME (sym));
-			  }
-
-			printf_filtered (";\n");
+			 type_print (SYMBOL_TYPE (sym),
+				     (SYMBOL_CLASS (sym) == LOC_TYPEDEF
+				      ? "" : SYMBOL_NAME (sym)),
+				     stdout, 0);
+			 
+			 printf_filtered (";\n");
 		      }
 		    else
 		      {
@@ -2622,6 +2629,36 @@ list_symbols (regexp, class, bpt)
 	  }
       prev_bv = bv;
     }
+
+
+  /* If there are no eyes, avoid all contact.  I mean, if there are
+     no debug symbols, then print directly from the misc_function_vector.  */
+
+  if (found_misc || class != 1) {
+    found_in_file = 0;
+    for (i = 0; i < misc_function_count; i++) {
+      if (misc_function_vector[i].type != ourtype
+       && misc_function_vector[i].type != ourtype2)
+	continue;
+      if (regexp == 0 || re_exec (misc_function_vector[i].name)) {
+	/* Functions:  Look up by address. */
+	if (class == 1)
+	  if (0 != find_pc_symtab (misc_function_vector[i].address))
+	    continue;
+	/* Variables/Absolutes:  Look up by name */
+	if (0 != lookup_symbol (misc_function_vector[i].name, 
+		(struct block *)0, VAR_NAMESPACE, 0, (struct symtab **)0))
+	  continue;
+	if (!found_in_file) {
+	  printf_filtered ("\nNon-debugging symbols:\n");
+	  found_in_file = 1;
+	}
+	printf_filtered ("	%08x  %s\n",
+	      misc_function_vector[i].address,
+	      misc_function_vector[i].name);
+      }
+    }
+  }
 }
 
 static void
@@ -2663,9 +2700,8 @@ rbreak_command (regexp)
   list_symbols (regexp, 1, 1);
 }
 
-/* Initialize the standard C scalar types.  */
+/* Helper function to initialize the standard scalar types.  */
 
-static
 struct type *
 init_type (code, length, uns, name)
      enum type_code code;
@@ -2849,6 +2885,51 @@ make_symbol_completion_list (text)
   return (return_val);
 }
 
+#if 0
+/* Add the type of the symbol sym to the type of the current
+   function whose block we are in (assumed).  The type of
+   this current function is contained in *TYPE.
+   
+   This basically works as follows:  When we find a function
+   symbol (N_FUNC with a 'f' or 'F' in the symbol name), we record
+   a pointer to its type in the global in_function_type.  Every 
+   time we come across a parameter symbol ('p' in its name), then
+   this procedure adds the name and type of that parameter
+   to the function type pointed to by *TYPE.  (Which should correspond
+   to in_function_type if it was called correctly).
+
+   Note that since we are modifying a type, the result of 
+   lookup_function_type() should be bcopy()ed before calling
+   this.  When not in strict typing mode, the expression
+   evaluator can choose to ignore this.
+
+   Assumption:  All of a function's parameter symbols will
+   appear before another function symbol is found.  The parameters 
+   appear in the same order in the argument list as they do in the
+   symbol table. */
+
+void
+add_param_to_type (type,sym)
+   struct type **type;
+   struct symbol *sym;
+{
+   int num = ++(TYPE_NFIELDS(*type));
+
+   if(TYPE_NFIELDS(*type)-1)
+      TYPE_FIELDS(*type) = 
+	 (struct field *)xrealloc((char *)(TYPE_FIELDS(*type)),
+				  num*sizeof(struct field));
+   else
+      TYPE_FIELDS(*type) =
+	 (struct field *)xmalloc(num*sizeof(struct field));
+   
+   TYPE_FIELD_BITPOS(*type,num-1) = num-1;
+   TYPE_FIELD_BITSIZE(*type,num-1) = 0;
+   TYPE_FIELD_TYPE(*type,num-1) = SYMBOL_TYPE(sym);
+   TYPE_FIELD_NAME(*type,num-1) = SYMBOL_NAME(sym);
+}
+#endif 
+
 void
 _initialize_symtab ()
 {
@@ -2881,31 +2962,6 @@ are listed.");
   add_com ("rbreak", no_class, rbreak_command,
 	    "Set a breakpoint for all functions matching REGEXP.");
 
-  /* FIXME:  The code below assumes that the sizes of the basic data
-     types are the same on the host and target machines!!!  */
-
-  builtin_type_void = init_type (TYPE_CODE_VOID, 1, 0, "void");
-
-  builtin_type_float = init_type (TYPE_CODE_FLT, sizeof (float), 0, "float");
-  builtin_type_double = init_type (TYPE_CODE_FLT, sizeof (double), 0, "double");
-
-  builtin_type_char = init_type (TYPE_CODE_INT, sizeof (char), 0, "char");
-  builtin_type_short = init_type (TYPE_CODE_INT, sizeof (short), 0, "short");
-  builtin_type_long = init_type (TYPE_CODE_INT, sizeof (long), 0, "long");
-  builtin_type_int = init_type (TYPE_CODE_INT, sizeof (int), 0, "int");
-
-  builtin_type_unsigned_char = init_type (TYPE_CODE_INT, sizeof (char), 1, "unsigned char");
-  builtin_type_unsigned_short = init_type (TYPE_CODE_INT, sizeof (short), 1, "unsigned short");
-  builtin_type_unsigned_long = init_type (TYPE_CODE_INT, sizeof (long), 1, "unsigned long");
-  builtin_type_unsigned_int = init_type (TYPE_CODE_INT, sizeof (int), 1, "unsigned int");
-
-  builtin_type_long_long =
-    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-	       0, "long long");
-  builtin_type_unsigned_long_long = 
-    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-	       1, "unsigned long long");
-
+  /* Initialize the one built-in type that isn't language dependent... */
   builtin_type_error = init_type (TYPE_CODE_ERROR, 0, 0, "<unknown type>");
 }
-
