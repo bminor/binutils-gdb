@@ -1,5 +1,10 @@
 2004-08-02  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbarch.sh (deprecated_register_virtual_type)
+	(deprecated_save_dummy_frame_tos, deprecated_push_return_address)
+	(deprecated_dummy_write_sp): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 	* gdbarch.sh (deprecated_register_bytes): Delete.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* regcache.c (deprecated_register_bytes): New function.

@@ -461,8 +461,6 @@ f:=:const char *:register_name:int regnr:regnr
 
 # REGISTER_TYPE is a direct replacement for DEPRECATED_REGISTER_VIRTUAL_TYPE.
 M::struct type *:register_type:int reg_nr:reg_nr
-# REGISTER_TYPE is a direct replacement for DEPRECATED_REGISTER_VIRTUAL_TYPE.
-F:=:struct type *:deprecated_register_virtual_type:int reg_nr:reg_nr
 # If the value returned by DEPRECATED_REGISTER_BYTE agrees with the
 # register offsets computed using just REGISTER_TYPE, this can be
 # deleted.  See: maint print registers.  NOTE: cagney/2002-05-02: This
@@ -485,9 +483,6 @@ F:=:int:deprecated_register_virtual_size:int reg_nr:reg_nr::generic_register_siz
 # See gdbint.texinfo, and PUSH_DUMMY_CALL.
 M::struct frame_id:unwind_dummy_id:struct frame_info *info:info
 # Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
-# SAVE_DUMMY_FRAME_TOS.
-F:=:void:deprecated_save_dummy_frame_tos:CORE_ADDR sp:sp
-# Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
 # DEPRECATED_FP_REGNUM.
 v:=:int:deprecated_fp_regnum::::-1:-1::0
 # Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
@@ -499,11 +494,6 @@ F:=:CORE_ADDR:deprecated_target_read_fp:void
 M::CORE_ADDR:push_dummy_call:struct value *function, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:function, regcache, bp_addr, nargs, args, sp, struct_return, struct_addr
 # PUSH_DUMMY_CALL is a direct replacement for DEPRECATED_PUSH_ARGUMENTS.
 F:=:CORE_ADDR:deprecated_push_arguments:int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:nargs, args, sp, struct_return, struct_addr
-# Implement PUSH_RETURN_ADDRESS, and then merge in
-# DEPRECATED_PUSH_RETURN_ADDRESS.
-F:=:CORE_ADDR:deprecated_push_return_address:CORE_ADDR pc, CORE_ADDR sp:pc, sp
-# Implement PUSH_DUMMY_CALL, then merge in DEPRECATED_DUMMY_WRITE_SP.
-F:=:void:deprecated_dummy_write_sp:CORE_ADDR val:val
 # DEPRECATED_REGISTER_SIZE can be deleted.
 v:=:int:deprecated_register_size
 v:=:int:call_dummy_location:::::AT_ENTRY_POINT::0

@@ -454,33 +454,6 @@ typedef struct type * (gdbarch_register_type_ftype) (struct gdbarch *gdbarch, in
 extern struct type * gdbarch_register_type (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_register_type (struct gdbarch *gdbarch, gdbarch_register_type_ftype *register_type);
 
-/* REGISTER_TYPE is a direct replacement for DEPRECATED_REGISTER_VIRTUAL_TYPE. */
-
-#if defined (DEPRECATED_REGISTER_VIRTUAL_TYPE)
-/* Legacy for systems yet to multi-arch DEPRECATED_REGISTER_VIRTUAL_TYPE */
-#if !defined (DEPRECATED_REGISTER_VIRTUAL_TYPE_P)
-#define DEPRECATED_REGISTER_VIRTUAL_TYPE_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_register_virtual_type_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_VIRTUAL_TYPE_P)
-#error "Non multi-arch definition of DEPRECATED_REGISTER_VIRTUAL_TYPE"
-#endif
-#if !defined (DEPRECATED_REGISTER_VIRTUAL_TYPE_P)
-#define DEPRECATED_REGISTER_VIRTUAL_TYPE_P() (gdbarch_deprecated_register_virtual_type_p (current_gdbarch))
-#endif
-
-typedef struct type * (gdbarch_deprecated_register_virtual_type_ftype) (int reg_nr);
-extern struct type * gdbarch_deprecated_register_virtual_type (struct gdbarch *gdbarch, int reg_nr);
-extern void set_gdbarch_deprecated_register_virtual_type (struct gdbarch *gdbarch, gdbarch_deprecated_register_virtual_type_ftype *deprecated_register_virtual_type);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_VIRTUAL_TYPE)
-#error "Non multi-arch definition of DEPRECATED_REGISTER_VIRTUAL_TYPE"
-#endif
-#if !defined (DEPRECATED_REGISTER_VIRTUAL_TYPE)
-#define DEPRECATED_REGISTER_VIRTUAL_TYPE(reg_nr) (gdbarch_deprecated_register_virtual_type (current_gdbarch, reg_nr))
-#endif
-
 /* If the value returned by DEPRECATED_REGISTER_BYTE agrees with the
    register offsets computed using just REGISTER_TYPE, this can be
    deleted.  See: maint print registers.  NOTE: cagney/2002-05-02: This
@@ -583,34 +556,6 @@ extern struct frame_id gdbarch_unwind_dummy_id (struct gdbarch *gdbarch, struct 
 extern void set_gdbarch_unwind_dummy_id (struct gdbarch *gdbarch, gdbarch_unwind_dummy_id_ftype *unwind_dummy_id);
 
 /* Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
-   SAVE_DUMMY_FRAME_TOS. */
-
-#if defined (DEPRECATED_SAVE_DUMMY_FRAME_TOS)
-/* Legacy for systems yet to multi-arch DEPRECATED_SAVE_DUMMY_FRAME_TOS */
-#if !defined (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P)
-#define DEPRECATED_SAVE_DUMMY_FRAME_TOS_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_save_dummy_frame_tos_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P)
-#error "Non multi-arch definition of DEPRECATED_SAVE_DUMMY_FRAME_TOS"
-#endif
-#if !defined (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P)
-#define DEPRECATED_SAVE_DUMMY_FRAME_TOS_P() (gdbarch_deprecated_save_dummy_frame_tos_p (current_gdbarch))
-#endif
-
-typedef void (gdbarch_deprecated_save_dummy_frame_tos_ftype) (CORE_ADDR sp);
-extern void gdbarch_deprecated_save_dummy_frame_tos (struct gdbarch *gdbarch, CORE_ADDR sp);
-extern void set_gdbarch_deprecated_save_dummy_frame_tos (struct gdbarch *gdbarch, gdbarch_deprecated_save_dummy_frame_tos_ftype *deprecated_save_dummy_frame_tos);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_SAVE_DUMMY_FRAME_TOS)
-#error "Non multi-arch definition of DEPRECATED_SAVE_DUMMY_FRAME_TOS"
-#endif
-#if !defined (DEPRECATED_SAVE_DUMMY_FRAME_TOS)
-#define DEPRECATED_SAVE_DUMMY_FRAME_TOS(sp) (gdbarch_deprecated_save_dummy_frame_tos (current_gdbarch, sp))
-#endif
-
-/* Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
    DEPRECATED_FP_REGNUM. */
 
 extern int gdbarch_deprecated_fp_regnum (struct gdbarch *gdbarch);
@@ -684,61 +629,6 @@ extern void set_gdbarch_deprecated_push_arguments (struct gdbarch *gdbarch, gdba
 #endif
 #if !defined (DEPRECATED_PUSH_ARGUMENTS)
 #define DEPRECATED_PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) (gdbarch_deprecated_push_arguments (current_gdbarch, nargs, args, sp, struct_return, struct_addr))
-#endif
-
-/* Implement PUSH_RETURN_ADDRESS, and then merge in
-   DEPRECATED_PUSH_RETURN_ADDRESS. */
-
-#if defined (DEPRECATED_PUSH_RETURN_ADDRESS)
-/* Legacy for systems yet to multi-arch DEPRECATED_PUSH_RETURN_ADDRESS */
-#if !defined (DEPRECATED_PUSH_RETURN_ADDRESS_P)
-#define DEPRECATED_PUSH_RETURN_ADDRESS_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_push_return_address_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PUSH_RETURN_ADDRESS_P)
-#error "Non multi-arch definition of DEPRECATED_PUSH_RETURN_ADDRESS"
-#endif
-#if !defined (DEPRECATED_PUSH_RETURN_ADDRESS_P)
-#define DEPRECATED_PUSH_RETURN_ADDRESS_P() (gdbarch_deprecated_push_return_address_p (current_gdbarch))
-#endif
-
-typedef CORE_ADDR (gdbarch_deprecated_push_return_address_ftype) (CORE_ADDR pc, CORE_ADDR sp);
-extern CORE_ADDR gdbarch_deprecated_push_return_address (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp);
-extern void set_gdbarch_deprecated_push_return_address (struct gdbarch *gdbarch, gdbarch_deprecated_push_return_address_ftype *deprecated_push_return_address);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PUSH_RETURN_ADDRESS)
-#error "Non multi-arch definition of DEPRECATED_PUSH_RETURN_ADDRESS"
-#endif
-#if !defined (DEPRECATED_PUSH_RETURN_ADDRESS)
-#define DEPRECATED_PUSH_RETURN_ADDRESS(pc, sp) (gdbarch_deprecated_push_return_address (current_gdbarch, pc, sp))
-#endif
-
-/* Implement PUSH_DUMMY_CALL, then merge in DEPRECATED_DUMMY_WRITE_SP. */
-
-#if defined (DEPRECATED_DUMMY_WRITE_SP)
-/* Legacy for systems yet to multi-arch DEPRECATED_DUMMY_WRITE_SP */
-#if !defined (DEPRECATED_DUMMY_WRITE_SP_P)
-#define DEPRECATED_DUMMY_WRITE_SP_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_dummy_write_sp_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_DUMMY_WRITE_SP_P)
-#error "Non multi-arch definition of DEPRECATED_DUMMY_WRITE_SP"
-#endif
-#if !defined (DEPRECATED_DUMMY_WRITE_SP_P)
-#define DEPRECATED_DUMMY_WRITE_SP_P() (gdbarch_deprecated_dummy_write_sp_p (current_gdbarch))
-#endif
-
-typedef void (gdbarch_deprecated_dummy_write_sp_ftype) (CORE_ADDR val);
-extern void gdbarch_deprecated_dummy_write_sp (struct gdbarch *gdbarch, CORE_ADDR val);
-extern void set_gdbarch_deprecated_dummy_write_sp (struct gdbarch *gdbarch, gdbarch_deprecated_dummy_write_sp_ftype *deprecated_dummy_write_sp);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_DUMMY_WRITE_SP)
-#error "Non multi-arch definition of DEPRECATED_DUMMY_WRITE_SP"
-#endif
-#if !defined (DEPRECATED_DUMMY_WRITE_SP)
-#define DEPRECATED_DUMMY_WRITE_SP(val) (gdbarch_deprecated_dummy_write_sp (current_gdbarch, val))
 #endif
 
 /* DEPRECATED_REGISTER_SIZE can be deleted. */
