@@ -1,5 +1,6 @@
 . ${srcdir}/emulparams/elf32frv.sh
 unset STACK_ADDR
+OUTPUT_FORMAT="elf32-frvfdpic"
 MAXPAGESIZE=0x4000
 TEMPLATE_NAME=elf32
 GENERATE_SHLIB_SCRIPT=yes
