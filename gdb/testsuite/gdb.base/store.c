@@ -7,8 +7,10 @@
    function calls within main even when no optimization flags were
    passed.  */
 
-char
-add_char (register char u, register char v)
+typedef signed char charest;
+
+charest
+add_charest (register charest u, register charest v)
 {
   return u + v;
 }
@@ -61,12 +63,12 @@ add_doublest (register doublest u, register doublest v)
 
 /* */
 
-char
-wack_char (register char u, register char v)
+charest
+wack_charest (register charest u, register charest v)
 {
-  register char l = u, r = v;
-  l = add_char (l, r);
-  return l;
+  register charest l = u, r = v;
+  l = add_charest (l, r);
+  return l + r;
 }
 
 short
@@ -74,7 +76,7 @@ wack_short (register short u, register short v)
 {
   register short l = u, r = v;
   l = add_short (l, r);
-  return l;
+  return l + r;
 }
 
 int
@@ -82,7 +84,7 @@ wack_int (register int u, register int v)
 {
   register int l = u, r = v;
   l = add_int (l, r);
-  return l;
+  return l + r;
 }
 
 long
@@ -90,7 +92,7 @@ wack_long (register long u, register long v)
 {
   register long l = u, r = v;
   l = add_long (l, r);
-  return l;
+  return l + r;
 }
 
 long
@@ -98,7 +100,7 @@ wack_longest (register longest u, register longest v)
 {
   register longest l = u, r = v;
   l = add_longest (l, r);
-  return l;
+  return l + r;
 }
 
 float
@@ -106,7 +108,7 @@ wack_float (register float u, register float v)
 {
   register float l = u, r = v;
   l = add_float (l, r);
-  return l;
+  return l + r;
 }
 
 double
@@ -114,7 +116,7 @@ wack_double (register double u, register double v)
 {
   register double l = u, r = v;
   l = add_double (l, r);
-  return l;
+  return l + r;
 }
 
 doublest
@@ -122,7 +124,7 @@ wack_doublest (register doublest u, register doublest v)
 {
   register doublest l = u, r = v;
   l = add_doublest (l, r);
-  return l;
+  return l + r;
 }
 
 /* */
@@ -253,7 +255,7 @@ int
 main ()
 {
   /* These calls are for current frame test.  */
-  wack_char (-1, -2);
+  wack_charest (-1, -2);
   wack_short (-1, -2);
   wack_int (-1, -2);
   wack_long (-1, -2);
@@ -263,7 +265,7 @@ main ()
   wack_doublest (-1, -2);
 
   /* These calls are for up frame.  */
-  wack_char (-1, -2);
+  wack_charest (-1, -2);
   wack_short (-1, -2);
   wack_int (-1, -2);
   wack_long (-1, -2);
