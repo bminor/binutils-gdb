@@ -1,4 +1,12 @@
+Fri Oct  3 12:04:25 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* wrstabs.c (write_stabs_in_sections_debugging_info): Cast p to
+	char * when calling strcpy and strlen.
+
 Wed Sep 24 11:34:05 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils.texi	(ar cmdline): Document that q now works like r.
+	From Marty Leisner <leisner@sdsp.mc.xerox.com>.
 
 	* binutils.texi (size): The object file argument is optional.
 	From Marty Leisner <leisner@sdsp.mc.xerox.com>.
