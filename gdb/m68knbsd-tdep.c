@@ -1,5 +1,5 @@
 /* Target-dependent code for NetBSD/i386, for GDB.
-   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000
+   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -23,7 +23,7 @@
 #include "gdbtypes.h"
 
 int
-i386nbsd_use_struct_convention (int gcc_p, struct type *type)
+m68knbsd_use_struct_convention (int gcc_p, struct type *type)
 {
   return !(TYPE_LENGTH (type) == 1
 	   || TYPE_LENGTH (type) == 2

@@ -26,8 +26,8 @@
 
 /* Define BPT_VECTOR if it is different than the default.
    This is the vector number used by traps to indicate a breakpoint. */
-
-#define BPT_VECTOR 0x2
+#define BPT_VECTOR		0xf
+#define REMOTE_BPT_VECTOR	0xf
 
 /* Address of end of stack space.  */
 #define STACK_END_ADDR USRSTACK
@@ -38,5 +38,9 @@
 
 #include "m68k/tm-m68k.h"
 #include "tm-nbsd.h"
+
+extern use_struct_convention_fn m68knbsd_use_struct_convention;
+#define USE_STRUCT_CONVENTION(gcc_p, type) \
+        m68knbsd_use_struct_convention(gcc_p, type)
 
 #endif /* TM_NBSD_H */

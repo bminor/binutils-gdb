@@ -1,3 +1,13 @@
+2001-01-17  J.T. Conklin  <jtc@redback.com>
+
+	* config/m68k/tm-nbsd.h (USE_STRUCT_CONVENTION): Define.
+	* config/m68k/nbsd.mt (TDEPFILES): Add m68knbsd-tdep.o.
+	* m68knbsd-tdep.c: New file.
+
+	* i386nbsd-tdep.c: Remove #if 0'd out #includes.
+
+	* m68knbsd-nat.c: #include gdbcore.h.
+
 Wed Jan 17 09:41:58 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Add J.T. Conklin to Blanket Write Privs.
