@@ -149,6 +149,8 @@ CFILES = \
 	cgen-asm.c \
 	cgen-dis.c \
 	cgen-opc.c \
+	cris-dis.c \
+	cris-opc.c \
 	d10v-dis.c \
 	d10v-opc.c \
 	d30v-dis.c \
@@ -228,6 +230,8 @@ ALL_MACHINES = \
 	cgen-asm.lo \
 	cgen-dis.lo \
 	cgen-opc.lo \
+	cris-dis.lo \
+	cris-opc.lo \
 	d10v-dis.lo \
 	d10v-opc.lo \
 	d30v-dis.lo \
@@ -741,6 +745,8 @@ ia64-gen.o: ia64-gen.c ia64-opc.c ia64-opc-a.c ia64-opc-b.c ia64-opc-f.c \
   ia64-opc-i.c ia64-opc-m.c ia64-opc-d.c ia64-opc.h
 
 ia64-asmtab.c: @MAINT@ ia64-gen ia64-ic.tbl ia64-raw.tbl ia64-waw.tbl ia64-war.tbl
+	for f in ia64-ic.tbl ia64-raw.tbl ia64-waw.tbl ia64-war.tbl; do \
+	  if test -e $$f; then true; else cp -p $(srcdir)/$$f .; fi; done
 	./ia64-gen > $(srcdir)/ia64-asmtab.c
 
 # This dependency stuff is copied from BFD.
@@ -817,6 +823,10 @@ cgen-dis.lo: cgen-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h
 cgen-opc.lo: cgen-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h
+cris-dis.lo: cris-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h sysdep.h config.h $(INCDIR)/opcode/cris.h \
+  $(INCDIR)/libiberty.h
+cris-opc.lo: cris-opc.c $(INCDIR)/opcode/cris.h
 d10v-dis.lo: d10v-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/d10v.h $(INCDIR)/dis-asm.h $(BFD_H)
 d10v-opc.lo: d10v-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \

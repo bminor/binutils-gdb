@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-06-18 17:38-0700\n"
+"POT-Creation-Date: 2000-07-20 16:47+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -48,21 +48,21 @@ msgstr ""
 msgid "branch address not on 4 byte boundary"
 msgstr ""
 
-#: arm-dis.c:476
+#: arm-dis.c:466
 msgid "<illegal precision>"
 msgstr ""
 
-#: arm-dis.c:888
+#: arm-dis.c:878
 #, c-format
 msgid "Unrecognised register name set: %s\n"
 msgstr ""
 
-#: arm-dis.c:895
+#: arm-dis.c:885
 #, c-format
 msgid "Unrecognised disassembler option: %s\n"
 msgstr ""
 
-#: arm-dis.c:1059
+#: arm-dis.c:1049
 msgid ""
 "\n"
 "The following ARM specific disassembler options are supported for use with\n"
@@ -184,23 +184,23 @@ msgstr ""
 msgid "Unrecognized field %d while setting vma operand.\n"
 msgstr ""
 
-#: h8300-dis.c:382
+#: h8300-dis.c:380
 #, c-format
 msgid "Hmmmm %x"
 msgstr ""
 
-#: h8300-dis.c:393
+#: h8300-dis.c:391
 #, c-format
 msgid "Don't understand %x \n"
 msgstr ""
 
-#: h8500-dis.c:140
+#: h8500-dis.c:141
 #, c-format
 msgid "can't cope with insert %d\n"
 msgstr ""
 
-#. Couldn't understand anything
-#: h8500-dis.c:345
+#. Couldn't understand anything.
+#: h8500-dis.c:348
 #, c-format
 msgid "%02x\t\t*unknown*"
 msgstr ""
