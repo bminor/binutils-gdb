@@ -5004,7 +5004,8 @@ elf_export_symbol (h, data)
   struct bfd_link_info *info = (struct bfd_link_info *) data;
 
   if (h->dynindx == -1
-      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
+      && (h->elf_link_hash_flags
+	  & (ELF_LINK_HASH_DEF_REGULAR | ELF_LINK_HASH_REF_REGULAR)) != 0)
     {
       if (! elf_link_record_dynamic_symbol (info, h))
 	{

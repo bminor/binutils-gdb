@@ -1,3 +1,8 @@
+Sat Nov 12 23:50:10 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elfcode.h (elf_export_symbol): Also export symbols which are
+	referenced by a regular file.
+
 Fri Nov 11 14:29:31 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* elfcode.h (NAME(bfd_elf,size_dynamic_sections)): Add
