@@ -31,6 +31,7 @@ Things-to-keep:
 CONTRIBUTORS
 COPYING
 ChangeLog
+ChangeLog.v9
 Makefile.in
 NEWS
 NOTES
@@ -49,6 +50,7 @@ bignum.h
 bit_fix.h
 cond.c
 config
+config-gas.com
 configure.bat
 configure.in
 debug.c
@@ -91,12 +93,27 @@ xmalloc.c
 
 Do-last:
 
+if ( echo $* | grep keep-v9 > /dev/null ) ; then
+	echo Keeping ChangeLog.v9.
+else
+	echo Removing ChangeLog.v9
+	if [ -n "${safe}" ] ; then
+		mv ChangeLog.v9 .Recover
+	else
+		rm ChangeLog.v9
+	fi
+fi
+
 echo Done in `pwd`.
 
 #
 #
 # $Log$
-# Revision 1.13  1992/12/08 08:05:32  raeburn
+# Revision 1.14  1993/01/08 14:40:59  raeburn
+# keep config-gas.com.
+# if purging v9, discard ChangeLog.v9, keep otherwise.
+#
+# Revision 1.13  1992/12/08  08:05:32  raeburn
 # updated for added/deleted files
 #
 # Revision 1.12  1992/07/28  18:58:12  gumby
