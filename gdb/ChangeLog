@@ -1,5 +1,7 @@
 2001-03-17  Mark Kettenis  <kettenis@gnu.org>
 
+	* i387-nat.h: Doc Fix.
+
 	* i386-tdep.c: Fix formatting.
 	(i386_get_frame_setup, i386_follow_jump, codestream_read,
 	codestream_seek, codestream_fill, skip_trampoline_code,

@@ -21,7 +21,7 @@
 #ifndef I387_NAT_H
 #define I387_NAT_H
 
-/* Fill register REGNO in GDB's register array with the appropriate
+/* Fill register REGNUM in GDB's register array with the appropriate
    value from *FSAVE.  This function masks off any of the reserved
    bits in *FSAVE.  */
 
