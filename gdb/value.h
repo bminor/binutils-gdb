@@ -499,11 +499,6 @@ extern void register_changed (int regnum);
 
 extern char *register_buffer (int regnum);
 
-extern void get_saved_register (char *raw_buffer, int *optimized,
-				CORE_ADDR * addrp,
-				struct frame_info *frame,
-				int regnum, enum lval_type *lval);
-
 extern void
 modify_field (char *addr, LONGEST fieldval, int bitpos, int bitsize);
 

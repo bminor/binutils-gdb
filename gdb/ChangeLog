@@ -1,3 +1,8 @@
+2001-02-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* value.h (get_saved_register): Move from here.
+	* frame.h: To here.
+
 2001-02-21  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib.h (in_svr4_dynsym_resolve_code): Delete declaration.

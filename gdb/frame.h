@@ -265,4 +265,9 @@ extern void generic_get_saved_register (char *, int *, CORE_ADDR *,
 					struct frame_info *, int,
 					enum lval_type *);
 
+extern void get_saved_register (char *raw_buffer, int *optimized,
+				CORE_ADDR * addrp,
+				struct frame_info *frame,
+				int regnum, enum lval_type *lval);
+
 #endif /* !defined (FRAME_H)  */
