@@ -309,9 +309,7 @@ AC_FUNC_ALLOCA
 AC_C_INLINE
 
 # VMS needs this.
-AC_CHECK_FUNC(unlink,,
-  AC_CHECK_FUNC(delete,AC_DEFINE(USE_DELETE_FOR_UNLINK),
-    AC_MSG_ERROR(No unlink or delete function available on this system.)))
+AC_CHECK_FUNCS(unlink delete, break)
 
 # Some non-ANSI preprocessors botch requoting inside strings.  That's bad
 # enough, but on some of those systems, the assert macro relies on requoting

@@ -1346,12 +1346,14 @@ fi
 
 
 # VMS needs this.
-echo $ac_n "checking for unlink""... $ac_c" 1>&4
-if eval "test \"`echo '${'ac_cv_func_unlink'+set}'`\" = set"; then
+for ac_func in unlink delete
+do
+echo $ac_n "checking for $ac_func""... $ac_c" 1>&4
+if eval "test \"`echo '${'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.$ac_ext <<EOF
-#line 1355 "configure"
+#line 1357 "configure"
 #include "confdefs.h"
 #include <ctype.h> /* Arbitrary system header to define __stub macros. */
 int main() { return 0; }
@@ -1360,75 +1362,36 @@ int t() {
 /* The GNU C library defines this for functions which it implements
     to always fail with ENOSYS.  Some functions are actually named
     something starting with __ and the normal name is an alias.  */
-#if defined (__stub_unlink) || defined (__stub___unlink)
+#if defined (__stub_$ac_func) || defined (__stub___$ac_func)
 choke me
 #else
 /* Override any gcc2 internal prototype to avoid an error.  */
-char unlink(); unlink();
+char $ac_func(); $ac_func();
 #endif
 
 ; return 0; }
 EOF
 if eval $ac_link; then
   rm -rf conftest*
-  eval "ac_cv_func_unlink=yes"
+  eval "ac_cv_func_$ac_func=yes"
 else
   rm -rf conftest*
-  eval "ac_cv_func_unlink=no"
+  eval "ac_cv_func_$ac_func=no"
 fi
 rm -f conftest*
 
 fi
-if eval "test \"`echo '$ac_cv_func_'unlink`\" = yes"; then
+if eval "test \"`echo '$ac_cv_func_'$ac_func`\" = yes"; then
   echo "$ac_t""yes" 1>&4
-  :
+    ac_tr_func=HAVE_`echo $ac_func | tr '[a-z]' '[A-Z]'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_func 1
+EOF
+ break
 else
   echo "$ac_t""no" 1>&4
-echo $ac_n "checking for delete""... $ac_c" 1>&4
-if eval "test \"`echo '${'ac_cv_func_delete'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&4
-else
-  cat > conftest.$ac_ext <<EOF
-#line 1393 "configure"
-#include "confdefs.h"
-#include <ctype.h> /* Arbitrary system header to define __stub macros. */
-int main() { return 0; }
-int t() {
-
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_delete) || defined (__stub___delete)
-choke me
-#else
-/* Override any gcc2 internal prototype to avoid an error.  */
-char delete(); delete();
-#endif
-
-; return 0; }
-EOF
-if eval $ac_link; then
-  rm -rf conftest*
-  eval "ac_cv_func_delete=yes"
-else
-  rm -rf conftest*
-  eval "ac_cv_func_delete=no"
 fi
-rm -f conftest*
-
-fi
-if eval "test \"`echo '$ac_cv_func_'delete`\" = yes"; then
-  echo "$ac_t""yes" 1>&4
-  cat >> confdefs.h <<\EOF
-#define USE_DELETE_FOR_UNLINK 1
-EOF
-
-else
-  echo "$ac_t""no" 1>&4
-{ echo "configure: No unlink or delete function available on this system." 1>&2; exit 1; }
-fi
-
-fi
+done
 
 
 # Some non-ANSI preprocessors botch requoting inside strings.  That's bad
@@ -1439,7 +1402,7 @@ if eval "test \"`echo '${'gas_cv_assert_ok'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.$ac_ext <<EOF
-#line 1443 "configure"
+#line 1406 "configure"
 #include "confdefs.h"
 #include <assert.h>
 #include <stdio.h>
@@ -1496,7 +1459,7 @@ if eval "test \"`echo '${'gas_cv_decl_needed_malloc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.$ac_ext <<EOF
-#line 1500 "configure"
+#line 1463 "configure"
 #include "confdefs.h"
 $gas_test_headers
 int main() { return 0; }
@@ -1532,7 +1495,7 @@ if eval "test \"`echo '${'gas_cv_decl_needed_free'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.$ac_ext <<EOF
-#line 1536 "configure"
+#line 1499 "configure"
 #include "confdefs.h"
 $gas_test_headers
 int main() { return 0; }
@@ -1571,7 +1534,7 @@ if eval "test \"`echo '${'gas_cv_decl_needed_errno'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.$ac_ext <<EOF
-#line 1575 "configure"
+#line 1538 "configure"
 #include "confdefs.h"
 
 #ifdef HAVE_ERRNO_H

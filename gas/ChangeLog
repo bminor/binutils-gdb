@@ -9,6 +9,10 @@ Tue Sep 13 16:45:08 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 Tue Sep 13 16:20:36 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* flonum-konst.c: Change preprocessor tests of HO_VMS to just VMS.
+	* hex-value.c: Ditto.
+	* config/obj-vms.c: Ditto.
+
 	* config/tc-sparc.c (sparc_ip): Replace as_bad/exit sequence with
 	a call to as_fatal.
 	* config/tc-i860.c (i860_ip): Ditto.
@@ -39,11 +43,9 @@ Tue Sep 13 16:20:36 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	* Makefile.in (*_FOR_TARGET, INSTALL_XFORM, install, uninstall):
 	Rewrite handling of program_transform_name.
 
-	* configure.in: Test for "unlink" and "delete", define
-	USE_DELETE_FOR_UNLINK if only the latter is found.  Not expected
-	to be triggered on UNIX/POSIX systems.
-	* acconfig.h (USE_DELETE_FOR_UNLINK): Undef here, provide
-	comments.
+	* configure.in: Test for functions unlink and delete.
+	* as.h: If unlink isn't available but delete is, define unlink to
+	be delete.
 
 	Update for autoconf 1.118:
 	* gdbinit.in: New file, created from old .gdbinit.

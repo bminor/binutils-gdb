@@ -28,7 +28,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* What we do if there is a goof. */
 #define error as_fatal
 
-#ifdef HO_VMS			/* These are of no use if we are cross assembling. */
+#ifdef VMS			/* These are of no use if we are cross assembling. */
 #include <fab.h>		/* Define File Access Block	  */
 #include <nam.h>		/* Define NAM Block		  */
 #include <xab.h>		/* Define XAB - all different types*/
@@ -241,7 +241,7 @@ static int Current_Object_Record_Type;	/* Type of record in above	   */
 /*
  *	Macros for moving data around.  Must work on big-endian systems.
  */
-#ifdef HO_VMS  /* These are more efficient for VMS->VMS systems */
+#ifdef VMS  /* These are more efficient for VMS->VMS systems */
 #define COPY_LONG(dest,val) {*(long *) dest = val; }
 #define COPY_SHORT(dest,val) {*(short *) dest = val; }
 #else
@@ -446,7 +446,7 @@ obj_crawl_symbol_chain (headers)
 static
 Create_VMS_Object_File ()
 {
-#if	defined(eunice) || !defined(HO_VMS)
+#if	defined(eunice) || !defined(VMS)
   VMS_Object_File_FD = creat (out_file_name, 0777, "var");
 #else	/* eunice */
   VMS_Object_File_FD = creat (out_file_name, 0, "rfm=var", 
@@ -488,22 +488,22 @@ Flush_VMS_Object_Record_Buffer ()
   /*
    *	Write the data to the file
    */
-#ifndef HO_VMS			/* For cross-assembly purposes. */
+#ifndef VMS			/* For cross-assembly purposes. */
   md_number_to_chars((char *) &RecLen, Object_Record_Offset, 2);
   i = write (VMS_Object_File_FD, &RecLen, 2);
-#endif /* not HO_VMS */
+#endif /* not VMS */
   i = write (VMS_Object_File_FD,
 	     Object_Record_Buffer,
 	     Object_Record_Offset);
   if (i != Object_Record_Offset)
     error ("I/O error writing VMS object file");
-#ifndef HO_VMS			/* When cross-assembling, we need to pad the record to an even
+#ifndef VMS			/* When cross-assembling, we need to pad the record to an even
 						number of bytes. */
   /* pad it if needed */
   zero = 0;
   if (Object_Record_Offset & 1 != 0)
     write (VMS_Object_File_FD, &zero, 1);
-#endif /* not HO_VMS */
+#endif /* not VMS */
   /*
    *	The buffer is now empty
    */
@@ -545,10 +545,10 @@ Close_VMS_Object_File ()
   /* @@ This should not be here!!  The same would presumably be needed
      if we were writing vax-bsd a.out files on a vms system.  Put it
      someplace else!  */
-#ifndef HO_VMS			/* For cross-assembly purposes. */
+#ifndef VMS			/* For cross-assembly purposes. */
 /* Write a 0xffff into the file, which means "End of File" */
   write (VMS_Object_File_FD, &m_one, 2);
-#endif /* not HO_VMS */
+#endif /* not VMS */
   close (VMS_Object_File_FD);
 }
 
@@ -1205,9 +1205,9 @@ VMS_TBT_Source_File (Filename, ID_Number)
   register char *cp, *cp1;
   int Status, i;
   char Local[512];
-#ifndef HO_VMS			/* Used for cross-assembly */
+#ifndef VMS			/* Used for cross-assembly */
   i = strlen (Filename);
-#else /* HO_VMS */
+#else /* VMS */
   static struct FAB Fab;
   static struct NAM Nam;
   static struct XABDAT Date_Xab;
@@ -1256,7 +1256,7 @@ VMS_TBT_Source_File (Filename, ID_Number)
    *	Calculate the size of the resultant string
    */
   i = Nam.nam$b_rsl;
-#endif /* HO_VMS */
+#endif /* VMS */
   /*
    *	Size of record
    */
@@ -1284,7 +1284,7 @@ VMS_TBT_Source_File (Filename, ID_Number)
    */
   COPY_SHORT (cp, ID_Number);
   cp += sizeof (short);
-#ifndef HO_VMS
+#ifndef VMS
   /*
    *	Creation Date.  Unknown, so we fill with zeroes.
    */
@@ -1338,7 +1338,7 @@ VMS_TBT_Source_File (Filename, ID_Number)
    */
   *cp++ = i;
   cp1 = Rs_String;
-#endif /* HO_VMS */
+#endif /* VMS */
   while (--i >= 0)
     *cp++ = *cp1++;
   /*
@@ -2957,7 +2957,7 @@ VMS_DBG_Define_Routine (symbolP, Curr_Routine, Txt_Psect)
 
 
 
-#ifndef HO_VMS
+#ifndef VMS
 #include <sys/types.h>
 #include <time.h>
 
@@ -2977,7 +2977,7 @@ get_VMS_time_on_unix (Now)
   sprintf (Now, "%2s-%3s-%s %s", pnt + 8, pnt + 4, pnt + 20, pnt + 11);
 }
 
-#endif /* not HO_VMS */
+#endif /* not VMS */
 /*
  *	Write the MHD (Module Header) records
  */
@@ -3052,13 +3052,13 @@ Write_VMS_MHD_Records ()
   /*
    *	Creation time is "now" (17 chars of time string)
    */
-#ifndef HO_VMS
+#ifndef VMS
   get_VMS_time_on_unix (&Now[0]);
-#else /* HO_VMS */
+#else /* VMS */
   Descriptor.Size = 17;
   Descriptor.Ptr = Now;
   sys$asctim (0, &Descriptor, 0, 0);
-#endif /* HO_VMS */
+#endif /* VMS */
   for (i = 0; i < 17; i++)
     PUT_CHAR (Now[i]);
   /*

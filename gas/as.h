@@ -134,7 +134,8 @@ extern PTR realloc ();
 extern void free ();
 #endif
 
-#ifdef USE_DELETE_FOR_UNLINK
+/* This is needed for VMS.  */
+#if ! defined (HAVE_UNLINK) && defined (HAVE_DELETE)
 #define unlink delete
 #endif
 

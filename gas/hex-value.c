@@ -52,7 +52,7 @@ const char
   __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __
 };
 
-#ifdef HO_VMS
+#ifdef VMS
 dummy2 ()
 {
 }

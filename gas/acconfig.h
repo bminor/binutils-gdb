@@ -41,8 +41,3 @@
 
 /* Needed only for sparc configuration */
 #undef sparcv9
-
-/* VMS does not provide an "unlink" function, but "delete" is provided.
-   Autoconf will never set this (at least until we have an "autovms"),
-   but this provides a halfway reasonable machine-independent hook.  */
-#undef USE_DELETE_FOR_UNLINK
