@@ -307,20 +307,10 @@ show_regs (args, from_tty)
 		   read_register (15));
 }
 
-
 void
 _initialize_sh_tdep ()
 {
-  extern int sim_memory_size;
-
   tm_print_insn = gdb_print_insn_sh;
-
-  /* FIXME, there should be a way to make a CORE_ADDR variable settable. */
-  add_show_from_set
-    (add_set_cmd ("memory_size", class_support, var_uinteger,
-		  (char *) &sim_memory_size,
-		"Set simulated memory size of simulator target.", &setlist),
-     &showlist);
 
   add_com ("regs", class_vars, show_regs, "Print all registers");
 }

@@ -349,7 +349,7 @@ ALLDEPFILES = "{s}"29k-share:udi:udip2soc.c "{s}"29k-share:udi:udr.c \Option-d
 	"{s}"remote-hms.c "{s}"remote-mips.c \Option-d
 	"{s}"remote-mm.c "{s}"remote-mon.c "{s}"remote-nindy.c "{s}"remote-sim.c \Option-d
 	"{s}"remote-st.c "{s}"remote-utils.c "{s}"dcache.c \Option-d
-	"{s}"remote-udi.c "{s}"remote-vx.c "{s}"remote-z8k.c "{s}"rs6000-nat.c \Option-d
+	"{s}"remote-udi.c "{s}"remote-vx.c "{s}"rs6000-nat.c \Option-d
 	"{s}"rs6000-tdep.c "{s}"ser-go32.c "{s}"ser-tcp.c "{s}"sh-tdep.c "{s}"solib.c "{s}"sparc-nat.c \Option-d
 	"{s}"sparc-tdep.c "{s}"sun3-nat.c "{s}"sun386-nat.c \Option-d
 	"{s}"symm-tdep.c "{s}"symm-nat.c \Option-d
@@ -1460,9 +1460,6 @@ MAKEOVERRIDES=
 	{gdbcore_h} {inferior_h} "{s}"target.h "{s}"vx-share:dbgRpcLib.h \Option-d
 	"{s}"vx-share:ptrace.h "{s}"vx-share:xdr_ld.h "{s}"vx-share:xdr_ptrace.h \Option-d
 	"{s}"vx-share:xdr_rdb.h
-
-"{o}"remote-z8k.c.o \Option-f  "{s}"remote-z8k.c {wait_h} "{s}":sim:z8k:sim.h \Option-d
-	{defs_h} {gdbcore_h} {inferior_h} "{s}"target.h "{s}"terminal.h
 
 "{o}"remote-utils.c.o \Option-f  "{s}"remote-utils.c {defs_h} {gdbcmd_h} {gdbcore_h} \Option-d
 	{inferior_h} {remote_utils_h} 

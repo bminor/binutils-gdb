@@ -1,3 +1,29 @@
+Fri Jun 30 16:15:36 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config/h8300/h8300.mt: Renamed from h8300hms.mt.
+	* config/h8500/h8500.mt: Renamed from h8500hms.mt.
+	* config/z8k/z8k.mt: Renamed from z8ksim.mt.
+	* configure, configure.in: Update to reflect renamings.
+
+	* remote-sim.c (sim): New command, passes commands to simulator.
+	(simulator_command): New function.
+	(gdbsim_ops): Clean up.
+	* remote-sim.h (sim_do_command): Declare.
+	* sh-tdep.c (memory_size): Remove command.
+
+	* Makefile.in (SIM, SIM_OBS): New variables.
+	(CLIBS, CDEPS): Add value of SIM.
+	(DEPFILES): Add value of SIM_OBS
+
+	* config/arm/arm.mt, config/h8300/h8300.mt, config/h8500/h8500.mt,
+	config/sh/sh.mt, config/sparc/sp64sim.mt, config/w65/w65.mt,
+	config/z8k/z8k.mt: Remove simulator files from TDEPFILES,
+	define in SIM_OBS and SIM.
+	config/sparc/sp64sim.mt (SIMFILES): Remove.
+
+	* remote-z8k.c: Remove, was superseded by remote-sim.c
+	* Makefile.in, mpw-make.in: Remove references to remote-z8k.c.
+
 Sun Jun 25 15:30:43 1995  Stan Shebs  <shebs@cygnus.com>
 
 	* remote.c (remote_read_bytes, remote_write_bytes): Second arg

@@ -385,7 +385,7 @@ gdbsim_files_info (target)
     }
 }
 
-/* Clear the sims notion of what the break points are.  */
+/* Clear the simulator's notion of what the break points are.  */
 
 static void
 gdbsim_mourn_inferior () 
@@ -397,37 +397,67 @@ gdbsim_mourn_inferior ()
   generic_mourn_inferior ();
 }
 
+/* Put a command string, in args, out to MONITOR.  Output from MONITOR
+   is placed on the users terminal until the prompt is seen. FIXME: We
+   read the characters ourseleves here cause of a nasty echo.  */
+
+static void
+simulator_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  sim_do_command (args);
+}
+
 /* Define the target subroutine names */
 
-struct target_ops gdbsim_ops = 
-{
-  "sim", "simulator",
-  "Use the simulator",
-  gdbsim_open, gdbsim_close, 
-  0, gdbsim_detach, gdbsim_resume, gdbsim_wait, /* attach */
-  gdbsim_fetch_register, gdbsim_store_register,
-  gdbsim_prepare_to_store,
-  gdbsim_xfer_inferior_memory, 
-  gdbsim_files_info,
-  memory_insert_breakpoint,
-  memory_remove_breakpoint,
-  0, 0, 0, 0, 0,		/* Terminal handling */
-  gdbsim_kill,			/* kill */
-  gdbsim_load,			/* load */
-  0,				/* lookup_symbol */
-  gdbsim_create_inferior,	/* create_inferior */ 
-  gdbsim_mourn_inferior,	/* mourn_inferior */
-  0,				/* can_run */
-  0,				/* notice_signals */
+struct target_ops gdbsim_ops = {
+  "sim",			/* to_shortname */
+  "simulator",			/* to_longname */
+  "Use the compiled-in simulator.",  /* to_doc */
+  gdbsim_open,			/* to_open */
+  gdbsim_close,			/* to_close */
+  NULL,				/* to_attach */
+  gdbsim_detach,		/* to_detach */
+  gdbsim_resume,		/* to_resume */
+  gdbsim_wait,			/* to_wait */
+  gdbsim_fetch_register,	/* to_fetch_registers */
+  gdbsim_store_register,	/* to_store_registers */
+  gdbsim_prepare_to_store,	/* to_prepare_to_store */
+  gdbsim_xfer_inferior_memory,	/* to_xfer_memory */
+  gdbsim_files_info,		/* to_files_info */
+  memory_insert_breakpoint,	/* to_insert_breakpoint */
+  memory_remove_breakpoint,	/* to_remove_breakpoint */
+  NULL,				/* to_terminal_init */
+  NULL,				/* to_terminal_inferior */
+  NULL,				/* to_terminal_ours_for_output */
+  NULL,				/* to_terminal_ours */
+  NULL,				/* to_terminal_info */
+  gdbsim_kill,			/* to_kill */
+  gdbsim_load,			/* to_load */
+  NULL,				/* to_lookup_symbol */
+  gdbsim_create_inferior,	/* to_create_inferior */ 
+  gdbsim_mourn_inferior,	/* to_mourn_inferior */
+  0,				/* to_can_run */
+  0,				/* to_notice_signals */
   0,				/* to_stop */
-  process_stratum, 0,		/* next */
-  1, 1, 1, 1, 1,		/* all mem, mem, stack, regs, exec */
-  0, 0,				/* Section pointers */
-  OPS_MAGIC,			/* Always the last thing */
+  process_stratum,		/* to_stratum */
+  NULL,				/* to_next */
+  1,				/* to_has_all_memory */
+  1,				/* to_has_memory */
+  1,				/* to_has_stack */
+  1,				/* to_has_registers */
+  1,				/* to_has_execution */
+  NULL,				/* sections */
+  NULL,				/* sections_end */
+  OPS_MAGIC,			/* to_magic */
 };
 
 void
 _initialize_remote_sim ()
 {
   add_target (&gdbsim_ops);
+
+  add_com ("sim <command>", class_obscure, simulator_command,
+	   "Send a command to the simulator."); 
 }

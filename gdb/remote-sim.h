@@ -119,4 +119,8 @@ void sim_stop_reason PARAMS ((enum sim_stop *reason, int *sigrc));
 
 void sim_resume PARAMS ((int step, int siggnal));
 
+/* Passthru for other commands that the simulator might support. */
+
+void sim_do_command PARAMS ((char *cmd));
+
 #endif /* !defined (REMOTE_SIM_H) */
