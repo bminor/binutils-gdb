@@ -1,3 +1,21 @@
+2004-03-22  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_elf_relocate_section) <case R_CRIS_16_GOTPLT,
+	R_CRIS_16_GOTPLT>: Also error if there's no PLT for a symbol
+	not defined by the executable, or defined in a DSO.
+	<eliding run-time relocation of .got>: Initialize GOT entry for a
+	function symbol or ELF_LINK_HASH_NEEDS_PLT statically in an
+	executable.
+	(cris_elf_gc_sweep_hook): Improve fallthrough marking.
+	(elf_cris_try_fold_plt_to_got): Improve head comment.  Do not fold
+	a PLT reloc to GOT for an executable.
+	(elf_cris_adjust_dynamic_symbol): Only fold a .got.plt entry with
+	.got for a DSO and explain why. 
+	(elf_cris_discard_excess_program_dynamics): Also lose GOT-relocs
+	and unreferenced symbols for which a PLT is defined.  Adjust
+	dynamic-symbol pruning correspondingly, to make sure we don't lose
+	a dynamic symbol also defined by a DSO.
+
 2004-03-17  Ralf Corsepius <corsepiu@faw.uni-ulm.de>
 
 	* config.bfd: Switch sh-*-rtems* to ELF.  Add sh-*-rtemscoff*.
