@@ -85,6 +85,49 @@ extern struct frame_info *frame_find_by_id (struct frame_id id);
    this frame.  */
 extern CORE_ADDR get_frame_pc (struct frame_info *);
 
+/* Return the frame address from FI.  Except in the machine-dependent
+   *FRAME* macros, a frame address has no defined meaning other than
+   as a magic cookie which identifies a frame over calls to the
+   inferior (um, SEE NOTE BELOW).  The only known exception is
+   inferior.h (PC_IN_CALL_DUMMY) [ON_STACK]; see comments there.  You
+   cannot assume that a frame address contains enough information to
+   reconstruct the frame; if you want more than just to identify the
+   frame (e.g. be able to fetch variables relative to that frame),
+   then save the whole struct frame_info (and the next struct
+   frame_info, since the latter is used for fetching variables on some
+   machines) (um, again SEE NOTE BELOW).
+
+   NOTE: cagney/2002-11-18: Actually, the frame address isn't
+   sufficient for identifying a frame, and the counter examples are
+   wrong!
+
+   Code that needs to (re)identify a frame must use get_frame_id() and
+   frame_find_by_id() (and in the future, a frame_compare() function
+   instead of INNER_THAN()).  Two reasons: an architecture (e.g.,
+   ia64) can have more than one frame address (due to multiple stack
+   pointers) (frame ID is going to be expanded to accomodate this);
+   successive frameless function calls can only be differientated by
+   comparing both the frame's base and the frame's enclosing function
+   (frame_find_by_id() is going to be modified to perform this test). 
+
+   The generic dummy frame version of PC_IN_CALL_DUMMY() is able to
+   identify a dummy frame using only the PC value.  So the frame
+   address is not needed.  In fact, most PC_IN_CALL_DUMMY() calls now
+   pass zero as the frame/sp values as the caller knows that those
+   values won't be used.  Once all architectures are using generic
+   dummy frames, PC_IN_CALL_DUMMY() can drop the sp/frame parameters.
+   When it comes to finding a dummy frame, the next frame's frame ID
+   (with out duing an unwind) can be used (ok, could if it wasn't for
+   the need to change the way the PPC defined frame base in a strange
+   way).
+
+   Modern architectures should be using something like dwarf2's
+   location expression to describe where a variable lives.  Such
+   expressions specify their own debug info centric frame address.
+   Consequently, a generic frame address is pretty meaningless.  */
+
+extern CORE_ADDR get_frame_base (struct frame_info *);
+
 /* Return the per-frame unique identifer.  Can be used to relocate a
    frame after a frame cache flush (and other similar operations).  */
 extern void get_frame_id (struct frame_info *fi, struct frame_id *id);
@@ -235,9 +278,10 @@ struct frame_saved_regs
 
 struct frame_info
   {
-    /* Nominal address of the frame described.  See comments at FRAME_FP
-       about what this means outside the *FRAME* macros; in the *FRAME*
-       macros, it can mean whatever makes most sense for this machine.  */
+    /* Nominal address of the frame described.  See comments at
+       get_frame_base() about what this means outside the *FRAME*
+       macros; in the *FRAME* macros, it can mean whatever makes most
+       sense for this machine.  */
     CORE_ADDR frame;
 
     /* Address at which execution is occurring in this frame.
@@ -333,20 +377,6 @@ enum print_what
 
 extern void *frame_obstack_alloc (unsigned long size);
 extern void frame_saved_regs_zalloc (struct frame_info *);
-
-/* Return the frame address from FI.  Except in the machine-dependent
-   *FRAME* macros, a frame address has no defined meaning other than
-   as a magic cookie which identifies a frame over calls to the
-   inferior.  The only known exception is inferior.h
-   (PC_IN_CALL_DUMMY) [ON_STACK]; see comments there.  You cannot
-   assume that a frame address contains enough information to
-   reconstruct the frame; if you want more than just to identify the
-   frame (e.g. be able to fetch variables relative to that frame),
-   then save the whole struct frame_info (and the next struct
-   frame_info, since the latter is used for fetching variables on some
-   machines).  */
-
-#define FRAME_FP(fi) ((fi)->frame)
 
 /* Define a default FRAME_CHAIN_VALID, in the form that is suitable for most
    targets.  If FRAME_CHAIN_VALID returns zero it means that the given frame

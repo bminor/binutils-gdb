@@ -1532,7 +1532,7 @@ hppa_pop_frame (void)
   struct frame_saved_regs fsr;
   double freg_buffer;
 
-  fp = FRAME_FP (frame);
+  fp = get_frame_base (frame);
   get_frame_saved_regs (frame, &fsr);
 
 #ifndef NO_PC_SPACE_QUEUE_RESTORE

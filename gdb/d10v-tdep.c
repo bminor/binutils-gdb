@@ -547,7 +547,7 @@ do_d10v_pop_frame (struct frame_info *fi)
   int regnum;
   char raw_buffer[8];
 
-  fp = FRAME_FP (fi);
+  fp = get_frame_base (fi);
   /* fill out fsr with the address of where each */
   /* register was stored in the frame */
   d10v_frame_init_saved_regs (fi);

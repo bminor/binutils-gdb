@@ -738,7 +738,7 @@ mn10300_pop_frame_regular (struct frame_info *frame)
       }
 
   /* Actually cut back the stack.  */
-  write_register (SP_REGNUM, FRAME_FP (frame));
+  write_register (SP_REGNUM, get_frame_base (frame));
 
   /* Don't we need to set the PC?!?  XXX FIXME.  */
 }

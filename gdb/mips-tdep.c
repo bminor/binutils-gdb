@@ -3813,7 +3813,7 @@ mips_pop_frame (void)
 {
   register int regnum;
   struct frame_info *frame = get_current_frame ();
-  CORE_ADDR new_sp = FRAME_FP (frame);
+  CORE_ADDR new_sp = get_frame_base (frame);
   mips_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
 
   if (USE_GENERIC_DUMMY_FRAMES

@@ -320,7 +320,7 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	{
 	  /* A frameless function interrupted by a signal did not change
 	     the frame pointer, fix up frame pointer accordingly.  */
-	  fi->frame = FRAME_FP (fi->next);
+	  fi->frame = get_frame_base (fi->next);
 	  fi->extra_info->bottom = fi->next->extra_info->bottom;
 	}
       else
@@ -848,7 +848,7 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 
       if (frame1->pc >= (frame1->extra_info->bottom ? 
 			 frame1->extra_info->bottom : read_sp ())
-	  && frame1->pc <= FRAME_FP (frame1))
+	  && frame1->pc <= get_frame_base (frame1))
 	{
 	  /* Dummy frame.  All but the window regs are in there somewhere.
 	     The window registers are saved on the stack, just like in a
@@ -1112,7 +1112,7 @@ static void
 sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
 {
   register int regnum;
-  CORE_ADDR frame_addr = FRAME_FP (fi);
+  CORE_ADDR frame_addr = get_frame_base (fi);
 
   if (!fi)
     internal_error (__FILE__, __LINE__,
@@ -1122,7 +1122,7 @@ sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
 
   if (fi->pc >= (fi->extra_info->bottom ? 
 		 fi->extra_info->bottom : read_sp ())
-      && fi->pc <= FRAME_FP (fi))
+      && fi->pc <= get_frame_base (fi))
     {
       /* Dummy frame.  All but the window regs are in there somewhere. */
       for (regnum = G1_REGNUM; regnum < G1_REGNUM + 7; regnum++)
@@ -1205,7 +1205,7 @@ sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
     }
   /* Otherwise, whatever we would get from ptrace(GETREGS) is accurate */
   /* FIXME -- should this adjust for the sparc64 offset? */
-  saved_regs_addr[SP_REGNUM] = FRAME_FP (fi);
+  saved_regs_addr[SP_REGNUM] = get_frame_base (fi);
 }
 
 /* Discard from the stack the innermost frame, restoring all saved registers.

@@ -1862,7 +1862,7 @@ finish_tfind_command (char *msg,
   struct symbol *old_func;
   char *reply;
 
-  old_frame_addr = FRAME_FP (get_current_frame ());
+  old_frame_addr = get_frame_base (get_current_frame ());
   old_func = find_pc_function (read_pc ());
 
   putpkt (msg);
@@ -1948,8 +1948,8 @@ finish_tfind_command (char *msg,
 
       if (old_func == find_pc_function (read_pc ()) &&
 	  (old_frame_addr == 0 ||
-	   FRAME_FP (get_current_frame ()) == 0 ||
-	   old_frame_addr == FRAME_FP (get_current_frame ())))
+	   get_frame_base (get_current_frame ()) == 0 ||
+	   old_frame_addr == get_frame_base (get_current_frame ())))
 	source_only = -1;
       else
 	source_only = 1;

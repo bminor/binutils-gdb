@@ -1,3 +1,18 @@
+2002-11-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.h (FRAME_FP): Delete macro.
+	(get_frame_base): New function declaration.
+	* frame.c (get_frame_base): New function.
+	(get_frame_id): Use ->frame.
+	(frame_find_by_id): Rewrite to use get_frame_id.
+	* blockframe.c: Use get_frame_base instead of FRAME_FP.
+	* cris-tdep.c, d10v-tdep.c, findvar.c, h8500-tdep.c: Ditto.
+	* hppa-tdep.c, i386-tdep.c, infcmd.c, infrun.c: Ditto.
+	* m68hc11-tdep.c, m68k-tdep.c, mcore-tdep.c, mips-tdep.c: Ditto.
+	* mn10200-tdep.c, mn10300-tdep.c, rs6000-tdep.c: Ditto.
+	* sh-tdep.c, sparc-tdep.c, stack.c, tracepoint.c: Ditto.
+	* v850-tdep.c, valops.c, z8k-tdep.c: Ditto.
+
 2002-11-24  Andrew Cagney  <ac131313@redhat.com>
 
 	* arm-tdep.c (arm_gdbarch_init): Do not set get_saved_register.

@@ -956,7 +956,7 @@ rs6000_pop_frame (void)
   int ii, wordsize;
 
   pc = read_pc ();
-  sp = FRAME_FP (frame);
+  sp = get_frame_base (frame);
 
   if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     {
@@ -1761,7 +1761,7 @@ rs6000_frame_chain (struct frame_info *thisframe)
 	   && FRAMELESS_FUNCTION_INVOCATION (thisframe))
     /* A frameless function interrupted by a signal did not change the
        frame pointer.  */
-    fp = FRAME_FP (thisframe);
+    fp = get_frame_base (thisframe);
   else
     fp = read_memory_addr ((thisframe)->frame, wordsize);
   return fp;

@@ -438,7 +438,7 @@ m68hc11_pop_frame (void)
     generic_pop_dummy_frame ();
   else
     {
-      fp = FRAME_FP (frame);
+      fp = get_frame_base (frame);
       FRAME_INIT_SAVED_REGS (frame);
 
       /* Copy regs from where they were saved in the frame.  */

@@ -810,7 +810,7 @@ mcore_pop_frame (void)
 	}
 
       /* Actually cut back the stack. */
-      write_register (SP_REGNUM, FRAME_FP (fi));
+      write_register (SP_REGNUM, get_frame_base (fi));
     }
 
   /* Finally, throw away any cached frame information. */

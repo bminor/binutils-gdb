@@ -47,7 +47,7 @@ get_frame_id (struct frame_info *fi, struct frame_id *id)
     }
   else
     {
-      id->base = FRAME_FP (fi);
+      id->base = fi->frame;
       id->pc = fi->pc;
     }
 }
@@ -66,19 +66,21 @@ frame_find_by_id (struct frame_id id)
        frame != NULL;
        frame = get_prev_frame (frame))
     {
-      if (INNER_THAN (FRAME_FP (frame), id.base))
+      struct frame_id this;
+      get_frame_id (frame, &this);
+      if (INNER_THAN (this.base, id.base))
 	/* ``inner/current < frame < id.base''.  Keep looking along
            the frame chain.  */
 	continue;
-      if (INNER_THAN (id.base, FRAME_FP (frame)))
+      if (INNER_THAN (id.base, this.base))
 	/* ``inner/current < id.base < frame''.  Oops, gone past it.
            Just give up.  */
 	return NULL;
       /* FIXME: cagney/2002-04-21: This isn't sufficient.  It should
-	 use id.pc to check that the two frames belong to the same
-	 function.  Otherwise we'll do things like match dummy frames
-	 or mis-match frameless functions.  However, until someone
-	 notices, stick with the existing behavour.  */
+	 use id.pc / this.pc to check that the two frames belong to
+	 the same function.  Otherwise we'll do things like match
+	 dummy frames or mis-match frameless functions.  However,
+	 until someone notices, stick with the existing behavour.  */
       return frame;
     }
   return NULL;
@@ -826,7 +828,7 @@ get_prev_frame (struct frame_info *next_frame)
     /* FIXME: 2002-11-09: There isn't any reason to special case this
        edge condition.  Instead the per-architecture code should hande
        it locally.  */
-    address = FRAME_FP (next_frame);
+    address = get_frame_base (next_frame);
   else
     {
       /* Two macros defined in tm.h specify the machine-dependent
@@ -1016,6 +1018,14 @@ CORE_ADDR
 get_frame_pc (struct frame_info *frame)
 {
   return frame->pc;
+}
+
+/* Per "frame.h", return the ``address'' of the frame.  Code should
+   really be using get_frame_id().  */
+CORE_ADDR
+get_frame_base (struct frame_info *fi)
+{
+  return fi->frame;
 }
 
 /* Level of the selected frame: 0 for innermost, 1 for its caller, ...

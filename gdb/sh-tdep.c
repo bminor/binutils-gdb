@@ -930,7 +930,7 @@ sh_frame_chain (struct frame_info *frame)
   if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return frame->frame;	/* dummy frame same as caller's frame */
   if (frame->pc && !inside_entry_file (frame->pc))
-    return read_memory_integer (FRAME_FP (frame) + frame->extra_info->f_offset, 4);
+    return read_memory_integer (get_frame_base (frame) + frame->extra_info->f_offset, 4);
   else
     return 0;
 }
@@ -975,7 +975,7 @@ sh64_frame_chain (struct frame_info *frame)
 	size = 4;
       else
 	size = REGISTER_RAW_SIZE (translate_insn_rn (FP_REGNUM, media_mode));
-      return read_memory_integer (FRAME_FP (frame) + frame->extra_info->f_offset, size);
+      return read_memory_integer (get_frame_base (frame) + frame->extra_info->f_offset, size);
     }
   else
     return 0;
@@ -1912,7 +1912,7 @@ sh_pop_frame (void)
     generic_pop_dummy_frame ();
   else
     {
-      fp = FRAME_FP (frame);
+      fp = get_frame_base (frame);
       FRAME_INIT_SAVED_REGS (frame);
 
       /* Copy regs from where they were saved in the frame */
@@ -1942,7 +1942,7 @@ sh64_pop_frame (void)
     generic_pop_dummy_frame ();
   else
     {
-      fp = FRAME_FP (frame);
+      fp = get_frame_base (frame);
       FRAME_INIT_SAVED_REGS (frame);
 
       /* Copy regs from where they were saved in the frame */

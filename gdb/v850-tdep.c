@@ -895,7 +895,7 @@ v850_pop_frame (void)
 		      read_memory_unsigned_integer (frame->saved_regs[regnum],
 					     v850_register_raw_size (regnum)));
 
-      write_register (E_SP_REGNUM, FRAME_FP (frame));
+      write_register (E_SP_REGNUM, get_frame_base (frame));
     }
 
   flush_cached_frames ();

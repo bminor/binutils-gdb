@@ -681,29 +681,29 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
 
   if (have_fp)
     {
-      fi->saved_regs[FP_REGNUM] = FRAME_FP (fi);
+      fi->saved_regs[FP_REGNUM] = get_frame_base (fi);
       
       /* Calculate the addresses.  */
       for (regno = regsave; regno >= 0; regno--)
         {
-          fi->saved_regs[regno] = FRAME_FP (fi) - val;
+          fi->saved_regs[regno] = get_frame_base (fi) - val;
           val -= 4;
         }
       if (fi->extra_info->leaf_function)
         {
           /* Set the register SP to contain the stack pointer of 
              the caller.  */
-          fi->saved_regs[SP_REGNUM] = FRAME_FP (fi) + 4;
+          fi->saved_regs[SP_REGNUM] = get_frame_base (fi) + 4;
         }
       else
         {
           /* Set the register SP to contain the stack pointer of 
              the caller.  */
-          fi->saved_regs[SP_REGNUM] = FRAME_FP (fi) + 8;
+          fi->saved_regs[SP_REGNUM] = get_frame_base (fi) + 8;
       
           /* Set the register SRP to contain the return address of 
              the caller.  */
-          fi->saved_regs[SRP_REGNUM] = FRAME_FP (fi) + 4;
+          fi->saved_regs[SRP_REGNUM] = get_frame_base (fi) + 4;
         }
     }
   return ip;
@@ -1260,7 +1260,7 @@ cris_frame_chain (struct frame_info *fi)
     }
   else if (!inside_entry_file (fi->pc))
     {
-      return read_memory_unsigned_integer (FRAME_FP (fi), 4);
+      return read_memory_unsigned_integer (get_frame_base (fi), 4);
     }
   else
     {

@@ -2053,7 +2053,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	      || trap_expected
 	      || (!CALL_DUMMY_BREAKPOINT_OFFSET_P
 		  && PC_IN_CALL_DUMMY (stop_pc, read_sp (),
-				       FRAME_FP (get_current_frame ())))
+				       get_frame_base (get_current_frame ())))
 	      || (step_range_end && step_resume_breakpoint == NULL));
 
       else
@@ -2064,7 +2064,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 				    check here as well as above.  */
 				 || (!CALL_DUMMY_BREAKPOINT_OFFSET_P
 				     && PC_IN_CALL_DUMMY (stop_pc, read_sp (),
-							  FRAME_FP
+							  get_frame_base
 							  (get_current_frame
 							   ()))));
 	  if (!ecs->random_signal)
@@ -2255,7 +2255,7 @@ process_event_stop_test:
 #if 0
 	/* FIXME - Need to implement nested temporary breakpoints */
 	if (step_over_calls
-	    && (INNER_THAN (FRAME_FP (get_current_frame ()),
+	    && (INNER_THAN (get_frame_base (get_current_frame ()),
 			    step_frame_address)))
 	  {
 	    ecs->another_trap = 1;
@@ -2466,7 +2466,7 @@ process_event_stop_test:
          case she'd better know what she's doing.  */
 
       if (CALL_DUMMY_HAS_COMPLETED (stop_pc, read_sp (),
-				    FRAME_FP (get_current_frame ()))
+				    get_frame_base (get_current_frame ()))
 	  && !step_range_end)
 	{
 	  stop_print_frame = 0;
@@ -2567,7 +2567,7 @@ process_event_stop_test:
 
 
       {
-	CORE_ADDR current_frame = FRAME_FP (get_current_frame ());
+	CORE_ADDR current_frame = get_frame_base (get_current_frame ());
 
 	if (INNER_THAN (current_frame, step_frame_address))
 	  {
@@ -2838,7 +2838,7 @@ process_event_stop_test:
     }
   step_range_start = ecs->sal.pc;
   step_range_end = ecs->sal.end;
-  step_frame_address = FRAME_FP (get_current_frame ());
+  step_frame_address = get_frame_base (get_current_frame ());
   ecs->current_line = ecs->sal.line;
   ecs->current_symtab = ecs->sal.symtab;
 
@@ -2846,7 +2846,7 @@ process_event_stop_test:
      of a line of the caller, continue stepping, but step_frame_address
      must be modified to current frame */
   {
-    CORE_ADDR current_frame = FRAME_FP (get_current_frame ());
+    CORE_ADDR current_frame = get_frame_base (get_current_frame ());
     if (!(INNER_THAN (current_frame, step_frame_address)))
       step_frame_address = current_frame;
   }
@@ -3353,7 +3353,7 @@ normal_stop (void)
 	    {
 	    case PRINT_UNKNOWN:
 	      if (stop_step
-		  && step_frame_address == FRAME_FP (get_current_frame ())
+		  && step_frame_address == get_frame_base (get_current_frame ())
 		  && step_start_function == find_pc_function (stop_pc))
 		source_flag = SRC_LINE;	/* finished step, just print source line */
 	      else

@@ -860,7 +860,7 @@ i386_do_pop_frame (struct frame_info *frame)
   int regnum;
   char regbuf[I386_MAX_REGISTER_SIZE];
 
-  fp = FRAME_FP (frame);
+  fp = get_frame_base (frame);
   i386_frame_init_saved_regs (frame);
 
   for (regnum = 0; regnum < NUM_REGS; regnum++)

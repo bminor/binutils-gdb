@@ -786,7 +786,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
 	   for some good purpose.  */
 	{
 	  VALUE_LVAL (v) = lval_reg_frame_relative;
-	  VALUE_FRAME (v) = FRAME_FP (frame);
+	  VALUE_FRAME (v) = get_frame_base (frame);
 	  VALUE_FRAME_REGNUM (v) = regnum;
 	}
       else if (mem_stor)

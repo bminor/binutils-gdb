@@ -472,7 +472,7 @@ m68k_pop_frame (void)
   register int regnum;
   char raw_buffer[12];
 
-  fp = FRAME_FP (frame);
+  fp = get_frame_base (frame);
   m68k_frame_init_saved_regs (frame);
   for (regnum = FP0_REGNUM + 7; regnum >= FP0_REGNUM; regnum--)
     {

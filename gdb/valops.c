@@ -660,7 +660,7 @@ value_assign (struct value *toval, struct value *fromval)
 	else
 	  {
 	    for (frame = get_current_frame ();
-		 frame && FRAME_FP (frame) != VALUE_FRAME (toval);
+		 frame && get_frame_base (frame) != VALUE_FRAME (toval);
 		 frame = get_prev_frame (frame))
 	      ;
 	    value_reg = VALUE_FRAME_REGNUM (toval);

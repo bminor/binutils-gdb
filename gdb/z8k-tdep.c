@@ -249,7 +249,7 @@ frame_find_saved_regs (struct frame_info *fip, struct frame_saved_regs *fsrp)
   pc = skip_adjust (get_pc_function_start (fip->pc), &locals);
 
   {
-    adr = FRAME_FP (fip) - locals;
+    adr = get_frame_base (fip) - locals;
     for (i = 0; i < 8; i++)
       {
 	int word = read_memory_short (pc);

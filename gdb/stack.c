@@ -1737,7 +1737,7 @@ return_command (char *retval_exp, int from_tty)
   if (selected_frame == NULL)
     error ("No selected frame.");
   thisfun = get_frame_function (selected_frame);
-  selected_frame_addr = FRAME_FP (selected_frame);
+  selected_frame_addr = get_frame_base (selected_frame);
   selected_frame_pc = selected_frame->pc;
 
   /* Compute the return value (if any -- possibly getting errors here).  */
@@ -1799,7 +1799,7 @@ return_command (char *retval_exp, int from_tty)
   /* If we are at the end of a call dummy now, pop the dummy frame too.  */
 
   if (CALL_DUMMY_HAS_COMPLETED (read_pc(), read_sp (),
-				FRAME_FP (get_current_frame ())))
+				get_frame_base (get_current_frame ())))
     POP_FRAME;
 
   /* If interactive, print the frame that is now current.  */

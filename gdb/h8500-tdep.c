@@ -117,7 +117,7 @@ CORE_ADDR
 h8500_frame_chain (struct frame_info *thisframe)
 {
   if (!inside_entry_file (thisframe->pc))
-    return (read_memory_integer (FRAME_FP (thisframe), PTR_SIZE));
+    return (read_memory_integer (get_frame_base (thisframe), PTR_SIZE));
   else
     return 0;
 }
@@ -154,7 +154,7 @@ NEXT_PROLOGUE_INSN (CORE_ADDR addr, CORE_ADDR lim, char *pword1)
 CORE_ADDR
 frame_saved_pc (struct frame_info *frame)
 {
-  return read_memory_integer (FRAME_FP (frame) + 2, PTR_SIZE);
+  return read_memory_integer (get_frame_base (frame) + 2, PTR_SIZE);
 }
 
 void
