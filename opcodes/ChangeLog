@@ -6,6 +6,7 @@ Thu Apr 16 11:44:59 1998  Doug Evans  <devans@canuck.cygnus.com>
 	(vif_get_unpackloc): Delete.
 	(state_vif_unpackloc{,_star_p}): Delete.
 	(dvp_opcode_init_parse): Update.
+	(vif_unpack_len_value): Avoid divide by zero.
 
 end-sanitize-sky
 start-sanitize-r5900
