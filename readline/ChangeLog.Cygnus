@@ -1,3 +1,21 @@
+2000-07-10  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* terminal.c (_rl_get_screen_size) [__DJGPP__]: Determine screen
+	size via DJGPP-specific calls.
+	(_rl_init_terminal_io) [__MSDOS__]: DJGPP-specific terminal
+	initialization.
+	(_rl_backspace) [__MSDOS__]: Don't call tputs.
+	(ding) [__MSDOS__]: Use DJGPP-specific calls to support visible
+	bell.
+
+	* display.c (_rl_move_vert) [__MSDOS__]: Support cursor movement
+	upwards with DJGPP-specific calls.
+	(_rl_clear_to_eol) [__MSDOS__]: Don't call tputs.
+	(_rl_clear_screen) [__MSDOS__]: Support clear-screen with
+	DJGPP-specific calls.
+	(insert_some_chars) [__MSDOS__]: Don't call tputs.
+	(delete_chars) [__MSDOS__]: Don't call tputs.
+
 2000-07-09  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
         * Import of readline 4.1.

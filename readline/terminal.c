@@ -55,6 +55,10 @@
 #  include <sys/ioctl.h>
 #endif /* GWINSZ_IN_SYS_IOCTL && !TIOCGWINSZ */
 
+#ifdef __MSDOS__
+# include <pc.h>
+#endif
+
 #include "rltty.h"
 #include "tcap.h"
 
@@ -71,13 +75,15 @@
 /*								    */
 /* **************************************************************** */
 
+#ifndef __MSDOS__
 static char *term_buffer = (char *)NULL;
 static char *term_string_buffer = (char *)NULL;
 
-static int tcap_initialized;
-
 /* Non-zero means this terminal can't really do anything. */
 static int dumb_term;
+#endif /* !__MSDOS__ */
+
+static int tcap_initialized;
 
 #if !defined (__linux__)
 #  if defined (__EMX__) || defined (NEED_EXTERN_PC)
@@ -185,7 +191,10 @@ _rl_get_screen_size (tty, ignore_env)
       if (ignore_env == 0 && (ss = get_env_value ("COLUMNS")))
 	screenwidth = atoi (ss);
 
-#if !defined (__DJGPP__)
+#if defined (__DJGPP__)
+      if (screenwidth <= 0)
+	screenwidth = ScreenCols ();
+#else
       if (screenwidth <= 0 && term_string_buffer)
 	screenwidth = tgetnum ("co");
 #endif
@@ -198,7 +207,10 @@ _rl_get_screen_size (tty, ignore_env)
       if (ignore_env == 0 && (ss = get_env_value ("LINES")))
 	screenheight = atoi (ss);
 
-#if !defined (__DJGPP__)
+#if defined (__DJGPP__)
+      if (screenheight <= 0)
+	screenheight = ScreenRows ();
+#else
       if (screenheight <= 0 && term_string_buffer)
 	screenheight = tgetnum ("li");
 #endif
@@ -318,6 +330,16 @@ _rl_init_terminal_io (terminal_name)
   if (term == 0)
     term = "dumb";
 
+#ifdef __MSDOS__
+  term_im = term_ei = term_ic = term_IC = (char *)NULL;
+  term_up = term_dc = term_DC = visible_bell = (char *)NULL;
+  term_ku = term_kd = term_kl = term_kr = (char *)NULL;
+  term_mm = term_mo = (char *)NULL;
+  terminal_can_insert = term_has_meta = _rl_term_autowrap = 0;
+  term_cr = "\r";
+
+  _rl_get_screen_size (tty, 0);
+#else  /* !__MSDOS__ */
   /* I've separated this out for later work on not calling tgetent at all
      if the calling application has supplied a custom redisplay function,
      (and possibly if the application has supplied a custom input function). */
@@ -410,6 +432,8 @@ _rl_init_terminal_io (terminal_name)
   if (!term_has_meta)
     term_mm = term_mo = (char *)NULL;
 
+#endif /* !__MSDOS__ */
+
   /* Attempt to find and bind the arrow keys.  Do not override already
      bound keys in an overzealous attempt, however. */
   xkeymap = _rl_keymap;
@@ -498,10 +522,12 @@ _rl_backspace (count)
 {
   register int i;
 
+#ifndef __MSDOS__
   if (term_backspace)
     for (i = 0; i < count; i++)
       tputs (term_backspace, 1, _rl_output_character_function);
   else
+#endif
     for (i = 0; i < count; i++)
       putc ('\b', _rl_out_stream);
   return 0;
@@ -531,11 +557,16 @@ ding ()
 	default:
 	  break;
 	case VISIBLE_BELL:
+#ifdef __MSDOS__
+	  ScreenVisualBell ();
+	  break;
+#else
 	  if (visible_bell)
 	    {
 	      tputs (visible_bell, 1, _rl_output_character_function);
 	      break;
 	    }
+#endif
 	  /* FALLTHROUGH */
 	case AUDIBLE_BELL:
 	  fprintf (stderr, "\007");

@@ -41,6 +41,10 @@
 
 #include <stdio.h>
 
+#ifdef __MSDOS__
+# include <pc.h>
+#endif
+
 /* System-specific feature definitions and include files. */
 #include "rldefs.h"
 
@@ -1224,9 +1228,18 @@ _rl_move_vert (to)
     }
   else
     {			/* delta < 0 */
+#ifdef __MSDOS__
+      int row, col;
+
+      i = fflush (rl_outstream); /* make sure the cursor pos is current! */
+      ScreenGetCursor (&row, &col);
+      ScreenSetCursor ((row + to - _rl_last_v_pos), col);
+      delta = i;
+#else /* !__MSDOS__ */
       if (term_up && *term_up)
 	for (i = 0; i < -delta; i++)
 	  tputs (term_up, 1, _rl_output_character_function);
+#endif /* !__MSDOS__ */
     }
 
   _rl_last_v_pos = to;		/* Now TO is here */
@@ -1436,9 +1449,12 @@ void
 _rl_clear_to_eol (count)
      int count;
 {
+#ifndef __MSDOS__
   if (term_clreol)
     tputs (term_clreol, 1, _rl_output_character_function);
-  else if (count)
+  else
+#endif
+  if (count)
     space_to_eol (count);
 }
 
@@ -1459,10 +1475,15 @@ space_to_eol (count)
 void
 _rl_clear_screen ()
 {
+#if defined (__GO32__)
+  ScreenClear ();	/* FIXME: only works in text modes */
+  ScreenSetCursor (0, 0);  /* term_clrpag is "cl" which homes the cursor */
+#else
   if (term_clrpag)
     tputs (term_clrpag, 1, _rl_output_character_function);
   else
     crlf ();
+#endif
 }
 
 /* Insert COUNT characters from STRING to the output stream. */
@@ -1471,6 +1492,9 @@ insert_some_chars (string, count)
      char *string;
      int count;
 {
+#ifdef __MSDOS__
+  _rl_output_some_chars (string, count);
+#else  /* !__MSDOS__ */
   /* If IC is defined, then we do not have to "enter" insert mode. */
   if (term_IC)
     {
@@ -1503,6 +1527,7 @@ insert_some_chars (string, count)
       if (term_ei && *term_ei)
 	tputs (term_ei, 1, _rl_output_character_function);
     }
+#endif /* !__MSDOS__ */
 }
 
 /* Delete COUNT characters from the display line. */
@@ -1513,6 +1538,7 @@ delete_chars (count)
   if (count > screenwidth)	/* XXX */
     return;
 
+#ifndef __MSDOS__
   if (term_DC && *term_DC)
     {
       char *buffer;
@@ -1525,6 +1551,7 @@ delete_chars (count)
 	while (count--)
 	  tputs (term_dc, 1, _rl_output_character_function);
     }
+#endif /* !__MSDOS__ */
 }
 
 void
