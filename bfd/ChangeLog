@@ -1,5 +1,9 @@
 2005-02-01  Ben Elliston  <bje@au.ibm.com>
 
+	* elfxx-target.h (bfd_elfNN_bfd_discard_group): Redefine.
+
+2005-02-01  Ben Elliston  <bje@au.ibm.com>
+
 	* aout-arm.c, aout-target.h, aoutx.h, archive.c, armnetbsd.c,
 	bfd-in.h, bfdio.c, coff-alpha.c, coff-arm.c, coff-h8300.c,
 	coff-i860.c, coff-mcore.c, coff-or32.c, coff-ppc.c, coff-sh.c,
