@@ -1,5 +1,9 @@
 2003-03-13  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (legacy_saved_regs_this_id): Handle a sentinel frame.
+	(get_prev_frame): Simplify.  Frame ID logic moved to
+	dummy_frame_this_id and legacy_saved_regs_this_id.
+
 	* d10v-tdep.c (d10v_frame_this_id): Replace d10v_frame_id_unwind.
 	(d10v_frame_unwind): Update.
 	(d10v_frame_prev_register): Replace d10v_frame_register_unwind.
