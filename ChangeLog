@@ -1,3 +1,8 @@
+Wed May 25 09:15:54 1994  Bill Cox  (bill@rtl.cygnus.com)
+
+	* config.sub: Strip off patch suffix so rtl is recognized
+	  as a sunos4.1.3 machine, even though it's been patched.
+
 Fri May 20 08:25:49 1994  Steve Chamberlain  (sac@deneb.cygnus.com)
 
 	* Makefile.in (INSTALL_LAST): Delete.

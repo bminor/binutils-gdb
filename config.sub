@@ -120,7 +120,7 @@ case $os in
 	-isc*)
 		basic_machine=`echo $1 | sed -e 's/86-.*/86-unknown/'`
 		;;
-	-lynx)
+	-lynx*)
 		os=-lynxos
 		;;
 	-os9k)
@@ -366,9 +366,6 @@ case $basic_machine in
 	z8ksim)						# CYGNUS LOCAL
 		basic_machine=z8k-zilog
 		os=-sim
-		;;
-	z8k)						# CYGNUS LOCAL
-		basic_machine=z8k-zilog
 		;;
 	sun3)
 		basic_machine=m68k-sun
@@ -624,11 +621,9 @@ case $basic_machine in
 		;;
 	sparclitefrw)					# CYGNUS LOCAL
 		basic_machine=sparclitefrw-fujitsu
-		os=-none
 		;;
 	sparclitefrwcompat)				# CYGNUS LOCAL
 		basic_machine=sparclitefrwcompat-fujitsu
-		os=-none
 		;;
 	adobe68k)					# CYGNUS LOCAL
 		basic_machine=m68010-adobe
@@ -910,6 +905,10 @@ fi
 # manufacturer.  We pick the logical manufacturer.
 vendor=unknown
 case $basic_machine in
+	sparc-sun)
+		# Strip off Sun's patch-release suffix
+		os=`echo $os | sed 's/_U1$//'`
+		;;
 	*-unknown)
 		case $os in
 			-riscix*)
