@@ -94,8 +94,8 @@ void set_range_str();
 /* Show command.  Display a warning if the language set
    does not match the frame. */
 void
-show_language_command (str, from_tty)
-   char *str;
+show_language_command (ignore, from_tty)
+   char *ignore;
    int from_tty;
 {
    enum language flang;		/* The language of the current frame */
@@ -109,8 +109,8 @@ show_language_command (str, from_tty)
 
 /* Set command.  Change the current working language. */
 void
-set_language_command (str, from_tty)
-   char *str;
+set_language_command (ignore, from_tty)
+   char *ignore;
    int from_tty;
 {
   int i;
@@ -161,8 +161,8 @@ modula-2         Use the Modula-2 language\n");
 /* Show command.  Display a warning if the type setting does
    not match the current language. */
 void
-show_type_command(str, from_tty)
-   char *str;
+show_type_command(ignore, from_tty)
+   char *ignore;
    int from_tty;
 {
    if (type_check != current_language->la_type_check)
@@ -172,8 +172,8 @@ show_type_command(str, from_tty)
 
 /* Set command.  Change the setting for type checking. */
 void
-set_type_command(str, from_tty)
-   char *str;
+set_type_command(ignore, from_tty)
+   char *ignore;
    int from_tty;
 {
    if (!strcmp(type,"on"))
@@ -200,14 +200,14 @@ set_type_command(str, from_tty)
       return;
    }
    set_type_str();
-   show_type_command();
+   show_type_command((char *)NULL, from_tty);
 }
 
 /* Show command.  Display a warning if the range setting does
    not match the current language. */
 void
-show_range_command(str, from_tty)
-   char *str;
+show_range_command(ignore, from_tty)
+   char *ignore;
    int from_tty;
 {
 
@@ -218,8 +218,8 @@ show_range_command(str, from_tty)
 
 /* Set command.  Change the setting for range checking. */
 void
-set_range_command(str, from_tty)
-   char *str;
+set_range_command(ignore, from_tty)
+   char *ignore;
    int from_tty;
 {
    if (!strcmp(range,"on"))
@@ -246,7 +246,7 @@ set_range_command(str, from_tty)
       return;
    }
    set_range_str();
-   show_range_command();
+   show_range_command((char *)0, from_tty);
 }
 
 /* Set the status of range and type checking based on
@@ -256,7 +256,6 @@ set_range_command(str, from_tty)
 static void
 set_type_range()
 {
-  char *rtmp, *ttmp;
 
   if (range_mode == range_mode_auto)
     range_check = current_language->la_range_check;
@@ -290,7 +289,7 @@ set_language(lang)
 void
 set_lang_str()
 {
-   char *tmp, *prefix = "";
+   char *prefix = "";
 
    free (language);
    if (language_mode == language_mode_auto)
@@ -360,11 +359,11 @@ void
 language_info ()
 {
    printf("Current Language:  %s\n",language);
-   show_language_command();
+   show_language_command((char *)0, 1);
    printf("Type checking:     %s\n",type);
-   show_type_command();
+   show_type_command((char *)0, 1);
    printf("Range checking:    %s\n",range);
-   show_range_command();
+   show_range_command((char *)0, 1);
 }
 
 /* Return the result of a binary operation. */
@@ -374,10 +373,8 @@ binop_result_type(v1,v2)
 {
    int l1,l2,size,uns;
 
-   l1=TYPE_LENGTH(VALUE_TYPE(v1));
-   l2=TYPE_LENGTH(VALUE_TYPE(v2));
-   size = l1 > l2 ? l1 : l2;
-   uns = TYPE_UNSIGNED(VALUE_TYPE(v1)) || TYPE_UNSIGNED(VALUE_TYPE(v2));
+   l1 = TYPE_LENGTH(VALUE_TYPE(v1));
+   l2 = TYPE_LENGTH(VALUE_TYPE(v2));
 
    switch(current_language->la_language)
    {
@@ -401,6 +398,8 @@ binop_result_type(v1,v2)
       return l1 > l2 ? VALUE_TYPE(v1) : VALUE_TYPE(v2);
       break;
    }
+   abort();
+   return (struct type *)0;	/* For lint */
 }
 
 /* This page contains functions that return format strings for
@@ -921,8 +920,8 @@ struct cmd_list_element *setchecklist = NULL;
 struct cmd_list_element *showchecklist = NULL;
 
 static void
-set_check (arg, from_tty)
-   char *arg;
+set_check (ignore, from_tty)
+   char *ignore;
    int from_tty;
 {
    printf(

@@ -166,3 +166,5 @@ char *language_str();
 
 /* Add a language to the set known by GDB (at initialization time).  */
 void add_language ();		/* Arg is &language_defn */
+
+extern enum language get_frame_language ();	/* In stack.c */

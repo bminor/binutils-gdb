@@ -42,6 +42,7 @@ extern int info_verbose;
 
 extern void qsort ();
 extern char *getenv ();
+extern char *rindex ();
 
 /* Functions this file defines */
 static bfd *symfile_open();
@@ -364,8 +365,6 @@ struct symtab *
 psymtab_to_symtab (pst)
      register struct partial_symtab *pst;
 {
-  register struct symtab *result;
-
   /* If it's been looked up before, return it. */
   if (pst->symtab)
     return pst->symtab;
@@ -645,8 +644,8 @@ add_symbol_file_command (arg_string, from_tty)
 
   dont_repeat ();
 
-  if (!query ("add symbol table from file \"%s\" at text_addr = 0x%x\n",
-	      name, text_addr))
+  if (!query ("add symbol table from file \"%s\" at text_addr = %s?\n",
+	      name, local_hex_string (text_addr)))
     error ("Not confirmed.");
 
   symbol_file_add (name, 0, text_addr, 0);
@@ -746,6 +745,53 @@ clear_complaints ()
 
   for (p = complaint_root->next; p != complaint_root; p = p->next)
     p->counter = 0;
+}
+
+/* allocate_symtab:
+
+   Allocate and partly initialize a new symbol table.  Return a pointer
+   to it.  error() if no space.
+
+   Caller must set these fields:
+	LINETABLE(symtab)
+	symtab->blockvector
+	symtab->typevector
+	symtab->dirname
+	symtab->free_code
+	symtab->free_ptr
+	initialize any EXTRA_SYMTAB_INFO
+	possibly free_named_symtabs (symtab->filename);
+	symtab->next = symtab_list;
+	symtab_list = symtab;
+ */
+
+struct symtab *
+allocate_symtab(name)
+	char *name;
+{
+  register struct symtab *symtab;
+  char *c;
+
+  symtab = (struct symtab *) xmalloc (sizeof (struct symtab));
+  bzero (symtab, sizeof (*symtab));
+  symtab->filename = name;
+  symtab->fullname = NULL;
+  symtab->nlines = 0;
+  symtab->line_charpos = 0;
+  symtab->version = 0;
+  symtab->language = language_unknown;		/* default */
+
+  c = rindex (name, '.');
+  
+  if (!c) {
+     ; /* Don't know language of file. */
+  } else if(!strcmp(c,".mod")) {
+     symtab->language = language_m2;
+  } else if(!strcmp(c,".c") || !strcmp(c,".cc")) {
+     symtab->language = language_c;
+  }
+
+  return symtab;
 }
 
 /* clear_symtab_users_once:
@@ -921,13 +967,15 @@ again2:
       free_symtab (s);
     }
   else
-    /* It is still possible that some breakpoints will be affected
-       even though no symtab was found, since the file might have
-       been compiled without debugging, and hence not be associated
-       with a symtab.  In order to handle this correctly, we would need
-       to keep a list of text address ranges for undebuggable files.
-       For now, we do nothing, since this is a fairly obscure case.  */
-    ;
+    {
+      /* It is still possible that some breakpoints will be affected
+	 even though no symtab was found, since the file might have
+	 been compiled without debugging, and hence not be associated
+	 with a symtab.  In order to handle this correctly, we would need
+	 to keep a list of text address ranges for undebuggable files.
+	 For now, we do nothing, since this is a fairly obscure case.  */
+      ;
+    }
 
   /* FIXME, what about the misc function vector? */
   return blewit;

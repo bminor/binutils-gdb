@@ -1,7 +1,5 @@
 /* Read coff symbol tables and convert to internal format, for GDB.
-   Design and support routines derived from dbxread.c, and UMAX COFF
-   specific routines written 9/1/87 by David D. Johnson, Brown University.
-   Revised 11/27/87 ddj@cs.brown.edu
+   Contributed by David D. Johnson, Brown University (ddj@cs.brown.edu).
    Copyright (C) 1987-1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -29,10 +27,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 
 #if defined (TDESC)
-/* Need to get C_VERSION and friends.  */
-#include <a.out.h>
-#else /* not TDESC */
-#include <intel-coff.h>
+/* Need to get C_VERSION and friends.  FIXME, should be in internalcoff.h */
+#include "m88k-bcs.h"
 #endif /* not TDESC */
 
 #include <obstack.h>
@@ -71,6 +67,15 @@ extern void free_all_psymtabs ();
 
 #define SDB_TYPE(type) (BTYPE(type) | (type & N_TMASK))
 
+/*
+ * Convert from an sdb register number to an internal gdb register number.
+ * This should be defined in tm.h, if REGISTER_NAMES is not set up
+ * to map one to one onto the sdb register numbers.
+ */
+#ifndef SDB_REG_TO_REGNUM
+# define SDB_REG_TO_REGNUM(value)     (value)
+#endif
+
 /* Name of source file whose symbol data we are now processing.
    This comes from a symbol named ".file".  */
 
@@ -84,11 +89,6 @@ static CORE_ADDR cur_src_end_addr;
 
 /* Core address of the end of the first object file.  */
 static CORE_ADDR first_object_file_end;
-
-/* End of the text segment of the executable file,
-   as found in the symbol _etext.  */
-
-static CORE_ADDR end_of_text_addr;
 
 /* The addresses of the symbol table stream and number of symbols
    of the object file we are reading (as copied into core).  */
@@ -127,6 +127,37 @@ static int prev_line_number;
 /* Number of elements allocated for line_vector currently.  */
 
 static int line_vector_length;
+
+/* Pointers to scratch storage, used for reading raw symbols and auxents.  */
+
+static char *temp_sym;
+static char *temp_aux;
+
+/* Local variables that hold the shift and mask values for the
+   COFF file that we are currently reading.  These come back to us
+   from BFD, and are referenced by their macro names, as well as
+   internally to the BTYPE, ISPTR, ISFCN, ISARY, ISTAG, and DECREF
+   macros from ../internalcoff.h .  */
+
+static unsigned	local_n_btmask;
+static unsigned	local_n_btshft;
+static unsigned	local_n_tmask;
+static unsigned	local_n_tshift;
+
+#define	N_BTMASK	local_n_btmask
+#define	N_BTSHFT	local_n_btshft
+#define	N_TMASK		local_n_tmask
+#define	N_TSHIFT	local_n_tshift
+ 
+/* Local variables that hold the sizes in the file of various COFF structures.
+   (We only need to know this to read them from the file -- BFD will then
+   translate the data in them, into `internal_xxx' structs in the right
+   byte order, alignment, etc.)  */
+
+static unsigned	local_linesz;
+static unsigned	local_symesz;
+static unsigned	local_auxesz;
+
 
 #ifdef TDESC
 #include "tdesc.h"
@@ -186,6 +217,13 @@ struct context_stack *context_stack;
    if nothing says specifically).  */
 
 int within_function;
+
+#if 0
+/* The type of the function we are currently reading in.  This is
+   used by define_symbol to record the type of arguments to a function. */
+
+struct type *in_function_type;
+#endif
 
 /* List of blocks already made (lexical contexts already closed).
    This is used at the end to make the blockvector.  */
@@ -518,12 +556,12 @@ end_symtab ()
   blockvector = make_blockvector ();
 
   /* Now create the symtab object for this source file.  */
-  symtab = (struct symtab *) xmalloc (sizeof (struct symtab));
-  symtab->free_ptr = 0;
+  symtab = allocate_symtab (last_source_file);
 
   /* Fill in its components.  */
   symtab->blockvector = blockvector;
   symtab->free_code = free_linetable;
+  symtab->free_ptr = 0;
   symtab->filename = last_source_file;
   symtab->dirname = NULL;
   lv = line_vector;
@@ -531,11 +569,6 @@ end_symtab ()
   symtab->linetable = (struct linetable *)
     xrealloc (lv, (sizeof (struct linetable)
 		   + lv->nitems * sizeof (struct linetable_entry)));
-  symtab->nlines = 0;
-  symtab->line_charpos = 0;
-
-  symtab->language = language_unknown;
-  symtab->fullname = NULL;
 
 #ifdef TDESC
   symtab->coffsem = last_coffsem;
@@ -592,10 +625,13 @@ struct coff_symfile_info {
   file_ptr max_lineno_offset;		/* 1+last byte of line#s in file */
 };
 
+static int text_bfd_scnum;
+
 void
 coff_symfile_init (sf)
      struct sym_fns *sf;
 {
+  asection	*section;
   bfd *abfd = sf->sym_bfd;
 
   /* Allocate struct to keep track of the symfile */
@@ -623,6 +659,11 @@ coff_symfile_init (sf)
       startup_file_start = 0;
       startup_file_end = 0;
     }
+   /* Save the section number for the text section */
+   if (section = bfd_get_section_by_name(abfd,".text"))
+   	text_bfd_scnum = section->index;
+   else
+   	text_bfd_scnum = -1; 
 }
 
 /* This function is called for every section; it finds the outer limits
@@ -646,12 +687,7 @@ find_linenos (abfd, asect, vpinfo)
 
   if (count == 0)
     return;
-#if !defined (LINESZ)
-/* Just in case, you never know what to expect from those
-   COFF header files.  */
-#define LINESZ (sizeof (struct lineno))
-#endif /* No LINESZ.  */
-  size = count * LINESZ;
+  size = count * local_linesz;
 
   info = (struct coff_symfile_info *)vpinfo;
 /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
@@ -700,6 +736,7 @@ coff_symfile_read (sf, addr, mainline)
 {
   struct coff_symfile_info *info = (struct coff_symfile_info *)sf->sym_private;
   bfd *abfd = sf->sym_bfd;
+  coff_data_type *cdata = coff_data (abfd);
   char *name = bfd_get_filename (abfd);
   int desc;
   register int val;
@@ -710,10 +747,29 @@ coff_symfile_read (sf, addr, mainline)
   symfile_bfd = abfd;			/* Kludge for swap routines */
 
 /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
-   desc = fileno ((FILE *)(abfd->iostream));		/* File descriptor */
+   desc = fileno ((FILE *)(abfd->iostream));	/* File descriptor */
    num_symbols = bfd_get_symcount (abfd);	/* How many syms */
-   symtab_offset = obj_sym_filepos (abfd);	/* Symbol table file offset */
-   stringtab_offset = symtab_offset + num_symbols * SYMESZ;  /* String tab */
+   symtab_offset = cdata->sym_filepos;		/* Symbol table file offset */
+   stringtab_offset = symtab_offset +		/* String table file offset */
+		      num_symbols * cdata->local_symesz;
+
+  /* Set a few file-statics that give us specific information about
+     the particular COFF file format we're reading.  */
+  local_linesz   = cdata->local_linesz;
+  local_n_btmask = cdata->local_n_btmask;
+  local_n_btshft = cdata->local_n_btshft;
+  local_n_tmask  = cdata->local_n_tmask;
+  local_n_tshift = cdata->local_n_tshift;
+  local_linesz   = cdata->local_linesz;
+  local_symesz   = cdata->local_symesz;
+  local_auxesz   = cdata->local_auxesz;
+
+  /* Allocate space for raw symbol and aux entries, based on their
+     space requirements as reported by BFD.  */
+  temp_sym = (char *) xmalloc
+	 (cdata->local_symesz + cdata->local_auxesz);
+  temp_aux = temp_sym + cdata->local_symesz;
+  make_cleanup (free_current_contents, &temp_sym);
 /* End of warning */
 
   /* Read the line number table, all at once.  */
@@ -920,7 +976,9 @@ read_coff_symtab (desc, nsyms)
 
           case C_STAT:
 	    if (cs->c_name[0] == '.') {
-		    if (strcmp (cs->c_name, _TEXT) == 0) {
+		    if (strcmp (cs->c_name, ".text") == 0) {
+			    /* FIXME:  don't wire in ".text" as section name
+				       or symbol name! */
 			    if (++num_object_files == 1) {
 				    /* last address of startup file */
 				    first_object_file_end = cs->c_value +
@@ -952,12 +1010,14 @@ read_coff_symtab (desc, nsyms)
 	      break;
 	    /* fall in for static symbols that don't start with '.' */
 	  case C_EXT:
-	    if (cs->c_sclass == C_EXT &&
-		cs->c_secnum == N_ABS &&
-		strcmp (cs->c_name, _ETEXT) == 0)
-		    end_of_text_addr = cs->c_value;
 	    if (!SDB_TYPE (cs->c_type)) {
-		    if (cs->c_secnum <= 1) {	/* text or abs */
+		/* FIXME: This is BOGUS Will Robinson! 
+	 	Coff should provide the SEC_CODE flag for executable sections,
+	 	then if we could look up sections by section number we
+  	 	could see if the flags indicate SEC_CODE.  If so, then
+	 	record this symbol as a miscellaneous function.  But why
+		are absolute syms recorded as functions, anyway?  */	
+		    if (cs->c_secnum <= text_bfd_scnum+1) {/* text or abs */
 			    record_misc_function (cs->c_name, cs->c_value);
 			    break;
 		    } else {
@@ -1168,22 +1228,21 @@ read_one_sym (cs, sym, aux)
     register struct internal_syment *sym;
     register union internal_auxent *aux;
 {
-  struct external_syment temp_sym[1];
-  union external_auxent temp_aux[1];
   int i;
 
   cs->c_symnum = symnum;
-  fread ((char *)temp_sym, SYMESZ, 1, nlist_stream_global);
-  bfd_coff_swap_sym_in (symfile_bfd, temp_sym, sym);
+  fread (temp_sym, local_symesz, 1, nlist_stream_global);
+  bfd_coff_swap_sym_in (symfile_bfd, temp_sym, (char *)sym);
   cs->c_nsyms = (sym->n_numaux & 0xff) + 1;
   if (cs->c_nsyms >= 2)
     {
-    fread ((char *)temp_aux, AUXESZ, 1, nlist_stream_global);
-    bfd_coff_swap_aux_in (symfile_bfd, temp_aux, sym->n_type, sym->n_sclass, aux);
+    fread (temp_aux, local_auxesz, 1, nlist_stream_global);
+    bfd_coff_swap_aux_in (symfile_bfd, temp_aux, sym->n_type, sym->n_sclass,
+			  (char *)aux);
     /* If more than one aux entry, read past it (only the first aux
        is important). */
     for (i = 2; i < cs->c_nsyms; i++)
-      fread ((char *)temp_aux, AUXESZ, 1, nlist_stream_global);
+      fread (temp_aux, local_auxesz, 1, nlist_stream_global);
     }
   cs->c_name = getsymname (sym);
   cs->c_value = sym->n_value;
@@ -1364,13 +1423,13 @@ enter_linenos (file_offset, first_line, last_line)
   rawptr = &linetab[file_offset - linetab_offset];
 
   /* skip first line entry for each function */
-  rawptr += LINESZ;
+  rawptr += local_linesz;
   /* line numbers start at one for the first line of the function */
   first_line--;
 
   for (;;) {
-    bfd_coff_swap_lineno_in (symfile_bfd, (LINENO *)rawptr, &lptr);
-    rawptr += LINESZ;
+    bfd_coff_swap_lineno_in (symfile_bfd, rawptr, &lptr);
+    rawptr += local_linesz;
     if (L_LNNO32 (&lptr) && L_LNNO32 (&lptr) <= last_line)
       record_line (first_line + L_LNNO32 (&lptr), lptr.l_addr.l_paddr);
     else
@@ -1515,8 +1574,23 @@ process_coff_symbol (cs, aux)
 
   if (ISFCN (cs->c_type))
     {
-      SYMBOL_TYPE (sym) = 
-	lookup_function_type (decode_function_type (cs, cs->c_type, aux));
+#if 0
+       /* FIXME:  This has NOT been tested.  The DBX version has.. */
+       /* Generate a template for the type of this function.  The 
+	  types of the arguments will be added as we read the symbol 
+	  table. */
+       struct type *new = (struct type *)
+		    obstack_alloc (symbol_obstack, sizeof (struct type));
+       
+       bcopy(lookup_function_type (decode_function_type (cs, cs->c_type, aux)),
+	     new, sizeof(struct type));
+       SYMBOL_TYPE (sym) = new;
+       in_function_type = SYMBOL_TYPE(sym);
+#else
+       SYMBOL_TYPE(sym) = 
+	 lookup_function_type (decode_function_type (cs, cs->c_type, aux));
+#endif
+
       SYMBOL_CLASS (sym) = LOC_BLOCK;
       if (cs->c_sclass == C_STAT)
 	add_symbol_to_list (sym, &file_symbols);
@@ -1555,8 +1629,12 @@ process_coff_symbol (cs, aux)
 	    }
 	    break;
 
+#ifdef C_GLBLREG		/* AMD coff */
+	  case C_GLBLREG:
+#endif
 	  case C_REG:
 	    SYMBOL_CLASS (sym) = LOC_REGISTER;
+	    SYMBOL_VALUE (sym) = SDB_REG_TO_REGNUM(cs->c_value);
 	    add_symbol_to_list (sym, &local_symbols);
 	    break;
 
@@ -1565,6 +1643,11 @@ process_coff_symbol (cs, aux)
 
 	  case C_ARG:
 	    SYMBOL_CLASS (sym) = LOC_ARG;
+#if 0
+	    /* FIXME:  This has not bee tested. */
+	    /* Add parameter to function.  */
+	    add_param_to_type(&in_function_type,sym);
+#endif
 	    add_symbol_to_list (sym, &local_symbols);
 #if !defined (BELIEVE_PCC_PROMOTION)
 	    /* If PCC says a parameter is a short or a char,
@@ -1580,6 +1663,7 @@ process_coff_symbol (cs, aux)
 
 	  case C_REGPARM:
 	    SYMBOL_CLASS (sym) = LOC_REGPARM;
+	    SYMBOL_VALUE (sym) = SDB_REG_TO_REGNUM(cs->c_value);
 	    add_symbol_to_list (sym, &local_symbols);
 #if !defined (BELIEVE_PCC_PROMOTION)
 	    /* If PCC says a parameter is a short or a char,
@@ -2021,6 +2105,13 @@ read_enum_type (index, length, lastsym)
       TYPE_FIELD_BITPOS (type, n) = SYMBOL_VALUE (syms->symbol);
       TYPE_FIELD_BITSIZE (type, n) = 0;
     }
+  /* Is this Modula-2's BOOLEAN type?  Flag it as such if so. */
+  if(TYPE_NFIELDS(type) == 2 &&
+     ((!strcmp(TYPE_FIELD_NAME(type,0),"TRUE") &&
+       !strcmp(TYPE_FIELD_NAME(type,1),"FALSE")) ||
+      (!strcmp(TYPE_FIELD_NAME(type,1),"TRUE") &&
+       !strcmp(TYPE_FIELD_NAME(type,0),"FALSE"))))
+     TYPE_CODE(type) = TYPE_CODE_BOOL;
   return type;
 }
 

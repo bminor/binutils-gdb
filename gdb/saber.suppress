@@ -368,26 +368,36 @@ suppress 68 on complain
 /* Benign type mismatch */
 suppress 3 in read_range_type
 /* Over/underflow unary minus */
-suppress 594 ../expread.tab.c
-/* Set but not used */
-suppress 593 ../expread.tab.c
-/* Label not used */
-suppress 590 ../expread.tab.c
-/* Formal param not used */
-suppress 442 ../../bfd/archive.c
+suppress 442 ../bfd/archive.c
 /* \0 in string */
-suppress 558 ../../bfd/b.out.c
+suppress 558 ../bfd/b.out.c
 /* Conditional if always true */
-suppress 558 ../../bfd/coffswap.c
+suppress 558 ../bfd/coffswap.c
 /* Conditional if always true -- bfd_h_put_x */
-suppress 529 ../../bfd/coffswap.c
+suppress 529 ../bfd/coffswap.c
 /* Stmt unreach -- bfd_h_put_x */
-suppress 590 ../../bfd/ecoff.c
+suppress 590 ../bfd/ecoff.c
 /* Formal parameter not used */
 suppress 590 on ignore
 /* Formal param not used */
+suppress 590 on ignore_exec_bfd
+/* Formal param not used */
+suppress 590 on ignore_core_bfd
+/* Formal param not used */
+suppress 590 on ignore_input_section
+/* Formal param not used */
 suppress 590 on ignore_newsect
 /* Formal param not used */
+suppress 590 on ignore_abfd
+/* Formal param not used */
+suppress 590 on ignore_symbol
+/* Formal param not used */
+suppress 590 on ignore_symbols
+/* Formal param not used */
+suppress 652 in ../bfd/libaout.h
+/* The declaration has no effect */
+suppress 442 in ../bfd/archive.c
+/* Escape sequence in string literal has null value */
 
 /* Signals caught and ignored */
 catch HUP
