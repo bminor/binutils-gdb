@@ -2720,6 +2720,13 @@ md_assemble (line)
 	    i.prefixes -= 1;
 	    code16 ^= CODE16;
 	  }
+	/* Pentium4 branch hints.  */
+	if (i.prefix[SEG_PREFIX] == CS_PREFIX_OPCODE /* not taken */
+	    || i.prefix[SEG_PREFIX] == DS_PREFIX_OPCODE /* taken */)
+	  {
+	    prefix++;
+	    i.prefixes--;
+	  }
 	if (i.prefix[REX_PREFIX])
 	  {
 	    prefix++;
@@ -2739,6 +2746,9 @@ md_assemble (line)
 	p = frag_more (prefix + 1);
 	if (i.prefix[DATA_PREFIX])
 	  *p++ = DATA_PREFIX_OPCODE;
+	if (i.prefix[SEG_PREFIX] == CS_PREFIX_OPCODE
+	    || i.prefix[SEG_PREFIX] == DS_PREFIX_OPCODE)
+	  *p++ = i.prefix[SEG_PREFIX];
 	if (i.prefix[REX_PREFIX])
 	  *p++ = i.prefix[REX_PREFIX];
 	*p = i.tm.base_opcode;
@@ -2768,6 +2778,13 @@ md_assemble (line)
 	      {
 		FRAG_APPEND_1_CHAR (ADDR_PREFIX_OPCODE);
 		i.prefixes -= 1;
+	      }
+	    /* Pentium4 branch hints.  */
+	    if (i.prefix[SEG_PREFIX] == CS_PREFIX_OPCODE /* not taken */
+		|| i.prefix[SEG_PREFIX] == DS_PREFIX_OPCODE /* taken */)
+	      {
+		FRAG_APPEND_1_CHAR (i.prefix[SEG_PREFIX]);
+		i.prefixes--;
 	      }
 	  }
 	else
@@ -2799,17 +2816,8 @@ md_assemble (line)
 	if (i.prefixes != 0 && !intel_syntax)
 	  as_warn (_("skipping prefixes on this instruction"));
 
-	if (fits_in_unsigned_byte (i.tm.base_opcode))
-	  {
-	    p = frag_more (1 + size);
-	  }
-	else
-	  {
-	    /* Opcode can be at most two bytes.  */
-	    p = frag_more (2 + size);
-	    *p++ = (i.tm.base_opcode >> 8) & 0xff;
-	  }
-	*p++ = i.tm.base_opcode & 0xff;
+	p = frag_more (1 + size);
+	*p++ = i.tm.base_opcode;
 
 	fix_new_exp (frag_now, p - frag_now->fr_literal, size,
 		     i.op[0].disps, 1, reloc (size, 1, 1, i.reloc[0]));

@@ -1,3 +1,8 @@
+2001-06-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-i386.c (md_assemble): Handle Pentium4 branch hints.
+	<JumpByte, JumpDword insn output>: Remove dead code.
+
 2001-06-06  Tracy Kuhrt <Tracy.Kuhrt@microchip.com>
 
 	* as.c (parse_args): Correct option name "listing-lhs-width2".
