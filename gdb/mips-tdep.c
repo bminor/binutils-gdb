@@ -316,6 +316,32 @@ mips16_decode_reg_save (inst, gen_mask)
     *gen_mask |= (1 << 31);
 }
 
+
+/* Fetch and return instruction from the specified location.  If the PC
+   is odd, assume it's a MIPS16 instruction; otherwise MIPS32.  */
+
+static t_inst
+mips_fetch_instruction (addr)
+    CORE_ADDR addr;
+{
+  char buf[MIPS_INSTLEN];
+  int instlen;
+  int status;
+
+  if (IS_MIPS16_ADDR (addr))
+    {
+      instlen = MIPS16_INSTLEN;
+      addr = UNMAKE_MIPS16_ADDR (addr);
+    }
+  else
+      instlen = MIPS_INSTLEN;
+  status = read_memory_nobpt (addr, buf, instlen);
+  if (status)
+    memory_error (status, addr);
+  return extract_unsigned_integer (buf, instlen);
+}
+
+
 /* Guaranteed to set fci->saved_regs to some values (it never leaves it
    NULL).  */
 
@@ -330,6 +356,7 @@ mips_find_saved_regs (fci)
   /* What registers have been saved?  Bitmasks.  */
   unsigned long gen_mask, float_mask;
   mips_extra_func_info_t proc_desc;
+  t_inst inst;
 
   fci->saved_regs = (struct frame_saved_regs *)
     obstack_alloc (&frame_cache_obstack, sizeof(struct frame_saved_regs));
@@ -406,34 +433,22 @@ mips_find_saved_regs (fci)
 	 claims are saved have been saved yet.  */
 
       CORE_ADDR addr;
-      int status;
-      char buf[MIPS_INSTLEN];
-      t_inst inst;
-      int instlen;
 
       /* Bitmasks; set if we have found a save for the register.  */
       unsigned long gen_save_found = 0;
       unsigned long float_save_found = 0;
+      int instlen;
 
       /* If the address is odd, assume this is MIPS16 code.  */
       addr = PROC_LOW_ADDR (proc_desc);
-      if (IS_MIPS16_ADDR (addr))
-	{
-	  instlen = MIPS16_INSTLEN;
-	  addr = UNMAKE_MIPS16_ADDR (addr);
-	}
-      else
-	instlen = MIPS_INSTLEN;
+      instlen = IS_MIPS16_ADDR (addr) ? MIPS16_INSTLEN : MIPS_INSTLEN;
 
       /* Scan through this function's instructions preceding the current
          PC, and look for those that save registers.  */
       while (addr < fci->pc)
 	{
-	  status = read_memory_nobpt (addr, buf, instlen);
-	  if (status)
-	    memory_error (status, addr);
-	  inst = extract_unsigned_integer (buf, instlen);
-	  if (instlen == MIPS16_INSTLEN)
+	  inst = mips_fetch_instruction (addr);
+	  if (IS_MIPS16_ADDR (addr))
 	    mips16_decode_reg_save (inst, &gen_save_found);
 	  else
 	    mips32_decode_reg_save (inst, &gen_save_found, &float_save_found);
@@ -452,6 +467,33 @@ mips_find_saved_regs (fci)
 	fci->saved_regs->regs[ireg] = reg_position;
 	reg_position -= MIPS_REGSIZE;
       }
+
+  /* The MIPS16 entry instruction saves $s0 and $s1 in the reverse order
+     of that normally used by gcc.  Therefore, we have to fetch the first
+     instruction of the function, and if it's an entry instruction that
+     saves $s0 or $s1, correct their saved addresses.  */
+  if (IS_MIPS16_ADDR (PROC_LOW_ADDR (proc_desc)))
+    {
+      inst = mips_fetch_instruction (PROC_LOW_ADDR (proc_desc));
+      if ((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700) /* entry */
+	{
+	  int reg;
+	  int sreg_count = (inst >> 6) & 3;
+	  
+	  /* Check if the ra register was pushed on the stack.  */
+	  reg_position = fci->frame + PROC_REG_OFFSET (proc_desc);
+	  if (inst & 0x20)
+	    reg_position -= MIPS_REGSIZE;
+
+	  /* Check if the s0 and s1 registers were pushed on the stack.  */
+	  for (reg = 16; reg < sreg_count+16; reg++)
+	    {
+	      fci->saved_regs->regs[reg] = reg_position;
+	      reg_position -= MIPS_REGSIZE;
+	    }
+	}
+    }
+
   /* Fill in the offsets for the registers which float_mask says
      were saved.  */
   reg_position = fci->frame + PROC_FREG_OFFSET (proc_desc);
@@ -459,7 +501,7 @@ mips_find_saved_regs (fci)
   /* The freg_offset points to where the first *double* register
      is saved.  So skip to the high-order word. */
   if (! GDB_TARGET_IS_MIPS64)
-    reg_position += 4;
+    reg_position += MIPS_REGSIZE;
 
   /* Fill in the offsets for the float registers which float_mask says
      were saved.  */
@@ -621,7 +663,7 @@ Otherwise, you told GDB there was a function where there isn't one, or\n\
 		 addiu sp,-n
 		 daddiu sp,-n
 		 extend -n followed by 'addiu sp,+n' or 'daddiu sp,+n'  */
-	    inst = read_memory_integer (UNMAKE_MIPS16_ADDR (start_pc), 2);
+	    inst = mips_fetch_instruction (start_pc);
 	    if (((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700) /* entry */
 		|| (inst & 0xff80) == 0x6380	/* addiu sp,-n */
 		|| (inst & 0xff80) == 0xfb80	/* daddiu sp,-n */
@@ -647,7 +689,7 @@ Otherwise, you told GDB there was a function where there isn't one, or\n\
     return start_pc;
 }
 
-/* Fetch the immediate value from the current instruction.
+/* Fetch the immediate value from a MIPS16 instruction.
    If the previous instruction was an EXTEND, use it to extend
    the upper bits of the immediate value.  This is a helper function
    for mips16_heuristic_proc_desc.  */
@@ -701,19 +743,14 @@ mips16_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
 
   for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS16_INSTLEN)
     {
-      char buf[MIPS16_INSTLEN];
-      int status, reg, offset;
+      int reg, offset;
 
       /* Save the previous instruction.  If it's an EXTEND, we'll extract
          the immediate offset extension from it in mips16_get_imm.  */
       prev_inst = inst;
 
-      /* Fetch the instruction.   */
-      status = read_memory_nobpt (UNMAKE_MIPS16_ADDR (cur_pc), buf,
-				  MIPS16_INSTLEN);
-      if (status) memory_error (status, cur_pc);
-      inst = (unsigned short) extract_unsigned_integer (buf, MIPS16_INSTLEN);
-
+      /* Fetch and decode the instruction.   */
+      inst = (unsigned short) mips_fetch_instruction (cur_pc);
       if ((inst & 0xff00) == 0x6300		/* addiu sp */
 	  || (inst & 0xff00) == 0xfb00)		/* daddiu sp */
 	{
@@ -786,10 +823,11 @@ mips16_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
 	  PROC_FRAME_OFFSET(&temp_proc_desc) += 32;
 
 	  /* Check if a0-a3 were saved in the caller's argument save area.  */
-	  for (reg = 4, offset = 32; reg < areg_count+4; reg++, offset += 4)
+	  for (reg = 4, offset = 32; reg < areg_count+4; reg++)
 	    {
 	      PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
 	      temp_saved_regs.regs[reg] = sp + offset;
+	      offset -= MIPS_REGSIZE;
 	    }
 
 	  /* Check if the ra register was pushed on the stack.  */
@@ -798,14 +836,15 @@ mips16_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
 	    {
 	      PROC_REG_MASK(&temp_proc_desc) |= 1 << 31;
 	      temp_saved_regs.regs[31] = sp + offset;
-	      offset -= 4;
+	      offset -= MIPS_REGSIZE;
 	    }
 
 	  /* Check if the s0 and s1 registers were pushed on the stack.  */
-	  for (reg = 16; reg < sreg_count+16; reg++, offset -= 4)
+	  for (reg = 16; reg < sreg_count+16; reg++)
 	    {
 	      PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
 	      temp_saved_regs.regs[reg] = sp + offset;
+	      offset -= MIPS_REGSIZE;
 	    }
 	}
       else if ((inst & 0xf800) == 0x1800)	/* jal(x) */
@@ -825,14 +864,11 @@ restart:
   PROC_FRAME_OFFSET(&temp_proc_desc) = 0;
   for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSTLEN)
     {
-      char buf[MIPS_INSTLEN];
       unsigned long inst, high_word, low_word;
-      int status, reg;
+      int reg;
 
       /* Fetch the instruction.   */
-      status = (unsigned long) read_memory_nobpt (cur_pc, buf, MIPS_INSTLEN);
-      if (status) memory_error (status, cur_pc);
-      inst = (unsigned long) extract_unsigned_integer (buf, MIPS_INSTLEN);
+      inst = (unsigned long) mips_fetch_instruction (cur_pc);
 
       /* Save some code by pre-extracting some useful fields.  */
       high_word = (inst >> 16) & 0xffff;
@@ -1246,7 +1282,12 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
       /* Floating point arguments passed in registers have to be
          treated specially.  On 32-bit architectures, doubles
 	 are passed in register pairs; the even register gets
-	 the low word, and the odd register gets the high word.  */
+	 the low word, and the odd register gets the high word.
+	 On non-EABI processors, the first two floating point arguments are
+	 also copied to general registers, because MIPS16 functions
+	 don't use float registers for arguments.  This duplication of
+	 arguments in general registers can't hurt non-MIPS16 functions
+	 because those registers are normally skipped.  */
       if (typecode == TYPE_CODE_FLT
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM
 	  && mips_fpu != MIPS_FPU_NONE)
@@ -1256,21 +1297,34 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 	      int low_offset = TARGET_BYTE_ORDER == BIG_ENDIAN ? 4 : 0;
 	      unsigned long regval;
 
+	      /* Write the low word of the double to the even register(s).  */
 	      regval = extract_unsigned_integer (val+low_offset, 4);
-	      write_register (float_argreg++, regval);	/* low word */
+	      write_register (float_argreg++, regval);
+	      if (!MIPS_EABI)
+		write_register (argreg+1, regval);
+
+	      /* Write the high word of the double to the odd register(s).  */
 	      regval = extract_unsigned_integer (val+4-low_offset, 4);
-	      write_register (float_argreg++, regval);	/* high word */
+	      write_register (float_argreg++, regval);
+	      if (!MIPS_EABI)
+	        {
+		  write_register (argreg, regval);
+		  argreg += 2;
+		}
 
 	    }
 	  else
 	    {
+	      /* This is a floating point value that fits entirely
+	         in a single register.  */
 	      CORE_ADDR regval = extract_address (val, len);
 	      write_register (float_argreg++, regval);
+	      if (!MIPS_EABI)
+	        {
+		  write_register (argreg, regval);
+		  argreg += GDB_TARGET_IS_MIPS64 ? 1 : 2;
+		}
 	    }
-
-	  /* If this is the old ABI, skip one or two general registers.  */
-	  if (!MIPS_EABI)
-	    argreg += GDB_TARGET_IS_MIPS64 ? 1 : 2;
 	}
       else
 	{
@@ -1325,7 +1379,7 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
   return sp;
 }
 
-void
+static void
 mips_push_register(CORE_ADDR *sp, int regno)
 {
   char buffer[MAX_REGISTER_RAW_SIZE];
@@ -1488,11 +1542,11 @@ mips_print_register (regnum, all)
     {
       char dbuffer[MAX_REGISTER_RAW_SIZE]; 
 
-      read_relative_register_raw_bytes (regnum, dbuffer);
-      read_relative_register_raw_bytes (regnum+1, dbuffer+4); /* FIXME!! */
-#ifdef REGISTER_CONVERT_TO_TYPE
-      REGISTER_CONVERT_TO_TYPE(regnum, builtin_type_double, dbuffer);
-#endif
+      /* MIPS doubles are stored in a register pair with the least
+         signficant register in the lower-numbered register.  */
+      read_relative_register_raw_bytes (regnum+1, dbuffer);
+      read_relative_register_raw_bytes (regnum, dbuffer+MIPS_REGSIZE);
+
       printf_filtered ("(d%d: ", regnum-FP0_REGNUM);
       val_print (builtin_type_double, dbuffer, 0,
 		 gdb_stdout, 0, 1, 0, Val_pretty_default);
@@ -1632,14 +1686,9 @@ mips32_skip_prologue (pc, lenient)
        or in the gcc frame.  */
     for (end_pc = pc + 100; pc < end_pc; pc += MIPS_INSTLEN)
       {
-	char buf[MIPS_INSTLEN];
-	int status;
 	unsigned long high_word;
 
-	status = read_memory_nobpt (pc, buf, MIPS_INSTLEN);
-	if (status)
-	  memory_error (status, pc);
-	inst = (unsigned long)extract_unsigned_integer (buf, MIPS_INSTLEN);
+	inst = mips_fetch_instruction (pc);
 	high_word = (inst >> 16) & 0xffff;
 
 #if 0
@@ -1724,6 +1773,8 @@ mips16_skip_prologue (pc, lenient)
      int lenient;
 {
     CORE_ADDR end_pc;
+    int extend_bytes = 0;
+    int prev_extend_bytes;
 
     /* Table of instructions likely to be found in a function prologue.  */
     static struct
@@ -1751,23 +1802,10 @@ mips16_skip_prologue (pc, lenient)
        or in the gcc frame.  */
     for (end_pc = pc + 100; pc < end_pc; pc += MIPS16_INSTLEN)
       {
-	char buf[MIPS16_INSTLEN];
-	int status;
 	unsigned short inst;
-	int extend_bytes = 0;
-	int prev_extend_bytes;
 	int i;
 
-	status = read_memory_nobpt (UNMAKE_MIPS16_ADDR (pc), buf,
-				    MIPS16_INSTLEN);
-	if (status)
-	  memory_error (status, pc);
-	inst = (unsigned long)extract_unsigned_integer (buf, MIPS16_INSTLEN);
-
-#if 0
-	if (lenient && is_delayed (inst))
-	  continue;
-#endif
+	inst = mips_fetch_instruction (pc);
 
 	/* Normally we ignore an extend instruction.  However, if it is
 	   not followed by a valid prologue instruction, we must adjust
@@ -1857,23 +1895,32 @@ mips_extract_return_value (valtype, regbuf, valbuf)
 {
   int regnum;
   int offset = 0;
+  int len = TYPE_LENGTH (valtype);
   
   regnum = 2;
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT
        && (mips_fpu == MIPS_FPU_DOUBLE
-	   || (mips_fpu == MIPS_FPU_SINGLE && TYPE_LENGTH (valtype) <= 4))) /* FIXME!! */
-    regnum = FP0_REGNUM;
+	   || (mips_fpu == MIPS_FPU_SINGLE && len <= MIPS_REGSIZE)))
+    {
+      regnum = FP0_REGNUM;
+
+      /* If this is a double, the odd-numbered register (FP1) contains the
+         high word of the result.  Copy that to the buffer before
+	 copying the low word in FP0.  */
+      if (len > MIPS_REGSIZE)
+	{
+	  memcpy (valbuf, regbuf + REGISTER_BYTE (regnum+1), MIPS_REGSIZE);
+	  len -= MIPS_REGSIZE;
+	  valbuf += MIPS_REGSIZE;
+	}
+    }
 
   if (TARGET_BYTE_ORDER == BIG_ENDIAN
       && TYPE_CODE (valtype) != TYPE_CODE_FLT
-      && TYPE_LENGTH (valtype) < REGISTER_RAW_SIZE (regnum))
-    offset = REGISTER_RAW_SIZE (regnum) - TYPE_LENGTH (valtype);
-
-  memcpy (valbuf, regbuf + REGISTER_BYTE (regnum) + offset,
-	  TYPE_LENGTH (valtype));
-#ifdef REGISTER_CONVERT_TO_TYPE
-  REGISTER_CONVERT_TO_TYPE(regnum, valtype, valbuf);
-#endif
+      && len < REGISTER_RAW_SIZE (regnum))
+    offset = REGISTER_RAW_SIZE (regnum) - len;
+    
+  memcpy (valbuf, regbuf + REGISTER_BYTE (regnum) + offset, len);
 }
 
 /* Given a return value in `regbuf' with a type `valtype', 
@@ -2162,9 +2209,9 @@ mips_about_to_return (pc)
        as $a3), then a "jr" using that register.  This second case
        is almost impossible to distinguish from an indirect jump
        used for switch statements, so we don't even try.  */
-    return read_memory_integer (UNMAKE_MIPS16_ADDR (pc), 2) == 0xe820; /* jr $ra */
+    return mips_fetch_instruction (pc) == 0xe820;	/* jr $ra */
   else
-    return read_memory_integer (pc, 4) == 0x3e00008;	/* jr $ra */
+    return mips_fetch_instruction (pc) == 0x3e00008;	/* jr $ra */
 }
 
 

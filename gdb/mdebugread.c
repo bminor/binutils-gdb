@@ -1893,14 +1893,13 @@ upgrade_type (fd, tpp, tq, ax, bigend, sym_name)
    to look for the function which contains the MIPS_EFI_SYMBOL_NAME symbol
    in question, or NULL to use top_stack->cur_block.  */
 
-static void parse_procedure PARAMS ((PDR *, struct symtab *, CORE_ADDR,
+static void parse_procedure PARAMS ((PDR *, struct symtab *,
 				     struct partial_symtab *));
 
 static void
-parse_procedure (pr, search_symtab, lowest_pdr_addr, pst)
+parse_procedure (pr, search_symtab, pst)
      PDR *pr;
      struct symtab *search_symtab;
-     CORE_ADDR lowest_pdr_addr;
      struct partial_symtab *pst;
 {
   struct symbol *s, *i;
@@ -2006,7 +2005,7 @@ parse_procedure (pr, search_symtab, lowest_pdr_addr, pst)
       e = (struct mips_extra_func_info *) SYMBOL_VALUE (i);
       e->pdr = *pr;
       e->pdr.isym = (long) s;
-      e->pdr.adr += pst->textlow - lowest_pdr_addr;
+      e->pdr.adr += cur_fdr->adr;  /* PDR address is relative to FDR address */
 
       /* Correct incorrect setjmp procedure descriptor from the library
 	 to make backtrace through setjmp work.  */
@@ -3372,7 +3371,7 @@ psymtab_to_symtab_1 (pst, filename)
 	  pdr_in = pr_block;
 	  pdr_in_end = pdr_in + fh->cpd;
 	  for (; pdr_in < pdr_in_end; pdr_in++)
-	    parse_procedure (pdr_in, st, lowest_pdr_addr, pst);
+	    parse_procedure (pdr_in, st, pst);
 
 	  do_cleanups (old_chain);
 	}
@@ -3486,7 +3485,7 @@ psymtab_to_symtab_1 (pst, filename)
 	      pdr_in = pr_block;
 	      pdr_in_end = pdr_in + fh->cpd;
 	      for (; pdr_in < pdr_in_end; pdr_in++)
-		parse_procedure (pdr_in, 0, lowest_pdr_addr, pst);
+		parse_procedure (pdr_in, 0, pst);
 
 	      do_cleanups (old_chain);
 	    }

@@ -1,3 +1,18 @@
+Fri Mar 21 19:10:05 1997  Mark Alexander  <marka@cygnus.com>
+
+	* mips-tdep.c (mips_push_arguments): On non-EABI architectures,
+	copy first two floating point arguments to general registers, so that
+	MIPS16 functions will receive the arguments correctly.
+	(mips_print_register): Print double registers correctly on
+	little-endian hosts.
+	(mips_extract_return_value): Return double values correctly
+	on little-endian hosts.
+
+	* mdebugread.c (parse_procedure): Adjust address of procedure relative
+	to address in file descriptor record; this accounts for constant
+	strings that may precede functions in the text section.  Remove
+	now-useless lowest_pdr_addr from argument list and all calls.
+
 Fri Mar 21 15:36:25 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.tgt (powerpc*-{eabi,linux,sysv,elf}*): Determine
