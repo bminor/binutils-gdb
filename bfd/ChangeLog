@@ -1,3 +1,9 @@
+Tue Mar 26 15:46:18 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Use AC_CHECK_TOOL to find ar and ranlib.  From
+	Miles Bader <miles@gnu.ai.mit.edu>.
+	* configure: Rebuild.
+
 Fri Mar 22 12:17:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (xcoff_link_input_bfd): Fix scan for C_BINCL/C_EINCL
