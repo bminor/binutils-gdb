@@ -1,5 +1,5 @@
 /* BFD back-end for Hitachi H8/300 COFF binaries.
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -53,7 +53,7 @@ static reloc_howto_type howto_table[] =
 /* Turn a howto into a reloc number */
 
 #define SELECT_RELOC(x,howto) \
-  { x = select_reloc(howto); }
+  { x.r_type = select_reloc(howto); }
 
 #define BADMAG(x) (H8300BADMAG(x)&& H8300HBADMAG(x))
 #define H8300 1			/* Customize coffcode.h */
@@ -148,12 +148,12 @@ rtype2howto (internal, dst)
  reloc_processing(relent, reloc, symbols, abfd, section)
 
 static void
-DEFUN (reloc_processing, (relent, reloc, symbols, abfd, section),
-       arelent * relent AND
-       struct internal_reloc *reloc AND
-       asymbol ** symbols AND
-       bfd * abfd AND
-       asection * section)
+reloc_processing (relent, reloc, symbols, abfd, section)
+     arelent * relent;
+     struct internal_reloc *reloc;
+     asymbol ** symbols;
+     bfd * abfd;
+     asection * section;
 {
   relent->address = reloc->r_vaddr;
   rtype2howto (relent, reloc);
@@ -177,9 +177,9 @@ DEFUN (reloc_processing, (relent, reloc, symbols, abfd, section),
 
 
 static int
-h8300_reloc16_estimate(input_section, symbols, reloc, shrink, link_info)
+h8300_reloc16_estimate(abfd, input_section, reloc, shrink, link_info)
+     bfd *abfd;
      asection *input_section;
-     asymbol **symbols;
      arelent *reloc;
      unsigned int shrink;
      struct bfd_link_info *link_info;
@@ -218,7 +218,7 @@ h8300_reloc16_estimate(input_section, symbols, reloc, shrink, link_info)
 	  /* The place to relc moves back by one */
 	  /* This will be two bytes smaller in the long run */
 	  shrink +=2 ;
-	  bfd_perform_slip(symbols, 2, input_section, address);
+	  bfd_perform_slip(abfd, 2, input_section, address);
 	}      
 
       break;
@@ -246,7 +246,7 @@ h8300_reloc16_estimate(input_section, symbols, reloc, shrink, link_info)
 	  reloc->howto = reloc->howto + 1;	  
 	  /* This will be two bytes smaller in the long run */
 	  shrink +=2 ;
-	  bfd_perform_slip(symbols, 2, input_section, address);
+	  bfd_perform_slip(abfd, 2, input_section, address);
 	}
       break;
 
@@ -274,7 +274,7 @@ h8300_reloc16_estimate(input_section, symbols, reloc, shrink, link_info)
 
 	  /* This will be two bytes smaller in the long run */
 	  shrink +=2 ;
-	  bfd_perform_slip(symbols, 2, input_section, address);
+	  bfd_perform_slip(abfd, 2, input_section, address);
 	}
       break;
     }
@@ -333,6 +333,28 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	bfd_put_8 (abfd, gap, data + dst_address);
 	dst_address++;
 	src_address++;
+
+	break;
+      }
+    case R_PCRWORD:
+      {
+	bfd_vma dot = link_order->offset 
+	  + dst_address 
+	    + link_order->u.indirect.section->output_section->vma;
+	int gap = (bfd_coff_reloc16_get_value (reloc, link_info, input_section)
+		   - dot) + 1;
+	if (gap > 32767 || gap < -32768)
+	  {
+	    if (! ((*link_info->callbacks->reloc_overflow)
+		   (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		    reloc->howto->name, reloc->addend, input_section->owner,
+		    input_section, reloc->address)))
+	      abort ();
+	  }
+
+	bfd_put_16 (abfd, gap, data + dst_address);
+	dst_address+=2;
+	src_address+=2;
 
 	break;
       }
