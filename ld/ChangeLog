@@ -1,3 +1,8 @@
+2000-09-21  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* emultempl/m68kelf.em: Conditionalise the embedded relocs feature
+	on the m68*-*-elf target.  Make it support COFF input objects.
+
 2000-09-21  Kazu Hirata  <kazu@hxi.com>
 
 	* ldmain.c: Fix formatting.
