@@ -2759,8 +2759,7 @@ som_write_symbol_strings (abfd, current_offset, syms, num_syms, string_sizep)
       /* Next comes the string itself + a null terminator.  */
       strcpy (p, syms[i]->name);
 
-      /* ACK.  FIXME.  */
-      syms[i]->name = (char *)strings_size;
+      som_symbol_data(syms[i])->stringtab_offset = strings_size;
       p += length + 1;
       strings_size += length + 1;
 
@@ -3548,7 +3547,7 @@ som_build_and_write_symbol_table (abfd)
       /* This is really an index into the symbol strings table.  
 	 By the time we get here, the index has already been 
 	 computed and stored into the name field in the BFD symbol.  */
-      som_symtab[i].name.n_strx = (int) bfd_syms[i]->name;
+      som_symtab[i].name.n_strx = som_symbol_data(bfd_syms[i])->stringtab_offset;
 
       /* Derive SOM information from the BFD symbol.  */
       som_bfd_derive_misc_symbol_info (abfd, bfd_syms[i], &info);

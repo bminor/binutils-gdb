@@ -64,6 +64,10 @@ typedef struct som_symbol
        the symbols from most used to least used we can significantly
        reduce the size of the relocation stream for incomplete objects.  */
     int reloc_count;
+
+    /* During object file writing, the offset of the name of this symbol
+       in the SOM string table. */
+    int stringtab_offset;
   }
 som_symbol_type;
 

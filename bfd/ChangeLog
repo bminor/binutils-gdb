@@ -1,3 +1,10 @@
+Wed Sep 14 15:37:19 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.h (som_symbol_type): Add "stringtab_offset" field.
+	* som.c (som_write_symbol_strings): Use "stringtab_offset"
+	rather than destroying the "name" field in the BFD symbol.
+	(som_build_and_write_symbol_table): Likewise.
+
 Wed Sep 14 15:06:55 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* libecoff.h (struct ecoff_tdata): Add field find_buffer.
