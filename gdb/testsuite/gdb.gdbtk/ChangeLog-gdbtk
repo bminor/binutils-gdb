@@ -1,3 +1,8 @@
+1999-02-03  Martin Hunt  <hunt@cygnus.com>
+
+	* console.test (clear_command_line): Add tests 1.5 - 1.8,
+	which test the new Shift-Up and Shift-Down bindings.
+
 1999-02-01  Martin Hunt  <hunt@cygnus.com>
 
 	* srcwin.test (srcwin-4.3): Fix bp test.
