@@ -13410,7 +13410,8 @@ mips_elf_final_processing (void)
 #endif /* OBJ_ELF || OBJ_MAYBE_ELF */
 
 typedef struct proc {
-  symbolS *isym;
+  symbolS *func_sym;
+  symbolS *func_end_sym;
   unsigned long reg_mask;
   unsigned long reg_offset;
   unsigned long fpreg_mask;
@@ -13594,7 +13595,7 @@ s_mips_end (int x ATTRIBUTE_UNUSED)
   if (p != NULL)
     {
       assert (S_GET_NAME (p));
-      if (strcmp (S_GET_NAME (p), S_GET_NAME (cur_proc_ptr->isym)))
+      if (strcmp (S_GET_NAME (p), S_GET_NAME (cur_proc_ptr->func_sym)))
 	as_warn (_(".end symbol does not match .ent symbol."));
 
       if (debug_type == DEBUG_STABS)
@@ -13603,6 +13604,21 @@ s_mips_end (int x ATTRIBUTE_UNUSED)
     }
   else
     as_warn (_(".end directive missing or unknown symbol"));
+
+  /* Create an expression to calculate the size of the function.  */
+  if (p && cur_proc_ptr)
+    {
+      OBJ_SYMFIELD_TYPE *obj = symbol_get_obj (p);
+      expressionS *exp = xmalloc (sizeof (expressionS));
+
+      obj->size = exp;
+      exp->X_op = O_subtract;
+      exp->X_add_symbol = symbol_temp_new_now ();
+      exp->X_op_symbol = p;
+      exp->X_add_number = 0;
+
+      cur_proc_ptr->func_end_sym = exp->X_add_symbol;
+    }
 
 #ifdef OBJ_ELF
   /* Generate a .pdr section.  */
@@ -13677,7 +13693,7 @@ s_mips_ent (int aent)
       cur_proc_ptr = &cur_proc;
       memset (cur_proc_ptr, '\0', sizeof (procS));
 
-      cur_proc_ptr->isym = symbolP;
+      cur_proc_ptr->func_sym = symbolP;
 
       symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
 

@@ -1,3 +1,10 @@
+2005-02-22  Eric Christopher  <echristo@redhat.com>
+
+	* config/tc-mips.c (struct proc): Change isym to
+	func_sym. New member func_end_sym.
+	(s_mips_ent): Update.
+	(s_mips_end): Ditto. Add code to compute function size.
+
 2005-02-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* read.c: Warning fixes.
