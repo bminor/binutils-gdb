@@ -445,6 +445,7 @@ static void xcoff_swap_ldrel_out
   PARAMS ((bfd *, const struct internal_ldrel *, struct external_ldrel *));
 static struct bfd_hash_entry *xcoff_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+static boolean xcoff_get_section_contents PARAMS ((bfd *, asection *));
 static struct internal_reloc *xcoff_read_internal_relocs
   PARAMS ((bfd *, asection *, boolean, bfd_byte *, boolean,
 	   struct internal_reloc *));
@@ -461,6 +462,8 @@ static bfd_size_type xcoff_find_reloc
 static boolean xcoff_link_add_symbols PARAMS ((bfd *, struct bfd_link_info *));
 static boolean xcoff_link_add_dynamic_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
+static boolean xcoff_mark_symbol
+  PARAMS ((struct bfd_link_info *, struct xcoff_link_hash_entry *));
 static boolean xcoff_mark PARAMS ((struct bfd_link_info *, asection *));
 static void xcoff_sweep PARAMS ((struct bfd_link_info *));
 static boolean xcoff_build_ldsyms
@@ -610,7 +613,8 @@ xcoff_get_section_contents (abfd, sec)
 
   if (coff_section_data (abfd, sec)->contents == NULL)
     {
-      coff_section_data (abfd, sec)->contents = bfd_malloc (sec->_raw_size);
+      coff_section_data (abfd, sec)->contents =
+	(bfd_byte *) bfd_malloc (sec->_raw_size);
       if (coff_section_data (abfd, sec)->contents == NULL)
 	return false;
 
@@ -717,7 +721,7 @@ _bfd_xcoff_canonicalize_dynamic_symtab (abfd, psyms)
 	    if (ldsym._l._l_name[i] == '\0')
 	      break;
 	  if (i < SYMNMLEN)
-	    symbuf->symbol.name = elsym->_l._l_name;
+	    symbuf->symbol.name = (char *) elsym->_l._l_name;
 	  else
 	    {
 	      char *c;
@@ -1938,8 +1942,7 @@ xcoff_link_add_symbols (abfd, info)
 	    /* Record the enclosing section in the tdata for this new
 	       section.  */
 	    csect->used_by_bfd =
-	      ((struct coff_section_tdata *)
-	       bfd_zalloc (abfd, sizeof (struct coff_section_tdata)));
+	      (PTR) bfd_zalloc (abfd, sizeof (struct coff_section_tdata));
 	    if (csect->used_by_bfd == NULL)
 	      goto error_return;
 	    coff_section_data (abfd, csect)->tdata =
@@ -2065,8 +2068,7 @@ xcoff_link_add_symbols (abfd, info)
 			 / symesz);
 
 	  csect->used_by_bfd =
-	    ((struct coff_section_tdata *)
-	     bfd_zalloc (abfd, sizeof (struct coff_section_tdata)));
+	    (PTR) bfd_zalloc (abfd, sizeof (struct coff_section_tdata));
 	  if (csect->used_by_bfd == NULL)
 	    goto error_return;
 	  coff_section_data (abfd, csect)->tdata =
