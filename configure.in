@@ -89,6 +89,7 @@ case "${host}" in
   m88k-motorola-sysv*)    host_makefile_frag=config/mh-delta88;;
   m88k-dg-dgux*)	  host_makefile_frag=config/mh-dgux ;;
   mips*-dec-ultrix*)      host_makefile_frag=config/mh-decstation ;;
+  mips*-sgi-irix5*)       host_makefile_frag=config/mh-irix5 ;;
   mips*-sgi-irix4*)       host_makefile_frag=config/mh-irix4 ;;
   mips*-sgi-irix3*)       host_makefile_frag=config/mh-sysv ;;
   mips*-*-sysv*)	  host_makefile_frag=config/mh-riscos ;;

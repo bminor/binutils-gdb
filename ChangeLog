@@ -1,3 +1,8 @@
+Thu Dec  2 14:35:54 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* configure.in (mips*-sgi-irix5*): New target; use mh-irix5.
+	* config/mh-irix5. New file for Irix 5.
+
 Wed Dec  1 17:00:33 1993  Jason Merrill  (jason@deneb.cygnus.com)
 
 	* Makefile.in (GZIPPROG): Renamed from GZIP, which gzip uses for
