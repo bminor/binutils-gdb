@@ -1,3 +1,25 @@
+2001-06-16  Andrew Cagney  <ac131313@redhat.com>
+
+	MI0 was the never enabled MI interface included in GDB 5.0.
+	* mi0-basics.exp: Copy mi-basics.exp.
+	* mi0-break.exp: Copy mi-break.exp.
+	* mi0-console.exp: Copy mi-console.exp.
+	* mi0-disassemble.exp: Copy mi-disassemble.exp.
+	* mi0-eval.exp: Copy mi-eval.exp.
+	* mi0-hack-cli.exp: Copy mi-hack-cli.exp.
+	* mi0-read-memory.exp: Copy mi-read-memory.exp.
+	* mi0-regs.exp: Copy mi-regs.exp.
+	* mi0-return.exp: Copy mi-return.exp.
+	* mi0-simplerun.exp: Copy mi-simplerun.exp.
+	* mi0-stack.exp: Copy mi-stack.exp.
+	* mi0-stepi.exp: Copy mi-stepi.exp.
+	* mi0-until.exp: Copy mi-until.exp.
+	* mi0-var-block.exp: Copy mi-var-block.exp.
+	* mi0-var-child.exp: Copy mi-var-child.exp.
+	* mi0-var-cmd.exp: Copy mi-var-cmd.exp.
+	* mi0-var-display.exp: Copy mi-var-display.exp.
+	* mi0-watch.exp: Copy mi-watch.exp.
+	
 2001-05-11  Fernando Nasser  <fnasser@redhat.com>
 
 	* mi-var-child.exp: Adjust for the fact that now (char *) can be
