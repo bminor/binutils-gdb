@@ -1,5 +1,5 @@
 /* tc-m68k.c -- Assemble for the m68k family
-   Copyright (C) 1987, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1987, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -315,36 +315,37 @@ static int current_architecture;
 struct m68k_cpu {
   unsigned long arch;
   const char *name;
+  int alias;
 };
 
 static const struct m68k_cpu archs[] = {
-  { m68000, "68000" },
-  { m68010, "68010" },
-  { m68020, "68020" },
-  { m68030, "68030" },
-  { m68040, "68040" },
-  { m68060, "68060" },
-  { cpu32,  "cpu32" },
-  { m68881, "68881" },
-  { m68851, "68851" },
+  { m68000, "68000", 0 },
+  { m68010, "68010", 0 },
+  { m68020, "68020", 0 },
+  { m68030, "68030", 0 },
+  { m68040, "68040", 0 },
+  { m68060, "68060", 0 },
+  { cpu32,  "cpu32", 0 },
+  { m68881, "68881", 0 },
+  { m68851, "68851", 0 },
   /* Aliases (effectively, so far as gas is concerned) for the above
      cpus.  */
-  { m68020, "68k" },
-  { m68000, "68302" },
-  { m68000, "68008" },
-  { m68000, "68ec000" },
-  { m68000, "68hc000" },
-  { m68000, "68hc001" },
-  { m68020, "68ec020" },
-  { m68030, "68ec030" },
-  { m68040, "68ec040" },
-  { cpu32,  "68330" },
-  { cpu32,  "68331" },
-  { cpu32,  "68332" },
-  { cpu32,  "68333" },
-  { cpu32,  "68340" },
-  { cpu32,  "68360" },
-  { m68881, "68882" },
+  { m68020, "68k", 1 },
+  { m68000, "68302", 1 },
+  { m68000, "68008", 1 },
+  { m68000, "68ec000", 1 },
+  { m68000, "68hc000", 1 },
+  { m68000, "68hc001", 1 },
+  { m68020, "68ec020", 1 },
+  { m68030, "68ec030", 1 },
+  { m68040, "68ec040", 1 },
+  { cpu32,  "68330", 1 },
+  { cpu32,  "68331", 1 },
+  { cpu32,  "68332", 1 },
+  { cpu32,  "68333", 1 },
+  { cpu32,  "68340", 1 },
+  { cpu32,  "68360", 1 },
+  { m68881, "68882", 1 },
 };
 
 static const int n_archs = sizeof (archs) / sizeof (archs[0]);
@@ -433,6 +434,8 @@ const pseudo_typeS md_pseudo_table[] =
 #ifdef OBJ_ELF
   {"swbeg", s_ignore, 0},
 #endif
+  {"extend", float_cons, 'x'},
+  {"ldouble", float_cons, 'x'},
 
   /* The following pseudo-ops are supported for MRI compatibility.  */
   {"chip", s_chip, 0},
@@ -592,7 +595,7 @@ tc_gen_reloc (section, fixp)
   arelent *reloc;
   bfd_reloc_code_real_type code;
 
-  if (fixP->fx_tcbit)
+  if (fixp->fx_tcbit)
     abort ();
 
 #define F(SZ,PCREL)		(((SZ) << 1) + (PCREL))
@@ -834,6 +837,11 @@ m68k_ip (instring)
 			   && ! isvar (&opP->disp)
 			   && (opP->disp.exp.X_op != O_constant
 			       || ! isword (opP->disp.exp.X_add_number)))
+		    losing++;
+		  else if (s[1] == 'W'
+			   && ! isvar (&opP->disp)
+			   && (opP->disp.exp.X_op != O_constant
+			       || ! issword (opP->disp.exp.X_add_number)))
 		    losing++;
 		  break;
 
@@ -1355,7 +1363,8 @@ m68k_ip (instring)
 		    for (idx = 0; idx < sizeof (archs) / sizeof (archs[0]);
 			 idx++)
 		      {
-			if (archs[idx].arch & ok_arch)
+			if ((archs[idx].arch & ok_arch)
+			    && ! archs[idx].alias)
 			  {
 			    if (got_one)
 			      {
@@ -1431,6 +1440,12 @@ m68k_ip (instring)
 		  break;
 		case 'w':
 		  if (!isword (nextword))
+		    opP->error = "operand out of range";
+		  addword (nextword);
+		  baseo = 0;
+		  break;
+		case 'W':
+		  if (!issword (nextword))
 		    opP->error = "operand out of range";
 		  addword (nextword);
 		  baseo = 0;
@@ -1924,6 +1939,13 @@ m68k_ip (instring)
 	      break;
 	    case 'w':
 	      if (!isword (tmpreg))
+		opP->error = "out of range";
+	      insop (tmpreg, opcode);
+	      if (isvar (&opP->disp))
+		the_ins.reloc[the_ins.nrel - 1].n = (opcode->m_codenum) * 2;
+	      break;
+	    case 'W':
+	      if (!issword (tmpreg))
 		opP->error = "out of range";
 	      insop (tmpreg, opcode);
 	      if (isvar (&opP->disp))
@@ -2510,6 +2532,7 @@ install_operand (mode, val)
       break;
     case 'b':
     case 'w':
+    case 'W':
     case 'l':
       break;
     case 'e':
@@ -5717,6 +5740,8 @@ s_mri_until (qual)
   colon (mri_control_stack->bottom);
 
   input_line_pointer = s;
+
+  pop_mri_control ();
 
   if (flag_mri)
     {

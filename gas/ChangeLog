@@ -1,5 +1,17 @@
 Wed Feb  7 14:12:03 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m68k.c (struct m68k_cpu): Add alias field.
+	(archs): Initialize new field.
+	(m68k_ip): Don't list alias names when listing CPUs which support
+	an instruction.
+
+	* as.c (main): Call parse_args before read_begin.
+	* app.c (do_scrub_chars): If flag_m68k_mri, don't put a dot in
+	front of generated pseudo-ops.
+	* read.c (potable): Ignore "name".
+	(s_app_file): Permit a single quote after the string, since one
+	may appear in m68k MRI mode.
+
 	* configure.in: Check for --enable-shared.  If linking against
 	shared BFD and opcodes, fix library name on SunOS, and try to set
 	-rpath reasonably.
