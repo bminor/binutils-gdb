@@ -1,3 +1,9 @@
+Wed Jan 14 17:52:33 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c (md_assemble): Add support for parsing parallel
+	instructions.
+	* cgen.c: Formatting changes to improve readability.
+
 Wed Jan 14 15:41:41 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mips.c (macro): Rework division code to avoid unfilled
