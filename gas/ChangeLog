@@ -1,3 +1,9 @@
+Tue Feb 20 21:48:03 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* config/tc-sparc.c (parse_keyword_arg): Accept leading '%'.
+	(sparc_ip): Accept %asr[1..31] for v8 and %asr[%16..31] for v9.
+	Recognize [uU] format args as sparclet cpregs.
+
 Tue Feb 20 22:25:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sh.c (sh_handle_align): Don't emit R_SH_ALIGN relocs
