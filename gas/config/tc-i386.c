@@ -1023,12 +1023,11 @@ int
 tc_i386_fix_adjustable (fixP)
      fixS *fixP;
 {
-#if defined (OBJ_ELF) || defined (TE_PE)
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined (TE_PE)
   /* Prevent all adjustments to global symbols, or else dynamic
      linking will not work correctly.  */
-  if (S_IS_EXTERN (fixP->fx_addsy))
-    return 0;
-  if (S_IS_WEAK (fixP->fx_addsy))
+  if (S_IS_EXTERNAL (fixP->fx_addsy)
+      || S_IS_WEAK (fixP->fx_addsy))
     return 0;
 #endif
   /* adjust_reloc_syms doesn't know about the GOT */
@@ -3765,12 +3764,19 @@ md_estimate_size_before_relax (fragP, segment)
   old_fr_fix = fragP->fr_fix;
   opcode = (unsigned char *) fragP->fr_opcode;
   /* We've already got fragP->fr_subtype right;  all we have to do is
-     check for un-relaxable symbols.  */
-  if (S_GET_SEGMENT (fragP->fr_symbol) != segment)
+     check for un-relaxable symbols.  On an ELF system, we can't relax
+     an externally visible symbol, because it may be overridden by a
+     shared library.  */
+  if (S_GET_SEGMENT (fragP->fr_symbol) != segment
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined (TE_PE)
+      || S_IS_EXTERNAL (fragP->fr_symbol)
+      || S_IS_WEAK (fragP->fr_symbol)
+#endif
+      )
     {
-      /* symbol is undefined in this segment */
-      int code16 = fragP->fr_subtype & CODE16;
-      int size = code16 ? 2 : 4;
+      /* Symbol is undefined in this segment, or we need to keep a
+	 reloc so that weak symbols can be overridden.  */
+      int size = (fragP->fr_subtype & CODE16) ? 2 : 4;
 #ifdef BFD_ASSEMBLER
       enum bfd_reloc_code_real reloc_type;
 #else
@@ -3785,7 +3791,7 @@ md_estimate_size_before_relax (fragP, segment)
 			most of the time. ERY  */
 	  && S_GET_SEGMENT(fragP->fr_symbol) == undefined_section)
 	reloc_type = BFD_RELOC_386_PLT32;
-      else if (code16)
+      else if (size == 2)
 	reloc_type = BFD_RELOC_16_PCREL;
       else
 	reloc_type = BFD_RELOC_32_PCREL;

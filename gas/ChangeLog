@@ -1,3 +1,10 @@
+2000-05-22  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-i386.c (tc_i386_fix_adjustable): Prevent adjustment
+	for OBJ_MAYBE_ELF too.  Use S_IS_EXTERNAL instead of S_IS_EXTERN.
+	(md_estimate_size_before_relax): Ensure jumps to weak and
+	externally visible symbols are relocatable.
+
 Sat May 20 16:41:55 2000  Hans-Peter Nilsson  <hp@axis.com>
 
 	* stabs.c (aout_process_stab): Make global.
