@@ -1270,7 +1270,7 @@ c-typeprint.o: c-typeprint.c c-lang.h $(defs_h) $(expression_h) \
 c-valprint.o: c-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(symtab_h) $(valprint_h) $(value_h) $(cp_abi_h)
 
-doublest.o: doublest.c $(defs_h) $(doublest_h) $(floatformat_h) \
+doublest.o: doublest.c $(defs_h) $(doublest_h) $(floatformat_h) $(gdbtypes_h) \
 	gdb_assert.h gdb_string.h
 
 f-lang.o: f-lang.c f-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
