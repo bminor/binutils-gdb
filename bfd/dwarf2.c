@@ -578,7 +578,8 @@ read_abbrevs (abfd, offset, stash)
 
       /* Read in abbrev header.  */
       cur_abbrev->number = abbrev_number;
-      cur_abbrev->tag = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
+      cur_abbrev->tag = (enum dwarf_tag)
+	read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
       abbrev_ptr += bytes_read;
       cur_abbrev->has_children = read_1_byte (abfd, abbrev_ptr);
       abbrev_ptr += 1;
@@ -601,8 +602,10 @@ read_abbrevs (abfd, offset, stash)
 		return 0;
 	    }
 
-	  cur_abbrev->attrs[cur_abbrev->num_attrs].name = abbrev_name;
-	  cur_abbrev->attrs[cur_abbrev->num_attrs++].form = abbrev_form;
+	  cur_abbrev->attrs[cur_abbrev->num_attrs].name
+	    = (enum dwarf_attribute) abbrev_name;
+	  cur_abbrev->attrs[cur_abbrev->num_attrs++].form
+	    = (enum dwarf_form) abbrev_form;
 	  abbrev_name = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
 	  abbrev_ptr += bytes_read;
 	  abbrev_form = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
@@ -646,7 +649,7 @@ read_attribute_value (attr, form, unit, info_ptr)
   struct dwarf_block *blk;
   bfd_size_type amt;
 
-  attr->form = form;
+  attr->form = (enum dwarf_form) form;
 
   switch (form)
     {
@@ -977,7 +980,8 @@ arange_add (unit, low_pc, high_pc)
     }
 
   /* Need to allocate a new arange and insert it into the arange list.  */
-  arange = bfd_zalloc (unit->abfd, (bfd_size_type) sizeof (*arange));
+  arange = (struct arange *)
+    bfd_zalloc (unit->abfd, (bfd_size_type) sizeof (*arange));
   arange->low = low_pc;
   arange->high = high_pc;
 
@@ -1733,18 +1737,18 @@ comp_unit_contains_address (unit, addr)
   struct arange *arange;
 
   if (unit->error)
-    return 0;
+    return false;
 
   arange = &unit->arange;
   do
     {
       if (addr >= arange->low && addr < arange->high)
-	return 1;
+	return true;
       arange = arange->next;
     }
   while (arange);
 
-  return 0;
+  return false;
 }
 
 /* If UNIT contains ADDR, set the output parameters to the values for
@@ -1802,7 +1806,7 @@ comp_unit_find_nearest_line (unit, addr, filename_ptr, functionname_ptr,
   line_p = lookup_address_in_line_info_table (unit->line_table, addr,
 					      function, filename_ptr,
 					      linenumber_ptr);
-  return line_p || func_p;
+  return (boolean) (line_p || func_p);
 }
 
 /* Locate a section in a BFD containing debugging info.  The search starts
