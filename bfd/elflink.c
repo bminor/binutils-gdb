@@ -2842,6 +2842,21 @@ elf_smash_syms (struct elf_link_hash_entry *h, void *data)
       return TRUE;
 
     case bfd_link_hash_undefined:
+      if (h->root.u.undef.abfd != inf->not_needed)
+	return TRUE;
+      if (h->root.u.undef.weak != NULL)
+	{
+	  /* Symbol was undefweak in u.undef.weak bfd, and has become
+	     undefined in as-needed lib.  Restore weak.  */
+	  h->root.type = bfd_link_hash_undefweak;
+	  h->root.u.undef.abfd = h->root.u.undef.weak;
+	  if (h->root.u.undef.next != NULL
+	      || inf->htab->root.undefs_tail == &h->root)
+	    inf->twiddled = TRUE;
+	  return TRUE;
+	}
+      break;
+
     case bfd_link_hash_undefweak:
       if (h->root.u.undef.abfd != inf->not_needed)
 	return TRUE;
@@ -2867,6 +2882,11 @@ elf_smash_syms (struct elf_link_hash_entry *h, void *data)
 	return TRUE;
       break;
     }
+
+  /* There is no way we can undo symbol table state from defined or
+     defweak back to undefined.  */
+  if (h->ref_regular)
+    abort ();
 
   /* Set sym back to newly created state, but keep undefs list pointer.  */
   bh = h->root.u.undef.next;

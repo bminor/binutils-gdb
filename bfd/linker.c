@@ -1604,6 +1604,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	  /* Make a new weak undefined symbol.  */
 	  h->type = bfd_link_hash_undefweak;
 	  h->u.undef.abfd = abfd;
+	  h->u.undef.weak = abfd;
 	  break;
 
 	case CDEF:

@@ -1,3 +1,9 @@
+2005-02-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* linker.c (_bfd_generic_link_add_one_symbol): Set u.undef.weak.
+	* elflink.c (elf_smash_syms): Restore symbols that were undefweak
+	before the as-needed lib was loaded.  Abort on unexpected refs.
+
 2005-02-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (elf_smash_syms): Expand comments.
