@@ -1339,7 +1339,7 @@ args=[],file="try.c",line="5"@}
 @subsubheading Synopsis
 
 @example
- -data-list-register-names [ ( @var{regno} )+ ]
+ -data-list-register-names [ [ -numbers ] ( @var{regno} )+ ]
 @end example
 
 Show a list of register names for the current target.  If no arguments
@@ -1348,6 +1348,9 @@ integer numbers are given as arguments, it will print a list of the
 names of the registers corresponding to the arguments.  To ensure
 consistency between a register name and its number, the output list may
 include empty register names.
+
+When the "-numbers" option is used, it will return the list of register
+numbers in addition to the register names.
 
 @subsubheading @value{GDBN} Command
 
