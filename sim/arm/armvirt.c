@@ -192,8 +192,8 @@ ARMul_ReLoadInstr (ARMul_State * state, ARMword address, ARMword isize)
   if ((isize == 2) && (address & 0x2))
     {
       /* We return the next two halfwords: */
-      ARMword lo = GetWord (state, address, TRUE);
-      ARMword hi = GetWord (state, address + 4, TRUE);
+      ARMword lo = GetWord (state, address, FALSE);
+      ARMword hi = GetWord (state, address + 4, FALSE);
 
       if (state->bigendSig == HIGH)
 	return (lo << 16) | (hi >> 16);
