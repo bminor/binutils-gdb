@@ -1,3 +1,9 @@
+2002-08-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	PRINT_VECTOR_INFO.
+	* gdb.texinfo (Vector Unit): Document "info vectors" command.
+
 2002-08-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.texinfo (Maintenance Commands): Document "maint print

@@ -173,6 +173,7 @@ struct gdbarch
   gdbarch_register_virtual_type_ftype *register_virtual_type;
   gdbarch_do_registers_info_ftype *do_registers_info;
   gdbarch_print_float_info_ftype *print_float_info;
+  gdbarch_print_vector_info_ftype *print_vector_info;
   gdbarch_register_sim_regno_ftype *register_sim_regno;
   gdbarch_register_bytes_ok_ftype *register_bytes_ok;
   gdbarch_cannot_fetch_register_ftype *cannot_fetch_register;
@@ -319,6 +320,7 @@ struct gdbarch startup_gdbarch =
   generic_register_size,
   0,
   generic_register_size,
+  0,
   0,
   0,
   0,
@@ -637,6 +639,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
     fprintf_unfiltered (log, "\n\tregister_virtual_type");
   /* Skip verify of do_registers_info, invalid_p == 0 */
   /* Skip verify of print_float_info, has predicate */
+  /* Skip verify of print_vector_info, has predicate */
   /* Skip verify of register_sim_regno, invalid_p == 0 */
   /* Skip verify of register_bytes_ok, has predicate */
   /* Skip verify of cannot_fetch_register, invalid_p == 0 */
@@ -1548,6 +1551,10 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
     fprintf_unfiltered (file,
                         "gdbarch_dump: print_float_info = 0x%08lx\n",
                         (long) current_gdbarch->print_float_info);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: print_vector_info = 0x%08lx\n",
+                        (long) current_gdbarch->print_vector_info);
 #ifdef PROLOGUE_FRAMELESS_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -3017,6 +3024,32 @@ set_gdbarch_print_float_info (struct gdbarch *gdbarch,
                               gdbarch_print_float_info_ftype print_float_info)
 {
   gdbarch->print_float_info = print_float_info;
+}
+
+int
+gdbarch_print_vector_info_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->print_vector_info != 0;
+}
+
+void
+gdbarch_print_vector_info (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame, const char *args)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->print_vector_info == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_print_vector_info invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_print_vector_info called\n");
+  gdbarch->print_vector_info (gdbarch, file, frame, args);
+}
+
+void
+set_gdbarch_print_vector_info (struct gdbarch *gdbarch,
+                               gdbarch_print_vector_info_ftype print_vector_info)
+{
+  gdbarch->print_vector_info = print_vector_info;
 }
 
 int

@@ -1710,6 +1710,39 @@ nofp_registers_info (char *addr_exp, int from_tty)
 {
   registers_info (addr_exp, 0);
 }
+
+static void
+print_vector_info (struct gdbarch *gdbarch, struct ui_file *file,
+		   struct frame_info *frame, const char *args)
+{
+  if (gdbarch_print_vector_info_p (gdbarch))
+    gdbarch_print_vector_info (gdbarch, file, frame, args);
+  else
+    {
+      int regnum;
+      int printed_something = 0;
+      for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
+	{
+	  if (TYPE_VECTOR (REGISTER_VIRTUAL_TYPE (regnum)))
+	    {
+	      printed_something = 1;
+#if 0
+	      gdbarch_print_registers_info (gdbarch, file, frame, regnum, 1);
+#else
+	      do_registers_info (regnum, 1);
+#endif
+	    }
+	}
+      if (!printed_something)
+	fprintf_filtered (file, "No vector information\n");
+    }
+}
+
+static void
+vector_info (char *args, int from_tty)
+{
+  print_vector_info (current_gdbarch, gdb_stdout, selected_frame, args);
+}
 
 
 /*
@@ -2082,6 +2115,9 @@ Register name as argument means describe only that register.");
 
   add_info ("float", float_info,
 	    "Print the status of the floating point unit\n");
+
+  add_info ("vector", vector_info,
+	    "Print the status of the vector unit\n");
 
   inferior_environ = make_environ ();
   init_environ (inferior_environ);

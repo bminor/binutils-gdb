@@ -3099,6 +3099,14 @@ If defined, use this to print the value of a register or all registers.
 If defined, then the @samp{info float} command will print information about
 the processor's floating point unit.
 
+@item PRINT_VECTOR_INFO()
+@findex PRINT_VECTOR_INFO
+If defined, then the @samp{info vector} command will call this function
+to print information about the processor's vector unit.
+
+By default, the @samp{info vector} command will print all vector
+registers (the register's type having the vector attribute).
+
 @item DWARF_REG_TO_REGNUM
 @findex DWARF_REG_TO_REGNUM
 Convert DWARF register number into @value{GDBN} regnum.  If not defined,

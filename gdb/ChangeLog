@@ -1,5 +1,14 @@
 2002-08-15  Andrew Cagney  <ac131313@redhat.com>
 
+	* infcmd.c (vector_info): New function.
+	(_initialize_infcmd): Add command "info vector".
+	(print_vector_info): New function.
+
+	* gdbarch.sh (PRINT_VECTOR_INFO): New method
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+2002-08-15  Andrew Cagney  <ac131313@redhat.com>
+
 	* infcmd.c (do_registers_info): Rename parameter ``fpregs'' to
 	``print_all''.  Only print vector registers when ``print_all''.
 

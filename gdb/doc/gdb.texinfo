@@ -5583,6 +5583,20 @@ floating point chip.  Currently, @samp{info float} is supported on
 the ARM and x86 machines.
 @end table
 
+@node Vector Unit
+@section Vector Unit
+@cindex vector unit
+
+Depending on the configuration, @value{GDBN} may be able to give you
+more information about the status of the vector unit.
+
+@table @code
+@kindex info vector
+@item info vector
+Display information about the vector unit.  The exact contents and
+layout vary depending on the hardware.
+@end table
+
 @node Memory Region Attributes
 @section Memory region attributes 
 @cindex memory region attributes
