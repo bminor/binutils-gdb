@@ -287,7 +287,7 @@ what (x, v)
     }
 }
 
-/* Read functions */
+/* Read functions.  */
 static int INLINE 
 rbat (x)
      word x;
@@ -389,7 +389,7 @@ IOMEM (addr, write, value)
 {
 }
 
-/* default to a 8 Mbyte (== 2^23) memory space */
+/* Default to a 8 Mbyte (== 2^23) memory space.  */
 static int sim_memory_size = 23;
 
 #define	MEM_SIZE_FLOOR	64
@@ -403,9 +403,9 @@ sim_size (power)
   if (cpu.mem)
     free (cpu.mem);
 
-  /* watch out for the '0 count' problem. There's probably a better
-     way.. e.g., why do we use 64 here? */
-  if (cpu.asregs.msize < 64)	/* ensure a boundary */
+  /* Watch out for the '0 count' problem. There's probably a better
+     way.. e.g., why do we use 64 here?  */
+  if (cpu.asregs.msize < 64)	/* Ensure a boundary.  */
     cpu.mem = (unsigned char *) calloc (64, (64 + cpu.asregs.msize) / 64);
   else
     cpu.mem = (unsigned char *) calloc (64, cpu.asregs.msize / 64);
