@@ -29,7 +29,7 @@ proc do_quad {} {
 if [istarget vax-*-* ] then {
     do_quad
 
-    if [istarget vax-*-*elf*] {
+    if { [istarget vax-*-*elf*] || [istarget vax-*-linux-gnu*] } then {
 	run_dump_test "elf-rel"
     }
 }

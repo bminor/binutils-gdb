@@ -1,9 +1,17 @@
+2005-04-01  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* gas/testsuite/gas/vax/elf-rel.d: Call gas with -k. Thanks to
+	Matt Thomas for figuring out.
+	* gas/testsuite/gas/vax/vax.exp: Run elf-rel.[sd] for NetBSD-ELF
+	and Linux.
+
 2005-04-01  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/bss.[sd]: New.
 	* gas/i386/i386.exp: Run new test.
 
 2005-04-01  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/i386/x86-64-pcrel.[sd]: New.
 	* gas/i386/i386.exp: Run new test.
 
