@@ -195,8 +195,7 @@ static struct so_list *so_list_head;	/* List of known shared objects */
 #ifndef SVR4_SHARED_LIBS
 
 static CORE_ADDR
-LM_ADDR (so)
-     struct so_list *so;
+LM_ADDR (struct so_list *so)
 {
 #if defined (HAVE_STRUCT_LINK_MAP32)
   if (bfd_get_arch_size (exec_bfd) == 32)
@@ -207,8 +206,7 @@ LM_ADDR (so)
 }
 
 static CORE_ADDR
-LM_NEXT (so)
-     struct so_list *so;
+LM_NEXT (struct so_list *so)
 {
 #if defined (HAVE_STRUCT_LINK_MAP32)
   if (bfd_get_arch_size (exec_bfd) == 32)
@@ -219,8 +217,7 @@ LM_NEXT (so)
 }
 
 static CORE_ADDR
-LM_NAME (so)
-     struct so_list *so;
+LM_NAME (struct so_list *so)
 {
 #if defined (HAVE_STRUCT_LINK_MAP32)
   if (bfd_get_arch_size (exec_bfd) == 32)
@@ -231,8 +228,7 @@ LM_NAME (so)
 }
 
 static int 
-IGNORE_FIRST_LINK_MAP_ENTRY (so)
-     struct so_list *so;
+IGNORE_FIRST_LINK_MAP_ENTRY (struct so_list *so)
 {
   return 0;
 }
@@ -240,8 +236,7 @@ IGNORE_FIRST_LINK_MAP_ENTRY (so)
 #else /* SVR4_SHARED_LIBS */
 
 static CORE_ADDR
-LM_ADDR (so)
-     struct so_list *so;
+LM_ADDR (struct so_list *so)
 {
 #if defined (HAVE_STRUCT_LINK_MAP32)
   if (bfd_get_arch_size (exec_bfd) == 32)
@@ -252,8 +247,7 @@ LM_ADDR (so)
 }
 
 static CORE_ADDR
-LM_NEXT (so)
-     struct so_list *so;
+LM_NEXT (struct so_list *so)
 {
 #if defined (HAVE_STRUCT_LINK_MAP32)
   if (bfd_get_arch_size (exec_bfd) == 32)
@@ -264,8 +258,7 @@ LM_NEXT (so)
 }
 
 static CORE_ADDR
-LM_NAME (so)
-     struct so_list *so;
+LM_NAME (struct so_list *so)
 {
 #if defined (HAVE_STRUCT_LINK_MAP32)
   if (bfd_get_arch_size (exec_bfd) == 32)
@@ -276,8 +269,7 @@ LM_NAME (so)
 }
 
 static int
-IGNORE_FIRST_LINK_MAP_ENTRY (so)
-     struct so_list *so;
+IGNORE_FIRST_LINK_MAP_ENTRY (struct so_list *so)
 {
 #if defined (HAVE_STRUCT_LINK_MAP32)
   if (bfd_get_arch_size (exec_bfd) == 32)
@@ -1068,7 +1060,7 @@ first_link_map_member (void)
 
   SYNOPSIS
 
-  void open_symbol_file_object (int from_tty)
+  void open_symbol_file_object (int *from_tty)
 
   DESCRIPTION
 
@@ -1077,11 +1069,13 @@ first_link_map_member (void)
   name is here, we can open it.  Useful when attaching to a process
   without first loading its symbol file.
 
- */
+  If FROM_TTYP dereferences to a non-zero integer, allow messages to
+  be printed.  This parameter is a pointer rather than an int because
+  open_symbol_file_object() is called via catch_errors() and
+  catch_errors() requires a pointer argument. */
 
 static int
-open_symbol_file_object (from_ttyp)
-     int *from_ttyp;	/* sneak past catch_errors */
+open_symbol_file_object (int *from_ttyp)
 {
   CORE_ADDR lm;
   char *filename;
