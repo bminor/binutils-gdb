@@ -37,6 +37,12 @@ static struct bfd_link_hash_table *elf_s390_link_hash_table_create
 static boolean elf_s390_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
+static asection *elf_s390_gc_mark_hook
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+static boolean elf_s390_gc_sweep_hook
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
 static boolean elf_s390_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static boolean elf_s390_size_dynamic_sections
@@ -49,6 +55,7 @@ static boolean elf_s390_finish_dynamic_symbol
 	   Elf_Internal_Sym *));
 static boolean elf_s390_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+static boolean elf_s390_object_p PARAMS ((bfd *));
 
 #define USE_RELA 1		/* We want RELA relocations, not REL.  */
 
@@ -107,7 +114,7 @@ static reloc_howto_type elf_howto_table[] =
 static reloc_howto_type elf64_s390_vtinherit_howto =
   HOWTO (R_390_GNU_VTINHERIT, 0,4,0,false,0,complain_overflow_dont, NULL, "R_390_GNU_VTINHERIT", false,0, 0, false);
 static reloc_howto_type elf64_s390_vtentry_howto =
-  HOWTO (R_390_GNU_VTENTRY, 0,4,0,false,0,complain_overflow_dont, _bfd_elf_rel_vtable_reloc_fn,"R_390_GNU_VTENTRY", false,0,0, false); 
+  HOWTO (R_390_GNU_VTENTRY, 0,4,0,false,0,complain_overflow_dont, _bfd_elf_rel_vtable_reloc_fn,"R_390_GNU_VTENTRY", false,0,0, false);
 
 static reloc_howto_type *
 elf_s390_reloc_type_lookup (abfd, code)
@@ -176,7 +183,7 @@ elf_s390_reloc_type_lookup (abfd, code)
   case BFD_RELOC_390_GOTENT:
     return &elf_howto_table[(int) R_390_GOTENT];
   default:
-    break;                                         
+    break;
   }
   return 0;
 }
@@ -203,7 +210,7 @@ elf_s390_info_to_howto (abfd, cache_ptr, dst)
     default:
       BFD_ASSERT (ELF64_R_TYPE(dst->r_info) < (unsigned int) R_390_max);
       cache_ptr->howto = &elf_howto_table[ELF64_R_TYPE(dst->r_info)];
-    }     
+    }
 }
 
 static boolean
@@ -232,7 +239,7 @@ elf_s390_is_local_label_name (abfd, name)
 /* The size in bytes of the first entry in the procedure linkage table.  */
 #define PLT_FIRST_ENTRY_SIZE 32
 /* The size in bytes of an entry in the procedure linkage table.  */
-#define PLT_ENTRY_SIZE 32 
+#define PLT_ENTRY_SIZE 32
 
 #define GOT_ENTRY_SIZE 8
 
@@ -246,7 +253,7 @@ elf_s390_is_local_label_name (abfd, name)
    are needed to load an address in a register and execute
    a branch( or just saving the address)
 
-   Furthermore, only r 0 and 1 are free to use!!!  */ 
+   Furthermore, only r 0 and 1 are free to use!!!  */
 
 /* The first 3 words in the GOT are then reserved.
    Word 0 is the address of the dynamic table.
@@ -258,7 +265,7 @@ elf_s390_is_local_label_name (abfd, name)
    The GOT holds the address in the PLT to be executed.
    The loader then gets:
    24(15) =  Pointer to the structure describing the object.
-   28(15) =  Offset in symbol table                                             
+   28(15) =  Offset in symbol table
    The loader  must  then find the module where the function is
    and insert the address in the GOT.
 
@@ -468,7 +475,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
       if (r_symndx < symtab_hdr->sh_info)
 	h = NULL;
       else
-	h = sym_hashes[r_symndx - symtab_hdr->sh_info];      
+	h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
       /* Some relocs require a global offset table.  */
       if (dynobj == NULL)
@@ -542,7 +549,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 		      if (! bfd_elf64_link_record_dynamic_symbol (info, h))
 			return false;
 		    }
-		  
+
 		  sgot->_raw_size += 8;
 		  srelgot->_raw_size += sizeof (Elf64_External_Rela);
 		}
@@ -551,7 +558,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 	    }
 	  else
 	    {
-     	      /* This is a global offset table entry for a local symbol.  */
+	      /* This is a global offset table entry for a local symbol.  */
 	      if (local_got_refcounts == NULL)
 		{
 		  size_t size;
@@ -635,7 +642,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 	  if (info->shared
               && (sec->flags & SEC_ALLOC) != 0
 	      && (ELF64_R_TYPE (rel->r_info) == R_390_8
-		  || ELF64_R_TYPE (rel->r_info) == R_390_16 
+		  || ELF64_R_TYPE (rel->r_info) == R_390_16
 		  || ELF64_R_TYPE (rel->r_info) == R_390_32
 		  || ELF64_R_TYPE (rel->r_info) == R_390_64
 		  || (h != NULL
@@ -736,7 +743,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
           if (!_bfd_elf64_gc_record_vtentry (abfd, sec, h, rel->r_addend))
             return false;
           break;
-                   
+
 	default:
 	  break;
 	}
@@ -1448,8 +1455,8 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
-          	      input_section, rel->r_offset,
-	 	     (!info->shared || info->no_undefined
+	      input_section, rel->r_offset,
+		     (!info->shared || info->no_undefined
 		      || ELF_ST_VISIBILITY (h->other)))))
 		return false;
 	      relocation = 0;
@@ -1556,7 +1563,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	    relocation += sgot->output_section->vma;
 
           break;
- 
+
         case R_390_GOTOFF:
           /* Relocation is relative to the start of the global offset
              table.  */
@@ -1692,7 +1699,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
                 }
               else if (r_type == R_390_PC16 ||
                        r_type == R_390_PC16DBL ||
-		       r_type == R_390_PC32 || 
+		       r_type == R_390_PC32 ||
 		       r_type == R_390_PC32DBL ||
 		       r_type == R_390_PC64)
                 {
@@ -1816,7 +1823,7 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
       srela = bfd_get_section_by_name (dynobj, ".rela.plt");
       BFD_ASSERT (splt != NULL && sgot != NULL && srela != NULL);
 
-      /* Calc. index no. 
+      /* Calc. index no.
          Current offset - size first entry / entry size.  */
       plt_index = (h->plt.offset - PLT_FIRST_ENTRY_SIZE) / PLT_ENTRY_SIZE;
 
@@ -2072,7 +2079,7 @@ elf_s390_finish_dynamic_sections (output_bfd, info)
 		      splt->contents + 8);
 	}
 
-      elf_section_data (splt->output_section)->this_hdr.sh_entsize = 
+      elf_section_data (splt->output_section)->this_hdr.sh_entsize =
 	PLT_ENTRY_SIZE;
     }
 

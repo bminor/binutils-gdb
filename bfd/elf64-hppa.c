@@ -198,9 +198,17 @@ static boolean elf64_hppa_adjust_dynamic_symbol
 static boolean elf64_hppa_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
+static boolean elf64_hppa_link_output_symbol_hook
+PARAMS ((bfd *abfd, struct bfd_link_info *, const char *,
+	 Elf_Internal_Sym *, asection *input_sec));
+
 static boolean elf64_hppa_finish_dynamic_symbol
   PARAMS ((bfd *, struct bfd_link_info *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+
+static int elf64_hppa_additional_program_headers PARAMS ((bfd *));
+
+static boolean elf64_hppa_modify_segment_map PARAMS ((bfd *));
 
 static boolean elf64_hppa_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
@@ -2658,7 +2666,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_object_p		elf64_hppa_object_p
 #define elf_backend_final_write_processing \
 					elf_hppa_final_write_processing
-#define elf_backend_fake_sections 	elf_hppa_fake_sections
+#define elf_backend_fake_sections	elf_hppa_fake_sections
 #define elf_backend_add_symbol_hook	elf_hppa_add_symbol_hook
 
 #define elf_backend_relocate_section	    elf_hppa_relocate_section

@@ -72,6 +72,10 @@ static struct bfd_link_hash_table *elf_cris_link_hash_table_create
   PARAMS ((bfd *));
 static boolean elf_cris_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+static boolean cris_elf_check_relocs
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
+
 static boolean elf_cris_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf_cris_finish_dynamic_symbol
@@ -2908,7 +2912,7 @@ elf_cris_discard_excess_program_dynamics (h, inf)
 	  asection *srelgot;
 
 	  BFD_ASSERT (dynobj != NULL);
-	  
+
 	  srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
 
 	  BFD_ASSERT (srelgot != NULL);

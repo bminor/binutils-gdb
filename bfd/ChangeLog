@@ -1,5 +1,13 @@
 2001-08-10  Andreas Jaeger  <aj@suse.de>
 
+	* elf64-sparc.c: Add missing prototypes.
+	* elf32-cris.c: Likewise.
+	* elf32-i370.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-s390.c: Likewise.
+
+2001-08-10  Andreas Jaeger  <aj@suse.de>
+
 	* elf64-x86-64.c (elf64_x86_64_elf_object_p): Make static.
 	Add prototypes where needed.
 

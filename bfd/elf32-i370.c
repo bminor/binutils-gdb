@@ -253,6 +253,9 @@ static reloc_howto_type i370_elf_howto_raw[] =
 };
 
 static void i370_elf_howto_init PARAMS ((void));
+static reloc_howto_type *i370_elf_reloc_type_lookup
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
+
 static void i370_elf_info_to_howto PARAMS ((bfd *abfd, arelent *cache_ptr,
 					    Elf32_Internal_Rela *dst));
 static boolean i370_elf_set_private_flags PARAMS ((bfd *, flagword));
@@ -309,6 +312,8 @@ static boolean i370_elf_relocate_section PARAMS ((bfd *,
 						  Elf_Internal_Rela *relocs,
 						  Elf_Internal_Sym *local_syms,
 						  asection **));
+static void i370_elf_post_process_headers
+  PARAMS ((bfd *, struct bfd_link_info *));
 
 static boolean i370_elf_create_dynamic_sections PARAMS ((bfd *,
 							 struct bfd_link_info *));
@@ -1709,7 +1714,7 @@ int i370_noop()
 #define elf_backend_add_symbol_hook \
   (boolean (*) PARAMS ((bfd *, struct bfd_link_info *, \
 			const Elf_Internal_Sym *, const char **, flagword *, \
-			asection **, bfd_vma *))) 		i370_noop
+			asection **, bfd_vma *)))		i370_noop
 #define elf_backend_finish_dynamic_symbol \
   (boolean (*) PARAMS ((bfd *, struct bfd_link_info *, \
 			struct elf_link_hash_entry *, \

@@ -35,31 +35,34 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define MINUS_ONE (~ (bfd_vma) 0)
 
 static struct bfd_link_hash_table * sparc64_elf_bfd_link_hash_table_create
-  PARAMS((bfd *));
+  PARAMS ((bfd *));
+static bfd_reloc_status_type init_insn_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *,
+	   bfd *, bfd_vma *, bfd_vma *));
 static reloc_howto_type *sparc64_elf_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void sparc64_elf_info_to_howto
   PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 
 static void sparc64_elf_build_plt
-  PARAMS((bfd *, unsigned char *, int));
+  PARAMS ((bfd *, unsigned char *, int));
 static bfd_vma sparc64_elf_plt_entry_offset
-  PARAMS((int));
+  PARAMS ((int));
 static bfd_vma sparc64_elf_plt_ptr_offset
-  PARAMS((int, int));
+  PARAMS ((int, int));
 
 static boolean sparc64_elf_check_relocs
-  PARAMS((bfd *, struct bfd_link_info *, asection *sec,
-	  const Elf_Internal_Rela *));
+  PARAMS ((bfd *, struct bfd_link_info *, asection *sec,
+	   const Elf_Internal_Rela *));
 static boolean sparc64_elf_adjust_dynamic_symbol
-  PARAMS((struct bfd_link_info *, struct elf_link_hash_entry *));
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static boolean sparc64_elf_size_dynamic_sections
-  PARAMS((bfd *, struct bfd_link_info *));
+  PARAMS ((bfd *, struct bfd_link_info *));
 static int sparc64_elf_get_symbol_type
   PARAMS (( Elf_Internal_Sym *, int));
 static boolean sparc64_elf_add_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
-        const char **, flagword *, asection **, bfd_vma *));
+	   const char **, flagword *, asection **, bfd_vma *));
 static void sparc64_elf_symbol_processing
   PARAMS ((bfd *, asymbol *));
 
@@ -68,11 +71,18 @@ static boolean sparc64_elf_copy_private_bfd_data
 static boolean sparc64_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 
+static const char *sparc64_elf_print_symbol_all
+  PARAMS ((bfd *, PTR, asymbol *));
 static boolean sparc64_elf_relax_section
   PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *));
 static boolean sparc64_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+static boolean sparc64_elf_finish_dynamic_symbol
+  PARAMS ((bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
+	   Elf_Internal_Sym *));
+static boolean sparc64_elf_finish_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
 static boolean sparc64_elf_object_p PARAMS ((bfd *));
 static long sparc64_elf_get_reloc_upper_bound PARAMS ((bfd *, asection *));
 static long sparc64_elf_get_dynamic_reloc_upper_bound PARAMS ((bfd *));
@@ -3025,8 +3035,8 @@ sparc64_elf_print_symbol_all (abfd, filep, symbol)
   fprintf (file, "REG_%c%c%11s%c%c    R", "GOLI" [reg / 8], '0' + (reg & 7), "",
 		 ((type & BSF_LOCAL)
 		  ? (type & BSF_GLOBAL) ? '!' : 'l'
-  	          : (type & BSF_GLOBAL) ? 'g' : ' '),
-  	         (type & BSF_WEAK) ? 'w' : ' ');
+	          : (type & BSF_GLOBAL) ? 'g' : ' '),
+	         (type & BSF_WEAK) ? 'w' : ' ');
   if (symbol->name == NULL || symbol->name [0] == '\0')
     return "#scratch";
   else
