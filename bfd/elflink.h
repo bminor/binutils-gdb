@@ -2983,6 +2983,25 @@ elf_fix_symbol_flags (h, eif)
 	    }
 	}
     }
+  else
+    {
+      /* Unfortunately, ELF_LINK_NON_ELF is only correct if the symbol
+         was first seen in a non-ELF file.  Fortunately, if the symbol
+         was first seen in an ELF file, we're probably OK unless the
+         symbol was defined in a non-ELF file.  Catch that case here.
+         FIXME: We're still in trouble if the symbol was first seen in
+         a dynamic object, and then later in a non-ELF regular object.  */
+      if ((h->root.type == bfd_link_hash_defined
+	   || h->root.type == bfd_link_hash_defweak)
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
+	  && (h->root.u.def.section->owner != NULL
+	      ? (bfd_get_flavour (h->root.u.def.section->owner)
+		 != bfd_target_elf_flavour)
+	      : (bfd_is_abs_section (h->root.u.def.section)
+		 && (h->elf_link_hash_flags
+		     & ELF_LINK_HASH_DEF_DYNAMIC) == 0)))
+	h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+    }
 
   /* If this is a final link, and the symbol was defined as a common
      symbol in a regular object file, and there was no definition in
