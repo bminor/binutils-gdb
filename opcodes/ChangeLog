@@ -1,4 +1,10 @@
+2003-02-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* hppa-dis.c: Formatting.
+
 2003-02-25  Matthew Wilcox  <willy@debian.org>
+
+	* hppa-dis.c (print_insn_hppa): Implement fcnv instruction modifiers.
 
 	* hppa-dis.c (print_insn_hppa <2 bit space register>): Do not print
 	the space register when the value is zero.
