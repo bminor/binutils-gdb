@@ -370,56 +370,6 @@ proc gdb_continue_to_breakpoint {name} {
 }
 
 
-# A regular expression matching the output GDB produces when it
-# reports an internal error.
-set gdb_internal_error_regexp ".*A problem internal to GDB has been detected"
-
-
-# gdb_internal_error_resync TESTNAME
-#
-# Answer the questions GDB asks after it reports an internal error
-# until we get back to a GDB prompt, as part of the test named
-# TESTNAME.  Decline to quit the debugging session, and decline to
-# create a core file.
-#
-# This procedure just answers whatever questions come up until it sees
-# a GDB prompt; it doesn't require you to have matched the input up to
-# any specific point.  However, it only answers questions it sees in
-# the output itself, so if you've matched a question, you had better
-# answer it yourself before calling this.
-#
-# The variable `gdb_internal_error_regexp' is set up to match the
-# internal error message, but none of the questions that follow it, so
-# you can write code like this:
-# 
-# gdb_expect {
-#     ...
-#     -re $gdb_internal_error_regexp {
-#         gdb_internal_error_resync "$message (internal error)"
-#     }
-#     ...
-# }
-proc gdb_internal_error_resync {testname} {
-    global gdb_prompt
-
-    gdb_expect {
-        -re "Quit this debugging session\\? \\(y or n\\) $" {
-            send_gdb "n\n"
-            exp_continue
-        }
-        -re "Create a core file of GDB\\? \\(y or n\\) $" {
-            send_gdb "n\n"
-            exp_continue
-        }
-        -re "$gdb_prompt $" {
-            # We're resynchronized.
-        }
-        timeout {
-            fail "$testname (internal error resync timeout)"
-        }
-    }
-}
-  
 
 # gdb_test COMMAND PATTERN MESSAGE QUESTION RESPONSE
 # Send a command to gdb; test the result.
@@ -445,7 +395,6 @@ proc gdb_test { args } {
     global verbose
     global gdb_prompt
     global GDB
-    global gdb_internal_error_regexp
     upvar timeout timeout
 
     if [llength $args]>2 then {
@@ -528,10 +477,6 @@ proc gdb_test { args } {
 	}
     }
     gdb_expect $tmt {
-         -re $gdb_internal_error_regexp {
-             fail "$message"
-             gdb_internal_error_resync "$message (internal error)"
-         }
 	 -re "\\*\\*\\* DOSEXIT code.*" {
 	     if { $message != "" } {
 		 fail "$message";
