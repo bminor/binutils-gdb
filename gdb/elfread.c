@@ -43,6 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "objfiles.h"
 #include "buildsym.h"
 #include "gdb-stabs.h"
+#include <string.h>
 
 #define STREQ(a,b) (strcmp((a),(b))==0)
 

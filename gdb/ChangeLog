@@ -1,3 +1,9 @@
+Wed Nov  4 15:27:31 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* elfread.c, mipsread.c:  Include <string.h>.
+	* i386-stub.c:  Include "ansidecl.h" to deal with prototypes.
+	* serial.h:  Add prototype for serial_restore().	
+
 Wed Nov  4 11:13:25 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* minsyms.c (lookup_minimal_symbol_by_pc): subtract 1, not 2, from

@@ -75,3 +75,7 @@ int serial_write PARAMS ((const char *str, int len));
 /* Close the serial port */
 
 void serial_close PARAMS ((void));
+
+/* Restore the serial port to the state saved in oldstate */
+
+void serial_restore PARAMS ((int desc, struct ttystate oldstate));
