@@ -1,3 +1,19 @@
+Wed Jan  4 18:56:27 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* lib/ld.exp: Use [which $ld] rather than [file exists $ld] to see
+	if the linker exists.
+
+Wed Dec 14 16:39:03 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* lib/ld.exp (prune_system_crud): Define if not already defined,
+	in case the user isn't using the newest DejaGnu version that we
+	haven't released to the net yet.
+
+Fri Dec  2 14:17:02 1994  Ian Lance Taylor  <ian@rtl.cygnus.com>
+
+	* config/default.exp: Define objdump if it is not defined.
+	* ld-empic/*: New tests to test -membedded-pic code.
+
 Mon Nov 28 11:24:36 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* ld-bootstrap/bootstrap.exp: Pass cmp output through

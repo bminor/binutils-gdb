@@ -3,7 +3,7 @@
 #	extract and print the version number of ld
 #
 proc default_ld_version { ld } {
-    if { [file exists $ld] == 0 } then {
+    if { [which $ld] == 0 } then {
 	perror "$ld does not exist"
 	exit 1
     }
@@ -24,7 +24,7 @@ proc default_ld_relocate { ld target objects } {
     
     global HOSTING_EMU
     
-    if { [file exists $ld] == 0 } then {
+    if { [which $ld] == 0 } then {
 	perror "$ld does not exist"
 	return 0
     }
@@ -56,7 +56,7 @@ proc default_ld_link { ld target objects } {
     set objs "$HOSTING_CRT0 $objects"
     set libs "$HOSTING_LIBS"
     
-    if { [file exists $ld] == 0 } then {
+    if { [which $ld] == 0 } then {
 	perror "$ld does not exist"
 	return 0
     }
@@ -80,7 +80,7 @@ proc default_ld_link { ld target objects } {
 #
 proc default_ld_simple_link { ld target objects } {
     
-    if { [file exists $ld] == 0 } then {
+    if { [which $ld] == 0 } then {
 	perror "$ld does not exist"
 	return 0
     }
