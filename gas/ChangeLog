@@ -1,5 +1,8 @@
 Wed Oct 27 11:48:56 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/tc-m68k.c (m68k_ip): Adjust offsets for PC relative
+	fixups.  Add 6 for long 7.3 case, 2 for short 7.2 case.
+
 	* config/obj-ecoff.c (obj_ecoff_ent): Ignore an optional number
 	after a .ent directive.
 
