@@ -1,3 +1,24 @@
+2003-09-30  Chris Demetriou  <cgd@broadcom.com>
+
+	* configure.in (mipsisa64r2, mipsisa64r2el, mipsisa64r2*): New CPUs.
+	* configure: Regenerate.
+	* config/tc-mips.c (imm2_expr): New variable.
+	(md_assemble, mips16_ip): Initialize imm2_expr.
+	(ISA_HAS_64BIT_REGS, ISA_HAS_DROR, ISA_HAS_ROR): Add ISA_MIPS64R2.
+	(macro_build): Handle +A, +B, +C, +E, +F, +G, and +H format operands.
+	(macro): Handle M_DEXT and M_DINS.
+	(validate_mips_insn): Handle +E, +F, +G, +H, and +I format operands.
+	(mips_ip): Likewise.
+	(OPTION_MIPS64R2): New define.
+	(md_longopts): New entry for -mips64r2 (OPTION_MIPS64R2).
+	OPTION_ASE_BASE): Increase to compensate for OPTION_MIPS64R2.
+	(md_parse_option): Handle OPTION_MIPS64R2.
+	(s_mipsset): Handle setting "mips64r2" ISA.
+	(mips_cpu_info_table): Add mips64r2.
+	(md_show_usage): Document -mips64r2 option.
+	* doc/as.texinfo: Docuemnt -mips64r2 option.
+	* doc/c-mips.texi: Likewise.
+
 2003-09-27  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* config/tc-hppa.c (pa_ip): Check for invalid 64-bit conditions.

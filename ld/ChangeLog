@@ -1,3 +1,7 @@
+2003-09-30  Chris Demetriou  <cgd@broadcom.com>
+
+	* ldmain.c (get_emulation): Ignore "-mips64r2".
+
 2003-09-03  Robert Millan  <robertmh@gnu.org>
 
 	* configure.host: Match GNU/KFreeBSD with new kfreebsd*-gnu

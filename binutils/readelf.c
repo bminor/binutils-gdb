@@ -1916,6 +1916,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    case E_MIPS_ARCH_32: strcat (buf, ", mips32"); break;
 	    case E_MIPS_ARCH_32R2: strcat (buf, ", mips32r2"); break;
 	    case E_MIPS_ARCH_64: strcat (buf, ", mips64"); break;
+	    case E_MIPS_ARCH_64R2: strcat (buf, ", mips64r2"); break;
 	    default: strcat (buf, ", unknown ISA"); break;
 	    }
 

@@ -1,3 +1,15 @@
+2003-09-30  Chris Demetriou  <cgd@broadcom.com>
+
+	* archures.c (bfd_mach_mipsisa64r2): New define.
+	* bfd-in2.h: Regenerate.
+	* aoutx.h (NAME(aout,machine_type)): Handle bfd_mach_mipsisa64r2.
+	* cpu-mips.c (I_mipsisa64r2): New enum value.
+	(arch_info_struct): Add entry for I_mipsisa64r2.
+	* elfxx-mips.c (_bfd_elf_mips_mach)
+	(_bfd_mips_elf_print_private_bfd_data): Handle E_MIPS_ARCH_64R2.
+	(mips_set_isa_flags): Add bfd_mach_mipsisa64r2 case.
+	(mips_mach_extensions): Add entry for bfd_mach_mipsisa64r2.
+
 2003-09-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (elfNN_hpux_backend_symbol_processing): New.

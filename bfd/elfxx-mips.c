@@ -4056,6 +4056,10 @@ _bfd_elf_mips_mach (flags)
 	case E_MIPS_ARCH_32R2:
 	  return bfd_mach_mipsisa32r2;
 	  break;
+
+	case E_MIPS_ARCH_64R2:
+	  return bfd_mach_mipsisa64r2;
+	  break;
 	}
     }
 
@@ -7192,6 +7196,10 @@ mips_set_isa_flags (abfd)
     case bfd_mach_mipsisa32r2:
       val = E_MIPS_ARCH_32R2;
       break;
+
+    case bfd_mach_mipsisa64r2:
+      val = E_MIPS_ARCH_64R2;
+      break;
     }
   elf_elfheader (abfd)->e_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH);
   elf_elfheader (abfd)->e_flags |= val;
@@ -8929,6 +8937,7 @@ struct mips_mach_extension {
 
 static const struct mips_mach_extension mips_mach_extensions[] = {
   /* MIPS64 extensions.  */
+  { bfd_mach_mipsisa64r2, bfd_mach_mipsisa64 },
   { bfd_mach_mips_sb1, bfd_mach_mipsisa64 },
 
   /* MIPS V extensions.  */
@@ -9275,6 +9284,8 @@ _bfd_mips_elf_print_private_bfd_data (abfd, ptr)
     fprintf (file, _(" [mips64]"));
   else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_32R2)
     fprintf (file, _(" [mips32r2]"));
+  else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_64R2)
+    fprintf (file, _(" [mips64r2]"));
   else
     fprintf (file, _(" [unknown ISA]"));
 

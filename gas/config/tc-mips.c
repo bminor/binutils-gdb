@@ -266,18 +266,20 @@ static int mips_32bitmode = 0;
    || (ISA) == ISA_MIPS4             \
    || (ISA) == ISA_MIPS5             \
    || (ISA) == ISA_MIPS64            \
+   || (ISA) == ISA_MIPS64R2          \
    )
 
 /* Return true if ISA supports 64-bit right rotate (dror et al.)
    instructions.  */
 #define ISA_HAS_DROR(ISA) (	\
-   0				\
+   (ISA) == ISA_MIPS64R2	\
    )
 
 /* Return true if ISA supports 32-bit right rotate (ror et al.)
    instructions.  */
 #define ISA_HAS_ROR(ISA) (	\
    (ISA) == ISA_MIPS32R2	\
+   || (ISA) == ISA_MIPS64R2	\
    )
 
 #define HAVE_32BIT_GPRS		                   \
@@ -1025,6 +1027,7 @@ static char *expr_end;
    mips_ip.  */
 
 static expressionS imm_expr;
+static expressionS imm2_expr;
 static expressionS offset_expr;
 
 /* Relocs associated with imm_expr and offset_expr.  */
@@ -1323,6 +1326,7 @@ md_assemble (char *str)
     = {BFD_RELOC_UNUSED, BFD_RELOC_UNUSED, BFD_RELOC_UNUSED};
 
   imm_expr.X_op = O_absent;
+  imm2_expr.X_op = O_absent;
   offset_expr.X_op = O_absent;
   imm_reloc[0] = BFD_RELOC_UNUSED;
   imm_reloc[1] = BFD_RELOC_UNUSED;
@@ -2870,6 +2874,41 @@ macro_build (char *place, int *counter, expressionS *ep, const char *name,
 	case ',':
 	case '(':
 	case ')':
+	  continue;
+
+	case '+':
+	  switch (*fmt++)
+	    {
+	    case 'A':
+	    case 'E':
+	      insn.insn_opcode |= (va_arg (args, int)
+				   & OP_MASK_SHAMT) << OP_SH_SHAMT;
+	      continue;
+
+	    case 'B':
+	    case 'F':
+	      /* Note that in the macro case, these arguments are already
+		 in MSB form.  (When handling the instruction in the
+		 non-macro case, these arguments are sizes from which
+		 MSB values must be calculated.)  */
+	      insn.insn_opcode |= (va_arg (args, int)
+				   & OP_MASK_INSMSB) << OP_SH_INSMSB;
+	      continue;
+
+	    case 'C':
+	    case 'G':
+	    case 'H':
+	      /* Note that in the macro case, these arguments are already
+		 in MSBD form.  (When handling the instruction in the
+		 non-macro case, these arguments are sizes from which
+		 MSBD values must be calculated.)  */
+	      insn.insn_opcode |= (va_arg (args, int)
+				   & OP_MASK_EXTMSBD) << OP_SH_EXTMSBD;
+	      continue;
+
+	    default:
+	      internalError ();
+	    }
 	  continue;
 
 	case 't':
@@ -4436,6 +4475,104 @@ macro (struct mips_cl_insn *ip)
       macro_build (NULL, &icnt, &offset_expr, likely ? "bnel" : "bne",
 		   "s,t,p", AT, 0);
       break;
+
+    case M_DEXT:
+      {
+	unsigned long pos;
+	unsigned long size;
+
+        if (imm_expr.X_op != O_constant || imm2_expr.X_op != O_constant)
+	  {
+	    as_bad (_("Unsupported large constant"));
+	    pos = size = 1;
+	  }
+	else
+	  {
+	    pos = (unsigned long) imm_expr.X_add_number;
+	    size = (unsigned long) imm2_expr.X_add_number;
+	  }
+
+	if (pos > 63)
+	  {
+	    as_bad (_("Improper position (%lu)"), pos);
+	    pos = 1;
+	  }
+        if (size == 0 || size > 64
+	    || (pos + size - 1) > 63)
+	  {
+	    as_bad (_("Improper extract size (%lu, position %lu)"),
+		    size, pos);
+	    size = 1;
+	  }
+
+	if (size <= 32 && pos < 32)
+	  {
+	    s = "dext";
+	    fmt = "t,r,+A,+C";
+	  }
+	else if (size <= 32)
+	  {
+	    s = "dextu";
+	    fmt = "t,r,+E,+H";
+	  }
+	else
+	  {
+	    s = "dextm";
+	    fmt = "t,r,+A,+G";
+	  }
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s,
+		     fmt, treg, sreg, pos, size - 1);
+      }
+      return;
+
+    case M_DINS:
+      {
+	unsigned long pos;
+	unsigned long size;
+
+        if (imm_expr.X_op != O_constant || imm2_expr.X_op != O_constant)
+	  {
+	    as_bad (_("Unsupported large constant"));
+	    pos = size = 1;
+	  }
+	else
+	  {
+	    pos = (unsigned long) imm_expr.X_add_number;
+	    size = (unsigned long) imm2_expr.X_add_number;
+	  }
+
+	if (pos > 63)
+	  {
+	    as_bad (_("Improper position (%lu)"), pos);
+	    pos = 1;
+	  }
+        if (size == 0 || size > 64
+	    || (pos + size - 1) > 63)
+	  {
+	    as_bad (_("Improper insert size (%lu, position %lu)"),
+		    size, pos);
+	    size = 1;
+	  }
+
+	if (pos < 32 && (pos + size - 1) < 32)
+	  {
+	    s = "dins";
+	    fmt = "t,r,+A,+B";
+	  }
+	else if (pos >= 32)
+	  {
+	    s = "dinsu";
+	    fmt = "t,r,+E,+F";
+	  }
+	else
+	  {
+	    s = "dinsm";
+	    fmt = "t,r,+A,+F";
+	  }
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s,
+		     fmt, treg, sreg, pos, pos + size - 1);
+      }
+      return;
 
     case M_DDIV_3:
       dbl = 1;
@@ -8060,6 +8197,11 @@ validate_mips_insn (const struct mips_opcode *opc)
 	  case 'C': USE_BITS (OP_MASK_EXTMSBD,	OP_SH_EXTMSBD);	break;
 	  case 'D': USE_BITS (OP_MASK_RD,	OP_SH_RD);
 		    USE_BITS (OP_MASK_SEL,	OP_SH_SEL);	break;
+	  case 'E': USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
+	  case 'F': USE_BITS (OP_MASK_INSMSB,	OP_SH_INSMSB);	break;
+	  case 'G': USE_BITS (OP_MASK_EXTMSBD,	OP_SH_EXTMSBD);	break;
+	  case 'H': USE_BITS (OP_MASK_EXTMSBD,	OP_SH_EXTMSBD);	break;
+	  case 'I': break;
 	  default:
 	    as_bad (_("internal: bad mips opcode (unknown extension operand type `+%c'): %s %s"),
 		    c, opc->name, opc->args);
@@ -8319,6 +8461,12 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		case 'A':		/* ins/ext position, becomes LSB.  */
 		  limlo = 0;
 		  limhi = 31;
+		  goto do_lsb;
+		case 'E':
+		  limlo = 32;
+		  limhi = 63;
+		  goto do_lsb;
+do_lsb:
 		  my_getExpression (&imm_expr, s);
 		  check_absolute_expr (ip, &imm_expr);
 		  if ((unsigned long) imm_expr.X_add_number < limlo
@@ -8338,6 +8486,12 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		case 'B':		/* ins size, becomes MSB.  */
 		  limlo = 1;
 		  limhi = 32;
+		  goto do_msb;
+		case 'F':
+		  limlo = 33;
+		  limhi = 64;
+		  goto do_msb;
+do_msb:
 		  my_getExpression (&imm_expr, s);
 		  check_absolute_expr (ip, &imm_expr);
 		  /* Check for negative input so that small negative numbers
@@ -8364,6 +8518,16 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		case 'C':		/* ext size, becomes MSBD.  */
 		  limlo = 1;
 		  limhi = 32;
+		  goto do_msbd;
+		case 'G':
+		  limlo = 33;
+		  limhi = 64;
+		  goto do_msbd;
+		case 'H':
+		  limlo = 33;
+		  limhi = 64;
+		  goto do_msbd;
+do_msbd:
 		  my_getExpression (&imm_expr, s);
 		  check_absolute_expr (ip, &imm_expr);
 		  /* Check for negative input so that small negative numbers
@@ -8390,6 +8554,15 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		case 'D':
 		  /* +D is for disassembly only; never match.  */
 		  break;
+
+		case 'I':
+		  /* "+I" is like "I", except that imm2_expr is used.  */
+		  my_getExpression (&imm2_expr, s);
+		  if (imm2_expr.X_op != O_big
+		      && imm2_expr.X_op != O_constant)
+		  insn_error = _("absolute expression required");
+		  s = expr_end;
+		  continue;
 
 		default:
 		  as_bad (_("internal: bad mips opcode (unknown extension operand type `+%c'): %s %s"),
@@ -9358,6 +9531,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
       imm_reloc[0] = BFD_RELOC_UNUSED;
       imm_reloc[1] = BFD_RELOC_UNUSED;
       imm_reloc[2] = BFD_RELOC_UNUSED;
+      imm2_expr.X_op = O_absent;
       offset_expr.X_op = O_absent;
       offset_reloc[0] = BFD_RELOC_UNUSED;
       offset_reloc[1] = BFD_RELOC_UNUSED;
@@ -10256,9 +10430,11 @@ struct option md_longopts[] =
   {"mips64", no_argument, NULL, OPTION_MIPS64},
 #define OPTION_MIPS32R2 (OPTION_ARCH_BASE + 9)
   {"mips32r2", no_argument, NULL, OPTION_MIPS32R2},
+#define OPTION_MIPS64R2 (OPTION_ARCH_BASE + 10)
+  {"mips64r2", no_argument, NULL, OPTION_MIPS64R2},
 
   /* Options which specify Application Specific Extensions (ASEs).  */
-#define OPTION_ASE_BASE (OPTION_ARCH_BASE + 10)
+#define OPTION_ASE_BASE (OPTION_ARCH_BASE + 11)
 #define OPTION_MIPS16 (OPTION_ASE_BASE + 0)
   {"mips16", no_argument, NULL, OPTION_MIPS16},
 #define OPTION_NO_MIPS16 (OPTION_ASE_BASE + 1)
@@ -10461,6 +10637,10 @@ md_parse_option (int c, char *arg)
 
     case OPTION_MIPS32R2:
       file_mips_isa = ISA_MIPS32R2;
+      break;
+
+    case OPTION_MIPS64R2:
+      file_mips_isa = ISA_MIPS64R2;
       break;
 
     case OPTION_MIPS64:
@@ -12020,6 +12200,8 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 	mips_opts.isa = ISA_MIPS32R2;
       else if (strcmp (name, "mips64") == 0)
 	mips_opts.isa = ISA_MIPS64;
+      else if (strcmp (name, "mips64r2") == 0)
+	mips_opts.isa = ISA_MIPS64R2;
       else if (strcmp (name, "arch=default") == 0)
 	{
 	  reset = 1;
@@ -12057,6 +12239,7 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 	case ISA_MIPS4:
 	case ISA_MIPS5:
 	case ISA_MIPS64:
+	case ISA_MIPS64R2:
 	  mips_opts.gp32 = 0;
 	  mips_opts.fp32 = 0;
 	  break;
@@ -14302,6 +14485,7 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "mips32",         1,      ISA_MIPS32,     CPU_MIPS32 },
   { "mips32r2",       1,      ISA_MIPS32R2,   CPU_MIPS32R2 },
   { "mips64",         1,      ISA_MIPS64,     CPU_MIPS64 },
+  { "mips64r2",       1,      ISA_MIPS64R2,   CPU_MIPS64R2 },
 
   /* MIPS I */
   { "r3000",          0,      ISA_MIPS1,      CPU_R3000 },
@@ -14533,6 +14717,7 @@ MIPS options:\n\
 -mips32                 generate MIPS32 ISA instructions\n\
 -mips32r2               generate MIPS32 release 2 ISA instructions\n\
 -mips64                 generate MIPS64 ISA instructions\n\
+-mips64r2               generate MIPS64 release 2 ISA instructions\n\
 -march=CPU/-mtune=CPU	generate code/schedule for CPU, where CPU is one of:\n"));
 
   first = 1;

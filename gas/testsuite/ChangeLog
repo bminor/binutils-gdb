@@ -1,3 +1,17 @@
+2003-09-30  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/cp0-names-mips64r2.d: New file.
+	* gas/mips/cp0sel-names-mips64r2.d: New file.
+	* gas/mips/elf_arch_mips64r2.d: New file.
+	* gas/mips/hwr-names-mips64r2.d: New file.
+	* gas/mips/mips32r2-ill-fp64.l: New file.
+	* gas/mips/mips32r2-ill-fp64.s: New file.
+	* gas/mips/mips64r2-ill.l: New file.
+	* gas/mips/mips64r2-ill.s: New file.
+	* gas/mips/mips64r2.d: New file.
+	* gas/mips/mips64r2.s: New file.
+	* gas/mips/mips.exp: Define "mips64r2" arch, and run new tests.
+
 2003-09-29  Dave Brolley  <brolley@redhat.com>
 
 	* gas/frv/allinsn.s (nldqi): Removed. Replaced with nop.

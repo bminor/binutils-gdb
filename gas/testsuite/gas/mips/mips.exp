@@ -366,6 +366,10 @@ mips_arch_create mips32r2 32	mips32	{ ror } \
 mips_arch_create mips64	64	mips5	{ mips32 } \
 			{ -march=mips64 -mtune=mips64 } { -mmips:isa64 } \
 			{ mipsisa64-*-* mipsisa64el-*-* }
+mips_arch_create mips64r2 64	mips64	{ mips32r2 ror } \
+			{ -march=mips64r2 -mtune=mips64r2 } \
+			{ -mmips:isa64r2 } \
+			{ mipsisa64r2-*-* mipsisa64r2el-*-* }
 mips_arch_create r3000 	32	mips1	{} \
 			{ -march=r3000 -mtune=r3000 } { -mmips:3000 }
 mips_arch_create r3900 	32	mips1	{ gpr_ilocks } \
@@ -560,9 +564,15 @@ if { [istarget mips*-*-*] } then {
     run_dump_test_arches "mips32"	[mips_arch_list_matching mips32]
 
     run_dump_test_arches "mips32r2"	[mips_arch_list_matching mips32r2]
-    run_list_test_arches "mips32r2-ill" "-32" [mips_arch_list_matching mips32r2]
+    run_list_test_arches "mips32r2-ill" "-32" \
+			 [mips_arch_list_matching mips32r2 gpr32]
+    run_list_test_arches "mips32r2-ill-fp64" "-mabi=o64" \
+			 [mips_arch_list_matching mips32r2 gpr64]
 
     run_dump_test_arches "mips64"	[mips_arch_list_matching mips64]
+
+    run_dump_test_arches "mips64r2"	[mips_arch_list_matching mips64r2]
+    run_list_test_arches "mips64r2-ill" "" [mips_arch_list_matching mips64r2]
 
     run_dump_test "set-arch"
 
@@ -609,6 +619,7 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "elf_arch_mips32"
 	run_dump_test "elf_arch_mips32r2"
 	run_dump_test "elf_arch_mips64"
+	run_dump_test "elf_arch_mips64r2"
 
 	# Verify that ASE markings are handled properly.
 	if { !$no_mips16 } { run_dump_test "elf_ase_mips16" }
@@ -690,14 +701,17 @@ if { [istarget mips*-*-*] } then {
     run_dump_test "cp0-names-mips32"
     run_dump_test "cp0-names-mips32r2"
     run_dump_test "cp0-names-mips64"
+    run_dump_test "cp0-names-mips64r2"
     run_dump_test "cp0-names-sb1"
 
     run_dump_test "cp0sel-names-numeric"
     run_dump_test "cp0sel-names-mips32"
     run_dump_test "cp0sel-names-mips32r2"
     run_dump_test "cp0sel-names-mips64"
+    run_dump_test "cp0sel-names-mips64r2"
     run_dump_test "cp0sel-names-sb1"
 
     run_dump_test "hwr-names-numeric"
     run_dump_test "hwr-names-mips32r2"
+    run_dump_test "hwr-names-mips64r2"
 }

@@ -391,7 +391,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mabi}=@var{ABI}] [@b{-32}] [@b{-n32}] [@b{-64}] [@b{-mfp32}] [@b{-mgp32}]
    [@b{-march}=@var{CPU}] [@b{-mtune}=@var{CPU}] [@b{-mips1}] [@b{-mips2}]
    [@b{-mips3}] [@b{-mips4}] [@b{-mips5}] [@b{-mips32}] [@b{-mips32r2}]
-   [@b{-mips64}]
+   [@b{-mips64}] [@b{-mips64r2}]
    [@b{-construct-floats}] [@b{-no-construct-floats}]
    [@b{-trap}] [@b{-no-break}] [@b{-break}] [@b{-no-trap}]
    [@b{-mfix7000}] [@b{-mno-fix7000}]
@@ -927,15 +927,17 @@ Generate ``little endian'' format output.
 @itemx -mips32
 @itemx -mips32r2
 @itemx -mips64
+@itemx -mips64r2
 Generate code for a particular @sc{mips} Instruction Set Architecture level.
 @samp{-mips1} is an alias for @samp{-march=r3000}, @samp{-mips2} is an
 alias for @samp{-march=r6000}, @samp{-mips3} is an alias for
 @samp{-march=r4000} and @samp{-mips4} is an alias for @samp{-march=r8000}.
-@samp{-mips5}, @samp{-mips32}, @samp{-mips32r2}, and @samp{-mips64}
+@samp{-mips5}, @samp{-mips32}, @samp{-mips32r2}, @samp{-mips64}, and
+@samp{-mips64r2}
 correspond to generic
-@samp{MIPS V}, @samp{MIPS32}, @samp{MIPS32 Release 2}, and
-@samp{MIPS64} ISA processors,
-respectively.
+@samp{MIPS V}, @samp{MIPS32}, @samp{MIPS32 Release 2}, @samp{MIPS64},
+and @samp{MIPS64 Release 2}
+ISA processors, respectively.
 
 @item -march=@var{CPU}
 Generate code for a particular @sc{mips} cpu.

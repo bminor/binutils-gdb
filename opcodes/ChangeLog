@@ -1,3 +1,13 @@
+2003-09-30  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips-dis.c (mips_arch_choices): Add entry for "mips64r2"
+	(print_insn_args): Add handing for +E, +F, +G, and +H.
+	* mips-opc.c (I65): New define for MIPS64r2.
+	(mips_builtin_opcodes): Add "dext", "dextm", "dextu", "dins",
+	"dinsm", "dinsu", "drotl", "drotr", "drotr32", "drotrv", "dsbh",
+	and "dshd" for MIPS64r2.  Adjust "dror", "dror32", and "drorv" to
+	be supported on MIPS64r2.
+
 2003-09-24  Dave Brolley  <brolley@redhat.com>
 
 	* frv-desc.c, frv-opc.c, frv-opc.h: Regenerated.

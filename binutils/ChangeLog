@@ -1,3 +1,7 @@
+2003-09-30  Chris Demetriou  <cgd@broadcom.com>
+
+	* readelf.c (get_machine_flags): Handle E_MIPS_ARCH_64R2.
+
 2003-09-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (dump_relocations): Support SHN_IA_64_ANSI_COMMON.
