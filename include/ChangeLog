@@ -1,3 +1,8 @@
+Wed Nov 26 16:47:58 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* callback.h (CB_SYSCALL): Consistantly use names for prototype
+	arguments.
+
 Wed Nov 26 11:39:30 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* callback.h (CB_SYSCALL): Change byte count arguments to

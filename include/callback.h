@@ -208,9 +208,9 @@ typedef struct cb_syscall {
      argument here.  We mimic sim_{read,write} for now.  Be careful to
      test any changes with -Wall -Werror, mixed signed comparisons
      will get you.  */
-  int (*read_mem) PARAMS ((host_callback *, struct cb_syscall *,
+  int (*read_mem) PARAMS ((host_callback *cb, struct cb_syscall *sc,
 			   unsigned long taddr, char *buf, int bytes));
-  int (*write_mem) PARAMS ((host_callback *, struct cb_syscall *,
+  int (*write_mem) PARAMS ((host_callback *cb, struct cb_syscall *sc,
 			    unsigned long taddr, const char *buf, int bytes));
 
   /* For sanity checking, should be last entry.  */
