@@ -1,5 +1,5 @@
 /* BFD back-end for HP PA-RISC ELF files.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    Original code by
@@ -64,28 +64,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
    PIC long branch stub:
    :		b,l .+8,%r1
-   :		addil L'X - ($PIC_pcrel$0 - 4),%r1
-   :		be,n R'X - ($PIC_pcrel$0 - 8)(%sr4,%r1)
+   :		addil LR'X - ($PIC_pcrel$0 - 4),%r1
+   :		be,n RR'X - ($PIC_pcrel$0 - 8)(%sr4,%r1)
 
    Import stub to call shared library routine from normal object file
    (single sub-space version)
-   :		addil L'lt_ptr+ltoff,%dp	; get procedure entry point
-   :		ldw R'lt_ptr+ltoff(%r1),%r21
+   :		addil LR'lt_ptr+ltoff,%dp	; get procedure entry point
+   :		ldw RR'lt_ptr+ltoff(%r1),%r21
    :            bv %r0(%r21)
-   :		ldw R'lt_ptr+ltoff+4(%r1),%r19	; get new dlt value.
+   :		ldw RR'lt_ptr+ltoff+4(%r1),%r19	; get new dlt value.
 
    Import stub to call shared library routine from shared library
    (single sub-space version)
-   :		addil L'ltoff,%r19		; get procedure entry point
-   :		ldw R'ltoff(%r1),%r21
+   :		addil LR'ltoff,%r19		; get procedure entry point
+   :		ldw RR'ltoff(%r1),%r21
    :            bv %r0(%r21)
-   :		ldw R'ltoff+4(%r1),%r19		; get new dlt value.
+   :		ldw RR'ltoff+4(%r1),%r19	; get new dlt value.
 
    Import stub to call shared library routine from normal object file
    (multiple sub-space support)
-   :		addil L'lt_ptr+ltoff,%dp	; get procedure entry point
-   :		ldw R'lt_ptr+ltoff(%r1),%r21
-   :		ldw R'lt_ptr+ltoff+4(%r1),%r19	; get new dlt value.
+   :		addil LR'lt_ptr+ltoff,%dp	; get procedure entry point
+   :		ldw RR'lt_ptr+ltoff(%r1),%r21
+   :		ldw RR'lt_ptr+ltoff+4(%r1),%r19	; get new dlt value.
    :		ldsid (%r21),%r1
    :		mtsp %r1,%sr0
    :		be 0(%sr0,%r21)			; branch to target
@@ -93,9 +93,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
    Import stub to call shared library routine from shared library
    (multiple sub-space support)
-   :		addil L'ltoff,%r19		; get procedure entry point
-   :		ldw R'ltoff(%r1),%r21
-   :		ldw R'ltoff+4(%r1),%r19		; get new dlt value.
+   :		addil LR'ltoff,%r19		; get procedure entry point
+   :		ldw RR'ltoff(%r1),%r21
+   :		ldw RR'ltoff+4(%r1),%r19	; get new dlt value.
    :		ldsid (%r21),%r1
    :		mtsp %r1,%sr0
    :		be 0(%sr0,%r21)			; branch to target
@@ -225,6 +225,10 @@ struct elf32_hppa_link_hash_entry {
 #endif
 
   /* Set during a static link if we detect a function is PIC.  */
+  unsigned int maybe_pic_call:1;
+
+  /* Set if the only reason we need a .plt entry is for a non-PIC to
+     PIC function call.  */
   unsigned int pic_call:1;
 
   /* Set if this symbol is used by a plabel reloc.  */
@@ -490,6 +494,7 @@ hppa_link_hash_newfunc (entry, table, string)
 #if ! LONG_BRANCH_PIC_IN_SHLIB || RELATIVE_DYNAMIC_RELOCS
       ret->reloc_entries = NULL;
 #endif
+      ret->maybe_pic_call = 0;
       ret->pic_call = 0;
       ret->plabel = 0;
       ret->plt_abs = 0;
@@ -721,7 +726,7 @@ hppa_type_of_stub (input_sec, rel, hash, destination)
 	      && hash->elf.plt.offset != (bfd_vma) -1)
 	  || hash->elf.root.type == bfd_link_hash_undefweak
 	  || hash->elf.root.type == bfd_link_hash_undefined
-	  || hash->pic_call))
+	  || (hash->maybe_pic_call && !(input_sec->flags & SEC_HAS_GOT_REF))))
     {
       /* If output_section is NULL, then it's a symbol defined in a
 	 shared library.  We will need an import stub.  Decide between
@@ -781,16 +786,16 @@ hppa_type_of_stub (input_sec, rel, hash, destination)
 #define BE_SR4_R1	0xe0202002	/* be,n  RR'XXX(%sr4,%r1)	*/
 
 #define BL_R1		0xe8200000	/* b,l   .+8,%r1		*/
-#define ADDIL_R1	0x28200000	/* addil L'XXX,%r1,%r1		*/
+#define ADDIL_R1	0x28200000	/* addil LR'XXX,%r1,%r1		*/
 #define DEPI_R1		0xd4201c1e	/* depi  0,31,2,%r1		*/
 
-#define ADDIL_DP	0x2b600000	/* addil L'XXX,%dp,%r1		*/
-#define LDW_R1_R21	0x48350000	/* ldw   R'XXX(%sr0,%r1),%r21	*/
+#define ADDIL_DP	0x2b600000	/* addil LR'XXX,%dp,%r1		*/
+#define LDW_R1_R21	0x48350000	/* ldw   RR'XXX(%sr0,%r1),%r21	*/
 #define BV_R0_R21	0xeaa0c000	/* bv    %r0(%r21)		*/
-#define LDW_R1_R19	0x48330000	/* ldw   R'XXX(%sr0,%r1),%r19	*/
+#define LDW_R1_R19	0x48330000	/* ldw   RR'XXX(%sr0,%r1),%r19	*/
 
-#define ADDIL_R19	0x2a600000	/* addil L'XXX,%r19,%r1		*/
-#define LDW_R1_DP	0x483b0000	/* ldw   R'XXX(%sr0,%r1),%dp	*/
+#define ADDIL_R19	0x2a600000	/* addil LR'XXX,%r19,%r1	*/
+#define LDW_R1_DP	0x483b0000	/* ldw   RR'XXX(%sr0,%r1),%dp	*/
 
 #define LDSID_R21_R1	0x02a010a1	/* ldsid (%sr0,%r21),%r1	*/
 #define MTSP_R1		0x00011820	/* mtsp  %r1,%sr0		*/
@@ -1890,6 +1895,14 @@ elf32_hppa_adjust_dynamic_symbol (info, h)
   if (h->type == STT_FUNC
       || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
+      if (!info->shared
+	  && h->plt.refcount > 0
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
+	  && (h->root.u.def.section->flags & SEC_HAS_GOT_REF) != 0)
+	{
+	  ((struct elf32_hppa_link_hash_entry *) h)->maybe_pic_call = 1;
+	}
+
       if (h->plt.refcount <= 0
 	  || ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
 	      && h->root.type != bfd_link_hash_defweak
@@ -1906,14 +1919,8 @@ elf32_hppa_adjust_dynamic_symbol (info, h)
 
 	  /* As a special sop to the hppa ABI, we keep a .plt entry
 	     for functions in sections containing PIC code.  */
-	  if (!info->shared
-	      && h->plt.refcount > 0
-	      && (h->root.type == bfd_link_hash_defined
-		  || h->root.type == bfd_link_hash_defweak)
-	      && (h->root.u.def.section->flags & SEC_HAS_GOT_REF) != 0)
-	    {
-	      ((struct elf32_hppa_link_hash_entry *) h)->pic_call = 1;
-	    }
+	  if (((struct elf32_hppa_link_hash_entry *) h)->maybe_pic_call)
+	    ((struct elf32_hppa_link_hash_entry *) h)->pic_call = 1;
 	  else
 	    {
 	      h->plt.offset = (bfd_vma) -1;
@@ -2059,6 +2066,7 @@ hppa_handle_PIC_calls (h, inf)
     }
 
   h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+  ((struct elf32_hppa_link_hash_entry *) h)->maybe_pic_call = 1;
   ((struct elf32_hppa_link_hash_entry *) h)->pic_call = 1;
 
   info = (struct bfd_link_info *) inf;
@@ -2138,7 +2146,7 @@ clobber_millicode_symbols (h, info)
   /* Note!  We only want to remove these from the dynamic symbol
      table.  Therefore we do not set ELF_LINK_FORCED_LOCAL.  */
   if (h->type == STT_PARISC_MILLI)
-    elf32_hppa_hide_symbol(info, h);
+    elf32_hppa_hide_symbol (info, h);
   return true;
 }
 
@@ -3244,11 +3252,12 @@ final_link_relocate (input_section, contents, rel, value, hplink, sym_sec, h)
 	 find the import stub in the stub hash.  */
       if (sym_sec == NULL
 	  || sym_sec->output_section == NULL
-	  || (h != NULL &&
-	      (h->pic_call
-	       || (h->elf.root.type == bfd_link_hash_defweak
-		   && h->elf.dynindx != -1
-		   && h->elf.plt.offset != (bfd_vma) -1))))
+	  || (h != NULL
+	      && ((h->maybe_pic_call
+		   && !(input_section->flags & SEC_HAS_GOT_REF))
+		  || (h->elf.root.type == bfd_link_hash_defweak
+		      && h->elf.dynindx != -1
+		      && h->elf.plt.offset != (bfd_vma) -1))))
 	{
 	  stub_entry = hppa_get_stub_entry (input_section, sym_sec,
 					    h, rel, hplink);

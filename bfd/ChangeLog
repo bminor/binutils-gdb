@@ -1,3 +1,18 @@
+2001-03-16  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf32-hppa.c (elf32_hppa_link_hash_entry): Add maybe_pic_call.
+	(hppa_link_hash_newfunc): Init it.
+	(hppa_type_of_stub): Only use non-PIC to PIC call stub if caller
+	section appears to be non-PIC.
+	(final_link_relocate): Likewise.
+	(elf32_hppa_adjust_dynamic_symbol): Set maybe_pic_call for any
+	possible candidate function, and set pic_call for those that will
+	only have a .plt entry for the PIC call stub.
+	(hppa_handle_PIC_calls): Set maybe_pic_call.
+
+	* elf32-hppa.c: Correct field selector in stub comments.
+	(clobber_millicode_symbols): Formatting fix.
+
 2001-03-11  Philip Blundell  <philb@gnu.org>
 
 	* configure.in: Set version to 2.11.
