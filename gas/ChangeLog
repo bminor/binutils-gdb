@@ -1,3 +1,10 @@
+1999-11-06  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-v850.c (v850_force_relocation): Force relocation
+        for weak symbols.
+	(v850_pcrel_from_selection): Do not compute a pcrel offset if
+        the symbol is weak.
+
 1999-11-05  Michael Meissner  <meissner@cygnus.com>
 
 	* expr.h (operatorT): Increase machine dependent operators to 16.

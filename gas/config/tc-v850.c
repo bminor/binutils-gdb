@@ -2260,7 +2260,7 @@ tc_gen_reloc (seg, fixp)
       return NULL;
     }
   
-  if (fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
+  if (   fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
       || fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT)
     reloc->addend = fixp->fx_offset;
   else
@@ -2290,16 +2290,14 @@ v850_pcrel_from_section (fixp, section)
      segT   section;
 {
   /* If the symbol is undefined, or in a section other than our own,
+     or it is weak (in which case it may well be in another section,
      then let the linker figure it out.  */
   if (fixp->fx_addsy != (symbolS *) NULL
       && (! S_IS_DEFINED (fixp->fx_addsy)
+	  || S_IS_WEAK (fixp->fx_addsy)
 	  || (S_GET_SEGMENT (fixp->fx_addsy) != section)))
-    {
-      /* The symbol is undefined/not in our section.
-	 Let the linker figure it out.  */
-      return 0;
-    }
-
+    return 0;
+  
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
 
@@ -2312,7 +2310,7 @@ md_apply_fix3 (fixp, valuep, seg)
   valueT value;
   char * where;
 
-  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+  if (   fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     {
       fixp->fx_done = 0;
@@ -2408,7 +2406,7 @@ md_apply_fix3 (fixp, valuep, seg)
    on the v850.  */
 void
 parse_cons_expression_v850 (exp)
-  expressionS *exp;
+  expressionS * exp;
 {
   /* See if there's a reloc prefix like hi() we have to handle.  */
   hold_cons_reloc = v850_reloc_prefix (NULL);
@@ -2422,7 +2420,7 @@ parse_cons_expression_v850 (exp)
    appropriate one based on the size of the expression.  */
 void
 cons_fix_new_v850 (frag, where, size, exp)
-     fragS *frag;
+     fragS * frag;
      int where;
      int size;
      expressionS *exp;
@@ -2442,37 +2440,42 @@ cons_fix_new_v850 (frag, where, size, exp)
   else
     fix_new (frag, where, size, NULL, 0, 0, hold_cons_reloc);
 }
+
 boolean
 v850_fix_adjustable (fixP)
-    fixS *fixP;
+    fixS * fixP;
 {
- 
   if (fixP->fx_addsy == NULL)
     return 1;
  
   /* Prevent all adjustments to global symbols. */
   if (S_IS_EXTERN (fixP->fx_addsy))
     return 0;
+  
   if (S_IS_WEAK (fixP->fx_addsy))
     return 0;
+  
   /* Don't adjust function names */
   if (S_IS_FUNCTION (fixP->fx_addsy))
     return 0;
 
   /* We need the symbol name for the VTABLE entries */
-  if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+  if (   fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
- 
+  
   return 1;
 }
  
 int
-v850_force_relocation (fixp)
-      struct fix *fixp;
+v850_force_relocation (fixP)
+      struct fix * fixP;
 {
-  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+  if (fixP->fx_addsy && S_IS_WEAK (fixP->fx_addsy))
+    return 1;
+  
+  if (   fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 1;
  
   return 0;
