@@ -1,7 +1,9 @@
 Thu Jul 15 10:55:59 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (em_m88kbcs.c): Correct dependency.
-	(scripttempl/m88kbcs.sc): It's ARCH, not arch.
+	* scripttempl/m88kbcs.sc: It's ARCH, not arch.  Removed TARGET
+	statement.  Changed OUTPUT_FORMAT to use ${OUTPUT_FORMAT}.
+	* emulparams/m88kbcs.sh: It's coff-m88kbcs, not m88kbcs.
 
 Wed Jul 14 21:42:53 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
