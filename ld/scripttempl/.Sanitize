@@ -33,6 +33,10 @@ elf.sc
 h8300.sc
 h8300h.sc
 h8500.sc
+h8500b.sc
+h8500c.sc
+h8500m.sc
+h8500s.sc
 hppaelf.sc
 i386coff.sc
 i960.sc

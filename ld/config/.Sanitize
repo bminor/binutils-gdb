@@ -28,6 +28,7 @@ alpha.mt
 alphaosf.mh
 coff-a29k.mt
 coff-h8300.mt
+coff-h8300h.mt
 coff-h8500.mt
 coff-sh.mt
 coff-sparc.mt
