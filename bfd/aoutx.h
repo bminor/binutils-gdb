@@ -3568,7 +3568,9 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 				  &finfo->strtab),
 		outsym->e_strx);
       PUT_WORD (output_bfd,
-		bfd_get_section_vma (input_bfd, obj_textsec (input_bfd)),
+		(bfd_get_section_vma (output_bfd,
+				      obj_textsec (input_bfd)->output_section)
+		 + obj_textsec (input_bfd)->output_offset),
 		outsym->e_value);
       ++obj_aout_external_sym_count (output_bfd);
       ++outsym;

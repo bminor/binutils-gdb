@@ -1,3 +1,8 @@
+Sun Jan 30 13:25:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* aoutx.h (aout_link_write_symbols): Write out correct value for
+	object file symbol.
+
 Fri Jan 28 18:34:05 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* hosts/vaxbsd.h (HOST_STACK_END_ADDR): Vax BSD doesn't define
