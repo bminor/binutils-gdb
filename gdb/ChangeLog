@@ -1,3 +1,9 @@
+2001-12-19  Jim Blandy  <jimb@redhat.com>
+
+	* c-lang.c (c_emit_char): Print ASCII 11 as '\v', to match
+	ISO C, and our parser.  Print ASCII 0 as '\0', since that's what
+	people are used to seeing.
+
 2001-12-18  Jim Blandy  <jimb@redhat.com>
 
 	* c-lang.c (c_printstr, c_builtin_types, cplus_builtin_types): 
