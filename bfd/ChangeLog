@@ -1,3 +1,12 @@
+Wed Aug 17 10:40:41 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coffgen.c (coff_get_normalized_symtab): If a C_FILE symbol has
+	no aux entries, use the symbol name as the file name.
+	(coff_find_nearest_line): Look for the right C_FILE symbol, rather
+	than always using the first one.  If there is a debugging symbol
+	after a function symbol, skip it.  Add the section VMA to the line
+	offset, since it was subtracted out in coff_slurp_line_table.
+
 Tue Aug 16 16:53:00 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_prep_headers): If writing some form of an executable,
