@@ -1,3 +1,8 @@
+Tue May  6 06:12:04 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* igen.c (print_itrace): Call trace_one_insn to trace
+	instructions, rather than doing it directly.
+
 Mon May  5 14:11:46 1997  Mike Meissner  <meissner@cygnus.com>
 
 	* gen-engine.c (engine_switch_leaf): Remove extra %s.

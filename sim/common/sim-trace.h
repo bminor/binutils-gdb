@@ -106,10 +106,16 @@ struct _sim_cpu;
 
 /* Non-zero if "--trace-insn" specified for CPU.  */
 #define TRACE_INSN_P(cpu) TRACE_P (cpu, TRACE_INSN_IDX)
+/* Non-zero if "--trace-linenum" specified for CPU.  */
+#define TRACE_LINENUM_P(cpu) TRACE_P (cpu, TRACE_LINENUM_IDX)
 /* Non-zero if "--trace-decode" specified for CPU.  */
 #define TRACE_DECODE_P(cpu) TRACE_P (cpu, TRACE_DECODE_IDX)
 /* Non-zero if "--trace-fpu" specified for CPU. */
 #define TRACE_FPU_P(cpu) TRACE_P (cpu, TRACE_FPU_IDX)
+
+extern void trace_one_insn PARAMS ((SIM_DESC, sim_cpu *, const char *, 
+				    int, int, address_word,
+				    const char *name));
 
 extern void trace_printf PARAMS ((SIM_DESC, sim_cpu *, const char *, ...))
      __attribute__((format (printf, 3, 4)));

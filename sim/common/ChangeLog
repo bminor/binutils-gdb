@@ -1,3 +1,16 @@
+Tue May  6 06:14:01 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* sim-trace.c (toplevel): Include bfd.h.
+	(trace_options): Note that --trace-linenum also turns on
+	--trace-insn.
+	(trace_option_handler): If --trace-linenum, also turn on
+	--trace-insn.
+	(trace_one_insn): New function to trace an instruction.  Support
+	--trace-linenum.
+
+	* sim-trace.h (TRACE_LINENUM_P): Define macro.
+	(trace_one_insn): Declare function.
+
 Mon May  5 14:08:34 1997  Mike Meissner  <meissner@cygnus.com>
 
 	* sim-trace.h (__attribute__): Define as nothing if not GNU C or

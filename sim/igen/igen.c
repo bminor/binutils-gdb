@@ -64,14 +64,14 @@ print_semantic_function_formal(lf *file)
 {
   int nr;
   if ((code & generate_with_icache))
-    nr = lf_printf(file, "SIM_DESC sd,\n %sidecode_cache *cache_entry,\n instruction_address cia",
-		   global_name_prefix);
+    nr = lf_printf(file, "SIM_DESC sd,\n %sidecode_cache *cache_entry,\n %sinstruction_address cia",
+		   global_name_prefix, global_name_prefix);
   else if (generate_smp)
-    nr = lf_printf(file, "sim_cpu *cpu,\n %sinstruction_word instruction,\n instruction_address cia",
-		   global_name_prefix);
+    nr = lf_printf(file, "sim_cpu *cpu,\n %sinstruction_word instruction,\n %sinstruction_address cia",
+		   global_name_prefix, global_name_prefix);
   else
-    nr = lf_printf(file, "SIM_DESC sd,\n %sinstruction_word instruction,\n instruction_address cia",
-		   global_name_prefix);
+    nr = lf_printf(file, "SIM_DESC sd,\n %sinstruction_word instruction,\n %sinstruction_address cia",
+		   global_name_prefix, global_name_prefix);
   return nr;
 }
 
@@ -92,7 +92,7 @@ int
 print_semantic_function_type(lf *file)
 {
   int nr;
-  nr = lf_printf(file, "instruction_address");
+  nr = lf_printf(file, "%sinstruction_address", global_name_prefix);
   return nr;
 }
 
@@ -108,7 +108,7 @@ print_icache_function_formal(lf *file)
   else
     nr += lf_printf(file, "SIM_DESC sd,\n");
   nr += lf_printf(file, " %sinstruction_word instruction,\n", global_name_prefix);
-  nr += lf_printf(file, " instruction_address cia,\n");
+  nr += lf_printf(file, " %sinstruction_address cia,\n", global_name_prefix);
   nr += lf_printf(file, " %sidecode_cache *cache_entry", global_name_prefix);
   return nr;
 }
@@ -248,18 +248,17 @@ print_itrace(lf *file,
 	     table_entry *file_entry,
 	     int idecode)
 {
-  const char *object = idecode ? "DECODE" : "INSN";
   lf_printf(file, "\n");
   lf_indent_suppress(file);
   lf_printf(file, "#if defined(WITH_TRACE)\n");
   lf_printf(file, "/* trace the instructions execution if enabled */\n");
-  lf_printf(file, "if (TRACE_%s_P (CPU)) {\n", object);
-  lf_printf(file, "  trace_printf (CPU,\n");
-  lf_printf(file, "    \"%s:%d:0x%%08lx:%%s\\n\", %s, %s);\n",
+  lf_printf(file, "if (TRACE_%s_P (CPU)) {\n", (idecode) ? "DECODE" : "INSN");
+  lf_printf(file, "  trace_one_insn (SD, CPU, \"%s\", %d, %d, %s, itable[MY_INDEX].name);\n",
 	    filter_filename(file_entry->file_name),
 	    file_entry->line_nr,
-	    ((code & generate_with_semantic_delayed_branch) ? "(long)cia.ip" : "(long)cia"),
-	    "itable[MY_INDEX].name");
+	    idecode,
+	    (code & generate_with_semantic_delayed_branch) ? "cia.ip" : "cia");
+	    
   lf_printf(file, "}\n");
   lf_indent_suppress(file);
   lf_printf(file, "#endif\n");

@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sim-main.h"
 #include "sim-io.h"
 #include "sim-options.h"
+#include "bfd.h"
 
 #ifdef HAVE_STRING_H
 #include <string.h>
@@ -28,6 +29,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif
+#endif
+
+#ifndef SIZE_LOCATION
+#define SIZE_LOCATION 20
+#endif
+
+#ifndef SIZE_PC
+#define SIZE_PC 6
+#endif
+
+#ifndef SIZE_LINE_NUMBER
+#define SIZE_LINE_NUMBER 4
 #endif
 
 static MODULE_UNINSTALL_FN trace_uninstall;
@@ -61,7 +74,7 @@ static const OPTION trace_options[] =
       '\0', NULL, "Perform instruction extraction tracing",
       trace_option_handler },
   { {"trace-linenum", no_argument, NULL, OPTION_TRACE_LINENUM},
-      '\0', NULL, "Perform line number tracing",
+      '\0', NULL, "Perform line number tracing (implies --trace-insn)",
       trace_option_handler },
   { {"trace-memory", no_argument, NULL, OPTION_TRACE_MEMORY},
       '\0', NULL, "Perform memory tracing",
@@ -135,11 +148,14 @@ trace_option_handler (sd, opt, arg)
       break;
 
     case OPTION_TRACE_LINENUM :
-      if (WITH_TRACE_LINENUM_P)
+      if (WITH_TRACE_LINENUM_P && WITH_TRACE_INSN_P)
 	for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	  CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_LINENUM_IDX] = 1;
+	  {
+	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_LINENUM_IDX] = 1;
+	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_INSN_IDX] = 1;
+	  }
       else
-	sim_io_eprintf (sd, "Line number tracing not compiled in, `--trace-linenum' ignored\n");
+	sim_io_eprintf (sd, "Line number or instruction tracing not compiled in, `--trace-linenum' ignored\n");
       break;
 
     case OPTION_TRACE_MEMORY :
@@ -242,6 +258,79 @@ trace_uninstall (SIM_DESC sd)
       TRACE_DATA *data = CPU_TRACE_DATA (STATE_CPU (sd, i));
       if (TRACE_FILE (data) != NULL)
 	fclose (TRACE_FILE (data));
+    }
+}
+
+void
+trace_one_insn (SIM_DESC sd, sim_cpu *cpu, const char *filename, 
+		int linenum, int idecode, address_word pc, const char *name)
+{
+  if (idecode)
+    trace_printf(sd, cpu, "%s:%-*d 0x%.*lx (decode) %s\n",
+		 filename,
+		 SIZE_LINE_NUMBER, linenum,
+		 SIZE_PC, (long)pc,
+		 name);
+
+  else if (!TRACE_LINENUM_P (cpu))
+    trace_printf(sd, cpu, "%s:%-*d 0x%.*lx %s\n",
+		 filename,
+		 SIZE_LINE_NUMBER, linenum,
+		 SIZE_PC, (long)pc,
+		 name);
+
+  else
+    {
+      char buf[256];
+
+      buf[0] = 0;
+      if (STATE_TEXT_SECTION (CPU_STATE (cpu))
+	  && pc >= STATE_TEXT_START (CPU_STATE (cpu))
+	  && pc < STATE_TEXT_END (CPU_STATE (cpu)))
+	{
+	  const char *pc_filename = (const char *)0;
+	  const char *pc_function = (const char *)0;
+	  unsigned int pc_linenum = 0;
+
+	  if (bfd_find_nearest_line (STATE_PROG_BFD (CPU_STATE (cpu)),
+				     STATE_TEXT_SECTION (CPU_STATE (cpu)),
+				     (struct symbol_cache_entry **) 0,
+				     pc - STATE_TEXT_START (CPU_STATE (cpu)),
+				     &pc_filename, &pc_function, &pc_linenum))
+	    {
+	      char *p = buf;
+	      if (pc_linenum)
+		{
+		  sprintf (p, "#%-*d ", SIZE_LINE_NUMBER, pc_linenum);
+		  p += strlen (p);
+		}
+	      else
+		{
+		  sprintf (p, "%-*s ", SIZE_LINE_NUMBER+1, "---");
+		  p += SIZE_LINE_NUMBER+2;
+		}
+
+	      if (pc_function)
+		{
+		  sprintf (p, "%s ", pc_function);
+		  p += strlen (p);
+		}
+	      else if (filename)
+		{
+		  char *q = (char *) strrchr (filename, '/');
+		  sprintf (p, "%s ", (q) ? q+1 : filename);
+		  p += strlen (p);
+		}
+
+	      if (*p == ' ')
+		*p = '\0';
+	    }
+	}
+
+      trace_printf (sd, cpu, "0x%.*x %-*.*s %s\n",
+		    SIZE_PC, (unsigned) pc,
+		    SIZE_LOCATION, SIZE_LOCATION, buf,
+		    name);
     }
 }
 
