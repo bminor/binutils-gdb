@@ -1,3 +1,8 @@
+Thu May 30 11:35:11 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.base/callfuncs.exp: Finish last change -- make sure the
+	prototype information ends up in the compiler info file.
+
 Thu May 23 12:48:41 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/callfuncs.exp: Remove the compiler info file prior to
