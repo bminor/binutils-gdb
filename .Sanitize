@@ -48,9 +48,11 @@ Do-first:
 
 keep_these_too="${keep_these_too} .cvsignore CYGNUS autoconf
 	bfd binutils byacc cvs deja-gnu dejagnu diff dosrel dvips emacs emacs19
-	examples expect fileutils flex gas gcc gdb gdbm gdbtest glob gprof grep
-	groff include install.sh ispell ld libg++ libgcc libgloss libiberty
-	libio librx libstdc++ m4 make mmalloc move-if-change newlib opcodes
+	examples expect fileutils flex
+	gas gcc gdb gdbm gdbtest glob gprof grep grez groff
+	include install.sh ispell
+	ld libg++ libgcc libgloss libiberty libio librx libstdc++
+	m4 make mmalloc move-if-change newlib opcodes
 	pagas patch prms rcs readline sed send-pr shellutils sim textutils
 	texinfo tgas utils uudecode wdiff xiberty
 	configure.bat makeall.bat winsup
