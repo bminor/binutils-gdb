@@ -1,3 +1,10 @@
+2001-12-18  Kevin Buettner  <kevinb@redhat.com>
+
+	* i387-nat.c (i387_fill_fxsave): Change type of ``val'' from char
+	to short so that we don't memcpy() beyond the end of this buffer.
+	Also, change shift value used in computing val to account for the
+	fact that only eight bits are used.
+
 2001-12-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* PROBLEMS: New file.  Add title.
