@@ -1,5 +1,11 @@
 Thu Mar 27 12:55:42 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Generate a COPY
+	reloc even if the symbol is in the .bss section.
+	* elf32-m68k.c (elf_m68k_adjust_dynamic_symbol): Likewise.
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-sparc.c (elf32_sparc_adjust_dynamic_symbol): Likewise.
+
 	* coffcode.h (bfd_coff_backend_data): Add new field
 	_bfd_coff_default_section_alignment_power.
 	(bfd_coff_default_section_alignment_power): Define.
