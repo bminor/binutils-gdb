@@ -1,3 +1,8 @@
+Fri May 13 10:51:21 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/mipsbelf.mt (SELECT_VECS): Add ecoff_big_vec and
+	ecoff_little_vec since Irix 5 supports ECOFF executables.
+
 Wed May 11 00:31:57 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff.c (ecoff_find_nearest_line): Handle fdr.adr != pdr.adr
