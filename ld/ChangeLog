@@ -1,3 +1,10 @@
+Sun Jun 11 15:20:46 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* emulparams/m68kelf.sh (NOP): Define.
+	(DYNAMIC_LINK): Don't define.
+	(TEXT_START_ADDR): Set to 0x80000000; the extra 0x100 for headers
+	will come from the linker script.
+
 Thu Jun  8 14:17:33 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* emulparams/armpe.sh, scriptempl/armpe.sc: Add end and stack.
