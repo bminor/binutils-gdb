@@ -1,3 +1,8 @@
+Thu Mar 17 18:26:46 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* trad-core.c (trad_unix_bfd_is_local_label): Fixed typo where
+	this was also named trad_unix_bfd_copy_private_bfd_data.
+
 Thu Mar 17 10:37:07 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* aoutx.h, elfcode.h, coff-alpha.c, bout.c, ecoff.c, ecofflink.c,

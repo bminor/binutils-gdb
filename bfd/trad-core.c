@@ -339,6 +339,12 @@ trad_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
 #define trad_unix_bfd_final_link \
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
+#define trad_unix_bfd_copy_private_section_data \
+  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_false)
+#define trad_unix_bfd_copy_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_false)
+#define trad_unix_bfd_is_local_label \
+  ((boolean (*) PARAMS ((bfd *, asection *))) bfd_false)
 
 /* If somebody calls any byte-swapping routines, shoot them.  */
 void
