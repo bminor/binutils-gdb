@@ -1,4 +1,22 @@
+Mon Mar  6 09:53:08 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* cpu-hppa.c (arch_info_struct): Support both PA1.0 and PA1.1
+	machine types.
+	(bfd_hppa_arch): Link in both PA1.0 and PA1.1 architecture info
+	structures.
+	* libhppa.h (enum pa_arch): New enumeration to describe the
+	different variants of the PA architecture.
+	* som.c (som_object_setup): Use new enumeration to set machine
+	type.
+	(som_finish_writing): If the machine type is PA1.1, then use the
+	PA1.1 machine identifier in the output file.
+
 Thu Mar  2 15:58:24 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aoutx.h (NAME(aout,swap_ext_reloc_in)): Treat the index of a
+        base relative reloc as an index into the symbol table, regardless
+        of the setting of r_extern.
+	(NAME(aout,swap_std_reloc_in)): Likewise.
 
 	* aoutx.h (NAME(aout,set_section_contents)): Double check that the
 	caller is writing to a valid section.

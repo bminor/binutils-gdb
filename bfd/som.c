@@ -1653,7 +1653,7 @@ som_object_setup (abfd, file_hdrp, aux_hdrp)
       obj_som_exec_data (abfd)->exec_flags = aux_hdrp->exec_flags;
     }
 
-  bfd_default_set_arch_mach (abfd, bfd_arch_hppa, 0);
+  bfd_default_set_arch_mach (abfd, bfd_arch_hppa, pa10);
   bfd_get_symcount (abfd) = file_hdrp->symbol_total;
 
   /* Initialize the saved symbol table and string table to NULL.  
@@ -2607,8 +2607,9 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		case R_DATA_PLABEL:
 		case R_CODE_PLABEL:
 		case R_DLT_REL:
-		  /* Account for any addend.  */
-		  if (bfd_reloc->addend)
+		  /* Account for any addend using R_DATA_OVERRIDE.  */
+		  if (bfd_reloc->howto->type != R_DATA_ONE_SYMBOL
+		      && bfd_reloc->addend)
 		    p = som_reloc_addend (abfd, bfd_reloc->addend, p, 
 					  &subspace_reloc_size, reloc_queue);
 
@@ -3442,13 +3443,12 @@ som_finish_writing (abfd)
       section = section->next;
     }
 
-  /* FIXME.  This should really be conditional based on whether or not
-     PA1.1 instructions/registers have been used. 
-
-     Setting of the system_id has to happen very late now that copying of
+  /* Setting of the system_id has to happen very late now that copying of
      BFD private data happens *after* section contents are set.  */
   if (abfd->flags & (EXEC_P | DYNAMIC))
     obj_som_file_hdr(abfd)->system_id = obj_som_exec_data (abfd)->system_id;
+  else if (bfd_get_mach (abfd) == pa11)
+    obj_som_file_hdr(abfd)->system_id = CPU_PA_RISC1_1;
   else
     obj_som_file_hdr(abfd)->system_id = CPU_PA_RISC1_0;
 
@@ -4092,7 +4092,7 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
      asymbol **symbols;
      boolean just_count;
 {
-  unsigned int op, varname;
+  unsigned int op, varname, deallocate_contents = 0;
   unsigned char *end_fixups = &fixup[end];
   const struct fixup_format *fp;
   char *cp;
@@ -4368,6 +4368,37 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 	      else if (som_hppa_howto_table[op].type == R_PCREL_CALL
 		       || som_hppa_howto_table[op].type == R_ABS_CALL)
 		;
+	      else if (som_hppa_howto_table[op].type == R_DATA_ONE_SYMBOL)
+		{
+		  unsigned addend = var ('V');
+
+		  /* Try what was specified in R_DATA_OVERRIDE first
+		     (if anything).  Then the hard way using the
+		     section contents.  */
+		  rptr->addend = var ('V');
+
+		  if (rptr->addend == 0 && !section->contents)
+		    {
+		      /* Got to read the damn contents first.  We don't
+		         bother saving the contents (yet).  Add it one
+			 day if the need arises.  */
+		      section->contents = malloc (section->_raw_size);
+		      if (section->contents == NULL)
+			return -1;
+
+		      deallocate_contents = 1;
+		      bfd_get_section_contents (section->owner,
+						section,
+						section->contents,
+						0,
+						section->_raw_size);
+		    }
+		  else if (rptr->addend == 0)
+		    rptr->addend = bfd_get_32 (section->owner,
+					       (section->contents
+						+ offset - var ('L')));
+			
+		}
 	      else
 		rptr->addend = var ('V');
 	      rptr++;
@@ -4379,6 +4410,9 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 	  memset (stack, 0, sizeof (stack));
 	}
     }
+  if (deallocate_contents)
+    free (section->contents);
+
   return count;
 
 #undef var
@@ -4807,9 +4841,6 @@ som_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
      CONST char **functionname_ptr;
      unsigned int *line_ptr;
 {
-  fprintf (stderr, "som_find_nearest_line unimplemented\n");
-  fflush (stderr);
-  abort ();
   return (false);
 }
 
@@ -5551,6 +5582,11 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
       /* Keep track of where each SOM will finally reside; then look
 	 at the next BFD.  */
       curr_som_offset += arelt_size (curr_bfd) + sizeof (struct ar_hdr);
+ 
+      /* A particular object in the archive may have an odd length; the
+	 linker requires objects begin on an even boundary.  So round
+	 up the current offset as necessary.  */
+      curr_som_offset = (curr_som_offset + 0x1) & ~0x1;
       curr_bfd = curr_bfd->next;
       som_index++;
     }
@@ -5649,6 +5685,8 @@ som_write_armap (abfd, elength, map, orl_count, stridx)
   lst_size = sizeof (struct lst_header);
 
   /* Start building the LST header.  */
+  /* FIXME:  Do we need to examine each element to determine the
+     largest id number?  */
   lst.system_id = CPU_PA_RISC1_0;
   lst.a_magic = LIBMAGIC;
   lst.version_id = VERSION_ID;
