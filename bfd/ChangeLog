@@ -1,5 +1,36 @@
 Wed Mar 27 10:43:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coff-ppc.c (ppc_record_toc_entry): Put inside COFF_IMAGE_WITH_PE
+	ifdef.  Remove unused variables.
+	(ppc_record_data_in_toc_entry): Ifdef out.  Removed unused
+	variables.
+	(ppc_mark_symbol_as_glue): Put inside COFF_IMAGE_WITH_PE ifdef.
+	(get_symbol_value): Ifdef out.
+	(pe_ppc_reloc): Ifdef out.  Remove unused variables.
+	(coff_ppc_relocate_section): Remove unused variables.  Make
+	fprintf strings and argument types correspond.  Put before_addr in
+	DEBUG_RELOC ifdef.
+	(ppc_reflo_reloc): Ifdef out.
+	(ppc_addr32nb_reloc): Ifdef out.
+	(ppc_coff_rtype2howto): Make fprintf strings and argument types
+	correspond.
+	(coff_ppc_rtype_to_howto): Likewise.
+	(ppc_coff_swap_sym_in_hook): Remove unused variables.
+
+	* peicode.h (pe_print_idata): Move otherwise unused variables into
+	the #ifdef where they are used.  Always return a value.
+	(pe_print_edata): Change fprintf strings and add cast to make
+	fprintf strings correspond to actual types.  Always return a
+	value.
+	(pe_print_pdata): Removed unused variable addr_value.  Always
+	return a value.
+	(pe_print_reloc): Remove unused variable onaline.  Make fprintf
+	strings and arguments correspond.  Always return a value.
+
+	* elf32-ppc.c (ppc_elf_fake_sections): Return true.
+	(ppc_elf_finish_dynamic_symbol): Move definition of unused
+	variable rela inside #if 0 section where it is used.
+
 	* libhppa.h: Define HINLINE rather than INLINE.  Define it to
 	extern inline if using gcc and to static INLINE otherwise.  Change
 	all functions from static INLINE to HINLINE.
