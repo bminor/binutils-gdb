@@ -1,3 +1,14 @@
+start-sanitize-sky
+Wed Feb 11 17:07:25 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/dvp/{*}: .text renamed to .vutext.
+	* gas/dvp/vif-1.[sd]: Renamed from pke-1.[sd].
+
+Tue Feb 10 15:32:22 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* gas/dvp/{error.exp,bignum-1.[sd],bignum_d.s}: New files.
+
+end-sanitize-sky
 start-sanitize-m32rx
 Mon Feb  9 17:19:05 1998  Nick Clifton  <nickc@cygnus.com>
 
