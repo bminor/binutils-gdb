@@ -234,7 +234,7 @@ cat << EOF
 #define SEM_IN_SWITCH
 
 #define WANT_CPU
-#define WANT_CPU_${CPU}
+#define WANT_CPU_@CPU@
 
 #include "sim-main.h"
 #include "bfd.h"
@@ -243,6 +243,62 @@ cat << EOF
 #include "cpu-opc.h"
 #include "cpu-sim.h"
 #include "sim-assert.h"
+
+/* Fill in the administrative ARGBUF fields required by all insns,
+   virtual and real.  */
+
+static INLINE void
+@cpu@_fill_argbuf (const SIM_CPU *cpu, ARGBUF *abuf, const IDESC *idesc,
+		    PCADDR pc, int fast_p)
+{
+  SEM_SET_CODE (abuf, idesc, fast_p);
+  ARGBUF_ADDR (abuf) = pc;
+  ARGBUF_IDESC (abuf) = idesc;
+}
+
+/* Fill in tracing/profiling fields of an ARGBUF.  */
+
+static INLINE void
+@cpu@_fill_argbuf_tp (const SIM_CPU *cpu, ARGBUF *abuf,
+		       int trace_p, int profile_p)
+{
+  ARGBUF_TRACE_P (abuf) = trace_p;
+  ARGBUF_PROFILE_P (abuf) = profile_p;
+}
+
+#if WITH_SCACHE_PBB
+
+/* Emit the "x-before" handler.
+   x-before is emitted before each insn (serial or parallel).
+   This is as opposed to x-after which is only emitted at the end of a group
+   of parallel insns.  */
+
+static INLINE void
+@cpu@_emit_before (SIM_CPU *current_cpu, SCACHE *sc, PCADDR pc, int first_p)
+{
+  ARGBUF *abuf = &sc[0].argbuf;
+  const IDESC *id = & CPU_IDESC (current_cpu) [@CPU@_INSN_X_BEFORE];
+
+  abuf->fields.before.first_p = first_p;
+  @cpu@_fill_argbuf (current_cpu, abuf, id, pc, 0);
+  /* no need to set trace_p,profile_p */
+}
+
+/* Emit the "x-after" handler.
+   x-after is emitted after a serial insn or at the end of a group of
+   parallel insns.  */
+
+static INLINE void
+@cpu@_emit_after (SIM_CPU *current_cpu, SCACHE *sc, PCADDR pc)
+{
+  ARGBUF *abuf = &sc[0].argbuf;
+  const IDESC *id = & CPU_IDESC (current_cpu) [@CPU@_INSN_X_AFTER];
+
+  @cpu@_fill_argbuf (current_cpu, abuf, id, pc, 0);
+  /* no need to set trace_p,profile_p */
+}
+
+#endif /* WITH_SCACHE_PBB */
 
 EOF
 
@@ -259,12 +315,13 @@ if [ x$scache != xyes -a x$pbb != xyes ] ; then
 #define FAST_P 0
 
 void
-${cpu}_engine_run_full (SIM_CPU *current_cpu)
+@cpu@_engine_run_full (SIM_CPU *current_cpu)
 {
 #define FAST_P 0
   SIM_DESC current_state = CPU_STATE (current_cpu);
   SCACHE cache[MAX_LIW_INSNS];
   SCACHE *sc = &cache[0];
+  IADDR pc;
 
 EOF
 
@@ -300,6 +357,20 @@ fi
 
 cat << EOF
 
+#if WITH_SEM_SWITCH_FULL && defined (__GNUC__)
+  {
+    if (! CPU_IDESC_SEM_INIT_P (current_cpu))
+      {
+/* ??? Later maybe paste sem-switch.c in when building mainloop.c.  */
+#define DEFINE_LABELS
+#include "$switch"
+	CPU_IDESC_SEM_INIT_P (current_cpu) = 1;
+      }
+  }
+#endif
+
+  pc = GET_H_PC ();
+
   do
     {
 /* begin full-{extract,exec}-simple */
@@ -333,7 +404,7 @@ if [ x$fast = xyes ] ; then
 
 #define FAST_P 1
 
-FIXME
+FIXME: "fast simple version unimplemented, delete -fast arg to genmloop.sh."
 
 #undef FAST_P
 
@@ -352,7 +423,7 @@ if [ x$scache = xyes ] ; then
     cat << EOF
 
 static INLINE SCACHE *
-${cpu}_scache_lookup (SIM_CPU *current_cpu, PCADDR vpc, SCACHE *scache,
+@cpu@_scache_lookup (SIM_CPU *current_cpu, PCADDR vpc, SCACHE *scache,
                      unsigned int hash_mask, int FAST_P)
 {
   /* First step: look up current insn in hash table.  */
@@ -389,7 +460,7 @@ cat << EOF
 #define FAST_P 0
 
 void
-${cpu}_engine_run_full (SIM_CPU *current_cpu)
+@cpu@_engine_run_full (SIM_CPU *current_cpu)
 {
   SIM_DESC current_state = CPU_STATE (current_cpu);
   SCACHE *scache = CPU_SCACHE_CACHE (current_cpu);
@@ -436,7 +507,7 @@ cat << EOF
     {
       SCACHE *sc;
 
-      sc = ${cpu}_scache_lookup (current_cpu, vpc, scache, hash_mask, FAST_P);
+      sc = @cpu@_scache_lookup (current_cpu, vpc, scache, hash_mask, FAST_P);
 
 /* begin full-exec-scache */
 EOF
@@ -468,7 +539,7 @@ if [ x$fast = xyes ] ; then
 #define FAST_P 1
 
 void
-${cpu}_engine_run_fast (SIM_CPU *current_cpu)
+@cpu@_engine_run_fast (SIM_CPU *current_cpu)
 {
   SIM_DESC current_state = CPU_STATE (current_cpu);
   SCACHE *scache = CPU_SCACHE_CACHE (current_cpu);
@@ -527,7 +598,7 @@ cat << EOF
     {
       SCACHE *sc;
 
-      sc = ${cpu}_scache_lookup (current_cpu, vpc, scache, hash_mask, FAST_P);
+      sc = @cpu@_scache_lookup (current_cpu, vpc, scache, hash_mask, FAST_P);
 
 /* begin fast-exec-scache */
 EOF
@@ -565,15 +636,15 @@ if [ x$pbb = xyes ] ; then
     cat << EOF
 
 /* Record address of cti terminating a pbb.  */
-#define SET_CTI_VPC(sc) do { cti_sc = (sc); } while (0)
+#define SET_CTI_VPC(sc) do { _cti_sc = (sc); } while (0)
 /* Record number of [real] insns in pbb.  */
-#define SET_INSN_COUNT(n) do { insn_count = (n); } while (0)
+#define SET_INSN_COUNT(n) do { _insn_count = (n); } while (0)
 
 /* Fetch and extract a pseudo-basic-block.
    FAST_P is non-zero if no tracing/profiling/etc. is wanted.  */
 
 INLINE SEM_PC
-${cpu}_pbb_begin (SIM_CPU *current_cpu, int FAST_P)
+@cpu@_pbb_begin (SIM_CPU *current_cpu, int FAST_P)
 {
   SEM_PC new_vpc;
   PCADDR pc;
@@ -585,9 +656,10 @@ ${cpu}_pbb_begin (SIM_CPU *current_cpu, int FAST_P)
   new_vpc = scache_lookup_or_alloc (current_cpu, pc, max_insns, &sc);
   if (! new_vpc)
     {
-      int insn_count = 0;
+      /* Leading '_' to avoid collision with mainloop.in.  */
+      int _insn_count = 0;
       SCACHE *orig_sc = sc;
-      SCACHE *cti_sc = NULL;
+      SCACHE *_cti_sc = NULL;
       int slice_insns = CPU_MAX_SLICE_INSNS (current_cpu);
 
       /* First figure out how many instructions to compile.
@@ -653,18 +725,18 @@ cat << EOF
 	const IDESC *id;
 
 	/* Was pbb terminated by a cti?  */
-	if (cti_sc)
+	if (_cti_sc)
 	  {
-	    id = & CPU_IDESC (current_cpu) [${CPU}_INSN_X_CTI_CHAIN];
+	    id = & CPU_IDESC (current_cpu) [@CPU@_INSN_X_CTI_CHAIN];
 	  }
 	else
 	  {
-	    id = & CPU_IDESC (current_cpu) [${CPU}_INSN_X_CHAIN];
+	    id = & CPU_IDESC (current_cpu) [@CPU@_INSN_X_CHAIN];
 	  }
 	SEM_SET_CODE (&sc->argbuf, id, FAST_P);
 	sc->argbuf.idesc = id;
 	sc->argbuf.addr = pc;
-	sc->argbuf.fields.chain.insn_count = insn_count;
+	sc->argbuf.fields.chain.insn_count = _insn_count;
 	sc->argbuf.fields.chain.next = 0;
 	++sc;
       }
@@ -684,7 +756,7 @@ cat << EOF
 /* Chain to the next block from a non-cti terminated previous block.  */
 
 INLINE SEM_PC
-${cpu}_pbb_chain (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+@cpu@_pbb_chain (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
 
@@ -693,7 +765,14 @@ ${cpu}_pbb_chain (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SET_H_PC (abuf->addr);
 
   /* If not running forever, exit back to main loop.  */
-  if (CPU_MAX_SLICE_INSNS (current_cpu) != 0)
+  if (CPU_MAX_SLICE_INSNS (current_cpu) != 0
+      /* Also exit back to main loop if there's an event.
+         Note that if CPU_MAX_SLICE_INSNS != 1, events won't get processed
+	 at the "right" time, but then that was what was asked for.
+	 There is no silver bullet for simulator engines.
+         ??? Clearly this needs a cleaner interface.
+	 At present it's just so Ctrl-C works.  */
+      || STATE_EVENTS (CPU_STATE (current_cpu))->work_pending)
     CPU_RUNNING_P (current_cpu) = 0;
 
   /* If chained to next block, go straight to it.  */
@@ -715,7 +794,7 @@ ${cpu}_pbb_chain (SIM_CPU *current_cpu, SEM_ARG sem_arg)
    NEW_VPC_PTR != SEM_BRANCH_UNTAKEN.  */
 
 INLINE SEM_PC
-${cpu}_pbb_cti_chain (SIM_CPU *current_cpu, SEM_ARG sem_arg,
+@cpu@_pbb_cti_chain (SIM_CPU *current_cpu, SEM_ARG sem_arg,
 		     SEM_PC *new_vpc_ptr, PCADDR new_pc)
 {
   ARGBUF *abuf;
@@ -723,7 +802,14 @@ ${cpu}_pbb_cti_chain (SIM_CPU *current_cpu, SEM_ARG sem_arg,
   PBB_UPDATE_INSN_COUNT (current_cpu, sem_arg);
 
   /* If not running forever, exit back to main loop.  */
-  if (CPU_MAX_SLICE_INSNS (current_cpu) != 0)
+  if (CPU_MAX_SLICE_INSNS (current_cpu) != 0
+      /* Also exit back to main loop if there's an event.
+         Note that if CPU_MAX_SLICE_INSNS != 1, events won't get processed
+	 at the "right" time, but then that was what was asked for.
+	 There is no silver bullet for simulator engines.
+         ??? Clearly this needs a cleaner interface.
+	 At present it's just so Ctrl-C works.  */
+      || STATE_EVENTS (CPU_STATE (current_cpu))->work_pending)
     CPU_RUNNING_P (current_cpu) = 0;
 
   /* Restart compiler if we branched to an uncacheable address
@@ -763,7 +849,7 @@ ${cpu}_pbb_cti_chain (SIM_CPU *current_cpu, SEM_ARG sem_arg,
    This is called before each insn.  */
 
 void
-${cpu}_pbb_before (SIM_CPU *current_cpu, SCACHE *sc)
+@cpu@_pbb_before (SIM_CPU *current_cpu, SCACHE *sc)
 {
   SEM_ARG sem_arg = sc;
   const ARGBUF *abuf = SEM_ARGBUF (sem_arg);
@@ -772,7 +858,8 @@ ${cpu}_pbb_before (SIM_CPU *current_cpu, SCACHE *sc)
   const IDESC *cur_idesc = cur_abuf->idesc;
   PCADDR pc = cur_abuf->addr;
 
-  PROFILE_COUNT_INSN (current_cpu, pc, cur_idesc->num);
+  if (ARGBUF_PROFILE_P (cur_abuf))
+    PROFILE_COUNT_INSN (current_cpu, pc, cur_idesc->num);
 
   /* If this isn't the first insn, finish up the previous one.  */
 
@@ -785,18 +872,23 @@ ${cpu}_pbb_before (SIM_CPU *current_cpu, SCACHE *sc)
 	  const IDESC *prev_idesc = prev_abuf->idesc;
 	  int cycles;
 
-	  cycles = (*prev_idesc->timing->model_fn) (current_cpu, prev_sem_arg);
-	  ${cpu}_model_insn_after (current_cpu, 0 /*last_p*/, cycles);
+	  /* ??? May want to measure all insns if doing insn tracing.  */
+	  if (ARGBUF_PROFILE_P (prev_abuf))
+	    {
+	      cycles = (*prev_idesc->timing->model_fn) (current_cpu, prev_sem_arg);
+	      @cpu@_model_insn_after (current_cpu, 0 /*last_p*/, cycles);
+	    }
 	}
 
-      TRACE_INSN_FINI (current_cpu, 0 /*last_p*/);
+      TRACE_INSN_FINI (current_cpu, cur_abuf, 0 /*last_p*/);
     }
 
   /* FIXME: Later make cover macros: PROFILE_INSN_{INIT,FINI}.  */
-  if (PROFILE_MODEL_P (current_cpu))
-    ${cpu}_model_insn_before (current_cpu, first_p);
+  if (PROFILE_MODEL_P (current_cpu)
+      && ARGBUF_PROFILE_P (cur_abuf))
+    @cpu@_model_insn_before (current_cpu, first_p);
 
-  TRACE_INSN_INIT (current_cpu, first_p);
+  TRACE_INSN_INIT (current_cpu, cur_abuf, first_p);
   TRACE_INSN (current_cpu, cur_idesc->opcode, cur_abuf, cur_abuf->addr);
 }
 
@@ -805,28 +897,30 @@ ${cpu}_pbb_before (SIM_CPU *current_cpu, SCACHE *sc)
    insns.  */
 
 void
-${cpu}_pbb_after (SIM_CPU *current_cpu, SCACHE *sc)
+@cpu@_pbb_after (SIM_CPU *current_cpu, SCACHE *sc)
 {
   SEM_ARG sem_arg = sc;
   const ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  const SEM_ARG prev_sem_arg = sc - 1;
+  const ARGBUF *prev_abuf = SEM_ARGBUF (prev_sem_arg);
 
-  if (PROFILE_MODEL_P (current_cpu))
+  /* ??? May want to measure all insns if doing insn tracing.  */
+  if (PROFILE_MODEL_P (current_cpu)
+      && ARGBUF_PROFILE_P (prev_abuf))
     {
-      const SEM_ARG prev_sem_arg = sc - 1;
-      const ARGBUF *prev_abuf = SEM_ARGBUF (prev_sem_arg);
       const IDESC *prev_idesc = prev_abuf->idesc;
       int cycles;
 
       cycles = (*prev_idesc->timing->model_fn) (current_cpu, prev_sem_arg);
-      ${cpu}_model_insn_after (current_cpu, 1 /*last_p*/, cycles);
+      @cpu@_model_insn_after (current_cpu, 1 /*last_p*/, cycles);
     }
-  TRACE_INSN_FINI (current_cpu, 1 /*last_p*/);
+  TRACE_INSN_FINI (current_cpu, prev_abuf, 1 /*last_p*/);
 }
 
 #define FAST_P 0
 
 void
-${cpu}_engine_run_full (SIM_CPU *current_cpu)
+@cpu@_engine_run_full (SIM_CPU *current_cpu)
 {
   SIM_DESC current_state = CPU_STATE (current_cpu);
   SCACHE *scache = CPU_SCACHE_CACHE (current_cpu);
@@ -871,8 +965,8 @@ cat << EOF
       /* Initialize the "begin (compile) a pbb" virtual insn.  */
       vpc = CPU_SCACHE_PBB_BEGIN (current_cpu);
       SEM_SET_FULL_CODE (SEM_ARGBUF (vpc),
-			 & CPU_IDESC (current_cpu) [${CPU}_INSN_X_BEGIN]);
-      vpc->argbuf.idesc = & CPU_IDESC (current_cpu) [${CPU}_INSN_X_BEGIN];
+			 & CPU_IDESC (current_cpu) [@CPU@_INSN_X_BEGIN]);
+      vpc->argbuf.idesc = & CPU_IDESC (current_cpu) [@CPU@_INSN_X_BEGIN];
 
       CPU_IDESC_SEM_INIT_P (current_cpu) = 1;
     }
@@ -882,7 +976,7 @@ cat << EOF
      pbb we don't want to call pbb_begin each time (which hashes on the pc
      and does a table lookup).  A way to speed this up is to save vpc
      between calls.  */
-  vpc = ${cpu}_pbb_begin (current_cpu, FAST_P);
+  vpc = @cpu@_pbb_begin (current_cpu, FAST_P);
 
   do
     {
@@ -912,7 +1006,7 @@ if [ x$fast = xyes ] ; then
 #define FAST_P 1
 
 void
-${cpu}_engine_run_fast (SIM_CPU *current_cpu)
+@cpu@_engine_run_fast (SIM_CPU *current_cpu)
 {
   SIM_DESC current_state = CPU_STATE (current_cpu);
   SCACHE *scache = CPU_SCACHE_CACHE (current_cpu);
@@ -957,8 +1051,8 @@ cat << EOF
       /* Initialize the "begin (compile) a pbb" virtual insn.  */
       vpc = CPU_SCACHE_PBB_BEGIN (current_cpu);
       SEM_SET_FAST_CODE (SEM_ARGBUF (vpc),
-			 & CPU_IDESC (current_cpu) [${CPU}_INSN_X_BEGIN]);
-      vpc->argbuf.idesc = & CPU_IDESC (current_cpu) [${CPU}_INSN_X_BEGIN];
+			 & CPU_IDESC (current_cpu) [@CPU@_INSN_X_BEGIN]);
+      vpc->argbuf.idesc = & CPU_IDESC (current_cpu) [@CPU@_INSN_X_BEGIN];
 
       CPU_IDESC_SEM_INIT_P (current_cpu) = 1;
     }
@@ -968,7 +1062,7 @@ cat << EOF
      pbb we don't want to call pbb_begin each time (which hashes on the pc
      and does a table lookup).  A way to speed this up is to save vpc
      between calls.  */
-  vpc = ${cpu}_pbb_begin (current_cpu, FAST_P);
+  vpc = @cpu@_pbb_begin (current_cpu, FAST_P);
 
   do
     {
@@ -990,6 +1084,7 @@ fi # -fast
 
 fi # -pbb
 
+# Process @cpu@,@CPU@ appearing in mainloop.in.
 sed -e "s/@cpu@/$cpu/g" -e "s/@CPU@/$CPU/g" < tmp-mloop.cin > mloop.cin
 rc=$?
 rm -f tmp-mloop.cin

@@ -1,3 +1,31 @@
+1999-01-05  Doug Evans  <devans@casey.cygnus.com>
+
+	* Make-common.in (CGEN_INCLUDE_DEPS): Add cgen-defs.h, cgen-engine.h.
+	(CGEN_MAIN_SCM): Add rtx-funcs.scm.
+	(cgen-arch): Pass $(mach) to cgen.sh.
+	* cgen-engine.h (SEM_BRANCH_FINI): New arg pcvar, all uses updated.
+	(SEM_BRANCH_INIT_EXTRACT): New macro.
+	(SEM_BRANCH_INIT): Add taken_p.
+	(TARGET_SEM_BRANCH_FINI): Provide default definition.
+	(SEM_BRANCH_FINI): Use it.
+	(SEM_INSN): Update.
+	* cgen-run.c (sim_resume): Handle tracing of last insn.
+	* cgen-scache.h (WITH_SCACHE): Define as 0 if not defined.
+	* cgen-trace.c (current_abuf): New static global.
+	(trace_insn_init): Initialize it.
+	(trace_insn_fini): Use it.
+	(trace_insn): Set it.
+	* cgen.sh (arch case): Pass -m ${mach} to cgen.
+	* genmloop.sh (@cpu@_emit_before): Only define if WITH_SCACHE_PBB.
+	(@cpu@_emit_after): Ditto.
+	(simple @cpu@_engine_run_full): New local `pc'.  Initialize semantic
+	labels if WITH_SEM_SWITCH_FULL.
+	* sim-model.c: Include bfd.h.
+	(sim_model_init): New function.
+	(sim_model_install): Record init fn.
+	* sim-model.h (MACH): New member bfd_name.
+	* sim-module.c (modules): Initialize model before scache.
+
 1998-12-24  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* dv-sockser.c (DEFAULT_TIMEOUT): Increase to 1 ms.

@@ -23,11 +23,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sim-options.h"
 #include "sim-assert.h"
 
-/* start-sanitize-am30 */
 #if WITH_HW
 #include "sim-hw.h"
 #endif
-/* end-sanitize-am30 */
 
 #include "libiberty.h"
 
@@ -52,20 +50,18 @@ static MODULE_INSTALL_FN * const modules[] = {
 #if WITH_WATCHPOINTS
   sim_watchpoint_install,
 #endif
-#if WITH_SCACHE
-  scache_install,
-#endif
 #ifdef SIM_HAVE_MODEL
   sim_model_install,
+#endif
+#if WITH_SCACHE
+  scache_install,
 #endif
 #ifdef SIM_HAVE_BREAKPOINTS
   sim_break_install,
 #endif
-  /* start-sanitize-am30 */
 #if WITH_HW
   sim_hw_install,
 #endif
-  /* end-sanitize-am30 */
   /* Configured in [simulator specific] additional modules.  */
 #ifdef MODULE_LIST
   MODULE_LIST
@@ -116,15 +112,15 @@ sim_post_argv_init (SIM_DESC sd)
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   SIM_ASSERT (STATE_MODULES (sd) != NULL);
 
-  if (sim_module_init (sd) != SIM_RC_OK)
-    return SIM_RC_FAIL;
-
   /* Set the cpu->state backlinks for each cpu.  */
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)
     {
       CPU_STATE (STATE_CPU (sd, i)) = sd;
       CPU_INDEX (STATE_CPU (sd, i)) = i;
     }
+
+  if (sim_module_init (sd) != SIM_RC_OK)
+    return SIM_RC_FAIL;
 
   return SIM_RC_OK;
 }
