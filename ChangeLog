@@ -188,12 +188,10 @@ Tue Dec  3 23:26:50 1996  Jason Merrill  <jason@yorick.cygnus.com>
 
 	* configure.in: Don't use --with-stabs on IRIX 6.
 
-start-sanitize-m32r
 Tue Dec  3 09:05:25 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.in (m32r): Build gdb, libg++ now.
 
-end-sanitize-m32r
 Sun Dec  1 00:18:59 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* configure.in (mips*-sgi-irix6*):  Remove gdb and related
@@ -346,12 +344,10 @@ Fri Oct 18 13:37:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 	CC_FOR_TARGET was specified on the command line.
 	(MAKEOVERRIDES): Don't define.
 
-start-sanitize-m32r
 Thu Oct 17 10:27:56 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.in (m32r): Fix spelling of libg++ libs.
 
-end-sanitize-m32r
 Thu Oct 10 10:37:17 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* config.sub (-apple*): Remove, now redundant.
@@ -458,12 +454,10 @@ Mon Sep 16 17:00:52 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Use a single line for host_tools and native_only.
 
-start-sanitize-m32r
 Mon Sep  9 12:21:30 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config.sub, configure.in: Add entries for m32r.
 
-end-sanitize-m32r
 Thu Sep  5 13:52:47 1996  Tom Tromey  <tromey@creche.cygnus.com>
 
 	* Makefile.in (inet-install): Don't run install-gzip.
