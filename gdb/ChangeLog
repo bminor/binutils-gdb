@@ -1,3 +1,18 @@
+2001-11-07  Elena Zannoni  <ezannoni@redhat.com>
+
+	* dbxread.c (set_namestring): New function, replacing the
+	SET_NAMESTRING macro.
+	(SET_NAMESTRING, CUR_SYMBOL_TYPE, CUR_SYMBOL_VALUE,
+	CUR_SYMBOL_STRX, DBXREAD_ONLY, START_PSYMTAB, END_PSYMTAB): Delete
+	definitions.
+	(read_dbx_symtab): Don't include partial-stab.h any more. Don't
+	reuse code in partial-stab.h, include the code directly, instead.
+
+        * Makefile.in (dbxread.o): Remove dependency on partial-stab.h.
+	(HFILES_NO_SRCDIR): Remove partial-stab.h.
+
+	* partial-stab.h: Remove file.
+	
 2001-11-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh: For multi-arch functions, check there is a

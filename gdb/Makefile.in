@@ -659,7 +659,7 @@ xcoffsolib_h =	xcoffsolib.h
 HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	dst.h environ.h $(gdbcmd_h) gdb.h gdbcore.h \
 	gdb-stabs.h hpread.h $(inferior_h) language.h minimon.h monitor.h \
-	objfiles.h parser-defs.h partial-stab.h serial.h solib.h \
+	objfiles.h parser-defs.h serial.h solib.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
 	c-lang.h ch-lang.h f-lang.h \
 	jv-lang.h \
@@ -1335,7 +1335,7 @@ dcache.o: dcache.c $(dcache_h) $(defs_h) $(gdbcmd_h) $(gdb_string_h) \
 
 dbxread.o: dbxread.c $(breakpoint_h) $(buildsym_h) $(command_h) \
 	$(complaints_h) $(defs_h) $(expression_h) $(gdb_stabs_h) $(gdbcore_h) \
-	$(gdbtypes_h) $(language_h) $(objfiles_h) partial-stab.h \
+	$(gdbtypes_h) $(language_h) $(objfiles_h) \
 	$(stabsread_h) $(symfile_h) $(symtab_h) $(target_h) $(gdb_string_h) \
 	$(cp_abi_h)
 
