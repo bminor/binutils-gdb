@@ -5,7 +5,7 @@
 
 	* config/tc-mips.c (mips16_mark_labels): Reduce number of calls to
 	S_GET_VALUE by using a temp.
-	(append_insn): Likewise, and for S_GET_VALUE too.
+	(append_insn): Likewise, and for S_SET_VALUE too.
 	(mips_emit_delays): Likewise.
 	(my_getExpression): Likewise.
 	(md_apply_fix): Likewise.  Use "valueT" rather than "long" for "value".
@@ -38,7 +38,7 @@
 
 2001-06-06  Christian Groessler <cpg@aladdin.de>
 
-        * config/tc-z8k.c: Removed many warnings by removing unused
+	* config/tc-z8k.c: Removed many warnings by removing unused
 	variables and tagging unused parameters as such.
 	(md_begin): Fixed a typo (","instead of ";").
 	(struct ctrl_table): Add parentheses to initialize array
@@ -82,7 +82,7 @@
 	BFD_RELOC_SPARC_UA32 and BFD_RELOC_SPARC_UA64.
 	(tc_gen_reloc): Likewise.
 	(sparc_cons_align): Don't clear sparc_no_align_cons.
-	(cons_fix_new_sparc): Substitute BFD_RELOC_SPARC_UA{16|32|64} for 
+	(cons_fix_new_sparc): Substitute BFD_RELOC_SPARC_UA{16|32|64} for
 	BFD_RELOC_{16|32|64} iff sparc_no_align_cons is set.
 
 2001-05-27  Alan Modra  <amodra@one.net.au>
@@ -131,7 +131,7 @@
 	* config/obj-coff.c : (add_lineno) xcoff allows negative line
 	numbers
 	* config/tc-ppc.c (ppc_stabx) : fix generated symbol
-	
+
 2001-05-24  Alan Modra  <amodra@one.net.au>
 
 	* write.c (write_object_file): Set finalize_syms = 1 before
@@ -143,7 +143,7 @@
 	architecture, remove erraneous ISA_MIPS32.
 	(md_show_usage): Add MIPS r12k support.
 	(mips_cpu_info_table): Add MIPS r12k support.
-	
+
 2001-05-22  Alan Modra  <amodra@one.net.au>
 
 	* config/tc-arc.c (md_assemble): Use is_end_of_line instead of
@@ -190,8 +190,8 @@
 
 2001-05-16  Jeff Johnston  <jjohnstn@redhat.com>
 
-        * cgen.c (gas_cgen_tc_gen_reloc): Changed error message when
-        howto entry is not found.
+	* cgen.c (gas_cgen_tc_gen_reloc): Changed error message when
+	howto entry is not found.
 
 2001-05-15  Alexandre Oliva  <aoliva@redhat.com>
 
@@ -264,7 +264,7 @@
 
 2001-05-11  Nick Clifton  <nickc@cambridge.redhat.com>
 
-	* config/tc-arm.c (arm_handle_align): When truncating an aligned 
+	* config/tc-arm.c (arm_handle_align): When truncating an aligned
 	block, ensure that the low order bits of the alignment are
 	preserved.
 
