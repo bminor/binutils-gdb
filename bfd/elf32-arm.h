@@ -4121,7 +4121,7 @@ elf32_arm_reloc_type_class (rela)
     }
 }
 
-static bfd_boolean elf32_arm_section_flags           PARAMS ((flagword *, Elf_Internal_Shdr *));
+static bfd_boolean elf32_arm_section_flags           PARAMS ((flagword *, const Elf_Internal_Shdr *));
 static void        elf32_arm_final_write_processing  PARAMS ((bfd *, bfd_boolean));
 
 /* Set the right machine number for an Arm ELF file.  */
@@ -4129,7 +4129,7 @@ static void        elf32_arm_final_write_processing  PARAMS ((bfd *, bfd_boolean
 static bfd_boolean
 elf32_arm_section_flags (flags, hdr)
      flagword *flags;
-     Elf_Internal_Shdr *hdr;
+     const Elf_Internal_Shdr *hdr;
 {
   if (hdr->sh_type == SHT_NOTE)
     *flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_SAME_CONTENTS;

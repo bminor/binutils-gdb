@@ -186,7 +186,7 @@ static bfd_boolean is_unwind_section_name
 static bfd_boolean elfNN_ia64_section_from_shdr
   PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
 static bfd_boolean elfNN_ia64_section_flags
-  PARAMS ((flagword *, Elf_Internal_Shdr *));
+  PARAMS ((flagword *, const Elf_Internal_Shdr *));
 static bfd_boolean elfNN_ia64_fake_sections
   PARAMS ((bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec));
 static void elfNN_ia64_final_write_processing
@@ -1271,7 +1271,7 @@ elfNN_ia64_section_from_shdr (abfd, hdr, name)
 static bfd_boolean
 elfNN_ia64_section_flags (flags, hdr)
      flagword *flags;
-     Elf_Internal_Shdr *hdr;
+     const Elf_Internal_Shdr *hdr;
 {
   if (hdr->sh_flags & SHF_IA_64_SHORT)
     *flags |= SEC_SMALL_DATA;

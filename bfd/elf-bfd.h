@@ -597,7 +597,7 @@ struct elf_backend_data
   /* A function to convert machine dependent section header flags to
      BFD internal section header flags.  */
   bfd_boolean (*elf_backend_section_flags)
-    (flagword *, Elf_Internal_Shdr *);
+    (flagword *, const Elf_Internal_Shdr *);
 
   /* A function to handle unusual program segment types when creating BFD
      sections from ELF program segments.  */

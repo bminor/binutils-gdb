@@ -75,7 +75,7 @@ static bfd_boolean elf64_alpha_object_p
 static bfd_boolean elf64_alpha_section_from_shdr
   PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
 static bfd_boolean elf64_alpha_section_flags
-  PARAMS ((flagword *, Elf_Internal_Shdr *));
+  PARAMS ((flagword *, const Elf_Internal_Shdr *));
 static bfd_boolean elf64_alpha_fake_sections
   PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
 static bfd_boolean elf64_alpha_create_got_section
@@ -2315,7 +2315,7 @@ elf64_alpha_section_from_shdr (abfd, hdr, name)
 static bfd_boolean
 elf64_alpha_section_flags (flags, hdr)
      flagword *flags;
-     Elf_Internal_Shdr *hdr;
+     const Elf_Internal_Shdr *hdr;
 {
   if (hdr->sh_flags & SHF_ALPHA_GPREL)
     *flags |= SEC_SMALL_DATA;
@@ -2572,7 +2572,6 @@ elf64_alpha_read_ecoff_info (abfd, section, debug)
 #undef READ
 
   debug->fdr = NULL;
-  debug->adjust = NULL;
 
   return TRUE;
 

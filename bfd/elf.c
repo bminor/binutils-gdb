@@ -652,6 +652,9 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
   if (newsect == NULL)
     return FALSE;
 
+  hdr->bfd_section = newsect;
+  elf_section_data (newsect)->this_hdr = *hdr;
+
   /* Always use the real type/flags.  */
   elf_section_type (newsect) = hdr->sh_type;
   elf_section_flags (newsect) = hdr->sh_flags;
@@ -797,9 +800,6 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	    }
 	}
     }
-
-  hdr->bfd_section = newsect;
-  elf_section_data (newsect)->this_hdr = *hdr;
 
   return TRUE;
 }

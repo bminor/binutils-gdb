@@ -1,3 +1,17 @@
+2004-04-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-alpha.c (elf64_alpha_read_ecoff_info): Don't assign
+	structure field removed in 2004-04-24 patch.
+	* elf64-sparc.c (sparc64_elf_plt_sym_val): Warning fix.
+
+	* elf-bfd.h (struct elf_backend_data <elf_backend_section_flags>):
+	Constify hdr arg.
+	* elf32-arm.h (elf32_arm_section_flags): Likewise.
+	* elf64-alpha.c (elf64_alpha_section_flags): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_section_flags): Likewise.
+	* elf.c (_bfd_elf_make_section_from_shdr): Set the bfd_section
+	field before calling elf_backend_section_flags.
+
 2004-04-24  Chris Demetriou  <cgd@broadcom.com>
 
 	* elf32-mips.c (elf_mips_gnu_rel_hi16, elf_mips_gnu_rel_lo16)

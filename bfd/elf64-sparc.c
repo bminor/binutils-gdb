@@ -3112,7 +3112,7 @@ sparc64_elf_object_p (abfd)
 
 static bfd_vma
 sparc64_elf_plt_sym_val (bfd_vma i, const asection *plt,
-			 const arelent *rel)
+			 const arelent *rel ATTRIBUTE_UNUSED)
 {
   bfd_vma j;
 
