@@ -1,3 +1,7 @@
+Mon Apr  4 16:30:46 1994  Doug Evans  (dje@canuck.cygnus.com)
+
+	* sparc-opc.c (sparc_opcodes): Fix "rd %fprs,%l0".
+
 Mon Apr  4 13:22:00 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ppc-opc.c (powerpc_operands): The signedp field has been
