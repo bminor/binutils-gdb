@@ -1,3 +1,15 @@
+2005-03-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_provide_bound_symbols): New
+	(gld${EMULATION_NAME}_finish): Call
+	gld${EMULATION_NAME}_provide_bound_symbols to provide
+	__preinit_array_start, __preinit_array_end, __init_array_start,
+	__init_array_end, __fini_array_start and __fini_array_end.
+
+	* scripttempl/elf.sc: Don't provide __preinit_array_start,
+	__preinit_array_end, __init_array_start, __init_array_end,
+	__fini_array_start nor __fini_array_end.
+
 2005-03-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): Set

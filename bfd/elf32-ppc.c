@@ -4545,26 +4545,6 @@ ppc_elf_relax_section (bfd *abfd,
   return FALSE;
 }
 
-/* Set SYM_NAME to VAL if the symbol exists and is undefined.  */
-
-static void
-set_linker_sym (struct ppc_elf_link_hash_table *htab,
-		const char *sym_name,
-		bfd_vma val)
-{
-  struct elf_link_hash_entry *h;
-  h = elf_link_hash_lookup (&htab->elf, sym_name, FALSE, FALSE, FALSE);
-  if (h != NULL && h->root.type == bfd_link_hash_undefined)
-    {
-      h->root.type = bfd_link_hash_defined;
-      h->root.u.def.section = bfd_abs_section_ptr;
-      h->root.u.def.value = val;
-      h->def_regular = 1;
-      h->type = STT_OBJECT;
-      h->other = STV_HIDDEN;
-    }
-}
-
 /* Set _SDA_BASE_, _SDA2_BASE, and sbss start and end syms.  They are
    set here rather than via PROVIDE in the default linker script,
    because using PROVIDE inside an output section statement results in
@@ -4599,19 +4579,19 @@ ppc_elf_set_sdata_syms (bfd *obfd, struct bfd_link_info *info)
 	val = s->vma + 32768;
       lsect->sym_val = val;
 
-      set_linker_sym (htab, lsect->sym_name, val);
+      _bfd_elf_provide_symbol (info, lsect->sym_name, val);
     }
 
   s = bfd_get_section_by_name (obfd, ".sbss");
   val = 0;
   if (s != NULL)
     val = s->vma;
-  set_linker_sym (htab, "__sbss_start", val);
-  set_linker_sym (htab, "___sbss_start", val);
+  _bfd_elf_provide_symbol (info, "__sbss_start", val);
+  _bfd_elf_provide_symbol (info, "___sbss_start", val);
   if (s != NULL)
     val += s->size;
-  set_linker_sym (htab, "__sbss_end", val);
-  set_linker_sym (htab, "___sbss_end", val);
+  _bfd_elf_provide_symbol (info, "__sbss_end", val);
+  _bfd_elf_provide_symbol (info, "___sbss_end", val);
   return TRUE;
 }
 

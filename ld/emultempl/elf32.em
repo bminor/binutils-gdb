@@ -1428,6 +1428,29 @@ if test x"$LDEMUL_FINISH" != xgld"$EMULATION_NAME"_finish; then
 cat >>e${EMULATION_NAME}.c <<EOF
 
 static void
+gld${EMULATION_NAME}_provide_bound_symbols (const char *sec,
+					    const char *start,
+					    const char *end)
+{
+  asection *s;
+  bfd_vma start_val, end_val;
+
+  s = bfd_get_section_by_name (output_bfd, sec);
+  if (s != NULL)
+    {
+      start_val = s->vma;
+      end_val = start_val + s->size;
+    }
+  else
+    {
+      start_val = 0;
+      end_val = 0;
+    }
+  _bfd_elf_provide_symbol (&link_info, start, start_val);
+  _bfd_elf_provide_symbol (&link_info, end, end_val);
+}
+
+static void
 gld${EMULATION_NAME}_finish (void)
 {
   if (bfd_elf_discard_info (output_bfd, &link_info))
@@ -1471,6 +1494,34 @@ gld${EMULATION_NAME}_finish (void)
 		    break;
 		  }
 	    }
+	}
+
+      /* If not building shared library, provide
+
+	 __preinit_array_start
+	 __preinit_array_end
+	 __init_array_start
+	 __init_array_end
+	 __fini_array_start
+	 __fini_array_end
+
+	 They are set here rather than via PROVIDE in the linker
+	 script, because using PROVIDE inside an output section
+	 statement results in unnecessary output sections.  Using
+	 PROVIDE outside an output section statement runs the risk of
+	 section alignment affecting where the section starts.  */
+
+      if (!link_info.shared)
+	{
+	  gld${EMULATION_NAME}_provide_bound_symbols
+	    (".preinit_array", "__preinit_array_start",
+	     "__preinit_array_end");
+	  gld${EMULATION_NAME}_provide_bound_symbols
+	    (".init_array", "__init_array_start",
+	     "__init_array_end");
+	  gld${EMULATION_NAME}_provide_bound_symbols
+	    (".fini_array", "__fini_array_start",
+	     "__fini_array_end");
 	}
     }
 }

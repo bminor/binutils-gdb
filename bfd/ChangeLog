@@ -1,3 +1,15 @@
+2005-03-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd-in.h (_bfd_elf_provide_symbol): New.
+	* bfd-in2.h: Regenerated.
+
+	* elf32-ppc.c (set_linker_sym): Moved to elflink.c.
+	(ppc_elf_set_sdata_syms): Call _bfd_elf_provide_symbol instead
+	of set_linker_sym.
+
+	* elflink.c (_bfd_elf_provide_symbol): New. Moved and renamed
+	from elf32-ppc.c.
+
 2005-03-22  Hans-Peter Nilsson  <hp@axis.com>
 
 	* hash.c (strtab_hash_newfunc): Fix typo in allocated size.

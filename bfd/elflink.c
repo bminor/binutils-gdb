@@ -9754,3 +9754,24 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section * sec)
   /* This is the first section with this name.  Record it.  */
   bfd_section_already_linked_table_insert (already_linked_list, sec);
 }
+
+/* Set NAME to VAL if the symbol exists and is undefined.  */
+
+void
+_bfd_elf_provide_symbol (struct bfd_link_info *info, const char *name,
+			 bfd_vma val)
+{
+  struct elf_link_hash_entry *h;
+  h = elf_link_hash_lookup (elf_hash_table (info), name, FALSE, FALSE,
+			    FALSE);
+  if (h != NULL && h->root.type == bfd_link_hash_undefined)
+    {
+      h->root.type = bfd_link_hash_defined;
+      h->root.u.def.section = bfd_abs_section_ptr;
+      h->root.u.def.value = val;
+      h->def_regular = 1;
+      h->type = STT_OBJECT;
+      h->other = STV_HIDDEN | (h->other & ~ ELF_ST_VISIBILITY (-1));
+      h->forced_local = 1;
+    }
+}
