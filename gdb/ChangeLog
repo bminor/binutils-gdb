@@ -1,3 +1,7 @@
+2001-12-30  Michael Snyder  <msnyder@redhat.com>
+
+	* sparc-tdep.c (sparc-store-return-value): Whitespace fix-up.
+
 2001-12-29  Elena Zannoni  <ezannoni@redhat.com>
 
         * Makefile.in (rs6000-tdep.o): Add dependency on parser-defs.h.

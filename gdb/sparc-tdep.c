@@ -2080,7 +2080,7 @@ sparc_store_return_value (struct type *type, char *valbuf)
   int regno;
   char *buffer;
 
-  buffer = alloca(MAX_REGISTER_RAW_SIZE);
+  buffer = alloca (MAX_REGISTER_RAW_SIZE);
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT && SPARC_HAS_FPU)
     /* Floating-point values are returned in the register pair */
