@@ -1,4 +1,4 @@
-#   Copyright 1997, 1999, 2002 Free Software Foundation, Inc.
+#   Copyright 1997, 1999, 2002, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -355,6 +355,9 @@ proc do_attach_tests {} {
       -re "$gdb_prompt $" {fail "after attach3, exit"}
       timeout         {fail "(timeout) after attach3, exit"}
    }
+
+   # Another "don't leave a process around"
+   remote_exec build "kill -9 ${testpid}"
 }
 
 proc do_call_attach_tests {} {

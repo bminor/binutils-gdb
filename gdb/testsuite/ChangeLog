@@ -1,3 +1,8 @@
+2004-06-25  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/attach.exp (do_attach_tests): Don't forget to kill second
+	attach process.
+
 2004-06-23  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/pr-1553.exp: Remove.
