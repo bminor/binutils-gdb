@@ -240,7 +240,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
      FIXME: we don't check that, we just clear them.  */
   HOWTO (R_PPC_ADDR14,          /* type */
 	 0,	                /* rightshift */
-	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
@@ -257,7 +257,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
      bits must be zero.  */
   HOWTO (R_PPC_ADDR14_BRTAKEN,  /* type */
 	 0,	                /* rightshift */
-	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
@@ -274,7 +274,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
      two bits must be zero.  */
   HOWTO (R_PPC_ADDR14_BRNTAKEN, /* type */
 	 0,	                /* rightshift */
-	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
@@ -304,7 +304,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
   /* A relative 16 bit branch; the lower two bits must be zero.  */
   HOWTO (R_PPC_REL14,           /* type */
 	 0,	                /* rightshift */
-	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
 	 true,	                /* pc_relative */
 	 0,	                /* bitpos */
@@ -321,7 +321,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
      zero.  */
   HOWTO (R_PPC_REL14_BRTAKEN,   /* type */
 	 0,	                /* rightshift */
-	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
 	 true,	                /* pc_relative */
 	 0,	                /* bitpos */
@@ -338,7 +338,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
      be zero.  */
   HOWTO (R_PPC_REL14_BRNTAKEN,  /* type */
 	 0,	                /* rightshift */
-	 1,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 16,	                /* bitsize */
 	 true,	                /* pc_relative */
 	 0,	                /* bitpos */

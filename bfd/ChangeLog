@@ -1,3 +1,8 @@
+Mon Sep 25 16:04:09 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_howto_raw): For all 14-bit branch relocs,
+	go back to telling the tools this reloc operates on 32 bits.
+
 Mon Sep 25 11:48:02 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libcoff-in.h (struct coff_section_tdata): Add offset, i,
