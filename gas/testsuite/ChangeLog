@@ -1,3 +1,14 @@
+Mon Aug  7 22:39:28 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/m68k/operands.s, gas/m68k/operands.d: New test.
+	* gas/m68k/op68000.d: New test.
+	* gas/m68k/cas.s, gas/m68k/cas.d: New test.
+	* gas/m68k/bitfield.s, gas/m68k/bitfield.d: New test.
+	* gas/m68k/schwab.d: Run objdump with -j .text.  Adjust for
+	changes to disassembler.
+	* gas/m68k/all.exp: Run new tests.  Run schwab test for
+	m68k-*-coff*.
+
 start-sanitize-sh3e
 Mon Aug  7 03:01:32 1995  Jeff Law  (law@snake.cs.utah.edu)
 

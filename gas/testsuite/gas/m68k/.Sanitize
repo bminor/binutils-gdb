@@ -26,7 +26,14 @@ Do-first:
 Things-to-keep:
 
 all.exp
+bitfield.d
+bitfield.s
+cas.d
+cas.s
 disperr.s
+op68000.d
+operands.d
+operands.s
 p2410.s
 p2663.s
 pic1.s
