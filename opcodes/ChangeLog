@@ -1,3 +1,8 @@
+2002-04-28  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* vax-dis.c (print_insn_arg): Pass the insn info to print_insn_mode.
+	(print_insn_mode): Print some basic info about floating point values.
+
 2002-05-09  Anton Blanchard  <anton@samba.org>
 
 	* ppc-opc.c: Add "tlbiel" for POWER4.
