@@ -25,6 +25,7 @@ Things-to-keep:
 
 Makefile.in
 bfd.texinfo
+bfdsumm.texi
 configure.in
 chew.c
 proto.str

@@ -61,7 +61,7 @@ CC_FOR_BUILD = $(CC)
 ###
 
 .c.o:
-	$(CC) $(CFLAGS) -c $(H_CFLAGS) -I.. -I$(srcdir)/.. -I$(srcdir)/../../include $<
+	$(CC) -c -I.. -I$(srcdir)/.. -I$(srcdir)/../../include $(H_CFLAGS) $(CFLAGS) $<
 
 # main GDB source directory
 
@@ -123,12 +123,16 @@ install-info: info
 docs: $(MKDOC) protos bfd.info bfd.dvi bfd.ps
 
 $(MKDOC): chew.o
-	$(CC_FOR_BUILD) $(CFLAGS) -o $(MKDOC) $(H_CFLAGS) chew.o $(LOADLIBES)
+	$(CC_FOR_BUILD) -o $(MKDOC) chew.o $(LOADLIBES) $(LDFLAGS)
 
 chew.o: chew.c
-	$(CC_FOR_BUILD) $(CFLAGS) -c $(H_CFLAGS) -I.. -I$(srcdir)/.. -I$(srcdir)/../../include $(srcdir)/chew.c
+	$(CC_FOR_BUILD) -c -I.. -I$(srcdir)/.. -I$(srcdir)/../../include $(H_CFLAGS) $(CFLAGS) $(srcdir)/chew.c
 
 protos: libbfd.h libcoff.h bfd.h
+
+
+# We can't replace these rules with an implicit rule, because
+# makes without VPATH support couldn't find the .h files in `..'.
 
 aoutx.texi: $(MKDOC) $(srcdir)/../aoutx.h $(srcdir)/doc.str
 	$(MKDOC) -f $(srcdir)/doc.str <$(srcdir)/../aoutx.h >aoutx.texi
@@ -201,6 +205,7 @@ libbfd.h: $(srcdir)/../libbfd-in.h	\
 	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../cpu-h8300.c >>libbfd.h
 	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../cpu-i960.c >>libbfd.h
 	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../archures.c >>libbfd.h
+	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../elf.c >>libbfd.h
 	$(MKDOC) -i -f $(srcdir)/proto.str  < $(srcdir)/../elfcode.h >>libbfd.h
 
 libcoff.h: $(srcdir)/../libcoff-in.h	\
@@ -256,16 +261,16 @@ distclean: clean
 realclean: clean
 	rm -f Makefile config.status
 
-bfd.info: $(DOCFILES) bfd.texinfo
+bfd.info: $(DOCFILES) bfdsumm.texi bfd.texinfo
 	$(MAKEINFO) -o bfd.info $(srcdir)/bfd.texinfo
 
-bfd.dvi: $(DOCFILES) bfd.texinfo
+bfd.dvi: $(DOCFILES) bfdsumm.texi bfd.texinfo
 	$(TEXI2DVI) $(srcdir)/bfd.texinfo
 
 bfd.ps: bfd.dvi
 	dvips bfd -o
-	
-quickdoc: $(DOCFILES) bfd.texinfo
+
+quickdoc: $(DOCFILES) bfdsumm.texi bfd.texinfo
 	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex bfd.texinfo
 
 stage1: force
