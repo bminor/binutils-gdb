@@ -1,4 +1,57 @@
+Fri May  6 01:08:14 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* emultempl/generic.em: Use "e" rather than "em_" as prefix for
+	filename.
+	* emultempl/gld960.em, emultempl/gld960c.em, emultempl/lnk960.em,
+	emultempl/hppaelf.em, emultempl/m88kbcs.em, emultempl/vanilla.em:
+	Ditto.
+	* Makefile.in: Changed all generated file names.
+	(ldemul-list.h): Depend on Makefile, not config.status.  Changed
+	sed patterns to handle new filenames.
+
+	* config/mipsl-idt.mt: Renamed from mips-idtl.mt.
+	* configure.in: Adjusted.
+
+Thu May  5 15:07:32 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* Makefile.in (install-info): Don't use "$<*", it doesn't always
+	work.  Instead, check build dir and $srcdir explicitly, and use
+	`echo' to get all the filenames.
+
+	* configure.in (h8300h-*-hms): Changed ld_target name to
+	cf-h8300h.
+	* config/cf-h8300h.mt: Renamed from coff-h8300h.mt, to make it
+	unique in 8.3.
+
+	* config/i960coff.mt: New file.
+	* emulparams/gld960coff.sh: New file.
+	* emultempl/gld960c.em: New file.
+	* configure.in (i960-*-vxworks5* except -vxworks5.0*): Use
+	i960coff configuration.
+	* Makefile.in (em_gld960coff.c): Added dependencies, build rule.
+
+	* Makefile.in (ALL_EMULATIONS): Remove em_delta68.o, since the
+	code isn't included in FSF releases, and it can still be
+	explicitly selected.
+	(distclean): Remove site.bak and tmpdir.
+	(STAGESTUFF): Removed $(GENERATED_CFILES) $(GENERATED_HFILES).
+	(mostlyclean): Delete them explicitly here.  Also remove tmpdir.
+
+	Patches from Ralph Campbell:
+	* config/mipsbsd.mh: New file.
+	* Makefile.in (em_mipsbsd.c): Use mipsbsd.sc, not aout.sc.
+	* scripttempl/mipsbsd.sc: Don't define __DYNAMIC.
+	* emulparams/mipsbsd.sh (OUTPUT_FORMAT): Fix name to have `a.out'
+	instead of `aout'.
+
+	* configure.in (i386-*-gnu*): Treat like i386-*-mach*.
+
 Wed May  4 11:59:40 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/m68k.mt (EMUL): Set to m68kaout.
+	* emulparams/m68kaout.sh: New file.
+	* Makefile.in (ALL_EMULATIONS): Add em_m68kaout.o.
+	(em_m68kaout.c): New target.
 
 	* ldlang.c (lang_size_sections): If dot moves because of an
 	assignment, don't try to insert a pad into the absolute output
