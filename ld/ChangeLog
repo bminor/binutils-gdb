@@ -1,3 +1,15 @@
+Wed Mar  6 18:08:18 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldemul.h (ldemul_unrecognized_file): Declare.
+	(ldemulation_xfer_type): Add unrecognized_file field.
+	* ldemul.c (ldemul_unrecognized_file): New function.
+	* ldlang.c (load_symbols): If a file can not be recognized, call
+	ldemul_unrecognized_file before trying it as a linker script.
+	* aix.em (gld${EMULATION_NAME}_unrecognized_file): New static
+	function.
+	(gld${EMULATION_NAME}_read_file): Use FOPEN_RT, not "r".
+	(ld_${EMULATION_NAME}_emulation): Initialize unrecognized_file.
+
 Mon Mar  4 14:11:17 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (wild): Handle foo.a(.text) by mapping each included
