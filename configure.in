@@ -618,6 +618,12 @@ case "${target}" in
            use_gnu_ld=no
     fi
     ;;
+# start-sanitize-sky
+  txvu-*-elf*)
+    noconfigdirs="$noconfigdirs gcc gdb target-newlib target-libgloss"
+    noconfigdirs="$noconfigdirs target-librx target-libg++ target-libstdc++ target-libio"
+    ;;
+# end-sanitize-sky
   v810-*-*)
     noconfigdirs="$noconfigdirs bfd binutils gas gcc gdb ld target-libio target-libg++ target-libstdc++ opcodes target-libgloss"
     ;;

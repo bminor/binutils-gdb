@@ -1,3 +1,10 @@
+start-sanitize-syk
+Mon Dec 22 14:08:27 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* configure.in: Add txvu-elf support.
+	* config.sub: Recognize txvu cpu.
+
+end-sanitize-sky
 start-sanitize-vr5400
 Mon Dec 22 11:27:12 1997  Jeffrey A Law  (law@cygnus.com)
 
