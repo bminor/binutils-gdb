@@ -1,3 +1,16 @@
+start-sanitize-d10v
+Mon Oct 21 17:16:59 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
+
+	* scripttempl/elfd10v.sc: Clone from elf.sc, move .text to
+	0x10000, so that is more room for data.
+
+	* emulparams/d10velf.sh (TEXT_START_ADDR): Now 0x100000.
+	(READONLY_START_ADDR): Now 0x0.
+	(SCRIPT_NAME): Now elfd10v.
+
+	* Makefile.in (ed10velf.c): Depend on elfd10v.sc, not elf.sc.
+
+end-sanitize-d10v
 start-sanitize-m32r
 Fri Oct 18 22:12:49 1996  Doug Evans  <dje@canuck.cygnus.com>
 
