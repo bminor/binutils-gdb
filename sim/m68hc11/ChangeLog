@@ -1,0 +1,178 @@
+2000-06-25  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* Makefile.in (SIM_RUN_OBJS): Define to use nrun.c
+	* dv-m68hc11.c (m68hc11cpu_finish): Register detach address callback.
+	(dv_m6811_detach_address_callback): New function to detach a
+	device from an address space.
+	* dv-m68hc11eepr.c (m68hc11eepr_port_event): Initialize
+	config register according to --cpu-config option.
+	* sim-main.h (_sim_cpu): Add cpu_config member.
+	* interp.c (sim_open): Delete specific simulator options.
+	* m68hc11_sim.c (cpu_option_handler): New options
+	--emulos and -cpu-config <val> to configure the simulator.
+	(cpu_initialize): Initialize cpu_config member.
+
+2000-06-24  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* emulos.c: Fix indentation and comments.
+	* gencode.c: Likewise.
+	* dv-m68hc11tim.c (m68hc11tim_timer_event): Handle COMPARE_EVENT.
+	(m68hc11tim_io_write_buffer): Write compare registers and
+	setup compare event.
+	* interp.c: Remove unused global variables.
+	* interrupts.c (idefs): New compare interrupts.
+	Fix indentation and comments.
+	* interrupts.h: Likewise.
+
+2000-06-18  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* dv-m68hc11sio.c: Fix indentation and comments.
+	Remove INT_PORT.
+	* dv-m68hc11.c: Fix indentation and comments.
+	(m68hc11cpu_port_event): Move initialization of M6811_HPRIO from here.
+	* m68hc11_sim.c (cpu_reset): To here.
+	* dv-m68hc11eepr.c: Fix indentation and comments.
+	
+2000-06-17  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* dv-nvram.c: New file, rename from dv-pram.c.
+	* dv-pram.c: Delete file.
+	* sim-main.h: Incorporate m68hc11_sim.h.
+	* m68hc11_sim.h: Delete file.
+	* configure.in: Rename pram into nvram.
+	* interp.c (sim_open): Likewise in creation of device tree.
+	
+2000-05-31  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* interp.c (sim_open): Create the SPI device.
+	* dv-m68hc11spi.c: New file for SPI device simulation.
+	* configure.in (hw_extra_devices): Add SPI device.
+
+2000-05-28  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* interrupts.c (interrupts_initialize): Clear XIRQ accounting.
+	(interrupts_process): Separate IRQ and XIRQ accounting.
+	(interrupts_info): Report XIRQ accounting.
+	* interrupts.h (struct interrupts): Added accounting for XIRQ.
+
+2000-04-16  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* dv-pram.c (attach_pram_regs): Fix the 'save-modified' mode.
+	* m68hc11_sim.h (_sim_cpu): Allow configuration of cpu mode.
+	* dv-m68hc11.c (attach_m68hc11_regs): Get the cpu MODA,MODB 
+	configuration from the 'mode' device tree property.
+	(m68hc11cpu_port_event): Reset M6811_HPRIO to the cpu MODA, MODB
+	configuration.
+
+2000-02-24  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* sim-main.h: Remove WITH_TARGET_* defines.
+	* Makefile.in (SIM_EXTRA_CFLAGS): Specify the WITH_TARGET_* flags.
+
+2000-02-08  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* dv-m68hc11sio.c (m68hc11sio_port_event): Setup the SCI to
+	1200 baud when cpu is in bootstrap mode.
+
+	* dv-m68hc11tim.c (m68hc11tim_io_write_buffer): Be able to
+	write in the TCTN timer register.
+
+	* dv-m68hc11sio.c (m68hc11sio_io_write_buffer): Divide cpu clock
+	by 4 to obtain the E clock frequency.
+	(sccr2_desc): Use M6811_TIE for TIE bit.
+	(m68hc11sio_info): Fix baud rate report.
+
+	* dv-m68hc11tim.c (to_realtime): Likewise.
+
+	* interp.c (sim_open): When building device tree, only provide
+	devices that do not exist yet.
+
+	* emulos.c: Fix compilation pb under Windows.
+
+	* dv-m68hc11.c (attach_m68hc11_regs): Get the clock frequency
+	from the 'clock' property.
+
+2000-01-02  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* m68hc11_sim.h (*_REGNUM): Define.
+	(_sim_cpu): New member cpu_page0_reg table.
+	* interp.c (sim_create_inferior): Fill the cpu_page0_reg table with
+	addresses of soft registers in .page0.
+	(sim_fetch_register, sim_store_register): Use cpu_page0_reg table 
+	to get/set soft registers.
+
+1999-12-31  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* dv-m68hc11.c (m68hc11cpu_io_write_buffer): Clear byte to avoid
+	returning random values.
+
+1999-12-17  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* gencode.c: Fix "subb N,x" that used a instead of b.
+
+1999-09-09  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* gencode.c: Fixed sbc8 and adc8 when there was a initial carry.
+
+1999-09-01  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* sim-main.h (SIM_HANDLES_LMA): Define to enable loading using lma.
+
+1999-08-14  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* dv-m68hc11.c (attach_m68hc11_regs): Save the size of the
+	register region in the m68hc11cpu struct.
+	(m68hc11cpu_io_write): When the IO mapping addres changes,
+	detach the register region and re-attach it at the new address.
+	(m68hc11cpu_io_read_buffer): Renamed base_address into
+	attach_address.
+	(m68hc11cpu_io_write_buffer): Likewise. Pass the hw pointer
+	to m68hc11cpu_io_write.
+
+1999-08-13  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* gencode.c: For sbc8, check the carry and increment the source
+	before trying to set the carry for the result.
+
+1999-05-24  John S. Kallal <kallal@voicenet.com>
+	
+	* interp.c (sim_get_info): Don't crash if the command line is 0.
+	Define prototype for sim_get_info() and init_system().
+	(sim_info): Correct call to sim_get_info().
+	
+1999-05-16  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* configure.in: Recognize m6811-*-*.
+	* configure: Regenerate.
+	* m68hc11_sim.h (cpu_ccr_update_add8, cpu_ccr_update_add16,
+	cpu_ccr_update_sub8, cpu_ccr_update_sub16):
+	Correct the computation of carry of 8 and 16-bits add and subtract.
+	* gencode.c: Use cpu_ccr_update_sub8 for subtraction (carry and
+	overflow set in a different manner than add).
+
+1999-05-14  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* dv-m68hc11.c (dv_m6811_attach_address_callback): Removed a
+	trace message.
+	* interp.c (sim_open, sim_create_inferior): Initialize the
+	cpu_elf_start from the ELF header.
+	* m68hc11_sim.c (cpu_initialize): Clear the new data members.
+	(cpu_restart): Use cpu_elf_start as the starting address when
+	the flag is set.
+	(cpu_special): When cpu_use_elf_start is set, the WAI instruction
+	exits the simulator (exit status is in D).
+	* m68hc11_sim.h (_sim_cpu): Added members cpu_use_elf_start and
+	cpu_elf_star to start execution at address specified in ELF file.
+
+1999-05-02  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* Makefile.in, config.in, configure, configure.in: New files.
+	* gencode.c: New file, generation of 68HC11 interpreter.
+	* m68hc11_sim.h, m68hc11_sim.c: New files, specific operations
+	for interpreter.
+	* interrupts.c, interrupts.h: New files, management of interrupts.
+	* interp.c, sim-main.h, 
+	* dv-m68hc11.c, dv-m68hc11eepr.c, dv-m68hc11sio.c,
+	dv-m68hc11tim.c, dv-pram.c: New files representing devices for
+	68HC11 (dv-pram.c is generic and could probably migrate to common).
+	* emulos.c: New file, basic emulation of some os.
