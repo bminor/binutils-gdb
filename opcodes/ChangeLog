@@ -1,3 +1,8 @@
+Wed Feb 12 12:27:40 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* m68k-dis.c (print_insn_m68k): Set bytes_per_chunk and
+	bytes_per_line.
+
 start-sanitize-tic80
 Tue Feb 11 16:36:31 1997  Fred Fish  <fnf@cygnus.com>
 
