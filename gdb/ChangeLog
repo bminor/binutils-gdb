@@ -1,5 +1,8 @@
 Fri Sep  3 08:57:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* elfread.c (elf_symtab_read): Don't add symbols starting with ".L"
+	to minimal symbols.
+
 	* target.c (pop_target): Don't try to deal with the stack becoming
 	empty.  Shouldn't happen and the code that tried was broken.
 

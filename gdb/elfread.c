@@ -278,6 +278,9 @@ elf_symtab_read (abfd, addr, objfile)
 		    {
 		      ms_type = mst_text;
 		    }
+		  else if (sym->name[0] == '.' && sym->name[1] == 'L')
+		    /* Looks like a compiler-generated label.  Skip it.  */
+		    continue;
 		  else
 		    {
 		      ms_type = mst_file_text;
