@@ -1,3 +1,8 @@
+2001-06-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* gnu-v3-abi.c: Include "gdb_assert.h".
+	(build_gdb_vtable_type): Replace abort() with gdb_assert().
+
 2001-06-06  Jim Blandy  <jimb@redhat.com>
 
 	* cp-abi.h: Rearrange code to put documentation comments above the

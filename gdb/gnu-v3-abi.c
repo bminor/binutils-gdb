@@ -23,6 +23,7 @@
 #include "value.h"
 #include "cp-abi.h"
 #include "demangle.h"
+#include "gdb_assert.h"
 
 static struct cp_abi_ops gnu_v3_abi_ops;
 
@@ -156,8 +157,7 @@ build_gdb_vtable_type (struct gdbarch *arch)
   field++;
 
   /* We assumed in the allocation above that there were four fields.  */
-  if (field != field_list + 4)
-    abort ();
+  gdb_assert (field == (field_list + 4));
 
   t = init_type (TYPE_CODE_STRUCT, offset, 0, 0, 0);
   TYPE_NFIELDS (t) = field - field_list;
