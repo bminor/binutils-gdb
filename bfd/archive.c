@@ -28,7 +28,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ 
  * $Log$
- * Revision 1.2  1991/04/03 22:09:43  steve
+ * Revision 1.3  1991/04/04 14:56:42  gumby
+ * Minor format fixes.
+ *
+ * Revision 1.2  1991/04/03  22:09:43  steve
  * Various noise
  *
  * Revision 1.1.1.1  1991/03/21  21:10:42  gumby
@@ -1168,7 +1171,6 @@ coff_write_armap (arch, elength, map, orl_count, stridx)
     int last_eltno = 0;		/* last element arch seen */
     int count;
     struct ar_hdr hdr;
-    struct stat statbuf;
     unsigned int i;
     int padit = mapsize & 1;
   
@@ -1177,11 +1179,14 @@ coff_write_armap (arch, elength, map, orl_count, stridx)
     archive_member_file_ptr =
 	mapsize + elength + sizeof (struct ar_hdr) + SARMAG;
 
-    fstat (arch->iostream, &statbuf); /* FIXME -- descriptor must be open! */
     memset ((char *)(&hdr), 0, sizeof (struct ar_hdr));
     hdr.ar_name[0] = '/';
     sprintf (hdr.ar_size, "%-10d", (int) mapsize);
-    sprintf (hdr.ar_date, "%ld", statbuf.st_mtime);  
+    sprintf (hdr.ar_date, "%ld", time (NULL));
+    /* This, at least, is what Intel coff sets the values to.: */
+    sprintf ((hdr.ar_uid), "%d", 0);
+    sprintf ((hdr.ar_gid), "%d", 0);
+    sprintf ((hdr.ar_mode), "%-7o", 0);
     hdr.ar_fmag[0] = '`'; hdr.ar_fmag[1] = '\n';
 
     for (i = 0; i < sizeof (struct ar_hdr); i++)
