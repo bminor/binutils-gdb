@@ -40,6 +40,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <varargs.h>
 #endif
 
+/* Microsoft C's stat.h doesn't define all the POSIX file modes.  */
+#ifndef S_IROTH
+#define S_IROTH S_IREAD
+#endif
+
 extern void mips_set_processor_type_command PARAMS ((char *, int));
 
 
@@ -1457,8 +1462,8 @@ device is attached to the target board (e.g., /dev/ttya).\n"
 "temporary file to be used by GDB for downloads as the second argument.\n"
 "This filename must be in the form host:filename, where host is the name\n"
 "of the host running the TFTP server, and the file must be readable by the\n"
-"world.  If the local name of the temporary file differs from the name as\n",
-"seen from the board via TFTP, specify that name as the third parameter\n");
+"world.  If the local name of the temporary file differs from the name as\n"
+"seen from the board via TFTP, specify that name as the third parameter.\n");
 
   /* Parse the serial port name, the optional TFTP name, and the
      optional local TFTP name.  */

@@ -678,7 +678,7 @@ unpack_double (type, valaddr, invp)
 #ifndef _MSC_VER
       return (ULONGEST) unpack_long (type, valaddr);
 #else
-#if (_MSC_VER > 800)
+#if (_MSC_VER > 900)
       return (ULONGEST) unpack_long (type, valaddr);
 #else
       /* FIXME!!! msvc22 doesn't support unsigned __int64 -> double */

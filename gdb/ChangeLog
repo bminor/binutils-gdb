@@ -1,3 +1,10 @@
+Thu Dec 19 09:38:56 1996  Mark Alexander  <marka@cygnus.com>
+
+	* values.c (unpack_double): Make it compile with MSVC++ 2.x.
+	* remote-mips.c (S_IROTH): Define if not defined by stat.h, e.g.
+	when using MSVC++.
+	(common_open): Fix help string.
+
 Sat Dec 14 20:50:01 1996  Mark Alexander  <marka@cygnus.com>
 
 	* mips-tdep.c (mips_push_arguments): Handle floating point args.
