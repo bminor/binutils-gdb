@@ -551,7 +551,9 @@ extern CONST short _bfd_host_big_endian;
 
 /* The bfd itself */
 
-#define bfd_get_filename(abfd) ((abfd)->filename)
+/* Cast from const char * to char * so that caller can assign to
+   a char * without a warning.  */
+#define bfd_get_filename(abfd) ((char *) (abfd)->filename)
 #define bfd_get_format(abfd) ((abfd)->format)
 #define bfd_get_target(abfd) ((abfd)->xvec->name)
 #define bfd_get_file_flags(abfd) ((abfd)->flags)
