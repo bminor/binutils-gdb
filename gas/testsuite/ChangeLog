@@ -1,3 +1,10 @@
+start-sanitize-m32rx
+Fri Feb 13 14:44:32 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/m32r/m32rx.s (rte__subx): Do not perform RTE and SUBX in
+	parallel since they both write to the C bit.
+
+end-sanitize-m32rx
 start-sanitize-sky
 Thu Feb 12 17:42:39 1998  Doug Evans  <devans@canuck.cygnus.com>
 
