@@ -424,10 +424,6 @@ trace_command (char *arg, int from_tty)
 	t->addr_string = savestring (addr_start, addr_end - addr_start);
 
       trace_mention (t);
-
-      /* Let the UI know of any additions */
-      if (create_tracepoint_hook)
-	create_tracepoint_hook (t);
     }
 
   if (sals.nelts > 1)
@@ -574,14 +570,10 @@ tracepoint_operation (struct tracepoint *t, int from_tty,
     {
     case enable_op:
       t->enabled = enabled;
-      if (modify_tracepoint_hook)
-	modify_tracepoint_hook (t);
       tracepoint_modify_event (t->number);
       break;
     case disable_op:
       t->enabled = disabled;
-      if (modify_tracepoint_hook)
-	modify_tracepoint_hook (t);
       tracepoint_modify_event (t->number);
       break;
     case delete_op:
@@ -595,10 +587,6 @@ tracepoint_operation (struct tracepoint *t, int from_tty,
 	  t2->next = t->next;
 	  break;
 	}
-
-      /* Let the UI know of any deletions */
-      if (delete_tracepoint_hook)
-	delete_tracepoint_hook (t);
 
       if (t->addr_string)
 	xfree (t->addr_string);
@@ -745,8 +733,6 @@ trace_pass_command (char *args, int from_tty)
 	    if (t1 == (struct tracepoint *) -1 || t1 == t2)
 	      {
 		t2->pass_count = count;
-		if (modify_tracepoint_hook)
-		  modify_tracepoint_hook (t2);
 		tracepoint_modify_event (t2->number);
 		if (from_tty)
 		  printf_filtered ("Setting tracepoint %d's passcount to %d\n",

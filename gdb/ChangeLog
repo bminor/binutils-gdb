@@ -1,3 +1,10 @@
+2001-06-14  Keith Seitz  <keiths@redhat.com>
+
+	* tracepoint.c (trace_command): We now have tracepoint
+	events. Get rid of those ugly hooks.
+	(tracepoint_operation): Likewise.
+	(trace_pass_command): Likewise.
+
 2001-06-13  Michael Snyder  <msnyder@redhat.com>
 
 	* gdbthread.h (struct thread_info): Add new fields: 
