@@ -1,3 +1,9 @@
+Thu Oct 20 00:43:38 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (md_apply_fix): Set new_val to 8 for all
+	fixups to branch instructions (not just pc-relative ones) which
+	will generate SOM relocations.
+
 Wed Oct 19 13:41:56 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* config/tc-a29k.c: Include ctype.h with angle brackets.
