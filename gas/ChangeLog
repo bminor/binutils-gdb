@@ -1,5 +1,8 @@
 2002-05-13  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* dwarf2dbg.c (dwarf2_emit_insn): Do not reset
+	loc_directive_seen.
+
 	* stabs.c (s_stab_generic): Fix grammatical error in warning
 	message.
 

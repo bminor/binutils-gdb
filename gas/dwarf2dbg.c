@@ -286,16 +286,18 @@ dwarf2_emit_insn (size)
 {
   struct dwarf2_line_info loc;
 
-  if (debug_type != DEBUG_DWARF2 && ! loc_directive_seen)
+  if (loc_directive_seen)
+    /* Use the last location established by a .loc directive, not
+       the value returned by dwarf2_where().  That calls as_where()
+       which will return either the logical input file name (foo.c)
+       or the physical input file name (foo.s) and not the file name
+       specified in the most recent .loc directive (eg foo.h).  */
+    loc = current;
+  else if (debug_type != DEBUG_DWARF2)
     return;
-  loc_directive_seen = false;
+  else
+    dwarf2_where (& loc);
 
-  /* Use the last location established by a .loc directive, not
-     the value returned by dwarf2_where().  That calls as_where()
-     which will return either the logical input file name (foo.c)
-     or the physical input file name (foo.s) and not the file name
-     specified in the most recent .loc directive (eg foo.h).  */
-  loc = current;
   dwarf2_gen_line_info (frag_now_fix () - size, &loc);
 }
 
