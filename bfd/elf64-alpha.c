@@ -240,16 +240,23 @@ alpha_elf_dynamic_symbol_p (h, info)
 
   if (h->dynindx == -1)
     return false;
-  switch (ELF_ST_VISIBILITY (h->other))
-    {
-    case STV_INTERNAL:
-    case STV_HIDDEN:
-      return false;
-    }
 
   if (h->root.type == bfd_link_hash_undefweak
       || h->root.type == bfd_link_hash_defweak)
     return true;
+
+  switch (ELF_ST_VISIBILITY (h->other))
+    {
+    case STV_DEFAULT:
+      break;
+    case STV_HIDDEN:
+    case STV_INTERNAL:
+      return false;
+    case STV_PROTECTED:
+      if (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
+        return false;
+      break;
+    }
 
   if ((info->shared && !info->symbolic)
       || ((h->elf_link_hash_flags
