@@ -464,12 +464,12 @@ foo:
  bound  dx, 0x90909090[eax]
  pushw  0x9090
  imul   dx, 0x90909090[eax], 0x9090
- pushw  0xff90
- imul   dx, 0x90909090[eax], 0xff90
+ pushw  0xffffff90
+ imul   dx, 0x90909090[eax], 0xffffff90
  ins    word ptr es:[edi], dx
  outs   dx, word ptr ds:[esi]
  adc    word ptr 0x90909090[eax], 0x9090
- adc    word ptr 0x90909090[eax], 0xff90
+ adc    word ptr 0x90909090[eax], 0xffffff90
  test   0x90909090[eax], dx
  xchg   0x90909090[eax], dx
  mov    0x90909090[eax], dx
