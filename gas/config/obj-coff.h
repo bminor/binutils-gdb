@@ -162,7 +162,7 @@ typedef struct {
 /* The zeroes if symbol name is longer than 8 chars */
 #define S_GET_ZEROES(s)		((s)->sy_symbol.ost_entry.n_zeroes)
 /* The value of the symbol */
-#define S_GET_VALUE(s)		((s)->sy_symbol.ost_entry.n_value)
+#define S_GET_VALUE(s)		((unsigned) ((s)->sy_symbol.ost_entry.n_value))	
 /* The numeric value of the segment */
 #define S_GET_SEGMENT(s)        (N_TYPE_seg[(s)->sy_symbol.ost_entry.n_scnum+4])
 /* The data type */

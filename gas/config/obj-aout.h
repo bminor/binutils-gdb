@@ -30,6 +30,24 @@ to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 #include "a_out.h"
 #endif
 
+struct reloc_info_generic
+{
+    unsigned long r_address;
+/*
+ * Using bit fields here is a bad idea because the order is not portable. :-(
+ */
+    unsigned int r_index;
+#define r_symbolnum	r_index
+    unsigned r_extern   : 1;
+    unsigned r_pcrel:1;
+    unsigned r_length:2;	/* 0=>byte 1=>short 2=>long 3=>8byte */
+    unsigned r_bsr:1;		/* NS32K */
+    unsigned r_disp:1;		/* NS32k */
+    unsigned r_callj:1;		/* i960 */
+    enum reloc_type r_type;
+    long r_addend;
+};
+
 extern const short seg_N_TYPE[];
 extern const segT  N_TYPE_seg[];
 

@@ -129,18 +129,22 @@ const pseudo_typeS obj_pseudo_table[] = {
 	{ "val",	s_ignore,		0	},
 #endif /* ignore debug */
 
+	{ "ident",      s_ignore,		0 }, /* we don't yet handle this. */
+
+
  /* stabs aka a.out aka b.out directives for debug symbols.
-    Currently ignored silently.  Except for .line which we
-    guess at from context. */
+    Currently ignored silently.  Except for .line at which
+    we guess from context. */
 	{ "desc",	s_ignore,		0	}, /* def */
 /*	{ "line",	s_ignore,		0	}, */ /* source code line number */
 	{ "stabd",	obj_coff_stab,		'd'	}, /* stabs */
 	{ "stabn",	obj_coff_stab,		'n'	}, /* stabs */
 	{ "stabs",	obj_coff_stab,		's'	}, /* stabs */
 
+ /* stabs-in-coff (?) debug pseudos (ignored) */
+	{ "optim",	s_ignore, 0 }, /* For sun386i cc (?) */
  /* other stuff */
 	{ "ABORT",      s_abort,		0 },
-	{ "ident",      s_ignore,		0 },
 
 	{ NULL}	/* end sentinel */
 }; /* obj_pseudo_table */
@@ -249,7 +253,7 @@ object_headers *headers;
 {
 	tc_headers_hook(headers);
 
-#ifdef CROSS_ASSEMBLE
+#ifdef CROSS_COMPILE
 	/* Eventually swap bytes for cross compilation for file header */
 	md_number_to_chars(*where, headers->filehdr.f_magic, sizeof(headers->filehdr.f_magic));
 	*where += sizeof(headers->filehdr.f_magic);
@@ -286,14 +290,14 @@ object_headers *headers;
 	*where += sizeof(headers->aouthdr.data_start);
 #endif /* OBJ_COFF_OMIT_OPTIONAL_HEADER */
 
-#else /* CROSS_ASSEMBLE */
+#else /* CROSS_COMPILE */
 
 	append(where, (char *) &headers->filehdr, sizeof(headers->filehdr));
 #ifndef OBJ_COFF_OMIT_OPTIONAL_HEADER
 	append(where, (char *) &headers->aouthdr, sizeof(headers->aouthdr));
 #endif /* OBJ_COFF_OMIT_OPTIONAL_HEADER */
 
-#endif /* CROSS_ASSEMBLE */
+#endif /* CROSS_COMPILE */
 
 	/* Output the section headers */
 	c_section_header_append(where, &text_section_header);
@@ -312,7 +316,7 @@ symbolS *symbolP;
 	char numaux = syment->n_numaux;
 	unsigned short type = S_GET_DATA_TYPE(symbolP);
 
-#ifdef CROSS_ASSEMBLE
+#ifdef CROSS_COMPILE
 	md_number_to_chars(*where, syment->n_value, sizeof(syment->n_value));
 	*where += sizeof(syment->n_value);
 	md_number_to_chars(*where, syment->n_scnum, sizeof(syment->n_scnum));
@@ -323,9 +327,9 @@ symbolS *symbolP;
 	*where += sizeof(syment->n_sclass);
 	md_number_to_chars(*where, syment->n_numaux, sizeof(syment->n_numaux));
 	*where += sizeof(syment->n_numaux);
-#else /* CROSS_ASSEMBLE */
+#else /* CROSS_COMPILE */
 	append(where, (char *) syment, sizeof(*syment));
-#endif /* CROSS_ASSEMBLE */
+#endif /* CROSS_COMPILE */
 
 	/* Should do the following : if (.file entry) MD(..)... else if (static entry) MD(..) */
 	if (numaux > OBJ_COFF_MAX_AUXENTRIES) {
@@ -333,7 +337,7 @@ symbolS *symbolP;
 	} /* too many auxents */
 
 	for (i = 0; i < numaux; ++i) {
-#ifdef CROSS_ASSEMBLE
+#ifdef CROSS_COMPILE
 #if 0 /* This code has never been tested */
 		/* The most common case, x_sym entry. */
 		if ((SF_GET(symbolP) & (SF_FILE | SF_STATICS)) == 0) {
@@ -372,9 +376,9 @@ symbolS *symbolP;
 			*where += sizeof(auxP->x_scn.x_nlinno);
 		}
 #endif /* 0 */
-#else /* CROSS_ASSEMBLE */
+#else /* CROSS_COMPILE */
 		append(where, (char *) &symbolP->sy_symbol.ost_auxent[i], sizeof(symbolP->sy_symbol.ost_auxent[i]));
-#endif /* CROSS_ASSEMBLE */
+#endif /* CROSS_COMPILE */
 
 	}; /* for each aux in use */
 
@@ -385,7 +389,7 @@ static void c_section_header_append(where, header)
 char **where;
 SCNHDR *header;
 {
-#ifdef CROSS_ASSEMBLE
+#ifdef CROSS_COMPILE
     md_number_to_chars(*where, header->s_paddr, sizeof(header->s_paddr));
     *where += sizeof(header->s_paddr);
 
@@ -413,11 +417,11 @@ SCNHDR *header;
     md_number_to_chars(*where, header->s_flags, sizeof(header->s_flags));
     *where += sizeof(header->s_flags);
 
-#else /* CROSS_ASSEMBLE */
+#else /* CROSS_COMPILE */
 
     append(where, (char *) header, sizeof(*header));
 
-#endif /* CROSS_ASSEMBLE */
+#endif /* CROSS_COMPILE */
 
     return;
 } /* c_section_header_append() */
@@ -650,15 +654,15 @@ char *file_start;
 
 		/* No matter which member of the union we process, they are
 		   both long. */
-#ifdef CROSS_ASSEMBLE
+#ifdef CROSS_COMPILE
 		md_number_to_chars(*where, line_entry->l_addr.l_paddr, sizeof(line_entry->l_addr.l_paddr));
 		*where += sizeof(line_entry->l_addr.l_paddr);
 
 		md_number_to_chars(*where, line_entry->l_lnno, sizeof(line_entry->l_lnno));
 		*where += sizeof(line_entry->l_lnno);
-#else /* CROSS_ASSEMBLE */
+#else /* CROSS_COMPILE */
 		append(where, (char *) line_entry, LINESZ);
-#endif /* CROSS_ASSEMBLE */
+#endif /* CROSS_COMPILE */
 
 	} /* for each line number */
 
@@ -1538,13 +1542,13 @@ char **where;
 {
 	symbolS *symbolP;
 
-#ifdef CROSS_ASSEMBLE
+#ifdef CROSS_COMPILE
 	/* Gotta do md_ byte-ordering stuff for string_byte_count first - KWK */
 	md_number_to_chars(*where, string_byte_count, sizeof(string_byte_count));
 	where += sizeof(string_byte_count);
-#else /* CROSS_ASSEMBLE */
+#else /* CROSS_COMPILE */
 	append(where, (char *) &string_byte_count, (unsigned long) sizeof(string_byte_count));
-#endif /* CROSS_ASSEMBLE */
+#endif /* CROSS_COMPILE */
 
 	for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next(symbolP)) {
 		if (SF_GET_STRING(symbolP)) {

@@ -27,7 +27,7 @@
 # See below for how to change them for certain systems.
 
 ALLOCA =
-CFLAGS = -g $(XCFLAGS) # -I$(srcdir)/../include
+CFLAGS = -g $(XCFLAGS) -I$(srcdir)/../include
 INTERNAL_CFLAGS = $(CROSS)
 OLDCC = cc
 BISON = bison
@@ -80,10 +80,6 @@ mandir = $(prefix)/man/man$(manext)
 
 # Additional system libraries to link with.
 CLIB=
-
-# Change this to a null string if obstacks are installed in the
-# system library.
-OBSTACK=obstack.o
 
 # Specify the rule for actually making gnulib.
 GNULIB = gnulib.portable
@@ -177,7 +173,6 @@ REAL_HEADERS = \
 	$(srcdir)/tc.h \
 	$(srcdir)/obj.h \
 	$(srcdir)/read.h \
-	$(srcdir)/reloc.h \
 	$(srcdir)/struc-symbol.h \
 	$(srcdir)/subsegs.h \
 	$(srcdir)/symbols.h \
@@ -242,11 +237,6 @@ ALL_CFLAGS = $(INTERNAL_CFLAGS) $(CFLAGS) $(HDEFINES) $(TDEFINES)
 USE_ALLOCA= `if [ x"${CC}" = x"${OLDCC}" ] ; then echo ${ALLOCA}; else true; fi`
 USE_HOST_ALLOCA= `if [ x"${CC}" = x"${OLDCC}" ] ; then echo ${HOST_PREFIX}${ALLOCA}; else true; fi`
 
-# Dependency on obstack, alloca, malloc or whatever library facilities
-# are not installed in the system libraries.
-# We don't use USE_ALLOCA because backquote expansion doesn't work in deps.
-LIBDEPS= $(OBSTACK) $(ALLOCA) $(MALLOC)
-
 # Likewise, for use in the tools that must run on this machine
 # even if we are cross-building GCC.
 # We don't use USE_ALLOCA because backquote expansion doesn't work in deps.
@@ -254,7 +244,7 @@ HOST_LIBDEPS= $(HOST_PREFIX)$(OBSTACK) $(HOST_PREFIX)$(ALLOCA) $(HOST_PREFIX)$(M
 
 # How to link with both our special library facilities
 # and the system's installed libraries.
-LIBS = $(OBSTACK) $(USE_ALLOCA) $(MALLOC) $(CLIB)
+LIBS = $(CLIB) $(srcdir)/../libiberty`if [ -d $(srcdir)/libiberty.$(target) ] ; then echo .$(target) ; fi`$(subdir)/libiberty.a
 
 # Likewise, for use in the tools that must run on this machine
 # even if we are cross-building GCC.
@@ -305,104 +295,94 @@ compilations: ${OBJS}
 
 # Compiling object files from source files.
 
-# Note that dependencies on obstack.h are not written
-# because that file is not part of GAS.
-
 app.o : app.c as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h struc-symbol.h reloc.h \
+  targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
 as.o : as.c as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h struc-symbol.h reloc.h \
+  targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
 atof-generic.o : atof-generic.c as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h struc-symbol.h reloc.h \
+  targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
 bignum-copy.o : bignum-copy.c as.h host.h \
   targ-env.h obj-format.h \
-  targ-cpu.h struc-symbol.h reloc.h \
+  targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
 cond.o : cond.c as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h struc-symbol.h reloc.h \
+  targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-  obstack.h 
+   
 debug.o : debug.c as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h struc-symbol.h reloc.h \
+  targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
   subsegs.h 
 expr.o : expr.c as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h reloc.h \
+  targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-  obstack.h 
+   
 flonum-const.o : flonum-const.c flonum.h bignum.h 
 flonum-copy.o : flonum-copy.c as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h reloc.h \
+  targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
 flonum-mult.o : flonum-mult.c flonum.h bignum.h 
 frags.o : frags.c as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h reloc.h \
+  targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-  subsegs.h obstack.h 
+  subsegs.h  
 hash.o : hash.c as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h reloc.h \
+  targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
 hex-value.o : hex-value.c 
 input-file.o : input-file.c as.h host.h \
    targ-env.h obj-format.h targ-cpu.h \
-   struc-symbol.h reloc.h write.h flonum.h bignum.h expr.h \
+   struc-symbol.h write.h flonum.h bignum.h expr.h \
   frags.h hash.h read.h symbols.h tc.h obj.h input-file.h 
 input-scrub.o : input-scrub.c /usr/include/errno.h /usr/include/sys/errno.h \
   as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h reloc.h \
+  targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
   input-file.h 
 messages.o : messages.c as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h reloc.h \
+  targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
-obstack.o : obstack.c obstack.h 
+obstack.o : obstack.c  
 output-file.o : output-file.c as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h reloc.h \
+  targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
   output-file.h 
 read.o : read.c as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h reloc.h \
+  targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-  obstack.h 
+   
 strstr.o : strstr.c   
 subsegs.o : subsegs.c as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h reloc.h \
+  targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-  subsegs.h obstack.h 
+  subsegs.h  
 symbols.o : symbols.c as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h reloc.h \
+  targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-  obstack.h subsegs.h 
+   subsegs.h 
 version.o : version.c 
 write.o : write.c as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h  struc-symbol.h reloc.h \
+  targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
-  subsegs.h obstack.h output-file.h 
+  subsegs.h  output-file.h 
 xmalloc.o : xmalloc.c
 xrealloc.o : xrealloc.c 
 atof-targ.o : atof-targ.c as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h struc-symbol.h reloc.h \
+  targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h \
   symbols.h tc.h obj.h 
 obj-format.o : obj-format.c as.h host.h targ-env.h obj-format.h \
-  targ-cpu.h struc-symbol.h reloc.h \
+  targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h \
-  symbols.h tc.h obj.h obstack.h 
+  symbols.h tc.h obj.h  
 targ-cpu.o : targ-cpu.c targ-env.h obj-format.h \
-  targ-cpu.h struc-symbol.h reloc.h \
+  targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h \
-  symbols.h tc.h obj.h obstack.h
+  symbols.h tc.h obj.h 
 
-# Normally this target is not used; but it is used if you
-# define ALLOCA=alloca.o.  In that case, you must get a suitable alloca.c
-# from the GNU Emacs distribution.
-# Note some machines won't allow $(CC) without -S on this source file.
-alloca.o:	alloca.c
-	$(CC) $(ALL_CFLAGS) $(CPPFLAGS) -S `echo $(srcdir)/alloca.c | sed 's,^\./,,'`
-	as alloca.s -o alloca.o
 
 # Compile the libraries to be used by gen*.
 # If we are not cross-building, gen* use the same .o's that cc1 will use,
@@ -508,7 +488,7 @@ bootstrap: as force
 	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
 	$(MAKE) stage2
 	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
-	for i in *.o; do cmp $$i stage2/$$i; done
+	$(MAKE) stage-last
 
 bootstrap2: force
 	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
@@ -518,7 +498,7 @@ bootstrap2: force
 
 bootstrap3: force
 	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
-	$(MAKE) comparison
+	$(MAKE) stage-last
 
 # Copy the object files from a particular stage into a subdirectory.
 stage1: force

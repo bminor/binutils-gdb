@@ -2,8 +2,9 @@
 
 #ifndef __STDC__
 #define NO_STDARG
-#include <memory.h>
 #endif /* not __STDC__ */
+
+#include <memory.h>
 
 #include <ctype.h>
 #include <string.h>

@@ -113,7 +113,7 @@ char **where;
 fixS *fixP;	/* Fixup chain for this segment. */
 relax_addressT segment_address_in_file;
 {
-	struct reloc_info_generic	ri;
+	struct relocation_info	ri;
 	register symbolS *		symbolP;
 	
 	/* If a machine dependent emitter is needed, call it instead. */
