@@ -1,3 +1,7 @@
+2001-07-06  Michael Chastain  <chastain@redhat.com>
+
+	* i387-tdep.c (print_i387_value): Fix pointer glitch.
+
 2001-07-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* lin-lwp.c (count_events_callback): Fix formatting.  Turn check
