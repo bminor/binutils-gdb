@@ -1,3 +1,9 @@
+Wed Aug 23 09:41:56 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* cfg-ml-com.in (powerpc*): Add support for -disable-biendian,
+	-disable-softfloat, -disable-relocatable, -disable-aix, and
+	-disable-sysv to control which multilib libraries get built.
+
 Thu Aug 17 16:03:41 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
 	* configure: Add Makefile.tem to list of files to remove in trap
