@@ -101,7 +101,11 @@ install-info: as.info
 	done
 
 as.dvi:	as-${CONFIG}.texinfo
-	$(TEXI2DVI) $(srcdir)/as-$(config).texinfo
+	if [ -f $(srcdir)/as-$(CONFIG).texinfo ] ; then \
+	  $(TEXI2DVI) $(srcdir)/as-$(CONFIG).texinfo ; \
+	else \
+	  $(TEXI2DVI) as-$(CONFIG).texinfo ; \
+	fi
 	mv as-${CONFIG}.dvi as.dvi
 
 # ROFF doc targets as.ms, as.mm, as.me
