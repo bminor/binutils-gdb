@@ -7,6 +7,11 @@
 	* config/te-symbian.h: Include "te-armeabi.h".
 
 2005-03-16  Nick Clifton  <nickc@redhat.com>
+
+	* cgen.c (gas_cgen_parse_operand): Copy opinfo parameter into a
+	local variable in case it is clobbered by the setjmp.
+
+2005-03-16  Nick Clifton  <nickc@redhat.com>
 	    Ben Elliston  <bje@au.ibm.com>
 
 	* configure.in (werror): New switch: Add -Werror to the

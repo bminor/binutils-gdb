@@ -320,9 +320,11 @@ gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
   /* These are volatile to survive the setjmp.  */
   char * volatile hold;
   enum cgen_parse_operand_result * volatile resultP_1;
+  volatile int opinfo_1;
 #else
   static char *hold;
   static enum cgen_parse_operand_result *resultP_1;
+  int opinfo_1;
 #endif
   const char *errmsg;
   expressionS exp;
@@ -336,6 +338,7 @@ gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
   resultP_1 = resultP;
   hold = input_line_pointer;
   input_line_pointer = (char *) *strP;
+  opinfo_1 = opinfo;
 
   /* We rely on md_operand to longjmp back to us.
      This is done via gas_cgen_md_operand.  */
@@ -356,7 +359,7 @@ gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
   input_line_pointer = hold;
 
 #ifdef TC_CGEN_PARSE_FIX_EXP
-  opinfo = TC_CGEN_PARSE_FIX_EXP (opinfo, & exp);
+  opinfo = TC_CGEN_PARSE_FIX_EXP (opinfo_1, & exp);
 #endif 
 
   /* FIXME: Need to check `want'.  */
@@ -383,7 +386,7 @@ gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
       break;
     de_fault:
     default:
-      queue_fixup (opindex, opinfo, &exp);
+      queue_fixup (opindex, opinfo_1, &exp);
       *valueP = 0;
       *resultP = CGEN_PARSE_OPERAND_RESULT_QUEUED;
       break;
