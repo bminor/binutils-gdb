@@ -1,3 +1,21 @@
+Thu Nov 12 17:19:43 1998  John Metzler  <jmetzler@cygnus.com>
+
+        * remote.c (remote_get_threadinfo) : Support for remote
+        multithread debugging.
+        (remote_get_threadlist) : get a partial list of threads
+        (remote_threadlist_iterator) : Step through all the threads
+        (init_remote_threadtests) : Optional builtin unit test commands.
+
+        * thread.c (bind_target_thread_vector) : Implementa a more dynamic
+        way of accessing target specific thread info functions than 
+        FIND_NEW_THREADS.
+        (target_thread_info) : Function to get extended thread information.
+
+        * gdbthread.h : Export internal data structures corresponding to
+        external detailed thread info response. This is more like a 'ps'
+        command than what might be expected of host based threads. This
+        is for embedded systems.
+
 Mon Nov  9 12:00:36 1998  Dave Brolley  <brolley@cygnus.com>
 
 	* config/fr30/fr30.mt: New file.
