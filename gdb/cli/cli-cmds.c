@@ -1199,12 +1199,14 @@ is displayed."),
 			    NULL, /* FIXME: i18n: */
 			    &setdebuglist, &showdebuglist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("remotetimeout", no_class, var_integer, (char *) &remote_timeout,
-		  "Set timeout limit to wait for target to respond.\n\
+  add_setshow_integer_cmd ("remotetimeout", no_class, &remote_timeout, _("\
+Set timeout limit to wait for target to respond."), _("\
+Show timeout limit to wait for target to respond."), _("\
 This value is used to set the time limit for gdb to wait for a response\n\
-from the target.", &setlist),
-     &showlist);
+from the target."),
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
   add_prefix_cmd ("debug", no_class, set_debug,
 		  _("Generic command for setting gdb debugging flags"),
@@ -1281,10 +1283,11 @@ With no argument, show definitions of all user defined commands."), &showlist);
   add_com ("apropos", class_support, apropos_command,
 	   _("Search for commands matching a REGEXP"));
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("max-user-call-depth", no_class, var_integer, 
-		  (char *) &max_user_call_depth,
-		  "Set the max call depth for user-defined commands.\n", 
-		  &setlist),
-     &showlist);
+  add_setshow_integer_cmd ("max-user-call-depth", no_class,
+			   &max_user_call_depth, _("\
+Set the max call depth for user-defined commands."), _("\
+Show the max call depth for user-defined commands."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 }

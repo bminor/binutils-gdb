@@ -1,5 +1,9 @@
 2005-02-18  Andrew Cagney  <cagney@gnu.org>
 
+	* cli/cli-decode.c (add_setshow_integer_cmd): New function.
+	* command.h (add_setshow_integer_cmd): Declare.
+	* cli/cli-cmds.c: Update.
+	
 	Use add_setshow_uinteger_cmd through out.
 	* printcmd.c, source.c, utils.c, valprint.c: Update.
 
