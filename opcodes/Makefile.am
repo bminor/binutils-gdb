@@ -342,6 +342,8 @@ CGENDEPS = \
 	$(CGENDIR)/opc-opinst.scm \
 	cgen-asm.in cgen-dis.in cgen-ibld.in
 
+CGEN_CPUS = fr30 frv ip2k m32r openrisc xstormy16
+
 if CGEN_MAINT
 IP2K_DEPS = stamp-ip2k
 M32R_DEPS = stamp-m32r
@@ -364,6 +366,14 @@ run-cgen:
 	  "$(options)" $(extrafiles)
 	touch stamp-${prefix}
 .PHONY: run-cgen
+
+# Maintainer utility rule to regenerate all cgen files.
+run-cgen-all:
+	for c in $(CGEN_CPUS) ; \
+	do \
+		$(MAKE) stamp-$$c || exit 1 ; \
+	done
+.PHONY: run-cgen-all
 
 # For now, require developers to configure with --enable-cgen-maint.
 $(srcdir)/ip2k-desc.h $(srcdir)/ip2k-desc.c $(srcdir)/ip2k-opc.h $(srcdir)/ip2k-opc.c $(srcdir)/ip2k-ibld.c $(srcdir)/ip2k-asm.c $(srcdir)/ip2k-dis.c: $(IP2K_DEPS)

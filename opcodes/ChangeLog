@@ -1,3 +1,9 @@
+2002-12-19  Doug Evans  <dje@sebabeach.org>
+
+	* Makefile.am (CGEN_CPUS): New variable.
+	(run-cgen-all): New rule.
+	* Makefile.in: Regenerate.
+
 2002-12-18  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Remove one "ror" and two
