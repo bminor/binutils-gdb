@@ -1,3 +1,8 @@
+Fri Apr 23 19:00:36 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* coff-alpha.c, cpu-alpha.c, config/alphaosf.mt,
+	config/alphaosf.mt, hosts/alphaosf.h:  New files.
+
 Fri Apr 23 16:48:46 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* Merge in HPPA/BSD changes from Utah.

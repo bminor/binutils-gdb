@@ -1,3 +1,13 @@
+Fri Apr 23 18:41:23 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* alpha.h: New file.
+
+Thu Apr  8 12:36:34 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* internal.h (C_SHADOW, C_VERSION): Copied in from m88k.h.
+	* m88k.h, i386.h, we32k.h: Don't define all the storage classes;
+	they're already in internal.h.
+
 Wed Apr  7 11:51:24 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* internal.h: Change n_sclass to unsigned char.

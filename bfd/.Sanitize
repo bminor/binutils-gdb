@@ -44,6 +44,7 @@ bfd.c
 bout.c
 cache.c
 ctor.c
+coff-alpha.c
 coff-a29k.c
 coff-h8300.c
 coff-h8500.c
@@ -84,6 +85,7 @@ ieee.c
 libaout.h
 libbfd-in.h
 libelf.h
+cpu-alpha.c
 cpu-a29k.c
 cpu-i386.c
 cpu-m68k.c
