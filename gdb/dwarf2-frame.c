@@ -1176,7 +1176,7 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
       {
 	ULONGEST value;
 	unsigned char *end_buf = buf + (sizeof (value) + 1) * 8 / 7;
-	*bytes_read_ptr = read_uleb128 (buf, end_buf, &value) - buf;
+	*bytes_read_ptr += read_uleb128 (buf, end_buf, &value) - buf;
 	return base + value;
       }
     case DW_EH_PE_udata2:
@@ -1192,7 +1192,7 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
       {
 	LONGEST value;
 	char *end_buf = buf + (sizeof (value) + 1) * 8 / 7;
-	*bytes_read_ptr = read_sleb128 (buf, end_buf, &value) - buf;
+	*bytes_read_ptr += read_sleb128 (buf, end_buf, &value) - buf;
 	return base + value;
       }
     case DW_EH_PE_sdata2:

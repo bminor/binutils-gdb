@@ -1,3 +1,8 @@
+2004-11-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (read_encoded_value): Correctly calculate number
+	of bytes read for aligned LEB128 encodings.
+
 2004-11-19  Mark Kettenis  <kettenis@gnu.org>
 
 	* bsd-kvm.c (bsd_kvm_pcb_cmd): Cast return value from
