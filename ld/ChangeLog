@@ -1,4 +1,8 @@
 start-sanitize-d10v
+Wed Jul 31 13:17:10 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+ 	* emulparams/d10velf.sh: Now works with elf.sc.
+
 Wed Jul 31 11:52:03 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* emulparams/d10velf.sh (SCRIPT_NAME): Change to vanilla.
