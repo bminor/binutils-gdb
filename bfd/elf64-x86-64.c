@@ -153,6 +153,7 @@ static boolean elf64_x86_64_finish_dynamic_symbol
 	   Elf_Internal_Sym *sym));
 static boolean elf64_x86_64_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+static enum elf_reloc_type_class elf64_x86_64_reloc_type_class PARAMS ((int));
 
 /* Given a BFD reloc type, return a HOWTO structure.  */
 static reloc_howto_type *
@@ -576,6 +577,8 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 3))
 			return false;
 		    }
+		  if (sec->flags & SEC_READONLY)
+		    info->flags |= DF_TEXTREL;
 		}
 
 	      sreloc->_raw_size += sizeof (Elf64_External_Rela);
@@ -946,14 +949,13 @@ elf64_x86_64_adjust_dynamic_symbol (info, h)
 
 static boolean
 elf64_x86_64_size_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
   bfd *dynobj;
   asection *s;
   boolean plt;
   boolean relocs;
-  boolean reltext;
 
   dynobj = elf_hash_table (info)->dynobj;
   BFD_ASSERT (dynobj != NULL);
@@ -993,7 +995,7 @@ elf64_x86_64_size_dynamic_sections (output_bfd, info)
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
      memory for them.  */
-  plt = relocs = reltext = false;
+  plt = relocs = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
       const char *name;
@@ -1038,29 +1040,8 @@ elf64_x86_64_size_dynamic_sections (output_bfd, info)
 	    }
 	  else
 	    {
-	      asection *target;
-
-	      /* Remember whether there are any reloc sections other
-		 than .rela.plt.  */
 	      if (strcmp (name, ".rela.plt") != 0)
-		{
-		  const char *outname;
-
-		  relocs = true;
-
-		  /* If this relocation section applies to a read only
-		     section, then we probably need a DT_TEXTREL
-		     entry.  The entries in the .rela.plt section
-		     really apply to the .got section, which we
-		     created ourselves and so know is not readonly.  */
-		  outname = bfd_get_section_name (output_bfd,
-						  s->output_section);
-		  target = bfd_get_section_by_name (output_bfd, outname + 5);
-		  if (target != NULL
-		      && (target->flags & SEC_READONLY) != 0
-		      && (target->flags & SEC_ALLOC) != 0)
-		    reltext = true;
-		}
+		relocs = true;
 
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
@@ -1120,11 +1101,10 @@ elf64_x86_64_size_dynamic_sections (output_bfd, info)
 	    return false;
 	}
 
-      if (reltext)
+      if ((info->flags & DF_TEXTREL) != 0)
 	{
 	  if (! bfd_elf64_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return false;
-	  info->flags |= DF_TEXTREL;
 	}
     }
 
@@ -1949,6 +1929,23 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
   return true;
 }
 
+static enum elf_reloc_type_class
+elf64_x86_64_reloc_type_class (type)
+     int type;
+{
+  switch (type)
+    {
+    case R_X86_64_RELATIVE:
+      return reloc_class_relative;
+    case R_X86_64_JUMP_SLOT:
+      return reloc_class_plt;
+    case R_X86_64_COPY:
+      return reloc_class_copy;
+    default:
+      return reloc_class_normal;
+    }
+}
+
 #define TARGET_LITTLE_SYM		    bfd_elf64_x86_64_vec
 #define TARGET_LITTLE_NAME		    "elf64-x86-64"
 #define ELF_ARCH			    bfd_arch_i386
@@ -1980,5 +1977,6 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_relocate_section	    elf64_x86_64_relocate_section
 #define elf_backend_size_dynamic_sections   elf64_x86_64_size_dynamic_sections
 #define elf_backend_object_p		    elf64_x86_64_elf_object_p
+#define elf_backend_reloc_type_class	    elf64_x86_64_reloc_type_class
 
 #include "elf64-target.h"

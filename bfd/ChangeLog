@@ -1,3 +1,12 @@
+2001-08-23  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_check_relocs): Set DF_TEXTREL if
+	the reloc is against read-only section.
+	(elf64_x86_64_size_dynamic_sections): Use DF_TEXTREL flag instead
+	of looking up section names for DT_TEXTREL.
+	(elf64_x86_64_reloc_type_class): New.
+	(elf_backend_reloc_type_class): Define.
+
 2001-08-23  H.J. Lu  <hjl@gnu.org>
 
 	* syms.c (bfd_print_symbol_vandf): Add abfd to arg.
