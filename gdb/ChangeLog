@@ -1,3 +1,9 @@
+2000-04-10  Fernando Nasser  <fnasser@cygnus.com>
+
+	From 2000-04-10 Rodney Brown <rdb@redhat.com>:
+	* command.h (enum command_class): Remove trailing "," to placate
+	AIX xlc.
+
 2000-04-10  Philip Blundell <philb@gnu.org>
  
  	* arm-linux-nat.c (arm_skip_solib_resolver): Remove and move to
