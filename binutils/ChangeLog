@@ -1,3 +1,8 @@
+2002-01-26  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* doc/Makefile.am (install): Depend on install-info.
+	* doc/Makefile.in: Regenerate.
+
 2002-01-25  Jason R. Thorpe <thorpej@wasabisystems.com>
 
 	* objcopy.c (strip_usage): Document -d as an alias

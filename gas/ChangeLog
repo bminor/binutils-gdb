@@ -1,3 +1,8 @@
+2002-01-26  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* doc/Makefile.am (install): Depend on install-info.
+	* doc/Makefile.in: Regenerate.
+
 2002-01-26  Nick Clifton <nick@redhat.com>
 
 	* po/fr.po: Updated version

@@ -59,6 +59,10 @@ gasver.texi: Makefile
 as.info: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
 as.dvi: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
 
+# We want install to imply install-info as per GNU standards, despite the
+# cygnus option.
+install: install-info
+
 # This one isn't ready for prime time yet.  Not even a little bit.
 
 noinst_TEXINFOS = internals.texi

@@ -460,6 +460,10 @@ gasver.texi: Makefile
 as.info: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
 as.dvi: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
 
+# We want install to imply install-info as per GNU standards, despite the
+# cygnus option.
+install: install-info
+
 # Maintenance
 
 # We need it for the taz target in ../../Makefile.in.
