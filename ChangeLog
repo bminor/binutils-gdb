@@ -7,12 +7,12 @@ Tue Nov 26 11:45:33 1996  Kim Knuttila  <krk@cygnus.com>
 
 	* config.sub (basic_machine): added mips16 configuration
 
-start-sanitize-d1v0
+start-sanitize-d10v
 Sat Nov 23 19:26:22 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config.sub: Handle d10v-unknown.
 
-end-sanitize-d1v0
+end-sanitize-d10v
 start-sanitize-v850
 Sat Nov 23 14:23:01 1996  Gavin Koch  <gavin@cygnus.com>
         
