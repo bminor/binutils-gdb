@@ -1,5 +1,8 @@
 2005-01-07  Andrew Cagney  <cagney@gnu.org>
 
+	* configure.ac: Rename configure.in, require autoconf 2.59.
+	* configure: Re-generate.
+
 	* configure.tgt: Disable arm*-*-*, thumb*-*-*, strongarm*-*-*,
 	xscale-*-* and i[34567]86-*-netware* code adding rdi-share or nlm
 	to configdirs.

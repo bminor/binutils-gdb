@@ -4,13 +4,12 @@ dnl necessary to tailor a template configure script into the configure
 dnl script appropriate for this directory.  For more information, check
 dnl any existing configure script.
 
-AC_PREREQ(2.5)
-AC_INIT(objdbg01.exp)
+AC_PREREQ(2.59)
+AC_INIT(weird.exp)
 
 CC=${CC-cc}
 AC_SUBST(CC)
-AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../../../..)
+AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../../..)
 AC_CANONICAL_SYSTEM
-AC_CONFIG_SUBDIRS(objdbg01 objdbg02 objdbg03 objdbg04)
 
 AC_OUTPUT(Makefile)

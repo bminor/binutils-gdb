@@ -1,3 +1,27 @@
+2005-01-07  Andrew Cagney  <cagney@gnu.org>
+
+	* configure.ac: Rename configure.in, require autoconf 2.59.
+	* configure: Re-generate.
+	* gdb.stabs/configure.ac: Rename configure.in, require autoconf 2.59.
+	* gdb.stabs/configure: Re-generate.
+	* gdb.hp/configure.ac: Rename configure.in, require autoconf 2.59.
+	* gdb.hp/configure: Re-generate.
+	* gdb.hp/gdb.objdbg/configure.ac: Rename configure.in, require
+	autoconf 2.59.
+	* gdb.hp/gdb.objdbg/configure: Re-generate.
+	* gdb.hp/gdb.defects/configure.ac: Rename configure.in, require
+	autoconf 2.59.
+	* gdb.hp/gdb.defects/configure: Re-generate.
+	* gdb.hp/gdb.compat/configure.ac: Rename configure.in, require
+	autoconf 2.59.
+	* gdb.hp/gdb.compat/configure: Re-generate.
+	* gdb.hp/gdb.base-hp/configure.ac: Rename configure.in, require
+	autoconf 2.59.
+	* gdb.hp/gdb.base-hp/configure: Re-generate.
+	* gdb.hp/gdb.aCC/configure.ac: Rename configure.in, require
+	autoconf 2.59.
+	* gdb.hp/gdb.aCC/configure: Re-generate.
+
 2004-12-15  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.threads/linux-dp.exp: Fix output regexp to handle output

@@ -1,3 +1,8 @@
+2005-01-07  Andrew Cagney  <cagney@gnu.org>
+
+	* configure.ac: Rename configure.in, require autoconf 2.59.
+	* configure: Re-generate.
+
 2004-12-08  Daniel Jacobowitz  <dan@debian.org>
 
 	* acinclude.m4 (SRV_CHECK_THREAD_DB): Add ps_get_thread_area.  Reset

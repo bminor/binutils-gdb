@@ -19,6 +19,8 @@ dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 dnl Process this file with autoconf to produce a configure script.
 
+AC_PREREQ(2.59)dnl
+
 AC_INIT(server.c)
 AC_CONFIG_HEADER(config.h:config.in)
 

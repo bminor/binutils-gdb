@@ -19,13 +19,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.
 
-# NOTE ON AUTOCONF VERSION:
-#   AC_PREREQ says 2.13.
-#   The output file says "Generated automatically using autoconf version 2.13".
-#   But that is wrong.  This file must be processed with autoconf 000227,
-#   a special version which identifies itself as autoconf 2.13.
-
-AC_PREREQ(2.13)
+AC_PREREQ(2.59)
 AC_INIT(gdb.base)
 
 AC_CANONICAL_BUILD
