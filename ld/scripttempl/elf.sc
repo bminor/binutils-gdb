@@ -264,6 +264,7 @@ cat <<EOF
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
     *(.text .stub${RELOCATING+ .text.* .gnu.linkonce.t.*})
+    KEEP (*(.text.*personality*))
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
     ${RELOCATING+${OTHER_TEXT_SECTIONS}}
@@ -311,13 +312,14 @@ cat <<EOF
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}
     *(.data${RELOCATING+ .data.* .gnu.linkonce.d.*})
+    KEEP (*(.gnu.linkonce.d.*personality*))
     ${CONSTRUCTING+SORT(CONSTRUCTORS)}
   }
   .data1        ${RELOCATING-0} : { *(.data1) }
   .tdata	${RELOCATING-0} : { *(.tdata${RELOCATING+ .tdata.* .gnu.linkonce.td.*}) }
   .tbss		${RELOCATING-0} : { *(.tbss${RELOCATING+ .tbss.* .gnu.linkonce.tb.*})${RELOCATING+ *(.tcommon)} }
   .eh_frame     ${RELOCATING-0} : { KEEP (*(.eh_frame)) }
-  .gcc_except_table ${RELOCATING-0} : { *(.gcc_except_table) }
+  .gcc_except_table ${RELOCATING-0} : { KEEP (*(.gcc_except_table)) *(.gcc_except_table.*) }
   ${WRITABLE_RODATA+${RODATA}}
   ${OTHER_READWRITE_SECTIONS}
   ${TEXT_DYNAMIC-${DYNAMIC}}

@@ -1,3 +1,9 @@
+2004-04-21  Eric Botcazou  <ebotcazou@act-europe.fr>
+
+	* scripttempl/elf.sc (.text): Add KEEP for .text.*personality*.
+	(.data): Add KEEP for .gnu.linkonce.d.*personality*.
+	(.gcc_except_table): Add KEEP for self and accept .gcc_except_table.*.
+
 2004-04-21  Ben Elliston  <bje@au.ibm.com>
 
 	* ld.texinfo (Simple Example): Add missing punctuation.
