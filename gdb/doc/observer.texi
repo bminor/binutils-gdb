@@ -90,3 +90,8 @@ at the entry-point instruction.  For @samp{attach} and @samp{core},
 @value{GDBN} calls this observer immediately after connecting to the
 inferior, and before any information on the inferior has been printed.
 @end deftypefun
+
+@deftypefun void solib_unloaded (struct so_list *@var{solib})
+The specified shared library has been discovered to be unloaded.
+@end deftypefun
+
