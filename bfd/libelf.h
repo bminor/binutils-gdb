@@ -25,17 +25,28 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "elf/internal.h"
 #include "elf/external.h"
 
+/* This CAT4 hack is to avoid a problem with some strict ANSI C preprocessors.
+   The problem is, "32_" is not a valid preprocessing token, and we don't
+   want extra underscores (e.g., "elf_32_").  The XCAT2 macro will cause the
+   inner CAT macros to be evaluated first, producing still-valid pp-tokens.
+   Then the final concatenation can be done.  (Sigh.)  */
+#ifdef __STDC__
+#define XCAT2(a,b)	CAT(a,b)
+#define CAT4(a,b,c,d)	XCAT2(CAT(a,b),CAT(c,d))
+#else
+#define CAT4(a,b,c,d)	a/**/b/**/c/**/d
+#endif
+
 #ifndef NAME
 #if ARCH_SIZE==64
-#define NAME(x,y) CAT3(x,64_,y)
-#define ElfNAME(X)	CAT(Elf64_,X)
-#define elfNAME(X)	CAT(elf64_,X)
+#define NAME(x,y) CAT4(x,64,_,y)
 #else /* ARCH_SIZE==32 */
-#define NAME(x,y) CAT3(x,32_,y)
-#define ElfNAME(X)	CAT(Elf32_,X)
-#define elfNAME(X)	CAT(elf32_,X)
+#define NAME(x,y) CAT4(x,32,_,y)
 #endif
 #endif
+
+#define ElfNAME(X)	NAME(Elf,X)
+#define elfNAME(X)	NAME(elf,X)
 
 typedef struct
 {
