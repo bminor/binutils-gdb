@@ -57,9 +57,19 @@ Remove DONTDEF code, commented-out code.
 Eliminate, as much as possible, anything not in config that is conditionalized
 on a CPU, format, or environment.
 
+Merge COFF support into one version, supporting all the pseudo-ops used in
+either versions now, but using BFD for high-level operations.  (See second
+following item.)  Currently there are two versions (plus the new BFD code),
+which support different features, and are used on different targets.
+
+Convert remaining a.out/b.out targets to using the BFD_ASSEMBLER code by
+default.
+
 Finish conversion to using BFD for all object file writing.  (This is the
 BFD_ASSEMBLER code, not BFD or BFD_HEADERS.)  VMS might be the tough one here,
-since there's no BFD support for it at all yet.  Eliminate the old code.
+since there's no BFD support for it at all yet.  Eliminate the old code.  Some
+of this can be done target by target, so doing a target where the CPU or
+format already supports BFD_ASSEMBLER mode may be easiest.
 
 Fix lots of uses of empty strings to use null pointers.  Will improve
 efficiency, and should make code clearer too.
@@ -68,11 +78,20 @@ Clean up comments; lots of 'em are one previous maintainer griping about
 another previous maintainer, unrelated to the code.  (And with no names,
 they're not so fun to read. :-)
 
-Lots of documentation.
+Get Steve to document H8/500 stuff (and others).
 
-Get Steve to document H8/500 stuff.
+Improve test suite.  Incorporate more reported net bugs, and non-confidential
+Cygnus customer bugs, and anything else.
 
-Put together a test suite, using DejaGnu.
+Add support for i386/i486 16-bit mode, so operating system initialization code
+doesn't require a separate assembler nor lots of `.byte' directives.
+
+See if it's more maintainable (and not too much of a performance loss) to use
+a yacc grammar for parsing input.  The lexer will have to be flexible, and the
+grammar will have to contain any construct used on any platform, but it may be
+easier to maintain, instead of having code in most of the back ends.
+
+PIC support.
 
 (From old "NOTES" file to-do list, not really reviewed:)
 
