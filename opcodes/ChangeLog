@@ -1,3 +1,8 @@
+2001-01-09  Nick Clifton  <nickc@redhat.com>
+
+	* arm-dis.c (print_insn): Set pc to zero for instructions with
+	a reloc associated with them.
+
 2001-01-09  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* cgen-asm.in (parse_insn_normal): Changed syn to be

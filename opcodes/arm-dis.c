@@ -1043,6 +1043,14 @@ print_insn (pc, info, little)
 	given = (b[0] << 24) | (b[1] << 16) | (b[2] << 8) | (b[3]);
     }
   
+  if (info->flags & INSN_HAS_RELOC)
+    /* If the instruction has a reloc associated with it, then
+       the offset field in the instruction will actually be the
+       addend for the reloc.  (We are using REL type relocs).
+       In such cases, we can ignore the pc when computing
+       addresses, since the addend is not currently pc-relative.  */
+    pc = 0;
+  
   if (is_thumb)
     status = print_insn_thumb (pc, info, given);
   else

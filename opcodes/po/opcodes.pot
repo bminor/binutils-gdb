@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-12-16 13:55-0800\n"
+"POT-Creation-Date: 2001-01-09 12:07-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,7 +63,7 @@ msgstr ""
 msgid "Unrecognised disassembler option: %s\n"
 msgstr ""
 
-#: arm-dis.c:1075
+#: arm-dis.c:1083
 msgid ""
 "\n"
 "The following ARM specific disassembler options are supported for use with\n"
@@ -204,7 +204,7 @@ msgstr ""
 msgid "%02x\t\t*unknown*"
 msgstr ""
 
-#: i386-dis.c:1949
+#: i386-dis.c:2624
 msgid "<internal disassembler error>"
 msgstr ""
 
