@@ -33,10 +33,6 @@ extern int kernel_u_size (void);
 #define REGISTER_U_ADDR(addr, blockend, regno) \
         (addr) = ppc_register_u_addr ((blockend),(regno));
 
-/* No <sys/reg.h> */
-
-#define NO_SYS_REG_H
-
 /* FIXME: kettenis/2000-09-03: This should be moved to ../nm-linux.h
    once we have converted all Linux targets to use the new threads
    stuff (without the #undef of course).  */
