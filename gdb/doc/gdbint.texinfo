@@ -556,12 +556,13 @@ distribution!
 From the top level directory (containing @file{gdb}, @file{bfd},
 @file{libiberty}, and so on):
 @example
-make gdb.tar.Z
+make -f Makefile.in gdb.tar.Z
 @end example
 
 This will properly configure, clean, rebuild any files that are
 distributed pre-built (e.g. @file{c-exp.tab.c} or @file{refcard.ps}),
-and will then make a tarfile.
+and will then make a tarfile.  (If the top level directory has already
+beenn configured, you can just do @code{make gdb.tar.Z} instead.)
 
 This procedure requires:
 @itemize @bullet

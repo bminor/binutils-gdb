@@ -1,6 +1,10 @@
+Tue Sep 15 02:57:09 1992  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo:  Improve release doc slightly.
+
 Fri Sep 11 01:34:25 1992  John Gilmore  (gnu@sphagnum.cygnus.com)
 
-	* doc/gdbint.texinfo:  Improve doc of GDB config macros.
+	* gdbint.texinfo:  Improve doc of GDB config macros.
 
 Wed Sep  9 16:52:06 1992  John Gilmore  (gnu@cygnus.com)
 
