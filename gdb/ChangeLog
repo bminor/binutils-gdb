@@ -1,3 +1,7 @@
+Mon Sep  6 15:01:57 1993  Jeffrey Wheat  (cassidy@cygnus.com)
+
+	* elfread.c: change elf32_symbol_type to elf_symbol_type
+
 Mon Sep  6 15:43:25 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* remote.c (remote_wait): Added 'W' and 'N' responses.

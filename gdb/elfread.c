@@ -387,7 +387,7 @@ elf_symtab_read (abfd, addr, objfile)
 		  continue;		/* Skip this symbol. */
 		}
 	      /* Pass symbol size field in via BFD.  FIXME!!!  */
-	      size = ((elf32_symbol_type *) sym) -> internal_elf_sym.st_size;
+	      size = ((elf_symbol_type *) sym) -> internal_elf_sym.st_size;
 	      record_minimal_symbol_and_info ((char *) sym -> name, symaddr,
 					      ms_type, (PTR) size, objfile);
 	    }
