@@ -2247,6 +2247,8 @@ pa_ip (str)
 
 	    /* Handle a 3 bit SFU identifier at 25.  */
 	    case 'f':
+	      if (*s++ != ',')
+		as_bad ("Invalid SFU identifier");
 	      num = pa_get_absolute_expression (&the_insn, &s);
 	      s = expr_end;
 	      CHECK_FIELD (num, 7, 0, 0);
@@ -2285,6 +2287,8 @@ pa_ip (str)
 
 	    /* Handle a 3-bit co-processor ID field.  */
 	    case 'u':
+	      if (*s++ != ',')
+		as_bad ("Invalid COPR identifier");
 	      num = pa_get_absolute_expression (&the_insn, &s);
 	      s = expr_end;
 	      CHECK_FIELD (num, 7, 0, 0);

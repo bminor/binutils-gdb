@@ -1,5 +1,8 @@
 Mon Jan 17 00:18:55 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/tc-hppa.c (pa_ip): Explicitly check for comma before 'u'
+	and 'f' template operand.
+
 	* config/tc-hppa.c (pa_ip): Handle 'N', 'O', 'o', '0', '1', 'u',
 	and '2' in copr and sfu instruction templates.
 
