@@ -1378,6 +1378,9 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_MSP430_16",
   "BFD_RELOC_MSP430_16_PCREL_BYTE",
   "BFD_RELOC_MSP430_16_BYTE",
+  "BFD_RELOC_IQ2000_OFFSET_16",
+  "BFD_RELOC_IQ2000_OFFSET_21",
+  "BFD_RELOC_IQ2000_UHI16",
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif

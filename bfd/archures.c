@@ -1,6 +1,6 @@
 /* BFD library support routines for architectures.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Hacked by John Gilmore and Steve Chamberlain of Cygnus Support.
 
@@ -272,6 +272,9 @@ DESCRIPTION
 .  bfd_arch_ip2k,      {* Ubicom IP2K microcontrollers. *}
 .#define bfd_mach_ip2022	1
 .#define bfd_mach_ip2022ext	2
+. bfd_arch_iq2000,     {* Vitesse IQ2000.  *}
+.#define bfd_mach_iq2000        1
+.#define bfd_mach_iq10          2
 .  bfd_arch_pj,
 .  bfd_arch_avr,       {* Atmel AVR microcontrollers.  *}
 .#define bfd_mach_avr1		1
@@ -360,6 +363,7 @@ extern const bfd_arch_info_type bfd_i860_arch;
 extern const bfd_arch_info_type bfd_i960_arch;
 extern const bfd_arch_info_type bfd_ia64_arch;
 extern const bfd_arch_info_type bfd_ip2k_arch;
+extern const bfd_arch_info_type bfd_iq2000_arch;
 extern const bfd_arch_info_type bfd_m32r_arch;
 extern const bfd_arch_info_type bfd_m68hc11_arch;
 extern const bfd_arch_info_type bfd_m68hc12_arch;
@@ -418,6 +422,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_i960_arch,
     &bfd_ia64_arch,
     &bfd_ip2k_arch,
+    &bfd_iq2000_arch,
     &bfd_m32r_arch,
     &bfd_m68hc11_arch,
     &bfd_m68hc12_arch,

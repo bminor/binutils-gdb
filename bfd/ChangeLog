@@ -1,3 +1,27 @@
+2002-01-02  Ben Elliston  <bje@redhat.com>
+	    Jeff Johnston  <jjohnstn@redhat.com>
+
+	* Makefile.am (ALL_MACHINES): Add cpu-iq2000.lo.
+	(ALL_MACHINES_CFILES): Add cpu-iq2000.c.
+	(BFD32_BACKENDS): Add elf32-iq2000.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-iq2000.c.
+	(cpu-iq2000.lo): New target.
+	* Makefile.in: Regenerate.
+	* config.bfd: Handle iq2000-*-elf.
+	* archures.c (bfd_architecture): Add bfd_{arch,mach}_iq2000.
+	(bfd_archures_list): Add bfd_iq2000_arch.
+	* configure.in: Handle bfd_elf32_iq2000_vec.
+	* configure: Regenerate.
+	* reloc.c: Add BFD_RELOC_IQ2000_OFFSET_16, BFD_RELOC_IQ2000_OFFSET_21, 
+	and BFD_RELOC_IQ2000_UHI16.
+	* targets.c (bfd_elf32_iq2000_vec): Declare.
+	(bfd_target_vector): Add bfd_elf32_iq2000_vec.
+	* elf.c (prep_headers): Set e_machine to EM_IQ2000.
+	* cpu-iq2000.c: New file.
+	* elf32-iq2000.c: Likewise.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Likewise.
+
 2003-01-02  Richard Sandiford  <rsandifo@redhat.com>
 
 	* elfxx-mips.c: Include libiberty.h.
