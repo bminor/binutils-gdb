@@ -80,6 +80,7 @@ config.sub
 configure
 configure.in
 etc
+# These will only show up if they checked out gas-extra-stuff.
 configure.bat
 makeall.bat
 
