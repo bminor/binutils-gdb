@@ -1602,6 +1602,8 @@ to compensate for the borrow when the low bits are added. */
 #define BFD_RELOC_MIPS_GPREL32 BFD_RELOC_GPREL32
   BFD_RELOC_MIPS_GOT_HI16,
   BFD_RELOC_MIPS_GOT_LO16,
+  BFD_RELOC_MIPS_CALL_HI16,
+  BFD_RELOC_MIPS_CALL_LO16,
 
 /* i386/elf relocations */
   BFD_RELOC_386_GOT32,

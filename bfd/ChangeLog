@@ -13,6 +13,7 @@ Tue Feb 13 14:35:15 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* reloc.c (BFD_RELOC_MIPS_GOT_HI16): Define.
 	(BFD_RELOC_MIPS_GOT_LO16): Define.
+	(BFD_RELOC_MIPS_CALL_HI16, BFD_RELOC_MIPS_CALL_LO16): Define.
 	* bfd-in2.h, libbfd.h: Rebuild.
 	* elf32-mips.c (mips_reloc_map): Map new relocs.
 

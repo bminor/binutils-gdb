@@ -1252,7 +1252,9 @@ static CONST struct elf_reloc_map mips_reloc_map[] =
   { BFD_RELOC_MIPS_CALL16, R_MIPS_CALL16 },
   { BFD_RELOC_MIPS_GPREL32, R_MIPS_GPREL32 },
   { BFD_RELOC_MIPS_GOT_HI16, R_MIPS_GOT_HI16 },
-  { BFD_RELOC_MIPS_GOT_LO16, R_MIPS_GOT_LO16 }
+  { BFD_RELOC_MIPS_GOT_LO16, R_MIPS_GOT_LO16 },
+  { BFD_RELOC_MIPS_CALL_HI16, R_MIPS_CALL_HI16 },
+  { BFD_RELOC_MIPS_CALL_LO16, R_MIPS_CALL_LO16 }
 };
 
 /* Given a BFD reloc type, return a howto structure.  */
