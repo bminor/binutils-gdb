@@ -1,5 +1,9 @@
 2003-11-22  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (skip_prologue_using_sal): New function.
+	(mips32_skip_prologue, mips16_skip_prologue): Use
+	skip_prologue_using_sal to get an upper bound on the search.
+
 	* config/powerpc/tm-linux.h (PROLOGUE_FIRSTLINE_OVERLAP): Delete
 	#if 0'ed macro.
 	* infrun.c (step_into_function): Delete #ifdef
