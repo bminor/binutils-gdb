@@ -1,3 +1,19 @@
+2004-02-08  Andrew Cagney  <cagney@redhat.com>
+
+	* configure.in (CONFIG_ALL): Set to Makefile target, and not
+	makefile macro.
+	* configure: Re-generate.
+	(CONFIG_CLEAN, CONFIG_INSTALL, CONFIG_UNINSTALL): Ditto.
+	* Makefile.in (SUBDIR_CLI_CLEAN): Delete.
+	(SUBDIR_CLI_INSTALL, SUBDIR_CLI_UNINSTALL): Delete.
+	(SUBDIR_CLI_ALL, SUBDIR_GDBTK_ALL): Delete.
+	(SUBDIR_GDBTK_CLEAN, SUBDIR_GDBTK_INSTALL): Delete.
+	(SUBDIR_GDBTK_UNINSTALL, SUBDIR_MI_ALL): Delete.
+	(SUBDIR_MI_CLEAN, SUBDIR_MI_INSTALL): Delete.
+	(SUBDIR_MI_UNINSTALL, SUBDIR_TUI_ALL): Delete.
+	(SUBDIR_TUI_CLEAN, SUBDIR_TUI_INSTALL): Delete.
+	(SUBDIR_TUI_UNINSTALL, SUBDIR_CLI_CLEAN): Delete.
+
 2004-02-07  Andrew Cagney  <cagney@redhat.com>
 
 	* Makefile.in: Update all dependencies.
