@@ -1,3 +1,9 @@
+start-sanitize-m32rx
+1999-01-06  Doug Evans  <devans@casey.cygnus.com>
+
+	* config/tc-m32r.c (OPERAND_IS_COND_BIT): Add check for psw.
+
+end-sanitize-m32rx
 Tue Jan  5 21:58:03 1999  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-mips.c (mips_frob_file): Disable "Unmatched %hi reloc"
