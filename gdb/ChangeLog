@@ -1,3 +1,34 @@
+2004-12-10  Kris Warkentin  <kewarken@qnx.com>
+
+	* nto-tdep.h: Include osabi.h.  Prototypes for generic Neutrino
+	osabi sniffer, signal handling initializer, 'in_dynsym_resolve_code'
+	function and nto_set_target function.
+	(struct nto_target_ops): Put comments inline with struct.  Add osabi
+	sniffer hook.  Redefine macros to permit testing/assignment.  Remove
+	nto_ prefix from members.
+	* nto-tdep.c (nto_find_and_open_solib): Allocate all buffers
+	dynamically to support arbitrary root paths.  Check for basename of
+	lib in search path and then check for absolute.
+	(nto_in_dynsym_resolve_code): New function.
+	(nto_core_sniffer): New function.
+	(regset_core_fns): Register core sniffer.
+	(nto_initialize_signals): New function.
+	(_initialize_nto_tdep): Move signal initialization code to above to
+	avoid initialization race conditions.
+	(nto_set_target): New function.
+	* nto-procfs.c: Minor formatting/indenting changes.
+	(procfs_is_nto_target): New function.
+	(procfs_open): Set nto_is_nto_target.
+	(_initialize_procfs): Ditto.  Remove notice_signals() call to avoid
+	initialization race conditions.
+	(procfs_create_inferior): Resume inferior after creation.
+	* i386-nto-tdep.c: Declare i386_nto_target.
+	(init_i386nto_ops): Initialize i386_nto_target instead of
+	current_nto_target.
+	(i386nto_init_abi): Initialize signals.  Call nto_set_target.  Set
+	TARGET_SO_IN_DYNSYM_RESOLVE_CODE.
+	(_initialize_i386nto_tdep): Call init_i386nto_ops.  Register osabi sniffer.
+
 2004-12-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppa-hpux-tdep.c (child_enable_exception_callback): Use XMALLOC.

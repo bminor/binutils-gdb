@@ -97,18 +97,24 @@ static unsigned nto_procfs_node = ND_LOCAL_NODE;
    is required is because QNX node descriptors are transient so
    we have to re-acquire them every time.  */
 static unsigned
-nto_node(void)
+nto_node (void)
 {
   unsigned node;
 
-  if (ND_NODE_CMP(nto_procfs_node, ND_LOCAL_NODE) == 0)
+  if (ND_NODE_CMP (nto_procfs_node, ND_LOCAL_NODE) == 0)
     return ND_LOCAL_NODE;
 
-  node = netmgr_strtond(nto_procfs_path,0);
+  node = netmgr_strtond (nto_procfs_path, 0);
   if (node == -1)
-      error ("Lost the QNX node.  Debug session probably over.");
+    error ("Lost the QNX node.  Debug session probably over.");
 
   return (node);
+}
+
+static enum gdb_osabi
+procfs_is_nto_target (bfd *abfd)
+{
+  return GDB_OSABI_QNXNTO;
 }
 
 /* This is called when we call 'target procfs <arg>' from the (gdb) prompt.
@@ -123,6 +129,8 @@ procfs_open (char *arg, int from_tty)
   char buffer[50];
   int fd, total_size;
   procfs_sysinfo *sysinfo;
+
+  nto_is_nto_target = procfs_is_nto_target;
 
   /* Set the default node used for spawning to this one,
      and only override it if there is a valid arg.  */
@@ -153,7 +161,8 @@ procfs_open (char *arg, int from_tty)
 	    *endstr = 0;
 	}
     }
-  snprintf (nto_procfs_path, PATH_MAX - 1, "%s%s", nodestr ? nodestr : "", "/proc");
+  snprintf (nto_procfs_path, PATH_MAX - 1, "%s%s", nodestr ? nodestr : "",
+	    "/proc");
   if (nodestr)
     xfree (nodestr);
 
@@ -271,7 +280,7 @@ procfs_pidlist (char *args, int from_tty)
   if (dp == NULL)
     {
       fprintf_unfiltered (gdb_stderr, "failed to opendir \"%s\" - %d (%s)",
-	      nto_procfs_path, errno, safe_strerror (errno));
+			  nto_procfs_path, errno, safe_strerror (errno));
       return;
     }
 
@@ -299,7 +308,7 @@ procfs_pidlist (char *args, int from_tty)
       if (fd == -1)
 	{
 	  fprintf_unfiltered (gdb_stderr, "failed to open %s - %d (%s)\n",
-		  buf, errno, safe_strerror (errno));
+			      buf, errno, safe_strerror (errno));
 	  closedir (dp);
 	  return;
 	}
@@ -308,8 +317,8 @@ procfs_pidlist (char *args, int from_tty)
       if (devctl (fd, DCMD_PROC_INFO, pidinfo, sizeof (buf), 0) != EOK)
 	{
 	  fprintf_unfiltered (gdb_stderr,
-		  "devctl DCMD_PROC_INFO failed - %d (%s)\n", errno,
-		  safe_strerror (errno));
+			      "devctl DCMD_PROC_INFO failed - %d (%s)\n",
+			      errno, safe_strerror (errno));
 	  break;
 	}
       num_threads = pidinfo->num_threads;
@@ -375,7 +384,8 @@ procfs_meminfo (char *args, int from_tty)
   err = devctl (ctl_fd, DCMD_PROC_MAPINFO, NULL, 0, &num);
   if (err != EOK)
     {
-      printf ("failed devctl num mapinfos - %d (%s)\n", err, safe_strerror (err));
+      printf ("failed devctl num mapinfos - %d (%s)\n", err,
+	      safe_strerror (err));
       return;
     }
 
@@ -565,7 +575,7 @@ do_attach (ptid_t ptid)
 
   if (devctl (ctl_fd, DCMD_PROC_STATUS, &status, sizeof (status), 0) == EOK
       && status.flags & _DEBUG_FLAG_STOPPED)
-    SignalKill (nto_node(), PIDGET (ptid), 0, SIGCONT, 0, 0);
+    SignalKill (nto_node (), PIDGET (ptid), 0, SIGCONT, 0, 0);
   attach_flag = 1;
   nto_init_solib_absolute_prefix ();
   return ptid;
@@ -778,7 +788,7 @@ procfs_detach (char *args, int from_tty)
     siggnal = atoi (args);
 
   if (siggnal)
-    SignalKill (nto_node(), PIDGET (inferior_ptid), 0, siggnal, 0, 0);
+    SignalKill (nto_node (), PIDGET (inferior_ptid), 0, siggnal, 0, 0);
 
   close (ctl_fd);
   ctl_fd = -1;
@@ -868,8 +878,8 @@ procfs_resume (ptid_t ptid, int step, enum target_signal signo)
 	{
 	  if (signal_to_pass != status.info.si_signo)
 	    {
-	      SignalKill (nto_node(), PIDGET (inferior_ptid), 0, signal_to_pass,
-			  0, 0);
+	      SignalKill (nto_node (), PIDGET (inferior_ptid), 0,
+			  signal_to_pass, 0, 0);
 	      run.flags |= _DEBUG_RUN_CLRFLT | _DEBUG_RUN_CLRSIG;
 	    }
 	  else			/* Let it kill the program without telling us.  */
@@ -892,7 +902,7 @@ procfs_mourn_inferior (void)
 {
   if (!ptid_equal (inferior_ptid, null_ptid))
     {
-      SignalKill (nto_node(), PIDGET (inferior_ptid), 0, SIGKILL, 0, 0);
+      SignalKill (nto_node (), PIDGET (inferior_ptid), 0, SIGKILL, 0, 0);
       close (ctl_fd);
     }
   inferior_ptid = null_ptid;
@@ -1042,7 +1052,7 @@ procfs_create_inferior (char *exec_file, char *allargs, char **env,
 
   if (ND_NODE_CMP (nto_procfs_node, ND_LOCAL_NODE) != 0)
     {
-      inherit.nd = nto_node();
+      inherit.nd = nto_node ();
       inherit.flags |= SPAWN_SETND;
       inherit.flags &= ~SPAWN_EXEC;
     }
@@ -1055,7 +1065,8 @@ procfs_create_inferior (char *exec_file, char *allargs, char **env,
   sigprocmask (SIG_BLOCK, &set, NULL);
 
   if (pid == -1)
-    error ("Error spawning %s: %d (%s)", argv[0], errno, safe_strerror (errno));
+    error ("Error spawning %s: %d (%s)", argv[0], errno,
+	   safe_strerror (errno));
 
   if (fds[0] != STDIN_FILENO)
     close (fds[0]);
@@ -1083,6 +1094,8 @@ procfs_create_inferior (char *exec_file, char *allargs, char **env,
       || (symfile_objfile != NULL && symfile_objfile->obfd != NULL))
     SOLIB_CREATE_INFERIOR_HOOK (pid);
 #endif
+  stop_soon = 0;
+  proceed (-1, TARGET_SIGNAL_DEFAULT, 0);
 }
 
 static void
@@ -1324,7 +1337,6 @@ _initialize_procfs (void)
 
   /* Set up trace and fault sets, as gdb expects them.  */
   sigemptyset (&run.trace);
-  notice_signals ();
 
   /* Stuff some information.  */
   nto_cpuinfo_flags = SYSPAGE_ENTRY (cpuinfo)->flags;
@@ -1332,6 +1344,8 @@ _initialize_procfs (void)
 
   add_info ("pidlist", procfs_pidlist, "pidlist");
   add_info ("meminfo", procfs_meminfo, "memory information");
+
+  nto_is_nto_target = procfs_is_nto_target;
 }
 
 

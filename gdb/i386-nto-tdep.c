@@ -59,6 +59,8 @@ static int regmap[] = {
   (-1 * 4)			/* filler */
 };
 
+static struct nto_target_ops i386_nto_target;
+
 /* Given a gdb regno, return the offset into Neutrino's register structure
    or -1 if register is unknown.  */
 static int
@@ -258,14 +260,14 @@ i386nto_sigcontext_addr (struct frame_info *next_frame)
 static void
 init_i386nto_ops (void)
 {
-  current_nto_target.nto_regset_id = i386nto_regset_id;
-  current_nto_target.nto_supply_gregset = i386nto_supply_gregset;
-  current_nto_target.nto_supply_fpregset = i386nto_supply_fpregset;
-  current_nto_target.nto_supply_altregset = nto_dummy_supply_regset;
-  current_nto_target.nto_supply_regset = i386nto_supply_regset;
-  current_nto_target.nto_register_area = i386nto_register_area;
-  current_nto_target.nto_regset_fill = i386nto_regset_fill;
-  current_nto_target.nto_fetch_link_map_offsets =
+  i386_nto_target.regset_id = i386nto_regset_id;
+  i386_nto_target.supply_gregset = i386nto_supply_gregset;
+  i386_nto_target.supply_fpregset = i386nto_supply_fpregset;
+  i386_nto_target.supply_altregset = nto_dummy_supply_regset;
+  i386_nto_target.supply_regset = i386nto_supply_regset;
+  i386_nto_target.register_area = i386nto_register_area;
+  i386_nto_target.regset_fill = i386nto_regset_fill;
+  i386_nto_target.fetch_link_map_offsets =
     i386nto_svr4_fetch_link_map_offsets;
 }
 
@@ -273,6 +275,9 @@ static void
 i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* Deal with our strange signals.  */
+  nto_initialize_signals ();
 
   /* NTO uses ELF.  */
   i386_elf_init_abi (info, gdbarch);
@@ -301,12 +306,18 @@ i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Supply a nice function to find our solibs.  */
   TARGET_SO_FIND_AND_OPEN_SOLIB = nto_find_and_open_solib;
 
-  init_i386nto_ops ();
+  /* Our linker code is in libc.  */
+  TARGET_SO_IN_DYNSYM_RESOLVE_CODE = nto_in_dynsym_resolve_code;
+
+  nto_set_target (&i386_nto_target);
 }
 
 void
 _initialize_i386nto_tdep (void)
 {
+  init_i386nto_ops ();
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_QNXNTO,
 			  i386nto_init_abi);
+  gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_elf_flavour,
+				  nto_elf_osabi_sniffer);
 }

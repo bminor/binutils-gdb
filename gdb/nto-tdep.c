@@ -65,6 +65,19 @@ nto_target (void)
 #endif
 }
 
+void
+nto_set_target(struct nto_target_ops *targ)
+{
+  nto_regset_id = targ->regset_id;
+  nto_supply_gregset = targ->supply_gregset;
+  nto_supply_fpregset = targ->supply_fpregset;
+  nto_supply_altregset = targ->supply_altregset;
+  nto_supply_regset = targ->supply_regset;
+  nto_register_area = targ->register_area;
+  nto_regset_fill = targ->regset_fill;
+  nto_fetch_link_map_offsets = targ->fetch_link_map_offsets;
+}
+
 /* Take a string such as i386, rs6000, etc. and map it onto CPUTYPE_X86,
    CPUTYPE_PPC, etc. as defined in nto-share/dsmsgs.h.  */
 int
@@ -86,10 +99,10 @@ nto_map_arch_to_cputype (const char *arch)
 int
 nto_find_and_open_solib (char *solib, unsigned o_flags, char **temp_pathname)
 {
-  char *buf, arch_path[PATH_MAX], *nto_root, *endian;
+  char *buf, *arch_path, *nto_root, *endian, *base;
   const char *arch;
-  char *path_fmt = "%s/lib:%s/usr/lib:%s/usr/photon/lib\
-:%s/usr/photon/dll:%s/lib/dll";
+  int ret;
+#define PATH_FMT "%s/lib:%s/usr/lib:%s/usr/photon/lib:%s/usr/photon/dll:%s/lib/dll"
 
   nto_root = nto_target ();
   if (strcmp (TARGET_ARCHITECTURE->arch_name, "i386") == 0)
@@ -109,13 +122,38 @@ nto_find_and_open_solib (char *solib, unsigned o_flags, char **temp_pathname)
       endian = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? "be" : "le";
     }
 
+  /* In case nto_root is short, add strlen(solib)
+     so we can reuse arch_path below.  */
+  arch_path =
+    alloca (strlen (nto_root) + strlen (arch) + strlen (endian) + 2 +
+	    strlen (solib));
   sprintf (arch_path, "%s/%s%s", nto_root, arch, endian);
 
-  buf = alloca (strlen (path_fmt) + strlen (arch_path) * 5 + 1);
-  sprintf (buf, path_fmt, arch_path, arch_path, arch_path, arch_path,
+  buf = alloca (strlen (PATH_FMT) + strlen (arch_path) * 5 + 1);
+  sprintf (buf, PATH_FMT, arch_path, arch_path, arch_path, arch_path,
 	   arch_path);
 
-  return openp (buf, OPF_TRY_CWD_FIRST, solib, o_flags, 0, temp_pathname);
+  /* Don't assume basename() isn't destructive.  */
+  base = strrchr (solib, '/');
+  if (!base)
+    base = solib;
+  else
+    base++;			/* Skip over '/'.  */
+
+  ret = openp (buf, 1, base, o_flags, 0, temp_pathname);
+  if (ret < 0 && base != solib)
+    {
+      sprintf (arch_path, "/%s", solib);
+      ret = open (arch_path, o_flags, 0);
+      if (temp_pathname)
+	{
+	  if (ret >= 0)
+	    *temp_pathname = gdb_realpath (arch_path);
+	  else
+	    **temp_pathname = '\0';
+	}
+    }
+  return ret;
 }
 
 void
@@ -266,6 +304,51 @@ nto_relocate_section_addresses (struct so_list *so, struct section_table *sec)
   sec->endaddr = nto_truncate_ptr (sec->endaddr + LM_ADDR (so) - vaddr);
 }
 
+/* This is cheating a bit because our linker code is in libc.so.  If we
+   ever implement lazy linking, this may need to be re-examined.  */
+int
+nto_in_dynsym_resolve_code (CORE_ADDR pc)
+{
+  if (in_plt_section (pc, NULL))
+    return 1;
+  return 0;
+}
+
+void
+nto_generic_supply_gpregset (const struct regset *regset,
+			     struct regcache *regcache, int regnum,
+			     const void *gregs, size_t len)
+{
+}
+
+void
+nto_generic_supply_fpregset (const struct regset *regset,
+			     struct regcache *regcache, int regnum,
+			     const void *fpregs, size_t len)
+{
+}
+
+void
+nto_generic_supply_altregset (const struct regset *regset,
+			      struct regcache *regcache, int regnum,
+			      const void *altregs, size_t len)
+{
+}
+
+void
+nto_dummy_supply_regset (char *regs)
+{
+  /* Do nothing.  */
+}
+
+enum gdb_osabi
+nto_elf_osabi_sniffer (bfd *abfd)
+{
+  if (nto_is_nto_target)
+      return nto_is_nto_target (abfd);
+  return GDB_OSABI_UNKNOWN;
+}
+
 static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 		      int which, CORE_ADDR reg_addr)
@@ -287,12 +370,6 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
     }
 }
 
-void
-nto_dummy_supply_regset (char *regs)
-{
-  /* Do nothing.  */
-}
-
 /* Register that we are able to handle ELF file formats using standard
    procfs "regset" structures.  */
 static struct core_fns regset_core_fns = {
@@ -304,18 +381,8 @@ static struct core_fns regset_core_fns = {
 };
 
 void
-_initialize_nto_tdep (void)
+nto_initialize_signals (void)
 {
-  add_setshow_zinteger_cmd ("nto-debug", class_maintenance,
-			    &nto_internal_debugging, "\
-Set QNX NTO internal debugging.", "\
-Show QNX NTO internal debugging.", "\
-When non-zero, nto specific debug info is\n\
-displayed. Different information is displayed\n\
-for different positive values.", "\
-QNX NTO internal debugging is %s.",
-			    NULL, NULL, &setdebuglist, &showdebuglist);
-
   /* We use SIG45 for pulses, or something, so nostop, noprint
      and pass them.  */
   signal_stop_update (target_signal_from_name ("SIG45"), 0);
@@ -334,7 +401,19 @@ QNX NTO internal debugging is %s.",
   signal_print_update (SIGPHOTON, 0);
   signal_pass_update (SIGPHOTON, 1);
 #endif
+}
 
+void
+_initialize_nto_tdep (void)
+{
+  add_setshow_zinteger_cmd ("nto-debug", class_maintenance,
+			    &nto_internal_debugging, "\
+Set QNX NTO internal debugging.", "\
+Show QNX NTO internal debugging.", "\
+When non-zero, nto specific debug info is\n\
+displayed. Different information is displayed\n\
+for different positive values.", "\
+QNX NTO internal debugging is %s.", NULL, NULL, &setdebuglist, &showdebuglist);
   /* Register core file support.  */
   deprecated_add_core_fns (&regset_core_fns);
 }
