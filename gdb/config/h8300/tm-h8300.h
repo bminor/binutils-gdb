@@ -19,17 +19,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Contributed by Steve Chamberlain sac@cygnus.com */
 
-int HMODE;
-
+extern int HMODE;
 
 #define BINWORD (HMODE?4:2)
+
 #define EXTRA_FRAME_INFO 	\
 	struct frame_saved_regs *fsr;	\
 	CORE_ADDR from_pc; \
 	CORE_ADDR args_pointer;\
         CORE_ADDR locals_pointer ;
-
-
 
 /* Zero the frame_saved_regs pointer when the frame is initialized,
    so that FRAME_FIND_SAVED_REGS () will know to allocate and
@@ -42,7 +40,6 @@ int HMODE;
 
 extern void init_extra_frame_info ();
 
-
 #define IEEE_FLOAT
 /* Define the bit, byte, and word ordering of the machine.  */
 #define TARGET_BYTE_ORDER BIG_ENDIAN
@@ -53,7 +50,6 @@ extern void init_extra_frame_info ();
 #undef TARGET_PTR_BIT
 #define TARGET_PTR_BIT  (HMODE ? 32:16)
 
-
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
 
@@ -62,10 +58,8 @@ extern void init_extra_frame_info ();
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-
 #define SKIP_PROLOGUE(ip)   {(ip) = h8300_skip_prologue(ip);}
 extern CORE_ADDR h8300_skip_prologue ();
-
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines
@@ -81,13 +75,10 @@ extern CORE_ADDR h8300_skip_prologue ();
 
 #define BREAKPOINT {0x7A, 0xFF}
 
-
 /* If your kernel resets the pc after the trap happens you may need to
    define this before including this file.  */
 
-
 #define DECR_PC_AFTER_BREAK 0
-
 
 /* Nonzero if instruction at PC is a return instruction.  */
 /* Allow any of the return instructions, including a trapv and a return
@@ -104,9 +95,8 @@ extern CORE_ADDR h8300_skip_prologue ();
 #define REGISTER_TYPE  unsigned short
 
 /*#  define NUM_REGS 20 /* 20 for fake HW support */
-#  define NUM_REGS 13  
-#  define REGISTER_BYTES (NUM_REGS*2)
-
+#define NUM_REGS 13  
+#define REGISTER_BYTES (NUM_REGS * 4)
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
@@ -116,7 +106,7 @@ extern CORE_ADDR h8300_skip_prologue ();
 /* Number of bytes of storage in the actual machine representation
    for register N.  On the H8/300, all regs are 2 bytes.  */
 
-#define REGISTER_RAW_SIZE(N) (HMODE ? 4:2)
+#define REGISTER_RAW_SIZE(N) (HMODE ? 4 : 2)
 
 /* Number of bytes of storage in the program's representation
    for register N.  */
@@ -150,8 +140,7 @@ extern CORE_ADDR h8300_skip_prologue ();
    of data in register N.  */
 
 #define REGISTER_VIRTUAL_TYPE(N) \
-(  HMODE ? builtin_type_unsigned_int : builtin_type_unsigned_short)
-
+(HMODE ? builtin_type_unsigned_long : builtin_type_unsigned_short)
 
 /* Initializer for an array of names of registers.
    Entries beyond the first NUM_REGS are ignored.  */
@@ -173,7 +162,6 @@ extern CORE_ADDR h8300_skip_prologue ();
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
-
 #define FP_REGNUM 6		/* Contains address of executing stack frame */
 #define SP_REGNUM 7		/* Contains address of top of stack */
 #define CCR_REGNUM 8		/* Contains processor status */
@@ -188,23 +176,23 @@ extern CORE_ADDR h8300_skip_prologue ();
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
+/* FIXME: Won't work with both h8/300's.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   bcopy ((char *)(REGBUF), VALBUF, TYPE_LENGTH(TYPE))
 
-
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  Assumes floats are passed
    in d0/d1.  */
-
+/* FIXME: Won't work with both h8/300's.  */
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
   write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE))
 
-
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
+/* FIXME: Won't work with both h8/300's.  */
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(CORE_ADDR *)(REGBUF))
 
@@ -243,8 +231,8 @@ extern CORE_ADDR h8300_skip_prologue ();
    SAVED FP   <-FP POINTS HERE
    LOCALS0
    LOCALS1    <-SP POINTS HERE
-   
    */
+
 #define FRAME_SAVED_PC(FRAME) frame_saved_pc(FRAME)
 
 #define FRAME_ARGS_ADDRESS(fi) frame_args_address(fi)
@@ -258,7 +246,6 @@ extern CORE_ADDR h8300_skip_prologue ();
    now that the C compiler delays popping them.  */
 
 #define FRAME_NUM_ARGS(val,fi) (val = -1)
-
 
 /* Return number of bytes at start of arglist that are not really args.  */
 
@@ -285,7 +272,6 @@ extern CORE_ADDR h8300_skip_prologue ();
 #define SHORT_INT_MAX 32767
 #define SHORT_INT_MIN -32768
 
-
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
 { memcpy((TO), (FROM),  BINWORD); }
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
@@ -301,6 +287,4 @@ typedef unsigned short INSN_WORD;
 
 #define DONT_USE_REMOTE
 
-
 #define	PRINT_REGISTER_HOOK(regno) print_register_hook(regno)
-
