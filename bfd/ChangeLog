@@ -1,3 +1,8 @@
+Wed Oct 11 00:49:29 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_link_add_object_symbols): Correct conditions
+	under which type and size change warnings are issued.
+
 Tue Oct 10 18:32:46 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffgen.c (coff_count_linenumbers): Don't count line numbers for
