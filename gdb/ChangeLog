@@ -1,3 +1,41 @@
+2002-12-11  Kevin Buettner  <kevinb@redhat.com>
+
+	* dwarf2read.c (dwarf2_const_ignored, dwarf2_volatile_ignored)
+	(dwarf2_non_const_array_bound_ignored)
+	(dwarf2_missing_line_number_section)
+	(dwarf2_statement_list_fits_in_line_number_section)
+	(dwarf2_mangled_line_number_section, dwarf2_unsupported_die_ref_attr)
+	(dwarf2_unsupported_stack_op, dwarf2_complex_location_expr)
+	(dwarf2_unsupported_tag, dwarf2_unsupported_at_encoding)
+	(dwarf2_unsupported_at_frame_base, dwarf2_unexpected_tag)
+	(dwarf2_missing_at_frame_base, dwarf2_bad_static_member_name)
+	(dwarf2_unsupported_accessibility, dwarf2_bad_member_name_complaint)
+	(dwarf2_missing_member_fn_type_complaint)
+	(dwarf2_vtbl_not_found_complaint, dwarf2_absolute_sibling_complaint)
+	(dwarf2_const_value_length_mismatch)
+	(dwarf2_unsupported_const_value_attr, dwarf2_misplaced_line_number)
+	(dwarf2_line_header_too_long, dwarf2_missing_macinfo_section)
+	(dwarf2_macros_too_long, dwarf2_macros_not_terminated)
+	(dwarf2_macro_outside_file, dwarf2_macro_unmatched_end_file)
+	(dwarf2_macro_malformed_definition, dwarf2_macro_spaces_in_definition)
+	(dwarf2_invalid_attrib_class, dwarf2_invalid_pointer_size): Delete
+	complaints using deprecated struct..
+	(dwarf2_non_const_array_bound_ignored_complaint)
+	(dwarf2_complex_location_expr_complaint)
+	(dwarf2_unsupported_at_frame_base_complaint)
+	(dwarf2_const_value_length_mismatch_complaint)
+	(dwarf2_macros_too_long_complaint)
+	(dwarf2_macro_malformed_definition_complaint)
+	(dwarf2_invalid_attrib_class_complaint): New functions.
+	(read_func_scope, dwarf2_attach_fields_to_type, dwarf2_add_member_fn)
+	(read_structure_scope, read_array_type, read_common_block)
+	(read_tag_pointer_type, read_base_type, read_partial_die)
+	(dwarf_decode_line_header, check_cu_functions, dwarf_decode_lines)
+	(new_symbol, dwarf2_const_value, read_type_die)
+	(dwarf2_get_ref_die_offset, decode_locdesc, consume_improper_spaces)
+	(parse_macro_definition, dwarf_decode_macros): Replace calls to
+	complain() with, possibly indirect, calls to complaint().
+
 2002-12-11  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (deprecated_get_frame_saved_regs): Rename
