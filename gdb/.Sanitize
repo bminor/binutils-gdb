@@ -428,8 +428,10 @@ z8k-tdep.c
 
 Things-to-lose:
 
-HOW_TO_RELEASE
 ser-go32-para.c
+HOW_TO_RELEASE
+tracepoint.c
+tracepoint.h
 
 Do-last:
 
