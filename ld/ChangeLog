@@ -1,3 +1,8 @@
+2003-10-02  Ivan Warren <ivan@vmfacility.fr>
+
+        * pe-dll.c (make_one): Correct sym def order & pick right sym for
+	.idata$7 reloc.
+
 2003-09-30  Chris Demetriou  <cgd@broadcom.com>
 
 	* NEWS: Add an indication of the cutoff for 2.14.

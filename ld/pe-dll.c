@@ -1780,10 +1780,10 @@ make_one (def_file_export *exp, bfd *parent)
 
   if  (*exp->internal_name == '@')
     {
-      if (! exp->flag_data)
-	quick_symbol (abfd, "", exp->internal_name, "", tx, BSF_GLOBAL, 0);
       quick_symbol (abfd, U ("_head_"), dll_symname, "", UNDSEC,
 		    BSF_GLOBAL, 0);
+      if (! exp->flag_data)
+	quick_symbol (abfd, "", exp->internal_name, "", tx, BSF_GLOBAL, 0);
       quick_symbol (abfd, U ("_imp_"), exp->internal_name, "", id5,
 		    BSF_GLOBAL, 0);
       /* Fastcall applies only to functions,
@@ -1791,11 +1791,11 @@ make_one (def_file_export *exp, bfd *parent)
     }
   else
     {
+      quick_symbol (abfd, U ("_head_"), dll_symname, "", UNDSEC,
+		    BSF_GLOBAL, 0);
       if (! exp->flag_data)
 	quick_symbol (abfd, U (""), exp->internal_name, "", tx,
 		      BSF_GLOBAL, 0);
-      quick_symbol (abfd, U ("_head_"), dll_symname, "", UNDSEC,
-		    BSF_GLOBAL, 0);
       quick_symbol (abfd, U ("_imp__"), exp->internal_name, "", id5,
 		    BSF_GLOBAL, 0);
       /* Symbol to reference ord/name of imported
@@ -1838,7 +1838,7 @@ make_one (def_file_export *exp, bfd *parent)
   d7 = xmalloc (4);
   id7->contents = d7;
   memset (d7, 0, 4);
-  quick_reloc (abfd, 0, BFD_RELOC_RVA, 6);
+  quick_reloc (abfd, 0, BFD_RELOC_RVA, 5);
   save_relocs (id7);
 
   bfd_set_section_size (abfd, id5, 4);
