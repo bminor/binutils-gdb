@@ -1,3 +1,17 @@
+Tue Feb 18 13:37:06 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/unsorted/unsorted.exp (align4 tests): Tweak expected
+	output.
+	
+Fri Feb 14 17:56:27 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/all/align.d, gas/all/align.s: New test.
+	* gas/all/gas.exp: Run it.
+
+Thu Feb 13 14:44:05 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mips/mips16.d: Correct PC relative instruction bytes.
+
 Wed Feb 12 12:33:08 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mips/lif-svr4pic.d: Pass -EB when running the assembler.
