@@ -286,7 +286,7 @@ cobr( memaddr, word1, word2 )
 	if ( word1 & 2 ){		/* Predicts branch not taken */
 		fputs_filtered ( ".f", stream );
 	}
-	fputs_filtered ( "\t", stream, 0 );
+	fputs_filtered ( "\t", stream );
 
 	src1 = (word1 >> 19) & 0x1f;
 	src2 = (word1 >> 14) & 0x1f;
@@ -666,7 +666,7 @@ reg( word1 )
 	dst  = (word1 >> 19) & 0x1f;
 
 	if  ( reg_tab[i].numops != 0 ){
-		fputs_filtered( "\t", stream, 0 );
+		fputs_filtered( "\t", stream );
 
 		switch ( reg_tab[i].numops ){
 		case 1:

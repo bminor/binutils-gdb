@@ -1,3 +1,9 @@
+Sun Nov 22 16:21:41 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* nindy-share/stop.h: fixed bogus comment-end in copyright message
+
+	* i960-pinsn.c: fixed two calls of fputs_filtered that had 3 arguments
+
 Fri Nov 20 21:35:57 1992  Fred Fish  (fnf@cygnus.com)
 
 	* defs.h (sevenbit_strings):  Add declaration.
