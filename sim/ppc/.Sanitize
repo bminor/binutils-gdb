@@ -15,6 +15,13 @@
 
 Do-first:
 
+# Lose the documentation until it is acceptable to DOS
+if ( echo $* | grep keep\-psim\-doc > /dev/null ) ; then
+	keep_these_too="doc"
+else
+	lose_these_too="doc"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -53,7 +60,6 @@ device.h
 device_table.c
 device_table.h
 dgen.c
-doc
 double.c
 dp-bit.c
 emul_bugapi.c
