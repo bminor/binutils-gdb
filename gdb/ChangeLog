@@ -1,3 +1,11 @@
+Fri Dec 10 15:53:56 1993  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* stabsread.c (read_array_type):  Allow negative array bounds,
+	without interpreting that to mean "adjustable."
+	* ch-valprint.c (chill_val_print):  Handle RANGE types.
+	* ch-typeprint.c (chill_type_print_base):  Handle BOOL.
+	Handle variant records.  Handle RANGE types.
+
 Tue Dec  7 15:41:32 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/mips/idt.mt: Use tm-idt.h instead of tm-bigmips.h.

@@ -2794,7 +2794,7 @@ read_array_type (pp, type, objfile)
     return error_type (pp);
   ++*pp;
 
-  if (!(**pp >= '0' && **pp <= '9'))
+  if (!(**pp >= '0' && **pp <= '9') && **pp != '-')
     {
       (*pp)++;
       adjustable = 1;
@@ -2803,7 +2803,7 @@ read_array_type (pp, type, objfile)
   if (nbits != 0)
     return error_type (pp);
 
-  if (!(**pp >= '0' && **pp <= '9'))
+  if (!(**pp >= '0' && **pp <= '9') && **pp != '-')
     {
       (*pp)++;
       adjustable = 1;

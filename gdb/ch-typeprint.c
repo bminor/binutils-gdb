@@ -114,6 +114,10 @@ chill_type_print_base (type, stream, show, level)
 	chill_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
 	break;
 
+      case TYPE_CODE_BOOL:
+	fprintf_filtered (stream, "BOOL");
+	break;
+
       case TYPE_CODE_ARRAY:
 	range_type = TYPE_FIELD_TYPE (type, 0);
 	index_type = TYPE_TARGET_TYPE (range_type);
@@ -180,11 +184,42 @@ chill_type_print_base (type, stream, show, level)
 		len = TYPE_NFIELDS (type);
 		for (i = TYPE_N_BASECLASSES (type); i < len; i++)
 		  {
+		    struct type *field_type = TYPE_FIELD_TYPE (type, i);
 		    QUIT;
 		    print_spaces_filtered (level + 4, stream);
-		    chill_print_type (TYPE_FIELD_TYPE (type, i),
-				      TYPE_FIELD_NAME (type, i),
-				      stream, show - 1, level + 4);
+		    if (TYPE_CODE (field_type) == TYPE_CODE_UNION)
+		      { int j; /* variant number */
+			fputs_filtered ("CASE OF\n", stream);
+			for (j = 0; j < TYPE_NFIELDS (field_type); j++)
+			  { int k; /* variant field index */
+			    struct type *variant_type
+			      = TYPE_FIELD_TYPE (field_type, j);
+			    int var_len = TYPE_NFIELDS (variant_type);
+			    print_spaces_filtered (level + 4, stream);
+			    if (strcmp (TYPE_FIELD_NAME (field_type, j),
+					"else") == 0)
+			      fputs_filtered ("ELSE\n", stream);
+			    else
+			      fputs_filtered (":\n", stream);
+			    if (TYPE_CODE (variant_type) != TYPE_CODE_STRUCT)
+			      error ("variant record confusion");
+			    for (k = 0; k < var_len; k++)
+			      {
+				print_spaces_filtered (level + 8, stream);
+				chill_print_type (TYPE_FIELD_TYPE (variant_type, k),
+						  TYPE_FIELD_NAME (variant_type, k),
+						  stream, show - 1, level + 8);
+				if (k < (var_len - 1))
+				  fputs_filtered (",", stream);
+				fputs_filtered ("\n", stream);
+			      }
+			  }
+			fputs_filtered ("ESAC\n", stream);
+		      }
+		    else
+		      chill_print_type (field_type,
+					TYPE_FIELD_NAME (type, i),
+					stream, show - 1, level + 4);
 		    if (i < (len - 1))
 		      {
 			fputs_filtered (",", stream);
@@ -196,10 +231,28 @@ chill_type_print_base (type, stream, show, level)
 	  }
 	break;
 
+      case TYPE_CODE_RANGE:
+	if (TYPE_TARGET_TYPE (type))
+	  {
+	    chill_type_print_base (TYPE_TARGET_TYPE (type),
+				   stream, show, level);
+	    fputs_filtered (" (", stream);
+	    print_type_scalar (TYPE_TARGET_TYPE (type),
+			       TYPE_FIELD_BITPOS (type, 0), stream);
+	    fputs_filtered (":", stream);
+	    print_type_scalar (TYPE_TARGET_TYPE (type),
+			       TYPE_FIELD_BITPOS (type, 1), stream);
+	    fputs_filtered (")", stream);
+	  }
+	else
+	  fprintf_filtered (stream, "RANGE? (%s : %d)",
+			    TYPE_FIELD_BITPOS (type, 0),
+			    TYPE_FIELD_BITPOS (type, 1));
+	break;
+
       case TYPE_CODE_VOID:
       case TYPE_CODE_UNDEF:
       case TYPE_CODE_ERROR:
-      case TYPE_CODE_RANGE:
       case TYPE_CODE_ENUM:
       case TYPE_CODE_UNION:
       case TYPE_CODE_METHOD:

@@ -234,14 +234,19 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 		   deref_ref, recurse, pretty);
       break;
 
+    case TYPE_CODE_RANGE:
+      if (TYPE_TARGET_TYPE (type))
+	chill_val_print (TYPE_TARGET_TYPE (type), valaddr, address, stream,
+			 format, deref_ref, recurse, pretty);
+      break;
+
     case TYPE_CODE_MEMBER:
     case TYPE_CODE_UNION:
     case TYPE_CODE_FUNC:
     case TYPE_CODE_VOID:
     case TYPE_CODE_ERROR:
-    case TYPE_CODE_RANGE:
     default:
-      /* Let's derfer printing to the C printer, rather than
+      /* Let's defer printing to the C printer, rather than
 	 print an error message.  FIXME! */
       c_val_print (type, valaddr, address, stream, format,
 		   deref_ref, recurse, pretty);
