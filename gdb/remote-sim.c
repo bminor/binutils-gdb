@@ -1,7 +1,7 @@
-/* Remote debugging interface for generalized simulator
-   Copyright 1992 Free Software Foundation, Inc.
-   Contributed by Cygnus Support.  Written by Steve Chamberlain
-   (sac@cygnus.com).
+/* Generic remote debugging interface for simulators.
+   Copyright 1993 Free Software Foundation, Inc.
+   Contributed by Cygnus Support.
+   Steve Chamberlain (sac@cygnus.com) and Doug Evans (dje@cygnus.com).
 
 This file is part of GDB.
 
@@ -32,60 +32,147 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "terminal.h"
 #include "target.h"
 #include "gdbcore.h"
+#include "remote-sim.h"
+
+/* Naming convention:
+
+   sim_* are the interface to the simulator (see remote-sim.h).
+
+   gdbsim_* are stuff which is internal to gdb.  */
 
 /* Forward data declarations */
-extern struct target_ops sim_ops;		/* Forward declaration */
+extern struct target_ops gdbsim_ops;
 
-int
-sim_write_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     unsigned char *myaddr;
+static int program_loaded = 0;
+
+static void
+dump_mem (buf, len)
+     char *buf;
      int len;
 {
-  return  sim_write(memaddr, myaddr, len);
+  if (len <= 8)
+    {
+      if (len == 8 || len == 4)
+	{
+	  long l[2];
+	  memcpy (l, buf, len);
+	  printf_filtered ("\t0x%x", l[0]);
+	  printf_filtered (len == 8 ? " 0x%x\n" : "\n", l[1]);
+	}
+      else
+	{
+	  int i;
+	  printf_filtered ("\t");
+	  for (i = 0; i < len; i++)
+	    printf_filtered ("0x%x ", buf[i]);
+	  printf_filtered ("\n");
+	}
+    }
 }
 
 static void
-store_register(regno)
+gdbsim_fetch_register (regno)
+int regno;
+{
+  if (regno == -1) 
+    {
+      for (regno = 0; regno < NUM_REGS; regno++)
+	gdbsim_fetch_register (regno);
+    }
+  else
+    {
+      char buf[MAX_REGISTER_RAW_SIZE];
+
+      sim_fetch_register (regno, buf);
+      supply_register (regno, buf);
+      if (sr_get_debug ())
+	{
+	  printf_filtered ("gdbsim_fetch_register: %d", regno);
+	  /* FIXME: We could print something more intelligible.  */
+	  dump_mem (buf, REGISTER_RAW_SIZE (regno));
+	}
+    }
+}
+
+static void
+gdbsim_store_register (regno)
 int regno;
 {
   if (regno  == -1) 
-  {
-    for (regno = 0; regno < NUM_REGS; regno++)
-     store_register(regno);
-  }
-  else 
-  {
-    sim_store_register(regno, read_register(regno));
-  }
+    {
+      for (regno = 0; regno < NUM_REGS; regno++)
+	gdbsim_store_register (regno);
+    }
+  else
+    {
+      /* FIXME: Until read_register() returns LONGEST, we have this.  */
+      char value[MAX_REGISTER_RAW_SIZE];
+
+      read_register_gen (regno, value);
+      SWAP_TARGET_AND_HOST (value, REGISTER_RAW_SIZE (regno));
+      sim_store_register (regno, value);
+      if (sr_get_debug ())
+	{
+	  printf_filtered ("gdbsim_store_register: %d", regno);
+	  /* FIXME: We could print something more intelligible.  */
+	  dump_mem (value, REGISTER_RAW_SIZE (regno));
+	}
+    }
 }
 
-
-/*
- * Download a file specified in 'args', to the sim. 
- */
 static void
-sim_load(args,fromtty)
-char	*args;
-int	fromtty;
+gdbsim_kill ()
+{
+  if (sr_get_debug ())
+    printf_filtered ("gdbsim_kill\n");
+
+  sim_kill ();	/* close fd's, remove mappings */
+  inferior_pid = 0;
+}
+
+/* Load an executable file into the target process.  This is expected to
+   not only bring new code into the target process, but also to update
+   GDB's symbol tables to match.  */
+
+static void
+gdbsim_load (prog, fromtty)
+     char *prog;
+     int fromtty;
 {
   bfd	*abfd;
-  asection *s;
+
+  if (sr_get_debug ())
+    printf_filtered ("gdbsim_load: prog \"%s\"\n", prog);
 
   inferior_pid = 0;  
-  abfd = bfd_openr (args, (char*)gnutarget);
+  program_loaded = 0;
+  abfd = bfd_openr (prog, gnutarget);
 
   if (!abfd) 
-  {
-    printf_filtered("Unable to open file %s\n", args);
-    return;
-  }
+    error ("Unable to open file %s.", prog);
 
-  if (bfd_check_format(abfd, bfd_object) ==0) 
-  {
-    printf_filtered("File is not an object file\n");
-    return ;
-  }
+  if (bfd_check_format (abfd, bfd_object) == 0)
+    error ("File is not an object file.");
+
+  if (sim_load (abfd, prog) != 0)
+    return;
+
+  program_loaded = 1;
+
+  sim_set_pc (abfd->start_address);
+}
+
+/*
+ * This is a utility routine that sim_load() can call to do the work.
+ * The result is 0 for success, non-zero for failure.
+ *
+ * Eg: int sim_load (bfd *bfd, char *prog) { return sim_load_standard (bfd); }
+ */
+
+sim_load_standard (abfd)
+     bfd *abfd;
+{
+  asection *s;
 
   s = abfd->sections;
   while (s != (asection *)NULL) 
@@ -94,196 +181,291 @@ int	fromtty;
     {
       int i;
       int delta = 4096;
-      char *buffer = xmalloc(delta);
-      printf_filtered("%s\t: 0x%4x .. 0x%4x  ",
+      char *buffer = xmalloc (delta);
+      printf_filtered ("%s\t: 0x%4x .. 0x%4x  ",
 		      s->name, s->vma, s->vma + s->_raw_size);
       for (i = 0; i < s->_raw_size; i+= delta) 
       {
 	int sub_delta = delta;
 	if (sub_delta > s->_raw_size - i)
-	 sub_delta = s->_raw_size - i ;
+	  sub_delta = s->_raw_size - i ;
 
-	bfd_get_section_contents(abfd, s, buffer, i, sub_delta);
-	sim_write_inferior_memory(s->vma + i, buffer, sub_delta);
-	printf_filtered("*");
-	fflush(stdout);
+	bfd_get_section_contents (abfd, s, buffer, i, sub_delta);
+	sim_write (s->vma + i, buffer, sub_delta);
+	printf_filtered ("*");
+	fflush (stdout);
       }
-      printf_filtered(  "\n");      
-      free(buffer);
+      printf_filtered ("\n");
+      free (buffer);
     }
     s = s->next;
   }
 
-  sim_store_register(PC_REGNUM, abfd->start_address);
-}
-
-/* This is called not only when we first attach, but also when the
-   user types "run" after having attached.  */
-void
-sim_create_inferior (execfile, args, env)
-     char *execfile;
-     char *args;
-     char **env;
-{
-  int entry_pt;
-
-  if (args && *args)
-   error ("Can't pass arguments to remote sim process.");
-
-  if (execfile == 0 || exec_bfd == 0)
-   error ("No exec file specified");
-
-  entry_pt = (int) bfd_get_start_address (exec_bfd);
-  init_wait_for_inferior ();
-  insert_breakpoints ();
-  proceed(entry_pt, -1, 0);
-}
-
-
-
-static void
-sim_open (name, from_tty)
-     char *name;
-     int from_tty;
-{
-  if(name == 0) 
-  {
-    name = "";
-  }
-  push_target (&sim_ops);
-  target_fetch_registers(-1);
-  printf_filtered("Connected to the simulator.\n");
-}
-
-/* Close out all files and local state before this target loses control. */
-
-static void
-sim_close (quitting)
-     int quitting;
-{
-}
-
-/* Terminate the open connection to the remote debugger.
-   Use this when you want to detach and do something else
-   with your gdb.  */
-void
-sim_detach (args,from_tty)
-     char *args;
-     int from_tty;
-{
-  pop_target();			/* calls sim_close to do the real work */
-  if (from_tty)
-   printf_filtered ("Ending remote %s debugging\n", target_shortname);
-
-}
- 
-/* Tell the remote machine to resume.  */
-
-
-/* Wait until the remote machine stops, then return,
-   storing status in STATUS just as `wait' would.  */
-
-int
-sim_wait (status)
-     WAITTYPE *status;
-{
-  WSETSTOP(*status, sim_stop_signal());  
   return 0;
 }
 
-static void
-fetch_register(regno)
-     int regno;
-{
-  if (regno  == -1) 
-    {
-      for (regno = 0; regno < NUM_REGS; regno++)
-	fetch_register(regno);
-    }
-  else 
-    {
-      char buf[MAX_REGISTER_RAW_SIZE];
+/* Start an inferior process and set inferior_pid to its pid.
+   EXEC_FILE is the file to run.
+   ALLARGS is a string containing the arguments to the program.
+   ENV is the environment vector to pass.  Errors reported with error().
+   On VxWorks and various standalone systems, we ignore exec_file.  */
+/* This is called not only when we first attach, but also when the
+   user types "run" after having attached.  */
 
-      sim_fetch_register(regno, buf);
-      supply_register(regno, buf);
-    }
+static void
+gdbsim_create_inferior (exec_file, args, env)
+     char *exec_file;
+     char *args;
+     char **env;
+{
+  int len,entry_pt;
+  char *arg_buf,**argv;
+
+  if (! program_loaded)
+    error ("No program loaded.");
+
+  if (sr_get_debug ())
+    printf_filtered ("gdbsim_create_inferior: exec_file \"%s\", args \"%s\"\n",
+      exec_file, args);
+
+  if (exec_file == 0 || exec_bfd == 0)
+   error ("No exec file specified.");
+
+  entry_pt = (int) bfd_get_start_address (exec_bfd);
+
+  gdbsim_kill (NULL, NULL);	 
+  remove_breakpoints ();
+  init_wait_for_inferior ();
+
+  len = 5 + strlen (exec_file) + 1 + strlen (args) + 1 + /*slop*/ 10;
+  arg_buf = (char *) alloca (len);
+  arg_buf[0] = '\0';
+  strcat (arg_buf, exec_file);
+  strcat (arg_buf, " ");
+  strcat (arg_buf, args);
+  argv = buildargv (arg_buf);
+  make_cleanup (freeargv, (char *) argv);
+  /* FIXME: remote-sim.h says targets that don't support this return
+     non-zero.  Perhaps distinguish between "not supported" and other errors?
+     Or maybe that can be the only error.  */
+  if (sim_set_args (argv, env) != 0)
+    return;
+
+  inferior_pid = 42;
+  insert_breakpoints ();	/* Needed to get correct instruction in cache */
+  proceed (entry_pt, -1, 0);
 }
 
+/* The open routine takes the rest of the parameters from the command,
+   and (if successful) pushes a new target onto the stack.
+   Targets should supply this routine, if only to provide an error message.  */
+/* Called when selecting the simulator. EG: (gdb) target sim name.  */
 
-int
-sim_xfer_inferior_memory(memaddr, myaddr, len, write, target)
+static void
+gdbsim_open (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  if (sr_get_debug ())
+    printf_filtered ("gdbsim_open: args \"%s\"\n", args);
+
+  if (sim_open (args) != 0)
+    {
+      /* FIXME: This is totally bogus.  sim_open should have a way to
+	 tell us what the error was, so we can tell the user.  */
+      error ("Unable to initialize simulator (insufficient memory?).");
+      return;
+    }
+
+  push_target (&gdbsim_ops);
+  target_fetch_registers (-1);
+
+  printf_filtered ("Connected to the simulator.\n");
+}
+
+/* Does whatever cleanup is required for a target that we are no longer
+   going to be calling.  Argument says whether we are quitting gdb and
+   should not get hung in case of errors, or whether we want a clean
+   termination even if it takes a while.  This routine is automatically
+   always called just before a routine is popped off the target stack.
+   Closing file descriptors and freeing memory are typical things it should
+   do.  */
+/* Close out all files and local state before this target loses control. */
+
+static void
+gdbsim_close (quitting)
+     int quitting;
+{
+  if (sr_get_debug ())
+    printf_filtered ("gdbsim_close: quitting %d\n", quitting);
+
+  program_loaded = 0;
+
+  /* FIXME: Need to call sim_close() to close all files and
+     delete all mappings. */
+}
+
+/* Takes a program previously attached to and detaches it.
+   The program may resume execution (some targets do, some don't) and will
+   no longer stop on signals, etc.  We better not have left any breakpoints
+   in the program or it'll die when it hits one.  ARGS is arguments
+   typed by the user (e.g. a signal to send the process).  FROM_TTY
+   says whether to be verbose or not.  */
+/* Terminate the open connection to the remote debugger.
+   Use this when you want to detach and do something else with your gdb.  */
+
+static void
+gdbsim_detach (args,from_tty)
+     char *args;
+     int from_tty;
+{
+  if (sr_get_debug ())
+    printf_filtered ("gdbsim_detach: args \"%s\"\n", args);
+
+  pop_target ();		/* calls gdbsim_close to do the real work */
+  if (from_tty)
+    printf_filtered ("Ending simulator %s debugging\n", target_shortname);
+}
+ 
+/* Resume execution of the target process.  STEP says whether to single-step
+   or to run free; SIGGNAL is the signal value (e.g. SIGINT) to be given
+   to the target, or zero for no signal.  */
+
+static void
+gdbsim_resume (pid, step, siggnal)
+     int pid, step, siggnal;
+{
+  if (sr_get_debug ())
+    printf_filtered ("gdbsim_resume: step %d, signal %d\n", step, siggnal);
+
+  sim_resume (step, siggnal);
+}
+
+/* Wait for inferior process to do something.  Return pid of child,
+   or -1 in case of error; store status through argument pointer STATUS,
+   just as `wait' would.  */
+
+static int
+gdbsim_wait (status)
+     WAITTYPE *status;
+{
+  if (sr_get_debug ())
+    printf_filtered ("gdbsim_wait: ");
+#if 1
+  *status = sim_stop_signal ();
+#else
+  WSETSTOP (*status, sim_stop_signal ());
+#endif
+  if (sr_get_debug ())
+    printf_filtered ("status %d\n", *status);
+  return 0;
+}
+
+/* Get ready to modify the registers array.  On machines which store
+   individual registers, this doesn't need to do anything.  On machines
+   which store all the registers in one fell swoop, this makes sure
+   that registers contains all the registers from the program being
+   debugged.  */
+
+static void
+gdbsim_prepare_to_store ()
+{
+  /* Do nothing, since we can store individual regs */
+}
+
+static int
+gdbsim_xfer_inferior_memory (memaddr, myaddr, len, write, target)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
      int write;
      struct target_ops *target;			/* ignored */
 {
+  if (! program_loaded)
+    error ("No program loaded.");
+
+  if (sr_get_debug ())
+    {
+      printf_filtered ("gdbsim_xfer_inferior_memory: myaddr 0x%x, memaddr 0x%x, len %d, write %d\n",
+		       myaddr, memaddr, len, write);
+      if (sr_get_debug () && write)
+	dump_mem(myaddr, len);
+    }
+
   if (write)
-  {
-    sim_write(memaddr, myaddr, len);
-  }
+    {
+      len = sim_write (memaddr, myaddr, len);
+    }
   else 
-  {
-    sim_read(memaddr, myaddr, len);
-  } 
+    {
+      len = sim_read (memaddr, myaddr, len);
+      if (sr_get_debug () && len > 0)
+	dump_mem(myaddr, len);
+    } 
   return len;
 }
 
-
-/* This routine is run as a hook, just before the main command loop is
-   entered.  If gdb is configured for the H8, but has not had its
-   target specified yet, this will loop prompting the user to do so.
-*/
-
-void
-sim_before_main_loop ()
+static void
+gdbsim_files_info (target)
+     struct target_ops *target;
 {
-  push_target (&sim_ops);
+  char *file = "nothing";
+
+  if (exec_bfd)
+    file = bfd_get_filename (exec_bfd);
+
+  if (sr_get_debug ())
+    printf_filtered ("gdbsim_files_info: file \"%s\"\n", file);
+
+  if (exec_bfd)
+    {
+      printf_filtered ("\tAttached to %s running program %s\n",
+		       target_shortname, file);
+      sim_info ();
+    }
 }
 
+/* Clear the sims notion of what the break points are.  */
 
-static void rem_resume(pid, a , b)
-{
-  sim_resume(a,b);
+static void
+gdbsim_mourn_inferior () 
+{ 
+  if (sr_get_debug ())
+    printf_filtered ("gdbsim_mourn_inferior:\n");
+
+  remove_breakpoints ();
+  generic_mourn_inferior ();
 }
 
-void
-pstore()
-{
-}
 /* Define the target subroutine names */
 
-struct target_ops sim_ops = 
+struct target_ops gdbsim_ops = 
 {
   "sim", "simulator",
   "Use the simulator",
-  sim_open, sim_close, 
-  0, sim_detach, rem_resume, sim_wait, /* attach */
-  fetch_register, store_register,
-  pstore,
-  sim_xfer_inferior_memory, 
-  0,
-  0, 0, /* Breakpoints */
+  gdbsim_open, gdbsim_close, 
+  0, gdbsim_detach, gdbsim_resume, gdbsim_wait, /* attach */
+  gdbsim_fetch_register, gdbsim_store_register,
+  gdbsim_prepare_to_store,
+  gdbsim_xfer_inferior_memory, 
+  gdbsim_files_info,
+  0, 0,				/* Breakpoints */
   0, 0, 0, 0, 0,		/* Terminal handling */
-  pstore,
-  sim_load, 
+  gdbsim_kill,			/* kill */
+  gdbsim_load, 
   0,				/* lookup_symbol */
-  sim_create_inferior,		/* create_inferior */ 
-  pstore,			/* mourn_inferior FIXME */
+  gdbsim_create_inferior,		/* create_inferior */ 
+  gdbsim_mourn_inferior,		/* mourn_inferior */
   0,				/* can_run */
   0,				/* notice_signals */
   process_stratum, 0,		/* next */
   1, 1, 1, 1, 1,		/* all mem, mem, stack, regs, exec */
-  0,0,				/* Section pointers */
+  0, 0,				/* Section pointers */
   OPS_MAGIC,			/* Always the last thing */
 };
-
-/***********************************************************************/
 
 void
 _initialize_remote_sim ()
 {
-  add_target (&sim_ops);
+  add_target (&gdbsim_ops);
 }
-
-

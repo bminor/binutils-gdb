@@ -31,7 +31,10 @@ extern int sim_verbose;
 /* Initialize the simulator.  This function is called when the simulator
    is selected from the command line. ARGS is passed from the command line
    and can be used to select whatever run time options the simulator provides.
-   ARGS is the raw character string and must be parsed by the simulator.  */
+   ARGS is the raw character string and must be parsed by the simulator.
+
+   Returns 0 for success, non-zero for failure (FIXME: how do we say what
+   kind of failure it was?).  */
 
 int sim_open PARAMS ((char *name));
 

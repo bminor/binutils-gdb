@@ -1,3 +1,16 @@
+Fri Sep 17 10:10:05 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
+
+	* remote-sim.h: New file.
+	* remote-sim.c: Add remote debug feature.  Rename stuff to distinguish
+	interface to simulator from gdb-specific stuff.  Other changes.
+start-sanitize-v9
+	* remote-sp64sim.c: Renamed to remote-sim.c.
+	Use sr_get_debug instead of our own sim_verbose/simif_snoop.
+	Use gnutarget in call to bfd_openr.
+	Rename simif_* to gdbsim_*.
+	* config/sparc/sp64sim.mt: Change remote-sp64sim.c to remote-sim.c.
+end-sanitize-v9
+
 Fri Sep 17 04:41:17 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* findvar.c (extract_signed_integer):  Cast *p to LONGEST before doing
