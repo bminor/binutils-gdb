@@ -627,14 +627,14 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
          error.  
 
          Zero-length types can legitimately arise from declarations
-         like 'struct {}'.  GDB may also create them when it finds
-         bogus debugging information; for example, in GCC 2.95.4 and
-         binutils 2.11.93.0.2, the STABS BINCL->EXCL compression
-         process can create bad type numbers.  GDB reads these as
-         TYPE_CODE_UNDEF types, with zero length.  (That bug is
-         actually the only known way to get a zero-length value
-         allocated to a register --- which is what it takes to make it
-         here.)
+         like 'struct {}' (a GCC extension, not valid ISO C).  GDB may
+         also create them when it finds bogus debugging information;
+         for example, in GCC 2.95.4 and binutils 2.11.93.0.2, the
+         STABS BINCL->EXCL compression process can create bad type
+         numbers.  GDB reads these as TYPE_CODE_UNDEF types, with zero
+         length.  (That bug is actually the only known way to get a
+         zero-length value allocated to a register --- which is what
+         it takes to make it here.)
 
          We'll just attribute the value to the original register.  */
       VALUE_LVAL (v) = lval_register;

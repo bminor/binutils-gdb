@@ -1,3 +1,7 @@
+2004-02-19  Jim Blandy  <jimb@redhat.com>
+
+	* findvar.c (value_from_register): Doc fix.
+
 2004-02-19  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* printcmd.c (print_scalar_formatted): Do not check for sizeof
