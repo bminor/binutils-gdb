@@ -50,7 +50,9 @@ symbolic_link='ln -s'
 progname=$0
 
 # clear some things potentially inherited from environment.
+
 ansi=
+clib=
 defaulttargets=
 destdir=
 fatal=
@@ -70,6 +72,9 @@ do
 	case ${arg} in
 	-ansi | +ansi)
 		ansi=true
+		;;
+	-clib | +c*)
+		clib=clib
 		;;
 	-destdir=* | +destdir=* | +destdi=* | +destd=* | +dest=* | +des=* | +de=* | +d=*)
 		destdir=`echo ${arg} | sed 's/[+-]d[a-z]*=//'`
@@ -181,7 +186,7 @@ fi
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-configdirs="libiberty bfd binutils ld gas readline gcc gnulib"
+configdirs="libiberty bfd binutils ld gas readline gcc gnulib ${clib}"
 srctrigger=README.configure
 srcname="gnu development package"
 
@@ -597,7 +602,10 @@ exit 0
 
 #
 # $Log$
-# Revision 1.16  1991/05/27 21:04:21  rich
+# Revision 1.17  1991/06/09 20:39:58  rich
+# Added +clib option.
+#
+# Revision 1.16  1991/05/27  21:04:21  rich
 # Removed clib for now.
 #
 # Revision 1.15  1991/05/27  20:54:24  rich
