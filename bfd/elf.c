@@ -475,20 +475,15 @@ setup_group (abfd, hdr, newsect)
 		n_elt = shdr->sh_size / 4;
 		while (--n_elt != 0)
 		  if ((s = (++idx)->shdr->bfd_section) != NULL
-		      && elf_section_data (s)->next_in_group != NULL)
+		      && elf_next_in_group (s) != NULL)
 		    break;
 		if (n_elt != 0)
 		  {
-		    const char *gname;
-		    asection *next;
-
 		    /* Snarf the group name from other member, and
 		       insert current section in circular list.  */
-		    gname = elf_section_data (s)->group;
-		    elf_section_data (newsect)->group = gname;
-		    next = elf_section_data (s)->next_in_group;
-		    elf_section_data (newsect)->next_in_group = next;
-		    elf_section_data (s)->next_in_group = newsect;
+		    elf_group_name (newsect) = elf_group_name (s);
+		    elf_next_in_group (newsect) = elf_next_in_group (s);
+		    elf_next_in_group (s) = newsect;
 		  }
 		else
 		  {
@@ -511,20 +506,20 @@ setup_group (abfd, hdr, newsect)
 		      return false;
 		    iname = H_GET_32 (abfd, ename);
 		    gname = elf_string_from_elf_strtab (abfd, iname);
-		    elf_section_data (newsect)->group = gname;
+		    elf_group_name (newsect) = gname;
 
 		    /* Start a circular list with one element.  */
-		    elf_section_data (newsect)->next_in_group = newsect;
+		    elf_next_in_group (newsect) = newsect;
 		  }
 		if (shdr->bfd_section != NULL)
-		  shdr->bfd_section->lineno = (alent *) newsect;
+		  elf_next_in_group (shdr->bfd_section) = newsect;
 		i = num_group - 1;
 		break;
 	      }
 	}
     }
 
-  if (elf_section_data (newsect)->group == NULL)
+  if (elf_group_name (newsect) == NULL)
     {
       (*_bfd_error_handler) (_("%s: no group info for section %s"),
 			     bfd_archive_filename (abfd), newsect->name);
@@ -1718,9 +1713,9 @@ bfd_section_from_shdr (abfd, shindex)
 
 	  while (--n_elt != 0)
 	    if ((s = (++idx)->shdr->bfd_section) != NULL
-		&& elf_section_data (s)->next_in_group != NULL)
+		&& elf_next_in_group (s) != NULL)
 	      {
-		hdr->bfd_section->lineno = (alent *) s;
+		elf_next_in_group (hdr->bfd_section) = s;
 		break;
 	      }
 	}
@@ -2085,7 +2080,7 @@ elf_fake_sections (abfd, asect, failedptrarg)
       if ((asect->flags & SEC_STRINGS) != 0)
 	this_hdr->sh_flags |= SHF_STRINGS;
     }
-  if (elf_section_data (asect)->group != NULL)
+  if (elf_group_name (asect) != NULL)
     this_hdr->sh_flags |= SHF_GROUP;
 
   /* Check for processor-specific section types.  */
@@ -2123,10 +2118,11 @@ set_group_contents (abfd, sec, failedptrarg)
     return;
 
   /* If called from the assembler, swap_out_syms will have set up
-     udata.i;  If called for "ld -r", the symbols won't yet be mapped,
-     so emulate elf_bfd_final_link.  */
-  symindx = sec->symbol->udata.i;
-  if (symindx == 0)
+     elf_section_syms;  If called for "ld -r", the symbols won't yet
+     be mapped, so emulate elf_bfd_final_link.  */
+  if (elf_section_syms (abfd) != NULL)
+    symindx = elf_section_syms (abfd)[sec->index]->udata.i;
+  else
     symindx = elf_section_data (sec)->this_idx;
   elf_section_data (sec)->this_hdr.sh_info = symindx;
 
@@ -2145,7 +2141,7 @@ set_group_contents (abfd, sec, failedptrarg)
 
   /* Get the pointer to the first section in the group that we
      squirreled away here.  */
-  elt = (asection *) sec->lineno;
+  elt = elf_next_in_group (sec);
 
   /* First element is a flag word.  Rest of section is elf section
      indices for all the sections of the group.  Write them backwards
@@ -2155,7 +2151,7 @@ set_group_contents (abfd, sec, failedptrarg)
     {
       loc -= 4;
       H_PUT_32 (abfd, elf_section_data (elt)->this_idx, loc);
-      elt = elf_section_data (elt)->next_in_group;
+      elt = elf_next_in_group (elt);
     }
 
   /* If this is a relocatable link, then the above did nothing because
@@ -2163,16 +2159,16 @@ set_group_contents (abfd, sec, failedptrarg)
      instead.  */
   for (l = sec->link_order_head; l != NULL; l = l->next)
     if (l->type == bfd_indirect_link_order
-	&& (elt = (asection *) l->u.indirect.section->lineno) != NULL)
+	&& (elt = elf_next_in_group (l->u.indirect.section)) != NULL)
       do
 	{
 	  loc -= 4;
 	  H_PUT_32 (abfd,
 		    elf_section_data (elt->output_section)->this_idx, loc);
-	  elt = elf_section_data (elt)->next_in_group;
+	  elt = elf_next_in_group (elt);
 	  /* During a relocatable link, the lists are circular.  */
 	}
-      while (elt != (asection *) l->u.indirect.section->lineno);
+      while (elt != elf_next_in_group (l->u.indirect.section));
 
   loc -= 4;
   H_PUT_32 (abfd, 0, loc);

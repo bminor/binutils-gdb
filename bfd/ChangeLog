@@ -1,5 +1,17 @@
 2001-10-09  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf-bfd.h (struct bfd_elf_section_data): Rename "group" to
+	"group_name".
+	(elf_group_name): Define.
+	(elf_next_in_group): Define.
+	* elf.c: Make use of elf_group_name and elf_next_in_group throughout.
+	(setup_group): Don't use sec->lineno for SHT_GROUP section to store
+	first member section; Instead use elf_next_in_group.
+	(bfd_section_from_shdr): Likewise.
+	(set_group_contents): Likewise.  Use elf_section_syms, not sec->symbol.
+
+2001-10-09  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf-bfd.h (struct bfd_elf_section_data): Add "group" and
 	"next_in_group".  Fix gp and gp_size comments.
 	* elf.c (union elf_internal_group): New.
@@ -12,6 +24,7 @@
 	(set_group_contents): New function.
 	(_bfd_elf_compute_section_file_positions): Call it.
 	(assign_section_numbers): Set sh_link for SHT_GROUP.
+
 	* elflink.h (gc_mark_hook): Handle section groups.
 	* elfxx-target.h: Add SEC_GROUP to applicable_flags.
 	* section.c (SEC_GROUP): Define.

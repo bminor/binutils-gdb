@@ -816,7 +816,7 @@ struct bfd_elf_section_data
   PTR merge_info;
 
   /* Group name, if this section is part of a group.  */
-  const char *group;
+  const char *group_name;
 
   /* A linked list of sections in the group.  Circular when used by
      the linker.  */
@@ -830,6 +830,8 @@ struct bfd_elf_section_data
 };
 
 #define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)
+#define elf_group_name(sec)    (elf_section_data(sec)->group_name)
+#define elf_next_in_group(sec) (elf_section_data(sec)->next_in_group)
 
 #define get_elf_backend_data(abfd) \
   ((struct elf_backend_data *) (abfd)->xvec->backend_data)
