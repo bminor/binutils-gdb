@@ -1,3 +1,7 @@
+Mon May 10 06:01:12 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* configure.in (targets): Treat m68*-*-sysv* like m68k-*-coff.
+
 Wed May  5 14:00:49 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/tc-mips.c (macro): Correct floating point double word
