@@ -2071,6 +2071,21 @@ assemble_insn (char *mnemonic, ins *insn)
             done_flag = (post_inc_mode == IS_INSN_TYPE (LD_STOR_INS_INC));
         }
 
+      if (done_flag)
+	{
+	  for (i = 0; i < insn->nargs; i++)
+	    {
+	      if (((instruction->operands[i].op_type == us3)
+		    || (instruction->operands[i].op_type == us4)
+		    || (instruction->operands[i].op_type == us5))
+		  && (insn->arg[i].signflag == 1))
+		  {
+		    done_flag = 0;
+		    break;
+		  }
+	    }
+	}
+
       if (done_flag == 0)
         {
 	  /* Try again with next instruction.  */
@@ -2118,7 +2133,7 @@ assemble_insn (char *mnemonic, ins *insn)
 	  || IS_INSN_TYPE (COP_BRANCH_INS))
 	{
 	  /* The coprocessor id is always the first argument.  */
-	  if ((instruction->operands[0].op_type == i4)
+	  if ((instruction->operands[0].op_type == us4)
 	      && (insn->arg[0].constant == 0)
 	      && (! IS_INSN_MNEMONIC ("mtcr")
 		  && ! IS_INSN_MNEMONIC ("mfcr")))
