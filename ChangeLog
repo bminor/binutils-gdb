@@ -1,3 +1,9 @@
+start-sanitize-ide
+Mon Aug 18 19:12:51 1997  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+	* Makefile.in (all-vmake): Depends on all-tix.
+
+end-sanitize-ide
 Mon Aug 18 17:20:10 1997  Jason Molenda  (crash@godzilla.cygnus.co.jp)
 
 	* Makefile.in (all-autoconf): Depends on all-texinfo.
