@@ -1,3 +1,11 @@
+Mon Jul 20 12:47:26 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* aoutx.h (NAME(aout,find_nearest_line)): Also remember the
+	directory name at the line number.
+
+	* elf.c (_bfd_elf_find_nearest_line): Also consider symbols
+	with an unspecified type.
+
 Wed Jul 15 11:20:01 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sunos.c: Add undef of valid to avoid problem on SunOS.
