@@ -619,7 +619,7 @@ check_PMUintr:
 		      /* XScale Load Consecutive insn.  */
 		      ARMword temp = GetLS7RHS (state, instr);
 		      ARMword temp2 = BIT (23) ? LHS + temp : LHS - temp;
-		      ARMword addr = BIT (24) ? temp2 : temp;
+		      ARMword addr = BIT (24) ? temp2 : LHS;
 		      
 		      if (BIT (12))
 			ARMul_UndefInstr (state, instr);
@@ -628,14 +628,14 @@ check_PMUintr:
 			ARMul_Abort (state, ARMul_DataAbortV);
 		      else
 			{
-			  int wb = BIT (24) && BIT (21);
+			  int wb = BIT (21) || (! BIT (24));
 			  
 			  state->Reg[BITS (12, 15)] =
 			    ARMul_LoadWordN (state, addr);
 			  state->Reg[BITS (12, 15) + 1] =
 			    ARMul_LoadWordN (state, addr + 4);
 			  if (wb)
-			    LSBase = addr;
+			    LSBase = temp2;
 			}
 
 		      goto donext;
@@ -645,7 +645,7 @@ check_PMUintr:
 		      /* XScale Store Consecutive insn.  */
 		      ARMword temp = GetLS7RHS (state, instr);
 		      ARMword temp2 = BIT (23) ? LHS + temp : LHS - temp;
-		      ARMword addr = BIT (24) ? temp2 : temp;
+		      ARMword addr = BIT (24) ? temp2 : LHS;
 
 		      if (BIT (12))
 			ARMul_UndefInstr (state, instr);
@@ -659,8 +659,8 @@ check_PMUintr:
 			  ARMul_StoreWordN (state, addr + 4,
 					    state->Reg[BITS (12, 15) + 1]);
 
-			  if (BIT (21))
-			    LSBase = addr;
+			  if (BIT (21)|| ! BIT (24))
+			    LSBase = temp2;
 			}
 
 		      goto donext;

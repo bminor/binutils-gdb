@@ -1,3 +1,8 @@
+2001-05-11  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* armemu.c (ARMul_Emulate32): Fix handling of XScale LDRD and STRD
+	instructions with post indexed addressing modes.
+
 2001-05-08  Jens-Christian Lache  <lache@tu-harburg.de>
 
 	* armsupp.c (ARMul_FixCPSR): Check Mode not Bank in order to
