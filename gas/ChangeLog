@@ -1,3 +1,9 @@
+Thu Oct  1 10:33:53 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d10v.c (find_symbol_matching_register): New function.
+	(find_opcode): Cope with the case where a register name matches
+	a symbol name.
+
 Wed Sep 30 10:52:32 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (md_pcrel_from): Rename to
