@@ -848,20 +848,34 @@ adjust_z_magic (abfd, execp)
 				? adata(abfd).exec_bytes_size
 				: adata(abfd).zmagic_disk_block_size);
   if (! obj_textsec(abfd)->user_set_vma)
-    /* ?? Do we really need to check for relocs here?  */
-    obj_textsec(abfd)->vma = ((abfd->flags & HAS_RELOC)
-			      ? 0
-			      : (ztih
-				 ? (abdp->default_text_vma
-				    + adata(abfd).exec_bytes_size)
-				 : abdp->default_text_vma));
-  /* Could take strange alignment of text section into account here?  */
-  
+    {
+      /* ?? Do we really need to check for relocs here?  */
+      obj_textsec(abfd)->vma = ((abfd->flags & HAS_RELOC)
+				? 0
+				: (ztih
+				   ? (abdp->default_text_vma
+				      + adata(abfd).exec_bytes_size)
+				   : abdp->default_text_vma));
+      text_pad = 0;
+    }
+  else
+    {
+      /* The .text section is being loaded at an unusual address.  We
+         may need to pad it such that the .data section starts at a page
+         boundary.  */
+      if (ztih)
+	text_pad = ((obj_textsec (abfd)->filepos - obj_textsec (abfd)->vma)
+		    & (adata (abfd).page_size - 1));
+      else
+	text_pad = ((- obj_textsec (abfd)->vma)
+		    & (adata (abfd).page_size - 1));
+    }
+
   /* Find start of data.  */
   if (ztih)
     {
       text_end = obj_textsec (abfd)->filepos + obj_textsec (abfd)->_raw_size;
-      text_pad = BFD_ALIGN (text_end, adata (abfd).page_size) - text_end;
+      text_pad += BFD_ALIGN (text_end, adata (abfd).page_size) - text_end;
     }
   else
     {
@@ -869,7 +883,7 @@ adjust_z_magic (abfd, execp)
 	 filepos == page_size, and this case is the same as the ztih
 	 case.  */
       text_end = obj_textsec (abfd)->_raw_size;
-      text_pad = BFD_ALIGN (text_end, adata (abfd).page_size) - text_end;
+      text_pad += BFD_ALIGN (text_end, adata (abfd).page_size) - text_end;
       text_end += obj_textsec (abfd)->filepos;
     }
   obj_textsec(abfd)->_raw_size += text_pad;
@@ -3010,6 +3024,7 @@ aout_link_check_ar_symbols (abfd, info, pneeded)
 	      if (h->type == bfd_link_hash_undefined)
 		{
 		  bfd *symbfd;
+		  unsigned int power;
 
 		  symbfd = h->u.undef.abfd;
 		  if (symbfd == (bfd *) NULL)
@@ -3029,6 +3044,22 @@ aout_link_check_ar_symbols (abfd, info, pneeded)
 		     symbol.  It is already on the undefs list.  */
 		  h->type = bfd_link_hash_common;
 		  h->u.c.size = value;
+		  if (h->u.c.size != value)
+		    {
+		      /* The size did not fit in the bitfield.  */
+		      bfd_set_error (bfd_error_bad_value);
+		      return false;
+		    }
+
+		  /* FIXME: This isn't quite right.  The maximum
+		     alignment of a common symbol should be set by the
+		     architecture of the output file, not of the input
+		     file.  */
+		  power = bfd_log2 (value);
+		  if (power > bfd_get_arch_info (abfd)->section_align_power)
+		    power = bfd_get_arch_info (abfd)->section_align_power;
+		  h->u.c.alignment_power = power;
+
 		  h->u.c.section = bfd_make_section_old_way (symbfd,
 							     "COMMON");
 		}
@@ -3258,6 +3289,17 @@ aout_link_add_symbols (abfd, info)
 	     (info, abfd, name, flags, section, value, string, copy, false,
 	      (struct bfd_link_hash_entry **) sym_hash)))
 	return false;
+
+      /* Restrict the maximum alignment of a common symbol based on
+	 the architecture, since a.out has no way to represent
+	 alignment requirements of a section in a .o file.  FIXME:
+	 This isn't quite right: it should use the architecture of the
+	 output file, not the input files.  */
+      if ((*sym_hash)->root.type == bfd_link_hash_common
+	  && ((*sym_hash)->root.u.c.alignment_power >
+	      bfd_get_arch_info (abfd)->section_align_power))
+	(*sym_hash)->root.u.c.alignment_power =
+	  bfd_get_arch_info (abfd)->section_align_power;
 
       if (type == (N_INDR | N_EXT) || type == N_WARNING)
 	++sym_hash;

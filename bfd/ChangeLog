@@ -1,3 +1,9 @@
+Wed Aug 10 13:09:38 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* aoutx.h (adjust_z_magic): Make sure data section is padded to
+	page boundary when the VMA is set by the calling program.  From
+	Eric Youngdale <ericy@cais.cais.com>.
+
 Mon Aug  8 17:18:49 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	Update to ns32k support, from Ian Dall (dall@hfrd.dsto.gov.au).
