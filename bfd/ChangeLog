@@ -1,3 +1,7 @@
+Fri Aug  6 09:59:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* hpux-core.c: Cast return value from bfd_zalloc.
+
 Thu Aug  5 13:22:44 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* Makefile.in (BFD_LIBS): Always include elf.o.
