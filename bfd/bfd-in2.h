@@ -1276,9 +1276,11 @@ bfd_perform_relocation
     bfd *output_bfd,
     char **error_message));
 
-typedef enum bfd_reloc_code_real
-{
-   /* Basic absolute relocations */
+enum bfd_reloc_code_real {
+  _dummy_first_bfd_reloc_code_real,
+
+
+/* Basic absolute relocations of N bits. */
   BFD_RELOC_64,
   BFD_RELOC_32,
   BFD_RELOC_26,
@@ -1286,51 +1288,52 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_14,
   BFD_RELOC_8,
 
-   /* PC-relative relocations */
+/* PC-relative relocations.  Sometimes these are relative to the address
+of the relocation itself; sometimes they are relative to the start of
+the section containing the relocation.  It depends on the specific target.
+
+The 24-bit relocation is used in some Intel 960 configurations. */
   BFD_RELOC_64_PCREL,
   BFD_RELOC_32_PCREL,
-  BFD_RELOC_24_PCREL,     /* used by i960 */
+  BFD_RELOC_24_PCREL,
   BFD_RELOC_16_PCREL,
   BFD_RELOC_8_PCREL,
 
-   /* Linkage-table relative */
+/* Linkage-table relative. */
   BFD_RELOC_32_BASEREL,
   BFD_RELOC_16_BASEREL,
   BFD_RELOC_8_BASEREL,
 
-   /* The type of reloc used to build a contructor table - at the moment
-     probably a 32 bit wide abs address, but the cpu can choose. */
-  BFD_RELOC_CTOR,
-
-   /* 8 bits wide, but used to form an address like 0xffnn */
+/* Absolute 8-bit relocation, but used to form an address like 0xFFnn. */
   BFD_RELOC_8_FFnn,
 
-   /* 32-bit pc-relative, shifted right 2 bits (i.e., 30-bit
-     word displacement, e.g. for SPARC) */
+/* These PC-relative relocations are stored as word displacements -- i.e.,
+byte displacements shifted right two bits.  The 30-bit word displacement
+(<<32_PCREL_S2>> -- 32 bits, shifted 2) is used on the SPARC.  The signed
+16-bit displacement is used on the MIPS, and the 23-bit displacement is
+used on the Alpha. */
   BFD_RELOC_32_PCREL_S2,
-   /* signed 16-bit pc-relative, shifted right 2 bits (e.g. for MIPS) */
   BFD_RELOC_16_PCREL_S2,
-   /* this is used on the Alpha */
   BFD_RELOC_23_PCREL_S2,
 
-   /* High 22 bits of 32-bit value, placed into lower 22 bits of
-     target word; simple reloc.  */
+/* High 22 bits and low 10 bits of 32-bit value, placed into lower bits of
+the target word.  These are used on the SPARC. */
   BFD_RELOC_HI22,
-   /* Low 10 bits.  */
   BFD_RELOC_LO10,
 
-   /* For systems that allocate a Global Pointer register, these are
-     displacements off that register.  These relocation types are
-     handled specially, because the value the register will have is
-     decided relatively late.  */
+/* For systems that allocate a Global Pointer register, these are
+displacements off that register.  These relocation types are
+handled specially, because the value the register will have is
+decided relatively late. */
   BFD_RELOC_GPREL16,
   BFD_RELOC_GPREL32,
 
-   /* Reloc types used for i960/b.out.  */
+/* Reloc types used for i960/b.out. */
   BFD_RELOC_I960_CALLJ,
 
-   /* now for the sparc/elf codes */
-  BFD_RELOC_NONE,		 /* actually used */
+/* SPARC ELF relocations.  There is probably some overlap with other
+relocation types already defined. */
+  BFD_RELOC_NONE,
   BFD_RELOC_SPARC_WDISP22,
   BFD_RELOC_SPARC22,
   BFD_RELOC_SPARC13,
@@ -1346,15 +1349,14 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_SPARC_RELATIVE,
   BFD_RELOC_SPARC_UA32,
 
-   /* these are a.out specific? */
+/* I think these are specific to SPARC a.out (e.g., Sun 4). */
   BFD_RELOC_SPARC_BASE13,
   BFD_RELOC_SPARC_BASE22,
 
-   /* some relocations we're using for sparc v9
-     -- subject to change */
+/* Some relocations we're using for SPARC V9 -- subject to change. */
+#define BFD_RELOC_SPARC_64 BFD_RELOC_64
   BFD_RELOC_SPARC_10,
   BFD_RELOC_SPARC_11,
-#define  BFD_RELOC_SPARC_64 BFD_RELOC_64
   BFD_RELOC_SPARC_OLO10,
   BFD_RELOC_SPARC_HH22,
   BFD_RELOC_SPARC_HM10,
@@ -1367,76 +1369,81 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_SPARC_GLOB_JMP,
   BFD_RELOC_SPARC_LO7,
 
-   /* Alpha ECOFF relocations.  Some of these treat the symbol or "addend"
-     in some special way.  */
-   /* For GPDISP_HI16 ("gpdisp") relocations, the symbol is ignored when
-     writing; when reading, it will be the absolute section symbol.  The
-     addend is the displacement in bytes of the "lda" instruction from
-     the "ldah" instruction (which is at the address of this reloc).  */
+/* Alpha ECOFF relocations.  Some of these treat the symbol or "addend"
+in some special way.
+For GPDISP_HI16 ("gpdisp") relocations, the symbol is ignored when
+writing; when reading, it will be the absolute section symbol.  The
+addend is the displacement in bytes of the "lda" instruction from
+the "ldah" instruction (which is at the address of this reloc). */
   BFD_RELOC_ALPHA_GPDISP_HI16,
-   /* For GPDISP_LO16 ("ignore") relocations, the symbol is handled as
-     with GPDISP_HI16 relocs.  The addend is ignored when writing the
-     relocations out, and is filled in with the file's GP value on
-     reading, for convenience.  */
+
+/* For GPDISP_LO16 ("ignore") relocations, the symbol is handled as
+with GPDISP_HI16 relocs.  The addend is ignored when writing the
+relocations out, and is filled in with the file's GP value on
+reading, for convenience. */
   BFD_RELOC_ALPHA_GPDISP_LO16,
 
-   /* The Alpha LITERAL/LITUSE relocs are produced by a symbol reference;
-     the assembler turns it into a LDQ instruction to load the address of
-     the symbol, and then fills in a register in the real instruction.
+/* The Alpha LITERAL/LITUSE relocs are produced by a symbol reference;
+the assembler turns it into a LDQ instruction to load the address of
+the symbol, and then fills in a register in the real instruction.
 
-     The LITERAL reloc, at the LDQ instruction, refers to the .lita
-     section symbol.  The addend is ignored when writing, but is filled
-     in with the file's GP value on reading, for convenience, as with the
-     GPDISP_LO16 reloc.
+The LITERAL reloc, at the LDQ instruction, refers to the .lita
+section symbol.  The addend is ignored when writing, but is filled
+in with the file's GP value on reading, for convenience, as with the
+GPDISP_LO16 reloc.
 
-     The LITUSE reloc, on the instruction using the loaded address, gives
-     information to the linker that it might be able to use to optimize
-     away some literal section references.  The symbol is ignored (read
-     as the absolute section symbol), and the "addend" indicates the type
-     of instruction using the register:
-              1 - "memory" fmt insn
-              2 - byte-manipulation (byte offset reg)
-              3 - jsr (target of branch)
+The LITUSE reloc, on the instruction using the loaded address, gives
+information to the linker that it might be able to use to optimize
+away some literal section references.  The symbol is ignored (read
+as the absolute section symbol), and the "addend" indicates the type
+of instruction using the register:
+1 - "memory" fmt insn
+2 - byte-manipulation (byte offset reg)
+3 - jsr (target of branch)
 
-     The GNU linker currently doesn't do any of this optimizing.  */
+The GNU linker currently doesn't do any of this optimizing. */
   BFD_RELOC_ALPHA_LITERAL,
   BFD_RELOC_ALPHA_LITUSE,
 
-   /* The HINT relocation indicates a value that should be filled into the
-     "hint" field of a jmp/jsr/ret instruction, for possible branch-
-     prediction logic which may be provided on some processors.  */
+/* The HINT relocation indicates a value that should be filled into the
+"hint" field of a jmp/jsr/ret instruction, for possible branch-
+prediction logic which may be provided on some processors. */
   BFD_RELOC_ALPHA_HINT,
 
-   /* Bits 27..2 of the relocation address shifted right 2 bits;
-     simple reloc otherwise.  */
+/* Bits 27..2 of the relocation address shifted right 2 bits;
+simple reloc otherwise. */
   BFD_RELOC_MIPS_JMP,
 
-   /* High 16 bits of 32-bit value; simple reloc.  */
+/* High 16 bits of 32-bit value; simple reloc. */
   BFD_RELOC_HI16,
-   /* High 16 bits of 32-bit value but the low 16 bits will be sign
-     extended and added to form the final result.  If the low 16
-     bits form a negative number, we need to add one to the high value
-     to compensate for the borrow when the low bits are added.  */
+
+/* High 16 bits of 32-bit value but the low 16 bits will be sign
+extended and added to form the final result.  If the low 16
+bits form a negative number, we need to add one to the high value
+to compensate for the borrow when the low bits are added. */
   BFD_RELOC_HI16_S,
-   /* Low 16 bits.  */
+
+/* Low 16 bits. */
   BFD_RELOC_LO16,
-   /* Like BFD_RELOC_HI16_S, but PC relative.  */
+
+/* Like BFD_RELOC_HI16_S, but PC relative. */
   BFD_RELOC_PCREL_HI16_S,
-   /* Like BFD_RELOC_LO16, but PC relative.  */
+
+/* Like BFD_RELOC_LO16, but PC relative. */
   BFD_RELOC_PCREL_LO16,
 
-   /* relocation relative to the global pointer.  */
+/* Relocation relative to the global pointer. */
 #define BFD_RELOC_MIPS_GPREL BFD_RELOC_GPREL16
 
-   /* Relocation against a MIPS literal section.  */
+/* Relocation against a MIPS literal section. */
   BFD_RELOC_MIPS_LITERAL,
 
-   /* MIPS ELF relocations.  */
+/* MIPS ELF relocations. */
   BFD_RELOC_MIPS_GOT16,
   BFD_RELOC_MIPS_CALL16,
 #define BFD_RELOC_MIPS_GPREL32 BFD_RELOC_GPREL32
 
-   /* i386/elf relocations */
+/* i386/elf relocations */
   BFD_RELOC_386_GOT32,
   BFD_RELOC_386_PLT32,
   BFD_RELOC_386_COPY,
@@ -1446,7 +1453,7 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_386_GOTOFF,
   BFD_RELOC_386_GOTPC,
 
-   /* ns32k relocations */
+/* ns32k relocations */
   BFD_RELOC_NS32K_IMM_8,
   BFD_RELOC_NS32K_IMM_16,
   BFD_RELOC_NS32K_IMM_32,
@@ -1460,21 +1467,29 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_NS32K_DISP_16_PCREL,
   BFD_RELOC_NS32K_DISP_32_PCREL,
 
-   /* PowerPC/POWER (RS/6000) relocs.  */
-   /* 26 bit relative branch.  Low two bits must be zero.  High 24
-     bits installed in bits 6 through 29 of instruction.  */
+/* PowerPC/POWER (RS/6000) relocs.
+26 bit relative branch.  Low two bits must be zero.  High 24
+bits installed in bits 6 through 29 of instruction. */
   BFD_RELOC_PPC_B26,
-   /* 26 bit absolute branch, like BFD_RELOC_PPC_B26 but absolute.  */
+
+/* 26 bit absolute branch, like BFD_RELOC_PPC_B26 but absolute. */
   BFD_RELOC_PPC_BA26,
-   /* 16 bit TOC relative reference.  */
+
+/* 16 bit TOC relative reference. */
   BFD_RELOC_PPC_TOC16,
 
-   /* this must be the highest numeric value */
-  BFD_RELOC_UNUSED
- } bfd_reloc_code_real_type;
+/* The type of reloc used to build a contructor table - at the moment
+probably a 32 bit wide absolute relocation, but the target can choose.
+It generally does map to one of the other relocation types. */
+  BFD_RELOC_CTOR,
+  BFD_RELOC_UNUSED };
+typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 const struct reloc_howto_struct *
 
 bfd_reloc_type_lookup  PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
+
+const char *
+bfd_get_reloc_code_name  PARAMS ((bfd_reloc_code_real_type code));
 
 
 typedef struct symbol_cache_entry

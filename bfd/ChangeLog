@@ -1,3 +1,12 @@
+Fri Sep  2 14:10:30 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* reloc.c (enum bfd_reloc_code_real): Rewrote definition to use
+	new "chew" commands for simultaneous definition of enumerator and
+	enumerator name table.
+	(bfd_get_reloc_code_name): New function, for retrieving a symbolic
+	name associated with an enumerator.
+	* libbfd.h, bfd-in2.h: Regenerated.
+
 Tue Aug 30 21:24:54 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_write_fixups, case R_ENTRY): Handle case where no

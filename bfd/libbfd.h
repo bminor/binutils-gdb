@@ -176,6 +176,7 @@ extern boolean _bfd_nocore_core_file_matches_executable_p
 #define _bfd_noarchive_openr_next_archived_file \
   ((bfd *(*) PARAMS ((bfd *, bfd *))) bfd_nullvoidptr)
 #define _bfd_noarchive_generic_stat_arch_elt bfd_generic_stat_arch_elt
+#define _bfd_noarchive_update_armap_timestamp bfd_false
 
 /* Routines to use for BFD_JUMP_TABLE_ARCHIVE to get BSD style
    archives.  Use BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd).  */
@@ -189,6 +190,7 @@ extern boolean _bfd_nocore_core_file_matches_executable_p
   bfd_generic_openr_next_archived_file
 #define _bfd_archive_bsd_generic_stat_arch_elt \
   bfd_generic_stat_arch_elt
+extern boolean _bfd_archive_bsd_update_armap_timestamp PARAMS ((bfd *));
 
 /* Routines to use for BFD_JUMP_TABLE_ARCHIVE to get COFF style
    archives.  Use BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff).  */
@@ -202,6 +204,7 @@ extern boolean _bfd_nocore_core_file_matches_executable_p
   bfd_generic_openr_next_archived_file
 #define _bfd_archive_coff_generic_stat_arch_elt \
   bfd_generic_stat_arch_elt
+#define _bfd_archive_coff_update_armap_timestamp bfd_true
 
 /* Routines to use for BFD_JUMP_TABLE_SYMBOLS where there is no symbol
    support.  Use BFD_JUMP_TABLE_SYMBOLS (_bfd_nosymbols).  */
@@ -447,6 +450,105 @@ boolean
 bfd_constructor_entry PARAMS ((bfd *abfd, 
     asymbol **symbol_ptr_ptr,
     CONST char*type));
+
+#ifdef _BFD_MAKE_TABLE_bfd_reloc_code_real
+
+static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
+
+  "BFD_RELOC_64",
+  "BFD_RELOC_32",
+  "BFD_RELOC_26",
+  "BFD_RELOC_16",
+  "BFD_RELOC_14",
+  "BFD_RELOC_8",
+  "BFD_RELOC_64_PCREL",
+  "BFD_RELOC_32_PCREL",
+  "BFD_RELOC_24_PCREL",
+  "BFD_RELOC_16_PCREL",
+  "BFD_RELOC_8_PCREL",
+  "BFD_RELOC_32_BASEREL",
+  "BFD_RELOC_16_BASEREL",
+  "BFD_RELOC_8_BASEREL",
+  "BFD_RELOC_8_FFnn",
+  "BFD_RELOC_32_PCREL_S2",
+  "BFD_RELOC_16_PCREL_S2",
+  "BFD_RELOC_23_PCREL_S2",
+  "BFD_RELOC_HI22",
+  "BFD_RELOC_LO10",
+  "BFD_RELOC_GPREL16",
+  "BFD_RELOC_GPREL32",
+  "BFD_RELOC_I960_CALLJ",
+  "BFD_RELOC_NONE",
+  "BFD_RELOC_SPARC_WDISP22",
+  "BFD_RELOC_SPARC22",
+  "BFD_RELOC_SPARC13",
+  "BFD_RELOC_SPARC_GOT10",
+  "BFD_RELOC_SPARC_GOT13",
+  "BFD_RELOC_SPARC_GOT22",
+  "BFD_RELOC_SPARC_PC10",
+  "BFD_RELOC_SPARC_PC22",
+  "BFD_RELOC_SPARC_WPLT30",
+  "BFD_RELOC_SPARC_COPY",
+  "BFD_RELOC_SPARC_GLOB_DAT",
+  "BFD_RELOC_SPARC_JMP_SLOT",
+  "BFD_RELOC_SPARC_RELATIVE",
+  "BFD_RELOC_SPARC_UA32",
+  "BFD_RELOC_SPARC_BASE13",
+  "BFD_RELOC_SPARC_BASE22",
+  "BFD_RELOC_SPARC_10",
+  "BFD_RELOC_SPARC_11",
+  "BFD_RELOC_SPARC_OLO10",
+  "BFD_RELOC_SPARC_HH22",
+  "BFD_RELOC_SPARC_HM10",
+  "BFD_RELOC_SPARC_LM22",
+  "BFD_RELOC_SPARC_PC_HH22",
+  "BFD_RELOC_SPARC_PC_HM10",
+  "BFD_RELOC_SPARC_PC_LM22",
+  "BFD_RELOC_SPARC_WDISP16",
+  "BFD_RELOC_SPARC_WDISP19",
+  "BFD_RELOC_SPARC_GLOB_JMP",
+  "BFD_RELOC_SPARC_LO7",
+  "BFD_RELOC_ALPHA_GPDISP_HI16",
+  "BFD_RELOC_ALPHA_GPDISP_LO16",
+  "BFD_RELOC_ALPHA_LITERAL",
+  "BFD_RELOC_ALPHA_LITUSE",
+  "BFD_RELOC_ALPHA_HINT",
+  "BFD_RELOC_MIPS_JMP",
+  "BFD_RELOC_HI16",
+  "BFD_RELOC_HI16_S",
+  "BFD_RELOC_LO16",
+  "BFD_RELOC_PCREL_HI16_S",
+  "BFD_RELOC_PCREL_LO16",
+  "BFD_RELOC_MIPS_LITERAL",
+  "BFD_RELOC_MIPS_GOT16",
+  "BFD_RELOC_MIPS_CALL16",
+  "BFD_RELOC_386_GOT32",
+  "BFD_RELOC_386_PLT32",
+  "BFD_RELOC_386_COPY",
+  "BFD_RELOC_386_GLOB_DAT",
+  "BFD_RELOC_386_JUMP_SLOT",
+  "BFD_RELOC_386_RELATIVE",
+  "BFD_RELOC_386_GOTOFF",
+  "BFD_RELOC_386_GOTPC",
+  "BFD_RELOC_NS32K_IMM_8",
+  "BFD_RELOC_NS32K_IMM_16",
+  "BFD_RELOC_NS32K_IMM_32",
+  "BFD_RELOC_NS32K_IMM_8_PCREL",
+  "BFD_RELOC_NS32K_IMM_16_PCREL",
+  "BFD_RELOC_NS32K_IMM_32_PCREL",
+  "BFD_RELOC_NS32K_DISP_8",
+  "BFD_RELOC_NS32K_DISP_16",
+  "BFD_RELOC_NS32K_DISP_32",
+  "BFD_RELOC_NS32K_DISP_8_PCREL",
+  "BFD_RELOC_NS32K_DISP_16_PCREL",
+  "BFD_RELOC_NS32K_DISP_32_PCREL",
+  "BFD_RELOC_PPC_B26",
+  "BFD_RELOC_PPC_BA26",
+  "BFD_RELOC_PPC_TOC16",
+  "BFD_RELOC_CTOR",
+ "@@overflow: BFD_RELOC_UNUSED@@",
+};
+#endif
 
 const struct reloc_howto_struct *
 bfd_default_reloc_type_lookup
