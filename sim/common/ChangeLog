@@ -1,3 +1,8 @@
+Fri Jan 31 07:16:49 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* aclocal.m4 (SIM_AC_COMMON): Move COMMON_MAKEFILE_FRAG from here.
+	(SIM_AC_OUTPUT): To here.
+
 Fri Jan 24 10:37:17 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* aclocal.m4 (COMMON_MAKEFILE_FRAG):  Quote a couple of $'s in

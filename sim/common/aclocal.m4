@@ -1,8 +1,20 @@
 # This file contains common code used by all simulators.
-# SIM_AC_COMMON invokes AC macros used by all simulators and by the
-# common directory.
-# SIM_AC_OUTPUT is a cover function to AC_OUTPUT to use generate the
-# Makefile in a target specific directory.
+#
+# SIM_AC_COMMON invokes AC macros used by all simulators and by the common
+# directory.  It is intended to be invoked before any target specific stuff.
+# SIM_AC_OUTPUT is a cover function to AC_OUTPUT to generate the Makefile.
+# It is intended to be invoked last.
+#
+# The simulator's configure.in should look like:
+#
+# dnl Process this file with `autoconf -l ../common' to produce a configure script.
+# AC_PREREQ(2.5)dnl
+# AC_INIT(Makefile.in)
+# SIM_AC_COMMON
+#
+# ... target specific stuff ...
+#
+# SIM_AC_OUTPUT
 
 AC_DEFUN(SIM_AC_COMMON,
 [
@@ -115,7 +127,19 @@ case "${target}" in
 	;;
 esac
 
-dnl Stuff that gets inserted into the Makefile
+]) dnl End of SIM_AC_COMMON
+
+dnl Generate the Makefile in a target specific directory.
+dnl Substitutions aren't performed on the file in AC_SUBST_FILE,
+dnl so this is a cover macro to tuck the details away of how we cope.
+dnl It also inserts default definitions of the SIM_FOO variables.
+
+AC_DEFUN(SIM_AC_OUTPUT,
+[
+
+dnl Stuff that gets inserted into the Makefile.
+dnl This is done now and not in SIM_AC_COMMON to catch updated values for
+dnl LIBS, etc. that may get changed by target specific checks.
 
 COMMON_MAKEFILE_FRAG=makefile-temp-$$
 cat > $COMMON_MAKEFILE_FRAG <<EOF
@@ -288,15 +312,6 @@ dnl end of COMMON_MAKEFILE_FRAG
 
 AC_SUBST_FILE(COMMON_MAKEFILE_FRAG)
 
-]) dnl End of SIM_AC_COMMON
-
-dnl Generate the Makefile in a target specific directory.
-dnl Substitutions aren't performed on the file in AC_SUBST_FILE,
-dnl so this is a cover macro to tuck the details away of how we cope.
-dnl It also inserts default definitions of the SIM_FOO variables.
-
-AC_DEFUN(SIM_AC_OUTPUT,
-[
 AC_LINK_FILES($sim_link_files, $sim_link_links)
  AC_OUTPUT(Makefile,[
  case "x$CONFIG_HEADERS" in xconfig.h:config.in) echo > stamp-h ;; esac
