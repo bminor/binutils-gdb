@@ -1,3 +1,7 @@
+Fri Dec  1 07:23:57 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* rs6000-tdep.c (push_arguments): Fix typo.
+
 Thu Nov 30 23:54:17 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* language.c (lang_bool_type), language.h:  New function.

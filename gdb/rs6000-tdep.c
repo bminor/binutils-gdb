@@ -716,7 +716,7 @@ push_arguments (nargs, args, sp, struct_return, struct_addr)
   for (argno=0, argbytes=0; argno < nargs && ii<8; ++ii) {
 
     arg = args[argno];
-    type = check_typedef (VALUE_TYPE (arg);
+    type = check_typedef (VALUE_TYPE (arg));
     len = TYPE_LENGTH (type);
 
     if (TYPE_CODE (type) == TYPE_CODE_FLT) {
