@@ -105,7 +105,7 @@ case ${target} in
     obj_format=aout 
     emulation=i386bsd	
     ;;
-  i[34]86-*-coff)
+  i[34]86-*-coff | i[34]86-*-sysv* | i[34]86-*-sco*)
     obj_format=coffbfd
     need_bfd="./../bfd/libbfd.a"
     gas_target=i386coff
