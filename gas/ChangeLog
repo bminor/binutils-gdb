@@ -1,3 +1,8 @@
+Thu Apr 27 20:07:33 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (RUNTEST): Use one in srcdir if present.
+	(RUNTESTFLAGS): Define.
+
 Wed Apr 26 15:54:10 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	Support for more portable alignment handling in assembly code,
