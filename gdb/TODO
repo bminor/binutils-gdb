@@ -152,7 +152,7 @@ patch has been submitted.
 
 The following code cleanups will hopefully be applied to GDB 5.1.
 
--- 2001-03-14
+-- 2001-03-22
 
 Resolve the build status of all broken targets as identified by the
 MAINTAINERS file.
@@ -161,6 +161,8 @@ MAINTAINERS file.
 	o	arm-* vs IRIX (see below)
 
 	o	delete m88k?
+
+	o	delete mpw?
 
 -- 2001-03-15
 
@@ -188,9 +190,14 @@ Steps:
 		        tic80-*
 			m68*-isi-*
 			m68*-sony-*
+			m68*-rom68k-*
+			m68*-*bug-*
+			m68*-monitor-*
+			m68*-est-*
 			a29k-ultra3
 			powerpcle-*-solaris*
 			powerpcle-*-cygwin*
+			powerpc-*-netware*
 		        w65-*-*
 			i[3456]86-*-sunos*
 

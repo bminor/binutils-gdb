@@ -1,5 +1,9 @@
 2001-03-22  Andrew Cagney  <ac131313@redhat.com>
 
+	* TODO (GDB 5.1 - Cleanups): Add more targets to obsolete.
+
+2001-03-22  Andrew Cagney  <ac131313@redhat.com>
+
 	* Makefile.in (NTSSTART): Delete.
 	(NTSOBS): Delete.
 	(kdb): Delete target.
