@@ -54,6 +54,7 @@
 + ENERGIZE_LIBS = ${ENERGIZE_LIB} -L/usr/lib -lm -lnet -lresolv -lform \
 + 	-lsocket -lc /usr/ucblib/libucb.a -lnsl
 ===================================================================
+diff -c -r2.70 .Sanitize
 *** 2.70	1992/09/03 16:25:59
 --- .Sanitize	1992/09/15 05:19:46
 ***************
@@ -370,8 +371,8 @@
   srctrigger=main.c
   target_dependent=true
 ===================================================================
-*** 1.46	1992/09/15 06:26:58
---- defs.h	1992/09/15 06:29:55
+*** 1.48	1992/09/15 08:55:59
+--- defs.h	1992/09/15 08:54:35
 ***************
 *** 811,814 ****
 --- 811,816 ----
@@ -718,6 +719,90 @@
     return (objfile);
   }
   
+===================================================================
+*** 1.60	1992/09/15 06:26:56
+--- utils.c	1992/09/15 08:57:41
+***************
+*** 700,720 ****
+        fflush (stdout);
+        va_start (args);
+        ctlstr = va_arg (args, char *);
+        vfprintf_filtered (stdout, ctlstr, args);
+-       va_end (args);
+        printf_filtered ("(y or n) ");
+!       fflush (stdout);
+!       answer = fgetc (stdin);
+!       clearerr (stdin);		/* in case of C-d */
+!       if (answer == EOF)	/* C-d */
+!         return 1;
+!       if (answer != '\n')	/* Eat rest of input line, to EOF or newline */
+! 	do 
+! 	  {
+! 	    ans2 = fgetc (stdin);
+! 	    clearerr (stdin);
+! 	  }
+!         while (ans2 != EOF && ans2 != '\n');
+        if (answer >= 'a')
+  	answer -= 040;
+        if (answer == 'Y')
+--- 700,731 ----
+        fflush (stdout);
+        va_start (args);
+        ctlstr = va_arg (args, char *);
++       energize_query (ctlstr, args);
+        vfprintf_filtered (stdout, ctlstr, args);
+        printf_filtered ("(y or n) ");
+!       if (energize)
+! 	{
+! 	  char *buf;
+! 
+! 	  buf = energize_command_line_input(0, 0);
+! 	  answer = buf ? *buf : 'Y';
+! 	  energize_acknowledge_query(buf);
+! 	}
+!       else
+! 	{
+! 	  fflush (stdout);
+! 	  answer = fgetc (stdin);
+! 	  clearerr (stdin);		/* in case of C-d */
+! 	  if (answer == EOF)	/* C-d */
+! 	    return 1;
+! 	  if (answer != '\n')	/* Eat rest of input line, to EOF or newline */
+! 	    do 
+! 	      {
+! 		ans2 = fgetc (stdin);
+! 		clearerr (stdin);
+! 	      }
+! 	  while (ans2 != EOF && ans2 != '\n');
+! 	}
+        if (answer >= 'a')
+  	answer -= 040;
+        if (answer == 'Y')
+***************
+*** 722,727 ****
+--- 733,739 ----
+        if (answer == 'N')
+  	return 0;
+        printf_filtered ("Please answer y or n.\n");
++       va_end (args);
+      }
+  }
+  
+***************
+*** 988,993 ****
+--- 1000,1011 ----
+    if (linebuffer == 0)
+      return;
+    
++   if (energize)
++     {
++       energize_fputs(linebuffer);
++       return;
++     }
++ 
+    /* Don't do any filtering if it is disabled.  */
+    if (stream != stdout
+     || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX))
 ===================================================================
 *** 1.54	1992/09/15 06:27:03
 --- valprint.c	1992/09/15 06:30:13
