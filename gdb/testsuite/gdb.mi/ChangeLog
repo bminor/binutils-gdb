@@ -1,34 +1,3 @@
-2003-02-03  Andrew Cagney  <ac131313@redhat.com>
-
-	* mi-cli.exp: Remove patterns checking for events.  Better handle
-	continuations.
-
-2002-08-21  Keith Seitz  <keiths@redhat.com>
-
-	* mi-cli.exp: Use "target_changed" instead of "register-update".
-
-2002-07-25  Keith Seitz  <keiths@redhat.com>
-
-	* mi-cli.exp: Fix typo in result for "-interpreter-exec console list"
-	test.
-	Don't break at main: use mi_run_to_main instead.
-	Add tests to break in callee4 and navigate the stack.
-	Add test to set a register and test for update event.
-
-2002-07-22  Keith Seitz  <keiths@redhat.com>
-
-	* mi-cli.exp: Use mi_run_to_main to get to main. Don't use "run".
-	Refine result string for "-interpreter-exec console bougs" test.
-	
-2002-06-25  Keith Seitz  <keiths@redhat.com>
-
-	* mi-cli.exp: Add tests to check if list_command in the console
-	is synchronized with MI's state.
-
-2002-06-24  Keith Seitz  <keiths@redhat.com>
-
-	* mi-cli.exp: New file.
-
 2002-12-13  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* mi-basics.exp: Change tests for -environment-directory.  Also add
