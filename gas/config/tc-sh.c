@@ -1,5 +1,5 @@
 /* tc-sh.c -- Assemble code for the Hitachi Super-H
-   Copyright (C) 1993, 94, 95, 96, 1997, 1998 Free Software Foundation.
+   Copyright (C) 1993, 94, 95, 96, 97, 1998 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -97,9 +97,11 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #define ENCODE_RELAX(what,length) (((what) << 4) + (length))
 #define GET_WHAT(x) ((x>>4))
 
-/* These are the two types of relaxable instrction */
+/* These are the three types of relaxable instrction */
 #define COND_JUMP 1
-#define UNCOND_JUMP  2
+#define COND_JUMP_DELAY 2
+#define UNCOND_JUMP  3
+#define END 4
 
 #define UNDEF_DISP 0
 #define COND8  1
@@ -108,7 +110,6 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #define UNCOND12 1
 #define UNCOND32 2
 #define UNDEF_WORD_DISP 4
-#define END 5
 
 #define UNCOND12 1
 #define UNCOND32 2
@@ -124,6 +125,8 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #define COND12_F 4100
 #define COND12_M -4090
 #define COND12_LENGTH 6
+
+#define COND12_DELAY_LENGTH 4
 
 /* ??? The minimum and maximum values are wrong, but this does not matter
    since this relocation type is not supported yet.  */
@@ -151,6 +154,16 @@ const relax_typeS md_relax_table[C (END, 0)] = {
   /* C (COND_JUMP, COND12) */
   { COND12_F, COND12_M, COND12_LENGTH, C (COND_JUMP, COND32), },
   /* C (COND_JUMP, COND32) */
+  { COND32_F, COND32_M, COND32_LENGTH, 0, },
+  { 0 }, { 0 }, { 0 }, { 0 },
+  { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 },
+
+  { 0 },
+  /* C (COND_JUMP_DELAY, COND8) */
+  { COND8_F, COND8_M, COND8_LENGTH, C (COND_JUMP_DELAY, COND12) },
+  /* C (COND_JUMP_DELAY, COND12) */
+  { COND12_F, COND12_M, COND12_DELAY_LENGTH, C (COND_JUMP_DELAY, COND32), },
+  /* C (COND_JUMP_DELAY, COND32) */
   { COND32_F, COND32_M, COND32_LENGTH, 0, },
   { 0 }, { 0 }, { 0 }, { 0 },
   { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 }, { 0 },
@@ -227,7 +240,7 @@ parse_reg (src, mode, reg)
   if (src[0] == 'r')
     {
       if (src[1] >= '0' && src[1] <= '7' && strncmp(&src[2], "_bank", 5) == 0
-	  && ! isalnum (src[7]))
+	  && ! isalnum ((unsigned char) src[7]))
 	{
 	  *mode = A_REG_B;
 	  *reg  = (src[1] - '0');
@@ -239,14 +252,16 @@ parse_reg (src, mode, reg)
     {
       if (src[1] == '1')
 	{
-	  if (src[2] >= '0' && src[2] <= '5' && ! isalnum (src[3]))
+	  if (src[2] >= '0' && src[2] <= '5'
+	      && ! isalnum ((unsigned char) src[3]))
 	    {
 	      *mode = A_REG_N;
 	      *reg = 10 + src[2] - '0';
 	      return 3;
 	    }
 	}
-      if (src[1] >= '0' && src[1] <= '9' && ! isalnum (src[2]))
+      if (src[1] >= '0' && src[1] <= '9'
+	  && ! isalnum ((unsigned char) src[2]))
 	{
 	  *mode = A_REG_N;
 	  *reg = (src[1] - '0');
@@ -254,65 +269,73 @@ parse_reg (src, mode, reg)
 	}
     }
 
-  if (src[0] == 's' && src[1] == 's' && src[2] == 'r' && ! isalnum (src[3]))
+  if (src[0] == 's'
+      && src[1] == 's'
+      && src[2] == 'r' && ! isalnum ((unsigned char) src[3]))
     {
       *mode = A_SSR;
       return 3;
     }
 
-  if (src[0] == 's' && src[1] == 'p' && src[2] == 'c' && ! isalnum (src[3]))
+  if (src[0] == 's' && src[1] == 'p' && src[2] == 'c'
+      && ! isalnum ((unsigned char) src[3]))
     {
       *mode = A_SPC;
       return 3;
     }
 
-  if (src[0] == 's' && src[1] == 'g' && src[2] == 'r' && ! isalnum (src[3]))
+  if (src[0] == 's' && src[1] == 'g' && src[2] == 'r'
+      && ! isalnum ((unsigned char) src[3]))
     {
       *mode = A_SGR;
       return 3;
     }
 
-  if (src[0] == 'd' && src[1] == 'b' && src[2] == 'r' && ! isalnum (src[3]))
+  if (src[0] == 'd' && src[1] == 'b' && src[2] == 'r'
+      && ! isalnum ((unsigned char) src[3]))
     {
       *mode = A_DBR;
       return 3;
     }
 
-  if (src[0] == 's' && src[1] == 'r' && ! isalnum (src[2]))
+  if (src[0] == 's' && src[1] == 'r' && ! isalnum ((unsigned char) src[2]))
     {
       *mode = A_SR;
       return 2;
     }
 
-  if (src[0] == 's' && src[1] == 'p' && ! isalnum (src[2]))
+  if (src[0] == 's' && src[1] == 'p' && ! isalnum ((unsigned char) src[2]))
     {
       *mode = A_REG_N;
       *reg = 15;
       return 2;
     }
 
-  if (src[0] == 'p' && src[1] == 'r' && ! isalnum (src[2]))
+  if (src[0] == 'p' && src[1] == 'r' && ! isalnum ((unsigned char) src[2]))
     {
       *mode = A_PR;
       return 2;
     }
-  if (src[0] == 'p' && src[1] == 'c' && ! isalnum (src[2]))
+  if (src[0] == 'p' && src[1] == 'c' && ! isalnum ((unsigned char) src[2]))
     {
       *mode = A_DISP_PC;
       return 2;
     }
-  if (src[0] == 'g' && src[1] == 'b' && src[2] == 'r' && ! isalnum (src[3]))
+  if (src[0] == 'g' && src[1] == 'b' && src[2] == 'r'
+      && ! isalnum ((unsigned char) src[3]))
     {
       *mode = A_GBR;
       return 3;
     }
-  if (src[0] == 'v' && src[1] == 'b' && src[2] == 'r' && ! isalnum (src[3]))
+  if (src[0] == 'v' && src[1] == 'b' && src[2] == 'r'
+      && ! isalnum ((unsigned char) src[3]))
     {
       *mode = A_VBR;
       return 3;
     }
 
-  if (src[0] == 'm' && src[1] == 'a' && src[2] == 'c' && ! isalnum (src[4]))
+  if (src[0] == 'm' && src[1] == 'a' && src[2] == 'c'
+      && ! isalnum ((unsigned char) src[4]))
     {
       if (src[3] == 'l')
 	{
@@ -329,14 +352,16 @@ parse_reg (src, mode, reg)
     {
       if (src[2] == '1')
 	{
-	  if (src[3] >= '0' && src[3] <= '5' && ! isalnum (src[4]))
+	  if (src[3] >= '0' && src[3] <= '5'
+	      && ! isalnum ((unsigned char) src[4]))
 	    {
 	      *mode = F_REG_N;
 	      *reg = 10 + src[3] - '0';
 	      return 4;
 	    }
 	}
-      if (src[2] >= '0' && src[2] <= '9' && ! isalnum (src[3]))
+      if (src[2] >= '0' && src[2] <= '9'
+	  && ! isalnum ((unsigned char) src[3]))
 	{
 	  *mode = F_REG_N;
 	  *reg = (src[2] - '0');
@@ -348,7 +373,7 @@ parse_reg (src, mode, reg)
       if (src[2] == '1')
 	{
 	  if (src[3] >= '0' && src[3] <= '4' && ! ((src[3] - '0') & 1)
-	      && ! isalnum (src[4]))
+	      && ! isalnum ((unsigned char) src[4]))
 	    {
 	      *mode = D_REG_N;
 	      *reg = 10 + src[3] - '0';
@@ -356,7 +381,7 @@ parse_reg (src, mode, reg)
 	    }
 	}
       if (src[2] >= '0' && src[2] <= '8' && ! ((src[2] - '0') & 1)
-	  && ! isalnum (src[3]))
+	  && ! isalnum ((unsigned char) src[3]))
 	{
 	  *mode = D_REG_N;
 	  *reg = (src[2] - '0');
@@ -368,7 +393,7 @@ parse_reg (src, mode, reg)
       if (src[2] == '1')
 	{
 	  if (src[3] >= '0' && src[3] <= '4' && ! ((src[3] - '0') & 1)
-	      && ! isalnum (src[4]))
+	      && ! isalnum ((unsigned char) src[4]))
 	    {
 	      *mode = X_REG_N;
 	      *reg = 11 + src[3] - '0';
@@ -376,7 +401,7 @@ parse_reg (src, mode, reg)
 	    }
 	}
       if (src[2] >= '0' && src[2] <= '8' && ! ((src[2] - '0') & 1)
-	  && ! isalnum (src[3]))
+	  && ! isalnum ((unsigned char) src[3]))
 	{
 	  *mode = X_REG_N;
 	  *reg = (src[2] - '0') + 1;
@@ -385,13 +410,14 @@ parse_reg (src, mode, reg)
     }
   if (src[0] == 'f' && src[1] == 'v')
     {
-      if (src[2] == '1'&& src[3] == '2' && ! isalnum (src[4]))
+      if (src[2] == '1'&& src[3] == '2' && ! isalnum ((unsigned char) src[4]))
 	{
 	  *mode = V_REG_N;
 	  *reg = 12;
 	  return 4;
 	}
-      if ((src[2] == '0' || src[2] == '4' || src[2] == '8') && ! isalnum (src[3]))
+      if ((src[2] == '0' || src[2] == '4' || src[2] == '8')
+	  && ! isalnum ((unsigned char) src[3]))
 	{
 	  *mode = V_REG_N;
 	  *reg = (src[2] - '0');
@@ -399,21 +425,21 @@ parse_reg (src, mode, reg)
 	}
     }
   if (src[0] == 'f' && src[1] == 'p' && src[2] == 'u' && src[3] == 'l'
-      && ! isalnum (src[4]))
+      && ! isalnum ((unsigned char) src[4]))
     {
       *mode = FPUL_N;
       return 4;
     }
 
   if (src[0] == 'f' && src[1] == 'p' && src[2] == 's' && src[3] == 'c'
-      && src[4] == 'r' && ! isalnum (src[5]))
+      && src[4] == 'r' && ! isalnum ((unsigned char) src[5]))
     {
       *mode = FPSCR_N;
       return 5;
     }
 
   if (src[0] == 'x' && src[1] == 'm' && src[2] == 't' && src[3] == 'r'
-      && src[4] == 'x' && ! isalnum (src[5]))
+      && src[4] == 'x' && ! isalnum ((unsigned char) src[5]))
     {
       *mode = XMTRX_M4;
       return 5;
@@ -865,10 +891,11 @@ build_relax (opcode)
 
   if (opcode->arg[0] == A_BDISP8)
     {
+      int what = (opcode->nibbles[1] & 4) ? COND_JUMP_DELAY : COND_JUMP;
       p = frag_var (rs_machine_dependent,
-		    md_relax_table[C (COND_JUMP, COND32)].rlx_length,
-		    md_relax_table[C (COND_JUMP, COND8)].rlx_length,
-		    C (COND_JUMP, 0),
+		    md_relax_table[C (what, COND32)].rlx_length,
+		    md_relax_table[C (what, COND8)].rlx_length,
+		    C (what, 0),
 		    immediate.X_add_symbol,
 		    immediate.X_add_number,
 		    0);
@@ -1259,34 +1286,11 @@ SH options:\n\
 -small			align sections to 4 byte boundaries, not 16\n"));
 }
 
-int md_short_jump_size;
-
 void
 tc_Nout_fix_to_chars ()
 {
   printf (_("call to tc_Nout_fix_to_chars \n"));
   abort ();
-}
-
-void
-md_create_short_jump (ptr, from_Nddr, to_Nddr, frag, to_symbol)
-     char *ptr;
-     addressT from_Nddr;
-     addressT to_Nddr;
-     fragS *frag;
-     symbolS *to_symbol;
-{
-  as_fatal (_("failed sanity check."));
-}
-
-void
-md_create_long_jump (ptr, from_Nddr, to_Nddr, frag, to_symbol)
-     char *ptr;
-     addressT from_Nddr, to_Nddr;
-     fragS *frag;
-     symbolS *to_symbol;
-{
-  as_fatal (_("failed sanity check."));
 }
 
 /* This struct is used to pass arguments to sh_count_relocs through
@@ -1490,6 +1494,7 @@ md_convert_frag (headers, seg, fragP)
   switch (fragP->fr_subtype)
     {
     case C (COND_JUMP, COND8):
+    case C (COND_JUMP_DELAY, COND8):
       subseg_change (seg, 0);
       fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset,
 	       1, BFD_RELOC_SH_PCDISP8BY2);
@@ -1510,7 +1515,7 @@ md_convert_frag (headers, seg, fragP)
       if (fragP->fr_symbol == NULL)
 	as_bad (_("at 0x%lx, displacement overflows 12-bit field"),
 		(unsigned long) fragP->fr_address);
-      else if (S_IS_DEFINED (fragP->fr_address))
+      else if (S_IS_DEFINED (fragP->fr_symbol))
 	as_bad (_("at 0x%lx, displacement to defined symbol %s overflows 12-bit field"),
 		(unsigned long) fragP->fr_address,		
 		S_GET_NAME (fragP->fr_symbol));
@@ -1562,17 +1567,25 @@ md_convert_frag (headers, seg, fragP)
       break;
 
     case C (COND_JUMP, COND12):
+    case C (COND_JUMP_DELAY, COND12):
       /* A bcond won't fit, so turn it into a b!cond; bra disp; nop */
       {
 	unsigned char *buffer =
 	  (unsigned char *) (fragP->fr_fix + fragP->fr_literal);
 	int highbyte = target_big_endian ? 0 : 1;
 	int lowbyte = target_big_endian ? 1 : 0;
+	int delay = fragP->fr_subtype == C (COND_JUMP_DELAY, COND12);
 
 	/* Toggle the true/false bit of the bcond.  */
 	buffer[highbyte] ^= 0x2;
 
-	/* Build a relocation to six bytes farther on.  */
+	/* If this is a dalayed branch, we may not put the the bra in the
+	   slot.  So we change it to a non-delayed branch, like that:
+	   b! cond slot_label; bra disp; slot_label: slot_insn
+	   ??? We should try if swapping the conditional branch and
+	   its delay-slot insn already makes the branch reach.  */
+
+	/* Build a relocation to six / four bytes farther on.  */
 	subseg_change (seg, 0);
 	fix_new (fragP, fragP->fr_fix, 2,
 #ifdef BFD_ASSEMBLER
@@ -1580,7 +1593,7 @@ md_convert_frag (headers, seg, fragP)
 #else
 		 seg_info (seg)->dot,
 #endif
-		 fragP->fr_address + fragP->fr_fix + 6,
+		 fragP->fr_address + fragP->fr_fix + (delay ? 4 : 6),
 		 1, BFD_RELOC_SH_PCDISP8BY2);
 
 	/* Set up a jump instruction.  */
@@ -1589,18 +1602,28 @@ md_convert_frag (headers, seg, fragP)
 	fix_new (fragP, fragP->fr_fix + 2, 2, fragP->fr_symbol,
 		 fragP->fr_offset, 1, BFD_RELOC_SH_PCDISP12BY2);
 
-	/* Fill in a NOP instruction.  */
-	buffer[highbyte + 4] = 0x0;
-	buffer[lowbyte + 4] = 0x9;
+	if (delay)
+	  {
+	    buffer[highbyte] &= ~0x4; /* Removes delay slot from branch.  */
+	    fragP->fr_fix += 4;
+	  }
+	else
+	  {
+	    /* Fill in a NOP instruction.  */
+	    buffer[highbyte + 4] = 0x0;
+	    buffer[lowbyte + 4] = 0x9;
 
-	fragP->fr_fix += 6;
+	    fragP->fr_fix += 6;
+	  }
 	fragP->fr_var = 0;
 	donerelax = 1;
       }
       break;
 
     case C (COND_JUMP, COND32):
+    case C (COND_JUMP_DELAY, COND32):
     case C (COND_JUMP, UNDEF_WORD_DISP):
+    case C (COND_JUMP_DELAY, UNDEF_WORD_DISP):
       if (fragP->fr_symbol == NULL)
 	as_bad (_("at 0x%lx, displacement overflows 8-bit field"), 
 		(unsigned long) fragP->fr_address);
@@ -1836,6 +1859,16 @@ md_apply_fix (fixP, val)
   long max, min;
   int shift;
 
+#ifdef BFD_ASSEMBLER
+  /* adjust_reloc_syms won't convert a reloc against a weak symbol
+     into a reloc against a section, but bfd_install_relocation will
+     screw up if the symbol is defined, so we have to adjust val here
+     to avoid the screw up later.  */
+  if (fixP->fx_addsy != NULL
+      && S_IS_WEAK (fixP->fx_addsy))
+    val -= S_GET_VALUE  (fixP->fx_addsy);
+#endif
+
 #ifndef BFD_ASSEMBLER
   if (fixP->fx_r_type == 0)
     {
@@ -2001,8 +2034,6 @@ md_apply_fix (fixP, val)
 #endif
 }
 
-int md_long_jump_size;
-
 /* Called just before address relaxation.  Return the length
    by which a fragment must grow to reach it's destination.  */
 
@@ -2036,27 +2067,31 @@ md_estimate_size_before_relax (fragP, segment_type)
     default:
       abort ();
     case C (COND_JUMP, UNDEF_DISP):
+    case C (COND_JUMP_DELAY, UNDEF_DISP):
       /* used to be a branch to somewhere which was unknown */
       if (fragP->fr_symbol
 	  && S_GET_SEGMENT (fragP->fr_symbol) == segment_type)
 	{
+	  int what = GET_WHAT (fragP->fr_subtype);
 	  /* Got a symbol and it's defined in this segment, become byte
 	     sized - maybe it will fix up */
-	  fragP->fr_subtype = C (COND_JUMP, COND8);
-	  fragP->fr_var = md_relax_table[C (COND_JUMP, COND8)].rlx_length;
+	  fragP->fr_subtype = C (what, COND8);
+	  fragP->fr_var = md_relax_table[C (what, COND8)].rlx_length;
 	}
       else if (fragP->fr_symbol)
 	{
+	  int what = GET_WHAT (fragP->fr_subtype);
 	  /* Its got a segment, but its not ours, so it will always be long */
-	  fragP->fr_subtype = C (COND_JUMP, UNDEF_WORD_DISP);
-	  fragP->fr_var = md_relax_table[C (COND_JUMP, COND32)].rlx_length;
-	  return md_relax_table[C (COND_JUMP, COND32)].rlx_length;
+	  fragP->fr_subtype = C (what, UNDEF_WORD_DISP);
+	  fragP->fr_var = md_relax_table[C (what, COND32)].rlx_length;
+	  return md_relax_table[C (what, COND32)].rlx_length;
 	}
       else
 	{
+	  int what = GET_WHAT (fragP->fr_subtype);
 	  /* We know the abs value */
-	  fragP->fr_subtype = C (COND_JUMP, COND8);
-	  fragP->fr_var = md_relax_table[C (COND_JUMP, COND8)].rlx_length;
+	  fragP->fr_subtype = C (what, COND8);
+	  fragP->fr_var = md_relax_table[C (what, COND8)].rlx_length;
 	}
 
       break;
