@@ -202,14 +202,14 @@ The overall format of the string field for most stab types is:
 "@var{name}:@var{symbol-descriptor} @var{type-information}"
 @end example
 
-@var{name} is the name of the symbol represented by the stab.
-@var{name} can be omitted, which means the stab represents an unnamed
-object.  For example, @samp{:t10=*2} defines type 10 as a pointer to
-type 2, but does not give the type a name.  Omitting the @var{name}
-field is supported by AIX dbx and GDB after about version 4.8, but not
-other debuggers.  GCC sometimes uses a single space as the name instead
-of omitting the name altogether; apparently that is supported by most
-debuggers.
+@var{name} is the name of the symbol represented by the stab; it can
+contain a pair of colons (@pxref{Nested Symbols}).  @var{name} can be
+omitted, which means the stab represents an unnamed object.  For
+example, @samp{:t10=*2} defines type 10 as a pointer to type 2, but does
+not give the type a name.  Omitting the @var{name} field is supported by
+AIX dbx and GDB after about version 4.8, but not other debuggers.  GCC
+sometimes uses a single space as the name instead of omitting the name
+altogether; apparently that is supported by most debuggers.
 
 The @var{symbol-descriptor} following the @samp{:} is an alphabetic
 character that tells more specifically what kind of symbol the stab
@@ -2232,6 +2232,7 @@ Symnum n_type n_othr n_desc n_value  n_strx String
 
 @menu
 * Class Names::			C++ class names are both tags and typedefs.
+* Nested Symbols::		C++ symbol names can be within other types.
 * Basic Cplusplus Types::
 * Simple Classes::
 * Class Instance::
@@ -2293,6 +2294,23 @@ or
 @example
 .stabs "foo:Tt19=s4x:1,0,32;;",128,0,0,0
 @end example
+
+@node Nested Symbols
+@section Defining a Symbol Within Another Type
+
+In C++, a symbol (such as a type name) can be defined within another type.
+@c FIXME: Needs example.
+
+In stabs, this is sometimes represented by making the name of a symbol
+which contains @samp{::}.  Such a pair of colons does not end the name
+of the symbol, the way a single colon would (@pxref{String Field}).  I'm
+not sure how consistently used or well thought out this mechanism is.
+So that a pair of colons in this position always has this meaning,
+@samp{:} cannot be used as a symbol descriptor.
+
+For example, if the string for a stab is @samp{foo::bar::baz:t5=*6},
+then @code{foo::bar::baz} is the name of the symbol, @samp{t} is the
+symbol descriptor, and @samp{5=*6} is the type information.
 
 @node Basic Cplusplus Types
 @section Basic Types For C++
@@ -3168,6 +3186,9 @@ for more information about their use.
 @itemx (
 @itemx -
 Variable on the stack; see @ref{Stack Variables}.
+
+@item :
+C++ nested symbol; see @xref{Nested Symbols}
 
 @item a
 Parameter passed by reference in register; see @ref{Reference Parameters}.
