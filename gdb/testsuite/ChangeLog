@@ -1,3 +1,7 @@
+2004-07-13  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/attach.exp: Remove cleanupfile handling.
+
 2004-07-12  Andrew Cagney  <cagney@gnu.org>
 
 	* gdb.base/annota1.exp: Cleanup corefile test name.

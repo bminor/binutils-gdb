@@ -43,17 +43,12 @@ set srcfile2 ${testfile}2.c
 set binfile  ${objdir}/${subdir}/${testfile}
 set binfile2 ${objdir}/${subdir}/${testfile}2
 set escapedbinfile  [string_to_regexp ${objdir}/${subdir}/${testfile}]
-set cleanupfile ${objdir}/${subdir}/${testfile}.awk
 
 #execute_anywhere "rm -f ${binfile} ${binfile2}"
 remote_exec build "rm -f ${binfile} ${binfile2}"
 # For debugging this test
 #
 #log_user 1
-
-# Clean out any old files from past runs.
-#
-remote_exec build "${cleanupfile}"
 
 # build the first test case
 #
