@@ -1,5 +1,12 @@
 Fri May 29 13:46:07 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	Based on patch from Klaus Kaempf <kkaempf@progis.de>:
+	* struc-symbol.h (struct broken_word): Add seg and subseg fields.
+	* read.c (emit_expr): Initialize seg and subseg fields of a new
+	broken word.
+	* write.c (write_object_file): Switch to the appropriate segment
+	and subsegment when processing a broken word.
+
 	* config/tc-m68k.c (mri_assemble): New static function.
 	(build_mri_control_operand): Call mri_assemble rather than
 	md_assemble.

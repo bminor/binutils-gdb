@@ -2353,6 +2353,10 @@ s_org (ignore)
   expressionS exp;
   register long temp_fill;
 
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
   /* The m68k MRI assembler has a different meaning for .org.  It
      means to create an absolute section at a given address.  We can't
      support that--use a linker script instead.  */
@@ -3427,6 +3431,8 @@ emit_expr (exp, nbytes)
       x = (struct broken_word *) xmalloc (sizeof (struct broken_word));
       x->next_broken_word = broken_words;
       broken_words = x;
+      x->seg = seg_now;
+      x->subseg = subseg_now;
       x->frag = frag_now;
       x->word_goes_here = p;
       x->dispfrag = 0;

@@ -1522,6 +1522,7 @@ write_object_file ()
 	{
 	  expressionS exp;
 
+	  subseg_change (lie->seg, lie->subseg);
 	  exp.X_op = O_subtract;
 	  exp.X_add_symbol = lie->add;
 	  exp.X_op_symbol = lie->sub;
@@ -1566,6 +1567,7 @@ write_object_file ()
 	addressT from_addr, to_addr;
 	int n, m;
 
+	subseg_change (lie->seg, lie->subseg);
 	fragP = lie->dispfrag;
 
 	/* Find out how many broken_words go here.  */
@@ -2550,7 +2552,7 @@ fixup_segment (fixP, this_segment_type)
 		  char buf[50];
 		  sprint_value (buf, fragP->fr_address + where);
 		  as_bad_where (fixP->fx_file, fixP->fx_line,
-				_("Subtraction of two symbols in different segments \"%s\" {%s segment} - \"%s\" {%s segment} at file address %s."),
+				_("Subtraction of two symbols in different sections \"%s\" {%s section} - \"%s\" {%s section} at file address %s."),
 				S_GET_NAME (add_symbolP),
 				segment_name (S_GET_SEGMENT (add_symbolP)),
 				S_GET_NAME (sub_symbolP),
