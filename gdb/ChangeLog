@@ -1,5 +1,14 @@
 2003-01-07  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (deprecated_get_frame_context): New function.
+	(deprecated_set_frame_context): New function.
+	* frame.h (deprecated_get_frame_context): Declare.
+	(deprecated_set_frame_context): Declare.
+	* dwarf2cfi.c (UNWIND_CONTEXT): Use deprecated_get_frame_context.
+	(cfi_init_extra_frame_info): Use deprecated_set_frame_context.
+	
+2003-01-07  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.c (deprecated_set_frame_next_hack): New function.
 	(deprecated_set_frame_prev_hack): New function.
 	* frame.h (deprecated_set_frame_next_hack): Declare.

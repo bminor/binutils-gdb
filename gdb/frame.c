@@ -1322,6 +1322,19 @@ deprecated_set_frame_prev_hack (struct frame_info *fi,
   fi->prev = prev;
 }
 
+struct context *
+deprecated_get_frame_context (struct frame_info *fi)
+{
+  return fi->context;
+}
+
+void
+deprecated_set_frame_context (struct frame_info *fi,
+			      struct context *context)
+{
+  fi->context = context;
+}
+
 struct frame_info *
 deprecated_frame_xmalloc (void)
 {

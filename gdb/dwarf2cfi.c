@@ -156,7 +156,7 @@ enum ptr_encoding
   PE_funcrel = DW_EH_PE_funcrel
 };
 
-#define UNWIND_CONTEXT(fi) ((struct context *) (fi->context))
+#define UNWIND_CONTEXT(fi) ((struct context *) (deprecated_get_frame_context (fi)))
 
 
 static struct cie_unit *cie_chunks;
@@ -1770,7 +1770,7 @@ cfi_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   unwind_tmp_obstack_init ();
 
   fs = frame_state_alloc ();
-  fi->context = frame_obstack_alloc (sizeof (struct context));
+  deprecated_set_frame_context (fi, frame_obstack_alloc (sizeof (struct context)));
   UNWIND_CONTEXT (fi)->reg =
     frame_obstack_alloc (sizeof (struct context_reg) * NUM_REGS);
   memset (UNWIND_CONTEXT (fi)->reg, 0,
