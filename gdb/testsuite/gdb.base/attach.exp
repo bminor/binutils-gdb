@@ -63,30 +63,11 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
-# Because we can't attach over nfs, copy binfile to /tmp/${binfile}.${pid}
-# and replace binfile with a symbolic link
-
-  set pid [pid]
-  exec /bin/cp -f ${binfile} /tmp/attach1.${pid}
-  exec rm -f ${binfile}
-  set binfile /tmp/attach1.${pid}
-#  exec ln -s /tmp/attach1.${pid} ${binfile}
-
 # Build the in-system-call test
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable {debug}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
-
-# Because we can't attach over nfs, copy binfile2 to /tmp/${binfile2}.${pid}
-# and replace binfile2 with a symbolic link
-
-  set pid [pid]
-  exec cp -f ${binfile2} /tmp/attach2.${pid} 
-  exec rm -f ${binfile2}
-  set binfile2 /tmp/attach2.${pid}
-#  exec ln -s /tmp/attach2.${pid} ${binfile2}
-
 
 if [get_compiler_info ${binfile}] {
     return -1
@@ -428,19 +409,7 @@ do_attach_tests
 gdb_exit
 gdb_start
 
-# this seems not necessary. - guo
-#
-# # Since we have moved the executable to /tmp, it will be hard for gdb
-# # to find the object file/executable to read the symbols.  This is
-# # a known limitation.  We try and get the name of the executable the
-# # process is running from a variety of methods, but none is foolproof.
-# # Using "dir" will get us the symbols.
-# 
-# gdb_test "dir ./gdb.base" ".*" "set up directory before attach"
 gdb_reinitialize_dir $srcdir/$subdir
 do_call_attach_tests
-
-# Cleanup the files placed in /tmp and the symlinks
-  remote_exec build "rm -f ${binfile} ${binfile2} /tmp/attach1.${pid} /tmp/attach2.${pid}"
 
 return 0

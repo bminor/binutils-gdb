@@ -1,3 +1,9 @@
+2002-12-22  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/attach.exp: There's no need to copy the test program to
+	/tmp; that was only ever necessary on HP/UX, and this test is
+	entirely disabled there anyway.
+
 2002-12-21  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.c++/psmang.exp: Doc fix.
