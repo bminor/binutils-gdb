@@ -3842,7 +3842,7 @@ kill_inferior (void)
 }
 
 
-#ifndef CHILD_RESUME
+#ifndef DEPRECATED_CHILD_RESUME
 
 /* Sanity check a thread about to be continued.
  */
@@ -4253,7 +4253,7 @@ threads_continue_one_with_signal (lwpid_t gdb_tid, int signal)
 }
 #endif
 
-#ifndef CHILD_RESUME
+#ifndef DEPRECATED_CHILD_RESUME
 
 /* Resume execution of the inferior process.
 
@@ -4554,7 +4554,7 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
 #endif
 
 }
-#endif /* CHILD_RESUME */
+#endif /* DEPRECATED_CHILD_RESUME */
 
 /*
  * Like it says.
