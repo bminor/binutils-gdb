@@ -1,3 +1,9 @@
+2002-08-16  Grace Sainsbury  <graces@redhat.com>
+
+	* remote.c (remote_insert_hw_breakpoint)
+	(remote_remove_hw_breakpoint): Fix calculation of length field
+	for Z-packet.
+
 2002-08-15  Michael Snyder  <msnyder@redhat.com>
 
 	* irix5-nat.c (supply_gregset): Allocate plenty-big buffer

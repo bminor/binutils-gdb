@@ -4985,11 +4985,11 @@ remote_insert_hw_breakpoint (CORE_ADDR addr, char *shadow)
   char *buf = alloca (rs->remote_packet_size);
   char *p = buf;
       
-  /* The length field should be set to soething so that the packet is
-     well formed.  */
+  /* The length field should be set to the size of a breakpoint
+     instruction.  */
 
-  len = strlen (shadow);
-  len = len ? len : 1;
+  BREAKPOINT_FROM_PC (&addr, &len);  
+
   if (remote_protocol_Z[Z_PACKET_HARDWARE_BP].support == PACKET_DISABLE)
     error ("Can't set hardware breakpoint without the '%s' (%s) packet\n",
 	   remote_protocol_Z[Z_PACKET_HARDWARE_BP].name,
@@ -5026,8 +5026,12 @@ remote_remove_hw_breakpoint (CORE_ADDR addr, char *shadow)
   struct remote_state *rs = get_remote_state ();
   char *buf = alloca (rs->remote_packet_size);
   char *p = buf;
-  
-  len = sizeof (shadow);
+
+  /* The length field should be set to the size of a breakpoint
+     instruction.  */
+
+  BREAKPOINT_FROM_PC (&addr, &len);
+
   if (remote_protocol_Z[Z_PACKET_HARDWARE_BP].support == PACKET_DISABLE)
     error ("Can't clear hardware breakpoint without the '%s' (%s) packet\n",
 	   remote_protocol_Z[Z_PACKET_HARDWARE_BP].name,
