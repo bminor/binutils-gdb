@@ -1,3 +1,9 @@
+2001-01-09  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/pic.d: Fix patterns to match new behaviour of
+	disassembler.
+	inst.d: Fix patterns to match new behaviour of disassembler.
+
 2001-01-03  Philip Blundell  <pb@futuretv.com>
 
 	* gas/vtable/vtable.exp: Don't run tests on Alpha.
