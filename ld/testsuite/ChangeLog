@@ -1,3 +1,7 @@
+2004-08-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-scripts/cross1.t: Remove .opd section spec.
+
 2004-08-01  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* ld-undefined/undefined.exp: The undefine tests now work on
