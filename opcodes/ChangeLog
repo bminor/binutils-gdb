@@ -1,3 +1,7 @@
+2004-01-19  Andrew Over  <andrew.over@cs.anu.edu.au>
+
+	* sparc-opc.c (sparc_opcodes) <f[dsq]tox, fxto[dsq]>: Fix args.
+
 2004-01-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* i386-dis.c (OP_E): Print scale factor on intel mode sib when not
