@@ -1,3 +1,7 @@
+2001-10-10  Jim Blandy  <jimb@redhat.com>
+
+	* mn10300-tdep.c (mn10300_analyze_prologue): Doc fixes.
+
 2001-10-10  Keith Seitz  <keiths@redhat.com>
 
 	* varobj.c (cplus_value_of_child): Deal with a failure
