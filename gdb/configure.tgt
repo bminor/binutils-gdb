@@ -114,7 +114,7 @@ ia64-*-linux*)		gdb_target=linux
 			;;
 ia64*-*-*)		gdb_target=ia64 ;;
 
-m32r-*-*)		gdb_target=m32r ;;
+# OBSOLETE m32r-*-elf*)		gdb_target=m32r ;;
 
 m68hc11*-*-*|m6811*-*-*)	gdb_target=m68hc11 ;;
 
@@ -265,7 +265,6 @@ esac
 
 case "${gdb_target}" in
 d10v)		gdb_multi_arch=yes ;;
-m32r)		gdb_multi_arch=yes ;;
 fbsd64)		gdb_multi_arch=yes ;;
 m68hc11)	gdb_multi_arch=yes ;;
 mn10300)	gdb_multi_arch=yes ;;
