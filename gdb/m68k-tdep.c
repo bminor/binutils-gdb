@@ -1,5 +1,5 @@
 /* Target dependent code for the Motorola 68000 series.
-   Copyright (C) 1990 Free Software Foundation, Inc.
+   Copyright (C) 1990, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -19,7 +19,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "ieee-float.h"
-#include "param.h"
 #include "frame.h"
 #include "symtab.h"
 
@@ -149,6 +148,7 @@ m68k_pop_frame ()
 #define P_LEA_L		0x43fb
 #define P_MOVM_L	0x48ef
 #define P_FMOVM		0xf237
+#define P_TRAP		0x4e40
 
 CORE_ADDR
 m68k_skip_prologue (ip)
@@ -236,12 +236,12 @@ void
 supply_gregset (gregsetp)
 gregset_t *gregsetp;
 {
-  register int regno;
+  register int regi;
   register greg_t *regp = (greg_t *) gregsetp;
 
-  for (regno = 0 ; regno < R_PC ; regno++)
+  for (regi = 0 ; regi < R_PC ; regi++)
     {
-      supply_register (regno, (char *) (regp + regno));
+      supply_register (regi, (char *) (regp + regi));
     }
   supply_register (PS_REGNUM, (char *) (regp + R_PS));
   supply_register (PC_REGNUM, (char *) (regp + R_PC));
@@ -252,7 +252,7 @@ fill_gregset (gregsetp, regno)
 gregset_t *gregsetp;
 int regno;
 {
-  int regi;
+  register int regi;
   register greg_t *regp = (greg_t *) gregsetp;
   extern char registers[];
 
@@ -260,7 +260,7 @@ int regno;
     {
       if ((regno == -1) || (regno == regi))
 	{
-	  *(regp + regno) = *(int *) &registers[REGISTER_BYTE (regi)];
+	  *(regp + regi) = *(int *) &registers[REGISTER_BYTE (regi)];
 	}
     }
   if ((regno == -1) || (regno == PS_REGNUM))
@@ -283,11 +283,13 @@ void
 supply_fpregset (fpregsetp)
 fpregset_t *fpregsetp;
 {
-  register int regno;
+  register int regi;
+  char *from;
   
-  for (regno = FP0_REGNUM ; regno < FPC_REGNUM ; regno++)
+  for (regi = FP0_REGNUM ; regi < FPC_REGNUM ; regi++)
     {
-      supply_register (regno, (char *) &(fpregsetp -> f_fpregs[regno][0]));
+      from = (char *) &(fpregsetp -> f_fpregs[regi-FP0_REGNUM][0]);
+      supply_register (regi, from);
     }
   supply_register (FPC_REGNUM, (char *) &(fpregsetp -> f_pcr));
   supply_register (FPS_REGNUM, (char *) &(fpregsetp -> f_psr));
@@ -314,8 +316,8 @@ int regno;
       if ((regno == -1) || (regno == regi))
 	{
 	  from = (char *) &registers[REGISTER_BYTE (regi)];
-	  to = (char *) &(fpregsetp -> f_fpregs[regi][0]);
-	  bcopy (from, to, REGISTER_RAW_SIZE (regno));
+	  to = (char *) &(fpregsetp -> f_fpregs[regi-FP0_REGNUM][0]);
+	  bcopy (from, to, REGISTER_RAW_SIZE (regi));
 	}
     }
   if ((regno == -1) || (regno == FPC_REGNUM))
@@ -335,3 +337,57 @@ int regno;
 #endif	/* defined (FP0_REGNUM) */
 
 #endif  /* USE_PROC_FS */
+
+#ifdef GET_LONGJMP_TARGET
+/* Figure out where the longjmp will land.  Slurp the args out of the stack.
+   We expect the first arg to be a pointer to the jmp_buf structure from which
+   we extract the pc (JB_PC) that we will land at.  The pc is copied into PC.
+   This routine returns true on success. */
+
+int
+get_longjmp_target(pc)
+     CORE_ADDR *pc;
+{
+  CORE_ADDR sp, jb_addr;
+
+  sp = read_register(SP_REGNUM);
+
+  if (target_read_memory(sp + SP_ARG0, /* Offset of first arg on stack */
+			 &jb_addr,
+			 sizeof(CORE_ADDR)))
+    return 0;
+
+
+  SWAP_TARGET_AND_HOST(&jb_addr, sizeof(CORE_ADDR));
+
+  if (target_read_memory(jb_addr + JB_PC * JB_ELEMENT_SIZE, pc,
+			 sizeof(CORE_ADDR)))
+    return 0;
+
+  SWAP_TARGET_AND_HOST(pc, sizeof(CORE_ADDR));
+
+  return 1;
+}
+#endif /* GET_LONGJMP_TARGET */
+
+/* Immediately after a function call, return the saved pc before the frame
+   is setup.  We check for the common case of being inside of a system call,
+   and if so, we know that Sun pushes the call # on the stack prior to doing
+   the trap. */
+
+CORE_ADDR
+m68k_saved_pc_after_call(frame)
+     struct frame_info *frame;
+{
+#ifdef sun
+  int op;
+
+  op = read_memory_integer (frame->pc, 2);
+  op &= 0xFFFF;
+
+  if (op == P_TRAP)
+    return read_memory_integer (read_register (SP_REGNUM) + 4, 4);
+  else
+#endif /* sun */
+    return read_memory_integer (read_register (SP_REGNUM), 4);
+}
