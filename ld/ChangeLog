@@ -1,3 +1,12 @@
+Mon Aug 15 17:17:33 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* ldexp.h (exp_get_abs_int): Declare.
+
+Sat Aug  6 01:45:39 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* ldlang.c (lang_do_assignments):  Handle complex AT's better.
+	* ldexp.c (exp_get_abs_int):  New function.
+
 Fri Aug  5 20:55:55 1994  Jason Molenda (crash@phydeaux.cygnus.com)
 
 	* configure.in: add i960-nindy-coff support.
