@@ -192,7 +192,8 @@ type_name_no_tag (type)
    If this is a stubbed struct (i.e. declared as struct foo *), see if
    we can find a full definition in some other file. If so, copy this
    definition, so we can use it in future.  If not, set a flag so we 
-   don't waste too much time in future.
+   don't waste too much time in future.  (FIXME, this doesn't seem
+   to be happening...)
 
    This used to be coded as a macro, but I don't think it is called 
    often enough to merit such treatment.
@@ -257,7 +258,7 @@ struct type *
 lookup_primitive_typename (name)
      char *name;
 {
-   struct type ***p;
+   struct type ** const *p;
 
    for (p = current_language->la_builtin_type_vector; *p; p++)
       if(!strcmp((**p)->name, name))

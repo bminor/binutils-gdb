@@ -1,3 +1,15 @@
+Fri Sep 20 02:28:15 1991  John Gilmore  (gnu at cygnus.com)
+
+	* utils.c (!HAVE_VPRINTF):  Define vfprintf as a function, so
+	language.c can use it.  (Though language.c should really not be
+	handling warnings/errors the way it does, FIXME.)
+	* symtab.c (lookup_primitive_type):  const lint.
+
+	Bugfix from Peter Schauer:
+	* source.c (lines_to_list):  Make signed, to avoid comparison
+	going unsigned and complaining that -3 is too high for 21 lines.
+	* stack.c (lines_to_list):  Ditto.
+
 Thu Sep 19 23:33:41 1991  John Gilmore  (gnu at cygnus.com)
 
 	* Makefile.in (HFILES):  Add minimon.h.
