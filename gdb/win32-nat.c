@@ -600,8 +600,6 @@ handle_load_dll (void *dummy ATTRIBUTE_UNUSED)
   if (!dll_name)
     return 1;
 
-  (void) strlwr (dll_name);
-
   while ((p = strchr (dll_name, '\\')))
     *p = '/';
 
