@@ -1,3 +1,8 @@
+2002-06-01  Richard Henderson  <rth@redhat.com>
+
+	* config/tc-alpha.c: Move LITUSE constants to "elf/alpha.h".
+	Rename them LITUSE_ALPHA_*.
+
 2002-05-31  Shrinivas Atre <ShrinivasA@kpit.com>
 
 	* config/tc-h8300.c (get_operand): Allow stm.l and ldm.l insns to

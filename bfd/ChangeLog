@@ -1,5 +1,23 @@
 2002-06-01  Richard Henderson  <rth@redhat.com>
 
+	* elf64-alpha.c (alpha_get_dtprel_base, alpha_get_tprel_base): New.
+	(elf64_alpha_relocate_section): Use them.  Reject LE TLS relocs
+	in shared libraries.  Fix DTPRELHI and TPRELHI value.
+	(INSN_ADDQ, INSN_RDUNIQ): New.
+	(struct alpha_relax_info): Add symtab_hdr, tls_segment, first_gotent.
+	(elf64_alpha_relax_with_lituse): Return boolean.  Remove irelend
+	argument.  Reject dynamic symbols.  Use LITUSE symbolic constants.
+	(elf64_alpha_relax_got_load): Rename from relax_without_lituse.
+	Handle GOTDTPREL and GOTTPREL relocations.
+	(elf64_alpha_relax_gprelhilo): New.
+	(elf64_alpha_relax_tls_get_addr): New.
+	(elf64_alpha_relax_find_tls_segment): New.
+	(elf64_alpha_relax_section): Handle TLS relocations.
+	(ALPHA_ELF_LINK_HASH_TLS_IE): New.
+	(elf64_alpha_check_relocs): Set it.
+
+2002-06-01  Richard Henderson  <rth@redhat.com>
+
 	* elf64-alpha.c (elf64_alpha_relax_section): Don't store computed gp.
 
 	* elf64-alpha.c (elf64_alpha_check_relocs): Fix typo on maybe_dynamic

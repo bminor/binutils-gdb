@@ -137,13 +137,6 @@ struct alpha_macro {
 #define DUMMY_RELOC_LITUSE_TLSGD	(BFD_RELOC_UNUSED + 5)
 #define DUMMY_RELOC_LITUSE_TLSLDM	(BFD_RELOC_UNUSED + 6)
 
-#define LITUSE_ADDR	0
-#define LITUSE_BASE	1
-#define LITUSE_BYTOFF	2
-#define LITUSE_JSR	3
-#define LITUSE_TLSGD	4
-#define LITUSE_TLSLDM	5
-
 #define USER_RELOC_P(R) ((R) >= O_literal && (R) <= O_tprel)
 
 /* Macros for extracting the type and number of encoded register tokens */
@@ -1758,14 +1751,14 @@ alpha_adjust_symtab_relocs (abfd, sec, ptr)
 	    as_bad_where (fixp->fx_file, fixp->fx_line,
 			  _("No !literal!%ld was found"),
 			  fixp->tc_fix_data.info->sequence);
-	  if (fixp->fx_offset == LITUSE_TLSGD)
+	  if (fixp->fx_offset == LITUSE_ALPHA_TLSGD)
 	    {
 	      if (! fixp->tc_fix_data.info->saw_tlsgd)
 		as_bad_where (fixp->fx_file, fixp->fx_line,
 			      _("No !tlsgd!%ld was found"),
 			      fixp->tc_fix_data.info->sequence);
 	    }
-	  else if (fixp->fx_offset == LITUSE_TLSLDM)
+	  else if (fixp->fx_offset == LITUSE_ALPHA_TLSLDM)
 	    {
 	      if (! fixp->tc_fix_data.info->saw_tlsldm)
 		as_bad_where (fixp->fx_file, fixp->fx_line,
@@ -2686,22 +2679,22 @@ emit_insn (insn)
 	  break;
 
 	case DUMMY_RELOC_LITUSE_ADDR:
-	  fixP->fx_offset = LITUSE_ADDR;
+	  fixP->fx_offset = LITUSE_ALPHA_ADDR;
 	  goto do_lituse;
 	case DUMMY_RELOC_LITUSE_BASE:
-	  fixP->fx_offset = LITUSE_BASE;
+	  fixP->fx_offset = LITUSE_ALPHA_BASE;
 	  goto do_lituse;
 	case DUMMY_RELOC_LITUSE_BYTOFF:
-	  fixP->fx_offset = LITUSE_BYTOFF;
+	  fixP->fx_offset = LITUSE_ALPHA_BYTOFF;
 	  goto do_lituse;
 	case DUMMY_RELOC_LITUSE_JSR:
-	  fixP->fx_offset = LITUSE_JSR;
+	  fixP->fx_offset = LITUSE_ALPHA_JSR;
 	  goto do_lituse;
 	case DUMMY_RELOC_LITUSE_TLSGD:
-	  fixP->fx_offset = LITUSE_TLSGD;
+	  fixP->fx_offset = LITUSE_ALPHA_TLSGD;
 	  goto do_lituse;
 	case DUMMY_RELOC_LITUSE_TLSLDM:
-	  fixP->fx_offset = LITUSE_TLSLDM;
+	  fixP->fx_offset = LITUSE_ALPHA_TLSLDM;
 	  goto do_lituse;
 	do_lituse:
 	  fixP->fx_addsy = section_symbol (now_seg);
