@@ -1,3 +1,11 @@
+1999-06-19  Ian Lance Taylor  <ian@zembu.com>
+
+	* elflink.h (elf_link_remove_section_and_adjust_dynindices):
+	Remove unused local variable spp.
+
+	* xcofflink.c (bfd_xcoff_size_dynamic_sections): Don't crash if
+	the entry symbol is not set.
+
 Fri Jun 18 04:24:57 1999  Richard Henderson  <rth@cygnus.com>
 
 	* elf64-alpha.c (elf64_alpha_relocate_section): Don't adjust

@@ -2412,8 +2412,6 @@ elf_link_remove_section_and_adjust_dynindices (info, section)
      struct bfd_link_info *info;
      asection *section;
 {
-  asection **spp;
-
   /* Remove the section from the output list.  */
   _bfd_strip_section_from_output (section);
 
