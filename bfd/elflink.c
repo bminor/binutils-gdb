@@ -6788,21 +6788,6 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 		      rel->r_info &= r_type_mask;
 		      rel->r_addend = 0;
 		    }
-
-		  /* Check that loaded segments don't reference symbols
-		     in non-loaded segments.  */
-		  if ((o->flags & SEC_ALLOC) != 0
-		      && sec != NULL
-		      && !bfd_is_abs_section (sec)
-		      && !elf_discarded_section (sec)
-		      && sec->output_section != NULL
-		      && (sec->output_section->flags & SEC_ALLOC) == 0)
-		    {
-		      (*_bfd_error_handler)
-			(_("`%s' referenced in section `%A' of %B: "
-			   "defined in non-loaded section `%A' of %B\n"),
-			 o, input_bfd, sec, sec->owner, sym_name);
-		    }
 		}
 	    }
 

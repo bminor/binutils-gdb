@@ -1,5 +1,7 @@
 2004-10-11  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.c (elf_link_input_bfd): Revert PR 354 change.
+
 	PR 354
 	* elflink.c (elf_link_input_bfd): Check that relocs in SEC_ALLOC
 	sections do not reference symbols in non-SEC_ALLOC sections.
