@@ -1,3 +1,10 @@
+2000-11-09  Kevin Buettner  <kevinb@redhat.com>
+
+	Changes based on a patch from Ulrich Drepper:
+	* solib-svr4.c (svr4_relocate_main_executable): New function.
+	(svr4_solib_create_inferior_hook):  Call
+	svr4_relocate_main_executable.
+	
 2000-11-09  J.T. Conklin  <jtc@redback.com>
 
 	* config/i386/nbsd.mh: Remove solib.o, solib-svr4.o from NATDEPFILES.
