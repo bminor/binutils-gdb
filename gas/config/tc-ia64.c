@@ -996,12 +996,6 @@ ia64_elf_section_type (str, len)
   if (STREQ ("unwind"))
     return SHT_IA_64_UNWIND;
 
-  if (STREQ ("init_array"))
-    return SHT_INIT_ARRAY;
-
-  if (STREQ ("fini_array"))
-    return SHT_FINI_ARRAY;
-
   return -1;
 #undef STREQ
 }

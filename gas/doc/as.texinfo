@@ -5291,7 +5291,15 @@ section contains data
 section does not contain data (i.e., section only occupies space)
 @item @@note
 section contains data which is used by things other than the program
+@item @@init_array
+section contains an array of pointers to init functions
+@item @@fini_array
+section contains an array of pointers to finish functions
+@item @@preinit_array
+section contains an array of pointers to pre-init functions
 @end table
+
+Many targets only support the first three section types.
 
 Note on targets where the @code{@@} character is the start of a comment (eg
 ARM) then another character is used instead.  For example the ARM port uses the

@@ -771,6 +771,12 @@ obj_elf_section_type (char *str, size_t len)
     return SHT_NOBITS;
   if (len == 4 && strncmp (str, "note", 4) == 0)
     return SHT_NOTE;
+  if (len == 10 && strncmp (str, "init_array", 10) == 0)
+    return SHT_INIT_ARRAY;
+  if (len == 10 && strncmp (str, "fini_array", 10) == 0)
+    return SHT_FINI_ARRAY;
+  if (len == 13 && strncmp (str, "preinit_array", 13) == 0)
+    return SHT_PREINIT_ARRAY;
 
 #ifdef md_elf_section_type
   {
