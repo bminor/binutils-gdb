@@ -49,7 +49,7 @@ static INLINE uint8 *map_memory (unsigned phys_addr);
 static long ui_loop_hook_counter = UI_LOOP_POLL_INTERVAL;
 
 /* Actual hook to call to run through gdb's gui event loop */
-extern int (*ui_loop_hook) PARAMS ((int signo));
+extern int (*deprecated_ui_loop_hook) PARAMS ((int signo));
 #endif /* NEED_UI_LOOP_HOOK */
 
 #ifndef INLINE
@@ -1061,10 +1061,10 @@ sim_resume (sd, step, siggnal)
       SLOT_FLUSH ();
 
 #ifdef NEED_UI_LOOP_HOOK
-      if (ui_loop_hook != NULL && ui_loop_hook_counter-- < 0)
+      if (deprecated_ui_loop_hook != NULL && ui_loop_hook_counter-- < 0)
 	{
 	  ui_loop_hook_counter = UI_LOOP_POLL_INTERVAL;
-	  ui_loop_hook (0);
+	  deprecated_ui_loop_hook (0);
 	}
 #endif /* NEED_UI_LOOP_HOOK */
     }

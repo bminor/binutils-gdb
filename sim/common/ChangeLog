@@ -1,3 +1,7 @@
+2004-06-28  Andrew Cagney  <cagney@gnu.org>
+
+	* run.c: Rename ui_loop_hook to deprecated_ui_loop_hook.
+
 2004-06-27  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* callback.c (os_shutdown): Fix bug in last change: actually

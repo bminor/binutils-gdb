@@ -1,3 +1,7 @@
+2004-06-28  Andrew Cagney  <cagney@gnu.org>
+
+	* interp.c: Rename ui_loop_hook to deprecated_ui_loop_hook.
+
 2003-02-27  Andrew Cagney  <cagney@redhat.com>
 
 	* interp.c (sim_open, sim_create_inferior): Rename _bfd to bfd.

@@ -12,7 +12,7 @@
 static long ui_loop_hook_counter = UI_LOOP_POLL_INTERVAL;
 
 /* Actual hook to call to run through gdb's gui event loop */
-extern int (*ui_loop_hook) (int);
+extern int (*deprecated_ui_loop_hook) (int);
 #endif /* NEED_UI_LOOP_HOOK */
 
 host_callback *mn10200_callback;
@@ -326,10 +326,10 @@ sim_resume (sd, step, siggnal)
       unsigned long insn, extension;
 
 #ifdef NEED_UI_LOOP_HOOK
-    if (ui_loop_hook != NULL && ui_loop_hook_counter-- < 0)
+    if (deprecated_ui_loop_hook != NULL && ui_loop_hook_counter-- < 0)
       {
 	ui_loop_hook_counter = UI_LOOP_POLL_INTERVAL;
-	ui_loop_hook (0);
+	deprecated_ui_loop_hook (0);
       }
 #endif /* NEED_UI_LOOP_HOOK */
 

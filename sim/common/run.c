@@ -63,7 +63,7 @@ extern int getopt ();
 
 #ifdef NEED_UI_LOOP_HOOK
 /* Gdb foolery. This is only needed for gdb using a gui.  */
-int (*ui_loop_hook) PARAMS ((int signo));
+int (*deprecated_ui_loop_hook) PARAMS ((int signo));
 #endif
 
 static SIM_DESC sd;
