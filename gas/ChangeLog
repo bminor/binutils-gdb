@@ -1,3 +1,11 @@
+2002-05-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (mapping): Map sectoff to BFD_RELOC_16_BASEREL.
+	(ppc_elf_validate_fix): Replace BFD_RELOC_32_BASEREL with
+	BFD_RELOC_16_BASEREL.
+	(md_assemble): Likewise.
+	(md_apply_fix3): Likewise.
+
 2002-05-02  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-arm.c (thumb_add_sub): Do not convert a subtract of
