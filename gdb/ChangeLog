@@ -1,3 +1,12 @@
+2001-07-17  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* source.c (find_source_lines): Remove tui test, must be replaced
+	by appropriate warning hook.
+	(print_source_lines): Remove tui hacks, must be replaced by cli.
+	(forward_search_command): Remove tui hacks, can be replaced by
+	appropriate calls to identify_source_line when tui scrolls.
+	(reverse_search_command): Likewise.
+
 2001-07-16  Nick Duffek  <nsd@redhat.com>
 
 	* remote.c (init_remote_ops, init_remote_cisco_ops,

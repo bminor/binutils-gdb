@@ -798,8 +798,6 @@ find_source_lines (struct symtab *s, int desc)
 
   if (mtime && mtime < st.st_mtime)
     {
-      if (tui_version)
-	printf_filtered ("\n");
       warning ("Source file is more recent than executable.\n");
     }
 
@@ -1135,31 +1133,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 void
 print_source_lines (struct symtab *s, int line, int stopline, int noerror)
 {
-#if defined(TUI)
-  if (!tui_version ||
-      m_winPtrIsNull (srcWin) || !srcWin->generic.isVisible)
-    print_source_lines_base (s, line, stopline, noerror);
-  else
-    {
-      TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
-extern void tui_vAddWinToLayout (va_list);
-extern void tui_vUpdateSourceWindowsWithLine (va_list);
-
-      /* Regardless of whether we can open the file,
-         set current_source_symtab. */
-      current_source_symtab = s;
-      current_source_line = line;
-      first_line_listed = line;
-
-      /* make sure that the source window is displayed */
-      tuiDo ((TuiOpaqueFuncPtr) tui_vAddWinToLayout, SRC_WIN);
-
-      tuiDo ((TuiOpaqueFuncPtr) tui_vUpdateSourceWindowsWithLine, s, line);
-      tuiDo ((TuiOpaqueFuncPtr) tui_vUpdateLocatorFilename, s->filename);
-    }
-#else
   print_source_lines_base (s, line, stopline, noerror);
-#endif
 }
 
 
@@ -1464,29 +1438,7 @@ forward_search_command (char *regex, int from_tty)
   int line;
   char *msg;
 
-#if defined(TUI)
-  /* 
-     ** If this is the TUI, search from the first line displayed in 
-     ** the source window, otherwise, search from last_line_listed+1 
-     ** in current_source_symtab 
-   */
-  if (!tui_version)
-    line = last_line_listed;
-  else
-    {
-      if (srcWin->generic.isVisible && srcWin->generic.contentSize > 0)
-	line = ((TuiWinContent)
-	 srcWin->generic.content)[0]->whichElement.source.lineOrAddr.lineNo;
-      else
-	{
-	  printf_filtered ("No source displayed.\nExpression not found.\n");
-	  return;
-	}
-    }
-  line++;
-#else
   line = last_line_listed + 1;
-#endif
 
   msg = (char *) re_comp (regex);
   if (msg)
@@ -1558,8 +1510,6 @@ forward_search_command (char *regex, int from_tty)
 	{
 	  /* Match! */
 	  fclose (stream);
-	  if (tui_version)
-	    print_source_lines_base (current_source_symtab, line, line + 1, 0);
 	  print_source_lines (current_source_symtab, line, line + 1, 0);
 	  set_internalvar (lookup_internalvar ("_"),
 			   value_from_longest (builtin_type_int,
@@ -1583,29 +1533,8 @@ reverse_search_command (char *regex, int from_tty)
   register FILE *stream;
   int line;
   char *msg;
-#if defined(TUI)
-  /*
-     ** If this is the TUI, search from the first line displayed in
-     ** the source window, otherwise, search from last_line_listed-1
-     ** in current_source_symtab
-   */
-  if (!tui_version)
-    line = last_line_listed;
-  else
-    {
-      if (srcWin->generic.isVisible && srcWin->generic.contentSize > 0)
-	line = ((TuiWinContent)
-	 srcWin->generic.content)[0]->whichElement.source.lineOrAddr.lineNo;
-      else
-	{
-	  printf_filtered ("No source displayed.\nExpression not found.\n");
-	  return;
-	}
-    }
-  line--;
-#else
+
   line = last_line_listed - 1;
-#endif
 
   msg = (char *) re_comp (regex);
   if (msg)
@@ -1666,8 +1595,6 @@ reverse_search_command (char *regex, int from_tty)
 	{
 	  /* Match! */
 	  fclose (stream);
-	  if (tui_version)
-	    print_source_lines_base (current_source_symtab, line, line + 1, 0);
 	  print_source_lines (current_source_symtab, line, line + 1, 0);
 	  set_internalvar (lookup_internalvar ("_"),
 			   value_from_longest (builtin_type_int,
