@@ -1,3 +1,15 @@
+Mon Jul 31 12:51:06 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ar.c (replace_members): For compatibility with existing ar
+	programs, permit users to add the same file multiple times.
+
+Tue Jul 25 11:21:53 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* strings.c (DATA_FLAGS): Remove SEC_DATA.
+	(main): If no file names are given, scan standard input.
+	* binutils.texi, strings.1: strings now scans non-data sections by
+	default.
+
 Mon Jul 24 13:52:28 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* srconv.c (wr_hd): Set afl field to 4 for bfd_arch_sh.
