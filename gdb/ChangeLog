@@ -1,5 +1,8 @@
 2001-07-29  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* go32-nat.c (get_cr3): Temporary disable support for page tables
+	in UMBs, as it is incomplete.
+
 	Support for stepping through longjmp in DJGPP programs:
 
 	* config/i386/tm-go32.h (JB_ELEMENT_SIZE, JB_PC): New macros.

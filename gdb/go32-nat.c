@@ -1703,6 +1703,7 @@ get_cr3 (void)
   cr3 = _farnspeekl (taskbase + 0x1c) & ~0xfff;
   if (cr3 > 0xfffff)
     {
+#if 0  /* not fullly supported yet */
       /* The Page Directory is in UMBs.  In that case, CWSDPMI puts
 	 the first Page Table right below the Page Directory.  Thus,
 	 the first Page Table's entry for its own address and the Page
@@ -1723,6 +1724,7 @@ get_cr3 (void)
 	      break;
 	    }
 	}
+#endif
 
       if (cr3 > 0xfffff)
 	cr3 = 0;
