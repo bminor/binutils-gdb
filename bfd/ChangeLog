@@ -1,3 +1,9 @@
+2003-07-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (func_desc_adjust): Give linker created function
+	descriptor symbols a size and type.
+	(ppc64_elf_relocate_section): Correct lq insn test.
+
 2003-07-28  Eric Christopher  <echristo@redhat.com>
 
 	* elf32-ppc.c (R_PPC_RELAX32): New relocation.

@@ -4310,6 +4310,8 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
 	    }
 	  fdh = (struct elf_link_hash_entry *) bh;
 	  fdh->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
+	  fdh->size = 24;
+	  fdh->type = STT_OBJECT;
 	}
 
       if (fdh != NULL
@@ -8434,7 +8436,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	     _DS relocs bloats all reloc switches in this file.  It
 	     doesn't seem to make much sense to use any of these relocs
 	     in data, so testing the insn should be safe.  */
-	  if ((insn & (0x3f << 26)) == (56 << 26))
+	  if ((insn & (0x3f << 26)) == (56u << 26))
 	    mask = 15;
 	  if (((relocation + addend) & mask) != 0)
 	    {
