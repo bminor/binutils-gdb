@@ -150,6 +150,7 @@ Copyright (C) 1988-2001 Free Software Foundation, Inc.
 * Command Line Editing::        Command Line Editing
 * Using History Interactively:: Using History Interactively
 * Installing GDB::              Installing GDB
+* Maintenance Commands::        Maintenance Commands
 * GNU Free Documentation License::  The license for this documentation
 * Index::                       Index
 @end menu
@@ -204,6 +205,7 @@ Copyright (C) 1988-2000 Free Software Foundation, Inc.
 * Command Line Editing::        Command Line Editing
 * Using History Interactively:: Using History Interactively
 * Installing GDB::              Installing GDB
+* Maintenance Commands::        Maintenance Commands
 * GNU Free Documentation License::  The license for this documentation
 * Index::                       Index
 @end menu
@@ -2630,49 +2632,12 @@ the breakpoints are conditional, this is even useful
 
 @cindex negative breakpoint numbers
 @cindex internal @value{GDBN} breakpoints
-@value{GDBN} itself sometimes sets breakpoints in your program for special
-purposes, such as proper handling of @code{longjmp} (in C programs).
-These internal breakpoints are assigned negative numbers, starting with
-@code{-1}; @samp{info breakpoints} does not display them.
-
+@value{GDBN} itself sometimes sets breakpoints in your program for
+special purposes, such as proper handling of @code{longjmp} (in C
+programs).  These internal breakpoints are assigned negative numbers,
+starting with @code{-1}; @samp{info breakpoints} does not display them.
 You can see these breakpoints with the @value{GDBN} maintenance command
-@samp{maint info breakpoints}.
-
-@table @code
-@kindex maint info breakpoints
-@item maint info breakpoints
-Using the same format as @samp{info breakpoints}, display both the
-breakpoints you've set explicitly, and those @value{GDBN} is using for
-internal purposes.  Internal breakpoints are shown with negative
-breakpoint numbers.  The type column identifies what kind of breakpoint
-is shown:
-
-@table @code
-@item breakpoint
-Normal, explicitly set breakpoint.
-
-@item watchpoint
-Normal, explicitly set watchpoint.
-
-@item longjmp
-Internal breakpoint, used to handle correctly stepping through
-@code{longjmp} calls.
-
-@item longjmp resume
-Internal breakpoint at the target of a @code{longjmp}.
-
-@item until
-Temporary internal breakpoint used by the @value{GDBN} @code{until} command.
-
-@item finish
-Temporary internal breakpoint used by the @value{GDBN} @code{finish} command.
-
-@item shlib events
-Shared library events.
-
-@end table
-
-@end table
+@samp{maint info breakpoints} (@pxref{maint info breakpoints}).
 
 
 @node Set Watchpoints
@@ -14863,6 +14828,51 @@ There is no convenient way to generate a list of all available hosts.
 
 There are many other options available as well, but they are generally
 needed for special purposes only.
+
+@node Maintenance Commands
+@appendix Maintenance Commands
+@cindex maintenance commands
+@cindex internal commands
+
+In addition to commands intended for @value{GDBN} users, @value{GDBN}
+includes a number of commands intended for @value{GDBN} developers.
+These commands are provided here for reference.
+
+@table @code
+@kindex maint info breakpoints
+@item @anchor{maint info breakpoints}maint info breakpoints
+Using the same format as @samp{info breakpoints}, display both the
+breakpoints you've set explicitly, and those @value{GDBN} is using for
+internal purposes.  Internal breakpoints are shown with negative
+breakpoint numbers.  The type column identifies what kind of breakpoint
+is shown:
+
+@table @code
+@item breakpoint
+Normal, explicitly set breakpoint.
+
+@item watchpoint
+Normal, explicitly set watchpoint.
+
+@item longjmp
+Internal breakpoint, used to handle correctly stepping through
+@code{longjmp} calls.
+
+@item longjmp resume
+Internal breakpoint at the target of a @code{longjmp}.
+
+@item until
+Temporary internal breakpoint used by the @value{GDBN} @code{until} command.
+
+@item finish
+Temporary internal breakpoint used by the @value{GDBN} @code{finish} command.
+
+@item shlib events
+Shared library events.
+
+@end table
+
+@end table
 
 @include fdl.texi
 

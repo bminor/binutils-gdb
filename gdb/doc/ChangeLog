@@ -1,5 +1,11 @@
 2002-01-17  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdb.texinfo 	(Maintenance Commands): Add appendix.
+	(Set Breaks): Copy ``maint info breakpoint'' doco to
+	``Maintenance Commands'' appendix.  Add reference.
+
+2002-01-17  Andrew Cagney  <ac131313@redhat.com>
+
 	* fdl.texi: Remove next/prev from @node.
 
 2002-01-17  Eli Zaretskii  <eliz@is.elta.co.il>
