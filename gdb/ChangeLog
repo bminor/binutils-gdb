@@ -1,3 +1,8 @@
+Fri Jul 15 01:06:00 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* infrun.c (wait_for_inferior):  Handle stepping into leaf
+	functions whose prologue consists of gp loading code only.
+
 Thu Jul 14 14:22:12 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* dbxread.c: Don't include libbfd.h.
