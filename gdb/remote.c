@@ -1654,7 +1654,7 @@ remote_threads_extra_info (struct thread_info *tp)
 
   if (use_threadextra_query)
     {
-      sprintf (bufp, "qfThreadExtraInfo,%x", tp->pid);
+      sprintf (bufp, "qThreadExtraInfo,%x", tp->pid);
       putpkt (bufp);
       getpkt (bufp, PBUFSIZ, 0);
       if (bufp[0] != 0)

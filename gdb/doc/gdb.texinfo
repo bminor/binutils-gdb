@@ -9465,7 +9465,7 @@ respond to each reply with a request for more thread ids (using the
 (lower-case el, for @code{'last'}).
 
 @item extra thread info
-@tab @code{qfThreadExtraInfo,}@var{<id>}
+@tab @code{q}@code{ThreadExtraInfo}@code{,}@var{id}
 @tab
 @item
 @tab
