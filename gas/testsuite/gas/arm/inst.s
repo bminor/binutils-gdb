@@ -150,7 +150,7 @@ foo:
 	
 	str	r0, [r1]
 	str	r1, [r1, r2]
-	str	r3, [r3, r4]!
+	str	r3, [r4, r3]!
 	str	r2, [r2, #32]
 	str	r2, [r3, r4, lsr #8]
 	streq	r4, [r5, r4, asl #9]!

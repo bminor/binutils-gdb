@@ -1,3 +1,9 @@
+1999-10-21  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/arm/arm7t.d: Update to match latest objdump output.
+	* gas/arm/inst.s: Fix erroneous test case.
+	* gas/arm/inst.d: Update to match latest objdump output.
+
 Mon Oct 11 13:37:51 1999  Geoffrey Keating  <geoffk@cygnus.com>
 
 	* lib/gas-defs.exp (regexp_diff): Allow '#...' to mean "some
