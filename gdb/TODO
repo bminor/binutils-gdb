@@ -254,7 +254,11 @@ Fix at least one thread bug.
 
 --
 
-Objective C/C++ Support.  Bu hopefully sooner...
+GCC 3.0 ABI support (but hopefully sooner...).
+
+--
+
+Objective C/C++ support (but hopefully sooner...).
 
 --
 
@@ -266,11 +270,12 @@ The following cleanups have been identified as part of GDB 5.2.
 --
 
 Remove old code that does not use ui_out functions and all the related
-"ifdef"s.
+"ifdef"s.  This also allows the elimination of -DUI_OUT from
+Makefile.in and configure.in.
 
 --
 
-Eliminate more compiler warnings.
+Eliminate one more compiler warnings.
 
 --
 
@@ -522,7 +527,7 @@ fundamental architectural change.
 
 --
 
-Hardware watchpint problems on x86 OSes, including Linux:
+Hardware watchpoint problems on x86 OSes, including Linux:
 
 1. Delete/disable hardware watchpoints should free hardware debug
 registers. 
