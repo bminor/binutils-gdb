@@ -1,3 +1,10 @@
+2003-08-08 Dmitry Diky <diwil@mail.ru>
+
+	* archures.c: Add xW42 and xE42 parts. Sort MPU list according to gcc order.
+	* cpu-msp430.c: Likewise.
+	* elf32-msp430.c: Likewise.
+	* bfd-in2.h: Regenerate.
+
 2003-08-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elfxx-target.h: Remove PTR cast.

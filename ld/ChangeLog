@@ -1,3 +1,16 @@
+2003-08-08 Dmitry Diky <diwil@mail.ru>
+
+	* Makefile.am: Add xW42 and xE42 parts. Sort MPU list according to
+	gcc order.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add extra emulations.
+	* emulparams/msp430xE423.sh: New file.
+	* emulparams/msp430xE427.sh: New file.
+	* emulparams/msp430xW425.sh: New file.
+	* emulparams/msp430xE425.sh: New file.  
+	* emulparams/msp430xW423.sh: New file.  
+	* emulparams/msp430xW427.sh: New file.
+
 2003-08-07  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_before_parse):
