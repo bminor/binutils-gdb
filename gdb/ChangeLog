@@ -1,5 +1,41 @@
 2003-11-02  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.h (struct sparc_gregset): Add r_y_size member.
+	(sparc32_supply_gregset): Renamed from sparc_supply_gregset.
+	(sparc32_collect_gregset): Renamed from sparc_collect_gregset.
+	(sparc32_supply_fpregset): Renamed from sparc_supply_fpregset.
+	(sparc32_collect_fpregset): Renamed from sparc_collect_fpregset.
+	* sparc-tdep.c (sparc32_supply_gregset): Renamed from
+	sparc_supply_gregset.
+	(sparc32_collect_gregset): Renamed from sparc_collect_gregset.
+	(sparc32_supply_fpregset): Renamed from sparc_supply_fpregset.
+	(sparc32_collect_fpregset): Renamed from sparc_collect_fpregset.
+	* sparc-linux-tdep.c: Include "solib-svr4.h".
+	(sparc32_linux_svr4_fetch_link_map_offsets): New function.
+	(sparc32_linux_init_abi): Set solib_svr4_fetch_link_map_offsets.
+	* sparc-nat.h: New file.
+	* sparc-nat.c: Add some more comments.  Include "sparc-nat.h".
+	(PTRACE_GETREGS): Define to PT_GETREGS if not already defined.
+	(PTRACE_SETREGS, PTRACE_GETFPREGS, PTRACE_SETFPREGS): Likewise.
+	(sparc_supply_gregset, sparc_collect_gregset,
+	sparc_supply_fpregset, sparc_collect_fpregset,
+	sparc_gregset_supplies_p, sparc_fpregset_supplies_p): New function
+	variables.
+	(sparc32_gregset_supplies_p): Rename from
+	sparc_gregset_supplies_p.
+	(sparc32_fpregset_supplies_p): Rename from
+	sparc_fpregset_supplies_p.
+	(fetch_inferior_registers): Deal with GNU/Linux LWPs.
+	(store_inferior_registers): Likewise.  Work around peculiarity in
+	NetBSD when writing the floating-point registers.
+	(_initialize_sparc_nat): Initialize sparc_supply_gregset,
+	sparc_collect_gregset, sparc_supply_fpregset,
+	sparc_collect_fpregset, sparc_gregset_supplies_p and
+	sparc_fpregset_supplies_p if necessary.
+	* sparc-sol2-nat.c (supply_gregset): Call sparc32_supply_gregset
+	instead of sparc_supply_gregset.
+	(supply_fpregset, fill_gregset, fill_fpregset): Likewise.
+
 	* config/sparc/nm-linux.h (PTRACE_ARG3_TYPE, PTRACE_XFER_TYPE):
 	Define.
 

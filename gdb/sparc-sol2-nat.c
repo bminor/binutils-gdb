@@ -34,24 +34,24 @@
 void
 supply_gregset (prgregset_t *gregs)
 {
-  sparc_supply_gregset (&sparc32_sol2_gregset, current_regcache, -1, gregs);
+  sparc32_supply_gregset (&sparc32_sol2_gregset, current_regcache, -1, gregs);
 }
 
 void
 supply_fpregset (prfpregset_t *fpregs)
 {
-  sparc_supply_fpregset (current_regcache, -1, fpregs);
+  sparc32_supply_fpregset (current_regcache, -1, fpregs);
 }
 
 void
 fill_gregset (prgregset_t *gregs, int regnum)
 {
-  sparc_collect_gregset (&sparc32_sol2_gregset,
-			 current_regcache, regnum, gregs);
+  sparc32_collect_gregset (&sparc32_sol2_gregset,
+			   current_regcache, regnum, gregs);
 }
 
 void
 fill_fpregset (prfpregset_t *fpregs, int regnum)
 {
-  sparc_collect_fpregset (current_regcache, regnum, fpregs);
+  sparc32_collect_fpregset (current_regcache, regnum, fpregs);
 }

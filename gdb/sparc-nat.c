@@ -23,7 +23,22 @@
 #include "inferior.h"
 #include "regcache.h"
 
-/* We need a data structure for use with ptrace(2).  SunOS 4 has
+#include <signal.h>
+#include "gdb_string.h"
+#include <sys/ptrace.h>
+#include "gdb_wait.h"
+#ifdef HAVE_MACHINE_REG_H
+#include <machine/reg.h>
+#endif
+
+#include "sparc-tdep.h"
+#include "sparc-nat.h"
+
+/* With some trickery we can use the code in this file for most (if
+   not all) ptrace(2) based SPARC systems, which includes SunOS 4,
+   Linux and the various SPARC BSD's.
+
+   First, we need a data structure for use with ptrace(2).  SunOS has
    `struct regs' and `struct fp_status' in <machine/reg.h>.  BSD's
    have `struct reg' and `struct fpreg' in <machine/reg.h>.  GNU/Linux
    has the same structures as SunOS 4, but they're in <asm/reg.h>,
@@ -35,11 +50,7 @@
    typedefs, providing them for the other systems, therefore solves
    the puzzle.  */
 
-#include <signal.h>
-#include <sys/ptrace.h>
-#include "gdb_wait.h"
 #ifdef HAVE_MACHINE_REG_H
-#include <machine/reg.h>
 #ifdef HAVE_STRUCT_REG
 typedef struct reg gregset_t;
 typedef struct fpreg fpregset_t;
@@ -49,15 +60,40 @@ typedef struct fp_status fpregset_t;
 #endif
 #endif
 
-#include "sparc-tdep.h"
+/* Second, we need to remap the BSD ptrace(2) requests to their SunOS
+   equivalents.  GNU/Linux already follows SunOS here.  */
+
+#ifndef PTRACE_GETREGS
+#define PTRACE_GETREGS PT_GETREGS
+#endif
+
+#ifndef PTRACE_SETREGS
+#define PTRACE_SETREGS PT_SETREGS
+#endif
+
+#ifndef PTRACE_GETFPREGS
+#define PTRACE_GETFPREGS PT_GETFPREGS
+#endif
+
+#ifndef PTRACE_SETFPREGS
+#define PTRACE_SETFPREGS PT_SETFPREGS
+#endif
 
 /* Register set description.  */
 const struct sparc_gregset *sparc_gregset;
+void (*sparc_supply_gregset) (const struct sparc_gregset *,
+			      struct regcache *, int , const void *);
+void (*sparc_collect_gregset) (const struct sparc_gregset *,
+			       const struct regcache *, int, void *);
+void (*sparc_supply_fpregset) (struct regcache *, int , const void *);
+void (*sparc_collect_fpregset) (const struct regcache *, int , void *);
+int (*sparc_gregset_supplies_p) (int);
+int (*sparc_fpregset_supplies_p) (int);
 
 /* Determine whether `gregset_t' contains register REGNUM.  */
 
 int
-sparc_gregset_supplies_p (int regnum)
+sparc32_gregset_supplies_p (int regnum)
 {
   /* Integer registers.  */
   if ((regnum >= SPARC_G1_REGNUM && regnum <= SPARC_G7_REGNUM)
@@ -78,8 +114,8 @@ sparc_gregset_supplies_p (int regnum)
 
 /* Determine whether `fpregset_t' contains register REGNUM.  */
 
-static int
-sparc_fpregset_supplies_p (int regnum)
+int
+sparc32_fpregset_supplies_p (int regnum)
 {
   /* Floating-point registers.  */
   if (regnum >= SPARC_F0_REGNUM && regnum <= SPARC_F31_REGNUM)
@@ -99,6 +135,24 @@ void
 fetch_inferior_registers (int regnum)
 {
   struct regcache *regcache = current_regcache;
+  int pid;
+
+  /* NOTE: cagney/2002-12-03: This code assumes that the currently
+     selected light weight processes' registers can be written
+     directly into the selected thread's register cache.  This works
+     fine when given an 1:1 LWP:thread model (such as found on
+     GNU/Linux) but will, likely, have problems when used on an N:1
+     (userland threads) or N:M (userland multiple LWP) model.  In the
+     case of the latter two, the LWP's registers do not necessarily
+     belong to the selected thread (the LWP could be in the middle of
+     executing the thread switch code).
+
+     These functions should instead be paramaterized with an explicit
+     object (struct regcache, struct thread_info?) into which the LWPs
+     registers can be written.  */
+  pid = TIDGET (inferior_ptid);
+  if (pid == 0)
+    pid = PIDGET (inferior_ptid);
 
   if (regnum == SPARC_G0_REGNUM)
     {
@@ -110,8 +164,7 @@ fetch_inferior_registers (int regnum)
     {
       gregset_t regs;
 
-      if (ptrace (PTRACE_GETREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &regs, 0) == -1)
+      if (ptrace (PTRACE_GETREGS, pid, (PTRACE_ARG3_TYPE) &regs, 0) == -1)
 	perror_with_name ("Couldn't get registers");
 
       sparc_supply_gregset (sparc_gregset, regcache, -1, &regs);
@@ -123,8 +176,7 @@ fetch_inferior_registers (int regnum)
     {
       fpregset_t fpregs;
 
-      if (ptrace (PTRACE_GETFPREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
+      if (ptrace (PTRACE_GETFPREGS, pid, (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't get floating point status");
 
       sparc_supply_fpregset (regcache, -1, &fpregs);
@@ -135,19 +187,24 @@ void
 store_inferior_registers (int regnum)
 {
   struct regcache *regcache = current_regcache;
+  int pid;
+
+  /* NOTE: cagney/2002-12-02: See comment in fetch_inferior_registers
+     about threaded assumptions.  */
+  pid = TIDGET (inferior_ptid);
+  if (pid == 0)
+    pid = PIDGET (inferior_ptid);
 
   if (regnum == -1 || sparc_gregset_supplies_p (regnum))
     {
       gregset_t regs;
 
-      if (ptrace (PTRACE_GETREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &regs, 0) == -1)
+      if (ptrace (PTRACE_GETREGS, pid, (PTRACE_ARG3_TYPE) &regs, 0) == -1)
 	perror_with_name ("Couldn't get registers");
 
       sparc_collect_gregset (sparc_gregset, regcache, regnum, &regs);
 
-      if (ptrace (PTRACE_SETREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &regs, 0) == -1)
+      if (ptrace (PTRACE_SETREGS, pid, (PTRACE_ARG3_TYPE) &regs, 0) == -1)
 	perror_with_name ("Couldn't write registers");
 
       /* Deal with the stack regs.  */
@@ -166,17 +223,24 @@ store_inferior_registers (int regnum)
 
   if (regnum == -1 || sparc_fpregset_supplies_p (regnum))
     {
-      fpregset_t fpregs;
+      fpregset_t fpregs, saved_fpregs;
 
-      if (ptrace (PTRACE_GETFPREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
+      if (ptrace (PTRACE_GETFPREGS, pid, (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't get floating-point registers");
 
+      memcpy (&saved_fpregs, &fpregs, sizeof (fpregs));
       sparc_collect_fpregset (regcache, regnum, &fpregs);
 
-      if (ptrace (PTRACE_SETFPREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
-	perror_with_name ("Couldn't write floating-point registers");
+      /* Writing the floating-point registers will fail on NetBSD with
+	 EINVAL if the inferior process doesn't have an FPU state
+	 (i.e. if it didn't use the FPU yet).  Therefore we don't try
+	 to write the registers if nothing changed.  */
+      if (memcmp (&saved_fpregs, &fpregs, sizeof (fpregs)) != 0)
+	{
+	  if (ptrace (PTRACE_SETFPREGS, pid,
+		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
+	    perror_with_name ("Couldn't write floating-point registers");
+	}
 
       if (regnum != -1)
 	return;
@@ -193,4 +257,16 @@ _initialize_sparc_nat (void)
   /* Deafult to using SunOS 4 register sets.  */
   if (sparc_gregset == NULL)
     sparc_gregset = &sparc32_sunos4_gregset;
+  if (sparc_supply_gregset == NULL)
+    sparc_supply_gregset = sparc32_supply_gregset;
+  if (sparc_collect_gregset == NULL)
+    sparc_collect_gregset = sparc32_collect_gregset;
+  if (sparc_supply_fpregset == NULL)
+    sparc_supply_fpregset = sparc32_supply_fpregset;
+  if (sparc_collect_fpregset == NULL)
+    sparc_collect_fpregset = sparc32_collect_fpregset;
+  if (sparc_gregset_supplies_p == NULL)
+    sparc_gregset_supplies_p = sparc32_gregset_supplies_p;
+  if (sparc_fpregset_supplies_p == NULL)
+    sparc_fpregset_supplies_p = sparc32_fpregset_supplies_p;
 }

@@ -1079,12 +1079,10 @@ sparc_collect_rwindow (const struct regcache *regcache,
 
 /* Helper functions for dealing with register sets.  */
 
-/* FIXME: kettenis/20031125: Make these handle 64-bit register sets.  */
-
 void
-sparc_supply_gregset (const struct sparc_gregset *gregset,
-		      struct regcache *regcache,
-		      int regnum, const void *gregs)
+sparc32_supply_gregset (const struct sparc_gregset *gregset,
+			struct regcache *regcache,
+			int regnum, const void *gregs)
 {
   const char *regs = gregs;
   int i;
@@ -1146,9 +1144,9 @@ sparc_supply_gregset (const struct sparc_gregset *gregset,
 }
 
 void
-sparc_collect_gregset (const struct sparc_gregset *gregset,
-		       const struct regcache *regcache,
-		       int regnum, void *gregs)
+sparc32_collect_gregset (const struct sparc_gregset *gregset,
+			 const struct regcache *regcache,
+			 int regnum, void *gregs)
 {
   char *regs = gregs;
   int i;
@@ -1201,8 +1199,8 @@ sparc_collect_gregset (const struct sparc_gregset *gregset,
 }
 
 void
-sparc_supply_fpregset (struct regcache *regcache,
-		       int regnum, const void *fpregs)
+sparc32_supply_fpregset (struct regcache *regcache,
+			 int regnum, const void *fpregs)
 {
   const char *regs = fpregs;
   int i;
@@ -1218,8 +1216,8 @@ sparc_supply_fpregset (struct regcache *regcache,
 }
 
 void
-sparc_collect_fpregset (const struct regcache *regcache,
-			int regnum, void *fpregs)
+sparc32_collect_fpregset (const struct regcache *regcache,
+			  int regnum, void *fpregs)
 {
   char *regs = fpregs;
   int i;
