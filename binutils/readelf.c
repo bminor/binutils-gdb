@@ -177,7 +177,7 @@ static int                display_debug_abbrev        PARAMS ((Elf32_Internal_Sh
 static int                display_debug_aranges       PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static unsigned char *    process_abbrev_section      PARAMS ((unsigned char *, unsigned char *));
 static unsigned long      read_leb128                 PARAMS ((unsigned char *, int *, int));
-static int                process_extended_line_op    PARAMS ((unsigned char *, int));
+static int                process_extended_line_op    PARAMS ((unsigned char *, int, int));
 static void               reset_state_machine         PARAMS ((int));
 static char *             get_TAG_name                PARAMS ((unsigned long));
 static char *             get_AT_name                 PARAMS ((unsigned long));
@@ -4132,9 +4132,10 @@ reset_state_machine (is_stmt)
 /* Handled an extend line op.  Returns true if this is the end
    of sequence.  */
 static int
-process_extended_line_op (data, is_stmt)
+process_extended_line_op (data, is_stmt, pointer_size)
      unsigned char * data;
      int is_stmt;
+     int pointer_size;
 {
   unsigned char   op_code;
   int             bytes_read;
@@ -4164,8 +4165,7 @@ process_extended_line_op (data, is_stmt)
       break;
 
     case DW_LNE_set_address:
-      /* XXX - assumption here that address size is 4! */
-      adr = byte_get (data, 4);
+      adr = byte_get (data, pointer_size);
       printf (_("set Address to 0x%lx\n"), adr);
       state_machine_regs.address = adr;
       break;
@@ -4193,6 +4193,10 @@ process_extended_line_op (data, is_stmt)
   return len;
 }
 
+/* Size of pointers in the .debug_line section.  This information is not
+   really present in that section.  It's obtained before dumping the debug
+   sections by doing some pre-scan of the .debug_info section.  */
+static int debug_line_pointer_size = 4;
 
 static int
 display_debug_lines (section, start, file)
@@ -4330,7 +4334,8 @@ display_debug_lines (section, start, file)
 	  switch (op_code)
 	    {
 	    case DW_LNS_extended_op:
-	      data += process_extended_line_op (data, info.li_default_is_stmt);
+	      data += process_extended_line_op (data, info.li_default_is_stmt,
+                                                debug_line_pointer_size);
 	      break;
 	      
 	    case DW_LNS_copy:
@@ -5817,27 +5822,47 @@ display_debug_not_supported (section, start, file)
   return 1;
 }
 
+/* Pre-scan the .debug_info section to record the size of address.
+   When dumping the .debug_line, we use that size information, assuming
+   that all compilation units have the same address size.  */
+static int
+prescan_debug_info (section, start, file)
+     Elf32_Internal_Shdr * section ATTRIBUTE_UNUSED;
+     unsigned char *       start;
+     FILE *                file ATTRIBUTE_UNUSED;
+{
+  DWARF2_External_CompUnit * external;
+
+  external = (DWARF2_External_CompUnit *) start;
+
+  debug_line_pointer_size = BYTE_GET (external->cu_pointer_size);
+  return 0;
+}
+
   /* A structure containing the name of a debug section and a pointer
-     to a function that can decode it.  */
+     to a function that can decode it.  The third field is a prescan
+     function to be run over the section before displaying any of the
+     sections.  */
 struct
 {
   char * name;
-  int (* display) PARAMS((Elf32_Internal_Shdr *, unsigned char *, FILE *));
+  int (* display) PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
+  int (* prescan) PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 }
 debug_displays[] =
 {
-  { ".debug_info",        display_debug_info },
-  { ".debug_abbrev",      display_debug_abbrev },
-  { ".debug_line",        display_debug_lines },
-  { ".debug_aranges",     display_debug_aranges },
-  { ".debug_pubnames",    display_debug_pubnames },
-  { ".debug_macinfo",     display_debug_not_supported },
-  { ".debug_frame",       display_debug_not_supported },
-  { ".debug_str",         display_debug_not_supported },
-  { ".debug_static_func", display_debug_not_supported },
-  { ".debug_static_vars", display_debug_not_supported },
-  { ".debug_types",       display_debug_not_supported },
-  { ".debug_weaknames",   display_debug_not_supported }
+  { ".debug_info",        display_debug_info, prescan_debug_info },
+  { ".debug_abbrev",      display_debug_abbrev, NULL },
+  { ".debug_line",        display_debug_lines, NULL },
+  { ".debug_aranges",     display_debug_aranges, NULL },
+  { ".debug_pubnames",    display_debug_pubnames, NULL },
+  { ".debug_macinfo",     display_debug_not_supported, NULL },
+  { ".debug_frame",       display_debug_not_supported, NULL },
+  { ".debug_str",         display_debug_not_supported, NULL },
+  { ".debug_static_func", display_debug_not_supported, NULL },
+  { ".debug_static_vars", display_debug_not_supported, NULL },
+  { ".debug_types",       display_debug_not_supported, NULL },
+  { ".debug_weaknames",   display_debug_not_supported, NULL }
 };
 
 static int
@@ -5885,15 +5910,48 @@ static int
 process_section_contents (file)
      FILE * file;
 {
-  Elf32_Internal_Shdr *    section;
-  unsigned int  i;
+  Elf32_Internal_Shdr * section;
+  unsigned int  	i;
 
   if (! do_dump)
     return 1;
 
+  /* Pre-scan the debug sections to find some debug information not
+     present in some of them.  For the .debug_line, we must find out the
+     size of address (specified in .debug_info and .debug_aranges).  */
   for (i = 0, section = section_headers;
-       i < elf_header.e_shnum
-       && i < num_dump_sects;
+       i < elf_header.e_shnum && i < num_dump_sects;
+       i ++, section ++)
+    {
+      char *	name = SECTION_NAME (section);
+      int       j;
+
+      if (section->sh_size == 0)
+        continue;
+
+      /* See if there is some pre-scan operation for this section.  */
+      for (j = NUM_ELEM (debug_displays); j--;)
+        if (strcmp (debug_displays[j].name, name) == 0)
+	  {
+	    if (debug_displays[j].prescan != NULL)
+	      {
+		bfd_size_type   length;
+		unsigned char * start;
+
+		length = section->sh_size;
+		GET_DATA_ALLOC (section->sh_offset, length, start, unsigned char *,
+				"debug section data");
+
+		debug_displays[j].prescan (section, start, file);
+		free (start);
+	      }
+	    
+            break;
+          }
+    }
+
+  for (i = 0, section = section_headers;
+       i < elf_header.e_shnum && i < num_dump_sects;
        i ++, section ++)
     {
 #ifdef SUPPORT_DISASSEMBLY

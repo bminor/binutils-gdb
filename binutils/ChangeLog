@@ -1,3 +1,14 @@
+1999-08-28  Stephane Carrez  <stcarrez@worldnet.fr>
+
+	* readelf.c (process_extended_line_op): New parameter pointer_size,
+	read the address according to pointer_size.
+	(debug_line_pointer_size): New global to indicate the
+	size of address in .debug_line section.
+	(debug_displays, prescan_debug_info): Prescan the .debug_info section
+	to record the size of address in `debug_line_pointer_size'.
+	(process_section_contents): Before dumping any section, execute
+	the pre-scan operation defined for some debug sections.
+
 1999-08-27  Jim Wilson  <wilson@cygnus.com>
 
 	* readelf.c (display_debug_lines): Use i-1 not i in standard_opcodes
