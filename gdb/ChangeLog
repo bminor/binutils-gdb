@@ -1,3 +1,77 @@
+2003-05-29  Richard Henderson  <rth@redhat.com>
+
+	* alpha-linux-tdep.c (alpha_linux_sigtramp_offset_1): New.
+	(alpha_linux_sigtramp_offset): Use it.  Make static.
+	(alpha_linux_sigcontext_addr): Handle __NR_rt_sigreturn;
+	update for new frame model.
+	* alpha-mdebug-tdep.c: New file.
+	* alpha-osf1-tdep.c (alpha_call_dummy_address): Move from alpha-tdep.c.
+	(alpha_osf1_init_abi): Install it.
+	* alpha-tdep.c (PROC_*): Move to alpha-mdebug-tdep.c.
+	(linked_proc_desc_table): Remove.
+	(alpha_frame_past_sigtramp_frame): Remove.
+	(alpha_dynamic_sigtramp_offset): Remove.
+	(ALPHA_PROC_SIGTRAMP_MAGIC): Remove.
+	(alpha_proc_desc_is_dyn_sigtramp): Remove.
+	(alpha_set_proc_desc_is_dyn_sigtramp): Remove.
+	(push_sigtramp_desc): Remove.
+	(alpha_cannot_fetch_register): Use ALPHA_FP_REGNUM.
+	(alpha_cannot_store_register): Likewise.
+	(alpha_sigcontext_addr): Remove.
+	(alpha_find_saved_regs): Remove.
+	(alpha_frame_init_saved_regs): Remove.
+	(alpha_init_frame_pc_first): Remove.
+	(read_next_frame_reg): Remove.
+	(alpha_frame_saved_pc): Remove.
+	(alpha_saved_pc_after_call): Remove.
+	(temp_proc_desc, temp_saved_regs): Remove.
+	(alpha_about_to_return): Remove.
+	(cached_proc_desc): Remove.
+	(alpha_frame_chain): Remove.
+	(alpha_print_extra_frame_info): Remove.
+	(alpha_init_extra_frame_info): Remove.
+	(alpha_frame_locals_address): Remove.
+	(alpha_frame_args_address): Remove.
+	(alpha_push_arguments): Use ALPHA_REGISTER_BYTES not sizeof CORE_ADDR.
+	(alpha_push_dummy_frame): Remove.
+	(alpha_pop_frame): Remove.
+	(alpha_after_prologue): Rename from after_prologue; remove mdebug bits.
+	(alpha_read_insn): New.
+	(alpha_skip_prologue): Merge alpha_skip_prologue_internal; adjust
+	for different insn encodings.
+	(alpha_in_lenient_prologue): Remove.
+	(struct alpha_sigtramp_unwind_cache): New.
+	(alpha_sigtramp_frame_unwind_cache): New.
+	(alpha_sigtramp_register_address): New.
+	(alpha_sigtramp_frame_this_id): New.
+	(alpha_sigtramp_frame_prev_register): New.
+	(alpha_sigtramp_frame_unwind): New.
+	(alpha_sigtramp_frame_p): New.
+	(struct alpha_heuristic_unwind_cache): New.
+	(alpha_heuristic_proc_start): Rename from heuristic_proc_start;
+	don't count nop insns that occur between functions.
+	(alpha_heuristic_frame_unwind_cache): New; incorporate much of
+	heuristic_proc_desc, but without the mdebug wrapping.
+	(alpha_heuristic_frame_this_id): New.
+	(alpha_heuristic_frame_prev_register): New.
+	(alpha_heuristic_frame_unwind): New.
+	(alpha_heuristic_frame_p): New.
+	(alpha_heuristic_frame_base_address): New.
+	(alpha_heuristic_frame_base): New.
+	(alpha_unwind_dummy_id): New.
+	(alpha_unwind_pc): New.
+	(alpha_gdbarch_init): Don't set skip_sigtramp_frame.  Kill use of
+	frame related deprecated initializations; install replacements.
+	(alpha_dump_tdep): Remove.
+	* alpha-tdep.h (struct gdbarch_tdep): Remove skip_sigtramp_frame.
+	(alpha_read_insn, alpha_after_prologue,
+	alpha_heuristic_frame_unwind_cache, alpha_heuristic_frame_this_id,
+	alpha_heuristic_frame_prev_register,
+	alpha_heuristic_frame_base_address, alpha_mdebug_init_abi): Declare.
+	* config/alpha/alpha-linux.mt (TDEPFILES): Add alpha-mdebug-tdep.o.
+	* config/alpha/tm-alpha.h (PRINT_EXTRA_FRAME_INFO): Remove.
+	* config/alpha/tm-alphalinux.h (SIGTRAMP_START, SIGTRAMP_END): Remove.
+
 2003-05-29  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb_assert.h (gdb_assert_fail): Provide different definitions

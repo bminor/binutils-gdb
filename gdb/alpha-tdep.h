@@ -80,19 +80,15 @@
 /* Target-dependent structure in gdbarch.  */
 struct gdbarch_tdep
 {
-  CORE_ADDR vm_min_address;	/* used by heuristic_proc_start */
+  CORE_ADDR vm_min_address;	/* Used by alpha_heuristic_proc_start.  */
 
   /* If PC is inside a dynamically-generated signal trampoline function
      (i.e. one copied onto the user stack at run-time), return how many
      bytes PC is beyond the start of that function.  Otherwise, return -1.  */
   LONGEST (*dynamic_sigtramp_offset) (CORE_ADDR);
 
-  /* If FRAME refers to a sigtramp frame, return the address of the next
-     frame.  */
-  CORE_ADDR (*skip_sigtramp_frame) (struct frame_info *, CORE_ADDR);
-
-  /* Translate a signal handler frame into the address of the sigcontext
-     structure for that signal handler.  */
+  /* Translate a signal handler stack base address into the address of
+     the sigcontext structure for that signal handler.  */
   CORE_ADDR (*sigcontext_addr) (struct frame_info *);
 
   int jb_pc;			/* Offset to PC value in jump buffer.
@@ -101,6 +97,22 @@ struct gdbarch_tdep
   size_t jb_elt_size;		/* And the size of each entry in the buf. */
 };
 
-void alpha_software_single_step (enum target_signal, int);
+extern unsigned int alpha_read_insn (CORE_ADDR pc);
+extern void alpha_software_single_step (enum target_signal, int);
+
+/* Let other files poke at the heuristic unwinder.  */
+extern CORE_ADDR alpha_after_prologue (CORE_ADDR pc);
+extern struct alpha_heuristic_unwind_cache *
+  alpha_heuristic_frame_unwind_cache (struct frame_info *, void **, CORE_ADDR);
+extern void alpha_heuristic_frame_this_id (struct frame_info *, void **,
+					   struct frame_id *);
+extern void alpha_heuristic_frame_prev_register (struct frame_info *,
+						 void **, int, int *,
+						 enum lval_type *,
+						 CORE_ADDR *, int *, void *);
+extern CORE_ADDR alpha_heuristic_frame_base_address (struct frame_info *,
+						     void **);
+
+extern void alpha_mdebug_init_abi (struct gdbarch_info, struct gdbarch *);
 
 #endif /* ALPHA_TDEP_H */
