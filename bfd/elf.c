@@ -2,24 +2,24 @@
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
-   This file is part of BFD, the Binary File Descriptor library.
+This file is part of BFD, the Binary File Descriptor library.
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software 
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*  SECTION
-    
+
 	ELF backends
 
 	BFD support for ELF formats is being worked on.
@@ -726,7 +726,7 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
 	      /* This section is part of this segment if its file
 		 offset plus size lies within the segment's memory
 		 span and, if the section is loaded, the extent of the
-		 loaded data lies within the extent of the segment.  
+		 loaded data lies within the extent of the segment.
 
 		 Note - we used to check the p_paddr field as well, and
 		 refuse to set the LMA if it was 0.  This is wrong
@@ -869,7 +869,7 @@ merge_sections_remove_hook (abfd, sec)
      asection *sec;
 {
   struct bfd_elf_section_data *sec_data;
-    
+
   sec_data = elf_section_data (sec);
   BFD_ASSERT (sec_data->sec_info_type == ELF_INFO_TYPE_MERGE);
   sec_data->sec_info_type = ELF_INFO_TYPE_NONE;
@@ -3484,7 +3484,7 @@ assign_file_positions_for_segments (abfd)
 	    {
 	      if ((m->sections[i]->flags & SEC_ALLOC) != 0)
 		{
-		  if (i != new_count) 
+		  if (i != new_count)
 		    m->sections[new_count] = m->sections[i];
 
 		  new_count ++;
@@ -3550,12 +3550,12 @@ assign_file_positions_for_segments (abfd)
       asection **secpp;
 
       /* If elf_segment_map is not from map_sections_to_segments, the
-         sections may not be correctly ordered.  NOTE: sorting should 
+         sections may not be correctly ordered.  NOTE: sorting should
 	 not be done to the PT_NOTE section of a corefile, which may
 	 contain several pseudo-sections artificially created by bfd.
 	 Sorting these pseudo-sections breaks things badly.  */
-      if (m->count > 1 
-	  && !(elf_elfheader (abfd)->e_type == ET_CORE 
+      if (m->count > 1
+	  && !(elf_elfheader (abfd)->e_type == ET_CORE
 	       && m->p_type == PT_NOTE))
 	qsort (m->sections, (size_t) m->count, sizeof (asection *),
 	       elf_sort_sections);
@@ -5003,15 +5003,15 @@ _bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
      This must be done here, rather than in the copy_private_bfd_data
      entry point, because the latter is called after the section
      contents have been set, which means that the program headers have
-     already been worked out.  The backend function provides a way to 
-     override the test conditions and code path for the call to 
+     already been worked out.  The backend function provides a way to
+     override the test conditions and code path for the call to
      copy_private_bfd_data.  */
   if (bed->copy_private_bfd_data_p)
     {
       if ((*bed->copy_private_bfd_data_p) (ibfd, isec, obfd, osec))
         if (! copy_private_bfd_data (ibfd, obfd))
           return false;
-    } 
+    }
   else if (elf_tdata (obfd)->segment_map == NULL && elf_tdata (ibfd)->phdr != NULL)
     {
 	asection *s;
@@ -6758,7 +6758,7 @@ elfcore_grok_netbsd_note (abfd, note)
          find this note before any of the others, which is fine,
          since the kernel writes this note out first when it
          creates a core file.  */
-      
+
       return elfcore_grok_netbsd_procinfo (abfd, note);
     }
 
@@ -6766,7 +6766,7 @@ elfcore_grok_netbsd_note (abfd, note)
      defined for NetBSD core files.  If the note type is less
      than the start of the machine-dependent note types, we don't
      understand it.  */
-  
+
   if (note->type < NT_NETBSDCORE_FIRSTMACH)
     return true;
 
@@ -6811,7 +6811,7 @@ elfcore_grok_netbsd_note (abfd, note)
 
 /* Function: elfcore_write_note
 
-   Inputs: 
+   Inputs:
      buffer to hold note
      name of note
      type of note
@@ -6878,7 +6878,7 @@ elfcore_write_prpsinfo (abfd, buf, bufsiz, fname, psargs)
      bfd  *abfd;
      char *buf;
      int  *bufsiz;
-     const char *fname; 
+     const char *fname;
      const char *psargs;
 {
   int note_type;
@@ -6895,7 +6895,7 @@ elfcore_write_prpsinfo (abfd, buf, bufsiz, fname, psargs)
   memset (&data, 0, sizeof (data));
   strncpy (data.pr_fname, fname, sizeof (data.pr_fname));
   strncpy (data.pr_psargs, psargs, sizeof (data.pr_psargs));
-  return elfcore_write_note (abfd, buf, bufsiz, 
+  return elfcore_write_note (abfd, buf, bufsiz,
 			     note_name, note_type, &data, sizeof (data));
 }
 #endif	/* PSINFO_T or PRPSINFO_T */
@@ -6917,7 +6917,7 @@ elfcore_write_prstatus (abfd, buf, bufsiz, pid, cursig, gregs)
   prstat.pr_pid = pid;
   prstat.pr_cursig = cursig;
   memcpy (&prstat.pr_reg, gregs, sizeof (prstat.pr_reg));
-  return elfcore_write_note (abfd, buf, bufsiz, 
+  return elfcore_write_note (abfd, buf, bufsiz,
 			     note_name, NT_PRSTATUS, &prstat, sizeof (prstat));
 }
 #endif /* HAVE_PRSTATUS_T */
@@ -6949,7 +6949,7 @@ elfcore_write_lwpstatus (abfd, buf, bufsiz, pid, cursig, gregs)
 	  gregs, sizeof (lwpstat.pr_context.uc_mcontext.__gregs));
 #endif
 #endif
-  return elfcore_write_note (abfd, buf, bufsiz, note_name, 
+  return elfcore_write_note (abfd, buf, bufsiz, note_name,
 			     NT_LWPSTATUS, &lwpstat, sizeof (lwpstat));
 }
 #endif /* HAVE_LWPSTATUS_T */
@@ -6969,7 +6969,7 @@ elfcore_write_pstatus (abfd, buf, bufsiz, pid, cursig, gregs)
 
   memset (&pstat, 0, sizeof (pstat));
   pstat.pr_pid = pid & 0xffff;
-  buf = elfcore_write_note (abfd, buf, bufsiz, note_name, 
+  buf = elfcore_write_note (abfd, buf, bufsiz, note_name,
 			    NT_PSTATUS, &pstat, sizeof (pstat));
   return buf;
 }
@@ -6984,7 +6984,7 @@ elfcore_write_prfpreg (abfd, buf, bufsiz, fpregs, size)
      int size;
 {
   char *note_name = "CORE";
-  return elfcore_write_note (abfd, buf, bufsiz, 
+  return elfcore_write_note (abfd, buf, bufsiz,
 			     note_name, NT_FPREGSET, fpregs, size);
 }
 
@@ -6997,7 +6997,7 @@ elfcore_write_prxfpreg (abfd, buf, bufsiz, xfpregs, size)
      int size;
 {
   char *note_name = "LINUX";
-  return elfcore_write_note (abfd, buf, bufsiz, 
+  return elfcore_write_note (abfd, buf, bufsiz,
 			     note_name, NT_PRXFPREG, xfpregs, size);
 }
 
@@ -7178,7 +7178,7 @@ _bfd_elf_reloc_type_class (rela)
   return reloc_class_normal;
 }
 
-/* For RELA architectures, return what the relocation value for
+/* For RELA architectures, return the relocation value for a
    relocation against a local symbol.  */
 
 bfd_vma
@@ -7217,7 +7217,7 @@ _bfd_elf_rel_local_sym (abfd, sym, psec, addend)
      Elf_Internal_Sym *sym;
      asection **psec;
      bfd_vma addend;
-{     
+{
   asection *sec = *psec;
 
   if (elf_section_data (sec)->sec_info_type != ELF_INFO_TYPE_MERGE)
