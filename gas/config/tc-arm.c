@@ -6897,13 +6897,14 @@ cons_fix_new_arm (frag, where, size, exp)
 {
   bfd_reloc_code_real_type type;
   int pcrel = 0;
-  
-  /* Pick a reloc ...
-   *
-   * @@ Should look at CPU word size.
-   */
+
+  /* Pick a reloc.
+     FIXME: @@ Should look at CPU word size.  */
   switch (size) 
     {
+    case 1:
+      type = BFD_RELOC_8;
+      break;
     case 2:
       type = BFD_RELOC_16;
       break;
