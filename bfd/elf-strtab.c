@@ -352,7 +352,7 @@ _bfd_elf_strtab_finalize (tab)
 
   qsort (array, size, sizeof (struct elf_strtab_hash_entry *), cmplengthentry);
 
-  last4tab = htab_create (size * 4, NULL, last4_eq, NULL);
+  last4tab = htab_create_alloc (size * 4, NULL, last4_eq, NULL, calloc, free);
   if (last4tab == NULL)
     goto alloc_failure;
 

@@ -652,8 +652,10 @@ merge_strings (sinfo)
   qsort (array, (size_t) sinfo->htab->size,
 	 sizeof (struct sec_merge_hash_entry *), cmplengthentry);
 
-  last4tab = htab_create ((size_t) sinfo->htab->size * 4, NULL, last4_eq, NULL);
-  lasttab = htab_create ((size_t) sinfo->htab->size * 4, NULL, last_eq, NULL);
+  last4tab = htab_create_alloc ((size_t) sinfo->htab->size * 4, 
+				NULL, last4_eq, NULL, calloc, free);
+  lasttab = htab_create_alloc ((size_t) sinfo->htab->size * 4, 
+			       NULL, last_eq, NULL, calloc, free);
   if (lasttab == NULL || last4tab == NULL)
     goto alloc_failure;
 
