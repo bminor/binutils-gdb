@@ -50,6 +50,7 @@ irix3.h
 irix4.h
 miniframe.h
 mipsbsd.h
+news.h
 ncr3000.h
 rs6000.h
 rtbsd.h
