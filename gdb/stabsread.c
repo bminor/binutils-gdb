@@ -3122,7 +3122,7 @@ read_huge_number (pp, end, bits)
     }
 
   upper_limit = LONG_MAX / radix;
-  while ((c = *p++) >= '0' && c <= ('0' + radix))
+  while ((c = *p++) >= '0' && c < ('0' + radix))
     {
       if (n <= upper_limit)
 	{
