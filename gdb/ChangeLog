@@ -1,3 +1,7 @@
+2001-02-14  Jim Kingdon  <jkingdon@engr.sgi.com>
+
+	* MAINTAINERS: Add myself to paper trail section.
+
 2001-02-14  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* configure.in (AC_CHECK_HEADERS): Add sys/file.h.

@@ -279,7 +279,7 @@ tui			Technical Contact Point	wdb@cup.hp.com
 
 Misc:
 
-Web pages.		Jim Kingdon		kingdon@engr.sgi.com
+Web pages.		Jim Kingdon		jkingdon@engr.sgi.com  ++
 			(anyone can edit; kingdon is just lead maintainer)
 
 Makefile.in, configure*	ALL
@@ -299,7 +299,7 @@ readline/		Master version: ftp://ftp.cwru.edu/pub/bash/
 		Write After Approval
 
 David Anderson					davea@sgi.com
-Jim Kingdon					kingdon@engr.sgi.com
+Jim Kingdon					jkingdon@engr.sgi.com  ++
 Jason Molenda					jsm@cygnus.com
 H.J. Lu						hjl@lucon.org
 Nick Clifton					nickc@cygnus.com
@@ -321,5 +321,6 @@ David Smith					dsmith@redhat.com
 can write in the source tree
 
 
-Folks that have been caught up in a paper trail:
+++ Folks that have been caught up in a paper trail:
 
+Jim Kingdon					jkingdon@engr.sgi.com
