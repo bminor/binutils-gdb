@@ -1,3 +1,8 @@
+Wed Dec 20 14:57:17 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (load_address): Correctly handle a constant in
+	SVR4_PIC case.  From Richard Kenner <kenner@vlsi1.ultra.nyu.edu>.
+
 Fri Dec 15 14:25:07 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* config/tc-sh.c (parse_reg): Recognize SH3 registers.
