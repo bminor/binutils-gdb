@@ -1,3 +1,10 @@
+2002-05-24  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v-tdep.c (d10v_gdbarch_init): Revert old code included in
+	change `2002-05-22 Michael Snyder' below.
+	(d10v_push_arguments): Ditto.
+	(d10v_extract_return_value): Ditto.
+
 2002-05-23  Jim Blandy  <jimb@redhat.com>
 
 	* macrotab.c (check_for_redefinition): Don't complain if the new
