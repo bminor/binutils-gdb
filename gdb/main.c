@@ -300,10 +300,6 @@ captured_main (void *data)
       {"statistics", no_argument, 0, 13},
       {"write", no_argument, &write_files, 1},
       {"args", no_argument, &set_args, 1},
-/* Allow machine descriptions to add more options... */
-#ifdef ADDITIONAL_OPTIONS
-      ADDITIONAL_OPTIONS
-#endif
       {0, no_argument, 0, 0}
     };
 
@@ -444,9 +440,6 @@ extern int gdbtk_test (char *);
 	    }
 	    break;
 
-#ifdef ADDITIONAL_OPTION_CASES
-	    ADDITIONAL_OPTION_CASES
-#endif
 	  case '?':
 	    fprintf_unfiltered (gdb_stderr,
 			_("Use `%s --help' for a complete list of options.\n"),
@@ -643,10 +636,6 @@ extern int gdbtk_test (char *);
   if (ttyarg != NULL)
     catch_command_errors (tty_command, ttyarg, !batch, RETURN_MASK_ALL);
 
-#ifdef ADDITIONAL_OPTION_HANDLER
-  ADDITIONAL_OPTION_HANDLER;
-#endif
-
   /* Error messages should no longer be distinguished with extra output. */
   error_pre_print = NULL;
   quit_pre_print = NULL;
@@ -835,9 +824,6 @@ Options:\n\n\
   --write            Set writing into executable and core files.\n\
   --xdb              XDB compatibility mode.\n\
 "), stream);
-#ifdef ADDITIONAL_OPTION_HELP
-  fputs_unfiltered (ADDITIONAL_OPTION_HELP, stream);
-#endif
   fputs_unfiltered (_("\n\
 For more information, type \"help\" from within GDB, or consult the\n\
 GDB manual (available as on-line info or a printed manual).\n\

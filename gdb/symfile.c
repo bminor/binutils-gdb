@@ -1652,11 +1652,11 @@ generic_load (char *args, int from_tty)
      for other targets too.  */
   write_pc (entry);
 
-  /* FIXME: are we supposed to call symbol_file_add or not?  According to
-     a comment from remote-mips.c (where a call to symbol_file_add was
-     commented out), making the call confuses GDB if more than one file is
-     loaded in.  remote-nindy.c had no call to symbol_file_add, but remote-vx.c
-     does.  */
+  /* FIXME: are we supposed to call symbol_file_add or not?  According
+     to a comment from remote-mips.c (where a call to symbol_file_add
+     was commented out), making the call confuses GDB if more than one
+     file is loaded in.  Some targets do (e.g., remote-vx.c) but
+     others don't (or didn't - perhaphs they have all been deleted).  */
 
   print_transfer_performance (gdb_stdout, cbdata.data_count, 
 			      cbdata.write_count, end_time - start_time);

@@ -2295,9 +2295,8 @@ always linked in.)
 
 @item USG
 Means that System V (prior to SVR4) include files are in use.  (FIXME:
-This symbol is abused in @file{infrun.c}, @file{regex.c},
-@file{remote-nindy.c}, and @file{utils.c} for other things, at the
-moment.)
+This symbol is abused in @file{infrun.c}, @file{regex.c}, and
+@file{utils.c} for other things, at the moment.)
 
 @item lint
 Define this to help placate @code{lint} in some situations.
@@ -2913,18 +2912,6 @@ machine.
 
 @table @code
 
-@item ADDITIONAL_OPTIONS
-@itemx ADDITIONAL_OPTION_CASES
-@itemx ADDITIONAL_OPTION_HANDLER
-@itemx ADDITIONAL_OPTION_HELP
-@findex ADDITIONAL_OPTION_HELP
-@findex ADDITIONAL_OPTION_HANDLER
-@findex ADDITIONAL_OPTION_CASES
-@findex ADDITIONAL_OPTIONS
-These are a set of macros that allow the addition of additional command
-line options to @value{GDBN}.  They are currently used only for the unsupported
-i960 Nindy target, and should not be used in any other configuration.
-
 @item ADDR_BITS_REMOVE (addr)
 @findex ADDR_BITS_REMOVE
 If a raw machine instruction address includes any bits that are not
@@ -2989,16 +2976,6 @@ Store in @var{buf} a pointer of type @var{type} representing the address
 This macro may safely assume that @var{type} is either a pointer or a
 C@t{++} reference type.
 @xref{Target Architecture Definition, , Pointers Are Not Always Addresses}.
-
-@item BEFORE_MAIN_LOOP_HOOK
-@findex BEFORE_MAIN_LOOP_HOOK
-Define this to expand into any code that you want to execute before the
-main loop starts.  Although this is not, strictly speaking, a target
-conditional, that is how it is currently being used.  Note that if a
-configuration were to define it one way for a host and a different way
-for the target, @value{GDBN} will probably not compile, let alone run
-correctly.  This macro is currently used only for the unsupported i960 Nindy
-target, and should not be used in any other configuration.
 
 @item BELIEVE_PCC_PROMOTION
 @findex BELIEVE_PCC_PROMOTION
@@ -3149,12 +3126,6 @@ Currently only implemented correctly for native Sparc configurations?
 Return non-zero if register @var{regnum} can represent data values in a
 non-standard form.
 @xref{Target Architecture Definition, , Using Different Register and Memory Data Representations}.
-
-@item DBX_PARM_SYMBOL_CLASS
-@findex DBX_PARM_SYMBOL_CLASS
-Hook for the @code{SYMBOL_CLASS} of a parameter when decoding DBX symbol
-information.  In the i960, parameters can be stored as locals or as
-args, depending on the type of the debug record.
 
 @item DECR_PC_AFTER_BREAK
 @findex DECR_PC_AFTER_BREAK

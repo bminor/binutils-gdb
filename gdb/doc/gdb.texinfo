@@ -11414,7 +11414,6 @@ configurations.
 * ARM::                         ARM
 * H8/300::                      Hitachi H8/300
 * H8/500::                      Hitachi H8/500
-* i960::                        Intel i960
 * M32R/D::                      Mitsubishi M32R/D
 * M68K::                        Motorola M68K
 * MIPS Embedded::               MIPS Embedded
@@ -11667,128 +11666,6 @@ memory}.  The accepted values for @var{mod} are @code{small},
 @code{big}, @code{medium}, and @code{compact}.
 
 @end table
-
-@node i960
-@subsection Intel i960
-
-@table @code
-
-@kindex target mon960
-@item target mon960 @var{dev}
-MON960 monitor for Intel i960.
-
-@kindex target nindy
-@item target nindy @var{devicename}
-An Intel 960 board controlled by a Nindy Monitor.  @var{devicename} is
-the name of the serial device to use for the connection, e.g.
-@file{/dev/ttya}.
-
-@end table
-
-@cindex Nindy
-@cindex i960
-@dfn{Nindy} is a ROM Monitor program for Intel 960 target systems.  When
-@value{GDBN} is configured to control a remote Intel 960 using Nindy, you can
-tell @value{GDBN} how to connect to the 960 in several ways:
-
-@itemize @bullet
-@item
-Through command line options specifying serial port, version of the
-Nindy protocol, and communications speed;
-
-@item
-By responding to a prompt on startup;
-
-@item
-By using the @code{target} command at any point during your @value{GDBN}
-session.  @xref{Target Commands, ,Commands for managing targets}.
-
-@end itemize
-
-@cindex download to Nindy-960
-With the Nindy interface to an Intel 960 board, @code{load}
-downloads @var{filename} to the 960 as well as adding its symbols in
-@value{GDBN}.
-
-@menu
-* Nindy Startup::               Startup with Nindy
-* Nindy Options::               Options for Nindy
-* Nindy Reset::                 Nindy reset command
-@end menu
-
-@node Nindy Startup
-@subsubsection Startup with Nindy
-
-If you simply start @code{@value{GDBP}} without using any command-line
-options, you are prompted for what serial port to use, @emph{before} you
-reach the ordinary @value{GDBN} prompt:
-
-@smallexample
-Attach /dev/ttyNN -- specify NN, or "quit" to quit:
-@end smallexample
-
-@noindent
-Respond to the prompt with whatever suffix (after @samp{/dev/tty})
-identifies the serial port you want to use.  You can, if you choose,
-simply start up with no Nindy connection by responding to the prompt
-with an empty line.  If you do this and later wish to attach to Nindy,
-use @code{target} (@pxref{Target Commands, ,Commands for managing targets}).
-
-@node Nindy Options
-@subsubsection Options for Nindy
-
-These are the startup options for beginning your @value{GDBN} session with a
-Nindy-960 board attached:
-
-@table @code
-@item -r @var{port}
-Specify the serial port name of a serial interface to be used to connect
-to the target system.  This option is only available when @value{GDBN} is
-configured for the Intel 960 target architecture.  You may specify
-@var{port} as any of: a full pathname (e.g. @samp{-r /dev/ttya}), a
-device name in @file{/dev} (e.g. @samp{-r ttya}), or simply the unique
-suffix for a specific @code{tty} (e.g. @samp{-r a}).
-
-@item -O
-(An uppercase letter ``O'', not a zero.)  Specify that @value{GDBN} should use
-the ``old'' Nindy monitor protocol to connect to the target system.
-This option is only available when @value{GDBN} is configured for the Intel 960
-target architecture.
-
-@quotation
-@emph{Warning:} if you specify @samp{-O}, but are actually trying to
-connect to a target system that expects the newer protocol, the connection
-fails, appearing to be a speed mismatch.  @value{GDBN} repeatedly
-attempts to reconnect at several different line speeds.  You can abort
-this process with an interrupt.
-@end quotation
-
-@item -brk
-Specify that @value{GDBN} should first send a @code{BREAK} signal to the target
-system, in an attempt to reset it, before connecting to a Nindy target.
-
-@quotation
-@emph{Warning:} Many target systems do not have the hardware that this
-requires; it only works with a few boards.
-@end quotation
-@end table
-
-The standard @samp{-b} option controls the line speed used on the serial
-port.
-
-@c @group
-@node Nindy Reset
-@subsubsection Nindy reset command
-
-@table @code
-@item reset
-@kindex reset
-For a Nindy target, this command sends a ``break'' to the remote target
-system; this is only useful if the target has been equipped with a
-circuit to perform a hard reset (or some other interesting action) when
-a break is detected.
-@end table
-@c @end group
 
 @node M32R/D
 @subsection Mitsubishi M32R/D

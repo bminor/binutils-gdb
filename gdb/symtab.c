@@ -716,11 +716,11 @@ fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
    attractive to put in some QUIT's (though I'm not really sure
    whether it can run long enough to be really important).  But there
    are a few calls for which it would appear to be bad news to quit
-   out of here: find_proc_desc in alpha-tdep.c and mips-tdep.c, and
-   nindy_frame_chain_valid in nindy-tdep.c.  (Note that there is C++
-   code below which can error(), but that probably doesn't affect
-   these calls since they are looking for a known variable and thus
-   can probably assume it will never hit the C++ code).  */
+   out of here: find_proc_desc in alpha-tdep.c and mips-tdep.c.  (Note
+   that there is C++ code below which can error(), but that probably
+   doesn't affect these calls since they are looking for a known
+   variable and thus can probably assume it will never hit the C++
+   code).  */
 
 struct symbol *
 lookup_symbol (const char *name, const struct block *block,

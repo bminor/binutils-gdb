@@ -1646,13 +1646,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       else
 	SYMBOL_TYPE (sym) = read_type (&p, objfile);
 
-      /* Normally this is a parameter, a LOC_ARG.  On the i960, it
-         can also be a LOC_LOCAL_ARG depending on symbol type.  */
-#ifndef DBX_PARM_SYMBOL_CLASS
-#define	DBX_PARM_SYMBOL_CLASS(type)	LOC_ARG
-#endif
-
-      SYMBOL_CLASS (sym) = DBX_PARM_SYMBOL_CLASS (type);
+      SYMBOL_CLASS (sym) = LOC_ARG;
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       add_symbol_to_list (sym, &local_symbols);

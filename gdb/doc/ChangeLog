@@ -1,6 +1,15 @@
 2003-02-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete
+	description of ADDITIONAL_OPTIONS, ADDITIONAL_OPTION_CASES,
+	ADDITIONAL_OPTION_HANDLER, and ADDITIONAL_OPTION_HELP, and
+	BEFORE_MAIN_LOOP_HOOK, and DBX_PARM_SYMBOL_CLASS along with
+	references to nindy and i960.
+	* gdb.texinfo (i960): Delete all references to i960 and nindy.
+
+2003-02-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
 	FLOAT_INFO.
 
 2003-01-30  Andrew Cagney  <ac131313@redhat.com>
