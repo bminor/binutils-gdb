@@ -361,6 +361,34 @@ The HOWTO define is horrible and will go away.
   {(unsigned)C,R,S,B, P, BI, ABS,O,SF,NAME,INPLACE,MASKSRC,MASKDST,PC}
 *-
 
+And will be replaced with the totally magic way. But for the moment,
+we are compatible, so do it this way..
+
+*+
+#define NEWHOWTO( FUNCTION, NAME,SIZE,REL) HOWTO(0,0,SIZE,0,REL,0,false,false,FUNCTION, NAME,false,0,0,false)
+*-
+
+Helper routine to turn a symbol into a relocation value.
+
+*+
+
+
+#define HOWTO_PREPARE(relocation, symbol) 	\
+  {						\
+  if (symbol != (asymbol *)NULL) {		\
+    if (symbol->flags & BSF_FORT_COMM) {	\
+      relocation = 0;				\
+    }						\
+    else {					\
+      relocation = symbol->value;		\
+    }						\
+  }						\
+  if (symbol->section != (asection *)NULL) {	\
+    relocation += symbol->section->output_section->vma +	\
+      symbol->section->output_offset;		\
+  }						\
+}			
+*-
 */
 
 /*proto* reloc_chain
