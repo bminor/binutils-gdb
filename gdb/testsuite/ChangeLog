@@ -1,3 +1,8 @@
+2000-04-10  Fernando Nasser  <fnasser@cygnus.com>
+
+	From Franz Sirl <Franz.Sirl-kernel@lauterbach.com>
+	* gdb.base/structs2.c: Support platforms defaulting to a unsigned char.
+
 2000-04-07  J.T. Conklin  <jtc@redback.com>
 
 	* gdb.base/call-ar-st.exp: Relax patterns matching tab characters.
