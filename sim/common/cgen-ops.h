@@ -222,6 +222,7 @@ extern DI EXTQIDI (QI);
 #else
 #define EXTQIDI(x) ((DI) (QI) (x))
 #endif
+#define EXTHIHI(x) ((HI) (HI) (x))
 #define EXTHISI(x) ((SI) (HI) (x))
 #define EXTSISI(x) ((SI) (SI) (x))
 #if defined (DI_FN_SUPPORT)

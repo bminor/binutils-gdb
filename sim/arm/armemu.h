@@ -95,6 +95,7 @@ extern ARMword isize;
 #define CLEARV state->VFlag = 0
 #define ASSIGNV(res) state->VFlag = res
 
+
 #define IFLAG (state->IFFlags >> 1)
 #define FFLAG (state->IFFlags & 1)
 #define IFFLAGS state->IFFlags
@@ -367,6 +368,8 @@ extern unsigned ARMul_NthReg(ARMword instr,unsigned number) ;
 extern void ARMul_MSRCpsr(ARMul_State *state, ARMword instr, ARMword rhs) ;
 extern void ARMul_NegZero(ARMul_State *state, ARMword result) ;
 extern void ARMul_AddCarry(ARMul_State *state, ARMword a, ARMword b, ARMword result) ;
+extern int AddOverflow(ARMword a, ARMword b, ARMword result) ;
+extern int SubOverflow(ARMword a, ARMword b, ARMword result) ;
 extern void ARMul_AddOverflow(ARMul_State *state, ARMword a, ARMword b, ARMword result) ;
 extern void ARMul_SubCarry(ARMul_State *state, ARMword a, ARMword b, ARMword result) ;
 extern void ARMul_SubOverflow(ARMul_State *state, ARMword a, ARMword b, ARMword result) ;

@@ -391,6 +391,20 @@ void ARMul_NegZero(ARMul_State *state, ARMword result)
  else { CLEARN ; CLEARZ ; } ;
  }
 
+/* Compute whether an addition of A and B, giving RESULT, overflowed.  */
+int AddOverflow (ARMword a, ARMword b, ARMword result)
+{
+  return ((NEG (a) && NEG (b) && POS (result))
+	  || (POS (a) && POS (b) && NEG (result)));
+}
+
+/* Compute whether a subtraction of A and B, giving RESULT, overflowed.  */
+int SubOverflow (ARMword a, ARMword b, ARMword result)
+{
+  return ((NEG (a) && POS (b) && POS (result))
+	  || (POS (a) && NEG (b) && NEG (result)));
+}
+
 /***************************************************************************\
 * Assigns the C flag after an addition of a and b to give result            *
 \***************************************************************************/
@@ -408,9 +422,8 @@ void ARMul_AddCarry(ARMul_State *state, ARMword a,ARMword b,ARMword result)
 
 void ARMul_AddOverflow(ARMul_State *state, ARMword a,ARMword b,ARMword result)
 {
- ASSIGNV( (NEG(a) && NEG(b) && POS(result)) ||
-          (POS(a) && POS(b) && NEG(result)) ) ;
- }
+  ASSIGNV (AddOverflow (a, b, result));
+}
 
 /***************************************************************************\
 * Assigns the C flag after an subtraction of a and b to give result         *
@@ -429,8 +442,7 @@ ASSIGNC( (NEG(a) && POS(b)) ||
 
 void ARMul_SubOverflow(ARMul_State *state,ARMword a,ARMword b,ARMword result)
 {
-ASSIGNV( (NEG(a) && POS(b) && POS(result)) ||
-         (POS(a) && NEG(b) && NEG(result)) ) ;
+  ASSIGNV (SubOverflow (a, b, result));
 }
 
 /***************************************************************************\
