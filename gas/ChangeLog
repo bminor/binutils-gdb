@@ -1,3 +1,9 @@
+2000-09-23  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-hppa.c (hppa_fix_adjustable): Do the external and weak
+	checks only for ELF.
+	(hppa_force_relocation): Likewise.
+
 2000-09-22  Jim Wilson  <wilson@cygnus.com>
 
 	* config/tc-ia64.c (dv_sem): Add "stop".

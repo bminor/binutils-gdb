@@ -8310,6 +8310,10 @@ hppa_fix_adjustable (fixp)
   if (fixp->fx_r_type == (int) R_PARISC_GNU_VTINHERIT
       || fixp->fx_r_type ==  (int) R_PARISC_GNU_VTENTRY)
     return 0;
+
+  if (fixp->fx_addsy && (S_IS_EXTERNAL (fixp->fx_addsy)
+			 || S_IS_WEAK (fixp->fx_addsy)))
+    return 0;
 #endif
 
   /* Reject reductions of symbols in sym1-sym2 expressions when
@@ -8372,10 +8376,6 @@ hppa_fix_adjustable (fixp)
       || hppa_fix->fx_r_field == e_lpsel)
     return 0;
 
-  if (fixp->fx_addsy && (S_IS_EXTERNAL (fixp->fx_addsy)
-			 || S_IS_WEAK (fixp->fx_addsy)))
-    return 0;
-
   /* Reject absolute calls (jumps).  */
   if (hppa_fix->fx_r_type == R_HPPA_ABS_CALL)
     return 0;
@@ -8414,13 +8414,13 @@ hppa_force_relocation (fixp)
   if (fixp->fx_r_type == (int) R_PARISC_GNU_VTINHERIT
       || fixp->fx_r_type == (int) R_PARISC_GNU_VTENTRY)
     return 1;
-#endif
 
   /* Ensure we emit a relocation for global symbols so that dynamic
      linking works.  */
   if (fixp->fx_addsy && (S_IS_EXTERNAL (fixp->fx_addsy)
 			 || S_IS_WEAK (fixp->fx_addsy)))
     return 1;
+#endif
 
   /* It is necessary to force PC-relative calls/jumps to have a relocation
      entry if they're going to need either a argument relocation or long
