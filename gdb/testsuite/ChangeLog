@@ -22,6 +22,10 @@
 	stop on the call statement as well as the statement after the
 	call.
 
+2001-05-21  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/long_long.exp: Allow for targets with 4-byte short.
+
 2001-05-10  Elena Zannoni  <ezannoni@redhat.com>
 
         * gdb.base/completion.exp: Revamp test. Make it execute on all

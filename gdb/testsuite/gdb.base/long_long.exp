@@ -85,6 +85,16 @@ gdb_expect {
     default { }
 }
 
+# Detect targets with 4-byte shorts.  Assume all others use 2-bytes.
+
+set sizeof_short 2
+send_gdb "print sizeof(short)\n"
+gdb_expect {
+    -re ".* = 4.*$gdb_prompt $" { set sizeof_short 4 }
+    -re ".*$gdb_prompt $" { }
+    default { }
+}
+
 # Detect targets with 4-byte doubles.
 
 set sizeof_double 8
@@ -172,13 +182,23 @@ if { $target_bigendian_p } {
 
     }
 
-    gdb_test "p/d *(short *)&oct" ".*-22738.*"
-    gdb_test "p/u *(short *)&oct" ".*42798.*"
-    gdb_test "p/o *(short *)&oct" ".*0123456.*"
-    gdb_test "p/t *(short *)&oct" ".*1010011100101110.*"
-    gdb_test "p/a *(short *)&oct" ".*0xf*ffffa72e.*"
-    gdb_test "p/c *(short *)&oct" ".* 46 '.'.*"
-    gdb_test "p/f *(short *)&oct" ".*-22738.*"
+    if { $sizeof_short == 2 } {
+	gdb_test "p/d *(short *)&oct" ".*-22738.*"
+	gdb_test "p/u *(short *)&oct" ".*42798.*"
+	gdb_test "p/o *(short *)&oct" ".*0123456.*"
+	gdb_test "p/t *(short *)&oct" ".*1010011100101110.*"
+	gdb_test "p/a *(short *)&oct" ".*0xf*ffffa72e.*"
+	gdb_test "p/c *(short *)&oct" ".* 46 '.'.*"
+	gdb_test "p/f *(short *)&oct" ".*-22738.*"
+    } else {
+	gdb_test "p/d *(short *)&oct" ".*-1490098887.*"
+	gdb_test "p/u *(short *)&oct" ".*2804868409.*"
+	gdb_test "p/o *(short *)&oct" ".*024713562471.*"
+	gdb_test "p/t *(short *)&oct" ".*10100111001011101110010100111001.*"
+	gdb_test "p/a *(short *)&oct" ".*0xf*a72ee539.*"
+	gdb_test "p/c *(short *)&oct" ".* 57 '9'.*"
+	gdb_test "p/f *(short *)&oct" ".*-2.42716126e-15.*"
+    }
 
     gdb_test "x/x &oct" ".*0xa72ee539.*"
     gdb_test "x/d &oct" ".*.-1490098887*"
