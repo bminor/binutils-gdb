@@ -35,13 +35,55 @@ struct blockvector;
 struct axs_value;
 struct agent_expr;
 
+/* Some of the structures in this file are space critical.
+   The space-critical structures are:
+
+     struct general_symbol_info
+     struct symbol
+     struct partial_symbol
+
+   These structures are layed out to encourage good packing.
+   They use ENUM_BITFIELD and short int fields, and they order the
+   structure members so that fields less than a word are next
+   to each other so they can be packed together. */
+
+/* Rearranged: used ENUM_BITFIELD and rearranged field order in
+   all the space critical structures (plus struct minimal_symbol).
+   Memory usage dropped from 99360768 bytes to 90001408 bytes.
+   I measured this with before-and-after tests of
+   "HEAD-old-gdb -readnow HEAD-old-gdb" and
+   "HEAD-new-gdb -readnow HEAD-old-gdb" on native i686-pc-linux-gnu,
+   red hat linux 8, with LD_LIBRARY_PATH=/usr/lib/debug,
+   typing "maint space 1" at the first command prompt.
+
+   Here is another measurement (from andrew c):
+     # no /usr/lib/debug, just plain glibc, like a normal user
+     gdb HEAD-old-gdb
+     (gdb) break internal_error
+     (gdb) run
+     (gdb) maint internal-error
+     (gdb) backtrace
+     (gdb) maint space 1
+
+   gdb gdb_6_0_branch  2003-08-19  space used: 8896512
+   gdb HEAD            2003-08-19  space used: 8904704
+   gdb HEAD            2003-08-21  space used: 8396800 (+symtab.h)
+   gdb HEAD            2003-08-21  space used: 8265728 (+gdbtypes.h)
+
+   The third line shows the savings from the optimizations in symtab.h.
+   The fourth line shows the savings from the optimizations in
+   gdbtypes.h.  Both optimizations are in gdb HEAD now.
+
+   --chastain 2003-08-21  */
+
+
+
 /* Define a structure for the information that is common to all symbol types,
    including minimal symbols, partial symbols, and full symbols.  In a
    multilanguage environment, some language specific information may need to
-   be recorded along with each symbol.
+   be recorded along with each symbol. */
 
-   These fields are ordered to encourage good packing, since we frequently
-   have tens or hundreds of thousands of these.  */
+/* This structure is space critical.  See space comments at the top. */
 
 struct general_symbol_info
 {
@@ -557,6 +599,8 @@ struct alias_list
   struct alias_list *next;
 };
 
+/* This structure is space critical.  See space comments at the top. */
+
 struct symbol
 {
 
@@ -637,6 +681,8 @@ struct symbol
    Each partial_symbol sits in a partial_symtab, all of which are chained
    on a  partial symtab list and which points to the corresponding 
    normal symtab once the partial_symtab has been referenced.  */
+
+/* This structure is space critical.  See space comments at the top. */
 
 struct partial_symbol
 {

@@ -1,3 +1,8 @@
+2003-08-21  Michael Chastain  <mec@shout.net>
+
+	* symtab.h: Add doco on the space critical structures and
+	some measurements of space usage.
+
 2003-08-21  Michael Snyder  <msnyder@redhat.com>
 
 	* tracepoint.c (trace_dump_command): Trace break address
