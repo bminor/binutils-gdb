@@ -51,6 +51,12 @@ enum strata {
 	process_stratum		/* Executing processes */
 };
 
+enum thread_control_capabilities {
+	tc_none = 0, 		/* Default: can't control thread execution. */
+	tc_schedlock = 1,	/* Can lock the thread scheduler. */
+	tc_switch = 2, 		/* Can switch the running thread on demand. */
+};
+
 /* Stuff for target_wait.  */
 
 /* Generally, what has the program done?  */
@@ -361,6 +367,7 @@ struct target_ops
   int		to_has_stack;
   int		to_has_registers;
   int		to_has_execution;
+  int		to_has_thread_control;	/* control thread execution */
   struct section_table
     	       *to_sections;
   struct section_table
@@ -933,6 +940,16 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
 
 #define	target_has_execution	\
 	(current_target.to_has_execution)
+
+/* Can the target support the debugger control of thread execution?
+   a) Can it lock the thread scheduler?
+   b) Can it switch the currently running thread?  */
+
+#define target_can_lock_scheduler \
+ 	(current_target.to_has_thread_control & tc_schedlock)
+
+#define target_can_switch_threads \
+ 	(current_target.to_has_thread_control & tc_switch)
 
 extern void target_link PARAMS ((char *, CORE_ADDR *));
 

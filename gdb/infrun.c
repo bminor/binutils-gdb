@@ -598,6 +598,28 @@ resume_cleanups (arg)
   normal_stop ();
 }
 
+static char schedlock_off[]    = "off";
+static char schedlock_on[]     = "on";
+static char schedlock_step[]   = "step";
+static char *scheduler_mode    = schedlock_off;
+static char *scheduler_enums[] = {schedlock_off, schedlock_on, schedlock_step};
+
+static void
+set_schedlock_func (args, from_tty, c)
+     char *args;
+     int from_tty;
+     struct cmd_list_element *c;
+{
+  if (c->type == set_cmd)
+    if (!target_can_lock_scheduler)
+      {
+	scheduler_mode = schedlock_off;
+	error ("Target '%s' cannot support this command.", 
+	       target_shortname);
+      }
+}
+
+
 /* Resume the inferior, but allow a QUIT.  This is useful if the user
    wants to interrupt some lengthy single-stepping operation
    (for child processes, the SIGINT goes to the inferior, and so
@@ -714,11 +736,17 @@ resume (step, sig)
         }
       else
 #endif /* HPUXHPPA */
+	{
+	  /* Vanilla resume. */
 
-        /* Vanilla resume. */
-        target_resume (-1, step, sig);
+	  if ((scheduler_mode == schedlock_on) ||
+	      (scheduler_mode == schedlock_step && step != 0))
+	    target_resume (inferior_pid, step, sig);
+	  else
+	    target_resume (-1, step, sig);
+	}
     }
-    
+  
   discard_cleanups (old_cleanups);
 }
 
@@ -3555,7 +3583,7 @@ _initialize_infrun ()
 {
   register int i;
   register int numsigs;
-  struct cmd_list_element *  c;
+  struct cmd_list_element * c;
 
   add_info ("signals", signals_info,
 	    "What debugger does when program gets various signals.\n\
@@ -3688,4 +3716,18 @@ By default, the debugger will follow the parent process.",
   add_show_from_set (c, &showlist);
 
   set_follow_fork_mode_command ("parent", 0, NULL);
+
+  c = add_set_enum_cmd ("scheduler-locking", class_run, 
+			scheduler_enums, 	/* array of string names */
+			(char *) &scheduler_mode, 	/* current mode  */
+			"Set mode for locking scheduler during execution.\n\
+off  == no locking (threads may preempt at any time)\n\
+on   == full locking (no thread except the current thread may run)\n\
+step == scheduler locked during every single-step operation.\n\
+	In this mode, no other thread may run during a step command.\n\
+	Other threads may run while stepping over a function call ('next').",
+			&setlist);
+
+  c->function.sfunc = set_schedlock_func;	/* traps on target vector */
+  add_show_from_set (c, &showlist);
 }

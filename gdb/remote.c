@@ -3185,6 +3185,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_ops.to_has_stack = 1;	
   remote_ops.to_has_registers = 1;	
   remote_ops.to_has_execution = 1;	
+  remote_ops.to_has_thread_control = tc_schedlock; /* can lock scheduler */
   remote_ops.to_magic = OPS_MAGIC;	
 }
 

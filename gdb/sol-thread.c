@@ -1569,6 +1569,7 @@ struct target_ops sol_thread_ops = {
   1,				/* to_has_stack */
   1,				/* to_has_registers */
   1,				/* to_has_execution */
+  tc_none,			/* to_has_thread_control */
   0,				/* sections */
   0,				/* sections_end */
   OPS_MAGIC			/* to_magic */
@@ -1638,6 +1639,7 @@ struct target_ops sol_core_ops = {
   1,				/* to_has_stack */
   1,				/* to_has_registers */
   0,				/* to_has_execution */
+  tc_none,			/* to_has_thread_control */
   0,				/* sections */
   0,				/* sections_end */
   OPS_MAGIC			/* to_magic */

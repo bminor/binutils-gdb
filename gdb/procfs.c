@@ -5760,9 +5760,9 @@ struct target_ops procfs_ops = {
   0,				/* to_close */
   procfs_attach,		/* to_attach */
   NULL,                         /* to_post_attach */
-  procfs_attach,			/* to_require_attach */
+  procfs_attach,		/* to_require_attach */
   procfs_detach, 		/* to_detach */
-  procfs_detach,			/* to_require_detach */
+  procfs_detach,		/* to_require_detach */
   procfs_resume,		/* to_resume */
   procfs_wait,			/* to_wait */
   NULL,                         /* to_post_wait */
@@ -5816,6 +5816,7 @@ struct target_ops procfs_ops = {
   1,				/* to_has_stack */
   1,				/* to_has_registers */
   1,				/* to_has_execution */
+  tc_none, 			/* to_has_thread_control */
   0,				/* sections */
   0,				/* sections_end */
   OPS_MAGIC			/* to_magic */

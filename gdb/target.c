@@ -248,6 +248,7 @@ struct target_ops dummy_target = {
   0,				/* to_has_stack */
   0,				/* to_has_registers */
   0,				/* to_has_execution */
+  tc_none,			/* to_has_thread_control */
   0,				/* to_sections */
   0,				/* to_sections_end */
   OPS_MAGIC,			/* to_magic */
@@ -593,6 +594,7 @@ update_current_target ()
       INHERIT (to_has_stack, t);
       INHERIT (to_has_registers, t);
       INHERIT (to_has_execution, t);
+      INHERIT (to_has_thread_control, t);
       INHERIT (to_sections, t);
       INHERIT (to_sections_end, t);
       INHERIT (to_magic, t);

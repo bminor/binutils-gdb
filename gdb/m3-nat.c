@@ -4595,6 +4595,7 @@ struct target_ops m3_ops = {
   1,				/* to_has_stack */
   1,				/* to_has_registers */
   1,				/* to_has_execution */
+  tc_none,			/* to_has_thread_control */
   0,				/* sections */
   0,				/* sections_end */
   OPS_MAGIC			/* to_magic */
