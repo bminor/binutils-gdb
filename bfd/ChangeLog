@@ -1,5 +1,12 @@
 Mon Mar 24 13:41:00 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* targmatch.sed: Use the hold space to put the #ifdef around the
+	the string constant.
+	* targets.c (UNSUPPORTED_TARGET): Don't define.
+	(find_target): Don't check for UNSUPPORTED_TARGET.
+	(bfd_set_default_target): Don't try to optimize by checking for
+	default.
+
 	* Makefile.in: Rebuild dependencies.
  	(ALL_MACHINES_CFILES): Add cpu-m32r.c.
 	(BFD32_BACKENDS_CFILES): Add elf32-m32r.c.
