@@ -1,3 +1,7 @@
+2002-01-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* PROBLEMS: Note that the i386 fix was missing from 5.1.1.
+
 2002-01-15  Rodney Brown  <rbrown64@csc.com.au>
 
 	* config/i386/tm-i386v4.h: Define HAVE_I387_REGS.
