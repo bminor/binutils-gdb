@@ -178,7 +178,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 4.12.3
+VERSION = 4.12.85
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -356,8 +356,6 @@ udiheaders = \
 	$(srcdir)/29k-share/udi/udipt29k.h \
 	$(srcdir)/29k-share/udi/udisoc.h
 
-dcache_h =	dcache.h
-
 gdbcore_h =	gdbcore.h $(bfd_h)
 
 frame_h =	frame.h
@@ -519,6 +517,11 @@ uninstall: force
 #
 # Formatting conventions:  The name of the _initialize_* routines must start
 # in column zero, and must not be inside #if.
+#
+# Note that the set of files with init functions might change, or the names
+# of the functions might change, so this files needs to depend on all the
+# object files that will be linked into gdb.
+
 init.c: $(OBS) $(TSOBS)
 	@echo Making init.c
 	@rm -f init.c-tmp
@@ -912,7 +915,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	nindy-share/Onindy.c nindy-share/nindy.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
 	ns32k-pinsn.c ns32km3-nat.c osfsolib.c \
-	paread.c procfs.c pyr-pinsn.c pyr-tdep.c pyr-xdep.c \
+	somread.c procfs.c pyr-pinsn.c pyr-tdep.c pyr-xdep.c \
 	remote-adapt.c remote-bug.c remote-e7000.c remote-eb.c remote-es.c \
 	remote-hms.c remote-mips.c \
 	remote-mm.c remote-mon.c remote-nindy.c remote-os9k.c remote-sim.c \
@@ -1295,7 +1298,6 @@ m88k-tdep.o: m88k-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
 	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h signals.h \
 	$(remote_utils_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(READLINE_CFLAGS) $(srcdir)/top.c
 
 main.o: main.c top.h $(defs_h)
 
@@ -1354,7 +1356,7 @@ objfiles.o: objfiles.c $(bfd_h) $(defs_h) objfiles.h symfile.h \
 osfsolib.o: osfsolib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	objfiles.h regex.h symfile.h target.h language.h
 
-paread.o: paread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
+somread.o: somread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	gdb-stabs.h objfiles.h symfile.h $(symtab_h)
 
 parse.o: parse.c $(command_h) $(defs_h) $(expression_h) $(frame_h) \
