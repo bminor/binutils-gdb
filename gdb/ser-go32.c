@@ -49,7 +49,26 @@ static int iov;
 #define com_lsr	iov+5
 #define com_msr	iov+6
 
-static int fd;
+static int
+strncasecmp(str1, str2, len)
+     char *str1, *str2;
+     register int len;
+{
+  unsigned char c1, c2;
+
+  for (; len != 0; --len)
+    {
+      c1 = *str1++;
+      c2 = *str2++;
+
+      if (toupper(c1) != toupper(c2))
+	return toupper(c1) - toupper(c2);
+
+      if (c1 == '\0')
+	return 0;
+    }
+  return 0;
+}
 
 static char *
 aptr(p)
@@ -65,39 +84,37 @@ getivec(int which)
 
   if (peek(0, which*4) != OFFSET)
     return 0;
+
   a = (ASYNC_STRUCT *)(0xe0000000 + peek(0, which*4+2)*16 + peek(0, which*4));
 
   if (a->signature != SIGNATURE)
     return 0;
+
   if (a->version != VERSION)
     return 0;
+
   return a;
 }
 
 static int
-dos_async_init()
+dos_async_init(port)
+     int port;
 {
   int i;
-  ASYNC_STRUCT *a1;
-  ASYNC_STRUCT *a2;
 
-  a1 = getivec(12);
-  a2 = getivec(11);
-  async = 0;
-  if (a1)
-    async = a1;
-  if (a2)
-    async = a2;
-
-  if (a1 && a2)
+  switch (port)
     {
-      if (a1 < a2)
-	async = a1;
-      else
-	async = a2;
+    case 1:
+      async = getivec (12);
+      break;
+    case 2:
+      async = getivec (11);
+      break;
+    default:
+      return 0;
     }
 
-  if (async == 0)
+  if (!async)
     {
       error("GDB can not connect to asynctsr program, check that it is installed\n\
 and that serial I/O is not being redirected (perhaps by NFS)\n\n\
@@ -114,10 +131,7 @@ C> gdb \n");
   outportb(com_mcr, 0x0b);
   async->getp = async->putp = async->buffer_start;
   
-  if (iov > 0x300)
-    return 1;
-  else
-    return 2;
+  return 1;
 }
 
 static void
@@ -203,7 +217,23 @@ go32_open (scb, name)
      serial_t scb;
      const char *name;
 {
-  scb->fd = dos_async_init();
+  int port;
+
+  if (strncasecmp (name, "com", 3) != 0)
+    {
+      errno = ENOENT;
+      return 1;
+    }
+
+  port = name[3] - '0';
+
+  if ((port != 1) && (port != 2))
+    {
+      errno = ENOENT;
+      return 1;
+    }
+
+  scb->fd = dos_async_init(port);
   if (!scb->fd)
     return 1;
 

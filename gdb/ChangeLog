@@ -1,5 +1,8 @@
 Wed Apr  7 18:43:09 1993  Stu Grossman  (grossman@cygnus.com)
 
+	* ser-go32.c:  Make it use serial port name.
+	* go32-xdep.c:  Put in def for strlwr, needed by dir.o in go32 libc.
+
 	* infcmd.c (read_pc):  Make sure that we read PC_REGNUM when not
 	in a system call!
 

@@ -32,6 +32,10 @@ sigsetmask()
 {
 }
 
-strlwr()
+void
+strlwr(str)
+     char *str;
 {
+  for (; *str; str++)
+    *str = tolower(*str);
 }
