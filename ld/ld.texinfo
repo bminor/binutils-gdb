@@ -692,6 +692,14 @@ with @samp{-Ur}; once the constructor table has been built, it cannot
 be added to.  Use @samp{-Ur} only for the last partial link, and
 @samp{-r} for the others.
 
+@kindex --unique
+@item --unique
+Creates a separate output section for every orphan input section.  This
+option prevents the normal merging of orphan input sections with the same
+name.  An orphan section is one not specifically mentioned in a linker
+script, so this option along with a custom linker script allows any
+selection of input sections to be merged while others are kept separate.
+
 @kindex -v
 @kindex -V
 @kindex --version
@@ -1135,22 +1143,23 @@ everything else.  This is to prevent gaps between symbols due to
 alignment constraints.
 
 @kindex --split-by-file
-@item --split-by-file
+@item --split-by-file [@var{size}]
 Similar to @code{--split-by-reloc} but creates a new output section for
-each input file.
+each input file when @var{size} is reached.  @var{size} defaults to a
+size of 1 if not given.
 
 @kindex --split-by-reloc
-@item --split-by-reloc @var{count}
-Trys to creates extra sections in the output file so that no single
+@item --split-by-reloc [@var{count}]
+Tries to creates extra sections in the output file so that no single
 output section in the file contains more than @var{count} relocations.
-This is useful when generating huge relocatable for downloading into
+This is useful when generating huge relocatable files for downloading into
 certain real time kernels with the COFF object file format; since COFF
 cannot represent more than 65535 relocations in a single section.  Note
 that this will fail to work with object file formats which do not
 support arbitrary sections.  The linker will not split up individual
 input sections for redistribution, so if a single input section contains
 more than @var{count} relocations one output section will contain that
-many relocations.
+many relocations.  @var{count} defaults to a value of 32768.
 
 @kindex --stats
 @item --stats

@@ -1,3 +1,33 @@
+2000-09-05  Alan Modra  <alan@linuxcare.com.au>
+
+	* ld.h (ld_config_type): Add unique_orphan_sections.
+	* lexsup.c (OPTION_UNIQUE): Define.
+	(ld_options): Add "--unique".
+	(parse_args): Handle it.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
+	search for an existing output section if unique_orphan_sections is
+	set.  Make use of bfd_get_unique_section_name rather than
+	duplicating code here.
+	* ld.texinfo: Describe --unique.
+
+	* lexsup.c (ld_options): Make split-by-reloc arg optional. Add
+	optional arg to split-by-file.
+	(parse_args): Handle them.
+	* ld.texinfo: Update description of these options.
+	* ldwrite.c (clone_section): Pass in the section name.  Replace
+	local code with bfd_get_unique_section_name.
+	(split_sections): Tidy code and comments.  Use a list traversal
+	more appropriate to the list construction.  Handle cooked section
+	sizes.  Split when split_by_reloc reached rather than exceeded.
+	Track section size and split when split_by_file reached.  Fix
+	link_order_tail (even though it's not used).
+	(ldwrite): Modify condition for calling split_sections to suit
+	changed split_by_reloc and split_by_file.
+	* ldmain.c (main): Init config.split_by_reloc and
+	config.split_by_file to -1.
+	* ld.h (ld_config_type): Change split_by_reloc to unsigned.
+	Change split_by_file to bfd_size_type.
+
 2000-09-02  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in: Increase version number to 2.10.91.

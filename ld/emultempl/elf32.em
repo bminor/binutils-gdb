@@ -1012,22 +1012,27 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   lang_statement_list_type *old = NULL;
   lang_statement_list_type add;
   etree_type *address;
-  const char *secname, *ps = NULL;
+  const char *secname;
   const char *outsecname;
+  const char *ps = NULL;
   lang_output_section_statement_type *os;
 
   secname = bfd_get_section_name (s->owner, s);
 
-  /* Look through the script to see where to place this section.  */
-  os = lang_output_section_find (secname);
-
-  if (os != NULL
-      && os->bfd_section != NULL
-      && ((s->flags ^ os->bfd_section->flags) & (SEC_LOAD | SEC_ALLOC)) == 0)
+  if (! config.unique_orphan_sections)
     {
-      /* We have already placed a section with this name.  */
-      wild_doit (&os->children, s, os, file);
-      return true;
+      /* Look through the script to see where to place this section.  */ 
+      os = lang_output_section_find (secname);
+
+      if (os != NULL
+	  && os->bfd_section != NULL
+	  && ((s->flags ^ os->bfd_section->flags)
+	      & (SEC_LOAD | SEC_ALLOC)) == 0)
+	{
+	  /* We have already placed a section with this name.  */
+	  wild_doit (&os->children, s, os, file);
+	  return true;
+	}
     }
 
   if (hold_text.os == NULL)
@@ -1087,24 +1092,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
      loadable or allocateable characteristics.  */
   outsecname = secname;
   if (bfd_get_section_by_name (output_bfd, outsecname) != NULL)
-    {
-      unsigned int len;
-      char *newname;
-      unsigned int i;
-
-      len = strlen (outsecname);
-      newname = xmalloc (len + 5);
-      strcpy (newname, outsecname);
-      i = 0;
-      do
-	{
-	  sprintf (newname + len, "%d", i);
-	  ++i;
-	}
-      while (bfd_get_section_by_name (output_bfd, newname) != NULL);
-
-      outsecname = newname;
-    }
+    outsecname = bfd_get_unique_section_name (output_bfd, outsecname, NULL);
 
   if (place != NULL)
     {

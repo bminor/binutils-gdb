@@ -200,6 +200,8 @@ main (argc, argv)
   config.build_constructors = true;
   config.dynamic_link = false;
   config.has_shared = false;
+  config.split_by_reloc = (unsigned) -1;
+  config.split_by_file = (bfd_size_type) -1;
   command_line.force_common_definition = false;
   command_line.interpreter = NULL;
   command_line.rpath = NULL;

@@ -206,8 +206,12 @@ typedef struct
 
   boolean stats;
 
-  int split_by_reloc;
-  boolean split_by_file;
+  /* If set, orphan input sections will be mapped to separate output
+     sections.  */
+  boolean unique_orphan_sections;
+
+  unsigned int split_by_reloc;
+  bfd_size_type split_by_file;
 } ld_config_type;
 
 extern ld_config_type config;

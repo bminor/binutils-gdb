@@ -125,6 +125,7 @@ int parsing_defsym = 0;
 #define OPTION_INIT                     (OPTION_NO_UNDEFINED + 1)
 #define OPTION_FINI                     (OPTION_INIT + 1)
 #define OPTION_SECTION_START		(OPTION_FINI + 1)
+#define OPTION_UNIQUE			(OPTION_SECTION_START + 1)
 
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
@@ -224,6 +225,8 @@ static const struct ld_option ld_options[] =
       'T', N_("FILE"), N_("Read linker script"), TWO_DASHES },
   { {"undefined", required_argument, NULL, 'u'},
       'u', N_("SYMBOL"), N_("Start with undefined reference to SYMBOL"), TWO_DASHES },
+  { {"unique", no_argument, NULL, OPTION_UNIQUE},
+      '\0', NULL, N_("Don't merge orphan sections with the same name"), TWO_DASHES },
   { {"Ur", no_argument, NULL, OPTION_UR},
       '\0', NULL, N_("Build global constructor/destructor tables"), ONE_DASH },
   { {"version", no_argument, NULL, OPTION_VERSION},
@@ -326,10 +329,10 @@ static const struct ld_option ld_options[] =
       '\0', NULL, N_("Sort common symbols by size"), TWO_DASHES },
   { {"sort_common", no_argument, NULL, OPTION_SORT_COMMON},
       '\0', NULL, NULL, NO_HELP },
-  { {"split-by-file", no_argument, NULL, OPTION_SPLIT_BY_FILE},
-      '\0', NULL, N_("Split output sections for each file"), TWO_DASHES },
-  { {"split-by-reloc", required_argument, NULL, OPTION_SPLIT_BY_RELOC},
-      '\0', N_("COUNT"), N_("Split output sections every COUNT relocs"), TWO_DASHES },
+  { {"split-by-file", optional_argument, NULL, OPTION_SPLIT_BY_FILE},
+      '\0', N_("[=SIZE]"), N_("Split output sections every SIZE octets"), TWO_DASHES },
+  { {"split-by-reloc", optional_argument, NULL, OPTION_SPLIT_BY_RELOC},
+      '\0', N_("[=COUNT]"), N_("Split output sections every COUNT relocs"), TWO_DASHES },
   { {"stats", no_argument, NULL, OPTION_STATS},
       '\0', NULL, N_("Print memory usage statistics"), TWO_DASHES },
   { {"task-link", required_argument, NULL, OPTION_TASK_LINK},
@@ -917,6 +920,9 @@ parse_args (argc, argv)
 	case 'u':
 	  ldlang_add_undef (optarg);
 	  break;
+	case OPTION_UNIQUE:
+	  config.unique_orphan_sections = true;
+	  break;
 	case OPTION_VERBOSE:
 	  ldversion (1);
 	  version_printed = true;
@@ -1005,10 +1011,16 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  add_ysym (optarg);
 	  break;
 	case OPTION_SPLIT_BY_RELOC:
-	  config.split_by_reloc = strtoul (optarg, NULL, 0);
+	  if (optarg != NULL)
+	    config.split_by_reloc = strtoul (optarg, NULL, 0);
+	  else
+	    config.split_by_reloc = 32768;
 	  break; 
 	case OPTION_SPLIT_BY_FILE:
-	  config.split_by_file = true;
+	  if (optarg != NULL)
+	    config.split_by_file = bfd_scan_vma (optarg, NULL, 0);
+	  else
+	    config.split_by_file = 1;
 	  break; 
 	case OPTION_CHECK_SECTIONS:
 	  command_line.check_section_addresses = true;
