@@ -351,12 +351,6 @@ fundamental architectural change.
 Add built-by, build-date, tm, xm, nm and anything else into gdb binary
 so that you can see how the GDB was created.
 
-Some of these (*m.h) would be added to the generated config.h.  That
-in turn would fix a long standing bug where by the build process many
-not notice a changed tm.h file.  Since everything depends on config.h,
-a change to *m.h forces a change to config.h and, consequently forces
-a rebuild.
-
 --
 
 Add an "info bfd" command that displays supported object formats,

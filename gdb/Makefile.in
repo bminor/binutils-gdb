@@ -548,7 +548,10 @@ command_h =	command.h
 gdbcmd_h =	gdbcmd.h $(command_h)
 
 call_cmds_h =	call-cmds.h
-defs_h =	defs.h xm.h tm.h nm.h config.status config.h gdbarch.h ui-file.h
+xm_h =		@xm_h@
+tm_h =		@tm_h@
+nm_h =		@nm_h@
+defs_h =	defs.h $(xm_h) $(tm_h) $(nm_h) config.status config.h gdbarch.h ui-file.h
 
 top_h =		top.h
 inferior_h =	inferior.h $(breakpoint_h)

@@ -7524,6 +7524,7 @@ case "${GDB_MULTI_ARCH}" in
     GDB_MULTI_ARCH_PURE )
 	if test x"${targetfile}" != x ; then
 	    echo "configure: warning: "GDB: Ingoring TM_FILE in ${target_makefile_frag}"" 1>&2
+	    targetfile=""
 	fi ;;
     *)  { echo "configure: error: "GDB: Unknown GDB_MULTI_ARCH value ${GDB_MULTI_ARCH}"" 1>&2; exit 1; };;
 esac
@@ -7537,34 +7538,56 @@ fi
 
 
 # If hostfile (XM_FILE) and/or targetfile (TM_FILE) and/or nativefile
-# (NAT_FILE) is not set in config/*/*.m[ht] files, we don't make the
-# corresponding links.  But we have to remove the xm.h files and tm.h
-# files anyway, e.g. when switching from "configure host" to
-# "configure none".
+# (NAT_FILE) is not set in config/*/*.m[ht] files, we link to an empty
+# version.
 
 files=
 links=
+
 rm -f xm.h
+xm_h=""
 if test "${hostfile}" != ""; then
-files="${files} config/${gdb_host_cpu}/${hostfile}"
-links="${links} xm.h"
+    xm_h=xm.h
+    GDB_XM_FILE="config/${gdb_host_cpu}/${hostfile}"
+    files="${files} ${GDB_XM_FILE}"
+    links="${links} xm.h"
+    cat >> confdefs.h <<EOF
+#define GDB_XM_FILE ${GDB_XM_FILE}
+EOF
+
 fi
+
+
 rm -f tm.h
+tm_h=""
 if test "${targetfile}" != ""; then
-files="${files} config/${gdb_target_cpu}/${targetfile}"
-links="${links} tm.h"
+    tm_h=tm.h
+    GDB_TM_FILE="config/${gdb_target_cpu}/${targetfile}"
+    files="${files} ${GDB_TM_FILE}"
+    links="${links} tm.h"
+    cat >> confdefs.h <<EOF
+#define GDB_TM_FILE ${GDB_TM_FILE}
+EOF
+
 fi
+
+
 rm -f nm.h
+nm_h=""
 if test "${nativefile}" != ""; then
-files="${files} config/${gdb_host_cpu}/${nativefile}"
-links="${links} nm.h"
-else
-# A cross-only configuration.
-files="${files} config/nm-empty.h"
-links="${links} nm.h"
+    nm_h=nm.h
+    GDB_NM_FILE="config/${gdb_host_cpu}/${nativefile}"
+    files="${files} ${GDB_NM_FILE}"
+    links="${links} nm.h"
+    cat >> confdefs.h <<EOF
+#define GDB_NM_FILE ${GDB_NM_FILE}
+EOF
+
 fi
+
+
 echo $ac_n "checking whether ln -s works""... $ac_c" 1>&6
-echo "configure:7568: checking whether ln -s works" >&5
+echo "configure:7591: checking whether ln -s works" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_LN_S'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -7588,12 +7611,12 @@ fi
 
 
 echo $ac_n "checking for Cygwin environment""... $ac_c" 1>&6
-echo "configure:7592: checking for Cygwin environment" >&5
+echo "configure:7615: checking for Cygwin environment" >&5
 if eval "test \"`echo '$''{'ac_cv_cygwin'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 7597 "configure"
+#line 7620 "configure"
 #include "confdefs.h"
 
 int main() {
@@ -7604,7 +7627,7 @@ int main() {
 return __CYGWIN__;
 ; return 0; }
 EOF
-if { (eval echo configure:7608: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:7631: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_cygwin=yes
 else
@@ -7621,19 +7644,19 @@ echo "$ac_t""$ac_cv_cygwin" 1>&6
 CYGWIN=
 test "$ac_cv_cygwin" = yes && CYGWIN=yes
 echo $ac_n "checking for mingw32 environment""... $ac_c" 1>&6
-echo "configure:7625: checking for mingw32 environment" >&5
+echo "configure:7648: checking for mingw32 environment" >&5
 if eval "test \"`echo '$''{'ac_cv_mingw32'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 7630 "configure"
+#line 7653 "configure"
 #include "confdefs.h"
 
 int main() {
 return __MINGW32__;
 ; return 0; }
 EOF
-if { (eval echo configure:7637: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:7660: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_mingw32=yes
 else
@@ -7652,7 +7675,7 @@ test "$ac_cv_mingw32" = yes && MINGW32=yes
 
 
 echo $ac_n "checking for executable suffix""... $ac_c" 1>&6
-echo "configure:7656: checking for executable suffix" >&5
+echo "configure:7679: checking for executable suffix" >&5
 if eval "test \"`echo '$''{'ac_cv_exeext'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -7662,7 +7685,7 @@ else
   rm -f conftest*
   echo 'int main () { return 0; }' > conftest.$ac_ext
   ac_cv_exeext=
-  if { (eval echo configure:7666: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+  if { (eval echo configure:7689: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
     for file in conftest.*; do
       case $file in
       *.c | *.o | *.obj | *.ilk | *.pdb) ;;
@@ -7954,6 +7977,9 @@ s%@host_makefile_frag@%%g
 s%@target_makefile_frag@%%g
 s%@frags@%$frags%g
 s%@SUBDIRS@%$SUBDIRS%g
+s%@xm_h@%$xm_h%g
+s%@tm_h@%$tm_h%g
+s%@nm_h@%$nm_h%g
 s%@LN_S@%$LN_S%g
 s%@EXEEXT@%$EXEEXT%g
 s%@subdirs@%$subdirs%g

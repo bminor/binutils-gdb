@@ -125,3 +125,11 @@
 /* Multi-arch enabled. */
 #undef GDB_MULTI_ARCH
 
+/* hostfile */
+#undef GDB_XM_FILE
+
+/* targetfile */
+#undef GDB_TM_FILE
+
+/* nativefile */
+#undef GDB_NM_FILE

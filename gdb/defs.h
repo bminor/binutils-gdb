@@ -79,7 +79,7 @@
 #define GDB_MULTI_ARCH_TM 2
 
 /* The target is pure multi-arch.  The MULTI-ARCH vector provides all
-   definitions.  "tm.h" is NOT included. */
+   definitions.  "tm.h" is linked to an empty file. */
 
 #define GDB_MULTI_ARCH_PURE 3
 
@@ -710,29 +710,35 @@ enum val_prettyprint
   };
 
 
-/* Host machine definition.  This will be a symlink to one of the
-   xm-*.h files, built by the `configure' script.  */
+/* Optional host machine definition.  Pure autoconf targets will not
+   need a "xm.h" file.  This will be a symlink to one of the xm-*.h
+   files, built by the `configure' script.  */
 
+#ifdef GDB_XM_FILE
 #include "xm.h"
+#endif
 
-/* Native machine support.  This will be a symlink to one of the
-   nm-*.h files, built by the `configure' script.  */
+/* Optional native machine support.  Non-native (and possibly pure
+   multi-arch) targets do not need a "nm.h" file.  This will be a
+   symlink to one of the nm-*.h files, built by the `configure'
+   script.  */
 
+#ifdef GDB_NM_FILE
 #include "nm.h"
+#endif
 
-/* Target machine definition.  This will be a symlink to one of the
+/* Optional target machine definition.  Pure multi-arch configurations
+   do not need a "tm.h" file.  This will be a symlink to one of the
    tm-*.h files, built by the `configure' script.  */
 
-#if (GDB_MULTI_ARCH < GDB_MULTI_ARCH_PURE)
+#ifdef GDB_TM_FILE
 #include "tm.h"
 #endif
 
 /* GDB_MULTI_ARCH is normally set by configure.in using information
    from configure.tgt or the config/%/%.mt Makefile fragment.  Since
-   some targets have defined it in their tm.h file, don't provide a
-   default until after "tm.h" has been included.  (In the above #if,
-   GDB_MULTI_ARCH will be interpreted as zero if it is not
-   defined). */
+   some targets have defined it in their "tm.h" file, delay providing
+   a default definition until after "tm.h" has been included.. */
 
 #ifndef GDB_MULTI_ARCH
 #define GDB_MULTI_ARCH 0
