@@ -236,8 +236,8 @@ static char stackop_size = '\0';  /* Used in 16 bit gcc mode to add an l
 
 /* Interface to relax_segment.
    There are 2 relax states for 386 jump insns: one for conditional &
-   one for unconditional jumps.  This is because the these two types
-   of jumps add different sizes to frags when we're figuring out what
+   one for unconditional jumps.  This is because these two types of
+   jumps add different sizes to frags when we're figuring out what
    sort of jump to choose to reach a given label.  */
 
 /* types */
@@ -2092,23 +2092,33 @@ md_assemble (line)
     /* Output jumps. */
     if (i.tm.opcode_modifier & Jump)
       {
-	long n = (long) i.disps[0]->X_add_number;
-	int prefix = (i.prefix[DATA_PREFIX] != 0);
-	int code16 = 0;
+	int size;
+	int code16;
+	int prefix;
 
-	if (prefix)
-	  {
-	    i.prefixes -= 1;
-	    code16 = CODE16;
-	  }
+	code16 = 0;
 	if (flag_16bit_code)
-	  code16 ^= CODE16;
+	  code16 = CODE16;
 
-	if (!intel_syntax && (i.prefixes != 0))
+	prefix = 0;
+	if (i.prefix[DATA_PREFIX])
+	  {
+	    prefix = 1;
+	    i.prefixes -= 1;
+	    code16 ^= CODE16;
+	  }
+
+	size = 4;
+	if (code16)
+	  size = 2;
+
+	if (i.prefixes != 0 && !intel_syntax)
 	  as_warn (_("skipping prefixes on this instruction"));
 
 	if (i.disps[0]->X_op == O_constant)
 	  {
+	    long n = (long) i.disps[0]->X_add_number;
+
 	    if (fits_in_signed_byte (n))
 	      {
 		insn_size += 2;
@@ -2122,7 +2132,6 @@ md_assemble (line)
 		   because text segments are limited to 64K anyway;
 		   Use 32-bit jumps for 32-bit code, because they're faster,
 		   and a 16-bit jump will clear the top 16 bits of %eip.  */
-		int jmp_size = code16 ? 2 : 4;
 		if (code16 && !fits_in_signed_word (n))
 		  {
 		    as_bad (_("16-bit jump out of range"));
@@ -2132,56 +2141,60 @@ md_assemble (line)
 		if (i.tm.base_opcode == JUMP_PC_RELATIVE)
 		  {		/* pace */
 		    /* unconditional jump */
-		    insn_size += prefix + 1 + jmp_size;
-		    p = frag_more (prefix + 1 + jmp_size);
+		    insn_size += prefix + 1 + size;
+		    p = frag_more (prefix + 1 + size);
 		    if (prefix)
 		      *p++ = DATA_PREFIX_OPCODE;
 		    *p++ = (char) 0xe9;
-		    md_number_to_chars (p, (valueT) n, jmp_size);
+		    md_number_to_chars (p, (valueT) n, size);
 		  }
 		else
 		  {
 		    /* conditional jump */
-		    insn_size += prefix + 2 + jmp_size;
-		    p = frag_more (prefix + 2 + jmp_size);
+		    insn_size += prefix + 2 + size;
+		    p = frag_more (prefix + 2 + size);
 		    if (prefix)
 		      *p++ = DATA_PREFIX_OPCODE;
 		    *p++ = TWO_BYTE_OPCODE_ESCAPE;
 		    *p++ = i.tm.base_opcode + 0x10;
-		    md_number_to_chars (p, (valueT) n, jmp_size);
+		    md_number_to_chars (p, (valueT) n, size);
 		  }
 	      }
 	  }
 	else
 	  {
-	    int size = code16 ? 2 : 4;
-
-	    /* It's a symbol; end frag & setup for relax.
-	       Make sure there are more than 6 chars left in the current frag;
-	       if not we'll have to start a new one. */
-	    frag_grow (prefix + 1 + 2 + size);
-	    insn_size += 1 + prefix;
-	    p = frag_more (1 + prefix);
+	    /* It's a symbol;  End frag & setup for relax.
+	       Make sure there is enough room in this frag for the largest
+	       instruction we may generate in md_convert_frag.  This is 2
+	       bytes for the opcode and room for the prefix and largest
+	       displacement.  */
+	    frag_grow (prefix + 2 + size);
+	    insn_size += prefix + 1;
+	    /* Prefix and 1 opcode byte go in fr_fix.  */
+	    p = frag_more (prefix + 1);
 	    if (prefix)
 	      *p++ = DATA_PREFIX_OPCODE;
 	    *p = i.tm.base_opcode;
+	    /* 1 possible extra opcode + displacement go in fr_var */
 	    frag_var (rs_machine_dependent,
-		      prefix + 2 + size, /* 2 opcode/prefix + displacement */
+		      1 + size,
 		      1,
 		      ((unsigned char) *p == JUMP_PC_RELATIVE
 		       ? ENCODE_RELAX_STATE (UNCOND_JUMP, SMALL) | code16
 		       : ENCODE_RELAX_STATE (COND_JUMP, SMALL) | code16),
 		      i.disps[0]->X_add_symbol,
-		      (offsetT) n, p);
+		      i.disps[0]->X_add_number,
+		      p);
 	  }
       }
     else if (i.tm.opcode_modifier & (JumpByte | JumpDword))
       {
-	int size = (i.tm.opcode_modifier & JumpByte) ? 1 : 4;
-	long n = (long) i.disps[0]->X_add_number;
+	int size;
 
-	if (size == 1) /* then this is a loop or jecxz type instruction */
+	if (i.tm.opcode_modifier & JumpByte)
 	  {
+	    /* This is a loop or jecxz type instruction.  */
+	    size = 1;
 	    if (i.prefix[ADDR_PREFIX])
 	      {
 		insn_size += 1;
@@ -2191,23 +2204,26 @@ md_assemble (line)
 	  }
 	else
 	  {
-	    int code16 = 0;
+	    int code16;
+
+	    code16 = 0;
+	    if (flag_16bit_code)
+	      code16 = CODE16;
 
 	    if (i.prefix[DATA_PREFIX])
 	      {
 		insn_size += 1;
 		FRAG_APPEND_1_CHAR (DATA_PREFIX_OPCODE);
 		i.prefixes -= 1;
-		code16 = CODE16;
+		code16 ^= CODE16;
 	      }
-	    if (flag_16bit_code)
-	      code16 ^= CODE16;
 
+	    size = 4;
 	    if (code16)
 	      size = 2;
 	  }
 
-	if (!intel_syntax && (i.prefixes != 0))
+	if (i.prefixes != 0 && !intel_syntax)
 	  as_warn (_("skipping prefixes on this instruction"));
 
 	if (fits_in_unsigned_byte (i.tm.base_opcode))
@@ -2217,7 +2233,8 @@ md_assemble (line)
 	  }
 	else
 	  {
-	    insn_size += 2 + size;	/* opcode can be at most two bytes */
+	    /* opcode can be at most two bytes */
+	    insn_size += 2 + size;
 	    p = frag_more (2 + size);
 	    *p++ = (i.tm.base_opcode >> 8) & 0xff;
 	  }
@@ -2225,6 +2242,8 @@ md_assemble (line)
 
 	if (i.disps[0]->X_op == O_constant)
 	  {
+	    long n = (long) i.disps[0]->X_add_number;
+
 	    if (size == 1 && !fits_in_signed_byte (n))
 	      {
 		as_bad (_("`%s' only takes byte displacement; %ld shortened to %d"),
@@ -2248,16 +2267,20 @@ md_assemble (line)
       {
 	int size;
 	int reloc_type;
-	int prefix = i.prefix[DATA_PREFIX] != 0;
-	int code16 = 0;
+	int prefix;
+	int code16;
 
-	if (prefix)
-	  {
-	    code16 = CODE16;
-	    i.prefixes -= 1;
-	  }
+	code16 = 0;
 	if (flag_16bit_code)
-	  code16 ^= CODE16;
+	  code16 = CODE16;
+
+	prefix = 0;
+	if (i.prefix[DATA_PREFIX])
+	  {
+	    prefix = 1;
+	    i.prefixes -= 1;
+	    code16 ^= CODE16;
+	  }
 
 	size = 4;
 	reloc_type = BFD_RELOC_32;
@@ -2267,7 +2290,7 @@ md_assemble (line)
 	    reloc_type = BFD_RELOC_16;
 	  }
 
-	if (!intel_syntax && (i.prefixes != 0))
+	if (i.prefixes != 0 && !intel_syntax)
 	  as_warn (_("skipping prefixes on this instruction"));
 
 	insn_size += prefix + 1 + 2 + size;  /* 1 opcode; 2 segment; offset */
@@ -4235,7 +4258,6 @@ i386_target_format ()
 #endif /* OBJ_MAYBE_ELF */
 #endif /* BFD_ASSEMBLER */
 
-/* ARGSUSED */
 symbolS *
 md_undefined_symbol (name)
      char *name;
