@@ -1409,7 +1409,9 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_SPARC_LO10:
 	case R_SPARC_UA16:
 	case R_SPARC_UA32:
-	  if (info->shared && (input_section->flags & SEC_ALLOC))
+	  if (info->shared
+	      && r_symndx != 0
+	      && (input_section->flags & SEC_ALLOC))
 	    {
 	      Elf_Internal_Rela outrel;
 	      boolean skip;

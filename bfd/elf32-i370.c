@@ -1449,7 +1449,8 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
            object.  */
 	case (int)R_I370_ADDR31:
 	case (int)R_I370_ADDR16:
-	  if (info->shared)
+	  if (info->shared
+	      && r_symndx != 0)
 	    {
 	      Elf_Internal_Rela outrel;
 	      boolean skip;

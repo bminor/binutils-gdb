@@ -1442,7 +1442,9 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_X86_64_64:
 	  /* FIXME: The ABI says the linker should make sure the value is
 	     the same when it's zeroextended to 64 bit.	 */
-	  if (info->shared && (input_section->flags & SEC_ALLOC) != 0)
+	  if (info->shared
+	      && r_symndx != 0
+	      && (input_section->flags & SEC_ALLOC) != 0)
 	    {
 	      Elf_Internal_Rela outrel;
 	      boolean skip, relocate;

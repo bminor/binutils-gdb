@@ -6325,6 +6325,7 @@ mips_elf_calculate_relocation (abfd,
 		    & ELF_LINK_HASH_DEF_DYNAMIC) != 0)
 	       && ((h->root.elf_link_hash_flags
 		    & ELF_LINK_HASH_DEF_REGULAR) == 0)))
+	  && r_symndx != 0
 	  && (input_section->flags & SEC_ALLOC) != 0)
 	{
 	  /* If we're creating a shared library, or this relocation is

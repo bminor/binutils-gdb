@@ -1644,6 +1644,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_68K_16:
 	case R_68K_32:
 	  if (info->shared
+	      && r_symndx != 0
 	      && (input_section->flags & SEC_ALLOC) != 0
 	      && ((r_type != R_68K_PC8
 		   && r_type != R_68K_PC16

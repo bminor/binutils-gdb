@@ -299,6 +299,16 @@ struct elf_link_hash_table
 /* Returns true if the hash table is a struct elf_link_hash_table.  */
 #define is_elf_hash_table(p)					      	\
   ((p)->hash->type == bfd_link_elf_hash_table)
+
+/* Used by bfd_section_from_r_symndx to cache a small number of local
+   symbol to section mappings.  */
+#define LOCAL_SYM_CACHE_SIZE 32
+struct sym_sec_cache
+{
+  bfd *abfd;
+  unsigned long indx[LOCAL_SYM_CACHE_SIZE];
+  asection *sec[LOCAL_SYM_CACHE_SIZE];
+};
 
 /* Constant information held for an ELF backend.  */
 
@@ -778,8 +788,9 @@ struct bfd_elf_section_data
   /* The number of relocations currently assigned to REL_HDR2.  */
   unsigned int rel_count2;
 
-  /* The number of dynamic relocs copied for local symbols.  */
-  unsigned int local_dynrel;
+  /* A pointer to a linked list tracking dynamic relocs copied for
+     local symbols.  */
+  PTR local_dynrel;
 
   /* A pointer to the bfd section used for dynamic relocs.  */
   asection *sreloc;
@@ -1198,6 +1209,8 @@ extern boolean bfd_section_from_phdr
 extern int _bfd_elf_symbol_from_bfd_symbol
   PARAMS ((bfd *, asymbol **));
 
+extern asection *bfd_section_from_r_symndx
+  PARAMS ((bfd *, struct sym_sec_cache *, asection *, unsigned long));
 extern asection *bfd_section_from_elf_index
   PARAMS ((bfd *, unsigned int));
 extern boolean _bfd_elf_create_dynamic_sections

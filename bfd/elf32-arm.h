@@ -1116,6 +1116,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       /* When generating a shared object, these relocations are copied
 	 into the output file to be resolved at run time.  */
       if (info->shared
+	  && r_symndx != 0
 	  && (r_type != R_ARM_PC24
 	      || (h != NULL
 	          && h->dynindx != -1

@@ -1747,6 +1747,62 @@ bfd_section_from_shdr (abfd, shindex)
   return true;
 }
 
+/* Return the section for the local symbol specified by ABFD, R_SYMNDX.
+   Return SEC for sections that have no elf section, and NULL on error.  */
+
+asection *
+bfd_section_from_r_symndx (abfd, cache, sec, r_symndx)
+     bfd *abfd;
+     struct sym_sec_cache *cache;
+     asection *sec;
+     unsigned long r_symndx;
+{
+  unsigned char esym_shndx[2];
+  unsigned int isym_shndx;
+  Elf_Internal_Shdr *symtab_hdr;
+  file_ptr pos;
+  bfd_size_type amt;
+  unsigned int ent = r_symndx % LOCAL_SYM_CACHE_SIZE;
+
+  if (cache->abfd == abfd && cache->indx[ent] == r_symndx)
+    return cache->sec[ent];
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  pos = symtab_hdr->sh_offset;
+  if (get_elf_backend_data (abfd)->s->sizeof_sym
+      == sizeof (Elf64_External_Sym))
+    {
+      pos += r_symndx * sizeof (Elf64_External_Sym);
+      pos += offsetof (Elf64_External_Sym, st_shndx);
+    }
+  else
+    {
+      pos += r_symndx * sizeof (Elf32_External_Sym);
+      pos += offsetof (Elf32_External_Sym, st_shndx);
+    }
+  amt = sizeof (esym_shndx);
+  if (bfd_seek (abfd, pos, SEEK_SET) != 0
+      || bfd_bread ((PTR) esym_shndx, amt, abfd) != amt)
+    return NULL;
+  isym_shndx = H_GET_16 (abfd, esym_shndx);
+
+  if (cache->abfd != abfd)
+    {
+      memset (cache->indx, -1, sizeof (cache->indx));
+      cache->abfd = abfd;
+    }
+  cache->indx[ent] = r_symndx;
+  cache->sec[ent] = sec;
+  if (isym_shndx > 0 && isym_shndx < SHN_LORESERVE)
+    {
+      asection *s;
+      s = bfd_section_from_elf_index (abfd, isym_shndx);
+      if (s != NULL)
+	cache->sec[ent] = s;
+    }
+  return cache->sec[ent];
+}
+
 /* Given an ELF section number, retrieve the corresponding BFD
    section.  */
 

@@ -3216,6 +3216,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_SH_DIR32:
 	case R_SH_REL32:
 	  if (info->shared
+	      && r_symndx != 0
 	      && (input_section->flags & SEC_ALLOC) != 0
 	      && (r_type != R_SH_REL32
 		  || (h != NULL

@@ -3560,6 +3560,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		   /* Don't emit relocs for __GLOB_DATA_PTR on AIX. */
 		   && (!h || strcmp (h->root.root.string,
 				     "__GLOB_DATA_PTR") != 0)))
+	      && r_symndx != 0
 	      && (input_section->flags & SEC_ALLOC) != 0)
 	    {
 	      unsigned int dyn_r_type;
@@ -3754,8 +3755,9 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_IA64_PCREL64MSB:
 	case R_IA64_PCREL64LSB:
 	  /* Install a dynamic relocation for this reloc.  */
-	  if (dynamic_symbol_p
-	      || elfNN_ia64_aix_vec (info->hash->creator))
+	  if ((dynamic_symbol_p
+	       || elfNN_ia64_aix_vec (info->hash->creator))
+	      && r_symndx != 0)
 	    {
 	      BFD_ASSERT (srel != NULL);
 

@@ -263,6 +263,9 @@ struct elf32_hppa_link_hash_table {
 
   /* Set if we need a .plt stub to support lazy dynamic linking.  */
   unsigned int need_plt_stub:1;
+
+  /* Small local sym to section mapping cache.  */
+  struct sym_sec_cache sym_sec;
 };
 
 /* Various hash macros and functions.  */
@@ -507,6 +510,7 @@ elf32_hppa_link_hash_table_create (abfd)
   ret->has_12bit_branch = 0;
   ret->has_17bit_branch = 0;
   ret->need_plt_stub = 0;
+  ret->sym_sec.abfd = NULL;
 
   return &ret->elf.root;
 }
@@ -1514,6 +1518,9 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 		      || (h->elf.elf_link_hash_flags
 			  & ELF_LINK_HASH_DEF_REGULAR) == 0)))
 	    {
+	      struct elf32_hppa_dyn_reloc_entry *p;
+	      struct elf32_hppa_dyn_reloc_entry **head;
+
 	      /* Create a reloc section in dynobj and make room for
 		 this reloc.  */
 	      if (sreloc == NULL)
@@ -1561,36 +1568,46 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 		 relocations we need for this symbol.  */
 	      if (h != NULL)
 		{
-		  struct elf32_hppa_dyn_reloc_entry *p;
-
-		  p = h->dyn_relocs;
-		  if (p == NULL || p->sec != sec)
-		    {
-		      p = ((struct elf32_hppa_dyn_reloc_entry *)
-			   bfd_alloc (htab->elf.dynobj,
-				      (bfd_size_type) sizeof *p));
-		      if (p == NULL)
-			return false;
-		      p->next = h->dyn_relocs;
-		      h->dyn_relocs = p;
-		      p->sec = sec;
-		      p->count = 0;
-#if RELATIVE_DYNRELOCS
-		      p->relative_count = 0;
-#endif
-		    }
-
-		  p->count += 1;
-#if RELATIVE_DYNRELOCS
-		  if (!IS_ABSOLUTE_RELOC (rtype))
-		    p->relative_count += 1;
-#endif
+		  head = &h->dyn_relocs;
 		}
 	      else
 		{
-		  /* Track dynamic relocs needed for local syms too.  */
-		  elf_section_data (sec)->local_dynrel += 1;
+		  /* Track dynamic relocs needed for local syms too.
+		     We really need local syms available to do this
+		     easily.  Oh well.  */
+
+		  asection *s;
+		  s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
+						 sec, r_symndx);
+		  if (s == NULL)
+		    return false;
+
+		  head = ((struct elf32_hppa_dyn_reloc_entry **)
+			  &elf_section_data (s)->local_dynrel);
 		}
+
+	      p = *head;
+	      if (p == NULL || p->sec != sec)
+		{
+		  p = ((struct elf32_hppa_dyn_reloc_entry *)
+		       bfd_alloc (htab->elf.dynobj,
+				  (bfd_size_type) sizeof *p));
+		  if (p == NULL)
+		    return false;
+		  p->next = *head;
+		  *head = p;
+		  p->sec = sec;
+		  p->count = 0;
+#if RELATIVE_DYNRELOCS
+		  p->relative_count = 0;
+#endif
+		}
+
+	      p->count += 1;
+#if RELATIVE_DYNRELOCS
+	      if (!IS_ABSOLUTE_RELOC (rtype))
+		p->relative_count += 1;
+#endif
 	    }
 	}
     }
@@ -1666,7 +1683,7 @@ elf32_hppa_gc_sweep_hook (abfd, info, sec, relocs)
   struct elf32_hppa_link_hash_table *htab;
   bfd *dynobj;
 
-  elf_section_data (sec)->local_dynrel = 0;
+  elf_section_data (sec)->local_dynrel = NULL;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
@@ -2184,7 +2201,7 @@ allocate_dynrelocs (h, inf)
       eh->dyn_relocs = NULL;
       return true;
 
-    keep:
+    keep: ;
     }
 
   /* Finally, allocate space.  */
@@ -2311,12 +2328,26 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 
       for (s = ibfd->sections; s != NULL; s = s->next)
 	{
-	  bfd_size_type count = elf_section_data (s)->local_dynrel;
+	  struct elf32_hppa_dyn_reloc_entry *p;
 
-	  if (count != 0)
+	  for (p = ((struct elf32_hppa_dyn_reloc_entry *)
+		    elf_section_data (s)->local_dynrel);
+	       p != NULL;
+	       p = p->next)
 	    {
-	      srel = elf_section_data (s)->sreloc;
-	      srel->_raw_size += count * sizeof (Elf32_External_Rela);
+	      if (!bfd_is_abs_section (p->sec)
+		  && bfd_is_abs_section (p->sec->output_section))
+		{
+		  /* Input section has been discarded, either because
+		     it is a copy of a linkonce section or due to
+		     linker script /DISCARD/, so we'll be discarding
+		     the relocs too.  */
+		}
+	      else
+		{
+		  srel = elf_section_data (p->sec)->sreloc;
+		  srel->_raw_size += p->count * sizeof (Elf32_External_Rela);
+		}
 	    }
 	}
 
@@ -3877,12 +3908,19 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PARISC_DPREL14R:
 	case R_PARISC_DPREL21L:
 	case R_PARISC_DIR32:
+	  /* r_symndx will be zero only for relocs against symbols
+	     from removed linkonce sections, or sections discarded by
+	     a linker script.  */
+	  if (r_symndx == 0
+	      || (input_section->flags & SEC_ALLOC) == 0)
+	    break;
+
 	  /* The reloc types handled here and this conditional
 	     expression must match the code in ..check_relocs and
-	     ..discard_relocs.  ie. We need exactly the same condition
+	     allocate_dynrelocs.  ie. We need exactly the same condition
 	     as in ..check_relocs, with some extra conditions (dynindx
 	     test in this case) to cater for relocs removed by
-	     ..discard_relocs.  If you squint, the non-shared test
+	     allocate_dynrelocs.  If you squint, the non-shared test
 	     here does indeed match the one in ..check_relocs, the
 	     difference being that here we test DEF_DYNAMIC as well as
 	     !DEF_REGULAR.  All common syms end up with !DEF_REGULAR,
@@ -3890,7 +3928,6 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	     Conversely, DEF_DYNAMIC can't be used in check_relocs as
 	     there all files have not been loaded.  */
 	  if ((info->shared
-	       && (input_section->flags & SEC_ALLOC) != 0
 	       && (IS_ABSOLUTE_RELOC (r_type)
 		   || (h != NULL
 		       && h->elf.dynindx != -1
@@ -3898,7 +3935,6 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 			   || (h->elf.elf_link_hash_flags
 			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
 	      || (!info->shared
-		  && (input_section->flags & SEC_ALLOC) != 0
 		  && h != NULL
 		  && h->elf.dynindx != -1
 		  && (h->elf.elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0

@@ -3175,7 +3175,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case (int) R_PPC_ADDR14:
 	case (int) R_PPC_UADDR32:
 	case (int) R_PPC_UADDR16:
-	  if (info->shared)
+	  if (info->shared && r_symndx != 0)
 	    {
 	      Elf_Internal_Rela outrel;
 	      boolean skip;

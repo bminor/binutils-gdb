@@ -1639,6 +1639,9 @@ struct ppc_link_hash_table
   asection *sdynbss;
   asection *srelbss;
   asection *sglink;
+
+  /* Small local sym to section mapping cache.  */
+  struct sym_sec_cache sym_sec;
 };
 
 /* Get the ppc64 ELF linker hash table from a link_info structure.  */
@@ -1701,6 +1704,7 @@ ppc64_elf_link_hash_table_create (abfd)
   htab->sdynbss = NULL;
   htab->srelbss = NULL;
   htab->sglink = NULL;
+  htab->sym_sec.abfd = NULL;
 
   return &htab->elf.root;
 }
@@ -2035,6 +2039,9 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 		      || (h->elf_link_hash_flags
 			  & ELF_LINK_HASH_DEF_REGULAR) == 0)))
 	    {
+	      struct ppc_dyn_relocs *p;
+	      struct ppc_dyn_relocs **head;
+
 	      /* We must copy these reloc types into the output file.
 		 Create a reloc section in dynobj and make room for
 		 this reloc.  */
@@ -2085,35 +2092,42 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 		 relocations we need for this symbol.  */
 	      if (h != NULL)
 		{
-		  struct ppc_link_hash_entry *eh;
-		  struct ppc_dyn_relocs *p;
-
-		  eh = (struct ppc_link_hash_entry *) h;
-		  p = eh->dyn_relocs;
-
-		  if (p == NULL || p->sec != sec)
-		    {
-		      p = ((struct ppc_dyn_relocs *)
-			   bfd_alloc (htab->elf.dynobj,
-				      (bfd_size_type) sizeof *p));
-		      if (p == NULL)
-			return false;
-		      p->next = eh->dyn_relocs;
-		      eh->dyn_relocs = p;
-		      p->sec = sec;
-		      p->count = 0;
-		      p->pc_count = 0;
-		    }
-
-		  p->count += 1;
-		  if (!IS_ABSOLUTE_RELOC (r_type))
-		    p->pc_count += 1;
+		  head = &((struct ppc_link_hash_entry *) h)->dyn_relocs;
 		}
 	      else
 		{
-		  /* Track dynamic relocs needed for local syms too.  */
-		  elf_section_data (sec)->local_dynrel += 1;
+		  /* Track dynamic relocs needed for local syms too.
+		     We really need local syms available to do this
+		     easily.  Oh well.  */
+
+		  asection *s;
+		  s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
+						 sec, r_symndx);
+		  if (s == NULL)
+		    return false;
+
+		  head = ((struct ppc_dyn_relocs **)
+			  &elf_section_data (s)->local_dynrel);
 		}
+
+	      p = *head;
+	      if (p == NULL || p->sec != sec)
+		{
+		  p = ((struct ppc_dyn_relocs *)
+		       bfd_alloc (htab->elf.dynobj,
+				  (bfd_size_type) sizeof *p));
+		  if (p == NULL)
+		    return false;
+		  p->next = *head;
+		  *head = p;
+		  p->sec = sec;
+		  p->count = 0;
+		  p->pc_count = 0;
+		}
+
+	      p->count += 1;
+	      if (!IS_ABSOLUTE_RELOC (r_type))
+		p->pc_count += 1;
 	    }
 	  break;
 
@@ -2189,6 +2203,8 @@ ppc64_elf_gc_sweep_hook (abfd, info, sec, relocs)
   struct elf_link_hash_entry **sym_hashes;
   bfd_signed_vma *local_got_refcounts;
   const Elf_Internal_Rela *rel, *relend;
+
+  elf_section_data (sec)->local_dynrel = NULL;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
@@ -2660,7 +2676,7 @@ allocate_dynrelocs (h, inf)
 	  if (h->dynindx == -1
 	      && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
 	    {
-	      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	      if (! bfd_elf64_link_record_dynamic_symbol (info, h))
 		return false;
 	    }
 
@@ -2672,7 +2688,7 @@ allocate_dynrelocs (h, inf)
 
       eh->dyn_relocs = NULL;
 
-    keep:
+    keep: ;
     }
 
   /* Finally, allocate space.  */
@@ -2759,12 +2775,26 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
 
       for (s = ibfd->sections; s != NULL; s = s->next)
 	{
-	  bfd_size_type count = elf_section_data (s)->local_dynrel;
+	  struct ppc_dyn_relocs *p;
 
-	  if (count != 0)
+	  for (p = *((struct ppc_dyn_relocs **)
+		     &elf_section_data (s)->local_dynrel);
+	       p != NULL;
+	       p = p->next)
 	    {
-	      srel = elf_section_data (s)->sreloc;
-	      srel->_raw_size += count * sizeof (Elf64_External_Rela);
+	      if (!bfd_is_abs_section (p->sec)
+		  && bfd_is_abs_section (p->sec->output_section))
+		{
+		  /* Input section has been discarded, either because
+		     it is a copy of a linkonce section or due to
+		     linker script /DISCARD/, so we'll be discarding
+		     the relocs too.  */
+		}
+	      else
+		{
+		  srel = elf_section_data (p->sec)->sreloc;
+		  srel->_raw_size += p->count * sizeof (Elf64_External_Rela);
+		}
 	    }
 	}
 
@@ -3429,8 +3459,14 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PPC64_UADDR32:
 	case R_PPC64_UADDR64:
 	case R_PPC64_TOC:
+	  /* r_symndx will be zero only for relocs against symbols
+	     from removed linkonce sections, or sections discarded by
+	     a linker script.  */
+	  if (r_symndx == 0
+	      || (input_section->flags & SEC_ALLOC) == 0)
+	    break;
+
 	  if ((info->shared
-	       && (input_section->flags & SEC_ALLOC) != 0
 	       && (IS_ABSOLUTE_RELOC (r_type)
 		   || (h != NULL
 		       && h->dynindx != -1
@@ -3438,7 +3474,6 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			   || (h->elf_link_hash_flags
 			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
 	      || (!info->shared
-		  && (input_section->flags & SEC_ALLOC) != 0
 		  && h != NULL
 		  && h->dynindx != -1
 		  && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
