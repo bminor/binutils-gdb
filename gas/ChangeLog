@@ -1,3 +1,10 @@
+start-sanitize-sky
+Thu Apr 23 11:09:34 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (dvp_frob_label): Don't emit _$ versions of
+	local labels ($ prefix).
+
+end-sanitize-sky
 Wed Apr 22 15:57:21 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* po/Make-in (MKINSTALLDIRS): Don't look in $(top_srcdir).
