@@ -1180,7 +1180,7 @@ static struct symbol *lookup_symbol_aux_using (const char *name,
 
   while (block != NULL)
     {
-      using = cp_copy_usings (BLOCK_USING (block), using);
+      using = cp_copy_usings (block_using (block), using);
       block = BLOCK_SUPERBLOCK (block);
     }
 
@@ -1776,18 +1776,6 @@ find_active_alias (struct symbol *sym, CORE_ADDR addr)
   return sym;
 }
 
-
-/* Return the symbol for the function which contains a specified
-   lexical block, described by a struct block BL.  */
-
-struct symbol *
-block_function (struct block *bl)
-{
-  while (BLOCK_FUNCTION (bl) == 0 && BLOCK_SUPERBLOCK (bl) != 0)
-    bl = BLOCK_SUPERBLOCK (bl);
-
-  return BLOCK_FUNCTION (bl);
-}
 
 /* Find the symtab associated with PC and SECTION.  Look through the
    psymtabs and read in another symtab if necessary. */
@@ -3376,18 +3364,6 @@ rbreak_command (char *regexp, int from_tty)
     }
 
   do_cleanups (old_chain);
-}
-
-
-/* Return Nonzero if block a is lexically nested within block b,
-   or if a and b have the same pc range.
-   Return zero otherwise. */
-int
-contained_in (struct block *a, struct block *b)
-{
-  if (!a || !b)
-    return 0;
-  return BLOCK_START (a) >= BLOCK_START (b) && BLOCK_END (a) <= BLOCK_END (b);
 }
 
 

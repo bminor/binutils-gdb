@@ -117,7 +117,7 @@ get_java_class_symtab (void)
       BLOCK_SUPERBLOCK (bl) = NULL;
       BLOCK_DICT (bl) = dict_create_linear (&objfile->symbol_obstack,
 					    NULL);
-      BLOCK_USING (bl) = NULL;
+      BLOCK_NAMESPACE (bl) = NULL;
       BLOCK_GCC_COMPILED (bl) = 0;
       BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = bl;
 

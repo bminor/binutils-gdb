@@ -67,6 +67,16 @@ struct using_direct_node
   struct using_direct_node *next;
 };
 
+/* This is used by struct block to store namespace-related info for
+   C++ files, namely using declarations and the current namespace in
+   scope.  */
+
+struct namespace_info
+{
+  struct using_direct_node *using;
+  const char *scope;
+};
+
 extern struct
 using_direct_node *cp_add_using_obstack (const char *name,
 					 unsigned short outer_length,

@@ -344,7 +344,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
   BLOCK_END (block) = end;
   /* Superblock filled in when containing block is made */
   BLOCK_SUPERBLOCK (block) = NULL;
-  BLOCK_USING (block) = NULL;
+  BLOCK_NAMESPACE (block) = NULL;
 
   BLOCK_GCC_COMPILED (block) = processing_gcc_compilation;
 
@@ -448,18 +448,41 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	  const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
 	  const char *next;
 
+	  if (processing_has_namespace_info)
+	    block_set_scope (block, processing_current_namespace,
+			     &objfile->symbol_obstack);
+	  else
+	    {
+	      const char *current, *next;
+	      
+	      for (current = name, next = cp_find_first_component (current);
+		   *next == ':';
+		   /* The '+ 2' is to skip the '::'.  */
+		   current = next,
+		     next = cp_find_first_component (current + 2))
+		;
+	      if (current == name)
+		block_set_scope (block, "", &objfile->symbol_obstack);
+	      else
+		block_set_scope (block,
+				 obsavestring (name, current - name,
+					       &objfile->symbol_obstack),
+				 &objfile->symbol_obstack);
+	    }
+	  
 	  for (next = cp_find_first_component (name);
 	       *next == ':';
 	       /* The '+ 2' is to skip the '::'.  */
 	       next = cp_find_first_component (next + 2))
 	    {
-	      BLOCK_USING (block)
-		= cp_add_using_obstack (name, 0, next - name,
-					BLOCK_USING (block),
-					&objfile->symbol_obstack);
+	      block_set_using (block,
+			       cp_add_using_obstack (name, 0, next - name,
+						     block_using (block),
+						     &objfile->symbol_obstack),
+			       &objfile->symbol_obstack);
 	    }
 
-	  /* FIMXE: carlton/2002-10-09: Until I understand the
+	  /* FIXME: carlton/2002-10-09: Until I understand the
 	     possible pitfalls of demangled names a lot better, I want
 	     to make sure I'm not running into surprises.  */
 	  gdb_assert (*next == '\0');
@@ -1025,9 +1048,10 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
       blockvector = make_blockvector (objfile);
       if (using_list != NULL)
 	{
-	  BLOCK_USING (BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK))
-	    = copy_usings_to_obstack (using_list,
-				      &objfile->symbol_obstack);
+	  block_set_using (BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK),
+			   copy_usings_to_obstack (using_list,
+						   &objfile->symbol_obstack),
+			   &objfile->symbol_obstack);
 	  using_list = NULL;
 	}
     }

@@ -1481,6 +1481,9 @@ decode_dollar (char **argptr, int funfirstline, struct symtab *default_symtab,
 
 
 
+/* Decode a linespec that's a variable.  If FILE_SYMTAB is non-NULL,
+   look in that file's static variables first.  */
+
 static struct symtabs_and_lines
 decode_variable (char **argptr, int funfirstline, char ***canonical,
 		 int is_quoted, char *paren_pointer,

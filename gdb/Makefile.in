@@ -531,7 +531,7 @@ TARGET_FLAGS_TO_PASS = \
 
 SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	ax-general.c ax-gdb.c \
-	bcache.c blockframe.c breakpoint.c buildsym.c builtin-regs.c \
+	bcache.c block.c blockframe.c breakpoint.c buildsym.c builtin-regs.c \
 	c-exp.y c-lang.c c-typeprint.c c-valprint.c \
 	charset.c cli-out.c coffread.c complaints.c completer.c corefile.c \
 	cp-abi.c cp-support.c cp-valprint.c \
@@ -830,7 +830,7 @@ TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 	$(SUBDIR_CLI_SRCS)
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
-COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
+COMMON_OBS = version.o block.o blockframe.o breakpoint.o findvar.o regcache.o \
 	charset.o dictionary.o disasm.o \
 	charset.o disasm.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
@@ -1533,6 +1533,7 @@ ax-gdb.o: ax-gdb.c $(defs_h) $(symtab_h) $(symfile_h) $(gdbtypes_h) \
 	$(target_h) $(ax_h) $(ax_gdb_h) $(gdb_string_h) $(block_h)
 ax-general.o: ax-general.c $(defs_h) $(ax_h) $(value_h) $(gdb_string_h)
 bcache.o: bcache.c $(defs_h) $(gdb_obstack_h) $(bcache_h) $(gdb_string_h)
+block.o: block.c $(defs_h) $(block_h) $(gdb_obstack_h) $(cp_support_h)
 blockframe.o: blockframe.c $(defs_h) $(symtab_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(frame_h) $(gdbcore_h) $(value_h) $(target_h) \
 	$(inferior_h) $(annotate_h) $(regcache_h) $(gdb_assert_h) \

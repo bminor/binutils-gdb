@@ -1,3 +1,42 @@
+2002-11-13  David Carlton  <carlton@math.stanford.edu>
+
+	* buildsym.c (finish_block): Initialize block_scope (block) in
+	C++ function blocks.
+	* dwarf2read.c: Delete variable current_namespace.
+	(psymtab_to_symtab_1): Rename current_namespace to
+	processing_current_namespace.
+	(read_namespace): Ditto.
+	* buildsym.h: New variable processing_current_namespace.
+	* block.h: Declarations for block_scope and block_set_scope.
+	* block.c (block_scope): New function.
+	(block_set_scope): New function.
+	* cp-support.h (struct namespace_info): Add 'scope' member.
+	* buildsym.c (finish_block): Replace BLOCK_USING by
+	block_set_using.
+	(end_symtab): Ditto.
+	* block.h: Declaration for block_set_using.
+	* block.c (block_set_using): New function.
+	(block_initialize_namespace): New function.
+	* symtab.c (lookup_symbol_aux_using): Replace BLOCK_USING by
+	block_using.
+	* buildsym.c (finish_block): Set BLOCK_NAMESPACE to NULL, not
+	BLOCK_USING.
+	* jv-lang.c (get_java_class_symtab): Ditto.
+	* block.h: Declaration for block_using.
+	* block.c (block_using): New function.
+	* Makefile.in (block.o): New rule; also add block.c to SFILES and
+	block.o to COMMON_OBS.
+	* block.c: New file.
+	* symtab.c (contained_in): Move to block.c.
+	(block_function): Ditto.
+	* block.h (struct block): Have the language-specific stuff contain
+	a struct namespace_info.
+	(BLOCK_NAMESPACE): New macro.
+	(BLOCK_USING): Delete.
+	* linespec.c (decode_variable): Add comment before
+	decode_variable.
+	* cp-support.h (struct namespace_info): New struct.
+
 2002-11-06  David Carlton  <carlton@math.stanford.edu>
 
 	* linespec.c: Delete declaration of operator_chars.
