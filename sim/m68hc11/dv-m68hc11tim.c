@@ -1,6 +1,6 @@
 /*  dv-m68hc11tim.c -- Simulation of the 68HC11 timer devices.
-    Copyright (C) 1999, 2000, 2002 Free Software Foundation, Inc.
-    Written by Stephane Carrez (stcarrez@worldnet.fr)
+    Copyright (C) 1999, 2000, 2002, 2003 Free Software Foundation, Inc.
+    Written by Stephane Carrez (stcarrez@nerim.fr)
     (From a driver model Contributed by Cygnus Solutions.)
 
     This file is part of the program GDB, the GNU debugger.
@@ -394,6 +394,30 @@ m68hc11tim_timer_event (struct hw *me, void *data)
 
 /* Descriptions of the Timer I/O ports.  These descriptions are only used to
    give information of the Timer device under GDB.  */
+io_reg_desc tmsk1_desc[] = {
+  { M6811_OC1I,  "OC1I ", "Timer Output Compare 1 Interrupt Enable" },
+  { M6811_OC2I,  "OC2I ", "Timer Output Compare 2 Interrupt Enable" },
+  { M6811_OC3I,  "OC3I ", "Timer Output Compare 3 Interrupt Enable" },
+  { M6811_OC4I,  "OC4I ", "Timer Output Compare 4 Interrupt Enable" },
+  { M6811_OC5I,  "OC5I ", "Timer Input Capture 4 / Output Compare 5 Enable" },
+  { M6811_IC1I,  "IC1I ", "Timer Input Capture 1 Interrupt Enable" },
+  { M6811_IC2I,  "IC2I ", "Timer Input Capture 2 Interrupt Enable" },
+  { M6811_IC3I,  "IC3I ", "Timer Input Capture 3 Interrupt Enable" },
+  { 0, 0, 0 }
+};
+
+io_reg_desc tflg1_desc[] = {
+  { M6811_OC1F,  "OC1F ", "Timer Output Compare 1 Interrupt Flag" },
+  { M6811_OC2F,  "OC2F ", "Timer Output Compare 2 Interrupt Flag" },
+  { M6811_OC3F,  "OC3F ", "Timer Output Compare 3 Interrupt Flag" },
+  { M6811_OC4F,  "OC4F ", "Timer Output Compare 4 Interrupt Flag" },
+  { M6811_OC5F,  "OC5F ", "Timer Input Capture 4 / Output Compare 5 Flag" },
+  { M6811_IC1F,  "IC1F ", "Timer Input Capture 1 Interrupt Flag" },
+  { M6811_IC2F,  "IC2F ", "Timer Input Capture 2 Interrupt Flag" },
+  { M6811_IC3F,  "IC3F ", "Timer Input Capture 3 Interrupt Flag" },
+  { 0, 0, 0 }
+};
+
 io_reg_desc tmsk2_desc[] = {
   { M6811_TOI,    "TOI   ", "Timer Overflow Interrupt Enable" },
   { M6811_RTII,   "RTII  ", "RTI Interrupt Enable" },
@@ -484,6 +508,7 @@ m68hc11tim_info (struct hw *me)
   sim_cpu *cpu;
   struct m68hc11tim *controller;
   uint8 val;
+  uint16 val16;
   
   sd = hw_system (me);
   cpu = STATE_CPU (sd, 0);
@@ -492,6 +517,56 @@ m68hc11tim_info (struct hw *me)
   sim_io_printf (sd, "M68HC11 Timer:\n");
 
   base = cpu_get_io_base (cpu);
+
+  /* Info for TIC1 */
+  val16  = (cpu->ios[M6811_TIC1_H] << 8) + cpu->ios[M6811_TIC1_L];
+  print_io_word (sd, "TIC1 ", 0, val16, base + M6811_TIC1);
+  sim_io_printf (sd, "\n");
+
+  /* Info for TIC2 */
+  val16  = (cpu->ios[M6811_TIC2_H] << 8) + cpu->ios[M6811_TIC2_L];
+  print_io_word (sd, "TIC2 ", 0, val16, base + M6811_TIC2);
+  sim_io_printf (sd, "\n");
+
+  /* Info for TIC3 */
+  val16  = (cpu->ios[M6811_TIC3_H] << 8) + cpu->ios[M6811_TIC3_L];
+  print_io_word (sd, "TIC3 ", 0, val16, base + M6811_TIC3);
+  sim_io_printf (sd, "\n");
+
+  /* Info for TOC1 */
+  val16  = (cpu->ios[M6811_TOC1_H] << 8) + cpu->ios[M6811_TOC1_L];
+  print_io_word (sd, "TOC1 ", 0, val16, base + M6811_TOC1);
+  sim_io_printf (sd, "\n");
+
+  /* Info for TOC2 */
+  val16  = (cpu->ios[M6811_TOC2_H] << 8) + cpu->ios[M6811_TOC2_L];
+  print_io_word (sd, "TOC2 ", 0, val16, base + M6811_TOC2);
+  sim_io_printf (sd, "\n");
+
+  /* Info for TOC3 */
+  val16  = (cpu->ios[M6811_TOC3_H] << 8) + cpu->ios[M6811_TOC3_L];
+  print_io_word (sd, "TOC3 ", 0, val16, base + M6811_TOC3);
+  sim_io_printf (sd, "\n");
+
+  /* Info for TOC4 */
+  val16  = (cpu->ios[M6811_TOC4_H] << 8) + cpu->ios[M6811_TOC4_L];
+  print_io_word (sd, "TOC4 ", 0, val16, base + M6811_TOC4);
+  sim_io_printf (sd, "\n");
+
+  /* Info for TOC5 */
+  val16  = (cpu->ios[M6811_TOC5_H] << 8) + cpu->ios[M6811_TOC5_L];
+  print_io_word (sd, "TOC5 ", 0, val16, base + M6811_TOC5);
+  sim_io_printf (sd, "\n");
+
+  /* Info for TMSK1 */
+  val  = cpu->ios[M6811_TMSK1];
+  print_io_byte (sd, "TMSK1 ", tmsk1_desc, val, base + M6811_TMSK1);
+  sim_io_printf (sd, "\n");
+
+  /* Info for TFLG1 */
+  val = cpu->ios[M6811_TFLG1];
+  print_io_byte (sd, "TFLG1", tflg1_desc, val, base + M6811_TFLG1);
+  sim_io_printf (sd, "\n");
 
   val  = cpu->ios[M6811_TMSK2];
   print_io_byte (sd, "TMSK2 ", tmsk2_desc, val, base + M6811_TMSK2);

@@ -1,3 +1,12 @@
+2003-08-08  Stephane Carrez  <stcarrez@nerim.fr>,
+	    Gary Piercey <gpiercey@northstar-technical.com>
+
+	* m68hc11_sim.c (print_io_word): New function to print 16-bit value.
+	* sim-main.h (print_io_word): Declare.
+	* dv-m68hc11tim.c (tmsk1_desc): New description table for TMSK1.
+	(tflg1_desc): Likewise for TFLG1.
+	(m68hc11tim_info): Print input and output compare registers
+
 2003-03-02  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* Makefile.in (SIM_EXTRA_CFLAGS): Set WITH_TARGET_ADDRESS_BITSIZE
