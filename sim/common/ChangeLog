@@ -1,3 +1,12 @@
+Fri Nov  7 00:37:36 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-events.c (sim_events_process): Delete redundant call to
+ 	update_time_from_event.
+	(sim_events_slip): Always decrement time_from_event.
+	(sim_events_tick, sim_events_deschedule, update_time_from_event):
+ 	Delete assertion that time_from_event >=0 when work in queue, no
+ 	longer applicable.
+
 Thu Nov  6 12:06:46 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-options.c (STANDARD_OPTIONS): Change OPTION_* to an enum.

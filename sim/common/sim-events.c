@@ -110,14 +110,13 @@ struct _sim_event {
    to occure.  If no next event it will hold the time of the last
    event.
 
-   TIME_FROM_EVENT: The current distance from TIME_OF_EVENT.  If an
-   event is pending, this will be positive.  If no future event is
-   pending (eg when poll-event is being processed) this will be
-   negative.  This variable is decremented once for each iteration of
-   a clock cycle.
+   TIME_FROM_EVENT: The current distance from TIME_OF_EVENT.  A value
+   <= 0 (except when poll-event is being processed) indicates that
+   event processing is due.  This variable is decremented once for
+   each iteration of a clock cycle.
 
    Initially, the clock is started at time one (0) with TIME_OF_EVENT
-   == 0 and TIME_FROM_EVENT == 0.
+   == 0 and TIME_FROM_EVENT == 0 and with NR_TICKS_TO_PROCESS == 1.
 
    Clearly there is a bug in that this code assumes that the absolute
    time counter will never become greater than 2^62.
@@ -339,7 +338,7 @@ INLINE_SIM_EVENTS\
 sim_events_time (SIM_DESC sd)
 {
   sim_events *events = STATE_EVENTS (sd);
-  return events->time_of_event - events->time_from_event;
+  return (events->time_of_event - events->time_from_event);
 }
 
 
@@ -360,8 +359,8 @@ update_time_from_event (SIM_DESC sd)
   signed64 current_time = sim_events_time (sd);
   if (events->queue != NULL)
     {
-      events->time_from_event = (events->queue->time_of_event - current_time);
       events->time_of_event = events->queue->time_of_event;
+      events->time_from_event = (events->queue->time_of_event - current_time);
     }
   else
     {
@@ -369,7 +368,6 @@ update_time_from_event (SIM_DESC sd)
       events->time_from_event = -1;
     }
   SIM_ASSERT (current_time == sim_events_time (sd));
-  SIM_ASSERT ((events->time_from_event >= 0) == (events->queue != NULL));
 }
 
 
@@ -682,7 +680,6 @@ sim_events_deschedule (SIM_DESC sd,
 {
   sim_events *events = STATE_EVENTS (sd);
   sim_event *to_remove = (sim_event*)event_to_remove;
-  SIM_ASSERT ((events->time_from_event >= 0) == (events->queue != NULL));
   if (event_to_remove != NULL)
     {
       sim_event **queue = NULL;
@@ -892,7 +889,6 @@ INLINE_SIM_EVENTS\
 sim_events_tick (SIM_DESC sd)
 {
   sim_events *events = STATE_EVENTS (sd);
-  SIM_ASSERT (events->nr_ticks_to_process == 0);
 
   /* this should only be called after the previous ticks have been
      fully processed */
@@ -904,10 +900,11 @@ sim_events_tick (SIM_DESC sd)
       events->nr_ticks_to_process += 1;
       return 1;
     }
-  else {
-    events->time_from_event -= 1;
-    return 0;
-  }
+  else
+    {
+      events->time_from_event -= 1;
+      return 0;
+    }
 }
 
 
@@ -923,16 +920,16 @@ sim_events_tickn (SIM_DESC sd,
      fully processed */
 
   /* Advance the time but *only* if there is nothing to process */
-  if (events->work_pending
-      || events->time_from_event < n)
+  if (events->work_pending || events->time_from_event < n)
     {
       events->nr_ticks_to_process += n;
       return 1;
     }
-  else {
-    events->time_from_event -= n;
-    return 0;
-  }
+  else
+    {
+      events->time_from_event -= n;
+      return 0;
+    }
 }
 
 
@@ -944,19 +941,13 @@ sim_events_slip (SIM_DESC sd,
   sim_events *events = STATE_EVENTS (sd);
   SIM_ASSERT (slip > 0);
 
-  /* Advance either TIME_FROM_EVENT or NR_TICKS_TO_PROCESS dependant
-     on which is closer for this SLIP.  While previous slips may have
-     advanced a different counter is sitll valid as the accumulative
-     effect is still the same. */
+  /* Flag a ready event with work_pending instead of number of ticks
+     to process so that the time continues to be correct */
   if (events->time_from_event < slip)
     {
-      events->nr_ticks_to_process += slip;
       events->work_pending = 1;
     }
-  else 
-    {
-      events->time_from_event -= slip;
-    }
+  events->time_from_event -= slip;
 }
 
 
@@ -991,8 +982,6 @@ sim_events_process (SIM_DESC sd)
 {
   sim_events *events = STATE_EVENTS(sd);
   signed64 event_time = sim_events_time(sd);
-
-  ASSERT (events->nr_ticks_to_process != 0);
 
   /* Clear work_pending before checking nr_held.  Clearing
      work_pending after nr_held (with out a lock could loose an
@@ -1085,8 +1074,7 @@ sim_events_process (SIM_DESC sd)
   if (events->watchpoints != NULL)
     events->work_pending = 1;
   
-  /* re-caculate time for new events then advance the time */
-  update_time_from_event(sd);
+  /* advance the time */
   SIM_ASSERT (events->time_from_event >= events->nr_ticks_to_process);
   SIM_ASSERT (events->queue != NULL); /* always poll event */
   events->time_from_event -= events->nr_ticks_to_process;
