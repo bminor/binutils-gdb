@@ -63,6 +63,16 @@ static void gld${EMULATION_NAME}_finish (void);
 
 EOF
 
+if [ "x${USE_LIBPATH}" = xyes ] ; then
+  case ${target} in
+    *-*-linux-gnu*)
+  cat >>e${EMULATION_NAME}.c <<EOF
+#include <glob.h>
+EOF
+    ;;
+  esac
+fi
+
 # Import any needed special functions and/or overrides.
 #
 if test -n "$EXTRA_EM_FILE" ; then
@@ -506,6 +516,141 @@ EOF
    in which we may find shared libraries.  /etc/ld.so.conf is really
    only meaningful on Linux.  */
 
+struct gld${EMULATION_NAME}_ld_so_conf
+{
+  char *path;
+  size_t len, alloc;
+};
+
+static void
+gld${EMULATION_NAME}_parse_ld_so_conf
+     (struct gld${EMULATION_NAME}_ld_so_conf *info, const char *filename);
+
+static void
+gld${EMULATION_NAME}_parse_ld_so_conf_include
+     (struct gld${EMULATION_NAME}_ld_so_conf *info, const char *filename,
+      const char *pattern)
+{
+  char *newp = NULL;
+  glob_t gl;
+
+  if (pattern[0] != '/')
+    {
+      char *p = strrchr (filename, '/');
+      size_t patlen = strlen (pattern) + 1;
+
+      newp = xmalloc (p - filename + 1 + patlen);
+      memcpy (newp, filename, p - filename + 1);
+      memcpy (newp + (p - filename + 1), pattern, patlen);
+      pattern = newp;
+    }
+
+  if (glob (pattern, 0, NULL, &gl) == 0)
+    {
+      size_t i;
+
+      for (i = 0; i < gl.gl_pathc; ++i)
+	gld${EMULATION_NAME}_parse_ld_so_conf (info, gl.gl_pathv[i]);
+      globfree (&gl);
+    }
+
+  if (newp)
+    free (newp);
+}
+
+static void
+gld${EMULATION_NAME}_parse_ld_so_conf
+     (struct gld${EMULATION_NAME}_ld_so_conf *info, const char *filename)
+{
+  FILE *f = fopen (filename, FOPEN_RT);
+  char *line = NULL;
+  size_t linelen = 0;
+
+  if (f == NULL)
+    return;
+
+  while (getline (&line, &linelen, f) != -1)
+    {
+      char *p;
+
+      p = strchr (line, '\n');
+      if (p)
+	*p = '\0';
+
+      /* Because the file format does not know any form of quoting we
+	 can search forward for the next '#' character and if found
+	 make it terminating the line.  */
+      p = strchr (line, '#');
+      if (p)
+	*p = '\0';
+
+      /* Remove leading whitespace.  NUL is no whitespace character.  */
+      p = line;
+      while (*p == ' ' || *p == '\f' || *p == '\r' || *p == '\t' || *p == '\v')
+	++p;
+
+      /* If the line is blank it is ignored.  */
+      if (p[0] == '\0')
+	continue;
+
+      if (!strncmp (p, "include", 7) && (p[7] == ' ' || p[7] == '\t'))
+	{
+	  char *dir, c;
+	  p += 8;
+	  do
+	    {
+	      while (*p == ' ' || *p == '\t')
+		++p;
+
+	      if (*p == '\0')
+		break;
+
+	      dir = p;
+
+	      while (*p != ' ' && *p != '\t' && *p)
+		++p;
+
+	      c = *p;
+	      *p++ = '\0';
+	      if (dir[0] != '\0')
+		gld${EMULATION_NAME}_parse_ld_so_conf_include (info, filename,
+							       dir);
+	    }
+	  while (c != '\0');
+	}
+      else
+	{
+	  char *dir = p;
+	  while (*p && *p != '=' && *p != ' ' && *p != '\t' && *p != '\f'
+		 && *p != '\r' && *p != '\v')
+	    ++p;
+
+	  while (p != dir && p[-1] == '/')
+	    --p;
+	  if (info->path == NULL)
+	    {
+	      info->alloc = p - dir + 1 + 256;
+	      info->path = xmalloc (info->alloc);
+	      info->len = 0;
+	    }
+	  else
+	    {
+	      if (info->len + 1 + (p - dir) >= info->alloc)
+		{
+		  info->alloc += p - dir + 256;
+		  info->path = xrealloc (info->path, info->alloc);
+		}
+	      info->path[info->len++] = ':';
+	    }
+	  memcpy (info->path + info->len, dir, p - dir);
+	  info->len += p - dir;
+	  info->path[info->len] = '\0';
+	}
+    }
+  free (line);
+  fclose (f);
+}
+
 static bfd_boolean
 gld${EMULATION_NAME}_check_ld_so_conf (const char *name, int force)
 {
@@ -515,71 +660,20 @@ gld${EMULATION_NAME}_check_ld_so_conf (const char *name, int force)
 
   if (! initialized)
     {
-      FILE *f;
       char *tmppath;
+      struct gld${EMULATION_NAME}_ld_so_conf info;
 
       tmppath = concat (ld_sysroot, "/etc/ld.so.conf", NULL);
-      f = fopen (tmppath, FOPEN_RT);
+      info.path = NULL;
+      info.len = info.alloc = 0;
+      gld${EMULATION_NAME}_parse_ld_so_conf (&info, tmppath);
       free (tmppath);
-      if (f != NULL)
+      if (info.path)
 	{
-	  char *b;
-	  size_t len, alloc;
-	  int c;
-
-	  len = 0;
-	  alloc = 100;
-	  b = (char *) xmalloc (alloc);
-
-	  while ((c = getc (f)) != EOF)
-	    {
-	      if (len + 1 >= alloc)
-		{
-		  alloc *= 2;
-		  b = (char *) xrealloc (b, alloc);
-		}
-	      if (c != ':'
-		  && c != ' '
-		  && c != '\t'
-		  && c != '\n'
-		  && c != ',')
-		{
-		  b[len] = c;
-		  ++len;
-		}
-	      else
-		{
-		  if (len > 0 && b[len - 1] != ':')
-		    {
-		      b[len] = ':';
-		      ++len;
-		    }
-		}
-	    }
-
-	  if (len > 0 && b[len - 1] == ':')
-	    --len;
-
-	  if (len > 0)
-	    b[len] = '\0';
-	  else
-	    {
-	      free (b);
-	      b = NULL;
-	    }
-
-	  fclose (f);
-
-	  if (b)
-	    {
-	      char *d = gld${EMULATION_NAME}_add_sysroot (b);
-	      free (b);
-	      b = d;
-	    }
-
-	  ld_so_conf = b;
+	  char *d = gld${EMULATION_NAME}_add_sysroot (info.path);
+	  free (info.path);
+	  ld_so_conf = d;
 	}
-
       initialized = TRUE;
     }
 
