@@ -1,3 +1,13 @@
+Mon Apr 15 19:06:59 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (struct mips_hi16): Define.
+	(mips_hi16_addr, mips_hi16_addend): Remove.
+	(mips_hi16_list): New static variable.
+	(mips_elf_hi16_reloc): Maintain a list of unmatched HI16 relocs.
+	(mips_elf_lo16_reloc): Process mips_hi16_list.
+	(mips_elf_relocate_section): Permit an arbitrary number of HI16
+	relocs before the associated LO16 reloc.
+
 Wed Apr 10 00:23:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* versados.c (versados_scan): Check bfd_alloc return value.
