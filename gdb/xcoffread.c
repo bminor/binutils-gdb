@@ -182,6 +182,8 @@ aixcoff_symfile_init PARAMS ((struct objfile *));
 static void
 aixcoff_new_init PARAMS ((struct objfile *));
 
+struct section_offset;
+
 static void
 aixcoff_symfile_read PARAMS ((struct objfile *, struct section_offset *, int));
 

@@ -1,5 +1,7 @@
 Tue Jul 14 00:12:30 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* xcoffread.c:  Add decl for section_offset to keep prototype happy.
+
 	* Makefile.in (VERSION):  4.5.9.
 
 	* xm-hp300bsd.h:  Add decl for strdup().
