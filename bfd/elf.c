@@ -674,9 +674,9 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
 	    case DT_POSFLAG_1: name = "POSFLAG_1"; break;
 	    case DT_SYMINSZ: name = "SYMINSZ"; break;
 	    case DT_SYMINENT: name = "SYMINENT"; break;
-	    case DT_CONFIG: name = "CONFIG"; break;
-	    case DT_DEPAUDIT: name = "DEPAUDIT"; break;
-	    case DT_AUDIT: name = "AUDIT"; break;
+	    case DT_CONFIG: name = "CONFIG"; stringp = true; break;
+	    case DT_DEPAUDIT: name = "DEPAUDIT"; stringp = true; break;
+	    case DT_AUDIT: name = "AUDIT"; stringp = true; break;
 	    case DT_PLTPAD: name = "PLTPAD"; break;
 	    case DT_MOVETAB: name = "MOVETAB"; break;
 	    case DT_SYMINFO: name = "SYMINFO"; break;

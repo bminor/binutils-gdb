@@ -1,3 +1,8 @@
+2000-07-19  H.J. Lu  <hjl@gnu.org>
+
+	* elf.c (_bfd_elf_print_private_bfd_data): Handle DT_CONFIG,
+	DT_DEPAUDIT and DT_AUDIT as strings.
+
 2000-07-19  Nick Clifton  <nickc@cygnus.com>
 
 	* format.c: Fix formatting.
