@@ -389,7 +389,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define GRP13	  NULL, NULL, USE_GROUPS, NULL, 20, NULL, 0
 #define GRP14	  NULL, NULL, USE_GROUPS, NULL, 21, NULL, 0
 #define GRPAMD	  NULL, NULL, USE_GROUPS, NULL, 22, NULL, 0
-#define GRPPADLCK NULL, NULL, USE_GROUPS, NULL, 23, NULL, 0
+#define GRPPADLCK1 NULL, NULL, USE_GROUPS, NULL, 23, NULL, 0
+#define GRPPADLCK2 NULL, NULL, USE_GROUPS, NULL, 24, NULL, 0
 
 #define PREGRP0   NULL, NULL, USE_PREFIX_USER_TABLE, NULL,  0, NULL, 0
 #define PREGRP1   NULL, NULL, USE_PREFIX_USER_TABLE, NULL,  1, NULL, 0
@@ -948,8 +949,8 @@ static const struct dis386 dis386_twobyte[] = {
   { "btS",		Ev, Gv, XX },
   { "shldS",		Ev, Gv, Ib },
   { "shldS",		Ev, Gv, CL },
-  { "(bad)",		XX, XX, XX },
-  { GRPPADLCK },
+  { GRPPADLCK2 },
+  { GRPPADLCK1 },
   /* a8 */
   { "pushT",		gs, XX, XX },
   { "popT",		gs, XX, XX },
@@ -1087,7 +1088,7 @@ static const unsigned char twobyte_has_modrm[256] = {
   /* 70 */ 1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1, /* 7f */
   /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
   /* 90 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 9f */
-  /* a0 */ 0,0,0,1,1,1,0,1,0,0,0,1,1,1,1,1, /* af */
+  /* a0 */ 0,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1, /* af */
   /* b0 */ 1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1, /* bf */
   /* c0 */ 1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0, /* cf */
   /* d0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* df */
@@ -1451,7 +1452,7 @@ static const struct dis386 grps[][8] = {
     { "(bad)",	XX, XX, XX },
     { "(bad)",	XX, XX, XX },
   },
-  /* GRPPADLCK */
+  /* GRPPADLCK1 */
   {
     { "xstorerng", OP_0f07, 0, XX, XX },
     { "xcryptecb", OP_0f07, 0, XX, XX },
@@ -1461,6 +1462,17 @@ static const struct dis386 grps[][8] = {
     { "xcryptofb", OP_0f07, 0, XX, XX },
     { "(bad)",	   OP_0f07, 0, XX, XX },
     { "(bad)",	   OP_0f07, 0, XX, XX },
+  },
+  /* GRPPADLCK2 */
+  {
+    { "montmul", OP_0f07, 0, XX, XX },
+    { "xsha1",   OP_0f07, 0, XX, XX },
+    { "xsha256", OP_0f07, 0, XX, XX },
+    { "(bad)",	 OP_0f07, 0, XX, XX },
+    { "(bad)",   OP_0f07, 0, XX, XX },
+    { "(bad)",   OP_0f07, 0, XX, XX },
+    { "(bad)",	 OP_0f07, 0, XX, XX },
+    { "(bad)",	 OP_0f07, 0, XX, XX },
   }
 };
 

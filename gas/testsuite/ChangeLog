@@ -1,3 +1,8 @@
+2004-07-30  Michal Ludvig  <mludvig@suse.cz>
+
+	* gas/i386/padlock.s, gas/i386/padlock.d: New tests for
+	VIA PadLock instructions.
+
 2004-07-29  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* gas/sh/basic.exp: Don't do sh2a test for sh5.

@@ -1,3 +1,10 @@
+2004-07-30  Michal Ludvig  <mludvig@suse.cz>
+
+	* i386-dis.c (GRPPADLCK): Renamed to GRPPADLCK1
+	(GRPPADLCK2): New define.
+	(twobyte_has_modrm): True for 0xA6.
+	(grps): GRPPADLCK2 for opcode 0xA6.
+
 2004-07-29  Alexandre Oliva  <aoliva@redhat.com>
 
 	Introduce SH2a support.
