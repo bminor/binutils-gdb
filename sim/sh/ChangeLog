@@ -1,7 +1,15 @@
+Wed Nov 29 12:39:27 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* gencode.c (tab): In shad/shld definitions, negate R[m] before
+	the and operation instead of after.  For shad delete cast.  For shld
+	use UR instead of R and delete cast.
+
+start-sanitize-sh3e
 Fri Nov 17 12:48:55 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* gencode.c (tab): Add explicit NaN support for ftrc instruction.
 
+end-sanitize-sh3e
 Wed Nov 15 11:25:27 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* interp.c:  Make target_byte_order be extern to prevent SGI cc from
