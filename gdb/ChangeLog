@@ -1,3 +1,8 @@
+2001-11-27 Keith Walker <keith.walker@arm.com>
+	* dwarf2read.c (read_attribute_value): New function to handle
+	DW_FORM_indirect
+	(read_attribute): uses read_attribute_value
+
 2001-11-29  Jim Blandy  <jimb@redhat.com>
 
 	* s390-tdep.c (s390_frame_saved_pc_nofix): If the prologue didn't

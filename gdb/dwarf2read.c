@@ -605,6 +605,9 @@ static char *read_full_die (struct die_info **, bfd *, char *,
 static char *read_attribute (struct attribute *, struct attr_abbrev *,
 			     bfd *, char *, const struct comp_unit_head *);
 
+static char *read_attribute_value (struct attribute *, unsigned,
+			     bfd *, char *, const struct comp_unit_head *);
+
 static unsigned int read_1_byte (bfd *, char *);
 
 static int read_1_signed_byte (bfd *, char *);
@@ -3360,19 +3363,18 @@ read_full_die (struct die_info **diep, bfd *abfd, char *info_ptr,
   return info_ptr;
 }
 
-/* Read an attribute described by an abbreviated attribute.  */
+/* Read an attribute value described by an attribute form.  */
 
 static char *
-read_attribute (struct attribute *attr, struct attr_abbrev *abbrev,
+read_attribute_value (struct attribute *attr, unsigned form,
 		bfd *abfd, char *info_ptr,
 		const struct comp_unit_head *cu_header)
 {
   unsigned int bytes_read;
   struct dwarf_block *blk;
 
-  attr->name = abbrev->name;
-  attr->form = abbrev->form;
-  switch (abbrev->form)
+  attr->form = form;
+  switch (form)
     {
     case DW_FORM_addr:
     case DW_FORM_ref_addr:
@@ -3469,11 +3471,26 @@ read_attribute (struct attribute *attr, struct attr_abbrev *abbrev,
       info_ptr += bytes_read;
       break;
     case DW_FORM_indirect:
+      form = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
+      info_ptr += bytes_read;
+      info_ptr = read_attribute_value (attr, form, abfd, info_ptr, cu_header);
+      break;
     default:
       error ("Dwarf Error: Cannot handle %s in DWARF reader.",
-	     dwarf_form_name (abbrev->form));
+	     dwarf_form_name (form));
     }
   return info_ptr;
+}
+
+/* Read an attribute described by an abbreviated attribute.  */
+
+static char *
+read_attribute (struct attribute *attr, struct attr_abbrev *abbrev,
+		bfd *abfd, char *info_ptr,
+		const struct comp_unit_head *cu_header)
+{
+  attr->name = abbrev->name;
+  return read_attribute_value (attr, abbrev->form, abfd, info_ptr, cu_header);
 }
 
 /* read dwarf information from a buffer */
@@ -5625,7 +5642,11 @@ dump_die (struct die_info *die)
 	  else
 	    fprintf (stderr, "flag: FALSE");
 	  break;
-	case DW_FORM_indirect:	/* we do not handle indirect yet */
+	case DW_FORM_indirect:
+	  /* the reader will have reduced the indirect form to
+	     the "base form" so this form should not occur */
+	  fprintf (stderr, "unexpected attribute form: DW_FORM_indirect");
+	  break;
 	default:
 	  fprintf (stderr, "unsupported attribute form: %d.",
 		   die->attrs[i].form);
