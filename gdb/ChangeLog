@@ -1,3 +1,8 @@
+2002-01-07  Jackie Smith Cashion  <jsmith@redhat.com>
+
+	From Nick Clifton  <nickc@redhat.com>
+	* d10v-tdep.c: Set STACK_START to 0x200bffe.
+
 2002-01-07  Michael Snyder  <msnyder@redhat.com>
 
 	* solib-legacy.c (legacy_svr4_fetch_link_map_offsets): 

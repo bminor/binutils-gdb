@@ -64,7 +64,7 @@ struct gdbarch_tdep
 
 #define DMEM_START	0x2000000
 #define IMEM_START	0x1000000
-#define STACK_START	0x0007ffe
+#define STACK_START	0x200bffe
 
 /* d10v register names. */
 
