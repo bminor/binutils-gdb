@@ -1,5 +1,5 @@
 /* Native-dependent code for Alpha BSD's.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -80,13 +80,11 @@ fill_gregset (gregset_t *gregsetp, int regno)
 
   for (i = 0; i < NUM_GREGS; i++)
     if ((regno == -1 || regno == i) && ! CANNOT_STORE_REGISTER (i))
-      memcpy (&gregsetp->r_regs[i], &registers[REGISTER_BYTE (i)],
-	      REGISTER_RAW_SIZE (i));
+      regcache_collect (i, (char *) &gregsetp->r_regs[i]);
 
   /* The PC travels in the R_ZERO slot.  */
   if (regno == -1 || regno == PC_REGNUM)
-    memcpy (&gregsetp->r_regs[R_ZERO], &registers[REGISTER_BYTE (PC_REGNUM)],
-	    REGISTER_RAW_SIZE (PC_REGNUM));
+    regcache_collect (PC_REGNUM, (char *) &gregsetp->r_regs[R_ZERO]);
 }
 
 /* Fill GDB's register array with the floating-point register values
@@ -119,13 +117,23 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 
   for (i = FP0_REGNUM; i < FP0_REGNUM + NUM_FPREGS; i++)
     if ((regno == -1 || regno == i) && ! CANNOT_STORE_REGISTER (i))
-      memcpy (&fpregsetp->fpr_regs[i - FP0_REGNUM],
-	      &registers[REGISTER_BYTE (i)], REGISTER_RAW_SIZE (i));
+      regcache_collect (i, (char *) &fpregsetp->fpr_regs[i - FP0_REGNUM]);
 
   if (regno == -1 || regno == FPCR_REGNUM)
-    memcpy (&fpregsetp->fpr_cr, &registers[REGISTER_BYTE (FPCR_REGNUM)],
-	    REGISTER_RAW_SIZE (FPCR_REGNUM));
+    regcache_collect (FPCR_REGNUM, (char *) &fpregsetp->fpr_cr);
 }
+
+
+/* Determine if PT_GETREGS fetches this register.  */
+
+static int
+getregs_supplies (int regno)
+{
+
+  return ((regno >= V0_REGNUM && regno <= ZERO_REGNUM)
+	  || regno >= PC_REGNUM);
+}
+
 
 /* Fetch register REGNO from the inferior.  If REGNO is -1, do this
    for all registers (including the floating point registers).  */
@@ -133,13 +141,19 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 void
 fetch_inferior_registers (int regno)
 {
-  gregset_t gregs;
 
-  if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
-              (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
-    perror_with_name ("Couldn't get registers");
+  if (regno == -1 || getregs_supplies (regno))
+    {
+      gregset_t gregs;
 
-  supply_gregset (&gregs);
+      if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
+		  (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
+	perror_with_name ("Couldn't get registers");
+
+      supply_gregset (&gregs);
+      if (regno != -1)
+	return;
+    }
 
   if (regno == -1 || regno >= FP0_REGNUM)
     {
@@ -162,17 +176,23 @@ fetch_inferior_registers (int regno)
 void
 store_inferior_registers (int regno)
 {
-  gregset_t gregs;
 
-  if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
-              (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
-    perror_with_name ("Couldn't get registers");
+  if (regno == -1 || getregs_supplies (regno))
+    {
+      gregset_t gregs;
+      if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
+                  (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
+        perror_with_name ("Couldn't get registers");
 
-  fill_gregset (&gregs, regno);
+      fill_gregset (&gregs, regno);
 
-  if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
-              (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
-    perror_with_name ("Couldn't write registers");
+      if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
+                  (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
+        perror_with_name ("Couldn't write registers");
+
+      if (regno != -1)
+	return;
+    }
 
   if (regno == -1 || regno >= FP0_REGNUM)
     {

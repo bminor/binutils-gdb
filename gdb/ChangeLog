@@ -1,3 +1,13 @@
+2002-01-18  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* alphabsd-nat.c: Update copyright years.
+	(fill_gregset): Use regcache_collect.
+	(fill_fpregset): Likewise.
+	(fetch_inferior_registers): Only fetch integer registers
+	if requested to do so.
+	(store_inferior_registers): Only store integer registers
+	if requested to do so.
+
 2002-01-17  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/alpha/alpha-osf3.mh (XDEPFILES): Delete.
