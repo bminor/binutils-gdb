@@ -1,3 +1,21 @@
+Mon Jan 29 17:36:29 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Based on patches from H J Lu <hjl@zoom.com>:
+	* objcopy.c (remove_leading_char): New static variable.
+	(OPTION_REMOVE_LEADING_CHAR): Define.
+	(copy_usage): Mention --remove-leading-char.
+	(filter_symbols): If remove_leading_char, and the first character
+	of a global symbol matches the symbol leading char of the BFD,
+	remove the first character.
+	(copy_object): Filter the symbols if remove_leading_char is set.
+	(copy_main): Handle --remove-leading-char.
+	* binutils.texi, objcopy.1: Document --remove-leading-char.
+
+Sat Jan 27 15:40:13 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* objdump.c (fprintf): Add prototype to avoid compiler warning on
+	SunOS.
+
 Fri Jan 26 11:53:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* binutils.texi (nm): Improve documentation on symbol types.
