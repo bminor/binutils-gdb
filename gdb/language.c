@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    whenever the working language changes.  That would be a lot faster.  */
 
 #include "defs.h"
+#include <ctype.h>
 #include "gdb_string.h"
 #ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
@@ -163,19 +164,31 @@ set_language_command (ignore, from_tty)
   enum language flang;
   char *err_lang;
 
-  /* FIXME -- do this from the list, with HELP.  */
-  if (!language || !language[0]) {
-    printf_unfiltered("The currently understood settings are:\n\n");
-    printf_unfiltered ("local or auto    Automatic setting based on source file\n");
-    printf_unfiltered ("c                Use the C language\n");
-    printf_unfiltered ("c++              Use the C++ language\n");
-    printf_unfiltered ("chill            Use the Chill language\n");
-    printf_unfiltered ("fortran          Use the Fortran language\n");
-    printf_unfiltered ("modula-2         Use the Modula-2 language\n");
-    /* Restore the silly string. */
-    set_language(current_language->la_language);
-    return;
-  }
+  if (!language || !language[0])
+    {
+      printf_unfiltered("The currently understood settings are:\n\n");
+      printf_unfiltered ("local or auto    Automatic setting based on source file\n");
+
+      for (i = 0; i < languages_size; ++i)
+	{
+	  /* Already dealt with these above.  */
+	  if (languages[i]->la_language == language_unknown
+	      || languages[i]->la_language == language_auto)
+	    continue;
+
+	  /* FIXME for now assume that the human-readable name is just
+	     a capitalization of the internal name.  */
+	  printf_unfiltered ("%-16s Use the %c%s language\n",
+			     languages[i]->la_name,
+			     /* Capitalize first letter of language
+				name.  */
+			     toupper (languages[i]->la_name[0]),
+			     languages[i]->la_name + 1);
+	}
+      /* Restore the silly string. */
+      set_language(current_language->la_language);
+      return;
+    }
 
   /* Search the list of languages for a match.  */
   for (i = 0; i < languages_size; i++) {

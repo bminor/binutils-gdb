@@ -1,8 +1,16 @@
-Sat Feb  3 10:45:10 1996  Fred Fish  <fnf@cygnus.com>
+Mon Feb  5 09:51:55 1996  Tom Tromey  <tromey@creche.cygnus.com>
 
-	* exec.c (exec_file_command): Fix problem reported by Hans Verkuil
-	(hans@wyst.hobby.nl) where filename in malloc'd memory is referenced
-	after being freed.
+	* language.c (set_language_command): Use languages table when
+	printing available languages.
+
+Sat Feb  3 12:22:05 1996  Fred Fish  <fnf@cygnus.com>
+
+	Fix problems reported by Hans Verkuil (hans@wyst.hobby.nl):
+	* command.c (add_cmd):  Add missing initialization for enums member.
+	Reorder members to match structure declaration to make it easier to
+	tell when one is missing.
+	* exec.c (exec_file_command): Fix problem where filename in malloc'd
+ 	memory is referenced after being freed.
 
 Sat Feb  3 03:26:21 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
