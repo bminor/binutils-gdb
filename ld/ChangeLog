@@ -1,5 +1,9 @@
 2003-02-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* ld.texinfo: Remove spaces between @samp and opening brace.
+
+2003-02-18  Alan Modra  <amodra@bigpond.net.au>
+
 	* emultempl/ppc64elf.em (ppc_create_output_section_statements): Check
 	hash creator.
 	(ppc_before_allocation): Don't do optimizations if wrong hash table.

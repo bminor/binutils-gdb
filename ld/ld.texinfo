@@ -1126,9 +1126,9 @@ first definition will be used.
 @item --allow-shlib-undefined
 @itemx --no-allow-shlib-undefined
 Allow (the default) or disallow undefined symbols in shared objects.
-The setting of this switch overrides @samp {--no-undefined} where
-shared objects are concerned.  Thus if @samp {--no-undefined} is set
-but @samp {--no-allow-shlib-undefined} is not, the net result will be
+The setting of this switch overrides @samp{--no-undefined} where
+shared objects are concerned.  Thus if @samp{--no-undefined} is set
+but @samp{--no-allow-shlib-undefined} is not, the net result will be
 that undefined symbols in regular object files will trigger an error,
 but undefined symbols in shared objects will be ignored.
 
