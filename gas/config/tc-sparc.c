@@ -27,17 +27,7 @@
 /* careful, this file includes data *declarations* */
 #include "opcode/sparc.h"
 
-void md_begin ();
-void md_end ();
-void md_number_to_chars ();
-void md_assemble ();
-char *md_atof ();
-void md_create_short_jump ();
-void md_create_long_jump ();
-int md_estimate_size_before_relax ();
-void md_ri_to_chars ();
-symbolS *md_undefined_symbol ();
-static void sparc_ip ();
+static void sparc_ip PARAMS ((char *));
 
 static enum sparc_architecture current_architecture = v6;
 static int architecture_requested;
@@ -50,14 +40,11 @@ const relax_typeS md_relax_table[1];
 /* handle of the OPCODE hash table */
 static struct hash_control *op_hash = NULL;
 
-static void s_seg (), s_proc (), s_data1 (), s_reserve (), s_common ();
-extern void s_globl (), s_long (), s_short (), s_space (), cons ();
-extern void s_align_bytes (), s_ignore (), s_local();
-/* start-sanitize-v9 */
-#ifndef NO_V9
-static void s_xword ();
-#endif
-/* end-sanitize-v9 */
+static void s_data1 PARAMS ((void));
+static void s_seg PARAMS ((int));
+static void s_proc PARAMS ((int));
+static void s_reserve PARAMS ((int));
+static void s_common PARAMS ((int));
 
 /* Ugly hack to keep non-BFD version working.  */
 #ifndef BFD_ASSEMBLER
@@ -71,7 +58,6 @@ static void s_xword ();
 #define BFD_RELOC_SPARC_BASE13	RELOC_BASE13
 #define BFD_RELOC_SPARC13	RELOC_13
 #define BFD_RELOC_SPARC_BASE22	RELOC_BASE22
-#define subseg_set		subseg_new
 #endif
 
 const pseudo_typeS md_pseudo_table[] =
@@ -88,7 +74,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"word", cons, 4},
 /* start-sanitize-v9 */
 #ifndef NO_V9
-  {"xword", s_xword, 0},
+  {"xword", cons, 8},
 #ifdef OBJ_ELF
   {"uaxword", cons, 8},
 #endif
@@ -181,7 +167,8 @@ static int max_alignment = 15;
 #endif
 
 static void
-s_reserve ()
+s_reserve (ignore)
+     int ignore;
 {
   char *name;
   char *p;
@@ -282,7 +269,7 @@ s_reserve ()
     {
       if (! need_pass_2)
 	{
-	  char *p;
+	  char *pfrag;
 	  segT current_seg = now_seg;
 	  subsegT current_subseg = now_subseg;
 
@@ -296,9 +283,9 @@ s_reserve ()
 	    symbolP->sy_frag->fr_symbol = NULL;
 
 	  symbolP->sy_frag = frag_now;
-	  p = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
-			size, (char *)0);
-	  *p = 0;
+	  pfrag = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
+			    size, (char *)0);
+	  *pfrag = 0;
 
 	  S_SET_SEGMENT (symbolP, bss_section);
 
@@ -314,7 +301,8 @@ s_reserve ()
 }
 
 static void
-s_common ()
+s_common (ignore)
+     int ignore;
 {
   char *name;
   char c;
@@ -362,7 +350,7 @@ s_common ()
   else
     {
 #ifndef OBJ_ELF
-      S_SET_VALUE (symbolP, size);
+      S_SET_VALUE (symbolP, (valueT) size);
       S_SET_EXTERNAL (symbolP);
 #endif
     }
@@ -420,7 +408,7 @@ s_common ()
 #endif
 	{
 	allocate_common:
-	  S_SET_VALUE (symbolP, size);
+	  S_SET_VALUE (symbolP, (valueT) size);
 	  S_SET_EXTERNAL (symbolP);
 	  /* should be common, but this is how gas does it for now */
 	  S_SET_SEGMENT (symbolP, &bfd_und_section);
@@ -464,19 +452,20 @@ s_common ()
 }
 
 static void
-s_seg ()
+s_seg (ignore)
+     int ignore;
 {
 
   if (strncmp (input_line_pointer, "\"text\"", 6) == 0)
     {
       input_line_pointer += 6;
-      s_text ();
+      s_text (0);
       return;
     }
   if (strncmp (input_line_pointer, "\"data\"", 6) == 0)
     {
       input_line_pointer += 6;
-      s_data ();
+      s_data (0);
       return;
     }
   if (strncmp (input_line_pointer, "\"data1\"", 7) == 0)
@@ -508,7 +497,8 @@ s_data1 ()
 }				/* s_data1() */
 
 static void
-s_proc ()
+s_proc (ignore)
+     int ignore;
 {
   while (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
@@ -520,15 +510,6 @@ s_proc ()
 
 /* start-sanitize-v9 */
 #ifndef NO_V9
-static void
-s_xword ()
-{
-  SKIP_WHITESPACE ();
-  if (isdigit (*input_line_pointer))
-    big_cons (8);
-  else
-    cons (8);
-}
 
 struct priv_reg_entry
   {
@@ -561,8 +542,8 @@ struct priv_reg_entry priv_reg_table[] =
 struct membar_masks
 {
   char *name;
-  int len;
-  int mask;
+  unsigned int len;
+  unsigned int mask;
 };
 
 #define MEMBAR_MASKS_SIZE 7
@@ -593,7 +574,7 @@ cmp_reg_entry (p, q)
 void
 md_begin ()
 {
-  register char *retval = NULL;
+  register const char *retval = NULL;
   int lose = 0;
   register unsigned int i = 0;
 
@@ -605,7 +586,7 @@ md_begin ()
     {
       const char *name = sparc_opcodes[i].name;
       retval = hash_insert (op_hash, name, &sparc_opcodes[i]);
-      if (retval != NULL && *retval != '\0')
+      if (retval != NULL)
 	{
 	  fprintf (stderr, "internal error: can't hash `%s': %s\n",
 		   sparc_opcodes[i].name, retval);
@@ -806,7 +787,7 @@ sparc_ip (str)
 #ifndef NO_V9
 	    case 'K':
 	      {
-		int mask = 0;
+		int kmask = 0;
 		int i;
 
 		/* Parse a series of masks.  */
@@ -821,7 +802,7 @@ sparc_ip (str)
 			    break;
 			if (i < MEMBAR_MASKS_SIZE)
 			  {
-			    mask |= membar_masks[i].mask;
+			    kmask |= membar_masks[i].mask;
 			    s += membar_masks[i].len;
 			  }
 			else
@@ -837,11 +818,11 @@ sparc_ip (str)
 		  {
 		    while (isdigit (*s))
 		      {
-			mask = mask * 10 + *s - '0';
+			kmask = kmask * 10 + *s - '0';
 			++s;
 		      }
 
-		    if (mask < 0 || mask > 127)
+		    if (kmask < 0 || kmask > 127)
 		      {
 			error_message = ": invalid membar mask number";
 			goto error;
@@ -852,7 +833,7 @@ sparc_ip (str)
 		    error_message = ": unrecognizable membar mask";
 		    goto error;
 		  }
-		opcode |= SIMM13 (mask);
+		opcode |= SIMM13 (kmask);
 		continue;
 	      }
 
@@ -909,7 +890,7 @@ sparc_ip (str)
 	      if (*s == '%')
 		{
 		  struct priv_reg_entry *p = priv_reg_table;
-		  int len = 9999999; /* init to make gcc happy */
+		  unsigned int len = 9999999; /* init to make gcc happy */
 
 		  s += 1;
 		  while (p->name[0] > s[0])
@@ -1916,6 +1897,14 @@ md_apply_fix (fixP, value)
 
   fixP->fx_addnumber = val;	/* Remember value for emit_reloc */
 
+#ifdef OBJ_ELF
+  /* FIXME: SPARC ELF relocations don't use an addend in the data
+     field itself.  This whole approach should be somehow combined
+     with the calls to bfd_perform_relocation.  */
+  if (fixP->fx_addsy != NULL)
+    return 1;
+#endif
+
   /*
    * This is a hack.  There should be a better way to
    * handle this.
@@ -2399,7 +2388,6 @@ md_parse_option (argP, cntP, vecP)
 #ifdef OBJ_ELF
   else if (**argP == 'V')
     {
-      extern void print_version_id ();
       print_version_id ();
     }
   else if (**argP == 'Q')
@@ -2412,6 +2400,10 @@ md_parse_option (argP, cntP, vecP)
       /* use .stab instead of .stab.excl */
     }
 #endif
+  else if (strcmp (*argP, "sparc") == 0)
+    {
+      /* Ignore -sparc, used by SunOS make default .s.o rule.  */
+    }
   else
     {
       /* Unknown option */
@@ -2451,7 +2443,7 @@ md_section_align (segment, size)
 {
 #ifdef OBJ_AOUT
   /* Round all sects to multiple of 8 */
-  size = (size + 7) & ~7;
+  size = (size + 7) & (valueT) ~7;
 #endif
   return size;
 }

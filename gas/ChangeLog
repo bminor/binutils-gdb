@@ -1,3 +1,8 @@
+Thu Oct 21 15:44:55 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-sparc.c (md_parse_option): Accept and ignore -sparc
+	option, which is used by the SunOS make default .s.o rule.
+
 Tue Oct 19 18:13:26 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-m68k.h (AOUT_MACHTYPE): Define to be external variable
