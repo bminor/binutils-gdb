@@ -5723,13 +5723,20 @@ ieee_array_type (p, low, high, stringp)
   struct ieee_handle *info = (struct ieee_handle *) p;
   unsigned int eleindx;
   boolean localp;
+  unsigned int size;
   struct ieee_modified_type *m = NULL;
   struct ieee_modified_array_type *a;
 
   /* IEEE does not store the range, so we just ignore it.  */
   ieee_pop_unused_type (info);
   localp = info->type_stack->type.localp;
+  size = info->type_stack->type.size;
   eleindx = ieee_pop_type (info);
+
+  /* If we don't know the range, treat the size as exactly one
+     element.  */
+  if (low < high)
+    size *= (high - low) + 1;
 
   if (! localp)
     {
@@ -5740,11 +5747,11 @@ ieee_array_type (p, low, high, stringp)
       for (a = m->arrays; a != NULL; a = a->next)
 	{
 	  if (a->low == low && a->high == high)
-	    return ieee_push_type (info, a->indx, 0, false, false);
+	    return ieee_push_type (info, a->indx, size, false, false);
 	}
     }
 
-  if (! ieee_define_type (info, 0, false, localp)
+  if (! ieee_define_type (info, size, false, localp)
       || ! ieee_write_number (info, low == 0 ? 'Z' : 'C')
       || ! ieee_write_number (info, eleindx))
     return false;
