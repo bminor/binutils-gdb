@@ -1,3 +1,9 @@
+1999-08-30  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* gas/i386/naked.s, gas/i386/naked.d: Test-suite addition for
+	allow_naked_reg parsing.
+	* gas/i386/i386.exp: Call it.
+
 1999-08-29  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* gas/i386/white.s, gas/i386/white.l: Add space in FP reg tests.
