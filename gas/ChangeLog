@@ -1,3 +1,18 @@
+2002-12-12  Alexandre Oliva  <aoliva@redhat.com>
+
+	* tc-mips.c (RELAX_BRANCH_ENCODE): Remove reloc_s2 argument.
+	Adjust callers.
+	(RELAX_BRANCH_RELOC_S2): Delete.
+	(append_insn): Use only BFD_RELOC_16_PCREL_S2 for branches.
+	Do not handle BFD_RELOC_16_PCREL.
+	(macro_build, mips_ip): Likewise.
+	(md_pcrel_from): Return 4 for undefined symbols regardless of
+	mips_pic.
+	(md_apply_fix3): Use only BFD_RELOC_16_PCREL_S2 for branches.
+	Don't dereference howto if no such relocation is available.
+	Do not apply hack for in-place zero addend in NEWABI.
+	(md_convert_frag): Use only BFD_RELOC_16_PCREL_S2 for branches.
+
 2002-12-12  Alexandre Oliva  <aoliva@redhat.com>,
 
 	Alan Modra  <amodra@bigpond.net.au>

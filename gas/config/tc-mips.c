@@ -714,16 +714,14 @@ static int mips_relax_branch;
 
 
    but it's not clear that it would actually improve performance.  */
-#define RELAX_BRANCH_ENCODE(reloc_s2, uncond, likely, link, toofar) \
+#define RELAX_BRANCH_ENCODE(uncond, likely, link, toofar) \
   ((relax_substateT) \
    (0xc0000000 \
     | ((toofar) ? 1 : 0) \
     | ((link) ? 2 : 0) \
     | ((likely) ? 4 : 0) \
-    | ((uncond) ? 8 : 0) \
-    | ((reloc_s2) ? 16 : 0)))
+    | ((uncond) ? 8 : 0)))
 #define RELAX_BRANCH_P(i) (((i) & 0xf0000000) == 0xc0000000)
-#define RELAX_BRANCH_RELOC_S2(i) (((i) & 16) != 0)
 #define RELAX_BRANCH_UNCOND(i) (((i) & 8) != 0)
 #define RELAX_BRANCH_LIKELY(i) (((i) & 4) != 0)
 #define RELAX_BRANCH_LINK(i) (((i) & 2) != 0)
@@ -2006,9 +2004,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 
   if (place == NULL
       && address_expr
-      && ((*reloc_type == BFD_RELOC_16_PCREL
-	   && address_expr->X_op != O_constant)
-	  || *reloc_type == BFD_RELOC_16_PCREL_S2)
+      && *reloc_type == BFD_RELOC_16_PCREL_S2
       && (pinfo & INSN_UNCOND_BRANCH_DELAY || pinfo & INSN_COND_BRANCH_DELAY
 	  || pinfo & INSN_COND_BRANCH_LIKELY)
       && mips_relax_branch
@@ -2025,8 +2021,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		     (pinfo & INSN_UNCOND_BRANCH_DELAY) ? -1
 		     : (pinfo & INSN_COND_BRANCH_LIKELY) ? 1 : 0), 4,
 		    RELAX_BRANCH_ENCODE
-		    (*reloc_type == BFD_RELOC_16_PCREL_S2,
-		     pinfo & INSN_UNCOND_BRANCH_DELAY,
+		    (pinfo & INSN_UNCOND_BRANCH_DELAY,
 		     pinfo & INSN_COND_BRANCH_LIKELY,
 		     pinfo & INSN_WRITE_GPR_31,
 		     0),
@@ -2130,10 +2125,6 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		 | ((address_expr->X_add_number & 0x3fffc) >> 2));
 	      break;
 
-	    case BFD_RELOC_16_PCREL:
-	      ip->insn_opcode |= address_expr->X_add_number & 0xffff;
-	      break;
-
 	    case BFD_RELOC_16_PCREL_S2:
 	      goto need_reloc;
 
@@ -2149,8 +2140,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	    {
 	      fixp[0] = fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
 				     address_expr,
-				     (*reloc_type == BFD_RELOC_16_PCREL
-				      || *reloc_type == BFD_RELOC_16_PCREL_S2),
+				     *reloc_type == BFD_RELOC_16_PCREL_S2,
 				     reloc_type[0]);
 
 	      /* These relocations can have an addend that won't fit in
@@ -3117,10 +3107,7 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 	      ep = NULL;
 	    }
 	  else
-	    if (mips_pic == EMBEDDED_PIC)
-	      *r = BFD_RELOC_16_PCREL_S2;
-	    else
-	      *r = BFD_RELOC_16_PCREL;
+	    *r = BFD_RELOC_16_PCREL_S2;
 	  continue;
 
 	case 'a':
@@ -9013,10 +9000,7 @@ mips_ip (str, ip)
 	      continue;
 
 	    case 'p':		/* pc relative offset */
-	      if (mips_pic == EMBEDDED_PIC)
-		*offset_reloc = BFD_RELOC_16_PCREL_S2;
-	      else
-		*offset_reloc = BFD_RELOC_16_PCREL;
+	      *offset_reloc = BFD_RELOC_16_PCREL_S2;
 	      my_getExpression (&offset_expr, s);
 	      s = expr_end;
 	      continue;
@@ -10867,14 +10851,7 @@ md_pcrel_from (fixP)
   if (OUTPUT_FLAVOR != bfd_target_aout_flavour
       && fixP->fx_addsy != (symbolS *) NULL
       && ! S_IS_DEFINED (fixP->fx_addsy))
-    {
-      /* This makes a branch to an undefined symbol be a branch to the
-	 current location.  */
-      if (mips_pic == EMBEDDED_PIC)
-	return 4;
-      else
-	return 1;
-    }
+    return 4;
 
   /* Return the address of the delay slot.  */
   return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
@@ -11105,7 +11082,7 @@ md_apply_fix3 (fixP, valP, seg)
 	  value -= symval;
 
 	  howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
-	  if (value != 0 && howto->partial_inplace
+	  if (value != 0 && howto && howto->partial_inplace
 	      && (! fixP->fx_pcrel || howto->pcrel_offset))
 	    {
 	      /* In this case, the bfd_install_relocation routine will
@@ -11169,8 +11146,7 @@ md_apply_fix3 (fixP, valP, seg)
 	  /* BFD's REL handling, for MIPS, is _very_ weird.
 	     This gives the right results, but it can't possibly
 	     be the way things are supposed to work.  */
-	  if ((fixP->fx_r_type != BFD_RELOC_16_PCREL
-	       && fixP->fx_r_type != BFD_RELOC_16_PCREL_S2)
+	  if (fixP->fx_r_type != BFD_RELOC_16_PCREL_S2
 	      || S_GET_SEGMENT (fixP->fx_addsy) != undefined_section)
 	    value += fixP->fx_frag->fr_address + fixP->fx_where;
 	}
@@ -11344,15 +11320,12 @@ md_apply_fix3 (fixP, valP, seg)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Branch to odd address (%lx)"), (long) value);
 
-      /* Fall through.  */
-
-    case BFD_RELOC_16_PCREL:
       /*
        * We need to save the bits in the instruction since fixup_segment()
        * might be deleting the relocation entry (i.e., a branch within
        * the current segment).
        */
-      if (!fixP->fx_done && value != 0)
+      if (!fixP->fx_done && (value != 0 || HAVE_NEWABI))
 	break;
       /* If 'value' is zero, the remaining reloc code won't actually
 	 do the store, so it must be done here.  This is probably
@@ -12959,8 +12932,7 @@ relaxed_branch_length (fragp, sec, update)
 
   if (fragp && update && toofar != RELAX_BRANCH_TOOFAR (fragp->fr_subtype))
     fragp->fr_subtype
-      = RELAX_BRANCH_ENCODE (RELAX_BRANCH_RELOC_S2 (fragp->fr_subtype),
-			     RELAX_BRANCH_UNCOND (fragp->fr_subtype),
+      = RELAX_BRANCH_ENCODE (RELAX_BRANCH_UNCOND (fragp->fr_subtype),
 			     RELAX_BRANCH_LIKELY (fragp->fr_subtype),
 			     RELAX_BRANCH_LINK (fragp->fr_subtype),
 			     toofar);
@@ -13454,9 +13426,7 @@ md_convert_frag (abfd, asec, fragp)
 
 	  fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
 			      4, &exp, 1,
-			      RELAX_BRANCH_RELOC_S2 (fragp->fr_subtype)
-			      ? BFD_RELOC_16_PCREL_S2
-			      : BFD_RELOC_16_PCREL);
+			      BFD_RELOC_16_PCREL_S2);
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
 
