@@ -1,3 +1,12 @@
+Mon Jan 24 18:40:06 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* config.guess:  Clean up NeXT support, to allow nextstep
+	on Intel machines.  Make OS be nextstep.
+
+Sun Jan 23 18:47:22 1994  Richard Kenner  (kenner@vlsi1.ultra.nyu.edu)
+
+	* config.guess: Add alternate forms for Convex.
+
 Thu Jan 20 16:13:41 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* configure:  Completely rewrite option processing.  Take
