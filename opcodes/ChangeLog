@@ -1,3 +1,7 @@
+Tue Oct 27 08:58:37 1998  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* mips-opc.c (IS_M): Added.
+
 start-sanitize-r5900
 Fri Oct 23 12:06:00 EDT 1998  Frank Ch. Eigler <fche@cygnus.com>
 

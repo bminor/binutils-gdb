@@ -1,3 +1,8 @@
+Tue Oct 27 08:56:44 1998  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* config/tc-mips.c (hilo_interlocks): Remove mips_3900.
+	(append_insn): Account for the tx39's multiply behavior.
+
 1998-10-26  Michael Meissner  <meissner@cygnus.com>
 
 	* config/tc-m32r.c (assemble_two_insns): Rename assemble_two_insns

@@ -47,7 +47,8 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
    A breakpoint instruction uses OP, CODE and SPEC (10 bits of the
    breakpoint instruction are not defined; Kane says the breakpoint
    code field in BREAK is 20 bits; yet MIPS assemblers and debuggers
-   only use ten bits).
+   only use ten bits).  An optional two-operand form of break/sdbbp
+   allows the lower ten bits to be set too.
 
    The syscall instruction uses SYSCALL.
 
@@ -65,6 +66,8 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define OP_SH_BCC		18
 #define OP_MASK_CODE		0x3ff
 #define OP_SH_CODE		16
+#define OP_MASK_CODE2		0x3ff
+#define OP_SH_CODE2		6
 #define OP_MASK_RT		0x1f
 #define OP_SH_RT		16
 #define OP_MASK_FT		0x1f
@@ -121,15 +124,33 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define OP_MASK_MMI             0x3f 
 #define OP_SH_MMISUB            6
 #define OP_MASK_MMISUB          0x1f
-/* start-sanitize-vr5400 */
 #define OP_MASK_PERFREG		0x1f	/* Performance monitoring */
 #define OP_SH_PERFREG		1
+/* start-sanitize-cygnus */
 #define OP_MASK_VECBYTE		0x7	/* Selector field is really 4 bits,
 					   but 0x8-0xf don't select bytes.  */
 #define OP_SH_VECBYTE		22
 #define OP_MASK_VECALIGN	0x7	/* Vector byte-align (alni.ob) op.  */
 #define OP_SH_VECALIGN		21
-/* end-sanitize-vr5400 */
+/* end-sanitize-cygnus */
+/* start-sanitize-r5900 */
+#define OP_SH_VADDI		6
+#define OP_MASK_VADDI		0x1f
+#define OP_SH_VUTREG		16
+#define OP_MASK_VUTREG		0x1f
+#define OP_SH_VUSREG		11
+#define OP_MASK_VUSREG		0x1f
+#define OP_SH_VUDREG		6
+#define OP_MASK_VUDREG		0x1f
+#define OP_SH_VUFSF		21
+#define OP_MASK_VUFSF		0x3
+#define OP_SH_VUFTF		23
+#define OP_MASK_VUFTF		0x3
+#define OP_SH_VUDEST		21
+#define OP_MASK_VUDEST		0xf
+#define OP_SH_VUCALLMS		6
+#define OP_MASK_VUCALLMS	0x7fff
+/* end-sanitize-r5900 */
 
 /* This structure holds information for a particular instruction.  */
 
@@ -141,9 +162,7 @@ struct mips_opcode
   const char *args;
   /* The basic opcode for the instruction.  When assembling, this
      opcode is modified by the arguments to produce the actual opcode
-     that is used.  If pinfo is INSN_MACRO, then this is instead the
-     ISA level of the macro (0 or 1 is always supported, 2 is ISA 2,
-     etc.).  */
+     that is used.  If pinfo is INSN_MACRO, then this is 0.  */
   unsigned long match;
   /* If pinfo is not INSN_MACRO, then this is a bit mask for the
      relevant portions of the opcode when disassembling.  If the
@@ -156,7 +175,7 @@ struct mips_opcode
      information.  */
   unsigned long pinfo;
   /* A collection of bits describing the instruction sets of which this
-     instruction is a member. */
+     instruction or macro is a member. */
   unsigned long membership;
 };
 
@@ -178,11 +197,12 @@ struct mips_opcode
    "i" 16 bit unsigned immediate (OP_*_IMMEDIATE)
    "j" 16 bit signed immediate (OP_*_DELTA)
    "k" 5 bit cache opcode in target register position (OP_*_CACHE)
-start-sanitize-vr5400
+start-sanitize-cygnus
 	     also vr5400 vector ops immediate operand
-end-sanitize-vr5400
+end-sanitize-cygnus
    "o" 16 bit signed offset (OP_*_DELTA)
    "p" 16 bit PC relative branch target address (OP_*_DELTA)
+   "q" 10 bit extra breakpoint code (OP_*_CODE2)
    "r" 5 bit same register used as both source and target (OP_*_RS)
    "s" 5 bit source register specifier (OP_*_RS)
    "t" 5 bit target register (OP_*_RT)
@@ -207,12 +227,12 @@ end-sanitize-vr5400
    Coprocessor instructions:
    "E" 5 bit target register (OP_*_RT)
    "G" 5 bit destination register (OP_*_RD)
-start-sanitize-vr5400
    "P" 5 bit performance-monitor register (OP_*_PERFREG)
+start-sanitize-cygnus
    "e" 5 bit vector register byte specifier (OP_*_VECBYTE)
    "%" 3 bit immediate vr5400 vector alignment operand (OP_*_VECALIGN)
    see also "k" above
-end-sanitize-vr5400
+end-sanitize-cygnus
 
    Macro instructions:
    "A" General 32 bit expression
@@ -225,17 +245,17 @@ end-sanitize-vr5400
    Other:
    "()" parens surrounding optional value
    ","  separates operands
-start-sanitize-vr5400
+start-sanitize-cygnus
    "[]" brackets around index for vector-op scalar operand specifier (vr5400)
-end-sanitize-vr5400
+end-sanitize-cygnus
 
    Characters used so far, for quick reference when adding more:
-start-sanitize-vr5400
+start-sanitize-cygnus
    "Pe%[]" plus...
-end-sanitize-vr5400
+end-sanitize-cygnus
    "<>(),"
    "ABCDEFGILMNSTRVW"
-   "abcdfhijkloprstuvwxz"
+   "abcdfhijklopqrstuvwxz"
 */
 
 /* These are the bits which may be set in the pinfo field of an
@@ -301,8 +321,8 @@ end-sanitize-vr5400
 #define FP_S			    0x10000000
 /* Instruction uses double precision floating point.  */
 #define FP_D			    0x20000000
-
-/* As yet unused bits:              0x40000000 */
+/* Instruction is part of the tx39's integer multiply family.    */
+#define INSN_MULT                   0x40000000
 
 /* Instruction is actually a macro.  It should be ignored by the
    disassembler, and requires special treatment by the assembler.  */
@@ -335,10 +355,14 @@ end-sanitize-vr5400
 #define INSN_4100                   0x00000040
 /* Toshiba R3900 instruction.  */
 #define INSN_3900                   0x00000080
-/* start-sanitize-vr5400 */
+/* start-sanitize-vr4320 */
+/* NEC VR4320 instruction.  */
+#define INSN_4320		    0x00002000
+/* end-sanitize-vr4320 */
+/* start-sanitize-cygnus */
 /* NEC VR5400 instruction.  */
 #define INSN_5400		    0x00001000
-/* end-sanitize-vr5400 */
+/* end-sanitize-cygnus */
 /* start-sanitize-r5900 */
 /* Toshiba R5900 instruction */
 #define INSN_5900                   0x00000100

@@ -70,6 +70,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define RD_HILO RD_HI|RD_LO
 #define MOD_HILO WR_HILO|RD_HILO
 
+#define IS_M    INSN_MULT
 
 #define I1	INSN_ISA1
 #define I2	INSN_ISA2
@@ -710,15 +711,15 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"madd.s",  "D,S,T",	0x4600001c, 0xffe0003f, WR_D|RD_S|RD_T|FP_S,    	T5	},
   /* end-sanitize-r5900 */
 {"madd",    "s,t",	0x0000001c, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,		L1	},
-{"madd",    "s,t",	0x70000000, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	        G1	},
-{"madd",    "d,s,t",	0x70000000, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d,	G1	},
+{"madd",    "s,t",	0x70000000, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO|IS_M,	        G1	},
+{"madd",    "d,s,t",	0x70000000, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d|IS_M,	G1	},
   /* start-sanitize-r5900 */
 {"madd1",   "s,t",	0x70000020, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,		T5	},
 {"madd1",   "d,s,t",	0x70000020, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d,	T5	},
   /* end-sanitize-r5900 */
 {"maddu",   "s,t",	0x0000001d, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,		L1	},
-{"maddu",   "s,t",	0x70000001, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,		G1	},
-{"maddu",   "d,s,t",	0x70000001, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d,	G1	},
+{"maddu",   "s,t",	0x70000001, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO|IS_M,	G1},
+{"maddu",   "d,s,t",	0x70000001, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d|IS_M,	G1},
   /* start-sanitize-r5900 */
 {"maddu1",  "s,t",	0x70000021, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,		T5	},
 {"maddu1",  "d,s,t",	0x70000021, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d,	T5	},
@@ -882,14 +883,14 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"mulshi",  "d,s,t",	0x000002d8, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
 {"mulshiu", "d,s,t",	0x000002d9, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	N5	},
   /* end-sanitize-cygnus */
-{"mult",    "s,t",	0x00000018, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	    I1},
-{"mult",    "d,s,t",	0x00000018, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, G1},
+{"mult",    "s,t",	0x00000018, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO|IS_M,	I1},
+{"mult",    "d,s,t",	0x00000018, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d|IS_M, G1},
   /* start-sanitize-r5900 */
 {"mult1",   "s,t",	0x70000018, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,      T5},
 {"mult1",   "d,s,t",	0x70000018, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, T5},
   /* end-sanitize-r5900 */
-{"multu",   "s,t",	0x00000019, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	    I1},
-{"multu",   "d,s,t",	0x00000019, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, G1},
+{"multu",   "s,t",	0x00000019, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO|IS_M,	I1},
+{"multu",   "d,s,t",	0x00000019, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d|IS_M, G1},
   /* start-sanitize-r5900 */
 {"multu1",  "s,t",	0x70000019, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO, 	    T5},
 {"multu1",  "d,s,t",	0x70000019, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, T5},

@@ -1,3 +1,11 @@
+Tue Oct 27 08:57:59 1998  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* mips.h (INSN_MULT): Added.
+
+Tue Oct 20 11:31:34 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386.h (MAX_MNEM_SIZE): Rename from MAX_OPCODE_SIZE.
+
 Mon Oct 19 12:50:00 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.h (CGEN_INSN_INT): New typedef.
