@@ -1,3 +1,15 @@
+2002-10-26  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_DO_REGISTERS_INFO): Rename
+	DO_REGISTERS_INFO.
+	gdbarch.h, gdbarch.c: Re-generate.
+	* infcmd.c (default_print_registers_info): Update reference.
+	* mips-tdep.c (mips_gdbarch_init): Set deprecated_do_registers_info.
+	(mips_dump_tdep): Do not print DO_REGISTERS_INFO.
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* h8300-tdep.c (h8300_gdbarch_init): Ditto.
+
 2002-10-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* x86-64-tdep.c (x86_64_init_abi): Set init_extra_frame_info to

@@ -1,3 +1,8 @@
+2002-10-26  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	definition of DO_REGISTERS_INFO.
+
 2002-10-18  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdbint.texinfo (Address Classes): Fix problems with insertion

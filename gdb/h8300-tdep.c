@@ -1085,7 +1085,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_virtual_size (gdbarch, h8300_register_raw_size);
   set_gdbarch_max_register_virtual_size (gdbarch, h8300h_reg_size);
   set_gdbarch_register_virtual_type (gdbarch, h8300_register_virtual_type);
-  set_gdbarch_do_registers_info (gdbarch, h8300_do_registers_info);
+  set_gdbarch_deprecated_do_registers_info (gdbarch, h8300_do_registers_info);
   set_gdbarch_print_float_info (gdbarch, h8300_print_float_info);
 
   /*

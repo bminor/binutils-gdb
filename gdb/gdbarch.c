@@ -171,7 +171,7 @@ struct gdbarch
   gdbarch_register_virtual_size_ftype *register_virtual_size;
   int max_register_virtual_size;
   gdbarch_register_virtual_type_ftype *register_virtual_type;
-  gdbarch_do_registers_info_ftype *do_registers_info;
+  gdbarch_deprecated_do_registers_info_ftype *deprecated_do_registers_info;
   gdbarch_print_registers_info_ftype *print_registers_info;
   gdbarch_print_float_info_ftype *print_float_info;
   gdbarch_print_vector_info_ftype *print_vector_info;
@@ -664,7 +664,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->register_virtual_type == 0))
     fprintf_unfiltered (log, "\n\tregister_virtual_type");
-  /* Skip verify of do_registers_info, has predicate */
+  /* Skip verify of deprecated_do_registers_info, has predicate */
   /* Skip verify of print_registers_info, invalid_p == 0 */
   /* Skip verify of print_float_info, has predicate */
   /* Skip verify of print_vector_info, has predicate */
@@ -1105,6 +1105,20 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: DECR_PC_AFTER_BREAK = %ld\n",
                       (long) DECR_PC_AFTER_BREAK);
 #endif
+#ifdef DEPRECATED_DO_REGISTERS_INFO
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_DO_REGISTERS_INFO(reg_nr, fpregs)",
+                      XSTRING (DEPRECATED_DO_REGISTERS_INFO (reg_nr, fpregs)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_DO_REGISTERS_INFO = 0x%08lx\n",
+                        (long) current_gdbarch->deprecated_do_registers_info
+                        /*DEPRECATED_DO_REGISTERS_INFO ()*/);
+#endif
 #ifdef DEPRECATED_EXTRACT_RETURN_VALUE
 #if GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
@@ -1143,20 +1157,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: DEPRECATED_STORE_RETURN_VALUE = 0x%08lx\n",
                         (long) current_gdbarch->deprecated_store_return_value
                         /*DEPRECATED_STORE_RETURN_VALUE ()*/);
-#endif
-#ifdef DO_REGISTERS_INFO
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DO_REGISTERS_INFO(reg_nr, fpregs)",
-                      XSTRING (DO_REGISTERS_INFO (reg_nr, fpregs)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: DO_REGISTERS_INFO = 0x%08lx\n",
-                        (long) current_gdbarch->do_registers_info
-                        /*DO_REGISTERS_INFO ()*/);
 #endif
 #ifdef DWARF2_BUILD_FRAME_INFO
 #if GDB_MULTI_ARCH
@@ -3113,29 +3113,29 @@ set_gdbarch_register_virtual_type (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_do_registers_info_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_do_registers_info_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->do_registers_info != 0;
+  return gdbarch->deprecated_do_registers_info != 0;
 }
 
 void
-gdbarch_do_registers_info (struct gdbarch *gdbarch, int reg_nr, int fpregs)
+gdbarch_deprecated_do_registers_info (struct gdbarch *gdbarch, int reg_nr, int fpregs)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->do_registers_info == 0)
+  if (gdbarch->deprecated_do_registers_info == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_do_registers_info invalid");
+                    "gdbarch: gdbarch_deprecated_do_registers_info invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_do_registers_info called\n");
-  gdbarch->do_registers_info (reg_nr, fpregs);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_do_registers_info called\n");
+  gdbarch->deprecated_do_registers_info (reg_nr, fpregs);
 }
 
 void
-set_gdbarch_do_registers_info (struct gdbarch *gdbarch,
-                               gdbarch_do_registers_info_ftype do_registers_info)
+set_gdbarch_deprecated_do_registers_info (struct gdbarch *gdbarch,
+                                          gdbarch_deprecated_do_registers_info_ftype deprecated_do_registers_info)
 {
-  gdbarch->do_registers_info = do_registers_info;
+  gdbarch->deprecated_do_registers_info = deprecated_do_registers_info;
 }
 
 void
