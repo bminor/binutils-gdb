@@ -1,5 +1,8 @@
 Tue Sep 12 12:37:39 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ar.c (replace_members): Don't call write_archive if nothing
+	changed.
+
 	* objdump.c (disassemble_data): Add casts to avoid gcc warnings.
 
 Thu Sep  7 12:12:17 1995  Ian Lance Taylor  <ian@cygnus.com>
