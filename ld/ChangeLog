@@ -1,3 +1,7 @@
+2002-06-20  Nathanael Nerode  <neroden@twcny.rr.com>
+
+	* ld/configure.host (romp): Drop support.
+
 2002-06-18  Chris Demetriou  <cgd@broadcom.com>
 
 	* emultempl/mipself.em (mips_elf${ELFSIZE}_check_sections): Check

@@ -231,8 +231,4 @@ alpha*-*-*)
   NATIVE_LIB_DIRS='/usr/local/lib /usr/ccs/lib /lib /usr/lib'
   ;;
 
-romp-*-*)
-  HDEFINES=-DNO_VARARGS
-  ;;
-
 esac
