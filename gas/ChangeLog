@@ -1,5 +1,8 @@
 Fri Aug  6 10:57:59 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* configure.in (mips-*-riscos*, mips-*-sysv*): New (untested)
+	targets, using ecoff and mips-big.
+
 	* config/tc-mips.c (mips_ip): From davidj@ICSI.Berkeley.EDU (David
 	Johnson): Added case for 'C' for coprocessor instruction codes.
 
