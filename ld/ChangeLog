@@ -1,3 +1,8 @@
+1999-08-08  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* configure.host (sparc-*-linux-gnu*): New host.
+	(sparc64-*-linux-gnu*): New host.
+
 1999-08-06  Ian Lance Taylor  <ian@zembu.com>
 
 	* lexsup.c (is_num): Reindent.
