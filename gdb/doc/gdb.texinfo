@@ -900,7 +900,7 @@ If the second argument begins with a decimal digit, @value{GDBN} will
 first attempt to attach to it as a process, and if that fails, attempt
 to open it as a corefile.  If you have a corefile whose name begins with
 a digit, you can prevent @value{GDBN} from treating it as a pid by 
-prefixing it with @samp{"./"}, eg. @samp{"./12345"}.
+prefixing it with @file{./}, eg. @file{./12345}.
 
 If @value{GDBN} has not been configured to included core file support,
 such as for most embedded targets, then it will complain about a second
