@@ -145,7 +145,7 @@ resize_buffer (struct macro_buffer *b, int n)
 
 
 /* Append the character C to the buffer B.  */
-static inline void
+static void
 appendc (struct macro_buffer *b, int c)
 {
   int new_len = b->len + 1;
@@ -159,7 +159,7 @@ appendc (struct macro_buffer *b, int c)
 
 
 /* Append the LEN bytes at ADDR to the buffer B.  */
-static inline void
+static void
 appendmem (struct macro_buffer *b, char *addr, int len)
 {
   int new_len = b->len + len;

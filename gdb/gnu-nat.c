@@ -98,12 +98,12 @@ void inf_validate_procs (struct inf *inf);
 void inf_steal_exc_ports (struct inf *inf);
 void inf_restore_exc_ports (struct inf *inf);
 struct proc *inf_tid_to_proc (struct inf *inf, int tid);
-inline void inf_set_threads_resume_sc (struct inf *inf,
-				       struct proc *run_thread,
-				       int run_others);
-inline int inf_set_threads_resume_sc_for_signal_thread (struct inf *inf);
-inline void inf_suspend (struct inf *inf);
-inline void inf_resume (struct inf *inf);
+void inf_set_threads_resume_sc (struct inf *inf,
+				struct proc *run_thread,
+				int run_others);
+int inf_set_threads_resume_sc_for_signal_thread (struct inf *inf);
+void inf_suspend (struct inf *inf);
+void inf_resume (struct inf *inf);
 void inf_set_step_thread (struct inf *inf, struct proc *proc);
 void inf_detach (struct inf *inf);
 void inf_attach (struct inf *inf, int pid);
@@ -1077,7 +1077,7 @@ inf_validate_procs (struct inf *inf)
 
 
 /* Makes sure that INF's thread list is synced with the actual process.  */
-inline int
+int
 inf_update_procs (struct inf *inf)
 {
   if (!inf->task)
@@ -1090,7 +1090,7 @@ inf_update_procs (struct inf *inf)
 /* Sets the resume_sc of each thread in inf.  That of RUN_THREAD is set to 0,
    and others are set to their run_sc if RUN_OTHERS is true, and otherwise
    their pause_sc.  */
-inline void
+void
 inf_set_threads_resume_sc (struct inf *inf,
 			   struct proc *run_thread, int run_others)
 {
@@ -1108,7 +1108,7 @@ inf_set_threads_resume_sc (struct inf *inf,
 
 /* Cause INF to continue execution immediately; individual threads may still
    be suspended (but their suspend counts will be updated).  */
-inline void
+void
 inf_resume (struct inf *inf)
 {
   struct proc *thread;
@@ -1133,7 +1133,7 @@ inf_resume (struct inf *inf)
 
 /* Cause INF to stop execution immediately; individual threads may still
    be running.  */
-inline void
+void
 inf_suspend (struct inf *inf)
 {
   struct proc *thread;
@@ -1179,7 +1179,7 @@ inf_set_step_thread (struct inf *inf, struct proc *thread)
 /* Set up the thread resume_sc's so that only the signal thread is running
    (plus whatever other thread are set to always run).  Returns true if we
    did so, or false if we can't find a signal thread.  */
-inline int
+int
 inf_set_threads_resume_sc_for_signal_thread (struct inf *inf)
 {
   if (inf->signal_thread)

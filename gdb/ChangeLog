@@ -1,3 +1,8 @@
+2003-09-08  Andrew Cagney  <cagney@redhat.com>
+
+	* gnu-nat.c: Remove "inline" function attribute.
+	* alpha-tdep.c, ppc-linux-tdep.c, macroexp.c: Ditto.
+
 2003-09-08  Kevin Buettner  <kevinb@redhat.com>
 
 	* config/frv/frv.mt (SIM_OBS, SIM): Enable simulator for FR-V

@@ -189,7 +189,7 @@ alpha_lds (void *out, const void *in)
 /* Similarly, this represents exactly the conversion performed by
    the STS instruction.  */
 
-static inline void
+static void
 alpha_sts (void *out, const void *in)
 {
   ULONGEST reg, mem;

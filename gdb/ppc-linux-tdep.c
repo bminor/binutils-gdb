@@ -188,7 +188,7 @@ ppc_linux_in_sigtramp (CORE_ADDR pc, char *func_name)
   return (pc == handler || pc == handler + 4);
 }
 
-static inline int
+static int
 insn_is_sigreturn (unsigned long pcinsn)
 {
   switch(pcinsn)
