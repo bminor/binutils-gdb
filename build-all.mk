@@ -44,6 +44,9 @@ endif
 ifeq ($(canonhost),i486-unknown-sco3.2v4.0)
 canonhost := i386-sco3.2v4
 endif
+ifeq ($(canonhost),i386-unknown-sco3.2v4.0)
+canonhost := i386-sco3.2v4
+endif
 ifeq ($(canonhost),i386-unknown-go32)
 canonhost := i386-go32
 endif
