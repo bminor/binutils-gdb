@@ -1,3 +1,8 @@
+1999-09-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* elfcode.h (write_relocs): Handle an absolute symbol in REL
+	relocs as we do for RELA relocs.
+
 1999-09-11  Donn Terry  <donn@interix.com>
 
 	* cofflink.c (coff_link_add_symbols): Don't warn about symbol type

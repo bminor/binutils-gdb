@@ -857,6 +857,8 @@ write_relocs (abfd, sec, data)
 
 	  if (sym == last_sym)
 	    n = last_sym_idx;
+	  else if (bfd_is_abs_section (sym->section) && sym->value == 0)
+	    n = STN_UNDEF;
 	  else
 	    {
 	      last_sym = sym;
