@@ -31,6 +31,7 @@ autoconf
 bfd
 binutils
 bison
+byacc
 cfg-paper.texi
 clib
 config
