@@ -1,3 +1,40 @@
+Tue May  2 11:22:00 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* read.c (pop_insert): New function.
+	(pop_override_ok, pop_table_name): New variables.
+	(md_pop_insert, obj_pop_insert): New macros.
+	(pobegin): Use them.
+
+	* config/tc-mips.c: Use USE_STDARG and USE_VARARGS instead of
+	NO_STDARG &c.
+
+	* read.c (target_big_endian): If TARGET_BYTES_BIG_ENDIAN is
+	defined, initialize to 1.
+	* config/tc-mips.c (mips_target_format): Changed to a function,
+	checking flavor and byte order at run time.
+	(md_parse_option, cases OPTION_EB and OPTION_EL): Set
+	target_big_endian here.
+	(md_begin): Not here.
+	* config/tc-mips.h (mips_target_format): Adjust declaration.
+	(TARGET_FORMAT): Call mips_target_format.
+
+	* config/tc-mips.h (USE_GLOBAL_POINTER_OPT): Define in terms of
+	OUTPUT_FLAVOR.
+	* config/tc-mips.c (g_switch_value, g_switch_seen): Define
+	unconditionally.
+	(md_begin, mips_ip, md_parse_option, s_change_sec, s_option,
+	s_abicalls, nopic_need_relax): Check USE_GLOBAL_POINTER_OPT at run
+	time, instead of compiling conditionally on GPOPT.
+	(GPOPT): Don't define.
+	(md_shortopts): Always include -G.
+	(RDATA_SECTION_NAME): Select at run time.
+	(md_begin): Test for ELF format at run time instead of compile time.
+	(mips_ip, s_change_sec): Ditto.
+	(md_parse_option, cases OPTION_CALL_SHARED and OPTION_NON_SHARED):
+	Ditto.
+	(OPTION_CALL_SHARED, OPTION_NON_SHARED, mips_regmask_frag): Define
+	unconditionally.
+
 Tue May  2 00:17:04 1995  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* Makefile.in (TARG_CPU_DEP_*): New variables.
