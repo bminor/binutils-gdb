@@ -1,3 +1,9 @@
+Thu Oct  9 15:17:50 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Remove AM_PROG_INSTALL; it's called by
+	AM_INIT_AUTOMAKE.
+	* configure: Rebuild.
+
 Thu Oct  9 01:44:36 1997  J"orn Rennecke  <amylaar@cygnus.co.uk>
 
 	* tc-d10v.h (TC_START_LABEL): Don't define.
