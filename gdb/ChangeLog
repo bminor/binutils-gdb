@@ -1,3 +1,7 @@
+2001-09-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbtypes.h (struct block): Add forward declaration.
+
 2001-09-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* defs.h (enum return_reason): Renumber so that all values are

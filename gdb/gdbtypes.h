@@ -23,6 +23,9 @@
 #if !defined (GDBTYPES_H)
 #define GDBTYPES_H 1
 
+/* Forward declarations for prototypes.  */
+struct block;
+
 /* Codes for `fundamental types'.  This is a monstrosity based on the
    bogus notion that there are certain compiler-independent
    `fundamental types'.  None of these is well-defined (how big is
