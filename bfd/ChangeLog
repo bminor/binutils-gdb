@@ -1,3 +1,8 @@
+Mon Mar 22 14:57:18 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c (ecoff_set_symbol_info): Relocate encapsulated stabs
+	if the type is not stNil.
+
 Tue Mar 16 10:35:27 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* elf32.c (elf_little_vec, elf_big_vec): Delete now-invalid
