@@ -1254,6 +1254,7 @@ struct m32r_reloc_map
   unsigned char elf_reloc_val;
 };
 
+#ifdef USE_M32R_OLD_RELOC
 static const struct m32r_reloc_map m32r_reloc_map_old[] =
 {
   { BFD_RELOC_NONE, R_M32R_NONE },
@@ -1270,7 +1271,7 @@ static const struct m32r_reloc_map m32r_reloc_map_old[] =
   { BFD_RELOC_VTABLE_INHERIT, R_M32R_GNU_VTINHERIT },
   { BFD_RELOC_VTABLE_ENTRY, R_M32R_GNU_VTENTRY },
 };
-
+#else
 static const struct m32r_reloc_map m32r_reloc_map[] =
 {
   { BFD_RELOC_NONE, R_M32R_NONE },
@@ -1305,6 +1306,7 @@ static const struct m32r_reloc_map m32r_reloc_map[] =
   { BFD_RELOC_M32R_GOTOFF_HI_SLO, R_M32R_GOTOFF_HI_SLO },
   { BFD_RELOC_M32R_GOTOFF_LO, R_M32R_GOTOFF_LO },
 };
+#endif
 
 static reloc_howto_type *
 bfd_elf32_bfd_reloc_type_lookup (abfd, code)

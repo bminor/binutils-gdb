@@ -38,6 +38,9 @@
 	* elf32-iq2000.c (iq2000_reloc_map): Remove unused structure and
 	array.
 
+	* elf32-m32r.c (m32r_reloc_map_old): Use #ifdef	USE_M32R_OLD_RELOC
+	to protect the declaration of this array.
+
 2005-02-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (toc_adjusting_stub_needed): Return true for
