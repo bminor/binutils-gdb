@@ -62,7 +62,7 @@ Relocation section '\.rela\.dyn' at offset 0x454 contains 18 entries:
 0+5a6 +0+846 R_PPC_TPREL16_LO +0+105a8 +\.tdata \+ 105c0
 0+10674 +0+44 R_PPC_DTPMOD32 +0+
 0+1067c +0+44 R_PPC_DTPMOD32 +0+
-0+10680 +0+4e R_PPC_DTPREL32 +0+105a8
+0+10680 +0+4e R_PPC_DTPREL32 +0+
 0+10684 +0+1244 R_PPC_DTPMOD32 +0+ +gd \+ 0
 0+10688 +0+124e R_PPC_DTPREL32 +0+ +gd \+ 0
 0+1068c +0+2144 R_PPC_DTPMOD32 +0+1c +gd0 \+ 0

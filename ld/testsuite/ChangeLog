@@ -1,3 +1,8 @@
+2003-03-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tlsso.r: Adjust for corrected zero symbol index relocs.
+	* ld-powerpc/tlsso32.r: Likewise.
+
 2003-02-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlsexe.d: Update for changed handling of invalid LD
