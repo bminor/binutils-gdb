@@ -1,5 +1,7 @@
 Thu Jan 23 13:35:03 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
+	* aclocal.m4:  Remove Make-common.in from dependencies.
+
 	* aclocal.m4 (SIM_AC_COMMON):  Move contents of Make-common.in
 	into here.  Makes insertion into makefiles easier.  Also, change
 	the way that callback.o, gentmap, targ-vals.h, targ-map.c,
