@@ -1,3 +1,8 @@
+Wed Oct 29 15:53:24 1997  David Taylor  <taylor@texas.cygnus.com>
+
+	* solib.c (solib_break_names): add entry for Solaris 2.6 run
+ 	time linker.  From Casper Dik via Peter Schauer.
+
 Fri Oct 24 16:48:21 1997  David Taylor  <taylor@texas.cygnus.com>
 
 	* sol-thread.c (sol_find_new_threads_callback,
