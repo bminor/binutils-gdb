@@ -1,6 +1,9 @@
-start-sanitize-v9
-Sun Mar 20 15:11:42 1994  Doug Evans  (dje@cygnus.com)
+Sun Mar 20 15:21:57 1994  Doug Evans  (dje@cygnus.com)
 
+	* sparc-tdep.c (sparc_frame_find_save_regs): Use REGISTER_RAW_SIZE
+	instead of 4.
+
+start-sanitize-v9
 	* sp64-tdep.c (target_ptr_bit, set_target_ptr_bit): Deleted,
 	can no longer set this at run time.
 end-sanitize-v9
