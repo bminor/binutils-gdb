@@ -1,5 +1,10 @@
 2001-08-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-mips.c (UNUSED_RELOC): Define.
+	(mips_elf64_howto_table_rel): Use it.
+	(mips_elf64_howto_table_rela): Here too.
+	(mips_elf64_write_relocs): Fix signed/unsigned warning.
+
 	* coffcode.h (coff_write_object_contents): Add ATTRIBUTE_UNUSED to
 	silence warning.
 	* coffgen.c (coff_print_symbol): Fix warnings.

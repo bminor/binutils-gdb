@@ -90,6 +90,8 @@ static boolean mips_elf64_write_armap
 
 /* The relocation table used for SHT_REL sections.  */
 
+#define UNUSED_RELOC(num) { num, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+
 static reloc_howto_type mips_elf64_howto_table_rel[] =
 {
   /* No relocation.  */
@@ -291,9 +293,9 @@ static reloc_howto_type mips_elf64_howto_table_rel[] =
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-    { 13 },
-    { 14 },
-    { 15 },
+  UNUSED_RELOC (13),
+  UNUSED_RELOC (14),
+  UNUSED_RELOC (15),
 
   /* A 5 bit shift field.  */
   HOWTO (R_MIPS_SHIFT5,		/* type */
@@ -845,9 +847,9 @@ static reloc_howto_type mips_elf64_howto_table_rela[] =
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-    { 13 },
-    { 14 },
-    { 15 },
+  UNUSED_RELOC (13),
+  UNUSED_RELOC (14),
+  UNUSED_RELOC (15),
 
   /* A 5 bit shift field.  */
   HOWTO (R_MIPS_SHIFT5,		/* type */
@@ -1813,7 +1815,7 @@ mips_elf64_write_relocs (abfd, sec, data)
     }
 
   BFD_ASSERT (ext_rela - (Elf64_Mips_External_Rela *) rela_hdr->contents
-	      == count);
+	      == (int) count);
 }
 
 /* Irix 6 defines a brand new archive map format, so that they can
