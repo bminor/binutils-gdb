@@ -1,9 +1,26 @@
+Thu Mar 21 11:00:47 1996  steve chamberlain  <sac@slash.cygnus.com>
+
+	* coffcode.h (coff_write_object_contents):  Allocate
+	buffers large enough for any FILEHDR or AOUTHDR.
+
+Thu Mar 21 16:28:17 1996  David Mosberger-Tang  <davidm@azstarnet.com>
+
+	* ecofflink.c (lookup_line): New static function, renamed and
+	slighly changed from old _bfd_ecoff_locate_line.
+	(_bfd_ecoff_locate_line): Cache line number information.  Use
+	lookup_line for actual lookup.
+
 Thu Mar 21 14:59:11 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* peicode.h (pe_print_pdata): Warn if the .pdata section is not a
 	multiple of 20 bytes.
 
 Thu Mar 21 13:54:40 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.c (_bfd_ecoff_find_nearest_line): Use bfd_zalloc to
+	allocate ecoff_find_line, and don't initialize by hand.
+	* elf32-mips.c (mips_elf_find_nearest_line): Use bfd_zalloc for
+	mips_elf_find_line, and don't call memset.
 
 	* coffcode.h (coff_compute_section_file_positions): If not
 	producing a final executable, don't consider sofar when aligning

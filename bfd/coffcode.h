@@ -2060,9 +2060,15 @@ coff_compute_section_file_positions (abfd)
 
 #ifndef I960
       /* make sure that this section is of the right size too */
-      old_sofar = sofar;
-      sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
-      current->_raw_size += sofar - old_sofar;
+      if ((abfd->flags & EXEC_P) == 0)
+	current->_raw_size = BFD_ALIGN (current->_raw_size,
+					1 << current->alignment_power);
+      else
+	{
+	  old_sofar = sofar;
+	  sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
+	  current->_raw_size += sofar - old_sofar;
+	}
 #endif
 
 #ifdef _LIB
@@ -2081,7 +2087,11 @@ coff_compute_section_file_positions (abfd)
 
 }
 
-#ifndef RS6000COFF_C
+#if 0
+
+/* This can never work, because it is called too late--after the
+   section positions have been set.  I can't figure out what it is
+   for, so I am going to disable it--Ian Taylor 20 March 1996.  */
 
 /* If .file, .text, .data, .bss symbols are missing, add them.  */
 /* @@ Should we only be adding missing symbols, or overriding the aux
@@ -2151,9 +2161,7 @@ coff_add_missing_symbols (abfd)
   return true;
 }
 
-#endif /* ! defined (RS6000COFF_C) */
-
-
+#endif /* 0 */
 
 /* SUPPRESS 558 */
 /* SUPPRESS 529 */
@@ -2542,7 +2550,7 @@ coff_write_object_contents (abfd)
   if (bfd_get_symcount (abfd) != 0)
     {
       int firstundef;
-#ifndef RS6000COFF_C
+#if 0
       if (!coff_add_missing_symbols (abfd))
 	return false;
 #endif
@@ -2687,14 +2695,16 @@ coff_write_object_contents (abfd)
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
     return false;
   {
-    FILHDR buff;
+    char buff[FILHSZ];
     coff_swap_filehdr_out (abfd, (PTR) & internal_f, (PTR) & buff);
     if (bfd_write ((PTR) & buff, 1, FILHSZ, abfd) != FILHSZ)
       return false;
   }
   if (abfd->flags & EXEC_P)
     {
-      AOUTHDR buff;
+      /* Note that peicode.h fills in a PEAOUTHDR, not an AOUTHDR. 
+	 include/coff/pe.h sets AOUTSZ == sizeof(PEAOUTHDR)) */
+      char buff[AOUTSZ];
       coff_swap_aouthdr_out (abfd, (PTR) & internal_a, (PTR) & buff);
       if (bfd_write ((PTR) & buff, 1, AOUTSZ, abfd) != AOUTSZ)
 	return false;
