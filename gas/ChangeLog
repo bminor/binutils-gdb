@@ -1,5 +1,10 @@
 Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 
+	* configure.in: Add case for h8300-*-elf.
+	* configure: Regenerate.
+
+Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
+
 	* doc/internals.texi (MD_PCREL_FROM_SECTION): Change
 	documentation to reflect reality.
 
