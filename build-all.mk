@@ -15,7 +15,7 @@ TREE	= devo
 
 NATIVE  = native
 
-DATE	= 921117
+DATE	= 921118
 
 TAG	= latest-$(DATE)
 
@@ -99,6 +99,23 @@ all-cygnus:
 	  else \
 	    echo "building $(canonhost) cross to $$i" ; \
             $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i do-cygnus $(tlog) && \
+	       echo "     completed successfully" ; \
+	  fi ; \
+	done
+	@echo done at `date`
+
+build-cygnus:
+	@echo build started at `date`
+	@for i in $(TARGETS) ; do \
+	  if [ "$$i" = "native" ] ; then \
+            if [ ! -f $(canonhost)-3stage-done ] ; then \
+	      echo "3staging $(canonhost) native" ; \
+	      $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(host)-stamp-3stage-done $(log) && \
+	         echo "     completed successfully" ; \
+	    fi \
+	  else \
+	    echo "building $(canonhost) cross to $$i" ; \
+            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build-cygnus $(tlog) && \
 	       echo "     completed successfully" ; \
 	  fi ; \
 	done
