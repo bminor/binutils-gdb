@@ -1,3 +1,8 @@
+2004-02-07  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.base/maint.exp: Update test to reflect
+         obstack changes.
+
 2004-02-04  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.base/pendshr.c (pendfunc): New function that calls
