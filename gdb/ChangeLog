@@ -1,5 +1,7 @@
 Wed Apr 14 17:12:51 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* stack.c (print_frame_info): Print specially if dummy frame.
+
 	* breakpoint.c: Add comments regarding within_scope future direction.
 
 	* Version 4.8.3.

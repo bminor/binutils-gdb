@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "breakpoint.h"
 #include "demangle.h"
+#include "inferior.h"
 
 static void
 return_command PARAMS ((char *, int));
@@ -142,9 +143,15 @@ print_frame_info (fi, level, source, args)
   enum language funlang = language_unknown;
   int numargs;
 
-#ifdef CORE_NEEDS_RELOCATION
-  CORE_NEEDS_RELOCATION(fi->pc);
-#endif
+  if (PC_IN_CALL_DUMMY (fi->pc, read_register (SP_REGNUM), fi->frame))
+    {
+      /* Do this regardless of SOURCE because we don't have any source
+	 to list for this frame.  */
+      if (level >= 0)
+	printf_filtered ("#%-2d ", level);
+      printf_filtered ("<function called from gdb>\n");
+      return;
+    }
 
   sal = find_pc_line (fi->pc, fi->next_frame);
   func = find_pc_function (fi->pc);
