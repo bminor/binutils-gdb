@@ -1,3 +1,9 @@
+Sun Jun 22 09:11:02 1997  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/printcmds.exp: Fix "check for floating addition"
+	regexp to accept results within approx +/- .01 of exact value.
+	* lib/gdb.exp (gdb_test): Remove unused expect_out global decl.
+
 Wed Jun 18 11:11:39 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* lib/gdb.exp(gdb_init): Pass our arguments to default_gdb_init

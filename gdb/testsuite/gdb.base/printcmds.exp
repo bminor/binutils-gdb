@@ -1,4 +1,4 @@
-# Copyright (C) 1992, 1994, 1995 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1994, 1995, 1997 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -113,9 +113,12 @@ proc test_integer_literals_rejected {} {
     # lexer thinks that 123DEADBEEF is a floating point number, but
     # then fails to notice that atof() only eats the 123 part.
     # FIXME:  This should be put into PRMS.
+    # Fixed, 4/25/97, by Bob Manson.
 
-    setup_xfail "*-*-*"
     test_print_reject "p 123DEADBEEF"
+    test_print_reject "p 123foobar.bazfoo3"
+    test_print_reject "p 123EEEEEEEEEEEEEEEEE33333k333"
+    gdb_test "p 123.4+56.7" "180.(099\[0-9]*|100\[0-9\]*)" "check for floating addition"
 
     # Test various octal values.
 
@@ -990,7 +993,7 @@ proc test_printf {} {
     # Test mixing args of different sizes.
     gdb_test "printf \"x=%d,y=%f,z=%d\\n\", 5, 6.0, 7" "x=5,y=6\.0+,z=7"
     gdb_test "printf \"%x %f, %c %x, %x, %f\\n\", 0xbad, -99.541, 'z',\
-0xfeedface, 0xdeadbeef, 5.0" "bad -99.5410+, z feedface, deadbeef, 5.0+"
+0xfeedface, 0xdeadbeef, 5.0" "bad -99.54\[0-9\]+, z feedface, deadbeef, 5.0+"
 }
 
 # Start with a fresh gdb.

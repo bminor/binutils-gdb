@@ -324,7 +324,6 @@ proc gdb_test { args } {
     global verbose
     global gdb_prompt
     global GDB
-    global expect_out
     upvar timeout timeout
 
     if [llength $args]>2 then {
