@@ -224,6 +224,7 @@ struct elf_obj_tdata
   PTR raw_syms;			/* Elf_External_Sym* */
   Elf_Internal_Sym *internal_syms;
   PTR symbols;			/* elf_symbol_type */
+  elf_sect_thunk thunk;
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
