@@ -1,5 +1,9 @@
 2004-06-29  Alan Modra  <amodra@bigpond.net.au>
 
+	* reloc16.c (bfd_coff_reloc16_relax_section): Set rawsize.
+
+2004-06-29  Alan Modra  <amodra@bigpond.net.au>
+
 	* bfd-in.h (bfd_get_section_limit): Define.
 	* reloc.c (bfd_perform_relocation, bfd_install_relocation) 
 	(_bfd_final_link_relocate): Use bfd_get_section_limit.

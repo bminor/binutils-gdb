@@ -230,6 +230,7 @@ bfd_coff_reloc16_relax_section (abfd, input_section, link_info, again)
       free ((char *) shrinks);
     }
 
+  input_section->rawsize = input_section->size;
   input_section->size -= shrink;
   free ((char *) reloc_vector);
   return TRUE;
