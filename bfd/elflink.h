@@ -1261,6 +1261,10 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  /* If st_other has a processor-specific meaning, specific
 	     code might be needed here. We never merge the visibility
 	     attribute with the one from a dynamic object.  */
+	  if (bed->elf_backend_merge_symbol_attribute)
+	    (*bed->elf_backend_merge_symbol_attribute) (h, isym, definition,
+							dynamic);
+
 	  if (isym->st_other != 0 && !dynamic)
 	    {
 	      unsigned char hvis, symvis, other, nvis;

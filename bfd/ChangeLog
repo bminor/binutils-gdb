@@ -1,3 +1,12 @@
+2003-10-14  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf-bfd.h (struct elf_backend_data): New function pointer member
+	elf_backend_merge_symbol_attribute.
+	* elflink.h (elf_link_add_object_symbols): Adjust call to
+	elf_backend_merge_symbol_attribute if the backend defined it.
+        * elfxx-target.h (elf_backend_merge_symbol_attribute): New macro.
+        (elfNN_bed): Add that to the initializer.
+
 2003-10-14  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (get_is_linkonce_section): Delete.

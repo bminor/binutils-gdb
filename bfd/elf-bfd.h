@@ -813,6 +813,11 @@ struct elf_backend_data
   void (*elf_backend_hide_symbol)
     (struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean);
 
+  /* Merge the backend specific symbol attribute.  */
+  void (*elf_backend_merge_symbol_attribute)
+    (struct elf_link_hash_entry *, const Elf_Internal_Sym *, bfd_boolean,
+     bfd_boolean);
+
   /* Emit relocations.  Overrides default routine for emitting relocs,
      except during a relocatable link, or if all relocs are being emitted.  */
   bfd_boolean (*elf_backend_emit_relocs)
