@@ -1,3 +1,4 @@
+# Start of "alldeps.mak" definitions
 ALLDEPFILES = $(ALLDEPFILES_MAINDIR) $(ALLDEPFILES_SUBDIR)
 ALLDEPFILES_MAINDIR=\
 altos-xdep.c\
@@ -134,6 +135,7 @@ ALLCONFIG=\
 ./tconfig/arm\
 ./tconfig/bigmips\
 ./tconfig/convex\
+./tconfig/dec3100\
 ./tconfig/hp300bsd\
 ./tconfig/hp300hpux\
 ./tconfig/i386sco\
@@ -174,6 +176,7 @@ ALLCONFIG=\
 ./xconfig/arm\
 ./xconfig/bigmips\
 ./xconfig/convex\
+./xconfig/dec3100\
 ./xconfig/hp300bsd\
 ./xconfig/hp300hpux\
 ./xconfig/i386sco\
@@ -205,3 +208,4 @@ ALLCONFIG=\
 ./xconfig/umax\
 ./xconfig/vax
 
+# End of "alldeps.mak" definitions

@@ -69,6 +69,7 @@ cplus-dem.c
 createtags
 dbxread.c
 defs.h
+depend
 doc
 environ.c
 environ.h

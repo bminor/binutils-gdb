@@ -288,12 +288,12 @@ static const short yyrline[] = { 0,
    352,   356,   360,   364,   368,   372,   376,   380,   384,   388,
    392,   396,   400,   404,   408,   412,   416,   420,   426,   436,
    449,   461,   474,   481,   488,   491,   497,   503,   509,   516,
-   523,   530,   548,   558,   570,   583,   601,   647,   742,   743,
-   778,   780,   782,   784,   786,   789,   791,   796,   802,   804,
-   808,   810,   814,   818,   819,   821,   823,   826,   833,   835,
-   837,   839,   841,   843,   845,   847,   849,   851,   853,   855,
-   857,   860,   863,   866,   868,   870,   872,   876,   877,   883,
-   889,   898,   903,   910,   911,   912,   913,   914,   917,   918
+   523,   530,   548,   558,   570,   583,   601,   647,   741,   742,
+   777,   779,   781,   783,   785,   788,   790,   795,   801,   803,
+   807,   809,   813,   817,   818,   820,   822,   825,   832,   834,
+   836,   838,   840,   842,   844,   846,   848,   850,   852,   854,
+   856,   859,   862,   865,   867,   869,   871,   875,   876,   882,
+   888,   897,   902,   909,   910,   911,   912,   913,   916,   917
 };
 
 static const char * const yytname[] = {   "$",
@@ -523,24 +523,24 @@ static const short yycheck[] = {    14,
     -1,    53,    54,    55,    56,    57,    58
 };
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
-#line 3 "/usr/unsupported/lib/bison.simple"
+#line 3 "/usr/latest/lib/bison.simple"
 
 /* Skeleton output parser for bison,
    Copyright (C) 1984, 1989, 1990 Bob Corbett and Richard Stallman
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 1, or (at your option)
+   any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
 #ifndef alloca
@@ -680,7 +680,7 @@ __yy_bcopy (char *from, char *to, int count)
 
 #endif
 
-#line 160 "/usr/unsupported/lib/bison.simple"
+#line 160 "/usr/latest/lib/bison.simple"
 int
 yyparse()
 {
@@ -1380,7 +1380,6 @@ case 68:
 				case LOC_TYPEDEF:
 				case LOC_LABEL:
 				case LOC_BLOCK:
-				case LOC_EXTERNAL:
 				case LOC_CONST_BYTES:
 
 				  /* In this case the expression can
@@ -1451,7 +1450,7 @@ case 68:
 			;
     break;}
 case 70:
-#line 744 "./expread.y"
+#line 743 "./expread.y"
 {
 		  /* This is where the interesting stuff happens.  */
 		  int done = 0;
@@ -1486,34 +1485,34 @@ case 70:
 		;
     break;}
 case 71:
-#line 779 "./expread.y"
+#line 778 "./expread.y"
 { push_type (tp_pointer); yyval.voidval = 0; ;
     break;}
 case 72:
-#line 781 "./expread.y"
+#line 780 "./expread.y"
 { push_type (tp_pointer); yyval.voidval = yyvsp[0].voidval; ;
     break;}
 case 73:
-#line 783 "./expread.y"
+#line 782 "./expread.y"
 { push_type (tp_reference); yyval.voidval = 0; ;
     break;}
 case 74:
-#line 785 "./expread.y"
+#line 784 "./expread.y"
 { push_type (tp_reference); yyval.voidval = yyvsp[0].voidval; ;
     break;}
 case 76:
-#line 790 "./expread.y"
+#line 789 "./expread.y"
 { yyval.voidval = yyvsp[-1].voidval; ;
     break;}
 case 77:
-#line 792 "./expread.y"
+#line 791 "./expread.y"
 {
 			  push_type_int (yyvsp[0].lval);
 			  push_type (tp_array);
 			;
     break;}
 case 78:
-#line 797 "./expread.y"
+#line 796 "./expread.y"
 {
 			  push_type_int (yyvsp[0].lval);
 			  push_type (tp_array);
@@ -1521,125 +1520,125 @@ case 78:
 			;
     break;}
 case 79:
-#line 803 "./expread.y"
+#line 802 "./expread.y"
 { push_type (tp_function); ;
     break;}
 case 80:
-#line 805 "./expread.y"
+#line 804 "./expread.y"
 { push_type (tp_function); ;
     break;}
 case 81:
-#line 809 "./expread.y"
+#line 808 "./expread.y"
 { yyval.lval = -1; ;
     break;}
 case 82:
-#line 811 "./expread.y"
+#line 810 "./expread.y"
 { yyval.lval = yyvsp[-1].lval; ;
     break;}
 case 83:
-#line 815 "./expread.y"
+#line 814 "./expread.y"
 { yyval.voidval = 0; ;
     break;}
 case 85:
-#line 820 "./expread.y"
+#line 819 "./expread.y"
 { yyval.tval = lookup_member_type (builtin_type_int, yyvsp[-2].tval); ;
     break;}
 case 86:
-#line 822 "./expread.y"
+#line 821 "./expread.y"
 { yyval.tval = lookup_member_type (yyvsp[-5].tval, yyvsp[-3].tval); ;
     break;}
 case 87:
-#line 824 "./expread.y"
+#line 823 "./expread.y"
 { yyval.tval = lookup_member_type
 			    (lookup_function_type (yyvsp[-7].tval), yyvsp[-5].tval); ;
     break;}
 case 88:
-#line 827 "./expread.y"
+#line 826 "./expread.y"
 { yyval.tval = lookup_member_type
 			    (lookup_function_type (yyvsp[-8].tval), yyvsp[-6].tval);
 			  free (yyvsp[-1].tvec); ;
     break;}
 case 89:
-#line 834 "./expread.y"
+#line 833 "./expread.y"
 { yyval.tval = yyvsp[0].tsym.type; ;
     break;}
 case 90:
-#line 836 "./expread.y"
+#line 835 "./expread.y"
 { yyval.tval = builtin_type_int; ;
     break;}
 case 91:
-#line 838 "./expread.y"
+#line 837 "./expread.y"
 { yyval.tval = builtin_type_long; ;
     break;}
 case 92:
-#line 840 "./expread.y"
+#line 839 "./expread.y"
 { yyval.tval = builtin_type_short; ;
     break;}
 case 93:
-#line 842 "./expread.y"
+#line 841 "./expread.y"
 { yyval.tval = builtin_type_long; ;
     break;}
 case 94:
-#line 844 "./expread.y"
+#line 843 "./expread.y"
 { yyval.tval = builtin_type_unsigned_long; ;
     break;}
 case 95:
-#line 846 "./expread.y"
+#line 845 "./expread.y"
 { yyval.tval = builtin_type_long_long; ;
     break;}
 case 96:
-#line 848 "./expread.y"
+#line 847 "./expread.y"
 { yyval.tval = builtin_type_long_long; ;
     break;}
 case 97:
-#line 850 "./expread.y"
+#line 849 "./expread.y"
 { yyval.tval = builtin_type_unsigned_long_long; ;
     break;}
 case 98:
-#line 852 "./expread.y"
+#line 851 "./expread.y"
 { yyval.tval = builtin_type_unsigned_long_long; ;
     break;}
 case 99:
-#line 854 "./expread.y"
+#line 853 "./expread.y"
 { yyval.tval = builtin_type_short; ;
     break;}
 case 100:
-#line 856 "./expread.y"
+#line 855 "./expread.y"
 { yyval.tval = builtin_type_unsigned_short; ;
     break;}
 case 101:
-#line 858 "./expread.y"
+#line 857 "./expread.y"
 { yyval.tval = lookup_struct (copy_name (yyvsp[0].sval),
 					      expression_context_block); ;
     break;}
 case 102:
-#line 861 "./expread.y"
+#line 860 "./expread.y"
 { yyval.tval = lookup_union (copy_name (yyvsp[0].sval),
 					     expression_context_block); ;
     break;}
 case 103:
-#line 864 "./expread.y"
+#line 863 "./expread.y"
 { yyval.tval = lookup_enum (copy_name (yyvsp[0].sval),
 					    expression_context_block); ;
     break;}
 case 104:
-#line 867 "./expread.y"
+#line 866 "./expread.y"
 { yyval.tval = lookup_unsigned_typename (TYPE_NAME(yyvsp[0].tsym.type)); ;
     break;}
 case 105:
-#line 869 "./expread.y"
+#line 868 "./expread.y"
 { yyval.tval = builtin_type_unsigned_int; ;
     break;}
 case 106:
-#line 871 "./expread.y"
+#line 870 "./expread.y"
 { yyval.tval = yyvsp[0].tsym.type; ;
     break;}
 case 107:
-#line 873 "./expread.y"
+#line 872 "./expread.y"
 { yyval.tval = builtin_type_int; ;
     break;}
 case 109:
-#line 878 "./expread.y"
+#line 877 "./expread.y"
 {
 		  yyval.tsym.stoken.ptr = "int";
 		  yyval.tsym.stoken.length = 3;
@@ -1647,7 +1646,7 @@ case 109:
 		;
     break;}
 case 110:
-#line 884 "./expread.y"
+#line 883 "./expread.y"
 {
 		  yyval.tsym.stoken.ptr = "long";
 		  yyval.tsym.stoken.length = 4;
@@ -1655,7 +1654,7 @@ case 110:
 		;
     break;}
 case 111:
-#line 890 "./expread.y"
+#line 889 "./expread.y"
 {
 		  yyval.tsym.stoken.ptr = "short";
 		  yyval.tsym.stoken.length = 5;
@@ -1663,42 +1662,42 @@ case 111:
 		;
     break;}
 case 112:
-#line 899 "./expread.y"
+#line 898 "./expread.y"
 { yyval.tvec = (struct type **)xmalloc (sizeof (struct type *) * 2);
 		  yyval.tvec[0] = (struct type *)0;
 		  yyval.tvec[1] = yyvsp[0].tval;
 		;
     break;}
 case 113:
-#line 904 "./expread.y"
+#line 903 "./expread.y"
 { int len = sizeof (struct type *) * ++(yyvsp[-2].ivec[0]);
 		  yyval.tvec = (struct type **)xrealloc (yyvsp[-2].tvec, len);
 		  yyval.tvec[yyval.ivec[0]] = yyvsp[0].tval;
 		;
     break;}
 case 114:
-#line 910 "./expread.y"
+#line 909 "./expread.y"
 { yyval.sval = yyvsp[0].ssym.stoken; ;
     break;}
 case 115:
-#line 911 "./expread.y"
+#line 910 "./expread.y"
 { yyval.sval = yyvsp[0].ssym.stoken; ;
     break;}
 case 116:
-#line 912 "./expread.y"
+#line 911 "./expread.y"
 { yyval.sval = yyvsp[0].tsym.stoken; ;
     break;}
 case 117:
-#line 913 "./expread.y"
+#line 912 "./expread.y"
 { yyval.sval = yyvsp[0].ssym.stoken; ;
     break;}
 case 118:
-#line 914 "./expread.y"
+#line 913 "./expread.y"
 { yyval.sval = yyvsp[0].ssym.stoken; ;
     break;}
 }
    /* the action file gets copied in in place of this dollarsign */
-#line 423 "/usr/unsupported/lib/bison.simple"
+#line 423 "/usr/latest/lib/bison.simple"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1885,7 +1884,7 @@ yyerrhandle:
   yystate = yyn;
   goto yynewstate;
 }
-#line 929 "./expread.y"
+#line 928 "./expread.y"
 
 
 /* Begin counting arguments for a function call,
