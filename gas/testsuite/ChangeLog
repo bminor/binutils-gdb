@@ -1,3 +1,8 @@
+Tue Nov 19 13:36:57 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mn10300/movm.s: Update for correct syntax.
+	* gas/mn10300/basic.exp: Update expected movm bit patterns.
+
 Fri Nov 15 13:57:42 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/other.s: Put parens around register
