@@ -1,4 +1,7 @@
-2003-10-11  Alan Modra  <alan@modra.org>
+2003-10-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* coff-sh.c: Move definition of MAP and guard more code with
+	COFF_IMAGE_WITH_PE.
 
 	* section.c (bfd_get_section_size_before_reloc): Ignore reloc_done.
 	* bfd-in2.h: Regenerate.
@@ -64,7 +67,7 @@
 
 2003-10-06  Matt Thomas <matt@3am-software.com>
 
-         config.bfd: Move the hppa*-*-netbsd* case to the hppa*-*-linux* case.
+	* config.bfd: Move the hppa*-*-netbsd* case to the hppa*-*-linux* case.
 
 2003-10-06  Robert Millan  <robertmh@gnu.org>
 

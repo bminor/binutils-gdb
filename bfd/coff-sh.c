@@ -1647,6 +1647,8 @@ struct sh_opcode
 #define SETSAS (0x40000)
 #define SETSAS_REG(x) USESAS_REG (x)
 
+#define MAP(a) a, sizeof a / sizeof a[0]
+
 #ifndef COFF_IMAGE_WITH_PE
 static bfd_boolean sh_insn_uses_reg
   PARAMS ((unsigned int, const struct sh_opcode *, unsigned int));
@@ -1666,10 +1668,8 @@ static bfd_boolean sh_insns_conflict
 static bfd_boolean sh_load_use
   PARAMS ((unsigned int, const struct sh_opcode *, unsigned int,
 	   const struct sh_opcode *));
-#endif
-/* The opcode maps.  */
 
-#define MAP(a) a, sizeof a / sizeof a[0]
+/* The opcode maps.  */
 
 static const struct sh_opcode sh_opcode00[] =
 {
@@ -2089,7 +2089,6 @@ static const struct sh_minor_opcode sh_opcodef[] =
   { MAP (sh_opcodef1), 0xf0ff }
 };
 
-#ifndef COFF_IMAGE_WITH_PE
 static struct sh_major_opcode sh_opcodes[] =
 {
   { MAP (sh_opcode0) },
@@ -2109,7 +2108,6 @@ static struct sh_major_opcode sh_opcodes[] =
   { MAP (sh_opcodee) },
   { MAP (sh_opcodef) }
 };
-#endif
 
 /* The double data transfer / parallel processing insns are not
    described here.  This will cause sh_align_load_span to leave them alone.  */
@@ -2131,7 +2129,6 @@ static const struct sh_minor_opcode sh_dsp_opcodef[] =
   { MAP (sh_dsp_opcodef0), 0xfc0d }
 };
 
-#ifndef COFF_IMAGE_WITH_PE
 /* Given an instruction, return a pointer to the corresponding
    sh_opcode structure.  Return NULL if the instruction is not
    recognized.  */
