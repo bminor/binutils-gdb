@@ -1,5 +1,10 @@
 2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (load_partial_dies): Check for NULL name before
+	adding types.
+
+2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (maybe_specification_partial_die): Removed.
 	(is_type_tag_for_partial): Renamed from is_type_tag.  Remove
 	some tags.

@@ -4572,10 +4572,11 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
 	      || part_die->tag == DW_TAG_subrange_type
 	      || part_die->tag == DW_TAG_enumeration_type))
 	{
-	  add_psymbol_to_list (part_die->name, strlen (part_die->name),
-			       VAR_DOMAIN, LOC_TYPEDEF,
-			       &cu->objfile->static_psymbols,
-			       0, (CORE_ADDR) 0, cu->language, cu->objfile);
+	  if (part_die->name != NULL)
+	    add_psymbol_to_list (part_die->name, strlen (part_die->name),
+				 VAR_DOMAIN, LOC_TYPEDEF,
+				 &cu->objfile->static_psymbols,
+				 0, (CORE_ADDR) 0, cu->language, cu->objfile);
 	  info_ptr = locate_pdi_sibling (part_die, info_ptr, abfd, cu);
 	  continue;
 	}
