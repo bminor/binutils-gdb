@@ -1,3 +1,9 @@
+Tue Sep 13 18:23:26 1994  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* w89k-rom.c op50-rom.c monitor.c config/pa/hppapro.mt: New files
+	to add a generic ROM monitor interface, and support file for the
+	WinBond W89K and the Oki OP50N PA based target boards.
+
 Tue Sep 13 08:59:04 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* gdbtk.c (gdbtk_flush gdbtk_fputs):  Buffer up output to make
