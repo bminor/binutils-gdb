@@ -425,8 +425,8 @@ extern void mips_pop_frame PARAMS ((void));
 #define	INIT_FRAME_PC(fromleaf, prev) /* nada */
 
 #define INIT_FRAME_PC_FIRST(fromleaf, prev) \
-  (prev)->pc = ((fromleaf) ? SAVED_PC_AFTER_CALL ((prev)->next) : \
-	      (prev)->next ? FRAME_SAVED_PC ((prev)->next) : read_pc ());
+   mips_init_frame_pc_first(fromleaf, prev)
+extern void mips_init_frame_pc_first PARAMS ((int, struct frame_info *));
 
 /* Special symbol found in blocks associated with routines.  We can hang
    mips_extra_func_info_t's off of this.  */
@@ -504,6 +504,16 @@ extern void fixup_sigtramp PARAMS ((void));
 
 /* Defined in mips-tdep.c and used in remote-mips.c */
 extern char *mips_read_processor_type PARAMS ((void));
+
+/* Functions for dealing with MIPS16 call and return stubs.  */
+#define IN_SOLIB_CALL_TRAMPOLINE(pc, name)	mips_in_call_stub (pc, name)
+#define IN_SOLIB_RETURN_TRAMPOLINE(pc, name)	mips_in_return_stub (pc, name)
+#define SKIP_TRAMPOLINE_CODE(pc)		mips_skip_stub (pc)
+#define IGNORE_HELPER_CALL(pc)			mips_ignore_helper (pc)
+extern int mips_in_call_stub PARAMS ((CORE_ADDR pc,  char *name));
+extern int mips_in_return_stub PARAMS ((CORE_ADDR pc,  char *name));
+extern CORE_ADDR mips_skip_stub PARAMS ((CORE_ADDR pc));
+extern int mips_ignore_helper PARAMS ((CORE_ADDR pc));
 
 #ifndef TARGET_MIPS
 #define TARGET_MIPS

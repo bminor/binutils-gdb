@@ -1,3 +1,22 @@
+Thu Apr  3 10:31:12 1997  Mark Alexander  <marka@cygnus.com>
+
+	* mips-tdep.c (mips_in_call_stub, mips_in_return_stub,
+	mips_skip_stub, mips_ignore_helper): New functions for dealing
+	with MIPS16 call/return thunks.
+	(mips_init_frame_pc_first): New function to implement
+	INIT_FRAME_PC_FIRST macro; includes code from old macro plus
+	new code to skip over MIPS16 thunks.
+	(mips_frame_chain): Skip over MIPS16 thunks.
+	* config/mips/tm-mips.h (mips_in_call_stub, mips_in_return_stub,
+	mips_skip_stub, mips_ignore_helper): Declare.
+	(IN_SOLIB_CALL_TRAMPOLINE, IN_SOLIB_RETURN_TRAMPOLINE,
+	SKIP_TRAMPOLINE_CODE, IGNORE_HELPER_CALL): New macros that invoke
+	the above functions.
+	(INIT_FRAME_PC_FIRST): Change to invoke mips_init_frame_pc.
+	(mips_init_frame_pc): Declare.
+	* infrun.c (wait_for_inferior): Use new IGNORE_HELPER_CALL macro
+	to decide if certain library function calls should be ignored.
+
 Wed Apr  2 14:16:51 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* remote-sim.c (gdbsim_open): Check return code from sim_open.

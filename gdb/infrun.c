@@ -34,13 +34,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include <signal.h>
 
-/* unistd.h is needed to #define X_OK */
-#ifdef USG
-#include <unistd.h>
-#else
-#include <sys/file.h>
-#endif
-
 /* Prototypes for local functions */
 
 static void signals_info PARAMS ((char *, int));
@@ -102,6 +95,14 @@ static void delete_breakpoint_current_contents PARAMS ((PTR));
 
 #ifndef IN_SOLIB_RETURN_TRAMPOLINE
 #define IN_SOLIB_RETURN_TRAMPOLINE(pc,name)	0
+#endif
+
+/* On MIPS16, a function that returns a floating point value may call
+   a library helper function to copy the return value to a floating point
+   register.  The IGNORE_HELPER_CALL macro returns non-zero if we
+   should ignore (i.e. step over) this function call.  */
+#ifndef IGNORE_HELPER_CALL
+#define IGNORE_HELPER_CALL(pc)	0
 #endif
 
 /* On some systems, the PC may be left pointing at an instruction that  won't
@@ -304,7 +305,7 @@ proceed (addr, siggnal, step)
 	 step one instruction before inserting breakpoints
 	 so that we do not stop right away.  */
 
-      if (breakpoint_here_p (read_pc ()))
+      if (read_pc () == stop_pc && breakpoint_here_p (read_pc ()))
 	oneproc = 1;
 
 #ifdef STEP_SKIPS_DELAY
@@ -797,6 +798,7 @@ wait_for_inferior ()
 #endif
 
       stop_func_start = 0;
+      stop_func_end = 0;
       stop_func_name = 0;
       /* Don't care about return value; stop_func_start and stop_func_name
 	 will both be 0 if it doesn't work.  */
@@ -857,7 +859,7 @@ wait_for_inferior ()
 	      /* See if there is a breakpoint at the current PC.  */
 	      stop_bpstat = bpstat_stop_status
 		(&stop_pc,
-#if DECR_PC_AFTER_BREAK
+		 (DECR_PC_AFTER_BREAK ?
 		 /* Notice the case of stepping through a jump
 		    that lands just after a breakpoint.
 		    Don't confuse that with hitting the breakpoint.
@@ -865,10 +867,8 @@ wait_for_inferior ()
 		    and 2) the pc before the last insn does not match
 		    the address of the breakpoint before the current pc.  */
 		 (prev_pc != stop_pc - DECR_PC_AFTER_BREAK
-		  && CURRENTLY_STEPPING ())
-#else /* DECR_PC_AFTER_BREAK zero */
-		 0
-#endif /* DECR_PC_AFTER_BREAK zero */
+		  && CURRENTLY_STEPPING ()) :
+		 0)
 		 );
 	      /* Following in case break condition called a
 		 function.  */
@@ -1080,9 +1080,12 @@ wait_for_inferior ()
 		     breakpoint_re_set.  */
 	          target_terminal_ours_for_output ();
 		  SOLIB_ADD (NULL, 0, NULL);
-		  re_enable_breakpoints_in_shlibs ();
 	          target_terminal_inferior ();
 		}
+
+	      /* Try to reenable shared library breakpoints, additional
+		 code segments in shared libraries might be mapped in now. */
+	      re_enable_breakpoints_in_shlibs ();
 
 	      /* If requested, stop when the dynamic linker notifies
 		 gdb of events.  This allows the user to get control
@@ -1203,9 +1206,8 @@ wait_for_inferior ()
 	  {
 	    struct symtab_and_line sr_sal;
 
+	    INIT_SAL (&sr_sal);		/* initialize to zeroes */
 	    sr_sal.pc = prev_pc;
-	    sr_sal.symtab = NULL;
-	    sr_sal.line = 0;
 	    /* We could probably be setting the frame to
 	       step_frame_address; I don't think anyone thought to try it.  */
 	    step_resume_breakpoint =
@@ -1320,7 +1322,7 @@ wait_for_inferior ()
 	      break;
 	    }
 
-	  if (step_over_calls > 0)
+	  if (step_over_calls > 0 || IGNORE_HELPER_CALL (stop_pc))
 	    /* We're doing a "next".  */
 	    goto step_over_function;
 
@@ -1338,10 +1340,10 @@ wait_for_inferior ()
 	      if (tmp)
 		{
 		  struct symtab_and_line xxx;
-
+		  /* Why isn't this s_a_l called "sr_sal", like all of the
+		     other s_a_l's where this code is duplicated?  */
+		  INIT_SAL (&xxx);	/* initialize to zeroes */
 		  xxx.pc = tmp;
-		  xxx.symtab = NULL;
-		  xxx.line = 0;
 		  step_resume_breakpoint = 
 		    set_momentary_breakpoint (xxx, NULL, bp_step_resume);
 		  insert_breakpoints ();
@@ -1368,11 +1370,11 @@ step_over_function:
 	  {
 	    /* Set a special breakpoint after the return */
 	    struct symtab_and_line sr_sal;
+
+	    INIT_SAL (&sr_sal);		/* initialize to zeroes */
 	    sr_sal.pc = 
 	      ADDR_BITS_REMOVE
 		(SAVED_PC_AFTER_CALL (get_current_frame ()));
-	    sr_sal.symtab = NULL;
-	    sr_sal.line = 0;
 	    step_resume_breakpoint =
 	      set_momentary_breakpoint (sr_sal, get_current_frame (),
 					bp_step_resume);
@@ -1418,9 +1420,8 @@ step_into_function:
 	    {
 	      struct symtab_and_line sr_sal;
 
+	      INIT_SAL (&sr_sal);	/* initialize to zeroes */
 	      sr_sal.pc = stop_func_start;
-	      sr_sal.symtab = NULL;
-	      sr_sal.line = 0;
 	      /* Do not specify what the fp should be when we stop
 		 since on some machines the prologue
 		 is where the new fp value is established.  */
@@ -1462,9 +1463,8 @@ step_into_function:
 	      /* And put the step-breakpoint there and go until there. */
 	      struct symtab_and_line sr_sal;
 
+	      INIT_SAL (&sr_sal);	/* initialize to zeroes */
 	      sr_sal.pc = tmp;
-	      sr_sal.symtab = NULL;
-	      sr_sal.line = 0;
 	      /* Do not specify what the fp should be when we stop
 		 since on some machines the prologue
 		 is where the new fp value is established.  */
@@ -1520,6 +1520,8 @@ step_into_function:
       step_range_start = sal.pc;
       step_range_end = sal.end;
       step_frame_address = FRAME_FP (get_current_frame ());
+      current_line = sal.line;
+      current_symtab = sal.symtab;
       goto keep_going;
 
     check_sigtramp2:
@@ -1540,9 +1542,8 @@ step_into_function:
 	     it says "exceedingly difficult").  */
 	  struct symtab_and_line sr_sal;
 
+	  INIT_SAL (&sr_sal);		/* initialize to zeroes */
 	  sr_sal.pc = prev_pc;
-	  sr_sal.symtab = NULL;
-	  sr_sal.line = 0;
 	  /* We perhaps could set the frame if we kept track of what
 	     the frame corresponding to prev_pc was.  But we don't,
 	     so don't.  */
