@@ -51,6 +51,7 @@ configure.in
 core.c
 demo64.c
 ecoff.c
+elf.c
 filemode.c
 format.c
 host-aout.c
@@ -113,7 +114,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.21  1991/10/01 03:55:34  steve
+# Revision 1.22  1991/10/03 22:23:56  gnu
+# Add elf.c
+#
+# Revision 1.21  1991/10/01  03:55:34  steve
 # Insert the incidentals and things I forgot to ci last time, same log message:
 #
 # Mon Sep 30 15:13:46 1991  Steve Chamberlain  (steve at cygnus.com)
