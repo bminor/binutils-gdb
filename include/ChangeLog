@@ -1,3 +1,7 @@
+Sun Jan 15 18:39:35 1995  Steve Chamberlain  <sac@splat>
+
+	* dis-asm.h (prin_insn_w65): Declare.
+
 Thu Jan 12 17:51:17 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* libiberty.h (hex_p): Fix sense of test.
