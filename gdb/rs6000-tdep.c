@@ -1527,6 +1527,16 @@ rs6000_frame_saved_pc (struct frame_info *fi)
       if (fi->next->signal_handler_caller)
 	return read_memory_addr (fi->next->frame + SIG_FRAME_LR_OFFSET,
 				 wordsize);
+      else if (PC_IN_CALL_DUMMY (get_next_frame (fi)->pc, 0, 0))
+	/* The link register wasn't saved by this frame and the next
+           (inner, newer) frame is a dummy.  Get the link register
+           value by unwinding it from that [dummy] frame.  */
+	{
+	  ULONGEST lr;
+	  frame_unwind_unsigned_register (get_next_frame (fi),
+					  tdep->ppc_lr_regnum, &lr);
+	  return lr;
+	}
       else
 	return read_memory_addr (FRAME_CHAIN (fi) + tdep->lr_frame_offset,
 				 wordsize);
