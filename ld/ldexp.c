@@ -1,6 +1,6 @@
 /* This module handles expression trees.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003
+   2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -43,6 +43,8 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 
 static etree_value_type exp_fold_tree_no_dot
   (etree_type *, lang_output_section_statement_type *, lang_phase_type);
+static bfd_vma align_n
+  (bfd_vma, bfd_vma);
 
 struct exp_data_seg exp_data_seg;
 
@@ -1099,7 +1101,8 @@ exp_get_abs_int (etree_type *tree,
   return res.value;
 }
 
-bfd_vma align_n (bfd_vma value, bfd_vma align)
+static bfd_vma
+align_n (bfd_vma value, bfd_vma align)
 {
   if (align <= 1)
     return value;

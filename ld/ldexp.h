@@ -1,6 +1,6 @@
 /* ldexp.h -
-   Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002,
+   2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
@@ -138,7 +138,5 @@ fill_type *exp_get_fill
   (etree_type *, fill_type *, char *, lang_phase_type);
 bfd_vma exp_get_abs_int
   (etree_type *, int, char *, lang_phase_type);
-bfd_vma align_n
-  (bfd_vma, bfd_vma);
 
 #endif

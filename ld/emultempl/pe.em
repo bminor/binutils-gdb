@@ -1647,7 +1647,6 @@ gld_${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s
 	}
 
       os = lang_enter_output_section_statement (outsecname, address, 0,
-						(bfd_vma) 0,
 						(etree_type *) NULL,
 						(etree_type *) NULL,
 						(etree_type *) NULL);

@@ -1,5 +1,32 @@
 2004-01-03  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldexp.c (align_n): Make static.
+	* ldexp.h (align_n): Delete declaration.
+	* ldlang.h (lang_enter_output_section_statement): Remove
+	block_value param.
+	* ldlang.c (lang_enter_output_section_statement): Likewise.
+	(TO_ADDR, TO_SIZE): Define.
+	(opb): New var.
+	(init_opb): New function.
+	(print_input_section): Call init_opb and use TO_ADDR.
+	(print_data_statement, print_reloc_statement): Likewise.
+	(print_padding_statement): Likewise.
+	(size_input_section): Use TO_SIZE and TO_ADDR, and global opb.
+	(lang_check_section_addresses): Likewise.
+	(lang_size_sections_1): Likewise.
+	(lang_do_assignments_1): Likewise.
+	(lang_set_startof): Likewise.
+	(lang_one_common): Likewise.  Combine power_of_two and opb alignment.
+	(lang_process): Call init_opb.
+	(lang_abs_symbol_at_end_of): Use TO_ADDR and global opb.
+	(lang_enter_overlay_section): Adjust
+	lang_enter_output_section_statement call.
+	* ldgram.y: Likewise.
+	* mri.c (mri_draw_tree): Likewise.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Likewise.
+	* emultempl/mmo.em (mmo_place_orphan): Likewise.
+	* emultempl/pe.em (gld${EMULATION_NAME}_place_orphan): Likewise.
+
 	* ldfile.c (ldfile_set_output_arch): Add defarch param.
 	* ldfile.h (ldfile_set_output_arch): Ditto.
 	* emultempl/aix.em (gld${EMULATION_NAME}_before_parse): Use

@@ -841,7 +841,7 @@ section:	NAME 		{ ldlex_expression(); }
 			{
 			  lang_enter_output_section_statement($1, $3,
 							      sectype,
-							      0, 0, $5, $4);
+							      0, $5, $4);
 			}
 		statement_list_opt
  		'}' { ldlex_popstate (); ldlex_expression (); }

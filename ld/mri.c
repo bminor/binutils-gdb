@@ -1,6 +1,6 @@
 /* mri.c -- handle MRI style linker scripts
-   Copyright 1991, 1992, 1993, 1994, 1996, 1997, 1998, 1999, 2000, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994, 1996, 1997, 1998, 1999, 2000, 2002,
+   2003, 2004 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -220,7 +220,7 @@ mri_draw_tree (void)
 
 	  lang_enter_output_section_statement (p->name, base,
 					       p->ok_to_load ? 0 : noload_section,
-					       1, align, subalign, NULL);
+					       align, subalign, NULL);
 	  base = 0;
 	  tmp = xmalloc (sizeof *tmp);
 	  tmp->next = NULL;

@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+#   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 #
 # This file is part of GLD, the Gnu Linker.
 #
@@ -127,7 +127,6 @@ mmo_place_orphan (lang_input_statement_type *file, asection *s)
   os = lang_enter_output_section_statement (bfd_get_section_name (s->owner,
 								  s),
 					    NULL, 0,
-					    (bfd_vma) 0,
 					    (etree_type *) NULL,
 					    (etree_type *) NULL,
 					    (etree_type *) NULL);

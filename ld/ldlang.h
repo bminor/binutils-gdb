@@ -1,6 +1,6 @@
 /* ldlang.h - linker command language support
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003
+   2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -403,7 +403,6 @@ extern lang_output_section_statement_type *lang_enter_output_section_statement
   (const char *output_section_statement_name,
    etree_type *address_exp,
    enum section_type sectype,
-   bfd_vma block_value,
    etree_type *align,
    etree_type *subalign,
    etree_type *);
