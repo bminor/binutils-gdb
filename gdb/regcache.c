@@ -1241,7 +1241,7 @@ regcache_collect (int regnum, void *buf)
   regcache_raw_collect (current_regcache, regnum, buf);
 }
 
-/* Supply register REGNUM, whose contents are store in BUF, to REGCACHE.  */
+/* Supply register REGNUM, whose contents are stored in BUF, to REGCACHE.  */
 
 void
 regcache_raw_supply (struct regcache *regcache, int regnum, const void *buf)
@@ -1249,7 +1249,7 @@ regcache_raw_supply (struct regcache *regcache, int regnum, const void *buf)
   void *regbuf;
   size_t size;
 
-  gdb_assert (regcache != NULL && buf != NULL);
+  gdb_assert (regcache != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
   gdb_assert (!regcache->readonly_p);
 
