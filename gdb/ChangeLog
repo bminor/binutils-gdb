@@ -1,5 +1,10 @@
 Sat May  2 09:35:07 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
+	* ocd.h:  Add new flags, function codes, and processor types to support
+	new Wiggler capabilities.
+	* (ocd_write_bytes_size):  New function to allow atomic writes of
+ 	memory in sizes larger than a byte.
+
 	* ser-unix.c (baudtab):  Add 57600, 115200, 230400, and 460800 baud.
 
 Fri May  1 19:51:32 1998  Frank Ch. Eigler  <fche@cygnus.com>
