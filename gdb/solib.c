@@ -131,10 +131,33 @@ solib_open (char *in_pathname, char **found_pathname)
       found_file = open (temp_pathname, O_RDONLY, 0);
     }
 
+  /* If the search in solib_absolute_prefix failed, and the path name is
+     absolute at this point, make it relative.  (openp will try and open the
+     file according to its absolute path otherwise, which is not what we want.)
+     Affects subsequent searches for this solib.  */
+  if (found_file < 0 && IS_ABSOLUTE_PATH (in_pathname))
+    {
+      /* First, get rid of any drive letters etc.  */
+      while (!IS_DIR_SEPARATOR (*in_pathname))
+        in_pathname++;
+
+      /* Next, get rid of all leading dir separators.  */
+      while (IS_DIR_SEPARATOR (*in_pathname))
+        in_pathname++;
+    }
+  
   /* If not found, next search the solib_search_path (if any).  */
   if (found_file < 0 && solib_search_path != NULL)
     found_file = openp (solib_search_path,
 			1, in_pathname, O_RDONLY, 0, &temp_pathname);
+  
+  /* If not found, next search the solib_search_path (if any) for the basename
+     only (ignoring the path).  This is to allow reading solibs from a path
+     that differs from the opened path.  */
+  if (found_file < 0 && solib_search_path != NULL)
+    found_file = openp (solib_search_path, 
+                        1, lbasename (in_pathname), O_RDONLY, 0,
+                        &temp_pathname);
 
   /* If not found, next search the inferior's $PATH environment variable. */
   if (found_file < 0 && solib_search_path != NULL)

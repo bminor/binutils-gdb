@@ -1,3 +1,9 @@
+2001-12-04  Orjan Friberg  <orjanf@axis.com>
+
+	* solib.c (solib_open): Make path relative if search for absolute path
+	failed.  If search for relative path in solib_search_path failed, fall
+	back to search for basename only.
+
 2001-12-03  Martin M. Hunt  <hunt@redhat.com>
 
 	* serial.h: Add a note to serial_open.
