@@ -1,3 +1,7 @@
+2002-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elfxx-mips.c: Call it IRIX, not Irix in comments.
+
 2002-05-13  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* config.bfd (shle-*-netbsdelf*): Add target which includes

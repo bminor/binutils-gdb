@@ -135,7 +135,7 @@ struct mips_elf_link_hash_table
   /* The size of the .compact_rel section (if SGI_COMPAT).  */
   bfd_size_type compact_rel_size;
   /* This flag indicates that the value of DT_MIPS_RLD_MAP dynamic
-     entry is set to the address of __rld_obj_head as in Irix 5.  */
+     entry is set to the address of __rld_obj_head as in IRIX5.  */
   boolean use_rld_obj_head;
   /* This is the value of the __rld_map or __rld_obj_head symbol.  */
   bfd_vma rld_value;
@@ -154,7 +154,7 @@ struct extsym_info
   boolean failed;
 };
 
-/* The names of the runtime procedure table symbols used on Irix 5.  */
+/* The names of the runtime procedure table symbols used on IRIX5.  */
 
 static const char * const mips_elf_dynsym_rtproc_names[] =
 {
@@ -165,7 +165,7 @@ static const char * const mips_elf_dynsym_rtproc_names[] =
 };
 
 /* These structures are used to generate the .compact_rel section on
-   Irix 5.  */
+   IRIX5.  */
 
 typedef struct
 {
@@ -2411,7 +2411,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
 	{
 	  value = addend + gp - p + 4;
 	  /* The MIPS ABI requires checking the R_MIPS_LO16 relocation
-	     for overflow.  But, on, say, Irix 5, relocations against
+	     for overflow.  But, on, say, IRIX5, relocations against
 	     _gp_disp are normally generated from the .cpload
 	     pseudo-op.  It generates code that normally looks like
 	     this:
@@ -3542,7 +3542,7 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
   else if (strcmp (name, ".mdebug") == 0)
     {
       hdr->sh_type = SHT_MIPS_DEBUG;
-      /* In a shared object on Irix 5.3, the .mdebug section has an
+      /* In a shared object on IRIX 5.3, the .mdebug section has an
          entsize of 0.  FIXME: Does this matter?  */
       if (SGI_COMPAT (abfd) && (abfd->flags & DYNAMIC) != 0)
 	hdr->sh_entsize = 0;
@@ -3552,7 +3552,7 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
   else if (strcmp (name, ".reginfo") == 0)
     {
       hdr->sh_type = SHT_MIPS_REGINFO;
-      /* In a shared object on Irix 5.3, the .reginfo section has an
+      /* In a shared object on IRIX 5.3, the .reginfo section has an
          entsize of 0x18.  FIXME: Does this matter?  */
       if (SGI_COMPAT (abfd))
 	{
@@ -3572,7 +3572,7 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
       if (SGI_COMPAT (abfd))
 	hdr->sh_entsize = 0;
 #if 0
-      /* This isn't how the Irix 6 linker behaves.  */
+      /* This isn't how the IRIX6 linker behaves.  */
       hdr->sh_info = SIZEOF_MIPS_DYNSYM_SECNAMES;
 #endif
     }
@@ -3693,7 +3693,7 @@ _bfd_mips_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       && (abfd->flags & DYNAMIC) != 0
       && strcmp (*namep, "_rld_new_interface") == 0)
     {
-      /* Skip Irix 5 rld entry name.  */
+      /* Skip IRIX5 rld entry name.  */
       *namep = NULL;
       return true;
     }
@@ -4790,7 +4790,7 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
 	}
       else if (strcmp (name, MIPS_ELF_STUB_SECTION_NAME (output_bfd)) == 0)
 	{
-	  /* Irix rld assumes that the function stub isn't at the end
+	  /* IRIX rld assumes that the function stub isn't at the end
 	     of .text section. So put a dummy. XXX  */
 	  s->_raw_size += MIPS_FUNCTION_STUB_SIZE;
 	}
@@ -5785,7 +5785,7 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
 
   /* The first entry of the global offset table will be filled at
      runtime. The second entry will be used by some runtime loaders.
-     This isn't the case of Irix rld.  */
+     This isn't the case of IRIX rld.  */
   if (sgot != NULL && sgot->_raw_size > 0)
     {
       MIPS_ELF_PUT_WORD (output_bfd, (bfd_vma) 0, sgot->contents);
@@ -6030,7 +6030,7 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
     }
 }
 
-/* When creating an Irix 5 executable, we need REGINFO and RTPROC
+/* When creating an IRIX5 executable, we need REGINFO and RTPROC
    segments.  */
 
 int
@@ -6060,7 +6060,7 @@ _bfd_mips_elf_additional_program_headers (abfd)
   return ret;
 }
 
-/* Modify the segment map for an Irix 5 executable.  */
+/* Modify the segment map for an IRIX5 executable.  */
 
 boolean
 _bfd_mips_elf_modify_segment_map (abfd)
@@ -6183,7 +6183,7 @@ _bfd_mips_elf_modify_segment_map (abfd)
 		}
 	    }
 	}
-      /* On Irix 5, the PT_DYNAMIC segment includes the .dynamic,
+      /* On IRIX5, the PT_DYNAMIC segment includes the .dynamic,
 	 .dynstr, .dynsym, and .hash sections, and everything in
 	 between.  */
       for (pm = &elf_tdata (abfd)->segment_map; *pm != NULL;
