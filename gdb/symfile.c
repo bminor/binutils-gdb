@@ -919,7 +919,7 @@ generic_load (filename, from_tty)
   asection *s;
   bfd *loadfile_bfd;
   time_t start_time, end_time;	/* Start and end times of download */
-  unsigned long data_count;	/* Number of bytes transferred to memory */
+  unsigned long data_count = 0;	/* Number of bytes transferred to memory */
 
   loadfile_bfd = bfd_openr (filename, gnutarget);
   if (loadfile_bfd == NULL)
