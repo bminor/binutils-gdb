@@ -2084,6 +2084,7 @@ dlltool [-d|--input-def @var{def-file-name}]
         [-S|--as @var{path-to-assembler}] [-f|--as-flags @var{options}]
         [-D|--dllname @var{name}] [-m|--machine @var{machine}]
         [-a|--add-indirect] [-U|--add-underscore] [-k|--kill-at]
+        [-A|--add-stdcall-alias]
         [-x|--no-idata4] [-c|--no-idata5] [-i|--interwork]
         [-n|--nodelete] [-v|--verbose] [-h|--help] [-V|--version]
         [object-file @dots{}]
@@ -2256,6 +2257,12 @@ Specifies that when @code{dlltool} is creating the exports file it
 should not append the string @samp{@@ <number>}.  These numbers are
 called ordinal numbers and they represent another way of accessing the
 function in a DLL, other than by name.
+
+@item -A
+@itemx --add-stdcall-alias
+Specifies that when @code{dlltool} is creating the exports file it
+should add aliases for stdcall symbols without @samp{@@ <number>}
+in addition to the symbols with @samp{@@ <number>}.
 
 @item -x
 @itemx --no-idata4

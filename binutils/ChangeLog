@@ -1,3 +1,41 @@
+Mon Oct 26 14:07:59 1998  Mumit Khan  <khan@xraylith.wisc.edu>
+        
+        * dllwrap.c (strhash): New function.
+        (main): Use it to supply image base if not supplied by user. 
+        (program_version): Up to 0.2.4.
+
+Mon Oct 26 14:07:59 1998  Mumit Khan  <khan@xraylith.wisc.edu>
+
+        * dlltool.c (add_stdcall_alias): New global.
+        (long_options): Add --add-stdcall-alias option.
+        (main): Handle it.
+        (scan_drectve_symbols): Add alias if --add-stdcall-alias is
+        specified.
+        (scan_filtered_symbols): Likewise.
+        (gen_def_file): Output alias for stdcall syms if appropriate.
+
+        * binutils.texi (dlltool): Document --add-stdcall-alias option.
+
+        * dllwrap.c (long_options): Add --add-stdcall-alias option.
+        (main): Handle it.
+
+        * defparse.y (opt_name): Allow "." in name.
+        * dlltool.c (def_name): Set dll_name from NAME entry in def file.
+        (def_library): Set dll_name from LIBRARY entry in def file.
+
+Mon Oct 26 14:07:59 1998  Mumit Khan  <khan@xraylith.wisc.edu>
+
+        * dllwrap.c (long_options): --implib synonym for --output-lib.
+        (main): Pass --export-all to dlltool only if specified.
+        (program_version): Up to 0.2.3.
+
+Mon Oct 26 14:07:59 1998  Mumit Khan  <khan@xraylith.wisc.edu>
+
+        * dllwrap.c (mybasename): New function.
+        (main): Run dlltool to create export definition file and import 
+        library file if necessary.
+        Change exp_file_name so that it's based on the dll name.
+
 Sun Oct 25 10:37:45 1998  Mumit Khan  <khan@xraylith.wisc.edu>
 
         * dlltool.c (scan_all_symbols): Fix patch error.
