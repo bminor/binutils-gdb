@@ -1,3 +1,8 @@
+Fri Oct  8 02:34:21 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* alpha-opc.h:  Add ldl_l, fix typo for ldq_u.
+	* alpha-dis.c (print_insn_alpha):  Add code for PAL_FORMAT_CODE.
+
 Tue Oct  5 17:47:53 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mips-opc.c: Correct lwu opcode value (book had it wrong).
