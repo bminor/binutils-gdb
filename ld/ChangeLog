@@ -1,10 +1,31 @@
+Thu Jul  8 15:33:32 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in (ALL_EMULATIONS): Include $(OTHER_EMULATIONS).
+
+	* ldmisc.h (einfo, minfo, info): Don't bother with PARAMS macro
+	when no prototype is being supplied.
+	(ldmalloc, ldrealloc): Size argument is now size_t.
+
+	* ldmisc.c (finfo): New function, accepts FILE* argument.
+	(vfinfo, case 'v'): New format character; displays bfd_vma in hex
+	without leading zeros.
+	(vfinfo, cases 'R' and 'C'): Use finfo(%v) when displaying a
+	bfd_vma value, instead of fprintf(%x) which won't hold a long long
+	value.
+	(concat, buystring): String lengths are size_t.
+	(ldmalloc, ldrealloc, xrealloc): Size argument is now size_t.
+
+	* ldlang.c (new_statement): Size argument is now size_t.  Added
+	forward declaration with prototype.
+
 Thu Jul  8 10:53:47 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldgram.y (OPTION_v): Don't turn on verbose output.
 
 Wed Jul  7 17:10:45 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
-	* ldlex.l: Get rid of !@$# local typedef for bfd_vma!
+	* ldlex.l: Get rid of local typedef for bfd_vma!  Get it from
+	bfd.h instead.
 
 Wed Jul  7 11:33:12 1993  Ian Lance Taylor  (ian@cygnus.com)
 
