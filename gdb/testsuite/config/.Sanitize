@@ -60,6 +60,8 @@ rom68k.exp
 sh.exp
 sim.exp
 slite.exp
+sparclet-old.exp
+sparclet.exp
 udi.exp
 unix.exp
 unknown.exp
@@ -69,9 +71,6 @@ vxworks.exp
 vxworks29k.exp
 
 Things-to-lose:
-
-sparclet-old.exp
-sparclet.exp
 
 # The lines between the "Do-last:" line and the end of the file
 # are executed as a /bin/sh shell script after everything else is
