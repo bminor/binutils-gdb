@@ -1,3 +1,7 @@
+Fri Dec 15 12:21:10 1995  Raymond Jou  <rjou@mexican.cygnus.com>
+
+	* mpw-make.sed: Add quotes to RIncludes reference. 
+
 Fri Dec 15 13:18:55 1995  Rob Savoye  <rob@darkstar.cygnus.com>
 
 	* remote-array.c: Remove bogus setting of baudrate to 4800. Their
