@@ -1,4 +1,0 @@
-# Host: VAX running NetBSD
-NAT_CLIBS=
-NATDEPFILES= infptrace.o inftarg.o fork-child.o vaxnbsd-nat.o
-NAT_FILE= nm-nbsd.h
