@@ -2,6 +2,8 @@ Sat Sep 27 12:51:34 1997  Fred Fish  <fnf@cygnus.com>
 
 	* interp.c (pc_addr): Discard upper bit(s) of PC in case
 	IMAP1 selects unified memory.
+	* d10v_sim.h (INC_ADDR): Align MOD_E to increment before testing
+	for end condition.
 
 Wed Sep 24 17:38:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
