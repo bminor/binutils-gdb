@@ -444,7 +444,7 @@ decode (addr, data, dst)
 		  return;
 		}
 	      else
-		printf ("Dont understand %x \n", looking_for);
+		printf ("Don't understand %x \n", looking_for);
 	    }
 
 	  len++;
