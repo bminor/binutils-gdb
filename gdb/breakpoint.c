@@ -4618,13 +4618,16 @@ parse_breakpoint_sals (char **address,
       /* Force almost all breakpoints to be in terms of the
          current_source_symtab (which is decode_line_1's default).  This
          should produce the results we want almost all of the time while
-         leaving default_breakpoint_* alone.  */
+         leaving default_breakpoint_* alone.  
+         ObjC: However, don't match an Objective-C method name which
+         may have a '+' or '-' succeeded by a '[' */
 	 
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 			
       if (default_breakpoint_valid
 	  && (!cursal.symtab
-	      || (strchr ("+-", (*address)[0]) != NULL)))
+ 	      || ((strchr ("+-", (*address)[0]) != NULL)
+ 		  && ((*address)[1] != '['))))
 	*sals = decode_line_1 (address, 1, default_breakpoint_symtab,
 			       default_breakpoint_line, addr_string);
       else

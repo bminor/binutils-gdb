@@ -1,3 +1,8 @@
+2002-10-16  Adam Fedor  <fedor@gnu.org>
+
+	* breakpoint.c (parse_breakpoint_sals): Ignore ObjC method
+	names when matching breakpoints in current file.
+
 2002-10-16  Kevin Buettner  <kevinb@redhat.com>
 
 	* dwarf2read.c (dwarf2_invalid_pointer_size): New complaint.
