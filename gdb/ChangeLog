@@ -1,3 +1,9 @@
+Fri Mar 10 16:13:18 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+start-sanitize-arc
+	* config/tm-arc.h: Change arc register names.
+end-sanitize-arc
+
 Fri Mar 10 02:49:40 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	Fix problems with infinite recursion when printing a class

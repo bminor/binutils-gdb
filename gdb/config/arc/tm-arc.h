@@ -70,12 +70,12 @@ extern CORE_ADDR skip_prologue ();
     /*  0 */ "r0",  "r1",  "r2",  "r3",  "r4",  "r5",  "r6",  "r7", \
     /*  8 */ "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15", \
     /* 16 */ "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23", \
-    /* 24 */ "r24", "r25", "r26", "r27", "r28", "ilink1", "ilink2", "blink", \
+    /* 24 */ "r24", "r25", "r26", "fp", "sp", "ilink1", "ilink2", "blink", \
     /* 32 */ "r32", "r33", "r34", "r35", "r36", "r37", "r38", "r39", \
     /* 40 */ "r40", "r41", "r42", "r43", "r44", "r45", "r46", "r47", \
     /* 48 */ "r48", "r49", "r50", "r51", "r52", "r53", "r54", "r55", \
-    /* 56 */ "r56", "mlo", "mmid", "mhi", "lpcnt", \
-    /* 61 */ "sta", "sema", "lpst", "lpend", "iden", "debug", \
+    /* 56 */ "r56", "mlo", "mmid", "mhi", "lp_count", \
+    /* 61 */ "status", "sema", "lp_start", "lp_end", "identity", "debug", \
     /* 67 */ "aux10", "aux11", "aux12", "aux13", "aux14", \
     /* 72 */ "aux15", "aux16", "aux17", "aux18", "aux19", \
     /* 77 */ "aux1a", "aux1b", "aux1c", "aux1d", "aux1e", \
