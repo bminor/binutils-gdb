@@ -1,3 +1,9 @@
+Wed Aug  6 16:27:29 1997  Chris Provenzano  <proven@cygnus.com>
+
+	* configure: Changed sed delimiter from ':' to '|' when
+	attempting to substitute ${config_shell} for SHELL. On
+	NT ${config_shell} may contain a ':' in it.
+
 Wed Aug  6 12:29:05 1997  Jason Merrill  <jason@yorick.cygnus.com>
 
 	* Makefile.in (EXTRA_GCC_FLAGS): Fix for non-bash shells.
