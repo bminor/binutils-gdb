@@ -1,3 +1,15 @@
+2001-11-09  H.J. Lu <hjl@gnu.org>
+
+	* ld-discard/discard.exp: New. Test ld discard.
+	* ld-discard/discard.ld: Likewise.
+	* ld-discard/exit.s: Likewise.
+	* ld-discard/extern.d: Likewise.
+	* ld-discard/extern.s: Likewise.
+	* ld-discard/start.d: Likewise.
+	* ld-discard/start.s: Likewise.
+	* ld-discard/static.d: Likewise.
+	* ld-discard/static.s: Likewise.
+
 2001-11-02  H.J. Lu  <hjl@gnu.org>
 
 	* ld-elfvsb/elfvsb.exp: Add the "ld -r" test.
