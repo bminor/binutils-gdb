@@ -1,5 +1,5 @@
 /* strings -- print the strings of printable characters in files
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -38,6 +38,11 @@
 
    -o		Like -to.  (Some other implementations have -o like -to,
 		others like -td.  We chose one arbitrarily.)
+
+   --encoding={s,b,l,B,L}
+   -e {s,b,l,B,L}
+		Select character encoding: single-byte, bigendian 16-bit,
+		littleendian 16-bit, bigendian 32-bit, littleendian 32-bit
 
    --target=BFDNAME
 		Specify a non-default object file format.
@@ -113,12 +118,17 @@ static boolean got_a_section;
 /* The BFD object file format.  */
 static char *target;
 
+/* The character encoding format.  */
+static char encoding;
+static int encoding_bytes;
+
 static struct option long_options[] =
 {
   {"all", no_argument, NULL, 'a'},
   {"print-file-name", no_argument, NULL, 'f'},
   {"bytes", required_argument, NULL, 'n'},
   {"radix", required_argument, NULL, 't'},
+  {"encoding", required_argument, NULL, 'e'},
   {"target", required_argument, NULL, 'T'},
   {"help", no_argument, NULL, 'h'},
   {"version", no_argument, NULL, 'v'},
@@ -156,8 +166,9 @@ main (argc, argv)
   print_filenames = false;
   datasection_only = true;
   target = NULL;
+  encoding = 's';
 
-  while ((optc = getopt_long (argc, argv, "afn:ot:v0123456789",
+  while ((optc = getopt_long (argc, argv, "afn:ot:e:v0123456789",
 			      long_options, (int *) 0)) != EOF)
     {
       switch (optc)
@@ -213,6 +224,12 @@ main (argc, argv)
 	  target = optarg;
 	  break;
 
+	case 'e':
+	  if (optarg[1] != '\0')
+	    usage (stderr, 1);
+	  encoding = optarg[0];
+	  break;
+
 	case 'v':
 	  print_version ("strings");
 	  break;
@@ -231,6 +248,23 @@ main (argc, argv)
 
   if (string_min < 0)
     string_min = 4;
+
+  switch (encoding)
+    {
+    case 's':
+      encoding_bytes = 1;
+      break;
+    case 'b':
+    case 'l':
+      encoding_bytes = 2;
+      break;
+    case 'B':
+    case 'L':
+      encoding_bytes = 4;
+      break;
+    default:
+      usage (stderr, 1);
+    }
 
   bfd_init ();
   set_default_bfd_target ();
@@ -366,6 +400,74 @@ strings_file (file)
   return true;
 }
 
+/* Read the next character, return EOF if none available.
+   Assume that STREAM is positioned so that the next byte read
+   is at address ADDRESS in the file.
+
+   If STREAM is NULL, do not read from it.
+   The caller can supply a buffer of characters
+   to be processed before the data in STREAM.
+   MAGIC is the address of the buffer and
+   MAGICCOUNT is how many characters are in it.  */
+
+static long
+get_char (stream, address, magiccount, magic)
+     FILE *stream;
+     file_ptr *address;
+     int *magiccount;
+     char **magic;
+{
+  int c, i;
+  long r;
+  unsigned char buf[4];
+
+  for (i = 0; i < encoding_bytes; i++)
+    {
+      if (*magiccount)
+	{
+	  (*magiccount)--;
+	  c = *(*magic)++;
+	}
+      else
+	{
+	  if (stream == NULL)
+	    return EOF;
+	  c = getc (stream);
+	  if (c == EOF)
+	    return EOF;
+	}
+
+      (*address)++;
+      buf[i] = c;
+    }
+
+  switch (encoding)
+    {
+    case 's':
+      r = buf[0];
+      break;
+    case 'b':
+      r = (buf[0] << 8) | buf[1];
+      break;
+    case 'l':
+      r = buf[0] | (buf[1] << 8);
+      break;
+    case 'B':
+      r = ((long) buf[0] << 24) | ((long) buf[1] << 16) |
+	((long) buf[2] << 8) | buf[3];
+      break;
+    case 'L':
+      r = buf[0] | ((long) buf[1] << 8) | ((long) buf[2] << 16) |
+	((long) buf[3] << 24);
+      break;
+    }
+
+  if (r == EOF)
+    return 0;
+
+  return r;
+}
+
 /* Find the strings in file FILENAME, read from STREAM.
    Assume that STREAM is positioned so that the next byte read
    is at address ADDRESS in the file.
@@ -387,13 +489,13 @@ print_strings (filename, stream, address, stop_point, magiccount, magic)
      int magiccount;
      char *magic;
 {
-  char *buf = (char *) xmalloc (string_min + 1);
+  char *buf = (char *) xmalloc (sizeof (char) * (string_min + 1));
 
   while (1)
     {
       file_ptr start;
       int i;
-      int c;
+      long c;
 
       /* See if the next `string_min' chars are all graphic chars.  */
     tryline:
@@ -402,21 +504,10 @@ print_strings (filename, stream, address, stop_point, magiccount, magic)
       start = address;
       for (i = 0; i < string_min; i++)
 	{
-	  if (magiccount)
-	    {
-	      magiccount--;
-	      c = *magic++;
-	    }
-	  else
-	    {
-	      if (stream == NULL)
-		return;
-	      c = getc (stream);
-	      if (c == EOF)
-		return;
-	    }
-	  address++;
-	  if (!isgraphic (c))
+	  c = get_char (stream, &address, &magiccount, &magic);
+	  if (c == EOF)
+	    return;
+	  if (c > 255 || c < 0 || !isgraphic (c))
 	    /* Found a non-graphic.  Try again starting with next char.  */
 	    goto tryline;
 	  buf[i] = c;
@@ -448,21 +539,10 @@ print_strings (filename, stream, address, stop_point, magiccount, magic)
 
       while (1)
 	{
-	  if (magiccount)
-	    {
-	      magiccount--;
-	      c = *magic++;
-	    }
-	  else
-	    {
-	      if (stream == NULL)
-		break;
-	      c = getc (stream);
-	      if (c == EOF)
-		break;
-	    }
-	  address++;
-	  if (! isgraphic (c))
+	  c = get_char (stream, &address, &magiccount, &magic);
+	  if (c == EOF)
+	    break;
+	  if (c > 255 || c < 0 || !isgraphic (c))
 	    break;
 	  putchar (c);
 	}
@@ -524,9 +604,9 @@ usage (stream, status)
      int status;
 {
   fprintf (stream, _("\
-Usage: %s [-afov] [-n min-len] [-min-len] [-t {o,x,d}] [-]\n\
-       [--all] [--print-file-name] [--bytes=min-len] [--radix={o,x,d}]\n\
-       [--target=bfdname] [--help] [--version] file...\n"),
+Usage: %s [-afov] [-n min-len] [-min-len] [-t {o,x,d}] [-e {s,b,l,B,L}]\n\
+       [-] [--all] [--print-file-name] [--bytes=min-len] [--radix={o,x,d}]\n\
+       [--target=bfdname] [--encoding {s,b,l,B,L}] [--help] [--version] file...\n"),
 	   program_name);
   list_supported_targets (program_name, stream);
   if (status == 0)

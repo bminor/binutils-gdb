@@ -1,3 +1,15 @@
+2001-09-14  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* strings.c (encoding, encoding_bytes): New variables.
+	(long_options): Add --encoding.
+	(main): Accept -e and --encoding.
+	(get_char): New function.  Read a, possibly wide, character from
+	the input stream.
+	(print_strings): Use get_char().
+	(usage): Document new command line option.
+	* doc/binutils.texi: Document new command line option.
+	* NEWS: Announce new command line option.
+
 Wed Sep 12 20:07:16 2001  Alexandre Oliva  <aoliva@redhat.com>
 
 	* readelf.c (guess_is_rela, dump_relocations, get_machine_name,
