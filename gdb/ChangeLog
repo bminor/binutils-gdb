@@ -1,5 +1,22 @@
 2004-05-31  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386bsd-nat.c: Don't include <sys/procfs.h>.
+	(gregset_t, fpregset_t): Remove typedefs.
+	(CANNOT_FETCH_REGISTER, CANNOT_STORE_REGISTER): Remove macros.
+	(REG_OFFSET): Rename argument.
+	(i386bsd_r_reg_offset): Rename from reg_offset.
+	(REG_ADDR): Remove macro.
+	(cannot_fetch_register, supply_gregset, fill_gregset): Remove
+	functions.
+	(i386bsd_supply_gregset, i386bsd_collect_gregset): New functions.
+	(fetch_inferior_registers): Use `struct reg' and `struct fpreg'
+	instead of gregset_t and fpregset_t.  Use i386bsd_supply_gregset
+	instead of supply_gregset.
+	(store_inferior_registers): Use `struct reg' and `struct fpreg'
+	instead of gregset_t and fpregset_t.  Use i386bsd_collect_gregset
+	instead of fill_gregset.
+	(register_u_addr): Use i386_r_reg_offset instead of REG_ADDR.
+
 	* i386bsd-nat.c: Don't include "gregset.h".
 	(supply_gregset, fill_gregset): Make static.
 	(supply_fpregset, fill_fpregset): Remove.

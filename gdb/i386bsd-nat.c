@@ -31,18 +31,6 @@
 #include <machine/reg.h>
 #include <machine/frame.h>
 
-#ifdef HAVE_SYS_PROCFS_H
-#include <sys/procfs.h>
-#endif
-
-#ifndef HAVE_GREGSET_T
-typedef struct reg gregset_t;
-#endif
-
-#ifndef HAVE_FPREGSET_T
-typedef struct fpreg fpregset_t;
-#endif
-
 #include "i386-tdep.h"
 #include "i387-tdep.h"
 
@@ -52,21 +40,13 @@ typedef struct fpreg fpregset_t;
    registers until the 3.0 release.  We have autoconf checks for their
    presence, and deal gracefully with their absence.  */
 
-/* Registers we shouldn't try to fetch.  */
-#undef CANNOT_FETCH_REGISTER
-#define CANNOT_FETCH_REGISTER(regnum) cannot_fetch_register (regnum)
+/* Offset in `struct reg' where MEMBER is stored.  */
+#define REG_OFFSET(member) offsetof (struct reg, member)
 
-/* Registers we shouldn't try to store.  */
-#undef CANNOT_STORE_REGISTER
-#define CANNOT_STORE_REGISTER(regnum) cannot_fetch_register (regnum)
-
-/* Offset to the gregset_t location where REG is stored.  */
-#define REG_OFFSET(reg) offsetof (gregset_t, reg)
-
-/* At reg_offset[REGNUM] you'll find the offset to the gregset_t
-   location where the GDB register REGNUM is stored.  Unsupported
+/* At i386bsd_reg_offset[REGNUM] you'll find the offset in `struct
+   reg' where the GDB register REGNUM is stored.  Unsupported
    registers are marked with `-1'.  */
-static int reg_offset[] =
+static int i386bsd_r_reg_offset[] =
 {
   REG_OFFSET (r_eax),
   REG_OFFSET (r_ecx),
@@ -94,8 +74,6 @@ static int reg_offset[] =
 #endif
 };
 
-#define REG_ADDR(regset, regnum) ((char *) (regset) + reg_offset[regnum])
-
 /* Macro to determine if a register is fetched with PT_GETREGS.  */
 #define GETREGS_SUPPLIES(regnum) \
   ((0 <= (regnum) && (regnum) <= 15))
@@ -105,52 +83,47 @@ static int reg_offset[] =
    so that we try PT_GETXMMREGS the first time around.  */
 static int have_ptrace_xmmregs = -1;
 #endif
-
-/* Return nonzero if we shouldn't try to fetch register REGNUM.  */
-
-static int
-cannot_fetch_register (int regnum)
-{
-  return (reg_offset[regnum] == -1);
-}
 
 
-/* Transfering the registers between GDB, inferiors and core files.  */
-
-/* Fill GDB's register array with the general-purpose register values
-   in *GREGSETP.  */
+/* Supply the general-purpose registers in GREGS, to REGCACHE.  */
 
 static void
-supply_gregset (gregset_t *gregsetp)
+i386bsd_supply_gregset (struct regcache *regcache, const void *gregs)
 {
-  struct regcache *regcache = current_regcache;
+  const char *regs = gregs;
   int regnum;
 
-  for (regnum = 0; regnum < I386_NUM_GREGS; regnum++)
+  for (regnum = 0; regnum < ARRAY_SIZE (i386bsd_r_reg_offset); regnum++)
     {
-      if (CANNOT_FETCH_REGISTER (regnum))
-	regcache_raw_supply (regcache, regnum, NULL);
-      else
-	regcache_raw_supply (regcache, regnum, REG_ADDR (gregsetp, regnum));
+      int offset = i386bsd_r_reg_offset[regnum];
+
+      if (offset != -1)
+	regcache_raw_supply (regcache, regnum, regs + offset);
     }
 }
 
-/* Fill register REGNUM (if it is a general-purpose register) in
-   *GREGSETPS with the value in GDB's register array.  If REGNUM is -1,
-   do this for all registers.  */
+/* Collect register REGNUM from REGCACHE and store its contents in
+   GREGS.  If REGNUM is -1, collect and store all appropriate
+   registers.  */
 
 static void
-fill_gregset (gregset_t *gregsetp, int regnum)
+i386bsd_collect_gregset (const struct regcache *regcache,
+			 void *gregs, int regnum)
 {
-  struct regcache *regcache = current_regcache;
+  char *regs = gregs;
   int i;
 
-  for (i = 0; i < I386_NUM_GREGS; i++)
-    if ((regnum == -1 || regnum == i) && ! CANNOT_STORE_REGISTER (i))
-      regcache_raw_collect (regcache, i, REG_ADDR (gregsetp, i));
+  for (i = 0; i < ARRAY_SIZE (i386bsd_r_reg_offset); i++)
+    {
+      if (regnum == -1 || regnum == i)
+	{
+	  int offset = i386bsd_r_reg_offset[i];
+
+	  if (offset != -1)
+	    regcache_raw_collect (regcache, i, regs + offset);
+	}
+    }
 }
-
-
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers (including the floating point registers).  */
@@ -160,20 +133,20 @@ fetch_inferior_registers (int regnum)
 {
   if (regnum == -1 || GETREGS_SUPPLIES (regnum))
     {
-      gregset_t gregs;
+      struct reg regs;
 
       if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
+		  (PTRACE_ARG3_TYPE) &regs, 0) == -1)
 	perror_with_name ("Couldn't get registers");
 
-      supply_gregset (&gregs);
+      i386bsd_supply_gregset (current_regcache, &regs);
       if (regnum != -1)
 	return;
     }
 
   if (regnum == -1 || regnum >= I386_ST0_REGNUM)
     {
-      fpregset_t fpregs;
+      struct fpreg fpregs;
 #ifdef HAVE_PT_GETXMMREGS
       char xmmregs[512];
 
@@ -210,16 +183,16 @@ store_inferior_registers (int regnum)
 {
   if (regnum == -1 || GETREGS_SUPPLIES (regnum))
     {
-      gregset_t gregs;
+      struct reg regs;
 
       if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
-                  (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
+                  (PTRACE_ARG3_TYPE) &regs, 0) == -1)
         perror_with_name ("Couldn't get registers");
 
-      fill_gregset (&gregs, regnum);
+      i386bsd_collect_gregset (current_regcache, &regs, regnum);
 
       if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
-	          (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
+	          (PTRACE_ARG3_TYPE) &regs, 0) == -1)
         perror_with_name ("Couldn't write registers");
 
       if (regnum != -1)
@@ -228,7 +201,7 @@ store_inferior_registers (int regnum)
 
   if (regnum == -1 || regnum >= I386_ST0_REGNUM)
     {
-      fpregset_t fpregs;
+      struct fpreg fpregs;
 #ifdef HAVE_PT_GETXMMREGS
       char xmmregs[512];
 
@@ -349,7 +322,9 @@ i386bsd_dr_get_status (void)
 CORE_ADDR
 register_u_addr (CORE_ADDR blockend, int regnum)
 {
-  return (CORE_ADDR) REG_ADDR (blockend, regnum);
+  gdb_assert (regnum >= 0 && regnum < ARRAY_SIZE (i386bsd_r_reg_offset));
+
+  return blockend + i386bsd_r_reg_offset[regnum];
 }
 
 #include <sys/param.h>
