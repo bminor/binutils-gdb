@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include <signal.h>
@@ -1126,6 +1126,8 @@ attach_command (args, from_tty)
      char *args;
      int from_tty;
 {
+  extern int auto_solib_add_at_startup;
+
   dont_repeat ();			/* Not for the faint of heart */
 
   if (target_has_execution)
@@ -1159,8 +1161,9 @@ attach_command (args, from_tty)
 #endif
 
 #ifdef SOLIB_ADD
+  if (auto_solib_add_at_startup)
   /* Add shared library symbols from the newly attached process, if any.  */
-  SOLIB_ADD ((char *)0, from_tty, (struct target_ops *)0);
+    SOLIB_ADD ((char *)0, from_tty, (struct target_ops *)0);
 #endif
 
   normal_stop ();

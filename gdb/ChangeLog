@@ -1,3 +1,8 @@
+Tue Sep 12 15:46:18 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* infcmd.c (attach_command): Add solibs only when
+	auto_solib_add_at_startup is set.
+
 Mon Sep 11 17:22:35 1995  Fred Fish  <fnf@cygnus.com>
 
 	* NEWS:  Add information about remote target caching.
