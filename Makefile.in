@@ -117,6 +117,12 @@ CHILL_FOR_TARGET = ` \
       t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
     fi; \
   fi`
+
+## This is ugly, but I don't want GNU make to put these variables in
+## the environment.  Older makes will see this as a set of targets
+## with no dependencies and no actions.
+unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
+
 $(end-sanitize-chill)
 
 CXX_FOR_TARGET = ` \
@@ -280,17 +286,7 @@ EXTRA_GCC_FLAGS = \
 	'RANLIB=$$(RANLIB_FOR_TARGET)' \
 	'XTRAFLAGS='
 
-# On SCO 3.2v4, the gcc build can fill the environment.  Resetting
-# some variables solves the problem.
-GCC_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) \
-	$(EXTRA_GCC_FLAGS) \
-$(start-sanitize-chill)\
-	"CHILLFLAGS=" \
-	"CHILL_FOR_TARGET=" \
-	"CHILL_LIB=" \
-$(end-sanitize-chill)\
-	"CXX_FOR_TARGET=" \
-	"XTRAFLAGS_FOR_TARGET="
+GCC_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_GCC_FLAGS)
 
 # The first rule in the file had better be this one.  Don't put any above it.
 all:	$(ALL)
@@ -806,7 +802,6 @@ install-chillrt: force
 		true ; \
 	fi
 
-all-gdb: all-chillrt
 ### end-sanitize-chill
 
 ### gprof
