@@ -1,8 +1,8 @@
 2002-05-09  Daniel Jacobowitz  <drow@mvista.com>
 
-	* signals.h: Update comments.
-	(enum target_signal): Remove conditional compilation around
+	* signals/signals.c (signals): Remove conditional compilation around
 	Mach-specific signals.  Move them to after TARGET_SIGNAL_DEFAULT.
+	(target_signal_from_name): Loop until TARGET_SIGNAL_LAST.
 
 2002-05-09  Michael Snyder  <msnyder@redhat.com>
 
