@@ -254,6 +254,7 @@ static const pseudo_typeS potable[] =
 /* val */
   {"xstabs", s_xstab, 's'},
   {"word", cons, 2},
+  {"zero", s_space, 0},
   {NULL}			/* end sentinel */
 };
 
@@ -738,7 +739,10 @@ do_align (n, fill)
   if (n && !need_pass_2)
     frag_align (n, *fill);
 
+#ifdef md_do_align
  just_record_alignment:
+#endif
+
   record_alignment (now_seg, n);
 }
 
