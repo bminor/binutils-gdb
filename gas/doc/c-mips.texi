@@ -97,6 +97,12 @@ Generate code for the MIPS 16 processor.  This is equivalent to putting
 @samp{.set mips16} at the start of the assembly file.  @samp{-no-mips16}
 turns off this option.
 
+@item -mips3d
+@itemx -no-mips3d
+Generate code for the MIPS-3D Application Specific Extension.
+This tells the assembler to accept MIPS-3D instructions.
+@samp{-no-mips3d} turns off this option.
+
 @item -mfix7000
 @itemx -no-mfix7000
 Cause nops to be inserted if the read of the destination register
@@ -321,5 +327,18 @@ stack and restores the settings.
 These directives can be useful inside an macro which must change an
 option such as the ISA level or instruction reordering but does not want
 to change the state of the code which invoked the macro.
+
+Traditional @sc{mips} assemblers do not support these directives.
+
+@node MIPS ASE instruction generation overrides
+@section Directives to control generation of MIPS ASE instructions
+
+@cindex MIPS MIPS-3D instruction generation override
+@kindex @code{.set mips3d}
+@kindex @code{.set nomips3d}
+The directive @code{.set mips3d} makes the assembler accept instructions
+from the MIPS-3D Application Specific Extension from that point on
+in the assembly.  The @code{.set nomips3d} directive prevents MIPS-3D
+instructions from being accepted.
 
 Traditional @sc{mips} assemblers do not support these directives.

@@ -1,5 +1,11 @@
 2002-03-15  Chris G. Demetriou  <cgd@broadcom.com>
 
+	* gas/mips/mips64-mips3d.s: New file.
+	* gas/mips/mips64-mips3d.d: Likewise.
+	* gas/mips/mips.exp: Run new "mips64-mips3d" test.
+
+2002-03-15  Chris G. Demetriou  <cgd@broadcom.com>
+
 	* gas/mips/mips.exp: Use elf-rel2 and elfel-rel2 for
 	mipsisa32*-*-* targets, rather than e32-rel2 and e32el-rel2.
 

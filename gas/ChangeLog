@@ -1,3 +1,23 @@
+2002-03-15  Chris G. Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (mips_set_options): New "ase_mips3d" member.
+	(mips_opts): Initialize "ase_mips3d" member.
+	(file_ase_mips3d): New variable.
+	(CPU_HAS_MIPS3D): New macro.
+	(md_begin): Initialize mips_opts.ase_mips3d and file_ase_mips3d
+	based on command line options and configuration defaults.
+	(macro_build, mips_ip): Accept MIPS-3D instructions if
+	mips_opts.ase_mips3d is set.
+	(OPTION_MIPS3D, OPTION_NO_MIPS3D, md_longopts, md_parse_option):
+	Add support for "-mips3d" and "-no-mips3d" options.
+	(OPTION_ELF_BASE): Move to accomodate new options.
+	(s_mipsset): Support ".set mips3d" and ".set nomips3d".
+	(mips_elf_final_processing): Add a comment indicating that a
+	MIPS-3D ASE ELF header flag should be set, when one exists.
+	* doc/as.texinfo: Document -mips3d and -no-mips3d options.
+	* doc/c-mips.texi: Likewise, and document ".set mips3d" and ".set
+	nomips3d" directives.
+	
 2002-03-14  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* config/tc-mmix.c (md_estimate_size_before_relax): Don't consider

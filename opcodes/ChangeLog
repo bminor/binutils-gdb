@@ -1,5 +1,17 @@
 2002-03-15  Chris G. Demetriou  <cgd@broadcom.com>
 
+	* mips-dis.c (mips_isa_type): Add MIPS3D instructions to the ISA
+	bit masks for bfd_mach_mips_sb1 and bfd_mach_mipsisa64.  Add
+	comments for bfd_mach_mipsisa32 and bfd_mach_mipsisa64 that
+	indicate that they should dissassemble all applicable
+	MIPS-specified ASEs.
+	* mips-opc.c: Add support for MIPS-3D instructions.
+	(M3D): New definition.
+
+	* mips-opc.c: Update copyright years.
+
+2002-03-15  Chris G. Demetriou  <cgd@broadcom.com>
+
 	* mips-opc.c (mips_builtin_opcodes): Sort bc<N> opcodes by name.
 
 2002-03-15  Chris Demetriou  <cgd@broadcom.com>

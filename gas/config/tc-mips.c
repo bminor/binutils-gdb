@@ -137,6 +137,10 @@ struct mips_set_options
      if it has not been initialized.  Changed by `.set mipsN', and the
      -mipsN command line option, and the default CPU.  */
   int isa;
+  /* Enabled Application Specific Extensions (ASEs).  These are set to -1
+     if they have not been initialized.  Changed by `.set <asename>', by
+     command line options, and based on the default architecture.  */
+  int ase_mips3d;
   /* Whether we are assembling for the mips16 processor.  0 if we are
      not, 1 if we are, and -1 if the value has not been initialized.
      Changed by `.set mips16' and `.set nomips16', and the -mips16 and
@@ -185,7 +189,7 @@ static int file_mips_fp32 = -1;
 
 static struct mips_set_options mips_opts =
 {
-  ISA_UNKNOWN, -1, 0, 0, 0, 0, 0, 0, 0, 0, NO_ABI
+  ISA_UNKNOWN, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, NO_ABI
 };
 
 /* These variables are filled in with the masks of registers used.
@@ -196,6 +200,10 @@ unsigned long mips_cprmask[4];
 
 /* MIPS ISA we are using for this output file.  */
 static int file_mips_isa = ISA_UNKNOWN;
+
+/* True if -mips3d was passed or implied by arguments passed on the
+   command line (e.g., by -march).  */
+static int file_ase_mips3d;
 
 /* The argument of the -mcpu= flag.  Historical for code generation.  */
 static int mips_cpu = CPU_UNKNOWN;
@@ -262,6 +270,10 @@ static int mips_32bitmode = 0;
         && mips_pic != EMBEDDED_PIC))
 
 #define HAVE_64BIT_ADDRESSES (! HAVE_32BIT_ADDRESSES)
+
+/* Return true if the given CPU supports the MIPS3D ASE.  */
+#define CPU_HAS_MIPS3D(cpu)	((cpu) == CPU_SB1      \
+				 )
 
 /* Whether the processor uses hardware interlocks to protect
    reads from the HI and LO registers, and thus does not
@@ -1223,6 +1235,11 @@ md_begin ()
       && ISA_HAS_64BIT_REGS (mips_isa_from_cpu))
     mips_32bitmode = 1;
 
+  /* If the selected architecture includes support for ASEs, enable
+     generation of code for them.  */
+  if (mips_opts.ase_mips3d == -1 && CPU_HAS_MIPS3D (mips_arch))
+    mips_opts.ase_mips3d = 1;
+
   if (! bfd_set_arch_mach (stdoutput, bfd_arch_mips, mips_arch))
     as_warn (_("Could not set architecture and machine"));
 
@@ -1233,6 +1250,7 @@ md_begin ()
 
   file_mips_isa = mips_opts.isa;
   file_mips_abi = mips_opts.abi;
+  file_ase_mips3d = mips_opts.ase_mips3d;
   mips_opts.gp32 = file_mips_gp32;
   mips_opts.fp32 = file_mips_fp32;
 
@@ -2885,7 +2903,10 @@ macro_build (place, counter, ep, name, fmt, va_alist)
     {
       if (strcmp (fmt, insn.insn_mo->args) == 0
 	  && insn.insn_mo->pinfo != INSN_MACRO
-	  && OPCODE_IS_MEMBER (insn.insn_mo, mips_opts.isa, mips_arch)
+	  && OPCODE_IS_MEMBER (insn.insn_mo,
+			       (mips_opts.isa
+	      		        | (mips_opts.ase_mips3d ? INSN_MIPS3D : 0)),
+			       mips_arch)
 	  && (mips_arch != CPU_R4650 || (insn.insn_mo->pinfo & FP_D) == 0))
 	break;
 
@@ -7670,7 +7691,10 @@ mips_ip (str, ip)
 
       assert (strcmp (insn->name, str) == 0);
 
-      if (OPCODE_IS_MEMBER (insn, mips_opts.isa, mips_arch))
+      if (OPCODE_IS_MEMBER (insn,
+			    (mips_opts.isa
+	      		     | (mips_opts.ase_mips3d ? INSN_MIPS3D : 0)),
+			    mips_arch))
 	ok = true;
       else
 	ok = false;
@@ -9738,8 +9762,12 @@ struct option md_longopts[] =
   {"no-m3900", no_argument, NULL, OPTION_NO_M3900},
 #define OPTION_GP64 (OPTION_MD_BASE + 32)
   {"mgp64", no_argument, NULL, OPTION_GP64},
+#define OPTION_MIPS3D (OPTION_MD_BASE + 33)
+  {"mips3d", no_argument, NULL, OPTION_MIPS3D},
+#define OPTION_NO_MIPS3D (OPTION_MD_BASE + 34)
+  {"no-mips3d", no_argument, NULL, OPTION_NO_MIPS3D},
 #ifdef OBJ_ELF
-#define OPTION_ELF_BASE    (OPTION_MD_BASE + 33)
+#define OPTION_ELF_BASE    (OPTION_MD_BASE + 35)
 #define OPTION_CALL_SHARED (OPTION_ELF_BASE + 0)
   {"KPIC",        no_argument, NULL, OPTION_CALL_SHARED},
   {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
@@ -9952,6 +9980,14 @@ md_parse_option (c, arg)
     case OPTION_NO_MIPS16:
       mips_opts.mips16 = 0;
       mips_no_prev_insn (false);
+      break;
+
+    case OPTION_MIPS3D:
+      mips_opts.ase_mips3d = 1;
+      break;
+
+    case OPTION_NO_MIPS3D:
+      mips_opts.ase_mips3d = 0;
       break;
 
     case OPTION_MEMBEDDED_PIC:
@@ -11275,6 +11311,10 @@ s_mipsset (x)
   else if (strcmp (name, "nomips16") == 0
 	   || strcmp (name, "noMIPS-16") == 0)
     mips_opts.mips16 = 0;
+  else if (strcmp (name, "mips3d") == 0)
+    mips_opts.ase_mips3d = 1;
+  else if (strcmp (name, "nomips3d") == 0)
+    mips_opts.ase_mips3d = 0;
   else if (strncmp (name, "mips", 4) == 0)
     {
       int isa;
@@ -12762,6 +12802,12 @@ mips_elf_final_processing ()
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_NOREORDER;
   if (mips_pic != NO_PIC)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_PIC;
+
+  /* Set MIPS ELF flags for ASEs. */
+#if 0 /* XXX FIXME */
+  if (file_ase_mips3d)
+    elf_elfheader (stdoutput)->e_flags |= ???;
+#endif
 
   /* Set the MIPS ELF ABI flags.  */
   if (file_mips_abi == NO_ABI)
