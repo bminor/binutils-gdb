@@ -29,6 +29,7 @@
 #include "frame-unwind.h"
 #include "frame-base.h"
 #include "trad-frame.h"
+#include "dis-asm.h"
 
 extern void _initialize_frv_tdep (void);
 

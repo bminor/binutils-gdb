@@ -1,3 +1,8 @@
+2003-09-10  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-tdep.c (dis-asm.h): Include.
+	* Makefile.in (frv-tdep.o): Update dependencies.
+
 2003-09-09  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* ia64-tdep.c (ia64_sigtramp_frame_init_saved_regs):
