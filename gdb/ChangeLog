@@ -1,3 +1,15 @@
+2004-04-19  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (dwarf2_tmp_obstack, dwarf2_free_tmp_obstack):
+	Delete.
+	(dwarf_alloc_block): Take a CU argument.  Use the comp_unit_obstack.
+	(read_attribute_value): Update calls to dwarf_alloc_block.
+	(dwarf2_build_psymtabs_hard): Don't initialize or clean up
+	dwarf2_tmp_obstack.
+	(psymtab_to_symtab_1): Likewise.  Clean up using
+	free_stack_comp_unit.
+	(add_to_cu_func_list): Use the comp_unit_obstack.
+
 2004-04-19  Joel Brobecker  <brobecker@gnat.com>
 
 	* dwarf2read.c (dwarf2_flag_true_p): New function.

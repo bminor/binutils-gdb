@@ -494,9 +494,6 @@ struct dwarf_block
 
 static struct die_info *die_ref_table[REF_HASH_SIZE];
 
-/* Obstack for allocating temporary storage used during symbol reading.  */
-static struct obstack dwarf2_tmp_obstack;
-
 /* Allocate fields for structs, unions and enums in this size.  */
 #ifndef DW_FIELD_ALLOC_CHUNK
 #define DW_FIELD_ALLOC_CHUNK 4
@@ -913,9 +910,7 @@ static struct type *dwarf2_fundamental_type (struct objfile *, int,
 
 /* memory allocation interface */
 
-static void dwarf2_free_tmp_obstack (void *);
-
-static struct dwarf_block *dwarf_alloc_block (void);
+static struct dwarf_block *dwarf_alloc_block (struct dwarf2_cu *);
 
 static struct abbrev_info *dwarf_alloc_abbrev (struct dwarf2_cu *);
 
@@ -1212,41 +1207,9 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
   char *beg_of_comp_unit;
   struct partial_die_info comp_unit_die;
   struct partial_symtab *pst;
-  struct cleanup *back_to;
   CORE_ADDR lowpc, highpc, baseaddr;
 
   info_ptr = dwarf2_per_objfile->info_buffer;
-
-  /* We use dwarf2_tmp_obstack for objects that don't need to survive
-     the partial symbol scan, like attribute values.
-
-     We could reduce our peak memory consumption during partial symbol
-     table construction by freeing stuff from this obstack more often
-     --- say, after processing each compilation unit, or each die ---
-     but it turns out that this saves almost nothing.  For an
-     executable with 11Mb of Dwarf 2 data, I found about 64k allocated
-     on dwarf2_tmp_obstack.  Some investigation showed:
-
-     1) 69% of the attributes used forms DW_FORM_addr, DW_FORM_data*,
-        DW_FORM_flag, DW_FORM_[su]data, and DW_FORM_ref*.  These are
-        all fixed-length values not requiring dynamic allocation.
-
-     2) 30% of the attributes used the form DW_FORM_string.  For
-        DW_FORM_string, read_attribute simply hands back a pointer to
-        the null-terminated string in info_buffer, so no dynamic
-        allocation is needed there either.
-
-     3) The remaining 1% of the attributes all used DW_FORM_block1.
-        75% of those were DW_AT_frame_base location lists for
-        functions; the rest were DW_AT_location attributes, probably
-        for the global variables.
-
-     Anyway, what this all means is that the memory the dwarf2
-     reader uses as temporary space reading partial symbols is about
-     0.5% as much as we use for dwarf_*_buffer.  That's noise.  */
-
-  obstack_init (&dwarf2_tmp_obstack);
-  back_to = make_cleanup (dwarf2_free_tmp_obstack, NULL);
 
   /* Since the objects we're extracting from .debug_info vary in
      length, only the individual functions to extract them (like
@@ -1363,7 +1326,6 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
       do_cleanups (back_to_inner);
     }
-  do_cleanups (back_to);
 }
 
 /* Process all loaded DIEs for compilation unit CU, starting at FIRST_DIE.
@@ -2056,8 +2018,8 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   /* We're in the global namespace.  */
   processing_current_prefix = "";
 
-  obstack_init (&dwarf2_tmp_obstack);
-  back_to = make_cleanup (dwarf2_free_tmp_obstack, NULL);
+  obstack_init (&cu.comp_unit_obstack);
+  back_to = make_cleanup (free_stack_comp_unit, &cu);
 
   buildsym_init ();
   make_cleanup (really_free_pendings, NULL);
@@ -2357,7 +2319,7 @@ add_to_cu_func_list (const char *name, CORE_ADDR lowpc, CORE_ADDR highpc,
   struct function_range *thisfn;
 
   thisfn = (struct function_range *)
-    obstack_alloc (&dwarf2_tmp_obstack, sizeof (struct function_range));
+    obstack_alloc (&cu->comp_unit_obstack, sizeof (struct function_range));
   thisfn->name = name;
   thisfn->lowpc = lowpc;
   thisfn->highpc = highpc;
@@ -5040,7 +5002,7 @@ read_attribute_value (struct attribute *attr, unsigned form,
       info_ptr += bytes_read;
       break;
     case DW_FORM_block2:
-      blk = dwarf_alloc_block ();
+      blk = dwarf_alloc_block (cu);
       blk->size = read_2_bytes (abfd, info_ptr);
       info_ptr += 2;
       blk->data = read_n_bytes (abfd, info_ptr, blk->size);
@@ -5048,7 +5010,7 @@ read_attribute_value (struct attribute *attr, unsigned form,
       DW_BLOCK (attr) = blk;
       break;
     case DW_FORM_block4:
-      blk = dwarf_alloc_block ();
+      blk = dwarf_alloc_block (cu);
       blk->size = read_4_bytes (abfd, info_ptr);
       info_ptr += 4;
       blk->data = read_n_bytes (abfd, info_ptr, blk->size);
@@ -5077,7 +5039,7 @@ read_attribute_value (struct attribute *attr, unsigned form,
       info_ptr += bytes_read;
       break;
     case DW_FORM_block:
-      blk = dwarf_alloc_block ();
+      blk = dwarf_alloc_block (cu);
       blk->size = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       blk->data = read_n_bytes (abfd, info_ptr, blk->size);
@@ -5085,7 +5047,7 @@ read_attribute_value (struct attribute *attr, unsigned form,
       DW_BLOCK (attr) = blk;
       break;
     case DW_FORM_block1:
-      blk = dwarf_alloc_block ();
+      blk = dwarf_alloc_block (cu);
       blk->size = read_1_byte (abfd, info_ptr);
       info_ptr += 1;
       blk->data = read_n_bytes (abfd, info_ptr, blk->size);
@@ -8120,19 +8082,13 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 
 /* memory allocation interface */
 
-static void
-dwarf2_free_tmp_obstack (void *ignore)
-{
-  obstack_free (&dwarf2_tmp_obstack, NULL);
-}
-
 static struct dwarf_block *
-dwarf_alloc_block (void)
+dwarf_alloc_block (struct dwarf2_cu *cu)
 {
   struct dwarf_block *blk;
 
   blk = (struct dwarf_block *)
-    obstack_alloc (&dwarf2_tmp_obstack, sizeof (struct dwarf_block));
+    obstack_alloc (&cu->comp_unit_obstack, sizeof (struct dwarf_block));
   return (blk);
 }
 
