@@ -64,6 +64,7 @@ nm-i386v.h
 nm-i386v4.h
 nm-linux.h
 nm-m3.h
+nm-nbsd.h
 nm-ptx4.h
 nm-sun386.h
 nm-symmetry.h
