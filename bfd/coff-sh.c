@@ -473,6 +473,7 @@ struct shcoff_reloc_map
   unsigned char shcoff_reloc_val;
 };
 
+#ifdef COFF_WITH_PE
 /* An array mapping BFD reloc codes to SH PE relocs.  */
 static const struct shcoff_reloc_map sh_reloc_map[] =
 {
@@ -480,6 +481,14 @@ static const struct shcoff_reloc_map sh_reloc_map[] =
   { BFD_RELOC_RVA, R_SH_IMAGEBASE },
   { BFD_RELOC_CTOR, R_SH_IMM32CE },
 };
+#else
+/* An array mapping BFD reloc codes to SH PE relocs.  */
+static const struct shcoff_reloc_map sh_reloc_map[] =
+{
+  { BFD_RELOC_32, R_SH_IMM32 },
+  { BFD_RELOC_CTOR, R_SH_IMM32 },
+};
+#endif
 
 /* Given a BFD reloc code, return the howto structure for the
    corresponding SH PE reloc.  */
