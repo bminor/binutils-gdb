@@ -1,3 +1,8 @@
+2002-07-31  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Retroactively add entry for Lars Brinkhoff's contribution
+	of the PDP-11 and 2.11BSD a.out support.
+
 2002-07-31  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* Makefile.am (eelf32btsmipn32.o, eelf32ltsmipn32.o): New emulations

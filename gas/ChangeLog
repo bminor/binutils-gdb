@@ -1,3 +1,8 @@
+2002-07-31  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Retroactively add entry for Lars Brinkhoff's contribution
+	of the PDP-11 and 2.11BSD a.out support.
+
 2002-07-31  Momchil Velikov  <velco@fadata.bg>
 
 	* config/tc-v850.c (md_assemble): Fix range check for immediate

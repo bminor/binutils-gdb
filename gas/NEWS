@@ -42,6 +42,8 @@ Changes in 2.12:
 
 Changes in 2.11:
 
+* Support for PDP-11 and 2.11BSD a.out format, by Lars Brinkhoff.
+
 * x86 gas now supports the full Pentium4 instruction set.
 
 * Support for AMD x86-64 architecture, by Jan Hubicka, SuSE Labs.

@@ -57,6 +57,8 @@ Changes in version 2.11:
 
 * Support for CRIS (Axis Communications ETRAX series).
 
+* Support for PDP-11 and 2.11BSD a.out format, by Lars Brinkhoff.
+
 Changes in version 2.10:
 
 * Added AT> to the linker script language to allow load-time allocation of 
@@ -80,7 +82,7 @@ Changes in version 2.10:
   wildcard file names.
 
 * Added -O option to optimize linker output (as of this writing, this only
-affects ELF shared library generation).
+  affects ELF shared library generation).
 
 * The -e option now accepts a number as well as a symbol name.
 
