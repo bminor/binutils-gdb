@@ -64,7 +64,7 @@ _fi__(0)
 This file documents the GNU debugger _GDBN__.
 
 @c !!set edition, date, version
-This is Edition 4.04, March 1992, 
+This is Edition 4.05, June 1992, 
 of @cite{Using GDB: A Guide to the GNU Source-Level Debugger}
 for GDB Version _GDB_VN__.
 
@@ -103,8 +103,8 @@ _if__(!_GENERIC__)
 _fi__(!_GENERIC__)
 @sp 1
 @c !!set edition, date, version
-@subtitle Edition 4.04, for _GDBN__ version _GDB_VN__
-@subtitle March 1992
+@subtitle Edition 4.05, for _GDBN__ version _GDB_VN__
+@subtitle June 1992
 @author by Richard M. Stallman and Roland H. Pesch
 @page
 @tex
@@ -144,7 +144,7 @@ instead of in the original English.
 This file describes _GDBN__, the GNU symbolic debugger.
 
 @c !!set edition, date, version
-This is Edition 4.04, March 1992, for GDB Version _GDB_VN__.
+This is Edition 4.05, June 1992, for GDB Version _GDB_VN__.
 @end ifinfo
 
 @menu
@@ -194,6 +194,7 @@ Starting _GDBN__
 _GDBN__ Commands
 
 * Command Syntax::              Command Syntax
+* Completion::                  Command Completion
 * Help::                        Getting Help
 
 Running Programs Under _GDBN__
@@ -439,11 +440,11 @@ omitted from this list, we would like to add your names!
 
 So that they may not regard their long labor as thankless, we
 particularly thank those who shepherded GDB through major releases: Stu
-Grossman and John Gilmore (releases 4.5, 4.4), John Gilmore (releases 4.3, 4.2,
-4.1, 4.0, and 3.9); Jim Kingdon (releases 3.5, 3.4, 3.3); and Randy
-Smith (releases 3.2, 3.1, 3.0).  As major maintainer of GDB for some
-period, each contributed significantly to the structure, stability, and
-capabilities of the entire debugger.
+Grossman and John Gilmore (releases 4.6, 4.5, 4.4), John Gilmore
+(releases 4.3, 4.2, 4.1, 4.0, and 3.9); Jim Kingdon (releases 3.5, 3.4,
+3.3); and Randy Smith (releases 3.2, 3.1, 3.0).  As major maintainer of
+GDB for some period, each contributed significantly to the structure,
+stability, and capabilities of the entire debugger.
 
 Richard Stallman, assisted at various times by Pete TerMaat, Chris
 Hanson, and Richard Mlynarik, handled releases through 2.8.
@@ -491,7 +492,8 @@ Andrew Beers of SUNY Buffalo wrote the language-switching code and
 the Modula-2 support, and contributed the Languages chapter of this
 manual.
 
-Fred Fish wrote most of the support for Unix System Vr4.
+Fred Fish wrote most of the support for Unix System Vr4, and enhanced
+the command-completion support to cover C++ overloaded symbols.
 
 @node New Features, Sample Session, Summary, Top
 @unnumbered New Features since GDB version 3.5
@@ -570,8 +572,8 @@ GDB 4 can debug programs and core files that use SunOS, SVR4, or IBM RS/6000
 shared libraries.
 
 @item Reference Card
-GDB 4 has a reference card.  @xref{Formatting Documentation} for
-instructions on printing it.
+GDB 4 has a reference card.  @xref{Formatting Documentation,,Formatting
+the Documentation}, for instructions to print it.
 
 @item Work in Progress
 Kernel debugging for BSD and Mach systems; Tahoe and HPPA architecture
@@ -1148,15 +1150,19 @@ arguments.  This is equivalent to @samp{shell make @var{make-args}}.
 @node Commands, Running, Invocation, Top
 @chapter _GDBN__ Commands
 
-You can abbreviate GDB command if that abbreviation is unambiguous;
-and you can repeat certain GDB commands by typing just @key{RET}.
+You can abbreviate a _GDBN__ command to the first few letters of the command
+name, if that abbreviation is unambiguous; and you can repeat certain
+GDB commands by typing just @key{RET}.  You can also use the @key{TAB}
+key to get _GDBN__ to fill out the rest of a word in a command (or to
+show you the alternatives available, if there's more than one possibility).
 
 @menu
 * Command Syntax::              Command Syntax
+* Completion::                  Command Completion
 * Help::                        Getting Help
 @end menu
 
-@node Command Syntax, Help, Commands, Commands
+@node Command Syntax, Completion, Commands, Commands
 @section Command Syntax
 
 A _GDBN__ command is a single line of input.  There is no limit on how long
@@ -1198,7 +1204,95 @@ that generates this sort of display.
 A line of input starting with @kbd{#} is a comment; it does nothing.
 This is useful mainly in command files (@pxref{Command Files}).
 
-@node Help,  , Command Syntax, Commands
+@node Completion, Help, Command Syntax, Commands
+@section Command Completion
+
+@cindex completion
+@cindex word completion
+_GDBN__ can fill in the rest of a word in a command for you, if there's
+only one possibility; it can also show you what the valid possibilities
+are for the next word in a command, at any time.  This works for _GDBN__
+commands, _GDBN__ subcommands, and the names of symbols in your program.
+
+Press the @key{TAB} key whenever you want _GDBN__ to fill out the rest
+of a word.  If there's only one possibility, _GDBN__ will fill in the
+word, and wait for you to finish the command (or press @key{RET} to
+enter it).  For example, if you type
+
+@example
+(_GDBP__) info bre@key{TAB}
+@end example
+
+@noindent
+_GDBN__ fills in the rest of the word @samp{breakpoints}, since that's
+the only @code{info} subcommand beginning with @samp{bre}:
+
+@example
+(_GDBP__) info breakpoints
+@end example
+
+@noindent
+You can either press @key{RET} at this point, to run the @code{info
+breakpoints} command, or backspace and enter something else, if
+@samp{breakpoints} doesn't look like the command you expected.  (If you
+were sure you wanted @code{info breakpoints} in the first place, you
+might as well just type @key{RET} immediately after @samp{info bre},
+to exploit command abbreviations rather than command completion).
+
+If there is more than one possibility for the next word when you press
+@key{TAB}, _GDBN__ will sound a bell.  You can either supply more
+characters and try again, or just press @key{TAB} a second time, and
+_GDBN__ will display all the possible completions for that word.  For
+example, you might want to set a breakpoint on a subroutine whose name
+begins with @samp{mak}, but when you type @kbd{b mak@key{TAB}} _GDBN__
+just sounds the bell.  Typing @key{TAB} again will display all the
+function names in your program that begin with those characters, for
+example:
+
+@example
+(_GDBP__) b mak@key{TAB}
+make_a_section_from_file     make_environ               
+make_abs_section             make_function_type         
+make_blockvector             make_pointer_type          
+make_cleanup                 make_reference_type        
+make_command                 make_symbol_completion_list
+(GDBP__) b mak
+@end example
+
+@noindent
+After displaying the available possibilities, _GDBN__ copies your
+partial input (@samp{b mak} in the example) so you can finish the
+command.
+
+If you just want to see the list of alternatives in the first place, you
+can press @kbd{M-?} rather than pressing @key{TAB} twice. (@kbd{M-?}
+means @kbd{@key{META} ?}.  If your keyboard doesn't have a Meta shift,
+you can type @key{ESC} followed by @kbd{?} instead.)
+
+@cindex quotes in commands
+@cindex completion of quoted strings
+Sometimes the string you need, while logically a ``word'', may contain
+parentheses or other characters that _GDBN__ normally excludes from its
+notion of a word.  To permit word completion to work in this situation,
+you may enclose words in @code{'} (single quote marks) in _GDBN__ commands.
+
+The most likely situation where you might need this is in typing the
+name of a C++ function.  This is because C++ allows function overloading
+(multiple definitions of the same function, distinguished by argument
+type).  For example, you may need to distinguish whether you mean
+@samp{name(int)} or @samp{name(float)} when you want to set a
+breakpoint.  To use the word-completion facilities in this situation,
+type a single quote @code{'} at the beginning of the function name.
+This alerts _GDBN__ that it may need to consider more information than
+usual when you press @key{TAB} or @kbd{M-?} to request word completion:
+
+@example
+(_GDBP__) b 'name(@key{M-?}
+name(int)    name(float)
+(_GDBP__) b 'name
+@end example
+
+@node Help,  , Completion, Commands
 @section Getting Help
 @cindex online documentation
 @kindex help
@@ -2460,18 +2554,22 @@ operators @samp{&&}, @samp{||} and @samp{?@dots{}:} may be useful.
 Some programming languages (notably C++) permit a single function name
 to be defined several times, for application in different contexts.
 This is called @dfn{overloading}.  When a function name is overloaded,
-@samp{break @var{function}} is not enough to tell _GDBN__ where you
-want a breakpoint.  _GDBN__ offers you a menu of numbered choices for
-different possible breakpoints, and waits for your selection with the
-prompt @samp{>}.  The first two options are always @samp{[0] cancel}
-and @samp{[1] all}.  Typing @kbd{1} sets a breakpoint at each
-definition of @var{function}, and typing @kbd{0} aborts the
-@code{break} command without setting any new breakpoints.
+@samp{break @var{function}} is not enough to tell _GDBN__ where you want
+a breakpoint.  If you realize this will be a problem, you can use
+something like @samp{break @var{function}(@var{types})} to specify which
+particular version of the function you want.  Otherwise, _GDBN__ offers
+you a menu of numbered choices for different possible breakpoints, and
+waits for your selection with the prompt @samp{>}.  The first two
+options are always @samp{[0] cancel} and @samp{[1] all}.  Typing @kbd{1}
+sets a breakpoint at each definition of @var{function}, and typing
+@kbd{0} aborts the @code{break} command without setting any new
+breakpoints.
 
 For example, the following session excerpt shows an attempt to set a
 breakpoint at the overloaded symbol @code{String::after}.
 We choose three particular definitions of that function name:
 
+@c FIXME! This is likely to change to show arg type lists, at least
 @example
 (_GDBP__) b String::after
 [0] cancel
@@ -5009,7 +5107,7 @@ The @code{@@} operator aids in the debugging of dynamic arrays, formed
 with pointers and a memory allocation function.  (@pxref{Expressions, ,Expressions})
 
 @node Debugging C plus plus,  , Debugging C, C
-@subsubsection _GDBN__ Commands for C++
+@subsubsection _GDBN__ Features for C++
 
 @cindex commands for C++
 Some _GDBN__ commands are particularly useful with C++, and some are
@@ -5059,6 +5157,14 @@ Choose whether to print derived (actual) or declared types of objects.
 @itemx show print vtbl
 Control the format for printing virtual function tables.
 @xref{Print Settings, ,Print Settings}.
+
+@item @r{Overloaded symbol names}
+You can specify a particular definition of an overloaded symbol, using
+the same notation that's used to declare such symbols in C++: type
+@code{@var{symbol}(@var{types})} rather than just @var{symbol}.  You can
+also use _GDBN__'s command-line word completion facilities to list the
+available choices, or to finish the type list for you.
+@xref{Completion,, Command Completion}, for details on how to do this.
 @end table
 
 @node Modula-2,  , C, Support
