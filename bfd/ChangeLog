@@ -1,4 +1,14 @@
+Mon Oct  5 03:33:39 1992  Mark Eichin  (eichin at tweedledumber.cygnus.com)
+
+	* Makefile.in: added rules for i386bsd.c
+	* i386bsd.c: new file, supporting 386bsd.
+	* configure.in: recognize i386-*-bsd target.
+	* config/i386-bsd.mt: new file - 386bsd target configuration.
+
 Thu Oct  1 17:51:07 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: re-arrange host section to use *-*-* notation,
+	clean up some of the target section as well
 
 	* seclet.c: cast result of bfd_get_relocated_section_contents to
 	avoid compiler warnings
