@@ -41,10 +41,6 @@ extern void xcoff_relocate_core PARAMS ((void));
 
 #define BELIEVE_PCC_PROMOTION 1
 
-/* Conversion between a register number in stab string to actual register num. */
-
-#define	STAB_REG_TO_REGNUM(value)	(value)
-
 /* return true if a given `pc' value is in `call dummy' function. */
 
 #define	PC_IN_CALL_DUMMY(STOP_PC, STOP_SP, STOP_FRAME_ADDR)	\

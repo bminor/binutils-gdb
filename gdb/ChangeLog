@@ -1,3 +1,7 @@
+Fri Mar 19 11:28:18 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* tm-rs6000.h: Nuke no-op STAB_REG_TO_REGNUM.
+
 Fri Mar 19 07:40:09 1993  Steve Chamberlain  (sac@cygnus.com)
 
 	* z8k-tdep.c (print_insn): Include the new dis-asm header file.
