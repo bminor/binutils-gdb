@@ -15,7 +15,7 @@ static bfd_arch_info_type arch_info_struct =
     bfd_default_compatible, 
     bfd_default_scan ,
     0,
-    0,
+    bfd_default_reloc_type_lookup,
   };
 
 void DEFUN_VOID(bfd_a29k_arch)
