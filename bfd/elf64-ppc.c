@@ -1,5 +1,5 @@
 /* PowerPC64-specific support for 64-bit ELF.
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Linus Nordberg, Swox AB <info@swox.com>,
    based on elf32-ppc.c by Ian Lance Taylor.
 
@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/ppc.h"
+#include "elf64-ppc.h"
 
 #define USE_RELA		/* we want RELA relocations, not REL.  */
 
@@ -75,8 +76,10 @@ static enum elf_reloc_type_class ppc64_elf_reloc_type_class
   PARAMS ((const Elf_Internal_Rela *));
 static boolean ppc64_elf_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
-static boolean ppc64_elf_final_link
-  PARAMS ((bfd *, struct bfd_link_info *));
+static bfd_byte *build_plt_stub
+  PARAMS ((bfd *, bfd_byte *, int, int));
+static boolean build_one_stub
+  PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean ppc64_elf_fake_sections
   PARAMS ((bfd *, Elf64_Internal_Shdr *, asection *));
 static boolean ppc64_elf_relocate_section
@@ -104,24 +107,45 @@ static boolean ppc64_elf_finish_dynamic_sections
 #define PLT_ENTRY_SIZE 24
 
 /* The initial size of the plt reserved for the dynamic linker.  */
-#define PLT_INITIAL_ENTRY_SIZE 96
+#define PLT_INITIAL_ENTRY_SIZE PLT_ENTRY_SIZE
 
 /* TOC base pointers offset from start of TOC.  */
 #define TOC_BASE_OFF (0x8000)
 
-/* Global linkage stub.  The first instruction has its offset patched.  */
-/* FIXME: Need traceback table?  */
-static const unsigned int ppc64_elf_glink_code[] = {
-  0xe9820000,			/* ld    %r12,0(%r2) */
-  0xf8410028,			/* std   %r2,40(%r1) */
-  0xe80c0000,			/* ld    %r0,0(%r12) */
-  0xe84c0008,			/* ld    %r2,8(%r12) */
-  0x7c0903a6,			/* mtctr %r0         */
-  0x4e800420			/* bctr              */
-};
+/* .plt call stub instructions.  */
+#define ADDIS_R12_R2	0x3d820000	/* addis %r12,%r2,xxx@ha     */
+#define STD_R2_40R1	0xf8410028	/* std	 %r2,40(%r1)	     */
+#define LD_R11_0R12	0xe96c0000	/* ld	 %r11,xxx+0@l(%r12)  */
+#define LD_R2_0R12	0xe84c0000	/* ld	 %r2,xxx+8@l(%r12)   */
+#define MTCTR_R11	0x7d6903a6	/* mtctr %r11		     */
+					/* ld	 %r11,xxx+16@l(%r12) */
+#define BCTR		0x4e800420	/* bctr			     */
 
-#define PPC64_ELF_GLINK_SIZE \
-  ((sizeof ppc64_elf_glink_code / sizeof ppc64_elf_glink_code[0]) * 4)
+/* The normal stub is this size.  */
+#define PLT_CALL_STUB_SIZE (7*4)
+
+/* But sometimes the .plt entry crosses a 64k boundary, and we need
+   to adjust the high word with this insn.  */
+#define ADDIS_R12_R12_1	0x3d8c0001	/* addis %r12,%r12,1	*/
+
+/* The .glink fixup call stub is the same as the .plt call stub, but
+   the first instruction restores r2, and the std is omitted.  */
+#define LD_R2_40R1	0xe8410028	/* ld    %r2,40(%r1)	*/
+
+/* Always allow this much space.  */
+#define GLINK_CALL_STUB_SIZE (8*4)
+
+/* Pad with this.  */
+#define NOP		0x60000000
+
+/* .glink entries for the first 32k functions are two instructions. */
+#define LI_R0_0		0x38000000	/* li    %r0,0		*/
+#define B_DOT		0x48000000	/* b     .		*/
+
+/* After that, we need two instructions to load the index, followed by
+   a branch.  */
+#define LIS_R0_0	0x3c000000	/* lis   %r0,0		*/
+#define ORI_R0_R0_0	0x60008000	/* ori	 %r0,%r0,0	*/
 
 /* Relocation HOWTO's.  */
 static reloc_howto_type *ppc64_elf_howto_table[(int) R_PPC_max];
@@ -1618,7 +1642,11 @@ struct ppc_link_hash_table
   asection *srelplt;
   asection *sdynbss;
   asection *srelbss;
+  asection *sstub;
   asection *sglink;
+
+  /* Set on error.  */
+  int plt_overflow;
 
   /* Small local sym to section mapping cache.  */
   struct sym_sec_cache sym_sec;
@@ -1683,7 +1711,9 @@ ppc64_elf_link_hash_table_create (abfd)
   htab->srelplt = NULL;
   htab->sdynbss = NULL;
   htab->srelbss = NULL;
+  htab->sstub = NULL;
   htab->sglink = NULL;
+  htab->plt_overflow = 0;
   htab->sym_sec.abfd = NULL;
 
   return &htab->elf.root;
@@ -1718,8 +1748,8 @@ create_got_section (dynobj, info)
   return true;
 }
 
-/* Create the .glink section as well as the ordinary dynamic
-   sections.  */
+/* Create the .stub and .glink sections as well as the ordinary
+   dynamic sections.  */
 
 static boolean
 ppc64_elf_create_dynamic_sections (dynobj, info)
@@ -1746,15 +1776,14 @@ ppc64_elf_create_dynamic_sections (dynobj, info)
       || (!info->shared && !htab->srelbss))
     abort ();
 
-  /* Our .plt just contains pointers, no code.  */
-  flags = bfd_get_section_flags (dynobj, htab->splt);
-  flags &= ~SEC_CODE;
-  if (! bfd_set_section_flags (dynobj, htab->splt, flags))
+  /* Create .stub and .glink for global linkage functions.  */
+  flags = (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_READONLY
+	   | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
+  htab->sstub = bfd_make_section (dynobj, ".stub");
+  if (htab->sstub == NULL
+      || ! bfd_set_section_flags (dynobj, htab->sstub, flags)
+      || ! bfd_set_section_alignment (dynobj, htab->sstub, 2))
     return false;
-
-  /* Create .glink for global linkage functions.  */
-  flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
-	   | SEC_LINKER_CREATED);
   htab->sglink = bfd_make_section (dynobj, ".glink");
   if (htab->sglink == NULL
       || ! bfd_set_section_flags (dynobj, htab->sglink, flags)
@@ -1814,7 +1843,7 @@ ppc64_elf_copy_indirect_symbol (dir, ind)
 
 /* Look through the relocs for a section during the first phase, and
    calculate needed space in the global offset table, procedure
-   linkage table, and dynamic reloc sections.  */ 
+   linkage table, and dynamic reloc sections.  */
 
 static boolean
 ppc64_elf_check_relocs (abfd, info, sec, relocs)
@@ -1956,9 +1985,18 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	    return false;
 	  break;
 
+	case R_PPC64_REL24:
+	  if (h != NULL)
+	    {
+	      /* We may need a .plt entry if the function this reloc
+		 refers to is in a shared lib.  */
+	      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+	      h->plt.refcount += 1;
+	    }
+	  break;
+
 	case R_PPC64_REL64:
 	case R_PPC64_REL32:
-	case R_PPC64_REL24:
 	case R_PPC64_REL14:
 	case R_PPC64_REL14_BRTAKEN:
 	case R_PPC64_REL14_BRNTAKEN:
@@ -2022,6 +2060,12 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	      struct ppc_dyn_relocs *p;
 	      struct ppc_dyn_relocs **head;
 
+#if 0
+	      /* Don't propagate .opd relocs.  */
+	      if (strcmp (bfd_get_section_name (abfd, sec), ".opd") == 0)
+		break;
+#endif
+
 	      /* We must copy these reloc types into the output file.
 		 Create a reloc section in dynobj and make room for
 		 this reloc.  */
@@ -2044,6 +2088,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 		      (*_bfd_error_handler)
 			(_("%s: bad relocation section name `%s\'"),
 			 bfd_archive_filename (abfd), name);
+		      bfd_set_error (bfd_error_bad_value);
 		    }
 
 		  if (htab->elf.dynobj == NULL)
@@ -2227,10 +2272,18 @@ ppc64_elf_gc_sweep_hook (abfd, info, sec, relocs)
 	    }
 	  break;
 
+	case R_PPC64_REL24:
+	  if (r_symndx >= symtab_hdr->sh_info)
+	    {
+	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	      if (h->plt.refcount > 0)
+		h->plt.refcount--;
+	    }
+	  /* Fall thru.  */
+
 	case R_PPC64_REL14:
 	case R_PPC64_REL14_BRNTAKEN:
 	case R_PPC64_REL14_BRTAKEN:
-	case R_PPC64_REL24:
 	case R_PPC64_REL32:
 	case R_PPC64_REL64:
 	  if (r_symndx >= symtab_hdr->sh_info)
@@ -2418,7 +2471,7 @@ ppc64_elf_adjust_dynamic_symbol (info, h)
     }
 
   /* If we didn't find any dynamic relocs in read-only sections, then
-     we'll be keeping the dynamic relocs and avoiding the copy reloc.  */ 
+     we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
   if (p == NULL)
     {
       h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
@@ -2548,21 +2601,22 @@ allocate_dynrelocs (h, inf)
 	    s->_raw_size += PLT_INITIAL_ENTRY_SIZE;
 
 	  h->plt.offset = s->_raw_size;
+	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 
 	  /* Make room for this entry.  */
 	  s->_raw_size += PLT_ENTRY_SIZE;
 
-	  /* Point the function at the linkage stub.  This works because
-	     the only references to the function code sym are calls.
-	     Function pointer comparisons use the function descriptor.  */
-	  s = htab->sglink;
-	  h->root.type = bfd_link_hash_defined;
-	  h->root.u.def.section = s;
-	  h->root.u.def.value = s->_raw_size;
-	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+	  /* Make room for the .stub and .glink code.  */
+	  s = htab->sstub;
+	  s->_raw_size += PLT_CALL_STUB_SIZE;
 
-	  /* Make room for global linkage code in .glink.  */
-	  s->_raw_size += PPC64_ELF_GLINK_SIZE;
+	  s = htab->sglink;
+	  if (s->_raw_size == 0)
+	    s->_raw_size += GLINK_CALL_STUB_SIZE;
+	  /* We need bigger stubs past index 32767.  */
+	  if (s->_raw_size >= GLINK_CALL_STUB_SIZE + 32768*2*4)
+	    s->_raw_size += 4;
+	  s->_raw_size += 2*4;
 
 	  /* We also need to make an entry in the .rela.plt section.  */
 	  s = htab->srelplt;
@@ -2804,11 +2858,14 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
   relocs = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
+      bfd_vma size;
+
       if ((s->flags & SEC_LINKER_CREATED) == 0)
 	continue;
 
       if (s == htab->splt
 	  || s == htab->sgot
+	  || s == htab->sstub
 	  || s == htab->sglink)
 	{
 	  /* Strip this section if we don't need it; see the
@@ -2855,7 +2912,13 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
 	 section's contents are written out.  This should not happen,
 	 but this way if it does, we get a R_PPC64_NONE reloc instead
 	 of garbage.  */
-      s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->_raw_size);
+      size = s->_raw_size;
+      if (s == htab->sstub)
+	{
+	  /* .stub may grow.  Allocate enough for the maximum growth.  */
+	  size += (size + 65536 + 65535) / 65536 * 4;
+	}
+      s->contents = (bfd_byte *) bfd_zalloc (dynobj, size);
       if (s->contents == NULL)
 	return false;
     }
@@ -2881,7 +2944,8 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
 	  if (!add_dynamic_entry (DT_PLTGOT, 0)
 	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
 	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
+	      || !add_dynamic_entry (DT_JMPREL, 0)
+	      || !add_dynamic_entry (DT_PPC64_GLINK, 0))
 	    return false;
 	}
 
@@ -2912,28 +2976,27 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
    final symbol resolution and section placement has been determined.
 
    We use this hook to provide a value for TOCstart, which we store in
-   the output bfd elf_gp, then we call the generic ELF final link
-   routine.  */
+   the output bfd elf_gp.  */
 
-static boolean
-ppc64_elf_final_link (abfd, info)
-     bfd *abfd;
+boolean
+ppc64_elf_set_toc (obfd, info)
+     bfd *obfd;
      struct bfd_link_info *info;
 {
-  if (! info->relocateable)
+  if (!info->relocateable)
     {
       asection *s;
       bfd_vma TOCstart;
 
-      /* The TOC consists of sections .got, .toc, .tocbss, .plt in this
+      /* The TOC consists of sections .got, .toc, .tocbss, .plt in that
 	 order.  The TOC starts where the first of these sections starts.  */
-      s = bfd_get_section_by_name (abfd, ".got");
+      s = bfd_get_section_by_name (obfd, ".got");
       if (s == NULL)
-	s = bfd_get_section_by_name (abfd, ".toc");
+	s = bfd_get_section_by_name (obfd, ".toc");
       if (s == NULL)
-	s = bfd_get_section_by_name (abfd, ".tocbss");
+	s = bfd_get_section_by_name (obfd, ".tocbss");
       if (s == NULL)
-	s = bfd_get_section_by_name (abfd, ".plt");
+	s = bfd_get_section_by_name (obfd, ".plt");
       if (s == NULL)
 	{
 	  /* This may happen for
@@ -2946,21 +3009,21 @@ ppc64_elf_final_link (abfd, info)
 
 	  /* Look for a likely section.  We probably won't even be
 	     using TOCstart.  */
-	  for (s = abfd->sections; s != NULL; s = s->next)
+	  for (s = obfd->sections; s != NULL; s = s->next)
 	    if ((s->flags & (SEC_ALLOC | SEC_SMALL_DATA | SEC_READONLY))
 		== (SEC_ALLOC | SEC_SMALL_DATA))
 	      break;
 	  if (s == NULL)
-	    for (s = abfd->sections; s != NULL; s = s->next)
+	    for (s = obfd->sections; s != NULL; s = s->next)
 	      if ((s->flags & (SEC_ALLOC | SEC_SMALL_DATA))
 		  == (SEC_ALLOC | SEC_SMALL_DATA))
 		break;
 	  if (s == NULL)
-	    for (s = abfd->sections; s != NULL; s = s->next)
+	    for (s = obfd->sections; s != NULL; s = s->next)
 	      if ((s->flags & (SEC_ALLOC | SEC_READONLY)) == SEC_ALLOC)
 		break;
 	  if (s == NULL)
-	    for (s = abfd->sections; s != NULL; s = s->next)
+	    for (s = obfd->sections; s != NULL; s = s->next)
 	      if ((s->flags & SEC_ALLOC) == SEC_ALLOC)
 		break;
 	}
@@ -2969,11 +3032,224 @@ ppc64_elf_final_link (abfd, info)
       if (s != NULL)
 	TOCstart = s->output_section->vma + s->output_offset;
 
-      elf_gp (abfd) = TOCstart;
+      elf_gp (obfd) = TOCstart;
     }
+  return true;
+}
 
-  /* Invoke the regular ELF backend linker to do all the work.  */
-  return bfd_elf64_bfd_final_link (abfd, info);
+/* PowerPC64 .plt entries are 24 bytes long, which doesn't divide
+   evenly into 64k.  Sometimes with a large enough .plt, we'll need to
+   use offsets differing in the high 16 bits when accessing a .plt
+   entry from a .plt call stub.  This function adjusts the size of
+   .stub to accommodate the extra stub instruction needed in such
+   cases.  */
+
+boolean
+ppc64_elf_size_stubs (obfd, info, changed)
+     bfd *obfd;
+     struct bfd_link_info *info;
+     int *changed;
+{
+  struct ppc_link_hash_table *htab = ppc_hash_table (info);
+  bfd_vma plt_offset, next_64k;
+  long base, num, extra;
+
+  /* .plt and .stub should be both present, or both absent.  */
+  if ((htab->splt == NULL || htab->splt->_raw_size == 0)
+      != (htab->sstub == NULL || htab->sstub->_raw_size == 0))
+    abort ();
+
+  /* If no .plt, then nothing to do.  */
+  if (htab->splt == NULL || htab->splt->_raw_size == 0)
+    return true;
+
+  plt_offset = (htab->splt->output_section->vma
+		+ htab->splt->output_offset
+		- elf_gp (obfd));
+  next_64k = (plt_offset + 65535) & -65536;
+
+  /* If the .plt doesn't have any entries crossing a 64k boundary,
+     then there is no need for bigger stubs.  */
+  if (next_64k <= plt_offset + htab->splt->_raw_size)
+    return true;
+
+  /* OK, so we have at least one transition.  Since .plt entries are
+     24 bytes long, we'll strike it lucky every 3*64k, with the 64k
+     boundary between .plt entries.  */
+  base = next_64k / 65536;
+  num = (plt_offset + htab->splt->_raw_size - next_64k) / 65536;
+  extra = (base % 3 + num + 1) * 2 / 3;
+
+  /* Allow one extra instruction for each EXTRA.  The change in .stub
+     may change the location of .toc and .plt.  .toc and .plt ought to
+     move as a group, but someone might be playing with eg. .plt
+     alignment, so don't allow .stub size to decrease.  */
+  if (htab->sstub->_cooked_size < htab->sstub->_raw_size + extra * 4)
+    {
+      htab->sstub->_cooked_size = htab->sstub->_raw_size + extra * 4;
+      *changed = true;
+    }
+  return true;
+}
+
+/* Build a .plt call stub.  */
+
+static bfd_byte *
+build_plt_stub (obfd, p, offset, glink)
+     bfd *obfd;
+     bfd_byte *p;
+     int offset;
+     int glink;
+{
+#define PPC_LO(v) ((v) & 0xffff)
+#define PPC_HI(v) (((v) >> 16) & 0xffff)
+#define PPC_HA(v) PPC_HI ((v) + 0x8000)
+
+  if (glink)
+    bfd_put_32 (obfd, LD_R2_40R1, p),			p += 4;
+  bfd_put_32 (obfd, ADDIS_R12_R2 | PPC_HA (offset), p),	p += 4;
+  if (!glink)
+    bfd_put_32 (obfd, STD_R2_40R1, p),			p += 4;
+  bfd_put_32 (obfd, LD_R11_0R12 | PPC_LO (offset), p),	p += 4;
+  if (PPC_HA (offset + 8) != PPC_HA (offset))
+    bfd_put_32 (obfd, ADDIS_R12_R12_1, p),		p += 4;
+  offset += 8;
+  bfd_put_32 (obfd, LD_R2_0R12 | PPC_LO (offset), p),	p += 4;
+  if (PPC_HA (offset + 8) != PPC_HA (offset))
+    bfd_put_32 (obfd, ADDIS_R12_R12_1, p),		p += 4;
+  offset += 8;
+  bfd_put_32 (obfd, MTCTR_R11, p),			p += 4;
+  bfd_put_32 (obfd, LD_R11_0R12 | PPC_LO (offset), p),	p += 4;
+  bfd_put_32 (obfd, BCTR, p),				p += 4;
+  return p;
+}
+
+/* Build the stubs for one function call.  */
+
+static boolean
+build_one_stub (h, inf)
+     struct elf_link_hash_entry *h;
+     PTR inf;
+{
+  struct bfd_link_info *info;
+  struct ppc_link_hash_table *htab;
+
+  if (h->root.type == bfd_link_hash_indirect
+      || h->root.type == bfd_link_hash_warning)
+    return true;
+
+  info = (struct bfd_link_info *) inf;
+  htab = ppc_hash_table (info);
+
+  if (htab->elf.dynamic_sections_created
+      && h->plt.offset != (bfd_vma) -1)
+    {
+      asection *s;
+      bfd_vma plt_r2;
+      bfd_byte *p;
+      unsigned int indx;
+
+      /* Point the function at the linkage stub.  This works because
+	 the only references to the function code sym are calls.
+	 Function pointer comparisons use the function descriptor.  */
+      s = htab->sstub;
+      h->root.type = bfd_link_hash_defined;
+      h->root.u.def.section = s;
+      h->root.u.def.value = s->_cooked_size;
+
+      /* Build the .plt call stub.  */
+      plt_r2 = (htab->splt->output_section->vma
+		+ htab->splt->output_offset
+		+ h->plt.offset
+		- elf_gp (htab->splt->output_section->owner)
+		- TOC_BASE_OFF);
+
+      if (plt_r2 + 0x80000000 > 0xffffffff)
+	{
+	  (*_bfd_error_handler)
+	    (_("linkage table overflow against `%s'"),
+	     h->root.root.string);
+	  bfd_set_error (bfd_error_bad_value);
+	  htab->plt_overflow = true;
+	  return false;
+	}
+      p = s->contents + s->_cooked_size;
+      p = build_plt_stub (s->owner, p, (int) plt_r2, 0);
+      s->_cooked_size = p - s->contents;
+
+      /* Build the .glink lazy link call stub.  */
+      s = htab->sglink;
+      p = s->contents + s->_cooked_size;
+      indx = s->reloc_count;
+      if (indx < 0x8000)
+	{
+	  bfd_put_32 (s->owner, LI_R0_0 | indx, p);
+	  p += 4;
+	}
+      else
+	{
+	  bfd_put_32 (s->owner, LIS_R0_0 | PPC_HI (indx), p);
+	  p += 4;
+	  bfd_put_32 (s->owner, ORI_R0_R0_0 | PPC_LO (indx), p);
+	  p += 4;
+	}
+      bfd_put_32 (s->owner, B_DOT | ((s->contents - p) & 0x3fffffc), p);
+      p += 4;
+      s->_cooked_size = p - s->contents;
+      s->reloc_count += 1;
+    }
+  return true;
+}
+
+boolean
+ppc64_elf_build_stubs (obfd, info)
+     bfd *obfd;
+     struct bfd_link_info *info;
+{
+  struct ppc_link_hash_table *htab = ppc_hash_table (info);
+  bfd_vma old_stub_size;
+  bfd_vma plt_r2;
+  bfd_byte *p;
+
+  /* If no .plt stubs, then nothing to do.  */
+  if (htab->sstub == NULL || htab->sstub->_raw_size == 0)
+    return true;
+
+  old_stub_size = htab->sstub->_cooked_size;
+  htab->sstub->_cooked_size = 0;
+
+  /* Build the .glink plt call stub.  */
+  plt_r2 = (htab->splt->output_section->vma
+	    + htab->splt->output_offset
+	    - elf_gp (obfd)
+	    - TOC_BASE_OFF);
+  p = htab->sglink->contents;
+  p = build_plt_stub (htab->sglink->owner, p, (int) plt_r2, 1);
+  while (p - htab->sglink->contents < GLINK_CALL_STUB_SIZE)
+    {
+      bfd_put_32 (htab->sglink->owner, NOP, p);
+      p += 4;
+    }
+  htab->sglink->_cooked_size = p - htab->sglink->contents;
+
+  /* Use reloc_count to count entries.  */
+  htab->sglink->reloc_count = 0;
+
+  elf_link_hash_traverse (&htab->elf, build_one_stub, (PTR) info);
+  htab->sglink->reloc_count = 0;
+
+  if (htab->plt_overflow)
+    return false;
+
+  if (old_stub_size != htab->sstub->_cooked_size
+      || htab->sglink->_raw_size != htab->sglink->_cooked_size)
+    {
+      (*_bfd_error_handler)
+	(_("stub section size doesn't match calculated size"));
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
+  return true;
 }
 
 /* Set up any other section flags and such that may be necessary.  */
@@ -3374,21 +3650,12 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	     which is the address of the start of the TOC plus 0x8000.
 	     The TOC consists of sections .got, .toc, .tocbss, and .plt,
 	     in this order.  */
-
 	case R_PPC64_TOC16:
 	case R_PPC64_TOC16_LO:
 	case R_PPC64_TOC16_HI:
 	case R_PPC64_TOC16_DS:
 	case R_PPC64_TOC16_LO_DS:
 	case R_PPC64_TOC16_HA:
-	  /* Only .got, .toc and *UND* symbols are allowed.  */
-	  BFD_ASSERT (sec != (asection *) 0
-		      && (bfd_is_und_section (sec)
-			  || strcmp (bfd_get_section_name (abfd, sec),
-				     ".toc") == 0
-			  || strcmp (bfd_get_section_name (abfd, sec),
-				     ".got") == 0));
-
 	  addend -= TOCstart + TOC_BASE_OFF;
 	  break;
 
@@ -3403,12 +3670,14 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    addend -= sec->output_section->vma;
 	  break;
 
+	case R_PPC64_REL24:
+	  break;
+
 	  /* Relocations that may need to be propagated if this is a
 	     dynamic object.  */
 	case R_PPC64_REL14:
 	case R_PPC64_REL14_BRNTAKEN:
 	case R_PPC64_REL14_BRTAKEN:
-	case R_PPC64_REL24:
 	case R_PPC64_REL32:
 	case R_PPC64_REL64:
 	case R_PPC64_ADDR14:
@@ -3431,12 +3700,15 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PPC64_UADDR16:
 	case R_PPC64_UADDR32:
 	case R_PPC64_UADDR64:
-	case R_PPC64_TOC:
 	  /* r_symndx will be zero only for relocs against symbols
 	     from removed linkonce sections, or sections discarded by
 	     a linker script.  */
-	  if (r_symndx == 0
-	      || (input_section->flags & SEC_ALLOC) == 0)
+	  if (r_symndx == 0)
+	    break;
+	  /* Fall thru.  */
+
+	case R_PPC64_TOC:
+	  if ((input_section->flags & SEC_ALLOC) == 0)
 	    break;
 
 	  if ((info->shared
@@ -3461,6 +3733,12 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      boolean skip, relocate;
 	      asection *sreloc;
 	      Elf64_External_Rela *loc;
+
+#if 0
+	      if (strcmp (bfd_get_section_name (output_bfd, input_section),
+			  ".opd") == 0)
+		break;
+#endif
 
 	      /* When generating a dynamic object, these relocations
 		 are copied into the output file to be resolved at run
@@ -3715,8 +3993,7 @@ ppc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       /* This symbol has an entry in the procedure linkage table.  Set
          it up.  */
 
-      if (h->dynindx == -1
-	  || htab->splt == NULL
+      if (htab->splt == NULL
 	  || htab->srelplt == NULL
 	  || htab->sglink == NULL
 	  || h->root.root.string[0] != '.'
@@ -3724,7 +4001,7 @@ ppc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	abort ();
 
       /* Find its corresponding function descriptor.
-	 ppc64_elf_adjust_dynamic_symbol has already set it up for us.  */ 
+	 ppc64_elf_adjust_dynamic_symbol has already set it up for us.  */
 
       funcdesc_h = elf_link_hash_lookup (elf_hash_table (info),
 					 h->root.root.string + 1,
@@ -3745,42 +4022,6 @@ ppc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       loc = (Elf64_External_Rela *) htab->srelplt->contents;
       loc += (h->plt.offset - PLT_INITIAL_ENTRY_SIZE) / PLT_ENTRY_SIZE;
       bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
-
-      /* We need to create a linkage function. */
-      if (h->root.u.def.section == htab->sglink)
-	{
-	  bfd_byte *p;
-	  bfd_vma pltoff;
-	  const unsigned int *stub;
-
-	  /* Where to write it.  */
-	  p = h->root.u.def.section->contents + h->root.u.def.value;
-
-	  /* The function descriptor is in the PLT.  */
-	  pltoff = htab->splt->output_section->vma
-	    + htab->splt->output_section->output_offset
-	    + h->plt.offset
-	    - elf_gp (output_bfd) - TOC_BASE_OFF;
-
-	  if (pltoff + 0x8000 > 0xffff)
-	    {
-	      (*_bfd_error_handler)
-		(_("linkage table overflow against `%s'"),
-		 h->root.root.string);
-	    }
-
-	  /* Write it out.  */
-	  stub = ppc64_elf_glink_code;
-	  bfd_put_32 (output_bfd, *stub | (pltoff & 0xfffc), p);
-	  while (p += 4, ++stub < (ppc64_elf_glink_code
-				   + (sizeof (ppc64_elf_glink_code)
-				      / sizeof (*ppc64_elf_glink_code))));
-	    {
-	      bfd_put_32 (output_bfd, (bfd_vma) *stub, p);
-	    }
-	}
-      else
-	abort ();
     }
 
   if (h->got.offset != (bfd_vma) -1)
@@ -3917,24 +4158,54 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
 	    default:
 	      continue;
 
+	    case DT_PPC64_GLINK:
+	      dyn.d_un.d_ptr = (htab->sglink->output_section->vma
+				+ htab->sglink->output_offset);
+	      break;
+
 	    case DT_PLTGOT:
-	      dyn.d_un.d_ptr = htab->splt->output_section->vma;
+	      dyn.d_un.d_ptr = (htab->splt->output_section->vma
+				+ htab->splt->output_offset);
 	      break;
 
 	    case DT_JMPREL:
-	      dyn.d_un.d_ptr = htab->srelplt->output_section->vma;
+	      dyn.d_un.d_ptr = (htab->srelplt->output_section->vma
+				+ htab->srelplt->output_offset);
 	      break;
 
 	    case DT_PLTRELSZ:
-	      if (htab->srelplt->output_section->_cooked_size != 0)
-		dyn.d_un.d_val = htab->srelplt->output_section->_cooked_size;
-	      else
-		dyn.d_un.d_val = htab->srelplt->output_section->_raw_size;
+	      dyn.d_un.d_val = htab->srelplt->_raw_size;
+	      break;
+
+	    case DT_RELASZ:
+	      /* Don't count procedure linkage table relocs in the
+		 overall reloc count.  */
+	      if (htab->srelplt != NULL)
+		dyn.d_un.d_val -= htab->srelplt->_raw_size;
 	      break;
 	    }
 
 	  bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
 	}
+    }
+
+  if (htab->sgot != NULL && htab->sgot->_raw_size != 0)
+    {
+      /* Fill in the first entry in the global offset table.
+	 We use it to hold the link-time TOCbase.  */
+      bfd_put_64 (output_bfd,
+		  elf_gp (output_bfd) - TOC_BASE_OFF,
+		  htab->sgot->contents);
+
+      /* Set .got entry size.  */
+      elf_section_data (htab->sgot->output_section)->this_hdr.sh_entsize = 8;
+    }
+
+  if (htab->splt != NULL && htab->splt->_raw_size != 0)
+    {
+      /* Set .plt entry size.  */
+      elf_section_data (htab->splt->output_section)->this_hdr.sh_entsize
+	= PLT_ENTRY_SIZE;
     }
 
   return true;
@@ -3962,17 +4233,15 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_plt_alignment 3
 #define elf_backend_plt_not_loaded 1
 #define elf_backend_got_symbol_offset 0
-#define elf_backend_got_header_size 0
+#define elf_backend_got_header_size 8
+#define elf_backend_plt_header_size PLT_INITIAL_ENTRY_SIZE
 #define elf_backend_can_gc_sections 1
 #define elf_backend_can_refcount 1
-
-#define elf_backend_plt_header_size PLT_INITIAL_ENTRY_SIZE
 
 #define bfd_elf64_bfd_reloc_type_lookup	      ppc64_elf_reloc_type_lookup
 #define bfd_elf64_bfd_set_private_flags	      ppc64_elf_set_private_flags
 #define bfd_elf64_bfd_merge_private_bfd_data  ppc64_elf_merge_private_bfd_data
 #define bfd_elf64_bfd_link_hash_table_create  ppc64_elf_link_hash_table_create
-#define bfd_elf64_bfd_final_link	      ppc64_elf_final_link
 
 #define elf_backend_section_from_shdr	      ppc64_elf_section_from_shdr
 #define elf_backend_create_dynamic_sections   ppc64_elf_create_dynamic_sections

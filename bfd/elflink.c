@@ -137,7 +137,7 @@ _bfd_elf_create_dynamic_sections (abfd, info)
   pltflags = flags;
   pltflags |= SEC_CODE;
   if (bed->plt_not_loaded)
-    pltflags &= ~ (SEC_LOAD | SEC_HAS_CONTENTS);
+    pltflags &= ~ (SEC_CODE | SEC_LOAD | SEC_HAS_CONTENTS);
   if (bed->plt_readonly)
     pltflags |= SEC_READONLY;
 

@@ -1,5 +1,45 @@
 2002-01-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.c (_bfd_elf_create_dynamic_sections): Don't set SEC_CODE
+	when plt_not_loaded.
+	* elf64-ppc.c (ppc64_elf_create_dynamic_sections): No need to
+	clear .plt SEC_CODE here.  Create .stub and correct .glink flags.
+	(PLT_INITIAL_ENTRY_SIZE): Set to 24.
+	(ppc64_elf_glink_code): Delete.
+	(PPC64_ELF_GLINK_SIZE): Delete.
+	(ADDIS_R12_R2, STD_R2_40R1, LD_R11_0R12, LD_R2_0R12, MTCTR_R11,
+	BCTR, ADDIS_R12_R12_1, LD_R2_40R1, NOP, LI_R0_0, B_DOT, LIS_R0_0,
+	ORI_R0_R0_0): Define.
+	(PLT_CALL_STUB_SIZE, GLINK_CALL_STUB_SIZE): Define.
+	(struct ppc_link_hash_table): Add sstub and plt_overflow.
+	(ppc64_elf_link_hash_table_create): Init them.
+	(ppc64_elf_check_relocs <R_PPC64_REL24>): Refcount .plt entry.
+	Don't copy to shared lib.
+	(ppc64_elf_check_relocs): Call bfd_set_error on errors.
+	(ppc64_elf_gc_sweep_hook <R_PPC64_REL24>): Sweep plt refcount.
+	(allocate_dynrelocs <plt>): Don't change function sym here.  Make
+	room for .stub and .glink code.
+	(ppc64_elf_size_dynamic_sections): Handle .stub.  Make entry for
+	DT_PPC64_GLINK.
+	(ppc64_elf_final_link): Rename to ppc64_elf_set_toc.  Don't call
+	bfd_elf64_bfd_final_link.
+	(bfd_elf64_bfd_final_link): Don't define.
+	(ppc64_elf_size_stubs): New.
+	(build_plt_stub): New.
+	(build_one_stub): New.
+	(ppc64_elf_build_stubs): New.
+	(ppc64_elf_relocate_section <toc relocs>): Remove assert.
+	(ppc64_elf_relocate_section): Don't copy R_PPC64_REL24 relocs.
+	(ppc64_elf_finish_dynamic_symbol): Don't build stubs here.  Set
+	DT_PPC64_GLINK entry.  Tweak DT_PLTGOT, DT_JMPREL, DT_PLTRELSZ in
+	case output sections not separate.  Adjust DT_RELASZ to not
+	include plt relocs.  Set reserved got entry.  Set got and plt
+	entry size.
+	(elf_backend_got_header_size): Set to 8.
+	* elf64-ppc.h: New file.
+
+2002-01-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-arm.h (elf32_arm_size_dynamic_sections): When removing
 	sections, use bfd_section_list_remove.
 	* elf32-i370.c (i370_elf_size_dynamic_sections): Likewise.
