@@ -22,12 +22,6 @@ Do-first:
 # called.  Directories not listed will be removed in their entirety
 # with rm -rf.
 
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-	keep_these_too="v850.h ${keep_these_too}"
-else
-	lose_these_too="v850.h ${lose_these_too}"
-fi
-
 Things-to-keep:
 
 ChangeLog
@@ -43,6 +37,7 @@ m32r.h
 mips.h
 ppc.h
 sparc.h
+v850.h
 
 Things-to-lose:
 
@@ -77,32 +72,6 @@ else
 fi
 
 v850_files="ChangeLog common.h v850.h"
-if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
-	for i in $v850_files ; do
-		if test ! -d $i && (grep sanitize-v850eq $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping v850eq stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $v850_files ; do
-		if test ! -d $i && (grep sanitize-v850eq $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850eq\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-v850eq/,/end\-sanitize\-v850eq/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
 if ( echo $* | grep keep\-v850e > /dev/null ) ; then
 	for i in $v850_files ; do
 		if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
