@@ -212,7 +212,7 @@ frame_address_in_block (struct frame_info *frame)
 struct block *
 get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
 {
-  const CORE_ADDR pc = get_frame_address_in_block (frame);
+  const CORE_ADDR pc = frame_address_in_block (frame);
 
   if (addr_in_block)
     *addr_in_block = pc;
@@ -512,7 +512,7 @@ block_innermost_frame (struct block *block)
       frame = get_prev_frame (frame);
       if (frame == NULL)
 	return NULL;
-      calling_pc = get_frame_address_in_block (frame);
+      calling_pc = frame_address_in_block (frame);
       if (calling_pc >= start && calling_pc < end)
 	return frame;
     }
