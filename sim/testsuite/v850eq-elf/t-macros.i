@@ -35,3 +35,30 @@ _start:
 	exit47
 1:	
 	.endm
+
+	.macro check1x sts reg val
+	jr 1f
+	.align 2
+1:	jarl 2f, r1
+	.long \val
+2:	ld.w 0[r1], r1
+	cmp r1, \reg
+	be 1f
+	mov 1, r6
+	addi \sts, r0, r7
+	trap 31
+1:	
+	.endm
+
+
+# definitions of various PSW bits
+	PSW_US = 0x100
+	PSW_NP = 0x80
+	PSW_EP = 0x40
+	PSW_ID = 0x20
+	PSW_SAT = 0x10
+	PSW_CY = 0x8
+	PSW_OV = 0x4
+	PSW_S = 0x2
+	PSW_Z = 0x1
+

@@ -5,7 +5,7 @@
 	# Set the callt base pointer
 	load r1 callt_base
 	ldsr r1, ctbp
-	
+
 test_callt:
 	callt 2
 	exit47
