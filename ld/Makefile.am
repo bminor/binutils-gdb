@@ -110,7 +110,6 @@ ALL_EMULATIONS = \
 	earmcoff.o \
 	earmelf.o \
 	earmelf_linux.o \
-	earmelf_linux26.o \
 	earmelf_oabi.o \
 	earmnbsd.o \
 	earmpe.o \
@@ -332,10 +331,6 @@ earmelf_linux.c: $(srcdir)/emulparams/armelf_linux.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armelf_linux "$(tdir_armelf_linux)"
-earmelf_linux26.c: $(srcdir)/emulparams/armelf_linux26.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/armelf.em \
-  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} armelf_linux26 "$(tdir_armelf_linux26)"
 earmaoutb.c:	$(srcdir)/emulparams/armaoutb.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/armaout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armaoutb "$(tdir_armaoutb)"

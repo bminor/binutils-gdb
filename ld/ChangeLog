@@ -1,3 +1,8 @@
+2001-02-06  Philip Blundell  <philb@gnu.org>
+
+	* Makefile.am: Remove mention of earmelf_linux26.
+	* Makefile.in: Regenerate.
+
 2001-02-04  Philip Blundell  <philb@gnu.org>
 
 	* emulparams/armelf_linux.sh (TEXT_START_ADDR): Set to 0x8000.
