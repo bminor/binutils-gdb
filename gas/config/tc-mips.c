@@ -11945,12 +11945,12 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
     mips_opts.ase_mdmx = 1;
   else if (strcmp (name, "nomdmx") == 0)
     mips_opts.ase_mdmx = 0;
-  else if (strncmp (name, "mips", 4) == 0)
+  else if (strncmp (name, "mips", 4) == 0 || strncmp (name, "arch=", 5) == 0)
     {
       int reset = 0;
 
-      /* Permit the user to change the ISA on the fly.  Needless to
-	 say, misuse can cause serious problems.  */
+      /* Permit the user to change the ISA and architecture on the fly.
+	 Needless to say, misuse can cause serious problems.  */
       if (strcmp (name, "mips0") == 0)
 	{
 	  reset = 1;
@@ -11972,6 +11972,25 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 	mips_opts.isa = ISA_MIPS32R2;
       else if (strcmp (name, "mips64") == 0)
 	mips_opts.isa = ISA_MIPS64;
+      else if (strcmp (name, "arch=default") == 0)
+	{
+	  reset = 1;
+	  mips_opts.arch = file_mips_arch;
+	  mips_opts.isa = file_mips_isa;
+	}
+      else if (strncmp (name, "arch=", 5) == 0)
+	{
+	  const struct mips_cpu_info *p;
+
+	  p = mips_parse_cpu("internal use", name + 5);
+	  if (!p)
+	    as_bad (_("unknown architecture %s"), name + 5);
+	  else
+	    {
+	      mips_opts.arch = p->cpu;
+	      mips_opts.isa = p->isa;
+	    }
+	}
       else
 	as_bad (_("unknown ISA level %s"), name + 4);
 
@@ -12042,47 +12061,6 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 	  mips_opts = s->options;
 	  mips_opts_stack = s->next;
 	  free (s);
-	}
-    }
-  else if (strncmp (name, "arch=", 5) == 0)
-    {
-      /* Permit the user to change the architecture on the fly.  Needless
-	 to say, misuse can cause serious problems.  */
-      if (strcmp (name + 5, "default") == 0)
-	{
-	  mips_opts.arch = file_mips_arch;
-	  mips_opts.isa = file_mips_isa;
-	  mips_opts.gp32 = file_mips_gp32;
-	  mips_opts.fp32 = file_mips_fp32;
-	}
-      else
-	{
-	  const struct mips_cpu_info *p;
-
-	  p = mips_parse_cpu("internal use", name + 5);
-	  if (!p)
-	    as_bad (_("unknown architecture %s"), name + 5);
-	  else
-	    {
-	      mips_opts.arch = p->cpu;
-	      mips_opts.isa = p->isa;
-	    }
-
-	  switch (mips_opts.arch)
-	    {
-	      case CPU_R3000:
-	      case CPU_R3900:
-	      case CPU_R6000:
-	      case CPU_MIPS32:
-	      case CPU_MIPS32R2:
-		mips_opts.gp32 = 1;
-		mips_opts.fp32 = 1;
-		break;
-	      default:
-		mips_opts.gp32 = 0;
-		mips_opts.fp32 = 0;
-		break;
-	    }
 	}
     }
   else
