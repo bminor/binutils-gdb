@@ -1,3 +1,7 @@
+Wed May 19 15:44:20 1993  K. Richard Pixley  (rich@cygnus.com)
+
+	* config/m68k/tm-m68k.h (FRAME_CHAIN): add missing close paren.
+
 Wed May 19 15:33:57 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* config/pa/nm-hppab.h:  Comment PTRACE_ARG3_TYPE.
