@@ -9,70 +9,34 @@ srcname="gnu development package"
 
 # per-host:
 
-# XXX - FIXME there needs to be a case for mh_dgux
-
-case "${host_os}" in
-aix*)		host_makefile_frag=config/mh-aix ;;
-m88kbcs)	host_makefile_frag=config/mh-delta88;;
-sysv4*)		host_makefile_frag=config/mh-sysv4 ;;
-solaris*)	host_makefile_frag=config/mh-solaris ;;
-sysv* | irix3)	host_makefile_frag=config/mh-sysv ;;
-scout)		;;
-sco*)		host_makefile_frag=config/mh-sco ;;
-irix4)		host_makefile_frag=config/mh-irix4 ;;
-linux)		host_makefile_frag=config/mh-linux ;;
-hpux)		host_makefile_frag=config/mh-hpux ;;
-ultrix*)
-	case "${host_cpu}" in
-	mips)	host_makefile_frag=config/mh-decstation ;;
-	esac
-esac
-
-case "${host_vendor}" in
-apollo*)	case "${host_cpu}" in
-		m68k*)
-			case "${host_os}" in
-			sysv*) host_makefile_frag=config/mh-apollo68 ;;
-			bsd*) host_makefile_frag=config/mh-a68bsd ;;
-			esac;;
-		esac ;;
-ncr*)		case "${host_os}" in
-		sysv4*) host_makefile_frag=config/mh-ncr3000 ;;
-		esac ;;
-			
+case "${host}" in
+  m68k-apollo-sysv*)      host_makefile_frag=config/mh-apollo68 ;;
+  m68k-apollo-bsd*)       host_makefile_frag=config/mh-a68bsd ;;
+  m88k-motorola-m88kbcs)  host_makefile_frag=config/mh-delta88;;
+  m88k-dg-dgux*)	  host_makefile_frag=config/mh-dgux ;;
+  mips-dec-ultrix*)       host_makefile_frag=config/mh-decstation ;;
+  mips-sgi-irix4)         host_makefile_frag=config/mh-irix4 ;;
+  mips-sgi-irix3)         host_makefile_frag=config/mh-sysv ;;
+  i[34]86-ncr-sysv4*)     host_makefile_frag=config/mh-ncr3000 ;;
+  i[34]86-*-sco*)         host_makefile_frag=config/mh-sco ;;
+  i[34]86-*-linux)        host_makefile_frag=config/mh-linux ;;
+  *-ibm-aix*)             host_makefile_frag=config/mh-aix ;;
+  *-sun-solaris*)         host_makefile_frag=config/mh-solaris ;;
+  *-hp-hpux)              host_makefile_frag=config/mh-hpux ;;
+  *-*sysv4*)              host_makefile_frag=config/mh-sysv4 ;;
+  *-*sysv*)               host_makefile_frag=config/mh-sysv ;;
 esac
 
 # per-target:
 
 bfd_target=
 
-case "${target_vendor}" in
-amd)
-	case "${target_os}" in
-		ebmon) 	bfd_target="ebmon29k" 
-			;;
-		udi) 	bfd_target="udi29k" 
-			;;
-		*) echo "bad target_os for amd"	1>&2
-			;;
-	esac
-	;;
-ericsson)
-	case "${target_alias}" in
-		OSE68000 | ose68000)
-			bfd_target="ose68000"
-			;;
-		OSE68k | ose68k)
-			bfd_target="ose68k"
-			;;
-		*)
-			bfd_target=${target-alias}
-			;;
-	esac
-	;;
-*)
-	bfd_target=${target_alias}
-	;;
+case "${target}" in
+  a29k-amd-ebmon) bfd_target="ebmon29k"  ;;
+  a29k-amd-udi)   bfd_target="udi29k" ;;
+  a29k-amd-*)     echo "bad target_os for amd" 1>&2
+		  exit 1
+		  ;;
 esac
 
 # remove various programs from consideration, if this is a cross-compiler 
