@@ -40,6 +40,7 @@ external.h
 hppa.h
 internal.h
 mips.h
+ppc.h
 
 Things-to-lose:
 
