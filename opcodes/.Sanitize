@@ -32,8 +32,6 @@ z8k-opc.h
 
 Do-last:
 
-Do-last:
-
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
 	echo Keeping v9 in sparc-opc.c
 else
