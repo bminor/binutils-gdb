@@ -1,5 +1,8 @@
 -*- text -*-
 
+* New linker script construct AS_NEEDED(), which sets the --as-needed flag
+  for input files listed inside of it.
+
 * A new command-line option, --sysroot, can be used to override the
   default sysroot location.  It only applies to toolchains that were
   configured using --with-sysroot.

@@ -1,3 +1,11 @@
+2005-01-21  Jakub Jelinek  <jakub@redhat.com>
+
+	* ldgram.y (AS_NEEDED): New token.
+	(input_list): Handle AS_NEEDED ( input_list ).
+	* ldlex.l (AS_NEEDED): Add.
+	* ld.texinfo: Document AS_NEEDED ().
+	* NEWS: Mention AS_NEEDED ().
+
 2005-01-21  Ben Elliston  <bje@au.ibm.com>
 
 	* ldlang.c (lang_reasonable_defaults): Remove.

@@ -1,6 +1,6 @@
 /* A YACC grammar to parse a superset of the AT&T linker scripting language.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
    This file is part of GNU ld.
@@ -144,7 +144,7 @@ static int error_index;
 %token STARTUP HLL SYSLIB FLOAT NOFLOAT NOCROSSREFS
 %token ORIGIN FILL
 %token LENGTH CREATE_OBJECT_SYMBOLS INPUT GROUP OUTPUT CONSTRUCTORS
-%token ALIGNMOD AT SUBALIGN PROVIDE
+%token ALIGNMOD AT SUBALIGN PROVIDE AS_NEEDED
 %type <token> assign_op atype attributes_opt sect_constraint
 %type <name>  filename
 %token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD ASSERT_K
@@ -372,6 +372,18 @@ input_list:
 	|	input_list LNAME
 		{ lang_add_input_file($2,lang_input_file_is_l_enum,
 				 (char *)NULL); }
+	|	AS_NEEDED '('
+		  { $<integer>$ = as_needed; as_needed = TRUE; }
+		     input_list ')'
+		  { as_needed = $<integer>3; }
+	|	input_list ',' AS_NEEDED '('
+		  { $<integer>$ = as_needed; as_needed = TRUE; }
+		     input_list ')'
+		  { as_needed = $<integer>5; }
+	|	input_list AS_NEEDED '('
+		  { $<integer>$ = as_needed; as_needed = TRUE; }
+		     input_list ')'
+		  { as_needed = $<integer>4; }
 	;
 
 sections:
