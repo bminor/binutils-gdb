@@ -1,4 +1,21 @@
+Thu Sep  8 16:20:38 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* coff-h8300.c (h8300_reloc16_extra_cases, case RELBYTE):  Flag overflows
+	correctly.
+
 Wed Sep  7 19:01:42 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* libelf.h (struct elf_backend_data): Change second argument of
+	elf_backend_final_write_processing hook to boolean.
+	(struct elf_obj_tdata): Add linker field.
+	* elfcode.h (NAME(bfd_elf,write_object_contents)): Pass value of
+	tdata linker field to final_write_processing, rather than NULL.
+	(elf_bfd_final_link): Don't call final_write_processing hook.  Set
+	tdata linker field to true.
+	* elf32-mips.c (mips_elf_final_write_processing): Change type of
+	second argument to boolean.
+	* elf32-hppa.c (elf32_hppa_backend_final_write_processing):
+	Likewise.
 
 	* coff-go32.c (RTYPE2HOWTO): Fully parenthesize arguments.
 	* coff-i960.c (RTYPE2HOWTO): Likewise.
