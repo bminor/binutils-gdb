@@ -104,7 +104,7 @@ handle_query (char *own_buf)
       thread_ptr = thread_ptr->next;
       return;
     }
-  
+
   if (strcmp ("qsThreadInfo", own_buf) == 0)
     {
       if (thread_ptr != NULL)
@@ -119,7 +119,27 @@ handle_query (char *own_buf)
 	  return;
 	}
     }
-      
+
+  if (the_target->read_auxv != NULL
+      && strncmp ("qPart:auxv:read::", own_buf, 17) == 0)
+    {
+      char data[(PBUFSIZ - 1) / 2];
+      CORE_ADDR ofs;
+      unsigned int len;
+      int n;
+      decode_m_packet (&own_buf[17], &ofs, &len); /* "OFS,LEN" */
+      if (len > sizeof data)
+	len = sizeof data;
+      n = (*the_target->read_auxv) (ofs, data, len);
+      if (n == 0)
+	write_ok (own_buf);
+      else if (n < 0)
+	write_enn (own_buf);
+      else
+	convert_int_to_ascii (data, own_buf, n);
+      return;
+    }
+
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
   own_buf[0] = 0;
@@ -371,7 +391,7 @@ main (int argc, char *argv[])
 	      detach_inferior ();
 	      write_ok (own_buf);
 	      putpkt (own_buf);
-	      remote_close ();		  
+	      remote_close ();
 
 	      /* If we are attached, then we can exit.  Otherwise, we need to
 		 hang around doing nothing, until the child is gone.  */

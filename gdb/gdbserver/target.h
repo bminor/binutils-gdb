@@ -92,7 +92,7 @@ struct target_ops
      If REGNO is -1, fetch all registers; otherwise, fetch at least REGNO.  */
 
   void (*fetch_registers) (int regno);
-  
+
   /* Store registers to the inferior process.
 
      If REGNO is -1, store all registers; otherwise, store at least REGNO.  */
@@ -125,6 +125,12 @@ struct target_ops
 
   /* Send a signal to the inferior process, however is appropriate.  */
   void (*send_signal) (int);
+
+  /* Read auxiliary vector data from the inferior process.
+
+     Read LEN bytes at OFFSET into a buffer at MYADDR.  */
+
+  int (*read_auxv) (CORE_ADDR offset, char *myaddr, unsigned int len);
 };
 
 extern struct target_ops *the_target;
