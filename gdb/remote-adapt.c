@@ -35,7 +35,6 @@
 #include "defs.h"
 #include "gdb_string.h"
 #include "inferior.h"
-#include "gdb_wait.h"
 #include "value.h"
 #include <ctype.h>
 #include <fcntl.h>

@@ -104,7 +104,6 @@
 #include "frame.h"
 #include "inferior.h"
 #include "target.h"
-#include "gdb_wait.h"
 #include "command.h"
 #include "symfile.h"
 #include "remote-utils.h"

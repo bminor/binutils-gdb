@@ -40,7 +40,6 @@
 #include "defs.h"
 #include "gdbcore.h"
 #include "target.h"
-#include "gdb_wait.h"
 #include <signal.h>
 #include "gdb_string.h"
 #include <sys/types.h>

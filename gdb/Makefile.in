@@ -1639,7 +1639,7 @@ mipsread.o: mipsread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
 
 mipsv4-nat.o: mipsv4-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
 
-monitor.o: monitor.c monitor.h $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
+monitor.o: monitor.c monitor.h $(bfd_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) target.h serial.h terminal.h gdb_string.h
 
 news-xdep.o: news-xdep.c
@@ -1699,7 +1699,7 @@ parse.o: parse.c $(command_h) $(defs_h) $(expression_h) $(frame_h) \
 	gdb_string.h linespec.h
 
 ppc-bdm.o: ppc-bdm.c $(defs_h) $(gdbcore_h) gdb_string.h $(frame_h) \
-	$(inferior_h) $(bfd_h) symfile.h target.h gdb_wait.h $(gdbcmd_h) \
+	$(inferior_h) $(bfd_h) symfile.h target.h $(gdbcmd_h) \
 	objfiles.h gdb-stabs.h serial.h ocd.h
 
 ppc-linux-nat.o: ppc-linux-nat.c $(defs_h) $(gdbcore_h) $(frame_h) \
@@ -1741,14 +1741,14 @@ linux-thread.o: linux-thread.c $(breakpoint_h) $(gdbcmd_h) gdb_wait.h \
 
 gnu-regex.o: gnu-regex.c gnu-regex.h $(defs_h) gdb_string.h
 
-remote-adapt.o: remote-adapt.c gdb_wait.h $(defs_h) $(gdbcore_h) \
+remote-adapt.o: remote-adapt.c $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h gdb_string.h
 
-remote-array.o: remote-array.c gdb_wait.h $(defs_h) $(gdbcore_h) target.h \
+remote-array.o: remote-array.c $(defs_h) $(gdbcore_h) target.h \
       gdb_string.h $(command_h) serial.h monitor.h $(remote_utils_h) \
 	$(version_h)
 
-remote-rdi.o: remote-rdi.c gdb_wait.h $(defs_h) $(gdbcore_h) \
+remote-rdi.o: remote-rdi.c $(defs_h) $(gdbcore_h) \
 	$(inferior_h) gdb_string.h
 
 rdi-share/libangsd.a:	force
@@ -1761,13 +1761,10 @@ rdi-share/libangsd.a:	force
 	  true; \
 	fi
 
-remote-d10v.o: remote-d10v.c $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
-	$(inferior_h) $(remote_utils_h) symfile.h terminal.h gdb_string.h
-
-remote-rdp.o: remote-rdp.c gdb_wait.h $(defs_h) $(gdbcore_h) \
+remote-rdp.o: remote-rdp.c $(defs_h) $(gdbcore_h) \
 	$(inferior_h) gdb_string.h
 
-remote-bug.o: remote-bug.c gdb_wait.h $(defs_h) $(gdbcore_h) \
+remote-bug.o: remote-bug.c $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h $(remote_utils_h) gdb_string.h
 
 # FIXME: For the SH target, remote-e7000 contains numerous -Wformat
@@ -1775,61 +1772,64 @@ remote-bug.o: remote-bug.c gdb_wait.h $(defs_h) $(gdbcore_h) \
 # handles the SH remote protocol the changes need to be tested against
 # an SH board before they can be committed. cagney 1999-09-01.
 remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) target.h \
-	gdb_wait.h serial.h gdb_string.h
+	serial.h gdb_string.h
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
 
-remote-eb.o: remote-eb.c gdb_wait.h $(srcdir)/config/a29k/tm-a29k.h \
+remote-eb.o: remote-eb.c $(srcdir)/config/a29k/tm-a29k.h \
 	$(defs_h) $(gdbcore_h) $(inferior_h) symfile.h target.h terminal.h \
 	gdb_string.h
 
-remote-es.o: remote-es.c $(bfd_h) gdb_wait.h $(command_h) $(defs_h) \
+remote-es.o: remote-es.c $(bfd_h) $(command_h) $(defs_h) \
 	$(inferior_h) $(remote_utils_h) terminal.h gdb_string.h \
 	symfile.h
 
-remote-hms.o: remote-hms.c gdb_wait.h $(defs_h) $(gdbcore_h) \
-	$(inferior_h) serial.h target.h terminal.h gdb_string.h
+remote-est.o: remote-est.c $(defs_h) $(gdbcore_h) \
+	$(inferior_h) serial.h target.h terminal.h 
 
-remote-mips.o: remote-mips.c gdb_wait.h $(defs_h) $(gdbcmd_h) \
+remote-hms.o: remote-hms.c $(defs_h) $(gdbcore_h) \
+	$(inferior_h) serial.h target.h terminal.h
+
+remote-mips.o: remote-mips.c $(defs_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(inferior_h) serial.h symfile.h target.h
 
-remote-mm.o: remote-mm.c $(bfd_h) gdb_wait.h $(defs_h) $(inferior_h) \
+remote-mm.o: remote-mm.c $(bfd_h) $(defs_h) $(inferior_h) \
 	minimon.h target.h terminal.h gdb_string.h
 
-remote-nindy.o: remote-nindy.c $(floatformat_h) gdb_wait.h $(command_h) \
+remote-nindy.o: remote-nindy.c $(floatformat_h) $(command_h) \
 	$(defs_h) $(gdbcore_h) $(inferior_h) \
 	nindy-share/env.h nindy-share/stop.h $(remote_utils_h) \
 	symfile.h
 
-remote-os9k.o: remote-os9k.c $(defs_h) $(gdbcore_h) gdb_wait.h \
+remote-os9k.o: remote-os9k.c $(defs_h) $(gdbcore_h) \
 	$(command_h) monitor.h $(remote_utils_h) $(symtab_h) symfile.h \
 	objfiles.h gdb-stabs.h gdb_string.h
 
-remote-sds.o: remote-sds.c $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
+remote-sds.o: remote-sds.c $(bfd_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(remote_utils_h) symfile.h terminal.h gdb_string.h
 
-remote-sim.o: remote-sim.c gdb_wait.h $(defs_h) $(gdbcore_h) \
+remote-sim.o: remote-sim.c $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h gdb_string.h \
 	$(INCLUDE_DIR)/callback.h
 
-remote-st.o: remote-st.c gdb_wait.h $(defs_h) $(gdbcore_h) serial.h \
+remote-st.o: remote-st.c $(defs_h) $(gdbcore_h) serial.h \
 	target.h gdb_string.h
 
-remote-udi.o: remote-udi.c $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
+remote-udi.o: remote-udi.c $(bfd_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) target.h terminal.h $(udiheaders) gdb_string.h
 
-remote-vx.o: remote-vx.c gdb_wait.h complaints.h $(defs_h) $(gdbcmd_h) \
+remote-vx.o: remote-vx.c complaints.h $(defs_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(inferior_h) target.h vx-share/dbgRpcLib.h \
 	vx-share/ptrace.h vx-share/xdr_ld.h vx-share/xdr_ptrace.h \
 	vx-share/xdr_rdb.h gdb-stabs.h objfiles.h symfile.h $(bfd_h) \
 	gdb_string.h
 
-remote-vx29k.o: remote-vx29k.c gdb_wait.h complaints.h $(defs_h) $(gdbcmd_h) \
+remote-vx29k.o: remote-vx29k.c complaints.h $(defs_h) $(gdbcmd_h) \
         $(gdbcore_h) $(inferior_h) target.h vx-share/dbgRpcLib.h \
         vx-share/ptrace.h vx-share/xdr_ld.h vx-share/xdr_ptrace.h \
         vx-share/xdr_rdb.h gdb_string.h
 
 ocd.o: ocd.c ocd.h $(gdbcore_h) gdb_string.h $(frame_h) $(inferior_h) \
-	$(bfd_h) symfile.h target.h gdb_wait.h $(gdbcmd_h) objfiles.h \
+	$(bfd_h) symfile.h target.h $(gdbcmd_h) objfiles.h \
 	gdb-stabs.h $(dcache_h) serial.h
 
 remote-utils.o: remote-utils.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \

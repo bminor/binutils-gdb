@@ -1,3 +1,35 @@
+2001-02-02  J.T. Conklin  <jtc@redback.com>
+
+	* monitor.c (#include "gdb_wait.h"): Removed.
+	* ocd.c: Likewise.
+	* ppc-bdm.c: Likewise.
+	* remote-adapt.c: Likewise.
+	* remote-array.c: Likewise.
+	* remote-bug.c: Likewise.
+	* remote-e7000.c: Likewise.
+	* remote-eb.c: Likewise.
+	* remote-es.c: Likewise.
+	* remote-mips.c: Likewise.
+	* remote-mm.c: Likewise.
+	* remote-nindy.c: Likewise.
+	* remote-os9k.c: Likewise.
+	* remote-rdi.c: Likewise.
+	* remote-rdp.c: Likewise.
+	* remote-sds.c: Likewise.
+	* remote-sim.c: Likewise.
+	* remote-st.c: Likewise.
+	* remote-udi.c: Likewise.
+	* remote-vx.c: Likewise.
+	* remote-vx29k.c: Likewise.
+	* remote-vx68.c: Likewise.
+	* remote-vx960.c: Likewise.
+	* remote-vxmips.c: Likewise.
+	* remote-vxsparc.c: Likewise.
+	* remote.c: Likewise.
+	* ser-pipe.c: Likewise.
+	* ser-unix.c: Likewise.
+	* Makefile.in: Updated dependencies.
+
 2001-01-31  David Smith  <dsmith@redhat.com>
 
 	* event-loop.c: Change inclusion of string.h to gdb_string.h and

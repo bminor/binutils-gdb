@@ -22,7 +22,6 @@
 
 #include "defs.h"
 #include "inferior.h"
-#include "gdb_wait.h"
 #include "value.h"
 #include "gdb_string.h"
 #include <ctype.h>

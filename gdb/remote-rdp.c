@@ -38,7 +38,6 @@
 
 #include "defs.h"
 #include "inferior.h"
-#include "gdb_wait.h"
 #include "value.h"
 #include "callback.h"
 #include "command.h"

@@ -22,7 +22,6 @@
 #include "defs.h"
 #include "frame.h"
 #include "inferior.h"
-#include "gdb_wait.h"
 #include "target.h"
 #include "gdbcore.h"
 #include "command.h"

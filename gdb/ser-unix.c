@@ -1,5 +1,5 @@
 /* Serial interface for local (hardwired) serial ports on Un*x like systems
-   Copyright 1992-1994, 1998-2000 Free Software Foundation, Inc.
+   Copyright 1992-1994, 1998-2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,7 +25,6 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include "terminal.h"
-#include "gdb_wait.h"
 #include <sys/socket.h>
 #include <sys/time.h>
 

@@ -27,7 +27,6 @@
 #include "gdb_vfork.h"
 
 #include <sys/types.h>
-#include "gdb_wait.h"
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <fcntl.h>
