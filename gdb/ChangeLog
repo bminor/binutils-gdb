@@ -47,24 +47,23 @@ Fri Apr 18 17:25:10 1997  Stu Grossman  (grossman@critters.cygnus.com)
 	uses of SERIAL_READCHAR with readchar, which has better error
 	checking.
 	* (e7000_parse_device):  Add prototype.
-	* (readchar):  Improve doc.  Handle random serial errors.
-	* (expect):  Disable notice_quit code.  It's busted.  Remove
+	(readchar):  Improve doc.  Handle random serial errors.
+	(expect):  Disable notice_quit code.  It's busted.  Remove
 	serial error handling (it's now handled in readchar).  Remove
 	remote_debug echoing.  That's handled in readchar as well.
-	* (e7000_parse_device):  Remove serial_flag arg.  It's not
+	(e7000_parse_device):  Remove serial_flag arg.  It's not
 	necessary.
-	* (e7000_open):  Split into two pieces.  Second part is
+	(e7000_open):  Split into two pieces.  Second part is
 	e7000_start_remote, and is error protected.  Now, when we connect
 	to the target, we setup the initial frame and registers so that
 	the user gets an immediate indication of where the target is.
-	* (gch):  Remove debug output.  That's handled by readchar.
-	* (e7000_read_inferior_memory):  Handle errors better.
-	* (_initialize_remote_e7000):  Get rid of `<xxx>' things from
+	(gch):  Remove debug output.  That's handled by readchar.
+	(e7000_read_inferior_memory):  Handle errors better.
+	(_initialize_remote_e7000):  Get rid of `<xxx>' things from
 	command names.  They show up when doing completion and confuse
 	things horribly.
-	* ser-e7kpc.c:  Remove the last seven months of brain damage.  Get
-	rid of the DLL's since we can access the device directly from Win32s
-	and Win95.  Get rid of debugify crud.
+	* ser-e7kpc.c: Get rid of the DLL's since we can access the device
+ 	directly from Win32s and Win95.  Get rid of debugify crud.
 	* serial.c:  Remove debugify cruft.
 	* (serial_logchar serial_log_command serial_write serial_readchar
 	serial_send_break serial_close):  Merge common functionality into
@@ -101,7 +100,7 @@ start-sanitize-gdbtk
 Wed Apr 16 12:33:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (install-only): Make list of gdbtcl files to install
- 	explicit - was picking up files such as CVS ChangeLog etc.
+ 	explicit - was picking up files such as ChangeLog etc.
 	(install-only): Don't blindly create the directory.
 
 end-sanitize-gdbtk
@@ -109,7 +108,7 @@ Thu Apr 17 14:30:04 1997  Per Bothner  <bothner@deneb.cygnus.com>
 
 	* defs.h (enum language):  Add language_java.
 	* java-exp.y, java-lang.c, java-lang.h, java-valprint.c:  New files.
-	* Makefile.in:  Upadte for new files.
+	* Makefile.in:  Update for new files.
 	* objfiles.c (allocate_objfile):  Allow NULL bfd argument.
 	* symfile.c (deduce_language_from_filename):  Recognize .java.
 
@@ -557,7 +556,6 @@ Wed Mar 12 14:29:52 1997  Tom Tromey  <tromey@cygnus.com>
 	LIBS.
 
 end-sanitize-gdbtk
-
 Tue Mar 11 07:25:27 1997  Mark Alexander  <marka@cygnus.com>
 
 	First cut at supporting simulators in gdbserver:
@@ -690,8 +688,8 @@ Tue Feb 18 11:13:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 Sat Feb 15 17:43:46 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
-	* remote-vx.c (vx_attach):  Fix for PR 11356.  Remove code added
-	by kung.  It made no sense.
+	* remote-vx.c (vx_attach): Remove code added by kung.  It made no
+ 	sense.
 
 Fri Feb 14 13:00:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -823,11 +821,12 @@ Mon Feb 10 16:11:57 1997  Jeffrey A Law  (law@cygnus.com)
 	(value_arg_coerce): Similarly.
 	(value_of_variable): Provide dummy initialization of "frame".
 
+start-sanitize-gdbtk
 Mon Feb 10 13:50:53 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* gdbtk.c (call_wrapper):  Clear running_now if an error occurs.
-	This fixes PR 11323, where gdbtk stops responding if an error occurs.
 
+end-sanitize-gdbtk
 Mon Feb 10 07:54:26 1997  Fred Fish  <fnf@cygnus.com>
 
 	* xcoffread.c (RECORD_MINIMAL_SYMBOL): Add NULL asection* parameter
@@ -886,7 +885,6 @@ Mon Feb  3 11:06:05 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* m32r-stub.c: New -- remote protocol support for M32R cpu.
 	* m32r-rom.c:  Several experiments with improved download time.
-	* .Sanitize:   Add entry for m32r-stub.c
 
 Fri Jan 31 08:26:39 1997  Mark Alexander  <marka@cygnus.com>
 
