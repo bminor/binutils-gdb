@@ -46,6 +46,9 @@ pr-5646-grt.ch
 pr-5646.exp
 pr-6292.ch
 pr-6292.exp
+pr-6632.ch
+pr-6632-grt.ch
+pr-6632.exp
 result.ch
 result.exp
 string.ch

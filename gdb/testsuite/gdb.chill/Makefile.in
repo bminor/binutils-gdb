@@ -97,7 +97,7 @@ CHILL_LIB = ` \
 EXECUTABLES = callch.exe chillvars.exe misc.exe \
   result.exe string.exe tuples.exe \
   pr-4975.exe pr-5016.exe pr-5020.exe pr-5022.exe pr-5646.exe pr-5984.exe \
-  pr-6292.exe
+  pr-6292.exe pr-6632.exe
 
 all:	$(EXECUTABLES)
 
@@ -105,8 +105,13 @@ all:	$(EXECUTABLES)
 # latter can use the former's grant file.
 pr-4975.o: pr-4975-grt.o
 pr-5646.o: pr-5646-grt.o
+pr-6632.o: pr-6632-grt.o
 
 .SUFFIXES: .ch .exe .check
+
+pr-6632.exe:  pr-6632.o pr-6632-grt.o
+	$(CHILL_FOR_TARGET) $(CHILLFLAGS) $(LDFLAGS) -o pr-6632.exe \
+	  pr-6632.o pr-6632-grt.o $(CHILL_LIB) $(LIBS)
 
 .o.exe:
 	$(CHILL_FOR_TARGET) $(CHILLFLAGS) $(LDFLAGS) -o $*.exe $*.o $(CHILL_LIB) $(LIBS)

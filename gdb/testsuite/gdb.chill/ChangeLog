@@ -1,3 +1,7 @@
+Tue Mar 28 17:13:13 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* pr-6632.ch, pr-6632-grt.ch, pr-6632.exp, Makefile.in:  New test case.
+
 Tue Mar 21 12:10:06 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* tuples.exp (do_tests): Make names of "print v_ps" test unique.
