@@ -4655,6 +4655,23 @@ page of memory, and changes them to use the eight-bit address form.
 (That is: the linker turns @samp{mov.b @code{@@}@var{aa}:16} into
 @samp{mov.b @code{@@}@var{aa}:8} whenever the address @var{aa} is in the
 top page of memory).
+
+@item bit manipulation instructions
+@command{ld} finds all bit manipulation instructions like @code{band, bclr, 
+biand, bild, bior, bist, bixor, bld, bnot, bor, bset, bst, btst, bxor}
+which use 32 bit and 16 bit absolute address form, but refer to the top 
+page of memory, and changes them to use the 8 bit address form.
+(That is: the linker turns @samp{bset #xx:3,@code{@@}@var{aa}:32} into
+@samp{bset #xx:3,@code{@@}@var{aa}:8} whenever the address @var{aa} is in 
+the top page of memory).
+
+@item system control instructions
+@command{ld} finds all @code{ldc.w, stc.w} instrcutions which use the 
+32 bit absolute address form, but refer to the top page of memory, and 
+changes them to use 16 bit address form.
+(That is: the linker turns @samp{ldc.w @code{@@}@var{aa}:32,ccr} into
+@samp{ldc.w @code{@@}@var{aa}:16,ccr} whenever the address @var{aa} is in 
+the top page of memory).
 @end table
 
 @ifclear GENERIC
