@@ -314,8 +314,8 @@ extern CONST short _bfd_host_big_endian;
 /* ------------------------------START FROM opncls.c
 
 *i bfd_openr
-Opens the file supplied (using fopen) with the target supplied, it
-returns a pointer to the created bfd.
+Opens the file supplied (using @code{fopen}) with the target supplied, it
+returns a pointer to the created BFD.
 
 If NULL is returned then an error has occured.
 Possible errors are no_memory, invalid_target or system_call error.
@@ -325,7 +325,7 @@ Possible errors are no_memory, invalid_target or system_call error.
 /*
 
 *i bfd_fdopenr
-bfd_fdopenr is to bfd_fopenr much like  fdopen is to fopen. It opens a bfd on
+bfd_fdopenr is to bfd_fopenr much like  fdopen is to fopen. It opens a BFD on
 a file already described by the @var{fd} supplied. 
 
 Possible errors are no_memory, invalid_target and system_call error.
@@ -336,7 +336,7 @@ Possible errors are no_memory, invalid_target and system_call error.
 /*
 
  bfd_openw
-Creates a bfd, associated with file @var{filename}, using the file
+Creates a BFD, associated with file @var{filename}, using the file
 format @var{target}, and returns a pointer to it.
 
 Possible errors are system_call_error, no_memory, invalid_target.
@@ -346,12 +346,12 @@ Possible errors are system_call_error, no_memory, invalid_target.
 /*
 
  bfd_close
-This function closes a bfd. If the bfd was open for writing, then
+This function closes a BFD. If the BFD was open for writing, then
 pending operations are completed and the file written out and closed.
 If the created file is executable, then @code{chmod} is called to mark
 it as such.
 
-All memory attatched to the bfd's obstacks is released. 
+All memory attached to the BFD's obstacks is released. 
 
 @code{true} is returned if all is ok, otherwise @code{false}.
 */
@@ -360,8 +360,8 @@ All memory attatched to the bfd's obstacks is released.
 /*
 
  bfd_create
-This routine creates a new bfd in the manner of bfd_openw, but without
-opening a file. The new bfd takes the target from the target used by
+This routine creates a new BFD in the manner of @code{bfd_openw}, but without
+opening a file. The new BFD takes the target from the target used by
 @var{template}. The format is always set to @code{bfd_object}.
 */
 
@@ -371,7 +371,7 @@ opening a file. The new bfd takes the target from the target used by
 
  bfd_alloc_size
 Return the number of bytes in the obstacks connected to the supplied
-bfd.
+BFD.
 */
  PROTO(bfd_size_type,bfd_alloc_size,(bfd *abfd));
 
@@ -436,7 +436,7 @@ stuff
  bfd_prinable_arch_mach
 Return a printable string representing the architecture and machine
 type. The result is only good until the next call to
-bfd_printable_arch_mach.  
+@code{bfd_printable_arch_mach}.  
 */
  PROTO(CONST char *,bfd_printable_arch_mach,
     (enum bfd_architecture arch, unsigned long machine));
@@ -454,10 +454,10 @@ Scan a string and attempt to turn it into an archive and machine type combinatio
 *i bfd_arch_compatible
 This routine is used to determine whether two BFDs' architectures and machine types are
 compatible.  It calculates the lowest common denominator between the
-two architectures and machine types implied by the bfds and sets the
+two architectures and machine types implied by the BFDs and sets the
 objects pointed at by @var{archp} and @var{machine} if non NULL. 
 
-This routine returns @code{true} if the bfds are of compatible type,
+This routine returns @code{true} if the BFDs are of compatible type,
 otherwise @code{false}.
 */
  PROTO(boolean, bfd_arch_compatible,
@@ -487,7 +487,7 @@ Set atch mach
 *i bfd_get_size
 These macros as used for reading and writing raw data in sections;
 each access (except for bytes) is vectored through the target format
-of the bfd and mangled accordingly. The mangling performs any
+of the BFD and mangled accordingly. The mangling performs any
 necessary endian translations and removes alignment restrictions.
 */
 #define bfd_put_8(abfd, val, ptr) \
@@ -548,7 +548,7 @@ the same as that passed to bfd_make_section.
     CONST char *name;
 
 /*
-The next section in the list belonging to the bfd, or NULL.
+The next section in the list belonging to the BFD, or NULL.
 */
 
     struct sec *next;
@@ -622,7 +622,7 @@ The section contains constructor information. This section type is
 used by the linker to create lists of constructors and destructors
 used by @code{g++}. When a back end sees a symbol which should be used
 in a constructor list, it creates a new section for the type of name
-(eg @code{__CTOR_LIST__}), attatches the symbol to it and builds a
+(eg @code{__CTOR_LIST__}), attaches the symbol to it and builds a
 relocation. To build the lists of constructors, all the linker has to
 to is catenate all the sections called @code{__CTOR_LIST__} and
 relocte the data contained within - exactly the operations it would
@@ -787,7 +787,7 @@ relocations created to relocate items within it.
    struct relent_chain *constructor_chain;
 
 /*
-The bfd which owns the section.
+The BFD which owns the section.
 */
 
    bfd *owner;
@@ -809,15 +809,15 @@ who's name matches that provided, otherwise NULL. @xref{Sections}, for more info
 /*
 
  bfd_make_section
-This function creates a new empty section called @var{name} and attatches it
-to the end of the chain of sections for @var{bfd}. An attempt to
+This function creates a new empty section called @var{name} and attaches it
+to the end of the chain of sections for the BFD supplied. An attempt to
 create a section with a name which is already in use, returns the old
 section by that name instead.
 
 Possible errors are:
 @table @code
 @item invalid_operation
-If output has already started for this bfd.
+If output has already started for this BFD.
 @item no_memory
 If obstack alloc fails.
 @end table
@@ -828,7 +828,7 @@ If obstack alloc fails.
 /*
 
  bfd_set_section_flags
-Attempts to set the attributes of the section named in the bfd
+Attempts to set the attributes of the section named in the BFD
 supplied to the value. Returns true on success, false on error.
 Possible error returns are:
 @table @code
@@ -845,8 +845,8 @@ example, a .bss section in @code{a.out} may not have the
 /*
 
  bfd_map_over_sections
-Calls the provided function @var{func} for each section attatched to
-the bfd @var{abfd}, passing @var{obj} as an argument. The function
+Calls the provided function @var{func} for each section attached to
+the BFD @var{abfd}, passing @var{obj} as an argument. The function
 will be called as if by 
 
 @example
@@ -875,7 +875,7 @@ Sets @var{section} to the size @var{val}. If the operation is ok, then
 Possible error returns:
 @table @code
 @item invalid_operation
-Writing has started to the bfd, so setting the size is invalid
+Writing has started to the BFD, so setting the size is invalid
 @end table 
 */
 
@@ -885,7 +885,7 @@ Writing has started to the bfd, so setting the size is invalid
 /*
 
  bfd_set_section_contents
-Sets the contents of the section @var{section} in bfd @var{abfd} to
+Sets the contents of the section @var{section} in BFD @var{abfd} to
 the data starting in memory at @var{data}. The data is written to the
 output section starting at offset @var{offset} for @var{count} bytes.
 
@@ -910,7 +910,7 @@ This routine is front end to the back end function @code{_bfd_set_section_conten
 /*
 
  bfd_get_section_contents
-This function reads data from @var{section} in bfd @var{abfd} into
+This function reads data from @var{section} in BFD @var{abfd} into
 memory starting at @var{location}. The data is read at an offset of
 @var{offset} from the start of the input section, and is read for
 @var{count} bytes.
@@ -943,7 +943,7 @@ An @code{asymbol} has the form:
 
 typedef struct symbol_cache_entry 
 {
-/* A pointer to the bfd which owns the symbol. This information is
+/* A pointer to the BFD which owns the symbol. This information is
 necessary so that a back end can work out what additional (invisible to
 the application writer) information is carried with the symbol. 
 */
@@ -1056,7 +1056,7 @@ The default value for common data.
 In some files the type of a symbol sometimes alters its location
 in an output file - ie in coff a @code{ISFCN} symbol which is also @code{C_EXT}
 symbol appears where it was declared and not at the end of a section. 
-This bit is set by the target bfd part to convey this information. 
+This bit is set by the target BFD part to convey this information. 
 */
 
 #define BSF_NOT_AT_END    0x40000
@@ -1108,8 +1108,8 @@ this a union.
 
  get_symtab_upper_bound
 Returns the number of bytes required in a vector of pointers to
-@code{asymbols} for all the symbols in the supplied bfd, including a
-terminal NULL pointer. If there are no symbols in the bfd, then 0 is
+@code{asymbols} for all the symbols in the supplied BFD, including a
+terminal NULL pointer. If there are no symbols in the BFD, then 0 is
 returned.
 */
 #define get_symtab_upper_bound(abfd) \
@@ -1118,8 +1118,8 @@ returned.
 /*
 
  bfd_canonicalize_symtab
-Supplied a bfd and a pointer to an uninitialized vector of pointers.
-This reads in the symbols from the bfd, and fills in the table with
+Supplied a BFD and a pointer to an uninitialized vector of pointers.
+This reads in the symbols from the BFD, and fills in the table with
 pointers to the symbols, and a trailing NULL. The routine returns the
 actual number of symbol pointers not including the NULL.
 */
@@ -1131,7 +1131,7 @@ actual number of symbol pointers not including the NULL.
 /*
  bfd_set_symtab
 Provided a table of pointers to to symbols and a count, writes to the
-output bfd the symbols when closed.
+output BFD the symbols when closed.
 */
 
  PROTO(boolean, bfd_set_symtab, (bfd *, asymbol **, unsigned int ));
@@ -1147,7 +1147,7 @@ Prints the value and flags of the symbol supplied to the stream file.
 /*
 
   bfd_make_empty_symbol
-This function creates a new @code{asymbol} structure for the bfd, and
+This function creates a new @code{asymbol} structure for the BFD, and
 returns a pointer to it.
 
 This routine is necessary, since each back end has private information
@@ -1167,16 +1167,16 @@ problems later on.
 @section typedef bfd
 
 Pointers to bfd structs are the cornerstone of any application using
-libbfd. References though the bfd and to data in the bfd give the
-entire bfd functionality.
+@code{libbfd}. References though the BFD and to data in the BFD give the
+entire BFD functionality.
 
-Finally!  The BFD struct itself.  This contains the major data about
+Here is the BFD struct itself.  This contains the major data about
 the file, and contains pointers to the rest of the data.
 */
 
 struct _bfd 
 {
-/*   The filename the application opened the bfd with.
+/*   The filename the application opened the BFD with.
 */
 
   CONST char *filename;                
@@ -1190,7 +1190,7 @@ A pointer to the target jump table.
 /*
 
 To avoid dragging too many header files into every file that
-includes bfd.h, IOSTREAM has been declared as a "char *", and MTIME
+includes @file{bfd.h}, IOSTREAM has been declared as a "char *", and MTIME
 as a "long".  Their correct types, to which they are cast when used,
 are "FILE *" and "time_t".  
 
@@ -1206,7 +1206,7 @@ Is the file being cached @xref{File Caching}.
   boolean cacheable;
 
 /*
-Marks whether there was a default target specified when the bfd was
+Marks whether there was a default target specified when the BFD was
 opened. This is used to select what matching algorithm to use to chose
 the back end.
 */
@@ -1214,14 +1214,15 @@ the back end.
   boolean target_defaulted;
 
 /*
-The caching routines use these to maintain an LRU list of bfds.
+The caching routines use these to maintain a least-recently-used list of
+BFDs (@pxref{File Caching}).
 */
 
   struct _bfd *lru_prev, *lru_next;
 
 /*
-When a file is closed by the caching routines, it retains the state
-here:
+When a file is closed by the caching routines, BFD retains state
+information on the file here:
 */
 
   file_ptr where;              
@@ -1247,13 +1248,13 @@ For output files, channel we locked (is this used?).
 int ifd;
 
 /*
-The format which belongs to the bfd.
+The format which belongs to the BFD.
 */
 
   bfd_format format;
 
 /*
-The direction the bfd was opened with
+The direction the BFD was opened with
 */
 
   enum bfd_direction {no_direction = 0,
@@ -1294,7 +1295,7 @@ The number of sections
   unsigned int section_count;
 
 /*
-Stuff only usefull for object files:
+Stuff only useful for object files:
 The start address.
 */
 
@@ -1303,7 +1304,7 @@ The start address.
 */
 
   unsigned int symcount;
-/* Symtab for output bfd
+/* Symbol table for output BFD
 */
 
   struct symbol_cache_entry  **outsymbols;             
@@ -1321,7 +1322,7 @@ Particular machine within arch, e.g. 68010
   unsigned long obj_machine;
 
 /*
-Stuff only usefull for archives:
+Stuff only useful for archives:
 */
 
   PTR arelt_data;              
@@ -1343,7 +1344,7 @@ Used by the application to hold private data
   PTR usrdata;
 
 /*
-Where all the allocated stuff under this BFD goes 
+Where all the allocated stuff under this BFD goes (@pxref{Memory Usage}).
 */
 
   struct obstack memory;
@@ -1353,7 +1354,7 @@ Where all the allocated stuff under this BFD goes
 
  bfd_set_start_address
 
-Marks the entry point of an output bfd. Returns @code{true} on
+Marks the entry point of an output BFD. Returns @code{true} on
 success, @code{false} otherwise.
 */
 
@@ -1417,7 +1418,7 @@ What this does
 /*
 
  bfd_set_archive_head
-Used whilst processing archives. Sets the head of the chain of bfds
+Used whilst processing archives. Sets the head of the chain of BFDs
 contained in an archive to @var{new_head}. (see chapter on archives)
 */
  PROTO(boolean, bfd_set_archive_head, (bfd *output, bfd *new_head));
@@ -1432,10 +1433,10 @@ contained in an archive to @var{new_head}. (see chapter on archives)
 /*
 
  bfd_openr_next_archived_file
-Initially provided a bfd containing an archive and NULL, opens a bfd
+Initially provided a BFD containing an archive and NULL, opens a BFD
 on the first contained element and returns that. Subsequent calls to
 bfd_openr_next_archived_file should pass the archive and the previous
-return value to return a created bfd to the next contained element.
+return value to return a created BFD to the next contained element.
 NULL is returned when there are no more.
 */
 
@@ -1447,6 +1448,36 @@ NULL is returned when there are no more.
  --------------------------------END FROM archive.c*/
 
 /* FROM core.c*/
+/* ------------------------------START FROM core.c
+ bfd_core_file_failing_command
+Returns a read-only string explaining what program was running when
+it failed and produced the core file being read
+*/
+
+ PROTO(CONST char *, bfd_core_file_failing_command, (bfd *));
+
+/*
+
+ bfd_core_file_failing_signal
+Returns the signal number which caused the core dump which generated
+the file the BFD is attached to.
+*/
+
+ PROTO(int, bfd_core_file_failing_signal, (bfd *));
+
+/*
+
+ core_file_matches_executable_p
+Returns @code{true} if the core file attached to @var{core_bfd} was
+generated by a run of the executable file attached to @var{exec_bfd},
+or else @code{false}.
+*/
+ PROTO(boolean, core_file_matches_executable_p,
+    (bfd *core_bfd, bfd *exec_bfd));
+
+/*
+
+ --------------------------------END FROM core.c*/
 
 /* FROM reloc.c*/
 /* ------------------------------START FROM reloc.c
@@ -1546,7 +1577,7 @@ Pointer to how to perform the required relocation
 
  reloc_howto_type
 The @code{reloc_howto_type} is a structure which contains all the
-information that bfd needs to know to tie up a back end's data.
+information that BFD needs to know to tie up a back end's data.
 */
 
 typedef CONST struct reloc_howto_struct 
@@ -1726,8 +1757,8 @@ while avoiding anguish on compilers that don't support protos.
 
 /*
 These macros are used to dispatch to functions through the bfd_target
-vector. They are used in a number of macros further down in bfd.h, and
-are also used when calling various routines by hand inside the bfd
+vector. They are used in a number of macros further down in @file{bfd.h}, and
+are also used when calling various routines by hand inside the BFD
 implementation.  The "arglist" argument must be parenthesized; it
 contains all the arguments to the called function.
 */
@@ -1736,7 +1767,7 @@ contains all the arguments to the called function.
                ((*((bfd)->xvec->message)) arglist)
 
 /*
-For operations which index on the bfd format 
+For operations which index on the BFD format 
 */
 
 #define BFD_SEND_FMT(bfd, message, arglist) \
@@ -1744,7 +1775,7 @@ For operations which index on the bfd format
 
 /*
 This is the struct which defines the type of BFD this is.  The
-"xvec" member of the struct bfd itself points here.  Each module
+"xvec" member of the struct @code{bfd} itself points here.  Each module
 that implements access to a different target under BFD, defines
 one of these.
 
@@ -1820,7 +1851,7 @@ The minimum alignment restriction for any section.
 
 /*
 Entries for byte swapping for data. These are different to the other
-entry points, since they don't take bfd as first arg.  Certain other handlers
+entry points, since they don't take BFD as first arg.  Certain other handlers
 could do the same.
 */
 
@@ -1964,8 +1995,8 @@ environment variable GNUTARGET; if that is null or not defined then
 the first entry in the target list is chosen.  Passing in the
 string "default" or setting the environment variable to "default"
 will cause the first entry in the target list to be returned,
-and "target_defaulted" will be set in the bfd.  This causes
-bfd_check_format to loop over all the targets to find the one
+and "target_defaulted" will be set in the BFD.  This causes
+@code{bfd_check_format} to loop over all the targets to find the one
 that matches the file being read.  
 */
  PROTO(bfd_target *, bfd_find_target,(CONST char *, bfd *));
@@ -1974,7 +2005,7 @@ that matches the file being read.
 
 *i bfd_target_list
 This function returns a freshly malloced NULL-terminated vector of the
-names of all the valid bfd targets. Do not modify the names 
+names of all the valid BFD targets. Do not modify the names 
 */
  PROTO(CONST char **,bfd_target_list,());
 
@@ -1986,12 +2017,12 @@ names of all the valid bfd targets. Do not modify the names
 /* ------------------------------START FROM format.c
 
 *i bfd_check_format
-This routine is supplied a bfd and a format. It attempts to verify if
-the file attatched to the bfd is indeed compatible with the format
+This routine is supplied a BFD and a format. It attempts to verify if
+the file attached to the BFD is indeed compatible with the format
 specified (ie, one of @code{bfd_object}, @code{bfd_archive} or
 @code{bfd_core}).
 
-If the bfd has been set to a specific @var{target} before the call,
+If the BFD has been set to a specific @var{target} before the call,
 only the named target and format combination will be checked. If the
 target has not been set, or has been set to @code{default} then all
 the known target backends will be interrogated to determine a match.
@@ -2017,9 +2048,9 @@ more than one backend recognised the file format.
 /*
 
 *i bfd_set_format
-This function sets the file format of the supplied bfd to the format
-requested. If the target set in the bfd does not support the format
-requested, the format is illegal or the bfd is not open for writing
+This function sets the file format of the supplied BFD to the format
+requested. If the target set in the BFD does not support the format
+requested, the format is illegal or the BFD is not open for writing
 than an error occurs.
 */
  PROTO(boolean,bfd_set_format,(bfd *, bfd_format));
