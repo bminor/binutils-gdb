@@ -124,6 +124,22 @@ Thu May 21 13:14:25 1998  John Metzler  <jmetzler@cygnus.com>
 	* win32-nat.c: (init_child_ops): Ditto.
 	(_initialize_inftarg): Ditto.
 
+1998-05-21  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* ax-gdb.c (const_var_ref): Don't handle function names.  I don't
+	want to implement all the "usual unary conversion" rules for
+	constants.
+	(gen_usual_unary): Turn "function" values into "pointer to
+	function" values, in accordance with ANSI.
+	(gen_deref): Don't do the usual unary conversions here.  Let the
+	caller do it.  Note that dereferencing a function pointer yields
+	a function designator, which we call an rvalue, not an lvalue.
+	(gen_address_of): Handle functions specially.
+	(gen_struct_ref): Perform the usual unary conversions before
+	calling gen_deref.
+	(gen_expr): In case for the prefix '*' operator, call
+	gen_usual_unary manually.
+
 Wed May 20 15:29:41 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* mips/tm-tx39.h (MIPS_DEFAULT_FPU_TYPE): Defined as MIPS_FPU_NONE.
@@ -151,19 +167,136 @@ Tue May 19 17:23:54 1998  John Metzler  <jmetzler@cygnus.com>
 	* m32r-rom.c (_initialize_m32r_rom): ditto
 	(init_m32r_cmds): ditto
 
+Tue May 19 14:54:11 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* tracepoint.c (memrange_cmp): use const void * args to avoid
+	ANSI compiler warnings.
+
+1998-05-19  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* ax-gdb.c (gen_fetch, gen_var_ref, gen_deref, find_field,
+	gen_bitfield_ref, gen_expr): Call error, not abort.
+	* ax-general.c (read_const, generic_ext, ax_trace_quick,
+ 	ax_label, ax_const_d, ax_reg, ax_print): Same.
+
+	* tracepoint.c: Remove the $(...) syntax for memranges.
+	(validate_actionline, encode_actions, trace_dump_command): Remove
+	clauses for the $(...) syntax.
+	(parse_and_eval_memrange): Function deleted.
+	(_initialize_tracepoint): Update function description. 
+
+	* gdbtk.c (struct wrapped_call_objs): Change the `func' member to
+ 	be a Tcl_ObjCmdProc, not an Tcl_CmdProc, since it accepts a vector
+ 	of objects as arguments.  Change the object vector to be const,
+	since that's what all the users of this structure seem to expect.
+	(call_obj_wrapper): Cast clientData properly before storing it in
+	the wrapped_args structure.
+
+	* ax-gdb.c (_initialize_ax_gdb): Make the "agent" command a
+ 	subcommand of "maintenance", as it should have been from the
+	beginning.  #include "gdbcmd.h", to get the declaration for
+	maintenancelist.
+	* Makefile.in: Document that dependency.
+
+Tue May 19 12:00:58 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* tracepoint.c (get_tracepoint_by_number): new function, to access
+	traceframe_number for use of the GUI.
+
+	* tracepoint.h: added prototype for get_traceframe_number.
+
 Mon May 18 13:34:27 1998  Keith Seitz  <keiths@cygnus.com>
 
         * dbxread.c (process_one_symbol): If block addresses are relative to
         function start addresses, reset function_start_address whenever a new
         source file is seen.
 
+Mon May 18 13:04:27 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* tracepoint.c (get_tracepoint_by_number): make sure to advance
+	arg pointer even if we fail to parse a useful number.  Otherwise,
+	since this function is called in a loop, it may loop forever!
+	Also change strtol call to allow arbitrary radix.
+	(map_args_over_tracepoints (and other places)): add QUIT; call
+	to loop, to allow breakout using control-C.  Not all loops were
+	analyzed to make sure they could terminate cleanly, but even
+	terminating with a messed-up tracepoint list would be better 
+	than not terminating at all!
+	(tdump_command): check to see if we're connected to a trace-
+	capable target (currently only "remote") before doing anything 
+	else.
+	
 start-sanitize-d30v
 Sat May 16 22:21:48 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* config/d30v/tm-d30v.h (INIT_FRAME_PC_FIRST): Fill in PC into
  	frame struct before extracting saved register offsets.
-
 end-sanitize-d30v
+	
+Fri May 15 22:47:45 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* tracepoint.c (encode_actions): fix typo in printf format string.
+
+1998-05-15  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	Implement a few more tracing operators: ^ | & ~ !
+	* ax-gdb.c (gen_integral_promotions, gen_logical_not,
+	gen_complement): New functions.
+	(gen_binop): New argument MAY_CARRY, indicating whether we need to
+	correct the upper bits of the value after performing the
+	operation.  Callers changed.
+	(gen_expr): Handle BINOP_BITWISE_AND, BINOP_BITWISE_IOR, and
+	BINOP_BITWISE_XOR here as well, by calling gen_binop.  Handle
+	UNOP_LOGICAL_NOT, UNOP_COMPLEMENT.
+
+	* ax-gdb.c (gen_conversion): Reworked to avoid some unnecessary
+	sign extension.
+	
+	* ax-gdb.c (gen_usual_arithmetic): Renamed from gen_usual_binary,
+	to match the ANSI C standard better.  Callers changed.
+	
+	* ax-gdb.c (gen_traced_pop): Add prototyped declaration.
+
+Fri May 15 18:18:38 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	* tracepoint.c (stringify_collections_list): return a collection
+	of strings rather than a single string.
+	(free_actions_list): new function.
+	(encode_actions): process collection of strings returned by
+	stringify_collections_list.
+
+1998-05-15  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* ax-gdb.c (gen_traced_pop): New function.
+	(gen_expr): Call it for comma operator.
+	(gen_trace_for_expr): Call it, instead of writing it out.
+
+	Add facilities for sending arbitrary packets to the remote agent.
+	There are a bunch of improvements to make (make it generic; handle
+	'O' replies properly), but I just want to get this onto the branch.
+	* remote.c (print_packet, remote_packet_command): New functions.
+	(_initialize_remote): Register the remote-packet command.
+
+Thu May 14 17:52:31 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* tracepoint.c: move actionline_type definition to tracepoint.h.
+	(validate_actionline): make non static.
+
+	* tracepoint.h: move actioline_type definition  from tracepoint.c.
+        (validate_actionline) moved prototype from tracepoint.c.
+
+Thu May 14 11:49:18 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	* tracepoint.c (validate_actionline): add additional error
+	checking, remove some dead code.
+	(encode_actions): additional cleanups.
+	(trace_find_command): remove some dead code.
+	(trace_find_pc_command): ditto.
+	(trace_find_tracepoint_command): ditto.
+	(trace_find_line_command): ditto.
+	(trace_find_range_command): ditto.
+	(trace_find_outside_command): ditto.
+
 Thu May 14 5:51:00 1998  Ron Unrau  <runrau@cygnus.com>
 
 	* symtab.c (decode_line_1): set section for "break *<addr>"
@@ -191,11 +324,25 @@ start-sanitize-java
 	targets.
 end-sanitize-java
 
+Wed May 13 11:19:08 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* tracepoint.c (trace_command): Remove old diagnostic code that was
+	preventing tracepoints from being defined with a full-path filename.
+
 Tue May 12 13:17:35 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* stabsread.c (read_one_struct_field): Check for typedef in type
  	tree before clearing bitfield information.
 
+1998-05-11  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* ax-gdb.c (gen_binop): New function, based on gen_mul, to replace
+	gen_mul and gen_div, and handle `%' op as well.  Correctly tests
+	type of arguments.
+	(gen_expr): Factor out common code in binary arithmetic operators.
+	Add support for `%'.
+	(gen_mul, gen_div): Removed.
+	
 Thu May  7 14:49:38 1998  Bob Manson  <manson@charmed.cygnus.com>
 
 	* config/sparc/tm-sp64.h (CALL_DUMMY): Store and retrieve
@@ -235,11 +382,23 @@ Wed May  6 16:34:03 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* somsolib.c: Include gdb_stat.h.
 
+Mon May  4 18:34:01 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	* ax-gdb.c (gen_mul): new function; (gen_div): new function;
+	(gen_expr): add support for * and / operators, call gen_mul and
+	gen_div as appropriate.
+
 Mon May  4 16:24:22 1998  Mark Alexander  <marka@cygnus.com>
 
 	* defs.h (make_run_cleanup): Declare.
 	* solib.c (find_solib): Pass correct number of arguments to
 	make_run_cleanup.
+
+Mon May  4 07:08:25 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* tracepoint.c (trace_actions_command): actions command must set
+	step_count to zero (in case previous actions have set it but the
+	new set does not).
 
 Sat May  2 09:35:07 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
@@ -280,6 +439,12 @@ Thu Apr 30 15:59:54 1998  Jason Molenda  (crash@bugshack.cygnus.com)
         Don't get ahead of yourself and delete Makefile
         before running `make'.
         (local-maintainer-clean, do-maintainer-clean): New rules.
+
+Wed Apr 29 14:02:59 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	* ax-gdb.c (gen_add): when adding a pointer and an int, use
+	the size of the pointer, not the int (typo) to decide how
+	to extend the result.
 
 Wed Apr 29 10:20:40 1998  John Metzler  <jmetzler@cygnus.com>
 start-sanitize-vr4111
@@ -397,6 +562,11 @@ Sun Apr 26 07:57:21 1998  Peter Schauer <pes@regent.e-technik.tu-muenchen.de>
 Fri Apr 24 17:18:56 1998  Geoffrey Noer  <noer@cygnus.com>
 
 	* Makefile.in: enable EXEEXT setting
+
+Fri Apr 24 11:53:49 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	* tracepoint.c (add_local_symbols): change type of type from
+	char to int so that type shows up as 'A' or 'L' not 0.
 
 start-sanitize-r5900
 Fri Apr 24 11:25:07 1998  Jeffrey A Law  (law@cygnus.com)
@@ -764,6 +934,19 @@ Mon Feb 16 14:05:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	* config/d10v/tm-d10v.h (USE_STRUCT_CONVENTION): Use stack when
  	size > 8.
 
+Tue Mar 31 16:39:28 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* tracepoint.c (get_tracepoint_by_number): change warning to note.
+	(delete_trace_command): suppress y/n query if no tracepoints, or
+	if not from_tty.  (trace_pass_command): reject junk at end of args.
+	(read_actions): an action list consisting only of "end" is discarded.
+	(validate_actionline (for collect command)): an argument beginning
+	with a dollar_sign but not recognized as a special argument is
+	parsed like any other expression -- if it isn't a register name,
+	it's rejected.  Also reject an empty argument to while-stepping.
+	(trace_find_command): reject a negative frame number argument.
+	(_initialize_tracepoint): set $traceframe initially to -1.
+
 Mon Mar 30 16:42:12 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* rdi-share/Makefile.am, rdi-share/aclocal.m4,
@@ -783,6 +966,51 @@ Sat Mar 28 15:19:48 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* NEWS: Update for 4.17 release.
 
+Fri Mar 27 10:15:50 1998  David Taylor  <taylor@tito.cygnus.com>
+
+	* tracepoint.c (parse_and_eval_memrange): Fix memory leaks.
+	(encode_actions): Use the new gen_trace_for_expr function
+	instead of expr_to_address_and_size; collect registers when
+	using expressions.  (clear_collection_list): Fix memory leak.
+
+1998-03-26  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* ax-gdb.h (gen_trace_for_expr): Add prototype.
+
+Thu Mar 26 17:24:23 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	* tracepoint.c (validate_actionline): Fix memory leak.
+	(encode_actions): Fix memory leak.
+
+Thu Mar 26 16:16:55 1998  David Taylor  <taylor@tito.cygnus.com>
+
+	* tracepoint.c (trace_mention): New function.
+	(trace_command): Call it.
+
+1998-03-26  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* ax-general.c (ax_reqs): New function.
+	* ax.h (enum agent_flaws, struct agent_reqs): New types.
+	(agent_reqs): New extern prototype.  Well, actually, this was
+	there before, due to a premature checkin.
+ 	(struct aop_map): Add new `data_size' member.
+	* ax-general.c (aop_map): Supply its value.
+	* ax-gdb.c (agent_command): Call ax_reqs, for testing.
+
+	* ax-general.c (ax_print): If we encounter an invalid or
+	incomplete opcode, don't abort; just print an error message.
+
+	* ax-gdb.c: Generate trace bytecodes, as appropriate.
+	(trace_kludge): New variable.
+	(gen_fetch, gen_bitfield_ref): Emit trace bytecodes, if asked
+ 	nicely.
+	(expr_to_agent): Ask for no trace bytecodes.
+	(gen_trace_for_expr): New function.
+	(agent_command): Call it, and display the result appropriately ---
+	no struct axs_value, so no type or kind information.
+
+	* ax-gdb.c: Use TARGET_CHAR_BIT throughout, not HOST_CHAR_BIT.
+
 Thu Mar 26 22:29:28 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
         * tracepoint.c (trace_status_command): Recognize a boolean return
@@ -792,6 +1020,30 @@ Thu Mar 26 22:29:28 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
         (trace_pass_command) added call to modify_tracepoint_hook.
 
         * tracepoint.h export trace_running_p.
+
+Thu Mar 26 13:08:01 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	* tracepoint.c (validate_actionline): do not error out if
+	exp->elts[0].opcode is not on short line -- let
+	expr_to_address_and_size handle it.
+
+1998-03-26  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* tracepoint.c: Include "ax.h", not "agentexpr.h".
+
+	* tracepoint.c (encode_actions): Call expr_to_address_and_size,
+	not simply expr_to_agent.
+
+	* ax-general.c: Comment out code in progress, so everyone else can
+	at least compile.
+
+	* gdbtypes.c: Doc fix.
+
+	* ax.h, ax-gdb.h, ax-general.c, ax-gdb.c: New files.
+	* Makefile.in (REMOTE_OBJS): Add ax-general.o and ax-gdb.o.
+	(SFILES): Add ax-general.c, ax-gdb.c.
+	(ax_h): New variable.
+	(ax-general.o, ax-gdb.o): New rules.
 
 start-sanitize-sky
 Wed Mar 25 11:45:19 1998  Frank Ch. Eigler  <fche@cygnus.com>
