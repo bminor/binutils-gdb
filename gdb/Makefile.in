@@ -163,11 +163,13 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${NAT_CDEPS} \
 ADD_FILES = ${REGEX} ${ALLOCA}  ${XM_ADD_FILES} ${TM_ADD_FILES} ${NAT_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} ${NAT_ADD_FILES}
 
-VERSION = 4.7.9
+VERSION = 4.8.1
 DIST=gdb
 
 LINT=/usr/5bin/lint
 LINTFLAGS= -I${BFD_DIR}
+
+DGFLAGS=
 
 # Host and target-dependent makefile fragments come in here.
 ####
@@ -334,6 +336,8 @@ YYOBJ = c-exp.tab.o m2-exp.tab.o ch-exp.tab.o
 all: gdb
 	$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=$(SUBDIRS)" subdir_do
 check:
+	../dejagnu/runtest -to gdb $(DGFLAGS)
+
 info: force
 	$(MAKE) $(FLAGS_TO_PASS) DO=info "DODIRS=$(SUBDIRS)" subdir_do
 install-info: force
