@@ -110,7 +110,7 @@ parse_hi16 (cd, strp, opindex, valuep)
       if (**strp == '-')
         errmsg = cgen_parse_signed_integer (cd, strp, opindex, (long *) &value);
       else
-        errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, &value);
+        errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, (unsigned long *) &value);
     }
   *valuep = (long) (short) (value & 0xffff);
   return errmsg;
@@ -160,7 +160,7 @@ parse_lo16 (cd, strp, opindex, valuep)
   if (**strp == '-')
     errmsg = cgen_parse_signed_integer (cd, strp, opindex, (long *) &value);
   else
-    errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, &value);
+    errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, (unsigned long *) &value);
   *valuep = (long) (short) (value & 0xffff);
   return errmsg;
 }
