@@ -1,3 +1,15 @@
+Tue Feb 27 11:31:34 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* libhppa.h (pa_arch): Add pa20.
+	(hppa_reloc_field_selector_type): Add R_HPPA_NSEL.
+	(e_nsel): Undefine.  Add to hppa_reloc_field_selector_type_alt.
+	(hppa_field_adjust): Handle e_nsel.
+	* som.c: Provide default definitions for many new relocs found only
+	in hpux10 include files.
+	(som_fixup_formats): Add several new relocs from hpux10.
+	(som_hppa_howto_table): Add hpux10 relocs.
+	(som_write_fixups): Handle R_N0SEL and R_N1SEL hpux10 relocs.
+
 Mon Feb 26 12:52:48 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Edit out recent shared library support, and

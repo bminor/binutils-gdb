@@ -18,7 +18,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef _HPPA_H
 #define _HPPA_H
@@ -34,6 +34,9 @@
 #endif /* GNU C? */
 #endif /* INLINE */
 
+/* The PA instruction set variants.  */
+enum pa_arch {pa10 = 10, pa11 = 11, pa20 = 20};
+
 /* HP PA-RISC relocation types */
 
 enum hppa_reloc_field_selector_type
@@ -47,12 +50,13 @@ enum hppa_reloc_field_selector_type
     R_HPPA_RDSEL = 0x6,
     R_HPPA_LRSEL = 0x7,
     R_HPPA_RRSEL = 0x8,
-    R_HPPA_PSEL = 0x9,
-    R_HPPA_LPSEL = 0xa,
-    R_HPPA_RPSEL = 0xb,
-    R_HPPA_TSEL = 0xc,
-    R_HPPA_LTSEL = 0xd,
-    R_HPPA_RTSEL = 0xe
+    R_HPPA_NSEL  = 0x9,
+    R_HPPA_PSEL = 0xa,
+    R_HPPA_LPSEL = 0xb,
+    R_HPPA_RPSEL = 0xc,
+    R_HPPA_TSEL = 0xd,
+    R_HPPA_LTSEL = 0xe,
+    R_HPPA_RTSEL = 0xf
   };
 
 /* /usr/include/reloc.h defines these to constants.  We want to use
@@ -69,6 +73,7 @@ enum hppa_reloc_field_selector_type
 #undef e_rdsel
 #undef e_lrsel
 #undef e_rrsel
+#undef e_nsel
 #undef e_psel
 #undef e_lpsel
 #undef e_rpsel
@@ -94,6 +99,7 @@ enum hppa_reloc_field_selector_type_alt
     e_rdsel = R_HPPA_RDSEL,
     e_lrsel = R_HPPA_LRSEL,
     e_rrsel = R_HPPA_RRSEL,
+    e_nsel = R_HPPA_NSEL,
     e_psel = R_HPPA_PSEL,
     e_lpsel = R_HPPA_LPSEL,
     e_rpsel = R_HPPA_RPSEL,
@@ -226,10 +232,10 @@ dis_assemble_21 (as21, x)
 }
 
 static INLINE unsigned long
-sign_ext (x, len)
+sign_extend (x, len)
      unsigned int x, len;
 {
-  return (x << (32 - len)) >> (32 - len);
+  return (int)(x >> (len - 1) ? (-1 << len) | x : x);
 }
 
 static INLINE unsigned int
@@ -263,17 +269,10 @@ sign_unext (x, len, result)
 }
 
 static INLINE unsigned long
-low_sign_ext (x, len)
+low_sign_extend (x, len)
      unsigned int x, len;
 {
-  unsigned int temp1, temp2;
-  unsigned int len_ones;
-
-  len_ones = ones (len);
-
-  temp1 = (x & 1) << (len - 1);
-  temp2 = ((x & 0xfffffffe) & len_ones) >> 1;
-  return sign_ext ((temp1 | temp2), len);
+  return (int)((x & 0x1 ? (-1 << (len - 1)) : 0) | x >> 1);
 }
 
 static INLINE void
@@ -311,16 +310,19 @@ hppa_field_adjust (value, constant_value, r_field)
   switch (r_field)
     {
     case e_fsel:		/* F  : no change                      */
+      value += constant_value;
       break;
 
     case e_lssel:		/* LS : if (bit 21) then add 0x800
 				   arithmetic shift right 11 bits */
+      value += constant_value;
       if (value & 0x00000400)
 	value += 0x800;
       value = (value & 0xfffff800) >> 11;
       break;
 
     case e_rssel:		/* RS : Sign extend from bit 21        */
+      value += constant_value;
       if (value & 0x00000400)
 	value |= 0xfffff800;
       else
@@ -328,23 +330,28 @@ hppa_field_adjust (value, constant_value, r_field)
       break;
 
     case e_lsel:		/* L  : Arithmetic shift right 11 bits */
+      value += constant_value;
       value = (value & 0xfffff800) >> 11;
       break;
 
     case e_rsel:		/* R  : Set bits 0-20 to zero          */
+      value += constant_value;
       value = value & 0x7ff;
       break;
 
     case e_ldsel:		/* LD : Add 0x800, arithmetic shift
 				   right 11 bits                  */
+      value += constant_value;
       value += 0x800;
       value = (value & 0xfffff800) >> 11;
       break;
 
     case e_rdsel:		/* RD : Set bits 0-20 to one           */
+      value += constant_value;
       value |= 0xfffff800;
       break;
 
+    case e_nsel:		/* Just a guess at the moment.	       */
     case e_lrsel:		/* LR : L with "rounded" constant      */
       value = value + ((constant_value + 0x1000) & 0xffffe000);
       value = (value & 0xfffff800) >> 11;
@@ -410,7 +417,7 @@ hppa_field_adjust (value, constant_value, r_field)
    FIXME:  opcodes which do not map to a known format
    should return an error of some sort.  */
 
-static char
+static INLINE char
 bfd_hppa_insn2fmt (insn)
      unsigned long insn;
 {
@@ -469,7 +476,7 @@ bfd_hppa_insn2fmt (insn)
 /* Insert VALUE into INSN using R_FORMAT to determine exactly what
    bits to change.  */
    
-static unsigned long
+static INLINE unsigned long
 hppa_rebuild_insn (abfd, insn, value, r_format)
      bfd *abfd;
      unsigned long insn;
