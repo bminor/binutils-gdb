@@ -1,3 +1,34 @@
+Wed May 10 17:57:35 1995  Stu Grossman  (grossman@andros.cygnus.com)
+
+	* config/cpu32bug.exp, config/est.exp, config/hppro.exp,
+	config/rom68k.exp:  New tcl glue for the appropriate monitors.
+	These all just end up calling monitor.exp.
+	* config/monitor.exp (gdb_target_monitor):  Handle `Connection
+	refused' by retrying.  Cleanup some timeout issues.
+	* (gdb_load):  Reduce timeout.  Cleanup some timeout issues.
+	* lib/gdb.exp (gdb_test gdb_test_exact):  Upvar timeout so that
+	callers don't have to set/restore global timeout variable.
+
+	* The following set of changes centralizes management of the global
+	timeout	variable.  This way, it can be set in one target dependent
+	place instead of dozens of places scattered throughout the test suite.
+	If you need to lengthen a timeout, then you should either set timeout
+	in one of the config/{target}.exp files, or multiply it by a factor.
+	Setting it to an absolute value is always going to lose for some
+	targets.
+	* gdb.base/a1-selftest.exp (test_with_self):  Only use local timeout.
+	* gdb.base/callfuncs.exp (do_function_calls):  Don't set timeout.
+	* gdb.base/funcargs.exp:  Don't set timeout.
+	* gdb.base/list.exp (test_forward_search):  Only use local timeout.
+	* gdb.base/printcmds.exp (test_print_string_constants
+	test_print_array_constants):  Don't set timeout.
+	* gdb.base/ptype.exp:  Don't set timeout.
+	* gdb.base/recurse.exp:  Don't set timeout.
+	* gdb.base/return.exp:  Don't set timeout.
+	* gdb.base/watchpoint.exp:  Don't set timeout.
+	* gdb.c++/classes.exp (do_tests):  Don't set timeout.
+	* gdb.c++/virtfunc.exp (test_virtual_calls):  Don't set timeout.
+
 Wed May 10 16:03:23 1995  Torbjorn Granlund  <tege@adder.cygnus.com>
 
 	* Makefile.in: Make clean targets work also when SUBDIRS is empty.

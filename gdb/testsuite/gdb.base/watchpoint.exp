@@ -426,8 +426,6 @@ proc test_watchpoint_triggered_in_syscall {} {
     global prompt
     global timeout
 
-    set saved_timeout $timeout 
-
     # Run until we get to the first marker function.
     set x 0
     set y 0
@@ -442,57 +440,55 @@ proc test_watchpoint_triggered_in_syscall {} {
 
 	gdb_test "set doread = 1" ""
 
-	# Sometimes our string never gets to GDB?!? dejagnu bug?  Whatever
-	# the cause we'll set a reasonably short timeout and resend our
-	# string again if we timeout.
-	set timeout 10
+	# If we send "123\n" before gdb has switched the tty, then it goes
+	# to gdb, not the inferior, and we lose.  So that is why we have
+	# watchpoint.c prompt us, so we can wait for that prompt.
 	send "continue\n"
+	expect {
+	    -re "Continuing\\.\r\ntype stuff for buf now:" {
+		pass "continue to read"
+	    }
+	    default { fail "continue to read"; return }
+	}
 	send "123\n"
 	expect {
 	    -re ".*\[Ww\]atchpoint.*buf\\\[0\\\].*Old value = 0.*New value = 49\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
 	    -re ".*\[Ww\]atchpoint.*buf\\\[1\\\].*Old value = 0.*New value = 50\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
 	    -re ".*\[Ww\]atchpoint.*buf\\\[2\\\].*Old value = 0.*New value = 51\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
 	    -re ".*\[Ww\]atchpoint.*buf\\\[3\\\].*Old value = 0.*New value = 10\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
-	    -re ".*$prompt $" { }
-	    timeout {
-		set timeout $saved_timeout
-		send "123\n"
-		exp_continue
-	    }
+	    -re ".*$prompt $" { pass "sent 123" }
+	    timeout { fail "sent 123" }
 	}
-
-	# Restore the timeout value.
-        set timeout $saved_timeout
 
 	# Examine the values in buf to see how many watchpoints we
 	# should have printed.
 	send "print buf\[0\]\n"
 	expect {
-	    -re ".*= 49.*$prompt $" { set y [expr $y+1] }
-	    -re ".*= 0" { }
-	    default { }
-	    timeout { }
+	    -re ".*= 49.*$prompt $" { set y [expr $y+1]; pass "print buf\[0\]"}
+	    -re ".*= 0.*$prompt $" { pass "print buf\[0\]"}
+	    -re ".*$prompt $" { fail "print buf\[0\]"}
+	    default { fail "print buf\[0\]"}
 	}
 	send "print buf\[1\]\n"
 	expect {
-	    -re ".*= 50.*$prompt $" { set y [expr $y+1] }
-	    -re ".*= 0" { }
-	    default { }
-	    timeout { }
+	    -re ".*= 50.*$prompt $" { set y [expr $y+1]; pass "print buf\[1\]"}
+	    -re ".*= 0.*$prompt $" { pass "print buf\[1\]"}
+	    -re ".*$prompt $" { fail "print buf\[1\]"}
+	    default { fail "print buf\[1\]"}
 	}
 	send "print buf\[2\]\n"
 	expect {
-	    -re ".*= 51.*$prompt $" { set y [expr $y+1] }
-	    -re ".*= 0" { }
-	    default { }
-	    timeout { }
+	    -re ".*= 51.*$prompt $" { set y [expr $y+1]; pass "print buf\[2\]"}
+	    -re ".*= 0.*$prompt $" { pass "print buf\[2\]"}
+	    -re ".*$prompt $" { fail "print buf\[2\]"}
+	    default { fail "print buf\[2\]"}
 	}
 	send "print buf\[3\]\n"
 	expect {
-	    -re ".*= 10.*$prompt $" { set y [expr $y+1] }
-	    -re ".*= 0" { }
-	    default { }
-	    timeout { }
+	    -re ".*= 10.*$prompt $" { set y [expr $y+1]; pass "print buf\[3\]"}
+	    -re ".*= 0.*$prompt $" { pass "print buf\[3\]"}
+	    -re ".*$prompt $" { fail "print buf\[3\]" }
+	    default { fail "print buf\[3\]" }
 	}
 
 	# Did we find what we were looking for?  If not, flunk it.
@@ -546,13 +542,6 @@ gdb_load $objdir/$subdir/$binfile
 
 if [initialize] then {
 
-    # Preserve the old timeout, and set a new one that should be
-    # sufficient to step from marker1 to marker2 with watchpoints
-    # set anywhere.
-
-    set timeoutsave $timeout
-    set timeout 60
-
     test_simple_watchpoint
 
     # The IDT/sim monitor only has 8 (!) open files, of which it uses
@@ -590,7 +579,9 @@ if [initialize] then {
 
     # Only enabled for some targets merely because it has not been tested 
     # elsewhere.
-    if {[istarget "hppa*-*-*"] || [istarget "sparc*-*-sunos*"]} then {
+    # On sparc-sun-sunos4.1.3, GDB was running all the way to the marker4 
+    # breakpoint before stopping for the watchpoint.  I don't know why.
+    if {[istarget "hppa*-*-*"]} then {
 	test_watchpoint_triggered_in_syscall
     }
 
@@ -608,8 +599,4 @@ if [initialize] then {
     if {[istarget "hppa*-*-*"] || [istarget "sparc*-*-sunos*"]} then {
 	test_complex_watchpoint
     }
-
-    # Restore the preserved old timeout value.
-
-    set timeout $timeoutsave
 }

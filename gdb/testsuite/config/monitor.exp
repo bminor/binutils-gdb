@@ -1,0 +1,111 @@
+# Test Framework Driver for GDB driving a ROM monitor (via monitor.c).
+#   Copyright 1995 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+load_lib gdb.exp
+
+#
+# gdb_version -- extract and print the version number of gdb
+#
+proc gdb_version {} {
+    default_gdb_version
+}
+
+#
+# gdb_target_monitor
+# Set gdb to target the monitor
+#
+proc gdb_target_monitor { } {
+    global prompt
+    global exit_status
+    global targetname
+    global serialport
+    global baud
+
+    set timeout 60
+    for {set i 1} {$i <= 3} {incr i -1} {
+	send "target $targetname $serialport\n"
+	expect {
+		-re "Remote target $targetname connected to.*$prompt $"	{
+		     verbose "Set target to $targetname"
+		     break
+		}
+		-re "Connection refused" {
+		    verbose "Connection refused by remote target.  Pausing, and trying again."
+		    sleep 30
+		    continue
+		}
+		timeout { 
+		    perror "Couldn't set target for $targetname."
+		    cleanup
+		    exit $exit_status
+		}
+	}
+    }
+}
+
+#
+# gdb_load -- load a file into the debugger.
+#             return a -1 if anything goes wrong.
+#
+proc gdb_load { arg } {
+    global verbose
+    global loadpath
+    global loadfile
+    global GDB
+    global prompt
+
+    if [gdb_file_cmd $arg] then { return -1 }
+
+    gdb_target_monitor
+
+    send "load\n"
+    set timeout 600
+    expect {
+	-re ".*$prompt $" {
+	    if $verbose>1 then {
+		send_user "Loaded $arg into $GDB\n"
+	    }
+	    return 1
+	}
+	-re "$prompt $"     {
+	    if $verbose>1 then {
+	 perror "GDB couldn't load."
+	    }
+	}
+	timeout {
+	    if $verbose>1 then {
+	 perror "Timed out trying to load $arg."
+	    }
+	}
+    }
+}
+
+#
+# gdb_start -- start GDB running.
+#
+proc gdb_start { } {
+    default_gdb_start
+}
+
+#
+# gdb_exit -- exit gdb
+#
+proc gdb_exit { } {
+    catch default_gdb_exit
+}
+
+gdb_start

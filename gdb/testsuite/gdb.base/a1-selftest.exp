@@ -43,7 +43,6 @@ proc test_with_self {} {
     global prompt
     global tool
     global det_file
-    global timeout
     global decimal
 
     # load yourself into the debugger
@@ -56,7 +55,6 @@ proc test_with_self {} {
     # After gdb is loaded, set the timeout to 30 seconds for the duration
     # of this test, and then back to the original value.
 
-    set oldtimeout $timeout
     set timeout 600
     if {[gdb_load "./x$tool"] <0} then {
 	return -1
@@ -470,7 +468,6 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$prompt $"\
     gdb_exit
 
     # Set the timeout back to the value it had when we were called.
-    set timeout $oldtimeout
 
     # Restart gdb in case next test expects it to be started already.
     gdb_start
