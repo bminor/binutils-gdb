@@ -1764,6 +1764,7 @@ add_to_stringtab (abfd, tab, str, copy)
      boolean copy;
 {
   boolean hash;
+  bfd_size_type index;
 
   /* An index of 0 always means the empty string.  */
   if (*str == '\0')
@@ -1775,9 +1776,16 @@ add_to_stringtab (abfd, tab, str, copy)
   if ((abfd->flags & BFD_TRADITIONAL_FORMAT) != 0)
     hash = false;
 
-  /* Add BYTES_IN_WORD to the return value to account for the space
-     taken up by the count.  */
-  return BYTES_IN_WORD + _bfd_stringtab_add (tab, str, hash, copy);
+  index = _bfd_stringtab_add (tab, str, hash, copy);
+
+  if (index != (bfd_size_type) -1)
+    {
+      /* Add BYTES_IN_WORD to the return value to account for the
+	 space taken up by the string table size.  */
+      index += BYTES_IN_WORD;
+    }
+
+  return index;
 }
 
 /* Write out a strtab.  ABFD is already at the right location in the
