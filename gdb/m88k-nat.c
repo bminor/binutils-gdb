@@ -62,8 +62,7 @@ extern jmp_buf stack_jmp;
 extern int errno;
 
 void
-fetch_inferior_registers (regno)
-     int regno;			/* Original value discarded */
+fetch_inferior_registers (int regno)
 {
   register unsigned int regaddr;
   char buf[MAX_REGISTER_RAW_SIZE];

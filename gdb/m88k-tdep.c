@@ -401,8 +401,7 @@ end_of_prologue_found:
    prologue.  */
 
 CORE_ADDR
-m88k_skip_prologue (ip)
-CORE_ADDR (ip);
+m88k_skip_prologue (CORE_ADDR ip)
 {
   struct frame_saved_regs saved_regs_dummy;
   struct symtab_and_line sal;

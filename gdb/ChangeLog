@@ -1,3 +1,8 @@
+2000-09-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* m88k-nat.c (fetch_inferior_registers): Protoize.
+	* m88k-tdep.c (m88k_skip_prologue): Protoize.
+
 2000-09-15  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* varobj.c (varobj_set_value): Call wrapped version of
