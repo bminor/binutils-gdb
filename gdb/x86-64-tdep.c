@@ -559,7 +559,8 @@ x86_64_use_struct_convention (int gcc_p, struct type *value_type)
    into VALBUF.  */
 
 void
-x86_64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
+x86_64_extract_return_value (struct type *type, struct regcache *regcache,
+			     void *valbuf)
 {
   enum x86_64_reg_class class[MAX_CLASSES];
   int n = classify_argument (type, class, 0);
@@ -576,7 +577,7 @@ x86_64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
       needed_intregs > RET_INT_REGS || needed_sseregs > RET_SSE_REGS)
     {				/* memory class */
       CORE_ADDR addr;
-      memcpy (&addr, regbuf, REGISTER_RAW_SIZE (RAX_REGNUM));
+      regcache_cooked_read (regcache, RAX_REGNUM, &addr);
       read_memory (addr, valbuf, TYPE_LENGTH (type));
       return;
     }
@@ -590,41 +591,40 @@ x86_64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	    case X86_64_NO_CLASS:
 	      break;
 	    case X86_64_INTEGER_CLASS:
-	      memcpy (valbuf + offset,
-		      regbuf + REGISTER_BYTE (ret_int_r[(intreg + 1) / 2]),
-		      8);
+	      regcache_cooked_read (regcache, ret_int_r[(intreg + 1) / 2],
+				    (char *) valbuf + offset);
 	      offset += 8;
 	      intreg += 2;
 	      break;
 	    case X86_64_INTEGERSI_CLASS:
-	      memcpy (valbuf + offset,
-		      regbuf + REGISTER_BYTE (ret_int_r[intreg / 2]), 4);
+	      regcache_cooked_read_part (regcache, ret_int_r[intreg / 2],
+					 0, 4, (char *) valbuf + offset);
 	      offset += 8;
 	      intreg++;
 	      break;
 	    case X86_64_SSEDF_CLASS:
 	    case X86_64_SSESF_CLASS:
 	    case X86_64_SSE_CLASS:
-	      memcpy (valbuf + offset,
-		      regbuf + REGISTER_BYTE (ret_sse_r[(ssereg + 1) / 2]),
-		      8);
+	      regcache_cooked_read_part (regcache,
+					 ret_sse_r[(ssereg + 1) / 2], 0, 8,
+					 (char *) valbuf + offset);
 	      offset += 8;
 	      ssereg += 2;
 	      break;
 	    case X86_64_SSEUP_CLASS:
-	      memcpy (valbuf + offset + 8,
-		      regbuf + REGISTER_BYTE (ret_sse_r[ssereg / 2]), 8);
+	      regcache_cooked_read_part (regcache, ret_sse_r[ssereg / 2],
+					 0, 8, (char *) valbuf + offset);
 	      offset += 8;
 	      ssereg++;
 	      break;
 	    case X86_64_X87_CLASS:
-	      memcpy (valbuf + offset, regbuf + REGISTER_BYTE (FP0_REGNUM),
-		      8);
+	      regcache_cooked_read_part (regcache, FP0_REGNUM,
+					 0, 8, (char *) valbuf + offset);
 	      offset += 8;
 	      break;
 	    case X86_64_X87UP_CLASS:
-	      memcpy (valbuf + offset,
-		      regbuf + REGISTER_BYTE (FP0_REGNUM) + 8, 8);
+	      regcache_cooked_read_part (regcache, FP0_REGNUM,
+					 8, 2, (char *) valbuf + offset);
 	      offset += 8;
 	      break;
 	    case X86_64_MEMORY_CLASS:
@@ -749,7 +749,8 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 /* Write into the appropriate registers a function return value stored
    in VALBUF of type TYPE, given in virtual format.  */
 void
-x86_64_store_return_value (struct type *type, char *valbuf)
+x86_64_store_return_value (struct type *type, struct regcache *regcache,
+			   const void *valbuf)
 {
   int len = TYPE_LENGTH (type);
 
@@ -760,8 +761,7 @@ x86_64_store_return_value (struct type *type, char *valbuf)
 	  && TARGET_LONG_DOUBLE_FORMAT == &floatformat_i387_ext)
 	{
 	  /* Copy straight over.  */
-	  deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM), valbuf,
-					   FPU_REG_RAW_SIZE);
+	  regcache_cooked_write (regcache, FP0_REGNUM, valbuf);
 	}
       else
 	{
@@ -774,8 +774,8 @@ x86_64_store_return_value (struct type *type, char *valbuf)
 	     it is the best we can do.  */
 	  val = extract_floating (valbuf, TYPE_LENGTH (type));
 	  floatformat_from_doublest (&floatformat_i387_ext, &val, buf);
-	  deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM), buf,
-					   FPU_REG_RAW_SIZE);
+	  regcache_cooked_write_part (regcache, FP0_REGNUM,
+			  	      0, FPU_REG_RAW_SIZE, buf);
 	}
     }
   else
@@ -784,13 +784,13 @@ x86_64_store_return_value (struct type *type, char *valbuf)
       int high_size = REGISTER_RAW_SIZE (1);
 
       if (len <= low_size)
-	deprecated_write_register_bytes (REGISTER_BYTE (0), valbuf, len);
+        regcache_cooked_write_part (regcache, 0, 0, len, valbuf);
       else if (len <= (low_size + high_size))
 	{
-	  deprecated_write_register_bytes (REGISTER_BYTE (0), valbuf,
-					   low_size);
-	  deprecated_write_register_bytes (REGISTER_BYTE (1),
-					   valbuf + low_size, len - low_size);
+ 	  regcache_cooked_write_part (regcache, 0, 0, low_size, valbuf);
+ 	  regcache_cooked_write_part (regcache, 1, 0,
+ 				      len - low_size,
+ 				      (const char *) valbuf + low_size);
 	}
       else
 	internal_error (__FILE__, __LINE__,
@@ -979,18 +979,13 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* FIXME: kettenis/20021026: Should we set parm_boundary to 64 here?  */
   set_gdbarch_read_fp (gdbarch, cfi_read_fp);
 
-  /* FIXME: kettenis/20021026: Should be undeprecated.  */
-  set_gdbarch_extract_return_value (gdbarch, legacy_extract_return_value);
-  set_gdbarch_deprecated_extract_return_value (gdbarch,
-					       x86_64_extract_return_value);
+  set_gdbarch_extract_return_value (gdbarch, x86_64_extract_return_value);
+
   set_gdbarch_push_arguments (gdbarch, x86_64_push_arguments);
   set_gdbarch_push_return_address (gdbarch, x86_64_push_return_address);
   set_gdbarch_pop_frame (gdbarch, x86_64_pop_frame);
   set_gdbarch_store_struct_return (gdbarch, x86_64_store_struct_return);
-  /* FIXME: kettenis/20021026: Should be undeprecated.  */
-  set_gdbarch_store_return_value (gdbarch, legacy_store_return_value);
-  set_gdbarch_deprecated_store_return_value (gdbarch,
-					     x86_64_store_return_value);
+  set_gdbarch_store_return_value (gdbarch, x86_64_store_return_value);
   /* Override, since this is handled by x86_64_extract_return_value.  */
   set_gdbarch_extract_struct_value_address (gdbarch, NULL);
   set_gdbarch_use_struct_convention (gdbarch, x86_64_use_struct_convention);
