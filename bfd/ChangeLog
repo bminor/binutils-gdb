@@ -1,3 +1,67 @@
+Tue Jun  1 04:15:57 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* elf.c: New file, for word-size independent code.
+	* elfcode.h (elf_hash): Moved to there, renamed bfd_elf_hash.
+	* Makefile.in: Include elf.o in standard objects.
+
+	* bfd-in.h (CAT3): Define here.
+	* libaout.h, libelf.h: Not here.
+
+	* libelf.h (struct strtab): Define here.
+	(bfd_elf_locate_sh): Declare here.
+	* elfcode.h (struct strtab): Definition deleted.
+
+	* reloc.c (enum bfd_reloc_code_real): Added HPPA_PCREL_CALL_12.
+
+	* Makefile.in: Make "all", not "bfd.h", be the default target.
+	(stmp-bfd.h): New target; prevents rebuilding world if bfd.h
+	hasn't really changed.
+
+	Tue May 25 12:15:15 1993  Michael Meissner  (meissner@osf.org)
+
+	* elfcode.h (elf_hash): Provide elf standard hash function.
+	(various): Key off of the machines use_rela_p field to determine
+	whether to use REL or RELA relocations.
+	(elf_swap_reloc_out, elf_swap_reloc_in): New functions.
+	(elf_make_sections): Allocate a pointer to hold all data for a
+	given section, and copy each fragment into the data region.
+	Update the section's pointer with the REL implicit addends if the
+	machine uses REL relocation.
+
+	* elf32-i386.c (elf_bfd_reloc_type_lookup): Rename to
+	elf_i386_bfd_reloc_type_lookup, and use cpp to map the name back
+	into was elf32-target.h expects.
+	(elf_info_to_howto): Rename to elf_i386_info_to_howto.
+	(elf_i386_bfd_reloc_type_lookup): Add relocation support.
+	(elf_i386_info_to_howto): Add minimal relocation support.
+
+	* libelf.h (elf_backend_data): Add use_rela_p, elf_64_p,
+	elf_info_to_howto_rel fields.
+
+	* elf32-target.h (elf_bed): Add support for new fields in
+	elf_backend_data.
+
+	Sun May 30 16:38:24 1993  Peter Hoogenboom  (hoogen@fast.cs.utah.edu)
+
+	* elf32-hppa.c: Add symbol extension section support, fix
+	relocation howto table, add stub generation support.
+
+	* elf32-hppa.h: Add symbol extension section support, fix
+	relocation howto table, add stub generation support.
+
+	* elfcode.h (bfd_elf_locate_sh): New function to locate ELF
+	section header.
+	(bfd_add_to_strtab):
+	(elf_idx_of_sym):
+	(elf_compute_section_file_positions):
+	(elf_write_object_contents): 
+	(elf_get_sect_thunk): 
+
+	* hppa.c (sign_ext): Reimplement.
+
+	* hppa.c (round_down,round,round_up,L,R,LS,RS,LD,RD,LR,RR): Make
+	these functions static.
+
 Tue Jun  1 14:40:41 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* Makefile.in (bfd.h):  Move closer to headers - and after 'all'!

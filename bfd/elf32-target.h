@@ -54,8 +54,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 static CONST struct elf32_backend_data elf32_bed =
 {
-  elf_info_to_howto,
-  ELF_ARCH,
+#ifdef USE_REL
+  0,				/* use_rela_p */
+#else
+  1,				/* use_rela_p */
+#endif
+  0,				/* elf_64_p */
+  ELF_ARCH,			/* arch */
+  elf_info_to_howto,		/* elf_info_to_howto */
+#ifdef elf_info_to_howto_rel
+  elf_info_to_howto_rel,	/* elf_info_to_howto_rel */
+#else
+  0,				/* elf_info_to_howto_rel */
+#endif
 };
 
 #ifdef TARGET_BIG_SYM
