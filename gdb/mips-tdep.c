@@ -1,5 +1,5 @@
 /* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
-   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998
    Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
@@ -37,6 +37,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "opcode/mips.h"
 
 #define VM_MIN_ADDRESS (CORE_ADDR)0x400000
+
+/* Do not use "TARGET_IS_MIPS64" to test the size of floating point registers */
+#define FP_REGISTER_DOUBLE (REGISTER_VIRTUAL_SIZE(FP0_REGNUM) == 8)
 
 /* FIXME: Put this declaration in frame.h.  */
 extern struct obstack frame_cache_obstack;
@@ -282,6 +285,9 @@ mips32_decode_reg_save (inst, gen_mask, float_mask)
 
   if ((inst & 0xffe00000) == 0xafa00000		/* sw reg,n($sp) */
       || (inst & 0xffe00000) == 0xafc00000	/* sw reg,n($r30) */
+      /* start-sanitize-r5900 */
+      || (inst & 0xffe00000) == 0x7fa00000	/* sq reg,n($sp) */
+      /* end-sanitize-r5900 */
       || (inst & 0xffe00000) == 0xffa00000)	/* sd reg,n($sp) */
     {
       /* It might be possible to use the instruction to
@@ -916,6 +922,15 @@ mips_find_saved_regs (fci)
       {
 	fci->saved_regs->regs[ireg] = reg_position;
 	reg_position -= MIPS_REGSIZE;
+	/* start-sanitize-r5900 */
+#ifdef R5900_128BIT_GPR_HACK
+	/* Gross.  The r5900 has 128bit wide registers, but MIPS_REGSIZE is
+	   still 64bits.  See the comments in tm.h for a discussion of the
+	   various problems this causes.  */
+	if (ireg <= RA_REGNUM)
+	  reg_position -= MIPS_REGSIZE;
+#endif
+	/* end-sanitize-r5900 */
       }
 
   /* The MIPS16 entry instruction saves $s0 and $s1 in the reverse order
@@ -1395,6 +1410,15 @@ restart:
 	  PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
 	  set_reg_offset (reg, sp + low_word + 8 - MIPS_REGSIZE);
 	}
+      /* start-sanitize-r5900 */
+      else if ((high_word & 0xFFE0) == 0x7fa0)	/* sq reg,offset($sp) */
+	{
+	  /* I don't think we have to worry about the Irix 6.2 N32 ABI
+	     issue noted int he sd reg, offset($sp) case above.  */
+	  PROC_REG_MASK(&temp_proc_desc) |= 1 << reg;
+	  set_reg_offset (reg, sp + low_word);
+	}
+      /* end-sanitize-r5900 */
       else if (high_word == 0x27be)			/* addiu $30,$sp,size */
 	{
 	  /* Old gcc frame, r30 is virtual frame pointer.  */
@@ -1708,6 +1732,20 @@ setup_arbitrary_frame (argc, argv)
   return create_new_frame (argv[0], argv[1]);
 }
 
+/*
+ * STACK_ARGSIZE -- how many bytes does a pushed function arg take up on the stack?
+ *
+ * For n32 ABI, eight.
+ * For all others, he same as the size of a general register.
+ */
+#if defined (_MIPS_SIM_NABI32) && _MIPS_SIM == _MIPS_SIM_NABI32
+#define MIPS_NABI32   1
+#define STACK_ARGSIZE 8
+#else
+#define MIPS_NABI32   0
+#define STACK_ARGSIZE MIPS_REGSIZE
+#endif
+
 CORE_ADDR
 mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
      int nargs;
@@ -1775,7 +1813,7 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 
       /* 32-bit ABIs always start floating point arguments in an
          even-numbered floating point register.   */
-      if (!GDB_TARGET_IS_MIPS64 && typecode == TYPE_CODE_FLT
+      if (!FP_REGISTER_DOUBLE && typecode == TYPE_CODE_FLT
           && (float_argreg & 1))
 	float_argreg++;
 
@@ -1792,7 +1830,7 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM
 	  && mips_fpu != MIPS_FPU_NONE)
 	{
-	  if (!GDB_TARGET_IS_MIPS64 && len == 8)
+	  if (!FP_REGISTER_DOUBLE && len == 8)
 	    {
 	      int low_offset = TARGET_BYTE_ORDER == BIG_ENDIAN ? 4 : 0;
 	      unsigned long regval;
@@ -1822,7 +1860,7 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 	      if (!MIPS_EABI)
 	        {
 		  write_register (argreg, regval);
-		  argreg += GDB_TARGET_IS_MIPS64 ? 1 : 2;
+		  argreg += FP_REGISTER_DOUBLE ? 1 : 2;
 		}
 	    }
 	}
@@ -1850,15 +1888,15 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 
 		  int longword_offset = 0;
 		  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-		    if (MIPS_REGSIZE == 8 &&
+		    if (STACK_ARGSIZE == 8 &&
 			(typecode == TYPE_CODE_INT ||
 			 typecode == TYPE_CODE_PTR ||
 			 typecode == TYPE_CODE_FLT) && len <= 4)
-		      longword_offset = MIPS_REGSIZE - len;
+		      longword_offset = STACK_ARGSIZE - len;
 		    else if ((typecode == TYPE_CODE_STRUCT ||
 			      typecode == TYPE_CODE_UNION) &&
-			     TYPE_LENGTH (arg_type) < MIPS_REGSIZE)
-		      longword_offset = MIPS_REGSIZE - len;
+			     TYPE_LENGTH (arg_type) < STACK_ARGSIZE)
+		      longword_offset = STACK_ARGSIZE - len;
 
 		  write_memory (sp + stack_offset + longword_offset, 
 				val, partial_len);
@@ -1907,12 +1945,14 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 		 begins at (4 * MIPS_REGSIZE) in the old ABI.  This 
 		 leaves room for the "home" area for register parameters.
 
-		 In the new EABI, the 8 register parameters do not 
-		 have "home" stack space reserved for them, so the
+		 In the new EABI (and the NABI32), the 8 register parameters 
+		 do not have "home" stack space reserved for them, so the
 		 stack offset does not get incremented until after
 		 we have used up the 8 parameter registers.  */
-	      if (!(MIPS_EABI && argnum < 8))
-		stack_offset += ROUND_UP (partial_len, MIPS_REGSIZE);
+
+	      if (!(MIPS_EABI || MIPS_NABI32) ||
+		  argnum >= 8)
+		stack_offset += ROUND_UP (partial_len, STACK_ARGSIZE);
 	    }
 	}
     }
@@ -1990,7 +2030,8 @@ mips_push_dummy_frame()
 
   /* Save general CPU registers */
   PROC_REG_MASK(proc_desc) = GEN_REG_SAVE_MASK;
-  PROC_REG_OFFSET(proc_desc) = sp - old_sp; /* offset of (Saved R31) from FP */
+  /* PROC_REG_OFFSET is the offset of the first saved register from FP.  */
+  PROC_REG_OFFSET(proc_desc) = sp - old_sp - MIPS_REGSIZE;
   for (ireg = 32; --ireg >= 0; )
     if (PROC_REG_MASK(proc_desc) & (1 << ireg))
       mips_push_register (&sp, ireg);
@@ -1999,7 +2040,9 @@ mips_push_dummy_frame()
   PROC_FREG_MASK(proc_desc) = 
     mips_fpu == MIPS_FPU_DOUBLE ? FLOAT_REG_SAVE_MASK
     : mips_fpu == MIPS_FPU_SINGLE ? FLOAT_SINGLE_REG_SAVE_MASK : 0;
-  PROC_FREG_OFFSET(proc_desc) = sp - old_sp; /* offset of (Saved D18) from FP */
+  /* PROC_FREG_OFFSET is the offset of the first saved *double* register
+     from FP.  */
+  PROC_FREG_OFFSET(proc_desc) = sp - old_sp - 8;
   for (ireg = 32; --ireg >= 0; )
     if (PROC_FREG_MASK(proc_desc) & (1 << ireg))
       mips_push_register (&sp, ireg + FP0_REGNUM);
@@ -2086,7 +2129,7 @@ mips_print_register (regnum, all)
   /* If an even floating point register, also print as double. */
   if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT
       && !((regnum-FP0_REGNUM) & 1))
-    if (REGISTER_RAW_SIZE(regnum) == 4)	/* this would be silly on MIPS64 */
+    if (REGISTER_RAW_SIZE(regnum) == 4)	/* this would be silly on MIPS64 or N32 (Irix 6) */
       {
 	char dbuffer[2 * MAX_REGISTER_RAW_SIZE]; 
 
@@ -2112,7 +2155,7 @@ mips_print_register (regnum, all)
 
   /* If virtual format is floating, print it that way.  */
   if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
-    if (REGISTER_RAW_SIZE(regnum) == 8)
+    if (FP_REGISTER_DOUBLE)
       { /* show 8-byte floats as float AND double: */
 	int offset = 4 * (TARGET_BYTE_ORDER == BIG_ENDIAN);
 
@@ -2387,6 +2430,9 @@ mips32_skip_prologue (pc, lenient)
 		 inst == 0x03a8e823)   	        /* subu $sp,$sp,$t0 */
 	    seen_sp_adjust = 1;
 	else if (((inst & 0xFFE00000) == 0xAFA00000 /* sw reg,n($sp) */
+		  /* start-sanitize-r5900 */
+		  || (inst & 0xFFE00000) == 0x7FA00000 /* sq reg,n($sp) */
+		  /* end-sanitize-r5900 */
 		  || (inst & 0xFFE00000) == 0xFFA00000) /* sd reg,n($sp) */
 		 && (inst & 0x001F0000))	/* reg != $zero */
 	    continue;

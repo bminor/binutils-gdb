@@ -1,3 +1,17 @@
+Tue Jun 23 11:14:04 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* config/mips/tm-irix5.h: Modify to work better on irix 6, by
+	making FP registers 8 bytes instead of 4.
+	REGISTER_BYTES: redefine.  REGISTER_BYTE(): redefine.
+	REGISTER_VIRTUAL_TYPE: redefine.  MIPS_LAST_ARG_REGNUM: redefine.
+	* irix5-nat.c (fetch_core_registers): read 8 bytes per FP register.
+	* mips-tdep.c (FP_REGISTER_DOUBLE): new macro to distinguish 
+	targets with 8-byte FP registers (don't use TARGET_MIPS64).
+	(STACK_ARGSIZE): new macro, how much space is taken up on the
+	stack for each function argument (don't use TARGET_MIPS64).
+	(mips_push_arguments): modify logic to work better on Irix 6
+	(n32 ABI).
+
 Tue Jun 23 12:29:53 1998  Jillian Ye  <jillian@cygnus.com>
 
         * configure.in: Add -lXext to mips_extra_libs

@@ -192,7 +192,8 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
     {
       memcpy ((char *)registers, core_reg_sect, core_reg_size);
     }
-  else if (core_reg_size == (2 * REGISTER_BYTES) && MIPS_REGSIZE == 4)
+  else if (MIPS_REGSIZE == 4 &&
+	   core_reg_size == (2 * MIPS_REGSIZE) * NUM_REGS)
     {
       /* This is a core file from a N32 executable, 64 bits are saved
 	 for all registers.  */
@@ -210,7 +211,20 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 	      *dstp++ = *srcp++;
 	      *dstp++ = *srcp++;
 	      *dstp++ = *srcp++;
-	      srcp += 4;
+	      if (REGISTER_RAW_SIZE(regno) == 4)
+		{
+		  /* copying 4 bytes from eight bytes?
+		     I don't see how this can be right...  */
+		  srcp += 4;	
+		}
+	      else
+		{
+		  /* copy all 8 bytes (sizeof(double)) */
+		  *dstp++ = *srcp++;
+		  *dstp++ = *srcp++;
+		  *dstp++ = *srcp++;
+		  *dstp++ = *srcp++;
+		}
 	    }
 	  else
 	    {
