@@ -1035,7 +1035,7 @@ gen_lib_file ()
 
   sprintf (outfile, "%st.s", prefix);
   f = fopen (outfile, "w");
-
+  fprintf (f, "\t.section	.idata$7\n");
   fprintf (f, "\t%s\t__%s_iname\n", ASM_GLOBAL, imp_name);
   fprintf (f, "__%s_iname:\t%s\t\"%s\"\n",
 	   imp_name, ASM_TEXT, dll_name);
