@@ -237,8 +237,12 @@ dwarf2_gen_line_info (ofs, loc)
   if (loc->filenum == 0 || loc->line == 0)
     return;
 
-  /* Don't emit sequences of line symbols for the same line. */
-  if (line == loc->line && filenum == loc->filenum)
+  /* Don't emit sequences of line symbols for the same line when the
+     symbols apply to assembler code.  It is necessary to emit
+     duplicate line symbols when a compiler asks for them, because GDB
+     uses them to determine the end of the prologue.  */
+  if (debug_type == DEBUG_DWARF2 
+      && line == loc->line && filenum == loc->filenum)
     return;
 
   line = loc->line;
