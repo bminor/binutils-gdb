@@ -1,3 +1,8 @@
+2001-07-22  H.J. Lu <hjl@gnu.org>
+
+	* config/tc-mips.c (s_mips_end): Remove unused variables.
+	(s_mips_frame): Add ATTRIBUTE_UNUSED.
+
 2001-07-17  Andreas Schwab  <schwab@suse.de>
 
 	* config/tc-m68k.c (md_pseudo_table) [OBJ_ELF]: Add .file and

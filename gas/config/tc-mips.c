@@ -11841,9 +11841,7 @@ s_mips_end (x)
   {
     segT saved_seg = now_seg;
     subsegT saved_subseg = now_subseg;
-    fragS *saved_frag = frag_now;
     valueT dot;
-    segT seg;
     expressionS exp;
     char *fragp;
 
@@ -11938,7 +11936,7 @@ s_mips_ent (aent)
 
 static void
 s_mips_frame (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
 #ifdef MIPS_STABS_ELF
 
