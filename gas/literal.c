@@ -1,5 +1,6 @@
 /* as.c - GAS literal pool management.
    Copyright (C) 1994 Free Software Foundation, Inc.
+   Written by Ken Raeburn (raeburn@cygnus.com).
 
    This file is part of GAS, the GNU Assembler.
 
@@ -49,6 +50,17 @@ add_to_literal_pool (sym, addend, sec, size)
   valueT offset;
   bfd_reloc_code_real_type reloc_type;
   char *p;
+  segment_info_type *seginfo = seg_info (sec);
+  fixS *fixp;
+
+  offset = 0;
+  /* @@ This assumes all entries in a given section will be of the same
+     size...  Probably correct, but unwise to rely on.  */
+  for (fixp = seginfo->fix_root; fixp; fixp = fixp->fx_next, offset += size)
+    {
+      if (fixp->fx_addsy == sym && fixp->fx_offset == addend)
+	return offset;
+    }
 
   subseg_set (sec, 0);
   p = frag_more (size);
@@ -70,8 +82,8 @@ add_to_literal_pool (sym, addend, sec, size)
 
   subseg_set (current_section, current_subsec);
 
-  offset = seg_info (sec)->literal_pool_size;
-  seg_info (sec)->literal_pool_size += size;
+  offset = seginfo->literal_pool_size;
+  seginfo->literal_pool_size += size;
 
   return offset;
 }

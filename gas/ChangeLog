@@ -1,3 +1,8 @@
+Tue Jan 18 19:05:32 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* literal.c (add_to_literal_pool): Handle duplicates of values
+	already written to literal pool.
+
 Tue Jan 18 17:23:52 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-aout.c (obj_aout_frob_symbol): Try to get symbols
