@@ -17,6 +17,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+/* The NON_BROKEN_OPCODES cases use the operands in the reverse order
+   from that documented in the Intel manuals.  The opcode values are
+   such that they actually generate different instructions.  These
+   values must not be changed, as existing code depends upon the
+   arguably erroneous behaviour.  */
+
 static const template i386_optab[] = {
 
 #define _ None
@@ -522,7 +528,7 @@ static const template i386_optab[] = {
 /* comparison (without pop) */
 {"fcom", 1, 0xd8d0, _, ShortForm, { FloatReg, 0, 0} },
 {"fcoms", 1, 0xd8, 2, Modrm, { Mem, 0, 0} },	/* compare %st0, mem float  */
-{"ficoml", 1, 0xda, 2, Modrm, { Mem, 0, 0} },	/* compare %st0, mem word  */ 
+{"ficoml", 1, 0xda, 2, Modrm, { Mem, 0, 0} },	/* compare %st0, mem word  */
 {"fcoml", 1, 0xdc, 2, Modrm, { Mem, 0, 0} },	/* compare %st0, mem double  */
 {"fcoml", 1, 0xd8d0, _, ShortForm, { FloatReg, 0, 0} },
 {"ficoms", 1, 0xde, 2, Modrm, { Mem, 0, 0} },	/* compare %st0, mem dword */
@@ -530,7 +536,7 @@ static const template i386_optab[] = {
 /* comparison (with pop) */
 {"fcomp", 1, 0xd8d8, _, ShortForm, { FloatReg, 0, 0} },
 {"fcomps", 1, 0xd8, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem float  */
-{"ficompl", 1, 0xda, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem word  */ 
+{"ficompl", 1, 0xda, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem word  */
 {"fcompl", 1, 0xdc, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem double  */
 {"fcompl", 1, 0xd8d8, _, ShortForm, { FloatReg, 0, 0} },
 {"ficomps", 1, 0xde, 3, Modrm, { Mem, 0, 0} },	/* compare %st0, mem dword */
@@ -584,7 +590,7 @@ static const template i386_optab[] = {
 #ifdef NON_BROKEN_OPCODES
 {"fsubp", 2, 0xdee8, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #else
-{"fsubp", 2, 0xdee8, _, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fsubp", 2, 0xdee0, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #endif
 {"fsubp", 0, 0xdee9, _, NoModrm, { 0, 0, 0} },
 {"fsubs", 1, 0xd8, 4, Modrm, { Mem, 0, 0} },
@@ -606,7 +612,7 @@ static const template i386_optab[] = {
 #ifdef NON_BROKEN_OPCODES
 {"fsubrp", 2, 0xdee0, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #else
-{"fsubrp", 2, 0xdee0, _, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fsubrp", 2, 0xdee8, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #endif
 {"fsubrp", 0, 0xdee1, _, NoModrm, { 0, 0, 0} },
 {"fsubrs", 1, 0xd8, 5, Modrm, { Mem, 0, 0} },
@@ -643,7 +649,7 @@ static const template i386_optab[] = {
 #ifdef NON_BROKEN_OPCODES
 {"fdivp", 2, 0xdef8, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #else
-{"fdivp", 2, 0xdef8, _, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fdivp", 2, 0xdef0, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #endif
 {"fdivp", 0, 0xdef9, _, NoModrm, { 0, 0, 0} },
 {"fdivs", 1, 0xd8, 6, Modrm, { Mem, 0, 0} },
@@ -665,7 +671,7 @@ static const template i386_optab[] = {
 #ifdef NON_BROKEN_OPCODES
 {"fdivrp", 2, 0xdef0, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #else
-{"fdivrp", 2, 0xdef0, _, ShortForm, { FloatAcc, FloatReg, 0} },
+{"fdivrp", 2, 0xdef8, _, ShortForm, { FloatAcc, FloatReg, 0} },
 #endif
 {"fdivrp", 0, 0xdef1, _, NoModrm, { 0, 0, 0} },
 {"fdivrs", 1, 0xd8, 7, Modrm, { Mem, 0, 0} },
@@ -835,8 +841,8 @@ static const reg_entry i386_regtab[] = {
   /* float registers */
   {"st(0)", FloatReg|FloatAcc, 0},
   {"st", FloatReg|FloatAcc, 0},
-  {"st(1)", FloatReg, 1}, {"st(2)", FloatReg, 2}, 
-  {"st(3)", FloatReg, 3}, {"st(4)", FloatReg, 4}, {"st(5)", FloatReg, 5}, 
+  {"st(1)", FloatReg, 1}, {"st(2)", FloatReg, 2},
+  {"st(3)", FloatReg, 3}, {"st(4)", FloatReg, 4}, {"st(5)", FloatReg, 5},
   {"st(6)", FloatReg, 6}, {"st(7)", FloatReg, 7}
 };
 
