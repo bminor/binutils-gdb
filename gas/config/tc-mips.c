@@ -198,6 +198,9 @@ static int file_mips_isa;
 /* The CPU type as a number: 2000, 3000, 4000, 4400, etc.  */
 static int mips_cpu = -1;
 
+/* The argument of the -mabi= flag. */
+static char* mips_abi_string = 0;
+
 /* Whether the 4650 instructions (mad/madu) are permitted.  */
 static int mips_4650 = -1;
 
@@ -9449,8 +9452,8 @@ struct option md_longopts[] = {
   {"fix-4011-branch-bug", no_argument, NULL, OPTION_FIX_4011_BRANCH_BUG},
 #define OPTION_NO_FIX_4011_BRANCH_BUG (OPTION_MD_BASE + 35)
   {"no-fix-4011-branch-bug", no_argument, NULL, OPTION_NO_FIX_4011_BRANCH_BUG},
-  /* end-sanitize-branchbug4011 */
 
+  /* end-sanitize-branchbug4011 */
   /* start-sanitize-vr4xxx */
 #define OPTION_M4121 (OPTION_MD_BASE + 36)
   {"m4121", no_argument, NULL, OPTION_M4121},
@@ -9458,6 +9461,9 @@ struct option md_longopts[] = {
   {"no-m4121", no_argument, NULL, OPTION_NO_M4121},
 
   /* end-sanitize-vr4xxx */
+#define OPTION_MABI (OPTION_MD_BASE + 38)
+  {"mabi", required_argument, NULL, OPTION_MABI},
+
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
 #define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
 #define OPTION_XGOT (OPTION_MD_BASE + 19)
@@ -9868,6 +9874,16 @@ md_parse_option (c, arg)
       break;
 
       /* end-sanitize-branchbug4011 */
+
+    case OPTION_MABI:
+      if (strcmp (arg,"32") == 0
+	  || strcmp (arg,"n32") == 0
+	  || strcmp (arg,"64") == 0
+	  || strcmp (arg,"o64") == 0
+	  || strcmp (arg,"eabi") == 0)
+	mips_abi_string = arg;
+      break;
+
     default:
       return 0;
     }
@@ -12066,6 +12082,21 @@ mips_elf_final_processing ()
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_NOREORDER;
   if (mips_pic != NO_PIC)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_PIC;
+
+  /* Set the MIPS ELF ABI flags. */
+  if (mips_abi_string == 0)
+    ;
+  else if (strcmp (mips_abi_string,"32") == 0)
+    elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_O32;
+  else if (strcmp (mips_abi_string,"o64") == 0)
+    elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_O64;
+  else if (strcmp (mips_abi_string,"eabi") == 0)
+    {
+      if (mips_opts.isa > 2)
+	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI32;
+      else
+	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI64;
+    }
 }
 
 #endif /* OBJ_ELF || OBJ_MAYBE_ELF */

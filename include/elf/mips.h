@@ -121,6 +121,22 @@ END_RELOC_NUMBERS
 /* -mips4 code.  */
 #define E_MIPS_ARCH_4		0x30000000
 
+/* The ABI of the file.  Also see EF_MIPS_ABI2 above. */
+#define EF_MIPS_ABI		0x0000F000
+
+/* The original o32 abi. */
+#define E_MIPS_ABI_O32          0x00001000
+
+/* O32 extended to work on 64 bit architectures */
+#define E_MIPS_ABI_O64          0x00002000
+
+/* EABI in 32 bit mode */
+#define E_MIPS_ABI_EABI32       0x00003000
+
+/* EABI in 64 bit mode */
+#define E_MIPS_ABI_EABI64       0x00004000
+
+
 /* Machine variant if we know it.  This field was invented at Cygnus,
    but it is hoped that other vendors will adopt it.  If some standard
    is developed, this code should be changed to follow it. */

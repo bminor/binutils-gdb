@@ -60,6 +60,7 @@ static int mips_elf_additional_program_headers PARAMS ((bfd *));
 static boolean mips_elf_modify_segment_map PARAMS ((bfd *));
 static INLINE int elf_mips_isa PARAMS ((flagword));
 static INLINE int elf_mips_mach PARAMS ((flagword));
+static INLINE char* elf_mips_abi_name PARAMS ((flagword));
 static boolean mips_elf32_section_from_shdr
   PARAMS ((bfd *, Elf32_Internal_Shdr *, char *));
 static boolean mips_elf32_section_processing
@@ -1716,6 +1717,29 @@ elf_mips_mach (flags)
   return 0;
 }
 
+/* Return printable name for ABI from flagword. */
+
+static INLINE char*
+elf_mips_abi_name (flags)
+     flagword flags;
+{
+  switch (flags & EF_MIPS_ABI)
+    {
+    case 0:
+      return "none";
+    case E_MIPS_ABI_O32:
+      return "O32";
+    case E_MIPS_ABI_O64:
+      return "O64";
+    case E_MIPS_ABI_EABI32:
+      return "EABI32";
+    case E_MIPS_ABI_EABI64:
+      return "EABI64";
+    default:
+      return "unknown abi";
+    }
+}
+
 /* A mapping from BFD reloc types to MIPS ELF reloc types.  */
 
 struct elf_reloc_map {
@@ -2386,6 +2410,24 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
 
       new_flags &= ~ (EF_MIPS_ARCH | EF_MIPS_MACH);
       old_flags &= ~ (EF_MIPS_ARCH | EF_MIPS_MACH);
+    }
+
+  /* Compare ABI's */
+  if ((new_flags & EF_MIPS_ABI) != (old_flags & EF_MIPS_ABI))
+    {
+      /* Only error if both are set (to different values). */
+      if ((new_flags & EF_MIPS_ABI)
+	  && (old_flags & EF_MIPS_ABI))
+	{
+	  (*_bfd_error_handler)
+	    (_("%s: ABI mismatch: linking %s module with previous %s modules"),
+	     bfd_get_filename (ibfd),
+	     elf_mips_abi_name (new_flags),
+	     elf_mips_abi_name (old_flags));
+	  ok = false;
+	}
+      new_flags &= ~EF_MIPS_ABI;
+      old_flags &= ~EF_MIPS_ABI;
     }
 
   /* Warn about any other mismatches */

@@ -1,3 +1,9 @@
+1998-12-15  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* config/tc-mips.c (mips_abi_string): New.
+	(md_parse_option,md_longopts): Add mabi.
+	(mips_elf_final_processing): Set e_flags based on mabi flag.
+
 start-sanitize-vr4xxx
 1998-12-15  Gavin Romig-Koch  <gavin@cygnus.com>
 
