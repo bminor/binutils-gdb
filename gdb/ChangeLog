@@ -1,3 +1,11 @@
+2000-02-16  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* configure.in: Replaces obsolete gdbtk-variable.c with
+	gdbtk-varobj.c.
+	* configure: Regenerate.
+	* Makefile.in: Remove obsolete/extraneous references to
+	gdbtk-var* files.
+
 2000-02-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* target.c (do_target_signal_to_host): Do not use REALTIME_LO in
