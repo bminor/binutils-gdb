@@ -1,3 +1,32 @@
+Mon Feb  5 16:14:42 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Support for building as a shared library, based on patches from
+	Alan Modra <alan@spri.levels.unisa.edu.au>:
+	* configure.in: Add AC_ARG_ENABLE for shared and commonbfdlib.
+	New substitutions: ALLLIBS, PICFLAG, SHLIB, SHLIB_CC,
+	SHLIB_CFLAGS, COMMON_SHLIB, SHLINK.
+	* configure: Rebuild.
+	* Makefile.in (ALLLIBS): New variable.
+	(PICFLAG, SHLIB, SHLIB_CC, SHLIB_CFLAGS): New variables.
+	(COMMON_SHLIB, SHLINK): New variables.
+	(.c.o): If PICFLAG is set, compile twice, once PIC, once normal.
+	(STAGESTUFF): Remove variable.
+	(all): Depend upon $(ALLLIBS) rather than $(TARGETLIB).
+	(stamp-piclist, piclist): New targets.
+	($(SHLIB), $(SHLINK)): New targets.
+	($(OFILES)): Depend upon stamp-picdir.
+	(disassemble.o): Build twice if PICFLAG is set.
+	(MOSTLYCLEAN): Add pic/*.o.
+	(clean): Remove $(SHLIB), $(SHLINK), piclist, and stamp-piclist.
+	(distclean): Remove pic and stamp-picdir.
+	(install): Install shared libraries.
+	(stamp-picdir): New target.
+
+Fri Feb  2 17:15:25 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* sparc-dis.c (print_insn_sparc): Delete DISASM_RAW_INSN support.
+	Print unknown instruction as "unknown", rather than in hex.
+
 Tue Jan 30 14:06:08 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* dis-buf.c: Include "sysdep.h" before "dis-asm.h".
