@@ -402,9 +402,6 @@ extern void mips_pop_frame PARAMS ((void));
 
 #define CALL_DUMMY_ADDRESS() (entry_point_address ())
 
-extern int mips_pc_in_call_dummy PARAMS ((CORE_ADDR pc));
-#define PC_IN_CALL_DUMMY(PC, SP, FP) mips_pc_in_call_dummy (PC)
-
 /* There's a mess in stack frame creation.  See comments in blockframe.c
    near reference to INIT_FRAME_PC_FIRST.  */
 
