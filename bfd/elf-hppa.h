@@ -1012,8 +1012,6 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
    The list will be deleted eventually.
 
    27210 R_PARISC_SEGREL32
-   772 R_PARISC_PLTOFF14DR
-   386 R_PARISC_PLTOFF21L
    6 R_PARISC_LTOFF64
    5 R_PARISC_SEGREL64  */
 
@@ -1174,6 +1172,36 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 		 || r_type == R_PARISC_GPREL16F
 		 || r_type == R_PARISC_GPREL16WF
 		 || r_type == R_PARISC_GPREL16DF)
+	  value = hppa_field_adjust (value, addend, e_fsel);
+	else
+	  value = hppa_field_adjust (value, addend, e_rrsel);
+
+	insn = elf_hppa_relocate_insn (insn, value, r_type);
+	break;
+      }
+
+    case R_PARISC_PLTOFF21L:
+    case R_PARISC_PLTOFF14R:
+    case R_PARISC_PLTOFF14F:
+    case R_PARISC_PLTOFF14WR:
+    case R_PARISC_PLTOFF14DR:
+    case R_PARISC_PLTOFF16F:
+    case R_PARISC_PLTOFF16WF:
+    case R_PARISC_PLTOFF16DF:
+      {
+	/* We want the value of the PLT offset for this symbol, not
+	   the symbol's actual address.  */
+	value = dyn_h->plt_offset + hppa_info->plt_sec->output_offset;
+
+	/* All PLTOFF relocations are basically the same at this point,
+	   except that we need different field selectors for the 21bit
+	   version vs the 14bit versions.  */
+	if (r_type == R_PARISC_PLTOFF21L)
+	  value = hppa_field_adjust (value, addend, e_lrsel);
+	else if (r_type == R_PARISC_PLTOFF14F
+		 || r_type == R_PARISC_PLTOFF16F
+		 || r_type == R_PARISC_PLTOFF16WF
+		 || r_type == R_PARISC_PLTOFF16DF)
 	  value = hppa_field_adjust (value, addend, e_fsel);
 	else
 	  value = hppa_field_adjust (value, addend, e_rrsel);
@@ -1348,6 +1376,7 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_PCREL21L:
     case R_PARISC_LTOFF_TP21L:
     case R_PARISC_DPREL21L:
+    case R_PARISC_PLTOFF21L:
       {
         int w;
 
@@ -1377,6 +1406,9 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DPREL14R:
     case R_PARISC_DPREL14F:
     case R_PARISC_GPREL16F:
+    case R_PARISC_PLTOFF14R:
+    case R_PARISC_PLTOFF14F:
+    case R_PARISC_PLTOFF16F:
       {
         int w;
 
@@ -1401,6 +1433,8 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_LTOFF_TP16DF:
     case R_PARISC_DPREL14DR:
     case R_PARISC_GPREL16DF:
+    case R_PARISC_PLTOFF14DR:
+    case R_PARISC_PLTOFF16DF:
       {
         int w;
 
@@ -1431,6 +1465,8 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_LTOFF_TP16WF:
     case R_PARISC_DPREL14WR:
     case R_PARISC_GPREL16WF:
+    case R_PARISC_PLTOFF14WR:
+    case R_PARISC_PLTOFF16WF:
       {
         int w;
 
