@@ -1,5 +1,5 @@
 /* tc-hppa.c -- Assemble for the PA
-   Copyright (C) 1989, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1996, 1997 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -2622,8 +2622,7 @@ tc_gen_reloc (section, fixp)
   assert (hppa_fixp != 0);
   assert (section != 0);
 
-  reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
-  assert (reloc != 0);
+  reloc = (arelent *) xmalloc (sizeof (arelent));
 
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
   codes = (bfd_reloc_code_real_type **) hppa_gen_reloc_type (stdoutput,
@@ -2633,18 +2632,14 @@ tc_gen_reloc (section, fixp)
 			       fixp->fx_subsy != NULL,
 			       fixp->fx_addsy->bsym);
 
+  if (codes == NULL)
+    abort ();
+
   for (n_relocs = 0; codes[n_relocs]; n_relocs++)
     ;
 
-  relocs = (arelent **)
-    bfd_alloc_by_size_t (stdoutput, sizeof (arelent *) * n_relocs + 1);
-  assert (relocs != 0);
-
-  reloc = (arelent *) bfd_alloc_by_size_t (stdoutput,
-					   sizeof (arelent) * n_relocs);
-  if (n_relocs > 0)
-    assert (reloc != 0);
-
+  relocs = (arelent **) xmalloc (sizeof (arelent *) * n_relocs + 1);
+  reloc = (arelent *) xmalloc (sizeof (arelent) * n_relocs);
   for (i = 0; i < n_relocs; i++)
     relocs[i] = &reloc[i];
 
@@ -4052,7 +4047,7 @@ pa_block (z)
   temp_fill = 0;
 
   p = frag_var (rs_fill, (int) temp_size, (int) temp_size,
-		(relax_substateT) 0, (symbolS *) 0, 1, NULL);
+		(relax_substateT) 0, (symbolS *) 0, (offsetT) 1, NULL);
   bzero (p, temp_size);
 
   /* Convert 2 bytes at a time.  */
