@@ -13366,6 +13366,10 @@ is in the standard mode, using these commands will automatically switch
 in the TUI mode.
 
 @table @code
+@item info win
+@kindex info win
+List and give the size of all displayed windows.
+
 @item layout next
 @kindex layout next
 Display the next layout.

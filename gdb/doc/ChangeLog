@@ -1,3 +1,7 @@
+2002-09-02  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gdb.texinfo (TUI Commands): Document info win command.
+
 2002-09-01  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* gdb.texinfo (TUI Overview): Document breakpoint markers.
