@@ -583,7 +583,7 @@ md_parse_option (c, arg)
 	  ppc_size = PPC_OPCODE_64;
 	}
       /* -mcom means assemble for the common intersection between Power
-	 and PowerPC.  At preseent, we just allow the union, rather
+	 and PowerPC.  At present, we just allow the union, rather
 	 than the intersection.  */
       else if (strcmp (arg, "com") == 0)
 	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_PPC;
