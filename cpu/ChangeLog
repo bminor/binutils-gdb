@@ -1,3 +1,7 @@
+2005-01-28  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris.cpu (mstep): Add missing insn.
+
 2005-01-25  Alexandre Oliva  <aoliva@redhat.com>
 
 	2004-11-10  Alexandre Oliva  <aoliva@redhat.com>

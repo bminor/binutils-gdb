@@ -3395,6 +3395,20 @@
    (cris-arit5 add SI Rd-sfield Rd-sfield Ps rbit rbit))
 )
 
+; MSTEP   Rs,Rd           [ Rd | 01111111 | Rs ]
+(dni-cdt-attr
+ mstep "Multiply step"
+ (MACH-PRE-V32)
+ "mstep $Rs,$Rd"
+ (+ Rd MODE_REGISTER RFIX_MSTEP SIZE_FIXED Rs)
+ (sequence
+   ((SI tmpd) (SI tmps))
+   (set tmps Rs)
+   (set tmpd (add (sll Rd 1) (if SI nbit tmps 0)))
+   (set Rd tmpd)
+   (setf-move SI tmpd))
+)
+
 ; DSTEP   Rs,Rd           [ Rd | 01101111 | Rs ]
 (dni-cdt
  dstep "Division step"
