@@ -95,7 +95,7 @@ This document describes the stabs debugging format.
 
 @dfn{Stabs} refers to a format for information that describes a program
 to a debugger.  This format was apparently invented by
-@c FIXME! <<name of inventor>> at
+Peter Kessler at
 the University of California at Berkeley, for the @code{pdx} Pascal
 debugger; the format has spread widely since then.
 
