@@ -11,7 +11,8 @@ Thu May 15 14:31:28 1997  Nick Clifton  <nickc@cygnus.com>
 Thu May 15 16:40:20 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_link_add_object_symbols): Force ELF symbol size
-	to common symbol size.
+	to common symbol size.  Consistently treat uninitialized symbols
+	in shared objects as common symbols.
 
 Fri May  9 10:15:27 1997  Nick Clifton  <nickc@cygnus.com>
 

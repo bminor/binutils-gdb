@@ -913,26 +913,16 @@ elf_link_add_object_symbols (abfd, info)
 	      && definition
 	      && h->root.type == bfd_link_hash_common
 	      && (sec->flags & SEC_ALLOC) != 0
-	      && (sec->flags & SEC_LOAD) == 0)
+	      && (sec->flags & SEC_LOAD) == 0
+	      && sym.st_size > 0
+	      && bind != STB_WEAK
+	      && ELF_ST_TYPE (sym.st_info) != STT_FUNC)
 	    {
-	      if (! ((*info->callbacks->multiple_common)
-		     (info, h->root.root.string,
-		      h->root.u.c.p->section->owner, bfd_link_hash_common,
-		      h->root.u.c.size, abfd, bfd_link_hash_common,
-		      sym.st_size)))
-		goto error_return;
-
-	      /* If the symbol in the shared library is smaller than
-                 the one we already have, then override it to stick
-                 with the larger symbol.  Set SIZE_CHANGE_OK because
-                 we only want to warn if requested with --warn-common.  */
-	      if (sym.st_size < h->size)
-		{
-		  override = true;
-		  sec = bfd_und_section_ptr;
-		  definition = false;
-		  size_change_ok = true;
-		}
+	      override = true;
+	      sec = bfd_com_section_ptr;
+	      definition = false;
+	      value = sym.st_size;
+	      size_change_ok = true;
 	    }
 
 	  /* Similarly, if we are not looking at a dynamic object, and
