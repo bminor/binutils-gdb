@@ -1,5 +1,8 @@
 2001-05-08  Jim Blandy  <jimb@redhat.com>
 
+	* mn10300-tdep.c (mn10300_gdbarch_init): We do have a
+	dummy_breakpoint_offset; it's zero.
+
 	* mn10300-tdep.c (mn10300_pop_frame): Split the mn10300-specific
 	stuff out into mn10300_pop_frame_regular, and use
 	generic_pop_current_frame.  This lets us share code, and also
