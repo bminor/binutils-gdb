@@ -1,3 +1,9 @@
+2004-04-01  Joel Brobecker  <brobecker@gnat.com>
+
+	* lib/ada.exp (gdb_compile_ada): Emit UNSUPPORTED if we failed
+	to build the application. Remove the message printed when in
+	verbose mode, redundant with the UNSUPPORTED message above.
+
 2004-03-31  Joel Brobecker  <brobecker@gnat.com>
 
 	* gdb.ada (bar.ads, bar.adb, null_record.adb): New files.
