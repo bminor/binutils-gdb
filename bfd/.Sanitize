@@ -61,6 +61,7 @@ ChangeLog.1
 ChangeLog.2
 Makefile.in
 PORTING
+README
 TODO
 VERSION
 acconfig.h
