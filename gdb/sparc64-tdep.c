@@ -615,7 +615,7 @@ sparc64_16_byte_align_p (struct type *type)
 
 static void
 sparc64_store_floating_fields (struct regcache *regcache, struct type *type,
-			       char *valbuf, int element, int bitpos)
+			       const char *valbuf, int element, int bitpos)
 {
   gdb_assert (element < 16);
 
@@ -853,7 +853,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 
   for (i = 0; i < nargs; i++)
     {
-      char *valbuf = value_contents (args[i]);
+      const char *valbuf = value_contents (args[i]);
       struct type *type = value_type (args[i]);
       int len = TYPE_LENGTH (type);
       int regnum = -1;
