@@ -1,5 +1,12 @@
 2003-08-21  Andrew Cagney  <cagney@redhat.com>
 
+	* thread-db.c (verbose_dlsym): New function.
+	(thread_db_load): Use verbose_dlsym
+	(thread_db_new_objfile): Print that libthread_db was loaded, and
+	that thread debugging was enabled.
+
+2003-08-21  Andrew Cagney  <cagney@redhat.com>
+
 	* x86-64-tdep.h (enum x86_64_regnums): Replace #define of
 	X86_64_RAX_REGNUM, X86_64_RDX_REGNUM, X86_64_RDI_REGNUM,
 	X86_64_RBP_REGNUM, X86_64_RSP_REGNUM, X86_64_RIP_REGNUM,
