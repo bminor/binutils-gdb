@@ -1,3 +1,7 @@
+2003-07-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (special_sections): Set attributes for .got and .plt.
+
 2003-07-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Ensure no copy relocs

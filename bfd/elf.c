@@ -2174,9 +2174,9 @@ static struct bfd_elf_special_section const special_sections[] =
   { ".init_array",	0,	NULL,	0,
     SHT_INIT_ARRAY,	SHF_ALLOC + SHF_WRITE },
   { ".fini_array",	0,	NULL,	0,
-    SHT_FINI_ARRAY, SHF_ALLOC + SHF_WRITE },
+    SHT_FINI_ARRAY,	SHF_ALLOC + SHF_WRITE },
   { ".preinit_array",	0,	NULL,	0,
-    SHT_PREINIT_ARRAY, SHF_ALLOC + SHF_WRITE },
+    SHT_PREINIT_ARRAY,	SHF_ALLOC + SHF_WRITE },
   { ".debug_line",	0,	NULL,	0,
     SHT_PROGBITS,	0 },
   { ".debug_info",	0,	NULL,	0,
@@ -2192,13 +2192,13 @@ static struct bfd_elf_special_section const special_sections[] =
   { ".dynsym",		0,	NULL,	0,
     SHT_DYNSYM,		SHF_ALLOC },
   { ".got",		0,	NULL,	0,
-    SHT_PROGBITS,	0 },
+    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
   { ".hash",		0,	NULL,	0,
     SHT_HASH,		SHF_ALLOC },
   { ".interp",		0,	NULL,	0,
     SHT_PROGBITS,	0 },
   { ".plt",		0,	NULL,	0,
-    SHT_PROGBITS,	0 },
+    SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR },
   { ".shstrtab",	0,	NULL,	0,
     SHT_STRTAB,		0 },
   { ".strtab",		0,	NULL,	0,
@@ -2216,11 +2216,11 @@ static struct bfd_elf_special_section const special_sections[] =
   { ".rela",		5,	NULL,	0,
     SHT_RELA,		0 },
   { ".rel",		4,	NULL,	0,
-    SHT_REL,	0 },
+    SHT_REL,		0 },
   { ".stab",		5,	"str",	3,
     SHT_STRTAB,		0 },
   { NULL,		0,	NULL,	0,
-    0,		0 }
+    0,		 0 }
 };
 
 static const struct bfd_elf_special_section *
