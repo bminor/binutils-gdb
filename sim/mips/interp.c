@@ -155,14 +155,18 @@ FILE *tracefh = NULL;
 static void open_trace PARAMS((SIM_DESC sd));
 #endif /* TRACE */
 
+static DECLARE_OPTION_HANDLER (mips_option_handler);
+
 #define OPTION_DINERO_TRACE  200
 #define OPTION_DINERO_FILE   201
 
 static SIM_RC
-mips_option_handler (sd, opt, arg)
+mips_option_handler (sd, cpu, opt, arg, is_command)
      SIM_DESC sd;
+     sim_cpu *cpu;
      int opt;
      char *arg;
+     int is_command;
 {
   int cpu_nr;
   switch (opt)
@@ -296,7 +300,7 @@ sim_open (kind, cb, abfd, argv)
   
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     return 0;
-  sim_add_option_table (sd, mips_options);
+  sim_add_option_table (sd, NULL, mips_options);
 
   /* Allocate core managed memory */
 

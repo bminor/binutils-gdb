@@ -1,3 +1,9 @@
+Fri Feb 27 18:41:01 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* interp.c (DECLARE_OPTION_HANDLER): Use it.
+	(mips_option_handler): New argument `cpu'.
+	(sim_open): Update call to sim_add_option_table.
+
 Wed Feb 25 18:56:22 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips.igen (CxC1): Add tracing.
