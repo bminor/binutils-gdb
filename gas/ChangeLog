@@ -6,6 +6,7 @@ Wed Sep 27 11:33:38 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 Wed Sep 27 10:29:13 1995  Kim Knuttila  <krk@nellie>
 
 	* configure (emulations): Added support for ppcle-*-[pe|winnt]
+	(target_frag): Removed an extraneous PPC definition.
 	* configure.in (emulations): Same
 	* config/tc-ppc.h:
 	* config/tc-ppc.c (md_pseudo_table): Base support for new or altered
@@ -21,6 +22,7 @@ Wed Sep 27 10:29:13 1995  Kim Knuttila  <krk@nellie>
 	(ppc_fix_adjustable): Removed from TE_PE mainline
 	(md_apply_fix3): For TE_PE toc entries, we don't need to mess 
         with fx_addnumber. Removed for the time being.
+	(lots): Put back missing assignments to ppc_current_csect.
 
 Tue Sep 26 14:57:59 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
