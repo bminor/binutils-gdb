@@ -59,6 +59,10 @@
 #include <fcntl.h>
 #include <signal.h>
 
+/* Use definition from readline 4.3.  */
+#undef CTRL_CHAR
+#define CTRL_CHAR(c) ((c) < control_character_threshold && (((c) & 0x80) == 0))
+
 /* This file controls the IO interactions between gdb and curses.
    When the TUI is enabled, gdb has two modes a curses and a standard
    mode.
