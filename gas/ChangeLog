@@ -1,3 +1,12 @@
+Mon Jan 12 13:04:57 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen.c: #include setjmp.h.  Clean up pass over `struct foo' usage.
+	(expr_jmp_buf): New static local.
+	(cgen_parse_operand): Allow use of longjmp in parsing to handle errors.
+	(cgen_md_operand): New function.
+	* tc-m32r.c: Clean up pass over `struct foo' usage.
+	(md_estimate_size_before_relax): Use CGEN_INSN_MNEMONIC.
+
 Tue Jan  6 15:36:02 1998  Richard Henderson  <rth@cygnus.com>
 
 	* symbols.c (S_SET_SEGMENT): Don't set the segment for section syms.

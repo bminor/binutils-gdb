@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with GAS; see the file COPYING.  If not, write to the Free Software
 Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
+#include <setjmp.h>
 #include "ansidecl.h"
 #include "bfd.h"
 #include "cgen-opc.h"
@@ -103,9 +104,9 @@ fixS *
 cgen_record_fixup (frag, where, insn, length, operand, opinfo, symbol, offset)
      fragS *frag;
      int where;
-     const struct cgen_insn *insn;
+     const CGEN_INSN *insn;
      int length;
-     const struct cgen_operand *operand;
+     const CGEN_OPERAND *operand;
      int opinfo;
      symbolS *symbol;
      offsetT offset;
@@ -141,9 +142,9 @@ fixS *
 cgen_record_fixup_exp (frag, where, insn, length, operand, opinfo, exp)
      fragS *frag;
      int where;
-     const struct cgen_insn *insn;
+     const CGEN_INSN *insn;
      int length;
-     const struct cgen_operand *operand;
+     const CGEN_OPERAND *operand;
      int opinfo;
      expressionS *exp;
 {
@@ -160,6 +161,9 @@ cgen_record_fixup_exp (frag, where, insn, length, operand, opinfo, exp)
 
   return fixP;
 }
+
+/* Used for communication between the next two procedures.  */
+static jmp_buf expr_jmp_buf;
 
 /* Callback for cgen interface.  Parse the expression at *STRP.
    The result is an error message or NULL for success (in which case
@@ -181,7 +185,14 @@ cgen_parse_operand (want, strP, opindex, opinfo, resultP, valueP)
      enum cgen_parse_operand_result *resultP;
      bfd_vma *valueP;
 {
-  char *hold;
+#ifdef __STDC__
+  /* These is volatile to survive the setjmp.  */
+  char * volatile hold;
+  enum cgen_parse_operand_result * volatile resultP_1;
+#else
+  static char *hold;
+  static enum cgen_parse_operand_result *resultP_1;
+#endif
   const char *errmsg = NULL;
   expressionS exp;
 
@@ -191,9 +202,21 @@ cgen_parse_operand (want, strP, opindex, opinfo, resultP, valueP)
       return NULL;
     }
 
+  resultP_1 = resultP;
   hold = input_line_pointer;
   input_line_pointer = (char *) *strP;
+
+  /* We rely on md_operand to longjmp back to us.
+     This is done via cgen_md_operand.  */
+  if (setjmp (expr_jmp_buf) != 0)
+    {
+      input_line_pointer = (char *) hold;
+      *resultP_1 = CGEN_PARSE_OPERAND_RESULT_ERROR;
+      return "illegal operand";
+    }
+
   expression (&exp);
+
   *strP = input_line_pointer;
   input_line_pointer = hold;
 
@@ -227,13 +250,25 @@ cgen_parse_operand (want, strP, opindex, opinfo, resultP, valueP)
   return errmsg;
 }
 
+/* md_operand handler to catch unrecognized expressions and halt the
+   parsing process so the next entry can be tried.
+
+   ??? This could be done differently by adding code to `expression'.  */
+
+void
+cgen_md_operand (expressionP)
+     expressionS *expressionP;
+{
+  longjmp (expr_jmp_buf, 1);
+}
+
 /* Finish assembling instruction INSN.
    BUF contains what we've built up so far.
    LENGTH is the size of the insn in bits.  */
 
 void
 cgen_asm_finish_insn (insn, buf, length)
-     const struct cgen_insn *insn;
+     const CGEN_INSN *insn;
      cgen_insn_t *buf;
      unsigned int length;
 {
@@ -303,12 +338,9 @@ cgen_asm_finish_insn (insn, buf, length)
 		f);
       /* Record the operand number with the fragment so md_convert_frag
 	 can use cgen_md_record_fixup to record the appropriate reloc.  */
-      /* FIXME: fr_targ.cgen is used pending deciding whether to
-	 allow a target to add members to fragS.  For more info
-	 see the comment above fr_targ in as.h.  */
-      old_frag->fr_targ.cgen.insn = insn;
-      old_frag->fr_targ.cgen.opindex = fixups[relax_operand].opindex;
-      old_frag->fr_targ.cgen.opinfo = fixups[relax_operand].opinfo;
+      old_frag->fr_cgen.insn = insn;
+      old_frag->fr_cgen.opindex = fixups[relax_operand].opindex;
+      old_frag->fr_cgen.opinfo = fixups[relax_operand].opinfo;
     }
   else
     f = frag_more (byte_len);
@@ -418,11 +450,11 @@ cgen_md_apply_fix3 (fixP, valueP, seg)
   if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
     {
       int opindex = (int) fixP->fx_r_type - (int) BFD_RELOC_UNUSED;
-      const struct cgen_operand *operand = & CGEN_SYM (operand_table) [opindex];
+      const CGEN_OPERAND *operand = & CGEN_SYM (operand_table) [opindex];
       const char *errmsg;
       bfd_reloc_code_real_type reloc_type;
-      struct cgen_fields fields;
-      const struct cgen_insn *insn = (struct cgen_insn *) fixP->tc_fix_data.insn;
+      CGEN_FIELDS fields;
+      const CGEN_INSN *insn = (CGEN_INSN *) fixP->tc_fix_data.insn;
 
       /* If the reloc has been fully resolved finish the operand here.  */
       /* FIXME: This duplicates the capabilities of code in BFD.  */
@@ -506,7 +538,7 @@ cgen_tc_gen_reloc (section, fixP)
 {
   arelent *reloc;
 
-  reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
+  reloc = (arelent *) bfd_alloc (stdoutput, sizeof (arelent));
 
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
   if (reloc->howto == (reloc_howto_type *) NULL)
