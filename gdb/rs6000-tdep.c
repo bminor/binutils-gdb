@@ -30,9 +30,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
-#include <sys/ptrace.h>
-#include <sys/reg.h>
-
 #include <a.out.h>
 #include <sys/file.h>
 #include <sys/stat.h>

@@ -32,7 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #undef fd_set
 
 #include <sys/select.h>
-#include <sys/ptrace.h>
 
 /* Big end is at the low address */
 
@@ -66,14 +65,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* There is no vfork.  */
 
 #define	vfork	fork
-
-/* Do implement the attach and detach commands.  */
-
-#define ATTACH_DETACH
-
-/* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
-
-#define FETCH_INFERIOR_REGISTERS
 
 /* Setpgrp() takes arguments, unlike ordinary Sys V's.  */
 

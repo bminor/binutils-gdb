@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "target.h"
 
-#include "nat.h"
+#include "nm.h"
 
 #ifdef USG
 #include <sys/types.h>
@@ -32,12 +32,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/dir.h>
 #include <signal.h>
 #include <sys/ioctl.h>
-#ifndef USG
+
 #ifdef PTRACE_IN_WRONG_PLACE
 #include <ptrace.h>
 #else
 #include <sys/ptrace.h>
-#endif
 #endif
 
 #if !defined (PT_KILL)

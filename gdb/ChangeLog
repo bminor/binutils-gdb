@@ -1,5 +1,18 @@
 Thu Oct  1 14:36:42 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	Rs6000 native support.
+
+	* infptrace.c: remove #ifdef USG from around include ptrace.h.
+	  machines without this header should not be compiling this file.
+	* nm-rs6000.h, rs6000-nat.c: new files for native support.
+	* rs6000-tdep.c: do not include sys/ptrace.h or sys/reg.h.
+	* rs6000-xdep.c: removed.  all code now in rs6000-nat.c.
+	* xm-rs6000.h: do not include ptrace.h.
+	  (ATTACH_DETACH, FETCH_INFERIOR_REGISTERS): moved to nm-rs6000.h.
+	* config/rs6000.mh (XDEPFILES): removed rs6000-xdep.o.
+	  infptrace.o and inftarg.o move to NATDEPFIES.
+	  (NAT_FILE, NATDEPFILES): new macro for native support.
+
 	Sun3 native support.
 
 	* config/sun3os3.mh, config/sun3os4.mh (NAT_FILE, NATDEPFILES):
