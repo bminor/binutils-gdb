@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux SPARC.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -83,10 +83,12 @@
    Otherwise, return 0.  */
 
 CORE_ADDR
-sparc_linux_sigtramp_start (CORE_ADDR pc, ULONGEST insn0, ULONGEST insn1)
+sparc_linux_sigtramp_start (struct frame_info *next_frame,
+			    ULONGEST insn0, ULONGEST insn1)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   ULONGEST word0, word1;
-  char buf[8];			/* Two instructions.  */
+  unsigned char buf[8];		/* Two instructions.  */
 
   /* We only recognize a signal trampoline if PC is at the start of
      one of the instructions.  We optimize for finding the PC at the
@@ -96,7 +98,7 @@ sparc_linux_sigtramp_start (CORE_ADDR pc, ULONGEST insn0, ULONGEST insn1)
      sequence, there will be a few trailing readable bytes on the
      stack.  */
 
-  if (deprecated_read_memory_nobpt (pc, buf, sizeof buf) != 0)
+  if (!safe_frame_unwind_memory (next_frame, pc, buf, sizeof buf))
     return 0;
 
   word0 = extract_unsigned_integer (buf, 4);
@@ -106,7 +108,7 @@ sparc_linux_sigtramp_start (CORE_ADDR pc, ULONGEST insn0, ULONGEST insn1)
 	return 0;
 
       pc -= 4;
-      if (deprecated_read_memory_nobpt (pc, buf, sizeof buf) != 0)
+      if (!safe_frame_unwind_memory (next_frame, pc, buf, sizeof buf))
 	return 0;
 
       word0 = extract_unsigned_integer (buf, 4);
@@ -120,30 +122,35 @@ sparc_linux_sigtramp_start (CORE_ADDR pc, ULONGEST insn0, ULONGEST insn1)
 }
 
 static CORE_ADDR
-sparc32_linux_sigtramp_start (CORE_ADDR pc)
+sparc32_linux_sigtramp_start (struct frame_info *next_frame)
 {
-  return sparc_linux_sigtramp_start (pc, LINUX32_SIGTRAMP_INSN0,
+  return sparc_linux_sigtramp_start (next_frame, LINUX32_SIGTRAMP_INSN0,
 				     LINUX32_SIGTRAMP_INSN1);
 }
 
 static CORE_ADDR
-sparc32_linux_rt_sigtramp_start (CORE_ADDR pc)
+sparc32_linux_rt_sigtramp_start (struct frame_info *next_frame)
 {
-  return sparc_linux_sigtramp_start (pc, LINUX32_RT_SIGTRAMP_INSN0,
+  return sparc_linux_sigtramp_start (next_frame, LINUX32_RT_SIGTRAMP_INSN0,
 				     LINUX32_RT_SIGTRAMP_INSN1);
 }
 
 static int
-sparc32_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
+sparc32_linux_sigtramp_p (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  char *name;
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
+
   /* If we have NAME, we can optimize the search.  The trampolines are
      named __restore and __restore_rt.  However, they aren't dynamically
      exported from the shared C library, so the trampoline may appear to
      be part of the preceding function.  This should always be sigaction,
      __sigaction, or __libc_sigaction (all aliases to the same function).  */
   if (name == NULL || strstr (name, "sigaction") != NULL)
-    return (sparc32_linux_sigtramp_start (pc) != 0
-	    || sparc32_linux_rt_sigtramp_start (pc) != 0);
+    return (sparc32_linux_sigtramp_start (next_frame) != 0
+	    || sparc32_linux_rt_sigtramp_start (next_frame) != 0);
 
   return (strcmp ("__restore", name) == 0
 	  || strcmp ("__restore_rt", name) == 0);
@@ -170,13 +177,12 @@ sparc32_linux_sigtramp_frame_cache (struct frame_info *next_frame,
   regnum = SPARC_O1_REGNUM;
   sigcontext_addr = frame_unwind_register_unsigned (next_frame, regnum);
 
-  cache->pc = frame_pc_unwind (next_frame);
-  addr = sparc32_linux_sigtramp_start (cache->pc);
+  addr = sparc32_linux_sigtramp_start (next_frame);
   if (addr == 0)
     {
       /* If this is a RT signal trampoline, adjust SIGCONTEXT_ADDR
          accordingly.  */
-      addr = sparc32_linux_rt_sigtramp_start (cache->pc);
+      addr = sparc32_linux_rt_sigtramp_start (next_frame);
       if (addr)
 	sigcontext_addr += 128;
       else
@@ -239,11 +245,7 @@ static const struct frame_unwind sparc32_linux_sigtramp_frame_unwind =
 static const struct frame_unwind *
 sparc32_linux_sigtramp_frame_sniffer (struct frame_info *next_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
-  char *name;
-
-  find_pc_partial_function (pc, &name, NULL, NULL);
-  if (sparc32_linux_pc_in_sigtramp (pc, name))
+  if (sparc32_linux_sigtramp_p (next_frame))
     return &sparc32_linux_sigtramp_frame_unwind;
 
   return NULL;

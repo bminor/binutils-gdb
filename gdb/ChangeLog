@@ -1,5 +1,17 @@
 2004-10-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-linux-tdep.c: Update copyright year.
+	(sparc_linux_sigtramp_start): Change first argument from CORE_ADDR
+	to struct frame_info *.  Use safe_frame_unwind_memory instead of
+	deprecated_read_memory_nobpt.
+	(sparc32_linux_sigtramp_start, sparc32_linux_rt_sigtramp_start):
+	Change argumen from CORE_ADDR to struct frame_info *.  Adjust for
+	changed signature of sparc_linux_sigtramp_start.
+	(sparc32_linux_pc_in_sigtramp): Remove function.
+	(sparc32_linux_sigtramp_p): New function.
+	(sparc32_linux_sigtramp_frame_sniffer): Use
+	sparc32_linux_sigtramp_p instead of sparc32_linux_pc_in_sigtramp.
+
 	* sparc-linux-tdep.c (sparc32_linux_svr4_fetch_link_map_offsets):
 	Remove function.
 	(sparc32_linux_init_abi): Don't set solib_svr4_link_map_offsets.
