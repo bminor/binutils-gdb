@@ -6,6 +6,13 @@ Thu Feb  5 14:21:34 1998  Michael Meissner  <meissner@cygnus.com>
 
 Thu Feb  5 11:51:05 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coff-i386.c (coff_pe_i386_relocate_section): New static function
+	if COFF_WITH_PE.
+	(coff_relocate_section): If COFF_WITH_PE, define as
+	coff_pe_i386_relocate_section.
+	* coffcode.h (coff_write_object_contents): If COFF_IMAGE_WITH_PE,
+	skip empty sections, to match coff_write_object_contents.
+
 	* elf64-mips.c (mips_elf64_swap_reloca_out): Swap out r_addend,
  	rather than swapping out r_offset twice.  From Luke Deller
  	<luked@cse.unsw.edu.au>.
