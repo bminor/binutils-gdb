@@ -1,3 +1,7 @@
+2002-03-20  David O'Brien  <obrien@FreeBSD.org>
+
+	* sparc-nat.c:  Include sys/param.h where possible.
+
 2002-03-12  David O'Brien  <obrien@FreeBSD.org>
 
 	* config/sparc/fbsd.mh: Fix copyright.
