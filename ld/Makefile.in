@@ -768,7 +768,9 @@ distclean: clean
 	-rm -f Makefile config.status TAGS site.exp site.bak config.cache
 	-rm -f config.h stamp-h
 	-rm -rf ldscripts
-realclean: clean distclean
+maintainer-clean realclean: clean distclean
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
 	-rm -f $(LDDISTSTUFF)
 
 .PHONY: diststuff mostlyclean clean distclean realclean

@@ -1,5 +1,7 @@
 Tue Sep 12 12:37:39 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (maintainer-clean): New target.
+
 	* ar.c (replace_members): Don't call write_archive if nothing
 	changed.
 

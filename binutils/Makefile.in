@@ -555,7 +555,9 @@ distclean:
 	-rm -f Makefile config.status *.o *~ \#* core y.* \
 		binutils.?? binutils.??s binutils.aux binutils.log binutils.toc
 	-rm -f $(PROGS) underscore.c config.h stamp-h config.cache config.log
-realclean: clean distclean
+maintainer-clean realclean: clean distclean
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
 	-rm -f $(DISTSTUFF) *.info TAGS
 
 etags tags: TAGS

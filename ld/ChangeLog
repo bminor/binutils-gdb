@@ -6,6 +6,8 @@ Thu Sep 12 12:50:49 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 Tue Sep 12 12:24:17 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (maintainer-clean): New target.
+
 	* ldmain.c (struct warning_callback_info): Define.
 	(warning_callback): Add new parameter symbol.  Call
 	warning_find_reloc to try to find the section and VMA.
