@@ -1,3 +1,13 @@
+Wed Mar 25 16:14:50 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_open): Tidy up device creation.
+
+	* dv-mn103int.c (mn103int_port_event): Drive NMI with non-zero
+ 	value.
+	(mn103int_io_read_buffer): Convert absolute address to register
+ 	block offsets.
+	(read_icr, write_icr): Convert block offset into group offset.
+	
 Wed Mar 25 15:08:49 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_open): Create second 1mb memory region at

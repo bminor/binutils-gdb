@@ -119,10 +119,11 @@ enum mn103int_trigger {
 
 enum mn103int_type {
   NMI_GROUP,
-  INT_GROUP,
+  LEVEL_GROUP,
 };
 
 struct mn103int_group {
+  int gid;
   int level;
   unsigned enable;
   unsigned request;
@@ -134,8 +135,8 @@ struct mn103int_group {
 enum {
   FIRST_NMI_GROUP = 0,
   LAST_NMI_GROUP = 1,
-  FIRST_INT_GROUP = 2,
-  LAST_INT_GROUP = 24,
+  FIRST_LEVEL_GROUP = 2,
+  LAST_LEVEL_GROUP = 24,
   NR_GROUPS,
 };
 
@@ -360,13 +361,14 @@ mn103int_finish (struct hw *me)
       struct mn103int_group *group = &controller->group[gid];
       group->enable = 0xf;
       group->trigger = NEGATIVE_EDGE;
+      group->gid = gid;
       if (FIRST_NMI_GROUP <= gid && gid <= LAST_NMI_GROUP)
 	{
 	  group->type = NMI_GROUP;
 	}
-      else if (FIRST_INT_GROUP <= gid && gid <= LAST_INT_GROUP)
+      else if (FIRST_LEVEL_GROUP <= gid && gid <= LAST_LEVEL_GROUP)
 	{
-	  group->type = INT_GROUP;
+	  group->type = LEVEL_GROUP;
 	}
       else
 	hw_abort (me, "internal error - unknown group id");
@@ -390,7 +392,7 @@ find_highest_interrupt_group (struct hw *me,
   selected = FIRST_NMI_GROUP; 
   controller->group[FIRST_NMI_GROUP].level = 7;
   
-  for (gid = FIRST_INT_GROUP; gid <= LAST_INT_GROUP; gid++)
+  for (gid = FIRST_LEVEL_GROUP; gid <= LAST_LEVEL_GROUP; gid++)
     {
       struct mn103int_group *group = &controller->group[gid];
       if ((group->request & group->enable) != 0)
@@ -491,12 +493,12 @@ mn103int_port_event (struct hw *me,
 	      if ((group->request & group->enable) != 0)
 		{
 		  HW_TRACE ((me, "port-out NMI"));
-		  hw_port_event (me, NMI_PORT, 0, NULL, NULL_CIA);
+		  hw_port_event (me, NMI_PORT, 1, NULL, NULL_CIA);
 		}
 	      break;
 	    }
 	      
-	  case INT_GROUP:
+	  case LEVEL_GROUP:
 	    {
 	      /* if an interrupt is now pending */
 	      HW_TRACE ((me, "port-in port=%d group=%d interrupt=%d - INT",
@@ -513,12 +515,24 @@ mn103int_port_event (struct hw *me,
 
 /* Read/write to to an ICR (group control register) */
 
+static struct mn103int_group *
+decode_group (struct hw *me,
+	      struct mn103int *controller,
+	      unsigned_word base,
+	      unsigned_word *offset)
+{
+  int gid = (base / 8) % NR_GROUPS;
+  *offset = (base % 8);
+  return &controller->group[gid];
+}
+
 static unsigned8
 read_icr (struct hw *me,
 	  struct mn103int *controller,
-	  struct mn103int_group *group,
-	  unsigned_word offset)
+	  unsigned_word base)
 {
+  unsigned_word offset;
+  struct mn103int_group *group = decode_group (me, controller, base, &offset);
   unsigned8 val = 0;
   switch (group->type)
     {
@@ -528,25 +542,35 @@ read_icr (struct hw *me,
 	{
 	case 0:
 	  val = INSERT_ID (group->request);
-	  HW_TRACE ((me, "read-icr 0x%02x", val));
+	  HW_TRACE ((me, "read-icr group=%d nmi 0x%02x",
+		     group->gid, val));
+	  break;
+	default:
 	  break;
 	}
       break;
 
-    case INT_GROUP:
+    case LEVEL_GROUP:
       switch (offset)
 	{
 	case 0:
 	  val = (INSERT_IR (group->request)
 		 | INSERT_ID (group->request & group->enable));
-	  HW_TRACE ((me, "read-icr 0:0x%02x", val));
+	  HW_TRACE ((me, "read-icr group=%d level 0 0x%02x",
+		     group->gid, val));
 	  break;
 	case 1:
 	  val = (INSERT_LV (group->level)
 		 | INSERT_IE (group->enable));
-	  HW_TRACE ((me, "read-icr 1:0x%02x", val));
+	  HW_TRACE ((me, "read-icr level-%d level 1 0x%02x",
+		     group->gid, val));
 	  break;
 	}
+      break;
+
+    default:
+      break;
+
     }
 
   return val;
@@ -555,10 +579,11 @@ read_icr (struct hw *me,
 static void
 write_icr (struct hw *me,
 	   struct mn103int *controller,
-	   struct mn103int_group *group,
-	   unsigned_word offset,
-		 unsigned8 val)
+	   unsigned_word base,
+	   unsigned8 val)
 {
+  unsigned_word offset;
+  struct mn103int_group *group = decode_group (me, controller, base, &offset);
   switch (group->type)
     {
 
@@ -566,7 +591,8 @@ write_icr (struct hw *me,
       switch (offset)
 	{
 	case 0:
-	  HW_TRACE ((me, "write-icr 0x%02x", val));
+	  HW_TRACE ((me, "write-icr group=%d nmi 0x%02x",
+		     group->gid, val));
 	  group->request &= ~EXTRACT_ID (val);
 	  break;
 	default:
@@ -574,17 +600,19 @@ write_icr (struct hw *me,
 	}
       break;
 
-    case INT_GROUP:
+    case LEVEL_GROUP:
       switch (offset)
 	{
 	case 0: /* request/detect */
 	  /* Clear any ID bits and then set them according to IR */
-	  HW_TRACE ((me, "write-icr 0:0x%02x", val));
+	  HW_TRACE ((me, "write-icr group=%d level 0 0x%02x",
+		     group->gid, val));
 	  group->request &= EXTRACT_ID (val);
 	  group->request |= EXTRACT_IR (val) & EXTRACT_ID (val);
 	  break;
 	case 1: /* level/enable */
-	  HW_TRACE ((me, "write-icr 1:0x%02x", val));
+	  HW_TRACE ((me, "write-icr group=%d level 1 0x%02x",
+		     group->gid, val));
 	  group->level = EXTRACT_LV (val);
 	  group->enable = EXTRACT_IE (val);
 	  break;
@@ -593,6 +621,9 @@ write_icr (struct hw *me,
 	  break;
 	}
       push_interrupt_level (me, controller);
+      break;
+
+    default:
       break;
 
     }
@@ -616,10 +647,13 @@ read_iagr (struct hw *me,
 	      & controller->group[val].enable))
 	  /* oops, lost the request */
 	  val = 0;
+	HW_TRACE ((me, "read-iagr %d", (int) val));
 	break;
       }
     default:
       val = 0;
+      HW_TRACE ((me, "read-iagr 0x%08lx bad offset", (long) offset));
+      break;
     }
   return val;
 }
@@ -658,6 +692,7 @@ read_extmd (struct hw *me,
 	  val |= (group[gid].trigger << (gid * 2));
 	}
     }
+  HW_TRACE ((me, "read-extmd 0x%02lx", (long) val));
   return val;
 }
 
@@ -677,6 +712,7 @@ write_extmd (struct hw *me,
 	  /* MAYBE: interrupts already pending? */
 	}
     }
+  HW_TRACE ((me, "write-extmd 0x%02lx", (long) val));
 }
 
 
@@ -685,27 +721,21 @@ write_extmd (struct hw *me,
 static int
 decode_addr (struct hw *me,
 	     struct mn103int *controller,
-	     unsigned_word addr)
+	     unsigned_word address,
+	     unsigned_word *offset)
 {
   int i;
   for (i = 0; i < NR_BLOCKS; i++)
     {
-      if (addr >= controller->block[i].base
-	  && addr <= controller->block[i].bound)
-	return i;
+      if (address >= controller->block[i].base
+	  && address <= controller->block[i].bound)
+	{
+	  *offset = address - controller->block[i].base;
+	  return i;
+	}
     }
   hw_abort (me, "bad address");
   return -1;
-}
-
-static struct mn103int_group *
-decode_group (struct hw *me,
-	      struct mn103int *controller,
-	      unsigned_word addr)
-{
-  unsigned_word offset = (addr - controller->block[ICR_BLOCK].base);
-  int gid = (offset / 8) % NR_GROUPS;
-  return &controller->group[gid];
 }
 
 static unsigned
@@ -720,21 +750,21 @@ mn103int_io_read_buffer (struct hw *me,
   struct mn103int *controller = hw_data (me);
   unsigned8 *buf = dest;
   unsigned byte;
+  HW_TRACE ((me, "read 0x%08lx %d", (long) base, (int) nr_bytes));
   for (byte = 0; byte < nr_bytes; byte++)
     {
       unsigned_word address = base + byte;
-      switch (decode_addr (me, controller, address))
+      unsigned_word offset;
+      switch (decode_addr (me, controller, address, &offset))
 	{
 	case ICR_BLOCK:
-	  buf[byte] = read_icr (me, controller,
-				decode_group (me, controller, address),
-				address);
+	  buf[byte] = read_icr (me, controller, offset);
 	  break;
 	case IAGR_BLOCK:
-	  buf[byte] = read_iagr (me, controller, address);
+	  buf[byte] = read_iagr (me, controller, offset);
 	  break;
 	case EXTMD_BLOCK:
-	  buf[byte] = read_extmd (me, controller, address);
+	  buf[byte] = read_extmd (me, controller, offset);
 	  break;
 	default:
 	  hw_abort (me, "bad switch");
@@ -755,21 +785,21 @@ mn103int_io_write_buffer (struct hw *me,
   struct mn103int *controller = hw_data (me);
   const unsigned8 *buf = source;
   unsigned byte;
+  HW_TRACE ((me, "write 0x%08lx %d", (long) base, (int) nr_bytes));
   for (byte = 0; byte < nr_bytes; byte++)
     {
       unsigned_word address = base + byte;
-      switch (decode_addr (me, controller, address))
+      unsigned_word offset;
+      switch (decode_addr (me, controller, address, &offset))
 	{
 	case ICR_BLOCK:
-	  write_icr (me, controller,
-		     decode_group (me, controller, address),
-		     address, buf[byte]);
+	  write_icr (me, controller, offset, buf[byte]);
 	  break;
 	case IAGR_BLOCK:
 	  /* not allowed */
 	  break;
 	case EXTMD_BLOCK:
-	  write_extmd (me, controller, address, buf[byte]);
+	  write_extmd (me, controller, offset, buf[byte]);
 	  break;
 	default:
 	  hw_abort (me, "bad switch");

@@ -28,8 +28,6 @@ Makefile.in
 config.in
 configure
 configure.in
-dv-mn103cpu.c
-dv-mn103int.c
 mn10300_sim.h
 gencode.c
 interp.c
@@ -40,6 +38,9 @@ sim-main.h
 op_utils.c
 
 Things-to-lose:
+
+dv-mn103cpu.c
+dv-mn103int.c
 
 Do-last:
 
