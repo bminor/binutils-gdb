@@ -151,6 +151,14 @@ int deferred_stores = 0;    /* Accumulated stores we want to do eventually. */
 #endif
 
 
+const unsigned char *
+sparc_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+{
+  static const char breakpoint[] = {0x91, 0xd0, 0x20, 0x01};
+  (*len) = sizeof (breakpoint);
+  return breakpoint;
+}
+
 /* Fetch a single instruction.  Even on bi-endian machines
    such as sparc86x, instructions are always big-endian.  */
 
@@ -3153,7 +3161,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* First set settings that are common for all sparc architectures.  */
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
-  set_gdbarch_breakpoint_from_pc (gdbarch, memory_breakpoint_from_pc);
+  set_gdbarch_breakpoint_from_pc (gdbarch, sparc_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sparc_extract_struct_value_address);

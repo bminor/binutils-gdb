@@ -540,7 +540,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->store_return_value = legacy_store_return_value;
   current_gdbarch->use_struct_convention = generic_use_struct_convention;
   current_gdbarch->prologue_frameless_p = generic_prologue_frameless_p;
-  current_gdbarch->breakpoint_from_pc = legacy_breakpoint_from_pc;
   current_gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   current_gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
   current_gdbarch->decr_pc_after_break = -1;
@@ -701,7 +700,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->inner_than == 0))
     fprintf_unfiltered (log, "\n\tinner_than");
-  /* Skip verify of breakpoint_from_pc, invalid_p == 0 */
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
+      && (gdbarch->breakpoint_from_pc == 0))
+    fprintf_unfiltered (log, "\n\tbreakpoint_from_pc");
   /* Skip verify of memory_insert_breakpoint, invalid_p == 0 */
   /* Skip verify of memory_remove_breakpoint, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)

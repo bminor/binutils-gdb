@@ -642,6 +642,14 @@ find_unwind_entry (CORE_ADDR pc)
   return NULL;
 }
 
+const unsigned char *
+hppa_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+{
+  static const char breakpoint[] = {0x00, 0x01, 0x00, 0x04};
+  (*len) = sizeof (breakpoint);
+  return breakpoint;
+}
+
 /* Return the adjustment necessary to make for addresses on the stack
    as presented by hpread.c.
 

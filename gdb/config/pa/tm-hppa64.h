@@ -97,9 +97,8 @@ extern CORE_ADDR hppa_stack_align (CORE_ADDR sp);
 #define STACK_ALIGN(sp) hppa_stack_align (sp)
 #endif
 
-/* Amount PC must be decremented by after a breakpoint.
-   This is often the number of bytes in BREAKPOINT
-   but not always.
+/* Amount PC must be decremented by after a breakpoint.  This is often
+   the number of bytes returned by BREAKPOINT_FROM_PC but not always.
 
    Not on the PA-RISC */
 

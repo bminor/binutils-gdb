@@ -543,9 +543,9 @@ fetch_instruction (CORE_ADDR addr, instruction_type *it, long long *instr)
    using the pattern seen below. */
 
 #if 0
-#define BREAKPOINT 0x00002000040LL
+#define IA64_BREAKPOINT 0x00002000040LL
 #endif
-#define BREAKPOINT 0x00003333300LL
+#define IA64_BREAKPOINT 0x00003333300LL
 
 static int
 ia64_memory_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
@@ -573,7 +573,7 @@ ia64_memory_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 
   instr = slotN_contents (bundle, slotnum);
   memcpy(contents_cache, &instr, sizeof(instr));
-  replace_slotN_contents (bundle, BREAKPOINT, slotnum);
+  replace_slotN_contents (bundle, IA64_BREAKPOINT, slotnum);
   if (val == 0)
     target_write_memory (addr, bundle, BUNDLE_LEN);
 

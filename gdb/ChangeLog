@@ -1,5 +1,42 @@
 2003-05-15  Andrew Cagney  <cagney@redhat.com>
 
+	* arch-utils.h (legacy_breakpoint_from_pc): Delete declaration.
+	* target.h (memory_breakpoint_from_pc): Delete declaration.
+	* mem-break.c (memory_breakpoint_from_pc): Delete function.
+	* arch-utils.c (legacy_breakpoint_from_pc): Delete function.
+	* monitor.c (monitor_insert_breakpoint): Use
+	gdbarch_breakpoint_from_pc instead of memory_breakpoint_from_pc.
+	* gdbarch.sh (BREAKPOINT_FROM_PC): Do not provide a default.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* sparc-tdep.c (sparc_breakpoint_from_pc): New function.
+	(sparc_gdbarch_init): Set breakpoint_from_pc to
+	sparc_breakpoint_from_pc.
+	* config/sparc/tm-sparc.h (BREAKPOINT): Delete macro.
+	(BREAKPOINT_FROM_PC): Define.
+	(sparc_breakpoint_from_pc): Declare.
+	* hppa-tdep.c (hppa_breakpoint_from_pc): New function.
+	* config/pa/tm-hppa.h (hppa_breakpoint_from_pc): Declare.
+	(BREAKPOINT_FROM_PC): Define.
+	(BREAKPOINT): Delete macro.
+	* target.h: Update comment.
+	* s390-tdep.c (s390_gdbarch_init): Update comments.
+	* remote.c: Update comments.
+	* remote-mips.c: Update comments.
+	* proc-api.c (write_with_trace): Do not check for a breakpoint.
+	* mem-break.c: Update comment.
+	* ia64-tdep.c (IA64_BREAKPOINT): Rename BREAKPOINT.
+	(ia64_memory_insert_breakpoint): Update.
+	* config/sparc/tm-sparc.h: Update comment.
+	* config/pa/tm-hppa64.h: Update comment.
+	* rs6000-tdep.c (BIG_BREAKPOINT, LITTLE_BREAKPOINT): Delete macro.
+	(rs6000_breakpoint_from_pc): Update.
+	* mips-tdep.c (BIG_BREAKPOINT, LITTLE_BREAKPOINT): Delete macro.
+	(PMON_BIG_BREAKPOINT, PMON_LITTLE_BREAKPOINT): Delete macro.
+	(IDT_LITTLE_BREAKPOINT, IDT_LITTLE_BREAKPOINT): Delete macro.
+	(MIPS16_LITTLE_BREAKPOINT, MIPS16_BIG_BREAKPOINT): Delete macro.
+	(mips_breakpoint_from_pc): Update.
+	(mips_dump_tdep): Update.
+
 	* symtab.h (DEPRECATED_SYMBOL_MATCHES_NAME): Delete macro.
 	* minsyms.c (lookup_minimal_symbol): Inline
 	DEPRECATED_SYMBOL_MATCHES_NAME.  Replace STREQ with strcmp.

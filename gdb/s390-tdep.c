@@ -1825,9 +1825,9 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_struct_return (gdbarch, s390_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch, s390_extract_return_value);
   set_gdbarch_deprecated_store_return_value (gdbarch, s390_store_return_value);
-  /* Amount PC must be decremented by after a breakpoint.
-     This is often the number of bytes in BREAKPOINT
-     but not always.  */
+  /* Amount PC must be decremented by after a breakpoint.  This is
+     often the number of bytes returned by BREAKPOINT_FROM_PC but not
+     always.  */
   set_gdbarch_decr_pc_after_break (gdbarch, 2);
   set_gdbarch_deprecated_pop_frame (gdbarch, s390_pop_frame);
   /* Stack grows downward.  */

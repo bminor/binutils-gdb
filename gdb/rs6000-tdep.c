@@ -305,14 +305,11 @@ branch_dest (int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety)
 
 /* Sequence of bytes for breakpoint instruction.  */
 
-#define BIG_BREAKPOINT { 0x7d, 0x82, 0x10, 0x08 }
-#define LITTLE_BREAKPOINT { 0x08, 0x10, 0x82, 0x7d }
-
 const static unsigned char *
 rs6000_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
 {
-  static unsigned char big_breakpoint[] = BIG_BREAKPOINT;
-  static unsigned char little_breakpoint[] = LITTLE_BREAKPOINT;
+  static unsigned char big_breakpoint[] = { 0x7d, 0x82, 0x10, 0x08 };
+  static unsigned char little_breakpoint[] = { 0x08, 0x10, 0x82, 0x7d };
   *bp_size = 4;
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     return big_breakpoint;

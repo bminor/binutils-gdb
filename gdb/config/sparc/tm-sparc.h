@@ -164,9 +164,8 @@ extern int sparc_intreg_size (void);
 
 #define FUNCTION_START_OFFSET 0
 
-/* Amount PC must be decremented by after a breakpoint.
-   This is often the number of bytes in BREAKPOINT
-   but not always.  */
+/* Amount PC must be decremented by after a breakpoint.  This is often
+   the number of bytes returned by BREAKPOINT_FROM_PC but not always.  */
 
 #define DECR_PC_AFTER_BREAK 0
 
@@ -361,7 +360,8 @@ extern CORE_ADDR sparc_pc_adjust (CORE_ADDR);
 
 /* Sequence of bytes for breakpoint instruction (ta 1). */
 
-#define BREAKPOINT {0x91, 0xd0, 0x20, 0x01}
+extern const unsigned char *sparc_breakpoint_from_pc (CORE_ADDR *pc, int *len);
+#define BREAKPOINT_FROM_PC(PC,LEN) sparc_breakpoint_from_pc ((PC), (LEN))
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
