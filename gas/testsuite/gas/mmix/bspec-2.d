@@ -11,13 +11,13 @@ There are 11 section headers, starting at offset 0x..:
        0+18  0+18           9     6     8
 #...
 Relocation section '\.rela\.MMIX\.spec_data\.2' at offset 0x4.. contains 2 entries:
-[ 	]+Offset[ 	]+Info[ 	]+Type[ 	]+Symbol's Value[ 	]+Symbol's Name[ 	]+Addend
-0+  0+600000004 R_MMIX_32             0+  forw                      \+ 0
-0+8  0+700000005 R_MMIX_64             0+  other                     \+ 0
+.*
+0+  0+600000004 R_MMIX_32 +0+ +forw +\+ 0
+0+8  0+700000005 R_MMIX_64 +0+ +other +\+ 0
 
 Relocation section '\.rela\.MMIX\.spec_data\.3' at offset 0x4.. contains 1 entries:
-[ 	]+Offset[ 	]+Info[ 	]+Type[ 	]+Symbol's Value[ 	]+Symbol's Name[ 	]+Addend
-0+  0+700000005 R_MMIX_64             0+  other                     \+ 0
+.*
+0+  0+700000005 R_MMIX_64 +0+ +other +\+ 0
 
 Hex dump of section '\.text':
   0x0+ fd010203                            .*

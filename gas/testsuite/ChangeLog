@@ -1,3 +1,8 @@
+2002-02-24  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gas/mmix/bspec-1.d, gas/mmix/bspec-2.d, gas/mmix/comment-1.d:
+	Adjust to changes in readelf output.
+
 2002-02-22  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* gasp/gasp.exp: If gasp does not exist, do not complain, just
