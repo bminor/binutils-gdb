@@ -1,7 +1,7 @@
 2001-01-12  Chris Demetriou  <cgd@sibyte.com>
 
-	* aclocal.m4 (SIM_AC_OPTION_SCACHE): Properly
-	handle the case where a numeric value is supplied.
+	* aclocal.m4 (SIM_AC_OPTION_SCACHE): Properly handle the case
+	where a numeric value is supplied.
 
 2001-01-06  Ben Elliston  <bje@redhat.com>
 
