@@ -1,3 +1,8 @@
+2000-05-22  David O'Brien  <obrien@FreeBSD.org>
+
+	* configure.in: Recognize alpha-*-freebsd*.
+	* configure: Regenerate.
+
 2000-05-26  Scott Bambrough <scottb@netwinder.org>
 
 	Port of patch to mainline by Nick Clifton <nickc@cygnus.com>:
