@@ -1,3 +1,7 @@
+Tue Dec 23 12:45:50 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config.guess: HP 9000/803 is a PA1.1 machine.
+
 start-sanitize-sky
 Mon Dec 22 14:08:27 1997  Doug Evans  <devans@canuck.cygnus.com>
 
@@ -5,6 +9,7 @@ Mon Dec 22 14:08:27 1997  Doug Evans  <devans@canuck.cygnus.com>
 	* config.sub: Recognize txvu cpu.
 
 end-sanitize-sky
+>>>>>>> 1.1122
 start-sanitize-vr5400
 Mon Dec 22 11:27:12 1997  Jeffrey A Law  (law@cygnus.com)
 
