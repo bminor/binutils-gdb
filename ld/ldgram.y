@@ -155,7 +155,6 @@ mri_script_command:
 			einfo("%P%F: unrecognised keyword in MRI style script '%s'\n",$1);
 			}
 	|	LIST  	{
-			write_map = true;
 			config.map_filename = "-";
 			}
         |       ORDER ordernamelist
@@ -282,7 +281,7 @@ sec_or_group_p1:
 
 statement_anywhere:
 		ENTRY '(' NAME ')'
-		{ lang_add_entry($3); }
+		{ lang_add_entry ($3, 0); }
 	|	assignment end
 	;
 

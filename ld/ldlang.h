@@ -64,6 +64,7 @@ typedef struct lang_statement_header_struct
       lang_object_symbols_statement_enum,
       lang_fill_statement_enum,
       lang_data_statement_enum,
+      lang_reloc_statement_enum,
       lang_target_statement_enum,
       lang_output_statement_enum,
       lang_padding_statement_enum,
@@ -148,8 +149,38 @@ typedef struct
   bfd_vma output_vma;
 } lang_data_statement_type;
 
+/* Generate a reloc in the output file.  */
 
+typedef struct
+{
+  lang_statement_header_type header;
 
+  /* Reloc to generate.  */
+  bfd_reloc_code_real_type reloc;
+
+  /* Reloc howto structure.  */
+  const reloc_howto_type *howto;
+
+  /* Section to generate reloc against.  Exactly one of section and
+     name must be NULL.  */
+  asection *section;
+
+  /* Name of symbol to generate reloc against.  Exactly one of section
+     and name must be NULL.  */
+  const char *name;
+
+  /* Expression for addend.  */
+  union etree_union *addend_exp;
+
+  /* Resolved addend.  */
+  bfd_vma addend_value;
+
+  /* Output section where reloc should be performed.  */
+  asection *output_section;
+
+  /* VMA within output section.  */
+  bfd_vma output_vma;
+} lang_reloc_statement_type;
 
 typedef struct lang_input_statement_struct
 {
@@ -259,6 +290,7 @@ typedef union lang_statement_union
   union lang_statement_union *next;
   lang_wild_statement_type wild_statement;
   lang_data_statement_type data_statement;
+  lang_reloc_statement_type reloc_statement;
   lang_address_statement_type address_statement;
   lang_output_section_statement_type output_section_statement;
   lang_afile_asection_pair_statement_type afile_asection_pair_statement;
@@ -273,7 +305,6 @@ typedef union lang_statement_union
   lang_padding_statement_type padding_statement;
 } lang_statement_union_type;
 
-extern bfd_size_type largest_section;
 extern lang_output_section_statement_type *abs_output_section;
 extern boolean lang_has_input_file;
 extern etree_type *base;
@@ -297,7 +328,7 @@ extern void lang_enter_output_section_statement
 extern void lang_final PARAMS ((void));
 extern void lang_process PARAMS ((void));
 extern void lang_section_start PARAMS ((const char *, union etree_union *));
-extern void lang_add_entry PARAMS ((const char *));
+extern void lang_add_entry PARAMS ((const char *, int));
 extern void lang_add_target PARAMS ((const char *));
 extern void lang_add_wild PARAMS ((const char *const , const char *const));
 extern void lang_add_map PARAMS ((const char *));
@@ -324,37 +355,6 @@ extern void lang_for_each_file
        statement != (lang_input_statement_type *)NULL;		\
        statement = (lang_input_statement_type *)statement->next)\
   
-#define LANG_FOR_EACH_INPUT_SECTION(statement, abfd, section, x)	\
-  {									\
-    extern lang_statement_list_type file_chain;				\
-    lang_input_statement_type *statement;				\
-    for (statement = (lang_input_statement_type *)file_chain.head;	\
-	 statement != (lang_input_statement_type *)NULL;		\
-	 statement = (lang_input_statement_type *)statement->next)	\
-      {									\
-	asection *section;						\
-	bfd *abfd = statement->the_bfd;					\
-        for (section = abfd->sections;					\
-	     section != (asection *)NULL;				\
-	     section = section->next)					\
-	  {								\
-	    x;								\
-	  }								\
-      }									\
-  }
-
-#define LANG_FOR_EACH_OUTPUT_SECTION(section, x)		\
-  {								\
-    extern bfd *output_bfd;					\
-    asection *section;      					\
-    for (section = output_bfd->sections;			\
-	 section != (asection *)NULL;				\
-	 section = section->next)				\
-      {								\
-	x;							\
-      }								\
-  }
-
 extern void lang_process PARAMS ((void));
 extern void ldlang_add_file PARAMS ((lang_input_statement_type *));
 extern lang_output_section_statement_type *lang_output_section_find
@@ -369,8 +369,16 @@ extern void ldlang_add_undef PARAMS ((const char *const name));
 extern void lang_add_output_format PARAMS ((const char *, int from_script));
 extern void lang_list_init PARAMS ((lang_statement_list_type*));
 extern void lang_add_data PARAMS ((int type, union etree_union *));
+extern void lang_add_reloc
+  PARAMS ((bfd_reloc_code_real_type reloc, const reloc_howto_type *howto,
+	   asection *section, const char *name, union etree_union *addend));
 extern void lang_for_each_statement
   PARAMS ((void (*func) (lang_statement_union_type *)));
 extern PTR stat_alloc PARAMS ((size_t size));
+extern bfd_vma lang_size_sections
+  PARAMS ((lang_statement_union_type *s,
+	   lang_output_section_statement_type *output_section_statement,
+	   lang_statement_union_type **prev, fill_type fill,
+	   bfd_vma dot, boolean relax));
 
 #endif

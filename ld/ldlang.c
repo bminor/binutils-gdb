@@ -143,7 +143,7 @@ lang_output_section_statement_type *abs_output_section;
 lang_statement_list_type *stat_ptr = &statement_list;
 lang_statement_list_type file_chain =
 {0};
-CONST char *entry_symbol = 0;
+static const char *entry_symbol = 0;
 boolean lang_has_input_file = false;
 boolean had_output_filename = false;
 boolean lang_float_flag = false;
@@ -2621,12 +2621,25 @@ lang_section_start (name, address)
   ad->address = address;
 }
 
+/* Set the start symbol to NAME.  CMDLINE is nonzero if this is called
+   because of a -e argument on the command line, or zero if this is
+   called by ENTRY in a linker script.  Command line arguments take
+   precedence.  */
+
 void
-lang_add_entry (name)
+lang_add_entry (name, cmdline)
      CONST char *name;
+     int cmdline;
 {
-  if (entry_symbol == NULL)
-    entry_symbol = name;
+  static int from_cmdline;
+
+  if (entry_symbol == NULL
+      || cmdline
+      || ! from_cmdline)
+    {
+      entry_symbol = name;
+      from_cmdline = cmdline;
+    }
 }
 
 void

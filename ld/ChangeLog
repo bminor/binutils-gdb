@@ -1,7 +1,10 @@
 Fri May 27 01:08:14 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
-	* ldlang.c (lang_add_entry): Only set the entry symbol if it has
-	not been set already.
+	* ldlang.c (entry_symbol): Make static.
+	(lang_add_entry): Add cmdline argument.
+	* ldlang.h (lang_add_entry): Change prototype.
+	* ldgram.y (statement_anywhere): Change lang_add_entry call.
+	* lexsup.c (parse_args): Likewise.
 
 Tue May 24 16:13:43 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 

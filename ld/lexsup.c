@@ -168,7 +168,7 @@ parse_args (argc, argv)
 	     be used to select an output format.  */
 	  break;
 	case 'e':
-	  lang_add_entry (optarg);
+	  lang_add_entry (optarg, 1);
 	  break;
 	case 'F':
 	  /* Ignore.  */
