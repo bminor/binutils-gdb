@@ -1319,9 +1319,10 @@ xcoff_link_add_symbols (abfd, info)
 	    enclosing = coff_section_from_bfd_index (abfd, sym.n_scnum);
 	    if (enclosing == NULL)
 	      goto error_return;
-	    if ((bfd_vma) sym.n_value < enclosing->vma
-		|| ((bfd_vma) sym.n_value + aux.x_csect.x_scnlen.l
-		    > enclosing->vma + enclosing->_raw_size))
+	    if (! bfd_is_abs_section (enclosing)
+		&& ((bfd_vma) sym.n_value < enclosing->vma
+		    || ((bfd_vma) sym.n_value + aux.x_csect.x_scnlen.l
+			> enclosing->vma + enclosing->_raw_size)))
 	      {
 		(*_bfd_error_handler)
 		  ("%s: csect `%s' not in enclosing section",
@@ -1362,32 +1363,36 @@ xcoff_link_add_symbols (abfd, info)
                could do a binary search here.  FIXME.  (XCOFF
                unfortunately does not require that symbols be sorted
                by address, or this would be a simple merge).  */
-	    rel = reloc_info[enclosing->target_index].relocs;
-	    rel_csect = reloc_info[enclosing->target_index].csects;
-	    for (relindx = 0;
-		 relindx < enclosing->reloc_count;
-		 relindx++, rel++, rel_csect++)
+	    if (enclosing->owner == abfd)
 	      {
-		if (*rel_csect == NULL
-		    && rel->r_vaddr >= csect->vma
-		    && rel->r_vaddr < csect->vma + csect->_raw_size)
+		rel = reloc_info[enclosing->target_index].relocs;
+		rel_csect = reloc_info[enclosing->target_index].csects;
+		for (relindx = 0;
+		     relindx < enclosing->reloc_count;
+		     relindx++, rel++, rel_csect++)
 		  {
-		    csect->rel_filepos = (enclosing->rel_filepos
-					  + relindx * bfd_coff_relsz (abfd));
-		    break;
+		    if (*rel_csect == NULL
+			&& rel->r_vaddr >= csect->vma
+			&& rel->r_vaddr < csect->vma + csect->_raw_size)
+		      {
+			csect->rel_filepos = (enclosing->rel_filepos
+					      + (relindx
+						 * bfd_coff_relsz (abfd)));
+			break;
+		      }
 		  }
-	      }
-	    while (relindx < enclosing->reloc_count
-		   && *rel_csect == NULL
-		   && rel->r_vaddr >= csect->vma
-		   && rel->r_vaddr < csect->vma + csect->_raw_size)
-	      {
-		*rel_csect = csect;
-		csect->flags |= SEC_RELOC;
-		++csect->reloc_count;
-		++relindx;
-		++rel;
-		++rel_csect;
+		while (relindx < enclosing->reloc_count
+		       && *rel_csect == NULL
+		       && rel->r_vaddr >= csect->vma
+		       && rel->r_vaddr < csect->vma + csect->_raw_size)
+		  {
+		    *rel_csect = csect;
+		    csect->flags |= SEC_RELOC;
+		    ++csect->reloc_count;
+		    ++relindx;
+		    ++rel;
+		    ++rel_csect;
+		  }
 	      }
 
 	    /* There are a number of other fields and section flags
