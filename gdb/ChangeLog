@@ -1,4 +1,21 @@
+Wed Aug 26 16:02:01 1992  Fred Fish  (fnf@cygnus.com)
+
+	* cplus-dem.c:  Reorder args to most local functions to make them
+	follow the consistent pattern of struct work_stuff pointer first,
+	followed by pointer into string being demangled, followed by
+	pointer to the string where the result is being stored, followed
+	by other args.  Also generally replace most variables of name
+	"type" with "mangled" for consistency.  They all pointed to the
+	same string but half were one name and half the other.
+	* cplus-dem.c (LONGERNAMES):  Remove #ifndef's.
+	* cplus-dem.c (demangle_qualified):  Rewrite to clean up and allow
+	use whenever a qualified name is being demangled.
+	* cplus-dem.c (do_type):  Qualified names are treated similarly
+	to fundamental types, not as modifiers of fundamental types.	
+
 Mon Aug 24 20:44:38 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* configure.in:  Add sparclite as a target.
 
 	* sparc-stub.c (handle_exception):  Flush instruction cache just
 	before returning to the user.  (hexToInt):  Fix overzealous cleanup.
