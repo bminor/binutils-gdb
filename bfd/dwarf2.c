@@ -402,7 +402,7 @@ read_indirect_string (unit, buf, bytes_read_ptr)
       return NULL;
     }
 
-  buf = stash->dwarf_str_buffer + offset;  
+  buf = stash->dwarf_str_buffer + offset;
   if (*buf == '\0')
     return NULL;
   return buf;
@@ -614,7 +614,7 @@ read_abbrevs (abfd, offset, stash)
       abbrevs[hash_number] = cur_abbrev;
 
       /* Get next abbreviation.
-         Under Irix6 the abbreviations for a compilation unit are not
+	 Under Irix6 the abbreviations for a compilation unit are not
 	 always properly terminated with an abbrev number of 0.
 	 Exit loop if we encounter an abbreviation which we have
 	 already read (which means we are about to read the abbreviations
@@ -806,7 +806,8 @@ struct line_info_table
   char* comp_dir;
   char** dirs;
   struct fileinfo* files;
-  struct line_info* last_line;
+  struct line_info* last_line;  /* largest VMA */
+  struct line_info* lcl_head;   /* local head; used in 'add_line_info' */
 };
 
 struct funcinfo
@@ -817,6 +818,11 @@ struct funcinfo
   bfd_vma high;
 };
 
+/* add_line_info: adds a new entry to the line_info list in the
+   line_info_table, ensuring that the list is sorted.  Note that the
+   line_info list is sorted from highest to lowest VMA (with possible
+   duplicates); that is, line_info->prev_line always accesses an equal
+   or smaller VMA.  */
 static void
 add_line_info (table, address, filename, line, column, end_sequence)
      struct line_info_table* table;
@@ -829,9 +835,72 @@ add_line_info (table, address, filename, line, column, end_sequence)
   bfd_size_type amt = sizeof (struct line_info);
   struct line_info* info = (struct line_info*) bfd_alloc (table->abfd, amt);
 
-  info->prev_line = table->last_line;
-  table->last_line = info;
+  /* Find the correct location for 'info'.  Normally we will receive
+     new line_info data 1) in order and 2) with increasing VMAs.
+     However some compilers break the rules (cf. decode_line_info) and
+     so we include some heuristics for quickly finding the correct
+     location for 'info'. In particular, these heuristics optimize for
+     the common case in which the VMA sequence that we receive is a
+     list of locally sorted VMAs such as
+       p...z a...j  (where a < j < p < z)
 
+     Note: table->lcl_head is used to head an *actual* or *possible*
+     sequence within the list (such as a...j) that is not directly
+     headed by table->last_line
+
+     Note: we may receive duplicate entries from 'decode_line_info'.  */
+
+  while (1)
+    if (!table->last_line
+	|| address >= table->last_line->address)
+      {
+	/* Normal case: add 'info' to the beginning of the list */
+	info->prev_line = table->last_line;
+	table->last_line = info;
+
+	/* lcl_head: initialize to head a *possible* sequence at the end.  */
+	if (!table->lcl_head)
+	  table->lcl_head = info;
+	break;
+      }
+    else if (!table->lcl_head->prev_line
+	     && table->lcl_head->address > address)
+      {
+	/* Abnormal but easy: lcl_head is 1) at the *end* of the line
+	   list and 2) the head of 'info'.  */
+	info->prev_line = NULL;
+	table->lcl_head->prev_line = info;
+	break;
+      }
+    else if (table->lcl_head->prev_line
+	     && table->lcl_head->address > address
+	     && address >= table->lcl_head->prev_line->address)
+      {
+	/* Abnormal but easy: lcl_head is 1) in the *middle* of the line
+	   list and 2) the head of 'info'.  */
+	info->prev_line = table->lcl_head->prev_line;
+	table->lcl_head->prev_line = info;
+	break;
+      }
+    else
+      {
+	/* Abnormal and hard: Neither 'last_line' nor 'lcl_head' are valid
+	   heads for 'info'.  Reset 'lcl_head' and repeat.  */
+	struct line_info* li2 = table->last_line; /* always non-NULL */
+	struct line_info* li1 = li2->prev_line;
+
+	while (li1)
+	  {
+	    if (li2->address > address && address >= li1->address)
+	      break;
+
+	    li2 = li1; /* always non-NULL */
+	    li1 = li1->prev_line;
+	  }
+	table->lcl_head = li2;
+      }
+
+  /* Set member data of 'info'.  */
   info->address = address;
   info->filename = filename;
   info->line = line;
@@ -982,6 +1051,7 @@ decode_line_info (unit, stash)
 
   table->files = NULL;
   table->last_line = NULL;
+  table->lcl_head = NULL;
 
   line_ptr = stash->dwarf_line_buffer + unit->line_offset;
 
@@ -1091,10 +1161,10 @@ decode_line_info (unit, stash)
       int basic_block = 0;
       int end_sequence = 0;
       /* eraxxon@alumni.rice.edu: Against the DWARF2 specs, some
-         compilers generate address sequences that are wildly out of
-         order using DW_LNE_set_address (e.g. Intel C++ 6.0 compiler
-         for ia64-Linux).  Thus, to determine the low and high
-         address, we must compare on every DW_LNS_copy, etc.  */
+	 compilers generate address sequences that are wildly out of
+	 order using DW_LNE_set_address (e.g. Intel C++ 6.0 compiler
+	 for ia64-Linux).  Thus, to determine the low and high
+	 address, we must compare on every DW_LNS_copy, etc.  */
       bfd_vma low_pc  = 0;
       bfd_vma high_pc = 0;
 
@@ -1249,19 +1319,31 @@ lookup_address_in_line_info_table (table, addr, function, filename_ptr,
      const char **filename_ptr;
      unsigned int *linenumber_ptr;
 {
+  /* Note: table->last_line should be a descendingly sorted list. */
   struct line_info* next_line = table->last_line;
-  struct line_info* each_line;
+  struct line_info* each_line = NULL;
+  *filename_ptr = NULL;
 
   if (!next_line)
     return false;
 
   each_line = next_line->prev_line;
 
+  /* Check for large addresses */
+  if (addr > next_line->address)
+    each_line = NULL; /* ensure we skip over the normal case */
+
+  /* Normal case: search the list; save  */
   while (each_line && next_line)
     {
-      if (!each_line->end_sequence
-	  && addr >= each_line->address && addr < next_line->address)
+      /* If we have an address match, save this info.  This allows us
+	 to return as good as results as possible for strange debugging
+	 info.  */
+      boolean addr_match = false;
+      if (each_line->address <= addr && addr <= next_line->address)
 	{
+	  addr_match = true;
+
 	  /* If this line appears to span functions, and addr is in the
 	     later function, return the first line of that function instead
 	     of the last line of the earlier one.  This check is for GCC
@@ -1278,16 +1360,22 @@ lookup_address_in_line_info_table (table, addr, function, filename_ptr,
 	      *filename_ptr = each_line->filename;
 	      *linenumber_ptr = each_line->line;
 	    }
-	  return true;
 	}
+
+      if (addr_match && !each_line->end_sequence)
+	return true; /* we have definitely found what we want */
+
       next_line = each_line;
       each_line = each_line->prev_line;
     }
 
-  /* At this point each_line is NULL but next_line is not.  If we found the
-     containing function in this compilation unit, return the first line we
-     have a number for.  This is also for compatibility with GCC 2.95.  */
-  if (function != NULL)
+  /* At this point each_line is NULL but next_line is not.  If we found
+     a candidate end-of-sequence point in the loop above, we can return
+     that (compatibility with a bug in the Intel compiler); otherwise,
+     assuming that we found the containing function for this address in
+     this compilation unit, return the first line we have a number for
+     (compatibility with GCC 2.95).  */
+  if (*filename_ptr == NULL && function != NULL)
     {
       *filename_ptr = next_line->filename;
       *linenumber_ptr = next_line->line;
@@ -1701,7 +1789,7 @@ comp_unit_find_nearest_line (unit, addr, filename_ptr, functionname_ptr,
 	}
 
       if (unit->first_child_die_ptr < unit->end_ptr
-          && ! scan_unit_for_functions (unit))
+	  && ! scan_unit_for_functions (unit))
 	{
 	  unit->error = 1;
 	  return false;
@@ -1821,7 +1909,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 	 return false;
 
       /* There can be more than one DWARF2 info section in a BFD these days.
-         Read them all in and produce one large stash.  We do this in two
+	 Read them all in and produce one large stash.  We do this in two
 	 passes - in the first pass we just accumulate the section sizes.
 	 In the second pass we read in the section's contents.  The allows
 	 us to avoid reallocing the data as we add sections to the stash.  */
@@ -1917,7 +2005,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
       stash->info_ptr += addr_size;
 
       if (length > 0)
-        {
+	{
 	  each = parse_comp_unit (abfd, stash, length, offset_size);
 	  stash->info_ptr += length;
 

@@ -1,3 +1,10 @@
+2002-10-23  Nathan Tallent  <eraxxon@alumni.rice.edu>
+
+	* dwarf2.c (add_line_info): Ensure that the line_info_table is
+	sorted even when given an out-of-order line sequence.
+	(lookup_address_in_line_info_table): When an exact VMA match is
+	not found, return line information with the closest VMA.
+
 2002-10-23 Ross Alexander <ross.alexander@uk.neceur.com>
 
 	* elf64-hppa.c: Force DT_FLAGS to always be set.  Required by
