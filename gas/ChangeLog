@@ -1,3 +1,16 @@
+2001-10-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/obj-elf.c: (obj_elf_change_section): Add "group" param.
+	Set elf_section_data group from it.  Warn if group name changed.
+	(obj_elf_parse_section_letters): Parse 'G' too.
+	(obj_elf_section): Parse group name.
+	(struct group_list): New.
+	(build_group_lists): New function.
+	(elf_frob_file): Create SEC_GROUP section(s).
+
+	* config/obj-elf.c: (elf_copy_symbol_attributes): Zap trailing
+	whitespace.
+
 2001-10-08  Aldy Hernandez  <aldyh@redhat.com>
 
 	* doc/arm/c-arm.texi (ARM Options): Add arm9e documentation.

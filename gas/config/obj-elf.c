@@ -58,6 +58,7 @@ static void elf_s_set_align PARAMS ((symbolS *, bfd_vma));
 static void elf_s_set_other PARAMS ((symbolS *, int));
 static int elf_sec_sym_ok_for_reloc PARAMS ((asection *));
 static void adjust_stab_sections PARAMS ((bfd *, asection *, PTR));
+static void build_group_lists PARAMS ((bfd *, asection *, PTR));
 static int elf_separate_stab_sections PARAMS ((void));
 static void elf_init_stab_section PARAMS ((segT));
 
@@ -74,7 +75,8 @@ static void obj_elf_ident PARAMS ((int));
 static void obj_elf_weak PARAMS ((int));
 static void obj_elf_local PARAMS ((int));
 static void obj_elf_visibility PARAMS ((int));
-static void obj_elf_change_section PARAMS ((char *, int, int, int, int));
+static void obj_elf_change_section
+  PARAMS ((const char *, int, int, int, const char *, int));
 static int obj_elf_parse_section_letters PARAMS ((char *, size_t));
 static int obj_elf_section_word PARAMS ((char *, size_t));
 static char *obj_elf_section_name PARAMS ((void));
@@ -618,9 +620,13 @@ static struct special_section const special_sections[] =
 };
 
 static void
-obj_elf_change_section (name, type, attr, entsize, push)
-     char *name;
-     int type, attr, entsize, push;
+obj_elf_change_section (name, type, attr, entsize, group, push)
+     const char *name;
+     int type;
+     int attr;
+     int entsize;
+     const char *group;
+     int push;
 {
   asection *old_sec;
   segT sec;
@@ -706,6 +712,7 @@ obj_elf_change_section (name, type, attr, entsize, push)
       bfd_set_section_flags (stdoutput, sec, flags);
       if (flags & SEC_MERGE)
 	sec->entsize = entsize;
+      elf_section_data (sec)->group = group;
 
       /* Add a symbol for this section to the symbol table.  */
       secsym = symbol_find (name);
@@ -725,6 +732,9 @@ obj_elf_change_section (name, type, attr, entsize, push)
 	as_warn (_("ignoring changed section attributes for %s"), name);
       else if ((flags & SEC_MERGE) && old_sec->entsize != (unsigned) entsize)
 	as_warn (_("ignoring changed section entity size for %s"), name);
+      else if ((attr & SHF_GROUP) != 0
+	       && strcmp (elf_section_data (old_sec)->group, group) != 0)
+	as_warn (_("ignoring new section group for %s"), name);
     }
 
 #ifdef md_elf_section_change_hook
@@ -758,6 +768,9 @@ obj_elf_parse_section_letters (str, len)
 	case 'S':
 	  attr |= SHF_STRINGS;
 	  break;
+	case 'G':
+	  attr |= SHF_GROUP;
+	  break;
 	/* Compatibility.  */
 	case 'm':
 	  if (*(str - 1) == 'a')
@@ -772,7 +785,7 @@ obj_elf_parse_section_letters (str, len)
 	    }
 	default:
 	  {
-	    char *bad_msg = _("unrecognized .section attribute: want a,w,x,M,S");
+	    char *bad_msg = _("unrecognized .section attribute: want a,w,x,M,S,G");
 #ifdef md_elf_section_letter
 	    int md_attr = md_elf_section_letter (*str, &bad_msg);
 	    if (md_attr >= 0)
@@ -882,7 +895,7 @@ void
 obj_elf_section (push)
      int push;
 {
-  char *name, *beg;
+  char *name, *group, *beg;
   int type, attr, dummy;
   int entsize;
 
@@ -913,6 +926,7 @@ obj_elf_section (push)
     return;
   type = SHT_NULL;
   attr = 0;
+  group = NULL;
   entsize = 0;
 
   if (*input_line_pointer == ',')
@@ -935,6 +949,8 @@ obj_elf_section (push)
 	  if (*input_line_pointer == ',')
 	    {
 	      char c;
+	      char *save = input_line_pointer;
+
 	      ++input_line_pointer;
 	      SKIP_WHITESPACE ();
 	      c = *input_line_pointer;
@@ -955,6 +971,8 @@ obj_elf_section (push)
 		  *input_line_pointer = c;
 		  type = obj_elf_section_type (beg, input_line_pointer - beg);
 		}
+	      else
+		input_line_pointer = save;
 	    }
 
 	  SKIP_WHITESPACE ();
@@ -975,6 +993,19 @@ obj_elf_section (push)
 	    {
 	      as_warn (_("entity size for SHF_MERGE not specified"));
 	      attr &= ~SHF_MERGE;
+	    }
+
+	  if ((attr & SHF_GROUP) != 0 && *input_line_pointer == ',')
+	    {
+	      ++input_line_pointer;
+	      group = obj_elf_section_name ();
+	      if (group == NULL)
+		attr &= ~SHF_GROUP;
+	    }
+	  else if ((attr & SHF_GROUP) != 0)
+	    {
+	      as_warn (_("group name for SHF_GROUP not specified"));
+	      attr &= ~SHF_GROUP;
 	    }
 	}
       else
@@ -1005,7 +1036,7 @@ obj_elf_section (push)
 
   demand_empty_rest_of_line ();
 
-  obj_elf_change_section (name, type, attr, entsize, push);
+  obj_elf_change_section (name, type, attr, entsize, group, push);
 }
 
 /* Change to the .data section.  */
@@ -1361,23 +1392,23 @@ void
 elf_copy_symbol_attributes (dest, src)
      symbolS *dest, *src;
 {
-  struct elf_obj_sy *srcelf = symbol_get_obj (src);		
-  struct elf_obj_sy *destelf = symbol_get_obj (dest);		
-  if (srcelf->size)						
-    {								
-      if (destelf->size == NULL)				
-	destelf->size =					
-	  (expressionS *) xmalloc (sizeof (expressionS));	
-      *destelf->size = *srcelf->size;				
-    }								
-  else							
-    {								
-      if (destelf->size != NULL)				
-	free (destelf->size);					
-      destelf->size = NULL;					
-    }								
-  S_SET_SIZE (dest, S_GET_SIZE (src));			
-  S_SET_OTHER (dest, S_GET_OTHER (src));			
+  struct elf_obj_sy *srcelf = symbol_get_obj (src);
+  struct elf_obj_sy *destelf = symbol_get_obj (dest);
+  if (srcelf->size)
+    {
+      if (destelf->size == NULL)
+	destelf->size =
+	  (expressionS *) xmalloc (sizeof (expressionS));
+      *destelf->size = *srcelf->size;
+    }
+  else
+    {
+      if (destelf->size != NULL)
+	free (destelf->size);
+      destelf->size = NULL;
+    }
+  S_SET_SIZE (dest, S_GET_SIZE (src));
+  S_SET_OTHER (dest, S_GET_OTHER (src));
 }
 
 void
@@ -1860,10 +1891,102 @@ elf_frob_symbol (symp, puntp)
 #endif
 }
 
+struct group_list
+{
+  asection **head;		/* Section lists.  */
+  unsigned int *elt_count;	/* Number of sections in each list.  */
+  unsigned int num_group;	/* Number of lists.  */
+};
+
+/* Called via bfd_map_over_sections.  If SEC is a member of a group,
+   add it to a list of sections belonging to the group.  INF is a
+   pointer to a struct group_list, which is where we store the head of
+   each list.  */
+
+static void
+build_group_lists (abfd, sec, inf)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *sec;
+     PTR inf;
+{
+  struct group_list *list = (struct group_list *) inf;
+  const char *group_name = elf_section_data (sec)->group;
+  unsigned int i;
+
+  if (group_name == NULL)
+    return;
+
+  /* If this group already has a list, add the section to the head of
+     the list.  */
+  for (i = 0; i < list->num_group; i++)
+    {
+      if (strcmp (group_name, elf_section_data (list->head[i])->group) == 0)
+	{
+	  elf_section_data (sec)->next_in_group = list->head[i];
+	  list->head[i] = sec;
+	  list->elt_count[i] += 1;
+	  return;
+	}
+    }
+
+  /* New group.  Make the arrays bigger in chunks to minimize calls to
+     realloc.  */
+  i = list->num_group;
+  if ((i & 127) == 0)
+    {
+      unsigned int newsize = i + 128;
+      list->head = xrealloc (list->head, newsize * sizeof (*list->head));
+      list->elt_count = xrealloc (list->elt_count,
+				  newsize * sizeof (*list->elt_count));
+    }
+  list->head[i] = sec;
+  list->elt_count[i] = 1;
+  list->num_group += 1;
+}
+
 void
 elf_frob_file ()
 {
+  struct group_list list;
+  unsigned int i;
+
   bfd_map_over_sections (stdoutput, adjust_stab_sections, (PTR) 0);
+
+  /* Go find section groups.  */
+  list.num_group = 0;
+  list.head = NULL;
+  list.elt_count = NULL;
+  bfd_map_over_sections (stdoutput, build_group_lists, (PTR) &list);
+
+  /* Make the SHT_GROUP sections that describe each section group.  We
+     can't set up the section contents here yet, because elf section
+     indices have yet to be calculated.  elf.c:set_group_contents does
+     the rest of the work.  */
+  for (i = 0; i < list.num_group; i++)
+    {
+      const char *group_name = elf_section_data (list.head[i])->group;
+      asection *s;
+      flagword flags;
+
+      s = subseg_force_new (group_name, 0);
+      flags = SEC_READONLY | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_GROUP;
+      if (s == NULL
+	  || !bfd_set_section_flags (stdoutput, s, flags)
+	  || !bfd_set_section_alignment (stdoutput, s, 2))
+	{
+	  as_fatal (_("can't create group: %s"),
+		    bfd_errmsg (bfd_get_error ()));
+	}
+
+      /* Pass a pointer to the first section in this group.  This
+	 seems as good a field to use as any;  It's not used otherwise
+	 by the ELF code.  */
+      s->lineno = (alent *) list.head[i];
+
+      s->_raw_size = 4 * (list.elt_count[i] + 1);
+      s->contents = frag_more (s->_raw_size);
+      frag_now->fr_fix = frag_now_fix_octets ();
+    }
 
 #ifdef elf_tc_final_processing
   elf_tc_final_processing ();
