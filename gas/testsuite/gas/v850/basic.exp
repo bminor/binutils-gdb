@@ -258,15 +258,15 @@ proc do_mem {} {
     # of instructions (as these tests to).
     while 1 {
 	expect {
-	    -re "^ +\[0-9\]+ 0000\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0004\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0008\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0000 05370500\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0004 25370400\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0008 25370500\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 000c\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 000e\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0010\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0012\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0016\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 001a\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0012 462F0500\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0016 662F0400\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001a 662F0500\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 001e\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0020\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0022\[^\n\]*\n"	{ set x [expr $x+1] }
@@ -282,6 +282,12 @@ proc do_mem {} {
 
     # Did we find what we were looking for?  If not, flunk it.
     if [expr $x==12] then { pass $testname } else { fail $testname }
+
+    setup_xfail v850*-*-*
+    fail "sld and sst instructions improperly assembled."
+
+    setup_xfail v850*-*-*
+    fail "sld and sst instructions did not catch improper index assembled."
 }
 
 proc do_misc {} {
@@ -344,7 +350,7 @@ proc do_move {} {
     gas_finish
 
     # Did we find what we were looking for?  If not, flunk it.
-    if [expr $x==4] then { pass $testname } else { setup_xfail "*-*-*" ; fail $testname }
+    if [expr $x==4] then { pass $testname } else { fail $testname }
 }
 
 if [istarget v850*-*-*] then {

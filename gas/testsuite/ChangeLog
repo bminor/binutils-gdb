@@ -1,6 +1,12 @@
 start-sanitize-v850
 Fri Aug 23 11:02:55 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* gas/v850/basic.exp (mem_tests): Test instruction bit patterns.
+	xfail sst and sld tests.
+	(mov_tests): Remove bogus xfail.
+	* gas/v850/mem.s: sst and sld instructions can only index from
+	"ep" register.
+
 	* gas/v850/basic.exp (logical_tests): Test instruction bit patterns.
 	Update addresses.
 	* gas/v850/logical.s: Tweak constants for better testing.
