@@ -1,6 +1,9 @@
 start-sanitize-v850
 Tue Oct 29 12:28:16 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-v850.c (md_assemble): Don't lose for relaxable
+	addresses like .+6.
+
 	* config/tc-v850.c (md_convert_frag): Make sure we insert the
 	fixup at the right address within the frag.
 
