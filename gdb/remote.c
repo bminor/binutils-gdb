@@ -1282,7 +1282,6 @@ whole:
     } while (*src++ != '\0');
   }
 
-out:
   SERIAL_WRITE (remote_desc, "+", 1);
 
   if (remote_debug)

@@ -1,3 +1,7 @@
+Wed Mar 30 11:43:29 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote.c (getpkt): Remove unused "out" label.
+
 Wed Mar 30 09:15:42 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* breakpoint.c (print_it_normal): Allow GDB to notify the user
