@@ -729,6 +729,11 @@ case "${target}" in
 	   target_configdirs="${target_configdirs} target-cygmon"
     fi
     ;;
+  sparc64-*-elf*)
+    if [ x${is_cross_compiler} != xno ] ; then
+	   target_configdirs="${target_configdirs} target-cygmon"
+    fi
+    ;;
   sparclite-*-aout*)
     if [ x${is_cross_compiler} != xno ] ; then
 	   target_configdirs="${target_configdirs} target-cygmon"
