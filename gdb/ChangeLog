@@ -1,3 +1,10 @@
+Sat Apr  4 10:05:00 1998  Dawn Perchik  <dawn@cygnus.com>
+	* infrun.c: Fix prototype of signals_info to match static funtion.
+
+Thu Apr  2 12:47:41 1998  Frank Ch. Eigler  <fche@cygnus.com>
+	* sol-thread.c (sol_thread_store_registers): Save & restore new
+ 	value of single updated register to prevent accidental clobbering.
+
 Wed Apr  1 22:01:09 1998  Mark Alexander  <marka@cygnus.com>
 
 	* config/sparc/tm-sparclite.h (TARGET_BYTE_ORDER_SELECTABLE): Define.
