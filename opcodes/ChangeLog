@@ -1,3 +1,8 @@
+1999-07-05  Nick Clifton  <nickc@cygnus.com>
+
+	* arm-dis.c (print_insn_arm): Display hex equivalent of rotated
+	constant. 
+
 1999-06-23  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386-dis.c: Mention intel mode specials in macro char comment.

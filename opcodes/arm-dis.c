@@ -19,7 +19,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include "sysdep.h"
 #include "dis-asm.h"
 #define DEFINE_TABLE
 #include "arm-opc.h"
@@ -307,9 +306,9 @@ print_insn_arm (pc, info, given)
 			{
 			  int rotate = (given & 0xf00) >> 7;
 			  int immed = (given & 0xff);
-			  func (stream, "#%d",
-				((immed << (32 - rotate))
-				 | (immed >> rotate)) & 0xffffffff);
+			  immed = (((immed << (32 - rotate))
+				    | (immed >> rotate)) & 0xffffffff);
+			  func (stream, "#%d\t; 0x%x", immed, immed);
 			}
 		      else
 			arm_decode_shift (given, func, stream);
