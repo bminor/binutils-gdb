@@ -1,5 +1,5 @@
 /* Common definitions for remote server for GDB.
-   Copyright 1993, 1995, 1997, 1998, 1999, 2000, 2002
+   Copyright 1993, 1995, 1997, 1998, 1999, 2000, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
