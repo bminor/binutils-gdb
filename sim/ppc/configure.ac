@@ -562,7 +562,6 @@ if test x"$silent" != x"yes" && test x"$sim_xor_endian" != x""; then
 fi],[sim_xor_endian=""])dnl
 
 
-AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 

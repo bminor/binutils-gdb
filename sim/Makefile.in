@@ -213,14 +213,14 @@ config.status: configure
 autoconf-common autoheader-common:
 	for d in * ; \
 	do \
-	    if [ -d $$d -a -f $$d/configure.in ] ; \
+	    if [ -d $$d -a -f $$d/configure.ac ] ; \
 	    then \
 		 echo "Running autoconf in $$d ..." ; \
-		 (cd $$d && autoconf) ; \
+		 (cd $$d && autoconf --force) ; \
 		 if [ $@ = autoheader-common ] ; \
 		 then \
 		   echo "Running autoheader in $$d ..." ; \
-		   (cd $$d && autoheader) ; \
+		   (cd $$d && autoheader --force) ; \
 		 fi ; \
 	    fi ; \
 	done
@@ -237,7 +237,7 @@ autoconf-changelog autoheader-changelog:
 	echo "$$date $$name $$id@$$host" ; \
 	for d in * ; \
 	do \
-	    if [ -d $$d -a -f $$d/configure.in ] ; \
+	    if [ -d $$d -a -f $$d/configure.ac ] ; \
 	    then \
 		 echo "Creating new-$(ChangeLog) in $$d ..." ; \
 		 ( echo "$$date  $$name  <$$id@$$host>" ; \
@@ -256,7 +256,7 @@ autoconf-changelog autoheader-changelog:
 autoconf-install autoheader-install:
 	for d in * ; \
 	do \
-	    if [ -d $$d -a -f $$d/configure.in ] ; \
+	    if [ -d $$d -a -f $$d/configure.ac ] ; \
 	    then \
 		 echo "Moving $$d/new-$(ChangeLog) to $$d/$(ChangeLog) ..." ; \
 		 mv $$d/new-$(ChangeLog) $$d/$(ChangeLog) ; \

@@ -865,21 +865,21 @@ if grep CGEN_MAINT $srcdir/Makefile.in >/dev/null; then
 cgen_breaks="break cgen_rtx_error";
 fi
 AC_SUBST(cgen_breaks)
-AC_OUTPUT(Makefile.sim:Makefile.in Make-common.sim:../common/Make-common.in .gdbinit:../common/gdbinit.in,
-[case "x$CONFIG_FILES" in
- xMakefile*)
-   echo "Merging Makefile.sim+Make-common.sim into Makefile ..."
-   rm -f Makesim1.tmp Makesim2.tmp Makefile
-   sed -n -e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ p' <Make-common.sim >Makesim1.tmp
-   sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >Makesim2.tmp
-   sed -e '/^## COMMON_PRE_/ r Makesim1.tmp' \
+AC_CONFIG_FILES(Makefile.sim:Makefile.in)
+AC_CONFIG_FILES(Make-common.sim:../common/Make-common.in)
+AC_CONFIG_FILES(.gdbinit:../common/gdbinit.in)
+AC_CONFIG_COMMANDS([Makefile],
+[echo "Merging Makefile.sim+Make-common.sim into Makefile ..."
+ rm -f Makesim1.tmp Makesim2.tmp Makefile
+ sed -n -e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ p' <Make-common.sim >Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r Makesim1.tmp' \
 	-e '/^## COMMON_POST_/ r Makesim2.tmp' \
 	<Makefile.sim >Makefile
-   rm -f Makefile.sim Make-common.sim Makesim1.tmp Makesim2.tmp
-   ;;
- esac
- case "x$CONFIG_HEADERS" in xconfig.h:config.in) echo > stamp-h ;; esac
+ rm -f Makefile.sim Make-common.sim Makesim1.tmp Makesim2.tmp
 ])
+AC_CONFIG_COMMANDS([stamp-h], [echo > stamp-h])
+AC_OUTPUT
 ])
 
 # This file is derived from `gettext.m4'.  The difference is that the

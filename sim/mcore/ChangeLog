@@ -1,3 +1,7 @@
+2005-01-11  Andrew Cagney  <cagney@localhost.localdomain>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 2005-01-07  Andrew Cagney  <cagney@gnu.org>
 
 	* configure.ac: Rename configure.in, require autoconf 2.59.

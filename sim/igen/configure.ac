@@ -26,7 +26,6 @@ else
 fi
 
 
-AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 

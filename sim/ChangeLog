@@ -1,3 +1,13 @@
+2005-01-11  Andrew Cagney  <cagney@gnu.org>
+
+	* Makefile.in (autoconf-common autoheader-common): Add --force to
+	autoconf and autoheader.
+	(autoconf-common autoheader-common)
+	(autoconf-install autoheader-install): Check for configure.ac, not
+	configure.in.
+	* configure.ac: Delete AC_CONFIG_AUX_DIR.
+	* configure: Re-generate.
+
 2005-01-07  Andrew Cagney  <cagney@gnu.org>
 
 	* configure.ac: Replace configure.in.  Requires autoconf 2.59 and

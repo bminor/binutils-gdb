@@ -1312,6 +1312,31 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+ac_aux_dir=
+for ac_dir in $srcdir $srcdir/.. $srcdir/../..; do
+  if test -f $ac_dir/install-sh; then
+    ac_aux_dir=$ac_dir
+    ac_install_sh="$ac_aux_dir/install-sh -c"
+    break
+  elif test -f $ac_dir/install.sh; then
+    ac_aux_dir=$ac_dir
+    ac_install_sh="$ac_aux_dir/install.sh -c"
+    break
+  elif test -f $ac_dir/shtool; then
+    ac_aux_dir=$ac_dir
+    ac_install_sh="$ac_aux_dir/shtool install -c"
+    break
+  fi
+done
+if test -z "$ac_aux_dir"; then
+  { { echo "$as_me:$LINENO: error: cannot find install-sh or install.sh in $srcdir $srcdir/.. $srcdir/../.." >&5
+echo "$as_me: error: cannot find install-sh or install.sh in $srcdir $srcdir/.. $srcdir/../.." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+ac_config_guess="$SHELL $ac_aux_dir/config.guess"
+ac_config_sub="$SHELL $ac_aux_dir/config.sub"
+ac_configure="$SHELL $ac_aux_dir/configure" # This should be Cygnus configure.
+
 # Make sure we can run config.sub.
 $ac_config_sub sun4 >/dev/null 2>&1 ||
   { { echo "$as_me:$LINENO: error: cannot run $ac_config_sub" >&5
@@ -3110,32 +3135,6 @@ rm -f conftest.mmap
 
 # autoconf.info says this should be called right after AC_INIT.
           ac_config_headers="$ac_config_headers config.h:config.in"
-
-
-ac_aux_dir=
-for ac_dir in `cd $srcdir;pwd`/../.. $srcdir/`cd $srcdir;pwd`/../..; do
-  if test -f $ac_dir/install-sh; then
-    ac_aux_dir=$ac_dir
-    ac_install_sh="$ac_aux_dir/install-sh -c"
-    break
-  elif test -f $ac_dir/install.sh; then
-    ac_aux_dir=$ac_dir
-    ac_install_sh="$ac_aux_dir/install.sh -c"
-    break
-  elif test -f $ac_dir/shtool; then
-    ac_aux_dir=$ac_dir
-    ac_install_sh="$ac_aux_dir/shtool install -c"
-    break
-  fi
-done
-if test -z "$ac_aux_dir"; then
-  { { echo "$as_me:$LINENO: error: cannot find install-sh or install.sh in \`cd $srcdir;pwd\`/../.. $srcdir/\`cd $srcdir;pwd\`/../.." >&5
-echo "$as_me: error: cannot find install-sh or install.sh in \`cd $srcdir;pwd\`/../.. $srcdir/\`cd $srcdir;pwd\`/../.." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-ac_config_guess="$SHELL $ac_aux_dir/config.guess"
-ac_config_sub="$SHELL $ac_aux_dir/config.sub"
-ac_configure="$SHELL $ac_aux_dir/configure" # This should be Cygnus configure.
 
 echo "$as_me:$LINENO: checking target system type" >&5
 echo $ECHO_N "checking target system type... $ECHO_C" >&6
@@ -7124,8 +7123,16 @@ if grep CGEN_MAINT $srcdir/Makefile.in >/dev/null; then
 cgen_breaks="break cgen_rtx_error";
 fi
 
-                              ac_config_files="$ac_config_files Makefile.sim:Makefile.in Make-common.sim:../common/Make-common.in .gdbinit:../common/gdbinit.in"
-          ac_config_commands="$ac_config_commands default"
+          ac_config_files="$ac_config_files Makefile.sim:Makefile.in"
+
+          ac_config_files="$ac_config_files Make-common.sim:../common/Make-common.in"
+
+          ac_config_files="$ac_config_files .gdbinit:../common/gdbinit.in"
+
+          ac_config_commands="$ac_config_commands Makefile"
+
+          ac_config_commands="$ac_config_commands stamp-h"
+
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -7661,7 +7668,8 @@ do
   "Make-common.sim" ) CONFIG_FILES="$CONFIG_FILES Make-common.sim:../common/Make-common.in" ;;
   ".gdbinit" ) CONFIG_FILES="$CONFIG_FILES .gdbinit:../common/gdbinit.in" ;;
   "$ac_config_links_1" ) CONFIG_LINKS="$CONFIG_LINKS $ac_config_links_1" ;;
-  "default" ) CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;
+  "Makefile" ) CONFIG_COMMANDS="$CONFIG_COMMANDS Makefile" ;;
+  "stamp-h" ) CONFIG_COMMANDS="$CONFIG_COMMANDS stamp-h" ;;
   "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h:config.in" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
@@ -8545,20 +8553,16 @@ esac
   { echo "$as_me:$LINENO: executing $ac_dest commands" >&5
 echo "$as_me: executing $ac_dest commands" >&6;}
   case $ac_dest in
-    default ) case "x$CONFIG_FILES" in
- xMakefile*)
-   echo "Merging Makefile.sim+Make-common.sim into Makefile ..."
-   rm -f Makesim1.tmp Makesim2.tmp Makefile
-   sed -n -e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ p' <Make-common.sim >Makesim1.tmp
-   sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >Makesim2.tmp
-   sed -e '/^## COMMON_PRE_/ r Makesim1.tmp' \
+    Makefile ) echo "Merging Makefile.sim+Make-common.sim into Makefile ..."
+ rm -f Makesim1.tmp Makesim2.tmp Makefile
+ sed -n -e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ p' <Make-common.sim >Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r Makesim1.tmp' \
 	-e '/^## COMMON_POST_/ r Makesim2.tmp' \
 	<Makefile.sim >Makefile
-   rm -f Makefile.sim Make-common.sim Makesim1.tmp Makesim2.tmp
-   ;;
- esac
- case "x$CONFIG_HEADERS" in xconfig.h:config.in) echo > stamp-h ;; esac
+ rm -f Makefile.sim Make-common.sim Makesim1.tmp Makesim2.tmp
  ;;
+    stamp-h ) echo > stamp-h ;;
   esac
 done
 _ACEOF
