@@ -1,3 +1,18 @@
+2003-01-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* ax-gdb.c, c-valprint.c, charset.c, corefile.c: Update copyright.
+	* demangle.c, disasm.c, dwarf2cfi.c, dwarfread.c: Update copyright.
+	* elfread.c, eval.c, expprint.c, expression.h: Update copyright.
+	* f-typeprint.c, findvar.c, gcore.c, gdb_mbuild.sh: Update copyright.
+	* gdbtypes.h, gnu-v2-abi.c, inferior.h, inftarg.c: Update copyright.
+	* language.c, language.h, m32r-tdep.c: Update copyright.
+	* mn10200-tdep.c, scm-lang.c, scm-lang.h: Update copyright.
+	* somsolib.c, somsolib.h, symfile.c, symtab.h: Update copyright.
+	* thread-db.c, typeprint.c, utils.c, valarith.c: Update copyright.
+	* values.c, win32-nat.c, x86-64-linux-nat.c: Update copyright.
+	* x86-64-linux-tdep.c, z8k-tdep.c: Update copyright.
+	* cli/cli-decode.h, config/h8500/tm-h8500.h: Update copyright.
+
 2003-01-13  Elena Zannoni  <ezannoni@redhat.com>
 
 	* stabsread.h (process_later, resolve_cfront_continuation):

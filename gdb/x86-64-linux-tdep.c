@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux running on x86-64, for GDB.
 
-   Copyright 2001 Free Software Foundation, Inc.
+   Copyright 2001, 2003 Free Software Foundation, Inc.
 
    Contributed by Jiri Smid, SuSE Labs.
 

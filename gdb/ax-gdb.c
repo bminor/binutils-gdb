@@ -1,5 +1,7 @@
-/* GDB-specific functions for operating on agent expressions
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+/* GDB-specific functions for operating on agent expressions.
+
+   Copyright 1998, 1999, 2000, 2001, 2003 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 

@@ -3,7 +3,7 @@
 #  Multi-build script for testing compilation of all maintained
 #  configs of GDB.
 
-#  Copyright 2002 Free Software Foundation, Inc.
+#  Copyright 2002, 2003 Free Software Foundation, Inc.
 
 #  Contributed by Richard Earnshaw  (rearnsha@arm.com)
 

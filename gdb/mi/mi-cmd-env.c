@@ -1,5 +1,7 @@
 /* MI Command Set - environment commands.
-   Copyright 2002 Free Software Foundation, Inc.
+
+   Copyright 2002, 2003 Free Software Foundation, Inc.
+
    Contributed by Red Hat Inc.
 
    This file is part of GDB.

@@ -1,5 +1,7 @@
 /* Definitions for expressions stored in reversed prefix form, for GDB.
-   Copyright 1986, 1989, 1992, 1994, 2000 Free Software Foundation, Inc.
+
+   Copyright 1986, 1989, 1992, 1994, 2000, 2003 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 

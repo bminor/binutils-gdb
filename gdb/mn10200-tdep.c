@@ -1,5 +1,7 @@
 /* Target-dependent code for the Matsushita MN10200 for GDB, the GNU debugger.
-   Copyright 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1997, 1998, 1999, 2000, 2001, 2003 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
