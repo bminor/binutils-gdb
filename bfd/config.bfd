@@ -883,12 +883,12 @@ case "${targ}" in
     targ_defvec=bfd_elf32_openrisc_vec
     ;;
 
-  or32-*-coff | or32-*-rtems*)
+  or32-*-coff)
     targ_defvec=or32coff_big_vec
     targ_underscore=yes
     ;;
 
-  or32-*-elf)
+  or32-*-elf | or32-*-rtems*)
     targ_defvec=bfd_elf32_or32_big_vec
     ;;
 

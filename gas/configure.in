@@ -401,7 +401,7 @@ changequote([,])dnl
       mn10300-*-*)			fmt=elf ;;
       msp430-*-*)			fmt=elf ;;
       openrisc-*-*)			fmt=elf ;;
-      or32-*-rtems*)			fmt=coff ;;
+      or32-*-rtems*)			fmt=elf ;;
       or32-*-coff)			fmt=coff ;;
       or32-*-elf)			fmt=elf ;;
       pj*)				fmt=elf ;;

@@ -1,3 +1,8 @@
+2004-05-13  Joel Sherrill <joel@oarcorp.com>
+
+	* configure.tgt (or32-*-rtems*): Switch to elf and
+	support versioned targets.
+
 2004-05-13  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
