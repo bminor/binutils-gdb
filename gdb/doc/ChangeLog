@@ -1,3 +1,8 @@
+Fri Apr 29 18:24:46 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* annotate.texi (Breakpoint Info): Document annotation of header
+	fields and record annotation.
+
 Thu Apr 28 07:44:28 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* annotate.texi: New file, to document annotations.

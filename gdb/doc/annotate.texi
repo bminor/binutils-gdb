@@ -322,19 +322,19 @@ The output from the @code{info breakpoints} command is annotated as follows:
 
 @example
 ^Z^Zbreakpoints-headers
-@var{headers}
+@var{header-entry}
 ^Z^Zbreakpoints-table
 @end example
 
-where @var{headers} is a string which is designed to convey to the user
-the order and significance of the fields.  This is followed by any
-number of entries.  Each entry beings with a @code{field 0} annotation.
-Some fields can be omitted if they don't apply for this entry.  Fields
-have trailing whitespace so that if they are printed in order in a
-fixed-width font, they match up with the headers.  The fields for an
-entry are:
+where @var{header-entry} has the same syntax as an entry (see below) but
+instead of containing data, it contains strings which are intended to
+convey the meaning of each field to the user.  This is followed by any
+number of entries.  If a field does not apply for this entry, it is
+omitted.  Fields may contain trailing whitespace.  Each entry consists
+of:
 
 @example
+^Z^Zrecord
 ^Z^Zfield 0
 @var{number}
 ^Z^Zfield 1
