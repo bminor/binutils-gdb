@@ -2500,10 +2500,6 @@ coff_slurp_symbol_table (abfd)
 #define OTHER_GLOBAL_CLASS C_LEAFEXT
 #endif
 
-#ifdef RS6000COFF_C
-#define OTHER_GLOBAL_CLASS C_HIDEXT
-#endif
-
 #ifdef COFF_WITH_PE
 #define OTHER_GLOBAL_CLASS C_SECTION
 #endif

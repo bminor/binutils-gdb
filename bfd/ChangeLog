@@ -13,6 +13,8 @@ Fri Oct  6 12:04:02 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffcode.h (coff_slurp_symbol_table): Set C_HIDEXT symbols to be
 	BSF_LOCAL.
+	(OTHER_GLOBAL_CLASS): Do not define to be C_HIDEXT if
+	RS6000COFF_C.
 
 	* targets.c (bfd_target): Add _bfd_read_ar_hdr field.  Modify
 	BFD_JUMP_TABLE_ARCHIVE accordingly.
