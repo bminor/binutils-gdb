@@ -216,6 +216,7 @@ value value_cast ();
 value value_zero ();
 value value_repeat ();
 value value_subscript ();
+value value_from_vtable_info ();
 
 value value_being_returned ();
 int using_struct_return ();
@@ -245,11 +246,10 @@ value value_x_binop ();
 value value_x_unop ();
 value value_fn_field ();
 value value_virtual_fn_field ();
-value value_static_field ();
 int binop_user_defined_p ();
 int unop_user_defined_p ();
 int typecmp ();
-int fill_in_vptr_fieldno ();
+void fill_in_vptr_fieldno ();
 int destructor_name_p ();
 
 #define value_free(val) free (val)
