@@ -128,7 +128,7 @@ else
 	done
 fi
 
-arc_files="ChangeLog configure.in disassemble.c"
+arc_files="ChangeLog Makefile.in configure.in disassemble.c"
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do
 		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
