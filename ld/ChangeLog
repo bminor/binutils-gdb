@@ -4,6 +4,9 @@ Tue Oct  1 16:17:33 1996  Joel Sherrill  <joel@oarcorp.com>
 
 Tue Oct  1 15:50:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* scripttempl/elfmips.sc: Handle CREATE_SHLIB the same way that
+	elf.sc does, so that glibc works better.
+
 	* ldver.c (ld_program_version): New variable.
 	(ldversion): Use it.
 	* ldver.h (ld_program_version): Declare.
