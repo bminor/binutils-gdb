@@ -2063,8 +2063,8 @@ static void s_thumb_func PARAMS ((int));
 static void s_thumb_set PARAMS ((int));
 static void arm_s_text PARAMS ((int));
 static void arm_s_data PARAMS ((int));
-#ifdef OBJ_ELF
 static void arm_s_section PARAMS ((int));
+#ifdef OBJ_ELF
 static void s_arm_elf_cons PARAMS ((int));
 #endif
 
@@ -2088,11 +2088,11 @@ const pseudo_typeS md_pseudo_table[] =
   /* Allow for the effect of section changes.  */
   { "text",        arm_s_text,    0 },
   { "data",        arm_s_data,    0 },
-#ifdef OBJ_ELF
   { "section",     arm_s_section, 0 },
   { "section.s",   arm_s_section, 0 },
   { "sect",        arm_s_section, 0 },
   { "sect.s",      arm_s_section, 0 },
+#ifdef OBJ_ELF
   { "word",        s_arm_elf_cons, 4 },
   { "long",        s_arm_elf_cons, 4 },
   { "file",        dwarf2_directive_file, 0 },
@@ -2585,16 +2585,19 @@ arm_s_data (ignore)
 #endif
 }
 
-#ifdef OBJ_ELF
 static void
 arm_s_section (ignore)
      int ignore;
 {
   s_ltorg (0);
 
+#ifdef OBJ_ELF
   obj_elf_section (ignore);
-}
 #endif
+#ifdef OBJ_COFF
+  obj_coff_section (ignore);
+#endif
+}
 
 static void
 opcode_select (width)

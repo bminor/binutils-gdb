@@ -1,3 +1,8 @@
+2002-05-22  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/tc-arm.c (arm_s_section): Enable for COFF builds as well
+	as ELF builds.
+
 2002-05-22  H.J. Lu <hjl@gnu.org>
 
 	* dwarf2dbg.c (dwarf2_emit_insn): Emit only one line symbol
