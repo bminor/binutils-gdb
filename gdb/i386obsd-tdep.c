@@ -67,7 +67,7 @@ i386obsd_aout_supply_regset (const struct regset *regset,
   i387_supply_fsave (regcache, regnum, (char *) regs + tdep->sizeof_gregset);
 }
 
-const struct regset *
+static const struct regset *
 i386obsd_aout_regset_from_core_section (struct gdbarch *gdbarch,
 					const char *sect_name,
 					size_t sect_size)
@@ -91,7 +91,6 @@ i386obsd_aout_regset_from_core_section (struct gdbarch *gdbarch,
 
   return NULL;
 }
-
 
 
 CORE_ADDR i386obsd_sigtramp_start = 0xbfbfdf20;

@@ -1,3 +1,10 @@
+2004-02-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386obsd-tdep.c (i386obsd_aout_regset_from_core_section): Make
+	static.  Remove extraneous whitespace.	
+	* i386nbsd-tdep.c (i386nbsd_aout_regset_from_core_section): Make
+	static.
+
 2004-02-17  Jim Blandy  <jimb@redhat.com>
 
 	* findvar.c (value_from_register): Doc fix.
