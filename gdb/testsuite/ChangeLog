@@ -1,5 +1,12 @@
 2003-08-17  Daniel Jacobowitz  <drow@mvista.com>
 
+	* mi-var-display.exp (-var-list-children weird): Accept function
+	pointers with argument types.
+	* mi1-var-display.exp (-var-list-children weird): Likewise.
+	* mi2-var-display.exp (-var-list-children weird): Likewise.
+
+2003-08-17  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.base/annota3.exp: Add missing newline.
 
 2003-08-07  Elena Zannoni  <ezannoni@redhat.com>
