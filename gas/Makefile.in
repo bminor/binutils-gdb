@@ -67,7 +67,7 @@ srcdir = .
 # NOTE: This directory must exist when you start installation.
 destdir = /usr/local
 # Directory in which to put the executable for the command `gcc'
-bindir = $(destdir)/H-$(host_alias)/T-$(target_alias)/bin
+bindir = $(destdir)/bin
 # Directory in which to put the directories used by the compiler.
 libdir = $(destdir)/H-$(host_alias)/T-$(target_alias)/lib
 # Directory in which the compiler finds executables, libraries, etc.
@@ -247,7 +247,7 @@ HOST_LIBDEPS= $(HOST_PREFIX)$(OBSTACK) $(HOST_PREFIX)$(ALLOCA) $(HOST_PREFIX)$(M
 # How to link with both our special library facilities
 # and the system's installed libraries.
 
-LIBS = $(LOCAL_LOADLIBES) $(CLIB) $(srcdir)/../libiberty`if [ -d $(srcdir)/libiberty.$(target) ] ; then echo .$(target) ; fi`$(subdir)/libiberty.a
+LIBS = $(LOCAL_LOADLIBES) $(CLIB) $(unsubdir)/../libiberty$(subdir)/libiberty.a
 
 # Likewise, for use in the tools that must run on this machine
 # even if we are cross-building GCC.
@@ -487,7 +487,7 @@ uninstall:
 # These exist for maintenance purposes.
 
 tags TAGS: force
-	etags $(REAL_SOURCES) $(REAL_HEADERS) README Makefile config/*.[hc]
+	etags $(REAL_SOURCES) $(REAL_HEADERS) $(srcdir)/README $(srcdir)/Makefile $(srcdir)/config/*.[hc]
 	
 bootstrap: $(ALL) force
 	$(MAKE) stage1
