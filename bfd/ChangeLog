@@ -2,10 +2,6 @@ Tue Oct  3 11:53:04 1995  Jeff Law  (law@hurl)
 
 	* som.c (setup_sections): Don't die if a space has no subspaces.
 
-	* elf.c (_bfd_elf_assign_file_position_for_section): Always
-	align to the section's alignment.  "align" argument removed;
-	all callers changed.
-
 Mon Oct  2 14:08:55 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_link_add_object_symbols): Don't let a weak

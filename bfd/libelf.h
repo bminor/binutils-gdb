@@ -634,7 +634,8 @@ _bfd_elf_compute_section_file_positions PARAMS ((bfd *,
 						 struct bfd_link_info *));
 void _bfd_elf_assign_file_positions_for_relocs PARAMS ((bfd *));
 file_ptr _bfd_elf_assign_file_position_for_section PARAMS ((Elf_Internal_Shdr *,
-							    file_ptr));
+							    file_ptr,
+							    boolean));
 
 boolean _bfd_elf_create_dynamic_sections PARAMS ((bfd *,
 						  struct bfd_link_info *));
