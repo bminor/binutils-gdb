@@ -1140,6 +1140,16 @@ build_bytes (this_try, operand)
 	}
       else if (x & ABSJMP)
 	{
+	  int where = 0;
+
+#ifdef OBJ_ELF
+	  /* To be compatible with the proposed H8 ELF format, we
+	     want the relocation's offset to point to the first byte
+	     that will be modified, not to the start of the instruction.  */
+	  where += 1;
+
+	     
+#endif
 	  /* This jmp may be a jump or a branch.  */
 
 	  check_operand (operand + i, Hmode ? 0xffffff : 0xffff, "@");
@@ -1152,7 +1162,7 @@ build_bytes (this_try, operand)
 	    operand[i].exp.X_add_number =
 	      ((operand[i].exp.X_add_number & 0xffff) ^ 0x8000) - 0x8000;
 	  fix_new_exp (frag_now,
-		       output - frag_now->fr_literal,
+		       output - frag_now->fr_literal + where,
 		       4,
 		       &operand[i].exp,
 		       0,
@@ -1458,21 +1468,43 @@ md_convert_frag (headers, seg, fragP)
   abort ();
 }
 
+#ifdef BFD_ASSEMBLER
+valueT
+md_section_align (segment, size)
+     segT segment;
+     valueT size;
+{
+  int align = bfd_get_section_alignment (stdoutput, segment);
+  return ((size + (1 << align) - 1) & (-1 << align));
+}
+#else
 valueT
 md_section_align (seg, size)
      segT seg;
      valueT size;
 {
   return ((size + (1 << section_alignment[(int) seg]) - 1)
-	  & (-1 << section_alignment[(int) seg]));
+          & (-1 << section_alignment[(int) seg]));
 }
+#endif
 
+
+#ifdef BFD_ASSEMBLER
+int
+md_apply_fix (fixP, valp)
+     fixS *fixP;
+     valueT *valp;
+#else
 void
 md_apply_fix (fixP, val)
      fixS *fixP;
      long val;
+#endif
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
+#ifdef BFD_ASSEMBLER
+  long val = *valp;
+#endif
 
   switch (fixP->fx_size)
     {

@@ -7,6 +7,11 @@
 Fri Aug 31 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 			  Jeff Law <law@redhat.com>
 
+	* config/tc-h8300.c (build_bytes): For OBJ_ELF, make relocation's
+	offset match H8 ELF spec.
+	(md_section_align): Alternate implementation for BFD_ASSEMBLER.
+	(md_apply_fix): Fix argument and return types for BFD_ASSEMBLER.
+
 	* tc-h8300.c (relocation mappings): Remove.  Moved to tc-h8300.h.
 	(build_bytes): Mark fixups for PCrel branches as signed.  For
 	OBJ_ELF, make sure the reloc's offset points to the first byte
