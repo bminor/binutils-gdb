@@ -649,7 +649,8 @@ test "$host_alias" != "$target_alias" &&
 
 
 # Directories to use in all configurations.
-configdirs="gdb.asm \
+configdirs="gdb.arch \
+            gdb.asm \
             gdb.base \
             gdb.c++ \
             gdb.java \
@@ -749,12 +750,12 @@ fi
 # End stuff to support --enable-shared
 
 echo $ac_n "checking for Cygwin environment""... $ac_c" 1>&6
-echo "configure:753: checking for Cygwin environment" >&5
+echo "configure:754: checking for Cygwin environment" >&5
 if eval "test \"`echo '$''{'ac_cv_cygwin'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 758 "configure"
+#line 759 "configure"
 #include "confdefs.h"
 
 int main() {
@@ -765,7 +766,7 @@ int main() {
 return __CYGWIN__;
 ; return 0; }
 EOF
-if { (eval echo configure:769: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:770: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_cygwin=yes
 else
@@ -782,19 +783,19 @@ echo "$ac_t""$ac_cv_cygwin" 1>&6
 CYGWIN=
 test "$ac_cv_cygwin" = yes && CYGWIN=yes
 echo $ac_n "checking for mingw32 environment""... $ac_c" 1>&6
-echo "configure:786: checking for mingw32 environment" >&5
+echo "configure:787: checking for mingw32 environment" >&5
 if eval "test \"`echo '$''{'ac_cv_mingw32'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 791 "configure"
+#line 792 "configure"
 #include "confdefs.h"
 
 int main() {
 return __MINGW32__;
 ; return 0; }
 EOF
-if { (eval echo configure:798: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:799: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_mingw32=yes
 else
@@ -813,7 +814,7 @@ test "$ac_cv_mingw32" = yes && MINGW32=yes
 
 
 echo $ac_n "checking for executable suffix""... $ac_c" 1>&6
-echo "configure:817: checking for executable suffix" >&5
+echo "configure:818: checking for executable suffix" >&5
 if eval "test \"`echo '$''{'ac_cv_exeext'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -823,7 +824,7 @@ else
   rm -f conftest*
   echo 'int main () { return 0; }' > conftest.$ac_ext
   ac_cv_exeext=
-  if { (eval echo configure:827: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+  if { (eval echo configure:828: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
     for file in conftest.*; do
       case $file in
       *.c | *.o | *.obj | *.ilk | *.pdb) ;;

@@ -13,7 +13,8 @@ AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
 AC_CANONICAL_SYSTEM
 
 # Directories to use in all configurations.
-configdirs="gdb.asm \
+configdirs="gdb.arch \
+            gdb.asm \
             gdb.base \
             gdb.c++ \
             gdb.java \
