@@ -1476,9 +1476,6 @@ path_command (char *dirname, int from_tty)
 }
 
 
-#ifdef REGISTER_NAMES
-char *gdb_register_names[] = REGISTER_NAMES;
-#endif
 /* Print out the machine register regnum. If regnum is -1, print all
    registers (print_all == 1) or all non-float and non-vector
    registers (print_all == 0).

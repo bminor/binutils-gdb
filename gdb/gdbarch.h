@@ -422,9 +422,7 @@ extern void set_gdbarch_dwarf_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_dw
 #define DWARF_REG_TO_REGNUM(dwarf_regnr) (gdbarch_dwarf_reg_to_regnum (current_gdbarch, dwarf_regnr))
 #endif
 
-/* Convert from an sdb register number to an internal gdb register number.
-   This should be defined in tm.h, if REGISTER_NAMES is not set up
-   to map one to one onto the sdb register numbers. */
+/* Convert from an sdb register number to an internal gdb register number. */
 
 typedef int (gdbarch_sdb_reg_to_regnum_ftype) (int sdb_regnr);
 extern int gdbarch_sdb_reg_to_regnum (struct gdbarch *gdbarch, int sdb_regnr);

@@ -3756,10 +3756,6 @@ register buffer at run-time.
 Return the name of register @var{i} as a string.  May return @code{NULL}
 or @code{NUL} to indicate that register @var{i} is not valid.
 
-@item REGISTER_NAMES
-@findex REGISTER_NAMES
-Deprecated in favor of @code{REGISTER_NAME}.
-
 @item DEPRECATED_REG_STRUCT_HAS_ADDR (@var{gcc_p}, @var{type})
 @findex DEPRECATED_REG_STRUCT_HAS_ADDR
 Define this to return 1 if the given type will be passed by pointer

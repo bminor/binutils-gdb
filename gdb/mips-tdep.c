@@ -6047,11 +6047,8 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   /* MIPS version of register names.  NOTE: At present the MIPS
      register name management is part way between the old -
-     #undef/#define REGISTER_NAMES and the new REGISTER_NAME(nr).
+     #undef/#define MIPS_REGISTER_NAMES and the new REGISTER_NAME(nr).
      Further work on it is required.  */
-  /* NOTE: many targets (esp. embedded) do not go thru the
-     gdbarch_register_name vector at all, instead bypassing it
-     by defining REGISTER_NAMES.  */
   set_gdbarch_register_name (gdbarch, mips_register_name);
   set_gdbarch_read_pc (gdbarch, mips_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
@@ -6402,8 +6399,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: RA_REGNUM = %d\n",
 		      RA_REGNUM);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: REGISTER_NAMES = delete?\n");
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: ROUND_DOWN = function?\n");
   fprintf_unfiltered (file,

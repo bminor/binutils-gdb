@@ -385,9 +385,10 @@ st2000_wait (ptid_t ptid, struct target_waitstatus *status)
   return inferior_ptid;
 }
 
-/* Return the name of register number REGNO in the form input and output by
-   STDEBUG.  Currently, REGISTER_NAMES just happens to contain exactly what
-   STDEBUG wants.  Lets take advantage of that just as long as possible! */
+/* Return the name of register number REGNO in the form input and
+   output by STDEBUG.  Currently, REGISTER_NAME just happens return
+   exactly what STDEBUG wants.  Lets take advantage of that just as
+   long as possible! */
 
 static char *
 get_reg_name (int regno)

@@ -1,3 +1,8 @@
+2003-09-18  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	documentation on REGISTER_NAMES.
+
 2003-09-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdbint.texinfo (Target Architecture Definition): Replace

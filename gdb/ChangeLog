@@ -1,3 +1,17 @@
+2003-09-17  Andrew Cagney  <cagney@redhat.com>
+
+	* sparc-tdep.c (legacy_register_name): Delete function.
+	* mips-tdep.c (mips_dump_tdep): Do not print REGISTER_NAME.
+	(mips_gdbarch_init): Refer to MIPS_REGISTER_NAME in comments.
+	* infcmd.c (gdb_register_name): Delete variable.
+	* gdbarch.sh (SDB_REG_TO_REGNUM): Delete reference to
+	REGISTER_NAME and "tm.h".
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* dpx2-nat.c (regmap): Refer to REGISTER_NAME and not
+	REGISTER_NAMES in comments.
+	* remote-st.c (get_reg_name), i386b-nat.c (tregmap): Ditto.
+	* m68klinux-nat.c (regmap): Ditto.
+
 2003-09-17  Jim Blandy  <jimb@redhat.com>
 
 	* Makefile.in (dis_asm_h): Note that this #includes "bfd.h".
