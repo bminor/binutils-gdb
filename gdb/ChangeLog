@@ -1,5 +1,12 @@
 2000-04-19  Jim Blandy  <jimb@redhat.com>
 
+	Bring RETURN_VALUE_ON_STACK under gdbarch's control.
+	* gdbarch.sh (RETURN_VALUE_ON_STACK): New entry.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* arch-utils.c (default_return_value_on_stack): New function.
+	* arch-utils.h (default_return_value_on_stack): New declaration.
+	* values.c (RETURN_VALUE_ON_STACK): Delete default definition.
+
 	* i386v-nat.c (i386_insert_nonaligned_watchpoint): Use a
 	two-dimensional array, instead of faking it with explicit index
 	arithmetic.
