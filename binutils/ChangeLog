@@ -1,5 +1,7 @@
 Fri May  1 16:20:23 1992  K. Richard Pixley  (rich@cygnus.com)
 
+	* Makefile.in: added test-install target.
+
 	* sanity.sh: new file.
 
 	* Makefile.in: use sanity test on make check.

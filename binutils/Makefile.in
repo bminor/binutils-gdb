@@ -136,6 +136,9 @@ all: $(ADDL_LIBS) $(PROGS)
 check:
 	/bin/sh $(srcdir)/sanity.sh .
 
+test-install:
+	/bin/sh $(srcdir)/sanity.sh $(bindir)
+
 info: binutils.info
 
 #$(BFD):$(LIBDIR)/../common/*.c
