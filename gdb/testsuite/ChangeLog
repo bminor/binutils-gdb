@@ -1,3 +1,8 @@
+2002-09-18  Corinna Vinschen  <vinschen@redhat.com>
+
+	* lib/gdb.exp (rerun_to_main): Allow restarting application.
+	* gdb.base/ena-dis-br.exp (rerun_to_main): Eliminate.
+
 2002-09-17  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/printcmds.exp (test_print_string_constants): Expect

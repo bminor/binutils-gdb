@@ -1685,6 +1685,10 @@ proc rerun_to_main {} {
   } else {
     send_gdb "run\n"
     gdb_expect {
+      -re "The program .* has been started already.*y or n. $" {
+	  send_gdb "y\n"
+	  exp_continue
+      }
       -re "Starting program.*$gdb_prompt $"\
 	      {pass "rerun to main" ; return 0}
       -re "$gdb_prompt $"\
