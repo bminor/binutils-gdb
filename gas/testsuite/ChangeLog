@@ -1,3 +1,10 @@
+start-sanitize-sky
+Mon Jan  5 14:20:17 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* gas/txvu/txvu.exp: New file.
+	* gas/txvu/basic-1.[ds]: New files.
+
+end-sanitize-sky
 start-sanitize-r5900
 Mon Dec 22 12:47:16 1997  Ian Lance Taylor  <ian@cygnus.com>
 
