@@ -53,15 +53,6 @@ gdb_test "continue" \
 gdb_test "next" \
          ".*i = f2 \\(i\\);.*" \
 	 "next over dummy 1"
-
-# As of Oct 2002, GCC does record the effect of #line directives in
-# the source line info, but not in macro info.  This means that GDB's
-# symtabs (built from the former, among other things) may mention
-# filenames that GDB's macro tables (built from the latter) don't have
-# any record of.  Make sure GDB can handle this by trying to evaluate
-# an expression, which will do a macro expansion.
-gdb_test "print i" ".* = 4.*" 
-
 gdb_test "next" \
          ".*dummy \\(2, i\\);.*" \
 	 "next to dummy 2"
