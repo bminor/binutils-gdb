@@ -1,3 +1,7 @@
+Wed Aug 30 11:02:11 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* Makefile.in (TOOL_PROGS): Include dlltool if needed.
+
 Tue Aug 29 13:25:21 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* dlltool.c (rva): Deleted.
@@ -5,6 +9,7 @@ Tue Aug 29 13:25:21 1995  steve chamberlain  <sac@slash.cygnus.com>
 	(flush_page, gen_exp_file, gen_lib_file): Use new way of RVAing.
 	(gen_exp_file): Don't generate .edata if no need.
 	(gen_lib_file): Don't make timestamp.
+	Put _iname in idata$7.
 	(workout_prefix): Fix memory initialization bug.
 	(usage): Tidy up, delete many single char options.
 	(main): rva option is gone.

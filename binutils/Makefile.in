@@ -15,7 +15,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 srcdir = .
 
@@ -70,7 +70,7 @@ LEX_OPTIONS = -I -Cem
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo flex ; fi`
 
 # Distribution version
-VERSION=cygnus-2.5
+VERSION=cygnus-2.5.3
 # Distribution name
 DIST_NAME=binutils-${VERSION}
 
@@ -101,18 +101,23 @@ OBJDUMP_PROG=objdump
 DEMANGLER_PROG=c++filt
 
 NLMCONV_PROG=nlmconv
+DLLTOOL_PROG=dlltool
 
 SRCONV_PROG=srconv sysdump coffdump 
 
+
+
 MANPAGES= ar nm objdump ranlib size strings strip objcopy nlmconv
 
-PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(BUILD_NLMCONV) $(BUILD_SRCONV) $(SYSINFO_PROG) 
+PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(BUILD_NLMCONV) $(BUILD_SRCONV) $(SYSINFO_PROG) $(BUILD_DLLTOOL)
 STAGESTUFF = $(PROGS) *.o
 # Files that can be generated, but should be in the distribution.
-DISTSTUFF=arparse.c arlex.c nlmheader.c sysinfo.c syslex.c info
+# Don't build $(DEMANGLER_PROG).1, since its name may vary with the
+# configuration.
+DISTSTUFF=arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h syslex.c
 
 # Stuff that goes in tooldir/ if appropriate
-TOOL_PROGS = nm.new strip.new ar ranlib
+TOOL_PROGS = nm.new strip.new ar ranlib $(DLLTOOL)
 
 BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
@@ -155,14 +160,19 @@ ADDL_LIBS = $(MALLOC) $(BULIBS) $(BFD) $(LIBIBERTY)
 BFD = ../bfd/libbfd.a
 OPCODES = ../opcodes/libopcodes.a
 
-RUNTEST = runtest
-RUNTESTFLAGS = 
+EXPECT = `if [ -f $${rootme}/../expect/expect ] ; then \
+          echo $${rootme}/../expect/expect ; \
+          else echo expect ; fi`
+RUNTEST = `if [ -f ${srcdir}/../dejagnu/runtest ] ; then \
+           echo ${srcdir}/../dejagnu/runtest ; \
+           else echo runtest ;  fi`
+RUNTESTFLAGS =
+
 FLAGS_TO_PASS = \
 	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
 	"RUNTEST=$(RUNTEST)" \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
-
 #
 ## The rules
 
@@ -200,10 +210,10 @@ site.exp: ./config.status Makefile
 	-@rm -f ./tmp?
 
 check: site.exp
-	r=`pwd`; export r; \
+	rootme=`pwd`; export rootme ; \
 	srcroot=`cd ${srcdir}; pwd` ; export srcroot ; \
 	EXPECT=${EXPECT} ; export EXPECT ; \
-	if [ -f $$r/../expect/expect ] ; then  \
+	if [ -f $$rootme/../expect/expect ] ; then  \
 	   TCL_LIBRARY=$${srcroot}/../tcl/library ; \
 	   export TCL_LIBRARY ; else true; fi ; \
 	$(RUNTEST) --tool binutils --srcdir $(srcdir)/testsuite \
@@ -244,10 +254,10 @@ version.o: version.c Makefile
 	$(CC) $(INCLUDES) $(HDEFINES) $(TDEFINES) -DVERSION='"$(VERSION)"' $(CFLAGS) -c $(srcdir)/version.c
 
 cplus-dem.o: $(BASEDIR)/libiberty/cplus-dem.c $(INCDIR)/getopt.h
-	$(CC) -c -DMAIN $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CFLAGS) $(BASEDIR)/libiberty/cplus-dem.c
+	$(CC) -c -DMAIN -DVERSION='"$(VERSION)"' $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CFLAGS) $(BASEDIR)/libiberty/cplus-dem.c
 
-$(DEMANGLER_PROG): cplus-dem.o $(LIBIBERTY) underscore.o version.o
-	$(CC) $(CFLAGS) $(LDFLAGS)  -o $(DEMANGLER_PROG) cplus-dem.o $(LIBIBERTY) $(EXTRALIBS) underscore.o version.o
+$(DEMANGLER_PROG): cplus-dem.o $(LIBIBERTY) underscore.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(DEMANGLER_PROG) cplus-dem.o $(LIBIBERTY) $(EXTRALIBS) underscore.o
 
 arparse.c: arparse.y
 	$(BISON) $(BISONFLAGS)  $(srcdir)/arparse.y
@@ -333,6 +343,23 @@ srconv.o: srconv.c sysroff.h sysroff.c coffgrok.h $(INCDIR)/coff/internal.h \
 
 srconv: srconv.o coffgrok.o $(ADDL_LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ srconv.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
+
+dlltool:dlltool.o defparse.o deflex.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ dlltool.o defparse.o deflex.o $(ADDL_LIBS) $(EXTRALIBS)
+
+defparse.c:defparse.y
+	$(BISON)  $(BISONFLAGS)  $(srcdir)/defparse.y
+	mv -f y.tab.c defparse.c
+	mv -f y.tab.h defparse.h
+
+defparse.h: defparse.c
+
+deflex.c:deflex.l
+	$(LEX) $(LEX_OPTIONS) $(srcdir)/deflex.l
+	mv lex.yy.c deflex.c
+
+dlltool.o:dlltool.c
+	$(CC) -c $(INCLUDES) $(HDEFINES) $(TDEFINES) $(DLLTOOL_DEFS) $(CFLAGS) $(srcdir)/dlltool.c
 
 coffdump: coffdump.o coffgrok.o $(ADDL_LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@  coffdump.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
@@ -437,14 +464,17 @@ de-stage3: force
 	- (cd stage3 ; mv -f * ..)
 	- rmdir stage3
 
-######################################################################
+###
 # DOCUMENTATION TARGETS
+config.texi: Makefile
+	rm -f config.texi
+	echo '@set VERSION $(VERSION)' > config.texi
 # TeX output
-binutils.dvi: $(srcdir)/binutils.texi
+binutils.dvi: $(srcdir)/binutils.texi config.texi
 	TEXINPUTS=$(TEXIDIR):$$TEXINPUTS $(TEXI2DVI) $(srcdir)/binutils.texi
 
 # info file for online browsing
-binutils.info: $(srcdir)/binutils.texi
+binutils.info: $(srcdir)/binutils.texi config.texi
 	$(MAKEINFO) -o binutils.info $(srcdir)/binutils.texi
 
 $(DEMANGLER_PROG).1: cxxfilt.man Makefile
@@ -511,19 +541,19 @@ binutils.me: $(srcdir)/binutils.texi
 	>binutils.me 
 
 
-######################################################################
+###
 
 mostlyclean:
-	-rm -f *.o *~ \#* core binutils.?? binutils.???
+	-rm -f *.o *~ \#* core binutils.?? binutils.??? y.output
 	-rm -rf tmpdir
 clean: mostlyclean
-	-rm -f $(PROGS) underscore.c
+	-rm -f $(PROGS) underscore.c sysroff sysroff.c sysroff.h sysinfo
 distclean:
 	-rm -f Makefile config.status sysdep.h *.o *~ \#* core y.* \
 		binutils.?? binutils.??s binutils.aux binutils.log binutils.toc
 	-rm -f $(PROGS) underscore.c
 realclean: clean distclean
-	-rm -f $(DISTSTUFF) TAGS
+	-rm -f $(DISTSTUFF) *.info TAGS
 
 etags tags: TAGS
 
@@ -573,7 +603,7 @@ clean-info:
 
 dist: $(DIST_NAME).tar.z
 
-diststuff: $(DISTSTUFF)
+diststuff: $(DISTSTUFF) info
 
 $(DIST_NAME).tar.z:
 	cd ../..; rm -f $(DIST_NAME); ln -s devo $(DIST_NAME)
