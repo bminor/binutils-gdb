@@ -201,7 +201,7 @@ regex.h
 rem-multi.shar
 remote-adapt.c
 remote-bug.c
-remite-e7000.c
+remote-e7000.c
 remote-eb.c
 remote-es.c
 remote-hms.c
