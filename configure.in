@@ -164,6 +164,7 @@ fi
 case "${enable_shared}" in
   yes) shared=yes ;;
   no) shared=no ;;
+  "") shared=no ;;
   *) shared=yes ;;
 esac
 
