@@ -1,3 +1,8 @@
+Wed May 24 00:38:09 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* utils.c (make_cleanup_close, do_close_cleanup): New functions.
+	* defs.h (make_cleanup_close): Add declaration.
+
 Tue May 23 20:47:50 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (build_warnings): Add -Wuninitialized.

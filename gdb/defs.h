@@ -332,6 +332,8 @@ extern struct cleanup *make_cleanup_freeargv (char **);
 struct ui_file;
 extern struct cleanup *make_cleanup_ui_file_delete (struct ui_file *);
 
+extern struct cleanup *make_cleanup_close (int fd);
+
 extern struct cleanup *make_cleanup_bfd_close (bfd *abfd);
 
 extern struct cleanup *make_final_cleanup (make_cleanup_ftype *, void *);

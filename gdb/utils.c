@@ -216,6 +216,19 @@ make_cleanup_bfd_close (bfd *abfd)
 }
 
 static void
+do_close_cleanup (void *arg)
+{
+  close ((int) arg);
+}
+
+struct cleanup *
+make_cleanup_close (int fd)
+{
+  /* int into void*. Outch!! */
+  return make_cleanup (do_close_cleanup, (void *) fd);
+}
+
+static void
 do_ui_file_delete (void *arg)
 {
   ui_file_delete (arg);
