@@ -111,7 +111,7 @@ struct frame_saved_regs;
 /* Sequence of bytes for breakpoint instruction.
    This is padded out to the size of a machine word. */
 
-#define BREAKPOINT 		{0x0, 0x0, 0x0, 0x0}	/* FIXME! */
+#define BREAKPOINT 		{0x49, 0x80, 0x00, 0x00}	/* FIXME! */
 
 /* Amount PC must be decremented by after a breakpoint.
    This is often the number of bytes in BREAKPOINT

@@ -1,3 +1,31 @@
+start-sanitize-tic80
+Wed Apr 30 15:23:02 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/tic80/tm-tic80.h (BREAKPOINT): Set it to trap 73.
+
+end-sanitize-tic80
+Mon Apr 28 21:25:32 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* Makefile.in: Add rule for gnu-nat.o and i386gnu-nat.o (Gnu Hurd)
+	* config/i386/i386gnu.mh: remove rules for [i386]gnu-nat.o, now 
+	in Makefile.in (as for other targets); add NATDEPFILE corelow.o to 
+	satisfy symbol dependancy in solib.c (core_ops).
+	* target.[ch] conditionalize Mach-specific signals so that they
+	won't show up in non-Mach gdb's!
+	* thread.c: add function thread_id_to_pid; change name of static
+	function "thread_switch" to "switch_to_thread", to avoid conflict
+	with Mach global symbol; move thread_cmd_list to global scope
+	so targets can add their own thread commands.
+	* infrun.c: sig_print_info: allow for long signal names.
+	* gnu-nat.[ch]: tidying up comments.
+	* gnu-nat.c: move several functions to static scope, just for tidy;
+	remove calls to prune_threads and renumber_threads; 
+	gnu_wait must not return -1 when inferior exits; 
+	attach_to_child will modify inferior_pid in a way that allows
+	fork_inferior to remain unchanged; 
+	remove extra arg from startup_inferior;
+	move mach-specific thread commands here from thread.c.
+
 Mon Apr 28 18:21:20 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* symtab.c: decode_line_1, replace the assignment to 
