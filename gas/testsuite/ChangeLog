@@ -1,3 +1,7 @@
+2001-10-16  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gas/sh/err-le.s, gas/sh/err-be.s: New tests.
+
 2001-10-13  matthew green  <mrg@redhat.com>
 
 	* gas/ppc/booke.s (rfci, wrtee, wrteei, mfdcrx, mfdcr, mtdcrx,
