@@ -1,5 +1,7 @@
 Thu Oct  7 10:50:38 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
+       * coffswap.h: (bfd_swap_reloc_in): a symndx is signed.
+
 	Make support for relaxing more generic.
 	* reloc16.c: Add new target entry - bfd_coff_reloc16_estimate,
 	fix bit rot.

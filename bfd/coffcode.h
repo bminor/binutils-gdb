@@ -303,73 +303,82 @@ CODE_FRAGMENT
  * 	in styp_to_sec_flags().
  */
 static long
-DEFUN(sec_to_styp_flags, (sec_name, sec_flags),
-	CONST char *		sec_name	AND
-	flagword	sec_flags)
+sec_to_styp_flags (sec_name, sec_flags)
+     CONST char *sec_name;
+     flagword sec_flags;
 {
   long styp_flags = 0;
 
   if (!strcmp(sec_name, _TEXT)) 
-  {
-    styp_flags = STYP_TEXT;
-  } 
+    {
+      styp_flags = STYP_TEXT;
+    }
   else if (!strcmp(sec_name, _DATA)) 
-  {
-    styp_flags = STYP_DATA;
+    {
+      styp_flags = STYP_DATA;
 #ifdef TWO_DATA_SECS
-  }
+    }
   else if (!strcmp(sec_name, ".data2")) 
-  {
-    styp_flags = STYP_DATA;
+    {
+      styp_flags = STYP_DATA;
 #endif				/* TWO_DATA_SECS */
-  }
+    }
   else if (!strcmp(sec_name, _BSS)) 
-  {
-    styp_flags = STYP_BSS;
+    {
+      styp_flags = STYP_BSS;
 #ifdef _COMMENT
-  } 
+    } 
   else if (!strcmp(sec_name, _COMMENT)) 
-  {
-    styp_flags = STYP_INFO;
+    {
+      styp_flags = STYP_INFO;
 #endif				/* _COMMENT */
 #ifdef _LIB
-  }
+    }
   else if (!strcmp(sec_name, _LIB)) 
-  {
-    styp_flags = STYP_LIB;
+    {
+      styp_flags = STYP_LIB;
 #endif				/* _LIB */
 #ifdef _LIT
-  }
+    }
   else if (!strcmp (sec_name, _LIT))
-  {
-    styp_flags = STYP_LIT;
+    {
+      styp_flags = STYP_LIT;
 #endif /* _LIT */
-
-  }
+    }
+  else if (!strcmp(sec_name, ".debug"))
+    {
+      styp_flags = STYP_INFO;
+    }
+  else if (!strcmp(sec_name, ".stab")
+ 	   || !strncmp(sec_name, ".stabstr", 8))
+    {
+      styp_flags = STYP_INFO;
+    }
   /* Try and figure out what it should be */
   else if (sec_flags & SEC_CODE) 
-  {
-    styp_flags = STYP_TEXT;
-  }
+    {
+      styp_flags = STYP_TEXT;
+    }
   else  if (sec_flags & SEC_DATA) 
-  {
-    styp_flags = STYP_DATA;
-  }
+    {
+      styp_flags = STYP_DATA;
+    }
   else if (sec_flags & SEC_READONLY)
-  {
+    {
 #ifdef STYP_LIT			/* 29k readonly text/data section */
-    styp_flags = STYP_LIT;
+      styp_flags = STYP_LIT;
 #else
-    styp_flags = STYP_TEXT;
+      styp_flags = STYP_TEXT;
 #endif				/* STYP_LIT */
-  }
+    }
   else if (sec_flags & SEC_LOAD)
-  {
-    styp_flags = STYP_TEXT;
-  }
-  else {
-     styp_flags = STYP_BSS;
-   }
+    {
+      styp_flags = STYP_TEXT;
+    }
+  else if (sec_flags & SEC_ALLOC)
+    {
+      styp_flags = STYP_BSS;
+    }
 
 #ifdef STYP_NOLOAD
   if (sec_flags & SEC_NEVER_LOAD)
@@ -427,9 +436,11 @@ DEFUN(styp_to_sec_flags, (abfd, hdr),
       sec_flags |= SEC_ALLOC;
   }
   else if (styp_flags & STYP_INFO) 
-  {
-    /* Nothing to do.  */
-  }
+    {
+      /* Assume that any informational section is primarily for debugging
+	 and therefore a prime candidate for stripping. */
+      sec_flags |= SEC_DEBUGGING;
+    }
   else
   {
     sec_flags |= SEC_ALLOC | SEC_LOAD;
@@ -574,6 +585,12 @@ dependent COFF routines
 .       bfd_byte *data,
 .       unsigned int *src_ptr,
 .       unsigned int *dst_ptr));
+. int (*_bfd_coff_reloc16_estimate) PARAMS ((
+.       asection *input_section,
+.       asymbol **symbols,
+.       arelent *r,
+.       unsigned int shrink));	
+.
 .} bfd_coff_backend_data;
 .
 .#define coff_backend_info(abfd) ((bfd_coff_backend_data *) (abfd)->xvec->backend_data)
@@ -650,6 +667,10 @@ dependent COFF routines
 .#define bfd_coff_reloc16_extra_cases(abfd, seclet, reloc, data, src_ptr, dst_ptr)\
 .        ((coff_backend_info (abfd)->_bfd_coff_reloc16_extra_cases)\
 .         (abfd, seclet, reloc, data, src_ptr, dst_ptr))
+.
+.#define bfd_coff_reloc16_estimate(abfd, section, symbols, reloc, shrink)\
+.        ((coff_backend_info (abfd)->_bfd_coff_reloc16_estimate)\
+.         (section, symbols, reloc, shrink))
 . 
 */
 
@@ -688,6 +709,8 @@ DEFUN (coff_make_section_hook, (abfd, name),
        char *name)
 {
 #ifdef TWO_DATA_SECS
+  /* FIXME: This predates the call to bfd_make_section_anyway
+     in make_a_section_from_file, and can probably go away.  */
   /* On SCO a file created by the Microsoft assembler can have two
      .data sections.  We use .data2 for the second one.  */
   if (strcmp (name, _DATA) == 0)
@@ -1229,6 +1252,10 @@ DEFUN(coff_compute_section_file_positions,(abfd),
    sofar += AOUTSZ;
 
   sofar += abfd->section_count * SCNHSZ;
+#ifdef USE_DISCARDED_SECTIONS_COUNT
+  /* Count any sections that were removed, so overall size doesn't change. */
+  sofar += discarded_sections_count * SCNHSZ;
+#endif
   for (current = abfd->sections;
        current != (asection *)NULL;
        current = current->next) {
@@ -2240,6 +2267,21 @@ bfd *abfd;
   }
 #endif
 
+#ifndef coff_reloc16_estimate
+#define coff_reloc16_estimate dummy_reloc16_estimate
+
+static dummy_reloc16_estimate(input_section, symbols, reloc, shrink)
+     asection *input_section;
+     asymbol **symbols;
+     arelent *reloc;
+     int shrink;
+{
+  abort();
+  
+}
+
+#endif
+
 #ifndef coff_reloc16_extra_cases
 #define coff_reloc16_extra_cases dummy_reloc16_extra_cases
 /* This works even if abort is not declared in any header file.  */
@@ -2272,7 +2314,8 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table = {
  coff_swap_filehdr_in, coff_swap_aouthdr_in, coff_swap_scnhdr_in,
  coff_bad_format_hook, coff_set_arch_mach_hook, coff_mkobject_hook,
  styp_to_sec_flags, coff_make_section_hook, coff_set_alignment_hook,
- coff_slurp_symbol_table, symname_in_debug_hook, coff_reloc16_extra_cases
+ coff_slurp_symbol_table, symname_in_debug_hook, 
+ coff_reloc16_extra_cases, coff_reloc16_estimate
 };
 
 #define coff_core_file_failing_command	_bfd_dummy_core_file_failing_command
