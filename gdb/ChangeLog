@@ -1,5 +1,14 @@
 2003-03-12  Andrew Cagney  <cagney@redhat.com>
 
+	* regcache.c (regcache_cooked_write_signed): New function.
+	(regcache_cooked_write_unsigned): New function.
+	(regcache_cooked_read_unsigned): Fix regnum in range assertion.
+	(regcache_cooked_read_signed): Fix regnum in range assertion.
+	* regcache.h (regcache_cooked_write_signed): Declare.
+	(regcache_cooked_write_unsigned): Declare.
+
+2003-03-12  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (DEPRECATED_FRAME_SAVED_PC): Replace FRAME_SAVED_PC.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.

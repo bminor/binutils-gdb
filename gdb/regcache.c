@@ -884,7 +884,7 @@ regcache_cooked_read_signed (struct regcache *regcache, int regnum,
 {
   char *buf;
   gdb_assert (regcache != NULL);
-  gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
+  gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_cooked_registers);
   buf = alloca (regcache->descr->sizeof_register[regnum]);
   regcache_cooked_read (regcache, regnum, buf);
   (*val) = extract_signed_integer (buf,
@@ -897,11 +897,35 @@ regcache_cooked_read_unsigned (struct regcache *regcache, int regnum,
 {
   char *buf;
   gdb_assert (regcache != NULL);
-  gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
+  gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_cooked_registers);
   buf = alloca (regcache->descr->sizeof_register[regnum]);
   regcache_cooked_read (regcache, regnum, buf);
   (*val) = extract_unsigned_integer (buf,
 				     regcache->descr->sizeof_register[regnum]);
+}
+
+void
+regcache_cooked_write_signed (struct regcache *regcache, int regnum,
+			      LONGEST val)
+{
+  void *buf;
+  gdb_assert (regcache != NULL);
+  gdb_assert (regnum >=0 && regnum < regcache->descr->nr_cooked_registers);
+  buf = alloca (regcache->descr->sizeof_register[regnum]);
+  store_signed_integer (buf, regcache->descr->sizeof_register[regnum], val);
+  regcache_cooked_write (regcache, regnum, buf);
+}
+
+void
+regcache_cooked_write_unsigned (struct regcache *regcache, int regnum,
+				ULONGEST val)
+{
+  void *buf;
+  gdb_assert (regcache != NULL);
+  gdb_assert (regnum >=0 && regnum < regcache->descr->nr_cooked_registers);
+  buf = alloca (regcache->descr->sizeof_register[regnum]);
+  store_unsigned_integer (buf, regcache->descr->sizeof_register[regnum], val);
+  regcache_cooked_write (regcache, regnum, buf);
 }
 
 /* Write register REGNUM at MYADDR to the target.  MYADDR points at

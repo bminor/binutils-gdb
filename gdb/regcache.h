@@ -75,6 +75,10 @@ extern void regcache_cooked_read_signed (struct regcache *regcache,
 					 int regnum, LONGEST *val);
 extern void regcache_cooked_read_unsigned (struct regcache *regcache,
 					   int regnum, ULONGEST *val);
+extern void regcache_cooked_write_signed (struct regcache *regcache,
+					  int regnum, LONGEST val);
+extern void regcache_cooked_write_unsigned (struct regcache *regcache,
+					    int regnum, ULONGEST val);
 
 /* Partial transfer of a cooked register.  These perform read, modify,
    write style operations.  */
