@@ -2181,11 +2181,9 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  }
 		else
 		  {
+		    outrel.r_addend = relocation + rel->r_addend;
 		    if (r_type == R_SPARC_64)
-		      {
-			outrel.r_info = ELF64_R_INFO (0, R_SPARC_RELATIVE);
-			outrel.r_addend = relocation + rel->r_addend;
-		      }
+		      outrel.r_info = ELF64_R_INFO (0, R_SPARC_RELATIVE);
 		    else
 		      {
 			long indx;
@@ -2215,6 +2213,13 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			    osec = sec->output_section;
 			    indx = elf_section_data (osec)->dynindx;
 
+			    /* We are turning this relocation into one
+			       against a section symbol, so subtract out
+			       the output section's address but not the
+			       offset of the input section in the output
+			       section.  */
+			    outrel.r_addend -= osec->vma;
+
 			    /* FIXME: we really should be able to link non-pic
 			       shared libraries.  */
 			    if (indx == 0)
@@ -2233,7 +2238,6 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 					  ELF64_R_TYPE_INFO (
 					    ELF64_R_TYPE_DATA (rel->r_info),
 							       r_type));
-			outrel.r_addend = relocation + rel->r_addend;
 		      }
 		  }
 
