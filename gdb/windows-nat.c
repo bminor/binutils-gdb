@@ -949,7 +949,7 @@ display_selector (HANDLE thread, DWORD sel)
 	     + info.BaseLow;
       limit = (info.HighWord.Bits.LimitHi << 16) + info.LimitLow;
       if (info.HighWord.Bits.Granularity)
-       limit = (limit << 12) | 0xfff;
+	limit = (limit << 12) | 0xfff;
       printf_filtered ("base=0x%08x limit=0x%08x", base, limit);
       if (info.HighWord.Bits.Default_Big)
 	puts_filtered(" 32-bit ");
@@ -1571,7 +1571,7 @@ child_attach (char *args, int from_tty)
 	ok = DebugActiveProcess (pid);
 
       if (!ok)
-    error ("Can't attach to process.");
+	error ("Can't attach to process.");
     }
 
   if (has_detach_ability ())
@@ -1964,16 +1964,16 @@ child_resume (ptid_t ptid, int step, enum target_signal sig)
 
       if (th->context.ContextFlags)
 	{
-     if (debug_registers_changed)
-       {
-	  th->context.Dr0 = dr[0];
-	  th->context.Dr1 = dr[1];
-	  th->context.Dr2 = dr[2];
-	  th->context.Dr3 = dr[3];
-	  /* th->context.Dr6 = dr[6];
-	   FIXME: should we set dr6 also ?? */
-	  th->context.Dr7 = dr[7];
-       }
+	  if (debug_registers_changed)
+	    {
+	      th->context.Dr0 = dr[0];
+	      th->context.Dr1 = dr[1];
+	      th->context.Dr2 = dr[2];
+	      th->context.Dr3 = dr[3];
+	      /* th->context.Dr6 = dr[6];
+	       FIXME: should we set dr6 also ?? */
+	      th->context.Dr7 = dr[7];
+	    }
 	  CHECK (SetThreadContext (th->h, &th->context));
 	  th->context.ContextFlags = 0;
 	}
