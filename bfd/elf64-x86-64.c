@@ -1442,7 +1442,9 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_X86_64_PC8:
 	case R_X86_64_PC16:
 	case R_X86_64_PC32:
-	  if (h == NULL)
+	  if (h == NULL || h->dynindx == -1
+	      || (info->symbolic
+		  && h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
 	    break;
 	  /* Fall through.  */
 	case R_X86_64_8:
@@ -1451,15 +1453,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_X86_64_64:
 	  /* FIXME: The ABI says the linker should make sure the value is
 	     the same when it's zeroextended to 64 bit.	 */
-	  if (info->shared
-	      && (input_section->flags & SEC_ALLOC) != 0
-	      && ((r_type != R_X86_64_PC8
-		   && r_type != R_X86_64_PC16
-		   && r_type != R_X86_64_PC32)
-		  || (! info->symbolic
-		      || (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_DEF_REGULAR) == 0)))
-
+	  if (info->shared && (input_section->flags & SEC_ALLOC) != 0)
 	    {
 	      Elf_Internal_Rela outrel;
 	      boolean skip, relocate;
@@ -1563,10 +1557,10 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 			  BFD_ASSERT (indx > 0);
 			}
 
- 		      relocate = false;
+		      relocate = false;
 		      outrel.r_info = ELF64_R_INFO (indx, r_type);
- 		      outrel.r_addend = relocation + rela->r_addend;
- 		    }
+		      outrel.r_addend = relocation + rela->r_addend;
+		    }
 
 		}
 

@@ -1,3 +1,8 @@
+2001-06-20  Bo Thorsen  <bo@suse.co.uk>
+
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Fix linking of
+	shared libraries.
+
 2001-06-18  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* configure.host (mips64-*-linux): Reformat.
@@ -24,7 +29,7 @@
         elf_backend_emit_relocs and elf_backend_count_relocs.
         * elflink.h (elf_link_size_reloc_section): Make the hash table
         big enough to hold the relocs counted by either reloc_count or
-        o->reloc_count.  
+        o->reloc_count.
         (elf_bfd_final_link) emit_relocs: New boolean, set if relocs
         should be emitted, either because of a command line option
         stored in the info structure or because the target provides a
@@ -72,7 +77,7 @@
 
 	* elf32-mips.c (mips_elf_link_hash_entry): Add a new field,
 	readonly_reloc, to record if a relocation in the .rel.dyn
-	section is against a read-only section. 
+	section is against a read-only section.
 	(mips_elf_link_hash_newfunc): Initialize the readonly_reloc
 	field to false.
 	(_bfd_mips_elf_check_relocs): Record if there is a relocation
