@@ -34,12 +34,16 @@ atof-ns32k.c
 atof-vax.c
 coff_gnu.h
 cplus-dem.c
+ebmon29k.mt
+h8300.mt
+h8300hds.mt
 ho-ansi.h
 ho-decstation.h
 ho-generic.h
 ho-go32.h
 ho-hpux.h
 ho-i386.h
+ho-i386aix.h
 ho-rs6000.h
 ho-sun3.h
 ho-sun386.h
@@ -47,9 +51,14 @@ ho-sun4.h
 ho-sunos.h
 ho-sysv.h
 ho-vax.h
+i386aix.mt
+m68k.mt
+m88k-opcode.h
+m88k.patches
 mh-i386
+mh-i386aix
+mips.mt
 mt-ebmon29k
-ebmon29k.mt
 mt-h8300
 mt-h8300hds
 mt-m68k
@@ -69,6 +78,7 @@ obj-generic.c
 obj-generic.h
 obj-ieee.c
 obj-ieee.h
+rs6000.mt
 tc-a29k.c
 tc-a29k.h
 tc-generic.c
@@ -86,6 +96,8 @@ tc-m68k.c
 tc-m68k.h
 tc-m68kmote.c
 tc-m68kmote.h
+tc-m88k.c
+tc-m88k.h
 tc-mips.c
 tc-mips.h
 tc-ns32k.c
@@ -98,6 +110,7 @@ tc-vax.c
 tc-vax.h
 te-dpx2.h
 te-generic.h
+te-i386aix.h
 te-ic960.h
 te-sco386.h
 te-sun3.h
@@ -125,7 +138,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.22  1992/05/07 00:24:39  sac
+# Revision 1.23  1992/07/23 18:23:44  gumby
+# Keep OSE support
+#
+# Revision 1.22  1992/05/07  00:24:39  sac
 # Keep the 29k config file
 #
 # Revision 1.21  1992/02/27  18:52:18  sac
