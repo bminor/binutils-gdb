@@ -1,3 +1,9 @@
+Thu May 25 13:49:17 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Fri 19 May 2000 Eli Zaretskii <eliz@is.elta.co.il>: *
+ 	config/djgpp/fnchange.lst: Fix bfd/coff-tic54x.c, bfd/coff-tc54x.c
+ 	and gdb/testsuite/gdb.mi/mi-var-cmd.exp.
+
 2000-05-23  Alexandre Oliva  <aoliva@cygnus.com>
 
 	* config/sparc/nm-linux.h: Include config/nm-linux.h.
