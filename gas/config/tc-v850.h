@@ -20,6 +20,8 @@
 
 #define TC_V850
 
+#include <elf/v850.h>
+
 #define TARGET_BYTES_BIG_ENDIAN 0
 
 #ifndef BFD_ASSEMBLER
@@ -62,17 +64,19 @@ extern const struct relax_type md_relax_table[];
 #define SHF_V850_R0REL		0x40000000
 
 #define ELF_TC_SPECIAL_SECTIONS \
-  { ".sdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL	}, \
-  { ".rosdata",	SHT_PROGBITS,	SHF_ALLOC +             SHF_V850_GPREL	}, \
-  { ".sbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL	}, \
-  { ".scommon",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL	}, \
-  { ".tdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_EPREL	}, \
-  { ".tbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_EPREL	}, \
-  { ".tcommon",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
-  { ".zdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
-  { ".rozdata",	SHT_PROGBITS,	SHF_ALLOC +             SHF_V850_R0REL	}, \
-  { ".zbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
-  { ".zcommon",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
+  { ".sdata",	SHT_PROGBITS,		SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL	}, \
+  { ".rosdata",	SHT_PROGBITS,		SHF_ALLOC +             SHF_V850_GPREL	}, \
+  { ".sbss",	SHT_NOBITS,		SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL	}, \
+  { ".scommon",	SHT_V850_SCOMMON, 	SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL	}, \
+  { ".tdata",	SHT_PROGBITS,		SHF_ALLOC + SHF_WRITE + SHF_V850_EPREL	}, \
+  { ".tbss",	SHT_NOBITS,		SHF_ALLOC + SHF_WRITE + SHF_V850_EPREL	}, \
+  { ".tcommon",	SHT_V850_TCOMMON,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
+  { ".zdata",	SHT_PROGBITS,		SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
+  { ".rozdata",	SHT_PROGBITS,		SHF_ALLOC +             SHF_V850_R0REL	}, \
+  { ".zbss",	SHT_NOBITS,	  	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
+  { ".zcommon",	SHT_V850_ZCOMMON, 	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
   { ".call_table_data",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },	   \
   { ".call_table_text",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_EXECINSTR },
 
+#define MD_PCREL_FROM_SECTION(fixP,section) v850_pcrel_from_section (fixP, section)
+extern long v850_pcrel_from_section ();

@@ -269,7 +269,7 @@ v850_comm (area)
       return;
     }
   
-  input_line_pointer++;		/* skip ',' */
+  input_line_pointer ++;		/* skip ',' */
   
   if ((temp = get_absolute_expression ()) < 0)
     {
@@ -319,6 +319,7 @@ v850_comm (area)
       else
 	{
 	  temp = get_absolute_expression ();
+	  
 	  if (temp < 0)
 	    {
 	      temp = 0;
@@ -475,7 +476,7 @@ v850_comm (area)
 	  S_SET_VALUE (symbolP, (valueT) size);
 	  S_SET_ALIGN (symbolP, temp);
 	  S_SET_EXTERNAL (symbolP);
-
+	  
 	  switch (area)
 	    {
 	    case AREA_SDA:
@@ -744,10 +745,12 @@ reg_name_search (regs, regcount, name, accept_numbers)
       else if (accept_numbers)
 	{
 	  int reg = S_GET_VALUE (symbolP);
-
+	  
 	  if (reg >= 0 && reg <= 31)
 	    return reg;
 	}
+
+      /* Otherwise drop through and try parsing name normally.  */
     }
   
   low = 0;
@@ -893,7 +896,7 @@ system_register_name (expressionP, accept_numbers
 	}
 /* end-sanitize-v850e */      
     }
-      
+  
   /* look to see if it's in the register table */
   if (reg_number >= 0) 
     {
@@ -1019,11 +1022,11 @@ parse_register_list
     case 0xfff8000f: regs = type2_regs; break;
     case 0xfff8001f: regs = type3_regs; break;
     default:
-      as_bad (_("unknown operand shift: %x\n"), operand->shift );
+      as_bad (_("unknown operand shift: %x\n"), operand->shift);
       return _("internal failure in parse_register_list");
     }
 
-  skip_white_space();
+  skip_white_space ();
 
   /* If the expression starts with a curly brace it is a register list.
      Otherwise it is a constant expression, whoes bits indicate which
@@ -1216,7 +1219,7 @@ md_show_usage (stream)
   fprintf (stream, _("  -mv850ea                  The code is targeted at the v850ea\n"));
   fprintf (stream, _("  -mv850any                 The code is generic, despite any processor specific instructions\n"));
 /* end-sanitize-v850e */
-} 
+}
 
 int
 md_parse_option (c, arg)
@@ -1355,8 +1358,8 @@ md_convert_frag (abfd, sec, fragP)
 	 target.  */
       md_number_to_chars (buffer + 2, 0x00000780, 4);
       fix_new (fragP, fragP->fr_fix + 2, 4, fragP->fr_symbol,
-	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + (int) fragP->fr_opcode
-	       + 1);
+	       fragP->fr_offset, 1, BFD_RELOC_UNUSED +
+	       (int) fragP->fr_opcode + 1);
       fragP->fr_var = 0;
       fragP->fr_fix += 6;
     }
@@ -1365,8 +1368,8 @@ md_convert_frag (abfd, sec, fragP)
     {
       md_number_to_chars (fragP->fr_fix + fragP->fr_literal, 0x00000780, 4);
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
-	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + (int) fragP->fr_opcode
-	       + 1);
+	       fragP->fr_offset, 1, BFD_RELOC_UNUSED +
+	       (int) fragP->fr_opcode + 1);
       fragP->fr_var = 0;
       fragP->fr_fix += 4;
     }
@@ -1443,19 +1446,21 @@ md_begin ()
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, machine);
 
  /* start-sanitize-v850e */
-   call_table_data_section = subseg_new (".call_table_data", 0);
-   bfd_set_section_flags (stdoutput, call_table_data_section,
-                        applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC
-                                      | SEC_DATA | SEC_HAS_CONTENTS));
-
-   call_table_text_section = subseg_new (".call_table_text", 0);
-   bfd_set_section_flags (stdoutput, call_table_text_section,
-                        applicable & (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE));
-
-   /* Restore text section as the current default.  */
-   subseg_set (text_section, 0);
- /* end-sanitize-v850e */
-
+  applicable = bfd_applicable_section_flags (stdoutput);
+  
+  call_table_data_section = subseg_new (".call_table_data", 0);
+  bfd_set_section_flags (stdoutput, call_table_data_section,
+			 applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC
+				       | SEC_DATA | SEC_HAS_CONTENTS));
+  
+  call_table_text_section = subseg_new (".call_table_text", 0);
+  bfd_set_section_flags (stdoutput, call_table_text_section,
+			 applicable & (SEC_ALLOC | SEC_LOAD | SEC_READONLY
+				       | SEC_CODE));
+  
+  /* Restore text section as the current default.  */
+  subseg_set (text_section, 0);
+  /* end-sanitize-v850e */
 }
 
 
@@ -1794,7 +1799,7 @@ md_assemble (str)
 	  if ((reloc = v850_reloc_prefix (operand)) != BFD_RELOC_UNUSED)
 	    {
 	      /* This is a fake reloc, used to indicate an error condition.  */
-	      if (reloc == BFD_RELOC_64) 
+	      if (reloc == BFD_RELOC_64)
 		{
 		  match = 1;
 		  goto error;
@@ -1857,13 +1862,13 @@ md_assemble (str)
 		      break;
 		    }
 
- 		  if (fc > MAX_INSN_FIXUPS)
- 		    as_fatal (_("too many fixups"));
-  
- 		  fixups[ fc ].exp     = ex;
- 		  fixups[ fc ].opindex = * opindex_ptr;
- 		  fixups[ fc ].reloc   = reloc;
- 		  fc++;
+		  if (fc > MAX_INSN_FIXUPS)
+		    as_fatal (_("too many fixups"));
+		  
+		  fixups[ fc ].exp     = ex;
+		  fixups[ fc ].opindex = * opindex_ptr;
+		  fixups[ fc ].reloc   = reloc;
+		  fc++;
 		}
 	      else
 		{
@@ -1941,8 +1946,7 @@ md_assemble (str)
 		  str = input_line_pointer;
 		  input_line_pointer = hold;
 	      
-		  while (   *str == ' ' || *str == ',' || *str == '['
-			 || *str == ']')
+		  while (*str == ' ' || *str == ',' || *str == '[' || *str == ']')
 		    ++ str;
 		  continue;
 		}
@@ -2012,7 +2016,7 @@ md_assemble (str)
 
 		  input_line_pointer = str;
 
-		  c = get_symbol_end();
+		  c = get_symbol_end ();
 		  
 		  if (symbol_find (str) != NULL)
 		    exists = 1;
@@ -2251,7 +2255,7 @@ md_assemble (str)
 	  /* XXX This will abort on an R_V850_8 reloc -
 	     is this reloc actually used ? */
 	  if (size != 2 && size != 4) 
-	    abort();
+	    abort ();
 
 	  address = (f - frag_now->fr_literal) + insn_size - size;
 
@@ -2259,7 +2263,7 @@ md_assemble (str)
 	    {
 	      address += 2;
 	    }
-
+	  
 	  fixP = fix_new_exp (frag_now, address, size,
 			      & fixups[i].exp, 
 			      reloc_howto->pc_relative,
@@ -2311,7 +2315,7 @@ tc_gen_reloc (seg, fixp)
       as_bad_where (fixp->fx_file, fixp->fx_line,
 		    /* xgettext:c-format */
                     _("reloc %d not supported by object file format"),
-		    (int)fixp->fx_r_type);
+		    (int) fixp->fx_r_type);
 
       xfree (reloc);
       
@@ -2339,16 +2343,21 @@ md_estimate_size_before_relax (fragp, seg)
 } 
 
 long
-md_pcrel_from (fixp)
+v850_pcrel_from_section (fixp, section)
      fixS * fixp;
+     segT   section;
 {
   /* If the symbol is undefined, or in a section other than our own,
      then let the linker figure it out.  */
-  if (fixp->fx_addsy != (symbolS *) NULL && ! S_IS_DEFINED (fixp->fx_addsy))
+  if (fixp->fx_addsy != (symbolS *) NULL
+      && (! S_IS_DEFINED (fixp->fx_addsy)
+	  || (S_GET_SEGMENT (fixp->fx_addsy) != section)))
     {
-      /* The symbol is undefined.  Let the linker figure it out.  */
+      /* The symbol is undefined/not in our section.
+	 Let the linker figure it out.  */
       return 0;
     }
+
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
 

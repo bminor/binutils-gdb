@@ -1,3 +1,12 @@
+Wed Sep 30 10:52:32 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-v850.c (md_pcrel_from): Rename to
+	v850_pcrel_from_section.
+	(v850_pcrel_from_section): Do not resolves symbols in other
+	sections. 
+
+	* config/tc-v850.h (MD_PCREL_FROM_SECTION): Define.
+
 Mon Sep 28 11:01:20 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d10v.c (find_opcode): Generate an error if a register
