@@ -1,3 +1,17 @@
+Mon Apr 29 13:15:17 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (struct mips_elf_link_hash_entry): Add
+	mips_32_relocs field.
+	(mips_elf_link_hash_newfunc): Initialize mips_32_relocs field.
+	(mips_elf_relocate_section): Copy R_MIPS_REL32 and R_MIPS_32
+	relocs against a global symbol which is not defined in a regular
+	file.
+	(mips_elf_check_relocs): For a R_MIPS_REL32 or R_MIPS_32 reloc
+	against a global symbol, increment mips_32_relocs.
+	(mips_elf_adjust_dynamic_symbol): If mips_32_relocs is set, and
+	the symbol is not defined in a regular file, make room in the
+	.rel.dyn section.
+
 Fri Apr 26 18:00:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ecoff.c (ecoff_compute_section_file_positions): Track the real
