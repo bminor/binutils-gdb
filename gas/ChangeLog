@@ -1,3 +1,9 @@
+start-sanitize-r5900
+Mon Jun  1 17:04:56 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mips.c (hilo_interlocks): The r5900 has HILO interlocks.
+
+end-sanitize-r5900
 Mon Jun  1 12:47:30 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-m32r.c (m32r_do_align): Only fill code sections with

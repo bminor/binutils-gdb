@@ -242,6 +242,9 @@ static int mips_4900 = -1;
 			 /* start-sanitize-vr4320 */		    \
 			 || mips_cpu == 4320			    \
 			 /* end-sanitize-vr4320 */		    \
+			 /* start-sanitize-r5900 */		    \
+			 || mips_cpu == 5900			    \
+			 /* end-sanitize-r5900 */		    \
                          )
 
 /* Whether the processor uses hardware interlocks to protect reads
@@ -7008,6 +7011,7 @@ validate_mips_insn (opc)
       case 'J': break;
       case 'O': USE_BITS (OP_MASK_VUCALLMS,	OP_SH_VUCALLMS);break;
       case '&': USE_BITS (OP_MASK_VUDEST,	OP_SH_VUDEST);	break;
+      case ';': break;
       case '#':
 	p++;
 	 break;
@@ -7317,6 +7321,7 @@ mips_ip (str, ip)
 	    case 'K':		/* DEST operand completer (optional), must
 				   match previous dest if specified.  */
 	    case '&':		/* DEST instruction completer */
+	    case ';':		/* DEST instruction completer, must be xyz */
 	      {
 		int w,x,y,z;
 		static int last_h;
@@ -7364,6 +7369,20 @@ mips_ip (str, ip)
 
 		    ip->insn_opcode |= ((w << 21) | (x << 24)
 					| (y << 23) | (z << 22));
+		    last_h = (w << 3) | (x << 0) | (y << 1) | (z << 2);
+		  }
+		else if (*args == ';')
+		  {
+		    /* This implicitly has the .xyz completer.  */
+		    if (w == 0 && x == 0 && y == 0 && z == 0)
+		      x = y = z = 1;
+
+		    if (w != 0 || x != 1 || y != 1 || z != 1)
+		      {
+			insn_error = "Invalid dest specification";
+			continue;
+		      }
+
 		    last_h = (w << 3) | (x << 0) | (y << 1) | (z << 2);
 		  }
 		else
