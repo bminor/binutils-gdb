@@ -784,7 +784,8 @@ _bfd_m68hc12_elf_print_private_bfd_data (abfd, ptr)
 #define elf_backend_gc_sweep_hook    elf32_m68hc11_gc_sweep_hook
 #define elf_backend_object_p	0
 #define elf_backend_final_write_processing	0
-#define elf_backend_can_gc_sections		1
+/* Disabled as this backend uses the generic linker.  */
+#define elf_backend_can_gc_sections		0
 
 #define bfd_elf32_bfd_merge_private_bfd_data \
 					_bfd_m68hc12_elf_merge_private_bfd_data
