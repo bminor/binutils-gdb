@@ -1,3 +1,9 @@
+2000-04-03  Denis Chertykov  <denisc@overta.ru>
+
+	* avr-dis.c: Syntax cleanup.
+	(add0fff): Print the pc relative address as a signed number.
+	(add03f8): Likewise.
+
 2000-04-01  Ian Lance Taylor  <ian@zembu.com>
 
 	* disassemble.c (disassembler_usage): Don't use a prototype.  Mark
