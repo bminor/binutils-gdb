@@ -1,3 +1,8 @@
+Sun Feb  6 13:26:21 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* printcmd.c (printf_command):  Add missing single-letter
+	backslash-escape sequences, and improve error message.
+
 Sun Feb  6 06:55:15 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* corelow.c (solib_add_stub, core_open): Pass address of from_tty
