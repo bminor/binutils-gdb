@@ -256,7 +256,7 @@ struct cmd_list_element
     struct cmd_list_element *cmd_pointer;
   };
 
-/* Forward-declarations of the entry-points of command.c.  */
+/* Forward-declarations of the entry-points of cli/cli-decode.c.  */
 
 extern struct cmd_list_element *add_cmd (char *, enum command_class,
 					 void (*fun) (char *, int), char *,
