@@ -1,3 +1,7 @@
+2004-10-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-sparc/tlssunbin32.sd: Adjust for changed .dynamic location.
+
 2004-10-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 371
