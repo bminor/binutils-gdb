@@ -265,7 +265,7 @@ mpg:
 	vaddaz.xyz  ACC,vf2,vf3
 	vaddaz.wxyz  ACC,vf2,vf3
 	vcallms  stuff
-	vcallmsr vi19
+	vcallmsr vi27
 	vclip vf4
 	vdiv Q,vf4z,vf8w
 	vdiv Q,vf4y,vf8x

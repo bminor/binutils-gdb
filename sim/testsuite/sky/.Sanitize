@@ -212,6 +212,7 @@ sce_test9_out_gif.dat
 sky.ld
 t-cop2.s
 t-cop2.vuexpect
+t-cop2b.c
 t-dma.c
 t-pke2.trc
 t-pke2.vif1expect

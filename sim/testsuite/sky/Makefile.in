@@ -109,7 +109,7 @@ TESTS = \
 	tsv408_0.ok tsv408_1.ok \
 	tsv416_0.ok tsv416_1.ok \
 	tsv432_0.ok tsv432_1.ok \
-	t-cop2.vuok
+	t-cop2.vuok t-cop2b.ok
 
 #SCE_TESTS := $(patsubst %.dvpasm, %.ok, $(wildcard sce*.dvpasm))
 SCE_TESTS = \
@@ -139,13 +139,13 @@ sanity:
 	@eval echo GCC_FOR_TARGET = $(GCC_FOR_TARGET)
 	@eval echo DVPAS_FOR_TARGET = $(DVPAS_FOR_TARGET)
 	@eval echo DVPOBJCP_FOR_TARGET = $(DVPOBJCP_FOR_TARGET)
-                
+
 #------------------------------------
 # Rules for building and running the SCE tests :
 #------------------------------------
 
 LDFLAGS=-T$(srcdir)/sky.ld
-CFLAGS += -I$(srcdir)
+CFLAGS += -g -I$(srcdir)
 ASFLAGS = -I$(srcdir)
 
 sce%.exe: sce%.o sce_main.o refresh.o
@@ -217,7 +217,7 @@ sce%.ok: sce%.exe
 .trc.c:
 	$(C_GEN) $< $@
 .c.run:
-	$(GCC_FOR_TARGET) -T$(srcdir)/sky.ld -o $@ $<
+	$(GCC_FOR_TARGET) $(CFLAGS) $(LDFLAGS) -o $@ $<
 .uu.run:
 	uudecode $< > $@
 .run.vif0out:
@@ -232,6 +232,8 @@ sce%.ok: sce%.exe
 .s.run:
 	rm -f $@
 	$(AS_FOR_TARGET) -mcpu=r5900 -o $@ $<
+.c.s:
+	$(GCC_FOR_TARGET) -S -o $@ $<
 
 
 #

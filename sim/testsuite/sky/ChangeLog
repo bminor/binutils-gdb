@@ -1,3 +1,9 @@
+Fri Apr 17 14:47:53 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* t-cop2b.c: New test for COP2 via inline asm.
+	* Makefile.in: Build t-cop2b.
+	* t-cop2.s: Update for new VCALLMSR instruction.
+
 Thu Apr 16 15:05:51 1998 Jillian Ye <jillian@cygnus.com>
 
 	* t-pke2.trc t-pke2.vif1expect : Update the testcase
