@@ -65,12 +65,6 @@ void
 frag_grow (nchars)
      unsigned int nchars;
 {
-  /* Try really hard to grow the obstack.  Creating a new obstack can
-     disable expression optimisations that would otherwise occur if
-     two symbols were located in the same obstack.  */
-  if (obstack_room (&frchain_now->frch_obstack) < nchars)
-    obstack_make_room (& frchain_now->frch_obstack, 2 * nchars);
-
   if (obstack_room (&frchain_now->frch_obstack) < nchars)
     {
       unsigned int n;
