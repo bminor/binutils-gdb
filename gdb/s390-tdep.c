@@ -974,18 +974,24 @@ s390_frame_chain (struct frame_info *thisframe)
 	{
 	  if (thisframe->saved_regs)
 	    {
-
 	      int regno;
 
-	      regno =
-		((prev_fextra_info.frame_pointer_saved_pc
-		  && thisframe->
-		  saved_regs[S390_FRAME_REGNUM]) ? S390_FRAME_REGNUM :
-		 S390_SP_REGNUM);
+              if (prev_fextra_info.frame_pointer_saved_pc
+                  && thisframe->saved_regs[S390_FRAME_REGNUM])
+                regno = S390_FRAME_REGNUM;
+              else
+                regno = S390_SP_REGNUM;
+
 	      if (thisframe->saved_regs[regno])
-		prev_fp =
-		  read_memory_integer (thisframe->saved_regs[regno],
-				       S390_GPR_SIZE);
+                {
+                  /* The SP's entry of `saved_regs' is special.  */
+                  if (regno == S390_SP_REGNUM)
+                    prev_fp = thisframe->saved_regs[regno];
+                  else
+                    prev_fp =
+                      read_memory_integer (thisframe->saved_regs[regno],
+                                           S390_GPR_SIZE);
+                }
 	    }
 	}
     }

@@ -1,5 +1,8 @@
 2001-11-27  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c (s390_frame_chain): Remember that the SP's element
+	of the frame's saved_regs array is special.
+
 	* s390-tdep.c (register_names): Call the general-purpose registers
 	`r0' -- `r15', and the floating-point registers `f0' -- `f15', to
 	match the assembly language.
