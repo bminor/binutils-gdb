@@ -1,8 +1,7 @@
 /* Target-vector operations for controlling win32 child processes, for GDB.
-   Copyright 1995, 1996
-   Free Software Foundation, Inc.
-
+   Copyright 1995, 1996 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
+
    This file is part of GDB.
 
    This program is free software; you can redistribute it and/or modify
@@ -20,6 +19,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* by Steve Chamberlain, sac@cygnus.com */
+
+/* We assume we're being built with and will be used for cygwin32.  */
 
 #include "defs.h"
 #include "frame.h"		/* required by inferior.h */
@@ -39,6 +40,7 @@
 #include "gdbthread.h"
 #include "gdbcmd.h"
 #include <sys/param.h>
+#include <unistd.h>
 
 #define CHECK(x) 	check (x, __FILE__,__LINE__)
 #define DEBUG_EXEC(x)	if (debug_exec)		printf x
@@ -68,7 +70,6 @@ static int event_count = 0;
 /* User options. */
 static int new_console = 0;
 static int new_group = 0;
-static int dos_path_style = 0;
 static int debug_exec = 0;		/* show execution */
 static int debug_events = 0;		/* show events from kernel */
 static int debug_memory = 0;		/* show target memory accesses */
@@ -597,138 +598,6 @@ child_open (arg, from_tty)
   error ("Use the \"run\" command to start a Unix child process.");
 }
 
-
-/* Convert a unix-style set-of-paths (a colon-separated list of directory
-   paths with forward slashes) into the dos style (semicolon-separated 
-   list with backward slashes), simultaneously undoing any translations
-   performed by the mount table. */
-
-static char *buf = NULL;
-static int blen = 2000;
-
-static char *
-unix_paths_to_dos_paths(char *newenv)
-{
-  int ei;
-  char *src;
-
-  if (buf == 0)
-    buf = (char *) malloc(blen);
-
-  if (newenv == 0 || *newenv == 0 ||
-     (src = strchr(newenv, '=')) == 0)	/* find the equals sign */
-    return 0;
-
-  src++;				/* now skip past it */
-
-  if (src[0] == '/' ||			/* is this a unix style path? */
-     (src[0] == '.' && src[1] == '/') ||
-     (src[0] == '.' && src[1] == '.' && src[2] == '/'))
-    { /* we accept that we will fail on a relative path like 'foo/mumble' */
-      /* Found an env name, turn from unix style into dos style */
-      int len = src - newenv;
-      char *dir = buf + len;
-
-      memcpy(buf, newenv, len);
-      /* Split out the colons */
-      while (1)
-	{
-	  char *tok = strchr (src, ':');
-	  int doff = dir - buf;
-
-	  if (doff + MAX_PATH > blen) 
-	    {
-	      blen *= 2;
-	      buf = (char *) realloc((void *) buf, blen);
-	      dir = buf + doff;
-	    }
-	  if (tok)
-	    {
-	      *tok = 0;
-	            cygwin32_unix_path_to_dos_path_keep_rel (src, dir);
-	      *tok = ':';
-	      dir += strlen(dir);
-	      src = tok + 1;
-	      *dir++ = ';';
-	    }
-	  else
-	    {
-      cygwin32_unix_path_to_dos_path_keep_rel (src, dir);
-	      dir += strlen(dir);
-	      *dir++ = 0;
-	      break;
-	    }
-	}
-      return buf;
-    }
-  return 0;
-}
-
-/* Convert a dos-style set-of-paths (a semicolon-separated list with
-   backward slashes) into the dos style (colon-separated list of
-   directory paths with forward slashes), simultaneously undoing any
-   translations performed by the mount table. */
-
-static char *
-dos_paths_to_unix_paths(char *newenv)
-{
-  int ei;
-  char *src;
-
-  if (buf == 0)
-    buf = (char *) malloc(blen);
-
-  if (newenv == 0 || *newenv == 0 ||
-     (src = strchr(newenv, '=')) == 0)	/* find the equals sign */
-    return 0;
-
-  src++;				/* now skip past it */
-
-  if (src[0] == '\\' ||		/* is this a dos style path? */
-     (isalpha(src[0]) && src[1] == ':' && src[2] == '\\') ||
-     (src[0] == '.' && src[1] == '\\') ||
-     (src[0] == '.' && src[1] == '.' && src[2] == '\\'))
-    { /* we accept that we will fail on a relative path like 'foo\mumble' */
-      /* Found an env name, turn from dos style into unix style */
-      int len = src - newenv;
-      char *dir = buf + len;
-
-      memcpy(buf, newenv, len);
-      /* Split out the colons */
-      while (1)
-	{
-	  char *tok = strchr (src, ';');
-	  int doff = dir - buf;
-	  
-	  if (doff + MAX_PATH > blen) 
-	    {
-	      blen *= 2;
-	      buf = (char *) realloc((void *) buf, blen);
-	      dir = buf + doff;
-	    }
-	  if (tok)
-	    {
-	      *tok = 0;
-	         cygwin32_dos_path_to_unix_path_keep_rel (src, dir);
-	      *tok = ';';
-	      dir += strlen(dir);
-	      src = tok + 1;
-	      *dir++ = ':';
-	    }
-	  else
-	    {
-	         cygwin32_dos_path_to_unix_path_keep_rel (src, dir);
-	      dir += strlen(dir);
-	      *dir++ = 0;
-	      break;
-	    }
-	}
-      return buf;
-    }
-  return 0;
-}
-
-
 /* Start an inferior win32 child process and sets inferior_pid to its pid.
    EXEC_FILE is the file to run.
    ALLARGS is a string containing the arguments to the program.
@@ -778,46 +647,86 @@ child_create_inferior (exec_file, allargs, env)
   strcat (args, " ");
   strcat (args, allargs);
 
-#if 0
-  /* get total size for env strings */
-  for (envlen = 0, i = 0; env[i] && *env[i]; i++)
-    envlen += strlen(env[i]) + 1;       
-#else
-  /* get total size for env strings */
-  for (envlen = 0, i = 0; env[i] && *env[i]; i++)
-    {
-#if 0
-      winenv = 0;
-#else
-      winenv = unix_paths_to_dos_paths(env[i]);
-#endif
-      envlen += winenv ? strlen(winenv) + 1 : strlen(env[i]) + 1;
-    }
-#endif
+  /* Prepare the environment vars for CreateProcess.  */
+  {
+    /* This code use to assume all env vars were file names and would
+       translate them all to win32 style.  That obviously doesn't work in the
+       general case.  The current rule is that the user either works solely
+       with win32 style path names or with posix style path names and that
+       all env vars are already set up appropriately.  At any rate it is
+       wrong for us to willy-nilly change them.
 
-  winenv = alloca(2 * envlen + 1);	/* allocate new buffer */
+       However, we need to handle PATH because we're about to call
+       CreateProcess and it uses PATH to find DLL's.  Fortunately PATH
+       has a well-defined value in both posix and win32 environments.
+       cygwin.dll will change it back to posix style if necessary.  If we're
+       working with win32 style path names, we don't need to do anything at
+       all.  */
 
-  /* copy env strings into new buffer */
-  for (temp = winenv, i = 0; env[i] && *env[i];     i++) 
-    {
-#if 0
-      char *p = 0;
-#else
-      char *p = unix_paths_to_dos_paths(env[i]);
-#endif
-      strcpy(temp, p ? p : env[i]);
-      temp += strlen(temp) + 1;
-    }
-#if 0
-  /* copy env strings into new buffer */
-  for (temp = winenv, i = 0; env[i] && *env[i];     i++) 
-    {
-      strcpy(temp, env[i]);
-      temp += strlen(temp) + 1;
-    }
-#endif
+    static const char *conv_path_names[] =
+      {
+	"PATH=",
+	0
+      };
+    int posix_rules_p = sysconf (_SC_PATH_RULES) == _PATH_RULES_POSIX;
 
-  *temp = 0;			/* final nil string to terminate new env */
+    /* CreateProcess takes the environment list as a null terminated set of
+       strings (i.e. two nulls terminate the list).  */
+
+    /* Get total size for env strings.  */
+    for (envlen = 0, i = 0; env[i] && *env[i]; i++)
+      {
+	if (posix_rules_p)
+	  {
+	    int j, len;
+
+	    for (j = 0; conv_path_names[j]; j++)
+	      {
+		len = strlen (conv_path_names[j]);
+		if (strncmp (conv_path_names[j], env[i], len) == 0)
+		  {
+		    envlen += len
+		      + cygwin32_posix_to_win32_path_list_buf_size (env[i] + len);
+		    break;
+		  }
+	      }
+	    if (conv_path_names[j] == NULL)
+	      envlen += strlen (env[i]) + 1;
+	  }
+	else
+	  envlen += strlen (env[i]) + 1;
+      }
+
+    winenv = alloca (envlen + 1);
+
+    /* Copy env strings into new buffer.  */
+    for (temp = winenv, i = 0; env[i] && *env[i]; i++) 
+      {
+	if (posix_rules_p)
+	  {
+	    int j, len;
+
+	    for (j = 0; conv_path_names[j]; j++)
+	      {
+		len = strlen (conv_path_names[j]);
+		if (strncmp (conv_path_names[j], env[i], len) == 0)
+		  {
+		    memcpy (temp, env[i], len);
+		    cygwin32_posix_to_win32_path_list (env[i] + len, temp + len);
+		    break;
+		  }
+	      }
+	    if (conv_path_names[j] == NULL)
+	      strcpy (temp, env[i]);
+	  }
+	else
+	  strcpy (temp, env[i]);
+	temp += strlen (temp) + 1;
+      }
+
+    /* Final nil string to terminate new env.  */
+    *temp = 0;
+  }
 
   ret = CreateProcess (0,
 		       args, 	/* command line */
@@ -1000,41 +909,6 @@ struct target_ops child_ops =
   OPS_MAGIC			/* to_magic */
 };
 
-#include "environ.h"
-
-static void
-set_pathstyle_dos(args, from_tty, c)
-     char *args;
-     int from_tty;
-     struct cmd_list_element *c;
-{
-  char **vector = environ_vector(inferior_environ);
-  char *thisvar;
-  int dos = *(int *) c->var;
-
-  if (info_verbose)
-    printf_unfiltered ("Change dos_path_style to %s\n", dos ? "true":"false");
-
-  while (vector && *vector) 
-    {
-      if (dos)
-	thisvar = unix_paths_to_dos_paths(*vector);
-      else
-	thisvar = dos_paths_to_unix_paths(*vector);
-
-      if (thisvar) 
-	{
-	  if (info_verbose)
-	    printf_unfiltered ("Change %s\nto %s\n", *vector, thisvar);
-	  free(*vector);
-	  *vector = xmalloc(strlen(thisvar) + 1);
-	  strcpy(*vector, thisvar);
-	}
-      vector++;
-    }
-}
-
-
 void
 _initialize_inftarg ()
 {
@@ -1053,15 +927,6 @@ _initialize_inftarg ()
 		  "Set creation of new group when creating child process.",
 		  &setlist),
      &showlist);
-
-  add_show_from_set
-    (c = add_set_cmd ("dos-path-style", class_support, var_boolean,
-		      (char *) &dos_path_style,
-		      "Set whether paths in child's environment are shown in dos style.",
-		  &setlist),
-     &showlist);
-
-  c->function.sfunc = set_pathstyle_dos;
 
   add_show_from_set
     (add_set_cmd ("debugexec", class_support, var_boolean,
