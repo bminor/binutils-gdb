@@ -1,3 +1,12 @@
+2003-08-26  Nick Clifton  <nickc@redhat.com>
+
+	* po/de.po: New German translation.
+	* configure.in (ALL_LINGUAS): Add de.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* gconfig.in: Regenerate.
+
 2003-08-21  Nick Clifton  <nickc@redhat.com>
 
 	* po/tr.po: Updated Turkish translation.
