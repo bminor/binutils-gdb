@@ -30,33 +30,17 @@
 #undef SKIP_TRAMPOLINE_CODE
 #undef IGNORE_HELPER_CALL
 
-/* FIXME: Do not include "tm-linux.h", because we do not want the host's
-   <signal.h>.  Instead, copy the non-signal bits for now.  */
+/* Linux/MIPS has __SIGRTMAX == 127.  */
 
-/* We need this file for the SOLIB_TRAMPOLINE stuff.  */
+#define REALTIME_LO 32
+#define REALTIME_HI 128
 
-#include "tm-sysv4.h"
-
-/* We define SVR4_SHARED_LIBS unconditionally, on the assumption that
-   link.h is available on all linux platforms.  For I386 and SH3/4,
-   we hard-code the information rather than use link.h anyway (for
-   the benefit of cross-debugging).  We may move to doing that for
-   other architectures as well.  */
-
-#define SVR4_SHARED_LIBS
-#include "solib.h"              /* Support for shared libraries.  */
-
-/* End from "tm-linux.h".  */
+#include "tm-linux.h"
 
 /* There's an E_MIPS_ABI_O32 flag in e_flags, but we don't use it - in
    fact, using it may violate the o32 ABI.  */
 
 #define MIPS_DEFAULT_ABI MIPS_ABI_O32
-
-/* Linux/MIPS has __SIGRTMAX == 127.  */
-
-#define REALTIME_LO 32
-#define REALTIME_HI 128
 
 /* Use target_specific function to define link map offsets.  */
 

@@ -1,5 +1,11 @@
 2001-07-11  Daniel Jacobowitz  <drow@mvista.com>
 
+	* config/mips/tm-linux.h: Include "tm-linux.h" instead of copying
+	from it.  Move definitions of REALTIME_LO and REALTIME_HI above
+	include.
+
+2001-07-11  Daniel Jacobowitz  <drow@mvista.com>
+
 	* MAINTAINERS: List myself for MIPS/Linux
 	port.
 
