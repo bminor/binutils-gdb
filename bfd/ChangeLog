@@ -1,3 +1,8 @@
+Tue Sep  5 19:35:28 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-sparc.c (CALC_ADDEND): Don't set the addend to the value of
+	a global symbol.
+
 Tue Sep  5 12:48:26 1995  Jason Molenda   (crash@phydeaux.cygnus.com)
 
 	* config.bfd: i386pe_ve -> i386pe_vec.
