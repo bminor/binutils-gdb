@@ -1,3 +1,8 @@
+2000-05-26  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* ldmain.c: Include filenames.h.
+	(set_scripts_dir): Support backslashes in program name.
+
 2000-05-23  Philip Blundell  <pb@futuretv.com>
 
 	* configure.in: Set version to 2.10.

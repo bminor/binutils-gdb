@@ -1,3 +1,39 @@
+2000-05-26  Alan Modra  <alan@linuxcare.com.au>
+
+	* gprof.h: Remove most nls defines.  They are pulled in by
+	bfd/sysdep.h.  #include "ansidecl.h" not <ansidecl.h>
+
+2000-05-26  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gprof.texi: Fix numerous typos. Mention some DOS/Windows related
+	issues.
+
+	* configure.in: Check for setmode function.
+	* configure: Regenerate.
+
+	* gmon_io.h (SET_BINARY) [HAVE_SETMODE]: Define.
+
+	* gmon_io.c (gmon_out_read) [SET_BINARY]: Switch stdin into binary
+	mode.
+
+	* source.c: Include filenames.h and sys/stat.h.
+	(source_file_lookup_path, source_file_lookup_name): Use
+	FILENAME_CMP to compare file names.
+	(annotate_source) [__MSDOS__]: If "filename-ann" would overwrite
+	"filename", replace the extension with ".ann".
+	[HAVE_DOS_BASED_FILE_SYSTEM]: Support file names with
+	backslashes and drive letters.
+	Use IS_ABSOLUTE_PATH.
+
+	* search_list.h (PATH_SEP_CHAR): Define.
+
+	* search_list.c (search_list_append): Use PATH_SEP_CHAR.
+
+	* hertz.c (HERTZ) [__MSDOS__]: Don't define unless they have
+	neither HAVE_SETITIMER nor HAVE_SYSCONF.
+	[HAVE_SETITIMER]: If they define both HAVE_SETITIMER and
+	HAVE_SYSCONF, try setitimer and fall back on sysconf.
+
 2000-05-23  Philip Blundell  <pb@futuretv.com>
 
 	* configure.in: Set version to 2.10.
