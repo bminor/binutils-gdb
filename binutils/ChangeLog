@@ -1,3 +1,8 @@
+Tue Jul 22 18:01:23 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* nlmconv.c (link_inputs): Call libiberty pexecute function.
+	(pexecute) [multiple versions]: Remove.
+
 Tue Jul 22 16:19:34 1997  Robert Hoehne <robert.hoehne@Mathematik.TU-Chemnitz.DE>
 
 	* bucomm.c (make_tempname): If we might be using a DOS filesystem,
