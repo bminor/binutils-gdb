@@ -1,3 +1,8 @@
+Sun Jun 21 21:27:03 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-sh.c (md_apply_fix): Handle weak symbols correctly if
+	BFD_ASSEMBLER.
+
 Sun Jun 21 12:26:36 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (d30v_align): Always perform alignment request,
