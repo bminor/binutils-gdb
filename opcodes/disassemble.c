@@ -94,13 +94,11 @@ disassembler (abfd)
 	disassemble = print_insn_little_arm;
       break;
 #endif
-/* start-sanitize-d10v */
 #ifdef ARCH_d10v
     case bfd_arch_d10v:
       disassemble = print_insn_d10v;
       break;
 #endif
-/* end-sanitize-d10v */
 /* start-sanitize-d30v */
 #ifdef ARCH_d30v
     case bfd_arch_d30v:

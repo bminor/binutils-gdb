@@ -1281,9 +1281,7 @@ only_if_gcc=no
 
 case "${target}" in
   arm*-*-*)		sim_target=arm ;;
-# start-sanitize-d10v
   d10v-*-*)		sim_target=d10v ;;
-# end-sanitize-d10v
   h8300*-*-*)		sim_target=h8300 ;;
   h8500-*-*)		sim_target=h8500 ;;
   mips*-*-*)
