@@ -1,6 +1,13 @@
 2003-09-11  Daniel Jacobowitz  <drow@mvista.com>
 
 	Merge from mainline:
+	2003-08-25  Daniel Jacobowitz  <drow@mvista.com>
+
+	PR java/1322
+	* dwarf2-frame.c (dwarf2_frame_find_fde): Check whether any FDEs are
+	available before calling SECT_OFF_TEXT.
+	* PROBLEMS: Remove description of java/1322.
+
 	2003-07-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* objfiles.h (struct objfile): Add memebers `data' and `num_data'.

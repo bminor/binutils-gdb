@@ -19,17 +19,3 @@ gcc 3.x generates these multiple object code functions in order to
 implement virtual base classes.  gcc 2.x generated just one object code
 function with a hidden parameter, but gcc 3.x conforms to a multi-vendor
 ABI for C++ which requires multiple object code functions.
-
-gdb/1322: "internal-error: sect_index_text not initialized" after printing a java type
-
-When gdb debugs a Java program which uses shared libraries, it can
-generate this internal error.
-
-If you get this error when debugging Java, you can try working around
-the problem by relinking your program with no shared libraries at all
-(even the standard C library).  With the GNU linker, use the "-static"
-argument to do this.
-
-You can also try this patch for gdb:
-
-  http://sources.redhat.com/ml/gdb-prs/2003-q3/msg00190.html

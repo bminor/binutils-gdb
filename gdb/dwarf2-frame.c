@@ -1130,9 +1130,13 @@ dwarf2_frame_find_fde (CORE_ADDR *pc)
       struct dwarf2_fde *fde;
       CORE_ADDR offset;
 
-      offset = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-      
       fde = objfile_data (objfile, dwarf2_frame_data);
+      if (fde == NULL)
+	continue;
+
+      gdb_assert (objfile->section_offsets);
+      offset = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+
       while (fde)
 	{
 	  if (*pc >= fde->initial_location + offset
