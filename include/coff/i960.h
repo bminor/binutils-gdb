@@ -32,9 +32,7 @@ struct external_filehdr {
 #define	F_I960CA	(0x5000)
 #define	F_I960KA	(0x6000)
 #define	F_I960SA	(0x6000)
-/* start-sanitize-i960xl */
-#define F_I960XL	(0x7000)
-/* end-sanitize-i960xl */
+#define F_I960JX	(0x7000)
 #define F_I960HX	(0x8000)
 
 
@@ -79,8 +77,8 @@ AOUTHDR;
 /* compute size of a header */
 
 /*#define AOUTSZ(aout) (sizeof(AOUTHDR)+(aout.tagentries*sizeof(TAGBITS)))*/
-#define AOUTSZ (sizeof(AOUTHDR))
-
+#define AOUTSZ 32
+#define AOUTHDRSZ 32
 
 
 /********************** SECTION HEADER **********************/
@@ -102,7 +100,7 @@ struct external_scnhdr {
 
 
 #define	SCNHDR	struct external_scnhdr
-#define	SCNHSZ	sizeof(SCNHDR)
+#define	SCNHSZ	44
 
 /*
  * names of "special" sections
@@ -229,9 +227,9 @@ union external_auxent {
 
 
 #define	SYMENT	struct external_syment
-#define	SYMESZ	sizeof(SYMENT)			/* FIXME - calc by hand */
+#define	SYMESZ	24
 #define	AUXENT	union external_auxent
-#define	AUXESZ	sizeof(AUXENT)			/* FIXME - calc by hand */
+#define	AUXESZ	24
 
 #	define _ETEXT	"_etext"
 
@@ -244,9 +242,14 @@ struct external_reloc {
   char pad[2];
 };
 
+/* r_type values for the i960.  */
 
-/* Relevent values for r_type and i960.  Would someone please document them */
+/* The i960 uses R_RELLONG, which is defined in internal.h as 0x11.
+   It is an absolute 32 bit relocation.  */
 
+#define R_IPRMED 	(0x19)	/* 24-bit ip-relative relocation */
+#define R_OPTCALL	(0x1b)	/* 32-bit optimizable call (leafproc/sysproc) */
+#define R_OPTCALLX	(0x1c)	/* 64-bit optimizable call (leafproc/sysproc) */
 
 #define RELOC struct external_reloc
 #define RELSZ 12
