@@ -4719,21 +4719,12 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
   return TRUE;
 }
 
-static bfd_boolean
-is_arm_mapping_symbol_name (const char * name)
-{
-  return (name != NULL)
-    && (name[0] == '$')
-    && ((name[1] == 'a') || (name[1] == 't') || (name[1] == 'd'))
-    && (name[2] == 0);
-}
-
 /* Treat mapping symbols as special target symbols.  */
 
 static bfd_boolean
 elf32_arm_is_target_special_symbol (bfd * abfd ATTRIBUTE_UNUSED, asymbol * sym)
 {
-  return is_arm_mapping_symbol_name (sym->name);
+  return bfd_is_arm_mapping_symbol_name (sym->name);
 }
 
 /* This is a copy of elf_find_function() from elf.c except that
@@ -4768,12 +4759,12 @@ arm_elf_find_function (bfd *         abfd ATTRIBUTE_UNUSED,
 	  break;
 	case STT_FUNC:
 	case STT_ARM_TFUNC:
+	case STT_NOTYPE:
 	  /* Skip $a and $t symbols.  */
 	  if ((q->symbol.flags & BSF_LOCAL)
-	      && is_arm_mapping_symbol_name (q->symbol.name))
+	      && bfd_is_arm_mapping_symbol_name (q->symbol.name))
 	    continue;
 	  /* Fall through.  */
-	case STT_NOTYPE:
 	  if (bfd_get_section (&q->symbol) == section
 	      && q->symbol.value >= low_func
 	      && q->symbol.value <= offset)
@@ -6098,7 +6089,7 @@ elf32_arm_output_symbol_hook (struct bfd_link_info *info,
     return TRUE;
 
   /* We only want mapping symbols.  */
-  if (! is_arm_mapping_symbol_name (name))
+  if (! bfd_is_arm_mapping_symbol_name (name))
     return TRUE;
 
   mapcount = ++(elf32_arm_section_data (input_sec)->mapcount);

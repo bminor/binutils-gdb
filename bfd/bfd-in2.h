@@ -828,6 +828,10 @@ extern bfd_boolean bfd_elf32_arm_get_bfd_for_interworking
 extern bfd_boolean bfd_elf32_arm_add_glue_sections_to_bfd
   (bfd *, struct bfd_link_info *);
 
+/* ELF ARM mapping symbol support */
+extern bfd_boolean bfd_is_arm_mapping_symbol_name
+  (const char * name);
+
 /* ARM Note section processing.  */
 extern bfd_boolean bfd_arm_merge_machines
   (bfd *, bfd *);

@@ -1,3 +1,10 @@
+2005-03-30  Julian Brown  <julian@codesourcery.com>
+
+	* config/tc-arm.c (mapping_state): Change documentation in function
+	comment to cross-reference spec instead. Change type of mapping symbols
+	to BSF_NO_TYPE.
+	(arm_adjust_symtab): Don't change type of mapping symbols here.
+
 2005-03-29  Julian Brown  <julian@codesourcery.com>
 
 	* config/tc-arm.c (marked_pr_dependency): New bitmap, bit N indicates
