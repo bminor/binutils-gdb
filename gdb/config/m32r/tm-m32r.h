@@ -1,6 +1,5 @@
 /* Parameters for execution on a Mitsubishi m32r processor.
-   Copyright 1996
-   Free Software Foundation, Inc. 
+   Copyright 1996, 1997 Free Software Foundation, Inc. 
 
 This file is part of GDB.
 
@@ -17,6 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+/* Used by mswin.  */
+#define TARGET_M32R 1
 
 /* mvs_check TARGET_BYTE_ORDER BIG_ENDIAN */
 #define TARGET_BYTE_ORDER BIG_ENDIAN
