@@ -3904,7 +3904,7 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	abort();
       max = 0x7ffff;
       min = -0x80000;
-      buf[1] = (buf[1] & 0x0f) | (val >> 12) & 0xf0;
+      buf[1] = (buf[1] & 0x0f) | ((val >> 12) & 0xf0);
       buf[2] = (val >> 8) & 0xff;
       buf[3] = val & 0xff;
       break;
@@ -3914,7 +3914,7 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       max = 0x7ffff;
       min = -0x80000;
       shift = 8;
-      buf[1] = (buf[1] & 0x0f) | (val >> 20) & 0xf0;
+      buf[1] = (buf[1] & 0x0f) | ((val >> 20) & 0xf0);
       buf[2] = (val >> 16) & 0xff;
       buf[3] = (val >> 8) & 0xff;
       break;

@@ -1,3 +1,8 @@
+2005-02-14  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* config/tc-sh.c (md_apply_fix3): Add parentheses around &
+	within |.
+
 2005-02-13  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-ia64.c (md_parse_option): Handle -xnone and -xdebugn.
