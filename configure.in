@@ -32,7 +32,7 @@ host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 	    prms send-pr gprof gdbtest tgas etc expect dejagnu sim
             m4 autoconf ispell grep diff rcs cvs fileutils shellutils
 	    textutils wdiff find emacs uudecode hello tar gzip indent
-	    recode release sed utils newlib"
+	    recode release sed utils"
 
 
 # these libraries are built for the target environment, and are built after
