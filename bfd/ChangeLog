@@ -10,7 +10,7 @@
 
 2003-08-03  Jeff Muizelaar  <muizelaar@rogers.com>
 
-	* coffcode.h: (coff_slurp_line_table) Return with a warning
+	* coffcode.h (coff_slurp_line_table): Return with a warning
 	message if the line number table could not be read.
 
 2003-08-04  Nick Clifton  <nickc@redhat.com>
