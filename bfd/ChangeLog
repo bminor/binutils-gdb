@@ -1,5 +1,17 @@
 2004-03-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* configure.in (HOST_64BIT_TYPE, HOST_U_64BIT_TYPE): Don't override
+	values selected in configure.host.  Require both to be defined
+	before setting BFD_HOST_64_BIT_DEFINED.  Protect assignment to
+	corresponding BFD_HOST vars with quotes.
+	<${host64}-${target64}-${want64} in *true*>: Don't exempt gcc;
+	Always require BFD_HOST_64_BIT_DEFINED.
+	<file_ptr type>: Find off_t size before emitting message.  Combine
+	off_t and ftello64 conditional.
+	* configure: Regenerate.
+
+2004-03-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-m32r.c (m32r_elf_create_dynamic_sections): Fix pointer
 	aliasing warning.  Remove trailing whitespace throughout file.
 

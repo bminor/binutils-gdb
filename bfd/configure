@@ -4615,18 +4615,18 @@ EOF
 
 if test "x${ac_cv_sizeof_long}" = "x8"; then
   host64=true
-  HOST_64BIT_TYPE="long"
+  BFD_HOST_64BIT_LONG=1
+  test -n "${HOST_64BIT_TYPE}" || HOST_64BIT_TYPE="long"
+  test -n "${HOST_U_64BIT_TYPE}" || HOST_U_64BIT_TYPE="unsigned long"
 elif test "x${ac_cv_sizeof_long_long}" = "x8"; then
-  HOST_64BIT_TYPE="long long"
-  HOST_U_64BIT_TYPE="unsigned long long"
+  test -n "${HOST_64BIT_TYPE}" || HOST_64BIT_TYPE="long long"
+  test -n "${HOST_U_64BIT_TYPE}" || HOST_U_64BIT_TYPE="unsigned long long"
 fi
 
-if test "x${HOST_64BIT_TYPE}" = "xlong"; then
-  BFD_HOST_64BIT_LONG=1
-elif test "x${HOST_64BIT_TYPE}" != "x"; then
+if test -n "${HOST_64BIT_TYPE}" -a -n "${HOST_U_64BIT_TYPE}"; then
   BFD_HOST_64_BIT_DEFINED=1
-  BFD_HOST_64_BIT=${HOST_64BIT_TYPE}
-  BFD_HOST_U_64_BIT=${HOST_U_64BIT_TYPE}
+  BFD_HOST_64_BIT="${HOST_64BIT_TYPE}"
+  BFD_HOST_U_64_BIT="${HOST_U_64BIT_TYPE}"
 fi
 
 
@@ -6579,7 +6579,7 @@ case ${host64}-${target64}-${want64} in
     wordsize=64
     bfd_libs='$(BFD64_LIBS) $(BFD32_LIBS)'
     all_backends='$(BFD64_BACKENDS) $(BFD32_BACKENDS)'
-    if test -z "$GCC" && test "$BFD_HOST_64BIT_LONG" = "0" && test "$BFD_HOST_64_BIT_DEFINED" = "0"; then
+    if test $BFD_HOST_64_BIT_DEFINED = 0; then
       echo "configure: warning: You have requested a 64 bit BFD configuration, but" 1>&2
       echo "configure: warning: your compiler may not have a 64 bit integral type" 1>&2
     fi
@@ -6683,19 +6683,15 @@ else
 fi
 done
 
-echo $ac_n "checking file_ptr type""... $ac_c" 1>&6
-echo "configure:6688: checking file_ptr type" >&5
-bfd_file_ptr="long"
-bfd_ufile_ptr="unsigned long"
 if test x"$ac_cv_func_ftello" = xyes -a x"$ac_cv_func_fseeko" = xyes; then
     echo $ac_n "checking size of off_t""... $ac_c" 1>&6
-echo "configure:6693: checking size of off_t" >&5
+echo "configure:6689: checking size of off_t" >&5
 if eval "test \"`echo '$''{'ac_cv_sizeof_off_t'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   for ac_size in 4 8 1 2 16 12  ; do # List sizes in rough order of prevalence.
   cat > conftest.$ac_ext <<EOF
-#line 6699 "configure"
+#line 6695 "configure"
 #include "confdefs.h"
 #include "confdefs.h"
 #include <sys/types.h>
@@ -6705,7 +6701,7 @@ int main() {
 switch (0) case 0: case (sizeof (off_t) == $ac_size):;
 ; return 0; }
 EOF
-if { (eval echo configure:6709: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:6705: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_sizeof_off_t=$ac_size
 else
@@ -6727,12 +6723,13 @@ cat >> confdefs.h <<EOF
 EOF
 
 
-    if test "x${ac_cv_sizeof_off_t}" = "x8"; then
-	bfd_file_ptr=BFD_HOST_64_BIT
-	bfd_ufile_ptr=BFD_HOST_U_64_BIT
-    fi
 fi
-if test x"$ac_cv_func_ftello64" = xyes -a x"$ac_cv_func_fseeko64" = xyes; then
+echo $ac_n "checking file_ptr type""... $ac_c" 1>&6
+echo "configure:6729: checking file_ptr type" >&5
+bfd_file_ptr="long"
+bfd_ufile_ptr="unsigned long"
+if test x"$ac_cv_func_ftello64" = xyes -a x"$ac_cv_func_fseeko64" = xyes \
+	-o x"${ac_cv_sizeof_off_t}" = x8; then
     bfd_file_ptr=BFD_HOST_64_BIT
     bfd_ufile_ptr=BFD_HOST_U_64_BIT
 fi
@@ -6753,17 +6750,17 @@ for ac_hdr in stdlib.h unistd.h sys/stat.h sys/types.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:6757: checking for $ac_hdr" >&5
+echo "configure:6754: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 6762 "configure"
+#line 6759 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:6767: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:6764: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -6792,12 +6789,12 @@ done
 for ac_func in getpagesize
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:6796: checking for $ac_func" >&5
+echo "configure:6793: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 6801 "configure"
+#line 6798 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -6820,7 +6817,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:6824: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:6821: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -6845,7 +6842,7 @@ fi
 done
 
 echo $ac_n "checking for working mmap""... $ac_c" 1>&6
-echo "configure:6849: checking for working mmap" >&5
+echo "configure:6846: checking for working mmap" >&5
 if eval "test \"`echo '$''{'ac_cv_func_mmap_fixed_mapped'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6853,7 +6850,7 @@ else
   ac_cv_func_mmap_fixed_mapped=no
 else
   cat > conftest.$ac_ext <<EOF
-#line 6857 "configure"
+#line 6854 "configure"
 #include "confdefs.h"
 
 /* Thanks to Mike Haertel and Jim Avera for this test.
@@ -7006,7 +7003,7 @@ main()
 }
 
 EOF
-if { (eval echo configure:7010: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:7007: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   ac_cv_func_mmap_fixed_mapped=yes
 else
@@ -7031,12 +7028,12 @@ fi
 for ac_func in madvise mprotect
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:7035: checking for $ac_func" >&5
+echo "configure:7032: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 7040 "configure"
+#line 7037 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -7059,7 +7056,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:7063: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:7060: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else

@@ -132,20 +132,18 @@ fi
 AC_COMPILE_CHECK_SIZEOF(long)
 if test "x${ac_cv_sizeof_long}" = "x8"; then
   host64=true
-  HOST_64BIT_TYPE="long"
-  HOST_U_64BIT_TYPE="unsigned long"
+  BFD_HOST_64BIT_LONG=1
+  test -n "${HOST_64BIT_TYPE}" || HOST_64BIT_TYPE="long"
+  test -n "${HOST_U_64BIT_TYPE}" || HOST_U_64BIT_TYPE="unsigned long"
 elif test "x${ac_cv_sizeof_long_long}" = "x8"; then
-  HOST_64BIT_TYPE="long long"
-  HOST_U_64BIT_TYPE="unsigned long long"
+  test -n "${HOST_64BIT_TYPE}" || HOST_64BIT_TYPE="long long"
+  test -n "${HOST_U_64BIT_TYPE}" || HOST_U_64BIT_TYPE="unsigned long long"
 fi
 
-if test "x${HOST_64BIT_TYPE}" = "xlong"; then
-  BFD_HOST_64BIT_LONG=1
-fi
-if test "x${HOST_64BIT_TYPE}" != "x"; then
+if test -n "${HOST_64BIT_TYPE}" -a -n "${HOST_U_64BIT_TYPE}"; then
   BFD_HOST_64_BIT_DEFINED=1
-  BFD_HOST_64_BIT=${HOST_64BIT_TYPE}
-  BFD_HOST_U_64_BIT=${HOST_U_64BIT_TYPE}
+  BFD_HOST_64_BIT="${HOST_64BIT_TYPE}"
+  BFD_HOST_U_64_BIT="${HOST_U_64BIT_TYPE}"
 fi
 
 AC_SUBST(BFD_HOST_64BIT_LONG)
@@ -890,7 +888,7 @@ case ${host64}-${target64}-${want64} in
     wordsize=64
     bfd_libs='$(BFD64_LIBS) $(BFD32_LIBS)'
     all_backends='$(BFD64_BACKENDS) $(BFD32_BACKENDS)'
-    if test -z "$GCC" && test "$BFD_HOST_64BIT_LONG" = "0" && test "$BFD_HOST_64_BIT_DEFINED" = "0"; then
+    if test $BFD_HOST_64_BIT_DEFINED = 0; then
       AC_MSG_WARN([You have requested a 64 bit BFD configuration, but])
       AC_MSG_WARN([your compiler may not have a 64 bit integral type])
     fi
@@ -927,17 +925,14 @@ AC_SUBST(bfd_default_target_size)
 # Hopefully a reasonable assumption since fseeko et.al. should be
 # upward compatible.
 AC_CHECK_FUNCS(ftello ftello64 fseeko fseeko64)
+if test x"$ac_cv_func_ftello" = xyes -a x"$ac_cv_func_fseeko" = xyes; then
+    AC_COMPILE_CHECK_SIZEOF(off_t)
+fi
 AC_MSG_CHECKING([file_ptr type])
 bfd_file_ptr="long"
 bfd_ufile_ptr="unsigned long"
-if test x"$ac_cv_func_ftello" = xyes -a x"$ac_cv_func_fseeko" = xyes; then
-    AC_COMPILE_CHECK_SIZEOF(off_t)
-    if test "x${ac_cv_sizeof_off_t}" = "x8"; then
-	bfd_file_ptr=BFD_HOST_64_BIT
-	bfd_ufile_ptr=BFD_HOST_U_64_BIT
-    fi
-fi
-if test x"$ac_cv_func_ftello64" = xyes -a x"$ac_cv_func_fseeko64" = xyes; then
+if test x"$ac_cv_func_ftello64" = xyes -a x"$ac_cv_func_fseeko64" = xyes \
+	-o x"${ac_cv_sizeof_off_t}" = x8; then
     bfd_file_ptr=BFD_HOST_64_BIT
     bfd_ufile_ptr=BFD_HOST_U_64_BIT
 fi
