@@ -11,6 +11,9 @@ Fri Apr  4 12:29:38 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 Fri Apr  4 14:04:16 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Correct file names for bfd_mn10[23]00_arch.
+	* configure: Rebuild.
+
 	* Makefile.in: Rebuild dependencies.
 
 	* d10v-dis.c: Include "ansidecl.h" before "opcode/d10v.h".
