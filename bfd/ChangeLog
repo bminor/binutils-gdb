@@ -1,5 +1,9 @@
 2005-02-23  Nick Clifton  <nickc@redhat.com>
 
+	* elf32-cr16c.c (cr16c_elf_final_link_relocate): Remove duplicated
+	return statements and replace with a single return at the end of
+	the function.  This helps pacify the flow analysis code in gcc 4.0.
+
 	* elf.c (_bfd_elf_compute_section_file_positions): Initialise
 	strtab to avoid compile time warning.
 

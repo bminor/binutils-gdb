@@ -426,8 +426,8 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
 	    return bfd_reloc_overflow;
 	  value &= 0xFF;
 	  bfd_put_8 (abfd, (bfd_vma) value, (unsigned char *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	case R_S_16C_16:	/* Two bytes.  */
 	  if (value > (int) MAX_UWORD || value < MIN_WORD)
 	    return bfd_reloc_overflow;
@@ -435,13 +435,13 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
 	  sword = value;
 	  bfd_put_16 (abfd, (bfd_vma) sword,
 		      (unsigned char *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	case R_S_16C_32:	/* Four bytes.  */
 	  value &= 0xFFFFFFFF;
 	  bfd_put_32 (abfd, (bfd_vma) value, (bfd_byte *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	default:
 	  return bfd_reloc_notsupported;
 	}
@@ -459,8 +459,8 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
 	  value <<= 4;
 	  value |= left_val;
 	  bfd_put_8 (abfd, (bfd_vma) value, (unsigned char *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	case R_S_16C_08:    /* word1(0-3,8-11).  */
 	  if (value > 255 || value < -256 || value == 0x80)
 	    return bfd_reloc_overflow;
@@ -471,8 +471,8 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
 	  sword |= left_val;
 	  bfd_put_16 (abfd, (bfd_vma) sword,
 		      (unsigned char *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	case R_S_16C_16:    /* word2.  */
 	  if (value > 65535 || value < -65536)
 	    return bfd_reloc_overflow;
@@ -482,8 +482,8 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
 	  sword = value;
 	  bfd_put_16 (abfd, (bfd_vma) sword,
 		      (unsigned char *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	case R_S_16C_24_a:	/* word1(0-7),word2.  */
 	  if (value > 16777215 || value < -16777216)
 	    return bfd_reloc_overflow;
@@ -493,8 +493,8 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
 	    ((value & 0x00800000) >> 7) | ((value & 0x007F8000) >> 15);
 	  value |= left_val;
 	  bfd_put_32 (abfd, (bfd_vma) value, (bfd_byte *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	case R_S_16C_24:    /* word2(0-3,8-11),word3.  */
 	  if (value > 16777215 || value < -16777216)
 	    return bfd_reloc_overflow;
@@ -507,8 +507,8 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
 	    ((value & 0x000F0000) >> 8) | ((value & 0x00F00000) >> 20);
 	  value |= left_val;
 	  bfd_put_32 (abfd, (bfd_vma) value, (bfd_byte *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	default:
 	  return bfd_reloc_notsupported;
 	}
@@ -523,8 +523,8 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
 	  value &= 0xF;
 	  value |= left_val;
 	  bfd_put_8 (abfd, (bfd_vma) value, (unsigned char *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	case R_S_16C_04_a:	/* word1(12-15) not scaled.  */
 	  if (value > 26 || value < 0)
 	    return bfd_reloc_overflow;
@@ -532,8 +532,8 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
 	  value >>= 1;
 	  value |= left_val;
 	  bfd_put_8 (abfd, (bfd_vma) value, (unsigned char *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	case R_S_16C_14:	/* word1(4-5),word2(0-3,8-15).  */
 	  if (value < 0 || value > 16383)
 	    return bfd_reloc_overflow;
@@ -543,8 +543,8 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
 	    ((value & 0x0000000F) << 16) | (value & 0x00000030);
 	  value |= left_val;
 	  bfd_put_32 (abfd, (bfd_vma) value, (bfd_byte *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	case R_S_16C_16:	/* word2.  */
 	  if (value > 65535 || value < 0)
 	    return bfd_reloc_overflow;
@@ -552,8 +552,8 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
 	  sword = value;
 	  bfd_put_16 (abfd, (bfd_vma) sword,
 		      (unsigned char *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	case R_S_16C_20:	/* word2(8-11),word3.  */
 	  /* if (value > 1048575 || value < 0) RELOC_ERROR(1); */
 	  value &= 0xFFFFF;
@@ -573,8 +573,8 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
 	      bfd_put_8 (abfd, (bfd_vma) value,
 			 (unsigned char *) data + octets - 3);
 	    }
-	  return bfd_reloc_ok;
 	  break;
+
 	default:
 	  return bfd_reloc_notsupported;
 	}
@@ -591,8 +591,8 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
 	    ((value & 0x000F0000) >> 16);
 	  value |= left_val;
 	  bfd_put_32 (abfd, (bfd_vma) value, (bfd_byte *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	case R_S_16C_24:	/* word2(0-3,8-11),word3.  */
 	  /* if (value > 16777215 || value < 0) RELOC_ERROR(1); */
 	  value &= 0xFFFFFF;
@@ -600,8 +600,8 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
 	    ((value & 0x000F0000) >> 8) | ((value & 0x00F00000) >> 20);
 	  value |= left_val;
 	  bfd_put_32 (abfd, (bfd_vma) value, (bfd_byte *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	default:
 	  return bfd_reloc_notsupported;
 	}
@@ -617,8 +617,8 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
 	  value <<= 4;
 	  value |= left_val;
 	  bfd_put_8 (abfd, (bfd_vma) value, (unsigned char *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	case R_S_16C_16:	/* word2.  */
 	  if (value > 32767 || value < -32768)
 	    return bfd_reloc_overflow;
@@ -626,8 +626,8 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
 	  sword = value;
 	  bfd_put_16 (abfd, (bfd_vma) sword,
 		      (unsigned char *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	case R_S_16C_20:	/* word1(0-3),word2.  */
 	  if (value > 1048575 || value < 0)
 	    return bfd_reloc_overflow;
@@ -636,15 +636,15 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
 	    ((value & 0x000F0000) >> 16);
 	  value |= left_val;
 	  bfd_put_32 (abfd, (bfd_vma) value, (bfd_byte *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	case R_S_16C_32:	/* word2, word3.  */
 	  value &= 0xFFFFFFFF;
 	  value = ((value & 0x0000FFFF) << 16) |
 	    ((value & 0xFFFF0000) >> 16);
 	  bfd_put_32 (abfd, (bfd_vma) value, (bfd_byte *) data + octets);
-	  return bfd_reloc_ok;
 	  break;
+
 	default:
 	  return bfd_reloc_notsupported;
 	}
@@ -652,6 +652,8 @@ cr16c_elf_final_link_relocate (reloc_howto_type *howto,
     default:
       return bfd_reloc_notsupported;
     }
+
+  return bfd_reloc_ok;
 }
 
 /* Relocate a CR16C ELF section.  */
