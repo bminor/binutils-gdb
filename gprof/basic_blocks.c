@@ -22,7 +22,6 @@
    02111-1307, USA.  */
 
 #include <stdio.h>
-#include <unistd.h>
 #include "basic_blocks.h"
 #include "corefile.h"
 #include "gmon_io.h"
@@ -31,6 +30,9 @@
 #include "libiberty.h"
 #include "source.h"
 #include "sym_ids.h"
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 /* Default option values:  */
 bool bb_annotate_all_lines = FALSE;
