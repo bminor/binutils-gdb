@@ -1,3 +1,35 @@
+Fri Sep 24 16:50:26 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* lynx-core.c (lynx_core_file_p):  Change per-thread register
+	section names from .regXXX to .reg/XXX to avoid parsing ambiguity
+	in gdb/corelow.c.  Create alias .reg section for the currently
+	running thread.
+
+Fri Sep 24 13:22:32 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* libecoff.h (ecoff_backend_data): Removed big_magic and
+	little_magic fields.
+	* coff-alpha.c (alpha_ecoff_backend_data): Removed initialization
+	of big_magic and little_magic.
+	* coff-mips.c (mips_ecoff_bad_format_hook): Make sure magic number
+	matches endianess of bfd.
+	(mips_ecoff_backend_data): Removed initialization of big_magic and
+	little_magic.
+	* ecoff.c (ecoff_set_arch_mach_hook): Set MIPS machine number
+	based on magic number.  Support r4000 magic numbers.
+	(ecoff_get_magic): New function.
+	(ecoff_write_object_contents): Use ecoff_get_magic, not fields in
+	the backend structure.
+	* cpu-mips.c (arch_info_struct): Added case for r6000.
+
+	For MIPS configurations put both big and little endian versions in
+	the list of targets; the code is getting compiled in anyhow.
+	* bigmips.mt (SELECT_VECS): Define to be ecoff_little_vec.
+	* decstation.mt (SELECT_VECS): Define to be ecoff_big_vec.
+	* mipsbelf.mt (SELECT_VECS): Define to be bfd_elf32_littlemips_vec.
+	* mipslelf.mt (SELECT_VECS): Define to be bfd_elf32_bitmips_vec.
+	* riscos.mt (SELECT_VECS): Define to be ecoff_little_vec.
+
 Fri Sep 24 00:42:23 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* osf-core.c:  New file for OSF/1 core file support.
