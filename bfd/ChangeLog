@@ -1,3 +1,9 @@
+2002-01-08  Klee Dienes  <kdienes@apple.com>
+
+	* Makefile.am (ALL_MACHINES): Use cpu-msp430.lo, not cpu-msp430.c.
+	(BFD32_BACKENDS): Use elf32-msp430.lo, not elf32-msp430.c.
+	* Makefile.in: Regenerate.
+	
 2003-01-08  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elfn32-mips.c (prev_reloc_section): New.

@@ -81,7 +81,7 @@ ALL_MACHINES = \
 	cpu-mcore.lo \
 	cpu-mips.lo \
 	cpu-mmix.lo \
-	cpu-msp430.c \
+	cpu-msp430.lo \
 	cpu-or32.lo \
 	cpu-ns32k.lo \
 	cpu-openrisc.lo \
@@ -236,7 +236,7 @@ BFD32_BACKENDS = \
 	elf32-mcore.lo \
 	elfxx-mips.lo \
 	elf32-mips.lo \
-	elf32-msp430.c \
+	elf32-msp430.lo \
 	elf32-openrisc.lo \
 	elf32-or32.lo \
 	elf32-pj.lo \
