@@ -1,5 +1,15 @@
 2001-08-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* bfd.c (bfd_get_gp_size): Return an unsigned int.
+	(bfd_set_gp_size): Make param unsigned.
+	* bfd-in2.h: Regenerate.
+	* elf32-ppc.c (ppc_elf_add_symbol_hook): Use elf_gp_size rather
+	than calling bfd_get_gp_size.
+	* elf64-alpha.c (elf64_alpha_add_symbol_hook): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_add_symbol_hook): Likewise.
+
+2001-08-17  Alan Modra  <amodra@bigpond.net.au>
+
 	* linker.c (default_fill_link_order): Handle four byte fill value.
 
 2001-08-17  Alan Modra  <amodra@bigpond.net.au>

@@ -3202,11 +3202,11 @@ bfd_get_mtime PARAMS ((bfd *abfd));
 long
 bfd_get_size PARAMS ((bfd *abfd));
 
-int
+unsigned int
 bfd_get_gp_size PARAMS ((bfd *abfd));
 
 void
-bfd_set_gp_size PARAMS ((bfd *abfd, int i));
+bfd_set_gp_size PARAMS ((bfd *abfd, unsigned int i));
 
 bfd_vma
 bfd_scan_vma PARAMS ((const char *string, const char **end, int base));

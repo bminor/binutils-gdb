@@ -891,7 +891,7 @@ FUNCTION
 	bfd_get_gp_size
 
 SYNOPSIS
-	int bfd_get_gp_size(bfd *abfd);
+	unsigned int bfd_get_gp_size(bfd *abfd);
 
 DESCRIPTION
 	Return the maximum size of objects to be optimized using the GP
@@ -899,7 +899,7 @@ DESCRIPTION
 	argument to the compiler, assembler or linker.
 */
 
-int
+unsigned int
 bfd_get_gp_size (abfd)
      bfd *abfd;
 {
@@ -918,7 +918,7 @@ FUNCTION
 	bfd_set_gp_size
 
 SYNOPSIS
-	void bfd_set_gp_size(bfd *abfd, int i);
+	void bfd_set_gp_size(bfd *abfd, unsigned int i);
 
 DESCRIPTION
 	Set the maximum size of objects to be optimized using the GP
@@ -929,7 +929,7 @@ DESCRIPTION
 void
 bfd_set_gp_size (abfd, i)
      bfd *abfd;
-     int i;
+     unsigned int i;
 {
   /* Don't try to set GP size on an archive or core file!  */
   if (abfd->format != bfd_object)
