@@ -160,14 +160,14 @@ case ${host64}-${target64}-${want64} in
     ;;
 esac
 
-if [ ${with_minimal_bfd} = yes ] \
+if [ x${with_minimal_bfd} = xyes ] \
    && grep -s TARGET_BACKENDS ${srcdir}/${target_makefile_frag} ; then
     echo 'BFD_BACKENDS = $(TARGET_BACKENDS)' >> Makefile.2
 else
     echo 'BFD_BACKENDS = $(ALL_BACKENDS)' >> Makefile.2
 fi
 
-if [ ${with_minimal_bfd} = yes ] \
+if [ x${with_minimal_bfd} = xyes ] \
    && grep -s TARGET_CPUS ${srcdir}/${target_makefile_frag} ; then
     echo 'BFD_MACHINES = $(TARGET_CPUS)' >> Makefile.2
 else
