@@ -6,4 +6,4 @@ NAT_FILE= nm-i386lynx.h
 REGEX=regex.o
 REGEX1=regex.o
 GDBSERVER_LIBS= -lbsd
-GDBSERVER_DEPFILES= remote-inflow.o
+GDBSERVER_DEPFILES= low-lynx.o
