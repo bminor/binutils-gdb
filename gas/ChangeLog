@@ -1,3 +1,17 @@
+Tue Jun 21 11:32:18 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* subsegs.c (abs_seg_info, und_seg_info): Define if BFD_ASSEMBLER.
+	(subseg_change): Store seg_info for bfd_abs_section_ptr in
+	abs_seg_info, and store seg_info for bfd_und_section_ptr in
+	und_seg_info.
+	(subseg_get): Likewise.  Also, don't set output_section if it is
+	already set.
+	(seg_info): Define as function.
+	* subsegs.h (seg_info): Declare as function rather than defining
+	as macro.
+	* write.c (relax_and_size_seg): Call seg_info rather than
+	bfd_get_section_userdata.
+
 Mon Jun 20 16:30:54 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* configure.in (ppc-*-elf*): New target, like -sysv4*.

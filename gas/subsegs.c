@@ -57,6 +57,13 @@ char *const seg_name[] =
   "register",
   "",
 };				/* Used by error reporters, dumpers etc. */
+#else /* BFD_ASSEMBLER */
+
+/* Gas segment information for bfd_abs_section_ptr and
+   bfd_und_section_ptr.  */
+static segment_info_type *abs_seg_info;
+static segment_info_type *und_seg_info;
+
 #endif /* BFD_ASSEMBLER */
 
 static void subseg_set_rest PARAMS ((segT, subsegT));
@@ -140,10 +147,16 @@ subseg_change (seg, subseg)
 	seginfo = (segment_info_type *) xmalloc (sizeof (*seginfo));
 	if (! seginfo)
 	  abort ();
-	seginfo->fix_root = 0;
+	seginfo->fix_root = NULL;
+	seginfo->fix_tail = NULL;
 	seginfo->bfd_section = seg;
 	seginfo->sym = 0;
-	bfd_set_section_userdata (stdoutput, seg, (char *) seginfo);
+	if (seg == bfd_abs_section_ptr)
+	  abs_seg_info = seginfo;
+	else if (seg == bfd_und_section_ptr)
+	  und_seg_info = seginfo;
+	else
+	  bfd_set_section_userdata (stdoutput, seg, (PTR) seginfo);
       }
   }
 #else
@@ -402,12 +415,21 @@ subseg_get (segname, force_new)
   seginfo = seg_info (secptr);
   if (! seginfo)
     {
-      secptr->output_section = secptr;
+      /* Check whether output_section is set first because secptr may
+         be bfd_abs_section_ptr.  */
+      if (secptr->output_section != secptr)
+	secptr->output_section = secptr;
       seginfo = (segment_info_type *) xmalloc (sizeof (*seginfo));
       memset ((char *) seginfo, 0, sizeof(seginfo));
       seginfo->fix_root = NULL;
+      seginfo->fix_tail = NULL;
       seginfo->bfd_section = secptr;
-      bfd_set_section_userdata (stdoutput, secptr, (char *) seginfo);
+      if (secptr == bfd_abs_section_ptr)
+	abs_seg_info = seginfo;
+      else if (secptr == bfd_und_section_ptr)
+	und_seg_info = seginfo;
+      else
+	bfd_set_section_userdata (stdoutput, secptr, (PTR) seginfo);
       seginfo->frchainP = NULL;
       seginfo->lineno_list_head = seginfo->lineno_list_tail = NULL;
       seginfo->sym = NULL;
@@ -462,6 +484,20 @@ subseg_set (secptr, subseg)
 #ifndef obj_sec_sym_ok_for_reloc
 #define obj_sec_sym_ok_for_reloc(SEC)	0
 #endif
+
+/* Get the gas information we are storing for a section.  */
+
+segment_info_type *
+seg_info (sec)
+     segT sec;
+{
+  if (sec == bfd_abs_section_ptr)
+    return abs_seg_info;
+  else if (sec == bfd_und_section_ptr)
+    return und_seg_info;
+  else
+    return (segment_info_type *) bfd_get_section_userdata (stdoutput, sec);
+}
 
 symbolS *
 section_symbol (sec)
