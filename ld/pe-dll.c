@@ -84,8 +84,7 @@ typedef struct {
   int pe_arch;
   int bfd_arch;
   int underscored;
-}
-pe_details_type;
+} pe_details_type;
 
 #define PE_ARCH_i386	1
 #define PE_ARCH_sh	2
@@ -159,8 +158,7 @@ typedef struct {
   bfd_vma vma;
   char type;
   short extra;
-}
-reloc_data_type;
+} reloc_data_type;
 
 static int
 reloc_sort (va, vb)
@@ -204,8 +202,7 @@ static int *exported_symbols;
 typedef struct exclude_list_struct {
   char *string;
   struct exclude_list_struct *next;
-}
-exclude_list_struct;
+} exclude_list_struct;
 
 static struct exclude_list_struct *excludes = 0;
 
@@ -848,6 +845,9 @@ generate_reloc (abfd, info)
 	  free (relocs);
 	  /* Warning: the allocated symbols are remembered in BFD and
 	     reused later, so don't free them!  */
+#if 0
+	  free (symbol);
+#endif
 	}
     }
 

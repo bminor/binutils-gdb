@@ -12,7 +12,9 @@
 	* ldlang.c: Likewise.
 	* ldlang.h: Likewise.
 	* ldmain.c: Likewise.
-	* pe-dll.c: Fix formatting.
+	* pe-dll.c: Likewise.
+
+	* pe-dll.c: Revert some formatting fixes.
 
 2000-10-08  Kazu Hirata  <kazu@hxi.com>
 
