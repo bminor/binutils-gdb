@@ -1,6 +1,6 @@
 /* This file is tc-sh.h
 
-   Copyright (C) 1993 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1995 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -16,31 +16,65 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
+   the Free Software Foundation, 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 #define TC_SH
 
 /* This macro translates between an internal fix and an coff reloc type */
-#define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype(fixP)
+#define TC_COFF_FIX2RTYPE(fix) ((fix)->fx_r_type)
 
 #define BFD_ARCH bfd_arch_sh
-#define COFF_MAGIC 0x0500
-/* Write out relocs which haven't been done by gas */
-#define TC_COUNT_RELOC(x) (((x)->fx_addsy))
-#define IGNORE_NONSTANDARD_ESCAPES
 
-#define TC_RELOC_MANGLE(a,b,c) tc_reloc_mangle(a,b,c)
+extern int shl;
+
+#define COFF_MAGIC (shl ? SH_ARCH_MAGIC_LITTLE : SH_ARCH_MAGIC_BIG)
+
+/* Whether -relax was used.  */
+extern int sh_relax;
+
+/* When relaxing, we need to generate relocations for alignment
+   directives.  */
+#define HANDLE_ALIGN(frag) sh_handle_align (frag)
+extern void sh_handle_align PARAMS ((fragS *));
+
+/* We need to force out some relocations when relaxing.  */
+#define TC_FORCE_RELOCATION(fix) sh_force_relocation (fix)
+extern int sh_force_relocation ();
+
+/* We need to write out relocs which have not been completed.  */
+#define TC_COUNT_RELOC(fix) ((fix)->fx_addsy != NULL)
+
+#define TC_RELOC_MANGLE(seg, fix, int, paddr) \
+  sh_coff_reloc_mangle ((seg), (fix), (int), (paddr))
+extern void sh_coff_reloc_mangle ();
+
+#define IGNORE_NONSTANDARD_ESCAPES
 
 #define tc_coff_symbol_emit_hook(a) ; /* not used */
 
 #define DO_NOT_STRIP 0
 #define DO_STRIP 0
-#define LISTING_HEADER "Hitachi Super-H GAS "
+#define LISTING_HEADER (shl ? "Hitachi Super-H GAS Little Endian" : "Hitachi Super-H GAS Big Endian")
 #define NEED_FX_R_TYPE 1
 #define RELOC_32 1234
-#define COFF_FLAGS 1
+
+#define TC_KEEP_FX_OFFSET 1
 
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
+extern int tc_coff_sizemachdep PARAMS ((fragS *));
+
+#define md_operand(x)
+
+extern const struct relax_type md_relax_table[];
+#define TC_GENERIC_RELAX_TABLE md_relax_table
+
+#define tc_frob_file sh_coff_frob_file
+extern void sh_coff_frob_file PARAMS (());
+
+/* We use a special alignment function to insert the correct nop
+   pattern.  */
+extern int sh_do_align PARAMS ((int, const char *));
+#define md_do_align(n,fill,l)	if (sh_do_align (n,fill)) goto l
 
 /* end of tc-sh.h */

@@ -1,5 +1,9 @@
 Wed Feb  7 14:12:03 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-sh.h (sh_do_align): Declare.
+	(md_do_align): Define.
+	* config/tc-sh.c (sh_do_align): New function.
+
 	* ecoff.c (ecoff_build_lineno): Don't try to store the address
 	difference if the next address is before the current one.
 

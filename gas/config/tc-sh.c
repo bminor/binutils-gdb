@@ -211,9 +211,14 @@ parse_reg (src, mode, reg)
      int *mode;
      int *reg;
 {
-  if (src[0] == 'r') 
+  /* We use !isalnum for the next character after the register name, to
+     make sure that we won't accidentally recognize a symbol name such as
+     'sram' as being a reference to the register 'sr'.  */
+
+  if (src[0] == 'r')
     {
-      if (src[1] >= '0' && src[1] <= '7' && strncmp(&src[2], "_bank", 5) == 0)
+      if (src[1] >= '0' && src[1] <= '7' && strncmp(&src[2], "_bank", 5) == 0
+	  && ! isalnum (src[7]))
 	{
 	  *mode = A_REG_B;
 	  *reg  = (src[1] - '0');
@@ -225,14 +230,14 @@ parse_reg (src, mode, reg)
     {
       if (src[1] == '1')
 	{
-	  if (src[2] >= '0' && src[2] <= '5')
+	  if (src[2] >= '0' && src[2] <= '5' && ! isalnum (src[3]))
 	    {
 	      *mode = A_REG_N;
 	      *reg = 10 + src[2] - '0';
 	      return 3;
 	    }
 	}
-      if (src[1] >= '0' && src[1] <= '9')
+      if (src[1] >= '0' && src[1] <= '9' && ! isalnum (src[2]))
 	{
 	  *mode = A_REG_N;
 	  *reg = (src[1] - '0');
@@ -240,53 +245,53 @@ parse_reg (src, mode, reg)
 	}
     }
 
-  if (src[0] == 's' && src[1] == 's' && src[2] == 'r')
+  if (src[0] == 's' && src[1] == 's' && src[2] == 'r' && ! isalnum (src[3]))
     {
       *mode = A_SSR;
       return 3;
     }
 
-  if (src[0] == 's' && src[1] == 'p' && src[2] == 'c')
+  if (src[0] == 's' && src[1] == 'p' && src[2] == 'c' && ! isalnum (src[3]))
     {
       *mode = A_SPC;
       return 3;
     }
 
-  if (src[0] == 's' && src[1] == 'r')
+  if (src[0] == 's' && src[1] == 'r' && ! isalnum (src[2]))
     {
       *mode = A_SR;
       return 2;
     }
 
-  if (src[0] == 's' && src[1] == 'p')
+  if (src[0] == 's' && src[1] == 'p' && ! isalnum (src[2]))
     {
       *mode = A_REG_N;
       *reg = 15;
       return 2;
     }
 
-  if (src[0] == 'p' && src[1] == 'r')
+  if (src[0] == 'p' && src[1] == 'r' && ! isalnum (src[2]))
     {
       *mode = A_PR;
       return 2;
     }
-  if (src[0] == 'p' && src[1] == 'c')
+  if (src[0] == 'p' && src[1] == 'c' && ! isalnum (src[2]))
     {
       *mode = A_DISP_PC;
       return 2;
     }
-  if (src[0] == 'g' && src[1] == 'b' && src[2] == 'r')
+  if (src[0] == 'g' && src[1] == 'b' && src[2] == 'r' && ! isalnum (src[3]))
     {
       *mode = A_GBR;
       return 3;
     }
-  if (src[0] == 'v' && src[1] == 'b' && src[2] == 'r')
+  if (src[0] == 'v' && src[1] == 'b' && src[2] == 'r' && ! isalnum (src[3]))
     {
       *mode = A_VBR;
       return 3;
     }
 
-  if (src[0] == 'm' && src[1] == 'a' && src[2] == 'c')
+  if (src[0] == 'm' && src[1] == 'a' && src[2] == 'c' && ! isalnum (src[4]))
     {
       if (src[3] == 'l')
 	{
@@ -299,38 +304,37 @@ parse_reg (src, mode, reg)
 	  return 4;
 	}
     }
-/* start-sanitize-sh3e */
   if (src[0] == 'f' && src[1] == 'r')
     {
       if (src[2] == '1')
 	{
-	  if (src[3] >= '0' && src[3] <= '5')
+	  if (src[3] >= '0' && src[3] <= '5' && ! isalnum (src[4]))
 	    {
 	      *mode = F_REG_N;
 	      *reg = 10 + src[3] - '0';
 	      return 4;
 	    }
 	}
-      if (src[2] >= '0' && src[2] <= '9')
+      if (src[2] >= '0' && src[2] <= '9' && ! isalnum (src[3]))
 	{
 	  *mode = F_REG_N;
 	  *reg = (src[2] - '0');
 	  return 3;
 	}
     }
-  if (src[0] == 'f' && src[1] == 'p' && src[2] == 'u' && src[3] == 'l')
+  if (src[0] == 'f' && src[1] == 'p' && src[2] == 'u' && src[3] == 'l'
+      && ! isalnum (src[4]))
     {
       *mode = FPUL_N;
       return 4;
     }
 
-  if (src[0] == 'f' && src[1] == 'p'
-      && src[2] == 's' && src[3] == 'c' && src[4] == 'r')
+  if (src[0] == 'f' && src[1] == 'p' && src[2] == 's' && src[3] == 'c'
+      && src[4] == 'r' && ! isalnum (src[5]))
     {
       *mode = FPSCR_N;
       return 5;
     }
-/* end-sanitize-sh3e */
 
   return 0;
 }
@@ -562,7 +566,6 @@ get_operands (info, args, operand)
 	      ptr++;
 	    }
 	  get_operand (&ptr, operand + 1);
-/* start-sanitize-sh3e */
 	  if (info->arg[2])
 	    {
 	      if (*ptr == ',')
@@ -575,23 +578,18 @@ get_operands (info, args, operand)
 	    {
 	      operand[2].type = 0;
 	    }
-/* end-sanitize-sh3e */
 	}
       else
 	{
 	  operand[1].type = 0;
-/* start-sanitize-sh3e */
 	  operand[2].type = 0;
-/* end-sanitize-sh3e */
 	}
     }
   else
     {
       operand[0].type = 0;
       operand[1].type = 0;
-/* start-sanitize-sh3e */
       operand[2].type = 0;
-/* end-sanitize-sh3e */
     }
   return ptr;
 }
@@ -650,12 +648,10 @@ get_specific (opcode, operands)
 	      if (user->type != A_R0_GBR || user->reg != 0)
 		goto fail;
 	      break;
-/* start-sanitize-sh3e */
 	    case F_FR0:
 	      if (user->type != F_REG_N || user->reg != 0)
 		goto fail;
 	      break;
-/* end-sanitize-sh3e */
 
 	    case A_REG_N:
 	    case A_INC_N:
@@ -663,11 +659,9 @@ get_specific (opcode, operands)
 	    case A_IND_N:
 	    case A_IND_R0_REG_N:
 	    case A_DISP_REG_N:
-/* start-sanitize-sh3e */
 	    case F_REG_N:
 	    case FPUL_N:
 	    case FPSCR_N:
-/* end-sanitize-sh3e */
 	      /* Opcode needs rn */
 	      if (user->type != arg)
 		goto fail;
@@ -700,7 +694,6 @@ get_specific (opcode, operands)
 	      reg_m = user->reg;
 	      break;
 
-/* start-sanitize-sh3e */
 	    case F_REG_M:
 	    case FPUL_M:
 	    case FPSCR_M:
@@ -709,7 +702,6 @@ get_specific (opcode, operands)
 		goto fail;
 	      reg_m = user->reg;
 	      break;
-/* end-sanitize-sh3e */
 	
 	    default:
 	      printf ("unhandled %d\n", arg);
@@ -1700,6 +1692,33 @@ tc_coff_sizemachdep (frag)
      fragS *frag;
 {
   return md_relax_table[frag->fr_subtype].rlx_length;
+}
+
+/* When we align the .text section, insert the correct NOP pattern.  */
+
+int
+sh_do_align (n, fill)
+     int n;
+     const char *fill;
+{
+  if ((fill == NULL || *fill == 0)
+      && (now_seg == text_section
+#ifdef BFD_ASSEMBLER
+	  || (now_seg->flags & SEC_CODE) != 0
+#endif
+	  || strcmp (obj_segment_name (now_seg), ".init") == 0))
+    {
+      static const unsigned char big_nop_pattern[] = { 0x00, 0x09 };
+      static const unsigned char little_nop_pattern[] = { 0x09, 0x00 };
+
+      if (target_big_endian)
+	frag_align_pattern (n, big_nop_pattern, sizeof big_nop_pattern);
+      else
+	frag_align_pattern (n, little_nop_pattern, sizeof little_nop_pattern);
+      return 1;
+    }
+
+  return 0;
 }
 
 #ifdef OBJ_COFF
