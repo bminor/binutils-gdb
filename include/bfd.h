@@ -379,6 +379,23 @@ All memory attached to the BFD's obstacks is released.
 
 /*
 
+ bfd_close_all_done
+This function closes a BFD. It differs from @code{bfd_close} since it
+does not complete any pending operations.  This routine would be used
+if the application had just used BFD for swapping and didn't want to
+use any of the writing code.
+
+If the created file is executable, then @code{chmod} is called to mark
+it as such.
+
+All memory attached to the BFD's obstacks is released. 
+
+@code{true} is returned if all is ok, otherwise @code{false}.
+*/
+ PROTO(boolean, bfd_close_all_done,(bfd *));
+
+/*
+
  bfd_create
 This routine creates a new BFD in the manner of @code{bfd_openw}, but without
 opening a file. The new BFD takes the target from the target used by
@@ -2110,7 +2127,7 @@ Archive entry points
  SDEF (boolean, write_armap, (bfd *arch, 
                               unsigned int elength,
                               struct orl *map,
-                              int orl_count, 
+                              unsigned int orl_count, 
                               int stridx));
 
 /*

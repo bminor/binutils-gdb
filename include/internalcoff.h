@@ -342,3 +342,4 @@ struct internal_reloc {
 #define R_GETSEG	(0x1d)
 #define R_GETPA		(0x1e)
 #define R_TAGWORD	(0x1f)
+#define R_JUMPTARG	0x20	/* strange 29k 00xx00xx reloc */
