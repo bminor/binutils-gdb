@@ -1,5 +1,7 @@
 Thu Feb  9 12:43:56 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.base/interrupt.exp: Also xfail hpux (for hp300).
+
 	* gdb.base/a1-selftest.exp: Don't run on hp300.
 
 Sat Feb  4 15:04:32 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
