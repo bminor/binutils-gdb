@@ -77,7 +77,8 @@ char 			dump_sects [NUM_DUMP_SECTS];
 #define DISASS_DUMP	2
 
 /* Forward declarations for dumb compilers.  */
-static char * get_dynamic_type PARAMS ((unsigned long));
+static const char * get_mips_dynamic_type PARAMS ((unsigned long type));
+static const char * get_dynamic_type PARAMS ((unsigned long type));
 static char * get_i386_rel_type    PARAMS ((unsigned long rtype));
 static char * get_m68k_rel_type    PARAMS ((unsigned long rtype));
 static char * get_sparc_rel_type   PARAMS ((unsigned long rtype));
@@ -97,7 +98,8 @@ static char * get_file_type     PARAMS ((unsigned e_type));
 static char * get_machine_name  PARAMS ((unsigned e_machine));
 static char * get_machine_data  PARAMS ((unsigned e_data));
 static char * get_machine_flags PARAMS ((unsigned, unsigned e_machine));
-static char * get_segment_type  PARAMS ((unsigned long p_type));
+static const char * get_mips_segment_type PARAMS ((unsigned long type));
+static const char * get_segment_type  PARAMS ((unsigned long p_type));
 static char * get_section_type_name PARAMS ((unsigned int sh_type));
 static char * get_symbol_binding PARAMS ((unsigned int binding));
 static char * get_symbol_type    PARAMS ((unsigned int type));
@@ -106,6 +108,7 @@ static void   parse_args PARAMS ((int argc, char ** argv));
 static int    process_file_header PARAMS ((void));
 static int    process_program_headers PARAMS ((FILE *));
 static int    process_section_headers PARAMS ((FILE *));
+static void   dynamic_segment_mips_val PARAMS ((Elf_Internal_Dyn *entry));
 static int    process_dynamic_segment PARAMS ((FILE *));
 static int    process_symbol_table PARAMS ((FILE *));
 static int    process_section_contents PARAMS ((FILE *));
@@ -821,7 +824,61 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
   return 1;
 }
 
-static char *
+static const char *
+get_mips_dynamic_type (type)
+     unsigned long type;
+{
+  switch (type)
+    {
+    case DT_MIPS_RLD_VERSION: return "MIPS_RLD_VERSION";
+    case DT_MIPS_TIME_STAMP: return "MIPS_TIME_STAMP";
+    case DT_MIPS_ICHECKSUM: return "MIPS_ICHECKSUM";
+    case DT_MIPS_IVERSION: return "MIPS_IVERSION";
+    case DT_MIPS_FLAGS: return "MIPS_FLAGS";
+    case DT_MIPS_BASE_ADDRESS: return "MIPS_BASE_ADDRESS";
+    case DT_MIPS_MSYM: return "MIPS_MSYM";
+    case DT_MIPS_CONFLICT: return "MIPS_CONFLICT";
+    case DT_MIPS_LIBLIST: return "MIPS_LIBLIST";
+    case DT_MIPS_LOCAL_GOTNO: return "MIPS_LOCAL_GOTNO";
+    case DT_MIPS_CONFLICTNO: return "MIPS_CONFLICTNO";
+    case DT_MIPS_LIBLISTNO: return "MIPS_LIBLISTNO";
+    case DT_MIPS_SYMTABNO: return "MIPS_SYMTABNO";
+    case DT_MIPS_UNREFEXTNO: return "MIPS_UNREFEXTNO";
+    case DT_MIPS_GOTSYM: return "MIPS_GOTSYM";
+    case DT_MIPS_HIPAGENO: return "MIPS_HIPAGENO";
+    case DT_MIPS_RLD_MAP: return "MIPS_RLD_MAP";
+    case DT_MIPS_DELTA_CLASS: return "MIPS_DELTA_CLASS";
+    case DT_MIPS_DELTA_CLASS_NO: return "MIPS_DELTA_CLASS_NO";
+    case DT_MIPS_DELTA_INSTANCE: return "MIPS_DELTA_INSTANCE";
+    case DT_MIPS_DELTA_INSTANCE_NO: return "MIPS_DELTA_INSTANCE_NO";
+    case DT_MIPS_DELTA_RELOC: return "MIPS_DELTA_RELOC";
+    case DT_MIPS_DELTA_RELOC_NO: return "MIPS_DELTA_RELOC_NO";
+    case DT_MIPS_DELTA_SYM: return "MIPS_DELTA_SYM";
+    case DT_MIPS_DELTA_SYM_NO: return "MIPS_DELTA_SYM_NO";
+    case DT_MIPS_DELTA_CLASSSYM: return "MIPS_DELTA_CLASSSYM";
+    case DT_MIPS_DELTA_CLASSSYM_NO: return "MIPS_DELTA_CLASSSYM_NO";
+    case DT_MIPS_CXX_FLAGS: return "MIPS_CXX_FLAGS";
+    case DT_MIPS_PIXIE_INIT: return "MIPS_PIXIE_INIT";
+    case DT_MIPS_SYMBOL_LIB: return "MIPS_SYMBOL_LIB";
+    case DT_MIPS_LOCALPAGE_GOTIDX: return "MIPS_LOCALPAGE_GOTIDX";
+    case DT_MIPS_LOCAL_GOTIDX: return "MIPS_LOCAL_GOTIDX";
+    case DT_MIPS_HIDDEN_GOTIDX: return "MIPS_HIDDEN_GOTIDX";
+    case DT_MIPS_PROTECTED_GOTIDX: return "MIPS_PROTECTED_GOTIDX";
+    case DT_MIPS_OPTIONS: return "MIPS_OPTIONS";
+    case DT_MIPS_INTERFACE: return "MIPS_INTERFACE";
+    case DT_MIPS_DYNSTR_ALIGN: return "MIPS_DYNSTR_ALIGN";
+    case DT_MIPS_INTERFACE_SIZE: return "MIPS_INTERFACE_SIZE";
+    case DT_MIPS_RLD_TEXT_RESOLVE_ADDR: return "MIPS_RLD_TEXT_RESOLVE_ADDR";
+    case DT_MIPS_PERF_SUFFIX: return "MIPS_PERF_SUFFIX";
+    case DT_MIPS_COMPACT_SIZE: return "MIPS_COMPACT_SIZE";
+    case DT_MIPS_GP_VALUE: return "MIPS_GP_VALUE";
+    case DT_MIPS_AUX_DYNAMIC: return "MIPS_AUX_DYNAMIC";
+    default:
+      return NULL;
+    }
+}
+
+static const char *
 get_dynamic_type (type)
      unsigned long type;
 {
@@ -863,7 +920,23 @@ get_dynamic_type (type)
 
     default:
       if ((type >= DT_LOPROC) && (type <= DT_HIPROC))
-	sprintf (buff, _("Processor Specific: (%x)"), type);
+	{
+	  const char *result = NULL;
+	  switch (elf_header.e_machine)
+	    {
+	    case EM_MIPS:
+	    case EM_MIPS_RS4_BE:
+	      result = get_mips_dynamic_type (type);
+	  default:
+	    }
+
+	  if (result == NULL)
+	    {
+	      sprintf (buff, _("Processor Specific: (%x)"), type);
+	      result = buff;
+	    }
+	  return result;
+	}
       else
 	sprintf (buff, _("<unknown>: %x"), type);
       return buff;
@@ -1028,7 +1101,24 @@ get_machine_data (e_data)
     }
 }
 
-static char *
+static const char *
+get_mips_segment_type (type)
+     unsigned long type;
+{
+  switch (type)
+    {
+    case PT_MIPS_REGINFO:
+      return "Register Info";
+    case PT_MIPS_RTPROC:
+      return "Runtime Proc Table";
+    case PT_MIPS_OPTIONS:
+      return "Options";
+    default:
+      return "Processor Specific";
+    }
+}
+
+static const char *
 get_segment_type (p_type)
      unsigned long p_type;
 {
@@ -1046,7 +1136,14 @@ get_segment_type (p_type)
 
     default:
       if ((p_type >= PT_LOPROC) && (p_type <= PT_HIPROC))
-	return _("processor specific");
+	switch (elf_header.e_machine)
+	  {
+	  case EM_MIPS:
+	  case EM_MIPS_RS4_BE:
+	    return get_mips_segment_type (p_type);
+	  default:
+	    return "Processor Specific";
+          }
       else
 	{
 	  sprintf (buff, _("<unknown>: %x"), p_type);
@@ -1776,6 +1873,32 @@ process_relocs (file)
 }
 
 
+static void
+dynamic_segment_mips_val (entry)
+     Elf_Internal_Dyn *entry;
+{
+  switch (entry->d_tag)
+    {
+    case DT_MIPS_LOCAL_GOTNO:
+    case DT_MIPS_CONFLICTNO:
+    case DT_MIPS_LIBLISTNO:
+    case DT_MIPS_SYMTABNO:
+    case DT_MIPS_UNREFEXTNO:
+    case DT_MIPS_HIPAGENO:
+    case DT_MIPS_DELTA_CLASS_NO:
+    case DT_MIPS_DELTA_INSTANCE_NO:
+    case DT_MIPS_DELTA_RELOC_NO:
+    case DT_MIPS_DELTA_SYM_NO:
+    case DT_MIPS_DELTA_CLASSSYM_NO:
+      if (do_dynamic)
+	printf ("%#ld\n", (long) entry->d_un.d_ptr);
+      break;
+    default:
+      if (do_dynamic)
+	printf ("%#lx\n", (long) entry->d_un.d_ptr);
+    }
+}
+
 /* Parse the dynamic segment */
 static int
 process_dynamic_segment (file)
@@ -1897,19 +2020,20 @@ process_dynamic_segment (file)
 
   if (do_dynamic && dynamic_addr)
     printf (_("\nDynamic segment at offset 0x%x contains %d entries:\n"),
-	    dynamic_addr, dynamic_size);
+	    dynamic_addr, dynamic_size % 1000);
   if (do_dynamic)
-    printf (_("  Tag        Type          Name/Value\n"));
+    printf (_("  Tag        Type                         Name/Value\n"));
 
   for (i = 0, entry = dynamic_segment;
-       i < dynamic_size;
+       /* XXX SGI's linker produces a number which is 1000 higher.  */
+       i < (dynamic_size % 1000);
        i++, entry ++)
     {
       if (do_dynamic)
 	printf (_("  0x%-8.8lx (%s)%*s"),
 		(unsigned long) entry->d_tag,
 		get_dynamic_type (entry->d_tag),
-		12 - strlen (get_dynamic_type (entry->d_tag)),
+		27 - strlen (get_dynamic_type (entry->d_tag)),
 		" ");
 
       switch (entry->d_tag)
@@ -2004,6 +2128,17 @@ process_dynamic_segment (file)
 	      if (do_dynamic)
 		printf ("%#lx\n", (long) entry->d_un.d_ptr);
 	    }
+	  else
+	    switch (elf_header.e_machine)
+	      {
+	      case EM_MIPS:
+	      case EM_MIPS_RS4_BE:
+		dynamic_segment_mips_val (entry);
+		break;
+	      default:
+		if (do_dynamic)
+		  printf ("%#lx\n", (long) entry->d_un.d_ptr);
+	      }
 	  break;
 	}
     }

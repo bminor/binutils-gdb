@@ -2,6 +2,7 @@
 
 	* readelf.c: Fix several versioning related bugs.  Produce nicer
 	output.
+	Add support for processor specific information on MIPS.
 
 Fri Jul 10 15:57:58 1998  Nick Clifton  <nickc@cygnus.com>
 
