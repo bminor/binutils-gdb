@@ -49,6 +49,8 @@ label.s
 mri.exp
 repeat.d
 repeat.s
+semi.d
+semi.s
 while.d
 while.s
 

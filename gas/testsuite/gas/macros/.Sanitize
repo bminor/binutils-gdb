@@ -31,6 +31,8 @@ irp.s
 macros.exp
 rept.d
 rept.s
+semi.d
+semi.s
 test1.d
 test1.s
 test2.d

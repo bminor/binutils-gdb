@@ -1,3 +1,10 @@
+Wed Feb 19 00:55:29 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/macros/semi.s, gas/macros/semi.d: New test.
+	* gas/macros/macros.exp: Run it.
+	* gas/mri/semi.s, gas/mri/semi.d: New test.
+	* gas/mri/mri.exp: Run it.
+
 Tue Feb 18 13:37:06 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/hppa/unsorted/unsorted.exp (align4 tests): Tweak expected
