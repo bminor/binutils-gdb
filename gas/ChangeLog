@@ -1,3 +1,8 @@
+Tue May 19 08:25:19 1998  Catherine Moore <clm@cygnus.com>
+
+        * config/tc-sparc.c (sparc_handle_align): Use number_to_chars_bigendian
+        or number_to_chars_littleendian to write data.
+
 Mon May 18 17:09:30 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (md_assemble): Remove artificially created
