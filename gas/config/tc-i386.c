@@ -1257,11 +1257,12 @@ md_assemble (line)
         && (strncmp (mnemonic, "fsub", 4) !=0)
         && (strncmp (mnemonic, "fdiv", 4) !=0))
       {
-        const reg_entry *temp_reg;
-        expressionS *temp_disp;
-        expressionS *temp_imm;
+        const reg_entry *temp_reg = NULL;
+        expressionS *temp_disp = NULL;
+        expressionS *temp_imm = NULL;
         unsigned int temp_type;
-        int xchg1, xchg2;
+        int xchg1 = 0;
+	int xchg2 = 0;
 
         if (i.operands == 2)
           {
@@ -2551,7 +2552,8 @@ i386_immediate (imm_start)
       if (cp != NULL)
         {
 	  char *tmpbuf;
-	  int len, first;
+	  int len = 0;
+	  int first;
 
 	  /* GOT relocations are not supported in 16 bit mode */
 	  if (flag_16bit_code)
@@ -2780,7 +2782,8 @@ i386_displacement (disp_start, disp_end)
       if (cp != NULL)
         {
 	  char *tmpbuf;
-	  int len, first;
+	  int len = 0;
+	  int first;
 
 	 /* GOT relocations are not supported in 16 bit mode */
 	 if (flag_16bit_code)
@@ -3460,8 +3463,8 @@ i386_operand (operand_string)
       int found_base_index_form;
 
       /* Start and end of displacement string expression (if found). */
-      char *displacement_string_start;
-      char *displacement_string_end;
+      char *displacement_string_start = NULL;
+      char *displacement_string_end = NULL;
 
     do_memory_reference:
 
@@ -3772,8 +3775,8 @@ md_convert_frag (headers, sec, fragP)
 #else
 void
 md_convert_frag (abfd, sec, fragP)
-     bfd *abfd;
-     segT sec;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     segT sec ATTRIBUTE_UNUSED;
      register fragS *fragP;
 #endif
 {
@@ -3855,8 +3858,8 @@ void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
      addressT from_addr, to_addr;
-     fragS *frag;
-     symbolS *to_symbol;
+     fragS *frag ATTRIBUTE_UNUSED;
+     symbolS *to_symbol ATTRIBUTE_UNUSED;
 {
   long offset;
 
@@ -4188,7 +4191,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 int
 md_parse_option (c, arg)
      int c;
-     char *arg;
+     char *arg ATTRIBUTE_UNUSED;
 {
   switch (c)
     {
@@ -4274,7 +4277,7 @@ md_undefined_symbol (name)
 /* Round up a section size to the appropriate boundary.  */
 valueT
 md_section_align (segment, size)
-     segT segment;
+     segT segment ATTRIBUTE_UNUSED;
      valueT size;
 {
 #ifdef OBJ_AOUT
@@ -4309,7 +4312,7 @@ md_pcrel_from (fixP)
 
 static void
 s_bss (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   register int temp;
 
@@ -4336,7 +4339,7 @@ i386_validate_fix (fixp)
 
 arelent *
 tc_gen_reloc (section, fixp)
-     asection *section;
+     asection *section ATTRIBUTE_UNUSED;
      fixS *fixp;
 {
   arelent *rel;

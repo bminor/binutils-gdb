@@ -609,7 +609,7 @@ stabs_generate_asm_func (funcname, startlabname)
 
 void
 stabs_generate_asm_endfunc (funcname, startlabname)
-     const char *funcname;
+     const char *funcname ATTRIBUTE_UNUSED;
      const char *startlabname;
 {
   static int label_count;

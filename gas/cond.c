@@ -248,7 +248,7 @@ s_ifc (arg)
 
 void 
 s_endif (arg)
-     int arg;
+     int arg ATTRIBUTE_UNUSED;
 {
   struct conditional_frame *hold;
 
@@ -280,7 +280,7 @@ s_endif (arg)
 
 void 
 s_else (arg)
-     int arg;
+     int arg ATTRIBUTE_UNUSED;
 {
   if (current_cframe == NULL)
     {

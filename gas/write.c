@@ -382,7 +382,7 @@ record_alignment (seg, align)
 
 static void
 renumber_sections (abfd, sec, countparg)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
      PTR countparg;
 {
@@ -433,9 +433,9 @@ chain_frchains_together_1 (section, frchp)
 
 static void
 chain_frchains_together (abfd, section, xxx)
-     bfd *abfd;			/* unused */
+     bfd *abfd ATTRIBUTE_UNUSED;
      segT section;
-     PTR xxx;			/* unused */
+     PTR xxx ATTRIBUTE_UNUSED;
 {
   segment_info_type *info;
 
@@ -578,7 +578,7 @@ static void
 relax_and_size_seg (abfd, sec, xxx)
      bfd *abfd;
      asection *sec;
-     PTR xxx;
+     PTR xxx ATTRIBUTE_UNUSED;
 {
   flagword flags;
   fragS *fragp;
@@ -688,9 +688,9 @@ dump_section_relocs (abfd, sec, stream_)
 
 static void
 adjust_reloc_syms (abfd, sec, xxx)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
-     PTR xxx;
+     PTR xxx ATTRIBUTE_UNUSED;
 {
   segment_info_type *seginfo = seg_info (sec);
   fixS *fixp;
@@ -889,7 +889,7 @@ static void
 write_relocs (abfd, sec, xxx)
      bfd *abfd;
      asection *sec;
-     PTR xxx;
+     PTR xxx ATTRIBUTE_UNUSED;
 {
   segment_info_type *seginfo = seg_info (sec);
   int i;
@@ -1088,9 +1088,9 @@ write_relocs (abfd, sec, xxx)
 
 static void
 write_contents (abfd, sec, xxx)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
-     PTR xxx;
+     PTR xxx ATTRIBUTE_UNUSED;
 {
   segment_info_type *seginfo = seg_info (sec);
   unsigned long offset = 0;
@@ -2769,7 +2769,8 @@ fixup_segment (fixP, this_segment_type)
 	}			/* not a bit fix */
 
 #ifdef TC_VALIDATE_FIX
-    skip: ;
+    skip:  ATTRIBUTE_UNUSED_LABEL
+      ;
 #endif
 #ifdef DEBUG5
       fprintf (stderr, "result:\n");

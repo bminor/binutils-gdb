@@ -142,6 +142,34 @@ ls =
     {
       INITIAL_STATE
     },
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    NULL,
+    { NULL, 0, 0, 0, 0 },
+    0,
+    {
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
   };
 
 
@@ -340,7 +368,7 @@ get_filenum (filenum, file)
   int i, last = filenum - 1;
   char char0 = file[0];
 
-  if ((unsigned) last >= ls.num_filenames)
+  if (last >= ls.num_filenames)
     last = ls.last_filename;
 
   /* do a quick check against the previously used filename: */
@@ -386,7 +414,7 @@ dwarf2_gen_line_info (addr, l)
 
   if (filenum > 0 && !l->filename)
     {
-      if (filenum >= ls.num_filenames)
+      if (filenum >= (unsigned int) ls.num_filenames)
 	{
 	  as_warn ("Encountered bad file number in line number debug info!");
 	  return;
@@ -563,7 +591,8 @@ print_stats (total_size)
       "set_column", "negate_stmt", "set_basic_block", "const_add_pc",
       "fixed_advance_pc"
     };
-  int i, j;
+  size_t i;
+  int j;
 
   fprintf (stderr, "Average size: %g bytes/line\n",
 	   total_size / (double) ls.num_line_entries);
@@ -658,7 +687,7 @@ dwarf2_finish ()
 
 void
 dwarf2_directive_file (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   int len;
 
@@ -685,7 +714,7 @@ dwarf2_directive_file (dummy)
 
 void
 dwarf2_directive_loc (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   ls.any_dwarf2_directives = 1;
 

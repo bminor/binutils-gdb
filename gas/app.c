@@ -267,7 +267,7 @@ app_pop (arg)
     saved_input = NULL;
   else
     {
-      assert (saved->saved_input_len <= sizeof input_buffer);
+      assert (saved->saved_input_len <= (int) (sizeof input_buffer));
       memcpy (input_buffer, saved->saved_input, saved->saved_input_len);
       saved_input = input_buffer;
       saved_input_len = saved->saved_input_len;

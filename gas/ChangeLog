@@ -1,3 +1,11 @@
+1999-07-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* Many files: Changes to avoid gcc warnings: Add ATTRIBUTE_UNUSED
+	as appropriate.  Fill in structure initializations.  Add variable
+	initializations.  Add casts.
+	* dwarf2dbg.c (print_stats): Change i to size_t.
+	* listing.c (listing_listing): Change list_line to unsigned int.
+
 1999-07-10  Ian Lance Taylor  <ian@zembu.com>
 
 	* config/tc-ppc.h (tc_fix_adjustable) [OBJ_ELF]: Call S_IS_LOCAL

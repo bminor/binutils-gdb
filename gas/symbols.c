@@ -771,7 +771,7 @@ symbol_insert (addme, target, rootPP, lastPP)
      symbolS *addme;
      symbolS *target;
      symbolS **rootPP;
-     symbolS **lastPP;
+     symbolS **lastPP ATTRIBUTE_UNUSED;
 {
   if (LOCAL_SYMBOL_CHECK (addme))
     abort ();
@@ -1190,7 +1190,7 @@ static void resolve_local_symbol PARAMS ((const char *, PTR));
 
 static void
 resolve_local_symbol (key, value)
-     const char *key;
+     const char *key ATTRIBUTE_UNUSED;
      PTR value;
 {
   if (value != NULL)

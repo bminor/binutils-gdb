@@ -374,9 +374,9 @@ hash_traverse (table, pfn)
 
 void
 hash_print_statistics (f, name, table)
-     FILE *f;
-     const char *name;
-     struct hash_control *table;
+     FILE *f ATTRIBUTE_UNUSED;
+     const char *name ATTRIBUTE_UNUSED;
+     struct hash_control *table ATTRIBUTE_UNUSED;
 {
 #ifdef HASH_STATISTICS
   unsigned int i;

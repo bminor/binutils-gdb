@@ -419,7 +419,7 @@ static const pseudo_typeS potable[] =
   {"xstabs", s_xstab, 's'},
   {"word", cons, 2},
   {"zero", s_space, 0},
-  {NULL}			/* end sentinel */
+  {NULL, NULL, 0}			/* end sentinel */
 };
 
 static int pop_override_ok = 0;
@@ -1147,7 +1147,7 @@ mri_comment_end (stop, stopc)
 
 void 
 s_abort (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   as_fatal (_(".abort detected.  Abandoning ship."));
 }
@@ -1337,7 +1337,7 @@ s_align_ptwo (arg)
 
 void 
 s_comm (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   register char *name;
   register char c;
@@ -1419,7 +1419,7 @@ s_comm (ignore)
 
 void
 s_mri_common (small)
-     int small;
+     int small ATTRIBUTE_UNUSED;
 {
   char *name;
   char c;
@@ -1518,7 +1518,7 @@ s_mri_common (small)
 
 void
 s_data (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   segT section;
   register int temp;
@@ -1592,7 +1592,7 @@ s_app_file (appfile)
 
 void
 s_app_line (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   int l;
 
@@ -1618,7 +1618,7 @@ s_app_line (ignore)
 
 void
 s_end (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (flag_mri)
     {
@@ -1636,7 +1636,7 @@ s_end (ignore)
 
 void
 s_err (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   as_bad (_(".err encountered"));
   demand_empty_rest_of_line ();
@@ -1646,7 +1646,7 @@ s_err (ignore)
 
 void
 s_fail (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   offsetT temp;
   char *stop = NULL;
@@ -1669,7 +1669,7 @@ s_fail (ignore)
 
 void 
 s_fill (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   expressionS rep_exp;
   long size = 1;
@@ -1766,7 +1766,7 @@ s_fill (ignore)
 
 void 
 s_globl (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   int c;
@@ -1841,7 +1841,7 @@ s_irp (irpc)
 
 void
 s_linkonce (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   enum linkonce_type type;
 
@@ -2119,7 +2119,7 @@ void s_lcomm_bytes (needs_align)
 
 void 
 s_lsym (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   register char *name;
   register char c;
@@ -2241,7 +2241,7 @@ get_line_sb (line)
 
 void
 s_macro (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *file;
   unsigned int line;
@@ -2293,7 +2293,7 @@ s_macro (ignore)
 
 void
 s_mexit (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   cond_exit_macro (macro_nest);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
@@ -2303,7 +2303,7 @@ s_mexit (ignore)
 
 void
 s_mri (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   int on, old_flag;
 
@@ -2371,7 +2371,7 @@ do_org (segment, exp, fill)
 
 void 
 s_org (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   register segT segment;
   expressionS exp;
@@ -2427,7 +2427,7 @@ s_org (ignore)
 
 void
 s_mri_sect (type)
-     char *type;
+     char *type ATTRIBUTE_UNUSED;
 {
 #ifdef TC_M68K
 
@@ -2591,7 +2591,7 @@ s_mri_sect (type)
 
 void
 s_print (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *s;
   int len;
@@ -2605,7 +2605,7 @@ s_print (ignore)
 
 void
 s_purgem (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (is_it_end_of_statement ())
     {
@@ -2635,7 +2635,7 @@ s_purgem (ignore)
 
 void
 s_rept (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   int count;
   sb one;
@@ -3007,7 +3007,7 @@ s_float_space (float_type)
 
 void
 s_struct (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *stop = NULL;
   char stopc;
@@ -3023,7 +3023,7 @@ s_struct (ignore)
 
 void
 s_text (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   register int temp;
 
@@ -4832,7 +4832,7 @@ equals (sym_name, reassign)
 /* ARGSUSED */
 void 
 s_include (arg)
-     int arg;
+     int arg ATTRIBUTE_UNUSED;
 {
   char *newbuf;
   char *filename;
@@ -5054,7 +5054,7 @@ do_s_func (end_p, default_prefix)
 
 void 
 s_ignore (arg)
-     int arg;
+     int arg ATTRIBUTE_UNUSED;
 {
   while (!is_end_of_line[(unsigned char) *input_line_pointer])
     {

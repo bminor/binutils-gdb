@@ -112,7 +112,7 @@ static const pseudo_typeS elf_pseudo_table[] =
   {"text", obj_elf_text, 0},
 
   /* End sentinel.  */
-  {NULL},
+  {NULL, NULL, 0},
 };
 
 static const pseudo_typeS ecoff_debug_pseudo_table[] =
@@ -157,7 +157,7 @@ static const pseudo_typeS ecoff_debug_pseudo_table[] =
   { "vreg",	s_ignore,		0 },
 #endif
 
-  {NULL}			/* end sentinel */
+  {NULL, NULL, 0}			/* end sentinel */
 };
 
 #undef NO_RELOC
@@ -301,7 +301,7 @@ obj_elf_common (is_common)
     }
   if (S_GET_VALUE (symbolP) != 0)
     {
-      if (S_GET_VALUE (symbolP) != size)
+      if (S_GET_VALUE (symbolP) != (valueT) size)
 	{
 	  as_warn (_("Length of .comm \"%s\" is already %ld. Not changed to %d."),
 		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
@@ -418,7 +418,7 @@ obj_elf_common (is_common)
 
 static void
 obj_elf_local (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   int c;
@@ -447,7 +447,7 @@ obj_elf_local (ignore)
 
 static void
 obj_elf_weak (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   int c;
@@ -902,7 +902,7 @@ obj_elf_text (i)
 
 static void
 obj_elf_subsection (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   register int temp;
 
@@ -934,7 +934,7 @@ obj_elf_section_change_hook ()
 
 void
 obj_elf_previous (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   segT new_section;
   int new_subsection;
@@ -962,7 +962,7 @@ obj_elf_previous (ignore)
 
 static void
 obj_elf_popsection (xxx)
-     int xxx;
+     int xxx ATTRIBUTE_UNUSED;
 {
   struct section_stack *top = section_stack;
 
@@ -989,7 +989,7 @@ obj_elf_popsection (xxx)
 
 static void
 obj_elf_line (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   /* Assume delimiter is part of expression.  BSD4.2 as fails with
      delightful bug, so we are not being incompatible here. */
@@ -1005,7 +1005,7 @@ obj_elf_line (ignore)
 
 static void
 obj_elf_symver (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   char c;
@@ -1065,6 +1065,7 @@ obj_elf_symver (ignore)
 
 static void
 obj_elf_vtable_inherit (ignore)
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *cname, *pname;
   symbolS *csym, *psym;
@@ -1136,6 +1137,7 @@ obj_elf_vtable_inherit (ignore)
 
 static void
 obj_elf_vtable_entry (ignore)
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   symbolS *sym;
@@ -1197,7 +1199,7 @@ obj_symbol_new_hook (symbolP)
 
 void
 obj_elf_version (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   unsigned int c;
@@ -1264,7 +1266,7 @@ obj_elf_version (ignore)
 
 static void
 obj_elf_size (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name = input_line_pointer;
   char c = get_symbol_end ();
@@ -1320,7 +1322,7 @@ obj_elf_size (ignore)
 
 static void
 obj_elf_type (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   char c;
@@ -1365,7 +1367,7 @@ obj_elf_type (ignore)
 
 static void
 obj_elf_ident (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   static segT comment_section;
   segT old_section = now_seg;
@@ -1425,7 +1427,7 @@ static void
 adjust_stab_sections (abfd, sec, xxx)
      bfd *abfd;
      asection *sec;
-     PTR xxx;
+     PTR xxx ATTRIBUTE_UNUSED;
 {
   char *name;
   asection *strsec;
