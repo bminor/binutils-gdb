@@ -2773,7 +2773,7 @@ subject, see the hardware manufacturer's manual.
 @menu
 * Vax-Dependent::		VAX Dependent Features
 * AMD29K-Dependent::		AMD 29K Dependent Features
-* H8/300-Dependent::		AMD 29K Dependent Features
+* H8/300-Dependent::		Hitachi H8/300 Dependent Features
 * i960-Dependent::		Intel 80960 Dependent Features
 * M68K-Dependent::		M680x0 Dependent Features
 * Sparc-Dependent::		SPARC Dependent Features
