@@ -311,36 +311,38 @@ readline/		Master version: ftp://ftp.cwru.edu/pub/bash/
 
 
 
-		Write After Approval
+			Write After Approval
+			   (alphabetic)
 
 To get recommended for the Write After Approval list you need a valid
 FSF assignment and have submitted one good patch.
 
 David Anderson					davea@sgi.com
-Jim Kingdon					jkingdon@engr.sgi.com  ++
-Jason Molenda					jsm@cygnus.com
-H.J. Lu						hjl@lucon.org
+Philip Blundell					philb@gnu.org
+Joel Brobecker					brobecker@act-europe.fr
+Michael Chastain				chastain@redhat.com
 Nick Clifton					nickc@cygnus.com
-Jonathan Larmour				jlarmour@redhat.co.uk
-Glen McCready					gkm@cygnus.com
-Gary Thomas					gthomas@redhat.com
-Pierre Muller					muller@sourceware.cygnus.com
+Orjan Friberg					orjanf@axis.com
+Paul Hilfinger					hilfinger@gnat.com
+Matt Hiller					hiller@redhat.com
 Kazu Hirata					kazu@hxi.com
-Tom Tromey					tromey@cygnus.com
+Jeff Holcomb					jeffh@redhat.com
+Don Howard					dhoward@redhat.com
+Martin Hunt					hunt@redhat.com
+Geoff Keating					geoffk@redhat.com
+Jim Kingdon					jkingdon@engr.sgi.com  ++
+Jonathan Larmour				jlarmour@redhat.co.uk
+H.J. Lu						hjl@lucon.org
+Glen McCready					gkm@cygnus.com
+Jason Molenda					jsm@cygnus.com
+Pierre Muller					muller@sourceware.cygnus.com
 Alexandre Oliva					aoliva@redhat.com
 Mark Salter					msalter@redhat.com
-Michael Chastain				chastain@redhat.com
-Orjan Friberg					orjanf@axis.com
-Jeff Holcomb					jeffh@redhat.com
-David Smith					dsmith@redhat.com
-Martin Hunt					hunt@redhat.com
-Matt Hiller					hiller@redhat.com
-Philip Blundell					philb@gnu.org
 Keith Seitz					keiths@cygnus.com
-Geoff Keating					geoffk@redhat.com
-Don Howard					dhoward@redhat.com
-Paul Hilfinger					hilfinger@gnat.com
-Joel Brobecker					brobecker@act-europe.fr
+David Smith					dsmith@redhat.com
+Gary Thomas					gthomas@redhat.com
+Tom Tromey					tromey@cygnus.com
+
 
 
 			Past Maintainers
