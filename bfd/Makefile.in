@@ -1859,7 +1859,7 @@ elf32.lo: elf32.c elfcode.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/safe-ctype.h
 elflink.lo: elflink.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h
+  $(INCDIR)/elf/external.h $(INCDIR)/libiberty.h
 elf-strtab.lo: elf-strtab.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/hashtab.h $(INCDIR)/libiberty.h

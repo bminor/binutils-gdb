@@ -1,3 +1,9 @@
+2004-04-08  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elflink.c: Include libiberty.h.
+	* Makefile.am (elflink.lo): Depend on libiberty.h.
+	* Makefile.in: Regenerate.
+
 2004-04-06  Daniel Jacobowitz  <drow@mvista.com>
 
 	* elfxx-mips.c (MIPS_ELF_STUB_SECTION_NAME): Always use
