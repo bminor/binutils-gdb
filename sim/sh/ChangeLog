@@ -1,6 +1,15 @@
 Wed Aug 30 22:05:17 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gencode.c (gensim): abort if an unknown opcode is encountered.
+start-sanitize-sh3e
+	* interp.c (FPSCR, FPUL): Define.
+	(struct save_state): Add fields for floating point registers,
+	FPSCR and FPUL.
+	(sim_resume): Add 'F' for accessing floating point registers
+	in the save state structure.
+	* gencode.c: Add sh3e opcodes.
+	(gensym): Define a buffer for int<->fp conversions.
+end-sanitize-sh3e
 
 Tue Aug 22 14:16:46 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 

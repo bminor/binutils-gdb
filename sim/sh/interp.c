@@ -60,6 +60,10 @@
 #define M 	saved_state.asregs.sr.bits.m
 #define Q 	saved_state.asregs.sr.bits.q
 #define S 	saved_state.asregs.sr.bits.s
+/* start-sanitize-sh3e */
+#define FPSCR	saved_state.asregs.fpscr
+#define FPUL	saved_state.asregs.fpul
+/* end-sanitize-sh3e */
 
 #define GET_SR() (saved_state.asregs.sr.bits.t = T, saved_state.asregs.sr.word)
 #define SET_SR(x) {saved_state.asregs.sr.word = (x); T =saved_state.asregs.sr.bits.t;}
@@ -96,6 +100,8 @@ int valid[16];
 #define UNDEF(x)
 #endif
 
+static void parse_and_set_memory_size PARAMS ((char *str));
+
 static int IOMEM PARAMS ((int addr, int write, int value));
 
 /* These variables are at file scope so that functions other than
@@ -114,6 +120,9 @@ typedef union
   {
 
     int regs[16];
+/* start-sanitize-sh3e */
+    float fregs[16];
+/* end-sanitize-sh3e */
     int pc;
     int pr;
 
@@ -122,6 +131,10 @@ typedef union
     int mach;
     int macl;
 
+/* start-sanitize-sh3e */
+    float fpscr;
+    int fpul;
+/* end-sanitize-sh3e */
 
     union
       {
@@ -473,7 +486,9 @@ trap (i, regs, memory, maskl, maskw, little_endian)
       regs[0] = trap12 ();
       break;
 #endif
-    case 3:
+
+    case 3:		/* FIXME: for backwards compat, should be removed */
+    case 34:
       {
 	extern int errno;
 	int perrno = errno;
@@ -490,9 +505,11 @@ trap (i, regs, memory, maskl, maskw, little_endian)
 	  case SYS_execve:
 	    regs[0] = execve (ptr (regs[5]), ptr (regs[6]), ptr (regs[7]));
 	    break;
+#ifdef SYS_execv	/* May be implemented as execve(arg,arg,0) */
 	  case SYS_execv:
 	    regs[0] = execv (ptr (regs[5]), ptr (regs[6]));
 	    break;
+#endif
 	  case SYS_pipe:
 	    {
 	      char *buf;
@@ -594,7 +611,6 @@ trap (i, regs, memory, maskl, maskw, little_endian)
 	regs[1] = errno;
 	errno = perrno;
       }
-
       break;
 
     case 0xc3:
@@ -916,6 +932,9 @@ sim_resume (step, siggnal)
   register unsigned char *jump_table = sh_jump_table0;
 
   register int *R = &(saved_state.asregs.regs[0]);
+/* start-sanitize-sh3e */
+  register float *F = &(saved_state.asregs.fregs[0]);
+/* end-sanitize-sh3e */
   register int T;
   register int PR;
 
@@ -923,7 +942,7 @@ sim_resume (step, siggnal)
   register int maskw = ((saved_state.asregs.msize - 1) & ~1);
   register int maskl = ((saved_state.asregs.msize - 1) & ~3);
   register unsigned char *memory;
-  register unsigned int sbit = (1 << 31);
+  register unsigned int sbit = ((unsigned int) 1 << 31);
 
   prev = signal (SIGINT, control_c);
 
@@ -1155,10 +1174,28 @@ sim_set_profile_size (n)
 
 
 void
-sim_open (name)
-     char *name;
+sim_open (args)
+     char *args;
 {
-  /* nothing to do */
+  int n;
+
+  if (args != NULL)
+    {
+      parse_and_set_memory_size (args);
+    }
+}
+
+static void
+parse_and_set_memory_size (str)
+     char *str;
+{
+  int n;
+
+  n = strtol (str, NULL, 10);
+  if (n > 0 && n <= 24)
+    sim_memory_size = n;
+  else
+    printf_filtered ("Bad memory size %d; must be 1 to 24, inclusive\n", n);
 }
 
 void
@@ -1192,3 +1229,24 @@ sim_kill ()
   /* nothing to do */
 }
 
+void
+sim_do_command (cmd)
+     char *cmd;
+{
+  int n;
+  char *sms_cmd = "set-memory-size";
+
+  if (strncmp (cmd, sms_cmd, strlen (sms_cmd)) == 0
+      && strchr (" 	", cmd[strlen(sms_cmd)]))
+    parse_and_set_memory_size (cmd + strlen(sms_cmd) + 1);
+
+  else if (strcmp (cmd, "help") == 0)
+    {
+	printf_filtered ("List of SH simulator commands:\n\n");
+	printf_filtered ("set-memory-size <n> -- Set the number of address bits to use\n");
+	printf_filtered ("\n");
+    }
+  else
+    fprintf (stderr, "Error: \"%s\" is not a valid SH simulator command.\n",
+	     cmd);
+}
