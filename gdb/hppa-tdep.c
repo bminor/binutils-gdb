@@ -5050,7 +5050,7 @@ _initialize_hppa_tdep (void)
   void break_at_finish_at_depth_command (char *arg, int from_tty);
 
   gdbarch_register (bfd_arch_hppa, hppa_gdbarch_init, hppa_dump_tdep);
-  tm_print_insn = print_insn_hppa;
+  deprecated_tm_print_insn = print_insn_hppa;
 
   add_cmd ("unwind", class_maintenance, unwind_command,
 	   "Print unwind table entry at given address.",

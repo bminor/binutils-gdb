@@ -1296,6 +1296,6 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 void
 _initialize_v850_tdep (void)
 {
-  tm_print_insn = print_insn_v850;
+  deprecated_tm_print_insn = print_insn_v850;
   register_gdbarch_init (bfd_arch_v850, v850_gdbarch_init);
 }

@@ -1147,7 +1147,7 @@ _initialize_frv_tdep (void)
 {
   register_gdbarch_init (bfd_arch_frv, frv_gdbarch_init);
 
-  tm_print_insn = print_insn_frv;
+  deprecated_tm_print_insn = print_insn_frv;
 }
 
 

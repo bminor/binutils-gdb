@@ -1066,5 +1066,5 @@ void
 _initialize_m68k_tdep (void)
 {
   gdbarch_register (bfd_arch_m68k, m68k_gdbarch_init, m68k_dump_tdep);
-  tm_print_insn = print_insn_m68k;
+  deprecated_tm_print_insn = print_insn_m68k;
 }

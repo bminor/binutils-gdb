@@ -1209,7 +1209,7 @@ _initialize_mn10300_tdep (void)
 {
 /*  printf("_initialize_mn10300_tdep\n"); */
 
-  tm_print_insn = print_insn_mn10300;
+  deprecated_tm_print_insn = print_insn_mn10300;
 
   register_gdbarch_init (bfd_arch_mn10300, mn10300_gdbarch_init);
 }

@@ -2460,7 +2460,7 @@ _initialize_sparc_tdep (void)
   /* Hook us into the gdbarch mechanism.  */
   gdbarch_register (bfd_arch_sparc, sparc_gdbarch_init, sparc_dump_tdep);
 
-  tm_print_insn = gdb_print_insn_sparc;
+  deprecated_tm_print_insn = gdb_print_insn_sparc;
   tm_print_insn_info.mach = TM_PRINT_INSN_MACH;		/* Selects sparc/sparclite */
   /* OBSOLETE target_architecture_hook = sparc_target_architecture_hook; */
 }

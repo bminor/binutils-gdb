@@ -6396,8 +6396,8 @@ _initialize_mips_tdep (void)
     internal_error (__FILE__, __LINE__, "mips_abi_strings out of sync");
 
   gdbarch_register (bfd_arch_mips, mips_gdbarch_init, mips_dump_tdep);
-  if (!tm_print_insn)		/* Someone may have already set it */
-    tm_print_insn = gdb_print_insn_mips;
+  if (!deprecated_tm_print_insn)	 /* Someone may have already set it */
+    deprecated_tm_print_insn = gdb_print_insn_mips;
 
   /* Add root prefix command for all "set mips"/"show mips" commands */
   add_prefix_cmd ("mips", no_class, set_mips_command,

@@ -6203,7 +6203,7 @@ gdbarch_update_p (struct gdbarch_info info)
 /* Disassembler */
 
 /* Pointer to the target-dependent disassembly function.  */
-int (*tm_print_insn) (bfd_vma, disassemble_info *);
+int (*deprecated_tm_print_insn) (bfd_vma, disassemble_info *);
 disassemble_info tm_print_insn_info;
 
 

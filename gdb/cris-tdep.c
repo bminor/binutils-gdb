@@ -3548,7 +3548,7 @@ static void cris_gdb_func (enum cris_op_type op_type, unsigned short inst,
 static int
 cris_delayed_get_disassembler (bfd_vma addr, disassemble_info *info)
 {
-  tm_print_insn = cris_get_disassembler (exec_bfd);
+  deprecated_tm_print_insn = cris_get_disassembler (exec_bfd);
   return TARGET_PRINT_INSN (addr, info);
 }
 
@@ -3861,7 +3861,7 @@ _initialize_cris_tdep (void)
   gdbarch_register (bfd_arch_cris, cris_gdbarch_init, cris_dump_tdep);
   
   /* Used in disassembly.  */
-  tm_print_insn = cris_delayed_get_disassembler;
+  deprecated_tm_print_insn = cris_delayed_get_disassembler;
 
   /* CRIS-specific user-commands.  */
   c = add_set_cmd ("cris-version", class_support, var_integer, 

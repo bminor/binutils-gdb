@@ -209,7 +209,7 @@ generic_prologue_frameless_p (CORE_ADDR ip)
 int
 legacy_print_insn (bfd_vma vma, disassemble_info *info)
 {
-  return (*tm_print_insn) (vma, info);
+  return (*deprecated_tm_print_insn) (vma, info);
 }
 
 /* Helper functions for INNER_THAN */

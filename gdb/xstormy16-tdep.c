@@ -1130,5 +1130,5 @@ _initialize_xstormy16_tdep (void)
   extern int print_insn_xstormy16 ();
 
   register_gdbarch_init (bfd_arch_xstormy16, xstormy16_gdbarch_init);
-  tm_print_insn = print_insn_xstormy16;
+  deprecated_tm_print_insn = print_insn_xstormy16;
 }

@@ -1925,7 +1925,7 @@ _initialize_alpha_tdep (void)
 
   gdbarch_register (bfd_arch_alpha, alpha_gdbarch_init, alpha_dump_tdep);
 
-  tm_print_insn = print_insn_alpha;
+  deprecated_tm_print_insn = print_insn_alpha;
 
   /* Let the user set the fence post for heuristic_proc_start.  */
 

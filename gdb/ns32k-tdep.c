@@ -624,5 +624,5 @@ _initialize_ns32k_tdep (void)
 {
   gdbarch_register (bfd_arch_ns32k, ns32k_gdbarch_init, NULL);
 
-  tm_print_insn = print_insn_ns32k;
+  deprecated_tm_print_insn = print_insn_ns32k;
 }

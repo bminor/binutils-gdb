@@ -1,3 +1,26 @@
+2003-04-28  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (deprecated_tm_print_insn): Rename tm_print_insn.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* xstormy16-tdep.c (_initialize_xstormy16_tdep): Update.
+	* vax-tdep.c (_initialize_vax_tdep): Update.
+	* v850-tdep.c (_initialize_v850_tdep): Update.
+	* sparc-tdep.c (_initialize_sparc_tdep): Update.
+	* s390-tdep.c (_initialize_s390_tdep): Update.
+	* ns32k-tdep.c (_initialize_ns32k_tdep): Update.
+	* mn10300-tdep.c (_initialize_mn10300_tdep): Update.
+	* mips-tdep.c (_initialize_mips_tdep): Update.
+	* mcore-tdep.c (_initialize_mcore_tdep): Update.
+	* m68k-tdep.c (_initialize_m68k_tdep): Update.
+	* ia64-tdep.c (_initialize_ia64_tdep): Update.
+	* hppa-tdep.c (_initialize_hppa_tdep): Update.
+	* h8300-tdep.c (_initialize_h8300_tdep): Update.
+	* frv-tdep.c (_initialize_frv_tdep): Update.
+	* cris-tdep.c (cris_delayed_get_disassembler): Update.
+	(_initialize_cris_tdep): Update.
+	* arch-utils.c (legacy_print_insn): Update.
+	* alpha-tdep.c (_initialize_alpha_tdep): Update.
+
 2003-04-26  Adam Fedor  <fedor@gnu.org>
 
 	* linespec.c (decode_objc): New function to decode ObjC calls

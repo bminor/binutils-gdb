@@ -1173,7 +1173,7 @@ _initialize_mcore_tdep (void)
 {
   extern int print_insn_mcore (bfd_vma, disassemble_info *);
   gdbarch_register (bfd_arch_mcore, mcore_gdbarch_init, mcore_dump_tdep);
-  tm_print_insn = print_insn_mcore;
+  deprecated_tm_print_insn = print_insn_mcore;
 
 #ifdef MCORE_DEBUG
   add_show_from_set (add_set_cmd ("mcoredebug", no_class,

@@ -3364,7 +3364,8 @@ extern void dis_asm_memory_error (int status, bfd_vma memaddr,
 extern void dis_asm_print_address (bfd_vma addr,
 				   disassemble_info *info);
 
-extern int (*tm_print_insn) (bfd_vma, disassemble_info*);
+/* Use set_gdbarch_print_insn instead.  */
+extern int (*deprecated_tm_print_insn) (bfd_vma, disassemble_info*);
 extern disassemble_info tm_print_insn_info;
 #ifndef TARGET_PRINT_INSN_INFO
 #define TARGET_PRINT_INSN_INFO (&tm_print_insn_info)

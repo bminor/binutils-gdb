@@ -1925,8 +1925,8 @@ _initialize_s390_tdep (void)
 
   /* Hook us into the gdbarch mechanism.  */
   register_gdbarch_init (bfd_arch_s390, s390_gdbarch_init);
-  if (!tm_print_insn)		/* Someone may have already set it */
-    tm_print_insn = gdb_print_insn_s390;
+  if (!deprecated_tm_print_insn)	/* Someone may have already set it */
+    deprecated_tm_print_insn = gdb_print_insn_s390;
 }
 
 #endif /* GDBSERVER */
