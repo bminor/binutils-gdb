@@ -1,3 +1,8 @@
+Fri Feb 13 16:37:44 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (AUTOMAKE_OPTIONS): Define.
+	* configure, Makefile.in, aclocal.m4: Rebuild with automake 1.2e.
+
 Thu Feb 12 14:13:46 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* deflex.l: Accept '?' in symbol names, for VC++ mangled names.
