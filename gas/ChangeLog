@@ -1,4 +1,8 @@
 start-sanitize-sky
+Tue Apr  7 12:21:39 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (md_convert_frag): Fix thinko.
+
 Mon Apr  6 17:08:47 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-dvp.c (assemble_vif): Watch for macro insns.

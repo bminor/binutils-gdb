@@ -1503,8 +1503,10 @@ md_convert_frag (abfd, sec, fragP)
 	 (so it abuts the following data).  */
       DVP_INSN insn = bfd_getl32 (fragP->fr_opcode);
       md_number_to_chars (fragP->fr_opcode, VIFNOP, 4);
+      if (growth > 4)
+	md_number_to_chars (fragP->fr_opcode + 4, VIFNOP, 4);
       if (growth > 8)
-	md_number_to_chars (fragP->fr_opcode, VIFNOP, 8);
+	md_number_to_chars (fragP->fr_opcode + 8, VIFNOP, 4);
       md_number_to_chars (fragP->fr_literal + fragP->fr_fix - 4, insn, 4);
 
       /* Adjust fr_opcode so md_apply_fix3 works with the right bytes.  */
