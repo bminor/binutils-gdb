@@ -2267,7 +2267,7 @@ struct ieee_name_type
   /* Type.  */
   struct ieee_write_type type;
   /* If this is a tag which has not yet been defined, this is the
-     kind.  If the tag has been defined, this is DEBUG_KIND_VOID.  */
+     kind.  If the tag has been defined, this is DEBUG_KIND_ILLEGAL.  */
   enum debug_type_kind kind;
 };
 
@@ -2357,6 +2357,7 @@ static boolean ieee_output_pending_parms PARAMS ((struct ieee_handle *));
 
 static boolean ieee_start_compilation_unit PARAMS ((PTR, const char *));
 static boolean ieee_start_source PARAMS ((PTR, const char *));
+static boolean ieee_ellipsis_type PARAMS ((PTR));
 static boolean ieee_empty_type PARAMS ((PTR));
 static boolean ieee_void_type PARAMS ((PTR));
 static boolean ieee_int_type PARAMS ((PTR, unsigned int, boolean));
@@ -2377,12 +2378,13 @@ static boolean ieee_method_type PARAMS ((PTR, boolean, int));
 static boolean ieee_const_type PARAMS ((PTR));
 static boolean ieee_volatile_type PARAMS ((PTR));
 static boolean ieee_start_struct_type
-  PARAMS ((PTR, const char *, boolean, unsigned int));
+  PARAMS ((PTR, const char *, unsigned int, boolean, unsigned int));
 static boolean ieee_struct_field
   PARAMS ((PTR, const char *, bfd_vma, bfd_vma, enum debug_visibility));
 static boolean ieee_end_struct_type PARAMS ((PTR));
 static boolean ieee_start_class_type
-  PARAMS ((PTR, const char *, boolean, unsigned int, boolean, boolean));
+  PARAMS ((PTR, const char *, unsigned int, boolean, unsigned int, boolean,
+	   boolean));
 static boolean ieee_class_static_member
   PARAMS ((PTR, const char *, const char *, enum debug_visibility));
 static boolean ieee_class_baseclass
@@ -2397,7 +2399,7 @@ static boolean ieee_class_end_method PARAMS ((PTR));
 static boolean ieee_end_class_type PARAMS ((PTR));
 static boolean ieee_typedef_type PARAMS ((PTR, const char *));
 static boolean ieee_tag_type
-  PARAMS ((PTR, const char *, enum debug_type_kind));
+  PARAMS ((PTR, const char *, unsigned int, enum debug_type_kind));
 static boolean ieee_typdef PARAMS ((PTR, const char *));
 static boolean ieee_tag PARAMS ((PTR, const char *));
 static boolean ieee_int_constant PARAMS ((PTR, const char *, bfd_vma));
@@ -2418,6 +2420,7 @@ static const struct debug_write_fns ieee_fns =
 {
   ieee_start_compilation_unit,
   ieee_start_source,
+  ieee_ellipsis_type,
   ieee_empty_type,
   ieee_void_type,
   ieee_int_type,
@@ -2797,7 +2800,7 @@ ieee_define_named_type (info, name, tagp, size, unsignedp, ppbuf)
 
       nt->type.size = size;
       nt->type.unsignedp = unsignedp;
-      nt->kind = DEBUG_KIND_VOID;
+      nt->kind = DEBUG_KIND_ILLEGAL;
 
       type_indx = nt->type.indx;
     }
@@ -2878,7 +2881,7 @@ write_ieee_debugging_info (abfd, dhandle)
       unsigned int name_indx;
       char code;
 
-      if (nt->kind == DEBUG_KIND_VOID)
+      if (nt->kind == DEBUG_KIND_ILLEGAL)
 	continue;
       if (tags == NULL)
 	{
@@ -3156,6 +3159,15 @@ ieee_start_source (p, filename)
      const char *filename;
 {
   return true;
+}
+
+/* Make an ellipsis type.  */
+
+static boolean
+ieee_ellipsis_type (p)
+     PTR p;
+{
+  abort ();
 }
 
 /* Make an empty type.  */
@@ -3598,9 +3610,10 @@ ieee_volatile_type (p)
    fields with the struct type itself.  */
 
 static boolean
-ieee_start_struct_type (p, tag, structp, size)
+ieee_start_struct_type (p, tag, id, structp, size)
      PTR p;
      const char *tag;
+     unsigned int id;
      boolean structp;
      unsigned int size;
 {
@@ -3699,9 +3712,10 @@ ieee_end_struct_type (p)
 /* Start a class type.  */
 
 static boolean
-ieee_start_class_type (p, tag, structp, size, vptr, ownvptr)
+ieee_start_class_type (p, tag, id, structp, size, vptr, ownvptr)
      PTR p;
      const char *tag;
+     unsigned int id;
      boolean structp;
      unsigned int size;
      boolean vptr;
@@ -3712,7 +3726,7 @@ ieee_start_class_type (p, tag, structp, size, vptr, ownvptr)
   /* FIXME.  */
   if (vptr && ! ownvptr)
     (void) ieee_pop_type (info);
-  return ieee_start_struct_type (p, tag, structp, size);
+  return ieee_start_struct_type (p, tag, id, structp, size);
 }
 
 /* Add a static member to a class.  */
@@ -3761,10 +3775,10 @@ ieee_class_start_method (p, name)
 /* Define a new method variant.  */
 
 static boolean
-ieee_class_method_variant (p, name, visibility, constp, volatilep,
+ieee_class_method_variant (p, physname, visibility, constp, volatilep,
 			   voffset, context)
      PTR p;
-     const char *name;
+     const char *physname;
      enum debug_visibility visibility;
      boolean constp;
      boolean volatilep;
@@ -3783,9 +3797,9 @@ ieee_class_method_variant (p, name, visibility, constp, volatilep,
 /* Define a new static method variant.  */
 
 static boolean
-ieee_class_static_method_variant (p, name, visibility, constp, volatilep)
+ieee_class_static_method_variant (p, physname, visibility, constp, volatilep)
      PTR p;
-     const char *name;
+     const char *physname;
      enum debug_visibility visibility;
      boolean constp;
      boolean volatilep;
@@ -3846,13 +3860,17 @@ ieee_typedef_type (p, name)
 /* Push a tagged type onto the type stack.  */
 
 static boolean
-ieee_tag_type (p, name, kind)
+ieee_tag_type (p, name, id, kind)
      PTR p;
      const char *name;
+     unsigned int id;
      enum debug_type_kind kind;
 {
   struct ieee_handle *info = (struct ieee_handle *) p;
   register struct ieee_name_type *nt;
+
+  if (name == NULL)
+    return true;
 
   for (nt = info->tags; nt != NULL; nt = nt->next)
     {
@@ -3899,7 +3917,7 @@ ieee_typdef (p, name)
   memset (nt, 0, sizeof *nt);
   nt->name = name;
   nt->type = info->type_stack->type;
-  nt->kind = DEBUG_KIND_VOID;
+  nt->kind = DEBUG_KIND_ILLEGAL;
 
   nt->next = info->typedefs;
   info->typedefs = nt;

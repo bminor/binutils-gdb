@@ -72,6 +72,7 @@ static boolean pr_fix_visibility
 
 static boolean pr_start_compilation_unit PARAMS ((PTR, const char *));
 static boolean pr_start_source PARAMS ((PTR, const char *));
+static boolean pr_ellipsis_type PARAMS ((PTR));
 static boolean pr_empty_type PARAMS ((PTR));
 static boolean pr_void_type PARAMS ((PTR));
 static boolean pr_int_type PARAMS ((PTR, unsigned int, boolean));
@@ -92,12 +93,13 @@ static boolean pr_method_type PARAMS ((PTR, boolean, int));
 static boolean pr_const_type PARAMS ((PTR));
 static boolean pr_volatile_type PARAMS ((PTR));
 static boolean pr_start_struct_type
-  PARAMS ((PTR, const char *, boolean, unsigned int));
+  PARAMS ((PTR, const char *, unsigned int, boolean, unsigned int));
 static boolean pr_struct_field
   PARAMS ((PTR, const char *, bfd_vma, bfd_vma, enum debug_visibility));
 static boolean pr_end_struct_type PARAMS ((PTR));
 static boolean pr_start_class_type
-  PARAMS ((PTR, const char *, boolean, unsigned int, boolean, boolean));
+  PARAMS ((PTR, const char *, unsigned int, boolean, unsigned int, boolean,
+	   boolean));
 static boolean pr_class_static_member
   PARAMS ((PTR, const char *, const char *, enum debug_visibility));
 static boolean pr_class_baseclass
@@ -111,7 +113,8 @@ static boolean pr_class_static_method_variant
 static boolean pr_class_end_method PARAMS ((PTR));
 static boolean pr_end_class_type PARAMS ((PTR));
 static boolean pr_typedef_type PARAMS ((PTR, const char *));
-static boolean pr_tag_type PARAMS ((PTR, const char *, enum debug_type_kind));
+static boolean pr_tag_type
+  PARAMS ((PTR, const char *, unsigned int, enum debug_type_kind));
 static boolean pr_typdef PARAMS ((PTR, const char *));
 static boolean pr_tag PARAMS ((PTR, const char *));
 static boolean pr_int_constant PARAMS ((PTR, const char *, bfd_vma));
@@ -131,6 +134,7 @@ static const struct debug_write_fns pr_fns =
 {
   pr_start_compilation_unit,
   pr_start_source,
+  pr_ellipsis_type,
   pr_empty_type,
   pr_void_type,
   pr_int_type,
@@ -409,6 +413,17 @@ pr_start_source (p, filename)
   return true;
 }
 
+/* Push an ellipsis type onto the type stack.  */
+
+static boolean
+pr_ellipsis_type (p)
+     PTR p;
+{
+  struct pr_handle *info = (struct pr_handle *) p;
+
+  return push_type (info, "...");
+}
+
 /* Push an empty type onto the type stack.  */
 
 static boolean
@@ -563,9 +578,13 @@ pr_pointer_type (p)
      PTR p;
 {
   struct pr_handle *info = (struct pr_handle *) p;
+  char *s;
 
   assert (info->stack != NULL);
 
+  s = strchr (info->stack->type, '|');
+  if (s != NULL && s[1] == '[')
+    return substitute_type (info, "(*|)");
   return substitute_type (info, "*|");
 }
 
@@ -838,9 +857,10 @@ pr_volatile_type (p)
 /* Start accumulating a struct type.  */
 
 static boolean
-pr_start_struct_type (p, tag, structp, size)
+pr_start_struct_type (p, tag, id, structp, size)
      PTR p;
      const char *tag;
+     unsigned int id;
      boolean structp;
      unsigned int size;
 {
@@ -853,14 +873,22 @@ pr_start_struct_type (p, tag, structp, size)
     return false;
   if (tag != NULL)
     {
-      if (! append_type (info, tag)
-	  || ! append_type (info, " "))
+      if (! append_type (info, tag))
 	return false;
     }
-  if (size != 0)
-    sprintf (ab, "{ /* size %u */\n", size);
   else
-    strcpy (ab, "{\n");
+    {
+      char idbuf[20];
+
+      sprintf (idbuf, "%%anon%u", id);
+      if (! append_type (info, idbuf))
+	return false;
+    }
+
+  if (size != 0)
+    sprintf (ab, " { /* size %u */\n", size);
+  else
+    strcpy (ab, " {\n");
   if (! append_type (info, ab))
     return false;
   info->stack->visibility = DEBUG_VISIBILITY_PUBLIC;
@@ -875,16 +903,15 @@ pr_fix_visibility (info, visibility)
      enum debug_visibility visibility;
 {
   const char *s;
-  struct pr_stack *top;
   char *t;
   unsigned int len;
 
-  assert (info->stack != NULL && info->stack->next != NULL);
+  assert (info->stack != NULL);
 
-  if (info->stack->next->visibility == visibility)
+  if (info->stack->visibility == visibility)
     return true;
 
-  assert (info->stack->next->visibility != DEBUG_VISIBILITY_IGNORE);
+  assert (info->stack->visibility != DEBUG_VISIBILITY_IGNORE);
 
   switch (visibility)
     {
@@ -903,12 +930,7 @@ pr_fix_visibility (info, visibility)
     }
 
   /* Trim off a trailing space in the struct string, to make the
-     output look a bit better, then stick on the visibility string.
-     Pop the stack temporarily to make the string manipulation
-     simpler.  */
-
-  top = info->stack;
-  info->stack = top->next;
+     output look a bit better, then stick on the visibility string.  */
 
   t = info->stack->type;
   len = strlen (t);
@@ -921,8 +943,6 @@ pr_fix_visibility (info, visibility)
     return false;
 
   info->stack->visibility = visibility;
-
-  info->stack = top;
 
   return true;
 }
@@ -939,9 +959,7 @@ pr_struct_field (p, name, bitpos, bitsize, visibility)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char ab[20];
-
-  if (! pr_fix_visibility (info, visibility))
-    return false;
+  char *t;
 
   if (! substitute_type (info, name))
     return false;
@@ -965,7 +983,14 @@ pr_struct_field (p, name, bitpos, bitsize, visibility)
       || ! indent_type (info))
     return false;
 
-  return append_type (info, pop_type (info));
+  t = pop_type (info);
+  if (t == NULL)
+    return false;
+
+  if (! pr_fix_visibility (info, visibility))
+    return false;
+
+  return append_type (info, t);
 }
 
 /* Finish a struct type.  */
@@ -995,9 +1020,10 @@ pr_end_struct_type (p)
 /* Start a class type.  */
 
 static boolean
-pr_start_class_type (p, tag, structp, size, vptr, ownvptr)
+pr_start_class_type (p, tag, id, structp, size, vptr, ownvptr)
      PTR p;
      const char *tag;
+     unsigned int id;
      boolean structp;
      unsigned int size;
      boolean vptr;
@@ -1019,11 +1045,19 @@ pr_start_class_type (p, tag, structp, size, vptr, ownvptr)
     return false;
   if (tag != NULL)
     {
-      if (! append_type (info, tag)
-	  || ! append_type (info, " "))
+      if (! append_type (info, tag))
 	return false;
     }
-  if (! append_type (info, "{"))
+  else
+    {
+      char idbuf[20];
+
+      sprintf (idbuf, "%%anon%u", id);
+      if (! append_type (info, idbuf))
+	return false;
+    }
+
+  if (! append_type (info, " {"))
     return false;
   if (size != 0 || vptr || ownvptr)
     {
@@ -1077,19 +1111,26 @@ pr_class_static_member (p, name, physname, visibility)
      enum debug_visibility visibility;
 {
   struct pr_handle *info = (struct pr_handle *) p;
-
-  if (! pr_fix_visibility (info, visibility))
-    return false;
+  char *t;
 
   if (! substitute_type (info, name))
     return false;
 
-  return (prepend_type (info, "static ")
-	  && append_type (info, "; /* physname ")
-	  && append_type (info, physname)
-	  && append_type (info, " */\n")
-	  && indent_type (info)
-	  && append_type (info, pop_type (info)));
+  if (! prepend_type (info, "static ")
+      || ! append_type (info, "; /* ")
+      || ! append_type (info, physname)
+      || ! append_type (info, " */\n")
+      || ! indent_type (info))
+    return false;
+
+  t = pop_type (info);
+  if (t == NULL)
+    return false;
+
+  if (! pr_fix_visibility (info, visibility))
+    return false;
+
+  return append_type (info, t);
 }
 
 /* Add a base class to a class.  */
@@ -1200,8 +1241,7 @@ pr_class_start_method (p, name)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
-  if (! push_type (info, ""))
-    return false;
+  assert (info->stack != NULL);
   info->stack->method = name;
   return true;
 }
@@ -1209,10 +1249,10 @@ pr_class_start_method (p, name)
 /* Add a variant to a method.  */
 
 static boolean
-pr_class_method_variant (p, argtypes, visibility, constp, volatilep, voffset,
+pr_class_method_variant (p, physname, visibility, constp, volatilep, voffset,
 			 context)
      PTR p;
-     const char *argtypes;
+     const char *physname;
      enum debug_visibility visibility;
      boolean constp;
      boolean volatilep;
@@ -1229,12 +1269,12 @@ pr_class_method_variant (p, argtypes, visibility, constp, volatilep, voffset,
   /* Put the const and volatile qualifiers on the type.  */
   if (volatilep)
     {
-      if (! prepend_type (info, "volatile "))
+      if (! append_type (info, " volatile"))
 	return false;
     }
   if (constp)
     {
-      if (! prepend_type (info, "const "))
+      if (! append_type (info, " const"))
 	return false;
     }
 
@@ -1260,15 +1300,15 @@ pr_class_method_variant (p, argtypes, visibility, constp, volatilep, voffset,
 	return false;
     }
 
-  /* Now the top of the stack is the holder for the method, and the
-     second element on the stack is the class.  */
+  /* Now the top of the stack is the class.  */
 
   if (! pr_fix_visibility (info, visibility))
     return false;
 
   if (! append_type (info, method_type)
       || ! append_type (info, " /* ")
-      || ! append_type (info, argtypes))
+      || ! append_type (info, physname)
+      || ! append_type (info, " "))
     return false;
   if (context || voffset != 0)
     {
@@ -1294,9 +1334,9 @@ pr_class_method_variant (p, argtypes, visibility, constp, volatilep, voffset,
 /* Add a static variant to a method.  */
 
 static boolean
-pr_class_static_method_variant (p, argtypes, visibility, constp, volatilep)
+pr_class_static_method_variant (p, physname, visibility, constp, volatilep)
      PTR p;
-     const char *argtypes;
+     const char *physname;
      enum debug_visibility visibility;
      boolean constp;
      boolean volatilep;
@@ -1311,12 +1351,12 @@ pr_class_static_method_variant (p, argtypes, visibility, constp, volatilep)
   /* Put the const and volatile qualifiers on the type.  */
   if (volatilep)
     {
-      if (! prepend_type (info, "volatile "))
+      if (! append_type (info, " volatile"))
 	return false;
     }
   if (constp)
     {
-      if (! prepend_type (info, "const "))
+      if (! append_type (info, " const"))
 	return false;
     }
 
@@ -1333,15 +1373,14 @@ pr_class_static_method_variant (p, argtypes, visibility, constp, volatilep)
   if (method_type == NULL)
     return false;
 
-  /* Now the top of the stack is the holder for the method, and the
-     second element on the stack is the class.  */
+  /* Now the top of the stack is the class.  */
 
   if (! pr_fix_visibility (info, visibility))
     return false;
 
   return (append_type (info, method_type)
 	  && append_type (info, " /* ")
-	  && append_type (info, argtypes)
+	  && append_type (info, physname)
 	  && append_type (info, " */;\n")
 	  && indent_type (info));
 }
@@ -1354,11 +1393,8 @@ pr_class_end_method (p)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
-  /* The method variants have been appended to the string on top of
-     the stack with the correct indentation.  We just need the append
-     the string on top of the stack to the class string that is second
-     on the stack.  */
-  return append_type (info, pop_type (info));
+  info->stack->method = NULL;
+  return true;
 }
 
 /* Finish up a class.  */
@@ -1385,13 +1421,15 @@ pr_typedef_type (p, name)
 /* Push a type on the stack using a tag name.  */
 
 static boolean
-pr_tag_type (p, name, kind)
+pr_tag_type (p, name, id, kind)
      PTR p;
      const char *name;
+     unsigned int id;
      enum debug_type_kind kind;
 {
   struct pr_handle *info = (struct pr_handle *) p;
-  const char *t;
+  const char *t, *tag;
+  char idbuf[20];
 
   switch (kind)
     {
@@ -1415,8 +1453,17 @@ pr_tag_type (p, name, kind)
       return false;
     }
 
-  return (push_type (info, t)
-	  && append_type (info, name));
+  if (! push_type (info, t))
+    return false;
+  if (name != NULL)
+    tag = name;
+  else
+    {
+      sprintf (idbuf, "%%anon%u", id);
+      tag = idbuf;
+    }
+
+  return append_type (info, tag);
 }
 
 /* Output a typedef.  */

@@ -32,6 +32,8 @@
 
 enum debug_type_kind
 {
+  /* Not used.  */
+  DEBUG_KIND_ILLEGAL,
   /* Indirect via a pointer.  */
   DEBUG_KIND_INDIRECT,
   /* Void.  */
@@ -172,6 +174,11 @@ struct debug_write_fns
 
   /* Each writer must keep a stack of types.  */
 
+  /* Push an ellipsis type onto the type stack.  This is not a real
+     type, but is used when a method takes a variable number of
+     arguments.  */
+  boolean (*ellipsis_type) PARAMS ((PTR));
+
   /* Push an empty type onto the type stack.  This type can appear if
      there is a reference to a type which is never defined.  */
   boolean (*empty_type) PARAMS ((PTR));
@@ -258,13 +265,14 @@ struct debug_write_fns
   /* Start building a struct.  This is followed by calls to the
      struct_field function, and finished by a call to the
      end_struct_type function.  The second argument is the tag; this
-     will be NULL if there isn't one.  The boolean argument is true
-     for a struct, false for a union.  The unsigned int argument is
-     the size.  If this is an undefined struct or union, the size will
-     be 0 and struct_field will not be called before end_struct_type
-     is called.  */
-  boolean (*start_struct_type) PARAMS ((PTR, const char *, boolean,
-					unsigned int));
+     will be NULL if there isn't one.  If the second argument is NULL,
+     the third argument is a constant identifying this struct for use
+     with tag_type.  The fourth argument is true for a struct, false
+     for a union.  The fifth argument is the size.  If this is an
+     undefined struct or union, the size will be 0 and struct_field
+     will not be called before end_struct_type is called.  */
+  boolean (*start_struct_type) PARAMS ((PTR, const char *, unsigned int,
+					boolean, unsigned int));
 
   /* Add a field to the struct type currently being built.  The type
      of the field should be popped off the type stack.  The arguments
@@ -280,16 +288,16 @@ struct debug_write_fns
      functions: struct_field, class_static_member, class_baseclass,
      class_start_method, class_method_variant,
      class_static_method_variant, and class_end_method.  The class is
-     finished by a call to end_class_type.  The second argument is the
-     tag; this will be NULL if there isn't one.  The boolean argument
-     is true for a struct, false for a union.  The next argument is
-     the size.  The next argument is true if there is a virtual
-     function table; if there is, the next argument is true if the
-     virtual function table can be found in the type itself, and is
-     false if the type of the object holding the virtual function
-     table should be popped from the type stack.  */
-  boolean (*start_class_type) PARAMS ((PTR, const char *, boolean,
-				       unsigned int, boolean, boolean));
+     finished by a call to end_class_type.  The first five arguments
+     are the same as for start_struct_type.  The sixth argument is
+     true if there is a virtual function table; if there is, the
+     seventh argument is true if the virtual function table can be
+     found in the type itself, and is false if the type of the object
+     holding the virtual function table should be popped from the type
+     stack.  */
+  boolean (*start_class_type) PARAMS ((PTR, const char *, unsigned int,
+				       boolean, unsigned int, boolean,
+				       boolean));
 
   /* Add a static member to the class currently being built.  The
      arguments are the field name, the physical name, and the
@@ -314,12 +322,11 @@ struct debug_write_fns
 
   /* Describe a variant to the class method currently being built.
      The type of the variant must be popped off the type stack.  The
-     second argument is a string which is either the physical name of
-     the function or describes the argument types; see the comment for
-     debug_make_method variant.  The following arguments are the
-     visibility, whether the variant is const, whether the variant is
-     volatile, the offset in the virtual function table, and whether
-     the context is on the type stack (below the variant type).  */
+     second argument is the physical name of the function.  The
+     following arguments are the visibility, whether the variant is
+     const, whether the variant is volatile, the offset in the virtual
+     function table, and whether the context is on the type stack
+     (below the variant type).  */
   boolean (*class_method_variant) PARAMS ((PTR, const char *,
 					   enum debug_visibility,
 					   boolean, boolean,
@@ -343,9 +350,17 @@ struct debug_write_fns
      call to typdef.  */
   boolean (*typedef_type) PARAMS ((PTR, const char *));
 
-  /* Push a type on the stack which was given a name by an earlier
-     call to tag.  */
-  boolean (*tag_type) PARAMS ((PTR, const char *, enum debug_type_kind));
+  /* Push a tagged type on the stack which was defined earlier.  If
+     the second argument is not NULL, the type was defined by a call
+     to tag.  If the second argument is NULL, the type was defined by
+     a call to start_struct_type or start_class_type with a tag of
+     NULL and the number of the third argument.  Either way, the
+     fourth argument is the tag kind.  Note that this may be called
+     for a struct (class) being defined, in between the call to
+     start_struct_type (start_class_type) and the call to
+     end_struct_type (end_class_type).  */
+  boolean (*tag_type) PARAMS ((PTR, const char *, unsigned int,
+			       enum debug_type_kind));
 
   /* Pop the type stack, and typedef it to the given name.  */
   boolean (*typdef) PARAMS ((PTR, const char *));
@@ -504,6 +519,13 @@ extern boolean debug_record_variable
 extern debug_type debug_make_indirect_type
   PARAMS ((PTR, debug_type *, const char *));
 
+/* Make an ellipsis type.  This is not a type at all, but is a marker
+   suitable for appearing in the list of argument types passed to
+   debug_make_method_type.  It should be used to indicate a method
+   which takes a variable number of arguments.  */
+
+extern debug_type debug_make_ellipsis_type PARAMS ((PTR));
+
 /* Make a void type.  */
 
 extern debug_type debug_make_void_type PARAMS ((PTR));
@@ -656,10 +678,9 @@ extern debug_field debug_make_static_member
 extern debug_method debug_make_method
   PARAMS ((PTR, const char *, debug_method_variant *));
 
-/* Make a method variant.  The second argument is either the physical
-   name of the function, or the encoded argument types, depending upon
-   whether the third argument specifies the argument types or not.
-   The third argument is the type of the function.  The fourth
+/* Make a method variant.  The second argument is the physical name of
+   the function.  The third argument is the type of the function,
+   probably constructed by debug_make_method_type.  The fourth
    argument is the visibility.  The fifth argument is whether this is
    a const function.  The sixth argument is whether this is a volatile
    function.  The seventh argument is the offset in the virtual
@@ -693,14 +714,42 @@ extern debug_type debug_tag_type PARAMS ((PTR, const char *, debug_type));
 
 extern boolean debug_record_type_size PARAMS ((PTR, debug_type, unsigned int));
 
+/* Find a named type.  */
+
+extern debug_type debug_find_named_type PARAMS ((PTR, const char *));
+
 /* Find a tagged type.  */
 
 extern debug_type debug_find_tagged_type
   PARAMS ((PTR, const char *, enum debug_type_kind));
 
+/* Get the kind of a type.  */
+
+extern enum debug_type_kind debug_get_type_kind PARAMS ((PTR, debug_type));
+
 /* Get the name of a type.  */
 
 extern const char *debug_get_type_name PARAMS ((PTR, debug_type));
+
+/* Get the return type of a function or method type.  */
+
+extern debug_type debug_get_return_type PARAMS ((PTR, debug_type));
+
+/* Get the NULL terminated array of parameter types for a function or
+   method type (actually, parameter types are not currently stored for
+   function types).  This may be used to determine whether a method
+   type is a stub method or not.  */
+
+extern const debug_type *debug_get_parameter_types PARAMS ((PTR, debug_type));
+
+/* Get the NULL terminated array of fields for a struct, union, or
+   class.  */
+
+extern const debug_field *debug_get_fields PARAMS ((PTR, debug_type));
+
+/* Get the type of a field.  */
+
+extern debug_type debug_get_field_type PARAMS ((PTR, debug_field));
 
 /* Write out the recorded debugging information.  This takes a set of
    function pointers which are called to do the actual writing.  The

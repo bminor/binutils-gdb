@@ -54,6 +54,10 @@ struct debug_handle
   unsigned int mark;
   /* Another mark used by debug_write.  */
   unsigned int class_mark;
+  /* A struct/class ID used by debug_write.  */
+  unsigned int class_id;
+  /* The base for class_id for this call to debug_write.  */
+  unsigned int base_id;
 };
 
 /* Information we keep for a single compilation unit.  */
@@ -150,6 +154,8 @@ struct debug_class_type
   debug_field *fields;
   /* A mark field used to avoid recursively printing out structs.  */
   unsigned int mark;
+  /* This is used to uniquely identify unnamed structs when printing.  */
+  unsigned int id;
   /* The remaining fields are only used for DEBUG_KIND_CLASS and
      DEBUG_KIND_UNION_CLASS.  */
   /* NULL terminated array of base classes.  */
@@ -309,8 +315,8 @@ struct debug_method
 
 struct debug_method_variant
 {
-  /* The argument types of the function.  */
-  const char *argtypes;
+  /* The physical name of the function.  */
+  const char *physname;
   /* The type of the function.  */
   struct debug_type *type;
   /* The visibility of the function.  */
@@ -497,6 +503,17 @@ struct debug_name
     } u;
 };
 
+/* This variable is an ellipsis type.  The contents are not used; its
+   address is returned by debug_make_ellipsis_type, and anything which
+   needs to know whether it is dealing with an ellipsis compares
+   addresses.  */
+
+static const struct debug_type debug_ellipsis_type;
+
+#define ELLIPSIS_P(t) ((t) == &debug_ellipsis_type)
+
+/* Local functions.  */
+
 static void debug_error PARAMS ((const char *));
 static struct debug_name *debug_add_to_namespace
   PARAMS ((struct debug_handle *, struct debug_namespace **, const char *,
@@ -506,6 +523,7 @@ static struct debug_name *debug_add_to_current_namespace
 	   enum debug_object_linkage));
 static struct debug_type *debug_make_type
   PARAMS ((struct debug_handle *, enum debug_type_kind, unsigned int));
+static struct debug_type *debug_get_real_type PARAMS ((PTR, debug_type));
 static boolean debug_write_name
   PARAMS ((struct debug_handle *, const struct debug_write_fns *, PTR,
 	   struct debug_name *));
@@ -1223,6 +1241,18 @@ debug_make_indirect_type (handle, slot, tag)
   return t;
 }
 
+/* Make an ellipsis type.  This is not a type at all, but is a marker
+   suitable for appearing in the list of argument types passed to
+   debug_make_method_type.  It should be used to indicate a method
+   which takes a variable number of arguments.  */
+
+debug_type
+debug_make_ellipsis_type (handle)
+     PTR handle;
+{
+  return (debug_type) &debug_ellipsis_type;
+}
+
 /* Make a void type.  There is only one of these.  */
 
 debug_type
@@ -1847,10 +1877,10 @@ debug_make_method (handle, name, variants)
 
 /*ARGSUSED*/
 debug_method_variant
-debug_make_method_variant (handle, argtypes, type, visibility, constp,
+debug_make_method_variant (handle, physname, type, visibility, constp,
 			   volatilep, voffset, context)
      PTR handle;
-     const char *argtypes;
+     const char *physname;
      debug_type type;
      enum debug_visibility visibility;
      boolean constp;
@@ -1863,7 +1893,7 @@ debug_make_method_variant (handle, argtypes, type, visibility, constp,
   m = (struct debug_method_variant *) xmalloc (sizeof *m);
   memset (m, 0, sizeof *m);
 
-  m->argtypes = argtypes;
+  m->physname = physname;
   m->type = type;
   m->visibility = visibility;
   m->constp = constp;
@@ -1879,10 +1909,10 @@ debug_make_method_variant (handle, argtypes, type, visibility, constp,
    since a static method can not also be virtual.  */
 
 debug_method_variant
-debug_make_static_method_variant (handle, argtypes, type, visibility,
+debug_make_static_method_variant (handle, physname, type, visibility,
 				  constp, volatilep)
      PTR handle;
-     const char *argtypes;
+     const char *physname;
      debug_type type;
      enum debug_visibility visibility;
      boolean constp;
@@ -1893,7 +1923,7 @@ debug_make_static_method_variant (handle, argtypes, type, visibility,
   m = (struct debug_method_variant *) xmalloc (sizeof *m);
   memset (m, 0, sizeof *m);
 
-  m->argtypes = argtypes;
+  m->physname = physname;
   m->type = type;
   m->visibility = visibility;
   m->constp = constp;
@@ -1919,6 +1949,13 @@ debug_name_type (handle, name, type)
   if (name == NULL || type == NULL)
     return DEBUG_TYPE_NULL;
 
+  if (info->current_unit == NULL
+      || info->current_file == NULL)
+    {
+      debug_error ("debug_record_variable: no current file");
+      return false;
+    }
+
   t = debug_make_type (info, DEBUG_KIND_NAMED, 0);
   if (t == NULL)
     return DEBUG_TYPE_NULL;
@@ -1930,10 +1967,11 @@ debug_name_type (handle, name, type)
 
   t->u.knamed = n;
 
-  /* We also need to add the name to the current namespace.  */
+  /* We always add the name to the global namespace.  This is probably
+     wrong in some cases, but it seems to be right for stabs.  FIXME.  */
 
-  nm = debug_add_to_current_namespace (info, name, DEBUG_OBJECT_TYPE,
-				       DEBUG_LINKAGE_NONE);
+  nm = debug_add_to_namespace (info, &info->current_file->globals, name,
+			       DEBUG_OBJECT_TYPE, DEBUG_LINKAGE_NONE);
   if (nm == NULL)
     return false;
 
@@ -2018,6 +2056,61 @@ debug_record_type_size (handle, type, size)
   return true;
 }
 
+/* Find a named type.  */
+
+debug_type
+debug_find_named_type (handle, name)
+     PTR handle;
+     const char *name;
+{
+  struct debug_handle *info = (struct debug_handle *) handle;
+  struct debug_block *b;
+  struct debug_file *f;
+
+  /* We only search the current compilation unit.  I don't know if
+     this is right or not.  */
+
+  if (info->current_unit == NULL)
+    {
+      debug_error ("debug_find_named_type: no current compilation unit");
+      return DEBUG_TYPE_NULL;
+    }
+
+  for (b = info->current_block; b != NULL; b = b->parent)
+    {
+      if (b->locals != NULL)
+	{
+	  struct debug_name *n;
+
+	  for (n = b->locals->list; n != NULL; n = n->next)
+	    {
+	      if (n->kind == DEBUG_OBJECT_TYPE
+		  && n->name[0] == name[0]
+		  && strcmp (n->name, name) == 0)
+		return n->u.type;
+	    }
+	}
+    }
+
+  for (f = info->current_unit->files; f != NULL; f = f->next)
+    {
+      if (f->globals != NULL)
+	{
+	  struct debug_name *n;
+
+	  for (n = f->globals->list; n != NULL; n = n->next)
+	    {
+	      if (n->kind == DEBUG_OBJECT_TYPE
+		  && n->name[0] == name[0]
+		  && strcmp (n->name, name) == 0)
+		return n->u.type;
+	    }
+	}
+    }
+
+  return DEBUG_TYPE_NULL;	  
+}
+
 /* Find a tagged type.  */
 
 debug_type
@@ -2045,7 +2138,7 @@ debug_find_tagged_type (handle, name, kind)
 	      for (n = f->globals->list; n != NULL; n = n->next)
 		{
 		  if (n->kind == DEBUG_OBJECT_TAG
-		      && (kind == DEBUG_KIND_VOID
+		      && (kind == DEBUG_KIND_ILLEGAL
 			  || n->u.tag->kind == kind)
 		      && n->name[0] == name[0]
 		      && strcmp (n->name, name) == 0)
@@ -2058,9 +2151,42 @@ debug_find_tagged_type (handle, name, kind)
   return DEBUG_TYPE_NULL;
 }
 
+/* Get a base type.  */
+
+static struct debug_type *
+debug_get_real_type (handle, type)
+     PTR handle;
+     debug_type type;
+{
+  switch (type->kind)
+    {
+    default:
+      return type;
+    case DEBUG_KIND_INDIRECT:
+      if (*type->u.kindirect->slot != NULL)
+	return debug_get_real_type (handle, *type->u.kindirect->slot);
+      return type;
+    case DEBUG_KIND_NAMED:
+      return debug_get_real_type (handle, type->u.knamed->type);
+    }
+  /*NOTREACHED*/
+}
+
+/* Get the kind of a type.  */
+
+enum debug_type_kind
+debug_get_type_kind (handle, type)
+     PTR handle;
+     debug_type type;
+{
+  if (type == NULL)
+    return DEBUG_KIND_ILLEGAL;
+  type = debug_get_real_type (handle, type);
+  return type->kind;
+}
+
 /* Get the name of a type.  */
 
-/*ARGSUSED*/
 const char *
 debug_get_type_name (handle, type)
      PTR handle;
@@ -2076,6 +2202,86 @@ debug_get_type_name (handle, type)
       || type->kind == DEBUG_KIND_TAGGED)
     return type->u.knamed->name->name;
   return NULL;
+}
+
+/* Get the return type of a function or method type.  */
+
+debug_type
+debug_get_return_type (handle, type)
+     PTR handle;
+     debug_type type;
+{
+  if (type == NULL)
+    return DEBUG_TYPE_NULL;
+  type = debug_get_real_type (handle, type);
+  switch (type->kind)
+    {
+    default:
+      return DEBUG_TYPE_NULL;
+    case DEBUG_KIND_FUNCTION:
+      return type->u.kfunction->return_type;
+    case DEBUG_KIND_METHOD:
+      return type->u.kmethod->return_type;
+    }
+  /*NOTREACHED*/      
+}
+
+/* Get the parameter types of a function or method type (except that
+   we don't currently store the parameter types of a function).  */
+
+const debug_type *
+debug_get_parameter_types (handle, type)
+     PTR handle;
+     debug_type type;
+{
+  if (type == NULL)
+    return NULL;
+  type = debug_get_real_type (handle, type);
+  switch (type->kind)
+    {
+    default:
+      return NULL;
+    case DEBUG_KIND_METHOD:
+      return type->u.kmethod->arg_types;
+    }
+  /*NOTREACHED*/
+}
+
+/* Get the NULL terminated array of fields for a struct, union, or
+   class.  */
+
+const debug_field *
+debug_get_fields (handle, type)
+     PTR handle;
+     debug_type type;
+{
+  if (type == NULL)
+    return NULL;
+  type = debug_get_real_type (handle, type);
+  switch (type->kind)
+    {
+    default:
+      return NULL;
+    case DEBUG_KIND_STRUCT:
+    case DEBUG_KIND_UNION:
+    case DEBUG_KIND_CLASS:
+    case DEBUG_KIND_UNION_CLASS:
+      return type->u.kclass->fields;
+    }
+  /*NOTREACHED*/
+}
+
+/* Get the type of a field.  */
+
+/*ARGSUSED*/
+debug_type
+debug_get_field_type (handle, field)
+     PTR handle;
+     debug_field field;
+{
+  if (field == NULL)
+    return NULL;
+  return field->type;
 }
 
 /* Write out the debugging information.  This is given a handle to
@@ -2095,6 +2301,11 @@ debug_write (handle, fns, fhandle)
      clear the mark fields if we happen to write out the same
      information more than once.  */
   ++info->mark;
+
+  /* The base_id field holds an ID value which will never be used, so
+     that we can tell whether we have assigned an ID during this call
+     to debug_write.  */
+  info->base_id = info->class_id;
 
   for (u = info->units; u != NULL; u = u->next)
     {
@@ -2225,7 +2436,7 @@ debug_write_type (info, fns, fhandle, type, name)
       if (type->kind == DEBUG_KIND_NAMED)
 	return (*fns->typedef_type) (fhandle, type->u.knamed->name->name);
       else
-	return (*fns->tag_type) (fhandle, type->u.knamed->name->name,
+	return (*fns->tag_type) (fhandle, type->u.knamed->name->name, 0,
 				 type->u.knamed->type->kind);
     }
 
@@ -2247,6 +2458,9 @@ debug_write_type (info, fns, fhandle, type, name)
 
   switch (type->kind)
     {
+    case DEBUG_KIND_ILLEGAL:
+      debug_error ("debug_write_type: illegal type encountered");
+      return false;
     case DEBUG_KIND_INDIRECT:
       if (*type->u.kindirect->slot == DEBUG_TYPE_NULL)
 	return (*fns->empty_type) (fhandle);
@@ -2266,17 +2480,25 @@ debug_write_type (info, fns, fhandle, type, name)
     case DEBUG_KIND_UNION:
       if (type->u.kclass != NULL)
 	{
-	  if (info->class_mark == type->u.kclass->mark)
+	  if (info->class_mark == type->u.kclass->mark
+	      || type->u.kclass->id > info->base_id)
 	    {
-	      /* We are currently outputting this struct.  I don't
-		 know if this can happen, but it can happen for a
-		 class.  */
-	      return (*fns->tag_type) (fhandle, "?defining?", type->kind);
+	      /* We are currently outputting this struct, or we have
+		 already output it.  I don't know if this can happen,
+		 but it can happen for a class.  */
+	      assert (type->u.kclass->id > info->base_id);
+	      return (*fns->tag_type) (fhandle, tag, type->u.kclass->id,
+				       type->kind);
 	    }
 	  type->u.kclass->mark = info->class_mark;
+	  ++info->class_id;
+	  type->u.kclass->id = info->class_id;
 	}
 
       if (! (*fns->start_struct_type) (fhandle, tag,
+				       (type->u.kclass != NULL
+					? type->u.kclass->id
+					: 0),
 				       type->kind == DEBUG_KIND_STRUCT,
 				       type->size))
 	return false;
@@ -2361,10 +2583,18 @@ debug_write_type (info, fns, fhandle, type, name)
 	{
 	  for (i = 0; type->u.kmethod->arg_types[i] != NULL; i++)
 	    {
-	      if (! debug_write_type (info, fns, fhandle,
-				      type->u.kmethod->arg_types[i],
-				      (struct debug_name *) NULL))
-		return false;
+	      if (ELLIPSIS_P (type->u.kmethod->arg_types[i]))
+		{
+		  if (! (*fns->ellipsis_type) (fhandle))
+		    return false;
+		}
+	      else
+		{
+		  if (! debug_write_type (info, fns, fhandle,
+					  type->u.kmethod->arg_types[i],
+					  (struct debug_name *) NULL))
+		    return false;
+		}
 	    }
 	}
       if (type->u.kmethod->domain_type != NULL)
@@ -2410,32 +2640,45 @@ debug_write_class_type (info, fns, fhandle, type, tag)
      const char *tag;
 {
   unsigned int i;
+  unsigned int id;
+  struct debug_type *vptrbase;
 
-  if (type->u.kclass != NULL)
+  if (type->u.kclass == NULL)
     {
-      if (info->class_mark == type->u.kclass->mark)
+      id = 0;
+      vptrbase = NULL;
+    }
+  else
+    {
+      if (info->class_mark == type->u.kclass->mark
+	  || type->u.kclass->id > info->base_id)
 	{
-	  /* We are currently outputting this class.  This can happen
-	     when there are methods for an anonymous class.  */
-	  return (*fns->tag_type) (fhandle, "?defining?", type->kind);
+	  /* We are currently outputting this class, or we have
+	     already output it.  This can happen when there are
+	     methods for an anonymous class.  */
+	  assert (type->u.kclass->id > info->base_id);
+	  return (*fns->tag_type) (fhandle, tag, type->u.kclass->id,
+				   type->kind);
 	}
       type->u.kclass->mark = info->class_mark;
+      ++info->class_id;
+      id = info->class_id;
+      type->u.kclass->id = id;
 
-      if (type->u.kclass->vptrbase != NULL
-	  && type->u.kclass->vptrbase != type)
+      vptrbase = type->u.kclass->vptrbase;
+      if (vptrbase != NULL && vptrbase != type)
 	{
-	  if (! debug_write_type (info, fns, fhandle,
-				  type->u.kclass->vptrbase,
+	  if (! debug_write_type (info, fns, fhandle, vptrbase,
 				  (struct debug_name *) NULL))
 	    return false;
 	}
     }
 
-  if (! (*fns->start_class_type) (fhandle, tag,
+  if (! (*fns->start_class_type) (fhandle, tag, id,
 				  type->kind == DEBUG_KIND_CLASS,
 				  type->size,
-				  type->u.kclass->vptrbase != NULL,
-				  type->u.kclass->vptrbase == type))
+				  vptrbase != NULL,
+				  vptrbase == type))
     return false;
 
   if (type->u.kclass != NULL)
@@ -2508,7 +2751,7 @@ debug_write_class_type (info, fns, fhandle, type, tag)
 		    return false;
 		  if (v->voffset != VOFFSET_STATIC_METHOD)
 		    {
-		      if (! (*fns->class_method_variant) (fhandle, v->argtypes,
+		      if (! (*fns->class_method_variant) (fhandle, v->physname,
 							  v->visibility,
 							  v->constp,
 							  v->volatilep,
@@ -2519,7 +2762,7 @@ debug_write_class_type (info, fns, fhandle, type, tag)
 		  else
 		    {
 		      if (! (*fns->class_static_method_variant) (fhandle,
-								 v->argtypes,
+								 v->physname,
 								 v->visibility,
 								 v->constp,
 								 v->volatilep))
