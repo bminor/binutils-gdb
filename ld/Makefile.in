@@ -305,14 +305,14 @@ ld_new_LDADD = $(EMULATION_OFILES) $(BFDLIB) $(LIBIBERTY)
 TESTBFDLIB = ../bfd/.libs/libbfd.a
 
 MOSTLYCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
-	ldemul-list.h crtbegin.o crtend.o
+	ldemul-list.h crtbegin.o crtend.o ld.log ld.sum
 CLEANFILES = dep.sed .dep .dep1 bfdsumm.texi
 
 # Stuff that should be included in a distribution.  The diststuff
 # target is run by the taz target in ../Makefile.in.
 LDDISTSTUFF = ldgram.c ldgram.h ldlex.c
 
-DISTCLEANFILES = tdirs
+DISTCLEANFILES = tdirs site.exp site.bak
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
