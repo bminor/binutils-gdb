@@ -54,6 +54,8 @@
  *    Date:	Jan 1993
  */
 
+#include <ctype.h>
+
 #include "as.h"
 #include "alpha-opcode.h"
 #include "subsegs.h"
@@ -87,7 +89,7 @@ static symbolS *gp;
 
 /* We'll probably be using this relocation frequently, and we
    will want to compare for it.  */
-static reloc_howto_type *gpdisp_hi16_howto;
+static const reloc_howto_type *gpdisp_hi16_howto;
 
 /* These are exported to ECOFF code.  */
 unsigned long alpha_gprmask, alpha_fprmask;
@@ -108,7 +110,7 @@ extern void s_globl (), s_long (), s_short (), s_space (), cons (), s_text (),
   s_data (), float_cons ();
 
 /* Static functions, needing forward declarations.  */
-static void s_mask (), s_base (), s_proc (), s_alpha_set ();
+static void s_base (), s_proc (), s_alpha_set ();
 static void s_gprel32 (), s_rdata (), s_sdata (), s_alpha_comm ();
 static int alpha_ip ();
 
@@ -183,7 +185,7 @@ const char comment_chars[] = "#";
 /* Note that input_file.c hand checks for '#' at the beginning of the
    first line of the input file.  This is because the compiler outputs
    #NO_APP at the beginning of its output. */
-/* Also note that '/*' will always start a comment */
+/* Also note that C style comments are always recognized.  */
 const char line_comment_chars[] = "#!";
 
 /* Chars that can be used to separate mant from exp in floating point nums */
@@ -226,7 +228,6 @@ int
 tc_get_register (frame)
      int frame;
 {
-  int reg;
   int framereg = SP;
 
   SKIP_WHITESPACE ();
@@ -350,7 +351,7 @@ tc_gen_reloc (sec, fixp)
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
-  if (fixp->fx_r_type > BFD_RELOC_UNUSED || fixp->fx_r_type < 0)
+  if (fixp->fx_r_type > BFD_RELOC_UNUSED)
     abort ();
 
   if (fixp->fx_r_type == BFD_RELOC_ALPHA_GPDISP_HI16)
@@ -406,7 +407,7 @@ s_base ()
   if (base_register < 0 || base_register > 31)
     {
       base_register = GP;
-      as_warn ("Bad base register, using $r.", base_register);
+      as_warn ("Bad base register, using $%d.", base_register);
     }
   demand_empty_rest_of_line ();
 }
@@ -526,7 +527,8 @@ load_insn_table (ops, size)
 
       if (strchr (name, '/'))
 	{
-	  const char *name2, *p, *q;
+	  char *name2, *p;
+	  const char *q;
 
 	  name2 = xmalloc (strlen (name));
 	  p = name2;
@@ -559,10 +561,6 @@ load_insn_table (ops, size)
 void
 md_begin ()
 {
-  const char *retval;
-  int lose = 0;
-  unsigned int i = 0;
-
   op_hash = hash_new ();
   load_insn_table (alpha_opcodes, NUMOPCODES);
 
@@ -732,8 +730,10 @@ alpha_fix_adjustable (f)
       return 0;
     case BFD_RELOC_GPREL32:
       return 1;
+    default:
+      return !alpha_force_relocation (f);
     }
-  return !alpha_force_relocation (f);
+  /*NOTREACHED*/
 }
 
 valueT
@@ -766,11 +766,7 @@ load_symbol_address (reg, insn)
   static symbolS *lita_sym;
 
   int x;
-  addressT reloc_addr;
   valueT retval;
-  char *p;
-  symbolS *sym;
-  valueT addend;
 
   if (!lita_sym)
     {
@@ -823,7 +819,7 @@ load_expression (reg, insn)
      int reg;
      struct alpha_it *insn;
 {
-  valueT addend;
+  valueT addend, addendhi, addendlo;
   int num_insns = 1;
 
   if (insn->reloc[0].exp.X_add_symbol->bsym->flags & BSF_SECTION_SYM)
@@ -838,22 +834,39 @@ load_expression (reg, insn)
   load_symbol_address (reg, insn);
   if (addend)
     {
-      num_insns++;
-      {
-	valueT x = addend;
-	if ((x & ~0x7fff) != 0
-	    && (x & ~0x7fff) + 0x8000 != 0)
-	  {
-	    as_bad ("assembler not prepared to handle constants >16 bits yet");
-	    addend = 0;
-	  }
-      }
-      insn[1].opcode = (0x20000000	/* lda */
-			| (reg << SA)
-			| (reg << SB)
-			| (addend & 0xffff));
-      insn[1].reloc[0].code = BFD_RELOC_ALPHA_LITUSE;
-      insn[1].reloc[0].exp = lituse_basereg;
+      if ((addend & ~0x7fffffff) != 0
+	  && (addend & ~0x7fffffff) + 0x80000000 != 0)
+	{
+	  as_bad ("assembler not prepared to handle constants >32 bits yet");
+	  addend = 0;
+	}
+      addendlo = addend & 0xffff;
+      addend -= addendlo;
+      addendhi = addend >> 16;
+      if (addendlo & 0x8000)
+	addendhi++;
+      /* It appears that the BASEREG LITUSE reloc should not be used on
+	 an LDAH instruction.  */
+      if (addendlo)
+	{
+	  insn[1].opcode = (0x20000000	/* lda */
+			    | (reg << SA)
+			    | (reg << SB)
+			    | (addendlo & 0xffff));
+	  insn[1].reloc[0].code = BFD_RELOC_ALPHA_LITUSE;
+	  insn[1].reloc[0].exp = lituse_basereg;
+	  num_insns++;
+	}
+      if (addendhi)
+	{
+	  insn[num_insns].opcode = (0x24000000
+				    | (reg << SA)
+				    | (reg << SB)
+				    | (addendhi & 0xffff));
+	  num_insns++;
+	}
+      if (num_insns == 1)
+	abort ();
       lituse_pending = 0;
     }
   return num_insns;
@@ -950,6 +963,7 @@ emit_store_unal (addr_reg, addr_offset, reg)
 static void
 emit_byte_manip_r (op, in, mask, out, mode, which)
      char *op;
+     int in, mask, out, mode, which;
 {
   char buf[90];
   sprintf (buf, "%s%c%c $%d,$%d,$%d", op, mode, which, in, mask, out);
@@ -958,24 +972,28 @@ emit_byte_manip_r (op, in, mask, out, mode, which)
 
 static void
 emit_extract_r (in, mask, out, mode, which)
+     int in, mask, out, mode, which;
 {
   emit_byte_manip_r ("ext", in, mask, out, mode, which);
 }
 
 static void
 emit_insert_r (in, mask, out, mode, which)
+     int in, mask, out, mode, which;
 {
   emit_byte_manip_r ("ins", in, mask, out, mode, which);
 }
 
 static void
 emit_mask_r (in, mask, out, mode, which)
+     int in, mask, out, mode, which;
 {
   emit_byte_manip_r ("msk", in, mask, out, mode, which);
 }
 
 static void
 emit_sign_extend (reg, size)
+     int reg, size;
 {
   char buf[90];
   sprintf (buf, "sll $%d,0x%x,$%d", reg, 64 - size, reg);
@@ -986,6 +1004,7 @@ emit_sign_extend (reg, size)
 
 static void
 emit_bis_r (in1, in2, out)
+     int in1, in2, out;
 {
   char buf[90];
   sprintf (buf, "bis $%d,$%d,$%d", in1, in2, out);
@@ -1317,9 +1336,10 @@ alpha_ip (str, insns)
 		  else if (at_ok && macro_ok)
 		    {
 		      /* Constant value supplied, but it's too large.  */
+		      char buf[50];
 		      char expansion[64];
-		      sprintf (expansion, "lda $%d,%d($%d)", AT,
-			       insns[0].reloc[0].exp.X_add_number, ZERO);
+		      sprint_value (buf, insns[0].reloc[0].exp.X_add_number);
+		      sprintf (expansion, "lda $%d,%s($%d)", AT, buf, ZERO);
 		      md_assemble (expansion);
 		      opcode |= 0x1000 /* use reg */  | (AT << SB);
 		      insns[0].reloc[0].code = BFD_RELOC_NONE;
@@ -1331,7 +1351,7 @@ alpha_ip (str, insns)
 
 	    case 'F':
 	      {
-		int format, length, mode, i, size;
+		int format, length, mode, i;
 		char temp[20 /*MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT*/];
 		char *err;
 		static const char formats[4] = "FGfd";
@@ -1402,7 +1422,6 @@ alpha_ip (str, insns)
 	      /* fall through */
 
 	    case 'G':		/* Addressing macros: GET */
-	    get_macro:
 	      /* All it is missing is the expression, which is what we
 		 will get now */
 
@@ -1634,7 +1653,7 @@ alpha_ip (str, insns)
 
 		    {
 		      /* Pick apart name and set flags.  */
-		      char *s = pattern->name;
+		      const char *s = pattern->name;
 
 		      if (*s == 'u')
 			{
@@ -2066,12 +2085,12 @@ Alpha options:\n\
 -32addr			treat addresses as 32-bit values\n\
 -F			lack floating point instructions support\n\
 -m21064 | -m21066 | -m21164\n\
-			specify variant of Alpha architecture\n\
--nocpp			ignored\n");
+			specify variant of Alpha architecture\n");
 }
 
 static void
 s_proc (is_static)
+     int is_static;
 {
   /* XXXX Align to cache linesize XXXXX */
   char *name;
@@ -2154,7 +2173,7 @@ md_pcrel_from (fixP)
 int
 alpha_do_align (n, fill)
      int n;
-     char *fill;
+     const char *fill;
 {
   if (!fill
       && (now_seg == text_section
@@ -2230,7 +2249,6 @@ md_apply_fix (fixP, valueP)
       *p |= value;
       value >>= 5;
       fixP->fx_done = 1;
-    check_zov:
       if (value != 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      "overflow in type-%d reloc", (int) fixP->fx_r_type);

@@ -110,7 +110,8 @@ Options:\n\
   h	include high-level source\n\
   l	include assembly\n\
   n	omit forms processing\n\
-  s	include symbols\n\
+  s	include symbols\n");
+  fprintf (stream, "\
 -D			produce assembler debugging messages\n\
 -f			skip whitespace and comment preprocessing\n\
 --help			show this message and exit\n\
@@ -158,9 +159,14 @@ parse_args (pargc, pargv)
 
   char *shortopts;
   extern CONST char *md_shortopts;
-  /* -v takes an argument on VMS, so we don't make it a generic option.
-     It gets recognized as an abbreviation of -version, anyway.  */
+  /* -v takes an argument on VMS, so we don't make it a generic option
+     in that case.  */
+#ifdef OBJ_VMS
   CONST char *std_shortopts = "-JKLRWZfa::DI:o:wX";
+#else
+  /* Normal set of short options.  */
+  CONST char *std_shortopts = "-JKLRWZfa::DI:o:vwX";
+#endif
 
   struct option *longopts;
   extern struct option md_longopts[];
@@ -179,7 +185,7 @@ parse_args (pargc, pargv)
   /* Construct the option lists from the standard list and the
      target dependent list.  */
   shortopts = concat (std_shortopts, md_shortopts, (char *) NULL);
-  longopts = xmalloc (sizeof (std_longopts) + md_longopts_size);
+  longopts = (struct option *) xmalloc (sizeof (std_longopts) + md_longopts_size);
   memcpy (longopts, std_longopts, sizeof (std_longopts));
   memcpy ((char *) longopts + sizeof (std_longopts),
 	  md_longopts, md_longopts_size);
@@ -238,6 +244,9 @@ parse_args (pargc, pargv)
 	case OPTION_VERSION:
 	  print_version_id ();
 	  exit (0);
+
+	case 'v':
+	  print_version_id ();
 
 	case 'J':
 	  flag_signed_overflow_ok = 1;
@@ -343,13 +352,17 @@ main (argc, argv)
      int argc;
      char **argv;
 {
-  char a;
   int keep_it;
   long start_time = get_run_time ();
 
+#ifdef HOST_SPECIAL_INIT
+  HOST_SPECIAL_INIT (argc, argv);
+#endif
+    
 #if 0 /* do we need any of this?? */
   {
     static const int sig[] = {SIGHUP, SIGINT, SIGPIPE, SIGTERM, 0};
+    int a;
 
     for (a = 0; sig[a] != 0; a++)
       if (signal (sig[a], SIG_IGN) != SIG_IGN)

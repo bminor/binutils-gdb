@@ -1402,6 +1402,7 @@ static int	debug		= 0; 		/* trace functions */
 static int	stabs_seen	= 0;		/* != 0 if stabs have been seen */
 
 static int current_file_idx;
+static const char *current_stabs_filename;
 
 /* Pseudo symbol to use when putting stabs into the symbol table.  */
 #ifndef STABS_SYMBOL
@@ -2200,6 +2201,8 @@ add_file (file_name, indx)
     listing_source_file (file_name);
 #endif
 
+  current_stabs_filename = file_name;
+
   /* If we're creating stabs, then we don't actually make a new FDR.
      Instead, we just create a stabs symbol.  */
   if (stabs_seen)
@@ -2275,7 +2278,7 @@ add_file (file_name, indx)
 					   &cur_file_ptr->thash_head[0]);
       if (generate_asm_line_stab)
 	{
-	  static char itstr[] = "int:t1=r1;-2147483648;2147483647;";
+	  static char itstr[] = "void:t1=1";
 	  mark_stabs (0);
           (void) add_ecoff_symbol (file_name, st_Nil, sc_Nil,
                                symbol_new ("L0\001", now_seg,
@@ -4097,13 +4100,11 @@ ecoff_build_procs (backend, buf, bufend, offset)
   void (* const swap_pdr_out) PARAMS ((bfd *, const PDR *, PTR))
     = backend->swap_pdr_out;
   char *pdr_out;
-  int first_fil;
   long iproc;
   vlinks_t *file_link;
 
   pdr_out = *buf + offset;
 
-  first_fil = 1;
   iproc = 0;
 
   /* The procedures are stored by file.  */
@@ -4153,10 +4154,11 @@ ecoff_build_procs (backend, buf, bufend, offset)
 						S_GET_SEGMENT (adr_sym)));
 		  if (first)
 		    {
-		      if (first_fil)
-			first_fil = 0;
-		      else
-			fil_ptr->fdr.adr = adr;
+		      /* This code used to force the adr of the very
+                         first fdr to be 0.  However, the native tools
+                         don't do that, and I can't remember why it
+                         used to work that way, so I took it out.  */
+		      fil_ptr->fdr.adr = adr;
 		      first = 0;
 		    }
 		  proc_ptr->pdr.adr = adr - fil_ptr->fdr.adr;
@@ -5116,10 +5118,17 @@ generate_ecoff_stab (what, string, type, other, desc)
 
 static int line_label_cnt = 0;
 void
-ecoff_generate_asm_line_stab (lineno)
+ecoff_generate_asm_line_stab (filename, lineno)
+    char *filename;
     int lineno;
 {
   char *ll;
+
+  if (strcmp (current_stabs_filename, filename)) 
+    {
+      add_file (filename, 0);
+      generate_asm_line_stab = 1;
+    }
 
   line_label_cnt++;
   /* generate local label $LMnn */

@@ -3261,7 +3261,7 @@ new_file (name)
     return 0;
 
   if (isp == MAX_INCLUDES)
-    FATAL ((stderr, "Unreasonable include depth (%d).\n", isp));
+    FATAL ((stderr, "Unreasonable include depth (%ld).\n", (long) isp));
 
   sp++;
   sp->handle = newone;

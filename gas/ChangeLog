@@ -1,5 +1,32 @@
 Wed Aug 24 12:46:08 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* as.c (main): Move a inside the #if 0 block which uses it.
+	* ecoff.c (current_stabs_filename): Make const.
+	* frags.h (frag_align_pattern): Declare.
+	* gasp.c (new_file): Cast isp to long, and use %ld to print it.
+	* config/tc-alpha.h (md_operand): Add cast to void.
+	(alpha_do_align): Declare argument types.
+	(tc_get_register): Declare.
+	(alpha_frob_ecoff_data): Declare.
+	* config/tc-alpha.c: Include <ctype.h>.
+	(s_mask): Don't declare; does not exist.
+	(line_comment_chars): Remove /* from descriptive comment.
+	(tc_get_register): Remove unused local reg.
+	(tc_gen_reloc): Don't bother to compare unsigned to zero.
+	(s_base): Correct warning to actually print register number.
+	(md_begin): Remove unused locals retval, lose, and i.
+	(alpha_fix_adjustable): Move default case inside switch to avoid
+	warning.
+	(load_symbol_address): Remove unused locals reloc_addr, p, sym,
+	and addend.
+	(emit_byte_manip_r): Declare types for all arguments.
+	(emit_extract_r, emit_insert_r, emit_mask_r): Likewise.
+	(emit_sign_extend, emit_bis_r, s_proc): Likewise.
+	(alpha_ip): Use sprint_value to print offsetT value.  Remove
+	unused local size.  Remove unused label get_macro.
+	(alpha_do_align): Make fill const.
+	(md_apply_fix): Remove unused label check_zov.
+
 	* configure.in: Recognize i586 as a synonym for i[34]86.
 
 Tue Aug 23 12:32:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
