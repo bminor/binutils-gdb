@@ -591,20 +591,8 @@ hppa_get_stub_entry (input_section, sym_sec, hash, rel, htab)
 
       stub_entry = hppa_stub_hash_lookup (&htab->stub_hash_table,
 					  stub_name, false, false);
-      if (stub_entry == NULL)
-	{
-	  if (hash == NULL || hash->elf.root.type != bfd_link_hash_undefweak)
-	    (*_bfd_error_handler) (_("%s(%s+0x%lx): cannot find stub entry %s"),
-				   bfd_archive_filename (input_section->owner),
-				   input_section->name,
-				   (long) rel->r_offset,
-				   stub_name);
-	}
-      else
-	{
-	  if (hash != NULL)
-	    hash->stub_cache = stub_entry;
-	}
+      if (hash != NULL)
+	hash->stub_cache = stub_entry;
 
       free (stub_name);
     }
@@ -3385,7 +3373,7 @@ final_link_relocate (input_section, contents, rel, value, htab, sym_sec, h)
 	      addend = 8;
 	    }
 	  else
-	    return bfd_reloc_notsupported;
+	    return bfd_reloc_undefined;
 	}
       /* Fall thru.  */
 
@@ -3513,7 +3501,7 @@ final_link_relocate (input_section, contents, rel, value, htab, sym_sec, h)
 	  stub_entry = hppa_get_stub_entry (input_section, sym_sec,
 					    h, rel, htab);
 	  if (stub_entry == NULL)
-	    return bfd_reloc_notsupported;
+	    return bfd_reloc_undefined;
 
 	  /* Munge up the value and addend so that we call the stub
 	     rather than the procedure directly.  */
@@ -3612,6 +3600,7 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_reloc_status_type r;
       const char *sym_name;
       boolean plabel;
+      boolean warned_undef;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type >= (unsigned int) R_PARISC_UNIMPLEMENTED)
@@ -3647,6 +3636,7 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
       h = NULL;
       sym = NULL;
       sym_sec = NULL;
+      warned_undef = false;
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* This is a local symbol, h defaults to NULL.  */
@@ -3685,10 +3675,13 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		   && h->elf.type != STT_PARISC_MILLI)
 	    {
 	      if (info->symbolic && !info->allow_shlib_undefined)
-		if (!((*info->callbacks->undefined_symbol)
-		      (info, h->elf.root.root.string, input_bfd,
-		       input_section, rel->r_offset, false)))
-		  return false;
+		{
+		  if (!((*info->callbacks->undefined_symbol)
+			(info, h->elf.root.root.string, input_bfd,
+			 input_section, rel->r_offset, false)))
+		    return false;
+		  warned_undef = true;
+		}
 	    }
 	  else
 	    {
@@ -3696,6 +3689,7 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		    (info, h->elf.root.root.string, input_bfd,
 		     input_section, rel->r_offset, true)))
 		return false;
+	      warned_undef = true;
 	    }
 	}
 
@@ -4062,15 +4056,18 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 
       if (r == bfd_reloc_undefined || r == bfd_reloc_notsupported)
 	{
-	  (*_bfd_error_handler)
-	    (_("%s(%s+0x%lx): cannot handle %s for %s"),
-	     bfd_archive_filename (input_bfd),
-	     input_section->name,
-	     (long) rel->r_offset,
-	     howto->name,
-	     sym_name);
-	  bfd_set_error (bfd_error_bad_value);
-	  return false;
+	  if (r == bfd_reloc_notsupported || !warned_undef)
+	    {
+	      (*_bfd_error_handler)
+		(_("%s(%s+0x%lx): cannot handle %s for %s"),
+		 bfd_archive_filename (input_bfd),
+		 input_section->name,
+		 (long) rel->r_offset,
+		 howto->name,
+		 sym_name);
+	      bfd_set_error (bfd_error_bad_value);
+	      return false;
+	    }
 	}
       else
 	{

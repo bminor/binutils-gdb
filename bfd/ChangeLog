@@ -1,3 +1,12 @@
+2001-12-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-hppa.c (hppa_get_stub_entry): Remove debug message that
+	happens to trigger on undefined symbols.
+	(final_link_relocate): Return bfd_reloc_undefined for undefined
+	stubs.
+	(elf32_hppa_relocate_section): Don't say we can't handle a reloc
+	if we have already warned about an undefined symbol.
+
 2001-12-02  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* elf32-mips.c (NEWABI_P): New define.
@@ -68,7 +77,7 @@ Mon Nov 26 12:33:44 2001  Jeffrey A Law  (law@cygnus.com)
 2001-11-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-hppa.c (elf32_hppa_size_stubs): Decrease default stub
-	group sizes to accomodate c++.
+	group sizes to accommodate c++.
 
 2001-11-23  Jakub Jelinek  <jakub@redhat.com>
 
@@ -3604,7 +3613,7 @@ Wed Aug 29 02:27:36 2001  J"orn Rennecke <amylaar@redhat.com>
 
 	* xcofflink.c : Many changes for xcoff64 support.  Move common
 	structures to include/coff/xcoff.h.  Move specific structure to
-	backends coff-rs6000.c and coff64-rs6000.c.   Use new backend
+	backends coff-rs6000.c and coff64-rs6000.c.  Use new backend
 	functions, defined in libxcoff.h, to isolate 32/64 dependencies.
 
 	(bfd_xcoff_size_dynamic_sections) : special __rtinit symbol for
