@@ -255,6 +255,9 @@ static struct option longopts[] = {
   {"disable-stdcall-fixup", no_argument, NULL, OPTION_DISABLE_STDCALL_FIXUP},
   {"out-implib", required_argument, NULL, OPTION_IMPLIB_FILENAME},
   {"warn-duplicate-exports", no_argument, NULL, OPTION_WARN_DUPLICATE_EXPORTS},
+  /* getopt() allows abbreviations, so we do this to stop it from
+     treating -c as an abbreviation for these --compat-implib.  */
+  {"compat-implib", no_argument, NULL, OPTION_IMP_COMPAT},
   {"compat-implib", no_argument, NULL, OPTION_IMP_COMPAT},
   {"enable-auto-image-base", no_argument, NULL, OPTION_ENABLE_AUTO_IMAGE_BASE},
   {"disable-auto-image-base", no_argument, NULL, OPTION_DISABLE_AUTO_IMAGE_BASE},

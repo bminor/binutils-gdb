@@ -3,6 +3,11 @@
 	* doc/as.texinfo (Invoking): Typo fix.
 	* config/tc-tic54x.c (encode_operand): Comment typo fix.
 
+2002-12-17  Nick Clifton  <nickc@redhat.com>
+
+	* as.c (std_longopts): Duplicate --keep-locals entry in order to
+	prevent it being confused with -k.
+
 2002-11-30  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* config/tc-sh.c (md_apply_fix3): Take account of fx_offset

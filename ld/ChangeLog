@@ -1,3 +1,8 @@
+2002-12-17  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/pe.em (longopts): Duplicate entry for --compact-implib
+	so that it is not confused with -c.
+
 2002-12-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (struct orphan_save): Add os_tail field.
