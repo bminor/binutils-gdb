@@ -365,14 +365,14 @@ fr30_cgen_insert_operand (od, opindex, fields, buffer, pc)
       {
         long value = fields->f_rel9;
         value = ((int) (((value) - (((pc) & (-2))))) >> (1));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_SIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
       }
       break;
     case FR30_OPERAND_LABEL12 :
       {
         long value = fields->f_rel12;
         value = ((int) (((value) - (((pc) & (-2))))) >> (1));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_SIGNED), 5, 11, CGEN_FIELDS_BITSIZE (fields), buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 5, 11, CGEN_FIELDS_BITSIZE (fields), buffer);
       }
       break;
     case FR30_OPERAND_REGLIST_LOW :
