@@ -2,6 +2,7 @@ Thu Apr 14 07:01:56 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* procfs.c (procfs_wait): Protect watchpoint code with appropriate
 	#ifdefs.
+	(procfs_set_watchpoint, procfs_stopped_by_watchpoint): Likewise.
 
 Wed Apr 13 14:52:46 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 

@@ -3538,6 +3538,7 @@ procfs_can_run ()
 {
   return(1);
 }
+#ifdef TARGET_CAN_USE_HARDWARE_WATCHPOINT
 
 /* Insert a watchpoint */
 int
@@ -3582,11 +3583,21 @@ procfs_stopped_by_watchpoint(pid)
       why = pi->prstatus.pr_why;
       what = pi->prstatus.pr_what;
       if (why == PR_FAULTED 
-	  && (what == FLTWATCH) || (what == FLTKWATCH))
+#if defined (FLTWATCH) && defined (FLTKWATCH)
+	  && (what == FLTWATCH) || (what == FLTKWATCH)
+#else
+#ifdef FLTWATCH
+	  && (what == FLTWATCH) 
+#endif
+#ifdef FLTKWATCH
+	  && (what == FLTKWATCH)
+#endif
+	  )
 	return what;
     }
   return 0;
 }
+#endif
 
 
 struct target_ops procfs_ops = {
