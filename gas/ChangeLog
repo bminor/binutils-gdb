@@ -1,3 +1,7 @@
+2003-05-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* config/tc-s390.c (s390_target_format): Always call init_default_arch.
+
 2003-05-07  H.J. Lu <hongjiu.lu@intel.com>
 
 	* config/tc-ia64.c (alias_hash): New.
