@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/*doc*
+/*
 @setfilename archive-info
 SECTION
 	Archives
@@ -93,8 +93,6 @@ DESCRIPTION
    front, and need to touch every entry to do so.  C'est la vie.
 */
 
-/* $Id$ */
-
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
@@ -128,12 +126,12 @@ boolean
 _bfd_generic_mkarchive (abfd)
      bfd *abfd;
 {
-  set_tdata (abfd, bfd_zalloc(abfd, sizeof (struct artdata)));
+  abfd->tdata.aout_ar_data = (struct artdata *)bfd_zalloc(abfd, sizeof (struct artdata));
 
   if (bfd_ardata (abfd) == NULL) {
-    bfd_error = no_memory;
-    return false;
-  }
+      bfd_error = no_memory;
+      return false;
+    }
   bfd_ardata(abfd)->cache = 0;
   return true;
 }
@@ -160,7 +158,7 @@ DESCRIPTION
 */
 
 symindex
-DEFUN(bfd_get_next_mapent,(abfd, prev, entry)
+DEFUN(bfd_get_next_mapent,(abfd, prev, entry),
      bfd *abfd AND
      symindex prev AND
      carsym **entry)
@@ -270,18 +268,18 @@ get_extended_arelt_filename (arch, name)
 #ifndef errno
   extern int errno;
 #endif
-    unsigned long index = 0;
+  unsigned long index = 0;
 
-    /* Should extract string so that I can guarantee not to overflow into
-       the next region, but I"m too lazy. */
-    errno = 0;
-    index = strtol (name, NULL, 10);
-    if (errno != 0) {
-	bfd_error = malformed_archive;
-	return NULL;
+  /* Should extract string so that I can guarantee not to overflow into
+     the next region, but I"m too lazy. */
+  errno = 0;
+  index = strtol (name, NULL, 10);
+  if (errno != 0) {
+      bfd_error = malformed_archive;
+      return NULL;
     }
 
-    return bfd_ardata (arch)->extended_names + index;
+  return bfd_ardata (arch)->extended_names + index;
 }  
 
 /* This functions reads an arch header and returns an areltdata pointer, or
@@ -330,7 +328,8 @@ snarf_ar_hdr (abfd)
     /* extract the filename from the archive - there are two ways to
        specify an extendend name table, either the first char of the
        name is a space, or it's a slash  */
-    if ((hdr.ar_name[0] == '/' || hdr.ar_name[0] == ' ') && bfd_ardata (abfd)->extended_names != NULL) {
+    if ((hdr.ar_name[0] == '/' || hdr.ar_name[0] == ' ') 
+	&& bfd_ardata (abfd)->extended_names != NULL) {
 	filename = get_extended_arelt_filename (abfd, hdr.ar_name);
 	if (filename == NULL) {
 	    bfd_error = malformed_archive;
@@ -432,7 +431,7 @@ DESCRIPTION
 
 */
 bfd *
-DEFUN(bfd_get_elt_at_index,(abfd, index)
+DEFUN(bfd_get_elt_at_index,(abfd, index),
      bfd *abfd AND
      int index)
 {
@@ -511,12 +510,15 @@ bfd_generic_archive_p (abfd)
 #ifdef GNU960
   if (strncmp (armag, BFD_GNU960_ARMAG(abfd), SARMAG)) return 0;
 #else
-  if (strncmp (armag, ARMAG, SARMAG)) return 0;
+  if (strncmp (armag, ARMAG, SARMAG) &&
+      strncmp (armag, ARMAGB, SARMAG)) return 0;
 #endif
+
+
 
   /* We are setting bfd_ardata(abfd) here, but since bfd_ardata
      involves a cast, we can't do it as the left operand of assignment. */
-  set_tdata (abfd, bfd_zalloc(abfd,sizeof (struct artdata)));
+  abfd->tdata.aout_ar_data = (struct artdata *) bfd_zalloc(abfd,sizeof (struct artdata));
 
   if (bfd_ardata (abfd)  == NULL) {
     bfd_error = no_memory;
@@ -527,13 +529,13 @@ bfd_generic_archive_p (abfd)
   
   if (!BFD_SEND (abfd, _bfd_slurp_armap, (abfd))) {
     bfd_release(abfd, bfd_ardata (abfd));
-    abfd->tdata = NULL;
+    abfd->tdata.aout_ar_data = NULL;
     return 0;
   }
 
   if (!BFD_SEND (abfd, _bfd_slurp_extended_name_table, (abfd))) {
     bfd_release(abfd, bfd_ardata (abfd));
-    abfd->tdata = NULL;
+    abfd->tdata.aout_ar_data = NULL;
     return 0;
   }
   
@@ -581,11 +583,20 @@ bfd_slurp_bsd_armap (abfd)
 	    if (bfd_read ((PTR)raw_armap, 1, mapdata->parsed_size, abfd) !=
 		mapdata->parsed_size) {
 		    bfd_error = malformed_archive;
+		  byebyebye:
 		    bfd_release (abfd, (PTR)raw_armap);
 		    goto byebye;
 		}
 
 	    ardata->symdef_count = bfd_h_get_32(abfd, (PTR)raw_armap) / sizeof (struct symdef);
+
+	    if (ardata->symdef_count * sizeof (struct symdef)
+		> mapdata->parsed_size - sizeof (*raw_armap)) {
+	            /* Probably we're using the wrong byte ordering.  */
+	            bfd_error = wrong_format;
+		    goto byebyebye;
+		  }
+
 	    ardata->cache = 0;
 	    rbase = raw_armap+1;
 	    ardata->symdefs = (carsym *) rbase;
@@ -621,7 +632,8 @@ bfd_slurp_coff_armap (abfd)
   unsigned int stringsize;
   carsym *carsyms;
   int result;
-
+  bfd_vma (*swap)();
+  
   result = bfd_read ((PTR)&nextname, 1, 1, abfd);
   bfd_seek (abfd, -1L, SEEK_CUR);
 
@@ -637,9 +649,9 @@ bfd_slurp_coff_armap (abfd)
   raw_armap = (int *) bfd_alloc(abfd,mapdata->parsed_size);
 
   if (raw_armap == NULL) 
-      {
+  {
     bfd_error = no_memory;
-  byebye:
+   byebye:
     bfd_release (abfd, (PTR)mapdata);
     return false;
   }
@@ -648,47 +660,64 @@ bfd_slurp_coff_armap (abfd)
   if (bfd_read ((PTR)raw_armap, 1, mapdata->parsed_size, abfd) !=
       mapdata->parsed_size) {
     bfd_error = malformed_archive;
-  oops:
+   oops:
     bfd_release (abfd, (PTR)raw_armap);
     goto byebye;
   }
 
   /* The coff armap must be read sequentially.  So we construct a bsd-style
      one in core all at once, for simplicity. 
-
+     
      It seems that all numeric information in a coff archive is always
      in big endian format, nomatter the host or target. */
 
-  stringsize = mapdata->parsed_size - (4 * (_do_getb32((PTR)raw_armap))) - 4;
-
+  stringsize 
+   = mapdata->parsed_size - (4 * (_do_getb32((PTR)raw_armap))) - 4;
+  /* Except that some archive formats are broken, and it may be our
+     fault - the i960 little endian coff sometimes has big and sometimes
+     little, because our tools changed.  Here's a horrible hack to clean
+     up the crap
+     */
+  swap = _do_getb32;
+  
+  if (stringsize > 0xfffff) 
   {
-    unsigned int nsymz = _do_getb32( (PTR)raw_armap);
-    unsigned int carsym_size = (nsymz * sizeof (carsym));
-    unsigned int ptrsize = (4 * nsymz);
-    unsigned int i;
-    ardata->symdefs = (carsym *) bfd_zalloc(abfd,carsym_size + stringsize + 1);
-    if (ardata->symdefs == NULL) {
-      bfd_error = no_memory;
-      goto oops;
-    }
-    carsyms = ardata->symdefs;
+    /* This looks dangerous, let's do it the other way around */
+    stringsize = mapdata->parsed_size - (4 *
+					 (_do_getl32((PTR)raw_armap))) - 4;
 
-    stringbase = ((char *) ardata->symdefs) + carsym_size;
-    memcpy (stringbase, (char*)raw_armap + ptrsize + 4,  stringsize);
-
-
-    /* OK, build the carsyms */
-    for (i = 0; i < nsymz; i++) 
-      {
-	rawptr = raw_armap + i + 1;
-	carsyms->file_offset = _do_getb32((PTR)rawptr);
-	carsyms->name = stringbase;
-	for (; *(stringbase++););
-	carsyms++;
-      }
-    *stringbase = 0;
+    swap = _do_getl32;
   }
-  ardata->symdef_count = _do_getb32((PTR)raw_armap);
+  
+
+ {
+   unsigned int nsymz = swap( (PTR)raw_armap);
+   unsigned int carsym_size = (nsymz * sizeof (carsym));
+   unsigned int ptrsize = (4 * nsymz);
+   unsigned int i;
+   ardata->symdefs = (carsym *) bfd_zalloc(abfd,carsym_size + stringsize + 1);
+   if (ardata->symdefs == NULL) {
+     bfd_error = no_memory;
+     goto oops;
+   }
+   carsyms = ardata->symdefs;
+
+   stringbase = ((char *) ardata->symdefs) + carsym_size;
+   memcpy (stringbase, (char*)raw_armap + ptrsize + 4,  stringsize);
+
+
+   /* OK, build the carsyms */
+   for (i = 0; i < nsymz; i++) 
+   {
+     rawptr = raw_armap + i + 1;
+     carsyms->file_offset = swap((PTR)rawptr);
+     carsyms->name = stringbase;
+     for (; *(stringbase++););
+     carsyms++;
+   }
+   *stringbase = 0;
+ }
+  ardata->symdef_count = swap((PTR)raw_armap);
   ardata->first_file_filepos = bfd_tell (abfd);
   /* Pad to an even boundary if you have to */
   ardata->first_file_filepos += (ardata->first_file_filepos) %2;
@@ -709,7 +738,7 @@ bfd_slurp_coff_armap (abfd)
   Intel has extended the format: longer names are stored in a special
   element (the first in the archive, or second if there is an armap);
   the name in the ar_hdr is replaced by <space><index into filename
-  element>.  Index is the P.R. of an int (radix: 8).  Data General have
+  element>.  Index is the P.R. of an int (decimal).  Data General have
   extended the format by using the prefix // for the special element */
 
 /* Returns false on error, true otherwise */
@@ -773,20 +802,57 @@ _bfd_slurp_extended_name_table (abfd)
   return true;
 }
 
-static
-char *normalize(file)
-char *file;
+#ifdef VMS
+
+/* Return a copy of the stuff in the filename between any :]> and a
+   semicolon */
+static CONST char *
+DEFUN(normalize,(file),
+      CONST char *file)
 {
-    char *    filename = strrchr(file, '/');
-    if (filename != (char *)NULL) {
-	filename ++;
+  CONST char *first;
+  CONST char *last;
+  char *copy;
+
+  first = file + strlen(file)-1;
+  last = first+1;
+
+  while (first != file) 
+  {
+    if (*first == ';') 
+     last = first;
+    if (*first == ':' || *first == ']' ||*first == '>') 
+    { 
+      first++;
+      break;
     }
-    else {
-	filename = file;
-    }
-return filename;
+    first --;
+  }
+  
+
+  copy = malloc(last - first + 1);
+  memcpy(copy, first, last-first);
+  copy[last-first] = 0;
+
+  return copy;
 }
 
+#else
+static
+CONST char *normalize(file)
+CONST char *file;
+{
+  CONST char *    filename = strrchr(file, '/');
+
+  if (filename != (char *)NULL) {
+      filename ++;
+    }
+  else {
+      filename = file;
+    }
+  return filename;
+}
+#endif
 /* Follows archive_head and produces an extended name table if necessary.
    Returns (in tabloc) a pointer to an extended name table, and in tablen
    the length of the table.  If it makes an entry it clobbers the filename
@@ -826,7 +892,7 @@ bfd_construct_extended_name_table (abfd, tabloc, tablen)
 
   for (current = abfd->archive_head; current != NULL; current =
        current->next) {
-    char *normal =normalize( current->filename);
+    CONST char *normal =normalize( current->filename);
     unsigned int thislen = strlen (normal);
     if (thislen > maxname) {
       /* Works for now; may need to be re-engineered if we encounter an oddball
@@ -837,7 +903,7 @@ bfd_construct_extended_name_table (abfd, tabloc, tablen)
       hdr->ar_name[0] = ' ';
       /* We know there will always be enough room (one of the few cases
 	 where you may safely use sprintf). */
-      sprintf ((hdr->ar_name) + 1, "%-o", (unsigned) (strptr - *tabloc));
+      sprintf ((hdr->ar_name) + 1, "%-d", (unsigned) (strptr - *tabloc));
       /* Kinda Kludgy.   We should just use the returned value of sprintf
 	 but not all implementations get this right */
 	{
@@ -970,13 +1036,8 @@ bfd_dont_truncate_arname (abfd, pathname, arhdr)
    
   struct ar_hdr *hdr = (struct ar_hdr *) arhdr;
   int length;
-  CONST char *filename = strrchr (pathname, '/');
+  CONST char *filename = normalize(pathname);
   int maxlen = ar_maxnamelen (abfd);
-
-  if (filename == NULL)
-    filename = pathname;
-  else
-    ++filename;
 
   length = strlen (filename);
 
@@ -1156,7 +1217,11 @@ _bfd_write_archive_contents (arch)
 	  if (amt > remaining) {
 	    amt = remaining;
 	  }
-	  if (bfd_read (buffer, amt, 1, current) != amt) goto syserr;
+	  if (bfd_read (buffer, amt, 1, current) != amt) {
+	      /* Looks like a truncated archive. */
+	      bfd_error = malformed_archive;
+	      return false;
+	  }
 	  if (bfd_write (buffer, amt, 1, arch)   != amt) goto syserr;
 	  remaining -= amt;
 	}
@@ -1221,9 +1286,14 @@ compute_and_write_armap (arch, elength)
 
 			/* Now map over all the symbols, picking out the ones we want */
 			for (src_count = 0; src_count <symcount; src_count++) {
-				flagword flags = (syms[src_count])->flags;
+				flagword flags =
+				 (syms[src_count])->flags;
+				asection  *sec =
+				 syms[src_count]->section;
+				
 				if ((flags & BSF_GLOBAL) ||
-				    (flags & BSF_FORT_COMM)) {
+				    (flags & BSF_INDIRECT) ||
+				    (sec == &bfd_com_section)) {
 
 					/* This symbol will go into the archive header */
 					if (orl_count == orl_max) 
@@ -1270,7 +1340,7 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   unsigned int mapsize = ranlibsize + stringsize + 8;
   file_ptr firstreal;
   bfd *current = arch->archive_head;
-  bfd *last_elt = current;		/* last element arch seen */
+  bfd *last_elt = current;	/* last element arch seen */
   int temp;
   int count;
   struct ar_hdr hdr;
@@ -1282,13 +1352,19 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   stat (arch->filename, &statbuf);
   memset ((char *)(&hdr), 0, sizeof (struct ar_hdr));
   sprintf (hdr.ar_name, RANLIBMAG);
-  sprintf (hdr.ar_date, "%ld", statbuf.st_mtime);  
+
+  /* write the timestamp of the archive header to be just a little bit
+     later than the timestamp of the file, otherwise the linker will
+     complain that the index is out of date.
+     */
+
+  sprintf (hdr.ar_date, "%ld", statbuf.st_mtime + 60);  
   sprintf (hdr.ar_uid, "%d", getuid());
   sprintf (hdr.ar_gid, "%d", getgid());
   sprintf (hdr.ar_size, "%-10d", (int) mapsize);
   hdr.ar_fmag[0] = '`'; hdr.ar_fmag[1] = '\n';
   for (i = 0; i < sizeof (struct ar_hdr); i++)
-    if (((char *)(&hdr))[i] == '\0') (((char *)(&hdr))[i]) = ' ';
+   if (((char *)(&hdr))[i] == '\0') (((char *)(&hdr))[i]) = ' ';
   bfd_write ((char *)&hdr, 1, sizeof (struct ar_hdr), arch);
   bfd_h_put_32(arch, ranlibsize, (PTR)&temp);
   bfd_write (&temp, 1, sizeof (temp), arch);
@@ -1298,12 +1374,12 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
     struct symdef *outp = &outs;
     
     if (((bfd *)(map[count]).pos) != last_elt) {
-	    do {
-		    firstreal += arelt_size (current) + sizeof (struct ar_hdr);
-		    firstreal += firstreal % 2;
-		    current = current->next;
-	    } while (current != (bfd *)(map[count]).pos);
-    } /* if new archive element */
+      do {
+	firstreal += arelt_size (current) + sizeof (struct ar_hdr);
+	firstreal += firstreal % 2;
+	current = current->next;
+      } while (current != (bfd *)(map[count]).pos);
+    }				/* if new archive element */
 
     last_elt = current;
     bfd_h_put_32(arch, ((map[count]).namidx),(PTR) &outs.s.string_offset);
@@ -1315,12 +1391,12 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   bfd_h_put_32(arch, stringsize, (PTR)&temp);
   bfd_write ((PTR)&temp, 1, sizeof (temp), arch);
   for (count = 0; count < orl_count; count++)
-    bfd_write (*((map[count]).name), 1, strlen (*((map[count]).name))+1, arch);
+   bfd_write (*((map[count]).name), 1, strlen (*((map[count]).name))+1, arch);
 
   /* The spec sez this should be a newline.  But in order to be
      bug-compatible for sun's ar we use a null. */
   if (padit)
-    bfd_write("\0",1,1,arch);
+   bfd_write("\0",1,1,arch);
 
   return true;
 }
@@ -1357,7 +1433,6 @@ coff_write_armap (arch, elength, map, symbol_count, stridx)
     unsigned int mapsize = stringsize + ranlibsize;
     file_ptr archive_member_file_ptr;
     bfd *current = arch->archive_head;
-    bfd *last_elt = current;	/* last element arch seen */
     int count;
     struct ar_hdr hdr;
     unsigned int i;
@@ -1389,11 +1464,10 @@ coff_write_armap (arch, elength, map, symbol_count, stridx)
     bfd_write_bigendian_4byte_int(arch, symbol_count);
 
     /* Two passes, first write the file offsets for each symbol -
-       remembering that each offset is on a two byte boundary
-       */
+       remembering that each offset is on a two byte boundary.  */
 
     /* Write out the file offset for the file associated with each
-       symbol, and remember to keep the offsets padded out */
+       symbol, and remember to keep the offsets padded out.  */
 
     current = arch->archive_head;
     count = 0;
