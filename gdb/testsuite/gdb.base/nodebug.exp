@@ -1,0 +1,70 @@
+# Test that things still (sort of) work when compiled without -g.
+# In gdb.t10 because it is related to symbol-reading, and so are the crossload
+# tests.
+
+if $tracelevel then {
+	strace $tracelevel
+}
+
+set prms_id 0
+set bug_id 0
+
+set binfile $objdir/$subdir/nodebug
+
+if ![file exists $binfile] then {
+    perror "$binfile does not exist."
+    return 0
+} else {
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load $binfile
+
+    if [runto inner] then {
+
+	# Expect to find global/local symbols in each of text/data/bss.
+
+	# The exact format for some of this output is not necessarily
+	# ideal, particularly interpreting "p top" requires a fair bit of
+	# savvy about gdb's workings and the meaning of the "{}"
+	# construct.  So the details maybe could be tweaked.  But the
+	# basic purpose should be maintained, which is (a) users should be
+	# able to interact with these variables with some care (they have
+	# to know how to interpret them according to their real type,
+	# since gdb doesn't know the type), but (b) users should be able
+	# to detect that gdb does not know the type, rather than just
+	# being told they are ints or functions returning int like old
+	# versions of gdb used to do.
+
+	gdb_test "p top" "{<text variable without -g>} \[0-9a-fx]* <top>"
+	gdb_test "whatis top" "<text variable without -g>"
+	gdb_test "ptype top" "int \\(\\)"
+
+	gdb_test "p middle" "{<text variable without -g>} \[0-9a-fx]* <middle>"
+	gdb_test "whatis middle" "<text variable without -g>"
+	gdb_test "ptype middle" "int \\(\\)"
+
+	gdb_test "p dataglobal" "= 3"
+	gdb_test "whatis dataglobal" "<data variable without -g>"
+	gdb_test "ptype dataglobal" "<data variable without -g>"
+
+	gdb_test "p datalocal" "= 4"
+	gdb_test "whatis datalocal" "<data variable without -g>"
+	gdb_test "ptype datalocal" "<data variable without -g>"
+
+	gdb_test "p bssglobal" "= 0"
+	gdb_test "whatis bssglobal" "<data variable without -g>"
+	gdb_test "ptype bssglobal" "<data variable without -g>"
+
+	gdb_test "p bsslocal" "= 0"
+	gdb_test "whatis bsslocal" "<data variable without -g>"
+	gdb_test "ptype bsslocal" "<data variable without -g>"
+
+	gdb_test "backtrace" "#0.*inner.*#1.*middle.*#2.*top.*#3.*main"
+	# Or if that doesn't work, at least hope for the external symbols
+	gdb_test "backtrace" "#0.*inner.*#1.*#2.*top.*#3.*main"
+	# Now, try that we can give names of file-local symbols which happen
+	# to be unique, and have it still work
+	if [runto middle] then {
+	    gdb_test "backtrace" "#0.*middle.*#1.*top.*#2.*main"
+	}
+    }
+}

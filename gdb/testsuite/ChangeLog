@@ -1,3 +1,9 @@
+Tue Jan 17 10:47:53 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
+
+	* gdb.base/nodebug.exp: Add tests to check that "print", "whatis"
+	and "ptype" work on variables in files compiled without -g.
+	Replaces commented out "maint print msymbol" tests.
+
 Mon Jan 16 12:13:28 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
 	* gdb.base/setvar.c (dummy): Call malloc.
