@@ -1,5 +1,10 @@
 Tue Apr  5 15:29:25 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* hppa-tdep.c (hppa_fix_call_dummy): If FUN is a procedure label,
+	then gets its real address into FUN and its GOT/DP value into %r19.
+
+	* tm-hppa.h (CALL_DUMMY): Use %r20, not %r19 as a temporary.
+
 	* hppa-tdep.c (frameless_function_invocation): If no unwind
 	descriptor was found, then assume this was not a frameless
 	function invocation.

@@ -1074,6 +1074,20 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 
   dyncall_addr = SYMBOL_VALUE_ADDRESS (msymbol);
 
+  /* FUN could be a procedure label, in which case we have to get
+     its real address and the value of its GOT/DP.  */
+  if (fun & 0x2)
+    {
+      /* Get the GOT/DP value for the target function.  It's
+	 at *(fun+4).  Note the call dummy is *NOT* allowed to
+	 trash %r19 before calling the target function.  */
+      write_register (19, read_memory_integer ((fun & ~0x3) + 4, 4));
+
+      /* Now get the real address for the function we are calling, it's
+	 at *fun.  */
+      fun = (CORE_ADDR) read_memory_integer (fun & ~0x3, 4);
+    }
+
   /* If we are calling an import stub (eg calling into a dynamic library)
      then have sr4export call the magic __d_plt_call routine which is linked
      in from end.o.  (You can't use _sr4export to call the import stub as
