@@ -1,3 +1,9 @@
+2002-02-09  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* emultempl/mmix-elfnmmo.em (mmix_after_allocation): Adjust
+	register section vma to a sane value after emitting error.  Make
+	fatal conditions cause program exit when emitting message.
+
 2002-02-08  Ivan Guzvinec <ivang@opencores.org>
 
 	* configure.tgt: Add or32-*-rtems target.
