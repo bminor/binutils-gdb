@@ -47,43 +47,6 @@
 
 
 
-// Multiply and Move LO.
-000000,5.RS,5.RT,5.RD,00100,101000::::MUL
-"mul r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
-{
-  SET_MulAcc (SD_, 0 + SignedMultiply (SD_, GPR[RS], GPR[RT]));
-  GPR[RD] = Low32Bits (SD_, MulAcc (SD_));
-}
-
-// Unsigned Multiply and Move LO.
-000000,5.RS,5.RT,5.RD,00101,101000::::MULU
-"mulu r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
-{
-  SET_MulAcc (SD_, 0 + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
-  GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
-}
-
-// Multiply and Move HI.
-000000,5.RS,5.RT,5.RD,01100,101000::::MULHI
-"mulhi r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
-{
-  SET_MulAcc (SD_, 0 + SignedMultiply   (SD_, GPR[RS], GPR[RT]));
-  GPR[RD] = High32Bits (SD_, MulAcc (SD_));
-}
-
-// Unsigned Multiply and Move HI.
-000000,5.RS,5.RT,5.RD,01101,101000::::MULHIU
-"mulhiu r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
-{
-  SET_MulAcc (SD_, 0 + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
-  GPR[RD] = High32Bits (SD_, MulAcc (SD_));
-}
-
-
 // Multiply, Accumulate
 000000,5.RS,5.RT,00000,00000,101000::::MAC
 "mac r<RS>, r<RT>"
@@ -95,15 +58,60 @@
 // D-Multiply, Accumulate
 000000,5.RS,5.RT,00000,00000,101001::::DMAC
 "dmac r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*vr4320:
 {
-  LO = MulAcc (SD_) + SignedMultiply (SD_, GPR[RS], GPR[RT]);
+  LO = 99 + SignedMultiply (SD_, GPR[RS], GPR[RT]);
 }
+
+
+
+
+
+// Multiply and Move LO.
+000000,5.RS,5.RT,5.RD,00100,101000::::MUL
+"mul r<RD>, r<RS>, r<RT>"
+*vr4320:
+{
+  SET_MulAcc (SD_, 0 + SignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = Low32Bits (SD_, MulAcc (SD_));
+}
+
+// Unsigned Multiply and Move LO.
+000000,5.RS,5.RT,5.RD,00101,101000::::MULU
+"mulu r<RD>, r<RS>, r<RT>"
+*vr4320:
+{
+  SET_MulAcc (SD_, 0 + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
+}
+
+// Multiply and Move HI.
+000000,5.RS,5.RT,5.RD,01100,101000::::MULHI
+"mulhi r<RD>, r<RS>, r<RT>"
+*vr4320:
+{
+  SET_MulAcc (SD_, 0 + SignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = High32Bits (SD_, MulAcc (SD_));
+}
+
+// Unsigned Multiply and Move HI.
+000000,5.RS,5.RT,5.RD,01101,101000::::MULHIU
+"mulhiu r<RD>, r<RS>, r<RT>"
+*vr4320:
+{
+  SET_MulAcc (SD_, 0 + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
+  GPR[RD] = High32Bits (SD_, MulAcc (SD_));
+}
+
+
+
+
+
 
 // Multiply, Accumulate and Move LO.
 000000,5.RS,5.RT,5.RD,00010,101000::::MACC
 "macc r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*vr4320:
 {
   SET_MulAcc (SD_, MulAcc (SD_) + SignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
@@ -112,7 +120,7 @@
 // Unsigned Multiply, Accumulate and Move LO.
 000000,5.RS,5.RT,5.RD,00011,101000::::MACCU
 "maccu r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*vr4320:
 {
   SET_MulAcc (SD_, MulAcc (SD_) + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
@@ -121,7 +129,7 @@
 // Multiply, Accumulate and Move HI.
 000000,5.RS,5.RT,5.RD,01010,101000::::MACCHI
 "macchi r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*vr4320:
 {
   SET_MulAcc (SD_, MulAcc (SD_) + SignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = High32Bits (SD_, MulAcc (SD_));
@@ -130,7 +138,7 @@
 // Unsigned Multiply, Accumulate and Move HI.
 000000,5.RS,5.RT,5.RD,01011,101000::::MACCHIU
 "macchiu r<RD>, r<RS>, r<RT>"
-*mipsI,mipsII,mipsIII,mipsIV:
+*vr4320:
 {
   SET_MulAcc (SD_, MulAcc (SD_) + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = High32Bits (SD_, MulAcc (SD_));
