@@ -858,8 +858,8 @@ sleep_ms (ms)
  */
 
 static int
-vx_wait (pid, status)
-     int pid;
+vx_wait (pid_to_wait_for, status)
+     int pid_to_wait_for;
      int *status;
 {
   register int pid;

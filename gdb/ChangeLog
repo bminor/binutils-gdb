@@ -1,5 +1,9 @@
 Fri Oct 22 07:49:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* remote-vx.c: Rename pid parameter to pid_to_wait_for.  Some
+	compilers (legitimately) don't like variables in the function's
+	outermost block whose name is the name as a parameter.
+
 	Merge Apollo patches from Troy Rollo (troy@cbme.unsw.edu.au):
 	* dst.h, dstread.c, config/m68k/{apollo68b.mt,tm-apollo68b.h}:
 	New files.
