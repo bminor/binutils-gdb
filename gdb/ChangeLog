@@ -1,6 +1,9 @@
 2005-03-16  Mark Mitchell  <mark@codesourcery.com>
 
-	* event-top.c (async_init_signals): Allow for systems that do not
+	* event-top.c (handle_sigquit): Do not define for systems without
+	SIGQUIT.
+	(sigquit_token): Likewise.
+	(async_init_signals): Allow for systems that do not
 	define SIGQUIT.
 	* ser-tcp.c (net_open): Allow for systems that do not have SIGPIPE.
 
