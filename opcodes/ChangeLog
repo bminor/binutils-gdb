@@ -1,12 +1,17 @@
-start-sanitize-sky
 Thu Feb 12 11:01:40 1998  Doug Evans  <devans@canuck.cygnus.com>
 
+	* cgen-opc.in (@arch@_cgen_lookup_insn): New argument alias_p.
+	Ignore ALIAS insns if asked to.
+	(@arch@_cgen_get_insn_operands): Pass 0 for alias_p, NULL for insn.
+	* m32r-opc.c: Regenerate.
+
+start-sanitize-sky
 	* dvp.opc.c: Nicely format opcode tables.
 	(vu_operands): New element UFLAGS.
 	(parse_uflags,print_uflags): New functions.
 	(vu_upper_opcodes): Add UFLAGS to all insns.
-
 end-sanitize-sky
+
 Thu Feb 12 03:41:00 1998  J"orn Rennecke  <amylaar@cygnus.co.uk>
 
 Fix rac to accept only a0:

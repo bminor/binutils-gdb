@@ -33,17 +33,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    If non-null INSN is the insn table entry.
    Otherwise INSN_VALUE is examined to compute it.
    LENGTH is the bit length of INSN_VALUE if known, otherwise 0.
+   ALIAS_P is non-zero if alias insns are to be included in the search.
    The result a pointer to the insn table entry, or NULL if the instruction
    wasn't recognized.  */
 
 const CGEN_INSN *
-m32r_cgen_lookup_insn (insn, insn_value, length, fields)
+m32r_cgen_lookup_insn (insn, insn_value, length, fields, alias_p)
      const CGEN_INSN *insn;
      cgen_insn_t insn_value;
      int length;
      CGEN_FIELDS *fields;
 {
-  char buf[4];
+  char buf[16];
 
   if (!insn)
     {
@@ -82,14 +83,18 @@ m32r_cgen_lookup_insn (insn, insn_value, length, fields)
 	{
 	  insn = insn_list->insn;
 
-	  /* Basic bit mask must be correct.  */
-	  /* ??? May wish to allow target to defer this check until the extract
-	     handler.  */
-	  if ((insn_value & CGEN_INSN_MASK (insn)) == CGEN_INSN_VALUE (insn))
+	  if (alias_p
+	      || ! CGEN_INSN_ATTR (insn, CGEN_INSN_ALIAS))
 	    {
-	      length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, fields);
-	      if (length > 0)
-		return insn;
+	      /* Basic bit mask must be correct.  */
+	      /* ??? May wish to allow target to defer this check until the
+		 extract handler.  */
+	      if ((insn_value & CGEN_INSN_MASK (insn)) == CGEN_INSN_VALUE (insn))
+		{
+		  length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, fields);
+		  if (length > 0)
+		    return insn;
+		}
 	    }
 
 	  insn_list = CGEN_DIS_NEXT_INSN (insn_list);
@@ -97,6 +102,11 @@ m32r_cgen_lookup_insn (insn, insn_value, length, fields)
     }
   else
     {
+      /* Sanity check: can't pass an alias insn if ! alias_p.  */
+      if (! alias_p
+	  && CGEN_INSN_ATTR (insn, CGEN_INSN_ALIAS))
+	abort ();
+
       length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, fields);
       if (length > 0)
 	return insn;
@@ -124,7 +134,11 @@ m32r_cgen_get_insn_operands (insn, insn_value, length, indices)
   const CGEN_OPERAND_INSTANCE *opinst;
   int i;
 
-  insn = m32r_cgen_lookup_insn (insn, insn_value, length, &fields);
+  /* FIXME: ALIAS insns are in transition from being record in the insn table
+     to being recorded separately as macros.  They don't have semantic code
+     so they can't be used here.  Thus we currently always ignore the INSN
+     argument.  */
+  insn = m32r_cgen_lookup_insn (NULL, insn_value, length, &fields, 0);
   if (! insn)
     return NULL;
 
@@ -444,148 +458,156 @@ static const CGEN_OPERAND_INSTANCE fmt_4_addi_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_5_addv3_ops[] = {
-  { INPUT, & HW_ENT (HW_H_SINT), CGEN_MODE_SI, & OP_ENT (SIMM16), 0 },
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
-  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, & OP_ENT (CONDBIT), 0 },
-  { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
-  { 0 }
-};
-
-static const CGEN_OPERAND_INSTANCE fmt_6_addx_ops[] = {
-  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, & OP_ENT (CONDBIT), 0 },
+static const CGEN_OPERAND_INSTANCE fmt_5_addv_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
-  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, & OP_ENT (CONDBIT), 0 },
+  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_7_bc8_ops[] = {
-  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, & OP_ENT (CONDBIT), 0 },
+static const CGEN_OPERAND_INSTANCE fmt_6_addv3_ops[] = {
+  { INPUT, & HW_ENT (HW_H_SINT), CGEN_MODE_SI, & OP_ENT (SIMM16), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
+  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
+  { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_7_addx_ops[] = {
+  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
+  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
+  { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_8_bc8_ops[] = {
+  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP8), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_9_bc24_ops[] = {
-  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, & OP_ENT (CONDBIT), 0 },
+static const CGEN_OPERAND_INSTANCE fmt_10_bc24_ops[] = {
+  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP24), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_11_beq_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_12_beq_ops[] = {
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_12_beqz_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_13_beqz_ops[] = {
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_13_bl8_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_14_bl8_ops[] = {
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP8), 0 },
-  { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, & OP_ENT (PC), 0 },
+  { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_14_bl24_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_15_bl24_ops[] = {
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP24), 0 },
-  { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, & OP_ENT (PC), 0 },
+  { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_15_bcl8_ops[] = {
-  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, & OP_ENT (CONDBIT), 0 },
+static const CGEN_OPERAND_INSTANCE fmt_16_bcl8_ops[] = {
+  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP8), 0 },
-  { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, & OP_ENT (PC), 0 },
+  { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_16_bcl24_ops[] = {
-  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, & OP_ENT (CONDBIT), 0 },
+static const CGEN_OPERAND_INSTANCE fmt_17_bcl24_ops[] = {
+  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP24), 0 },
-  { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, & OP_ENT (PC), 0 },
+  { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_17_bra8_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_18_bra8_ops[] = {
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP8), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_18_bra24_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_19_bra24_ops[] = {
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP24), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_19_cmp_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_20_cmp_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
-  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, & OP_ENT (CONDBIT), 0 },
+  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_20_cmpi_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_21_cmpi_ops[] = {
   { INPUT, & HW_ENT (HW_H_SINT), CGEN_MODE_SI, & OP_ENT (SIMM16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
-  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, & OP_ENT (CONDBIT), 0 },
+  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_21_cmpui_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_22_cmpui_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { INPUT, & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (UIMM16), 0 },
-  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, & OP_ENT (CONDBIT), 0 },
+  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_22_cmpz_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_23_cmpz_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
-  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, & OP_ENT (CONDBIT), 0 },
+  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_23_div_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_24_div_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_24_jc_ops[] = {
-  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, & OP_ENT (CONDBIT), 0 },
+static const CGEN_OPERAND_INSTANCE fmt_25_jc_ops[] = {
+  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_25_jl_ops[] = {
-  { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, & OP_ENT (PC), 0 },
+static const CGEN_OPERAND_INSTANCE fmt_26_jl_ops[] = {
+  { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_26_jmp_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_27_jmp_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_27_ld_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_28_ld_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_29_ld_d_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_30_ld_d_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
@@ -593,14 +615,14 @@ static const CGEN_OPERAND_INSTANCE fmt_29_ld_d_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_31_ldb_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_32_ldb_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_32_ldb_d_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_33_ldb_d_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
@@ -608,14 +630,14 @@ static const CGEN_OPERAND_INSTANCE fmt_32_ldb_d_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_33_ldh_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_34_ldh_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_34_ldh_d_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_35_ldh_d_ops[] = {
   { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
@@ -623,33 +645,47 @@ static const CGEN_OPERAND_INSTANCE fmt_34_ldh_d_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_35_ld24_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_36_ld_plus_ops[] = {
+  { INPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
+  { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
+  { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_37_ld24_ops[] = {
   { INPUT, & HW_ENT (HW_H_ADDR), CGEN_MODE_VM, & OP_ENT (UIMM24), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_36_ldi8_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_38_ldi8_ops[] = {
   { INPUT, & HW_ENT (HW_H_SINT), CGEN_MODE_SI, & OP_ENT (SIMM8), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_37_ldi16_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_39_ldi16_ops[] = {
   { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_38_machi_ops[] = {
-  { INPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, & OP_ENT (ACCUM), 0 },
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
-  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
-  { OUTPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, & OP_ENT (ACCUM), 0 },
+static const CGEN_OPERAND_INSTANCE fmt_40_lock_ops[] = {
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_39_machi_a_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_41_machi_ops[] = {
+  { INPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, 0, 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { OUTPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, 0, 0 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_42_machi_a_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACC), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
@@ -657,108 +693,129 @@ static const CGEN_OPERAND_INSTANCE fmt_39_machi_a_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_40_mulhi_a_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_43_mulhi_ops[] = {
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { OUTPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, 0, 0 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_44_mulhi_a_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACC), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_41_mv_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_45_mv_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_42_mvfachi_ops[] = {
-  { INPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, & OP_ENT (ACCUM), 0 },
+static const CGEN_OPERAND_INSTANCE fmt_46_mvfachi_ops[] = {
+  { INPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_43_mvfachi_a_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_47_mvfachi_a_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACCS), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_44_mvfc_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_48_mvfc_ops[] = {
   { INPUT, & HW_ENT (HW_H_CR), CGEN_MODE_SI, & OP_ENT (SCR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_45_mvtachi_ops[] = {
-  { INPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, & OP_ENT (ACCUM), 0 },
+static const CGEN_OPERAND_INSTANCE fmt_49_mvtachi_ops[] = {
+  { INPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
-  { OUTPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, & OP_ENT (ACCUM), 0 },
+  { OUTPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_46_mvtachi_a_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_50_mvtachi_a_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACCS), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { OUTPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACCS), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_47_mvtc_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_51_mvtc_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_CR), CGEN_MODE_SI, & OP_ENT (DCR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_49_rac_ops[] = {
-  { INPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, & OP_ENT (ACCUM), 0 },
-  { OUTPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, & OP_ENT (ACCUM), 0 },
+static const CGEN_OPERAND_INSTANCE fmt_53_rac_ops[] = {
+  { INPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, 0, 0 },
+  { OUTPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_50_rac_d_ops[] = {
-  { INPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, & OP_ENT (ACCUM), 0 },
+static const CGEN_OPERAND_INSTANCE fmt_54_rac_d_ops[] = {
+  { INPUT, & HW_ENT (HW_H_ACCUM), CGEN_MODE_DI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACCD), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_51_rac_ds_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_55_rac_ds_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACCS), 0 },
   { OUTPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACCD), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_52_rac_dsi_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_56_rac_dsi_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACCS), 0 },
   { INPUT, & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (IMM1), 0 },
   { OUTPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACCD), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_53_rte_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_57_rte_ops[] = {
   { INPUT, & HW_ENT (HW_H_BCOND), CGEN_MODE_VM, 0, 0 },
   { INPUT, & HW_ENT (HW_H_BIE), CGEN_MODE_VM, 0, 0 },
   { INPUT, & HW_ENT (HW_H_BPC), CGEN_MODE_VM, 0, 0 },
   { INPUT, & HW_ENT (HW_H_BSM), CGEN_MODE_VM, 0, 0 },
-  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, & OP_ENT (CONDBIT), 0 },
-  { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, & OP_ENT (PC), 0 },
+  { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
+  { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_IE), CGEN_MODE_VM, 0, 0 },
   { OUTPUT, & HW_ENT (HW_H_SM), CGEN_MODE_VM, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_54_seth_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_58_seth_ops[] = {
   { INPUT, & HW_ENT (HW_H_HI16), CGEN_MODE_UHI, & OP_ENT (HI16), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_55_slli_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_59_sll3_ops[] = {
+  { INPUT, & HW_ENT (HW_H_SINT), CGEN_MODE_SI, & OP_ENT (SIMM16), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
+  { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_60_slli_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { INPUT, & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (UIMM5), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_57_st_d_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_61_st_ops[] = {
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_63_st_d_ops[] = {
   { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
@@ -766,32 +823,76 @@ static const CGEN_OPERAND_INSTANCE fmt_57_st_d_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_59_trap_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_65_stb_ops[] = {
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_66_stb_d_ops[] = {
+  { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_QI, 0, 0 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_67_sth_ops[] = {
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_68_sth_d_ops[] = {
+  { INPUT, & HW_ENT (HW_H_SLO16), CGEN_MODE_HI, & OP_ENT (SLO16), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_HI, 0, 0 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_69_st_plus_ops[] = {
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { OUTPUT, & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0 },
+  { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_70_trap_ops[] = {
   { INPUT, & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (UIMM4), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_62_satb_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_71_unlock_ops[] = {
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_74_satb_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_63_sat_ops[] = {
-  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, & OP_ENT (CONDBIT), 0 },
+static const CGEN_OPERAND_INSTANCE fmt_75_sat_ops[] = {
+  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_64_sadd_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_76_sadd_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, 0, 1 },
   { OUTPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, 0, 0 },
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_65_macwu1_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_77_macwu1_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, 0, 1 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
@@ -799,9 +900,16 @@ static const CGEN_OPERAND_INSTANCE fmt_65_macwu1_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_66_sc_ops[] = {
-  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, & OP_ENT (CONDBIT), 0 },
-  { OUTPUT, & HW_ENT (HW_H_ABORT), CGEN_MODE_UBI, & OP_ENT (ABORT_PARALLEL_EXECUTION), 0 },
+static const CGEN_OPERAND_INSTANCE fmt_78_mulwu1_ops[] = {
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
+  { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
+  { OUTPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, 0, 1 },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_79_sc_ops[] = {
+  { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
+  { OUTPUT, & HW_ENT (HW_H_ABORT), CGEN_MODE_UBI, 0, 0 },
   { 0 }
 };
 
@@ -926,140 +1034,166 @@ static const CGEN_SYNTAX syntax_table[] =
 
 static const CGEN_FORMAT format_table[] = 
 {
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr.dr.SI.sr.SI. */
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(dr SI)(sr SI)(dr SI) */
 /*   0 */  { 16, 16, 0xf0f0 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr.f-simm16.slo16.slo16.HI.sr.SI. */
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(f-simm16 slo16)(slo16 HI)(sr SI)(dr SI) */
 /*   1 */  { 32, 32, 0xf0f00000 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr.f-uimm16.uimm16.sr.SI.uimm16.USI. */
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(f-uimm16 uimm16)(sr SI)(uimm16 USI)(dr SI) */
 /*   2 */  { 32, 32, 0xf0f00000 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr.f-uimm16.ulo16.sr.SI.ulo16.UHI. */
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(f-uimm16 ulo16)(sr SI)(ulo16 UHI)(dr SI) */
 /*   3 */  { 32, 32, 0xf0f00000 },
-/* f-op1.number.f-r1.dr.f-simm8.simm8.dr.SI.simm8.SI. */
+/* (f-op1 #)(f-r1 dr)(f-simm8 simm8)(dr SI)(simm8 SI)(dr SI) */
 /*   4 */  { 16, 16, 0xf000 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr.f-simm16.simm16.simm16.SI.sr.SI. */
-/*   5 */  { 32, 32, 0xf0f00000 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr.condbit.UBI.dr.SI.sr.SI. */
-/*   6 */  { 16, 16, 0xf0f0 },
-/* f-op1.number.f-r1.number.f-disp8.disp8.condbit.UBI.disp8.VM. */
-/*   7 */  { 16, 16, 0xff00 },
-/* f-op1.number.f-r1.number.f-disp8.disp8. */
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(dr SI)(sr SI)(condbit UBI)(dr SI) */
+/*   5 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(f-simm16 simm16)(simm16 SI)(sr SI)(condbit UBI)(dr SI) */
+/*   6 */  { 32, 32, 0xf0f00000 },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(condbit UBI)(dr SI)(sr SI)(condbit UBI)(dr SI) */
+/*   7 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 #)(f-disp8 disp8)(condbit UBI)(disp8 VM) */
 /*   8 */  { 16, 16, 0xff00 },
-/* f-op1.number.f-r1.number.f-disp24.disp24.condbit.UBI.disp24.VM. */
-/*   9 */  { 32, 32, 0xff000000 },
-/* f-op1.number.f-r1.number.f-disp24.disp24. */
+/* (f-op1 #)(f-r1 #)(f-disp8 disp8) */
+/*   9 */  { 16, 16, 0xff00 },
+/* (f-op1 #)(f-r1 #)(f-disp24 disp24)(condbit UBI)(disp24 VM) */
 /*  10 */  { 32, 32, 0xff000000 },
-/* f-op1.number.f-r1.src1.f-op2.number.f-r2.src2.f-disp16.disp16.disp16.VM.src1.SI.src2.SI. */
-/*  11 */  { 32, 32, 0xf0f00000 },
-/* f-op1.number.f-r1.number.f-op2.number.f-r2.src2.f-disp16.disp16.disp16.VM.src2.SI. */
-/*  12 */  { 32, 32, 0xfff00000 },
-/* f-op1.number.f-r1.number.f-disp8.disp8.disp8.VM.pc.USI. */
-/*  13 */  { 16, 16, 0xff00 },
-/* f-op1.number.f-r1.number.f-disp24.disp24.disp24.VM.pc.USI. */
-/*  14 */  { 32, 32, 0xff000000 },
-/* f-op1.number.f-r1.number.f-disp8.disp8.condbit.UBI.disp8.VM.pc.USI. */
-/*  15 */  { 16, 16, 0xff00 },
-/* f-op1.number.f-r1.number.f-disp24.disp24.condbit.UBI.disp24.VM.pc.USI. */
-/*  16 */  { 32, 32, 0xff000000 },
-/* f-op1.number.f-r1.number.f-disp8.disp8.disp8.VM. */
-/*  17 */  { 16, 16, 0xff00 },
-/* f-op1.number.f-r1.number.f-disp24.disp24.disp24.VM. */
-/*  18 */  { 32, 32, 0xff000000 },
-/* f-op1.number.f-r1.src1.f-op2.number.f-r2.src2.src1.SI.src2.SI. */
-/*  19 */  { 16, 16, 0xf0f0 },
-/* f-op1.number.f-r1.number.f-op2.number.f-r2.src2.f-simm16.simm16.simm16.SI.src2.SI. */
-/*  20 */  { 32, 32, 0xfff00000 },
-/* f-op1.number.f-r1.number.f-op2.number.f-r2.src2.f-uimm16.uimm16.src2.SI.uimm16.USI. */
+/* (f-op1 #)(f-r1 #)(f-disp24 disp24) */
+/*  11 */  { 32, 32, 0xff000000 },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 src2)(f-disp16 disp16)(disp16 VM)(src1 SI)(src2 SI) */
+/*  12 */  { 32, 32, 0xf0f00000 },
+/* (f-op1 #)(f-r1 #)(f-op2 #)(f-r2 src2)(f-disp16 disp16)(disp16 VM)(src2 SI) */
+/*  13 */  { 32, 32, 0xfff00000 },
+/* (f-op1 #)(f-r1 #)(f-disp8 disp8)(disp8 VM)(pc USI)(h-gr-14 SI) */
+/*  14 */  { 16, 16, 0xff00 },
+/* (f-op1 #)(f-r1 #)(f-disp24 disp24)(disp24 VM)(pc USI)(h-gr-14 SI) */
+/*  15 */  { 32, 32, 0xff000000 },
+/* (f-op1 #)(f-r1 #)(f-disp8 disp8)(condbit UBI)(disp8 VM)(pc USI)(h-gr-14 SI) */
+/*  16 */  { 16, 16, 0xff00 },
+/* (f-op1 #)(f-r1 #)(f-disp24 disp24)(condbit UBI)(disp24 VM)(pc USI)(h-gr-14 SI) */
+/*  17 */  { 32, 32, 0xff000000 },
+/* (f-op1 #)(f-r1 #)(f-disp8 disp8)(disp8 VM) */
+/*  18 */  { 16, 16, 0xff00 },
+/* (f-op1 #)(f-r1 #)(f-disp24 disp24)(disp24 VM) */
+/*  19 */  { 32, 32, 0xff000000 },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 src2)(src1 SI)(src2 SI)(condbit UBI) */
+/*  20 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 #)(f-op2 #)(f-r2 src2)(f-simm16 simm16)(simm16 SI)(src2 SI)(condbit UBI) */
 /*  21 */  { 32, 32, 0xfff00000 },
-/* f-op1.number.f-r1.number.f-op2.number.f-r2.src2.src2.SI. */
-/*  22 */  { 16, 16, 0xfff0 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr.f-simm16.number.dr.SI.sr.SI. */
-/*  23 */  { 32, 32, 0xf0f0ffff },
-/* f-op1.number.f-r1.number.f-op2.number.f-r2.sr.condbit.UBI.sr.SI. */
-/*  24 */  { 16, 16, 0xfff0 },
-/* f-op1.number.f-r1.number.f-op2.number.f-r2.sr.pc.USI.sr.SI. */
+/* (f-op1 #)(f-r1 #)(f-op2 #)(f-r2 src2)(f-uimm16 uimm16)(src2 SI)(uimm16 USI)(condbit UBI) */
+/*  22 */  { 32, 32, 0xfff00000 },
+/* (f-op1 #)(f-r1 #)(f-op2 #)(f-r2 src2)(src2 SI)(condbit UBI) */
+/*  23 */  { 16, 16, 0xfff0 },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(f-simm16 #)(dr SI)(sr SI)(dr SI) */
+/*  24 */  { 32, 32, 0xf0f0ffff },
+/* (f-op1 #)(f-r1 #)(f-op2 #)(f-r2 sr)(condbit UBI)(sr SI) */
 /*  25 */  { 16, 16, 0xfff0 },
-/* f-op1.number.f-r1.number.f-op2.number.f-r2.sr.sr.SI. */
+/* (f-op1 #)(f-r1 #)(f-op2 #)(f-r2 sr)(pc USI)(sr SI)(h-gr-14 SI) */
 /*  26 */  { 16, 16, 0xfff0 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr.h-memory-sr.SI.sr.SI. */
-/*  27 */  { 16, 16, 0xf0f0 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr. */
+/* (f-op1 #)(f-r1 #)(f-op2 #)(f-r2 sr)(sr SI) */
+/*  27 */  { 16, 16, 0xfff0 },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(h-memory-sr SI)(sr SI)(dr SI) */
 /*  28 */  { 16, 16, 0xf0f0 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr.f-simm16.slo16.h-memory-add-WI-sr-slo16.SI.slo16.HI.sr.SI. */
-/*  29 */  { 32, 32, 0xf0f00000 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr.f-simm16.slo16. */
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr) */
+/*  29 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(f-simm16 slo16)(h-memory-add-WI-sr-slo16 SI)(slo16 HI)(sr SI)(dr SI) */
 /*  30 */  { 32, 32, 0xf0f00000 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr.h-memory-sr.QI.sr.SI. */
-/*  31 */  { 16, 16, 0xf0f0 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr.f-simm16.slo16.h-memory-add-WI-sr-slo16.QI.slo16.HI.sr.SI. */
-/*  32 */  { 32, 32, 0xf0f00000 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr.h-memory-sr.HI.sr.SI. */
-/*  33 */  { 16, 16, 0xf0f0 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr.f-simm16.slo16.h-memory-add-WI-sr-slo16.HI.slo16.HI.sr.SI. */
-/*  34 */  { 32, 32, 0xf0f00000 },
-/* f-op1.number.f-r1.dr.f-uimm24.uimm24.uimm24.VM. */
-/*  35 */  { 32, 32, 0xf0000000 },
-/* f-op1.number.f-r1.dr.f-simm8.simm8.simm8.SI. */
-/*  36 */  { 16, 16, 0xf000 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.number.f-simm16.slo16.slo16.HI. */
-/*  37 */  { 32, 32, 0xf0ff0000 },
-/* f-op1.number.f-r1.src1.f-op2.number.f-r2.src2.accum.DI.src1.SI.src2.SI. */
-/*  38 */  { 16, 16, 0xf0f0 },
-/* f-op1.number.f-r1.src1.f-acc.acc.f-op23.number.f-r2.src2.acc.DI.src1.SI.src2.SI. */
-/*  39 */  { 16, 16, 0xf070 },
-/* f-op1.number.f-r1.src1.f-acc.acc.f-op23.number.f-r2.src2.src1.SI.src2.SI. */
-/*  40 */  { 16, 16, 0xf070 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.sr.sr.SI. */
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(f-simm16 slo16) */
+/*  31 */  { 32, 32, 0xf0f00000 },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(h-memory-sr QI)(sr SI)(dr SI) */
+/*  32 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(f-simm16 slo16)(h-memory-add-WI-sr-slo16 QI)(slo16 HI)(sr SI)(dr SI) */
+/*  33 */  { 32, 32, 0xf0f00000 },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(h-memory-sr HI)(sr SI)(dr SI) */
+/*  34 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(f-simm16 slo16)(h-memory-add-WI-sr-slo16 HI)(slo16 HI)(sr SI)(dr SI) */
+/*  35 */  { 32, 32, 0xf0f00000 },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(h-memory-sr SI)(sr SI)(dr SI)(sr SI) */
+/*  36 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 dr)(f-uimm24 uimm24)(uimm24 VM)(dr SI) */
+/*  37 */  { 32, 32, 0xf0000000 },
+/* (f-op1 #)(f-r1 dr)(f-simm8 simm8)(simm8 SI)(dr SI) */
+/*  38 */  { 16, 16, 0xf000 },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 #)(f-simm16 slo16)(slo16 HI)(dr SI) */
+/*  39 */  { 32, 32, 0xf0ff0000 },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(dr SI)(sr SI) */
+/*  40 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 src2)(accum DI)(src1 SI)(src2 SI)(accum DI) */
 /*  41 */  { 16, 16, 0xf0f0 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.number.accum.DI. */
-/*  42 */  { 16, 16, 0xf0ff },
-/* f-op1.number.f-r1.dr.f-op2.number.f-accs.accs.f-op3.number.accs.DI. */
-/*  43 */  { 16, 16, 0xf0f3 },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.scr.scr.SI. */
-/*  44 */  { 16, 16, 0xf0f0 },
-/* f-op1.number.f-r1.src1.f-op2.number.f-r2.number.accum.DI.src1.SI. */
-/*  45 */  { 16, 16, 0xf0ff },
-/* f-op1.number.f-r1.src1.f-op2.number.f-accs.accs.f-op3.number.accs.DI.src1.SI. */
-/*  46 */  { 16, 16, 0xf0f3 },
-/* f-op1.number.f-r1.dcr.f-op2.number.f-r2.sr.sr.SI. */
-/*  47 */  { 16, 16, 0xf0f0 },
-/* f-op1.number.f-r1.number.f-op2.number.f-r2.number. */
-/*  48 */  { 16, 16, 0xffff },
-/* f-op1.number.f-r1.number.f-op2.number.f-r2.number.accum.DI. */
-/*  49 */  { 16, 16, 0xffff },
-/* f-op1.number.f-accd.accd.f-bits67.number.f-op2.number.f-accs.number.f-bit14.number.f-imm1.number.accum.DI. */
-/*  50 */  { 16, 16, 0xf3ff },
-/* f-op1.number.f-accd.accd.f-bits67.number.f-op2.number.f-accs.accs.f-bit14.number.f-imm1.number.accs.DI. */
-/*  51 */  { 16, 16, 0xf3f3 },
-/* f-op1.number.f-accd.accd.f-bits67.number.f-op2.number.f-accs.accs.f-bit14.number.f-imm1.imm1.accs.DI.imm1.USI. */
-/*  52 */  { 16, 16, 0xf3f2 },
-/* f-op1.number.f-r1.number.f-op2.number.f-r2.number.h-bcond-0.VM.h-bie-0.VM.h-bpc-0.VM.h-bsm-0.VM. */
+/* (f-op1 #)(f-r1 src1)(f-acc acc)(f-op23 #)(f-r2 src2)(acc DI)(src1 SI)(src2 SI)(acc DI) */
+/*  42 */  { 16, 16, 0xf070 },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 src2)(src1 SI)(src2 SI)(accum DI) */
+/*  43 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 src1)(f-acc acc)(f-op23 #)(f-r2 src2)(src1 SI)(src2 SI)(acc DI) */
+/*  44 */  { 16, 16, 0xf070 },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(sr SI)(dr SI) */
+/*  45 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 #)(accum DI)(dr SI) */
+/*  46 */  { 16, 16, 0xf0ff },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-accs accs)(f-op3 #)(accs DI)(dr SI) */
+/*  47 */  { 16, 16, 0xf0f3 },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 scr)(scr SI)(dr SI) */
+/*  48 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 #)(accum DI)(src1 SI)(accum DI) */
+/*  49 */  { 16, 16, 0xf0ff },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-accs accs)(f-op3 #)(accs DI)(src1 SI)(accs DI) */
+/*  50 */  { 16, 16, 0xf0f3 },
+/* (f-op1 #)(f-r1 dcr)(f-op2 #)(f-r2 sr)(sr SI)(dcr SI) */
+/*  51 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 #)(f-op2 #)(f-r2 #) */
+/*  52 */  { 16, 16, 0xffff },
+/* (f-op1 #)(f-r1 #)(f-op2 #)(f-r2 #)(accum DI)(accum DI) */
 /*  53 */  { 16, 16, 0xffff },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.number.f-hi16.hi16.hi16.UHI. */
-/*  54 */  { 32, 32, 0xf0ff0000 },
-/* f-op1.number.f-r1.dr.f-shift-op2.number.f-uimm5.uimm5.dr.SI.uimm5.USI. */
-/*  55 */  { 16, 16, 0xf0e0 },
-/* f-op1.number.f-r1.src1.f-op2.number.f-r2.src2. */
-/*  56 */  { 16, 16, 0xf0f0 },
-/* f-op1.number.f-r1.src1.f-op2.number.f-r2.src2.f-simm16.slo16.slo16.HI.src1.SI.src2.SI. */
-/*  57 */  { 32, 32, 0xf0f00000 },
-/* f-op1.number.f-r1.src1.f-op2.number.f-r2.src2.f-simm16.slo16. */
-/*  58 */  { 32, 32, 0xf0f00000 },
-/* f-op1.number.f-r1.number.f-op2.number.f-uimm4.uimm4.uimm4.USI. */
-/*  59 */  { 16, 16, 0xfff0 },
-/* f-op1.number.f-r1.src1.f-op2.number.f-r2.number. */
-/*  60 */  { 16, 16, 0xf0ff },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.number. */
-/*  61 */  { 16, 16, 0xf0ff },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.src2.f-uimm16.number.src2.SI. */
-/*  62 */  { 32, 32, 0xf0f0ffff },
-/* f-op1.number.f-r1.dr.f-op2.number.f-r2.src2.f-uimm16.number.condbit.UBI.src2.SI. */
-/*  63 */  { 32, 32, 0xf0f0ffff },
-/* f-op1.number.f-r1.number.f-op2.number.f-r2.number.h-accums-0.DI.h-accums-1.DI. */
-/*  64 */  { 16, 16, 0xffff },
-/* f-op1.number.f-r1.src1.f-op2.number.f-r2.src2.h-accums-1.DI.src1.SI.src2.SI. */
+/* (f-op1 #)(f-accd accd)(f-bits67 #)(f-op2 #)(f-accs #)(f-bit14 #)(f-imm1 #)(accum DI)(accd DI) */
+/*  54 */  { 16, 16, 0xf3ff },
+/* (f-op1 #)(f-accd accd)(f-bits67 #)(f-op2 #)(f-accs accs)(f-bit14 #)(f-imm1 #)(accs DI)(accd DI) */
+/*  55 */  { 16, 16, 0xf3f3 },
+/* (f-op1 #)(f-accd accd)(f-bits67 #)(f-op2 #)(f-accs accs)(f-bit14 #)(f-imm1 imm1)(accs DI)(imm1 USI)(accd DI) */
+/*  56 */  { 16, 16, 0xf3f2 },
+/* (f-op1 #)(f-r1 #)(f-op2 #)(f-r2 #)(h-bcond-0 VM)(h-bie-0 VM)(h-bpc-0 VM)(h-bsm-0 VM)(condbit UBI)(pc USI)(h-ie-0 VM)(h-sm-0 VM) */
+/*  57 */  { 16, 16, 0xffff },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 #)(f-hi16 hi16)(hi16 UHI)(dr SI) */
+/*  58 */  { 32, 32, 0xf0ff0000 },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 sr)(f-simm16 simm16)(simm16 SI)(sr SI)(dr SI) */
+/*  59 */  { 32, 32, 0xf0f00000 },
+/* (f-op1 #)(f-r1 dr)(f-shift-op2 #)(f-uimm5 uimm5)(dr SI)(uimm5 USI)(dr SI) */
+/*  60 */  { 16, 16, 0xf0e0 },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 src2)(src1 SI)(src2 SI)(h-memory-src2 SI) */
+/*  61 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 src2) */
+/*  62 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 src2)(f-simm16 slo16)(slo16 HI)(src1 SI)(src2 SI)(h-memory-add-WI-src2-slo16 SI) */
+/*  63 */  { 32, 32, 0xf0f00000 },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 src2)(f-simm16 slo16) */
+/*  64 */  { 32, 32, 0xf0f00000 },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 src2)(src1 SI)(src2 SI)(h-memory-src2 QI) */
 /*  65 */  { 16, 16, 0xf0f0 },
-/* f-op1.number.f-r1.number.f-op2.number.f-r2.number.condbit.UBI. */
-/*  66 */  { 16, 16, 0xffff },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 src2)(f-simm16 slo16)(slo16 HI)(src1 SI)(src2 SI)(h-memory-add-WI-src2-slo16 QI) */
+/*  66 */  { 32, 32, 0xf0f00000 },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 src2)(src1 SI)(src2 SI)(h-memory-src2 HI) */
+/*  67 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 src2)(f-simm16 slo16)(slo16 HI)(src1 SI)(src2 SI)(h-memory-add-WI-src2-slo16 HI) */
+/*  68 */  { 32, 32, 0xf0f00000 },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 src2)(src1 SI)(src2 SI)(h-memory-src2 SI)(src2 SI) */
+/*  69 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 #)(f-op2 #)(f-uimm4 uimm4)(uimm4 USI) */
+/*  70 */  { 16, 16, 0xfff0 },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 src2)(src1 SI)(src2 SI) */
+/*  71 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 #) */
+/*  72 */  { 16, 16, 0xf0ff },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 #) */
+/*  73 */  { 16, 16, 0xf0ff },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 src2)(f-uimm16 #)(src2 SI)(dr SI) */
+/*  74 */  { 32, 32, 0xf0f0ffff },
+/* (f-op1 #)(f-r1 dr)(f-op2 #)(f-r2 src2)(f-uimm16 #)(condbit UBI)(src2 SI)(dr SI) */
+/*  75 */  { 32, 32, 0xf0f0ffff },
+/* (f-op1 #)(f-r1 #)(f-op2 #)(f-r2 #)(h-accums-0 DI)(h-accums-1 DI)(h-accums-0 DI) */
+/*  76 */  { 16, 16, 0xffff },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 src2)(h-accums-1 DI)(src1 SI)(src2 SI)(h-accums-1 DI) */
+/*  77 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 src1)(f-op2 #)(f-r2 src2)(src1 SI)(src2 SI)(h-accums-1 DI) */
+/*  78 */  { 16, 16, 0xf0f0 },
+/* (f-op1 #)(f-r1 #)(f-op2 #)(f-r2 #)(condbit UBI)(abort-parallel-execution UBI) */
+/*  79 */  { 16, 16, 0xffff },
 };
 
 #define A(a) (1 << CGEN_CAT3 (CGEN_INSN,_,a))
@@ -1173,133 +1307,133 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* addv $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "addv", "addv", SYN (0), FMT (0), 0x80,
-    & fmt_0_add_ops[0],
+    "addv", "addv", SYN (0), FMT (5), 0x80,
+    & fmt_5_addv_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_OS, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* addv3 $dr,$sr,#$simm16 */
   {
     { 1, 1, 1, 1 },
-    "addv3", "addv3", SYN (9), FMT (5), 0x80800000,
-    & fmt_5_addv3_ops[0],
+    "addv3", "addv3", SYN (9), FMT (6), 0x80800000,
+    & fmt_6_addv3_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* addv3 $dr,$sr,$simm16 */
   {
     { 1, 1, 1, 1 },
-    "addv3.a", "addv3", SYN (10), FMT (5), 0x80800000,
-    & fmt_5_addv3_ops[0],
+    "addv3.a", "addv3", SYN (10), FMT (6), 0x80800000,
+    & fmt_6_addv3_ops[0],
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* addx $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "addx", "addx", SYN (0), FMT (6), 0x90,
-    & fmt_6_addx_ops[0],
+    "addx", "addx", SYN (0), FMT (7), 0x90,
+    & fmt_7_addx_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_OS, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* bc $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bc8", "bc", SYN (11), FMT (7), 0x7c00,
-    & fmt_7_bc8_ops[0],
+    "bc8", "bc", SYN (11), FMT (8), 0x7c00,
+    & fmt_8_bc8_ops[0],
     { 4, 0|A(RELAXABLE)|A(COND_CTI), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* bc.s $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bc8.s", "bc.s", SYN (11), FMT (8), 0x7c00,
+    "bc8.s", "bc.s", SYN (11), FMT (9), 0x7c00,
     0,
     { 4, 0|A(ALIAS)|A(COND_CTI), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* bc $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bc24", "bc", SYN (12), FMT (9), 0xfc000000,
-    & fmt_9_bc24_ops[0],
+    "bc24", "bc", SYN (12), FMT (10), 0xfc000000,
+    & fmt_10_bc24_ops[0],
     { 4, 0|A(RELAX)|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* bc.l $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bc24.l", "bc.l", SYN (12), FMT (10), 0xfc000000,
+    "bc24.l", "bc.l", SYN (12), FMT (11), 0xfc000000,
     0,
     { 4, 0|A(ALIAS)|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* beq $src1,$src2,$disp16 */
   {
     { 1, 1, 1, 1 },
-    "beq", "beq", SYN (13), FMT (11), 0xb0000000,
-    & fmt_11_beq_ops[0],
+    "beq", "beq", SYN (13), FMT (12), 0xb0000000,
+    & fmt_12_beq_ops[0],
     { 4, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* beqz $src2,$disp16 */
   {
     { 1, 1, 1, 1 },
-    "beqz", "beqz", SYN (14), FMT (12), 0xb0800000,
-    & fmt_12_beqz_ops[0],
+    "beqz", "beqz", SYN (14), FMT (13), 0xb0800000,
+    & fmt_13_beqz_ops[0],
     { 4, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* bgez $src2,$disp16 */
   {
     { 1, 1, 1, 1 },
-    "bgez", "bgez", SYN (14), FMT (12), 0xb0b00000,
-    & fmt_12_beqz_ops[0],
+    "bgez", "bgez", SYN (14), FMT (13), 0xb0b00000,
+    & fmt_13_beqz_ops[0],
     { 4, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* bgtz $src2,$disp16 */
   {
     { 1, 1, 1, 1 },
-    "bgtz", "bgtz", SYN (14), FMT (12), 0xb0d00000,
-    & fmt_12_beqz_ops[0],
+    "bgtz", "bgtz", SYN (14), FMT (13), 0xb0d00000,
+    & fmt_13_beqz_ops[0],
     { 4, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* blez $src2,$disp16 */
   {
     { 1, 1, 1, 1 },
-    "blez", "blez", SYN (14), FMT (12), 0xb0c00000,
-    & fmt_12_beqz_ops[0],
+    "blez", "blez", SYN (14), FMT (13), 0xb0c00000,
+    & fmt_13_beqz_ops[0],
     { 4, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* bltz $src2,$disp16 */
   {
     { 1, 1, 1, 1 },
-    "bltz", "bltz", SYN (14), FMT (12), 0xb0a00000,
-    & fmt_12_beqz_ops[0],
+    "bltz", "bltz", SYN (14), FMT (13), 0xb0a00000,
+    & fmt_13_beqz_ops[0],
     { 4, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* bnez $src2,$disp16 */
   {
     { 1, 1, 1, 1 },
-    "bnez", "bnez", SYN (14), FMT (12), 0xb0900000,
-    & fmt_12_beqz_ops[0],
+    "bnez", "bnez", SYN (14), FMT (13), 0xb0900000,
+    & fmt_13_beqz_ops[0],
     { 4, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* bl $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bl8", "bl", SYN (11), FMT (13), 0x7e00,
-    & fmt_13_bl8_ops[0],
+    "bl8", "bl", SYN (11), FMT (14), 0x7e00,
+    & fmt_14_bl8_ops[0],
     { 4, 0|A(FILL_SLOT)|A(RELAXABLE)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O, WRITE_LR_YES, WRITE_SRC_NO } }
   },
 /* bl.s $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bl8.s", "bl.s", SYN (11), FMT (8), 0x7e00,
+    "bl8.s", "bl.s", SYN (11), FMT (9), 0x7e00,
     0,
     { 4, 0|A(FILL_SLOT)|A(ALIAS)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O, WRITE_LR_YES, WRITE_SRC_NO } }
   },
 /* bl $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bl24", "bl", SYN (12), FMT (14), 0xfe000000,
-    & fmt_14_bl24_ops[0],
+    "bl24", "bl", SYN (12), FMT (15), 0xfe000000,
+    & fmt_15_bl24_ops[0],
     { 4, 0|A(RELAX)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_YES, WRITE_SRC_NO } }
   },
 /* bl.l $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bl24.l", "bl.l", SYN (12), FMT (10), 0xfe000000,
+    "bl24.l", "bl.l", SYN (12), FMT (11), 0xfe000000,
     0,
     { 4, 0|A(ALIAS)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_YES, WRITE_SRC_NO } }
   },
@@ -1307,8 +1441,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* bcl $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bcl8", "bcl", SYN (11), FMT (15), 0x7800,
-    & fmt_15_bcl8_ops[0],
+    "bcl8", "bcl", SYN (11), FMT (16), 0x7800,
+    & fmt_16_bcl8_ops[0],
     { 4, 0|A(RELAXABLE)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O, WRITE_LR_YES, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -1316,7 +1450,7 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* bcl.s $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bcl8.s", "bcl.s", SYN (11), FMT (8), 0x7800,
+    "bcl8.s", "bcl.s", SYN (11), FMT (9), 0x7800,
     0,
     { 4, 0|A(ALIAS)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O, WRITE_LR_YES, WRITE_SRC_NO } }
   },
@@ -1325,8 +1459,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* bcl $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bcl24", "bcl", SYN (12), FMT (16), 0xf8000000,
-    & fmt_16_bcl24_ops[0],
+    "bcl24", "bcl", SYN (12), FMT (17), 0xf8000000,
+    & fmt_17_bcl24_ops[0],
     { 4, 0|A(RELAX)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_NONE, WRITE_LR_YES, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -1334,7 +1468,7 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* bcl.l $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bcl24.l", "bcl.l", SYN (12), FMT (10), 0xf8000000,
+    "bcl24.l", "bcl.l", SYN (12), FMT (11), 0xf8000000,
     0,
     { 4, 0|A(ALIAS)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_NONE, WRITE_LR_YES, WRITE_SRC_NO } }
   },
@@ -1342,63 +1476,63 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* bnc $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bnc8", "bnc", SYN (11), FMT (7), 0x7d00,
-    & fmt_7_bc8_ops[0],
+    "bnc8", "bnc", SYN (11), FMT (8), 0x7d00,
+    & fmt_8_bc8_ops[0],
     { 4, 0|A(RELAXABLE)|A(COND_CTI), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* bnc.s $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bnc8.s", "bnc.s", SYN (11), FMT (8), 0x7d00,
+    "bnc8.s", "bnc.s", SYN (11), FMT (9), 0x7d00,
     0,
     { 4, 0|A(ALIAS)|A(COND_CTI), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* bnc $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bnc24", "bnc", SYN (12), FMT (9), 0xfd000000,
-    & fmt_9_bc24_ops[0],
+    "bnc24", "bnc", SYN (12), FMT (10), 0xfd000000,
+    & fmt_10_bc24_ops[0],
     { 4, 0|A(RELAX)|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* bnc.l $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bnc24.l", "bnc.l", SYN (12), FMT (10), 0xfd000000,
+    "bnc24.l", "bnc.l", SYN (12), FMT (11), 0xfd000000,
     0,
     { 4, 0|A(ALIAS)|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* bne $src1,$src2,$disp16 */
   {
     { 1, 1, 1, 1 },
-    "bne", "bne", SYN (13), FMT (11), 0xb0100000,
-    & fmt_11_beq_ops[0],
+    "bne", "bne", SYN (13), FMT (12), 0xb0100000,
+    & fmt_12_beq_ops[0],
     { 4, 0|A(COND_CTI), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* bra $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bra8", "bra", SYN (11), FMT (17), 0x7f00,
-    & fmt_17_bra8_ops[0],
+    "bra8", "bra", SYN (11), FMT (18), 0x7f00,
+    & fmt_18_bra8_ops[0],
     { 4, 0|A(FILL_SLOT)|A(RELAXABLE)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* bra.s $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bra8.s", "bra.s", SYN (11), FMT (8), 0x7f00,
+    "bra8.s", "bra.s", SYN (11), FMT (9), 0x7f00,
     0,
     { 4, 0|A(ALIAS)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* bra $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bra24", "bra", SYN (12), FMT (18), 0xff000000,
-    & fmt_18_bra24_ops[0],
+    "bra24", "bra", SYN (12), FMT (19), 0xff000000,
+    & fmt_19_bra24_ops[0],
     { 4, 0|A(RELAX)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* bra.l $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bra24.l", "bra.l", SYN (12), FMT (10), 0xff000000,
+    "bra24.l", "bra.l", SYN (12), FMT (11), 0xff000000,
     0,
     { 4, 0|A(ALIAS)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
@@ -1406,8 +1540,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* bncl $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bncl8", "bncl", SYN (11), FMT (15), 0x7900,
-    & fmt_15_bcl8_ops[0],
+    "bncl8", "bncl", SYN (11), FMT (16), 0x7900,
+    & fmt_16_bcl8_ops[0],
     { 4, 0|A(RELAXABLE)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O, WRITE_LR_YES, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -1415,7 +1549,7 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* bncl.s $disp8 */
   {
     { 1, 1, 1, 1 },
-    "bncl8.s", "bncl.s", SYN (11), FMT (8), 0x7900,
+    "bncl8.s", "bncl.s", SYN (11), FMT (9), 0x7900,
     0,
     { 4, 0|A(ALIAS)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O, WRITE_LR_YES, WRITE_SRC_NO } }
   },
@@ -1424,8 +1558,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* bncl $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bncl24", "bncl", SYN (12), FMT (16), 0xf9000000,
-    & fmt_16_bcl24_ops[0],
+    "bncl24", "bncl", SYN (12), FMT (17), 0xf9000000,
+    & fmt_17_bcl24_ops[0],
     { 4, 0|A(RELAX)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_NONE, WRITE_LR_YES, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -1433,7 +1567,7 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* bncl.l $disp24 */
   {
     { 1, 1, 1, 1 },
-    "bncl24.l", "bncl.l", SYN (12), FMT (10), 0xf9000000,
+    "bncl24.l", "bncl.l", SYN (12), FMT (11), 0xf9000000,
     0,
     { 4, 0|A(ALIAS)|A(COND_CTI), { (1<<MACH_M32RX), PIPE_NONE, WRITE_LR_YES, WRITE_SRC_NO } }
   },
@@ -1441,51 +1575,51 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* cmp $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "cmp", "cmp", SYN (15), FMT (19), 0x40,
-    & fmt_19_cmp_ops[0],
+    "cmp", "cmp", SYN (15), FMT (20), 0x40,
+    & fmt_20_cmp_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_OS, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* cmpi $src2,#$simm16 */
   {
     { 1, 1, 1, 1 },
-    "cmpi", "cmpi", SYN (16), FMT (20), 0x80400000,
-    & fmt_20_cmpi_ops[0],
+    "cmpi", "cmpi", SYN (16), FMT (21), 0x80400000,
+    & fmt_21_cmpi_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* cmpi $src2,$simm16 */
   {
     { 1, 1, 1, 1 },
-    "cmpi.a", "cmpi", SYN (17), FMT (20), 0x80400000,
-    & fmt_20_cmpi_ops[0],
+    "cmpi.a", "cmpi", SYN (17), FMT (21), 0x80400000,
+    & fmt_21_cmpi_ops[0],
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* cmpu $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "cmpu", "cmpu", SYN (15), FMT (19), 0x50,
-    & fmt_19_cmp_ops[0],
+    "cmpu", "cmpu", SYN (15), FMT (20), 0x50,
+    & fmt_20_cmp_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_OS, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* cmpui $src2,#$uimm16 */
   {
     { 1, 1, 1, 1 },
-    "cmpui", "cmpui", SYN (18), FMT (21), 0x80500000,
-    & fmt_21_cmpui_ops[0],
+    "cmpui", "cmpui", SYN (18), FMT (22), 0x80500000,
+    & fmt_22_cmpui_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* cmpui $src2,$uimm16 */
   {
     { 1, 1, 1, 1 },
-    "cmpui.a", "cmpui", SYN (19), FMT (21), 0x80500000,
-    & fmt_21_cmpui_ops[0],
+    "cmpui.a", "cmpui", SYN (19), FMT (22), 0x80500000,
+    & fmt_22_cmpui_ops[0],
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* start-sanitize-m32rx */
 /* cmpeq $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "cmpeq", "cmpeq", SYN (15), FMT (19), 0x60,
-    & fmt_19_cmp_ops[0],
+    "cmpeq", "cmpeq", SYN (15), FMT (20), 0x60,
+    & fmt_20_cmp_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_OS, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -1493,45 +1627,45 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* cmpz $src2 */
   {
     { 1, 1, 1, 1 },
-    "cmpz", "cmpz", SYN (20), FMT (22), 0x70,
-    & fmt_22_cmpz_ops[0],
+    "cmpz", "cmpz", SYN (20), FMT (23), 0x70,
+    & fmt_23_cmpz_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_OS, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
 /* div $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "div", "div", SYN (0), FMT (23), 0x90000000,
-    & fmt_23_div_ops[0],
+    "div", "div", SYN (0), FMT (24), 0x90000000,
+    & fmt_24_div_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* divu $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "divu", "divu", SYN (0), FMT (23), 0x90100000,
-    & fmt_23_div_ops[0],
+    "divu", "divu", SYN (0), FMT (24), 0x90100000,
+    & fmt_24_div_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* rem $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "rem", "rem", SYN (0), FMT (23), 0x90200000,
-    & fmt_23_div_ops[0],
+    "rem", "rem", SYN (0), FMT (24), 0x90200000,
+    & fmt_24_div_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* remu $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "remu", "remu", SYN (0), FMT (23), 0x90300000,
-    & fmt_23_div_ops[0],
+    "remu", "remu", SYN (0), FMT (24), 0x90300000,
+    & fmt_24_div_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* start-sanitize-m32rx */
 /* divh $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "divh", "divh", SYN (0), FMT (23), 0x90000010,
-    & fmt_23_div_ops[0],
+    "divh", "divh", SYN (0), FMT (24), 0x90000010,
+    & fmt_24_div_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -1539,8 +1673,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* jc $sr */
   {
     { 1, 1, 1, 1 },
-    "jc", "jc", SYN (21), FMT (24), 0x1cc0,
-    & fmt_24_jc_ops[0],
+    "jc", "jc", SYN (21), FMT (25), 0x1cc0,
+    & fmt_25_jc_ops[0],
     { 4, 0|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -1548,279 +1682,279 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* jnc $sr */
   {
     { 1, 1, 1, 1 },
-    "jnc", "jnc", SYN (21), FMT (24), 0x1dc0,
-    & fmt_24_jc_ops[0],
+    "jnc", "jnc", SYN (21), FMT (25), 0x1dc0,
+    & fmt_25_jc_ops[0],
     { 4, 0|A(COND_CTI), { (1<<MACH_M32RX), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
 /* jl $sr */
   {
     { 1, 1, 1, 1 },
-    "jl", "jl", SYN (21), FMT (25), 0x1ec0,
-    & fmt_25_jl_ops[0],
+    "jl", "jl", SYN (21), FMT (26), 0x1ec0,
+    & fmt_26_jl_ops[0],
     { 4, 0|A(FILL_SLOT)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O, WRITE_LR_YES, WRITE_SRC_NO } }
   },
 /* jmp $sr */
   {
     { 1, 1, 1, 1 },
-    "jmp", "jmp", SYN (21), FMT (26), 0x1fc0,
-    & fmt_26_jmp_ops[0],
+    "jmp", "jmp", SYN (21), FMT (27), 0x1fc0,
+    & fmt_27_jmp_ops[0],
     { 4, 0|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ld $dr,@$sr */
   {
     { 1, 1, 1, 1 },
-    "ld", "ld", SYN (22), FMT (27), 0x20c0,
-    & fmt_27_ld_ops[0],
+    "ld", "ld", SYN (22), FMT (28), 0x20c0,
+    & fmt_28_ld_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ld $dr,@($sr) */
   {
     { 1, 1, 1, 1 },
-    "ld-2", "ld", SYN (23), FMT (28), 0x20c0,
+    "ld-2", "ld", SYN (23), FMT (29), 0x20c0,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ld $dr,@($slo16,$sr) */
   {
     { 1, 1, 1, 1 },
-    "ld-d", "ld", SYN (24), FMT (29), 0xa0c00000,
-    & fmt_29_ld_d_ops[0],
+    "ld-d", "ld", SYN (24), FMT (30), 0xa0c00000,
+    & fmt_30_ld_d_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ld $dr,@($sr,$slo16) */
   {
     { 1, 1, 1, 1 },
-    "ld-d2", "ld", SYN (25), FMT (30), 0xa0c00000,
+    "ld-d2", "ld", SYN (25), FMT (31), 0xa0c00000,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldb $dr,@$sr */
   {
     { 1, 1, 1, 1 },
-    "ldb", "ldb", SYN (22), FMT (31), 0x2080,
-    & fmt_31_ldb_ops[0],
+    "ldb", "ldb", SYN (22), FMT (32), 0x2080,
+    & fmt_32_ldb_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldb $dr,@($sr) */
   {
     { 1, 1, 1, 1 },
-    "ldb-2", "ldb", SYN (23), FMT (28), 0x2080,
+    "ldb-2", "ldb", SYN (23), FMT (29), 0x2080,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldb $dr,@($slo16,$sr) */
   {
     { 1, 1, 1, 1 },
-    "ldb-d", "ldb", SYN (24), FMT (32), 0xa0800000,
-    & fmt_32_ldb_d_ops[0],
+    "ldb-d", "ldb", SYN (24), FMT (33), 0xa0800000,
+    & fmt_33_ldb_d_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldb $dr,@($sr,$slo16) */
   {
     { 1, 1, 1, 1 },
-    "ldb-d2", "ldb", SYN (25), FMT (30), 0xa0800000,
+    "ldb-d2", "ldb", SYN (25), FMT (31), 0xa0800000,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldh $dr,@$sr */
   {
     { 1, 1, 1, 1 },
-    "ldh", "ldh", SYN (22), FMT (33), 0x20a0,
-    & fmt_33_ldh_ops[0],
+    "ldh", "ldh", SYN (22), FMT (34), 0x20a0,
+    & fmt_34_ldh_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldh $dr,@($sr) */
   {
     { 1, 1, 1, 1 },
-    "ldh-2", "ldh", SYN (23), FMT (28), 0x20a0,
+    "ldh-2", "ldh", SYN (23), FMT (29), 0x20a0,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldh $dr,@($slo16,$sr) */
   {
     { 1, 1, 1, 1 },
-    "ldh-d", "ldh", SYN (24), FMT (34), 0xa0a00000,
-    & fmt_34_ldh_d_ops[0],
+    "ldh-d", "ldh", SYN (24), FMT (35), 0xa0a00000,
+    & fmt_35_ldh_d_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldh $dr,@($sr,$slo16) */
   {
     { 1, 1, 1, 1 },
-    "ldh-d2", "ldh", SYN (25), FMT (30), 0xa0a00000,
+    "ldh-d2", "ldh", SYN (25), FMT (31), 0xa0a00000,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldub $dr,@$sr */
   {
     { 1, 1, 1, 1 },
-    "ldub", "ldub", SYN (22), FMT (31), 0x2090,
-    & fmt_31_ldb_ops[0],
+    "ldub", "ldub", SYN (22), FMT (32), 0x2090,
+    & fmt_32_ldb_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldub $dr,@($sr) */
   {
     { 1, 1, 1, 1 },
-    "ldub-2", "ldub", SYN (23), FMT (28), 0x2090,
+    "ldub-2", "ldub", SYN (23), FMT (29), 0x2090,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldub $dr,@($slo16,$sr) */
   {
     { 1, 1, 1, 1 },
-    "ldub-d", "ldub", SYN (24), FMT (32), 0xa0900000,
-    & fmt_32_ldb_d_ops[0],
+    "ldub-d", "ldub", SYN (24), FMT (33), 0xa0900000,
+    & fmt_33_ldb_d_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldub $dr,@($sr,$slo16) */
   {
     { 1, 1, 1, 1 },
-    "ldub-d2", "ldub", SYN (25), FMT (30), 0xa0900000,
+    "ldub-d2", "ldub", SYN (25), FMT (31), 0xa0900000,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* lduh $dr,@$sr */
   {
     { 1, 1, 1, 1 },
-    "lduh", "lduh", SYN (22), FMT (33), 0x20b0,
-    & fmt_33_ldh_ops[0],
+    "lduh", "lduh", SYN (22), FMT (34), 0x20b0,
+    & fmt_34_ldh_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* lduh $dr,@($sr) */
   {
     { 1, 1, 1, 1 },
-    "lduh-2", "lduh", SYN (23), FMT (28), 0x20b0,
+    "lduh-2", "lduh", SYN (23), FMT (29), 0x20b0,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* lduh $dr,@($slo16,$sr) */
   {
     { 1, 1, 1, 1 },
-    "lduh-d", "lduh", SYN (24), FMT (34), 0xa0b00000,
-    & fmt_34_ldh_d_ops[0],
+    "lduh-d", "lduh", SYN (24), FMT (35), 0xa0b00000,
+    & fmt_35_ldh_d_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* lduh $dr,@($sr,$slo16) */
   {
     { 1, 1, 1, 1 },
-    "lduh-d2", "lduh", SYN (25), FMT (30), 0xa0b00000,
+    "lduh-d2", "lduh", SYN (25), FMT (31), 0xa0b00000,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ld $dr,@$sr+ */
   {
     { 1, 1, 1, 1 },
-    "ld-plus", "ld", SYN (26), FMT (27), 0x20e0,
-    & fmt_27_ld_ops[0],
+    "ld-plus", "ld", SYN (26), FMT (36), 0x20e0,
+    & fmt_36_ld_plus_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_YES } }
   },
 /* ld24 $dr,#$uimm24 */
   {
     { 1, 1, 1, 1 },
-    "ld24", "ld24", SYN (27), FMT (35), 0xe0000000,
-    & fmt_35_ld24_ops[0],
+    "ld24", "ld24", SYN (27), FMT (37), 0xe0000000,
+    & fmt_37_ld24_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ld24 $dr,$uimm24 */
   {
     { 1, 1, 1, 1 },
-    "ld24.a", "ld24", SYN (28), FMT (35), 0xe0000000,
-    & fmt_35_ld24_ops[0],
+    "ld24.a", "ld24", SYN (28), FMT (37), 0xe0000000,
+    & fmt_37_ld24_ops[0],
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldi $dr,#$simm8 */
   {
     { 1, 1, 1, 1 },
-    "ldi8", "ldi", SYN (7), FMT (36), 0x6000,
-    & fmt_36_ldi8_ops[0],
+    "ldi8", "ldi", SYN (7), FMT (38), 0x6000,
+    & fmt_38_ldi8_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_OS, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldi $dr,$simm8 */
   {
     { 1, 1, 1, 1 },
-    "ldi8.a", "ldi", SYN (8), FMT (36), 0x6000,
-    & fmt_36_ldi8_ops[0],
+    "ldi8.a", "ldi", SYN (8), FMT (38), 0x6000,
+    & fmt_38_ldi8_ops[0],
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_OS, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldi8 $dr,#$simm8 */
   {
     { 1, 1, 1, 1 },
-    "ldi8a", "ldi8", SYN (7), FMT (36), 0x6000,
-    & fmt_36_ldi8_ops[0],
+    "ldi8a", "ldi8", SYN (7), FMT (38), 0x6000,
+    & fmt_38_ldi8_ops[0],
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_OS, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldi8 $dr,$simm8 */
   {
     { 1, 1, 1, 1 },
-    "ldi8a.a", "ldi8", SYN (8), FMT (36), 0x6000,
-    & fmt_36_ldi8_ops[0],
+    "ldi8a.a", "ldi8", SYN (8), FMT (38), 0x6000,
+    & fmt_38_ldi8_ops[0],
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_OS, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldi $dr,$slo16 */
   {
     { 1, 1, 1, 1 },
-    "ldi16", "ldi", SYN (29), FMT (37), 0x90f00000,
-    & fmt_37_ldi16_ops[0],
+    "ldi16", "ldi", SYN (29), FMT (39), 0x90f00000,
+    & fmt_39_ldi16_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* ldi16 $dr,$slo16 */
   {
     { 1, 1, 1, 1 },
-    "ldi16a", "ldi16", SYN (29), FMT (37), 0x90f00000,
-    & fmt_37_ldi16_ops[0],
+    "ldi16a", "ldi16", SYN (29), FMT (39), 0x90f00000,
+    & fmt_39_ldi16_ops[0],
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* lock $dr,@$sr */
   {
     { 1, 1, 1, 1 },
-    "lock", "lock", SYN (22), FMT (0), 0x20d0,
-    & fmt_0_add_ops[0],
+    "lock", "lock", SYN (22), FMT (40), 0x20d0,
+    & fmt_40_lock_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* machi $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "machi", "machi", SYN (15), FMT (38), 0x3040,
-    & fmt_38_machi_ops[0],
+    "machi", "machi", SYN (15), FMT (41), 0x3040,
+    & fmt_41_machi_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* start-sanitize-m32rx */
 /* machi $src1,$src2,$acc */
   {
     { 1, 1, 1, 1 },
-    "machi-a", "machi", SYN (30), FMT (39), 0x3040,
-    & fmt_39_machi_a_ops[0],
+    "machi-a", "machi", SYN (30), FMT (42), 0x3040,
+    & fmt_42_machi_a_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
 /* maclo $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "maclo", "maclo", SYN (15), FMT (38), 0x3050,
-    & fmt_38_machi_ops[0],
+    "maclo", "maclo", SYN (15), FMT (41), 0x3050,
+    & fmt_41_machi_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* start-sanitize-m32rx */
 /* maclo $src1,$src2,$acc */
   {
     { 1, 1, 1, 1 },
-    "maclo-a", "maclo", SYN (30), FMT (39), 0x3050,
-    & fmt_39_machi_a_ops[0],
+    "maclo-a", "maclo", SYN (30), FMT (42), 0x3050,
+    & fmt_42_machi_a_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
 /* macwhi $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "macwhi", "macwhi", SYN (15), FMT (38), 0x3060,
-    & fmt_38_machi_ops[0],
+    "macwhi", "macwhi", SYN (15), FMT (41), 0x3060,
+    & fmt_41_machi_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* macwlo $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "macwlo", "macwlo", SYN (15), FMT (38), 0x3070,
-    & fmt_38_machi_ops[0],
+    "macwlo", "macwlo", SYN (15), FMT (41), 0x3070,
+    & fmt_41_machi_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* mul $dr,$sr */
@@ -1833,184 +1967,184 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* mulhi $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "mulhi", "mulhi", SYN (15), FMT (19), 0x3000,
-    & fmt_19_cmp_ops[0],
+    "mulhi", "mulhi", SYN (15), FMT (43), 0x3000,
+    & fmt_43_mulhi_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* start-sanitize-m32rx */
 /* mulhi $src1,$src2,$acc */
   {
     { 1, 1, 1, 1 },
-    "mulhi-a", "mulhi", SYN (30), FMT (40), 0x3000,
-    & fmt_40_mulhi_a_ops[0],
+    "mulhi-a", "mulhi", SYN (30), FMT (44), 0x3000,
+    & fmt_44_mulhi_a_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
 /* mullo $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "mullo", "mullo", SYN (15), FMT (19), 0x3010,
-    & fmt_19_cmp_ops[0],
+    "mullo", "mullo", SYN (15), FMT (43), 0x3010,
+    & fmt_43_mulhi_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* start-sanitize-m32rx */
 /* mullo $src1,$src2,$acc */
   {
     { 1, 1, 1, 1 },
-    "mullo-a", "mullo", SYN (30), FMT (40), 0x3010,
-    & fmt_40_mulhi_a_ops[0],
+    "mullo-a", "mullo", SYN (30), FMT (44), 0x3010,
+    & fmt_44_mulhi_a_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
 /* mulwhi $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "mulwhi", "mulwhi", SYN (15), FMT (19), 0x3020,
-    & fmt_19_cmp_ops[0],
+    "mulwhi", "mulwhi", SYN (15), FMT (43), 0x3020,
+    & fmt_43_mulhi_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* mulwlo $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "mulwlo", "mulwlo", SYN (15), FMT (19), 0x3030,
-    & fmt_19_cmp_ops[0],
+    "mulwlo", "mulwlo", SYN (15), FMT (43), 0x3030,
+    & fmt_43_mulhi_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* mv $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "mv", "mv", SYN (0), FMT (41), 0x1080,
-    & fmt_41_mv_ops[0],
+    "mv", "mv", SYN (0), FMT (45), 0x1080,
+    & fmt_45_mv_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_OS, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* mvfachi $dr */
   {
     { 1, 1, 1, 1 },
-    "mvfachi", "mvfachi", SYN (31), FMT (42), 0x50f0,
-    & fmt_42_mvfachi_ops[0],
+    "mvfachi", "mvfachi", SYN (31), FMT (46), 0x50f0,
+    & fmt_46_mvfachi_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* start-sanitize-m32rx */
 /* mvfachi $dr,$accs */
   {
     { 1, 1, 1, 1 },
-    "mvfachi-a", "mvfachi", SYN (32), FMT (43), 0x50f0,
-    & fmt_43_mvfachi_a_ops[0],
+    "mvfachi-a", "mvfachi", SYN (32), FMT (47), 0x50f0,
+    & fmt_47_mvfachi_a_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
 /* mvfaclo $dr */
   {
     { 1, 1, 1, 1 },
-    "mvfaclo", "mvfaclo", SYN (31), FMT (42), 0x50f1,
-    & fmt_42_mvfachi_ops[0],
+    "mvfaclo", "mvfaclo", SYN (31), FMT (46), 0x50f1,
+    & fmt_46_mvfachi_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* start-sanitize-m32rx */
 /* mvfaclo $dr,$accs */
   {
     { 1, 1, 1, 1 },
-    "mvfaclo-a", "mvfaclo", SYN (32), FMT (43), 0x50f1,
-    & fmt_43_mvfachi_a_ops[0],
+    "mvfaclo-a", "mvfaclo", SYN (32), FMT (47), 0x50f1,
+    & fmt_47_mvfachi_a_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
 /* mvfacmi $dr */
   {
     { 1, 1, 1, 1 },
-    "mvfacmi", "mvfacmi", SYN (31), FMT (42), 0x50f2,
-    & fmt_42_mvfachi_ops[0],
+    "mvfacmi", "mvfacmi", SYN (31), FMT (46), 0x50f2,
+    & fmt_46_mvfachi_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* start-sanitize-m32rx */
 /* mvfacmi $dr,$accs */
   {
     { 1, 1, 1, 1 },
-    "mvfacmi-a", "mvfacmi", SYN (32), FMT (43), 0x50f2,
-    & fmt_43_mvfachi_a_ops[0],
+    "mvfacmi-a", "mvfacmi", SYN (32), FMT (47), 0x50f2,
+    & fmt_47_mvfachi_a_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
 /* mvfc $dr,$scr */
   {
     { 1, 1, 1, 1 },
-    "mvfc", "mvfc", SYN (33), FMT (44), 0x1090,
-    & fmt_44_mvfc_ops[0],
+    "mvfc", "mvfc", SYN (33), FMT (48), 0x1090,
+    & fmt_48_mvfc_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* mvtachi $src1 */
   {
     { 1, 1, 1, 1 },
-    "mvtachi", "mvtachi", SYN (34), FMT (45), 0x5070,
-    & fmt_45_mvtachi_ops[0],
+    "mvtachi", "mvtachi", SYN (34), FMT (49), 0x5070,
+    & fmt_49_mvtachi_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* start-sanitize-m32rx */
 /* mvtachi $src1,$accs */
   {
     { 1, 1, 1, 1 },
-    "mvtachi-a", "mvtachi", SYN (35), FMT (46), 0x5070,
-    & fmt_46_mvtachi_a_ops[0],
+    "mvtachi-a", "mvtachi", SYN (35), FMT (50), 0x5070,
+    & fmt_50_mvtachi_a_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
 /* mvtaclo $src1 */
   {
     { 1, 1, 1, 1 },
-    "mvtaclo", "mvtaclo", SYN (34), FMT (45), 0x5071,
-    & fmt_45_mvtachi_ops[0],
+    "mvtaclo", "mvtaclo", SYN (34), FMT (49), 0x5071,
+    & fmt_49_mvtachi_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* start-sanitize-m32rx */
 /* mvtaclo $src1,$accs */
   {
     { 1, 1, 1, 1 },
-    "mvtaclo-a", "mvtaclo", SYN (35), FMT (46), 0x5071,
-    & fmt_46_mvtachi_a_ops[0],
+    "mvtaclo-a", "mvtaclo", SYN (35), FMT (50), 0x5071,
+    & fmt_50_mvtachi_a_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
 /* mvtc $sr,$dcr */
   {
     { 1, 1, 1, 1 },
-    "mvtc", "mvtc", SYN (36), FMT (47), 0x10a0,
-    & fmt_47_mvtc_ops[0],
+    "mvtc", "mvtc", SYN (36), FMT (51), 0x10a0,
+    & fmt_51_mvtc_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* neg $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "neg", "neg", SYN (0), FMT (41), 0x30,
-    & fmt_41_mv_ops[0],
+    "neg", "neg", SYN (0), FMT (45), 0x30,
+    & fmt_45_mv_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_OS, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* nop */
   {
     { 1, 1, 1, 1 },
-    "nop", "nop", SYN (37), FMT (48), 0x7000,
+    "nop", "nop", SYN (37), FMT (52), 0x7000,
     0,
     { 4, 0, { (1<<MACH_M32R), PIPE_OS, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* not $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "not", "not", SYN (0), FMT (41), 0xb0,
-    & fmt_41_mv_ops[0],
+    "not", "not", SYN (0), FMT (45), 0xb0,
+    & fmt_45_mv_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_OS, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* rac */
   {
     { 1, 1, 1, 1 },
-    "rac", "rac", SYN (37), FMT (49), 0x5090,
-    & fmt_49_rac_ops[0],
+    "rac", "rac", SYN (37), FMT (53), 0x5090,
+    & fmt_53_rac_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* start-sanitize-m32rx */
 /* rac $accd */
   {
     { 1, 1, 1, 1 },
-    "rac-d", "rac", SYN (38), FMT (50), 0x5090,
-    & fmt_50_rac_d_ops[0],
+    "rac-d", "rac", SYN (38), FMT (54), 0x5090,
+    & fmt_54_rac_d_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -2018,8 +2152,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* rac $accd,$accs */
   {
     { 1, 1, 1, 1 },
-    "rac-ds", "rac", SYN (39), FMT (51), 0x5090,
-    & fmt_51_rac_ds_ops[0],
+    "rac-ds", "rac", SYN (39), FMT (55), 0x5090,
+    & fmt_55_rac_ds_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -2027,24 +2161,24 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* rac $accd,$accs,#$imm1 */
   {
     { 1, 1, 1, 1 },
-    "rac-dsi", "rac", SYN (40), FMT (52), 0x5090,
-    & fmt_52_rac_dsi_ops[0],
+    "rac-dsi", "rac", SYN (40), FMT (56), 0x5090,
+    & fmt_56_rac_dsi_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
 /* rach */
   {
     { 1, 1, 1, 1 },
-    "rach", "rach", SYN (37), FMT (49), 0x5080,
-    & fmt_49_rac_ops[0],
+    "rach", "rach", SYN (37), FMT (53), 0x5080,
+    & fmt_53_rac_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* start-sanitize-m32rx */
 /* rach $accd */
   {
     { 1, 1, 1, 1 },
-    "rach-d", "rach", SYN (38), FMT (50), 0x5080,
-    & fmt_50_rac_d_ops[0],
+    "rach-d", "rach", SYN (38), FMT (54), 0x5080,
+    & fmt_54_rac_d_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -2052,8 +2186,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* rach $accd,$accs */
   {
     { 1, 1, 1, 1 },
-    "rach-ds", "rach", SYN (39), FMT (51), 0x5080,
-    & fmt_51_rac_ds_ops[0],
+    "rach-ds", "rach", SYN (39), FMT (55), 0x5080,
+    & fmt_55_rac_ds_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -2061,30 +2195,30 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* rach $accd,$accs,#$imm1 */
   {
     { 1, 1, 1, 1 },
-    "rach-dsi", "rach", SYN (40), FMT (52), 0x5080,
-    & fmt_52_rac_dsi_ops[0],
+    "rach-dsi", "rach", SYN (40), FMT (56), 0x5080,
+    & fmt_56_rac_dsi_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
 /* rte */
   {
     { 1, 1, 1, 1 },
-    "rte", "rte", SYN (37), FMT (53), 0x10d6,
-    & fmt_53_rte_ops[0],
+    "rte", "rte", SYN (37), FMT (57), 0x10d6,
+    & fmt_57_rte_ops[0],
     { 4, 0|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* seth $dr,#$hi16 */
   {
     { 1, 1, 1, 1 },
-    "seth", "seth", SYN (41), FMT (54), 0xd0c00000,
-    & fmt_54_seth_ops[0],
+    "seth", "seth", SYN (41), FMT (58), 0xd0c00000,
+    & fmt_58_seth_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* seth $dr,$hi16 */
   {
     { 1, 1, 1, 1 },
-    "seth.a", "seth", SYN (42), FMT (54), 0xd0c00000,
-    & fmt_54_seth_ops[0],
+    "seth.a", "seth", SYN (42), FMT (58), 0xd0c00000,
+    & fmt_58_seth_ops[0],
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* sll $dr,$sr */
@@ -2097,29 +2231,29 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* sll3 $dr,$sr,#$simm16 */
   {
     { 1, 1, 1, 1 },
-    "sll3", "sll3", SYN (9), FMT (5), 0x90c00000,
-    & fmt_5_addv3_ops[0],
+    "sll3", "sll3", SYN (9), FMT (59), 0x90c00000,
+    & fmt_59_sll3_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* sll3 $dr,$sr,$simm16 */
   {
     { 1, 1, 1, 1 },
-    "sll3.a", "sll3", SYN (10), FMT (5), 0x90c00000,
-    & fmt_5_addv3_ops[0],
+    "sll3.a", "sll3", SYN (10), FMT (59), 0x90c00000,
+    & fmt_59_sll3_ops[0],
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* slli $dr,#$uimm5 */
   {
     { 1, 1, 1, 1 },
-    "slli", "slli", SYN (43), FMT (55), 0x5040,
-    & fmt_55_slli_ops[0],
+    "slli", "slli", SYN (43), FMT (60), 0x5040,
+    & fmt_60_slli_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* slli $dr,$uimm5 */
   {
     { 1, 1, 1, 1 },
-    "slli.a", "slli", SYN (44), FMT (55), 0x5040,
-    & fmt_55_slli_ops[0],
+    "slli.a", "slli", SYN (44), FMT (60), 0x5040,
+    & fmt_60_slli_ops[0],
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* sra $dr,$sr */
@@ -2132,29 +2266,29 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* sra3 $dr,$sr,#$simm16 */
   {
     { 1, 1, 1, 1 },
-    "sra3", "sra3", SYN (9), FMT (5), 0x90a00000,
-    & fmt_5_addv3_ops[0],
+    "sra3", "sra3", SYN (9), FMT (59), 0x90a00000,
+    & fmt_59_sll3_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* sra3 $dr,$sr,$simm16 */
   {
     { 1, 1, 1, 1 },
-    "sra3.a", "sra3", SYN (10), FMT (5), 0x90a00000,
-    & fmt_5_addv3_ops[0],
+    "sra3.a", "sra3", SYN (10), FMT (59), 0x90a00000,
+    & fmt_59_sll3_ops[0],
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* srai $dr,#$uimm5 */
   {
     { 1, 1, 1, 1 },
-    "srai", "srai", SYN (43), FMT (55), 0x5020,
-    & fmt_55_slli_ops[0],
+    "srai", "srai", SYN (43), FMT (60), 0x5020,
+    & fmt_60_slli_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* srai $dr,$uimm5 */
   {
     { 1, 1, 1, 1 },
-    "srai.a", "srai", SYN (44), FMT (55), 0x5020,
-    & fmt_55_slli_ops[0],
+    "srai.a", "srai", SYN (44), FMT (60), 0x5020,
+    & fmt_60_slli_ops[0],
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* srl $dr,$sr */
@@ -2167,127 +2301,127 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* srl3 $dr,$sr,#$simm16 */
   {
     { 1, 1, 1, 1 },
-    "srl3", "srl3", SYN (9), FMT (5), 0x90800000,
-    & fmt_5_addv3_ops[0],
+    "srl3", "srl3", SYN (9), FMT (59), 0x90800000,
+    & fmt_59_sll3_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* srl3 $dr,$sr,$simm16 */
   {
     { 1, 1, 1, 1 },
-    "srl3.a", "srl3", SYN (10), FMT (5), 0x90800000,
-    & fmt_5_addv3_ops[0],
+    "srl3.a", "srl3", SYN (10), FMT (59), 0x90800000,
+    & fmt_59_sll3_ops[0],
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* srli $dr,#$uimm5 */
   {
     { 1, 1, 1, 1 },
-    "srli", "srli", SYN (43), FMT (55), 0x5000,
-    & fmt_55_slli_ops[0],
+    "srli", "srli", SYN (43), FMT (60), 0x5000,
+    & fmt_60_slli_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* srli $dr,$uimm5 */
   {
     { 1, 1, 1, 1 },
-    "srli.a", "srli", SYN (44), FMT (55), 0x5000,
-    & fmt_55_slli_ops[0],
+    "srli.a", "srli", SYN (44), FMT (60), 0x5000,
+    & fmt_60_slli_ops[0],
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* st $src1,@$src2 */
   {
     { 1, 1, 1, 1 },
-    "st", "st", SYN (45), FMT (19), 0x2040,
-    & fmt_19_cmp_ops[0],
+    "st", "st", SYN (45), FMT (61), 0x2040,
+    & fmt_61_st_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* st $src1,@($src2) */
   {
     { 1, 1, 1, 1 },
-    "st-2", "st", SYN (46), FMT (56), 0x2040,
+    "st-2", "st", SYN (46), FMT (62), 0x2040,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* st $src1,@($slo16,$src2) */
   {
     { 1, 1, 1, 1 },
-    "st-d", "st", SYN (47), FMT (57), 0xa0400000,
-    & fmt_57_st_d_ops[0],
+    "st-d", "st", SYN (47), FMT (63), 0xa0400000,
+    & fmt_63_st_d_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* st $src1,@($src2,$slo16) */
   {
     { 1, 1, 1, 1 },
-    "st-d2", "st", SYN (48), FMT (58), 0xa0400000,
+    "st-d2", "st", SYN (48), FMT (64), 0xa0400000,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* stb $src1,@$src2 */
   {
     { 1, 1, 1, 1 },
-    "stb", "stb", SYN (45), FMT (19), 0x2000,
-    & fmt_19_cmp_ops[0],
+    "stb", "stb", SYN (45), FMT (65), 0x2000,
+    & fmt_65_stb_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* stb $src1,@($src2) */
   {
     { 1, 1, 1, 1 },
-    "stb-2", "stb", SYN (46), FMT (56), 0x2000,
+    "stb-2", "stb", SYN (46), FMT (62), 0x2000,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* stb $src1,@($slo16,$src2) */
   {
     { 1, 1, 1, 1 },
-    "stb-d", "stb", SYN (47), FMT (57), 0xa0000000,
-    & fmt_57_st_d_ops[0],
+    "stb-d", "stb", SYN (47), FMT (66), 0xa0000000,
+    & fmt_66_stb_d_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* stb $src1,@($src2,$slo16) */
   {
     { 1, 1, 1, 1 },
-    "stb-d2", "stb", SYN (48), FMT (58), 0xa0000000,
+    "stb-d2", "stb", SYN (48), FMT (64), 0xa0000000,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* sth $src1,@$src2 */
   {
     { 1, 1, 1, 1 },
-    "sth", "sth", SYN (45), FMT (19), 0x2020,
-    & fmt_19_cmp_ops[0],
+    "sth", "sth", SYN (45), FMT (67), 0x2020,
+    & fmt_67_sth_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* sth $src1,@($src2) */
   {
     { 1, 1, 1, 1 },
-    "sth-2", "sth", SYN (46), FMT (56), 0x2020,
+    "sth-2", "sth", SYN (46), FMT (62), 0x2020,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* sth $src1,@($slo16,$src2) */
   {
     { 1, 1, 1, 1 },
-    "sth-d", "sth", SYN (47), FMT (57), 0xa0200000,
-    & fmt_57_st_d_ops[0],
+    "sth-d", "sth", SYN (47), FMT (68), 0xa0200000,
+    & fmt_68_sth_d_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* sth $src1,@($src2,$slo16) */
   {
     { 1, 1, 1, 1 },
-    "sth-d2", "sth", SYN (48), FMT (58), 0xa0200000,
+    "sth-d2", "sth", SYN (48), FMT (64), 0xa0200000,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* st $src1,@+$src2 */
   {
     { 1, 1, 1, 1 },
-    "st-plus", "st", SYN (49), FMT (19), 0x2060,
-    & fmt_19_cmp_ops[0],
+    "st-plus", "st", SYN (49), FMT (69), 0x2060,
+    & fmt_69_st_plus_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_YES } }
   },
 /* st $src1,@-$src2 */
   {
     { 1, 1, 1, 1 },
-    "st-minus", "st", SYN (50), FMT (19), 0x2070,
-    & fmt_19_cmp_ops[0],
+    "st-minus", "st", SYN (50), FMT (69), 0x2070,
+    & fmt_69_st_plus_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_YES } }
   },
 /* sub $dr,$sr */
@@ -2300,49 +2434,49 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* subv $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "subv", "subv", SYN (0), FMT (0), 0x0,
-    & fmt_0_add_ops[0],
+    "subv", "subv", SYN (0), FMT (5), 0x0,
+    & fmt_5_addv_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_OS, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* subx $dr,$sr */
   {
     { 1, 1, 1, 1 },
-    "subx", "subx", SYN (0), FMT (6), 0x10,
-    & fmt_6_addx_ops[0],
+    "subx", "subx", SYN (0), FMT (7), 0x10,
+    & fmt_7_addx_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_OS, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* trap #$uimm4 */
   {
     { 1, 1, 1, 1 },
-    "trap", "trap", SYN (51), FMT (59), 0x10f0,
-    & fmt_59_trap_ops[0],
+    "trap", "trap", SYN (51), FMT (70), 0x10f0,
+    & fmt_70_trap_ops[0],
     { 4, 0|A(FILL_SLOT)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* trap $uimm4 */
   {
     { 1, 1, 1, 1 },
-    "trap.a", "trap", SYN (52), FMT (59), 0x10f0,
-    & fmt_59_trap_ops[0],
+    "trap.a", "trap", SYN (52), FMT (70), 0x10f0,
+    & fmt_70_trap_ops[0],
     { 4, 0|A(ALIAS)|A(FILL_SLOT)|A(UNCOND_CTI), { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* unlock $src1,@$src2 */
   {
     { 1, 1, 1, 1 },
-    "unlock", "unlock", SYN (45), FMT (19), 0x2050,
-    & fmt_19_cmp_ops[0],
+    "unlock", "unlock", SYN (45), FMT (71), 0x2050,
+    & fmt_71_unlock_ops[0],
     { 4, 0, { (1<<MACH_M32R), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* push $src1 */
   {
     { 1, 1, 1, 1 },
-    "push", "push", SYN (34), FMT (60), 0x207f,
+    "push", "push", SYN (34), FMT (72), 0x207f,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* pop $dr */
   {
     { 1, 1, 1, 1 },
-    "pop", "pop", SYN (31), FMT (61), 0x20ef,
+    "pop", "pop", SYN (31), FMT (73), 0x20ef,
     0,
     { 4, 0|A(ALIAS), { (1<<MACH_M32R), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
@@ -2350,8 +2484,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* satb $dr,$src2 */
   {
     { 1, 1, 1, 1 },
-    "satb", "satb", SYN (53), FMT (62), 0x80000100,
-    & fmt_62_satb_ops[0],
+    "satb", "satb", SYN (53), FMT (74), 0x80000100,
+    & fmt_74_satb_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -2359,8 +2493,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* sath $dr,$src2 */
   {
     { 1, 1, 1, 1 },
-    "sath", "sath", SYN (53), FMT (62), 0x80000200,
-    & fmt_62_satb_ops[0],
+    "sath", "sath", SYN (53), FMT (74), 0x80000200,
+    & fmt_74_satb_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -2368,8 +2502,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* sat $dr,$src2 */
   {
     { 1, 1, 1, 1 },
-    "sat", "sat", SYN (53), FMT (63), 0x80000000,
-    & fmt_63_sat_ops[0],
+    "sat", "sat", SYN (53), FMT (75), 0x80000000,
+    & fmt_75_sat_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_NONE, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -2377,8 +2511,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* pcmpbz $src2 */
   {
     { 1, 1, 1, 1 },
-    "pcmpbz", "pcmpbz", SYN (20), FMT (22), 0x370,
-    & fmt_22_cmpz_ops[0],
+    "pcmpbz", "pcmpbz", SYN (20), FMT (23), 0x370,
+    & fmt_23_cmpz_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_OS, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -2386,8 +2520,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* sadd */
   {
     { 1, 1, 1, 1 },
-    "sadd", "sadd", SYN (37), FMT (64), 0x50e4,
-    & fmt_64_sadd_ops[0],
+    "sadd", "sadd", SYN (37), FMT (76), 0x50e4,
+    & fmt_76_sadd_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -2395,8 +2529,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* macwu1 $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "macwu1", "macwu1", SYN (15), FMT (65), 0x50b0,
-    & fmt_65_macwu1_ops[0],
+    "macwu1", "macwu1", SYN (15), FMT (77), 0x50b0,
+    & fmt_77_macwu1_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -2404,8 +2538,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* msblo $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "msblo", "msblo", SYN (15), FMT (38), 0x50d0,
-    & fmt_38_machi_ops[0],
+    "msblo", "msblo", SYN (15), FMT (41), 0x50d0,
+    & fmt_41_machi_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -2413,8 +2547,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* mulwu1 $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "mulwu1", "mulwu1", SYN (15), FMT (19), 0x50a0,
-    & fmt_19_cmp_ops[0],
+    "mulwu1", "mulwu1", SYN (15), FMT (78), 0x50a0,
+    & fmt_78_mulwu1_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -2422,8 +2556,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* maclh1 $src1,$src2 */
   {
     { 1, 1, 1, 1 },
-    "maclh1", "maclh1", SYN (15), FMT (65), 0x50c0,
-    & fmt_65_macwu1_ops[0],
+    "maclh1", "maclh1", SYN (15), FMT (77), 0x50c0,
+    & fmt_77_macwu1_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_S, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -2431,8 +2565,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* sc */
   {
     { 1, 1, 1, 1 },
-    "sc", "sc", SYN (37), FMT (66), 0x7401,
-    & fmt_66_sc_ops[0],
+    "sc", "sc", SYN (37), FMT (79), 0x7401,
+    & fmt_79_sc_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */
@@ -2440,8 +2574,8 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
 /* snc */
   {
     { 1, 1, 1, 1 },
-    "snc", "snc", SYN (37), FMT (66), 0x7501,
-    & fmt_66_sc_ops[0],
+    "snc", "snc", SYN (37), FMT (79), 0x7501,
+    & fmt_79_sc_ops[0],
     { 4, 0, { (1<<MACH_M32RX), PIPE_O, WRITE_LR_NO, WRITE_SRC_NO } }
   },
 /* end-sanitize-m32rx */

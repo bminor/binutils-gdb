@@ -33,17 +33,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    If non-null INSN is the insn table entry.
    Otherwise INSN_VALUE is examined to compute it.
    LENGTH is the bit length of INSN_VALUE if known, otherwise 0.
+   ALIAS_P is non-zero if alias insns are to be included in the search.
    The result a pointer to the insn table entry, or NULL if the instruction
    wasn't recognized.  */
 
 const CGEN_INSN *
-@arch@_cgen_lookup_insn (insn, insn_value, length, fields)
+@arch@_cgen_lookup_insn (insn, insn_value, length, fields, alias_p)
      const CGEN_INSN *insn;
      cgen_insn_t insn_value;
      int length;
      CGEN_FIELDS *fields;
 {
-  char buf[4];
+  char buf[16];
 
   if (!insn)
     {
@@ -82,14 +83,18 @@ const CGEN_INSN *
 	{
 	  insn = insn_list->insn;
 
-	  /* Basic bit mask must be correct.  */
-	  /* ??? May wish to allow target to defer this check until the extract
-	     handler.  */
-	  if ((insn_value & CGEN_INSN_MASK (insn)) == CGEN_INSN_VALUE (insn))
+	  if (alias_p
+	      || ! CGEN_INSN_ATTR (insn, CGEN_INSN_ALIAS))
 	    {
-	      length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, fields);
-	      if (length > 0)
-		return insn;
+	      /* Basic bit mask must be correct.  */
+	      /* ??? May wish to allow target to defer this check until the
+		 extract handler.  */
+	      if ((insn_value & CGEN_INSN_MASK (insn)) == CGEN_INSN_VALUE (insn))
+		{
+		  length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, fields);
+		  if (length > 0)
+		    return insn;
+		}
 	    }
 
 	  insn_list = CGEN_DIS_NEXT_INSN (insn_list);
@@ -97,6 +102,11 @@ const CGEN_INSN *
     }
   else
     {
+      /* Sanity check: can't pass an alias insn if ! alias_p.  */
+      if (! alias_p
+	  && CGEN_INSN_ATTR (insn, CGEN_INSN_ALIAS))
+	abort ();
+
       length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, fields);
       if (length > 0)
 	return insn;
@@ -124,7 +134,11 @@ const CGEN_INSN *
   const CGEN_OPERAND_INSTANCE *opinst;
   int i;
 
-  insn = @arch@_cgen_lookup_insn (insn, insn_value, length, &fields);
+  /* FIXME: ALIAS insns are in transition from being record in the insn table
+     to being recorded separately as macros.  They don't have semantic code
+     so they can't be used here.  Thus we currently always ignore the INSN
+     argument.  */
+  insn = @arch@_cgen_lookup_insn (NULL, insn_value, length, &fields, 0);
   if (! insn)
     return NULL;
 
