@@ -740,7 +740,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
   char *filestring = "";
   int depth = 0;
   int fcn_first_line = 0;
-  CORE_ADDR fcn_first_line_addr;
+  CORE_ADDR fcn_first_line_addr = 0;
   int fcn_last_line = 0;
   int fcn_start_addr = 0;
   long fcn_line_ptr = 0;
@@ -1009,6 +1009,8 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	    }
 	  else if (STREQ (cs->c_name, ".ef"))
 	    {
+	      if (!within_function)
+		error ("Bad coff function information\n");
 	      /* the value of .ef is the address of epilogue code;
 	         not useful for gdb.  */
 	      /* { main_aux.x_sym.x_misc.x_lnsz.x_lnno

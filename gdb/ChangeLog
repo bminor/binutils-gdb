@@ -1,3 +1,12 @@
+2001-03-25  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	From  Andrew Cagney  <ac131313@redhat.com>
+	
+        * coffread.c (coff_symtab_read): Initialize
+ 	``fcn_first_line_addr''.  Check that the ``.bf'' always preceeds
+ 	the ``.ef'' info.
+	* dbxread.c (find_text_range): Initialize ``start'' and ``end''.
+
 2001-03-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/sparc/tm-sp64.h (GDB_MULTI_ARCH): Down grade to

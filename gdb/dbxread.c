@@ -213,7 +213,8 @@ find_text_range (bfd * sym_bfd, struct objfile *objfile)
 {
   asection *sec;
   int found_any = 0;
-  CORE_ADDR start, end;
+  CORE_ADDR start = 0;
+  CORE_ADDR end = 0;
 
   for (sec = sym_bfd->sections; sec; sec = sec->next)
     if (bfd_get_section_flags (sym_bfd, sec) & SEC_CODE)
