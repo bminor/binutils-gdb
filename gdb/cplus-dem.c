@@ -90,8 +90,10 @@ extern char *cplus_demangle ();
 #endif
 
 #ifdef __STDC__
-extern char *xmalloc (int);
-extern char *xrealloc (char *, int);
+/* GDB prototypes these as void* in defs.h, so we better too, at least
+   as long as we're including defs.h.  */
+extern void *xmalloc (int);
+extern void *xrealloc (char *, int);
 extern void free (char *);
 #else
 extern char *xmalloc ();
