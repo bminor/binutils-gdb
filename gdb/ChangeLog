@@ -1,3 +1,7 @@
+Sat Jun 13 13:02:32 1998  Dawn Perchik (dawn@cygnus.com)
+
+	* remote.c : Fix remote help string to match that of help.exp.
+
 Fri Jun 12 14:22:55 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* configure.in (LIBS): Add -lw to the list of libraries if needed.
