@@ -1,3 +1,9 @@
+2002-02-28  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* go32-nat.c (_initialize_go32_nat): Don't use periods in the
+	first line of the doc string for "info dos", except at the end of
+	the sentence, since the short help stops at the first period.
+
 2002-02-28  Jason Merrill  <jason@redhat.com>
 
 	* dwarf2read.c (dwarf_cfi_name): Add new codes.
