@@ -1,3 +1,12 @@
+Wed Mar 25 11:19:28 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Yan Meroth <YAN.MEROTH@st.com>:
+	* ihex.c (ihex_scan): Add extbase variable so that getting an
+ 	extended linear address record does not ignore any previous
+ 	extended address.
+	(ihex_write_object_contents): When writing out an extended linear
+ 	address record, zero out any previous extended address.
+
 Tue Mar 24 16:09:43 1998  Manfred Hollstein  <manfred@s-direktnet.de>
 
 	* ieee.c (do_one): Check section before dereferencing it.
