@@ -1,4 +1,8 @@
 start-sanitize-d10v
+Fri Jul 26 11:47:10 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v.h (OPERAND_SHIFT): New operand flag.
+
 Thu Jul 25 12:06:22 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v.h: Changes for divs, parallel-only instructions, and
