@@ -36,6 +36,7 @@ gdbint.texinfo
 gdbinv-m.m4.in
 gdbinv-s.m4.in
 gen.m4
+h8.m4
 i80386.m4
 i960.m4
 lpsrc.sed
