@@ -1,5 +1,10 @@
 2002-07-31  Kevin Buettner  <kevinb@redhat.com>
 
+	* mips-tdep.c (mips_find_abi_section): Add N64 ABI recognition
+	test.  (Thanks to Daniel Jacobowitz.)
+	
+2002-07-31  Kevin Buettner  <kevinb@redhat.com>
+
 	* mips-tdep.c (enum mips_abi): Add MIPS_ABI_N64.
 	(mips_abi_strings): Add "n64".
 	(mips_gdbarch_init): Add test for n64 abi.  Add MIPS_ABI_N64 case.
