@@ -43,7 +43,7 @@ mips*-sgi-irix6*)	host64=true
 			HOST_64BIT_TYPE="long long";
 			HOST_U_64BIT_TYPE="unsigned long long";
 			;;
-mips64*-*-linux*)		host64=true
+mips64*-*-linux*)	host64=true
 			HOST_64BIT_TYPE="long long";
 			HOST_U_64BIT_TYPE="unsigned long long";
 			;;

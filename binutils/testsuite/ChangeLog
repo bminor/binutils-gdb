@@ -1,3 +1,7 @@
+2001-06-18  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* binutils-all/readelf.exp: Typo.
+
 2001-06-19  Andreas Jaeger  <aj@suse.de>
 
 	* binutils-all/readelf.r: Don't check for specific info value to

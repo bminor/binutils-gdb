@@ -249,7 +249,7 @@ if ![is_remote host] {
 
 send_user "Version [binutil_version $READELF]"
 
-# Assemle the test file.
+# Assemble the test file.
 if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
     perror "unresolved 1"
     unresolved "readelf - failed to assemble"

@@ -1,3 +1,7 @@
+2001-06-18  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* configure.host (mips64-*-linux): Reformat.
+
 2001-06-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-hppa.c (elf32_hppa_size_dynamic_sections): Always
