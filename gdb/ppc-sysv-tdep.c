@@ -69,11 +69,22 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   CORE_ADDR saved_sp;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  greg = struct_return ? 4 : 3;
+  greg = 3;
   freg = 1;
   vreg = 2;
   argstkspace = 0;
   structstkspace = 0;
+
+  /* If the function is returning a `struct', then the first word
+     (which will be passed in r3) is used for struct return address.
+     In that case we should advance one word and start from r4
+     register to copy parameters.  */
+  if (struct_return)
+    {
+      regcache_raw_write_signed (regcache, tdep->ppc_gp0_regnum + greg,
+				 struct_addr);
+      greg++;
+    }
 
   /* Figure out how much new stack space is required for arguments
      which don't fit in registers.  Unlike the PowerOpen ABI, the

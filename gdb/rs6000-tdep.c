@@ -1123,6 +1123,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 			int nargs, struct value **args, CORE_ADDR sp,
 			int struct_return, CORE_ADDR struct_addr)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int ii;
   int len = 0;
   int argno;			/* current argument number */
@@ -1137,14 +1138,19 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   CORE_ADDR saved_sp;
 
   /* The first eight words of ther arguments are passed in registers.
-     Copy them appropriately.
+     Copy them appropriately.  */
+  ii = 0;
 
-     If the function is returning a `struct', then the first word (which 
-     will be passed in r3) is used for struct return address.  In that
-     case we should advance one word and start from r4 register to copy 
-     parameters.  */
-
-  ii = struct_return ? 1 : 0;
+  /* If the function is returning a `struct', then the first word
+     (which will be passed in r3) is used for struct return address.
+     In that case we should advance one word and start from r4
+     register to copy parameters.  */
+  if (struct_return)
+    {
+      regcache_raw_write_unsigned (regcache, tdep->ppc_gp0_regnum + 3,
+				   struct_addr);
+      ii++;
+    }
 
 /* 
    effectively indirect call... gcc does...
@@ -2049,16 +2055,6 @@ rs6000_stab_reg_to_regnum (int num)
       break;
     }
   return regnum;
-}
-
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  */
-
-static void
-rs6000_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  write_register (tdep->ppc_gp0_regnum + 3, addr);
 }
 
 /* Write into appropriate registers a function return value
@@ -2973,7 +2969,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     set_gdbarch_push_dummy_call (gdbarch, rs6000_push_dummy_call);
 
-  set_gdbarch_deprecated_store_struct_return (gdbarch, rs6000_store_struct_return);
   set_gdbarch_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, rs6000_pop_frame);
 
