@@ -1,3 +1,10 @@
+2004-03-12  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/pr-1553.exp: New.  Tests for PR c++/1553.
+	* gdb.cp/pr-1553.cc: Ditto.
+	* gdb.cp/local.exp (ptype NestedInnerLocal): Add comment, third
+	pass branch.
+
 2004-03-12  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/templates.exp: Accept more template types.
