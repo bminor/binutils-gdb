@@ -1,3 +1,15 @@
+2001-11-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* arm-tdep.c (arm_register_type): New function.
+	(arm_register_convertible): Delete.
+	(arm_register_convert_to_virtual): Delete.
+	(arm_register_convert_to_raw): Delete.
+	* config/arm/tm-arm.h (REGISTER_CONVERTIBLE): Delete.
+	(REGISTER_CONVERT_TO_VIRTUAL): Delete.
+	(REGISTER_CONVERT_TO_RAW): Delete.
+	(REGISTER_VIRTUAL_TYPE): Redefine as call to arm_register_type.
+	(arm_register_type): Declare.
+	
 2001-11-13  Elena Zannoni  <ezannoni@redhat.com>
 
 	From Andrew Cagney <cagney@redhat.com>:

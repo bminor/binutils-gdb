@@ -1437,6 +1437,20 @@ arm_float_info (void)
   print_fpu_flags (status);
 }
 
+struct type *
+arm_register_type (int regnum)
+{
+  if (regnum >= F0_REGNUM && regnum < F0_REGNUM + NUM_FREGS)
+    {
+      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+	return builtin_type_arm_ext_big;
+      else
+	return builtin_type_arm_ext_littlebyte_bigword;
+    }
+  else
+    return builtin_type_int32;
+}
+
 /* NOTE: cagney/2001-08-20: Both convert_from_extended() and
    convert_to_extended() use floatformat_arm_ext_littlebyte_bigword.
    It is thought that this is is the floating-point register format on
@@ -1464,40 +1478,6 @@ convert_to_extended (void *dbl, void *ptr)
   else
     floatformat_from_doublest (&floatformat_arm_ext_littlebyte_bigword,
 			       &d, dbl);
-}
-
-/* Nonzero if register N requires conversion from raw format to
-   virtual format.  */
-
-int
-arm_register_convertible (unsigned int regnum)
-{
-  return ((regnum - F0_REGNUM) < 8);
-}
-
-/* Convert data from raw format for register REGNUM in buffer FROM to
-   virtual format with type TYPE in buffer TO.  */
-
-void
-arm_register_convert_to_virtual (unsigned int regnum, struct type *type,
-				 void *from, void *to)
-{
-  double val;
-
-  convert_from_extended (from, &val);
-  store_floating (to, TYPE_LENGTH (type), val);
-}
-
-/* Convert data from virtual format with type TYPE in buffer FROM to
-   raw format for register REGNUM in buffer TO.  */
-
-void
-arm_register_convert_to_raw (unsigned int regnum, struct type *type,
-			     void *from, void *to)
-{
-  double val = extract_floating (from, TYPE_LENGTH (type));
-
-  convert_to_extended (&val, to);
 }
 
 static int

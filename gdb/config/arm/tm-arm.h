@@ -268,35 +268,11 @@ extern char **arm_register_names;
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 #define MAX_REGISTER_VIRTUAL_SIZE FP_REGISTER_VIRTUAL_SIZE
 
-/* Nonzero if register N requires conversion from raw format to
-   virtual format. */
-extern int arm_register_convertible (unsigned int);
-#define REGISTER_CONVERTIBLE(REGNUM) (arm_register_convertible (REGNUM))
-
-/* Convert data from raw format for register REGNUM in buffer FROM to
-   virtual format with type TYPE in buffer TO. */
-
-extern void arm_register_convert_to_virtual (unsigned int regnum,
-					     struct type *type,
-					     void *from, void *to);
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO) \
-     arm_register_convert_to_virtual (REGNUM, TYPE, FROM, TO)
-
-/* Convert data from virtual format with type TYPE in buffer FROM to
-   raw format for register REGNUM in buffer TO.  */
-
-extern void arm_register_convert_to_raw (unsigned int regnum,
-					 struct type *type,
-					 void *from, void *to);
-#define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO) \
-     arm_register_convert_to_raw (REGNUM, TYPE, FROM, TO)
-
 /* Return the GDB type object for the "standard" data type of data in
    register N.  */
 
-#define REGISTER_VIRTUAL_TYPE(N) \
-     (((unsigned)(N) - F0_REGNUM) < NUM_FREGS \
-      ? builtin_type_double : builtin_type_int)
+extern struct type *arm_register_type (int regnum);
+#define REGISTER_VIRTUAL_TYPE(N) arm_register_type (N)
 
 /* The system C compiler uses a similar structure return convention to gcc */
 extern use_struct_convention_fn arm_use_struct_convention;
