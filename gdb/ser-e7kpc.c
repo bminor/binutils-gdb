@@ -28,8 +28,6 @@
 #define strncasecmp strnicmp
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#define W32SUT_32
-#include "mswin/w32sut.h"
 #endif
 
 #ifdef __GO32__
@@ -44,13 +42,6 @@ static int e7000pc_write PARAMS ((serial_t scb, const char *str, int len));
 static void e7000pc_close PARAMS ((serial_t scb));
 static serial_ttystate e7000pc_get_tty_state PARAMS ((serial_t scb));
 static int e7000pc_set_tty_state PARAMS ((serial_t scb, serial_ttystate state));
-static char *aptr PARAMS ((short p));
-
-static int dos_async_init PARAMS ((int port));
-static void dos_async_tx PARAMS ((const char c));
-static int dos_async_rx PARAMS (());
-
-
 
 #define OFF_DPD 	0x0000
 #define OFF_DDP 	0x1000

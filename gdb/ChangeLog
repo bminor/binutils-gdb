@@ -1,3 +1,9 @@
+Mon Sep  8 16:45:51 1997  Stu Grossman  <grossman@cygnus.com>
+
+	* ser-e7kpc.c:  Don't include w32sut.h.  We no longer use the UT
+	mechanism.  Remove prototypes for dos_async_* functions.  They don't
+	exist anymore.
+
 Sun Sep  7 17:26:30 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* dbxread.c, buildsym.c, symtab.c, stabsread.c: Add support for 
