@@ -22,6 +22,7 @@
    02111-1307, USA.  */
 
 #include "bfd.h"
+#include "bfdlink.h"
 #include "sysdep.h"
 #include "libiberty.h"
 #include "demangle.h"
@@ -508,12 +509,63 @@ ld_abort (file, line, fn)
 }
 
 bfd_boolean
-error_handler VPARAMS ((int id ATTRIBUTE_UNUSED, const char *fmt, ...))
+error_handler VPARAMS ((int id, const char *fmt, ...))
 {
   VA_OPEN (arg, fmt);
   VA_FIXEDARG (arg, const char *, fmt);
 
+  va_start (arg, fmt);
+
+  switch (id)
+    {
+    default:
+      break;
+
+    /* We can be called with
+    
+	error_handler (-LD_DEFINITION_IN_DISCARDED_SECTION, "", 0);
+	
+	to make this error non-fatal and
+
+	error_handler (-LD_DEFINITION_IN_DISCARDED_SECTION, "", 1);
+
+	to make this error fatal.  */
+    case -LD_DEFINITION_IN_DISCARDED_SECTION:
+    case LD_DEFINITION_IN_DISCARDED_SECTION:
+      {
+	static struct bfd_hash_table *hash;
+	static int fatal = 1;
+	const char *name;
+
+	if (id == -LD_DEFINITION_IN_DISCARDED_SECTION)
+	  {
+	    fatal = va_arg (arg, int);
+	    goto out;
+	  }
+
+	name = va_arg (arg, const char *);
+	/* Only warn once about a particular undefined symbol.  */
+	if (hash == NULL)
+	  {
+	    hash = ((struct bfd_hash_table *)
+		    xmalloc (sizeof (struct bfd_hash_table)));
+	    if (! bfd_hash_table_init (hash, bfd_hash_newfunc))
+	      einfo (_("%F%P: bfd_hash_table_init failed: %E\n"));
+	  }
+
+	if (bfd_hash_lookup (hash, name, FALSE, FALSE) != NULL)
+	  goto out;
+
+	if (bfd_hash_lookup (hash, name, TRUE, TRUE) == NULL)
+	  einfo (_("%F%P: bfd_hash_lookup failed: %E\n"));
+
+	if (fatal)
+	  config.make_executable = FALSE;
+      }
+      break;
+    }
   vfinfo (stderr, fmt, arg);
+out:
   VA_CLOSE (arg);
   return TRUE;
 }

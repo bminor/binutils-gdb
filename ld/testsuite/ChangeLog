@@ -1,5 +1,11 @@
 2003-06-03  H.J. Lu <hongjiu.lu@intel.com>
 
+	* ld-discard/extern.d: Updated.
+	* ld-discard/start.d: Likewise.
+	* ld-discard/static.d: Likewise.
+
+2003-06-03  H.J. Lu <hongjiu.lu@intel.com>
+
 	* ld-elfcomm/elfcomm.exp: Mark tests untested if compiler is
 	not available.
 

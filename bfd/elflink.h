@@ -5003,13 +5003,13 @@ elf_link_input_bfd (finfo, input_bfd)
 			      memset (rel, 0, sizeof (*rel));
 			    }
 			  else
-			    {
-			      if (! ((*finfo->info->callbacks->undefined_symbol)
-				     (finfo->info, h->root.root.string,
-				      input_bfd, o, rel->r_offset,
-				      TRUE)))
-				return FALSE;
-			    }
+			    finfo->info->callbacks->error_handler
+			      (LD_DEFINITION_IN_DISCARDED_SECTION,
+			       _("%T: discarded in section `%s' from %s\n"),
+			       h->root.root.string,
+			       h->root.root.string,
+			       h->root.u.def.section->name,
+			       bfd_archive_filename (h->root.u.def.section->owner));
 			}
 		    }
 		  else
@@ -5028,26 +5028,21 @@ elf_link_input_bfd (finfo, input_bfd)
 			    }
 			  else
 			    {
-			      bfd_boolean ok;
-			      const char *msg
-				= _("local symbols in discarded section %s");
-			      bfd_size_type amt
-				= strlen (sec->name) + strlen (msg) - 1;
-			      char *buf = (char *) bfd_malloc (amt);
+			      static int count;
+			      int ok;
+			      char *buf;
 
-			      if (buf != NULL)
-				sprintf (buf, msg, sec->name);
-			      else
-				buf = (char *) sec->name;
-			      ok = (*finfo->info->callbacks
-				    ->undefined_symbol) (finfo->info, buf,
-							 input_bfd, o,
-							 rel->r_offset,
-							 TRUE);
-			      if (buf != sec->name)
+			      ok = asprintf (&buf, "local symbol %d",
+					     count++);
+			      if (ok <= 0)
+				buf = (char *) "local symbol";
+			      finfo->info->callbacks->error_handler
+				(LD_DEFINITION_IN_DISCARDED_SECTION,
+				 _("%T: discarded in section `%s' from %s\n"),
+				 buf, buf, sec->name,
+				 bfd_archive_filename (input_bfd));
+			      if (ok != -1)
 				free (buf);
-			      if (!ok)
-				return FALSE;
 			    }
 			}
 		    }
