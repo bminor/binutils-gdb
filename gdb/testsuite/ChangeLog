@@ -36,7 +36,7 @@
 
 2001-11-14  Michael Snyder  <msnyder@redhat.com>
 
-	* gdb.base/code-exprs.exp: New file.  Tests use of the "@code"
+	* gdb.base/code-expr.exp: New file.  Tests use of the "@code"
 	qualifier in a type cast expression, to designate an address
 	in the instruction space (Harvard architecture).
 
