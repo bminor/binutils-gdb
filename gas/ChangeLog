@@ -1,3 +1,10 @@
+start-sanitize-tic80
+Tue Jul 15 16:29:54 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config/tc-tic80.c (build_insn): Initialize extended word to zero
+	when it will be filled in later by relocation information.
+
+end-sanitize-tic80
 Mon Jul 14 23:10:58 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (macro_build): Restore check of fmt argument.

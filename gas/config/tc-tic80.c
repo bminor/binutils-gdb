@@ -639,6 +639,7 @@ build_insn (opcode, opers)
 	  else if (bits == 32)	/* was (flags & TIC80_OPERAND_BASEREL) */
 	    {
 	      extended++;
+	      insn[1] = 0;
 	      fix_new_exp (frag_now,
 			   (f + 4) - (frag_now -> fr_literal),
 			   4,
