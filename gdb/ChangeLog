@@ -1,3 +1,22 @@
+start-sanitize-sky
+Fri Jul 31 16:06:05 1998  Ron Unrau  <runrau@cygnus.com>
+
+	* config/tm-txvu.h: use NUM_CORE_REGS instead of NUM_R5900_REGS
+	* mips-tdep.c: use NUM_CORE_REGS
+	* txvu-tdep.c: use NUM_CORE_REGS, add function prototypes
+	(txvu_insert_breakpoints): use VIF interrupt bit
+
+end-sanitize-sky
+Thu Jul 30 13:53:50 1998  Mark Alexander  <marka@cygnus.com>
+
+	* mips-tdep.c (mask_address_p): New variable.
+	(mips_addr_bits_remove): Test mask_address_p to decide whether
+	to mask off the upper 32 bits of addresses.
+	(_initialize_mips_tdep): Add command to set mask_address_p.
+	(mips_call_dummy_address): New function.
+	* config/mips/tm-mips.h (CALL_DUMMY_ADDRESS): Redefine to
+	call mips_call_dummy_address.
+
 1998-07-29  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* symfile.c (add_symbol_file_command): Test for the from_tty
