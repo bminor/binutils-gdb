@@ -36,8 +36,14 @@ it will be treated as a corefile.  If it begins with a digit,
 GDB will attempt to attach it as a process, and if no such process
 is found, will then attempt to open it as a corefile.
 
+* Changes in ARM configurations.
+
+Multi-arch support is enabled for all ARM configurations.  The ARM/NetBSD
+configuration is fully multi-arch.
+
 * New native configurations
 
+ARM NetBSD					arm*-*-netbsd*
 x86 OpenBSD					i[3456]86-*-openbsd*
 AMD x86-64 running GNU/Linux			x86_64-*-linux-*
 

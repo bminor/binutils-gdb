@@ -1,3 +1,8 @@
+2002-02-20  Richard Earnshaw  <rearnsha@arm.com>
+
+	* News: Add news about ARM and Multi-arch.  Mention the new target
+	arm*-*-netbsd*.
+
 2002-02-19  Jim Blandy  <jimb@redhat.com>
 
 	* stabsread.c (error_type_complaint): Improve error message.
