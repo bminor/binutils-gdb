@@ -1,6 +1,15 @@
+Thu Nov 14 19:11:13 1991  Fred Fish  (fnf at cygnus.com)
+
+	* syms.c:  Trivial fix to comment to remove a redundant "to".
+
+Wed Nov 13 17:02:01 1991  John Gilmore  (gnu at cygnus.com)
+
+	* coff-{i386,m68k,m88k}.c:  Change name of file format to standard
+	form that GDB recognizes as COFF.
+
 Wed Nov 13 09:09:41 1991  Steve Chamberlain  (sac at cygnus.com)
 
-	* ieee.c: (ieee_object_p) cast NULL correctly.
+	* ieee.c (ieee_object_p):  cast NULL correctly.
 	* configure.in: added harris host
 
 	* coff-a29k.c: Lots of changes, most from David Wood.

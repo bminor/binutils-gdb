@@ -69,7 +69,7 @@ appliction which reads the symbol table:
   if (storage_needed == 0) {
      return ;
   }
-  symbol_table = (asymbol **) malloc (storage_needed);
+  symbol_table = (asymbol **) bfd_xmalloc (storage_needed);
     ...
   number_of_symbols = 
      bfd_canonicalize_symtab (abfd, symbol_table); 
@@ -247,7 +247,7 @@ $#define BSF_INDIRECT     0x4000000
 
 $  flagword flags;
 
-Aointer to the section to which this symbol is relative, or 0 if the
+A pointer to the section to which this symbol is relative, or 0 if the
 symbol is absolute or undefined. Note that it is not sufficient to set
 this location to 0 to mark a symbol as absolute - the flag
 @code{BSF_ABSOLUTE} must be set also.
@@ -263,12 +263,13 @@ $} asymbol;
 
 */
 
-#include "sysdep.h"
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
+#include "stab.gnu.h"
  
 /*doc*
-@node symbol handling functions, Symbols, typedef asymbol, Symbols
+@node symbol handling functions,  , typedef asymbol, Symbols
 @subsection Symbol Handling Functions
 
 */
@@ -301,7 +302,7 @@ actual number of symbol pointers not including the NULL.
 
 
 /*proto* bfd_set_symtab
-Provided a table of pointers to to symbols and a count, writes to the
+Provided a table of pointers to symbols and a count, writes to the
 output BFD the symbols when closed.
 
 *; PROTO(boolean, bfd_set_symtab, (bfd *, asymbol **, unsigned int ));
@@ -370,3 +371,75 @@ problems later on.
      BFD_SEND (abfd, _bfd_make_empty_symbol, (abfd))
 *-
 */
+
+/*proto* bfd_decode_symclass
+Return a lower-case character corresponding to the symbol class of symbol.
+
+*; PROTO(int, bfd_decode_symclass, (asymbol *symbol));
+*/
+int
+DEFUN(bfd_decode_symclass,(symbol),
+asymbol *symbol)
+{
+  flagword flags = symbol->flags;
+  
+#if 0
+  if ((symbol->value == 0) && (symbol->section != NULL))
+    /* Huh?  All section names don't begin with "." */
+    return (symbol->section->name)[1];
+#endif
+
+  if (flags & BSF_FORT_COMM) return 'C';
+  if (flags & BSF_UNDEFINED) return 'U';
+  if (flags & BSF_ABSOLUTE)  return 'a';
+
+ 
+   if ( flags & (BSF_GLOBAL|BSF_LOCAL) ) {
+     if (symbol->section == (asection *)NULL)
+       return '*';
+     else if ( !strcmp(symbol->section->name, ".text") )
+       return (flags & BSF_GLOBAL) ? 'T' : 't';
+     else if ( !strcmp(symbol->section->name, ".data") )
+       return (flags & BSF_GLOBAL) ? 'D' : 'd';
+     else if ( !strcmp(symbol->section->name, ".bss") )
+       return (flags & BSF_GLOBAL) ? 'B' : 'b';
+     else
+       return (flags & BSF_GLOBAL) ? 'O' : 'o';
+    }
+
+  /* We don't have to handle these cases just yet, but we will soon:
+     N_SETV: 'v'; 
+     N_SETA: 'l'; 
+     N_SETT: 'x';
+     N_SETD: 'z';
+     N_SETB: 's';
+     N_INDR: 'i';
+     */
+ 
+  return '?';
+}
+
+/* Create a table of debugging stab-codes and corresponding names.  */
+
+#define __define_stab(NAME, CODE, STRING) {NAME, STRING},
+struct {enum __stab_debug_code code; char *string;} bfd_stab_names[]
+  = {
+#include "stab.def"
+    };
+#undef __define_stab
+
+/*proto* bfd_stab_name
+Returns a string for the stab with the given code, or NULL if not found.
+
+*; PROTO(char *, bfd_stab_name, (int code));
+*/
+char *
+DEFUN(bfd_stab_name,(code),
+int code)
+{
+  register int i;
+  for (i = sizeof(bfd_stab_names) / sizeof(bfd_stab_names[0]) - 1; i >= 0; i--)
+    if (bfd_stab_names[i].code == (enum __stab_debug_code) code)
+      return bfd_stab_names[i].string;
+  return NULL;
+}
