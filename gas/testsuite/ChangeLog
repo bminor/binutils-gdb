@@ -1,3 +1,8 @@
+Fri Jun 10 10:23:35 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/reloc.exp (roundmode test): Tweak expected output
+	for SOM to match current testcase.
+
 Thu Jun  2 19:46:58 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* gas/i386/{pushw.s,pushw.l}: New test.
