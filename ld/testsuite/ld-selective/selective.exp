@@ -20,7 +20,9 @@
 
 
 # AOUT based ports do not support selective linking
-if {[istarget "vax-*-ultrix*"]} {
+if {[istarget "*-*-*aout*"] \
+    || [istarget "*-*-*bout*"] \
+    || [istarget "vax-*-ultrix*"]} {
     return
 }
 

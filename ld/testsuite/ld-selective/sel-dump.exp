@@ -20,7 +20,13 @@
 
 if { ![istarget *-*-linux*]
      && ![istarget *-*-gnu]
+     && ![istarget hppa*64*-*-hpux*]
      && ![istarget *-*-elf] } {
+    return
+}
+
+if { [istarget *-*-linux*aout*] \
+     || [istarget *-*-linux*oldld*] } {
     return
 }
 

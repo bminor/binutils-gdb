@@ -1,3 +1,118 @@
+2002-09-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+	2002-09-19  Jakub Jelinek  <jakub@redhat.com>
+	* ld-i386/i386.exp: New.
+	* ld-i386/tlsbin.dd: New test.
+	* ld-i386/tlsbinpic.s: New test.
+	* ld-i386/tlsbin.rd: New test.
+	* ld-i386/tlsbin.s: New test.
+	* ld-i386/tlsbin.sd: New test.
+	* ld-i386/tlsbin.td: New test.
+	* ld-i386/tlslib.s: New test.
+	* ld-i386/tlsnopic1.s: New test.
+	* ld-i386/tlsnopic2.s: New test.
+	* ld-i386/tlsnopic.dd: New test.
+	* ld-i386/tlsnopic.rd: New test.
+	* ld-i386/tlsnopic.sd: New test.
+	* ld-i386/tlspic1.s: New test.
+	* ld-i386/tlspic2.s: New test.
+	* ld-i386/tlspic.dd: New test.
+	* ld-i386/tlspic.rd: New test.
+	* ld-i386/tlspic.sd: New test.
+	* ld-i386/tlspic.td: New test.
+
+	2002-08-13  H.J. Lu <hjl@gnu.org>
+	* ld-elfvers/vers.exp: Add vers23c and vers23d.
+
+	* ld-elfvers/vers23c.ver: New.
+	* ld-elfvers/vers23d.dsym: New.
+
+	2002-08-12  H.J. Lu <hjl@gnu.org>
+	* ld-elfvers/vers.exp: Add vers23.
+
+	* ld-elfvers/vers23.c: New.
+	* ld-elfvers/vers23.dsym: New.
+	* ld-elfvers/vers23.ver: New.
+	* ld-elfvers/vers23a.c: New.
+	* ld-elfvers/vers23a.dsym: New.
+	* ld-elfvers/vers23a.map: New.
+	* ld-elfvers/vers23a.sym: New.
+	* ld-elfvers/vers23a.ver: New.
+	* ld-elfvers/vers23b.c: New.
+	* ld-elfvers/vers23b.dsym: New.
+	* ld-elfvers/vers23b.map: New.
+	* ld-elfvers/vers23b.ver: New.
+
+	2002-08-10  Alan Modra  <amodra@bigpond.net.au>
+	* ld-discard/discard.exp: Don't run on linuxaout or linuxoldld.
+	* ld-linkonce/linkonce.exp: Likewise.
+	* ld-selective/sel-dump.exp: Likewise.
+	* ld-selective/selective.exp: Don't run on aout or bout.
+
+	2002-08-08  H.J. Lu <hjl@gnu.org>
+	* ld-elfvers/vers.exp: Add vers22.
+
+	* ld-elfvers/vers22.c: New.
+	* ld-elfvers/vers22.dsym: New.
+	* ld-elfvers/vers22.map: New.
+	* ld-elfvers/vers22.ver: New.
+	* ld-elfvers/vers22a.c: New.
+	* ld-elfvers/vers22a.dsym: New.
+	* ld-elfvers/vers22a.sym: New.
+	* ld-elfvers/vers22a.ver: New.
+	* ld-elfvers/vers22b.c: New.
+	* ld-elfvers/vers22b.dsym: New.
+	* ld-elfvers/vers22b.ver: New.
+
+	2002-08-08  Stephen Clarke <stephen.clarke@superh.com>
+	* ld-sh/sh64/abi32.xd: Adjust whitespace in elf32 section
+	listing.
+	* ld-sh/sh64/cmpct1.xd, ld-sh/sh64/mix1.xd, ld-sh/sh64/mix2.xd,
+	ld-sh/sh64/rel32.xd, ld-sh/sh64/shdl32.xd: Likewise.
+
+	2002-08-07  H.J. Lu <hjl@gnu.org>
+	* ld-elfvers/vers.exp: Add --no-undefined-version.
+
+	* ld-elfvers/vers1.map: Remove the unused foo1 and foo2.
+	* ld-elfvers/vers8.map: Likewise.
+	* ld-elfvers/vers18.map: Likewise.
+
+	2002-08-07  Stephen Clarke <stephen.clarke@superh.com>
+	* ld-sh/sh64/abi32.xd: Adjust as type of linker-script-symbols
+	is no longer set to object.
+	* ld-sh/sh64/abi64.xd, ld-sh/sh64/cmpct1.xd, ld-sh/sh64/crange1.rd,
+	ld-sh/sh64/crange2.rd, ld-sh/sh64/crange3-cmpct.rd,
+	ld-sh/sh64/crange3-media.rd, ld-sh/sh64/crange3.rd,
+	ld-sh/sh64/mix1.xd, ld-sh/sh64/mix2.xd, ld-sh/sh64/shdl32.xd,
+	ld-sh/sh64/shdl64.xd: Likewise.
+
+	2002-08-06  H.J. Lu <hjl@gnu.org>
+	* ld-elfvers/vers.exp: Add --no-undefined-version.
+
+	* ld-elfvers/vers1.map: Remove the unused foo1 and foo2.
+	* ld-elfvers/vers8.map: Likewise.
+	* ld-elfvers/vers18.map: Likewise.
+
+	2002-07-28  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+	* ld-discard/discard.exp, ld-scripts/phdrs.exp, ld-scripts/phdrs2.exp,
+	ld-selective/sel-dump.exp: Test hppa*64*-*-hpux* target.
+	* ld-elfvers/vers.exp, ld-elfvsb/elfvsb.exp, ld-elfweak/elfweak.exp,
+	ld-linkonce/linkonce.exp, ld-shared/shared.exp,
+	ld-undefined/weak-undef.exp:  Test hppa*64*-*-hpux* and hppa*-*-linux*
+	targets.
+	* ld-discard/exit.s, ld-discard/extern.s, ld-discard/start.s,
+	ld-discard/static.s: Add whitespace before assembler directives.
+
+	2002-07-15  H.J. Lu <hjl@gnu.org>
+	* ld-elfvers/vers.exp: Add vers21.
+
+	* ld-elfvers/vers21.c: New.
+	* ld-elfvers/vers21.dsym: New.
+	* ld-elfvers/vers21.map: New.
+	* ld-elfvers/vers21.sym: New.
+	* ld-elfvers/vers21.ver: New.
+
 2002-08-15  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/libdso-4.d, ld-cris/undef1.d: New test.
