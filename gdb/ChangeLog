@@ -1,3 +1,7 @@
+2004-01-03  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-sol2-nat.c: Add missing ')'.
+
 2004-01-03  J. Brobecker  <brobecker@gnat.com>
 
 	* infrun.c (handle_step_into_function): New function.

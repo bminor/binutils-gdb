@@ -49,7 +49,7 @@
    process using /proc on Solaris.  */
 
 #if (defined (__arch64__) ||
-     (defined (PR_MODEL_NATIVE) && (PR_MODEL_NATIVE == PR_MODEL_LP64))
+     (defined (PR_MODEL_NATIVE) && (PR_MODEL_NATIVE == PR_MODEL_LP64)))
 
 #include "sparc64-tdep.h"
 
