@@ -1,3 +1,7 @@
+2000-01-27  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (usage): Call disassembler_usage().
+
 2000-01-27  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* readelf.c (get_dynamic_flags): Return buff.

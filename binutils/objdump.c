@@ -268,6 +268,8 @@ usage (stream, status)
       --adjust-vma <offset>      Add <offset> to all displayed section addresses\n\
 \n"));
       list_supported_targets (program_name, stream);
+      
+      disassembler_usage (stream);
     }
   if (status == 0)
     fprintf (stream, _("Report bugs to bug-gnu-utils@gnu.org\n"));

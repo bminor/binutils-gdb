@@ -251,3 +251,9 @@ disassembler (abfd)
     }
   return disassemble;
 }
+
+void
+disassembler_usage (FILE * stream)
+{
+  return;
+}

@@ -1,3 +1,8 @@
+2000-01-27  Nick Clifton  <nickc@redhat.com>
+
+	* disassemble.c (disassembler_usage): New function: Print out any
+	target specific disassembler options.
+
 2000-01-27  Thomas de Lellis  <tdel@windriver.com>
 
         * arm-dis.c (printf_insn_big_arm): Treat ELF symbols with the
