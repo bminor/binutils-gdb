@@ -1,3 +1,7 @@
+2002-01-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure: Regenerated.
+
 2002-01-27  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* elfcore.h (elf_core_file_p): Set the machine architecture
