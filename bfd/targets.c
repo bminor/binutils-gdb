@@ -139,7 +139,7 @@ of a file.
 .    bfd_target_oasys_flavour,
 .    bfd_target_tekhex_flavour,
 .    bfd_target_srec_flavour,
-.    bfd_target_hppa_flavour} flavour;
+.    bfd_target_som_flavour} flavour;
 
 The order of bytes within the data area of a file.
 
@@ -326,6 +326,7 @@ extern bfd_target a29kcoff_big_vec;
 extern bfd_target a_out_adobe_vec;
 extern bfd_target aout_mips_big_vec;
 extern bfd_target aout_mips_little_vec;
+extern bfd_target apollocoff_vec;
 extern bfd_target b_out_vec_big_host;
 extern bfd_target b_out_vec_little_host;
 extern bfd_target bfd_elf32_big_generic_vec;
@@ -352,17 +353,21 @@ extern bfd_target h8500coff_vec;
 extern bfd_target host_aout_vec;
 extern bfd_target hp300bsd_vec;
 extern bfd_target hp300hpux_vec;
-extern bfd_target hppa_vec;
+extern bfd_target som_vec;
 extern bfd_target i386aout_vec;
 extern bfd_target i386bsd_vec;
+extern bfd_target netbsd386_vec;
 extern bfd_target i386coff_vec;
 extern bfd_target i386linux_vec;
-extern bfd_target i386lynx_vec;
+extern bfd_target i386lynx_aout_vec;
+extern bfd_target i386lynx_coff_vec;
 extern bfd_target icoff_big_vec;
 extern bfd_target icoff_little_vec;
 extern bfd_target ieee_vec;
 extern bfd_target m68kcoff_vec;
 extern bfd_target m68kcoffun_vec;
+extern bfd_target m68klynx_aout_vec;
+extern bfd_target m68klynx_coff_vec;
 extern bfd_target m88kbcs_vec;
 extern bfd_target newsos3_vec;
 extern bfd_target nlm32_big_generic_vec;
@@ -385,6 +390,7 @@ extern bfd_target symbolsrec_vec;
 /* All of the xvecs for core files.  */
 extern bfd_target aix386_core_vec;
 extern bfd_target hpux_core_vec;
+extern bfd_target osf_core_vec;
 extern bfd_target sco_core_vec;
 extern bfd_target trad_core_vec;
 
@@ -456,20 +462,24 @@ bfd_target *target_vector[] = {
 #endif
 	&hp300hpux_vec,
 #if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD)
-        &hppa_vec,
+        &som_vec,
 #endif
 	&i386aout_vec,
 	&i386bsd_vec,
+	&netbsd386_vec,
 	&i386coff_vec,
 #if 0
 	&i386linux_vec,
 #endif
-	&i386lynx_vec,
+	&i386lynx_aout_vec,
+	&i386lynx_coff_vec,
 	&icoff_big_vec,
 	&icoff_little_vec,
 	&ieee_vec,
 	&m68kcoff_vec,
 	&m68kcoffun_vec,
+	&m68klynx_aout_vec,
+	&m68klynx_coff_vec,
 	&m88kbcs_vec,
 	&newsos3_vec,
 #if 0				/* No one seems to use this.  */
@@ -513,6 +523,9 @@ bfd_target *target_vector[] = {
 #endif
 #ifdef HPUX_CORE
 	&hpux_core_vec,
+#endif
+#ifdef OSF_CORE
+	&osf_core_vec,
 #endif
 #ifdef	SCO_CORE
 	&sco_core_vec,

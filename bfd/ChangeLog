@@ -1,3 +1,114 @@
+Thu Oct 21 12:16:26 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* elfcode.h (FILE_ALIGN): Renamed from EALIGN, to avoid conflict
+	with Ultrix header files.
+
+	* som.h (struct som_section_data_struct): Renamed from
+	som_section_data to avoid conflict with macro by that name.
+
+	Changes from Jeff Law and Peter Hoogenboom at Utah:
+
+	* elf32-hppa.c (hppa_elf_reloc):  Target register for a 'jump
+	in delay slot' optimization in combination with a long call
+	stub should always be r31.
+
+	* elf32-hppa.c: (hppa_elf_relocate_insn): To be consistent
+	across all relocation types, retrieve instruction addends from
+	the relocation entry rather than from the instruction itself.
+
+	* elf32-hppa.c: (hppa_elf_relocate_insn): Fix a relocation
+	error that only occurred when the addend of an 'addil' or
+	'ldil' was larger than 21 bits and very close to a 2K byte
+	boundary.
+
+	* elf32-hppa.c: (hppa_elf_reloc):  Handle the optimization in
+	which a jump is placed in the delay slot of a function call.
+	The jump was being accomplished via an adjustment to the
+	return pointer.  This optimization would break the long call
+	stub code, if there was any.
+
+	* elf32-hppa.c: (hppa_elf_build_long_branch_stub): Corrections
+	to long branch stubs to avoid use of general register 2.
+
+	* hppa_stubs.h: New stub instructions.
+
+	* elfcode.h: Declare bfd_elf_find_section.
+
+	* som.h (som_section_data): Add new "subspace_index" field.
+
+	* som.c (setup_sections): Save the original SOM subspace index
+	in the BFD section associated with that subspace.  
+	(som_get_symtab_upper_bound): Implement.
+	(som_get_symtab): Implement.
+	(som_print_symbol): Implement.
+	(som_slurp_string_table): New function to read a string table
+	from a SOM object file.
+	(som_section_from_subspace_index): New function to return the
+	section which corresponds to a SOM subspace index.
+	(som_slurp_symbol_table): New function to read the symbol
+	table from a SOM object file.
+	(som_make_empty_symbol): Check for errors from bfd_zalloc.
+	(som_new_section_hook): Initialize subspace_index field to
+	-1 instead of 0.
+
+	* som.c (som_object_setup): Fix polarity of test to set HAS_RELOC.
+	Set EXEC_P for executables.
+	(setup_sections): Correctly identify when a section has
+	relocations.
+	(log2): New function.
+	(setup_sections): Correctly convert between SOM alignments and BFD
+	alignments.
+
+	* som.c (setup_sections): Do not set SEC_ALLOC or SEC_LOAD
+	for sections which correspond to SOM spaces, doing so confuses
+	many utilities.  Set assorted SEC_* flags for SOM subspaces
+	which correspond to BFD sections.
+
+	* elf32-hppa.c: (elf32_hppa_backend_fake_sections): The stab
+	string table should have sh_type == SHT_STRTAB.  Add
+	processing to make it so.
+
+	* elfcode.h: (bfd_section_from_shdr): String tables (other
+	than .strtab) were not getting the file offsets recorded, so
+	they could not be read from disk.
+
+	* elfcode.h: (elf_make_sections):  Leave the sh_addr field of
+	the section header and the vma field of a section at 0 if the
+	section is not part of the program execution image. (e.g.,
+	.stab)
+
+	* som.[hc]: Change target vector prefix from "hppa" to "som".
+	Consistently use obj_som prefix to access fields in backend data
+	structures.  Fix all callers/references.
+
+	* som.h: Do not include files only needed for core file reading here.
+	Include a.out for both HOST_HPPAHPUX and HOST_HPPABSD.  Delete
+	forward structure declarations, they are unnecessary.
+	(struct somdata): Delete aux_hdr, and hp_symbol_entry_size fields.
+	Change "symbols" to "symtab".  Add "stringtab" and "reloc_filepos"
+	fields for future use.  Change obj_som_* macros as appropriate.
+	(som_section_data): New structure to keep SOM specific information
+	about BFD sections (for future use).
+
+	* som.c: Provide PARAMS declarations for all functions currently
+	in this file.
+	(struct container): Delete unwanted structure definition.
+	(som_object_setup): Add comments.  Use som_mkobject to allocate
+	SOM specific information in the BFD; use information from the
+	file and (possibly empty) auxiliary headers to initialize this
+	information.  Delete redundant bfd_get_symcount (abfd) "calls".
+	(setup_sections): Return type is now boolean, fix return statements.
+	"Fix" handling of BSS like subspaces in the computation of the
+	containing space's size.  If the subspace has relocations, set the
+	appropriate BFD section flags and record the index into and the
+	size of the fixup stream.  Always return a value.
+	(som_object_p): Set bfd_error appropriately if errors are detected
+	from bfd_{read,seek} functions.  Handle EXECLIBMAGIC type files.
+	Do not try to read a non-existant auxiliary header.
+	(som_mkobject): Flesh out.
+	(som_section_hook): Allocate space to hold SOM specific information
+	about sections.
+
 Thu Oct 21 12:41:34 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	gcc -Wall lint:
@@ -34,6 +145,15 @@ Wed Oct 20 12:22:37 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 Wed Oct 20 10:28:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hosts/i386bsd.h [__bsdi__]: Define HOST_DATA_START_ADDR.
+
+Wed Oct 20 10:10:07 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* Makefile.in (HFILES): New variable, for use in "make dep".
+	(.dep): Depend on $(CFILES) and $(HFILES).  Delete .dep1 and
+	remake it, so that "$?" is complete.
+	(.dep1): Don't need to remove .dep1 first.
+	(dep.sed): Depend on config.status, not Makefile.
+	(CFILES): Add nlm.c.
 
 Tue Oct 19 15:26:26 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
@@ -529,7 +649,7 @@ Mon Sep 13 21:03:18 1993  John Gilmore  (gnu@cacophony.cygnus.com)
 	rewrite the timestamp.
 
 	* hosts/std-host.h (offsetof):  Define, if not already, for archive.c.
-	
+
 Sat Sep 11 18:13:42 1993  Jim Kingdon  (kingdon@poseidon.cygnus.com)
 
 	* hosts/i386sco.h: Define a bunch of stuff for core files.
@@ -710,7 +830,7 @@ Fri Aug 27 16:43:35 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 	* Makefile.in: Replace hppa.c with som.c.  elf32-hppa.o
 	depends on libhppa.h now.
 
-	* configure.in (hppa_vec): Needs som.o module instead of 
+	* configure.in (hppa_vec): Needs som.o module instead of
 	hppa.o.
 
 	* elf32-hppa.c: Include libhppa.h.  Do not define
@@ -726,7 +846,7 @@ Fri Aug 27 16:43:35 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 	* config/hppa-elf.mt (SELECT_ARCHITECTURES): Don't define
 	SELECT_VECS.
 
-	* elf32-hppa.c (hppa_elf_relocate_unwind_table): Delete unused 
+	* elf32-hppa.c (hppa_elf_relocate_unwind_table): Delete unused
 	variables.
 	(elf_hppa_reloc_type_lookup): Likewise.
 	(elf_hppa_tc_make_sections): Likewise.
@@ -1003,7 +1123,7 @@ Thu Aug 12 10:32:47 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 	Makefile.in (BFD_LIBS): Remove reloc16.o.
 
 	* config/u68k-coff.mt: Fix typo, DEFAULT_TARGET for
-	DEFAULT_VECTOR. 
+	DEFAULT_VECTOR.
 
 	* config/h8300-coff.mt, h8500-coff.mt, sh-coff.mt, st2000.mt,
 	z8k-coff.mt (DEFAULT_VECTOR): Define.  Don't explicitly add
@@ -1723,7 +1843,7 @@ Thu Jul  1 14:52:47 1993  Frederic Pierresteguy (F.Pierresteguy@frcl.bull.fr)
 	* i386linux.h: Include <sys/file.h>.
 	* coff-m68k-un.c: new file to handle names with underscores on
 	svr3 machines.
-	* coff-m68k.c (m68k_rtype2howto): added #ifdef ONLY_DECLARE_RELOCS 
+	* coff-m68k.c (m68k_rtype2howto): added #ifdef ONLY_DECLARE_RELOCS
 	to not duplicate the function in the executable.
 	(TARGET_SYM, TARGET_NAME, NAMES_HAVE_UNDERSCORE): new macros needed
 	by coff-m68k-un.c.
@@ -2168,7 +2288,7 @@ Tue Jun  8 20:28:02 1993  Mark Eichin  (eichin at tweedledumber)
 
 	* elfcode.h (elf_slurp_symbol_table): subtract section vma from
 	symbol value, since bfd symbols are section relative, but ELF
-	symbols aren't. 
+	symbols aren't.
 
 Tue Jun  8 12:08:27 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
@@ -2185,9 +2305,9 @@ Tue Jun  8 12:08:27 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 	* coffcode.h (coff_set_arch_mach_hook): Cope with H8300 magic
 	number.
 	* cpu-h8300.c: Removed disassemble stuff. (h8300_scan): Recognise
-	H8/300H name. (compatible): New function. 
+	H8/300H name. (compatible): New function.
 	* reloc16.c (bfd_coff_reloc16_get_relocated_sec): Cope with more
-	addressing modes.	
+	addressing modes.
 
 Tue Jun  8 10:30:13 1993  Ian Lance Taylor  (ian@cygnus.com)
 
@@ -2731,7 +2851,7 @@ Thu Apr 15 09:09:18 1993  Jim Kingdon  (kingdon@cygnus.com)
 Wed Apr 14 23:48:25 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* rs6000-core.c (rs6000coff_core_p): Improve error checking and
-	recognize .data section if present. 
+	recognize .data section if present.
 
 Thu Apr 15 01:00:29 1993  John Gilmore  (gnu@cygnus.com)
 
@@ -2857,7 +2977,7 @@ Tue Mar 30 09:33:16 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 	* section.c: Add declaration of lma field to section structure.
 	* coffcode.h (coff_write_object_contents): Use lma field for load
 	address.
-	* bfd-in.h (bfd_set_section_vma): Set lma along with vma.	
+	* bfd-in.h (bfd_set_section_vma): Set lma along with vma.
 
 	* aoutx.h (translate_from_native_sym_flags): Now handles indirect
 	symbols in a better way. (translate_to_native_sym_flag): Set the
@@ -2986,7 +3106,7 @@ Thu Mar  4 14:44:01 1993  Ian Lance Taylor  (ian@cygnus.com)
 	(ecoff_write_object_contents): Added BFD_ASSERT calls to ensure
 	relocs are reasonable.
 	* coff-msym.c: Eliminated uses of DEFUN.
-	(ecoff_swap_tir_out): New function.	
+	(ecoff_swap_tir_out): New function.
 
 Tue Mar  2 17:52:58 1993  Fred Fish  (fnf@cygnus.com)
 
@@ -3480,7 +3600,7 @@ Fri Dec 18 10:20:27 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* aoutf1.h (sunos4_write_object_contents): set flags to 0, fixing
 	1927.
-	    
+
 Thu Dec 17 19:35:32 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in: added dvi target
@@ -3733,7 +3853,7 @@ Thu Oct 15 10:16:35 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* coff-m68k.c (m68k_howto2type, SELECT_RELOC): new function to
 	work out a coff relocation type from a howto's attributes rather
-	than using the input r_type field. This fixes PR1677 and allows 
+	than using the input r_type field. This fixes PR1677 and allows
 	conversion of a.out relocs to coff relocs.
 
 	* coffcode.h (coff_write_relocs): if supplied a relocation
@@ -3864,7 +3984,7 @@ Thu Oct  8 08:52:48 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	* aout-adobe.c, aout-target.h, bout.c, coff-a29k.c, coff-h8300.c,
 	coff-z8k.c: targets set so they have leading underscore
 	* coff-i386.c, coff-i960.c, coff-m68k.c, coff-mips.c, coff-m88k.c,
-	coff-rs6000.c, coff-we32k.c, elf.c, ieee.c, srec.c: targets set 
+	coff-rs6000.c, coff-we32k.c, elf.c, ieee.c, srec.c: targets set
 	without leading underscore flag
 	* targets.c: add symbol leading char to xvec description
 	* bfd-in.h (bfd_get_symbol_leading_char): new macro.
@@ -4078,7 +4198,7 @@ Tue Aug 25 08:39:10 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
         Add basic support for the z8k:
 
 	* Makefile.in, archures.c, coffcode.h, configure.in, reloc.c,
-	section.c, targets.c, 
+	section.c, targets.c,
 
 	* syms.c: move mis-inserted patch.
 
@@ -4223,7 +4343,7 @@ Thu Jul 16 08:08:25 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	header e_relaxable, major hackery in callbacks
 	* libaout.h : add space for a_relaxable.
 	* seclet.c (rel): don't relax empty sections
-	
+
 
 Wed Jul 15 07:57:46 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
@@ -4242,7 +4362,7 @@ Mon Jul 13 05:06:51 1992  John Gilmore  (gnu at cygnus.com)
 	malloc for raw symbols, and free it before returning.
 	(bfd_section_from_shdr):  Do not slurp symbol table until politely
 	asked. 	Do not even slurp string tables.
-	(elf_get_symtab_upper_bound):  Count 'em without reading them.	
+	(elf_get_symtab_upper_bound):  Count 'em without reading them.
 	(elf_get_symtab):  This is how to politely ask.  Schlurp!
 	This should probably just *become* elf_slurp_symbol_table, FIXME.
 
@@ -4444,7 +4564,7 @@ Sun May 31 05:45:00 1992  david d `zoo' zuhn (zoo@cygnus.com)
 	* configure.in: handle m680[01234]0 as aliases for m68k
 
 Tue May 26 16:50:59 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
-	
+
 	* coff-a29k.c: do byte relocs correctly
 	* coffcode.h (styp_to_sec_flags): never load INFO sections
 	* seclet.c (rel): don't relocate INFO sections
@@ -4555,11 +4675,11 @@ Tue May 12 14:08:59 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	short patches from Glenn Kasten (glenn@ready.com)
 	* target.c: enabled oasys support
-	* oasys.c:  Insert . when UNDERSCORE_HACK is enabled, 
+	* oasys.c:  Insert . when UNDERSCORE_HACK is enabled,
 	fix problem where a relocation which crossed a modification byte
 	boundary did not work. Fix problem where a relocation near the end
 	of a data record did not work.
-	
+
 
 Tue May  5 18:11:25 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
@@ -4621,7 +4741,7 @@ Wed Apr 22 09:36:08 1992  Fred Fish  (fnf@cygnus.com)
 
 	* tekhex.c (struct data_struct):  Convert from typedef that
 	typedefs nothing to a normal structure declaration.
-	* tekhex.c (pass_over):  Prototype args for function that 
+	* tekhex.c (pass_over):  Prototype args for function that
 	second arg points to.
 
 Mon Apr 20 22:22:51 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
@@ -4680,9 +4800,9 @@ Sun Mar 29 09:37:59 1992  John Gilmore  (gnu at cygnus.com)
 	* bout.c, coff-a29k.c, coff-i960.c:  Lint.
 	* configure.in:  Add new host and target configs.
 	* elf.c (bfd_prstatus, bfd_fpregset):  Avoid typename of register
-	structs, which vary; just use member name. 
+	structs, which vary; just use member name.
 	(elf_object_p, elf_core_file_p):  Lint, fix comments.
-	* config/sparc-elf.mt, hosts/sysv4.h:  New config files.	
+	* config/sparc-elf.mt, hosts/sysv4.h:  New config files.
 
 Sat Mar 28 13:07:02 1992  Fred Fish  (fnf@cygnus.com)
 
@@ -4733,7 +4853,7 @@ Fri Mar 13 15:44:37 1992  K. Richard Pixley  (rich@cygnus.com)
 Fri Mar 13 07:41:13 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* config/mt-<foo> now <foo>.mt, config/mh-<foo> now <foo>.mh.
-	host/h-<foo> now just <foo>. 
+	host/h-<foo> now just <foo>.
 	* configure.in: reflect changes
 
 Thu Mar 12 11:15:02 1992  Per Bothner  (bothner@cygnus.com)
@@ -4744,7 +4864,7 @@ Thu Mar 12 11:15:02 1992  Per Bothner  (bothner@cygnus.com)
 Sat Mar  7 10:33:41 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* coff-i960.c (icoff_little_vec): add COFF_SWAP_TABLE so we can run
-	gdb on little-endian 960 code. 
+	gdb on little-endian 960 code.
 	* archive.c (compute_and_write_armap): indirect symbols should go
 	into the archive header too.
 
@@ -4810,7 +4930,7 @@ Wed Feb 26 19:40:59 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
 Tue Feb 25 14:29:24 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* coffcode.h (coff_write_symbol): write out the correct number of
-	auxents. 
+	auxents.
 	* cpu-h8300.c: fix disassembly bug
 
 Fri Feb 21 21:39:56 1992  John Gilmore  (gnu at cygnus.com)
@@ -4858,7 +4978,7 @@ Thu Feb 13 20:11:47 1992  Fred Fish  (fnf at cygnus.com)
 Thu Feb 13 17:22:44 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* coffcode.h (get_normalized_symtab): fixed bug where symbols
-	with more than one auxent can cause nasty core dumps. 
+	with more than one auxent can cause nasty core dumps.
 
 	* coffcode.h, libcoff.c: added new fielded to coff_symbol_struct
 	"done_lineno" so that a symbol which appears twice in the symbol
@@ -4908,7 +5028,7 @@ Thu Jan 30 11:41:45 1992  Stu Grossman  (grossman at cygnus.com)
 Thu Jan 30 07:26:53 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	Various lints found on PersSony
-	* aoutx.h: cast an enum 
+	* aoutx.h: cast an enum
 	* coff-a29k.c: many ints in reloc structure turned to enum
 	* coffcode.h: more enums
 	* cpu-h8300.c: more enums
@@ -5113,7 +5233,7 @@ Wed Dec  4 10:14:17 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* aoutf1.h (sunos_<size>_object_p, sunos4_callback): moved the
 	computation of arch and machine type so it's worked out before
-	some_aout_object_p is called. 
+	some_aout_object_p is called.
 	* aoutx.h: (some_aout_object_p): don't set arch and mach to
 	unknown.
 	* archures.c: add extra field 'section_align_power' to hold
@@ -5199,7 +5319,7 @@ Tue Nov 26 09:10:55 1991  Steve Chamberlain  (sac at cygnus.com)
 	* cpu-h8300.c: fix various disassembly problems
 	* libcoff.h: took out some code which has been #0ed for a long
 	time.
-	* targets.c: added h8 coff 
+	* targets.c: added h8 coff
 	* coff-a29k.c, coff-i386.c, coff-i960.c, coff-m68k.c, coff-m88k.c
 	added new macro RTYPE2HOWTO to take a load of #ifdefs out of
 	coffcode.h
@@ -5382,7 +5502,7 @@ Sun Nov  3 12:07:08 1991  Per Bothner  (bothner at cygnus.com)
 
 Sat Nov  2 14:26:03 1991  Steve Chamberlain  (steve at cygnus.com)
 
-	* Makefile.in: Added ctor.c 
+	* Makefile.in: Added ctor.c
 	* archures.c (bfd_default_arch_struct) added
 	bfd_default_reloc_type_lookup.
 	* coffcode.h: removed a load of #if 0ed code.
@@ -5391,7 +5511,7 @@ Sat Nov  2 14:26:03 1991  Steve Chamberlain  (steve at cygnus.com)
 	(coff_get_symtab): looks for constructor symbols and calls the
 	right function when they're found. (coff_canonicalize_reloc):
 	knows when a section is full of constructors and does the right
-	thing. 
+	thing.
 	* cpu-m88k.c: Added default_reloc_type lookup to the architecture
 	description.
 	* libbfd-in.h: (bfd_default_reloc_type_lookup) defun  added.
@@ -5495,7 +5615,7 @@ Mon Oct 21 09:34:11 1991  Steve Chamberlain  (steve at rtl.cygnus.com)
 	(coff_write_symbol) now zeros auxent before filling it up to help
 	with sensitive applications.
 	* libbfd.c (bfd_write_bigendian_4byte_int): added.
-	
+
 Wed Oct 16 22:58:45 1991  John Gilmore  (gnu at cygnus.com)
 
 	* bfd.c:  Make sure we don't get a macro strerror().
@@ -5589,7 +5709,7 @@ Fri Oct 11 13:03:02 1991  Per Bothner  (bothner at cygnus.com)
 	* aoutx.h (NAME(aout,set_section_contents): Change the way
 	filepos and size of sections are carried out to support
 	older styles of demand paged executables.
-	
+
 
 Fri Oct 11 12:33:36 1991  Steve Chamberlain  (steve at cygnus.com)
 
@@ -5654,7 +5774,7 @@ Sun Oct  6 19:10:06 1991  John Gilmore  (gnu at cygnus.com)
 	* aoutx.h (...some_aout_object_p):  Take a third parameter,
 	the internal_exec struct, and avoid ever looking at an
 	external_exec.  All callers changed to read the entire
-	external_exec struct, swap and check its magic number, 
+	external_exec struct, swap and check its magic number,
 	swap in the whole structure, and pass the swapped-in version to
 	some_aout_object_p.
 	* bout.c:  Bring into modern era.  Use single _object_p routine
@@ -5667,7 +5787,7 @@ Sun Oct  6 19:10:06 1991  John Gilmore  (gnu at cygnus.com)
 
 	* ../include/aout64.h:  Change EXTERNAL_LIST_SIZE to
 	EXTERNAL_NLIST_SIZE.  Callers changed.
-	
+
 Fri Oct  4 18:18:46 1991  John Gilmore  (gnu at cygnus.com)
 
 	* bfd.c:  Remove strerror() to libiberty.
@@ -5729,7 +5849,7 @@ Wed Oct  2 13:50:35 1991  Steve Chamberlain  (steve at cygnus.com)
 	* archures.c: Took out the first char filter which made it only
 	look for a cpu/arch match when the first chars of supplied and
 	tested names were the same.
-	
+
 	* targets.c removed oasys stuff, pending someone to fix the bugs
 	in it.
 
@@ -5812,7 +5932,7 @@ Mon Sep 30 15:13:46 1991  Steve Chamberlain  (steve at cygnus.com)
 	simulators.
 
 	* libbfd.c, libbfd.h: changed prototype of bfd_write.
-	
+
 	* newsos3.c: (newos3_callback) now calls bfd_set_arch_mach rather
 	than fixing the structure directly.
 
@@ -5833,7 +5953,7 @@ Mon Sep 30 15:13:46 1991  Steve Chamberlain  (steve at cygnus.com)
 
 	* howto.c: for future use, will allow an application to work out
 	what cookie to use as a handle on a relcoatio howto.
-	
+
 Mon Sep 30 13:31:15 1991  John Gilmore  (gnu at cygnus.com)
 
 	* srec.c:  Better error checking, partly from Peter Schauer.
@@ -5887,11 +6007,11 @@ Thu Sep 12 14:29:09 1991  John Gilmore  (gnu at cygint.cygnus.com)
 	(coff_swap_sym_{in,out}):  Check that SYMNMLEN == E_SYMNMLEN.
 	(coff_swap_aux_{in,out}):  Check that FILNMLEN == E_FILNMLEN
 	and DIMNUM == E_DIMNUM.
-	* configure.in:  Handle a29k-*-* hosts, and targets 
+	* configure.in:  Handle a29k-*-* hosts, and targets
 	a29k-*-coff, a29k-*-aout, and a29k-*-sym1.
 	* libcoff-in.h:  Add local_n_btmask, local_n_btshft,
 	local_n_tmask, local_n_tshift, local_symesz, local_auxesz,
-	local_linesz to `coff_data' (tdata) struct.	
+	local_linesz to `coff_data' (tdata) struct.
 	(coff_data, coff_data_type, coff_tdata):  Rename struct icofdata.
 	* config/h-ultra3:  Handle a29k-*-* hosts as Ultracomputers.
 
@@ -5943,7 +6063,7 @@ Thu Aug 22 22:20:19 1991  Stu Grossman  (grossman at cygint.cygnus.com)
 Thu Aug 22 11:27:06 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	* bfd.texinfo: some cleanup, reincorporated more intro matter from
-	bfd.doc 
+	bfd.doc
 	bfd.c, targets.c: minor rewording of doc segments
 
 
@@ -5963,12 +6083,12 @@ Wed Aug 21 14:33:06 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	* Makefile.in: use targets "bfd.dvi" and "bfd.ps" instead of
 	texdoc and psdoc; make these depend on generated .texi's
-	
+
 	* scanit, (new) unPROTO: turn PROTO macros into ANSI declarations in
 	doc
-	
+
 	* bfd.c, reloc.c, syms.c: minor spelling/wording fixes in doc
-	portions	 
+	portions
 
 	* Makefile.in, awkscan-ip, awkscan-p, intobfd,
 	libbfd.h, libcoff.h, tolibcoff; new bfd-in.h, libbfd-in.h,
@@ -5993,7 +6113,7 @@ Mon Aug 19 13:48:22 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 	oasys.c, opncls.c, reloc.c, section.c, syms.c, targets.c (documentation
 	segments): used BFD (caps) more consistently as a name in
 	discourse, fixed a few other minor typos and uses of fonts
-	
+
 
 Thu Aug  8 16:47:43 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
@@ -6009,7 +6129,7 @@ Thu Aug  1 16:35:28 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* aoutx.h: made translate_from_native_sym_flags and
 	translate_to_native_sym_flags produce the above flags.
-		
+
 
 Wed Jul 31 09:53:52 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
@@ -6058,13 +6178,13 @@ Fri Jun 14 13:19:40 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 	insertion necessitates an update of all backends..
 
 	* aoutf1.h jump table field inserted
-	
+
 	* archive.c(snarf_ar_hdr)(bfd_slurp_coff_armap) can now parse dgux style extended
 	filenames too.
 
 	* bout.c(b_out_squirt_out_relocs) fix to assertion tests. Jump
 	table field inserted.
-	
+
 	* coffcode.h(just about everything) Now patches up symbol tables
 	using a different mechanism. The Intel major bug has been fixed,
 	and the linker can self host on the Aviion and be debugged with
@@ -6080,15 +6200,15 @@ Fri Jun 14 13:19:40 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 	srec.c: jump table patch. trad-code.c fixed #IF typeo
 
 Fri Jun  7 12:35:46 1991  Sean Fagan  (sef at cygint.cygnus.com)
- 
+
  	* coffcode.h (coff_swap_aux_in): added else case to deal with
  	filenames less than 9 characters.
- 
+
 
 Thu Jun  6 18:27:38 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* ../include/oasys.h oasys.c (oasys_archive_p): fixed so it works
-	
+
 	* srec.c: now allows any number of sections to be created in a
 	file. Outputs addresses of the right length.
 
@@ -6108,7 +6228,7 @@ Tue May 28 17:21:43 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* Merge in changes from gdb-3.95 release.
 	Makefile.in:  Allow hmake and tmake files to add OFILES.
-	aoutf1.h:  
+	aoutf1.h:
 	bfd.c:  support specific targets as well as searching.  When
 	searching, take default target in preference to others.
 	bfd.doc:  typos
@@ -6124,15 +6244,15 @@ Tue May 28 17:21:43 1991  John Gilmore  (gnu at cygint.cygnus.com)
 Fri May 24 18:56:52 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* i386coff.c: created.
-	* coffcode.h: added support for 386. 
-	* Makefile.in: added support for 386. 
+	* coffcode.h: added support for 386.
+	* Makefile.in: added support for 386.
 	* ../include/i386coff.h: created
 
 Wed May 22 07:26:38 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* coffcode.h: removed all put_x_<sizes>
 	* libbfd.c: Changed #ifdef __GNUC__ to #ifdef HOST_64_BIT, Added
-	DEFUNS 
+	DEFUNS
 
 
 Tue May 21 08:58:58 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
@@ -6148,11 +6268,11 @@ Mon May 20 17:12:17 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 Fri May 17 19:35:26 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	Changed all the [get|put][name] routines to use  [get|put]_[size
-	in bytes].  
+	in bytes].
 
 	Put in support for 64 bit work. Now two versions of bfd may be
 	generated, according to the state of TARGET_64_BIT, one which is
-	32 bit only, and one which is 64/32 bits. 
+	32 bit only, and one which is 64/32 bits.
 	Created new back end 'demo64' to test 64 bit functionality.
 
 	Renamed some files to work on DOS.
@@ -6191,7 +6311,7 @@ Mon May 13 10:03:29 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 	(swap_filehdr) delete. Changed all the usage of bfd_h_put_x.
 	(swap_aouthdr_in, swap_aouthdr_out) add. (swap_aouthdr) delete.
 	(coff_real_object_p) cleaned up, added MIPS. (coff_object_p)
-	cleaned up. (coff_write_object_contents) cleaned up. 
+	cleaned up. (coff_write_object_contents) cleaned up.
 
 	* ecoff.c: Totally different. Now supports ecoff fully.
 
@@ -6238,7 +6358,7 @@ Fri May 10 16:58:53 1991  John Gilmore  (gnu at cygint.cygnus.com)
 	* ecoff.c:  Remove close_and_cleanup.  New tvec regime.
 	* icoff.c, m88k-bcs.c:  Add write_contents to tvec.
 	* ieee.c, oasys.c:  Remove close_and_cleanup, add write_contents
-	to tvec. 
+	to tvec.
 	* opncls.c (bfd_close):  Call format-dependent write_contents
 	routine, if writing, before calling target-dependent
 	close_and_cleanup routine (which is now always generic, I think).
@@ -6272,7 +6392,7 @@ Fri May 10 12:34:48 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 	* Makefile.in, m68kcoff.c, targets.c
 	Test new structure code with a 68k coff implementaion
 
-	* coff-code.h, icoff.c, coffswap.c, libcoff.h 
+	* coff-code.h, icoff.c, coffswap.c, libcoff.h
 	Fixed all the places where there were problems with the size and
 	alignments of structures on disk and structures in memory. #ifed out
 	all the code in coffswap.c, since it should be done using the target
@@ -6355,7 +6475,7 @@ Thu Feb 14 07:53:16 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* bfd.c (bfd_perform_relocation): fixed to use output_offsets
 	correctly.
-	
+
 	* bfd.h: changed type of udata in asymbol to void *, like it
 	should be. Added bfd_reloc_dangerous enum member.
 
@@ -6431,11 +6551,11 @@ Wed Jan 30 21:36:26 1991  John Gilmore  (gnu at cygint.cygnus.com)
 	architecture.
 
 Tue Jan 29 20:56:10 PST 1991 steve@cygnus.com
-	
+
 	* archures.c fixed =/== typo
-	
+
 	* sunos.c added architecture stuff for output. Fixed
-	bug where files where vma(data) != size(text) 
+	bug where files where vma(data) != size(text)
 	were processed wrong.
 
 	* coff-code.h added a lint cast
@@ -6448,11 +6568,11 @@ Mon Jan 28 19:15:29 PST 1991 steve@cygnus.com
 	* archive.c removed loads of includes, and fixed bug where string
 	table didn't have a null at the end.
 
-	* bfd.c fixed includes, added symbols argument to 
+	* bfd.c fixed includes, added symbols argument to
 	canonicalize_reloc entry point.
 
 	* libbfd.c fixed includes and added some lint patches.
-	
+
 	* targets.c added both sorts of intel coff.
 
 	* b.out.c fixed included, changed was the canonical
@@ -6473,7 +6593,7 @@ Mon Jan 28 19:15:29 PST 1991 steve@cygnus.com
 
 	* libcoff.h added conversion table to tie relocs to
 	canonical symbols
-		
+
 	* sysdep.h created
 
 	* coff-code.h fixed includes. Added code to support
@@ -6485,7 +6605,7 @@ Mon Jan 28 19:15:29 PST 1991 steve@cygnus.com
 
 
 Mon Jan 21 11:53:51 PST 1991 steve@cygnus.com
-	
+
 	* bfd.h	changed name of alignment entry in sec_struct to
 	alignment_power, because of conflicting uses within bfd.
 	Now it should be obvious that it's a 2**n alignment
@@ -6499,10 +6619,10 @@ Mon Jan 21 11:53:51 PST 1991 steve@cygnus.com
 	relative symbols properly.
 
 	* sunos.c (sunos4_object_p) fixed to use new alignment_power.
-	Fixed (translate_from_native_sym_flags) to correctly make	
+	Fixed (translate_from_native_sym_flags) to correctly make
 	symbols section relative.
 
-	* bfd.c (bfd_errmsg) fixed various enum cast problems. 
+	* bfd.c (bfd_errmsg) fixed various enum cast problems.
 	(bfd_make_section) took out initialization of obsolete members.
 	(bfd_print_symbol_vandf) added
 
@@ -6523,7 +6643,7 @@ Sat Jan 19 16:10:42 PST 1991 steve@cygnus.com
 	* archive.c lots of lint
 
 	* b.out.c added callj relocation support, upgrated reloc howto.
-	Fixed so that asymbol and reloc records are output 
+	Fixed so that asymbol and reloc records are output
 	correctly.
 
 	* bfd.c lots of lint, support for new bfd entry point
@@ -6540,7 +6660,7 @@ Sat Jan 19 16:10:42 PST 1991 steve@cygnus.com
 	reloc records are handled correctly. Added timestamp.
 
 	* icoff.c Added support for new howto shape.
-	
+
 	* liba.out.h Added support for new asymbol shape
 
 	* libbfd.c various lints
@@ -6564,7 +6684,7 @@ Wed Jan 16 21:38:09 PST 1991 steve@cygnus.com
 	that it won't be affected by any lengthing of the howto struct typedef.
 	Various lints
 
-	* bfd.h added support for n_other field, added special_function 	
+	* bfd.h added support for n_other field, added special_function
 	reloc type, modified bfd_perform_relocation prototype. Added bfd_h_get_x
 	macros.
 
@@ -6624,7 +6744,7 @@ Wed Jan 16 01:55:53 1991  John Gilmore  (gnu at rtl)
 
 	* opncls.c (bfd_openr):  Eliminate misplaced #if 0 code.
 	(bfd_openr, bfd_openw):  Actually open the file, give error now.
-	
+
 	* sunos.c (sunos4_core_file_p):  Set section count.
 	(sunos4_set_section_linenos, stab_names, fprint_name):  Eliminiate
 	obsolete definitions.
