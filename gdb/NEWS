@@ -7,6 +7,11 @@
 
 x86 OpenBSD					i[3456]86-*-openbsd*
 
+* Changes to command line processing
+
+The new `--args' feature can be used to specify command-line arguments
+for the inferior from gdb's command line.
+
 *** Changes in GDB 5.1:
 
 * New native configurations
