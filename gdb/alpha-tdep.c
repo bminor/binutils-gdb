@@ -314,13 +314,14 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   /* Load the argument registers.  */
   for (i = 0; i < required_arg_regs; i++)
     {
-      LONGEST val;
-
-      val = extract_unsigned_integer (arg_reg_buffer + i*ALPHA_REGISTER_SIZE,
-				      ALPHA_REGISTER_SIZE);
-      regcache_cooked_write_signed (regcache, ALPHA_A0_REGNUM + i, val);
-      regcache_cooked_write_signed (regcache, ALPHA_FPA0_REGNUM + i, val);
+      regcache_cooked_write (regcache, ALPHA_A0_REGNUM + i,
+			     arg_reg_buffer + i*ALPHA_REGISTER_SIZE);
+      regcache_cooked_write (regcache, ALPHA_FPA0_REGNUM + i,
+			     arg_reg_buffer + i*ALPHA_REGISTER_SIZE);
     }
+
+  /* Finally, update the stack pointer.  */
+  regcache_cooked_write_signed (regcache, ALPHA_SP_REGNUM, sp);
 
   return sp;
 }
