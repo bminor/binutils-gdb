@@ -1,3 +1,7 @@
+2002-07-16  Moritz Jodeit  <moritz@jodeit.org>
+
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_out): Correct order of memset args.
+
 2002-07-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h: Formatting fixes, tidy prototypes.
