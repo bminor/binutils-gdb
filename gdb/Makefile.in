@@ -179,7 +179,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 4.12.4
+VERSION = 4.13.1
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -1161,7 +1161,7 @@ core-svr4.o: core-svr4.c $(command_h) $(defs_h) $(gdbcore_h) \
 core.o: core.c $(dis-asm_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) target.h language.h
 
-coredep.o: coredep.c $(defs_h) $(gdbcore_h) $(value_h)
+coredep.o: coredep.c $(defs_h) $(gdbcore_h) $(value_h) $(inferior_h)
 
 corelow.o: corelow.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h thread.h

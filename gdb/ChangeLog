@@ -1,3 +1,8 @@
+Sun Aug 14 13:05:26 1994  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (VERSION):  Bump to 4.13.1
+	* NEWS, README:  Update to match gdb 4.13 release version.
+
 Sat Aug 13 08:22:50 1994  Fred Fish  (fnf@cygnus.com)
 
 	Harris CX/UX support, from Bob Rusk (rrusk@mail.csd.harris.com).

@@ -1,5 +1,5 @@
-		      README for gdb-4.12 release
-		    Updated 3-Feb-94 by Fred Fish
+		      README for gdb-4.13 release
+		    Updated 8-Aug-94 by Fred Fish
 
 This is GDB, the GNU source-level debugger, presently running under un*x.
 A summary of new features is in the file `NEWS'.
@@ -11,7 +11,7 @@ Unpacking and Installation -- quick overview
 In this release, the GDB debugger sources, the generic GNU include
 files, the BFD ("binary file description") library, the readline
 library, and other libraries all have directories of their own
-underneath the gdb-4.12 directory.  The idea is that a variety of GNU
+underneath the gdb-4.13 directory.  The idea is that a variety of GNU
 tools can share a common copy of these things.  Be aware of variation
 over time--for example don't try to build gdb with a copy of bfd from
 a release other than the gdb release (such as a binutils or gas
@@ -20,8 +20,8 @@ Configuration scripts and makefiles exist to cruise up and down this
 directory tree and automatically build all the pieces in the right
 order.
 
-When you unpack the gdb-4.12.tar.gz file, you'll find a directory
-called `gdb-4.12', which contains:
+When you unpack the gdb-4.13.tar.gz file, you'll find a directory
+called `gdb-4.13', which contains:
 
   Makefile.in      config.sub*      glob/            opcodes/
   README           configure*       include/         readline/
@@ -31,7 +31,7 @@ called `gdb-4.12', which contains:
 
 To build GDB, you can just do:
 
-	cd gdb-4.12
+	cd gdb-4.13
 	./configure
 	make
 	cp gdb/gdb /usr/local/bin/gdb	(or wherever you want)
@@ -51,9 +51,9 @@ More Documentation
 ******************
 
    The GDB 4 release includes an already-formatted reference card,
-ready for printing with PostScript or GhostScript, in the `gdb'
-subdirectory of the main source directory.  (In `gdb-4.12/gdb/refcard.ps'.)
-If you can use PostScript or GhostScript with your printer, you can
+ready for printing with PostScript or Ghostscript, in the `gdb'
+subdirectory of the main source directory.  (In `gdb-4.13/gdb/refcard.ps'.)
+If you can use PostScript or Ghostscript with your printer, you can
 print the reference card immediately with `refcard.ps'.
 
    The release also includes the source for the reference card.  You
@@ -86,7 +86,7 @@ distribution.
 Info formatting programs, such as `texinfo-format-buffer' or `makeinfo'.
 
    If you have `makeinfo' installed, and are in the top level GDB
-source directory (`gdb-4.12', in the case of version 4.12), you can make
+source directory (`gdb-4.13', in the case of version 4.13), you can make
 the Info file by typing:
 
      cd gdb
@@ -112,7 +112,7 @@ format.  On its own, TeX cannot read, much less typeset a Texinfo file.
 
    If you have TeX and a DVI printer program installed, you can typeset
 and print this manual.  First switch to the the `gdb' subdirectory of
-the main source directory (for example, to `gdb-4.12/gdb') and then type:
+the main source directory (for example, to `gdb-4.13/gdb') and then type:
 
      make gdb.dvi
 
@@ -128,42 +128,42 @@ preparing GDB for installation; you can then use `make' to build the
 a single directory, whose name is usually composed by appending the
 version number to `gdb'.
 
-   For example, the GDB version 4.12 distribution is in the `gdb-4.12'
+   For example, the GDB version 4.13 distribution is in the `gdb-4.13'
 directory.  That directory contains:
 
-`gdb-4.12/configure (and supporting files)'
+`gdb-4.13/configure (and supporting files)'
      script for configuring GDB and all its supporting libraries.
 
-`gdb-4.12/gdb'
+`gdb-4.13/gdb'
      the source specific to GDB itself
 
-`gdb-4.12/bfd'
+`gdb-4.13/bfd'
      source for the Binary File Descriptor library
 
-`gdb-4.12/include'
+`gdb-4.13/include'
      GNU include files
 
-`gdb-4.12/libiberty'
+`gdb-4.13/libiberty'
      source for the `-liberty' free software library
 
-`gdb-4.12/opcodes'
+`gdb-4.13/opcodes'
      source for the library of opcode tables and disassemblers
 
-`gdb-4.12/readline'
+`gdb-4.13/readline'
      source for the GNU command-line interface
 
-`gdb-4.12/glob'
+`gdb-4.13/glob'
      source for the GNU filename pattern-matching subroutine
 
-`gdb-4.12/mmalloc'
+`gdb-4.13/mmalloc'
      source for the GNU memory-mapped malloc package
 
-'gdb-4.12/sim'
+'gdb-4.13/sim'
      source for some simulators (z8000, H8/300, H8/500, etc)
 
    The simplest way to configure and build GDB is to run `configure'
 from the `gdb-VERSION-NUMBER' source directory, which in this example
-is the `gdb-4.12' directory.
+is the `gdb-4.13' directory.
 
    First switch to the `gdb-VERSION-NUMBER' source directory if you are
 not already in it; then run `configure'.  Pass the identifier for the
@@ -171,7 +171,7 @@ platform on which GDB will run as an argument.
 
    For example:
 
-     cd gdb-4.12
+     cd gdb-4.13
      ./configure HOST
      make
 
@@ -190,8 +190,8 @@ you may need to run `sh' on it explicitly:
      sh configure HOST
 
    If you run `configure' from a directory that contains source
-directories for multiple libraries or programs, such as the `gdb-4.12'
-source directory for version 4.12, `configure' creates configuration
+directories for multiple libraries or programs, such as the `gdb-4.13'
+source directory for version 4.13, `configure' creates configuration
 files for every directory level underneath (unless you tell it not to,
 with the `--norecursion' option).
 
@@ -199,10 +199,10 @@ with the `--norecursion' option).
 directories in the GDB distribution, if you only want to configure that
 subdirectory; but be sure to specify a path to it.
 
-   For example, with version 4.12, type the following to configure only
+   For example, with version 4.13, type the following to configure only
 the `bfd' subdirectory:
 
-     cd gdb-4.12/bfd
+     cd gdb-4.13/bfd
      ../configure HOST
 
    You can install `gdb' anywhere; it has no hardwired paths. However,
@@ -231,13 +231,13 @@ directory.  If the path to `configure' would be the same as the
 argument to `--srcdir', you can leave out the `--srcdir' option; it
 will be assumed.)
 
-   For example, with version 4.12, you can build GDB in a separate
+   For example, with version 4.13, you can build GDB in a separate
 directory for a Sun 4 like this:
 
-     cd gdb-4.12
+     cd gdb-4.13
      mkdir ../gdb-sun4
      cd ../gdb-sun4
-     ../gdb-4.12/configure sun4
+     ../gdb-4.13/configure sun4
      make
 
    When `configure' builds a configuration using a remote source
@@ -258,8 +258,8 @@ called `configure' (or one of its subdirectories).
 
    The `Makefile' that `configure' generates in each source directory
 also runs recursively.  If you type `make' in a source directory such
-as `gdb-4.12' (or in a separate configured directory configured with
-`--srcdir=PATH/gdb-4.12'), you will build all the required libraries,
+as `gdb-4.13' (or in a separate configured directory configured with
+`--srcdir=PATH/gdb-4.13'), you will build all the required libraries,
 and then build GDB.
 
    When you have multiple hosts or targets configured in separate
@@ -302,7 +302,7 @@ you can use it to test your guesses on abbreviations--for example:
      Invalid configuration `i786v': machine `i786v' not recognized
 
 `config.sub' is also distributed in the GDB source directory
-(`gdb-4.12', for version 4.12).
+(`gdb-4.13', for version 4.13).
 
 
 `configure' options
@@ -427,7 +427,7 @@ Reporting Bugs
 The correct address for reporting bugs found in gdb is
 "bug-gdb@prep.ai.mit.edu".  Please email all bugs, and all requests for
 help with GDB, to that address.  Please include the GDB version number
-(e.g. gdb-4.12), and how you configured it (e.g. "sun4" or "mach386
+(e.g. gdb-4.13), and how you configured it (e.g. "sun4" or "mach386
 host, i586-intel-synopsys target").  If you include the banner that GDB
 prints when it starts up, that will give us enough information.
 
@@ -442,10 +442,6 @@ Known bugs:
     incorrect value for the frame pointer register (register 15 or
     30).  As far as we can tell, this is a kernel problem.  Any help
     with this would be greatly appreciated.
-
-  * On the SPARC GDB reports incorrect values of struct arguments to
-    functions, for the seventh and subsequent arguments.  We have been looking
-    at this but no fix is available yet.
 
   * On DECstations there are warnings about shift counts out of range in
     various BFD modules.  None of them is a cause for alarm, they are actually
@@ -471,8 +467,15 @@ Known bugs:
     try to relink your executable with the -non_shared option when using cc
     or with the -static option when using gcc.
 
+  * Notes for Solaris 2.x, using the SPARCworks cc compiler:
+    You have to compile your program with the -xs option of the SPARCworks
+    compiler to be able to debug your program with gdb.
+    Under Solaris 2.3 you also need patch 101409-03 (Jumbo linker patch).
+    Under Solaris 2.2, if you have patch 101052 installed, make sure
+    that it is at least at revision 101052-06.
+
   * Notes for BSD/386:
-    To compile gdb-4.12 on BSD/386, you must run the configure script and
+    To compile gdb-4.13 on BSD/386, you must run the configure script and
     its subscripts with bash.  Here is an easy way to do this:
 
 	bash -c 'CONFIG_SHELL=/bin/bash ./configure'
@@ -525,25 +528,25 @@ GDB Testsuite
 =============
 
 There is a dejagnu based testsuite available for testing your newly
-built gdb, or for regression testing gdb's with local modifications.
-The testsuite is distributed separately from the base gdb distribution
-for the convenience of people that wish to get either gdb or the testsuite
+built GDB, or for regression testing GDBs with local modifications.
+The testsuite is distributed separately from the base GDB distribution
+for the convenience of people that wish to get either GDB or the testsuite
 separately.
 
-The name of the testsuite is gdb-4.12-testsuite.tar.gz.  You unpack it in the
-same directory in which you unpacked the base gdb distribution, and it
-will create and populate the directory gdb-4.12/gdb/testsuite.
+The name of the testsuite is gdb-4.13-testsuite.tar.gz.  You unpack it in the
+same directory in which you unpacked the base GDB distribution, and it
+will create and populate the directory gdb-4.13/gdb/testsuite.
 
 Running the testsuite requires the prior installation of dejagnu, which
 should be available via ftp.  Once dejagnu is installed, you can run
 the tests in one of two ways:
 
-  (1)	cd gdb-4.12/gdb		(assuming you also unpacked gdb)
+  (1)	cd gdb-4.13/gdb		(assuming you also unpacked gdb)
 	make check
 
 or
 
-  (2)	cd gdb-4.12/gdb/testsuite
+  (2)	cd gdb-4.13/gdb/testsuite
 	make		(builds the test executables)
 	make site.exp	(builds the site specific file)
 	runtest -tool gdb GDB=../gdb    (or GDB=<somepath> as appropriate)
@@ -551,7 +554,7 @@ or
 The second method gives you slightly more control in case of problems with
 building one or more test executables, in case you wish to remove some
 test executables before running the tests, or if you are using the testsuite
-'standalone', without it being part of the gdb source tree.
+'standalone', without it being part of the GDB source tree.
 
 See the dejagnu documentation for further details.
 

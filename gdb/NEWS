@@ -1,12 +1,81 @@
 		What has changed since GDB-3.5?
 		(Organized release by release)
 
+
 *** Changes in GDB-4.13:
 
-* New "complete" command for use by emacs.
+* New "complete" command
 
-* "set prompt" no longer adds a space for you after the prompt you set.  This
+This lists all the possible completions for the rest of the line, if it
+were to be given as a command itself.  This is intended for use by emacs.
+
+* Trailing space optional in prompt
+
+"set prompt" no longer adds a space for you after the prompt you set.  This
 allows you to set a prompt which ends in a space or one that does not.
+
+* Breakpoint hit counts
+
+"info break" now displays a count of the number of times the breakpoint
+has been hit.  This is especially useful in conjunction with "ignore"; you
+can ignore a large number of breakpoint hits, look at the breakpoint info
+to see how many times the breakpoint was hit, then run again, ignoring one
+less than that number, and this will get you quickly to the last hit of
+that breakpoint.
+
+* Ability to stop printing at NULL character
+
+"set print null-stop" will cause GDB to stop printing the characters of
+an array when the first NULL is encountered.  This is useful when large
+arrays actually contain only short strings.
+
+* Shared library breakpoints
+
+In SunOS 4.x, SVR4, and Alpha OSF/1 configurations, you can now set
+breakpoints in shared libraries before the executable is run.
+
+* Hardware watchpoints
+
+There is a new hardware breakpoint for the watch command for sparclite
+targets.  See gdb/sparclite/hw_breakpoint.note.
+
+Hardware watchpoints are also now supported under Linux.
+ 
+* Annotations
+
+Annotations have been added.  These are for use with graphical interfaces,
+and are still experimental.  Currently only gdba.el uses these.
+
+* Improved Irix 5 support
+
+GDB now works properly with Irix 5.2.
+
+* Improved HPPA support
+
+GDB now works properly with the latest GCC and GAS.
+
+* New native configurations
+
+Sequent PTX4				i[34]86-sequent-ptx4
+HPPA running OSF/1			hppa*-*-osf*
+Atari TT running SVR4			m68*-*-sysv4*
+RS/6000 LynxOS				rs6000-*-lynxos*
+
+* New targets
+
+OS/9000					i[34]86-*-os9k
+MIPS R4000				mips64*{,el}-*-{ecoff,elf}
+Sparc64					sparc64-*-*
+
+* Hitachi SH7000 and E7000-PC ICE support
+
+There is now support for communicating with the Hitachi E7000-PC ICE.
+This is available automatically when GDB is configured for the SH.
+
+* Fixes
+
+As usual, a variety of small fixes and improvements, both generic
+and configuration-specific.  See the ChangeLog for more detail.
 
 *** Changes in GDB-4.12:
 
