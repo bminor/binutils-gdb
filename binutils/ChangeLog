@@ -1,4 +1,41 @@
+Thu Mar 20 21:16:51 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* size.c (usage): Make definition match its prototype.
+	(display_bfd, lprint_number, rprint_number): Likewise.
+	(print_berkeley_format, sysv_internal_printer): Likewise.
+	(print_sysv_format): Likewise.
+	* nm.c (set_print_radix, set_output_format): Likewise.
+	* objcopy.c (filter_bytes): Likewise.
+
+Tue Mar 18 16:39:55 1997  H.J. Lu  <hjl@lucon.org>
+
+	* Many files: Add function prototypes.
+	* ar.c (mri_emul, get_pos_bfd): Make static.
+	* arlex.l: Include "libiberty.h".  Don't declare strdup.  Use
+	xstrdup rather than strdup.
+	* arparse.y (yyerror): Make argument const.  Correct typo.
+	* arsup.c (strdup): Don't declare.
+	(ar_save): Use xstrdup rather than strdup.
+	* filemode.c: Include "bucomm.h".
+	* nm.c (usage): Make static.
+	(print_symname): Make format and name const.
+	* objcopy.c (cat): Remove.
+	(copy_archive): Make output_target const.  Use concat, not cat.
+	(copy_file, simple_copy, smart_rename): Make arguments const.
+	* objdump.c (read_section_stabs): Likewise.
+	(print_section_stabs): Likewise.
+	(display_target_tables): Don't declare getenv.
+	* strings.c (strings_object_file): Change file to const.
+	(print_strings): Change filename to const.
+	* Makefile.in: Rebuild dependencies.
+
 Tue Mar 18 11:37:24 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Add BFD_NEED_DECLARATION(getenv).
+	* acconfig.h: Add NEED_DECLARATION_GETENV.
+	* bucomm.h (getenv): Declare if NEED_DECLARATION_GETENV.
+	* configure, config.in: Rebuild.
+	* nlmconv.c (getenv): Don't declare.
 
 	* Makefile.in: Rebuild dependencies.
 
