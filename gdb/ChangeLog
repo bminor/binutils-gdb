@@ -1,3 +1,11 @@
+Sun Jan  3 14:24:56 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* remote-sim.c: first attempt at general simulator interface
+	* remote-hms.c: whitespace
+	* h8300-tdep.c: (h8300_skip_prologue, examine_prologue):
+	understand new stack layout. (print_register_hook): print ccr
+	register in a fancy way.
+
 Sun Jan  3 14:16:10 1993  Fred Fish  (fnf@cygnus.com)
 
 	* eval.c (language.h): Include.

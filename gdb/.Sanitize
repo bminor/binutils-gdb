@@ -210,6 +210,7 @@ remote-es1800.c
 remote-hms.c
 remote-mm.c
 remote-nindy.c
+remote-sim.c
 remote-st2000.c
 remote-vx.c
 remote.c

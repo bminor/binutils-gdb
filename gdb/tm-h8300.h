@@ -77,17 +77,8 @@ UNSIGNED_SHORT(read_memory_integer (read_register (SP_REGNUM), 2))
 
 #define INNER_THAN <
 
-/* Sequence of bytes for breakpoint instruction.
-   This is a TRAP instruction.  The last 4 bits (0xf below) is the
-   vector.  Systems which don't use 0xf should define BPT_VECTOR
-   themselves before including this file.  */
 
-
-#define BPT_VECTOR 0xf
-
-
-
-#define BREAKPOINT {0x4e, (0x40 | BPT_VECTOR)}
+#define BREAKPOINT {0x53, 0x00}
 
 
 /* If your kernel resets the pc after the trap happens you may need to
@@ -304,4 +295,7 @@ typedef unsigned short INSN_WORD;
 
 #define read_memory_short(x)  (read_memory_integer(x,2) & 0xffff)
 #define DONT_USE_REMOTE
+
+
+#define	PRINT_REGISTER_HOOK(regno) print_register_hook(regno)
 
