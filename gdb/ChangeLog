@@ -1,3 +1,8 @@
+Thu Jul 23 14:58:09 1998  Dawn Perchik  <dawn@cygnus.com>
+
+	* i386-tdep.c (i386_get_frame_setup): Recognize function
+	prologues in code compiled with -fcheck-stack.
+
 Thu Jul 23 14:49:27 1998  Dawn Perchik  <dawn@cygnus.com>
 
 	* remote-mips.c (remote_mips_insert_hw_breakpoint,
