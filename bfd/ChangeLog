@@ -1,3 +1,18 @@
+start-sanitize-m32r
+Wed Mar  5 13:59:09 1997  Doug Evans  <dje@seba.cygnus.com>
+
+	* elf32-m32r.c (m32r_elf_do_10_pcrel_reloc): Fix overflow calc.
+	(m32r_elf_relax_section, m32r_elf_relax_delete_bytes,
+	m32r_elf_get_relocated_section_contents): First pass at relax support.
+
+end-sanitize-m32r
+Mon Mar  3 13:27:09 1997  Ulrich Drepper  <drepper@rtl.cygnus.com>
+
+	* elflink.h (elf_link_add_object_symbols): Use correct sh_size
+	entry for reading verdef records.
+	Use correct braces for computing increments of extverdaux and
+	exteverdef record pointers.
+
 start-sanitize-tic80
 Sun Mar  2 22:47:54 1997  Fred Fish  <fnf@cygnus.com>
 
