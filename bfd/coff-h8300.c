@@ -31,7 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (1)
 
 /* We derive a hash table from the basic BFD hash table to
-   hold entries in the function vector.  Aside from the 
+   hold entries in the function vector.  Aside from the
    info stored by the basic hash table, we need the offset
    of a particular entry within the hash table as well as
    the offset where we'll add the next entry.  */
@@ -196,7 +196,7 @@ h8300_coff_link_hash_table_create (abfd)
    We only come here for pcrel stuff and return normally if not an -r link.
    When doing -r, we can't do any arithmetic for the pcrel stuff, because
    the code in reloc.c assumes that we can manipulate the targets of
-   the pcrel branches.  This isn't so, since the H8/300 can do relaxing, 
+   the pcrel branches.  This isn't so, since the H8/300 can do relaxing,
    which means that the gap after the instruction may not be enough to
    contain the offset required for the branch, so we have to use only
    the addend until the final link.  */
@@ -439,7 +439,7 @@ h8300_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
   static asection *last_input_section = NULL;
   static arelent *last_reloc = NULL;
 
-  /* The address of the thing to be relocated will have moved back by 
+  /* The address of the thing to be relocated will have moved back by
      the size of the shrink - but we don't change reloc->address here,
      since we need it to know where the relocation lives in the source
      uncooked section.  */
@@ -450,7 +450,7 @@ h8300_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
 
   /* Only examine the relocs which might be relaxable.  */
   switch (reloc->howto->type)
-    {     
+    {
     /* This is the 16/24 bit absolute branch which could become an 8 bit
        pc-relative branch.  */
     case R_JMP1:
@@ -472,7 +472,7 @@ h8300_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
 	 this jump.  +128 is valid since the target will move two bytes
 	 closer if we do relax this branch.  */
       if ((int)gap >= -128 && (int)gap <= 128 )
-	{ 
+	{
 	  /* It's possible we may be able to eliminate this branch entirely;
 	     if the previous instruction is a branch around this instruction,
 	     and there's no label at this instruction, then we can reverse
@@ -482,7 +482,7 @@ h8300_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
 		 bCC lab1			bCC' lab2
 		 jmp lab2
 		lab1:				lab1:
-	
+
 	     This saves 4 bytes instead of two, and should be relatively
 	     common.  */
 
@@ -535,7 +535,7 @@ h8300_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
 	 this jump.  +128 is valid since the target will move two bytes
 	 closer if we do relax this branch.  */
       if ((int)gap >= -128 && (int)gap <= 128 )
-	{ 
+	{
 	  /* Change the reloc type.  */
 	  reloc->howto = howto_table + 15;
 
@@ -690,8 +690,8 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 
       /* Get the address of the instruction (not the reloc).  */
-      dot = (link_order->offset 
-	     + dst_address 
+      dot = (link_order->offset
+	     + dst_address
 	     + link_order->u.indirect.section->output_section->vma + 1);
 
       gap = value - dot;
@@ -908,7 +908,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	src_address += 2;
 
 	break;
-      
+
     /* Similarly for a 24bit absolute that is now 8 bits.  */
     case R_JMPL2:
       /* Get the address of the target of this branch.  */
@@ -1079,7 +1079,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	  }
 
 	/* This is a jump/call through a function vector, and we're
-	   expected to create the function vector ourselves. 
+	   expected to create the function vector ourselves.
 
 	   First look up this symbol in the linker hash table -- we need
 	   the derived linker symbol which holds this symbol's index
@@ -1278,7 +1278,6 @@ h8300_bfd_link_add_symbols (abfd, info)
 	      /* Look this symbol up in the function vector hash table.  */
 	      h = funcvec_hash_lookup (h8300_coff_hash_table (info)->funcvec_hash_table,
 				       name, false, false);
-
 
 	      /* If this symbol isn't already in the hash table, add
 		 it and bump up the size of the hash table.  */

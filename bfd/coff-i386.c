@@ -594,7 +594,7 @@ const bfd_target
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
 
-/* Note that we allow an object file to be treated as a core file as well. */
+/* Note that we allow an object file to be treated as a core file as well.  */
     {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
        bfd_generic_archive_p, coff_object_p},
     {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */

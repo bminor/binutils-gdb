@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define COFF_PAGE_SIZE 0x1000
 
-static reloc_howto_type howto_table[] = 
+static reloc_howto_type howto_table[] =
 {
   {0},
 };
@@ -54,15 +54,15 @@ static reloc_howto_type howto_table[] =
 
 #ifdef COFF_WITH_PE
 /* Return true if this relocation should
-   appear in the output .reloc section. */
+   appear in the output .reloc section.  */
 
 static boolean
 in_reloc_p(abfd, howto)
      bfd * abfd;
      reloc_howto_type *howto;
 {
-  return 0;			/* We don't do relocs for now... */
-}     
+  return 0;			/* We don't do relocs for now...  */
+}
 #endif
 
 #include "coffcode.h"
@@ -174,7 +174,7 @@ const bfd_target
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
 
-/* Note that we allow an object file to be treated as a core file as well. */
+/* Note that we allow an object file to be treated as a core file as well.  */
     {_bfd_dummy_target, ia64coff_object_p, /* bfd_check_format */
        bfd_generic_archive_p, ia64coff_object_p},
     {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
