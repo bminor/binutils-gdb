@@ -1,3 +1,11 @@
+2001-04-06  J.T. Conklin  <jtc@redback.com>
+
+	* gdbserver/low-hppabsd.c (read_inferior_memory): Add explicit 
+	void return value;
+	* gdbserver/low-nbsd.c: Likewise.
+	* gdbserver/low-sparc.c: Likewise.
+	* gdbserver/low-sun3.c: Likewise.
+
 2001-04-06  Geoffrey Keating  <geoffk@redhat.com>
 
 	* config/rs6000/nm-rs6000.h (PTRACE_ATTACH): Don't define.

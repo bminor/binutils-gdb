@@ -231,6 +231,7 @@ store_inferior_registers (int ignored)
 /* Copy LEN bytes from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.  */
 
+void
 read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   register int i;
