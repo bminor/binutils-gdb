@@ -70,7 +70,9 @@ static int mips_output_flavor () { return OUTPUT_FLAVOR; }
 
 #include "ecoff.h"
 
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 static char *mips_regmask_frag;
+#endif
 
 #define AT  1
 #define PIC_CALL_REG 25
@@ -5626,8 +5628,9 @@ mips_ip (str, ip)
 	      if (*args == 'i')
 		{
 		  if ((c == '\0' && imm_expr.X_op != O_constant)
-		      || imm_expr.X_add_number < 0
-		      || imm_expr.X_add_number >= 0x10000)
+		      || ((imm_expr.X_add_number < 0
+                           || imm_expr.X_add_number >= 0x10000)
+                          && imm_expr.X_op == O_constant))
 		    {
 		      if (insn + 1 < &mips_opcodes[NUMOPCODES] &&
 			  !strcmp (insn->name, insn[1].name))
@@ -5660,8 +5663,9 @@ mips_ip (str, ip)
 		  else
 		    max = 0x10000;
 		  if ((c == '\0' && imm_expr.X_op != O_constant)
-		      || imm_expr.X_add_number < -0x8000
-		      || imm_expr.X_add_number >= max
+		      || ((imm_expr.X_add_number < -0x8000
+                           || imm_expr.X_add_number >= max)
+                          && imm_expr.X_op == O_constant)
 		      || (more
 			  && imm_expr.X_add_number < 0
 			  && mips_isa >= 3
@@ -7512,6 +7516,7 @@ tc_gen_reloc (section, fixp)
 {
   static arelent *retval[4];
   arelent *reloc;
+  bfd_reloc_code_real_type code;
 
   reloc = retval[0] = (arelent *) xmalloc (sizeof (arelent));
   retval[1] = NULL;
@@ -7644,20 +7649,51 @@ tc_gen_reloc (section, fixp)
 	abort ();
     }
 
+  /* Since DIFF_EXPR_OK is defined in tc-mips.h, it is possible that
+     fixup_segment converted a non-PC relative reloc into a PC
+     relative reloc.  In such a case, we need to convert the reloc
+     code.  */
+  code = fixp->fx_r_type;
+  if (fixp->fx_pcrel)
+    {
+      switch (code)
+	{
+	case BFD_RELOC_8:
+	  code = BFD_RELOC_8_PCREL;
+	  break;
+	case BFD_RELOC_16:
+	  code = BFD_RELOC_16_PCREL;
+	  break;
+	case BFD_RELOC_32:
+	  code = BFD_RELOC_32_PCREL;
+	  break;
+	case BFD_RELOC_8_PCREL:
+	case BFD_RELOC_16_PCREL:
+	case BFD_RELOC_32_PCREL:
+	case BFD_RELOC_16_PCREL_S2:
+	  break;
+	default:
+	  as_bad_where (fixp->fx_file, fixp->fx_line,
+			"Cannot make %s relocation PC relative",
+			bfd_get_reloc_code_name (code));
+	}
+    }
+
   /* To support a PC relative reloc when generating embedded PIC code
      for ECOFF, we use a Cygnus extension.  We check for that here to
      make sure that we don't let such a reloc escape normally.  */
   if (OUTPUT_FLAVOR == bfd_target_ecoff_flavour
-      && fixp->fx_r_type == BFD_RELOC_16_PCREL_S2
+      && code == BFD_RELOC_16_PCREL_S2
       && mips_pic != EMBEDDED_PIC)
     reloc->howto = NULL;
   else
-    reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
+    reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
 
   if (reloc->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    "Can not represent relocation in this object file format");
+		    "Can not represent %s relocation in this object file format",
+		    bfd_get_reloc_code_name (code));
       retval[0] = NULL;
     }
 
