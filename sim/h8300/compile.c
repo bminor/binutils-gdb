@@ -1044,10 +1044,10 @@ sim_resume (sd, step, siggnal)
 #endif
 
       if (code->opcode)
-       {
-        cycles += code->cycles;
-        insts++;
-       }
+	{
+	  cycles += code->cycles;
+	  insts++;
+	}
 
       switch (code->opcode)
 	{
@@ -1139,35 +1139,35 @@ sim_resume (sd, step, siggnal)
 
 	case O (O_EEPMOV, SB):
 	case O (O_EEPMOV, SW):
-		 if(h8300hmode||h8300smode)
-	          {
-		    register unsigned char *_src,*_dst;
-		    unsigned int count = (code->opcode==O(O_EEPMOV, SW))?cpu.regs[R4_REGNUM]&0xffff:
-									 cpu.regs[R4_REGNUM]&0xff;
+	  if(h8300hmode||h8300smode)
+	    {
+	      register unsigned char *_src,*_dst;
+	      unsigned int count = (code->opcode==O(O_EEPMOV, SW))?cpu.regs[R4_REGNUM]&0xffff:
+		cpu.regs[R4_REGNUM]&0xff;
 
-		   _src = cpu.regs[R5_REGNUM] < memory_size ? cpu.memory+cpu.regs[R5_REGNUM] :
-	           				       	      cpu.eightbit + (cpu.regs[R5_REGNUM] & 0xff);
-		   if((_src+count)>=(cpu.memory+memory_size))
-		   {
-			   if((_src+count)>=(cpu.eightbit+0x100))
-			      goto illegal;
-		   }
-		   _dst = cpu.regs[R6_REGNUM] < memory_size ? cpu.memory+cpu.regs[R6_REGNUM] :
+	      _src = cpu.regs[R5_REGNUM] < memory_size ? cpu.memory+cpu.regs[R5_REGNUM] :
+		cpu.eightbit + (cpu.regs[R5_REGNUM] & 0xff);
+	      if((_src+count)>=(cpu.memory+memory_size))
+		{
+		  if((_src+count)>=(cpu.eightbit+0x100))
+		    goto illegal;
+		}
+	      _dst = cpu.regs[R6_REGNUM] < memory_size ? cpu.memory+cpu.regs[R6_REGNUM] :
 	           				       	      cpu.eightbit + (cpu.regs[R6_REGNUM] & 0xff);
-		   if((_dst+count)>=(cpu.memory+memory_size))
-		   {
-			   if((_dst+count)>=(cpu.eightbit+0x100))
-			      goto illegal;
-		   }
-		   memcpy(_dst,_src,count);
+	      if((_dst+count)>=(cpu.memory+memory_size))
+		{
+		  if((_dst+count)>=(cpu.eightbit+0x100))
+		    goto illegal;
+		}
+	      memcpy(_dst,_src,count);
 
-		   cpu.regs[R5_REGNUM]+=count;
-		   cpu.regs[R6_REGNUM]+=count;
-		   cpu.regs[R4_REGNUM]&=(code->opcode==O(O_EEPMOV, SW))?(~0xffff):(~0xff);
-		   cycles += 2*count;
-	           goto next;
-	     }
-	    goto illegal;
+	      cpu.regs[R5_REGNUM]+=count;
+	      cpu.regs[R6_REGNUM]+=count;
+	      cpu.regs[R4_REGNUM]&=(code->opcode==O(O_EEPMOV, SW))?(~0xffff):(~0xff);
+	      cycles += 2*count;
+	      goto next;
+	    }
+	  goto illegal;
 
 	case O (O_ADDS, SL):
 	  SET_L_REG (code->dst.reg,
@@ -1256,59 +1256,59 @@ sim_resume (sd, step, siggnal)
 	  goto setc;
 	case O (O_STC, SB):
 	case O (O_STC, SW):
-          if(code->src.type==OP_CCR)
-          {
-	     GET_CCR(res);
-          }
-          else if(code->src.type==OP_EXR && h8300smode)
-          {
-	     GET_EXR(res);
-          }
-          else
+	  if(code->src.type==OP_CCR)
+	    {
+	      GET_CCR(res);
+	    }
+	  else if(code->src.type==OP_EXR && h8300smode)
+	    {
+	      GET_EXR(res);
+	    }
+	  else
 	    goto illegal;
 	  store (&code->dst, res);
 	  goto next;
 
 	case O (O_ANDC, SB):
-          if(code->dst.type==OP_CCR)
-          {
-	     GET_CCR (rd);
-          }
-          else if(code->dst.type==OP_EXR && h8300smode)
-          {
-	     GET_EXR (rd);
-          }
-          else
+	  if(code->dst.type==OP_CCR)
+	    {
+	      GET_CCR (rd);
+	    }
+	  else if(code->dst.type==OP_EXR && h8300smode)
+	    {
+	      GET_EXR (rd);
+	    }
+	  else
 	    goto illegal;
 	  ea = code->src.literal;
 	  res = rd & ea;
 	  goto setc;
 
 	case O (O_ORC, SB):
-          if(code->dst.type==OP_CCR)
-          {
-	     GET_CCR (rd);
-          }
-          else if(code->dst.type==OP_EXR && h8300smode)
-          {
-	     GET_EXR (rd);
-          }
-          else
+	  if(code->dst.type==OP_CCR)
+	    {
+	      GET_CCR (rd);
+	    }
+	  else if(code->dst.type==OP_EXR && h8300smode)
+	    {
+	      GET_EXR (rd);
+	    }
+	  else
 	    goto illegal;
 	  ea = code->src.literal;
 	  res = rd | ea;
 	  goto setc;
 
 	case O (O_XORC, SB):
-          if(code->dst.type==OP_CCR)
-          {
-	     GET_CCR (rd);
-          }
-          else if(code->dst.type==OP_EXR && h8300smode)
-          {
-	     GET_EXR (rd);
-          }
-          else
+	  if(code->dst.type==OP_CCR)
+	    {
+	      GET_CCR (rd);
+	    }
+	  else if(code->dst.type==OP_EXR && h8300smode)
+	    {
+	      GET_EXR (rd);
+	    }
+	  else
 	    goto illegal;
 	  ea = code->src.literal;
 	  res = rd ^ ea;
@@ -1489,7 +1489,7 @@ sim_resume (sd, step, siggnal)
              the macros here instead of looking for .../sys/wait.h.  */
 #define SIM_WIFEXITED(v) (((v) & 0xff) == 0)
 #define SIM_WIFSIGNALED(v) (((v) & 0x7f) > 0 && (((v) & 0x7f) < 0x7f))
-  	  if (! SIM_WIFEXITED (cpu.regs[0]) && SIM_WIFSIGNALED (cpu.regs[0])) 
+  	  if (! SIM_WIFEXITED (cpu.regs[0]) && SIM_WIFSIGNALED (cpu.regs[0]))
 	    cpu.exception = SIGILL;
 	  else
 	    cpu.exception = SIGTRAP;
@@ -1502,7 +1502,7 @@ sim_resume (sd, step, siggnal)
 	  OBITOP (O_BNOT, 1, 1, ea ^= m);
 	  OBITOP (O_BTST, 1, 0, nz = ea & m);
 	  OBITOP (O_BCLR, 1, 1, ea &= ~m);
-	  OBITOP (O_BSET, 1, 1, ea |= m);	
+	  OBITOP (O_BSET, 1, 1, ea |= m);
 	  OBITOP (O_BLD, 1, 0, c = ea & m);
 	  OBITOP (O_BILD, 1, 0, c = !(ea & m));
 	  OBITOP (O_BST, 1, 1, ea &= ~m;
@@ -1534,20 +1534,20 @@ sim_resume (sd, step, siggnal)
 	  break;
 
 	case O (O_TAS, SB):
-          if( !h8300smode || code->src.type != X (OP_REG, SL) )
-          	goto illegal;
-          switch(code->src.reg)
-          {
-           case R0_REGNUM:
-           case R1_REGNUM:
-           case R4_REGNUM:
-           case R5_REGNUM:
-           	break;
-           default:
-             goto illegal;
-          }
-          res =  fetch (&code->src);
-          store (&code->src,res|0x80);
+	  if( !h8300smode || code->src.type != X (OP_REG, SL) )
+	    goto illegal;
+	  switch(code->src.reg)
+	    {
+	    case R0_REGNUM:
+	    case R1_REGNUM:
+	    case R4_REGNUM:
+	    case R5_REGNUM:
+	      break;
+	    default:
+	      goto illegal;
+	    }
+	  res = fetch (&code->src);
+	  store (&code->src,res|0x80);
 	  goto just_flags_log8;
 
 	case O (O_DIVU, SB):
@@ -1682,17 +1682,17 @@ sim_resume (sd, step, siggnal)
 
     setc:
       if(code->dst.type==OP_CCR)
-      {
-       cpu.ccr = res;
-       GETSR ();
-      }
+	{
+	  cpu.ccr = res;
+	  GETSR ();
+	}
       else if(code->dst.type==OP_EXR && h8300smode)
-      {
-       cpu.exr = res;
-       GETEXR ();
-      }
+	{
+	  cpu.exr = res;
+	  GETEXR ();
+	}
       else
-	 goto illegal;
+	goto illegal;
 
       goto next;
 
@@ -1995,7 +1995,7 @@ sim_fetch_register (sd, rn, buf, length)
   init_pointers ();
 
   if(!h8300smode && rn >=EXR_REGNUM)
-  	rn++;
+    rn++;
   switch (rn)
     {
     default:
