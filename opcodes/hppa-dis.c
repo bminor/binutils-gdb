@@ -18,8 +18,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include "dis-asm.h"
+#include <ansidecl.h>
 #include "sysdep.h"
+#include "dis-asm.h"
 #include "opcode/hppa.h"
 
 /* Initializer for an array of names of registers.
@@ -91,7 +92,7 @@ static const char short_ldst_compl_names[][4] = {"", ",ma", "", ",mb"};
 static const char *const short_bytes_compl_names[] = {
   "", ",b,m", ",e", ",e,m"
 };
-static const char *const float_format_names[] = {",sgl", ",dbl", ",quad"};
+static const char *const float_format_names[] = {",sgl", ",dbl", "", ",quad"};
 static const char float_comp_names[][8] =
 {
   ",false?", ",false", ",?", ",!<=>", ",=", ",=t", ",?=", ",!<>",

@@ -1,3 +1,7 @@
+Mon Jul 19 13:52:21 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* hppa-dis.c (float_format_names): 10 is undefined, and 11 is quad.
+
 Sun Jul 18 16:30:02 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
 
 	* mips-opc.c: New file, containing opcode table from
