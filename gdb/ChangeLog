@@ -1,5 +1,9 @@
 2003-12-13  Jim Blandy  <jimb@redhat.com>
 
+	* dwarf2read.c (dwarf2_add_member_fn, read_structure_scope):
+	Replace uses of DEPRECATED_STREQ and DEPRECATED_STREQN with calls
+	to strcmp and strncmp.
+
 	* osabi.c (gdbarch_init_osabi): Reformat error message with better
 	line breaks.
 
