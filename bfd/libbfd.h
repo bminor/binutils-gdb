@@ -259,8 +259,8 @@ extern boolean _bfd_archive_coff_construct_extended_name_table
   ((void (*) PARAMS ((bfd *, PTR, asymbol *, bfd_print_symbol_type))) bfd_void)
 #define _bfd_nosymbols_get_symbol_info \
   ((void (*) PARAMS ((bfd *, asymbol *, symbol_info *))) bfd_void)
-#define _bfd_nosymbols_bfd_is_local_label \
-  ((boolean (*) PARAMS ((bfd *, asymbol *))) bfd_false)
+#define _bfd_nosymbols_bfd_is_local_label_name \
+  ((boolean (*) PARAMS ((bfd *, const char *))) bfd_false)
 #define _bfd_nosymbols_get_lineno \
   ((alent *(*) PARAMS ((bfd *, asymbol *))) bfd_nullvoidptr)
 #define _bfd_nosymbols_find_nearest_line \
@@ -339,7 +339,7 @@ extern boolean _bfd_generic_set_section_contents
 
 /* Generic routine to determine of the given symbol is a local
    label.  */
-extern boolean bfd_generic_is_local_label PARAMS ((bfd *, asymbol *));
+extern boolean bfd_generic_is_local_label_name PARAMS ((bfd *, const char *));
 
 /* Generic minisymbol routines.  */
 extern long _bfd_generic_read_minisymbols
@@ -766,6 +766,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_M32R_HI16_ULO",
   "BFD_RELOC_M32R_HI16_SLO",
   "BFD_RELOC_M32R_LO16",
+  "BFD_RELOC_M32R_SDA16",
 /* end-sanitize-m32r */
 
 /* start-sanitize-v850 */

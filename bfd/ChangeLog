@@ -1,5 +1,20 @@
 Thu Feb 27 18:36:23 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* targets.c (BFD_JUMP_TABLE_SYMBOLS): Change _bfd_is_local_label
+	to _bfd_is_local_label_name.
+	(bfd_target): Likewise.
+	* syms.c (bfd_is_local_label): Define as function, not macro.
+	(bfd_is_local_name): Define.
+	* libbfd.c (bfd_generic_is_local_label_name): Rename from
+	bfd_generic_is_local_label, and take a string rather than a
+	symbol.
+	* libbfd-in.h (_bfd_nosymbols_bfd_is_local_label): Don't define.
+	(_bfd_nosymbols_bfd_is_local_label_name): Define.
+ 	(bfd_generic_is_local_label): Don't declare.
+	(bfd_generic_is_local_label_name): Declare.
+	* bfd-in2.h, libbfd.h: Rebuild.
+	* All backends: Change local_label to local_label_name.
+
 	* elf32-mips.c (struct mips_got_info): Add assigned_gotno field.
 	(mips_elf_relocate_got_local): Change return type to boolean.
 	Don't assume that the first zero entry is unassigned; instead, use

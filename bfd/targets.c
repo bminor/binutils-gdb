@@ -1,5 +1,5 @@
 /* Generic target-file-type support for the BFD library.
-   Copyright 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -340,7 +340,7 @@ The general target vector.
 .CAT(NAME,_make_empty_symbol),\
 .CAT(NAME,_print_symbol),\
 .CAT(NAME,_get_symbol_info),\
-.CAT(NAME,_bfd_is_local_label),\
+.CAT(NAME,_bfd_is_local_label_name),\
 .CAT(NAME,_get_lineno),\
 .CAT(NAME,_find_nearest_line),\
 .CAT(NAME,_bfd_make_debug_symbol),\
@@ -359,7 +359,7 @@ The general target vector.
 .                                      struct symbol_cache_entry *,
 .                                      symbol_info *));
 .#define bfd_get_symbol_info(b,p,e) BFD_SEND(b, _bfd_get_symbol_info, (b,p,e))
-.  boolean	 (*_bfd_is_local_label) PARAMS ((bfd *, asymbol *));
+.  boolean	 (*_bfd_is_local_label_name) PARAMS ((bfd *, const char *));
 .
 .  alent *    (*_get_lineno) PARAMS ((bfd *, struct symbol_cache_entry *));
 .  boolean    (*_bfd_find_nearest_line) PARAMS ((bfd *abfd,

@@ -1,5 +1,5 @@
 /* Support for the generic parts of most COFF variants, for BFD.
-   Copyright 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -2255,6 +2255,9 @@ coff_compute_section_file_positions (abfd)
       previous = current;
     }
 
+  /* Make sure the relocations are aligned.  */
+  sofar = BFD_ALIGN (sofar, 1 << COFF_DEFAULT_SECTION_ALIGNMENT_POWER);
+
   obj_relocbase (abfd) = sofar;
   abfd->output_has_begun = true;
 
@@ -2728,7 +2731,7 @@ coff_write_object_contents (abfd)
 #define __A_MAGIC_SET__
 #endif /* A29K */
 #ifdef TIC80
-    internal_a.magic = TIC80MAGIC;
+    internal_a.magic = TIC80_ARCH_MAGIC;
 #define __A_MAGIC_SET__
 #endif /* TIC80 */
 #ifdef I860
@@ -3901,8 +3904,8 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
 #define coff_bfd_print_private_bfd_data  _bfd_generic_bfd_print_private_bfd_data
 #endif
 
-#ifndef coff_bfd_is_local_label
-#define coff_bfd_is_local_label bfd_generic_is_local_label
+#ifndef coff_bfd_is_local_label_name
+#define coff_bfd_is_local_label_name bfd_generic_is_local_label_name
 #endif
 #ifndef coff_read_minisymbols
 #define coff_read_minisymbols _bfd_generic_read_minisymbols

@@ -78,7 +78,7 @@ static void evax_print_symbol
   PARAMS ((bfd *abfd, PTR file, asymbol *symbol, bfd_print_symbol_type how));
 static void evax_get_symbol_info
   PARAMS ((bfd *abfd, asymbol *symbol, symbol_info *ret));
-static boolean evax_bfd_is_local_label PARAMS ((bfd *abfd, asymbol *symbol));
+static boolean evax_bfd_is_local_label_name PARAMS ((bfd *abfd, const char *));
 static alent *evax_get_lineno PARAMS ((bfd *abfd, asymbol *symbol));
 static boolean evax_find_nearest_line
   PARAMS ((bfd *abfd, asection *section, asymbol **symbols, bfd_vma offset,
@@ -1136,12 +1136,12 @@ evax_get_symbol_info (abfd, symbol, ret)
    a compiler generated local label, else return false.  */
 
 static boolean
-evax_bfd_is_local_label (abfd, symbol)
+evax_bfd_is_local_label_name (abfd, name)
      bfd *abfd;
-     asymbol *symbol;
+     const char *name;
 {
 #if EVAX_DEBUG
-  evax_debug (1, "evax_bfd_is_local_label(%p, %p)\n", abfd, symbol);
+  evax_debug (1, "evax_bfd_is_local_label_name(%p, %s)\n", abfd, name);
 #endif
   return false;
 }

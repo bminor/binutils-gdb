@@ -1,5 +1,5 @@
 /* Target definitions for NN-bit ELF
-   Copyright 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -112,8 +112,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define bfd_elfNN_bfd_set_private_flags \
   ((boolean (*) PARAMS ((bfd *, flagword))) bfd_true)
 #endif
-#ifndef bfd_elfNN_bfd_is_local_label
-#define bfd_elfNN_bfd_is_local_label bfd_generic_is_local_label
+#ifndef bfd_elfNN_bfd_is_local_label_name
+#define bfd_elfNN_bfd_is_local_label_name bfd_generic_is_local_label_name
 #endif
 
 #ifndef bfd_elfNN_get_dynamic_reloc_upper_bound

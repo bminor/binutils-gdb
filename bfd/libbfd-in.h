@@ -1,6 +1,6 @@
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
-   Copyright 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 ** NOTE: libbfd.h is a GENERATED file.  Don't change it; instead,
@@ -259,8 +259,8 @@ extern boolean _bfd_archive_coff_construct_extended_name_table
   ((void (*) PARAMS ((bfd *, PTR, asymbol *, bfd_print_symbol_type))) bfd_void)
 #define _bfd_nosymbols_get_symbol_info \
   ((void (*) PARAMS ((bfd *, asymbol *, symbol_info *))) bfd_void)
-#define _bfd_nosymbols_bfd_is_local_label \
-  ((boolean (*) PARAMS ((bfd *, asymbol *))) bfd_false)
+#define _bfd_nosymbols_bfd_is_local_label_name \
+  ((boolean (*) PARAMS ((bfd *, const char *))) bfd_false)
 #define _bfd_nosymbols_get_lineno \
   ((alent *(*) PARAMS ((bfd *, asymbol *))) bfd_nullvoidptr)
 #define _bfd_nosymbols_find_nearest_line \
@@ -339,7 +339,7 @@ extern boolean _bfd_generic_set_section_contents
 
 /* Generic routine to determine of the given symbol is a local
    label.  */
-extern boolean bfd_generic_is_local_label PARAMS ((bfd *, asymbol *));
+extern boolean bfd_generic_is_local_label_name PARAMS ((bfd *, const char *));
 
 /* Generic minisymbol routines.  */
 extern long _bfd_generic_read_minisymbols
@@ -425,6 +425,20 @@ extern bfd_reloc_status_type _bfd_final_link_relocate
 extern bfd_reloc_status_type _bfd_relocate_contents
   PARAMS ((reloc_howto_type *, bfd *, bfd_vma, bfd_byte *));
 
+/* Link stabs in sections in the first pass.  */
+
+extern boolean _bfd_link_section_stabs
+  PARAMS ((bfd *, PTR *, asection *, asection *, PTR *));
+
+/* Write out the .stab section when linking stabs in sections.  */
+
+extern boolean _bfd_write_section_stabs
+  PARAMS ((bfd *, asection *, PTR *, bfd_byte *));
+
+/* Write out the .stabstr string table when linking stabs in sections.  */
+
+extern boolean _bfd_write_stab_strings PARAMS ((bfd *, PTR *));
+
 /* Create a string table.  */
 extern struct bfd_strtab_hash *_bfd_stringtab_init PARAMS ((void));
 
@@ -468,15 +482,6 @@ void	bfd_assert PARAMS ((const char*,int));
 FILE *	bfd_cache_lookup_worker PARAMS ((bfd *));
 
 extern bfd *bfd_last_cache;
-    
-/* Now Steve, what's the story here? */
-#ifdef lint
-#define itos(x) "l"
-#define stoi(x) 1
-#else
-#define itos(x) ((char*)(x))
-#define stoi(x) ((int)(x))
-#endif
 
 /* List of supported target vectors, and the default vector (if
    bfd_default_vector[0] is NULL, there is no default).  */
@@ -500,6 +505,14 @@ extern boolean _bfd_ecoff_get_accumulated_ss PARAMS ((PTR, bfd_byte *));
 
 extern bfd_vma _bfd_get_gp_value PARAMS ((bfd *));
 extern void _bfd_set_gp_value PARAMS ((bfd *, bfd_vma));
+
+/* Function shared by the COFF and ELF SH backends, which have no
+   other common header files.  */
+
+extern boolean _bfd_sh_align_load_span
+  PARAMS ((bfd *, asection *, bfd_byte *,
+	   boolean (*) (bfd *, asection *, PTR, bfd_byte *, bfd_vma),
+	   PTR, bfd_vma **, bfd_vma *, bfd_vma, bfd_vma, boolean *));
 
 /* And more follows */
 

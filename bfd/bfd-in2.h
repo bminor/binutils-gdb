@@ -539,6 +539,7 @@ struct ecoff_extr;
 struct symbol_cache_entry;
 struct bfd_link_info;
 struct bfd_link_hash_entry;
+struct bfd_elf_version_tree;
 #endif
 extern bfd_vma bfd_ecoff_get_gp_value PARAMS ((bfd * abfd));
 extern boolean bfd_ecoff_set_gp_value PARAMS ((bfd *abfd, bfd_vma gp_value));
@@ -606,10 +607,12 @@ extern struct bfd_link_needed_list *bfd_elf_get_needed_list
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean bfd_elf32_size_dynamic_sections
   PARAMS ((bfd *, const char *, const char *, boolean, const char *,
-	   const char * const *, struct bfd_link_info *, struct sec **));
+	   const char * const *, struct bfd_link_info *, struct sec **,
+	   struct bfd_elf_version_tree *));
 extern boolean bfd_elf64_size_dynamic_sections
   PARAMS ((bfd *, const char *, const char *, boolean, const char *,
-	   const char * const *, struct bfd_link_info *, struct sec **));
+	   const char * const *, struct bfd_link_info *, struct sec **,
+	   struct bfd_elf_version_tree *));
 extern void bfd_elf_set_dt_needed_name PARAMS ((bfd *, const char *));
 extern const char *bfd_elf_get_dt_soname PARAMS ((bfd *));
 
@@ -2080,8 +2083,11 @@ typedef struct symbol_cache_entry
 boolean 
 bfd_is_local_label PARAMS ((bfd *abfd, asymbol *sym));
 
-#define bfd_is_local_label(abfd, sym) \
-     BFD_SEND (abfd, _bfd_is_local_label,(abfd, sym))
+boolean 
+bfd_is_local_label_name PARAMS ((bfd *abfd, const char *name));
+
+#define bfd_is_local_label_name(abfd, name) \
+     BFD_SEND (abfd, _bfd_is_local_label_name, (abfd, name))
 #define bfd_canonicalize_symtab(abfd, location) \
      BFD_SEND (abfd, _bfd_canonicalize_symtab,\
                   (abfd, location))
@@ -2610,7 +2616,7 @@ CAT(NAME,_get_symtab),\
 CAT(NAME,_make_empty_symbol),\
 CAT(NAME,_print_symbol),\
 CAT(NAME,_get_symbol_info),\
-CAT(NAME,_bfd_is_local_label),\
+CAT(NAME,_bfd_is_local_label_name),\
 CAT(NAME,_get_lineno),\
 CAT(NAME,_find_nearest_line),\
 CAT(NAME,_bfd_make_debug_symbol),\
@@ -2629,7 +2635,7 @@ CAT(NAME,_minisymbol_to_symbol)
                                       struct symbol_cache_entry *,
                                       symbol_info *));
 #define bfd_get_symbol_info(b,p,e) BFD_SEND(b, _bfd_get_symbol_info, (b,p,e))
-  boolean	 (*_bfd_is_local_label) PARAMS ((bfd *, asymbol *));
+  boolean	 (*_bfd_is_local_label_name) PARAMS ((bfd *, const char *));
 
   alent *    (*_get_lineno) PARAMS ((bfd *, struct symbol_cache_entry *));
   boolean    (*_bfd_find_nearest_line) PARAMS ((bfd *abfd,
