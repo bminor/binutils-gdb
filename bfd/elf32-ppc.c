@@ -124,6 +124,23 @@ static boolean ppc_elf_finish_dynamic_sections PARAMS ((bfd *, struct bfd_link_i
 /* The number of single-slot PLT entries (the rest use two slots).  */
 #define PLT_NUM_SINGLE_ENTRIES 8192
 
+/* Will references to this symbol always reference the symbol
+   in this object?  */
+#define SYMBOL_REFERENCES_LOCAL(INFO, H)				\
+  ((! INFO->shared							\
+    || INFO->symbolic							\
+    || H->dynindx == -1							\
+    || ELF_ST_VISIBILITY (H->other) == STV_INTERNAL			\
+    || ELF_ST_VISIBILITY (H->other) == STV_HIDDEN)			\
+   && (H->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
+
+/* Will _calls_ to this symbol always call the version in this object?  */
+#define SYMBOL_CALLS_LOCAL(INFO, H)				\
+  ((! INFO->shared							\
+    || INFO->symbolic							\
+    || H->dynindx == -1							\
+    || ELF_ST_VISIBILITY (H->other) != STV_DEFAULT)			\
+   && (H->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
 
 static reloc_howto_type *ppc_elf_howto_table[ (int)R_PPC_max ];
 
@@ -1703,9 +1720,7 @@ ppc_elf_adjust_dynamic_symbol (info, h)
       || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
       if (! elf_hash_table (info)->dynamic_sections_created
-	  || ((!info->shared || info->symbolic || h->dynindx == -1)
-	      && (h->elf_link_hash_flags
-		  & ELF_LINK_HASH_DEF_REGULAR) != 0)
+ 	  || SYMBOL_CALLS_LOCAL (info, h)
 	  || (info->shared && h->plt.refcount <= 0))
 	{
 	  /* A PLT entry is not required/allowed when:
@@ -1713,10 +1728,8 @@ ppc_elf_adjust_dynamic_symbol (info, h)
 	     1. We are not using ld.so; because then the PLT entry
 	     can't be set up, so we can't use one.
 
-	     2. We know for certain that a symbol is defined in
-	     this object, because this object is the application,
-	     is linked with -Bsymbolic, the symbol is local,
-	     or because the symbol is protected or hidden.
+	     2. We know for certain that a call to this symbol
+	     will go to this object.
 
 	     3. GC has rendered the entry unused.
 	     Note, however, that in an executable all references to the
@@ -2386,7 +2399,8 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	case R_PPC_REL14_BRNTAKEN:
 	case R_PPC_REL32:
 	  if (h == NULL
-	      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+	      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0
+	      || SYMBOL_REFERENCES_LOCAL (info, h))
 	    break;
 	  /* fall through */
 
@@ -2708,8 +2722,7 @@ ppc_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	 the global offset table will already have been initialized in
 	 the relocate_section function.  */
       if (info->shared
-	  && (info->symbolic || h->dynindx == -1)
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
+	  && SYMBOL_REFERENCES_LOCAL (info, h))
 	{
 	  rela.r_info = ELF32_R_INFO (0, R_PPC_RELATIVE);
 	  rela.r_addend = (h->root.u.def.value
@@ -2952,6 +2965,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       reloc_howto_type *howto;
       unsigned long r_symndx;
       bfd_vma relocation;
+      int will_become_local;
 
       /* Unknown relocation handling */
       if ((unsigned)r_type >= (unsigned)R_PPC_max || !ppc_elf_howto_table[(int)r_type])
@@ -3005,6 +3019,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  relocation = (sec->output_section->vma
 			+ sec->output_offset
 			+ sym->st_value);
+	  /* Relocs to local symbols are always resolved.  */
+	  will_become_local = 1;
 	}
       else
 	{
@@ -3013,11 +3029,16 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	  sym_name = h->root.root.string;
+
+	  /* Can this relocation be resolved immediately?  */
+	  will_become_local = SYMBOL_REFERENCES_LOCAL (info, h);
+
 	  if (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
 	      sec = h->root.u.def.section;
-	      if ((r_type == R_PPC_PLT32
+	      if (((r_type == R_PPC_PLT32
+		    || r_type == R_PPC_PLTREL24)
 		   && splt != NULL
 		   && h->plt.offset != (bfd_vma) -1)
 		  || (r_type == R_PPC_LOCAL24PC
@@ -3027,14 +3048,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		       || r_type == R_PPC_GOT16_HI
 		       || r_type == R_PPC_GOT16_HA)
 		      && elf_hash_table (info)->dynamic_sections_created
-		      && (! info->shared
-			  || (! info->symbolic && h->dynindx != -1)
-			  || (h->elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_REGULAR) == 0))
+		      && (! info->shared || ! will_become_local))
 		  || (info->shared
-		      && ((! info->symbolic && h->dynindx != -1)
-			  || (h->elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_REGULAR) == 0)
+ 		      && ! will_become_local
 		      && ((input_section->flags & SEC_ALLOC) != 0
 			  /* Testing SEC_DEBUGGING here may be wrong.
                              It's here to avoid a crash when
@@ -3052,7 +3068,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			  || r_type == R_PPC_ADDR14
 			  || r_type == R_PPC_ADDR14_BRTAKEN
 			  || r_type == R_PPC_ADDR14_BRNTAKEN
-			  || r_type == R_PPC_PLTREL24
 			  || r_type == R_PPC_COPY
 			  || r_type == R_PPC_GLOB_DAT
 			  || r_type == R_PPC_JMP_SLOT
@@ -3100,8 +3115,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
-	  else if (info->shared && !info->symbolic
-		   && !info->no_undefined
+	  else if (info->shared && !info->symbolic && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    relocation = 0;
 	  else
@@ -3158,7 +3172,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* If these relocations are not to a named symbol, they can be
 	     handled right here, no need to bother the dynamic linker.  */
 	  if (h == NULL
-	      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+	      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0
+	      || SYMBOL_REFERENCES_LOCAL (info, h))
 	    break;
 	/* fall through */
 
@@ -3233,12 +3248,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		memset (&outrel, 0, sizeof outrel);
 	      /* h->dynindx may be -1 if this symbol was marked to
                  become local.  */
-	      else if (h != NULL
-		       && ((! info->symbolic && h->dynindx != -1)
-			   || (h->elf_link_hash_flags
-			       & ELF_LINK_HASH_DEF_REGULAR) == 0))
+	      else if (! will_become_local)
 		{
-		  BFD_ASSERT (h->dynindx != -1);
 		  outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
 		  outrel.r_addend = rel->r_addend;
 		}
@@ -3359,8 +3370,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      if (! elf_hash_table (info)->dynamic_sections_created
 		  || (info->shared
-		      && (info->symbolic || h->dynindx == -1)
-		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+		      && SYMBOL_REFERENCES_LOCAL (info, h)))
 		{
 		  /* This is actually a static link, or it is a
                      -Bsymbolic link and the symbol is defined

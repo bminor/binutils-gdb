@@ -1,3 +1,15 @@
+2000-10-16  Geoffrey Keating  <geoffk@shoggoth.cygnus.com>
+
+	* elf32-ppc.c (SYMBOL_REFERENCES_LOCAL): New macro.
+	(SYMBOL_CALLS_LOCAL): New macro.
+	(ppc_elf_adjust_dynamic_symbol): Use SYMBOL_CALLS_LOCAL.
+	(ppc_elf_check_relocs): Use SYMBOL_REFERENCES_LOCAL.
+	(ppc_elf_finish_dynamic_symbol): Use SYMBOL_REFERENCES_LOCAL.
+	(ppc_elf_relocate_section): Use flag variable to determine
+	whether the relocation refers to a local symbol.
+	Test whether a PLTREL24 reloc will produce a reloc by looking
+	to see whether a PLT entry was made.
+
 2000-10-14  Geoffrey Keating  <geoffk@shoggoth.cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_finish_dynamic_symbol): Don't make PLT
