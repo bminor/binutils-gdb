@@ -1,3 +1,7 @@
+Wed Jan 14 15:02:19 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* config/tc-mips.c (mips_ip): Don't test pinfo flags if INSN_MACRO.
+
 Mon Jan 12 13:04:57 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.c: #include setjmp.h.  Clean up pass over `struct foo' usage.

@@ -6820,12 +6820,15 @@ mips_ip (str, ip)
       else
 	ok = false;
 
-      if (mips_4650 && (insn->pinfo & FP_D) != 0)
-	ok = false;
-      /* start-sanitize-r5900 */
-      if (mips_5900 && (insn->pinfo & FP_D) != 0)
-	ok = false;
-      /* end-sanitize-r5900 */
+      if (insn->pinfo != INSN_MACRO)
+	{
+	  if (mips_4650 && (insn->pinfo & FP_D) != 0)
+	    ok = false;
+	  /* start-sanitize-r5900 */
+	  if (mips_5900 && (insn->pinfo & FP_D) != 0)
+	    ok = false;
+	  /* end-sanitize-r5900 */
+	}
 
       if (! ok)
 	{
