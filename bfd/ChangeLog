@@ -1,3 +1,8 @@
+Wed May 28 09:48:43 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* cpu-arm.c (compatible): Add test for supersets of ARM
+	architectures. 
+
 Tue May 27 19:42:03 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* cofflink.c (_bfd_coff_final_link): Initialize global_to_static
