@@ -161,7 +161,9 @@ elf_link_is_defined_archive_symbol (abfd, symdef)
 	{
 	  result =
 	    (ELF_ST_BIND (sym.st_info) == STB_GLOBAL)
-	    && (sym.st_shndx != SHN_UNDEF);
+	    && (sym.st_shndx != SHN_UNDEF)
+	    && (sym.st_shndx != SHN_COMMON)
+	    ;
 	  break;
 	}
     }
