@@ -567,7 +567,7 @@ static const asymbol global_syms[] =
     { NAME,  IDX, 0,     NULL, FLAGS, 0,            0,			\
 									\
     /* linker_mark, gc_mark, segment_mark, vma, lma, _cooked_size,   */	\
-       0,           0,       0,            0,   0,   0,            	\
+       0,           1,       0,            0,   0,   0,            	\
 									\
     /* _raw_size, output_offset, output_section,    alignment_power, */ \
        0,         0,           (struct sec *) &SEC, 0,			\

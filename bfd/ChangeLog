@@ -1,3 +1,7 @@
+2000-11-09  Philip Blundell  <pb@futuretv.com>
+
+	* section.c (STD_SECTION): Set gc_mark flag.
+
 2000-11-11  Kazu Hirata  <kazu@hxi.com>
 
 	* coff-i960.c: Likewise.
