@@ -587,6 +587,7 @@ pke_issue(SIM_DESC sd, struct pke_device* me)
 	  me->flags &= ~PKE_FLAG_INT_NOLOOP;
 	  /* mask interrupt bit from instruction word so re-decoded instructions don't stall */
 	  BIT_MASK_SET(fw, PKE_OPCODE_I_B, PKE_OPCODE_I_E, 0);
+	  intr = 0;
 	}
       else /* new interrupt-flagged instruction */
 	{
@@ -603,48 +604,56 @@ pke_issue(SIM_DESC sd, struct pke_device* me)
   if(PKE_REG_MASK_GET(me, STAT, PPS) == PKE_REG_STAT_PPS_IDLE)
     PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_DECODE);
 
+  /* handle [new - first time] interrupts */
+  if(intr)
+    {
+      PKE_REG_MASK_SET(me, STAT, PIS, 1);
+      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
+      /* presume stall state follows; only PKEMARK may go ahead anyway */
+    }
+
   /* decode & execute */
-  if(IS_PKE_CMD(cmd, PKENOP))
+  if(IS_PKE_CMD(cmd, PKENOP) && !intr)
     pke_code_nop(me, fw);
-  else if(IS_PKE_CMD(cmd, STCYCL))
+  else if(IS_PKE_CMD(cmd, STCYCL) && !intr)
     pke_code_stcycl(me, fw);
-  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, OFFSET))
+  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, OFFSET) && !intr)
     pke_code_offset(me, fw);
-  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, BASE))
+  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, BASE) && !intr)
     pke_code_base(me, fw);
-  else if(IS_PKE_CMD(cmd, ITOP))
+  else if(IS_PKE_CMD(cmd, ITOP) && !intr)
     pke_code_itop(me, fw);
-  else if(IS_PKE_CMD(cmd, STMOD))
+  else if(IS_PKE_CMD(cmd, STMOD) && !intr)
     pke_code_stmod(me, fw);
-  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, MSKPATH3))
+  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, MSKPATH3) && !intr)
     pke_code_mskpath3(me, fw);
   else if(IS_PKE_CMD(cmd, PKEMARK))
     pke_code_pkemark(me, fw);
-  else if(IS_PKE_CMD(cmd, FLUSHE))
+  else if(IS_PKE_CMD(cmd, FLUSHE) && !intr)
     pke_code_flushe(me, fw);
-  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, FLUSH))
+  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, FLUSH) && !intr)
     pke_code_flush(me, fw);
-  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, FLUSHA))
+  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, FLUSHA) && !intr)
     pke_code_flusha(me, fw);
-  else if(IS_PKE_CMD(cmd, PKEMSCAL))
+  else if(IS_PKE_CMD(cmd, PKEMSCAL) && !intr)
     pke_code_pkemscal(me, fw);
-  else if(IS_PKE_CMD(cmd, PKEMSCNT))
+  else if(IS_PKE_CMD(cmd, PKEMSCNT) && !intr)
     pke_code_pkemscnt(me, fw);
-  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, PKEMSCALF))
+  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, PKEMSCALF) && !intr)
     pke_code_pkemscalf(me, fw);
-  else if(IS_PKE_CMD(cmd, STMASK))
+  else if(IS_PKE_CMD(cmd, STMASK) && !intr)
     pke_code_stmask(me, fw);
-  else if(IS_PKE_CMD(cmd, STROW))
+  else if(IS_PKE_CMD(cmd, STROW) && !intr)
     pke_code_strow(me, fw);
-  else if(IS_PKE_CMD(cmd, STCOL))
+  else if(IS_PKE_CMD(cmd, STCOL) && !intr)
     pke_code_stcol(me, fw);
-  else if(IS_PKE_CMD(cmd, MPG))
+  else if(IS_PKE_CMD(cmd, MPG) && !intr)
     pke_code_mpg(me, fw);
-  else if(IS_PKE_CMD(cmd, DIRECT))
+  else if(IS_PKE_CMD(cmd, DIRECT) && !intr)
     pke_code_direct(me, fw);
-  else if(IS_PKE_CMD(cmd, DIRECTHL))
+  else if(IS_PKE_CMD(cmd, DIRECTHL) && !intr)
     pke_code_directhl(me, fw);
-  else if(IS_PKE_CMD(cmd, UNPACK))
+  else if(IS_PKE_CMD(cmd, UNPACK) && !intr)
     pke_code_unpack(me, fw);
   /* ... no other commands ... */
   else
@@ -931,14 +940,6 @@ pke_flip_dbf(struct pke_device* me)
 void 
 pke_code_nop(struct pke_device* me, unsigned_4 pkecode)
 {
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
-
   /* done */
   pke_pc_advance(me, 1);
   PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
@@ -949,14 +950,6 @@ void
 pke_code_stcycl(struct pke_device* me, unsigned_4 pkecode)
 {
   int imm = BIT_MASK_GET(pkecode, PKE_OPCODE_IMM_B, PKE_OPCODE_IMM_E);
-
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
 
   /* copy immediate value into CYCLE reg */
   PKE_REG_MASK_SET(me, CYCLE, WL, BIT_MASK_GET(imm, 8, 15));
@@ -971,14 +964,6 @@ void
 pke_code_offset(struct pke_device* me, unsigned_4 pkecode)
 {
   int imm = BIT_MASK_GET(pkecode, PKE_OPCODE_IMM_B, PKE_OPCODE_IMM_E);
-
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
 
   /* copy 10 bits to OFFSET field */
   PKE_REG_MASK_SET(me, OFST, OFFSET, BIT_MASK_GET(imm, 0, 9));
@@ -999,14 +984,6 @@ pke_code_base(struct pke_device* me, unsigned_4 pkecode)
 {
   int imm = BIT_MASK_GET(pkecode, PKE_OPCODE_IMM_B, PKE_OPCODE_IMM_E);
 
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
-
   /* copy 10 bits to BASE field */
   PKE_REG_MASK_SET(me, BASE, BASE, BIT_MASK_GET(imm, 0, 9));
   /* done */
@@ -1019,14 +996,6 @@ void
 pke_code_itop(struct pke_device* me, unsigned_4 pkecode)
 {
   int imm = BIT_MASK_GET(pkecode, PKE_OPCODE_IMM_B, PKE_OPCODE_IMM_E);
-
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
 
   /* copy 10 bits to ITOPS field */
   PKE_REG_MASK_SET(me, ITOPS, ITOPS, BIT_MASK_GET(imm, 0, 9));
@@ -1041,14 +1010,6 @@ pke_code_stmod(struct pke_device* me, unsigned_4 pkecode)
 {
   int imm = BIT_MASK_GET(pkecode, PKE_OPCODE_IMM_B, PKE_OPCODE_IMM_E);
 
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
-
   /* copy 2 bits to MODE register */
   PKE_REG_MASK_SET(me, MODE, MDE, BIT_MASK_GET(imm, 0, 2));
   /* done */
@@ -1062,14 +1023,6 @@ pke_code_mskpath3(struct pke_device* me, unsigned_4 pkecode)
 {
   int imm = BIT_MASK_GET(pkecode, PKE_OPCODE_IMM_B, PKE_OPCODE_IMM_E);
   unsigned_4 gif_mode;
-
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
 
   /* set appropriate bit */
   if(BIT_MASK_GET(imm, PKE_REG_MSKPATH3_B, PKE_REG_MSKPATH3_E) != 0)
@@ -1089,8 +1042,6 @@ pke_code_mskpath3(struct pke_device* me, unsigned_4 pkecode)
 void
 pke_code_pkemark(struct pke_device* me, unsigned_4 pkecode)
 {
-  /* ignore possible interrupt stall */
-
   int imm = BIT_MASK_GET(pkecode, PKE_OPCODE_IMM_B, PKE_OPCODE_IMM_E);
   /* copy 16 bits to MARK register */
   PKE_REG_MASK_SET(me, MARK, MARK, BIT_MASK_GET(imm, 0, 15));
@@ -1105,14 +1056,6 @@ pke_code_pkemark(struct pke_device* me, unsigned_4 pkecode)
 void
 pke_code_flushe(struct pke_device* me, unsigned_4 pkecode)
 {
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
-
   /* compute next PEW bit */
   if(pke_check_stall(me, chk_vu))
     {
@@ -1135,14 +1078,6 @@ void
 pke_code_flush(struct pke_device* me, unsigned_4 pkecode)
 {
   int something_busy = 0;
-
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
 
   /* compute next PEW, PGW bits */
   if(pke_check_stall(me, chk_vu))
@@ -1183,14 +1118,6 @@ pke_code_flusha(struct pke_device* me, unsigned_4 pkecode)
 {
   int something_busy = 0;
 
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
-
   /* compute next PEW, PGW bits */
   if(pke_check_stall(me, chk_vu))
     {
@@ -1228,14 +1155,6 @@ pke_code_flusha(struct pke_device* me, unsigned_4 pkecode)
 void
 pke_code_pkemscal(struct pke_device* me, unsigned_4 pkecode)
 {
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
-
   /* compute next PEW bit */
   if(pke_check_stall(me, chk_vu))
     {
@@ -1280,14 +1199,6 @@ pke_code_pkemscal(struct pke_device* me, unsigned_4 pkecode)
 void
 pke_code_pkemscnt(struct pke_device* me, unsigned_4 pkecode)
 {
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
-
   /* compute next PEW bit */
   if(pke_check_stall(me, chk_vu))
     {
@@ -1333,14 +1244,6 @@ void
 pke_code_pkemscalf(struct pke_device* me, unsigned_4 pkecode)
 {
   int something_busy = 0;
-
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
 
   /* compute next PEW, PGW bits */
   if(pke_check_stall(me, chk_vu))
@@ -1402,14 +1305,6 @@ pke_code_stmask(struct pke_device* me, unsigned_4 pkecode)
 {
   unsigned_4* mask;
 
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
-
   /* check that FIFO has one more word for STMASK operand */
   mask = pke_pc_operand(me, 1);
   if(mask != NULL)
@@ -1445,14 +1340,6 @@ pke_code_strow(struct pke_device* me, unsigned_4 pkecode)
   /* check that FIFO has four more words for STROW operand */
   unsigned_4* last_op;
   
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
-
   last_op = pke_pc_operand(me, 4);
   if(last_op != NULL)
     {
@@ -1490,14 +1377,6 @@ pke_code_stcol(struct pke_device* me, unsigned_4 pkecode)
   /* check that FIFO has four more words for STCOL operand */
   unsigned_4* last_op;
   
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
-
   last_op = pke_pc_operand(me, 4);
   if(last_op != NULL)
     {
@@ -1539,14 +1418,6 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
   /* assert 64-bit alignment of MPG operand */
   if(me->qw_pc != 3 && me->qw_pc != 1)
     return pke_code_error(me, pkecode);
-
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
 
   /* map zero to max+1 */
   if(num==0) num=0x100;
@@ -1657,14 +1528,6 @@ pke_code_direct(struct pke_device* me, unsigned_4 pkecode)
   if(me->qw_pc != 3)
     return pke_code_error(me, pkecode);
 
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
-
   /* map zero to max+1 */
   if(imm==0) imm=0x10000;
   
@@ -1735,14 +1598,6 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
   int n, num_operands;
   unsigned_4* last_operand_word = NULL;
   
-  /* handle interrupts */
-  if(BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E))
-    {
-      PKE_REG_MASK_SET(me, STAT, PIS, 1);
-      PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_STALL);
-      return;
-    }
-
   /* compute PKEcode length, as given in CPU2 spec, v2.1 pg. 11 */
   if(wl <= cl)
     n = num;
