@@ -1,3 +1,16 @@
+2001-07-11  Steve Ellcey  <sje@cup.hp.com>
+
+	* reloc.c (bfd_reloc_code_type): Add IA64 relocs
+	BFD_RELOC_IA64_LTOFF_FPTR32MSB and BFD_RELOC_IA64_LTOFF_FPTR32LSB
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elfxx-ia64.c (ia64_howto_table): Define how to handle
+	new relocations.
+	(elfNN_ia64_reloc_type_lookup): Handle new relocations.
+	(elfNN_ia64_check_relocs): Likewise.
+	(elfNN_ia64_install_value): Likewise.
+	(elfNN_ia64_relocate_section): Likewise.
+
 2001-07-11  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-sparc.c (_bfd_sparc_elf_howto_table): Remove support for

@@ -360,6 +360,8 @@ static reloc_howto_type ia64_howto_table[] =
 
     IA64_HOWTO (R_IA64_LTOFF_FPTR22, "LTOFF_FPTR22", 0, false, true),
     IA64_HOWTO (R_IA64_LTOFF_FPTR64I, "LTOFF_FPTR64I", 0, false, true),
+    IA64_HOWTO (R_IA64_LTOFF_FPTR32MSB, "LTOFF_FPTR32MSB", 2, false, true),
+    IA64_HOWTO (R_IA64_LTOFF_FPTR32LSB, "LTOFF_FPTR32LSB", 2, false, true),
     IA64_HOWTO (R_IA64_LTOFF_FPTR64MSB, "LTOFF_FPTR64MSB", 4, false, true),
     IA64_HOWTO (R_IA64_LTOFF_FPTR64LSB, "LTOFF_FPTR64LSB", 4, false, true),
 
@@ -480,6 +482,8 @@ elfNN_ia64_reloc_type_lookup (abfd, bfd_code)
 
     case BFD_RELOC_IA64_LTOFF_FPTR22:	rtype = R_IA64_LTOFF_FPTR22; break;
     case BFD_RELOC_IA64_LTOFF_FPTR64I:	rtype = R_IA64_LTOFF_FPTR64I; break;
+    case BFD_RELOC_IA64_LTOFF_FPTR32MSB: rtype = R_IA64_LTOFF_FPTR32MSB; break;
+    case BFD_RELOC_IA64_LTOFF_FPTR32LSB: rtype = R_IA64_LTOFF_FPTR32LSB; break;
     case BFD_RELOC_IA64_LTOFF_FPTR64MSB: rtype = R_IA64_LTOFF_FPTR64MSB; break;
     case BFD_RELOC_IA64_LTOFF_FPTR64LSB: rtype = R_IA64_LTOFF_FPTR64LSB; break;
 
@@ -2007,6 +2011,8 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 
 	case R_IA64_LTOFF_FPTR22:
 	case R_IA64_LTOFF_FPTR64I:
+	case R_IA64_LTOFF_FPTR32MSB:
+	case R_IA64_LTOFF_FPTR32LSB:
 	case R_IA64_LTOFF_FPTR64MSB:
 	case R_IA64_LTOFF_FPTR64LSB:
 	  need_entry = NEED_FPTR | NEED_GOT | NEED_LTOFF_FPTR;
@@ -2814,6 +2820,7 @@ elfNN_ia64_install_value (abfd, hit_addr, val, r_type)
     case R_IA64_GPREL32MSB:
     case R_IA64_FPTR32MSB:
     case R_IA64_PCREL32MSB:
+    case R_IA64_LTOFF_FPTR32MSB:
     case R_IA64_SEGREL32MSB:
     case R_IA64_SECREL32MSB:
     case R_IA64_LTV32MSB:
@@ -2824,6 +2831,7 @@ elfNN_ia64_install_value (abfd, hit_addr, val, r_type)
     case R_IA64_GPREL32LSB:
     case R_IA64_FPTR32LSB:
     case R_IA64_PCREL32LSB:
+    case R_IA64_LTOFF_FPTR32LSB:
     case R_IA64_SEGREL32LSB:
     case R_IA64_SECREL32LSB:
     case R_IA64_LTV32LSB:
@@ -3678,6 +3686,8 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	case R_IA64_LTOFF_FPTR22:
 	case R_IA64_LTOFF_FPTR64I:
+	case R_IA64_LTOFF_FPTR32MSB:
+	case R_IA64_LTOFF_FPTR32LSB:
 	case R_IA64_LTOFF_FPTR64MSB:
 	case R_IA64_LTOFF_FPTR64LSB:
 	  {
