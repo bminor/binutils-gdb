@@ -163,6 +163,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_convex_arch)	;;
 	bfd_d10v_arch)		ta="$ta d10v-dis.lo d10v-opc.lo" ;;
 	bfd_d30v_arch)		ta="$ta d30v-dis.lo d30v-opc.lo" ;;
+	bfd_fr30_arch)          ta="$ta $cgen_files fr30-opc.lo fr30-asm.lo fr30-dis.lo" ;;
 	bfd_h8300_arch)		ta="$ta h8300-dis.lo" ;;
 	bfd_h8500_arch)		ta="$ta h8500-dis.lo" ;;
 	bfd_hppa_arch)		ta="$ta hppa-dis.lo" ;;

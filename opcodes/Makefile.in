@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.3 from Makefile.am
+# Makefile.in generated automatically by automake 1.3b from Makefile.am
 
 # Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -32,7 +32,7 @@ mandir = @mandir@
 includedir = @includedir@
 oldincludedir = /usr/include
 
-DISTDIR =
+DESTDIR =
 
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -64,18 +64,47 @@ host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
 AR = @AR@
+AS = @AS@
 BFD_MACHINES = @BFD_MACHINES@
+CATALOGS = @CATALOGS@
+CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 CC_FOR_BUILD = @CC_FOR_BUILD@
+DATADIRNAME = @DATADIRNAME@
+DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
 EXEEXT_FOR_BUILD = @EXEEXT_FOR_BUILD@
+GMOFILES = @GMOFILES@
+GMSGFMT = @GMSGFMT@
+GT_NO = @GT_NO@
+GT_YES = @GT_YES@
 HDEFINES = @HDEFINES@
+INCLUDE_LOCALE_H = @INCLUDE_LOCALE_H@
+INSTOBJEXT = @INSTOBJEXT@
+INTLDEPS = @INTLDEPS@
+INTLLIBS = @INTLLIBS@
+INTLOBJS = @INTLOBJS@
+LD = @LD@
 LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
+MAINT = @MAINT@
+MAKEINFO = @MAKEINFO@
+MKINSTALLDIRS = @MKINSTALLDIRS@
+MSGFMT = @MSGFMT@
+NM = @NM@
+PACKAGE = @PACKAGE@
+POFILES = @POFILES@
+POSUB = @POSUB@
 RANLIB = @RANLIB@
+USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
+USE_NLS = @USE_NLS@
+VERSION = @VERSION@
 WIN32LDFLAGS = @WIN32LDFLAGS@
 WIN32LIBADD = @WIN32LIBADD@
 archdefs = @archdefs@
+cgen = @cgen@
 cgendir = @cgendir@
+l = @l@
 
 AUTOMAKE_OPTIONS = cygnus
 
@@ -110,8 +139,13 @@ CFILES = \
 	cgen-opc.c \
 	d10v-dis.c \
 	d10v-opc.c \
+	d30v-dis.c \
+	d30v-opc.c \
 	dis-buf.c \
 	disassemble.c \
+	fr30-asm.c \
+	fr30-dis.c \
+	fr30-opc.c \
 	h8300-dis.c \
 	h8500-dis.c \
 	hppa-dis.c \
@@ -154,10 +188,11 @@ ALL_MACHINES = \
 	cgen-opc.lo \
 	d10v-dis.lo \
 	d10v-opc.lo \
-	$(start-sanitize-d30v) \
 	d30v-dis.lo \
 	d30v-opc.lo \
-	$(end-sanitize-d30v) \
+	fr30-asm.lo \
+	fr30-dis.lo \
+	fr30-opc.lo \
 	h8300-dis.lo \
 	h8500-dis.lo \
 	hppa-dis.lo \
@@ -217,7 +252,7 @@ POTFILES = $(HFILES) $(CFILES)
 
 CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1
 # start-sanitize-cygnus
-CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1 stamp-m32r
+CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1 stamp-m32r stamp-fr30
 # end-sanitize-cygnus
 
 # start-sanitize-cygnus
@@ -236,12 +271,14 @@ CGENFILES = $(CGENDIR)/cos.scm $(CGENDIR)/utils.scm \
 	$(CGENDIR)/model.scm $(CGENDIR)/hardware.scm \
 	$(CGENDIR)/ifield.scm $(CGENDIR)/iformat.scm \
 	$(CGENDIR)/operand.scm $(CGENDIR)/insn.scm $(CGENDIR)/minsn.scm \
-	$(CGENDIR)/opcodes.scm $(CGENDIR)/cdl-c.scm \
+	$(CGENDIR)/opcodes.scm $(CGENDIR)/rtl.scm \
 	$(CGENDIR)/cgen-opc.scm cgen-opc.in cgen-asm.in cgen-dis.in
-# The CGEN_MAINT conditional is put here so it end up in Makefile.in
+# The CGEN_MAINT conditional is put here so it ends up in Makefile.in
 # properly sanitized.
 @CGEN_MAINT_TRUE@M32R_DEPS = stamp-m32r
+@CGEN_MAINT_TRUE@FR30_DEPS = stamp-fr30
 @CGEN_MAINT_FALSE@M32R_DEPS =
+@CGEN_MAINT_FALSE@FR30_DEPS =
 # The end marker is written this way to pass through automake unscathed.
 ENDSAN = end-sanitize-cygnus
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -262,15 +299,12 @@ LTLIBRARIES =  $(lib_LTLIBRARIES)
 
 libopcodes_la_OBJECTS =  dis-buf.lo disassemble.lo
 CFLAGS = @CFLAGS@
-COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
-LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -o $@
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LINK = $(LIBTOOL) --mode=link $(CC) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  ChangeLog Makefile.am Makefile.in acconfig.h acinclude.m4 \
 aclocal.m4 config.in configure configure.in stamp-h.in
 
-
-PACKAGE = @PACKAGE@
-VERSION = @VERSION@
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
@@ -407,7 +441,7 @@ check-recursive installcheck-recursive info-recursive dvi-recursive:
 	list='$(SUBDIRS)'; for subdir in $$list; do \
 	  target=`echo $@ | sed s/-recursive//`; \
 	  echo "Making $$target in $$subdir"; \
-	  (cd $$subdir && $(MAKE) $$target) \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$target) \
 	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
 	done && test -z "$$fail"
 
@@ -420,12 +454,12 @@ maintainer-clean-recursive:
 	for subdir in $$rev; do \
 	  target=`echo $@ | sed s/-recursive//`; \
 	  echo "Making $$target in $$subdir"; \
-	  (cd $$subdir && $(MAKE) $$target) \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$target) \
 	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
 	done && test -z "$$fail"
 tags-recursive:
 	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  (cd $$subdir && $(MAKE) tags); \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
 	done
 
 tags: TAGS
@@ -470,12 +504,12 @@ distcheck: dist
 	dc_install_base=`cd $(distdir)/=inst && pwd`; \
 	cd $(distdir)/=build \
 	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
-	  && $(MAKE) \
-	  && $(MAKE) dvi \
-	  && $(MAKE) check \
-	  && $(MAKE) install \
-	  && $(MAKE) installcheck \
-	  && $(MAKE) dist
+	  && $(MAKE) $(AM_MAKEFLAGS) \
+	  && $(MAKE) $(AM_MAKEFLAGS) dvi \
+	  && $(MAKE) $(AM_MAKEFLAGS) check \
+	  && $(MAKE) $(AM_MAKEFLAGS) install \
+	  && $(MAKE) $(AM_MAKEFLAGS) installcheck \
+	  && $(MAKE) $(AM_MAKEFLAGS) dist
 	-rm -rf $(distdir)
 	@echo "========================"; \
 	echo "$(distdir).tar.gz is ready for distribution"; \
@@ -503,17 +537,17 @@ distdir: $(DISTFILES)
 	  || mkdir $(distdir)/$$subdir \
 	  || exit 1; \
 	  chmod 777 $(distdir)/$$subdir; \
-	  (cd $$subdir && $(MAKE) top_distdir=../$(distdir) distdir=../$(distdir)/$$subdir distdir) \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir=../$(distdir) distdir=../$(distdir)/$$subdir distdir) \
 	    || exit 1; \
 	done
 info: info-recursive
 dvi: dvi-recursive
 check:
-	$(MAKE) check-recursive
+	$(MAKE) $(AM_MAKEFLAGS) check-recursive
 installcheck: installcheck-recursive
 install-info: install-info-recursive
 all-recursive-am: config.h
-	$(MAKE) all-recursive
+	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) config.h
 
@@ -533,25 +567,21 @@ install: install-recursive install-exec-am
 uninstall: uninstall-recursive uninstall-am
 
 install-strip:
-	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
 installdirs: installdirs-recursive
-	$(mkinstalldirs)  $(DATADIR)$(libdir)
+	$(mkinstalldirs)  $(DESTDIR)$(libdir)
 
 
 mostlyclean-generic:
-	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
 	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
-	-rm -f Makefile $(DISTCLEANFILES)
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
-	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 
 maintainer-clean-generic:
-	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstLIBRARIES \
 		mostlyclean-compile mostlyclean-libtool \
 		mostlyclean-libLTLIBRARIES mostlyclean-tags \
@@ -626,17 +656,20 @@ config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 	$(SHELL) ./config.status --recheck
 
 # start-sanitize-cygnus
-cgen:
+run-cgen:
 	$(SHELL) $(srcdir)/cgen.sh opcodes $(srcdir) $(CGEN) $(CGENDIR) $(CGENFLAGS) $(arch) $(prefix)
 	touch stamp-${prefix}
-
-.PHONY: cgen
+.PHONY: run-cgen
 
 # For now, require developers to configure with --enable-cgen-maint.
 m32r-opc.h m32r-opc.c m32r-asm.c m32r-dis.c: $(M32R_DEPS)
 	@true
 stamp-m32r: $(CGENFILES) $(CGENDIR)/m32r.cpu $(CGENDIR)/m32r.opc
-	$(MAKE) cgen arch=m32r prefix=m32r
+	$(MAKE) run-cgen arch=m32r prefix=m32r
+fr30-opc.h fr30-opc.c fr30-asm.c fr30-dis.c: $(FR30_DEPS)
+	@true
+stamp-fr30: $(CGENFILES) $(CGENDIR)/fr30.cpu $(CGENDIR)/fr30.opc
+	$(MAKE) run-cgen arch=fr30 prefix=fr30
 # end-sanitize-cygnus
 
 # start-sanitize-tic80
@@ -706,7 +739,8 @@ alpha-opc.lo: alpha-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/alpha.h \
   $(BFD_H) opintl.h
 arm-dis.lo: arm-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h arm-opc.h $(INCDIR)/coff/internal.h \
-  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h opintl.h
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h opintl.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
 cgen-asm.lo: cgen-asm.c sysdep.h config.h $(INCDIR)/libiberty.h \
   $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h \
   opintl.h
@@ -717,6 +751,9 @@ cgen-opc.lo: cgen-opc.c sysdep.h config.h $(INCDIR)/libiberty.h \
 d10v-dis.lo: d10v-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/d10v.h \
   $(INCDIR)/dis-asm.h $(BFD_H)
 d10v-opc.lo: d10v-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/d10v.h
+d30v-dis.lo: d30v-dis.c $(INCDIR)/opcode/d30v.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h opintl.h
+d30v-opc.lo: d30v-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/d30v.h
 dis-buf.lo: dis-buf.c sysdep.h config.h $(INCDIR)/dis-asm.h \
   $(BFD_H) opintl.h
 disassemble.lo: disassemble.c $(INCDIR)/ansidecl.h \
@@ -740,6 +777,15 @@ m32r-dis.lo: m32r-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
 m32r-opc.lo: m32r-opc.c sysdep.h config.h $(INCDIR)/libiberty.h \
   $(BFD_H) $(INCDIR)/symcat.h m32r-opc.h $(INCDIR)/opcode/cgen.h \
   opintl.h
+fr30-asm.lo: fr30-asm.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/symcat.h fr30-opc.h $(INCDIR)/opcode/cgen.h \
+  opintl.h
+fr30-dis.lo: fr30-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/symcat.h fr30-opc.h $(INCDIR)/opcode/cgen.h \
+  opintl.h
+fr30-opc.lo: fr30-opc.c sysdep.h config.h $(INCDIR)/libiberty.h \
+  $(BFD_H) $(INCDIR)/symcat.h fr30-opc.h $(INCDIR)/opcode/cgen.h \
+  opintl.h
 m68k-dis.lo: m68k-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/floatformat.h opintl.h \
   $(INCDIR)/opcode/m68k.h
@@ -749,9 +795,8 @@ m88k-dis.lo: m88k-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
 mips-dis.lo: mips-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
   $(BFD_H) $(INCDIR)/opcode/mips.h opintl.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/elf/mips.h
-mips-opc.lo: mips-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mips.h \
-  vu0.h
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/mips.h $(INCDIR)/elf/reloc-macros.h
+mips-opc.lo: mips-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mips.h
 mips16-opc.lo: mips16-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mips.h
 m10200-dis.lo: m10200-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mn10200.h \
   $(INCDIR)/dis-asm.h $(BFD_H) opintl.h

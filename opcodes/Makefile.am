@@ -33,8 +33,13 @@ CFILES = \
 	cgen-opc.c \
 	d10v-dis.c \
 	d10v-opc.c \
+	d30v-dis.c \
+	d30v-opc.c \
 	dis-buf.c \
 	disassemble.c \
+	fr30-asm.c \
+	fr30-dis.c \
+	fr30-opc.c \
 	h8300-dis.c \
 	h8500-dis.c \
 	hppa-dis.c \
@@ -77,10 +82,11 @@ ALL_MACHINES = \
 	cgen-opc.lo \
 	d10v-dis.lo \
 	d10v-opc.lo \
-	$(start-sanitize-d30v) \
 	d30v-dis.lo \
 	d30v-opc.lo \
-	$(end-sanitize-d30v) \
+	fr30-asm.lo \
+	fr30-dis.lo \
+	fr30-opc.lo \
 	h8300-dis.lo \
 	h8500-dis.lo \
 	hppa-dis.lo \
@@ -160,7 +166,7 @@ config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 
 CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1
 # start-sanitize-cygnus
-CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1 stamp-m32r
+CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1 stamp-m32r stamp-fr30
 # end-sanitize-cygnus
 
 # start-sanitize-cygnus
@@ -168,42 +174,46 @@ CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1 stamp-m32r
 # Sanitization must be split between assignments and rules because
 # automake splits them that way.
 
-SCHEME = @SCHEME@
-SCHEMEFLAGS = -s
-CGENDIR = $(srcdir)/../cgen
+CGENDIR = @cgendir@
+CGEN = @cgen@
 CGENFLAGS = -v
 
-CGENFILES = $(CGENDIR)/object.scm $(CGENDIR)/utils.scm \
+CGENFILES = $(CGENDIR)/cos.scm $(CGENDIR)/utils.scm \
 	$(CGENDIR)/attr.scm $(CGENDIR)/enum.scm $(CGENDIR)/types.scm \
 	$(CGENDIR)/utils-cgen.scm $(CGENDIR)/cpu.scm \
 	$(CGENDIR)/mode.scm $(CGENDIR)/mach.scm \
 	$(CGENDIR)/model.scm $(CGENDIR)/hardware.scm \
 	$(CGENDIR)/ifield.scm $(CGENDIR)/iformat.scm \
 	$(CGENDIR)/operand.scm $(CGENDIR)/insn.scm $(CGENDIR)/minsn.scm \
-	$(CGENDIR)/opcodes.scm $(CGENDIR)/cdl-c.scm \
+	$(CGENDIR)/opcodes.scm $(CGENDIR)/rtl.scm \
 	$(CGENDIR)/cgen-opc.scm cgen-opc.in cgen-asm.in cgen-dis.in
-# The CGEN_MAINT conditional is put here so it end up in Makefile.in
+# The CGEN_MAINT conditional is put here so it ends up in Makefile.in
 # properly sanitized.
 if CGEN_MAINT
 M32R_DEPS = stamp-m32r
+FR30_DEPS = stamp-fr30
 else
 M32R_DEPS =
+FR30_DEPS =
 endif
 # The end marker is written this way to pass through automake unscathed.
 ENDSAN = end-sanitize-cygnus
 
 # start-sanitize-cygnus
-cgen:
-	$(SHELL) $(srcdir)/cgen.sh opcodes $(srcdir) $(CGENDIR) $(CGENFLAGS) $(SCHEME) $(SCHEMEFLAGS) $(arch)
-	touch stamp-${arch}
-
-.PHONY: cgen
+run-cgen:
+	$(SHELL) $(srcdir)/cgen.sh opcodes $(srcdir) $(CGEN) $(CGENDIR) $(CGENFLAGS) $(arch) $(prefix)
+	touch stamp-${prefix}
+.PHONY: run-cgen
 
 # For now, require developers to configure with --enable-cgen-maint.
 m32r-opc.h m32r-opc.c m32r-asm.c m32r-dis.c: $(M32R_DEPS)
 	@true
 stamp-m32r: $(CGENFILES) $(CGENDIR)/m32r.cpu $(CGENDIR)/m32r.opc
-	$(MAKE) cgen arch=m32r prefix=m32r
+	$(MAKE) run-cgen arch=m32r prefix=m32r
+fr30-opc.h fr30-opc.c fr30-asm.c fr30-dis.c: $(FR30_DEPS)
+	@true
+stamp-fr30: $(CGENFILES) $(CGENDIR)/fr30.cpu $(CGENDIR)/fr30.opc
+	$(MAKE) run-cgen arch=fr30 prefix=fr30
 # end-sanitize-cygnus
 
 # start-sanitize-tic80
@@ -273,7 +283,8 @@ alpha-opc.lo: alpha-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/alpha.h \
   $(BFD_H) opintl.h
 arm-dis.lo: arm-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h arm-opc.h $(INCDIR)/coff/internal.h \
-  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h opintl.h
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h opintl.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
 cgen-asm.lo: cgen-asm.c sysdep.h config.h $(INCDIR)/libiberty.h \
   $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h \
   opintl.h
@@ -284,6 +295,9 @@ cgen-opc.lo: cgen-opc.c sysdep.h config.h $(INCDIR)/libiberty.h \
 d10v-dis.lo: d10v-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/d10v.h \
   $(INCDIR)/dis-asm.h $(BFD_H)
 d10v-opc.lo: d10v-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/d10v.h
+d30v-dis.lo: d30v-dis.c $(INCDIR)/opcode/d30v.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h opintl.h
+d30v-opc.lo: d30v-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/d30v.h
 dis-buf.lo: dis-buf.c sysdep.h config.h $(INCDIR)/dis-asm.h \
   $(BFD_H) opintl.h
 disassemble.lo: disassemble.c $(INCDIR)/ansidecl.h \
@@ -307,6 +321,15 @@ m32r-dis.lo: m32r-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
 m32r-opc.lo: m32r-opc.c sysdep.h config.h $(INCDIR)/libiberty.h \
   $(BFD_H) $(INCDIR)/symcat.h m32r-opc.h $(INCDIR)/opcode/cgen.h \
   opintl.h
+fr30-asm.lo: fr30-asm.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/symcat.h fr30-opc.h $(INCDIR)/opcode/cgen.h \
+  opintl.h
+fr30-dis.lo: fr30-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/symcat.h fr30-opc.h $(INCDIR)/opcode/cgen.h \
+  opintl.h
+fr30-opc.lo: fr30-opc.c sysdep.h config.h $(INCDIR)/libiberty.h \
+  $(BFD_H) $(INCDIR)/symcat.h fr30-opc.h $(INCDIR)/opcode/cgen.h \
+  opintl.h
 m68k-dis.lo: m68k-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/floatformat.h opintl.h \
   $(INCDIR)/opcode/m68k.h
@@ -316,9 +339,8 @@ m88k-dis.lo: m88k-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
 mips-dis.lo: mips-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
   $(BFD_H) $(INCDIR)/opcode/mips.h opintl.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/elf/mips.h
-mips-opc.lo: mips-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mips.h \
-  vu0.h
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/mips.h $(INCDIR)/elf/reloc-macros.h
+mips-opc.lo: mips-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mips.h
 mips16-opc.lo: mips16-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mips.h
 m10200-dis.lo: m10200-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mn10200.h \
   $(INCDIR)/dis-asm.h $(BFD_H) opintl.h
