@@ -1,3 +1,14 @@
+2002-03-05  Paul Koning  <pkoning@equallogic.com>
+
+	* tc-pdp11.c: Use VAX float format support for PDP-11 target.
+	(parse_ac5): New function for parsing float regs in float operand.
+	(parse_expression): Remove attempt to make literals be octal.
+	(parse_op_no_deferred): Support float literals.
+	(parse_op): Reject attempts to refer to float regs.
+	(parse_fop): New function, like parse_op but for float operand.
+	(md_assemble): Add cases to parse float operands.  Also fix 
+	IMM3, IMM6, IMM8 cases to pick up the operand from the right spot.
+
 2002-03-04  H.J. Lu <hjl@gnu.org>
 
 	* config/obj-elf.c (special_section): Add .init_array,

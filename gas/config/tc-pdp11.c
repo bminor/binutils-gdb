@@ -1,5 +1,5 @@
 /* tc-pdp11.c - pdp11-specific -
-   Copyright 2001 Free Software Foundation, Inc.
+   Copyright 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -32,6 +32,9 @@
 static int set_option PARAMS ((char *arg));
 static int set_cpu_model PARAMS ((char *arg));
 static int set_machine_model PARAMS ((char *arg));
+
+extern int flonum_gen2vax PARAMS ((char format_letter, FLONUM_TYPE * f,
+                                   LITTLENUM_TYPE * words));
 
 #define TRUE 1
 #define FALSE 0
@@ -85,7 +88,7 @@ CONST char EXP_CHARS[] = "eE";
 /* Chars that mean this number is a floating point constant */
 /* as in 0f123.456 */
 /* or    0H1.234E-12 (see exp chars above) */
-CONST char FLT_CHARS[] = "dDfFgGhH";
+CONST char FLT_CHARS[] = "dDfF";
 
 void pseudo_even (int);
 void pseudo_bss (int);
@@ -298,7 +301,7 @@ parse_reg (char *str, struct pdp11_code *operand)
 }
 
 static char *
-parse_ac (char *str, struct pdp11_code *operand)
+parse_ac5 (char *str, struct pdp11_code *operand)
 {
   str = skip_whitespace (str);
   if (strncmp (str, "fr", 2) == 0 ||
@@ -310,6 +313,7 @@ parse_ac (char *str, struct pdp11_code *operand)
       switch (*str)
 	{
 	case '0': case '1': case '2': case '3':
+        case '4': case '5':
 	  operand->code = *str - '0';
 	  str++;
 	  break;
@@ -322,6 +326,19 @@ parse_ac (char *str, struct pdp11_code *operand)
     {
       operand->error = "Bad register name";
       return str;
+    }
+
+  return str;
+}
+
+static char *
+parse_ac (char *str, struct pdp11_code *operand)
+{
+  str = parse_ac5 (str, operand);
+  if (!operand->error && operand->code > 3)
+    {
+	  operand->error = "Bad register name";
+	  return str - 3;
     }
 
   return str;
@@ -348,6 +365,15 @@ parse_expression (char *str, struct pdp11_code *operand)
 
   operand->reloc.pc_rel = 0;
 
+#if 0
+  /* FIXME: what follows is broken badly.  You can't deal with differences
+     in radix conventions this way, because of symbolic constants, constant
+     expressions made up of pieces of differing radix, etc.  The only 
+     choices are to change ../expr.c to know about pdp11 conventions, or
+     to accept the fact that gas will use consistent conventions that differ
+     from those of traditional pdp11 assemblers.  For now, I've
+     chosen the latter.   paul koning, 12/23/2001
+  */
   if (operand->reloc.exp.X_op == O_constant)
     {
       if (*str == '.')
@@ -362,13 +388,15 @@ parse_expression (char *str, struct pdp11_code *operand)
 	  operand->reloc.exp.X_add_number = strtol (buf, &end, 8);
 	}
     }
-
+#endif
   return str;
 }
 
 static char *
 parse_op_no_deferred (char *str, struct pdp11_code *operand)
 {
+  LITTLENUM_TYPE literal_float[2];
+
   str = skip_whitespace (str);
 
   switch (*str)
@@ -412,6 +440,19 @@ parse_op_no_deferred (char *str, struct pdp11_code *operand)
 	  operand->reloc.type = BFD_RELOC_16;
 	  operand->reloc.pc_rel = 0;
 	  break;
+        case O_big:
+          if (operand->reloc.exp.X_add_number > 0)
+            {
+              operand->error = "Error in expression";
+              break;
+            }
+          /* it's a floating literal... */
+          know (operand->reloc.exp.X_add_number < 0);
+          flonum_gen2vax ('f', &generic_floating_point_number, literal_float);
+          operand->word = literal_float[0];
+          if (literal_float[1] != 0)
+            as_warn (_("Low order bits truncated in immediate float operand"));
+          break;
 	default:
 	  operand->error = "Error in expression";
 	  break;
@@ -504,13 +545,9 @@ parse_op_no_deferred (char *str, struct pdp11_code *operand)
 }
 
 static char *
-parse_op (char *str, struct pdp11_code *operand)
+parse_op_noreg (char *str, struct pdp11_code *operand)
 {
   str = skip_whitespace (str);
-
-  str = parse_reg (str, operand);
-  if (!operand->error)
-    return str;
   operand->error = NULL;
 
   if (*str == '@' || *str == '*')
@@ -524,6 +561,46 @@ parse_op (char *str, struct pdp11_code *operand)
     str = parse_op_no_deferred (str, operand);
 
   return str;
+}
+
+static char *
+parse_op (char *str, struct pdp11_code *operand)
+{
+  str = skip_whitespace (str);
+
+  str = parse_reg (str, operand);
+  if (!operand->error)
+    return str;
+
+  operand->error = NULL;
+  parse_ac5 (str, operand);
+  if (!operand->error)
+    {
+      operand->error = "Float AC not legal as integer operand";
+      return str;
+    }
+  
+  return parse_op_noreg (str, operand);
+}
+
+static char *
+parse_fop (char *str, struct pdp11_code *operand)
+{
+  str = skip_whitespace (str);
+
+  str = parse_ac5 (str, operand);
+  if (!operand->error)
+    return str;
+
+  operand->error = NULL;
+  parse_reg (str, operand);
+  if (!operand->error)
+    {
+      operand->error = "General register not legal as float operand";
+      return str;
+    }
+
+  return parse_op_noreg (str, operand);
 }
 
 static char *
@@ -585,7 +662,7 @@ md_assemble (instruction_string)
 		       &insn.reloc.exp, insn.reloc.pc_rel, insn.reloc.type);
       }
 #else
-      as_warn ("Unknown instruction");
+      as_bad (_("Unknown instruction '%s'"), str);
 #endif
 
       return;
@@ -627,31 +704,36 @@ md_assemble (instruction_string)
       str = parse_expression (str, &op1);
       if (op1.error)
 	break;
+      if (op1.reloc.exp.X_op != O_constant || op1.reloc.type != BFD_RELOC_NONE)
+	{
+	  op1.error = "operand is not an absolute constant";
+	  break;
+	}
       switch (op->type)
 	{
 	case PDP11_OPCODE_IMM3:
-	  if (op1.code & ~7)
+	  if (op1.reloc.exp.X_add_number & ~7)
 	    {
 	      op1.error = "3-bit immediate out of range";
 	      break;
 	    }
 	  break;
 	case PDP11_OPCODE_IMM6:
-	  if (op1.code & ~0x3f)
+	  if (op1.reloc.exp.X_add_number & ~0x3f)
 	    {
 	      op1.error = "6-bit immediate out of range";
 	      break;
 	    }
 	  break;
 	case PDP11_OPCODE_IMM8:
-	  if (op1.code & ~0xff)
+	  if (op1.reloc.exp.X_add_number & ~0xff)
 	    {
 	      op1.error = "8-bit immediate out of range";
 	      break;
 	    }
 	  break;
 	}
-      insn.code |= op1.code;
+      insn.code |= op1.reloc.exp.X_add_number;
       break;
 
     case PDP11_OPCODE_DISPL:
@@ -686,6 +768,15 @@ md_assemble (instruction_string)
 
     case PDP11_OPCODE_OP:
       str = parse_op (str, &op1);
+      if (op1.error)
+	break;
+      insn.code |= op1.code;
+      if (op1.additional)
+	size += 2;
+      break;
+
+    case PDP11_OPCODE_FOP:
+      str = parse_fop (str, &op1);
       if (op1.error)
 	break;
       insn.code |= op1.code;
@@ -731,6 +822,44 @@ md_assemble (instruction_string)
       insn.code |= op2.code << 6;
       break;
 
+    case PDP11_OPCODE_AC_FOP:
+      str = parse_ac (str, &op2);
+      if (op2.error)
+	break;
+      insn.code |= op2.code << 6;
+      str = parse_separator (str, &error);
+      if (error)
+	{
+	  op1.error = "Missing ','";
+	  break;
+	}
+      str = parse_fop (str, &op1);
+      if (op1.error)
+	break;
+      insn.code |= op1.code;
+      if (op1.additional)
+	size += 2;
+      break;
+
+    case PDP11_OPCODE_FOP_AC:
+      str = parse_fop (str, &op1);
+      if (op1.error)
+	break;
+      insn.code |= op1.code;
+      if (op1.additional)
+	size += 2;
+      str = parse_separator (str, &error);
+      if (error)
+	{
+	  op1.error = "Missing ','";
+	  break;
+	}
+      str = parse_ac (str, &op2);
+      if (op2.error)
+	break;
+      insn.code |= op2.code << 6;
+      break;
+
     case PDP11_OPCODE_AC_OP:
       str = parse_ac (str, &op2);
       if (op2.error)
@@ -748,6 +877,25 @@ md_assemble (instruction_string)
       insn.code |= op1.code;
       if (op1.additional)
 	size += 2;
+      break;
+
+    case PDP11_OPCODE_OP_AC:
+      str = parse_op (str, &op1);
+      if (op1.error)
+	break;
+      insn.code |= op1.code;
+      if (op1.additional)
+	size += 2;
+      str = parse_separator (str, &error);
+      if (error)
+	{
+	  op1.error = "Missing ','";
+	  break;
+	}
+      str = parse_ac (str, &op2);
+      if (op2.error)
+	break;
+      insn.code |= op2.code << 6;
       break;
 
     case PDP11_OPCODE_OP_OP:
