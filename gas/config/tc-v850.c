@@ -559,7 +559,6 @@ static const struct reg_name pre_defined_registers[] =
 static const struct reg_name system_registers[] = 
 {
 /* start-sanitize-v850e */
-
   { "ctbp",  20 },
   { "ctpc",  16 },
   { "ctpsw", 17 },
@@ -574,6 +573,15 @@ static const struct reg_name system_registers[] =
   { "psw",    5 },
 };
 #define SYSREG_NAME_CNT	(sizeof (system_registers) / sizeof (struct reg_name))
+
+/* start-sanitize-v850e */
+static const struct reg_name system_list_registers[] =
+{
+  {"PS",      5 },
+  {"SR",      0 + 1}
+};
+#define SYSREGLIST_NAME_CNT	(sizeof (system_list_registers) / sizeof (struct reg_name))
+/* end-sanitize-v850e */
 
 static const struct reg_name cc_names[] =
 {
@@ -607,14 +615,34 @@ static const struct reg_name cc_names[] =
    number from the array on success, or -1 on failure. */
 
 static int
-reg_name_search (regs, regcount, name)
+reg_name_search (regs, regcount, name, accept_numbers)
      const struct reg_name * regs;
      int                     regcount;
      const char *            name;
+     boolean                 accept_numbers;
 {
   int middle, low, high;
   int cmp;
+  symbolS * symbolP;
 
+  /* If the register name is a symbol, then evaluate it.  */
+  if ((symbolP = symbol_find (name)) != NULL)
+    {
+      /* If the symbol is an alias for another name then use that.
+	 If the symbol is an alias for a number, then return the number.  */
+      if (symbolP->sy_value.X_op == O_symbol)
+	{
+	  name = S_GET_NAME (symbolP->sy_value.X_add_symbol);
+	}
+      else if (accept_numbers)
+	{
+	  int reg = S_GET_VALUE (symbolP);
+
+	  if (reg >= 0 && reg <= 31)
+	    return reg;
+	}
+    }
+  
   low = 0;
   high = regcount - 1;
 
@@ -658,7 +686,7 @@ register_name (expressionP)
 
   c = get_symbol_end ();
 
-  reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT, name);
+  reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT, name, FALSE);
 
   * input_line_pointer = c;	/* put back the delimiting char */
   
@@ -685,18 +713,31 @@ register_name (expressionP)
 
 /* Summary of system_register_name().
  *
- * in: Input_line_pointer points to 1st char of operand.
+ * in:  Input_line_pointer points to 1st char of operand.
+ *      expressionP points to an expression structure to be filled in.
+ *      accept_numbers is true iff numerical register names may be used.
+ * start-sanitize-v850e
+ *      accept_list_names is true iff the special names PS and SR may be 
+ *      accepted.
+ * end-sanitize-v850eq
  *
- * out: A expressionS.
+ * out: A expressionS structure in expressionP.
  *	The operand may have been a register: in this case, X_op == O_register,
  *	X_add_number is set to the register number, and truth is returned.
  *	Input_line_pointer->(next non-blank) char after operand, or is in
  *	its original state.
  */
 static boolean
-system_register_name (expressionP, accept_numbers)
+system_register_name (expressionP, accept_numbers
+		      /* start-sanitize-v850e */
+		      , accept_list_names
+		      /* end-sanitize-v850e */
+		      )
      expressionS * expressionP;
      boolean       accept_numbers;
+/* start-sanitize-v850e */
+     boolean       accept_list_names;
+/* end-sanitize-v850e */
 {
   int    reg_number;
   char * name;
@@ -707,7 +748,7 @@ system_register_name (expressionP, accept_numbers)
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
-  reg_number = reg_name_search (system_registers, SYSREG_NAME_CNT, name);
+  reg_number = reg_name_search (system_registers, SYSREG_NAME_CNT, name, accept_numbers);
 
   * input_line_pointer = c;   /* put back the delimiting char */
   
@@ -717,19 +758,30 @@ system_register_name (expressionP, accept_numbers)
       input_line_pointer   = start; /* reset input_line pointer */
 
       if (isdigit (* input_line_pointer))
-	reg_number = strtol (input_line_pointer, & input_line_pointer, 10);
-
-      /* Make sure that the register number is allowable. */
-      if (   reg_number < 0
-	  || reg_number > 5
-/* start-sanitize-v850e */
-	  && reg_number < 16
-	  || reg_number > 20
-/* end-sanitize-v850e */
-	     )
 	{
-	  reg_number = -1;
+	  reg_number = strtol (input_line_pointer, & input_line_pointer, 10);
+
+	  /* Make sure that the register number is allowable. */
+	  if (   reg_number < 0
+		 || reg_number > 5
+/* start-sanitize-v850e */
+		 && reg_number < 16
+		 || reg_number > 20
+/* end-sanitize-v850e */
+		 )
+	    {
+	      reg_number = -1;
+	    }
 	}
+/* start-sanitize-v850e */      
+      else if (accept_list_names)
+	{
+	  c = get_symbol_end ();
+	  reg_number = reg_name_search (system_list_registers, SYSREGLIST_NAME_CNT, name, FALSE);
+
+	  * input_line_pointer = c;   /* put back the delimiting char */
+	}
+/* end-sanitize-v850e */      
     }
       
   /* look to see if it's in the register table */
@@ -776,7 +828,7 @@ cc_name (expressionP)
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
-  reg_number = reg_name_search (cc_names, CC_NAME_CNT, name);
+  reg_number = reg_name_search (cc_names, CC_NAME_CNT, name, FALSE);
 
   * input_line_pointer = c;   /* put back the delimiting char */
   
@@ -954,7 +1006,7 @@ parse_register_list
 	      return "illegal register included in list";
 	    }
 	}
-      else if (system_register_name (& exp, true))
+      else if (system_register_name (& exp, true, true))
 	{
 	  if (regs == type1_regs)
 	    {
@@ -967,8 +1019,10 @@ parse_register_list
 	      else
 		* insn |= 0x8;
 	    }
-	  else
+	  else if (exp.X_add_number < 4)
 	    * insn |= 0x80000;
+	  else
+	    return "High value system registers cannot be included in list";
 	}
       else if (* input_line_pointer == '}')
 	{
@@ -1043,12 +1097,12 @@ md_show_usage (stream)
   FILE * stream;
 {
   fprintf (stream, "V850 options:\n");
-  fprintf (stream, "\t-wsigned_overflow    Warn if signed immediate values overflow\n");
-  fprintf (stream, "\t-wunsigned_overflow  Warn if unsigned immediate values overflow\n");
-  fprintf (stream, "\t-mv850               The code is targeted at the v850\n");
+  fprintf (stream, "\t-mwarn_signed_overflow    Warn if signed immediate values overflow\n");
+  fprintf (stream, "\t-mwarn_unsigned_overflow  Warn if unsigned immediate values overflow\n");
+  fprintf (stream, "\t-mv850                    The code is targeted at the v850\n");
 /* start-sanitize-v850e */
-  fprintf (stream, "\t-mv850e              The code is targeted at the v850e\n");
-  fprintf (stream, "\t-mv850eq             The code is targeted at the v850eq\n");
+  fprintf (stream, "\t-mv850e                   The code is targeted at the v850e\n");
+  fprintf (stream, "\t-mv850eq                  The code is targeted at the v850eq\n");
 /* end-sanitize-v850e */
 } 
 
@@ -1057,46 +1111,38 @@ md_parse_option (c, arg)
      int    c;
      char * arg;
 {
-  switch (c)
-    {
-    case 'w':
-      if (strcmp (arg, "signed_overflow") == 0)
-	{
-	  warn_signed_overflows = TRUE;
-	  return 1;
-	}
-      else if (strcmp (arg, "unsigned_overflow") == 0)
-	{
-	  warn_unsigned_overflows = TRUE;
-	  return 1;
-	}
-      break;
+  if (c != 'm')
+    return 0;
 
-    case 'm':
-      if (strcmp (arg, "v850") == 0)
-	{
-	  machine = 0;
-	  processor_mask = PROCESSOR_V850;
-	  return 1;
-	}
-/* start-sanitize-v850e */
-      else if (strcmp (arg, "v850e") == 0)
-	{
-	  machine = bfd_mach_v850e;
-	  processor_mask = PROCESSOR_V850E;
-	  return 1;
-	}
-      else if (strcmp (arg, "v850eq") == 0)
-	{
-	  machine = bfd_mach_v850eq;
-	  processor_mask = PROCESSOR_V850EQ;
-	  return 1;
-	}
-/* end-sanitize-v850e */
-      break;
+  if (strcmp (arg, "warn_signed_overflow") == 0)
+    {
+      warn_signed_overflows = TRUE;
     }
+  else if (strcmp (arg, "warn_unsigned_overflow") == 0)
+    {
+      warn_unsigned_overflows = TRUE;
+    }
+  else if (strcmp (arg, "v850") == 0)
+    {
+      machine = 0;
+      processor_mask = PROCESSOR_V850;
+    }
+/* start-sanitize-v850e */
+  else if (strcmp (arg, "v850e") == 0)
+    {
+      machine = bfd_mach_v850e;
+      processor_mask = PROCESSOR_V850E;
+    }
+  else if (strcmp (arg, "v850eq") == 0)
+    {
+      machine = bfd_mach_v850eq;
+      processor_mask = PROCESSOR_V850EQ;
+    }
+/* end-sanitize-v850e */
+  else
+    return 0;
   
-  return 0;
+  return 1;
 }
 
 symbolS *
@@ -1302,6 +1348,9 @@ md_begin ()
 
   zcommon_section = subseg_new (".zcommon", 0);
   bfd_set_section_flags (stdoutput, zcommon_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS | SEC_IS_COMMON));
+
+  tcommon_section = subseg_new (".tcommon", 0);
+  bfd_set_section_flags (stdoutput, tcommon_section, applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA | SEC_HAS_CONTENTS | SEC_IS_COMMON));
 
 /* start-sanitize-v850e */
   call_table_data_section = subseg_new (".call_table_data", 0);
@@ -1640,7 +1689,11 @@ md_assemble (str)
 		}
 	      else if ((operand->flags & V850_OPERAND_SRG) != 0) 
 		{
-		  if (!system_register_name (& ex, true))
+		  if (!system_register_name (& ex, true
+					     /* start-sanitize-v850e */
+					     , false
+					     /* end-sanitize-v850e */
+					     ))
 		    {
 		      errmsg = "invalid system register name";
 		    }
@@ -1717,12 +1770,28 @@ md_assemble (str)
 		  ex.X_add_number       = 0;
 		}
 /* end-sanitize-v850e */
-	      else if (register_name (&ex)
+	      else if (register_name (& ex)
 		       && (operand->flags & V850_OPERAND_REG) == 0)
 		{
-		  errmsg = "syntax error: register not expected";
+		  /* It is possible that an alias has been defined that
+		     matches a register name.  For example the code may
+		     include a ".set ZERO, 0" directive, which matches
+		     the register name "zero".  Attempt to reparse the
+		     field as an expression, and only complain if we
+		     cannot generate a constant.  */
+		  
+		  input_line_pointer = str;
+		  
+		  expression (& ex);
+
+		  if (ex.X_op != O_constant)
+		    errmsg = "syntax error: register not expected";
 		}
-	      else if (system_register_name (& ex, false)
+	      else if (system_register_name (& ex, false
+					     /* start-sanitize-v850e */
+					     , false
+					     /* end-sanitize-v850e */
+					     )
 		       && (operand->flags & V850_OPERAND_SRG) == 0)
 		{
 		  errmsg = "syntax error: system register not expected";
@@ -2155,6 +2224,14 @@ v850_insert_operand (insn, operand, val, file, line)
 	      const char * err = "operand out of range (%s not between %ld and %ld)";
 	      char         buf[100];
 	      
+	      /* Restore min and mix to expected values for decimal ranges.  */
+	      if ((operand->flags & V850_OPERAND_SIGNED) && ! warn_signed_overflows)
+		max = (1 << (operand->bits - 1)) - 1;
+
+	      if (! (operand->flags & V850_OPERAND_SIGNED)
+		  && ! warn_unsigned_overflows)
+		min = 0;
+
 	      sprint_value (buf, test);
 	      if (file == (char *) NULL)
 		as_warn (err, buf, min, max);

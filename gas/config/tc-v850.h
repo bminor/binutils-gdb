@@ -39,7 +39,7 @@
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
 
-#define DIFF_EXPR_OK		/* .-foo gets turned into PC relative relocs */
+#define DIFF_EXPR_OK		/* foo-. gets turned into PC relative relocs */
 
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
@@ -63,16 +63,16 @@ extern const struct relax_type md_relax_table[];
 
 #define ELF_TC_SPECIAL_SECTIONS \
   { ".sdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL	}, \
-  { ".sbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL	}, \
   { ".rosdata",	SHT_PROGBITS,	SHF_ALLOC +             SHF_V850_GPREL	}, \
+  { ".sbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL	}, \
   { ".scommon",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_GPREL	}, \
   { ".tdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_EPREL	}, \
   { ".tbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_EPREL	}, \
+  { ".tcommon",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
   { ".zdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
   { ".rozdata",	SHT_PROGBITS,	SHF_ALLOC +             SHF_V850_R0REL	}, \
-  { ".zcommon",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
   { ".zbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
-  { ".tcommon",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
+  { ".zcommon",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_V850_R0REL	}, \
   { ".call_table_data",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },	   \
   { ".call_table_text",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_EXECINSTR },
 
