@@ -12,9 +12,11 @@ ac_help=
 ac_default_prefix=/usr/local
 # Any additions from configure.in:
 ac_help="$ac_help
-  --enable-shared         use shared libraries"
+  --with-stabs            arrange to use stabs instead of host debug format"
 ac_help="$ac_help
-  --enable-gdbtk "
+  --enable-gtk            enable gdbtk graphical user interface (GUI)"
+ac_help="$ac_help
+  --enable-shared         build shared libraries [deault=yes]"
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -32,6 +34,7 @@ program_suffix=NONE
 program_transform_name=s,x,x,
 silent=
 site=
+sitefile=
 srcdir=
 target=NONE
 verbose=
@@ -146,6 +149,7 @@ Configuration:
   --help                  print this message
   --no-create             do not create output files
   --quiet, --silent       do not print \`checking...' messages
+  --site-file=FILE        use FILE as the site file
   --version               print the version of autoconf that created configure
 Directory and file names:
   --prefix=PREFIX         install architecture-independent files in PREFIX
@@ -316,6 +320,11 @@ EOF
   -site=* | --site=* | --sit=*)
     site="$ac_optarg" ;;
 
+  -site-file | --site-file | --site-fil | --site-fi | --site-f)
+    ac_prev=sitefile ;;
+  -site-file=* | --site-file=* | --site-fil=* | --site-fi=* | --site-f=*)
+    sitefile="$ac_optarg" ;;
+
   -srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
     ac_prev=srcdir ;;
   -srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=*)
@@ -481,12 +490,16 @@ fi
 srcdir=`echo "${srcdir}" | sed 's%\([^/]\)/*$%\1%'`
 
 # Prefer explicitly selected file to automatically selected ones.
-if test -z "$CONFIG_SITE"; then
-  if test "x$prefix" != xNONE; then
-    CONFIG_SITE="$prefix/share/config.site $prefix/etc/config.site"
-  else
-    CONFIG_SITE="$ac_default_prefix/share/config.site $ac_default_prefix/etc/config.site"
+if test -z "$sitefile"; then
+  if test -z "$CONFIG_SITE"; then
+    if test "x$prefix" != xNONE; then
+      CONFIG_SITE="$prefix/share/config.site $prefix/etc/config.site"
+    else
+      CONFIG_SITE="$ac_default_prefix/share/config.site $ac_default_prefix/etc/config.site"
+    fi
   fi
+else
+  CONFIG_SITE="$sitefile"
 fi
 for ac_site_file in $CONFIG_SITE; do
   if test -r "$ac_site_file"; then
@@ -526,10 +539,8 @@ fi
 
 
 
-CC=${CC-cc}
-
 ac_aux_dir=
-for ac_dir in `cd $srcdir;pwd`/../.. $srcdir/`cd $srcdir;pwd`/../..; do
+for ac_dir in $srcdir $srcdir/.. $srcdir/../..; do
   if test -f $ac_dir/install-sh; then
     ac_aux_dir=$ac_dir
     ac_install_sh="$ac_aux_dir/install-sh -c"
@@ -541,32 +552,29 @@ for ac_dir in `cd $srcdir;pwd`/../.. $srcdir/`cd $srcdir;pwd`/../..; do
   fi
 done
 if test -z "$ac_aux_dir"; then
-  { echo "configure: error: can not find install-sh or install.sh in `cd $srcdir;pwd`/../.. $srcdir/`cd $srcdir;pwd`/../.." 1>&2; exit 1; }
+  { echo "configure: error: can not find install-sh or install.sh in $srcdir $srcdir/.. $srcdir/../.." 1>&2; exit 1; }
 fi
 ac_config_guess=$ac_aux_dir/config.guess
 ac_config_sub=$ac_aux_dir/config.sub
 ac_configure=$ac_aux_dir/configure # This should be Cygnus configure.
 
+echo $ac_n "checking build system type""... $ac_c" 1>&6
+echo "configure:563: checking build system type" >&5
 
-# Do some error checking and defaulting for the host and target type.
-# The inputs are:
-#    configure --host=HOST --target=TARGET --build=BUILD NONOPT
-#
-# The rules are:
-# 1. You are not allowed to specify --host, --target, and nonopt at the
-#    same time.
-# 2. Host defaults to nonopt.
-# 3. If nonopt is not specified, then host defaults to the current host,
-#    as determined by config.guess.
-# 4. Target and build default to nonopt.
-# 5. If nonopt is not specified, then target and build default to host.
-
-# The aliases save the names the user supplied, while $host etc.
-# will get canonicalized.
-case $host---$target---$nonopt in
-NONE---*---* | *---NONE---* | *---*---NONE) ;;
-*) { echo "configure: error: can only configure for one host and one target at a time" 1>&2; exit 1; } ;;
+build_alias=$build
+case "$build_alias" in
+NONE)
+  case $nonopt in
+  NONE) build_alias=$host_alias ;;
+  *) build_alias=$nonopt ;;
+  esac ;;
 esac
+
+build=`${CONFIG_SHELL-/bin/sh} $ac_config_sub $build_alias`
+build_cpu=`echo $build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
+build_vendor=`echo $build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
+build_os=`echo $build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
+echo "$ac_t""$build" 1>&6
 
 
 # Make sure we can run config.sub.
@@ -575,7 +583,7 @@ else { echo "configure: error: can not run $ac_config_sub" 1>&2; exit 1; }
 fi
 
 echo $ac_n "checking host system type""... $ac_c" 1>&6
-echo "configure:579: checking host system type" >&5
+echo "configure:587: checking host system type" >&5
 
 host_alias=$host
 case "$host_alias" in
@@ -596,7 +604,7 @@ host_os=`echo $host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 echo "$ac_t""$host" 1>&6
 
 echo $ac_n "checking target system type""... $ac_c" 1>&6
-echo "configure:600: checking target system type" >&5
+echo "configure:608: checking target system type" >&5
 
 target_alias=$target
 case "$target_alias" in
@@ -613,137 +621,114 @@ target_vendor=`echo $target | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
 target_os=`echo $target | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 echo "$ac_t""$target" 1>&6
 
-echo $ac_n "checking build system type""... $ac_c" 1>&6
-echo "configure:618: checking build system type" >&5
-
-build_alias=$build
-case "$build_alias" in
-NONE)
-  case $nonopt in
-  NONE) build_alias=$host_alias ;;
-  *) build_alias=$nonopt ;;
-  esac ;;
-esac
-
-build=`${CONFIG_SHELL-/bin/sh} $ac_config_sub $build_alias`
-build_cpu=`echo $build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
-build_vendor=`echo $build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
-build_os=`echo $build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
-echo "$ac_t""$build" 1>&6
-
-test "$host_alias" != "$target_alias" &&
-  test "$program_prefix$program_suffix$program_transform_name" = \
-    NONENONEs,x,x, &&
-  program_prefix=${target_alias}-
-
 
 # Directories to use in all configurations.
-configdirs="gdb.arch \
-            gdb.asm \
-            gdb.base \
-            gdb.c++ \
-            gdb.java \
-            gdb.disasm \
-            gdb.mi \
-            gdb.threads \
-            gdb.trace"
+subdirs="gdb.arch gdb.asm gdb.base gdb.c++ gdb.java gdb.disasm"
 
+subdirs="gdb.arch gdb.asm gdb.base gdb.c++ gdb.java gdb.disasm gdb.mi gdb.threads gdb.trace"
 
-# Directories to use for a configuration which uses stabs.
-stabsdirs="gdb.stabs"
+configdirs=
 
-	# this section is for targets that use stabs
-# add stabs tests for appropriate targets
-case "${target}" in
-	powerpc-*-aix*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	rs6000-*-aix*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	*-*-bsd*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	*-*-go32*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	*-*-linux*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	*-*-lynxos*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	*-sun-*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	hppa*-*-*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	*-*-elf*)	configdirs="${configdirs} ${stabsdirs}" ;;
-	*)		if test "x${with_stabs}" = x"yes" ; then
-			  configdirs="${configdirs} ${stabsdirs}"
-			fi ;;
+# Add HP-specific tests when appropriate.
+case $target in
+  hppa*-*-hpux*)
+    configdirs="$configdirs gdb.hp" ;;
 esac
 
-# Directory with HP specific tests. They will run only with HP's compilers. 
-# These tests will not work on other platforms and compilers.
-
-hpdir="gdb.hp"
-
-case "${target}" in
- hppa*-*-hpux*) configdirs="${configdirs} ${hpdir}" ;;
-esac
-
-
-# Begin stuff to support --enable-shared
-# Check whether --enable-shared or --disable-shared was given.
-if test "${enable_shared+set}" = set; then
-  enableval="$enable_shared"
-  case "${enableval}" in
-  yes) shared=true ;;
-  no)  shared=false ;;
-  *) shared=true ;;
+# With stabs.
+# Check whether --with-stabs or --without-stabs was given.
+if test "${with_stabs+set}" = set; then
+  withval="$with_stabs"
+  :
+else
+  # We enable stabs tests by default on selected targets.
+case $target in
+   powerpc-*-aix* \
+ | rs6000-*-aix*  \
+ | *-*-bsd*       \
+ | *-*-go32*      \
+ | *-*-linux*     \
+ | *-*-lynxos*    \
+ | *-sun-*        \
+ | hppa*-*-*      \
+ | *-*-elf*       \
+ )
+    with_stabs=yes ;;
+ *)
+    with_stabs=no ;;
 esac
 fi
-RPATH_ENVVAR=LD_LIBRARY_PATH
-# If we have shared libraries, try to set RPATH_ENVVAR reasonably.
-if test "${shared}" = "true"; then
-  case "${host}" in
-  *-*-hpux*)
-    RPATH_ENVVAR=SHLIB_PATH
-    ;;
-  esac
+
+
+# Add stabs tests when appropriate.
+if test $with_stabs = yes; then
+  configdirs="$configdirs gdb.stabs"
 fi
 
-# End stuff to support --enable-shared
-# Start stuff to support --enable-gdbtk
+# Enable gdbtk.
 # Check whether --enable-gdbtk or --disable-gdbtk was given.
 if test "${enable_gdbtk+set}" = set; then
   enableval="$enable_gdbtk"
-  case "${enableval}" in
-    yes)
-        case "$host" in
-        *go32*)
-            enable_gdbtk=no ;;
-        *windows*)
-            enable_gdbtk=no ;;
-        *)
-            enable_gdbtk=yes ;;
-        esac ;;
-    no)
-        enable_gdbtk=no  ;;
-    *)
-        { echo "configure: error: bad value ${enableval} given for gdbtk option" 1>&2; exit 1; } ;;
-esac
+  :
 else
-  
-# Default is on for everything but go32 and windows
-case "$host" in
-    *go32* | *windows*)
-        ;;
-    *)
-        enable_gdbtk=yes ;;
-    esac
+  if test -d $srcdir/gdb.gdbtk; then
+    enable_gdbtk=yes
+  else
+    enable_gdbtk=no
+  fi
+fi
 
+# We unconditionally disable gdbtk tests on selected platforms.
+case $host_os in
+  go32* | windows*)
+    enable_gdbtk=no ;;
+esac
+
+# Add gdbtk tests when appropriate.
+if test $enable_gdbtk = yes; then
+  configdirs="$configdirs gdb.gdbtk"
+fi
+
+# Enable shared libraries.
+# Check whether --enable-shared or --disable-shared was given.
+if test "${enable_shared+set}" = set; then
+  enableval="$enable_shared"
+  :
+else
+  enable_shared=yes
 fi
 
 
-if test "${enable_gdbtk}" = "yes"; then
-    configdirs="${configdirs} gdb.gdbtk"
+# If we have shared libraries, try to set RPATH_ENVVAR reasonably,
+# such that we can find the shared libraries in the build tree.
+if test $enable_shared = no; then
+  # The variable `RPATH_ENVVAR' itself is not likely to be used on any
+  # platform.
+  RPATH_ENVVAR=RPATH_ENVVAR
+else
+  # The variable `LD_LIBRARY_PATH' is used on most platforms.
+  RPATH_ENVVAR=LD_LIBRARY_PATH
+  # The following exceptions are taken from Libtool 1.4.3.
+  case $host_os in
+    aix*)
+      if test $host_cpu != ia64; then
+        RPATH_ENVVAR=LIBPATH
+      fi ;;
+    darwin* | rhapsody*)
+      RPATH_ENVVAR=DYLD_LIBRARY_PATH ;;
+    hpux*)
+      RPATH_ENVVAR=SHLIB_PATH ;;
+  esac
 fi
-# End stuff to support --enable-shared
+
 
 echo $ac_n "checking for Cygwin environment""... $ac_c" 1>&6
-echo "configure:742: checking for Cygwin environment" >&5
+echo "configure:727: checking for Cygwin environment" >&5
 if eval "test \"`echo '$''{'ac_cv_cygwin'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 747 "configure"
+#line 732 "configure"
 #include "confdefs.h"
 
 int main() {
@@ -754,7 +739,7 @@ int main() {
 return __CYGWIN__;
 ; return 0; }
 EOF
-if { (eval echo configure:758: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:743: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_cygwin=yes
 else
@@ -771,19 +756,19 @@ echo "$ac_t""$ac_cv_cygwin" 1>&6
 CYGWIN=
 test "$ac_cv_cygwin" = yes && CYGWIN=yes
 echo $ac_n "checking for mingw32 environment""... $ac_c" 1>&6
-echo "configure:775: checking for mingw32 environment" >&5
+echo "configure:760: checking for mingw32 environment" >&5
 if eval "test \"`echo '$''{'ac_cv_mingw32'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 780 "configure"
+#line 765 "configure"
 #include "confdefs.h"
 
 int main() {
 return __MINGW32__;
 ; return 0; }
 EOF
-if { (eval echo configure:787: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:772: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_mingw32=yes
 else
@@ -802,7 +787,7 @@ test "$ac_cv_mingw32" = yes && MINGW32=yes
 
 
 echo $ac_n "checking for executable suffix""... $ac_c" 1>&6
-echo "configure:806: checking for executable suffix" >&5
+echo "configure:791: checking for executable suffix" >&5
 if eval "test \"`echo '$''{'ac_cv_exeext'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -812,10 +797,10 @@ else
   rm -f conftest*
   echo 'int main () { return 0; }' > conftest.$ac_ext
   ac_cv_exeext=
-  if { (eval echo configure:816: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+  if { (eval echo configure:801: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
     for file in conftest.*; do
       case $file in
-      *.c | *.o | *.obj) ;;
+      *.c | *.C | *.o | *.obj | *.ilk | *.pdb) ;;
       *) ac_cv_exeext=`echo $file | sed -e s/conftest//` ;;
       esac
     done
@@ -833,9 +818,7 @@ echo "$ac_t""${ac_cv_exeext}" 1>&6
 ac_exeext=$EXEEXT
 
 
-# configure the subdirectories too
-subdirs="$configdirs"
-
+subdirs="gdb.arch gdb.asm gdb.base gdb.c++ gdb.java gdb.disasm gdb.mi gdb.threads gdb.trace $configdirs"
 
 trap '' 1 2 15
 cat > confcache <<\EOF
@@ -981,7 +964,11 @@ s%@includedir@%$includedir%g
 s%@oldincludedir@%$oldincludedir%g
 s%@infodir@%$infodir%g
 s%@mandir@%$mandir%g
-s%@CC@%$CC%g
+s%@build@%$build%g
+s%@build_alias@%$build_alias%g
+s%@build_cpu@%$build_cpu%g
+s%@build_vendor@%$build_vendor%g
+s%@build_os@%$build_os%g
 s%@host@%$host%g
 s%@host_alias@%$host_alias%g
 s%@host_cpu@%$host_cpu%g
@@ -992,14 +979,9 @@ s%@target_alias@%$target_alias%g
 s%@target_cpu@%$target_cpu%g
 s%@target_vendor@%$target_vendor%g
 s%@target_os@%$target_os%g
-s%@build@%$build%g
-s%@build_alias@%$build_alias%g
-s%@build_cpu@%$build_cpu%g
-s%@build_vendor@%$build_vendor%g
-s%@build_os@%$build_os%g
+s%@subdirs@%$subdirs%g
 s%@RPATH_ENVVAR@%$RPATH_ENVVAR%g
 s%@EXEEXT@%$EXEEXT%g
-s%@subdirs@%$subdirs%g
 
 CEOF
 EOF
@@ -1132,7 +1114,7 @@ if test "$no_recursion" != yes; then
     esac
   done
 
-  for ac_config_dir in $configdirs; do
+  for ac_config_dir in gdb.arch gdb.asm gdb.base gdb.c++ gdb.java gdb.disasm gdb.mi gdb.threads gdb.trace $configdirs; do
 
     # Do not complain, so a configure script can configure whichever
     # parts of a large source tree are present.
