@@ -1,3 +1,15 @@
+Wed Aug  7 14:27:33 1996  Philippe De Muyter  <phdm@info.ucl.ac.be>
+
+	* configure.in: Call BFD_NEED_DECLARATION on strstr and sbrk.
+	* acconfig.h (NEED_DECLARATION_STRSTR): New macro.
+	(NEED_DECLARATION_SBRK): New macro.
+	* configure, config.in: Rebuild.
+	* bucomm.h (strstr): Declare if NEED_DECLARATION_STRSTR.
+	(sbrk): Declare if HAVE_SBRK and NEED_DECLARATION_SBRK.
+
+	* prdbg.c (pr_end_struct_type): Avoid using a string constant in
+	assert, for the benefit of broken assert macros.
+
 Fri Jul 26 14:06:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c (disassemble_data): Set disasm_info.flavour from
