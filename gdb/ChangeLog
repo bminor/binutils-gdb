@@ -1,3 +1,9 @@
+Tue Nov  5 10:08:07 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* mswin/gdbwin.h:  Remove bogus definition of CORE_ADDR.
+	* mswin/srcwin.cpp (CSrcScroll1::CSrcScroll1):  Initialize depth
+	to fix divide-by-zero problem with clicking on source window.
+
 Mon Nov  4 00:48:37 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* mswin/recordit:  Fix problem with absolute paths.
