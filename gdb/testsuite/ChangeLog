@@ -1,5 +1,19 @@
 Thu Feb  6 12:46:14 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* gdb.base/nodebug.exp: Don't try to do an inferior function
+	call if the target doesn't support them.
+	* gdb.base/printcmds.exp: Likewise.
+	* gdb.base/setvar.exp: Likewise.
+	* gdb.base/structs.exp: Likewise.
+	* gdb.c++/templates.exp: Likewise.
+	* gdb.base/ptype.exp: Likewise.  Remove UDI specific stuff.
+
+	* gdb.base/recurse.exp: Enable for the mn10200.
+
+	* configure.in: Do configure gdb.stabs directory for *-*-elf
+	targets.
+	* configure: Rebuilt.
+
 	* gdb.base/break.exp: Check for gdb,noresults before testing
 	exit status and/or results from the target.
 	* gdb.base/watchpoint.exp, gdb.base/langs.exp: Likewise.

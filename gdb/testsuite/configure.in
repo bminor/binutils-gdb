@@ -29,6 +29,7 @@ case "${target}" in
 	*-*-lynxos*)	configdirs="${configdirs} ${stabsdirs}" ;;
 	*-sun-*)	configdirs="${configdirs} ${stabsdirs}" ;;
 	hppa*-*-*)	configdirs="${configdirs} ${stabsdirs}" ;;
+	*-*-elf*)	configdirs="${configdirs} ${stabsdirs}" ;;
 	*)		if test "x${with_stabs}" = x"yes" ; then
 			  configdirs="${configdirs} ${stabsdirs}"
 			fi ;;

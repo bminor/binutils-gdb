@@ -133,6 +133,12 @@ send_gdb "set print sevenbit-strings\n" ; expect -re "$gdb_prompt $"
 send_gdb "set print address off\n" ; expect -re "$gdb_prompt $"
 send_gdb "set width 0\n" ; expect -re "$gdb_prompt $"
 
+if [target_info exists gdb,cannot_call_functions] {
+    setup_xfail "*-*-*" 2416
+    fail "This target can not call functions"
+    return 0
+}
+
 if [runto_main] then {
     do_function_calls
 } else {
