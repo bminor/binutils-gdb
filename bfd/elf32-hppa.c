@@ -1,5 +1,5 @@
 /* BFD back-end for HP PA-RISC ELF files.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
    Free Software Foundation, Inc.
 
    Original code by
@@ -2142,7 +2142,6 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 
   if (hplink->root.dynamic_sections_created)
     {
-      const char *funcname;
       bfd *i;
 
       /* Set the contents of the .interp section to the interpreter.  */
@@ -2158,54 +2157,6 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
       elf_link_hash_traverse (&hplink->root,
 			      clobber_millicode_symbols,
 			      info);
-
-      /* DT_INIT and DT_FINI need a .plt entry.  Make sure they have
-	 one.  */
-      funcname = info->init_function;
-      while (1)
-	{
-	  if (funcname != NULL)
-	    {
-	      struct elf_link_hash_entry *h;
-
-	      h = elf_link_hash_lookup (&hplink->root,
-					funcname,
-					false, false, false);
-	      if (h != NULL
-		  && (h->elf_link_hash_flags & (ELF_LINK_HASH_REF_REGULAR
-						| ELF_LINK_HASH_DEF_REGULAR)))
-		{
-		  if (h->plt.refcount <= 0)
-		    {
-		      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
-
-		      /* Make an entry in the .plt section.  We know
-			 the function doesn't have a plabel by the
-			 refcount.  */
-		      s = hplink->splt;
-		      h->plt.offset = s->_raw_size;
-		      s->_raw_size += PLT_ENTRY_SIZE;
-
-		      /* Make sure this symbol is output as a dynamic
-			 symbol.  */
-		      if (h->dynindx == -1)
-			{
-			  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
-			    return false;
-			}
-
-		      /* Make an entry for the reloc too.  */
-		      s = hplink->srelplt;
-		      s->_raw_size += sizeof (Elf32_External_Rela);
-		    }
-
-		  ((struct elf32_hppa_link_hash_entry *) h)->plt_abs = 1;
-		}
-	    }
-	  if (funcname == info->fini_function)
-	    break;
-	  funcname = info->fini_function;
-	}
 
       /* Set up .plt offsets for local plabels.  */
       for (i = info->input_bfds; i; i = i->link_next)
@@ -4103,31 +4054,6 @@ elf32_hppa_finish_dynamic_sections (output_bfd, info)
 		dyn.d_un.d_val = s->_raw_size;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
-
-	    case DT_INIT:
-	    case DT_FINI:
-	      {
-		struct elf_link_hash_entry *h;
-		const char *funcname;
-
-		if (dyn.d_tag == DT_INIT)
-		  funcname = info->init_function;
-		else
-		  funcname = info->fini_function;
-
-		h = elf_link_hash_lookup (&hplink->root, funcname,
-					  false, false, false);
-
-		/* This is a function pointer.  The magic +2 offset
-		   signals to $$dyncall that the function pointer
-		   is in the .plt and thus has a gp pointer too.  */
-		dyn.d_un.d_ptr = (h->plt.offset
-				  + hplink->splt->output_offset
-				  + hplink->splt->output_section->vma
-				  + 2);
-		bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
-		break;
-	      }
 	    }
 	}
     }
