@@ -1,5 +1,7 @@
 Fri Mar 19 10:23:34 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* stabs.texinfo: Fixes re arrays and continuations.
+
 	* gdbint.texinfo: Add XCOFF node.
 
 Mon Mar  8 15:52:18 1993  John Gilmore  (gnu@cygnus.com)

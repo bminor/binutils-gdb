@@ -208,16 +208,17 @@ This is described more thoroughly in the section on types.  @xref{Type
 Descriptors,,Table D: Type Descriptors}, for a list of
 @var{type_descriptor} values.
 
-@c FIXME! "too long" below introduced at J Gilmore's request; used to
-@c say "more than 80 chars".  Why is vaguer better?
-All this can make the @code{"@var{string}"} field quite long.  When the
-@code{"@var{string}"} part of a stab is too long, the compiler splits
-the @code{.stabs} directive into two @code{.stabs} directives.  Both
-stabs duplicate exactly all but the @code{"@var{string}"} field.  The
-@code{"@var{string}"} field of the first stab contains the first part of
-the overlong string, marked as continued with a double-backslash at the
-end.  The @code{"@var{string}"} field of the second stab holds the
-second half of the overlong string.
+All this can make the @code{"@var{string}"} field quite long.  All
+versions of GDB, and some versions of DBX, can handle arbitrarily long
+strings.  But many versions of DBX cretinously limit the strings to
+about 80 characters, so compilers which must work with such DBX's need
+to split the @code{.stabs} directive into several @code{.stabs}
+directives.  Each stab duplicates exactly all but the
+@code{"@var{string}"} field.  The @code{"@var{string}"} field of the
+every stab except the last is marked as continued with a
+double-backslash at the end.  Removing the backslashes and concatenating
+the @code{"@var{string}"} fields of each stab produces the original,
+long string.
 
 @node C example
 @section A simple example in C source
@@ -3127,6 +3128,9 @@ GNU C stabs define *all* types, file or procedure scope, as
 N_LSYM.  Sun doc talks about using N_GSYM too.
 
 @item
+@c FIXME: are you sure?  The 'a' is usually followed by an 'r' which means
+@c "range type" but that doesn't mean the type descriptor is 'ar'.
+@c A (non-C) array could be indexed by an enum, for example. -kingdon
 GNU C stabs use `ar' as type descriptor when defining arrays vs. just
 `a' in Sun doc.
 
