@@ -1,5 +1,14 @@
 2002-12-18  Andrew Cagney  <ac131313@redhat.com>
 
+	* frame.c (deprecated_update_current_frame_pc_hack): Replace 
+	deprecated_update_current_frame_pc_hack.
+	(deprecated_update_frame_base_hack): New function.
+	* frame.h (deprecated_update_frame_pc_hack): Replace
+	(deprecated_update_frame_base_hack): Declare.
+	* infrun.c (normal_stop): Update.
+
+2002-12-18  Andrew Cagney  <ac131313@redhat.com>
+
 	* rs6000-tdep.c (rs6000_init_extra_frame_info): Use
 	frame_extra_info_zalloc.
 	(rs6000_frame_args_address): Use get_frame_extra_info.

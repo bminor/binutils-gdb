@@ -663,6 +663,15 @@ extern CORE_ADDR *get_frame_saved_regs (struct frame_info *);
 /* FIXME: cagney/2002-12-06: Has the PC in the current frame changed?
    "infrun.c", Thanks to DECR_PC_AFTER_BREAK, can change the PC after
    the initial frame create.  This puts things back in sync.  */
-extern void deprecated_update_current_frame_pc_hack (CORE_ADDR pc);
+extern void deprecated_update_frame_pc_hack (struct frame_info *frame,
+					     CORE_ADDR pc);
+
+/* FIXME: cagney/2002-12-18: Has the frame's base changed?  Or to be
+   more exact, whas that initial guess at the frame's base as returned
+   by read_fp() wrong.  If it was, fix it.  This shouldn't be
+   necessary since the code should be getting the frame's base correct
+   from the outset.  */
+extern void deprecated_update_frame_base_hack (struct frame_info *frame,
+					       CORE_ADDR base);
 
 #endif /* !defined (FRAME_H)  */

@@ -2985,7 +2985,7 @@ normal_stop (void)
        DECR_PC_AFTER_BREAK, the program counter can change.  Ask the
        frame code to check for this and sort out any resultant mess.
        DECR_PC_AFTER_BREAK needs to just go away.  */
-    deprecated_update_current_frame_pc_hack (read_pc ());
+    deprecated_update_frame_pc_hack (get_current_frame (), read_pc ());
 
   if (target_has_execution && breakpoints_inserted)
     {
