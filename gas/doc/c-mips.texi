@@ -106,7 +106,7 @@ This tells the assembler to accept MIPS-3D instructions.
 @samp{-no-mips3d} turns off this option.
 
 @item -mfix7000
-@itemx -no-mfix7000
+@itemx -mno-fix7000
 Cause nops to be inserted if the read of the destination register
 of an mfhi or mflo instruction occurs in the following two instructions.
 

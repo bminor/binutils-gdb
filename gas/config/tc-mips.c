@@ -9953,8 +9953,9 @@ struct option md_longopts[] =
   {"no-mips16", no_argument, NULL, OPTION_NO_MIPS16},
 #define OPTION_M7000_HILO_FIX (OPTION_MD_BASE + 15)
   {"mfix7000", no_argument, NULL, OPTION_M7000_HILO_FIX},
-#define OPTION_NO_M7000_HILO_FIX (OPTION_MD_BASE + 16)
-  {"no-fix-7000", no_argument, NULL, OPTION_NO_M7000_HILO_FIX},
+#define OPTION_MNO_7000_HILO_FIX (OPTION_MD_BASE + 16)
+  {"no-fix-7000", no_argument, NULL, OPTION_MNO_7000_HILO_FIX},
+  {"mno-fix7000", no_argument, NULL, OPTION_MNO_7000_HILO_FIX},
 #define OPTION_FP32 (OPTION_MD_BASE + 17)
   {"mfp32", no_argument, NULL, OPTION_FP32},
 #define OPTION_GP32 (OPTION_MD_BASE + 18)
@@ -10362,7 +10363,7 @@ md_parse_option (c, arg)
       mips_7000_hilo_fix = true;
       break;
 
-    case OPTION_NO_M7000_HILO_FIX:
+    case OPTION_MNO_7000_HILO_FIX:
       mips_7000_hilo_fix = false;
       break;
 
