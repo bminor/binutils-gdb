@@ -71,6 +71,7 @@ responsibility among the other maintainers.
   MMIX		   Hans-Peter Nilsson <hp@bitrange.com>
   PPC		   Geoff Keating <geoffk@redhat.com>
   PPC XCOFF	   Tom Rix <trix@redhat.com>
+  s390, s390x	   Martin Schwidefsky <schwidefsky@de.ibm.com>
   SH		   Jörn Rennecke <amylaar@onetel.net.uk>
   SH		   Hans-Peter Nilsson <hp@bitrange.com>
   SPARC		   Jakub Jelinek <jakub@redhat.com>
