@@ -1,3 +1,9 @@
+2003-07-04  Paul  <paulc@senet.com.au>
+
+	* elf32-h8300.c (R_H8_DIR32A16): Fix name field.
+	(elf32_h8_relax_section) <R_H8_DIR16A8>: Adjust position of relocation.
+	<R_H8_DIR32A16>: Fix type of relocation.
+
 2003-07-04  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf32-sh.c (sh_elf_create_dynamic_sections): Return if dynamic

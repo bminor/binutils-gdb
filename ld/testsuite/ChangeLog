@@ -1,3 +1,11 @@
+2003-07-04  Richard Sandiford  <rsandifo@redhat.com>
+
+	* ld-h8300/h8300.exp: Replace loop with explicit list.  Run relax.d
+	unconditionally.  Run relax-2.d for *-elf targets.
+	* ld-h8300/relax.d: Fix typo.
+	* ld-h8300/relax.s: Add 0x prefixes.
+	* ld-h8300/relad-2.[sd]: New test.
+
 2003-06-29  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* ld-mips-elf/mips-elf.exp: Use is_elf_format.

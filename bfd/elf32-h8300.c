@@ -183,7 +183,7 @@ static reloc_howto_type h8_elf_howto_table[] = {
 	 0,			/* bitpos */
 	 complain_overflow_dont,/* complain_on_overflow */
 	 special,		/* special_function */
-	 "R_H8_DIR32",		/* name */
+	 "R_H8_DIR32A16",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
@@ -1076,6 +1076,9 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 		irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
 					     R_H8_DIR8);
 
+		/* Move the relocation.  */
+		irel->r_offset--;
+
 		/* Delete two bytes of data.  */
 		if (!elf32_h8_relax_delete_bytes (abfd, sec,
 						  irel->r_offset + 1, 2))
@@ -1187,7 +1190,7 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 
 		/* Fix the relocation's type.  */
 		irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
-					     R_H8_DIR16A8);
+					     R_H8_DIR16);
 
 		/* Delete two bytes of data.  */
 		if (!elf32_h8_relax_delete_bytes (abfd, sec,
