@@ -54,7 +54,7 @@ keep_these_too="${keep_these_too} .cvsignore autoconf automake
 	guile gzip
 	include inet install-sh intl ispell
 	ld less libgcc libgloss libiberty libio
-	libstdc++ libtool
+	libstdc++ libtermcap libtool
 	m4 make mkinstalldirs mmalloc move-if-change newlib ncurses opcodes
 	pagas patch perl prms
 	rcs readline sed send-pr shellutils sim tar textutils time
