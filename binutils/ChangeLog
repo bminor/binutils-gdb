@@ -7,6 +7,9 @@
 	(usage): Handle.
 	(main): Handle.
 
+	* dllwrap.c (enum target_type): Rename MINGW32_TARGET to MINGW_TARGET.
+	(main): Use. Don't look for "32" in cygwin and mingw target names.
+
 2000-01-03  Nick Clifton  <nickc@cygnus.com>
 
 	* binutils.texi: Document new, ARM specific disassembler

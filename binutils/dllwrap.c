@@ -1,5 +1,5 @@
 /* dllwrap.c -- wrapper for DLLTOOL and GCC to generate PE style DLLs
-   Copyright (C) 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000 Free Software Foundation, Inc.
    Contributed by Mumit Khan (khan@xraylith.wisc.edu).
 
    This file is part of GNU Binutils.
@@ -94,7 +94,7 @@ static char *target = TARGET;
 typedef enum {
   UNKNOWN_TARGET, 
   CYGWIN_TARGET, 
-  MINGW32_TARGET
+  MINGW_TARGET
 } 
 target_type;
 
@@ -830,10 +830,10 @@ main (argc, argv)
     }
   
   /* set the target platform. */
-  if (strstr (target, "cygwin32"))
+  if (strstr (target, "cygwin"))
     which_target = CYGWIN_TARGET;
-  else if (strstr (target, "mingw32"))
-    which_target = MINGW32_TARGET;
+  else if (strstr (target, "mingw"))
+    which_target = MINGW_TARGET;
   else 
     which_target = UNKNOWN_TARGET;
 
@@ -869,7 +869,7 @@ main (argc, argv)
           driver_flags = cygwin_driver_flags;
 	  break;
 	
-	case MINGW32_TARGET:
+	case MINGW_TARGET:
           driver_flags = mingw32_driver_flags;
 	  break;
 	
@@ -890,7 +890,7 @@ main (argc, argv)
 	  entry_point = "__cygwin_dll_entry@12";
 	  break;
 	
-	case MINGW32_TARGET:
+	case MINGW_TARGET:
 	  entry_point = "_DllMainCRTStartup@12";
 	  break;
 	
