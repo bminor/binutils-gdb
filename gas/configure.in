@@ -449,11 +449,12 @@ changequote([,])dnl
 			    fmt=aout ;;
       vax-*-vms)            fmt=vms ;;
 
+      w65-*-*)              fmt=coff ;;
+
+      xstormy16-*-*)	    fmt=elf bfd_gas=yes ;;
 
       z8k-*-coff | z8k-*-sim)
 			    fmt=coff ;;
-
-      w65-*-*)              fmt=coff ;;
 
       *-*-aout | *-*-scout)
 			    fmt=aout ;;
@@ -570,6 +571,11 @@ changequote([,])dnl
 	  AC_DEFINE_UNQUOTED(DEFAULT_ARCH, "${arch}", [Default architecture.])
 	fi
 	;;
+
+      xstormy16)
+	using_cgen=yes
+	;;
+
       *)
 	;;
     esac

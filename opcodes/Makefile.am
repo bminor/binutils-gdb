@@ -32,6 +32,7 @@ HFILES = \
 	ia64-asmtab.h \
 	ia64-opc.h \
 	w65-opc.h \
+	xstormy16-desc.h xstormy16-opc.h \
 	z8k-opc.h
 
 # C source files that correspond to .o's.
@@ -126,6 +127,11 @@ CFILES = \
 	v850-opc.c \
 	vax-dis.c \
 	w65-dis.c \
+	xstormy16-asm.c \
+	xstormy16-desc.c \
+	xstormy16-dis.c \
+	xstormy16-ibld.c \
+	xstormy16-opc.c \
 	z8k-dis.c \
 	z8kgen.c
 
@@ -209,6 +215,11 @@ ALL_MACHINES = \
 	v850-opc.lo \
 	vax-dis.lo \
 	w65-dis.lo \
+	xstormy16-asm.lo \
+	xstormy16-desc.lo \
+	xstormy16-dis.lo \
+	xstormy16-ibld.lo \
+	xstormy16-opc.lo \
 	z8k-dis.lo
 
 OFILES = @BFD_MACHINES@
@@ -253,6 +264,7 @@ config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 
 CLEANFILES = \
 	stamp-m32r stamp-fr30 stamp-openrisc \
+	stamp-xstormy16 \
 	libopcodes.a stamp-lib dep.sed DEP DEPA DEP1 DEP2
 
 
@@ -272,10 +284,12 @@ if CGEN_MAINT
 M32R_DEPS = stamp-m32r
 FR30_DEPS = stamp-fr30
 OPENRISC_DEPS = stamp-openrisc
+XSTORMY16_DEPS = stamp-xstormy16
 else
 M32R_DEPS =
 FR30_DEPS =
 OPENRISC_DEPS = 
+XSTORMY16_DEPS = 
 endif
 
 run-cgen:
@@ -300,6 +314,11 @@ $(srcdir)/openrisc-desc.h $(srcdir)/openrisc-desc.c $(srcdir)/openrisc-opc.h $(s
 	@true
 stamp-openrisc: $(CGENDEPS) $(CPUDIR)/openrisc.cpu $(CPUDIR)/openrisc.opc
 	$(MAKE) run-cgen arch=openrisc prefix=openrisc options= extrafiles=
+
+$(srcdir)/xstormy16-desc.h $(srcdir)/xstormy16-desc.c $(srcdir)/xstormy16-opc.h $(srcdir)/xstormy16-opc.c $(srcdir)/xstormy16-ibld.c $(srcdir)/xstormy16-asm.c $(srcdir)/xstormy16-dis.c: $(XSTORMY16_DEPS)
+	@true
+stamp-xstormy16: $(CGENDEPS) $(CPUDIR)/xstormy16.cpu $(CPUDIR)/xstormy16.opc
+	$(MAKE) run-cgen arch=xstormy16 prefix=xstormy16 options= extrafiles=
 
 ia64-gen: ia64-gen.o
 	$(LINK) ia64-gen.o $(LIBIBERTY)

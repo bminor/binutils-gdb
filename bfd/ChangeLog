@@ -1,3 +1,20 @@
+2001-12-07  Geoffrey Keating  <geoffk@redhat.com>
+	    Richard Henderson  <rth@redhat.com>
+	    Corinna Vinschen  <vinschen@redhat.com>
+
+	* Makefile.am: Add support for xstormy16.
+	* archures.c: Add support for xstormy16.
+	* config.bfd: Add support for xstormy16.
+	* configure.in: Add support for xstormy16.
+	* reloc.c: Add support for xstormy16.
+	* targets.c: Add support for xstormy16.
+	* cpu-xstormy16.c: New file.
+	* elf32-xstormy16.c: New file.
+	* Makefile.in: Regenerated.
+	* bfd-in2.h: Regenerated.
+	* configure: Regenerated.
+	* libbfd.h: Regenerated.
+
 2001-12-07  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elf.c (assign_file_positions_for_segments): Combine sentance

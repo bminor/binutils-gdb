@@ -972,6 +972,10 @@ case "${targ}" in
     targ_defvec=w65_vec
     ;;
 
+  xstormy16-*-elf)
+    targ_defvec=bfd_elf32_xstormy16_vec
+    ;;
+
   z8k*-*-*)
     targ_defvec=z8kcoff_vec
     targ_underscore=yes

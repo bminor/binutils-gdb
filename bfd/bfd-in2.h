@@ -1612,6 +1612,8 @@ enum bfd_architecture
 #define bfd_mach_s390_esame    1
   bfd_arch_openrisc,  /* OpenRISC */
   bfd_arch_mmix,      /* Donald Knuth's educational processor */
+  bfd_arch_xstormy16,
+#define bfd_mach_xstormy16     0
   bfd_arch_last
   };
 
@@ -2919,6 +2921,11 @@ This is the 3 bits of a value. */
   BFD_RELOC_H8_DIR24A8,
   BFD_RELOC_H8_DIR24R8,
   BFD_RELOC_H8_DIR32A16,
+
+/* Sony Xstormy16 Relocations. */
+  BFD_RELOC_XSTORMY16_REL_12,
+  BFD_RELOC_XSTORMY16_24,
+  BFD_RELOC_XSTORMY16_FPTR16,
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *

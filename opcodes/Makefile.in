@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -142,6 +142,7 @@ HFILES = \
 	ia64-asmtab.h \
 	ia64-opc.h \
 	w65-opc.h \
+	xstormy16-desc.h xstormy16-opc.h \
 	z8k-opc.h
 
 
@@ -237,6 +238,11 @@ CFILES = \
 	v850-opc.c \
 	vax-dis.c \
 	w65-dis.c \
+	xstormy16-asm.c \
+	xstormy16-desc.c \
+	xstormy16-dis.c \
+	xstormy16-ibld.c \
+	xstormy16-opc.c \
 	z8k-dis.c \
 	z8kgen.c
 
@@ -321,6 +327,11 @@ ALL_MACHINES = \
 	v850-opc.lo \
 	vax-dis.lo \
 	w65-dis.lo \
+	xstormy16-asm.lo \
+	xstormy16-desc.lo \
+	xstormy16-dis.lo \
+	xstormy16-ibld.lo \
+	xstormy16-opc.lo \
 	z8k-dis.lo
 
 
@@ -344,6 +355,7 @@ POTFILES = $(HFILES) $(CFILES)
 
 CLEANFILES = \
 	stamp-m32r stamp-fr30 stamp-openrisc \
+	stamp-xstormy16 \
 	libopcodes.a stamp-lib dep.sed DEP DEPA DEP1 DEP2
 
 
@@ -365,6 +377,8 @@ CGENDEPS = ../cgen/stamp-cgen \
 @CGEN_MAINT_FALSE@FR30_DEPS = 
 @CGEN_MAINT_TRUE@OPENRISC_DEPS = @CGEN_MAINT_TRUE@stamp-openrisc
 @CGEN_MAINT_FALSE@OPENRISC_DEPS = 
+@CGEN_MAINT_TRUE@XSTORMY16_DEPS = @CGEN_MAINT_TRUE@stamp-xstormy16
+@CGEN_MAINT_FALSE@XSTORMY16_DEPS = 
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
@@ -558,7 +572,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" != "." || dot_seen=yes; \
+	  test "$$subdir" = "." && dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \
@@ -811,6 +825,11 @@ $(srcdir)/openrisc-desc.h $(srcdir)/openrisc-desc.c $(srcdir)/openrisc-opc.h $(s
 	@true
 stamp-openrisc: $(CGENDEPS) $(CPUDIR)/openrisc.cpu $(CPUDIR)/openrisc.opc
 	$(MAKE) run-cgen arch=openrisc prefix=openrisc options= extrafiles=
+
+$(srcdir)/xstormy16-desc.h $(srcdir)/xstormy16-desc.c $(srcdir)/xstormy16-opc.h $(srcdir)/xstormy16-opc.c $(srcdir)/xstormy16-ibld.c $(srcdir)/xstormy16-asm.c $(srcdir)/xstormy16-dis.c: $(XSTORMY16_DEPS)
+	@true
+stamp-xstormy16: $(CGENDEPS) $(CPUDIR)/xstormy16.cpu $(CPUDIR)/xstormy16.opc
+	$(MAKE) run-cgen arch=xstormy16 prefix=xstormy16 options= extrafiles=
 
 ia64-gen: ia64-gen.o
 	$(LINK) ia64-gen.o $(LIBIBERTY)

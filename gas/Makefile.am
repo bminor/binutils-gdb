@@ -78,6 +78,7 @@ CPU_TYPES = \
 	vax \
 	w65 \
 	v850 \
+	xstormy16 \
 	z8k
 
 # Object format types.  This is only used for dependency information.
@@ -263,6 +264,7 @@ TARGET_CPU_CFILES = \
 	config/tc-vax.c \
 	config/tc-w65.c \
 	config/tc-v850.c \
+	config/tc-xstormy16.c \
 	config/tc-z8k.c
 
 TARGET_CPU_HFILES = \
@@ -307,6 +309,7 @@ TARGET_CPU_HFILES = \
 	config/tc-vax.h \
 	config/tc-w65.h \
 	config/tc-v850.h \
+	config/tc-xstormy16.h \
 	config/tc-z8k.h
 
 # OBJ files in config

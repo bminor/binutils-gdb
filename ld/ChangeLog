@@ -1,3 +1,12 @@
+2001-12-07  Geoffrey Keating  <geoffk@redhat.com>
+	    Richard Henderson  <rth@redhat.com>
+
+	* Makefile.am: Add support for xstormy16.
+	* configure.tgt: Add support for xstormy16.
+	* Makefile.in: Regenerate.
+	* emulparams/elf32xstormy16.sh: New file.
+	* scripttempl/xstormy16.sc: New file.
+
 2001-12-07  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* lexsup.c (ld_options): Insert 'PROGRAM' into the text string

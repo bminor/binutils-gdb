@@ -89,6 +89,7 @@ ALL_MACHINES = \
 	cpu-vax.lo \
 	cpu-we32k.lo \
 	cpu-w65.lo \
+	cpu-xstormy16.lo \
 	cpu-z8k.lo
 
 ALL_MACHINES_CFILES = \
@@ -135,6 +136,7 @@ ALL_MACHINES_CFILES = \
 	cpu-vax.c \
 	cpu-we32k.c \
 	cpu-w65.c \
+	cpu-xstormy16.c \
 	cpu-z8k.c
 
 # The .o files needed by all of the 32 bit vectors that are configured into
@@ -217,6 +219,7 @@ BFD32_BACKENDS = \
 	elf32-sh-lin.lo \
 	elf32-sparc.lo \
 	elf32-v850.lo \
+	elf32-xstormy16.lo \
 	elf32.lo \
 	elflink.lo \
 	elf-strtab.lo \
@@ -358,6 +361,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-sh-lin.c \
 	elf32-sparc.c \
 	elf32-v850.c \
+	elf32-xstormy16.c \
 	elf32.c \
 	elflink.c \
 	elf-strtab.c \
@@ -857,6 +861,7 @@ cpu-v850.lo: cpu-v850.c $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h
 cpu-vax.lo: cpu-vax.c $(INCDIR)/filenames.h
 cpu-we32k.lo: cpu-we32k.c $(INCDIR)/filenames.h
 cpu-w65.lo: cpu-w65.c $(INCDIR)/filenames.h
+cpu-xstormy16.lo: cpu-xstormy16.c $(INCDIR)/filenames.h
 cpu-z8k.lo: cpu-z8k.c $(INCDIR)/filenames.h
 aout-adobe.lo: aout-adobe.c $(INCDIR)/filenames.h $(INCDIR)/aout/adobe.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def libaout.h \
@@ -1132,6 +1137,10 @@ elf32-v850.lo: elf32-v850.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/v850.h $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/libiberty.h elf32-target.h
+elf32-xstormy16.lo: elf32-xstormy16.c $(INCDIR)/filenames.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/xstormy16.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/reloc-macros.h \
+  elf32-target.h
 elf32.lo: elf32.c elfcode.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elfcore.h \

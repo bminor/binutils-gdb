@@ -1,3 +1,9 @@
+2001-12-07  Geoffrey Keating  <geoffk@redhat.com>
+
+	* readelf.c (guess_is_rela): Add support for stormy16.
+	(dump_relocations): Likewise.
+	(get_machine_name): Likewise.
+
 2001-12-05  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* dllwrap.c (main) Replace multiple strings describing a
