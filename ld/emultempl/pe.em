@@ -1369,24 +1369,33 @@ gld_${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
 
   string = (char *) xmalloc (strlen (search->name)
                              + strlen (filename) 
-                             + sizeof "/lib.dll"
+                             + sizeof "/lib.a.dll"
                              + 1);
 
-  /* Try "foo.dll" first.  */
-  sprintf (string, "%s/%s.dll", search->name, filename);
+  /* Try "libfoo.dll.a" first (preferred explicit import library for dll's */
+  sprintf (string, "%s/lib%s.dll.a", search->name, filename);
 
   if (! ldfile_try_open_bfd (string, entry))
     {
-      /* Try "libfoo.dll" next.  */
-      sprintf (string, "%s/lib%s.dll", search->name, filename);
-
+      /* Try "foo.dll.a" next (alternate explicit import library for dll's */
+      sprintf (string, "%s/%s.dll.a", search->name, filename);
       if (! ldfile_try_open_bfd (string, entry))
         {
-          free (string);
-          return false;
+          /* Try "libfoo.dll" (preferred dll name) */
+          sprintf (string, "%s/lib%s.dll", search->name, filename);
+          if (! ldfile_try_open_bfd (string, entry))
+            {
+              /* Finally, try "foo.dll" (alternate dll name) */
+              sprintf (string, "%s/%s.dll", search->name, filename);
+              if (! ldfile_try_open_bfd (string, entry))
+                {
+                  free (string);
+                  return false;
+                }
+            }
         }
     }
-  
+
   entry->filename = string;
 
   return true;

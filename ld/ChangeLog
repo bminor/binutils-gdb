@@ -1,3 +1,10 @@
+Wed Jul 05 03:18:00 2000 Charles Wilson <cwilson@ece.gatech.edu>
+
+	* ld/emultempl/pe.em: institute the following search order for
+	dynamic libraries on pei386: libfoo.dll.a, foo.dll.a (import
+	libs), libfoo.dll, foo.dll (link direct to dll).  Fall back to
+	static lib (libfoo.a) if none of the above are found.
+
 2000-07-07  Mumit Khan  <khan@xraylith.wisc.edu>
 
 	* ld/emultempl/pe.em (pe_enable_auto_image_base): New variable. 
