@@ -15,7 +15,7 @@
 
 Do-first:
 
-mpw_files="xm-mpw.h"
+mpw_files="xm-mpw.h tm-mac.h"
 
 if ( echo $* | grep keep\-mpw > /dev/null ) ; then
 	keep_these_too="${mpw_files}"

@@ -21,7 +21,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "fopen-bin.h"
 
+#include "spin.h"
+
 #define CANT_FORK
+
+#ifdef MPW_C
 
 /* MPW C is basically ANSI, but doesn't actually enable __STDC__,
    nor does it allow __STDC__ to be #defined. */
@@ -29,6 +33,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef ALMOST_STDC
 #define ALMOST_STDC
 #endif
+
+#endif /* MPW_C */
 
 #ifdef BFD_TRUE_FALSE
 #ifndef false
