@@ -1,3 +1,10 @@
+2001-10-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* tree.c (parse_size): Assert #size-cells > 0.
+	(parse_address): Ditto for #address-cells.
+	(parse_reg_property): Only parse the size when #size-cells is
+	non-zero.
+
 2001-10-25  Andrew Cagney  <ac131313@redhat.com>
 
 	* emul_generic.c (OEA_MEMORY_SIZE): Increase to 4mb.
