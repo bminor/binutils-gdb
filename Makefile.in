@@ -1063,7 +1063,7 @@ all-textutils:
 all-tgas: all-libiberty all-bfd
 all-time:
 all-wdiff:
-all-target-winsup: all-target-newlib 
+all-target-winsup: all-target-newlib  configure-target-winsup 
 configure-target-winsup: configure-target-newlib
 all-uudecode: all-libiberty
 configure-target-libiberty: $(ALL_GCC)

@@ -42,7 +42,7 @@ host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 # these libraries are built for the target environment, and are built after
 # the host libraries and the host tools (which may be a cross compiler)
 #
-target_libs="target-libiberty target-libgloss target-newlib target-libio target-librx target-libstdc++ target-libg++"
+target_libs="target-libiberty target-libgloss target-newlib target-libio target-librx target-libstdc++ target-libg++ target-winsup"
 
 
 # these tools are built using the target libs, and are intended to run only
@@ -413,7 +413,7 @@ case "${target}" in
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
     # and winsup
-    configdirs="$configdirs winsup" 
+    configdirs="$configdirs target-winsup" 
     ;;    
   i[345]86-*-pe)
     noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx"
