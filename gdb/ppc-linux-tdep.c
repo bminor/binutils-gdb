@@ -860,7 +860,7 @@ ppc_linux_supply_gregset (struct regcache *regcache,
   struct gdbarch_tdep *regcache_tdep = gdbarch_tdep (regcache_arch);
   const bfd_byte *buf = gregs;
 
-  for (regi = 0; regi < 32; regi++)
+  for (regi = 0; regi < ppc_num_gprs; regi++)
     right_supply_register (regcache, wordsize,
                            regcache_tdep->ppc_gp0_regnum + regi,
                            buf + wordsize * regi);
@@ -934,7 +934,7 @@ ppc_linux_sigtramp_cache (struct frame_info *next_frame, void **this_cache)
   fpregs = gpregs + 48 * tdep->wordsize;
 
   /* General purpose.  */
-  for (i = 0; i < 32; i++)
+  for (i = 0; i < ppc_num_gprs; i++)
     {
       int regnum = i + tdep->ppc_gp0_regnum;
       cache->saved_regs[regnum].addr = gpregs + i * tdep->wordsize;

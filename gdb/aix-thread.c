@@ -338,9 +338,9 @@ pdc_read_regs (pthdb_user_t user,
    this is needed, I have implemented what I think it should do,
    however this code is untested.  */
 
-  uint64_t gprs64[32];
-  uint32_t gprs32[32];
-  double fprs[32];
+  uint64_t gprs64[ppc_num_gprs];
+  uint32_t gprs32[ppc_num_gprs];
+  double fprs[ppc_num_fprs];
   struct ptxsprs sprs64;
   struct ptsprs sprs32;
   
@@ -1004,7 +1004,7 @@ supply_gprs64 (uint64_t *vals)
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int regno;
 
-  for (regno = 0; regno < 32; regno++)
+  for (regno = 0; regno < ppc_num_gprs; regno++)
     supply_register (tdep->ppc_gp0_regnum + regno, (char *) (vals + regno));
 }
 
@@ -1028,7 +1028,7 @@ supply_fprs (double *vals)
      floating-point registers.  */
   gdb_assert (ppc_floating_point_p (current_gdbarch));
 
-  for (regno = 0; regno < 32; regno++)
+  for (regno = 0; regno < ppc_num_fprs; regno++)
     supply_register (regno + tdep->ppc_fp0_regnum, (char *) (vals + regno));
 }
 
@@ -1116,7 +1116,7 @@ fetch_regs_user_thread (pthdb_pthread_t pdtid)
   if (arch64)
     supply_gprs64 (ctx.gpr);
   else
-    for (i = 0; i < 32; i++)
+    for (i = 0; i < ppc_num_gprs; i++)
       supply_reg32 (tdep->ppc_gp0_regnum + i, ctx.gpr[i]);
 
   /* Floating-point registers.  */
@@ -1153,9 +1153,9 @@ static void
 fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  uint64_t gprs64[32];
-  uint32_t gprs32[32];
-  double fprs[32];
+  uint64_t gprs64[ppc_num_gprs];
+  uint32_t gprs32[ppc_num_gprs];
+  double fprs[ppc_num_fprs];
   struct ptxsprs sprs64;
   struct ptsprs sprs32;
   int i;
@@ -1181,7 +1181,7 @@ fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
 	{
 	  if (!ptrace32 (PTT_READ_GPRS, tid, gprs32, 0, NULL))
 	    memset (gprs32, 0, sizeof (gprs32));
-	  for (i = 0; i < 32; i++)
+	  for (i = 0; i < ppc_num_gprs; i++)
 	    supply_reg32 (tdep->ppc_gp0_regnum + i, gprs32[i]);
 	}
     }
@@ -1391,7 +1391,7 @@ store_regs_user_thread (pthdb_pthread_t pdtid)
 
   /* Collect general-purpose register values from the regcache.  */
 
-  for (i = 0; i < 32; i++)
+  for (i = 0; i < ppc_num_gprs; i++)
     if (register_cached (tdep->ppc_gp0_regnum + i))
       {
 	if (arch64)
@@ -1461,9 +1461,9 @@ static void
 store_regs_kernel_thread (int regno, pthdb_tid_t tid)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  uint64_t gprs64[32];
-  uint32_t gprs32[32];
-  double fprs[32];
+  uint64_t gprs64[ppc_num_gprs];
+  uint32_t gprs32[ppc_num_gprs];
+  double fprs[ppc_num_fprs];
   struct ptxsprs sprs64;
   struct ptsprs  sprs32;
   int i;

@@ -586,12 +586,12 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 
   if (ARCH64 ())
     {
-      for (regi = 0; regi < 32; regi++)
+      for (regi = 0; regi < ppc_num_gprs; regi++)
         supply_register (tdep->ppc_gp0_regnum + regi,
                          (char *) &regs->r64.gpr[regi]);
 
       if (tdep->ppc_fp0_regnum >= 0)
-        for (regi = 0; regi < 32; regi++)
+        for (regi = 0; regi < ppc_num_fprs; regi++)
           supply_register (tdep->ppc_fp0_regnum + regi,
                            (char *) &regs->r64.fpr[regi]);
 
@@ -606,12 +606,12 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
     }
   else
     {
-      for (regi = 0; regi < 32; regi++)
+      for (regi = 0; regi < ppc_num_gprs; regi++)
         supply_register (tdep->ppc_gp0_regnum + regi,
                          (char *) &regs->r32.gpr[regi]);
 
       if (tdep->ppc_fp0_regnum >= 0)
-        for (regi = 0; regi < 32; regi++)
+        for (regi = 0; regi < ppc_num_fprs; regi++)
           supply_register (tdep->ppc_fp0_regnum + regi,
                            (char *) &regs->r32.fpr[regi]);
 

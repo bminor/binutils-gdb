@@ -590,7 +590,7 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
   /* Start with zeros.  */
   memset (regp, 0, elf_ngreg * sizeof (*regp));
 
-  for (regi = 0; regi < 32; regi++)
+  for (regi = 0; regi < ppc_num_gprs; regi++)
     {
       if ((regno == -1) || regno == tdep->ppc_gp0_regnum + regi)
 	right_fill_reg (tdep->ppc_gp0_regnum + regi, (regp + PT_R0 + regi));

@@ -186,7 +186,7 @@ ppc_supply_gregset (const struct regset *regset, struct regcache *regcache,
   int i;
 
   for (i = tdep->ppc_gp0_regnum, offset = offsets->r0_offset;
-       i < tdep->ppc_gp0_regnum + 32;
+       i < tdep->ppc_gp0_regnum + ppc_num_gprs;
        i++, offset += 4)
     {
       if (regnum == -1 || regnum == i)
@@ -262,7 +262,7 @@ ppc_collect_gregset (const struct regset *regset,
 
   offset = offsets->r0_offset;
   for (i = tdep->ppc_gp0_regnum;
-       i < tdep->ppc_gp0_regnum + 32;
+       i < tdep->ppc_gp0_regnum + ppc_num_gprs;
        i++, offset += 4)
     {
       if (regnum == -1 || regnum == i)
@@ -2477,7 +2477,7 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
          then that's strange.  But we have no indices to even record
          the addresses under, so we just ignore it.  */
       if (ppc_floating_point_unit_p (gdbarch))
-        for (i = fdata.saved_fpr; i < 32; i++)
+        for (i = fdata.saved_fpr; i < ppc_num_fprs; i++)
           {
             cache->saved_regs[tdep->ppc_fp0_regnum + i].addr = fpr_addr;
             fpr_addr += 8;
@@ -2491,7 +2491,7 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
     {
       int i;
       CORE_ADDR gpr_addr = cache->base + fdata.gpr_offset;
-      for (i = fdata.saved_gpr; i < 32; i++)
+      for (i = fdata.saved_gpr; i < ppc_num_gprs; i++)
 	{
 	  cache->saved_regs[tdep->ppc_gp0_regnum + i].addr = gpr_addr;
 	  gpr_addr += wordsize;
@@ -2522,7 +2522,7 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
 	{
 	  int i;
 	  CORE_ADDR ev_addr = cache->base + fdata.ev_offset;
-	  for (i = fdata.saved_ev; i < 32; i++)
+	  for (i = fdata.saved_ev; i < ppc_num_gprs; i++)
 	    {
 	      cache->saved_regs[tdep->ppc_ev0_regnum + i].addr = ev_addr;
               cache->saved_regs[tdep->ppc_gp0_regnum + i].addr = ev_addr + 4;

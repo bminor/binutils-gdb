@@ -6,6 +6,19 @@
 
 2004-05-13  Jim Blandy  <jimb@redhat.com>
 
+	* aix-thread.c (pdc_read_regs, supply_gprs64, supply_fprs)
+	(fetch_regs_user_thread, fetch_regs_kernel_thread)
+	(store_regs_user_thread, store_regs_kernel_thread): Use
+	ppc_num_gprs and ppc_num_fprs instead of '32' and '31'.
+	* ppc-linux-nat.c (fill_gregset): Same.
+	* ppc-linux-tdep.c (ppc_linux_supply_gregset) 
+	(ppc_linux_sigtramp_cache): Same.
+	* ppcnbsd-tdep.c (ppcnbsd_supply_reg, ppcnbsd_fill_reg) 
+	(ppcnbsd_sigtramp_cache_init): Same.
+	* rs6000-nat.c (fetch_core_registers): Same.
+	* rs6000-tdep.c (ppc_supply_gregset, ppc_collect_gregset) 
+	(rs6000_frame_cache): Same.
+
 	* aix-thread.c (supply_gprs64, fetch_regs_user_thread)
 	(store_regs_user_thread): Use tdep->ppc_gp0_regnum, instead
 	of assuming that the gprs are numbered starting with zero.

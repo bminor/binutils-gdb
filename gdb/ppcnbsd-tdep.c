@@ -55,7 +55,7 @@ ppcnbsd_supply_reg (char *regs, int regno)
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int i;
 
-  for (i = 0; i <= 31; i++)
+  for (i = 0; i < ppc_num_gprs; i++)
     {
       if (regno == tdep->ppc_gp0_regnum + i || regno == -1)
 	supply_register (tdep->ppc_gp0_regnum + i,
@@ -84,7 +84,7 @@ ppcnbsd_fill_reg (char *regs, int regno)
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int i;
 
-  for (i = 0; i <= 31; i++)
+  for (i = 0; i < ppc_num_gprs; i++)
     {
       if (regno == tdep->ppc_gp0_regnum + i || regno == -1)
 	regcache_collect (tdep->ppc_gp0_regnum + i,
@@ -266,7 +266,7 @@ ppcnbsd_sigtramp_cache_init (const struct tramp_frame *self,
 
   base = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
   offset = base + 0x18 + 2 * tdep->wordsize;
-  for (i = 0; i < 32; i++)
+  for (i = 0; i < ppc_num_gprs; i++)
     {
       int regnum = i + tdep->ppc_gp0_regnum;
       trad_frame_set_reg_addr (this_cache, regnum, offset);
