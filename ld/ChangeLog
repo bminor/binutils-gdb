@@ -1,3 +1,8 @@
+2003-06-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* emulparams/elf64ppc.sh (EXECUTABLE_SYMBOLS, OTHER_BSS_END_SYMBOLS,
+	CTOR_START, CTOR_END, DTOR_START, DTOR_END): Don't define.
+
 2003-06-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc64elf.em (emit_stub_syms, toc_section): New vars.
