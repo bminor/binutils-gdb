@@ -1109,8 +1109,6 @@ evax_get_symbol_info (abfd, symbol, ret)
     ret->type = 'A';
   else if (bfd_is_und_section (sec))
     ret->type = 'U';
-  else if (bfd_is_abs_section (sec))
-    ret->type = 'A';
   else if (bfd_is_ind_section (sec))
     ret->type = 'I';
   else if (bfd_get_section_flags (abfd, sec) & SEC_CODE)

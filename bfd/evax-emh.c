@@ -159,7 +159,7 @@ get_vms_time_string ()
   } Descriptor;
   Descriptor.Size = 17;
   Descriptor.Ptr = tbuf;
-  sys$asctim (0, &Descriptor, 0, 0);
+  SYS$ASCTIM (0, &Descriptor, 0, 0);
 #endif /* not VMS */
 
 #if EVAX_DEBUG
@@ -273,7 +273,7 @@ _bfd_evax_write_emh (abfd)
 	      continue;
 	    }
 
-	  _bfd_evax_output_dump (abfd, (char *)symbol->name, strlen (symbol->name));
+	  _bfd_evax_output_dump (abfd, (unsigned char *)symbol->name, strlen (symbol->name));
 	  if (had_case)
 	    break;
 	  had_file = 1;
@@ -281,7 +281,7 @@ _bfd_evax_write_emh (abfd)
     }
 
   if (symnum == abfd->symcount)
-    _bfd_evax_output_dump (abfd, "noname", 6);
+    _bfd_evax_output_dump (abfd, (unsigned char *)"noname", 6);
 
   _bfd_evax_output_flush (abfd);
 

@@ -1,6 +1,30 @@
 Mon Oct 20 15:01:27 1997  Klaus K"ampf  <kkaempf@progis.de>
 
-	* evax-egsd.c: make section flags dec c compatible
+	* evax-egsd.c: Weak symbols are global.
+
+	* evax-emh.c: Use proper casts.
+
+	* evax-egsd.c (_bfd_evax_write_egsd): Remove unneeded uname.
+
+	* evax-egsd.c: Section names and symbols have different
+	length restrictions. Add length parameter to
+	_bfd_evax_length_hash_symbol.
+	* evax-etir.c: Likewise.
+	* evax-misc.c (_bfd_evax_length_hash_symbol): Add length
+	parameter.
+	* evax.h (EOBJ_S_C_SECSIZ): Define.
+
+	* evax-alpha.c: Remove duplicate test.
+
+	* evax-emh.c: SYS$ functions are upper-case.
+
+	* evax-egsd.c: Create separate sections for common symbols.
+	* evax-etir.c: Don't output common section.
+	* evax.h: Bump up section count.
+
+	* configure.com: Use 64bit integers with DEC C.
+
+	* evax-egsd.c: Make section flags dec c compatible.
 
 Mon Oct 20 09:38:31 1997  Jeffrey A Law  (law@cygnus.com)
 

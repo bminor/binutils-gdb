@@ -402,7 +402,6 @@ _bfd_evax_write_egsd (abfd)
   char dummy_name[10];
   char *sname;
   flagword new_flags, old_flags;
-  char uname[200];
   char *nptr, *uptr;
 
 #if EVAX_DEBUG
@@ -481,12 +480,20 @@ _bfd_evax_write_egsd (abfd)
 	  else if ((*sname == 'l') && (strcmp (sname, "lcomm") == 0))
 	    sname = EVAX_LOCAL_NAME;
 	}
+      else
+	sname = _bfd_evax_length_hash_symbol (abfd, sname, EOBJ_S_C_SECSIZ);
 
       _bfd_evax_output_begin (abfd, EGSD_S_C_PSC, -1);
       _bfd_evax_output_short (abfd, section->alignment_power & 0xff);
-      _bfd_evax_output_short (abfd,
-			      evax_esecflag_by_name (sname,
-						     section->_raw_size));
+      if (bfd_is_com_section (section))
+	{
+	  new_flags = (EGPS_S_V_OVR|EGPS_S_V_REL|EGPS_S_V_GBL|EGPS_S_V_RD|EGPS_S_V_WRT|EGPS_S_V_NOMOD|EGPS_S_V_COM);
+	}
+      else
+	{
+	  new_flags = evax_esecflag_by_name (sname, section->_raw_size);
+	}
+      _bfd_evax_output_short (abfd, new_flags);
       _bfd_evax_output_long (abfd, section->_raw_size);
       _bfd_evax_output_counted (abfd, sname);
       _bfd_evax_output_flush (abfd);
@@ -514,15 +521,10 @@ _bfd_evax_write_egsd (abfd)
 	}
       old_flags = symbol->flags;
 
-      if ((*(symbol->section->name+1) == 'c')
-	 && (strcmp (symbol->section->name+1, "comm") == 0)
-	 && (strcmp (symbol->name, ".comm") != 0))
-	old_flags |= BSF_GLOBAL;
-
       if (old_flags & BSF_FILE)
 	continue;
 
-      if (((old_flags & BSF_GLOBAL) == 0)		/* not xdef */
+      if (((old_flags & (BSF_GLOBAL|BSF_WEAK)) == 0)	/* not xdef */
 	  && (!bfd_is_und_section (symbol->section)))	/* and not xref */
 	continue;					/* dont output */
 
@@ -542,14 +544,18 @@ _bfd_evax_write_egsd (abfd)
       _bfd_evax_output_short (abfd, 0);			/* data type, alignment */
 
       new_flags = 0;
+
       if (old_flags & BSF_WEAK)
 	new_flags |= EGSY_S_V_WEAK;
+      if (bfd_is_com_section (symbol->section))		/* .comm  */
+	new_flags |= (EGSY_S_V_WEAK|EGSY_S_V_COMM);
+
       if (old_flags & BSF_FUNCTION)
 	{
 	  new_flags |= EGSY_S_V_NORM;
 	  new_flags |= EGSY_S_V_REL;
 	}
-      if (old_flags & BSF_GLOBAL)
+      if (old_flags & (BSF_GLOBAL|BSF_WEAK))
 	{
 	  new_flags |= EGSY_S_V_DEF;
 	  if (!bfd_is_abs_section (symbol->section))
@@ -557,7 +563,7 @@ _bfd_evax_write_egsd (abfd)
 	}
       _bfd_evax_output_short (abfd, new_flags);
 
-      if (old_flags & BSF_GLOBAL)			/* symbol definition */
+      if (old_flags & (BSF_GLOBAL|BSF_WEAK))		/* symbol definition */
 	{
 	  if (old_flags & BSF_FUNCTION)
 	    {
@@ -574,10 +580,10 @@ _bfd_evax_write_egsd (abfd)
 	      _bfd_evax_output_quad (abfd, symbol->value);	/* L_VALUE */
 	      _bfd_evax_output_quad (abfd, 0);			/* L_CODE_ADDRESS */
 	      _bfd_evax_output_long (abfd, 0);			/* L_CA_PSINDX */
-	      _bfd_evax_output_long (abfd, symbol->section->index);/* L_PSINDX, FIXME */
+	      _bfd_evax_output_long (abfd, symbol->section->index);/* L_PSINDX */
 	    }
 	}
-      _bfd_evax_output_counted (abfd, _bfd_evax_length_hash_symbol (abfd, symbol->name));
+      _bfd_evax_output_counted (abfd, _bfd_evax_length_hash_symbol (abfd, symbol->name, EOBJ_S_C_SYMSIZ));
 
       _bfd_evax_output_flush (abfd);
 
