@@ -20,8 +20,6 @@
 
 #include <signal.h>
 #include "sysdep.h"
-//#include <sys/times.h>
-//#include <sys/param.h>				 
 #include "bfd.h"
 #include "remote-sim.h"
 #include <sys/syscall.h>

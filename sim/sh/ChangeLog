@@ -1,3 +1,7 @@
+Thu Jun 22 17:25:57 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* interp.c: Don't include sys/times.h or sys/param.h
+
 Wed Jun 21 15:03:49 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	*  interp.c: (SIGBUS, SIGTERM): Define if not.
