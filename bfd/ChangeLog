@@ -1,5 +1,23 @@
 Thu Sep 28 11:19:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* sunos.c (sunos_add_one_symbol): Don't change
+	bfd_link_hash_common to bfd_link_hash_new, since it may be on the
+	undef list.
+	(bfd_sunos_record_link_assignment): Don't put __DYNAMIC in the
+	dynamic symbols when creating a shared library.
+	(sunos_scan_ext_relocs): Handle relocs correctly when creating a
+	shared library.
+	(sunos_scan_dynamic_symbol): Don't mark the __DYNAMIC symbol as
+	written even if it is not defined in a regular object.
+	(sunos_write_dynamic_symbol): Use plt_offset for the address of
+	the jump table reloc.  Add an assertion.  Use RELOC_JMP_SLOT
+	rather than the constant 22.
+	(sunos_check_dynamic_reloc): Handle creating a shared library.
+	(sunos_finish_dynamic_link): Set the first entry in the GOT to
+	zero when creating a shared library.
+	* aoutx.h (NAME(aout,final_link)): If there is a symbol __DYNAMIC,
+	write it out at the start of the symbol table.
+
 	* Makefile.in (BFD32_BACKENDS): Add coff-arm.o.
 
 Thu Sep 28 00:58:05 1995  Doug Evans  <dje@deneb.cygnus.com>
