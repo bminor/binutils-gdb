@@ -18,21 +18,7 @@ void vu0_issue(void);
 
 #define VU0_REGISTER_WINDOW_START 0x10000c00
 
-#define VU0_VF00		0x10000c00
-/* ... */
-#define VU0_VF31		0x10000df0
-
-#define VU0_VI00		0x10000e00
-/* ... */
-#define VU0_VI15		0x10000ef0
-
-/* ... */
-
 #define VPE0_STAT		0x10000fd0
 #define VU0_CIA			0x10000fe0
-
-#define VU0_REGISTER_WINDOW_END   0x10000ff0
-
-#define VU0_REGISTER_WINDOW_SIZE (VU0_REGISTER_WINDOW_END - VU0_REGISTER_WINDOW_START)
 
 #endif

@@ -27,10 +27,6 @@ void init_vu(VectorUnitState *state,
 	     char* mem_buffer, unsigned mem_qw_size);
 
 #if 0
-int vu1_busy(void) {
-    if (vu1_state.runState == VU_READY) { return 0; } else { return 1; }
-}
-
 static void dump_mem() {
     int i;
     typedef int T[2048][4];  
@@ -51,108 +47,44 @@ vu1_issue(void)
 
 static int
 vu1_io_read_register_window(device *me,
-                   void *dest,
-                   int space,
-                   address_word addr,
-                   unsigned nr_bytes,
-                   sim_cpu *processor,
-                   sim_cia cia)
+			    void *dest,
+			    int space,
+			    address_word addr,
+			    unsigned nr_bytes,
+			    sim_cpu *processor,
+			    sim_cia cia)
 {
-	/* Slow and crappy hack ... */
+  if (addr < VU1_REGISTER_WINDOW_START)
+    return 0;
 
-	
-	int i;
+  addr -= VU1_REGISTER_WINDOW_START;
 
-	char source_buffer[VU1_REGISTER_WINDOW_SIZE];
-	char* src;
+  /* Adjust nr_bytes if too big */
+  if ((addr + nr_bytes) > VU_REG_END)
+    nr_bytes -= addr + nr_bytes - VU_REG_END;
 
-	assert(nr_bytes == 1 || nr_bytes == 2 || nr_bytes == 4 || nr_bytes == 8 || nr_bytes == 16);
-
-	memcpy(source_buffer, &vu1_state.regs.VF[0][0], 0x200);	/* copy VF registers */	
-	for (i = 0; i<16; i++ ) {
-	    *(short*)&source_buffer[0x200 + i*16] = vu1_state.regs.VI[i];
-	}
-	*(u_long*)&source_buffer[VU1_MST   - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MST;
-	*(u_long*)&source_buffer[VU1_MMC   - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MMC;
-	*(u_long*)&source_buffer[VU1_MCP   - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MCP;
-	*(u_long*)&source_buffer[VU1_MR    - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MR;
-	*(u_long*)&source_buffer[VU1_MI    - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MI;
-	*(u_long*)&source_buffer[VU1_MQ    - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MQ;
-	*(u_long*)&source_buffer[VU1_MP    - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MP;
-	*(u_long*)&source_buffer[VU1_MTPC  - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MTPC;
-
-	{
-	    u_long stat;
-	    stat = 0;
-	    if (vu1_state.runState == VU_RUN || vu1_state.runState == VU_BREAK)
-		SET_BIT(stat, VPU_STAT_VBS1_BIT);
-	    
-	    *(u_long*)&source_buffer[VPE1_STAT - VU1_REGISTER_WINDOW_START] = H2T_4(stat);
-	}
-
-	*(u_long*)&source_buffer[VU1_CIA  - VU1_REGISTER_WINDOW_START] = H2T_4(vu1_state.junk._vpepc);
-	/* XXX: other H2T_N's needed around here. */
-
-#if 0
-	printf("%s: Read: %x, %d, dest: %x, space: %d, %x!\n", me->name, (int)addr, nr_bytes, (int)dest, space, *(int*)&(vu1_state.regs.VPE_STAT));
-	printf("	vu1_state.regs.VPE_STAT = %x\n", *(int*)&(vu1_state.regs.VPE_STAT));
-#endif
-
-	if (addr + nr_bytes > VU1_REGISTER_WINDOW_END) {
-	    fprintf(stderr, "Error: Read past end of vu1 register window!!!\n");
-	    exit(1);
-	}
-
-	src = &source_buffer[0] + (addr - VU1_REGISTER_WINDOW_START);
-	memcpy(dest, src, nr_bytes);
-	return nr_bytes;
+  return read_vu_registers (&vu1_state, addr, nr_bytes, dest);
 }
 
 static int
 vu1_io_write_register_window(device *me,
-                    const void *source,
-                    int space,
-                    address_word addr,
-                    unsigned nr_bytes,
-                    sim_cpu *processor,
-                    sim_cia cia)
+			     const void *source,
+			     int space,
+			     address_word addr,
+			     unsigned nr_bytes,
+			     sim_cpu *processor,
+			     sim_cia cia)
 {
-	char *dest;
+  if (addr < VU1_REGISTER_WINDOW_START)
+    return 0;
 
-	assert(nr_bytes == 4);
+  addr -= VU1_REGISTER_WINDOW_START;
 
-	if (addr == VPE1_STAT) {
-	    /* Do nothing, read only register. */
-	    sim_warning("vu1: Write to read/only register at address %lx.\n", (u_long)addr);
-	    return nr_bytes;
-	} else if (addr == VU1_MST) {
-	    /* Magic switch to set _TOP register */
-	    vu1_state.junk._TOP = T2H_4(*(int*)source); 	
-	    return nr_bytes;
-        } else if (addr == VU1_CIA) {
-	    vu1_state.junk.pc = vu1_state.junk._vpepc = T2H_4(*(int*)source);
-	    vu1_state.runState = VU_RUN;
-	    vu1_state.junk.eflag = 0;
-	    vu1_state.junk.peflag = 0;
-	    return nr_bytes;
-	}
+  /* Adjust nr_bytes if too big */
+  if ((addr + nr_bytes) > VU_REG_END)
+    nr_bytes -= addr + nr_bytes - VU_REG_END;
 
-	/* Everything else does nothing... */
-	sim_warning("vu1: Write to unimplemented control register at address %lx.\n", (u_long)addr);
-	return nr_bytes;
-
-	/*printf("%s: Write: %x, %d, source: %x, space: %d!\n", me->name, (int)addr, nr_bytes, (int)source, space);*/
-
-	if (addr + nr_bytes > VU1_REGISTER_WINDOW_END) {
-	    fprintf(stderr, "Error: Read past end of vu1 register window!!!\n");
-	    exit(1);
-	}
-
-	dest = ((char*) (&vu1_state.regs)) + (addr - VU1_REGISTER_WINDOW_START);
-
-	memcpy(dest, source, nr_bytes);
-
-	return nr_bytes;
+  return write_vu_registers (&vu1_state, addr, nr_bytes, source);
 }
 
 device vu1_device = 
@@ -172,7 +104,7 @@ vu1_init(SIM_DESC sd)
                    access_read_write,
                    0 /*space ???*/,
                    VU1_REGISTER_WINDOW_START,
-                   VU1_REGISTER_WINDOW_SIZE /*nr_bytes*/,
+                   VU_REG_END /*nr_bytes*/,
                    0 /*modulo*/,
                    &vu1_device,
                    NULL /*buffer*/);

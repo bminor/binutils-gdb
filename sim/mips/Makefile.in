@@ -17,6 +17,7 @@ SIM_SKY_OBJS = \
 	sky-hardware.o \
 	sky-libvpe.o \
 	sky-pke.o \
+	sky-vu.o \
 	sky-vu0.o \
 	sky-vu1.o \
 	sky-gdb.o
@@ -46,6 +47,7 @@ SIM_M16_OBJ = \
 	m16run.o \
 
 MIPS_EXTRA_OBJS = @mips_extra_objs@
+MIPS_EXTRA_LIBS = @mips_extra_libs@
 
 SIM_OBJS = \
 	$(SIM_@sim_gen@_OBJ) \
@@ -76,6 +78,8 @@ SIM_EXTRA_CFLAGS = \
 SIM_EXTRA_CLEAN = clean-extra
 
 SIM_EXTRA_ALL = $(SIM_@sim_gen@_ALL)
+
+SIM_EXTRA_LIBS = $(MIPS_EXTRA_LIBS)
 
 # List of main object files for `run'.
 SIM_RUN_OBJS = nrun.o
@@ -127,6 +131,9 @@ IGEN_INCLUDE=\
 	$(srcdir)/vr5400.igen \
 	$(srcdir)/mdmx.igen \
 	$(end-sanitize-vr5400) \
+	$(start-sanitize-vr4320) \
+	$(srcdir)/vr4320.igen \
+	$(end-sanitize-vr4320) \
 	$(srcdir)/m16.igen
 
 SIM_IGEN_ALL = tmp-igen

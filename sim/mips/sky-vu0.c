@@ -5,7 +5,10 @@
 #include "sim-main.h"
 
 #include "sky-device.h"
+#include "sky-vu.h"
 #include "sky-vu0.h"
+
+VectorUnitState vu0_state;
 
 /* these are aligned versions of zalloc() pointers - do not zfree()! */
 static char* vu0_mem0_buffer = 0;
@@ -26,8 +29,16 @@ vu0_io_read_buffer(device *me,
                       sim_cpu *processor,
                       sim_cia cia)
 {
-	printf("%s: Read!\n", me->name);
-	return nr_bytes;
+  if (addr < VU0_REGISTER_WINDOW_START)
+    return 0;
+
+  addr -= VU0_REGISTER_WINDOW_START;
+
+  /* Adjust nr_bytes if too big */
+  if ((addr + nr_bytes) > VU_REG_END)
+    nr_bytes -= addr + nr_bytes - VU_REG_END;
+
+  return read_vu_registers (&vu0_state, addr, nr_bytes, dest);
 }
 
 static int
@@ -39,8 +50,16 @@ vu0_io_write_buffer(device *me,
                     sim_cpu *processor,
                     sim_cia cia)
 {
-	printf("%s: Write!\n", me->name);
-	return nr_bytes;
+  if (addr < VU0_REGISTER_WINDOW_START)
+    return 0;
+
+  addr -= VU0_REGISTER_WINDOW_START;
+
+  /* Adjust nr_bytes if too big */
+  if ((addr + nr_bytes) > VU_REG_END)
+    nr_bytes -= addr + nr_bytes - VU_REG_END;
+
+  return write_vu_registers (&vu0_state, addr, nr_bytes, source);
 }
 
 device vu0_device = 
@@ -59,7 +78,7 @@ vu0_attach(SIM_DESC sd)
                    access_read_write,
                    0 /*space ???*/,
                    VU0_REGISTER_WINDOW_START,
-                   VU0_REGISTER_WINDOW_SIZE /*nr_bytes*/,
+                   VU_REG_END /*nr_bytes*/,
                    0 /*modulo*/,
                    &vu0_device,
                    NULL /*buffer*/);

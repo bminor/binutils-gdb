@@ -66,6 +66,12 @@ code on the hardware.
 
 #include "sysdep.h"
 
+/* start-sanitize-sky */
+#ifdef TARGET_SKY
+#include "sky-vu.h"
+#endif
+/* end-sanitize-sky */
+
 #ifndef PARAMS
 #define PARAMS(x) 
 #endif
@@ -666,10 +672,7 @@ sim_store_register (sd,rn,memory,length)
       rn = rn - NUM_R5900_REGS;
 
       if (rn < NUM_VU_INTEGER_REGS)
-	{
-	  vu_regs[0].i[rn] = T2H_2( *(unsigned short *) memory );
-	  size = 2;
-	}
+	size = write_vu_int_reg (&(vu0_state.regs), rn, memory);
       else if( rn < NUM_VU_REGS )
 	vu_regs[0].f[rn - NUM_VU_INTEGER_REGS] 
 	  = T2H_4( *(unsigned int *) memory );
@@ -677,10 +680,7 @@ sim_store_register (sd,rn,memory,length)
 	rn = rn - NUM_VU_REGS;
 
 	if( rn < NUM_VU_INTEGER_REGS ) 
-	  {
-	    vu_regs[1].i[rn] = T2H_2( *(unsigned short *) memory );
-	    size = 2;
-	  }
+	  size = write_vu_int_reg (&(vu1_state.regs), rn, memory);
 	else if( rn < NUM_VU_REGS )
 	  vu_regs[1].f[rn - NUM_VU_INTEGER_REGS] 
 	    = T2H_4( *(unsigned int *) memory );
@@ -768,10 +768,7 @@ sim_fetch_register (sd,rn,memory,length)
       rn = rn - NUM_R5900_REGS;
 
       if (rn < NUM_VU_INTEGER_REGS)
-	{
-	  *((unsigned short *) memory) = H2T_2( vu_regs[0].i[rn] );
-	  size = 2;
-	}
+	size = read_vu_int_reg (&(vu0_state.regs), rn, memory);
       else if (rn < NUM_VU_REGS)
 	*((unsigned int *) memory) 
 	  = H2T_4( vu_regs[0].f[rn - NUM_VU_INTEGER_REGS] );
@@ -780,10 +777,7 @@ sim_fetch_register (sd,rn,memory,length)
 	  rn = rn - NUM_VU_REGS;
 	
 	  if (rn < NUM_VU_INTEGER_REGS) 
-	    {
-	      (*(unsigned short *) memory) = H2T_2( vu_regs[1].i[rn] );
-	      size = 2;
-	    }
+	    size = read_vu_int_reg (&(vu1_state.regs), rn, memory);
 	  else if (rn < NUM_VU_REGS)
 	    (*(unsigned int *) memory) 
 	      = H2T_4( vu_regs[1].f[rn - NUM_VU_INTEGER_REGS] );

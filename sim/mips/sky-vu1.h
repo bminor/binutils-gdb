@@ -20,30 +20,8 @@ int vu1_busy(void);
 
 #define VU1_REGISTER_WINDOW_START 0x11007000
 
-#define VU1_VF00		0x11007000
-/* ... */
-#define VU1_VF31		0x110071f0
-
-#define VU1_VI00		0x11007200
-/* ... */
-#define VU1_VI15		0x110072f0
-
-#define VU1_MST			0x11007300
-#define VU1_MMC			0x11007310
-#define VU1_MCP			0x11007320
-#define VU1_MR			0x11007330
-#define VU1_MI			0x11007340
-#define VU1_MQ			0x11007350
-#define VU1_MP			0x11007360
-#define VU1_MTPC		0x110073a0
-#define VPE1_STAT		0x110073d0
-
+/* FIX ME: These should be derived from enum in sky-vu.h */
 #define VPU_STAT		0x110073d0
-
 #define VU1_CIA			0x110073e0
-
-#define VU1_REGISTER_WINDOW_END   0x110073f0
-
-#define VU1_REGISTER_WINDOW_SIZE (VU1_REGISTER_WINDOW_END - VU1_REGISTER_WINDOW_START)
 
 #endif
