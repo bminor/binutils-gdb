@@ -1,3 +1,7 @@
+2001-10-29  Kazu Hirata  <kazu@hxi.com>
+
+	* bfdsumm.texi: Fix a typo.
+
 2001-10-26  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* bfd.texinfo: Change footer to refer to FSF.  Change subtitle
