@@ -240,9 +240,11 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
  [ -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC ]
  [ -b ] [ -no-relax ]
 @end ifset
+@c start-sanitize-m32rx
 @ifset M32R
  [ --m32rx ]
 @end ifset
+@c start-sanitize-m32rx
 @ifset M680X0
  [ -l ] [ -m68000 | -m68010 | -m68020 | ... ]
 @end ifset
@@ -426,6 +428,7 @@ error if necessary.
 @end table
 @end ifset
 
+@c start-sanitize-m32rx
 @ifset M32R
 The following options are available when @value{AS} is configured for the
 Mitsubishi M32R series.
@@ -438,6 +441,7 @@ is normally the M32R, but this option changes it to the M32RX.
 
 @end table
 @end ifset
+@c end-sanitize-m32rx
 
 @ifset M680X0
 The following options are available when @value{AS} is configured for the
