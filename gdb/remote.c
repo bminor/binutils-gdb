@@ -1542,6 +1542,18 @@ remote_send (buf)
     error ("Remote failure reply: %s", buf);
 }
 
+/* Display a null-terminated packet on stdout, for debugging, using C
+   string notation.  */
+static void
+print_packet (char *buf)
+{
+  puts_filtered ("\"");
+  while (*buf)
+    gdb_printchar (*buf++, gdb_stdout, '"');
+  puts_filtered ("\"");
+}
+
+
 /* Send a packet to the remote machine, with error checking.
    The data of the packet is in BUF.  */
 
@@ -2022,6 +2034,8 @@ open_remote_target (name, from_tty, target, extended_p)
   remote_open_1 (name, from_tty, target, extended_p);
 }
 
+
+
 /* Table used by the crc32 function to calcuate the checksum. */
 static unsigned long crc32_table[256] = {0, 0};
 
@@ -2053,15 +2067,8 @@ crc32 (buf, len, crc)
   return crc;
 }
 
-/* compare-sections command
-
-   With no arguments, compares each loadable section in the exec bfd
-   with the same memory range on the target, and reports mismatches.
-   Useful for verifying the image on the target against the exec file.
-   Depends on the target understanding the new "qCRC:" request.  */
-
 static void
-remote_compare_command (args, from_tty)
+compare_sections_command (args, from_tty)
      char *args;
      int from_tty;
 {
@@ -2073,6 +2080,7 @@ remote_compare_command (args, from_tty)
   bfd_size_type size;
   bfd_vma lma;
   int matched = 0;
+  int mismatched = 0;
 
   if (!exec_bfd)
     error ("command cannot be used without an exec file");
@@ -2120,12 +2128,45 @@ remote_compare_command (args, from_tty)
       if (host_crc == target_crc)
 	printf_filtered ("matched.\n");
       else
+       {
 	printf_filtered ("MIS-MATCHED!\n");
+        mismatched++;
+       }
 
       do_cleanups (old_chain);
     }
+  if (mismatched > 0)
+     warning ("One or more sections of the remote executable does not match\nthe loaded file\n");
   if (args && !matched)
     printf_filtered ("No loaded section named '%s'.\n", args);
+}
+
+
+static void
+packet_command (args, from_tty)
+     char *args;
+     int from_tty;
+
+
+{
+  char buf[PBUFSIZ];
+
+  if (!current_target.to_shortname ||
+      strcmp (current_target.to_shortname, "remote") != 0)
+    error ("command can only be used with remote target");
+
+  if (! args)
+    error ("remote-packet command requires packet text as argument");
+
+  puts_filtered ("sending: ");
+  print_packet (args);
+  puts_filtered ("\n");
+  putpkt (args);
+
+  getpkt (buf, 0);
+  puts_filtered ("received: ");
+  print_packet (buf);
+  puts_filtered ("\n");
 }
 
 void
@@ -2136,10 +2177,20 @@ _initialize_remote ()
   add_target (&remote_ops);
   add_target (&extended_remote_ops);
 
-  add_cmd ("compare-sections", class_obscure, remote_compare_command, 
-	   "Compare section data on remote target to the exec file.\n\
-Optional argument is a single section name (default: all loadable sections).", 
+  add_cmd ("compare-sections", class_obscure, compare_sections_command, 
+	   "Compare section data on target to the exec file.\n\
+Argument is a single section name (default: all loaded sections).", 
 	   &cmdlist);
+
+  add_cmd ("packet", class_maintenance, packet_command,
+	   "Send an arbitrary packet to a remote target.\n\
+   maintenance packet TEXT\n\
+If GDB is talking to an inferior via the GDB serial protocol, then\n\
+this command sends the string TEXT to the inferior, and displays the\n\
+response packet.  GDB supplies the initial `$' character, and the\n\
+terminating `#' character and checksum.  This command was originally\n\
+provided for use by the gdb.emc test suite.",
+	   &maintenancelist);
 
   add_show_from_set (add_set_cmd ("remotetimeout", no_class,
 				  var_integer, (char *)&remote_timeout,
@@ -2156,3 +2207,16 @@ Optional argument is a single section name (default: all loadable sections).",
 				  "Set the maximum number of bytes in each memory write packet.\n", &setlist),
 		     &showlist);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,3 +1,17 @@
+Thu Jun  4 10:15:03 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* remote.c: merged.
+
+        - Jim Blandy  <jimb@zwingli.cygnus.com>
+	(print_packet, remote_packet_command): New functions.
+        (_initialize_remote): Register the remote-packet command.
+        - David Taylor  <taylor@texas.cygnus.com> 
+        (_initialize_remote): remote-compare is now
+        compare-sections.
+        - Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+         (remote_compare_command): added warning, issued in case
+        of mismatch only.
+
 Thu Jun  4 08:25:38 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* remote.c (remote_compare_command): New function, new command.
