@@ -56,9 +56,9 @@ tic54x_putl32 (data, addr)
      register bfd_byte *addr;
 {
   addr[2] = (bfd_byte)data;
-  addr[3] = (bfd_byte)(data >>  8);
-  addr[0] = (bfd_byte)(data >> 16);
-  addr[1] = (bfd_byte)(data >> 24);
+  addr[3] = (bfd_byte) (data >>  8);
+  addr[0] = (bfd_byte) (data >> 16);
+  addr[1] = (bfd_byte) (data >> 24);
 }
 
 bfd_signed_vma

@@ -223,7 +223,7 @@ extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
     case R_H8500_IMM24:
       {
 	int v = bfd_coff_reloc16_get_value(reloc, link_info, input_section);
-	int o = bfd_get_32(in_abfd, data+ *dst_ptr -1);
+	int o = bfd_get_32 (in_abfd, data+ *dst_ptr -1);
 	v = (v & 0x00ffffff) | (o & 0xff00000);
 	bfd_put_32 (in_abfd, v, data  + *dst_ptr -1);
 	(*dst_ptr) +=3;

@@ -85,7 +85,7 @@ extern void dump_toc PARAMS ((PTR));
 #define HASH_CHECK(addr) \
  if (strcmp(addr->eye_catcher, EYE) != 0) \
   { \
-    fprintf(stderr,\
+    fprintf (stderr,\
     _("File %s, line %d, Hash check failure, bad eye %8s\n"), \
     __FILE__, __LINE__, addr->eye_catcher); \
     abort (); \
@@ -781,13 +781,13 @@ static reloc_howto_type ppc_coff_howto_table[] =
    if (i == 0)                                               \
      {                                                       \
        i = 1;                                                \
-       fprintf(stderr,_("Unimplemented Relocation -- %s\n"),x); \
+       fprintf (stderr,_("Unimplemented Relocation -- %s\n"),x); \
      }                                                       \
 }
 
 #define DUMP_RELOC(n,r)                              \
 {                                                    \
-   fprintf(stderr,"%s sym %d, addr %d, addend %d\n", \
+   fprintf (stderr,"%s sym %d, addr %d, addend %d\n", \
 	   n, (*(r->sym_ptr_ptr))->name,             \
 	   r->address, r->addend);                   \
 }
@@ -803,7 +803,7 @@ static reloc_howto_type ppc_coff_howto_table[] =
 
 #define DUMP_RELOC2(n,r)                     \
 {                                            \
-   fprintf(stderr,"%s sym %d, r_vaddr %d %s\n", \
+   fprintf (stderr,"%s sym %d, r_vaddr %d %s\n", \
 	   n, r->r_symndx, r->r_vaddr,\
 	   (((r->r_type) & IMAGE_REL_PPC_TOCDEFN) == 0) \
 	   ?" ":" TOCDEFN"  );      \
@@ -1258,7 +1258,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 			       priv,
 			       strdup(name));
 
-		    bfd_put_32(output_bfd,
+		    bfd_put_32 (output_bfd,
 			       val,
 			       toc_section->contents + our_toc_offset);
 
@@ -1318,7 +1318,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		    record_toc(toc_section, our_toc_offset, pub, strdup(name));
 
 		    /* write out the toc entry */
-		    bfd_put_32(output_bfd,
+		    bfd_put_32 (output_bfd,
 			       val,
 			       toc_section->contents + our_toc_offset);
 
@@ -1383,8 +1383,8 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		my_name = h->root.root.root.string;
 		if (h->symbol_is_glue == 1)
 		  {
-		    x = bfd_get_32(input_bfd, loc);
-		    bfd_put_32(input_bfd, h->glue_insn, loc);
+		    x = bfd_get_32 (input_bfd, loc);
+		    bfd_put_32 (input_bfd, h->glue_insn, loc);
 		  }
 	      }
 	  }
@@ -1410,13 +1410,13 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		my_name = h->root.root.root.string;
 	      }
 
-	    fprintf(stderr,
+	    fprintf (stderr,
 		    _("Warning: unsupported reloc %s <file %s, section %s>\n"),
 		    howto->name,
 		    bfd_get_filename(input_bfd),
 		    input_section->name);
 
-	    fprintf(stderr,"sym %ld (%s), r_vaddr %ld (%lx)\n",
+	    fprintf (stderr,"sym %ld (%s), r_vaddr %ld (%lx)\n",
 		    rel->r_symndx, my_name, (long) rel->r_vaddr,
 		    (unsigned long) rel->r_vaddr);
 	  }
@@ -1649,11 +1649,11 @@ dump_toc (vfile)
   FILE *file = (FILE *) vfile;
   struct list_ele *t;
 
-  fprintf(file, _(h1));
-  fprintf(file, _(h2));
-  fprintf(file, _(h3));
+  fprintf (file, _(h1));
+  fprintf (file, _(h2));
+  fprintf (file, _(h3));
 
-  for(t = head; t != 0; t=t->next)
+  for (t = head; t != 0; t=t->next)
     {
       const char *cat = "";
 
@@ -1670,22 +1670,22 @@ dump_toc (vfile)
 	    cat = _("IAT reference ");
 	  else
 	    {
-	      fprintf(file,
+	      fprintf (file,
 		      _("**** global_toc_size %ld(%lx), thunk_size %ld(%lx)\n"),
 		      global_toc_size, global_toc_size, thunk_size, thunk_size);
 	      cat = _("Out of bounds!");
 	    }
 	}
 
-      fprintf(file,
+      fprintf (file,
 	      " %04lx    (%d)", (unsigned long) t->offset, t->offset - 32768);
-      fprintf(file,
+      fprintf (file,
 	      "    %s %s\n",
 	      cat, t->name);
 
     }
 
-  fprintf(file, "\n");
+  fprintf (file, "\n");
 }
 
 boolean
@@ -2067,7 +2067,7 @@ ppc_coff_rtype2howto (relent, internal)
 	howto = ppc_coff_howto_table + IMAGE_REL_PPC_TOCREL16;
       break;
     default:
-      fprintf(stderr,
+      fprintf (stderr,
 	      _("Warning: Unsupported reloc %s [%d] used -- it may not work.\n"),
 	      ppc_coff_howto_table[r_type].name,
 	      r_type);
@@ -2142,7 +2142,7 @@ coff_ppc_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
       howto = ppc_coff_howto_table + r_type;
       break;
     default:
-      fprintf(stderr,
+      fprintf (stderr,
 	      _("Warning: Unsupported reloc %s [%d] used -- it may not work.\n"),
 	      ppc_coff_howto_table[r_type].name,
 	      r_type);

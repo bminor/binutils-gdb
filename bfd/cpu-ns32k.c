@@ -174,8 +174,8 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
      asection *input_section;
      bfd *output_bfd;
      char **error_message ATTRIBUTE_UNUSED;
-     long (*get_data)();
-     int (*put_data)();
+     long (*get_data) ();
+     int (*put_data) ();
 {
   int overflow = 0;
   bfd_vma relocation;
@@ -596,8 +596,8 @@ _bfd_do_ns32k_reloc_contents ( howto, input_bfd, relocation, location,
      bfd *input_bfd ATTRIBUTE_UNUSED;
      bfd_vma relocation;
      bfd_byte *location;
-     long (*get_data)();
-     int (*put_data)();
+     long (*get_data) ();
+     int (*put_data) ();
 {
   int size;
   bfd_vma x;

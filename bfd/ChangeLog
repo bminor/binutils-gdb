@@ -1,6 +1,17 @@
 2000-11-21  Kazu Hirata  <kazu@hxi.com>
 
-	* ecoff.c: Fix formatting.
+	* coff-a29k.c: Fix formatting.
+	* coff-h8500.c: Likewise.
+	* coff-i960.c: Likewise.
+	* coff-ppc.c: Likewise.
+	* coff-rs6000.c: Likewise.
+	* coff-stgo32.c: Likewise.
+	* coff-tic54x.c: Likewise.
+	* coff-w65.c: Likewise.
+	* cpu-h8500.c: Likewise.
+	* cpu-hppa.c: Likewise.
+	* cpu-ns32k.c: Likewise.
+	* ecoff.c: Likewise.
 	* ecofflink.c: Likewise.
 
 2000-11-21  Nick Clifton  <nickc@redhat.com>

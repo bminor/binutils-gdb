@@ -40,13 +40,13 @@ howto16_callback (abfd, reloc_entry, symbol_in, data,
 {
   long relocation = 0;
   bfd_vma addr = reloc_entry->address;
-  long x = bfd_get_16(abfd, (bfd_byte *)data + addr);
+  long x = bfd_get_16 (abfd, (bfd_byte *)data + addr);
 
   HOWTO_PREPARE(relocation, symbol_in);
 
   x = (x + relocation + reloc_entry->addend);
 
-  bfd_put_16(abfd, x, (bfd_byte *)data + addr);
+  bfd_put_16 (abfd, x, (bfd_byte *)data + addr);
   return bfd_reloc_ok;
 }
 
@@ -62,13 +62,13 @@ howto8_callback (abfd, reloc_entry, symbol_in, data,
 {
   long relocation = 0;
   bfd_vma addr = reloc_entry->address;
-  long x = bfd_get_8(abfd, (bfd_byte *)data + addr);
+  long x = bfd_get_8 (abfd, (bfd_byte *)data + addr);
 
   HOWTO_PREPARE(relocation, symbol_in);
 
   x = (x + relocation + reloc_entry->addend);
 
-  bfd_put_8(abfd, x, (bfd_byte *)data + addr);
+  bfd_put_8 (abfd, x, (bfd_byte *)data + addr);
   return bfd_reloc_ok;
 }
 
@@ -85,13 +85,13 @@ howto8_FFnn_callback (abfd, reloc_entry, symbol_in, data,
   long relocation = 0;
   bfd_vma addr = reloc_entry->address;
 
-  long x = bfd_get_8(abfd, (bfd_byte *)data + addr);
+  long x = bfd_get_8 (abfd, (bfd_byte *)data + addr);
   abort ();
   HOWTO_PREPARE(relocation, symbol_in);
 
   x = (x + relocation + reloc_entry->addend);
 
-  bfd_put_8(abfd, x, (bfd_byte *)data + addr);
+  bfd_put_8 (abfd, x, (bfd_byte *)data + addr);
   return bfd_reloc_ok;
 }
 
@@ -107,13 +107,13 @@ howto8_pcrel_callback (abfd, reloc_entry, symbol_in, data,
 {
   long relocation = 0;
   bfd_vma addr = reloc_entry->address;
-  long x = bfd_get_8(abfd, (bfd_byte *)data + addr);
+  long x = bfd_get_8 (abfd, (bfd_byte *)data + addr);
   abort ();
   HOWTO_PREPARE(relocation, symbol_in);
 
   x = (x + relocation + reloc_entry->addend);
 
-  bfd_put_8(abfd, x, (bfd_byte *)data + addr);
+  bfd_put_8 (abfd, x, (bfd_byte *)data + addr);
   return bfd_reloc_ok;
 }
 

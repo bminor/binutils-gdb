@@ -146,7 +146,7 @@ optcall_callback (abfd, reloc_entry, symbol_in, data,
 	   to the correct location.  */
 	{
 	  union internal_auxent *aux = &((cs->native+2)->u.auxent);
-	  int word = bfd_get_32(abfd, (bfd_byte *)data + reloc_entry->address);
+	  int word = bfd_get_32 (abfd, (bfd_byte *)data + reloc_entry->address);
 	  int olf = (aux->x_bal.x_balntry - cs->native->u.syment.n_value);
 	  BFD_ASSERT(cs->native->u.syment.n_numaux==2);
 
@@ -156,7 +156,7 @@ optcall_callback (abfd, reloc_entry, symbol_in, data,
 	     sym and auxents untouched, so the delta between the two
 	     is the offset of the bal entry point.  */
 	  word = ((word +  olf)  & BAL_MASK) | BAL;
-  	  bfd_put_32(abfd, word, (bfd_byte *) data + reloc_entry->address);
+  	  bfd_put_32 (abfd, word, (bfd_byte *) data + reloc_entry->address);
   	}
 	result = bfd_reloc_ok;
 	break;

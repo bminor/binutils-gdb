@@ -140,7 +140,7 @@ _bfd_xcoff_swap_sym_in (abfd, ext1, in1)
   SYMENT *ext = (SYMENT *)ext1;
   struct internal_syment      *in = (struct internal_syment *)in1;
 
-  if(ext->e.e_name[0] != 0)
+  if (ext->e.e_name[0] != 0)
     {
       memcpy(in->_n._n_name, ext->e.e_name, SYMNMLEN);
     }
@@ -167,7 +167,7 @@ _bfd_xcoff_swap_sym_out (abfd, inp, extp)
   struct internal_syment *in = (struct internal_syment *)inp;
   SYMENT *ext =(SYMENT *)extp;
 
-  if(in->_n._n_name[0] != 0)
+  if (in->_n._n_name[0] != 0)
     {
       memcpy(ext->e.e_name, in->_n._n_name, SYMNMLEN);
     }

@@ -93,7 +93,7 @@ a29k_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
   long signed_value;
 
   unsigned long addr = reloc_entry->address ; /*+ input_section->vma*/
-  bfd_byte  *hit_data =addr + (bfd_byte *)(data);
+  bfd_byte  *hit_data =addr + (bfd_byte *) (data);
 
   r_type = reloc_entry->howto->type;
 
@@ -128,7 +128,7 @@ a29k_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
   switch (r_type)
   {
    case R_IREL:
-    insn = bfd_get_32(abfd, hit_data);
+    insn = bfd_get_32 (abfd, hit_data);
     /* Take the value in the field and sign extend it */
     signed_value = EXTRACT_HWORD(insn);
     signed_value = SIGN_EXTEND_HWORD(signed_value);
@@ -156,17 +156,17 @@ a29k_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
     }
     signed_value >>= 2;
     insn = INSERT_HWORD(insn, signed_value);
-    bfd_put_32(abfd, insn ,hit_data);
+    bfd_put_32 (abfd, insn ,hit_data);
     break;
    case R_ILOHALF:
-    insn = bfd_get_32(abfd, hit_data);
+    insn = bfd_get_32 (abfd, hit_data);
     unsigned_value = EXTRACT_HWORD(insn);
     unsigned_value +=  sym_value + reloc_entry->addend;
     insn = INSERT_HWORD(insn, unsigned_value);
-    bfd_put_32(abfd, insn, hit_data);
+    bfd_put_32 (abfd, insn, hit_data);
     break;
    case R_IHIHALF:
-    insn = bfd_get_32(abfd, hit_data);
+    insn = bfd_get_32 (abfd, hit_data);
     /* consth, part 1
        Just get the symbol value that is referenced */
     part1_consth_active = true;
@@ -174,7 +174,7 @@ a29k_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
     /* Don't modify insn until R_IHCONST */
     break;
    case R_IHCONST:
-    insn = bfd_get_32(abfd, hit_data);
+    insn = bfd_get_32 (abfd, hit_data);
     /* consth, part 2
        Now relocate the reference */
     if (part1_consth_active == false) {
@@ -188,26 +188,26 @@ a29k_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
     unsigned_value = unsigned_value >> 16;
     insn = INSERT_HWORD(insn, unsigned_value);
     part1_consth_active = false;
-    bfd_put_32(abfd, insn, hit_data);
+    bfd_put_32 (abfd, insn, hit_data);
     break;
    case R_BYTE:
-    insn = bfd_get_8(abfd, hit_data);
+    insn = bfd_get_8 (abfd, hit_data);
     unsigned_value = insn + sym_value + reloc_entry->addend;
     if (unsigned_value & 0xffffff00)
       return(bfd_reloc_overflow);
-    bfd_put_8(abfd, unsigned_value, hit_data);
+    bfd_put_8 (abfd, unsigned_value, hit_data);
     break;
    case R_HWORD:
-    insn = bfd_get_16(abfd, hit_data);
+    insn = bfd_get_16 (abfd, hit_data);
     unsigned_value = insn + sym_value + reloc_entry->addend;
     if (unsigned_value & 0xffff0000)
       return(bfd_reloc_overflow);
-    bfd_put_16(abfd, insn, hit_data);
+    bfd_put_16 (abfd, insn, hit_data);
     break;
    case R_WORD:
-    insn = bfd_get_32(abfd, hit_data);
+    insn = bfd_get_32 (abfd, hit_data);
     insn += sym_value + reloc_entry->addend;
-    bfd_put_32(abfd, insn, hit_data);
+    bfd_put_32 (abfd, insn, hit_data);
     break;
    default:
     *error_message = _("Unrecognized reloc");

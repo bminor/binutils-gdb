@@ -366,7 +366,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
       }
       break;
     default:
-      printf(_("ignoring reloc %s\n"), reloc->howto->name);
+      printf (_("ignoring reloc %s\n"), reloc->howto->name);
       break;
 
     }
