@@ -1,3 +1,10 @@
+Mon Nov 27 13:44:15 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config-ml.in: Get list of multidirs using gcc --print-multi-lib
+	rather than basing it on the target.  Simplify handling of options
+	controlling which directories to configure.  Remove extraneous
+	slash in multi-clean target.
+
 Fri Nov 24 17:29:29 1995  Doug Evans  <dje@deneb.cygnus.com>
 
 	* config-ml.in: Prefix more variables with ml_ so they don't collide
