@@ -1,4 +1,4 @@
-2002-06-11  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+2002-06-11  Andreas Jaeger  <aj@suse.de>
 
 	* ld-undefined/undefined.exp: Add s390x to dwarf2 xfails.
 
