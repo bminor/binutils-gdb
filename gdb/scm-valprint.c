@@ -290,8 +290,9 @@ taloop:
 	      {
 		result
 		  = scm_apply (hook,
-			scm_listify (exp, port, (writing ? BOOL_T : BOOL_F),
-				     SCM_UNDEFINED),
+			       scm_listify (exp, port, 
+					    (writing ? BOOL_T : BOOL_F),
+					    SCM_UNDEFINED),
 			       EOL);
 		if (result == BOOL_F)
 		  goto punk;
@@ -338,7 +339,9 @@ taloop:
 	  break;
 	case tc7_port:
 	  i = PTOBNUM (exp);
-	  if (i < scm_numptob && scm_ptobs[i].print && (scm_ptobs[i].print) (exp, port, writing))
+	  if (i < scm_numptob 
+	      && scm_ptobs[i].print 
+	      && (scm_ptobs[i].print) (exp, port, writing))
 	    break;
 	  goto punk;
 	case tc7_smob:

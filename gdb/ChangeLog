@@ -20,6 +20,7 @@
 
 2005-01-13  Michael Snyder  <msnyder@redhat.com>
 
+	* scm-valprint.c: Whitespace tweaks.
 	* rs6000-tdep.c: Whitespace tweaks.
 	* rs6000-nat.c: Whitespace tweaks.
 	* remote.c: Whitespace tweaks.
