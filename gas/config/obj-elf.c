@@ -1742,21 +1742,6 @@ elf_frob_symbol (symp, puntp)
       && S_IS_DEFINED (symp))
     symbol_get_bfdsym (symp)->flags |= BSF_OBJECT;
 #endif
-
-  if (symbol_section_p (symp))
-    {
-      asection *symsec = S_GET_SEGMENT (symp);
-
-      if ((bfd_get_section_flags (stdoutput, symsec) & SEC_LINK_ONCE) != 0
-	  || strncmp (segment_name (symsec), ".gnu.linkonce",
-		      sizeof ".gnu.linkonce" - 1) == 0)
-	{
-	  /* Make section syms global on ELF linkonce sections.
-	     This way, any reference to the section symbol will
-	     resolve to the section that actually stays in.  */
-	  S_SET_EXTERNAL (symp);
-	}
-    }
 }
 
 void

@@ -1,5 +1,7 @@
 2000-10-11  Alan Modra  <alan@linuxcare.com.au>
 
+	* elf.c (swap_out_syms): Revert 2000-10-07 changes.
+
 	* ieee.c (ieee_make_empty_symbol): Oops, bfd_zalloc needs another arg.
 
 2000-10-10  Alan Modra  <alan@linuxcare.com.au>

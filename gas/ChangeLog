@@ -1,3 +1,7 @@
+2000-10-11  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/obj-elf.c (elf_frob_symbol): Revert 2000-10-07 change.
+
 2000-10-07  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-hppa.c (md_apply_fix): Remove plainly wrong assert.
