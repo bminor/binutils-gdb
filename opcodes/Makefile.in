@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -467,7 +467,7 @@ acinclude.m4 aclocal.m4 config.in configure configure.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = libopcodes.a.c $(libopcodes_la_SOURCES)
 OBJECTS = libopcodes.a.$(OBJEXT) $(libopcodes_la_OBJECTS)
@@ -616,7 +616,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" != "." || dot_seen=yes; \
+	  test "$$subdir" = "." && dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \
@@ -905,8 +905,14 @@ stamp-fr30: $(CGENDEPS) $(CPUDIR)/fr30.cpu $(CPUDIR)/fr30.opc
 
 $(srcdir)/frv-desc.h $(srcdir)/frv-desc.c $(srcdir)/frv-opc.h $(srcdir)/frv-opc.c $(srcdir)/frv-ibld.c $(srcdir)/frv-asm.c $(srcdir)/frv-dis.c: $(FRV_DEPS)
 	@true
-stamp-frv: $(CGENDEPS) $(CPUDIR)/frv.cpu $(CPUDIR)/frv.opc
+# .cpu and .opc files for frv are kept in a different directory, but cgen has no switch to specify that location, so
+# copy those file to the regular place.
+stamp-frv: $(CGENDEPS) $(srcdir)/../cpu/frv.cpu $(srcdir)/../cpu/frv.opc
+	cp -fp $(srcdir)/../cpu/frv.cpu $(CPUDIR)/frv.cpu
+	cp -fp $(srcdir)/../cpu/frv.opc $(CPUDIR)/frv.opc
 	$(MAKE) run-cgen arch=frv prefix=frv options= extrafiles=
+	rm -f $(CPUDIR)/frv.cpu
+	rm -f $(CPUDIR)/frv.opc
 
 $(srcdir)/openrisc-desc.h $(srcdir)/openrisc-desc.c $(srcdir)/openrisc-opc.h $(srcdir)/openrisc-opc.c $(srcdir)/openrisc-ibld.c $(srcdir)/openrisc-asm.c $(srcdir)/openrisc-dis.c: $(OPENRISC_DEPS)
 	@true

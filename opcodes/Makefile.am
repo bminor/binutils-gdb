@@ -409,8 +409,14 @@ stamp-fr30: $(CGENDEPS) $(CPUDIR)/fr30.cpu $(CPUDIR)/fr30.opc
 
 $(srcdir)/frv-desc.h $(srcdir)/frv-desc.c $(srcdir)/frv-opc.h $(srcdir)/frv-opc.c $(srcdir)/frv-ibld.c $(srcdir)/frv-asm.c $(srcdir)/frv-dis.c: $(FRV_DEPS)
 	@true
-stamp-frv: $(CGENDEPS) $(CPUDIR)/frv.cpu $(CPUDIR)/frv.opc
+# .cpu and .opc files for frv are kept in a different directory, but cgen has no switch to specify that location, so
+# copy those file to the regular place.
+stamp-frv: $(CGENDEPS) $(srcdir)/../cpu/frv.cpu $(srcdir)/../cpu/frv.opc
+	cp -fp $(srcdir)/../cpu/frv.cpu $(CPUDIR)/frv.cpu
+	cp -fp $(srcdir)/../cpu/frv.opc $(CPUDIR)/frv.opc
 	$(MAKE) run-cgen arch=frv prefix=frv options= extrafiles=
+	rm -f $(CPUDIR)/frv.cpu
+	rm -f $(CPUDIR)/frv.opc
 
 $(srcdir)/openrisc-desc.h $(srcdir)/openrisc-desc.c $(srcdir)/openrisc-opc.h $(srcdir)/openrisc-opc.c $(srcdir)/openrisc-ibld.c $(srcdir)/openrisc-asm.c $(srcdir)/openrisc-dis.c: $(OPENRISC_DEPS)
 	@true

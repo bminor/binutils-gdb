@@ -1,3 +1,9 @@
+2003-08-29  Dave Brolley  <brolley@redhat.com>
+
+	* Makefile.am (stamp-frv): Copy frv.cpu and frv.opc from
+	$(srcdir)/../cpu temporarily when regenerating source files.
+	* Makefile.in: Regenerated.
+
 2003-08-19  Nick Clifton  <nickc@redhat.com>
 
 	* arm-dis.c (print_insn_arm: case 'A'): Add code to
