@@ -39,6 +39,8 @@ enum reloc_type
     RELOC_11,
     RELOC_WDISP2_14,
     RELOC_WDISP19,
+    RELOC_HHI22,
+    RELOC_HLO10,
     
     /* 29K relocation types */
     RELOC_JUMPTARG, RELOC_CONST,     RELOC_CONSTH,

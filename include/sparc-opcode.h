@@ -905,8 +905,8 @@ static const struct sparc_opcode sparc_opcodes[] = {
 { "mulx",	F3(2, 0x09, 1), F3(~2, ~0x09, ~1),		"1,i,d", 0, v9 },
 { "umulxcc",	F3(2, 0x19, 0), F3(~2, ~0x19, ~0)|ASI(~0),	"1,2,d", 0, v9 },
 { "umulxcc",	F3(2, 0x19, 1), F3(~2, ~0x19, ~1),		"1,i,d", 0, v9 },
-{ "sdivx",	F3(2, 0x1d, 0), F3(~2, ~0x1d, ~0)|ASI(~0),	"1,2,d", 0, v9 },
-{ "sdivx",	F3(2, 0x1d, 1), F3(~2, ~0x1d, ~1),		"1,i,d", 0, v9 },
+{ "sdivxcc",	F3(2, 0x1d, 0), F3(~2, ~0x1d, ~0)|ASI(~0),	"1,2,d", 0, v9 },
+{ "sdivxcc",	F3(2, 0x1d, 1), F3(~2, ~0x1d, ~1),		"1,i,d", 0, v9 },
 { "udivx",	F3(2, 0x0d, 0), F3(~2, ~0x0d, ~0)|ASI(~0),	"1,2,d", 0, v9 },
 { "udivx",	F3(2, 0x0d, 1), F3(~2, ~0x0d, ~1),		"1,i,d", 0, v9 },
 
