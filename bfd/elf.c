@@ -1359,7 +1359,8 @@ _bfd_elf_link_hash_copy_indirect (const struct elf_backend_data *bed,
 				    | ELF_LINK_HASH_REF_REGULAR
 				    | ELF_LINK_HASH_REF_REGULAR_NONWEAK
 				    | ELF_LINK_NON_GOT_REF
-				    | ELF_LINK_HASH_NEEDS_PLT));
+				    | ELF_LINK_HASH_NEEDS_PLT
+				    | ELF_LINK_POINTER_EQUALITY_NEEDED));
 
   if (ind->root.type != bfd_link_hash_indirect)
     return;

@@ -771,7 +771,8 @@ elf_i386_copy_indirect_symbol (const struct elf_backend_data *bed,
       (ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
 				   | ELF_LINK_HASH_REF_REGULAR
 				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK
-				   | ELF_LINK_HASH_NEEDS_PLT));
+				   | ELF_LINK_HASH_NEEDS_PLT
+				   | ELF_LINK_POINTER_EQUALITY_NEEDED));
   else
     _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
@@ -1001,6 +1002,8 @@ elf_i386_check_relocs (bfd *abfd,
 	      /* We may need a .plt entry if the function this reloc
 		 refers to is in a shared lib.  */
 	      h->plt.refcount += 1;
+	      if (r_type != R_386_PC32)
+		h->elf_link_hash_flags |= ELF_LINK_POINTER_EQUALITY_NEEDED;
 	    }
 
 	  /* If we are creating a shared library, and this is a reloc
@@ -3004,11 +3007,16 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
 	  /* Mark the symbol as undefined, rather than as defined in
-	     the .plt section.  Leave the value alone.  This is a clue
+	     the .plt section.  Leave the value if there were any
+	     relocations where pointer equality matters (this is a clue
 	     for the dynamic linker, to make function pointer
 	     comparisons work between an application and shared
-	     library.  */
+	     library), otherwise set it to zero.  If a function is only
+	     called from a binary, there is no need to slow down
+	     shared libraries because of that.  */
 	  sym->st_shndx = SHN_UNDEF;
+	  if ((h->elf_link_hash_flags & ELF_LINK_POINTER_EQUALITY_NEEDED) == 0)
+	    sym->st_value = 0;
 	}
     }
 

@@ -200,6 +200,9 @@ struct elf_link_hash_entry
 #define ELF_LINK_DYNAMIC_DEF 020000
   /* Symbol is weak in all shared objects.  */
 #define ELF_LINK_DYNAMIC_WEAK 040000
+  /* Symbol is referenced with a relocation where C/C++ pointer equality
+     matters.  */
+#define ELF_LINK_POINTER_EQUALITY_NEEDED 0100000
 };
 
 /* Will references to this symbol always reference the symbol

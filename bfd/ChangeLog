@@ -1,3 +1,12 @@
+2003-11-22  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf-bfd.h (ELF_LINK_POINTER_EQUALITY_NEEDED): Define new flag.
+	* elf.c (_bfd_elf_link_hash_copy_indirect): Copy it.
+	* elf32-i386.c (elf_i386_copy_indirect_symbol): Likewise.
+	(elf_i386_check_relocs): Set it.
+	(elf_i386_finish_dynamic_symbol): If it is not set,
+	clear st_value of SHN_UNDEF symbol.
+
 2003-11-20  Jim Blandy  <jimb@redhat.com>
 
 	* cpu-powerpc.c (powerpc_compatible): Any ISA in the PowerPC
