@@ -1,4 +1,4 @@
-cat >ld__${EMULATION_NAME}.c <<EOF
+cat >em_${EMULATION_NAME}.c <<EOF
 /* Copyright (C) 1991 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.

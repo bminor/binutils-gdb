@@ -186,9 +186,9 @@ BFDLIB=$(unsubdir)/../bfd$(subdir)/libbfd.a
 LIBIBERTY=$(unsubdir)/../libiberty$(subdir)/libiberty.a
 
 OFILES= ldgram.o ldlex.o ldlang.o ldctor.o ldmain.o ldindr.o \
-	ldwarn.o ldwrite.o ldexp.o ldlnk960.o ld__gld68k.o ld__i386aout.o \
-	ld__m88k.o ld__glda29k.o ld__news.o h8300hms.o ld__ebmon29k.o \
-	ld__gld.o ldgld960.o ldemul.o ldver.o ldmisc.o ldsym.o \
+	ldwarn.o ldwrite.o ldexp.o ldlnk960.o em_gld68k.o em_i386aout.o \
+	em_m88k.o em_glda29k.o em_news.o h8300hms.o em_ebmon29k.o \
+	em_gld.o ldgld960.o ldemul.o ldver.o ldmisc.o ldsym.o \
 	ldvanilla.o ldfile.o \
 	relax.o ../bfd/seclet.o lderror.o
 
@@ -199,11 +199,11 @@ HEADERS=config.h ldmain.h ldmain.h ldwarn.h ldmisc.h ldindr.h \
 MANSOURCES=ld.tex
 
 LDCSOURCES=ldlang.c ldctor.c ldindr.c ldmain.c ldwrite.c ldwarn.c ldlnk960.c \
-	ld__gld.c ld__gld68k.c ld__m88k.c ld__ebmon29k.c \
+	em_gld.c em_gld68k.c em_m88k.c em_ebmon29k.c \
 	ldgld960.c ldemul.c ldver.c ldmisc.c ldexp.c ldsym.c ldfile.c \
 	ldvanilla.c relax.c ../bfd/seclet.c lderror.c
 
-GENERATED_SOURCES=ldgram.c ldlex.c ldgram.h ld__*.c
+GENERATED_SOURCES=ldgram.c ldlex.c ldgram.h em_*.c
 GENERATED_HEADERS=ldgram.h
 
 LDSOURCES=$(LDCSOURCES) ldgram.y ldlex.l ldgram.h
@@ -225,46 +225,46 @@ ldgram.h ldgram.c: ldgram.y
 ldlex.c: ldlex.l
 	lex -t $(VPATH)/ldlex.l >ldlex.c 
 
-# These all start with ld__ so 'make clean' can find them.
+# These all start with em_ so 'make clean' can find them.
 
-ld__gld.c: $(srcdir)/ldtemplate
+em_gld.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldgld/g -e s/"<arch>"/m68k/g \
 	-e s/"<target>"//g -e s/"<TARGET>"//g <$(srcdir)/ldtemplate >$@
-ld__news.c: $(srcdir)/ldtemplate
+em_news.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/news/g -e s/"<arch>"/m68k/g \
 	-e s/"<target>"/news/g -e s/"<TARGET>"/NEWS/g <$(srcdir)/ldtemplate >$@
 
-ld__i386aout.c: $(srcdir)/ldtemplate
+em_i386aout.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/i386aout/g -e s/"<arch>"/i386/g \
 	-e s/"<target>"/i386aout/g -e s/"<TARGET>"/I386AOUT/g <$(srcdir)/ldtemplate >$@
  
 
-ld__ebmon29k.c: $(srcdir)/ldtemplate
+em_ebmon29k.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ebmon29k/g -e s/"<arch>"/a29k/g \
 	-e s/"gld<target>"/ebmon29k/g -e s/"GLD<TARGET>"/EBMON29K/g \
 	-e s/"<ldtarget>.x"/ebmon.x/ <$(srcdir)/ldtemplate >$@
 
-ld__gld68k.c: $(srcdir)/ldtemplate
+em_gld68k.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldgld68k/g -e s/"<arch>"/m68k/g \
 	-e s/"<target>"/68k/g -e s/"<TARGET>"/68K/g <$(srcdir)/ldtemplate >$@
-ld__glda29k.c: $(srcdir)/ldtemplate
+em_glda29k.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldglda29k/g -e s/"<arch>"/a29k/g \
 	-e s/"<target>"/29k/g -e s/"<TARGET>"/29K/g <$(srcdir)/ldtemplate >$@
-ld__m88k.c: $(srcdir)/ldtemplate
+em_m88k.c: $(srcdir)/ldtemplate
 	sed -e s/"<ldtarget>"/ldm88k/g -e s/"<arch>"/m88k/g \
 	-e s/"<target>"/m88kbcs/g -e s/"<TARGET>"/M88KBCS/g <$(srcdir)/ldtemplate >$@
 
 # The .c files for these are generated from ldtemplete.
-ld__gld.o: mkscript ldgld.x ldgld.xr ldgld.xu ldgld.xn ldgld.xnn
-ld__news.o: mkscript news.x news.xr news.xu news.xn news.xnn
-ld__i386aout.o: mkscript i386aout.x i386aout.xr i386aout.xu i386aout.xn i386aout.xnn
-ld__ebmon29k.o: mkscript ebmon29k.x ebmon29k.xr ebmon29k.xu \
+em_gld.o: mkscript ldgld.x ldgld.xr ldgld.xu ldgld.xn ldgld.xnn
+em_news.o: mkscript news.x news.xr news.xu news.xn news.xnn
+em_i386aout.o: mkscript i386aout.x i386aout.xr i386aout.xu i386aout.xn i386aout.xnn
+em_ebmon29k.o: mkscript ebmon29k.x ebmon29k.xr ebmon29k.xu \
 	ebmon29k.xn ebmon29k.xnn
-ld__gld68k.o: mkscript ldgld68k.x ldgld68k.xr ldgld68k.xu \
+em_gld68k.o: mkscript ldgld68k.x ldgld68k.xr ldgld68k.xu \
 	ldgld68k.xn ldgld68k.xnn
-ld__glda29k.o: mkscript ldglda29k.x ldglda29k.xr ldglda29k.xu \
+em_glda29k.o: mkscript ldglda29k.x ldglda29k.xr ldglda29k.xu \
 	ldglda29k.xn ldglda29k.xnn
-ld__m88k.o: mkscript ldm88k.x ldm88k.xr ldm88k.xu ldm88k.xn ldm88k.xnn
+em_m88k.o: mkscript ldm88k.x ldm88k.xr ldm88k.xu ldm88k.xn ldm88k.xnn
 
 # The .c files for these are (for now) specially written (not ldtemplete).
 ldgld960.o: mkscript ldgld960.x

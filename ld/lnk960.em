@@ -1,4 +1,4 @@
-cat >ld__${EMULATION_NAME}.c <<EOF
+cat >em_${EMULATION_NAME}.c <<EOF
 /* intel coff loader emulation specific stuff
    Copyright (C) 1991 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
