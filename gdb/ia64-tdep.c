@@ -984,6 +984,13 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
   if (do_fsr_stuff) {
     int i;
     CORE_ADDR addr;
+    int sor, rrb_gr;
+    
+    /* Extract the size of the rotating portion of the stack
+       frame and the register rename base from the current
+       frame marker. */
+    sor = ((frame->extra_info->cfm >> 14) & 0xf) * 8;
+    rrb_gr = (frame->extra_info->cfm >> 18) & 0x7f;
 
     for (i = 0, addr = frame->extra_info->bsp;
 	 i < frame->extra_info->sof;
@@ -993,7 +1000,11 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
 	  {
 	    addr += 8;
 	  }
-	frame->saved_regs[IA64_GR32_REGNUM + i] = addr;
+	if (i < sor)
+	  frame->saved_regs[IA64_GR32_REGNUM + ((i + (sor - rrb_gr)) % sor)] 
+	    = addr;
+	else
+	  frame->saved_regs[IA64_GR32_REGNUM + i] = addr;
 
 	if (i+32 == cfm_reg)
 	  frame->saved_regs[IA64_CFM_REGNUM] = addr;
@@ -1125,6 +1136,16 @@ ia64_get_saved_register (char *raw_buffer,
       int prN_val;
       ia64_get_saved_register (pr_raw_buffer, &pr_optim, &pr_addr,
                                frame, IA64_PR_REGNUM, &pr_lval);
+      if (IA64_PR16_REGNUM <= regnum && regnum <= IA64_PR63_REGNUM)
+	{
+	  /* Fetch predicate register rename base from current frame
+	     marker for this frame. */
+	  int rrb_pr = (frame->extra_info->cfm >> 32) & 0x3f;
+
+	  /* Adjust the register number to account for register rotation. */
+	  regnum = IA64_PR16_REGNUM 
+	         + ((regnum - IA64_PR16_REGNUM) + rrb_pr) % 48;
+	}
       prN_val = extract_bit_field ((unsigned char *) pr_raw_buffer,
                                    regnum - IA64_PR0_REGNUM, 1);
       store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), prN_val);
@@ -1215,6 +1236,18 @@ ia64_get_saved_register (char *raw_buffer,
     }
   else
     {
+      if (IA64_FR32_REGNUM <= regnum && regnum <= IA64_FR127_REGNUM)
+	{
+	  /* Fetch floating point register rename base from current
+	     frame marker for this frame. */
+	  int rrb_fr = (frame->extra_info->cfm >> 25) & 0x7f;
+
+	  /* Adjust the floating point register number to account for
+	     register rotation. */
+	  regnum = IA64_FR32_REGNUM
+	         + ((regnum - IA64_FR32_REGNUM) + rrb_fr) % 96;
+	}
+
       generic_get_saved_register (raw_buffer, optimized, addrp, frame,
                                   regnum, lval);
     }

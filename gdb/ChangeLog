@@ -1,3 +1,10 @@
+2000-09-06  Kevin Buettner  <kevinb@redhat.com>
+
+	* ia64-tdep.c (examine_prologue): Add rotating register rename
+	support for the general registers.
+	(ia64_get_saved_register): Add rotating register rename support
+	for the predicate registers and the floating-point registers.
+
 2000-09-05  Kevin Buettner  <kevinb@redhat.com>
 
 	* config/arm/tm-linux.h (arm_linux_sigcontext_register_address,
