@@ -42,7 +42,8 @@
 #define LSMASKn XCONCAT2(LSMASK,N)
 #define MSMASKEDn XCONCAT2(MSMASKED,N)
 #define MSMASKn XCONCAT2(MSMASK,N)
-#define EXTRACTEDn XCONCAT2(EXTRACTED,N)
+#define LSEXTRACTEDn XCONCAT2(LSEXTRACTED,N)
+#define MSEXTRACTEDn XCONCAT2(MSEXTRACTED,N)
 #define INSERTEDn XCONCAT2(INSERTED,N)
 #define ROTn XCONCAT2(ROT,N)
 #define ROTLn XCONCAT2(ROTL,N)
@@ -80,16 +81,29 @@ MSMASKEDn (unsignedN word,
   return (word & MSMASKn (nr_bits));
 }
 
-/* TAGS: EXTRACTED16 EXTRACTED32 EXTRACTED64 */
+/* TAGS: LSEXTRACTED16 LSEXTRACTED32 LSEXTRACTED64 */
 
 INLINE_SIM_BITS\
 (unsignedN)
-EXTRACTEDn (unsignedN val,
-	    unsigned start,
-	    unsigned stop)
+LSEXTRACTEDn (unsignedN val,
+	      unsigned start,
+	      unsigned stop)
 {
-  val <<= _MSB_SHIFT (N, start);
-  val >>= (_MSB_SHIFT (N, start) + _LSB_SHIFT (N, stop));
+  val <<= (N - 1 - start); /* drop high bits */
+  val >>= (N - 1 - start) + (stop); /* drop low bits */
+  return val;
+}
+
+/* TAGS: MSEXTRACTED16 MSEXTRACTED32 MSEXTRACTED64 */
+
+INLINE_SIM_BITS\
+(unsignedN)
+MSEXTRACTEDn (unsignedN val,
+	      unsigned start,
+	      unsigned stop)
+{
+  val <<= (start); /* drop high bits */
+  val >>= (start) + (N - 1 - stop); /* drop low bits */
   return val;
 }
 
@@ -169,7 +183,8 @@ SEXTn (signedN val,
 #undef ROTRn
 #undef ROTn
 #undef INSERTEDn
-#undef EXTRACTEDn
+#undef LSEXTRACTEDn
+#undef MSEXTRACTEDn
 #undef LSMASKEDn
 #undef LSMASKn
 #undef MSMASKEDn

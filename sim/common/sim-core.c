@@ -408,7 +408,7 @@ sim_core_map_detach (SIM_DESC sd,
        entry = &(*entry)->next)
     {
       if ((*entry)->base == addr
-	  && (*entry)->level == attach
+	  && (*entry)->level == (int) attach
 	  && (*entry)->space == space)
 	{
 	  sim_core_mapping *dead = (*entry);

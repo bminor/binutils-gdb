@@ -39,6 +39,9 @@
    architectures ignoring the first 32bits leaving bit 32 as the most
    significant.
 
+   NB: Use EXTRACTED, MSEXTRACTED and LSEXTRACTED as a guideline for
+   naming.  LSMASK and LSMASKED are wrong.
+
    BIT*(POS): Constant with just 1 bit set.
 
    LSBIT*(OFFSET): Constant with just 1 bit set - LS bit is zero.
@@ -65,6 +68,12 @@
    EXTRACTED*(VALUE, FIRST, LAST): Masks out bits [FIRST .. LAST] but
    also right shifts the masked value so that bit LAST becomes the
    least significant (right most).
+
+   LSEXTRACTED*(VALUE, FIRST, LAST): Same as extracted - LS bit is
+   zero.
+
+   MSEXTRACTED*(VALUE, FIRST, LAST): Same as extracted - MS bit is
+   zero.
 
    SHUFFLED**(VALUE, OLD, NEW): Mask then move a single bit from OLD
    new NEW.
@@ -377,9 +386,26 @@ INLINE_SIM_BITS(unsigned_word) MSMASKED (unsigned_word word, unsigned nr_bits);
 
 /* extract the required bits aligning them with the lsb */
 
-INLINE_SIM_BITS(unsigned16) EXTRACTED16 (unsigned16 val, unsigned start, unsigned stop);
-INLINE_SIM_BITS(unsigned32) EXTRACTED32 (unsigned32 val, unsigned start, unsigned stop);
-INLINE_SIM_BITS(unsigned64) EXTRACTED64 (unsigned64 val, unsigned start, unsigned stop);
+INLINE_SIM_BITS(unsigned16) LSEXTRACTED16 (unsigned16 val, unsigned start, unsigned stop);
+INLINE_SIM_BITS(unsigned32) LSEXTRACTED32 (unsigned32 val, unsigned start, unsigned stop);
+INLINE_SIM_BITS(unsigned64) LSEXTRACTED64 (unsigned64 val, unsigned start, unsigned stop);
+
+INLINE_SIM_BITS(unsigned16) MSEXTRACTED16 (unsigned16 val, unsigned start, unsigned stop);
+INLINE_SIM_BITS(unsigned32) MSEXTRACTED32 (unsigned32 val, unsigned start, unsigned stop);
+INLINE_SIM_BITS(unsigned64) MSEXTRACTED64 (unsigned64 val, unsigned start, unsigned stop);
+
+#if (WITH_TARGET_WORD_MSB == 0)
+#define EXTRACTED16 MSEXTRACTED32
+#define EXTRACTED32 MSEXTRACTED32
+#define EXTRACTED64 MSEXTRACTED32
+#else
+#define EXTRACTED16 LSEXTRACTED32
+#define EXTRACTED32 LSEXTRACTED32
+#define EXTRACTED64 LSEXTRACTED32
+#endif
+
+
+
 
 INLINE_SIM_BITS(unsigned_word) EXTRACTED (unsigned_word val, unsigned start, unsigned stop);
 

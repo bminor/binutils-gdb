@@ -62,11 +62,6 @@
    values */
 
 
-/* Macro's to type cast 32bit constants to 64bits */
-#define SIGNED64(val)   ((signed64)(signed32)(val))
-#define UNSIGNED64(val) ((unsigned64)(unsigned32)(val))
-
-
 /* Start a section of ALU code */
 
 #define ALU16_BEGIN(VAL) \
@@ -81,6 +76,14 @@
   unsigned64 alu_carry_val; \
   signed64 alu_overflow_val; \
   ALU32_SET(VAL)
+
+#define ALU64_BEGIN(VAL) \
+{ \
+  natural64 alu_val; \
+  unsigned64 alu_carry_val; \
+  signed64 alu_overflow_val; \
+  ALU64_SET(VAL)
+
 
 #define ALU_BEGIN(VAL) XCONCAT3(ALU,WITH_TARGET_WORD_BITSIZE,_BEGIN)(VAL)
 
@@ -128,14 +131,14 @@ do { \
 
 #define ALU64_ADD(VAL) \
 do { \
-  unsigned64 alu_lo = (UNSIGNED64(alu_val) \
-		       + UNSIGNED64(VAL)); \
-  signed alu_carry = ((alu_lo & BIT(31)) != 0); \
+  unsigned64 val = (VAL); \
+  unsigned64 alu_lo = alu_val + val); \
+  signed alu_carry = ((alu_lo & LSBIT64 (31)) != 0); \
   alu_carry_val = (alu_carry_val \
-		   + UNSIGNED64(EXTRACTED(val, 0, 31)) \
+		   + MSEXTRACTED64 (val, 0, 31) \
 		   + alu_carry); \
   alu_overflow_val = (alu_overflow_val \
-		      + SIGNED64(EXTRACTED(val, 0, 31)) \
+		      + MSEXTRACTED64 (val, 0, 31) \
 		      + alu_carry); \
   alu_val = alu_val + val; \
 } while (0)
