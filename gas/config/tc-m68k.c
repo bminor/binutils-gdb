@@ -235,14 +235,14 @@ struct m68k_it
   reloc[5];			/* Five is enough???  */
 };
 
-#define cpu_of_arch(x)		((x) & (m68000up | mcf))
+#define cpu_of_arch(x)		((x) & (m68000up | mcfisa_a))
 #define float_of_arch(x)	((x) & mfloat)
 #define mmu_of_arch(x)		((x) & mmmu)
-#define arch_coldfire_p(x)	((x) & mcf)
-#define arch_coldfire_v4e_p(x)	((x) & mcfv4e)
+#define arch_coldfire_p(x)	((x) & mcfisa_a)
+#define arch_coldfire_fpu(x)	((x) & cfloat)
 
 /* Macros for determining if cpu supports a specific addressing mode.  */
-#define HAVE_LONG_BRANCH(x)     ((x) & (m68020|m68030|m68040|m68060|cpu32|mcf5407|mcfv4e))
+#define HAVE_LONG_BRANCH(x)     ((x) & (m68020|m68030|m68040|m68060|cpu32|mcfisa_b))
 
 static struct m68k_it the_ins;	/* The instruction being assembled.  */
 
@@ -361,62 +361,85 @@ static void s_mri_endw PARAMS ((int));
 static void md_convert_frag_1 PARAMS ((fragS *));
 
 static int current_architecture;
+static int current_chip;
 
 struct m68k_cpu
   {
     unsigned long arch;
+    unsigned long chip;
     const char *name;
     int alias;
   };
 
 static const struct m68k_cpu archs[] =
   {
-    { m68000,		"68000", 0 },
-    { m68010,		"68010", 0 },
-    { m68020,		"68020", 0 },
-    { m68030,		"68030", 0 },
-    { m68040,		"68040", 0 },
-    { m68060,		"68060", 0 },
-    { cpu32,		"cpu32", 0 },
-    { m68881,		"68881", 0 },
-    { m68851,		"68851", 0 },
-    { mcf5200,		"5200",  0 },
-    { mcf5206e,		"5206e", 0 },
-    { mcf528x|mcfmac,	"528x",  0 },
-    { mcf5307|mcfmac,	"5307",  0 },
-    { mcf5407|mcfmac,	"5407",  0 },
-    { mcfv4e|mcfemac,	"cfv4e", 0 },
+    { m68000,						m68000, "68000", 0 },
+    { m68010,						m68010, "68010", 0 },
+    { m68020,						m68020, "68020", 0 },
+    { m68030,						m68030, "68030", 0 },
+    { m68040,						m68040, "68040", 0 },
+    { m68060,						m68060, "68060", 0 },
+    { cpu32,						cpu32, "cpu32", 0 },
+    { m68881,						m68881, "68881", 0 },
+    { m68851,						m68851, "68851", 0 },
+    { mcfisa_a,						mcf5200, "5200", 0 },
+    { mcfisa_a|mcfhwdiv|mcfmac,				mcf5206e, "5206e", 0 },
+    { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf521x, "521x", 0 },
+    { mcfisa_a|mcfhwdiv|mcfemac,			mcf5249, "5249", 0 },
+    { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf528x, "528x", 0 },
+    { mcfisa_a|mcfhwdiv|mcfmac,				mcf5307, "5307", 0 },
+    { mcfisa_a|mcfhwdiv|mcfisa_b|mcfmac,		mcf5407, "5407", 0 },
+    { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,	mcf5470, "547x", 0 },
+    { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,	mcf5480, "548x", 0 },
     /* Aliases (effectively, so far as gas is concerned) for the above
        cpus.  */
-    { m68020,		"68k", 1 },
-    { m68000,		"68008", 1 },
-    { m68000,		"68302", 1 },
-    { m68000,		"68306", 1 },
-    { m68000,		"68307", 1 },
-    { m68000,		"68322", 1 },
-    { m68000,		"68356", 1 },
-    { m68000,		"68ec000", 1 },
-    { m68000,		"68hc000", 1 },
-    { m68000,		"68hc001", 1 },
-    { m68020,		"68ec020", 1 },
-    { m68030,		"68ec030", 1 },
-    { m68040,		"68ec040", 1 },
-    { m68060,		"68ec060", 1 },
-    { cpu32,		"68330", 1 },
-    { cpu32,		"68331", 1 },
-    { cpu32,		"68332", 1 },
-    { cpu32,		"68333", 1 },
-    { cpu32,		"68334", 1 },
-    { cpu32,		"68336", 1 },
-    { cpu32,		"68340", 1 },
-    { cpu32,		"68341", 1 },
-    { cpu32,		"68349", 1 },
-    { cpu32,		"68360", 1 },
-    { m68881,		"68882", 1 },
-    { mcf5200,		"5202", 1 },
-    { mcf5200,		"5204", 1 },
-    { mcf5200,		"5206", 1 },
-    { mcf5407|mcfmac,	"cfv4", 1 },
+    { m68020,						m68020,	"68k", 1 },
+    { m68000,						m68000,	"68008", 1 },
+    { m68000,						m68000,	"68302", 1 },
+    { m68000,						m68000,	"68306", 1 },
+    { m68000,						m68000,	"68307", 1 },
+    { m68000,						m68000,	"68322", 1 },
+    { m68000,						m68000,	"68356", 1 },
+    { m68000,						m68000,	"68ec000", 1 },
+    { m68000,						m68000,	"68hc000", 1 },
+    { m68000,						m68000,	"68hc001", 1 },
+    { m68020,						m68020,	"68ec020", 1 },
+    { m68030,						m68030,	"68ec030", 1 },
+    { m68040,						m68040,	"68ec040", 1 },
+    { m68060,						m68060,	"68ec060", 1 },
+    { cpu32,						cpu32,	"68330", 1 },
+    { cpu32,						cpu32,	"68331", 1 },
+    { cpu32,						cpu32,	"68332", 1 },
+    { cpu32,						cpu32,	"68333", 1 },
+    { cpu32,						cpu32,	"68334", 1 },
+    { cpu32,						cpu32,	"68336", 1 },
+    { cpu32,						cpu32,	"68340", 1 },
+    { cpu32,						cpu32,	"68341", 1 },
+    { cpu32,						cpu32,	"68349", 1 },
+    { cpu32,						cpu32,	"68360", 1 },
+    { m68881,						m68881,	"68882", 1 },
+    { mcfisa_a,						mcf5200, "5202", 1 },
+    { mcfisa_a,						mcf5200, "5204", 1 },
+    { mcfisa_a,						mcf5200, "5206", 1 },
+    { mcfisa_a|mcfhwdiv|mcfisa_aa|mcfemac,		mcf521x, "5214", 1 },
+    { mcfisa_a|mcfhwdiv|mcfisa_aa|mcfemac,		mcf521x, "5216", 1 },
+    { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac,		mcf528x, "5280", 1 },
+    { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac,		mcf528x, "5281", 1 },
+    { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac,		mcf528x, "5282", 1 },
+    { mcfisa_a|mcfhwdiv|mcfisa_b|mcfmac,		mcf5407, "cfv4", 1 },
+    { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,	mcf5470, "5470", 1 },
+    { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,	mcf5470, "5471", 1 },
+    { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,	mcf5470, "5472", 1 },
+    { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,	mcf5470, "5473", 1 },
+    { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,	mcf5470, "5474", 1 },
+    { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,	mcf5470, "5475", 1 },
+    { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,	mcf5470, "5480", 1 },
+    { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,	mcf5470, "5481", 1 },
+    { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,	mcf5470, "5482", 1 },
+    { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,	mcf5470, "5483", 1 },
+    { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,	mcf5470, "5484", 1 },
+    { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,	mcf5470, "5485", 1 },
+    { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,	mcf5470, "cfv4e", 1 },
   };
 
 static const int n_archs = sizeof (archs) / sizeof (archs[0]);
@@ -660,12 +683,80 @@ static char alt_notend_table[256];
       || (*s == ':'						\
 	  && alt_notend_table[(unsigned char) s[1]])))
 
+/* Return a human readable string holding the list of chips that are
+   valid for a particular architecture, suppressing aliases (unless
+   there is only one of them).  */
+
+static char *
+find_cf_chip (int architecture)
+{
+  static char buf[1024];
+  int i, j, n_chips, n_alias;
+  char *cp;
+
+  strcpy (buf, " (");
+  cp = buf + strlen (buf);
+
+  for (i = 0, n_chips = 0, n_alias = 0; i < n_archs; ++i)
+    if (archs[i].arch & architecture)
+      {
+	n_chips++;
+	if (archs[i].alias)
+	  n_alias++;
+      }
+
+  if (n_chips == 0)
+    as_fatal (_("no matching ColdFire architectures found"));
+
+  if (n_alias > 1)
+    n_chips -= n_alias;
+      
+  for (i = 0, j = 0; i < n_archs && j < n_chips; ++i)
+    if (archs[i].arch & architecture)
+      {
+	if (j)
+	  {
+	    if (((j == n_chips - 1) && !(n_alias > 1))|| ! n_alias)
+	      {
+		if (n_chips == 2)
+		  {
+		    strncpy (cp, _(" or "), (sizeof (buf) - (cp - buf)));
+		    cp += strlen (cp);
+		  }
+		else
+		  {
+		    strncpy (cp, _(", or "), (sizeof (buf) - (cp - buf)));
+		    cp += strlen (cp);
+		  }
+	      }
+	    else
+	      {
+		strncpy (cp, ", ", (sizeof (buf) - (cp - buf)));
+		cp += strlen (cp);
+	      }
+	  }
+	strncpy (cp, archs[i].name, (sizeof (buf) - (cp - buf)));
+	cp += strlen (cp);
+	j++;
+      }
+
+  if (n_alias > 1)
+    {
+      strncpy (cp, _(", or aliases"), (sizeof (buf) - (cp - buf)));
+      cp += strlen (cp);
+    }
+
+  strncpy (cp, ")", (sizeof (buf) - (cp - buf)));
+
+  return buf;
+}
+
 #if defined (M68KCOFF) && !defined (BFD_ASSEMBLER)
 
 #ifdef NO_PCREL_RELOCS
 
 int
-make_pcrel_absolute(fixP, add_number)
+make_pcrel_absolute (fixP, add_number)
     fixS *fixP;
     long *add_number;
 {
@@ -677,14 +768,14 @@ make_pcrel_absolute(fixP, add_number)
   if (opcode[0] == 0x60 && opcode[1] == 0xff) /* BRA -> JMP.  */
     {
       if (flag_keep_pcrel)
-    	as_fatal(_("Tried to convert PC relative branch to absolute jump"));
+    	as_fatal (_("Tried to convert PC relative branch to absolute jump"));
       opcode[0] = 0x4e;
       opcode[1] = 0xf9;
     }
   else if (opcode[0] == 0x61 && opcode[1] == 0xff) /* BSR -> JSR.  */
     {
       if (flag_keep_pcrel)
-    	as_fatal(_("Tried to convert PC relative BSR to absolute JSR"));
+    	as_fatal (_("Tried to convert PC relative BSR to absolute JSR"));
       opcode[0] = 0x4e;
       opcode[1] = 0xb9;
     }
@@ -1925,13 +2016,40 @@ m68k_ip (instring)
 	    {
 	      char buf[200], *cp;
 
-	      strcpy (buf,
-		      _("invalid instruction for this architecture; needs "));
+	      strncpy (buf,
+		      _("invalid instruction for this architecture; needs "), sizeof (buf));
 	      cp = buf + strlen (buf);
 	      switch (ok_arch)
 		{
+		case mcfisa_a:
+		  strncpy (cp, _("ColdFire ISA_A"), (sizeof (buf) - (cp - buf)));
+		  cp += strlen (cp);
+		  strncpy (cp, find_cf_chip (ok_arch), (sizeof (buf) - (cp - buf)));
+		  cp += strlen (cp);
+		  break;
+		case mcfhwdiv:
+		  strncpy (cp, _("ColdFire hardware divide"), (sizeof (buf) - (cp - buf)));
+		  cp += strlen (cp);
+		  strncpy (cp, find_cf_chip (ok_arch), (sizeof (buf) - (cp - buf)));
+		  cp += strlen (cp);
+		  break;
+		case mcfisa_aa:
+		  strncpy (cp, _("ColdFire ISA_A+"), (sizeof (buf) - (cp - buf)));
+		  cp += strlen (cp);
+		  strncpy (cp, find_cf_chip (ok_arch), (sizeof (buf) - (cp - buf)));
+		  cp += strlen (cp);
+		  break;
+		case mcfisa_b:
+		  strncpy (cp, _("ColdFire ISA_B"), (sizeof (buf) - (cp - buf)));
+		  cp += strlen (cp);
+		  strncpy (cp, find_cf_chip (ok_arch), (sizeof (buf) - (cp - buf)));
+		  cp += strlen (cp);
+		  break;
 		case cfloat:
-		  strcpy (cp, _("ColdFire fpu (cfv4e)"));
+		  strncpy (cp, _("ColdFire fpu"), (sizeof (buf) - (cp - buf)));
+		  cp += strlen (cp);
+		  strncpy (cp, find_cf_chip (ok_arch), (sizeof (buf) - (cp - buf)));
+		  cp += strlen (cp);
 		  break;
 		case mfloat:
 		  strcpy (cp, _("fpu (68040, 68060 or 68881/68882)"));
@@ -1951,9 +2069,8 @@ m68k_ip (instring)
 		default:
 		  {
 		    int got_one = 0, idx;
-		    for (idx = 0;
-			 idx < (int) (sizeof (archs) / sizeof (archs[0]));
-			 idx++)
+
+		    for (idx = 0; idx < n_archs; idx++)
 		      {
 			if ((archs[idx].arch & ok_arch)
 			    && ! archs[idx].alias)
@@ -2281,7 +2398,7 @@ m68k_ip (instring)
 		       && cpu_of_arch (current_architecture) < m68020)
 		      || (opP->index.scale == 8
 			  && (arch_coldfire_p (current_architecture)
-                              && !arch_coldfire_v4e_p(current_architecture))))
+                              && !arch_coldfire_fpu (current_architecture))))
 		    {
 		      opP->error =
 			_("scale factor invalid on this architecture; needs cpu32 or 68020 or higher");
@@ -3377,7 +3494,7 @@ install_operand (mode, val)
     default:
       as_fatal (_("failed sanity check."));
     }
-}				/* install_operand() */
+}
 
 static void
 install_gen_operand (mode, val)
@@ -3411,12 +3528,10 @@ install_gen_operand (mode, val)
     default:
       as_fatal (_("failed sanity check."));
     }
-}				/* install_gen_operand() */
+}
 
-/*
- * verify that we have some number of paren pairs, do m68k_ip_op(), and
- * then deal with the bitfield hack.
- */
+/* Verify that we have some number of paren pairs, do m68k_ip_op(), and
+   then deal with the bitfield hack.  */
 
 static char *
 crack_operand (str, opP)
@@ -4185,10 +4300,11 @@ static void
 select_control_regs ()
 {
   /* Note which set of "movec" control registers is available.  */
-  switch (cpu_of_arch (current_architecture))
+  switch (current_chip)
     {
     case 0:
-      as_warn (_("architecture not yet selected: defaulting to 68020"));
+      if (verbose)
+	as_warn (_("architecture not yet selected: defaulting to 68020"));
       control_regs = m68020_control_regs;
       break;
       
@@ -4218,9 +4334,11 @@ select_control_regs ()
       control_regs = mcf_control_regs;
       break;
     case mcf528x:
+    case mcf521x:
       control_regs = mcf528x_control_regs;
       break;
-    case mcfv4e:
+    case mcf5470:
+    case mcf5480:
       control_regs = mcfv4e_control_regs;
       break;
     default:
@@ -4628,7 +4746,7 @@ md_convert_frag_1 (fragP)
       if (fragP->fr_opcode[0] == 0x61)		/* jbsr */
 	{
 	  if (flag_keep_pcrel)
-    	    as_fatal(_("Tried to convert PC relative BSR to absolute JSR"));
+    	    as_fatal (_("Tried to convert PC relative BSR to absolute JSR"));
 	  fragP->fr_opcode[0] = 0x4E;
 	  fragP->fr_opcode[1] = (char) 0xB9; /* JSR with ABSL LONG operand.  */
 	  fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
@@ -4638,7 +4756,7 @@ md_convert_frag_1 (fragP)
       else if (fragP->fr_opcode[0] == 0x60)	/* jbra */
 	{
 	  if (flag_keep_pcrel)
-	    as_fatal(_("Tried to convert PC relative branch to absolute jump"));
+	    as_fatal (_("Tried to convert PC relative branch to absolute jump"));
 	  fragP->fr_opcode[0] = 0x4E;
 	  fragP->fr_opcode[1] = (char) 0xF9; /* JMP with ABSL LONG operand.  */
 	  fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
@@ -4654,7 +4772,7 @@ md_convert_frag_1 (fragP)
       break;
     case TAB (BRABSJCOND, LONG):
       if (flag_keep_pcrel)
-    	as_fatal(_("Tried to convert PC relative conditional branch to absolute jump"));
+    	as_fatal (_("Tried to convert PC relative conditional branch to absolute jump"));
 
       /* Only Bcc 68000 instructions can come here
 	 Change bcc into b!cc/jmp absl long.  */
@@ -4694,7 +4812,7 @@ md_convert_frag_1 (fragP)
 	 Change dbcc into dbcc/bral.
 	 JF: these used to be fr_opcode[2-7], but that's wrong.  */
       if (flag_keep_pcrel)
-    	as_fatal(_("Tried to convert DBcc to absolute jump"));
+    	as_fatal (_("Tried to convert DBcc to absolute jump"));
 
       *buffer_address++ = 0x00;	/* Branch offset = 4.  */
       *buffer_address++ = 0x04;
@@ -4713,7 +4831,7 @@ md_convert_frag_1 (fragP)
 	 Change dbcc into dbcc/jmp.
 	 JF: these used to be fr_opcode[2-7], but that's wrong.  */
       if (flag_keep_pcrel)
-    	as_fatal(_("Tried to convert PC relative conditional branch to absolute jump"));
+    	as_fatal (_("Tried to convert PC relative conditional branch to absolute jump"));
 
       *buffer_address++ = 0x00;		/* Branch offset = 4.  */
       *buffer_address++ = 0x04;
@@ -4777,7 +4895,7 @@ md_convert_frag_1 (fragP)
       break;
     case TAB (ABSTOPCREL, LONG):
       if (flag_keep_pcrel)
-    	as_fatal(_("Tried to convert PC relative conditional branch to absolute jump"));
+    	as_fatal (_("Tried to convert PC relative conditional branch to absolute jump"));
       /* The thing to do here is force it to ABSOLUTE LONG, since
 	 ABSTOPCREL is really trying to shorten an ABSOLUTE address anyway.  */
       if ((fragP->fr_opcode[1] & 0x3F) != 0x3A)
@@ -5037,10 +5155,10 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
 {
   valueT offset;
 
-  if (!HAVE_LONG_BRANCH(current_architecture))
+  if (!HAVE_LONG_BRANCH (current_architecture))
     {
       if (flag_keep_pcrel)
-    	as_fatal(_("Tried to convert PC relative branch to absolute jump"));
+    	as_fatal (_("Tried to convert PC relative branch to absolute jump"));
       offset = to_addr - S_GET_VALUE (to_symbol);
       md_number_to_chars (ptr, (valueT) 0x4EF9, 2);
       md_number_to_chars (ptr + 2, (valueT) offset, 4);
@@ -5306,6 +5424,7 @@ mri_chip ()
   else
     current_architecture &= m68881 | m68851;
   current_architecture |= archs[i].arch;
+  current_chip |= archs[i].chip;
 
   while (*input_line_pointer == '/')
     {
@@ -5684,6 +5803,7 @@ struct save_opts
   int keep_locals;
   int short_refs;
   int architecture;
+  int chip;
   int quick;
   int rel32;
   int listing;
@@ -5709,6 +5829,7 @@ s_save (ignore)
   s->keep_locals = flag_keep_locals;
   s->short_refs = flag_short_refs;
   s->architecture = current_architecture;
+  s->chip = current_chip;
   s->quick = m68k_quick;
   s->rel32 = m68k_rel32;
   s->listing = listing;
@@ -5743,6 +5864,7 @@ s_restore (ignore)
   flag_keep_locals = s->keep_locals;
   flag_short_refs = s->short_refs;
   current_architecture = s->architecture;
+  current_chip = s->chip;
   m68k_quick = s->quick;
   m68k_rel32 = s->rel32;
   listing = s->listing;
@@ -7095,6 +7217,7 @@ md_parse_option (c, arg)
 		  {
 		    current_architecture &= ~m68000up;
 		    current_architecture |= arch;
+		    current_chip |= archs[i].chip;
 		  }
 		else if (arch == m68881)
 		  {
@@ -7212,8 +7335,8 @@ md_show_usage (stream)
 -l			use 1 word for refs to undefined symbols [default 2]\n\
 -m68000 | -m68008 | -m68010 | -m68020 | -m68030 | -m68040 | -m68060 |\n\
 -m68302 | -m68331 | -m68332 | -m68333 | -m68340 | -m68360 | -mcpu32 |\n\
--m5200  | -m5202  | -m5204  | -m5206  | -m5206e | -m528x  | -m5307  |\n\
--m5407  | -mcfv4  | -mcfv4e\n\
+-m5200  | -m5202  | -m5204  | -m5206  | -m5206e | -m521x  | -m5249  |\n\
+-m528x  | -m5307  | -m5407  | -m547x  | -m548x  | -mcfv4  | -mcfv4e\n\
 			specify variant of 680X0 architecture [default %s]\n\
 -m68881 | -m68882 | -mno-68881 | -mno-68882\n\
 			target has/lacks floating-point coprocessor\n\

@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Support for Motorola MCF521x/5249/547x/548x added.
+
 * Support for ColdFire EMAC instructions added and Motorola syntax for MAC/EMAC
   instrucitons.
 

@@ -1,3 +1,13 @@
+2004-05-05  Peter Barada  <peter@the-baradas.com>
+
+	* config/tc-m68k.c: Add find_cf_chip to print list of valid
+	chips for invalid coldfire instructions, rename selectors
+	for ColdFire sub-variants, add 521x,5249,547x,548x and aliases,
+	add current_chip to track which chip is referred to(including save/restore),
+	use current_chip to select control registers, not current_arch.
+	(md_show_usage): Add new chips.
+	* doc/c-m68k.texi: Document new command line switches.
+
 2004-05-05  Jakub Jelinek  <jakub@redhat.com>
 
 	* tc-s390.h (md_do_align, HANDLE_ALIGN): Remove.

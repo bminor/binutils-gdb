@@ -41,7 +41,11 @@ static const bfd_arch_info_type arch_info_struct[] =
     N(bfd_mach_mcf5407, "m68k:5407",  FALSE, &arch_info_struct[11]),
     N(bfd_mach_m68060,  "m68k:68060", FALSE, &arch_info_struct[12]),
     N(bfd_mach_mcf528x, "m68k:528x",  FALSE, &arch_info_struct[13]),
-    N(bfd_mach_mcfv4e, "m68k:cfv4e",  FALSE, 0),
+    N(bfd_mach_mcf521x, "m68k:521x",  FALSE, &arch_info_struct[14]),
+    N(bfd_mach_mcf5249, "m68k:5249",  FALSE, &arch_info_struct[15]),
+    N(bfd_mach_mcf547x, "m68k:547x",  FALSE, &arch_info_struct[16]),
+    N(bfd_mach_mcf548x, "m68k:548x",  FALSE, &arch_info_struct[17]),
+    N(bfd_mach_mcfv4e,  "m68k:cfv4e", FALSE, 0),
   };
 
 const bfd_arch_info_type bfd_m68k_arch =

@@ -1,3 +1,9 @@
+2004-05-05  Peter Barada  <peter@the-baradas.com>
+
+	* bfd_archures.c(bfd_architecture): Add 521x,5249,547x,548x.
+	* cpu-m68k.c(bfd_m68k_arch): Likewise.
+	* bfd-in2.h(bfd_architecture): Regenerate.
+
 2004-05-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (_bfd_elf_rela_local_sym): Set kept_section for excluded

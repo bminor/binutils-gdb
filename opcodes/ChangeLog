@@ -1,3 +1,9 @@
+2004-05-05  Peter Barada  <peter@the-baradas.com>
+
+	* m68k-dis.c(print_insn_m68k): Add new chips, use core
+	variants in arch_mask.  Only set m68881/68851 for 68k chips.
+	* m68k-op.c: Switch from ColdFire chips to core variants.
+
 2004-05-05  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 146.
