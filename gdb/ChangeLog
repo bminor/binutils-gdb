@@ -71,6 +71,14 @@ Thu Jul  8 14:48:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hppa-tdep.c: Change _initialize_hppab_tdep to _initialize_hppa_tdep.
 
+start-sanitize-v9
+Thu Jul  8 14:47:00 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* sparc-tdep.c (sparc_frame_chain): Handle sizeof (CORE_ADDR)
+	!= sizeof (REGISTER_TYPE).
+	(frame_saved_pc): Ditto.
+end-sanitize-v9
+
 Thu Jul  8 08:22:05 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* config/h8300/tm-h8300.h: (REGISTER_TYPES): Adjust for h8/300h.
