@@ -74,6 +74,12 @@ const int md_reloc_size = 8;	/* Size of relocation record */
    references.  */
 int flag_want_pic;
 
+#ifdef REGISTER_PREFIX_OPTIONAL
+int flag_reg_prefix_optional = REGISTER_PREFIX_OPTIONAL;
+#else
+int flag_reg_prefix_optional;
+#endif
+
 /* Its an arbitrary name:  This means I don't approve of it */
 /* See flames below */
 static struct obstack robyn;
@@ -187,13 +193,25 @@ struct m68k_exp
     short e_siz;		/* 0== default 1==short/byte 2==word 3==long */
   };
 
-/* DATA and ADDR have to be contiguous, so that reg-DATA gives 0-7==data reg,
-   8-15==addr reg for operands that take both types */
+/* DATA and ADDR have to be contiguous, so that reg-DATA gives
+   0-7==data reg, 8-15==addr reg for operands that take both types.
+
+   We don't use forms like "ADDR0 = ADDR" here because this file is
+   likely to be used on an Apollo, and the broken Apollo compiler
+   gives an `undefined variable' error if we do that, according to
+   troy@cbme.unsw.edu.au.  */
+
+#define DATA DATA0
+#define ADDR ADDR0
+#define SP ADDR7
+#define FPREG FP0
+#define COPNUM  COP0
+#define BAD BAD0
+#define BAC BAC0
 
 enum _register
   {
-    DATA = 1,			/*   1- 8 == data registers 0-7 */
-    DATA0 = DATA,
+    DATA0 = 1,			/*   1- 8 == data registers 0-7 */
     DATA1,
     DATA2,
     DATA3,
@@ -202,8 +220,7 @@ enum _register
     DATA6,
     DATA7,
 
-    ADDR,
-    ADDR0 = ADDR,
+    ADDR0,
     ADDR1,
     ADDR2,
     ADDR3,
@@ -212,13 +229,10 @@ enum _register
     ADDR6,
     ADDR7,
 
-    /* Note that COPNUM==processor #1 -- COPNUM+7==#8, which stores as 000 */
+    /* Note that COP0==processor #1 -- COP0+7==#8, which stores as 000 */
     /* I think. . .  */
 
-    SP = ADDR7,
-
-    FPREG,			/* Eight FP registers */
-    FP0 = FPREG,
+    FP0,			/* Eight FP registers */
     FP1,
     FP2,
     FP3,
@@ -226,8 +240,8 @@ enum _register
     FP5,
     FP6,
     FP7,
-    COPNUM = (FPREG + 8),	/* Co-processor #1-#8 */
-    COP0 = COPNUM,
+
+    COP0,			/* Co-processor #1-#8 */
     COP1,
     COP2,
     COP3,
@@ -235,12 +249,13 @@ enum _register
     COP5,
     COP6,
     COP7,
+
     PC,				/* Program counter */
     ZPC,			/* Hack for Program space, but 0 addressing */
     SR,				/* Status Reg */
     CCR,			/* Condition code Reg */
 
-    /* These have to be in order for the movec instruction to work. */
+    /* These have to be grouped together for the movec instruction to work. */
     USP,			/*  User Stack Pointer */
     ISP,			/*  Interrupt stack pointer */
     SFC,
@@ -257,6 +272,9 @@ enum _register
     TC,
     SRP,
     URP,
+    BUSCR,			/* 68060 added these */
+    PCR,
+#define last_movec_reg PCR
     /* end of movec ordering constraints */
 
     FPI,
@@ -269,8 +287,7 @@ enum _register
     VAL,
     SCC,
     AC,
-    BAD,
-    BAD0 = BAD,
+    BAD0,
     BAD1,
     BAD2,
     BAD3,
@@ -278,8 +295,7 @@ enum _register
     BAD5,
     BAD6,
     BAD7,
-    BAC,
-    BAC0 = BAC,
+    BAC0,
     BAC1,
     BAC2,
     BAC3,
@@ -299,6 +315,28 @@ enum _register
     TT0,			/* 68030 access control unit regs */
     TT1,
   };
+
+static const enum _register m68000_control_regs[] = { 0 };
+static const enum _register m68010_control_regs[] = {
+  SFC, DFC, USP, VBR,
+  0
+};
+static const enum _register m68020_control_regs[] = {
+  SFC, DFC, USP, VBR, CACR, CAAR, MSP, ISP,
+  0
+};
+static const enum _register m68040_control_regs[] = {
+  SFC, DFC, CACR, TC, ITT0, ITT1, DTT0, DTT1,
+  USP, VBR, MSP, ISP, MMUSR, URP, SRP,
+  0
+};
+static const enum _register m68060_control_regs[] = {
+  SFC, DFC, CACR, TC, ITT0, ITT1, DTT0, DTT1, BUSCR,
+  USP, VBR, URP, SRP, PCR,
+  0
+};
+
+static const enum _register *control_regs;
 
 /* Internal form of an operand.  */
 struct m68k_op
@@ -597,15 +635,19 @@ m68k_reg_parse (ccp)
   char *p;
   symbolS *symbolP;
 
-#ifdef REGISTER_PREFIX
-  if (*start != REGISTER_PREFIX)
-    return FAIL;
-  p = start + 1;
-#else
-  p = start;
-  if (*p == OPTIONAL_REGISTER_PREFIX)
-    p++, start++;
-#endif
+  if (flag_reg_prefix_optional)
+    {
+      if (*start == REGISTER_PREFIX)
+	start++;
+      p = start;
+    }
+  else
+    {
+      if (*start != REGISTER_PREFIX)
+	return FAIL;
+      p = start + 1;
+    }
+
   if (!isalpha (*p) || !is_name_beginner (*p))
     return FAIL;
 
@@ -846,7 +888,7 @@ m68k_ip_op (str, opP)
     ;
   --strend;
 
-  if (*str == '#')
+  if (*str == '#' || *str == '&')
     {
       str++;
       opP->con1 = add_exp (str, strend);
@@ -1002,9 +1044,8 @@ m68k_ip_op (str, opP)
 	    {
 	      /* "(EXPR,..." , a displacement */
 	      char *stmp;
-	      char *index ();
 
-	      if ((stmp = index (str, ',')) != NULL)
+	      if ((stmp = strchr (str, ',')) != NULL)
 		{
 		  opP->con1 = add_exp (str, stmp - 1);
 		  str = stmp;
@@ -1097,8 +1138,7 @@ m68k_ip_op (str, opP)
       {
 	/* "EXP2" or "EXP2(REG..." */
 	char *stmp;
-	char *index ();
-	if ((stmp = index (str, '(')) != NULL)
+	if ((stmp = strchr (str, '(')) != NULL)
 	  {
 	    char *ostr = str;
 
@@ -1397,10 +1437,47 @@ m68k_ip_op (str, opP)
 
 #if defined (M68KCOFF) && !defined (BFD_ASSEMBLER)
 
+#ifdef NO_PCREL_RELOCS
+
+int
+make_pcrel_absolute(fixP, add_number)
+    fixS *fixP;
+    long *add_number;
+{
+  register unsigned char *opcode = fixP->fx_frag->fr_opcode;
+
+  /* rewrite the PC relative instructions to absolute address ones.
+   * these are rumoured to be faster, and the apollo linker refuses
+   * to deal with the PC relative relocations.
+   */
+  if (opcode[0] == 0x60 && opcode[1] == 0xff) /* BRA -> JMP */
+    {
+      opcode[0] = 0x4e;
+      opcode[1] = 0xf9;
+    }
+  else if (opcode[0] == 0x61 && opcode[1] == 0xff) /* BSR -> JSR */
+    {
+      opcode[0] = 0x4e;
+      opcode[1] = 0xb9;
+    }
+  else
+    as_fatal ("Unknown PC relative instruction");
+  *add_number -= 4;
+  return 0;
+}
+
+#endif /* NO_PCREL_RELOCS */
+
 short
 tc_coff_fix2rtype (fixP)
      fixS *fixP;
 {
+#ifdef NO_PCREL_RELOCS
+  know (fixP->fx_pcrel == 0);
+  return (fixP->fx_size == 1 ? R_RELBYTE
+	  : fixP->fx_size == 2 ? R_DIR16
+	  : R_DIR32);
+#else
   return (fixP->fx_pcrel ?
 	  (fixP->fx_size == 1 ? R_PCRBYTE :
 	   fixP->fx_size == 2 ? R_PCRWORD :
@@ -1408,8 +1485,7 @@ tc_coff_fix2rtype (fixP)
 	  (fixP->fx_size == 1 ? R_RELBYTE :
 	   fixP->fx_size == 2 ? R_RELWORD :
 	   R_RELLONG));
-
-
+#endif
 }
 
 #endif
@@ -1823,27 +1899,17 @@ m68k_ip (instring)
 		case 'J':
 		  if (opP->mode != MSCR
 		      || opP->reg < USP
-		      || opP->reg > URP
-		      || cpu_of_arch (current_architecture) < m68010	/* before 68010 had none */
-		      || (cpu_of_arch (current_architecture) < m68020
-			  && opP->reg != SFC
-			  && opP->reg != DFC
-			  && opP->reg != USP
-			  && opP->reg != VBR)	/* 68010's had only these */
-		      || (cpu_of_arch (current_architecture) < m68040
-			  && opP->reg != SFC
-			  && opP->reg != DFC
-			  && opP->reg != USP
-			  && opP->reg != VBR
-			  && opP->reg != CACR
-			  && opP->reg != CAAR
-			  && opP->reg != MSP
-			  && opP->reg != ISP)	/* 680[23]0's have only these */
-		      || (cpu_of_arch (current_architecture) == m68040	/* 68040 has all but this */
-			  && opP->reg == CAAR))
+		      || opP->reg > last_movec_reg)
+		    losing++;
+		  else
 		    {
-		      losing++;
-		    }		/* doesn't cut it */
+		      enum _register *rp;
+		      for (rp = control_regs; *rp; rp++)
+			if (*rp == opP->reg)
+			  break;
+		      if (*rp == 0)
+			losing++;
+		    }
 		  break;
 
 		case 'k':
@@ -2042,7 +2108,7 @@ m68k_ip (instring)
 	      switch (ok_arch)
 		{
 		case mfloat:
-		  strcpy (cp, "fpu (68040 or 68881/68882)");
+		  strcpy (cp, "fpu (68040, 68060 or 68881/68882)");
 		  break;
 		case mmmu:
 		  strcpy (cp, "mmu (68030 or 68851)");
@@ -2071,6 +2137,7 @@ m68k_ip (instring)
 		      { m68020, "68020" },
 		      { m68030, "68030" },
 		      { m68040, "68040" },
+		      { m68060, "68060" },
 		      { cpu32,  "cpu32" },
 		      { m68881, "68881" },
 		      { m68851, "68851" }
@@ -2195,7 +2262,7 @@ m68k_ip (instring)
 		  /* Can other cases happen here?  */
 		  if (op (opP->con1) != O_constant)
 		    abort ();
-		  
+
 		  val = (valueT) offs (opP->con1);
 		  gencnt = 0;
 		  do
@@ -2267,6 +2334,7 @@ m68k_ip (instring)
 		      if (opP->reg == PC)
 			{
 			  addword (0x0170);
+			  opP->con1->e_exp.X_add_number += 6;
 			  add_fix ('l', opP->con1, 1);
 			  addword (0), addword (0);
 			  break;
@@ -2292,6 +2360,7 @@ m68k_ip (instring)
 		    {
 		      if (opP->reg == PC)
 			{
+			  opP->con1->e_exp.X_add_number += 2;
 			  add_fix ('w', opP->con1, 1);
 			}
 		      else
@@ -3376,24 +3445,25 @@ insert_reg (regname, regnum)
 {
   char buf[100];
   int i;
-symbolS *s;
 
 #ifdef REGISTER_PREFIX
-  buf[0] = REGISTER_PREFIX;
-  strcpy (buf + 1, regname);
-  regname = buf;
+  if (!flag_reg_prefix_optional)
+    {
+      buf[0] = REGISTER_PREFIX;
+      strcpy (buf + 1, regname);
+      regname = buf;
+    }
 #endif
 
-  symbol_table_insert (s = symbol_new (regname, reg_section, regnum, &zero_address_frag));
-
-verify_symbol_chain_2 (s);
+  symbol_table_insert (symbol_new (regname, reg_section, regnum,
+				   &zero_address_frag));
 
   for (i = 0; regname[i]; i++)
     buf[i] = islower (regname[i]) ? toupper (regname[i]) : regname[i];
   buf[i] = '\0';
 
-  symbol_table_insert (s = symbol_new (buf, reg_section, regnum, &zero_address_frag));
-verify_symbol_chain_2 (s);
+  symbol_table_insert (symbol_new (buf, reg_section, regnum,
+				   &zero_address_frag));
 }
 
 struct init_entry
@@ -3538,83 +3608,6 @@ md_assemble (str)
   int m, n = 0;
   char *to_beg_P;
   int shorts_this_frag;
-  static int done_first_time;
-
-  if (!done_first_time)
-    {
-      done_first_time = 1;
-
-      if (cpu_of_arch (current_architecture) == 0)
-	{
-	  int cpu_type;
-
-	  if (strcmp (TARGET_CPU, "m68000") == 0
-	      || strcmp (TARGET_CPU, "m68302") == 0)
-	    cpu_type = m68000;
-	  else if (strcmp (TARGET_CPU, "m68010") == 0)
-	    cpu_type = m68010;
-	  else if (strcmp (TARGET_CPU, "m68020") == 0
-		   || strcmp (TARGET_CPU, "m68k") == 0)
-	    cpu_type = m68020;
-	  else if (strcmp (TARGET_CPU, "m68030") == 0)
-	    cpu_type = m68030;
-	  else if (strcmp (TARGET_CPU, "m68040") == 0)
-	    cpu_type = m68040;
-	  else if (strcmp (TARGET_CPU, "cpu32") == 0
-		   || strcmp (TARGET_CPU, "m68331") == 0
-		   || strcmp (TARGET_CPU, "m68332") == 0
-		   || strcmp (TARGET_CPU, "m68333") == 0
-		   || strcmp (TARGET_CPU, "m68340") == 0)
-	    cpu_type = cpu32;
-	  else
-	    cpu_type = m68020;
-
-	  current_architecture |= cpu_type;
-	}
-#if 0				/* Could be doing emulation.  */
-      if (current_architecture & m68881)
-	{
-	  if (current_architecture & m68000)
-	    as_bad ("incompatible processors 68000 and 68881/2 specified");
-	  if (current_architecture & m68010)
-	    as_bad ("incompatible processors 68010 and 68881/2 specified");
-	  if (current_architecture & m68040)
-	    as_bad ("incompatible processors 68040 and 68881/2 specified");
-	}
-#endif
-      /* What other incompatibilities could we check for?  */
-
-      /* Toss in some default assumptions about coprocessors.  */
-      if (!no_68881
-	  && (cpu_of_arch (current_architecture)
-      /* Can CPU32 have a 68881 coprocessor??  */
-	      & (m68020 | m68030 | cpu32)))
-	{
-	  current_architecture |= m68881;
-	}
-      if (!no_68851
-	  && (cpu_of_arch (current_architecture) & m68020up) != 0
-	  && cpu_of_arch (current_architecture) != m68040)
-	{
-	  current_architecture |= m68851;
-	}
-      if (no_68881 && (current_architecture & m68881))
-	as_bad ("options for 68881 and no-68881 both given");
-      if (no_68851 && (current_architecture & m68851))
-	as_bad ("options for 68851 and no-68851 both given");
-
-#ifdef OBJ_AOUT
-      /* Work out the magic number.  This isn't very general.  */
-      if (current_architecture & m68000)
-	m68k_aout_machtype = 0;
-      else if (current_architecture & m68010)
-	m68k_aout_machtype = 1;
-      else if (current_architecture & m68020)
-	m68k_aout_machtype = 2;
-      else
-	m68k_aout_machtype = 2;
-#endif
-    }
 
   memset ((char *) (&the_ins), '\0', sizeof (the_ins));
   m68k_ip (str);
@@ -3791,8 +3784,7 @@ md_begin ()
   register unsigned int i;
   register char c;
 
-  if ((op_hash = hash_new ()) == NULL)
-    as_fatal ("Virtual memory exhausted");
+  op_hash = hash_new ();
 
   obstack_begin (&robyn, 4000);
   for (i = 0; i < numopcodes; i++)
@@ -3822,7 +3814,6 @@ md_begin ()
       while (slak);
 
       retval = hash_insert (op_hash, ins->name, (char *) hack);
-      /* Didn't his mommy tell him about null pointers? */
       if (retval)
 	as_bad ("Internal Error:  Can't hash %s: %s", ins->name, retval);
     }
@@ -3848,9 +3839,6 @@ md_begin ()
 #ifdef REGISTER_PREFIX
   alt_notend_table[REGISTER_PREFIX] = 1;
 #endif
-#ifdef OPTIONAL_REGISTER_PREFIX
-  alt_notend_table[OPTIONAL_REGISTER_PREFIX] = 1;
-#endif
 
 #ifndef MIT_SYNTAX_ONLY
   /* Insert pseudo ops, these have to go into the opcode table since
@@ -3873,19 +3861,118 @@ md_begin ()
   init_regtable ();
 }
 
+void
+m68k_init_after_args ()
+{
+  if (cpu_of_arch (current_architecture) == 0)
+    {
+      int cpu_type;
+
+      if (strcmp (TARGET_CPU, "m68000") == 0
+	  || strcmp (TARGET_CPU, "m68302") == 0)
+	cpu_type = m68000;
+      else if (strcmp (TARGET_CPU, "m68010") == 0)
+	cpu_type = m68010;
+      else if (strcmp (TARGET_CPU, "m68020") == 0
+	       || strcmp (TARGET_CPU, "m68k") == 0)
+	cpu_type = m68020;
+      else if (strcmp (TARGET_CPU, "m68030") == 0)
+	cpu_type = m68030;
+      else if (strcmp (TARGET_CPU, "m68040") == 0)
+	cpu_type = m68040;
+      else if (strcmp (TARGET_CPU, "m68060") == 0)
+	cpu_type = m68060;
+      else if (strcmp (TARGET_CPU, "cpu32") == 0
+	       || strcmp (TARGET_CPU, "m68331") == 0
+	       || strcmp (TARGET_CPU, "m68332") == 0
+	       || strcmp (TARGET_CPU, "m68333") == 0
+	       || strcmp (TARGET_CPU, "m68340") == 0)
+	cpu_type = cpu32;
+      else
+	cpu_type = m68020;
+
+      current_architecture |= cpu_type;
+    }
+#if 0				/* Could be doing emulation.  */
+  if (current_architecture & m68881)
+    {
+      if (current_architecture & m68000)
+	as_bad ("incompatible processors 68000 and 68881/2 specified");
+      if (current_architecture & m68010)
+	as_bad ("incompatible processors 68010 and 68881/2 specified");
+      if (current_architecture & m68040)
+	as_bad ("incompatible processors 68040 and 68881/2 specified");
+    }
+#endif
+  if (current_architecture & m68851)
+    {
+      if (current_architecture & m68040)
+	{
+	  as_warn ("68040 and 68851 specified; mmu instructions may assemble incorrectly");
+	}
+    }
+  /* What other incompatibilities could we check for?  */
+
+  /* Toss in some default assumptions about coprocessors.  */
+  if (!no_68881
+      && (cpu_of_arch (current_architecture)
+	  /* Can CPU32 have a 68881 coprocessor??  */
+	  & (m68020 | m68030 | cpu32)))
+    {
+      current_architecture |= m68881;
+    }
+  if (!no_68851
+      && (cpu_of_arch (current_architecture) & m68020up) != 0
+      && (cpu_of_arch (current_architecture) & m68040up) == 0)
+    {
+      current_architecture |= m68851;
+    }
+  if (no_68881 && (current_architecture & m68881))
+    as_bad ("options for 68881 and no-68881 both given");
+  if (no_68851 && (current_architecture & m68851))
+    as_bad ("options for 68851 and no-68851 both given");
+
+#ifdef OBJ_AOUT
+  /* Work out the magic number.  This isn't very general.  */
+  if (current_architecture & m68000)
+    m68k_aout_machtype = 0;
+  else if (current_architecture & m68010)
+    m68k_aout_machtype = 1;
+  else if (current_architecture & m68020)
+    m68k_aout_machtype = 2;
+  else
+    m68k_aout_machtype = 2;
+#endif
+
+  /* Note which set of "movec" control registers is available.  */
+  switch (cpu_of_arch (current_architecture))
+    {
+    case m68000:
+      control_regs = m68000_control_regs;
+      break;
+    case m68010:
+      control_regs = m68010_control_regs;
+      break;
+    case m68020:
+    case m68030:
+      control_regs = m68020_control_regs;
+      break;
+    case m68040:
+      control_regs = m68040_control_regs;
+      break;
+    case m68060:
+      control_regs = m68060_control_regs;
+      break;
+    default:
+      abort ();
+    }
+}
+
 #if 0
 #define notend(s) ((*s == ',' || *s == '}' || *s == '{' \
 		    || (*s == ':' && strchr("aAdD#", s[1]))) \
 		   ? 0 : 1)
 #endif
-
-/* This funciton is called once, before the assembler exits.  It is
-   supposed to do any final cleanup for this part of the assembler.
-   */
-void
-md_end ()
-{
-}
 
 /* Equal to MAX_PRECISION in atof-ieee.c */
 #define MAX_LITTLENUMS 6
@@ -3949,37 +4036,13 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
-/* Turn an integer of n bytes (in val) into a stream of bytes appropriate
-   for use in the a.out file, and stores them in the array pointed to by buf.
-   This knows about the endian-ness of the target machine and does
-   THE RIGHT THING, whatever it is.  Possible values for n are 1 (byte)
-   2 (short) and 4 (long)  Floating numbers are put out as a series of
-   LITTLENUMS (shorts, here at least)
-   */
 void
 md_number_to_chars (buf, val, n)
      char *buf;
      valueT val;
      int n;
 {
-  switch (n)
-    {
-    case 1:
-      *buf++ = val;
-      break;
-    case 2:
-      *buf++ = (val >> 8);
-      *buf++ = val;
-      break;
-    case 4:
-      *buf++ = (val >> 24);
-      *buf++ = (val >> 16);
-      *buf++ = (val >> 8);
-      *buf++ = val;
-      break;
-    default:
-      as_fatal ("failed sanity check.");
-    }
+  number_to_chars_bigendian (buf, val, n);
 }
 
 static void
@@ -4526,8 +4589,7 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
    * Out: GNU LD relocation length code: 0, 1, or 2.
    */
 
-  static CONST unsigned char nbytes_r_length[] =
-  {42, 0, 1, 42, 2};
+  static CONST unsigned char nbytes_r_length[] = {42, 0, 1, 42, 2};
   long r_symbolnum;
 
   know (fixP->fx_addsy != NULL);
@@ -4545,8 +4607,6 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
   where[6] = r_symbolnum & 0x0ff;
   where[7] = (((fixP->fx_pcrel << 7) & 0x80) | ((nbytes_r_length[fixP->fx_size] << 5) & 0x60) |
 	      (((!S_IS_DEFINED (fixP->fx_addsy)) << 4) & 0x10));
-
-  return;
 }
 #endif
 
@@ -4897,6 +4957,20 @@ s_proc (ignore)
 #endif
 
 int
+m68k_parse_long_option (opt)
+     char *opt;
+{
+  /* Skip over double-dash.  */
+  opt += 2;
+  if (!strcmp (opt, "register-prefix-optional"))
+    {
+      flag_reg_prefix_optional = 1;
+      return 1;
+    }
+  return 0;
+}
+
+int
 md_parse_option (argP, cntP, vecP)
      char **argP;
      int *cntP;
@@ -4944,6 +5018,10 @@ md_parse_option (argP, cntP, vecP)
       else if (!strcmp (*argP, "68040"))
 	{
 	  current_architecture |= m68040 | MAYBE_FLOAT_TOO;
+	}
+      else if (!strcmp (*argP, "68060"))
+	{
+	  current_architecture |= m68060 | MAYBE_FLOAT_TOO;
 	}
 #ifndef NO_68881
       else if (!strcmp (*argP, "68881"))

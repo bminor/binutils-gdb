@@ -109,7 +109,7 @@ case ${target_cpu} in
   # but this is what the support files are named...
   hppa*)	cpu_type=hppa ;;
   i486)		cpu_type=i386 ;;
-  m680[01234]0) cpu_type=m68k ;;
+  m680[012346]0) cpu_type=m68k ;;
   m68008)	cpu_type=m68k ;;
   m683??)       cpu_type=m68k ;;
   m8*)		cpu_type=m88k ;;
