@@ -1290,7 +1290,6 @@ lookup_symbol_aux_using_loop (const char *name,
   if (scope[scope_len] != '\0')
     {
       struct symbol *sym;
-      int next_component;
       int new_scope_len = scope_len;
 
       /* If the current scope is followed by "::", skip past that.  */
@@ -1299,9 +1298,9 @@ lookup_symbol_aux_using_loop (const char *name,
 	  gdb_assert (scope[new_scope_len] == ':');
 	  new_scope_len += 2;
 	}
-      next_component = cp_find_first_component (scope + new_scope_len) - scope;
+      new_scope_len += cp_find_first_component (scope + new_scope_len);
       sym = lookup_symbol_aux_using_loop (name, linkage_name, block, namespace,
-					  symtab, scope, next_component);
+					  symtab, scope, new_scope_len);
       if (sym != NULL)
 	return sym;
     }

@@ -162,8 +162,9 @@ static void
 scan_for_anonymous_namespaces (struct symbol *symbol)
 {
   const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
-  const char *beginning;
-  const char *end;
+  int old_index;
+  int new_index;
+  const char *len;
 
   /* Start with a quick-and-dirty check for mention of "(anonymous
      namespace)".  */
@@ -171,13 +172,13 @@ scan_for_anonymous_namespaces (struct symbol *symbol)
   if (!cp_is_anonymous (name, -1))
     return;
 
-  beginning = name;
-  end = cp_find_first_component (beginning);	 
+  old_index = 0;
+  new_index = cp_find_first_component (name + old_index);
 
-  while (*end == ':')
+  while (name[new_index] == ':')
     {
-      if ((end - beginning) == ANONYMOUS_NAMESPACE_LEN
-	  && strncmp (beginning, "(anonymous namespace)",
+      if ((new_index - old_index) == ANONYMOUS_NAMESPACE_LEN
+	  && strncmp (name + old_index, "(anonymous namespace)",
 		      ANONYMOUS_NAMESPACE_LEN) == 0)
 	{
 	  /* We've found a component of the name that's an anonymous
@@ -185,12 +186,12 @@ scan_for_anonymous_namespaces (struct symbol *symbol)
 	     by the previous component if there is one, or to the
 	     global namespace if there isn't.  */
 	  add_using_directive (name,
-			       beginning == name ? 0 : beginning - name - 2,
-			       end - name);
+			       old_index == 0 ? 0 : old_index - 2,
+			       new_index);
 	}
       /* The "+ 2" is for the "::".  */
-       beginning = end + 2;
-       end = cp_find_first_component (beginning);
+      old_index = new_index + 2;
+      new_index = old_index + cp_find_first_component (name + old_index);
     }
 }
 
@@ -455,12 +456,13 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		 think that's a problem yet, but it will be.  */
 
 	      current = name;
-	      next = cp_find_first_component (current);
+	      next = current + cp_find_first_component (current);
 	      while (*next == ':')
 		{
 		  current = next;
 		  /* The '+ 2' is to skip the '::'.  */
-		  next = cp_find_first_component (current + 2);
+		  next = current + 2;
+		  next += cp_find_first_component (next);
 		}
 	      if (current == name)
 		block_set_scope (block, "", &objfile->symbol_obstack);

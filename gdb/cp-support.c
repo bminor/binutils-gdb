@@ -320,66 +320,76 @@ cp_free_usings (struct using_direct_node *using)
 
 #define LENGTH_OF_OPERATOR 8
 
-const char *
-cp_find_first_component (const char *name)
+int
+cp_find_first_component (const char *const name)
 {
   /* Names like 'operator<<' screw up the recursion, so let's
      special-case them.  I _hope_ they can only occur at the start of
      a component.  */
 
+  int index = 0;
+
   if (strncmp (name, "operator", LENGTH_OF_OPERATOR) == 0)
     {
-      name += LENGTH_OF_OPERATOR;
-      switch (*name)
+      index += LENGTH_OF_OPERATOR;
+      switch (name[index])
 	{
 	case '<':
-	  if (name[1] == '<')
-	    name += 2;
+	  if (name[index + 1] == '<')
+	    index += 2;
 	  else
-	    name += 1;
+	    index += 1;
 	  break;
 	case '>':
 	case '-':
-	  if (name[1] == '>')
-	    name +=2;
+	  if (name[index + 1] == '>')
+	    index += 2;
 	  else
-	    name += 1;
+	    index += 1;
 	  break;
 	case '(':
-	  name += 2;
+	  index += 2;
 	  break;
 	default:
-	  name += 1;
+	  index += 1;
 	  break;
 	}
     }
 
-  for (;; ++name)
+  for (;; ++index)
     {
-      switch (*name)
+      switch (name[index])
 	{
 	case '<':
 	  /* Template; eat it up.  The calls to cp_first_component
 	     should only return (I hope!) when they reach the '>'
 	     terminating the component or a '::' between two
 	     components.  (Hence the '+ 2'.)  */
-	  for (name = cp_find_first_component (name + 1);
-	       *name != '>';
-	       name = cp_find_first_component (name + 2))
-	    gdb_assert (*name == ':');
+	  index += 1;
+	  for (index += cp_find_first_component (name + index);
+	       name[index] != '>';
+	       index += cp_find_first_component (name + index))
+	    {
+	      gdb_assert (name[index] == ':');
+	      index += 2;
+	    }
 	  break;
 	case '(':
 	  /* Similar comment as to '<'.  */
-	  for (name = cp_find_first_component (name + 1);
-	       *name != ')';
-	       name = cp_find_first_component (name + 2))
-	    gdb_assert (*name == ':');
+	  index += 1;
+	  for (index += cp_find_first_component (name + index);
+	       name[index] != ')';
+	       index += cp_find_first_component (name + index))
+	    {
+	      gdb_assert (name[index] == ':');
+	      index += 2;
+	    }
 	  break;
 	case '>':
 	case ')':
 	case '\0':
 	case ':':
-	  return name;
+	  return index;
 	default:
 	  break;
 	}
@@ -590,14 +600,17 @@ check_possible_namespace_symbols_loop (const char *name, int len)
 {
   if (name[len] == ':')
     {
-      const char *next_name = cp_find_first_component (name + len + 2);
-      int done = check_possible_namespace_symbols_loop (name,
-							next_name - name);
+      int done;
+      int next_len = len + 2;
+
+      next_len += cp_find_first_component (name + next_len);
+      done = check_possible_namespace_symbols_loop (name, next_len);
 
       if (!done)
 	{
 	  done = check_one_possible_namespace_symbol (name, len);
 	}
+
       return done;
     }
   else
@@ -612,8 +625,7 @@ void
 cp_check_possible_namespace_symbols (const char *name)
 {
   check_possible_namespace_symbols_loop (name,
-					 cp_find_first_component (name)
-					 - name);
+					 cp_find_first_component (name));
 }
 
 /* Look for a symbol in possible_namespace_block named NAME.  */
@@ -679,9 +691,11 @@ cp_func_name (const char *full_name)
   if (!full_name)
     return NULL;
 
-  for (next_component = cp_find_first_component (previous_component);
+  for (next_component = (previous_component
+			 + cp_find_first_component (previous_component));
        *next_component == ':';
-       next_component = cp_find_first_component (previous_component))
+       next_component = (previous_component
+			 + cp_find_first_component (previous_component)))
     {
       /* Skip '::'.  */
       previous_component = next_component + 2;

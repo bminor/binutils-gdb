@@ -30,7 +30,7 @@ extern char *class_name_from_physname (const char *physname);
 
 extern char *method_name_from_physname (const char *physname);
 
-extern const char *cp_find_first_component (const char *name);
+extern int cp_find_first_component (const char *name);
 
 /* This is a struct to store data from "using directives" and similar
    language constructs.  NAME is a pointer to a string; its initial

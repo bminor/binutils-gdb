@@ -2939,8 +2939,7 @@ find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
 				 struct badness_vector **oload_champ_bv,
 				 int *oload_champ)
 {
-  int modified_namespace_len = namespace_len;
-  int next_namespace_len;
+  int next_namespace_len = namespace_len;
   int searched_deeper = 0;
   int num_fns = 0;
   struct cleanup *old_cleanups;
@@ -2948,14 +2947,13 @@ find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
   struct symbol **new_oload_syms;
   struct badness_vector *new_oload_champ_bv;
 
-  if (modified_namespace_len != 0)
+  if (next_namespace_len != 0)
     {
-      gdb_assert (qualified_name[modified_namespace_len] == ':');
-      modified_namespace_len +=  2;
+      gdb_assert (qualified_name[next_namespace_len] == ':');
+      next_namespace_len +=  2;
     }
   next_namespace_len
-    = (cp_find_first_component (qualified_name + modified_namespace_len)
-       - qualified_name);
+    += cp_find_first_component (qualified_name + next_namespace_len);
 
   /* Initialize these to values that can safely be xfree'd.  */
   *oload_syms = NULL;

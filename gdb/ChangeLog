@@ -1,3 +1,32 @@
+2003-02-12  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c (examine_compound_token): Call decode_namespace.
+	(decode_namespace): New function.
+	* cp-support.c (cp_find_first_component): Return the offset, not a
+	pointer.
+	(check_possible_namespace_symbols_loop): Update call to
+	cp_find_first_component.
+	(cp_check_possible_namespace_symbols): Ditto.
+	(cp_func_name): Ditto.
+	* buildsym.c (scan_for_anonymous_namespaces): Ditto.
+	(finish_block): Ditto.
+	* linespec.c (examine_compound_token): Ditto.
+	* symtab.c (lookup_symbol_aux_using_loop): Ditto.
+	* valops.c (find_oload_champ_namespace_loop): Ditto.
+	* cp-support.h: Declare cp_find_first_component to return an int.
+	* Makefile.in (linespec.o): cp_support_h.
+	* linespec.c (symtab_from_filename): Rename from handle_filename.
+	(decode_line_1): Call symtab_from_filename instead of
+	handle_filename.
+	(locate_compound_sym): Rename from locate_class_sym.  Search in
+	such a way that we find namespace symbols, too.
+	(examine_compound_token): Call locate_class_sym instead of
+	locate_compound_sym.
+	(locate_compound_sym): Add NAMESPACE arg.
+	(examine_compound_token): New arg to locate_compound_sym.
+	Handle TYPE_CODE_NAMESPACE.
+	#include "cp-support.hp"
+
 2003-02-11  David Carlton  <carlton@math.stanford.edu>
 
 	* valops.c (find_oload_champ): Add comment.

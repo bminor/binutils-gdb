@@ -33,6 +33,7 @@
 #include "cp-abi.h"
 #include "block.h"
 #include "parser-defs.h"
+#include "cp-support.h"
 
 /* Prototypes for local functions.  */
 
@@ -60,7 +61,15 @@ static int examine_compound_token (char **argptr,
 				   char *p,
 				   struct symtabs_and_lines *values);
 
-static struct symbol *locate_class_sym (char **argptr, char *p);
+static struct symbol *locate_compound_sym (char **argptr,
+					   char *current_component,
+					   const char *namespace);
+
+static int decode_namespace (char **argptr, int funfirstline,
+			     char ***canonical,
+			     char *next_component,
+			     const char *namespace,
+			     struct symtabs_and_lines *values);
 
 static char *find_next_token (char **argptr);
 
@@ -106,8 +115,9 @@ static NORETURN void cplusplus_error (const char *name,
 				      const char *fmt, ...)
      ATTR_NORETURN ATTR_FORMAT (printf, 2, 3);
 
-static struct symtab *handle_filename (char **argptr, char *filename_end,
-				       int is_quote_enclosed);
+static struct symtab *symtab_from_filename (char **argptr,
+					    char *filename_end,
+					    int is_quote_enclosed);
 
 static int is_all_digits (char *arg);
 
@@ -263,7 +273,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	/* No, the first part is a filename; set file_symtab
 	   accordingly.  Also, move argptr past the filename.  */
       
-	file_symtab = handle_filename (argptr, p, is_quote_enclosed);
+	file_symtab = symtab_from_filename (argptr, p, is_quote_enclosed);
       }
   }
 
@@ -664,78 +674,149 @@ examine_compound_token (char **argptr, int funfirstline,
 			char *saved_arg, char *current_component,
 			struct symtabs_and_lines *values)
 {
-  char *copy;
-  struct symbol *class_sym;
-  struct type *t;
-  
-  /* If CURRENT_COMPONENT points at the end of a name of a class, find
-     the corresponding symbol and advance ARGPTR past the end of the
-     class.  */
+  const char *namespace = "";
 
-  class_sym = locate_class_sym (argptr, current_component);
-
-  if (class_sym == NULL)
-    return 0;
-
-  t = check_typedef (SYMBOL_TYPE (class_sym));
-
-  switch (TYPE_CODE (t))
+  while (1)
     {
-    case TYPE_CODE_STRUCT:
-    case TYPE_CODE_UNION:
-      /* Find the next token (everything up to end or next blank).  */
+      char *copy;
+      struct symbol *class_sym;
+      struct type *t;
 
-      current_component = find_next_token (argptr);
-      copy = alloca (current_component - *argptr + 1);
-      memcpy (copy, *argptr, current_component - *argptr);
-      copy[current_component - *argptr] = '\0';
-      if (current_component != *argptr
-	  && copy[current_component - *argptr - 1]
-	  && (strchr (get_gdb_completer_quote_characters (),
-		      copy[current_component - *argptr - 1])
-	      != NULL))
-	copy[current_component - *argptr - 1] = '\0';
+      /* If CURRENT_COMPONENT points at the end of a name of a class
+	 or namespace, find the corresponding symbol and advance
+	 ARGPTR past the end of the class/namespace.  */
+
+      class_sym = locate_compound_sym (argptr, current_component, namespace);
+
+      if (class_sym == NULL)
+	return 0;
+
+      t = check_typedef (SYMBOL_TYPE (class_sym));
+
+      switch (TYPE_CODE (t))
+	{
+	case TYPE_CODE_STRUCT:
+	case TYPE_CODE_UNION:
+	  /* Find the next token (everything up to end or next blank).  */
+
+	  current_component = find_next_token (argptr);
+	  copy = alloca (current_component - *argptr + 1);
+	  memcpy (copy, *argptr, current_component - *argptr);
+	  copy[current_component - *argptr] = '\0';
+	  if (current_component != *argptr
+	      && copy[current_component - *argptr - 1]
+	      && (strchr (get_gdb_completer_quote_characters (),
+			  copy[current_component - *argptr - 1])
+		  != NULL))
+	    copy[current_component - *argptr - 1] = '\0';
 	      
-      while (*current_component == ' ' || *current_component == '\t')
-	current_component++;
-      *argptr = current_component;
+	  while (*current_component == ' ' || *current_component == '\t')
+	    current_component++;
+	  *argptr = current_component;
 
-      *values = find_method (funfirstline, canonical, saved_arg, copy,
-			     t, class_sym);
+	  *values = find_method (funfirstline, canonical, saved_arg, copy,
+				 t, class_sym);
       
-      return 1;
-    case TYPE_CODE_NAMESPACE:
-      return 0;
-    default:
-      /* FIXME: carlton/2002-11-19: Once this all settles down, this
-	 case should be an error rather than a return 0; that will
-	 allow us to make VALUES the return value rather than an
-	 argument.  */
-      return 0;
+	  return 1;
+	case TYPE_CODE_NAMESPACE:
+	  {
+	    char *next_component = find_next_token (argptr);
+	    namespace = TYPE_TAG_NAME (t);
+	    if (*next_component == ':')
+	      {
+		current_component = next_component;
+		break;
+	      }
+	    else
+	      {
+		return decode_namespace (argptr, funfirstline,
+					 canonical,
+					 next_component, namespace,
+					 values);
+	      }
+	  }
+	default:
+	  /* FIXME: carlton/2002-11-19: Once this all settles down, this
+	     case should be an error rather than a return 0; that will
+	     allow us to make VALUES the return value rather than an
+	     argument.  */
+	  return 0;
+	}
     }
 }
 
+/* Locate a symbol associated to a class/namespace that starts at
+   *argptr and ends at current_component, looking for it in the
+   namespace NAMESPACE.  Advance *ARGPTR to the start of the next
+   component.  It's the caller's responsibility to verify that the
+   symbol in question is non-NULL and of the correct type.  */
+
 static struct symbol *
-locate_class_sym (char **argptr, char *p)
+locate_compound_sym (char **argptr, char *current_component,
+		     const char *namespace)
 {
   char *p1;
   char *copy;
       
-  /* Extract the class name.  */
-  p1 = p;
-  while (p != *argptr && p[-1] == ' ')
-    --p;
-  copy = alloca (p - *argptr + 1);
-  memcpy (copy, *argptr, p - *argptr);
-  copy[p - *argptr] = 0;
+  /* Extract the class/namespace name.  */
+  p1 = current_component;
+  while (current_component != *argptr && current_component[-1] == ' ')
+    --current_component;
+  copy = alloca (current_component - *argptr + 1);
+  memcpy (copy, *argptr, current_component - *argptr);
+  copy[current_component - *argptr] = 0;
 	  
   /* Discard the class name from the arg.  */
-  p = p1 + (p1[0] == ':' ? 2 : 1);
-  while (*p == ' ' || *p == '\t')
-    p++;
-  *argptr = p;
+  current_component = p1 + (p1[0] == ':' ? 2 : 1);
+  while (*current_component == ' ' || *current_component == '\t')
+    current_component++;
+  *argptr = current_component;
 
-  return lookup_symbol (copy, NULL, STRUCT_NAMESPACE, NULL, NULL);
+  return lookup_symbol_namespace (namespace, strlen (namespace),
+				  copy, NULL, get_selected_block(0),
+				  VAR_NAMESPACE, NULL);
+}
+
+/* Try to look up the symbol in the namespace NAMESPACE whose name
+   starts at *ARGPTR and ends at *NEXT_COMPONENT.  If successful,
+   return 1 and store an appropriate symtabs_and_lines in VALUES;
+   otherwise, return 0.  */
+
+/* FIXME: carlton/2003-02-12: The only reason for not just returning
+   the symtabs_and_lines directly (and signalling an error if an
+   appropriate one can't be produced) is because
+   examine_compound_token wants it for historical reasons; I sure
+   don't like it.  */
+
+static int
+decode_namespace (char **argptr, int funfirstline,
+		  char ***canonical,
+		  char *next_component, const char *namespace,
+		  struct symtabs_and_lines *values)
+{
+  char *copy;
+  struct symbol *sym;
+  struct symtab *sym_symtab;
+
+  copy = alloca (next_component - *argptr + 1);
+  memcpy (copy, *argptr, next_component - *argptr);
+  copy[next_component - *argptr] = '\0';
+  *argptr = next_component;
+
+  sym = lookup_symbol_namespace (namespace, strlen (namespace),
+				 copy, NULL, get_selected_block(0),
+				 VAR_NAMESPACE, &sym_symtab);
+
+  if (sym != NULL)
+    {
+      *values = symbol_found (funfirstline, canonical, copy,
+			      sym, NULL, sym_symtab);
+      return 1;
+    }
+  else
+    {
+      return 0;
+    }
 }
 
 /* Find the next token (presumably a method name); if some of it is
@@ -1262,7 +1343,8 @@ cplusplus_error (const char *name, const char *fmt, ...)
    of *ARGPTR ending at FILE_NAME_END.  */
 
 static struct symtab *
-handle_filename (char **argptr, char *filename_end, int is_quote_enclosed)
+symtab_from_filename (char **argptr, char *filename_end,
+		       int is_quote_enclosed)
 {
   char *saved_filename_end;
   char *copy;
