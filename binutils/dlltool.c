@@ -497,6 +497,7 @@ struct mac
     const char *how_space;
     const char *how_align_short;
     const char *how_align_long;
+    const char *how_default_as_switches;
     const char *how_bfd_target;
     enum bfd_architecture how_bfd_arch;
     const unsigned char *how_jtab;
@@ -511,27 +512,33 @@ mtable[] =
 #define MARM 0
     "arm", ".byte", ".short", ".long", ".asciz", "@",
     "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long",
-    ".global", ".space", ".align\t2",".align\t4","pe-arm-little", bfd_arch_arm,
+    ".global", ".space", ".align\t2",".align\t4", "",
+    "pe-arm-little", bfd_arch_arm,
     arm_jtab, sizeof (arm_jtab), 8
   }
   ,
   {
 #define M386 1
-    "i386", ".byte", ".short", ".long", ".asciz", "#", "jmp *", ".global", ".space", ".align\t2",".align\t4","pe-i386",bfd_arch_i386,
-   i386_jtab, sizeof (i386_jtab), 2
+    "i386", ".byte", ".short", ".long", ".asciz", "#",
+    "jmp *", ".global", ".space", ".align\t2",".align\t4", "",
+    "pe-i386",bfd_arch_i386,
+    i386_jtab, sizeof (i386_jtab), 2
   }
   ,
   {
 #define MPPC 2
-    "ppc", ".byte", ".short", ".long", ".asciz", "#", "jmp *", ".global", ".space", ".align\t2",".align\t4","pe-powerpcle",bfd_arch_powerpc,
-   ppc_jtab, sizeof (ppc_jtab), 0
+    "ppc", ".byte", ".short", ".long", ".asciz", "#",
+    "jmp *", ".global", ".space", ".align\t2",".align\t4", "",
+    "pe-powerpcle",bfd_arch_powerpc,
+    ppc_jtab, sizeof (ppc_jtab), 0
   }
   ,
   {
 #define MTHUMB 3
     "thumb", ".byte", ".short", ".long", ".asciz", "@",
     "push\t{r6}\n\tldr\tr6, [pc, #8]\n\tldr\tr6, [r6]\n\tmov\tip, r6\n\tpop\t{r6}\n\tbx\tip",
-    ".global", ".space", ".align\t2",".align\t4","pe-arm-little", bfd_arch_arm,
+    ".global", ".space", ".align\t2",".align\t4", "=mthumb-interwork",
+    "pe-arm-little", bfd_arch_arm,
     thumb_jtab, sizeof (thumb_jtab), 12
   }
   ,
@@ -539,7 +546,8 @@ mtable[] =
   {
     "arm_interwork", ".byte", ".short", ".long", ".asciz", "@",
     "ldr\tip,[pc]\n\tldr\tip,[ip]\n\tbx\tip\n\t.long",
-    ".global", ".space", ".align\t2",".align\t4","pe-arm-little", bfd_arch_arm,
+    ".global", ".space", ".align\t2",".align\t4", "-mthumb-interwork",
+    "pe-arm-little", bfd_arch_arm,
     arm_interwork_jtab, sizeof (arm_interwork_jtab), 12
   }
   ,
@@ -547,7 +555,8 @@ mtable[] =
 #define MMCORE_BE 5
     "mcore", ".byte", ".short", ".long", ".asciz", "//",
     "jmpi\t1\n\tnop\n\t.long",
-    ".global", ".space", ".align\t2",".align\t4","pe-mcore-big", bfd_arch_mcore,
+    ".global", ".space", ".align\t2",".align\t4", "",
+    "pe-mcore-big", bfd_arch_mcore,
     mcore_be_jtab, sizeof (mcore_be_jtab), 8
   }
   ,
@@ -555,7 +564,8 @@ mtable[] =
 #define MMCORE_LE 6
     "mcore-le", ".byte", ".short", ".long", ".asciz", "//",
     "jmpi\t1\n\tnop\n\t.long",
-    ".global", ".space", ".align\t2",".align\t4","pe-mcore-little", bfd_arch_mcore,
+    ".global", ".space", ".align\t2",".align\t4", "-EL",
+    "pe-mcore-little", bfd_arch_mcore,
     mcore_le_jtab, sizeof (mcore_le_jtab), 8
   }
   ,
@@ -563,7 +573,8 @@ mtable[] =
 #define MMCORE_ELF 7
     "mcore-elf", ".byte", ".short", ".long", ".asciz", "//",
     "jmpi\t1\n\tnop\n\t.long",
-    ".global", ".space", ".align\t2",".align\t4","elf32-mcore-big", bfd_arch_mcore,
+    ".global", ".space", ".align\t2",".align\t4", "",
+    "elf32-mcore-big", bfd_arch_mcore,
     mcore_be_jtab, sizeof (mcore_be_jtab), 8
   }
   ,
@@ -571,11 +582,12 @@ mtable[] =
 #define MMCORE_ELF_LE 8
     "mcore-elf-le", ".byte", ".short", ".long", ".asciz", "//",
     "jmpi\t1\n\tnop\n\t.long",
-    ".global", ".space", ".align\t2",".align\t4","elf32-mcore-little", bfd_arch_mcore,
+    ".global", ".space", ".align\t2",".align\t4", "-EL",
+    "elf32-mcore-little", bfd_arch_mcore,
     mcore_le_jtab, sizeof (mcore_le_jtab), 8
   }
   ,
- {    0}
+  { 0 }
 };
 
 typedef struct dlist
@@ -798,11 +810,14 @@ asm_prefix (machine)
 #define ASM_RVA_AFTER  	rvaafter(machine)
 #define ASM_PREFIX	asm_prefix(machine)
 #define ASM_ALIGN_LONG  mtable[machine].how_align_long
-#define HOW_BFD_TARGET  0  /* always default*/
+#define HOW_BFD_READ_TARGET  0  /* always default*/
+#define HOW_BFD_WRITE_TARGET mtable[machine].how_bfd_target
 #define HOW_BFD_ARCH    mtable[machine].how_bfd_arch
 #define HOW_JTAB        mtable[machine].how_jtab
 #define HOW_JTAB_SIZE   mtable[machine].how_jtab_size
 #define HOW_JTAB_ROFF   mtable[machine].how_jtab_roff
+#define ASM_SWITCHES    mtable[machine].how_default_as_switches
+
 static char **oav;
 
 void
@@ -1716,6 +1731,23 @@ generate_idata_ofile (filvar)
     }
 }
 
+/* Assemble the specified file. */
+static void
+assemble_file (source, dest)
+     const char * source;
+     const char * dest;
+{
+  char * cmd;
+  
+  cmd = (char *) alloca (strlen (ASM_SWITCHES) + strlen (as_flags)
+			 + strlen (exp_name) + strlen (source)
+			 + strlen (dest) + 50);
+
+  sprintf (cmd, "%s %s -o %s %s", ASM_SWITCHES, as_flags, dest, source);
+
+  run (as_name, cmd);
+}
+
 static void
 gen_exp_file ()
 {
@@ -1723,7 +1755,6 @@ gen_exp_file ()
   int i;
   export_type *exp;
   dlist_type *dl;
-  char *cmd;
 
   /* xgettext:c-format */
   inform (_("Generating export file: %s\n"), exp_name);
@@ -1941,16 +1972,7 @@ gen_exp_file ()
   fclose (f);
 
   /* assemble the file */
-  cmd = (char *) alloca (strlen (as_flags) + strlen (exp_name)
-			 + sizeof TMP_ASM + 50);
-  sprintf (cmd, "%s -o %s %s", as_flags, exp_name, TMP_ASM);
-
-#ifdef DLLTOOL_ARM
-  if (machine == MARM_INTERWORK || machine == MTHUMB)
-    strcat (cmd, " -mthumb-interwork");
-#endif
-
-  run (as_name, cmd);
+  assemble_file (TMP_ASM, exp_name);
 
   if (dontdeltemps == 0)
     unlink (TMP_ASM);
@@ -2134,7 +2156,7 @@ make_one_lib_file (exp, i)
       char *name;
       FILE *f;
       const char *prefix = "d";
-      char *cmd;
+      char *dest;
 
       name = (char *) alloca (strlen (prefix) + 10);
       sprintf (name, "%ss%05d.s", prefix, i);
@@ -2173,16 +2195,9 @@ make_one_lib_file (exp, i)
 
       fclose (f);
 
-      cmd = (char *) alloca (strlen (as_flags) + 2 * strlen (prefix) + 50);
-      sprintf (cmd, "%s -o %ss%05d.o %ss%d.s",
-	       as_flags, prefix, i, prefix, i);
-
-#ifdef DLLTOOL_ARM
-      if (machine == MARM_INTERWORK || machine == MTHUMB)
-	strcat (cmd, " -mthumb-interwork");
-#endif
-  
-      run (as_name, cmd);
+      dest = (char *) alloca (strlen (prefix) + 10);
+      sprintf (dest, "%ss%05d.o", prefix, i);
+      assemble_file (name, dest);
     }
 #else /* if 0 */
     {
@@ -2209,7 +2224,7 @@ make_one_lib_file (exp, i)
       
       sprintf (outname, "%s%05d.o", TMP_STUB, i);
       
-      abfd = bfd_openw (outname, HOW_BFD_TARGET);
+      abfd = bfd_openw (outname, HOW_BFD_WRITE_TARGET);
       
       if (!abfd)
 	/* xgettext:c-format */
@@ -2586,7 +2601,7 @@ make_one_lib_file (exp, i)
 
       bfd_set_symtab (abfd, ptrs, oidx);
       bfd_close (abfd);
-      abfd = bfd_openr (outname, HOW_BFD_TARGET);
+      abfd = bfd_openr (outname, HOW_BFD_READ_TARGET);
       return abfd;
     }
 #endif
@@ -2596,7 +2611,6 @@ static bfd *
 make_head ()
 {
   FILE *f = fopen (TMP_HEAD_S, FOPEN_WT);
-  char *cmd;
 
   if (f == NULL)
     {
@@ -2647,25 +2661,15 @@ make_head ()
   
   fclose (f);
 
-  cmd = (char *) alloca (strlen (as_flags) + sizeof TMP_HEAD_O
-			 + sizeof TMP_HEAD_S + 50);
-  sprintf (cmd, "%s -o %s %s", as_flags, TMP_HEAD_O, TMP_HEAD_S);
-  
-#ifdef DLLTOOL_ARM
-  if (machine == MARM_INTERWORK || machine == MTHUMB)
-    strcat (cmd, " -mthumb-interwork");
-#endif
-  
-  run (as_name, cmd);
+  assemble_file (TMP_HEAD_S, TMP_HEAD_O);
 
-  return bfd_openr (TMP_HEAD_O, HOW_BFD_TARGET);
+  return bfd_openr (TMP_HEAD_O, HOW_BFD_READ_TARGET);
 }
 
 static bfd *
 make_tail ()
 {
   FILE *f = fopen (TMP_TAIL_S, FOPEN_WT);
-  char *cmd;
 
   if (f == NULL)
     {
@@ -2716,18 +2720,9 @@ make_tail ()
 
   fclose (f);
 
-  cmd = (char *) alloca (strlen (as_flags) + sizeof TMP_TAIL_O
-			 + sizeof TMP_TAIL_S + 50);
-  sprintf (cmd, "%s -o %s %s", as_flags, TMP_TAIL_O, TMP_TAIL_S);
+  assemble_file (TMP_TAIL_S, TMP_TAIL_O);
   
-#ifdef DLLTOOL_ARM
-  if (machine == MARM_INTERWORK || machine == MTHUMB)
-    strcat (cmd, " -mthumb-interwork");
-#endif
-  
-  run (as_name, cmd);
-  
-  return  bfd_openr (TMP_TAIL_O, HOW_BFD_TARGET);
+  return  bfd_openr (TMP_TAIL_O, HOW_BFD_READ_TARGET);
 }
 
 static void
@@ -2742,7 +2737,7 @@ gen_lib_file ()
 
   unlink (imp_name);
 
-  outarch = bfd_openw (imp_name, HOW_BFD_TARGET);
+  outarch = bfd_openw (imp_name, HOW_BFD_WRITE_TARGET);
 
   if (!outarch)
     /* xgettext:c-format */

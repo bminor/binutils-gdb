@@ -1,3 +1,26 @@
+1999-10-22  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c (struct mac): Add new field 'how_default_as_switches'.
+	(mtable): Initialise new field.  Some machines have a non empty
+	string for this field.
+	(HOW_BFD_TARGET): Undefine and replace with...
+	(HOW_BFD_READ_TARGET): New macro: bfd target to use when opening a
+	file for reading.  This is set to 0 so that any recognisable bfd
+	format can be read.
+	(HOW_BFD_WRITE_TARGET): New macro: bfd target to use when opening
+	a file for writing.  This is set to the target machine type.
+	(ASM_SWITCHES): New macro: default switches to use when assembling
+	a file.
+	(assemble_file): New function: Assemble a source file into a
+	destination object file.
+	(gen_exp_file): Use assemble_file to create the exp file.
+	(make_one_lib_file): Use assemble_file to create the lib file.
+	Open output file use HOW_BFD_WRITE_TARGET and input files using
+	HOW_BFD_READ_TARGET.
+	(make_head): Use assemble_file to create the head file.
+	(make_tail): Use assemble_file to create the tail file.
+	(gen_lib_file): Open output file use HOW_BFD_WRITE_TARGET.
+
 1999-10-15  Ian Lance Taylor  <ian@zembu.com>
 
 	* ar.c (normalize): Fix full_pathname code.
