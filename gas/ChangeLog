@@ -1,3 +1,17 @@
+Thu Sep  8 17:18:24 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* config/obj-ecoff.h : Change names to  OBJ_GENERATE_ASM_LINENO,
+	and generate_asm_lineno.
+	* config/obj-elf.h : ditto.
+	* read.h : ditto.
+	* read.c (read_a_source_file): if no file when inst is read, set
+	generate_asm_lineno to true.
+	* ecoff.h : change name to generate_asm_lineno and add function
+	ecoff_no_current_file.
+	* ecoff.c : change name to generate_asm_lineno.
+	* ecoff.c (ecoff_generate_asm_lineno) : new function, to generate 
+	ecoff style line for asm file.
+
 Thu Sep  8 19:43:49 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/obj-coff.c (size_section): Do an fprintf to stderr rather

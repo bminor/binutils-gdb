@@ -2197,11 +2197,12 @@ add_file (file_name, indx)
 	as_fatal ("fake .file after real one");
       as_where (&file, (unsigned int *) NULL);
       file_name = (const char *) file;
+
       if (! symbol_table_frozen)
-	generate_asm_line_stab = 1;
+	generate_asm_lineno = 1;
     }
   else
-      generate_asm_line_stab = 0;
+      generate_asm_lineno = 0;
 
 #ifndef NO_LISTING
   if (listing)
@@ -2283,7 +2284,11 @@ add_file (file_name, indx)
       fil_ptr->int_type = add_aux_sym_tir (&int_type_info,
 					   hash_yes,
 					   &cur_file_ptr->thash_head[0]);
-      if (generate_asm_line_stab)
+      /* gas used to have a bug that if the file does not have any
+	 symbol, it either will abort or will not build the file,
+	 the following is to get around that problem. ---kung*/
+#if 0
+      if (generate_asm_lineno)
 	{
 	  mark_stabs (0);
           (void) add_ecoff_symbol (file_name, st_Nil, sc_Nil,
@@ -2295,6 +2300,7 @@ add_file (file_name, indx)
 				   (symbolS *) NULL, 0,
 				   ECOFF_MARK_STAB (N_LSYM));
 	}
+#endif
     }
 }
 
@@ -3002,7 +3008,8 @@ ecoff_directive_end (ignore)
 					 (valueT) frag_now_fix (),
 					 frag_now),
 			     (symint_t) 0, (symint_t) 0);
-      if (generate_asm_line_stab)
+
+      if (stabs_seen && generate_asm_lineno)
 	{
 	char *n;
 
@@ -5123,6 +5130,60 @@ generate_ecoff_stab (what, string, type, other, desc)
   cur_file_ptr = save_file_ptr;
 }
 
+int 
+ecoff_no_current_file ()
+{
+  return cur_file_ptr == (efdr_t *) NULL;
+}
+
+void
+ecoff_generate_asm_lineno (filename, lineno)
+    char *filename;
+    int lineno;
+{
+  lineno_list_t *list;
+
+  /* this potential can cause problem, when we start to see stab half the 
+     way thru the file */
+/*
+  if (stabs_seen)
+    ecoff_generate_asm_line_stab(filename, lineno);
+*/
+
+  if (strcmp (current_stabs_filename, filename))
+    {
+      add_file (filename, 0);
+      generate_asm_lineno = 1;
+    }
+
+  list = allocate_lineno_list ();
+
+  list->next = (lineno_list_t *) NULL;
+  list->file = cur_file_ptr;
+  list->proc = cur_proc_ptr;
+  list->frag = frag_now;
+  list->paddr = frag_now_fix ();
+  list->lineno = lineno;
+
+  /* A .loc directive will sometimes appear before a .ent directive,
+     which means that cur_proc_ptr will be NULL here.  Arrange to
+     patch this up.  */
+  if (cur_proc_ptr == (proc_t *) NULL)
+    {
+      lineno_list_t **pl;
+
+      pl = &noproc_lineno;
+      while (*pl != (lineno_list_t *) NULL)
+        pl = &(*pl)->next;
+      *pl = list;
+    }
+  else
+    {
+      *last_lineno_ptr = list;
+      last_lineno_ptr = &list->next;
+    }
+}
+
 static int line_label_cnt = 0;
 void
 ecoff_generate_asm_line_stab (filename, lineno)
@@ -5134,7 +5195,7 @@ ecoff_generate_asm_line_stab (filename, lineno)
   if (strcmp (current_stabs_filename, filename)) 
     {
       add_file (filename, 0);
-      generate_asm_line_stab = 1;
+      generate_asm_lineno = 1;
     }
 
   line_label_cnt++;

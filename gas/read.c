@@ -60,7 +60,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 char *input_line_pointer;	/*->next char of source file to parse. */
 
-int generate_asm_line_stab = 0;	/* flag to generate line stab for .s file */
+int generate_asm_lineno = 0;	/* flag to generate line stab for .s file */
 
 #if BITS_PER_CHAR != 8
 /*  The following table is indexed by[(char)] and will break if
@@ -546,13 +546,18 @@ read_a_source_file (name)
 		      c = *input_line_pointer;
 		      *input_line_pointer = '\0';
 
-#ifdef OBJ_GENERATE_ASM_LINE_STAB
-		      if (generate_asm_line_stab)
+#ifdef OBJ_GENERATE_ASM_LINENO
+		      if (generate_asm_lineno == 0)
+			{
+		          if (ecoff_no_current_file())
+			    generate_asm_lineno = 1;
+			}
+		      else
 			{
 			int lineno;
 			char *s;
 			  as_where (&s, &lineno);
-			  OBJ_GENERATE_ASM_LINE_STAB (lineno);
+			  OBJ_GENERATE_ASM_LINENO (s, lineno);
 			}
 #endif
 
