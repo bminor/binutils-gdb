@@ -1,5 +1,9 @@
 Wed Sep 11 11:57:56 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* tekhex.c (first_phase): Change type parameter from char to int.
+	(out): Likewise.
+	(pass_over): Change func to expect int, not char.
+
 	* elf.c (assign_file_positions_for_segments): Test SEC_ALLOC
 	rather than SEC_LOAD when aligning the file offset for the first
 	section in a segment.
