@@ -1,3 +1,7 @@
+2001-02-16  Loren J. Rittle  <ljrittle@acm.org>
+
+	* cplus-dem.c (main): Initialize style.
+	
 2001-01-31  Bryce McKinlay  <bryce@albatross.co.nz>
 
 	Add support for Java demangling under the v3 ABI:
