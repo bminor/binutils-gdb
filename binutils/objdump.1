@@ -44,6 +44,7 @@ objdump \- display information from object files.
 .RB " | " "\-\-architecture="\c
 .I machine\c
 \&\|] 
+.RB "[\|" \-p | \-\-private\-headers "\|]" 
 .RB "[\|" \-\-prefix\-addresses "\|]" 
 .RB "[\|" \-r | \-\-reloc "\|]" 
 .RB "[\|" \-R | \-\-dynamic\-reloc "\|]" 
@@ -257,6 +258,14 @@ Specify the architecture to use when disassembling object files.  This
 can be useful when disassembling object files which do not describe
 architecture information, such as S-records.  You can list the available
 architectures with the \fB\-i\fP option. 
+
+.TP
+.B \-p
+.TP
+.B \-\-private\-headers
+Print information that is specific to the object file format.  The
+exact information printed depends upon the object file format.  For
+some object file formats, no additional information is printed.
 
 .TP
 .B \-r

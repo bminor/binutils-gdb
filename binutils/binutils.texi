@@ -1126,6 +1126,7 @@ objdump [ -a | --archive-headers ]
         [ -j @var{section} | --section=@var{section} ]
         [ -l | --line-numbers ] [ -S | --source ]
         [ -m @var{machine} | --architecture=@var{machine} ]
+        [ -p | --private-headers ]
         [ -r | --reloc ] [ -R | --dynamic-reloc ]
         [ -s | --full-contents ]  [ --stabs ]
         [ -t | --syms ] [ -T | --dynamic-syms ] [ -x | --all-headers ]
@@ -1282,6 +1283,12 @@ Specify the architecture to use when disassembling object files.  This
 can be useful when disassembling object files which do not describe
 architecture information, such as S-records.  You can list the available
 architectures with the @samp{-i} option.
+
+@item -p
+@itemx --private-headers
+Print information that is specific to the object file format.  The exact
+information printed depends upon the object file format.  For some
+object file formats, no additional information is printed.
 
 @item -r
 @itemx --reloc

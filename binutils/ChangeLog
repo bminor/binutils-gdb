@@ -1,3 +1,7 @@
+Wed Jun  3 19:31:33 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils.texi, objdump.1: Document -p/--private-headers.
+
 Wed Jun  3 12:09:40 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* objcopy.c: Add new command line options: --change-section-lma
