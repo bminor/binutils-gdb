@@ -1,3 +1,10 @@
+1999-08-19  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-arm.h (arm_add_to_rel): New function.  Add a value to
+	a REL style reloc.
+	(elf32_arm_relocate_section): Use arm_add_to_rel to increment
+	REL relocs when performing a partial relocation.
+
 1999-08-18  Donn Terry  <donn@interix.com>
 
 	* cofflink.c: Move definitions of N_TMASK, et. al., out of

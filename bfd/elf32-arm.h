@@ -1581,6 +1581,45 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
     }
 }
 
+#ifdef USE_REL
+/* Add INCREMENT to the reloc (of type HOWTO) at ADDRESS.  */
+static void
+arm_add_to_rel (abfd, address, howto, increment)
+     bfd *              abfd;
+     bfd_vma            address;
+     reloc_howto_type * howto;
+     bfd_signed_vma     increment;
+{
+  bfd_vma        contents;
+  bfd_signed_vma addend;
+
+  contents = bfd_get_32 (abfd, address);
+
+  /* Get the (signed) value from the instruction.  */
+  addend = contents & howto->src_mask;
+  if (addend & ((howto->src_mask + 1) >> 1))
+    {
+      bfd_signed_vma mask;
+      
+      mask = -1;
+      mask &= ~ howto->src_mask;
+      addend |= mask;
+    }
+
+  /* Add in the increment, (which is a byte value).  */
+  addend <<= howto->size;
+  addend +=  increment;
+      
+  /* Should we check for overflow here ?  */
+
+  /* Drop any undesired bits.  */
+  addend >>= howto->rightshift;
+  
+  contents = (contents & ~ howto->dst_mask) | (addend & howto->dst_mask);
+  
+  bfd_put_32 (abfd, contents, address);
+}
+#endif /* USE_REL */
 
 /* Relocate an ARM ELF section.  */
 static boolean
@@ -1641,18 +1680,8 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  sec = local_sections[r_symndx];
 #ifdef USE_REL
-		  {
-		    bfd_vma val;
-		    bfd_vma insn;
-
-		    insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
-		    val = insn + ((sec->output_offset + sym->st_value)
-				  >> howto->rightshift);
-		    val &= howto->dst_mask;
-		    val |= insn & ~(howto->dst_mask);
-
-		    bfd_put_32 (input_bfd, val, contents + rel->r_offset);
-		  }
+		  arm_add_to_rel (input_bfd, contents + rel->r_offset,
+				  howto, sec->output_offset + sym->st_value);
 #else
 		  rel->r_addend += (sec->output_offset + sym->st_value)
 		    >> howto->rightshift;
