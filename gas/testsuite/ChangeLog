@@ -1,3 +1,8 @@
+2002-12-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/arm/adrl.s: Pad end of .text.
+	* gas/arm/adrl.d: Adjust to suit.
+
 2002-12-04  David Mosberger  <davidm@hpl.hp.com>
 
 	* gas/ia64/opc-b.d: Update for instructions added by SDM2.1.

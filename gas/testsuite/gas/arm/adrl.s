@@ -21,3 +21,4 @@ foo:
 
 	.globl X; 
 X:
+	.p2align 5,0
