@@ -1,5 +1,36 @@
 2002-02-01  Alan Modra  <amodra@bigpond.net.au>
 
+	* alpha.c (alpha_find_call): Warning fixes.
+	* mips.c (mips_find_call): Likewise.
+	* sparc.c (sparc_find_call): Likewise.
+	* basic_blocks.c: Warning fixes.  Eliminate DEFUN.
+	* call_graph.c: Likewise.
+	* cg_arcs.c: Likewise.
+	* cg_dfn.cp: Likewise.
+	* gprof.c: Likewise.
+	* gprof.h: Likewise.
+	* hist.c: Likewise.
+	* search_list.c: Likewise.
+	* source.c: Likewise.
+	* source.h: Likewise.
+	* sym_ids.c: Likewise.
+	* symtab.c: Likewise.
+	* symtab.h: Likewise.
+	* utils.c: Likewise.
+	* cg_print.c: Likewise.
+	(struct function_map, symbol_map, symbol_map_count): Move
+	declaration to..
+	* corefile: ..here.
+	* corefile.c: Warning fixes.  Eliminate DEFUN.
+	(struct function_map): Remove declaration.
+	* gmon_io.c: Warning fixes.  Eliminate DEFUN.
+	(gmon_io_read_64): Make static.
+	(gmon_io_write_64): Likewise.
+	(gmon_read_raw_arc): Likewise.
+	(gmon_write_raw_arc): Likewise.
+	(gmon_io_write_8): Don't pass char, pass int param.
+	* gmon_io.h (gmon_io_write_8): Likewise.
+
 	* Makefile.am: Run "make dep-am"
 	* Makefile.in: Regenerate.
 

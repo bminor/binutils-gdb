@@ -34,11 +34,20 @@
 #include "hist.h"
 #include "libiberty.h"
 
+static int gmon_io_read_64 PARAMS ((FILE *, BFD_HOST_U_64_BIT *));
+static int gmon_io_write_64 PARAMS ((FILE *, BFD_HOST_U_64_BIT));
+static int gmon_read_raw_arc
+  PARAMS ((FILE *, bfd_vma *, bfd_vma *, unsigned long *));
+static int gmon_write_raw_arc
+  PARAMS ((FILE *, bfd_vma, bfd_vma, unsigned long));
+
 int gmon_input = 0;
 int gmon_file_version = 0;	/* 0 == old (non-versioned) file format.  */
 
 int
-DEFUN (gmon_io_read_32, (ifp, valp), FILE * ifp AND unsigned int *valp)
+gmon_io_read_32 (ifp, valp)
+     FILE *ifp;
+     unsigned int *valp;
 {
   char buf[4];
 
@@ -48,8 +57,10 @@ DEFUN (gmon_io_read_32, (ifp, valp), FILE * ifp AND unsigned int *valp)
   return 0;
 }
 
-int
-DEFUN (gmon_io_read_64, (ifp, valp), FILE * ifp AND BFD_HOST_U_64_BIT *valp)
+static int
+gmon_io_read_64 (ifp, valp)
+     FILE *ifp;
+     BFD_HOST_U_64_BIT *valp;
 {
   char buf[8];
 
@@ -60,7 +71,9 @@ DEFUN (gmon_io_read_64, (ifp, valp), FILE * ifp AND BFD_HOST_U_64_BIT *valp)
 }
 
 int
-DEFUN (gmon_io_read_vma, (ifp, valp), FILE * ifp AND bfd_vma *valp)
+gmon_io_read_vma (ifp, valp)
+     FILE *ifp;
+     bfd_vma *valp;
 {
   unsigned int val32;
   BFD_HOST_U_64_BIT val64;
@@ -88,7 +101,10 @@ DEFUN (gmon_io_read_vma, (ifp, valp), FILE * ifp AND bfd_vma *valp)
 }
 
 int
-DEFUN (gmon_io_read, (ifp, buf, n), FILE * ifp AND char *buf AND size_t n)
+gmon_io_read (ifp, buf, n)
+     FILE *ifp;
+     char *buf;
+     size_t n;
 {
   if (fread (buf, 1, n, ifp) != n)
     return 1;
@@ -96,29 +112,35 @@ DEFUN (gmon_io_read, (ifp, buf, n), FILE * ifp AND char *buf AND size_t n)
 }
 
 int
-DEFUN (gmon_io_write_32, (ofp, val), FILE * ofp AND unsigned int val)
+gmon_io_write_32 (ofp, val)
+     FILE *ofp;
+     unsigned int val;
 {
   char buf[4];
 
-  bfd_put_32 (core_bfd, val, buf);
+  bfd_put_32 (core_bfd, (bfd_vma) val, buf);
   if (fwrite (buf, 1, 4, ofp) != 4)
     return 1;
   return 0;
 }
 
-int
-DEFUN (gmon_io_write_64, (ofp, val), FILE * ofp AND BFD_HOST_U_64_BIT val)
+static int
+gmon_io_write_64 (ofp, val)
+     FILE *ofp;	
+     BFD_HOST_U_64_BIT val;
 {
   char buf[8];
 
-  bfd_put_64 (core_bfd, val, buf);
+  bfd_put_64 (core_bfd, (bfd_vma) val, buf);
   if (fwrite (buf, 1, 8, ofp) != 8)
     return 1;
   return 0;
 }
 
 int
-DEFUN (gmon_io_write_vma, (ofp, val), FILE * ofp AND bfd_vma val)
+gmon_io_write_vma (ofp, val)
+     FILE *ofp;
+     bfd_vma val;
 {
 
   switch (bfd_arch_bits_per_address (core_bfd))
@@ -142,7 +164,9 @@ DEFUN (gmon_io_write_vma, (ofp, val), FILE * ofp AND bfd_vma val)
 }
 
 int
-DEFUN (gmon_io_write_8, (ofp, val), FILE * ofp AND unsigned char val)
+gmon_io_write_8 (ofp, val)
+     FILE *ofp;	
+     unsigned int val;
 {
   char buf[1];
 
@@ -153,15 +177,22 @@ DEFUN (gmon_io_write_8, (ofp, val), FILE * ofp AND unsigned char val)
 }
 
 int
-DEFUN (gmon_io_write, (ofp, buf, n), FILE * ofp AND char *buf AND size_t n)
+gmon_io_write (ofp, buf, n)
+     FILE *ofp;	
+     char *buf;
+     size_t n;
 {
   if (fwrite (buf, 1, n, ofp) != n)
     return 1;
   return 0;
 }
 
-int
-DEFUN (gmon_read_raw_arc, (ifp, fpc, spc, cnt), FILE * ifp AND bfd_vma * fpc AND bfd_vma * spc AND unsigned long * cnt)
+static int
+gmon_read_raw_arc (ifp, fpc, spc, cnt)
+     FILE *ifp;
+     bfd_vma *fpc;
+     bfd_vma *spc;
+     unsigned long *cnt;
 {
   BFD_HOST_U_64_BIT cnt64;
   unsigned int cnt32;
@@ -192,8 +223,12 @@ DEFUN (gmon_read_raw_arc, (ifp, fpc, spc, cnt), FILE * ifp AND bfd_vma * fpc AND
   return 0;
 }
 
-int
-DEFUN (gmon_write_raw_arc, (ofp, fpc, spc, cnt), FILE * ofp AND bfd_vma fpc AND bfd_vma spc AND unsigned long cnt)
+static int
+gmon_write_raw_arc (ofp, fpc, spc, cnt)
+     FILE *ofp;
+     bfd_vma fpc;
+     bfd_vma spc;
+     unsigned long cnt;
 {
 
   if (gmon_io_write_vma (ofp, fpc)
@@ -221,7 +256,8 @@ DEFUN (gmon_write_raw_arc, (ofp, fpc, spc, cnt), FILE * ofp AND bfd_vma fpc AND 
 }
 
 void
-DEFUN (gmon_out_read, (filename), const char *filename)
+gmon_out_read (filename)
+     const char *filename;
 {
   FILE *ifp;
   struct gmon_hdr ghdr;
@@ -538,7 +574,8 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 
 
 void
-DEFUN (gmon_out_write, (filename), const char *filename)
+gmon_out_write (filename)
+     const char *filename;
 {
   FILE *ofp;
   struct gmon_hdr ghdr;
@@ -555,7 +592,7 @@ DEFUN (gmon_out_write, (filename), const char *filename)
       /* Write gmon header.  */
 
       memcpy (&ghdr.cookie[0], GMON_MAGIC, 4);
-      bfd_put_32 (core_bfd, GMON_VERSION, (bfd_byte *) ghdr.version);
+      bfd_put_32 (core_bfd, (bfd_vma) GMON_VERSION, (bfd_byte *) ghdr.version);
 
       if (fwrite (&ghdr, sizeof (ghdr), 1, ofp) != 1)
 	{
@@ -652,7 +689,7 @@ DEFUN (gmon_out_write, (filename), const char *filename)
 	  || hz != hertz())
 	{
           if (gmon_io_write_32 (ofp, GMONVERSION)
-	      || gmon_io_write_32 (ofp, hz))
+	      || gmon_io_write_32 (ofp, (unsigned int) hz))
 	    {
 	      perror (filename);
 	      done (1);
@@ -671,7 +708,8 @@ DEFUN (gmon_out_write, (filename), const char *filename)
       /* Dump the samples.  */
       for (i = 0; i < hist_num_bins; ++i)
 	{
-	  bfd_put_16 (core_bfd, hist_sample[i], (bfd_byte *) & raw_bin_count[0]);
+	  bfd_put_16 (core_bfd, (bfd_vma) hist_sample[i],
+		      (bfd_byte *) &raw_bin_count[0]);
 	  if (fwrite (&raw_bin_count[0], sizeof (raw_bin_count), 1, ofp) != 1)
 	    {
 	      perror (filename);

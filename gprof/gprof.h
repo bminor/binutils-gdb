@@ -126,6 +126,6 @@ extern File_Format file_format;		/* requested file format */
 
 extern boolean first_output;		/* no output so far? */
 
-extern void done PARAMS ((int status));
+extern void done PARAMS ((int status)) ATTRIBUTE_NORETURN;
 
 #endif /* gprof_h */

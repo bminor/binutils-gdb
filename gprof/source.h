@@ -1,6 +1,6 @@
 /* source.h
 
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -53,8 +53,8 @@ extern Source_File *source_file_lookup_name PARAMS ((const char *));
    Returns a pointer to the output file (which maybe stdout) such
    that summary statistics can be printed.  If the returned file
    is not stdout, it should be closed when done with it.  */
-extern FILE *annotate_source PARAMS ((Source_File * sf, int max_width,
-				      void (*annote) (char *b, int w, int l,
-						      void *arg),
-				      void *arg));
+extern FILE *annotate_source
+  PARAMS ((Source_File *sf, unsigned int max_width,
+	   void (*annote) (char *, unsigned int, int, PTR arg),
+	   PTR arg));
 #endif /* source_h */

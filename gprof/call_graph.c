@@ -1,6 +1,6 @@
 /* call_graph.c  -  Create call graphs.
 
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -30,9 +30,11 @@
 #include "gmon_out.h"
 #include "sym_ids.h"
 
-extern void
-DEFUN (cg_tally, (from_pc, self_pc, count),
-       bfd_vma from_pc AND bfd_vma self_pc AND unsigned long count)
+void
+cg_tally (from_pc, self_pc, count)
+     bfd_vma from_pc;
+     bfd_vma self_pc;
+     unsigned long count;
 {
   Sym *parent;
   Sym *child;
@@ -78,7 +80,9 @@ DEFUN (cg_tally, (from_pc, self_pc, count),
    for formatting error-messages only.  */
 
 void
-DEFUN (cg_read_rec, (ifp, filename), FILE * ifp AND CONST char *filename)
+cg_read_rec (ifp, filename)
+     FILE *ifp;
+     const char *filename;
 {
   bfd_vma from_pc, self_pc;
   unsigned int count;
@@ -105,7 +109,9 @@ DEFUN (cg_read_rec, (ifp, filename), FILE * ifp AND CONST char *filename)
    only.  */
 
 void
-DEFUN (cg_write_arcs, (ofp, filename), FILE * ofp AND const char *filename)
+cg_write_arcs (ofp, filename)
+     FILE *ofp;
+     const char *filename;
 {
   Arc *arc;
   Sym *sym;

@@ -1,6 +1,6 @@
 /* corefile.h
 
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -20,6 +20,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef corefile_h
 #define corefile_h
+
+struct function_map
+{
+  char *function_name;
+  char *file_name;
+};
+
+extern struct function_map *symbol_map;
+extern unsigned int symbol_map_count;
 
 extern bfd *core_bfd;		/* BFD for core-file.  */
 extern int core_num_syms;	/* # of entries in symbol-table.  */

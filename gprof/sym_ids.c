@@ -1,6 +1,6 @@
 /* sym_ids.c
 
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -46,6 +46,12 @@ struct sym_id
   }
  *id_list;
 
+static void parse_spec PARAMS ((char *, Sym *));
+static void parse_id PARAMS ((struct sym_id *));
+static boolean match PARAMS ((Sym *, Sym *));
+static void extend_match PARAMS ((struct match *, Sym *, Sym_Table *, boolean));
+
+
 Sym_Table syms[NUM_TABLES];
 
 #ifdef DEBUG
@@ -74,8 +80,9 @@ static Source_File non_existent_file =
 
 
 void
-DEFUN (sym_id_add, (spec, which_table),
-       const char *spec AND Table_Id which_table)
+sym_id_add (spec, which_table)
+     const char *spec;
+     Table_Id which_table;
 {
   struct sym_id *id;
   int len = strlen (spec);
@@ -103,7 +110,9 @@ DEFUN (sym_id_add, (spec, which_table),
    FILENAME not containing a dot can be specified by FILENAME.  */
 
 static void
-DEFUN (parse_spec, (spec, sym), char *spec AND Sym * sym)
+parse_spec (spec, sym)
+     char *spec;
+     Sym *sym;
 {
   char *colon;
 
@@ -158,7 +167,8 @@ DEFUN (parse_spec, (spec, sym), char *spec AND Sym * sym)
    by parse_spec().  */
 
 static void
-DEFUN (parse_id, (id), struct sym_id *id)
+parse_id (id)
+     struct sym_id *id;
 {
   char *slash;
 
@@ -207,7 +217,9 @@ DEFUN (parse_id, (id), struct sym_id *id)
 /* Return TRUE iff PATTERN matches SYM.  */
 
 static boolean
-DEFUN (match, (pattern, sym), Sym * pattern AND Sym * sym)
+match (pattern, sym)
+     Sym *pattern;
+     Sym *sym;
 {
   return (pattern->file ? pattern->file == sym->file : true)
     && (pattern->line_num ? pattern->line_num == sym->line_num : true)
@@ -219,8 +231,11 @@ DEFUN (match, (pattern, sym), Sym * pattern AND Sym * sym)
 
 
 static void
-DEFUN (extend_match, (m, sym, tab, second_pass),
-     struct match *m AND Sym * sym AND Sym_Table * tab AND boolean second_pass)
+extend_match (m, sym, tab, second_pass)
+     struct match *m;
+     Sym *sym;
+     Sym_Table *tab;
+     boolean second_pass;
 {
   if (m->prev_match != sym - 1)
     {
@@ -255,7 +270,7 @@ DEFUN (extend_match, (m, sym, tab, second_pass),
    requests---you get what you ask for!  */
 
 void
-DEFUN_VOID (sym_id_parse)
+sym_id_parse ()
 {
   Sym *sym, *left, *right;
   struct sym_id *id;
@@ -354,12 +369,14 @@ DEFUN_VOID (sym_id_parse)
    very big (the user has to type them!), so a linear search is probably
    tolerable.  */
 boolean
-DEFUN (sym_id_arc_is_present, (symtab, from, to),
-       Sym_Table * symtab AND Sym * from AND Sym * to)
+sym_id_arc_is_present (sym_tab, from, to)
+     Sym_Table *sym_tab;
+     Sym *from;
+     Sym *to;
 {
   Sym *sym;
 
-  for (sym = symtab->base; sym < symtab->limit; ++sym)
+  for (sym = sym_tab->base; sym < sym_tab->limit; ++sym)
     {
       if (from->addr >= sym->addr && from->addr <= sym->end_addr
 	  && arc_lookup (sym, to))

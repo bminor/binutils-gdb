@@ -33,6 +33,9 @@
 #include "sym_ids.h"
 #include "demangle.h"
 
+static void usage PARAMS ((FILE *, int)) ATTRIBUTE_NORETURN;
+int main PARAMS ((int, char **));
+
 const char *whoami;
 const char *function_mapping_file;
 const char *a_out_name = A_OUTNAME;
@@ -142,7 +145,9 @@ static struct option long_options[] =
 
 
 static void
-DEFUN (usage, (stream, status), FILE * stream AND int status)
+usage (stream, status)
+     FILE *stream;
+     int status;
 {
   fprintf (stream, _("\
 Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
@@ -166,7 +171,9 @@ Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
 
 
 int
-DEFUN (main, (argc, argv), int argc AND char **argv)
+main (argc, argv)
+     int argc;
+     char **argv;
 {
   char **sp, *str;
   Sym **cg = 0;

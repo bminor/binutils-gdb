@@ -38,7 +38,7 @@ sparc_find_call (parent, p_lowpc, p_highpc)
      bfd_vma p_highpc;
 {
   bfd_vma pc, dest_pc;
-  unsigned long insn;
+  unsigned int insn;
   Sym *child;
 
   if (core_text_space == 0)
@@ -56,7 +56,7 @@ sparc_find_call (parent, p_lowpc, p_highpc)
   DBG (CALLDEBUG, printf ("[find_call] %s: 0x%lx to 0x%lx\n",
 			  parent->name, (unsigned long) p_lowpc,
 			  (unsigned long) p_highpc));
-  for (pc = (p_lowpc + 3) & ~3; pc < p_highpc; pc += 4)
+  for (pc = (p_lowpc + 3) & ~(bfd_vma) 3; pc < p_highpc; pc += 4)
     {
       insn = bfd_get_32 (core_bfd, ((unsigned char *) core_text_space
 				    + pc - core_text_sect->vma));

@@ -74,7 +74,7 @@ mips_find_call (parent, p_lowpc, p_highpc)
 	  DBG (CALLDEBUG,
 	       printf (_("[find_call] 0x%lx: jal"), (unsigned long) pc));
           offset = (op & 0x03ffffff) << 2;
-	  dest_pc = (pc & ~0xfffffff) | offset;
+	  dest_pc = (pc & ~(bfd_vma) 0xfffffff) | offset;
 	  if (dest_pc >= s_lowpc && dest_pc <= s_highpc)
 	    {
 	      child = sym_lookup (&symtab, dest_pc);
