@@ -4688,9 +4688,8 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 		      sreloc = bfd_make_section (dynobj, name);
 		      flags = (SEC_HAS_CONTENTS | SEC_READONLY
-			       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-		      if ((sec->flags & SEC_ALLOC) != 0)
-			flags |= SEC_ALLOC | SEC_LOAD;
+			       | SEC_IN_MEMORY | SEC_LINKER_CREATED
+			       | SEC_ALLOC | SEC_LOAD);
 		      if (sreloc == NULL
 			  || ! bfd_set_section_flags (dynobj, sreloc, flags)
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 3))
