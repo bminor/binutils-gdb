@@ -389,6 +389,13 @@ go32_wait (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *status)
      point of changing back to where GDB thinks is its cwd, when we
      return control to the debugger, but restore child's cwd before we
      run it.  */
+  /* Initialize child_cwd, before the first call to run_child and not
+     in the initialization, so the child get also the changed directory
+     set with the gdb-command "cd ..." */
+  if (!*child_cwd)
+    /* Initialize child's cwd with the current one.  */
+    getcwd (child_cwd, sizeof (child_cwd));
+    
   chdir (child_cwd);
 
 #if __DJGPP_MINOR__ < 3
@@ -603,6 +610,11 @@ go32_create_inferior (char *exec_file, char *args, char **env)
     }
   resume_signal = -1;
   resume_is_step = 0;
+
+  /* Initialize child's cwd as empty to be initialized when starting
+     the child.  */
+  *child_cwd = 0;
+
   /* Init command line storage.  */
   if (redir_debug_init (&child_cmd) == -1)
     internal_error ("Cannot allocate redirection storage: not enough memory.\n");
@@ -1224,8 +1236,9 @@ init_go32_ops (void)
   go32_ops.to_has_execution = 1;
   go32_ops.to_magic = OPS_MAGIC;
 
-  /* Initialize child's cwd with the current one.  */
-  getcwd (child_cwd, sizeof (child_cwd));
+  /* Initialize child's cwd as empty to be initialized when starting
+     the child.  */
+  *child_cwd = 0;
 
   /* Initialize child's command line storage.  */
   if (redir_debug_init (&child_cmd) == -1)

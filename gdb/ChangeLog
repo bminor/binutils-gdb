@@ -1,3 +1,11 @@
+2000-08-05  Eli Zaretskii <eliz@is.elta.co.il>
+
+	* go32-nat.c: (go32_wait): If child_cwd[] is empty, initialize
+	it to GDB's current directory.
+	(go32_create_inferior, init_go32_ops): Initialize child_cwd[] to
+	an empty string, to signal an uninitialized value.
+	From Robert Hoehne <robert.hoehne@gmx.net>.
+
 2000-08-04  Kevin Buettner  <kevinb@redhat.com>
 
 	* symtab.h (fixup_psymbol_section): Declare.
