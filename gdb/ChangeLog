@@ -1,3 +1,8 @@
+Sun Mar 26 13:22:47 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* breakpoint.c (bpstat_do_actions): Once we've executed the
+	commands, set bs->commands to NULL.
+
 Sat Mar 25 01:16:10 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* buildsym.c (patch_subfile_name):  Update last_source_file
