@@ -1,3 +1,12 @@
+Tue Dec 29 15:06:00 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* build-all.mk: If canonhost is i386-unknown-sco3.2v4, change it
+	to i386-sco3.2v4.  Set TARGETS and CFLAGS for i386-sco3.2v4.
+	(all-cygnus, native, build-cygnus): Make
+	$(canonhost)-stamp-3stage-done, not $(host)....
+	* test-build.mk (stamp-3stage-compared): Use tail +10c for
+	i386-sco3.2v4.  Added else true to if command.
+
 Mon Dec 28 12:08:56 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* config.sub: (from FSF) Sequent uses a BSD-like OS.

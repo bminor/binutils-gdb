@@ -477,7 +477,7 @@ $(host)-stamp-holes:
 		found= ; \
 		for j in $(HOLE_DIRS) ; do \
 			if [ -x $$j/$$i ] ; then \
-				cp $$j/$$i $(HOLESDIR) ; \
+				ln -s $$j/$$i $(HOLESDIR) || cp $$j/$$i $(HOLESDIR) ; \
 				echo $$i from $$j ; \
 				found=t ; \
 				break ; \
@@ -511,7 +511,7 @@ comparison: $(host)-stamp-3stage-compared
 
 $(host)-stamp-3stage-compared:
 	rm -f .bad-compare
-ifeq ($(subst rs6000-ibm-aix,mips-sgi-irix4,$(subst mips-dec-ultrix,mips-sgi-irix4,$(host))),mips-sgi-irix4)
+ifeq ($(subst i386-sco3.2v4,mips-sgi-irix4,$(subst rs6000-ibm-aix,mips-sgi-irix4,$(subst mips-dec-ultrix,mips-sgi-irix4,$(host)))),mips-sgi-irix4)
 	for i in `cd $(STAGE3DIR) ; find . -name \*.o -print` ; do \
 		tail +10c $(STAGE2DIR)/$$i > foo1 ; \
 		tail +10c $(STAGE3DIR)/$$i > foo2 ; \
@@ -537,6 +537,7 @@ endif
 	    else \
 	      rm -rf $(STAGE1DIR) $(STAGE2DIR) ; \
 	    fi ; \
+	  else true ; \
 	  fi ; \
 	fi
 	touch $@	

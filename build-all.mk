@@ -28,6 +28,9 @@ log	= 1>$(canonhost)-build-log 2>&1
 tlog    = 1> $(canonhost)-x-$$i-build-log 2>&1
 
 canonhost := $(shell $(TREE)/config.sub $(host))
+ifeq ($(canonhost),i386-unknown-sco3.2v4)
+canonhost := i386-sco3.2v4
+endif
 
 ifeq ($(canonhost),sparc-sun-sunos4.1.1)
 TARGETS	= $(NATIVE) m68k-aout	i386-aout	a29k-amd-udi \
@@ -79,6 +82,12 @@ CFLAGS = -g
 all: all-native
 endif
 
+ifeq ($(canonhost),i386-sco3.2v4)
+TARGETS = $(NATIVE) i386-aout
+CFLAGS =
+all: all-cygnus
+endif
+
 FLAGS_TO_PASS := \
 	"GCC=$(GCC)" \
 	"CFLAGS=$(CFLAGS)" \
@@ -93,7 +102,7 @@ all-cygnus:
 	  if [ "$$i" = "native" ] ; then \
             if [ ! -f $(canonhost)-3stage-done ] ; then \
 	      echo "3staging $(canonhost) native" ; \
-	      $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(host)-stamp-3stage-done $(log) && \
+	      $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(canonhost)-stamp-3stage-done $(log) && \
 	         echo "     completed successfully" ; \
 	    fi \
 	  else \
@@ -109,7 +118,7 @@ native:
 	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
 	rm -f /usr/cygnus/$(TAG)
 	ln -s $(INSTALLDIR) /usr/cygnus/$(TAG) 
-	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(host)-stamp-3stage-done $(log)
+	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(canonhost)-stamp-3stage-done $(log)
 	@echo done at `date`
 
 build-cygnus:
@@ -118,7 +127,7 @@ build-cygnus:
 	  if [ "$$i" = "native" ] ; then \
             if [ ! -f $(canonhost)-3stage-done ] ; then \
 	      echo "3staging $(canonhost) native" ; \
-	      $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(host)-stamp-3stage-done $(log) && \
+	      $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(canonhost)-stamp-3stage-done $(log) && \
 	         echo "     completed successfully" ; \
 	    fi \
 	  else \
