@@ -1,3 +1,8 @@
+1999-05-29  Ian Lance Taylor  <ian@zembu.com>
+
+	* ld.texinfo (Options): Clarify that options which refer to files
+	must be properly ordered.
+
 1999-05-29  Nick Clifton  <nickc@cygnus.com>
 
 	* emultempl/armelf.em (..._parse_args): New function: Parse
