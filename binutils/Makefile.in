@@ -261,6 +261,8 @@ sysroff.c: sysinfo sysroff.info
 	./sysinfo -c <$(srcdir)/sysroff.info >sysroff.c
 	./sysinfo -i <$(srcdir)/sysroff.info >>sysroff.c
 	./sysinfo -g <$(srcdir)/sysroff.info >>sysroff.c
+
+sysroff.h: sysinfo sysroff.info
 	./sysinfo -d <$(srcdir)/sysroff.info >sysroff.h	
 
 # Depend upon arparse.c to avoid building both arparse.c and sysinfo.c
@@ -296,13 +298,18 @@ sysinfo.o: sysinfo.c
 	  $(CC_FOR_BUILD) -c -I. $(CFLAGS) $(srcdir)/sysinfo.c ; \
 	fi
 
-srconv: sysroff.c srconv.o sysroff.c  coffgrok.o $(ADDL_LIBS)
+srconv.o: srconv.c sysroff.h sysroff.c coffgrok.h $(INCDIR)/coff/internal.h \
+  ../bfd/libcoff.h
+
+srconv: srconv.o coffgrok.o $(ADDL_LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ srconv.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
 
 coffdump: coffdump.o coffgrok.o $(ADDL_LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@  coffdump.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
 
-sysdump: sysroff.c sysdump.o $(ADDL_LIBS)
+sysdump.o: sysdump.c sysroff.h
+
+sysdump: sysdump.o $(ADDL_LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ sysdump.o $(ADDL_LIBS) $(EXTRALIBS)
 
 # Depend upon sysinfo.c to avoid building both nlmheader.c and sysinfo.c

@@ -1,3 +1,15 @@
+Sun Oct  9 18:04:00 1994  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* Makefile.in (srconv.o): Add dependence on sysroff.c.
+
+Tue Oct  4 12:19:51 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* configure.in: Use ${config_shell} when running config.bfd.
+
+	* Makefile.in (sysroff.h): Split target away from sysroff.c.
+	(srconv.o, sysdump.o): New targets.
+	(srconv, sysdump): Don't depend upon sysroff.c.
+
 Wed Sep 28 13:04:34 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* Makefile.in (arparse.c): Don't ignore errors from mv.
