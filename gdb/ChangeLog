@@ -1,3 +1,10 @@
+2001-07-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/arm/xm-linux.h, config/i386/xm-linux.h,
+	config/m68k/xm-linux.h, config/powerpc/xm-linux.h,
+	config/sparc/xm-linux.h, config/ia64/xm-linux.h (HAVE_TERMIOS):
+	Removed.  Taken care of by autoconf and terminal.h.
+
 2001-07-12  Daniel Jacobowitz  <drow@mvista.com>
 
 	* mips-tdep.c (mips_type_needs_double_align): New function.

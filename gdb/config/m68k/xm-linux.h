@@ -1,5 +1,5 @@
 /* Native support for linux, for GDB, the GNU debugger.
-   Copyright 1996, 1998 Free Software Foundation, Inc.
+   Copyright 1996, 1998, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,7 +29,6 @@
    to get the offset in the core file of the register values.  */
 #define KERNEL_U_ADDR 0x0
 
-#define HAVE_TERMIOS
 #define NEED_POSIX_SETPGID
 
 /* Need R_OK etc, but USG isn't defined.  */

@@ -1,5 +1,5 @@
 /* Native support for GNU/Linux, for GDB, the GNU debugger.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,8 +22,6 @@
 #define XM_LINUX_H
 
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
-
-#define HAVE_TERMIOS
 
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */

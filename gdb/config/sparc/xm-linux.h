@@ -1,5 +1,5 @@
 /* Macro definitions for running gdb on a Sparc running Linux.
-   Copyright (C) 1989, 1993, 1994, 1995, 1996, 1998
+   Copyright 1989, 1993, 1994, 1995, 1996, 1998, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -24,7 +24,6 @@
 
 #include "sparc/xm-sparc.h"
 
-#define HAVE_TERMIOS
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
 #define KERNEL_U_ADDR 0x0
