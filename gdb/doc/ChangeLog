@@ -1,3 +1,8 @@
+2002-01-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Embedded Processors, Calling program functions):
+	Obsolete references to a29k.
+
 2002-01-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Coding): Review Cleanups section.  Examples
