@@ -1,3 +1,13 @@
+Tue Nov 16 20:38:21 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_ip): Fix thinko in 21bit range check.
+
+Sat Nov 13 18:22:48 1993  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* config/tc-sh.c (md_apply_fix): Cope with IMM16 type too.
+	* config/tc-z8k.c (build_bytes, md_apply_fix): Understand nDISP7
+	relocs.
+
 Fri Nov 12 16:51:47 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.[ch]: Fix assorted trivial indention problems.
@@ -8,7 +18,7 @@ Fri Nov 12 15:26:21 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* Makefile.in (VERSION): Updated following 2.2 release.
 
-Fri Nov 12 14:52:17 1993  Jeffrey A. Law  (law@snake.cs.utah.edu
+Fri Nov 12 14:52:17 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (hppa_fix_struct): Use a real type for the
 	field selector, rather than an int.  All uses of field selectors
