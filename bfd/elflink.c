@@ -3237,6 +3237,10 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		  /* Clobber the section size so that the warning does
 		     not get copied into the output file.  */
 		  s->size = 0;
+
+		  /* Also set SEC_EXCLUDE, so that symbols defined in
+		     the warning section don't get copied to the output.  */
+		  s->flags |= SEC_EXCLUDE;
 		}
 	    }
 	}

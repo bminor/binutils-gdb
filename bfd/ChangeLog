@@ -1,3 +1,8 @@
+2005-03-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (elf_link_add_object_symbols): Set SEC_EXCLUDE on
+	.gnu.warning.* sections.
+
 2005-03-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (is_ppc_elf_target): New function.
