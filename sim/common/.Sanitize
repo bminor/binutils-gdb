@@ -38,6 +38,7 @@ aclocal.m4
 callback.c
 cgen-mem.h
 cgen-ops.h
+cgen-run.c
 cgen-scache.c
 cgen-sim.h
 cgen-trace.c
@@ -127,6 +128,7 @@ sim-options.h
 sim-profile.c
 sim-profile.h
 sim-reason.c
+sim-reg.c
 sim-resume.c
 sim-run.c
 sim-signal.c
