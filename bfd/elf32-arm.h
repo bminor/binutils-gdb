@@ -55,7 +55,7 @@ static int elf32_thumb_to_arm_stub
   PARAMS ((struct bfd_link_info *, const char *, bfd *, bfd *, asection *,
 	   bfd_byte *, asection *, bfd_vma, bfd_signed_vma, bfd_vma));
 
-#define INTERWORK_FLAG(abfd)   (elf_elfheader (abfd)->e_flags & EF_INTERWORK)
+#define INTERWORK_FLAG(abfd)   (elf_elfheader (abfd)->e_flags & EF_ARM_INTERWORK)
 
 /* The linker script knows the section names for placement.
    The entry_names are used to do simple name mangling on the stubs.
@@ -1963,7 +1963,7 @@ elf32_arm_set_private_flags (abfd, flags)
     {
       if (EF_ARM_EABI_VERSION (flags) == EF_ARM_EABI_UNKNOWN)
 	{
-	  if (flags & EF_INTERWORK)
+	  if (flags & EF_ARM_INTERWORK)
 	    _bfd_error_handler (_("\
 Warning: Not setting interwork flag of %s since it has already been specified as non-interworking"),
 				bfd_get_filename (abfd));
@@ -2004,28 +2004,28 @@ elf32_arm_copy_private_bfd_data (ibfd, obfd)
       && in_flags != out_flags)
     {
       /* Cannot mix APCS26 and APCS32 code.  */
-      if ((in_flags & EF_APCS_26) != (out_flags & EF_APCS_26))
+      if ((in_flags & EF_ARM_APCS_26) != (out_flags & EF_ARM_APCS_26))
 	return false;
 
       /* Cannot mix float APCS and non-float APCS code.  */
-      if ((in_flags & EF_APCS_FLOAT) != (out_flags & EF_APCS_FLOAT))
+      if ((in_flags & EF_ARM_APCS_FLOAT) != (out_flags & EF_ARM_APCS_FLOAT))
 	return false;
 
       /* If the src and dest have different interworking flags
          then turn off the interworking bit.  */
-      if ((in_flags & EF_INTERWORK) != (out_flags & EF_INTERWORK))
+      if ((in_flags & EF_ARM_INTERWORK) != (out_flags & EF_ARM_INTERWORK))
 	{
-	  if (out_flags & EF_INTERWORK)
+	  if (out_flags & EF_ARM_INTERWORK)
 	    _bfd_error_handler (_("\
 Warning: Clearing the interwork flag in %s because non-interworking code in %s has been linked with it"),
 			  bfd_get_filename (obfd), bfd_get_filename (ibfd));
 
-	  in_flags &= ~EF_INTERWORK;
+	  in_flags &= ~EF_ARM_INTERWORK;
 	}
 
       /* Likewise for PIC, though don't warn for this case.  */
-      if ((in_flags & EF_PIC) != (out_flags & EF_PIC))
-	in_flags &= ~EF_PIC;
+      if ((in_flags & EF_ARM_PIC) != (out_flags & EF_ARM_PIC))
+	in_flags &= ~EF_ARM_PIC;
     }
 
   elf_elfheader (obfd)->e_flags = in_flags;
@@ -2122,49 +2122,49 @@ Error: %s compiled for EABI version %d, whereas %s is compiled for version %d"),
   /* Not sure what needs to be checked for EABI versions >= 1.  */
   if (EF_ARM_EABI_VERSION (in_flags) == EF_ARM_EABI_UNKNOWN)
     {
-      if ((in_flags & EF_APCS_26) != (out_flags & EF_APCS_26))
+      if ((in_flags & EF_ARM_APCS_26) != (out_flags & EF_ARM_APCS_26))
 	{
 	  _bfd_error_handler (_("\
 Error: %s compiled for APCS-%d, whereas %s is compiled for APCS-%d"),
 			bfd_get_filename (ibfd),
-			in_flags & EF_APCS_26 ? 26 : 32,
+			in_flags & EF_ARM_APCS_26 ? 26 : 32,
 			bfd_get_filename (obfd),
-			out_flags & EF_APCS_26 ? 26 : 32);
+			out_flags & EF_ARM_APCS_26 ? 26 : 32);
 	  flags_compatible = false;
 	}
 
-      if ((in_flags & EF_APCS_FLOAT) != (out_flags & EF_APCS_FLOAT))
+      if ((in_flags & EF_ARM_APCS_FLOAT) != (out_flags & EF_ARM_APCS_FLOAT))
 	{
 	  _bfd_error_handler (_("\
 Error: %s passes floats in %s registers, whereas %s passes them in %s registers"),
 			bfd_get_filename (ibfd),
-		     in_flags & EF_APCS_FLOAT ? _("float") : _("integer"),
+		     in_flags & EF_ARM_APCS_FLOAT ? _("float") : _("integer"),
 			bfd_get_filename (obfd),
-		      out_flags & EF_APCS_26 ? _("float") : _("integer"));
+		      out_flags & EF_ARM_APCS_26 ? _("float") : _("integer"));
 	  flags_compatible = false;
 	}
 
-#ifdef EF_SOFT_FLOAT
-      if ((in_flags & EF_SOFT_FLOAT) != (out_flags & EF_SOFT_FLOAT))
+#ifdef EF_ARM_SOFT_FLOAT
+      if ((in_flags & EF_ARM_SOFT_FLOAT) != (out_flags & EF_ARM_SOFT_FLOAT))
 	{
 	  _bfd_error_handler (_ ("\
 Error: %s uses %s floating point, whereas %s uses %s floating point"),
 			      bfd_get_filename (ibfd),
-			      in_flags & EF_SOFT_FLOAT ? _("soft") : _("hard"),
+			      in_flags & EF_ARM_SOFT_FLOAT ? _("soft") : _("hard"),
 			      bfd_get_filename (obfd),
-			      out_flags & EF_SOFT_FLOAT ? _("soft") : _("hard"));
+			      out_flags & EF_ARM_SOFT_FLOAT ? _("soft") : _("hard"));
 	  flags_compatible = false;
 	}
 #endif
 
       /* Interworking mismatch is only a warning.  */
-      if ((in_flags & EF_INTERWORK) != (out_flags & EF_INTERWORK))
+      if ((in_flags & EF_ARM_INTERWORK) != (out_flags & EF_ARM_INTERWORK))
 	_bfd_error_handler (_("\
 Warning: %s %s interworking, whereas %s %s"),
 			  bfd_get_filename (ibfd),
-	  in_flags & EF_INTERWORK ? _("supports") : _("does not support"),
+	  in_flags & EF_ARM_INTERWORK ? _("supports") : _("does not support"),
 			  bfd_get_filename (obfd),
-		    out_flags & EF_INTERWORK ? _("does not") : _("does"));
+		    out_flags & EF_ARM_INTERWORK ? _("does not") : _("does"));
     }
 
   return flags_compatible;
@@ -2198,31 +2198,31 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
       /* The following flag bits are GNU extenstions and not part of the
 	 official ARM ELF extended ABI.  Hence they are only decoded if
 	 the EABI version is not set.  */
-      if (flags & EF_INTERWORK)
+      if (flags & EF_ARM_INTERWORK)
 	fprintf (file, _(" [interworking enabled]"));
 
-      if (flags & EF_APCS_26)
+      if (flags & EF_ARM_APCS_26)
 	fprintf (file, _(" [APCS-26]"));
       else
 	fprintf (file, _(" [APCS-32]"));
 
-      if (flags & EF_APCS_FLOAT)
+      if (flags & EF_ARM_APCS_FLOAT)
 	fprintf (file, _(" [floats passed in float registers]"));
 
-      if (flags & EF_PIC)
+      if (flags & EF_ARM_PIC)
 	fprintf (file, _(" [position independent]"));
 
-      if (flags & EF_NEW_ABI)
+      if (flags & EF_ARM_NEW_ABI)
 	fprintf (file, _(" [new ABI]"));
 
-      if (flags & EF_OLD_ABI)
+      if (flags & EF_ARM_OLD_ABI)
 	fprintf (file, _(" [old ABI]"));
 
-      if (flags & EF_SOFT_FLOAT)
+      if (flags & EF_ARM_SOFT_FLOAT)
 	fprintf (file, _(" [software FP]"));
 
-      flags &= ~(EF_INTERWORK | EF_APCS_26 | EF_APCS_FLOAT | EF_PIC
-		 | EF_NEW_ABI | EF_OLD_ABI | EF_SOFT_FLOAT);
+      flags &= ~(EF_ARM_INTERWORK | EF_ARM_APCS_26 | EF_ARM_APCS_FLOAT | EF_ARM_PIC
+		 | EF_ARM_NEW_ABI | EF_ARM_OLD_ABI | EF_ARM_SOFT_FLOAT);
       break;
 
     case EF_ARM_EABI_VER1:
@@ -2234,6 +2234,24 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
 	fprintf (file, _(" [unsorted symbol table]"));
 
       flags &= ~ EF_ARM_SYMSARESORTED;
+      break;
+
+    case EF_ARM_EABI_VER2:
+      fprintf (file, _(" [Version2 EABI]"));
+
+      if (flags & EF_ARM_SYMSARESORTED)
+	fprintf (file, _(" [sorted symbol table]"));
+      else
+	fprintf (file, _(" [unsorted symbol table]"));
+
+      if (flags & EF_ARM_DYNSYMSUSESEGIDX)
+	fprintf (file, _(" [dynamic symbols use segment index]"));
+
+      if (flags & EF_ARM_MAPSYMSFIRST)
+	fprintf (file, _(" [mapping symbols precede others]"));
+
+      flags &= ~(EF_ARM_SYMSARESORTED | EF_ARM_DYNSYMSUSESEGIDX 
+		 | EF_ARM_MAPSYMSFIRST);
       break;
 
     default:

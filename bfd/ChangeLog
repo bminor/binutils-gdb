@@ -1,3 +1,8 @@
+2001-02-28  Philip Blundell  <pb@futuretv.com>
+
+	* elf32-arm.h: Update mentions of renamed EF_xx constants.
+ 	(elf32_arm_print_private_bfd_data): Handle ARM EABI version 2.
+
 2001-02-27  H.J. Lu  <hjl@gnu.org>
 
 	* aoutx.h (NAME(aout,bfd_free_cached_info)): Return true if
