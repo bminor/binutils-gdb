@@ -24,8 +24,19 @@ Do-first:
 Things-to-keep:
 
 ChangeLog
+Make-common.in
+Makefile.in
+aclocal.m4
+callback.c
+config.in
+configure.in
+configure
+gentmap.c
+gentvals.sh
+nltvals.def
 run.c
 run.1
+tconfig.in
 
 Things-to-lose:
 
