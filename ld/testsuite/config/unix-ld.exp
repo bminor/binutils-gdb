@@ -71,5 +71,38 @@ proc ld_exit {} {
 #	relink the linker
 #
 proc ld_start { ld target } {
-    default_ld_start $ld $target
+	#
 }
+
+#
+# ld_relocate 
+#	link an object using relocation
+#
+proc ld_relocate { ld target objects } {
+	default_ld_relocate $ld $target $objects
+}
+
+#
+# ld_link 
+#	link a program using ld
+#
+proc ld_link { ld target objects } {
+	default_ld_link $ld $target $objects
+}
+
+#
+# ld_compile 
+#	compile an object using $cc
+#
+proc ld_compile { cc source object } {
+	default_ld_compile $cc $source $object 
+}
+
+#
+# ld_exec
+#	execute ithe target
+#
+proc ld_exec { target output } {
+	default_ld_exec $target $output
+}
+

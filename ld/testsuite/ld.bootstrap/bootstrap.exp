@@ -28,8 +28,18 @@ if $tracelevel then {
 set tmpdir /tmp
 
 set stage 0
-# link the target with itself
-ld_start $objdir/ld.new $tmpdir/ld.$stage
+
+#
+# link an object using relocation
+#
+
+ld_relocate $objdir/ld.new $tmpdir/ld-partial.o $OFILES
+	
+ld_link $objdir/ld.new $tmpdir/ld.partial $tmpdir/ld-partial.o
+
+ld_link $tmpdir/ld.partial $tmpdir/ld.full $OFILES
+
+ld_link $tmpdir/ld.full $tmpdir/ld.$stage $OFILES
 
 #
 # main test loop
@@ -53,7 +63,7 @@ for { set stage 0 } { $stage < 9 } { incr stage } {
     verbose "### stage is now $stage\n" 1
     
     # link the target with itself
-    ld_start $ld_old $ld_new
+    ld_link $ld_old $ld_new $OFILES
     
     # load (compare) the target 	
     if ![file exists $ld_old] then {
@@ -87,5 +97,3 @@ catch "exec rm -f $ld_old" result
 verbose "### EXEC rm -f $ld_old $ld_new"
 catch "exec rm -f $ld_old $ld_new" result
 ld_exit
-
-
