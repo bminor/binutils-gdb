@@ -18,9 +18,15 @@ OTHER_BSS_SYMBOLS="
   .tocbss	${RELOCATING-0}${RELOCATING+ALIGN(8)} : { *(.tocbss)}"
 OTHER_PLT_RELOC_SECTIONS="
   .rela.tocbss	${RELOCATING-0} : { *(.rela.tocbss) }"
-GOT="
-  .got		${RELOCATING-0}${RELOCATING+ALIGN(8)} : { *(.got${RELOCATING+ .toc}) }
-  ${RELOCATING-.toc		0 : { *(.toc) }}"
+
+if test x${RELOCATING+set} = xset; then
+  GOT="
+  .got		ALIGN(8) : { *(.got .toc) }"
+else
+  GOT="
+  .got		0 : { *(.got) }
+  .toc		0 : { *(.toc) }"
+fi
 OTHER_GOT_RELOC_SECTIONS="
   .rela.toc	${RELOCATING-0} : { *(.rela.toc) }"
 OTHER_READWRITE_SECTIONS="

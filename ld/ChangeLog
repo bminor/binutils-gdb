@@ -1,5 +1,7 @@
 2003-07-28  Alan Modra  <amodra@bigpond.net.au>
 
+	* emulparams/elf64ppc.sh (GOT): Fix for shell brace matching.
+
 	* emulparams/elf64ppc.sh (GOT): Don't merge .toc into .got for ld -r.
 
 2003-07-27  Alan Modra  <amodra@bigpond.net.au>
