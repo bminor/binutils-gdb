@@ -1,5 +1,8 @@
 Tue Mar 30 10:11:41 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
+	* doc/as.texinfo: Don't use @value in node names for the moment;
+	references don't appear to work right.
+
 	* as.h (const, volatile): Put these definitions back, and use
 	them.
 
