@@ -1,5 +1,11 @@
 Wed Apr  2 10:49:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf-m10200.c: Rename from elf32-mn10200.c.
+	* elf-m10300.c: Rename from elf32-mn10300.c.
+	* cpu-m10200.c: Rename from cpu-mn10200.c
+	* cpu-m10300.c: Rename from cpu-mn10300.c
+	* Makefile.in: Update accordingly.
+
 	* elf32-mips.c (elf_mips_ctor64_howto): New static variable.
 	(elf_mips_isa): Move to earlier in file.
 	(mips_reloc_map): Remove BFD_RELOC_CTOR entry.
