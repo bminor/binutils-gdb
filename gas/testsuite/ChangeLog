@@ -1,3 +1,8 @@
+Sun Jan 30 23:34:58 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* gas/all/gas.exp: Adjust regexp for x930509.s for current listing
+	format.
+
 Thu Jan 20 16:44:51 1994  Rob Savoye  (rob@darkstar.cygnus.com)
 
 	* gas/all/gas.exp, lib/gas-defs.exp, sun4/addend.exp,
