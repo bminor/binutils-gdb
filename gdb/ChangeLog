@@ -1,3 +1,9 @@
+2002-06-19  Grace Sainsbury  <graces@redhat.com>
+
+	* config/m68k/tm-m68k.h (GDB_MULTI_ARCH): Added (set to 0).
+	* m68k-tdep.c (m68k_gdbarch_init): Added.
+	(m68k_dump_tdep): Added.
+
 2002-06-19  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ada-lang.c (fill_in_ada_prototype): Update comment.

@@ -677,9 +677,40 @@ m68k_saved_pc_after_call (struct frame_info *frame)
     return read_memory_integer (read_register (SP_REGNUM), 4);
 }
 
+/* Function: m68k_gdbarch_init
+   Initializer function for the m68k gdbarch vector.
+   Called by gdbarch.  Sets up the gdbarch vector(s) for this target. */
+
+static struct gdbarch *
+m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+{
+  struct gdbarch_tdep *tdep = NULL;
+  struct gdbarch *gdbarch;
+
+  /* find a candidate among the list of pre-declared architectures. */
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return (arches->gdbarch);
+
+#if 0
+  tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
+#endif
+
+  gdbarch = gdbarch_alloc (&info, 0);
+
+  return gdbarch;
+}
+
+
+static void
+m68k_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+{
+
+}
 
 void
 _initialize_m68k_tdep (void)
 {
+  gdbarch_register (bfd_arch_m68k, m68k_gdbarch_init, m68k_dump_tdep);
   tm_print_insn = print_insn_m68k;
 }
