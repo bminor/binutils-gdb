@@ -1,6 +1,6 @@
 Mon Jan  6 13:28:35 1997  Jeffrey A Law  (law@cygnus.com)
 
-	* elf32-mn10200-c (elf_mn10200_howto): Don't ever set partial-inplace.
+	* elf32-mn10200.c (elf_mn10200_howto): Don't ever set partial-inplace.
 	Use bfd_elf_generic_reloc as special function for all relocs.
 	(bfd_elf32_mn10200_reloc): Remove unnecessary function.
 
