@@ -23,17 +23,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "as.h"
 #include "m88k-opcode.h"
 
-char *getval ();
-char *get_reg ();
-char *get_imm16 ();
-char *get_bf ();
-char *get_pcr ();
-char *get_cmp ();
-char *get_cnd ();
-char *get_cr ();
-char *get_fcr ();
-char *get_vec9 ();
-
 struct field_val_assoc
 {
   char *name;
@@ -129,6 +118,24 @@ struct m88k_insn
   enum reloc_type reloc;
 };
 
+static char *get_bf PARAMS ((char *param, unsigned *valp));
+static char *get_cmp PARAMS ((char *param, unsigned *valp));
+static char *get_cnd PARAMS ((char *param, unsigned *valp));
+static char *get_cr PARAMS ((char *param, unsigned *regnop));
+static char *get_fcr PARAMS ((char *param, unsigned *regnop));
+static char *get_imm16 PARAMS ((char *param, struct m88k_insn *insn));
+static char *get_o6 PARAMS ((char *param, unsigned *valp));
+static char *get_reg PARAMS ((char *param, unsigned *regnop, int reg_prefix));
+static char *get_vec9 PARAMS ((char *param, unsigned *valp));
+static char *getval PARAMS ((char *param, unsigned int *valp));
+
+static char *get_pcr PARAMS ((char *param, struct m88k_insn *insn,
+		      enum reloc_type reloc));
+
+static int calcop PARAMS ((struct m88k_opcode *format,
+			   char *param, struct m88k_insn *insn));
+
+
 extern char *myname;
 static struct hash_control *op_hash = NULL;
 
@@ -154,7 +161,6 @@ const char FLT_CHARS[] = "dDfF";
 
 extern void float_cons (), cons (), s_globl (), s_space (),
   s_set (), s_lcomm ();
-static void s_file ();
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -176,7 +182,7 @@ const pseudo_typeS md_pseudo_table[] =
 void
 md_begin ()
 {
-  char *retval = NULL;
+  const char *retval = NULL;
   unsigned int i = 0;
 
   /* initialize hash table */
@@ -317,7 +323,7 @@ md_assemble (op)
     }
 }
 
-int
+static int
 calcop (format, param, insn)
      struct m88k_opcode *format;
      char *param;
@@ -341,7 +347,7 @@ calcop (format, param, insn)
 	{
 	case 0:
 	  insn->opcode |= opcode;
-	  return *param == 0;
+	  return (*param == 0 || *param == '\n');
 
 	default:
 	  if (f != *param++)
@@ -352,6 +358,11 @@ calcop (format, param, insn)
 	  param = get_reg (param, &val, reg_prefix);
 	  reg_prefix = 'r';
 	  opcode |= val << 21;
+	  break;
+
+	case 'o':
+	  param = get_o6 (param, &val);
+	  opcode |= ((val >> 2) << 7);
 	  break;
 
 	case 'x':
@@ -426,7 +437,7 @@ calcop (format, param, insn)
     }
 }
 
-char *
+static char *
 match_name (param, assoc_tab, valp)
      char *param;
      struct field_val_assoc *assoc_tab;
@@ -450,7 +461,7 @@ match_name (param, assoc_tab, valp)
     }
 }
 
-char *
+static char *
 get_reg (param, regnop, reg_prefix)
      char *param;
      unsigned *regnop;
@@ -497,7 +508,7 @@ get_reg (param, regnop, reg_prefix)
   return 0;
 }
 
-char *
+static char *
 get_imm16 (param, insn)
      char *param;
      struct m88k_insn *insn;
@@ -556,7 +567,7 @@ get_imm16 (param, insn)
   return param;
 }
 
-char *
+static char *
 get_pcr (param, insn, reloc)
      char *param;
      struct m88k_insn *insn;
@@ -578,7 +589,7 @@ get_pcr (param, insn, reloc)
   return saveparam;
 }
 
-char *
+static char *
 get_cmp (param, valp)
      char *param;
      unsigned *valp;
@@ -612,7 +623,7 @@ get_cmp (param, valp)
   return param;
 }
 
-char *
+static char *
 get_cnd (param, valp)
      char *param;
      unsigned *valp;
@@ -649,7 +660,7 @@ get_cnd (param, valp)
   return param;
 }
 
-char *
+static char *
 get_bf2 (param, bc)
      char *param;
      int bc;
@@ -672,7 +683,7 @@ get_bf2 (param, bc)
     }
 }
 
-char *
+static char *
 get_bf_offset_expression (param, offsetp)
      char *param;
      unsigned *offsetp;
@@ -701,7 +712,7 @@ get_bf_offset_expression (param, offsetp)
   return param;
 }
 
-char *
+static char *
 get_bf (param, valp)
      char *param;
      unsigned *valp;
@@ -744,15 +755,13 @@ get_bf (param, valp)
   return param;
 }
 
-char *
+static char *
 get_cr (param, regnop)
      char *param;
      unsigned *regnop;
 {
   unsigned regno;
   unsigned c;
-  int i;
-  int name_len;
 
   if (!strncmp (param, "cr", 2))
     {
@@ -790,15 +799,13 @@ get_cr (param, regnop)
   return param;
 }
 
-char *
+static char *
 get_fcr (param, regnop)
      char *param;
      unsigned *regnop;
 {
   unsigned regno;
   unsigned c;
-  int i;
-  int name_len;
 
   if (!strncmp (param, "fcr", 3))
     {
@@ -836,7 +843,7 @@ get_fcr (param, regnop)
   return param;
 }
 
-char *
+static char *
 get_vec9 (param, valp)
      char *param;
      unsigned *valp;
@@ -858,12 +865,34 @@ get_vec9 (param, valp)
   return param;
 }
 
+static char *
+get_o6 (param, valp)
+     char *param;
+     unsigned *valp;
+{
+  unsigned val;
+  char *save_ptr;
+
+  save_ptr = input_line_pointer;
+  input_line_pointer = param;
+  val = get_absolute_expression ();
+  param = input_line_pointer;
+  input_line_pointer = save_ptr;
+
+  if (val & 0x3)
+    as_warn ("Removed lower 2 bits of expression");
+
+  *valp = val;
+
+  return(param);
+}
+
 #define hexval(z) \
   (isdigit (z) ? (z) - '0' :						\
    islower (z) ? (z) - 'a' + 10 : 					\
    isupper (z) ? (z) - 'A' + 10 : -1)
 
-char *
+static char *
 getval (param, valp)
      char *param;
      unsigned int *valp;
@@ -1141,6 +1170,7 @@ md_estimate_size_before_relax (fragP, segment_type)
      segT segment_type;
 {
   as_fatal ("Relaxation should never occur");
+  return (-1);
 }
 
 const relax_typeS md_relax_table[] =

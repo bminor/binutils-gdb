@@ -1,5 +1,15 @@
 Fri Sep 24 12:37:59 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	* config/tc-m88k.c (get_o6): new function.
+	  (get_bf, get_cmp, get_cnd, get_cr, get_fcr, get_imm16, get_reg,
+	  get_vec9, getval, get_pcr, calcop, match_name): make static and
+	  prototype.
+	  (s_file): remove extraneous forward decl.
+	  (md_begin): add const to retval decl.
+	  (calcop): cope with instructions without arguments.  Handle 'o'
+	  type argument, the o6 field of the prot insn.
+	  (md_estimate_size_before_relax): return a dummy value.
+
 	* config/m88k-opcode.h (m88k_opcodes): comment change; o6 field is
 	  in bits 10 through 7.  flt.[dxs]s requires an r register in the
 	  second argument.  New instruction lda.x.  New instruction muls
