@@ -34,7 +34,9 @@ if { ([istarget "*-*-elf*"]
     run_list_test "inherit1" "-al"
 
     # The vtable entry results are different on Rel and Rela targets.
-    if {[istarget "i*86-*-*"] || [istarget "mips*-*-*"]} then {
+    if {[istarget "i*86-*-*"] 
+	|| [istarget "mips*-*-*"] 
+	|| [istarget "arm*-*-*"]} then {
 
 	run_dump_test "entry0"
 

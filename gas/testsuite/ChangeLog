@@ -1,3 +1,9 @@
+1999-09-01  Scott Bambrough  <scottb@netwinder.org>
+ 
+        * gas/vtable/vtable.exp: Added [istarget "arm*-*-*"] to run dump 
+        test "entry0" instead of "entry1".  ARM targets use REL relocs,
+        and should use the test entry0.
+
 1999-09-01  H.J. Lu  <hjl@gnu.org>
 
 	* gas/i386/naked.d: Fix for coff targets.
