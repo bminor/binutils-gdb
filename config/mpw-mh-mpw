@@ -11,7 +11,7 @@ CC_MPW_C = C -d MPW_C -d ALMOST_STDC -d ANSI_PROTOTYPES -d MPW -mc68020 -model f
 
 CC_SC = SC -d ALMOST_STDC -d ANSI_PROTOTYPES -d MPW -mc68020 -model far -b -i '' -i :
 
-CC_MWC68K = MWC68K -d MPW -i "{topsrcdir}"include:mpw:sys:
+CC_MWC68K = MWC68K -d MPW -i "{topsrcdir}"include:mpw:sys: -sym on
 
 CC_PPCC = PPCC -d powerc=1 -d pascal= -d ALMOST_STDC -d ANSI_PROTOTYPES -d MPW -w
 
@@ -19,7 +19,18 @@ CC_MRC = MrC -d powerc=1 -d pascal= -d ALMOST_STDC -d ANSI_PROTOTYPES -d MPW -i 
 
 CC_SMrC = SMrC -d MPW
 
-CC_MWCPPC = MWCPPC -d MPW -i "{topsrcdir}"include:mpw:sys: -enum int -opt global,peep,l4,speed
+# "-mpw_chars" is necessary because GNU sources often mix signed and
+# unsigned casually.
+# "-w off" is not a great idea, but CW7 is complaining about enum
+# assignments.
+# "-opt global,peep,l4,speed" is sometimes good, and sometimes bad.
+# We must use {CIncludes} so that MPW tools will work; {MWCIncludes}
+# defines stdout, islower, etc, in ways that are incompatible with MPW's
+# runtime.  However, this cannot be done via  -i "{CIncludes}", since
+# that does not affect how <>-type includes happen; instead, the variable
+# MWCIncludes must be set to point at {CIncludes}.
+
+CC_MWCPPC = MWCPPC -d MPW -enum int -mpw_chars -sym on -w off
 
 CC_68K_GCC = gC -Dpascal= -DANSI_PROTOTYPES -DMPW
 
@@ -55,11 +66,11 @@ RANLIB_RANLIB = ranlib
 
 CC_LD_LINK = Link -w -d -model far {CC_LD_TOOL_FLAGS}
 
-CC_LD_MWLINK68K = MWLink68K -w -d -model far {CC_LD_TOOL_FLAGS}
+CC_LD_MWLINK68K = MWLink68K -w -d -model far {CC_LD_TOOL_FLAGS} -sym on
 
 CC_LD_PPCLINK = PPCLink -main __start -outputformat xcoff
 
-CC_LD_MWLINKPPC = MWLinkPPC -w {CC_LD_TOOL_FLAGS}
+CC_LD_MWLINKPPC = MWLinkPPC -w {CC_LD_TOOL_FLAGS} -sym on
 
 CC_LD_GLD = gC
 
@@ -92,17 +103,18 @@ EXTRALIBS_C = \Option-d
 	"{Libraries}"ToolLibs.o
 
 EXTRALIBS_PPC = \Option-d
+	"{PPCLibraries}"StdCRuntime.o \Option-d
 	"{PPCLibraries}"InterfaceLib.xcoff \Option-d
 	"{PPCLibraries}"MathLib.xcoff \Option-d
 	"{PPCLibraries}"StdCLib.xcoff \Option-d
 	"{PPCLibraries}"PPCToolLibs.o \Option-d
-	"{PPCLibraries}"StdCRuntime.o \Option-d
 	"{PPCLibraries}"PPCCRuntime.o
 
 EXTRALIBS_MWCPPC = \Option-d
-	"{MWPPCLibraries}"InterfaceLib \Option-d
 	"{MWPPCLibraries}"MWStdCRuntime.Lib \Option-d
+	"{MWPPCLibraries}"InterfaceLib \Option-d
 	"{MWPPCLibraries}"StdCLib \Option-d
+	"{MWPPCLibraries}"MathLib \Option-d
 	"{MWPPCLibraries}"PPCToolLibs.o
 
 # Tool to make PEF with, if needed.
