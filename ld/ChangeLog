@@ -1,3 +1,10 @@
+Mon Jul  7 12:39:42 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Manfred Hollstein <manfred@s-direktnet.de>:
+	* configure.host (i[3456]86-*-linux*libc1*): Renamed from
+	i[3456]86-*-linux*.
+	(i[3456]86-*-linux*): New host.
+
 Thu Jun 26 13:54:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* scripttempl/pe.sc: Put .rsrc after .reloc.  Put input .rsrc
