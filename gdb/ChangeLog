@@ -1,3 +1,22 @@
+start-sanitize-gdbtk
+Wed Jun 19 17:23:38 1996  Geoffrey Noer  <noer@cygnus.com>
+
+	* configure.in: disable gdbtk for *cygwin32* hosted compiles
+	* configure: regenerated with autoconf 2.8
+
+end-sanitize-gdbtk
+start-sanitize-h8s
+Tue Jun 18 16:25:54 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* h8300-dep.c (gdb_print_insn_h8300): Handle the H8/S.
+	(h8300_command): Likewise.
+	(set_machine): Likewise.
+	(set_machine_hook): Likewise.
+	(_initialize_h8300m): Likewise.
+
+	* config/h8300/tm-h8300.h (h8300smode): Declare.
+
+end-sanitize-h8s
 Sun Jun 16 15:21:51 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* somsolib.c (som_solib_create_inferior_hook): Handle tracking
