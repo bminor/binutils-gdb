@@ -4,6 +4,9 @@ Sat Aug 28 01:23:11 1999  Jeffrey A Law  (law@cygnus.com)
 
 Sat Aug 28 00:26:26 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 
+        * config/tc-hppa.c (pa_ip): Replace 'f' by 'v'.  Prefix float register
+	args by 'f'.
+
 	* config/tc-hppa.c (pa_ip): Add args q, %, and |.
 
 	* config/tc-hppa.c (pa_ip):  Absorb white space in instructions

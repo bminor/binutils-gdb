@@ -1599,7 +1599,6 @@ pa_ip (str)
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 16);
 
 	    /* Handle a 5 bit register field at 31.  */
-	    case 'y':
 	    case 't':
 	      num = pa_parse_number (&s, 0);
 	      CHECK_FIELD (num, 31, 0, 0);
@@ -2878,7 +2877,7 @@ pa_ip (str)
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
 	    /* Handle a 3 bit SFU identifier at 25.  */
-	    case 'f':
+	    case 'v':
 	      if (*s++ != ',')
 		as_bad (_("Invalid SFU identifier"));
 	      num = pa_get_absolute_expression (&the_insn, &s);
@@ -2955,211 +2954,6 @@ pa_ip (str)
 	      the_insn.fpof1 = flag;
 	      INSERT_FIELD_AND_CONTINUE (opcode, flag, 11);
 
-	    /* Handle L/R register halves like 't'.  */
-	    case 'v':
-	      {
-		struct pa_11_fp_reg_struct result;
-
-		pa_parse_number (&s, &result);
-		CHECK_FIELD (result.number_part, 31, 0, 0);
-		opcode |= result.number_part;
-
-		/* 0x30 opcodes are FP arithmetic operation opcodes
-		   and need to be turned into 0x38 opcodes.  This
-		   is not necessary for loads/stores.  */
-		if (need_pa11_opcode (&the_insn, &result)
-		    && ((opcode & 0xfc000000) == 0x30000000))
-		  opcode |= 1 << 27;
-
-		INSERT_FIELD_AND_CONTINUE (opcode, result.l_r_select & 1, 6);
-	      }
-
-	    /* Handle L/R register halves like 'b'.  */
-	    case 'E':
-	      {
-		struct pa_11_fp_reg_struct result;
-
-		pa_parse_number (&s, &result);
-		CHECK_FIELD (result.number_part, 31, 0, 0);
-		opcode |= result.number_part << 21;
-		if (need_pa11_opcode (&the_insn, &result))
-		  {
-		    opcode |= (result.l_r_select & 1) << 7;
-		    opcode |= 1 << 27;
-		  }
-		continue;
-	      }
-
-	    /* Float operand 1 similar to 'b' but with l/r registers.  */
-	    case 'J':
-	      {
-		struct pa_11_fp_reg_struct result;
-
-		pa_parse_number (&s, &result);
-		CHECK_FIELD (result.number_part, 31, 0, 0);
-		opcode |= result.number_part << 21;
-		opcode |= (result.l_r_select & 1) << 7;
-		continue;
-	      }
-
-	    /* Handle L/R register halves like 'b'.  */
-	    case '3':
-	      {
-		struct pa_11_fp_reg_struct result;
-		int regnum;
-
-		pa_parse_number (&s, &result);
-		CHECK_FIELD (result.number_part, 31, 0, 0);
-		opcode |= (result.number_part & 0x1c) << 11;
-		opcode |= (result.number_part & 0x3) << 9;
-		opcode |= (result.l_r_select & 1) << 8;
-		continue;
-	      }
-
-	    /* Handle L/R register halves like 'x'.  */
-	    case 'e':
-	      {
-		struct pa_11_fp_reg_struct result;
-
-		pa_parse_number (&s, &result);
-		CHECK_FIELD (result.number_part, 31, 0, 0);
-		opcode |= (result.number_part & 0x1f) << 16;
-		if (need_pa11_opcode (&the_insn, &result))
-		  {
-		    opcode |= (result.l_r_select & 1) << 1;
-		  }
-		continue;
-	      }
-
-	    /* Handle L/R register halves like 'x'.  */
-	    case 'X':
-	      {
-		struct pa_11_fp_reg_struct result;
-
-		pa_parse_number (&s, &result);
-		CHECK_FIELD (result.number_part, 31, 0, 0);
-		opcode |= (result.number_part & 0x1f) << 16;
-		if (need_pa11_opcode (&the_insn, &result))
-		  {
-		    opcode |= (result.l_r_select & 1) << 12;
-		    opcode |= 1 << 27;
-		  }
-		continue;
-	      }
-
-	    /* Float operand 2, like 'x' but with l/r register halves.  */
-	    case 'K':
-	      {
-		struct pa_11_fp_reg_struct result;
-
-		pa_parse_number (&s, &result);
-		CHECK_FIELD (result.number_part, 31, 0, 0);
-		opcode |= (result.number_part & 0x1f) << 16;
-		opcode |= (result.l_r_select & 1) << 12;
-		continue;
-	      }
-
-	    /* Handle a 5 bit register field at 10.  */
-	    case '4':
-	      {
-		struct pa_11_fp_reg_struct result;
-
-		pa_parse_number (&s, &result);
-		CHECK_FIELD (result.number_part, 31, 0, 0);
-		if (the_insn.fpof1 == SGL)
-		  {
-		    if (result.number_part < 16)
-		      {
-			as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
-			break;
-		      }
-
-		    result.number_part &= 0xF;
-		    result.number_part |= (result.l_r_select & 1) << 4;
-		  }
-		INSERT_FIELD_AND_CONTINUE (opcode, result.number_part, 21);
-	      }
-
-	    /* Handle a 5 bit register field at 15.  */
-	    case '6':
-	      {
-		struct pa_11_fp_reg_struct result;
-
-		pa_parse_number (&s, &result);
-		CHECK_FIELD (result.number_part, 31, 0, 0);
-		if (the_insn.fpof1 == SGL)
-		  {
-		    if (result.number_part < 16)
-		      {
-			as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
-			break;
-		      }
-		    result.number_part &= 0xF;
-		    result.number_part |= (result.l_r_select & 1) << 4;
-		  }
-		INSERT_FIELD_AND_CONTINUE (opcode, result.number_part, 16);
-	      }
-
-	    /* Handle a 5 bit register field at 31.  */
-	    case '7':
-	      {
-		struct pa_11_fp_reg_struct result;
-
-		pa_parse_number (&s, &result);
-		CHECK_FIELD (result.number_part, 31, 0, 0);
-		if (the_insn.fpof1 == SGL)
-		  {
-		    if (result.number_part < 16)
-		      {
-			as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
-			break;
-		      }
-		    result.number_part &= 0xF;
-		    result.number_part |= (result.l_r_select & 1) << 4;
-		  }
-		INSERT_FIELD_AND_CONTINUE (opcode, result.number_part, 0);
-	      }
-
-	    /* Handle a 5 bit register field at 20.  */
-	    case '8':
-	      {
-		struct pa_11_fp_reg_struct result;
-
-		pa_parse_number (&s, &result);
-		CHECK_FIELD (result.number_part, 31, 0, 0);
-		if (the_insn.fpof1 == SGL)
-		  {
-		    if (result.number_part < 16)
-		      {
-			as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
-			break;
-		      }
-		    result.number_part &= 0xF;
-		    result.number_part |= (result.l_r_select & 1) << 4;
-		  }
-		INSERT_FIELD_AND_CONTINUE (opcode, result.number_part, 11);
-	      }
-
-	    /* Handle a 5 bit register field at 25.  */
-	    case '9':
-	      {
-		struct pa_11_fp_reg_struct result;
-
-		pa_parse_number (&s, &result);
-		CHECK_FIELD (result.number_part, 31, 0, 0);
-		if (the_insn.fpof1 == SGL)
-		  {
-		    if (result.number_part < 16)
-		      {
-			as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
-			break;
-		      }
-		    result.number_part &= 0xF;
-		    result.number_part |= (result.l_r_select & 1) << 4;
-		  }
-		INSERT_FIELD_AND_CONTINUE (opcode, result.number_part, 6);
-	      }
-
 	    /* Handle a floating point operand format at 26.
 	       Only allows single and double precision.  */
 	    case 'H':
@@ -3178,6 +2972,226 @@ pa_ip (str)
 		  as_bad (_("Invalid Floating Point Operand Format."));
 		}
 	      break;
+
+	    /* Handle all floating point registers.  */
+	    case 'f':
+	      switch (*++args)
+	        {
+		/* Float target register.  */
+		case 't':
+		  num = pa_parse_number (&s, 0);
+		  CHECK_FIELD (num, 31, 0, 0);
+		  INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
+
+		/* Float target register with L/R selection.  */
+		case 'T':
+		  {
+		    struct pa_11_fp_reg_struct result;
+
+		    pa_parse_number (&s, &result);
+		    CHECK_FIELD (result.number_part, 31, 0, 0);
+		    opcode |= result.number_part;
+
+		    /* 0x30 opcodes are FP arithmetic operation opcodes
+		       and need to be turned into 0x38 opcodes.  This
+		       is not necessary for loads/stores.  */
+		    if (need_pa11_opcode (&the_insn, &result)
+			&& ((opcode & 0xfc000000) == 0x30000000))
+		      opcode |= 1 << 27;
+
+		    INSERT_FIELD_AND_CONTINUE (opcode, result.l_r_select & 1, 6);
+		  }
+
+		/* Float operand 1.  */
+		case 'a':
+		  {
+		    struct pa_11_fp_reg_struct result;
+
+		    pa_parse_number (&s, &result);
+		    CHECK_FIELD (result.number_part, 31, 0, 0);
+		    opcode |= result.number_part << 21;
+		    if (need_pa11_opcode (&the_insn, &result))
+		      {
+			opcode |= (result.l_r_select & 1) << 7;
+			opcode |= 1 << 27;
+		      }
+		    continue;
+		  }
+
+		/* Float operand 1 with L/R selection.  */
+		case 'A':
+		  {
+		    struct pa_11_fp_reg_struct result;
+
+		    pa_parse_number (&s, &result);
+		    CHECK_FIELD (result.number_part, 31, 0, 0);
+		    opcode |= result.number_part << 21;
+		    opcode |= (result.l_r_select & 1) << 7;
+		    continue;
+		  }
+
+		/* Float operand 2.  */
+		case 'b':
+		  {
+		    struct pa_11_fp_reg_struct result;
+
+		    pa_parse_number (&s, &result);
+		    CHECK_FIELD (result.number_part, 31, 0, 0);
+		    opcode |= (result.number_part & 0x1f) << 16;
+		    if (need_pa11_opcode (&the_insn, &result))
+		      {
+			opcode |= (result.l_r_select & 1) << 12;
+			opcode |= 1 << 27;
+		      }
+		    continue;
+		  }
+
+		/* Float operand 2 with L/R selection.  */
+		case 'B':
+		  {
+		    struct pa_11_fp_reg_struct result;
+
+		    pa_parse_number (&s, &result);
+		    CHECK_FIELD (result.number_part, 31, 0, 0);
+		    opcode |= (result.number_part & 0x1f) << 16;
+		    opcode |= (result.l_r_select & 1) << 12;
+		    continue;
+		  }
+
+		/* Float operand 3 for fmpyfadd, fmpynfadd.  */
+		case 'C':
+		  {
+		    struct pa_11_fp_reg_struct result;
+		    int regnum;
+
+		    pa_parse_number (&s, &result);
+		    CHECK_FIELD (result.number_part, 31, 0, 0);
+		    opcode |= (result.number_part & 0x1c) << 11;
+		    opcode |= (result.number_part & 0x3) << 9;
+		    opcode |= (result.l_r_select & 1) << 8;
+		    continue;
+		  }
+
+		/* Float mult operand 1 for fmpyadd, fmpysub */
+		case 'i':
+		  {
+		    struct pa_11_fp_reg_struct result;
+
+		    pa_parse_number (&s, &result);
+		    CHECK_FIELD (result.number_part, 31, 0, 0);
+		    if (the_insn.fpof1 == SGL)
+		      {
+			if (result.number_part < 16)
+			  {
+			    as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
+			    break;
+			  }
+
+			result.number_part &= 0xF;
+			result.number_part |= (result.l_r_select & 1) << 4;
+		      }
+		    INSERT_FIELD_AND_CONTINUE (opcode, result.number_part, 21);
+		  }
+
+		/* Float mult operand 2 for fmpyadd, fmpysub */
+		case 'j':
+		  {
+		    struct pa_11_fp_reg_struct result;
+		  
+		    pa_parse_number (&s, &result);
+		    CHECK_FIELD (result.number_part, 31, 0, 0);
+		    if (the_insn.fpof1 == SGL)
+		      {
+		        if (result.number_part < 16)
+		          {
+		    	as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
+		    	break;
+		          }
+		        result.number_part &= 0xF;
+		        result.number_part |= (result.l_r_select & 1) << 4;
+		      }
+		    INSERT_FIELD_AND_CONTINUE (opcode, result.number_part, 16);
+		  }
+
+		/* Float mult target for fmpyadd, fmpysub */
+		case 'k':
+		  {
+		    struct pa_11_fp_reg_struct result;
+		  
+		    pa_parse_number (&s, &result);
+		    CHECK_FIELD (result.number_part, 31, 0, 0);
+		    if (the_insn.fpof1 == SGL)
+		      {
+		        if (result.number_part < 16)
+		          {
+		    	as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
+		    	break;
+		          }
+		        result.number_part &= 0xF;
+		        result.number_part |= (result.l_r_select & 1) << 4;
+		      }
+		    INSERT_FIELD_AND_CONTINUE (opcode, result.number_part, 0);
+		  }
+
+		/* Float add operand 1 for fmpyadd, fmpysub */
+		case 'l':
+		  {
+		    struct pa_11_fp_reg_struct result;
+		  
+		    pa_parse_number (&s, &result);
+		    CHECK_FIELD (result.number_part, 31, 0, 0);
+		    if (the_insn.fpof1 == SGL)
+		      {
+		        if (result.number_part < 16)
+		          {
+		    	as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
+		    	break;
+		          }
+		        result.number_part &= 0xF;
+		        result.number_part |= (result.l_r_select & 1) << 4;
+		      }
+		    INSERT_FIELD_AND_CONTINUE (opcode, result.number_part, 6);
+		  }
+
+		/* Float add target for fmpyadd, fmpysub */
+		case 'm':
+		  {
+		    struct pa_11_fp_reg_struct result;
+		  
+		    pa_parse_number (&s, &result);
+		    CHECK_FIELD (result.number_part, 31, 0, 0);
+		    if (the_insn.fpof1 == SGL)
+		      {
+		        if (result.number_part < 16)
+		          {
+		    	as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
+		    	break;
+		          }
+		        result.number_part &= 0xF;
+		        result.number_part |= (result.l_r_select & 1) << 4;
+		      }
+		    INSERT_FIELD_AND_CONTINUE (opcode, result.number_part, 11);
+		  }
+
+		default:
+		  abort ();
+		}
+	      break;
+
+	    /* Handle L/R register halves like 'x'.  */
+	    case 'e':
+	      {
+		struct pa_11_fp_reg_struct result;
+
+		pa_parse_number (&s, &result);
+		CHECK_FIELD (result.number_part, 31, 0, 0);
+		opcode |= (result.number_part & 0x1f) << 16;
+		if (need_pa11_opcode (&the_insn, &result))
+		  {
+		    opcode |= (result.l_r_select & 1) << 1;
+		  }
+		continue;
+	      }
 
 	    default:
 	      abort ();
