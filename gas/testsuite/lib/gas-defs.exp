@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
 # DejaGnu@cygnus.com
@@ -172,16 +172,6 @@ proc gas_init {} {
     return
 }
 
-# For easier reading.
-proc fail_phase { name phase opts } {
-    set opts [string trim $opts]
-    if { $opts == "" } {
-	fail "$name ($phase)"
-    } else {
-	fail "$name ($phase: $opts)"
-    }
-}
-
 # This proc requires two input files -- the .s file containing the
 # assembly source, and a .d file containing the expected output from
 # objdump or nm or whatever, and leading comments indicating any options
@@ -189,8 +179,8 @@ proc fail_phase { name phase opts } {
 
 proc run_dump_test { name } {
     global subdir srcdir
-    global OBJDUMP NM AS
-    global OBJDUMPFLAGS NMFLAGS ASFLAGS
+    global OBJDUMP NM AS OBJCOPY
+    global OBJDUMPFLAGS NMFLAGS ASFLAGS OBJCOPYFLAGS
 
     if [string match "*/*" $name] {
 	set file $name
@@ -206,6 +196,7 @@ proc run_dump_test { name } {
     set opts(as) {}
     set opts(objdump) {}
     set opts(nm) {}
+    set opts(objcopy) {}
     set opts(name) {}
     set opts(PROG) {}
     set opts(source) {}
@@ -232,6 +223,8 @@ proc run_dump_test { name } {
 		{ set program objdump }
 	    nm
 		{ set program nm }
+	    objcopy
+		{ set program objcopy }
 	    default
 		{ perror "unrecognized program option $opts(PROG) in $file.d"
 		  unresolved $subdir/$name
@@ -241,6 +234,8 @@ proc run_dump_test { name } {
 	set program nm
     } elseif {$opts(objdump) != "" && $opts(nm) == ""} {
 	set program objdump
+    } elseif {$opts(objcopy) != ""} {
+	set program objcopy
     } else {
 	perror "dump program unspecified in $file.d"
 	unresolved $subdir/$name
@@ -248,7 +243,7 @@ proc run_dump_test { name } {
     }
     set progopts1 $opts($program)
     eval set progopts \$[string toupper $program]FLAGS
-    eval set program \$[string toupper $program]
+    eval set binary \$[string toupper $program]
     if { $opts(name) == "" } {
 	set testname "$subdir/$name"
     } else {
@@ -261,25 +256,37 @@ proc run_dump_test { name } {
 	set sourcefile $srcdir/$subdir/$opts(source)
     }
 
-    catch "exec $srcdir/lib/run $AS $ASFLAGS $opts(as) $sourcefile" comp_output
+    send_log "$AS $ASFLAGS $opts(as) -o dump.o $sourcefile\n"
+    catch "exec $srcdir/lib/run $AS $ASFLAGS $opts(as) -o dump.o $sourcefile" comp_output
 
     if ![string match "" $comp_output] then {
 	send_log "$comp_output\n"
 	verbose "$comp_output" 3
-	fail_phase $testname assembly "$ASFLAGS $opts(as)"
+	fail $testname
 	return
     }
 
     if { $progopts1 == "" } { set $progopts1 "-r" }
-    verbose "running $program $progopts $progopts1" 3
-    if [catch "exec $program $progopts $progopts1 > dump.out" comp_output] {
-	fail_phase $testname {running objdump} "$progopts $progopts1"
-	return
+    verbose "running $binary $progopts $progopts1" 3
+    if { $program == "objcopy" } {
+	send_log "$binary $progopts $progopts1 dump.o dump.out\n"
+	if [catch "exec $binary $progopts $progopts1 dump.o dump.out" comp_output] {
+	    send_log "$comp_output\n"
+	    fail $testname
+	    return
+	}
+    } else {
+	send_log "$binary $progopts $progopts1 dump.o > dump.out\n"
+	if [catch "exec $binary $progopts $progopts1 dump.o > dump.out" comp_output] {
+	    send_log "$comp_output\n"
+	    fail $testname
+	    return
+	}
     }
 
     verbose_eval {[file_contents "dump.out"]} 3
     if { [regexp_diff "dump.out" "${file}.d"] } then {
-	fail_phase $testname {checking output} "$ASFLAGS $opts(as)"
+	fail $testname
 	return
     }
 
@@ -364,6 +371,7 @@ proc regexp_diff { file_1 file_2 } {
     set eof -1
     set end 0
     set differences 0
+    set diff_pass 0
 
     if [file exists $file_1] then {
 	set file_a [open $file_1 r]
@@ -392,6 +400,11 @@ proc regexp_diff { file_1 file_2 } {
 	    }
 	}
 	while { [string length $line_b] == 0 || [string match "#*" $line_b] } {
+	    if [ string match "#pass" $line_b ] {
+		set end 1
+		set diff_pass 1
+		break
+	    }
 	    if { [gets $file_b line_b] == $eof } {
 		set end 1
 		break
@@ -406,7 +419,7 @@ proc regexp_diff { file_1 file_2 } {
 	}
     }
 
-    if { $differences == 0 && [eof $file_a] != [eof $file_b] } {
+    if { $differences == 0 && !$diff_pass && [eof $file_a] != [eof $file_b] } {
 	send_log "different lengths\n"
 	verbose "different lengths" 3
 	set differences 1
