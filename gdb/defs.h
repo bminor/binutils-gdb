@@ -36,7 +36,7 @@ typedef unsigned int CORE_ADDR;
 /* Gdb does *lots* of string compares.  Use macros to speed them up by
    avoiding function calls if the first characters are not the same. */
 
-#define STRCMP(a,b) (*(a) == *(b) ? strcmp ((a), (b)) : *(a) - *(b))
+#define STRCMP(a,b) (*(a) == *(b) ? strcmp ((a), (b)) : (int)*(a) - (int)*(b))
 #define STREQ(a,b) (*(a) == *(b) ? !strcmp ((a), (b)) : 0)
 #define STREQN(a,b,c) (*(a) == *(b) ? !strncmp ((a), (b), (c)) : 0)
 
@@ -70,6 +70,23 @@ enum command_class
   class_files, class_support, class_info, class_breakpoint,
   class_alias, class_obscure, class_user, class_maintenance,
   class_pseudo
+};
+
+/* Languages represented in the symbol table and elsewhere.
+   This should probably be in language.h, but since enum's can't
+   be forward declared to satisfy opaque references before their
+   actual definition, needs to be here. */
+
+enum language 
+{
+   language_unknown, 		/* Language not known */
+   language_auto,		/* Placeholder for automatic setting */
+   language_c, 			/* C */
+   language_cplus, 		/* C++ */
+				/* start-sanitize-chill */
+   language_chill,		/* Chill */
+				/* end-sanitize-chill */
+   language_m2			/* Modula-2 */
 };
 
 /* the cleanup list records things that have to be undone
@@ -247,7 +264,7 @@ extern void
 fprint_symbol PARAMS ((FILE *, char *));
 
 extern void
-fputs_demangled PARAMS ((char *, FILE *, int));
+fputs_demangled PARAMS ((char *, FILE *, int, enum language));
 
 extern void
 perror_with_name PARAMS ((char *));
@@ -348,23 +365,6 @@ extern unsigned output_radix;
 
 /* Baud rate specified for communication with serial target systems.  */
 extern char *baud_rate;
-
-/* Languages represented in the symbol table and elsewhere.
-   This should probably be in language.h, but since enum's can't
-   be forward declared to satisfy opaque references before their
-   actual definition, needs to be here. */
-
-enum language 
-{
-   language_unknown, 		/* Language not known */
-   language_auto,		/* Placeholder for automatic setting */
-   language_c, 			/* C */
-   language_cplus, 		/* C++ */
-				/* start-sanitize-chill */
-   language_chill,		/* Chill */
-				/* end-sanitize-chill */
-   language_m2			/* Modula-2 */
-};
 
 /* Possibilities for prettyprint parameters to routines which print
    things.  Like enum language, this should be in value.h, but needs
@@ -536,6 +536,17 @@ enum val_prettyprint
 # else
 #  define LONGEST long
 # endif
+#endif
+
+/* If we picked up a copy of CHAR_BIT from a configuration file
+   (which may get it by including <limits.h>) then use it to set
+   the number of bits in a host char.  If not, use the same size
+   as the target. */
+
+#if defined (CHAR_BIT)
+#define HOST_CHAR_BIT CHAR_BIT
+#else
+#define HOST_CHAR_BIT TARGET_CHAR_BIT
 #endif
 
 /* Assorted functions we can declare, now that const and volatile are 

@@ -1,3 +1,21 @@
+Thu Mar 11 09:33:01 1993  Fred Fish  (fnf@cygnus.com)
+
+	* utils.c (fputs_demangled):  Complete rewrite to clean up and
+	add a language parameter that is used to select the demangling
+	algorithm.
+	* defs.h (enum language):  Move further up in file so enum can
+	be used in prototypes.
+	* defs.h (fputs_demangled):  Update prototype to add lang arg.
+	* c-typeprint.c (cp_type_print_method_args):  Add language arg
+	to fputs_demangled calls, remove DMGL_PARAMS flag.
+	* stack.c (print_frame_info):  Remove obsolete code so we don't
+	have to update fputs_demangled usage in it.
+	* stack.c (print_frame_info, frame_info):  Add language variable
+	to pass to fputs_demangled and initialize it from the symbol's
+	language.  Call fputs_demangled with language arg.
+	* symtab.c (find_methods):  Add language arg to fputs_demangled
+	call.
+
 Wed Mar 10 17:37:11 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (VERSION):  Bump version to 4.8.2.

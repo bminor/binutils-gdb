@@ -1,5 +1,5 @@
 /* Print and select stack frames for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -139,32 +139,8 @@ print_frame_info (fi, level, source, args)
   struct symtab_and_line sal;
   struct symbol *func;
   register char *funname = 0;
+  enum language funlang = language_unknown;
   int numargs;
-
-#if 0	/* Symbol reading is fast enough now */
-  struct partial_symtab *pst;
-
-  /* Don't give very much information if we haven't readin the
-     symbol table yet.  */
-  pst = find_pc_psymtab (fi->pc);
-  if (pst && !pst->readin)
-    {
-      /* Abbreviated information.  */
-      char *fname;
-
-      if (!find_pc_partial_function (fi->pc, &fname, 0))
-	fname = "??";
-	
-      printf_filtered ("#%-2d ", level);
-      if (addressprint)
-        printf_filtered ("%s in ", local_hex_string(fi->pc));
-
-      fputs_demangled (fname, stdout, 0);
-      fputs_filtered (" (...)\n", stdout);
-      
-      return;
-    }
-#endif
 
 #ifdef CORE_NEEDS_RELOCATION
   CORE_NEEDS_RELOCATION(fi->pc);
@@ -190,7 +166,7 @@ print_frame_info (fi, level, source, args)
 
       struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
       if (msymbol != NULL
-	  && (msymbol -> address
+	  && (SYMBOL_VALUE_ADDRESS (msymbol) 
 	      > BLOCK_START (SYMBOL_BLOCK_VALUE (func))))
 	{
 	  /* In this case we have no way of knowing the source file
@@ -199,16 +175,23 @@ print_frame_info (fi, level, source, args)
 	  /* We also don't know anything about the function besides
 	     its address and name.  */
 	  func = 0;
-	  funname = msymbol -> name;
+	  funname = SYMBOL_NAME (msymbol);
+	  funlang = SYMBOL_LANGUAGE (msymbol);
 	}
       else
-	funname = SYMBOL_NAME (func);
+	{
+	  funname = SYMBOL_NAME (func);
+	  funlang = SYMBOL_LANGUAGE (func);
+	}
     }
   else
     {
       register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
       if (msymbol != NULL)
-	funname = msymbol -> name;
+	{
+	  funname = SYMBOL_NAME (msymbol);
+	  funlang = SYMBOL_LANGUAGE (msymbol);
+	}
     }
 
   if (source >= 0 || !sal.symtab)
@@ -218,7 +201,7 @@ print_frame_info (fi, level, source, args)
       if (addressprint)
 	if (fi->pc != sal.pc || !sal.symtab)
 	  printf_filtered ("%s in ", local_hex_string(fi->pc));
-      fputs_demangled (funname ? funname : "??", stdout, 0);
+      fputs_demangled (funname ? funname : "??", stdout, 0, funlang);
       wrap_here ("   ");
       fputs_filtered (" (", stdout);
       if (args)
@@ -265,10 +248,6 @@ print_frame_info (fi, level, source, args)
   fflush (stdout);
 }
 
-#ifdef FRAME_SPECIFICATION_DYADIC
-extern FRAME setup_arbitrary_frame ();
-#endif
-
 /*
  * Read a frame specification in whatever the appropriate format is.
  * Call error() if the specification is in any way invalid (i.e.
@@ -279,7 +258,9 @@ parse_frame_specification (frame_exp)
      char *frame_exp;
 {
   int numargs = 0;
-  int arg1, arg2;
+  int arg1, arg2, arg3;
+#define	MAXARGS	4
+  int args[MAXARGS];
   
   if (frame_exp)
     {
@@ -287,27 +268,25 @@ parse_frame_specification (frame_exp)
       struct cleanup *tmp_cleanup;
 
       while (*frame_exp == ' ') frame_exp++;
-      for (p = frame_exp; *p && *p != ' '; p++)
-	;
 
-      if (*frame_exp)
+      while (*frame_exp)
 	{
-	  numargs = 1;
+	  if (numargs > MAXARGS)
+	    error ("Too many args in frame specification");
+	  /* Parse an argument.  */
+          for (p = frame_exp; *p && *p != ' '; p++)
+	    ;
 	  addr_string = savestring(frame_exp, p - frame_exp);
 
 	  {
 	    tmp_cleanup = make_cleanup (free, addr_string);
-	    arg1 = parse_and_eval_address (addr_string);
+	    args[numargs++] = parse_and_eval_address (addr_string);
 	    do_cleanups (tmp_cleanup);
 	  }
 
+	  /* Skip spaces, move to possible next arg.  */
 	  while (*p == ' ') p++;
-	  
-	  if (*p)
-	    {
-	      numargs = 2;
-	      arg2 = parse_and_eval_address (p);
-	    }
+	  frame_exp = p;
 	}
     }
 
@@ -320,7 +299,7 @@ parse_frame_specification (frame_exp)
       /* NOTREACHED */
     case 1:
       {
-	int level = arg1;
+	int level = args[0];
 	FRAME fid = find_relative_frame (get_current_frame (), &level);
 	FRAME tfid;
 
@@ -332,35 +311,33 @@ parse_frame_specification (frame_exp)
 	   (s)he gets.  Still, give the highest one that matches.  */
 
 	for (fid = get_current_frame ();
-	     fid && FRAME_FP (fid) != arg1;
+	     fid && FRAME_FP (fid) != args[0];
 	     fid = get_prev_frame (fid))
 	  ;
 
 	if (fid)
 	  while ((tfid = get_prev_frame (fid)) &&
-		 (FRAME_FP (tfid) == arg1))
+		 (FRAME_FP (tfid) == args[0]))
 	    fid = tfid;
 	  
-#ifdef FRAME_SPECIFICATION_DYADIC
-	if (!fid)
-	  error ("Incorrect number of args in frame specification");
-
-	return fid;
-#else
-	return create_new_frame (arg1, 0);
-#endif
+	/* We couldn't identify the frame as an existing frame, but
+	   perhaps we can create one with a single argument.
+	   Fall through to default case; it's up to SETUP_ARBITRARY_FRAME
+	   to complain if it doesn't like a single arg.  */
       }
-      /* NOTREACHED */
-    case 2:
-      /* Must be addresses */
-#ifndef FRAME_SPECIFICATION_DYADIC
-      error ("Incorrect number of args in frame specification");
+
+     default:
+#ifdef SETUP_ARBITRARY_FRAME
+      return SETUP_ARBITRARY_FRAME (numargs, args);
 #else
-      return setup_arbitrary_frame (arg1, arg2);
+      /* Usual case.  Do it here rather than have everyone supply
+	 a SETUP_ARBITRARY_FRAME that does this.  */
+      if (numargs == 1)
+	return create_new_frame (args[0], 0);
+      error ("Too many args in frame specification");
 #endif
       /* NOTREACHED */
     }
-  fatal ("Internal: Error in parsing in parse_frame_specification");
   /* NOTREACHED */
 }
 
@@ -391,6 +368,7 @@ frame_info (addr_exp, from_tty)
   FRAME calling_frame;
   int i, count;
   char *funname = 0;
+  enum language funlang = language_unknown;
 
   if (!target_has_stack)
     error ("No inferior or core file.");
@@ -404,12 +382,18 @@ frame_info (addr_exp, from_tty)
   func = get_frame_function (frame);
   s = find_pc_symtab(fi->pc);
   if (func)
-    funname = SYMBOL_NAME (func);
+    {
+      funname = SYMBOL_NAME (func);
+      funlang = SYMBOL_LANGUAGE (func);
+    }
   else
     {
       register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
       if (msymbol != NULL)
-	funname = msymbol -> name;
+	{
+	  funname = SYMBOL_NAME (msymbol);
+	  funlang = SYMBOL_LANGUAGE (msymbol);
+	}
     }
   calling_frame = get_prev_frame (frame);
 
@@ -429,7 +413,7 @@ frame_info (addr_exp, from_tty)
   if (funname)
     {
       printf_filtered (" in ");
-      fputs_demangled (funname, stdout, DMGL_ANSI | DMGL_PARAMS);
+      fputs_demangled (funname, stdout, DMGL_ANSI | DMGL_PARAMS, funlang);
     }
   wrap_here ("   ");
   if (sal.symtab)
@@ -460,6 +444,10 @@ frame_info (addr_exp, from_tty)
     puts_filtered ("\n");
   if (s)
      printf_filtered(" source language %s.\n", language_str(s->language));
+
+#ifdef PRINT_EXTRA_FRAME_INFO
+  PRINT_EXTRA_FRAME_INFO (fi);
+#endif
 
   {
     /* Address of the argument list for this frame, or 0.  */
@@ -666,7 +654,7 @@ print_block_frame_locals (b, frame, stream)
 	  || SYMBOL_CLASS (sym) == LOC_STATIC)
 	{
 	  values_printed = 1;
-	  fprint_symbol (stream, SYMBOL_NAME (sym));
+	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), stream);
 	  fputs_filtered (" = ", stream);
 	  print_variable_value (sym, frame, stream);
 	  fprintf_filtered (stream, "\n");
@@ -693,7 +681,7 @@ print_block_frame_labels (b, have_default, stream)
   for (i = 0; i < nsyms; i++)
     {
       sym = BLOCK_SYM (b, i);
-      if (! strcmp (SYMBOL_NAME (sym), "default"))
+      if (STREQ (SYMBOL_NAME (sym), "default"))
 	{
 	  if (*have_default)
 	    continue;
@@ -704,7 +692,7 @@ print_block_frame_labels (b, have_default, stream)
 	  struct symtab_and_line sal;
 	  sal = find_pc_line (SYMBOL_VALUE_ADDRESS (sym), 0);
 	  values_printed = 1;
-	  fputs_demangled (SYMBOL_NAME (sym), stream, DMGL_ANSI | DMGL_PARAMS);
+	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), stream);
 	  if (addressprint)
 	    fprintf_filtered (stream, " %s", 
 			      local_hex_string(SYMBOL_VALUE_ADDRESS (sym)));
@@ -879,7 +867,7 @@ print_frame_arg_vars (frame, stream)
 	  || SYMBOL_CLASS (sym) == LOC_REGPARM)
 	{
 	  values_printed = 1;
-	  fprint_symbol (stream, SYMBOL_NAME (sym));
+	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), stream);
 	  fputs_filtered (" = ", stream);
 	  /* We have to look up the symbol because arguments often have
 	     two entries (one a parameter, one a register) and the one
@@ -1127,8 +1115,6 @@ return_command (retval_exp, from_tty)
   FRAME_ADDR selected_frame_addr;
   CORE_ADDR selected_frame_pc;
   FRAME frame;
-  char *funcname;
-  struct cleanup *back_to;
   value return_value;
 
   if (selected_frame == NULL)
@@ -1153,14 +1139,11 @@ return_command (retval_exp, from_tty)
     {
       if (thisfun != 0)
 	{
-	  funcname = strdup_demangled (SYMBOL_NAME (thisfun));
-	  back_to = make_cleanup (free, funcname);
-	  if (!query ("Make %s return now? ", funcname))
+	  if (!query ("Make %s return now? ", SYMBOL_SOURCE_NAME (thisfun)))
 	    {
 	      error ("Not confirmed.");
 	      /* NOTREACHED */
 	    }
-	  do_cleanups (back_to);
 	}
       else
 	if (!query ("Make selected stack frame return now? "))

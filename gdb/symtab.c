@@ -1389,7 +1389,8 @@ find_methods (t, name, sym_arr)
 		else
 		  {
 		    fputs_filtered("(Cannot find method ", stdout);
-		    fputs_demangled(phys_name, stdout, DMGL_PARAMS);
+		    fputs_demangled(phys_name, stdout, DMGL_PARAMS,
+				    language_cplus);
 		    fputs_filtered(" - possibly inlined.)\n", stdout);
 		  }
 	      }
