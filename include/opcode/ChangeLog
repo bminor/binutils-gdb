@@ -1,3 +1,40 @@
+Tue Jul  6 15:17:35 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mips.h: Replaced with version from Ralph Campbell and OSF.  The
+	new version includes instruction hazard information, but is
+	otherwise reasonably similar.
+
+Thu Jul  1 20:36:17 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* h8300.h: Fix typo in UNOP3 (affected sh[al][lr].l).
+
+Fri Jun 11 18:38:44 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	Patches from Jeff Law, law@cs.utah.edu:
+	* hppa.h: Clean up some of the OLD_TABLE, non-OLD_TABLE braindamage.
+	Make the tables be the same for the following instructions:
+	"bb", "addb[tf]", "addib[tf]", "add", "add[loc]", "addco", 
+	"sh[123]add", "sh[123]add[lo]", "sub", "sub[obt]", "sub[bt]o",
+	"ds", "comclr", "addi", "addi[ot]", "addito", "subi", "subio", 
+	"comiclr", "fadd", "fsub", "fmpy", "fdiv", "fsqrt", "fabs", 
+	"frnd", "fcpy", "fcnvff", "fcnvxf", "fcnvfx", "fcnvfxt", 
+	"fcmp", and "ftest".
+
+	* hppa.h: Make new and old tables the same for "break", "mtctl",
+	"mfctl", "bb", "ssm", "rsm", "xmpyu", "fmpyadd", "fmpysub".
+	Fix typo in last patch.  Collapse several #ifdefs into a
+	single #ifdef.
+
+	* hppa.h: Delete remaining OLD_TABLE code.  Bring some
+	of the comments up-to-date.
+
+	* hppa.h: Update "free list" of letters and update
+	comments describing each letter's function.
+
+Fri Jun  4 15:41:37 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* h8300.h: checkpoint, includes H8/300-H opcodes.
+
 Thu Jun  3 15:42:59 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* Patches from Jeffrey Law <law@cs.utah.edu>.
