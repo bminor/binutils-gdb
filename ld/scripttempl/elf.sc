@@ -3,15 +3,19 @@ OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
 
 ${RELOCATING+${LIB_SEARCH_DIRS}}
-${RELOCATING+__DYNAMIC  =  0;}
-${STACKZERO+${RELOCATING+${STACKZERO}}}
-${SHLIB_PATH+${RELOCATING+${SHLIB_PATH}}}
+/* Do we need any of these for elf?
+   ${RELOCATING+__DYNAMIC  =  0;}
+   ${STACKZERO+${RELOCATING+${STACKZERO}}}
+   ${SHLIB_PATH+${RELOCATING+${SHLIB_PATH}}}  */
 SECTIONS
 {
   .text ${RELOCATING+${TEXT_START_ADDR}}:
   {
     CREATE_OBJECT_SYMBOLS
+    *(.init)
     *(.text)
+    *(.fini)
+    *(.rodata)
     ${RELOCATING+_etext = ${DATA_ALIGNMENT};}
   }
   .data  ${RELOCATING+${DATA_ALIGNMENT}} :
@@ -26,7 +30,7 @@ SECTIONS
    *(.bss)
    *(COMMON)
    ${RELOCATING+_end = . };
-   ${RELOCATING+__end = . };
+   ${RELOCATING+end = . };
   }
 }
 EOF
