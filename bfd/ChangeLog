@@ -1,5 +1,9 @@
 Mon Oct 21 09:34:11 1991  Steve Chamberlain  (steve at rtl.cygnus.com)
 
+	* coffcode.h (coff_compute_section_file_positions): make it pad
+	section size out if there are alignment restrictions so that the
+	image will be ok on a system where section positions are worked
+	out by accumulating sizes rather than from the section headers.
 	* targets.c (proto write_armap). Changed orl_count to unsigned.
 	* opncls.c (bfd_close_all_done). Added so that generative
 	programs like gas can close a bfd without causing bfd confusion.

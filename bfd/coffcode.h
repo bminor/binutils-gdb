@@ -2011,7 +2011,13 @@ DEFUN(coff_compute_section_file_positions,(abfd),
        do this (FIXME) so we can stay in sync with Intel.  960
        doesn't yet page from files... */
 #ifndef I960
+   {	
+     /* Whatever the alignment, make sure that the sections are big
+	enough to cover the gap */
+    bfd_vma old_sofar= sofar;
     sofar = ALIGN(sofar, 1 << current->alignment_power);
+    current->size += sofar - old_sofar;
+  }
 #endif
     /* FIXME, in demand paged files, the low order bits of the file
        offset must match the low order bits of the virtual address.
