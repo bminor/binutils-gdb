@@ -136,8 +136,7 @@ val_print (type, valaddr, address, stream, format, deref_ref, recurse, pretty)
 
   /* Ensure that the type is complete and not just a stub.  If the type is
      only a stub and we can't find and substitute its complete type, then
-     print appropriate string and return.  Typical types that my be stubs
-     are structs, unions, and C++ methods. */
+     print appropriate string and return.  */
 
   check_stub_type (type);
   if (TYPE_FLAGS (type) & TYPE_FLAG_STUB)
@@ -798,7 +797,12 @@ val_print_string (addr, len, stream)
 	    ++addr;
 	    ++bufptr;
 	    if (bufptr[-1] == '\0')
-	      break;
+	      {
+		/* We don't care about any error which happened after
+		   the NULL terminator.  */
+		errcode = 0;
+		break;
+	      }
 	  }
       }
   } while (errcode == 0					/* no error */
