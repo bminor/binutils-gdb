@@ -184,7 +184,7 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 $(ACLOCAL_M4): @MAINT@ configure.in 
 	cd $(srcdir) && $(ACLOCAL)
 
-config.status: $(srcdir)/configure
+config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
 $(srcdir)/configure: @MAINT@$(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
@@ -224,15 +224,15 @@ install-binPROGRAMS: $(bin_PROGRAMS)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`; \
+	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	  else :; fi; \
 	done
 
 uninstall-binPROGRAMS:
 	@$(NORMAL_UNINSTALL)
 	list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  rm -f $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`; \
+	  rm -f $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	done
 
 .c.o:
@@ -418,10 +418,10 @@ uninstall-man1:
 	done
 install-man: $(MANS)
 	@$(NORMAL_INSTALL)
-	$(MAKE) install-man1
+	$(MAKE) $(AM_MAKEFLAGS) install-man1
 uninstall-man:
 	@$(NORMAL_UNINSTALL)
-	$(MAKE) uninstall-man1
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-man1
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run `make' without going through this Makefile.
@@ -439,7 +439,7 @@ check-recursive installcheck-recursive info-recursive dvi-recursive:
 	list='$(SUBDIRS)'; for subdir in $$list; do \
 	  target=`echo $@ | sed s/-recursive//`; \
 	  echo "Making $$target in $$subdir"; \
-	  (cd $$subdir && $(MAKE) $$target) \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$target) \
 	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
 	done && test -z "$$fail"
 
@@ -452,12 +452,12 @@ maintainer-clean-recursive:
 	for subdir in $$rev; do \
 	  target=`echo $@ | sed s/-recursive//`; \
 	  echo "Making $$target in $$subdir"; \
-	  (cd $$subdir && $(MAKE) $$target) \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$target) \
 	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
 	done && test -z "$$fail"
 tags-recursive:
 	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  (cd $$subdir && $(MAKE) tags); \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
 	done
 
 tags: TAGS
@@ -502,12 +502,12 @@ distcheck: dist
 	dc_install_base=`cd $(distdir)/=inst && pwd`; \
 	cd $(distdir)/=build \
 	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
-	  && $(MAKE) \
-	  && $(MAKE) dvi \
-	  && $(MAKE) check \
-	  && $(MAKE) install \
-	  && $(MAKE) installcheck \
-	  && $(MAKE) dist
+	  && $(MAKE) $(AM_MAKEFLAGS) \
+	  && $(MAKE) $(AM_MAKEFLAGS) dvi \
+	  && $(MAKE) $(AM_MAKEFLAGS) check \
+	  && $(MAKE) $(AM_MAKEFLAGS) install \
+	  && $(MAKE) $(AM_MAKEFLAGS) installcheck \
+	  && $(MAKE) $(AM_MAKEFLAGS) dist
 	-rm -rf $(distdir)
 	@echo "========================"; \
 	echo "$(distdir).tar.gz is ready for distribution"; \
@@ -535,18 +535,18 @@ distdir: $(DISTFILES)
 	  || mkdir $(distdir)/$$subdir \
 	  || exit 1; \
 	  chmod 777 $(distdir)/$$subdir; \
-	  (cd $$subdir && $(MAKE) top_distdir=../$(distdir) distdir=../$(distdir)/$$subdir distdir) \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir=../$(distdir) distdir=../$(distdir)/$$subdir distdir) \
 	    || exit 1; \
 	done
-	$(MAKE) top_distdir="$(top_distdir)" distdir="$(distdir)" dist-info
+	$(MAKE) $(AM_MAKEFLAGS) top_distdir="$(top_distdir)" distdir="$(distdir)" dist-info
 info: $(INFO_DEPS) info-recursive
 dvi: $(DVIS) dvi-recursive
 check:
-	$(MAKE) check-recursive
+	$(MAKE) $(AM_MAKEFLAGS) check-recursive
 installcheck: installcheck-recursive
 install-info: install-info-am install-info-recursive
 all-recursive-am: gconfig.h
-	$(MAKE) all-recursive
+	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 all-am: Makefile $(PROGRAMS) $(MANS) $(HEADERS) gconfig.h
 
@@ -568,7 +568,7 @@ install: install-recursive install-exec-am install-data-am
 uninstall: uninstall-recursive uninstall-am
 
 install-strip:
-	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
 installdirs: installdirs-recursive
 	$(mkinstalldirs)  $(DATADIR)$(bindir) $(DESTDIR)$(mandir)/man1
 
