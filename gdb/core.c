@@ -127,6 +127,7 @@ core_open (filename, from_tty)
 	   bfd_errmsg (bfd_error));
 
   ontop = !push_target (&core_ops);
+  make_cleanup (pop_target, 0);
 
   p = bfd_core_file_failing_command (core_bfd);
   if (p)
@@ -143,12 +144,9 @@ core_open (filename, from_tty)
     set_current_frame ( create_new_frame (read_register (FP_REGNUM),
 					  read_pc ()));
     select_frame (get_current_frame (), 0);
-#if 0
-    /* Shouldn't be necessary to read in symbols.  */
 #ifdef SOLIB_ADD
     SOLIB_ADD (NULL, from_tty);
 #endif
-#endif /* 0 */
     print_sel_frame (0);	/* Print the top frame and source line */
   } else {
     printf (
