@@ -280,11 +280,28 @@ cc -o myprog myprog.c utils.c -g -pg
 @end example
 
 Note: The @samp{-pg} option must be part of your compilation options
-as well as your link options.  If it is not, when you run @code{gprof}
-you will get no profile report and an error message like this:
+as well as your link options.  If it is not then no call-graph data
+will be gathered and when you run @code{gprof} you will get an error
+message like this:
 
 @example
 gprof: gmon.out file is missing call-graph data
+@end example
+
+If you add the @samp{-Q} switch to suppress the printing of the call
+graph data you will still be able to see the time samples:
+
+@example
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  Ts/call  Ts/call  name    
+ 44.12      0.07     0.07                             zazLoop
+ 35.29      0.14     0.06                             main
+ 20.59      0.17     0.04                             bazMillion
+
+ %         the percentage of the total running time of the
 @end example
 
 If you run the linker @code{ld} directly instead of through a compiler
@@ -327,6 +344,16 @@ it will count how many times it executed each branch of each @samp{if}
 statement, each iteration of each @samp{do} loop, etc.  This will
 enable @code{gprof} to construct an annotated source code
 listing showing how many times each line of code was executed.
+
+It also worth noting that GCC supports a different profiling method
+which is enabled by the @samp{-fprofile-arcs}, @samp{-ftest-coverage}
+and @samp{-fprofile-values} switches. These switches do not produce
+data which is useful to @code{gprof} however, so they are not
+discussed further here.  There is also the
+@samp{-finstrument-functions} switch which will cause GCC to insert
+calls to special user supplied instrumentation routines at the entry
+and exit of every function in their program.  This can be used to
+implement an alternative profiling scheme.
 
 @node Executing
 @chapter Executing the Program
@@ -1645,7 +1672,10 @@ Looking at the per-line call counts only tells part of the story.
 Because @code{gprof} can only report call times and counts by function,
 the best way to get finer-grained information on where the program
 is spending its time is to re-factor large functions into sequences
-of calls to smaller ones.
+of calls to smaller ones.  Beware however that this can introduce
+artifical hot spots since compiling with @samp{-pg} adds a significant
+overhead to function calls.  An alternative solution is to use a
+non-intrusive profiler, e.g.@: oprofile.
 
 @item How do I find which lines in my program were executed the most times?
 

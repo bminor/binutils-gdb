@@ -1,6 +1,13 @@
+2003-10-30  Nick Clifton  <nickc@redhat.com>
+
+	* gprof.texi (Compiling): Describe how to use gprof when source
+	files are not compiled with -pg.  Mention other profiling options
+	supported by gcc.
+	(How do I?): Mention the function call overhead introduced by -pg.
+
 2003-10-29  Nick Clifton  <nickc@redhat.com>
 
-	* gprof.texi: Apply patch supplied by Eric S Raymond via RMS.
+	* gprof.texi: Apply patch supplied by Eric S Raymond via RMS:
 	(Compiling): Mention that -pg must be passed to both the compiler
 	and the linker.
 	Mention that -a is now deprecated.
