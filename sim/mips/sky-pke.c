@@ -33,8 +33,6 @@ static unsigned_4 pke_pc_operand_bits(struct pke_device*, int bit_offset,
 				      int bit_width, unsigned_4* sourceaddr);
 static struct fifo_quadword* pke_pc_fifo(struct pke_device*, int operand_num, 
 					 unsigned_4** operand);
-static int pke_track_write(struct pke_device*, const void* src, int len,
-			   address_word dest, unsigned_4 sourceaddr);
 static void pke_attach(SIM_DESC sd, struct pke_device* me);
 enum pke_check_target { chk_vu, chk_path1, chk_path2, chk_path3 };
 static int pke_check_stall(struct pke_device* me, enum pke_check_target what);
@@ -149,13 +147,22 @@ pke_attach(SIM_DESC sd, struct pke_device* me)
                    (device*) me,
                    NULL /*buffer*/);
 
-  /* source-addr tracking word */
+  /* VU MEM0 tracking table */
   sim_core_attach (sd, NULL, 0, access_read_write, 0,
-		   (me->pke_number == 0) ? PKE0_SRCADDR : PKE1_SRCADDR,
-                   sizeof(unsigned_4) /*nr_bytes*/,
+		   ((me->pke_number == 0) ? VU0_MEM0_SRCADDR_START : VU1_MEM0_SRCADDR_START),
+                   ((me->pke_number == 0) ? VU0_MEM0_SIZE : VU1_MEM0_SIZE) / 2,
                    0 /*modulo*/,
-		   NULL, 
-                   zalloc(sizeof(unsigned_4)) /*buffer*/);
+                   NULL,
+                   NULL /*buffer*/);
+
+  /* VU MEM1 tracking table */
+  sim_core_attach (sd, NULL, 0, access_read_write, 0,
+		   ((me->pke_number == 0) ? VU0_MEM1_SRCADDR_START : VU1_MEM1_SRCADDR_START),
+                   ((me->pke_number == 0) ? VU0_MEM1_SIZE : VU1_MEM1_SIZE) / 4,
+                   0 /*modulo*/,
+                   NULL,
+                   NULL /*buffer*/);
+
 
   /* attach to trace file if appropriate */
   {
@@ -170,6 +177,7 @@ pke_attach(SIM_DESC sd, struct pke_device* me)
 	  {
 	    perror("VIF FIFO trace error on fopen");
 	  }
+	setvbuf(me->fifo_trace_file, NULL, _IOLBF, 0);
       }
   }
 }
@@ -459,7 +467,7 @@ pke_io_write_buffer(device *me_,
 	{
 	  /* time to grow */
 	  int new_fifo_buffer_size = me->fifo_buffer_size + 20;
-	  void* ptr = realloc((void*) me->fifo, new_fifo_buffer_size*sizeof(quadword));
+	  void* ptr = realloc((void*) me->fifo, new_fifo_buffer_size*sizeof(struct fifo_quadword));
  
 	  if(ptr == NULL)
 	    {
@@ -478,10 +486,10 @@ pke_io_write_buffer(device *me_,
 	fqw->word_class[2] = fqw->word_class[3] = wc_unknown;
       memcpy((void*) fqw->data, me->fifo_qw_in_progress, sizeof(quadword));
       ASSERT(sizeof(unsigned_4) == 4);
-      PKE_MEM_READ((SIM_ADDR) (me->pke_number == 0 ? DMA_D0_MADR : DMA_D1_MADR),
+      PKE_MEM_READ(me, (me->pke_number == 0 ? DMA_D0_MADR : DMA_D1_MADR),
 		   & fqw->source_address,
 		   4);
-      PKE_MEM_READ((SIM_ADDR) (me->pke_number == 0 ? DMA_D0_PKTFLAG : DMA_D1_PKTFLAG),
+      PKE_MEM_READ(me, (me->pke_number == 0 ? DMA_D0_PKTFLAG : DMA_D1_PKTFLAG),
 		   & dma_tag_present,
 		   4);
 
@@ -490,7 +498,6 @@ pke_io_write_buffer(device *me_,
 	  /* lower two words are DMA tags */
 	  fqw->word_class[0] = fqw->word_class[1] = wc_dma;
 	}
-
 
       me->fifo_num_elements++;
 
@@ -538,6 +545,14 @@ pke_issue(SIM_DESC sd, struct pke_device* me)
      (PKE_REG_MASK_GET(me, STAT, PIS) && !PKE_REG_MASK_GET(me, ERR, MII)))
     {
       /* try again next cycle; no state change */
+
+      /* trace command */
+      if(me->fifo_trace_file != NULL)
+	{
+	  fprintf(me->fifo_trace_file, "# stalled STAT: %08lx\n",
+		  (unsigned long) me->regs[PKE_REG_STAT][0]);
+	}
+
       return;
     }
 
@@ -576,7 +591,8 @@ pke_issue(SIM_DESC sd, struct pke_device* me)
     }
 
   /* decoding */
-  PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_DECODE);
+  if(PKE_REG_MASK_GET(me, STAT, PPS) == PKE_REG_STAT_PPS_IDLE)
+    PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_DECODE);
 
   /* decode & execute */
   if(IS_PKE_CMD(cmd, PKENOP))
@@ -677,7 +693,7 @@ pke_pc_advance(struct pke_device* me, int num_words)
 
 		  /* print trace record */
 		  fprintf(me->fifo_trace_file,
-			  "%d 0x%ux_%ux_%ux_%ux 0x%ux %c%c%c%c\n",
+			  "%d 0x%08x_%08x_%08x_%08x 0x%08x %c%c%c%c\n",
 			  (me->pke_number == 0 ? 0 : 1),
 			  (unsigned) fq->data[3], (unsigned) fq->data[2],
 			  (unsigned) fq->data[1], (unsigned) fq->data[0],
@@ -803,13 +819,17 @@ pke_pc_operand_bits(struct pke_device* me, int bit_offset, int bit_width, unsign
   unsigned_4* word = NULL;
   unsigned_4 value;
   struct fifo_quadword* fifo_operand;
+  int wordnumber, bitnumber;
+
+  wordnumber = bit_offset/32;
+  bitnumber = bit_offset%32;
 
   /* find operand word with bitfield */
-  fifo_operand = pke_pc_fifo(me, (bit_offset / 32) + 1, &word);
-  ASSERT(word != 0);
+  fifo_operand = pke_pc_fifo(me, wordnumber + 1, &word);
+  ASSERT(word != NULL);
 
   /* extract bitfield from word */
-  value = BIT_MASK_GET(*word, bit_offset % 32, bit_width);
+  value = BIT_MASK_GET(*word, bitnumber, bitnumber + bit_width - 1);
 
   /* extract source addr from fifo word */
   *source_addr = fifo_operand->source_address;
@@ -817,39 +837,6 @@ pke_pc_operand_bits(struct pke_device* me, int bit_offset, int bit_width, unsign
   return value;
 }
 
-
-
-
-
-/* Write a bunch of bytes into simulator memory.  Store the given source address into the
-   PKE sourceaddr tracking word. */
-int
-pke_track_write(struct pke_device* me, const void* src, int len, 
-		address_word dest, unsigned_4 sourceaddr)
-{
-  int rc;
-  unsigned_4 no_sourceaddr = 0;
-
-  /* write srcaddr into PKE srcaddr tracking */
-  sim_write(NULL,
-	    (SIM_ADDR) (me->pke_number == 0) ? PKE0_SRCADDR : PKE1_SRCADDR,
-	    (void*) & sourceaddr,
-	    sizeof(unsigned_4));
-  
-  /* write bytes into simulator */
-  rc = sim_write(NULL,
-		 (SIM_ADDR) dest,
-		 (void*) src,
-		 len);
-  
-  /* clear srcaddr from PKE srcaddr tracking */
-  sim_write(NULL,
-	    (SIM_ADDR) (me->pke_number == 0) ? PKE0_SRCADDR : PKE1_SRCADDR,
-	    (void*) & no_sourceaddr,
-	    sizeof(unsigned_4));
-
-  return rc;
-}
 
 
 /* check for stall conditions on indicated devices (path* only on PKE1), do not change status
@@ -861,15 +848,13 @@ pke_check_stall(struct pke_device* me, enum pke_check_target what)
   unsigned_4 cop2_stat, gpuif_stat;
 
   /* read status words */
-  sim_read(NULL,
-	   (SIM_ADDR) (GIF_REG_STAT),
-	   (void*) & gpuif_stat,
-	   sizeof(unsigned_4));
-
-  sim_read(NULL,
-	   (SIM_ADDR) (COP2_REG_STAT_ADDR),
-	   (void*) & cop2_stat,
-	   sizeof(unsigned_4));
+  ASSERT(sizeof(unsigned_4) == 4);
+  PKE_MEM_READ(me, (GIF_REG_STAT),
+	       & gpuif_stat,
+	       4);
+  PKE_MEM_READ(me, (COP2_REG_STAT_ADDR),
+	       & cop2_stat,
+	       4);
 
   /* perform checks */
   if(what == chk_vu)
@@ -945,7 +930,8 @@ pke_code_stcycl(struct pke_device* me, unsigned_4 pkecode)
 {
   int imm = BIT_MASK_GET(pkecode, PKE_OPCODE_IMM_B, PKE_OPCODE_IMM_E);
   /* copy immediate value into CYCLE reg */
-  me->regs[PKE_REG_CYCLE][0] = imm;
+  PKE_REG_MASK_SET(me, CYCLE, WL, BIT_MASK_GET(imm, 8, 15));
+  PKE_REG_MASK_SET(me, CYCLE, CL, BIT_MASK_GET(imm, 0, 7));
   /* done */
   pke_pc_advance(me, 1);
   PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
@@ -1158,11 +1144,12 @@ pke_code_pkemscal(struct pke_device* me, unsigned_4 pkecode)
 
       /* compute new PC for VU */
       vu_pc = BIT_MASK_GET(imm, 0, 15);
+
       /* write new PC; callback function gets VU running */
-      sim_write(NULL,
-		(SIM_ADDR) (me->pke_number == 0 ? VU0_CIA : VU1_CIA),
-		(void*) & vu_pc,
-		sizeof(unsigned_4));
+      ASSERT(sizeof(unsigned_4) == 4);
+      PKE_MEM_WRITE(me, (me->pke_number == 0 ? VU0_CIA : VU1_CIA),
+		    & vu_pc,
+		    4);
 
       /* done */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
@@ -1195,16 +1182,16 @@ pke_code_pkemscnt(struct pke_device* me, unsigned_4 pkecode)
 	pke_flip_dbf(me);
 
       /* read old PC */
-      sim_read(NULL,
-	       (SIM_ADDR) (me->pke_number == 0 ? VU0_CIA : VU1_CIA),
-	       (void*) & vu_pc,
-	       sizeof(unsigned_4));
+      ASSERT(sizeof(unsigned_4) == 4);
+      PKE_MEM_READ(me, (me->pke_number == 0 ? VU0_CIA : VU1_CIA),
+		   & vu_pc,
+		   4);
 
       /* rewrite new PC; callback function gets VU running */
-      sim_write(NULL,
-		(SIM_ADDR) (me->pke_number == 0 ? VU0_CIA : VU1_CIA),
-		(void*) & vu_pc,
-		sizeof(unsigned_4));
+      ASSERT(sizeof(unsigned_4) == 4);
+      PKE_MEM_WRITE(me, (me->pke_number == 0 ? VU0_CIA : VU1_CIA),
+		    & vu_pc,
+		    4);
 
       /* done */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
@@ -1255,11 +1242,12 @@ pke_code_pkemscalf(struct pke_device* me, unsigned_4 pkecode)
 
       /* compute new PC for VU */
       vu_pc = BIT_MASK_GET(imm, 0, 15);
-      /* write new PC; callback function gets VU running */
-      sim_write(NULL,
-		(SIM_ADDR) (me->pke_number == 0 ? VU0_CIA : VU1_CIA),
-		(void*) & vu_pc,
-		sizeof(unsigned_4));
+
+      /* rewrite new PC; callback function gets VU running */
+      ASSERT(sizeof(unsigned_4) == 4);
+      PKE_MEM_WRITE(me, (me->pke_number == 0 ? VU0_CIA : VU1_CIA),
+		    & vu_pc,
+		    4);
 
       /* done */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
@@ -1399,37 +1387,51 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 	  /* "transferring" operand */
 	  PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_XFER);
 	  
-	  /* transfer VU instructions, one word per iteration */
-	  for(i=0; i<num*2; i++)
+	  /* set NUM */
+	  PKE_REG_MASK_SET(me, NUM, NUM, num);
+
+	  /* transfer VU instructions, one word-pair per iteration */
+	  for(i=0; i<num; i++)
 	    {
 	      address_word vu_addr_base, vu_addr;
 	      address_word vutrack_addr_base, vutrack_addr;
+	      unsigned_4 vu_opcode[2];
 	      unsigned_4* operand;
-	      struct fifo_quadword* fq = pke_pc_fifo(me, num, & operand);
-	      
-	      /* set NUM */
-	      PKE_REG_MASK_SET(me, NUM, NUM, (num*2 - i) / 2);
+	      struct fifo_quadword* fq;
+	      int next_num;
+
+	      /* decrement NUM */
+	      next_num = PKE_REG_MASK_GET(me, NUM, NUM) - 1;
+	      PKE_REG_MASK_SET(me, NUM, NUM, next_num);
 	      
 	      /* imm: in 64-bit units for MPG instruction */
 	      /* VU*_MEM0 : instruction memory */
 	      vu_addr_base = (me->pke_number == 0) ?
 		VU0_MEM0_WINDOW_START : VU0_MEM0_WINDOW_START;
-	      vu_addr = vu_addr_base + (imm*2) + i;
+	      vu_addr = vu_addr_base + (imm + i) *2;
+
+	      /* XXX: overflow check! */
 	      
 	      /* VU*_MEM0_TRACK : source-addr tracking table */
 	      vutrack_addr_base = (me->pke_number == 0) ?
 		VU0_MEM0_SRCADDR_START : VU1_MEM0_SRCADDR_START;
-	      vutrack_addr = vu_addr_base + (imm*2) + i;
+	      vutrack_addr = vu_addr_base + imm + i;
+
+	      /* Fetch operand words */
+	      fq = pke_pc_fifo(me, num*2 + i, & operand);
+	      vu_opcode[0] = *operand;
+	      vu_opcode[1] = *pke_pc_operand(me, num*2 + i + 1);
 	      
 	      /* write data into VU memory */
-	      pke_track_write(me, operand, sizeof(unsigned_4),
-			      vu_addr, fq->source_address);
+	      ASSERT(sizeof(vu_opcode) == 8);
+	      PKE_MEM_WRITE(me, vu_addr,
+			    vu_opcode,
+			    8);
 	      
 	      /* write srcaddr into VU srcaddr tracking table */
-	      sim_write(NULL,
-			(SIM_ADDR) vutrack_addr,
-			(void*) & fq->source_address,
-			sizeof(unsigned_4));
+	      PKE_MEM_WRITE(me, vutrack_addr,
+			    & fq->source_address,
+			    4);
 	    } /* VU xfer loop */
 
 	  /* check NUM */
@@ -1479,18 +1481,18 @@ pke_code_direct(struct pke_device* me, unsigned_4 pkecode)
       /* transfer GPUIF quadwords, one word per iteration */
       for(i=0; i<imm*4; i++)
 	{
-	  unsigned_4* operand;
-	  struct fifo_quadword* fq = pke_pc_fifo(me, num, &operand);
+	  unsigned_4* operand = pke_pc_operand(me, num);
 	  
 	  /* collect word into quadword */
-	  fifo_data[i%4] = *operand;
+	  fifo_data[i % 4] = *operand;
 	  
-	  /* write to GPUIF FIFO only with full word */
-	  if(i%4 == 3)
+	  /* write to GPUIF FIFO only with full quadword */
+	  if(i % 4 == 3)
 	    {
-	      address_word gpuif_fifo = GIF_PATH2_FIFO_ADDR+(i/4);
-	      pke_track_write(me, fifo_data, sizeof(quadword),
-			      (SIM_ADDR) gpuif_fifo, fq->source_address);
+	      ASSERT(sizeof(fifo_data) == 16);
+	      PKE_MEM_WRITE(me, GIF_PATH2_FIFO_ADDR,
+			    fifo_data,
+			    16);
 	    } /* write collected quadword */
 	  
 	} /* GPUIF xfer loop */
@@ -1531,10 +1533,7 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
   int sx = BIT_MASK_GET(imm, 14, 14);
 
   int n, num_operands;
-  unsigned_4* last_operand_word;
-  
-  /* map zero to max+1 */
-  if(num==0) num=0x100;
+  unsigned_4* last_operand_word = NULL;
   
   /* compute PKEcode length, as given in CPU2 spec, v2.1 pg. 11 */
   if(wl <= cl)
@@ -1544,11 +1543,13 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
   num_operands = ((32 >> vl) * (vn+1) * n)/32;
   
   /* confirm that FIFO has enough words in it */
-  last_operand_word = pke_pc_operand(me, num_operands);
-  if(last_operand_word != NULL)
+  if(num_operands > 0)
+    last_operand_word = pke_pc_operand(me, num_operands);
+  if(last_operand_word != NULL || num_operands == 0)
     {
-      address_word vu_addr_base;
-      int vector_num;
+      address_word vu_addr_base, vutrack_addr_base;
+      address_word vu_addr_max_size;
+      int vector_num_out, vector_num_in;
       
       /* "transferring" operand */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_XFER);
@@ -1557,49 +1558,71 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 
       /* compute VU address base */
       if(me->pke_number == 0)
-	vu_addr_base = VU0_MEM1_WINDOW_START + BIT_MASK_GET(imm, 0, 9);
+	{
+	  vu_addr_base = VU0_MEM1_WINDOW_START + 16 * BIT_MASK_GET(imm, 0, 9);
+	  vu_addr_max_size = VU0_MEM1_SIZE;
+	  vutrack_addr_base = VU0_MEM1_SRCADDR_START + 4 * BIT_MASK_GET(imm, 0, 9);
+	}
       else
 	{
-	  vu_addr_base = VU1_MEM1_WINDOW_START + BIT_MASK_GET(imm, 0, 9);
-	  if(r) vu_addr_base += PKE_REG_MASK_GET(me, TOPS, TOPS);
+	  vu_addr_base = VU1_MEM1_WINDOW_START + 16 * BIT_MASK_GET(imm, 0, 9);
+	  vu_addr_max_size = VU1_MEM1_SIZE;
+	  vutrack_addr_base = VU1_MEM1_SRCADDR_START + 4 * BIT_MASK_GET(imm, 0, 9);
+	  if(r) /* double-buffering */
+	    {
+	      vu_addr_base += 16 * PKE_REG_MASK_GET(me, TOPS, TOPS);
+	      vutrack_addr_base += 4 * PKE_REG_MASK_GET(me, TOPS, TOPS);
+	    }
 	}
 
+
       /* set NUM */
-      PKE_REG_MASK_SET(me, NUM, NUM, num);
+      PKE_REG_MASK_SET(me, NUM, NUM, num == 0 ? 0x100 : num );
 
       /* transfer given number of vectors */
-      vector_num = 0;  /* output vector number being processed */
+      vector_num_out = 0;  /* output vector number being processed */
+      vector_num_in = 0;  /* argument vector number being processed */
       do
 	{
 	  quadword vu_old_data;
 	  quadword vu_new_data;
 	  quadword unpacked_data;
 	  address_word vu_addr;
+	  address_word vutrack_addr;
 	  unsigned_4 source_addr = 0;
 	  int i;
-	  
+	  int next_num;
+
 	  /* decrement NUM */
-	  PKE_REG_MASK_SET(me, NUM, NUM,
-			   PKE_REG_MASK_GET(me, NUM, NUM) - 1);
-	      
+	  next_num = PKE_REG_MASK_GET(me, NUM, NUM) - 1;
+	  PKE_REG_MASK_SET(me, NUM, NUM, next_num);
+
 	  /* compute VU destination address, as bytes in R5900 memory */
 	  if(cl >= wl)
 	    {
 	      /* map zero to max+1 */
 	      if(wl == 0) wl = 0x0100;
-	      vu_addr = vu_addr_base + 16*(cl*(vector_num/wl) + (vector_num%wl));
+	      vu_addr = vu_addr_base + 16*(cl*(vector_num_out/wl) + (vector_num_out%wl));
 	    }
 	  else
-	    vu_addr = vu_addr_base + 16*vector_num;
+	    vu_addr = vu_addr_base + 16*vector_num_out;
 
-	  /* XXX: can vu_addr overflow? */
-	  
+	  /* check for vu_addr overflow */
+	  while(vu_addr >= vu_addr_base + vu_addr_max_size)
+	    vu_addr -= vu_addr_max_size;
+
+	  /* compute address of tracking table entry */
+	  vutrack_addr = vutrack_addr_base + ((signed_8)vu_addr - (signed_8)vu_addr_base) / 4;
+
 	  /* read old VU data word at address */
-	  sim_read(NULL, (SIM_ADDR) vu_addr, (void*) & vu_old_data, sizeof(vu_old_data));
+	  ASSERT(sizeof(vu_old_data) == 16);
+	  PKE_MEM_READ(me, vu_addr,
+		       vu_old_data,
+		       16);
 	  
 	  /* For cyclic unpack, next operand quadword may come from instruction stream
 	     or be zero. */
-	  if((cl < wl) && ((vector_num % wl) >= cl)) /* wl != 0, set above */
+	  if((cl < wl) && ((vector_num_out % wl) >= cl)) /* wl != 0, set above */
 	    {
 	      /* clear operand - used only in a "indeterminate" state */
 	      for(i = 0; i < 4; i++)
@@ -1634,7 +1657,7 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 
 		  /* offset in bits in current operand word */
 		  int bitoffset =
-		    (vector_num * vectorbits) + (i * unitbits); /* # of bits from PKEcode */
+		    (vector_num_in * vectorbits) + (i * unitbits); /* # of bits from PKEcode */
 
 		  /* last unit of V4_5 is only one bit wide */
 		  if(vl == 3 && vn == 3 && i == 3) /* PKE_UNPACK_V4_5 */
@@ -1644,20 +1667,23 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 		  operand = pke_pc_operand_bits(me, bitoffset, unitbits, & source_addr);
 
 		  /* selectively sign-extend; not for V4_5 1-bit value */
-		  if(sx && unitbits > 0)
+		  if(sx && unitbits > 1)
 		    unpacked_data[i] = SEXT32(operand, unitbits-1);
 		  else
 		    unpacked_data[i] = operand;
 		}
+
+	      /* consumed a vector from the PKE instruction stream */
+	      vector_num_in ++;
 	    } /* unpack word from instruction operand */
 	  
 	  /* compute replacement word */
 	  if(m) /* use mask register? */
 	    {
 	      /* compute index into mask register for this word */
-	      int mask_index = PKE_LIMIT(vector_num % wl, 3);  /* wl != 0, set above */
+	      int mask_index = PKE_LIMIT(vector_num_out % wl, 3);  /* wl != 0, set above */
 	      
-	      for(i=0; i<3; i++) /* loop over columns */
+	      for(i=0; i<4; i++) /* loop over columns */
 		{
 		  int mask_op = PKE_MASKREG_GET(me, mask_index, i);
 		  unsigned_4* masked_value = NULL;
@@ -1680,7 +1706,7 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 		      break;
 		      
 		    case PKE_MASKREG_COLUMN: /* exploit C0..C3 contiguity */
-		      masked_value = & me->regs[PKE_REG_C0 + PKE_LIMIT(vector_num,3)][0];
+		      masked_value = & me->regs[PKE_REG_C0 + mask_index][0];
 		      break;
 		      
 		    case PKE_MASKREG_NOTHING:
@@ -1727,11 +1753,19 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 	    }
 
 	  /* write replacement word */
-	  pke_track_write(me, vu_new_data, sizeof(vu_new_data),
-			  (SIM_ADDR) vu_addr, source_addr);
+	  ASSERT(sizeof(vu_new_data) == 16);
+	  PKE_MEM_WRITE(me, vu_addr,
+			vu_new_data,
+			16);
+
+	  /* write tracking address */
+	  ASSERT(sizeof(unsigned_4) == 4);
+	  PKE_MEM_WRITE(me, vutrack_addr,
+			& source_addr,
+			4);
 
 	  /* next vector please */
-	  vector_num ++;
+	  vector_num_out ++;
 	} /* vector transfer loop */
       while(PKE_REG_MASK_GET(me, NUM, NUM) > 0);
 

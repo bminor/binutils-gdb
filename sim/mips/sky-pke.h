@@ -245,11 +245,6 @@ typedef unsigned_4 quadword[4];
 #define PKE_REG_ERR_MII_B 0
 
 
-/* source-addr for words written to VU/GPUIF ports */
-#define PKE0_SRCADDR 0x20000020 /* from 1998-01-22 e-mail plans */
-#define PKE1_SRCADDR 0x20000024 /* from 1998-01-22 e-mail plans */
-
-
 /* UNPACK opcodes */
 #define PKE_UNPACK(vn,vl) ((vn) << 2 | (vl))
 #define PKE_UNPACK_S_32  PKE_UNPACK(0, 0)
@@ -300,8 +295,9 @@ typedef unsigned_4 quadword[4];
 /* set bitfield value */
 #define BIT_MASK_SET(lvalue,begin,end,value) \
 do { \
-  lvalue &= ~BIT_MASK_BTW(begin,end); \
-  lvalue |= (((value) << (begin)) & BIT_MASK_BTW(begin,end)); \
+  ASSERT((begin) <= (end)); \
+  (lvalue) &= ~BIT_MASK_BTW((begin),(end)); \
+  (lvalue) |= ((value) << (begin)) & BIT_MASK_BTW((begin),(end)); \
 } while(0)
 
 /* get bitfield value */
@@ -309,18 +305,21 @@ do { \
   (((rvalue) & BIT_MASK_BTW(begin,end)) >> (begin))
 /* e.g., BIT_MASK_GET(0000111100001111, 2, 8) = 0000000100001100 */
 
-/* get bitfield value, sign-extended to given bit number */
-#define BIT_MASK_GET_SX(rvalue,begin,end,sx) \
-  (BIT_MASK_GET(rvalue,begin,end) | ((BIT_MASK_GET(rvalue,begin,end) & BIT_MASK_BTW(end,end)) ? BIT_MASK_BTW(end,sx) : 0))
-/* e.g., BIT_MASK_GET_SX(0000111100001111, 2, 8, 15) = 1111111100001100 */
-
-
 /* These ugly macro hacks allow succinct bitfield accesses */
 /* set a bitfield in a register by "name" */
 #define PKE_REG_MASK_SET(me,reg,flag,value) \
-     BIT_MASK_SET(((me)->regs[PKE_REG_##reg][0]), \
-		  PKE_REG_##reg##_##flag##_B, PKE_REG_##reg##_##flag##_E, \
-		  (value))
+     do { \
+       unsigned_4 old = BIT_MASK_GET(((me)->regs[PKE_REG_##reg][0]), \
+		    PKE_REG_##reg##_##flag##_B, PKE_REG_##reg##_##flag##_E); \
+       BIT_MASK_SET(((me)->regs[PKE_REG_##reg][0]), \
+		    PKE_REG_##reg##_##flag##_B, PKE_REG_##reg##_##flag##_E, \
+		    (value)); \
+       if((me)->fifo_trace_file != NULL) \
+	 { \
+	   if(old != (value)) \
+	     fprintf((me)->fifo_trace_file, "# Reg %s:%s = 0x%x\n", #reg, #flag, (unsigned)(value)); \
+	 } \
+     } while(0)
 
 /* get a bitfield from a register by "name" */
 #define PKE_REG_MASK_GET(me,reg,flag) \
@@ -390,18 +389,40 @@ struct pke_device
 
 /* Kludge alert */
 
-#define PKE_MEM_READ(addr,data,size) \
-    do { sim_cpu* cpu;  cpu = STATE_CPU(CURRENT_STATE, 0); \
-         *(data) = sim_core_read_aligned_##size(cpu, CIA_GET(cpu), sim_core_read_map, \
-					      (addr)); } while(0)
+#define PKE_MEM_READ(me,addr,data,size) \
+    do { \
+      sim_cpu* cpu = STATE_CPU(CURRENT_STATE, 0); \
+      unsigned_##size value = \
+	sim_core_read_aligned_##size(cpu, CIA_GET(cpu), sim_core_read_map, \
+				     (SIM_ADDR)(addr)); \
+      memcpy((unsigned_##size*) (data), (void*) & value, size); \
+      if(me->fifo_trace_file != NULL) \
+	{ \
+	  int i; \
+	  fprintf((me)->fifo_trace_file, "# Read  %2d bytes from ", size); \
+	  fprintf((me)->fifo_trace_file, "0x%08lx: ", (unsigned long)(addr)); \
+	  for(i=0; i<size; i++) \
+	    fprintf((me)->fifo_trace_file, " %02x", ((unsigned_1*)(& value))[i]); \
+	  fprintf((me)->fifo_trace_file, "\n"); \
+	} \
+     } while(0)
 
-#define PKE_MEM_WRITE(addr,data,size) \
-    do { sim_cpu* cpu;  cpu = STATE_CPU(CURRENT_STATE, 0); \
+#define PKE_MEM_WRITE(me,addr,data,size) \
+    do { sim_cpu* cpu = STATE_CPU(CURRENT_STATE, 0); \
          unsigned_##size value; \
-         memcpy((void*) value, (data), size); \
+         memcpy((void*) & value, (unsigned_##size*)(data), size); \
          sim_core_write_aligned_##size(cpu, CIA_GET(cpu), sim_core_write_map, \
-				       (addr), value); } while(0)
-      
+				       (SIM_ADDR)(addr), value); \
+         if((me)->fifo_trace_file != NULL) \
+	   { \
+	     int i; \
+	     fprintf((me)->fifo_trace_file, "# Write %2d bytes  to  ", size); \
+	     fprintf((me)->fifo_trace_file, "0x%08lx: ", (unsigned long)(addr)); \
+	     for(i=0; i<size; i++) \
+	       fprintf((me)->fifo_trace_file, " %02x", ((unsigned_1*)(& value))[i]); \
+ 	     fprintf((me)->fifo_trace_file, "\n"); \
+	   } \
+        } while(0)      
 
 
 
