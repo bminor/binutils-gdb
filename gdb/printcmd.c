@@ -927,48 +927,34 @@ address_info (exp, from_tty)
       printf ("an argument in register %s", reg_names[val]);
       break;
 
-   case LOC_REGPARM_ADDR:
-     printf ("address of an argument in register %s", reg_names[val]);
-     break;
-      
+    case LOC_REGPARM_ADDR:
+      printf ("address of an argument in register %s", reg_names[val]);
+      break;
+
     case LOC_ARG:
-      if (SYMBOL_BASEREG_VALID (sym))
-	{
-	  printf ("an argument at offset %ld from register %s",
-		  val, reg_names[basereg]);
-	}
-      else
-	{
-	  printf ("an argument at offset %ld", val);
-	}
+      printf ("an argument at offset %ld", val);
       break;
 
     case LOC_LOCAL_ARG:
-      if (SYMBOL_BASEREG_VALID (sym))
-	{
-	  printf ("an argument at offset %ld from register %s",
-		  val, reg_names[basereg]);
-	}
-      else
-	{
-	  printf ("an argument at frame offset %ld", val);
-	}
+      printf ("an argument at frame offset %ld", val);
       break;
 
     case LOC_LOCAL:
-      if (SYMBOL_BASEREG_VALID (sym))
-	{
-	  printf ("a local variable at offset %ld from register %s",
-		  val, reg_names[basereg]);
-	}
-      else
-	{
-	  printf ("a local variable at frame offset %ld", val);
-	}
+      printf ("a local variable at frame offset %ld", val);
       break;
 
     case LOC_REF_ARG:
       printf ("a reference argument at offset %ld", val);
+      break;
+
+    case LOC_BASEREG:
+      printf ("a variable at offset %ld from register %s",
+	      val, reg_names[basereg]);
+      break;
+
+    case LOC_BASEREG_ARG:
+      printf ("an argument at offset %ld from register %s",
+	      val, reg_names[basereg]);
       break;
 
     case LOC_TYPEDEF:
@@ -1494,6 +1480,8 @@ print_frame_args (func, fi, num, stream)
       case LOC_REGPARM:
       case LOC_REGPARM_ADDR:
       case LOC_LOCAL_ARG:
+      case LOC_BASEREG:
+      case LOC_BASEREG_ARG:
 	break;
 
       /* Other types of symbols we just skip over.  */

@@ -1931,6 +1931,8 @@ yylex ()
 	      case LOC_REGPARM:
 	      case LOC_LOCAL:
 	      case LOC_LOCAL_ARG:
+	      case LOC_BASEREG:
+	      case LOC_BASEREG_ARG:
 		if (innermost_block == NULL
 		    || contained_in (block_found, innermost_block))
 		  {

@@ -607,6 +607,8 @@ variable:	NAME
 				case LOC_REF_ARG:
 				case LOC_REGPARM:
 				case LOC_LOCAL_ARG:
+				case LOC_BASEREG:
+				case LOC_BASEREG_ARG:
 				  if (innermost_block == 0 ||
 				      contained_in (block_found,
 						    innermost_block))
@@ -1119,6 +1121,8 @@ yylex ()
        case LOC_REGPARM:
        case LOC_LOCAL:
        case LOC_LOCAL_ARG:
+       case LOC_BASEREG:
+       case LOC_BASEREG_ARG:
        case LOC_CONST:
        case LOC_CONST_BYTES:
 	  return NAME;

@@ -21,9 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
 
-FIXME: Figure out how to get the frame pointer register number in the
-execution environment of the target.  Remove R_FP kludge
-
 FIXME: Do we need to generate dependencies in partial symtabs?
 (Perhaps we don't need to).
 
@@ -180,10 +177,6 @@ struct complaint not_row_major =
   "DIE @ 0x%x \"%s\", array not row major; not handled correctly", 0, 0
 };
 
-#ifndef R_FP		/* FIXME */
-#define R_FP 14		/* Kludge to get frame pointer register number */
-#endif
-
 typedef unsigned int DIE_REF;	/* Reference to a DIE */
 
 #ifndef GCC_PRODUCER
@@ -332,7 +325,11 @@ static int dbsize;	/* Size of dwarf info in bytes */
 static int dbroff;	/* Relative offset from start of .debug section */
 static char *lnbase;	/* Base pointer to line section */
 static int isreg;	/* Kludge to identify register variables */
-static int offreg;	/* Kludge to identify basereg references */
+/* Kludge to identify basereg references.  Nonzero if we have an offset
+   relative to a basereg.  */
+static int offreg;
+/* Which base register is it relative to?  */
+static int basereg;
 
 /* This value is added to each symbol value.  FIXME:  Generalize to 
    the section_offsets structure used by dbxread (once this is done,
@@ -2207,21 +2204,13 @@ locval (loc)
 	    break;
 	  case OP_BASEREG:
 	    /* push value of register (number) */
-	    /* Actually, we compute the value as if register has 0 */
+	    /* Actually, we compute the value as if register has 0, so the
+	       value ends up being the offset from that register.  */
 	    offreg = 1;
-	    regno = target_to_host (loc, loc_value_size, GET_UNSIGNED,
-				    current_objfile);
+	    basereg = target_to_host (loc, loc_value_size, GET_UNSIGNED,
+				      current_objfile);
 	    loc += loc_value_size;
-	    if (regno == R_FP)
-	      {
-		stack[++stacki] = 0;
-	      }
-	    else
-	      {
-		stack[++stacki] = 0;
-
-		complain (&basereg_not_handled, DIE_ID, DIE_NAME, regno);
-	      }
+	    stack[++stacki] = 0;
 	    break;
 	  case OP_ADDR:
 	    /* push address (relocated address) */
@@ -2988,7 +2977,8 @@ new_symbol (dip, objfile)
 		}
 	      else if (offreg)
 		{
-		  SYMBOL_CLASS (sym) = LOC_LOCAL;
+		  SYMBOL_CLASS (sym) = LOC_BASEREG;
+		  SYMBOL_BASEREG (sym) = basereg;
 		}
 	      else
 		{
@@ -3006,6 +2996,11 @@ new_symbol (dip, objfile)
 	  if (isreg)
 	    {
 	      SYMBOL_CLASS (sym) = LOC_REGPARM;
+	    }
+	  else if (offreg)
+	    {
+	      SYMBOL_CLASS (sym) = LOC_BASEREG_ARG;
+	      SYMBOL_BASEREG (sym) = basereg;
 	    }
 	  else
 	    {

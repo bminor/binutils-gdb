@@ -899,7 +899,8 @@ lookup_block_symbol (block, name, namespace)
 		  SYMBOL_CLASS (sym) != LOC_LOCAL_ARG &&
 		  SYMBOL_CLASS (sym) != LOC_REF_ARG &&
 		  SYMBOL_CLASS (sym) != LOC_REGPARM &&
-		  SYMBOL_CLASS (sym) != LOC_REGPARM_ADDR)
+		  SYMBOL_CLASS (sym) != LOC_REGPARM_ADDR &&
+		  SYMBOL_CLASS (sym) != LOC_BASEREG_ARG)
 		{
 		  break;
 		}

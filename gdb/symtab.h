@@ -515,6 +515,22 @@ enum address_class
 
   LOC_LOCAL_ARG,
 
+  /* Value is at SYMBOL_VALUE offset from the current value of
+     register number SYMBOL_BASEREG.  This exists mainly for the same
+     things that LOC_LOCAL and LOC_ARG do; but we need to do this
+     instead because on 88k DWARF gives us the offset from the
+     frame/stack pointer, rather than the offset from the "canonical
+     frame address" used by COFF, stabs, etc., and we don't know how
+     to convert between these until we start examining prologues.
+
+     Note that LOC_BASEREG is much less general than a DWARF expression.  */
+
+  LOC_BASEREG,
+
+  /* Same as LOC_BASEREG but it is an argument.  */
+
+  LOC_BASEREG_ARG,
+
   /* The variable does not actually exist in the program.
      The value is ignored.  */
 
@@ -551,12 +567,8 @@ struct symbol
 
   union
     {
-      /* for OP_BASEREG in DWARF location specs */
-      struct
-	{
-	  short regno_valid;	/* 0 == regno invalid; !0 == regno valid */
-	  short regno;		/* base register number {0, 1, 2, ...} */
-	} basereg;
+      /* Used by LOC_BASEREG and LOC_BASEREG_ARG.  */
+      short basereg;
     }
   aux_value;
 
@@ -566,25 +578,7 @@ struct symbol
 #define SYMBOL_CLASS(symbol)		(symbol)->class
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
-#define SYMBOL_BASEREG(symbol)		(symbol)->aux_value.basereg.regno
-
-/* If we want to do baseregs using this approach we should have a
-   LOC_BASEREG (and LOC_BASEREG_ARG) rather than changing the meaning
-   of LOC_LOCAL, LOC_ARG, etc. based on SYMBOL_BASEREG_VALID.  But
-   this approach provides just a small fraction of the expressiveness
-   of a DWARF location, so it does less than we might want.  On the
-   other hand, it may do more than we need; FRAME_LOCALS_ADDRESS,
-   LOC_REGPARM_ADDR, and similar things seem to handle most of the
-   cases which actually come up.  */
-
-#if 0
-/* This currently fails because some symbols are not being initialized
-   to zero on allocation, and no code is currently setting this value.  */
-#define SYMBOL_BASEREG_VALID(symbol) (symbol)->aux_value.basereg.regno_valid
-#else
-#define SYMBOL_BASEREG_VALID(symbol) 0
-#endif
-
+#define SYMBOL_BASEREG(symbol)		(symbol)->aux_value.basereg
 
 /* A partial_symbol records the name, namespace, and address class of
    symbols whose types we have not parsed yet.  For functions, it also
