@@ -619,6 +619,7 @@ struct cplus_struct_type
 	    unsigned int is_final:1;
 	    unsigned int is_synchronized:1;
 	    unsigned int is_native:1;
+	    unsigned int is_artificial:1;
 
 	    /* A stub method only has some fields valid (but they are enough
 	       to reconstruct the rest of the fields).  */
@@ -628,7 +629,7 @@ struct cplus_struct_type
 	    unsigned int is_inlined:1;
 
 	    /* Unused.  */
-	    unsigned int dummy:4;
+	    unsigned int dummy:3;
 
 	    /* Index into that baseclass's virtual function table,
 	       minus 2; else if static: VOFFSET_STATIC; else: 0.  */
@@ -867,6 +868,7 @@ extern void allocate_cplus_struct_type (struct type *);
 #define TYPE_FN_FIELD_FINAL(thisfn, n) ((thisfn)[n].is_final)
 #define TYPE_FN_FIELD_SYNCHRONIZED(thisfn, n) ((thisfn)[n].is_synchronized)
 #define TYPE_FN_FIELD_NATIVE(thisfn, n) ((thisfn)[n].is_native)
+#define TYPE_FN_FIELD_ARTIFICIAL(thisfn, n) ((thisfn)[n].is_artificial)
 #define TYPE_FN_FIELD_ABSTRACT(thisfn, n) ((thisfn)[n].is_abstract)
 #define TYPE_FN_FIELD_STUB(thisfn, n) ((thisfn)[n].is_stub)
 #define TYPE_FN_FIELD_INLINED(thisfn, n) ((thisfn)[n].is_inlined)

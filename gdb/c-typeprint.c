@@ -642,9 +642,9 @@ void
 c_type_print_base (struct type *type, struct ui_file *stream, int show,
 		   int level)
 {
-  register int i;
-  register int len;
-  register int lastval;
+  int i;
+  int len, real_len;
+  int lastval;
   char *mangled_name;
   char *demangled_name;
   char *demangled_no_static;
@@ -907,9 +907,21 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      fprintf_filtered (stream, ";\n");
 	    }
 
-	  /* If there are both fields and methods, put a space between. */
+	  /* If there are both fields and methods, put a blank line
+	      between them.  Make sure to count only method that we will
+	      display; artificial methods will be hidden.  */
 	  len = TYPE_NFN_FIELDS (type);
-	  if (len && section_type != s_none)
+	  real_len = 0;
+	  for (i = 0; i < len; i++)
+	    {
+	      struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
+	      int len2 = TYPE_FN_FIELDLIST_LENGTH (type, i);
+	      int j;
+	      for (j = 0; j < len2; j++)
+		if (!TYPE_FN_FIELD_ARTIFICIAL (f, j))
+		  real_len++;
+	    }
+	  if (real_len > 0 && section_type != s_none)
 	    fprintf_filtered (stream, "\n");
 
 	  /* C++: print out the methods */
@@ -928,6 +940,9 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 		   || is_destructor_name (physname)
 		   || method_name[0] == '~';
 
+		  /* Do not print out artificial methods.  */
+		  if (TYPE_FN_FIELD_ARTIFICIAL (f, j))
+		    continue;
 
 		  QUIT;
 		  if (TYPE_FN_FIELD_PROTECTED (f, j))

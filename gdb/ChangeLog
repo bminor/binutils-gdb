@@ -1,5 +1,14 @@
 2002-01-20  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbtypes.h (struct cplus_struct_type): Add is_artificial to
+	member function fields.  Add accessor macro
+	TYPE_FN_FIELD_ARTIFICIAL.
+	* dwarf2read.c (dwarf2_add_member_fn): Check for artificial methods.
+	* c-typeprint.c (c_type_print_base): Skip artificial member
+	functions.
+
+2002-01-20  Daniel Jacobowitz  <drow@mvista.com>
+
 	* f-typeprint.c: Delete unused function f_type_print_args.
 	* p-typeprint.c: Delete unused function pascal_type_print_args.
 

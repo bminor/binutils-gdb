@@ -2168,6 +2168,11 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 	}
     }
 
+  /* Check for artificial methods.  */
+  attr = dwarf_attr (die, DW_AT_artificial);
+  if (attr && DW_UNSND (attr) != 0)
+    fnp->is_artificial = 1;
+
   /* Get index in virtual function table if it is a virtual member function.  */
   attr = dwarf_attr (die, DW_AT_vtable_elem_location);
   if (attr)
