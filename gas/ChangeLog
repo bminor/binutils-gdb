@@ -1,7 +1,9 @@
 Tue Jan 28 15:27:28 1997  Ian Lance Taylor  <ian@cygnus.com>
 
-	* config/tc-mips.c (md_apply_fix): Make a branch to an odd address
-	an error rather than a warning.
+	* config/tc-mips.c (append_insn): Give an error for jumps to a
+	misaligned address.
+	(md_apply_fix): Make a branch to an odd address an error rather
+	than a warning.
 
 	* config/tc-mips.c (md_convert_frag): If the user explicitly
 	requested an extended opcode, pass warn as true to mips16_immed.
