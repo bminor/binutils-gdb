@@ -1,3 +1,8 @@
+Sun Sep 13 20:29:39 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* obj-coffbfd.c (fixup_segment): fixed missing parens in
+	expression checking for byte or word overflow.
+
 Fri Sep 11 10:21:04 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	Support for i386 coff
