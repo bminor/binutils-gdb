@@ -28,6 +28,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "symfile.h"
 
+  	
+/* Should call_function allocate stack space for a struct return?  */
+int
+mn10200_use_struct_convention (gcc_p, type)
+     int gcc_p;
+     struct type *type;
+{
+  return (TYPE_NFIELDS (type) > 1 || TYPE_LENGTH (type) > 8);
+}
+
+
+
 /* The main purpose of this file is dealing with prologues to extract
    information about stack frames and saved registers.
 

@@ -1381,14 +1381,21 @@ value_being_returned (valtype, retbuf, struct_return)
    2.0-2.3.3.  This is somewhat unfortunate, but changing gcc2_compiled
    would cause more chaos than dealing with some struct returns being
    handled wrong.  */
-#if !defined (USE_STRUCT_CONVENTION)
-#define USE_STRUCT_CONVENTION(gcc_p, type)\
-  (!((gcc_p == 1) && (TYPE_LENGTH (value_type) == 1                \
-		      || TYPE_LENGTH (value_type) == 2             \
-		      || TYPE_LENGTH (value_type) == 4             \
-		      || TYPE_LENGTH (value_type) == 8             \
-		      )                                            \
-     ))
+
+int
+generic_use_struct_convention (gcc_p, value_type)
+     int gcc_p;
+     struct type *value_type;
+{     
+  return !((gcc_p == 1)
+	    && (TYPE_LENGTH (value_type) == 1
+		|| TYPE_LENGTH (value_type) == 2
+		|| TYPE_LENGTH (value_type) == 4
+		|| TYPE_LENGTH (value_type) == 8));
+}
+
+#ifndef USE_STRUCT_CONVENTION
+#define USE_STRUCT_CONVENTION(gcc_p,type) generic_use_struct_convention (gcc_p, type)
 #endif
 
 /* Some fundamental types (such as long double) are returned on the stack for

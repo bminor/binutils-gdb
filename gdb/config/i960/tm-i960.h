@@ -210,7 +210,8 @@ extern CORE_ADDR saved_pc_after_call ();
    On i960, a structure is returned in registers g0-g3, if it will fit.
    If it's more than 16 bytes long, g13 pointed to it on entry.  */
 
-#define USE_STRUCT_CONVENTION(gcc_p, type) (TYPE_LENGTH (type) > 16)
+extern use_struct_convention_fn i960_use_struct_convention;
+#define USE_STRUCT_CONVENTION(gcc_p, type) i960_use_struct_convention (gcc_p, type)
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,

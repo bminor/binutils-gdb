@@ -1,3 +1,30 @@
+Mon Nov 23 10:47:54 1998  Andrew Cagney  <cagney@chook.cygnus.com>
+
+	* config/sh/tm-sh.h, config/mn10200/tm-mn10200.h,
+ 	config/m32r/tm-m32r.h, config/arm/tm-arm.h, config/i960/tm-i960.h,
+ 	config/gould/tm-np1.h, config/d10v/tm-d10v.h,
+ 	config/v850/tm-v850.h, config/pa/tm-hppa.h, config/a29k/tm-a29k.h,
+ 	config/mn10300/tm-mn10300.h, config/mips/tm-mips.h
+ 	(USE_STRUCT_CONVENTION): Cleanup, define macro as function.
+	
+	* sh-tdep.c (sh_use_struct_convention), mn10200-tdep.c
+ 	(mn10200_use_struct_convention), i960-tdep.c
+ 	(i960_use_struct_convention), gould-tdep.c
+ 	(gould_use_struct_convention), d10v-tdep.c
+ 	(d10v_use_struct_convention), v850-tdep.c
+ 	(v850_use_struct_convention), hppa-tdep.c
+ 	(hpha_use_struct_convention), m32r-tdep.c
+ 	(m32r_use_struct_convention), arm-tdep.c
+ 	(arm_use_struct_convention), mn10300-tdep.c
+ 	(mn10300_use_struct_convention), a29k-tdep.c
+ 	(a29k_use_struct_convention), mips-tdep.c
+ 	(mips_use_struct_convention): New functions
+
+	* value.h, values.c (generic_use_struct_convention): New function,
+ 	replace macro.
+	* values.c (USE_STRUCT_CONVENTION): Macro defaults to function
+ 	generic_use_struct_convention.
+
 Sat Nov 21 17:15:40 1998  Philippe De Muyter  <phdm@macqel.be>
 
 	* breakpoint.c (bpstat_stop_status): Do not increment hit_count

@@ -33,6 +33,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Number of elements in the opcode table.  */
 #define NOPCODES (sizeof gld_opcodes / sizeof gld_opcodes[0])
 
+/* Both gcc and cc return small structs in registers (i.e. in GDB
+   terminology, small structs don't use the struct return convention).  */
+int
+gould_use_struct_convention (gcc_p, type)
+     int gcc_p;
+     struct type *type;
+{
+  return (TYPE_LENGTH(type) > 8);
+}
+
+
 
 /* Print the GOULD instruction at address MEMADDR in debugged memory,
    on STREAM.  Returns length of the instruction, in bytes.  */

@@ -180,8 +180,8 @@ extern CORE_ADDR m32r_skip_prologue PARAMS ((CORE_ADDR pc));
 #define STORE_STRUCT_RETURN(STRUCT_ADDR, SP)	\
 	write_register (0, STRUCT_ADDR)
 
-#define USE_STRUCT_CONVENTION(GCC_P, TYPE) \
-	(TYPE_LENGTH (TYPE) > 8)
+extern use_struct_convention_fn m32r_use_struct_convention;
+#define USE_STRUCT_CONVENTION(GCC_P, TYPE) m32r_use_struct_convention (GCC_P, TYPE)
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
   extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \

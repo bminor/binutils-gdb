@@ -167,7 +167,8 @@ extern CORE_ADDR sh_skip_prologue ();
 #define STORE_STRUCT_RETURN(ADDR, SP) \
     { write_register (STRUCT_RETURN_REGNUM, (ADDR));  }
 
-#define USE_STRUCT_CONVENTION(gcc_p, type)	(TYPE_LENGTH(type) > 1)
+extern use_struct_convention_fn sh_use_struct_convention;
+#define USE_STRUCT_CONVENTION(gcc_p, type) sh_use_struct_convention (gcc_p, type)
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,

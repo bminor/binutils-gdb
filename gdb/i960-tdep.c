@@ -31,6 +31,28 @@ static CORE_ADDR next_insn PARAMS ((CORE_ADDR memaddr,
 				    unsigned int *pword1,
 				    unsigned int *pword2));
 
+/* Does the specified function use the "struct returning" convention
+   or the "value returning" convention?  The "value returning" convention
+   almost invariably returns the entire value in registers.  The
+   "struct returning" convention often returns the entire value in
+   memory, and passes a pointer (out of or into the function) saying
+   where the value (is or should go).
+
+   Since this sometimes depends on whether it was compiled with GCC,
+   this is also an argument.  This is used in call_function to build a
+   stack, and in value_being_returned to print return values.
+
+   On i960, a structure is returned in registers g0-g3, if it will fit.
+   If it's more than 16 bytes long, g13 pointed to it on entry.  */
+
+int
+i960_use_struct_convention (gcc_p, type)
+     int gcc_p;
+     struct type *type;
+{
+  return (TYPE_LENGTH (type) > 16);
+}
+
 /* gdb960 is always running on a non-960 host.  Check its characteristics.
    This routine must be called as part of gdb initialization.  */
 

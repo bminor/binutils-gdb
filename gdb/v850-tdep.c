@@ -48,6 +48,17 @@ struct prologue_info
 
 static CORE_ADDR v850_scan_prologue PARAMS ((CORE_ADDR pc, 
 					     struct prologue_info *fs));
+
+
+/* Should call_function allocate stack space for a struct return?  */
+int
+v850_use_struct_convention (gcc_p, type)
+     int gcc_p;
+     struct type *type;
+{
+  return (TYPE_NFIELDS (type) > 1 || TYPE_LENGTH (type) > 4);
+}
+
 
 /* Function: scan_prologue
    Scan the prologue of the function that contains PC, and record what

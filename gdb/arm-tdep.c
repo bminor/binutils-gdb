@@ -27,6 +27,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdb_string.h"
 #include "coff/internal.h"	/* Internal format of COFF symbols in BFD */
 
+/*
+  The following macros are actually wrong.  Neither arm nor thumb can
+  or should set the lsb on addr.
+  The thumb addresses are mod 2, so (addr & 2) would be a good heuristic
+  to use when checking for thumb (see arm_pc_is_thumb() below).
+  Unfortunately, something else depends on these (incorrect) macros, so
+  fixing them actually breaks gdb.  I didn't have time to investigate. Z.R.
+*/
 /* Thumb function addresses are odd (bit 0 is set).  Here are some
    macros to test, set, or clear bit 0 of addresses.  */
 #define IS_THUMB_ADDR(addr)	((addr) & 1)
@@ -38,6 +46,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ROUND_DOWN(n,a) 	((n) & ~((a) - 1))
 #define ROUND_UP(n,a) 		(((n) + (a) - 1) & ~((a) - 1))
   
+/* Should call_function allocate stack space for a struct return?  */
+/* The system C compiler uses a similar structure return convention to gcc */
+int
+arm_use_struct_convention (gcc_p, type)
+     int gcc_p;
+     struct type *type;
+{
+  return (TYPE_LENGTH (type) > 4);
+}
+
 /* Set to true if the 32-bit mode is in use. */
 
 int arm_apcs_32 = 1;
@@ -838,6 +856,15 @@ arm_push_arguments(nargs, args, sp, struct_return, struct_addr)
   int float_argreg;
   int argnum;
   int stack_offset;
+  struct stack_arg {
+      char *val;
+      int len;
+      int offset;
+    };
+  struct stack_arg *stack_args =
+      (struct stack_arg*)alloca (nargs * sizeof (struct stack_arg));
+  int nstack_args = 0;
+
 
   /* Initialize the integer and float register pointers.  */
   argreg = A1_REGNUM;
@@ -852,10 +879,9 @@ arm_push_arguments(nargs, args, sp, struct_return, struct_addr)
      This leaves room for the "home" area for register parameters.  */
   stack_offset = REGISTER_SIZE * 4;
 
-  /* Now load as many as possible of the first arguments into
-     registers, and push the rest onto the stack.  Loop thru args
-     from first to last.  */
-  for (argnum = 0; argnum < nargs; argnum++)
+  /* Process args from left to right.  Store as many as allowed in
+	registers, save the rest to be pushed on the stack */
+  for(argnum = 0; argnum < nargs; argnum++)
     {
       char *         val;
       value_ptr      arg = args[argnum];
@@ -864,6 +890,7 @@ arm_push_arguments(nargs, args, sp, struct_return, struct_addr)
       int            len = TYPE_LENGTH (arg_type);
       enum type_code typecode = TYPE_CODE (arg_type);
       CORE_ADDR      regval;
+      int newarg;
 
       val = (char *) VALUE_CONTENTS (arg);
 
@@ -899,30 +926,35 @@ arm_push_arguments(nargs, args, sp, struct_return, struct_addr)
 	     registers and stack.  */
 	  while (len > 0)
 	    {
-	      int partial_len = len < REGISTER_SIZE ? len : REGISTER_SIZE;
-
 	      if (argreg <= ARM_LAST_ARG_REGNUM)
 		{
+	          int partial_len = len < REGISTER_SIZE ? len : REGISTER_SIZE;
 		  regval = extract_address (val, partial_len);
 
 		  /* It's a simple argument being passed in a general
 		     register.  */
 		  write_register (argreg, regval);
 		  argreg++;
+	          len -= partial_len;
+	          val += partial_len;
 		}
 	      else
 		{
-		  /* Write this portion of the argument to the stack.  */
-		  partial_len = len;
-		  sp -= partial_len;
-		  write_memory (sp, val, partial_len);
+		  /* keep for later pushing */
+		  stack_args[nstack_args].val = val;
+		  stack_args[nstack_args++].len = len;
+		  break;
 		}
-    
-	      len -= partial_len;
-	      val += partial_len;
 	    }
 	}
     }
+    /* now do the real stack pushing, process args right to left */
+    while(nstack_args--)
+      {
+	sp -= stack_args[nstack_args].len;
+	write_memory(sp, stack_args[nstack_args].val,
+		stack_args[nstack_args].len);
+      }
 
   /* Return adjusted stack pointer.  */
   return sp;
@@ -1436,27 +1468,39 @@ arm_breakpoint_from_pc (pcptr, lenptr)
      CORE_ADDR * pcptr;
      int * lenptr;
 {
-  CORE_ADDR sp = read_sp();
-
   if (arm_pc_is_thumb (*pcptr) || arm_pc_is_thumb_dummy (*pcptr))
     {
-      static char thumb_breakpoint[] = THUMB_BREAKPOINT;
-      
-      *pcptr = UNMAKE_THUMB_ADDR (*pcptr);
-      *lenptr = sizeof (thumb_breakpoint);
-      
-      return thumb_breakpoint;
+      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+        {
+          static char thumb_breakpoint[] = THUMB_BE_BREAKPOINT;
+          *pcptr = UNMAKE_THUMB_ADDR (*pcptr);
+          *lenptr = sizeof (thumb_breakpoint);
+          return thumb_breakpoint;
+         }
+      else
+        {
+          static char thumb_breakpoint[] = THUMB_LE_BREAKPOINT;
+          *pcptr = UNMAKE_THUMB_ADDR (*pcptr);
+          *lenptr = sizeof (thumb_breakpoint);
+          return thumb_breakpoint;
+        }
     }
   else
     {
-      static char arm_breakpoint[] = ARM_BREAKPOINT;
-      
-      *lenptr = sizeof (arm_breakpoint);
-      
-      return arm_breakpoint;
+      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+        {
+          static char arm_breakpoint[] = ARM_BE_BREAKPOINT;
+          *lenptr = sizeof (arm_breakpoint);
+          return arm_breakpoint;
+        }
+      else
+        {
+          static char arm_breakpoint[] = ARM_LE_BREAKPOINT;
+          *lenptr = sizeof (arm_breakpoint);
+          return arm_breakpoint;
+        }
     }
 }
-
 /* Return non-zero if the PC is inside a call thunk (aka stub or trampoline).
    This implements the IN_SOLIB_CALL_TRAMPOLINE macro.  */
 

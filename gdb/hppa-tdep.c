@@ -110,6 +110,16 @@ static void internalize_unwinds PARAMS ((struct objfile *,
 static void pa_print_registers PARAMS ((char *, int, int));
 static void pa_print_fp_reg PARAMS ((int));
 
+
+/* Should call_function allocate stack space for a struct return?  */
+int
+hppa_use_struct_convention (gcc_p, type)
+     int gcc_p;
+     struct type *type;
+{
+  return (TYPE_LENGTH (type) > 8);
+}
+
 
 /* Routines to extract various sized constants out of hppa 
    instructions. */

@@ -186,8 +186,8 @@ extern CORE_ADDR d10v_skip_prologue ();
    The d10v returns anything less than 8 bytes in size in
    registers. */
 
-#define USE_STRUCT_CONVENTION(gcc_p, type) \
-   (TYPE_LENGTH (type) > 8)
+extern use_struct_convention_fn d10v_use_struct_convention;
+#define USE_STRUCT_CONVENTION(gcc_p, type) d10v_use_struct_convention (gcc_p, type)
 
 
 

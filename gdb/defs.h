@@ -285,6 +285,11 @@ extern void mfree PARAMS ((PTR, PTR));
 
 extern void set_demangling_style PARAMS ((char *));
 
+/* From tm.h */
+struct type;
+typedef int (use_struct_convention_fn) PARAMS ((int gcc_p, struct type *value_type));
+extern use_struct_convention_fn generic_use_struct_convention;
+
 
 /* Annotation stuff.  */
 

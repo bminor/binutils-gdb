@@ -36,6 +36,22 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 void d10v_frame_find_saved_regs PARAMS ((struct frame_info *fi,
 					 struct frame_saved_regs *fsr));
 
+/* Should we use EXTRACT_STRUCT_VALUE_ADDRESS instead of
+   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc
+   and TYPE is the type (which is known to be struct, union or array).
+
+   The d10v returns anything less than 8 bytes in size in
+   registers. */
+
+int
+d10v_use_struct_convention (gcc_p, type)
+     int gcc_p;
+     struct type *type;
+{
+  return (TYPE_LENGTH (type) > 8);
+}
+
+
 /* Discard from the stack the innermost frame, restoring all saved
    registers.  */
 

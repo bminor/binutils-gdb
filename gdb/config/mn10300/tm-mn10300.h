@@ -162,8 +162,8 @@ mn10300_push_arguments PARAMS ((int, struct value **, CORE_ADDR,
 #define REG_STRUCT_HAS_ADDR(gcc_p,TYPE) \
 	(TYPE_LENGTH (TYPE) > 8)
 
-#define USE_STRUCT_CONVENTION(GCC_P, TYPE) \
-  	(TYPE_NFIELDS (TYPE) > 1 || TYPE_LENGTH (TYPE) > 8)
+extern use_struct_convention_fn mn10300_use_struct_convention;
+#define USE_STRUCT_CONVENTION(GCC_P, TYPE) mn10300_use_struct_convention (GCC_P, TYPE)
 
 /* override the default get_saved_register function with
    one that takes account of generic CALL_DUMMY frames */

@@ -153,8 +153,8 @@ v850_push_arguments PARAMS ((int nargs, struct value **args, CORE_ADDR sp,
 
 #define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP)
 
-#define USE_STRUCT_CONVENTION(GCC_P, TYPE) \
-  	(TYPE_NFIELDS (TYPE) > 1 || TYPE_LENGTH (TYPE) > 4)
+extern use_struct_convention_fn v850_use_struct_convention;
+#define USE_STRUCT_CONVENTION(GCC_P, TYPE) v850_use_struct_convention (GCC_P, TYPE);
 
 /* override the default get_saved_register function with
    one that takes account of generic CALL_DUMMY frames */

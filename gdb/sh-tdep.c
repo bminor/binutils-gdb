@@ -105,6 +105,17 @@ struct {
 #define IS_FMOV(x)		(((x) & 0xf00f) == 0xf00b)
 #define FPSCR_SZ		(1 << 20)
 
+
+/* Should call_function allocate stack space for a struct return?  */
+int
+sh_use_struct_convention (gcc_p, type)
+     int gcc_p;
+     struct type *type;
+{
+  return (TYPE_LENGTH (type) > 1);
+}
+
+
 /* Skip any prologue before the guts of a function */
 
 CORE_ADDR

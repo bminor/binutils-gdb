@@ -41,6 +41,18 @@ extern CORE_ADDR text_start;	/* FIXME, kludge... */
 
 static CORE_ADDR rstack_high_address = UINT_MAX;
 
+
+/* Should call_function allocate stack space for a struct return?  */
+/* On the a29k objects over 16 words require the caller to allocate space.  */
+int
+a29k_use_struct_convention (gcc_p, type)
+     int gcc_p;
+     struct type *type;
+{
+  return (TYPE_LENGTH (type) > 16 * 4);
+}
+
+
 /* Structure to hold cached info about function prologues.  */
 
 struct prologue_info

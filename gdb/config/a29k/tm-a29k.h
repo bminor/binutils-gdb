@@ -281,7 +281,8 @@ CORE_ADDR skip_prologue ();
 
 /* Should call_function allocate stack space for a struct return?  */
 /* On the a29k objects over 16 words require the caller to allocate space.  */
-#define USE_STRUCT_CONVENTION(gcc_p, type) (TYPE_LENGTH (type) > 16 * 4)
+extern use_struct_convention_fn a29k_use_struct_convention;
+#define USE_STRUCT_CONVENTION(gcc_p, type) a29k_use_struct_convention (gcc_p, type)
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,

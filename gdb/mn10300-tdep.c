@@ -49,6 +49,16 @@ static CORE_ADDR mn10300_analyze_prologue PARAMS ((struct frame_info *fi,
 #define NO_MORE_FRAMES 0x4
  
 
+/* Should call_function allocate stack space for a struct return?  */
+int
+mn10300_use_struct_convention (gcc_p, type)
+     int gcc_p;
+     struct type *type;
+{
+  return (TYPE_NFIELDS (type) > 1 || TYPE_LENGTH (type) > 8);
+}
+
+
 /* Fix fi->frame if it's bogus at this point.  This is a helper
    function for mn10300_analyze_prologue. */
 
@@ -187,7 +197,8 @@ mn10300_analyze_prologue (fi, pc)
   /* If we're in start, then give up.  */
   if (strcmp (name, "start") == 0)
     {
-      fi->status = NO_MORE_FRAMES;
+      if (fi != NULL)
+	fi->status = NO_MORE_FRAMES;
       return pc;
     }
 

@@ -350,14 +350,8 @@ extern void mips_store_return_value PARAMS ((struct type *, char *));
   (extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \
 		    REGISTER_RAW_SIZE (V0_REGNUM)))
 
-#if MIPS_EABI
-#undef  USE_STRUCT_CONVENTION
-#define USE_STRUCT_CONVENTION(gcc_p, type) \
-  (TYPE_LENGTH (type) > 2 * MIPS_REGSIZE)
-#else
-/* Structures are returned by ref in extra arg0 */
-#define USE_STRUCT_CONVENTION(gcc_p, type)	1
-#endif
+extern use_struct_convention_fn mips_use_struct_convention;
+#define USE_STRUCT_CONVENTION(gcc_p, type) mips_use_struct_convention (gcc_p, type)
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */

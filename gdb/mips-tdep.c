@@ -211,6 +211,21 @@ struct linked_proc_info
 } *linked_proc_desc_table = NULL;
 
 
+/* Should the upper word of 64-bit addresses be zeroed? */
+static int mask_address_p = 1;
+
+/* Should call_function allocate stack space for a struct return?  */
+int
+mips_use_struct_convention (gcc_p, type)
+     int gcc_p;
+     struct type *type;
+{
+  if (MIPS_EABI)
+    return (TYPE_LENGTH (type) > 2 * MIPS_REGSIZE);
+  else
+    return 1; /* Structures are returned by ref in extra arg0 */
+}
+
 /* Tell if the program counter value in MEMADDR is in a MIPS16 function.  */
 
 static int
@@ -1009,10 +1024,7 @@ mips_addr_bits_remove (addr)
     CORE_ADDR addr;
 {
 #if GDB_TARGET_IS_MIPS64
-  if ((addr >> 32 == (CORE_ADDR)0xffffffff)
-      && (strcmp (target_shortname,"pmon")==0
-	 || strcmp (target_shortname,"ddb")==0
-	 || strcmp (target_shortname,"sim")==0))
+  if (mask_address_p && (addr >> 32 == (CORE_ADDR)0xffffffff))
     {
       /* This hack is a work-around for existing boards using PMON,
 	 the simulator, and any other 64-bit targets that doesn't have
@@ -1766,9 +1778,11 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 #define ROUND_UP(n,a) (((n)+(a)-1) & ~((a)-1))
   
   /* First ensure that the stack and structure return address (if any)
-     are properly aligned. The stack has to be 64-bit aligned even
-     on 32-bit machines, because doubles must be 64-bit aligned. */
-  sp = ROUND_DOWN (sp, 8);
+     are properly aligned. The stack has to be at least 64-bit aligned
+     even on 32-bit machines, because doubles must be 64-bit aligned.
+     On at least one MIPS variant, stack frames need to be 128-bit
+     aligned, so we round to this widest known alignment. */
+  sp = ROUND_DOWN (sp, 16);
   struct_addr = ROUND_DOWN (struct_addr, MIPS_REGSIZE);
       
   /* Now make space on the stack for the args. We allocate more
@@ -1776,7 +1790,7 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
      passed in registers, but that's OK. */
   for (argnum = 0; argnum < nargs; argnum++)
     len += ROUND_UP (TYPE_LENGTH(VALUE_TYPE(args[argnum])), MIPS_REGSIZE);
-  sp -= ROUND_UP (len, 8);
+  sp -= ROUND_UP (len, 16);
 
   /* Initialize the integer and float register pointers.  */
   argreg = A0_REGNUM;
@@ -2253,8 +2267,8 @@ do_gp_register_row (regnum)
   int numregs = NUM_REGS;
 
 /* start-sanitize-sky */
-#ifdef NUM_R5900_REGS
-  numregs = NUM_R5900_REGS;
+#ifdef NUM_CORE_REGS
+  numregs = NUM_CORE_REGS;
 #endif
 /* end-sanitize-sky */
 
@@ -2331,10 +2345,10 @@ mips_do_registers_info (regnum, fpregs)
 	  else
 	    regnum = do_gp_register_row (regnum);	/* GP (int) regs */
 /* start-sanitize-sky */
-#ifdef NUM_R5900_REGS
+#ifdef NUM_CORE_REGS
 	  /* For the sky project, NUM_REGS includes the vector slaves,
 	     which are handled elsewhere */
-	  if (regnum >= NUM_R5900_REGS)
+	  if (regnum >= NUM_CORE_REGS)
 	    break;
 #endif
 /* end-sanitize-sky */
@@ -3151,6 +3165,24 @@ mips_ignore_helper (pc)
 }
 
 
+/* Return a location where we can set a breakpoint that will be hit
+   when an inferior function call returns.  This is normally the
+   program's entry point.  Executables that don't have an entry
+   point (e.g. programs in ROM) should define a symbol __CALL_DUMMY_ADDRESS
+   whose address is the location where the breakpoint should be placed.  */
+
+CORE_ADDR
+mips_call_dummy_address ()
+{
+  struct minimal_symbol *sym;
+
+  sym = lookup_minimal_symbol ("__CALL_DUMMY_ADDRESS", NULL, NULL);
+  if (sym)
+    return SYMBOL_VALUE_ADDRESS (sym);
+  else
+    return entry_point_address ();
+}
+
 void
 _initialize_mips_tdep ()
 {
@@ -3215,4 +3247,13 @@ search.  The only need to set it is when debugging a stripped executable.",
      might change our ability to get backtraces.  */
   c->function.sfunc = reinit_frame_cache_sfunc;
   add_show_from_set (c, &showlist);
+
+  /* Allow the user to control whether the upper bits of 64-bit
+     addresses should be zeroed.  */
+  add_show_from_set
+    (add_set_cmd ("mask-address", no_class, var_boolean, (char *)&mask_address_p,
+	   "Set zeroing of upper 32 bits of 64-bit addresses.\n\
+Use \"on\" to enable the masking, and \"off\" to disable it.\n\
+Without an argument, zeroing of upper address bits is enabled.", &setlist),
+     &showlist);
 }
