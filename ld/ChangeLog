@@ -1,4 +1,21 @@
+Fri Jan 14 12:37:16 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	Motorola Delta sysV68 support from phdm@info.ucl.ac.BE (Philippe
+	De Muyter).
+	* configure.in (m68k-motorola-sysv*) New target.
+	* config/delta68.mt: New file.
+	* emulparams/delta68.sh: New file.
+	* scripttempl/delta68.sc: New file.
+	* Makefile.in (ALL_EMULATIONS): Added em_delta68.o.
+	(em_delta68.c): New target.
+
 Tue Jan 11 13:22:04 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldmain.c (add_archive_element): If trace_files or
+	trace_file_tries, print file name.
+	* ldlang.c (lookup_name): Likewise.
+	(ldlang_add_file): Don't put files on input_bfds list in reverse
+	order.
 
 	* scripttempl/elf.sc: Correct typo.
 

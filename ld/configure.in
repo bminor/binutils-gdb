@@ -59,6 +59,7 @@ case "${targ}" in
   m68*-wrs-vxworks*)    ld_target=vxworks68 ;;
   m68*-ericsson-ose)	ld_target=ose68 ;;
   *-tandem-none)	ld_target=st2000 ;; # FIXME needs better name
+  i[34]86-*-vsta)	ld_target=vsta ;;
   i[34]86-*-go32)	ld_target=go32 ;;
   i[34]86-*-aix*)	ld_target=i386-coff ;;
   i[34]86-*-sco*)	ld_target=i386-coff ;;
@@ -83,6 +84,7 @@ case "${targ}" in
   sh-*-*)		ld_target=coff-sh ;;
   m68k-sony-*)		ld_target=news ;;
   m68k-hp-bsd*)		ld_target=hp300bsd ;;
+  m68k-motorola-sysv*)	ld_target=delta68 ;;
   m68*-*-aout)		ld_target=m68k ;;
   m68*-*-coff)		ld_target=m68k-coff ;;
   m68*-*-hpux)		ld_target=hp300hpux ;;
@@ -100,6 +102,7 @@ case "${targ}" in
   mips*-dec-bsd*)	ld_target=mipsbsd ;;
   mips*-*-elf*)		ld_target=mipsb-elf32 ;;
   alpha-*-osf*)		ld_target=alpha ;;
+  alpha-*-netware*)	ld_target=alpha ;;
   z8k-*-sim | z8k-*-coff) ld_target=z8ksim ;;
   *-*-aout)		ld_target=${target_cpu}-${target_vendor} ;;
   *-*-coff)		ld_target=${target_cpu}-${target_vendor} ;;

@@ -164,7 +164,7 @@ ALL_CFLAGS=$(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(CFLAGS)
 BFDLIB = ../bfd/libbfd.a
 LIBIBERTY = ../libiberty/libiberty.a
 
-ALL_EMULATIONS=em_lnk960.o em_sun3.o em_i386aout.o em_go32.o \
+ALL_EMULATIONS=em_lnk960.o em_sun3.o em_i386aout.o em_go32.o em_vsta.o \
 	em_m88kbcs.o em_a29k.o em_news.o em_hp300bsd.o em_hp3hpux.o \
 	em_h8300.o em_h8300h.o em_ebmon29k.o em_sun4.o em_gld960.o \
 	em_m68kcoff.o em_st2000.o em_sa29200.o em_i386mach.o \
@@ -172,6 +172,7 @@ ALL_EMULATIONS=em_lnk960.o em_sun3.o em_i386aout.o em_go32.o \
 	em_mipsbig.o em_mipsbsd.o em_mipsidt.o em_vax.o em_h8500.o \
 	em_hppaosf.o em_mipsidtl.o em_sh.o em_elf_i386.o em_alpha.o \
 	em_i386lynx.o em_m68klynx.o em_sparclynx.o em_coff_sparc.o \
+	em_delta68.o \
 	$(OTHER_EMULATIONS)
 
 # This is now set by configure.in.
@@ -248,6 +249,9 @@ em_sun4.c: $(srcdir)/emulparams/sun4.sh \
 em_sun3.c: $(srcdir)/emulparams/sun3.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sun3
+em_vsta.c: $(srcdir)/emulparams/vsta.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} vsta
 em_go32.c: $(srcdir)/emulparams/go32.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} go32
@@ -314,6 +318,9 @@ em_gld960.c: $(srcdir)/emulparams/gld960.sh \
 em_m68kcoff.c: $(srcdir)/emulparams/m68kcoff.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/m68kcoff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68kcoff
+em_delta68.c: $(srcdir)/emulparams/delta68.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/delta68.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} delta68
 em_m68klynx.c: $(srcdir)/emulparams/m68klynx.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/m68kcoff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68klynx
