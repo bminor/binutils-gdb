@@ -1,3 +1,7 @@
+Wed Sep 27 10:37:14 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* targets.c (bfd_find_target): Remove debugging code.
+
 Wed Sep 27 07:23:39 1995  Kim Knuttila  <krk@nellie>
 
 	* coff-ppc.c, pe-ppc.c, pei-ppc.c: Initial bfd for coff/PE 

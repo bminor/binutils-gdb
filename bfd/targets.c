@@ -821,7 +821,6 @@ bfd_find_target (target_name, abfd)
   }
 
   bfd_set_error (bfd_error_invalid_target);
-  fprintf(stderr,"Target = %s\n", target_name);
   return NULL;
 }
 
