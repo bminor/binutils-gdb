@@ -5,6 +5,8 @@ Mon Feb 21 10:12:02 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 Mon Feb 21 09:50:06 1994  Ian Lance Taylor  (ian@lisa.cygnus.com)
 
+	* hosts/hp300.h: Include <stdlib.h>; don't declare free.
+
 	* som.c (som_bfd_count_ar_symbols): Use a pointer and alloca
 	rather than an array of variable size.
 	(som_bfd_fill_in_ar_symbols): Likewise.

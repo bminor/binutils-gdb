@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
@@ -16,8 +17,6 @@
 #define HOST_HP300HPUX
 
 #define USE_UTIME
-
-void free();
 
 /* Some things that need to be defined in order to make code written for
    BSD Unix compile under System V Unix.  */
