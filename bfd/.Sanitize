@@ -31,22 +31,6 @@ ChangeLog
 Makefile.in
 TODO
 VERSION
-awkscan
-awkscan-ip
-awkscan-p
-blins-p
-exfilter
-exmerge
-intobfd
-mergecom-p
-movecom-p
-scanit
-scanph
-sedscript
-sedscript-p
-startcom-p
-tolibbfd
-tolibcoff
 amdcoff.c
 aout32.c
 aout64.c
@@ -54,9 +38,14 @@ aoutf1.h
 aoutx.h
 archive.c
 archures.c
+awkscan
+awkscan-ip
+awkscan-p
+bfd-in.h
 bfd.c
-bfd.texinfo
 bfd.doc.ps
+bfd.texinfo
+blins-p
 bout.c
 cache.c
 coffcode.h
@@ -66,31 +55,46 @@ configure.in
 core.c
 demo64.c
 ecoff.c
+exfilter
+exmerge
 filemode.c
 format.c
 host-aout.c
 i386coff.c
 icoff.c
 ieee.c
+intobfd
 libaout.h
+libbfd-in.h
 libbfd.c
 libbfd.h
+libcoff-in.h
 libcoff.h
 libieee.h
 liboasys.h
 m68kcoff.c
 m88k-bcs.c
+mergecom-p
+movecom-p
 newsos3.c
 oasys.c
 opncls.c
 reloc.c
+scanit
+scanph
 section.c
+sedscript
+sedscript-p
 srec.c
+startcom-p
 sunos.c
 syms.c
 targets.c
+tolibbfd
+tolibcoff
 trad-core.c
 trad-core.h
+unPROTO
 
 Do-last:
 
@@ -123,7 +127,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.14  1991/08/17 00:17:00  steve
+# Revision 1.15  1991/08/22 07:20:49  gnu
+# Improve our Sanity.
+#
+# Revision 1.14  1991/08/17  00:17:00  steve
 # Documentation
 #
 # Revision 1.13  1991/08/01  14:37:51  steve
