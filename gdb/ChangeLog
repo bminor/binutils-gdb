@@ -1,3 +1,7 @@
+2004-06-27  Andreas Schwab  <schwab@suse.de>
+
+	* source.c: Fix whitespace.
+
 2004-06-27  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Include <sys/param.h> for td_pcb test.

@@ -1,6 +1,6 @@
 /* List lines of source files for GDB, the GNU debugger.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -741,11 +741,11 @@ openp (const char *path, int try_cwd_first, const char *string,
       strcat (filename, string);
 
       if (is_regular_file (filename))
-      {
-        fd = open (filename, mode);
-        if (fd >= 0)
-          break;
-      }
+	{
+	  fd = open (filename, mode);
+	  if (fd >= 0)
+	    break;
+	}
     }
 
 done:
@@ -765,9 +765,9 @@ done:
 	  /* Beware the // my son, the Emacs barfs, the botch that catch... */
 
 	  char *f = concat (current_directory,
-           IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1])
-				     ? "" : SLASH_STRING,
-				     filename, NULL);
+			    IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1])
+			    ? "" : SLASH_STRING,
+			    filename, NULL);
 	  *filename_opened = xfullpath (f);
 	  xfree (f);
 	}
@@ -787,8 +787,7 @@ done:
    If the file was found, this function returns 1, and FULL_PATHNAME is
    set to the fully-qualified pathname.
 
-   Else, this functions returns 0, and FULL_PATHNAME is set to NULL.
- */
+   Else, this functions returns 0, and FULL_PATHNAME is set to NULL.  */
 int
 source_full_path_of (char *filename, char **full_pathname)
 {
@@ -825,9 +824,9 @@ source_full_path_of (char *filename, char **full_pathname)
      FULLNAME is set to NULL.  */
 int
 find_and_open_source (struct objfile *objfile,
-                      const char *filename,
-                      const char *dirname, 
-					  char **fullname)
+		      const char *filename,
+		      const char *dirname,
+		      char **fullname)
 {
   char *path = source_path;
   const char *p;
@@ -892,11 +891,11 @@ find_and_open_source (struct objfile *objfile,
 int
 open_source_file (struct symtab *s)
 {
-    if (!s)
-      return -1;
+  if (!s)
+    return -1;
 
   return find_and_open_source (s->objfile, s->filename, s->dirname, 
-		  		 &s->fullname);
+			       &s->fullname);
 }
 
 /* Finds the fullname that a symtab represents.
@@ -916,14 +915,14 @@ symtab_to_fullname (struct symtab *s)
 
   /* Don't check s->fullname here, the file could have been 
      deleted/moved/..., look for it again */
-  r =
-    find_and_open_source (s->objfile, s->filename, s->dirname, &s->fullname);
+  r = find_and_open_source (s->objfile, s->filename, s->dirname,
+			    &s->fullname);
 
   if (r)
-  {
-    close (r);
-    return s->fullname;
-  }
+    {
+      close (r);
+      return s->fullname;
+    }
 
   return NULL;
 }
@@ -945,19 +944,18 @@ psymtab_to_fullname (struct partial_symtab *ps)
 
   /* Don't check ps->fullname here, the file could have been
      deleted/moved/..., look for it again */
-  r =
-    find_and_open_source (ps->objfile, ps->filename, ps->dirname,
-			  &ps->fullname);
+  r = find_and_open_source (ps->objfile, ps->filename, ps->dirname,
+			    &ps->fullname);
 
   if (r) 
-  {
-    close (r);
-    return ps->fullname;
-}
-
+    {
+      close (r);
+      return ps->fullname;
+    }
+
   return NULL;
 }
-
+
 /* Create and initialize the table S->line_charpos that records
    the positions of the lines in the source file, which is assumed
    to be open on descriptor DESC.
