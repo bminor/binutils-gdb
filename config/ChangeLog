@@ -1,4 +1,22 @@
+Sun Jun 23 22:59:25 1996  Geoffrey Noer  <noer@cygnus.com>
+
+	* mh-cygwin32: new file.  Like mh-go32 without the CFLAGS entry.
+
+Tue Mar 26 14:10:41 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mh-go32 (CFLAGS): Define.
+
+Thu Mar 14 19:20:54 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mh-necv4: New file.
+
 Thu Feb 15 13:07:43 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mh-cxux (CC): New variable.
+	(CFLAGS, LDFLAGS): Remove.
+	* mh-ncrsvr43 (CC): New variable.
+	(CFLAGS): Remove.
+	* mh-solaris (CFLAGS): Remove.
 
 	* mh-go32: Remove most variable settings, since they presumed a
 	Canadian Cross, which is now handled correctly by the configure
