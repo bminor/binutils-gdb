@@ -34,8 +34,11 @@
 #include "regcache.h"
 #include "doublest.h"
 #include "value.h"
-#include "i386-tdep.h"
 #include "gdb_assert.h"
+
+#include "elf-bfd.h"
+
+#include "i386-tdep.h"
 
 #undef XMALLOC
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
@@ -1205,20 +1208,103 @@ gdb_print_insn_i386 (bfd_vma memaddr, disassemble_info *info)
 }
 
 
+static void
+process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
+{
+  int *os_ident_ptr = obj;
+  const char *name;
+  unsigned int sect_size;
+
+  name = bfd_get_section_name (abfd, sect);
+  sect_size = bfd_section_size (abfd, sect);
+  if (strcmp (name, ".note.ABI-tag") == 0 && sect_size > 0)
+    {
+      unsigned int name_length, data_length, note_type;
+      char *note = alloca (sect_size);
+
+      bfd_get_section_contents (abfd, sect, note,
+                                (file_ptr) 0, (bfd_size_type) sect_size);
+
+      name_length = bfd_h_get_32 (abfd, note);
+      data_length = bfd_h_get_32 (abfd, note + 4);
+      note_type = bfd_h_get_32 (abfd, note + 8);
+
+      if (name_length == 4 && data_length == 16 && note_type == 1
+          && strcmp (note + 12, "GNU") == 0)
+        {
+          int os_number = bfd_h_get_32 (abfd, note + 16);
+
+          /* The case numbers are from abi-tags in glibc.  */
+          switch (os_number)
+            {
+            case 0:
+              *os_ident_ptr = ELFOSABI_LINUX;
+              break;
+            case 1:
+              *os_ident_ptr = ELFOSABI_HURD;
+              break;
+            case 2:
+              *os_ident_ptr = ELFOSABI_SOLARIS;
+              break;
+            default:
+              internal_error (__FILE__, __LINE__,
+                              "process_note_abi_sections: "
+                              "unknown OS number %d", os_number);
+              break;
+            }
+        }
+    }
+}
 
 struct gdbarch *
 i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
+  int os_ident;
 
-  /* For the moment there is only one i386 architecture.  */
-  if (arches != NULL)
-    return arches->gdbarch;
+  if (info.abfd != NULL
+      && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
+    {
+      os_ident = elf_elfheader (info.abfd)->e_ident[EI_OSABI];
+
+      /* If os_ident is 0, it is not necessarily the case that we're
+         on a SYSV system.  (ELFOSABI_NONE is defined to be 0.)
+         GNU/Linux uses a note section to record OS/ABI info, but
+         leaves e_ident[EI_OSABI] zero.  So we have to check for note
+         sections too.  */
+      if (os_ident == ELFOSABI_NONE)
+	bfd_map_over_sections (info.abfd,
+			       process_note_abi_tag_sections,
+			       &os_ident);
+	  
+      /* If that didn't help us, revert to some non-standard checks.  */
+      if (os_ident == ELFOSABI_NONE)
+	{
+	  /* FreeBSD folks are naughty; they stored the string
+	     "FreeBSD" in the padding of the e_ident field of the ELF
+	     header.  */
+	  if (strcmp (&elf_elfheader (info.abfd)->e_ident[8], "FreeBSD") == 0)
+	    os_ident = ELFOSABI_FREEBSD;
+        }
+    }
+  else
+    os_ident = -1;
+
+  for (arches = gdbarch_list_lookup_by_info (arches, &info);
+       arches != NULL;
+       arches = gdbarch_list_lookup_by_info (arches->next, &info))
+    {
+      if (gdbarch_tdep (current_gdbarch)->os_ident != os_ident)
+        continue;
+      return arches->gdbarch;
+    }
 
   /* Allocate space for the new architecture.  */
   tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
+
+  tdep->os_ident = os_ident;
 
   /* FIXME: kettenis/2001-11-24: Although not all IA-32 processors
      have the SSE registers, it's easier to set the default to 8.  */

@@ -43,6 +43,9 @@
 /* i386 architecture specific information.  */
 struct gdbarch_tdep
 {
+  /* OS/ABI.  */
+  int os_ident;
+
   /* Number of SSE registers.  */
   int num_xmm_regs;
 };
