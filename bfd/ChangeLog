@@ -1,5 +1,9 @@
 Thu Sep  4 09:44:10 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* reloc.c: Remove extraneous commas from relocation entries.
+	Remove BFD_RELOC_V850_16_PCREL.
+	* bfd-in2.h: Rebuild.
+
 	* xcofflink.c (xcoff_link_add_symbols): Put XTY_CM/XMC_TD symbols
 	in sections named .tocbss rather than .bss.
 
