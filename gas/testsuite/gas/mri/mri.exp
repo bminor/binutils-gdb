@@ -19,4 +19,14 @@ run_dump_test expr
 
 setup_xfail "alpha*-*-*"
 setup_xfail "sparc*-*-*"
+setup_xfail "i960*-*-vxworks" "i960-*-vxworks4*" "i960*-*-vxworks5.0"
+setup_xfail "i960-*-bout*" i960-*-nindy*"
 run_dump_test common
+
+# The remaining tests assume an m68k target
+if [istarget "m68*-*-*"] {
+    run_dump_test for
+    run_dump_test if
+    run_dump_test repeat
+    run_dump_test while
+}
