@@ -42,7 +42,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* "wait.h" fills in the gaps left by <wait.h> */
 #include "wait.h"
-#include <sys/unistd.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 extern struct symtab_and_line *
 child_enable_exception_callback PARAMS ((enum exception_event_kind, int));

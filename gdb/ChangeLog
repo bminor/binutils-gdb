@@ -1,3 +1,9 @@
+Mon Jan  4 15:05:29 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	* inftarg.c: change <sys/unistd.h> to <unistd.h> and
+	conditionalize its inclusion.
+	* infttrace.c: ditto.
+
 Thu Dec 31 15:26:13 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* corelow.c (core_ops): Don't initialize statically.

@@ -44,7 +44,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/ioctl.h>
 
 #include <sys/ttrace.h>
-#include <sys/unistd.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <sys/mman.h>
 
 #ifndef NO_PTRACE_H
