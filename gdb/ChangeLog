@@ -1,3 +1,8 @@
+Sat Mar 14 11:44:47 1992  Fred Fish  (fnf@cygnus.com)
+
+	* xcoffread.c:  Only enable compilation of debugging functions
+	if IBM6000 is defined.  Fails to compile otherwise.
+
 Fri Mar 13 15:51:11 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in: pass MAKEINFO down on info.

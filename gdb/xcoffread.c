@@ -2273,7 +2273,7 @@ char **pp;
 
 #define DEBUG 1
 
-#ifdef DEBUG
+#if defined (DEBUG) && defined (IBM6000)	/* Needs both defined */
 void
 dump_strtbl ()
 {
