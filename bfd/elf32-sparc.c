@@ -1467,6 +1467,17 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 		  if (!(outrel.r_offset & 3))
 		    r_type = R_SPARC_32;
 		  break;
+	  	case R_SPARC_DISP8:
+		case R_SPARC_DISP16:
+	  	case R_SPARC_DISP32:
+		  /* If the symbol is not dynamic, we should not keep
+		     a dynamic relocation.  But an .rela.* slot has been
+		     allocated for it, output R_SPARC_NONE.
+		     FIXME: Add code tracking needed dynamic relocs as
+		     e.g. i386 has.  */
+		  if (h->dynindx == -1)
+		    skip = true, relocate = true;
+		  break;
 		}
 
 	      if (skip)

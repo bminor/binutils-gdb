@@ -1982,6 +1982,9 @@ mark_PIC_calls (h, inf)
      struct elf_link_hash_entry *h;
      PTR inf ATTRIBUTE_UNUSED;
 {
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
   if (! (h->plt.refcount > 0
 	 && (h->root.type == bfd_link_hash_defined
 	     || h->root.type == bfd_link_hash_defweak)
@@ -2011,9 +2014,11 @@ allocate_plt_static (h, inf)
   struct elf32_hppa_link_hash_table *htab;
   asection *s;
 
-  if (h->root.type == bfd_link_hash_indirect
-      || h->root.type == bfd_link_hash_warning)
+  if (h->root.type == bfd_link_hash_indirect)
     return true;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   info = (struct bfd_link_info *) inf;
   htab = hppa_link_hash_table (info);
@@ -2080,9 +2085,11 @@ allocate_dynrelocs (h, inf)
   struct elf32_hppa_link_hash_entry *eh;
   struct elf32_hppa_dyn_reloc_entry *p;
 
-  if (h->root.type == bfd_link_hash_indirect
-      || h->root.type == bfd_link_hash_warning)
+  if (h->root.type == bfd_link_hash_indirect)
     return true;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   info = (struct bfd_link_info *) inf;
   htab = hppa_link_hash_table (info);
@@ -2213,6 +2220,9 @@ clobber_millicode_symbols (h, info)
      struct elf_link_hash_entry *h;
      struct bfd_link_info *info;
 {
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
   if (h->type == STT_PARISC_MILLI
       && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
     {
@@ -2230,6 +2240,9 @@ readonly_dynrelocs (h, inf)
 {
   struct elf32_hppa_link_hash_entry *eh;
   struct elf32_hppa_dyn_reloc_entry *p;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   eh = (struct elf32_hppa_link_hash_entry *) h;
   for (p = eh->dyn_relocs; p != NULL; p = p->next)

@@ -1,5 +1,5 @@
 /* IBM S/390-specific support for 64-bit ELF
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed Martin Schwidefsky (schwidefsky@de.ibm.com).
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1169,9 +1169,11 @@ allocate_dynrelocs (h, inf)
   struct elf_s390_link_hash_entry *eh;
   struct elf_s390_dyn_relocs *p;
 
-  if (h->root.type == bfd_link_hash_indirect
-      || h->root.type == bfd_link_hash_warning)
+  if (h->root.type == bfd_link_hash_indirect)
     return true;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   info = (struct bfd_link_info *) inf;
   htab = elf_s390_hash_table (info);
@@ -1338,6 +1340,9 @@ readonly_dynrelocs (h, inf)
 {
   struct elf_s390_link_hash_entry *eh;
   struct elf_s390_dyn_relocs *p;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   eh = (struct elf_s390_link_hash_entry *) h;
   for (p = eh->dyn_relocs; p != NULL; p = p->next)
@@ -2325,7 +2330,7 @@ static boolean
 elf_s390_object_p (abfd)
      bfd *abfd;
 {
-  return bfd_default_set_arch_mach (abfd, bfd_arch_s390, bfd_mach_s390_esame);
+  return bfd_default_set_arch_mach (abfd, bfd_arch_s390, bfd_mach_s390_64);
 }
 
 /*

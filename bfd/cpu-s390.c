@@ -1,5 +1,5 @@
 /* BFD support for the s390 processor.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Carl B. Pedersen and Martin Schwidefsky.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -23,15 +23,15 @@
 #include "sysdep.h"
 #include "libbfd.h"
 
-const bfd_arch_info_type bfd_s390_esame_arch =
+const bfd_arch_info_type bfd_s390_64_arch =
 {
     64,        /* bits in a word */
     64,        /* bits in an address */
     8, /* bits in a byte */
     bfd_arch_s390,
-    bfd_mach_s390_esame,
+    bfd_mach_s390_64,
     "s390",
-    "s390:esame",
+    "s390:64-bit",
     3, /* section alignment power */
     true, /* the default */
     bfd_default_compatible,
@@ -45,12 +45,12 @@ const bfd_arch_info_type bfd_s390_arch =
     32,	/* bits in an address */
     8,	/* bits in a byte */
     bfd_arch_s390,
-    bfd_mach_s390_esa,
+    bfd_mach_s390_31,
     "s390",
-    "s390:390",
+    "s390:31-bit",
     3, /* section alignment power */
     true, /* the default */
     bfd_default_compatible,
     bfd_default_scan,
-    &bfd_s390_esame_arch
+    &bfd_s390_64_arch
 };

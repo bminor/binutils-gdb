@@ -1,5 +1,5 @@
 /* i370-specific support for 32-bit ELF
-   Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001
+   Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Hacked by Linas Vepstas for i370 linas@linas.org
@@ -735,6 +735,9 @@ i370_elf_adjust_dynindx (h, cparg)
 	   "i370_elf_adjust_dynindx called, h->dynindx = %d, *cp = %d\n",
 	   h->dynindx, *cp);
 #endif
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   if (h->dynindx != -1)
     h->dynindx += *cp;

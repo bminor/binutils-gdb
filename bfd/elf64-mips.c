@@ -3052,6 +3052,9 @@ mips_elf64_sort_hash_table_f (h, data)
   struct mips_elf64_hash_sort_data *hsd 
     = (struct mips_elf64_hash_sort_data *) data;
 
+  if (h->root.root.type == bfd_link_hash_warning)
+    h = (struct mips_elf64_link_hash_entry *) h->root.root.u.i.link;
+
   /* Symbols without dynamic symbol table entries aren't interesting
      at all.  */
   if (h->root.dynindx == -1)
@@ -3090,9 +3093,9 @@ mips_elf64_sort_hash_table (info, max_local)
   hsd.min_got_dynindx = elf_hash_table (info)->dynsymcount;
   hsd.max_non_got_dynindx = max_local;
   mips_elf64_link_hash_traverse (((struct mips_elf64_link_hash_table *) 
-				elf_hash_table (info)), 
-			       mips_elf64_sort_hash_table_f, 
-			       &hsd);
+				  elf_hash_table (info)), 
+				 mips_elf64_sort_hash_table_f, 
+				 &hsd);
 
   /* There shoud have been enough room in the symbol table to
      accomodate both the GOT and non-GOT symbols.  */
@@ -4685,6 +4688,9 @@ mips_elf64_check_mips16_stubs (h, data)
      struct mips_elf64_link_hash_entry *h;
      PTR data ATTRIBUTE_UNUSED;
 {
+  if (h->root.root.type == bfd_link_hash_warning)
+    h = (struct mips_elf64_link_hash_entry *) h->root.root.u.i.link;
+
   if (h->fn_stub != NULL
       && ! h->need_fn_stub)
     {
@@ -6129,6 +6135,9 @@ mips_elf64_output_extsym (h, data)
   boolean strip;
   asection *sec, *output_section;
 
+  if (h->root.root.type == bfd_link_hash_warning)
+    h = (struct mips_elf64_link_hash_entry *) h->root.root.u.i.link;
+
   if (h->root.indx == -2)
     strip = false;
   else if (((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
@@ -6619,8 +6628,8 @@ mips_elf64_final_link (abfd, info)
 	  einfo.swap = swap;
 	  einfo.failed = false;
 	  mips_elf64_link_hash_traverse (mips_elf64_hash_table (info),
-				       mips_elf64_output_extsym,
-				       (PTR) &einfo);
+					 mips_elf64_output_extsym,
+					 (PTR) &einfo);
 	  if (einfo.failed)
 	    return false;
 

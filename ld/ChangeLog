@@ -1,3 +1,16 @@
+2002-04-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* dep-in.sed: Cope with absolute paths.
+	* Makefile.am (dep.sed): Subst TOPDIR and BFDDIR.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+	Merge from mainline.
+	2002-03-28  Alan Modra  <amodra@bigpond.net.au>
+	* configure.host: Set up for generic hosts first, then tweak as
+	necessary in more specific targets.
+	(HOSTING_LIBS): Include libgcc_eh.a if found.
+
 2002-03-28  Alan Modra  <amodra@bigpond.net.au>
 
 	Merge from mainline.

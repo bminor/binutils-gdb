@@ -709,6 +709,9 @@ elf32_mn10300_finish_hash_table_entry (gen_entry, in_args)
 
   entry = (struct elf32_mn10300_link_hash_entry *) gen_entry;
 
+  if (entry->root.root.type == bfd_link_hash_warning)
+    entry = (struct elf32_mn10300_link_hash_entry *) entry->root.root.u.i.link;
+
   /* If we already know we want to convert "call" to "calls" for calls
      to this symbol, then return now.  */
   if (entry->flags == MN10300_CONVERT_CALL_TO_CALLS)

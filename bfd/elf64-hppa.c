@@ -1,5 +1,5 @@
 /* Support for HPPA 64-bit ELF
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -1022,6 +1022,9 @@ elf64_hppa_mark_exported_functions (h, data)
   struct elf64_hppa_link_hash_table *hppa_info;
 
   hppa_info = elf64_hppa_hash_table (info);
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   if (h
       && (h->root.type == bfd_link_hash_defined

@@ -1,3 +1,14 @@
+2002-04-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* dep-in.sed: Cope with absolute paths.
+	* Makefile.am (dep.sed): Subst TOPDIR.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+	Merge from mainline
+	2002-02-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+	* s390-dis.c (init_disasm): Use renamed architecture defines.
+
 2002-03-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* aclocal.m4: Regenerate.

@@ -700,8 +700,8 @@ DEP1: $(CFILES)
 dep.sed: dep-in.sed config.status
 	sed <$(srcdir)/dep-in.sed >dep.sed	\
 		-e 's!@BFD_H@!$(BFD_H)!'	\
-		-e 's!@INCDIR@!$(INCDIR)!'	\
-		-e 's!@SRCDIR@!$(srcdir)!'
+		-e 's!@SRCDIR@!$(srcdir)!'	\
+		-e 's!@TOPDIR@!'`echo $(srcdir) | sed -e s,/bfd$$,,`'!'
 
 dep: DEP
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile

@@ -1079,6 +1079,9 @@ elf_hppa_unmark_useless_dynamic_symbols (h, data)
 {
   struct bfd_link_info *info = (struct bfd_link_info *)data;
 
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
   /* If we are not creating a shared library, and this symbol is
      referenced by a shared library but is not defined anywhere, then
      the generic code will warn that it is undefined.
@@ -1111,6 +1114,9 @@ elf_hppa_remark_useless_dynamic_symbols (h, data)
      PTR data;
 {
   struct bfd_link_info *info = (struct bfd_link_info *)data;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   /* If we are not creating a shared library, and this symbol is
      referenced by a shared library but is not defined anywhere, then

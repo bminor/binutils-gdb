@@ -1710,6 +1710,9 @@ elfNN_ia64_global_dyn_sym_thunk (xentry, xdata)
     = (struct elfNN_ia64_dyn_sym_traverse_data *) xdata;
   struct elfNN_ia64_dyn_sym_info *dyn_i;
 
+  if (entry->root.root.type == bfd_link_hash_warning)
+    entry = (struct elfNN_ia64_link_hash_entry *) entry->root.root.u.i.link;
+
   for (dyn_i = entry->info; dyn_i; dyn_i = dyn_i->next)
     if (! (*data->func) (dyn_i, data->data))
       return false;
