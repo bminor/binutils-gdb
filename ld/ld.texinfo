@@ -737,7 +737,21 @@ for Solaris compatibility.
 
 @kindex -z @var{keyword}
 @item -z @var{keyword}
-This option is ignored for Solaris compatibility.
+The recognized keywords are @code{initfirst}, @code{interpose},
+@code{loadfltr}, @code{nodefaultlib}, @code{nodelete}, @code{nodlopen},
+@code{nodump}, @code{now} and @code{origin}. The other keywords are
+ignored for Solaris compatibility. @code{initfirst} marks the object
+to be initialized first at runtime before any other objects.
+@code{interpose} marks the object that its symbol table interposes
+before all symbols but the primary executable. @code{loadfltr} marks
+the object that its filtees be processed immediately at runtime.
+@code{nodefaultlib} marks the object that the search for dependencies
+of this object will ignore any default library search paths.
+@code{nodelete} marks the object shouldn't be unloaded at runtime.
+@code{nodlopen} marks the object not available to @code{dlopen}.
+@code{nodump} marks the object can not be dumped by @code{dldump}.
+@code{now} marks the object with the non-lazy runtime binding.
+@code{origin} marks the object may contain $ORIGIN.
 
 @kindex -(
 @cindex groups of archives

@@ -237,6 +237,8 @@ main (argc, argv)
      and _fini symbols.  We are compatible.  */
   link_info.init_function = "_init";
   link_info.fini_function = "_fini";
+  link_info.flags = (bfd_vma) 0;
+  link_info.flags_1 = (bfd_vma) 0;
 
   ldfile_add_arch ("");
 

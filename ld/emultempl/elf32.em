@@ -45,6 +45,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ldfile.h"
 #include "ldemul.h"
 #include "ldgram.h"
+#include "elf/common.h"
 
 static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
 static boolean gld${EMULATION_NAME}_open_dynamic_archive
@@ -1184,20 +1185,167 @@ EOF
 
 fi
 
-if test -n "$PARSE_AND_LIST_ARGS" ; then
+if test -n "$PARSE_AND_LIST_ARGS_CASES" || test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
+NEED_PARSE_AND_LIST=yes
+
 cat >>e${EMULATION_NAME}.c <<EOF
 static int  gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
 static void gld_${EMULATION_NAME}_list_options PARAMS ((FILE * file));
-
- $PARSE_AND_LIST_ARGS
 EOF
 else
+NEED_PARSE_AND_LIST=no
 
 cat >>e${EMULATION_NAME}.c <<EOF
 #define gld_${EMULATION_NAME}_parse_args   NULL
 #define gld_${EMULATION_NAME}_list_options NULL
 EOF
 
+fi
+
+if test -n "$PARSE_AND_LIST_PROLOGUE" ; then
+cat >>e${EMULATION_NAME}.c <<EOF
+ $PARSE_AND_LIST_PROLOGUE
+EOF
+fi
+
+if test "$NEED_PARSE_AND_LIST" = yes; then
+cat >>e${EMULATION_NAME}.c <<EOF
+
+#include "getopt.h"
+
+static struct option longopts[] =
+{
+EOF
+fi
+
+if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
+cat >>e${EMULATION_NAME}.c <<EOF
+  {NULL, required_argument, NULL, 'z'},
+EOF
+fi
+
+if test -n "$PARSE_AND_LIST_LONGOPTS" ; then
+cat >>e${EMULATION_NAME}.c <<EOF
+ $PARSE_AND_LIST_LONGOPTS
+EOF
+fi
+
+if test "$NEED_PARSE_AND_LIST" = yes; then
+cat >>e${EMULATION_NAME}.c <<EOF
+  {NULL, no_argument, NULL, 0}
+};
+
+static int
+gld_${EMULATION_NAME}_parse_args (argc, argv)
+     int argc;
+     char ** argv;
+{
+  int longind, optc;
+  int prevoptind = optind;
+  int prevopterr = opterr;
+  int wanterror;
+  static int lastoptind = -1;
+
+  if (lastoptind != optind)
+    opterr = 0;
+
+  wanterror  = opterr;
+  optc = getopt_long_only (argc, argv, "-z:", longopts, &longind);
+  opterr = prevopterr;
+
+  switch (optc)
+    {
+    default:
+      if (wanterror)
+	xexit (1);
+      optind =  prevoptind;
+      return 0;
+EOF
+fi
+
+if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
+cat >>e${EMULATION_NAME}.c <<EOF
+    case 'z':
+      if (strcmp (optarg, "initfirst") == 0)
+	link_info.flags_1 |= (bfd_vma) DF_1_INITFIRST;
+      else if (strcmp (optarg, "interpose") == 0)
+	link_info.flags_1 |= (bfd_vma) DF_1_INTERPOSE;
+      else if (strcmp (optarg, "loadfltr") == 0)
+	link_info.flags_1 |= (bfd_vma) DF_1_LOADFLTR;
+      else if (strcmp (optarg, "nodefaultlib") == 0)
+	link_info.flags_1 |= (bfd_vma) DF_1_NODEFLIB;
+      else if (strcmp (optarg, "nodelete") == 0)
+	link_info.flags_1 |= (bfd_vma) DF_1_NODELETE;
+      else if (strcmp (optarg, "nodlopen") == 0)
+	link_info.flags_1 |= (bfd_vma) DF_1_NOOPEN;
+      else if (strcmp (optarg, "nodump") == 0)
+	link_info.flags_1 |= (bfd_vma) DF_1_NODUMP;
+      else if (strcmp (optarg, "now") == 0)
+	{
+	  link_info.flags |= (bfd_vma) DF_BIND_NOW;
+	  link_info.flags_1 |= (bfd_vma) DF_1_NOW;
+	}
+      else if (strcmp (optarg, "origin") == 0)
+	{
+	  link_info.flags |= (bfd_vma) DF_ORIGIN;
+	  link_info.flags_1 |= (bfd_vma) DF_1_ORIGIN;
+	}
+      /* What about the other Solaris -z options? FIXME.  */
+    break;
+EOF
+fi
+
+if test -n "$PARSE_AND_LIST_ARGS_CASES" ; then
+cat >>e${EMULATION_NAME}.c <<EOF
+ $PARSE_AND_LIST_ARGS_CASES
+EOF
+fi
+
+if test "$NEED_PARSE_AND_LIST" = yes; then
+cat >>e${EMULATION_NAME}.c <<EOF
+    }
+
+  return 1;
+}
+
+static void
+gld_${EMULATION_NAME}_list_options (file)
+     FILE * file;
+{
+EOF
+fi
+
+if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
+cat >>e${EMULATION_NAME}.c <<EOF
+  fprintf (file, _("  -z initfirst\t\tMark DSO to be initialized first at rutime\n"));
+  fprintf (file, _("  -z interpose\t\tMark object to interpose all DSOs but execuable\n"));
+  fprintf (file, _("  -z loadfltr\t\tMark object requiring immediate process\n"));
+  fprintf (file, _("  -z nodefaultlib\tMark object not to use default search paths\n"));
+  fprintf (file, _("  -z nodelete\t\tMark DSO non-deletable at runtime\n"));
+  fprintf (file, _("  -z nodlopen\t\tMark DSO not availale to dlopen\n"));
+  fprintf (file, _("  -z nodump\t\tMark DSO not availale to dldump\n"));
+  fprintf (file, _("  -z now\t\tMark object non-lazy runtime binding\n"));
+  fprintf (file, _("  -z origin\t\tMark object requiring immediate \$ORIGIN processing\n"));
+  fprintf (file, _("\t\t\t  at runtime\n"));
+EOF
+fi
+
+if test -n "$PARSE_AND_LIST_OPTIONS" ; then
+cat >>e${EMULATION_NAME}.c <<EOF
+ $PARSE_AND_LIST_OPTIONS
+EOF
+fi
+
+if test "$NEED_PARSE_AND_LIST" = yes; then
+cat >>e${EMULATION_NAME}.c <<EOF
+}
+EOF
+fi
+
+if test -n "$PARSE_AND_LIST_EPILOGUE" ; then
+cat >>e${EMULATION_NAME}.c <<EOF
+ $PARSE_AND_LIST_EPILOGUE
+EOF
 fi
 
 cat >>e${EMULATION_NAME}.c <<EOF
