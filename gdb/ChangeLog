@@ -1,3 +1,8 @@
+2003-06-15  Andrew Cagney  <cagney@redhat.com>
+
+	* rdi-share/host.h (Fail): Change to a varargs function.
+	* remote-rdi.c (Fail): Update.
+	
 2003-06-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_next_regnum): Fix bounds checking.
