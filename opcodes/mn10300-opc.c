@@ -150,6 +150,9 @@ const struct mn10300_operand mn10300_operands[] = {
 #define IMM8_SHIFT8 (IMM8E_SHIFT8 + 1)
   {8, 8, 0},
 
+#define REGS    (IMM8_SHIFT8+1)
+  {8, 0, MN10300_OPERAND_REG_LIST},
+
 } ; 
 
 #define MEM(ADDR) PAREN, ADDR, PAREN 
@@ -280,8 +283,8 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "exth",	0x18,		0xfc,		FMT_S0, {DN0}},
 { "exthu",	0x1c,		0xfc,		FMT_S0, {DN0}},
 
-{ "movm",	0xce00,		0xff00,		FMT_S1, {MEM(SP), IMM8}},
-{ "movm",	0xcf00,		0xff00,		FMT_S1, {IMM8, MEM(SP)}},
+{ "movm",	0xce00,		0xff00,		FMT_S1, {MEM(SP), REGS}},
+{ "movm",	0xcf00,		0xff00,		FMT_S1, {REGS, MEM(SP)}},
 
 { "clr",	0x00,		0xf3,		FMT_S0, {DN1}},
 
