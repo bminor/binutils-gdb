@@ -232,7 +232,7 @@ java_class_from_object (value_ptr obj_val)
   if (TYPE_CODE (VALUE_TYPE (obj_val)) == TYPE_CODE_PTR
       && TYPE_LENGTH (TYPE_TARGET_TYPE (VALUE_TYPE (obj_val))) == 0)
     obj_val = value_at (get_java_object_type (),
-			value_as_pointer (obj_val), NULL);
+			value_as_address (obj_val), NULL);
 
   vtable_val = value_struct_elt (&obj_val, NULL, "vtable", NULL, "structure");
   return value_struct_elt (&vtable_val, NULL, "class", NULL, "structure");
@@ -243,7 +243,7 @@ static int
 java_class_is_primitive (value_ptr clas)
 {
   value_ptr vtable = value_struct_elt (&clas, NULL, "vtable", NULL, "struct");
-  CORE_ADDR i = value_as_pointer (vtable);
+  CORE_ADDR i = value_as_address (vtable);
   return (int) (i & 0x7fffffff) == (int) 0x7fffffff;
 }
 
@@ -911,7 +911,7 @@ evaluate_subexp_java (struct type *expect_type, register struct expression *exp,
 
 	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	    return value_zero (el_type, VALUE_LVAL (arg1));
-	  address = value_as_pointer (arg1);
+	  address = value_as_address (arg1);
 	  address += JAVA_OBJECT_SIZE;
 	  read_memory (address, buf4, 4);
 	  length = (long) extract_signed_integer (buf4, 4);

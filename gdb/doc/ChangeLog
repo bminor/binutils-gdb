@@ -1,5 +1,10 @@
 2001-10-15  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbint.texinfo (Target Architecture Definition): Function
+	value_as_pointer renamed to value_as_address.
+
+2001-10-15  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbint.texinfo (Target Architecture Definition): Default
 	POINTER_TO_ADDRESS functions assume unsigned addresses.
 	(INTEGER_TO_ADDRESS): Document.  Derive pragmatics section from a

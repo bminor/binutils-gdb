@@ -251,12 +251,12 @@ gnuv2_value_rtti_type (value_ptr v, int *full, int *top, int *using_enc)
                                           TYPE_VPTR_FIELDNO (known_type));
       tempval=value_field (v, TYPE_VPTR_FIELDNO(known_type));
       VALUE_ADDRESS(tempval) += bitpos / 8;
-      vtbl=value_as_pointer (tempval);
+      vtbl=value_as_address (tempval);
       using_enclosing=1;
     }
   else
     {
-      vtbl=value_as_pointer(value_field(v,TYPE_VPTR_FIELDNO(known_type)));
+      vtbl=value_as_address(value_field(v,TYPE_VPTR_FIELDNO(known_type)));
       using_enclosing=0;
     }
 

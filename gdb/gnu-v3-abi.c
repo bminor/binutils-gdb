@@ -209,7 +209,7 @@ gnuv3_rtti_type (struct value *value,
   /* Fetch VALUE's virtual table pointer, and tweak it to point at
      an instance of our imaginary gdb_gnu_v3_abi_vtable structure.   */
   vtable_address
-    = value_as_pointer (value_field (value, TYPE_VPTR_FIELDNO (value_type)));
+    = value_as_address (value_field (value, TYPE_VPTR_FIELDNO (value_type)));
   vtable = value_at_lazy (vtable_type,
                           vtable_address - vtable_address_point_offset (),
                           VALUE_BFD_SECTION (value));
@@ -311,7 +311,7 @@ gnuv3_virtual_fn_field (struct value **value_p,
   /* Now value is an object of the appropriate base type.  Fetch its
      virtual table.  */
   vtable_address
-    = value_as_pointer (value_field (value, TYPE_VPTR_FIELDNO (vfn_base)));
+    = value_as_address (value_field (value, TYPE_VPTR_FIELDNO (vfn_base)));
   vtable = value_at_lazy (vtable_type,
                           vtable_address - vtable_address_point_offset (),
                           VALUE_BFD_SECTION (value));

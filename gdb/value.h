@@ -289,7 +289,7 @@ extern LONGEST value_as_long (value_ptr val);
 
 extern DOUBLEST value_as_double (value_ptr val);
 
-extern CORE_ADDR value_as_pointer (value_ptr val);
+extern CORE_ADDR value_as_address (value_ptr val);
 
 extern LONGEST unpack_long (struct type *type, char *valaddr);
 

@@ -561,7 +561,7 @@ value_as_double (register value_ptr val)
    Note that val's type may not actually be a pointer; value_as_long
    handles all the cases.  */
 CORE_ADDR
-value_as_pointer (value_ptr val)
+value_as_address (value_ptr val)
 {
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
@@ -723,7 +723,7 @@ unpack_double (struct type *type, char *valaddr, int *invp)
    host byte order.
 
    If you want functions and arrays to be coerced to pointers, and
-   references to be dereferenced, call value_as_pointer() instead.
+   references to be dereferenced, call value_as_address() instead.
 
    C++: It is assumed that the front-end has taken care of
    all matters concerning pointers to members.  A pointer
@@ -993,7 +993,7 @@ value_headof (value_ptr in_arg, struct type *btype, struct type *dtype)
   /* Turn vtable into typeinfo function */
   VALUE_OFFSET(vtbl)+=4;
 
-  msymbol = lookup_minimal_symbol_by_pc ( value_as_pointer(value_ind(vtbl)) );
+  msymbol = lookup_minimal_symbol_by_pc ( value_as_address(value_ind(vtbl)) );
   if (msymbol == NULL
       || (demangled_name = SYMBOL_NAME (msymbol)) == NULL)
       {

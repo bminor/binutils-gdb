@@ -1348,7 +1348,7 @@ x_command (char *exp, int from_tty)
 	   && VALUE_LVAL (val) == lval_memory)
 	next_address = VALUE_ADDRESS (val);
       else
-	next_address = value_as_pointer (val);
+	next_address = value_as_address (val);
       if (VALUE_BFD_SECTION (val))
 	next_section = VALUE_BFD_SECTION (val);
       do_cleanups (old_chain);
@@ -1586,7 +1586,7 @@ do_one_display (struct display *d)
 	printf_filtered ("  ");
 
       val = evaluate_expression (d->exp);
-      addr = value_as_pointer (val);
+      addr = value_as_address (val);
       if (d->format.format == 'i')
 	addr = ADDR_BITS_REMOVE (addr);
 
@@ -2244,7 +2244,7 @@ printf_command (char *arg, int from_tty)
 	      char *str;
 	      CORE_ADDR tem;
 	      int j;
-	      tem = value_as_pointer (val_args[i]);
+	      tem = value_as_address (val_args[i]);
 
 	      /* This is a %s argument.  Find the length of the string.  */
 	      for (j = 0;; j++)

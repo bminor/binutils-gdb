@@ -202,7 +202,7 @@ java_value_print (value_ptr val, struct ui_file *stream, int format,
       && strcmp (TYPE_NAME (TYPE_TARGET_TYPE (type)), "java.lang.String") == 0
       && (format == 0 || format == 's')
       && address != 0
-      && value_as_pointer (val) != 0)
+      && value_as_address (val) != 0)
     {
       value_ptr data_val;
       CORE_ADDR data;
@@ -215,13 +215,13 @@ java_value_print (value_ptr val, struct ui_file *stream, int format,
       mark = value_mark ();	/* Remember start of new values */
 
       data_val = value_struct_elt (&val, NULL, "data", NULL, NULL);
-      data = value_as_pointer (data_val);
+      data = value_as_address (data_val);
 
       boffset_val = value_struct_elt (&val, NULL, "boffset", NULL, NULL);
-      boffset = value_as_pointer (boffset_val);
+      boffset = value_as_address (boffset_val);
 
       count_val = value_struct_elt (&val, NULL, "count", NULL, NULL);
-      count = value_as_pointer (count_val);
+      count = value_as_address (count_val);
 
       value_free_to_mark (mark);	/* Release unnecessary values */
 

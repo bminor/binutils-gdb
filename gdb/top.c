@@ -1436,7 +1436,7 @@ get_prompt_1 (void *data)
 		  break;
 		case TYPE_CODE_PTR:
 		  elt_type = check_typedef (TYPE_TARGET_TYPE (arg_type));
-		  addrval = value_as_pointer (arg_val);
+		  addrval = value_as_address (arg_val);
 
 		  if (TYPE_LENGTH (elt_type) == 1 &&
 		      TYPE_CODE (elt_type) == TYPE_CODE_INT &&

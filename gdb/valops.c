@@ -970,7 +970,7 @@ value_ind (value_ptr arg1)
       enc_type = TYPE_TARGET_TYPE (enc_type);
       /* Retrieve the enclosing object pointed to */
       arg2 = value_at_lazy (enc_type,
-		   value_as_pointer (arg1) - VALUE_POINTED_TO_OFFSET (arg1),
+		   value_as_address (arg1) - VALUE_POINTED_TO_OFFSET (arg1),
 			    VALUE_BFD_SECTION (arg1));
       /* Re-adjust type */
       VALUE_TYPE (arg2) = TYPE_TARGET_TYPE (base_type);
@@ -1221,7 +1221,7 @@ find_function_addr (value_ptr function, struct type **retval_type)
     }
   else if (code == TYPE_CODE_PTR)
     {
-      funaddr = value_as_pointer (function);
+      funaddr = value_as_address (function);
       ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
       if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
 	  || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
@@ -1237,7 +1237,7 @@ find_function_addr (value_ptr function, struct type **retval_type)
       /* Handle the case of functions lacking debugging info.
          Their values are characters since their addresses are char */
       if (TYPE_LENGTH (ftype) == 1)
-	funaddr = value_as_pointer (value_addr (function));
+	funaddr = value_as_address (value_addr (function));
       else
 	/* Handle integer used as address of a function.  */
 	funaddr = (CORE_ADDR) value_as_long (function);

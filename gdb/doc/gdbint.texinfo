@@ -2441,7 +2441,7 @@ If @var{type} is not a pointer or reference type, then this function
 will signal an internal error.
 @end deftypefun
 
-@deftypefun CORE_ADDR value_as_pointer (value_ptr @var{val})
+@deftypefun CORE_ADDR value_as_address (value_ptr @var{val})
 Assuming that @var{val} is a pointer, return the address it represents,
 as appropriate for the current architecture.
 

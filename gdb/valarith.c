@@ -80,7 +80,7 @@ value_add (value_ptr arg1, value_ptr arg2)
       if (len == 0)
 	len = 1;		/* For (void *) */
       retval = value_from_pointer (valptrtype,
-				   value_as_pointer (valptr)
+				   value_as_address (valptr)
 				   + (len * value_as_long (valint)));
       VALUE_BFD_SECTION (retval) = VALUE_BFD_SECTION (valptr);
       return retval;
@@ -105,7 +105,7 @@ value_sub (value_ptr arg1, value_ptr arg2)
 	  /* pointer - integer.  */
 	  LONGEST sz = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)));
 	  return value_from_pointer (type1,
-				     (value_as_pointer (arg1)
+				     (value_as_address (arg1)
 				      - (sz * value_as_long (arg2))));
 	}
       else if (TYPE_CODE (type2) == TYPE_CODE_PTR
@@ -1199,9 +1199,9 @@ value_equal (register value_ptr arg1, register value_ptr arg2)
   /* FIXME: Need to promote to either CORE_ADDR or LONGEST, whichever
      is bigger.  */
   else if (code1 == TYPE_CODE_PTR && (code2 == TYPE_CODE_INT || code2 == TYPE_CODE_BOOL))
-    return value_as_pointer (arg1) == (CORE_ADDR) value_as_long (arg2);
+    return value_as_address (arg1) == (CORE_ADDR) value_as_long (arg2);
   else if (code2 == TYPE_CODE_PTR && (code1 == TYPE_CODE_INT || code1 == TYPE_CODE_BOOL))
-    return (CORE_ADDR) value_as_long (arg1) == value_as_pointer (arg2);
+    return (CORE_ADDR) value_as_long (arg1) == value_as_address (arg2);
 
   else if (code1 == code2
 	   && ((len = (int) TYPE_LENGTH (type1))
@@ -1253,14 +1253,14 @@ value_less (register value_ptr arg1, register value_ptr arg2)
 	   && (code2 == TYPE_CODE_FLT || code2 == TYPE_CODE_INT || code2 == TYPE_CODE_BOOL))
     return value_as_double (arg1) < value_as_double (arg2);
   else if (code1 == TYPE_CODE_PTR && code2 == TYPE_CODE_PTR)
-    return value_as_pointer (arg1) < value_as_pointer (arg2);
+    return value_as_address (arg1) < value_as_address (arg2);
 
   /* FIXME: Need to promote to either CORE_ADDR or LONGEST, whichever
      is bigger.  */
   else if (code1 == TYPE_CODE_PTR && (code2 == TYPE_CODE_INT || code2 == TYPE_CODE_BOOL))
-    return value_as_pointer (arg1) < (CORE_ADDR) value_as_long (arg2);
+    return value_as_address (arg1) < (CORE_ADDR) value_as_long (arg2);
   else if (code2 == TYPE_CODE_PTR && (code1 == TYPE_CODE_INT || code1 == TYPE_CODE_BOOL))
-    return (CORE_ADDR) value_as_long (arg1) < value_as_pointer (arg2);
+    return (CORE_ADDR) value_as_long (arg1) < value_as_address (arg2);
   else if (code1 == TYPE_CODE_STRING && code2 == TYPE_CODE_STRING)
     return value_strcmp (arg1, arg2) < 0;
   else

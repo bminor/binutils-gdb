@@ -484,7 +484,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 
 	locaddr = SYMBOL_VALUE_ADDRESS (var);
 	loc = value_at (lookup_pointer_type (type), locaddr, NULL);
-	addr = value_as_pointer (loc);
+	addr = value_as_address (loc);
       }
 
     case LOC_ARG:
@@ -507,7 +507,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 	  return 0;
 	argref += SYMBOL_VALUE (var);
 	ref = value_at (lookup_pointer_type (type), argref, NULL);
-	addr = value_as_pointer (ref);
+	addr = value_as_address (ref);
 	break;
       }
 
@@ -529,7 +529,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 				      SYMBOL_BASEREG (var), frame);
 	if (regval == NULL)
 	  error ("Value of base register not available.");
-	addr = value_as_pointer (regval);
+	addr = value_as_address (regval);
 	addr += SYMBOL_VALUE (var);
 	break;
       }
@@ -567,7 +567,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 	    if (regval == NULL)
 	      error ("Value of register variable not available.");
 
-	    addr = value_as_pointer (regval);
+	    addr = value_as_address (regval);
 	    VALUE_LVAL (v) = lval_memory;
 	  }
 	else

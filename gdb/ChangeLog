@@ -1,3 +1,10 @@
+2001-10-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* value.h (value_as_address): Rename value_as_pointer.
+	* eval.c, findvar.c, gnu-v2-abi.c, gnu-v3-abi.c, jv-lang.c,
+	jv-valprint.c, printcmd.c, stack.c, top.c, valarith.c, valops.c,
+	values.c: Update.
+
 202001-10-15  Jim Ingham  <jingham@inghji.apple.com>
 
         * valarith.c (value_sub): Don't pass a raw type to

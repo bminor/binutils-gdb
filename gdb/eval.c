@@ -80,7 +80,7 @@ parse_and_eval_address (char *exp)
   register struct cleanup *old_chain =
   make_cleanup (free_current_contents, &expr);
 
-  addr = value_as_pointer (evaluate_expression (expr));
+  addr = value_as_address (evaluate_expression (expr));
   do_cleanups (old_chain);
   return addr;
 }
@@ -96,7 +96,7 @@ parse_and_eval_address_1 (char **expptr)
   register struct cleanup *old_chain =
   make_cleanup (free_current_contents, &expr);
 
-  addr = value_as_pointer (evaluate_expression (expr));
+  addr = value_as_address (evaluate_expression (expr));
   do_cleanups (old_chain);
   return addr;
 }
@@ -1676,7 +1676,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	return value_zero (exp->elts[pc + 1].type, lval_memory);
       else
 	return value_at_lazy (exp->elts[pc + 1].type,
-			      value_as_pointer (arg1),
+			      value_as_address (arg1),
 			      NULL);
 
     case UNOP_PREINCREMENT:
