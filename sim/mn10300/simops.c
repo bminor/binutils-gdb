@@ -2586,8 +2586,10 @@ void OP_CD000000 (insn, extension)
       sp -= 4;
     }
 
-  /* Update the stack pointer.  */
-  State.regs[REG_SP] = sp - extension;
+  /* Update the stack pointer, note that the register saves to do not
+     modify SP.  The SP adjustment is derived totally from the imm8
+     field.  */
+  State.regs[REG_SP] -= extension;
   State.regs[REG_MDR] = next_pc;
   State.regs[REG_PC] += SEXT16 ((insn & 0xffff00) >> 8) - 5;
 }
@@ -2651,8 +2653,10 @@ void OP_DD000000 (insn, extension)
       sp -= 4;
     }
 
-  /* Update the stack pointer.  */
-  State.regs[REG_SP] = sp - (extension & 0xff);
+  /* Update the stack pointer, note that the register saves to do not
+     modify SP.  The SP adjustment is derived totally from the imm8
+     field.  */
+  State.regs[REG_SP] -= (extension & 0xff);
   State.regs[REG_MDR] = next_pc;
   State.regs[REG_PC] += (((insn & 0xffffff) << 8) | ((extension & 0xff0000) >> 16)) - 7;
 }
