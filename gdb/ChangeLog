@@ -1,5 +1,10 @@
 2003-11-22  Andrew Cagney  <cagney@redhat.com>
 
+	* procfs.c (procfs_wait): Delete FAULTED_USE_SIGINFO comment.
+	* config/sparc/tm-sun4sol2.h (FAULTED_USE_SIGINFO): Delete macro.
+	* config/i386/tm-i386sol2.h (FAULTED_USE_SIGINFO): Delete macro.
+	* config/alpha/nm-osf2.h (FAULTED_USE_SIGINFO): Delete macro.
+
 	* mips-tdep.c (SIGFRAME_REG_SIZE): Delete macro.
 	(mips_find_saved_regs): Replace SIGFRAME_REG_SIZE with
 	mips_regsize.
