@@ -169,10 +169,7 @@ wrap_value_equal (char *a)
 }
 
 int
-gdb_value_assign (val1, val2, result)
-     value_ptr val1;
-     value_ptr val2;
-     value_ptr *result;
+gdb_value_assign (value_ptr val1, value_ptr val2, value_ptr *result)
 {
   struct gdb_wrapper_arguments args;
 
@@ -191,8 +188,7 @@ gdb_value_assign (val1, val2, result)
 }
 
 static int
-wrap_value_assign (a)
-     char *a;
+wrap_value_assign (char *a)
 {
   struct gdb_wrapper_arguments *args = (struct gdb_wrapper_arguments *) a;
   value_ptr val1, val2;

@@ -1,3 +1,7 @@
+2000-11-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* wrapper.c (gdb_value_assign, wrap_value_assign): Protoize.
+
 2000-11-16  Christopher Faylor  <cgf@redhat.com>
 
 	* thread.c (thread_apply_all_command): Save the command before
