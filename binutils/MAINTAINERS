@@ -95,7 +95,7 @@ responsibility among the other maintainers.
   TESTSUITES	   Ben Elliston <bje@gnu.org>
   TIC4X            Svein Seldal <svein.seldal@solidas.com>
   TIC54X           Timothy Wall <twall@alum.mit.edu>
-  VAX		   Jason R Thorpe <thorpej@wasabisystems.com>
+  VAX		   Jason R Thorpe <thorpej@netbsd.org>
   x86_64	   Jan Hubicka <jh@suse.cz>
   x86_64	   Andreas Jaeger <aj@suse.de>
   Xtensa	   Bob Wilson <bob.wilson@acm.org>
