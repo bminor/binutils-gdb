@@ -1,4 +1,11 @@
 start-sanitize-tic80
+Sat Jan 18 15:15:05 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80-dis.c (tic80_opcodes): Add "wrcr", "vmpy", "vrnd",
+	"vsub", "vst", "xnor", and "xor" instructions.
+	(V_a1): Renamed from V_a, msb of accumulator reg number.
+	(V_a0): Add macro, lsb of accumulator reg number.
+	
 Fri Jan 17 18:24:31 1997  Fred Fish  <fnf@cygnus.com>
 
 	* tic80-dis.c (print_insn_tic80): Broke excessively long

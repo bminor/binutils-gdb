@@ -240,7 +240,10 @@ const int tic80_num_operands = sizeof (tic80_operands)/sizeof(*tic80_operands);
 #define P1(x)		((x) << 5)
 
 /* The 'a' field at bit 16 in vector instructions */
-#define V_a(x)		((x) << 16)
+#define V_a1(x)		((x) << 16)
+
+/* The 'a' field at bit 11 in vector instructions */
+#define V_a0(x)		((x) << 11)
 
 /* The 'm' field at bit 10 in vector instructions */
 #define V_m(x)		((x) << 10)
@@ -810,6 +813,13 @@ const struct tic80_opcode tic80_opcodes[] = {
   {"subu",	OP_REG(0x3B6),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
   {"subu",	OP_LI(0x3B7),	MASK_LI,	0,	{LSI, REG_22, REG_DEST}		},
 
+  /* Write Control Register
+     Is a special form of the "swcr" instruction so comes before it in the table. */
+
+  {"wrcr",	OP_SI(0x5),	MASK_SI | (0x1F << 27),		0,	{CR_SI, REG_22}	},
+  {"wrcr",	OP_REG(0x30A),	MASK_REG | (0x1F << 27),	0,	{REG_0, REG_22}	},
+  {"wrcr",	OP_LI(0x30B),	MASK_LI | (0x1F << 27),		0,	{CR_LI, REG_22}	},
+
   /* Swap Control Register */
 
   {"swcr",	OP_SI(0x5),	MASK_SI,	0,	{CR_SI, REG_22, REG_DEST}	},
@@ -824,30 +834,83 @@ const struct tic80_opcode tic80_opcodes[] = {
 
   /* Vector Floating-Point Add */
 
-  {"vadd.ss",	OP_REG(0x3C0) | P2(0) | P1(0),	MASK_REG | V_a(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0, REG_22, REG_22}	},
-  {"vadd.sd",	OP_REG(0x3C0) | P2(1) | P1(0),	MASK_REG | V_a(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0, REG_22, REG_22}	},
-  {"vadd.dd",	OP_REG(0x3C0) | P2(1) | P1(1),	MASK_REG | V_a(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0, REG_22, REG_22}	},
+  {"vadd.ss",	OP_REG(0x3C0) | P2(0) | P1(0),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0, REG_22, REG_22}	},
+  {"vadd.sd",	OP_REG(0x3C0) | P2(1) | P1(0),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0, REG_22, REG_22}	},
+  {"vadd.dd",	OP_REG(0x3C0) | P2(1) | P1(1),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0, REG_22, REG_22}	},
 
-  {"vadd.ss",	OP_LI(0x3C1) | P2(0) | P1(0),	MASK_LI | V_a(1) | P2(1) | P1(1),	TIC80_VECTOR,	{SPFI, REG_22, REG_22}	},
-  {"vadd.sd",	OP_LI(0x3C1) | P2(1) | P1(0),	MASK_LI | V_a(1) | P2(1) | P1(1),	TIC80_VECTOR,	{SPFI, REG_22, REG_22}	},
+  {"vadd.ss",	OP_LI(0x3C1) | P2(0) | P1(0),	MASK_LI | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{SPFI, REG_22, REG_22}	},
+  {"vadd.sd",	OP_LI(0x3C1) | P2(1) | P1(0),	MASK_LI | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{SPFI, REG_22, REG_22}	},
 
-  /* Vector Floating-Point Multiply and Add to Accumulator */
+  /* Vector Floating-Point Multiply and Add to Accumulator
+   FIXME! This is not yet implemented.  From the documentation there appears to be no way to
+   tell the difference between the opcodes for instructions that have register destinations
+   and instructions that have accumulator destinations.  Further investigation is necessary.
+   Since this isn't critical to getting a TIC80 toolchain up and running, it is defered
+   until later. */
 
-  /* Vector Load Data Into Register - Note that this comes after all the other
-   vector instructions so that the disassembler will always print the load instruction
-   second for vector instructions that have two instructions in the same opcode. */
+  /* Vector Floating-Point Multiply
+   Note: If r0 is in the destination reg, then this is a "vector nop" instruction. */
+
+  {"vmpy.ss",	OP_REG(0x3C4) | P2(0) | P1(0),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR | TIC80_NO_R0_DEST, {REG_0, REG_22, REG_22} },
+  {"vmpy.sd",	OP_REG(0x3C4) | P2(1) | P1(0),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR | TIC80_NO_R0_DEST, {REG_0, REG_22, REG_22} },
+  {"vmpy.dd",	OP_REG(0x3C4) | P2(1) | P1(1),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR | TIC80_NO_R0_DEST, {REG_0, REG_22, REG_22} },
+
+  {"vmpy.ss",	OP_LI(0x3C5) | P2(0) | P1(0),	MASK_LI | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR | TIC80_NO_R0_DEST, {SPFI, REG_22, REG_22}	},
+  {"vmpy.sd",	OP_LI(0x3C5) | P2(1) | P1(0),	MASK_LI | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR | TIC80_NO_R0_DEST, {SPFI, REG_22, REG_22}	},
+
+  /* Vector Floating-Point Multiply and Subtract from Accumulator
+     FIXME: See note above for vmac instruction */
+
+  /* Vector Floating-Point Subtract Accumulator From Source
+     FIXME: See note above for vmac instruction */
+
+  /* Vector Round With Floating-Point Input
+     FIXME: See note above for vmac instruction */
+
+  /* Vector Round with Integer Input */
+
+  {"vrnd.is",	OP_REG (0x3CA) | P2(0) | P1(0),	MASK_REG | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {REG_0, REG_22}},
+  {"vrnd.us",	OP_REG (0x3CA) | P2(0) | P1(1),	MASK_REG | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {REG_0, REG_22}},
+  {"vrnd.id",	OP_REG (0x3CA) | P2(1) | P1(0),	MASK_REG | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {REG_0, REG_22}},
+  {"vrnd.ud",	OP_REG (0x3CA) | P2(1) | P1(1),	MASK_REG | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {REG_0, REG_22}},
+
+  {"vrnd.is",	OP_LI (0x3CB) | P2(0) | P1(0),	MASK_LI | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {LSI, REG_22}},
+  {"vrnd.us",	OP_LI (0x3CB) | P2(0) | P1(1),	MASK_LI | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {LUI, REG_22}},
+  {"vrnd.id",	OP_LI (0x3CB) | P2(1) | P1(0),	MASK_LI | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {LSI, REG_22}},
+  {"vrnd.ud",	OP_LI (0x3CB) | P2(1) | P1(1),	MASK_LI | V_a0(1) | V_Z(1) | P2(1) | P1(1),	TIC80_VECTOR, {LUI, REG_22}},
+
+  /* Vector Floating-Point Subtract */
+
+  {"vsub.ss",	OP_REG(0x3C2) | P2(0) | P1(0),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0, REG_22, REG_22}	},
+  {"vsub.sd",	OP_REG(0x3C2) | P2(1) | P1(0),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0, REG_22, REG_22}	},
+  {"vsub.dd",	OP_REG(0x3C2) | P2(1) | P1(1),	MASK_REG | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{REG_0, REG_22, REG_22}	},
+
+  {"vsub.ss",	OP_LI(0x3C3) | P2(0) | P1(0),	MASK_LI | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{SPFI, REG_22, REG_22}	},
+  {"vsub.sd",	OP_LI(0x3C3) | P2(1) | P1(0),	MASK_LI | V_a1(1) | P2(1) | P1(1),	TIC80_VECTOR,	{SPFI, REG_22, REG_22}	},
+
+  /* Vector Load Data Into Register - Note that the vector load/store instructions come after the other
+   vector instructions so that the disassembler will always print the load/store instruction second for
+   vector instructions that have two instructions in the same opcode. */
 
   {"vld0.s",	OP_V(0x1E) | V_m(1) | V_S(0) | V_p(0),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST} },
   {"vld1.s",	OP_V(0x1E) | V_m(1) | V_S(0) | V_p(1),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST} },
   {"vld0.d",	OP_V(0x1E) | V_m(1) | V_S(1) | V_p(0),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST} },
   {"vld1.d",	OP_V(0x1E) | V_m(1) | V_S(1) | V_p(1),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST} },
 
-  {"xnor",	OP_LI(0x333),	MASK_LI,	0,		FIXME},
-  {"xnor",	OP_REG(0x332),	MASK_REG,	0,		FIXME},
-  {"xnor",	OP_SI(0x19),	MASK_SI,	0,		FIXME},
-  {"xor",	OP_LI(0x32D),	MASK_LI,	0,		FIXME},
-  {"xor",	OP_REG(0x32C),	MASK_REG,	0,		FIXME},
-  {"xor",	OP_SI(0x16),	MASK_SI,	0,		FIXME},
+  /* Vector Store Data Into Memory - Note that the vector load/store instructions come after the other
+   vector instructions so that the disassembler will always print the load/store instruction second for
+   vector instructions that have two instructions in the same opcode. */
+
+  {"vst.s",	OP_V(0x1E) | V_m(0) | V_S(0) | V_p(1),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST} },
+  {"vst.d",	OP_V(0x1E) | V_m(0) | V_S(1) | V_p(1),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST} },
+
+  {"xnor",	OP_SI(0x19),	MASK_SI,	0,	{SUBF, REG_22, REG_DEST} },
+  {"xnor",	OP_REG(0x332),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST} },
+  {"xnor",	OP_LI(0x333),	MASK_LI,	0,	{LUBF, REG_22, REG_DEST} },
+
+  {"xor",	OP_SI(0x16),	MASK_SI,	0,	{SUBF, REG_22, REG_DEST} },
+  {"xor",	OP_REG(0x32C),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST} },
+  {"xor",	OP_LI(0x32D),	MASK_LI,	0,	{LUBF, REG_22, REG_DEST} },
 
 };
 
