@@ -1,3 +1,9 @@
+2002-05-08  J. Brobecker  <brobecker@gnat.com>
+
+	* fork-child.c (escape_bang_in_quoted_argument): New function.
+	(fork_inferior): Escape '!' characters in quoted arguments
+	only when needed.
+
 2003-05-08  J. Brobecker  <brobecker@gnat.com>
 
 	* dwarf2read.c (set_cu_language): Set the language to "minimal" if

@@ -88,6 +88,29 @@ breakup_args (char *scratch, char **argv)
 
 }
 
+/* When executing a command under the given shell, return non-zero
+   if the '!' character should be escaped when embedded in a quoted
+   command-line argument.  */
+
+static int
+escape_bang_in_quoted_argument (const char *shell_file)
+{
+  const int shell_file_len = strlen (shell_file);
+  
+  /* Bang should be escaped only in C Shells.  For now, simply check
+     that the shell name ends with 'csh', which covers at least csh
+     and tcsh.  This should be good enough for now.  */
+
+  if (shell_file_len < 3)
+    return 0;
+
+  if (shell_file[shell_file_len - 3] == 'c'
+      && shell_file[shell_file_len - 2] == 's'
+      && shell_file[shell_file_len - 1] == 'h')
+    return 1;
+
+  return 0;
+}
 
 /* Start an inferior Unix child process and sets inferior_ptid to its pid.
    EXEC_FILE is the file to run.
@@ -171,6 +194,7 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 
       char *p;
       int need_to_quote;
+      const int escape_bang = escape_bang_in_quoted_argument (shell_file);
 
       strcat (shell_command, "exec ");
 
@@ -215,7 +239,7 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 	    {
 	      if (*p == '\'')
 		strcat (shell_command, "'\\''");
-	      else if (*p == '!')
+	      else if (*p == '!' && escape_bang)
 		strcat (shell_command, "\\!");
 	      else
 		strncat (shell_command, p, 1);
