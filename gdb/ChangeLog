@@ -1,5 +1,12 @@
 Fri Jan 28 15:40:33 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/m68k/tm-monitor.h: Changes to bring this into accordance
+	with the old tm-m68k-em.h:
+	(GDBINIT_FILENAME, DEFAULT_PROMPT): Remove.
+	(HAVE_68881): Don't undefine; this #define is obsolete.
+	(REGISTER_NAMES): Don't muck with it; what tm-m68k.h has is fine.
+	Add FIXME regarding GET_LONGJMP_TARGET.
+
 	* remote-udi.c (udi_close, udi_detach, udi_kill): Add comments.
 
 Fri Jan 28 11:55:52 1994  Rob Savoye  (rob@darkstar.cygnus.com)
