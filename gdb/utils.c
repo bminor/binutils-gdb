@@ -37,6 +37,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "expression.h"
 #include "language.h"
 
+#include "readline.h"
+
+/* readline defines this.  */
+#undef savestring
+
 /* Prototypes for local functions */
 
 #if defined (NO_MMALLOC) || defined (NO_MMALLOC_CHECK)
@@ -793,6 +798,7 @@ query (va_alist)
   char *ctlstr;
   register int answer;
   register int ans2;
+  int retval;
 
   /* Automatically answer "yes" if input is not from a terminal.  */
   if (!input_from_terminal_p ())
@@ -802,16 +808,27 @@ query (va_alist)
     {
       wrap_here ("");		/* Flush any buffered output */
       gdb_flush (gdb_stdout);
+
+      if (annotation_level > 1)
+	printf_filtered ("\n\032\032pre-query\n");
+
       va_start (args);
       ctlstr = va_arg (args, char *);
       vfprintf_filtered (gdb_stdout, ctlstr, args);
       va_end (args);
       printf_filtered ("(y or n) ");
+
+      if (annotation_level > 1)
+	printf_filtered ("\n\032\032query\n");
+
       gdb_flush (gdb_stdout);
       answer = fgetc (stdin);
       clearerr (stdin);		/* in case of C-d */
       if (answer == EOF)	/* C-d */
-        return 1;
+        {
+	  retval = 1;
+	  break;
+	}
       if (answer != '\n')	/* Eat rest of input line, to EOF or newline */
 	do 
 	  {
@@ -822,11 +839,21 @@ query (va_alist)
       if (answer >= 'a')
 	answer -= 040;
       if (answer == 'Y')
-	return 1;
+	{
+	  retval = 1;
+	  break;
+	}
       if (answer == 'N')
-	return 0;
+	{
+	  retval = 0;
+	  break;
+	}
       printf_filtered ("Please answer y or n.\n");
     }
+
+  if (annotation_level > 1)
+    printf_filtered ("\n\032\032post-query\n");
+  return retval;
 }
 
 
@@ -1018,6 +1045,12 @@ static void
 prompt_for_continue ()
 {
   char *ignore;
+  char cont_prompt[120];
+
+  strcpy (cont_prompt,
+	  "---Type <return> to continue, or q <return> to quit---");
+  if (annotation_level > 1)
+    strcat (cont_prompt, "\n\032\032prompt-for-continue\n");
 
   /* We must do this *before* we call gdb_readline, else it will eventually
      call us -- thinking that we're trying to print beyond the end of the 
@@ -1035,8 +1068,7 @@ prompt_for_continue ()
   /* Call readline, not gdb_readline, because GO32 readline handles control-C
      whereas control-C to gdb_readline will cause the user to get dumped
      out to DOS.  */
-  ignore =
-    readline ("---Type <return> to continue, or q <return> to quit---");
+  ignore = readline (cont_prompt);
   if (ignore)
     {
       char *p = ignore;

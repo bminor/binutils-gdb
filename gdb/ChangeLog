@@ -1,3 +1,8 @@
+Thu Apr 28 08:40:56 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* utils.c (query): Change syntax of query annotations to be
+	consistent with other input annotations.
+
 Thu Apr 28 01:20:39 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mdebugread.c (psymtab_to_symtab_1):  Do not call sort_blocks
