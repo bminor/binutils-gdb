@@ -1,3 +1,17 @@
+Mon Oct 25 11:33:14 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* z8kgen.c, z8k-opc.h: Add full lda information.
+
+Tue Oct 19 12:39:25 1993  Jeffrey A Law  (law@cs.utah.edu)
+
+	* hppa-dis.c (print_insn_hppa): Do not emit a space after
+	movb instructions.  Any necessary space will be emitted by
+	the code to handle nullification completers.
+
+Wed Oct 13 16:19:07 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips-opc.c: Moved l.d down so that it disassembles as ldc1.
+
 Fri Oct  8 02:34:21 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* alpha-opc.h:  Add ldl_l, fix typo for ldq_u.
