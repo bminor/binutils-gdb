@@ -1,0 +1,45 @@
+#   Copyright (C) 1988, 1990, 1991, 1992 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-dejagnu@prep.ai.mit.edu
+
+# This file was written by Rob Savoye. (rob@cygnus.com)
+
+load_lib util-defs.exp
+
+#
+# nm_version -- extract and print the version number of nm
+#
+proc nm_version { } {
+    set tmp [exec $NM +version]
+    regexp " \[0-9\.\]+" $tmp version
+    clone_output "[which $NM] version $version\n"
+    unset tmp
+    unset version
+}
+
+#
+# add some basic error trapping. These mostly catch programming error's
+# within the tests themselves
+#
+expect_before {
+    buffer_full		   { error "internal buffer is full." }
+    "can't open '*'" { error "Can't open test file." }
+}
+
+
+
