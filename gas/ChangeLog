@@ -1,5 +1,8 @@
 Tue Aug  8 13:07:05 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* doc/c-m68k.texi: Add documentation for CPU specific options, and
+	for Motorola syntax.
+
 	* config/m68k-parse.y (motorola_operand): For (%pc), set mode to
 	DISP, not BASE.
 
