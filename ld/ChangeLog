@@ -1,3 +1,8 @@
+Tue May  5 14:05:05 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* ldver.c:  Increase version number to 1.97, for consistency
+	with ../binutils.
+
 Tue May  5 12:12:24 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in: FLEX -> LEX.

@@ -34,7 +34,7 @@ DEFUN(ldversion,(noisy),
       int noisy)
 
 {
-  fprintf(stdout,"ld version 1.96 (with BFD %s)\n", BFD_VERSION);
+  fprintf(stdout,"ld version 1.97 (with BFD %s)\n", BFD_VERSION);
 
   if (noisy) 
   {
