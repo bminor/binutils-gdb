@@ -2466,9 +2466,29 @@ VMS_typedef_parse (str)
 	  spnt->VMS_type = DBG_S_C_UQUAD;	/* unsigned quadword */
 	  spnt->data_size = 8;
 	}
+      else if (type_check ("complex float"))
+	{
+	  spnt->VMS_type = DBG_S_C_COMPLX4;
+	  spnt->data_size = 2 * 4;
+	}
+      else if (type_check ("complex double"))
+	{
+	  /* caveat: this assumes D_float, and is not correct for G_float */
+	  spnt->VMS_type = DBG_S_C_COMPLX8;
+	  spnt->data_size = 2 * 8;
+	}
+      else if (type_check ("complex long double"))
+	{
+	  /* same as complex double, at least for now */
+	  spnt->VMS_type = DBG_S_C_COMPLX8;
+	  spnt->data_size = 2 * 8;
+	}
       else
 	{
-	  /* something more substantial ought to be done here */
+	  /*	[pr]
+	   * Shouldn't get here, but if we do, something
+	   * more substantial ought to be done...
+	   */
 	  spnt->VMS_type = 0;
 	  spnt->data_size = 0;
 	}
