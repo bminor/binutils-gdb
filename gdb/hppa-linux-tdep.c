@@ -1,4 +1,4 @@
-/* Target-dependent code for Linux running on PA-RISC, for GDB.
+/* Target-dependent code for GNU/Linux running on PA-RISC, for GDB.
 
    Copyright 2004 Free Software Foundation, Inc.
 
@@ -550,7 +550,7 @@ hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  /* Linux is always ELF.  */
+  /* GNU/Linux is always ELF.  */
   tdep->is_elf = 1;
 
   tdep->find_global_pointer = hppa_linux_find_global_pointer;

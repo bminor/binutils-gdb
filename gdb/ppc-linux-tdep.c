@@ -1,7 +1,7 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1997, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1070,7 +1070,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
          However, as one of the known warts of its ABI, PPC GNU/Linux
          uses eight-byte long doubles.  GCC only recently got 128-bit
          long double support on PPC, so it may be changing soon.  The
-         Linux Standards Base says that programs that use 'long
+         Linux[sic] Standards Base says that programs that use 'long
          double' on PPC GNU/Linux are non-conformant.  */
       set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
 

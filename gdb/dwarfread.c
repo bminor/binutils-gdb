@@ -84,7 +84,7 @@
      On 2003-06-09 the gdb list received a report from a user
        with Absoft ProFortran f77 which is dwarf-1.
 
-     Absoft ProFortran Linux Fortran User Guide (no version,
+     Absoft ProFortran Linux[sic] Fortran User Guide (no version,
      but copyright dates are 1991-2001) says that Absoft ProFortran
      supports -gdwarf1 and -gdwarf2.
 

@@ -1,4 +1,5 @@
-/* Functions specific to running gdb native on HPPA running Linux.
+/* Functions specific to running GDB native on HPPA running GNU/Linux.
+
    Copyright 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.

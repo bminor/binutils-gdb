@@ -114,8 +114,8 @@ typedef char gdb_vrregset_t[SIZEOF_VRREGS];
 
 /* On PPC processors that support the the Signal Processing Extension
    (SPE) APU, the general-purpose registers are 64 bits long.
-   However, the ordinary Linux PTRACE_PEEKUSR / PTRACE_POKEUSR /
-   PT_READ_U / PT_WRITE_U ptrace calls only access the lower half of
+   However, the ordinary Linux kernel PTRACE_PEEKUSR / PTRACE_POKEUSR
+   / PT_READ_U / PT_WRITE_U ptrace calls only access the lower half of
    each register, to allow them to behave the same way they do on
    non-SPE systems.  There's a separate pair of calls,
    PTRACE_GETEVRREGS / PTRACE_SETEVRREGS, that read and write the top
