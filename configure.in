@@ -46,7 +46,7 @@ target_libs="libm xiberty newlib libg++"
 # list belongs in this list.  those programs are also very likely
 # candidates for the "native_only" list which follows
 #
-target_tools=
+target_tools="groff"
 
 ################################################################################
 
@@ -58,7 +58,7 @@ target_tools=
 
 # directories to be built in the native environment only
 #
-native_only="autoconf cvs diff emacs fileutils find grep ispell m4
+native_only="autoconf cvs diff emacs fileutils find grep groff ispell m4
              rcs sed shellutils textutils wdiff"
 
 # directories to be built in a cross environment only
@@ -93,8 +93,8 @@ case "${host}" in
   *-sun-solaris*)         host_makefile_frag=config/mh-solaris ;;
   *-sun-*)		  host_makefile_frag=config/mh-sun ;;
   *-hp-hpux)              host_makefile_frag=config/mh-hpux ;;
-  *-*sysv4*)              host_makefile_frag=config/mh-sysv4 ;;
-  *-*sysv*)               host_makefile_frag=config/mh-sysv ;;
+  *-*-sysv4*)              host_makefile_frag=config/mh-sysv4 ;;
+  *-*-sysv*)               host_makefile_frag=config/mh-sysv ;;
 esac
 
 # per-target:
