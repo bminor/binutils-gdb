@@ -1368,7 +1368,7 @@ Procedure Call Standard, whilst specifying @samp{-M reg-names-raw} will
 just use @samp{r} followed by the register number.
 
 There are also two variants on the APCS register naming scheme enabled
-by @samp{-M reg-names-atpcs} and @samp{-M reg-names-atpcs-special} which
+by @samp{-M reg-names-atpcs} and @samp{-M reg-names-special-atpcs} which
 use the ARM/Thumb Procedure Call Standard naming conventions.  (Eiuther
 with the normal register name sor the special register names).
 

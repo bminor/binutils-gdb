@@ -1,3 +1,8 @@
+2000-02-14  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* binutils.texi: Document the change of flavor name from atpcs-special
+	to special-atpcs to prevent name conflict in gdb.
+
 2000-02-08  Timothy Wall  <twall@redhat.com>
 
 	* objdump.c (show_line): Fix bug preventing printing of the very
