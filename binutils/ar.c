@@ -1,6 +1,6 @@
 /* ar.c - Archive modify and extract.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001
+   2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
@@ -280,8 +280,14 @@ usage (help)
       fprintf (s, _("  [-X32_64]    - (ignored)\n"));
     }
   else
+    {
     /* xgettext:c-format */
-    fprintf (s, _("Usage: %s [-vV] archive\n"), program_name);
+      fprintf (s, _("Usage: %s [options] archive\n"), program_name);
+      fprintf (s, _(" Generate an index to speed access to archives\n"));
+      fprintf (s, _(" The options are:\n\
+  -h --help                    Print this help message\n\
+  -V --version                 Print version information\n"));
+    }
 
   list_supported_targets (program_name, stderr);
 
@@ -453,7 +459,10 @@ main (argc, argv)
     {
       boolean touch = false;
 
-      if (argc < 2 || strcmp (argv[1], "--help") == 0)
+      if (argc < 2
+	  || strcmp (argv[1], "--help") == 0
+	  || strcmp (argv[1], "-h") == 0
+	  || strcmp (argv[1], "-H") == 0)
 	usage (0);
       if (strcmp (argv[1], "-V") == 0
 	  || strcmp (argv[1], "-v") == 0

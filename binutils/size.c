@@ -1,5 +1,5 @@
 /* size.c -- report size of various sections of an executable file.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
@@ -76,16 +76,22 @@ usage (stream, status)
      FILE *stream;
      int status;
 {
-  fprintf (stream, _("\
-Usage: %s [-A | --format=sysv | -B | --format=berkeley]\n\
-       [-o | --radix=8 | -d | --radix=10 | -h | --radix=16]\n\
-       [-V | --version] [--target=bfdname] [--help] [file...]\n"),
-	   program_name);
+  fprintf (stream, _("Usage: %s [option(s)] [file(s)]\n"), program_name);
+  fprintf (stream, _(" Displays the sizes of sections inside binary files\n"));
+  fprintf (stream, _(" If no input file(s) are specified, a.out is assumed\n"));  
+  fprintf (stream, _(" The options are:\n\
+  -A|-B     --format={sysv|berkeley}  Select output style (default is %s)\n\
+  -o|-d|-h  --radix={8|10|16}         Display numbers in octal, decimal or hex\n\
+            --target=<bfdname>        Set the binary file format\n\
+  -h        --help                    Display this information\n\
+  -v        --version                 Display the program's version\n\
+\n"),
 #if BSD_DEFAULT
-  fputs (_("default is --format=berkeley\n"), stream);
+  "berkeley"
 #else
-  fputs (_("default is --format=sysv\n"), stream);
+  "sysv"
 #endif
+);
   list_supported_targets (program_name, stream);
   if (status == 0)
     fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
@@ -127,7 +133,7 @@ main (argc, argv)
   bfd_init ();
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "ABVdfox", long_options,
+  while ((c = getopt_long (argc, argv, "ABHhVvdfox", long_options,
 			   (int *) 0)) != EOF)
     switch (c)
       {
@@ -181,6 +187,7 @@ main (argc, argv)
       case 'B':
 	berkeley_format = 1;
 	break;
+      case 'v':
       case 'V':
 	show_version = 1;
 	break;
@@ -205,6 +212,8 @@ main (argc, argv)
 	break;
       case 0:
 	break;
+      case 'h':
+      case 'H':
       case '?':
 	usage (stderr, 1);
       }

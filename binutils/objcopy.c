@@ -360,7 +360,8 @@ copy_usage (stream, exit_status)
      FILE *stream;
      int exit_status;
 {
-  fprintf (stream, _("Usage: %s <options> in-file [out-file]\n"), program_name);
+  fprintf (stream, _("Usage: %s [option(s)] in-file [out-file]\n"), program_name);
+  fprintf (stream, _(" Copies a binary file, possibly transforming it in the process\n"));
   fprintf (stream, _(" The options are:\n"));
   fprintf (stream, _("\
   -I --input-target <bfdname>      Assume input file is in format <bfdname>\n\
@@ -429,19 +430,20 @@ strip_usage (stream, exit_status)
      FILE *stream;
      int exit_status;
 {
-  fprintf (stream, _("Usage: %s <options> in-file(s)\n"), program_name);
+  fprintf (stream, _("Usage: %s <option(s)> in-file(s)\n"), program_name);
+  fprintf (stream, _(" Removes symbols and sections from files\n"));
   fprintf (stream, _(" The options are:\n"));
   fprintf (stream, _("\
-  -I --input-target <bfdname>      Assume input file is in format <bfdname>\n\
-  -O --output-target <bfdname>     Create an output file in format <bfdname>\n\
-  -F --target <bfdname>            Set both input and output format to <bfdname>\n\
+  -I --input-target=<bfdname>      Assume input file is in format <bfdname>\n\
+  -O --output-target=<bfdname>     Create an output file in format <bfdname>\n\
+  -F --target=<bfdname>            Set both input and output format to <bfdname>\n\
   -p --preserve-dates              Copy modified/access timestamps to the output\n\
-  -R --remove-section <name>       Remove section <name> from the output\n\
+  -R --remove-section=<name>       Remove section <name> from the output\n\
   -s --strip-all                   Remove all symbol and relocation information\n\
   -g -S --strip-debug              Remove all debugging symbols\n\
      --strip-unneeded              Remove all symbols not needed by relocations\n\
-  -N --strip-symbol <name>         Do not copy symbol <name>\n\
-  -K --keep-symbol <name>          Only copy symbol <name>\n\
+  -N --strip-symbol=<name>         Do not copy symbol <name>\n\
+  -K --keep-symbol=<name>          Only copy symbol <name>\n\
   -x --discard-all                 Remove all non-global symbols\n\
   -X --discard-locals              Remove any compiler-generated symbols\n\
   -v --verbose                     List all object files modified\n\
@@ -1947,7 +1949,7 @@ strip_main (argc, argv)
   struct section_list *p;
   char *output_file = NULL;
 
-  while ((c = getopt_long (argc, argv, "I:O:F:K:N:R:o:sSpdgxXVv",
+  while ((c = getopt_long (argc, argv, "I:O:F:K:N:R:o:sSpdgxXHhVv",
 			   strip_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -2004,6 +2006,7 @@ strip_main (argc, argv)
 	case 0:
 	  /* We've been given a long option.  */
 	  break;
+	case 'H':
 	case 'h':
 	  strip_usage (stdout, 0);
 	default:
@@ -2081,7 +2084,7 @@ copy_main (argc, argv)
   struct section_list *p;
   struct stat statbuf;
 
-  while ((c = getopt_long (argc, argv, "b:B:i:I:j:K:N:s:O:d:F:L:G:R:SpgxXVvW:",
+  while ((c = getopt_long (argc, argv, "b:B:i:I:j:K:N:s:O:d:F:L:G:R:SpgxXHhVvW:",
 			   copy_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -2497,6 +2500,7 @@ copy_main (argc, argv)
 	case 0:
 	  break;		/* we've been given a long option */
 
+	case 'H':
 	case 'h':
 	  copy_usage (stdout, 0);
 

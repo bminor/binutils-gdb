@@ -1,5 +1,5 @@
 /* dllwrap.c -- wrapper for DLLTOOL and GCC to generate PE style DLLs
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Mumit Khan (khan@xraylith.wisc.edu).
 
    This file is part of GNU Binutils.
@@ -516,7 +516,7 @@ usage (file, status)
      FILE *file;
      int status;
 {
-  fprintf (file, _("Usage %s <options> <object-files>\n"), program_name);
+  fprintf (file, _("Usage %s <option(s)> <object-file(s)>\n"), program_name);
   fprintf (file, _("  Generic options:\n"));
   fprintf (file, _("   --quiet, -q            Work quietly\n"));
   fprintf (file, _("   --verbose, -v          Verbose\n"));

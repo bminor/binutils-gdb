@@ -161,9 +161,9 @@ usage (stream, status)
      FILE *stream;
      int status;
 {
-  fprintf (stream, _("Usage: %s OPTION... FILE...\n"), program_name);
-  fprintf (stream, _("Display information from object FILE.\n"));
-  fprintf (stream, _("\n At least one of the following switches must be given:\n"));
+  fprintf (stream, _("Usage: %s <option(s)> <file(s)>\n"), program_name);
+  fprintf (stream, _(" Display information from object <file(s)>.\n"));
+  fprintf (stream, _(" At least one of the following switches must be given:\n"));
   fprintf (stream, _("\
   -a, --archive-headers    Display archive header information\n\
   -f, --file-headers       Display the contents of the overall file header\n\
@@ -180,7 +180,7 @@ usage (stream, status)
   -T, --dynamic-syms       Display the contents of the dynamic symbol table\n\
   -r, --reloc              Display the relocation entries in the file\n\
   -R, --dynamic-reloc      Display the dynamic relocation entries in the file\n\
-  -V, --version            Display this program's version number\n\
+  -v, --version            Display this program's version number\n\
   -i, --info               List object formats and architectures supported\n\
   -H, --help               Display this information\n\
 "));
@@ -2766,14 +2766,14 @@ main (argc, argv)
   bfd_init ();
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "pib:m:M:VCdDlfahHrRtTxsSj:wE:zgG",
+  while ((c = getopt_long (argc, argv, "pib:m:M:VvCdDlfaHhrRtTxsSj:wE:zgG",
 			   long_options, (int *) 0))
 	 != EOF)
     {
       switch (c)
 	{
 	case 0:
-	  break;		/* we've been given a long option */
+	  break;		/* We've been given a long option.  */
 	case 'm':
 	  machine = optarg;
 	  break;
@@ -2794,12 +2794,12 @@ main (argc, argv)
 	  if (optarg != NULL)
 	    {
 	      enum demangling_styles style;
-	      
+
 	      style = cplus_demangle_name_to_style (optarg);
 	      if (style == unknown_demangling) 
 		fatal (_("unknown demangling style `%s'"),
 		       optarg);
-	      
+
 	      cplus_demangle_set_style (style);
            }
 	  break;
@@ -2837,7 +2837,7 @@ main (argc, argv)
 	      usage (stderr, 1);
 	    }
 	  break;
-	  
+
 	case 'f':
 	  dump_file_header = true;
 	  seenflag = true;
@@ -2915,6 +2915,7 @@ main (argc, argv)
 	case 'H':
 	  usage (stdout, 0);
 	  seenflag = true;
+	case 'v':
 	case 'V':
 	  show_version = true;
 	  seenflag = true;

@@ -3135,7 +3135,7 @@ usage (file, status)
      int status;
 {
   /* xgetext:c-format */
-  fprintf (file, _("Usage %s <options> <object-files>\n"), program_name);
+  fprintf (file, _("Usage %s <option(s)> <object-file(s)>\n"), program_name);
   /* xgetext:c-format */
   fprintf (file, _("   -m --machine <machine>    Create as DLL for <machine>.  [default: %s]\n"), mname);
   fprintf (file, _("        possible <machine>: arm[_interwork], i386, mcore[-elf]{-le|-be}, ppc, thumb\n"));
@@ -3228,9 +3228,9 @@ main (ac, av)
 
   while ((c = getopt_long (ac, av,
 #ifdef DLLTOOL_MCORE_ELF			   
-			   "m:e:l:aD:d:z:b:xcCuUkAS:f:nvVhM:L:F:",
+			   "m:e:l:aD:d:z:b:xcCuUkAS:f:nvVHhM:L:F:",
 #else
-			   "m:e:l:aD:d:z:b:xcCuUkAS:f:nvVh",
+			   "m:e:l:aD:d:z:b:xcCuUkAS:f:nvVHh",
 #endif
 			   long_options, 0))
 	 != EOF)
@@ -3280,6 +3280,7 @@ main (ac, av)
 	case 'e':
 	  exp_name = optarg;
 	  break;
+	case 'H':
 	case 'h':
 	  usage (stdout, 0);
 	  break;

@@ -297,9 +297,9 @@ usage (stream, status)
      FILE *stream;
      int status;
 {
-  fprintf (stream, _("Usage: %s [OPTION]... [FILE]...\n"), program_name);
-  fprintf (stream, _("List symbols from FILEs (a.out by default).\n"));
-  fprintf (stream, _("\n\
+  fprintf (stream, _("Usage: %s [option(s)] [file(s)]\n"), program_name);
+  fprintf (stream, _(" List symbols in [file(s)] (a.out by default).\n"));
+  fprintf (stream, _(" The options are:\n\
   -a, --debug-syms       Display debugger-only symbols\n\
   -A, --print-file-name  Print name of the input file before every symbol\n\
   -B                     Same as --format=bsd\n\
@@ -313,7 +313,6 @@ usage (stream, status)
   -f, --format=FORMAT    Use the output format FORMAT.  FORMAT can be `bsd',\n\
                            `sysv' or `posix'.  The default is `bsd'\n\
   -g, --extern-only      Display only external symbols\n\
-  -h, --help             Display this information\n\
   -l, --line-numbers     Use debugging information to find a filename and\n\
                            line number for each symbol\n\
   -n, --numeric-sort     Sort symbols numerically by address\n\
@@ -326,8 +325,9 @@ usage (stream, status)
   -t, --radix=RADIX      Use RADIX for printing symbol values\n\
       --target=BFDNAME   Specify the target object format as BFDNAME\n\
   -u, --undefined-only   Display only undefined symbols\n\
-  -V, --version          Display this program's version number\n\
   -X 32_64               (ignored)\n\
+  -h, --help             Display this information\n\
+  -V, --version          Display this program's version number\n\
 \n"));
   list_supported_targets (program_name, stream);
   if (status == 0)
@@ -421,7 +421,7 @@ main (argc, argv)
   bfd_init ();
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "aABCDef:glnopPrst:uvVX:",
+  while ((c = getopt_long (argc, argv, "aABCDef:gHhlnopPrst:uvVvX:",
 			   long_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -462,6 +462,7 @@ main (argc, argv)
 	case 'g':
 	  external_only = 1;
 	  break;
+	case 'H':
 	case 'h':
 	  usage (stdout, 0);
 	case 'l':

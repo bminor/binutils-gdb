@@ -2151,35 +2151,38 @@ struct option options [] =
 static void
 usage ()
 {
-  fprintf (stdout, _("Usage: readelf {options} elf-file(s)\n"));
-  fprintf (stdout, _("  Options are:\n"));
-  fprintf (stdout, _("  -a or --all               Equivalent to: -h -l -S -s -r -d -V -A -I\n"));
-  fprintf (stdout, _("  -h or --file-header       Display the ELF file header\n"));
-  fprintf (stdout, _("  -l or --program-headers or --segments\n"));
-  fprintf (stdout, _("                            Display the program headers\n"));
-  fprintf (stdout, _("  -S or --section-headers or --sections\n"));
-  fprintf (stdout, _("                            Display the sections' header\n"));
-  fprintf (stdout, _("  -e or --headers           Equivalent to: -h -l -S\n"));
-  fprintf (stdout, _("  -s or --syms or --symbols Display the symbol table\n"));
-  fprintf (stdout, _("  -n or --notes             Display the core notes (if present)\n"));
-  fprintf (stdout, _("  -r or --relocs            Display the relocations (if present)\n"));
-  fprintf (stdout, _("  -u or --unwind            Display the unwind info (if present)\n"));
-  fprintf (stdout, _("  -d or --dynamic           Display the dynamic segment (if present)\n"));
-  fprintf (stdout, _("  -V or --version-info      Display the version sections (if present)\n"));
-  fprintf (stdout, _("  -A or --arch-specific     Display architecture specific information (if any).\n"));
-  fprintf (stdout, _("  -D or --use-dynamic       Use the dynamic section info when displaying symbols\n"));
-  fprintf (stdout, _("  -x <number> or --hex-dump=<number>\n"));
-  fprintf (stdout, _("                            Dump the contents of section <number>\n"));
-  fprintf (stdout, _("  -w[liaprmfs] or --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames,=str]\n"));
-  fprintf (stdout, _("                            Display the contents of DWARF2 debug sections\n"));
+  fprintf (stdout, _("Usage: readelf <option(s)> elf-file(s)\n"));
+  fprintf (stdout, _(" Display information about the contents of ELF format files\n"));
+  fprintf (stdout, _(" Options are:\n\
+  -a --all               Equivalent to: -h -l -S -s -r -d -V -A -I\n\
+  -h --file-header       Display the ELF file header\n\
+  -l --program-headers   Display the program headers\n\
+     --segments          An alias for --program-headers\n\
+  -S --section-headers   Display the sections' header\n\
+     --sections          An alias for --section-headers\n\
+  -e --headers           Equivalent to: -h -l -S\n\
+  -s --syms              Display the symbol table\n\
+      --symbols          An alias for --syms\n\
+  -n --notes             Display the core notes (if present)\n\
+  -r --relocs            Display the relocations (if present)\n\
+  -u --unwind            Display the unwind info (if present)\n\
+  -d --dynamic           Display the dynamic segment (if present)\n\
+  -V --version-info      Display the version sections (if present)\n\
+  -A --arch-specific     Display architecture specific information (if any).\n\
+  -D --use-dynamic       Use the dynamic section info when displaying symbols\n\
+  -x --hex-dump=<number> Dump the contents of section <number>\n\
+  -w --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames,=str]\n\
+                         Display the contents of DWARF2 debug sections\n"));
 #ifdef SUPPORT_DISASSEMBLY
-  fprintf (stdout, _("  -i <number> or --instruction-dump=<number>\n"));
-  fprintf (stdout, _("                            Disassemble the contents of section <number>\n"));
+  fprintf (stdout, _("\
+  -i --instruction-dump=<number>\n\
+                         Disassemble the contents of section <number>\n"));
 #endif
-  fprintf (stdout, _("  -I or --histogram         Display histogram of bucket list lengths\n"));
-  fprintf (stdout, _("  -v or --version           Display the version number of readelf\n"));
-  fprintf (stdout, _("  -W or --wide              Don't split lines or truncate symbols to fit into 80 columns\n"));
-  fprintf (stdout, _("  -H or --help              Display this information\n"));
+  fprintf (stdout, _("\
+  -I --histogram         Display histogram of bucket list lengths\n\
+  -W --wide              Allow output width to exceed 80 characters\n\
+  -H --help              Display this information\n\
+  -v --version           Display the version number of readelf\n"));
   fprintf (stdout, _("Report bugs to %s\n"), REPORT_BUGS_TO);
 
   exit (0);

@@ -1,22 +1,22 @@
 /* nlmconv.c -- NLM conversion program
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
-This file is part of GNU Binutils.
+   This file is part of GNU Binutils.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Written by Ian Lance Taylor <ian@cygnus.com>.
 
@@ -122,7 +122,6 @@ static struct option long_options[] =
 
 /* Local routines.  */
 
-static void show_help PARAMS ((void));
 static void show_usage PARAMS ((FILE *, int));
 static const char *select_output_format PARAMS ((enum bfd_architecture,
 						 unsigned long, boolean));
@@ -226,7 +225,7 @@ main (argc, argv)
   bfd_init ();
   set_default_bfd_target ();
 
-  while ((opt = getopt_long (argc, argv, "dhI:l:O:T:V", long_options,
+  while ((opt = getopt_long (argc, argv, "dHhI:l:O:T:Vv", long_options,
 			     (int *) NULL))
 	 != EOF)
     {
@@ -235,9 +234,10 @@ main (argc, argv)
 	case 'd':
 	  debug = 1;
 	  break;
+	case 'H':
 	case 'h':
-	  show_help ();
-	  /*NOTREACHED*/
+	  show_usage (stdout, 0);
+	  break;
 	case 'I':
 	  input_format = optarg;
 	  break;
@@ -250,14 +250,15 @@ main (argc, argv)
 	case 'T':
 	  header_file = optarg;
 	  break;
+	case 'v':
 	case 'V':
 	  print_version ("nlmconv");
-	  /*NOTREACHED*/
+	  break;
 	case 0:
 	  break;
 	default:
 	  show_usage (stderr, 1);
-	  /*NOTREACHED*/
+	  break;
 	}
     }
 
@@ -1093,15 +1094,6 @@ main (argc, argv)
   return 0;
 }
 
-/* Display a help message and exit.  */
-
-static void
-show_help ()
-{
-  printf (_("%s: Convert an object file into a NetWare Loadable Module\n"),
-	  program_name);
-  show_usage (stdout, 0);
-}
 
 /* Show a usage message and exit.  */
 
@@ -1110,13 +1102,17 @@ show_usage (file, status)
      FILE *file;
      int status;
 {
-  fprintf (file, _("\
-Usage: %s [-dhV] [-I bfdname] [-O bfdname] [-T header-file] [-l linker]\n\
-       [--input-target=bfdname] [--output-target=bfdname]\n\
-       [--header-file=file] [--linker=linker] [--debug]\n\
-       [--help] [--version]\n\
-       [in-file [out-file]]\n"),
-	   program_name);
+  fprintf (file, _("Usage: %s [option(s)] [in-file [out-file]]\n"), program_name);
+  fprintf (file, _(" Convert an object file into a NetWare Loadable Module\n"));
+  fprintf (file, _(" The options are:\n\
+  -I --input-target=<bfdname>   Set the input binary file format\n\
+  -O --output-target=<bfdname>  Set the output binary file format\n\
+  -T --header-file=<file>       Read <file> for NLM header information\n\
+  -l --linker=<linker>          Use <linker> for any linking\n\
+  -d --debug                    Display on stderr the linker command line\n\
+  -h --help                     Display this information\n\
+  -v --version                  Display the program's version\n\
+"));
   if (status == 0)
     fprintf (file, _("Report bugs to %s\n"), REPORT_BUGS_TO);
   exit (status);

@@ -1,5 +1,5 @@
 /* addr2line.c -- convert addresses to line number and function name
-   Copyright 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Ulrich Lauther <Ulrich.Lauther@mchp.siemens.de>
 
    This file is part of GNU Binutils.
@@ -70,11 +70,19 @@ usage (stream, status)
      FILE *stream;
      int status;
 {
-  fprintf (stream, _("\
-Usage: %s [-CfsHV] [-b bfdname] [--target=bfdname]\n\
-       [-e executable] [--exe=executable] [--demangle[=style]]\n\
-       [--basenames] [--functions] [addr addr ...]\n"),
-	   program_name);
+  fprintf (stream, _("Usage: %s [option(s)] [addr(s)]\n"), program_name);
+  fprintf (stream, _(" Convert addresses into line number/file name pairs.\n"));
+  fprintf (stream, _(" If no addresses are specified on the command line, they will be read from stdin\n"));
+  fprintf (stream, _(" The options are:\n\
+  -b --target=<bfdname>  Set the binary file format\n\
+  -e --exe=<executable>  Set the input file name (default is a.out)\n\
+  -s --basenames         Strip directory names\n\
+  -f --functions         Show function names\n\
+  -C --demangle[=style]  Demangle function names\n\
+  -h --help              Display this information\n\
+  -v --version           Display the program's version\n\
+\n"));
+
   list_supported_targets (program_name, stream);
   if (status == 0)
     fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
@@ -291,13 +299,13 @@ main (argc, argv)
 
   filename = NULL;
   target = NULL;
-  while ((c = getopt_long (argc, argv, "b:Ce:sfHV", long_options, (int *) 0))
+  while ((c = getopt_long (argc, argv, "b:Ce:sfHhVv", long_options, (int *) 0))
 	 != EOF)
     {
       switch (c)
 	{
 	case 0:
-	  break;		/* we've been given a long option */
+	  break;		/* We've been given a long option.  */
 	case 'b':
 	  target = optarg;
 	  break;
@@ -324,9 +332,11 @@ main (argc, argv)
 	case 'f':
 	  with_functions = true;
 	  break;
+	case 'v':
 	case 'V':
 	  print_version ("addr2line");
 	  break;
+	case 'h':
 	case 'H':
 	  usage (stdout, 0);
 	  break;

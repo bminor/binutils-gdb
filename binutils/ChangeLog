@@ -1,3 +1,39 @@
+2002-01-23  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* addr2line.c (usage): Update text to provide verbose
+	description of the command line options.
+	* ar.c (usage): Update text to provide verbose
+	description of the command line options.
+	(main): Accept -h and -H when running as ranlib.
+	* coffdump.c (show_usage): Update text to provide verbose
+	description of the command line options.
+	* dlltool.c (main): Accept -H as an alias for --help.
+	* nlmconv.c (show_usage): Update text to provide verbose
+	description of the command line options.
+	* nm.c (usage): Replace OPTIONS with option(s).
+	(main): Accept -H as an alias for --help.
+	* objcopy.c (strip_main): Accept -H as an alias for --help.
+	* objdump.c (main): Accept -v as an alias for --verbose.
+        * readelf.c (usage): Adjust format to match style used in
+	other binutils.
+	* size.c (usage): Update text to provide verbose description
+	of the command line options.
+	(main): Accept -v, -h and -H as command line options.
+	* srconv.c (show_usage): Update text to provide verbose
+	description of the command line options.
+	* strings.c (main): Accept -H and -v as command line options.
+	(usage): Update text to provide verbose description of the
+	command line options.
+	* sysdump.c (show_usage): Update text to provide verbose
+	description of the command line options.
+	* windres.c (usage): Adjust format to match style used in
+	other binutils.
+
+	* coffdump.c: Fix formatting.
+	* nlmconv.c: Fix formatting.
+	* srconv.c: Fix formatting.
+	* sysdump.c: Fix formatting.
+
 2002-01-18  Andreas Jaeger  <aj@suse.de>
 
 	* version.c (print_version): Update year.

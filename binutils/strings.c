@@ -1,6 +1,6 @@
 /* strings -- print the strings of printable characters in files
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+   2002 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -176,7 +176,7 @@ main (argc, argv)
   target = NULL;
   encoding = 's';
 
-  while ((optc = getopt_long (argc, argv, "afn:ot:e:v0123456789",
+  while ((optc = getopt_long (argc, argv, "afhHn:ot:e:Vv0123456789",
 			      long_options, (int *) 0)) != EOF)
     {
       switch (optc)
@@ -189,6 +189,7 @@ main (argc, argv)
 	  print_filenames = true;
 	  break;
 
+	case 'H':
 	case 'h':
 	  usage (stdout, 0);
 
@@ -238,6 +239,7 @@ main (argc, argv)
 	  encoding = optarg[0];
 	  break;
 
+	case 'V':
 	case 'v':
 	  print_version ("strings");
 	  break;
@@ -645,11 +647,20 @@ usage (stream, status)
      FILE *stream;
      int status;
 {
-  fprintf (stream, _("\
-Usage: %s [-afov] [-n min-len] [-min-len] [-t {o,x,d}] [-e {s,b,l,B,L}]\n\
-       [-] [--all] [--print-file-name] [--bytes=min-len] [--radix={o,x,d}]\n\
-       [--target=bfdname] [--encoding {s,b,l,B,L}] [--help] [--version] file...\n"),
-	   program_name);
+  fprintf (stream, _("Usage: %s [option(s)] [file(s)]\n"), program_name);
+  fprintf (stream, _(" Display printable strings in [file(s)] (stdin by default)\n"));
+  fprintf (stream, _(" The options are:\n\
+  -a - --all                Scan the entire file, not just the data section\n\
+  -f --print-file-name      Print the name of the file before each string\n\
+  -n --bytes=[number]       Locate & print any NUL-terminated sequence of at\n\
+  -<number>                 least [number] characters (default 4).\n\
+  -t --radix={o,x,d}        Print the location of the string in base 8, 10 or 16\n\
+  -o                        An alias for --radix=o\n\
+  -T --target=<BFDNAME>     Specify the binary file format\n\
+  -e --encoding={s,b,l,B,L} Select character size and endianness:\n\
+                            s = 8-bit, {b,l} = 16-bit, {B,L} = 32-bit\n\
+  -h --help                 Display this information\n\
+  -v --version              Print the program's version number\n"));
   list_supported_targets (program_name, stream);
   if (status == 0)
     fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
