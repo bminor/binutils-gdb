@@ -1,3 +1,7 @@
+Wed Mar 31 17:04:31 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* m68k-dis.c:  Fix prototype for fetch_arg().
+
 Wed Mar 31 10:07:04 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dis-buf.c: New file, for new read_memory_func interface.

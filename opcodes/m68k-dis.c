@@ -38,7 +38,7 @@ extern CONST struct ext_format ext_format_68881;
 /* Local function prototypes */
 
 static int
-fetch_arg PARAMS ((unsigned char *, int, int));
+fetch_arg PARAMS ((unsigned char *, int, int, disassemble_info *));
 
 static void
 print_base PARAMS ((int, int, disassemble_info*));
