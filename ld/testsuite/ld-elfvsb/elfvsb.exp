@@ -117,11 +117,11 @@ proc visibility_test { visibility progname testname main sh1 sh2 dat args } {
     }
     if {![ld_simple_link $CC $tmpdir/$progname.so "$shared $shldflags $tmpdir/$sh1 $tmpdir/$sh2"]} {
 	if { [ string match $visibility "hidden_undef" ]
-	     && [regexp ".*/sh1.c.*: undefined reference to \`visibility\'" $link_output]
+	     && [regexp ".*/sh1.c.*: undefined reference to \`\.?visibility\'" $link_output]
 	     && [regexp ".*/sh1.c.*: undefined reference to \`visibility_var\'" $link_output] } {
     	    pass "$testname"
 	} else { if { [ string match $visibility "protected_undef" ]
-	     && [regexp ".*/sh1.c.*: undefined reference to \`visibility\'" $link_output]
+	     && [regexp ".*/sh1.c.*: undefined reference to \`\.?visibility\'" $link_output]
 	     && [regexp ".*/sh1.c.*: undefined reference to \`visibility_var\'" $link_output] } {
     	    pass "$testname"
 	} else {
@@ -140,13 +140,13 @@ proc visibility_test { visibility progname testname main sh1 sh2 dat args } {
     }
     if ![ld_simple_link $CC $tmpdir/$progname "-Wl,-rpath,$rpath $tmpdir/$main $tmpdir/$progname.so"] {
 	if { [ string match $visibility "hidden" ]
-	     && [regexp ".*/main.c.*: undefined reference to \`visibility\'" $link_output]
+	     && [regexp ".*/main.c.*: undefined reference to \`\.?visibility\'" $link_output]
 	     && [regexp ".*/main.c.*: undefined reference to \`visibility_var\'" $link_output] } {
     	    pass "$testname"
 	} else { if { [ string match $visibility "hidden_undef_def" ]
-	     && [regexp ".*/main.c.*: undefined reference to \`visibility\'" $link_output]
+	     && [regexp ".*/main.c.*: undefined reference to \`\.?visibility\'" $link_output]
 	     && [regexp ".*/main.c.*: undefined reference to \`visibility_def\'" $link_output]
-	     && [regexp ".*/main.c.*: undefined reference to \`visibility_func\'" $link_output]
+	     && [regexp ".*/main.c.*: undefined reference to \`\.?visibility_func\'" $link_output]
 	     && [regexp ".*/main.c.*: undefined reference to \`visibility_var\'" $link_output] } {
     	    pass "$testname"
 	} else {

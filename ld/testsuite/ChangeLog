@@ -1,5 +1,9 @@
 2004-08-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* ld-elfvsb/elfvsb.exp: Cope with ppc64 dot symbols.
+
+2004-08-17  Alan Modra  <amodra@bigpond.net.au>
+
 	* ld-scripts/cross1.t: Remove .opd section spec.
 
 2004-08-01  Stephane Carrez  <stcarrez@nerim.fr>
