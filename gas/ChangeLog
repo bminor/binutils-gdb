@@ -1,3 +1,7 @@
+2001-04-24  H.J. Lu  <hjl@gnu.org>
+
+	* configure: Regenerated with the right version of autoconf.
+
 2001-04-24  Christian Groessler  <cpg@aladdin.de>
 
 	* config/tc-z8k.c (build_bytes): 12 and 16 bit displacements now
