@@ -1660,6 +1660,11 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	    looking_for_rp = 0;
 	    cache->saved_regs[HPPA_RP_REGNUM].addr = -20;
 	  }
+	else if (inst == 0x6bc23fd1) /* stw rp,-0x18(sr0,sp) */
+	  {
+	    looking_for_rp = 0;
+	    cache->saved_regs[HPPA_RP_REGNUM].addr = -24;
+	  }
 	else if (inst == 0x0fc212c1) /* std rp,-0x10(sr0,sp) */
 	  {
 	    looking_for_rp = 0;

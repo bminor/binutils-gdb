@@ -1,5 +1,9 @@
 2004-10-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* hppa-tdep.c (hppa_frame_cache): Add support for OpenBSD and
+	NetBSD system call stubs that store %rp in the ERP slot of the
+	stack frame.
+
 	* source.c: Always define O_BINARY to 0 if not defined already.
 	(openp): Unconditionally use O_BINARY.
 
