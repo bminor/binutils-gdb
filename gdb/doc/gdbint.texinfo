@@ -3674,11 +3674,6 @@ The number of the ``next program counter'' register, if defined.
 If non-zero, round arguments to a boundary of this many bits before
 pushing them on the stack.
 
-@item PRINT_TYPELESS_INTEGER
-@findex PRINT_TYPELESS_INTEGER
-This is an obscure substitute for @code{print_longest} that seems to
-have been defined for the Convex target.
-
 @item PROCESS_LINENUMBER_HOOK
 @findex PROCESS_LINENUMBER_HOOK
 A hook defined for XCOFF reading.
