@@ -1,3 +1,7 @@
+Thu Feb  1 11:01:10 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/pa/tm-hppa.h (SOFT_FLOAT): Provide a default definition.
+
 Wed Jan 31 19:01:28 1996  Fred Fish  <fnf@cygnus.com>
 
 	* serial.c: Change fputc/fputs/fprintf to _unfiltered forms.
