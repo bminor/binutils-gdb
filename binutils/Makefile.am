@@ -488,10 +488,11 @@ readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/d10v.h $(INCDIR)/elf/d30v.h $(INCDIR)/elf/sh.h \
   $(INCDIR)/elf/mn10200.h $(INCDIR)/elf/mn10300.h $(INCDIR)/elf/hppa.h \
   $(INCDIR)/elf/h8.h $(INCDIR)/elf/arc.h $(INCDIR)/elf/fr30.h \
-  $(INCDIR)/elf/mcore.h $(INCDIR)/elf/i960.h $(INCDIR)/elf/pj.h \
-  $(INCDIR)/elf/avr.h $(INCDIR)/elf/ia64.h $(INCDIR)/elf/cris.h \
-  $(INCDIR)/elf/i860.h $(INCDIR)/elf/x86-64.h $(INCDIR)/elf/s390.h \
-  bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/elf/mcore.h $(INCDIR)/elf/mmix.h $(INCDIR)/elf/i960.h \
+  $(INCDIR)/elf/pj.h $(INCDIR)/elf/avr.h $(INCDIR)/elf/ia64.h \
+  $(INCDIR)/elf/cris.h $(INCDIR)/elf/i860.h $(INCDIR)/elf/x86-64.h \
+  $(INCDIR)/elf/s390.h $(INCDIR)/elf/xstormy16.h bucomm.h \
+  config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
   unwind-ia64.h
 resres.o: resres.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h bucomm.h config.h $(INCDIR)/bin-bugs.h \

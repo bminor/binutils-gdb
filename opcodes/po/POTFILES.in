@@ -102,6 +102,13 @@ v850-opc.c
 vax-dis.c
 w65-dis.c
 w65-opc.h
+xstormy16-asm.c
+xstormy16-desc.c
+xstormy16-desc.h
+xstormy16-dis.c
+xstormy16-ibld.c
+xstormy16-opc.c
+xstormy16-opc.h
 z8k-dis.c
 z8k-opc.h
 z8kgen.c

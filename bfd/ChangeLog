@@ -1,3 +1,9 @@
+2002-01-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2002-01-22  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* configure.host (hppa*64*-*-hpux*, hppa*64*-*-linux*): Add new

@@ -122,6 +122,8 @@ config/tc-vax.c
 config/tc-vax.h
 config/tc-w65.c
 config/tc-w65.h
+config/tc-xstormy16.c
+config/tc-xstormy16.h
 config/tc-z8k.c
 config/tc-z8k.h
 depend.c

@@ -12,6 +12,7 @@ aout64.c
 aoutf1.h
 aoutx.h
 archive.c
+archive64.c
 archures.c
 armnetbsd.c
 bfd.c
@@ -97,6 +98,7 @@ cpu-v850.c
 cpu-vax.c
 cpu-w65.c
 cpu-we32k.c
+cpu-xstormy16.c
 cpu-z8k.c
 demo64.c
 dwarf1.c
@@ -107,6 +109,7 @@ ecoffswap.h
 efi-app-ia32.c
 efi-app-ia64.c
 elf-bfd.h
+elf-eh-frame.c
 elf-hppa.h
 elf-m10200.c
 elf-m10300.c
@@ -139,9 +142,11 @@ elf32-pj.c
 elf32-ppc.c
 elf32-s390.c
 elf32-sh-lin.c
+elf32-sh-nbsd.c
 elf32-sh.c
 elf32-sparc.c
 elf32-v850.c
+elf32-xstormy16.c
 elf32.c
 elf64-alpha.c
 elf64-gen.c
