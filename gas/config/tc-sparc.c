@@ -2905,22 +2905,29 @@ md_apply_fix3 (fixP, value, segment)
      don't want to include the value of an externally visible symbol.  */
   if (fixP->fx_addsy != NULL)
     {
-      if (symbol_used_in_reloc_p (fixP->fx_addsy)
-	  && (S_IS_EXTERNAL (fixP->fx_addsy)
-	      || S_IS_WEAK (fixP->fx_addsy)
-	      || (S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE)
+	symbolS * sym = fixP->fx_addsy;
+        segT      seg = S_GET_SEGMENT (sym);
+
+      if (symbol_used_in_reloc_p (sym)
+	  && (S_IS_EXTERNAL (sym)
+	      || S_IS_WEAK (sym)
+#if 0 /* Although fixups against local symbols in SEC_MERGE sections
+	 should be treated as if they were against external symbols
+	 write.c:fixup_segment() will not have included the value of
+	 the symbol under these particular cicumstances.  */
+	      || (seg->flags & SEC_MERGE)
+#endif
 	      || (sparc_pic_code && ! fixP->fx_pcrel)
-	      || (S_GET_SEGMENT (fixP->fx_addsy) != segment
-		  && ((bfd_get_section_flags (stdoutput,
-					      S_GET_SEGMENT (fixP->fx_addsy))
-		       & SEC_LINK_ONCE) != 0
-		      || strncmp (segment_name (S_GET_SEGMENT (fixP->fx_addsy)),
-				  ".gnu.linkonce",
-				  sizeof ".gnu.linkonce" - 1) == 0)))
-	  && S_GET_SEGMENT (fixP->fx_addsy) != absolute_section
-	  && S_GET_SEGMENT (fixP->fx_addsy) != undefined_section
-	  && ! bfd_is_com_section (S_GET_SEGMENT (fixP->fx_addsy)))
-	fixP->fx_addnumber -= S_GET_VALUE (fixP->fx_addsy);
+	      || (seg != segment
+		  && (((bfd_get_section_flags (stdoutput, seg) & SEC_LINK_ONCE) != 0)
+		      || (strncmp (segment_name (seg),
+			 	   ".gnu.linkonce",
+				   sizeof ".gnu.linkonce" - 1) == 0))))
+	  && seg != absolute_section
+	  && seg != undefined_section
+	  && ! bfd_is_com_section (seg))
+	fixP->fx_addnumber -= S_GET_VALUE (sym);
+
       return 1;
     }
 #endif
