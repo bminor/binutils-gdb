@@ -384,10 +384,6 @@ needed.
 
 --
 
-Replace strsave() + mstrsave() with libiberty:xstrdup().
-
---
-
 Replace savestring() with something from libiberty.
 
 An xstrldup()? but that would have different semantics.
@@ -419,7 +415,7 @@ how.
 
 --
 
-Eliminate mmalloc() from GDB.
+Eliminate mmalloc(), mstrsave() et.al. from GDB.
 
 Also eliminate it from defs.h.
 

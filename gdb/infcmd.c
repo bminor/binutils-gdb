@@ -1,5 +1,5 @@
 /* Memory-access and commands for "inferior" process, for GDB.
-   Copyright 1986, 87, 88, 89, 91, 92, 95, 96, 1998, 1999
+   Copyright 1986, 87, 88, 89, 91, 92, 95, 96, 1998, 1999, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1436,7 +1436,7 @@ path_command (char *dirname, int from_tty)
   /* Can be null if path is not set */
   if (!env)
     env = "";
-  exec_path = strsave (env);
+  exec_path = xstrdup (env);
   mod_path (dirname, &exec_path);
   set_in_environ (inferior_environ, path_var_name, exec_path);
   xfree (exec_path);

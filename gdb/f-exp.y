@@ -1,6 +1,7 @@
 /* YACC parser for Fortran expressions, for GDB.
-   Copyright 1986, 1989, 1990, 1991, 1993, 1994
-             Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1990, 1991, 1993, 1994, 2001 Free Software
+   Foundation, Inc.
+
    Contributed by Motorola.  Adapted from the C parser by Farooq Butt
    (fmbutt@engage.sps.mot.com).
 
@@ -653,7 +654,7 @@ parse_number (p, len, parsed_float, putithere)
       /* [dD] is not understood as an exponent by atof, change it to 'e'.  */
       char *tmp, *tmp2;
 
-      tmp = strsave (p);
+      tmp = xstrdup (p);
       for (tmp2 = tmp; *tmp2; ++tmp2)
 	if (*tmp2 == 'd' || *tmp2 == 'D')
 	  *tmp2 = 'e';

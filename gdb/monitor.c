@@ -755,7 +755,7 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
 
   if (dev_name)
     xfree (dev_name);
-  dev_name = strsave (args);
+  dev_name = xstrdup (args);
 
   monitor_desc = SERIAL_OPEN (dev_name);
 

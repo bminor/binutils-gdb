@@ -1530,7 +1530,7 @@ device is attached to the target board (e.g., /dev/ttya).\n"
     nomem (0);
   make_cleanup_freeargv (argv);
 
-  serial_port_name = strsave (argv[0]);
+  serial_port_name = xstrdup (argv[0]);
   if (argv[1])			/* remote TFTP name specified? */
     {
       remote_name = argv[1];
@@ -1586,8 +1586,8 @@ device is attached to the target board (e.g., /dev/ttya).\n"
 	      local_name++;	/* skip over the colon */
 	  if (local_name == NULL)
 	    local_name = remote_name;	/* local name same as remote name */
-	  tftp_name = strsave (remote_name);
-	  tftp_localname = strsave (local_name);
+	  tftp_name = xstrdup (remote_name);
+	  tftp_localname = xstrdup (local_name);
 	  tftp_in_use = 1;
 	}
     }
@@ -1597,7 +1597,7 @@ device is attached to the target board (e.g., /dev/ttya).\n"
 
   /* Reset the expected monitor prompt if it's never been set before.  */
   if (mips_monitor_prompt == NULL)
-    mips_monitor_prompt = strsave (new_monitor_prompt);
+    mips_monitor_prompt = xstrdup (new_monitor_prompt);
   mips_monitor = new_monitor;
 
   mips_initialize ();
@@ -1613,7 +1613,7 @@ device is attached to the target board (e.g., /dev/ttya).\n"
   /* Try to figure out the processor model if possible.  */
   ptype = mips_read_processor_type ();
   if (ptype)
-    mips_set_processor_type_command (strsave (ptype), 0);
+    mips_set_processor_type_command (xstrdup (ptype), 0);
 
 /* This is really the job of start_remote however, that makes an assumption
    that the target is about to print out a status message of some sort.  That

@@ -1,7 +1,7 @@
 /* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
 
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, Free Software Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
@@ -3331,7 +3331,7 @@ mips_set_processor_type_command (char *args, int from_tty)
 	printf_unfiltered ("%s\n", mips_processor_type_table[i].name);
 
       /* Restore the value.  */
-      tmp_mips_processor_type = strsave (mips_processor_type);
+      tmp_mips_processor_type = xstrdup (mips_processor_type);
 
       return;
     }
@@ -3340,7 +3340,7 @@ mips_set_processor_type_command (char *args, int from_tty)
     {
       error ("Unknown processor type `%s'.", tmp_mips_processor_type);
       /* Restore its value.  */
-      tmp_mips_processor_type = strsave (mips_processor_type);
+      tmp_mips_processor_type = xstrdup (mips_processor_type);
     }
 }
 
@@ -4610,8 +4610,8 @@ Set this to be able to access processor-type-specific registers.\n\
   c = add_show_from_set (c, &showlist);
   c->function.cfunc = mips_show_processor_type_command;
 
-  tmp_mips_processor_type = strsave (DEFAULT_MIPS_TYPE);
-  mips_set_processor_type_command (strsave (DEFAULT_MIPS_TYPE), 0);
+  tmp_mips_processor_type = xstrdup (DEFAULT_MIPS_TYPE);
+  mips_set_processor_type_command (xstrdup (DEFAULT_MIPS_TYPE), 0);
 #endif
 
   /* We really would like to have both "0" and "unlimited" work, but

@@ -1,6 +1,6 @@
 /* Remote debugging interface to m32r and mon2000 ROM monitors for GDB, 
    the GNU debugger.
-   Copyright 1996 Free Software Foundation, Inc.
+   Copyright 1996, 2001 Free Software Foundation, Inc.
 
    Adapted by Michael Snyder of Cygnus Support.
 
@@ -480,7 +480,7 @@ m32r_upload_command (char *args, int from_tty)
 	error ("Please use 'set board-address' to set the M32R-EVA board's IP address.");
       if (strchr (myIPaddress, '('))
 	*(strchr (myIPaddress, '(')) = '\0';	/* delete trailing junk */
-      board_addr = strsave (myIPaddress);
+      board_addr = xstrdup (myIPaddress);
     }
   if (server_addr == 0)
     {
@@ -508,7 +508,7 @@ m32r_upload_command (char *args, int from_tty)
   if (args[0] != '/' && download_path == 0)
     {
       if (current_directory)
-	download_path = strsave (current_directory);
+	download_path = xstrdup (current_directory);
       else
 	error ("Need to know default download path (use 'set download-path')");
     }

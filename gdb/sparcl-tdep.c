@@ -1,5 +1,5 @@
 /* Target dependent code for the Fujitsu SPARClite for GDB, the GNU debugger.
-   Copyright 1994, 1995, 1996, 1999  Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1999, 2001  Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -413,7 +413,7 @@ sparclite_open (char *name, int from_tty)
   if (remote_target_name)
     xfree (remote_target_name);
 
-  remote_target_name = strsave (name);
+  remote_target_name = xstrdup (name);
 
   /* We need a 'serial' or 'udp' keyword to disambiguate host:port, which can
      mean either a serial port on a terminal server, or the IP address of a

@@ -1,6 +1,6 @@
 /* *INDENT-OFF* */ /* ATTR_FORMAT confuses indent, avoid running it for now */
 /* Basic, host-specific, and target-specific definitions for GDB.
-   Copyright (C) 1986, 1989, 1991-1996, 1998-2000
+   Copyright (C) 1986, 1989, 1991-1996, 1998-2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -821,8 +821,6 @@ extern int longest_to_int (LONGEST);
 extern char *savestring (const char *, int);
 
 extern char *msavestring (void *, const char *, int);
-
-extern char *strsave (const char *);
 
 extern char *mstrsave (void *, const char *);
 

@@ -1,5 +1,5 @@
 /* List lines of source files for GDB, the GNU debugger.
-   Copyright 1986-1989, 1991-1999 Free Software Foundation, Inc.
+   Copyright 1986-1989, 1991-1999, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -255,7 +255,7 @@ init_source_path (void)
   char buf[20];
 
   sprintf (buf, "$cdir%c$cwd", DIRNAME_SEPARATOR);
-  source_path = strsave (buf);
+  source_path = xstrdup (buf);
   forget_cached_source_info ();
 }
 
@@ -295,7 +295,7 @@ mod_path (char *dirname, char **which_path)
   if (dirname == 0)
     return;
 
-  dirname = strsave (dirname);
+  dirname = xstrdup (dirname);
   make_cleanup (xfree, dirname);
 
   do

@@ -1,5 +1,5 @@
 /* Remote target glue for the Hitachi SH-3 ROM monitor.
-   Copyright 1995, 1996, 2000 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -249,7 +249,7 @@ sh3_open (char *args, int from_tty)
 
   if (args)
     {
-      char *cursor = serial_port_name = strsave (args);
+      char *cursor = serial_port_name = xstrdup (args);
 
       while (*cursor && *cursor != ' ')
 	cursor++;
@@ -289,7 +289,7 @@ sh3e_open (char *args, int from_tty)
 
   if (args)
     {
-      char *cursor = serial_port_name = strsave (args);
+      char *cursor = serial_port_name = xstrdup (args);
 
       while (*cursor && *cursor != ' ')
 	cursor++;

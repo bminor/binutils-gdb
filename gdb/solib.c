@@ -1,5 +1,5 @@
 /* Handle shared libraries for GDB, the GNU Debugger.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 98, 1999, 2000
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 98, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -143,7 +143,7 @@ solib_open (char *in_pathname, char **found_pathname)
   /* Done.  If not found, tough luck.  Return found_file and 
      (optionally) found_pathname.  */
   if (found_pathname != NULL && temp_pathname != NULL)
-    *found_pathname = strsave (temp_pathname);
+    *found_pathname = xstrdup (temp_pathname);
   return found_file;
 }
 

@@ -1,3 +1,31 @@
+Tue Jan 30 17:09:07 2001  Andrew Cagney  <cagney@redhat.com>
+
+	* defs.h (strsave): Delete declaration.
+	* utils.c (strsave): Delete definition.
+	* TODO (strsave): Update
+
+	* mac-xdep.c (tilde_expand): Replace strsave with xstrdup.
+	* sparcl-tdep.c (sparclite_open): Ditto.
+	* mips-tdep.c (mips_set_processor_type_command):  Ditto.
+	(_initialize_mips_tdep):  Ditto.
+	* solib.c (solib_open):  Ditto.
+	* symfile.c (add_filename_language):  Ditto.
+	(set_ext_lang_command):  Ditto.
+	* source.c (init_source_path):  Ditto.
+	(mod_path):  Ditto.
+	* sh3-rom.c (sh3_open):  Ditto.
+	(sh3e_open):  Ditto.
+	* serial.c (serial_open):  Ditto.
+	* remote-mips.c (common_open):  Ditto.
+	* monitor.c (monitor_open):  Ditto.
+	* m32r-rom.c (m32r_upload_command):  Ditto.
+	* infcmd.c (path_command):  Ditto.
+	* f-exp.y (parse_number):  Ditto.
+	* breakpoint.c (create_longjmp_breakpoint):  Ditto.
+	(create_thread_event_breakpoint):  Ditto.
+	* arc-tdep.c (arc_set_cpu_type_command):  Ditto.
+	(_initialize_arc_tdep):  Ditto.
+
 Tue Jan 30 15:14:26 2001  Andrew Cagney  <cagney@skil>
 
 	* cli/cli-script.c (define_command): Check for a bad hook value in

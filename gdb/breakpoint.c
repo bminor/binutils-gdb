@@ -1,6 +1,6 @@
 /* Everything about breakpoints, for GDB.
-   Copyright 1986, 87, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999, 2000
-   Free Software Foundation, Inc.
+   Copyright 1986, 87, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999,
+   2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -3871,7 +3871,7 @@ create_longjmp_breakpoint (char *func_name)
   b->enable = disabled;
   b->silent = 1;
   if (func_name)
-    b->addr_string = strsave (func_name);
+    b->addr_string = xstrdup (func_name);
   b->number = internal_breakpoint_number--;
 }
 
@@ -3928,7 +3928,7 @@ create_thread_event_breakpoint (CORE_ADDR address)
   b->enable = enabled;
   /* addr_string has to be used or breakpoint_re_set will delete me.  */
   sprintf (addr_string, "*0x%s", paddr (b->address));
-  b->addr_string = strsave (addr_string);
+  b->addr_string = xstrdup (addr_string);
 
   return b;
 }

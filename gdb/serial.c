@@ -1,5 +1,7 @@
 /* Generic serial interface routines
-   Copyright 1992, 1993, 1996, 1997, 1999, 2000 Free Software Foundation, Inc.
+
+   Copyright 1992, 1993, 1996, 1997, 1999, 2000, 2001 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -213,7 +215,7 @@ serial_open (const char *name)
       return NULL;
     }
 
-  scb->name = strsave (name);
+  scb->name = xstrdup (name);
   scb->next = scb_base;
   scb->refcnt = 1;
   scb->debug_p = 0;

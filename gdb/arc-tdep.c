@@ -1,5 +1,5 @@
 /* ARC target-dependent stuff.
-   Copyright (C) 1995, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1997, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -636,7 +636,7 @@ arc_set_cpu_type_command (char *args, int from_tty)
 	printf_unfiltered ("%s\n", arc_cpu_type_table[i].name);
 
       /* Restore the value.  */
-      tmp_arc_cpu_type = strsave (arc_cpu_type);
+      tmp_arc_cpu_type = xstrdup (arc_cpu_type);
 
       return;
     }
@@ -645,7 +645,7 @@ arc_set_cpu_type_command (char *args, int from_tty)
     {
       error ("Unknown cpu type `%s'.", tmp_arc_cpu_type);
       /* Restore its value.  */
-      tmp_arc_cpu_type = strsave (arc_cpu_type);
+      tmp_arc_cpu_type = xstrdup (arc_cpu_type);
     }
 }
 
@@ -695,9 +695,9 @@ cpu-type-specific registers and recognize cpu-type-specific instructions.\
   c = add_show_from_set (c, &showlist);
   c->function.cfunc = arc_show_cpu_type_command;
 
-  /* We have to use strsave here because the `set' command frees it before
-     setting a new value.  */
-  tmp_arc_cpu_type = strsave (DEFAULT_ARC_CPU_TYPE);
+  /* We have to use xstrdup() here because the `set' command frees it
+     before setting a new value.  */
+  tmp_arc_cpu_type = xstrdup (DEFAULT_ARC_CPU_TYPE);
   arc_set_cpu_type (tmp_arc_cpu_type);
 
   c = add_set_cmd ("displaypipeline", class_support, var_zinteger,

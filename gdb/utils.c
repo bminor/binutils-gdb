@@ -1,5 +1,5 @@
 /* General utility routines for GDB, the GNU debugger.
-   Copyright 1986, 1989, 1990-1992, 1995, 1996, 1998, 2000
+   Copyright 1986, 1989, 1990-1992, 1995, 1996, 1998, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1160,15 +1160,6 @@ msavestring (void *md, const char *ptr, int size)
   memcpy (p, ptr, size);
   p[size] = 0;
   return p;
-}
-
-/* The "const" is so it compiles under DGUX (which prototypes strsave
-   in <string.h>.  FIXME: This should be named "xstrsave", shouldn't it?
-   Doesn't real strsave return NULL if out of memory?  */
-char *
-strsave (const char *ptr)
-{
-  return savestring (ptr, strlen (ptr));
 }
 
 char *

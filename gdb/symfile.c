@@ -1,5 +1,5 @@
 /* Generic symbol file reading for the GNU debugger, GDB.
-   Copyright 1990-1996, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1990-1996, 1998, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
    This file is part of GDB.
@@ -1786,7 +1786,7 @@ add_filename_language (char *ext, enum language lang)
 					 fl_table_size);
     }
 
-  filename_language_table[fl_table_next].ext = strsave (ext);
+  filename_language_table[fl_table_next].ext = xstrdup (ext);
   filename_language_table[fl_table_next].lang = lang;
   fl_table_next++;
 }
@@ -1845,7 +1845,7 @@ set_ext_lang_command (char *args, int from_tty)
       /*          ext_args, language_str (lang));           */
 
       xfree (filename_language_table[i].ext);
-      filename_language_table[i].ext = strsave (ext_args);
+      filename_language_table[i].ext = xstrdup (ext_args);
       filename_language_table[i].lang = lang;
     }
 }

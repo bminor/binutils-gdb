@@ -1,5 +1,5 @@
 /* Top level support for Mac interface to GDB, the GNU debugger.
-   Copyright 1994 Free Software Foundation, Inc.
+   Copyright 1994, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Stan Shebs.
 
    This file is part of GDB.
@@ -926,7 +926,7 @@ filename_completion_function (char *text, char *name)
 char *
 tilde_expand (char *str)
 {
-  return strsave (str);
+  return xstrdup (str);
 }
 
 /* Modified versions of standard I/O. */
