@@ -1,3 +1,8 @@
+2000-03-25  Geoff Keating  <geoffk@cygnus.com>
+
+	* ppc-instructions (Disabled_Exponent_Underflow): Increment
+	the exponent when denormalizing.
+
 Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
