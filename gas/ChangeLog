@@ -1,3 +1,10 @@
+Wed Mar 25 12:59:07 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	Based on patch from H.J. Lu  <hjl@gnu.org>:
+	* Makefile.am (DISTSTUFF): New variable.
+	(diststuff): New target.
+	* Makefile.in: Rebuild.
+
 Tue Mar 24 16:51:29 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.h (md_cleanup, md_elf_section_change_hook): Call
