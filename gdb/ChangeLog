@@ -1,5 +1,7 @@
 2003-02-01  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/i386mk.mt, config/i386/i386mk.mh: Removed.
+
 	* config/i386/i386dgux.mh: Removed.
 	* configure.host (i[3456]86-*-dgux): Set gdb_host to i386v4.
 
