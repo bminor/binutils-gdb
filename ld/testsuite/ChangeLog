@@ -1,3 +1,7 @@
+2004-07-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-discard/static.d: Accept both original sym and section sym.
+
 2004-07-01  Jakub Jelinek  <jakub@redhat.com>
 
 	* ld-sparc/tlssunpic32.rd: Adjust for section reordering changes
