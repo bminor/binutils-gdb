@@ -1894,37 +1894,53 @@ rs6000_dwarf2_reg_to_regnum (int num)
 
 
 static void
-rs6000_store_return_value (struct type *type, char *valbuf)
+rs6000_store_return_value (struct type *type,
+                           struct regcache *regcache,
+                           const void *valbuf)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int regnum = -1;
 
   /* The calling convention this function implements assumes the
      processor has floating-point registers.  We shouldn't be using it
      on PPC variants that lack them.  */
-  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
+  gdb_assert (ppc_floating_point_unit_p (gdbarch));
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
-
     /* Floating point values are returned starting from FPR1 and up.
        Say a double_double_double type could be returned in
        FPR1/FPR2/FPR3 triple.  */
-
-    deprecated_write_register_bytes
-      (DEPRECATED_REGISTER_BYTE (tdep->ppc_fp0_regnum + 1),
-       valbuf,
-       TYPE_LENGTH (type));
+    regnum = tdep->ppc_fp0_regnum + 1;
   else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
     {
       if (TYPE_LENGTH (type) == 16
           && TYPE_VECTOR (type))
-	deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (tdep->ppc_vr0_regnum + 2),
-					 valbuf, TYPE_LENGTH (type));
+        regnum = tdep->ppc_vr0_regnum + 2;
+      else
+        gdb_assert (0);
     }
   else
     /* Everything else is returned in GPR3 and up.  */
-    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + 3),
-				     valbuf, TYPE_LENGTH (type));
+    regnum = tdep->ppc_gp0_regnum + 3;
+
+  {
+    size_t bytes_written = 0;
+
+    while (bytes_written < TYPE_LENGTH (type))
+      {
+        /* How much of this value can we write to this register?  */
+        size_t bytes_to_write = min (TYPE_LENGTH (type) - bytes_written,
+                                     register_size (gdbarch, regnum));
+        regcache_cooked_write_part (regcache, regnum,
+                                    0, bytes_to_write,
+                                    (char *) valbuf + bytes_written);
+        regnum++;
+        bytes_written += bytes_to_write;
+      }
+  }
 }
+
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
@@ -2885,7 +2901,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     {
       set_gdbarch_deprecated_extract_return_value (gdbarch, rs6000_extract_return_value);
-      set_gdbarch_deprecated_store_return_value (gdbarch, rs6000_store_return_value);
+      set_gdbarch_store_return_value (gdbarch, rs6000_store_return_value);
     }
 
   /* Set lr_frame_offset.  */

@@ -1,5 +1,11 @@
 2004-06-04  Jim Blandy  <jimb@redhat.com>
 
+	* rs6000-tdep.c (rs6000_store_return_value): Use
+	regcache_cooked_write_part instead of
+	deprecated_write_register_bytes.
+	(rs6000_gdbarch_init): Register it for gdbarch_store_return_value,
+	not gdbarch_deprecated_store_return_value.
+
 	* ppc-linux-nat.c (store_register, fetch_register): Remove
 	incorrect assertions.  Simplify and generalize handling of
 	transfers whose sizes are not multiples of, or less than, sizeof
