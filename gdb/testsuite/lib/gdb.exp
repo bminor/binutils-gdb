@@ -859,22 +859,25 @@ proc gdb_expect { args } {
     upvar timeout timeout
     if [target_info exists gdb,timeout] {
 	if [info exists timeout] {
-	    set oldt $timeout;
 	    if { $timeout < [target_info gdb,timeout] } {
-		set timeout [target_info gdb,timeout];
+		set gtimeout [target_info gdb,timeout];
+	    } else {
+		set gtimeout $timeout;
 	    }
 	} else {
-	    set timeout [target_info gdb,timeout];
+	    set gtimeout [target_info gdb,timeout];
 	}
     }
-    set code [catch {uplevel remote_expect host $timeout $args} string];
-    if [target_info exists gdb,timeout] {
-	if [info exists oldt] {
-	    set timeout $oldt
+    if ![info exists gtimeout] {
+	global timeout;
+	if [info exists timeout] {
+	    set gtimeout $timeout;
 	} else {
-	    unset timeout
+	    # Eeeeew.
+	    set gtimeout 60;
 	}
     }
+    set code [catch {uplevel remote_expect host $gtimeout $args} string];
 
     if {$code == 1} {
         global errorInfo errorCode;
