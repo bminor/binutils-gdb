@@ -61,7 +61,7 @@ static char *rom68k_regnames[] = {
 
 struct target_ops rom68k_ops = {
   "rom68k",
-  "WinBond's debug monitor for the Rom68k Eval board",
+  "Rom68k debug monitor for the IDP Eval board",
   "Debug on a Motorola IDP eval board running the ROM68K monitor.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).",
   rom68k_open,
