@@ -1602,9 +1602,7 @@ enable_break ()
       /* For whatever reason we couldn't set a breakpoint in the dynamic
 	 linker.  Warn and drop into the old code.  */
 bkpt_at_symbol:
-      warning ("Unable to find dynamic linker breakpoint function.");
-      warning ("GDB will be unable to debug shared library initializers");
-      warning ("and track explicitly loaded dynamic code.");
+      warning ("Unable to find dynamic linker breakpoint function.\nGDB will be unable to debug shared library initializers\nand track explicitly loaded dynamic code.");
     }
 #endif
 

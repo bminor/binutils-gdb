@@ -1,3 +1,8 @@
+Wed Apr 15 12:19:42 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* solib.c (enable_break): Only call warning once
+	instead of three times.
+
 Tue Apr 14 16:52:59 1998  Mark Alexander  <marka@cygnus.com>
 
 	* sparc-tdep.c (sparc_extract_struct_value_address): Make it
