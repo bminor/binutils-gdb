@@ -5,6 +5,14 @@ Thu Jun 20 18:14:25 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 Thu Jun 20 11:00:57 1996  Doug Evans  <dje@canuck.cygnus.com>
 
+	* coffcode.h (coff_set_alignment_hook): Change COFF_IMAGE_WITH_PE
+	ifdef to COFF_WITH_PE.
+	(coff_compute_section_file_positions): Likewise.
+	(coff_write_object_contents): Likewise.  Delete COFF_OBJ_WITH_PE.
+	* pe-{arm,i386,ppc}.c (COFF_OBJ_WITH_PE): Delete.
+	* peicode.h (pe_bfd_copy_private_bfd_data): Delete ifdef
+	COFF_IMAGE_WITH_PE, always include.
+
 	* peicode.h (coff_swap_scnhdr_out): ".drectve" doesn't have trailing 0.
 
 Wed Jun 19 11:37:52 1996  Ian Lance Taylor  <ian@cygnus.com>

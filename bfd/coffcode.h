@@ -1110,6 +1110,36 @@ coff_set_alignment_hook (abfd, section, scnhdr)
       section->alignment_power = 2;
     }
 #endif
+
+#ifdef COFF_WITH_PE
+  /* In a PE image file, the s_paddr field holds the virtual size of a
+     section, while the s_size field holds the raw size.  */
+  if (hdr->s_paddr != 0)
+    {
+      if (coff_section_data (abfd, section) == NULL)
+	{
+	  section->used_by_bfd =
+	    (PTR) bfd_zalloc (abfd, sizeof (struct coff_section_tdata));
+	  if (section->used_by_bfd == NULL)
+	    {
+	      /* FIXME: Return error.  */
+	      abort ();
+	    }
+	}
+      if (pei_section_data (abfd, section) == NULL)
+	{
+	  coff_section_data (abfd, section)->tdata =
+	    (PTR) bfd_zalloc (abfd, sizeof (struct pei_section_tdata));
+	  if (coff_section_data (abfd, section)->tdata == NULL)
+	    {
+	      /* FIXME: Return error.  */
+	      abort ();
+	    }
+	}
+      pei_section_data (abfd, section)->virt_size = hdr->s_paddr;
+    }
+#endif
+
 }
 #undef ALIGN_SET
 #undef ELIFALIGN_SET
@@ -1469,6 +1499,17 @@ coff_set_arch_mach_hook (abfd, filehdr)
       break;
 #endif
 
+/* start-sanitize-h8s */
+#ifdef H8300SMAGIC
+    case H8300SMAGIC:
+      arch = bfd_arch_h8300;
+      machine = bfd_mach_h8300s;
+      /* !! FIXME this probably isn't the right place for this */
+      abfd->flags |= BFD_IS_RELAXABLE;
+      break;
+#endif
+
+/* end-sanitize-h8s */
 #ifdef SH_ARCH_MAGIC_BIG
     case SH_ARCH_MAGIC_BIG:
     case SH_ARCH_MAGIC_LITTLE:
@@ -1919,6 +1960,11 @@ coff_set_flags (abfd, magicp, flagsp)
 	case bfd_mach_h8300h:
 	  *magicp = H8300HMAGIC;
 	  return true;
+/* start-sanitize-h8s */
+	case bfd_mach_h8300s:
+	  *magicp = H8300SMAGIC;
+	  return true;
+/* end-sanitize-h8s */
 	}
       break;
 #endif
@@ -2140,10 +2186,33 @@ coff_compute_section_file_positions (abfd)
 #endif
       current->filepos = sofar;
 
-#ifdef COFF_IMAGE_WITH_PE
-      /* With PE we have to pad each section to be a multiple of its page size
-	 too, and remember both sizes. Cooked_size becomes very useful. */
-      current->_cooked_size = current->_raw_size;
+#ifdef COFF_WITH_PE
+      /* With PE we have to pad each section to be a multiple of its
+	 page size too, and remember both sizes.  */
+
+      if (coff_section_data (abfd, current) == NULL)
+	{
+	  current->used_by_bfd =
+	    (PTR) bfd_zalloc (abfd, sizeof (struct coff_section_tdata));
+	  if (current->used_by_bfd == NULL)
+	    {
+	      /* FIXME: Return error.  */
+	      abort ();
+	    }
+	}
+      if (pei_section_data (abfd, current) == NULL)
+	{
+	  coff_section_data (abfd, current)->tdata =
+	    (PTR) bfd_zalloc (abfd, sizeof (struct pei_section_tdata));
+	  if (coff_section_data (abfd, current)->tdata == NULL)
+	    {
+	      /* FIXME: Return error.  */
+	      abort ();
+	    }
+	}
+      if (pei_section_data (abfd, current)->virt_size == 0)
+	pei_section_data (abfd, current)->virt_size = current->_raw_size;
+
       current->_raw_size = (current->_raw_size + page_size -1) & -page_size;
 #endif
 
@@ -2269,6 +2338,7 @@ coff_write_object_contents (abfd)
   file_ptr sym_base;
   unsigned long reloc_size = 0;
   unsigned long lnno_size = 0;
+  boolean long_section_names;
   asection *text_sec = NULL;
   asection *data_sec = NULL;
   asection *bss_sec = NULL;
@@ -2343,6 +2413,7 @@ coff_write_object_contents (abfd)
   if (bfd_seek (abfd, scn_base, SEEK_SET) != 0)
     return false;
 
+  long_section_names = false;
   for (current = abfd->sections;
        current != NULL;
        current = current->next)
@@ -2376,6 +2447,7 @@ coff_write_object_contents (abfd)
 	    memset (section.s_name, 0, SCNNMLEN);
 	    sprintf (section.s_name, "/%lu", (unsigned long) string_size);
 	    string_size += len + 1;
+	    long_section_names = true;
 	  }
       }
 #endif
@@ -2392,7 +2464,12 @@ coff_write_object_contents (abfd)
       section.s_size =  current->_raw_size;
 
 #ifdef COFF_WITH_PE
-      section.s_paddr = current->_cooked_size;
+      /* Reminder: s_paddr holds the virtual size of the section.  */
+      if (coff_section_data (abfd, current) != NULL
+	  && pei_section_data (abfd, current) != NULL)
+	section.s_paddr = pei_section_data (abfd, current)->virt_size;
+      else
+	section.s_paddr = 0;
 #endif
 
       /*
@@ -2763,7 +2840,10 @@ coff_write_object_contents (abfd)
     }
   else
     {
-      internal_f.f_symptr = 0;
+      if (long_section_names)
+	internal_f.f_symptr = sym_base;
+      else
+	internal_f.f_symptr = 0;
       internal_f.f_flags |= F_LSYMS;
     }
 

@@ -23,7 +23,34 @@ Most of this hacked by  Steve Chamberlain,
 			sac@cygnus.com
 */
 
+/* Hey look, some documentation [and in a place you expect to find it]!
 
+   The main reference for the pei format is "Microsoft Portable Executable
+   and Common Object File Format Specification 4.1".  Get it if you need to
+   do some serious hacking on this code.
+
+   Another reference:
+   "Peering Inside the PE: A Tour of the Win32 Portable Executable
+   File Format", MSJ 1994, Volume 9.
+
+   The *sole* difference between the pe format and the pei format is that the
+   latter has an MSDOS 2.0 .exe header on the front that prints the message
+   "This app must be run under Windows." (or some such).
+   (FIXME: Whether that statement is *really* true or not is unknown.
+   Are there more subtle differences between pe and pei formats?
+   For now assume there aren't.  If you find one, then for God sakes
+   document it here!)
+
+   The Microsoft docs use the word "image" instead of "executable" because
+   the former can also refer to a DLL (shared library).  Confusion can arise
+   because the `i' in `pei' also refers to "image".  The `pe' format can
+   also create images (i.e. executables), it's just that to run on a win32
+   system you need to use the pei format.
+
+   FIXME: Please add more docs here so the next poor fool that has to hack
+   on this code has a chance of getting something accomplished without
+   wasting too much time.
+*/
 
 #define coff_bfd_print_private_bfd_data pe_print_private_bfd_data
 #define coff_mkobject pe_mkobject
@@ -1870,8 +1897,6 @@ pe_bfd_copy_private_bfd_data (ibfd, obfd)
   return true;
 }
 
-#ifdef COFF_IMAGE_WITH_PE
-
 /* Copy private section data.  */
 
 #define coff_bfd_copy_private_section_data pe_bfd_copy_private_section_data
@@ -1909,5 +1934,3 @@ pe_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
 
   return true;
 }
-
-#endif
