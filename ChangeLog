@@ -1,3 +1,7 @@
+Tue Jul  7 15:24:38 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ltconfig, ltmain.sh: Update to libtool 1.2b.
+
 Thu Jul  2 13:57:36 1998  Klaus Kaempf  <kkaempf@rmi.de>
 
 	* makefile.vms: Update to build binutils/makefile.vms.  Add install
