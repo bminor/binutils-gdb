@@ -1,3 +1,9 @@
+2002-11-24  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* varobj.c (find_frame_addr_in_frame_chain):
+	Use get_frame_base instead of FRAME_FP,
+	obvious fix.
+
 2002-11-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.h (FRAME_FP): Delete macro.

@@ -412,7 +412,7 @@ find_frame_addr_in_frame_chain (CORE_ADDR frame_addr)
       frame = get_prev_frame (frame);
       if (frame == NULL)
 	return NULL;
-      if (FRAME_FP (frame) == frame_addr)
+      if (get_frame_base (frame) == frame_addr)
 	return frame;
     }
 }
