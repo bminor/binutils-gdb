@@ -1,3 +1,8 @@
+Thu Nov  3 15:43:46 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* gas/mips/ulh.d, gas/mips/ulw.d, gas/mips/ush.d, gas/mips/usw.d:
+	Correct test cases.
+
 Thu Oct 20 00:55:13 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/reloc/blebug3.s: New test.
