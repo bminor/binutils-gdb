@@ -634,7 +634,7 @@ print_vma (vma, mode)
 	case DEC_5:
 	  if (vma <= 99999)
 	    {
-	      printf ("** %5ld", (long) vma);
+	      printf ("%5ld", (long) vma);
 	      break;
 	    }
 	  /* Drop through.  */
