@@ -368,12 +368,6 @@ if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
 	mv new Makefile.in
 fi
 
-for i in * ; do
-	if test ! -d $i && (grep sanitize $i > /dev/null) ; then
-		echo '***' Some mentions of Sanitize are still left in $i! 1>&2
-	fi
-done
-
 if ( echo $* | grep keep\-gm > /dev/null ) ; then
 	for i in * ; do
 		if test ! -d $i && (grep sanitize-gm $i > /dev/null) ; then
@@ -400,5 +394,13 @@ else
 		fi
 	done
 fi
+
+# Do this check LAST!
+for i in * ; do
+	if test ! -d $i && (grep sanitize $i > /dev/null) ; then
+		echo '***' Some mentions of Sanitize are still left in $i! 1>&2
+		exit 1
+	fi
+done
 
 # eof
