@@ -16,9 +16,7 @@ Wed Jul 22 16:22:11 1998  Nick Clifton  <nickc@cygnus.com>
 	* arc.h: Use reloc-macros.h.
 	* arm.h: Use reloc-macros.h.
 	* d10v.h: Use reloc-macros.h.
-start-sanitize-d30v
 	* d30v.h: Use reloc-macros.h.
-end-sanitize-d30v
 	* hppa.h: Use reloc-macros.h.
 	* i386.h: Use reloc-macros.h.
 	* m32r.h: Use reloc-macros.h.
@@ -39,9 +37,7 @@ end-sanitize-d30v
 	* alpha.h: Likewise.
 	* arm.h: Likewise.
 	* d10v.h: Likewise.
-start-sanitize-d30v
 	* d30v.h: Likewise.
-end-sanitize-d30v
 	* m32r.h: Likewise.
 	* m68k.h: Likewise.
 	* mn10200.h: Likewise.
@@ -52,9 +48,7 @@ end-sanitize-d30v
 
 	* arm.h: New file.
 	* d10v.h: New file.
-start-sanitize-d30v
 	* d30v.h: New file.
-end-sanitize-d30v
 	* i386.h: New file.
 	* m68k.h: New file.
 	* mn10200.h: New file.
@@ -250,12 +244,10 @@ Wed Feb 19 15:35:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* external.h, internal.h, common.h: Added new structures and
 	definitions for ELF versions.
 
-start-sanitize-d30v
 Tue Feb 18 17:40:36 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* common.h (EM_CYGNUS_D30V): Define.
 
-end-sanitize-d30v
 Mon Jan 27 11:54:44 1997  Doug Evans  <dje@seba.cygnus.com>
 
 	* m32r.h (enum reloc_type): Add R_M32R_HI16_[SU]LO,R_M32R_LO16.

@@ -238,12 +238,10 @@ Mon Mar  2 10:44:07 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.h (CGEN_BOOL_ATTR): New macro.
 
-start-sanitize-d30v
 Thu Feb 26 15:54:31 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* d30v.h (FLAG_DELAY): New flag for delayed branches/jumps.
 
-end-sanitize-d30v
 start-sanitize-sky
 Fri Feb 27 10:00:44 1998  Doug Evans  <devans@canuck.cygnus.com>
 
@@ -373,7 +371,6 @@ Mon Jan 12 11:37:36 1998  Doug Evans  <devans@seba.cygnus.com>
 	(CGEN_{SYNTAX,FORMAT}): New types.
 	(cgen_insn): Format and syntax separated from each other.
 
-start-sanitize-d30v
 Tue Dec 16 15:15:52 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* d30v.h (d30v_opcode): Reorder flags somewhat, add new flags for
@@ -381,18 +378,15 @@ Tue Dec 16 15:15:52 1997  Michael Meissner  <meissner@cygnus.com>
 	flags_{used,set} long.
 	(d30v_operand): Make flags field long.
 
-end-sanitize-d30v
 Mon Dec  1 12:24:44 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* m68k.h: Fix comment describing operand types.
 
-start-sanitize-d30v
 Sun Nov 23 22:31:27 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* d30v.h (SHORT_CMPU): Add case for cmpu instruction, and move
 	everything else after down.
 
-end-sanitize-d30v
 Tue Nov 18 18:45:14 1997  J"orn Rennecke  <amylaar@cygnus.co.uk>
 
 	* d10v.h (OPERAND_FLAG): Split into:
@@ -446,7 +440,6 @@ start-sanitize-v850e
 	(PROCESSOR_V850EA): New bit constants.
 end-sanitize-v850e
 
-start-sanitize-d30v
 Mon Sep 15 11:29:43 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	Merge changes from Martin Hunt:
@@ -465,7 +458,6 @@ Mon Sep 15 11:29:43 1997  Ken Raeburn  <raeburn@cygnus.com>
 	* d30v.h (OPERAND_2REG): Add new operand to indicate 2
 	registers are used.  Needed for VLIW optimization.
 
-end-sanitize-d30v
 Mon Sep  8 14:05:45 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* cgen.h: Move assembler interface section
@@ -628,7 +620,6 @@ Sat Feb 22 21:25:00 1997  Dawn Perchik  <dawn@cygnus.com>
 	so that we can increase the size of the mips opcodes table
 	dynamically.
 
-start-sanitize-d30v
 Fri Feb 21 16:34:18 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d30v.h (FLAG_X): Remove unused flag.
@@ -637,7 +628,6 @@ Tue Feb 18 17:37:20 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d30v.h: New file.
 
-end-sanitize-d30v
 start-sanitize-tic80
 Fri Feb 14 13:16:15 1997  Fred Fish  <fnf@cygnus.com>
 

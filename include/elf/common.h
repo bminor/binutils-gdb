@@ -77,21 +77,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define EM_386		3	/* Intel 80386 */
 #define EM_68K		4	/* Motorola m68k family */
 #define EM_88K		5	/* Motorola m88k family */
+#define EM_486		6	/* Intel 80486 */
 #define EM_860		7	/* Intel 80860 */
 #define EM_MIPS		8	/* MIPS R3000 (officially, big-endian only) */
-
+#define EM_S370		9	/* Amdahl */
 #define EM_MIPS_RS4_BE 10	/* MIPS R4000 big-endian */
 
 #define EM_PARISC      15	/* HPPA */
 
 #define EM_SPARC32PLUS 18	/* Sun's "v8plus" */
-
+#define EM_960         19       /* Intel 80960 */
 #define EM_PPC	       20	/* PowerPC */
 
+#define EM_V800        36	/* NEC V800 series */
+#define EM_FR20	       37	/* Fujitsu FR20 */
+#define EM_RH32	       38       /* TRW RH32 */
+#define EM_MMA         39	/* Fujitsu MMA */
 #define EM_ARM	       40	/* ARM */
-
+#define EM_OLD_ALPHA   41	/* Digital Alpha */
 #define EM_SH	       42	/* Hitachi SH */
-
 #define EM_SPARCV9     43	/* SPARC v9 64-bit */
 
 /* If it is necessary to assign new unofficial EM_* values, please pick large
@@ -124,10 +128,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* D10V backend magic number.  Written in the absence of an ABI.  */
 #define EM_CYGNUS_D10V	0x7650
 
-/* start-sanitize-d30v */
 /* D30V backend magic number.  Written in the absence of an ABI.  */
 #define EM_CYGNUS_D30V	0x7676
-/* end-sanitize-d30v */
 
 /* V850 backend magic number.  Written in the absense of an ABI.  */
 #define EM_CYGNUS_V850	0x9080

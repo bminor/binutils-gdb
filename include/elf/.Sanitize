@@ -21,14 +21,6 @@ Do-first:
 # called.  Directories not listed will be removed in their entirety
 # with rm -rf.
 
-d30v_files="d30v.h"
-
-if ( echo $* | grep keep\-d30v > /dev/null ) ; then
-	keep_these_too="${d30v_files} ${keep_these_too}"
-else
-	lose_these_too="${d30v_files} ${lose_these_too}"
-fi
-
 Things-to-keep:
 
 ChangeLog
@@ -37,6 +29,7 @@ arc.h
 arm.h
 common.h
 d10v.h
+d30v.h
 dwarf.h
 dwarf2.h
 external.h
@@ -49,6 +42,7 @@ mips.h
 mn10200.h
 mn10300.h
 ppc.h
+reloc-macros.h
 sh.h
 sparc.h
 v850.h
@@ -74,34 +68,6 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-am33/,/end-\sanitize\-am33/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-d30v_files="ChangeLog common.h"
-if ( echo $* | grep keep\-d30v > /dev/null ) ; then
-	for i in $d30v_files ; do
-		if test ! -d $i && (grep sanitize-d30v $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping d30v stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $d30v_files ; do
-		if test ! -d $i && (grep sanitize-d30v $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"d30v\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-d30v/,/end-\sanitize\-d30v/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
