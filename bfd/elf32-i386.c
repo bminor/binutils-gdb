@@ -501,6 +501,20 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 
       r_symndx = ELF32_R_SYM (rel->r_info);
 
+      if (r_symndx >= symtab_hdr->sh_size / symtab_hdr->sh_entsize)
+	{
+	  if (abfd->my_archive)
+	    (*_bfd_error_handler) (_("%s(%s): bad symbol index: %d"),
+				   bfd_get_filename (abfd->my_archive),
+				   bfd_get_filename (abfd),
+				   r_symndx);
+	  else
+	    (*_bfd_error_handler) (_("%s: bad symbol index: %d"),
+				   bfd_get_filename (abfd),
+				   r_symndx);
+	  return false;
+	}
+
       if (r_symndx < symtab_hdr->sh_info)
 	h = NULL;
       else
@@ -686,7 +700,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 			(*_bfd_error_handler) (_("%s: bad relocation section name `%s\'"),
 					       bfd_get_filename (abfd),
 					       name);
-		  }
+		    }
 
 		  sreloc = bfd_get_section_by_name (dynobj, name);
 		  if (sreloc == NULL)

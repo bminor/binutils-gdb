@@ -1,3 +1,8 @@
+2001-04-26  H.J. Lu  <hjl@gnu.org>
+
+	* elf32-i386.c (elf_i386_check_relocs): Verify if r_symndx is
+	valid.
+
 2001-04-25  Frank Ch. Eigler  <fche@redhat.com>
 
 	* bfd-in.h (bfd_cache_close): Declare newly exported function.
