@@ -233,7 +233,7 @@ static autofilter_entry_type autofilter_liblist[] =
   { "libmingw32.", 11 },
   { "libg2c.", 7 },
   { "libsupc++.", 10 },
-  { "libobjc.", 8 }, 
+  { "libobjc.", 8 },
   { NULL, 0 }
 };
 
@@ -373,7 +373,7 @@ typedef struct exclude_list_struct
   {
     char *string;
     struct exclude_list_struct *next;
-    int type;	
+    int type;
   }
 exclude_list_struct;
 
@@ -382,7 +382,7 @@ static struct exclude_list_struct *excludes = 0;
 void
 pe_dll_add_excludes (new_excludes, type)
      const char *new_excludes;
-     const int type;	
+     const int type;
 {
   char *local_copy;
   char *exclude_string;
@@ -442,7 +442,7 @@ auto_export (abfd, d, n)
 
       /* First of all, make context checks:
          Don't export anything from standard libs.  */
-      if (libname)	
+      if (libname)
 	{
 	  afptr = autofilter_liblist;
 
@@ -516,7 +516,7 @@ auto_export (abfd, d, n)
 	    return 0;
 	}
       else if (strcmp (n, ex->string) == 0)
-        return 0;	      		
+	return 0;
     }
 
   return 1;

@@ -170,8 +170,8 @@ ldemul_recognized_file (entry)
 
 char *
 ldemul_choose_target (argc, argv)
-      int argc;
-      char **argv;
+     int argc;
+     char **argv;
 {
   return ld_emulation->choose_target (argc, argv);
 }

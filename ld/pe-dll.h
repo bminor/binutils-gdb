@@ -47,8 +47,8 @@ extern void pe_dll_fill_sections PARAMS ((bfd *, struct bfd_link_info *));
 extern void pe_exe_fill_sections PARAMS ((bfd *, struct bfd_link_info *));
 
 extern void pe_walk_relocs_of_symbol PARAMS ((struct bfd_link_info * info,
-					     CONST char *name,
-					     int (*cb) (arelent *, asection *)));
+					      CONST char *name,
+					      int (*cb) (arelent *, asection *)));
 
 extern void pe_create_import_fixup PARAMS ((arelent * rel));
 #endif /* PE_DLL_H */

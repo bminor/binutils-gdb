@@ -1,3 +1,10 @@
+2002-05-25  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* ldemul.c: Fix formatting.
+	* ldfile.c: Likewise.
+	* pe-dll.c: Likewise.
+	* pe-dll.h: Likewise.
+
 2002-05-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (lang_process): Formatting, grammar.
