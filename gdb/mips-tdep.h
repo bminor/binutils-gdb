@@ -62,6 +62,7 @@ struct mips_regnum
 extern const struct mips_regnum *mips_regnum (struct gdbarch *gdbarch);
 
 enum {
+  MIPS_SP_REGNUM = 29,
   MIPS_EMBED_LO_REGNUM = 33,
   MIPS_EMBED_HI_REGNUM = 34,
   MIPS_EMBED_BADVADDR_REGNUM = 35,

@@ -757,7 +757,7 @@ mips_register_type (struct gdbarch *gdbarch, int regnum)
 static CORE_ADDR
 mips_read_sp (void)
 {
-  return read_signed_register (SP_REGNUM);
+  return read_signed_register (MIPS_SP_REGNUM);
 }
 
 /* Should the upper word of 64-bit addresses be zeroed? */
@@ -849,7 +849,7 @@ mips_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 static struct frame_id
 mips_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  return frame_id_build (frame_unwind_register_signed (next_frame, NUM_REGS + SP_REGNUM),
+  return frame_id_build (frame_unwind_register_signed (next_frame, NUM_REGS + MIPS_SP_REGNUM),
 			 frame_pc_unwind (next_frame));
 }
 
@@ -880,7 +880,7 @@ after_prologue (CORE_ADDR pc, mips_extra_func_info_t proc_desc)
     {
       /* If function is frameless, then we need to do it the hard way.  I
          strongly suspect that frameless always means prologueless... */
-      if (PROC_FRAME_REG (proc_desc) == SP_REGNUM
+      if (PROC_FRAME_REG (proc_desc) == MIPS_SP_REGNUM
 	  && PROC_FRAME_OFFSET (proc_desc) == 0)
 	return 0;
     }
@@ -1683,7 +1683,7 @@ mips_mdebug_frame_cache (struct frame_info *next_frame, void **this_cache)
   }
 
   /* SP_REGNUM, contains the value and not the address.  */
-  trad_frame_set_value (cache->saved_regs, NUM_REGS + SP_REGNUM, cache->base);
+  trad_frame_set_value (cache->saved_regs, NUM_REGS + MIPS_SP_REGNUM, cache->base);
 
   return (*this_cache);
 }
@@ -1756,8 +1756,8 @@ read_next_frame_reg (struct frame_info *fi, int regno)
       regcache_cooked_read_signed (current_regcache, regno, &val);
       return val;
     }
-  else if ((regno % NUM_REGS) == SP_REGNUM)
-    /* The SP_REGNUM is special, its value is stored in saved_regs.
+  else if ((regno % NUM_REGS) == MIPS_SP_REGNUM)
+    /* MIPS_SP_REGNUM is special, its value is stored in saved_regs.
        In fact, it is so special that it can even only be fetched
        using a raw register number!  Once this code as been converted
        to frame-unwind the problem goes away.  */
@@ -2194,7 +2194,7 @@ restart:
 	  /* Old gcc frame, r30 is virtual frame pointer.  */
 	  if ((long) low_word != PROC_FRAME_OFFSET (&temp_proc_desc))
 	    frame_addr = sp + low_word;
-	  else if (PROC_FRAME_REG (&temp_proc_desc) == SP_REGNUM)
+	  else if (PROC_FRAME_REG (&temp_proc_desc) == MIPS_SP_REGNUM)
 	    {
 	      unsigned alloca_adjust;
 	      PROC_FRAME_REG (&temp_proc_desc) = 30;
@@ -2217,7 +2217,7 @@ restart:
       else if (inst == 0x03A0F021 || inst == 0x03a0f025 || inst == 0x03a0f02d)
 	{
 	  /* New gcc frame, virtual frame pointer is at r30 + frame_size.  */
-	  if (PROC_FRAME_REG (&temp_proc_desc) == SP_REGNUM)
+	  if (PROC_FRAME_REG (&temp_proc_desc) == MIPS_SP_REGNUM)
 	    {
 	      unsigned alloca_adjust;
 	      PROC_FRAME_REG (&temp_proc_desc) = 30;
@@ -2249,7 +2249,7 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   CORE_ADDR sp;
 
   if (cur_frame)
-    sp = read_next_frame_reg (next_frame, NUM_REGS + SP_REGNUM);
+    sp = read_next_frame_reg (next_frame, NUM_REGS + MIPS_SP_REGNUM);
   else
     sp = 0;
 
@@ -2259,7 +2259,7 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   temp_saved_regs = xrealloc (temp_saved_regs, SIZEOF_FRAME_SAVED_REGS);
   memset (temp_saved_regs, '\0', SIZEOF_FRAME_SAVED_REGS);
   PROC_LOW_ADDR (&temp_proc_desc) = start_pc;
-  PROC_FRAME_REG (&temp_proc_desc) = SP_REGNUM;
+  PROC_FRAME_REG (&temp_proc_desc) = MIPS_SP_REGNUM;
   PROC_PC_REG (&temp_proc_desc) = RA_REGNUM;
 
   if (start_pc + 200 < limit_pc)
@@ -3026,7 +3026,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	fprintf_unfiltered (gdb_stdlog, "\n");
     }
 
-  regcache_cooked_write_signed (regcache, SP_REGNUM, sp);
+  regcache_cooked_write_signed (regcache, MIPS_SP_REGNUM, sp);
 
   /* Return adjusted stack pointer.  */
   return sp;
@@ -3312,7 +3312,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	fprintf_unfiltered (gdb_stdlog, "\n");
     }
 
-  regcache_cooked_write_signed (regcache, SP_REGNUM, sp);
+  regcache_cooked_write_signed (regcache, MIPS_SP_REGNUM, sp);
 
   /* Return adjusted stack pointer.  */
   return sp;
@@ -3727,7 +3727,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	fprintf_unfiltered (gdb_stdlog, "\n");
     }
 
-  regcache_cooked_write_signed (regcache, SP_REGNUM, sp);
+  regcache_cooked_write_signed (regcache, MIPS_SP_REGNUM, sp);
 
   /* Return adjusted stack pointer.  */
   return sp;
@@ -4181,7 +4181,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	fprintf_unfiltered (gdb_stdlog, "\n");
     }
 
-  regcache_cooked_write_signed (regcache, SP_REGNUM, sp);
+  regcache_cooked_write_signed (regcache, MIPS_SP_REGNUM, sp);
 
   /* Return adjusted stack pointer.  */
   return sp;
@@ -5612,7 +5612,8 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       }
     /* FIXME: cagney/2003-11-15: For MIPS, hasn't PC_REGNUM been
        replaced by read_pc?  */
-    set_gdbarch_pc_regnum (gdbarch, regnum->pc);
+    set_gdbarch_pc_regnum (gdbarch, regnum->pc + num_regs);
+    set_gdbarch_sp_regnum (gdbarch, MIPS_SP_REGNUM + num_regs);
     set_gdbarch_fp0_regnum (gdbarch, regnum->fp0);
     set_gdbarch_num_regs (gdbarch, num_regs);
     set_gdbarch_num_pseudo_regs (gdbarch, num_regs);

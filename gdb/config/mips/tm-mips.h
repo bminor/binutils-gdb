@@ -56,7 +56,6 @@ extern int mips_step_skips_delay (CORE_ADDR);
 #define V0_REGNUM 2		/* Function integer return value */
 #define A0_REGNUM 4		/* Loc of first arg during a subr call */
 #define T9_REGNUM 25		/* Contains address of callee in PIC */
-#define SP_REGNUM 29		/* Contains address of top of stack */
 #define RA_REGNUM 31		/* Contains return address value */
 #define PS_REGNUM 32		/* Contains processor status */
 #define	UNUSED_REGNUM 73	/* Never used, FIXME */

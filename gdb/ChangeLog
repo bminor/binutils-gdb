@@ -1,3 +1,12 @@
+2004-06-21  Martin Hunt  <hunt@redhat.com>
+	Kevin Buettner <kevinb@redhat.com>
+
+        * config/mips/tm-mips.h (SP_REGNUM): Delete define.
+	* mips-tdep.h (MIPS_SP_REGNUM): Define.
+	* mips-tdep.c (mips_gdbarch_init): Set SP_REGNUM via call
+	to set_gdbarch_sp_regnum().  Use cooked register number.
+        (SP_REGNUM): Replace all occurrences with MIPS_SP_REGNUM.
+
 2004-06-21  Andrew Cagney  <cagney@gnu.org>
 
 	* gdbarch.sh: When the macro field is empty, do not generate a
