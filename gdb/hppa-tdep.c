@@ -510,7 +510,7 @@ read_unwind_info (struct objfile *objfile)
   obj_private_data_t *obj_private;
 
   text_offset = ANOFFSET (objfile->section_offsets, 0);
-  ui = (struct obj_unwind_info *) obstack_alloc (&objfile->psymbol_obstack,
+  ui = (struct obj_unwind_info *) obstack_alloc (&objfile->objfile_obstack,
 					   sizeof (struct obj_unwind_info));
 
   ui->table = NULL;
@@ -560,7 +560,7 @@ read_unwind_info (struct objfile *objfile)
 
   /* Allocate memory for the unwind table.  */
   ui->table = (struct unwind_table_entry *)
-    obstack_alloc (&objfile->psymbol_obstack, total_size);
+    obstack_alloc (&objfile->objfile_obstack, total_size);
   ui->last = total_entries - 1;
 
   /* Now read in each unwind section and internalize the standard unwind
@@ -623,7 +623,7 @@ read_unwind_info (struct objfile *objfile)
   if (objfile->obj_private == NULL)
     {
       obj_private = (obj_private_data_t *)
-	obstack_alloc (&objfile->psymbol_obstack,
+	obstack_alloc (&objfile->objfile_obstack,
 		       sizeof (obj_private_data_t));
       obj_private->unwind_info = NULL;
       obj_private->so_info = NULL;

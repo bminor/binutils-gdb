@@ -230,8 +230,6 @@ print_objfile_statistics (void)
     if (OBJSTAT (objfile, sz_strtab) > 0)
       printf_filtered ("  Space used by a.out string tables: %d\n",
 		       OBJSTAT (objfile, sz_strtab));
-    printf_filtered ("  Total memory used for psymbol obstack: %d\n",
-		     obstack_memory_used (&objfile->psymbol_obstack));
     printf_filtered ("  Total memory used for psymbol cache: %d\n",
 		     bcache_memory_used (objfile->psymbol_cache));
     printf_filtered ("  Total memory used for macro cache: %d\n",

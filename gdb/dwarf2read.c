@@ -446,7 +446,7 @@ static int isreg;		/* Object lives in register.
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.
    The complete dwarf information for an objfile is kept in the
-   psymbol_obstack, so that absolute die references can be handled.
+   objfile_obstack, so that absolute die references can be handled.
    Most of the information in this structure is related to an entire
    object file and could be passed via the sym_private field of the objfile.
    It is however conceivable that dwarf2 might not be the only type
@@ -1256,7 +1256,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 				  objfile->static_psymbols.next);
 
       pst->read_symtab_private = (char *)
-	obstack_alloc (&objfile->psymbol_obstack, sizeof (struct dwarf2_pinfo));
+	obstack_alloc (&objfile->objfile_obstack, sizeof (struct dwarf2_pinfo));
       DWARF_INFO_BUFFER (pst) = dwarf_info_buffer;
       DWARF_INFO_OFFSET (pst) = beg_of_comp_unit - dwarf_info_buffer;
       DWARF_ABBREV_BUFFER (pst) = dwarf_abbrev_buffer;
@@ -4132,7 +4132,7 @@ make_cleanup_free_die_list (struct die_info *dies)
 
 
 /* Read the contents of the section at OFFSET and of size SIZE from the
-   object file specified by OBJFILE into the psymbol_obstack and return it.  */
+   object file specified by OBJFILE into the objfile_obstack and return it.  */
 
 char *
 dwarf2_read_section (struct objfile *objfile, asection *sectp)
@@ -4144,7 +4144,7 @@ dwarf2_read_section (struct objfile *objfile, asection *sectp)
   if (size == 0)
     return NULL;
 
-  buf = (char *) obstack_alloc (&objfile->psymbol_obstack, size);
+  buf = (char *) obstack_alloc (&objfile->objfile_obstack, size);
   retbuf
     = (char *) symfile_relocate_debug_section (abfd, sectp, (bfd_byte *) buf);
   if (retbuf != NULL)

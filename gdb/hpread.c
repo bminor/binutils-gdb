@@ -1973,7 +1973,7 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 		    if (!have_name)
 		      {
 			pst->filename = (char *)
-			  obstack_alloc (&pst->objfile->psymbol_obstack,
+			  obstack_alloc (&pst->objfile->objfile_obstack,
 					 strlen (namestring) + 1);
 			strcpy (pst->filename, namestring);
 			have_name = 1;
@@ -2392,7 +2392,7 @@ hpread_start_psymtab (struct objfile *objfile, char *filename,
 
   result->textlow += offset;
   result->read_symtab_private = (char *)
-    obstack_alloc (&objfile->psymbol_obstack, sizeof (struct symloc));
+    obstack_alloc (&objfile->objfile_obstack, sizeof (struct symloc));
   LDSYMOFF (result) = ldsymoff;
   result->read_symtab = hpread_psymtab_to_symtab;
 
@@ -2453,7 +2453,7 @@ hpread_end_psymtab (struct partial_symtab *pst, char **include_list,
   if (number_dependencies)
     {
       pst->dependencies = (struct partial_symtab **)
-	obstack_alloc (&objfile->psymbol_obstack,
+	obstack_alloc (&objfile->objfile_obstack,
 		    number_dependencies * sizeof (struct partial_symtab *));
       memcpy (pst->dependencies, dependency_list,
 	      number_dependencies * sizeof (struct partial_symtab *));
@@ -2468,7 +2468,7 @@ hpread_end_psymtab (struct partial_symtab *pst, char **include_list,
 
       subpst->section_offsets = pst->section_offsets;
       subpst->read_symtab_private =
-	(char *) obstack_alloc (&objfile->psymbol_obstack,
+	(char *) obstack_alloc (&objfile->objfile_obstack,
 				sizeof (struct symloc));
       LDSYMOFF (subpst) =
 	LDSYMLEN (subpst) =
@@ -2478,7 +2478,7 @@ hpread_end_psymtab (struct partial_symtab *pst, char **include_list,
       /* We could save slight bits of space by only making one of these,
          shared by the entire set of include files.  FIXME-someday.  */
       subpst->dependencies = (struct partial_symtab **)
-	obstack_alloc (&objfile->psymbol_obstack,
+	obstack_alloc (&objfile->objfile_obstack,
 		       sizeof (struct partial_symtab *));
       subpst->dependencies[0] = pst;
       subpst->number_of_dependencies = 1;

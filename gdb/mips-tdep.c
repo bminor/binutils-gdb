@@ -2286,7 +2286,7 @@ non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
 	     This means that we should not bother with this method on 64-bit
 	     targets (until that is fixed).  */
 
-	  priv = obstack_alloc (&sec->objfile->psymbol_obstack,
+	  priv = obstack_alloc (&sec->objfile->objfile_obstack,
 				sizeof (struct mips_objfile_private));
 	  priv->size = 0;
 	  sec->objfile->obj_private = priv;
@@ -2295,14 +2295,14 @@ non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
 	{
 	  asection *bfdsec;
 
-	  priv = obstack_alloc (&sec->objfile->psymbol_obstack,
+	  priv = obstack_alloc (&sec->objfile->objfile_obstack,
 				sizeof (struct mips_objfile_private));
 
 	  bfdsec = bfd_get_section_by_name (sec->objfile->obfd, ".pdr");
 	  if (bfdsec != NULL)
 	    {
 	      priv->size = bfd_section_size (sec->objfile->obfd, bfdsec);
-	      priv->contents = obstack_alloc (&sec->objfile->psymbol_obstack,
+	      priv->contents = obstack_alloc (&sec->objfile->objfile_obstack,
 					      priv->size);
 	      bfd_get_section_contents (sec->objfile->obfd, bfdsec,
 					priv->contents, 0, priv->size);
@@ -2354,7 +2354,7 @@ non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
 
 	      /* Fill in what we need of the proc_desc.  */
 	      proc_desc = (mips_extra_func_info_t)
-		obstack_alloc (&sec->objfile->psymbol_obstack,
+		obstack_alloc (&sec->objfile->objfile_obstack,
 			       sizeof (struct mips_extra_func_info));
 	      PROC_LOW_ADDR (proc_desc) = startaddr;
 

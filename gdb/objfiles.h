@@ -294,8 +294,6 @@ struct objfile
 
     /* Obstacks to hold objects that should be freed when we load a new symbol
        table from this object file. */
-
-    struct obstack psymbol_obstack;	/* Partial symbols */
     struct obstack symbol_obstack;	/* Full symbols */
 
     /* A byte cache where we can stash arbitrary "chunks" of bytes that
@@ -312,7 +310,7 @@ struct objfile
     struct htab *demangled_names_hash;
 
     /* Vectors of all partial symbols read in from file.  The actual data
-       is stored in the psymbol_obstack. */
+       is stored in the objfile_obstack. */
 
     struct psymbol_allocation_list global_psymbols;
     struct psymbol_allocation_list static_psymbols;
@@ -402,7 +400,7 @@ struct objfile
     unsigned num_data;
 
     /* Set of relocation offsets to apply to each section.
-       Currently on the psymbol_obstack (which makes no sense, but I'm
+       Currently on the objfile_obstack (which makes no sense, but I'm
        not sure it's harming anything).
 
        These offsets indicate that all symbols (including partial and
@@ -430,7 +428,7 @@ struct objfile
        SECTIONS points to the first entry in the table, and
        SECTIONS_END points to the first location past the last entry
        in the table.  Currently the table is stored on the
-       psymbol_obstack (which makes no sense, but I'm not sure it's
+       objfile_obstack (which makes no sense, but I'm not sure it's
        harming anything).  */
 
     struct obj_section

@@ -1,6 +1,6 @@
 /* Read AIX xcoff symbol tables and convert to internal format, for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Derived from coffread.c, dbxread.c, and a lot of hacking.
    Contributed by IBM Corporation.
@@ -1946,7 +1946,7 @@ xcoff_start_psymtab (struct objfile *objfile, char *filename, int first_symnum,
 			global_syms, static_syms);
 
   result->read_symtab_private = (char *)
-    obstack_alloc (&objfile->psymbol_obstack, sizeof (struct symloc));
+    obstack_alloc (&objfile->objfile_obstack, sizeof (struct symloc));
   ((struct symloc *) result->read_symtab_private)->first_symnum = first_symnum;
   result->read_symtab = xcoff_psymtab_to_symtab;
 
@@ -1993,7 +1993,7 @@ xcoff_end_psymtab (struct partial_symtab *pst, char **include_list,
   if (number_dependencies)
     {
       pst->dependencies = (struct partial_symtab **)
-	obstack_alloc (&objfile->psymbol_obstack,
+	obstack_alloc (&objfile->objfile_obstack,
 		    number_dependencies * sizeof (struct partial_symtab *));
       memcpy (pst->dependencies, dependency_list,
 	      number_dependencies * sizeof (struct partial_symtab *));
@@ -2008,7 +2008,7 @@ xcoff_end_psymtab (struct partial_symtab *pst, char **include_list,
 
       subpst->section_offsets = pst->section_offsets;
       subpst->read_symtab_private =
-	(char *) obstack_alloc (&objfile->psymbol_obstack,
+	(char *) obstack_alloc (&objfile->objfile_obstack,
 				sizeof (struct symloc));
       ((struct symloc *) subpst->read_symtab_private)->first_symnum = 0;
       ((struct symloc *) subpst->read_symtab_private)->numsyms = 0;
@@ -2018,7 +2018,7 @@ xcoff_end_psymtab (struct partial_symtab *pst, char **include_list,
       /* We could save slight bits of space by only making one of these,
          shared by the entire set of include files.  FIXME-someday.  */
       subpst->dependencies = (struct partial_symtab **)
-	obstack_alloc (&objfile->psymbol_obstack,
+	obstack_alloc (&objfile->objfile_obstack,
 		       sizeof (struct partial_symtab *));
       subpst->dependencies[0] = pst;
       subpst->number_of_dependencies = 1;
@@ -2081,7 +2081,7 @@ swap_sym (struct internal_syment *symbol, union internal_auxent *aux,
 	  /* FIXME: wastes memory for symbols which we don't end up putting
 	     into the minimal symbols.  */
 	  char *p;
-	  p = obstack_alloc (&objfile->psymbol_obstack, E_SYMNMLEN + 1);
+	  p = obstack_alloc (&objfile->objfile_obstack, E_SYMNMLEN + 1);
 	  strncpy (p, symbol->n_name, E_SYMNMLEN);
 	  p[E_SYMNMLEN] = '\0';
 	  *name = p;
@@ -2959,7 +2959,7 @@ xcoff_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
 
   objfile->num_sections = bfd_count_sections (objfile->obfd);
   objfile->section_offsets = (struct section_offsets *)
-    obstack_alloc (&objfile->psymbol_obstack, 
+    obstack_alloc (&objfile->objfile_obstack, 
 		   SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
 
   /* Initialize the section indexes for future use. */

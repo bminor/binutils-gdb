@@ -1,7 +1,7 @@
 /* Read ELF (Executable and Linking Format) object files for GDB.
 
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Written by Fred Fish at Cygnus Support.
 
@@ -712,7 +712,7 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
       /* Found it!  Allocate a new psymtab struct, and fill it in.  */
       maybe->found++;
       pst->section_offsets = (struct section_offsets *)
-	obstack_alloc (&objfile->psymbol_obstack, 
+	obstack_alloc (&objfile->objfile_obstack, 
 		       SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
       for (i = 0; i < maybe->num_sections; i++)
 	(pst->section_offsets)->offsets[i] = maybe->sections[i];

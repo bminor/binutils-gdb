@@ -88,7 +88,7 @@ struct agent_expr;
 struct general_symbol_info
 {
   /* Name of the symbol.  This is a required field.  Storage for the
-     name is allocated on the psymbol_obstack or symbol_obstack for
+     name is allocated on the objfile_obstack or symbol_obstack for
      the associated objfile.  For languages like C++ that make a
      distinction between the mangled name and demangled name, this is
      the mangled name.  */
@@ -858,7 +858,7 @@ struct symtab
 
    Even after the source file has been read into a symtab, the
    partial_symtab remains around.  They are allocated on an obstack,
-   psymbol_obstack.  FIXME, this is bad for dynamic linking or VxWorks-
+   objfile_obstack.  FIXME, this is bad for dynamic linking or VxWorks-
    style execution of a bunch of .o's.  */
 
 struct partial_symtab

@@ -145,12 +145,11 @@ allocate_rt_common_objfile (void)
   objfile->md = NULL;
   objfile->psymbol_cache = bcache_xmalloc ();
   objfile->macro_cache = bcache_xmalloc ();
-  obstack_specify_allocation (&objfile->psymbol_obstack, 0, 0, xmalloc,
+  obstack_specify_allocation (&objfile->objfile_obstack, 0, 0, xmalloc,
 			      xfree);
   obstack_specify_allocation (&objfile->symbol_obstack, 0, 0, xmalloc,
 			      xfree);
-  obstack_specify_allocation (&objfile->objfile_obstack, 0, 0, xmalloc,
-			      xfree);
+
   objfile->name = mstrsave (objfile->md, "rt_common");
 
   /* Add this file onto the tail of the linked list of other such files. */

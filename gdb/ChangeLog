@@ -20,6 +20,49 @@
 
 2004-02-07  Elena Zannoni  <ezannoni@redhat.com>
 
+	* dbxread.c (dbx_symfile_init, start_psymtab, end_psymtab,
+	coffstab_build_psymtabs, elfstab_build_psymtabs)
+	(stabsect_build_psymtabs): Replace psymbol_obstack with
+	objfile_obstack.
+	* dwarf2-frame.c (decode_frame_entry_1): Ditto.
+	* dwarf2read.c (dwarf2_build_psymtabs_hard, dwarf2_read_section):
+	Ditto.
+	* dwarfread.c (scan_compilation_units): Ditto.
+	* elfread.c (elfstab_offset_sections): Ditto.
+	* hppa-tdep.c (read_unwind_info): Ditto.
+	* hpread.c (hpread_build_psymtabs, hpread_start_psymtab)
+	(hpread_end_psymtab): Ditto.
+	* mdebugread.c (mdebug_build_psymtabs, add_pending)
+	(parse_partial_symbols, new_psymtab, elfmdebug_build_psymtabs):
+	Ditto.
+	* mips-tdep.c (non_heuristic_proc_desc): Ditto.
+	* objfiles.c (add_to_objfile_sections) 
+	(build_objfile_section_table): Ditto.
+	(allocate_objfile): Remove init of psymbol_obstack.
+	(free_objfile): Remove freeing of psymbol_obstack.
+	* objfiles.h (struct objfile): Remove field
+	psymbol_obstack. Update comments.
+	* pa64solib.c (pa64_solib_add_solib_objfile): Replace
+	psymbol_obstack with objfile_obstack.
+	* solib-sunos.c (allocate_rt_common_objfile): Remove init of
+        psymbol_obstack.
+	* somread.c (som_symfile_offsets, init_import_symbols)
+	(init_export_symbols): Replace psymbol_obstack with
+	objfile_obstack.
+	* somsolib.c (som_solib_add_solib_objfile): Ditto.
+	* symfile.c (default_symfile_offsets, syms_from_objfile)
+	(reread_symbols): Remove freeing and init of psymbol_obstack.
+	(cashier_psymtab): Update comment.
+	* symmisc.c (print_objfile_statistics): Don't report stats for
+	psymbol obstack.
+	* symtab.h (struct general_symbol_info, struct partial_symtab):
+	Update comments.
+	* xcoffread.c (xcoff_start_psymtab, xcoff_end_psymtab, swap_sym)
+	(xcoff_symfile_offsets): Replace psymbol_obstack with
+	objfile_obstack.
+
+2004-02-07  Elena Zannoni  <ezannoni@redhat.com>
+
 	* objfiles.h (struct objfile): Add objfile_obstack field.
 	Remove type_obstack field.
 

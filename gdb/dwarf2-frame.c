@@ -1211,7 +1211,7 @@ decode_frame_entry_1 (struct comp_unit *unit, char *start, int eh_frame_p)
 	return end;
 
       cie = (struct dwarf2_cie *)
-	obstack_alloc (&unit->objfile->psymbol_obstack,
+	obstack_alloc (&unit->objfile->objfile_obstack,
 		       sizeof (struct dwarf2_cie));
       cie->initial_instructions = NULL;
       cie->cie_pointer = cie_pointer;
@@ -1327,7 +1327,7 @@ decode_frame_entry_1 (struct comp_unit *unit, char *start, int eh_frame_p)
 	return NULL;
 
       fde = (struct dwarf2_fde *)
-	obstack_alloc (&unit->objfile->psymbol_obstack,
+	obstack_alloc (&unit->objfile->objfile_obstack,
 		       sizeof (struct dwarf2_fde));
       fde->cie = find_cie (unit, cie_pointer);
       if (fde->cie == NULL)

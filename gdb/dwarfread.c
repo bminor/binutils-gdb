@@ -2800,7 +2800,7 @@ scan_compilation_units (char *thisdie, char *enddie, file_ptr dbfoff,
 
 	  pst->texthigh = di.at_high_pc;
 	  pst->read_symtab_private = (char *)
-	    obstack_alloc (&objfile->psymbol_obstack,
+	    obstack_alloc (&objfile->objfile_obstack,
 			   sizeof (struct dwfinfo));
 	  DBFOFF (pst) = dbfoff;
 	  DBROFF (pst) = curoff;

@@ -428,7 +428,7 @@ mdebug_build_psymtabs (struct objfile *objfile,
       char *fdr_end;
       FDR *fdr_ptr;
 
-      info->fdr = (FDR *) obstack_alloc (&objfile->psymbol_obstack,
+      info->fdr = (FDR *) obstack_alloc (&objfile->objfile_obstack,
 					 (info->symbolic_header.ifdMax
 					  * sizeof (FDR)));
       fdr_src = info->external_fdr;
@@ -581,7 +581,7 @@ add_pending (FDR *fh, char *sh, struct type *t)
   if (!p)
     {
       p = ((struct mdebug_pending *)
-	   obstack_alloc (&current_objfile->psymbol_obstack,
+	   obstack_alloc (&current_objfile->objfile_obstack,
 			  sizeof (struct mdebug_pending)));
       p->s = sh;
       p->t = t;
@@ -2262,7 +2262,7 @@ parse_partial_symbols (struct objfile *objfile)
       && (bfd_get_section_flags (cur_bfd, text_sect) & SEC_RELOC))
     relocatable = 1;
 
-  extern_tab = (EXTR *) obstack_alloc (&objfile->psymbol_obstack,
+  extern_tab = (EXTR *) obstack_alloc (&objfile->objfile_obstack,
 				       sizeof (EXTR) * hdr->iextMax);
 
   includes_allocated = 30;
@@ -2306,7 +2306,7 @@ parse_partial_symbols (struct objfile *objfile)
   /* Allocate the global pending list.  */
   pending_list =
     ((struct mdebug_pending **)
-     obstack_alloc (&objfile->psymbol_obstack,
+     obstack_alloc (&objfile->objfile_obstack,
 		    hdr->ifdMax * sizeof (struct mdebug_pending *)));
   memset (pending_list, 0,
 	  hdr->ifdMax * sizeof (struct mdebug_pending *));
@@ -2558,7 +2558,7 @@ parse_partial_symbols (struct objfile *objfile)
 				  objfile->global_psymbols.next,
 				  objfile->static_psymbols.next);
       pst->read_symtab_private = ((char *)
-				  obstack_alloc (&objfile->psymbol_obstack,
+				  obstack_alloc (&objfile->objfile_obstack,
 						 sizeof (struct symloc)));
       memset (pst->read_symtab_private, 0, sizeof (struct symloc));
 
@@ -3661,7 +3661,7 @@ parse_partial_symbols (struct objfile *objfile)
       pst->number_of_dependencies = 0;
       pst->dependencies =
 	((struct partial_symtab **)
-	 obstack_alloc (&objfile->psymbol_obstack,
+	 obstack_alloc (&objfile->objfile_obstack,
 			((fh->crfd - 1)
 			 * sizeof (struct partial_symtab *))));
       for (s_idx = 1; s_idx < fh->crfd; s_idx++)
@@ -4609,7 +4609,7 @@ new_psymtab (char *name, struct objfile *objfile)
   /* Keep a backpointer to the file's symbols */
 
   psymtab->read_symtab_private = ((char *)
-				  obstack_alloc (&objfile->psymbol_obstack,
+				  obstack_alloc (&objfile->objfile_obstack,
 						 sizeof (struct symloc)));
   memset (psymtab->read_symtab_private, 0, sizeof (struct symloc));
   CUR_BFD (psymtab) = cur_bfd;
@@ -4740,7 +4740,7 @@ elfmdebug_build_psymtabs (struct objfile *objfile,
   back_to = make_cleanup_discard_minimal_symbols ();
 
   info = ((struct ecoff_debug_info *)
-	  obstack_alloc (&objfile->psymbol_obstack,
+	  obstack_alloc (&objfile->objfile_obstack,
 			 sizeof (struct ecoff_debug_info)));
 
   if (!(*swap->read_debug_info) (abfd, sec, info))
