@@ -993,6 +993,10 @@ symbol_file_add (name, from_tty, addrs, mainline, flags)
    used in GDB (perhaps "set mapped on", "set readnow on" would be
    better), (3) the order of options matters, which is contrary to GNU
    conventions (because it is confusing and inconvenient).  */
+/* Note: ezannoni 2000-04-17. This function used to have support for
+   rombug (see remote-os9k.c). It consisted of a call to target_link()
+   (target.c) to get the address of the text segment from the target,
+   and pass that to symbol_file_add(). This is no longer supported. */
 
 void
 symbol_file_command (args, from_tty)
@@ -1001,7 +1005,6 @@ symbol_file_command (args, from_tty)
 {
   char **argv;
   char *name = NULL;
-  CORE_ADDR text_relocation = 0;	/* text_relocation */
   struct cleanup *cleanups;
   int flags = OBJF_USERLOADED;
 
@@ -1026,9 +1029,7 @@ symbol_file_command (args, from_tty)
 
       symfile_objfile = NULL;
       if (from_tty)
-	{
 	  printf_unfiltered ("No symbol file now.\n");
-	}
 #ifdef HPUXHPPA
       RESET_HP_UX_GLOBALS ();
 #endif
@@ -1043,56 +1044,26 @@ symbol_file_command (args, from_tty)
       while (*argv != NULL)
 	{
 	  if (STREQ (*argv, "-mapped"))
-	    {
-	      flags |= OBJF_MAPPED;
-	    }
-	  else if (STREQ (*argv, "-readnow"))
-	    {
+	    flags |= OBJF_MAPPED;
+	  else 
+	    if (STREQ (*argv, "-readnow"))
 	      flags |= OBJF_READNOW;
-	    }
-	  else if (**argv == '-')
-	    {
-	      error ("unknown option `%s'", *argv);
-	    }
-	  else
-	    {
-	      char *p;
-
-	      name = *argv;
-
-	      /* this is for rombug remote only, to get the text relocation by
-	         using link command */
-	      p = strrchr (name, '/');
-	      if (p != NULL)
-		p++;
+	    else 
+	      if (**argv == '-')
+		error ("unknown option `%s'", *argv);
 	      else
-		p = name;
-
-	      target_link (p, &text_relocation);
-
-	      if (text_relocation == (CORE_ADDR) 0)
-		return;
-	      else if (text_relocation == (CORE_ADDR) -1)
 		{
+                  name = *argv;
 		  symbol_file_add (name, from_tty, NULL, 1, flags);
 #ifdef HPUXHPPA
 		  RESET_HP_UX_GLOBALS ();
 #endif
-		}
-	      else
-		{
-		  struct section_addr_info section_addrs;
-		  memset (&section_addrs, 0, sizeof (section_addrs));
-		  section_addrs.text_addr = (CORE_ADDR) text_relocation;
-		  symbol_file_add (name, from_tty, &section_addrs, 0, flags);
-		}
+		  /* Getting new symbols may change our opinion about
+		     what is frameless.  */
+		  reinit_frame_cache ();
 
-	      /* Getting new symbols may change our opinion about what is
-	         frameless.  */
-	      reinit_frame_cache ();
-
-	      set_initial_language ();
-	    }
+		  set_initial_language ();
+		}
 	  argv++;
 	}
 

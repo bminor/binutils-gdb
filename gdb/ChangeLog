@@ -1,5 +1,10 @@
 2000-04-17  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
+	symfile.c: (symbol_file_command): Remove support for rombug, to
+ 	simplify code.
+
+2000-04-17  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
 	* symfile.c (add_symbol_file_command): Rewrite the arguments
  	processing part. Simplify syntax of command. Remove support for
  	rombug.
