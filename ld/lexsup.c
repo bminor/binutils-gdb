@@ -432,12 +432,13 @@ parse_args (argc, argv)
 	  whole_archive = true;
 	  break;
 	case OPTION_BASE_FILE:
-	  link_info.base_file = fopen (optarg,"w");
-	  if (!link_info.base_file) {
-	    fprintf (stderr, "%s: Can't open base file %s\n",
-		     program_name, optarg);
-	    xexit (1);
-	  }
+	  link_info.base_file = (PTR) fopen (optarg,"w");
+	  if (link_info.base_file == NULL)
+	    {
+	      fprintf (stderr, "%s: Can't open base file %s\n",
+		       program_name, optarg);
+	      xexit (1);
+	    }
 	  break;
 	case 'X':
 	  link_info.discard = discard_l;

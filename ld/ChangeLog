@@ -1,3 +1,8 @@
+Sun Jul  2 17:52:34 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lexsup.c (parse_args): Cast fopen result to PTR before storing
+	it in link_info.base_file.  Fix indentation.
+
 Wed Jun 28 17:11:25 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* ldmain.c (main): Always initialize PE info in link_info.
