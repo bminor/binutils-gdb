@@ -89,6 +89,11 @@ extern int unlink();
 #define BYTES_IN_PRINTF_INT 4
 #endif
 
+/* From ANSI C <stddef.h>, which we can't depend upon the existence of */
+#ifndef offsetof
+#define	offsetof(type,memb)	((size_t)&(((type *)0)->memb))
+#endif
+
 #include "fopen-same.h"
 #define hosts_std_host_H
 #endif
