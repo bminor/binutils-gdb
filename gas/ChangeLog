@@ -1,3 +1,9 @@
+Sat Mar 15 20:27:12 1997  Fred Fish  <fnf@cygnus.com>
+
+	* NEWS: Note BeOS support.
+	* configure.in: (ppc-*-beos): New target, use coff as object format.
+	* configure: Regenerate with autoconf.
+	
 Sat Mar 15 19:14:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (md_apply_fix): Improve error message for out

@@ -2,13 +2,25 @@
 
 Changes in 2.8:
 
+BeOS support added.
+
 MIPS16 support added.
 
 Motorola ColdFire 5200 support added (configure for m68k and use -m5200).
 
 Alpha/VMS support added.
 
-m68k options --base-size-default-16 and --base-size-default-32 added.
+m68k options --base-size-default-16, --base-size-default-32,
+--disp-size-default-16, and --disp-size-default-32 added.
+
+The alignment directives now take an optional third argument, which is the
+maximum number of bytes to skip.  If doing the alignment would require skipping
+more than the given number of bytes, the alignment is not done at all.
+
+The ELF assembler has a new pseudo-op, .symver, used for symbol versioning.
+
+The -a option takes a new suboption, c (e.g., -alc), to skip false conditionals
+in listings.
 
 Changes in 2.7:
 
