@@ -1,4 +1,4 @@
-/* Target-dependent code for Motorola 68HC11
+/* Target-dependent code for Motorola 68HC11 & 68HC12
    Copyright (C) 1999, 2000 Free Software Foundation, Inc.
    Contributed by Stephane Carrez, stcarrez@worldnet.fr
 
@@ -77,6 +77,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define M68HC11_REG_SIZE    (2)
 
+struct insn_sequence;
 struct gdbarch_tdep
   {
     /* from the elf header */
@@ -87,6 +88,9 @@ struct gdbarch_tdep
        the address where the last value is saved.  For 68hc12, the stack
        pointer points to the last value pushed.  No offset is necessary.  */
     int stack_correction;
+
+    /* Description of instructions in the prologue.  */
+    struct insn_sequence *prologue;
   };
 
 #define M6811_TDEP gdbarch_tdep (current_gdbarch)
@@ -298,7 +302,7 @@ m68hc11_frame_saved_pc (struct frame_info *frame)
 static CORE_ADDR
 m68hc11_frame_args_address (struct frame_info *frame)
 {
-  return frame->frame;
+  return frame->frame + frame->extra_info->size + STACK_CORRECTION + 2;
 }
 
 static CORE_ADDR
@@ -337,6 +341,176 @@ m68hc11_pop_frame (void)
   flush_cached_frames ();
 }
 
+
+/* 68HC11 & 68HC12 prologue analysis.
+
+ */
+#define MAX_CODES 12
+
+/* 68HC11 opcodes.  */
+#undef M6811_OP_PAGE2
+#define M6811_OP_PAGE2 (0x18)
+#define M6811_OP_LDX   (0xde)
+#define M6811_OP_PSHX  (0x3c)
+#define M6811_OP_STS   (0x9f)
+#define M6811_OP_TSX   (0x30)
+#define M6811_OP_XGDX  (0x8f)
+#define M6811_OP_ADDD  (0xc3)
+#define M6811_OP_TXS   (0x35)
+#define M6811_OP_DES   (0x34)
+
+/* 68HC12 opcodes.  */
+#define M6812_OP_PAGE2 (0x18)
+#define M6812_OP_MOVW  (0x01)
+#define M6812_PB_PSHW  (0xae)
+#define M6812_OP_STS   (0x7f)
+#define M6812_OP_LEAS  (0x1b)
+
+/* Operand extraction.  */
+#define OP_DIRECT      (0x100) /* 8-byte direct addressing.  */
+#define OP_IMM_LOW     (0x200) /* Low part of 16-bit constant/address.  */
+#define OP_IMM_HIGH    (0x300) /* High part of 16-bit constant/address.  */
+#define OP_PBYTE       (0x400) /* 68HC12 indexed operand.  */
+
+/* Identification of the sequence.  */
+enum m6811_seq_type
+{
+  P_LAST = 0,
+  P_SAVE_REG,  /* Save a register on the stack.  */
+  P_SET_FRAME, /* Setup the frame pointer.  */
+  P_LOCAL_1,   /* Allocate 1 byte for locals.  */
+  P_LOCAL_2,   /* Allocate 2 bytes for locals.  */
+  P_LOCAL_N    /* Allocate N bytes for locals.  */
+};
+
+struct insn_sequence {
+  enum m6811_seq_type type;
+  unsigned length;
+  unsigned short code[MAX_CODES];
+};
+
+/* Sequence of instructions in the 68HC11 function prologue.  */
+static struct insn_sequence m6811_prologue[] = {
+  /* Sequences to save a soft-register.  */
+  { P_SAVE_REG, 3, { M6811_OP_LDX, OP_DIRECT,
+                     M6811_OP_PSHX } },
+  { P_SAVE_REG, 5, { M6811_OP_PAGE2, M6811_OP_LDX, OP_DIRECT,
+                     M6811_OP_PAGE2, M6811_OP_PSHX } },
+
+  /* Sequences to allocate local variables.  */
+  { P_LOCAL_N,  7, { M6811_OP_TSX,
+                     M6811_OP_XGDX,
+                     M6811_OP_ADDD, OP_IMM_HIGH, OP_IMM_LOW,
+                     M6811_OP_XGDX,
+                     M6811_OP_TXS } },
+  { P_LOCAL_N, 11, { M6811_OP_PAGE2, M6811_OP_TSX,
+                     M6811_OP_PAGE2, M6811_OP_XGDX,
+                     M6811_OP_ADDD, OP_IMM_HIGH, OP_IMM_LOW,
+                     M6811_OP_PAGE2, M6811_OP_XGDX,
+                     M6811_OP_PAGE2, M6811_OP_TXS } },
+  { P_LOCAL_1,  1, { M6811_OP_DES } },
+  { P_LOCAL_2,  1, { M6811_OP_PSHX } },
+  { P_LOCAL_2,  2, { M6811_OP_PAGE2, M6811_OP_PSHX } },
+
+  /* Initialize the frame pointer.  */
+  { P_SET_FRAME, 2, { M6811_OP_STS, OP_DIRECT } },
+  { P_LAST, 0, { 0 } }
+};
+
+
+/* Sequence of instructions in the 68HC12 function prologue.  */
+static struct insn_sequence m6812_prologue[] = {  
+  { P_SAVE_REG,  5, { M6812_OP_PAGE2, M6812_OP_MOVW, M6812_PB_PSHW,
+                      OP_IMM_HIGH, OP_IMM_LOW } },
+  { P_SET_FRAME, 3, { M6812_OP_STS, OP_IMM_HIGH, OP_IMM_LOW } },
+  { P_LOCAL_N,   2, { M6812_OP_LEAS, OP_PBYTE } },
+  { P_LAST, 0 }
+};
+
+
+/* Analyze the sequence of instructions starting at the given address.
+   Returns a pointer to the sequence when it is recognized and
+   the optional value (constant/address) associated with it.
+   Advance the pc for the next sequence.  */
+static struct insn_sequence *
+m68hc11_analyze_instruction (struct insn_sequence *seq, CORE_ADDR *pc,
+                             CORE_ADDR *val)
+{
+  unsigned char buffer[MAX_CODES];
+  unsigned bufsize;
+  unsigned j;
+  CORE_ADDR cur_val;
+  short v = 0;
+
+  bufsize = 0;
+  for (; seq->type != P_LAST; seq++)
+    {
+      cur_val = 0;
+      for (j = 0; j < seq->length; j++)
+        {
+          if (bufsize < j + 1)
+            {
+              buffer[bufsize] = read_memory_unsigned_integer (*pc + bufsize,
+                                                              1);
+              bufsize++;
+            }
+          /* Continue while we match the opcode.  */
+          if (seq->code[j] == buffer[j])
+            continue;
+          
+          if ((seq->code[j] & 0xf00) == 0)
+            break;
+          
+          /* Extract a sequence parameter (address or constant).  */
+          switch (seq->code[j])
+            {
+            case OP_DIRECT:
+              cur_val = (CORE_ADDR) buffer[j];
+              break;
+
+            case OP_IMM_HIGH:
+              cur_val = cur_val & 0x0ff;
+              cur_val |= (buffer[j] << 8);
+              break;
+
+            case OP_IMM_LOW:
+              cur_val &= 0x0ff00;
+              cur_val |= buffer[j];
+              break;
+
+            case OP_PBYTE:
+              if ((buffer[j] & 0xE0) == 0x80)
+                {
+                  v = buffer[j] & 0x1f;
+                  if (v & 0x10)
+                    v |= 0xfff0;
+                }
+              else if ((buffer[j] & 0xfe) == 0xf0)
+                {
+                  v = read_memory_unsigned_integer (*pc + j + 1, 1);
+                  if (buffer[j] & 1)
+                    v |= 0xff00;
+                }
+              else if (buffer[j] == 0xf2)
+                {
+                  v = read_memory_unsigned_integer (*pc + j + 1, 2);
+                }
+              cur_val = v;
+              break;
+            }
+        }
+
+      /* We have a full match.  */
+      if (j == seq->length)
+        {
+          *val = cur_val;
+          *pc = *pc + j;
+          return seq;
+        }
+    }
+  return 0;
+}
+
 /* Analyze the function prologue to find some information
    about the function:
     - the PC of the first line (for m68hc11_skip_prologue)
@@ -349,13 +523,12 @@ m68hc11_guess_from_prologue (CORE_ADDR pc, CORE_ADDR fp,
 {
   CORE_ADDR save_addr;
   CORE_ADDR func_end;
-  unsigned char op0, op1, op2;
-  int add_sp_mode;
-  int sp_adjust = 0;
   int size;
   int found_frame_point;
   int saved_reg;
   CORE_ADDR first_pc;
+  int done = 0;
+  struct insn_sequence *seq_table;
   
   first_pc = get_pc_function_start (pc);
   size = 0;
@@ -368,21 +541,8 @@ m68hc11_guess_from_prologue (CORE_ADDR pc, CORE_ADDR fp,
       return;
     }
 
-#define OP_PAGE2 (0x18)
-#define OP_LDX  (0xde)
-#define OP_LDY  (0xde)
-#define OP_PSHX (0x3c)
-#define OP_PSHY (0x3c)
-#define OP_STS  (0x9f)
-#define OP_TSX  (0x30)
-#define OP_TSY  (0x30)
-#define OP_XGDX (0x8f)
-#define OP_XGDY (0x8f)
-#define OP_ADDD (0xc3)
-#define OP_TXS  (0x35)
-#define OP_TYS  (0x35)
-#define OP_DES  (0x34)
-
+  seq_table = gdbarch_tdep (current_gdbarch)->prologue;
+  
   /* The 68hc11 stack is as follows:
 
 
@@ -426,169 +586,55 @@ m68hc11_guess_from_prologue (CORE_ADDR pc, CORE_ADDR fp,
   */
   pc = first_pc;
   func_end = pc + 128;
-  add_sp_mode = 0;
   found_frame_point = 0;
-  while (pc + 2 < func_end)
+  *frame_offset = 0;
+  save_addr = fp;
+  while (!done && pc + 2 < func_end)
     {
-      op0 = read_memory_unsigned_integer (pc, 1);
-      op1 = read_memory_unsigned_integer (pc + 1, 1);
-      op2 = read_memory_unsigned_integer (pc + 2, 1);
+      struct insn_sequence *seq;
+      CORE_ADDR val;
       
-      /* ldx *frame */
-      if (op0 == OP_LDX && op1 == M68HC11_FP_ADDR)
-        {
-          pc += 2;
-        }
+      seq = m68hc11_analyze_instruction (seq_table, &pc, &val);
+      if (seq == 0)
+        break;
 
-      /* ldy *frame */
-      else if (op0 == OP_PAGE2 && op1 == OP_LDY
-               && op2 == M68HC11_FP_ADDR)
+      if (seq->type == P_SAVE_REG)
         {
-          pc += 3;
-        }
+          if (found_frame_point)
+            {
+              saved_reg = m68hc11_which_soft_register (val);
+              if (saved_reg < 0)
+                break;
 
-      /* pshx */
-      else if (op0 == OP_PSHX)
-        {
-          pc += 1;
-          size += 2;
+              save_addr -= 2;
+              if (pushed_regs)
+                pushed_regs[saved_reg] = save_addr;
+            }
+          else
+            {
+              size += 2;
+            }
         }
-
-      /* pshy */
-      else if (op0 == OP_PAGE2 && op1 == OP_PSHX)
-        {
-          pc += 2;
-          size += 2;
-        }
-
-      /* sts *frame */
-      else if (op0 == OP_STS && op1 == M68HC11_FP_ADDR)
+      else if (seq->type == P_SET_FRAME)
         {
           found_frame_point = 1;
-          pc += 2;
-          break;
+          *frame_offset = size;
         }
-      else if (op0 == OP_TSX && op1 == OP_XGDX)
+      else if (seq->type == P_LOCAL_1)
         {
-          add_sp_mode  = 1;
-          pc += 2;
-        }
-      /* des to allocate 1 byte on the stack */
-      else if (op0 == OP_DES)
-        {
-          pc += 1;
           size += 1;
         }
-      else if (op0 == OP_PAGE2 && op1 == OP_TSY && op2 == OP_PAGE2)
+      else if (seq->type == P_LOCAL_2)
         {
-          op0 = read_memory_unsigned_integer (pc + 3, 1);
-          if (op0 != OP_XGDY)
-            break;
-          
-          add_sp_mode  = 2;
-          pc += 4;
+          size += 2;
         }
-      else if (add_sp_mode && op0 == OP_ADDD)
+      else if (seq->type == P_LOCAL_N)
         {
-          sp_adjust = read_memory_unsigned_integer (pc + 1, 2);
-          if (sp_adjust & 0x8000)
-            sp_adjust |= 0xffff0000L;
-
-          sp_adjust = -sp_adjust;
-          add_sp_mode |= 4;
-          pc += 3;
-        }
-      else if (add_sp_mode == (1 | 4) && op0 == OP_XGDX
-               && op1 == OP_TXS)
-        {
-          size += sp_adjust;
-          pc += 2;
-          add_sp_mode = 0;
-        }
-      else if (add_sp_mode == (2 | 4) && op0 == OP_PAGE2
-               && op1 == OP_XGDY && op2 == OP_PAGE2)
-        {
-          op0 = read_memory_unsigned_integer (pc + 3, 1);
-          if (op0 != OP_TYS)
-            break;
-
-          size += sp_adjust;
-          pc += 4;
-          add_sp_mode = 0;
-        }
-      else
-        {
-          break;
-        }
-    }
-
-  if (found_frame_point == 0)
-    {
-      *frame_offset = 0;
-    }
-  else
-    {
-      *frame_offset = size;
-    }
-
-  /* Now, look forward to see how many registers are pushed on the stack.
-     We look only for soft registers so there must be a first LDX *REG
-     before a PSHX.  */
-  saved_reg = -1;
-  save_addr = fp;
-  while (pc + 2 < func_end)
-    {
-      op0 = read_memory_unsigned_integer (pc, 1);
-      op1 = read_memory_unsigned_integer (pc + 1, 1);
-      op2 = read_memory_unsigned_integer (pc + 2, 1);
-      if (op0 == OP_LDX)
-        {
-          saved_reg = m68hc11_which_soft_register (op1);
-          if (saved_reg < 0 || saved_reg == SOFT_FP_REGNUM)
-            break;
-          
-          pc += 2;
-        }
-      else if (op0 == OP_PAGE2 && op1 == OP_LDY)
-        {
-          saved_reg = m68hc11_which_soft_register (op2);
-          if (saved_reg < 0 || saved_reg == SOFT_FP_REGNUM)
-            break;
-          
-          pc += 3;
-        }
-      else if (op0 == OP_PSHX)
-        {
-          /* If there was no load, this is a push for a function call.  */
-          if (saved_reg < 0 || saved_reg >= M68HC11_ALL_REGS)
-            break;
-
-          /* Keep track of the address where that register is saved
-             on the stack.  */
-          save_addr -= 2;
-          if (pushed_regs)
-            pushed_regs[saved_reg] = save_addr;
-
-          pc += 1;
-          saved_reg = -1;
-        }
-      else if (op0 == OP_PAGE2 && op1 == OP_PSHY)
-        {
-          if (saved_reg < 0 || saved_reg >= M68HC11_ALL_REGS)
-            break;
-          
-          /* Keep track of the address where that register is saved
-             on the stack.  */
-          save_addr -= 2;
-          if (pushed_regs)
-            pushed_regs[saved_reg] = save_addr;
-
-          pc += 2;
-          saved_reg = -1;
-        }
-      else
-        {
-          break;
+          /* Stack pointer is decremented for the allocation.  */
+          if (val & 0x8000)
+            size -= (int) (val) | 0xffff0000;
+          else
+            size -= val;
         }
     }
   *first_line  = pc;
@@ -668,7 +714,8 @@ m68hc11_frame_init_saved_regs (struct frame_info *fi)
                                fi->saved_regs);
 
   addr = fi->frame + fi->extra_info->size + STACK_CORRECTION;
-  fi->saved_regs[SOFT_FP_REGNUM] = addr - 2;
+  if (soft_regs[SOFT_FP_REGNUM].name)
+    fi->saved_regs[SOFT_FP_REGNUM] = addr - 2;
   fi->saved_regs[HARD_SP_REGNUM] = addr;
   fi->saved_regs[HARD_PC_REGNUM] = fi->saved_regs[HARD_SP_REGNUM];
 }
@@ -1009,10 +1056,12 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
     {
     case bfd_arch_m68hc11:
       tdep->stack_correction = 1;
+      tdep->prologue = m6811_prologue;
       break;
 
     case bfd_arch_m68hc12:
       tdep->stack_correction = 0;
+      tdep->prologue = m6812_prologue;
       break;
 
     default:

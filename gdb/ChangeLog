@@ -1,3 +1,15 @@
+2000-12-03  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* m68hc11-tdep.c (m68hc11_frame_args_address): Fix args address
+	computation.
+	(m68hc11_frame_init_saved_regs): Frame pointer is saved only if
+	the symbol exist.
+	(m68hc11_analyze_instruction): New function.
+	(m6811_prologue, m6812_prologue): New prologue description tables.
+	(m68hc11_guess_from_prologue): Use the above.
+	(m68hc11_gdbarch_init): Setup gdbarch_tdep for the prologue
+	descriptions.
+
 Sun Dec  3 02:28:26 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* ser-pipe.c (pipe_open): Only use vfork when available.
