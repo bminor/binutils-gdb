@@ -1,3 +1,10 @@
+2003-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Don't
+	use the last CIE from a different section.
+	(_bfd_elf_write_section_eh_frame): Don't pad beyond the raw
+	size of the output section.
+
 2003-10-07  Roland McGrath  <roland@redhat.com>
 
 	* elf.c (_bfd_elf_make_section_from_phdr): Set alignment_power of

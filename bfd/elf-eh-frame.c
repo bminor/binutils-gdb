@@ -372,6 +372,9 @@ _bfd_elf_discard_section_eh_frame
 		 all FDEs.  Also, it can be removed if we have removed
 		 all FDEs using it.  */
 	      if ((!info->relocatable
+		   && hdr_info->last_cie_sec
+		   && (sec->output_section
+		       == hdr_info->last_cie_sec->output_section)
 		   && cie_compare (&cie, &hdr_info->last_cie) == 0)
 		  || cie_usage_count == 0)
 		{
@@ -1031,7 +1034,11 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
       unsigned int alignment = 1 << sec->alignment_power;
       unsigned int pad = sec->_cooked_size % alignment;
 
-      if (pad)
+      /* Don't pad beyond the raw size of the output section. It
+	 can happen at the last input section.  */
+      if (pad
+	  && ((sec->output_offset + sec->_cooked_size + pad)
+	      <= sec->output_section->_raw_size))
 	{
 	  /* Find the last CIE/FDE.  */
 	  for (i = sec_info->count - 1; i > 0; i--)
