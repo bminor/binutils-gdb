@@ -1273,6 +1273,12 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	    return false;
 	}      
 
+      if (info->symbolic)
+	{
+	  if (! elf_add_dynamic_entry (info, DT_SYMBOLIC, 0))
+	    return false;
+	}
+
       if (rpath != NULL)
 	{
 	  bfd_size_type indx;
@@ -1430,6 +1436,16 @@ elf_adjust_dynamic_symbol (h, data)
   struct elf_info_failed *eif = (struct elf_info_failed *) data;
   bfd *dynobj;
   struct elf_backend_data *bed;
+
+  /* If -Bsymbolic was used (which means to bind references to global
+     symbols to the definition within the shared object), and this
+     symbol was defined in a regular object, then it actually doesn't
+     need a PLT entry.  */
+  if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0
+      && eif->info->shared
+      && eif->info->symbolic
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
+    h->elf_link_hash_flags &=~ ELF_LINK_HASH_NEEDS_PLT;
 
   /* If this symbol does not require a PLT entry, and it is not
      defined by a dynamic object, or is not referenced by a regular

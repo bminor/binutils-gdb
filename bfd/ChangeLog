@@ -5,6 +5,30 @@ Mon Jul 10 11:45:55 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 Mon Jul 10 11:09:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	Based on patches from Eric Youngdale <eric@aib.com>:
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): If -Bsymbolic,
+	output a DT_SYMBOLIC dynamic entry.
+	(elf_adjust_dynamic_symbol): If -Bsymbolic, don't require a PLT
+	entry for a locally defined symbol.
+	* elf32-i386.c (elf_i386_relocate_section): If -Bsymbolic, do warn
+	about undefined symbols, and fill in the GOT entry for a symbol
+	defined in a regular object file.
+	(elf_i386_finish_dynamic_symbol): If -Bsymbolic, output a RELATIVE
+	reloc rather than a GLOB_DAT reloc for a symbol defined in a
+	regular object file.
+	* elf32-m68k.c (elf_m68k_relocate_section): If -Bsymbolic, do warn
+	about undefined symbols, and fill in the GOT entry for a symbol
+	defined in a regular object file.
+	(elf_m68k_finish_dynamic_symbol): If -Bsymbolic, output a RELATIVE
+	reloc rather than a GLOB_DAT reloc for a symbol defined in a
+	regular object file.
+	* elf32-sparc.c (elf32_sparc_relocate_section): If -Bsymbolic, do
+	warn about undefined symbols, and fill in the GOT entry for a
+	symbol defined in a regular object file.
+	(elf32_sparc_finish_dynamic_symbol): If -Bsymbolic, output a
+	RELATIVE reloc rather than a GLOB_DAT reloc for a symbol defined
+	in a regular object file.
+
 	* config/m68k-coff.mt (SELECT_VECS): Rename from SELECT_VECTORS.
 	Correct elements to be actual BFD vector names.
 
