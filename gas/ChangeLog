@@ -1,3 +1,12 @@
+Fri Jan  7 17:38:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.c (ecoff_stab): Don't clobber the ECOFF symbol information
+	with the associate stabs information.
+	(ecoff_build_symbols): Never set the type of stabs symbols to
+	st_Global.  Don't update the symbol index or ifd if the gas symbol
+	is not the same as the ECOFF symbol (which is now the case for
+	stabs symbols).
+
 Fri Jan  7 11:14:07 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* config/tc-mips.c (macro): Add a LOSING_COMPILER ifdef that
