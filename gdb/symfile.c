@@ -67,34 +67,28 @@ struct complaint empty_symtab_complaint = {
 
 extern int info_verbose;
 
+extern void report_transfer_performance PARAMS ((unsigned long,
+						 time_t, time_t));
+
 /* Functions this file defines */
 
-static void
-set_initial_language PARAMS ((void));
+static void set_initial_language PARAMS ((void));
 
-static void
-load_command PARAMS ((char *, int));
+static void load_command PARAMS ((char *, int));
 
-static void
-add_symbol_file_command PARAMS ((char *, int));
+static void add_symbol_file_command PARAMS ((char *, int));
 
-static void
-add_shared_symbol_files_command PARAMS ((char *, int));
+static void add_shared_symbol_files_command PARAMS ((char *, int));
 
-static void
-cashier_psymtab PARAMS ((struct partial_symtab *));
+static void cashier_psymtab PARAMS ((struct partial_symtab *));
 
-static int
-compare_psymbols PARAMS ((const void *, const void *));
+static int compare_psymbols PARAMS ((const void *, const void *));
 
-static int
-compare_symbols PARAMS ((const void *, const void *));
+static int compare_symbols PARAMS ((const void *, const void *));
 
-static bfd *
-symfile_bfd_open PARAMS ((char *));
+static bfd *symfile_bfd_open PARAMS ((char *));
 
-static void
-find_sym_fns PARAMS ((struct objfile *));
+static void find_sym_fns PARAMS ((struct objfile *));
 
 /* List of all available sym_fns.  On gdb startup, each object file reader
    calls add_symtab_fns() to register information on each format it is
@@ -995,11 +989,25 @@ generic_load (filename, from_tty)
      loaded in.  remote-nindy.c had no call to symbol_file_add, but remote-vx.c
      does.  */
 
-  if (end_time != start_time)
-   printf_filtered ("Transfer rate: %d bits/sec.\n",
-                    (data_count * 8)/(end_time - start_time));
+  report_transfer_performance (data_count, start_time, end_time);
 
   do_cleanups (old_cleanups);
+}
+
+/* Report how fast the transfer went. */
+
+void
+report_transfer_performance (data_count, start_time, end_time)
+unsigned long data_count;
+time_t start_time, end_time;
+{
+  printf_filtered ("Transfer rate: ");
+  if (end_time != start_time)
+    printf_filtered ("%d bits/sec",
+		     (data_count * 8) / (end_time - start_time));
+  else
+    printf_filtered ("%d bits in <1 sec", (data_count * 8));
+  printf_filtered (".\n");
 }
 
 /* This function allows the addition of incrementally linked object files.

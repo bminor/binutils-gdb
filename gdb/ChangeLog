@@ -1,3 +1,9 @@
+Thu Apr  4 15:43:07 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* symfile.c (report_transfer_performance): New function.
+	(generic_load): Call it to report transfer rate.
+	* remote-e7000.c (e7000_load): Ditto.
+
 Mon Apr  1 16:31:00 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Change references to config.h to be in objdir,

@@ -44,6 +44,8 @@
 #include "serial.h"
 #include "remote-utils.h"
 #include "symfile.h"
+#include <time.h>
+
 #if 0
 #define HARD_BREAKPOINTS
 #define BC_BREAKPOINTS 0
@@ -55,6 +57,9 @@
 #define CTRLZ 0x1a
 
 extern void notice_quit PARAMS ((void));
+
+extern void report_transfer_performance PARAMS ((unsigned long,
+						 time_t, time_t));
 
 /* Local function declarations.  */
 
@@ -580,8 +585,12 @@ or \t\ttarget e7000 pc\n");
 
   expect_prompt ();
 
+  puts_e7000debug ("b -\r");
+
+  expect_prompt ();
+
   if (from_tty)
-    printf_filtered ("Remote %s connected to %s\n", target_shortname,
+    printf_filtered ("Remote target %s connected to %s\n", target_shortname,
 		     dev_name);
 
 #ifdef GDB_TARGET_IS_H8300
@@ -1391,6 +1400,8 @@ e7000_load (args, from_tty)
   char *filename;
   int quiet;
   int nostart;
+  time_t start_time, end_time;	/* Start and end times of download */
+  unsigned long data_count;	/* Number of bytes transferred to memory */
 
   if (!strchr (dev_name, ':'))
     {
@@ -1442,6 +1453,9 @@ e7000_load (args, from_tty)
     error ("\"%s\" is not an object file: %s", filename,
 	   bfd_errmsg (bfd_get_error ()));
 
+  start_time = time (NULL);
+  data_count = 0;
+
   puts_e7000debug ("mw\r");
 
   expect ("\nOK");
@@ -1465,6 +1479,8 @@ e7000_load (args, from_tty)
 
 	  fptr = 0;
 	  
+	  data_count += section_size;
+
 	  while (section_size > 0)
 	    {
 	      int count;
@@ -1488,7 +1504,9 @@ e7000_load (args, from_tty)
 	      bfd_get_section_contents (pbfd, section, buf + 10, fptr, count);
 
 	      if (SERIAL_WRITE (e7000_desc, buf, count + 10))
-		fprintf_unfiltered (gdb_stderr, "e7000_load: SERIAL_WRITE failed: %s\n", safe_strerror(errno));
+		fprintf_unfiltered (gdb_stderr,
+				    "e7000_load: SERIAL_WRITE failed: %s\n",
+				    safe_strerror(errno));
 
 	      expect ("OK");
 
@@ -1508,6 +1526,8 @@ e7000_load (args, from_tty)
   write_e7000 ("ED");
 
   expect_prompt ();
+
+  end_time = time (NULL);
 
 /* Finally, make the PC point at the start address */
 
@@ -1533,6 +1553,8 @@ e7000_load (args, from_tty)
 
 /*      start_routine (entry);*/
     }
+
+  report_transfer_performance (data_count, start_time, end_time);
 
   do_cleanups (old_chain);
 }
