@@ -1,3 +1,12 @@
+Fri Jun  5 18:19:59 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/aix.em (gld${EMULATION_NAME}_before_parse): Set
+	config.has_shared to true.
+	* emultempl/linux.em (gld${EMULATION_NAME}_before_parse):
+	Likewise.
+	* emultempl/sunos.em (gld${EMULATION_NAME}_before_parse):
+	Likewise.
+
 Tue Jun  2 12:55:03 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (lang_finish): If the entry symbol is not found, try
