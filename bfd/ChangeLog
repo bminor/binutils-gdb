@@ -1,7 +1,9 @@
 Wed Dec 14 20:21:58 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* elfcode.h (elf_map_symbols): Only use section symbols whose
-	value is the start of the section.
+	value is the start of the section, checking output_offset when
+	using output_section.  When creating a new symbol, set the value
+	to 0, since BFD symbol values are section relative.
 
 Tue Dec 13 13:31:06 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
