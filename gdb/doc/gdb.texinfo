@@ -146,6 +146,7 @@ Copyright (C) 1988-1999 Free Software Foundation, Inc.
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
 * Emacs::                       Using @value{GDBN} under @sc{gnu} Emacs
+* Annotations::                 @value{GDBN}'s annotations interface.
 
 * GDB Bugs::                    Reporting bugs in @value{GDBN}
 * Formatting Documentation::    How to format and print @value{GDBN} documentation
@@ -749,22 +750,33 @@ them, so long as enough of the option is present to be unambiguous.
 (If you prefer, you can flag option arguments with @samp{--} rather
 than @samp{-}, though we illustrate the more usual convention.)
 
+@c NOTE: the @cindex entries here use double dashes ON PURPOSE.  This
+@c way, both those who look for -foo and --foo in the index, will find
+@c it.
+
 @table @code
 @item -symbols @var{file}
 @itemx -s @var{file}
+@cindex @code{--symbols}
+@cindex @code{-s}
 Read symbol table from file @var{file}.
 
 @item -exec @var{file}
 @itemx -e @var{file}
+@cindex @code{--exec}
+@cindex @code{-e}
 Use file @var{file} as the executable file to execute when appropriate,
 and for examining pure data in conjunction with a core dump.
 
 @item -se @var{file}
+@cindex @code{--se}
 Read symbol table from file @var{file} and use it as the executable
 file.
 
 @item -core @var{file}
 @itemx -c @var{file}
+@cindex @code{--core}
+@cindex @code{-c}
 Use file @var{file} as a core dump to examine.
 
 @item -c @var{number}
@@ -774,15 +786,21 @@ case @samp{-c} specifies that file as a core dump to read).
 
 @item -command @var{file}
 @itemx -x @var{file}
+@cindex @code{--command}
+@cindex @code{-x}
 Execute @value{GDBN} commands from file @var{file}.  @xref{Command
 Files,, Command files}.
 
 @item -directory @var{directory}
 @itemx -d @var{directory}
+@cindex @code{--directory}
+@cindex @code{-d}
 Add @var{directory} to the path to search for source files.
 
 @item -m
 @itemx -mapped
+@cindex @code{--mapped}
+@cindex @code{-m}
 @emph{Warning: this option depends on operating system facilities that are not
 supported on all systems.}@*
 If memory-mapped files are available on your system through the @code{mmap}
@@ -800,6 +818,8 @@ table.  It cannot be shared across multiple host platforms.
 
 @item -r
 @itemx -readnow
+@cindex @code{--readnow}
+@cindex @code{-r}
 Read each symbol file's entire symbol table immediately, rather than
 the default, which is to read it incrementally as it is needed.
 This makes startup slower, but makes future operations faster.
@@ -825,6 +845,8 @@ batch mode or quiet mode.
 @table @code
 @item -nx
 @itemx -n
+@cindex @code{--nx}
+@cindex @code{-n}
 Do not execute commands found in any initialization files (normally
 called @file{.gdbinit}, or @file{gdb.ini} on PCs).  Normally,
 @value{GDBN} executes the commands in these files after all the command
@@ -832,11 +854,16 @@ options and arguments have been processed.  @xref{Command Files,,Command
 files}.
 
 @item -quiet
+@itemx -silent
 @itemx -q
+@cindex @code{--quiet}
+@cindex @code{--silent}
+@cindex @code{-q}
 ``Quiet''.  Do not print the introductory and copyright messages.  These
 messages are also suppressed in batch mode.
 
 @item -batch
+@cindex @code{--batch}
 Run in batch mode.  Exit with status @code{0} after processing all the
 command files specified with @samp{-x} (and all commands from
 initialization files, if not inhibited with @samp{-n}).  Exit with
@@ -858,21 +885,28 @@ mode.
 
 @item -nowindows
 @itemx -nw
+@cindex @code{--nowindows}
+@cindex @code{-nw}
 ``No windows''.  If @value{GDBN} comes with a graphical user interface
 (GUI) built in, then this option tells GDB to only use the command-line
 interface.  If no GUI is available, this option has no effect.
 
 @item -windows
 @itemx -w
+@cindex @code{--windows}
+@cindex @code{-w}
 If @value{GDBN} includes a GUI, then this option requires it to be
 used if possible.
 
 @item -cd @var{directory}
+@cindex @code{--cd}
 Run @value{GDBN} using @var{directory} as its working directory,
 instead of the current directory.
 
 @item -fullname
 @itemx -f
+@cindex @code{--fullname}
+@cindex @code{-f}
 @sc{gnu} Emacs sets this option when it runs @value{GDBN} as a
 subprocess.  It tells @value{GDBN} to output the full file name and line
 number in a standard, recognizable fashion each time a stack frame is
@@ -883,17 +917,65 @@ and a newline.  The Emacs-to-@value{GDBN} interface program uses the two
 @samp{\032} characters as a signal to display the source code for the
 frame.
 
+@item -epoch
+@cindex @code{--epoch}
+The Epoch Emacs-@value{GDBN} interface sets this option when it runs
+@value{GDBN} as a subprocess.  It tells @value{GDBN} to modify its print
+routines so as to allow Epoch to display values of expressions in a
+separate window.
+
+@item -annotate @var{level}
+@cindex @code{--annotate}
+This option sets the @dfn{annotation level} inside @value{GDBN}.  Its
+effect is identical to using @samp{set annotate @var{level}}
+(@pxref{Annotations}).
+Annotation level controls how much information does @value{GDBN} print
+together with its prompt, values of expressions, source lines, and other
+types of output.  Level 0 is the normal, level 1 is for use when
+@value{GDBN} is run as a subprocess of @sc{gnu} Emacs, level 2 is the
+maximum annotation suitable for programs that control @value{GDBN}.
+
+@item -async
+@cindex @code{--async}
+Use the asynchronous event loop for the command-line interface.
+@value{GDBN} processes all events, such as user keyboard input, via a
+special event loop.  This allows @value{GDBN} to accept and process user
+commands in parallel with the debugged process being
+run@footnote{@value{GDBN} built with @sc{djgpp} tools for
+MS-DOS/MS-Windows supports this mode of operation, but the event loop is
+suspended when the debuggee runs.}, so you don't need to wait for
+control to return to @value{GDBN} before you type the next command.
+(@emph{Note:} as of version 5.0, the target side of the asynchronous
+operation is not yet in place, so @samp{-async} does not work fully
+yet.)
+@c FIXME: when the target side of the event loop is done, the above NOTE
+@c should be removed.
+
+When the standard input is connected to a terminal device, @value{GDBN}
+uses the asynchronous event loop by default, unless disabled by the
+@samp{-noasync} option.
+
+@item -noasync
+@cindex @code{--noasync}
+Disable the asynchronous event loop for the command-line interface.
+
 @item -baud @var{bps}
 @itemx -b @var{bps}
+@cindex @code{--baud}
+@cindex @code{-b}
 Set the line speed (baud rate or bits per second) of any serial
 interface used by @value{GDBN} for remote debugging.
 
 @item -tty @var{device}
+@itemx -t @var{device}
+@cindex @code{--tty}
+@cindex @code{-t}
 Run using @var{device} for your program's standard input and output.
 @c FIXME: kingdon thinks there is more to -tty.  Investigate.
 
 @c resolve the situation of these eventually
 @c @item -tui
+@c @cindex @code{--tui}
 @c Use a Terminal User Interface.  For information, use your Web browser to
 @c read the file @file{TUI.html}, which is usually installed in the
 @c directory @code{/opt/langtools/wdb/doc} on HP-UX systems.  Do not use
@@ -901,10 +983,37 @@ Run using @var{device} for your program's standard input and output.
 @c @value{GDBN} under @sc{gnu} Emacs}).
 
 @c @item -xdb
+@c @cindex @code{--xdb}
 @c Run in XDB compatibility mode, allowing the use of certain XDB commands.
 @c For information, see the file @file{xdb_trans.html}, which is usually
 @c installed in the directory @code{/opt/langtools/wdb/doc} on HP-UX
 @c systems.
+
+@item -interpreter @var{interp}
+@cindex @code{--interpreter}
+Use the interpreter @var{interp} for interface with the controlling
+program or device.  This option is meant to be set by programs which
+communicate with @value{GDBN} using it as a back end.  For example,
+@samp{--interpreter=mi} causes @value{GDBN} to use the @dfn{gdbmi
+interface}.
+@c FIXME: There should be an @xref here to the GDB/MI docs, but
+@c gdbmi.texi doesn't have a single node to reference!
+
+@item -write
+@cindex @code{--write}
+Open the executable and core files for both reading and writing.  This
+is equivalent to the @samp{set write on} command inside @value{GDBN}
+(@pxref{Patching}).
+
+@item -statistics
+@cindex @code{--statistics}
+This option causes @value{GDBN} to print statistics about time and
+memory usage after it completes each command and returns to the prompt.
+
+@item -version
+@cindex @code{--version}
+This option causes @value{GDBN} to print its version number and
+no-warranty blurb, and exit.
 
 @end table
 
@@ -11865,6 +11974,8 @@ environment.  Users of this environment can use a new command,
 @code{inspect} which performs identically to @code{print} except that
 each value is printed in its own window.
 @end ignore
+
+@include annotate.texi
 
 @node GDB Bugs
 @chapter Reporting Bugs in @value{GDBN}

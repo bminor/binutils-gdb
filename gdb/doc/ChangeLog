@@ -1,3 +1,13 @@
+2000-03-16  Eli Zaretskii <eliz@is.elta.co.il>
+
+	* gdb.texinfo (main menu): Add Annotations.
+	(File Options): Add @cindex entries for each command-line option.
+	Document --epoch, --annotate, --async, --interpreter, --write,
+	--statistics, and --version.
+
+	* annotate.texi: Convert to a chapter.  Use @value{GDBN} instead
+	of GDB.
+
 2000-02-23  Jim Blandy  <jimb@redhat.com>
 
 	* gdbint.texinfo (FUNCTION_START_OFFSET): Document.
