@@ -1,3 +1,7 @@
+2001-10-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/POTFILES.in: Regenerate.
+
 2001-10-13  matthew green  <mrg@redhat.com>
 
 	* ppc-opc.c (MO): New macro for MO field of mbar instruction.

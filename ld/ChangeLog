@@ -1,3 +1,7 @@
+2001-10-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/POTFILES.in: Regenerate.
+
 2001-10-16  Vassili Karpov  <malc@pulsesoft.com>
 
 	* emultempl/elf32.em (gld*_list_options): Remove extra '\t' from
