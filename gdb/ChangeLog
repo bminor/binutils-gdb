@@ -1,3 +1,8 @@
+2003-08-26  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* ia64-tdep.c (examine_prologue): Only stop at predicated insns if
+	we are frameless or the return address register is already known. 
+
 2003-08-26  Andrew Cagney  <cagney@redhat.com>
 
 	* i386-linux-nat.c (ps_get_thread_area): Make "desc" four "int"s

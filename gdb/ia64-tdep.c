@@ -1143,11 +1143,18 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *next_frame,
       if (next_pc == 0)
 	break;
 
-      if ((it == B && ((instr & 0x1e1f800003f) != 0x04000000000))
-          || ((instr & 0x3fLL) != 0LL))
+      if (it == B && ((instr & 0x1e1f800003f) != 0x04000000000))
 	{
-	  /* Exit loop upon hitting a non-nop branch instruction 
-	     or a predicated instruction. */
+	  /* Exit loop upon hitting a non-nop branch instruction. */ 
+	  if (trust_limit)
+	    lim_pc = pc;
+	  break;
+	}
+      else if (((instr & 0x3fLL) != 0LL) && 
+	       (frameless || ret_reg != 0))
+	{
+	  /* Exit loop upon hitting a predicated instruction if
+	     we already have the return register or if we are frameless.  */ 
 	  if (trust_limit)
 	    lim_pc = pc;
 	  break;
