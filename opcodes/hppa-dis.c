@@ -29,7 +29,7 @@ static const char *const reg_names[] =
  {"flags", "r1", "rp", "r3", "r4", "r5", "r6", "r7", "r8", "r9",
   "r10", "r11", "r12", "r13", "r14", "r15", "r16", "r17", "r18", "r19",
   "r20", "r21", "r22", "arg3", "arg2", "arg1", "arg0", "dp", "ret0", "ret1",
-  "sp", "r31"}
+  "sp", "r31"};
 
 /* Floating point register names, indexed by the numbers which appear in the
    opcodes.  */
@@ -356,7 +356,6 @@ print_insn_hppa (memaddr, info)
      disassemble_info *info;
 {
   unsigned int insn, i, op;
-  FILE *stream = info->stream;
 
   {
     int status =
@@ -378,7 +377,7 @@ print_insn_hppa (memaddr, info)
 	  
 	  (*info->fprintf_func) (info->stream, "%s", opcode->name);
 
-	  if (!strchr ("cCY<?!@-+&U>~nZFIMad", opcode->args[0]))
+	  if (!strchr ("cfCY<?!@-+&U>~nNZFIMadu|", opcode->args[0]))
 	    (*info->fprintf_func) (info->stream, " ");
 	  for (s = opcode->args; *s != '\0'; ++s)
 	    {
@@ -436,7 +435,8 @@ print_insn_hppa (memaddr, info)
 		  fput_const (extract_5_load (insn), info);
 		  break;
 		case 's':
-		  fprintf_filtered (stream, "sr%d", GET_FIELD (insn, 16, 17));
+		  (*info->fprintf_func) (info->stream,
+					 "sr%d", GET_FIELD (insn, 16, 17));
 		  break;
 		case 'S':
 		  (*info->fprintf_func) (info->stream, "sr%d", extract_3 (insn));
@@ -489,6 +489,7 @@ print_insn_hppa (memaddr, info)
 		  (*info->fprintf_func) (info->stream, "%s ",
 				    unit_cond_names[GET_COND (insn)]);
 		  break;
+		case '|':
 		case '>':
 		case '~':
 		  (*info->fprintf_func)
@@ -527,20 +528,29 @@ print_insn_hppa (memaddr, info)
 		  else
 		    (*info->fprintf_func) (info->stream, " ");
 		  break;
+		case 'N':
+		  if ((insn & 0x20) && s[1])
+		    (*info->fprintf_func) (info->stream, ",n ");
+		  else if (insn & 0x20)
+		    (*info->fprintf_func) (info->stream, ",n");
+		  else if (s[1])
+		    (*info->fprintf_func) (info->stream, " ");
+		  break;
 		case 'w':
 		  (*info->print_address_func) (memaddr + 8 + extract_12 (insn),
 					       info);
 		  break;
 		case 'W':
-		  /* don't interpret an address if it's an external branch
-		     instruction. */
-		  op = GET_FIELD (insn, 0, 5);
-		  if (op != 0x38 /* be */ && op != 0x39 /* ble */)
-		    (*info->print_address_func) ((memaddr + 8
-						  + extract_17 (insn)),
-						 info);
-		  else
-		    fput_const (extract_17 (insn), info);
+		  /* 17 bit PC-relative branch.  */
+		  (*info->print_address_func) ((memaddr + 8 
+						+ extract_17 (insn)),
+					       info);
+		  break;
+		case 'z':
+		  /* 17 bit displacement.  This is an offset from a register
+		     so it gets disasssembled as just a number, not any sort
+		     of address.  */
+		  fput_const (extract_17 (insn), info);
 		  break;
 		case 'p':
 		  (*info->fprintf_func) (info->stream, "%d",
@@ -589,17 +599,18 @@ print_insn_hppa (memaddr, info)
 			       GET_FIELD (insn, 27, 31)), info);
 		  break;
 		case 'u':
-		  (*info->fprintf_func) (info->stream, "%d", GET_FIELD (insn, 23, 25));
+		  (*info->fprintf_func) (info->stream, ",%d", GET_FIELD (insn, 23, 25));
 		  break;
 		case 'F':
-		  /* if no destination completer, need a space here */
-		  if (GET_FIELD (insn, 21, 22) == 1)
+		  /* if no destination completer and not before a completer
+		     for fcmp, need a space here */
+		  if (GET_FIELD (insn, 21, 22) == 1 || s[1] == 'M')
 		    fputs_filtered (float_format_names[GET_FIELD (insn, 19, 20)],
 				    info);
 		  else
 		    (*info->fprintf_func) (info->stream, "%s ",
-				      float_format_names[GET_FIELD
-							 (insn, 19, 20)]);
+					   float_format_names[GET_FIELD
+							      (insn, 19, 20)]);
 		  break;
 		case 'G':
 		  (*info->fprintf_func) (info->stream, "%s ",
@@ -611,14 +622,15 @@ print_insn_hppa (memaddr, info)
                                                       (insn, 26, 26)], info);
 		  break;
 		case 'I':
-		  /* if no destination completer, need a space here */
-		  if (GET_FIELD (insn, 21, 22) == 1)
+		  /* if no destination completer and not before a completer
+		     for fcmp, need a space here */
+		  if (GET_FIELD (insn, 21, 22) == 1 || s[1] == 'M')
 		    fputs_filtered (float_format_names[GET_FIELD (insn, 20, 20)],
 				    info);
 		  else
-		    fprintf_filtered (stream, "%s ",
-				      float_format_names[GET_FIELD
-							 (insn, 20, 20)]);
+		    (*info->fprintf_func) (info->stream, "%s ",
+					   float_format_names[GET_FIELD
+							      (insn, 20, 20)]);
 		  break;
 		case 'J':
                   if (GET_FIELD (insn, 24, 24))
@@ -634,8 +646,9 @@ print_insn_hppa (memaddr, info)
 		      fput_fp_reg (GET_FIELD (insn, 11, 15), info);
 		  break;
 		case 'M':
-		  fputs_filtered (float_comp_names[GET_FIELD (insn, 27, 31)],
-				  info);
+		    (*info->fprintf_func) (info->stream, "%s ",
+					   float_comp_names[GET_FIELD
+							      (insn, 27, 31)]);
 		  break;
 		default:
 		  (*info->fprintf_func) (info->stream, "%c", *s);

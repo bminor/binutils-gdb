@@ -1,4 +1,10 @@
-Fri Feb  4 23:38:03 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+Sat Feb  5 00:04:02 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* hppa-dis.c (print_insn_hppa): Do not emit a space after 'F'
+	or 'I' operands if the next format specifier is 'M' (fcmp
+	condition completer).
+
+Feb  4 23:38:03 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ppc-opc.c (powerpc_operands): New operand type MBE to handle a
 	single number giving a bitmask for the MB and ME fields of an M
