@@ -1,3 +1,9 @@
+2004-10-08  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
+
+	* dlltool.c (make_one_lib_file): Revert 2004-09-02 and 2004-09-04
+	patches.
+	* doc/binutils.texi (dlltool): Revert 2004-09-06 patch.
+
 2004-10-07  Alexandre Oliva  <aoliva@redhat.com>
 
 	* readelf.c (get_machine_flags): Don't fall through into m68k cpu

@@ -2517,17 +2517,11 @@ make_one_lib_file (export_type *exp, int i)
                      why it did that, and it does not match what I see
                      in programs compiled with the MS tools.  */
 		  int idx = exp->hint;
-		  /* If the user has specified an internal name, use it.
-		     Ignore command line name translation options.  */	 
-		  char const * internal_name
-		    = exp->internal_name != exp->name
-		      ? exp->internal_name : xlate (exp->name);
-
-		  si->size = strlen (internal_name) + 3;
+		  si->size = strlen (xlate (exp->name)) + 3;
 		  si->data = xmalloc (si->size);
 		  si->data[0] = idx & 0xff;
 		  si->data[1] = idx >> 8;
-		  strcpy (si->data + 2, internal_name);
+		  strcpy (si->data + 2, xlate (exp->name));
 		}
 	      break;
 	    case IDATA7:
