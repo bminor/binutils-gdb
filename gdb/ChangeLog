@@ -1,3 +1,7 @@
+2002-10-18  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.h: Delete 'struct source' and 'struct sourcevector'.
+
 2002-10-18  Adam Fedor  <fedor@gnu.org>
 
 	* stabsread.c (find_name_end): New function.
@@ -10,7 +14,7 @@
 	* config/alpha/nm-nbsd.h (CANNOT_STEP_BREAKPOINT): Define to 1.
 	* config/alpha/nm-osf.h (CANNOT_STEP_BREAKPOINT): Define to 1.
 
-2002-10-09  David Carlton  <carlton@math.stanford.edu>
+2002-10-17  David Carlton  <carlton@math.stanford.edu>
 
 	* symfile.h: Add opaque declaration for struct obstack.
 	Declare obsavestring to take a const char *.

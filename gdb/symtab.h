@@ -750,15 +750,6 @@ struct partial_symbol
 #define PSYMBOL_CLASS(psymbol)		(psymbol)->aclass
 
 
-/* Source-file information.  This describes the relation between source files,
-   line numbers and addresses in the program text.  */
-
-struct sourcevector
-{
-  int length;			/* Number of source files described */
-  struct source *source[1];	/* Descriptions of the files */
-};
-
 /* Each item represents a line-->pc (or the reverse) mapping.  This is
    somewhat more wasteful of space than one might wish, but since only
    the files which are actually debugged are read in to core, we don't
@@ -795,14 +786,6 @@ struct linetable
      `struct hack', you can shove it up your ANSI (seriously, if the
      committee tells us how to do it, we can probably go along).  */
   struct linetable_entry item[1];
-};
-
-/* All the information on one source file.  */
-
-struct source
-{
-  char *name;			/* Name of file */
-  struct linetable contents;
 };
 
 /* How to relocate the symbols from each section in a symbol file.
