@@ -1,9 +1,12 @@
 2004-02-22  Andrew Cagney  <cagney@redhat.com>
 
+	* hppa-tdep.c (hppa_gdbarch_init): Convert compile time #if0s into
+	runtime if(0).
+
 	* hppa-tdep.c (hppa_breakpoint_from_pc): Make "breakpoint"
 	unsigned.
 	(hppa_frame_find_saved_regs): Fix "std" instruction pattern
-	
+
 	* config/pa/tm-hppa.h: Update copyright.
 	(DEPRECATED_INIT_FRAME_PC): Delete macro.
 	(deprecated_init_frame_pc_default): Delete declaration.
