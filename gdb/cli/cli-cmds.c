@@ -504,9 +504,9 @@ shell_escape (char *arg, int from_tty)
 	p++;			/* Get past '/' */
 
       if (!arg)
-	execl (user_shell, p, 0);
+	execl (user_shell, p, (char *) 0);
       else
-	execl (user_shell, p, "-c", arg, 0);
+	execl (user_shell, p, "-c", arg, (char *) 0);
 
       fprintf_unfiltered (gdb_stderr, "Cannot execute %s: %s\n", user_shell,
 			  safe_strerror (errno));

@@ -1,5 +1,8 @@
 2004-01-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* ser-pipe.c (pipe_open): Use proper null pointer in execl call.
+	* cli/cli-cmds.c (shell_escape): Likewise.
+
 	* osabi.c (generic_elf_osabi_sniff_abi_tag_sections): Recognize
 	OpenBSD .note.openbsd.ident sections.
 
