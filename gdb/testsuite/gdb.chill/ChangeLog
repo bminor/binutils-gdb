@@ -1,3 +1,9 @@
+Fri Dec 29 10:46:09 1995  Fred Fish  <fnf@cygnus.com>
+
+	* builtins.exp (test_size):  Alpha seems to have long builtins.
+	* tests1.exp: Setup xfail "*-*-*" for "ptype r2".
+	* tests2.exp: Add check to skip chill tests.
+	
 Mon Dec 11 16:53:40 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* tuples.ch, tuples.exp:  Exhance test cases (from PR 8643).

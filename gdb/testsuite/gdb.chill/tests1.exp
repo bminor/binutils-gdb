@@ -152,6 +152,8 @@ proc test_modes {} {
     test_print_accept "ptype r16" "long \\(-2147483648:2147483647\\)" \
 	"print long range mode"
 
+    # Not sure what this should be.
+    setup_xfail "*-*-*"
     test_print_accept "ptype r2" "set1 \\(bbb:ccc\\)" \
 	"print unnumbered set range mode"
     setup_xfail "*-*-*"

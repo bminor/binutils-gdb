@@ -117,8 +117,13 @@ proc test_lower {} {
     test_print_accept "print lower(char)" "C'00'"
     test_print_accept "print lower(byte)" "-128"
     test_print_accept "print lower(ubyte)" "0"
-    test_print_accept "print lower(int)" "-32768"
+    if [istarget "alpha-*-*"] then {
+	test_print_accept "print lower(int)" "-2147483648"
+    } else {
+	test_print_accept "print lower(int)" "-32768"
+    }
     test_print_accept "print lower(uint)" "0"
+    setup_xfail "alpha-*-*"
     test_print_accept "print lower(long)" "-2147483648"
     test_print_accept "print lower(ulong)" "0"
     test_print_accept "print lower(m_set)" "e1"
@@ -133,8 +138,13 @@ proc test_lower {} {
     test_print_accept "print lower(v_char)" "C'00'"
     test_print_accept "print lower(v_byte)" "-128"
     test_print_accept "print lower(v_ubyte)" "0"
-    test_print_accept "print lower(v_int)" "-32768"
+    if [istarget "alpha-*-*"] then {
+	test_print_accept "print lower(v_int)" "-2147483648"
+    } else {
+	test_print_accept "print lower(v_int)" "-32768"
+    }
     test_print_accept "print lower(v_uint)" "0"
+    setup_xfail "alpha-*-*"
     test_print_accept "print lower(v_long)" "-2147483648"
     test_print_accept "print lower(v_ulong)" "0"
     test_print_accept "print lower(v_set)" "e1"
@@ -162,7 +172,11 @@ proc test_lower {} {
     test_print_accept "print lower(m_arr)" "1";
     test_print_accept "print lower(m_char_arr)" "C'00'"
     test_print_accept "print lower(m_bool_arr)" "FALSE"
-    test_print_accept "print lower(m_int_arr)" "-32768"
+    if [istarget "alpha-*-*"] then {
+	test_print_accept "print lower(m_int_arr)" "-2147483648"
+    } else {
+	test_print_accept "print lower(m_int_arr)" "-32768"
+    }
     test_print_accept "print lower(m_set_arr)" "e1"
     test_print_accept "print lower(m_set_range_arr)" "e2"
     test_print_accept "print lower(m_char_range_arr)" "'A'"
@@ -174,7 +188,11 @@ proc test_lower {} {
     test_print_accept "print lower(v_arr)" "1";
     test_print_accept "print lower(v_char_arr)" "C'00'"
     test_print_accept "print lower(v_bool_arr)" "FALSE"
-    test_print_accept "print lower(v_int_arr)" "-32768"
+    if [istarget "alpha-*-*"] then {
+	test_print_accept "print lower(v_int_arr)" "-2147483648"
+    } else {
+	test_print_accept "print lower(v_int_arr)" "-32768"
+    }
     test_print_accept "print lower(v_set_arr)" "e1"
     test_print_accept "print lower(v_set_range_arr)" "e2"
     test_print_accept "print lower(v_char_range_arr)" "'A'"
@@ -194,10 +212,18 @@ proc test_upper {} {
     test_print_accept "print upper(char)" "C'ff'"
     test_print_accept "print upper(byte)" "127"
     test_print_accept "print upper(ubyte)" "255"
-    test_print_accept "print upper(int)" "32767"
-    test_print_accept "print upper(uint)" "65535"
-    test_print_accept "print upper(long)" "2147483647"
-    test_print_accept "print upper(ulong)" "4294967295"
+    if [istarget "alpha-*-*"] then {
+	test_print_accept "print upper(int)" "2147483647"
+	test_print_accept "print upper(uint)" "4294967295"
+	setup_xfail "alpha-*-*"
+	test_print_accept "print upper(long)" "4294967295"
+	test_print_accept "print upper(ulong)" "18446744073709551615"
+    } else {
+	test_print_accept "print upper(int)" "32767"
+	test_print_accept "print upper(uint)" "65535"
+	test_print_accept "print upper(long)" "2147483647"
+	test_print_accept "print upper(ulong)" "4294967295"
+    }
     test_print_accept "print upper(m_set)" "e6"
     test_print_accept "print upper(m_set_range)" "e5"
     test_print_accept "print upper(m_char_range)" "'Z'"
@@ -210,10 +236,18 @@ proc test_upper {} {
     test_print_accept "print upper(v_char)" "C'ff'"
     test_print_accept "print upper(v_byte)" "127"
     test_print_accept "print upper(v_ubyte)" "255"
-    test_print_accept "print upper(v_int)" "32767"
-    test_print_accept "print upper(v_uint)" "65535"
-    test_print_accept "print upper(v_long)" "2147483647"
-    test_print_accept "print upper(v_ulong)" "4294967295"
+    if [istarget "alpha-*-*"] then {
+	test_print_accept "print upper(v_int)" "2147483647"
+	test_print_accept "print upper(v_uint)" "4294967295"
+	setup_xfail "alpha-*-*"
+	test_print_accept "print upper(v_long)" "4294967295"
+	test_print_accept "print upper(v_ulong)" "18446744073709551615"
+    } else {
+	test_print_accept "print upper(v_int)" "32767"
+	test_print_accept "print upper(v_uint)" "65535"
+	test_print_accept "print upper(v_long)" "2147483647"
+	test_print_accept "print upper(v_ulong)" "4294967295"
+    }
     test_print_accept "print upper(v_set)" "e6"
     test_print_accept "print upper(v_set_range)" "e5"
     test_print_accept "print upper(v_char_range)" "'Z'"
@@ -239,7 +273,11 @@ proc test_upper {} {
     test_print_accept "print upper(m_arr)" "10";
     test_print_accept "print upper(m_char_arr)" "C'ff'"
     test_print_accept "print upper(m_bool_arr)" "TRUE"
-    test_print_accept "print upper(m_int_arr)" "32767"
+    if [istarget "alpha-*-*"] then {
+	test_print_accept "print upper(m_int_arr)" "2147483647"
+    } else {
+	test_print_accept "print upper(m_int_arr)" "32767"
+    }
     test_print_accept "print upper(m_set_arr)" "e6"
     test_print_accept "print upper(m_set_range_arr)" "e5"
     test_print_accept "print upper(m_char_range_arr)" "'Z'"
@@ -251,7 +289,11 @@ proc test_upper {} {
     test_print_accept "print upper(v_arr)" "10";
     test_print_accept "print upper(v_char_arr)" "C'ff'"
     test_print_accept "print upper(v_bool_arr)" "TRUE"
-    test_print_accept "print upper(v_int_arr)" "32767"
+    if [istarget "alpha-*-*"] then {
+	test_print_accept "print upper(v_int_arr)" "2147483647"
+    } else {
+	test_print_accept "print upper(v_int_arr)" "32767"
+    }
     test_print_accept "print upper(v_set_arr)" "e6"
     test_print_accept "print upper(v_set_range_arr)" "e5"
     test_print_accept "print upper(v_char_range_arr)" "'Z'"
@@ -295,31 +337,47 @@ proc test_size {} {
     test_print_accept "print size(bool)" "1"
     test_print_accept "print size(char)" "1"
     test_print_accept "print size(byte)" "1"
-    test_print_accept "print size(int)" "2"
-    test_print_accept "print size(ulong)" "4"
-    test_print_accept "print size(ptr)" "4"
+    if [istarget "alpha-*-*"] then {
+	test_print_accept "print size(int)" "4"
+	test_print_accept "print size(ulong)" "8"
+	test_print_accept "print size(ptr)" "8"
+	test_print_accept "print size(m_chars_v)" "24"
+	test_print_accept "print size(m_struct)" "40"
+    } else {
+	test_print_accept "print size(int)" "2"
+	test_print_accept "print size(ulong)" "4"
+	test_print_accept "print size(ptr)" "4"
+	test_print_accept "print size(m_chars_v)" "22"
+	test_print_accept "print size(m_struct)" "36"
+    }
     test_print_accept "print size(m_set)" "1"
     test_print_accept "print size(m_char_range)" "1"
     test_print_accept "print size(m_range_arr)" "17"
     test_print_accept "print size(m_chars)" "20"
-    test_print_accept "print size(m_chars_v)" "22"
     test_print_accept "print size(m_bits)" "2"
-    test_print_accept "print size(m_struct)" "36"
 
     # locations
     test_print_accept "print size(v_bool)" "1"
     test_print_accept "print size(v_char)" "1"
     test_print_accept "print size(v_byte)" "1"
-    test_print_accept "print size(v_int)" "2"
-    test_print_accept "print size(v_ulong)" "4"
-    test_print_accept "print size(v_ptr)" "4"
+    if [istarget "alpha-*-*"] then {
+	test_print_accept "print size(v_int)" "4"
+	test_print_accept "print size(v_ulong)" "8"
+	test_print_accept "print size(v_ptr)" "8"
+	test_print_accept "print size(v_chars_v)" "24"
+	test_print_accept "print size(v_struct)" "40"
+    } else {
+	test_print_accept "print size(v_int)" "2"
+	test_print_accept "print size(v_ulong)" "4"
+	test_print_accept "print size(v_ptr)" "4"
+	test_print_accept "print size(v_chars_v)" "22"
+	test_print_accept "print size(v_struct)" "36"
+    }
     test_print_accept "print size(v_set)" "1"
     test_print_accept "print size(v_char_range)" "1"
     test_print_accept "print size(v_range_arr)" "17"
     test_print_accept "print size(v_chars)" "20"
-    test_print_accept "print size(v_chars_v)" "22"
     test_print_accept "print size(v_bits)" "2"
-    test_print_accept "print size(v_struct)" "36"
 }
 
 proc test_num {} {
