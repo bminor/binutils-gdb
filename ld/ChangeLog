@@ -1,3 +1,24 @@
+Sat Mar 28 16:48:19 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	Fix some gcc -Wall warnings:
+	* ldcref.c (output_cref): Add casts to avoid warnings.
+	* ldfile.c (ldfile_add_arch): Likewise.
+	* ldlang.c (lang_leave_overlay_section): Likewise.
+	* lexsup.c (OPTION_COUNT): Likewise.
+	(parse_args): Likewise.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan):
+	Likewise.
+	* emultempl/sunos.em (gld${EMULATION_NAME}_search_dir): Likewise.
+	* ldlang.c (lang_check): Initialize variables to avoid warnings.
+	* ldwrite.c (build_link_order): Likewise.
+	* emultempl/sunos.em (gld${EMULATION_NAME}_find_so): Likewise.
+	* emultempl/armcoff.em (gld${EMULATION_NAME}_before_allocation):
+	Remove unused variables.
+
+	* Makefile.am (MOSTLYCLEANFILES): Correct name (was
+	MOSTCLEANFILES).
+	* Makefile.in: Rebuild.
+
 Fri Mar 27 16:39:25 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_before_allocation): Put

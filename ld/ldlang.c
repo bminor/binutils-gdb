@@ -1,5 +1,6 @@
 /* Linker command language support.
-   Copyright (C) 1991, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 1998
+   Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -471,7 +472,7 @@ lang_memory_default (section)
   flagword sec_flags = section->flags;
 
   /* Override SEC_DATA to mean a writable section.  */
-  if (sec_flags & (SEC_ALLOC | SEC_READONLY | SEC_CODE) == SEC_ALLOC)
+  if ((sec_flags & (SEC_ALLOC | SEC_READONLY | SEC_CODE)) == SEC_ALLOC)
     sec_flags |= SEC_DATA;
 
   for (p = lang_memory_region_list;
@@ -2165,10 +2166,28 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	   /* No address specified for this section, get one
 	      from the region specification
 	      */
-	   if (os->region == (lang_memory_region_type *) NULL)
+	   if (os->region == (lang_memory_region_type *) NULL
+	       || (((bfd_get_section_flags (output_bfd, os->bfd_section)
+		    & (SEC_ALLOC | SEC_LOAD)) != 0)
+		   && os->region->name[0] == '*'
+		   && strcmp (os->region->name, "*default*") == 0))
 	   {
 	     os->region = lang_memory_default (os->bfd_section);
 	   }
+
+	   /* If a loadable section is using the default memory
+	      region, and some non default memory regions were
+	      defined, issue a warning.  */
+	   if ((bfd_get_section_flags (output_bfd, os->bfd_section)
+		& (SEC_ALLOC | SEC_LOAD)) != 0
+	       && ! link_info.relocateable
+	       && strcmp (os->region->name, "*default*") == 0
+	       && lang_memory_region_list != NULL
+	       && (strcmp (lang_memory_region_list->name, "*default*") != 0
+		   || lang_memory_region_list->next != NULL))
+	     einfo ("%P: warning: no memory region specified for section `%s'\n",
+		    bfd_get_section_name (output_bfd, os->bfd_section));
+
 	   dot = os->region->current;
 	   if (os->section_alignment == -1)
 	     {
@@ -2737,7 +2756,7 @@ lang_check ()
 	}
       else
 	{
-	  bfd_error_handler_type pfn;
+	  bfd_error_handler_type pfn = NULL;
 
 	  /* If we aren't supposed to warn about mismatched input
              files, temporarily set the BFD error handler to a
@@ -3893,7 +3912,7 @@ lang_leave_overlay_section (fill, phdrs)
   clean = xmalloc (strlen (name) + 1);
   s2 = clean;
   for (s1 = name; *s1 != '\0'; s1++)
-    if (isalnum (*s1) || *s1 == '_')
+    if (isalnum ((unsigned char) *s1) || *s1 == '_')
       *s2++ = *s1;
   *s2 = '\0';
 
