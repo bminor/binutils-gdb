@@ -1,5 +1,9 @@
 Tue Oct 26 15:07:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	gcc -Wall lint:
+	* nlmread.c: Include stabsread.h.
+	* Makefile.in: Update dependencies.
+
 	* remote.c: Change PBUFSIZ back to 400.  John's 28 Feb 1992 change
 	to increase it broke the ability to write large chunks of memory
 	with m68k-stub and i386-stub.  Now we only use more than 400 on

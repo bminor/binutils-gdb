@@ -1232,7 +1232,7 @@ nindy.o: nindy-share/nindy.c $(wait_h) nindy-share/block_io.h \
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/nindy.c
 
 nlmread.o: nlmread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
-	gdb-stabs.h objfiles.h symfile.h $(symtab_h)
+	gdb-stabs.h objfiles.h symfile.h $(symtab_h) stabsread.h
 
 ttyflush.o: nindy-share/ttyflush.c
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/ttyflush.c
