@@ -1,3 +1,7 @@
+Mon Jul 25 11:50:57 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* coredep.c: Include inferior.h.
+
 Mon Jul 25 11:36:02 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* Makefile.in (LD_FOR_TARGET): Look for ld in ../ld/ld.new.

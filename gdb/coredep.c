@@ -25,6 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/param.h>
 #include "gdbcore.h"
 #include "value.h" /* For supply_register.  */
+#include "inferior.h" /* For ARCH_NUM_REGS. */
 
 /* These are needed on various systems to expand REGISTER_U_ADDR.  */
 #ifndef USG
