@@ -1,3 +1,7 @@
+2003-10-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Remote Protocol): Document v and vCont.
+
 2003-10-10  Kei Sakamoto  <sakamoto.kei@renesas.com>
 
 	* gdb.texinfo: Replace "Hitachi" and "Mitsubishi" with "Renesas".
