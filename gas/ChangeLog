@@ -1,3 +1,13 @@
+Wed Nov 23 19:36:09 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* config/obj-coff.h (TARGET_FORMAT): Select between coff-shl and coff-sh.
+	* config/sh.mh (TARG_CPU_DEPENDENTS): Get it right.
+	* config/tc-sh.c  (little): New function.
+	(md_parse_option): Notice new option.
+	(build_relax, build_Mytes, md_atof, md_convert_frag, md_apply_fix):
+        Cope with little endian data.
+	* config/tc-sh.h (COFF_MAGIC, LISTING_HEADER): Endian dependent.
+
 Wed Nov 23 10:54:38 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (tc_gen_reloc, ELF variant): Revert last
