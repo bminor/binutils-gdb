@@ -1,3 +1,29 @@
+2003-08-29  Jakub Jelinek  <jakub@redhat.com>
+
+	* dw2gencfi.c (cfi_pseudo_table): Add cfi_gnu_window_save.
+	(dot_cfi, output_cfi_insn): Handle DW_CFA_GNU_window_save.
+	(output_cie): Don't use DW_EH_PE_pcrel if neither DIFF_EXPR_OK
+	nor tc_cfi_emit_pcrel_expr are defined.
+	(output_fde): Use tc_cfi_emit_pcrel_expr if available and
+	DIFF_EXPR_OK is not defined.
+	* config/tc-sparc.h (TARGET_USE_CFIPOP): Define.
+	(tc_cfi_frame_initial_instructions, tc_regname_to_dw2regnum,
+	tc_cfi_emit_pcrel_expr): Define.
+	(sparc_cfi_frame_initial_instructions, sparc_regname_to_dw2regnum,
+	sparc_cfi_emit_pcrel_expr): New prototypes.
+	(sparc_cie_data_alignment): New decl.
+	(DWARF2_DEFAULT_RETURN_COLUMN, DWARF2_CIE_DATA_ALIGNMENT): Define.
+	* config/tc-sparc.c: Include dw2gencfi.h.
+	(sparc_cie_data_alignment): New variable.
+	(md_begin): Initialize it.
+	(sparc_cfi_frame_initial_instructions): New function.
+	(sparc_regname_to_dw2regnum): Likewise.
+	(sparc_cfi_emit_pcrel_expr): Likewise.
+	* doc/as.texinfo: Document .cfi_gnu_window_save.
+
+	* config/tc-sparc.c (s_common): Cast last argument to long and
+	change format string to shut up warning.
+
 2003-08-25  Jason Eckhardt  <jle@rice.edu>
 
 	* doc/c-i860.texi: Update text about relocatable address expansions.

@@ -374,6 +374,7 @@ const pseudo_typeS cfi_pseudo_table[] =
     { "cfi_same_value", dot_cfi, DW_CFA_same_value },
     { "cfi_remember_state", dot_cfi, DW_CFA_remember_state },
     { "cfi_restore_state", dot_cfi, DW_CFA_restore_state },
+    { "cfi_gnu_window_save", dot_cfi, DW_CFA_GNU_window_save },
     { "cfi_escape", dot_cfi_escape, 0 },
     { NULL, NULL, 0 }
   };
@@ -527,6 +528,10 @@ dot_cfi (int arg)
 
     case DW_CFA_restore_state:
       cfi_add_CFA_restore_state ();
+      break;
+
+    case DW_CFA_GNU_window_save:
+      cfi_add_CFA_insn (DW_CFA_GNU_window_save);
       break;
 
     default:
@@ -798,6 +803,10 @@ output_cfi_insn (struct cfi_insn_data *insn)
       out_one (insn->insn);
       break;
 
+    case DW_CFA_GNU_window_save:
+      out_one (DW_CFA_GNU_window_save);
+      break;
+
     case CFI_escape:
       {
 	struct cfi_escape_data *e;
@@ -838,7 +847,11 @@ output_cie (struct cie_entry *cie)
   out_sleb128 (DWARF2_CIE_DATA_ALIGNMENT);	/* Data alignment */
   out_one (cie->return_column);			/* Return column */
   out_uleb128 (1);				/* Augmentation size */
+#if defined DIFF_EXPR_OK || defined tc_cfi_emit_pcrel_expr
   out_one (DW_EH_PE_pcrel | DW_EH_PE_sdata4);
+#else
+  out_one (DW_EH_PE_sdata4);
+#endif
 
   if (cie->first)
     for (i = cie->first; i != cie->last; i = i->next)
@@ -867,10 +880,22 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
   exp.X_add_symbol = after_size_address;
   exp.X_op_symbol = cie->start_address;
   emit_expr (&exp, 4);				/* CIE offset */
-  
+
+#ifdef DIFF_EXPR_OK  
   exp.X_add_symbol = fde->start_address;
   exp.X_op_symbol = symbol_temp_new_now ();
   emit_expr (&exp, 4);				/* Code offset */
+#else
+  exp.X_op = O_symbol;
+  exp.X_add_symbol = fde->start_address;
+  exp.X_op_symbol = NULL;
+#ifdef tc_cfi_emit_pcrel_expr
+  tc_cfi_emit_pcrel_expr (&exp, 4);		/* Code offset */
+#else
+  emit_expr (&exp, 4);				/* Code offset */
+#endif
+  exp.X_op = O_subtract;
+#endif
 
   exp.X_add_symbol = fde->end_address;
   exp.X_op_symbol = fde->start_address;		/* Code length */

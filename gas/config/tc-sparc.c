@@ -26,6 +26,7 @@
 #include "subsegs.h"
 
 #include "opcode/sparc.h"
+#include "dw2gencfi.h"
 
 #ifdef OBJ_ELF
 #include "elf/sparc.h"
@@ -115,6 +116,9 @@ static int target_little_endian_data;
 
 /* Symbols for global registers on v9.  */
 static symbolS *globals[8];
+
+/* The dwarf2 data alignment, adjusted for 32 or 64 bit.  */
+int sparc_cie_data_alignment;
 
 /* V9 and 86x have big and little endian data, but instructions are always big
    endian.  The sparclet has bi-endian support but both data and insns have
@@ -798,6 +802,7 @@ md_begin ()
   if (! default_init_p)
     init_default_arch ();
 
+  sparc_cie_data_alignment = sparc_arch_size == 64 ? -8 : -4;
   op_hash = hash_new ();
 
   while (i < (unsigned int) sparc_num_opcodes)
@@ -3804,8 +3809,8 @@ s_common (ignore)
     {
       if (S_GET_VALUE (symbolP) != (valueT) size)
 	{
-	  as_warn (_("Length of .comm \"%s\" is already %ld. Not changed to %d."),
-		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
+	  as_warn (_("Length of .comm \"%s\" is already %ld. Not changed to %ld."),
+		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), (long) size);
 	}
     }
   else
@@ -4482,4 +4487,63 @@ cons_fix_new_sparc (frag, where, nbytes, exp)
    }
 
   fix_new_exp (frag, where, (int) nbytes, exp, 0, r);
+  sparc_cons_special_reloc = NULL;
+}
+
+void
+sparc_cfi_frame_initial_instructions ()
+{
+  cfi_add_CFA_def_cfa (14, sparc_arch_size == 64 ? 0x7ff : 0);
+}
+
+int
+sparc_regname_to_dw2regnum (const char *regname)
+{
+  char *p, *q;
+
+  if (!regname[0])
+    return -1;
+
+  q = "goli";
+  p = strchr (q, regname[0]);
+  if (p)
+    {
+      if (regname[1] < '0' || regname[1] > '8' || regname[2])
+	return -1;
+      return (p - q) * 8 + regname[1] - '0';
+    }
+  if (regname[0] == 's' && regname[1] == 'p' && !regname[2])
+    return 14;
+  if (regname[0] == 'f' && regname[1] == 'p' && !regname[2])
+    return 30;
+  if (regname[0] == 'f' || regname[0] == 'r')
+    {
+      unsigned int regnum;
+
+      regnum = strtoul (regname + 1, &q, 10);
+      if (p == q || *q)
+        return -1;
+      if (regnum >= ((regname[0] == 'f'
+		      && SPARC_OPCODE_ARCH_V9_P (max_architecture))
+		     ? 64 : 32))
+	return -1;
+      if (regname[0] == 'f')
+	{
+          regnum += 32;
+          if (regnum >= 64 && (regnum & 1))
+	    return -1;
+        }
+      return regnum;
+    }
+  return -1;
+}
+
+void
+sparc_cfi_emit_pcrel_expr (expressionS *exp, unsigned int nbytes)
+{
+  sparc_cons_special_reloc = "disp";
+  sparc_no_align_cons = 1;
+  emit_expr (exp, nbytes);
+  sparc_no_align_cons = 0;
+  sparc_cons_special_reloc = NULL;
 }

@@ -1,3 +1,11 @@
+2003-08-29  Jakub Jelinek  <jakub@redhat.com>
+
+	* gas/cfi/cfi-sparc-1.s: New test.
+	* gas/cfi/cfi-sparc-1.d: New test.
+	* gas/cfi/cfi-sparc64-1.s: New test.
+	* gas/cfi/cfi-sparc64-1.d: New test.
+	* gas/cfi/cfi.exp: Run them.
+
 2003-08-19  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/copro.s: Add tests of Addressing Mode 5 (Unindexed).

@@ -39,6 +39,16 @@ if [istarget "x86_64-*"] then {
 } elseif { [istarget "m68*-*"] } then {
     run_dump_test "cfi-m68k"
 
+} elseif { [istarget sparc*-*-*] } then {
+    global NM
+    global NMFLAGS
+    global srcdir
+
+    catch "exec $srcdir/lib/run $NM $NMFLAGS --help" nm_help
+    run_dump_test "cfi-sparc-1"
+    if { [regexp "elf64\[_-\]sparc" $nm_help] } then {
+	run_dump_test "cfi-sparc64-1"
+    }
 } else {
     return
 }
