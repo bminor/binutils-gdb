@@ -1,3 +1,8 @@
+Wed Nov 11 18:10:15 1998  DJ Delorie  <dj@cygnus.com>
+
+	* pe-dll.c (generate_reloc): don't output PE relocs for sections
+ 	that won't be loaded.
+
 Wed Nov 11 13:44:54 1998  DJ Delorie  <dj@cygnus.com>
 
 	* pe-dll.c (fill_edata): don't strip underscores

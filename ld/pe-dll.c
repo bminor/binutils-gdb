@@ -617,6 +617,24 @@ generate_reloc (abfd, info)
 	  asymbol **symbols;
 	  int nsyms, symsize;
 
+	  /* if it's not loaded, we don't need to relocate it this way */
+	  if (!(s->output_section->flags & SEC_LOAD))
+	    continue;
+
+	  /* I don't know why there would be a reloc for these, but I've
+	     seen it happen - DJ */
+	  if (s->output_section == &bfd_abs_section)
+	    continue;
+
+	  if (s->output_section->vma == 0)
+	    {
+	      /* Huh?  Shouldn't happen, but punt if it does */
+	      einfo ("DJ: zero vma section reloc detected: `%s' #%d f=%d\n",
+		     s->output_section->name, s->output_section->index,
+		     s->output_section->flags);
+	      continue;
+	    }
+
 	  symsize = bfd_get_symtab_upper_bound (b);
 	  symbols = (asymbol **) xmalloc (symsize);
 	  nsyms = bfd_canonicalize_symtab (b, symbols);
@@ -627,7 +645,8 @@ generate_reloc (abfd, info)
 
 	  for (i = 0; i < nrelocs; i++)
 	    {
-	      if (!relocs[i]->howto->pc_relative)
+	      if (!relocs[i]->howto->pc_relative
+		  && relocs[i]->howto->type != R_IMAGEBASE)
 		{
 		  switch (relocs[i]->howto->bitsize)
 		    {
