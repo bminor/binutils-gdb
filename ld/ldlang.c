@@ -3445,7 +3445,7 @@ lang_do_assignments_1
   return dot;
 }
 
-bfd_vma
+void
 lang_do_assignments (lang_statement_union_type *s,
 		     lang_output_section_statement_type
 		     *output_section_statement,

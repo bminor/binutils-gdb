@@ -447,7 +447,7 @@ extern void lang_for_each_file
   (void (*dothis) (lang_input_statement_type *));
 extern void lang_reset_memory_regions
   (void);
-extern bfd_vma lang_do_assignments
+extern void lang_do_assignments
   (lang_statement_union_type *, lang_output_section_statement_type *,
    fill_type *, bfd_vma);
 

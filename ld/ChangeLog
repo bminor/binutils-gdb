@@ -1,3 +1,11 @@
+2003-12-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_do_assignments): Function return is void.
+	* ldlang.h (lang_do_assignments): Ditto.
+	* emultempl/netbsd.em (gld${EMULATION_NAME}_before_parse): Declare.
+	* Makefile.am (ens32knbsd.c): Depend on netbsd.em.
+	* Makefile.in: Regenerate.
+
 2003-12-03  Dave Airlie  <airlied@linux.ie>
 
 	* configure.tgt: Add vax-linux-gnu target.
