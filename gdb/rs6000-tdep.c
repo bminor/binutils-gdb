@@ -213,19 +213,20 @@ rs6000_software_single_step (signal, insert_breakpoints_p)
 /* return pc value after skipping a function prologue and also return
    information about a function frame.
 
-   in struct rs6000_frameinfo fdata:
+   in struct rs6000_framedata fdata:
     - frameless is TRUE, if function does not have a frame.
     - nosavedpc is TRUE, if function does not save %pc value in its frame.
-    - offset is the number of bytes used in the frame to save registers.
+    - offset is the initial size of this stack frame --- the amount by
+      which we decrement the sp to allocate the frame.
     - saved_gpr is the number of the first saved gpr.
     - saved_fpr is the number of the first saved fpr.
     - alloca_reg is the number of the register used for alloca() handling.
       Otherwise -1.
-    - gpr_offset is the offset of the saved gprs
-    - fpr_offset is the offset of the saved fprs
+    - gpr_offset is the offset of the first saved gpr from the previous frame.
+    - fpr_offset is the offset of the first saved fpr from the previous frame.
     - lr_offset is the offset of the saved lr
     - cr_offset is the offset of the saved cr
- */
+*/
 
 #define SIGNED_SHORT(x) 						\
   ((sizeof (short) == 2)						\
@@ -668,19 +669,24 @@ pop_frame ()
   write_register (PC_REGNUM, lr);
 
   /* reset register values if any was saved earlier. */
-  addr = prev_sp - fdata.offset;
 
   if (fdata.saved_gpr != -1)
-    for (ii = fdata.saved_gpr; ii <= 31; ++ii) {
-      read_memory (addr, &registers [REGISTER_BYTE (ii)], 4);
-      addr += 4;
+    {
+      addr = prev_sp + fdata.gpr_offset;
+      for (ii = fdata.saved_gpr; ii <= 31; ++ii) {
+	read_memory (addr, &registers [REGISTER_BYTE (ii)], 4);
+	addr += 4;
+      }
     }
 
   if (fdata.saved_fpr != -1)
-    for (ii = fdata.saved_fpr; ii <= 31; ++ii) {
-      read_memory (addr, &registers [REGISTER_BYTE (ii+FP0_REGNUM)], 8);
-      addr += 8;
-  }
+    {
+      addr = prev_sp + fdata.fpr_offset;
+      for (ii = fdata.saved_fpr; ii <= 31; ++ii) {
+	read_memory (addr, &registers [REGISTER_BYTE (ii+FP0_REGNUM)], 8);
+	addr += 8;
+      }
+    }
 
   write_register (SP_REGNUM, prev_sp);
   target_store_registers (-1);

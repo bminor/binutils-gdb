@@ -66,14 +66,16 @@ struct fp_status {
 /* To be used by skip_prologue. */
 
 struct rs6000_framedata {
-  int	offset;				/* # of bytes in gpr's and fpr's are saved */
+  int	offset;				/* total size of frame --- the distance
+					   by which we decrement sp to allocate
+					   the frame */
   int	saved_gpr;			/* smallest # of saved gpr */
   int	saved_fpr;			/* smallest # of saved fpr */
   int	alloca_reg;			/* alloca register number (frame ptr) */
   char	frameless;			/* true if frameless functions. */
   char	nosavedpc;			/* true if pc not saved. */
-  int	gpr_offset;			/* offset of saved gprs */
-  int	fpr_offset;			/* offset of saved fprs */
+  int	gpr_offset;			/* offset of saved gprs from prev sp */
+  int	fpr_offset;			/* offset of saved fprs from prev sp */
   int	lr_offset;			/* offset of saved lr */
   int	cr_offset;			/* offset of saved cr */
 };
@@ -149,7 +151,7 @@ extern void aix_process_linenos PARAMS ((void));
 
 /* Stack grows downward.  */
 
-#define INNER_THAN <
+#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
 /* This is how arguments pushed onto stack or passed in registers.
    Stack must be aligned on 64-bit boundaries when synthesizing
