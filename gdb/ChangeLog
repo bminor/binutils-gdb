@@ -1,5 +1,10 @@
 2002-06-01  Andrew Cagney  <ac131313@redhat.com>
 
+	* MAINTAINERS: Mention that any `HP/UX reader' can be changed by
+	any maintainer.
+
+2002-06-01  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.h: Regenerate.
 
 2002-06-01  Andrew Cagney  <ac131313@redhat.com>

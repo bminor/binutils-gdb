@@ -282,6 +282,8 @@ generic symtabs		Jim Blandy		jimb@redhat.com
   linespec		Jim Blandy		jimb@redhat.com
 			Elena Zannoni		ezannoni@redhat.com
 			Fernando Nasser		fnasser@redhat.com
+  HP/UX readers		Any [past] maintainer can modify this.
+			Please send tricky ones to the symtabs maintainers.
 
 tracing bytecode stuff  Jim Blandy              jimb@redhat.com
 tracing			Michael Snyder		msnyder@redhat.com
