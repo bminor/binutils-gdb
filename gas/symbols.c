@@ -1379,7 +1379,7 @@ S_SET_EXTERNAL (s)
 {
   if ((s->bsym->flags & BSF_WEAK) != 0)
     {
-      as_bad ("%s already declared as weak", S_GET_NAME (s));
+      /* Let .weak override .global.  */
       return;
     }
   s->bsym->flags |= BSF_GLOBAL;
@@ -1392,7 +1392,7 @@ S_CLEAR_EXTERNAL (s)
 {
   if ((s->bsym->flags & BSF_WEAK) != 0)
     {
-      as_bad ("%s already declared as weak", S_GET_NAME (s));
+      /* Let .weak override.  */
       return;
     }
   s->bsym->flags |= BSF_LOCAL;
@@ -1403,11 +1403,6 @@ void
 S_SET_WEAK (s)
      symbolS *s;
 {
-  if ((s->bsym->flags & BSF_GLOBAL) != 0)
-    {
-      as_bad ("%s already declared as global", S_GET_NAME (s));
-      return;
-    }
   s->bsym->flags |= BSF_WEAK;
   s->bsym->flags &= ~(BSF_GLOBAL|BSF_LOCAL);
 }

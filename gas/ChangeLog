@@ -1,3 +1,9 @@
+Fri Jul 26 11:56:08 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* symbols.c (S_SET_EXTERNAL): Let .weak override.
+	(S_CLEAR_EXTERNAL): Likewise.
+	(S_SET_WEAK): Remove error; just let .weak override.
+
 start-sanitize-d10v
 Thu Jul 25 15:22:51 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
