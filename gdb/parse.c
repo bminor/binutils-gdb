@@ -41,6 +41,7 @@
 #include "command.h"
 #include "language.h"
 #include "parser-defs.h"
+#include "linespec.h"
 #include "gdbcmd.h"
 #include "symfile.h"		/* for overlay functions */
 #include "inferior.h"		/* for NUM_PSEUDO_REGS.  NOTE: replace 

@@ -39,6 +39,7 @@
 #include "annotate.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "linespec.h"
 #ifdef UI_OUT
 #include "ui-out.h"
 #endif

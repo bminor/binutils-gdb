@@ -27,6 +27,7 @@
 #include "language.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "completer.h"
 
 #ifdef USG
 #include <sys/types.h>

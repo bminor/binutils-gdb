@@ -37,6 +37,7 @@
 #include "gdb_stat.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "completer.h"
 
 /* Local function declarations.  */
 

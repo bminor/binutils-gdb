@@ -35,6 +35,7 @@
 #include "language.h"
 #include "demangle.h"
 #include "inferior.h"
+#include "linespec.h"
 
 #include "obstack.h"
 

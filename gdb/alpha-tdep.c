@@ -29,6 +29,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdb_string.h"
+#include "linespec.h"
 
 /* FIXME: Some of this code should perhaps be merged with mips-tdep.c.  */
 

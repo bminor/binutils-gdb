@@ -31,6 +31,7 @@
 #include "inferior.h"
 #include "tracepoint.h"
 #include "remote.h"
+#include "linespec.h"
 
 #include "ax.h"
 #include "ax-gdb.h"

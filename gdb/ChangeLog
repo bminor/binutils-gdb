@@ -1,3 +1,31 @@
+2000-11-30  Fernando Nasser  <fnasser@redhat.com>
+
+	* linespec.h: New file. Declarations for linespec.c.
+	* linespec.c, alpha-tdep.c, breakpoint.c, parse.c, source.c,
+	symtab.c, tracepoint.c: Include the above.
+	* completer.c: New file. Line completion stuff for GDB.
+	(get_gdb_completer_word_break_characters,
+	get_gdb_completer_quote_characters): New functions. Accessors for
+	useful completer internal data.
+	(filename_completer, line_completion_function, skip_quoted): Moved
+	here from top.c.
+	* completer.h: New file. Declarations for the above.
+	* linespec.c (decode_line_1): Use
+	get_gdb_completer_word_break_characters and
+        get_gdb_completer_quote_characters.
+	* top.c: Include completer.h.
+	(filename_completer, line_completion_function, skip_quoted):
+	Moved to completer.c.
+	* corefile.c, exec.c, source.c, symfile.c, linespec.c: Include
+	completer.h.
+	* Makefile.in (SFILES): Add completer.c.
+	(COMMON_OBS): Add completer.o.
+	(completer.o): New target.
+	(linespec.o, alpha-tdep.o, breakpoint.o, parse.o, source.o,
+        symtab.o, tracepoint.o): Add linespec.h to dependencies list.
+	(corefile.o, exec.o, source.o, symfile.o, linespec.o): Add completer.h
+	to dependencies list.
+
 Thu Nov 30 13:19:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch.c: Regenerate.

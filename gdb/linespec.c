@@ -21,12 +21,13 @@
 
 #include "defs.h"
 #include "symtab.h"
-#include "gdbtypes.h"
+#include "frame.h"
+#include "command.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "gdbcmd.h"
 #include "demangle.h"
-#include "inferior.h"
+#include "value.h"
+#include "completer.h"
 
 /* Prototype for one function in parser-defs.h,
    instead of including that entire file. */
@@ -573,7 +574,8 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* Maybe arg is FILE : LINENUM or FILE : FUNCTION */
 
   is_quoted = (**argptr
-	       && strchr (gdb_completer_quote_characters, **argptr) != NULL);
+	       && strchr (get_gdb_completer_quote_characters (),
+			  **argptr) != NULL);
 
   has_parens = ((pp = strchr (*argptr, '(')) != NULL
 		&& (pp = strrchr (pp, ')')) != NULL);
@@ -727,7 +729,8 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 		  /* Arg token is not digits => try it as a function name
 		     Find the next token(everything up to end or next blank). */
 		  if (**argptr
-		      && strchr (gdb_completer_quote_characters, **argptr) != NULL)
+		      && strchr (get_gdb_completer_quote_characters (),
+				 **argptr) != NULL)
 		    {
 		      p = skip_quoted (*argptr);
 		      *argptr = *argptr + 1;
@@ -766,7 +769,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 		    copy[p - *argptr] = '\0';
 		    if (p != *argptr
 			&& copy[p - *argptr - 1]
-			&& strchr (gdb_completer_quote_characters,
+			&& strchr (get_gdb_completer_quote_characters (),
 				   copy[p - *argptr - 1]) != NULL)
 		      copy[p - *argptr - 1] = '\0';
 		  }
@@ -1097,7 +1100,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   if (p != *argptr
       && copy[0]
       && copy[0] == copy[p - *argptr - 1]
-      && strchr (gdb_completer_quote_characters, copy[0]) != NULL)
+      && strchr (get_gdb_completer_quote_characters (), copy[0]) != NULL)
     {
       copy[p - *argptr - 1] = '\0';
       copy++;

@@ -477,7 +477,7 @@ TARGET_FLAGS_TO_PASS = \
 SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	buildsym.c c-exp.y c-lang.c c-typeprint.c c-valprint.c \
 	ch-exp.c ch-lang.c ch-typeprint.c ch-valprint.c coffread.c \
-	command.c complaints.c corefile.c cp-valprint.c dbxread.c \
+	command.c complaints.c completer.c corefile.c cp-valprint.c dbxread.c \
 	demangle.c dwarfread.c dwarf2read.c elfread.c environ.c eval.c \
 	event-loop.c event-top.c \
 	expprint.c f-exp.y f-lang.c f-typeprint.c f-valprint.c \
@@ -623,7 +623,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	symtab.o symfile.o symmisc.o linespec.o infcmd.o infrun.o command.o \
 	expprint.o environ.o stack.o thread.o \
-	event-loop.o event-top.o inf-loop.o \
+	event-loop.o event-top.o inf-loop.o completer.o \
 	gdbarch.o arch-utils.o gdbtypes.o copying.o $(DEPFILES) \
 	mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
 	kod.o kod-cisco.o \
@@ -1148,7 +1148,7 @@ a68v-nat.o: a68v-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
 alpha-nat.o: alpha-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
 
 alpha-tdep.o: alpha-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) $(symtab_h) $(dis-asm.h) gdb_string.h
+	$(inferior_h) $(symtab_h) $(dis-asm.h) gdb_string.h linespec.h
 
 # OBSOLETE altos-xdep.o: altos-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
@@ -1170,7 +1170,7 @@ blockframe.o: blockframe.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 
 breakpoint.o: breakpoint.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) language.h target.h gdbthread.h gdb_string.h \
-	gdb-events.h
+	gdb-events.h linespec.h
 
 buildsym.o: buildsym.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	objfiles.h symfile.h $(symtab_h) gdb_string.h
@@ -1238,7 +1238,7 @@ core-regset.o: core-regset.c $(command_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h gdb_string.h
 
 corefile.o: corefile.c $(dis-asm_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) target.h language.h gdb_string.h
+	$(inferior_h) target.h language.h gdb_string.h completer.h
 
 corelow.o: corelow.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h gdbthread.h gdb_string.h
@@ -1292,7 +1292,7 @@ inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(inf_loop_h) $(event_loop_h) \
 	 $(event_top_h)
 
 exec.o: exec.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
-	target.h language.h gdb_string.h
+	target.h language.h gdb_string.h completer.h
 
 expprint.o: expprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h parser-defs.h $(symtab_h) $(value_h)
@@ -1396,7 +1396,7 @@ v850-tdep.o: v850-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(obstack_h) \
 
 tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
 	$(gdbtypes_h) $(expression_h) $(gdbcmd_h) $(value_h) target.h \
-	language.h gdb_string.h $(readline_headers) $(remote_h)
+	language.h gdb_string.h $(readline_headers) $(remote_h) linespec.h
 
 gdbarch.o: gdbarch.c $(defs_h) $(bfd_h) $(gdbcmd_h)
 
@@ -1652,7 +1652,7 @@ hp-symtab-read.o: hp-symtab-read.c hpread.h $(bfd_h) buildsym.h complaints.h \
 
 parse.o: parse.c $(command_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h) \
-	gdb_string.h
+	gdb_string.h linespec.h
 
 ppc-bdm.o: ppc-bdm.c $(defs_h) $(gdbcore_h) gdb_string.h $(frame_h) \
 	$(inferior_h) $(bfd_h) symfile.h target.h gdb_wait.h $(gdbcmd_h) \
@@ -1848,7 +1848,7 @@ solib-svr4.o: solib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 
 source.o: source.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 	$(gdbcore_h) language.h objfiles.h gnu-regex.h symfile.h $(symtab_h) \
-	gdb_string.h source.h
+	gdb_string.h source.h completer.h linespec.h
 
 sparc-nat.o: sparc-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(gdbcore_h) \
 	target.h
@@ -1884,7 +1884,7 @@ sun386-nat.o: sun386-nat.c $(defs_h) $(inferior_h) $(gdbcore_h)
 symfile.o: symfile.c $(breakpoint_h) complaints.h $(defs_h) \
 	$(expression_h) $(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) \
 	language.h objfiles.h symfile.h $(symtab_h) target.h \
-	gdb_string.h
+	gdb_string.h completer.h
 
 symm-tdep.o: symm-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
@@ -1897,10 +1897,11 @@ symmisc.o: symmisc.c $(bfd_h) $(breakpoint_h) $(command_h) $(defs_h) \
 symtab.o: symtab.c call-cmds.h $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h objfiles.h \
 	gnu-regex.h symfile.h $(symtab_h) target.h $(value_h) \
-	gdb_string.h
+	gdb_string.h linespec.h
 
-linespec.o: linespec.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) objfiles.h \
-	symfile.h $(symtab_h) $(INCLUDE_DIR)/demangle.h inferior.h
+linespec.o: linespec.c linespec.h $(defs_h) $(frame_h) $(value_h) \
+	objfiles.h symfile.h completer.h $(symtab_h) \
+	$(INCLUDE_DIR)/demangle.h command.h
 
 # OBSOLETE tahoe-tdep.o: tahoe-tdep.c $(OP_INCLUDE)/tahoe.h $(defs_h) \
 # OBSOLETE	$(symtab_h)
@@ -1912,9 +1913,13 @@ target.o: target.c $(bfd_h) $(defs_h) $(gdbcmd_h) $(inferior_h) \
 
 thread.o: thread.c $(defs_h) gdbthread.h $(gdbcmd_h) target.h
 
+completer.o: completer.c completer.h $(gdbtypes_h) $(symtab_h) \
+	$(defs_h) $(gdbcmd_h) $(expression_h) $(readline_headers)
+
 top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
 	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h signals.h \
-	$(remote_utils_h) gdb_string.h $(event_loop_h) $(event_top_h) $(version_h)
+	$(remote_utils_h) gdb_string.h $(event_loop_h) $(event_top_h) \
+	completer.h $(version_h)
 
 typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \
