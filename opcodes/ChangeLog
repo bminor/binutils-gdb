@@ -1,3 +1,8 @@
+Wed Apr  6 17:11:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips-opc.c (mips_opcodes): Correct operands of "nor" with an
+	immediate argument.
+
 Mon Apr  4 16:30:46 1994  Doug Evans  (dje@canuck.cygnus.com)
 
 	* sparc-opc.c (sparc_opcodes): Fix "rd %fprs,%l0".
