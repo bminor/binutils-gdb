@@ -157,7 +157,7 @@ struct readline_input_state
 readline_input_state;
 
 
-/* Wrapper function foe calling into the readline library. The event
+/* Wrapper function for calling into the readline library. The event
    loop expects the callback function to have a paramter, while readline 
    expects none. */
 static void
@@ -515,7 +515,7 @@ command_handler (char *command)
   execute_command (command, instream == stdin);
 
   /* Set things up for this function to be compete later, once the
-     executin has completed, if we are doing an execution command,
+     execution has completed, if we are doing an execution command,
      otherwise, just go ahead and finish. */
   if (target_can_async_p () && target_executing)
     {
