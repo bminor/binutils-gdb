@@ -1,3 +1,8 @@
+Mon Jan  9 15:51:32 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* elfcode.h (elf_link_add_object_symbols): It's reasonable for no
+	flags to be set, so don't insist otherwise.
+
 Fri Jan  6 16:39:40 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* elfcode.h (elf_slurp_symbol_table): Don't set BSF_GLOBAL for an

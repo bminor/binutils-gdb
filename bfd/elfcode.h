@@ -4259,7 +4259,7 @@ elf_link_add_object_symbols (abfd, info)
 	}
 
       /* Sanity check that all possibilities were handled.  */
-      if (flags == BSF_NO_FLAGS || sec == (asection *) NULL)
+      if (sec == (asection *) NULL)
 	{
 	  bfd_set_error (bfd_error_bad_value);
 	  goto error_return;
