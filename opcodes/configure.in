@@ -60,6 +60,22 @@ AM_PROG_INSTALL
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h)
 
+# start-sanitize-cygnus
+use_cgen=no
+if test ${USE_MAINTAINER_MODE} = yes ; then
+	for targ in $target $canon_targets
+	do
+	    case $targ in
+	    all) use_cgen=yes ;;
+	    m32r-*-*) use_cgen=yes ;;
+	    esac
+	done
+fi
+if test $use_cgen = yes ; then
+    AC_CHECK_PROG(SCHEME, guile, guile, guile)
+fi
+# end-sanitize-cygnus
+
 # target-specific stuff:
 
 # Canonicalize the secondary target names.

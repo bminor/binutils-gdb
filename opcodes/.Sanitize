@@ -15,6 +15,14 @@
 
 Do-first:
 
+cygnus_files="cgen.sh cgen-asm.in cgen-dis.in"
+
+if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
+	keep_these_too="${cygnus_files} ${keep_these_too}"
+else
+	lose_these_too="${cygnus_files} ${lose_these_too}"
+fi
+
 d30v_files="d30v-dis.c d30v-opc.c"
 
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
@@ -60,8 +68,11 @@ arc-opc.c
 arm-dis.c
 arm-opc.h
 a29k-dis.c
+cgen.sh
 cgen-asm.c
+cgen-asm.in
 cgen-dis.c
+cgen-dis.in
 cgen-opc.c
 config.in
 configure
@@ -115,6 +126,34 @@ z8kgen.c
 Things-to-lose:
 
 Do-last:
+
+cygnus_files="ChangeLog Makefile.am Makefile.in configure.in configure"
+if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
+	for i in $cygnus_files ; do
+		if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping cygnus stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $cygnus_files ; do
+		if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"cygnus\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-cygnus/,/end-\sanitize\-cygnus/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
 
 d30v_files="ChangeLog Makefile.in Makefile.am configure.in configure disassemble.c"
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then

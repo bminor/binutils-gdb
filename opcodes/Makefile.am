@@ -138,6 +138,44 @@ stamp-lib: libopcodes.la
 libopcodes.a: stamp-lib ; @true
 
 CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1
+# start-sanitize-cygnus
+CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1 stamp-m32r
+# end-sanitize-cygnus
+
+# start-sanitize-cygnus
+# CGEN support is sanitized out of FSF releases for now.
+# Sanitization must be split between assignments and rules because
+# automake splits them that way.
+
+SCHEME = @SCHEME@
+SCHEMEFLAGS = -s
+CGENDIR = $(srcdir)/../cgen
+CGENFLAGS = -v
+
+CGENFILES = $(CGENDIR)/object.scm $(CGENDIR)/utils.scm \
+	$(CGENDIR)/utils-cgen.scm $(CGENDIR)/cpu.scm \
+	$(CGENDIR)/mode.scm $(CGENDIR)/mach.scm \
+	$(CGENDIR)/ifield.scm $(CGENDIR)/iformat.scm \
+	$(CGENDIR)/operand.scm $(CGENDIR)/insn.scm \
+	$(CGENDIR)/opcodes.scm $(CGENDIR)/cgen-opc.scm \
+	cgen-asm.in cgen-dis.in
+# The end marker is written this way to pass through automake unscathed.
+ENDSAN = end-sanitize-cygnus
+
+# start-sanitize-cygnus
+cgen:
+	$(SHELL) $(srcdir)/cgen.sh $(srcdir) $(CGENDIR) $(CGENFLAGS) $(SCHEME) $(SCHEMEFLAGS) $(arch)
+	touch stamp-${arch}
+
+.PHONY: cgen
+
+# For now, require developers to configure with --enable-maintainer-mode.
+# ??? Do we need to use a different option?
+m32r-opc.h m32r-opc.c m32r-asm.c m32r-dis.c: @MAINT@ stamp-m32r
+	@true
+stamp-m32r: $(CGENFILES) $(CGENDIR)/m32r.cpu $(CGENDIR)/m32r.opc
+	$(MAKE) cgen arch=m32r prefix=m32r
+# end-sanitize-cygnus
 
 # start-sanitize-tic80
 tic80-dis.lo: tic80-dis.c $(INCDIR)/dis-asm.h ../bfd/bfd.h \
