@@ -1,10 +1,45 @@
+Tue Nov  4 16:35:57 1997  Ian Dall  <Ian.Dall@dsto.defence.gov.au>
+
+	* write.c (print_fixup): Use TC_FIX_DATA_PRINT (if defined) to
+	print out MD fields of fix.
+	* frags.c (frag_var, frag_variant): Use TC_FRAG_INIT macro (if
+ 	defined) to initialize MD fields in frag.
+	* as.h (struct frag, ns32k support): Rename ns32k to fr_ns32k.
+	Delete pcrel_adjust.  Add fr_opcode_fragP, fr_opcode_offset.
+	* config/tc-ns32k.h: Add comments. Remove obsolete
+ 	BFD_FAST_SECTION_FILL definition, change prototypes for
+ 	fix_new_ns32k and fix_new_ns32k_exp to add new arguments
+ 	opcode_frag and opcode_offset and remove pcrel_adjust.
+	(TC_FIX_TYPE): add opcode_fragP and opcode_offset fields.
+	(TC_FIX_DATA_PRINT): new macro to print out TC_FIX_TYPE.
+	(TC_FRAG_INIT): new macro to initialize machine dependent field in
+ 	frags.
+	(frag_opcode_frag, frag_opcode_offset, frag_bsr): macros to access
+ 	MD fields in frag structure.
+	(fix_im_disp, fix_bit_fixP, fix_opcode_frag, fix_opcode_offset,
+ 	fix_bsr): macros to access MD fields in fix structure.
+	* config/tc-ns32k.c: Avoid overlength lines. Align comments.  Don't
+ 	use struct opcode_location as these fields are now in the frag
+	structure.
+	(convert_iif): Call frag_more as it is needed instead
+ 	of trying to allocate for the whole insn. Avoid call of frag_more
+ 	with negative argument.
+	(md_pcrel_adjust, md_fix_pcrel_adjust, md_apply_fix,
+	md_estimate_size_before_relax, md_pcrel_from,
+	tc_aout_fix_to_chars): use accessor macros to get md fields in fix
+ 	and frag structures.
+	(fix_new_ns32k, fix_new_ns32k_exp): add new arguments opcode_frag and
+	opcode_offset and remove pcrel_adjust.
+	(convert_iif, cons_fix_new_ns32k): call fix_new_ns32k,
+ 	fix_new_ns32k_exp with changed arguments.
+
 Mon Nov  3 13:30:17 1997  Gavin Koch  <gavin@cygnus.com>
 
-	   * tc-mips.c (md_begin): Reorganize setting of default values so
-	   that mips_cpu depends on TARGET_CPU, and mips_opts.isa depends on
-	   mips_cpu.
-	   (md_parse_option): Remove all code that sets defaults; md_begin
-	   handles all of this now.
+	* tc-mips.c (md_begin): Reorganize setting of default values so
+	that mips_cpu depends on TARGET_CPU, and mips_opts.isa depends on
+	mips_cpu.
+	(md_parse_option): Remove all code that sets defaults; md_begin
+	handles all of this now.
 
 Sun Nov  2 14:46:09 1997  Ian Lance Taylor  <ian@cygnus.com>
 

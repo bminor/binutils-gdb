@@ -52,11 +52,13 @@
 
 /* AIX requires this to be the first thing in the file.  */
 #ifdef __GNUC__
-#ifdef __STDC__
+# ifndef alloca
+#  ifdef __STDC__
 extern void *alloca ();
-#else
+#  else
 extern char *alloca ();
-#endif
+#  endif
+# endif
 #else
 # if HAVE_ALLOCA_H
 #  include <alloca.h>
@@ -410,6 +412,7 @@ typedef addressT relax_addressT;
  BUG: it may be smarter to have a single pointer off to various different
  notes for different frag kinds. See how code pans
  */
+
 struct frag
 {
   /* Object file address. */
@@ -442,8 +445,10 @@ struct frag
        we can't really conditionalize it.  This code should be
        rearranged a bit to make that possible.  */
     struct {
-      char pcrel_adjust, bsr;
-    } ns32k;
+      struct frag *fr_opcode_fragP;
+      unsigned int fr_opcode_offset;
+      char fr_bsr;
+    } fr_ns32k;
 #ifdef USING_CGEN
     /* Don't include this unless using CGEN to keep frag size down.  */
     struct {
@@ -467,9 +472,9 @@ struct frag
 
 typedef struct frag fragS;
 
-/* Current frag we are building.  This frag is incomplete.  It is, however,
-   included in frchain_now.  The fr_fix field is bogus; instead, use:
-   obstack_next_free(&frags)-frag_now->fr_literal.  */
+/* Current frag we are building.  This frag is incomplete.  It is,
+   however, included in frchain_now.  The fr_fix field is bogus;
+   instead, use frag_now_fix ().  */
 COMMON fragS *frag_now;
 extern int frag_now_fix PARAMS ((void));
 
@@ -623,7 +628,7 @@ void do_scrub_begin PARAMS ((int));
 void input_scrub_begin PARAMS ((void));
 void input_scrub_close PARAMS ((void));
 void input_scrub_end PARAMS ((void));
-void new_logical_line PARAMS ((char *fname, int line_number));
+int new_logical_line PARAMS ((char *fname, int line_number));
 void subsegs_begin PARAMS ((void));
 void subseg_change PARAMS ((segT seg, int subseg));
 segT subseg_new PARAMS ((const char *name, subsegT subseg));
