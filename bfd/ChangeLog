@@ -1,5 +1,18 @@
 2004-08-28  Alan Modra  <amodra@bigpond.net.au>
 
+	* targets.c (struct bfd_target <_bfd_get_synthetic_symtab>): Pass
+	symbol counts and both symbol tables.
+	* bfd.c (bfd_get_synthetic_symtab): Adjust.
+	* elf-bfd.h (_bfd_elf_get_synthetic_symtab): Adjust.
+	* elf.c (_bfd_elf_get_synthetic_symtab): Adjust.
+	* libbfd-in.h (_bfd_nodynamic_get_synthetic_symtab): Adjust.
+	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Adjust.  Use both
+	symbol tables on non-relocatable objects.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
+2004-08-28  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (ppc64_elf_branch_reloc): Check .opd is in a regular
 	object file.
 	(struct sfpr_def_parms): Save some space.

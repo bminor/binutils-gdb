@@ -1,3 +1,8 @@
+2004-08-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* objdump.c (dump_bfd): Pass both symbol tables to
+	bfd_get_synthetic_symtab.
+
 2004-08-17  Jakub Jelinek  <jakub@redhat.com>
 
 	* objdump.c (dump_bfd): For relocatable objects, pass syms instead

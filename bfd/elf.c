@@ -7744,7 +7744,12 @@ bfd_elf_bfd_from_remote_memory
 }
 
 long
-_bfd_elf_get_synthetic_symtab (bfd *abfd, asymbol **relsyms, asymbol **ret)
+_bfd_elf_get_synthetic_symtab (bfd *abfd,
+			       long symcount ATTRIBUTE_UNUSED,
+			       asymbol **syms ATTRIBUTE_UNUSED,
+			       long dynsymcount ATTRIBUTE_UNUSED,
+			       asymbol **dynsyms,
+			       asymbol **ret)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   asection *relplt;
@@ -7782,7 +7787,7 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd, asymbol **relsyms, asymbol **ret)
     return 0;
 
   slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
-  if (! (*slurp_relocs) (abfd, relplt, relsyms, TRUE))
+  if (! (*slurp_relocs) (abfd, relplt, dynsyms, TRUE))
     return -1;
 
   count = relplt->size / hdr->sh_entsize;

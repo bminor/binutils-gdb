@@ -2566,18 +2566,10 @@ dump_bfd (bfd *abfd)
     dynsyms = slurp_dynamic_symtab (abfd);
   if (disassemble)
     {
-      synthcount = 0;
-      if (bfd_get_file_flags (abfd) & (DYNAMIC | EXEC_P))
-	{
-	  if (dynsymcount > 0)
-	    synthcount = bfd_get_synthetic_symtab (abfd, dynsyms, &synthsyms);
-	}
-      else
-	{
-	  if (symcount > 0)
-	    synthcount = bfd_get_synthetic_symtab (abfd, syms, &synthsyms);
-	}
-      if (synthcount < 0) synthcount = 0;
+      synthcount = bfd_get_synthetic_symtab (abfd, symcount, syms,
+					     dynsymcount, dynsyms, &synthsyms);
+      if (synthcount < 0)
+	synthcount = 0;
     }
 
   if (dump_symtab)

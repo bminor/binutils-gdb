@@ -4111,8 +4111,9 @@ bfd_boolean bfd_set_private_flags (bfd *abfd, flagword flags);
 #define bfd_canonicalize_dynamic_symtab(abfd, asymbols) \
        BFD_SEND (abfd, _bfd_canonicalize_dynamic_symtab, (abfd, asymbols))
 
-#define bfd_get_synthetic_symtab(abfd, relsyms, ret) \
-       BFD_SEND (abfd, _bfd_get_synthetic_symtab, (abfd, relsyms, ret))
+#define bfd_get_synthetic_symtab(abfd, count, syms, dyncount, dynsyms, ret) \
+       BFD_SEND (abfd, _bfd_get_synthetic_symtab, (abfd, count, syms, \
+                                                   dyncount, dynsyms, ret))
 
 #define bfd_get_dynamic_reloc_upper_bound(abfd) \
        BFD_SEND (abfd, _bfd_get_dynamic_reloc_upper_bound, (abfd))
@@ -4520,7 +4521,8 @@ typedef struct bfd_target
     (bfd *, struct bfd_symbol **);
   /* Create synthetized symbols.  */
   long        (*_bfd_get_synthetic_symtab)
-    (bfd *, struct bfd_symbol **, struct bfd_symbol **);
+    (bfd *, long, struct bfd_symbol **, long, struct bfd_symbol **,
+     struct bfd_symbol **);
   /* Get the amount of memory required to hold the dynamic relocs.  */
   long        (*_bfd_get_dynamic_reloc_upper_bound) (bfd *);
   /* Read in the dynamic relocs.  */

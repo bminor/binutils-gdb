@@ -1438,7 +1438,7 @@ extern long _bfd_elf_get_dynamic_symtab_upper_bound
 extern long _bfd_elf_canonicalize_dynamic_symtab
   (bfd *, asymbol **);
 extern long _bfd_elf_get_synthetic_symtab
-  (bfd *, asymbol **, asymbol **);
+  (bfd *, long, asymbol **, long, asymbol **, asymbol **);
 extern long _bfd_elf_get_reloc_upper_bound
   (bfd *, sec_ptr);
 extern long _bfd_elf_canonicalize_reloc

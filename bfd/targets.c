@@ -475,7 +475,8 @@ BFD_JUMP_TABLE macros.
 .    (bfd *, struct bfd_symbol **);
 .  {* Create synthetized symbols.  *}
 .  long        (*_bfd_get_synthetic_symtab)
-.    (bfd *, struct bfd_symbol **, struct bfd_symbol **);
+.    (bfd *, long, struct bfd_symbol **, long, struct bfd_symbol **,
+.     struct bfd_symbol **);
 .  {* Get the amount of memory required to hold the dynamic relocs.  *}
 .  long        (*_bfd_get_dynamic_reloc_upper_bound) (bfd *);
 .  {* Read in the dynamic relocs.  *}

@@ -2645,16 +2645,18 @@ sym_exists_at (asymbol **syms, long lo, long hi, int id, bfd_vma value)
    entry syms.  */
 
 static long
-ppc64_elf_get_synthetic_symtab (bfd *abfd, asymbol **relsyms, asymbol **ret)
+ppc64_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
+				long dynsymcount, asymbol **dynsyms,
+				asymbol **ret)
 {
   asymbol *s;
   long i;
   long count;
   char *names;
-  asymbol **syms = NULL;
-  long symcount = 0, codesecsym, codesecsymend, secsymend, opdsymend;
+  long codesecsym, codesecsymend, secsymend, opdsymend;
   asection *opd;
   bfd_boolean relocatable = (abfd->flags & (EXEC_P | DYNAMIC)) == 0;
+  asymbol **sy = NULL;
 
   *ret = NULL;
 
@@ -2662,60 +2664,45 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd, asymbol **relsyms, asymbol **ret)
   if (opd == NULL)
     return 0;
 
-  if ((bfd_get_file_flags (abfd) & HAS_SYMS))
+  if (!relocatable)
     {
-      long storage;
-      storage = bfd_get_symtab_upper_bound (abfd);
-      if (storage < 0)
-	return 0;
-
-      if (storage)
+      if (symcount != 0 && dynsymcount != 0)
 	{
-	  syms = bfd_malloc (storage);
-	  if (syms == NULL)
+	  /* Use both symbol tables.  */
+	  sy = bfd_malloc ((symcount + dynsymcount + 1) * sizeof (*syms));
+	  if (sy == NULL)
 	    return 0;
+	  memcpy (sy, syms, symcount * sizeof (*syms));
+	  memcpy (sy + symcount, dynsyms, (dynsymcount + 1) * sizeof (*syms));
+	  syms = sy;
+	  symcount = symcount + dynsymcount;
 	}
-
-      symcount = bfd_canonicalize_symtab (abfd, syms);
-      if (symcount < 0)
+      else if (symcount == 0)
 	{
-	  free (syms);
-	  return 0;
-	}
-
-      if (symcount == 0)
-	{
-	  free (syms);
-	  syms = NULL;
+	  syms = dynsyms;
+	  symcount = dynsymcount;
 	}
     }
 
   if (symcount == 0)
-    {
-      long storage;
-
-      storage = bfd_get_dynamic_symtab_upper_bound (abfd);
-      if (storage < 0)
-	return 0;
-
-      if (storage)
-	{
-	  syms = bfd_malloc (storage);
-	  if (syms == NULL)
-	    return 0;
-	}
-
-      symcount = bfd_canonicalize_dynamic_symtab (abfd, syms);
-      if (symcount < 0)
-	{
-	  free (syms);
-	  return 0;
-	}
-    }
+    return 0;
 
   synthetic_opd = opd;
   synthetic_relocatable = relocatable;
   qsort (syms, symcount, sizeof (asymbol *), compare_symbols);
+
+  if (!relocatable && symcount > 1)
+    {
+      long j;
+      /* Trim duplicate syms, since we may have merged the normal and
+	 dynamic symbols.  Actually, we only care about syms that have
+	 different values, so trim any with the same value.  */ 
+      for (i = 1, j = 1; i < symcount; ++i)
+	if (syms[i - 1]->value + syms[i - 1]->section->vma
+	    != syms[i]->value + syms[i]->section->vma)
+	  syms[j++] = syms[i];
+      symcount = j;
+    }
 
   i = 0;
   if (syms[i]->section == opd)
@@ -2745,13 +2732,10 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd, asymbol **relsyms, asymbol **ret)
       break;
   symcount = i;
 
-  if (opdsymend == secsymend)
-    {
-      free (syms);
-      return 0;
-    }
-
   count = 0;
+  if (opdsymend == secsymend)
+    goto done;
+
   if (relocatable)
     {
       bfd_boolean (*slurp_relocs) (bfd *, asection *, asymbol **, bfd_boolean);
@@ -2765,11 +2749,8 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd, asymbol **relsyms, asymbol **ret)
       relcount = (opd->flags & SEC_RELOC) ? opd->reloc_count : 0;
 
       if (! relcount
-	  || ! (*slurp_relocs) (abfd, relopd, relsyms, FALSE))
-	{
-	  free (syms);
-	  return 0;
-	}
+	  || ! (*slurp_relocs) (abfd, relopd, syms, FALSE))
+	goto done;
 
       size = 0;
       for (i = secsymend, r = relopd->relocation; i < opdsymend; ++i)
@@ -2802,8 +2783,8 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd, asymbol **relsyms, asymbol **ret)
       s = *ret = bfd_malloc (size);
       if (s == NULL)
 	{
-	  free (syms);
-	  return 0;
+	  count = 0;
+	  goto done;
 	}
 
       names = (char *) (s + count);
@@ -2851,9 +2832,11 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd, asymbol **relsyms, asymbol **ret)
       if (!bfd_malloc_and_get_section (abfd, opd, &contents))
 	{
 	  if (contents)
-	    free (contents);
-	  free (syms);
-	  return 0;
+	    {
+	    free_contents_and_exit:
+	      free (contents);
+	    }
+	  goto done;
 	}
 
       size = 0;
@@ -2873,9 +2856,8 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd, asymbol **relsyms, asymbol **ret)
       s = *ret = bfd_malloc (size);
       if (s == NULL)
 	{
-	  free (contents);
-	  free (syms);
-	  return 0;
+	  count = 0;
+	  goto free_contents_and_exit;
 	}
 
       names = (char *) (s + count);
@@ -2887,30 +2869,29 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd, asymbol **relsyms, asymbol **ret)
 	  ent = bfd_get_64 (abfd, contents + syms[i]->value);
 	  if (!sym_exists_at (syms, opdsymend, symcount, -1, ent))
 	    {
-	      long lo, hi, mid;
+	      long lo, hi;
 	      size_t len;
-	      asection *sec;
+	      asection *sec = abfd->sections;
 
 	      *s = *syms[i];
 	      lo = codesecsym;
 	      hi = codesecsymend;
 	      while (lo < hi)
 		{
-		  mid = (lo + hi) >> 1;
+		  long mid = (lo + hi) >> 1;
 		  if (syms[mid]->section->vma < ent)
 		    lo = mid + 1;
 		  else if (syms[mid]->section->vma > ent)
 		    hi = mid;
 		  else
-		    break;
+		    {
+		      sec = syms[mid]->section;
+		      break;
+		    }
 		}
 
-	      if (lo < hi)
-		sec = syms[mid]->section;
-	      else if (lo > codesecsym)
+	      if (lo >= hi && lo > codesecsym)
 		sec = syms[lo - 1]->section;
-	      else
-		sec = abfd->sections;
 
 	      for (; sec != NULL; sec = sec->next)
 		{
@@ -2934,7 +2915,9 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd, asymbol **relsyms, asymbol **ret)
       free (contents);
     }
 
-  free (syms);
+ done:
+  if (sy != NULL)
+    free (sy);
   return count;
 }
 
