@@ -104,11 +104,11 @@ bfd *obfd;
     }
 
     /* Copy architecture of input file to output file */
-    if (!bfd_set_arch_mach(obfd, bfd_get_architecture(ibfd),
-			   bfd_get_machine(ibfd))) {
+    if (!bfd_set_arch_mach(obfd, bfd_get_arch(ibfd),
+			   bfd_get_mach(ibfd))) {
 	fprintf(stderr, "Output file cannot represent architecture %s\n",
-		bfd_printable_arch_mach(bfd_get_architecture(ibfd),
-					bfd_get_machine(ibfd)));
+		bfd_printable_arch_mach(bfd_get_arch(ibfd),
+					bfd_get_mach(ibfd)));
     }
     if (!bfd_set_format(obfd, bfd_get_format(ibfd)))
 	{
@@ -356,6 +356,8 @@ main(argc, argv)
   int             i;
 
   program_name = argv[0];
+
+  bfd_init();
 
   if (strcmp(program_name,"strip") == 0) {
     strip = true;

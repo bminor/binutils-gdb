@@ -83,6 +83,8 @@ main (argc, argv)
   int c;
   program_name = argv[0];
 	
+  bfd_init();
+
   strip_symbols = strip_undef;	/* default is to strip everything.  */
   discard_locals = locals_undef;
 	
