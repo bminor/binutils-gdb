@@ -1,3 +1,8 @@
+Wed Jun 24 13:45:00 1998  Catherine Moore  <clm@cygnus.com>
+
+        * config/tc-v850.c (v850_comm):  Restore old section
+        after common processing.
+
 Wed Jun 24 11:50:54 1998  Klaus Kaempf  <kkaempf@progis.de>
 
 	* config/obj-vms.c (Create_VMS_Object_File): Force binary file.
@@ -28,6 +33,7 @@ end-sanitize-v850e
 	* config/obj-coff.c (c_symbol_merge): Replace complex expresion
 	with call to macro SYM_AUXINFO.
 
+>>>>>>> 1.2596
 Tue Jun 23 15:09:27 1998  Mike Stump  <mrs@wrs.com>
 
 	* Makefile.am (install-exec-local): Don't let EXEEXT interfere
