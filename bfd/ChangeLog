@@ -1,10 +1,10 @@
 Wed Dec 11 16:39:45 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* makefile.dos, configdj.bat: New files from DJ
-	* cache.c: fopen with "b" is needed for DOS.
+	* cache.c: fopen with new macros is needed for DOS.
 	* ieee.c: environ renamed to envi to stop an include file
 	conflict.
-	* opncls.c: more fopens with "b"
+	* opncls.c, coff-rs6000.c: more fopens with macros.
 
 
 Tue Dec 10 04:07:24 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
