@@ -1,5 +1,8 @@
 Mon Aug  2 12:06:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* thread.c (thread_switch): Define as static.
+	(add_thread): Cast return value from xmalloc.
+
 	* gdbtypes.c (fill_in_vptr_fieldno): Call check_stub_type.
 	* gdbtypes.{c,h}: Improve comments on vptr_fieldno.
 

@@ -76,7 +76,7 @@ add_thread (pid)
 {
   struct thread_info *tp;
 
-  tp = xmalloc (sizeof (struct thread_info));
+  tp = (struct thread_info *) xmalloc (sizeof (struct thread_info));
 
   tp->pid = pid;
   tp->num = ++highest_thread_num;
@@ -180,7 +180,7 @@ info_threads_command (arg, from_tty)
 
 /* Switch from one thread to another. */
 
-void
+static void
 thread_switch (pid)
      int pid;
 {
