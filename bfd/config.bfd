@@ -284,7 +284,7 @@ case "${targ}" in
     targ_defvec=tic30_coff_vec
     ;;
 
-  c4x-*-*coff* | tic4x-*-*coff*)
+  c4x-*-*coff* | tic4x-*-*coff* | tic4x-*-rtems*)
     targ_defvec=tic4x_coff1_vec
     targ_selvecs="tic4x_coff1_beh_vec tic4x_coff2_vec tic4x_coff2_beh_vec tic4x_coff0_vec tic4x_coff0_beh_vec"
     targ_underscore=yes
