@@ -90,7 +90,7 @@ by the Foundation.
 
 @end titlepage
 
-@node Top, Readline Top, ,(DIR)
+@node Top, , ,(DIR)
 @chapter GNU Readline Library
 
 @ifinfo
@@ -100,8 +100,8 @@ to provide a command line interface.
 @end ifinfo
 
 @menu
-* Readline Top::	GNU Readline User's Manual
-* Readline Technical::	GNU Readline Programmer's Manual
+* Command Line Editing::        GNU Readline User's Manual
+* Readline Technical::	        GNU Readline Programmer's Manual
 @end menu
 @include inc-read.texi
 @node Readline Technical, , Top, Top

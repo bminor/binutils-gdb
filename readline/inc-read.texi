@@ -46,15 +46,11 @@ in any case.
 
 @menu
 * Conventions::			Notation used in this appendix.
-* Basic Line Editing::		The minimum set of commands for editing a line.
-* Movement Commands::		Commands for moving the cursor about the line.
-* Cutting and Pasting::		Deletion and copying of text sections.
-* Transposition::		Exchanging two characters or words.
-* Completion::			Expansion of a partially typed word into
-				 the full text.
+* Readline Interaction::	How to use Readline
+* Readline Init File::		Customizing Readline for your own use
 @end menu
 
-@node Conventions, Basic Line Editing, Command Line Editing, Command Line Editing
+@node Conventions, Readline Interaction, Command Line Editing, Command Line Editing
 @appendixsec Conventions on Notation
 
 In this Appendix, the following notation is used to describe
@@ -77,7 +73,7 @@ In addition, several keys have their own names.  Specifically,
 stand for themselves when seen in this text, or in an init file
 (@pxref{Readline Init File}, for more info).
 
-@node Readline Interaction, Readline Init File, Readline Introduction, Readline Top
+@node Readline Interaction, Readline Init File, Conventions, Command Line Editing
 @appendixsec Readline Interaction
 @cindex interaction, readline
 
@@ -217,7 +213,7 @@ the remainder of the digits, and then the command.  For example, to give
 the @kbd{C-d} command an argument of 10, you could type @kbd{M-1 0 C-d}.
 
 
-@node Readline Init File, , Readline Interaction, Readline Top
+@node Readline Init File, , Readline Interaction, Command Line Editing
 @appendixsec Readline Init File
 
 Although the Readline library comes with a set of Emacs-like
@@ -459,7 +455,7 @@ The line editing commands @code{reverse-search-history} (@kbd{C-r}) and
 you can abort the search, and return to normal input mode, by using the
 @code{abort} (@kbd{C-g}) command.
 
-@item do-uppercase-version (@kbd{M-a}, @kbd{M-b}, @dots)
+@item do-uppercase-version (@kbd{M-a}, @kbd{M-b}, @dots{})
 Run the command that is bound to your uppercase brother.
 
 @item prefix-meta (@key{ESC})
