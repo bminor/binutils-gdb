@@ -3,6 +3,7 @@ Mon Aug 23 1993  Sean Fagan  (sef@cygnus.com)
 
 	Add NetBSD support:
 	* netbsd386.c: New file.
+	* aoutx.h: Make sym_is_debugger_info true for N_FN.
 	* Makefile.in, aout-target.h, config.bfd, configure.host, configure.in,
 	libaout.h, targets.c: Other changes.
 
