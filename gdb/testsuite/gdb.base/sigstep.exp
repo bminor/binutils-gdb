@@ -87,7 +87,8 @@ proc advance { i } {
 	    exp_continue
 	}
 	-re "Program exited normally.*${gdb_prompt} $" {
-	    kfail gdb/1613 "$test (program exited)"
+	    setup_kfail powerpc-*-*bsd* gdb/1639
+	    fail "$test (program exited)"
 	}
 	-re "(while ..done|return 0).*${gdb_prompt} $" {
 	    # After stepping out of a function /r signal-handler, GDB will
@@ -122,12 +123,12 @@ proc advancei { i } {
 	-re "signal handler called.*${gdb_prompt} $" {
 	    pass "$test"
 	}
-	-re "Program exited normally.*${gdb_prompt} $" {
-	    kfail gdb/1613 "$test (program exited)"
-	    set program_exited 1
-	}
 	-re "main .*${gdb_prompt} $" {
 	    fail "$test (in main)"
+	}
+	-re "Program exited normally.*${gdb_prompt} $" {
+	    fail "$test (program exited)"
+	    set program_exited 1
 	}
 	-re "Make handler return now.*y or n. $" {
 	    send_gdb "y\n"
@@ -151,12 +152,16 @@ proc advancei { i } {
 	    send_gdb "y\n"
 	    exp_continue
 	}
+	-re "Program exited normally.*${gdb_prompt} $" {
+	    kfail gdb/1639 "$test (program exited)"
+	    set program_exited 1
+	}
 	-re "The program is not being run.*${gdb_prompt} $" {
 	    if { $program_exited } {
 		# Previously kfailed with an exit
-		pass "$test (The program is not being run)"
+		pass "$test (the program is not being run)"
 	    } else {
-		fail "$test"
+		fail "$test (the program is not being run)"
 	    }
 	}
     }

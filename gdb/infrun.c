@@ -2412,75 +2412,16 @@ process_event_stop_test:
      But we can update it every time we leave the step range.  */
   ecs->update_step_sp = 1;
 
-  /* Did we just step into a singal trampoline (either by stepping out
-     of a handler, or by taking a signal)?  */
-  if (get_frame_type (get_current_frame ()) == SIGTRAMP_FRAME
-      && !frame_id_eq (get_frame_id (get_current_frame ()), step_frame_id))
+  if (step_range_end != 1
+      && (step_over_calls == STEP_OVER_UNDEBUGGABLE
+	  || step_over_calls == STEP_OVER_ALL)
+      && get_frame_type (get_current_frame ()) == SIGTRAMP_FRAME)
     {
-      {
-	struct frame_id current_frame = get_frame_id (get_current_frame ());
-
-	if (frame_id_inner (current_frame, step_frame_id))
-	  {
-	    /* We have just taken a signal; go until we are back to
-	       the point where we took it and one more.  */
-
-	    /* This code is needed at least in the following case:
-	       The user types "next" and then a signal arrives (before
-	       the "next" is done).  */
-
-	    /* Note that if we are stopped at a breakpoint, then we need
-	       the step_resume breakpoint to override any breakpoints at
-	       the same location, so that we will still step over the
-	       breakpoint even though the signal happened.  */
-	    struct symtab_and_line sr_sal;
-
-	    init_sal (&sr_sal);
-	    sr_sal.symtab = NULL;
-	    sr_sal.line = 0;
-	    sr_sal.pc = prev_pc;
-	    /* We could probably be setting the frame to
-	       step_frame_id; I don't think anyone thought to try it.  */
-	    check_for_old_step_resume_breakpoint ();
-	    step_resume_breakpoint =
-	      set_momentary_breakpoint (sr_sal, null_frame_id, bp_step_resume);
-	    if (breakpoints_inserted)
-	      insert_breakpoints ();
-	  }
-	else
-	  {
-	    /* We just stepped out of a signal handler and into
-	       its calling trampoline.
-
-	       Normally, we'd call step_over_function from
-	       here, but for some reason GDB can't unwind the
-	       stack correctly to find the real PC for the point
-	       user code where the signal trampoline will return
-	       -- FRAME_SAVED_PC fails, at least on HP-UX 10.20.
-	       But signal trampolines are pretty small stubs of
-	       code, anyway, so it's OK instead to just
-	       single-step out.  Note: assuming such trampolines
-	       don't exhibit recursion on any platform... */
-	    find_pc_partial_function (stop_pc, &ecs->stop_func_name,
-				      &ecs->stop_func_start,
-				      &ecs->stop_func_end);
-	    /* Readjust stepping range */
-	    step_range_start = ecs->stop_func_start;
-	    step_range_end = ecs->stop_func_end;
-	    ecs->stepping_through_sigtramp = 1;
-	  }
-      }
-
-
-      /* If this is stepi or nexti, make sure that the stepping range
-         gets us past that instruction.  */
-      if (step_range_end == 1)
-	/* FIXME: Does this run afoul of the code below which, if
-	   we step into the middle of a line, resets the stepping
-	   range?  */
-	step_range_end = (step_range_start = prev_pc) + 1;
-
-      ecs->remove_breakpoints_on_following_step = 1;
+      /* The inferior, while doing a "step" or "next", has ended up in
+	 a signal trampoline (either by a signal being delivered or by
+	 the signal handler returning).  Just single-step until the
+	 inferior leaves the trampoline (either by calling the handler
+	 or returning).  */
       keep_going (ecs);
       return;
     }
