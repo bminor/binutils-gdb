@@ -2169,6 +2169,7 @@ if [istarget h8300*-*-*] then {
 
     run_dump_test h8sx_disp2
     run_dump_test h8sx_rtsl
+    run_dump_test h8sx_mov_imm
 
     # Now some random tests
     set svr4pic [expr [istarget *-*-elf*] || [istarget *-*-irix5*] ]
