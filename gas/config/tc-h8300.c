@@ -34,7 +34,7 @@
 const char comment_chars[] =
 {';', 0};
 const char line_separator_chars[] =
-{'$', 0};
+{0};
 const char line_comment_chars[] = "#";
 
 /* This table describes all the machine specific pseudo-ops the assembler
@@ -53,18 +53,23 @@ int Hmode;
 int bsize = L_8;		/* default branch displacement */
 
 
-void 
+void
 h8300hmode ()
 {
   Hmode = 1;
 }
 
 
-void 
+void
 sbranch (size)
      int size;
 {
   bsize = size;
+}
+
+static void pint ()
+{
+  cons (Hmode ? 4 : 2);
 }
 
 const pseudo_typeS md_pseudo_table[] =
@@ -74,7 +79,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"sbranch", sbranch, L_8},
   {"lbranch", sbranch, L_16},
 
-  {"int", cons, 2},
+  {"int", pint, 0},
   {"data.b", cons, 1},
   {"data.w", cons, 2},
   {"data.l", cons, 4},
@@ -139,7 +144,7 @@ md_begin ()
 	    }
 	  *dst++ = *src++;
 	}
-	      *dst++ = 0;
+      *dst++ = 0;
       if (strcmp (buffer, prev_buffer))
 	{
 	  hash_insert (opcode_hash_control, buffer, (char *) opcode);
@@ -263,15 +268,16 @@ parse_reg (src, mode, reg, direction)
 }
 
 char *
-DEFUN (parse_exp, (s, op),
-       char *s AND
-       expressionS * op)
+parse_exp (s, op)
+     char *s;
+     expressionS * op;
 {
   char *save = input_line_pointer;
   char *new;
 
   input_line_pointer = s;
-  if (expression (op) == O_absent)
+  expression (op);
+  if (op->X_op == O_absent)
     as_bad ("missing operand");
   new = input_line_pointer;
   input_line_pointer = save;
@@ -291,7 +297,7 @@ skip_colonthing (ptr, exp, mode)
 	{
 	  ptr++;
 	  /* ff fill any 8 bit quantity */
-	  exp->X_add_number |= 0xff00;
+	 /* exp->X_add_number -= 0x100;*/
 	}
       else
 	{
@@ -345,9 +351,9 @@ colonmod24 (op, src)
 	{
 	  if (Hmode)
 	    mode = L_24;
-	  else 
+	  else
 	    mode = L_16;
-      }
+	}
       else if (op->exp.X_add_symbol
 	       || op->exp.X_op_symbol)
 	mode = DSYMMODE;
@@ -356,7 +362,7 @@ colonmod24 (op, src)
     }
   op->mode |= mode;
   return src;
-  
+
 }
 
 
@@ -426,7 +432,7 @@ get_operand (ptr, op, dst, direction)
 	  *ptr = src + len;
 	  return;
 	}
-      if (*src == '(' )
+      if (*src == '(')
 	{
 	  /* Disp */
 	  src++;
@@ -441,7 +447,7 @@ get_operand (ptr, op, dst, direction)
 	  if (*src == ')')
 	    {
 	      src++;
-	      op->mode = DISP | direction;
+	      op->mode |= ABS | direction;
 	      *ptr = src;
 	      return;
 	    }
@@ -553,10 +559,10 @@ get_operand (ptr, op, dst, direction)
 
 static
 char *
-DEFUN (get_operands, (noperands, op_end, operand),
-       unsigned int noperands AND
-       char *op_end AND
-       struct h8_op *operand)
+get_operands (noperands, op_end, operand)
+     unsigned int noperands;
+     char *op_end;
+     struct h8_op *operand;
 {
   char *ptr = op_end;
 
@@ -678,14 +684,24 @@ get_specific (opcode, operands)
 		   && (op & (DISP | IMM | ABS)) == (x & (DISP | IMM | ABS)))
 	    {
 	      /* Got a diplacement,will fit if no size or same size as try */
+	      if (op & ABS && op & L_8) 
+		{
+		  /* We want an 8 bit abs here, but one which looks like 16 bits will do fine */
+		  if (x & L_16)
+		    found= 1;
+		}
+	      else
 	      if ((x & SIZE) != 0
 		  && ((op & SIZE) != (x & SIZE)))
 		found = 0;
 	    }
+#if 0
 	  else if ((op & ABSMOV) && (x & ABS))
 	    {
+	      /* An absmov is only
 	      /* Ok */
 	    }
+#endif
 	  else if ((op & MODE) != (x & MODE))
 	    {
 	      found = 0;
@@ -700,22 +716,32 @@ get_specific (opcode, operands)
 }
 
 static void
-DEFUN (check_operand, (operand, width, string),
-       struct h8_op *operand AND
-       unsigned int width AND
-       char *string)
+check_operand (operand, width, string)
+     struct h8_op *operand;
+     unsigned int width;
+     char *string;
 {
   if (operand->exp.X_add_symbol == 0
       && operand->exp.X_op_symbol == 0)
     {
 
       /* No symbol involved, let's look at offset, it's dangerous if any of
-         the high bits are not 0 or ff's, find out by oring or anding with
-         the width and seeing if the answer is 0 or all fs*/
+	 the high bits are not 0 or ff's, find out by oring or anding with
+	 the width and seeing if the answer is 0 or all fs*/
+      
       if ((operand->exp.X_add_number & ~width) != 0 &&
 	  (operand->exp.X_add_number | width) != (~0))
 	{
+	  if (width == 255 
+	      && (operand->exp.X_add_number & 0xff00) == 0xff00)
+	    {
+	      /* Just ignore this one - which happens when trying to 
+	      fit a 16 bit address truncated into an 8 bit address of something like bset  */
+	    }
+	  else 
+	    {
 	  as_warn ("operand %s0x%x out of range.", string, operand->exp.X_add_number);
+	}
 	}
     }
 
@@ -739,6 +765,10 @@ do_a_fix_imm (offset, operand, relaxing)
       char *bytes = frag_now->fr_literal + offset;
       switch (operand->mode & SIZE)
 	{
+	case L_2:
+	  check_operand (operand, 0x3, t);
+	  bytes[0] |= (operand->exp.X_add_number) << 4;
+	  break;
 	case L_3:
 	  check_operand (operand, 0x7, t);
 	  bytes[0] |= (operand->exp.X_add_number) << 4;
@@ -773,14 +803,14 @@ do_a_fix_imm (offset, operand, relaxing)
     {
       switch (operand->mode & SIZE)
 	{
-	default:
-	  abort ();
+
 	case L_24:
 	  size = 4;
 	  where = -1;
 	  idx = relaxing ? R_MOVLB1 : R_RELLONG;
 	  break;
-
+	default:
+	  as_bad("Can't work out size of operand.\n");
 	case L_32:
 	  size = 4;
 	  where = 0;
@@ -797,8 +827,8 @@ do_a_fix_imm (offset, operand, relaxing)
 	  idx = R_RELBYTE;
 	}
 
-
-      operand->exp.X_add_number = (short) operand->exp.X_add_number;
+      /* Sign extend any expression */
+      operand->exp.X_add_number = (short)operand->exp.X_add_number;
       fix_new_exp (frag_now,
 		   offset + where,
 		   size,
@@ -825,7 +855,7 @@ build_bytes (this_try, operand)
   op_type c;
   char high;
   unsigned int nibble_count = 0;
-
+  int absat;
   int immat;
   int nib;
   char asnibbles[30];
@@ -859,14 +889,20 @@ build_bytes (this_try, operand)
 	      nib = dispreg;
 	    }
 
-	  else if (c & ABSMOV) 
+	  else if (c & ABSMOV)
 	    {
 	      operand[d].mode &= ~ABS;
 	      operand[d].mode |= ABSMOV;
 	      immat = nibble_count / 2;
 	      nib = 0;
 	    }
-	  else if (c & (IMM | PCREL | ABS | ABSJMP | DISP ))
+	  else if (c &  ABS )
+	    {
+	      operand[d].mode = c;
+	      absat = nibble_count / 2;
+	      nib = 0;
+	    }
+	  else if (c & (IMM | PCREL | ABS | ABSJMP | DISP))
 	    {
 	      operand[d].mode = c;
 	      immat = nibble_count / 2;
@@ -934,9 +970,13 @@ build_bytes (this_try, operand)
     {
       int x = operand[i].mode;
 
-      if (x & (IMM | ABS | DISP))
+      if (x & (IMM | DISP))
 	{
-	  do_a_fix_imm (output - frag_now->fr_literal + immat, operand + i,0);
+	  do_a_fix_imm (output - frag_now->fr_literal + immat, operand + i, 0);
+	}
+      else if (x & ABS)
+	{
+	  do_a_fix_imm (output - frag_now->fr_literal + absat, operand + i, 0);
 	}
       else if (x & PCREL)
 	{
@@ -977,20 +1017,21 @@ build_bytes (this_try, operand)
       else if (x & ABSMOV)
 	{
 	  /* This mov is either absolute long or thru a memory loc */
-	  do_a_fix_imm (output - frag_now->fr_literal + immat, operand + i,1);
+	  do_a_fix_imm (output - frag_now->fr_literal + immat, operand + i, 1);
 	}
 
       else if (x & ABSJMP)
 	{
 	  /* This jmp may be a jump or a branch */
 
-	  check_operand (operand + i, Hmode ? 0xfffff : 0xffff, "@");
+	  check_operand (operand + i, Hmode ? 0xffffff : 0xffff, "@");
 	  if (operand[i].exp.X_add_number & 1)
 	    {
 	      as_warn ("branch operand has odd offset (%x)\n",
 		       operand->exp.X_add_number);
 	    }
-	  operand[i].exp.X_add_number = (short) operand[i].exp.X_add_number;
+	  if (!Hmode)
+	    operand[i].exp.X_add_number = (short) operand[i].exp.X_add_number;
 	  fix_new_exp (frag_now,
 		       output - frag_now->fr_literal,
 		       4,
@@ -1008,9 +1049,9 @@ build_bytes (this_try, operand)
   */
 
 static void
-DEFUN (clever_message, (opcode, operand),
-       struct h8_opcode *opcode AND
-       struct h8_op *operand)
+clever_message (opcode, operand)
+     struct h8_opcode *opcode;
+     struct h8_op *operand;
 {
   struct h8_opcode *scan = opcode;
 
@@ -1082,8 +1123,8 @@ DEFUN (clever_message, (opcode, operand),
 
 
 void
-DEFUN (md_assemble, (str),
-       char *str)
+md_assemble (str)
+     char *str;
 {
   char *op_start;
   char *op_end;
@@ -1132,9 +1173,10 @@ DEFUN (md_assemble, (str),
       return;
     }
 
+  /* We use to set input_line_pointer to the result of get_operands,
+     but that is wrong.  Our caller assumes we don't change it.  */
 
-  input_line_pointer = get_operands (opcode->noperands, op_end,
-				     operand);
+  (void) get_operands (opcode->noperands, op_end, operand);
   *op_end = c;
   prev_opcode = opcode;
 
@@ -1164,29 +1206,24 @@ DEFUN (md_assemble, (str),
 }
 
 void
-DEFUN (tc_crawl_symbol_chain, (headers),
-       object_headers * headers)
+tc_crawl_symbol_chain (headers)
+     object_headers * headers;
 {
   printf ("call to tc_crawl_symbol_chain \n");
 }
 
 symbolS *
-DEFUN (md_undefined_symbol, (name),
-       char *name)
+md_undefined_symbol (name)
+     char *name;
 {
   return 0;
 }
 
 void
-DEFUN (tc_headers_hook, (headers),
-       object_headers * headers)
+tc_headers_hook (headers)
+     object_headers * headers;
 {
   printf ("call to tc_headers_hook \n");
-}
-
-void
-DEFUN_VOID (md_end)
-{
 }
 
 /* Various routines to kill one day */
@@ -1249,20 +1286,29 @@ md_atof (type, litP, sizeP)
       md_number_to_chars (litP, (long) (*wordP++), sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
-  return "";
+  return 0;
 }
+
+CONST char *md_shortopts = "";
+struct option md_longopts[] = {
+  {NULL, no_argument, NULL, 0}
+};
+size_t md_longopts_size = sizeof(md_longopts);
 
 int
-md_parse_option (argP, cntP, vecP)
-     char **argP;
-     int *cntP;
-     char ***vecP;
-
+md_parse_option (c, arg)
+     int c;
+     char *arg;
 {
   return 0;
-
 }
 
+void
+md_show_usage (stream)
+     FILE *stream;
+{
+}
+
 int md_short_jump_size;
 
 void
@@ -1303,7 +1349,8 @@ md_convert_frag (headers, fragP)
   abort ();
 }
 
-valueT md_section_align (seg, size)
+valueT 
+md_section_align (seg, size)
      segT seg;
      valueT size;
 {
@@ -1340,11 +1387,13 @@ md_apply_fix (fixP, val)
 }
 
 void
-DEFUN (md_operand, (expressionP), expressionS * expressionP)
+md_operand (expressionP)
+     expressionS * expressionP;
 {
 }
 
 int md_long_jump_size;
+
 int
 md_estimate_size_before_relax (fragP, segment_type)
      register fragS *fragP;
@@ -1357,10 +1406,10 @@ md_estimate_size_before_relax (fragP, segment_type)
 /* Put number into target byte order */
 
 void
-DEFUN (md_number_to_chars, (ptr, use, nbytes),
-       char *ptr AND
-       valueT use AND
-       int nbytes)
+md_number_to_chars (ptr, use, nbytes)
+     char *ptr;
+     valueT use;
+     int nbytes;
 {
   switch (nbytes)
     {
@@ -1382,11 +1431,6 @@ md_pcrel_from (fixP)
      fixS *fixP;
 {
   abort ();
-}
-
-void
-tc_coff_symbol_emit_hook ()
-{
 }
 
 

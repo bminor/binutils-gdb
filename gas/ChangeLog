@@ -3,6 +3,10 @@ Fri Dec 16 14:40:16 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	* config/tc-sh.c (md_begin): Don't fill in md_relax_table here.
 	(md_relax_table): Use static initialization.
 
+	* config/tc-h8300.c (parse_exp, get_operands, clever_message,
+	md_assemble, tc_crawl_symbol_chain, md_undefined_symbol,
+	tc_headers_hook, md_operand, md_number_to_chars): Don't use DEFUN.
+
 	* Makefile.in (CHECKFLAGS): Don't pass AS_FOR_TARGET,
 	CC_FOR_TARGET, OBJDUMP_FOR_TARGET, NM_FOR_TARGET; they're not
 	used.
