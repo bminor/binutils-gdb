@@ -135,6 +135,17 @@ if test x"$enable_gdbmi" = xyes; then
   fi
 fi
 
+# FIXME: kettenis/20030102: We seem to prefer HP curses (Hcurses) over
+# Xcurses on HP-UX; see the `-D__HP_CURSES' in the relevant host
+# Makefile fragments.  That's why we need to have `Hcurses' before
+# `curses'.  I don't see why we should use HP curses if a more
+# standard curses is available, except that according to HP's
+# documentation one needs to compile `-D_XOPEN_SOURCE_EXTENDED' on
+# HP-UX 10.10 and 10.20.
+
+AC_SEARCH_LIBS(initscr, [ncurses Hcurses curses pdcurses], [],
+    [AC_MSG_WARN([no curses library found])])
+
 # Enable TUI.
 AC_ARG_ENABLE(tui,
 [  --enable-tui            enable full-screen terminal user interface (TUI)],
@@ -143,14 +154,16 @@ AC_ARG_ENABLE(tui,
       ;;
     *)
       AC_MSG_ERROR([bad value $enableval for --enable-tui]) ;;
-  esac])
+  esac],enable_tui=yes)
 if test x"$enable_tui" = xyes; then
   if test -d $srcdir/tui; then
-    CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
-    CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
-    CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_TUI_SRCS)"
-    ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_TUI_CFLAGS)"
-    need_curses=yes
+    if test "$ac_cv_search_initscr" != no; then
+      CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
+      CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
+      CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_TUI_SRCS)"
+      CONFIG_INITS="$CONFIG_INITS \$(SUBDIR_TUI_INITS)"
+      ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_TUI_CFLAGS)"
+    fi
   fi
 fi
 
@@ -279,20 +292,7 @@ AC_SEARCH_LIBS(socketpair, socket)
 
 # Since GDB uses Readline, we need termcap functionality, so we need
 # to find a library that provides that.  When GDB is configured with
-# --enable-tui, we need full curses functionality.
-#
-# FIXME: kettenis/20030102: We seem to prefer HP curses (Hcurses) over
-# Xcurses on HP-UX; see the `-D__HP_CURSES' in the relevant host
-# Makefile fragments.  That's why we need to have `Hcurses' before
-# `curses'.  I don't see why we should use HP curses if a more
-# standard curses is available, except that according to HP's
-# documentation one needs to compile `-D_XOPEN_SOURCE_EXTENDED' on
-# HP-UX 10.10 and 10.20.
-
-if test "$need_curses" = yes; then
-  AC_SEARCH_LIBS(initscr, [ncurses Hcurses curses], [],
-    [AC_MSG_ERROR([no curses library found])])
-fi
+# the TUI, we need full curses functionality.
 
 case $host_os in
   cygwin*)

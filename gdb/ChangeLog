@@ -1,3 +1,10 @@
+2004-02-16  Andrew Cagney  <cagney@redhat.com>
+
+	* configure.in: Always check for curses, including pdcurses.
+	Warn, instead of error, when no curses are found.  Enable TUI when
+	curses is available.
+	* configure: Re-generate.
+
 2004-02-16  Corinna Vinschen  <vinschen@redhat.com>
 
 	* sh-tdep.c (sh_register_convert_to_virtual): Rename from
