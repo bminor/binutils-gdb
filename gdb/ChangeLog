@@ -1,3 +1,13 @@
+2002-05-13  Jim Blandy  <jimb@redhat.com>
+
+	Add first preprocessor macro-expansion files.
+	* macroexp.c, macroexp.h, macrotab.c, macrotab.h: New files.
+	* Makefile.in (SFILES): Add macrotab.c, macroexp.c.
+	(splay_tree_h, macroexp_h, macrotab_h): New variable.
+	(HFILES_NO_SRCDIR): Add macrotab.h, macroexp.h.
+	(COMMON_OBS): Add macrotab.o, macroexp.o.
+	(macroexp.o, macrotab.o): New rules.
+
 2002-05-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/m88k/tm-m88k.h: Update copyright.
