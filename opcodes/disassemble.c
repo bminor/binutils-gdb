@@ -107,7 +107,7 @@ disassembler (abfd)
 #endif
 #ifdef ARCH_cris
     case bfd_arch_cris:
-      disassemble = print_insn_cris;
+      disassemble = cris_get_disassembler (abfd);
       break;
 #endif
 #ifdef ARCH_d10v

@@ -1,3 +1,17 @@
+2000-09-27  Hans-Peter Nilsson  <hp@axis.com>
+
+	Changes to add dollar prefix to registers for files where user symbols
+	don't have a leading underscore.  Fix formatting.
+	* cris-dis.c (REGISTER_PREFIX_CHAR): New.
+	(format_reg): Add parameter with_reg_prefix.  All callers changed.
+	(print_with_operands): Ditto.
+	(print_insn_cris_generic): Renamed from print_insn_cris, add
+	parameter with_reg_prefix.
+	(print_insn_cris_with_register_prefix,
+	print_insn_cris_without_register_prefix, cris_get_disassembler):
+	New.
+	* disassemble.c (disassembler) [ARCH_cris]: Call cris_get_disassembler.
+
 2000-09-22  Jim Wilson  <wilson@cygnus.com>
 
 	* ia64-opc-f.c (ia64_opcodes_f): Add fpcmp pseudo-ops for

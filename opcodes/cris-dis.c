@@ -24,7 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "opcode/cris.h"
 #include "libiberty.h"
 
-
 /* No instruction will be disassembled longer than this.  In theory, and
    in silicon, address prefixes can be cascaded.  In practice, cascading
    is not used by GCC, and not supported by the assembler.  */
@@ -37,6 +36,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef PARSE_PREFIX
 #define PARSE_PREFIX 1
 #endif
+
+/* Sometimes we prefix all registers with this character.  */
+#define REGISTER_PREFIX_CHAR '$'
 
 /* Whether or not to trace the following sequence:
    sub* X,r%d
@@ -78,22 +80,28 @@ static long last_immediate = 0;
 static int number_of_bits PARAMS ((unsigned int));
 static char *format_hex PARAMS ((unsigned long, char *));
 static char *format_dec PARAMS ((long, char *, int));
-static char *format_reg PARAMS ((int, char *));
+static char *format_reg PARAMS ((int, char *, boolean));
 static int cris_constraint PARAMS ((const char *, unsigned int,
 				    unsigned int));
 static unsigned bytes_to_skip PARAMS ((unsigned int,
 				       const struct cris_opcode *));
 static char *print_flags PARAMS ((unsigned int, char *));
-static void print_with_operands PARAMS ((const struct cris_opcode *,
-					 unsigned int, unsigned char *,
-					 bfd_vma, disassemble_info *,
-					 const struct cris_opcode *,
-					 unsigned int, unsigned char *));
+static void print_with_operands
+  PARAMS ((const struct cris_opcode *, unsigned int, unsigned char *,
+	   bfd_vma, disassemble_info *, const struct cris_opcode *,
+	   unsigned int, unsigned char *, boolean));
 static const struct cris_spec_reg *spec_reg_info PARAMS ((unsigned int));
+static int print_insn_cris_generic
+  PARAMS ((bfd_vma, disassemble_info *, boolean));
+static int print_insn_cris_with_register_prefix
+  PARAMS ((bfd_vma, disassemble_info *));
+static int print_insn_cris_without_register_prefix
+  PARAMS ((bfd_vma, disassemble_info *));
 
 /* Return the descriptor of a special register.
    FIXME: Depend on a CPU-version specific argument when all machinery
    is in place.  */
+
 static const struct cris_spec_reg *
 spec_reg_info (sreg)
      unsigned int sreg;
@@ -108,8 +116,8 @@ spec_reg_info (sreg)
   return NULL;
 }
 
-
 /* Return the number of bits in the argument.  */
+
 static int
 number_of_bits (val)
      unsigned int val;
@@ -122,8 +130,8 @@ number_of_bits (val)
   return bits;
 }
 
-
 /* Get an entry in the opcode-table.  */
+
 static const struct cris_opcode *
 get_opcode_entry (insn, prefix_insn)
      unsigned int insn;
@@ -281,8 +289,8 @@ get_opcode_entry (insn, prefix_insn)
   return max_matchedp;
 }
 
-
 /* Format number as hex with a leading "0x" into outbuffer.  */
+
 static char *
 format_hex (number, outbuffer)
      unsigned long number;
@@ -302,10 +310,10 @@ format_hex (number, outbuffer)
   return outbuffer + strlen (outbuffer);
 }
 
-
 /* Format number as decimal into outbuffer.  Parameter signedp says
    whether the number should be formatted as signed (!= 0) or
    unsigned (== 0).  */
+
 static char *
 format_dec (number, outbuffer, signedp)
      long number;
@@ -318,13 +326,19 @@ format_dec (number, outbuffer, signedp)
   return outbuffer + strlen (outbuffer);
 }
 
-
 /* Format the name of the general register regno into outbuffer.  */
+
 static char *
-format_reg (regno, outbuffer)
+format_reg (regno, outbuffer_start, with_reg_prefix)
      int regno;
-     char *outbuffer;
+     char *outbuffer_start;
+     boolean with_reg_prefix;
 {
+  char *outbuffer = outbuffer_start;
+
+  if (with_reg_prefix)
+    *outbuffer++ = REGISTER_PREFIX_CHAR;
+
   switch (regno)
     {
     case 15:
@@ -340,13 +354,13 @@ format_reg (regno, outbuffer)
       break;
     }
 
-  return outbuffer + strlen (outbuffer);
+  return outbuffer_start + strlen (outbuffer_start);
 }
-
 
 /* Return -1 if the constraints of a bitwise-matched instruction say
    that there is no match.  Otherwise return a nonnegative number
    indicating the confidence in the match (higher is better).  */
+
 static int
 cris_constraint (cs, insn, prefix_insn)
      const char *cs;
@@ -493,8 +507,8 @@ cris_constraint (cs, insn, prefix_insn)
   return retval;
 }
 
-
 /* Return the length of an instruction.  */
+
 static unsigned
 bytes_to_skip (insn, matchedp)
      unsigned int insn;
@@ -536,8 +550,8 @@ bytes_to_skip (insn, matchedp)
   return to_skip;
 }
 
-
 /* Print condition code flags.  */
+
 static char *
 print_flags (insn, cp)
      unsigned int insn;
@@ -559,13 +573,13 @@ print_flags (insn, cp)
   return cp;
 }
 
-
 /* Print out an insn with its operands, and update the info->insn_type
    fields.  The prefix_opcodep and the rest hold a prefix insn that is
    supposed to be output as an address mode.  */
+
 static void
 print_with_operands (opcodep, insn, buffer, addr, info, prefix_opcodep,
-		     prefix_insn, prefix_buffer)
+		     prefix_insn, prefix_buffer, with_reg_prefix)
      const struct cris_opcode *opcodep;
      unsigned int insn;
      unsigned char *buffer;
@@ -577,10 +591,11 @@ print_with_operands (opcodep, insn, buffer, addr, info, prefix_opcodep,
      const struct cris_opcode *prefix_opcodep;
      unsigned int prefix_insn;
      unsigned char *prefix_buffer;
+     boolean with_reg_prefix;
 {
   /* Get a buffer of somewhat reasonable size where we store
      intermediate parts of the insn.  */
-  char temp[sizeof (".d [r13=r12-2147483648],r10") * 2];
+  char temp[sizeof (".d [$r13=$r12-2147483648],$r10") * 2];
   char *tp = temp;
   static const char mode_char[] = "bwd?";
   const char *s;
@@ -654,11 +669,11 @@ print_with_operands (opcodep, insn, buffer, addr, info, prefix_opcodep,
 
       case 'D':
       case 'r':
-	tp = format_reg (insn & 15, tp);
+	tp = format_reg (insn & 15, tp, with_reg_prefix);
 	break;
 
       case 'R':
-	tp = format_reg ((insn >> 12) & 15, tp);
+	tp = format_reg ((insn >> 12) & 15, tp, with_reg_prefix);
 	break;
 
       case 'y':
@@ -804,7 +819,7 @@ print_with_operands (opcodep, insn, buffer, addr, info, prefix_opcodep,
 	      {
 		if (insn & 0x400)
 		  {
-		    tp = format_reg (insn & 15, tp);
+		    tp = format_reg (insn & 15, tp, with_reg_prefix);
 		    *tp++ = '=';
 		  }
 
@@ -846,7 +861,8 @@ print_with_operands (opcodep, insn, buffer, addr, info, prefix_opcodep,
 			info->target2 = prefix_insn & 15;
 
 			*tp++ = '[';
-			tp = format_reg (prefix_insn & 15, tp);
+			tp = format_reg (prefix_insn & 15, tp,
+					 with_reg_prefix);
 			if (prefix_insn & 0x400)
 			  *tp++ = '+';
 			*tp++ = ']';
@@ -862,7 +878,8 @@ print_with_operands (opcodep, insn, buffer, addr, info, prefix_opcodep,
 			number -= 256;
 
 		      /* Output "reg+num" or, if num < 0, "reg-num".  */
-		      tp = format_reg ((prefix_insn >> 12) & 15, tp);
+		      tp = format_reg ((prefix_insn >> 12) & 15, tp,
+				       with_reg_prefix);
 		      if (number >= 0)
 			*tp++ = '+';
 		      tp = format_dec (number, tp, 1);
@@ -875,9 +892,10 @@ print_with_operands (opcodep, insn, buffer, addr, info, prefix_opcodep,
 
 		  case BIAP_OPCODE:
 		    /* Output "r+R.m".  */
-		    tp = format_reg (prefix_insn & 15, tp);
+		    tp = format_reg (prefix_insn & 15, tp, with_reg_prefix);
 		    *tp++ = '+';
-		    tp = format_reg ((prefix_insn >> 12) & 15, tp);
+		    tp = format_reg ((prefix_insn >> 12) & 15, tp,
+				     with_reg_prefix);
 		    *tp++ = '.';
 		    *tp++ = mode_char[(prefix_insn >> 4) & 3];
 
@@ -899,7 +917,8 @@ print_with_operands (opcodep, insn, buffer, addr, info, prefix_opcodep,
 		  case BDAP_INDIR_OPCODE:
 		    /* Output "r+s.m", or, if "s" is [pc+], "r+s" or
 		       "r-s".  */
-		    tp = format_reg ((prefix_insn >> 12) & 15, tp);
+		    tp = format_reg ((prefix_insn >> 12) & 15, tp,
+				     with_reg_prefix);
 
 		    if ((prefix_insn & 0x400) && (prefix_insn & 15) == 15)
 		      {
@@ -969,7 +988,8 @@ print_with_operands (opcodep, insn, buffer, addr, info, prefix_opcodep,
 			/* Output "r+[R].m" or "r+[R+].m".  */
 			*tp++ = '+';
 			*tp++ = '[';
-			tp = format_reg (prefix_insn & 15, tp);
+			tp = format_reg (prefix_insn & 15, tp,
+					 with_reg_prefix);
 			if (prefix_insn & 0x400)
 			  *tp++ = '+';
 			*tp++ = ']';
@@ -998,7 +1018,7 @@ print_with_operands (opcodep, insn, buffer, addr, info, prefix_opcodep,
 	      }
 	    else
 	      {
-		tp = format_reg (insn & 15, tp);
+		tp = format_reg (insn & 15, tp, with_reg_prefix);
 
 		info->flags |= CRIS_DIS_FLAG_MEM_TARGET_IS_REG;
 		info->target = insn & 15;
@@ -1011,7 +1031,7 @@ print_with_operands (opcodep, insn, buffer, addr, info, prefix_opcodep,
 	break;
 
       case 'x':
-	tp = format_reg ((insn >> 12) & 15, tp);
+	tp = format_reg ((insn >> 12) & 15, tp, with_reg_prefix);
 	*tp++ = '.';
 	*tp++ = mode_char[(insn >> 4) & 3];
 	break;
@@ -1083,7 +1103,7 @@ print_with_operands (opcodep, insn, buffer, addr, info, prefix_opcodep,
 
 	tp = format_dec (number, tp, 1);
 	*tp++ = ',';
-	tp = format_reg ((insn >> 12) & 15, tp);
+	tp = format_reg ((insn >> 12) & 15, tp, with_reg_prefix);
       }
       break;
 
@@ -1105,6 +1125,8 @@ print_with_operands (opcodep, insn, buffer, addr, info, prefix_opcodep,
 	  *tp++ = '?';
 	else
 	  {
+	    if (with_reg_prefix)
+	      *tp++ = REGISTER_PREFIX_CHAR;
 	    strcpy (tp, sregp->name);
 	    tp += strlen (tp);
 	  }
@@ -1155,11 +1177,14 @@ print_with_operands (opcodep, insn, buffer, addr, info, prefix_opcodep,
 
 
 /* Print the CRIS instruction at address memaddr on stream.  Returns
-   length of the instruction, in bytes.  */
-int
-print_insn_cris (memaddr, info)
+   length of the instruction, in bytes.  Prefix register names with `$' if
+   WITH_REG_PREFIX.  */
+
+static int
+print_insn_cris_generic (memaddr, info, with_reg_prefix)
      bfd_vma memaddr;
      disassemble_info *info;
+     boolean with_reg_prefix;
 {
   int nbytes;
   unsigned int insn;
@@ -1300,7 +1325,7 @@ print_insn_cris (memaddr, info)
 		 to the operands.   */
 	      print_with_operands (matchedp, insn, bufp, addr, info,
 				   prefix_opcodep, prefix_insn,
-				   prefix_buffer);
+				   prefix_buffer, with_reg_prefix);
 	    }
 	}
     }
@@ -1333,6 +1358,39 @@ print_insn_cris (memaddr, info)
   info->display_endian = BFD_ENDIAN_BIG;
 
   return advance;
+}
+
+/* Disassemble, prefixing register names with `$'.  */
+
+static int
+print_insn_cris_with_register_prefix (vma, info)
+     bfd_vma vma;
+     disassemble_info *info;
+{
+  return print_insn_cris_generic (vma, info, true);
+}
+
+/* Disassemble, no prefixes on register names.  */
+
+static int
+print_insn_cris_without_register_prefix (vma, info)
+     bfd_vma vma;
+     disassemble_info *info;
+{
+  return print_insn_cris_generic (vma, info, false);
+}
+
+/* Return a disassembler-function that prints registers with a `$' prefix,
+   or one that prints registers without a prefix.  */
+
+disassembler_ftype
+cris_get_disassembler (abfd)
+     bfd *abfd;
+{
+  if (bfd_get_symbol_leading_char (abfd) == 0)
+    return print_insn_cris_with_register_prefix;
+
+  return print_insn_cris_without_register_prefix;
 }
 
 /*
