@@ -20,9 +20,12 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "cli/cli-cmds.h"
+#include "command.h"
 #include "frame.h"
 #include "regcache.h"
 #include "target.h"
+#include "value.h"
 
 #include "gdb_assert.h"
 #include <fcntl.h>
@@ -30,6 +33,7 @@
 #include <nlist.h>
 #include "readline/readline.h"
 #include <sys/param.h>
+#include <sys/proc.h>
 #include <sys/user.h>
 
 #include "bsd-kvm.h"
@@ -201,6 +205,61 @@ bsd_kvm_fetch_registers (int regnum)
 }
 
 
+/* Kernel memory interface commands.  */
+struct cmd_list_element *bsd_kvm_cmdlist = NULL;
+
+static void
+bsd_kvm_cmd (char *arg, int fromtty)
+{
+  /* ??? Should this become an alias for "target kvm"?  */
+}
+
+#ifndef HAVE_STRUCT_THREAD_TD_PCB
+
+static void
+bsd_kvm_proc_cmd (char *arg, int fromtty)
+{
+  CORE_ADDR addr;
+
+  if (arg == NULL)
+    error_no_arg ("proc address");
+
+  if (core_kd == NULL)
+    error ("No kernel memory image.");
+
+  addr = parse_and_eval_address (arg);
+  addr += offsetof (struct proc, p_addr);
+
+  if (kvm_read (core_kd, addr, &bsd_kvm_paddr, sizeof bsd_kvm_paddr) == -1)
+    error ("%s", kvm_geterr (core_kd));
+
+  target_fetch_registers (-1);
+
+  flush_cached_frames ();
+  select_frame (get_current_frame ());
+  print_stack_frame (get_selected_frame (), -1, 1);
+}
+
+#endif
+
+static void
+bsd_kvm_pcb_cmd (char *arg, int fromtty)
+{
+  if (arg == NULL)
+    error_no_arg ("pcb address");
+
+  if (core_kd == NULL)
+    error ("No kernel memory image.");
+
+  bsd_kvm_paddr = (struct pcb *) parse_and_eval_address (arg);
+
+  target_fetch_registers (-1);
+
+  flush_cached_frames ();
+  select_frame (get_current_frame ());
+  print_stack_frame (get_selected_frame (), -1, 1);
+}
+
 /* Add the libkvm interface to the list of all possible targets and
    register CUPPLY_PCB as the architecture-specific process control
    block interpreter.  */
@@ -226,4 +285,15 @@ Optionally specify the filename of a core dump.";
   bsd_kvm_ops.to_magic = OPS_MAGIC;
 
   add_target (&bsd_kvm_ops);
+  
+  add_prefix_cmd ("kvm", class_obscure, bsd_kvm_cmd, "\
+Generic command for manipulating the kernel memory interface.",
+		  &bsd_kvm_cmdlist, "kvm ", 0, &cmdlist);
+
+#ifndef HAVE_STRUCT_THREAD_TD_PCB
+  add_cmd ("proc", class_obscure, bsd_kvm_proc_cmd,
+	   "Set current context from proc address", &bsd_kvm_cmdlist);
+#endif
+  add_cmd ("pcb", class_obscure, bsd_kvm_pcb_cmd,
+	   "Set current context from pcb address", &bsd_kvm_cmdlist);
 }

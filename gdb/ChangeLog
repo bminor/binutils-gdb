@@ -1,3 +1,13 @@
+2004-07-03  Mark Kettenis  <kettenis@gnu.org>
+
+	* bsd-kvm.c: Include "cli/cli-cmds.h", "command.h", "value.h" and
+	<sys/proc.h>.
+	(bsd_kvm_cmdlist): New variable.
+	(bsd_kvm_cmd, bsd_kvm_proc_cmd, bsd_kvm_pcb_cmd): New functions.
+	(bsd_kvm_add_target): Register "kvm" command prefix, "kvm pcb"
+	command and "kvm proc" command.
+	* Makefile.in (bsd-kvm.o): Update dependencies.
+
 2004-07-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* osabi.c: Update copyright year.

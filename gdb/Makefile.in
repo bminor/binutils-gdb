@@ -1646,8 +1646,9 @@ breakpoint.o: breakpoint.c $(defs_h) $(symtab_h) $(frame_h) $(breakpoint_h) \
 	$(objfiles_h) $(source_h) $(linespec_h) $(completer_h) $(gdb_h) \
 	$(ui_out_h) $(cli_script_h) $(gdb_assert_h) $(block_h) \
 	$(gdb_events_h)
-bsd-kvm.o: bsd-kvm.c $(defs_h) $(frame_h) $(regcache_h) $(target_h) \
-	$(gdb_assert_h) $(readline_h) $(bsd_kvm_h)
+bsd-kvm.o: bsd-kvm.c $(defs_h) $(cli_cmds.h) $(command_h) $(value_h) \
+	$(frame_h) $(regcache_h) $(target_h) $(gdb_assert_h) $(readline_h) \
+	$(bsd_kvm_h)
 buildsym.o: buildsym.c $(defs_h) $(bfd_h) $(gdb_obstack_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(gdb_assert_h) \
 	$(complaints_h) $(gdb_string_h) $(expression_h) $(language_h) \
