@@ -537,7 +537,8 @@ eh_frame_convert_frag (frag)
       break;
     }
 
-  frag->fr_fix += frag->fr_subtype;
+  frag->fr_fix += frag->fr_subtype & 7;
   frag->fr_type = rs_fill;
+  frag->fr_subtype = 0;
   frag->fr_offset = 0;
 }
