@@ -1,3 +1,8 @@
+2004-06-28  Joel Brobecker  <brobecker@gnat.com>
+
+	* ada-lang.c: Re-indent file, with some massaging to help indent
+	a bit when the result is otherwise really too ugly.
+
 2004-06-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* frame.h (struct frame_id): Change bit field type of stack_addr_p, 

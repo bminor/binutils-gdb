@@ -993,8 +993,9 @@ ada_decode (const char *encoded)
           for (k = 0; ada_opname_table[k].encoded != NULL; k += 1)
             {
               int op_len = strlen (ada_opname_table[k].encoded);
-              if (strncmp (ada_opname_table[k].encoded + 1, encoded + i + 1,
-                           op_len - 1) == 0 && !isalnum (encoded[i + op_len]))
+              if ((strncmp (ada_opname_table[k].encoded + 1, encoded + i + 1,
+                            op_len - 1) == 0)
+                  && !isalnum (encoded[i + op_len]))
                 {
                   strcpy (decoded + j, ada_opname_table[k].decoded);
                   at_start_name = 0;
@@ -2688,11 +2689,10 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
           else if (deprocedure_p
                    && !is_nonfunction (candidates, n_candidates))
             {
-              i = ada_resolve_function (candidates, n_candidates, NULL, 0,
-                                        SYMBOL_LINKAGE_NAME (exp->
-                                                             elts[pc +
-                                                                  2].symbol),
-                                        context_type);
+              i = ada_resolve_function
+                (candidates, n_candidates, NULL, 0,
+                 SYMBOL_LINKAGE_NAME (exp->elts[pc + 2].symbol),
+                 context_type);
               if (i < 0)
                 error ("Could not find a match for %s",
                        SYMBOL_PRINT_NAME (exp->elts[pc + 2].symbol));
@@ -2740,13 +2740,11 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
               i = 0;
             else
               {
-                i = ada_resolve_function (candidates, n_candidates,
-                                          argvec, nargs,
-                                          SYMBOL_LINKAGE_NAME (exp->
-                                                               elts[pc +
-                                                                    5].
-                                                               symbol),
-                                          context_type);
+                i = ada_resolve_function
+                  (candidates, n_candidates,
+                   argvec, nargs,
+                   SYMBOL_LINKAGE_NAME (exp->elts[pc + 5].symbol),
+                   context_type);
                 if (i < 0)
                   error ("Could not find a match for %s",
                          SYMBOL_PRINT_NAME (exp->elts[pc + 5].symbol));
@@ -3097,9 +3095,9 @@ user_select_syms (struct ada_symbol_info *syms, int nsyms, int max_results)
             find_function_start_sal (syms[i].sym, 1);
           printf_unfiltered ("[%d] %s at %s:%d\n", i + first_choice,
                              SYMBOL_PRINT_NAME (syms[i].sym),
-                             sal.symtab ==
-                             NULL ? "<no source file available>" : sal.
-                             symtab->filename, sal.line);
+                             (sal.symtab == NULL
+                              ? "<no source file available>"
+                              : sal.symtab->filename), sal.line);
           continue;
         }
       else
@@ -6994,13 +6992,10 @@ ada_search_struct_field (char *name, struct value *arg, int offset,
 
       else if (ada_is_wrapper_field (type, i))
         {
-          struct value *v = ada_search_struct_field (name, arg,
-                                                     offset +
-                                                     TYPE_FIELD_BITPOS (type,
-                                                                        i) /
-                                                     8,
-                                                     TYPE_FIELD_TYPE (type,
-                                                                      i));
+          struct value *v =     /* Do not let indent join lines here. */
+            ada_search_struct_field (name, arg,
+                                     offset + TYPE_FIELD_BITPOS (type, i) / 8,
+                                     TYPE_FIELD_TYPE (type, i));
           if (v != NULL)
             return v;
         }
@@ -7013,13 +7008,10 @@ ada_search_struct_field (char *name, struct value *arg, int offset,
 
           for (j = TYPE_NFIELDS (field_type) - 1; j >= 0; j -= 1)
             {
-              struct value *v = ada_search_struct_field (name, arg,
-                                                         var_offset
-                                                         +
-                                                         TYPE_FIELD_BITPOS
-                                                         (field_type, j) / 8,
-                                                         TYPE_FIELD_TYPE
-                                                         (field_type, j));
+              struct value *v = ada_search_struct_field /* Force line break.  */
+                (name, arg,
+                 var_offset + TYPE_FIELD_BITPOS (field_type, j) / 8,
+                 TYPE_FIELD_TYPE (field_type, j));
               if (v != NULL)
                 return v;
             }
