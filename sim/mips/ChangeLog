@@ -28,6 +28,11 @@ Mon Dec 16 14:59:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 	(INDELAYSLOT, INJALDELAYSLOT): Define.
 	(simulate): Clear simJALDELAYSLOT when simDELAYSLOT is cleared.
 
+Tue Dec 24 22:11:20 1996  Angela Marie Thomas (angela@cygnus.com)
+
+	* interp.c (sim_open): add flush_cache as a PMON routine
+	(sim_monitor): handle flush_cache by ignoring it
+
 Wed Dec 11 13:53:51 1996  Jim Wilson  <wilson@cygnus.com>
 
 	* gencode.c (build_instruction): Use !ByteSwapMem instead of

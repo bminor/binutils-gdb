@@ -816,6 +816,10 @@ Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
             case 8: /* cliexit */
               value = 17;
               break;
+
+            case 11: /* flush_cache */
+              value = 28;
+              break;
           }
 	    /* FIXME - should monitor_base be SIM_ADDR?? */
         value = ((unsigned int)monitor_base + (value * 8));
@@ -1647,6 +1651,9 @@ sim_monitor(reason)
       sim_warning("sim_monitor(17): _exit(int reason) to be coded");
       state |= (simSTOP | simEXIT); /* stop executing code */
       rcexit = (unsigned int)(A0 & 0xFFFFFFFF);
+      break;
+
+    case 28 : /* PMON flush_cache */
       break;
 
     case 55: /* void get_mem_info(unsigned int *ptr) */
