@@ -24,6 +24,11 @@
 
 #include "sparc-tdep.h"
 
+/* Register offsets for the general-purpose register set.  */
+
+/* UltraSPARC doesn't have %psr.  */
+#define r_tstate_offset r_psr_offset
+
 /* Register numbers of various important registers.  */
 
 enum sparc64_regnum
@@ -66,6 +71,25 @@ enum sparc64_regnum
 
 extern void sparc64_init_abi (struct gdbarch_info info,
 			      struct gdbarch *gdbarch);
+
+extern void sparc64_supply_gregset (const struct sparc_gregset *gregset,
+				    struct regcache *regcache,
+				    int regnum, const void *gregs);
+extern void sparc64_collect_gregset (const struct sparc_gregset *gregset,
+				     const struct regcache *regcache,
+				     int regnum, void *gregs);
+extern void sparc64_supply_fpregset (struct regcache *regcache,
+				     int regnum, const void *fpregs);
+extern void sparc64_collect_fpregset (const struct regcache *regcache,
+				      int regnum, void *fpregs);
+
+/* Functions and variables exported from sparc64-sol2-tdep.c.  */
+
+/* Register offsets for Solaris 2.  */
+extern const struct sparc_gregset sparc64_sol2_gregset;
+
+extern void sparc64_sol2_init_abi (struct gdbarch_info info,
+				   struct gdbarch *gdbarch);
 
 /* Functions exported from sparc64fbsd-tdep.c.  */
 

@@ -133,6 +133,7 @@ sh*-*-netbsdelf*)	gdb_host=nbsd ;;
 sparc-*-solaris2*)	gdb_host=sol2 ;;
 sparc-*-linux*)		gdb_host=linux ;;
 sparc64-*-freebsd*)	gdb_host=fbsd ;;
+sparc64-*-linux*)	gdb_host=linux64 ;;
 
 vax-*-bsd*)		gdb_host=vaxbsd ;;
 vax-*-ultrix2*)		gdb_host=vaxult2 ;;

@@ -205,6 +205,7 @@ sh*)			gdb_target=embed ;;
 sparc-*-solaris2*)	gdb_target=sol2 ;;
 sparc-*-linux*)		gdb_target=linux ;;
 sparc-*-*)		gdb_target=sparc ;;
+sparc64-*-linux*)	gdb_target=linux64 ;;
 
 xstormy16-*-*)          gdb_target=xstormy16 ;;
 

@@ -1,5 +1,38 @@
 2003-11-02  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64-tdep.h (r_tstate_offset): New define.
+	(sparc64_supply_gregset, sparc64_collect_gregset,
+	sparc64_supply_fpregset, sparc64_collect_fpregset): New
+	prototypes.
+	(sparc64_sol2_gregset): New extern declaration.
+	(sparc64_sol2_init_abi): New prototype.
+	* sparc64-tdep.c: Include "symtab.h" and "objfiles.h".  Don't
+	include "sparc-tdep.h".
+	(X_RD, X_I): New macros.
+	(sparc64_analyze_prologue): Sync with implementation in
+	sparc-tdep.c.
+	(TSTATE_CWP, TSTATE_ICC, TSTATE_XCC): New macros.
+	(PSR_S, PSR_ICC, PSR_VERS, PSR_IMPL, PSR_V8PLUS, PSR_XCC): New
+	macros.
+	(sparc64_supply_gregset, sparc64_collect_gregset,
+	sparc64_supply_fpregset, sparc64_collect_fpregset): New functions.
+	* sparc64-nat.c: New file.
+	* sparc64-sol2-nat.c: New file.
+	* sparc64-sol2-tdep.c: New file.
+	* sparc64-linux-nat.c: New file.
+	* sparc64-linux-tdep.c: New file.
+	* Makefile.in (sparc_tdep_h): New variable.
+	(ALLDEPFILES): Add sparc64-sol2-tdep.c, sparc64-linux-tdep.c,
+	sparc64-nat.c sparc64-sol2-nat.c and sparc64-linux-nat.c
+	(sparc-nat.o, sparc-linux-tdep.o, sparc64-tdep.o): Update
+	dependencies.
+	(sparc64-nat.o, sparc64-linux-nat.o, sparc64-linux-tdep.o,
+	sparc64-sol2-nat.o, sparc64-sol2-tdep.o): New dependencies.
+	* configure.tgt: Add sparc64-*-linux*.
+	* configure.host: Add sparc64-*-linux*.
+	* config/sparc/linux64.mt: New file.
+	* config/sparc/linux64.mh: New file.
+
 	* sparc-tdep.h (struct sparc_gregset): Add r_y_size member.
 	(sparc32_supply_gregset): Renamed from sparc_supply_gregset.
 	(sparc32_collect_gregset): Renamed from sparc_collect_gregset.

@@ -28,6 +28,8 @@
 #include "gdbcore.h"
 #include "gdbtypes.h"
 #include "inferior.h"
+#include "symtab.h"
+#include "objfiles.h"
 #include "osabi.h"
 #include "regcache.h"
 #include "target.h"
@@ -36,7 +38,6 @@
 #include "gdb_assert.h"
 #include "gdb_string.h"
 
-#include "sparc-tdep.h"
 #include "sparc64-tdep.h"
 
 /* This file implements the The SPARC 64-bit ABI as defined by the
@@ -56,11 +57,13 @@
 
 /* Macros to extract fields from SPARC instructions.  */
 #define X_OP(i) (((i) >> 30) & 0x3)
+#define X_RD(i) (((i) >> 25) & 0x1f)
 #define X_A(i) (((i) >> 29) & 1)
 #define X_COND(i) (((i) >> 25) & 0xf)
 #define X_OP2(i) (((i) >> 22) & 0x7)
 #define X_IMM22(i) ((i) & 0x3fffff)
 #define X_OP3(i) (((i) >> 19) & 0x3f)
+#define X_I(i) (((i) >> 13) & 1)
 /* Sign extension macros.  */
 #define X_DISP22(i) ((X_IMM22 (i) ^ 0x200000) - 0x200000)
 #define X_DISP19(i) ((((i) & 0x7ffff) ^ 0x40000) - 0x40000)
@@ -526,17 +529,52 @@ static CORE_ADDR
 sparc64_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 			  struct sparc64_frame_cache *cache)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   unsigned long insn;
+  int offset = 0;
+  int dest = -1;
 
   if (current_pc <= pc)
     return current_pc;
 
-  /* Check whether the function starts with a SAVE instruction.  */
+  /* We have to handle to "Procedure Linkage Table" (PLT) special.  On
+     SPARC the linker usually defines a symbol (typically
+     _PROCEDURE_LINKAGE_TABLE_) at the start of the .plt section.
+     This symbol makes us end up here with PC pointing at the start of
+     the PLT and CURRENT_PC probably pointing at a PLT entry.  If we
+     would do our normal prologue analysis, we would probably conclude
+     that we've got a frame when in reality we don't, since the
+     dynamic linker patches up the first PLT with some code that
+     starts with a SAVE instruction.  Patch up PC such that it points
+     at the start of our PLT entry.  */
+  if (tdep->plt_entry_size > 0 && in_plt_section (current_pc, NULL))
+    pc = current_pc - ((current_pc - pc) % tdep->plt_entry_size);
+
   insn = sparc_fetch_instruction (pc);
+
+  /* Recognize a SETHI insn and record its destination.  */
+  if (X_OP (insn) == 0 && X_OP2 (insn) == 0x04)
+    {
+      dest = X_RD (insn);
+      offset += 4;
+
+      insn = sparc_fetch_instruction (pc + 4);
+    }
+
+  /* Allow for an arithmetic operation on DEST or %g1.  */
+  if (X_OP (insn) == 2 && X_I (insn)
+      && (X_RD (insn) == 1 || X_RD (insn) == dest))
+    {
+      offset += 4;
+
+      insn = sparc_fetch_instruction (pc + 8);
+    }
+
+  /* Check for the SAVE instruction that sets up the frame.  */
   if (X_OP (insn) == 2 && X_OP3 (insn) == 0x3c)
     {
       cache->frameless_p = 0;
-      return pc + 4;
+      return pc + offset + 4;
     }
 
   return pc;
@@ -1203,4 +1241,299 @@ sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   frame_unwind_append_sniffer (gdbarch, sparc64_frame_sniffer);
   frame_base_set_default (gdbarch, &sparc64_frame_base);
+}
+
+
+/* Helper functions for dealing with register sets.  */
+
+#define TSTATE_CWP	0x000000000000001f
+#define TSTATE_ICC	0x0000000f00000000
+#define TSTATE_XCC	0x000000f000000000
+
+#define PSR_S		0x00000080
+#define PSR_ICC		0x00f00000
+#define PSR_VERS	0x0f000000
+#define PSR_IMPL	0xf0000000
+#define PSR_V8PLUS	0xff000000
+#define PSR_XCC		0x000f0000
+
+void
+sparc64_supply_gregset (const struct sparc_gregset *gregset,
+			struct regcache *regcache,
+			int regnum, const void *gregs)
+{
+  int sparc32 = (gdbarch_ptr_bit (current_gdbarch) == 32);
+  const char *regs = gregs;
+  int i;
+
+  if (sparc32)
+    {
+      if (regnum == SPARC32_PSR_REGNUM || regnum == -1)
+	{
+	  int offset = gregset->r_tstate_offset;
+	  ULONGEST tstate, psr;
+	  char buf[4];
+
+	  tstate = extract_unsigned_integer (regs + offset, 8);
+	  psr = ((tstate & TSTATE_CWP) | PSR_S | ((tstate & TSTATE_ICC) >> 12)
+		 | ((tstate & TSTATE_XCC) >> 20) | PSR_V8PLUS);
+	  store_unsigned_integer (buf, 4, psr);
+	  regcache_raw_supply (regcache, SPARC32_PSR_REGNUM, buf);
+	}
+
+      if (regnum == SPARC32_PC_REGNUM || regnum == -1)
+	regcache_raw_supply (regcache, SPARC32_PC_REGNUM,
+			     regs + gregset->r_pc_offset + 4);
+
+      if (regnum == SPARC32_NPC_REGNUM || regnum == -1)
+	regcache_raw_supply (regcache, SPARC32_NPC_REGNUM,
+			     regs + gregset->r_npc_offset + 4);
+
+      if (regnum == SPARC32_Y_REGNUM || regnum == -1)
+	{
+	  int offset = gregset->r_y_offset + 8 - gregset->r_y_size;
+	  regcache_raw_supply (regcache, SPARC32_Y_REGNUM, regs + offset);
+	}
+    }
+  else
+    {
+      if (regnum == SPARC64_STATE_REGNUM || regnum == -1)
+	regcache_raw_supply (regcache, SPARC64_STATE_REGNUM,
+			     regs + gregset->r_tstate_offset);
+
+      if (regnum == SPARC64_PC_REGNUM || regnum == -1)
+	regcache_raw_supply (regcache, SPARC64_PC_REGNUM,
+			     regs + gregset->r_pc_offset);
+
+      if (regnum == SPARC64_NPC_REGNUM || regnum == -1)
+	regcache_raw_supply (regcache, SPARC64_NPC_REGNUM,
+			     regs + gregset->r_npc_offset);
+
+      if (regnum == SPARC64_Y_REGNUM || regnum == -1)
+	{
+	  char buf[8];
+
+	  memset (buf, 0, 8);
+	  memcpy (buf + 8 - gregset->r_y_size,
+		  regs + gregset->r_y_offset, gregset->r_y_size);
+	  regcache_raw_supply (regcache, SPARC64_Y_REGNUM, buf);
+	}
+    }
+
+  if (regnum == SPARC_G0_REGNUM || regnum == -1)
+    regcache_raw_supply (regcache, SPARC_G0_REGNUM, NULL);
+
+  if ((regnum >= SPARC_G1_REGNUM && regnum <= SPARC_O7_REGNUM) || regnum == -1)
+    {
+      int offset = gregset->r_g1_offset;
+
+      if (sparc32)
+	offset += 4;
+
+      for (i = SPARC_G1_REGNUM; i <= SPARC_O7_REGNUM; i++)
+	{
+	  if (regnum == i || regnum == -1)
+	    regcache_raw_supply (regcache, i, regs + offset);
+	  offset += 8;
+	}
+    }
+
+  if ((regnum >= SPARC_L0_REGNUM && regnum <= SPARC_I7_REGNUM) || regnum == -1)
+    {
+      /* Not all of the register set variants include Locals and
+         Inputs.  For those that don't, we read them off the stack.  */
+      if (gregset->r_l0_offset == -1)
+	{
+	  ULONGEST sp;
+
+	  regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM, &sp);
+	  sparc_supply_rwindow (regcache, sp, regnum);
+	}
+      else
+	{
+	  int offset = gregset->r_l0_offset;
+
+	  if (sparc32)
+	    offset += 4;
+
+	  for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)
+	    {
+	      if (regnum == i || regnum == -1)
+		regcache_raw_supply (regcache, i, regs + offset);
+	      offset += 8;
+	    }
+	}
+    }
+}
+
+void
+sparc64_collect_gregset (const struct sparc_gregset *gregset,
+			 const struct regcache *regcache,
+			 int regnum, void *gregs)
+{
+  int sparc32 = (gdbarch_ptr_bit (current_gdbarch) == 32);
+  char *regs = gregs;
+  int i;
+
+  if (sparc32)
+    {
+      if (regnum == SPARC32_PSR_REGNUM || regnum == -1)
+	{
+	  int offset = gregset->r_tstate_offset;
+	  ULONGEST tstate, psr;
+	  char buf[8];
+
+	  tstate = extract_unsigned_integer (regs + offset, 8);
+	  regcache_raw_collect (regcache, SPARC32_PSR_REGNUM, buf);
+	  psr = extract_unsigned_integer (buf, 4);
+	  tstate |= (psr & PSR_ICC) << 12;
+	  if ((psr & (PSR_VERS | PSR_IMPL)) == PSR_V8PLUS)
+	    tstate |= (psr & PSR_XCC) << 20;
+	  store_unsigned_integer (buf, 8, tstate);
+	  memcpy (regs + offset, buf, 8);
+	}
+
+      if (regnum == SPARC32_PC_REGNUM || regnum == -1)
+	regcache_raw_collect (regcache, SPARC32_PC_REGNUM,
+			      regs + gregset->r_pc_offset + 4);
+
+      if (regnum == SPARC32_NPC_REGNUM || regnum == -1)
+	regcache_raw_collect (regcache, SPARC32_NPC_REGNUM,
+			      regs + gregset->r_npc_offset + 4);
+
+      if (regnum == SPARC32_Y_REGNUM || regnum == -1)
+	{
+	  int offset = gregset->r_y_offset + 8 - gregset->r_y_size;
+	  regcache_raw_collect (regcache, SPARC32_Y_REGNUM, regs + offset);
+	}
+    }
+  else
+    {
+      if (regnum == SPARC64_STATE_REGNUM || regnum == -1)
+	regcache_raw_collect (regcache, SPARC64_STATE_REGNUM,
+			      regs + gregset->r_tstate_offset);
+
+      if (regnum == SPARC64_PC_REGNUM || regnum == -1)
+	regcache_raw_collect (regcache, SPARC64_PC_REGNUM,
+			      regs + gregset->r_pc_offset);
+
+      if (regnum == SPARC64_NPC_REGNUM || regnum == -1)
+	regcache_raw_collect (regcache, SPARC64_NPC_REGNUM,
+			      regs + gregset->r_npc_offset);
+
+      if (regnum == SPARC64_Y_REGNUM || regnum == -1)
+	{
+	  char buf[8];
+
+	  regcache_raw_collect (regcache, SPARC64_Y_REGNUM, buf);
+	  memcpy (regs + gregset->r_y_offset,
+		  buf + 8 - gregset->r_y_size, gregset->r_y_size);
+	}
+    }
+
+  if ((regnum >= SPARC_G1_REGNUM && regnum <= SPARC_O7_REGNUM) || regnum == -1)
+    {
+      int offset = gregset->r_g1_offset;
+
+      if (sparc32)
+	offset += 4;
+
+      /* %g0 is always zero.  */
+      for (i = SPARC_G1_REGNUM; i <= SPARC_O7_REGNUM; i++)
+	{
+	  if (regnum == i || regnum == -1)
+	    regcache_raw_collect (regcache, i, regs + offset);
+	  offset += 8;
+	}
+    }
+
+  if ((regnum >= SPARC_L0_REGNUM && regnum <= SPARC_I7_REGNUM) || regnum == -1)
+    {
+      /* Not all of the register set variants include Locals and
+         Inputs.  For those that don't, we read them off the stack.  */
+      if (gregset->r_l0_offset != -1)
+	{
+	  int offset = gregset->r_l0_offset;
+
+	  if (sparc32)
+	    offset += 4;
+
+	  for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)
+	    {
+	      if (regnum == i || regnum == -1)
+		regcache_raw_collect (regcache, i, regs + offset);
+	      offset += 8;
+	    }
+	}
+    }
+}
+
+void
+sparc64_supply_fpregset (struct regcache *regcache,
+			 int regnum, const void *fpregs)
+{
+  int sparc32 = (gdbarch_ptr_bit (current_gdbarch) == 32);
+  const char *regs = fpregs;
+  int i;
+
+  for (i = 0; i < 32; i++)
+    {
+      if (regnum == (SPARC_F0_REGNUM + i) || regnum == -1)
+	regcache_raw_supply (regcache, SPARC_F0_REGNUM + i, regs + (i * 4));
+    }
+
+  if (sparc32)
+    {
+      if (regnum == SPARC32_FSR_REGNUM || regnum == -1)
+	regcache_raw_supply (regcache, SPARC32_FSR_REGNUM,
+			     regs + (32 * 4) + (16 * 8) + 4);
+    }
+  else
+    {
+      for (i = 0; i < 16; i++)
+	{
+	  if (regnum == (SPARC64_F32_REGNUM + i) || regnum == -1)
+	    regcache_raw_supply (regcache, SPARC64_F32_REGNUM + i,
+				 regs + (32 * 4) + (i * 8));
+	}
+
+      if (regnum == SPARC64_FSR_REGNUM || regnum == -1)
+	regcache_raw_supply (regcache, SPARC64_FSR_REGNUM,
+			     regs + (32 * 4) + (16 * 8));
+    }
+}
+
+void
+sparc64_collect_fpregset (const struct regcache *regcache,
+			  int regnum, void *fpregs)
+{
+  int sparc32 = (gdbarch_ptr_bit (current_gdbarch) == 32);
+  char *regs = fpregs;
+  int i;
+
+  for (i = 0; i < 32; i++)
+    {
+      if (regnum == (SPARC_F0_REGNUM + i) || regnum == -1)
+	regcache_raw_collect (regcache, SPARC_F0_REGNUM + i, regs + (i * 4));
+    }
+
+  if (sparc32)
+    {
+      if (regnum == SPARC32_FSR_REGNUM || regnum == -1)
+	regcache_raw_collect (regcache, SPARC32_FSR_REGNUM,
+			      regs + (32 * 4) + (16 * 8) + 4);
+    }
+  else
+    {
+      for (i = 0; i < 16; i++)
+	{
+	  if (regnum == (SPARC64_F32_REGNUM + i) || regnum == -1)
+	    regcache_raw_collect (regcache, SPARC64_F32_REGNUM + i,
+				  regs + (32 * 4) + (i * 8));
+	}
+
+      if (regnum == SPARC64_FSR_REGNUM || regnum == -1)
+	regcache_raw_collect (regcache, SPARC64_FSR_REGNUM,
+			      regs + (32 * 4) + (16 * 8));
+    }
 }
