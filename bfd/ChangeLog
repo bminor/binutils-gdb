@@ -1,3 +1,8 @@
+1999-06-15  Richard Henderson  <rth@cygnus.com>
+
+	* section.c (SEC_SHORT): Define.
+	* bfd-in2.h: Rebuild.
+
 1999-06-13  Mark Mitchell  <mark@codesourcery.com>
 
 	* elflink.h (elf_link_remove_section_and_adjust_dynindices):

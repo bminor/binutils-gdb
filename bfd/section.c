@@ -307,6 +307,10 @@ CODE_FRAGMENT
 .	{* This section should not be subject to garbage collection.  *}
 .#define SEC_KEEP 0x1000000
 .
+.	{* This section contains "short" data, and should be placed
+.	   "near" the GP.  *}
+.#define SEC_SHORT 0x2000000
+.
 .	{*  End of section flags.  *}
 .
 .	{* Some internal packed boolean fields.  *}
