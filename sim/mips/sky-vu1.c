@@ -293,7 +293,7 @@ void getoption(VectorUnitState* state)
 	state->junk._vpepc = 0;
 	state->junk._is_verb = 0;
 	state->junk._is_dump = 0;
-	state->junk._pgpuif	 = 2;
+	state->junk._pgpuif	 = 4;	/* MEMGPUIF */
 	state->junk._ITOP = 20;
 	state->junk._TOP = 10;
 
