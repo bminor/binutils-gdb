@@ -1299,7 +1299,7 @@ ALLDEPFILES = \
 	sparc-nat.c sparc-sol2-nat.c sparcbsd-nat.c sparcnbsd-nat.c \
 	sparc64-tdep.c sparc64-sol2-tdep.c sparc64-linux-tdep.c \
 	sparc64fbsd-tdep.c \
-	sparc64-nat.c sparc64-sol2-nat.c sparc64-linux-nat.c \
+	sparc64-nat.c sparc64-linux-nat.c \
 	sparc64fbsd-nat.c \
 	sun3-nat.c \
 	symm-tdep.c symm-nat.c \
@@ -2316,7 +2316,7 @@ sparc-tdep.o: sparc-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) $(frame_h) \
 sparc-linux-tdep.o: sparc-linux-tdep.c $(defs_h) $(gdbarch_h) $(osabi_h) \
 	$(solib_svr4_h) $(sparc_tdep_h)
 sparc-sol2-nat.o: sparc-sol2-nat.c $(defs_h) $(gregset_h) $(regcache_h) \
-	$(sparc_tdep_h)
+	$(sparc_tdep_h) $(sparc64_tdep_h)
 sparc-sol2-tdep.o: sparc-sol2-tdep.c $(defs_h) $(frame_h) $(frame_base_h) \
 	$(frame_unwind_h) $(gdbcore_h) $(symtab_h) $(objfiles_h) $(osabi_h) \
 	$(regcache_h) $(target_h) $(trad_frame_h) $(gdb_assert_h) \
@@ -2338,8 +2338,6 @@ sparc64-linux-nat.o: sparc64-linux-nat.c $(defs_h) \
 	$(sparc64_tdep_h) $(sparc_nat_h)
 sparc64-linux-tdep.o: sparc64-linux-tdep.c $(defs_h) $(gdbarch_h) \
 	$(osabi_h) $(solib_svr4_h) $(sparc64_tdep_h)
-sparc64-sol2-nat.o: sparc64-sol2-nat.c $(defs_h) $(gregset_h) $(regcache_h) \
-	$(sparc64_tdep_h)
 sparc64-sol2-tdep.o: sparc64-sol2-tdep.c $(defs_h) $(gdbarch_h) $(symtab_h) \
 	$(objfiles_h) $(osabi_h) $(sparc64_tdep_h)
 sparc64fbsd-tdep.o: sparc64fbsd-tdep.c $(defs_h) $(gdbcore_h) $(osabi_h) \
