@@ -1,5 +1,8 @@
 2004-08-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/nm-linux64.h (PTRACE_ARG3_TYPE, PTRACE_XFER_TYPE):
+	Remove defines.
+
 	* linux-nat.c (kill_inferior): Add missing third and fourth
 	arguments to ptrace call.  Don't use PTRACE_ARG3_TYPE.
 
