@@ -1,5 +1,8 @@
 Fri Apr 11 15:43:24 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elfcode.h (elf_slurp_symbol_table): Only subtract the section
+	VMA if this is an executable file or a shared object.
+
 	* targets.c (netbsd_core_vec): Declare.  From Gordon W. Ross
 	<gwr@mc.com>.
 
