@@ -348,7 +348,7 @@ lin_lwp_attach (char *args, int from_tty)
   child_ops.to_attach (args, from_tty);
 
   /* Add the initial process as the first LWP to the list.  */
-  lp = add_lwp (BUILD_LWP (inferior_ptid, inferior_ptid));
+  lp = add_lwp (BUILD_LWP (PIDGET (inferior_ptid), PIDGET (inferior_ptid)));
 
   /* Make sure the initial process is stopped.  The user-level threads
      layer might want to poke around in the inferior, and that won't
@@ -414,7 +414,7 @@ lin_lwp_detach (char *args, int from_tty)
   sigprocmask (SIG_SETMASK, &normal_mask, NULL);
   sigemptyset (&blocked_mask);
 
-  inferior_ptid = GET_PID (inferior_ptid);
+  inferior_ptid = pid_to_ptid (GET_PID (inferior_ptid));
   child_ops.to_detach (args, from_tty);
 }
 

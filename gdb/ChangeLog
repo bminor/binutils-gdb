@@ -1,3 +1,10 @@
+2001-05-09  Kevin Buettner  <kevinb@redhat.com>
+
+	* lin-lwp.c (lin_lwp_attach): Use PIDGET() to fetch the pid
+	component from inferior_ptid.
+	(lin_lwp_detach): Use pid_to_ptid() to convert from a pid to a
+	ptid.
+
 2001-05-09  Elena Zannoni  <ezannoni@redhat.com>
 
 	* sh3-rom.c (_initialize_sh3_rom): Get rid of specific _WINDOWS
