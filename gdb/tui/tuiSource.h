@@ -23,13 +23,9 @@
 #define _TUI_SOURCE_H
 
 #include "defs.h"
-#if 0
-#include "symtab.h"
-#include "breakpoint.h"
-#endif
 
 extern TuiStatus tuiSetSourceContent (struct symtab *, int, int);
-extern void tuiShowSource (struct symtab *, Opaque, int);
+extern void tuiShowSource (struct symtab *, TuiLineOrAddress, int);
 extern void tuiShowSourceAsIs (struct symtab *, Opaque, int);
 extern int tuiSourceIsDisplayed (char *);
 extern void tuiVerticalSourceScroll (TuiScrollDirection, int);

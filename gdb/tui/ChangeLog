@@ -1,5 +1,43 @@
 2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* tuiWin.c (_parseScrollingArgs): Fix uninitialized variable.
+	(_makeVisibleWithNewHeight): Use TuiLineOrAddress type.
+
+	* tuiStack.c (tuiShowFrameInfo): Use TuiLineOrAddress type.
+	(tui_vUpdateLocatorFilename): Remove.
+	* tuiStack.h: Update prototypes.
+
+	* tuiSourceWin.c (tuiAddrIsDisplayed): New function.
+	(tuiLineIsDisplayed): Split for address and line.
+	(tuiUpdateSourceWindow): Use TuiLineOrAddress type.
+	(tuiUpdateSourceWindowAsIs): Likewise.
+	(tuiUpdateSourceWindowsWithAddr): Likewise.
+	(tuiUpdateSourceWindowsWithLine): Likewise.
+	(tuiHorizontalSourceScroll): Likewise.
+	(tuiSetIsExecPointAt): Likewise.
+	(tuiUpdateOnEnd): Likewise.
+	* tuiSourceWin.h: Update prototypes.
+
+	* tuiSource.c (tuiVerticalSourceScroll): Use TuiLineOrAddress type.
+	(tuiShowSource): Likewise.
+	(tuiVerticalSourceScroll): Likewise.
+	* tuiSource.h (tuiShowSource): Update prototype.
+
+	* tuiDisassem.c (tuiSetDisassemContent): Use CORE_ADDR for address.
+	(tuiShowDisassem): Use TuiLineOrAddress type.
+	(tuiShowDisassemAndUpdateSource): Likewise.
+	(tuiVerticalDisassemScroll): Likewise.
+	(tuiShowDisassemAsIs): Remove.
+	* tuiDisassem.h (tuiSetDisassemContent): Update prototype.
+
+	* tuiData.c (initWinInfo): Use CORE_ADDR for address.
+	(clearWinDetail): Likewise.
+	(displayableWinContentOf): Fix address conversion.
+	(tuiNextWin): Fix crash when the window is not yet created.
+	(partialWinByName): Likewise.
+
+2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* tuiSourceWin.h: Remove unused declarations.
 	* tuiSourceWin.c (tui_vUpdateSourceWindowsWithAddr): Remove.
 	(tui_vUpdateSourceWindowsWithLine): Remove.

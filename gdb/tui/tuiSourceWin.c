@@ -119,7 +119,7 @@ tuiDisplayMainFunction (void)
  */
 void
 tuiUpdateSourceWindow (TuiWinInfoPtr winInfo, struct symtab *s,
-                       Opaque lineOrAddr, int noerror)
+                       TuiLineOrAddress lineOrAddr, int noerror)
 {
   winInfo->detail.sourceInfo.horizontalOffset = 0;
   tuiUpdateSourceWindowAsIs (winInfo, s, lineOrAddr, noerror);
@@ -135,14 +135,14 @@ tuiUpdateSourceWindow (TuiWinInfoPtr winInfo, struct symtab *s,
  */
 void
 tuiUpdateSourceWindowAsIs (TuiWinInfoPtr winInfo, struct symtab *s,
-                           Opaque lineOrAddr, int noerror)
+                           TuiLineOrAddress lineOrAddr, int noerror)
 {
   TuiStatus ret;
 
   if (winInfo->generic.type == SRC_WIN)
-    ret = tuiSetSourceContent (s, (int) lineOrAddr, noerror);
+    ret = tuiSetSourceContent (s, lineOrAddr.lineNo, noerror);
   else
-    ret = tuiSetDisassemContent (s, (Opaque) lineOrAddr);
+    ret = tuiSetDisassemContent (s, lineOrAddr.addr);
 
   if (ret == TUI_FAILURE)
     {
@@ -156,7 +156,7 @@ tuiUpdateSourceWindowAsIs (TuiWinInfoPtr winInfo, struct symtab *s,
       tuiUpdateExecInfo (winInfo);
       if (winInfo->generic.type == SRC_WIN)
 	{
-	  current_source_line = (int) lineOrAddr +
+	  current_source_line = lineOrAddr.lineNo +
 	    (winInfo->generic.contentSize - 2);
 	  current_source_symtab = s;
 	  /*
@@ -185,7 +185,8 @@ tuiUpdateSourceWindowsWithAddr (CORE_ADDR addr)
   if (addr != 0)
     {
       struct symtab_and_line sal;
-
+      TuiLineOrAddress l;
+      
       switch (currentLayout ())
 	{
 	case DISASSEM_COMMAND:
@@ -197,7 +198,8 @@ tuiUpdateSourceWindowsWithAddr (CORE_ADDR addr)
 	  break;
 	default:
 	  sal = find_pc_line (addr, 0);
-	  tuiShowSource (sal.symtab, sal.line, FALSE);
+	  l.lineNo = sal.line;
+	  tuiShowSource (sal.symtab, l, FALSE);
 	  break;
 	}
     }
@@ -226,7 +228,8 @@ void
 tuiUpdateSourceWindowsWithLine (struct symtab *s, int line)
 {
   CORE_ADDR pc;
-
+  TuiLineOrAddress l;
+  
   switch (currentLayout ())
     {
     case DISASSEM_COMMAND:
@@ -235,7 +238,8 @@ tuiUpdateSourceWindowsWithLine (struct symtab *s, int line)
       tuiUpdateSourceWindowsWithAddr (pc);
       break;
     default:
-      tuiShowSource (s, line, FALSE);
+      l.lineNo = line;
+      tuiShowSource (s, l, FALSE);
       if (currentLayout () == SRC_DISASSEM_COMMAND)
 	{
 	  find_line_pc (s, line, &pc);
@@ -422,12 +426,9 @@ tuiHorizontalSourceScroll (TuiWinInfoPtr winInfo,
       tuiUpdateSourceWindowAsIs (
 				  winInfo,
 				  s,
-				  ((winInfo == srcWin) ?
-				   (Opaque) ((TuiWinElementPtr)
-       winInfo->generic.content[0])->whichElement.source.lineOrAddr.lineNo :
-				   (Opaque) ((TuiWinElementPtr)
-	 winInfo->generic.content[0])->whichElement.source.lineOrAddr.addr),
-				  (int) FALSE);
+				  ((TuiWinElementPtr)
+				   winInfo->generic.content[0])->whichElement.source.lineOrAddr,
+				  FALSE);
     }
 
   return;
@@ -439,7 +440,7 @@ tuiHorizontalSourceScroll (TuiWinInfoPtr winInfo,
    **        Set or clear the hasBreak flag in the line whose line is lineNo.
  */
 void
-tuiSetIsExecPointAt (Opaque lineOrAddr, TuiWinInfoPtr winInfo)
+tuiSetIsExecPointAt (TuiLineOrAddress l, TuiWinInfoPtr winInfo)
 {
   int i;
   TuiWinContent content = (TuiWinContent) winInfo->generic.content;
@@ -447,7 +448,7 @@ tuiSetIsExecPointAt (Opaque lineOrAddr, TuiWinInfoPtr winInfo)
   i = 0;
   while (i < winInfo->generic.contentSize)
     {
-      if (content[i]->whichElement.source.lineOrAddr.addr == lineOrAddr)
+      if (content[i]->whichElement.source.lineOrAddr.addr == l.addr)
 	content[i]->whichElement.source.isExecPoint = TRUE;
       else
 	content[i]->whichElement.source.isExecPoint = FALSE;
@@ -456,7 +457,6 @@ tuiSetIsExecPointAt (Opaque lineOrAddr, TuiWinInfoPtr winInfo)
 
   return;
 }				/* tuiSetIsExecPointAt */
-
 
 /*
    ** tuiSetHasBreakAt().
@@ -756,9 +756,13 @@ tuiUpdateOnEnd (void)
   /* for all the windows (src, asm) */
   for (i = 0; i < (sourceWindows ())->count; i++)
     {
+      TuiLineOrAddress l;
+      
       winInfo = (TuiWinInfoPtr) (sourceWindows ())->list[i];
 
-      tuiSetIsExecPointAt ((Opaque) - 1, winInfo);	/* the target is'n running */
+      l.addr = -1;
+      l.lineNo = -1;
+      tuiSetIsExecPointAt (l, winInfo);	/* the target is'n running */
       /* -1 should not match any line number or pc */
       tuiSetExecInfoContent (winInfo);	/*set winInfo so that > is'n displayed */
       tuiShowExecInfoContent (winInfo);		/* display the new contents */
@@ -771,7 +775,7 @@ tuiUpdateOnEnd (void)
 		      filename,
 		      (char *) NULL,
 		      0,
-		      (Opaque) NULL,
+		      (CORE_ADDR) 0,
 	   &((TuiWinElementPtr) locator->content[0])->whichElement.locator);
   tuiShowLocatorContent ();
 
@@ -833,7 +837,7 @@ tuiAllocSourceBuffer (TuiWinInfoPtr winInfo)
    **      in the current source window.
  */
 int
-tuiLineIsDisplayed (Opaque lineNoOrAddr, TuiWinInfoPtr winInfo,
+tuiLineIsDisplayed (int line, TuiWinInfoPtr winInfo,
                     int checkThreshold)
 {
   int isDisplayed = FALSE;
@@ -846,19 +850,43 @@ tuiLineIsDisplayed (Opaque lineNoOrAddr, TuiWinInfoPtr winInfo,
   i = 0;
   while (i < winInfo->generic.contentSize - threshold && !isDisplayed)
     {
-      if (winInfo == srcWin)
-	isDisplayed = (((TuiWinElementPtr)
-	 winInfo->generic.content[i])->whichElement.source.lineOrAddr.lineNo
-		       == (int) lineNoOrAddr);
-      else
-	isDisplayed = (((TuiWinElementPtr)
-	   winInfo->generic.content[i])->whichElement.source.lineOrAddr.addr
-		       == lineNoOrAddr);
+      isDisplayed = (((TuiWinElementPtr)
+		      winInfo->generic.content[i])->whichElement.source.lineOrAddr.lineNo
+		     == (int) line);
       i++;
     }
 
   return isDisplayed;
 }				/* tuiLineIsDisplayed */
+
+
+/*
+   ** tuiLineIsDisplayed().
+   **      Answer whether the a particular line number or address is displayed
+   **      in the current source window.
+ */
+int
+tuiAddrIsDisplayed (CORE_ADDR addr, TuiWinInfoPtr winInfo,
+		    int checkThreshold)
+{
+  int isDisplayed = FALSE;
+  int i, threshold;
+
+  if (checkThreshold)
+    threshold = SCROLL_THRESHOLD;
+  else
+    threshold = 0;
+  i = 0;
+  while (i < winInfo->generic.contentSize - threshold && !isDisplayed)
+    {
+      isDisplayed = (((TuiWinElementPtr)
+		      winInfo->generic.content[i])->whichElement.source.lineOrAddr.addr
+		     == addr);
+      i++;
+    }
+
+  return isDisplayed;
+}
 
 
 /*****************************************

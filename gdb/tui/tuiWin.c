@@ -1139,26 +1139,19 @@ _makeVisibleWithNewHeight (TuiWinInfoPtr winInfo)
 	      winInfo->detail.sourceInfo.startLineOrAddr.addr;
 	  freeWinContent (&winInfo->generic);
 	  tuiUpdateSourceWindow (winInfo,
-				 current_source_symtab,
-				 ((winInfo->generic.type == SRC_WIN) ?
-				  (Opaque) lineOrAddr.lineNo :
-				  lineOrAddr.addr),
-				 TRUE);
+				 current_source_symtab, lineOrAddr, TRUE);
 	}
       else if (selected_frame != (struct frame_info *) NULL)
 	{
-	  Opaque line = 0;
+	  TuiLineOrAddress line;
 	  extern int current_source_line;
 
 	  s = find_pc_symtab (selected_frame->pc);
 	  if (winInfo->generic.type == SRC_WIN)
-	    line = (Opaque) current_source_line;
+	    line.lineNo = current_source_line;
 	  else
 	    {
-	      CORE_ADDR pc;
-
-	      find_line_pc (s, current_source_line, &pc);
-	      line = (Opaque) pc;
+	      find_line_pc (s, current_source_line, &line.addr);
 	    }
 	  tuiUpdateSourceWindow (winInfo, s, line, TRUE);
 	}
@@ -1349,7 +1342,9 @@ _parseScrollingArgs (char *arg, TuiWinInfoPtr * winToScroll, int *numToScroll)
 
 	  if (*bufPtr != (char) 0)
 	    wname = bufPtr;
-
+	  else
+	    wname = "?";
+	  
 	  /* Validate the window name */
 	  for (i = 0; i < strlen (wname); i++)
 	    wname[i] = toupper (wname[i]);

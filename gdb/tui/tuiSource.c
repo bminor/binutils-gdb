@@ -25,6 +25,7 @@
 #include "frame.h"
 #include "breakpoint.h"
 #include "source.h"
+#include "symtab.h"
 
 #include "tui.h"
 #include "tuiData.h"
@@ -332,10 +333,10 @@ tuiSetSourceContentNil (TuiWinInfoPtr winInfo, char *warning_string)
    **        initializes the horizontal scroll to 0.
  */
 void
-tuiShowSource (struct symtab *s, Opaque line, int noerror)
+tuiShowSource (struct symtab *s, TuiLineOrAddress line, int noerror)
 {
   srcWin->detail.sourceInfo.horizontalOffset = 0;
-  m_tuiShowSourceAsIs (s, line, noerror);
+  tuiUpdateSourceWindowAsIs(srcWin, s, line, noerror);
 
   return;
 }				/* tuiShowSource */
@@ -359,12 +360,12 @@ tuiSourceIsDisplayed (char *fname)
    **      Scroll the source forward or backward vertically
  */
 void
-tuiVerticalSourceScroll (TuiScrollDirection scrollDirection, int numToScroll)
+tuiVerticalSourceScroll (TuiScrollDirection scrollDirection,
+                         int numToScroll)
 {
   if (srcWin->generic.content != (OpaquePtr) NULL)
     {
-      int line;
-      Opaque addr;
+      TuiLineOrAddress l;
       struct symtab *s;
       TuiWinContent content = (TuiWinContent) srcWin->generic.content;
 
@@ -375,21 +376,22 @@ tuiVerticalSourceScroll (TuiScrollDirection scrollDirection, int numToScroll)
 
       if (scrollDirection == FORWARD_SCROLL)
 	{
-	  line = content[0]->whichElement.source.lineOrAddr.lineNo +
+	  l.lineNo = content[0]->whichElement.source.lineOrAddr.lineNo +
 	    numToScroll;
-	  if (line > s->nlines)
+	  if (l.lineNo > s->nlines)
 	    /*line = s->nlines - winInfo->generic.contentSize + 1; */
 	    /*elz: fix for dts 23398 */
-	    line = content[0]->whichElement.source.lineOrAddr.lineNo;
+	    l.lineNo = content[0]->whichElement.source.lineOrAddr.lineNo;
 	}
       else
 	{
-	  line = content[0]->whichElement.source.lineOrAddr.lineNo -
+	  l.lineNo = content[0]->whichElement.source.lineOrAddr.lineNo -
 	    numToScroll;
-	  if (line <= 0)
-	    line = 1;
+	  if (l.lineNo <= 0)
+	    l.lineNo = 1;
 	}
-      tuiUpdateSourceWindowAsIs (srcWin, s, (Opaque) line, FALSE);
+      if (identify_source_line (s, l.lineNo, 0, -1) == 1)
+        tuiUpdateSourceWindowAsIs (srcWin, s, l, FALSE);
     }
 
   return;

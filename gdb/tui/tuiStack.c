@@ -164,23 +164,6 @@ tuiUpdateLocatorFilename (char *fileName)
   return;
 }				/* tuiUpdateLocatorFilename */
 
-
-/*
-   ** tui_vUpdateLocatorFilename().
-   **        Update only the filename portion of the locator with args in a va_list.
- */
-void
-tui_vUpdateLocatorFilename (va_list args)
-{
-  char *fileName;
-
-  fileName = va_arg (args, char *);
-  tuiUpdateLocatorFilename (fileName);
-
-  return;
-}				/* tui_vUpdateLocatorFilename */
-
-
 /*
    ** tuiSwitchFilename().
    **   Update the filename portion of the locator. Clear the other info in locator.
@@ -336,16 +319,19 @@ tuiShowFrameInfo (struct frame_info *fi)
       if (s == 0)
         return;
 
+      startLine = 0;
       sourceAlreadyDisplayed = tuiSourceIsDisplayed (s->filename);
       tuiUpdateLocatorDisplay (fi);
       for (i = 0; i < (sourceWindows ())->count; i++)
 	{
+	  TuiWhichElement *item;
 	  winInfo = (TuiWinInfoPtr) (sourceWindows ())->list[i];
+
+	  item = &((TuiWinElementPtr) locator->content[0])->whichElement;
 	  if (winInfo == srcWin)
 	    {
-	      startLine =
-		(((TuiWinElementPtr) locator->content[0])->whichElement.locator.lineNo -
-		 (winInfo->generic.viewportHeight / 2)) + 1;
+	      startLine = (item->locator.lineNo -
+			   (winInfo->generic.viewportHeight / 2)) + 1;
 	      if (startLine <= 0)
 		startLine = 1;
 	    }
@@ -359,26 +345,30 @@ tuiShowFrameInfo (struct frame_info *fi)
 
 	  if (winInfo == srcWin)
 	    {
-	      if (!(sourceAlreadyDisplayed && m_tuiLineDisplayedWithinThreshold (
-								    winInfo,
-										  ((TuiWinElementPtr) locator->content[0])->whichElement.locator.lineNo)))
-		tuiUpdateSourceWindow (winInfo, s, (Opaque) startLine, TRUE);
+	      TuiLineOrAddress l;
+	      l.lineNo = startLine;
+	      if (!(sourceAlreadyDisplayed
+		    && tuiLineIsDisplayed (item->locator.lineNo, winInfo, TRUE)))
+		tuiUpdateSourceWindow (winInfo, s, l, TRUE);
 	      else
-		tuiSetIsExecPointAt ((Opaque)
-				     ((TuiWinElementPtr) locator->content[0])->whichElement.locator.lineNo,
-				     winInfo);
+		{
+		  l.lineNo = item->locator.lineNo;
+		  tuiSetIsExecPointAt (l, winInfo);
+		}
 	    }
 	  else
 	    {
 	      if (winInfo == disassemWin)
 		{
-		  if (!m_tuiLineDisplayedWithinThreshold (winInfo,
-							  ((TuiWinElementPtr) locator->content[0])->whichElement.locator.addr))
-		    tuiUpdateSourceWindow (winInfo, s, (Opaque) low, TRUE);
+		  TuiLineOrAddress a;
+		  a.addr = low;
+		  if (!tuiAddrIsDisplayed (item->locator.addr, winInfo, TRUE))
+		    tuiUpdateSourceWindow (winInfo, s, a, TRUE);
 		  else
-		    tuiSetIsExecPointAt ((Opaque)
-					 ((TuiWinElementPtr) locator->content[0])->whichElement.locator.addr,
-					 winInfo);
+		    {
+		      a.addr = item->locator.addr;
+		      tuiSetIsExecPointAt (a, winInfo);
+		    }
 		}
 	    }
 	  tuiUpdateExecInfo (winInfo);
@@ -397,23 +387,6 @@ tuiShowFrameInfo (struct frame_info *fi)
 
   return;
 }				/* tuiShowFrameInfo */
-
-
-/*
-   ** tui_vShowFrameInfo().
-   **        Function to print the frame inforrmation for the TUI with args in a va_list.
- */
-void
-tui_vShowFrameInfo (va_list args)
-{
-  struct frame_info *fi;
-
-  fi = va_arg (args, struct frame_info *);
-  tuiShowFrameInfo (fi);
-
-  return;
-}				/* tui_vShowFrameInfo */
-
 
 /*
    ** _initialize_tuiStack().

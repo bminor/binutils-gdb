@@ -23,9 +23,9 @@
 #define _TUI_SOURCEWIN_H
 
 extern void tuiDisplayMainFunction (void);
-extern void tuiUpdateSourceWindow (TuiWinInfoPtr, struct symtab *, Opaque,
+extern void tuiUpdateSourceWindow (TuiWinInfoPtr, struct symtab *, TuiLineOrAddress,
 				   int);
-extern void tuiUpdateSourceWindowAsIs (TuiWinInfoPtr, struct symtab *, Opaque,
+extern void tuiUpdateSourceWindowAsIs (TuiWinInfoPtr, struct symtab *, TuiLineOrAddress,
 				       int);
 extern void tuiUpdateSourceWindowsWithAddr (CORE_ADDR);
 extern void tuiUpdateSourceWindowsWithLine (struct symtab *, int);
@@ -51,11 +51,12 @@ extern void tuiClearAllExecInfosContent (void);
 extern void tuiUpdateExecInfo (TuiWinInfoPtr);
 extern void tuiUpdateAllExecInfos (void);
 
-extern void tuiSetIsExecPointAt (Opaque, TuiWinInfoPtr);
+extern void tuiSetIsExecPointAt (TuiLineOrAddress, TuiWinInfoPtr);
 extern void tuiSetHasBreakAt (struct breakpoint *, TuiWinInfoPtr, int);
 extern void tuiAllSetHasBreakAt (struct breakpoint *, int);
 extern TuiStatus tuiAllocSourceBuffer (TuiWinInfoPtr);
-extern int tuiLineIsDisplayed (Opaque, TuiWinInfoPtr, int);
+extern int tuiLineIsDisplayed (int, TuiWinInfoPtr, int);
+extern int tuiAddrIsDisplayed (CORE_ADDR, TuiWinInfoPtr, int);
 
 
 /*

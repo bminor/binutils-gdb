@@ -113,7 +113,7 @@ extern void strcat_address_numeric (CORE_ADDR, int, char *, int);
 			&(tui_file_get_strbuf (gdb_dis_out)[offset]));
 	      else
 		element->whichElement.source.line[0] = '\0';
-	      element->whichElement.source.lineOrAddr.addr = (Opaque) pc;
+	      element->whichElement.source.lineOrAddr.addr = pc;
 	      element->whichElement.source.isExecPoint =
 		(pc == (CORE_ADDR) ((TuiWinElementPtr) locator->content[0])->whichElement.locator.addr);
 	      bp = _hasBreak (pc);
@@ -146,9 +146,11 @@ tuiShowDisassem (CORE_ADDR startAddr)
 {
   struct symtab *s = find_pc_symtab (startAddr);
   TuiWinInfoPtr winWithFocus = tuiWinWithFocus ();
+  TuiLineOrAddress val;
 
+  val.addr = startAddr;
   tuiAddWinToLayout (DISASSEM_WIN);
-  tuiUpdateSourceWindow (disassemWin, s, startAddr, FALSE);
+  tuiUpdateSourceWindow (disassemWin, s, val, FALSE);
   /*
      ** if the focus was in the src win, put it in the asm win, if the
      ** source view isn't split
@@ -172,13 +174,15 @@ tuiShowDisassemAndUpdateSource (CORE_ADDR startAddr)
   tuiShowDisassem (startAddr);
   if (currentLayout () == SRC_DISASSEM_COMMAND)
     {
+      TuiLineOrAddress val;
       TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
       /*
          ** Update what is in the source window if it is displayed too,
          ** note that it follows what is in the disassembly window and visa-versa
        */
       sal = find_pc_line (startAddr, 0);
-      tuiUpdateSourceWindow (srcWin, sal.symtab, sal.line, TRUE);
+      val.lineNo = sal.line;
+      tuiUpdateSourceWindow (srcWin, sal.symtab, val, TRUE);
       if (sal.symtab)
 	{
 	  current_source_symtab = sal.symtab;
@@ -190,28 +194,6 @@ tuiShowDisassemAndUpdateSource (CORE_ADDR startAddr)
 
   return;
 }				/* tuiShowDisassemAndUpdateSource */
-
-
-/*
-   ** tuiShowDisassemAsIs().
-   **        Function to display the disassembly window.  This function shows
-   **        the disassembly as specified by the horizontal offset.
- */
-void
-tuiShowDisassemAsIs (Opaque addr)
-{
-  tuiAddWinToLayout (DISASSEM_WIN);
-  tuiUpdateSourceWindowAsIs (disassemWin, (struct symtab *) NULL, addr, FALSE);
-  /*
-     ** Update what is in the source window if it is displayed too, not that it
-     ** follows what is in the disassembly window and visa-versa
-   */
-  if (currentLayout () == SRC_DISASSEM_COMMAND)
-    tuiShowSourceContent (srcWin);	/*????  Need to do more? */
-
-  return;
-}				/* tuiShowDisassem */
-
 
 /*
    ** tuiGetBeginAsmAddress().
@@ -272,6 +254,7 @@ tuiVerticalDisassemScroll (TuiScrollDirection scrollDirection,
 	  register int line = 0;
 	  register CORE_ADDR newLow;
 	  bfd_byte buffer[4];
+	  TuiLineOrAddress val;
 
 	  newLow = pc;
 	  if (scrollDirection == FORWARD_SCROLL)
@@ -281,10 +264,11 @@ tuiVerticalDisassemScroll (TuiScrollDirection scrollDirection,
 	    }
 	  else
 	    {
-	      for (; newLow >= (Opaque) 0 && line < numToScroll; line++)
+	      for (; newLow != 0 && line < numToScroll; line++)
 		newLow -= sizeof (bfd_getb32 (buffer));
 	    }
-	  tuiUpdateSourceWindowAsIs (disassemWin, s, newLow, FALSE);
+	  val.addr = newLow;
+	  tuiUpdateSourceWindowAsIs (disassemWin, s, val, FALSE);
 	}
     }
 

@@ -22,6 +22,7 @@
 #include "defs.h"
 #include "tui.h"
 #include "tuiData.h"
+#include "tuiGeneralWin.h"
 
 /****************************
 ** GLOBAL DECLARATIONS
@@ -236,7 +237,7 @@ clearWinDetail (TuiWinInfoPtr winInfo)
 	{
 	case SRC_WIN:
 	case DISASSEM_WIN:
-	  winInfo->detail.sourceInfo.startLineOrAddr.addr = (Opaque) NULL;
+	  winInfo->detail.sourceInfo.startLineOrAddr.addr = 0;
 	  winInfo->detail.sourceInfo.horizontalOffset = 0;
 	  break;
 	case CMD_WIN:
@@ -484,7 +485,7 @@ tuiNextWin (TuiWinInfoPtr curWin)
     type = curWin->generic.type + 1;
   while (type != curWin->generic.type && m_winPtrIsNull (nextWin))
     {
-      if (winList[type]->generic.isVisible)
+      if (winList[type] && winList[type]->generic.isVisible)
 	nextWin = winList[type];
       else
 	{
@@ -604,9 +605,9 @@ displayableWinContentOf (TuiGenWinInfoPtr winInfo, TuiWinElementPtr elementPtr)
 	      else
 		strcpy (lineNo, "??");
 	      if (elementPtr != (TuiWinElementPtr) NULL &&
-		  elementPtr->whichElement.locator.addr > (Opaque) 0)
-		sprintf (pc, "0x%x",
-			 elementPtr->whichElement.locator.addr);
+		  elementPtr->whichElement.locator.addr != 0)
+		sprintf (pc, "0x%lx",
+			 (long) elementPtr->whichElement.locator.addr);
 	      else
 		strcpy (pc, "??");
 	      /*
@@ -728,10 +729,13 @@ partialWinByName (char *name)
 
       while (i < MAX_MAJOR_WINDOWS && m_winPtrIsNull (winInfo))
 	{
-	  char *curName = winName (&winList[i]->generic);
-	  if (strlen (name) <= strlen (curName) &&
-	      strncmp (name, curName, strlen (name)) == 0)
-	    winInfo = winList[i];
+          if (winList[i] != 0)
+            {
+              char *curName = winName (&winList[i]->generic);
+              if (strlen (name) <= strlen (curName) &&
+                  strncmp (name, curName, strlen (name)) == 0)
+                winInfo = winList[i];
+            }
 	  i++;
 	}
     }
@@ -889,7 +893,7 @@ initWinInfo (TuiWinInfoPtr winInfo)
       winInfo->detail.sourceInfo.executionInfo = (TuiGenWinInfoPtr) NULL;
       winInfo->detail.sourceInfo.hasLocator = FALSE;
       winInfo->detail.sourceInfo.horizontalOffset = 0;
-      winInfo->detail.sourceInfo.startLineOrAddr.addr = (Opaque) NULL;
+      winInfo->detail.sourceInfo.startLineOrAddr.addr = 0;
       break;
     case DATA_WIN:
       winInfo->detail.dataDisplayInfo.dataContent = (TuiWinContent) NULL;
