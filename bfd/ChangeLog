@@ -1,3 +1,8 @@
+2001-08-21  Mark Elbrecht  <snowball3@bigfoot.com>
+
+	* coff-go32.c: Make DWARF2 sections use an alignment of 0.
+	* coff-sto32.c: Likewise.
+
 2001-08-20  Andreas Jaeger  <aj@suse.de>
 
 	* coff-sparc.c: Add missing prototypes.
