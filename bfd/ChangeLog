@@ -1,5 +1,9 @@
 Fri Mar  7 10:37:30 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in ($(SHLINK)): Just use ln -s, not ln -sf, since
+	Solaris doesn't like the combined options, and the -f is
+	unnecessary.
+
 	* elf32-mips.c (mips_elf_relocate_section): Correct R_MIPS16_26
 	handling when little endian.
 
