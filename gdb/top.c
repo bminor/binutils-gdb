@@ -2737,7 +2737,7 @@ set_endian_from_file (abfd)
       ? TARGET_BYTE_ORDER != BIG_ENDIAN
       : TARGET_BYTE_ORDER == BIG_ENDIAN)
     warning ("%s endian file does not match %s endian target.",
-	     want == BIG_ENDIAN ? "big" : "little",
+	     abfd->xvec->byteorder_big_p ? "big" : "little",
 	     TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
 
 #endif /* ! defined (TARGET_BYTE_ORDER_SELECTABLE) */
