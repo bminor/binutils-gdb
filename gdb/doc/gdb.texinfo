@@ -9901,12 +9901,209 @@ communicate with @value{GDBN}.
 Other remote targets may be available in your
 configuration of @value{GDBN}; use @code{help target} to list them.
 
-@menu
-* Remote Serial::               @value{GDBN} remote serial protocol
-@end menu
+@node KOD
+@section Kernel Object Display
 
-@node Remote Serial
-@subsection The @value{GDBN} remote serial protocol
+@cindex kernel object display
+@cindex kernel object
+@cindex KOD
+
+Some targets support kernel object display.  Using this facility,
+@value{GDBN} communicates specially with the underlying operating system
+and can display information about operating system-level objects such as
+mutexes and other synchronization objects.  Exactly which objects can be
+displayed is determined on a per-OS basis.
+
+Use the @code{set os} command to set the operating system.  This tells
+@value{GDBN} which kernel object display module to initialize:
+
+@example
+(@value{GDBP}) set os cisco
+@end example
+
+If @code{set os} succeeds, @value{GDBN} will display some information
+about the operating system, and will create a new @code{info} command
+which can be used to query the target.  The @code{info} command is named
+after the operating system:
+
+@example
+(@value{GDBP}) info cisco
+List of Cisco Kernel Objects
+Object     Description
+any        Any and all objects
+@end example
+
+Further subcommands can be used to query about particular objects known
+by the kernel.
+
+There is currently no way to determine whether a given operating system
+is supported other than to try it.
+
+
+@node Remote Debugging
+@chapter Debugging remote programs
+
+@node Server
+@section Using the @code{gdbserver} program
+
+@kindex gdbserver
+@cindex remote connection without stubs
+@code{gdbserver} is a control program for Unix-like systems, which
+allows you to connect your program with a remote @value{GDBN} via
+@code{target remote}---but without linking in the usual debugging stub.
+
+@code{gdbserver} is not a complete replacement for the debugging stubs,
+because it requires essentially the same operating-system facilities
+that @value{GDBN} itself does.  In fact, a system that can run
+@code{gdbserver} to connect to a remote @value{GDBN} could also run
+@value{GDBN} locally!  @code{gdbserver} is sometimes useful nevertheless,
+because it is a much smaller program than @value{GDBN} itself.  It is
+also easier to port than all of @value{GDBN}, so you may be able to get
+started more quickly on a new system by using @code{gdbserver}.
+Finally, if you develop code for real-time systems, you may find that
+the tradeoffs involved in real-time operation make it more convenient to
+do as much development work as possible on another system, for example
+by cross-compiling.  You can use @code{gdbserver} to make a similar
+choice for debugging.
+
+@value{GDBN} and @code{gdbserver} communicate via either a serial line
+or a TCP connection, using the standard @value{GDBN} remote serial
+protocol.
+
+@table @emph
+@item On the target machine,
+you need to have a copy of the program you want to debug.
+@code{gdbserver} does not need your program's symbol table, so you can
+strip the program if necessary to save space.  @value{GDBN} on the host
+system does all the symbol handling.
+
+To use the server, you must tell it how to communicate with @value{GDBN};
+the name of your program; and the arguments for your program.  The
+syntax is:
+
+@smallexample
+target> gdbserver @var{comm} @var{program} [ @var{args} @dots{} ]
+@end smallexample
+
+@var{comm} is either a device name (to use a serial line) or a TCP
+hostname and portnumber.  For example, to debug Emacs with the argument
+@samp{foo.txt} and communicate with @value{GDBN} over the serial port
+@file{/dev/com1}:
+
+@smallexample
+target> gdbserver /dev/com1 emacs foo.txt
+@end smallexample
+
+@code{gdbserver} waits passively for the host @value{GDBN} to communicate
+with it.
+
+To use a TCP connection instead of a serial line:
+
+@smallexample
+target> gdbserver host:2345 emacs foo.txt
+@end smallexample
+
+The only difference from the previous example is the first argument,
+specifying that you are communicating with the host @value{GDBN} via
+TCP.  The @samp{host:2345} argument means that @code{gdbserver} is to
+expect a TCP connection from machine @samp{host} to local TCP port 2345.
+(Currently, the @samp{host} part is ignored.)  You can choose any number
+you want for the port number as long as it does not conflict with any
+TCP ports already in use on the target system (for example, @code{23} is
+reserved for @code{telnet}).@footnote{If you choose a port number that
+conflicts with another service, @code{gdbserver} prints an error message
+and exits.}  You must use the same port number with the host @value{GDBN}
+@code{target remote} command.
+
+@item On the @value{GDBN} host machine,
+you need an unstripped copy of your program, since @value{GDBN} needs
+symbols and debugging information.  Start up @value{GDBN} as usual,
+using the name of the local copy of your program as the first argument.
+(You may also need the @w{@samp{--baud}} option if the serial line is
+running at anything other than 9600@dmn{bps}.)  After that, use @code{target
+remote} to establish communications with @code{gdbserver}.  Its argument
+is either a device name (usually a serial device, like
+@file{/dev/ttyb}), or a TCP port descriptor in the form
+@code{@var{host}:@var{PORT}}.  For example:
+
+@smallexample
+(@value{GDBP}) target remote /dev/ttyb
+@end smallexample
+
+@noindent
+communicates with the server via serial line @file{/dev/ttyb}, and
+
+@smallexample
+(@value{GDBP}) target remote the-target:2345
+@end smallexample
+
+@noindent
+communicates via a TCP connection to port 2345 on host @w{@file{the-target}}.
+For TCP connections, you must start up @code{gdbserver} prior to using
+the @code{target remote} command.  Otherwise you may get an error whose
+text depends on the host system, but which usually looks something like
+@samp{Connection refused}.
+@end table
+
+@node NetWare
+@section Using the @code{gdbserve.nlm} program
+
+@kindex gdbserve.nlm
+@code{gdbserve.nlm} is a control program for NetWare systems, which
+allows you to connect your program with a remote @value{GDBN} via
+@code{target remote}.
+
+@value{GDBN} and @code{gdbserve.nlm} communicate via a serial line,
+using the standard @value{GDBN} remote serial protocol.
+
+@table @emph
+@item On the target machine,
+you need to have a copy of the program you want to debug.
+@code{gdbserve.nlm} does not need your program's symbol table, so you
+can strip the program if necessary to save space.  @value{GDBN} on the
+host system does all the symbol handling.
+
+To use the server, you must tell it how to communicate with
+@value{GDBN}; the name of your program; and the arguments for your
+program.  The syntax is:
+
+@smallexample
+load gdbserve [ BOARD=@var{board} ] [ PORT=@var{port} ]
+              [ BAUD=@var{baud} ] @var{program} [ @var{args} @dots{} ]
+@end smallexample
+
+@var{board} and @var{port} specify the serial line; @var{baud} specifies
+the baud rate used by the connection.  @var{port} and @var{node} default
+to 0, @var{baud} defaults to 9600@dmn{bps}.
+
+For example, to debug Emacs with the argument @samp{foo.txt}and
+communicate with @value{GDBN} over serial port number 2 or board 1
+using a 19200@dmn{bps} connection:
+
+@smallexample
+load gdbserve BOARD=1 PORT=2 BAUD=19200 emacs foo.txt
+@end smallexample
+
+@item On the @value{GDBN} host machine,
+you need an unstripped copy of your program, since @value{GDBN} needs
+symbols and debugging information.  Start up @value{GDBN} as usual,
+using the name of the local copy of your program as the first argument.
+(You may also need the @w{@samp{--baud}} option if the serial line is
+running at anything other than 9600@dmn{bps}.  After that, use @code{target
+remote} to establish communications with @code{gdbserve.nlm}.  Its
+argument is a device name (usually a serial device, like
+@file{/dev/ttyb}).  For example:
+
+@smallexample
+(@value{GDBP}) target remote /dev/ttyb
+@end smallexample
+
+@noindent
+communications with the server via serial line @file{/dev/ttyb}.
+@end table
+
+@node remote stub
+@section Implementing a remote stub
 
 @cindex remote serial debugging, overview
 To debug a program running on another machine (the debugging
@@ -9998,13 +10195,10 @@ recently added stubs.
 * Stub Contents::       What the stub can do for you
 * Bootstrapping::       What you must do for the stub
 * Debug Session::       Putting it all together
-* Protocol::            Definition of the communication protocol
-* Server::                Using the `gdbserver' program
-* NetWare::                Using the `gdbserve.nlm' program
 @end menu
 
 @node Stub Contents
-@subsubsection What the stub can do for you
+@subsection What the stub can do for you
 
 @cindex remote serial stub
 The debugging stub for your architecture supplies these three
@@ -10055,7 +10249,7 @@ start of your debugging session.
 @end table
 
 @node Bootstrapping
-@subsubsection What you must do for the stub
+@subsection What you must do for the stub
 
 @cindex remote stub, support routines
 The debugging stubs that come with @value{GDBN} are set up for a particular
@@ -10146,7 +10340,7 @@ subroutines which @code{@value{GCC}} generates as inline code.
 
 
 @node Debug Session
-@subsubsection Putting it all together
+@subsection Putting it all together
 
 @cindex remote serial debugging summary
 In summary, when your program is ready to debug, you must follow these
@@ -10264,7 +10458,7 @@ remote} again to connect once more.)  If you type @kbd{n}, @value{GDBN}
 goes back to waiting.
 
 @node Protocol
-@subsubsection Communication protocol
+@section Communication protocol
 
 @cindex debugging stub, example
 @cindex remote stub, example
@@ -11122,203 +11316,6 @@ Example sequence of a target being stepped by a single instruction:
 -> @code{1455...}
 <- @code{+}
 @end example
-
-@node Server
-@subsubsection Using the @code{gdbserver} program
-
-@kindex gdbserver
-@cindex remote connection without stubs
-@code{gdbserver} is a control program for Unix-like systems, which
-allows you to connect your program with a remote @value{GDBN} via
-@code{target remote}---but without linking in the usual debugging stub.
-
-@code{gdbserver} is not a complete replacement for the debugging stubs,
-because it requires essentially the same operating-system facilities
-that @value{GDBN} itself does.  In fact, a system that can run
-@code{gdbserver} to connect to a remote @value{GDBN} could also run
-@value{GDBN} locally!  @code{gdbserver} is sometimes useful nevertheless,
-because it is a much smaller program than @value{GDBN} itself.  It is
-also easier to port than all of @value{GDBN}, so you may be able to get
-started more quickly on a new system by using @code{gdbserver}.
-Finally, if you develop code for real-time systems, you may find that
-the tradeoffs involved in real-time operation make it more convenient to
-do as much development work as possible on another system, for example
-by cross-compiling.  You can use @code{gdbserver} to make a similar
-choice for debugging.
-
-@value{GDBN} and @code{gdbserver} communicate via either a serial line
-or a TCP connection, using the standard @value{GDBN} remote serial
-protocol.
-
-@table @emph
-@item On the target machine,
-you need to have a copy of the program you want to debug.
-@code{gdbserver} does not need your program's symbol table, so you can
-strip the program if necessary to save space.  @value{GDBN} on the host
-system does all the symbol handling.
-
-To use the server, you must tell it how to communicate with @value{GDBN};
-the name of your program; and the arguments for your program.  The
-syntax is:
-
-@smallexample
-target> gdbserver @var{comm} @var{program} [ @var{args} @dots{} ]
-@end smallexample
-
-@var{comm} is either a device name (to use a serial line) or a TCP
-hostname and portnumber.  For example, to debug Emacs with the argument
-@samp{foo.txt} and communicate with @value{GDBN} over the serial port
-@file{/dev/com1}:
-
-@smallexample
-target> gdbserver /dev/com1 emacs foo.txt
-@end smallexample
-
-@code{gdbserver} waits passively for the host @value{GDBN} to communicate
-with it.
-
-To use a TCP connection instead of a serial line:
-
-@smallexample
-target> gdbserver host:2345 emacs foo.txt
-@end smallexample
-
-The only difference from the previous example is the first argument,
-specifying that you are communicating with the host @value{GDBN} via
-TCP.  The @samp{host:2345} argument means that @code{gdbserver} is to
-expect a TCP connection from machine @samp{host} to local TCP port 2345.
-(Currently, the @samp{host} part is ignored.)  You can choose any number
-you want for the port number as long as it does not conflict with any
-TCP ports already in use on the target system (for example, @code{23} is
-reserved for @code{telnet}).@footnote{If you choose a port number that
-conflicts with another service, @code{gdbserver} prints an error message
-and exits.}  You must use the same port number with the host @value{GDBN}
-@code{target remote} command.
-
-@item On the @value{GDBN} host machine,
-you need an unstripped copy of your program, since @value{GDBN} needs
-symbols and debugging information.  Start up @value{GDBN} as usual,
-using the name of the local copy of your program as the first argument.
-(You may also need the @w{@samp{--baud}} option if the serial line is
-running at anything other than 9600@dmn{bps}.)  After that, use @code{target
-remote} to establish communications with @code{gdbserver}.  Its argument
-is either a device name (usually a serial device, like
-@file{/dev/ttyb}), or a TCP port descriptor in the form
-@code{@var{host}:@var{PORT}}.  For example:
-
-@smallexample
-(@value{GDBP}) target remote /dev/ttyb
-@end smallexample
-
-@noindent
-communicates with the server via serial line @file{/dev/ttyb}, and
-
-@smallexample
-(@value{GDBP}) target remote the-target:2345
-@end smallexample
-
-@noindent
-communicates via a TCP connection to port 2345 on host @w{@file{the-target}}.
-For TCP connections, you must start up @code{gdbserver} prior to using
-the @code{target remote} command.  Otherwise you may get an error whose
-text depends on the host system, but which usually looks something like
-@samp{Connection refused}.
-@end table
-
-@node NetWare
-@subsubsection Using the @code{gdbserve.nlm} program
-
-@kindex gdbserve.nlm
-@code{gdbserve.nlm} is a control program for NetWare systems, which
-allows you to connect your program with a remote @value{GDBN} via
-@code{target remote}.
-
-@value{GDBN} and @code{gdbserve.nlm} communicate via a serial line,
-using the standard @value{GDBN} remote serial protocol.
-
-@table @emph
-@item On the target machine,
-you need to have a copy of the program you want to debug.
-@code{gdbserve.nlm} does not need your program's symbol table, so you
-can strip the program if necessary to save space.  @value{GDBN} on the
-host system does all the symbol handling.
-
-To use the server, you must tell it how to communicate with
-@value{GDBN}; the name of your program; and the arguments for your
-program.  The syntax is:
-
-@smallexample
-load gdbserve [ BOARD=@var{board} ] [ PORT=@var{port} ]
-              [ BAUD=@var{baud} ] @var{program} [ @var{args} @dots{} ]
-@end smallexample
-
-@var{board} and @var{port} specify the serial line; @var{baud} specifies
-the baud rate used by the connection.  @var{port} and @var{node} default
-to 0, @var{baud} defaults to 9600@dmn{bps}.
-
-For example, to debug Emacs with the argument @samp{foo.txt}and
-communicate with @value{GDBN} over serial port number 2 or board 1
-using a 19200@dmn{bps} connection:
-
-@smallexample
-load gdbserve BOARD=1 PORT=2 BAUD=19200 emacs foo.txt
-@end smallexample
-
-@item On the @value{GDBN} host machine,
-you need an unstripped copy of your program, since @value{GDBN} needs
-symbols and debugging information.  Start up @value{GDBN} as usual,
-using the name of the local copy of your program as the first argument.
-(You may also need the @w{@samp{--baud}} option if the serial line is
-running at anything other than 9600@dmn{bps}.  After that, use @code{target
-remote} to establish communications with @code{gdbserve.nlm}.  Its
-argument is a device name (usually a serial device, like
-@file{/dev/ttyb}).  For example:
-
-@smallexample
-(@value{GDBP}) target remote /dev/ttyb
-@end smallexample
-
-@noindent
-communications with the server via serial line @file{/dev/ttyb}.
-@end table
-
-@node KOD
-@section Kernel Object Display
-
-@cindex kernel object display
-@cindex kernel object
-@cindex KOD
-
-Some targets support kernel object display.  Using this facility,
-@value{GDBN} communicates specially with the underlying operating system
-and can display information about operating system-level objects such as
-mutexes and other synchronization objects.  Exactly which objects can be
-displayed is determined on a per-OS basis.
-
-Use the @code{set os} command to set the operating system.  This tells
-@value{GDBN} which kernel object display module to initialize:
-
-@example
-(@value{GDBP}) set os cisco
-@end example
-
-If @code{set os} succeeds, @value{GDBN} will display some information
-about the operating system, and will create a new @code{info} command
-which can be used to query the target.  The @code{info} command is named
-after the operating system:
-
-@example
-(@value{GDBP}) info cisco
-List of Cisco Kernel Objects
-Object     Description
-any        Any and all objects
-@end example
-
-Further subcommands can be used to query about particular objects known
-by the kernel.
-
-There is currently no way to determine whether a given operating system
-is supported other than to try it.
 
 
 @node Configurations
