@@ -562,6 +562,7 @@ EOF
 	# so do these separately because I don't trust the order of sed -e expressions.
 
 	# Conditionalize for this site from "Makefile.in" (or whatever it's called) into Makefile.tem
+	rm -f Makefile.tem
 	case "${site}" in
 	"") cp ${srcdir}/${subdir}/${Makefile_in} ${subdir}/Makefile.tem ;;
 	*)
@@ -579,6 +580,7 @@ EOF
 	# working copy now in ${subdir}/Makefile.tem
 
 	# Conditionalize the makefile for this host.
+	rm -f ${Makefile}
 	case "${host_makefile_frag}" in
 	"") mv ${subdir}/Makefile.tem ${Makefile} ;;
 	*)
@@ -596,6 +598,7 @@ EOF
 	# working copy now in ${Makefile}
 
 	# Conditionalize the makefile for this target.
+	rm -f Makefile.tem
 	case "${target_makefile_frag}" in
 	"") mv ${Makefile} ${subdir}/Makefile.tem ;;
 	*)
@@ -611,6 +614,7 @@ EOF
 	# real copy now in ${subdir}/Makefile.tem
 
 	# prepend warning about editting, and a bunch of variables.
+	rm -f ${Makefile}
 	cat > ${Makefile} <<EOF
 # ${NO_EDIT}
 VPATH = ${makesrcdir}
@@ -670,7 +674,7 @@ EOF
 		${subdir}/Makefile.tem >> ${Makefile}
 	# final copy now in ${Makefile}
 
-	rm ${subdir}/Makefile.tem
+	rm -f ${subdir}/Makefile.tem
 
 	if [ -n "${verbose}" -o -z "${silent}" ] ; then
 		case "${host_makefile_frag}" in

@@ -1,5 +1,8 @@
 Tue Apr 21 12:31:33 1992  K. Richard Pixley  (rich@cygnus.com)
 
+	* configure: patch from eggert.  Avoids a protection problem if
+	  the original Makefile.in is read only.
+
 	* configure: use move-if-change from gcc to create config.status.
 	  Some makefiles depend on config.status to tell if a directory
 	  has been reconfigured for a different host.  This change
