@@ -25,10 +25,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define BCACHE_HASHSIZE	(1 << BCACHE_HASHLENGTH)
 #define BCACHE_MAXLENGTH	128
 
+/* Note that the user data is stored in data[].  Since it can be any type,
+   it needs to have the same alignment  as the most strict alignment of 
+   any type on the host machine.  So do it the same way obstack does. */
+
 struct hashlink {
   struct hashlink *next;
-  char data[1];
+  union {
+    char data[1];
+    double dummy;
+  } d;
 };
+
+/* BCACHE_DATA is used to get the address of the cached data. */
+
+#define BCACHE_DATA(p) ((p)->d.data)
+
+/* BCACHE_DATA_ALIGNMENT is used to get the offset of the start of
+   cached data within the hashlink struct.  This value, plus the
+   size of the cached data, is the amount of space to allocate for
+   a hashlink struct to hold the next pointer and the data. */
+
+#define BCACHE_DATA_ALIGNMENT \
+	(((char *) &BCACHE_DATA((struct hashlink*) 0) - (char *) 0))
 
 struct bcache {
   struct obstack cache;

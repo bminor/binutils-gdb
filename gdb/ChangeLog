@@ -1,3 +1,16 @@
+Sat Mar 23 17:24:28 1996  Fred Fish  <fnf@cygnus.com>
+
+	* os9kread.c (os9k_process_one_symbol): Note nonportable
+	assumption that an int can hold a char *.
+
+	* bcache.h (struct hashlink): Wrap data[] inside union with
+	double to force longest alignment.
+	(BCACHE_DATA): New macro to access data[].
+	(BCACHE_ALIGNMENT): New macro to get offset to data[].
+	* bcache.c (lookup_cache, bcache): Use BCACHE_DATA to get
+ 	address of cached data.  Use BCACHE_ALIGNMENT to compute
+	amount of space to allocate for each hashlink struct.
+
 Sat Mar 23 17:10:56 1996  Fred Fish  <fnf@cygnus.com>
 
 	* configure, testsuite/configure, testsuite/gdb.base/configure,

@@ -1528,9 +1528,10 @@ os9k_process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     case N_SYM_SLINE:
       /* This type of "symbol" really just records
 	 one line-number -- core-address correspondence.
-	 Enter it in the line list for this symbol table.  */
+	 Enter it in the line list for this symbol table. */
       /* Relocate for dynamic loading and for ELF acc fn-relative syms.  */
       valu += ANOFFSET (section_offsets, SECT_OFF_TEXT); 
+      /* FIXME: loses if sizeof (char *) > sizeof (int) */
       record_line (current_subfile, (int)name, valu);
       break;
 

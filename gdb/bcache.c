@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "defs.h"
 #include "obstack.h"
 #include "bcache.h"
+#include "gdb_string.h"		/* For memcpy declaration */
 
 /* FIXME:  Incredibly simplistic hash generator.  Probably way too expensive
  (consider long strings) and unlikely to have good distribution across hash
@@ -67,9 +68,9 @@ lookup_cache (bytes, count, hashval, bcachep)
       linkp = hashtablep[hashval];
       while (linkp != NULL)
 	{
-	  if (memcmp (linkp -> data, bytes, count) == 0)
+	  if (memcmp (BCACHE_DATA (linkp), bytes, count) == 0)
 	    {
-	      location = linkp -> data;
+	      location = BCACHE_DATA (linkp);
 	      break;
 	    }
 	  linkp = linkp -> next;
@@ -115,17 +116,17 @@ bcache (bytes, count, bcachep)
 	    {
 	      *hashtablepp = (struct hashlink **)
 		obstack_alloc (&bcachep->cache, BCACHE_HASHSIZE * sizeof (struct hashlink *));
-	      bcachep -> cache_bytes += sizeof (struct hashlink *);
+	      bcachep -> cache_bytes += BCACHE_HASHSIZE * sizeof (struct hashlink *);
 	      memset (*hashtablepp, 0, BCACHE_HASHSIZE * sizeof (struct hashlink *));
 	    }
 	  linkpp = &(*hashtablepp)[hashval];
 	  newlink = (struct hashlink *)
-	    obstack_alloc (&bcachep->cache, sizeof (struct hashlink *) + count);
-	  bcachep -> cache_bytes += sizeof (struct hashlink *) + count;
-	  memcpy (newlink -> data, bytes, count);
+	    obstack_alloc (&bcachep->cache, BCACHE_DATA_ALIGNMENT + count);
+	  bcachep -> cache_bytes += BCACHE_DATA_ALIGNMENT + count;
+	  memcpy (BCACHE_DATA (newlink), bytes, count);
 	  newlink -> next = *linkpp;
 	  *linkpp = newlink;
-	  location = newlink -> data;
+	  location = BCACHE_DATA (newlink);
 	}
     }
   return (location);
