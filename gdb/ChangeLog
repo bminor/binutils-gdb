@@ -1,5 +1,39 @@
 2002-11-16  Daniel Jacobowitz  <drow@mvista.com>
 
+	* config/pa/nm-hppah.h (CHILD_POST_FOLLOW_INFERIOR_BY_CLONE): Don't
+	define.
+	(struct target_waitstatus): Add opaque definition.
+	* corelow.c (init_core_ops): Don't set to_clone_and_follow_inferior.
+	* exec.c (init_exec_ops): Likewise.
+	* fork-child.c (clone_and_follow_inferior): Remove.
+	* hppah-nat.c (child_post_follow_inferior_by_clone): Remove.
+	* inferior.h (clone_and_follow_inferior): Remove prototype.
+	* infrun.c (follow_fork_mode_both): Remove.
+	(follow_fork_mode_kind_names): Remove commented out "both".
+	(follow_inferior_fork): Remove follow_fork_mode_both support.
+	* inftarg.c (child_clone_and_follow_inferior): Remove.
+	(child_post_follow_inferior_by_clone): Remove.
+	(init_child_ops): Don't set to_clone_and_follow_inferior
+	or to_post_follow_inferior_by_clone.
+	* target.c (default_clone_and_follow_inferior): Remove.
+	(cleanup_target): Don't set to_clone_and_follow_inferior
+	or to_post_follow_inferior_by_clone.
+	(find_default_clone_and_follow_inferior): Remove.
+	(init_dummy_target): Don't set to_clone_and_follow_inferior.
+	(debug_to_clone_and_follow_inferior): Remove.
+	(debug_to_post_follow_inferior_by_clone): Remove.
+	(setup_target_debug): Don't set to_clone_and_follow_inferior
+	or to_post_follow_inferior_by_clone.
+	* target.h (struct target_ops): Remove to_clone_and_follow_inferior
+	and to_post_follow_inferior_by_clone.
+	(child_clone_and_follow_inferior): Remove prototype.
+	(child_post_follow_inferior_by_clone): Remove prototype.
+	(target_clone_and_follow_inferior): Remove macro.
+	(target_post_follow_inferior_by_clone): Remove macro.
+	(find_default_clone_and_follow_inferior): Remove prototype.
+
+2002-11-16  Daniel Jacobowitz  <drow@mvista.com>
+
 	* breakpoint.c (bpstat_stop_status): Call inferior_has_forked,
 	inferior_has_vforked, and inferior_has_execd instead of
 	target_has_forked, target_has_vforked, and target_has_execd.

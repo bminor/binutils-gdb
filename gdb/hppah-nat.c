@@ -386,24 +386,6 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 
 
 void
-child_post_follow_inferior_by_clone (void)
-{
-  int status;
-
-  /* This function is used when following both the parent and child
-     of a fork.  In this case, the debugger clones itself.  The original
-     debugger follows the parent, the clone follows the child.  The
-     original detaches from the child, delivering a SIGSTOP to it to
-     keep it from running away until the clone can attach itself.
-
-     At this point, the clone has attached to the child.  Because of
-     the SIGSTOP, we must now deliver a SIGCONT to the child, or it
-     won't behave properly. */
-  status = kill (PIDGET (inferior_ptid), SIGCONT);
-}
-
-
-void
 child_post_follow_vfork (int parent_pid, int followed_parent, int child_pid,
 			 int followed_child)
 {

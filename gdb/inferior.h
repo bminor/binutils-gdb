@@ -270,8 +270,6 @@ extern void fork_inferior (char *, char *, char **,
 			   void (*)(int), void (*)(void), char *);
 
 
-extern void clone_and_follow_inferior (int, int *);
-
 extern void startup_inferior (int);
 
 extern char *construct_inferior_arguments (struct gdbarch *, int, char **);

@@ -65,7 +65,6 @@
 /* In hppah-nat.c: */
 #define FETCH_INFERIOR_REGISTERS
 #define CHILD_XFER_MEMORY
-#define CHILD_POST_FOLLOW_INFERIOR_BY_CLONE
 #define CHILD_POST_FOLLOW_VFORK
 
 /* While this is for use by threaded programs, it doesn't appear
@@ -88,6 +87,7 @@ extern int hppa_prepare_to_proceed (void);
 #define CHILD_THREAD_ALIVE
 #define CHILD_PID_TO_STR
 #define CHILD_WAIT
+struct target_waitstatus;
 extern ptid_t child_wait (ptid_t, struct target_waitstatus *);
 
 #define REQUIRE_ATTACH(pid) hppa_require_attach(pid)

@@ -371,17 +371,11 @@ static struct
 pending_follow;
 
 static const char follow_fork_mode_ask[] = "ask";
-static const char follow_fork_mode_both[] = "both";
 static const char follow_fork_mode_child[] = "child";
 static const char follow_fork_mode_parent[] = "parent";
 
 static const char *follow_fork_mode_kind_names[] = {
   follow_fork_mode_ask,
-  /* ??rehrauer: The "both" option is broken, by what may be a 10.20
-     kernel problem.  It's also not terribly useful without a GUI to
-     help the user drive two debuggers.  So for now, I'm disabling the
-     "both" option. */
-  /* follow_fork_mode_both, */
   follow_fork_mode_child,
   follow_fork_mode_parent,
   NULL
@@ -484,24 +478,6 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
          actually didn't get set in the child, but only in the parent.) */
       breakpoint_re_set ();
       insert_breakpoints ();
-    }
-
-  /* If we're to be following both parent and child, then fork ourselves,
-     and attach the debugger clone to the child. */
-  else if (follow_mode == follow_fork_mode_both)
-    {
-      char pid_suffix[100];	/* Arbitrary length. */
-
-      /* Clone ourselves to follow the child.  This is the end of our
-         involvement with child_pid; our clone will take it from here... */
-      dont_repeat ();
-      target_clone_and_follow_inferior (child_pid, &followed_child);
-      followed_parent = !followed_child;
-
-      /* We continue to follow the parent.  To help distinguish the two
-         debuggers, though, both we and our clone will reset our prompts. */
-      sprintf (pid_suffix, "[%d] ", PIDGET (inferior_ptid));
-      set_prompt (strcat (get_prompt (), pid_suffix));
     }
 
   /* The parent and child of a vfork share the same address space.

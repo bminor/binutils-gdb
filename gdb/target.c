@@ -44,8 +44,6 @@ static void cleanup_target (struct target_ops *);
 
 static void maybe_kill_then_create_inferior (char *, char *, char **);
 
-static void default_clone_and_follow_inferior (int, int *);
-
 static void maybe_kill_then_attach (char *, int);
 
 static void kill_or_be_killed (int);
@@ -348,12 +346,6 @@ maybe_kill_then_create_inferior (char *exec, char *args, char **env)
   target_create_inferior (exec, args, env);
 }
 
-static void
-default_clone_and_follow_inferior (int child_pid, int *followed_child)
-{
-  target_clone_and_follow_inferior (child_pid, followed_child);
-}
-
 /* Clean up a target struct so it no longer has any zero pointers in it.
    We default entries, at least to stubs that print error messages.  */
 
@@ -468,11 +460,6 @@ cleanup_target (struct target_ops *t)
 	    target_ignore);
   de_fault (to_acknowledge_created_inferior, 
 	    (void (*) (int)) 
-	    target_ignore);
-  de_fault (to_clone_and_follow_inferior, 
-	    default_clone_and_follow_inferior);
-  de_fault (to_post_follow_inferior_by_clone, 
-	    (void (*) (void)) 
 	    target_ignore);
   de_fault (to_insert_fork_catchpoint, 
 	    (int (*) (int)) 
@@ -606,8 +593,6 @@ update_current_target (void)
       INHERIT (to_create_inferior, t);
       INHERIT (to_post_startup_inferior, t);
       INHERIT (to_acknowledge_created_inferior, t);
-      INHERIT (to_clone_and_follow_inferior, t);
-      INHERIT (to_post_follow_inferior_by_clone, t);
       INHERIT (to_insert_fork_catchpoint, t);
       INHERIT (to_remove_fork_catchpoint, t);
       INHERIT (to_insert_vfork_catchpoint, t);
@@ -1254,16 +1239,6 @@ find_default_create_inferior (char *exec_file, char *allargs, char **env)
   return;
 }
 
-void
-find_default_clone_and_follow_inferior (int child_pid, int *followed_child)
-{
-  struct target_ops *t;
-
-  t = find_default_run_target ("run");
-  (t->to_clone_and_follow_inferior) (child_pid, followed_child);
-  return;
-}
-
 static int
 default_region_size_ok_for_hw_watchpoint (int byte_count)
 {
@@ -1564,7 +1539,6 @@ init_dummy_target (void)
   dummy_target.to_require_attach = find_default_require_attach;
   dummy_target.to_require_detach = find_default_require_detach;
   dummy_target.to_create_inferior = find_default_create_inferior;
-  dummy_target.to_clone_and_follow_inferior = find_default_clone_and_follow_inferior;
   dummy_target.to_pid_to_str = normal_pid_to_str;
   dummy_target.to_stratum = dummy_stratum;
   dummy_target.to_find_memory_regions = dummy_find_memory_regions;
@@ -2038,24 +2012,6 @@ debug_to_acknowledge_created_inferior (int pid)
 		      pid);
 }
 
-static void
-debug_to_clone_and_follow_inferior (int child_pid, int *followed_child)
-{
-  debug_target.to_clone_and_follow_inferior (child_pid, followed_child);
-
-  fprintf_unfiltered (gdb_stdlog,
-		      "target_clone_and_follow_inferior (%d, %d)\n",
-		      child_pid, *followed_child);
-}
-
-static void
-debug_to_post_follow_inferior_by_clone (void)
-{
-  debug_target.to_post_follow_inferior_by_clone ();
-
-  fprintf_unfiltered (gdb_stdlog, "target_post_follow_inferior_by_clone ()\n");
-}
-
 static int
 debug_to_insert_fork_catchpoint (int pid)
 {
@@ -2325,8 +2281,6 @@ setup_target_debug (void)
   current_target.to_create_inferior = debug_to_create_inferior;
   current_target.to_post_startup_inferior = debug_to_post_startup_inferior;
   current_target.to_acknowledge_created_inferior = debug_to_acknowledge_created_inferior;
-  current_target.to_clone_and_follow_inferior = debug_to_clone_and_follow_inferior;
-  current_target.to_post_follow_inferior_by_clone = debug_to_post_follow_inferior_by_clone;
   current_target.to_insert_fork_catchpoint = debug_to_insert_fork_catchpoint;
   current_target.to_remove_fork_catchpoint = debug_to_remove_fork_catchpoint;
   current_target.to_insert_vfork_catchpoint = debug_to_insert_vfork_catchpoint;

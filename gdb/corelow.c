@@ -518,7 +518,6 @@ init_core_ops (void)
   core_ops.to_insert_breakpoint = ignore;
   core_ops.to_remove_breakpoint = ignore;
   core_ops.to_create_inferior = find_default_create_inferior;
-  core_ops.to_clone_and_follow_inferior = find_default_clone_and_follow_inferior;
   core_ops.to_thread_alive = core_file_thread_alive;
   core_ops.to_stratum = core_stratum;
   core_ops.to_has_memory = 1;

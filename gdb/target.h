@@ -272,8 +272,6 @@ struct target_ops
     void (*to_create_inferior) (char *, char *, char **);
     void (*to_post_startup_inferior) (ptid_t);
     void (*to_acknowledge_created_inferior) (int);
-    void (*to_clone_and_follow_inferior) (int, int *);
-    void (*to_post_follow_inferior_by_clone) (void);
     int (*to_insert_fork_catchpoint) (int);
     int (*to_remove_fork_catchpoint) (int);
     int (*to_insert_vfork_catchpoint) (int);
@@ -540,10 +538,6 @@ extern void child_post_startup_inferior (ptid_t);
 
 extern void child_acknowledge_created_inferior (int);
 
-extern void child_clone_and_follow_inferior (int, int *);
-
-extern void child_post_follow_inferior_by_clone (void);
-
 extern int child_insert_fork_catchpoint (int);
 
 extern int child_remove_fork_catchpoint (int);
@@ -694,33 +688,6 @@ extern void target_load (char *arg, int from_tty);
 
 #define target_acknowledge_created_inferior(pid) \
      (*current_target.to_acknowledge_created_inferior) (pid)
-
-/* An inferior process has been created via a fork() or similar
-   system call.  This function will clone the debugger, then ensure
-   that CHILD_PID is attached to by that debugger.
-
-   FOLLOWED_CHILD is set TRUE on return *for the clone debugger only*,
-   and FALSE otherwise.  (The original and clone debuggers can use this
-   to determine which they are, if need be.)
-
-   (This is not a terribly useful feature without a GUI to prevent
-   the two debuggers from competing for shell input.)  */
-
-#define target_clone_and_follow_inferior(child_pid,followed_child) \
-     (*current_target.to_clone_and_follow_inferior) (child_pid, followed_child)
-
-/* This operation is intended to be used as the last in a sequence of
-   steps taken when following both parent and child of a fork.  This
-   is used by a clone of the debugger, which will follow the child.
-
-   The original debugger has detached from this process, and the
-   clone has attached to it.
-
-   On some targets, this requires a bit of cleanup to make it work
-   correctly.  */
-
-#define target_post_follow_inferior_by_clone() \
-     (*current_target.to_post_follow_inferior_by_clone) ()
 
 /* On some targets, we can catch an inferior fork or vfork event when
    it occurs.  These functions insert/remove an already-created
@@ -1199,8 +1166,6 @@ extern void find_default_require_attach (char *, int);
 extern void find_default_require_detach (int, char *, int);
 
 extern void find_default_create_inferior (char *, char *, char **);
-
-extern void find_default_clone_and_follow_inferior (int, int *);
 
 extern struct target_ops *find_run_target (void);
 

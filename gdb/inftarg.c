@@ -433,27 +433,6 @@ child_acknowledge_created_inferior (int pid)
 #endif
 
 
-void
-child_clone_and_follow_inferior (int child_pid, int *followed_child)
-{
-  clone_and_follow_inferior (child_pid, followed_child);
-
-  /* Don't resume CHILD_PID; it's stopped where it ought to be, until
-     the decision gets made elsewhere how to continue it.
-   */
-}
-
-
-#if !defined(CHILD_POST_FOLLOW_INFERIOR_BY_CLONE)
-void
-child_post_follow_inferior_by_clone (void)
-{
-  /* This version of Unix doesn't require a meaningful "post follow inferior"
-     operation by a clone debugger.
-   */
-}
-#endif
-
 #if !defined(CHILD_INSERT_FORK_CATCHPOINT)
 int
 child_insert_fork_catchpoint (int pid)
@@ -662,8 +641,6 @@ init_child_ops (void)
   child_ops.to_create_inferior = child_create_inferior;
   child_ops.to_post_startup_inferior = child_post_startup_inferior;
   child_ops.to_acknowledge_created_inferior = child_acknowledge_created_inferior;
-  child_ops.to_clone_and_follow_inferior = child_clone_and_follow_inferior;
-  child_ops.to_post_follow_inferior_by_clone = child_post_follow_inferior_by_clone;
   child_ops.to_insert_fork_catchpoint = child_insert_fork_catchpoint;
   child_ops.to_remove_fork_catchpoint = child_remove_fork_catchpoint;
   child_ops.to_insert_vfork_catchpoint = child_insert_vfork_catchpoint;
