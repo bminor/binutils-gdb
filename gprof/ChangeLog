@@ -1,3 +1,23 @@
+Sun Jul 12 19:06:00 1992  John Gilmore  (gnu at cygnus.com)
+
+	* blurbs.c:  New file, created from gprof.flat and gprof.callg by
+	* make-c-prog.awk:  which processes text files into C programs.
+	* printgprof.c (flatprofheader, gprofheader):  Call new functions
+	to print blurbs.
+	(printblurb):  Remove.
+	* Makefile.in:  Infrastructure to build blurbs.
+	* pathnames.h:  has been removed.  Gprof now has no filename
+	dependencies in it.
+	* gprof.c:  Lint.
+
+Sat Jul 11 18:07:21 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: define man1dir and install the man page
+
+Fri Jul 10 21:14:08 1992  david d `zoo' zuhn (zoo@cygnus.com)
+
+	* Makefile.in: added dummy info and install-info targets
+
 Thu Jun  4 11:34:02 1992  Mark Eichin  (eichin at cygnus.com)
 
 	* lookup.c: fixed fencepost in nllookup and added dbg_nllookup for
