@@ -59,6 +59,9 @@
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
+/* Define if compiling on Solaris 7. */
+#undef _MSE_INT_H
+
 /* Define if you want to use new multi-fd /proc interface
    (replaces HAVE_MULTIPLE_PROC_FDS as well as other macros). */
 #undef NEW_PROC_API

@@ -88,6 +88,14 @@ AC_TYPE_SIGNAL
 
 AC_HEADER_STDC
 
+dnl Solaris 7 needs _MSE_INT_H defined to avoid a clash between <widec.h>
+dnl and <wchar.h> that causes AC_CHECK_HEADERS to think <curses.h> doesn't
+dnl exist.
+
+case $host_os in solaris2.7) case "$GCC" in yes)
+    AC_DEFINE(_MSE_INT_H)
+esac; esac
+
 AC_CHECK_HEADERS(ctype.h curses.h endian.h link.h thread_db.h proc_service.h \
 	memory.h objlist.h ptrace.h sgtty.h stddef.h stdlib.h \
 	string.h sys/procfs.h sys/ptrace.h sys/reg.h stdint.h \
@@ -176,10 +184,7 @@ if test "${target}" = "${host}"; then
   *-*-unixware* | *-*-sysv4.2* | *-*-sysv5*)
       AC_DEFINE(NEW_PROC_API)
       ;;
-  # FIXME: we would like to define NEW_PROC_API for all versions of
-  # Solaris from 2.6 on... but it isn't quite working yet.  Seems
-  # to work on sparc 2.6, so let's try it out there.
-  sparc-sun-solaris2.6)
+  *-*-solaris2.[678])
       AC_DEFINE(NEW_PROC_API)
       ;;
   esac

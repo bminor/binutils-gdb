@@ -1,3 +1,11 @@
+2000-04-06  Nick Duffek  <nsd@cygnus.com>
+
+	* configure.in (_MSE_INT_H): Define on Solaris 7.
+	(NEW_PROC_API): Define on Solaris 7 and 8 as well as 6.
+	* acconfig.h (_MSE_INT_H): Define on Solaris 7.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2000-04-06  Michael Snyder  <msnyder@cygnus.com>
 
 	* sol-thread.c (GET_LWP, GET_THREAD, BUILD_LWP, BUILD_THREAD):

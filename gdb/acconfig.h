@@ -1,3 +1,6 @@
+/* Define if compiling on Solaris 7. */
+#undef _MSE_INT_H
+
 /* Define if pstatus_t type is available */
 #undef HAVE_PSTATUS_T
 
