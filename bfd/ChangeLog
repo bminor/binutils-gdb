@@ -1,3 +1,17 @@
+Wed Sep 10 11:17:50 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* archures.c (bfd_default_scan): Use strcasecmp.
+	(bfd_default_scan): Test for match with arch_name + ":" +
+ 	printable_name.
+	(bfd_default_scan): Test for match with printable_name - ":".
+	(bfd_default_scan): Delete w65, h8300, h8500, z8k, i960 special
+ 	cases.  Each implements their own scan function.
+	(bfd_default_scan): Delete 386, 2900, 860, mips 2000, mips 4400
+ 	special cases.  Since info->mach == 0.  The test mach == number
+ 	fails.
+	(bfd_arch_list): New function, return name of all the supported
+ 	architectures.
+
 Tue Sep  9 10:21:56 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-v850.c (v850_elf_print_private_bfd_data): Break after

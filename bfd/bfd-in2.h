@@ -1283,6 +1283,9 @@ bfd_printable_name PARAMS ((bfd *abfd));
 const bfd_arch_info_type *
 bfd_scan_arch PARAMS ((const char *string));
 
+const char **
+bfd_arch_list PARAMS ((void));
+
 const bfd_arch_info_type *
 bfd_arch_get_compatible PARAMS ((
     const bfd *abfd,

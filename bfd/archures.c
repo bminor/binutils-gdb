@@ -335,6 +335,61 @@ bfd_scan_arch (string)
 
 /*
 FUNCTION
+	bfd_arch_list
+
+SYNOPSIS
+	const char **bfd_arch_list(void);
+
+DESCRIPTION
+	Return a freshly malloced NULL-terminated vector of the names
+	of all the valid BFD architectures.  Do not modify the names.
+
+*/
+
+const char **
+bfd_arch_list ()
+{
+  int vec_length = 0;
+  const char **name_ptr;
+  const char **name_list;
+  const bfd_arch_info_type * const *app;
+
+  /* Determine the number of architectures */
+  vec_length = 0;
+  for (app = bfd_archures_list; *app != NULL; app++)
+    {
+      const bfd_arch_info_type *ap;
+      for (ap = *app; ap != NULL; ap = ap->next)
+	{
+	  vec_length++;
+	}
+    }
+
+  name_list = (CONST char **)
+    bfd_malloc ((vec_length + 1) * sizeof (char **));
+  if (name_list == NULL)
+    return NULL;
+
+  /* Point the list at each of the names */
+  name_ptr = name_list;
+  for (app = bfd_archures_list; *app != NULL; app++)
+    {
+      const bfd_arch_info_type *ap;
+      for (ap = *app; ap != NULL; ap = ap->next)
+	{
+	  *name_ptr = ap->printable_name;
+	  name_ptr++;
+	}
+    }
+  *name_ptr = NULL;
+
+  return name_list;
+}
+
+
+
+/*
+FUNCTION
 	bfd_arch_get_compatible
 
 SYNOPSIS
@@ -584,10 +639,56 @@ bfd_default_scan (info, string)
   const char *ptr_tst;
   unsigned long number;
   enum bfd_architecture arch;
+  const char *printable_name_colon;
 
-  /* First test for an exact match */
-  if (strcmp (string, info->printable_name) == 0)
+  /* Exact match of the architecture name (ARCH_NAME) and also the
+     default architecture? */
+  if (strcasecmp (string, info->arch_name) == 0
+      && info->the_default)
     return true;
+
+  /* Exact match of the machine name (PRINTABLE_NAME)? */
+  if (strcasecmp (string, info->printable_name) == 0)
+    return true;
+     
+  /* Given that printable_name contains no colon, attempt to match:
+     ARCH_NAME [ ":" ] PRINTABLE_NAME? */
+  printable_name_colon = strchr (info->printable_name, ':');
+  if (printable_name_colon == NULL)
+    {
+      int strlen_arch_name = strlen (info->arch_name);
+      if (strncasecmp (string, info->arch_name, strlen_arch_name) == 0)
+	if (string[strlen_arch_name] == ':')
+	  {
+	    if (strcasecmp (string + strlen_arch_name + 1,
+			    info->printable_name) == 0)
+	      return true;
+	  }
+	else
+	  {
+	    if (strcasecmp (string + strlen_arch_name,
+			    info->printable_name) == 0)
+	      return true;
+	  }
+    }
+
+  /* Given that PRINTABLE_NAME has the form: <arch> ":" <mach>;
+     Attempt to match: <arch> <mach>? */
+  if (printable_name_colon != NULL)
+    {
+      int colon_index = printable_name_colon - info->printable_name;
+      if (strncasecmp (string, info->printable_name, colon_index) == 0
+	  && strcasecmp (string + colon_index,
+			 info->printable_name + colon_index + 1) == 0)
+	return true;
+    }
+
+  /* Given that PRINTABLE_NAME has the form: <arch> ":" <mach>; Do not
+     attempt to match just <mach>, it could be ambigious.  This test
+     is left until later. */
+
+  /* NOTE: The below is retained for compatibility only. Please do not
+     add to this code */
 
   /* See how much of the supplied string matches with the
      architecture, eg the string m68k:68020 would match the 68k entry
@@ -619,20 +720,11 @@ bfd_default_scan (info, string)
       ptr_src++;
     }
 
+  /* NOTE: The below is retained for compatibility only.  Please do
+     not add to this code. */
+
   switch (number) 
     {
-    case 65:
-      arch = bfd_arch_w65;
-      break;
-
-    case 300:
-      arch = bfd_arch_h8300;
-      break;
-
-    case 500:
-      arch = bfd_arch_h8500;
-      break;
-
     case 68010:
     case 68020:
     case 68030:
@@ -643,38 +735,12 @@ bfd_default_scan (info, string)
       arch = bfd_arch_m68k; 
       break;
 
-    case 386: 
-    case 80386:
-    case 486:
-    case 80486:
-      arch = bfd_arch_i386;
-      break;
-
-    case 29000: 
-      arch = bfd_arch_a29k;
-      break;
-
-    case 8000:
-      arch = bfd_arch_z8k;
-      break;
-
     case 32000:
       arch = bfd_arch_we32k;
       break;
 
-    case 860:
-    case 80860: 
-      arch = bfd_arch_i860; 
-      break;
-    case 960:
-    case 80960:
-      arch = bfd_arch_i960;
-      break;
-
-    case 2000:
     case 3000:
     case 4000:
-    case 4400:
       arch = bfd_arch_mips;
       break;
 
