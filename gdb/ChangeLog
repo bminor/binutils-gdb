@@ -1,3 +1,8 @@
+2002-11-13  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* p-exp.y (name_not_typename): Use copy_name to
+	set current_type variable for fields of THIS.
+
 2002-11-12  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gnu-nat.c (init_gnu_ops): Remove NULL initializations.

@@ -649,7 +649,7 @@ variable:	name_not_typename
 			      if (this_type)
 				current_type = lookup_struct_elt_type (
 				  this_type,
-				  $1.stoken.ptr, false);
+				  copy_name($1.stoken), false);
 			      else
 				current_type = NULL; 
 			    }
