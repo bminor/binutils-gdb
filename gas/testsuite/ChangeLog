@@ -1,3 +1,8 @@
+Thu Nov  2 23:11:05 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/m68k/link.s, gas/m68k/link.d: New test.
+	* gas/m68k/all.exp: Run it.
+
 Tue Oct 24 10:57:20 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/hppa/basic/basic.exp: Test lci and syncdma instructions.
