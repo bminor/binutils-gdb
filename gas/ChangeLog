@@ -1,3 +1,17 @@
+2003-06-05  Michael Snyder  <msnyder@redhat.com>
+
+	* config/tc-h8sx.c (get_specific): Distinguish h8h from h8s ops.
+	(build_bytes): Ditto.
+
+2003-06-05  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-h8sx.c (DMODE): Remove.
+	(colonmod24): Don't choose a default if the operand is a 16-bit
+	constant integer.
+	(fix_operand_size): New function.
+	(md_assemble): Use it to choose between @(d:2, ERn) and @(d:16,ERn).
+	Adjust @(d:2,ERn) operands before choosing the specific opcodes.
+
 2003-06-05  Michal Ludvig  <mludvig@suse.cz>
 
 	* dw2gencfi.c (cfi_add_CFA_insn, cfi_add_CFA_insn_reg)

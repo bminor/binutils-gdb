@@ -58,7 +58,6 @@ int Nmode;
 int SXmode;
 
 #define PSIZE (Hmode ? L_32 : L_16)
-#define DMODE (L_16)
 #define DSYMMODE (Hmode ? L_24 : L_16)
 
 int bsize = L_8;		/* Default branch displacement.  */
@@ -320,6 +319,7 @@ struct h8_op
 };
 
 static void clever_message PARAMS ((const struct h8_instruction *, struct h8_op *));
+static void fix_operand_size PARAMS ((struct h8_op *, int));
 static void build_bytes    PARAMS ((const struct h8_instruction *, struct h8_op *));
 static void do_a_fix_imm   PARAMS ((int, int, struct h8_op *, int));
 static void check_operand  PARAMS ((struct h8_op *, unsigned int, char *));
@@ -536,7 +536,8 @@ colonmod24 (op, src)
 
   if (!mode)
     {
-      /* Choose a default mode.  */
+      /* If the operand is a 16-bit constant integer, leave fix_operand_size
+	 to calculate its size.  Otherwise choose a default here.  */
       if (op->exp.X_add_number < -32768
 	  || op->exp.X_add_number > 32767)
 	{
@@ -548,8 +549,6 @@ colonmod24 (op, src)
       else if (op->exp.X_add_symbol
 	       || op->exp.X_op_symbol)
 	mode = DSYMMODE;
-      else
-	mode = DMODE;
     }
 
   op->mode |= mode;
@@ -1316,6 +1315,7 @@ get_specific (instruction, operands, size)
       if (found)
 	{
 	  if ((this_try->opcode->available == AV_H8SX && ! SXmode)
+	      || (this_try->opcode->available == AV_H8S && ! Smode)
 	      || (this_try->opcode->available == AV_H8H && ! Hmode))
 	    found = 0, found_other = this_try;
 	  else if (this_size != size && (this_size != SN && size != SN))
@@ -1524,8 +1524,19 @@ build_bytes (this_try, operand)
   char *p = asnibbles;
   int high, low;
 
-  if (!(this_try->opcode->available == AV_H8 || Hmode))
+  if (!Hmode && this_try->opcode->available != AV_H8)
     as_warn (_("Opcode `%s' with these operand types not available in H8/300 mode"),
+	     this_try->opcode->name);
+  else if (!Smode 
+	   && this_try->opcode->available != AV_H8 
+	   && this_try->opcode->available != AV_H8H)
+    as_warn (_("Opcode `%s' with these operand types not available in H8/300H mode"),
+	     this_try->opcode->name);
+  else if (!SXmode 
+	   && this_try->opcode->available != AV_H8
+	   && this_try->opcode->available != AV_H8H
+	   && this_try->opcode->available != AV_H8S)
+    as_warn (_("Opcode `%s' with these operand types not available in H8/300S mode"),
 	     this_try->opcode->name);
 
   while (*nibble_ptr != (op_type) E)
@@ -1857,6 +1868,56 @@ clever_message (instruction, operand)
   as_bad (_("invalid operands"));
 }
 
+
+/* Adjust OPERAND's value and size given that it is accessing a field
+   of SIZE bytes.
+
+   This function handles the choice between @(d:2,ERn) and @(d:16,ERn)
+   when no size is explicitly given.  It also scales down the assembly-level
+   displacement in an @(d:2,ERn) operand.  */
+
+static void
+fix_operand_size (operand, size)
+     struct h8_op *operand;
+     int size;
+{
+  if ((operand->mode & MODE) == DISP)
+    {
+      /* If the user didn't specify an operand width, see if we
+	 can use @(d:2,ERn).  */
+      if (SXmode
+	  && (operand->mode & SIZE) == 0
+	  && (operand->exp.X_add_number == size
+	      || operand->exp.X_add_number == size * 2
+	      || operand->exp.X_add_number == size * 3))
+	operand->mode |= L_2;
+
+      /* Scale down the displacement in an @(d:2,ERn) operand.
+	 X_add_number then contains the desired field value.  */
+      if ((operand->mode & SIZE) == L_2)
+	{
+	  if (operand->exp.X_add_number % size != 0)
+	    as_warn (_("operand/size mis-match"));
+	  operand->exp.X_add_number /= size;
+	}
+    }
+
+  /* If the operand needs a size but doesn't have one yet, it must be
+     a 16-bit integer (see colonmod24).  */
+  if ((operand->mode & SIZE) == 0)
+    switch (operand->mode & MODE)
+      {
+      case DISP:
+      case INDEXB:
+      case INDEXW:
+      case INDEXL:
+      case ABS:
+	operand->mode |= L_16;
+	break;
+      }
+}
+
+
 /* This is the guts of the machine-dependent assembler.  STR points to
    a machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles.  */
@@ -1948,6 +2009,43 @@ md_assemble (str)
 	  break;
 	}
     }
+  if (OP_KIND (instruction->opcode->how) == O_MOVAB ||
+      OP_KIND (instruction->opcode->how) == O_MOVAW ||
+      OP_KIND (instruction->opcode->how) == O_MOVAL)
+    {
+      switch (operand[0].mode & MODE)
+	{
+	case INDEXB:
+	default:
+	  fix_operand_size (&operand[1], 1);
+	  break;
+	case INDEXW:
+	  fix_operand_size (&operand[1], 2);
+	  break;
+	case INDEXL:
+	  fix_operand_size (&operand[1], 4);
+	  break;
+	}
+    }
+  else
+    {
+      for (i = 0; i < 3 && operand[i].mode != 0; i++)
+	switch (size)
+	  {
+	  case SN:
+	  case SB:
+	  default:
+	    fix_operand_size (&operand[i], 1);
+	    break;
+	  case SW:
+	    fix_operand_size (&operand[i], 2);
+	    break;
+	  case SL:
+	    fix_operand_size (&operand[i], 4);
+	    break;
+	  }
+    }
+
   instruction = get_specific (instruction, operand, size);
 
   if (instruction == 0)
@@ -1960,55 +2058,6 @@ md_assemble (str)
       clever_message (prev_instruction, operand);
 
       return;
-    }
-
-  /* This is the earliest point at which we can do this:
-     any DISP2 operands need to be fixed-up according to 
-     the size of the operation.  */
-  /* MOVA is a whole different set of rules...  */
-  if (OP_KIND (instruction->opcode->how) == O_MOVAB ||
-      OP_KIND (instruction->opcode->how) == O_MOVAW ||
-      OP_KIND (instruction->opcode->how) == O_MOVAL)
-    {
-      if ((operand[1].mode & MODE) == DISP &&
-	  (operand[1].mode & SIZE) == L_2)
-	switch (operand[0].mode & MODE) {
-	case INDEXB:
-	default:
-	  break;
-	case INDEXW:
-	  if (operand[1].exp.X_add_number % 2)
-	    as_warn (_("operand/size mis-match"));
-	  operand[1].exp.X_add_number /= 2;
-	  break;
-	case INDEXL:
-	  if (operand[1].exp.X_add_number % 4)
-	    as_warn (_("operand/size mis-match"));
-	  operand[1].exp.X_add_number /= 4;
-	  break;
-	}
-    }
-  else
-    {
-      for (i = 0; i < instruction->noperands; i++)
-	if ((operand[i].mode & MODE) == DISP &&
-	    (operand[i].mode & SIZE) == L_2)
-	  switch (size) {
-	  case SN:
-	  case SB:
-	  default:
-	    break;
-	  case SW:
-	    if (operand[i].exp.X_add_number % 2)
-	      as_warn (_("operand/size mis-match"));
-	    operand[i].exp.X_add_number /= 2;
-	    break;
-	  case SL:
-	    if (operand[i].exp.X_add_number % 4)
-	      as_warn (_("operand/size mis-match"));
-	    operand[i].exp.X_add_number /= 4;
-	    break;
-	  }
     }
 
   build_bytes (instruction, operand);
