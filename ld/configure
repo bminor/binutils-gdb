@@ -179,9 +179,6 @@ configdirs=
 srctrigger=ldversion.c
 srcname="linker"
 
-# per-host:
-
-
 ## end of common part
 
 # are we rebuilding config itself?
@@ -209,11 +206,15 @@ if [ -n "${template}" ] ; then
 			exit 1
 		fi
 
-		sed -e '/^# per\-target:/,$d' configure.in > configure.com
+		# split configure.in into common, per-host, and per-target parts
+		sed -e '/^# per\-host:/,$d' configure.in > configure.com
+		sed -e '1,/^# per\-host:/d' -e '/^# per\-target:/,$d' configure.in > configure.hst
 		sed -e '1,/^# per\-target:/d' configure.in > configure.tgt
 
-		sed -e '/^#### configure.in common parts/  r configure.com' \
-			-e '/^#### /  r configure.tgt' \
+		# and insert them
+		sed -e '/^#### configure.in common part/  r configure.com' \
+			-e '/^#### configure.in per\-host part/  r configure.hst' \
+			-e '/^#### configure.in per\-target part/  r configure.tgt' \
 			${template} >> configure
 
 		rm -f configure.com configure.tgt configure.hst
@@ -552,7 +553,10 @@ exit 0
 
 #
 # $Log$
-# Revision 1.7  1991/04/15 23:57:22  rich
+# Revision 1.8  1991/04/17 01:41:32  rich
+# Fixed a problem with host dependent parts.
+#
+# Revision 1.6  1991/04/16  00:18:44  rich
 # Now handles multiple hosts and targets.
 #
 # Revision 1.5  1991/04/15  23:43:44  rich

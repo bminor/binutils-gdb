@@ -178,63 +178,6 @@ fi
 srctrigger=as.c
 srcname="gas"
 
-# per-host:
-
-
-# assign cpu type
-case ${target} in
-sun4* | sparc*)
-	cpu_type=sparc
-	;;
-sun3*)
-	cpu_type=m68k
-	;;
-i386*)
-	cpu_type=i386
-	;;
-i960*)
-	cpu_type=i960
-	;;
-a29k*)
-	cpu_type=a29k
-	;;
-*)
-	cpu_type=generic
-	;;
-esac
-
-# assign object format
-case ${target} in
-*-coff)
-	obj_format=coff
-	;;
-*-bout)
-	obj_format=bout
-	;;
-generic)
-	obj_format=generic
-	;;
-*)
-	obj_format=aout
-	;;
-esac
-
-# assign floating point type
-case ${target} in
-vax)
-	atof=vax
-	;;
-*)
-	atof=ieee
-	;;
-esac
-
-files="config/ho-${host}.h config/tc-${cpu_type}.c \
-	config/tc-${cpu_type}.h config/te-generic.h \
-	config/obj-${obj_format}.h config/obj-${obj_format}.c \
-	config/atof-${atof}.c"
-
-links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-targ.c"
 ## end of common part
 
 # are we rebuilding config itself?
@@ -262,11 +205,15 @@ if [ -n "${template}" ] ; then
 			exit 1
 		fi
 
-		sed -e '/^# per\-target:/,$d' configure.in > configure.com
+		# split configure.in into common, per-host, and per-target parts
+		sed -e '/^# per\-host:/,$d' configure.in > configure.com
+		sed -e '1,/^# per\-host:/d' -e '/^# per\-target:/,$d' configure.in > configure.hst
 		sed -e '1,/^# per\-target:/d' configure.in > configure.tgt
 
-		sed -e '/^#### configure.in common parts/  r configure.com' \
-			-e '/^#### /  r configure.tgt' \
+		# and insert them
+		sed -e '/^#### configure.in common part/  r configure.com' \
+			-e '/^#### configure.in per\-host part/  r configure.hst' \
+			-e '/^#### configure.in per\-target part/  r configure.tgt' \
 			${template} >> configure
 
 		rm -f configure.com configure.tgt configure.hst
@@ -319,60 +266,6 @@ for host in ${hosts} ; do
 
 #### configure.in per-host parts come in here.
 
-# assign cpu type
-case ${target} in
-sun4* | sparc*)
-	cpu_type=sparc
-	;;
-sun3*)
-	cpu_type=m68k
-	;;
-i386*)
-	cpu_type=i386
-	;;
-i960*)
-	cpu_type=i960
-	;;
-a29k*)
-	cpu_type=a29k
-	;;
-*)
-	cpu_type=generic
-	;;
-esac
-
-# assign object format
-case ${target} in
-*-coff)
-	obj_format=coff
-	;;
-*-bout)
-	obj_format=bout
-	;;
-generic)
-	obj_format=generic
-	;;
-*)
-	obj_format=aout
-	;;
-esac
-
-# assign floating point type
-case ${target} in
-vax)
-	atof=vax
-	;;
-*)
-	atof=ieee
-	;;
-esac
-
-files="config/ho-${host}.h config/tc-${cpu_type}.c \
-	config/tc-${cpu_type}.h config/te-generic.h \
-	config/obj-${obj_format}.h config/obj-${obj_format}.c \
-	config/atof-${atof}.c"
-
-links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-targ.c"
 ## end of per-target part
 
 
@@ -713,7 +606,10 @@ exit 0
 
 #
 # $Log$
-# Revision 1.7  1991/04/16 00:04:08  rich
+# Revision 1.8  1991/04/17 01:40:45  rich
+# Fixed a problem with host dependent parts.
+#
+# Revision 1.6  1991/04/16  00:18:44  rich
 # Now handles multiple hosts and targets.
 #
 # Revision 1.5  1991/04/15  23:43:44  rich
