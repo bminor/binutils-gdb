@@ -1,3 +1,13 @@
+Sat Jun 12 16:13:17 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* hosts/std-host.h (struct int64e_struct): Remove needless typedef
+	keyword.
+
+Fri Jun 11 14:25:34 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* aoutf1.h (sunos4_write_object_contents): set flags to 1, breaking
+	1927 but fixing some other important things.
+
 Thu Jun 10 20:36:22 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* hosts/std-host.h (int64e_type): Fix definition.

@@ -110,7 +110,7 @@ extern int unlink();
 #define uint64_typeLOW(x) (uint32_type)(((x) & 0xffffffff))
 #define uint64_typeHIGH(x) (uint32_type)(((x) >> 32) & 0xffffffff)
 #else
-typedef struct  uint64e_struct {
+struct  uint64e_struct {
   uint32e_type low, high;
 };
 #define uint64e_type struct uint64e_struct
