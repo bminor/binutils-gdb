@@ -2689,7 +2689,7 @@ fi
 #
 # gdb linked statically w/ Solaris iff GCC is used, otherwise dynamic
 #
-            sparc-sun-solaris2*)
+            sparc*-sun-solaris2*)
                 if test "x$GCC" = "xyes";
                 then
                     X_LIBS="-Wl,-Bstatic -lX11 -lXext -lX11 -Wl,-Bdynamic -ldl -lw"
@@ -2761,6 +2761,7 @@ m88*)			gdb_host_cpu=m88k ;;
 np1)			gdb_host_cpu=gould ;;
 pyramid)		gdb_host_cpu=pyr ;;
 powerpc*)		gdb_host_cpu=powerpc ;;
+sparc64)		gdb_host_cpu=sparc ;;
 *)			gdb_host_cpu=$host_cpu ;;
 
 esac
@@ -2876,6 +2877,7 @@ sparc-*-solaris2*)	gdb_host=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_host=sun4os4 ;;
 sparc-*-sunos5*)	gdb_host=sun4sol2 ;;
 sparc-*-*)		gdb_host=sun4os4 ;;
+sparc64-*-*)		gdb_host=sun4sol2 ;;
 
 tahoe-*-*)		gdb_host=tahoe ;;
 
@@ -3093,6 +3095,7 @@ sparc-*-sunos5*)	gdb_target=sun4sol2 ;;
 sparc-*-vxworks*)	gdb_target=vxsparc ;;
 sparc-*-*)		gdb_target=sun4os4 ;;
 sparclite*-*-*)		gdb_target=sparclite ;;
+sparc64-*-solaris2*)	gdb_target=sp64sol2 ;;
 sparc64-*-*)		gdb_target=sp64 ;;
 
 tahoe-*-*)		gdb_target=tahoe ;;

@@ -1,3 +1,12 @@
+Thu Jan 25 03:26:38 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* configure.in (sparc64-*-*): Add default host configuration.
+start-sanitize-gdbtk
+	(sparc64-*-solaris2* host): Link statically if GCC used.
+end-sanitize-gdbtk
+	(sparc64-*-solaris2*): Add target configuration.
+	* sparc/sp64sol2.mt: New file.
+
 Wed Jan 24 22:31:37 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* Makefile.in (RUNTEST): srcdir renamed to rootsrc.
