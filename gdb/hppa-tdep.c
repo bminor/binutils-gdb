@@ -61,9 +61,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 static int restore_pc_queue PARAMS ((struct frame_saved_regs *fsr));
 static int hppa_alignof PARAMS ((struct type *arg));
-static FRAME_ADDR dig_fp_from_stack PARAMS ((FRAME frame,
-					     struct unwind_table_entry *u));
 CORE_ADDR frame_saved_pc PARAMS ((FRAME frame));
+static int prologue_inst_adjust_sp PARAMS ((unsigned long));
+static int is_branch PARAMS ((unsigned long));
+static int inst_saves_gr PARAMS ((unsigned long));
+static int inst_saves_fr PARAMS ((unsigned long));
 
 
 /* Routines to extract various sized constants out of hppa 
@@ -618,7 +620,14 @@ frame_chain (frame)
 	return read_memory_integer (frame->frame, 4);
       /* %r3 was saved somewhere in the stack.  Dig it out.  */
       else 
-	return dig_fp_from_stack (frame, u);
+	{
+	  struct frame_info *fi;
+	  struct frame_saved_regs saved_regs;
+
+	  fi = get_frame_info (frame);
+	  get_frame_saved_regs (fi, &saved_regs);
+	  return read_memory_integer (saved_regs.regs[FP_REGNUM], 4);
+	}
     }
   else
     {
@@ -626,52 +635,6 @@ frame_chain (frame)
 	 holds the value of the previous frame pointer).  */
       return read_register (FP_REGNUM);
     }
-}
-
-/* Given a frame and an unwind descriptor return the value for %fr (aka fp)
-   which was saved into the stack.  FIXME: Why can't we just use the standard
-   saved_regs stuff?  */
-
-static FRAME_ADDR
-dig_fp_from_stack (frame, u)
-     FRAME frame;
-     struct unwind_table_entry *u;
-{
-  CORE_ADDR pc = u->region_start;
-
-  /* Search the function for the save of %r3.  */
-  while (pc != u->region_end)
-    {
-      char buf[4];
-      unsigned long inst;
-      int status;
-
-      /* We need only look for the standard stw %r3,X(%sp) instruction,
-	 the other variants (eg stwm) are only used on the first register
-	 save (eg %r3).  */
-      status = target_read_memory (pc, buf, 4);
-      inst = extract_unsigned_integer (buf, 4);
-
-      if (status != 0)
-	memory_error (status, pc);
-
-      /* Check for stw %r3,X(%sp).  */
-      if ((inst & 0xffffc000) == 0x6bc30000)
-	{
-	  /* Found the instruction which saves %r3.  The offset (relative
-	     to this frame) is framesize + immed14 (derived from the 
-	     store instruction).  */
-	  int offset = (u->Total_frame_size << 3) + extract_14 (inst);
-
-	  return read_memory_integer (frame->frame + offset, 4);
-	}
-
-      /* Keep looking.  */
-      pc += 4;
-    }
-
-  warning ("Unable to find %%r3 in stack.\n");
-  return 0;
 }
 
 
@@ -1203,38 +1166,378 @@ skip_trampoline_code (pc, name)
   return pc;
 }
 
-/* Advance PC across any function entry prologue instructions
-   to reach some "real" code.  */
+/* For the given instruction (INST), return any adjustment it makes
+   to the stack pointer or zero for no adjustment. 
 
-/* skip (stw rp, -20(0,sp)); copy 4,1; copy sp, 4; stwm 1,framesize(sp) 
-   for gcc, or (stw rp, -20(0,sp); stwm 1, framesize(sp) for hcc */
+   This only handles instructions commonly found in prologues.  */
+
+static int
+prologue_inst_adjust_sp (inst)
+     unsigned long inst;
+{
+  /* This must persist across calls.  */
+  static int save_high21;
+
+  /* The most common way to perform a stack adjustment ldo X(sp),sp */
+  if ((inst & 0xffffc000) == 0x37de0000)
+    return extract_14 (inst);
+
+  /* stwm X,D(sp) */
+  if ((inst & 0xffe00000) == 0x6fc00000)
+    return extract_14 (inst);
+
+  /* addil high21,%r1; ldo low11,(%r1),%r30)
+     save high bits in save_high21 for later use.  */
+  if ((inst & 0xffe00000) == 0x28200000)
+    {
+      save_high21 = extract_21 (inst);
+      return 0;
+    }
+
+  if ((inst & 0xffff0000) == 0x343e0000)
+    return save_high21 + extract_14 (inst);
+
+  /* fstws as used by the HP compilers.  */
+  if ((inst & 0xffffffe0) == 0x2fd01220)
+    return extract_5_load (inst);
+
+  /* No adjustment.  */
+  return 0;
+}
+
+/* Return nonzero if INST is a branch of some kind, else return zero.  */
+
+static int
+is_branch (inst)
+     unsigned long inst;
+{
+  switch (inst >> 26)
+    {
+    case 0x20:
+    case 0x21:
+    case 0x22:
+    case 0x23:
+    case 0x28:
+    case 0x29:
+    case 0x2a:
+    case 0x2b:
+    case 0x30:
+    case 0x31:
+    case 0x32:
+    case 0x33:
+    case 0x38:
+    case 0x39:
+    case 0x3a:
+      return 1;
+
+    default:
+      return 0;
+    }
+}
+
+/* Return the register number for a GR which is saved by INST or
+   zero it INST does not save a GR.
+
+   Note we only care about full 32bit register stores (that's the only
+   kind of stores the prologue will use).  */
+
+static int
+inst_saves_gr (inst)
+     unsigned long inst;
+{
+  /* Does it look like a stw?  */
+  if ((inst >> 26) == 0x1a)
+    return extract_5R_store (inst);
+
+  /* Does it look like a stwm?  */
+  if ((inst >> 26) == 0x1b)
+    return extract_5R_store (inst);
+
+  return 0;
+}
+
+/* Return the register number for a FR which is saved by INST or
+   zero it INST does not save a FR.
+
+   Note we only care about full 64bit register stores (that's the only
+   kind of stores the prologue will use).  */
+
+static int
+inst_saves_fr (inst)
+     unsigned long inst;
+{
+  if ((inst & 0xfc1fffe0) == 0x2c101220)
+    return extract_5r_store (inst);
+  return 0;
+}
+
+/* Advance PC across any function entry prologue instructions
+   to reach some "real" code. 
+
+   Use information in the unwind table to determine what exactly should
+   be in the prologue.  */
 
 CORE_ADDR
 skip_prologue(pc)
      CORE_ADDR pc;
 {
   char buf[4];
-  unsigned long inst;
-  int status;
+  unsigned long inst, stack_remaining, save_gr, save_fr, save_rp, save_sp;
+  int status, i;
+  struct unwind_table_entry *u;
 
-  status = target_read_memory (pc, buf, 4);
-  inst = extract_unsigned_integer (buf, 4);
-  if (status != 0)
-    return pc;
+  u = find_unwind_entry (pc);
+  if (!u)
+    return 0;
 
-  if (inst == 0x6BC23FD9)	/* stw rp,-20(sp) */
+  /* This is how much of a frame adjustment we need to account for.  */
+  stack_remaining = u->Total_frame_size << 3;
+
+  /* Magic register saves we want to know about.  */
+  save_rp = u->Save_RP;
+  save_sp = u->Save_SP;
+
+  /* Turn the Entry_GR field into a bitmask.  */
+  save_gr = 0;
+  for (i = 3; i < u->Entry_GR + 3; i++)
     {
-      if (read_memory_integer (pc + 4, 4) == 0x8030241)	/* copy r3,r1 */
-	pc += 16;
-      else if ((read_memory_integer (pc + 4, 4) & ~MASK_14) == 0x68710000) /* stw r1,(r3) */
-	pc += 8;
+      /* Frame pointer gets saved into a special location.  */
+      if (u->Save_SP && i == FP_REGNUM)
+	continue;
+
+      save_gr |= (1 << i);
     }
-  else if (read_memory_integer (pc, 4) == 0x8030241) /* copy r3,r1 */
-    pc += 12;
-  else if ((read_memory_integer (pc, 4) & ~MASK_14) == 0x68710000) /* stw r1,(r3) */
-    pc += 4;
+
+  /* Turn the Entry_FR field into a bitmask too.  */
+  save_fr = 0;
+  for (i = 12; i < u->Entry_FR + 12; i++)
+    save_fr |= (1 << i);
+
+  /* Loop until we find everything of interest or hit a branch.
+
+     For unoptimized GCC code and for any HP CC code this will never ever
+     examine any user instructions.
+
+     For optimzied GCC code we're faced with problems.  GCC will schedule
+     its prologue and make prologue instructions available for delay slot
+     filling.  The end result is user code gets mixed in with the prologue
+     and a prologue instruction may be in the delay slot of the first branch
+     or call.
+
+     Some unexpected things are expected with debugging optimized code, so
+     we allow this routine to walk past user instructions in optimized
+     GCC code.  */
+  while (save_gr || save_fr || save_rp || save_sp || stack_remaining > 0)
+    {
+      status = target_read_memory (pc, buf, 4);
+      inst = extract_unsigned_integer (buf, 4);
+
+      /* Yow! */
+      if (status != 0)
+	return pc;
+
+      /* Note the interesting effects of this instruction.  */
+      stack_remaining -= prologue_inst_adjust_sp (inst);
+
+      /* There is only one instruction used for saving RP into the stack.  */
+      if (inst == 0x6bc23fd9)
+	save_rp = 0;
+
+      /* This is the only way we save SP into the stack.  At this time
+	 the HP compilers never bother to save SP into the stack.  */
+      if ((inst & 0xffffc000) == 0x6fc10000)
+	save_sp = 0;
+
+      /* Account for general and floating-point register saves.  */
+      save_gr &= ~(1 << inst_saves_gr (inst));
+      save_fr &= ~(1 << inst_saves_fr (inst));
+
+      /* Quit if we hit any kind of branch.  This can happen if a prologue
+	 instruction is in the delay slot of the first call/branch.  */
+      if (is_branch (inst))
+	break;
+
+      /* Bump the PC.  */
+      pc += 4;
+    }
 
   return pc;
+}
+
+/* Put here the code to store, into a struct frame_saved_regs,
+   the addresses of the saved registers of frame described by FRAME_INFO.
+   This includes special registers such as pc and fp saved in special
+   ways in the stack frame.  sp is even more special:
+   the address we return for it IS the sp for the next frame.  */
+
+void
+hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
+     struct frame_info *frame_info;
+     struct frame_saved_regs *frame_saved_regs;
+{
+  CORE_ADDR pc;
+  struct unwind_table_entry *u;
+  unsigned long inst, stack_remaining, save_gr, save_fr, save_rp, save_sp;
+  int status, i, reg;
+  char buf[4];
+  int fp_loc = -1;
+
+  /* Zero out everything.  */
+  memset (frame_saved_regs, '\0', sizeof (struct frame_saved_regs));
+
+  /* Call dummy frames always look the same, so there's no need to
+     examine the dummy code to determine locations of saved registers;
+     instead, let find_dummy_frame_regs fill in the correct offsets
+     for the saved registers.  */
+  if ((frame_info->pc >= frame_info->frame
+       && frame_info->pc <= (frame_info->frame + CALL_DUMMY_LENGTH
+			     + 32 * 4 + (NUM_REGS - FP0_REGNUM) * 8
+			     + 6 * 4)))
+    find_dummy_frame_regs (frame_info, frame_saved_regs);
+
+  /* Get the starting address of the function referred to by the PC
+     saved in frame_info.  */
+  pc = get_pc_function_start (frame_info->pc);
+
+  /* Yow! */
+  u = find_unwind_entry (pc);
+  if (!u)
+    return;
+
+  /* This is how much of a frame adjustment we need to account for.  */
+  stack_remaining = u->Total_frame_size << 3;
+
+  /* Magic register saves we want to know about.  */
+  save_rp = u->Save_RP;
+  save_sp = u->Save_SP;
+
+  /* Turn the Entry_GR field into a bitmask.  */
+  save_gr = 0;
+  for (i = 3; i < u->Entry_GR + 3; i++)
+    {
+      /* Frame pointer gets saved into a special location.  */
+      if (u->Save_SP && i == FP_REGNUM)
+	continue;
+
+      save_gr |= (1 << i);
+    }
+
+  /* Turn the Entry_FR field into a bitmask too.  */
+  save_fr = 0;
+  for (i = 12; i < u->Entry_FR + 12; i++)
+    save_fr |= (1 << i);
+
+  /* Loop until we find everything of interest or hit a branch.
+
+     For unoptimized GCC code and for any HP CC code this will never ever
+     examine any user instructions.
+
+     For optimzied GCC code we're faced with problems.  GCC will schedule
+     its prologue and make prologue instructions available for delay slot
+     filling.  The end result is user code gets mixed in with the prologue
+     and a prologue instruction may be in the delay slot of the first branch
+     or call.
+
+     Some unexpected things are expected with debugging optimized code, so
+     we allow this routine to walk past user instructions in optimized
+     GCC code.  */
+  while (save_gr || save_fr || save_rp || save_sp || stack_remaining > 0)
+    {
+      status = target_read_memory (pc, buf, 4);
+      inst = extract_unsigned_integer (buf, 4);
+
+      /* Yow! */
+      if (status != 0)
+	return;
+
+      /* Note the interesting effects of this instruction.  */
+      stack_remaining -= prologue_inst_adjust_sp (inst);
+
+      /* There is only one instruction used for saving RP into the stack.  */
+      if (inst == 0x6bc23fd9)
+	{
+	  save_rp = 0;
+	  frame_saved_regs->regs[RP_REGNUM] = frame_info->frame - 20;
+	}
+
+      /* This is the only way we save SP into the stack.  At this time
+	 the HP compilers never bother to save SP into the stack.  */
+      if ((inst & 0xffffc000) == 0x6fc10000)
+	{
+	  save_sp = 0;
+	  frame_saved_regs->regs[SP_REGNUM] = frame_info->frame;
+	}
+
+      /* Account for general and floating-point register saves.  */
+      reg = inst_saves_gr (inst);
+      if (reg >= 3 && reg <= 18
+	  && (!u->Save_SP || reg != FP_REGNUM))
+	{
+	  save_gr &= ~(1 << reg);
+
+	  /* stwm with a positive displacement is a *post modify*.  */
+	  if ((inst >> 26) == 0x1b
+	      && extract_14 (inst) >= 0)
+	    frame_saved_regs->regs[reg] = frame_info->frame;
+	  else
+	    {
+	      /* Handle code with and without frame pointers.  */
+	      if (u->Save_SP)
+		frame_saved_regs->regs[reg]
+		  = frame_info->frame + extract_14 (inst);
+	      else
+		frame_saved_regs->regs[reg]
+		  = frame_info->frame + (u->Total_frame_size << 3)
+		    + extract_14 (inst);
+	    }
+	}
+
+
+      /* GCC handles callee saved FP regs a little differently.  
+
+	 It emits an instruction to put the value of the start of
+	 the FP store area into %r1.  It then uses fstds,ma with
+	 a basereg of %r1 for the stores.
+
+	 HP CC emits them at the current stack pointer modifying
+	 the stack pointer as it stores each register.  */
+
+      /* ldo X(%r3),%r1 or ldo X(%r30),%r1.  */
+      if ((inst & 0xffffc000) == 0x34610000
+	  || (inst & 0xffffc000) == 0x37c10000)
+	fp_loc = extract_14 (inst);
+	
+      reg = inst_saves_fr (inst);
+      if (reg >= 12 && reg <= 21)
+	{
+	  /* Note +4 braindamage below is necessary because the FP status
+	     registers are internally 8 registers rather than the expected
+	     4 registers.  */
+	  save_fr &= ~(1 << reg);
+	  if (fp_loc == -1)
+	    {
+	      /* 1st HP CC FP register store.  After this instruction
+		 we've set enough state that the GCC and HPCC code are
+		 both handled in the same manner.  */
+	      frame_saved_regs->regs[reg + FP4_REGNUM + 4] = frame_info->frame;
+	      fp_loc = 8;
+	    }
+	  else
+	    {
+	      frame_saved_regs->regs[reg + FP0_REGNUM + 4]
+		= frame_info->frame + fp_loc;
+	      fp_loc += 8;
+	    }
+	}
+
+      /* Quit if we hit any kind of branch.  This can happen if a prologue
+	 instruction is in the delay slot of the first call/branch.  */
+      if (is_branch (inst))
+	break;
+
+      /* Bump the PC.  */
+      pc += 4;
+    }
 }
 
 #ifdef MAINTENANCE_CMDS
