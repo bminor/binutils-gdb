@@ -1,3 +1,8 @@
+2003-10-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/ia64elf.em (gld${EMULATION_NAME}_after_parse): Don't
+	use $EMULATION_NAME to call bfd function.
+
 2003-10-14  Danny Smith  <dannysmith@users.sourceforge.net>  
 
 	* pe-dll.c (pe_implied_import_dll): Also scan .rdata sections

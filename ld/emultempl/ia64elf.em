@@ -32,7 +32,7 @@ static int itanium = 0;
 static void
 gld${EMULATION_NAME}_after_parse (void)
 {
-  bfd_${EMULATION_NAME}_after_parse (itanium);
+  bfd_elf${ELFSIZE}_ia64_after_parse (itanium);
 }
 
 EOF
