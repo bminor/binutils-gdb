@@ -65,6 +65,9 @@ unsigned int include_stack_ptr = 0;
 
 %a 4000
 %o 5000
+
+CMDFILENAMECHAR   [_a-zA-Z0-9\/\.\\_\+\$\:\[\]\\\,\=\&\!\<\>\-]
+CMDFILENAMECHAR1  [_a-zA-Z0-9\/\.\\_\+\$\:\[\]\\\,\=\&\!\<\>]
 FILENAMECHAR1	[_a-zA-Z\/\.\\]
 SYMBOLCHARN     [_a-zA-Z\/\.\\0-9]
 FILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\=\$\:\[\]\\]
@@ -189,7 +192,7 @@ WHITE		[ \t\n]+
 				   yylval.integer = strtol(yytext+1, 0, base);	
 				   return INT;
 				 }
-<MRI,BOTH,EXPRESSION>"$"?"0x"?([0-9A-Fa-f])+(M|K|m|k)? {
+<DEFSYMEXP,MRI,BOTH,EXPRESSION>"$"?"0x"?([0-9A-Fa-f])+(M|K|m|k)? {
 				  yylval.integer = strtol(yytext,0,hex_mode);
 				  if (yytext[yyleng-1]=='M'
 					|| yytext[yyleng-1] == 'm') {
@@ -305,6 +308,12 @@ WHITE		[ \t\n]+
 <MRI>"list".*                   { RTOKEN(LIST); /* LIST and ignore to end of line */ }
 <MRI>"sect"			{ RTOKEN(SECT); }
 <MRI>"absolute"			{ RTOKEN(ABSOLUTE); }
+
+<COMMAND>{CMDFILENAMECHAR1}{CMDFILENAMECHAR}*	{
+				 yylval.name = buystring(yytext); 
+				  return NAME;
+				}
+
 
 <MRI,BOTH,EXPRESSION>{FILENAMECHAR1}{FILENAMECHAR}*	{
 				 yylval.name = buystring(yytext); 
