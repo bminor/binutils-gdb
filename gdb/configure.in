@@ -361,7 +361,7 @@ host_makefile_frag=config/${gdb_host_cpu}/${gdb_host}.mh
 target_makefile_frag=config/${gdb_target_cpu}/${gdb_target}.mt
 
 # If hostfile (XM_FILE) and/or targetfile (TM_FILE) and/or nativefile
-# (NAT_FILE) is not set in the ?config/* file, we don't make the
+# (NAT_FILE) is not set in config/*/*.m[ht] files, we don't make the
 # corresponding links.  But we have to remove the xm.h files and tm.h
 # files anyway, e.g. when switching from "configure host" to
 # "configure none".
@@ -382,10 +382,9 @@ rm -f nm.h
 if [ "${nativefile}" != "" ]; then
 	files="${files} config/${gdb_host_cpu}/${nativefile}"
 	links="${links} nm.h"
-# temporary scaffolding until all hosts have the host/target/native
-# split in place.
 else
-	files="${files} config/nm-trash.h"
+	# A cross-only configuration.
+	files="${files} config/nm-empty.h"
 	links="${links} nm.h"
 fi
 

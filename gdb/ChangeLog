@@ -1,10 +1,22 @@
+Sun Sep  4 16:06:34 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* configure.in (config/nm-empty.h): If cross only, use instead
+	of config/nm-trash.h.
+	* config/nm-trash.h: Remove.
+	* config/nm-empty.h: New file.
+	* config/i386/nm-m3.h: New file, includes config/nm-m3.h.
+	* config/mips/nm-m3.h: New file, includes config/nm-m3.h.
+	* config/m68k/nm-sysv4.h: New file, includes config/nm-sysv4.h.
+	* config/mips/nm-sysv4.h: New file, includes config/nm-sysv4.h.
+	* config/sparc/nm-sysv4.h: New file, includes config/nm-sysv4.h.
+
 Fri Sep  2 19:11:40 1994  Stu Grossman  (grossman@cygnus.com)
 
-	* configure.in:  Don't ln gdbtk.tcl if it's already there.
+	* configure.in: Don't symlink to gdbtk.tcl if it's already there.
 
 Fri Sep  2 17:35:55 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
-	* configure.in: No longer looks for nm, tm, and xm headers in
+	* configure.in: No longer look for nm, tm, and xm headers in
 	  config/<header>; they are always in config/<cpu>/<header>.
 
 Fri Sep  2 16:40:03 1994  Stan Shebs  (shebs@andros.cygnus.com)
