@@ -1,5 +1,11 @@
 Tue Oct 21 10:42:38 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* sim-fpu.c (EXPMAX): Type is unsigned.
+	(MIN_INT, MAX_INT): Type is signed64.
+	(i2fpu): Type of val is signed64.
+
+Tue Oct 21 10:42:38 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
 	* sim-profile.h (PROFILE_PC_BUCKET_SIZE): Treat a shift of zero as
  	a bucket size of zero.
 
