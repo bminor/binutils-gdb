@@ -1,3 +1,9 @@
+Thu Sep 15 13:05:44 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* ldmisc.c (vfinfo): Print BFD file name as well as file name
+	returned by find_nearest_line, in case the file name is something
+	unhelpful such as a .h file.  Handle %u.
+
 Wed Sep 14 12:49:12 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* ldlang.c (lang_do_assignments): Make sure output statement
