@@ -1230,7 +1230,8 @@ md_estimate_size_before_relax (fragp, seg)
     return 3;
   if (fragp->fr_subtype == 6)
     {
-      if (!S_IS_DEFINED (fragp->fr_symbol))
+      if (!S_IS_DEFINED (fragp->fr_symbol)
+	  || seg != S_GET_SEGMENT (fragp->fr_symbol))
 	{
 	  fragp->fr_subtype = 7;
 	  return 5;

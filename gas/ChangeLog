@@ -1,3 +1,9 @@
+Thu Feb  6 20:08:12 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10200.c (md_estimate_size_before_relax): Treat
+	a jsr target in a different section just like a jsr to
+	an undefined target.
+
 Thu Feb  6 16:52:57 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (mips_fix_adjustable): Don't adjust relocations
