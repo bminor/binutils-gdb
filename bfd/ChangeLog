@@ -1,3 +1,8 @@
+Tue Jul 14 11:18:14 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffgen.c (bfd_coff_set_symbol_class): Call bfd_alloc, not
+	xmalloc.
+
 Mon Jul 13 11:06:31 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-arm.c: Supress definition of TARGET_UNDERSCORE and add a
