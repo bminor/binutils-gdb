@@ -1,6 +1,6 @@
 /* This file is tc-m68k.h
    Copyright 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002
+   1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -178,11 +178,6 @@ extern int tc_m68k_fix_adjustable PARAMS ((struct fix *));
 #define elf_tc_final_processing m68k_elf_final_processing
 extern void m68k_elf_final_processing PARAMS ((void));
 #endif
-
-#define TC_FORCE_RELOCATION(FIX)			\
-  ((FIX)->fx_r_type == BFD_RELOC_VTABLE_INHERIT	\
-   || (FIX)->fx_r_type == BFD_RELOC_VTABLE_ENTRY	\
-   || S_FORCE_RELOC ((FIX)->fx_addsy))
 
 #else /* ! BFD_ASSEMBLER */
 

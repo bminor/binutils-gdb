@@ -1,6 +1,7 @@
 /* This file is tc-mcore.h
 
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -73,7 +74,7 @@ struct mcore_tc_sy
 
 # if defined TE_PE
 #  define TC_FORCE_RELOCATION(x) \
-     ((x)->fx_r_type == BFD_RELOC_RVA || S_FORCE_RELOC ((x)->fx_addsy))
+     ((x)->fx_r_type == BFD_RELOC_RVA || generic_force_reloc (x))
 # endif
 
 #endif /* OBJ_COFF */

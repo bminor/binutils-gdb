@@ -1,5 +1,75 @@
 2003-01-23  Alan Modra  <amodra@bigpond.net.au>
 
+	* symbols.c (S_FORCE_RELOC): Add "strict" param.
+	* symbols.h (S_FORCE_RELOC): Likewise.
+	* config/obj-aout.h (S_FORCE_RELOC): Likewise.
+	* config/obj-bout.h (S_FORCE_RELOC): Likewise.
+	* config/obj-coff.h (S_FORCE_RELOC): Likewise.
+	* config/obj-ieee.h (S_FORCE_RELOC): Likewise.
+	* config/obj-vms.h (S_FORCE_RELOC): Likewise.
+	* write.c (generic_force_reloc): New function.
+	(TC_FORCE_RELOCATION): Use it here instead of S_FORCE_RELOC.
+	(TC_FORCE_RELOCATION_SUB_SAME): Test TC_FORCE_RELOCATION too.
+	(adjust_reloc_syms): Adjust S_FORCE_RELOC call.
+	* as.h (generic_force_reloc): Declare.
+	* doc/internals.texi (S_FORCE_RELOC): Update.
+	(TC_FORCE_RELOCATION_SUB_SAME): Update.
+
+	* config/tc-alpha.c (alpha_force_relocation): Adjust to use
+	generic_force_reloc.
+	(alpha_fix_adjustable): Likewise.
+	* config/tc-arm.c (arm_force_relocation): Likewise.
+	* config/tc-cris.c (md_cris_force_relocation): Likewise.
+	* config/tc-frv.c (frv_force_relocation): Likewise.
+	* config/tc-i386.c (md_apply_fix3): Likewise.
+	* config/tc-ia64.c (ia64_force_relocation): Likewise.
+	* config/tc-ip2k.c (ip2k_force_relocation): Likewise.
+	* config/tc-m32r.c (m32r_force_relocation): Likewise.
+	* config/tc-m68hc11.c (tc_m68hc11_force_relocation): Likewise.
+	* config/tc-mcore.c (mcore_force_relocation): Likewise.
+	* config/tc-mips.c (mips_force_relocation): Likewise.
+	* config/tc-mmix.c (mmix_force_relocation): Likewise.
+	* config/tc-ppc.c (ppc_force_relocation): Likewise.
+	* config/tc-s390.c (tc_s390_force_relocation): Likewise.
+	* config/tc-sh.c (sh_force_relocation): Likewise.
+	(md_pcrel_from_section): Likewise.
+	* config/tc-sparc.c (tc_gen_reloc): Likewise.
+	* config/tc-v850.c (v850_force_relocation): Likewise.
+	* config/tc-xstormy16.c (xstormy16_force_relocation): Likewise.
+	* config/tc-i386.h (TC_FORCE_RELOCATION): Likewise.
+	* config/tc-mcore.h (TC_FORCE_RELOCATION): Likewise.
+	* config/tc-sparc.h (tc_fix_adjustable): Likewise.
+
+	* config/tc-d10v.c (d10v_force_relocation): Delete.
+	* config/tc-d10v.h (TC_FORCE_RELOCATION): Don't define.
+	* config/tc-dlx.c (md_dlx_force_relocation): Delete.
+	* config/tc-dlx.h (TC_FORCE_RELOCATION): Don't define.
+	* config/tc-fr30.c (fr30_force_relocation): Delete.
+	* config/tc-fr30.h (TC_FORCE_RELOCATION): Don't define.
+	* config/tc-mn10300.c (mn10300_force_relocation): Delete.
+	* config/tc-mn10300.h (TC_FORCE_RELOCATION): Don't define.
+	(TC_FORCE_RELOCATION_SUB_SAME): Test TC_FORCE_RELOCATION too.
+	* config/tc-i960.h (TC_FORCE_RELOCATION_SUB_SAME): Likewise.
+	* config/tc-hppa.c (hppa_force_relocation): Adjust S_FORCE_RELOC call.
+	* config/tc-mips.c (RELAX_BRANCH_TOOFAR): Warning fix.
+	* config/tc-mips.h (TC_FORCE_RELOCATION_SUB_SAME): Don't define.
+	* config/tc-openrisc.c (openrisc_force_relocation): Delete.
+	* config/tc-openrisc.h (TC_FORCE_RELOCATION): Don't define.
+	* config/tc-sparc.c (elf32_sparc_force_relocation): Delete.
+	* config/tc-sparc.h (TC_FORCE_RELOCATION): Don't define for ELF.
+	* config/tc-i386.c (i386_force_relocation): Delete.
+	* config/tc-i386.h (TC_FORCE_RELOCATION): Don't define for
+	BFD_ASSEMBLER.
+	(EXTERN_FORCE_RELOC): Fix TE_PE and STRICT_PE_FORMAT nesting.
+	* config/tc-m68k.h (TC_FORCE_RELOCATION): Don't define.
+	* config/tc-pj.h (TC_FORCE_RELOCATION): Don't define.
+	* config/tc-sh.h (TC_FORCE_RELOCATION_SUB_ABS): Don't call
+	S_FORCE_RELOC.
+	(TC_FORCE_RELOCATION_SUB_SAME): Test TC_FORCE_RELOCATION too.
+	* config/tc-sh64.h (TC_FORCE_RELOCATION_SUB_SAME): Likewise.
+
+2003-01-23  Alan Modra  <amodra@bigpond.net.au>
+
 	* config/tc-sh64.c (shmedia_frob_section_type): Adjust for changed
 	sh64_elf_section_data.
 	* config/tc-sh64.h: Include elf32-sh64.h.

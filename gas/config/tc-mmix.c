@@ -1,5 +1,5 @@
 /* tc-mmix.c -- Assembler for Don Knuth's MMIX.
-   Copyright (C) 2001, 2002 Free Software Foundation.
+   Copyright (C) 2001, 2002, 2003 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -3246,8 +3246,6 @@ mmix_force_relocation (fixP)
      fixS *fixP;
 {
   if (fixP->fx_r_type == BFD_RELOC_MMIX_LOCAL
-      || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY
       || fixP->fx_r_type == BFD_RELOC_MMIX_BASE_PLUS_OFFSET)
     return 1;
 
@@ -3261,7 +3259,7 @@ mmix_force_relocation (fixP)
   if (fixP->fx_pcrel)
     return 1;
 
-  return S_FORCE_RELOC (fixP->fx_addsy);
+  return generic_force_reloc (fixP);
 }
 
 /* The location from which a PC relative jump should be calculated,

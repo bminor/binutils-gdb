@@ -1,5 +1,5 @@
 /* tc-dlx.h -- Assemble for the DLX
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -73,11 +73,6 @@ extern int dlx_unrecognized_line PARAMS ((int));
 /* No shared lib support, so we don't need to ensure externally
    visible symbols can be overridden.  */
 #define EXTERN_FORCE_RELOC 0
-
-/* We need to force out some relocations when relaxing.  */
-#define TC_FORCE_RELOCATION(FIX) md_dlx_force_relocation (FIX)
-struct fix;
-extern int md_dlx_force_relocation PARAMS ((struct fix *));
 
 #define tc_fix_adjustable(FIX) md_dlx_fix_adjustable (FIX)
 extern bfd_boolean md_dlx_fix_adjustable PARAMS ((struct fix *));

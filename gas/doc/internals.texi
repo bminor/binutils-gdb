@@ -1,6 +1,6 @@
 \input texinfo
 @c  Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-@c  2001, 2002
+@c  2001, 2002, 2003
 @c  Free Software Foundation, Inc.
 @setfilename internals.info
 @node Top
@@ -1294,12 +1294,13 @@ symbol in the current section.  If undefined, fixups that are not
 returns non-zero, will emit relocs.
 
 @item TC_FORCE_RELOCATION_SUB_SAME (@var{fix}, @var{seg})
-@cindex TC_FORCE_RELOCATION_SUB
+@cindex TC_FORCE_RELOCATION_SUB_SAME
 This macro controls resolution of fixup expressions involving the
 difference of two symbols in the same section.  If this macro returns zero,
 the subtrahend will be resolved and @code{fx_subsy} set to @code{NULL} for
 @code{md_apply_fix3}.  If undefined, the default of
-@w{@code{! SEG_NORMAL (@var{seg})}} will be used.
+@w{@code{! SEG_NORMAL (@var{seg}) || TC_FORCE_RELOCATION (@var{fix})}} will
+be used.
 
 @item TC_FORCE_RELOCATION_SUB_ABS (@var{fix})
 @cindex TC_FORCE_RELOCATION_SUB_ABS
@@ -1324,13 +1325,13 @@ to @code{md_apply_fix3}.  If the macro is undefined, or returns non-zero, the
 symbol value will be included.  For ELF, a suitable definition might simply be
 @code{0}, because ELF relocations don't include the symbol value in the addend.
 
-@item S_FORCE_RELOC (@var{sym})
+@item S_FORCE_RELOC (@var{sym}, @var{strict})
 @cindex S_FORCE_RELOC
 This macro (or function, for @code{BFD_ASSEMBLER} gas) returns true for symbols
 that should not be reduced to section symbols or eliminated from expressions,
 because they may be overridden by the linker.  ie. for symbols that are
-undefined, common or weak, or for ELF assemblers that support ELF shared
-library linking semantics, global.
+undefined or common, and when @var{strict} is set, weak, or global (for ELF
+assemblers that support ELF shared library linking semantics).
 
 @item EXTERN_FORCE_RELOC
 @cindex EXTERN_FORCE_RELOC

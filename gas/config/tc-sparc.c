@@ -1,6 +1,6 @@
 /* tc-sparc.c -- Assemble for the SPARC
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002
+   1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    This file is part of GAS, the GNU Assembler.
 
@@ -3329,7 +3329,7 @@ tc_gen_reloc (section, fixp)
       switch (code)
 	{
 	case BFD_RELOC_32_PCREL_S2:
-	  if (S_FORCE_RELOC (fixp->fx_addsy))
+	  if (generic_force_reloc (fixp))
 	    code = BFD_RELOC_SPARC_WPLT30;
 	  break;
 	case BFD_RELOC_HI22:
@@ -4349,16 +4349,3 @@ cons_fix_new_sparc (frag, where, nbytes, exp)
 
   fix_new_exp (frag, where, (int) nbytes, exp, 0, r);
 }
-
-#ifdef OBJ_ELF
-int
-elf32_sparc_force_relocation (fixp)
-     struct fix *fixp;
-{
-  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-    return 1;
-
-  return S_FORCE_RELOC (fixp->fx_addsy);
-}
-#endif

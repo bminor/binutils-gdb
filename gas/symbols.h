@@ -1,6 +1,6 @@
 /* symbols.h -
    Copyright 1987, 1990, 1992, 1993, 1994, 1995, 1997, 1999, 2000, 2001,
-   2002 Free Software Foundation, Inc.
+   2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -90,7 +90,7 @@ extern int S_IS_EXTERNAL PARAMS ((symbolS *));
 extern int S_IS_WEAK PARAMS ((symbolS *));
 extern int S_IS_COMMON PARAMS ((symbolS *));
 extern int S_IS_DEFINED PARAMS ((symbolS *));
-extern int S_FORCE_RELOC PARAMS ((symbolS *));
+extern int S_FORCE_RELOC PARAMS ((symbolS *, int));
 extern int S_IS_DEBUG PARAMS ((symbolS *));
 extern int S_IS_LOCAL PARAMS ((symbolS *));
 extern int S_IS_EXTERN PARAMS ((symbolS *));

@@ -107,8 +107,9 @@ extern int sh64_target_mach PARAMS ((void));
    || TC_FORCE_RELOCATION (FIX))
 
 #undef TC_FORCE_RELOCATION_SUB_SAME
-#define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEG)		\
-  (! SEG_NORMAL (SEG)					\
+#define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEC)		\
+  (! SEG_NORMAL (SEC)					\
+   || TC_FORCE_RELOCATION (FIX)				\
    || (sh_relax && SWITCH_TABLE (FIX))			\
    || *symbol_get_tc ((FIX)->fx_addsy) != NULL)
 

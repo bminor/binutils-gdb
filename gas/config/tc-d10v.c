@@ -1,5 +1,5 @@
 /* tc-d10v.c -- Assembler code for the Mitsubishi D10V
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1902,15 +1902,4 @@ d10v_fix_adjustable (fixP)
     return 0;
 
   return 1;
-}
-
-int
-d10v_force_relocation (fixp)
-     fixS *fixp;
-{
-  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-    return 1;
-
-  return S_FORCE_RELOC (fixp->fx_addsy);
 }

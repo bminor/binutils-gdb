@@ -1,5 +1,5 @@
 /* tc-mcore.c -- Assemble code for M*Core
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -2371,12 +2371,10 @@ int
 mcore_force_relocation (fix)
      fixS * fix;
 {
-  if (   fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY
-      || fix->fx_r_type == BFD_RELOC_RVA)
+  if (fix->fx_r_type == BFD_RELOC_RVA)
     return 1;
 
-  return S_FORCE_RELOC (fix->fx_addsy);
+  return generic_force_reloc (fix);
 }
 
 /* Return true if the fix can be handled by GAS, false if it must

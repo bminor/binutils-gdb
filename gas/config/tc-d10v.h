@@ -60,9 +60,6 @@ int d10v_cleanup PARAMS ((void));
 #define tc_fix_adjustable(FIX) d10v_fix_adjustable(FIX)
 bfd_boolean d10v_fix_adjustable PARAMS ((struct fix *));
 
-#define TC_FORCE_RELOCATION(FIX) d10v_force_relocation(FIX)
-extern int d10v_force_relocation PARAMS ((struct fix *));
-
 /* Values passed to md_apply_fix3 don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 

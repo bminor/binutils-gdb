@@ -1807,15 +1807,17 @@ S_IS_DEFINED (s)
    symbols or eliminated from expressions, because they may be
    overridden by the linker.  */
 int
-S_FORCE_RELOC (s)
+S_FORCE_RELOC (s, strict)
      symbolS *s;
+     int strict;
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return ((struct local_symbol *) s)->lsy_section == undefined_section;
 
-  return ((s->bsym->flags & BSF_WEAK) != 0
-	  || (EXTERN_FORCE_RELOC
-	      && (s->bsym->flags & BSF_GLOBAL) != 0)
+  return ((strict
+	   && ((s->bsym->flags & BSF_WEAK) != 0
+	       || (EXTERN_FORCE_RELOC
+		   && (s->bsym->flags & BSF_GLOBAL) != 0)))
 	  || s->bsym->section == undefined_section
 	  || bfd_is_com_section (s->bsym->section));
 }

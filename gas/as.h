@@ -608,6 +608,8 @@ int eh_frame_estimate_size_before_relax PARAMS ((fragS *));
 int eh_frame_relax_frag PARAMS ((fragS *));
 void eh_frame_convert_frag PARAMS ((fragS *));
 
+int generic_force_reloc PARAMS ((struct fix *));
+
 #include "expr.h"		/* Before targ-*.h */
 
 /* this one starts the chain of target dependant headers */

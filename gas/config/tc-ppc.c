@@ -1,5 +1,5 @@
 /* tc-ppc.c -- Assemble for the PowerPC or POWER (RS/6000)
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
@@ -5256,7 +5256,7 @@ ppc_force_relocation (fix)
 		  <= fix->fx_frag->fr_address))))
     return 1;
 
-  return S_FORCE_RELOC (fix->fx_addsy);
+  return generic_force_reloc (fix);
 }
 
 #endif /* OBJ_XCOFF */
@@ -5278,14 +5278,12 @@ ppc_force_relocation (fix)
     case BFD_RELOC_PPC_BA16_BRTAKEN:
     case BFD_RELOC_PPC_BA16_BRNTAKEN:
     case BFD_RELOC_PPC64_TOC:
-    case BFD_RELOC_VTABLE_INHERIT:
-    case BFD_RELOC_VTABLE_ENTRY:
       return 1;
     default:
       break;
     }
 
-  return S_FORCE_RELOC (fix->fx_addsy);
+  return generic_force_reloc (fix);
 }
 
 int

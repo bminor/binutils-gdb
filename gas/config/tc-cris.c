@@ -1,5 +1,5 @@
 /* tc-cris.c -- Assembler code for the CRIS CPU core.
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by Axis Communications AB, Lund, Sweden.
    Originally written for GAS 1.38.1 by Mikael Asker.
@@ -3158,8 +3158,6 @@ md_cris_force_relocation (fixp)
 {
   switch (fixp->fx_r_type)
     {
-    case BFD_RELOC_VTABLE_INHERIT:
-    case BFD_RELOC_VTABLE_ENTRY:
     case BFD_RELOC_CRIS_16_GOT:
     case BFD_RELOC_CRIS_32_GOT:
     case BFD_RELOC_CRIS_16_GOTPLT:
@@ -3172,7 +3170,7 @@ md_cris_force_relocation (fixp)
       ;
     }
 
-  return S_FORCE_RELOC (fixp->fx_addsy);
+  return generic_force_reloc (fixp);
 }
 
 /* Check and emit error if broken-word handling has failed to fix up a

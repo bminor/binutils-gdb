@@ -737,7 +737,7 @@ static int mips_relax_branch;
 #define RELAX_BRANCH_UNCOND(i) (((i) & 8) != 0)
 #define RELAX_BRANCH_LIKELY(i) (((i) & 4) != 0)
 #define RELAX_BRANCH_LINK(i) (((i) & 2) != 0)
-#define RELAX_BRANCH_TOOFAR(i) (((i) & 1))
+#define RELAX_BRANCH_TOOFAR(i) (((i) & 1) != 0)
 
 /* For mips16 code, we use an entirely different form of relaxation.
    mips16 supports two versions of most instructions which take
@@ -11173,9 +11173,7 @@ int
 mips_force_relocation (fixp)
      fixS *fixp;
 {
-  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
-      || S_FORCE_RELOC (fixp->fx_addsy))
+  if (generic_force_reloc (fixp))
     return 1;
 
   if (HAVE_NEWABI

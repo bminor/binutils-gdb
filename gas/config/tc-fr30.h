@@ -51,10 +51,6 @@
 struct fix;
 extern bfd_boolean fr30_fix_adjustable PARAMS ((struct fix *));
 
-/* When relaxing, we need to emit various relocs we otherwise wouldn't.  */
-#define TC_FORCE_RELOCATION(fix) fr30_force_relocation (fix)
-extern int fr30_force_relocation PARAMS ((struct fix *));
-
 #define tc_gen_reloc gas_cgen_tc_gen_reloc
 
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */

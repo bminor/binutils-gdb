@@ -3187,18 +3187,10 @@ int
 tc_m68hc11_force_relocation (fixP)
      fixS * fixP;
 {
-  switch (fixP->fx_r_type)
-    {
-    case BFD_RELOC_VTABLE_INHERIT:
-    case BFD_RELOC_VTABLE_ENTRY:
-    case BFD_RELOC_M68HC11_RL_GROUP:
-      return 1;
+  if (fixP->fx_r_type == BFD_RELOC_M68HC11_RL_GROUP)
+    return 1;
 
-    default:
-      break;
-    }
-
-  return S_FORCE_RELOC (fixP->fx_addsy);
+  return generic_force_reloc (fixP);
 }
 
 /* Here we decide which fixups can be adjusted to make them relative

@@ -1,5 +1,5 @@
 /* tc-v850.c -- Assembler code for the NEC V850
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -2474,10 +2474,6 @@ int
 v850_force_relocation (fixP)
      struct fix *fixP;
 {
-  if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-    return 1;
-
   if (fixP->fx_r_type == BFD_RELOC_V850_LONGCALL
       || fixP->fx_r_type == BFD_RELOC_V850_LONGJUMP)
     return 1;
@@ -2490,5 +2486,5 @@ v850_force_relocation (fixP)
 	  || fixP->fx_r_type >= BFD_RELOC_UNUSED))
     return 1;
 
-  return S_FORCE_RELOC (fixP->fx_addsy);
+  return generic_force_reloc (fixP);
 }

@@ -1,6 +1,6 @@
 /* tc-i386.h -- Header file for tc-i386.c
    Copyright 1989, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002
+   2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -471,19 +471,14 @@ extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 /* ELF wants external syms kept, as does PE COFF.  */
-#ifdef TE_PE
-# ifdef STRICT_PE_FORMAT
-#   define EXTERN_FORCE_RELOC				\
+#if defined (TE_PE) && defined (STRICT_PE_FORMAT)
+#define EXTERN_FORCE_RELOC				\
   (OUTPUT_FLAVOR == bfd_target_elf_flavour		\
    || OUTPUT_FLAVOR == bfd_target_coff_flavour)
-# endif
 #else
 #define EXTERN_FORCE_RELOC				\
   (OUTPUT_FLAVOR == bfd_target_elf_flavour)
 #endif
-
-#define TC_FORCE_RELOCATION(FIX)	i386_force_relocation (FIX)
-extern bfd_boolean i386_force_relocation PARAMS ((struct fix *));
 
 /* This expression evaluates to true if the relocation is for a local
    object for which we still want to do the relocation at runtime.
@@ -513,7 +508,7 @@ extern bfd_boolean i386_force_relocation PARAMS ((struct fix *));
 
 /* For COFF.  */
 #define TC_FORCE_RELOCATION(FIX)			\
-  ((FIX)->fx_r_type == 7 || S_FORCE_RELOC ((FIX)->fx_addsy))
+  ((FIX)->fx_r_type == 7 || generic_force_reloc (FIX))
 #endif /* ! BFD_ASSEMBLER */
 
 #define md_operand(x)

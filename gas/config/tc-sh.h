@@ -1,6 +1,6 @@
 /* This file is tc-sh.h
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+   2003 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -85,8 +85,9 @@ extern int sh_force_relocation PARAMS ((struct fix *));
        || (FIX)->fx_r_type == BFD_RELOC_8		\
        || SWITCH_TABLE_CONS (FIX)))
 
-#define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEG)		\
-  (! SEG_NORMAL (SEG)					\
+#define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEC)		\
+  (! SEG_NORMAL (SEC)					\
+   || TC_FORCE_RELOCATION (FIX)				\
    || (sh_relax && SWITCH_TABLE (FIX)))
 
 /* Don't complain when we leave fx_subsy around.  */
@@ -237,8 +238,7 @@ extern bfd_boolean sh_fix_adjustable PARAMS ((struct fix *));
 /* This keeps the subtracted symbol around, for use by PLT_PCREL
    relocs.  */
 #define TC_FORCE_RELOCATION_SUB_ABS(FIX)		\
-  ((FIX)->fx_r_type == BFD_RELOC_32_PLT_PCREL		\
-   || S_FORCE_RELOC ((FIX)->fx_subsy))
+  ((FIX)->fx_r_type == BFD_RELOC_32_PLT_PCREL)
 
 /* Don't complain when we leave fx_subsy around.  */
 #undef TC_VALIDATE_FIX_SUB

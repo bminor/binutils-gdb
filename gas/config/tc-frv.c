@@ -1,5 +1,5 @@
 /* tc-frv.c -- Assembler for the Fujitsu FRV.
-   Copyright 2002 Free Software Foundation.
+   Copyright 2002, 2003 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1232,13 +1232,11 @@ int
 frv_force_relocation (fix)
      fixS * fix;
 {
-  if (fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY
-      || fix->fx_r_type == BFD_RELOC_FRV_GPREL12
+  if (fix->fx_r_type == BFD_RELOC_FRV_GPREL12
       || fix->fx_r_type == BFD_RELOC_FRV_GPRELU12)
     return 1;
 
-  return S_FORCE_RELOC (fix->fx_addsy);
+  return generic_force_reloc (fix);
 }
 
 /* Write a value out to the object file, using the appropriate endianness.  */

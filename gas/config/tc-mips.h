@@ -140,10 +140,6 @@ extern int mips_fix_adjustable PARAMS ((struct fix *));
 #define TC_FORCE_RELOCATION(FIX) mips_force_relocation (FIX)
 extern int mips_force_relocation PARAMS ((struct fix *));
 
-#define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEG)	\
-  (mips_force_relocation (FIX)			\
-   || !SEG_NORMAL (SEG))
-
 /* Register mask variables.  These are set by the MIPS assembly code
    and used by ECOFF and possibly other object file formats.  */
 extern unsigned long mips_gprmask;

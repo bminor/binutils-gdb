@@ -1,5 +1,5 @@
 /* tc-openrisc.h -- Header file for tc-openrisc.c.
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -54,10 +54,6 @@ extern const char openrisc_comment_chars [];
 
 extern bfd_boolean openrisc_fix_adjustable PARAMS ((struct fix *));
 #define tc_fix_adjustable(FIX) openrisc_fix_adjustable (FIX)
-
-/* When relaxing, we need to emit various relocs we otherwise wouldn't.  */
-extern int openrisc_force_relocation PARAMS ((struct fix *));
-#define TC_FORCE_RELOCATION(fix) openrisc_force_relocation (fix)
 
 #define tc_gen_reloc gas_cgen_tc_gen_reloc
 

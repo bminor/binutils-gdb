@@ -1,5 +1,5 @@
 /* tc-mn10300.c -- Assembler code for the Matsushita 10300
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1990,21 +1990,6 @@ md_apply_fix3 (fixP, valP, seg)
   /* If a symbol remains, pass the fixup, as a reloc, onto the linker.  */
   if (fixP->fx_addsy == NULL)
     fixP->fx_done = 1;
-}
-
-/* Return nonzero if the fixup in FIXP will require a relocation,
-   even it if appears that the fixup could be completely handled
-   within GAS.  */
-
-int
-mn10300_force_relocation (fixp)
-     struct fix *fixp;
-{
-  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-    return 1;
-
-  return S_FORCE_RELOC (fixp->fx_addsy);
 }
 
 /* Return zero if the fixup in fixp should be left alone and not

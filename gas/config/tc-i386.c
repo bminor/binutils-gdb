@@ -1,6 +1,6 @@
 /* i386.c -- Assemble code for the Intel 80386
    Copyright 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -4647,7 +4647,7 @@ md_apply_fix3 (fixP, valP, seg)
 	  if ((sym_seg == seg
 	       || (symbol_section_p (fixP->fx_addsy)
 		   && sym_seg != absolute_section))
-	      && !S_FORCE_RELOC (fixP->fx_addsy))
+	      && !generic_force_reloc (fixP))
 	    {
 	      /* Yes, we add the values in twice.  This is because
 		 bfd_install_relocation subtracts them out again.  I think
@@ -5144,17 +5144,6 @@ i386_validate_fix (fixp)
 	}
       fixp->fx_subsy = 0;
     }
-}
-
-bfd_boolean
-i386_force_relocation (fixp)
-     fixS *fixp;
-{
-  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-    return 1;
-
-  return S_FORCE_RELOC (fixp->fx_addsy);
 }
 
 arelent *

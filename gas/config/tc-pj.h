@@ -1,5 +1,5 @@
 /* This file is tc-pj.h
-   Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by Steve Chamberlain of Transmeta, sac@pobox.com
 
@@ -51,12 +51,6 @@ arelent *tc_gen_reloc PARAMS((asection *, struct fix *));
 /* No shared lib support, so we don't need to ensure externally
    visible symbols can be overridden.  */
 #define EXTERN_FORCE_RELOC 0
-
-/* Always leave vtable relocs untouched in the output.  */
-#define TC_FORCE_RELOCATION(FIX)                                  	\
-          ((FIX)->fx_r_type == BFD_RELOC_VTABLE_INHERIT           	\
-	   || (FIX)->fx_r_type == BFD_RELOC_VTABLE_ENTRY		\
-	   || S_FORCE_RELOC ((FIX)->fx_addsy))
 
 /* Values passed to md_apply_fix3 don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0

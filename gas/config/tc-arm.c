@@ -1,5 +1,5 @@
 /* tc-arm.c -- Assemble for the ARM
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
@@ -11443,9 +11443,7 @@ arm_force_relocation (fixp)
     return 1;
 #endif
 #ifdef OBJ_ELF
-  if (   fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
-      || fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH
+  if (fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH
       || fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BLX
       || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX
       || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BRANCH23)
@@ -11457,7 +11455,7 @@ arm_force_relocation (fixp)
       || fixp->fx_r_type == BFD_RELOC_ARM_ADRL_IMMEDIATE)
     return 0;
 
-  return S_FORCE_RELOC (fixp->fx_addsy);
+  return generic_force_reloc (fixp);
 }
 
 #ifdef OBJ_COFF

@@ -134,7 +134,8 @@ struct relocation_info
    as the target of a call instruction.  */
 #define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEG)	\
   ((FIX)->fx_tcbit				\
-   || ! SEG_NORMAL (SEG))
+   || ! SEG_NORMAL (SEG)			\
+   || TC_FORCE_RELOCATION (FIX))
 
 /* reloc_callj() may replace a 'call' with a 'calls' or a
    'bal', in which cases it modifies *fixP as appropriate.

@@ -1,5 +1,5 @@
 /* tc-ldx.c -- Assemble for the DLX
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1140,18 +1140,6 @@ md_chars_to_number (val, n)
     }
 
   return retval;
-}
-
-/* Definition of TC_FORCE_RELOCATION.
-   we need this for gas to force relocation for VTABLE.  */
-
-int
-md_dlx_force_relocation (fixp)
-     struct fix *fixp;
-{
-  return (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-	  || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
-	  || S_FORCE_RELOC (fixp->fx_addsy));
 }
 
 bfd_boolean

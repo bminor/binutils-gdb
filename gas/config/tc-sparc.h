@@ -1,6 +1,6 @@
 /* tc-sparc.h - Macros and type defines for the sparc.
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -69,11 +69,6 @@ extern void sparc_handle_align PARAMS ((struct frag *));
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (3 + 4 + 4)
 
-#ifdef OBJ_ELF
-#define TC_FORCE_RELOCATION(FIX) elf32_sparc_force_relocation(FIX)
-extern int elf32_sparc_force_relocation PARAMS ((struct fix *));
-#endif
-
 /* I know that "call 0" fails in sparc-coff if this doesn't return 1.  I
    don't know about other relocation types, or other formats, yet.  */
 #ifdef OBJ_COFF
@@ -112,7 +107,7 @@ extern int elf32_sparc_force_relocation PARAMS ((struct fix *));
 	   && (FIX)->fx_r_type != BFD_RELOC_LO10			\
 	   && (FIX)->fx_r_type != BFD_RELOC_SPARC13			\
 	   && ((FIX)->fx_r_type != BFD_RELOC_32_PCREL_S2		\
-	       || !S_FORCE_RELOC ((FIX)->fx_addsy))			\
+	       || !generic_force_reloc (FIX))				\
 	   && ((FIX)->fx_pcrel						\
 	       || ((FIX)->fx_subsy != NULL				\
 		   && (S_GET_SEGMENT ((FIX)->fx_subsy)			\

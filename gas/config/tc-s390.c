@@ -1,5 +1,5 @@
 /* tc-s390.c -- Assemble for the S390
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed by Martin Schwidefsky (schwidefsky@de.ibm.com).
 
    This file is part of GAS, the GNU Assembler.
@@ -1736,14 +1736,12 @@ tc_s390_force_relocation (fixp)
     case BFD_RELOC_390_GOTPLT32:
     case BFD_RELOC_390_GOTPLT64:
     case BFD_RELOC_390_GOTPLTENT:
-    case BFD_RELOC_VTABLE_INHERIT:
-    case BFD_RELOC_VTABLE_ENTRY:
       return 1;
     default:
       break;;
     }
 
-  return S_FORCE_RELOC (fixp->fx_addsy);
+  return generic_force_reloc (fixp);
 }
 
 /* Apply a fixup to the object code.  This is called for all the

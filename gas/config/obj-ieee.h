@@ -1,5 +1,5 @@
 /* This file is obj-ieee.h
-   Copyright 1987, 1988, 1989, 1990, 1991, 1992, 2000, 2002
+   Copyright 1987, 1988, 1989, 1990, 1991, 1992, 2000, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -35,7 +35,7 @@ obj_symbol_type;
 /* Return true for symbols that should not be reduced to section
    symbols or eliminated from expressions, because they may be
    overridden by the linker.  */
-#define S_FORCE_RELOC(s) (!SEG_NORMAL (x->sy_symbol.seg))
+#define S_FORCE_RELOC(s, strict) (!SEG_NORMAL (x->sy_symbol.seg))
 
 typedef struct
   {

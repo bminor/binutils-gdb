@@ -1,6 +1,6 @@
 /* b.out object file format
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 2000,
-   2002 Free Software Foundation, Inc.
+   2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -185,7 +185,7 @@ struct relocation_info
 /* Return true for symbols that should not be reduced to section
    symbols or eliminated from expressions, because they may be
    overridden by the linker.  */
-#define S_FORCE_RELOC(s) \
+#define S_FORCE_RELOC(s, strict) \
   (!SEG_NORMAL (S_GET_SEGMENT (s)))
 
 #define S_IS_COMMON(s) \

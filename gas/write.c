@@ -1,6 +1,6 @@
 /* write.c - emit .o file
    Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002
+   1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -34,7 +34,7 @@
 
 #ifndef TC_FORCE_RELOCATION
 #define TC_FORCE_RELOCATION(FIX)		\
-  (S_FORCE_RELOC ((FIX)->fx_addsy))
+  (generic_force_reloc (FIX))
 #endif
 
 #ifndef TC_FORCE_RELOCATION_ABS
@@ -51,7 +51,7 @@
 
 #ifndef TC_FORCE_RELOCATION_SUB_SAME
 #define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEG)	\
-  (! SEG_NORMAL (SEG))
+  (! SEG_NORMAL (SEG) || TC_FORCE_RELOCATION (FIX))
 #endif
 
 #ifndef TC_FORCE_RELOCATION_SUB_ABS
@@ -372,6 +372,19 @@ fix_new_exp (frag, where, size, exp, pcrel, r_type)
     }
 
   return fix_new_internal (frag, where, size, add, sub, off, pcrel, r_type);
+}
+
+/* Generic function to determine whether a fixup requires a relocation.  */
+int
+generic_force_reloc (fix)
+     fixS *fix;
+{
+#ifdef BFD_ASSEMBLER
+  if (fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 1;
+#endif
+  return S_FORCE_RELOC (fix->fx_addsy, fix->fx_subsy == NULL);
 }
 
 /* Append a string onto another string, bumping the pointer along.  */
@@ -823,7 +836,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 
 	/* If the symbol is undefined, common, weak, or global (ELF
 	   shared libs), we can't replace it with the section symbol.  */
-	if (S_FORCE_RELOC (fixp->fx_addsy))
+	if (S_FORCE_RELOC (fixp->fx_addsy, 1))
 	  continue;
 
 	/* Is there some other (target cpu dependent) reason we can't adjust

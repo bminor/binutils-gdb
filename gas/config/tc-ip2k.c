@@ -1,5 +1,5 @@
 /* tc-ip2k.c -- Assembler for the Scenix IP2xxx.
-   Copyright (C) 2000, 2002 Free Software Foundation.
+   Copyright (C) 2000, 2002, 2003 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -385,10 +385,6 @@ ip2k_force_relocation (fix)
 {
   switch (fix->fx_r_type)
     {
-      /* (No C++ support in ip2k.  */
-      /* case BFD_RELOC_VTABLE_INHERIT: */
-      /* case BFD_RELOC_VTABLE_ENTRY: */
-
     case BFD_RELOC_IP2K_FR9:
     case BFD_RELOC_IP2K_FR_OFFSET:
     case BFD_RELOC_IP2K_BANK:
@@ -417,7 +413,7 @@ ip2k_force_relocation (fix)
       break;
     }
 
-  return S_FORCE_RELOC (fix->fx_addsy);
+  return generic_force_reloc (fix);
 }
 
 void

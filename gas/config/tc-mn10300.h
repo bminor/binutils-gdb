@@ -1,5 +1,6 @@
 /* tc-mn10300.h -- Header file for tc-mn10300.c.
-   Copyright 1996, 1997, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -35,17 +36,14 @@
    visible symbols can be overridden.  */
 #define EXTERN_FORCE_RELOC 0
 
-/* For fixup and relocation handling.  */
-#define TC_FORCE_RELOCATION(fixp) mn10300_force_relocation (fixp)
-extern int mn10300_force_relocation PARAMS ((struct fix *));
-
 /* Do not adjust relocations involving symbols in code sections,
    because it breaks linker relaxations.  This could be fixed in the
    linker, but this fix is simpler, and it pretty much only affects
    object size a little bit.  */
-#define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEG)	\
-  (! SEG_NORMAL (SEG)				\
-   || ((SEG)->flags & SEC_CODE) != 0)
+#define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEC)	\
+  (((SEC)->flags & SEC_CODE) != 0		\
+   || ! SEG_NORMAL (SEC)			\
+   || TC_FORCE_RELOCATION (FIX))
 
 /* We validate subtract arguments within tc_gen_reloc(), so don't
    report errors at this point.  */

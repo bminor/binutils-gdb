@@ -1,5 +1,5 @@
 /* tc-xstormy16.c -- Assembler for the Sanyo XSTORMY16.
-   Copyright 2000, 2001, 2002 Free Software Foundation.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -380,18 +380,10 @@ int
 xstormy16_force_relocation (fix)
      fixS * fix;
 {
-  switch (fix->fx_r_type)
-    {
-    case BFD_RELOC_XSTORMY16_FPTR16:
-    case BFD_RELOC_VTABLE_INHERIT:
-    case BFD_RELOC_VTABLE_ENTRY:
-      return 1;
+  if (fix->fx_r_type == BFD_RELOC_XSTORMY16_FPTR16)
+    return 1;
 
-    default:
-      break;
-    }
-
-  return S_FORCE_RELOC (fix->fx_addsy);
+  return generic_force_reloc (fix);
 }
 
 /* Return true if a relocation against a symbol may be replaced with

@@ -1,5 +1,5 @@
 /* tc-m32r.c -- Assembler for the Mitsubishi M32R.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1818,9 +1818,7 @@ int
 m32r_force_relocation (fix)
      fixS *fix;
 {
-  if (fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY
-      || S_FORCE_RELOC (fix->fx_addsy))
+  if (generic_force_reloc (fix))
     return 1;
 
   if (! m32r_relax)

@@ -1,5 +1,5 @@
 /* tc-sh.c -- Assemble code for the Hitachi Super-H
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -3236,16 +3236,14 @@ sh_force_relocation (fix)
     return 0;
 
   /* Make sure some relocations get emitted.  */
-  if (fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY
-      || fix->fx_r_type == BFD_RELOC_SH_LOOP_START
+  if (fix->fx_r_type == BFD_RELOC_SH_LOOP_START
       || fix->fx_r_type == BFD_RELOC_SH_LOOP_END
       || fix->fx_r_type == BFD_RELOC_SH_TLS_GD_32
       || fix->fx_r_type == BFD_RELOC_SH_TLS_LD_32
       || fix->fx_r_type == BFD_RELOC_SH_TLS_IE_32
       || fix->fx_r_type == BFD_RELOC_SH_TLS_LDO_32
       || fix->fx_r_type == BFD_RELOC_SH_TLS_LE_32
-      || S_FORCE_RELOC (fix->fx_addsy))
+      || generic_force_reloc (fix))
     return 1;
 
   if (! sh_relax)
@@ -3705,7 +3703,7 @@ md_pcrel_from_section (fixP, sec)
 {
   if (! sh_local_pcrel (fixP)
       && fixP->fx_addsy != (symbolS *) NULL
-      && (S_FORCE_RELOC (fixP->fx_addsy)
+      && (generic_force_reloc (fixP)
 	  || S_GET_SEGMENT (fixP->fx_addsy) != sec))
     {
       /* The symbol is undefined (or is defined but not in this section,

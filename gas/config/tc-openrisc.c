@@ -1,5 +1,5 @@
 /* tc-openrisc.c -- Assembler for the OpenRISC family.
-   Copyright 2001, 2002 Free Software Foundation.
+   Copyright 2001, 2002, 2003 Free Software Foundation.
    Contributed by Johan Rydberg, jrydberg@opencores.org
 
    This file is part of GAS, the GNU Assembler.
@@ -398,23 +398,6 @@ md_cgen_lookup_reloc (insn, operand, fixP)
 
   return BFD_RELOC_NONE;
 }
-
-/* See whether we need to force a relocation into the output file.
-   This is used to force out switch and PC relative relocations when
-   relaxing.  */
-
-int
-openrisc_force_relocation (fix)
-     fixS * fix ATTRIBUTE_UNUSED;
-{
-  if (fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-    return 1;
-
-  return S_FORCE_RELOC (fix->fx_addsy);
-}
-
-
 
 /* Write a value out to the object file, using the appropriate endianness.  */
 

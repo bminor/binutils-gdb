@@ -1,6 +1,6 @@
 /* coff object file format
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2002
+   1999, 2000, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -500,8 +500,8 @@ typedef struct
 /* Return true for symbols that should not be reduced to section
    symbols or eliminated from expressions, because they may be
    overridden by the linker.  */
-#define S_FORCE_RELOC(s) \
-  (!SEG_NORMAL (S_GET_SEGMENT (s)) || S_IS_WEAK (s))
+#define S_FORCE_RELOC(s, strict) \
+  (!SEG_NORMAL (S_GET_SEGMENT (s)) || (strict && S_IS_WEAK (s)))
 
 /* True if a debug special symbol entry.  */
 #define S_IS_DEBUG(s) \

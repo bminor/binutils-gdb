@@ -1,6 +1,6 @@
 /* tc-hppa.c -- Assemble for the PA
    Copyright 1989, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002 Free Software Foundation, Inc.
+   2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -8518,7 +8518,7 @@ hppa_force_relocation (fixp)
 
   /* Ensure we emit a relocation for global symbols so that dynamic
      linking works.  */
-  if (S_FORCE_RELOC (fixp->fx_addsy))
+  if (S_FORCE_RELOC (fixp->fx_addsy, 1))
     return 1;
 
   /* It is necessary to force PC-relative calls/jumps to have a relocation
