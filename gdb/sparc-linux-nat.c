@@ -56,22 +56,22 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
 
   for (i = G0_REGNUM; i <= I7_REGNUM; i++)
     if (regno == -1 || regno == i)
-      read_register_gen (i, (char *) (regp + (i - G0_REGNUM)));
+      regcache_collect (i, regp + (i - G0_REGNUM));
 
   if (regno == -1 || regno == PS_REGNUM)
-    read_register_gen (PS_REGNUM, (char *) (regp + 32));
+    regcache_collect (PS_REGNUM, regp + 32);
 
   if (regno == -1 || regno == PC_REGNUM)
-    read_register_gen (PC_REGNUM, (char *) (regp + 33));
+    regcache_collect (PC_REGNUM, regp + 33);
   if (regno == -1 || regno == NPC_REGNUM)
-    read_register_gen (NPC_REGNUM, (char *) (regp + 34));
+    regcache_collect (NPC_REGNUM, regp + 34);
   if (regno == -1 || regno == Y_REGNUM)
-    read_register_gen (Y_REGNUM, (char *) (regp + 35));
+    regcache_collect (Y_REGNUM, regp + 35);
 
   if (regno == -1 || regno == WIM_REGNUM)
-    read_register_gen (WIM_REGNUM, (char *) (regp + 36));
+    regcache_collect (WIM_REGNUM, regp + 36);
   if (regno == -1 || regno == TBR_REGNUM)
-    read_register_gen (TBR_REGNUM, (char *) (regp + 37));
+    regcache_collect (TBR_REGNUM, regp + 37);
 }
 
 void
@@ -92,8 +92,8 @@ fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
 
   for (i = FP0_REGNUM; i < FP0_REGNUM + 32; i++)
     if (regno == -1 || regno == i)
-      read_register_gen (i, (char *) &fpregsetp->pr_fr.pr_regs[i - FP0_REGNUM]);
+      regcache_collect (i, &fpregsetp->pr_fr.pr_regs[i - FP0_REGNUM]);
 
   if (regno == -1 || regno == FPS_REGNUM)
-    read_register_gen (FPS_REGNUM, (char *) &fpregsetp->pr_fsr);
+    regcache_collect (FPS_REGNUM, &fpregsetp->pr_fsr);
 }
