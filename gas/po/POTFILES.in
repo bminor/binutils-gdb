@@ -52,6 +52,8 @@ config/tc-avr.c
 config/tc-avr.h
 config/tc-cris.c
 config/tc-cris.h
+config/tc-crx.c
+config/tc-crx.h
 config/tc-d10v.c
 config/tc-d10v.h
 config/tc-d30v.c

@@ -1,3 +1,13 @@
+2004-09-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+	* po/gas.pot: Regenerate.
+
 2004-09-14  Hideki IWAMOTO  <h-iwamoto@kit.hi-ho.ne.jp>
 
 	* config/tc-mmix.c [!LLONG_MIN]: Correct #elsif to #elif.
