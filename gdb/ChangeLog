@@ -1,5 +1,9 @@
 2001-05-08  Jim Blandy  <jimb@redhat.com>
 
+	* mn10300-tdep.c (mn10300_dwarf2_reg_to_regnum): New function.
+	(mn10300_gdbarch_init): Register it as the architecture's
+	dwarf2_reg_to_regnum method.
+
 	Correct and expand handling of `movm' instruction, and register
 	saves in general.
 	* config/mn10300/tm-mn10300.h (D0_REGNUM, A0_REGNUM, MDRQ_REGNUM,
