@@ -15,6 +15,7 @@
 
 #define REG0(X) ((X) & 0x3)
 #define REG1(X) (((X) & 0xc) >> 2)
+#define REG0_4(X) (((X) & 0x30) >> 4)
 #define REG0_8(X) (((X) & 0x300) >> 8)
 #define REG1_8(X) (((X) & 0xc00) >> 10)
 #define REG0_16(X) (((X) & 0x30000) >> 16)
@@ -167,7 +168,7 @@ void OP_FCB40000 (insn, extension)
 void OP_F300 (insn, extension)
      unsigned long insn, extension;
 {
-  State.regs[REG_D0 + REG0_8 (insn)]
+  State.regs[REG_D0 + REG0_4 (insn)]
     = load_mem ((State.regs[REG_A0 + REG0 (insn)]
 		 + State.regs[REG_D0 + REG1 (insn)]), 4);
 }
@@ -250,7 +251,7 @@ void OP_FCB00000 (insn, extension)
 void OP_F380 (insn, extension)
      unsigned long insn, extension;
 {
-  State.regs[REG_A0 + REG0_8 (insn)]
+  State.regs[REG_A0 + REG0_4 (insn)]
     = load_mem ((State.regs[REG_A0 + REG0 (insn)]
 		 + State.regs[REG_D0 + REG1 (insn)]), 4);
 }
@@ -344,7 +345,7 @@ void OP_F340 (insn, extension)
 {
   store_mem ((State.regs[REG_A0 + REG0 (insn)]
 	      + State.regs[REG_D0 + REG1 (insn)]), 4,
-	     State.regs[REG_D0 + REG0_8 (insn)]);
+	     State.regs[REG_D0 + REG0_4 (insn)]);
 }
 
 /* mov dm, (abs16) */
@@ -426,7 +427,7 @@ void OP_F3C0 (insn, extension)
 {
   store_mem ((State.regs[REG_A0 + REG0 (insn)]
 	      + State.regs[REG_D0 + REG1 (insn)]), 4,
-	     State.regs[REG_A0 + REG0_8 (insn)]);
+	     State.regs[REG_A0 + REG0_4 (insn)]);
 }
 
 /* mov am, (abs16) */
@@ -554,7 +555,7 @@ void OP_FCB80000 (insn, extension)
 void OP_F400 (insn, extension)
      unsigned long insn, extension;
 {
-  State.regs[REG_D0 + REG0_8 (insn)]
+  State.regs[REG_D0 + REG0_4 (insn)]
     = load_mem ((State.regs[REG_A0 + REG0 (insn)]
 		 + State.regs[REG_D0 + REG1 (insn)]), 1);
 }
@@ -639,7 +640,7 @@ void OP_F440 (insn, extension)
 {
   store_mem ((State.regs[REG_A0 + REG0 (insn)]
 	      + State.regs[REG_D0 + REG1 (insn)]), 1,
-	     State.regs[REG_D0 + REG0_8 (insn)]);
+	     State.regs[REG_D0 + REG0_4 (insn)]);
 }
 
 /* movbu dm, (abs16) */
@@ -719,7 +720,7 @@ void OP_FCBC0000 (insn, extension)
 void OP_F480 (insn, extension)
      unsigned long insn, extension;
 {
-  State.regs[REG_D0 + REG0_8 (insn)]
+  State.regs[REG_D0 + REG0_4 (insn)]
     = load_mem ((State.regs[REG_A0 + REG0 (insn)]
 		 + State.regs[REG_D0 + REG1 (insn)]), 2);
 }
@@ -804,7 +805,7 @@ void OP_F4C0 (insn, extension)
 {
   store_mem ((State.regs[REG_A0 + REG0 (insn)]
 	      + State.regs[REG_D0 + REG1 (insn)]), 2,
-	     State.regs[REG_D0 + REG0_8 (insn)]);
+	     State.regs[REG_D0 + REG0_4 (insn)]);
 }
 
 /* movhu dm, (abs16) */
