@@ -10,7 +10,7 @@ typedef struct _sim_cpu SIM_CPU;
 #include "config.h"
 
 #include "cgen-types.h"
-#include "arch.h" /* machine generated */
+#include "arch.h"
 #include "sim-basics.h"
 
 /* These must be defined before sim-base.h.  */
@@ -28,16 +28,16 @@ typedef SI sim_cia;
 #include "cpu-sim.h"
 
 #ifdef WANT_CPU_M32R
-#include "cpu.h"   /* machine generated */
-#include "decode.h" /* machine generated */
+#include "cpu.h"
+#include "decode.h"
 #endif
 /* start-sanitize-m32rx */
 #ifdef WANT_CPU_M32RX
-#include "cpux.h"  /* machine generated */
-#include "decodex.h" /* machine generated */
+#include "cpux.h"
+#include "decodex.h"
 #endif
 /* end-sanitize-m32rx */
-#include "cpuall.h" /* machine generated */
+#include "cpuall.h"
 
 /* Misc. profile data.  */
 typedef struct {
@@ -48,20 +48,22 @@ typedef struct {
 struct _sim_cpu {
   sim_cpu_base base;
 
-  /* Non-machine generated parts of cgen.  */
+  /* Static parts of cgen.  */
   CGEN_CPU cgen_cpu;
 
-  /* Machine generated and cpu specific parts go here.
+  /* CPU specific parts go here.
      Note that in files that don't need to access these pieces WANT_CPU_FOO
      won't be defined and thus these parts won't appear.  This is ok.
      One has to of course be careful to not take the size of this
      struct, etc.  */
 #if defined (WANT_CPU_M32R)
   M32R_CPU_DATA cpu_data;
+/* start-sanitize-m32rx */
 #elif defined (WANT_CPU_M32RX)
   M32RX_CPU_DATA cpu_data;
   PARALLEL_EXEC par_exec;
 #define CPU_PAR_EXEC(cpu) (& (cpu)->par_exec)
+/* end-sanitize-m32rx */
 #endif
 
   M32R_MISC_PROFILE m32r_misc_profile;
