@@ -246,7 +246,7 @@ mn10300_type_align (struct type *type)
       return mn10300_type_align (check_typedef (type));
 
     default:
-      abort ();
+      internal_error (__FILE__, __LINE__, "bad switch");
     }
 }
 

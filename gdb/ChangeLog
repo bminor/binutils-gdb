@@ -1,5 +1,8 @@
 2004-06-10  Andrew Cagney  <cagney@gnu.org>
 
+	* mn10300-tdep.c (mn10300_type_align): Call internal_error instead
+	of abort.
+
 	* ns32k-tdep.c (ns32k_push_arguments): New function.
 	(ns32k_gdbarch_init): Set deprecated_push_arguments.
 	* infcall.c (call_function_by_hand): Call error instead of
