@@ -1,3 +1,12 @@
+Thu Mar  2 22:20:22 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* dwarfread.c (struct dieinfo): Use CORE_ADDR for at_{low,high}_pc.
+	(target_to_host): Change result type to CORE_ADDR.
+
+Thu Mar  2 15:13:04 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* rs6000-tdep.c: Fix byte-swapping sins.
+
 Thu Mar  2 16:48:45 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* rs6000-tdep.c (branch_dest): Minor code cleanup, don't share

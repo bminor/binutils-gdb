@@ -300,8 +300,8 @@ struct dieinfo {
   unsigned long		at_bit_size;
   BLOCK *		at_element_list;
   unsigned long		at_stmt_list;
-  unsigned long		at_low_pc;
-  unsigned long		at_high_pc;
+  CORE_ADDR		at_low_pc;
+  CORE_ADDR		at_high_pc;
   unsigned long		at_language;
   unsigned long		at_member;
   unsigned long		at_discr;
@@ -451,7 +451,7 @@ static const struct language_defn *cu_language_defn;
 static int
 attribute_size PARAMS ((unsigned int));
 
-static unsigned long
+static CORE_ADDR
 target_to_host PARAMS ((char *, int, int, struct objfile *));
 
 static void
@@ -3797,16 +3797,18 @@ NOTES
 	use it as signed data, then we need to explicitly sign extend the
 	result until the bfd library is able to do this for us.
 
+	FIXME: Would a 32 bit target ever need an 8 byte result?
+
  */
 
-static unsigned long
+static CORE_ADDR
 target_to_host (from, nbytes, signextend, objfile)
      char *from;
      int nbytes;
      int signextend;		/* FIXME:  Unused */
      struct objfile *objfile;
 {
-  unsigned long rtnval;
+  CORE_ADDR rtnval;
 
   switch (nbytes)
     {
