@@ -103,7 +103,7 @@ GDBFLAGS = -nx
 #### host, target, and site specific Makefile frags come in here.
 
 EXECUTABLES = chillvars.exe result.exe \
-  pr-4975.exe pr-5020.exe pr-5022.exe
+  pr-4975.exe pr-5016.exe pr-5020.exe pr-5022.exe
 
 # To force pr-4975-grt to be compiled before pr-4975, so the
 # latter can use the former's grant file.
@@ -111,13 +111,21 @@ pr-4975.o: pr-4975-grt.o
 
 all:	$(EXECUTABLES)
 
-.SUFFIXES: .ch .exe
+.SUFFIXES: .ch .exe .check
 
 .o.exe:
 	$(CHILL_FOR_TARGET) $(CHILLFLAGS) $(LDFLAGS) -o $*.exe $*.o $(CHILL_LIB) $(LIBS)
 
 .ch.o:
 	$(CHILL_FOR_TARGET) $(CHILLFLAGS) -fspecial_UC -c $<
+
+# Do 'make chillvars.check' to run just the chillvars.{ch,exp} test.
+
+.exe.check:
+	rootme=`pwd`/; export rootme; \
+	cd .. ; \
+	$(MAKE) just-check RUNTESTFLAGS="${RUNTESTFLAGS} $*.exp" \
+	  GDB=${GDB} EXPECT=${EXPECT}
 
 .NOEXPORT:
 INFODIRS=doc
