@@ -69,6 +69,8 @@ lif-svr4pic.d
 lifloat.d
 lifloat.s
 mips.exp
+mips4.d
+mips4.s
 mul.d
 mul.s
 rol.d
