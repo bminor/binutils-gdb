@@ -1136,8 +1136,8 @@ void::function::do_xor:signed32 *rDest, signed32 Source1, signed32 Source2
 	*rDest = result;
 31.Dest,26.Source2,21.0b0010110,14.UnsignedImmediate::::xor i
 	do_xor (_SD, rDest, vSource1, rSource2);
-31.Dest,26.Source2,21.0b110010110,13.0,12.0,11./,4.Source1::::xor r
+31.Dest,26.Source2,21.0b110010110,12.0,11./,4.Source1::::xor r
 	do_xor (_SD, rDest, rSource1, rSource2);
-31.Dest,26.Source2,21.0b110010110,13.0,12.1,11./::::xor l
+31.Dest,26.Source2,21.0b110010110,12.1,11./::::xor l
 	long_immediate (LongUnsignedImmediate);
 	do_xor (_SD, rDest, LongUnsignedImmediate, rSource2);
