@@ -1,3 +1,8 @@
+Tue May 23 17:21:24 2000  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* config/sparc/nm-linux.h: Include config/nm-linux.h.
+	* config/powerpc/nm-linux.h: Likewise.
+
 Tue May 23 13:20:00 1999  Gregory Lielens  <info@fft.be>
 
 	* f-valprint.c : Corrected f_val_print function for TYPE_CODE

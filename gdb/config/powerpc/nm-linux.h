@@ -18,6 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #ifndef NM_LINUX_H
+
+#include "nm-linux.h"
+
 #define NM_LINUX_H
 
 /* Return sizeof user struct to callers in less machine dependent routines */
