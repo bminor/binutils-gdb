@@ -1,3 +1,8 @@
+Mon Oct 14 12:37:26 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.host: Use `long long' as the 64 bit type on a Solaris
+	host, since both gcc and the SunPRO compilers support it.
+
 Mon Oct 14 11:17:24 1996  Richard Henderson  <rth@tamu.edu>
 
 	* reloc.c: Create a new BFD_RELOC_ALPHA_ELF_LITERAL.  It was a 
