@@ -3168,7 +3168,10 @@ ppc_function (ignore)
 }
 
 /* The .bf pseudo-op.  This is just like a COFF C_FCN symbol named
-   ".bf".  */
+   ".bf".  If the pseudo op .bi was seen before .bf, patch the .bi sym
+   with the correct line number */
+ 
+static symbolS *saved_bi_sym = 0;
 
 static void
 ppc_bf (ignore)
@@ -3186,6 +3189,14 @@ ppc_bf (ignore)
 
   S_SET_NUMBER_AUXILIARY (sym, 1);
   SA_SET_SYM_LNNO (sym, coff_line_base);
+
+  /* Line number for bi.  */
+  if (saved_bi_sym) 
+    {
+      S_SET_VALUE (saved_bi_sym, coff_n_line_nos);
+      saved_bi_sym = 0;
+    }
+  
 
   symbol_get_tc (sym)->output = 1;
 
@@ -3220,7 +3231,8 @@ ppc_ef (ignore)
 
 /* The .bi and .ei pseudo-ops.  These take a string argument and
    generates a C_BINCL or C_EINCL symbol, which goes at the start of
-   the symbol list.  */
+   the symbol list.  The value of .bi will be know when the next .bf
+   is encountered.  */
 
 static void
 ppc_biei (ei)
@@ -3249,6 +3261,12 @@ ppc_biei (ei)
 
   S_SET_STORAGE_CLASS (sym, ei ? C_EINCL : C_BINCL);
   symbol_get_tc (sym)->output = 1;
+
+  /* Save bi.  */
+  if (ei) 
+    saved_bi_sym = 0;
+  else
+    saved_bi_sym = sym;
 
   for (look = last_biei ? last_biei : symbol_rootP;
        (look != (symbolS *) NULL

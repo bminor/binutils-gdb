@@ -1309,6 +1309,7 @@ coff_frob_symbol (symp, punt)
       set_end = next_set_end;
     }
 
+#ifndef OBJ_XCOFF
   if (! *punt
       && S_GET_STORAGE_CLASS (symp) == C_FCN
       && strcmp (S_GET_NAME (symp), ".bf") == 0)
@@ -1317,7 +1318,7 @@ coff_frob_symbol (symp, punt)
 	SA_SET_SYM_ENDNDX (coff_last_bf, symp);
       coff_last_bf = symp;
     }
-
+#endif
   if (coffsymbol (symbol_get_bfdsym (symp))->lineno)
     {
       int i;

@@ -1,3 +1,9 @@
+2001-10-08  Tom Rix <trix@redhat.com>
+
+	* config/tc-ppc (ppc_bf, ppc_biei) : Set first .bi lineno value to 
+	location of next .bf
+	* config/obj-coff.c (coff_frob_symbol) : XCOFF does not use endndx.
+
 2001-10-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/obj-elf.c: Standardize error/warning messages - don't
