@@ -8,6 +8,9 @@ INCDIR = $(srcdir)/../include
 BFDDIR = $(srcdir)/../bfd
 MKDEP = gcc -MM
 
+WARN_CFLAGS = @WARN_CFLAGS@
+AM_CFLAGS = $(WARN_CFLAGS)
+
 lib_LTLIBRARIES = libopcodes.la
 
 # This is where bfd.h lives.

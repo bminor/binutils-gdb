@@ -12,6 +12,9 @@ docdir = doc
 
 lib_LTLIBRARIES = libbfd.la
 
+WARN_CFLAGS = @WARN_CFLAGS@
+AM_CFLAGS = $(WARN_CFLAGS)
+
 # bfd.h goes here, for now
 BFD_H = bfd.h
 

@@ -12,6 +12,9 @@ tooldir = $(exec_prefix)/$(target_alias)
 YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ;  else echo flex ; fi`
 
+WARN_CFLAGS = @WARN_CFLAGS@
+AM_CFLAGS = $(WARN_CFLAGS)
+
 MKDEP = gcc -MM
 
 TARG_CPU = @target_cpu_type@

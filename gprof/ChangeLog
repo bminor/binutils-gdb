@@ -1,3 +1,10 @@
+Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+ 
+	* configure.in (WARN_CFLAGS): Set to -W -Wall by default.  Add
+ 	--enable-build-warnings option.
+	* Makefile.am (AM_CFLAGS, WARN_CFLAGS): Add definitions.
+	* Makefile.in, configure, aclocal.m4: Re-generate.
+
 2000-04-05  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
 
 	* gprof.c (copyright): Do not use N_ in array initializer.
