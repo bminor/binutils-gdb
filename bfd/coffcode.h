@@ -1880,17 +1880,23 @@ coff_set_arch_mach_hook (abfd, filehdr)
 	      cputype = 0;
 	    else
 	      {
-		bfd_byte buf[bfd_coff_symesz (abfd)];
+		bfd_byte *buf;
 		struct internal_syment sym;
 
+		buf = (bfd_byte *) bfd_malloc (bfd_coff_symesz (abfd));
 		if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
-		    || bfd_read (buf, 1, bfd_coff_symesz (abfd), abfd) != bfd_coff_symesz (abfd))
-		  return false;
+		    || (bfd_read (buf, 1, bfd_coff_symesz (abfd), abfd) 
+			!= bfd_coff_symesz (abfd)))
+		  {
+		    bfd_free (buf);
+		    return false;
+		  }
 		coff_swap_sym_in (abfd, (PTR) buf, (PTR) &sym);
 		if (sym.n_sclass == C_FILE)
 		  cputype = sym.n_type & 0xff;
 		else
 		  cputype = 0;
+		bfd_free (buf);
 	      }
 	  }
 
@@ -2762,7 +2768,7 @@ coff_compute_section_file_positions (abfd)
 	  current->target_index = target_index++;
       }
 
-    free (section_list);
+    bfd_free (section_list);
   }
 #else /* ! COFF_IMAGE_WITH_PE */
   {
@@ -3696,7 +3702,7 @@ coff_write_object_contents (abfd)
     coff_swap_filehdr_out (abfd, (PTR) & internal_f, (PTR) buff);
     amount = bfd_write ((PTR) buff, 1, bfd_coff_filhsz (abfd), abfd);
     
-    free (buff);
+    bfd_free (buff);
     
     if (amount != bfd_coff_filhsz (abfd))
       return false;
@@ -3716,7 +3722,7 @@ coff_write_object_contents (abfd)
       coff_swap_aouthdr_out (abfd, (PTR) & internal_a, (PTR) buff);
       amount = bfd_write ((PTR) buff, 1, bfd_coff_aoutsz (abfd), abfd);
       
-      free (buff);
+      bfd_free (buff);
       
       if (amount != bfd_coff_aoutsz (abfd))
 	return false;
