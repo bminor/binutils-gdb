@@ -1,3 +1,7 @@
+Fri Mar 19 21:02:19 1993  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* Makefile.in (targ-cpu.o): Depend on config.h.
+
 Wed Mar 17 16:44:06 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* app.c (do_scrub_next_char): Added new state, 9, to avoid

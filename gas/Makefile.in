@@ -327,7 +327,7 @@ obj-format.o : obj-format.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h \
   subsegs.h symbols.h tc.h obj.h  
-targ-cpu.o : targ-cpu.c targ-env.h obj-format.h \
+targ-cpu.o : targ-cpu.c config.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h \
   symbols.h tc.h obj.h $(TARG_CPU_DEPENDENTS)
