@@ -759,6 +759,7 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
   bfd *output_bfd = relocateable ? abfd : (bfd *) NULL;
   bfd_vma gp;
   boolean gp_undefined;
+  bfd_vma gp;
   bfd_vma stack[RELOC_STACKSIZE];
   int tos = 0;
 
@@ -785,7 +786,8 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 
   /* Get the GP value for the output BFD.  */
   gp_undefined = false;
-  if (_bfd_get_gp_value (abfd) == 0)
+  gp = _bfd_get_gp_value (abfd);
+  if (gp == 0)
     {
       if (relocateable != false)
 	{
@@ -804,7 +806,8 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 		      || strcmp (sec->name, ".lita") == 0))
 		lo = sec->vma;
 	    }
-	  _bfd_set_gp_value (abfd, lo + 0x8000);
+	  gp = lo + 0x8000;
+	  _bfd_set_gp_value (abfd, gp);
 	}
       else
 	{
@@ -816,13 +819,14 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 	      || h->type != bfd_link_hash_defined)
 	    gp_undefined = true;
 	  else
-	    _bfd_set_gp_value (abfd,
-			       (h->u.def.value
-				+ h->u.def.section->output_section->vma
-				+ h->u.def.section->output_offset));
+	    {
+	      gp = (h->u.def.value
+		    + h->u.def.section->output_section->vma
+		    + h->u.def.section->output_offset);
+	      _bfd_set_gp_value (abfd, gp);
+	    }
 	}
     }
-  gp = _bfd_get_gp_value (abfd);
 
   for (; *reloc_vector != (arelent *) NULL; reloc_vector++)
     {

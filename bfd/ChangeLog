@@ -1,5 +1,28 @@
 Mon Feb 19 12:37:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coff-alpha.c (alpha_ecoff_get_relocated_section_contents): Don't
+	assume that we can set the GP value and then get the same value,
+	since it won't be true if the output file is neither ELF nor
+	ECOFF.
+	* coff-mips.c (mips_adjust_reloc_in): Don't bother to use
+	_bfd_get_gp_value here.
+	(mips_gprel_reloc): Don't assume we can set and get the GP value.
+	* elf32-mips.c (mips_elf_hi16_reloc): Get gp value from
+	mips_elf_final_gp.
+	(mips_elf_lo16_reloc): Likewise.
+	(mips_elf_final_gp): Add pgp parameter.  Set it to the GP value.
+	Don't require that the BFD be ELF.
+	(mips_elf_gprel16_reloc): Get gp value from mips_elf_final_gp.
+	(mips_elf_gprel32_reloc): Likewise.
+	(mips_elf_relocate_section): Don't assume we can set and get the
+	GP value.
+	(mips_elf_finish_dynamic_symbol): Don't bother to use
+	_bfd_get_gp_value here.
+
+	* elf32-mips.c (mips_elf_create_procedure_table): Initialize sv.
+	Don't change epdr between malloc and free.  Be careful not to free
+	NULL pointers.  Zero out the first RPDR.
+
 	* configure.host: On Linux, only pass -rpath option if $(libdir)
 	is neither /lib nor /usr/lib.  From Alan Modra
 	<alan@mullet.Levels.UniSA.Edu.Au>.
