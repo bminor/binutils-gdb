@@ -155,7 +155,6 @@ struct gdbarch
   int ps_regnum;
   int fp0_regnum;
   int npc_regnum;
-  int nnpc_regnum;
   gdbarch_stab_reg_to_regnum_ftype *stab_reg_to_regnum;
   gdbarch_ecoff_reg_to_regnum_ftype *ecoff_reg_to_regnum;
   gdbarch_dwarf_reg_to_regnum_ftype *dwarf_reg_to_regnum;
@@ -303,7 +302,6 @@ struct gdbarch startup_gdbarch =
   -1,
   -1,
   -1,
-  0,
   0,
   0,
   0,
@@ -476,7 +474,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->ps_regnum = -1;
   current_gdbarch->fp0_regnum = -1;
   current_gdbarch->npc_regnum = -1;
-  current_gdbarch->nnpc_regnum = -1;
   current_gdbarch->stab_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->ecoff_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->dwarf_reg_to_regnum = no_op_reg_to_regnum;
@@ -610,7 +607,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of ps_regnum, invalid_p == 0 */
   /* Skip verify of fp0_regnum, invalid_p == 0 */
   /* Skip verify of npc_regnum, invalid_p == 0 */
-  /* Skip verify of nnpc_regnum, invalid_p == 0 */
   /* Skip verify of stab_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of ecoff_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of dwarf_reg_to_regnum, invalid_p == 0 */
@@ -1438,14 +1434,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: MEMORY_REMOVE_BREAKPOINT = 0x%08lx\n",
                         (long) current_gdbarch->memory_remove_breakpoint
                         /*MEMORY_REMOVE_BREAKPOINT ()*/);
-#endif
-#ifdef NNPC_REGNUM
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: NNPC_REGNUM # %s\n",
-                      XSTRING (NNPC_REGNUM));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: NNPC_REGNUM = %d\n",
-                      NNPC_REGNUM);
 #endif
 #ifdef NPC_REGNUM
   fprintf_unfiltered (file,
@@ -2731,23 +2719,6 @@ set_gdbarch_npc_regnum (struct gdbarch *gdbarch,
                         int npc_regnum)
 {
   gdbarch->npc_regnum = npc_regnum;
-}
-
-int
-gdbarch_nnpc_regnum (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  /* Skip verify of nnpc_regnum, invalid_p == 0 */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_nnpc_regnum called\n");
-  return gdbarch->nnpc_regnum;
-}
-
-void
-set_gdbarch_nnpc_regnum (struct gdbarch *gdbarch,
-                         int nnpc_regnum)
-{
-  gdbarch->nnpc_regnum = nnpc_regnum;
 }
 
 int

@@ -3417,11 +3417,6 @@ This should only need to be defined if @code{TARGET_READ_PC} and
 @findex NPC_REGNUM
 The number of the ``next program counter'' register, if defined.
 
-@item NNPC_REGNUM
-@findex NNPC_REGNUM
-The number of the ``next next program counter'' register, if defined.
-Currently, this is only defined for the Motorola 88K.
-
 @item PARM_BOUNDARY
 @findex PARM_BOUNDARY
 If non-zero, round arguments to a boundary of this many bits before

@@ -1,3 +1,17 @@
+2002-05-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/m88k/tm-m88k.h: Update copyright.
+	(m88k_target_write_pc): Declare
+	(TARGET_WRITE_PC): Redefine using m88k_target_write_pc.
+	(M88K_NNPC_REGNUM): Rename NNPC_REGNUM.
+	(SHIFT_INST_REGS): Update definition.
+	* m88k-tdep.c (m88k_target_write_pc): New function.  Implement
+	using old definition of TARGET_WRITE_PC.
+	* regcache.c (generic_target_write_pc): Delete code handling
+	NNPC_REGNUM.
+	* gdbarch.sh (NNPC_REGNUM): Delete.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
 2002-05-13  Richard Earnshaw  <rearnsha@arm.com>
 
 	* builtin-regs.c (value_of_builtin_reg): Correctly calculate the

@@ -1,3 +1,8 @@
+2002-05-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	documentation on NNPC_REGNUM.
+
 2002-05-11  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Document

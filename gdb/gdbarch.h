@@ -558,22 +558,6 @@ extern void set_gdbarch_npc_regnum (struct gdbarch *gdbarch, int npc_regnum);
 #endif
 #endif
 
-/* Default (value) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (NNPC_REGNUM)
-#define NNPC_REGNUM (-1)
-#endif
-
-extern int gdbarch_nnpc_regnum (struct gdbarch *gdbarch);
-extern void set_gdbarch_nnpc_regnum (struct gdbarch *gdbarch, int nnpc_regnum);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (NNPC_REGNUM)
-#error "Non multi-arch definition of NNPC_REGNUM"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (NNPC_REGNUM)
-#define NNPC_REGNUM (gdbarch_nnpc_regnum (current_gdbarch))
-#endif
-#endif
-
 /* Convert stab register number (from `r' declaration) to a gdb REGNUM. */
 
 /* Default (function) for non- multi-arch platforms. */
