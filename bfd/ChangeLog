@@ -1,3 +1,21 @@
+2001-06-17  H.J. Lu  <hjl@gnu.org>
+
+	* elf32-mips.c (mips_elf_link_hash_entry): Add a new field,
+	readonly_reloc, to record if a relocation in the .rel.dyn
+	section is against a read-only section. 
+	(mips_elf_link_hash_newfunc): Initialize the readonly_reloc
+	field to false.
+	(_bfd_mips_elf_check_relocs): Record if there is a relocation
+	in the .rel.dyn section against a read-only section by setting
+	DF_TEXTREL or readonly_reloc.
+	(_bfd_mips_elf_copy_indirect_symbol): Copy readonly_reloc if
+	it is true.
+	(_bfd_mips_elf_adjust_dynamic_symbol): Record DF_TEXTREL if
+	there is a relocation in the .rel.dyn section against a
+	read-only section.
+	(_bfd_mips_elf_size_dynamic_sections): Set DT_TEXTREL if
+	DF_TEXTREL is set.
+
 2001-06-12  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* coffcode.h (styp_flags_to_sec_flags): Change to a boolean
