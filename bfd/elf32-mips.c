@@ -85,28 +85,19 @@ static void bfd_mips_elf32_swap_gptab_in
 static void bfd_mips_elf32_swap_gptab_out
   PARAMS ((bfd *, const Elf32_gptab *, Elf32_External_gptab *));
 static boolean mips_elf_sym_is_global PARAMS ((bfd *, asymbol *));
-static boolean mips_elf_object_p PARAMS ((bfd *));
+static boolean mips_elf32_object_p PARAMS ((bfd *));
 static boolean mips_elf_create_procedure_table
   PARAMS ((PTR, bfd *, struct bfd_link_info *, asection *,
 	   struct ecoff_debug_info *));
 static int mips_elf_additional_program_headers PARAMS ((bfd *));
 static boolean mips_elf_modify_segment_map PARAMS ((bfd *));
-static void mips_elf_final_write_processing
-  PARAMS ((bfd *, boolean));
 static boolean mips_elf_set_private_flags PARAMS ((bfd *, flagword));
 static boolean mips_elf_copy_private_bfd_data PARAMS ((bfd *, bfd *));
 static boolean mips_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
 static boolean mips_elf32_section_from_shdr
   PARAMS ((bfd *, Elf32_Internal_Shdr *, char *));
-static boolean mips_elf_fake_sections
-  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
-static boolean mips_elf_section_from_bfd_section
-  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *, int *));
-static boolean mips_elf_section_processing
+static boolean mips_elf32_section_processing
   PARAMS ((bfd *, Elf32_Internal_Shdr *));
-static void mips_elf_symbol_processing PARAMS ((bfd *, asymbol *));
-static boolean mips_elf_read_ecoff_info
-  PARAMS ((bfd *, asection *, struct ecoff_debug_info *));
 static boolean mips_elf_is_local_label
   PARAMS ((bfd *, asymbol *));
 static boolean mips_elf_find_nearest_line
@@ -1445,10 +1436,11 @@ mips_elf_sym_is_global (abfd, sym)
   return (sym->flags & BSF_SECTION_SYM) == 0 ? true : false;
 }
 
-/* Set the right machine number for a MIPS ELF file.  */
+/* Set the right machine number for a MIPS ELF file.  This is used for
+   both the 32-bit and the 64-bit ABI.  */
 
-static boolean
-mips_elf_object_p (abfd)
+boolean
+_bfd_mips_elf_object_p (abfd)
      bfd *abfd;
 {
   switch (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH)
@@ -1471,21 +1463,30 @@ mips_elf_object_p (abfd)
       break;
     }
 
+  return true;
+}
+
+/* Set the right machine number for a 32-bit MIPS ELF file.  */
+
+static boolean
+mips_elf32_object_p (abfd)
+     bfd *abfd;
+{
   /* Irix 5 is broken.  Object file symbol tables are not always
      sorted correctly such that local symbols precede global symbols,
      and the sh_info field in the symbol table is not always right.  */
   elf_bad_symtab (abfd) = true;
 
-  return true;
+  return _bfd_mips_elf_object_p (abfd);
 }
 
 /* The final processing done just before writing out a MIPS ELF object
    file.  This gets the MIPS architecture right based on the machine
-   number.  */
+   number.  This is used by both the 32-bit and the 64-bit ABI.  */
 
 /*ARGSUSED*/
-static void
-mips_elf_final_write_processing (abfd, linker)
+void
+_bfd_mips_elf_final_write_processing (abfd, linker)
      bfd *abfd;
      boolean linker;
 {
@@ -1767,10 +1768,11 @@ mips_elf32_section_from_shdr (abfd, hdr, name)
 }
 
 /* Set the correct type for a MIPS ELF section.  We do this by the
-   section name, which is a hack, but ought to work.  */
+   section name, which is a hack, but ought to work.  This routine is
+   used by both the 32-bit and the 64-bit ABI.  */
 
-static boolean
-mips_elf_fake_sections (abfd, hdr, sec)
+boolean
+_bfd_mips_elf_fake_sections (abfd, hdr, sec)
      bfd *abfd;
      Elf32_Internal_Shdr *hdr;
      asection *sec;
@@ -1797,7 +1799,7 @@ mips_elf_fake_sections (abfd, hdr, sec)
     {
       hdr->sh_type = SHT_MIPS_GPTAB;
       hdr->sh_entsize = sizeof (Elf32_External_gptab);
-      /* The sh_info field is set in mips_elf_final_write_processing.  */
+      /* The sh_info field is set in final_write_processing.  */
     }
   else if (strcmp (name, ".ucode") == 0)
     hdr->sh_type = SHT_MIPS_UCODE;
@@ -1854,10 +1856,13 @@ mips_elf_fake_sections (abfd, hdr, sec)
 }
 
 /* Given a BFD section, try to locate the corresponding ELF section
-   index.  */
+   index.  This is used by both the 32-bit and the 64-bit ABI.
+   Actually, it's not clear to me that the 64-bit ABI supports these,
+   but for non-PIC objects we will certainly want support for at least
+   the .scommon section.  */
 
-static boolean
-mips_elf_section_from_bfd_section (abfd, hdr, sec, retval)
+boolean
+_bfd_mips_elf_section_from_bfd_section (abfd, hdr, sec, retval)
      bfd *abfd;
      Elf32_Internal_Shdr *hdr;
      asection *sec;
@@ -1878,30 +1883,15 @@ mips_elf_section_from_bfd_section (abfd, hdr, sec, retval)
 
 /* Work over a section just before writing it out.  We update the GP
    value in the .reginfo section based on the value we are using.
-   FIXME: We recognize sections that need the SHF_MIPS_GPREL flag by
-   name; there has to be a better way.  */
+   This routine is used by both the 32-bit and the 64-bit ABI.  FIXME:
+   We recognize sections that need the SHF_MIPS_GPREL flag by name;
+   there has to be a better way.  */
 
-static boolean
-mips_elf_section_processing (abfd, hdr)
+boolean
+_bfd_mips_elf_section_processing (abfd, hdr)
      bfd *abfd;
-     Elf32_Internal_Shdr *hdr;
+     Elf_Internal_Shdr *hdr;
 {
-  if (hdr->sh_type == SHT_MIPS_REGINFO)
-    {
-      bfd_byte buf[4];
-
-      BFD_ASSERT (hdr->sh_size == sizeof (Elf32_External_RegInfo));
-      BFD_ASSERT (hdr->contents == NULL);
-
-      if (bfd_seek (abfd,
-		    hdr->sh_offset + sizeof (Elf32_External_RegInfo) - 4,
-		    SEEK_SET) == -1)
-	return false;
-      bfd_h_put_32 (abfd, (bfd_vma) elf_gp (abfd), buf);
-      if (bfd_write (buf, (bfd_size_type) 1, (bfd_size_type) 4, abfd) != 4)
-	return false;
-    }
-
   if (hdr->bfd_section != NULL)
     {
       const char *name = bfd_get_section_name (abfd, hdr->bfd_section);
@@ -1942,6 +1932,34 @@ mips_elf_section_processing (abfd, hdr)
 
   return true;
 }
+
+/* Work over a section just before writing it out.  We update the GP
+   value in the .reginfo section based on the value we are using.  The
+   64 bit ABI does not use the .reginfo section.  */
+
+static boolean
+mips_elf32_section_processing (abfd, hdr)
+     bfd *abfd;
+     Elf32_Internal_Shdr *hdr;
+{
+  if (hdr->sh_type == SHT_MIPS_REGINFO)
+    {
+      bfd_byte buf[4];
+
+      BFD_ASSERT (hdr->sh_size == sizeof (Elf32_External_RegInfo));
+      BFD_ASSERT (hdr->contents == NULL);
+
+      if (bfd_seek (abfd,
+		    hdr->sh_offset + sizeof (Elf32_External_RegInfo) - 4,
+		    SEEK_SET) == -1)
+	return false;
+      bfd_h_put_32 (abfd, (bfd_vma) elf_gp (abfd), buf);
+      if (bfd_write (buf, (bfd_size_type) 1, (bfd_size_type) 4, abfd) != 4)
+	return false;
+    }
+
+  return _bfd_mips_elf_section_processing (abfd, hdr);
+}
 
 /* MIPS ELF uses two common sections.  One is the usual one, and the
    other is for small objects.  All the small objects are kept
@@ -1971,10 +1989,11 @@ static asection *mips_elf_data_section_ptr;
 static asymbol mips_elf_data_symbol;
 static asymbol *mips_elf_data_symbol_ptr;
 
-/* Handle the special MIPS section numbers that a symbol may use.  */
+/* Handle the special MIPS section numbers that a symbol may use.
+   This is used for both the 32-bit and the 64-bit ABI.  */
 
-static void
-mips_elf_symbol_processing (abfd, asym)
+void
+_bfd_mips_elf_symbol_processing (abfd, asym)
      bfd *abfd;
      asymbol *asym;
 {
@@ -2282,8 +2301,8 @@ ecoff_swap_rpdr_out (abfd, in, ex)
 /* Read ECOFF debugging information from a .mdebug section into a
    ecoff_debug_info structure.  */
 
-static boolean
-mips_elf_read_ecoff_info (abfd, section, debug)
+boolean
+_bfd_mips_elf_read_ecoff_info (abfd, section, debug)
      bfd *abfd;
      asection *section;
      struct ecoff_debug_info *debug;
@@ -2433,7 +2452,7 @@ mips_elf_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 	      return false;
 	    }
 
-	  if (! mips_elf_read_ecoff_info (abfd, msec, &fi->d))
+	  if (! _bfd_mips_elf_read_ecoff_info (abfd, msec, &fi->d))
 	    {
 	      msec->flags = origflags;
 	      return false;
@@ -3176,7 +3195,7 @@ mips_elf_final_link (abfd, info)
 	      reginfo.ri_cprmask[3] |= sub.ri_cprmask[3];
 
 	      /* ri_gp_value is set by the function
-		 mips_elf_section_processing when the section is
+		 mips_elf32_section_processing when the section is
 		 finally written out.  */
 
 	      /* Hack: reset the SEC_HAS_CONTENTS flag so that
@@ -3313,8 +3332,8 @@ mips_elf_final_link (abfd, info)
 	      /* The ECOFF linking code expects that we have already
 		 read in the debugging information and set up an
 		 ecoff_debug_info structure, so we do that now.  */
-	      if (! mips_elf_read_ecoff_info (input_bfd, input_section,
-					      &input_debug))
+	      if (! _bfd_mips_elf_read_ecoff_info (input_bfd, input_section,
+						   &input_debug))
 		return false;
 
 	      if (! (bfd_ecoff_debug_accumulate
@@ -5893,7 +5912,7 @@ error_return:
 
 /* ECOFF swapping routines.  These are used when dealing with the
    .mdebug section, which is in the ECOFF debugging format.  */
-static const struct ecoff_debug_swap mips_elf_ecoff_debug_swap =
+static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap =
 {
   /* Symbol table magic number.  */
   magicSym,
@@ -5931,7 +5950,7 @@ static const struct ecoff_debug_swap mips_elf_ecoff_debug_swap =
   _bfd_ecoff_swap_tir_out,
   _bfd_ecoff_swap_rndx_out,
   /* Function to read in symbolic data.  */
-  mips_elf_read_ecoff_info
+  _bfd_mips_elf_read_ecoff_info
 };
 
 #define TARGET_LITTLE_SYM		bfd_elf32_littlemips_vec
@@ -5946,19 +5965,19 @@ static const struct ecoff_debug_swap mips_elf_ecoff_debug_swap =
 #define elf_info_to_howto		0
 #define elf_info_to_howto_rel		mips_info_to_howto_rel
 #define elf_backend_sym_is_global	mips_elf_sym_is_global
-#define elf_backend_object_p		mips_elf_object_p
+#define elf_backend_object_p		mips_elf32_object_p
 #define elf_backend_section_from_shdr	mips_elf32_section_from_shdr
-#define elf_backend_fake_sections	mips_elf_fake_sections
+#define elf_backend_fake_sections	_bfd_mips_elf_fake_sections
 #define elf_backend_section_from_bfd_section \
-					mips_elf_section_from_bfd_section
-#define elf_backend_section_processing	mips_elf_section_processing
-#define elf_backend_symbol_processing	mips_elf_symbol_processing
+					_bfd_mips_elf_section_from_bfd_section
+#define elf_backend_section_processing	mips_elf32_section_processing
+#define elf_backend_symbol_processing	_bfd_mips_elf_symbol_processing
 #define elf_backend_additional_program_headers \
 					mips_elf_additional_program_headers
 #define elf_backend_modify_segment_map	mips_elf_modify_segment_map
 #define elf_backend_final_write_processing \
-					mips_elf_final_write_processing
-#define elf_backend_ecoff_debug_swap	&mips_elf_ecoff_debug_swap
+					_bfd_mips_elf_final_write_processing
+#define elf_backend_ecoff_debug_swap	&mips_elf32_ecoff_debug_swap
 
 #define bfd_elf32_bfd_is_local_label	mips_elf_is_local_label
 #define bfd_elf32_find_nearest_line	mips_elf_find_nearest_line

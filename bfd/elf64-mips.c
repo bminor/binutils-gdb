@@ -18,6 +18,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+/* This file supports the 64-bit MIPS ELF ABI.
+
+   The MIPS 64-bit ELF ABI uses an unusual reloc format.  This file
+   overrides the usual ELF reloc handling, and handles reading and
+   writing the relocations here.  */
+
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
@@ -26,11 +32,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf-bfd.h"
 #include "elf/mips.h"
 
-/* This file supports the 64-bit MIPS ELF ABI.
-
-   The MIPS 64-bit ELF ABI uses an unusual reloc format.  This file
-   overrides the usual ELF reloc handling, and handles reading and
-   writing the relocations here.  */
+/* Get the ECOFF swapping routines.  The 64-bit ABI is not supposed to
+   use ECOFF.  However, we support it anyhow for an easier changeover.  */
+#include "coff/sym.h"
+#include "coff/symconst.h"
+#include "coff/internal.h"
+#include "coff/ecoff.h"
+/* The 64 bit versions of the mdebug data structures are in alpha.h.  */
+#include "coff/alpha.h"
+#define ECOFF_64
+#include "ecoffswap.h"
 
 static void mips_elf64_swap_reloc_in
   PARAMS ((bfd *, const Elf64_Mips_External_Rel *,
@@ -38,14 +49,17 @@ static void mips_elf64_swap_reloc_in
 static void mips_elf64_swap_reloca_in
   PARAMS ((bfd *, const Elf64_Mips_External_Rela *,
 	   Elf64_Mips_Internal_Rela *));
+#if 0
 static void mips_elf64_swap_reloc_out
   PARAMS ((bfd *, const Elf64_Mips_Internal_Rel *,
 	   Elf64_Mips_External_Rel *));
+#endif
 static void mips_elf64_swap_reloca_out
   PARAMS ((bfd *, const Elf64_Mips_Internal_Rela *,
 	   Elf64_Mips_External_Rela *));
 static reloc_howto_type *mips_elf64_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
+static long mips_elf64_get_reloc_upper_bound PARAMS ((bfd *, asection *));
 static boolean mips_elf64_slurp_one_reloc_table
   PARAMS ((bfd *, asection *, asymbol **, const Elf_Internal_Shdr *));
 static boolean mips_elf64_slurp_reloc_table
@@ -94,7 +108,9 @@ enum mips_elf64_reloc_type
   R_MIPS_CALL_LO16 = 31,
   R_MIPS_SCN_DISP = 32,
   R_MIPS_REL16 = 33,
-  R_MIPS_ADD_IMMEDIATE = 34
+  R_MIPS_ADD_IMMEDIATE = 34,
+  R_MIPS_PJUMP = 35,
+  R_MIPS_RELGOT = 36
 };
 
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value
@@ -615,6 +631,34 @@ static reloc_howto_type mips_elf64_howto_table_rel[] =
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  HOWTO (R_MIPS_PJUMP,		/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS_PJUMP",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  HOWTO (R_MIPS_RELGOT,		/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS_RELGOT",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
 	 false)			/* pcrel_offset */
 };
 
@@ -1124,6 +1168,34 @@ static reloc_howto_type mips_elf64_howto_table_rela[] =
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  HOWTO (R_MIPS_PJUMP,		/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS_PJUMP",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  HOWTO (R_MIPS_RELGOT,		/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS_RELGOT",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
 	 false)			/* pcrel_offset */
 };
 
@@ -1160,6 +1232,10 @@ mips_elf64_swap_reloca_in (abfd, src, dst)
   dst->r_addend = bfd_h_get_64 (abfd, (bfd_byte *) src->r_addend);
 }
 
+#if 0
+
+/* This is not currently used.  */
+
 /* Swap out a MIPS 64-bit Rel reloc.  */
 
 static void
@@ -1175,6 +1251,8 @@ mips_elf64_swap_reloc_out (abfd, src, dst)
   bfd_h_put_8 (abfd, src->r_type2, (bfd_byte *) dst->r_type2);
   bfd_h_put_8 (abfd, src->r_type, (bfd_byte *) dst->r_type);
 }
+
+#endif /* 0 */
 
 /* Swap out a MIPS 64-bit Rela reloc.  */
 
@@ -1245,6 +1323,17 @@ mips_elf64_reloc_type_lookup (abfd, code)
     }
 
   return NULL;
+}
+
+/* Since each entry in an SHT_REL or SHT_RELA section can represent up
+   to three relocs, we must tell the user to allocate more space.  */
+
+static long
+mips_elf64_get_reloc_upper_bound (abfd, sec)
+     bfd *abfd;
+     asection *sec;
+{
+  return (sec->reloc_count * 3 + 1) * sizeof (arelent *);
 }
 
 /* Read the relocations from one reloc section.  */
@@ -1495,8 +1584,145 @@ mips_elf64_write_relocs (abfd, sec, data)
      asection *sec;
      PTR data;
 {
-  /* FIXME.  */
-  abort ();
+  boolean *failedp = (boolean *) data;
+  unsigned int count;
+  Elf_Internal_Shdr *rela_hdr;
+  Elf64_Mips_External_Rela *ext_rela;
+  unsigned int idx;
+  asymbol *last_sym = 0;
+  int last_sym_idx = 0;
+
+  /* If we have already failed, don't do anything.  */
+  if (*failedp)
+    return;
+
+  if ((sec->flags & SEC_RELOC) == 0)
+    return;
+
+  /* The linker backend writes the relocs out itself, and sets the
+     reloc_count field to zero to inhibit writing them here.  Also,
+     sometimes the SEC_RELOC flag gets set even when there aren't any
+     relocs.  */
+  if (sec->reloc_count == 0)
+    return;
+
+  /* We can combine up to three relocs that refer to the same address
+     if the latter relocs have no associated symbol.  */
+  count = 0;
+  for (idx = 0; idx < sec->reloc_count; idx++)
+    {
+      bfd_vma addr;
+      unsigned int i;
+
+      ++count;
+
+      addr = sec->orelocation[idx]->address;
+      for (i = 0; i < 2; i++)
+	{
+	  arelent *r;
+
+	  if (idx + 1 >= sec->reloc_count)
+	    break;
+	  r = sec->orelocation[idx + 1];
+	  if (r->address != addr
+	      || ! bfd_is_abs_section ((*r->sym_ptr_ptr)->section)
+	      || (*r->sym_ptr_ptr)->value != 0)
+	    break;
+
+	  /* We can merge the reloc at IDX + 1 with the reloc at IDX.  */
+
+	  ++idx;
+	}
+    }
+
+  rela_hdr = &elf_section_data (sec)->rel_hdr;
+
+  rela_hdr->sh_size = rela_hdr->sh_entsize * count;
+  rela_hdr->contents = (PTR) bfd_alloc (abfd, rela_hdr->sh_size);
+  if (rela_hdr->contents == NULL)
+    {
+      *failedp = true;
+      return;
+    }
+
+  ext_rela = (Elf64_Mips_External_Rela *) rela_hdr->contents;
+  for (idx = 0; idx < sec->reloc_count; idx++, ext_rela++)
+    {
+      arelent *ptr;
+      Elf64_Mips_Internal_Rela int_rela;
+      asymbol *sym;
+      int n;
+      unsigned int i;
+
+      ptr = sec->orelocation[idx];
+
+      /* The address of an ELF reloc is section relative for an object
+	 file, and absolute for an executable file or shared library.
+	 The address of a BFD reloc is always section relative.  */
+      if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
+	int_rela.r_offset = ptr->address;
+      else
+	int_rela.r_offset = ptr->address + sec->vma;
+
+      sym = *ptr->sym_ptr_ptr;
+      if (sym == last_sym)
+	n = last_sym_idx;
+      else
+	{
+	  last_sym = sym;
+	  n = _bfd_elf_symbol_from_bfd_symbol (abfd, &sym);
+	  if (n < 0)
+	    {
+	      *failedp = true;
+	      return;
+	    }
+	  last_sym_idx = n;
+	}
+
+      int_rela.r_sym = n;
+
+      int_rela.r_addend = ptr->addend;
+
+      int_rela.r_ssym = RSS_UNDEF;
+
+      if ((*ptr->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
+	  && ! _bfd_elf_validate_reloc (abfd, ptr))
+	{
+	  *failedp = true;
+	  return;
+	}
+
+      int_rela.r_type = ptr->howto->type;
+      int_rela.r_type2 = (int) R_MIPS_NONE;
+      int_rela.r_type3 = (int) R_MIPS_NONE;
+
+      for (i = 0; i < 2; i++)
+	{
+	  arelent *r;
+
+	  if (idx + 1 >= sec->reloc_count)
+	    break;
+	  r = sec->orelocation[idx + 1];
+	  if (r->address != ptr->address
+	      || ! bfd_is_abs_section ((*r->sym_ptr_ptr)->section)
+	      || (*r->sym_ptr_ptr)->value != 0)
+	    break;
+
+	  /* We can merge the reloc at IDX + 1 with the reloc at IDX.  */
+
+	  if (i == 0)
+	    int_rela.r_type2 = r->howto->type;
+	  else
+	    int_rela.r_type3 = r->howto->type;
+
+	  ++idx;
+	}
+
+      mips_elf64_swap_reloca_out (abfd, &int_rela, ext_rela);
+    }
+
+  BFD_ASSERT (ext_rela - (Elf64_Mips_External_Rela *) rela_hdr->contents
+	      == count);
 }
 
 /* Handle a 64-bit MIPS ELF specific section.  */
@@ -1512,7 +1738,50 @@ mips_elf64_section_from_shdr (abfd, hdr, name)
 
   return true;
 }
-
+
+/* ECOFF swapping routines.  These are used when dealing with the
+   .mdebug section, which is in the ECOFF debugging format.  */
+static const struct ecoff_debug_swap mips_elf64_ecoff_debug_swap =
+{
+  /* Symbol table magic number.  */
+  magicSym2,
+  /* Alignment of debugging information.  E.g., 4.  */
+  8,
+  /* Sizes of external symbolic information.  */
+  sizeof (struct hdr_ext),
+  sizeof (struct dnr_ext),
+  sizeof (struct pdr_ext),
+  sizeof (struct sym_ext),
+  sizeof (struct opt_ext),
+  sizeof (struct fdr_ext),
+  sizeof (struct rfd_ext),
+  sizeof (struct ext_ext),
+  /* Functions to swap in external symbolic data.  */
+  ecoff_swap_hdr_in,
+  ecoff_swap_dnr_in,
+  ecoff_swap_pdr_in,
+  ecoff_swap_sym_in,
+  ecoff_swap_opt_in,
+  ecoff_swap_fdr_in,
+  ecoff_swap_rfd_in,
+  ecoff_swap_ext_in,
+  _bfd_ecoff_swap_tir_in,
+  _bfd_ecoff_swap_rndx_in,
+  /* Functions to swap out external symbolic data.  */
+  ecoff_swap_hdr_out,
+  ecoff_swap_dnr_out,
+  ecoff_swap_pdr_out,
+  ecoff_swap_sym_out,
+  ecoff_swap_opt_out,
+  ecoff_swap_fdr_out,
+  ecoff_swap_rfd_out,
+  ecoff_swap_ext_out,
+  _bfd_ecoff_swap_tir_out,
+  _bfd_ecoff_swap_rndx_out,
+  /* Function to read in symbolic data.  */
+  _bfd_mips_elf_read_ecoff_info
+};
+
 /* Relocations in the 64 bit MIPS ELF ABI are more complex than in
    standard ELF.  This structure is used to redirect the relocation
    handling routines.  */
@@ -1548,7 +1817,18 @@ const struct elf_size_info mips_elf64_size_info =
 #define ELF_MACHINE_CODE		EM_MIPS
 #define ELF_MAXPAGESIZE			0x1000
 #define elf_backend_size_info		mips_elf64_size_info
+#define elf_backend_object_p		_bfd_mips_elf_object_p
 #define elf_backend_section_from_shdr	mips_elf64_section_from_shdr
+#define elf_backend_fake_sections	_bfd_mips_elf_fake_sections
+#define elf_backend_section_from_bfd_section \
+					_bfd_mips_elf_section_from_bfd_section
+#define elf_backend_section_processing	_bfd_mips_elf_section_processing
+#define elf_backend_symbol_processing	_bfd_mips_elf_symbol_processing
+#define elf_backend_final_write_processing \
+					_bfd_mips_elf_final_write_processing
+#define elf_backend_ecoff_debug_swap	&mips_elf64_ecoff_debug_swap
+
+#define bfd_elf64_get_reloc_upper_bound mips_elf64_get_reloc_upper_bound
 #define bfd_elf64_bfd_reloc_type_lookup	mips_elf64_reloc_type_lookup
 
 #include "elf64-target.h"

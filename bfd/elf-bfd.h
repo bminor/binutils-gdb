@@ -718,6 +718,10 @@ extern boolean _bfd_elf_new_section_hook PARAMS ((bfd *, asection *));
 extern void _bfd_elf_no_info_to_howto PARAMS ((bfd *, arelent *,
 					       Elf_Internal_Rela *));
 
+extern boolean bfd_section_from_shdr PARAMS ((bfd *, unsigned int shindex));
+
+extern int _bfd_elf_symbol_from_bfd_symbol PARAMS ((bfd *, asymbol **));
+
 asection *bfd_section_from_elf_index PARAMS ((bfd *, unsigned int));
 boolean _bfd_elf_create_dynamic_sections PARAMS ((bfd *,
 						  struct bfd_link_info *));
@@ -732,6 +736,8 @@ void _bfd_elf_assign_file_positions_for_relocs PARAMS ((bfd *));
 file_ptr _bfd_elf_assign_file_position_for_section PARAMS ((Elf_Internal_Shdr *,
 							    file_ptr,
 							    boolean));
+
+extern boolean _bfd_elf_validate_reloc PARAMS ((bfd *, arelent *));
 
 boolean _bfd_elf_create_dynamic_sections PARAMS ((bfd *,
 						  struct bfd_link_info *));
@@ -876,7 +882,18 @@ extern boolean bfd_elf64_link_create_dynamic_sections
 
 /* MIPS ELF specific routines.  */
 
+extern boolean _bfd_mips_elf_object_p PARAMS ((bfd *));
 extern boolean _bfd_mips_elf_section_from_shdr
   PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
+extern boolean _bfd_mips_elf_fake_sections
+  PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
+extern boolean _bfd_mips_elf_section_from_bfd_section
+  PARAMS ((bfd *, Elf_Internal_Shdr *, asection *, int *));
+extern boolean _bfd_mips_elf_section_processing
+  PARAMS ((bfd *, Elf_Internal_Shdr *));
+extern void _bfd_mips_elf_symbol_processing PARAMS ((bfd *, asymbol *));
+extern boolean _bfd_mips_elf_read_ecoff_info
+  PARAMS ((bfd *, asection *, struct ecoff_debug_info *));
+extern void _bfd_mips_elf_final_write_processing PARAMS ((bfd *, boolean));
 
 #endif /* _LIBELF_H_ */

@@ -1,5 +1,47 @@
 Thu May 30 12:38:49 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf64-mips.c: Extensive additions to provide better support for
+	writing files and for gas.
+	* elf32-mips.c (_bfd_mips_elf_object_p): New function, broken out
+	of mips_elf_object_p.
+	(mips_elf32_object_p): Rename from mips_elf_object_p; call
+	_bfd_mips_elf_object_p.
+	(_bfd_mips_elf_final_write_processing): Rename from
+	mips_elf_final_write_processing and make globally visible.
+	(_bfd_mips_elf_fake_sections): Rename from
+	mips_elf_fake_sections and make globally visible.
+	(_bfd_mips_elf_section_from_bfd_section): Rename from
+	mips_elf_section_from_bfd_section and make globally visible.
+	(_bfd_mips_elf_section_processing): New function, broken out of
+	mips_elf_section_processing.
+	(mips_elf32_section_processing): Rename from
+	mips_elf_section_processing; call
+	_bfd_mips_elf_section_processing.
+	(_bfd_mips_elf_symbol_processing): Rename from
+	mips_elf_symbol_processing and make globally visible.
+	(_bfd_mips_elf_read_ecoff_info): Rename from
+	mips_elf_read_ecoff_info and make globally visible.
+	(mips_elf32_ecoff_debug_swap): Rename from
+	mips_elf_ecoff_debug_swap.
+	* elf.c (_bfd_elf_symbol_from_bfd_symbol): Use asymbol rather than
+	struct symbol_cache_entry.
+	(_bfd_elf_validate_reloc): New function, moved in from
+	elfcode.h:validate_reloc.
+	* elfcode.h (validate_reloc): Remove; moved into elf.c and renamed
+	to _bfd_elf_validate_reloc.  Change all callers.
+	* elf-bfd.h (bfd_section_from_shdr): Declare.
+	(_bfd_elf_symbol_from_bfd_symbol): Declare.
+	(_bfd_elf_validate_reloc): Declare.
+	(_bfd_mips_elf_object_p): Declare.
+	(_bfd_mips_elf_fake_sections): Declare.
+	(_bfd_mips_elf_section_from_bfd_section): Declare.
+	(_bfd_mips_elf_section_processing): Declare.
+	(_bfd_mips_elf_symbol_processing): Declare.
+	(_bfd_mips_elf_read_ecoff_info): Declare.
+	(_bfd_mips_elf_final_write_processing): Declare.
+	* elfxx-target.h (bfd_elfNN_get_reloc_upper_bound): Don't define
+	if already defined.
+
 	* elf32-mips.c (mips_elf_object_p): Handle E_MIPS_ARCH_4.
 	(mips_elf_final_write_processing): Likewise.
 
