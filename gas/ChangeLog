@@ -1,3 +1,30 @@
+start-sanitize-v850
+Wed Aug 13 18:58:56 1997  Nick Clifton  <nickc@cygnus.com>
+
+start-sanitize-v850e
+	* config/.Sanitize (Do-first, Do-last): Add support for keep-v850e
+	command line option.
+end-sanitize-v850e
+
+start-sanitize-v850eq
+	* config/.Sanitize (Do-first, Do-last): Add support for keep-v850eq
+	command line option.
+end-sanitize-v850eq
+
+start-sanitize-v850eq
+	* config/tc-v850.c (md_assemble, md_show_usage, md_parse_option):
+	Add support for v850eq instructions.
+start-sanitize-v850eq
+	
+start-sanitize-v850e
+	* config/tc-v850.c (md_assemble, md_show_usage, md_parse_option):
+	Add support for v850e instructions.
+start-sanitize-v850e
+	
+	* config/tc-v850.c (md_assemble): Fix error recovery to reload
+	text of entire opcode. 
+end-sanitize-v850
+
 Tue Aug 12 10:27:34 1997  Richard Henderson  <rth@cygnus.com>
 
 	* doc/internals.texi: Document rs_leb128.
