@@ -1,7 +1,13 @@
+Wed Feb 15 14:23:28 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* configure.in, gdb.{base,c++,chill}/configure.in: changed so
+	  *-*-vxworks* matches vxworks and *-*-netware* matches NetWare.
+
 Sun Feb 12 08:11:58 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
-	* gdb.base/callfuncs.exp: Add tests for passing floats, chars, and
-	shorts where there are ANSI-style function definitions.
+	* gdb.base/{callfuncs.exp,callfuncs.c}: Add tests for passing
+	floats, chars, and shorts where there are ANSI-style function
+	definitions.
 
 	* gdb.base/langs.exp, gdb.base/langs*: New test.
 	* gdb.base/Makefile.in: Build it.
