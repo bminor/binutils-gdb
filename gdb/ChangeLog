@@ -1,3 +1,8 @@
+2003-01-06  Michal Ludvig  <mludvig@suse.cz>
+
+	* x86-64-linux-nat.c (i386_sse_regnum_p): Deleted. Not needed anymore 
+	since it is in i386-tdep.c.
+
 2003-01-06  J. Brobecker  <brobecker@gnat.com>
 
 	* alpha-tdep.c (alpha_gdbarch_init): Fix a small compilation
