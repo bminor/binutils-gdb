@@ -12973,8 +12973,8 @@ Execute the command file @var{filename}.
 @end table
 
 The lines in a command file are executed sequentially.  They are not
-printed as they are executed.  An error in any command terminates execution
-of the command file.
+printed as they are executed.  An error in any command terminates
+execution of the command file and control is returned to the console.
 
 Commands that would ask for confirmation if used interactively proceed
 without asking when used in a command file.  Many @value{GDBN} commands that

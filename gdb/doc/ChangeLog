@@ -1,3 +1,8 @@
+2002-07-09  Don Howard  <dhoward@redhat.com>
+
+	* gdb.texinfo (Command Files): Further describe the behavior of
+	sourced command files.
+
 2002-06-27  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (User Interface): ISO C rather than ISO-C.
