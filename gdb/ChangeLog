@@ -1,3 +1,9 @@
+2004-09-19  Daniel Jacobowitz  <dan@debian.org>
+
+	* symtab.c (output_source_filename): Mark first argument as const.
+	(sources_info): Use symtab_to_fullname and psymtab_to_fullname
+	for "info sources" output.
+
 2004-09-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/nm-fbsd.h, config/i386/nm-obsd.h: Don't include

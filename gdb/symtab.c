@@ -69,7 +69,7 @@ static void variables_info (char *, int);
 
 static void sources_info (char *, int);
 
-static void output_source_filename (char *, int *);
+static void output_source_filename (const char *, int *);
 
 static int find_line_common (struct linetable *, int, int *);
 
@@ -2622,7 +2622,7 @@ filename_seen (const char *file, int add, int *first)
    NAME is the name to print and *FIRST is nonzero if this is the first
    name printed.  Set *FIRST to zero.  */
 static void
-output_source_filename (char *name, int *first)
+output_source_filename (const char *name, int *first)
 {
   /* Since a single source file can result in several partial symbol
      tables, we need to avoid printing it more than once.  Note: if
@@ -2671,7 +2671,8 @@ sources_info (char *ignore, int from_tty)
   first = 1;
   ALL_SYMTABS (objfile, s)
   {
-    output_source_filename (s->filename, &first);
+    const char *fullname = symtab_to_fullname (s);
+    output_source_filename (fullname ? fullname : s->filename, &first);
   }
   printf_filtered ("\n\n");
 
@@ -2682,7 +2683,8 @@ sources_info (char *ignore, int from_tty)
   {
     if (!ps->readin)
       {
-	output_source_filename (ps->filename, &first);
+	const char *fullname = psymtab_to_fullname (ps);
+	output_source_filename (fullname ? fullname : ps->filename, &first);
       }
   }
   printf_filtered ("\n");
