@@ -1907,15 +1907,21 @@ mips_extract_return_value (valtype, regbuf, valbuf)
   
   regnum = 2;
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT
-       && (mips_fpu == MIPS_FPU_DOUBLE
-	   || (mips_fpu == MIPS_FPU_SINGLE && len <= MIPS_REGSIZE)))
+      && (mips_fpu == MIPS_FPU_DOUBLE
+	  || (mips_fpu == MIPS_FPU_SINGLE && len <= MIPS_REGSIZE)))
     regnum = FP0_REGNUM;
 
-  if (TARGET_BYTE_ORDER == BIG_ENDIAN
-      && TYPE_CODE (valtype) != TYPE_CODE_FLT
-      && len < REGISTER_RAW_SIZE (regnum))
-    offset = REGISTER_RAW_SIZE (regnum) - len;
-    
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    { /* "un-left-justify" the value from the register */
+      if (len < REGISTER_RAW_SIZE (regnum)     &&
+	  TYPE_CODE (valtype) != TYPE_CODE_FLT)
+	offset = REGISTER_RAW_SIZE (regnum) - len;
+      if (len > REGISTER_RAW_SIZE (regnum)     &&	/* odd-size structs */
+	  len < REGISTER_RAW_SIZE (regnum) * 2 &&
+	  (TYPE_CODE (valtype) == TYPE_CODE_STRUCT ||
+	   TYPE_CODE (valtype) == TYPE_CODE_UNION))
+	offset = 2 * REGISTER_RAW_SIZE (regnum) - len;
+    }
   memcpy (valbuf, regbuf + REGISTER_BYTE (regnum) + offset, len);
   REGISTER_CONVERT_TO_TYPE (regnum, valtype, valbuf);
 }
@@ -1928,18 +1934,31 @@ mips_store_return_value (valtype, valbuf)
     char *valbuf;
 {
   int regnum;
+  int offset = 0;
+  int len = TYPE_LENGTH (valtype);
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
   
   regnum = 2;
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT
-       && (mips_fpu == MIPS_FPU_DOUBLE
-	   || (mips_fpu == MIPS_FPU_SINGLE && TYPE_LENGTH (valtype) <= 4))) /* FIXME!! */
+      && (mips_fpu == MIPS_FPU_DOUBLE
+	  || (mips_fpu == MIPS_FPU_SINGLE && len <= MIPS_REGSIZE)))
     regnum = FP0_REGNUM;
 
-  memcpy(raw_buffer, valbuf, TYPE_LENGTH (valtype));
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    { /* "left-justify" the value in the register */
+      if (len < REGISTER_RAW_SIZE (regnum))
+	offset = REGISTER_RAW_SIZE (regnum) - len;
+      if (len > REGISTER_RAW_SIZE (regnum)     &&	/* odd-size structs */
+	  len < REGISTER_RAW_SIZE (regnum) * 2 &&
+	  (TYPE_CODE (valtype) == TYPE_CODE_STRUCT ||
+	   TYPE_CODE (valtype) == TYPE_CODE_UNION))
+	offset = 2 * REGISTER_RAW_SIZE (regnum) - len;
+    }
+  memcpy(raw_buffer + offset, valbuf, len);
   REGISTER_CONVERT_FROM_TYPE(regnum, valtype, raw_buffer);
-
-  write_register_bytes(REGISTER_BYTE (regnum), raw_buffer, TYPE_LENGTH (valtype));
+  write_register_bytes(REGISTER_BYTE (regnum), raw_buffer, 
+		       len > REGISTER_RAW_SIZE (regnum) ? 
+		       len : REGISTER_RAW_SIZE (regnum));
 }
 
 /* Exported procedure: Is PC in the signal trampoline code */
