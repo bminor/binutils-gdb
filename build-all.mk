@@ -73,7 +73,8 @@ all: all-native
 endif
 
 ifeq ($(canonhost),hppa1.1-hp-hpux)
-TARGETS	= m68k-aout m68k-coff m68k-vxworks i960-vxworks a29k-amd-udi
+#TARGETS	= m68k-aout m68k-coff m68k-vxworks i960-vxworks a29k-amd-udi
+TARGETS	= m68k-aout m68k-coff m68k-vxworks a29k-amd-udi
 CC = cc 
 all: all-native
 endif

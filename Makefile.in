@@ -78,11 +78,7 @@ MAKEINFO = `if [ -f $${rootme}/texinfo/C/makeinfo ] ; \
 CC_FOR_BUILD = $(CC)
 CXX_FOR_BUILD = $(CXX)
 
-SUBDIRS = libiberty mmalloc glob readline opcodes bfd h8300sim z8ksim \
-### start-sanitize-chill
-          chillrt \
-### end-sanitize-chill
-	  gdb binutils ld gas tgas gcc libg++ newlib deja-gnu
+SUBDIRS = libiberty mmalloc glob readline opcodes bfd h8300sim z8ksim gdb binutils ld gas tgas gcc libg++ newlib chillrt deja-gnu
 OTHERS = 
 
 ALL = all.normal
@@ -204,7 +200,7 @@ X11_FLAGS_TO_PASS = \
 	"X11_LIB_FLAGS=$(X11_LIB_FLAGS)"
 
 # Flags to pass down to makes which are built with the target
-# environment (e.g. libg++, xiberty, newlib).  -- keep these in alpha order please
+# environment (e.g. libg++, xiberty, newlib, chillrt).  -- keep these in alpha order please
 TARGET_FLAGS_TO_PASS = \
 	"AR=$(AR_FOR_TARGET)" \
 	"AR_FLAGS=$(AR_FLAGS)" \
@@ -259,22 +255,14 @@ all.normal: all-m4 all-autoconf all-libiberty all-mmalloc all-texinfo \
 	all-make all-rcs all-cvs all-diff all-grep \
 	all-patch all-emacs all-ispell all-etc \
 	all-tcl all-tk all-expect \
-	all-newlib \
-### start-sanitize-chill
-	all-chillrt \
-### end-sanitize-chill
-	all-gprof all-send_pr all-libm all-deja-gnu \
+	all-newlib all-chillrt all-gprof all-send_pr all-libm all-deja-gnu \
 	all-fileutils all-find all-gawk all-sed all-shellutils \
 	all-textutils all-time all-wdiff
 
 
 all.cross: all-libiberty all-mmalloc all-gas all-byacc all-flex all-ld \
-	all-opcodes all-z8ksim all-h8300sim all-bfd all-readline \
-	all-gdb all-binutils all-gcc all-newlib \
-### start-sanitize-chill
-	all-chillrt \
-### end-sanitize-chill
-	all-deja-gnu
+	 all-opcodes all-z8ksim all-h8300sim all-bfd all-readline all-gdb all-binutils all-gcc \
+	all-newlib all-chillrt all-deja-gnu
 
 .PHONY: clean distclean mostlyclean realclean do_clean
 
@@ -333,9 +321,7 @@ install-no-fixedincludes: install-dirs gcc-no-fixedincludes \
 	install-make \
 	install-mmalloc \
 	install-newlib \
-### start-sanitize-chill
 	install-chillrt \
-### end-sanitize-chill
 	install-patch \
 	install-rcs \
 	install-readline \
@@ -362,11 +348,7 @@ install.cross: install-dirs install-libiberty install-mmalloc \
         install-binutils install-opcodes install-byacc install-flex \
         install-ld install-gas install-readline \
         install-glob install-gdb install-mmalloc \
-        install-newlib \
-### start-sanitize-chill
-	install-chillrt \
-### end-sanitize-chill
-	install-gcc install-etc install-deja-gnu
+        install-newlib install-chillrt install-gcc install-etc install-deja-gnu
 
 ### deja-gnu
 all-deja-gnu: force
@@ -1257,28 +1239,13 @@ subdir_do:
 	@for i in $(DODIRS); do \
 	  if [ -f ./$$i/localenv ] || [ -f ./$$i/Makefile ] ; then \
 	    case $$i in \
-	    libg++ | xiberty | newlib) \
+	    libg++ | xiberty | newlib | chillrt) \
 	      if (rootme=`pwd` ; export rootme ; \
 		  srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
 		  cd ./$$i ; \
 		  $(MAKE) $(TARGET_FLAGS_TO_PASS) $(DO)) ; then true ; \
 	      else exit 1 ; fi \
 	      ;; \
-### start-sanitize-chill
-### 
-### WARNING: THIS IS VERY UGLY AND I DID NOT DO THIS WILLINGLY
-###
-### if you change the above code for libg++ et al, also change the
-### code down here
-###
-	    chillrt) \
-	      if (rootme=`pwd` ; export rootme ; \
-		  srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
-		  cd ./$$i ; \
-		  $(MAKE) $(TARGET_FLAGS_TO_PASS) $(DO)) ; then true ; \
-	      else exit 1 ; fi \
-	      ;; \
-### end-sanitize-chill
 	    *) \
 	      if (rootme=`pwd` ; export rootme ; \
 		  cd ./$$i ; \
