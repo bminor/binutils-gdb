@@ -1,4 +1,4 @@
-2003-10-15  Andrew Cagney  <cagney@redhat.com>
+2003-10-17  Andrew Cagney  <cagney@redhat.com>
 
 	* target.c (target_stack): Change to a static target_ops.
 	(update_current_target): Walk the "struct target_ops" stack.
