@@ -1,3 +1,8 @@
+Tue Jan 16 16:15:49 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* srconv.c (wr_hd): Space size within segment was being
+	stored in segment identifier field.
+
 Tue Jan 16 12:07:25 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-config.in (BUILD_NLMCONV, BUILD_SRCONV, SYSINFO_PROG,

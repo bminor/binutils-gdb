@@ -25,7 +25,6 @@
    All debugging information is preserved */
 
 #include <bfd.h>
-#include "sysdep.h"
 #include "bucomm.h"
 #include "sysroff.h"
 #include "coffgrok.h"
@@ -172,8 +171,13 @@ writeINT (n, ptr, idx, size, file)
   int byte = *idx / 8;
 
   if (size == -2)
-    size = 4;
-  if (size == -1)
+    {
+      if (sh)	
+	size = 4;
+      else if (h8300)
+	size = 2;
+    }
+  else if (size == -1)
     size = 0;
 
   if (byte > 240)
@@ -346,13 +350,9 @@ wr_un (ptr, sfile, first, nsecs)
 	}
     }
   if (sh)
-    {
-      un.tool = "C_SH";
-    }
-  if (h8300)
-    {
-      un.tool = "C_H8/300H";
-    }
+    un.tool = "C_SH";
+  else if (h8300)
+    un.tool = "C_H8/300H";
   un.tcd = DATE;
   un.linker = "L_GX00";
   un.lcd = DATE;
@@ -385,9 +385,9 @@ wr_hd (p)
     {
     case bfd_arch_h8300:
       hd.au = 8;
-      hd.si = 32;
+      hd.si = 0;
       hd.afl = 2;
-      hd.spcsz = 0;
+      hd.spcsz = 32;
       hd.segsz = 0;
       hd.segsh = 0;
       hd.cpu = "H8300H";
@@ -395,9 +395,9 @@ wr_hd (p)
       break;
     case bfd_arch_sh:
       hd.au = 8;
-      hd.si = 32;
+      hd.si = 0;
       hd.afl = 4;
-      hd.spcsz = 0;
+      hd.spcsz = 32;
       hd.segsz = 0;
       hd.segsh = 0;
       hd.cpu = "SH";
@@ -1119,7 +1119,7 @@ walk_tree_symbol (sfile, section, symbol, nest)
     {
       if (sh)
 	dsy.reg = rname_sh[symbol->where->offset];
-      if (h8300)
+      else if (h8300)
 	dsy.reg = rname_h8300[symbol->where->offset];
     }
 
