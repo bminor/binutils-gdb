@@ -1,3 +1,8 @@
+2001-11-12  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* frags.c (frag_grow): Use frag_make_room() to grow the
+	obstack.
+
 2001-11-14  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-sparc.c (md_apply_fix3): Do not remove the symbol's
