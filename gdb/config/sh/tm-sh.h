@@ -149,6 +149,7 @@ extern CORE_ADDR sh_skip_prologue ();
 #define MACL_REGNUM 	21
 #define SR_REGNUM 	22
 #define FPUL_REGNUM	23
+#define FPSCR_REGNUM 24
 #define FP0_REGNUM	25
 #define FP15_REGNUM	40
 #define SSR_REGNUM	41

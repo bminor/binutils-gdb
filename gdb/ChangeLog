@@ -1,3 +1,9 @@
+Fri Jun  6 14:43:23 1997  Keith Seitz  <keiths@pizza.cygnus.com>
+
+	* config/sh/tm-sh.h: add define for FPSCR_REGNUM
+	* sh-tdep.c (sh_show_regs): print out all registers for
+	the current processor
+	
 Fri Jun  6 13:01:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-sim.c (gdbsim_kill): Remove call to depreciated function

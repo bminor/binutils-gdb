@@ -638,6 +638,13 @@ sh_show_regs (args, from_tty)
      char *args;
      int from_tty;
 {
+  int cpu = 0;
+
+  if (strcmp (sh_processor_type, "sh3") == 0)
+    cpu = 1;
+  else if (strcmp (sh_processor_type, "sh3e") == 0)
+    cpu = 2;
+
   printf_filtered ("PC=%08x SR=%08x PR=%08x MACH=%08x MACHL=%08x\n",
 		   read_register (PC_REGNUM),
 		   read_register (SR_REGNUM),
@@ -645,7 +652,23 @@ sh_show_regs (args, from_tty)
 		   read_register (MACH_REGNUM),
 		   read_register (MACL_REGNUM));
 
-  printf_filtered ("R0-R7  %08x %08x %08x %08x %08x %08x %08x %08x\n",
+  printf_filtered ("GBR=%08x VBR=%08x",
+                   read_register (GBR_REGNUM),
+                   read_register (VBR_REGNUM));
+  if (cpu == 1 || cpu == 2)
+    {
+      printf_filtered (" SSR=%08x SPC=%08x",
+                       read_register (SSR_REGNUM),
+                       read_register (SPC_REGNUM));
+      if (cpu ==2)
+        {
+          printf_filtered (" FPUL=%08x FPSCR=%08x",
+                           read_register (FPUL_REGNUM),
+                           read_register (FPSCR_REGNUM));
+        }
+    }
+
+  printf_filtered ("\nR0-R7  %08x %08x %08x %08x %08x %08x %08x %08x\n",
 		   read_register (0),
 		   read_register (1),
 		   read_register (2),
@@ -663,6 +686,27 @@ sh_show_regs (args, from_tty)
 		   read_register (13),
 		   read_register (14),
 		   read_register (15));
+  if (cpu == 2)
+    {
+      printf_filtered ("FP0-FP7  %08x %08x %08x %08x %08x %08x %08x %08x\n",
+                       read_register (FP0_REGNUM + 0),
+                       read_register (FP0_REGNUM + 1),
+                       read_register (FP0_REGNUM + 2),
+                       read_register (FP0_REGNUM + 3),
+                       read_register (FP0_REGNUM + 4),
+                       read_register (FP0_REGNUM + 5),
+                       read_register (FP0_REGNUM + 6),
+                       read_register (FP0_REGNUM + 7));
+      printf_filtered ("FP8-FP15 %08x %08x %08x %08x %08x %08x %08x %08x\n",
+                       read_register (FP0_REGNUM + 8),
+                       read_register (FP0_REGNUM + 9),
+                       read_register (FP0_REGNUM + 10),
+                       read_register (FP0_REGNUM + 11),
+                       read_register (FP0_REGNUM + 12),
+                       read_register (FP0_REGNUM + 13),
+                       read_register (FP0_REGNUM + 14),
+                       read_register (FP0_REGNUM + 15));
+    }
 }
 
 /* Function: extract_return_value
