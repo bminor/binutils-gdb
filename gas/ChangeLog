@@ -3,6 +3,9 @@ Tue Feb 24 11:01:25 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-dvp.h (tc_frob_label): Define.
 	* config/tc-dvp.c (dvp_frob_label): New function.
+	(create_colon_label): New argument `sto'.  All callers updated.
+	(record_mach): New argument `force_next_p'.  All callers updated.
+	(cpu_sto): New function.
 
 Mon Feb 23 15:55:12 1998  Doug Evans  <devans@canuck.cygnus.com>
 

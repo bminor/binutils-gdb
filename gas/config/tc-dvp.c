@@ -45,7 +45,7 @@
 
 static long parse_float PARAMS ((char **, const char **));
 static symbolS * create_label PARAMS ((const char *, const char *));
-static symbolS * create_colon_label PARAMS ((const char *, const char *));
+static symbolS * create_colon_label PARAMS ((int, const char *, const char *));
 static char * unique_name PARAMS ((const char *));
 static long eval_expr PARAMS ((int, int, const char *, ...));
 static long parse_dma_addr_autocount ();
@@ -101,13 +101,15 @@ static void push_asm_state PARAMS ((asm_state));
 static void pop_asm_state PARAMS ((int));
 static void set_asm_state PARAMS ((asm_state));
 
-/* Current mach (machine variant) type state.
+/* Current cpu (machine variant) type state.
    We copy the mips16 way of recording what the current machine type is in
    the code.  A label is created whenever necessary and has an "other" value
    the denotes the machine type.  */
-static dvp_cpu cur_mach;
+static dvp_cpu cur_cpu;
 /* Record the current mach type.  */
-static void record_mach PARAMS ((dvp_cpu));
+static void record_mach PARAMS ((dvp_cpu, int));
+/* Given a dvp_cpu value, return the STO_DVP value to use.  */
+static int cpu_sto PARAMS ((dvp_cpu, const char **));
 
 /* Nonzero if inside .DmaData.  */
 static int dma_data_state = 0;
@@ -224,7 +226,7 @@ md_begin ()
 
   /* Set the current mach to an illegal value to force a label for the
      first insn.  */
-  cur_mach = -1;
+  cur_cpu = DVP_UNKNOWN;
 
   /* Initialize the parsing state.  */
   cur_state_index = 0;
@@ -362,7 +364,7 @@ assemble_dma (str)
   if (!output_dma)
     return;
 
-  record_mach (DVP_DMA);
+  record_mach (DVP_DMA, 0);
 
   len = 4;
   f = frag_more (len * 4);
@@ -434,9 +436,15 @@ assemble_vif (str)
   if (output_vif)
     {
       /* Record the mach before doing the alignment so that we properly
-	 disassemble any inserted vifnop's.  */
+	 disassemble any inserted vifnop's.  For variable length insns
+	 force the recording of the mach type for the next insn.  A label may
+	 be embedded in it to compute the length and this will cause the
+	 disassembler to wrongly disassemble the next insn.  */
 
-      record_mach (DVP_VIF);
+      if (opcode->flags & VIF_OPCODE_LENVAR)
+	record_mach (DVP_VIF, 1);
+      else
+	record_mach (DVP_VIF, 0);
 
       if (opcode->flags & VIF_OPCODE_MPG)
 	{
@@ -558,7 +566,7 @@ assemble_gif (str)
   frag_align (4, 0, 0);
   record_alignment (now_seg, 4);
 
-  record_mach (DVP_GIF);
+  record_mach (DVP_GIF, 1);
 
   gif_insn_frag = f = frag_more (16);
   for (i = 0; i < 4; ++i)
@@ -566,7 +574,7 @@ assemble_gif (str)
 
   /* Insert a label so we can compute the number of quadwords when the
      .endgif is seen.  */
-  gif_data_name = S_GET_NAME (create_colon_label ("", unique_name (NULL)));
+  gif_data_name = S_GET_NAME (create_colon_label (0, "", unique_name (NULL)));
 
   /* Record the type of the gif tag so we know how to compute nloop
      in s_endgif.  */
@@ -602,7 +610,7 @@ assemble_vu (str)
   frag_align (3, 0, 0);
   record_alignment (now_seg, 3);
 
-  record_mach (DVP_VUUP);
+  record_mach (DVP_VUUP, 0);
 
   /* The lower instruction has the lower address.
      Handle this by grabbing 8 bytes now, and then filling each word
@@ -968,31 +976,49 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
   return 0;
 }
 
-/* Record the current mach type in the object file.  */
+/* Given a dvp cpu type, return it's STO_DVP value.
+   The section name prefix to use is stored in *PNAME.  */
+
+static int
+cpu_sto (cpu, pname)
+     dvp_cpu cpu;
+     const char **pname;
+{
+  switch (cpu)
+    {
+    case DVP_DMA : *pname = ".dma."; return STO_DVP_DMA;
+    case DVP_VIF : *pname = ".vif."; return STO_DVP_VIF;
+    case DVP_GIF : *pname = ".gif."; return STO_DVP_GIF;
+    case DVP_VUUP : *pname = ".vu."; return STO_DVP_VU;
+    }
+  abort ();
+}
+
+/* Record the current mach type in the object file.
+   If FORCE_NEXT_P is non-zero, force a label to be emitted the next time
+   we're called.  This is useful for variable length instructions that can
+   have labels embedded within them.  */
 
 static void
-record_mach (mach)
-     dvp_cpu mach;
+record_mach (cpu, force_next_p)
+     dvp_cpu cpu;
+     int force_next_p;
 {
   symbolS *label;
-  char *name;
-  int other;
+  const char *name;
+  int sto;
 
-  if (mach == cur_mach)
+  if (cpu == cur_cpu)
     return;
 
-  switch (mach)
-    {
-    case DVP_DMA : name = ".dma."; other = STO_DVP_DMA; break;
-    case DVP_VIF : name = ".vif."; other = STO_DVP_VIF; break;
-    case DVP_GIF : name = ".gif."; other = STO_DVP_GIF; break;
-    case DVP_VUUP : name = ".vu."; other = STO_DVP_VU; break;
-    default : abort ();
-    }
+  sto = cpu_sto (cpu, &name);
 
-  label = create_colon_label ("", unique_name (name));
-  S_SET_OTHER (label, other);
-  cur_mach = mach;
+  label = create_colon_label (sto, "", unique_name (name));
+
+  if (force_next_p)
+    cur_cpu = DVP_UNKNOWN;
+  else
+    cur_cpu = cpu;
 }
 
 /* Push/pop the current parsing state.  */
@@ -1078,6 +1104,9 @@ void
 dvp_frob_label (sym)
      symbolS *sym;
 {
+  /* All labels in vu code must be specially marked for the disassembler.
+     The disassembler ignores all previous information at each new label
+     (that has a higher address than the last one).  */
   if (CUR_ASM_STATE == ASM_MPG
       || CUR_ASM_STATE == ASM_VU)
     S_SET_OTHER (sym, STO_DVP_VU);
@@ -1487,10 +1516,14 @@ create_label (prefix, name)
 }
 
 /* Create a label named by concatenating PREFIX to NAME,
-   and define it as `.'.  */
+   and define it as `.'.
+   STO, if non-zero, is the st_other value to assign to this label.
+   If STO is zero `cur_cpu' is set to DVP_UNKNOWN to force record_mach to
+   emit a cpu label.  Otherwise the disassembler gets confused.  */
 
 static symbolS *
-create_colon_label (prefix, name)
+create_colon_label (sto, prefix, name)
+     int sto;
      const char *prefix, *name;
 {
   int namelen = strlen (name);
@@ -1502,6 +1535,10 @@ create_colon_label (prefix, name)
   strcpy (fullname, prefix);
   strcat (fullname, name);
   result = colon (fullname);
+  if (sto)
+    S_SET_OTHER (result, sto);
+  else
+    cur_cpu = DVP_UNKNOWN;
   free (fullname);
   return result;
 }
@@ -1573,7 +1610,7 @@ inline_dma_data (autocount_p, insn_buf)
 
   if (autocount_p)
     {
-      dma_data_name = S_GET_NAME (create_colon_label ("", unique_name (NULL)));
+      dma_data_name = S_GET_NAME (create_colon_label (0, "", unique_name (NULL)));
       setup_dma_autocount (dma_data_name, insn_buf, 1);
     }
   else
@@ -1920,7 +1957,7 @@ s_enddmadata (ignore)
       /* Fill the data out to a multiple of 16 bytes.  */
       /* FIXME: Are the fill contents right?  */
       frag_align (4, 0, 0);
-      create_colon_label (END_LABEL_PREFIX, dma_data_name);
+      create_colon_label (0, END_LABEL_PREFIX, dma_data_name);
     }
 }
 
