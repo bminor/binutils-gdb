@@ -1,3 +1,9 @@
+2001-02-08  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* acinclude.m4 (AM_PROG_LEX): Override installed definition.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
 2001-02-07  Todd Vierling  <tv@wasabisystems.com>
 
 	* bucomm.c (bfd_target_vector): Change extern array to pointer.
