@@ -6001,21 +6001,21 @@ pa_build_unwind_subspace (call_info)
   else
     reloc = R_PARISC_SEGREL32;
 
+  save_seg = now_seg;
+  save_subseg = now_subseg;
   /* Get into the right seg/subseg.  This may involve creating
      the seg the first time through.  Make sure to have the
      old seg/subseg so that we can reset things when we are done.  */
   seg = bfd_get_section_by_name (stdoutput, UNWIND_SECTION_NAME);
   if (seg == ASEC_NULL)
     {
-      seg = bfd_make_section_old_way (stdoutput, UNWIND_SECTION_NAME);
+      seg = subseg_new (UNWIND_SECTION_NAME, 0);
       bfd_set_section_flags (stdoutput, seg,
 			     SEC_READONLY | SEC_HAS_CONTENTS
 			     | SEC_LOAD | SEC_RELOC | SEC_ALLOC | SEC_DATA);
       bfd_set_section_alignment (stdoutput, seg, 2);
     }
 
-  save_seg = now_seg;
-  save_subseg = now_subseg;
   subseg_set (seg, 0);
 
 
