@@ -1,3 +1,10 @@
+Mon Jan  3 11:09:28 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* aout-target.h, netbsd386.c: Replace NO_SWAP_MAGIC with SWAP_MAGIC,
+	and do the swapping here rather than calling ntohl from the N_*
+	macros.  This cleans up assumptions about the size of a host long,
+	the existence to ntohl, etc.
+
 Sat Jan  1 13:50:05 1994  Rob Savoye  (rob@darkstar.cygnus.com)
 
 	* config.bfd: Add support for VSTa micro-kernel. It currently uses

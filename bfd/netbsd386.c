@@ -38,11 +38,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define TARGETNAME "a.out-netbsd-386"
 
 #define N_MAGIC(ex) \
-    ( (((ex).a_info)&0xffff0000) ? (ntohl(((ex).a_info))&0xffff) : ((ex).a_info))
+    ( (((ex).a_info)&0xffff0000) ? ((((ex).a_info))&0xffff) : ((ex).a_info))
 #define N_MACHTYPE(ex) \
-    ( (((ex).a_info)&0xffff0000) ? ((ntohl(((ex).a_info))>>16)&0x03ff) : 0 )
+    ( (((ex).a_info)&0xffff0000) ? (((((ex).a_info))>>16)&0x03ff) : 0 )
 # define N_FLAGS(ex) \
-    ( (((ex).a_info)&0xffff0000) ? ((ntohl(((ex).a_info))>>26)&0x3f) : 0 )
+    ( (((ex).a_info)&0xffff0000) ? ((((ex).a_info)>>26)&0x3f) : 0 )
 #define N_SET_INFO(ex, mag,mid,flag) \
     ( (ex).a_info = htonl( (((flag)&0x3f)<<26) | (((mid)&0x03ff)<<16) | \
     (((mag)&0xffff)) ) )
@@ -60,7 +60,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libaout.h"
 
 #define N_GETMAGIC2(ex) \
-    ( (((ex).a_info)&0xffff0000) ? (ntohl(((ex).a_info))&0xffff) : \
+    ( (((ex).a_info)&0xffff0000) ? ((((ex).a_info))&0xffff) : \
     (((ex).a_info) | 0x10000) )
 
 #define N_TXTADDR(ex)	(N_GETMAGIC2(ex) == (ZMAGIC|0x10000) ? 0 : 4096)
@@ -78,7 +78,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* #define N_BADMAG(x)	n_badmag(N_MAGIC(x)) */
 
-#define NO_SWAP_MAGIC	/* magic number already in correct endian format */
+/* On NetBSD, the magic number is always in ntohl's "network" (big-endian)
+   format.  */
+#define SWAP_MAGIC(ext) bfd_getb32 (ext)
 
 #include "aout-target.h"
 

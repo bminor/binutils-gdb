@@ -93,11 +93,11 @@ DEFUN(MY(object_p),(abfd),
     return 0;
   }
 
-#ifdef NO_SWAP_MAGIC
-  memcpy (&exec.a_info, exec_bytes.e_info, sizeof(exec.a_info));
+#ifdef SWAP_MAGIC
+  exec.a_info = SWAP_MAGIC (exec_bytes.e_info);
 #else
   exec.a_info = bfd_h_get_32 (abfd, exec_bytes.e_info);
-#endif /* NO_SWAP_MAGIC */
+#endif /* SWAP_MAGIC */
 
   if (N_BADMAG (exec)) return 0;
 #ifdef MACHTYPE_OK
