@@ -615,15 +615,16 @@ string are represented as @samp{\"}).
 @item S @var{type-information} , @var{elements} , @var{bits} , @var{pattern}
 Set constant.  @var{type-information} is the type of the constant, as it
 would appear after a symbol descriptor (@pxref{Stabs Format}).
-@var{elements} is the number of elements in the set (is this just the
-number of bits set in @var{pattern}?  Or redundant with the type?  I
-don't get it), @var{bits} is the number of bits in the constant (meaning
-it specifies the length of @var{pattern}, I think), and @var{pattern} is
-a hexadecimal representation of the set.  AIX documentation refers to a
-limit of 32 bytes, but I see no reason why this limit should exist.
-This form could probably be used for arbitrary constants, not just sets;
-the only catch is that @var{pattern} should be understood to be target,
-not host, byte order and format.
+@var{elements} is the number of elements in the set (Does this means
+how many bits of @var{pattern} are actually used, which would be
+redundant with the type, or perhaps the number of bits set in
+@var{pattern}?  I don't get it), @var{bits} is the number of bits in the
+constant (meaning it specifies the length of @var{pattern}, I think),
+and @var{pattern} is a hexadecimal representation of the set.  AIX
+documentation refers to a limit of 32 bytes, but I see no reason why
+this limit should exist.  This form could probably be used for arbitrary
+constants, not just sets; the only catch is that @var{pattern} should be
+understood to be target, not host, byte order and format.
 @end table
 
 The boolean, character, string, and set constants are not supported by
@@ -1902,7 +1903,7 @@ pointer offset for local variables is negative.
 130 .stabs "an_u:23",128,0,0,-20
 @end example
 
-@node Function types
+@node Function Types
 @section Function types
 
 There are various types for function variables.  These types are not
@@ -3252,7 +3253,10 @@ Enumeration type, @xref{Enumerations}.
 N-dimensional subarray, @xref{Arrays}.
 
 @item f
-Function type, @xref{Function types}.
+Function type, @xref{Function Types}.
+
+@item F
+Pascal function parameter, @xref{Function Types}
 
 @item g
 Builtin floating point type, @xref{Builtin Type Descriptors}.
@@ -3269,17 +3273,20 @@ Const-qualified type, @xref{Miscellaneous Types}.
 @item K
 COBOL File Descriptor.  See AIX documentation for details.
 
+@item M
+Multiple instance type, @xref{Miscellaneous Types}.
+
 @item n
 String type, @xref{Strings}.
 
 @item N
 Stringptr, @xref{Strings}.
 
-@item M
-Multiple instance type, @xref{Miscellaneous Types}.
-
 @item o
 Opaque type, @xref{Typedefs}.
+
+@item p
+Procedure, @xref{Function Types}.
 
 @item P
 Packed array, @xref{Arrays}.
@@ -3288,7 +3295,11 @@ Packed array, @xref{Arrays}.
 Range type, @xref{Subranges}.
 
 @item R
-Builtin floating type, @xref{Builtin Type Descriptors}.
+Builtin floating type, @xref{Builtin Type Descriptors} (Sun).  Pascal
+subroutine parameter, @xref{Function Types} (AIX).  Detecting this
+conflict is possible with careful parsing (hint: a Pascal subroutine
+parameter type will always contain a comma, and a builtin type
+descriptor never will).
 
 @item s
 Structure type, @xref{Structures}.
