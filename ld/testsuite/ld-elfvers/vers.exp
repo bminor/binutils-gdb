@@ -67,6 +67,29 @@ set SOBJDUMP_FLAGS --syms
 set shared "--shared --no-undefined-version"
 set script --version-script
 
+if [istarget mips*-*-*] {
+    set picflag ""
+} else {
+    # Unfortunately, the gcc argument is -fpic and the cc argument is
+    # -KPIC.  We have to try both.
+    set picflag "-fpic"
+    send_log "$CC $picflag\n"
+    verbose "$CC $picflag"
+    catch "exec $CC $picflag" exec_output
+    send_log "$exec_output\n"
+    verbose "--" "$exec_output"
+    if { [string match "*illegal option*" $exec_output] \
+	 || [string match "*option ignored*" $exec_output] \
+	 || [string match "*unrecognized option*" $exec_output] \
+	 || [string match "*passed to ld*" $exec_output] } {
+	if [istarget *-*-sunos4*] {
+	    set picflag "-pic"
+	} else {
+	    set picflag "-KPIC"
+	}
+    }
+}
+
 proc test_ar { test lib object expect } {
     global ar
     global nm
@@ -470,7 +493,7 @@ proc objdump_versionstuff { objdump object expectfile } {
     }
 }
 
-proc build_vers_lib { test source libname other mapfile verexp versymexp symexp } {
+proc build_vers_lib { pic test source libname other mapfile verexp versymexp symexp } {
     global ld
     global srcdir
     global subdir
@@ -484,7 +507,7 @@ proc build_vers_lib { test source libname other mapfile verexp versymexp symexp 
     global shared
     global script
 
-    if ![ld_compile "$CC -S $CFLAGS" $srcdir/$subdir/$source $tmpdir/$libname.s]     {
+    if ![ld_compile "$CC -S $pic $CFLAGS" $srcdir/$subdir/$source $tmpdir/$libname.s]     {
 	unresolved "$test"
 	return
     }
@@ -536,6 +559,15 @@ proc build_vers_lib { test source libname other mapfile verexp versymexp symexp 
 
     pass $test
     
+}
+
+proc build_vers_lib_no_pic { test source libname other mapfile verexp versymexp symexp } {
+  build_vers_lib "" $test $source $libname $other $mapfile $verexp $versymexp $symexp 
+}
+
+proc build_vers_lib_pic { test source libname other mapfile verexp versymexp symexp } {
+  global picflag
+  build_vers_lib $picflag $test $source $libname $other $mapfile $verexp $versymexp $symexp 
 }
 
 proc test_ldfail { test flag source execname other mapfile whyfail } {
@@ -724,7 +756,7 @@ proc build_exec { test source execname flags solibname verexp versymexp symexp }
 #
 # Basic test - build a library with versioned symbols.
 #
-build_vers_lib "vers1" vers1.c vers1 "" vers1.map vers1.ver vers1.dsym vers1.sym
+build_vers_lib_no_pic "vers1" vers1.c vers1 "" vers1.map vers1.ver vers1.dsym vers1.sym
 
 
 #
@@ -735,7 +767,7 @@ if [istarget x86_64-*-linux*] {
     # x86_64 doesn't like non-pic shared libraries
     xfail "vers2"
 } else {
-    build_vers_lib "vers2" vers2.c vers2 vers1.so vers2.map vers2.ver vers2.dsym ""
+    build_vers_lib_no_pic "vers2" vers2.c vers2 vers1.so vers2.map vers2.ver vers2.dsym ""
 }
 
 #
@@ -774,7 +806,7 @@ build_exec "vers6" vers6.c vers6 "" vers1.so vers6.ver vers6.dsym vers6.sym
 # Another test to verify that something made local via 'local' is truly not
 # accessible.
 #
-build_vers_lib "vers7a" vers7a.c vers7a "" vers7.map vers7a.ver vers7a.dsym vers7a.sym
+build_vers_lib_no_pic "vers7a" vers7a.c vers7a "" vers7.map vers7a.ver vers7a.dsym vers7a.sym
 
 test_ldfail "vers7" "" vers7.c vers7 vers7a.so "" "undefined reference to hide_a"
 
@@ -784,7 +816,7 @@ test_ldfail "vers7" "" vers7.c vers7 vers7a.so "" "undefined reference to hide_a
 # command line as if it were a normal .o file.
 #
 catch "exec cp $srcdir/$subdir/vers8.map $tmpdir/" ignore_output
-build_vers_lib "vers8" vers1.c vers8 vers8.map "" vers8.ver vers1.dsym vers1.sym
+build_vers_lib_no_pic "vers8" vers1.c vers8 vers8.map "" vers8.ver vers1.dsym vers1.sym
 
 #
 # This test tries to make sure that version references to versioned symbols
@@ -829,30 +861,30 @@ build_exec "vers15" vers15.c vers15 "" vers1.so vers15.ver vers15.dsym vers15.sy
 # Test that when we override a versioned symbol from the library this
 # symbol appears in the dynamic symbol table of the executable.
 #
-build_vers_lib "vers16a" vers16a.c vers16a "" vers16.map vers16a.ver vers16a.dsym ""
+build_vers_lib_no_pic "vers16a" vers16a.c vers16a "" vers16.map vers16a.ver vers16a.dsym ""
 build_exec "vers16" vers16.c vers16 "" vers16a.so "" vers16.dsym ""
 
 # Test a weak versioned symbol.
-build_vers_lib "vers17" vers17.c vers17 "" vers17.map vers17.ver vers17.dsym ""
-build_vers_lib "vers18" vers18.c vers18 vers17.so vers18.map vers18.ver vers18.dsym vers18.sym
+build_vers_lib_no_pic "vers17" vers17.c vers17 "" vers17.map vers17.ver vers17.dsym ""
+build_vers_lib_no_pic "vers18" vers18.c vers18 vers17.so vers18.map vers18.ver vers18.dsym vers18.sym
 build_exec "vers19" vers19.c vers19 "-rpath ." vers18.so vers19.ver vers19.dsym ""
 
-build_vers_lib "vers20a" vers20.c vers20a "" vers20.map vers20a.ver vers20.dsym ""
+build_vers_lib_no_pic "vers20a" vers20.c vers20a "" vers20.map vers20a.ver vers20.dsym ""
 exec cp $tmpdir/vers20a.so $tmpdir/vers20b.so
-build_vers_lib "vers20" vers20.c vers20 "vers20a.so vers20b.so" vers20.map vers20.ver vers20.dsym ""
+build_vers_lib_no_pic "vers20" vers20.c vers20 "vers20a.so vers20b.so" vers20.map vers20.ver vers20.dsym ""
 
 # Test .symver override.
-build_vers_lib "vers21" vers21.c vers21 "" vers21.map vers21.ver vers21.dsym vers21.sym
+build_vers_lib_no_pic "vers21" vers21.c vers21 "" vers21.map vers21.ver vers21.dsym vers21.sym
 
 # Test moving default definition from one DSO to another.
-build_vers_lib "vers22a" vers22a.c vers22a "" vers22.map vers22a.ver vers22a.dsym vers22a.sym
-build_vers_lib "vers22b" vers22b.c vers22b "" vers22.map vers22b.ver vers22b.dsym ""
-build_vers_lib "vers22" vers22.c vers22 "vers22a.so vers22b.so" "" vers22.ver vers22.dsym ""
+build_vers_lib_no_pic "vers22a" vers22a.c vers22a "" vers22.map vers22a.ver vers22a.dsym vers22a.sym
+build_vers_lib_no_pic "vers22b" vers22b.c vers22b "" vers22.map vers22b.ver vers22b.dsym ""
+build_vers_lib_no_pic "vers22" vers22.c vers22 "vers22a.so vers22b.so" "" vers22.ver vers22.dsym ""
 
 # Test versioned definitions in different files.
-build_vers_lib "vers23a" vers23a.c vers23a "" vers23a.map vers23a.ver vers23a.dsym vers23a.sym
-build_vers_lib "vers23b" vers23b.c vers23b "" vers23b.map vers23b.ver vers23b.dsym ""
-build_vers_lib "vers23c" vers23b.c vers23c "vers23a.so" vers23b.map vers23c.ver vers23b.dsym ""
+build_vers_lib_no_pic "vers23a" vers23a.c vers23a "" vers23a.map vers23a.ver vers23a.dsym vers23a.sym
+build_vers_lib_no_pic "vers23b" vers23b.c vers23b "" vers23b.map vers23b.ver vers23b.dsym ""
+build_vers_lib_no_pic "vers23c" vers23b.c vers23c "vers23a.so" vers23b.map vers23c.ver vers23b.dsym ""
 build_exec "vers23d" vers23.c vers23d "tmpdir/vers23a.so tmpdir/vers23c.so" "" vers23.ver vers23d.dsym ""
 build_exec "vers23" vers23.c vers23 "tmpdir/vers23a.so tmpdir/vers23b.o tmpdir/vers23b.so" "" vers23.ver vers23.dsym ""
 
@@ -875,6 +907,10 @@ run_ld_link_tests [list "\"vers24c\"
 			 \"libvers24c.so\" \"-fpic\""]
 
 # Test versioned definition vs. normal definition in different files.
-build_vers_lib "vers25a" vers25a.c vers25a "" vers25a.map vers25a.ver vers25a.dsym ""
-build_vers_lib "vers25b1" vers25b.c vers25b1 "vers25a.o vers25a.so" "" vers25b.ver vers25b.dsym ""
-build_vers_lib "vers25b2" vers25b.c vers25b2 "vers25a.so vers25a.o" "" vers25b.ver vers25b.dsym ""
+build_vers_lib_no_pic "vers25a" vers25a.c vers25a "" vers25a.map vers25a.ver vers25a.dsym ""
+build_vers_lib_no_pic "vers25b1" vers25b.c vers25b1 "vers25a.o vers25a.so" "" vers25b.ver vers25b.dsym ""
+build_vers_lib_no_pic "vers25b2" vers25b.c vers25b2 "vers25a.so vers25a.o" "" vers25b.ver vers25b.dsym ""
+build_vers_lib_pic "vers26a" vers26a.c vers26a "" vers26a.map vers26a.ver vers26a.dsym ""
+build_vers_lib_pic "vers26b1" vers26b.c vers26b1 "" "" vers26b.ver vers26b.dsym ""
+build_vers_lib_pic "vers26b2" vers26b.c vers26b2 "vers26a.so vers26b1.so vers26a.o" "" vers26b.ver vers26b.dsym ""
+build_vers_lib_no_pic "vers26b3" vers26b.c vers26b3 "vers26a.so vers26b1.so vers26a.o" "" vers26b.ver vers26b.dsym ""

@@ -909,10 +909,12 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash, skip,
       /* Handle the case where we had a versioned symbol in a dynamic
 	 library and now find a definition in a normal object.  In this
 	 case, we make the versioned symbol point to the normal one.  */
+      struct elf_backend_data *bed = get_elf_backend_data (abfd);
       flip->root.type = h->root.type;
-      flip->root.u.undef.abfd = h->root.u.undef.abfd;
       h->root.type = bfd_link_hash_indirect;
       h->root.u.i.link = (struct bfd_link_hash_entry *) flip;
+      (*bed->elf_backend_copy_indirect_symbol) (bed, flip, h);
+      flip->root.u.undef.abfd = h->root.u.undef.abfd;
       if (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)
 	{
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_DEF_DYNAMIC;

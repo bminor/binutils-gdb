@@ -1,3 +1,22 @@
+2003-04-28  H.J. Lu <hjl@gnu.org>
+
+	* ld-elfvers/vers.exp (picflag): Set PIC flag for compiler.
+	(build_vers_lib): Support PIC.
+	(build_vers_lib_no_pic): New. Change all calls to build_vers_lib
+	to build_vers_lib_no_pic.
+	(build_vers_lib_pic): New.
+	Add tests vers26a, vers26b1, vers26b2 and vers26b3 for versioned
+	definition vs. normal definition in different files.
+
+	* ld-elfvers/vers26a.c: New file.
+	* ld-elfvers/vers26a.dsym: Likewise.
+	* ld-elfvers/vers26a.map: Likewise.
+	* ld-elfvers/vers26a.ver: Likewise.
+	* ld-elfvers/vers26b.c: Likewise.
+
+	* ld-elfvers/vers26b.dsym: New empty file.
+	* ld-elfvers/vers26b.ver: Likewise.
+
 2003-04-27  H.J. Lu <hjl@gnu.org>
 
 	* ld-elfvsb/elfvsb.dat: Updated.

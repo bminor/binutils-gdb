@@ -1,3 +1,9 @@
+2003-04-28  H.J. Lu <hjl@gnu.org>
+
+	* elflink.h (elf_merge_symbol): Call elf_backend_copy_indirect_symbol
+	to copy any information related to dynamic linking when we flip
+	the indirection.
+
 2003-04-27  H.J. Lu <hjl@gnu.org>
 
 	* elf-bfd.h (ELF_LINK_DYNAMIC_DEF): New.
