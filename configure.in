@@ -191,9 +191,11 @@ case "${host}" in
   *-mingw32*)
     host_makefile_frag="${host_makefile_frag} config/mh-mingw32"
     ;;
+# start-sanitize-mswin
   *-windows*)
     host_makefile_frag="${host_makefile_frag} config/mh-windows"
     ;;
+# end-sanitize-mswin
   vax-*-ultrix2*)
     host_makefile_frag="${host_makefile_frag} config/mh-vaxult2"
     ;;
