@@ -117,7 +117,7 @@ case "${host}" in
   i[345]86-*-win32)	  host_makefile_frag=config/mh-i386win32 ;;
   vax-*-ultrix2*)         host_makefile_frag=config/mh-vaxult2 ;;
   *-*-solaris2*)          host_makefile_frag=config/mh-solaris ;;
-  m68k-sun-*)		  host_makefile_frag=config/mh-sun3 ;;
+  m68k-sun-sunos*)	  host_makefile_frag=config/mh-sun3 ;;
   *-hp-hpux[78]*)         host_makefile_frag=config/mh-hpux8 ;;
   *-hp-hpux*)             host_makefile_frag=config/mh-hpux ;;
   *-*-hiux*)              host_makefile_frag=config/mh-hpux ;;

@@ -1,3 +1,9 @@
+Tue Oct 31 17:52:39 1995  J.T. Conklin  <jtc@slave.cygnus.com>
+
+	* configure.in (host_makefile_frag): Use m68k-sun-sunos* instead
+ 	of m68k-sun-* when selecting mh-sun3 to avoid matching NetBSD/sun3
+ 	systems.
+
 Tue Oct 31 16:57:32 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* configure.in (copy_dirs): Use sys-include instead of include
