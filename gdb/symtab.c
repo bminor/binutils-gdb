@@ -255,8 +255,7 @@ gdb_mangle_name (type, i, j)
   char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
   char *newname = type_name_no_tag (type);
   int is_constructor = STREQ (field_name, newname);
-  int is_destructor = is_constructor && physname[0] == '_'
-      && physname[1] == CPLUS_MARKER && physname[2] == '_';
+  int is_destructor = is_constructor && DESTRUCTOR_PREFIX_P (physname);
   /* Need a new type prefix.  */
   char *const_prefix = method->is_const ? "C" : "";
   char *volatile_prefix = method->is_volatile ? "V" : "";
@@ -920,8 +919,11 @@ find_pc_symtab (pc)
   register struct block *b;
   struct blockvector *bv;
   register struct symtab *s = NULL;
+  register struct symtab *best_s = NULL;
   register struct partial_symtab *ps;
   register struct objfile *objfile;
+  int distance = 0;;
+
 
   /* Search all symtabs for one whose file contains our pc */
 
@@ -930,9 +932,17 @@ find_pc_symtab (pc)
       bv = BLOCKVECTOR (s);
       b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
       if (BLOCK_START (b) <= pc
-	  && BLOCK_END (b) > pc)
-	return (s);
+	  && BLOCK_END (b) > pc
+	  && (distance == 0
+	      || BLOCK_END (b) - BLOCK_START (b) < distance))
+	{
+	  distance = BLOCK_END (b) - BLOCK_START (b);
+	  best_s = s;
+	}
     }
+
+  if (best_s != NULL)
+    return(best_s);
 
   s = NULL;
   ps = find_pc_psymtab (pc);
@@ -1380,6 +1390,9 @@ find_methods (t, name, sym_arr)
 		if (TYPE_FN_FIELD_STUB (f, field_counter))
 		  check_stub_method (t, method_counter, field_counter);
 		phys_name = TYPE_FN_FIELD_PHYSNAME (f, field_counter);
+		/* Destructor is handled by caller, dont add it to the list */
+		if (DESTRUCTOR_PREFIX_P (phys_name))
+		  continue;
 		sym_arr[i1] = lookup_symbol (phys_name,
 					     SYMBOL_BLOCK_VALUE (sym_class),
 					     VAR_NAMESPACE,
@@ -1599,7 +1612,15 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 		  /* destructors are a special case.  */
 		  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, 0);
 		  int len = TYPE_FN_FIELDLIST_LENGTH (t, 0) - 1;
+		  /* gcc 1.x puts destructor in last field,
+		     gcc 2.x puts destructor in first field.  */
 		  char *phys_name = TYPE_FN_FIELD_PHYSNAME (f, len);
+		  if (!DESTRUCTOR_PREFIX_P (phys_name))
+		    {
+		      phys_name = TYPE_FN_FIELD_PHYSNAME (f, 0);
+		      if (!DESTRUCTOR_PREFIX_P (phys_name))
+			phys_name = "";
+		    }
 		  sym_arr[i1] =
 		    lookup_symbol (phys_name, SYMBOL_BLOCK_VALUE (sym_class),
 				   VAR_NAMESPACE, 0, (struct symtab **)NULL);
@@ -2258,7 +2279,21 @@ list_symbols (regexp, class, bpt)
 		      {
 			/* Set a breakpoint here, if it's a function */
 			if (class == 1)
-			  break_command (SYMBOL_NAME(sym), 0);
+			  {
+			    /* There may be more than one function with the
+			       same name but in different files.  In order to
+			       set breakpoints on all of them, we must give
+			       both the file name and the function name to
+			       break_command.  */
+			    char *string =
+			      (char *) alloca (strlen (s->filename)
+					       + strlen (SYMBOL_NAME(sym))
+					       + 2);
+			    strcpy (string, s->filename);
+			    strcat (string, ":");
+			    strcat (string, SYMBOL_NAME(sym));
+			    break_command (string, 0);
+			  }
 		      }
 		    else if (!found_in_file)
 		      {

@@ -1,3 +1,13 @@
+Thu Apr  8 10:34:37 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* symtab.h (DESTRUCTOR_PREFIX_P): New macro to check if physname
+	is a C++ destructor.
+	* symtab.c (gdb_mangle_name): Use it.
+	* symtab.c (find_methods): Do not add destructors to choice list
+	for constructors.
+	* symtab.c (decode_line_1): Make breakpoints on destructors work
+	for gcc-2.x again.
+
 Wed Apr  7 18:43:09 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* ser-go32.c:  Make it use serial port name.

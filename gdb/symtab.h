@@ -100,6 +100,13 @@ struct general_symbol_info
 	  /* end-sanitize-chill */
 	} lang_u;
     } lang_specific;
+
+  /* Which section is this symbol in?  This is an index into
+     section_offsets for this objfile.  Negative means that the symbol
+     does not get relocated relative to a section.  */
+  /* Disclaimer: currently this is just used for xcoff, so don't expect
+     all symbol-reading code to set it correctly.  */
+  int section;
 };
 
 #define SYMBOL_NAME(symbol)		(symbol)->ginfo.name
@@ -109,6 +116,7 @@ struct general_symbol_info
 #define SYMBOL_BLOCK_VALUE(symbol)	(symbol)->ginfo.value.block
 #define SYMBOL_VALUE_CHAIN(symbol)	(symbol)->ginfo.value.chain
 #define SYMBOL_LANGUAGE(symbol)		(symbol)->ginfo.lang_specific.language
+#define SYMBOL_SECTION(symbol)		(symbol)->ginfo.section
 
 #define SYMBOL_CPLUS_DEMANGLED_NAME(symbol)	\
   (symbol)->ginfo.lang_specific.lang_u.cplus_specific.demangled_name
@@ -507,7 +515,7 @@ enum address_class
 
   LOC_BLOCK,
 
-  /* Value is a constant byte-sequence pointed to by SYMBOL_VALUE_ADDRESS, in
+  /* Value is a constant byte-sequence pointed to by SYMBOL_VALUE_BYTES, in
      target byte order.  */
 
   LOC_CONST_BYTES,
@@ -518,8 +526,12 @@ enum address_class
      (FRAME_ARGS_ADDRESS).  Added for i960, which passes args in regs then
      copies to frame.  */
 
-  LOC_LOCAL_ARG
+  LOC_LOCAL_ARG,
 
+  /* The variable does not actually exist in the program.
+     The SYMBOL_VALUE is ignored.  */
+
+  LOC_OPTIMIZED_OUT
 };
 
 struct symbol
@@ -678,6 +690,17 @@ struct symtab
        Can be NULL if none.  */
 
     struct linetable *linetable;
+
+    /* Section in objfile->section_offsets for the blockvector and
+       the linetable.  */
+
+    int block_line_section;
+
+    /* If several symtabs share a blockvector, exactly one of them
+       should be designed the primary, so that the blockvector
+       is relocated exactly once by objfile_relocate.  */
+
+    int primary;
 
     /* Name of this source file.  */
 
@@ -854,8 +877,17 @@ struct partial_symtab
 #define OPNAME_PREFIX_P(NAME) \
   ((NAME)[0] == 'o' && (NAME)[1] == 'p' && (NAME)[2] == CPLUS_MARKER)
 
+/* Macro that yields non-zero value iff NAME is the prefix for C++ vtbl
+   names.  */
+
 #define VTBL_PREFIX_P(NAME) \
   ((NAME)[3] == CPLUS_MARKER && !strncmp ((NAME), "_vt", 3))
+
+/* Macro that yields non-zero value iff NAME is the prefix for C++ destructor
+   names.  */
+
+#define DESTRUCTOR_PREFIX_P(NAME) \
+  ((NAME)[0] == '_' && (NAME)[1] == CPLUS_MARKER && (NAME)[2] == '_')
 
 
 /* External variables and functions for the objects described above. */
@@ -935,7 +967,7 @@ prim_record_minimal_symbol PARAMS ((const char *, CORE_ADDR,
 extern void
 prim_record_minimal_symbol_and_info PARAMS ((const char *, CORE_ADDR,
 					     enum minimal_symbol_type,
-					     char *info));
+					     char *info, int section));
 
 extern struct minimal_symbol *
 lookup_minimal_symbol PARAMS ((const char *, struct objfile *));
