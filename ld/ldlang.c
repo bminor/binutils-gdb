@@ -2652,16 +2652,27 @@ map_input_to_output_sections
 	  FAIL ();
 	  break;
 	case lang_address_statement_enum:
-	  /* Mark the specified section with the supplied address.  */
-	  {
-	    lang_output_section_statement_type *aos
-	      = (lang_output_section_statement_lookup
-		 (s->address_statement.section_name));
+	  /* Mark the specified section with the supplied address.  
 
-	    if (aos->bfd_section == NULL)
-	      init_os (aos);
-	    aos->addr_tree = s->address_statement.address;
-	  }
+	     If this section was actually a segment marker, then the
+	     directive is ignored if the linker script explicitly
+	     processed the segment marker.  Originally, the linker
+	     treated segment directives (like -Ttext on the
+	     command-line) as section directives.  We honor the
+	     section directive semantics for backwards compatibilty;
+	     linker scripts that do not specifically check for
+	     SEGMENT_START automatically get the old semantics.  */
+	  if (!s->address_statement.segment 
+	      || !s->address_statement.segment->used)
+	    {
+	      lang_output_section_statement_type *aos
+		= (lang_output_section_statement_lookup
+		   (s->address_statement.section_name));
+	      
+	      if (aos->bfd_section == NULL)
+		init_os (aos);
+	      aos->addr_tree = s->address_statement.address;
+	    }
 	  break;
 	}
     }
@@ -4971,13 +4982,15 @@ lang_add_wild (struct wildcard_spec *filespec,
 }
 
 void
-lang_section_start (const char *name, etree_type *address)
+lang_section_start (const char *name, etree_type *address,
+		    const segment_type *segment)
 {
   lang_address_statement_type *ad;
 
   ad = new_stat (lang_address_statement, stat_ptr);
   ad->section_name = name;
   ad->address = address;
+  ad->segment = segment;
 }
 
 /* Set the start symbol to NAME.  CMDLINE is nonzero if this is called

@@ -18,6 +18,9 @@
 #	OTHER_SECTIONS - at the end
 #	EXECUTABLE_SYMBOLS - symbols that must be defined for an
 #		executable (e.g., _DYNAMIC_LINK)
+#       TEXT_START_ADDR - the first byte of the text segment, after any
+#               headers.
+#       TEXT_BASE_ADDRESS - the first byte of the text segment.
 #	TEXT_START_SYMBOLS - symbols that appear at the start of the
 #		.text section.
 #	DATA_START_SYMBOLS - symbols that appear at the start of the

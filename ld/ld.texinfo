@@ -4680,6 +4680,16 @@ This function is closely related to @code{ALIGN(@var{exp})}; unless you
 use the @code{MEMORY} command to define discontinuous memory for the
 output file, the two functions are equivalent.
 
+@item SEGMENT_START(@var{segment}, @var{default})
+@kindex SEGMENT_START(@var{segment}, @var{default})
+Return the base address of the named @var{segment}.  If an explicit
+value has been given for this segment (with a command-line @samp{-T}
+option) that value will be returned; otherwise the value will be
+@var{default}.  At present, the @samp{-T} command-line option can only
+be used to set the base address for the ``text'', ``data'', and
+``bss'' sections, but you use @code{SEGMENT_START} with any segment
+name.
+
 @item SIZEOF(@var{section})
 @kindex SIZEOF(@var{section})
 @cindex section size

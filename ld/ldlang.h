@@ -316,6 +316,7 @@ typedef struct lang_address_statement_struct
   lang_statement_header_type header;
   const char *section_name;
   union etree_union *address;
+  const segment_type *segment;
 } lang_address_statement_type;
 
 typedef struct
@@ -461,7 +462,7 @@ extern void lang_final
 extern void lang_process
   (void);
 extern void lang_section_start
-  (const char *, union etree_union *);
+  (const char *, union etree_union *, const segment_type *);
 extern void lang_add_entry
   (const char *, bfd_boolean);
 extern void lang_add_target

@@ -134,6 +134,7 @@ static int error_index;
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
 %token INHIBIT_COMMON_ALLOCATION
 %token SIZEOF_HEADERS
+%token SEGMENT_START
 %token INCLUDE
 %token MEMORY DEFSYMEND
 %token NOLOAD DSECT COPY INFO OVERLAY
@@ -843,6 +844,15 @@ exp	:
 			{ $$ = exp_binop (DATA_SEGMENT_RELRO_END, $5, $3); }
 	|	DATA_SEGMENT_END '(' exp ')'
 			{ $$ = exp_unop(DATA_SEGMENT_END, $3); }
+        |       SEGMENT_START '(' NAME ',' exp ')'
+                        { /* The operands to the expression node are
+			     placed in the opposite order from the way
+			     in which they appear in the script as
+			     that allows us to reuse more code in
+			     fold_binary.  */
+			  $$ = exp_binop (SEGMENT_START,
+					  $5,
+					  exp_nameop (NAME, $3)); }
 	|	BLOCK '(' exp ')'
 			{ $$ = exp_unop(ALIGN_K,$3); }
 	|	NAME

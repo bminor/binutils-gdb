@@ -1,3 +1,28 @@
+2004-10-25  Mark Mitchell  <mark@codesourcery.com>
+
+	* Makefile.in (earmsymbian.c): Depend on armbpabi.sc, not elf.sc.
+	* ldexp.h (segment_type): New type.
+	(segments): New variable.
+	* ldexp.c (segments): New variable.
+	(exp_print_token): Handle SEGMENT_START.
+	(fold_binary): Likewise.
+	* ldgram.y (SEGMENT_START): Declare it as a token.
+	(exp): Handle SEGMENT_START.
+	* ldlang.h (lang_address_statement_type): Add segment field.
+	(lang_section_start): Change prototype.
+	* ldlang.c (map_input_to_output_sections): Do not process section
+	assignments if a corresponding SEGMENT_START has already been
+	seen.
+	(lang_section_start): Add segment parameter.
+	* ldlex.l (SEGMENT_START): Add it.
+	* lexsup.c (seg_segment_start): New function.
+	(parse_args): Use it for -Tbss, -Tdata, and -Ttext.
+	* ld.texinfo (SEGMENT_START): Document it.
+	* emulparams/armsymbian.sh (EMBEDDED): Set it.
+	* scripttempl/armbpabi.sc: Use SEGMENT_START to control segment
+	base addresses.  Do not map relocations.
+	* NEWS: Mention SEGMENT_START.
+
 2004-10-26  Paul Brook  <paul@codesourcery.com>
 
 	* ld.texinfo: Document --default-symver.

@@ -55,6 +55,7 @@
 
 static void set_default_dirlist (char *);
 static void set_section_start (char *, char *);
+static void set_segment_start (const char *, char *);
 static void help (void);
 
 /* Non-zero if we are processing a --defsym from the command line.  */
@@ -1138,13 +1139,13 @@ parse_args (unsigned argc, char **argv)
 	  ldemul_list_emulation_options (stdout);
 	  exit (0);
 	case OPTION_TBSS:
-	  set_section_start (".bss", optarg);
+	  set_segment_start (".bss", optarg);
 	  break;
 	case OPTION_TDATA:
-	  set_section_start (".data", optarg);
+	  set_segment_start (".data", optarg);
 	  break;
 	case OPTION_TTEXT:
-	  set_section_start (".text", optarg);
+	  set_segment_start (".text", optarg);
 	  break;
 	case OPTION_TRADITIONAL_FORMAT:
 	  link_info.traditional_format = TRUE;
@@ -1380,8 +1381,44 @@ set_section_start (char *sect, char *valstr)
   bfd_vma val = bfd_scan_vma (valstr, &end, 16);
   if (*end)
     einfo (_("%P%F: invalid hex number `%s'\n"), valstr);
-  lang_section_start (sect, exp_intop (val));
+  lang_section_start (sect, exp_intop (val), NULL);
 }
+
+static void
+set_segment_start (const char *section, char *valstr)
+{
+  const char *name;
+  const char *end;
+  segment_type *seg;
+
+  bfd_vma val = bfd_scan_vma (valstr, &end, 16);
+  if (*end)
+    einfo (_("%P%F: invalid hex number `%s'\n"), valstr);
+  /* If we already have an entry for this segment, update the existing
+     value.  */
+  name = section + 1;
+  for (seg = segments; seg; seg = seg->next)
+    if (strcmp (seg->name, name) == 0)
+      {
+	seg->value = val;
+	return;
+      }
+  /* There was no existing value so we must create a new segment
+     entry.  */
+  seg = stat_alloc (sizeof (*seg));
+  seg->name = name;
+  seg->value = val;
+  seg->used = FALSE;
+  /* Add it to the linked list of segments.  */
+  seg->next = segments;
+  segments = seg;
+  /* Historically, -Ttext and friends set the base address of a
+     particular section.  For backwards compatibility, we still do
+     that.  If a SEGMENT_START directive is seen, the section address
+     assignment will be disabled.  */
+  lang_section_start (section, exp_intop (val), seg);
+}
+
 
 /* Print help messages for the options.  */
 

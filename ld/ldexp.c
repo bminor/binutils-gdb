@@ -48,6 +48,8 @@ static bfd_vma align_n
 
 struct exp_data_seg exp_data_seg;
 
+segment_type *segments;
+
 /* Print the string representation of the given token.  Surround it
    with spaces if INFIX_P is TRUE.  */
 
@@ -102,7 +104,8 @@ exp_print_token (token_code_type code, int infix_p)
     { REL, "relocatable" },
     { DATA_SEGMENT_ALIGN, "DATA_SEGMENT_ALIGN" },
     { DATA_SEGMENT_RELRO_END, "DATA_SEGMENT_RELRO_END" },
-    { DATA_SEGMENT_END, "DATA_SEGMENT_END" }
+    { DATA_SEGMENT_END, "DATA_SEGMENT_END" },
+    { SEGMENT_START, "SEGMENT_START" }
   };
   unsigned int idx;
 
@@ -305,7 +308,27 @@ fold_binary (etree_type *tree,
 
   result = exp_fold_tree (tree->binary.lhs, current_section,
 			  allocation_done, dot, dotp);
-  if (result.valid_p)
+
+  /* The SEGMENT_START operator is special because its first
+     operand is a string, not the name of a symbol.  */
+  if (result.valid_p && tree->type.node_code == SEGMENT_START)
+    {
+      const char *segment_name;
+      segment_type *seg;
+      /* Check to see if the user has overridden the default
+	 value.  */
+      segment_name = tree->binary.rhs->name.name;
+      for (seg = segments; seg; seg = seg->next) 
+	if (strcmp (seg->name, segment_name) == 0)
+	  {
+	    seg->used = TRUE;
+	    result.value = seg->value;
+	    result.str = NULL;
+	    result.section = NULL;
+	    break;
+	  }
+    }
+  else if (result.valid_p)
     {
       etree_value_type other;
 
