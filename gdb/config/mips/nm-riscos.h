@@ -17,8 +17,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define PCB_OFFSET(FIELD) ((int)&((struct user*)0)->u_pcb.FIELD)
 
 #include <bsd43/machine/vmparam.h>
+#ifndef BSD43_NBPG
+/* RISC/os 5.0 defines this in machparam.h.  */
+#include <bsd43/machine/machparam.h>
+#endif
 #define NBPG BSD43_NBPG
 #define UPAGES BSD43_UPAGES
+#define KERNEL_U_ADDR BSD43_UADDR
 
 #define REGISTER_U_ADDR(addr, blockend, regno) 		\
 	      if (regno < FP0_REGNUM) \

@@ -1,3 +1,10 @@
+Fri Jul  2 13:51:04 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in (mipos-*-riscos*): New host and target; use riscos.
+	* config/mips/nm-riscos.h: If BSD43_NBPG is not defined by
+	vmparam.h, include machparam.h.
+	(KERNEL_U_ADDR): Define to be BSD43_UADDR.
+
 Fri Jul  2 13:39:48 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* c-exp.y (yylex): Give error if unmatched single quote.
