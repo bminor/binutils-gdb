@@ -1062,6 +1062,35 @@ extern void set_gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch, gdbarch_re
 #endif
 #endif
 
+#if defined (SAVE_DUMMY_FRAME_TOS)
+/* Legacy for systems yet to multi-arch SAVE_DUMMY_FRAME_TOS */
+#define SAVE_DUMMY_FRAME_TOS_P() (1)
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (GDB_MULTI_ARCH == 0) && !defined (SAVE_DUMMY_FRAME_TOS_P)
+#define SAVE_DUMMY_FRAME_TOS_P() (0)
+#endif
+
+extern int gdbarch_save_dummy_frame_tos_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > 1) || !defined (SAVE_DUMMY_FRAME_TOS_P)
+#define SAVE_DUMMY_FRAME_TOS_P() (gdbarch_save_dummy_frame_tos_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (GDB_MULTI_ARCH == 0) && !defined (SAVE_DUMMY_FRAME_TOS)
+#define SAVE_DUMMY_FRAME_TOS(sp) (internal_error ("SAVE_DUMMY_FRAME_TOS"), 0)
+#endif
+
+typedef void (gdbarch_save_dummy_frame_tos_ftype) (CORE_ADDR sp);
+extern void gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch, CORE_ADDR sp);
+extern void set_gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch, gdbarch_save_dummy_frame_tos_ftype *save_dummy_frame_tos);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > 1) || !defined (SAVE_DUMMY_FRAME_TOS)
+#define SAVE_DUMMY_FRAME_TOS(sp) (gdbarch_save_dummy_frame_tos (current_gdbarch, sp))
+#endif
+#endif
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 

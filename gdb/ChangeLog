@@ -1,3 +1,11 @@
+Mon May 15 15:31:30 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* valops.c (hand_function_call): Replace #ifdef
+ 	SAVE_DUMMY_FRAME_TOS with if SAVE_DUMMY_FRAME_TOS_P.
+
+	* gdbarch.sh (SAVE_DUMMY_FRAME_TOS): Add.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
 Mon May 15 16:05:46 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* ax.h (make_cleanup_free_agent_expr): Add declaration.

@@ -219,6 +219,7 @@ struct gdbarch
   gdbarch_frame_num_args_ftype *frame_num_args;
   gdbarch_stack_align_ftype *stack_align;
   gdbarch_reg_struct_has_addr_ftype *reg_struct_has_addr;
+  gdbarch_save_dummy_frame_tos_ftype *save_dummy_frame_tos;
 };
 
 
@@ -286,6 +287,7 @@ struct gdbarch startup_gdbarch = {
   0,
   0,
   generic_get_saved_register,
+  0,
   0,
   0,
   0,
@@ -634,6 +636,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
     internal_error ("gdbarch: verify_gdbarch: frame_num_args invalid");
   /* Skip verify of stack_align, has predicate */
   /* Skip verify of reg_struct_has_addr, has predicate */
+  /* Skip verify of save_dummy_frame_tos, has predicate */
 }
 
 
@@ -1175,6 +1178,12 @@ gdbarch_dump (void)
                       "gdbarch_update: REG_STRUCT_HAS_ADDR = 0x%08lx\n",
                       (long) current_gdbarch->reg_struct_has_addr
                       /*REG_STRUCT_HAS_ADDR ()*/);
+#endif
+#ifdef SAVE_DUMMY_FRAME_TOS
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: SAVE_DUMMY_FRAME_TOS = 0x%08lx\n",
+                      (long) current_gdbarch->save_dummy_frame_tos
+                      /*SAVE_DUMMY_FRAME_TOS ()*/);
 #endif
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: GDB_MULTI_ARCH = %d\n",
@@ -2786,6 +2795,29 @@ set_gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch,
                                  gdbarch_reg_struct_has_addr_ftype reg_struct_has_addr)
 {
   gdbarch->reg_struct_has_addr = reg_struct_has_addr;
+}
+
+int
+gdbarch_save_dummy_frame_tos_p (struct gdbarch *gdbarch)
+{
+  return gdbarch->save_dummy_frame_tos != 0;
+}
+
+void
+gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch, CORE_ADDR sp)
+{
+  if (gdbarch->save_dummy_frame_tos == 0)
+    internal_error ("gdbarch: gdbarch_save_dummy_frame_tos invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_save_dummy_frame_tos called\n");
+  gdbarch->save_dummy_frame_tos (sp);
+}
+
+void
+set_gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch,
+                                  gdbarch_save_dummy_frame_tos_ftype save_dummy_frame_tos)
+{
+  gdbarch->save_dummy_frame_tos = save_dummy_frame_tos;
 }
 
 
