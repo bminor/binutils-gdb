@@ -16,7 +16,12 @@ case "${target}" in
 rs6000-*-aix*)		target_makefile_frag=xcoff.mt ;;
 
 mips-*-bsd*)		target_makefile_frag=aout.mt ;;
-mips-*-*)		target_makefile_frag=ecoff.mt ;;
+mips-*-*)		if [ x${with_gnu_as} = xyes ]; then
+			  target_makefile_frag=aout.mt
+			else
+			  target_makefile_frag=ecoff.mt
+			fi
+			;;
 
 *-*-*)			target_makefile_frag=aout.mt ;;
 

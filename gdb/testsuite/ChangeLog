@@ -1,3 +1,9 @@
+Mon Jul 19 23:59:26 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.stabs/configure.in: If configured -with-gnu-as for mips-*-*
+	targets use aout.mt instead of ecoff.mt as gas understands
+	standard aout format.
+
 Mon Jul 19 18:14:06 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* lib/gdb.exp (runto): Don't insist that function we are running to
