@@ -1,5 +1,8 @@
 Fri Dec  6 14:13:34 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* simops.c: Call abort for any instruction that's not currently
+	simulated.
+
 	* simops.c: Define accessor macros to extract register
 	values from instructions.  Use them consistently.
 
