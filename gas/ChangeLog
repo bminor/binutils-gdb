@@ -1,3 +1,12 @@
+2000-12-12  Franz Sirl  <Franz.Sirl-kernel@lauterbach.com>
+
+	* config/tc-ppc.c (md_pseudo_table): Add .file and .loc.
+	(md_assemble): Call dwarf2_emit_insn.
+	(shlib): Fix typo SHILB -> SHLIB.
+	(md_parse_option): Likewise.
+	(ppc_elf_validate_fix): Likewise:
+	* config/tc-ppc.h (DWARF2_LINE_MIN_INSN_LENGTH): New.
+
 2000-12-12  Nick Clifton  <nickc@redhat.com>
 
 	* cgen.h: Fix formatting.

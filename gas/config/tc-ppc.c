@@ -29,6 +29,7 @@
 
 #ifdef OBJ_ELF
 #include "elf/ppc.h"
+#include "dwarf2dbg.h"
 #endif
 
 #ifdef TE_PE
@@ -197,6 +198,8 @@ const pseudo_typeS md_pseudo_table[] =
   { "rdata",	ppc_elf_rdata,	0 },
   { "rodata",	ppc_elf_rdata,	0 },
   { "lcomm",	ppc_elf_lcomm,	0 },
+  { "file",	dwarf2_directive_file, 0 },
+  { "loc",	dwarf2_directive_loc, 0 },
 #endif
 
 #ifdef TE_PE
@@ -674,7 +677,7 @@ static struct hash_control *ppc_macro_hash;
 
 #ifdef OBJ_ELF
 /* What type of shared library support to use */
-static enum { SHLIB_NONE, SHLIB_PIC, SHILB_MRELOCATABLE } shlib = SHLIB_NONE;
+static enum { SHLIB_NONE, SHLIB_PIC, SHLIB_MRELOCATABLE } shlib = SHLIB_NONE;
 
 /* Flags to set in the elf header */
 static flagword ppc_flags = 0;
@@ -879,13 +882,13 @@ md_parse_option (c, arg)
       /* -mrelocatable/-mrelocatable-lib -- warn about initializations that require relocation */
       else if (strcmp (arg, "relocatable") == 0)
 	{
-	  shlib = SHILB_MRELOCATABLE;
+	  shlib = SHLIB_MRELOCATABLE;
 	  ppc_flags |= EF_PPC_RELOCATABLE;
 	}
 
       else if (strcmp (arg, "relocatable-lib") == 0)
 	{
-	  shlib = SHILB_MRELOCATABLE;
+	  shlib = SHLIB_MRELOCATABLE;
 	  ppc_flags |= EF_PPC_RELOCATABLE_LIB;
 	}
 
@@ -1553,7 +1556,7 @@ ppc_elf_validate_fix (fixp, seg)
     case SHLIB_PIC:
       return;
 
-    case SHILB_MRELOCATABLE:
+    case SHLIB_MRELOCATABLE:
       if (fixp->fx_r_type <= BFD_RELOC_UNUSED
 	  && fixp->fx_r_type != BFD_RELOC_16_GOTOFF
 	  && fixp->fx_r_type != BFD_RELOC_HI16_GOTOFF
@@ -2096,6 +2099,10 @@ md_assemble (str)
   /* Write out the instruction.  */
   f = frag_more (4);
   md_number_to_chars (f, insn, 4);
+
+#ifdef OBJ_ELF
+  dwarf2_emit_insn (4);
+#endif
 
   /* Create any fixups.  At this point we do not use a
      bfd_reloc_code_real_type, but instead just use the

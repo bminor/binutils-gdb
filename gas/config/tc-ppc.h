@@ -258,6 +258,7 @@ extern const char *ppc_comment_chars;
        && S_IS_DEFINED ((FIX)->fx_addsy) \
        && ! S_IS_COMMON ((FIX)->fx_addsy)))
 
+#define DWARF2_LINE_MIN_INSN_LENGTH 4
 #endif /* OBJ_ELF */
 
 /* call md_apply_fix3 with segment instead of md_apply_fix */
