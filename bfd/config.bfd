@@ -30,6 +30,7 @@ targ_cpu=`echo $targ | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
 case "${targ_cpu}" in
 alpha*) targ_archs=bfd_alpha_arch ;;
 arm*)	targ_archs=bfd_arm_arch ;;
+thumb*)	targ_archs=bfd_arm_arch ;;
 hppa*)	targ_archs=bfd_hppa_arch ;;
 i[3456]86) targ_archs=bfd_i386_arch ;;
 m68*)	targ_archs=bfd_m68k_arch ;;
@@ -97,7 +98,11 @@ case "${targ}" in
     targ_selvecs=armcoff_big_vec
     targ_underscore=yes
     ;;
-
+  thumb-*-coff)
+    targ_defvec=armcoff_little_vec
+    targ_selvecs=armcoff_big_vec
+    targ_underscore=yes
+    ;;
   a29k-*-ebmon* | a29k-*-udi* | a29k-*-coff* | a29k-*-sym1* | \
   a29k-*-vxworks* | a29k-*-sysv*)
     targ_defvec=a29kcoff_big_vec
@@ -152,7 +157,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs=i386coff_vec
     ;;
-  i[3456]86-*-msdosdjgpp* | i[3456]*-*-go32*)
+  i[3456]86-*-msdosdjgpp* | i[3456]*-*-go32* | i[3456]86-go32-rtems* )
     targ_defvec=go32coff_vec
     targ_selvecs="go32stubbedcoff_vec i386aout_vec"
     ;;
@@ -505,20 +510,24 @@ case "${targ}" in
   sparc-*-sysv4*)
     targ_defvec=bfd_elf32_sparc_vec
     ;;
+  sparc-*-netware*)
+    targ_defvec=bfd_elf32_sparc_vec
+    targ_selvecs="nlm32_sparc_vec sunos_big_vec"
+    ;;
+#ifdef BFD64
   sparc64-*-aout*)
     targ_defvec=sunos_big_vec
     targ_underscore=yes
     ;;
-#ifdef BFD64
+  sparc64-*-linux*)
+    targ_defvec=bfd_elf64_sparc_vec
+    targ_selvecs="bfd_elf32_sparc_vec sparclinux_vec sunos_big_vec"
+    ;;
   sparc64-*-elf*)
     targ_defvec=bfd_elf64_sparc_vec
     targ_selvecs=bfd_elf32_sparc_vec
     ;;    
 #endif /* BFD64 */
-  sparc-*-netware*)
-    targ_defvec=bfd_elf32_sparc_vec
-    targ_selvecs="nlm32_sparc_vec sunos_big_vec"
-    ;;
   sparc*-*-coff*)
     targ_defvec=sparccoff_vec
     ;;
@@ -549,7 +558,7 @@ case "${targ}" in
   v850e-*-*)
     targ_defvec=bfd_elf32_v850_vec
     ;;
-  v850eq-*-*)
+  v850ea-*-*)
     targ_defvec=bfd_elf32_v850_vec
     ;;
 # end-sanitize-v850e

@@ -1,3 +1,12 @@
+Mon Dec 22 13:04:33 1997  Joel Sherrill  <joel@oarcorp.com>
+
+        * config.bfd (i[3456]86*-go32-rtems*): Fix to be the same as
+	i[3456]86-go32.
+
+Thu Dec 18 16:01:25 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* configure: Regenerate to get @SHELL@ substituted.
+
 Wed Dec 17 09:45:09 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-arm.c (coff_arm_relocate_section): Only look at section
