@@ -1,3 +1,7 @@
+Tue Jul 20 11:28:50 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* test-build.mk: support for CONFIG_SHELL
+
 Mon Jul 19 21:54:46 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* config.sub (netware):  Add as a basic system type.
