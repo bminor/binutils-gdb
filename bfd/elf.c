@@ -3262,10 +3262,10 @@ assign_file_positions_for_segments (abfd)
 
 	  /* The section may have artificial alignment forced by a
 	     link script.  Notice this case by the gap between the
-	     cumulative phdr vma and the section's vma.  */
-	  if (p->p_vaddr + p->p_memsz < sec->vma)
+	     cumulative phdr lma and the section's lma.  */
+	  if (p->p_paddr + p->p_memsz < sec->lma)
 	    {
-	      bfd_vma adjust = sec->vma - (p->p_vaddr + p->p_memsz);
+	      bfd_vma adjust = sec->lma - (p->p_paddr + p->p_memsz);
 
 	      p->p_memsz += adjust;
 	      off += adjust;
@@ -3994,16 +3994,19 @@ copy_private_bfd_data (ibfd, obfd)
 
   /* Decide if the given section should be included in the given segment.
      A section will be included if:
-       1. It is within the address space of the segment,
+       1. It is within the address space of the segment -- we use the LMA
+          if that is set for the segment and the VMA otherwise,
        2. It is an allocated segment,
        3. There is an output section associated with it,
        4. The section has not already been allocated to a previous segment.  */
-#define INCLUDE_SECTION_IN_SEGMENT(section, segment)	\
-  ((((IS_CONTAINED_BY_VMA (section, segment) 		\
-      || IS_SOLARIS_PT_INTERP (segment, section))	\
-     && (section->flags & SEC_ALLOC) != 0)		\
-    || IS_COREFILE_NOTE (segment, section))		\
-   && section->output_section != NULL			\
+#define INCLUDE_SECTION_IN_SEGMENT(section, segment)			\
+  (((((segment->p_paddr							\
+       ? IS_CONTAINED_BY_LMA (section, segment, segment->p_paddr)	\
+       : IS_CONTAINED_BY_VMA (section, segment))			\
+      || IS_SOLARIS_PT_INTERP (segment, section))			\
+     && (section->flags & SEC_ALLOC) != 0)				\
+    || IS_COREFILE_NOTE (segment, section))				\
+   && section->output_section != NULL					\
    && section->segment_mark == false)
 
   /* Returns true iff seg1 starts after the end of seg2.  */

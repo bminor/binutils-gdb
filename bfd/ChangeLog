@@ -2,6 +2,10 @@
 
 	* elf.c (_bfd_elf_make_section_from_shdr): Set the LMA based on the
 	p_paddr of the segment that contains it.
+	(copy_private_bfd_data): If the LMA for a segment is known, use it
+	for matching sections to segments.
+	(assign_file_positions_for_segments): Use the LMA when adjusting
+	for inter-section alignment padding.
 
 2001-10-29  Kazu Hirata  <kazu@hxi.com>
 
