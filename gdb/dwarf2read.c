@@ -4878,8 +4878,8 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 		* lh->minimum_instruction_length;
 	      line += lh->line_base + (adj_opcode % lh->line_range);
 	      /* append row to matrix using current values */
-	      address = check_cu_functions (address);
-	      record_line (current_subfile, line, address);
+	      record_line (current_subfile, line, 
+	                   check_cu_functions (address));
 	      basic_block = 1;
 	    }
 	  else switch (op_code)
@@ -4925,8 +4925,8 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 		}
 	      break;
 	    case DW_LNS_copy:
-	      address = check_cu_functions (address);
-	      record_line (current_subfile, line, address);
+	      record_line (current_subfile, line, 
+	                   check_cu_functions (address));
 	      basic_block = 0;
 	      break;
 	    case DW_LNS_advance_pc:
