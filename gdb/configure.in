@@ -37,6 +37,7 @@ hppa*-hp-hpux*)		gdb_host=hppahpux ;;
 i[34]86-ncr-*)		gdb_host=ncr3000 ;;
 i[34]86-sequent-*)	gdb_host=symmetry ;;
 
+i[34]86-*-aix*)		gdb_host=i386aix ;;
 i[34]86-*-bsd*)		gdb_host=i386bsd ;;
 i[34]86-*-go32)		gdb_host=go32 ;;
 i[34]86-*-linux)	gdb_host=linux ;;
@@ -168,6 +169,7 @@ i[34]86-*-aout)		gdb_target=i386aout ;;
 i[34]86-*-coff)		gdb_target=i386v ;;
 i[34]86-*-elf)		gdb_target=i386v ;;
 
+i[34]86-*-aix*)		gdb_target=i386aix ;;
 i[34]86-*-bsd*)		gdb_target=i386bsd ;;
 i[34]86-*-go32)		gdb_target=i386aout ;;
 i[34]86-*-lynxos*)	gdb_target=i386lynx

@@ -38,8 +38,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #if defined(USG) || defined(__CYGNUSCLIB__)
 #include <sys/types.h>
 #include <fcntl.h>
-#define L_SET 0
-#define L_INCR 1
 #endif
 
 #include <obstack.h>
@@ -67,6 +65,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native, now */
+
+#if !defined (SEEK_SET)
+#define SEEK_SET 0
+#define SEEK_CUR 1
+#endif
 
 /* Each partial symbol table entry contains a pointer to private data for the
    read_symtab() function to use when expanding a partial symbol table entry
@@ -455,7 +458,7 @@ dbx_symfile_read (objfile, section_offsets, mainline)
   int val;
 
   sym_bfd = objfile->obfd;
-  val = bfd_seek (objfile->obfd, DBX_SYMTAB_OFFSET (objfile), L_SET);
+  val = bfd_seek (objfile->obfd, DBX_SYMTAB_OFFSET (objfile), SEEK_SET);
   if (val < 0)
     perror_with_name (objfile->name);
 
@@ -572,7 +575,7 @@ dbx_symfile_init (objfile)
     }
   else
     {
-      val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, L_SET);
+      val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, SEEK_SET);
       if (val < 0)
 	perror_with_name (name);
       
@@ -612,7 +615,7 @@ dbx_symfile_init (objfile)
 	  
 	  /* Now read in the string table in one big gulp.  */
 	  
-	  val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, L_SET);
+	  val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, SEEK_SET);
 	  if (val < 0)
 	    perror_with_name (name);
 	  val = bfd_read (DBX_STRINGTAB (objfile), DBX_STRINGTAB_SIZE (objfile), 1,
@@ -1232,7 +1235,7 @@ dbx_psymtab_to_symtab_1 (pst)
       symbol_size = SYMBOL_SIZE (pst);
 
       /* Read in this file's symbols */
-      bfd_seek (pst->objfile->obfd, SYMBOL_OFFSET (pst), L_SET);
+      bfd_seek (pst->objfile->obfd, SYMBOL_OFFSET (pst), SEEK_SET);
       read_ofile_symtab (pst);
       sort_symtab_syms (pst->symtab);
 
@@ -1331,7 +1334,7 @@ read_ofile_symtab (pst)
      would slow down initial readin, so we look for it here instead.  */
   if (!processing_acc_compilation && sym_offset >= (int)symbol_size)
     {
-      bfd_seek (symfile_bfd, sym_offset - symbol_size, L_INCR);
+      bfd_seek (symfile_bfd, sym_offset - symbol_size, SEEK_CUR);
       fill_symbuf (abfd);
       bufp = &symbuf[symbuf_idx++];
       SWAP_SYMBOL (bufp, abfd);
@@ -1363,7 +1366,7 @@ read_ofile_symtab (pst)
       /* The N_SO starting this symtab is the first symbol, so we
 	 better not check the symbol before it.  I'm not this can
 	 happen, but it doesn't hurt to check for it.  */
-      bfd_seek (symfile_bfd, sym_offset, L_INCR);
+      bfd_seek (symfile_bfd, sym_offset, SEEK_CUR);
       processing_gcc_compilation = 0;
     }
 
@@ -1990,7 +1993,7 @@ elfstab_build_psymtabs (objfile, section_offsets, mainline,
 
   /* Now read in the string table in one big gulp.  */
 
-  val = bfd_seek (sym_bfd, stabstroffset, L_SET);
+  val = bfd_seek (sym_bfd, stabstroffset, SEEK_SET);
   if (val < 0)
     perror_with_name (name);
   val = bfd_read (DBX_STRINGTAB (objfile), stabstrsize, 1, sym_bfd);

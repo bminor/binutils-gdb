@@ -1,7 +1,14 @@
 Mon Jun 21 16:09:46 1993  Jim Kingdon  (kingdon@cygnus.com)
 
-	* config/i386/*aix*: New files.
+	* config/i386/*aix*, i386aix-nat.c: New files.
+	* configure.in: Use them.
 	* alldeps.mak: List them.
+	* coffread.c (decode_base_type): Deal with anonymous enum type.
+	* i387-tdep.c (print_387_status_word): Add comment re "top".
+	* i386-tdep.c [I386_AIX_TARGET] (i386_extract_return_value): New func.
+	* dbxread.c: Use SEEK_SET and SEEK_CUR, not L_*.  Define them if and
+	only if not defined by a header file.
+	* mipsread.c: Don't define L_SET or L_INCR.
 
 Mon Jun 21 15:10:07 1993  Fred Fish  (fnf@cygnus.com)
 

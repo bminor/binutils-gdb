@@ -33,6 +33,7 @@ ${srcdir}/i386-tdep.c\
 ${srcdir}/i386b-nat.c\
 ${srcdir}/i386mach-nat.c\
 ${srcdir}/i386v-nat.c\
+${srcdir}/i386aix-nat.c\
 ${srcdir}/i386v4-nat.c\
 ${srcdir}/i387-tdep.c\
 ${srcdir}/i960-pinsn.c\

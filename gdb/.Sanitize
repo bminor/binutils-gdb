@@ -115,6 +115,7 @@ hppah-nat.c
 i386-pinsn.c
 i386-stub.c
 i386-tdep.c
+i386aix-nat.c
 i386b-nat.c
 i386mach-nat.c
 i386v-nat.c
