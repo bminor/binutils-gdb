@@ -1,3 +1,8 @@
+2003-08-27  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elf32-frv.c (elf32_frv_relocate_section): Use
+	_bfd_elf_rela_local_sym.
+
 2003-08-26  Michael Snyder  <msnyder@redhat.com>
 
 	* cpu-frv.c: Remove unused enum.
