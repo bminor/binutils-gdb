@@ -1,3 +1,8 @@
+Thu Jun 27 20:41:40 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/signals.exp (test_handle_all_print): Temporarily increase
+	timeout by 60 seconds.
+
 Thu Jun 27 18:13:57 1996  Fred Fish  <fnf@cygnus.com>
 
 	* config/unix-gdb.exp: Increase default timeout from 30 to 60 sec.

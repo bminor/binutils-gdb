@@ -301,13 +301,16 @@ gdb_start
 # but I want to test that TARGET_SIGNAL_0, TARGET_SIGNAL_DEFAULT, and
 # TARGET_SIGNAL_UNKNOWN are skipped.
 proc test_handle_all_print {} {
-
+    global timeout
     # Increase timeout and expect input buffer for large output from gdb.
     # Allow blank or TAB as whitespace characters.
-    set timeout 30
+    set oldtimeout $timeout
+    set timeout [expr "$timeout + 60"]
     verbose "Timeout is now $timeout seconds" 2
     match_max 8000
     gdb_test "handle all print" "Signal\[ 	\]+Stop\[ 	\]+Print\[ 	\]+Pass to program\[ 	\]+Description\r\nSIGHUP\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Hangup.*SIG63\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Real-time event 63"
+    set timeout $oldtimeout
+    verbose "Timeout restored to $timeout seconds" 2
 }
 test_handle_all_print
 
