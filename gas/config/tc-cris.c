@@ -360,7 +360,7 @@ cris_relax_frag (seg, fragP, stretch)
   const relax_typeS *table = TC_GENERIC_RELAX_TABLE;
 
   /* We only have to cope with frags as prepared by
-     md_estimate_size_before_relax.  The dword cases may geet here
+     md_estimate_size_before_relax.  The dword cases may get here
      because of the different reasons that they aren't relaxable.  */
   switch (fragP->fr_subtype)
     {
@@ -924,8 +924,7 @@ md_assemble (str)
 	    is_undefined = 1;
 	}
 
-      if (output_instruction.expr.X_op == O_constant
-	  || to_seg == now_seg || is_undefined)
+      if (to_seg == now_seg || is_undefined)
 	{
 	  /* Handle complex expressions.  */
 	  valueT addvalue
@@ -949,8 +948,7 @@ md_assemble (str)
 	{
 	  /* We have: to_seg != now_seg && to_seg != undefined_section.
 	     This means it is a branch to a known symbol in another
-	     section.  Code in data?  Weird but valid.	Emit a 32-bit
-	     branch.  */
+	     section, perhaps an absolute address.  Emit a 32-bit branch.  */
 	  char *cond_jump = frag_more (10);
 
 	  gen_cond_branch_32 (opcodep, cond_jump, frag_now,
