@@ -1,18 +1,22 @@
 2002-12-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (edit_opd): Correct typo.
+
+2002-12-04  Alan Modra  <amodra@bigpond.net.au>
+
 	* srec.c (srec_write_symbols): Restore '$' prefix to address
 	accidentally removed in 2002-04-04 change.
 	(srec_get_symtab): Use 0 instead of `(long) FALSE'.
 
 2002-11-27  David O'Brien  <obrien@FreeBSD.org>
 
-        * elf.c (_bfd_elf_copy_private_section_data): Don't define bed.
+	* elf.c (_bfd_elf_copy_private_section_data): Don't define bed.
 
 2002-11-21  Richard Henderson  <rth@redhat.com>
 
-        * elflink.h (elf_link_add_object_symbols): Don't overwrite the
-        arch's st_other bits when merging visibilities.
-        (elf_link_output_extsym): Tidy clearing of visibility field.
+	* elflink.h (elf_link_add_object_symbols): Don't overwrite the
+	arch's st_other bits when merging visibilities.
+	(elf_link_output_extsym): Tidy clearing of visibility field.
 
 2002-11-14  David O'Brien  <obrien@FreeBSD.org>
 
@@ -29,11 +33,11 @@
 	(ppc64_elf_merge_private_bfd_data): Allow BFD_ENDIAN_UNKNOWN input.
 
 2002-11-11  Nick Clifton  <nickc@redhat.com>
-	
+
 	Import this patch from mainline:
-	
+
 	2002-09-19  Nick Clifton  <nickc@redhat.com>
-	
+
 	* elflink.h (elf_fix_symbol_flags): When examining weak symbols,
 	follow indirect links.
 
@@ -322,7 +326,7 @@
 	2002-09-21  Alan Modra  <amodra@bigpond.net.au>
 	* elfcode.h (elf_slurp_reloc_table_from_section): Make "symcount"
 	unsigned.  Move "symcount" assignment out of loop.
- 
+
 	2002-09-19  Nathan Tallent  <eraxxon@alumni.rice.edu>
 	* dwarf2.c (_bfd_dwarf2_find_nearest_line): If address length is
 	zero, set it to 8 for (non-standard) 64-bit DWARF2 formats
@@ -632,7 +636,7 @@
 	Merge from mainline:
 	2002-08-17  Andrew Cagney  <ac131313@redhat.com>
 	* elf.c (bfd_elf_get_elf_syms): Change type of `esym' to
- 	`bfd_byte'.
+	`bfd_byte'.
 
 2002-08-26  Alan Modra  <amodra@bigpond.net.au>
 

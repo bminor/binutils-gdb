@@ -3583,7 +3583,7 @@ edit_opd (obfd, info)
       sym_hashes = elf_sym_hashes (ibfd);
 
       /* Read the relocations.  */
-      relstart = _bfd_elf64_link_read_relocs (obfd, sec, (PTR) NULL,
+      relstart = _bfd_elf64_link_read_relocs (ibfd, sec, (PTR) NULL,
 					      (Elf_Internal_Rela *) NULL,
 					      info->keep_memory);
       if (relstart == NULL)
