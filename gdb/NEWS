@@ -1,7 +1,10 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 5.1:
+*** Changes since GDB 5.2:
+
+
+*** Changes in GDB 5.2:
 
 * New command "set trust-readonly-sections on[off]".
 

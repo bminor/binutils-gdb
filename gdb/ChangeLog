@@ -1,3 +1,7 @@
+2002-03-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* NEWS: Update headings, 5.2 has branched.
+
 2002-03-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/linux-low.c (PTRACE_XFER_TYPE): Change to long.
