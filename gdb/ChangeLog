@@ -1,3 +1,39 @@
+2003-09-19  Jim Blandy  <jimb@redhat.com>
+
+	Merge from mainline:
+	
+	2003-09-12  Jim Blandy  <jimb@redhat.com>
+
+	* dbxread.c (read_dbx_symtab): Don't report an internal error if
+	the file has no .data, .bss, or .rodata sections.  Instead wait
+	until we see a variable alleged to live in one of those sections.
+
+	2003-09-12  Jim Blandy  <jimb@redhat.com>
+
+	* dbxread.c (read_dbx_symtab): If we have no .data section and no
+	.bss section, presume that any variables we find live in the
+	.rodata section.
+
+	2003-09-12  Jim Blandy  <jimb@redhat.com>
+
+	* dbxread.c (read_dbx_symtab): Add FIXME about finding section
+	offsets for global and static variables.
+
+	2003-09-09  Jim Blandy  <jimb@redhat.com>
+
+	* dbxread.c (read_dbx_symtab): The N_DATA and N_DATA | N_EXT
+	symbol types are, by definition, in the .data section, so it is
+	correct to use SECT_OFF_DATA (objfile) here, not data_sect_index.
+	If there is no .data section, there should be no N_DATA or N_DATA
+	| N_EXT symbols.
+
+	2003-07-10  Jim Blandy  <jimb@redhat.com>
+
+	* Makefile.in (dbxread.o): Note new dependency on $(gdb_assert_h).
+	* dbxread.c: #include "gdb_assert.h".
+	(read_dbx_symtab): If the objfile has no .data section, use the
+	section index for the .bss section instead.
+
 2003-09-19  Christopher Faylor  <cgf@redhat.com>
  
  	* win32-nat.c (mappings): Remove HAVE_SSE conditional.

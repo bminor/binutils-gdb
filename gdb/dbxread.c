@@ -58,6 +58,7 @@
 #include "language.h"		/* Needed for local_hex_string */
 #include "complaints.h"
 #include "cp-abi.h"
+#include "gdb_assert.h"
 
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native, now */
@@ -1304,6 +1305,7 @@ read_dbx_symtab (struct objfile *objfile)
   struct cleanup *back_to;
   bfd *abfd;
   int textlow_not_set;
+  int data_sect_index;
 
   /* Current partial symtab */
   struct partial_symtab *pst;
@@ -1354,6 +1356,38 @@ read_dbx_symtab (struct objfile *objfile)
   next_symbol_text_func = dbx_next_symbol_text;
   textlow_not_set = 1;
   has_line_numbers = 0;
+
+  /* FIXME: jimb/2003-09-12: We don't apply the right section's offset
+     to global and static variables.  The stab for a global or static
+     variable doesn't give us any indication of which section it's in,
+     so we can't tell immediately which offset in
+     objfile->section_offsets we should apply to the variable's
+     address.
+
+     We could certainly find out which section contains the variable
+     by looking up the variable's unrelocated address with
+     find_pc_section, but that would be expensive; this is the
+     function that constructs the partial symbol tables by examining
+     every symbol in the entire executable, and it's
+     performance-critical.  So that expense would not be welcome.  I'm
+     not sure what to do about this at the moment.
+
+     What we have done for years is to simply assume that the .data
+     section's offset is appropriate for all global and static
+     variables.  Recently, this was expanded to fall back to the .bss
+     section's offset if there is no .data section, and then to the
+     .rodata section's offset.  */
+  data_sect_index = objfile->sect_index_data;
+  if (data_sect_index == -1)
+    data_sect_index = SECT_OFF_BSS (objfile);
+  if (data_sect_index == -1)
+    data_sect_index = SECT_OFF_RODATA (objfile);
+
+  /* If data_sect_index is still -1, that's okay.  It's perfectly fine
+     for the file to have no .data, no .bss, and no .text at all, if
+     it also has no global or static variables.  If it does, we will
+     get an internal error from an ANOFFSET macro below when we try to
+     use data_sect_index.  */
 
   for (symnum = 0; symnum < DBX_SYMCOUNT (objfile); symnum++)
     {
@@ -1757,7 +1791,7 @@ read_dbx_symtab (struct objfile *objfile)
 	  switch (p[1])
 	  {
 	  case 'S':
-	    nlist.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+	    nlist.n_value += ANOFFSET (objfile->section_offsets, data_sect_index);
 #ifdef STATIC_TRANSFORM_NAME
 	    namestring = STATIC_TRANSFORM_NAME (namestring);
 #endif
@@ -1768,7 +1802,7 @@ read_dbx_symtab (struct objfile *objfile)
 				 psymtab_language, objfile);
 	    continue;
 	  case 'G':
-	    nlist.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+	    nlist.n_value += ANOFFSET (objfile->section_offsets, data_sect_index);
 	    /* The addresses in these entries are reported to be
 	       wrong.  See the code that reads 'G's for symtabs. */
 	    add_psymbol_to_list (namestring, p - namestring,
