@@ -1,6 +1,6 @@
 /* tc-ppc.h -- Header file for tc-ppc.c.
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
+   2004 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -110,6 +110,11 @@ extern char *ppc_target_format PARAMS ((void));
 	}								\
     }
 
+#define md_frag_check(FRAGP) \
+  if ((FRAGP)->has_code							\
+      && (((FRAGP)->fr_address + (FRAGP)->insn_addr) & 3) != 0)		\
+    as_bad_where ((FRAGP)->fr_file, (FRAGP)->fr_line,			\
+		  _("instruction address is not a multiple of 4"));
 
 #ifdef TE_PE
 

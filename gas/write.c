@@ -1,6 +1,6 @@
 /* write.c - emit .o file
    Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003
+   1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -616,6 +616,9 @@ cvt_frag_to_fill (object_headers *headersP, segT sec, fragS *fragP)
       BAD_CASE (fragP->fr_type);
       break;
     }
+#ifdef md_frag_check
+  md_frag_check (fragP);
+#endif
 }
 
 #endif /* defined (BFD_ASSEMBLER) || !defined (BFD)  */

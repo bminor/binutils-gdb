@@ -1,3 +1,10 @@
+2004-07-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* frags.h (struct frag): Add has_code and insn_addr fields.
+	* write.c (cvt_frag_to_fill): Invoke md_frag_check.
+	* config/tc-ppc.c (md_assemble): Check and set insn_addr.
+	* config/tc-ppc.h (md_frag_check): Define.
+
 2004-06-28  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* doc/Makefile.am (info): Rename goal to...

@@ -2091,6 +2091,7 @@ md_assemble (str)
   struct ppc_fixup fixups[MAX_INSN_FIXUPS];
   int fc;
   char *f;
+  int addr_mod;
   int i;
 #ifdef OBJ_ELF
   bfd_reloc_code_real_type reloc;
@@ -2618,6 +2619,11 @@ md_assemble (str)
 
   /* Write out the instruction.  */
   f = frag_more (4);
+  addr_mod = frag_now_fix () & 3;
+  if (frag_now->has_code && frag_now->insn_addr != addr_mod)
+    as_bad (_("instruction address is not a multiple of 4"));
+  frag_now->insn_addr = addr_mod;
+  frag_now->has_code = 1;
   md_number_to_chars (f, insn, 4);
 
 #ifdef OBJ_ELF
