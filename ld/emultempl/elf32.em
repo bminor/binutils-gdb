@@ -66,7 +66,7 @@ static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
 static void
 gld${EMULATION_NAME}_before_parse()
 {
-  ldfile_output_architecture = bfd_arch_${ARCH};
+  ldfile_output_architecture = bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`;
   config.dynamic_link = ${DYNAMIC_LINK-true};
 }
 
