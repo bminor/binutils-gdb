@@ -3,6 +3,8 @@ Mon Apr  6 17:16:48 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* dvp-opc.c (vif_macros): Tweak unpackloc operand.
 	(dvp_expand_macro): Implement.
+	(insert_vif_datalen): Record value with max+1 -> 0 conversion.
+	(vif_unpack_len): Perform 0 -> max+1 conversion on `wl' value.
 
 end-sanitize-sky
 Sun Apr  5 16:04:39 1998  H.J. Lu  <hjl@gnu.org>
