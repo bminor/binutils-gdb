@@ -1,3 +1,14 @@
+start-sanitize-d30v
+Tue Feb 18 17:32:42 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config.sub, configure.in: Add d30v target cpu. 
+	
+end-sanitize-d30v
+Thu Feb 13 22:04:44 1997  Klaus Kaempf  <kkaempf@progis.de>
+
+	* makefile.vms: New file.
+	* make-all.com: Remove.
+
 Wed Feb 12 12:54:18 1997  Jim Wilson  <wilson@cygnus.com>
 
 	* Makefile.in (EXTRA_GCC_FLAGS): Add LIBGCC2_DEBUG_CFLAGS.

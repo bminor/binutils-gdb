@@ -428,6 +428,11 @@ case "${target}" in
     noconfigdirs="$noconfigdirs target-librx target-libg++ target-libstdc++ target-libio target-libgloss"
     ;;
 # end-sanitize-d10v
+# start-sanitize-d30v
+  d30v-*-*)
+    noconfigdirs="$noconfigdirs sim tcl tk expect gcc gdb newlib ld target-librx target-libg++ target-libstdc++ target-libio target-libgloss"
+    ;;
+# end-sanitize-d30v
   h8300*-*-* | \
   h8500-*-*)
     noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx target-libgloss"

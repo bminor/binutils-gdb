@@ -108,6 +108,9 @@ case $os in
 		os=vxworks
 		basic_machine=$1
 		;;
+        -hiuxmpp)
+                os=-hiuxmpp
+                ;;
 	-hiux*)
 		os=-hiuxwe2
 		;;
@@ -180,13 +183,18 @@ case $basic_machine in
 	mips64vr5000 | mips64vr5000el) # CYGNUS LOCAL ian/vr5000
 		basic_machine=$basic_machine-unknown
 		;;
+# start-sanitize-r5900
+	mips64vr5900 | mips64vr5900el) # CYGNUS LOCAL gavin/r5900
+		basic_machine=$basic_machine-unknown
+		;;
+# end-sanitize-r5900
 	mips16) # CYGNUS LOCAL krk/mips16
 		basic_machine=$basic_machine-unknown
 		;;
-# CYGNUS LOCAL law
 	mn10300)
 		basic_machine=$basic_machine-unknown
 		;;
+# CYGNUS LOCAL law
 	mn10200)
 		basic_machine=$basic_machine-unknown
 		;;
@@ -206,6 +214,11 @@ case $basic_machine in
 		basic_machine=$basic_machine-unknown
 		;;
 # end-sanitize-d10v
+# start-sanitize-d30v
+	d30v)				# CYGNUS LOCAL hunt/d30v
+		basic_machine=$basic_machine-unknown
+		;;
+# end-sanitize-d30v
 # start-sanitize-m32r
 	m32r)				# CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
@@ -238,12 +251,16 @@ case $basic_machine in
 	      | pdp11-* | sh-* | powerpc-* | powerpcle-* | sparc64-* | mips64-* | mipsel-* \
 	      | mips64el-* | mips64orion-* | mips64orionel-* | f301-*)
 		;;
-	m88110-* | m680[01234]0-* | m683?2-* | m68360-* | z8k-* | h8500-* | v850-* | d10v-*) # CYGNUS LOCAL
+	m88110-* | m680[01234]0-* | m683?2-* | m68360-* | z8k-* | h8500-* | v850-* | d10v-* | d30v-*) # CYGNUS LOCAL
 		;;
 	mips64vr4300-* | mips64vr4300el-*) # CYGNUS LOCAL jsmith/vr4300
 		;;
 	mips64vr4100-* | mips64vr4100el-*) # CYGNUS LOCAL jsmith/vr4100
 		;;
+# start-sanitize-r5900
+	mips64vr5900-* | mips64vr5900el-*) # CYGNUS LOCAL gavin/r5900
+                ;;
+# end-sanitize-r5900
 	mips16-*) # CYGNUS LOCAL krk/mips16
 		;;
 # start-sanitize-tic80
@@ -400,6 +417,10 @@ case $basic_machine in
 		basic_machine=tron-gmicro
 		os=-sysv
 		;;
+        hiuxmpp)
+                basic_machine=hppa1.1-hitachi
+                os=-hiuxmpp
+                ;;
 	h3050r* | hiux*)
 		basic_machine=hppa1.1-hitachi
 		os=-hiuxwe2
@@ -526,6 +547,14 @@ case $basic_machine in
 		;;
 	miniframe)
 		basic_machine=m68000-convergent
+		;;
+	mipsel*-linux*)
+		basic_machine=mipsel-unknown
+		os=-linux
+		;;
+	mips*-linux*)
+		basic_machine=mips-unknown
+		os=-linux
 		;;
 	mips3*-*)
 		basic_machine=`echo $basic_machine | sed -e 's/mips3/mips64/'`
@@ -660,6 +689,11 @@ case $basic_machine in
 	ps2)
 		basic_machine=i386-ibm
 		;;
+# start-sanitize-r5900
+        r5900)                                          # CYGNUS LOCAL
+                basic_machine=mips64vr5900el-unknown
+                ;;
+# end-sanitize-r5900
 	rom68k)						# CYGNUS LOCAL
 		basic_machine=m68k-rom68k
 		os=-coff
@@ -813,7 +847,11 @@ case $basic_machine in
 		basic_machine=hppa1.1-oki
 		;;
 	mips)
-		basic_machine=mips-mips
+		if [ x$os = x-linux ]; then
+			basic_machine=mips-unknown
+		else
+			basic_machine=mips-mips
+		fi
 		;;
 	romp)
 		basic_machine=romp-ibm
@@ -1032,6 +1070,9 @@ case $basic_machine in
 	mips*-cisco)					# CYGNUS LOCAL
 		os=-elf
 		;;
+        mips*-*)                                        # CYGNUS LOCAL
+                os=-elf
+                ;;
 	*-tti)	# must be before sparc entry or we get the wrong os.
 		os=-sysv3
 		;;
