@@ -28,6 +28,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdb_string.h"
 #include <time.h>
 
+/* Type of function passed to bfd_map_over_sections.  */
+
+typedef void (*section_map_func) PARAMS ((bfd *abfd, asection *sect, PTR obj));
+
 /* Packet escape character used by Densan monitor.  */
 
 #define PESC 0xdc
@@ -187,6 +191,7 @@ static struct bit_field status_fields [] =
 };
 
 
+#if 0	/* FIXME: Enable when we add support for modifying cache register.  */
 static struct bit_field cache_fields [] =
 {
   /* Status register portion (dummy for parsing only) */
@@ -214,6 +219,8 @@ static struct bit_field cache_fields [] =
 
   { NULL,	NULL,	NULL,	0,  0 }		/* end of table marker */
 };
+#endif
+
 
 static struct bit_field cause_fields[] = 
 {
@@ -272,6 +279,7 @@ r3900_supply_register (regname, regnamelen, val, vallen)
   monitor_supply_register (regno, valbuf);
 }
 
+
 /* Fetch the BadVaddr register.  Unlike the other registers, this
    one can't be modified, and the monitor won't even prompt to let
    you modify it.  */
@@ -315,6 +323,7 @@ fetch_fields (bf)
   return val;
 }
 
+
 static void
 fetch_bitmapped_register (regno, bf)
      int regno;
@@ -335,10 +344,11 @@ fetch_bitmapped_register (regno, bf)
 
 }
 
+
 /* Fetch all registers (if regno is -1), or one register from the
    monitor.  For most registers, we can use the generic monitor_
    monitor_fetch_registers function.  But others are displayed in
-   very unusual fashion and must be handled specially.  */
+   a very unusual fashion by the monitor, and must be handled specially.  */
 
 static void
 r3900_fetch_registers (regno)
@@ -394,6 +404,7 @@ store_bitmapped_register (regno, bf)
   monitor_expect_prompt (NULL, 0);
 }
 
+
 static void
 r3900_store_registers (regno)
      int regno;
@@ -442,7 +453,7 @@ write_long_le (buf, n)
 
 /* Read a character from the monitor.  If remote debugging is on,
    print the received character.  If HEX is non-zero, print the
-   character in hexadecimal; otherwise, print it in ascii.  */
+   character in hexadecimal; otherwise, print it in ASCII.  */
 
 static int
 debug_readchar (hex)
@@ -501,6 +512,9 @@ debug_write (buf, buflen)
       length (low byte)
       length (high byte)
       data (length bytes)
+
+   The last two bytes of the data field are a checksum, but we don't
+   bother to verify it.
 */
 
 static void
@@ -535,7 +549,12 @@ ignore_packet ()
 }
 
 
-/* Send a packet to the monitor.  */
+/* Encapsulate some data into a packet and send it to the monitor.
+
+   The 'p' packet is a special case.  This is a packet we send
+   in response to a read ('r') packet from the monitor.  This function
+   appends a one-byte sequence number to the data field of such a packet.
+*/
 
 static void
 send_packet (type, buf, buflen, seq)
@@ -603,7 +622,15 @@ send_packet (type, buf, buflen, seq)
 
 
 /* Respond to an expected read request from the monitor by sending
-   data in chunks.  Handle all acknowledgements and handshaking packets.  */
+   data in chunks.  Handle all acknowledgements and handshaking packets.
+
+   The monitor expects a response consisting of a one or more 'p' packets,
+   each followed by a portion of the data requested.  The 'p' packet
+   contains only a four-byte integer, the value of which is the number
+   of bytes of data we are about to send.  Following the 'p' packet,
+   the monitor expects the data bytes themselves in raw, unpacketized,
+   form, without even a checksum.
+ */
 
 static void
 process_read_request (buf, buflen)
@@ -614,13 +641,13 @@ process_read_request (buf, buflen)
   int i, chunk;
   unsigned char seq;
 
-  /* Discard the read request.  We have to hope it's for
-     the exact number of bytes we want to send.  */
+  /* Discard the read request.  FIXME: we have to hope it's for
+     the exact number of bytes we want to send; should check for this.  */
   ignore_packet ();
 
   for (i = chunk = 0, seq = 0; i < buflen; i += chunk, seq++)
     {
-      /* Don't send more than 256 bytes at a time.  */
+      /* Don't send more than MAXPSIZE bytes at a time.  */
       chunk = buflen - i;
       if (chunk > MAXPSIZE)
 	chunk = MAXPSIZE;
@@ -769,7 +796,8 @@ r3900_load (filename, from_tty)
   send_packet ('a', "", 0, 0);
   
   /* Output the fast load header (number of sections and starting address).  */
-  bfd_map_over_sections ((bfd *) abfd, count_section, &section_count);
+  bfd_map_over_sections ((bfd *) abfd, (section_map_func) count_section,
+			 &section_count);
   write_long (&buffer[0], (long)section_count);
   if (exec_bfd)
     write_long (&buffer[4], (long)bfd_get_start_address (exec_bfd));
@@ -779,7 +807,7 @@ r3900_load (filename, from_tty)
 
   /* Output the section data.  */
   start_time = time (NULL);
-  bfd_map_over_sections (abfd, load_section, &data_count);
+  bfd_map_over_sections (abfd, (section_map_func) load_section, &data_count);
   end_time = time (NULL);
 
   /* Acknowledge the close packet and put the monitor back into
@@ -790,7 +818,7 @@ r3900_load (filename, from_tty)
   monitor_printf ("vconsx\r");
   monitor_expect_prompt (NULL, 0);
 
-  /* Print download performance information.  */
+  /* Print start address and download performance information.  */
   printf_filtered ("Start address 0x%lx\n", (long)bfd_get_start_address (abfd));
   report_transfer_performance (data_count, start_time, end_time);
 
@@ -806,16 +834,13 @@ r3900_load (filename, from_tty)
      Another way to do this might be to call normal_stop, except that
      the stack may not be valid, and things would get horribly
      confused... */
-
   clear_symtab_users ();
 }
 
 
-static struct target_ops r3900_ops;
-
 /* Commands to send to the monitor when first connecting:
     * The bare carriage return forces a prompt from the monitor
-      (monitor doesn't prompt after a reset).
+      (monitor doesn't prompt immediately after a reset).
     * The "vconsx" switches the monitor back to interactive mode
       in case an aborted download had left it in packet mode.
     * The "Xtr" command causes subsequent "t" (trace) commands to display
@@ -828,6 +853,7 @@ static struct target_ops r3900_ops;
 static char *r3900_inits[] = {"\r", "vconsx\r", "Xtr\r", "Xxr\r", "bx\r", NULL};
 static char *dummy_inits[] = { NULL };
 
+static struct target_ops r3900_ops;
 static struct monitor_ops r3900_cmds;
 
 static void
@@ -869,6 +895,7 @@ _initialize_r3900_rom ()
   r3900_cmds.flags = MO_NO_ECHO_ON_OPEN |
 		     MO_ADDR_BITS_REMOVE |
 		     MO_CLR_BREAK_USES_ADDR |
+		     MO_GETMEM_READ_SINGLE |
 		     MO_PRINT_PROGRAM_OUTPUT;
 
   r3900_cmds.init = dummy_inits;
@@ -882,8 +909,12 @@ _initialize_r3900_rom ()
   r3900_cmds.setmem.cmdw = "sh %Lx %x\r";	/* COREADDR, val */
   r3900_cmds.setmem.cmdl = "sw %Lx %x\r";	/* COREADDR, val */
 
-  r3900_cmds.getmem.cmdb = "dx %Lx s %x\r";	/* COREADDR, len */
+  r3900_cmds.getmem.cmdb = "sx %Lx\r";		/* COREADDR */
+  r3900_cmds.getmem.cmdw = "sh %Lx\r";		/* COREADDR */
+  r3900_cmds.getmem.cmdl = "sw %Lx\r";		/* COREADDR */
   r3900_cmds.getmem.resp_delim = " : ";
+  r3900_cmds.getmem.term = " ";
+  r3900_cmds.getmem.term_cmd = ".\r";
 
   r3900_cmds.setreg.cmd = "x%s %x\r";		/* regname, val */
 

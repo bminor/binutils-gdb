@@ -1,3 +1,9 @@
+Mon Jan 26 17:54:45 1998  Mark Alexander  <marka@cygnus.com>
+
+	* dve3900-rom.c: Improve performance by using memory commands
+	that print less fluff.  Minor cosmetic changes.
+	Eliminate compiler warnings.
+
 Sat Jan 24 23:44:43 1998  Martin M. Hunt  <hunt@cygnus.com>
 
 	* breakpoint.c (enable_breakpoint): Preserve breakpoint
