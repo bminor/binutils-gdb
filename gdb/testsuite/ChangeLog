@@ -1,3 +1,17 @@
+Fri Jun  3 18:56:06 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	Various changes to gdb.t31:
+
+	* Makefile.in (gdbme.o):  Compile with -fspecial_UC.
+	* gdbme.ch:  Make all key-words and predefineds be upper-case.
+	* chillvars.exp:  Expect key-words and predefinds in upper-case.
+
+	* chillvars.exp:  Use gdb_test_exact many places.
+	Change expected output for arrays (which now includes index labels).
+
+	* pr-5020.exp, gdme.ch (module PR_5020):
+	New test, for PR-5020.
+
 Thu Jun  2 16:02:41 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* lib/gdb.exp (string_to_regexp, gdb_test_exact):  New procedures.
