@@ -1,3 +1,7 @@
+2003-09-22  Michael Chastain  <mec@shout.net>
+
+	* MAINTAINERS: Rename gdb.c++ to gdb.cp.
+
 2003-09-22  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* top.c (quit_force): Fix indirect call to quit_target so

@@ -254,7 +254,7 @@ testsuite		(Global Maintainers)
   lib                   Fernando Nasser         fnasser@redhat.com
                         Mark Salter             msalter@redhat.com
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
-  c++ (gdb.c++)		Michael Chastain	mec@shout.net
+  c++ (gdb.cp) 		Michael Chastain	mec@shout.net
 			David Carlton		carlton@kealia.com
   mi tests (gdb.mi)     Elena Zannoni           ezannoni@redhat.com
                         Andrew Cagney           cagney@redhat.com
