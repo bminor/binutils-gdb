@@ -115,6 +115,7 @@ static void s_reserve PARAMS ((int));
 static void s_common PARAMS ((int));
 static void s_empty PARAMS ((int));
 static void s_uacons PARAMS ((int));
+static void s_ncons PARAMS ((int));
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -123,6 +124,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"empty", s_empty, 0},
   {"global", s_globl, 0},
   {"half", cons, 2},
+  {"nword", s_ncons, 0},
   {"optim", s_ignore, 0},
   {"proc", s_proc, 0},
   {"reserve", s_reserve, 0},
@@ -174,9 +176,7 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
    changed in read.c.  Ideally it shouldn't have to know about it at all,
    but nothing is ideal around here.  */
 
-static unsigned char octal[256];
-#define isoctal(c)  octal[(unsigned char) (c)]
-static unsigned char toHex[256];
+#define isoctal(c)  ((c) >= '0' && (c) < '8')
 
 struct sparc_it
   {
@@ -184,6 +184,7 @@ struct sparc_it
     unsigned long opcode;
     struct nlist *nlistp;
     expressionS exp;
+    expressionS exp2;
     int pcrel;
     bfd_reloc_code_real_type reloc;
   };
@@ -613,6 +614,27 @@ md_show_usage (stream)
 #endif
 }
 
+/* native operand size opcode translation */
+struct
+  {
+    char *name;
+    char *name32;
+    char *name64;
+  } native_op_table[] =
+{
+  {"ldn", "ld", "ldx"},
+  {"ldna", "lda", "ldxa"},
+  {"stn", "st", "stx"},
+  {"stna", "sta", "stxa"},
+  {"slln", "sll", "sllx"},
+  {"srln", "srl", "srlx"},
+  {"sran", "sra", "srax"},
+  {"casn", "cas", "casx"},
+  {"casna", "casa", "casxa"},
+  {"clrn", "clr", "clrx"},
+  {NULL, NULL, NULL},
+};
+
 /* sparc64 priviledged registers */
 
 struct priv_reg_entry
@@ -693,16 +715,16 @@ md_begin ()
       retval = hash_insert (op_hash, name, (PTR) &sparc_opcodes[i]);
       if (retval != NULL)
 	{
-	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-		   sparc_opcodes[i].name, retval);
+	  as_bad (_("Internal error: can't hash `%s': %s\n"),
+		  sparc_opcodes[i].name, retval);
 	  lose = 1;
 	}
       do
 	{
 	  if (sparc_opcodes[i].match & sparc_opcodes[i].lose)
 	    {
-	      fprintf (stderr, _("internal error: losing opcode: `%s' \"%s\"\n"),
-		       sparc_opcodes[i].name, sparc_opcodes[i].args);
+	      as_bad (_("Internal error: losing opcode: `%s' \"%s\"\n"),
+		      sparc_opcodes[i].name, sparc_opcodes[i].args);
 	      lose = 1;
 	    }
 	  ++i;
@@ -711,17 +733,32 @@ md_begin ()
 	     && !strcmp (sparc_opcodes[i].name, name));
     }
 
+  for (i = 0; native_op_table[i].name; i++)
+    {
+      const struct sparc_opcode *insn;
+      char *name = sparc_arch_size == 32 ? native_op_table[i].name32 :
+			native_op_table[i].name64;
+      insn = (struct sparc_opcode *)hash_find (op_hash, name);
+      if (insn == NULL)
+        {
+          as_bad (_("Internal error: can't find opcode `%s' for `%s'\n"),
+          	  name, native_op_table[i].name);
+          lose = 1;
+        }
+      else
+	{
+	  retval = hash_insert (op_hash, native_op_table[i].name, (PTR) insn);
+	  if (retval != NULL)
+	    {
+	      as_bad (_("Internal error: can't hash `%s': %s\n"),
+		      sparc_opcodes[i].name, retval);
+	      lose = 1;
+	    }
+	}
+    }
+
   if (lose)
     as_fatal (_("Broken assembler.  No assembly attempted."));
-
-  for (i = '0'; i < '8'; ++i)
-    octal[i] = 1;
-  for (i = '0'; i <= '9'; ++i)
-    toHex[i] = i - '0';
-  for (i = 'a'; i <= 'f'; ++i)
-    toHex[i] = i + 10 - 'a';
-  for (i = 'A'; i <= 'F'; ++i)
-    toHex[i] = i + 10 - 'A';
 
   qsort (priv_reg_table, sizeof (priv_reg_table) / sizeof (priv_reg_table[0]),
 	 sizeof (priv_reg_table[0]), cmp_reg_entry);
@@ -1885,89 +1922,221 @@ sparc_ip (str, pinsn)
 	      if (*s == ' ')
 		s++;
 
-	      /* Check for %hi, etc.  */
-	      if (*s == '%')
-		{
-		  static struct ops {
-		    /* The name as it appears in assembler.  */
-		    char *name;
-		    /* strlen (name), precomputed for speed */
-		    int len;
-		    /* The reloc this pseudo-op translates to.  */
-		    int reloc;
-		    /* Non-zero if for v9 only.  */
-		    int v9_p;
-		    /* Non-zero if can be used in pc-relative contexts.  */
-		    int pcrel_p;/*FIXME:wip*/
-		  } ops[] = {
-		    /* hix/lox must appear before hi/lo so %hix won't be
-		       mistaken for %hi.  */
-		    { "hix", 3, BFD_RELOC_SPARC_HIX22, 1, 0 },
-		    { "lox", 3, BFD_RELOC_SPARC_LOX10, 1, 0 },
-		    { "hi", 2, BFD_RELOC_HI22, 0, 1 },
-		    { "lo", 2, BFD_RELOC_LO10, 0, 1 },
-		    { "hh", 2, BFD_RELOC_SPARC_HH22, 1, 1 },
-		    { "hm", 2, BFD_RELOC_SPARC_HM10, 1, 1 },
-		    { "lm", 2, BFD_RELOC_SPARC_LM22, 1, 1 },
-		    { "h44", 3, BFD_RELOC_SPARC_H44, 1, 0 },
-		    { "m44", 3, BFD_RELOC_SPARC_M44, 1, 0 },
-		    { "l44", 3, BFD_RELOC_SPARC_L44, 1, 0 },
-		    { "uhi", 3, BFD_RELOC_SPARC_HH22, 1, 0 },
-		    { "ulo", 3, BFD_RELOC_SPARC_HM10, 1, 0 },
-		    { NULL }
-		  };
-		  struct ops *o;
-
-		  for (o = ops; o->name; o++)
-		    if (strncmp (s + 1, o->name, o->len) == 0)
-		      break;
-		  if (o->name == NULL)
-		    break;
-
-		  the_insn.reloc = o->reloc;
-		  s += o->len + 1;
-		  v9_arg_p = o->v9_p;
-		}
-
-	      /* Note that if the get_expression() fails, we will still
-		 have created U entries in the symbol table for the
-		 'symbols' in the input string.  Try not to create U
-		 symbols for registers, etc.  */
 	      {
+		char *s1;
+		char *op_arg = NULL;
+		expressionS op_exp;
+		bfd_reloc_code_real_type old_reloc = the_insn.reloc;
+
+		/* Check for %hi, etc.  */
+		if (*s == '%')
+		  {
+		    static const struct ops {
+		      /* The name as it appears in assembler.  */
+		      char *name;
+		      /* strlen (name), precomputed for speed */
+		      int len;
+		      /* The reloc this pseudo-op translates to.  */
+		      int reloc;
+		      /* Non-zero if for v9 only.  */
+		      int v9_p;
+		      /* Non-zero if can be used in pc-relative contexts.  */
+		      int pcrel_p;/*FIXME:wip*/
+		    } ops[] = {
+		      /* hix/lox must appear before hi/lo so %hix won't be
+			 mistaken for %hi.  */
+		      { "hix", 3, BFD_RELOC_SPARC_HIX22, 1, 0 },
+		      { "lox", 3, BFD_RELOC_SPARC_LOX10, 1, 0 },
+		      { "hi", 2, BFD_RELOC_HI22, 0, 1 },
+		      { "lo", 2, BFD_RELOC_LO10, 0, 1 },
+		      { "hh", 2, BFD_RELOC_SPARC_HH22, 1, 1 },
+		      { "hm", 2, BFD_RELOC_SPARC_HM10, 1, 1 },
+		      { "lm", 2, BFD_RELOC_SPARC_LM22, 1, 1 },
+		      { "h44", 3, BFD_RELOC_SPARC_H44, 1, 0 },
+		      { "m44", 3, BFD_RELOC_SPARC_M44, 1, 0 },
+		      { "l44", 3, BFD_RELOC_SPARC_L44, 1, 0 },
+		      { "uhi", 3, BFD_RELOC_SPARC_HH22, 1, 0 },
+		      { "ulo", 3, BFD_RELOC_SPARC_HM10, 1, 0 },
+		      { NULL }
+		    };
+		    const struct ops *o;
+  
+		    for (o = ops; o->name; o++)
+		      if (strncmp (s + 1, o->name, o->len) == 0)
+			break;
+		    if (o->name == NULL)
+		      break;
+		      
+		    if (s[o->len + 1] != '(')
+		      {
+			as_bad (_("Illegal operands: %%%s requires arguments in ()"), o->name);
+			return;
+		      }
+
+		    op_arg = o->name;
+		    the_insn.reloc = o->reloc;
+		    s += o->len + 2;
+		    v9_arg_p = o->v9_p;
+		  }
+
+		/* Note that if the get_expression() fails, we will still
+		   have created U entries in the symbol table for the
+		   'symbols' in the input string.  Try not to create U
+		   symbols for registers, etc.  */
+
 		/* This stuff checks to see if the expression ends in
 		   +%reg.  If it does, it removes the register from
 		   the expression, and re-sets 's' to point to the
 		   right place.  */
 
-		char *s1;
+		if (op_arg)
+		  {
+		    int npar = 0;
+
+		    for (s1 = s; *s1 && *s1 != ',' && *s1 != ']'; s1++)
+		      if (*s1 == '(')
+			npar++;
+		      else if (*s1 == ')')
+			{
+			  if (!npar)
+			    break;
+			  npar--;
+			}
+
+		    if (*s1 != ')')
+		      {
+			as_bad (_("Illegal operands: %%%s requires arguments in ()"), op_arg);
+			return;
+		      }
+		    
+		    *s1 = '\0';
+		    (void) get_expression (s);
+		    *s1 = ')';
+		    s = s1 + 1;
+		    if (*s == ',' || *s == ']' || !*s)
+		      continue;
+		    if (*s != '+' && *s != '-')
+		      {
+			as_bad (_("Illegal operands: Can't do arithmetics other than + and - involving %%%s()"), op_arg);
+			return;
+		      }
+		    *s1 = '0';
+		    s = s1;
+		    op_exp = the_insn.exp;
+		    memset (&the_insn.exp, 0, sizeof(the_insn.exp));
+		  }
 
 		for (s1 = s; *s1 && *s1 != ',' && *s1 != ']'; s1++) ;
 
 		if (s1 != s && isdigit ((unsigned char) s1[-1]))
 		  {
 		    if (s1[-2] == '%' && s1[-3] == '+')
-		      {
-			s1 -= 3;
-			*s1 = '\0';
-			(void) get_expression (s);
-			*s1 = '+';
-			s = s1;
-			continue;
-		      }
+		      s1 -= 3;
 		    else if (strchr ("goli0123456789", s1[-2]) && s1[-3] == '%' && s1[-4] == '+')
+		      s1 -= 4;
+		    else
+		      s1 = NULL;
+		    if (s1)
 		      {
-			s1 -= 4;
 			*s1 = '\0';
 			(void) get_expression (s);
 			*s1 = '+';
+			if (op_arg)
+			  *s = ')';
 			s = s1;
-			continue;
+		      }
+		  }
+		else
+		  s1 = NULL;
+
+		if (!s1)
+		  {
+		    (void) get_expression (s);
+		    if (op_arg)
+		      *s = ')';
+		    s = expr_end;
+		  }
+
+		if (op_arg)
+		  {
+		    the_insn.exp2 = the_insn.exp;
+		    the_insn.exp = op_exp;
+		    if (the_insn.exp2.X_op == O_absent)
+		      the_insn.exp2.X_op = O_illegal;
+		    else if (the_insn.exp.X_op == O_absent)
+		      {
+			the_insn.exp = the_insn.exp2;
+			the_insn.exp2.X_op = O_illegal;
+		      }
+		    else if (the_insn.exp.X_op == O_constant)
+		      {
+			valueT val = the_insn.exp.X_add_number;
+			switch (the_insn.reloc)
+			  {
+			  case BFD_RELOC_SPARC_HH22:
+			    val = BSR (val, 32);
+			    /* intentional fallthrough */
+
+			  case BFD_RELOC_SPARC_LM22:
+			  case BFD_RELOC_HI22:
+			    val = (val >> 10) & 0x3fffff;
+			    break;
+
+			  case BFD_RELOC_SPARC_HM10:
+			    val = BSR (val, 32);
+			    /* intentional fallthrough */
+
+			  case BFD_RELOC_LO10:
+			    val &= 0x3ff;
+			    break;
+
+			  case BFD_RELOC_SPARC_H44:
+			    val >>= 22;
+			    val &= 0x3fffff;
+			    break;
+
+			  case BFD_RELOC_SPARC_M44:
+			    val >>= 12;
+			    val &= 0x3ff;
+			    break;
+
+			  case BFD_RELOC_SPARC_L44:
+			    val &= 0xfff;
+			    break;
+
+			  case BFD_RELOC_SPARC_HIX22:
+			    val = ~ val;
+			    val = (val >> 10) & 0x3fffff;
+			    break;
+
+			  case BFD_RELOC_SPARC_LOX10:
+			    val = (val & 0x3ff) | 0x1c00;
+			    break;
+			  }
+			the_insn.exp = the_insn.exp2;
+			the_insn.exp.X_add_number += val;
+			the_insn.exp2.X_op = O_illegal;
+			the_insn.reloc = old_reloc;
+		      }
+		    else if (the_insn.exp2.X_op != O_constant)
+		      {
+			as_bad (_("Illegal operands: Can't add non-constant expression to %%%s()"), op_arg);
+			return;
+		      }
+		    else
+		      {
+			if (1 || old_reloc != BFD_RELOC_SPARC13
+			    || the_insn.reloc != BFD_RELOC_LO10
+			    || sparc_arch_size != 64
+			    || sparc_pic_code)
+			  {
+			    as_bad (_("Illegal operands: Can't do arithmetics involving %%%s() of a relocatable symbol"), op_arg);
+			    return;
+			  }
+			the_insn.reloc = BFD_RELOC_SPARC_OLO10;
 		      }
 		  }
 	      }
-	      (void) get_expression (s);
-	      s = expr_end;
-
 	      /* Check for constants that don't require emitting a reloc.  */
 	      if (the_insn.exp.X_op == O_constant
 		  && the_insn.exp.X_add_symbol == 0
@@ -3393,6 +3562,17 @@ s_uacons (bytes)
   /* Tell sparc_cons_align not to align this value.  */
   sparc_no_align_cons = 1;
   cons (bytes);
+}
+
+/* This handles the native word allocation pseudo-op .nword.
+   For sparc_arch_size 32 it is equivalent to .word,  for
+   sparc_arch_size 64 it is equivalent to .xword.  */
+
+static void
+s_ncons (bytes)
+     int bytes;
+{
+  cons (sparc_arch_size == 32 ? 4 : 8);
 }
 
 /* If the --enforce-aligned-data option is used, we require .word,
