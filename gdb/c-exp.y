@@ -1186,6 +1186,8 @@ yylex ()
 	  if (namelen > 2)
 	    {
 	      lexptr = tokstart + namelen;
+	      if (lexptr[-1] != '\'')
+		error ("Unmatched single quote.");
 	      namelen -= 2;
 	      tokstart++;
 	      goto tryname;

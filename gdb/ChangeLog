@@ -1,5 +1,9 @@
 Fri Jul  2 13:39:48 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* c-exp.y (yylex): Give error if unmatched single quote.
+
+	* configure.in, config/m68k/*delta68*, delta68-nat.c: New port.
+
 	* Remove unused STACK_END_ADDR in the following files (in other
 	files it is used for something): tm-mips.h, tm-sun2.h, tm-news.h,
 	tm-a29k, tm-i386v.h, tm-hppa.h, tm-nindy960.h, tm-amix.h,
