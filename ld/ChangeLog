@@ -1,3 +1,11 @@
+Fri Apr  5 18:11:25 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* emulparams/elf32{b,l}4300.sh (MACHINE): Add explicit
+ 	architecture number.
+	* scripttempl/elf.sc: Use $MACHINE definition if present.
+	* configure.tgt (targ_extra_emuls): Force 4100 build to use same
+ 	template as 4300.
+
 Mon Apr  1 17:35:40 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (lang_size_sections): Change region check to handle
