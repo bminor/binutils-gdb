@@ -357,7 +357,21 @@ appearance of a human-readable @file{bb.out} means the basic-block
 counts didn't get written into @file{gmon.out}.
 The Perl script @code{bbconv.pl}, included with the @code{gprof}
 source distribution, will convert a @file{bb.out} file into
-a format readable by @code{gprof}.
+a format readable by @code{gprof}.  Invoke it like this:
+
+@smallexample
+bbconv.pl < bb.out > @var{bh-data}
+@end smallexample
+
+This translates the information in @file{bb.out} into a form that
+@code{gprof} can understand.  But you still need to tell @code{gprof}
+about the existence of this translated information.  To do that, include
+@var{bb-data} on the @code{gprof} command line, @emph{along with
+@file{gmon.out}}, like this:
+
+@smallexample
+gprof @var{options} @var{executable-file} gmon.out @var{bb-data} [@var{yet-more-profile-data-files}@dots{}] [> @var{outfile}]
+@end smallexample
 
 @node Invoking
 @chapter @code{gprof} Command Summary

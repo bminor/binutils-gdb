@@ -1,3 +1,8 @@
+2002-07-29  Ulrich Drepper  <drepper@redhat.com>
+
+	* gprof.texi (Executing the Program): Add documentation on how to use
+	bbconv.pl.  Patch by Eric Hanchrow.
+
 2002-07-25  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
