@@ -1,5 +1,10 @@
 Thu Jul 20 11:40:13 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* gdb.base/return.c: Put return values into variables so we
+	can have gdb print them rather than depending on the program
+	to print them.
+	* gdb.base/return.exp: Corresponding changes.
+
 	* lib/gdb.exp: Provide default value for noinferiorio.
 	* gdb.base/interrupt.exp: Skip tests if we can't handle IO to/from
 	the inferior.
