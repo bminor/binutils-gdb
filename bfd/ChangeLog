@@ -1,3 +1,14 @@
+2001-12-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* elfcode.h (elf_swap_ehdr_out): Adjust value written for e_shnum
+	and e_shstrndx if out of range.
+	(elf_object_p): Read extended values for e_shnum and e_shstrndx
+	from the first section header.  Allocate space in elf_elfsections
+	for reserved sections and set to NULLs.
+	(elf_write_shdrs_and_ehdr): Set overflow fields in first section
+	header.  Skip reserved sections in elf_elfsections.  Remove
+	duplicate size calculation.
+
 2001-12-07  Geoffrey Keating  <geoffk@redhat.com>
 	    Richard Henderson  <rth@redhat.com>
 	    Corinna Vinschen  <vinschen@redhat.com>

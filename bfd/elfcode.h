@@ -277,6 +277,7 @@ elf_swap_ehdr_out (abfd, src, dst)
      const Elf_Internal_Ehdr *src;
      Elf_External_Ehdr *dst;
 {
+  unsigned int tmp;
   int signed_vma = get_elf_backend_data (abfd)->sign_extend_vma;
   memcpy (dst->e_ident, src->e_ident, EI_NIDENT);
   /* note that all elements of dst are *arrays of unsigned char* already...  */
@@ -294,8 +295,14 @@ elf_swap_ehdr_out (abfd, src, dst)
   H_PUT_16 (abfd, src->e_phentsize, dst->e_phentsize);
   H_PUT_16 (abfd, src->e_phnum, dst->e_phnum);
   H_PUT_16 (abfd, src->e_shentsize, dst->e_shentsize);
-  H_PUT_16 (abfd, src->e_shnum, dst->e_shnum);
-  H_PUT_16 (abfd, src->e_shstrndx, dst->e_shstrndx);
+  tmp = src->e_shnum;
+  if (tmp >= SHN_LORESERVE)
+    tmp = SHN_UNDEF;
+  H_PUT_16 (abfd, tmp, dst->e_shnum);
+  tmp = src->e_shstrndx;
+  if (tmp >= SHN_LORESERVE)
+    tmp = SHN_XINDEX;
+  H_PUT_16 (abfd, tmp, dst->e_shstrndx);
 }
 
 /* Translate an ELF section header table entry in external format into an
@@ -494,6 +501,7 @@ elf_object_p (abfd)
   Elf_External_Ehdr x_ehdr;	/* Elf file header, external form */
   Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
   Elf_External_Shdr x_shdr;	/* Section header table entry, external form */
+  Elf_Internal_Shdr i_shdr;
   Elf_Internal_Shdr *i_shdrp = NULL; /* Section header table, internal form */
   unsigned int shindex;
   char *shstrtab;		/* Internal copy of section header stringtab */
@@ -634,27 +642,65 @@ elf_object_p (abfd)
   /* Remember the entry point specified in the ELF file header.  */
   bfd_set_start_address (abfd, i_ehdrp->e_entry);
 
+  /* Seek to the section header table in the file.  */
+  if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_shoff, SEEK_SET) != 0)
+    goto got_no_match;
+
+  /* Read the first section header at index 0, and convert to internal
+     form.  */
+  if (bfd_bread ((PTR) & x_shdr, (bfd_size_type) sizeof x_shdr, abfd)
+      != sizeof (x_shdr))
+    goto got_no_match;
+  elf_swap_shdr_in (abfd, &x_shdr, &i_shdr);
+
+  /* If the section count is zero, the actual count is in the first
+     section header.  */
+  if (i_ehdrp->e_shnum == SHN_UNDEF)
+    i_ehdrp->e_shnum = i_shdr.sh_size;
+
+  /* And similarly for the string table index.  */
+  if (i_ehdrp->e_shstrndx == SHN_XINDEX)
+    i_ehdrp->e_shstrndx = i_shdr.sh_link;
+
   /* Allocate space for a copy of the section header table in
-     internal form, seek to the section header table in the file,
-     read it in, and convert it to internal form.  */
+     internal form.  */
   if (i_ehdrp->e_shnum != 0)
     {
+      Elf_Internal_Shdr *shdrp;
+
       amt = sizeof (*i_shdrp) * i_ehdrp->e_shnum;
       i_shdrp = (Elf_Internal_Shdr *) bfd_alloc (abfd, amt);
+      if (!i_shdrp)
+	goto got_no_match;
       amt = sizeof (i_shdrp) * i_ehdrp->e_shnum;
+      if (i_ehdrp->e_shnum > SHN_LORESERVE)
+	amt += sizeof (i_shdrp) * (SHN_HIRESERVE + 1 - SHN_LORESERVE);
       elf_elfsections (abfd) = (Elf_Internal_Shdr **) bfd_alloc (abfd, amt);
-      if (!i_shdrp || !elf_elfsections (abfd))
+      if (!elf_elfsections (abfd))
 	goto got_no_match;
-      if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_shoff, SEEK_SET) != 0)
-	goto got_no_match;
+
+      memcpy (i_shdrp, &i_shdr, sizeof (*i_shdrp));
+      shdrp = i_shdrp;
+      shindex = 0;
+      if (i_ehdrp->e_shnum > SHN_LORESERVE)
+	{
+	  for ( ; shindex < SHN_LORESERVE; shindex++)
+	    elf_elfsections (abfd)[shindex] = shdrp++;
+	  for ( ; shindex < SHN_HIRESERVE + 1; shindex++)
+	    elf_elfsections (abfd)[shindex] = NULL;
+	}
+      for ( ; shindex < i_ehdrp->e_shnum; shindex++)
+	elf_elfsections (abfd)[shindex] = shdrp++;
     }
-  for (shindex = 0; shindex < i_ehdrp->e_shnum; shindex++)
+
+  /* Read in the rest of the section header table and convert it to
+     internal form.  */
+  for (shindex = 1; shindex < i_ehdrp->e_shnum; shindex++)
     {
       if (bfd_bread ((PTR) & x_shdr, (bfd_size_type) sizeof x_shdr, abfd)
 	  != sizeof (x_shdr))
 	goto got_no_match;
       elf_swap_shdr_in (abfd, &x_shdr, i_shdrp + shindex);
-      elf_elfsections (abfd)[shindex] = i_shdrp + shindex;
 
       /* If the section is loaded, but not page aligned, clear
          D_PAGED.  */
@@ -987,21 +1033,30 @@ elf_write_shdrs_and_ehdr (abfd)
       || bfd_bwrite ((PTR) & x_ehdr, amt, abfd) != amt)
     return false;
 
+  /* Some fields in the first section header handle overflow of ehdr
+     fields.  */
+  if (i_ehdrp->e_shnum >= SHN_LORESERVE)
+    i_shdrp[0]->sh_size = i_ehdrp->e_shnum;
+  if (i_ehdrp->e_shstrndx >= SHN_LORESERVE)
+    i_shdrp[0]->sh_link = i_ehdrp->e_shstrndx;
+
   /* at this point we've concocted all the ELF sections...  */
-  amt = sizeof (*x_shdrp) * i_ehdrp->e_shnum;
+  amt = i_ehdrp->e_shnum;
+  amt *= sizeof (*x_shdrp);
   x_shdrp = (Elf_External_Shdr *) bfd_alloc (abfd, amt);
   if (!x_shdrp)
     return false;
 
-  for (count = 0; count < i_ehdrp->e_shnum; count++)
+  for (count = 0; count < i_ehdrp->e_shnum; i_shdrp++, count++)
     {
 #if DEBUG & 2
-      elf_debug_section (count, i_shdrp[count]);
+      elf_debug_section (count, *i_shdrp);
 #endif
-      elf_swap_shdr_out (abfd, i_shdrp[count], x_shdrp + count);
+      elf_swap_shdr_out (abfd, *i_shdrp, x_shdrp + count);
+      
+      if (count == SHN_LORESERVE - 1)
+	i_shdrp += SHN_HIRESERVE + 1 - SHN_LORESERVE;
     }
-  amt = i_ehdrp->e_shnum;
-  amt *= sizeof (*x_shdrp);
   if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_shoff, SEEK_SET) != 0
       || bfd_bwrite ((PTR) x_shdrp, amt, abfd) != amt)
     return false;
