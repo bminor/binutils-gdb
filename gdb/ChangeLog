@@ -1,3 +1,8 @@
+Tue Apr  7 16:34:07 1992  Per Bothner  (bothner@cygnus.com)
+
+	* breakpoint.c (breakpoint_1):  Add (int) casts for enums
+	used in array index context (otherwise, some compilers barf).	
+
 Tue Apr  7 08:45:46 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* m68k-tdep.c, tm-sun3.h:  #ifdef around get_longjmp_target().
