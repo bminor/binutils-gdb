@@ -1,5 +1,8 @@
 Tue Sep 23 17:48:09 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* app.c (do_scrub_chars): Clear mri_state at end of .mri
+	pseudo-op.
+
 	* config/tc-mips.c (hilo_interlocks): Change from a static
 	variable to a macro, so that it varies with the variables upon
 	which it depends.
