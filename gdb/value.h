@@ -307,6 +307,8 @@ extern value_ptr allocate_value (struct type *type);
 
 extern value_ptr allocate_repeat_value (struct type *type, int count);
 
+extern value_ptr value_change_enclosing_type (value_ptr val, struct type *new_type);
+
 extern value_ptr value_mark (void);
 
 extern void value_free_to_mark (value_ptr mark);

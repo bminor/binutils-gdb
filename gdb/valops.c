@@ -365,7 +365,7 @@ value_cast (struct type *type, register value_ptr arg2)
 	  /* No superclass found, just fall through to change ptr type.  */
 	}
       VALUE_TYPE (arg2) = type;
-      VALUE_ENCLOSING_TYPE (arg2) = type;	/* pai: chk_val */
+      arg2 = value_change_enclosing_type (arg2, type);
       VALUE_POINTED_TO_OFFSET (arg2) = 0;	/* pai: chk_val */
       return arg2;
     }
@@ -609,7 +609,7 @@ value_assign (register value_ptr toval, register value_ptr fromval)
     case lval_internalvar:
       set_internalvar (VALUE_INTERNALVAR (toval), fromval);
       val = value_copy (VALUE_INTERNALVAR (toval)->value);
-      VALUE_ENCLOSING_TYPE (val) = VALUE_ENCLOSING_TYPE (fromval);
+      val = value_change_enclosing_type (val, VALUE_ENCLOSING_TYPE (fromval));
       VALUE_EMBEDDED_OFFSET (val) = VALUE_EMBEDDED_OFFSET (fromval);
       VALUE_POINTED_TO_OFFSET (val) = VALUE_POINTED_TO_OFFSET (fromval);
       return val;
@@ -823,7 +823,7 @@ value_assign (register value_ptr toval, register value_ptr fromval)
   memcpy (VALUE_CONTENTS_RAW (val), VALUE_CONTENTS (fromval),
 	  TYPE_LENGTH (type));
   VALUE_TYPE (val) = type;
-  VALUE_ENCLOSING_TYPE (val) = VALUE_ENCLOSING_TYPE (fromval);
+  val = value_change_enclosing_type (val, VALUE_ENCLOSING_TYPE (fromval));
   VALUE_EMBEDDED_OFFSET (val) = VALUE_EMBEDDED_OFFSET (fromval);
   VALUE_POINTED_TO_OFFSET (val) = VALUE_POINTED_TO_OFFSET (fromval);
 
@@ -965,7 +965,7 @@ value_addr (value_ptr arg1)
 
   /* This may be a pointer to a base subobject; so remember the
      full derived object's type ... */
-  VALUE_ENCLOSING_TYPE (arg2) = lookup_pointer_type (VALUE_ENCLOSING_TYPE (arg1));
+  arg2 = value_change_enclosing_type (arg2, lookup_pointer_type (VALUE_ENCLOSING_TYPE (arg1)));
   /* ... and also the relative position of the subobject in the full object */
   VALUE_POINTED_TO_OFFSET (arg2) = VALUE_EMBEDDED_OFFSET (arg1);
   VALUE_BFD_SECTION (arg2) = VALUE_BFD_SECTION (arg1);
@@ -1009,7 +1009,7 @@ value_ind (value_ptr arg1)
       /* Re-adjust type */
       VALUE_TYPE (arg2) = TYPE_TARGET_TYPE (base_type);
       /* Add embedding info */
-      VALUE_ENCLOSING_TYPE (arg2) = enc_type;
+      arg2 = value_change_enclosing_type (arg2, enc_type);
       VALUE_EMBEDDED_OFFSET (arg2) = VALUE_POINTED_TO_OFFSET (arg1);
 
       /* We may be pointing to an object of some derived type */
@@ -3165,7 +3165,7 @@ value_full_object (value_ptr argp, struct type *rtype, int xfull, int xtop,
      type is wrong, set it *//* pai: FIXME -- sounds iffy */
   if (full)
     {
-      VALUE_ENCLOSING_TYPE (argp) = real_type;
+      argp = value_change_enclosing_type (argp, real_type);
       return argp;
     }
 
