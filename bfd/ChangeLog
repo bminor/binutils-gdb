@@ -1,3 +1,24 @@
+Thu Apr 21 09:29:37 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* libelf.h (elf_obj_tdata):  Add members for dynamic symbol table
+	handling.
+	* elfcode.h (bfd_section_from_shdr):  Handle dynamic symbol table.
+	* elfcode.h (elf_slurp_symbol_table):  Take additional parameter
+	to select static or dynamic symbol table and return number of
+	symbols slurped or -1 on error.
+	* elfcode.h (elf_get_symtab):  Set bfd symcount from
+	elf_slurp_symbol_table result.
+	* elfcode.h (elf_get_dynamic_symtab_upper_bound,
+	elf_canonicalize_dynamic_symtab):  New functions to handle dynamic
+	symbol table.
+	* elf32-target.h, elf64-target.h (BFD_JUMP_TABLE_DYNAMIC):
+	Change to handle dynamic symbol table, provide default definitions
+	for dynamic relocs.
+	* aoutx.h (howto_table_std, NAME(aout,swap_std_reloc_out),
+	NAME(aout,swap_std_reloc_in), aout_link_input_section_std,
+	aout_link_reloc_link_order):  Handle r_jmptable and r_relative
+	relocations.
+
 Thu Apr 21 11:58:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* libnlm.h (struct nlm_obj_tdata): Add nlm_cygnus_section_hdr

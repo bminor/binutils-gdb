@@ -75,13 +75,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define elf_core_file_failing_command	NAME(bfd_elf,core_file_failing_command)
 #define elf_core_file_failing_signal	NAME(bfd_elf,core_file_failing_signal)
-#define elf_core_file_matches_executable_p NAME(bfd_elf,core_file_matches_executable_p)
+#define elf_core_file_matches_executable_p \
+  NAME(bfd_elf,core_file_matches_executable_p)
 #define elf_object_p			NAME(bfd_elf,object_p)
 #define elf_core_file_p			NAME(bfd_elf,core_file_p)
 #define elf_get_symtab_upper_bound	NAME(bfd_elf,get_symtab_upper_bound)
+#define elf_get_dynamic_symtab_upper_bound \
+  NAME(bfd_elf,get_dynamic_symtab_upper_bound)
 #define elf_get_reloc_upper_bound	NAME(bfd_elf,get_reloc_upper_bound)
 #define elf_canonicalize_reloc		NAME(bfd_elf,canonicalize_reloc)
 #define elf_get_symtab			NAME(bfd_elf,get_symtab)
+#define elf_canonicalize_dynamic_symtab \
+  NAME(bfd_elf,canonicalize_dynamic_symtab)
 #define elf_make_empty_symbol		NAME(bfd_elf,make_empty_symbol)
 #define elf_get_symbol_info		NAME(bfd_elf,get_symbol_info)
 #define elf_print_symbol		NAME(bfd_elf,print_symbol)
@@ -123,7 +128,7 @@ static struct sec *section_from_elf_index PARAMS ((bfd *, unsigned int));
 
 static int elf_section_from_bfd_section PARAMS ((bfd *, struct sec *));
 
-static boolean elf_slurp_symbol_table PARAMS ((bfd *, asymbol **));
+static long elf_slurp_symbol_table PARAMS ((bfd *, asymbol **, boolean));
 
 static int elf_symbol_from_bfd_symbol PARAMS ((bfd *,
 					     struct symbol_cache_entry **));
@@ -547,6 +552,18 @@ bfd_section_from_shdr (abfd, shindex)
       abfd->flags |= HAS_SYMS;
       return true;
 
+    case SHT_DYNSYM:		/* A dynamic symbol table */
+      if (elf_dynsymtab (abfd) == shindex)
+	return true;
+
+      BFD_ASSERT (hdr->sh_entsize == sizeof (Elf_External_Sym));
+      BFD_ASSERT (elf_dynsymtab (abfd) == 0);
+      elf_dynsymtab (abfd) = shindex;
+      elf_tdata (abfd)->dynsymtab_hdr = *hdr;
+      elf_elfsections (abfd)[shindex] = &elf_tdata (abfd)->dynsymtab_hdr;
+      abfd->flags |= HAS_SYMS;
+      return true;
+
     case SHT_STRTAB:		/* A string table */
       if (hdr->rawdata)
 	return true;
@@ -570,6 +587,12 @@ bfd_section_from_shdr (abfd, shindex)
 		  {
 		    elf_tdata (abfd)->strtab_hdr = *hdr;
 		    elf_elfsections (abfd)[shindex] = &elf_tdata (abfd)->strtab_hdr;
+		    return true;
+		  }
+		if (elf_dynsymtab (abfd) == i)
+		  {
+		    elf_tdata (abfd)->dynstrtab_hdr = *hdr;
+		    elf_elfsections (abfd)[shindex] = &elf_tdata (abfd)->dynstrtab_hdr;
 		    return true;
 		  }
 #if 0				/* Not handling other string tables specially right now.  */
@@ -664,7 +687,6 @@ bfd_section_from_shdr (abfd, shindex)
       break;
 
     case SHT_HASH:
-    case SHT_DYNSYM:		/* could treat this like symtab... */
 #if 0
       fprintf (stderr, "Dynamic Linking sections not yet supported.\n");
       BFD_FAIL ();
@@ -2584,24 +2606,18 @@ elf_symbol_from_bfd_symbol (abfd, asym_ptr_ptr)
   return idx;
 }
 
-static boolean
-elf_slurp_symbol_table (abfd, symptrs)
+static long
+elf_slurp_symbol_table (abfd, symptrs, dynamic)
      bfd *abfd;
      asymbol **symptrs;		/* Buffer for generated bfd symbols */
+     boolean dynamic;
 {
-  Elf_Internal_Shdr *hdr = &elf_tdata (abfd)->symtab_hdr;
+  Elf_Internal_Shdr *hdr;
   long symcount;		/* Number of external ELF symbols */
   elf_symbol_type *sym;		/* Pointer to current bfd symbol */
   elf_symbol_type *symbase;	/* Buffer for generated bfd symbols */
   Elf_Internal_Sym i_sym;
   Elf_External_Sym *x_symp = NULL;
-
-  /* this is only valid because there is only one symtab... */
-  /* FIXME:  This is incorrect, there may also be a dynamic symbol
-     table which is a subset of the full symbol table.  We either need
-     to be prepared to read both (and merge them) or ensure that we
-     only read the full symbol table.  Currently we only get called to
-     read the full symbol table.  -fnf */
 
   /* Read each raw ELF symbol, converting from external ELF form to
      internal ELF form, and then using the information to create a
@@ -2613,8 +2629,12 @@ elf_slurp_symbol_table (abfd, symptrs)
      space left over at the end.  When we have all the symbols, we
      build the caller's pointer vector. */
 
+  if (dynamic)
+    hdr = &elf_tdata (abfd)->dynsymtab_hdr;
+  else
+    hdr = &elf_tdata (abfd)->symtab_hdr;
   if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) == -1)
-    return false;
+    return -1;
 
   symcount = hdr->sh_size / sizeof (Elf_External_Sym);
 
@@ -2625,14 +2645,14 @@ elf_slurp_symbol_table (abfd, symptrs)
       long i;
 
       if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) == -1)
-	return false;
+	return -1;
 
       symbase = ((elf_symbol_type *)
 		 bfd_zalloc (abfd, symcount * sizeof (elf_symbol_type)));
       if (symbase == (elf_symbol_type *) NULL)
 	{
 	  bfd_set_error (bfd_error_no_memory);
-	  return false;
+	  return -1;
 	}
       sym = symbase;
 
@@ -2716,6 +2736,9 @@ elf_slurp_symbol_table (abfd, symptrs)
 	      break;
 	    }
 
+	  if (dynamic)
+	    sym->symbol.flags |= BSF_DYNAMIC;
+
 	  /* Do some backend-specific processing on this symbol.  */
 	  {
 	    struct elf_backend_data *ebd = get_elf_backend_data (abfd);
@@ -2736,13 +2759,15 @@ elf_slurp_symbol_table (abfd, symptrs)
 
   /* We rely on the zalloc to clear out the final symbol entry.  */
 
-  bfd_get_symcount (abfd) = symcount = sym - symbase;
+  symcount = sym - symbase;
 
   /* Fill in the user's symbol pointer vector if needed.  */
   if (symptrs)
     {
+      long l = symcount;
+
       sym = symbase;
-      while (symcount-- > 0)
+      while (l-- > 0)
 	{
 	  *symptrs++ = &sym->symbol;
 	  sym++;
@@ -2752,11 +2777,11 @@ elf_slurp_symbol_table (abfd, symptrs)
 
   if (x_symp != NULL)
     free (x_symp);
-  return true;
+  return symcount;
 error_return:
   if (x_symp != NULL)
     free (x_symp);
-  return false;
+  return -1;
 }
 
 /* Return the number of bytes required to hold the symtab vector.
@@ -2772,6 +2797,20 @@ elf_get_symtab_upper_bound (abfd)
   long symcount;
   long symtab_size;
   Elf_Internal_Shdr *hdr = &elf_tdata (abfd)->symtab_hdr;
+
+  symcount = hdr->sh_size / sizeof (Elf_External_Sym);
+  symtab_size = (symcount - 1 + 1) * (sizeof (asymbol *));
+
+  return symtab_size;
+}
+
+long
+elf_get_dynamic_symtab_upper_bound (abfd)
+     bfd *abfd;
+{
+  long symcount;
+  long symtab_size;
+  Elf_Internal_Shdr *hdr = &elf_tdata (abfd)->dynsymtab_hdr;
 
   symcount = hdr->sh_size / sizeof (Elf_External_Sym);
   symtab_size = (symcount - 1 + 1) * (sizeof (asymbol *));
@@ -3106,10 +3145,19 @@ elf_get_symtab (abfd, alocation)
      bfd *abfd;
      asymbol **alocation;
 {
-  if (!elf_slurp_symbol_table (abfd, alocation))
-    return -1;
+  long symcount = elf_slurp_symbol_table (abfd, alocation, false);
 
-  return bfd_get_symcount (abfd);
+  if (symcount >= 0)
+    bfd_get_symcount (abfd) = symcount;
+  return symcount;
+}
+
+long
+elf_canonicalize_dynamic_symtab (abfd, alocation)
+     bfd *abfd;
+     asymbol **alocation;
+{
+  return elf_slurp_symbol_table (abfd, alocation, true);
 }
 
 asymbol *

@@ -59,6 +59,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define bfd_elf32_bfd_is_local_label bfd_generic_is_local_label
 #endif
 
+#ifndef bfd_elf32_get_dynamic_reloc_upper_bound
+#define bfd_elf32_get_dynamic_reloc_upper_bound \
+  _bfd_nodynamic_get_dynamic_reloc_upper_bound
+#endif
+#ifndef bfd_elf32_canonicalize_dynamic_reloc
+#define bfd_elf32_canonicalize_dynamic_reloc \
+  _bfd_nodynamic_canonicalize_dynamic_reloc
+#endif
+
 #ifndef elf_info_to_howto_rel
 #define elf_info_to_howto_rel 0
 #endif
@@ -208,7 +217,7 @@ bfd_target TARGET_BIG_SYM =
       BFD_JUMP_TABLE_RELOCS (bfd_elf32),
       BFD_JUMP_TABLE_WRITE (bfd_elf32),
       BFD_JUMP_TABLE_LINK (bfd_elf32),
-      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+      BFD_JUMP_TABLE_DYNAMIC (bfd_elf32),
 
   /* backend_data: */
   (PTR) &elf32_bed,
@@ -296,7 +305,7 @@ bfd_target TARGET_LITTLE_SYM =
       BFD_JUMP_TABLE_RELOCS (bfd_elf32),
       BFD_JUMP_TABLE_WRITE (bfd_elf32),
       BFD_JUMP_TABLE_LINK (bfd_elf32),
-      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+      BFD_JUMP_TABLE_DYNAMIC (bfd_elf32),
 
   /* backend_data: */
   (PTR) &elf32_bed,

@@ -206,7 +206,9 @@ struct elf_obj_tdata
   Elf_Internal_Shdr symtab_hdr;
   Elf_Internal_Shdr shstrtab_hdr;
   Elf_Internal_Shdr strtab_hdr;
-  int symtab_section, shstrtab_section, strtab_section;
+  Elf_Internal_Shdr dynsymtab_hdr;
+  Elf_Internal_Shdr dynstrtab_hdr;
+  int symtab_section, shstrtab_section, strtab_section, dynsymtab_section;
   file_ptr next_file_pos;
   void *prstatus;		/* The raw /proc prstatus structure */
   void *prpsinfo;		/* The raw /proc prpsinfo structure */
@@ -219,6 +221,7 @@ struct elf_obj_tdata
 #define elf_elfsections(bfd)	(elf_tdata(bfd) -> elf_sect_ptr)
 #define elf_shstrtab(bfd)	(elf_tdata(bfd) -> strtab_ptr)
 #define elf_onesymtab(bfd)	(elf_tdata(bfd) -> symtab_section)
+#define elf_dynsymtab(bfd)	(elf_tdata(bfd) -> dynsymtab_section)
 #define elf_num_locals(bfd)	(elf_tdata(bfd) -> num_locals)
 #define elf_num_globals(bfd)	(elf_tdata(bfd) -> num_globals)
 #define elf_sym_extra(bfd)	(elf_tdata(bfd) -> sym_extra)
@@ -265,6 +268,8 @@ extern boolean bfd_elf32_set_section_contents PARAMS ((bfd *, sec_ptr, PTR,
 
 extern long bfd_elf32_get_symtab_upper_bound PARAMS ((bfd *));
 extern long bfd_elf32_get_symtab PARAMS ((bfd *, asymbol **));
+extern long bfd_elf32_get_dynamic_symtab_upper_bound PARAMS ((bfd *));
+extern long bfd_elf32_canonicalize_dynamic_symtab PARAMS ((bfd *, asymbol **));
 extern long bfd_elf32_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
 extern long bfd_elf32_canonicalize_reloc PARAMS ((bfd *, sec_ptr,
 						  arelent **, asymbol **));
@@ -301,6 +306,8 @@ extern boolean bfd_elf64_set_section_contents PARAMS ((bfd *, sec_ptr, PTR,
 
 extern long bfd_elf64_get_symtab_upper_bound PARAMS ((bfd *));
 extern long bfd_elf64_get_symtab PARAMS ((bfd *, asymbol **));
+extern long bfd_elf64_get_dynamic_symtab_upper_bound PARAMS ((bfd *));
+extern long bfd_elf64_canonicalize_dynamic_symtab PARAMS ((bfd *, asymbol **));
 extern long bfd_elf64_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
 extern long bfd_elf64_canonicalize_reloc PARAMS ((bfd *, sec_ptr,
 						  arelent **, asymbol **));
