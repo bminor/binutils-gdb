@@ -231,13 +231,17 @@ struct type
 
     char *tag_name;
 
-    /* Length of storage for a value of this type.  Various places pass
-       this to memcpy and such, meaning it must be in units of
-       HOST_CHAR_BIT.  Various other places expect they can calculate
-       addresses by adding it and such, meaning it must be in units of
+    /* Length of storage for a value of this type.  This is of length
+       of the type as defined by the debug info and not the length of
+       the value that resides within the type.  For instance, an
+       i386-ext floating-point value only occupies 80 bits of what is
+       typically a 12 byte `long double'.  Various places pass this to
+       memcpy and such, meaning it must be in units of HOST_CHAR_BIT.
+       Various other places expect they can calculate addresses by
+       adding it and such, meaning it must be in units of
        TARGET_CHAR_BIT.  For some DSP targets, in which HOST_CHAR_BIT
-       will (presumably) be 8 and TARGET_CHAR_BIT will be (say) 32, this
-       is a problem.  One fix would be to make this field in bits
+       will (presumably) be 8 and TARGET_CHAR_BIT will be (say) 32,
+       this is a problem.  One fix would be to make this field in bits
        (requiring that it always be a multiple of HOST_CHAR_BIT and
        TARGET_CHAR_BIT)--the other choice would be to make it
        consistently in units of HOST_CHAR_BIT.  */

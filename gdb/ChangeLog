@@ -1,3 +1,7 @@
+2001-08-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbtypes.h (struct type): Clarify meaning of field ``length''.
+
 2001-08-17  Keith Seitz  <keiths@redhat.com>
 
 	* varobj.c (varobj_update): Change first parameter to
