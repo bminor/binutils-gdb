@@ -2327,6 +2327,7 @@ macro_build (place, counter, ep, name, fmt, va_alist)
   struct mips_cl_insn insn;
   bfd_reloc_code_real_type r;
   va_list args;
+  int insn_isa;
 
 #ifdef USE_STDARG
   va_start (args, fmt);
@@ -2357,32 +2358,50 @@ macro_build (place, counter, ep, name, fmt, va_alist)
   assert (insn.insn_mo);
   assert (strcmp (name, insn.insn_mo->name) == 0);
 
-  while (strcmp (fmt, insn.insn_mo->args) != 0
-	 || insn.insn_mo->pinfo == INSN_MACRO
-	 || ((insn.insn_mo->membership & INSN_ISA) == INSN_ISA2
-	     && mips_opts.isa < 2)
-	 || ((insn.insn_mo->membership & INSN_ISA) == INSN_ISA3
-	     && mips_opts.isa < 3)
-	 || ((insn.insn_mo->membership & INSN_ISA) == INSN_ISA4
-	     && mips_opts.isa < 4)
-         || ((insn.insn_mo->membership & INSN_ISA) == INSN_3900
-	     && ! mips_3900)
-         || ((insn.insn_mo->membership & INSN_ISA) == INSN_4650
-	     && ! mips_4650)
-	 || ((insn.insn_mo->membership & INSN_ISA) == INSN_4010
-	     && ! mips_4010)
-	 || ((insn.insn_mo->membership & INSN_ISA) == INSN_4100
-	     && ! mips_4100)
-	 /* start-sanitize-r5900 */
-         || ((insn.insn_mo->membership & INSN_ISA) == INSN_5900
-	     && ! mips_5900)
-         /* end-sanitize-r5900 */
-         )
+
+  /* Search until we get a match for NAME.  */
+  while (1)
     {
-      ++insn.insn_mo;
-      assert (insn.insn_mo->name);
-      assert (strcmp (name, insn.insn_mo->name) == 0);
+      if (insn.insn_mo->pinfo == INSN_MACRO)
+	insn_isa = insn.insn_mo->match;
+      else if ((insn.insn_mo->membership & INSN_ISA) == INSN_ISA1)
+	insn_isa = 1;
+      else if ((insn.insn_mo->membership & INSN_ISA) == INSN_ISA2)
+	insn_isa = 2;
+      else if ((insn.insn_mo->membership & INSN_ISA) == INSN_ISA3)
+	insn_isa = 3;
+      else if ((insn.insn_mo->membership & INSN_ISA) == INSN_ISA4)
+	insn_isa = 4;
+      else
+	insn_isa = 15;
+
+      if (insn_isa > mips_opts.isa
+	  && (insn.insn_mo->pinfo != INSN_MACRO
+	      && ((mips_4650
+		   && (insn.insn_mo->membership & INSN_4650) != INSN_4650)
+		  || (mips_4650 && (insn.insn_mo->pinfo & FP_D))
+		  || (mips_4010
+		      && (insn.insn_mo->membership & INSN_4010) != INSN_4010)
+		  || (mips_4100
+		      && (insn.insn_mo->membership & INSN_4100) != INSN_4100)
+		  /* start-sanitize-r5900 */
+		  || (mips_5900
+		      && (insn.insn_mo->membership & INSN_5900) != INSN_5900)
+		  || (mips_5900 && (insn.insn_mo->pinfo & FP_D))
+		  /* end-sanitize-r5900 */
+		  || (mips_3900
+		      && (insn.insn_mo->membership & INSN_3900) != INSN_3900))))
+	{
+	  ++insn.insn_mo;
+	  assert (insn.insn_mo->name);
+	  assert (strcmp (name, insn.insn_mo->name) == 0);
+	  continue;
+	}
+
+      /* We got a successful match.  */
+      break;
     }
+
   insn.insn_opcode = insn.insn_mo->match;
   for (;;)
     {
@@ -6557,6 +6576,8 @@ mips_ip (str, ip)
 
       if (insn->pinfo == INSN_MACRO)
 	insn_isa = insn->match;
+      else if ((insn->membership & INSN_ISA) == INSN_ISA1)
+	insn_isa = 1;
       else if ((insn->membership & INSN_ISA) == INSN_ISA2)
 	insn_isa = 2;
       else if ((insn->membership & INSN_ISA) == INSN_ISA3)
@@ -6564,23 +6585,24 @@ mips_ip (str, ip)
       else if ((insn->membership & INSN_ISA) == INSN_ISA4)
 	insn_isa = 4;
       else
-	insn_isa = 1;
+	insn_isa = 15;
 
       if (insn_isa > mips_opts.isa
-	  || (insn->pinfo != INSN_MACRO
-	      && (((insn->membership & INSN_ISA) == INSN_4650
-                   && ! mips_4650)
-		  || ((insn->membership & INSN_ISA) == INSN_4010
-		      && ! mips_4010)
-		  || ((insn->membership & INSN_ISA) == INSN_4100
-		      && ! mips_4100)
+	  && (insn->pinfo != INSN_MACRO
+	      && ((mips_4650
+		   && (insn->membership & INSN_4650) != INSN_4650)
+		  || (mips_4650 && (insn->pinfo & FP_D))
+		  || (mips_4010
+		      && (insn->membership & INSN_4010) != INSN_4010)
+		  || (mips_4100
+		      && (insn->membership & INSN_4100) != INSN_4100)
 		  /* start-sanitize-r5900 */
-		  || ((insn->membership & INSN_ISA) == INSN_5900
-		      && ! mips_5900)
+		  || (mips_5900
+		      && (insn->membership & INSN_5900) != INSN_5900)
+		  || (mips_5900 && (insn->pinfo & FP_D))
 		  /* end-sanitize-r5900 */
-                  || ((insn->membership & INSN_ISA) == INSN_3900
-		      && ! mips_3900)
-                  )))
+		  || (mips_3900
+		      && (insn->membership & INSN_3900) != INSN_3900))))
 	{
 	  if (insn + 1 < &mips_opcodes[NUMOPCODES]
 	      && strcmp (insn->name, insn[1].name) == 0)
