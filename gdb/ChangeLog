@@ -1,3 +1,12 @@
+2002-04-11  Michael Snyder  <msnyder@redhat.com>
+
+	* configure.in: Autoconfiscate _SYSCALL32 define for solaris.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* acconfig.h: Add define for _SYSCALL32.
+	* core-sol2.c: Remove #define _SYSCALL32.
+	* solib-legacy.c: Remove #define _SYSCALL32.
+
 2002-04-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* stack.c (select_frame): Cleanup internal error message, do not

@@ -409,6 +409,7 @@ if test ${host} = ${target} ; then
   AC_MSG_RESULT($gdb_cv_have_struct_link_map32)
   if test $gdb_cv_have_struct_link_map32 = yes; then
     AC_DEFINE(HAVE_STRUCT_LINK_MAP32)
+    AC_DEFINE(_SYSCALL32)
   fi
 fi
 
