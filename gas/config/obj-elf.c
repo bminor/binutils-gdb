@@ -1408,7 +1408,9 @@ elf_copy_symbol_attributes (dest, src)
       destelf->size = NULL;
     }
   S_SET_SIZE (dest, S_GET_SIZE (src));
-  S_SET_OTHER (dest, S_GET_OTHER (src));
+  /* Don't copy visibility.  */
+  S_SET_OTHER (dest, (ELF_ST_VISIBILITY (S_GET_OTHER (dest))
+		      | (S_GET_OTHER (src) & ~ELF_ST_VISIBILITY (-1))));
 }
 
 void
@@ -1838,6 +1840,8 @@ elf_frob_symbol (symp, puntp)
 
 	      /* This will copy over the size information.  */
 	      copy_symbol_attributes (symp2, symp);
+
+	      S_SET_OTHER (symp2, S_GET_OTHER (symp));
 
 	      if (S_IS_WEAK (symp))
 		S_SET_WEAK (symp2);

@@ -1,3 +1,9 @@
+2002-03-01  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/obj-elf.c (elf_copy_symbol_attributes): Don't copy
+	visibility.
+	(obj_frob_symbol): Copy visibility.
+
 2002-02-28  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-alpha.c (s_alpha_text): Use obj_elf_text for OBJ_ELF, not
