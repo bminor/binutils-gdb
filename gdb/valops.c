@@ -290,6 +290,20 @@ value_cast (type, arg2)
       return value_from_longest (type, convert_to_boolean ? 
 				 (LONGEST) (longest ? 1 : 0) : longest);
     }
+  else if (code1 == TYPE_CODE_PTR && (code2 == TYPE_CODE_INT  || 
+                                    code2 == TYPE_CODE_ENUM ||
+                                    code2 == TYPE_CODE_RANGE))
+    {
+      int ptr_bit = HOST_CHAR_BIT * TYPE_LENGTH (type);
+      LONGEST longest = value_as_long (arg2);
+      if (ptr_bit < sizeof (LONGEST) * HOST_CHAR_BIT)
+	{
+	  if (longest >= ((LONGEST) 1 << ptr_bit)
+	      || longest <= -((LONGEST) 1 << ptr_bit))
+	    warning ("value truncated");
+	}
+      return value_from_longest (type, longest);
+    }
   else if (TYPE_LENGTH (type) == TYPE_LENGTH (type2))
     {
       if (code1 == TYPE_CODE_PTR && code2 == TYPE_CODE_PTR)
