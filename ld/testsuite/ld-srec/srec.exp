@@ -278,6 +278,11 @@ if { ![ld_compile $CC $srcdir/$subdir/sr1.c tmpdir/sr1.o] \
 # sections where objdump finds them.  I don't know which is wrong.
 setup_xfail "i\[345\]86-*-aout*"
 
+# These tests fail on the MIPS ELF target because the GP value in the
+# .reginfo section is not updated when the S-record version is written
+# out.
+setup_xfail "mips*-*-elf*" "mips*-*-irix\[56\]*"
+
 run_srec_test $test1 "tmpdir/sr1.o tmpdir/sr2.o"
 
 # Now try linking a C++ program with global constructors and
@@ -296,6 +301,7 @@ if ![ld_compile "$CXX $CXXFLAGS -fgnu-linker" $srcdir/$subdir/sr3.cc tmpdir/sr3.
 
 # See above.
 setup_xfail "i\[345\]86-*-aout*"
+setup_xfail "mips*-*-elf*" "mips*-*-irix\[56\]*"
 
 # The i960 COFF targets fail this test because the i960 defaults to
 # little endian, while the srec target is big endian.  When the number
