@@ -4519,7 +4519,7 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       break;
     case MIPS_ABI_N32:
-      tdep->mips_default_saved_regsize = 4;
+      tdep->mips_default_saved_regsize = 8;
       tdep->mips_default_stack_argsize = 8;
       tdep->mips_fp_register_double = 1;
       tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
