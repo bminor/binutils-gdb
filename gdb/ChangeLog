@@ -9,6 +9,7 @@ Sat Mar 16 16:45:43 1996  Fred Fish  <fnf@cygnus.com>
 	(config.h, stamp-h): New targets to remake config.h when necessary.
 	* defs.h (config.h): Include before any other includes or defines.
 	* i386-tdep.c (gdb_string.h): Move include after include of defs.h.
+	* i386v4-nat.c (defs.h): Include before testing HAVE_SYS_PROCFS_H.
 
 Sat Mar 16 14:55:27 1996  Fred Fish  <fnf@cygnus.com>
 
