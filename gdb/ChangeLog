@@ -1,5 +1,16 @@
 2001-05-08  Jim Blandy  <jimb@redhat.com>
 
+	* mn10300-tdep.c (mn10300_pop_frame): Split the mn10300-specific
+	stuff out into mn10300_pop_frame_regular, and use
+	generic_pop_current_frame.  This lets us share code, and also
+	makes this function's prototype match that expected by gdbarch.
+	Make this function static.
+	(mn10300_pop_frame_regular): New function.
+	(mn10300_gdbarch_init): Register mn10300_pop_frame as the
+	gdbarch's pop_frame method.
+	* config/mn10300/tm-mn10300.h (POP_FRAME): Delete definition.
+	(mn10300_pop_frame): Delete declaration.
+
 	* mn10300-tdep.c (mn10300_saved_pc_after_call,
 	mn10300_extract_return_value,
 	mn10300_extract_struct_value_address, mn10300_store_return_value,

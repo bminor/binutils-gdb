@@ -57,9 +57,6 @@
 
 #define INIT_FRAME_PC		/* Not necessary */
 
-extern void mn10300_pop_frame (struct frame_info *);
-#define POP_FRAME mn10300_pop_frame (get_current_frame ())
-
 /* Cons up virtual frame pointer for trace */
 extern void mn10300_virtual_frame_pointer (CORE_ADDR, long *, long *);
 #define TARGET_VIRTUAL_FRAME_POINTER(PC, REGP, OFFP) \

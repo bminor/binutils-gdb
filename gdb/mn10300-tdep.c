@@ -592,38 +592,41 @@ mn10300_skip_prologue (CORE_ADDR pc)
   return mn10300_analyze_prologue (NULL, pc);
 }
 
+/* generic_pop_current_frame calls this function if the current
+   frame isn't a dummy frame.  */
+static void
+mn10300_pop_frame_regular (struct frame_info *frame)
+{
+  int regnum;
+
+  write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
+
+  /* Restore any saved registers.  */
+  for (regnum = 0; regnum < NUM_REGS; regnum++)
+    if (frame->saved_regs[regnum] != 0)
+      {
+        ULONGEST value;
+
+        value = read_memory_unsigned_integer (frame->saved_regs[regnum],
+                                              REGISTER_RAW_SIZE (regnum));
+        write_register (regnum, value);
+      }
+
+  /* Actually cut back the stack.  */
+  write_register (SP_REGNUM, FRAME_FP (frame));
+
+  /* Don't we need to set the PC?!?  XXX FIXME.  */
+}
 
 /* Function: pop_frame
    This routine gets called when either the user uses the `return'
    command, or the call dummy breakpoint gets hit.  */
-
-void
-mn10300_pop_frame (struct frame_info *frame)
+static void
+mn10300_pop_frame (void)
 {
-  int regnum;
-
-  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
-    generic_pop_dummy_frame ();
-  else
-    {
-      write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
-
-      /* Restore any saved registers.  */
-      for (regnum = 0; regnum < NUM_REGS; regnum++)
-	if (frame->saved_regs[regnum] != 0)
-	  {
-	    ULONGEST value;
-
-	    value = read_memory_unsigned_integer (frame->saved_regs[regnum],
-						REGISTER_RAW_SIZE (regnum));
-	    write_register (regnum, value);
-	  }
-
-      /* Actually cut back the stack.  */
-      write_register (SP_REGNUM, FRAME_FP (frame));
-
-      /* Don't we need to set the PC?!?  XXX FIXME.  */
-    }
+  /* This function checks for and handles generic dummy frames, and
+     calls back to our function for ordinary frames.  */
+  generic_pop_current_frame (mn10300_pop_frame_regular);
 
   /* Throw away any cached frame information.  */
   flush_cached_frames ();
@@ -1025,6 +1028,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
     (gdbarch, mn10300_extract_struct_value_address);
   set_gdbarch_store_return_value (gdbarch, mn10300_store_return_value);
   set_gdbarch_store_struct_return (gdbarch, mn10300_store_struct_return);
+  set_gdbarch_pop_frame (gdbarch, mn10300_pop_frame);
   set_gdbarch_skip_prologue (gdbarch, mn10300_skip_prologue);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frame_args_address (gdbarch, default_frame_address);
