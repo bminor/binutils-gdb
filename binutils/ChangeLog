@@ -1,3 +1,13 @@
+1999-05-28  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (dump_relocations): Add extra parameter: is_rela to
+	specify the kind of relocations to be dumped.  Call guess_is_rela
+	if this parameter has a value of UNKNOWN.
+	(guess_is_rela): New function:  Guess the kind of reloc being used
+	baced on the machine number.
+	(process_relocs): Determine type of reloc before calling
+	dump_relocations.
+
 1999-05-28  Ian Lance Taylor  <ian@zembu.com>
 
 	* readelf.c: Include "elf/i960.h".

@@ -118,7 +118,7 @@ unsigned int		num_dump_sects = 0;
 static unsigned long (*   byte_get)                   PARAMS ((unsigned char *, int));
 static const char *       get_mips_dynamic_type       PARAMS ((unsigned long type));
 static const char *       get_dynamic_type            PARAMS ((unsigned long type));
-static int                dump_relocations            PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *, char *));
+static int                dump_relocations            PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *, char *, int));
 static char *             get_file_type               PARAMS ((unsigned e_type));
 static char *             get_machine_name            PARAMS ((unsigned e_machine));
 static char *             get_machine_data            PARAMS ((unsigned e_data));
@@ -174,8 +174,15 @@ static void		  request_dump                PARAMS ((unsigned int, char));
 static const char *       get_elf_class               PARAMS ((unsigned char));
 static const char *       get_data_encoding           PARAMS ((unsigned char));
 static const char *       get_osabi_name              PARAMS ((unsigned char));
+static int		  guess_is_rela               PARAMS ((unsigned long));
 
 typedef int Elf32_Word;
+
+#ifndef TRUE
+#define TRUE     1
+#define FALSE    0
+#endif
+#define UNKNOWN -1
 
 #define SECTION_NAME(X) 	(string_table + (X)->sh_name)
 
@@ -329,24 +336,12 @@ byte_get_big_endian (field, size)
 }
 
 
-/* Display the contents of the relocation data
-   found at the specified offset.  */
+/* Guess the relocation sized based on the sized commonly used by the specific machine.  */
 static int
-dump_relocations (file, rel_offset, rel_size, symtab, strtab)
-     FILE *                 file;
-     unsigned long          rel_offset;
-     unsigned long          rel_size;
-     Elf_Internal_Sym *     symtab;
-     char *                 strtab;
+guess_is_rela (e_machine)
+     unsigned long e_machine;
 {
-  unsigned int        i;
-  int                 is_rela;
-  Elf_Internal_Rel *  rels;
-  Elf_Internal_Rela * relas;
-
-
-  /* Compute number of relocations and read them in.  */
-  switch (elf_header.e_machine)
+  switch (e_machine)
     {
       /* Targets that use REL relocations.  */
     case EM_ARM:
@@ -357,30 +352,8 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
     case EM_CYGNUS_D10V:
     case EM_MIPS:
     case EM_MIPS_RS4_BE:
-      {
-	Elf32_External_Rel * erels;
-
-	GET_DATA_ALLOC (rel_offset, rel_size, erels,
-			Elf32_External_Rel *, "relocs");
-
-	rel_size = rel_size / sizeof (Elf32_External_Rel);
-
-	rels = (Elf_Internal_Rel *) malloc (rel_size *
-					    sizeof (Elf_Internal_Rel));
-
-	for (i = 0; i < rel_size; i++)
-	  {
-	    rels[i].r_offset = BYTE_GET (erels[i].r_offset);
-	    rels[i].r_info   = BYTE_GET (erels[i].r_info);
-	  }
-
-	free (erels);
-
-	is_rela = 0;
-	relas   = (Elf_Internal_Rela *) rels;
-      }
-    break;
-
+      return FALSE;
+      
       /* Targets that use RELA relocations.  */
     case EM_68K:
     case EM_SPARC:
@@ -390,37 +363,95 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
     case EM_CYGNUS_MN10200:
     case EM_CYGNUS_MN10300:
     case EM_CYGNUS_FR30:
+/* start-sanitize-venus */
+    case EM_CYGNUS_VENUS:
+/* end-sanitize-venus */
     case EM_SH:
     case EM_ALPHA:
     case EM_MCORE:
-      {
-	Elf32_External_Rela * erelas;
-
-	GET_DATA_ALLOC (rel_offset, rel_size, erelas,
-			Elf32_External_Rela *, "relocs");
-
-	rel_size = rel_size / sizeof (Elf32_External_Rela);
-
-	relas = (Elf_Internal_Rela *) malloc (rel_size *
-					      sizeof (Elf_Internal_Rela));
-
-	for (i = 0; i < rel_size; i++)
-	  {
-	    relas[i].r_offset = BYTE_GET (erelas[i].r_offset);
-	    relas[i].r_info   = BYTE_GET (erelas[i].r_info);
-	    relas[i].r_addend = BYTE_GET (erelas[i].r_addend);
-	  }
-
-	free (erelas);
-
-	is_rela = 1;
-	rels    = (Elf_Internal_Rel *) relas;
-      }
-    break;
-
+      return TRUE;
+      
     default:
       warn (_("Don't know about relocations on this machine architecture\n"));
-      return 0;
+      return FALSE;
+    }
+}
+
+/* Display the contents of the relocation data
+   found at the specified offset.  */
+static int
+dump_relocations (file, rel_offset, rel_size, symtab, strtabm, is_rela)
+     FILE *                 file;
+     unsigned long          rel_offset;
+     unsigned long          rel_size;
+     Elf_Internal_Sym *     symtab;
+     char *                 strtab;
+     int                    is_rela;
+{
+  unsigned int        i;
+  Elf_Internal_Rel *  rels;
+  Elf_Internal_Rela * relas;
+
+  
+  if (is_rela == UNKNOWN)
+    is_rela = guess_is_rela (elf_header.e_machine);
+
+  if (is_rela)
+    {
+      Elf32_External_Rela * erelas;
+      
+      GET_DATA_ALLOC (rel_offset, rel_size, erelas,
+		      Elf32_External_Rela *, "relocs");
+      
+      rel_size = rel_size / sizeof (Elf32_External_Rela);
+      
+      relas = (Elf_Internal_Rela *) malloc (rel_size *
+					    sizeof (Elf_Internal_Rela));
+      
+      if (relas == NULL)
+	{
+	  error(_("out of memory parsing relocs"));
+	  return 0;
+	}
+      
+      for (i = 0; i < rel_size; i++)
+	{
+	  relas[i].r_offset = BYTE_GET (erelas[i].r_offset);
+	  relas[i].r_info   = BYTE_GET (erelas[i].r_info);
+	  relas[i].r_addend = BYTE_GET (erelas[i].r_addend);
+	}
+      
+      free (erelas);
+      
+      rels = (Elf_Internal_Rel *) relas;
+    }
+  else
+    {
+      Elf32_External_Rel * erels;
+      unsigned long        saved_rel_size = rel_size;
+
+      GET_DATA_ALLOC (rel_offset, rel_size, erels,
+		      Elf32_External_Rel *, "relocs");
+      
+      rel_size = rel_size / sizeof (Elf32_External_Rel);
+      
+      rels = (Elf_Internal_Rel *) malloc (rel_size *
+					  sizeof (Elf_Internal_Rel));
+      if (rels == NULL)
+	{
+	  error(_("out of memory parsing relocs"));
+	  return 0;
+	}
+      
+      for (i = 0; i < rel_size; i++)
+	{
+	  rels[i].r_offset = BYTE_GET (erels[i].r_offset);
+	  rels[i].r_info   = BYTE_GET (erels[i].r_info);
+	}
+      
+      free (erels);
+      
+      relas = (Elf_Internal_Rela *) rels;
     }
 
   if (is_rela)
@@ -1827,6 +1858,8 @@ process_relocs (file)
 
   if (do_using_dynamic)
     {
+      int is_rela;
+
       rel_size   = 0;
       rel_offset = 0;
 
@@ -1834,16 +1867,19 @@ process_relocs (file)
 	{
 	  rel_offset = dynamic_info[DT_REL];
 	  rel_size   = dynamic_info[DT_RELSZ];
+	  is_rela    = FALSE;
 	}
       else if (dynamic_info [DT_RELA])
 	{
 	  rel_offset = dynamic_info[DT_RELA];
 	  rel_size   = dynamic_info[DT_RELASZ];
+	  is_rela    = TRUE;
 	}
       else if (dynamic_info[DT_JMPREL])
 	{
 	  rel_offset = dynamic_info[DT_JMPREL];
 	  rel_size   = dynamic_info[DT_PLTRELSZ];
+	  is_rela    = UNKNOWN;
 	}
 
       if (rel_size)
@@ -1853,7 +1889,7 @@ process_relocs (file)
 	     rel_offset, rel_size);
 
 	  dump_relocations (file, rel_offset - loadaddr, rel_size,
-			    dynamic_symbols, dynamic_strings);
+			    dynamic_symbols, dynamic_strings, is_rela);
 	}
       else
 	printf (_("\nThere are no dynamic relocations in this file.\n"));
@@ -1881,13 +1917,26 @@ process_relocs (file)
 	      Elf32_Internal_Shdr * symsec;
 	      Elf_Internal_Sym *    symtab;
 	      char *                strtab;
-
+	      int                   is_rela;
+	      
 	      printf (_("\nRelocation section "));
 
 	      if (string_table == NULL)
-		printf ("%d", section->sh_name);
+		{
+		  printf ("%d", section->sh_name);
+		  is_rela = UNKNOWN;
+		}
 	      else
-		printf ("'%s'", SECTION_NAME (section));
+		{
+		  printf ("'%s'", SECTION_NAME (section));
+
+		  if (strncmp (".rela.", SECTION_NAME (section), 6) == 0)
+		    is_rela = TRUE;
+		  else if (strncmp (".rel.", SECTION_NAME (section), 5) == 0)
+		    is_rela = FALSE;
+		  else
+		    is_rela = UNKNOWN;
+		}
 
 	      printf (_(" at offset 0x%lx contains %lu entries:\n"),
 		 rel_offset, (unsigned long) (rel_size / section->sh_entsize));
@@ -1905,7 +1954,7 @@ process_relocs (file)
 	      GET_DATA_ALLOC (strsec->sh_offset, strsec->sh_size, strtab,
 			      char *, "string table");
 
-	      dump_relocations (file, rel_offset, rel_size, symtab, strtab);
+	      dump_relocations (file, rel_offset, rel_size, symtab, strtab, is_rela);
 
 	      free (strtab);
 	      free (symtab);
