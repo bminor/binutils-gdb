@@ -322,8 +322,16 @@ done
 # Configure extra directories which are host specific
 
 case "${host}" in
-  i[345]86-*-go32*|i[345]86-*-win32*)
+  i[345]86-*-win32* | i[345]86-*-go32*)
 	  configdirs="$configdirs dosrel" ;;
+esac
+
+
+# Configure extra directories which are target specific
+
+case "${target}" in
+  i[345]86-*-win32*)
+	  configdirs="$configdirs winsup" ;;
 esac
 
 # Remove more programs from consideration, based on the host or 
@@ -340,7 +348,7 @@ case "${host}" in
     noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff"
 	;;
   i[345]86-*-win32)
-     noconfigdirs="tk tcl expect diff make texinfo bison flex send-pr gprof gdb readline"
+     noconfigdirs="tk tcl expect dejagnu texinfo bison send-pr gprof rcs"
     ;;
 esac
 
@@ -396,10 +404,12 @@ case "${target}" in
     ;;
 
   i[345]86-*-win32)
-    # Can't build gdb for win32 target
-    noconfigdirs="$noconfigdirs gdb tk"
-    # but put newlib back
-    skipdirs=`echo " ${skipdirs} " | sed -e 's/ newlib / /'`
+
+    noconfigdirs="$noconfigdirs tk"
+    # Can't build gdb for win32 if not native.
+    if [ x${is_cross_compiler} = xyes ]; then
+	    noconfigdirs="$noconfigdirs gdb"
+    fi
     ;;    
   i[345]86-*-pe)
     noconfigdirs="$noconfigdirs libg++ libstdc++ libio librx"
@@ -500,6 +510,7 @@ esac
 # Remove the entries in $skipdirs and $noconfigdirs from $configdirs and
 # $target_configdirs.
 # If we have the source for $noconfigdirs entries, add them to $notsupp.
+
 notsupp=""
 for dir in . $skipdirs $noconfigdirs ; do
   if [ $dir != . ]  && echo " ${configdirs} " | grep " ${dir} " >/dev/null 2>&1; then

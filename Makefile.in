@@ -135,7 +135,7 @@ OTHERS =
 
 # This is set by the configure script to the list of directories which
 # should be built using the target tools.
-TARGET_CONFIGDIRS = xiberty libgloss newlib libio librx libstdc++ libg++
+TARGET_CONFIGDIRS = xiberty libgloss newlib libio librx libstdc++ libg++ winsup
 
 # This is set by the configure script to the arguments passed to configure.
 CONFIG_ARGUMENTS = 
@@ -548,6 +548,7 @@ ALL_TARGET_MODULES = \
 	all-librx \
 	all-libg++ \
 	all-newlib \
+	all-winsup \
 	all-libgloss \
 	all-xiberty
 
@@ -559,6 +560,7 @@ CONFIGURE_TARGET_MODULES = \
 	configure-librx \
 	configure-libg++ \
 	configure-newlib \
+	configure-winsup \
 	configure-libgloss \
 	configure-xiberty
 
@@ -569,6 +571,7 @@ CHECK_TARGET_MODULES = \
 	check-libstdc++ \
 	check-libg++ \
 	check-newlib \
+	check-winsup \
 	check-xiberty
 
 # This is a list of the install targets for all of the modules which are
@@ -578,12 +581,13 @@ INSTALL_TARGET_MODULES = \
 	install-libstdc++ \
 	install-libg++ \
 	install-newlib \
+	install-winsup \
 	install-libgloss \
 	install-xiberty
 
 # This is a shell case of all modules which are compiled using
 # $(TARGET_FLAGS_TO_PASS), used in the do-X rule.
-TARGET_LIBS = libio | libstdc++ | librx | libg++ | newlib | xiberty
+TARGET_LIBS = libio | libstdc++ | librx | libg++ | newlib | xiberty | winsup
 
 # The first rule in the file had better be this one.  Don't put any above it.
 all: all.normal
@@ -816,19 +820,23 @@ $(CONFIGURE_TARGET_MODULES):
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  true; \
 	elif echo " $(TARGET_CONFIGDIRS) " | grep " $${dir} " >/dev/null 2>&1; then \
-	  if [ -d ./$${dir} ]; then true; else mkdir $${dir}; fi; \
-	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
-	  AR="$(AR_FOR_TARGET)"; export AR; \
-	  AS="$(AS_FOR_TARGET)"; export AS; \
-	  CC="$(CC_FOR_TARGET)"; export CC; \
-	  CFLAGS="$(CFLAGS_FOR_TARGET)"; export CFLAGS; \
-	  CXX="$(CXX_FOR_TARGET)"; export CXX; \
-	  CXXFLAGS="$(CXXFLAGS_FOR_TARGET)"; export CXXFLAGS; \
-	  NM="$(NM_FOR_TARGET)"; export NM; \
-	  RANLIB="$(RANLIB_FOR_TARGET)"; export RANLIB; \
-	  cd $${dir}; \
-	  $${srcroot}/configure $(CONFIG_ARGUMENTS) --srcdir=$${srcroot}/$${dir}; \
+	  if [ -d $(srcdir)/$${dir} ]; then \
+	    if [ -d ./$${dir} ]; then true; else mkdir $${dir}; fi; \
+	    r=`pwd`; export r; \
+	    srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	    AR="$(AR_FOR_TARGET)"; export AR; \
+	    AS="$(AS_FOR_TARGET)"; export AS; \
+	    CC="$(CC_FOR_TARGET)"; export CC; \
+	    CFLAGS="$(CFLAGS_FOR_TARGET)"; export CFLAGS; \
+	    CXX="$(CXX_FOR_TARGET)"; export CXX; \
+	    CXXFLAGS="$(CXXFLAGS_FOR_TARGET)"; export CXXFLAGS; \
+	    NM="$(NM_FOR_TARGET)"; export NM; \
+	    RANLIB="$(RANLIB_FOR_TARGET)"; export RANLIB; \
+	    cd $${dir}; \
+	    $${srcroot}/configure $(CONFIG_ARGUMENTS) --srcdir=$${srcroot}/$${dir}; \
+	  else \
+	    true; \
+	  fi \
 	else \
 	  true; \
 	fi
@@ -1027,6 +1035,8 @@ all-textutils:
 all-tgas: all-libiberty all-bfd
 all-time:
 all-wdiff:
+all-winsup: all-newlib 
+configure-winsup: configure-newlib
 all-uudecode: all-libiberty
 configure-xiberty: all-gcc
 all-xiberty: configure-xiberty all-gcc all-ld all-newlib

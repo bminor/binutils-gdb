@@ -53,7 +53,7 @@ keep_these_too="${keep_these_too} .cvsignore CYGNUS autoconf
 	libio librx libstdc++ m4 make mmalloc move-if-change newlib opcodes
 	pagas patch prms rcs readline sed send-pr shellutils sim textutils
 	texinfo tgas utils uudecode wdiff xiberty
-	configure.bat makeall.bat
+	configure.bat makeall.bat winsup
 	mpw-README mpw-configure mpw-config.in mpw-build.in"
 
 lose_these_too="${lose_these_too} testsuite"
