@@ -396,6 +396,7 @@ get_core_registers (regno)
   char *the_regs;
 
   reg_sec = bfd_get_section_by_name (core_bfd, ".reg");
+  if (!reg_sec) goto cant;
   size = bfd_section_size (core_bfd, reg_sec);
   the_regs = alloca (size);
   if (bfd_get_section_contents (core_bfd, reg_sec, the_regs,
@@ -405,6 +406,7 @@ get_core_registers (regno)
     }
   else
     {
+cant:
       fprintf (stderr, "Couldn't fetch registers from core file: %s\n",
 	       bfd_errmsg (bfd_error));
     }

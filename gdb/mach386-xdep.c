@@ -3,21 +3,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
-#if defined (GDB_TARGET_IS_MACH386)
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
@@ -26,6 +24,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "signame.h"
 #include "gdbcore.h"
+
+#if defined (GDB_TARGET_IS_MACH386)
 
 #include <sys/param.h>
 #include <sys/dir.h>
@@ -103,10 +103,25 @@ store_inferior_registers (regno)
   ptrace (PTRACE_SETFPREGS, inferior_pid, &inferior_fp_registers);
 }
 
-/* Machine-dependent code which would otherwise be in core.c */
+#else /* Not mach386 target.  */
+
+/* These functions shouldn't be called when we're cross-debugging.  */
+
+void
+fetch_inferior_registers ()
+{
+}
+
+/* ARGSUSED */
+store_inferior_registers (regno)
+     int regno;
+{
+}
+
+#endif /* Not mach386 target.  */
+
 /* Work with core files, for GDB. */
 
-
 void
 fetch_core_registers (core_reg_sect, core_reg_size, which)
      char *core_reg_sect;
@@ -123,10 +138,12 @@ fetch_core_registers (core_reg_sect, core_reg_size, which)
     break;
 
   case 2:
+#ifdef FP0_REGNUM
     bcopy (core_reg_sect,
 	   &registers[REGISTER_BYTE (FP0_REGNUM)],
 	   core_reg_size);		/* FIXME, probably bogus */
-#if 0
+#endif
+#ifdef FPC_REGNUM
     bcopy (&corestr.c_fpu.f_fpstatus.f_ctrl,
 	   &registers[REGISTER_BYTE (FPC_REGNUM)],
 	   sizeof corestr.c_fpu.f_fpstatus -
@@ -135,28 +152,3 @@ fetch_core_registers (core_reg_sect, core_reg_size, which)
     break;
   }
 }
-#else /* Not mach386 target.  */
-
-/* These functions shouldn't be called when we're cross-debugging.  */
-
-void
-fetch_inferior_registers ()
-{
-}
-
-/* ARGSUSED */
-store_inferior_registers (regno)
-     int regno;
-{
-}
-
-/* ARGSUSED */
-void
-fetch_core_registers (core_reg_sect, core_reg_size, which)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-{
-}
-
-#endif /* Not mach386 target.  */

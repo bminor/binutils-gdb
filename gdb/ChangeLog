@@ -1,3 +1,9 @@
+Thu Oct 10 17:25:47 1991  John Gilmore  (gnu at cygnus.com)
+
+	* mach386-xdep.c:  Even when cross-compiling, leave in the
+	core-file reading code.
+	* core.c (get_core_registers):  Avoid coredump if no .reg section.
+
 Wed Oct  9 17:03:34 1991  John Gilmore  (gnu at cygnus.com)
 
 	* mipsread.c, coffread.c:  initialise TYPE_VPTR_FIELDNO to -1.
