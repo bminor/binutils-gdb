@@ -1,3 +1,8 @@
+Sat Jul 16 13:26:31 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* configure.in (m88*-harris-cxux7*): Recognize.
+	* sysdep-cxux7.h: New file.
+
 Fri Jul  8 13:18:33 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* rttty.c (control_meta_key_on): Remove superfluous testing of

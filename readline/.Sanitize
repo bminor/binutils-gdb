@@ -1,8 +1,6 @@
-# Sanitize.in for devo.
-# $Id$
-#
+# .Sanitize for devo/readline.
 
-# Each directory to survive it's way into a release will need a file
+# Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
 # and must exist in the order specified by this file.  Each directory
 # in the tree will be processed, top down, in the following order.
@@ -13,7 +11,7 @@
 
 # The lines between the "Do-first:" line and the "Things-to-keep:"
 # line are executed as a /bin/sh shell script before anything else is
-# done in this 
+# done in this directory. 
 
 Do-first:
 
@@ -52,6 +50,7 @@ rltty.c
 search.c
 signals.c
 sysdep-aix.h
+sysdep-cxux7.h
 sysdep-irix.h
 sysdep-norm.h
 sysdep-obsd.h
