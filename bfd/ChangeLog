@@ -1,5 +1,10 @@
 2004-12-09  Ian Lance Taylor  <ian@wasabisystems.com>
 
+	* elfxx-mips.c (mips_elf_calculate_relocation): For R_MIPS_JALR,
+	return a real value, unless it is a PLT symbol.
+	(mips_elf_perform_relocation): On the RM9000, turn a jal into a
+	bal if possible.
+
 	* elfn32-mips.c (elf_mips_howto_table_rela): Change dst_mask of
 	R_MIPS_JALR entry to 0.
 

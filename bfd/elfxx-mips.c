@@ -3523,12 +3523,16 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       value &= howto->dst_mask;
       break;
 
-    case R_MIPS_PJUMP:
     case R_MIPS_JALR:
-      /* Both of these may be ignored.  R_MIPS_JALR is an optimization
-	 hint; we could improve performance by honoring that hint.  */
-      return bfd_reloc_continue;
+      /* This relocation is only a hint.  In some cases, we optimize
+	 it into a bal instruction.  But we don't try to optimize
+	 branches to the PLT; that will wind up wasting time.  */
+      if (h != NULL && h->root.plt.offset != (bfd_vma) -1)
+	return bfd_reloc_continue;
+      value = symbol + addend;
+      break;
 
+    case R_MIPS_PJUMP:
     case R_MIPS_GNU_VTINHERIT:
     case R_MIPS_GNU_VTENTRY:
       /* We don't do anything with these at present.  */
@@ -3728,6 +3732,33 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
 
       /* Make this the JALX opcode.  */
       x = (x & ~(0x3f << 26)) | (jalx_opcode << 26);
+    }
+
+  /* On the RM9000, bal is faster than jal, because bal uses branch
+     prediction hardware.  If we are linking for the RM9000, and we
+     see jal, and bal fits, use it instead.  Note that this
+     transformation should be safe for all architectures.  */
+  if (bfd_get_mach (input_bfd) == bfd_mach_mips9000
+      && !info->relocatable
+      && !require_jalx
+      && ((r_type == R_MIPS_26 && (x >> 26) == 0x3)	    /* jal addr */
+	  || (r_type == R_MIPS_JALR && x == 0x0320f809)))   /* jalr t9 */
+    {
+      bfd_vma addr;
+      bfd_vma dest;
+      bfd_signed_vma off;
+
+      addr = (input_section->output_section->vma
+	      + input_section->output_offset
+	      + relocation->r_offset
+	      + 4);
+      if (r_type == R_MIPS_26)
+	dest = (value << 2) | ((addr >> 28) << 28);
+      else
+	dest = value;
+      off = dest - addr;
+      if (off <= 0x1ffff && off >= -0x20000)
+	x = 0x04110000 | (((bfd_vma) off >> 2) & 0xffff);   /* bal addr */
     }
 
   /* Swap the high- and low-order 16 bits on little-endian systems
