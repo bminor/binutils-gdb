@@ -1,3 +1,15 @@
+Sun Apr  7 13:32:41 1996  Fred Fish  <fnf@rtl.cygnus.com>
+
+	* configure.in (case host): Add i386sco5 host.
+	* configure: Regenerate.
+	
+	From: Robert Lipe <robertl@dgii.com>
+	Add support for SCO OpenServer 5 (a.k.a. 3.2v5*)  This
+	target is an SVR3.2 with COFF, ELF, and shared libes, but
+	no /proc.
+	* config/i386/i386sco5.mh:  New file.
+	* config/i386/nm-i386sco5.h:  New file.
+
 Sat Apr  6 08:55:22 1996  Fred Fish  <fnf@cygnus.com>
 
 	* bcache.c (bcache): When size of chunk to cache is exactly equal to
