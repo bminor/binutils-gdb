@@ -1,4 +1,12 @@
+Wed May 19 07:33:17 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* config/tc-h5000.c (build_bytes): Understand @rd mode and build
+	relocations correctly.
+
 Mon May 17 15:06:26 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* Makefile.in (FLAGS_TO_PASS): Leave out TEXI2DVI for now, because
+	it's wrong.
 
 	* config/tc-m68k.c (md_apply_fix_2): Apply range checks and warn
 	if value is out of range.
