@@ -435,8 +435,10 @@ static const CGEN_IFLD fr30_cgen_ifld_table[] =
   { FR30_F_DIR9, "f-dir9", 0, 16, 8, 8, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
   { FR30_F_DIR10, "f-dir10", 0, 16, 8, 8, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
   { FR30_F_REL12, "f-rel12", 0, 16, 5, 11, { 0, 0|(1<<CGEN_IFLD_PCREL_ADDR)|(1<<CGEN_IFLD_SIGNED), { 0 } }  },
-  { FR30_F_REGLIST_HI, "f-reglist_hi", 0, 16, 8, 8, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { FR30_F_REGLIST_LOW, "f-reglist_low", 0, 16, 8, 8, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
+  { FR30_F_REGLIST_HI_ST, "f-reglist_hi_st", 0, 16, 8, 8, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
+  { FR30_F_REGLIST_LOW_ST, "f-reglist_low_st", 0, 16, 8, 8, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
+  { FR30_F_REGLIST_HI_LD, "f-reglist_hi_ld", 0, 16, 8, 8, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
+  { FR30_F_REGLIST_LOW_LD, "f-reglist_low_ld", 0, 16, 8, 8, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
   { 0 }
 };
 
@@ -540,11 +542,17 @@ const CGEN_OPERAND fr30_cgen_operand_table[MAX_OPERANDS] =
 /* label12: 12 bit pc relative address */
   { "label12", & HW_ENT (HW_H_IADDR), 5, 11,
     { 0, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), { 0 } }  },
-/* reglist_low: 8 bit register mask */
-  { "reglist_low", & HW_ENT (HW_H_UINT), 8, 8,
+/* reglist_low_ld: 8 bit register mask for ldm */
+  { "reglist_low_ld", & HW_ENT (HW_H_UINT), 8, 8,
     { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
-/* reglist_hi: 8 bit register mask */
-  { "reglist_hi", & HW_ENT (HW_H_UINT), 8, 8,
+/* reglist_hi_ld: 8 bit register mask for ldm */
+  { "reglist_hi_ld", & HW_ENT (HW_H_UINT), 8, 8,
+    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+/* reglist_low_st: 8 bit register mask for ldm */
+  { "reglist_low_st", & HW_ENT (HW_H_UINT), 8, 8,
+    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+/* reglist_hi_st: 8 bit register mask for ldm */
+  { "reglist_hi_st", & HW_ENT (HW_H_UINT), 8, 8,
     { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
 /* cc: condition codes */
   { "cc", & HW_ENT (HW_H_UINT), 4, 4,
@@ -901,8 +909,8 @@ static const CGEN_OPERAND_INSTANCE fmt_ldr15gr_ops[] = {
 static const CGEN_OPERAND_INSTANCE fmt_ldr15dr_ops[] = {
   { INPUT, "h_gr_15", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 15, 0 },
   { INPUT, "h_memory_reg__VM_h_gr_15", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, 0 },
-  { OUTPUT, "Rs2", & HW_ENT (HW_H_DR), CGEN_MODE_SI, & OP_ENT (RS2), 0, 0 },
   { OUTPUT, "h_gr_15", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 15, 0 },
+  { OUTPUT, "Rs2", & HW_ENT (HW_H_DR), CGEN_MODE_SI, & OP_ENT (RS2), 0, 0 },
   { 0 }
 };
 
@@ -1322,10 +1330,63 @@ static const CGEN_OPERAND_INSTANCE fmt_extuh_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_stm0_ops[] = {
-  { INPUT, "reglist_low", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (REGLIST_LOW), 0, 0 },
+static const CGEN_OPERAND_INSTANCE fmt_ldm0_ops[] = {
+  { INPUT, "reglist_low_ld", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (REGLIST_LOW_LD), 0, 0 },
   { INPUT, "h_gr_15", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 15, COND_REF },
+  { INPUT, "h_memory_reg__VM_h_gr_15", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, COND_REF },
+  { OUTPUT, "h_gr_0", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, COND_REF },
+  { OUTPUT, "h_gr_15", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 15, COND_REF },
+  { OUTPUT, "h_gr_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 1, COND_REF },
+  { OUTPUT, "h_gr_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 2, COND_REF },
+  { OUTPUT, "h_gr_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 3, COND_REF },
+  { OUTPUT, "h_gr_4", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 4, COND_REF },
+  { OUTPUT, "h_gr_5", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 5, COND_REF },
+  { OUTPUT, "h_gr_6", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 6, COND_REF },
+  { OUTPUT, "h_gr_7", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 7, COND_REF },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_ldm1_ops[] = {
+  { INPUT, "reglist_hi_ld", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (REGLIST_HI_LD), 0, 0 },
+  { INPUT, "h_gr_15", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 15, COND_REF },
+  { INPUT, "h_memory_reg__VM_h_gr_15", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, COND_REF },
+  { OUTPUT, "h_gr_8", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 8, COND_REF },
+  { OUTPUT, "h_gr_15", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 15, COND_REF },
+  { OUTPUT, "h_gr_9", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 9, COND_REF },
+  { OUTPUT, "h_gr_10", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 10, COND_REF },
+  { OUTPUT, "h_gr_11", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 11, COND_REF },
+  { OUTPUT, "h_gr_12", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 12, COND_REF },
+  { OUTPUT, "h_gr_13", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 13, COND_REF },
+  { OUTPUT, "h_gr_14", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14, COND_REF },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_stm0_ops[] = {
+  { INPUT, "reglist_low_st", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (REGLIST_LOW_ST), 0, 0 },
+  { INPUT, "h_gr_15", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 15, COND_REF },
+  { INPUT, "h_gr_7", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 7, COND_REF },
+  { INPUT, "h_gr_6", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 6, COND_REF },
+  { INPUT, "h_gr_5", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 5, COND_REF },
+  { INPUT, "h_gr_4", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 4, COND_REF },
+  { INPUT, "h_gr_3", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 3, COND_REF },
+  { INPUT, "h_gr_2", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 2, COND_REF },
+  { INPUT, "h_gr_1", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 1, COND_REF },
   { INPUT, "h_gr_0", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 0, COND_REF },
+  { OUTPUT, "h_gr_15", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 15, COND_REF },
+  { OUTPUT, "h_memory_reg__VM_h_gr_15", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, COND_REF },
+  { 0 }
+};
+
+static const CGEN_OPERAND_INSTANCE fmt_stm1_ops[] = {
+  { INPUT, "reglist_hi_st", & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (REGLIST_HI_ST), 0, 0 },
+  { INPUT, "h_gr_15", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 15, COND_REF },
+  { INPUT, "h_gr_14", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 14, COND_REF },
+  { INPUT, "h_gr_13", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 13, COND_REF },
+  { INPUT, "h_gr_12", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 12, COND_REF },
+  { INPUT, "h_gr_11", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 11, COND_REF },
+  { INPUT, "h_gr_10", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 10, COND_REF },
+  { INPUT, "h_gr_9", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 9, COND_REF },
+  { INPUT, "h_gr_8", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 8, COND_REF },
   { OUTPUT, "h_gr_15", & HW_ENT (HW_H_GR), CGEN_MODE_SI, 0, 15, COND_REF },
   { OUTPUT, "h_memory_reg__VM_h_gr_15", & HW_ENT (HW_H_MEMORY), CGEN_MODE_SI, 0, 0, COND_REF },
   { 0 }
@@ -1756,15 +1817,19 @@ static const CGEN_IFMT fmt_extuh = {
 };
 
 static const CGEN_IFMT fmt_ldm0 = {
-  16, 16, 0xff00, { F (F_OP1), F (F_OP2), F (F_REGLIST_LOW), 0 }
+  16, 16, 0xff00, { F (F_OP1), F (F_OP2), F (F_REGLIST_LOW_LD), 0 }
 };
 
 static const CGEN_IFMT fmt_ldm1 = {
-  16, 16, 0xff00, { F (F_OP1), F (F_OP2), F (F_REGLIST_HI), 0 }
+  16, 16, 0xff00, { F (F_OP1), F (F_OP2), F (F_REGLIST_HI_LD), 0 }
 };
 
 static const CGEN_IFMT fmt_stm0 = {
-  16, 16, 0xff00, { F (F_OP1), F (F_OP2), F (F_REGLIST_LOW), 0 }
+  16, 16, 0xff00, { F (F_OP1), F (F_OP2), F (F_REGLIST_LOW_ST), 0 }
+};
+
+static const CGEN_IFMT fmt_stm1 = {
+  16, 16, 0xff00, { F (F_OP1), F (F_OP2), F (F_REGLIST_HI_ST), 0 }
 };
 
 static const CGEN_IFMT fmt_enter = {
@@ -3217,40 +3282,40 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
     (PTR) & fmt_extuh_ops[0],
     { 0, 0, { 0 } }
   },
-/* ldm0 ($reglist_low) */
+/* ldm0 ($reglist_low_ld) */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_LDM0, "ldm0", "ldm0",
-    { { MNEM, ' ', '(', OP (REGLIST_LOW), ')', 0 } },
+    { { MNEM, ' ', '(', OP (REGLIST_LOW_LD), ')', 0 } },
     & fmt_ldm0, { 0x8c00 },
-    (PTR) 0,
+    (PTR) & fmt_ldm0_ops[0],
     { 0, 0, { 0 } }
   },
-/* ldm1 ($reglist_hi) */
+/* ldm1 ($reglist_hi_ld) */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_LDM1, "ldm1", "ldm1",
-    { { MNEM, ' ', '(', OP (REGLIST_HI), ')', 0 } },
+    { { MNEM, ' ', '(', OP (REGLIST_HI_LD), ')', 0 } },
     & fmt_ldm1, { 0x8d00 },
-    (PTR) 0,
+    (PTR) & fmt_ldm1_ops[0],
     { 0, 0, { 0 } }
   },
-/* stm0 ($reglist_low) */
+/* stm0 ($reglist_low_st) */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_STM0, "stm0", "stm0",
-    { { MNEM, ' ', '(', OP (REGLIST_LOW), ')', 0 } },
+    { { MNEM, ' ', '(', OP (REGLIST_LOW_ST), ')', 0 } },
     & fmt_stm0, { 0x8e00 },
     (PTR) & fmt_stm0_ops[0],
     { 0, 0, { 0 } }
   },
-/* stm1 ($reglist_hi) */
+/* stm1 ($reglist_hi_st) */
   {
     { 1, 1, 1, 1 },
     FR30_INSN_STM1, "stm1", "stm1",
-    { { MNEM, ' ', '(', OP (REGLIST_HI), ')', 0 } },
-    & fmt_ldm1, { 0x8f00 },
-    (PTR) 0,
+    { { MNEM, ' ', '(', OP (REGLIST_HI_ST), ')', 0 } },
+    & fmt_stm1, { 0x8f00 },
+    (PTR) & fmt_stm1_ops[0],
     { 0, 0, { 0 } }
   },
 /* enter $u10 */
@@ -3573,11 +3638,17 @@ fr30_cgen_get_int_operand (opindex, fields)
     case FR30_OPERAND_LABEL12 :
       value = fields->f_rel12;
       break;
-    case FR30_OPERAND_REGLIST_LOW :
-      value = fields->f_reglist_low;
+    case FR30_OPERAND_REGLIST_LOW_LD :
+      value = fields->f_reglist_low_ld;
       break;
-    case FR30_OPERAND_REGLIST_HI :
-      value = fields->f_reglist_hi;
+    case FR30_OPERAND_REGLIST_HI_LD :
+      value = fields->f_reglist_hi_ld;
+      break;
+    case FR30_OPERAND_REGLIST_LOW_ST :
+      value = fields->f_reglist_low_st;
+      break;
+    case FR30_OPERAND_REGLIST_HI_ST :
+      value = fields->f_reglist_hi_st;
       break;
     case FR30_OPERAND_CC :
       value = fields->f_cc;
@@ -3695,11 +3766,17 @@ fr30_cgen_get_vma_operand (opindex, fields)
     case FR30_OPERAND_LABEL12 :
       value = fields->f_rel12;
       break;
-    case FR30_OPERAND_REGLIST_LOW :
-      value = fields->f_reglist_low;
+    case FR30_OPERAND_REGLIST_LOW_LD :
+      value = fields->f_reglist_low_ld;
       break;
-    case FR30_OPERAND_REGLIST_HI :
-      value = fields->f_reglist_hi;
+    case FR30_OPERAND_REGLIST_HI_LD :
+      value = fields->f_reglist_hi_ld;
+      break;
+    case FR30_OPERAND_REGLIST_LOW_ST :
+      value = fields->f_reglist_low_st;
+      break;
+    case FR30_OPERAND_REGLIST_HI_ST :
+      value = fields->f_reglist_hi_st;
       break;
     case FR30_OPERAND_CC :
       value = fields->f_cc;
@@ -3821,11 +3898,17 @@ fr30_cgen_set_int_operand (opindex, fields, value)
     case FR30_OPERAND_LABEL12 :
       fields->f_rel12 = value;
       break;
-    case FR30_OPERAND_REGLIST_LOW :
-      fields->f_reglist_low = value;
+    case FR30_OPERAND_REGLIST_LOW_LD :
+      fields->f_reglist_low_ld = value;
       break;
-    case FR30_OPERAND_REGLIST_HI :
-      fields->f_reglist_hi = value;
+    case FR30_OPERAND_REGLIST_HI_LD :
+      fields->f_reglist_hi_ld = value;
+      break;
+    case FR30_OPERAND_REGLIST_LOW_ST :
+      fields->f_reglist_low_st = value;
+      break;
+    case FR30_OPERAND_REGLIST_HI_ST :
+      fields->f_reglist_hi_st = value;
       break;
     case FR30_OPERAND_CC :
       fields->f_cc = value;
@@ -3940,11 +4023,17 @@ fr30_cgen_set_vma_operand (opindex, fields, value)
     case FR30_OPERAND_LABEL12 :
       fields->f_rel12 = value;
       break;
-    case FR30_OPERAND_REGLIST_LOW :
-      fields->f_reglist_low = value;
+    case FR30_OPERAND_REGLIST_LOW_LD :
+      fields->f_reglist_low_ld = value;
       break;
-    case FR30_OPERAND_REGLIST_HI :
-      fields->f_reglist_hi = value;
+    case FR30_OPERAND_REGLIST_HI_LD :
+      fields->f_reglist_hi_ld = value;
+      break;
+    case FR30_OPERAND_REGLIST_LOW_ST :
+      fields->f_reglist_low_st = value;
+      break;
+    case FR30_OPERAND_REGLIST_HI_ST :
+      fields->f_reglist_hi_st = value;
       break;
     case FR30_OPERAND_CC :
       fields->f_cc = value;
