@@ -1,5 +1,5 @@
 /* Support for an sbrk-like function that uses mmap.
-   Copyright 1992 Free Software Foundation, Inc.
+   Copyright 1992, 2000 Free Software Foundation, Inc.
 
    Contributed by Fred Fish at Cygnus Support.   fnf@cygnus.com
 
@@ -22,6 +22,9 @@ Boston, MA 02111-1307, USA.  */
 
 #if defined(HAVE_MMAP)
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>	/* Prototypes for lseek */
+#endif
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/mman.h>
