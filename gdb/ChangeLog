@@ -1,3 +1,13 @@
+Mon Apr 22 14:54:45 1996  Mark Alexander  <marka@superball.cygnus.com>
+
+	* corefile.c (specify_exec_file_hook): Allow arbitrary number of
+ 	hooks.
+	(call_extra_exec_file_hooks): New function.
+	* h8300-tdep.c: Lint; add .h files to provide missing declarations,
+	remove unused variables.
+	(set_machine_hook): New function.
+	(_initialize_h8300m): Initialize it.
+
 Fri Apr 19 15:03:49 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* remote-mips.c (encoding): Don't specify size, to avoid bug in

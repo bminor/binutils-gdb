@@ -29,6 +29,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "dis-asm.h"
 #include "gdbcmd.h"
 #include "gdbtypes.h"
+#include "gdbcore.h"
+#include "gdb_string.h"
+#include "value.h"
+
 
 #undef NUM_REGS
 #define NUM_REGS 11
@@ -52,7 +56,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define IS_MOVK_R5(x) (x==0x7905)
 #define IS_SUB_R5SP(x) (x==0x1957)
 
+/* Local function declarations.  */
+
 static CORE_ADDR examine_prologue ();
+static void set_machine_hook PARAMS ((char *filename));
 
 void frame_find_saved_regs ();
 CORE_ADDR 
@@ -137,9 +144,6 @@ frame_find_saved_regs (fi, fsr)
      struct frame_info *fi;
      struct frame_saved_regs *fsr;
 {
-  register CORE_ADDR next_addr;
-  register CORE_ADDR *saved_regs;
-  register int regnum;
   register struct frame_saved_regs *cache_fsr;
   extern struct obstack frame_cache_obstack;
   CORE_ADDR ip;
@@ -212,12 +216,8 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
 {
   register CORE_ADDR next_ip;
   int r;
-  int i;
   int have_fp = 0;
-  register int src;
-  register struct pic_prologue_code *pcode;
   INSN_WORD insn_word;
-  int size, offset;
   /* Number of things pushed onto stack, starts at 2/4, 'cause the
      PC is already there */
   unsigned int reg_save_depth = h8300hmode ? 4 : 2;
@@ -378,7 +378,7 @@ h8300_pop_frame ()
   for (regnum = 0; regnum < 8; regnum++)
     {
       if (fsr.regs[regnum])
-	write_register (regnum, read_memory_integer(fsr.regs[regnum]), BINWORD);
+	write_register (regnum, read_memory_integer(fsr.regs[regnum], BINWORD));
 
       flush_cached_frames ();
     }
@@ -410,6 +410,19 @@ set_machine (args, from_tty)
   help_list (setmemorylist, "set memory ", -1, gdb_stdout);
 }
 
+/* set_machine_hook is called as the exec file is being opened, but
+   before the symbol file is opened.  This allows us to set the
+   h8300hmode flag based on the machine type specified in the exec
+   file.  This in turn will cause subsequently defined pointer types
+   to be 16 or 32 bits as appropriate for the machine.  */
+
+static void
+set_machine_hook (filename)
+     char *filename;
+{
+  h8300hmode = (bfd_get_mach (exec_bfd) == bfd_mach_h8300h);
+}
+
 void
 _initialize_h8300m ()
 {
@@ -422,6 +435,10 @@ _initialize_h8300m ()
 
   add_cmd ("h8300h", class_support, h8300h_command,
 	   "Set machine to be H8/300H.", &setmemorylist);
+
+  /* Add a hook to set the machine type when we're loading a file. */
+
+  specify_exec_file_hook(set_machine_hook);
 }
 
 
