@@ -788,6 +788,55 @@ sh_next_flt_argreg (int len)
   return FLOAT_ARG0_REGNUM + argreg;
 }
 
+/* Helper function which figures out, if a type is treated like a float type.
+
+   Second, the FPU ABIs have a special way how to treat types as float types.
+   Structures with exactly one member, which is of type float or double, are
+   treated exactly as the base types float or double:
+
+     struct sf {
+       float f;
+     };
+
+     struct sd {
+       double d;
+     };
+
+   are handled the same way as just
+
+     float f;
+
+     double d;
+
+   As a result, arguments of these struct types are pushed into floating point
+   registers exactly as floats or doubles, using the same decision algorithm.
+
+   The same is valid if these types are used as function return types.  The
+   above structs are returned in fr0 resp. fr0,fr1 instead of in r0, r0,r1
+   or even using struct convention as it is for other structs.  */
+
+static int
+sh_treat_as_flt_p (struct type *type)
+{
+  int len = TYPE_LENGTH (type);
+
+  /* Ordinary float types are obviously treated as float.  */
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    return 1;
+  /* Otherwise non-struct types are not treated as float.  */
+  if (TYPE_CODE (type) != TYPE_CODE_STRUCT)
+    return 0;
+  /* Otherwise structs with more than one memeber are not treated as float.  */
+  if (TYPE_NFIELDS (type) != 1)
+    return 0;
+  /* Otherwise if the type of that member is float, the whole type is
+     treated as float.  */
+  if (TYPE_CODE (TYPE_FIELD_TYPE (type, 0)) == TYPE_CODE_FLT)
+    return 1;
+  /* Otherwise it's not treated as float.  */
+  return 0;
+}
+
 static CORE_ADDR
 sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 			CORE_ADDR func_addr,
@@ -805,7 +854,8 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
   CORE_ADDR regval;
   char *val;
   int len, reg_size = 0;
-  int pass_on_stack;
+  int pass_on_stack = 0;
+  int treat_as_flt;
 
   /* first force sp to a 4-byte alignment */
   sp = sh_frame_align (gdbarch, sp);
@@ -832,43 +882,43 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
       /* Some decisions have to be made how various types are handled.
          This also differs in different ABIs. */
       pass_on_stack = 0;
-      if (len > 16)
-	pass_on_stack = 1;	/* Types bigger than 16 bytes are passed on stack. */
 
       /* Find out the next register to use for a floating point value. */
-      if (TYPE_CODE (type) == TYPE_CODE_FLT)
+      treat_as_flt = sh_treat_as_flt_p (type);
+      if (treat_as_flt)
 	flt_argreg = sh_next_flt_argreg (len);
+      /* In contrast to non-FPU CPUs, arguments are never split between
+	 registers and stack.  If an argument doesn't fit in the remaining
+	 registers it's always pushed entirely on the stack.  */
+      else if (len > ((ARGLAST_REGNUM - argreg + 1) * 4))
+	pass_on_stack = 1;
 
       while (len > 0)
 	{
-	  if ((TYPE_CODE (type) == TYPE_CODE_FLT
-	       && flt_argreg > FLOAT_ARGLAST_REGNUM)
-	      || argreg > ARGLAST_REGNUM || pass_on_stack)
+	  if ((treat_as_flt && flt_argreg > FLOAT_ARGLAST_REGNUM)
+	      || (!treat_as_flt && (argreg > ARGLAST_REGNUM
+	                            || pass_on_stack)))
 	    {
-	      /* The remainder of the data goes entirely on the stack,
-	         4-byte aligned. */
+	      /* The data goes entirely on the stack, 4-byte aligned. */
 	      reg_size = (len + 3) & ~3;
 	      write_memory (sp + stack_offset, val, reg_size);
 	      stack_offset += reg_size;
 	    }
-	  else if (TYPE_CODE (type) == TYPE_CODE_FLT
-		   && flt_argreg <= FLOAT_ARGLAST_REGNUM)
+	  else if (treat_as_flt && flt_argreg <= FLOAT_ARGLAST_REGNUM)
 	    {
 	      /* Argument goes in a float argument register.  */
 	      reg_size = register_size (gdbarch, flt_argreg);
 	      regval = extract_unsigned_integer (val, reg_size);
 	      regcache_cooked_write_unsigned (regcache, flt_argreg++, regval);
 	    }
-	  else if (argreg <= ARGLAST_REGNUM)
+	  else if (!treat_as_flt && argreg <= ARGLAST_REGNUM)
 	    {
 	      /* there's room in a register */
 	      reg_size = register_size (gdbarch, argreg);
 	      regval = extract_unsigned_integer (val, reg_size);
 	      regcache_cooked_write_unsigned (regcache, argreg++, regval);
 	    }
-	  /* Store the value reg_size bytes at a time.  This means that things
-	     larger than reg_size bytes may go partly in registers and partly
-	     on the stack.  */
+	  /* Store the value one register at a time or in one step on stack.  */
 	  len -= reg_size;
 	  val += reg_size;
 	}
@@ -986,7 +1036,7 @@ static void
 sh3e_sh4_extract_return_value (struct type *type, struct regcache *regcache,
 			       void *valbuf)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (sh_treat_as_flt_p (type))
     {
       int len = TYPE_LENGTH (type);
       int i, regnum = FP0_REGNUM;
@@ -1027,7 +1077,7 @@ static void
 sh3e_sh4_store_return_value (struct type *type, struct regcache *regcache,
 			     const void *valbuf)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (sh_treat_as_flt_p (type))
     {
       int len = TYPE_LENGTH (type);
       int i, regnum = FP0_REGNUM;

@@ -1,3 +1,12 @@
+2003-10-10  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh-tdep.c (sh_treat_as_flt_p): New function to recognize float
+	types correctly.
+	(sh_push_dummy_call_fpu): Fix argument passing rules.
+	(sh3e_sh4_extract_return_value): Call sh_treat_as_flt_p to recognize
+	float types.
+	(sh3e_sh4_store_return_value): Ditto.
+
 2003-10-10  Elena Zannoni  <ezannoni@redhat.com>
 
 	* sh-tdep.c (sh_use_struct_convention): Clarify one case in
