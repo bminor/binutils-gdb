@@ -1,3 +1,20 @@
+2005-02-28  Jakub Jelinek  <jakub@redhat.com>
+
+	* readelf.c (get_file_type, get_machine_name, get_osabi_name,
+	get_segment_type, get_section_type_name, get_elf_class,
+	get_data_encoding, get_group_flags, dynamic_section_mips_val,
+	get_symbol_binding, get_symbol_type, get_TAG_name, get_FORM_name,
+	get_AT_name, process_mips_specific, process_gnu_liblist,
+	get_note_type, get_netbsd_elfcore_note_type): Use snprintf instead of
+	sprintf where needed.
+	(get_dynamic_type): Likewise.  Increase buff to 64 bytes.
+	(get_elf_section_flags): Increase buff to 33 bytes.  Avoid
+	using strcat.
+	(get_dynamic_flags): Renamed to...
+	(print_dynamic_flags): ... this.  Print the flags to stdout instead
+	of returning them as string.
+	(process_dynamic_section): Adjust caller.
+
 2005-02-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (display_debug_ranges): Print out offset for end of

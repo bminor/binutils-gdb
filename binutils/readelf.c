@@ -1462,7 +1462,7 @@ get_ia64_dynamic_type (unsigned long type)
 static const char *
 get_dynamic_type (unsigned long type)
 {
-  static char buff[32];
+  static char buff[64];
 
   switch (type)
     {
@@ -1566,7 +1566,7 @@ get_dynamic_type (unsigned long type)
 	  if (result != NULL)
 	    return result;
 
-	  sprintf (buff, _("Processor Specific: %lx"), type);
+	  snprintf (buff, sizeof (buff), _("Processor Specific: %lx"), type);
 	}
       else if ((type >= DT_LOOS) && (type <= DT_HIOS))
 	{
@@ -1585,10 +1585,11 @@ get_dynamic_type (unsigned long type)
 	  if (result != NULL)
 	    return result;
 
-	  sprintf (buff, _("Operating System specific: %lx"), type);
+	  snprintf (buff, sizeof (buff), _("Operating System specific: %lx"),
+		    type);
 	}
       else
-	sprintf (buff, _("<unknown>: %lx"), type);
+	snprintf (buff, sizeof (buff), _("<unknown>: %lx"), type);
 
       return buff;
     }
@@ -1609,11 +1610,11 @@ get_file_type (unsigned e_type)
 
     default:
       if ((e_type >= ET_LOPROC) && (e_type <= ET_HIPROC))
-	sprintf (buff, _("Processor Specific: (%x)"), e_type);
+	snprintf (buff, sizeof (buff), _("Processor Specific: (%x)"), e_type);
       else if ((e_type >= ET_LOOS) && (e_type <= ET_HIOS))
-	sprintf (buff, _("OS Specific: (%x)"), e_type);
+	snprintf (buff, sizeof (buff), _("OS Specific: (%x)"), e_type);
       else
-	sprintf (buff, _("<unknown>: %x"), e_type);
+	snprintf (buff, sizeof (buff), _("<unknown>: %x"), e_type);
       return buff;
     }
 }
@@ -1720,7 +1721,7 @@ get_machine_name (unsigned e_machine)
     case EM_XTENSA_OLD:
     case EM_XTENSA:		return "Tensilica Xtensa Processor";
     default:
-      sprintf (buff, _("<unknown>: %x"), e_machine);
+      snprintf (buff, sizeof (buff), _("<unknown>: %x"), e_machine);
       return buff;
     }
 }
@@ -2228,7 +2229,7 @@ get_osabi_name (unsigned int osabi)
     case ELFOSABI_STANDALONE:	return _("Standalone App");
     case ELFOSABI_ARM:		return "ARM";
     default:
-      sprintf (buff, _("<unknown: %x>"), osabi);
+      snprintf (buff, sizeof (buff), _("<unknown: %x>"), osabi);
       return buff;
     }
 }
@@ -2366,7 +2367,7 @@ get_segment_type (unsigned long p_type)
 	  sprintf (buff, "LOOS+%lx", p_type - PT_LOOS);
 	}
       else
-	sprintf (buff, _("<unknown>: %lx"), p_type);
+	snprintf (buff, sizeof (buff), _("<unknown>: %lx"), p_type);
 
       return buff;
     }
@@ -2550,7 +2551,7 @@ get_section_type_name (unsigned int sh_type)
       else if ((sh_type >= SHT_LOUSER) && (sh_type <= SHT_HIUSER))
 	sprintf (buff, "LOUSER+%x", sh_type - SHT_LOUSER);
       else
-	sprintf (buff, _("<unknown>: %x"), sh_type);
+	snprintf (buff, sizeof (buff), _("<unknown>: %x"), sh_type);
 
       return buff;
     }
@@ -2948,7 +2949,7 @@ get_elf_class (unsigned int elf_class)
     case ELFCLASS32:   return "ELF32";
     case ELFCLASS64:   return "ELF64";
     default:
-      sprintf (buff, _("<unknown: %x>"), elf_class);
+      snprintf (buff, sizeof (buff), _("<unknown: %x>"), elf_class);
       return buff;
     }
 }
@@ -2964,7 +2965,7 @@ get_data_encoding (unsigned int encoding)
     case ELFDATA2LSB: return _("2's complement, little endian");
     case ELFDATA2MSB: return _("2's complement, big endian");
     default:
-      sprintf (buff, _("<unknown: %x>"), encoding);
+      snprintf (buff, sizeof (buff), _("<unknown: %x>"), encoding);
       return buff;
     }
 }
@@ -3637,9 +3638,8 @@ get_64bit_elf_symbols (FILE *file, Elf_Internal_Shdr *section)
 static const char *
 get_elf_section_flags (bfd_vma sh_flags)
 {
-  static char buff[32];
-
-  *buff = 0;
+  static char buff[33];
+  char *p = buff;
 
   while (sh_flags)
     {
@@ -3650,34 +3650,36 @@ get_elf_section_flags (bfd_vma sh_flags)
 
       switch (flag)
 	{
-	case SHF_WRITE:		   strcat (buff, "W"); break;
-	case SHF_ALLOC:		   strcat (buff, "A"); break;
-	case SHF_EXECINSTR:	   strcat (buff, "X"); break;
-	case SHF_MERGE:		   strcat (buff, "M"); break;
-	case SHF_STRINGS:	   strcat (buff, "S"); break;
-	case SHF_INFO_LINK:	   strcat (buff, "I"); break;
-	case SHF_LINK_ORDER:	   strcat (buff, "L"); break;
-	case SHF_OS_NONCONFORMING: strcat (buff, "O"); break;
-	case SHF_GROUP:		   strcat (buff, "G"); break;
-	case SHF_TLS:		   strcat (buff, "T"); break;
+	case SHF_WRITE:		   *p = 'W'; break;
+	case SHF_ALLOC:		   *p = 'A'; break;
+	case SHF_EXECINSTR:	   *p = 'X'; break;
+	case SHF_MERGE:		   *p = 'M'; break;
+	case SHF_STRINGS:	   *p = 'S'; break;
+	case SHF_INFO_LINK:	   *p = 'I'; break;
+	case SHF_LINK_ORDER:	   *p = 'L'; break;
+	case SHF_OS_NONCONFORMING: *p = 'O'; break;
+	case SHF_GROUP:		   *p = 'G'; break;
+	case SHF_TLS:		   *p = 'T'; break;
 
 	default:
 	  if (flag & SHF_MASKOS)
 	    {
-	      strcat (buff, "o");
+	      *p = 'o';
 	      sh_flags &= ~ SHF_MASKOS;
 	    }
 	  else if (flag & SHF_MASKPROC)
 	    {
-	      strcat (buff, "p");
+	      *p = 'p';
 	      sh_flags &= ~ SHF_MASKPROC;
 	    }
 	  else
-	    strcat (buff, "x");
+	    *p = 'x';
 	  break;
 	}
+      p++;
     }
 
+  *p = '\0';
   return buff;
 }
 
@@ -3949,7 +3951,7 @@ get_group_flags (unsigned int flags)
       return "COMDAT";
 
    default:
-      sprintf (buff, _("[<unknown>: 0x%x]"), flags);
+      snprintf (buff, sizeof (buff), _("[<unknown>: 0x%x]"), flags);
       break;
     }
   return buff;
@@ -5112,9 +5114,9 @@ dynamic_section_mips_val (Elf_Internal_Dyn *entry)
 
 	time_t time = entry->d_un.d_val;
 	tmp = gmtime (&time);
-	sprintf (timebuf, "%04u-%02u-%02uT%02u:%02u:%02u",
-		 tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
-		 tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
+	snprintf (timebuf, sizeof (timebuf), "%04u-%02u-%02uT%02u:%02u:%02u",
+		  tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
+		  tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
 	printf ("Time Stamp: %s\n", timebuf);
       }
       break;
@@ -5304,13 +5306,11 @@ get_64bit_dynamic_section (FILE *file)
   return 1;
 }
 
-static const char *
-get_dynamic_flags (bfd_vma flags)
+static void
+print_dynamic_flags (bfd_vma flags)
 {
-  static char buff[128];
-  char *p = buff;
+  int first = 1;
 
-  *p = '\0';
   while (flags)
     {
       bfd_vma flag;
@@ -5318,22 +5318,22 @@ get_dynamic_flags (bfd_vma flags)
       flag = flags & - flags;
       flags &= ~ flag;
 
-      if (p != buff)
-	*p++ = ' ';
+      if (first)
+	first = 0;
+      else
+	putc (' ', stdout);
 
       switch (flag)
 	{
-	case DF_ORIGIN:		strcpy (p, "ORIGIN"); break;
-	case DF_SYMBOLIC:	strcpy (p, "SYMBOLIC"); break;
-	case DF_TEXTREL:	strcpy (p, "TEXTREL"); break;
-	case DF_BIND_NOW:	strcpy (p, "BIND_NOW"); break;
-	case DF_STATIC_TLS:	strcpy (p, "STATIC_TLS"); break;
-	default:		strcpy (p, "unknown"); break;
+	case DF_ORIGIN:		fputs ("ORIGIN", stdout); break;
+	case DF_SYMBOLIC:	fputs ("SYMBOLIC", stdout); break;
+	case DF_TEXTREL:	fputs ("TEXTREL", stdout); break;
+	case DF_BIND_NOW:	fputs ("BIND_NOW", stdout); break;
+	case DF_STATIC_TLS:	fputs ("STATIC_TLS", stdout); break;
+	default:		fputs ("unknown", stdout); break;
 	}
-
-      p = strchr (p, '\0');
     }
-  return buff;
+  puts ("");
 }
 
 /* Parse and display the contents of the dynamic section.  */
@@ -5530,7 +5530,7 @@ process_dynamic_section (FILE *file)
 	{
 	case DT_FLAGS:
 	  if (do_dynamic)
-	    puts (get_dynamic_flags (entry->d_un.d_val));
+	    print_dynamic_flags (entry->d_un.d_val);
 	  break;
 
 	case DT_AUXILIARY:
@@ -6339,11 +6339,12 @@ get_symbol_binding (unsigned int binding)
     case STB_WEAK:	return "WEAK";
     default:
       if (binding >= STB_LOPROC && binding <= STB_HIPROC)
-	sprintf (buff, _("<processor specific>: %d"), binding);
+	snprintf (buff, sizeof (buff), _("<processor specific>: %d"),
+		  binding);
       else if (binding >= STB_LOOS && binding <= STB_HIOS)
-	sprintf (buff, _("<OS specific>: %d"), binding);
+	snprintf (buff, sizeof (buff), _("<OS specific>: %d"), binding);
       else
-	sprintf (buff, _("<unknown>: %d"), binding);
+	snprintf (buff, sizeof (buff), _("<unknown>: %d"), binding);
       return buff;
     }
 }
@@ -6374,7 +6375,7 @@ get_symbol_type (unsigned int type)
 	  if (elf_header.e_machine == EM_PARISC && type == STT_PARISC_MILLI)
 	    return "PARISC_MILLI";
 
-	  sprintf (buff, _("<processor specific>: %d"), type);
+	  snprintf (buff, sizeof (buff), _("<processor specific>: %d"), type);
 	}
       else if (type >= STT_LOOS && type <= STT_HIOS)
 	{
@@ -6386,10 +6387,10 @@ get_symbol_type (unsigned int type)
 		return "HP_STUB";
 	    }
 
-	  sprintf (buff, _("<OS specific>: %d"), type);
+	  snprintf (buff, sizeof (buff), _("<OS specific>: %d"), type);
 	}
       else
-	sprintf (buff, _("<unknown>: %d"), type);
+	snprintf (buff, sizeof (buff), _("<unknown>: %d"), type);
       return buff;
     }
 }
@@ -7561,7 +7562,7 @@ get_TAG_name (unsigned long tag)
       {
 	static char buffer[100];
 
-	sprintf (buffer, _("Unknown TAG value: %lx"), tag);
+	snprintf (buffer, sizeof (buffer), _("Unknown TAG value: %lx"), tag);
 	return buffer;
       }
     }
@@ -7597,7 +7598,7 @@ get_FORM_name (unsigned long form)
       {
 	static char buffer[100];
 
-	sprintf (buffer, _("Unknown FORM value: %lx"), form);
+	snprintf (buffer, sizeof (buffer), _("Unknown FORM value: %lx"), form);
 	return buffer;
       }
     }
@@ -8530,7 +8531,8 @@ get_AT_name (unsigned long attribute)
       {
 	static char buffer[100];
 
-	sprintf (buffer, _("Unknown AT value: %lx"), attribute);
+	snprintf (buffer, sizeof (buffer), _("Unknown AT value: %lx"),
+		  attribute);
 	return buffer;
       }
     }
@@ -10889,9 +10891,10 @@ process_mips_specific (FILE *file)
 	      liblist.l_flags = BYTE_GET (elib[cnt].l_flags);
 
 	      tmp = gmtime (&time);
-	      sprintf (timebuf, "%04u-%02u-%02uT%02u:%02u:%02u",
-		       tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
-		       tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
+	      snprintf (timebuf, sizeof (timebuf),
+			"%04u-%02u-%02uT%02u:%02u:%02u",
+			tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
+			tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
 
 	      printf ("%3lu: ", (unsigned long) cnt);
 	      if (VALID_DYNAMIC_NAME (liblist.l_name))
@@ -11267,9 +11270,10 @@ process_gnu_liblist (FILE *file)
 	      liblist.l_flags = BYTE_GET (elib[cnt].l_flags);
 
 	      tmp = gmtime (&time);
-	      sprintf (timebuf, "%04u-%02u-%02uT%02u:%02u:%02u",
-		       tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
-		       tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
+	      snprintf (timebuf, sizeof (timebuf),
+			"%04u-%02u-%02uT%02u:%02u:%02u",
+			tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
+			tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
 
 	      printf ("%3lu: ", (unsigned long) cnt);
 	      if (do_wide)
@@ -11333,7 +11337,7 @@ get_note_type (unsigned e_type)
 	break;
       }
 
-  sprintf (buff, _("Unknown note type: (0x%08x)"), e_type);
+  snprintf (buff, sizeof (buff), _("Unknown note type: (0x%08x)"), e_type);
   return buff;
 }
 
@@ -11355,7 +11359,7 @@ get_netbsd_elfcore_note_type (unsigned e_type)
 
   if (e_type < NT_NETBSDCORE_FIRSTMACH)
     {
-      sprintf (buff, _("Unknown note type: (0x%08x)"), e_type);
+      snprintf (buff, sizeof (buff), _("Unknown note type: (0x%08x)"), e_type);
       return buff;
     }
 
@@ -11394,7 +11398,8 @@ get_netbsd_elfcore_note_type (unsigned e_type)
 	}
     }
 
-  sprintf (buff, _("PT_FIRSTMACH+%d"), e_type - NT_NETBSDCORE_FIRSTMACH);
+  snprintf (buff, sizeof (buff), _("PT_FIRSTMACH+%d"),
+	    e_type - NT_NETBSDCORE_FIRSTMACH);
   return buff;
 }
 
