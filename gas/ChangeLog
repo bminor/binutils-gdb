@@ -2,6 +2,8 @@ Thu Sep 18 14:11:56 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (md_assemble): Cope with a zero data area
 	relocation with a constant offset.
+	(md_assemble): Produce error message when special data area
+	relocations are used on instructions which do not support them.
 
 Thu Sep 18 11:24:01 1997  Doug Evans  <dje@canuck.cygnus.com>
 

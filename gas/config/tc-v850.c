@@ -1045,8 +1045,12 @@ handle_ctoff (const struct v850_operand * operand)
   if (operand == NULL)
     return BFD_RELOC_V850_CALLT_16_16_OFFSET;
 
-  assert (operand->bits == 6);
-  assert (operand->shift == 0);
+  if (   operand->bits  != 6
+      || operand->shift == 0)
+    {
+      as_bad ("ctoff() relocation used on an instruction which does not support it");
+      return BFD_RELOC_64;  /* Used to indicate an error condition.  */
+    }
       
   return BFD_RELOC_V850_CALLT_6_7_OFFSET;
 }
@@ -1061,8 +1065,12 @@ handle_sdaoff (const struct v850_operand * operand)
   if (operand->bits == -1)                         return BFD_RELOC_V850_SDA_16_16_SPLIT_OFFSET;
   /* end-sanitize-v850e */
   
-  assert (operand->bits == 16);
-  assert (operand->shift == 16);
+  if (   operand->bits  != 16
+      || operand->shift == 16)
+    {
+      as_bad ("sdaoff() relocation used on an instruction which does not support it");
+      return BFD_RELOC_64;  /* Used to indicate an error condition.  */
+    }
   
   return BFD_RELOC_V850_SDA_16_16_OFFSET;
 }
@@ -1075,9 +1083,13 @@ handle_zdaoff (const struct v850_operand * operand)
   /* start-sanitize-v850e */
   if (operand->bits == -1)                         return BFD_RELOC_V850_ZDA_16_16_SPLIT_OFFSET;
   /* end-sanitize-v850e */
-  
-  assert (operand->bits == 16);
-  assert (operand->shift == 16);
+
+  if (   operand->bits  != 16
+      || operand->shift != 16)
+    {
+      as_bad ("zdaoff() relocation used on an instruction which does not support it");
+      return BFD_RELOC_64;  /* Used to indicate an error condition.  */
+    }
   
   return BFD_RELOC_V850_ZDA_16_16_OFFSET;
 }
@@ -1093,7 +1105,11 @@ handle_tdaoff (const struct v850_operand * operand)
   /* end-sanitize-v850e */
   if (operand->bits == 16 && operand->shift == 16)   return BFD_RELOC_V850_TDA_16_16_OFFSET; /* set1 & chums, operands: D16 */
   
-  assert (operand->bits == 7);
+  if (operand->bits != 7)
+    {
+      as_bad ("tdaoff() relocation used on an instruction which does not support it");
+      return BFD_RELOC_64;  /* Used to indicate an error condition.  */
+    }
   
   return  operand->insert != NULL
     ? BFD_RELOC_V850_TDA_7_8_OFFSET     /* sld.h/sst.h, operand: D8_7 */
@@ -1237,11 +1253,15 @@ md_assemble (str)
 	  hold = input_line_pointer;
 	  input_line_pointer = str;
 	  
-/* fprintf (stderr, "operand: %s   index = %d, opcode = %s\n", input_line_pointer, opindex_ptr - opcode->operands, opcode->name ); */
-
 	  /* lo(), hi(), hi0(), etc... */
 	  if ((reloc = v850_reloc_prefix (operand)) != BFD_RELOC_UNUSED)
 	    {
+	      if (reloc == BFD_RELOC_64) /* This is a fake reloc, used to indicate an error condition.  */
+		{
+		  match = 1;
+		  goto error;
+		}
+		 
 	      expression (& ex);
 
 	      if (ex.X_op == O_constant)
