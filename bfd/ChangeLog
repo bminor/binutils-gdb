@@ -1,5 +1,15 @@
 Fri Apr 22 11:08:38 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	Fix ECOFF objcopy to actually copy debugging information.
+	* ecoff.c (ecoff_bfd_copy_private_bfd_data): New function.
+	(ecoff_get_extr): Assume that any ECOFF symbol with local clear is
+	an external symbol, rather than checking the symbol flags.  Only
+	check the flags for non-ECOFF symbols.
+	* ecofflink.c (bfd_ecoff_debug_externals): Don't crash if the
+	output_section field of the symbol section is NULL.
+	* libecoff.h (ecoff_bfd_copy_private_bfd_data): Declare as
+	function rather than defining as macro.
+
 	* ieee.c (ieee_object_p): Set bfd_error_got_wrong_format if
 	appropriate.
 

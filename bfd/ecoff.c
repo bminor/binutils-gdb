@@ -2167,6 +2167,112 @@ ecoff_find_nearest_line (abfd,
   return true;
 }
 
+/* Copy private BFD data.  This is called by objcopy and strip.  We
+   use it to copy the ECOFF debugging information from one BFD to the
+   other.  It would be theoretically possible to represent the ECOFF
+   debugging information in the symbol table.  However, it would be a
+   lot of work, and there would be little gain (gas, gdb, and ld
+   already access the ECOFF debugging information via the
+   ecoff_debug_info structure, and that structure would have to be
+   retained in order to support ECOFF debugging in MIPS ELF).
+
+   The debugging information for the ECOFF external symbols comes from
+   the symbol table, so this function only handles the other debugging
+   information.  */
+
+boolean
+ecoff_bfd_copy_private_bfd_data (ibfd, obfd)
+     bfd *ibfd;
+     bfd *obfd;
+{
+  struct ecoff_debug_info *iinfo = &ecoff_data (ibfd)->debug_info;
+  struct ecoff_debug_info *oinfo = &ecoff_data (obfd)->debug_info;
+  asymbol **sym_ptr_ptr;
+  size_t c;
+  boolean local;
+
+  BFD_ASSERT (ibfd->xvec == obfd->xvec);
+
+  oinfo->symbolic_header.vstamp = iinfo->symbolic_header.vstamp;
+
+  /* If there are no symbols, don't copy any debugging information.  */
+  c = bfd_get_symcount (obfd);
+  sym_ptr_ptr = bfd_get_outsymbols (obfd);
+  if (c == 0 || sym_ptr_ptr == (asymbol **) NULL)
+    return true;
+
+  /* See if there are any local symbols.  */
+  local = false;
+  for (; c > 0; c--, sym_ptr_ptr++)
+    {
+      if (ecoffsymbol (*sym_ptr_ptr)->local)
+	{
+	  local = true;
+	  break;
+	}
+    }
+
+  if (local)
+    {
+      /* There are some local symbols.  We just bring over all the
+	 debugging information.  FIXME: This is not quite the right
+	 thing to do.  If the user has asked us to discard all
+	 debugging information, then we are probably going to wind up
+	 keeping it because there will probably be some local symbol
+	 which objcopy did not discard.  We should actually break
+	 apart the debugging information and only keep that which
+	 applies to the symbols we want to keep.  */
+      oinfo->symbolic_header.ilineMax = iinfo->symbolic_header.ilineMax;
+      oinfo->symbolic_header.cbLine = iinfo->symbolic_header.cbLine;
+      oinfo->line = iinfo->line;
+
+      oinfo->symbolic_header.idnMax = iinfo->symbolic_header.idnMax;
+      oinfo->external_dnr = iinfo->external_dnr;
+
+      oinfo->symbolic_header.ipdMax = iinfo->symbolic_header.ipdMax;
+      oinfo->external_pdr = iinfo->external_pdr;
+
+      oinfo->symbolic_header.isymMax = iinfo->symbolic_header.isymMax;
+      oinfo->external_sym = iinfo->external_sym;
+
+      oinfo->symbolic_header.ioptMax = iinfo->symbolic_header.ioptMax;
+      oinfo->external_opt = iinfo->external_opt;
+
+      oinfo->symbolic_header.iauxMax = iinfo->symbolic_header.iauxMax;
+      oinfo->external_aux = iinfo->external_aux;
+
+      oinfo->symbolic_header.issMax = iinfo->symbolic_header.issMax;
+      oinfo->ss = iinfo->ss;
+
+      oinfo->symbolic_header.ifdMax = iinfo->symbolic_header.ifdMax;
+      oinfo->external_fdr = iinfo->external_fdr;
+
+      oinfo->symbolic_header.crfd = iinfo->symbolic_header.crfd;
+      oinfo->external_rfd = iinfo->external_rfd;
+    }
+  else
+    {
+      /* We are discarding all the local symbol information.  Look
+	 through the external symbols and remove all references to FDR
+	 or aux information.  */
+      c = bfd_get_symcount (obfd);
+      sym_ptr_ptr = bfd_get_outsymbols (obfd);
+      for (; c > 0; c--, sym_ptr_ptr++)
+	{
+	  EXTR esym;
+
+	  (*(ecoff_backend (obfd)->debug_swap.swap_ext_in))
+	    (obfd, ecoffsymbol (*sym_ptr_ptr)->native, &esym);
+	  esym.ifd = ifdNil;
+	  esym.asym.index = indexNil;
+	  (*(ecoff_backend (obfd)->debug_swap.swap_ext_out))
+	    (obfd, &esym, ecoffsymbol (*sym_ptr_ptr)->native);
+	}
+    }
+
+  return true;
+}
+
 /* Set the architecture.  The supported architecture is stored in the
    backend pointer.  We always set the architecture anyhow, since many
    callers ignore the return value.  */
@@ -2461,15 +2567,15 @@ ecoff_get_extr (sym, esym)
   ecoff_symbol_type *ecoff_sym_ptr;
   bfd *input_bfd;
 
-  /* Don't include debugging, local or section symbols.  */
-  if ((sym->flags & BSF_DEBUGGING) != 0
-      || (sym->flags & BSF_LOCAL) != 0
-      || (sym->flags & BSF_SECTION_SYM) != 0)
-    return false;
-
   if (bfd_asymbol_flavour (sym) != bfd_target_ecoff_flavour
       || ecoffsymbol (sym)->native == NULL)
     {
+      /* Don't include debugging, local, or section symbols.  */
+      if ((sym->flags & BSF_DEBUGGING) != 0
+	  || (sym->flags & BSF_LOCAL) != 0
+	  || (sym->flags & BSF_SECTION_SYM) != 0)
+	return false;
+
       esym->jmptbl = 0;
       esym->cobol_main = 0;
       esym->weakext = 0;
@@ -2486,7 +2592,7 @@ ecoff_get_extr (sym, esym)
   ecoff_sym_ptr = ecoffsymbol (sym);
 
   if (ecoff_sym_ptr->local)
-    abort ();
+    return false;
 
   input_bfd = bfd_asymbol_bfd (sym);
   (*(ecoff_backend (input_bfd)->debug_swap.swap_ext_in))
