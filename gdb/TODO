@@ -183,6 +183,16 @@ Dan Nicolaescu writes:
 
 --
 
+GDB5 TOT on unixware 7
+http://sourceware.cygnus.com/ml/gdb/2000-04/msg00119.html
+
+Robert Lipe writes:
+> I just spun the top of tree of the GDB5 branch on UnixWare 7.  As a
+> practical matter, the current thread support is somewhat more annoying
+> than when GDB was thread-unaware.
+
+--
+
 		------------------------------------------------
 
 Code cleanups
