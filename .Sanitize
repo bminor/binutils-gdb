@@ -23,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+CYGNUS
 ChangeLog
 Makefile.in
 README
