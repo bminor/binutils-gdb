@@ -1,3 +1,8 @@
+Fri Jul 17 22:06:11 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.dos, gld.1, ld.texinfo, ldemul.c, ldfile.c, ldlang.c,
+	  ldmisc.c: removed rcsid's.
+
 Tue Jul 14 08:34:34 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ldlang.c (lang_map): print changes in sizes due to relaxing
