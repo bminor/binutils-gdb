@@ -1,3 +1,8 @@
+Wed Jan  3 17:26:32 MET 2001  Jan Hubicka  <jh@suse.cz>
+
+	* tc-i387.c (pi, pte, pt): Update.
+	(type_names): Add new types.
+
 Wed Jan  3 16:26:52 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* tc-i386.h (CpuK6, CpuAthlon, CpuSledgehammer, CpuMMX, Cpu3dnow,

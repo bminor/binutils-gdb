@@ -916,15 +916,20 @@ pi (line, x)
      char *line;
      i386_insn *x;
 {
-  register template *p;
-  int i;
+  unsigned int i;
 
   fprintf (stdout, "%s: template ", line);
   pte (&x->tm);
-  fprintf (stdout, "  modrm:  mode %x  reg %x  reg/mem %x",
+  fprintf (stdout, "  address: base %s  index %s  scale %x\n",
+	   x->base_reg ? x->base_reg->reg_name : "none",
+	   x->index_reg ? x->index_reg->reg_name : "none",
+	   x->log2_scale_factor);
+  fprintf (stdout, "  modrm:  mode %x  reg %x  reg/mem %x\n",
 	   x->rm.mode, x->rm.reg, x->rm.regmem);
-  fprintf (stdout, " base %x  index %x  scale %x\n",
-	   x->bi.base, x->bi.index, x->bi.scale);
+  fprintf (stdout, "  sib:  base %x  index %x  scale %x\n",
+	   x->sib.base, x->sib.index, x->sib.scale);
+  fprintf (stdout, "  rex: 64bit %x  extX %x  extY %x  extZ %x\n",
+	   x->rex.mode64, x->rex.extX, x->rex.extY, x->rex.extZ);
   for (i = 0; i < x->operands; i++)
     {
       fprintf (stdout, "    #%d:  ", i + 1);
@@ -944,7 +949,7 @@ static void
 pte (t)
      template *t;
 {
-  int i;
+  unsigned int i;
   fprintf (stdout, " %d operands ", t->operands);
   fprintf (stdout, "opcode %x ", t->base_opcode);
   if (t->extension_opcode != None)
@@ -1004,15 +1009,20 @@ type_names[] =
   { Reg8, "r8" },
   { Reg16, "r16" },
   { Reg32, "r32" },
+  { Reg64, "r64" },
   { Imm8, "i8" },
   { Imm8S, "i8s" },
   { Imm16, "i16" },
   { Imm32, "i32" },
+  { Imm32S, "i32s" },
+  { Imm64, "i64" },
   { Imm1, "i1" },
   { BaseIndex, "BaseIndex" },
   { Disp8, "d8" },
   { Disp16, "d16" },
   { Disp32, "d32" },
+  { Disp32S, "d32s" },
+  { Disp64, "d64" },
   { InOutPortReg, "InOutPortReg" },
   { ShiftCount, "ShiftCount" },
   { Control, "control reg" },
@@ -1036,16 +1046,9 @@ pt (t)
 {
   register struct type_name *ty;
 
-  if (t == Unknown)
-    {
-      fprintf (stdout, _("Unknown"));
-    }
-  else
-    {
-      for (ty = type_names; ty->mask; ty++)
-	if (t & ty->mask)
-	  fprintf (stdout, "%s, ", ty->tname);
-    }
+  for (ty = type_names; ty->mask; ty++)
+    if (t & ty->mask)
+      fprintf (stdout, "%s, ", ty->tname);
   fflush (stdout);
 }
 
