@@ -1,3 +1,10 @@
+1998-08-25 16:45  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c (process_dynamic_segment): Read syminfo section if
+	available.
+	(process_syminfo): New function.  Print syminfo information.
+	(process_file): Call process_syminfo and free syminfo data at the end.
+
 Wed Aug 19 16:19:51 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* dlltool.c (usage): Add file parameter.  Change all callers.
