@@ -259,9 +259,6 @@ static const struct hw_port_descriptor mn103int_ports[] = {
   { "irq-6", G29_PORT, 0, input_port, },
   { "irq-7", G30_PORT, 0, input_port, },
 
-  /*   { "ad-end", G24_PORT, 0, input_port, },  a/d conversion end, not in 103002? */ 
-
-
   /* interrupt inputs (as generic numbers) */
 
   { "int", 0, NR_G_PORTS, input_port, },
