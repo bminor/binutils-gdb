@@ -30,6 +30,7 @@
 #include "bfd.h"
 #include "bucomm.h"
 #include "libiberty.h"
+#include "demangle.h"
 #include "debug.h"
 #include "budbg.h"
 
@@ -151,7 +152,8 @@ static debug_type parse_stab_sun_floating_type
   PARAMS ((PTR, const char **));
 static debug_type parse_stab_enum_type PARAMS ((PTR, const char **));
 static debug_type parse_stab_struct_type
-  PARAMS ((PTR, struct stab_handle *, const char **, boolean, const int *));
+  PARAMS ((PTR, struct stab_handle *, const char *, const char **, boolean,
+	   const int *));
 static boolean parse_stab_baseclasses
   PARAMS ((PTR, struct stab_handle *, const char **, debug_baseclass **));
 static boolean parse_stab_struct_fields
@@ -163,7 +165,11 @@ static boolean parse_stab_one_struct_field
   PARAMS ((PTR, struct stab_handle *, const char **, const char *,
 	   debug_field *, boolean *));
 static boolean parse_stab_members
-  PARAMS ((PTR, struct stab_handle *, const char **, debug_method **));
+  PARAMS ((PTR, struct stab_handle *, const char *, const char **,
+	   const int *, debug_method **));
+static debug_type parse_stab_argtypes
+  PARAMS ((PTR, struct stab_handle *, debug_type, const char *, const char *,
+	   debug_type, const char *, boolean, boolean, const char **));
 static boolean parse_stab_tilde_field
   PARAMS ((PTR, struct stab_handle *, const char **, const int *,
 	   debug_type *, boolean *));
@@ -183,6 +189,11 @@ static boolean stab_record_type
   PARAMS ((PTR, struct stab_handle *, const int *, debug_type));
 static debug_type stab_xcoff_builtin_type
   PARAMS ((PTR, struct stab_handle *, int));
+static debug_type stab_find_tagged_type
+  PARAMS ((PTR, struct stab_handle *, const char *, int,
+	   enum debug_type_kind));
+static debug_type *stab_demangle_argtypes
+  PARAMS ((PTR, struct stab_handle *, const char *));
 
 /* Save a string in memory.  */
 
@@ -365,11 +376,18 @@ finish_stab (dhandle, handle)
 
   for (st = info->tags; st != NULL; st = st->next)
     {
-      st->slot = debug_make_undefined_tagged_type (dhandle, st->name,
-						   st->kind);
+      enum debug_type_kind kind;
+
+      kind = st->kind;
+      if (kind == DEBUG_KIND_ILLEGAL)
+	kind = DEBUG_KIND_STRUCT;
+      st->slot = debug_make_undefined_tagged_type (dhandle, st->name, kind);
       if (st->slot == DEBUG_TYPE_NULL)
 	return false;
     }
+
+  if (info->pending)
+    fprintf (stderr, "Left over pending variables in stabs debugging\n");
 
   return true;
 }
@@ -437,14 +455,10 @@ parse_stab (dhandle, handle, type, desc, value, string)
 	return false;
 
       --info->block_depth;
-      if (info->block_depth == 0)
+      if (info->block_depth < 0)
 	{
-	  info->within_function = false;
-	  if (! debug_end_function (dhandle,
-				    (value
-				     + info->file_start_offset
-				     + info->function_start_offset)))
-	    return false;
+	  fprintf (stderr, "Too many N_RBRACs\n");
+	  return false;
 	}
       break;
 
@@ -456,7 +470,7 @@ parse_stab (dhandle, handle, type, desc, value, string)
 	{
 	  if (info->within_function)
 	    {
-	      if (! debug_end_function (dhandle, (bfd_vma) -1))
+	      if (! debug_end_function (dhandle, value))
 		return false;
 	      info->within_function = false;
 	    }
@@ -478,7 +492,7 @@ parse_stab (dhandle, handle, type, desc, value, string)
 	{
 	  if (info->within_function)
 	    {
-	      if (! debug_end_function (dhandle, (bfd_vma) -1))
+	      if (! debug_end_function (dhandle, value))
 		return false;
 	      info->within_function = false;
 	    }
@@ -563,7 +577,7 @@ parse_stab (dhandle, handle, type, desc, value, string)
 	  {
 	    if (info->within_function)
 	      {
-		if (! debug_end_function (dhandle, (bfd_vma) -1))
+		if (! debug_end_function (dhandle, value))
 		  return false;
 	      }
 	    /* For stabs in sections, line numbers and block addresses
@@ -917,7 +931,7 @@ parse_stab_string (dhandle, info, stabtype, desc, value, string)
 	  ++p;
 	}
 
-      dtype = parse_stab_type (dhandle, info, (const char *) NULL, &p, &slot);
+      dtype = parse_stab_type (dhandle, info, name, &p, &slot);
       if (dtype == DEBUG_TYPE_NULL)
 	return false;
       if (name == NULL)
@@ -1018,9 +1032,9 @@ parse_stab_string (dhandle, info, stabtype, desc, value, string)
 }
 
 /* Parse a stabs type.  The typename argument is non-NULL if this is a
-   typedef.  The pp argument points to the stab string, and is
-   updated.  The slotp argument points to a place to store the slot
-   used if the type is being defined.  */
+   typedef or a tag definition.  The pp argument points to the stab
+   string, and is updated.  The slotp argument points to a place to
+   store the slot used if the type is being defined.  */
 
 static debug_type
 parse_stab_type (dhandle, info, typename, pp, slotp)
@@ -1139,8 +1153,6 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
       {
 	enum debug_type_kind code;
 	const char *q1, *q2, *p;
-	char *name;
-	struct stab_tag *st;
 
 	/* A cross reference to another type.  */
 
@@ -1185,52 +1197,9 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
 	      }
 	  }
 
-	name = savestring (*pp, p - *pp);
+	dtype = stab_find_tagged_type (dhandle, info, *pp, p - *pp, code);
 
 	*pp = p + 1;
-
-	/* We pass DEBUG_KIND_VOID because we want all tags in the
-           same namespace.  This is right for C, and I don't know how
-           to handle other languages.  FIXME.  */
-	dtype = debug_find_tagged_type (dhandle, name, DEBUG_KIND_VOID);
-	if (dtype != DEBUG_TYPE_NULL)
-	  {
-	    free (name);
-	    if (typenums[0] != -1)
-	      {
-		if (! stab_record_type (dhandle, info, typenums, dtype))
-		  return DEBUG_TYPE_NULL;
-	      }
-	    return dtype;
-	  }
-
-	/* We need to allocate an entry on the undefined tag list.  */
-	for (st = info->tags; st != NULL; st = st->next)
-	  {
-	    if (st->name[0] == name[0]
-		&& strcmp (st->name, name) == 0)
-	      break;
-	  }
-	if (st == NULL)
-	  {
-	    st = (struct stab_tag *) xmalloc (sizeof *st);
-	    memset (st, 0, sizeof *st);
-
-	    st->next = info->tags;
-	    st->name = name;
-	    st->kind = code;
-	    st->slot = DEBUG_TYPE_NULL;
-	    st->type = debug_make_indirect_type (dhandle, &st->slot, name);
-	    info->tags = st;
-	  }
-
-	dtype = st->type;
-	if (typenums[0] != -1)
-	  {
-	    if (! stab_record_type (dhandle, info, typenums, dtype))
-	      return DEBUG_TYPE_NULL;
-	  }
-	return dtype;
       }
       break;
 
@@ -1433,6 +1402,27 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
 	    }
 	  ++*pp;
 
+	  /* If the last type is void, then this function does not
+	     take a variable number of arguments.  If the last is not
+	     void, then it does.  */
+	  if (n > 0
+	      && debug_get_type_kind (dhandle, args[n - 1]) == DEBUG_KIND_VOID)
+	    --n;
+	  else
+	    {
+	      if (n + 1 >= alloc)
+		{
+		  alloc += 10;
+		  args = ((debug_type *)
+			  xrealloc ((PTR) args, alloc * sizeof *args));
+		}
+
+	      args[n] = debug_make_ellipsis_type (dhandle);
+	      if (args[n] == DEBUG_TYPE_NULL)
+		return DEBUG_TYPE_NULL;
+	      ++n;
+	    }
+
 	  args[n] = DEBUG_TYPE_NULL;
 
 	  dtype = debug_make_method_type (dhandle, return_type, domain, args);
@@ -1463,7 +1453,7 @@ parse_stab_type (dhandle, info, typename, pp, slotp)
     case 's':
     case 'u':
       /* Struct or union type.  */
-      dtype = parse_stab_struct_type (dhandle, info, pp,
+      dtype = parse_stab_struct_type (dhandle, info, typename, pp,
 				      descriptor == 's', typenums);
       break;
 
@@ -1925,9 +1915,10 @@ parse_stab_enum_type (dhandle, pp)
    *PP will point to "4a:1,0,32;;".  */
 
 static debug_type
-parse_stab_struct_type (dhandle, info, pp, structp, typenums)
+parse_stab_struct_type (dhandle, info, tagname, pp, structp, typenums)
      PTR dhandle;
      struct stab_handle *info;
+     const char *tagname;
      const char **pp;
      boolean structp;
      const int *typenums;
@@ -1949,7 +1940,7 @@ parse_stab_struct_type (dhandle, info, pp, structp, typenums)
   /* Get the other information.  */
   if (! parse_stab_baseclasses (dhandle, info, pp, &baseclasses)
       || ! parse_stab_struct_fields (dhandle, info, pp, &fields, &statics)
-      || ! parse_stab_members (dhandle, info, pp, &methods)
+      || ! parse_stab_members (dhandle, info, tagname, pp, typenums, &methods)
       || ! parse_stab_tilde_field (dhandle, info, pp, typenums, &vptrbase,
 				   &ownvptr))
     return DEBUG_TYPE_NULL;
@@ -2432,10 +2423,12 @@ parse_stab_one_struct_field (dhandle, info, pp, p, retp, staticsp)
    name (such as `+=') and `.' marks the end of the operator name.  */
 
 static boolean
-parse_stab_members (dhandle, info, pp, retp)
+parse_stab_members (dhandle, info, tagname, pp, typenums, retp)
      PTR dhandle;
      struct stab_handle *info;
+     const char *tagname;
      const char **pp;
+     const int *typenums;
      debug_method **retp;
 {
   const char *orig;
@@ -2505,6 +2498,7 @@ parse_stab_members (dhandle, info, pp, retp)
 	  boolean constp, volatilep, staticp;
 	  bfd_vma voffset;
 	  debug_type context;
+	  const char *physname;
 
 	  if (look_ahead_type != DEBUG_TYPE_NULL)
 	    {
@@ -2532,8 +2526,6 @@ parse_stab_members (dhandle, info, pp, retp)
 	      bad_stab (orig);
 	      return false;
 	    }
-
-	  /* FIXME: gdb sets is_stub here.  */
 
 	  argtypes = savestring (*pp, p - *pp);
 	  *pp = p + 1;
@@ -2645,7 +2637,6 @@ parse_stab_members (dhandle, info, pp, retp)
 	      ++*pp;
 	      staticp = true;
 	      voffset = 0;
-	      /* FIXME: gdb sets is_stub here.  */
 	      context = DEBUG_TYPE_NULL;
 	      break;
 
@@ -2662,6 +2653,36 @@ parse_stab_members (dhandle, info, pp, retp)
 	      break;
 	    }
 
+	  /* If this is a method type which is not a stub--that is,
+	     the argument types are fully specified--then the argtypes
+	     string is actually the physical name of the function.
+	     Otherwise, the argtypes string is the mangled from of the
+	     argument types, and the physical name of the function,
+	     and the argument types, must be deduced from it.  */
+
+	  if (debug_get_type_kind (dhandle, type) == DEBUG_KIND_METHOD
+	      && debug_get_parameter_types (dhandle, type) != NULL)
+	    physname = argtypes;
+	  else
+	    {
+	      debug_type class_type, return_type;
+
+	      class_type = stab_find_type (dhandle, info, typenums);
+	      if (class_type == DEBUG_TYPE_NULL)
+		return false;
+	      return_type = debug_get_return_type (dhandle, type);
+	      if (return_type == DEBUG_TYPE_NULL)
+		{
+		  bad_stab (orig);
+		  return false;
+		}
+	      type = parse_stab_argtypes (dhandle, info, class_type, name,
+					  tagname, return_type, argtypes,
+					  constp, volatilep, &physname);
+	      if (type == DEBUG_TYPE_NULL)
+		return false;
+	    }
+
 	  if (cvars + 1 >= allocvars)
 	    {
 	      allocvars += 10;
@@ -2671,13 +2692,13 @@ parse_stab_members (dhandle, info, pp, retp)
 	    }
 
 	  if (! staticp)
-	    variants[cvars] = debug_make_method_variant (dhandle, argtypes,
+	    variants[cvars] = debug_make_method_variant (dhandle, physname,
 							 type, visibility,
 							 constp, volatilep,
 							 voffset, context);
 	  else
 	    variants[cvars] = debug_make_static_method_variant (dhandle,
-								argtypes,
+								physname,
 								type,
 								visibility,
 								constp,
@@ -2712,6 +2733,128 @@ parse_stab_members (dhandle, info, pp, retp)
   *retp = methods;
 
   return true;
+}
+
+/* Parse a string representing argument types for a method.  Stabs
+   tries to save space by packing argument types into a mangled
+   string.  This string should give us enough information to extract
+   both argument types and the physical name of the function, given
+   the tag name.  */
+
+static debug_type
+parse_stab_argtypes (dhandle, info, class_type, fieldname, tagname,
+		     return_type, argtypes, constp, volatilep, pphysname)
+     PTR dhandle;
+     struct stab_handle *info;
+     debug_type class_type;
+     const char *fieldname;
+     const char *tagname;
+     debug_type return_type;
+     const char *argtypes;
+     boolean constp;
+     boolean volatilep;
+     const char **pphysname;
+{
+  boolean is_full_physname_constructor;
+  boolean is_constructor;
+  boolean is_destructor;
+  debug_type *args;
+
+  /* Constructors are sometimes handled specially.  */
+  is_full_physname_constructor = ((argtypes[0] == '_'
+				   && argtypes[1] == '_'
+				   && (isdigit ((unsigned char) argtypes[2])
+				       || argtypes[2] == 'Q'
+				       || argtypes[2] == 't'))
+				  || strncmp (argtypes, "__ct", 4) == 0);
+
+  is_constructor = (is_full_physname_constructor
+		    || (tagname != NULL
+			&& strcmp (fieldname, tagname) == 0));
+  is_destructor = ((argtypes[0] == '_'
+		    && (argtypes[1] == '$' || argtypes[1] == '.')
+		    && argtypes[2] == '_')
+		   || strncmp (argtypes, "__dt", 4) == 0);
+
+  if (is_destructor || is_full_physname_constructor)
+    *pphysname = argtypes;
+  else
+    {
+      unsigned int len;
+      const char *const_prefix;
+      const char *volatile_prefix;
+      char buf[20];
+      unsigned int mangled_name_len;
+      char *physname;
+
+      len = tagname == NULL ? 0 : strlen (tagname);
+      const_prefix = constp ? "C" : "";
+      volatile_prefix = volatilep ? "V" : "";
+
+      if (len == 0)
+	sprintf (buf, "__%s%s", const_prefix, volatile_prefix);
+      else if (tagname != NULL && strchr (tagname, '<') != NULL)
+	{
+	  /* Template methods are fully mangled.  */
+	  sprintf (buf, "__%s%s", const_prefix, volatile_prefix);
+	  tagname = NULL;
+	  len = 0;
+	}
+      else
+	sprintf (buf, "__%s%s%d", const_prefix, volatile_prefix, len);
+
+      mangled_name_len = ((is_constructor ? 0 : strlen (fieldname))
+			  + strlen (buf)
+			  + len
+			  + strlen (argtypes)
+			  + 1);
+
+      if (fieldname[0] == 'o'
+	  && fieldname[1] == 'p'
+	  && (fieldname[2] == '$' || fieldname[2] == '.'))
+	{
+	  const char *opname;
+
+	  opname = cplus_mangle_opname (fieldname + 3, 0);
+	  if (opname == NULL)
+	    {
+	      fprintf (stderr, "No mangling for \"%s\"\n", fieldname);
+	      return DEBUG_TYPE_NULL;
+	    }
+	  mangled_name_len += strlen (opname);
+	  physname = (char *) xmalloc (mangled_name_len);
+	  strncpy (physname, fieldname, 3);
+	  strcpy (physname + 3, opname);
+	}
+      else
+	{
+	  physname = (char *) xmalloc (mangled_name_len);
+	  if (is_constructor)
+	    physname[0] = '\0';
+	  else
+	    strcpy (physname, fieldname);
+	}
+
+      strcat (physname, buf);
+      if (tagname != NULL)
+	strcat (physname, tagname);
+      strcat (physname, argtypes);
+
+      *pphysname = physname;
+    }
+
+  if (*argtypes == '\0')
+    {
+      args = (debug_type *) xmalloc (sizeof *args);
+      *args = NULL;
+      return debug_make_method_type (dhandle, return_type, class_type, args);
+    }
+
+  args = stab_demangle_argtypes (dhandle, info, *pphysname);
+  if (args == NULL)
+    return DEBUG_TYPE_NULL;
+
+  return debug_make_method_type (dhandle, return_type, class_type, args);
 }
 
 /* The tail end of stabs for C++ classes that contain a virtual function
@@ -2941,7 +3084,8 @@ stab_record_variable (dhandle, info, name, type, kind, val)
 {
   struct stab_pending_var *v;
 
-  if (! info->within_function
+  if ((kind == DEBUG_GLOBAL || kind == DEBUG_STATIC)
+      || ! info->within_function
       || (info->gcc_compiled == 0 && info->n_opt_found))
     return debug_record_variable (dhandle, name, type, kind, val);
 
@@ -3258,4 +3402,1483 @@ stab_xcoff_builtin_type (dhandle, info, typenum)
   info->xcoff_types[-typenum] = rettype;
 
   return rettype;
+}
+
+/* Find or create a tagged type.  */
+
+static debug_type
+stab_find_tagged_type (dhandle, info, p, len, kind)
+     PTR dhandle;
+     struct stab_handle *info;
+     const char *p;
+     int len;
+     enum debug_type_kind kind;
+{
+  char *name;
+  debug_type dtype;
+  struct stab_tag *st;
+
+  name = savestring (p, len);
+
+  /* We pass DEBUG_KIND_ILLEGAL because we want all tags in the same
+     namespace.  This is right for C, and I don't know how to handle
+     other languages.  FIXME.  */
+  dtype = debug_find_tagged_type (dhandle, name, DEBUG_KIND_ILLEGAL);
+  if (dtype != DEBUG_TYPE_NULL)
+    {
+      free (name);
+      return dtype;
+    }
+
+  /* We need to allocate an entry on the undefined tag list.  */
+  for (st = info->tags; st != NULL; st = st->next)
+    {
+      if (st->name[0] == name[0]
+	  && strcmp (st->name, name) == 0)
+	{
+	  if (st->kind == DEBUG_KIND_ILLEGAL)
+	    st->kind = kind;
+	  free (name);
+	  break;
+	}
+    }
+  if (st == NULL)
+    {
+      st = (struct stab_tag *) xmalloc (sizeof *st);
+      memset (st, 0, sizeof *st);
+
+      st->next = info->tags;
+      st->name = name;
+      st->kind = kind;
+      st->slot = DEBUG_TYPE_NULL;
+      st->type = debug_make_indirect_type (dhandle, &st->slot, name);
+      info->tags = st;
+    }
+
+  return st->type;
+}
+
+/* In order to get the correct argument types for a stubbed method, we
+   need to extract the argument types from a C++ mangled string.
+   Since the argument types can refer back to the return type, this
+   means that we must demangle the entire physical name.  In gdb this
+   is done by calling cplus_demangle and running the results back
+   through the C++ expression parser.  Since we have no expression
+   parser, we must duplicate much of the work of cplus_demangle here.
+
+   We assume that GNU style demangling is used, since this is only
+   done for method stubs, and only g++ should output that form of
+   debugging information.  */
+
+/* This structure is used to hold a pointer to type information which
+   demangling a string.  */
+
+struct stab_demangle_typestring
+{
+  /* The start of the type.  This is not null terminated.  */
+  const char *typestring;
+  /* The length of the type.  */
+  unsigned int len;
+};
+
+/* This structure is used to hold information while demangling a
+   string.  */
+
+struct stab_demangle_info
+{
+  /* The debugging information handle.  */
+  PTR dhandle;
+  /* The stab information handle.  */
+  struct stab_handle *info;
+  /* The array of arguments we are building.  */
+  debug_type *args;
+  /* The array of types we have remembered.  */
+  struct stab_demangle_typestring *typestrings;
+  /* The number of typestrings.  */
+  unsigned int typestring_count;
+  /* The number of typestring slots we have allocated.  */
+  unsigned int typestring_alloc;
+};
+
+static void stab_bad_demangle PARAMS ((const char *));
+static unsigned int stab_demangle_count PARAMS ((const char **));
+static boolean stab_demangle_get_count
+  PARAMS ((const char **, unsigned int *));
+static boolean stab_demangle_prefix
+  PARAMS ((struct stab_demangle_info *, const char **));
+static boolean stab_demangle_function_name
+  PARAMS ((struct stab_demangle_info *, const char **, const char *));
+static boolean stab_demangle_signature
+  PARAMS ((struct stab_demangle_info *, const char **));
+static boolean stab_demangle_qualified
+  PARAMS ((struct stab_demangle_info *, const char **, debug_type *));
+static boolean stab_demangle_template
+  PARAMS ((struct stab_demangle_info *, const char **));
+static boolean stab_demangle_class
+  PARAMS ((struct stab_demangle_info *, const char **, const char **));
+static boolean stab_demangle_args
+  PARAMS ((struct stab_demangle_info *, const char **, debug_type **));
+static boolean stab_demangle_arg
+  PARAMS ((struct stab_demangle_info *, const char **, debug_type **,
+	   unsigned int *, unsigned int *));
+static boolean stab_demangle_type
+  PARAMS ((struct stab_demangle_info *, const char **, debug_type *));
+static boolean stab_demangle_fund_type
+  PARAMS ((struct stab_demangle_info *, const char **, debug_type *));
+static boolean stab_demangle_remember_type
+  PARAMS ((struct stab_demangle_info *, const char *, int));
+
+/* Warn about a bad demangling.  */
+
+static void
+stab_bad_demangle (s)
+     const char *s;
+{
+  fprintf (stderr, "bad mangled name `%s'\n", s);
+}
+
+/* Get a count from a stab string.  */
+
+static unsigned int
+stab_demangle_count (pp)
+     const char **pp;
+{
+  unsigned int count;
+
+  count = 0;
+  while (isdigit ((unsigned char) **pp))
+    {
+      count *= 10;
+      count += **pp - '0';
+      ++*pp;
+    }
+  return count;
+}
+
+/* Require a count in a string.  The count may be multiple digits, in
+   which case it must end in an underscore.  */
+
+static boolean
+stab_demangle_get_count (pp, pi)
+     const char **pp;
+     unsigned int *pi;
+{
+  if (! isdigit ((unsigned char) **pp))
+    return false;
+
+  *pi = **pp - '0';
+  ++*pp;
+  if (isdigit ((unsigned char) **pp))
+    {
+      unsigned int count;
+      const char *p;
+
+      count = *pi;
+      p = *pp;
+      do
+	{
+	  count *= 10;
+	  count += *p - '0';
+	  ++p;
+	}
+      while (isdigit ((unsigned char) *p));
+      if (*p == '_')
+	{
+	  *pp = p + 1;
+	  *pi = count;
+	}
+    }
+
+  return true;
+}
+
+/* This function demangles a physical name, returning a NULL
+   terminated array of argument types.  */
+
+static debug_type *
+stab_demangle_argtypes (dhandle, info, physname)
+     PTR dhandle;
+     struct stab_handle *info;
+     const char *physname;
+{
+  struct stab_demangle_info minfo;
+
+  minfo.dhandle = dhandle;
+  minfo.info = info;
+  minfo.args = NULL;
+  minfo.typestring_alloc = 10;
+  minfo.typestrings = ((struct stab_demangle_typestring *)
+		       xmalloc (minfo.typestring_alloc
+				* sizeof *minfo.typestrings));
+  minfo.typestring_count = 0;
+
+  /* cplus_demangle checks for special GNU mangled forms, but we can't
+     see any of them in mangled method argument types.  */
+
+  if (! stab_demangle_prefix (&minfo, &physname))
+    goto error_return;
+
+  if (*physname != '\0')
+    {
+      if (! stab_demangle_signature (&minfo, &physname))
+	goto error_return;
+    }
+
+  free (minfo.typestrings);
+  minfo.typestrings = NULL;
+
+  if (minfo.args == NULL)
+    fprintf (stderr, "no argument types in mangled string\n");
+
+  return minfo.args;
+
+ error_return:
+  if (minfo.typestrings != NULL)
+    free (minfo.typestrings);
+  return NULL;
+}
+
+/* Demangle the prefix of the mangled name.  */
+
+static boolean
+stab_demangle_prefix (minfo, pp)
+     struct stab_demangle_info *minfo;
+     const char **pp;
+{
+  const char *scan;
+  unsigned int i;
+
+  /* cplus_demangle checks for global constructors and destructors,
+     but we can't see them in mangled argument types.  */
+
+  /* Look for `__'.  */
+  scan = *pp;
+  do
+    {
+      scan = strchr (scan, '_');
+    }
+  while (scan != NULL && *++scan != '_');
+
+  if (scan == NULL)
+    {
+      stab_bad_demangle (*pp);
+      return false;
+    }
+
+  --scan;
+
+  /* We found `__'; move ahead to the last contiguous `__' pair.  */
+  i = strspn (scan, "_");
+  if (i > 2)
+    scan += i - 2;
+
+  if (scan == *pp
+      && (isdigit ((unsigned char) scan[2])
+	  || scan[2] == 'Q'
+	  || scan[2] == 't'))
+    {
+      /* This is a GNU style constructor name.  */
+      *pp = scan + 2;
+      return true;
+    }
+  else if (scan == *pp
+	   && ! isdigit ((unsigned char) scan[2])
+	   && scan[2] != 't')
+    {
+      /* Look for the `__' that separates the prefix from the
+         signature.  */
+      while (*scan == '_')
+	++scan;
+      scan = strstr (scan, "__");
+      if (scan == NULL || scan[2] == '\0')
+	{
+	  stab_bad_demangle (*pp);
+	  return false;
+	}
+
+      return stab_demangle_function_name (minfo, pp, scan);
+    }
+  else if (scan[2] != '\0')
+    {
+      /* The name doesn't start with `__', but it does contain `__'.  */
+      return stab_demangle_function_name (minfo, pp, scan);
+    }
+  else
+    {
+      stab_bad_demangle (*pp);
+      return false;
+    }
+  /*NOTREACHED*/
+}
+
+/* Demangle a function name prefix.  The scan argument points to the
+   double underscore which separates the function name from the
+   signature.  */
+
+static boolean
+stab_demangle_function_name (minfo, pp, scan)
+     struct stab_demangle_info *minfo;
+     const char **pp;
+     const char *scan;
+{
+  const char *name;
+
+  /* The string from *pp to scan is the name of the function.  We
+     don't care about the name, since we just looking for argument
+     types.  However, for conversion operators, the name may include a
+     type which we must remember in order to handle backreferences.  */
+
+  name = *pp;
+  *pp = scan + 2;
+
+  if (*pp - name >= 5
+	   && strncmp (name, "type", 4) == 0
+	   && (name[4] == '$' || name[4] == '.'))
+    {
+      const char *tem;
+
+      /* This is a type conversion operator.  */
+      tem = name + 5;
+      if (! stab_demangle_type (minfo, &tem, (debug_type *) NULL))
+	return false;
+    }
+  else if (name[0] == '_'
+	   && name[1] == '_'
+	   && name[2] == 'o'
+	   && name[3] == 'p')
+    {
+      const char *tem;
+
+      /* This is a type conversion operator.  */
+      tem = name + 4;
+      if (! stab_demangle_type (minfo, &tem, (debug_type *) NULL))
+	return false;
+    }
+
+  return true;
+}
+
+/* Demangle the signature.  This is where the argument types are
+   found.  */
+
+static boolean
+stab_demangle_signature (minfo, pp)
+     struct stab_demangle_info *minfo;
+     const char **pp;
+{
+  const char *orig;
+  boolean expect_func, func_done;
+  const char *hold;
+
+  orig = *pp;
+
+  expect_func = false;
+  func_done = false;
+  hold = NULL;
+
+  while (**pp != '\0')
+    {
+      switch (**pp)
+	{
+	case 'Q':
+	  hold = *pp;
+	  if (! stab_demangle_qualified (minfo, pp, (debug_type *) NULL)
+	      || ! stab_demangle_remember_type (minfo, hold, *pp - hold))
+	    return false;
+	  expect_func = true;
+	  hold = NULL;
+	  break;
+
+	case 'S':
+	  /* Static member function.  FIXME: Can this happen?  */
+	  if (hold == NULL)
+	    hold = *pp;
+	  ++*pp;
+	  break;
+
+	case 'C':
+	  /* Const member function.  */
+	  if (hold == NULL)
+	    hold = *pp;
+	  ++*pp;
+	  break;
+
+	case '0': case '1': case '2': case '3': case '4':
+	case '5': case '6': case '7': case '8': case '9':
+	  if (hold == NULL)
+	    hold = *pp;
+	  if (! stab_demangle_class (minfo, pp, (const char **) NULL)
+	      || ! stab_demangle_remember_type (minfo, hold, *pp - hold))
+	    return false;
+	  expect_func = true;
+	  hold = NULL;
+	  break;
+
+	case 'F':
+	  /* Function.  I don't know if this actually happens with g++
+             output.  */
+	  hold = NULL;
+	  func_done = true;
+	  ++*pp;
+	  if (! stab_demangle_args (minfo, pp, &minfo->args))
+	    return false;
+	  break;
+
+	case 't':
+	  /* Template.  */
+	  if (hold == NULL)
+	    hold = *pp;
+	  if (! stab_demangle_template (minfo, pp)
+	      || ! stab_demangle_remember_type (minfo, hold, *pp - hold))
+	    return false;
+	  hold = NULL;
+	  expect_func = true;
+	  break;
+
+	case '_':
+	  /* At the outermost level, we cannot have a return type
+	     specified, so if we run into another '_' at this point we
+	     are dealing with a mangled name that is either bogus, or
+	     has been mangled by some algorithm we don't know how to
+	     deal with.  So just reject the entire demangling.  */
+	  stab_bad_demangle (orig);
+	  return false;
+
+	default:
+	  /* Assume we have stumbled onto the first outermost function
+	     argument token, and start processing args.  */
+	  func_done = true;
+	  if (! stab_demangle_args (minfo, pp, &minfo->args))
+	    return false;
+	  break;
+	}
+
+      if (expect_func)
+	{
+	  func_done = true;
+	  if (! stab_demangle_args (minfo, pp, &minfo->args))
+	    return false;
+	}
+    }
+
+  if (! func_done)
+    {
+      /* With GNU style demangling, bar__3foo is 'foo::bar(void)', and
+	 bar__3fooi is 'foo::bar(int)'.  We get here when we find the
+	 first case, and need to ensure that the '(void)' gets added
+	 to the current declp.  */
+      if (! stab_demangle_args (minfo, pp, &minfo->args))
+	return false;
+    }
+
+  return true;
+}
+
+/* Demangle a qualified name, such as "Q25Outer5Inner" which is the
+   mangled form of "Outer::Inner".  */
+
+static boolean
+stab_demangle_qualified (minfo, pp, ptype)
+     struct stab_demangle_info *minfo;
+     const char **pp;
+     debug_type *ptype;
+{
+  const char *orig;
+  const char *p;
+  unsigned int qualifiers;
+  debug_type context;
+
+  orig = *pp;
+
+  switch ((*pp)[1])
+    {
+    case '_':
+      /* GNU mangled name with more than 9 classes.  The count is
+	 preceded by an underscore (to distinguish it from the <= 9
+	 case) and followed by an underscore.  */
+      p = *pp + 2;
+      if (! isdigit ((unsigned char) *p) || *p == '0')
+	{
+	  stab_bad_demangle (orig);
+	  return false;
+	}
+      qualifiers = atoi (p);
+      while (isdigit ((unsigned char) *p))
+	++p;
+      if (*p != '_')
+	{
+	  stab_bad_demangle (orig);
+	  return false;
+	}
+      *pp = p + 1;
+      break;
+
+    case '1': case '2': case '3': case '4': case '5':
+    case '6': case '7': case '8': case '9':
+      qualifiers = (*pp)[1] - '0';
+      /* Skip an optional underscore after the count.  */
+      if ((*pp)[2] == '_')
+	++*pp;
+      *pp += 2;
+      break;
+
+    case '0':
+    default:
+      stab_bad_demangle (orig);
+      return false;
+    }
+
+  context = DEBUG_TYPE_NULL;
+
+  /* Pick off the names.  */
+  while (qualifiers-- > 0)
+    {
+      if (**pp == '_')
+	++*pp;
+      if (**pp == 't')
+	{
+	  /* FIXME: I don't know how to handle the ptype != NULL case
+             here.  */
+	  if (! stab_demangle_template (minfo, pp))
+	    return false;
+	}
+      else
+	{
+	  unsigned int len;
+
+	  len = stab_demangle_count (pp);
+	  if (strlen (*pp) < len)
+	    {
+	      stab_bad_demangle (orig);
+	      return false;
+	    }
+
+	  if (ptype != NULL)
+	    {
+	      const debug_field *fields;
+
+	      fields = NULL;
+	      if (context != DEBUG_TYPE_NULL)
+		fields = debug_get_fields (minfo->dhandle, context);
+
+	      context = DEBUG_TYPE_NULL;
+
+	      if (fields != NULL)
+		{
+		  char *name;
+
+		  /* Try to find the type by looking through the
+                     fields of context until we find a field with the
+                     same type.  This ought to work for a class
+                     defined within a class, but it won't work for,
+                     e.g., an enum defined within a class.  stabs does
+                     not give us enough information to figure out the
+                     latter case.  */
+
+		  name = savestring (*pp, len);
+
+		  for (; *fields != DEBUG_FIELD_NULL; fields++)
+		    {
+		      debug_type ft;
+		      const char *dn;
+
+		      ft = debug_get_field_type (minfo->dhandle, *fields);
+		      if (ft == NULL)
+			return false;
+		      dn = debug_get_type_name (minfo->dhandle, ft);
+		      if (dn != NULL && strcmp (dn, name) == 0)
+			{
+			  context = ft;
+			  break;
+			}
+		    }
+
+		  free (name);
+		}
+
+	      if (context == DEBUG_TYPE_NULL)
+		{
+	  /* We have to fall back on finding the type by name.
+                     If there are more types to come, then this must
+                     be a class.  Otherwise, it could be anything.  */
+
+		  if (qualifiers == 0)
+		    {
+		      char *name;
+
+		      name = savestring (*pp, len);
+		      context = debug_find_named_type (minfo->dhandle,
+						       name);
+		      free (name);
+		    }
+
+		  if (context == DEBUG_TYPE_NULL)
+		    {
+		      context = stab_find_tagged_type (minfo->dhandle,
+						       minfo->info,
+						       *pp, len,
+						       (qualifiers == 0
+							? DEBUG_KIND_ILLEGAL
+							: DEBUG_KIND_CLASS));
+		      if (context == DEBUG_TYPE_NULL)
+			return false;
+		    }
+		}
+	    }
+
+	  *pp += len;
+	}
+    }
+
+  if (ptype != NULL)
+    *ptype = context;
+
+  return true;
+}
+
+/* Demangle a template.  */
+
+static boolean
+stab_demangle_template (minfo, pp)
+     struct stab_demangle_info *minfo;
+     const char **pp;
+{
+  const char *orig;
+  unsigned int r, i;
+
+  orig = *pp;
+
+  ++*pp;
+
+  /* Skip the template name.  */
+  r = stab_demangle_count (pp);
+  if (r == 0 || strlen (*pp) < r)
+    {
+      stab_bad_demangle (orig);
+      return false;
+    }
+  *pp += r;
+
+  /* Get the size of the parameter list.  */
+  if (stab_demangle_get_count (pp, &r) == 0)
+    {
+      stab_bad_demangle (orig);
+      return false;
+    }
+
+  for (i = 0; i < r; i++)
+    {
+      if (**pp == 'Z')
+	{
+	  /* This is a type parameter.  */
+	  ++*pp;
+	  if (! stab_demangle_type (minfo, pp, (debug_type *) NULL))
+	    return false;
+	}
+      else
+	{
+	  const char *old_p;
+	  boolean pointerp, realp, integralp, charp, boolp;
+	  boolean done;
+
+	  old_p = *pp;
+	  pointerp = false;
+	  realp = false;
+	  integralp = false;
+	  charp = false;
+	  boolp = false;
+	  done = false;
+
+	  /* This is a value parameter.  */
+
+	  if (! stab_demangle_type (minfo, pp, (debug_type *) NULL))
+	    return false;
+
+	  while (*old_p != '\0' && ! done)
+	    {
+	      switch (*old_p)
+		{
+		case 'P':
+		case 'p':
+		case 'R':
+		  pointerp = true;
+		  done = true;
+		  break;
+		case 'C':	/* Const.  */
+		case 'S':	/* Signed.  */
+		case 'U':	/* Unsigned.  */
+		case 'V':	/* Volatile.  */
+		case 'F':	/* Function.  */
+		case 'M':	/* Member function.  */
+		case 'O':	/* ??? */
+		  ++old_p;
+		  break;
+		case 'Q':	/* Qualified name.  */
+		  integralp = true;
+		  done = true;
+		  break;
+		case 'T':	/* Remembered type.  */
+		  abort ();
+		case 'v':	/* Void.  */
+		  abort ();
+		case 'x':	/* Long long.  */
+		case 'l':	/* Long.  */
+		case 'i':	/* Int.  */
+		case 's':	/* Short.  */
+		case 'w':	/* Wchar_t.  */
+		  integralp = true;
+		  done = true;
+		  break;
+		case 'b':	/* Bool.  */
+		  boolp = true;
+		  done = true;
+		  break;
+		case 'c':	/* Char.  */
+		  charp = true;
+		  done = true;
+		  break;
+		case 'r':	/* Long double.  */
+		case 'd':	/* Double.  */
+		case 'f':	/* Float.  */
+		  realp = true;
+		  done = true;
+		  break;
+		default:
+		  /* Assume it's a uder defined integral type.  */
+		  integralp = true;
+		  done = true;
+		  break;
+		}
+	    }
+
+	  if (integralp)
+	    {
+	      if (**pp == 'm')
+		++*pp;
+	      while (isdigit ((unsigned char) **pp))
+		++*pp;
+	    }
+	  else if (charp)
+	    {
+	      unsigned int val;
+
+	      if (**pp == 'm')
+		++*pp;
+	      val = stab_demangle_count (pp);
+	      if (val == 0)
+		{
+		  stab_bad_demangle (orig);
+		  return false;
+		}
+	    }
+	  else if (boolp)
+	    {
+	      unsigned int val;
+
+	      val = stab_demangle_count (pp);
+	      if (val != 0 && val != 1)
+		{
+		  stab_bad_demangle (orig);
+		  return false;
+		}
+	    }
+	  else if (realp)
+	    {
+	      if (**pp == 'm')
+		++*pp;
+	      while (isdigit ((unsigned char) **pp))
+		++*pp;
+	      if (**pp == '.')
+		{
+		  ++*pp;
+		  while (isdigit ((unsigned char) **pp))
+		    ++*pp;
+		}
+	      if (**pp == 'e')
+		{
+		  ++*pp;
+		  while (isdigit ((unsigned char) **pp))
+		    ++*pp;
+		}
+	    }
+	  else if (pointerp)
+	    {
+	      unsigned int len;
+
+	      if (! stab_demangle_get_count (pp, &len))
+		{
+		  stab_bad_demangle (orig);
+		  return false;
+		}
+	      *pp += len;
+	    }
+	}
+    }
+
+  return true;
+}
+
+/* Demangle a class name.  */
+
+static boolean
+stab_demangle_class (minfo, pp, pstart)
+     struct stab_demangle_info *minfo;
+     const char **pp;
+     const char **pstart;
+{
+  const char *orig;
+  unsigned int n;
+
+  orig = *pp;
+
+  n = stab_demangle_count (pp);
+  if (strlen (*pp) < n)
+    {
+      stab_bad_demangle (orig);
+      return false;
+    }
+
+  if (pstart != NULL)
+    *pstart = *pp;
+
+  *pp += n;
+
+  return true;
+}
+
+/* Demangle function arguments.  If the pargs argument is not NULL, it
+   is set to a NULL terminated array holding the arguments.  */
+
+static boolean
+stab_demangle_args (minfo, pp, pargs)
+     struct stab_demangle_info *minfo;
+     const char **pp;
+     debug_type **pargs;
+{
+  const char *orig;
+  unsigned int alloc, count;
+
+  orig = *pp;
+
+  alloc = 10;
+  if (pargs != NULL)
+    *pargs = (debug_type *) xmalloc (alloc * sizeof **pargs);
+  count = 0;
+
+  while (**pp != '_' && **pp != '\0' && **pp != 'e')
+    {
+      if (**pp == 'N' || **pp == 'T')
+	{
+	  char temptype;
+	  unsigned int r, t;
+
+	  temptype = **pp;
+	  ++*pp;
+
+	  if (temptype == 'T')
+	    r = 1;
+	  else
+	    {
+	      if (! stab_demangle_get_count (pp, &r))
+		{
+		  stab_bad_demangle (orig);
+		  return false;
+		}
+	    }
+
+	  if (! stab_demangle_get_count (pp, &t))
+	    {
+	      stab_bad_demangle (orig);
+	      return false;
+	    }
+
+	  if (t >= minfo->typestring_count)
+	    {
+	      stab_bad_demangle (orig);
+	      return false;
+	    }
+	  while (r-- > 0)
+	    {
+	      const char *tem;
+
+	      tem = minfo->typestrings[t].typestring;
+	      if (! stab_demangle_arg (minfo, &tem, pargs, &count, &alloc))
+		return false;
+	    }
+	}
+      else
+	{
+	  if (! stab_demangle_arg (minfo, pp, pargs, &count, &alloc))
+	    return false;
+	}
+    }
+
+  if (**pp == 'e')
+    {
+      if (pargs != NULL)
+	{
+	  debug_type type;
+
+	  type = debug_make_ellipsis_type (minfo->dhandle);
+	  if (type == DEBUG_TYPE_NULL)
+	    return false;
+
+	  if (count + 1 >= alloc)
+	    {
+	      alloc += 10;
+	      *pargs = ((debug_type *)
+			xrealloc (*pargs, alloc * sizeof **pargs));
+	    }
+	  (*pargs)[count] = type;
+	  ++count;
+	}
+
+      ++*pp;
+    }
+
+  if (pargs != NULL)
+    (*pargs)[count] = DEBUG_TYPE_NULL;
+
+  return true;
+}
+
+/* Demangle a single argument.  */
+
+static boolean
+stab_demangle_arg (minfo, pp, pargs, pcount, palloc)
+     struct stab_demangle_info *minfo;
+     const char **pp;
+     debug_type **pargs;
+     unsigned int *pcount;
+     unsigned int *palloc;
+{
+  const char *start;
+  debug_type type;
+
+  start = *pp;
+  if (! stab_demangle_type (minfo, pp,
+			    pargs == NULL ? (debug_type *) NULL : &type)
+      || ! stab_demangle_remember_type (minfo, start, *pp - start))
+    return false;
+
+  if (pargs != NULL)
+    {
+      if (type == DEBUG_TYPE_NULL)
+	return false;
+
+      if (*pcount + 1 >= *palloc)
+	{
+	  *palloc += 10;
+	  *pargs = ((debug_type *)
+		    xrealloc (*pargs, *palloc * sizeof **pargs));
+	}
+      (*pargs)[*pcount] = type;
+      ++*pcount;
+    }
+
+  return true;
+}
+
+/* Demangle a type.  If the ptype argument is not NULL, *ptype is set
+   to the newly allocated type.  */
+
+static boolean
+stab_demangle_type (minfo, pp, ptype)
+     struct stab_demangle_info *minfo;
+     const char **pp;
+     debug_type *ptype;
+{
+  const char *orig;
+
+  orig = *pp;
+
+  switch (**pp)
+    {
+    case 'P':
+    case 'p':
+      /* A pointer type.  */
+      ++*pp;
+      if (! stab_demangle_type (minfo, pp, ptype))
+	return false;
+      if (ptype != NULL)
+	*ptype = debug_make_pointer_type (minfo->dhandle, *ptype);
+      break;
+
+    case 'R':
+      /* A reference type.  */
+      ++*pp;
+      if (! stab_demangle_type (minfo, pp, ptype))
+	return false;
+      if (ptype != NULL)
+	*ptype = debug_make_reference_type (minfo->dhandle, *ptype);
+      break;
+
+    case 'A':
+      /* An array.  */
+      {
+	unsigned long high;
+
+	++*pp;
+	high = 0;
+	while (**pp != '\0' && **pp != '_')
+	  {
+	    if (! isdigit ((unsigned char) **pp))
+	      {
+		stab_bad_demangle (orig);
+		return false;
+	      }
+	    high *= 10;
+	    high += **pp - '0';
+	    ++*pp;
+	  }
+	if (**pp != '_')
+	  {
+	    stab_bad_demangle (orig);
+	    return false;
+	  }
+	++*pp;
+
+	if (! stab_demangle_type (minfo, pp, ptype))
+	  return false;
+	if (ptype != NULL)
+	  {
+	    debug_type int_type;
+
+	    int_type = debug_find_named_type (minfo->dhandle, "int");
+	    if (int_type == NULL)
+	      int_type = debug_make_int_type (minfo->dhandle, 4, false);
+	    *ptype = debug_make_array_type (minfo->dhandle, *ptype, int_type,
+					    0, high, false);
+	  }
+      }
+      break;
+
+    case 'T':
+      /* A back reference to a remembered type.  */
+      {
+	unsigned int i;
+	const char *p;
+
+	++*pp;
+	if (! stab_demangle_get_count (pp, &i))
+	  {
+	    stab_bad_demangle (orig);
+	    return false;
+	  }
+	if (i >= minfo->typestring_count)
+	  {
+	    stab_bad_demangle (orig);
+	    return false;
+	  }
+	p = minfo->typestrings[i].typestring;
+	if (! stab_demangle_type (minfo, &p, ptype))
+	  return false;
+      }
+      break;
+
+    case 'F':
+      /* A function.  */
+      ++*pp;
+      /* FIXME: We should pick up the argument types.  */
+      if (! stab_demangle_args (minfo, pp, (debug_type **) NULL))
+	return false;
+      if (**pp != '_')
+	{
+	  /* cplus_demangle will accept a function without a return
+             type, but I don't know when that will happen, or what to
+             do if it does.  */
+	  stab_bad_demangle (orig);
+	  return false;
+	}
+      ++*pp;
+      if (! stab_demangle_type (minfo, pp, ptype))
+	return false;
+      if (ptype != NULL)
+	*ptype = debug_make_function_type (minfo->dhandle, *ptype);
+      break;
+
+    case 'M':
+    case 'O':
+      {
+	boolean memberp, constp, volatilep;
+	debug_type *args;
+	unsigned int n;
+	const char *name;
+
+	memberp = **pp == 'M';
+	constp = false;
+	volatilep = false;
+	args = NULL;
+
+	++*pp;
+	if (! isdigit ((unsigned char) **pp))
+	  {
+	    stab_bad_demangle (orig);
+	    return false;
+	  }
+	n = stab_demangle_count (pp);
+	if (strlen (*pp) < n)
+	  {
+	    stab_bad_demangle (orig);
+	    return false;
+	  }
+	name = *pp;
+	*pp += n;
+
+	if (memberp)
+	  {
+	    if (**pp == 'C')
+	      {
+		constp = true;
+		++*pp;
+	      }
+	    else if (**pp == 'V')
+	      {
+		volatilep = true;
+		++*pp;
+	      }
+	    if (**pp != 'F')
+	      {
+		stab_bad_demangle (orig);
+		return false;
+	      }
+	    ++*pp;
+	    if (! stab_demangle_args (minfo, pp,
+				      (ptype == NULL
+				       ? (debug_type **) NULL
+				       : &args)))
+	      return false;
+	  }
+
+	if (**pp != '_')
+	  {
+	    stab_bad_demangle (orig);
+	    return false;
+	  }
+	++*pp;
+
+	if (! stab_demangle_type (minfo, pp, ptype))
+	  return false;
+
+	if (ptype != NULL)
+	  {
+	    debug_type class_type;
+
+	    class_type = stab_find_tagged_type (minfo->dhandle, minfo->info,
+						name, (int) n,
+						DEBUG_KIND_CLASS);
+	    if (class_type == DEBUG_TYPE_NULL)
+	      return false;
+
+	    if (! memberp)
+	      *ptype = debug_make_offset_type (minfo->dhandle, class_type,
+					       *ptype);
+	    else
+	      {
+		/* FIXME: We have no way to record constp or
+                   volatilep.  */
+		*ptype = debug_make_method_type (minfo->dhandle, *ptype,
+						 class_type, args);
+	      }
+	  }
+      }
+      break;
+
+    case 'G':
+      ++*pp;
+      if (! stab_demangle_type (minfo, pp, ptype))
+	return false;
+      break;
+
+    case 'C':
+      ++*pp;
+      if (! stab_demangle_type (minfo, pp, ptype))
+	return false;
+      if (ptype != NULL)
+	*ptype = debug_make_const_type (minfo->dhandle, *ptype);
+      break;
+
+    case 'Q':
+      {
+	const char *hold;
+
+	hold = *pp;
+	if (! stab_demangle_qualified (minfo, pp, ptype))
+	  return false;
+      }
+      break;
+
+    default:
+      if (! stab_demangle_fund_type (minfo, pp, ptype))
+	return false;
+      break;
+    }
+
+  return true;
+}
+
+/* Demangle a fundamental type.  If the ptype argument is not NULL,
+   *ptype is set to the newly allocated type.  */
+
+static boolean
+stab_demangle_fund_type (minfo, pp, ptype)
+     struct stab_demangle_info *minfo;
+     const char **pp;
+     debug_type *ptype;
+{
+  const char *orig;
+  boolean constp, volatilep, unsignedp, signedp;
+  boolean done;
+
+  orig = *pp;
+
+  constp = false;
+  volatilep = false;
+  unsignedp = false;
+  signedp = false;
+
+  done = false;
+  while (! done)
+    {
+      switch (**pp)
+	{
+	case 'C':
+	  constp = true;
+	  ++*pp;
+	  break;
+
+	case 'U':
+	  unsignedp = true;
+	  ++*pp;
+	  break;
+
+	case 'S':
+	  signedp = true;
+	  ++*pp;
+	  break;
+
+	case 'V':
+	  volatilep = true;
+	  ++*pp;
+	  break;
+
+	default:
+	  done = true;
+	  break;
+	}
+    }
+
+  switch (**pp)
+    {
+    case '\0':
+    case '_':
+      /* cplus_demangle permits this, but I don't know what it means.  */
+      stab_bad_demangle (orig);
+      break;
+
+    case 'v': /* void */
+      if (ptype != NULL)
+	{
+	  *ptype = debug_find_named_type (minfo->dhandle, "void");
+	  if (*ptype == DEBUG_TYPE_NULL)
+	    *ptype = debug_make_void_type (minfo->dhandle);
+	}
+      ++*pp;
+      break;
+
+    case 'x': /* long long */
+      if (ptype != NULL)
+	{
+	  *ptype = debug_find_named_type (minfo->dhandle,
+					  (unsignedp
+					   ? "long long unsigned int"
+					   : "long long int"));
+	  if (*ptype == DEBUG_TYPE_NULL)
+	    *ptype = debug_make_int_type (minfo->dhandle, 8, unsignedp);
+	}
+      ++*pp;
+      break;
+
+    case 'l': /* long */
+      if (ptype != NULL)
+	{
+	  *ptype = debug_find_named_type (minfo->dhandle,
+					  (unsignedp
+					   ? "long unsigned int"
+					   : "long int"));
+	  if (*ptype == DEBUG_TYPE_NULL)
+	    *ptype = debug_make_int_type (minfo->dhandle, 4, unsignedp);
+	}
+      ++*pp;
+      break;
+
+    case 'i': /* int */
+      if (ptype != NULL)
+	{
+	  *ptype = debug_find_named_type (minfo->dhandle,
+					  (unsignedp
+					   ? "unsigned int"
+					   : "int"));
+	  if (*ptype == DEBUG_TYPE_NULL)
+	    *ptype = debug_make_int_type (minfo->dhandle, 4, unsignedp);
+	}
+      ++*pp;
+      break;
+
+    case 's': /* short */
+      if (ptype != NULL)
+	{
+	  *ptype = debug_find_named_type (minfo->dhandle,
+					  (unsignedp
+					   ? "short unsigned int"
+					   : "short int"));
+	  if (*ptype == DEBUG_TYPE_NULL)
+	    *ptype = debug_make_int_type (minfo->dhandle, 2, unsignedp);
+	}
+      ++*pp;
+      break;
+
+    case 'b': /* bool */
+      if (ptype != NULL)
+	{
+	  *ptype = debug_find_named_type (minfo->dhandle, "bool");
+	  if (*ptype == DEBUG_TYPE_NULL)
+	    *ptype = debug_make_bool_type (minfo->dhandle, 4);
+	}
+      ++*pp;
+      break;
+
+    case 'c': /* char */
+      if (ptype != NULL)
+	{
+	  *ptype = debug_find_named_type (minfo->dhandle,
+					  (unsignedp
+					   ? "unsigned char"
+					   : (signedp
+					      ? "signed char"
+					      : "char")));
+	  if (*ptype == DEBUG_TYPE_NULL)
+	    *ptype = debug_make_int_type (minfo->dhandle, 1, unsignedp);
+	}
+      ++*pp;
+      break;
+
+    case 'w': /* wchar_t */
+      if (ptype != NULL)
+	{
+	  *ptype = debug_find_named_type (minfo->dhandle, "__wchar_t");
+	  if (*ptype == DEBUG_TYPE_NULL)
+	    *ptype = debug_make_int_type (minfo->dhandle, 2, true);
+	}
+      ++*pp;
+      break;
+
+    case 'r': /* long double */
+      if (ptype != NULL)
+	{
+	  *ptype = debug_find_named_type (minfo->dhandle, "long double");
+	  if (*ptype == DEBUG_TYPE_NULL)
+	    *ptype = debug_make_float_type (minfo->dhandle, 8);
+	}
+      ++*pp;
+      break;
+
+    case 'd': /* double */
+      if (ptype != NULL)
+	{
+	  *ptype = debug_find_named_type (minfo->dhandle, "double");
+	  if (*ptype == DEBUG_TYPE_NULL)
+	    *ptype = debug_make_float_type (minfo->dhandle, 8);
+	}
+      ++*pp;
+      break;
+
+    case 'f': /* float */
+      if (ptype != NULL)
+	{
+	  *ptype = debug_find_named_type (minfo->dhandle, "float");
+	  if (*ptype == DEBUG_TYPE_NULL)
+	    *ptype = debug_make_float_type (minfo->dhandle, 4);
+	}
+      ++*pp;
+      break;
+
+    case 'G':
+      ++*pp;
+      if (! isdigit ((unsigned char) **pp))
+	{
+	  stab_bad_demangle (orig);
+	  return false;
+	}
+      /* Fall through.  */
+    case '0': case '1': case '2': case '3': case '4':
+    case '5': case '6': case '7': case '8': case '9':
+      {
+	const char *hold;
+
+	if (! stab_demangle_class (minfo, pp, &hold))
+	  return false;
+	if (ptype != NULL)
+	  {
+	    char *name;
+
+	    name = savestring (hold, *pp - hold);
+	    *ptype = debug_find_named_type (minfo->dhandle, name);
+	    if (*ptype == DEBUG_TYPE_NULL)
+	      {
+		/* FIXME: It is probably incorrect to assume that
+                   undefined types are tagged types.  */
+		*ptype = stab_find_tagged_type (minfo->dhandle, minfo->info,
+						hold, *pp - hold,
+						DEBUG_KIND_ILLEGAL);
+	      }
+	    free (name);
+	  }
+      }
+      break;
+
+    case 't':
+      if (! stab_demangle_template (minfo, pp))
+	return false;
+      abort ();
+      break;
+
+    default:
+      stab_bad_demangle (orig);
+      return false;
+    }
+
+  if (ptype != NULL)
+    {
+      if (constp)
+	*ptype = debug_make_const_type (minfo->dhandle, *ptype);
+      if (volatilep)
+	*ptype = debug_make_volatile_type (minfo->dhandle, *ptype);
+    }
+
+  return true;
+}
+
+/* Remember a type string in a demangled string.  */
+
+static boolean
+stab_demangle_remember_type (minfo, p, len)
+     struct stab_demangle_info *minfo;
+     const char *p;
+     int len;
+{
+  if (minfo->typestring_count >= minfo->typestring_alloc)
+    {
+      minfo->typestring_alloc += 10;
+      minfo->typestrings = ((struct stab_demangle_typestring *)
+			    xrealloc (minfo->typestrings,
+				      (minfo->typestring_alloc
+				       * sizeof *minfo->typestrings)));
+    }
+
+  minfo->typestrings[minfo->typestring_count].typestring = p;
+  minfo->typestrings[minfo->typestring_count].len = (unsigned int) len;
+  ++minfo->typestring_count;
+
+  return true;
 }

@@ -1,3 +1,96 @@
+Fri Jan 19 12:31:57 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* stabs.c: Include "demangle.h".  Added several new static
+	functions not listed below to demangle argument types; they are
+	all called via stab_demangle_argtypes.
+	(finish_stab): If the kind of an undefined tag is
+	DEBUG_KIND_ILLEGAL, use DEBUG_KIND_STRUCT instead.  Warn if there
+	are any pending variable.
+	(parse_stab): Don't close the function when the block depth goes
+	to zero.  Pass value to debug_end_function.
+	(parse_stab_string): In case 'T', pass the name to
+	parse_stab_type.
+	(parse_stab_type): In case 'x', use stab_find_tagged_type.  In
+	case '#', handle functions with variable numbers of arguments.
+	(parse_stab_struct_type): Add tagname parameter.  Change all
+	callers.
+	(parse_stab_members): Add tagname and typenums parameters.  Change
+	all callers.  If the type of a method is a stub, call
+	parse_stab_argtypes to demangle the argument types and get the
+	physical name of the function.
+	(parse_stab_argtypes): New static function.
+	(stab_record_variable): For a DEBUG_GLOBAL or DEBUG_STATIC
+	variable, call debug_record_variable immediately.
+	(stab_find_tagged_type): New static function.
+
+	* debug.h (enum debug_type_kind): Add DEBUG_KIND_ILLEGAL.
+	(struct debug_write_fns): Add field ellipsis_type.  Add id
+	parameter to start_struct_type, start_class_type, and tag_type.
+	(debug_make_ellipsis_type): Declare.
+	(debug_find_named_type): Declare.
+	(debug_get_type_kind): Declare.
+	(debug_get_return_type): Declare.
+	(debug_get_parameter_types): Declare.
+	(debug_get_fields): Declare.
+	(debug_get_field_type): Declare.
+	* debug.c (struct debug_handle): Add fields class_id and base_id.
+	(struct debug_class_type): Add field id.
+	(struct debug_method_variant): Rename argtypes to physname.
+	Change all uses.
+	(debug_ellipsis_type): New static variable.
+	(ELLIPSIS_P): New macro.
+	(debug_make_ellipsis_type): New function.
+	(debug_make_method_variant): Rename argtypes to physname.
+	(debug_make_static_method_variant): Likewise.
+	(debug_name_type): Always put types in the global namespace.
+	(debug_find_named_type): New function.
+	(debug_find_tagged_type): Treat DEBUG_KIND_ILLEGAL specially,
+	rather than DEBUG_KIND_VOID.
+	(debug_get_real_type): New static function.
+	(debug_get_type_kind): New function.
+	(debug_get_return_type): New function.
+	(debug_get_parameter_types): New function.
+	(debug_get_fields): New function.
+	(debug_get_field_type): New function.
+	(debug_write): Initialize base_id.
+	(debug_write_type): Pass new id argument to tag_type.  Handle
+	DEBUG_KIND_ILLEGAL.  Use id for	DEBUG_KIND_STRUCT and
+	DEBUG_KIND_UNION.  Handle ellipsis for method arguments.
+	(debug_write_class_type): Don't dereference kclass if it is NULL.
+	Use id.
+	* prdbg.c (pr_fns): Add pr_ellipsis_type.
+	(pr_ellipsis_type): New static function.
+	(pr_pointer_type): If this is a pointer to an array, parenthesize
+	it correctly.
+	(pr_start_struct_type): Add id parameter.
+	(pr_start_class_type): Likewise.
+	(pr_tag_type): Likewise.
+	(pr_fix_visibility): Add the visibility to the top of the stack,
+	not the second element on the stack.
+	(pr_struct_field): Pop the stack before calling pr_fix_visibility.
+	(pr_class_static_member): Likewise.
+	(pr_class_start_method): Don't push a type, just set the method
+	name in the type on the top of the stack.
+	(pr_class_end_method): Don't pop the stack.
+	(pr_class_method_variant): Rename argtypes parameter to physname.
+	Append const and volatile rather than prepending them.  Add a
+	space after the physname.
+	(pr_class_static_method_variant): Likewise.
+	* ieee.c (ieee_fns): Add ieee_ellipsis_type.
+	(ieee_define_named_type): Use DEBUG_KIND_ILLEGAL rather than
+	DEBUG_KIND_VOID.
+	(write_ieee_debugging_info): Likewise.
+	(ieee_typdef): Likewise.
+	(ieee_ellipsis_type): New static function.
+	(ieee_start_struct_type): Add id parameter.
+	(ieee_start_class_type): Likewise.
+	(ieee_tag_type): Likewise.
+	(ieee_class_method_variant): Rename name to physname.
+	(ieee_class_static_method_variant): Likewise.
+
+	* Makefile.in (DEBUG_OBJS): Remove prdbg.o.
+	($(OBJDUMP_PROG)): Depend upon, and link against, prdbg.o.
+
 Thu Jan 18 17:35:06 1996  Kim Knuttila  <krk@cygnus.com>
 
 	* dlltool.c (make_tail): Changed the order of the sections to avoid
