@@ -44,19 +44,19 @@ struct obstack;
 
 struct frag
 {
-  /* Object file address (as an octet offset). */
+  /* Object file address (as an octet offset).  */
   addressT fr_address;
-  /* Chain forward; ascending address order.  Rooted in frch_root. */
+  /* Chain forward; ascending address order.  Rooted in frch_root.  */
   struct frag *fr_next;
 
-  /* (Fixed) number of octets we know we have.  May be 0. */
+  /* (Fixed) number of octets we know we have.  May be 0.  */
   offsetT fr_fix;
   /* May be used for (Variable) number of octets after above.
      The generic frag handling code no longer makes any use of fr_var.  */
   offsetT fr_var;
-  /* For variable-length tail. */
+  /* For variable-length tail.  */
   symbolS *fr_symbol;
-  /* For variable-length tail. */
+  /* For variable-length tail.  */
   offsetT fr_offset;
   /* Points to opcode low addr byte, for relaxation.  */
   char *fr_opcode;
@@ -95,7 +95,7 @@ struct frag
 
 #define SIZEOF_STRUCT_FRAG \
 ((char *)zero_address_frag.fr_literal-(char *)&zero_address_frag)
-/* We want to say fr_literal[0] above. */
+/* We want to say fr_literal[0] above.  */
 
 /* Current frag we are building.  This frag is incomplete.  It is,
    however, included in frchain_now.  The fr_fix field is bogus;
@@ -104,9 +104,9 @@ COMMON fragS *frag_now;
 extern addressT frag_now_fix PARAMS ((void));
 extern addressT frag_now_fix_octets PARAMS ((void));
 
-/* For foreign-segment symbol fixups. */
+/* For foreign-segment symbol fixups.  */
 COMMON fragS zero_address_frag;
-/* For local common (N_BSS segment) fixups. */
+/* For local common (N_BSS segment) fixups.  */
 COMMON fragS bss_address_frag;
 
 #if 0
@@ -127,7 +127,6 @@ COMMON fragS bss_address_frag;
 extern void frag_append_1_char PARAMS ((int));
 #define FRAG_APPEND_1_CHAR(X) frag_append_1_char (X)
 #endif
-
 
 void frag_init PARAMS ((void));
 fragS *frag_alloc PARAMS ((struct obstack *));

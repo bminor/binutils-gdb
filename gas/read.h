@@ -1,5 +1,5 @@
 /* read.h - of read.c
-   Copyright (C) 1986, 90, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1986, 90, 92, 93, 94, 95, 96, 97, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -18,12 +18,12 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-extern char *input_line_pointer;/* -> char we are parsing now. */
+extern char *input_line_pointer;/* -> char we are parsing now.  */
 
 #define PERMIT_WHITESPACE	/* Define to make whitespace be allowed in */
-/* many syntactically unnecessary places. */
+/* many syntactically unnecessary places.  */
 /* Normally undefined. For compatibility */
-/* with ancient GNU cc. */
+/* with ancient GNU cc.  */
 /* #undef PERMIT_WHITESPACE */
 
 #ifdef PERMIT_WHITESPACE
@@ -31,7 +31,6 @@ extern char *input_line_pointer;/* -> char we are parsing now. */
 #else
 #define SKIP_WHITESPACE() know(*input_line_pointer != ' ' )
 #endif
-
 
 #define	LEX_NAME	(1)	/* may continue a name */
 #define LEX_BEGIN_NAME	(2)	/* may begin a name */
@@ -169,5 +168,3 @@ extern void s_text PARAMS ((int));
 extern void stringer PARAMS ((int append_zero));
 extern void s_xstab PARAMS ((int what));
 extern void s_rva PARAMS ((int));
-
-/* end of read.h */

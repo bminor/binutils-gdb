@@ -1,5 +1,5 @@
 /* dwarf2dbg.h - DWARF2 debug support
-   Copyright (C) 1999 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -58,7 +58,7 @@ extern void dwarf2_where PARAMS ((struct dwarf2_line_info *l));
    source information passed in the arguments.  ADDR should be the
    frag-relative offset of the instruction the information is for and
    L is the source information that should be associated with that
-   address. */
+   address.  */
 extern void dwarf2_gen_line_info PARAMS ((addressT addr,
 					  struct dwarf2_line_info *l));
 

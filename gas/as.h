@@ -80,7 +80,7 @@ extern void *alloca ();
 
 /* Now, tend to the rest of the configuration.  */
 
-/* System include files first... */
+/* System include files first...  */
 #include <stdio.h>
 #include <ctype.h>
 #ifdef HAVE_STRING_H
@@ -136,8 +136,7 @@ extern void *alloca ();
 
 #endif
 
-
-/* Now GNU header files... */
+/* Now GNU header files...  */
 #include "ansidecl.h"
 #ifdef BFD_ASSEMBLER
 #include "bfd.h"
@@ -246,7 +245,7 @@ typedef addressT valueT;
 
 #ifndef COMMON
 #ifdef TEST
-#define COMMON			/* declare our COMMONs storage here. */
+#define COMMON			/* declare our COMMONs storage here.  */
 #else
 #define COMMON extern		/* our commons live elswhere */
 #endif
@@ -296,10 +295,10 @@ typedef enum _segT
     SEG_ABSOLUTE = 0,
     SEG_LIST,
     SEG_UNKNOWN,
-    SEG_GOOF,			/* Only happens if AS has a logic error. */
+    SEG_GOOF,			/* Only happens if AS has a logic error.  */
     /* Invented so we don't crash printing */
-    /* error message involving weird segment. */
-    SEG_EXPR,			/* Intermediate expression values. */
+    /* error message involving weird segment.  */
+    SEG_EXPR,			/* Intermediate expression values.  */
     SEG_DEBUG,			/* Debug segment */
     SEG_NTV,			/* Transfert vector preload segment */
     SEG_PTV,			/* Transfert vector postload segment */
@@ -319,7 +318,7 @@ typedef int subsegT;
 /* What subseg we are accreting now? */
 COMMON subsegT now_subseg;
 
-/* Segment our instructions emit to. */
+/* Segment our instructions emit to.  */
 COMMON segT now_seg;
 
 #ifdef BFD_ASSEMBLER
@@ -355,7 +354,7 @@ enum _relax_state
   {
     /* Variable chars to be repeated fr_offset times.
        Fr_symbol unused. Used with fr_offset == 0 for a
-       constant length frag. */
+       constant length frag.  */
     rs_fill = 1,
 
     /* Align.  The fr_offset field holds the power of 2 to which to
@@ -372,7 +371,7 @@ enum _relax_state
     rs_align_code,
 
     /* Org: Fr_offset, fr_symbol: address. 1 variable char: fill
-       character. */
+       character.  */
     rs_org,
 
 #ifndef WORKING_DOT_WORD
@@ -436,7 +435,7 @@ COMMON int flag_fatal_warnings; /* --fatal-warnings */
    are detected.  */
 COMMON unsigned char flag_always_generate_output; /* -Z */
 
-/* This is true if the assembler should output time and space usage. */
+/* This is true if the assembler should output time and space usage.  */
 COMMON unsigned char flag_print_statistics;
 
 /* True if local absolute symbols are to be stripped.  */
@@ -451,7 +450,7 @@ COMMON char *out_file_name;
 /* name of file defining extensions to the basic instruction set */
 COMMON char *insttbl_file_name;
 
-/* TRUE if we need a second pass. */
+/* TRUE if we need a second pass.  */
 COMMON int need_pass_2;
 
 /* TRUE if we should do no relaxing, and
@@ -683,5 +682,3 @@ COMMON char *found_comment_file;
 #endif
 
 #endif /* GAS */
-
-/* end of as.h */
