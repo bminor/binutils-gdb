@@ -53,9 +53,9 @@ Disassembly of section \.text:
 .*	7d 49 19 2a 	stdx	r10,r9,r3
 .*	e9 22 80 58 	ld	r9,-32680\(r2\)
 .*	7d 49 6b 2e 	sthx	r10,r9,r13
-.*	e9 4d 90 2a 	lwa	r10,-28632\(r13\)
+.*	e9 4d 00 02 	lwa	r10,0\(r13\)
 .*	3d 2d 00 00 	addis	r9,r13,0
-.*	a9 49 90 30 	lha	r10,-28624\(r9\)
+.*	a9 49 00 00 	lha	r10,0\(r9\)
 .*	7d 89 02 a6 	mfctr	r12
 .*	78 0b 1f 24 	rldicr	r11,r0,3,60
 .*	34 40 80 00 	addic\.	r2,r0,-32768

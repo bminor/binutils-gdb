@@ -33,7 +33,7 @@ Disassembly of section \.text:
 .*	39 23 80 40 	addi	r9,r3,-32704
 .*	3d 23 00 00 	addis	r9,r3,0
 .*	81 49 80 48 	lwz	r10,-32696\(r9\)
-.*	3d 2d 00 00 	addis	r9,r13,0
+.*	e9 22 80 48 	ld	r9,-32696\(r2\)
 .*	7d 49 18 2a 	ldx	r10,r9,r3
 .*	e9 22 80 50 	ld	r9,-32688\(r2\)
 .*	7d 49 6a 2e 	lhzx	r10,r9,r13

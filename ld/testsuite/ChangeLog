@@ -1,3 +1,11 @@
+2003-06-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tlsexetoc.d: Update.
+	* ld-powerpc/tlsso.d: Update.
+	* ld-powerpc/tlstoc.d: Update.
+	* ld-powerpc/tlstocso.d: Update.
+	* ld-powerpc/tlstocso.r: Update.
+
 2003-06-16  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/ldsym1.d: Restrict to cris-*-*elf* and cris-*-*aout*.

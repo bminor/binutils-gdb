@@ -50,9 +50,9 @@ Program Headers:
 
 Relocation section '\.rela\.dyn' at offset .* contains 11 entries:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
-0+6c2 +0+d00000048 R_PPC64_TPREL16_HA +0+108b8 \.toc \+ 40
 0+6d2 +0+1300000045 R_PPC64_TPREL16 +0+60 le0 \+ 0
 0+6d6 +0+1600000048 R_PPC64_TPREL16_HA +0+68 le1 \+ 0
+0+6da +0+1600000046 R_PPC64_TPREL16_LO +0+68 le1 \+ 0
 0+108b8 +0+1200000044 R_PPC64_DTPMOD64 +0+ gd \+ 0
 0+108c0 +0+120000004e R_PPC64_DTPREL64 +0+ gd \+ 0
 0+108c8 +0+1700000044 R_PPC64_DTPMOD64 +0+ ld \+ 0
