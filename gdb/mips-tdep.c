@@ -26,33 +26,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "value.h"
 #include "gdbcmd.h"
 #include "language.h"
-
-#ifdef USG
-#include <sys/types.h>
-#endif
-
-#include <sys/param.h>
-#include <signal.h>
-#include <sys/ioctl.h>
-
 #include "gdbcore.h"
 #include "symfile.h"
 #include "objfiles.h"
 
-#ifndef	MIPSMAGIC
-#ifdef MIPSEL
-#define MIPSMAGIC	MIPSELMAGIC
-#else
-#define MIPSMAGIC	MIPSEBMAGIC
-#endif
-#endif
-
 #define VM_MIN_ADDRESS (unsigned)0x400000
-
-#include <sys/user.h>		/* After a.out.h  */
-#include <sys/file.h>
-#include <sys/stat.h>
-
 
 /* Some MIPS boards don't support floating point, so we permit the
    user to turn it off.  */
@@ -726,7 +704,7 @@ isa_NAN(p, len)
     {
       exponent = *p;
       exponent = exponent << 1 >> (32 - SINGLE_EXP_BITS - 1);
-      return ((exponent == -1) || (! exponent && *p));
+      return ((exponent == -1) || (exponent == 0 && ((*p << 1) != 0)));
     }
   else if (len == 8)
     {
