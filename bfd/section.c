@@ -796,8 +796,8 @@ bfd_make_section_anyway (abfd, name)
     return NULL;
 
   newsect->name = name;
-  newsect->id = section_id++;
-  newsect->index = abfd->section_count++;
+  newsect->id = section_id;
+  newsect->index = abfd->section_count;
   newsect->flags = SEC_NO_FLAGS;
 
   newsect->userdata = NULL;
@@ -831,6 +831,8 @@ bfd_make_section_anyway (abfd, name)
       return NULL;
     }
 
+  section_id++;
+  abfd->section_count++;
   *prev = newsect;
   return newsect;
 }

@@ -733,19 +733,23 @@ vms_new_section_hook (abfd, section)
      bfd *abfd;
      asection *section;
 {
-#if VMS_DEBUG
-  vms_debug (1, "vms_new_section_hook (%p, [%d]%s), count %d\n", abfd, section->index, section->name, abfd->section_count);
-#endif
-  bfd_set_section_alignment(abfd, section, 4);
+  /* Count hasn't been incremented yet.  */
+  unsigned int section_count = abfd->section_count + 1;
 
-  if (abfd->section_count > PRIV (section_count))
+#if VMS_DEBUG
+  vms_debug (1, "vms_new_section_hook (%p, [%d]%s), count %d\n",
+	     abfd, section->index, section->name, section_count);
+#endif
+  bfd_set_section_alignment (abfd, section, 4);
+
+  if (section_count > PRIV (section_count))
     {
-      bfd_size_type amt = abfd->section_count;
+      bfd_size_type amt = section_count;
       amt *= sizeof (asection *);
       PRIV (sections) = (asection **) bfd_realloc (PRIV (sections), amt);
       if (PRIV (sections) == 0)
 	return false;
-      PRIV (section_count) = abfd->section_count;
+      PRIV (section_count) = section_count;
     }
 #if VMS_DEBUG
   vms_debug (6, "section_count: %d\n", PRIV (section_count));

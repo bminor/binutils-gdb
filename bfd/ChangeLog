@@ -1,3 +1,11 @@
+2001-11-13  John Marshall  <jmarshall@acm.org>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* section.c (bfd_make_section_anyway): Don't increment section_id
+	and the BFD's section_count if adding the section failed.
+	* vms.c (vms_new_section_hook): Adjust for bfd_make_section_anyway
+	change.
+
 2001-11-12  Orjan Friberg  <orjanf@axis.com>
 
 	* elf32-cris.c (cris_elf_grok_prstatus): Adjust values to match new
