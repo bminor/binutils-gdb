@@ -1,5 +1,9 @@
 Tue Oct  8 09:03:22 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
+	* config/i386/windows.mh config/i386/xm-windows.h::  New config
+	files to support building Wingdb (built under Microsoft build
+	environment).
+
 	* Makefile.in:  Add rule for hpux-thread.o (needs special header
 	files).
 	* (SUBDIRS):  Remove mswin.
