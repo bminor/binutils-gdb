@@ -1,3 +1,9 @@
+2001-06-28  Andrew Cagney  <ac131313@redhat.com>
+
+	From Fernando Nasser:
+	* infrun.c (handle_inferior_event): Handle "nexti" inside function
+	prologues.
+	
 2001-06-28  Michael Snyder  <msnyder@redhat.com>
 
 	* infrun.c (handle_inferior_event): Replace prev_pc test in all

@@ -2755,11 +2755,16 @@ handle_inferior_event (struct execution_control_state *ecs)
       {
 	/* It's a subroutine call.  */
 
-	if (step_over_calls == STEP_OVER_NONE)
+	if ((step_over_calls == STEP_OVER_NONE)
+	    || ((step_range_end == 1)
+	        && in_prologue (prev_pc, ecs->stop_func_start)))
 	  {
 	    /* I presume that step_over_calls is only 0 when we're
 	       supposed to be stepping at the assembly language level
 	       ("stepi").  Just stop.  */
+	    /* Also, maybe we just did a "nexti" inside a prolog,
+               so we thought it was a subroutine call but it was not.
+               Stop as well.  FENN */
 	    stop_step = 1;
 	    print_stop_reason (END_STEPPING_RANGE, 0);
 	    stop_stepping (ecs);
