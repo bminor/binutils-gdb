@@ -3,7 +3,6 @@ Mon Sep 30 20:02:45 1996  Fred Fish  <fnf@cygnus.com>
 	* defs.h: Remove define of PRIVATE_XMALLOC.
 
 start-sanitize-v850
-start-sanitize-v850
 Mon Sep 30 15:39:28 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* config/v850/tm-v850.h:  Use distinct register for PC, not EIPC.
