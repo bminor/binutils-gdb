@@ -821,7 +821,7 @@ extern bfd_boolean bfd_elf32_arm_allocate_interworking_sections
   (struct bfd_link_info *);
 
 extern bfd_boolean bfd_elf32_arm_process_before_allocation
-  (bfd *, struct bfd_link_info *, int, int);
+  (bfd *, struct bfd_link_info *, int);
 
 void bfd_elf32_arm_set_target_relocs
   (struct bfd_link_info *, int, char *);

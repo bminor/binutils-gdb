@@ -1,3 +1,15 @@
+2004-11-30  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (struct elf32_arm_link_hash_table): Remove
+	no_pipeline_knowledge
+	(elf32_arm_link_hash_table_create): Ditto.
+	(bfd_elf32_arm_process_before_allocation): Ditto.
+	(elf32_arm_final_link_relocate): Ditto.  Remove oabi relocation
+	handling.
+	* bfd-in.h (bfd_elf32_arm_process_before_allocation): Update
+	prototype.
+	* bfd-in2.h: Regenerate.
+
 2004-11-30  Randolph Chung  <tausq@debian.org>
 
 	* elf32-hppa.c (elf32_hppa_grok_prstatus): New function.

@@ -25,7 +25,6 @@
 test -z $TARGET2_TYPE && TARGET2_TYPE="rel"
 cat >>e${EMULATION_NAME}.c <<EOF
 
-static int no_pipeline_knowledge = 0;
 static char *thumb_entry_symbol = NULL;
 static bfd *bfd_for_interwork;
 static int byteswap_code = 0;
@@ -125,7 +124,6 @@ arm_elf_before_allocation (void)
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
 	if (!bfd_elf32_arm_process_before_allocation (is->the_bfd, & link_info,
-						      no_pipeline_knowledge,
 						      byteswap_code))
 	  {
 	    /* xgettext:c-format */
@@ -219,7 +217,6 @@ PARSE_AND_LIST_LONGOPTS='
 '
 
 PARSE_AND_LIST_OPTIONS='
-  fprintf (file, _("  -p --no-pipeline-knowledge  Stop the linker knowing about the pipeline length\n"));
   fprintf (file, _("     --thumb-entry=<sym>      Set the entry point to be Thumb symbol <sym>\n"));
   fprintf (file, _("     --be8                    Oputput BE8 format image\n"));
   fprintf (file, _("     --target1=rel            Interpret R_ARM_TARGET1 as R_ARM_REL32\n"));
@@ -229,7 +226,7 @@ PARSE_AND_LIST_OPTIONS='
 
 PARSE_AND_LIST_ARGS_CASES='
     case '\'p\'':
-      no_pipeline_knowledge = 1;
+      /* Only here for backwards compatibility.  */
       break;
 
     case OPTION_THUMB_ENTRY:

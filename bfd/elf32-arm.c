@@ -1161,10 +1161,6 @@ struct elf32_arm_link_hash_table
     /* An arbitrary input BFD chosen to hold the glue sections.  */
     bfd * bfd_of_glue_owner;
 
-    /* A boolean indicating whether knowledge of the ARM's pipeline
-       length should be applied by the linker.  */
-    int no_pipeline_knowledge;
-
     /* Nonzero to output a BE8 image.  */
     int byteswap_code;
 
@@ -1382,7 +1378,6 @@ elf32_arm_link_hash_table_create (bfd *abfd)
   ret->thumb_glue_size = 0;
   ret->arm_glue_size = 0;
   ret->bfd_of_glue_owner = NULL;
-  ret->no_pipeline_knowledge = 0;
   ret->byteswap_code = 0;
   ret->target1_is_rel = 0;
   ret->target2_reloc = R_ARM_NONE;
@@ -1771,7 +1766,6 @@ bfd_elf32_arm_get_bfd_for_interworking (bfd *abfd, struct bfd_link_info *info)
 bfd_boolean
 bfd_elf32_arm_process_before_allocation (bfd *abfd,
 					 struct bfd_link_info *link_info,
-					 int no_pipeline_knowledge,
 					 int byteswap_code)
 {
   Elf_Internal_Shdr *symtab_hdr;
@@ -1793,8 +1787,6 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 
   BFD_ASSERT (globals != NULL);
   BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
-
-  globals->no_pipeline_knowledge = no_pipeline_knowledge;
 
   if (byteswap_code && !bfd_big_endian (abfd))
     {
@@ -2494,61 +2486,29 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		}
 	    }
 
-	  if (   strcmp (bfd_get_target (input_bfd), "elf32-littlearm-oabi") == 0
-	      || strcmp (bfd_get_target (input_bfd), "elf32-bigarm-oabi") == 0)
-	    {
-	      /* The old way of doing things.  Trearing the addend as a
-		 byte sized field and adding in the pipeline offset.  */
-	      value -= (input_section->output_section->vma
-			+ input_section->output_offset);
-	      value -= rel->r_offset;
-	      value += addend;
+	  /* The ARM ELF ABI says that this reloc is computed as: S - P + A
+	     where:
+	      S is the address of the symbol in the relocation.
+	      P is address of the instruction being relocated.
+	      A is the addend (extracted from the instruction) in bytes.
 
-	      if (! globals->no_pipeline_knowledge)
-		value -= 8;
-	    }
-	  else
-	    {
-	      /* The ARM ELF ABI says that this reloc is computed as: S - P + A
-		 where:
-		  S is the address of the symbol in the relocation.
-		  P is address of the instruction being relocated.
-		  A is the addend (extracted from the instruction) in bytes.
+	     S is held in 'value'.
+	     P is the base address of the section containing the
+	       instruction plus the offset of the reloc into that
+	       section, ie:
+		 (input_section->output_section->vma +
+		  input_section->output_offset +
+		  rel->r_offset).
+	     A is the addend, converted into bytes, ie:
+		 (signed_addend * 4)
 
-		 S is held in 'value'.
-		 P is the base address of the section containing the
-		   instruction plus the offset of the reloc into that
-		   section, ie:
-		     (input_section->output_section->vma +
-		      input_section->output_offset +
-		      rel->r_offset).
-		 A is the addend, converted into bytes, ie:
-		     (signed_addend * 4)
-
-		 Note: None of these operations have knowledge of the pipeline
-		 size of the processor, thus it is up to the assembler to
-		 encode this information into the addend.  */
-	      value -= (input_section->output_section->vma
-			+ input_section->output_offset);
-	      value -= rel->r_offset;
-	      value += (signed_addend << howto->size);
-
-	      /* Previous versions of this code also used to add in the
-		 pipeline offset here.  This is wrong because the linker is
-		 not supposed to know about such things, and one day it might
-		 change.  In order to support old binaries that need the old
-		 behaviour however, so we attempt to detect which ABI was
-		 used to create the reloc.  */
-	      if (! globals->no_pipeline_knowledge)
-		{
-		  Elf_Internal_Ehdr * i_ehdrp; /* Elf file header, internal form */
-
-		  i_ehdrp = elf_elfheader (input_bfd);
-
-		  if (i_ehdrp->e_ident[EI_OSABI] == 0)
-		    value -= 8;
-		}
-	    }
+	     Note: None of these operations have knowledge of the pipeline
+	     size of the processor, thus it is up to the assembler to
+	     encode this information into the addend.  */
+	  value -= (input_section->output_section->vma
+		    + input_section->output_offset);
+	  value -= rel->r_offset;
+	  value += (signed_addend << howto->size);
 
 	  signed_addend = value;
 	  signed_addend >>= howto->rightshift;
@@ -2732,23 +2692,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	relocation -= (input_section->output_section->vma
 		       + input_section->output_offset
 		       + rel->r_offset);
-
-	if (! globals->no_pipeline_knowledge)
-	  {
-	    Elf_Internal_Ehdr * i_ehdrp; /* Elf file header, internal form.  */
-
-	    i_ehdrp = elf_elfheader (input_bfd);
-
-	    /* Previous versions of this code also used to add in the pipline
-	       offset here.  This is wrong because the linker is not supposed
-	       to know about such things, and one day it might change.  In order
-	       to support old binaries that need the old behaviour however, so
-	       we attempt to detect which ABI was used to create the reloc.  */
-	    if (   strcmp (bfd_get_target (input_bfd), "elf32-littlearm-oabi") == 0
-		|| strcmp (bfd_get_target (input_bfd), "elf32-bigarm-oabi") == 0
-		|| i_ehdrp->e_ident[EI_OSABI] == 0)
-	      relocation += 4;
-	  }
 
 	check = relocation >> howto->rightshift;
 

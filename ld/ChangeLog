@@ -1,3 +1,7 @@
+2004-11-30  Paul Brook  <paul@codesourcery.com>
+
+	* emultempl/armelf.em: Ignore -p and -no-pipeline-knowledge.
+
 2004-11-30  Tero Niemela  <tero_niemela@yahoo.com>
 
 	* Makefile.am: Change LOCALEDIR to $(datadir)/share.
