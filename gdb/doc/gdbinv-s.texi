@@ -237,7 +237,6 @@ if the serial line is connected to the device named @file{/dev/ttyb}.
 @c seen an example...  pesch 4sep1992
 This will stop the remote machine if it is not already stopped.
 @end ignore
-
 @end enumerate
 
 Now you can use all the usual commands to examine and change data and to
@@ -245,6 +244,24 @@ step and continue the remote program.
 
 To resume the remote program and stop debugging it, use the @code{detach}
 command.
+
+@cindex interrupting remote programs
+@cindex remote programs, interrupting
+Whenever @value{GDBN} is waiting for the remote program, if you type the
+interrupt character (often @key{C-C}), @value{GDBN} attempts to stop the
+program.  This may or may not succeed, depending in part on the hardware
+and the serial drivers the remote system uses.  If you type the
+interrupt character once again, @value{GDBN} displays this prompt:
+
+@example
+Interrupted while waiting for the program.
+Give up (and stop debugging it)?  (y or n)
+@end example
+
+If you type @kbd{y}, @value{GDBN} abandons the remote debugging session.
+(If you decide you want to try again later, you can use @samp{target
+remote} again to connect once more.)  If you type @kbd{n}, @value{GDBN}
+goes back to waiting.
 
 @node Protocol
 @subsubsection Outline of the communication protocol

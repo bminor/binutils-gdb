@@ -1,3 +1,10 @@
+Fri May  7 11:56:18 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdbinv-s.texi (Remote Serial): describe new ^C behavior in
+	target remote.
+
+	* gdb.texinfo (Machine Code): more index entries for disassemble
+
 Fri May  7 10:12:30 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Clarify the intended use of the gdb-testers and gdb-patches

@@ -3516,6 +3516,10 @@ variables}).
 @table @code
 @kindex disassemble
 @item disassemble
+@cindex assembly instructions
+@cindex instructions, assembly
+@cindex machine instructions
+@cindex listing machine instructions
 This specialized command dumps a range of memory as machine
 instructions.  The default memory range is the function surrounding the
 program counter of the selected frame.  A single argument to this
