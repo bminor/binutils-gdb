@@ -3364,6 +3364,11 @@ Convert(rm,op,from,to)
         break;
       }
 
+#if 0
+      /* FIXME: This code is incorrect.  The rounding mode does not
+         round to integral values; it rounds to the nearest
+         representable value in the format.  */
+
       switch (rm) {
        case FP_RM_NEAREST:
         /* Round result to nearest representable value. When two
@@ -3398,6 +3403,8 @@ Convert(rm,op,from,to)
         tmp = (float)floor((double)tmp);
         break;
       }
+#endif /* 0 */
+
       result = (uword64)*(unsigned int *)&tmp;
     }
     break;
@@ -3425,6 +3432,11 @@ Convert(rm,op,from,to)
         break;
       }
 
+#if 0
+      /* FIXME: This code is incorrect.  The rounding mode does not
+         round to integral values; it rounds to the nearest
+         representable value in the format.  */
+
       switch (rm) {
        case FP_RM_NEAREST:
 #ifdef HAVE_ANINT
@@ -3450,6 +3462,8 @@ Convert(rm,op,from,to)
         tmp = floor(*(double *)&tmp);
         break;
       }
+#endif /* 0 */
+
       result = *(uword64 *)&tmp;
     }
     break;

@@ -1,13 +1,16 @@
 Thu Sep 19 15:34:17 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* gencode.c (MIPS_DECODE): Set UNSIGNED for multu instruction.
+	(process_instructions): Correct handling of nor instruction.
+	Correct shift count for 32 bit shift instructions. Correct sign
+	extension for arithmetic shifts to not shift the number of bits in
+	the type.  Fix 64 bit multiply high word calculation.  Fix 32 bit
+	unsigned multiply.  Fix ldxc1 and friends to use coprocessor 1.
+	Fix madd.
 	* interp.c (CHECKHILO): Don't set HIACCESS, LOACCESS, or HLPC.
 	It's OK to have a mult follow a mult.  What's not OK is to have a
 	mult follow an mfhi.
-
-	* gencode.c (process_instructions): Correct handling of nor
-	instruction.  Correct shift count for 32 bit shift instructions.
-	Correct sign extension for arithmetic shifts to not shift the
-	number of bits in the type.
+	(Convert): Comment out incorrect rounding code.
 
 Mon Sep 16 11:38:16 1996  James G. Smith  <jsmith@cygnus.co.uk>
 

@@ -486,7 +486,7 @@ struct instruction MIPS_DECODE[] = {
  {"MSUB.S",  4,"010011bbbbbkkkkkvvvvvrrrrr101000",COP1X,  FPSUB,    (FP | MULTIPLY | SINGLE)},
  {"MUL",     1,"01000110mmmkkkkkvvvvvrrrrr000010",COP1,   FPMUL,    (FP | HI | LO)},
  {"MULT",    1,"000000sssssggggg0000000000011000",SPECIAL,MUL,      (WORD | WORD32 | HI | LO)},
- {"MULTU",   1,"000000sssssggggg0000000000011001",SPECIAL,MUL,      (WORD | WORD32 | HI | LO)},
+ {"MULTU",   1,"000000sssssggggg0000000000011001",SPECIAL,MUL,      (WORD | WORD32 | UNSIGNED | HI | LO)},
  {"MxC1",    1,"01000100x00kkkkkvvvvv00000000000",COP1S,  FPMOVEC,  (FP | WORD)},
  {"NEG",     1,"01000110mmm00000vvvvvrrrrr000111",COP1,   FPNEG,    (FP)},
  {"NMADD.D", 4,"010011bbbbbkkkkkvvvvvrrrrr110001",COP1X,  FPADD,    (FP | NOT | MULTIPLY | DOUBLE)},
@@ -1056,21 +1056,35 @@ process_instructions(doarch,features)
         printf("   {\n");
         if (GETDATASIZE() == DOUBLEWORD) {
           printf("   uword64 mid;\n");
+	  printf("   uword64 midhi;\n");
           printf("   uword64 temp;\n");
+	  if ((MIPS_DECODE[loop].flags & UNSIGNED) == 0)
+	    {
+	      printf("   int sign = 0;\n");
+	      printf("   if (op1 < 0) { op1 = - op1; ++sign; }\n");
+	      printf("   if (op2 < 0) { op2 = - op2; ++sign; }\n");
+	    }
           printf("   LO = ((uword64)WORD64LO(op1) * WORD64LO(op2));\n");
           printf("   HI = ((uword64)WORD64HI(op1) * WORD64HI(op2));\n");
           printf("   mid = ((uword64)WORD64HI(op1) * WORD64LO(op2));\n");
-          printf("   temp = (LO + SET64HI(WORD64LO(mid)));\n");
-          printf("   if ((temp == mid) ? (LO != 0) : (temp < mid))\n");
+	  printf("   midhi = SET64HI(WORD64LO(mid));\n");
+          printf("   temp = (LO + midhi);\n");
+          printf("   if ((temp == midhi) ? (LO != 0) : (temp < midhi))\n");
           printf("    HI += 1;\n");
           printf("   HI += WORD64HI(mid);\n");
           printf("   mid = ((uword64)WORD64LO(op1) * WORD64HI(op2));\n");
-          printf("   LO = (temp + SET64HI(WORD64LO(mid)));\n");
-          printf("   if ((LO == mid) ? (temp != 0) : (LO < mid))\n");
+	  printf("   midhi = SET64HI(WORD64LO(mid));\n");
+          printf("   LO = (temp + midhi);\n");
+          printf("   if ((LO == midhi) ? (temp != 0) : (LO < midhi))\n");
           printf("    HI += 1;\n");
           printf("   HI += WORD64HI(mid);\n");
+	  if ((MIPS_DECODE[loop].flags & UNSIGNED) == 0)
+	    printf("   if (sign & 1) { LO = - LO; HI = (LO == 0 ? 0 : -1) - HI; }\n");
         } else {
-          printf("   uword64 temp = (op1 * op2);\n");
+	  if (MIPS_DECODE[loop].flags & UNSIGNED)
+	    printf("   uword64 temp = ((uword64)(op1 & 0xffffffff) * (uword64)(op2 & 0xffffffff));\n");
+	  else
+	    printf("   uword64 temp = (op1 * op2);\n");
           printf("   LO = SIGNEXTEND((%s)WORD64LO(temp),32);\n",regtype);
           printf("   HI = SIGNEXTEND((%s)WORD64HI(temp),32);\n",regtype);
         }
@@ -1585,7 +1599,10 @@ process_instructions(doarch,features)
                     implementation will be needed to ascertain the
                     correct operation. */
                  if (MIPS_DECODE[loop].flags & COPROC)
-                  printf("     COP_LW(((instruction >> 26) & 0x3),destreg,(unsigned int)");
+                  printf("     COP_LW(%s,destreg,(unsigned int)",
+			 ((MIPS_DECODE[loop].flags & REG)
+			  ? "1"
+			  : "((instruction >> 26) & 0x3)"));
                  else
                   printf("     GPR[destreg] = (");
 
@@ -1597,7 +1614,10 @@ process_instructions(doarch,features)
                  printf(");\n");
                } else {
                  if (MIPS_DECODE[loop].flags & COPROC)
-                  printf("     COP_LD(((instruction >> 26) & 0x3),destreg,memval);;\n");
+                  printf("     COP_LD(%s,destreg,memval);;\n",
+			 ((MIPS_DECODE[loop].flags & REG)
+			  ? "1"
+			  : "((instruction >> 26) & 0x3)"));
                  else
                   printf("     GPR[destreg] = memval;\n");
                }
@@ -1628,12 +1648,21 @@ process_instructions(doarch,features)
                   printf("     paddr = ((paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2)));\n");
                   printf("     byte = ((vaddr & mask) ^ (BigEndianCPU << 2));\n");
                   if (MIPS_DECODE[loop].flags & COPROC)
-                   printf("     memval = (((uword64)COP_SW(((instruction >> 26) & 0x3),%s)) << (8 * byte));\n",((MIPS_DECODE[loop].flags & FP) ? "fs" : "destreg"));
+                   printf("     memval = (((uword64)COP_SW(%s,%s)) << (8 * byte));\n",
+			  ((MIPS_DECODE[loop].flags & REG)
+			   ? "1"
+			   : "((instruction >> 26) & 0x3)"),
+			  ((MIPS_DECODE[loop].flags & FP) ? "fs" : "destreg"));
                   else
                    printf("     memval = (op2 << (8 * byte));\n");
                 } else { /* !proc64 SC and SW, plus proc64 SD and SCD */
                   if (MIPS_DECODE[loop].flags & COPROC)
-                   printf("     memval = (uword64)COP_S%c(((instruction >> 26) & 0x3),%s);\n",((datalen == 8) ? 'D' : 'W'),((MIPS_DECODE[loop].flags & FP) ? "fs" : "destreg"));
+                   printf("     memval = (uword64)COP_S%c(%s,%s);\n",
+			  ((datalen == 8) ? 'D' : 'W'),
+			  ((MIPS_DECODE[loop].flags & REG)
+			   ? "1"
+			   : "((instruction >> 26) & 0x3)"),
+			  ((MIPS_DECODE[loop].flags & FP) ? "fs" : "destreg"));
                   else
                    printf("     memval = op2;\n");
                 }
@@ -1989,7 +2018,12 @@ process_instructions(doarch,features)
              fprintf(stderr,"Error: Invalid data size %d for FPADD operation in instruction table\n",GETDATASIZE());
              exit(1);
           }
-          printf("   StoreFPR(destreg,%s,%s(Add(Multiply(ValueFPR(fs,%s),ValueFPR(ft,%s),%s),ValueFPR(fr,%s),%s),%s));\n",type,((MIPS_DECODE[loop].flags & NOT) ? "Negate" : ""),type,type,type,type,type,type);
+	  if (MIPS_DECODE[loop].flags & NOT)
+	    printf ("   StoreFPR(destreg,%s,Negate(Add(Multiply(ValueFPR(fs,%s),ValueFPR(ft,%s),%s),ValueFPR(fr,%s),%s),%s));\n",
+		    type, type, type, type, type, type, type);
+	  else
+	    printf ("   StoreFPR(destreg,%s,Add(Multiply(ValueFPR(fs,%s),ValueFPR(ft,%s),%s),ValueFPR(fr,%s),%s));\n",
+		    type, type, type, type, type, type);
         } else {
           printf("  if ((format != fmt_single) && (format != fmt_double))\n");
           printf("   SignalException(ReservedInstruction,instruction);\n");
