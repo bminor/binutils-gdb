@@ -32,6 +32,9 @@ struct target_ops;
 extern void
 som_solib_add PARAMS ((char *, int, struct target_ops *));
 
+extern CORE_ADDR
+som_solib_get_got_by_pc PARAMS ((CORE_ADDR));
+
 /* Function to be called when the inferior starts up, to discover the names
    of shared libraries that are dynamically linked, the base addresses to
    which they are linked, and sufficient information to read in their symbols

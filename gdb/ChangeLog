@@ -1,3 +1,10 @@
+Wed Nov 30 22:27:27 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* somsolib.c (som_solib_get_got_by_pc): New function.
+	* somsolib.h (som_solib_get_got_by_pc): Add extern decl.
+	* hppa-tdep.c (hppa_fix_call_dummy): Handle case where FUN is the
+	function's export stub or real address in a shared library.
+
 Tue Nov 29 13:40:25 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
 
 	* config/i386/nbsd.mh (REGEX, REGEX1): No longer define.

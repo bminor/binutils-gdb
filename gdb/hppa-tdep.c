@@ -1378,6 +1378,19 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 	 at *fun.  */
       fun = (CORE_ADDR) read_memory_integer (fun & ~0x3, 4);
     }
+  else
+    {
+
+      /* FUN could be either an export stub, or the real address of a
+	 function in a shared library.
+
+	 To call this function we need to get the GOT/DP value for the target
+	 function.  Do this by calling shared library support routines in
+	 somsolib.c.  Once the GOT value is in %r19 we can call the procedure
+	 in the normal fashion.  */
+
+	 write_register (19, som_solib_get_got_by_pc (fun));
+    }
 
   /* If we are calling an import stub (eg calling into a dynamic library)
      then have sr4export call the magic __d_plt_call routine which is linked

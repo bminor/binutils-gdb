@@ -43,8 +43,6 @@ and by Cygnus Support.  */
 
    * Do we need/want a command to load a shared library?
 
-   * Test attaching to running dynamically linked code.
-
    * Support for hpux8 dynamic linker.
 
    * Support for tracking user calls to dld_load, dld_unload.  */
@@ -542,6 +540,29 @@ som_solib_create_inferior_hook()
     }
 
   som_solib_add ((char *) 0, 0, (struct target_ops *) 0);
+}
+
+/* Return the GOT value for the shared library in which ADDR belongs.  If
+   ADDR isn't in any known shared library, return zero.  */
+
+CORE_ADDR
+som_solib_get_got_by_pc (addr)
+     CORE_ADDR addr;
+{
+  struct so_list *so_list = so_list_head;
+  CORE_ADDR got_value = 0;
+
+  while (so_list)
+    {
+      if (so_list->som_solib.text_addr <= addr
+	  && so_list->som_solib.text_end > addr)
+	{
+	  got_value = so_list->som_solib.got_value;
+	  break;
+	}
+      so_list = so_list->next;
+    }
+  return got_value;
 }
 
 /* Dump information about all the currently loaded shared libraries.  */
