@@ -1,3 +1,8 @@
+2004-02-20  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (add_partial_symbol): Fix typo in adding enumerators
+	to the partial symbol table.
+
 2004-02-20  J. brobecker  <brobecker@gnat.com>
 
 	* PROBLEMS: Add description of problem documented under gdb/1560.
