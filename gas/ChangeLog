@@ -1,3 +1,4 @@
+start-sanitize-sky
 Mon Feb 23 17:24:06 1998  Jim Lemke  <jlemke@cygnus.com>
 
 	* config/obj-elf.c: Take Ian's suggestion, leave .bss etc
@@ -5,6 +6,7 @@ Mon Feb 23 17:24:06 1998  Jim Lemke  <jlemke@cygnus.com>
 	ELF_TC_SPECIAL_SECTIONS.
 	* config/tc-dvp.h: Likewise.
 
+end-sanitize-sky
 Mon Feb 23 11:29:06 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.c: #include symcat.h.
