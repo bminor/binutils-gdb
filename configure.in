@@ -320,6 +320,11 @@ case "${target}" in
     # newlib is not 64 bit ready
     noconfigdirs="$noconfigdirs newlib"
     ;;
+# start-sanitize-arc
+  arc-*-*)
+    noconfigdirs="$noconfigdirs libg++ libstdc++ libio librx"
+    ;;
+# end-sanitize-arc
   arm-*-*)
     noconfigdirs="$noconfigdirs ld"
     ;;

@@ -158,6 +158,13 @@ case $basic_machine in
 	      | m88110-* | m680[01234]0-* | m683?2-* | z8k-* \
 	      | h8500-*) # CYGNUS LOCAL
 		;;
+# start-sanitize-arc
+	arc)
+		basic_machine=$basic_machine-unknown
+		;;
+	arc-*)
+		;;
+# end-sanitize-arc
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
 	386bsd)						# CYGNUS LOCAL
