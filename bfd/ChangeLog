@@ -1,5 +1,10 @@
 1999-07-13  Richard Henderson  <rth@cygnus.com>
 
+	* elf.c (assign_file_positions_for_segments): Thinko last change.
+	Always overwrite p_flags.
+
+1999-07-13  Richard Henderson  <rth@cygnus.com>
+
 	* elf-bfd.h (struct elf_backend_data): Add want_dynbss.
 	* elflink.c (_bfd_elf_create_dynamic_sections): Only create
 	.dynbss and .rel[a].bss if want_dynbss.
