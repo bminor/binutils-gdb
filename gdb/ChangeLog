@@ -1,3 +1,8 @@
+2001-01-12  Nicholas Duffek  <nsd@redhat.com>
+
+	* blockframe.c (generic_get_saved_register): Spelling fix.
+	* frame.h (FRAME_FP): Spelling fix.
+
 Fri Jan 12 18:29:46 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* infcmd.c (print_return_value): Restore space lost by switch to

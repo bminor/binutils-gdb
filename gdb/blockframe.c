@@ -1249,7 +1249,7 @@ generic_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
    calculated rather than fetched).  We will use not_lval for values
    fetched from generic dummy frames.
 
-   Set *ADDRP to the address, either in memory on as a REGISTER_BYTE
+   Set *ADDRP to the address, either in memory or as a REGISTER_BYTE
    offset into the registers array.  If the value is stored in a dummy
    frame, set *ADDRP to zero.
 

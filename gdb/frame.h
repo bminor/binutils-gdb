@@ -121,7 +121,7 @@ enum print_what
 extern void *frame_obstack_alloc (unsigned long size);
 extern void frame_saved_regs_zalloc (struct frame_info *);
 
-/* Return the frame address from FR.  Except in the machine-dependent
+/* Return the frame address from FI.  Except in the machine-dependent
    *FRAME* macros, a frame address has no defined meaning other than
    as a magic cookie which identifies a frame over calls to the
    inferior.  The only known exception is inferior.h
