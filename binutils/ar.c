@@ -31,11 +31,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "../bfd/libbfd.h"
 #include "arsup.h"
 #include <stdio.h>
-#ifdef	USG
+#ifdef POSIX_UTIME
+#include <utime.h>
+#else /* ! POSIX_UTIME */
+#ifdef	USE_UTIME
 #include <time.h>
-#else
+#else /* ! USE_UTIME */
 #include <sys/time.h>
-#endif
+#endif /* ! USE_UTIME */
+#endif /* ! POSIX_UTIME */
 #include <errno.h>
 #ifndef errno
 extern int errno;
@@ -56,7 +60,6 @@ PROTO(void, ranlib_only, (char *archname));
 
 /** Globals and flags */
 
-extern	       *program_version;
 char           *program_name = NULL;
 bfd            *inarch;		/* The input arch we're manipulating */
 
@@ -155,11 +158,20 @@ DEFUN(map_over_members,(function, files, count),
   for (; count > 0; files++, count--) {
     boolean         found = false;
     for (head = inarch->next; head; head = head->next)
-     if ((head->filename != NULL) &&
-	 (!strcmp(*files, head->filename))) {
-       found = true;
-       function(head);
-     }
+    {
+      if (head->filename == NULL)
+      {
+	/* Some archive formats don't get the filenames filled in
+	   'till the elements are opened */
+	struct stat buf;
+	bfd_stat_arch_elt(head, &buf);
+      }
+      if ((head->filename != NULL) &&
+	  (!strcmp(*files, head->filename))) {
+	found = true;
+	function(head);
+      }
+    }
     if (!found)
      fprintf(stderr, "No entry %s in archive.\n", *files);
   }
@@ -167,6 +179,13 @@ DEFUN(map_over_members,(function, files, count),
 
 
 boolean operation_alters_arch = false;
+
+void
+do_show_version ()
+{
+  extern char *program_version;
+  printf ("%s version %s\n", program_name, program_version);
+}
 
 /*
    The option parsing should be in its own function.  It will be when I have
@@ -206,14 +225,22 @@ main(argc, argv)
   if (is_ranlib > 0 || (is_ranlib < 0 && strcmp(temp, "ranlib") == 0)) {
     if (argc < 2)
      fatal("Too few command arguments.");
-    ranlib_only(argv[1]);
+    arg_ptr = argv[1];
+    if (strcmp(argv[1], "-V") == 0 || strcmp(argv[1], "-v") == 0) {
+      do_show_version();
+      if (argc == 2)
+	exit(0);
+      arg_ptr = argv[2];
+    }
+    ranlib_only(arg_ptr);
   }
 
   if (argc == 2 && strcmp(argv[1],"-M") == 0) {
     mri_emul();
     exit(0);
   }
-  if (argc < 3)
+
+  if (argc < 2)
    fatal("Too few command arguments.");
 
   arg_ptr = argv[1];
@@ -298,7 +325,13 @@ main(argc, argv)
   }
 
   if (show_version)
-     printf ("%s version %s\n", program_name, program_version);
+     do_show_version();
+
+  if (argc < 3)
+    if (show_version)
+       exit(0);
+    else
+      fatal("Too few command arguments.");
 
   if (mri_mode) {
     mri_emul();
@@ -549,19 +582,26 @@ extract_file(abfd)
     chmod(abfd->filename, buf.st_mode);
 
     if (preserve_dates) {
-#ifdef USG
+#ifdef POSIX_UTIME
+        struct utimbuf	tb;
+	tb.actime = buf.st_mtime;
+	tb.modtime = buf.st_mtime;
+	utime(abfd->filename, tb);	/* FIXME check result */
+#else /* ! POSIX_UTIME */
+#ifdef USE_UTIME
 	long            tb[2];
 	tb[0] = buf.st_mtime;
 	tb[1] = buf.st_mtime;
 	utime(abfd->filename, tb);	/* FIXME check result */
-#else
+#else /* ! USE_UTIME */
 	struct timeval  tv[2];
 	tv[0].tv_sec = buf.st_mtime;
 	tv[0].tv_usec = 0;
 	tv[1].tv_sec = buf.st_mtime;
 	tv[1].tv_usec = 0;
 	utimes(abfd->filename, tv);	/* FIXME check result */
-#endif
+#endif /* ! USE_UTIME */
+#endif /* ! POSIX_UTIME */
     }
 }
 
@@ -948,6 +988,3 @@ print_descr(abfd)
 {
     print_arelt_descr(stdout,abfd, verbose);
 }
-
-
-

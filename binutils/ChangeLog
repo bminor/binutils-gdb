@@ -1,3 +1,13 @@
+Mon Nov  2 12:42:11 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ar.c (extract_file): instead of checking USG: if POSIX_UTIME,
+	use utime and utimbuf structure, otherwise if USE_UTIME use utime
+	and array of two longs, otherwise use utimes.
+
+Thu Oct 15 13:57:35 1992  Per Bothner  (bothner@cygnus.com)
+
+	* binutils.tex:  Document yesterday's changes to strip and copy.
+
 Wed Oct 14 13:22:14 1992  Per Bothner  (bothner@cygnus.com)
 
 	* copy.c:  Re-do command-line parsing to use getopt_long().
