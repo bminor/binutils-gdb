@@ -1,3 +1,9 @@
+2001-07-15  H.J. Lu  <hjl@gnu.org>
+
+	* Makefile.am (po/SRC-POTFILES.in): Use tmp.src instead of tmp.
+	(po/BLD-POTFILES.in): Use tmp.bld instead of tmp.
+	* Makefile.in: Regenerate.
+
 2001-07-11  H.J. Lu  <hjl@gnu.org>
 
 	* elf64-alpha.c (elf64_alpha_check_relocs): Set the ALLOC|LOAD
