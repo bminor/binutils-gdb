@@ -1,8 +1,3 @@
-2004-02-28  Andrew Cagney  <cagney@redhat.com>
-
-        * amd64-linux-nat.c (ps_get_thread_area): When architecture is
-	i386 use PTRACE_GET_THREAD_AREA.  Suggested by Roland McGrath.
-
 2004-02-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64-tdep.c (amd64_frame_cache): Fix comment.
