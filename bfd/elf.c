@@ -4656,13 +4656,20 @@ copy_private_bfd_data (ibfd, obfd)
    && ! section->segment_mark)
 
   /* Returns TRUE iff seg1 starts after the end of seg2.  */
-#define SEGMENT_AFTER_SEGMENT(seg1, seg2)				\
-  (seg1->p_vaddr >= SEGMENT_END (seg2, seg2->p_vaddr))
+#define SEGMENT_AFTER_SEGMENT(seg1, seg2, field)			\
+  (seg1->field >= SEGMENT_END (seg2, seg2->field))
 
-  /* Returns TRUE iff seg1 and seg2 overlap.  */
+  /* Returns TRUE iff seg1 and seg2 overlap. Segments overlap iff both
+     their VMA address ranges and their LMA address ranges overlap.
+     It is possible to have overlapping VMA ranges without overlapping LMA
+     ranges.  RedBoot images for example can have both .data and .bss mapped
+     to the same VMA range, but with the .data section mapped to a different
+     LMA.  */
 #define SEGMENT_OVERLAPS(seg1, seg2)					\
-  (!(SEGMENT_AFTER_SEGMENT (seg1, seg2)					\
-     || SEGMENT_AFTER_SEGMENT (seg2, seg1)))
+  (   !(SEGMENT_AFTER_SEGMENT (seg1, seg2, p_vaddr)			\
+        || SEGMENT_AFTER_SEGMENT (seg2, seg1, p_vaddr)) 		\
+   && !(SEGMENT_AFTER_SEGMENT (seg1, seg2, p_paddr)			\
+        || SEGMENT_AFTER_SEGMENT (seg2, seg1, p_paddr)))
 
   /* Initialise the segment mark field.  */
   for (section = ibfd->sections; section != NULL; section = section->next)
@@ -4760,13 +4767,14 @@ copy_private_bfd_data (ibfd, obfd)
 	continue;
 
       /* Compute how many sections might be placed into this segment.  */
-      section_count = 0;
-      for (section = ibfd->sections; section != NULL; section = section->next)
+      for (section = ibfd->sections, section_count = 0;
+	   section != NULL;
+	   section = section->next)
 	if (INCLUDE_SECTION_IN_SEGMENT (section, segment, bed))
 	  ++section_count;
-
-      /* Allocate a segment map big enough to contain all of the
-	 sections we have selected.  */
+ 
+      /* Allocate a segment map big enough to contain
+	 all of the sections we have selected.  */
       amt = sizeof (struct elf_segment_map);
       amt += ((bfd_size_type) section_count - 1) * sizeof (asection *);
       map = (struct elf_segment_map *) bfd_alloc (obfd, amt);
@@ -4838,7 +4846,7 @@ copy_private_bfd_data (ibfd, obfd)
 	    and possibly its LMA changed, and a new segment or segments will
 	    have to be created to contain the other sections.
 
-	 4. The sections have been moved, but not be the same amount.
+	 4. The sections have been moved, but not by the same amount.
 	    In this case we can change the segment's LMA to match the LMA
 	    of the first section and we will have to create a new segment
 	    or segments to contain the other sections.
@@ -5082,10 +5090,8 @@ copy_private_bfd_data (ibfd, obfd)
     if (map->p_paddr != 0)
       break;
   if (map == NULL)
-    {
-      for (map = map_first; map != NULL; map = map->next)
-	map->p_paddr_valid = 0;
-    }
+    for (map = map_first; map != NULL; map = map->next)
+      map->p_paddr_valid = 0;
 
   elf_tdata (obfd)->segment_map = map_first;
 

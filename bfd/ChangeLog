@@ -1,3 +1,9 @@
+2003-02-17  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (SEGMENT_AFTER_SEGMENT): Add third parameter - the
+	address field to use in the comparison.
+        (SEGMENT_OVERLAPS): Check that LMAs overlap as well.
+
 2003-02-14  Bob Wilson  <bob.wilson@acm.org>
 
 	* elfcore.h (elf_core_file_p): Compare alternate machine codes for ELF
