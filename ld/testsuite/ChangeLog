@@ -1,3 +1,44 @@
+2003-01-25  Jakub Jelinek  <jakub@redhat.com>
+
+	* ld-sparc/sparc.exp: New.
+	* ld-sparc/tlsg32.s: New test.
+	* ld-sparc/tlsg32.sd: Likewise.
+	* ld-sparc/tlsg64.s: Likewise.
+	* ld-sparc/tlsg64.sd: Likewise.
+	* ld-sparc/tlslib.s: Likewise.
+	* ld-sparc/tlsnopic.s: Likewise.
+	* ld-sparc/tlspic.s: Likewise.
+	* ld-sparc/tlssunbin32.dd: Likewise.
+	* ld-sparc/tlssunbin32.rd: Likewise.
+	* ld-sparc/tlssunbin32.s: Likewise.
+	* ld-sparc/tlssunbin32.sd: Likewise.
+	* ld-sparc/tlssunbin32.td: Likewise.
+	* ld-sparc/tlssunbin64.dd: Likewise.
+	* ld-sparc/tlssunbin64.rd: Likewise.
+	* ld-sparc/tlssunbin64.s: Likewise.
+	* ld-sparc/tlssunbin64.sd: Likewise.
+	* ld-sparc/tlssunbin64.td: Likewise.
+	* ld-sparc/tlssunbinpic32.s: Likewise.
+	* ld-sparc/tlssunbinpic64.s: Likewise.
+	* ld-sparc/tlssunnopic32.dd: Likewise.
+	* ld-sparc/tlssunnopic32.rd: Likewise.
+	* ld-sparc/tlssunnopic32.s: Likewise.
+	* ld-sparc/tlssunnopic32.sd: Likewise.
+	* ld-sparc/tlssunnopic64.dd: Likewise.
+	* ld-sparc/tlssunnopic64.rd: Likewise.
+	* ld-sparc/tlssunnopic64.s: Likewise.
+	* ld-sparc/tlssunnopic64.sd: Likewise.
+	* ld-sparc/tlssunpic32.dd: Likewise.
+	* ld-sparc/tlssunpic32.rd: Likewise.
+	* ld-sparc/tlssunpic32.s: Likewise.
+	* ld-sparc/tlssunpic32.sd: Likewise.
+	* ld-sparc/tlssunpic32.td: Likewise.
+	* ld-sparc/tlssunpic64.dd: Likewise.
+	* ld-sparc/tlssunpic64.rd: Likewise.
+	* ld-sparc/tlssunpic64.s: Likewise.
+	* ld-sparc/tlssunpic64.sd: Likewise.
+	* ld-sparc/tlssunpic64.td: Likewise.
+
 2003-01-24  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* ld-s390/s390.exp: New file.

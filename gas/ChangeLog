@@ -1,3 +1,13 @@
+2003-01-25  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-sparc.c (sparc_ip): Handle TLS % operators.
+	(tc_gen_reloc): Handle TLS relocs.
+	(sparc_cons, cons_fix_new_sparc): Handle %r_tls_dtpoff.
+	* config/tc-sparc.h (tc_fix_adjustable): Don't adjust TLS
+	relocs.
+	* config/obj-elf.c (obj_elf_section_word): Handle tls.
+	(obj_elf_type): Handle tls_object.
+
 2003-01-24  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* config/tc-s390.c (s390_tls_suffix): New function.

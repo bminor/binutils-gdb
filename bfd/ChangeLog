@@ -1,3 +1,40 @@
+2003-01-25  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-sparc.c (_bfd_sparc_elf_howto_table): Add TLS relocs.
+	(elf32_sparc_rev32_howto): New variable.
+	(sparc_reloc_map): Add TLS relocs.
+	(elf32_sparc_reloc_type_lookup, elf32_sparc_info_to_howto):
+	Handle REV32.
+	(sparc_elf_hix22_reloc, sparc_elf_lox10_reloc, elf32_sparc_mkobject):
+	New functions.
+	(struct elf32_sparc_dyn_relocs, struct elf32_sparc_link_hash_entry,
+	struct elf32_sparc_link_hash_table):
+	New structures.
+	(elf32_sparc_tdata, elf32_sparc_local_got_tls_type,
+	elf32_sparc_hash_table): Define.
+	(link_hash_newfunc, elf32_sparc_link_hash_table_create,
+	create_got_section, elf32_sparc_create_dynamic_sections,
+	elf32_sparc_copy_indirect_symbol, elf32_sparc_tls_transition): New
+	functions.
+	(elf32_sparc_check_relocs): Handle TLS relocs.  Add dynamic reloc
+	reference counting.
+	(elf32_sparc_gc_sweep_hook): Likewise.
+	(elf32_sparc_adjust_dynamic_symbol): Likewise.
+	(elf32_sparc_size_dynamic_sections): Likewise.
+	(elf32_sparc_relocate_section): Likewise.
+	(allocate_dynrelocs, readonly_dynrelocs, dtpoff_base, tpoff):
+	New functions.
+	(elf32_sparc_object_p): Allocate backend private object data.
+	(bfd_elf32_bfd_link_hash_table_create,
+	elf_backend_copy_indirect_symbol, bfd_elf32_mkobject,
+	elf_backend_can_refcount): Define.
+	(elf_backend_create_dynamic_sections): Define to
+	elf32_sparc_create_dynamic_sections.
+	* reloc.c: Add SPARC TLS relocs.
+	* bfd-in2.h, libbfd.h: Rebuilt.
+	* elf64-sparc.c (sparc64_elf_howto_table): Add TLS relocs.
+	(sparc_reloc_map): Likewise.
+
 2003-01-24  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* bfd-in2.h: Regenerate.

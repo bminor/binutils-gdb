@@ -868,6 +868,8 @@ obj_elf_section_word (str, len)
     return SHF_ALLOC;
   if (len == 9 && strncmp (str, "execinstr", 9) == 0)
     return SHF_EXECINSTR;
+  if (len == 3 && strncmp (str, "tls", 3) == 0)
+    return SHF_TLS;
 
 #ifdef md_elf_section_word
   {
@@ -1638,6 +1640,9 @@ obj_elf_type (ignore)
   else if (strcmp (typename, "object") == 0
 	   || strcmp (typename, "STT_OBJECT") == 0)
     type = BSF_OBJECT;
+  else if (strcmp (typename, "tls_object") == 0
+	   || strcmp (typename, "STT_TLS") == 0)
+    type = BSF_OBJECT | BSF_THREAD_LOCAL;
 #ifdef md_elf_symbol_type
   else if ((type = md_elf_symbol_type (typename, sym, elfsym)) != -1)
     ;

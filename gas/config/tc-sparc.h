@@ -102,6 +102,8 @@ extern void sparc_handle_align PARAMS ((struct frag *));
 #define tc_fix_adjustable(FIX)						\
   ((FIX)->fx_r_type != BFD_RELOC_VTABLE_INHERIT				\
    && (FIX)->fx_r_type != BFD_RELOC_VTABLE_ENTRY			\
+   && ((FIX)->fx_r_type < BFD_RELOC_SPARC_TLS_GD_HI22			\
+       || (FIX)->fx_r_type > BFD_RELOC_SPARC_TLS_TPOFF64)		\
    && (! sparc_pic_code							\
        || ((FIX)->fx_r_type != BFD_RELOC_HI22				\
 	   && (FIX)->fx_r_type != BFD_RELOC_LO10			\

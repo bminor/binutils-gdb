@@ -1806,10 +1806,88 @@ sparc_ip (str, pinsn)
 	      break;
 
 	    case '\0':		/* End of args.  */
-	      if (*s == '\0')
+	      if (s[0] == ',' && s[1] == '%')
 		{
-		  match = 1;
+		  static const struct tls_ops {
+		    /* The name as it appears in assembler.  */
+		    char *name;
+		    /* strlen (name), precomputed for speed */
+		    int len;
+		    /* The reloc this pseudo-op translates to.  */
+		    int reloc;
+		    /* 1 if call.  */
+		    int call;
+		  } tls_ops[] = {
+		    { "tgd_add", 7, BFD_RELOC_SPARC_TLS_GD_ADD, 0 },
+		    { "tgd_call", 8, BFD_RELOC_SPARC_TLS_GD_CALL, 1 },
+		    { "tldm_add", 8, BFD_RELOC_SPARC_TLS_LDM_ADD, 0 },
+		    { "tldm_call", 9, BFD_RELOC_SPARC_TLS_LDM_CALL, 1 },
+		    { "tldo_add", 8, BFD_RELOC_SPARC_TLS_LDO_ADD, 0 },
+		    { "tie_ldx", 7, BFD_RELOC_SPARC_TLS_IE_LDX, 0 },
+		    { "tie_ld", 6, BFD_RELOC_SPARC_TLS_IE_LD, 0 },
+		    { "tie_add", 7, BFD_RELOC_SPARC_TLS_IE_ADD, 0 }
+		  };
+		  const struct tls_ops *o;
+		  char *s1;
+		  int npar = 0;
+
+		  for (o = tls_ops; o->name; o++)
+		    if (strncmp (s + 2, o->name, o->len) == 0)
+		      break;
+		  if (o->name == NULL)
+		    break;
+
+		  if (s[o->len + 2] != '(')
+		    {
+		      as_bad (_("Illegal operands: %%%s requires arguments in ()"), o->name);
+		      return special_case;
+		    }
+
+		  if (! o->call && the_insn.reloc != BFD_RELOC_NONE)
+		    {
+		      as_bad (_("Illegal operands: %%%s cannot be used together with other relocs in the insn ()"),
+			      o->name);
+		      return special_case;
+		    }
+
+		  if (o->call
+		      && (the_insn.reloc != BFD_RELOC_32_PCREL_S2
+			  || the_insn.exp.X_add_number != 0
+			  || the_insn.exp.X_add_symbol
+			     != symbol_find_or_make ("__tls_get_addr")))
+		    {
+		      as_bad (_("Illegal operands: %%%s can be only used with call __tls_get_addr"),
+			      o->name);
+		      return special_case;
+		    }
+
+		  the_insn.reloc = o->reloc;
+		  memset (&the_insn.exp, 0, sizeof (the_insn.exp));
+		  s += o->len + 3;
+
+		  for (s1 = s; *s1 && *s1 != ',' && *s1 != ']'; s1++)
+		    if (*s1 == '(')
+		      npar++;
+		    else if (*s1 == ')')
+		      {
+			if (!npar)
+			  break;
+			npar--;
+		      }
+
+		  if (*s1 != ')')
+		    {
+		      as_bad (_("Illegal operands: %%%s requires arguments in ()"), o->name);
+		      return special_case;
+		    }
+
+		  *s1 = '\0';
+		  (void) get_expression (s);
+		  *s1 = ')';
+		  s = s1 + 1;
 		}
+	      if (*s == '\0')
+		match = 1;
 	      break;
 
 	    case '+':
@@ -2176,6 +2254,18 @@ sparc_ip (str, pinsn)
 		      { "l44", 3, BFD_RELOC_SPARC_L44, 1, 0 },
 		      { "uhi", 3, BFD_RELOC_SPARC_HH22, 1, 0 },
 		      { "ulo", 3, BFD_RELOC_SPARC_HM10, 1, 0 },
+		      { "tgd_hi22", 8, BFD_RELOC_SPARC_TLS_GD_HI22, 0, 0 },
+		      { "tgd_lo10", 8, BFD_RELOC_SPARC_TLS_GD_LO10, 0, 0 },
+		      { "tldm_hi22", 9, BFD_RELOC_SPARC_TLS_LDM_HI22, 0, 0 },
+		      { "tldm_lo10", 9, BFD_RELOC_SPARC_TLS_LDM_LO10, 0, 0 },
+		      { "tldo_hix22", 10, BFD_RELOC_SPARC_TLS_LDO_HIX22, 0,
+									 0 },
+		      { "tldo_lox10", 10, BFD_RELOC_SPARC_TLS_LDO_LOX10, 0,
+									 0 },
+		      { "tie_hi22", 8, BFD_RELOC_SPARC_TLS_IE_HI22, 0, 0 },
+		      { "tie_lo10", 8, BFD_RELOC_SPARC_TLS_IE_LO10, 0, 0 },
+		      { "tle_hix22", 9, BFD_RELOC_SPARC_TLS_LE_HIX22, 0, 0 },
+		      { "tle_lox10", 9, BFD_RELOC_SPARC_TLS_LE_LOX10, 0, 0 },
 		      { NULL, 0, 0, 0, 0 }
 		    };
 		    const struct ops *o;
@@ -2375,6 +2465,13 @@ sparc_ip (str, pinsn)
 		      && in_signed_range (the_insn.exp.X_add_number, 0x3fff))
 		    {
 		      error_message = _(": PC-relative operand can't be a constant");
+		      goto error;
+		    }
+
+		  if (the_insn.reloc >= BFD_RELOC_SPARC_TLS_GD_HI22
+		      && the_insn.reloc <= BFD_RELOC_SPARC_TLS_TPOFF64)
+		    {
+		      error_message = _(": TLS operand can't be a constant");
 		      goto error;
 		    }
 
@@ -3305,6 +3402,26 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_SPARC_PLT64:
     case BFD_RELOC_VTABLE_ENTRY:
     case BFD_RELOC_VTABLE_INHERIT:
+    case BFD_RELOC_SPARC_TLS_GD_HI22:
+    case BFD_RELOC_SPARC_TLS_GD_LO10:
+    case BFD_RELOC_SPARC_TLS_GD_ADD:
+    case BFD_RELOC_SPARC_TLS_GD_CALL:
+    case BFD_RELOC_SPARC_TLS_LDM_HI22:
+    case BFD_RELOC_SPARC_TLS_LDM_LO10:
+    case BFD_RELOC_SPARC_TLS_LDM_ADD:
+    case BFD_RELOC_SPARC_TLS_LDM_CALL:
+    case BFD_RELOC_SPARC_TLS_LDO_HIX22:
+    case BFD_RELOC_SPARC_TLS_LDO_LOX10:
+    case BFD_RELOC_SPARC_TLS_LDO_ADD:
+    case BFD_RELOC_SPARC_TLS_IE_HI22:
+    case BFD_RELOC_SPARC_TLS_IE_LO10:
+    case BFD_RELOC_SPARC_TLS_IE_LD:
+    case BFD_RELOC_SPARC_TLS_IE_LDX:
+    case BFD_RELOC_SPARC_TLS_IE_ADD:
+    case BFD_RELOC_SPARC_TLS_LE_HIX22:
+    case BFD_RELOC_SPARC_TLS_LE_LOX10:
+    case BFD_RELOC_SPARC_TLS_DTPOFF32:
+    case BFD_RELOC_SPARC_TLS_DTPOFF64:
       code = fixp->fx_r_type;
       break;
     default:
@@ -3393,7 +3510,9 @@ tc_gen_reloc (section, fixp)
       && code != BFD_RELOC_SPARC_WDISP22
       && code != BFD_RELOC_SPARC_WDISP16
       && code != BFD_RELOC_SPARC_WDISP19
-      && code != BFD_RELOC_SPARC_WPLT30)
+      && code != BFD_RELOC_SPARC_WPLT30
+      && code != BFD_RELOC_SPARC_TLS_GD_CALL
+      && code != BFD_RELOC_SPARC_TLS_LDM_CALL)
     reloc->addend = fixp->fx_addnumber;
   else if (symbol_section_p (fixp->fx_addsy))
     reloc->addend = (section->vma
@@ -4196,6 +4315,16 @@ sparc_cons (exp, size)
 	      sparc_cons_special_reloc = "plt";
 	    }
 	}
+      else if (strncmp (input_line_pointer + 3, "tls_dtpoff", 10) == 0)
+	{
+	  if (size != 4 && size != 8)
+	    as_bad (_("Illegal operands: %%r_tls_dtpoff in %d-byte data field"), size);
+	  else
+	    {
+	      input_line_pointer += 13;
+	      sparc_cons_special_reloc = "tls_dtpoff";
+	    }
+	}
       if (sparc_cons_special_reloc)
 	{
 	  int bad = 0;
@@ -4329,11 +4458,17 @@ cons_fix_new_sparc (frag, where, nbytes, exp)
 	  case 8: r = BFD_RELOC_64_PCREL; break;
 	  default: abort ();
 	  }
-      else
+      else if (*sparc_cons_special_reloc == 'p')
 	switch (nbytes)
 	  {
 	  case 4: r = BFD_RELOC_SPARC_PLT32; break;
 	  case 8: r = BFD_RELOC_SPARC_PLT64; break;
+	  }
+      else
+	switch (nbytes)
+	  {
+	  case 4: r = BFD_RELOC_SPARC_TLS_DTPOFF32; break;
+	  case 8: r = BFD_RELOC_SPARC_TLS_DTPOFF64; break;
 	  }
     }
   else if (sparc_no_align_cons)
