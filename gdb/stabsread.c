@@ -1255,22 +1255,31 @@ read_type (pp, objfile)
 	return dbx_alloc_type (typenums, objfile);
 
       /* Type is being defined here.  */
-#if 0 /* Callers aren't prepared for a NULL result!  FIXME -- metin!  */
-      {
-	struct type *tt;
+      /* Skip the '='.  */
+      ++(*pp);
 
-	/* if such a type already exists, this is an unnecessary duplication
-	   of the stab string, which is common in (RS/6000) xlc generated
-	   objects.  In that case, simply return NULL and let the caller take
-	   care of it. */
-
-	tt = *dbx_lookup_type (typenums);
-	if (tt && tt->length && tt->code)
-	  return NULL;
-      }
-#endif
-
-      *pp += 2;
+      while (**pp == '@')
+	{
+	  char *p = *pp + 1;
+	  /* It might be a type attribute or a member type.  */
+	  if (isdigit (*p) || *p ==  '(' || *p == '-')
+	    /* Member type.  */
+	    break;
+	  else
+	    {
+	      /* Type attributes; skip to the semicolon.  */
+	      while (*p != ';' && *p != '\0')
+		++p;
+	      *pp = p;
+	      if (*p == '\0')
+		return error_type (pp);
+	      else
+		/* Skip the semicolon.  */
+		++*pp;
+	    }
+	}
+      /* Skip the type descriptor, we get it below with (*pp)[-1].  */
+      ++(*pp);
     }
   else
     {
