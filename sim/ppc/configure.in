@@ -58,10 +58,10 @@ AC_ARG_ENABLE(sim-inline,
 [  --enable-sim-inline=inlines	Specify which functions should be inlined.],
 [sim_inline=""
 case "$enableval" in
-  no)		flags="";;
-  0)		flags="-DDEFAULT_INLINE=0";;
-  yes | 2)	flags="-DDEFAULT_INLINE=2";;
-  1)		flags="-DDEFAULT_INLINE=1";;
+  no)		sim_inline="";;
+  0)		sim_inline="-DDEFAULT_INLINE=0";;
+  yes | 2)	sim_inline="-DDEFAULT_INLINE=2";;
+  1)		sim_inline="-DDEFAULT_INLINE=1";;
   *) for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
        new_flag=""
        case "$x" in
