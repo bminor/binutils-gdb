@@ -1,15 +1,16 @@
 # GDB GUI setup
 
 set cfile Blank
-set wins($cfile) .text
+set wins($cfile) .src.text
 set current_label {}
 set screen_height 0
 set screen_top 0
 set screen_bot 0
-set current_output_win .command.text
+set current_output_win .cmd.text
 set cfunc NIL
-option add *Foreground White
-option add *Background Blue
+#option add *Foreground Black
+#option add *Background White
+#option add *Font -*-*-medium-r-normal--18-*-*-*-m-*-*-1
 
 proc echo string {puts stdout $string}
 
@@ -348,18 +349,15 @@ proc delete_breakpoint_tag {win line} {
 }
 
 proc gdbtk_tcl_busy {} {
-	.start configure -state disabled
-	.stop configure -state normal
-	.step configure -state disabled
-	.next configure -state disabled
-	.continue configure -state disabled
-	.finish configure -state disabled
-	.quit configure -state disabled
-	.up configure -state disabled
-	.down configure -state disabled
-	.bottom configure -state disabled
-	.asm_but configure -state disabled
-	.registers configure -state disabled
+	.src.start configure -state disabled
+	.src.stop configure -state normal
+	.src.step configure -state disabled
+	.src.next configure -state disabled
+	.src.continue configure -state disabled
+	.src.finish configure -state disabled
+	.src.up configure -state disabled
+	.src.down configure -state disabled
+	.src.bottom configure -state disabled
 	.asm.stepi configure -state disabled
 	.asm.nexti configure -state disabled
 	.asm.continue configure -state disabled
@@ -371,18 +369,15 @@ proc gdbtk_tcl_busy {} {
 }
 
 proc gdbtk_tcl_idle {} {
-	.start configure -state normal
-	.stop configure -state disabled
-	.step configure -state normal
-	.next configure -state normal
-	.continue configure -state normal
-	.finish configure -state normal
-	.quit configure -state normal
-	.up configure -state normal
-	.down configure -state normal
-	.bottom configure -state normal
-	.asm_but configure -state normal
-	.registers configure -state normal
+	.src.start configure -state normal
+	.src.stop configure -state disabled
+	.src.step configure -state normal
+	.src.next configure -state normal
+	.src.continue configure -state normal
+	.src.finish configure -state normal
+	.src.up configure -state normal
+	.src.down configure -state normal
+	.src.bottom configure -state normal
 	.asm.stepi configure -state normal
 	.asm.nexti configure -state normal
 	.asm.continue configure -state normal
@@ -737,7 +732,7 @@ proc create_file_win {filename} {
 # a unique name for the text widget.
 
 	regsub -all {\.|/} $filename {} temp
-	set win .text$temp
+	set win .src.text$temp
 
 # Open the file, and read it into the text widget
 
@@ -745,7 +740,7 @@ proc create_file_win {filename} {
 # File can't be read.  Put error message into .nofile window and return.
 
 		catch {destroy .nofile}
-		text .nofile -height 25 -width 80 -relief raised -borderwidth 2 -yscrollcommand textscrollproc -setgrid true -cursor hand2
+		text .nofile -height 25 -width 88 -relief raised -borderwidth 2 -yscrollcommand textscrollproc -setgrid true -cursor hand2
 		.nofile insert 0.0 $fh
 		.nofile configure -state disabled
 		bind .nofile <1> do_nothing
@@ -755,7 +750,7 @@ proc create_file_win {filename} {
 
 # Actually create and do basic configuration on the text widget.
 
-	text $win -height 25 -width 80 -relief raised -borderwidth 2 -yscrollcommand textscrollproc -setgrid true -cursor hand2
+	text $win -height 25 -width 88 -relief raised -borderwidth 2 -yscrollcommand textscrollproc -setgrid true -cursor hand2
 
 # Setup all the bindings
 
@@ -855,7 +850,7 @@ proc create_asm_win {funcname pc} {
 
 # Actually create and do basic configuration on the text widget.
 
-	text $win -height 25 -width 80 -relief raised -borderwidth 2 \
+	text $win -height 25 -width 88 -relief raised -borderwidth 2 \
 		-setgrid true -cursor hand2 -yscrollcommand asmscrollproc
 
 # Setup all the bindings
@@ -872,9 +867,10 @@ proc create_asm_win {funcname pc} {
 
 # Disassemble the code, and read it into the new text widget
 
+	set temp $current_output_win
 	set current_output_win $win
 	gdb_cmd "disassemble $pc"
-	set current_output_win .command.text
+	set current_output_win $temp
 
 	set numlines [$win index end]
 	set numlines [lindex [split $numlines .] 0]
@@ -1009,7 +1005,7 @@ proc update_listing {linespec} {
 
 # Pack the text widget into the listing widget, and scroll to the right place
 
-		pack $wins($cfile) -side left -expand yes -in .listing -fill both -after .label
+		pack $wins($cfile) -side left -expand yes -in .src.info -fill both -after .src.scroll
 		$wins($cfile) yview [expr $line - $screen_height / 2]
 		}
 
@@ -1017,7 +1013,7 @@ proc update_listing {linespec} {
 
 	if {$current_label != "$filename.$funcname"} then {
 		set tail [expr [string last / $filename] + 1]
-		.label configure -text "[string range $filename $tail end] : ${funcname}()"
+		.src.label configure -text "[string range $filename $tail end] : ${funcname}()"
 		set current_label $filename.$funcname
 		}
 
@@ -1049,19 +1045,6 @@ proc update_listing {linespec} {
 #
 # Local procedure:
 #
-#	update_ptr - Update the listing window.
-#
-# Description:
-#
-#	This routine will update the listing window using the result of
-#	gdb_loc.
-#
-
-proc update_ptr {} {update_listing [gdb_loc]}
-
-#
-# Local procedure:
-#
 #	asm_command - Open up the assembly window.
 #
 # Description:
@@ -1076,41 +1059,37 @@ proc asm_command {} {
 		set cfunc *None*
 		set win [asm_win_name $cfunc]
 
-		toplevel .asm
-		wm minsize .asm 1 1
-		wm title .asm Assembly
+		build_framework .asm Assembly "*NIL*"
 
-		label .asm.label -text "*NIL*" -borderwidth 2 -relief raised
-		text $win -height 25 -width 80 -relief raised -borderwidth 2 \
-			-setgrid true -cursor hand2 \
-			-yscrollcommand asmscrollproc
-		scrollbar .asm.scroll -orient vertical \
-			-command {[asm_win_name $cfunc] yview}
-		frame .asm.buts
+		.asm.text configure -yscrollcommand asmscrollproc
 
-		button .asm.stepi -text Stepi \
+		frame .asm.row1
+		frame .asm.row2
+
+		button .asm.stepi -width 6 -text Stepi \
 			-command {gdb_cmd stepi ; update_ptr}
-		button .asm.nexti -text Nexti \
+		button .asm.nexti -width 6 -text Nexti \
 			-command {gdb_cmd nexti ; update_ptr}
-		button .asm.continue -text Continue \
+		button .asm.continue -width 6 -text Cont \
 			-command {gdb_cmd continue ; update_ptr}
-		button .asm.finish -text Finish \
+		button .asm.finish -width 6 -text Finish \
 			-command {gdb_cmd finish ; update_ptr}
-		button .asm.up -text Up -command {gdb_cmd up ; update_ptr}
-		button .asm.down -text Down \
+		button .asm.up -width 6 -text Up -command {gdb_cmd up ; update_ptr}
+		button .asm.down -width 6 -text Down \
 			-command {gdb_cmd down ; update_ptr}
-		button .asm.bottom -text Bottom \
+		button .asm.bottom -width 6 -text Bottom \
 			-command {gdb_cmd {frame 0} ; update_ptr}
-		button .asm.close -text Close -command {destroy .asm}
 
-		pack .asm.label -side top -fill x
-		pack .asm.stepi .asm.nexti .asm.continue .asm.finish .asm.up \
-		     .asm.down .asm.bottom .asm.close -side left -in .asm.buts
-		pack .asm.buts -side top -fill x
-		pack $win -side left -expand yes -fill both
-		pack .asm.scroll -side left -fill y
+		pack .asm.stepi .asm.continue .asm.up .asm.bottom -side left -padx 3 -pady 5 -in .asm.row1
+		pack .asm.nexti .asm.finish .asm.down -side left -padx 3 -pady 5 -in .asm.row2
+
+		pack .asm.row1 .asm.row2 -side top -anchor w
 
 		update
+
+		pack forget .asm.text
+
+		update_assembly [gdb_loc]
 	}
 }
 
@@ -1128,18 +1107,11 @@ proc registers_command {} {
 	global cfunc
 
 	if ![winfo exists .reg] {
-		toplevel .reg
-		wm minsize .reg 1 1
-		wm title .reg Registers
-		set win .reg.regs
+		build_framework .reg Registers
 
-		text $win -height 41 -width 45 -relief raised \
-			-borderwidth 2 \
-			-setgrid true -cursor hand2
+		.reg.text configure -height 40 -width 45
 
-		pack $win -side left -expand yes -fill both
-	} else {
-		destroy .reg
+		destroy .reg.label
 	}
 }
 
@@ -1156,15 +1128,16 @@ proc registers_command {} {
 proc update_registers {} {
 	global current_output_win
 
-	set win .reg.regs
+	set win .reg.text
 
 	$win configure -state normal
 
 	$win delete 0.0 end
 
+	set temp $current_output_win
 	set current_output_win $win
 	gdb_cmd "info registers"
-	set current_output_win .command.text
+	set current_output_win $temp
 
 	$win yview 0
 	$win configure -state disabled
@@ -1227,7 +1200,7 @@ proc update_assembly {linespec} {
 # Pack the text widget, and scroll to the right place
 
 		pack $win -side left -expand yes -fill both \
-			-after .asm.buts
+			-after .asm.scroll
 		set line [pc_to_line $pclist($cfunc) $pc]
 		$win yview [expr $line - $asm_screen_height / 2]
 		}
@@ -1276,6 +1249,17 @@ proc update_assembly {linespec} {
 		}
 }
 
+#
+# Local procedure:
+#
+#	update_ptr - Update the listing window.
+#
+# Description:
+#
+#	This routine will update the listing window using the result of
+#	gdb_loc.
+#
+
 proc update_ptr {} {
 	update_listing [gdb_loc]
 	if [winfo exists .asm] {
@@ -1295,54 +1279,19 @@ proc update_ptr {} {
 #
 #
 
+# Make toplevel window disappear
+
+wm withdraw .
+
 # Setup listing window
 
-frame .listing
-
-wm minsize . 1 1
-
-label .label -text "*No file*" -borderwidth 2 -relief raised
-text $wins($cfile) -height 25 -width 80 -relief raised -borderwidth 2 -yscrollcommand textscrollproc -setgrid true -cursor hand2
-scrollbar .scroll -orient vertical -command {$wins($cfile) yview}
-
-if {[tk colormodel .text] == "color"} {
-	set highlight "-background red2 -borderwidth 2 -relief sunk"
-} else {
-	set fg [lindex [.text config -foreground] 4]
-	set bg [lindex [.text config -background] 4]
-	set highlight "-foreground $bg -background $fg -borderwidth 0"
-}
-
-proc textscrollproc {args} {global screen_height screen_top screen_bot
-			    eval ".scroll set $args"
-			    set screen_height [lindex $args 1]
-			    set screen_top [lindex $args 2]
-			    set screen_bot [lindex $args 3]}
-
-$wins($cfile) insert 0.0 "  This page intentionally left blank."
-$wins($cfile) configure -state disabled
-
-pack .label -side bottom -fill x -in .listing
-pack $wins($cfile) -side left -expand yes -in .listing -fill both
-pack .scroll -side left -fill y -in .listing
-
-button .start -text Start -command \
-	{gdb_cmd {break main}
-	 gdb_cmd {enable delete $bpnum}
-	 gdb_cmd run
-	 update_ptr }
-button .stop -text Stop -fg red -activeforeground red -state disabled -command gdb_stop
-button .step -text Step -command {gdb_cmd step ; update_ptr}
-button .next -text Next -command {gdb_cmd next ; update_ptr}
-button .continue -text Continue -command {gdb_cmd continue ; update_ptr}
-button .finish -text Finish -command {gdb_cmd finish ; update_ptr}
-#button .test -text Test -command {echo [info var]}
-button .quit -text Quit -command {gdb_cmd quit}
-button .up -text Up -command {gdb_cmd up ; update_ptr}
-button .down -text Down -command {gdb_cmd down ; update_ptr}
-button .bottom -text Bottom -command {gdb_cmd {frame 0} ; update_ptr}
-button .asm_but -text Asm -command {asm_command ; update_ptr}
-button .registers -text Regs -command {registers_command ; update_ptr}
+#if {[tk colormodel .text] == "color"} {
+#	set highlight "-background red2 -borderwidth 2 -relief sunk"
+#} else {
+#	set fg [lindex [.text config -foreground] 4]
+#	set bg [lindex [.text config -background] 4]
+#	set highlight "-foreground $bg -background $fg -borderwidth 0"
+#}
 
 proc files_command {} {
 	toplevel .files_window
@@ -1364,22 +1313,120 @@ proc files_command {} {
 
 button .files -text Files -command files_command
 
-pack .listing -side bottom -fill both -expand yes
-#pack .test -side bottom -fill x
-pack .start .stop .step .next .continue .finish .up .down .bottom .asm_but \
-	.registers .files .quit -side left
-toplevel .command
-wm title .command Command
-
 # Setup command window
 
-label .command.label -text "* Command Buffer *" -borderwidth 2 -relief raised
-text .command.text -height 25 -width 80 -relief raised -borderwidth 2 -setgrid true -cursor hand2 -yscrollcommand {.command.scroll set}
-scrollbar .command.scroll -orient vertical -command {.command.text yview}
+proc build_framework {win {title GDBtk} {label {}}} {
 
-pack .command.label -side top -fill x
-pack .command.text -side left -expand yes -fill both
-pack .command.scroll -side right -fill y
+	toplevel ${win}
+	wm title .src $title
+	wm minsize ${win} 1 1
+
+	frame ${win}.menubar
+
+	menubutton ${win}.menubar.file -padx 12 -text File \
+		-menu ${win}.menubar.file.menu -underline 0
+
+	menu ${win}.menubar.file.menu
+	${win}.menubar.file.menu add command -label Edit \
+		-command {exec $editor +[expr ($screen_top + $screen_bot)/2] $cfile &}
+	${win}.menubar.file.menu add command -label Close \
+		-command "destroy ${win}"
+	${win}.menubar.file.menu add command -label Quit \
+		-command {gdb_cmd quit}
+
+	menubutton ${win}.menubar.view -padx 12 -text View \
+		-menu ${win}.menubar.view.menu -underline 0
+
+	menu ${win}.menubar.view.menu
+	${win}.menubar.view.menu add command -label Hex -command {echo Hex}
+	${win}.menubar.view.menu add command -label Decimal \
+		-command {echo Decimal}
+	${win}.menubar.view.menu add command -label Octal -command {echo Octal}
+
+	menubutton ${win}.menubar.window -padx 12 -text Window \
+		-menu ${win}.menubar.window.menu -underline 0
+
+	menu ${win}.menubar.window.menu
+	${win}.menubar.window.menu add command -label Source \
+		-command {echo Source}
+	${win}.menubar.window.menu add command -label Command \
+		-command {echo Command}
+	${win}.menubar.window.menu add command -label Assembly \
+		-command {asm_command ; update_ptr}
+	${win}.menubar.window.menu add command -label Register \
+		-command {registers_command ; update_ptr}
+
+	menubutton ${win}.menubar.help -padx 12 -text Help \
+		-menu ${win}.menubar.help.menu -underline 0
+
+	menu ${win}.menubar.help.menu
+	${win}.menubar.help.menu add command -label "with GDBtk" \
+		-command {echo "with GDBtk"}
+	${win}.menubar.help.menu add command -label "with this window" \
+		-command {echo "with this window"}
+
+	tk_menuBar ${win}.menubar ${win}.menubar.file ${win}.menubar.view \
+		${win}.menubar.window ${win}.menubar.help
+	pack ${win}.menubar.file ${win}.menubar.view ${win}.menubar.window \
+		-side left
+	pack ${win}.menubar.help -side right
+
+	frame ${win}.info
+	text ${win}.text -height 25 -width 80 -relief raised -borderwidth 2 \
+		-setgrid true -cursor hand2 -yscrollcommand "${win}.scroll set"
+
+	label ${win}.label -text $label -borderwidth 2 -relief raised
+
+	scrollbar ${win}.scroll -orient vertical -command "${win}.text yview"
+
+	pack ${win}.label -side bottom -fill x -in ${win}.info
+	pack ${win}.scroll -side right -fill y -in ${win}.info
+	pack ${win}.text -side left -expand yes -fill both -in ${win}.info
+
+	pack ${win}.menubar -side top -fill x
+	pack ${win}.info -side top -fill both -expand yes
+}
+
+build_framework .src Source "*No file*"
+
+frame .src.row1
+frame .src.row2
+
+button .src.start -width 6 -text Start -command \
+	{gdb_cmd {break main}
+	 gdb_cmd {enable delete $bpnum}
+	 gdb_cmd run
+	 update_ptr }
+button .src.stop -width 6 -text Stop -fg red -activeforeground red \
+	-state disabled -command gdb_stop
+button .src.step -width 6 -text Step -command {gdb_cmd step ; update_ptr}
+button .src.next -width 6 -text Next -command {gdb_cmd next ; update_ptr}
+button .src.continue -width 6 -text Cont \
+	-command {gdb_cmd continue ; update_ptr}
+button .src.finish -width 6 -text Finish -command {gdb_cmd finish ; update_ptr}
+button .src.up -width 6 -text Up -command {gdb_cmd up ; update_ptr}
+button .src.down -width 6 -text Down -command {gdb_cmd down ; update_ptr}
+button .src.bottom -width 6 -text Bottom \
+	-command {gdb_cmd {frame 0} ; update_ptr}
+
+pack .src.start .src.step .src.continue .src.up .src.bottom -side left \
+	-padx 3 -pady 5 -in .src.row1
+pack .src.stop .src.next .src.finish .src.down -side left -padx 3 -pady 5 -in .src.row2
+
+pack .src.row1 .src.row2 -side top -anchor w
+
+$wins($cfile) insert 0.0 "  This page intentionally left blank."
+$wins($cfile) configure -width 88 -state disabled -yscrollcommand textscrollproc
+
+proc textscrollproc {args} {global screen_height screen_top screen_bot
+			    eval ".src.scroll set $args"
+			    set screen_height [lindex $args 1]
+			    set screen_top [lindex $args 2]
+			    set screen_bot [lindex $args 3]}
+
+#.src.label configure -text "*No file*" -borderwidth 2 -relief raised
+
+build_framework .cmd Command "* Command Buffer *"
 
 set command_line {}
 
@@ -1387,18 +1434,18 @@ gdb_cmd {set language c}
 gdb_cmd {set height 0}
 gdb_cmd {set width 0}
 
-bind .command.text <Enter> {focus %W}
-bind .command.text <Delete> {delete_char %W}
-bind .command.text <BackSpace> {delete_char %W}
-bind .command.text <Control-u> {delete_line %W}
-bind .command.text <Any-Key> {
+bind .cmd.text <Enter> {focus %W}
+bind .cmd.text <Delete> {delete_char %W}
+bind .cmd.text <BackSpace> {delete_char %W}
+bind .cmd.text <Control-u> {delete_line %W}
+bind .cmd.text <Any-Key> {
 	global command_line
 
 	%W insert end %A
 	%W yview -pickplace end
 	append command_line %A
 	}
-bind .command.text <Key-Return> {
+bind .cmd.text <Key-Return> {
 	global command_line
 
 	%W insert end \n
@@ -1426,5 +1473,3 @@ proc delete_line {win} {
 	$win yview -pickplace insert
 	set command_line {}
 }
-
-wm minsize .command 1 1

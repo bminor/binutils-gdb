@@ -1,3 +1,8 @@
+Mon Nov 28 09:17:20 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* gdbtk.tcl:  Re-arrange windows using new, consistent layout. Clean
+	up lots of code and centralize framework initialization.
+
 Fri Nov 25 21:26:02 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* tm-hppa.h (skip_trampoline_code): Add extern decl.
