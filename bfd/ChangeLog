@@ -1,3 +1,8 @@
+2002-06-29  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* mmo.c (mmo_write_loc_chunk): Don't eliminate leading and
+	trailing zero-sequences when there's previous left-over data.
+
 2002-06-27  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* elf64-hppa.c (elf64_hppa_reloc_type_class): New function.

@@ -913,16 +913,23 @@ mmo_write_loc_chunk (abfd, vma, loc, len, last_vmap)
   /* Find an initial and trailing section of zero tetras; we don't need to
      write out zeros.  FIXME: When we do this, we should emit section size
      and address specifiers, else objcopy can't always perform an identity
-     translation.  */
-  while (len >= 4 && bfd_get_32 (abfd, loc) == 0)
-    {
-      vma += 4;
-      len -= 4;
-      loc += 4;
-    }
+     translation.  Only do this if we *don't* have left-over data from a
+     previous write or the vma of this chunk is *not* the next address,
+     because then data isn't tetrabyte-aligned and we're concatenating to
+     that left-over data.  */
 
-  while (len >= 4 && bfd_get_32 (abfd, loc + len - 4) == 0)
-    len -= 4;
+  if (abfd->tdata.mmo_data->byte_no == 0 || vma != *last_vmap)
+    {
+      while (len >= 4 && bfd_get_32 (abfd, loc) == 0)
+	{
+	  vma += 4;
+	  len -= 4;
+	  loc += 4;
+	}
+
+      while (len >= 4 && bfd_get_32 (abfd, loc + len - 4) == 0)
+	len -= 4;
+    }
 
   /* Only write out the location if it's different than the one the caller
      (supposedly) previously handled, accounting for omitted leading zeros.  */
