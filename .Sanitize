@@ -135,36 +135,6 @@ fi
 mv new Makefile.in
 
 if [ -n "${verbose}" ] ; then
-	echo Looking for signs of \"v9\"...
-fi
-
-# Don't try to clean directories here, as the 'mv' command will fail.
-# Also, grep fails on NFS mounted directories.
-if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-v9 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping v9 stuff in $i
-			fi
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-v9 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Cleaning the \"v9\" out of $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-v9/,/end-\sanitize\-v9/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-if [ -n "${verbose}" ] ; then
 	echo Thawing away the \"chill\"...
 fi
 

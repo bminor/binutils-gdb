@@ -163,14 +163,12 @@ case $basic_machine in
 		;;
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
-# start-sanitize-v9
 	sparc64)					# CYGNUS LOCAL
 		basic_machine=sparc64-sun
 		os=-elf
 		;;
 	sparc64-*)					# CYGNUS LOCAL
 		;;
-# end-sanitize-v9
 
 	mips3-*)					# CYGNUS LOCAL
 		basic_machine=`echo $basic_machine | sed -e 's/mips3/mips64/'`
@@ -905,10 +903,6 @@ fi
 # manufacturer.  We pick the logical manufacturer.
 vendor=unknown
 case $basic_machine in
-	sparc-sun)
-		# Strip off Sun's patch-release suffix
-		os=`echo $os | sed 's/_U1$//'`
-		;;
 	*-unknown)
 		case $os in
 			-riscix*)
