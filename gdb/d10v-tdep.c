@@ -191,7 +191,7 @@ d10v_ts3_register_name (int reg_nr)
   return register_names[reg_nr];
 }
 
-/* Access the DMAP/IMAP registers in a target independant way. */
+/* Access the DMAP/IMAP registers in a target independent way. */
 
 static unsigned long
 d10v_ts2_dmap_register (int reg_nr)

@@ -791,12 +791,12 @@ struct cont_elem
     /* sym and stabsstring for continuing information in cfront */
     struct symbol *sym;
     char *stabs;
-    /* state dependancies (statics that must be preserved) */
+    /* state dependencies (statics that must be preserved) */
     int sym_idx;
     int sym_end;
     int symnum;
     int (*func) (struct objfile *, struct symbol *, char *);
-    /* other state dependancies include:
+    /* other state dependencies include:
        (assumption is that these will not change since process_now FIXME!!)
        stringtab_global
        n_stabs
@@ -1836,7 +1836,7 @@ read_ofile_symtab (struct partial_symtab *pst)
 
   pst->symtab = end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT (objfile));
 
-  /* Process items which we had to "process_later" due to dependancies 
+  /* Process items which we had to "process_later" due to dependencies 
      on other stabs.  */
   process_now (objfile);
 
