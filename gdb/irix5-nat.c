@@ -52,15 +52,16 @@ supply_gregset (gregsetp)
 {
   register int regi;
   register greg_t *regp = &(*gregsetp)[0];
+  int gregoff = sizeof (greg_t) - MIPS_REGSIZE;
   static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
 
   for(regi = 0; regi <= CTX_RA; regi++)
-    supply_register (regi, (char *)(regp + regi));
+    supply_register (regi, (char *)(regp + regi) + gregoff);
 
-  supply_register (PC_REGNUM, (char *)(regp + CTX_EPC));
-  supply_register (HI_REGNUM, (char *)(regp + CTX_MDHI));
-  supply_register (LO_REGNUM, (char *)(regp + CTX_MDLO));
-  supply_register (CAUSE_REGNUM, (char *)(regp + CTX_CAUSE));
+  supply_register (PC_REGNUM, (char *)(regp + CTX_EPC) + gregoff);
+  supply_register (HI_REGNUM, (char *)(regp + CTX_MDHI) + gregoff);
+  supply_register (LO_REGNUM, (char *)(regp + CTX_MDLO) + gregoff);
+  supply_register (CAUSE_REGNUM, (char *)(regp + CTX_CAUSE) + gregoff);
 
   /* Fill inaccessible registers with zero.  */
   supply_register (BADVADDR_REGNUM, zerobuf);
@@ -76,19 +77,29 @@ fill_gregset (gregsetp, regno)
 
   for (regi = 0; regi <= CTX_RA; regi++)
     if ((regno == -1) || (regno == regi))
-      *(regp + regi) = *(greg_t *) &registers[REGISTER_BYTE (regi)];
+      *(regp + regi) =
+	extract_address (&registers[REGISTER_BYTE (regi)],
+			 REGISTER_RAW_SIZE (regi));
 
   if ((regno == -1) || (regno == PC_REGNUM))
-    *(regp + CTX_EPC) = *(greg_t *) &registers[REGISTER_BYTE (PC_REGNUM)];
+    *(regp + CTX_EPC) =
+      extract_address (&registers[REGISTER_BYTE (PC_REGNUM)],
+		       REGISTER_RAW_SIZE (PC_REGNUM));
 
   if ((regno == -1) || (regno == CAUSE_REGNUM))
-    *(regp + CTX_CAUSE) = *(greg_t *) &registers[REGISTER_BYTE (CAUSE_REGNUM)];
+    *(regp + CTX_CAUSE) =
+      extract_address (&registers[REGISTER_BYTE (CAUSE_REGNUM)],
+		       REGISTER_RAW_SIZE (CAUSE_REGNUM));
 
   if ((regno == -1) || (regno == HI_REGNUM))
-    *(regp + CTX_MDHI) = *(greg_t *) &registers[REGISTER_BYTE (HI_REGNUM)];
+    *(regp + CTX_MDHI) =
+      extract_address (&registers[REGISTER_BYTE (HI_REGNUM)],
+		       REGISTER_RAW_SIZE (HI_REGNUM));
 
   if ((regno == -1) || (regno == LO_REGNUM))
-    *(regp + CTX_MDLO) = *(greg_t *) &registers[REGISTER_BYTE (LO_REGNUM)];
+    *(regp + CTX_MDLO) =
+      extract_address (&registers[REGISTER_BYTE (LO_REGNUM)],
+		       REGISTER_RAW_SIZE (LO_REGNUM));
 }
 
 /*
@@ -105,6 +116,8 @@ supply_fpregset (fpregsetp)
 {
   register int regi;
   static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
+
+  /* FIXME, this is wrong for the N32 ABI which has 64 bit FP regs. */
 
   for (regi = 0; regi < 32; regi++)
     supply_register (FP0_REGNUM + regi,
@@ -123,6 +136,8 @@ fill_fpregset (fpregsetp, regno)
 {
   int regi;
   char *from, *to;
+
+  /* FIXME, this is wrong for the N32 ABI which has 64 bit FP regs. */
 
   for (regi = FP0_REGNUM; regi < FP0_REGNUM + 32; regi++)
     {
@@ -669,12 +684,32 @@ xfer_link_map_member (so_list_ptr, lm)
 	memory_error (errcode, (CORE_ADDR) list_32.oi_pathname);
 
       LM_ADDR (so_list_ptr) = (CORE_ADDR) list_32.oi_ehdr;
-      LM_OFFSET (so_list_ptr)
-	= (CORE_ADDR) list_32.oi_ehdr - (CORE_ADDR) list_32.oi_orig_ehdr;
+      LM_OFFSET (so_list_ptr) =
+	(CORE_ADDR) list_32.oi_ehdr - (CORE_ADDR) list_32.oi_orig_ehdr;
     }
   else
 #endif
     {
+#if defined (_MIPS_SIM_NABI32) && _MIPS_SIM == _MIPS_SIM_NABI32
+      /* If we are compiling GDB under N32 ABI, the alignments in
+	 the obj struct are different from the O32 ABI and we will get
+	 wrong values when accessing the struct.
+	 As a workaround we use fixed values which are good for
+	 Irix 6.2.  */
+      char buf[432];
+
+      read_memory ((CORE_ADDR) list_old.data, buf, sizeof (buf));
+
+      target_read_string (extract_address (&buf[236], 4),
+			  &so_list_ptr -> so_name,
+			  INT_MAX, &errcode);
+      if (errcode != 0)
+	memory_error (errcode, extract_address (&buf[236], 4));
+
+      LM_ADDR (so_list_ptr) = extract_address (&buf[196], 4);
+      LM_OFFSET (so_list_ptr) =
+	extract_address (&buf[196], 4) - extract_address (&buf[248], 4);
+#else
       struct obj obj_old;
 
       read_memory ((CORE_ADDR) list_old.data, (char *) &obj_old,
@@ -687,8 +722,9 @@ xfer_link_map_member (so_list_ptr, lm)
 	memory_error (errcode, (CORE_ADDR) obj_old.o_path);
 
       LM_ADDR (so_list_ptr) = (CORE_ADDR) obj_old.o_praw;
-      LM_OFFSET (so_list_ptr)
-	= (CORE_ADDR) obj_old.o_praw - obj_old.o_base_address;
+      LM_OFFSET (so_list_ptr) =
+	(CORE_ADDR) obj_old.o_praw - obj_old.o_base_address;
+#endif
     }
 
   solib_map_sections (so_list_ptr);

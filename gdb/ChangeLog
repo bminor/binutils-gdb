@@ -1,3 +1,10 @@
+Sun Dec  8 00:36:31 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* irix5-nat.c (supply_gregset, fill_gregset):  Handle gregsets
+	from O32 and N32 ABI.
+	(xfer_link_map_member):  Work around problem with alignments
+	in struct obj when compiling GDB under N32 ABI.
+
 start-sanitize-d10v
 Thu Dec  5 23:30:44 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
