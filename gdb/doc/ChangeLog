@@ -1,3 +1,7 @@
+2001-04-01  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* stabs.texinfo: Change Permissions to GFDL.  Update Copyright.
+
 2001-03-26  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdb.texinfo: Change Permissions to GFDL.  Update Copyright.
