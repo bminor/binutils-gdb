@@ -1,4 +1,45 @@
+Mon May 17 15:06:26 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* config/tc-m68k.c (md_apply_fix_2): Apply range checks and warn
+	if value is out of range.
+
+	Patch from Minh Tran-Le:
+	* config/tc-i386.c (i386_operand): For in/out port register used
+	as base reg, include InOutPortReg in operand type.
+	(MATCH): Accept overlap value of InOutPortReg.
+
+Mon May 17 09:29:34 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/obj-ecoff.c (add_file, obj_ecoff_loc, obj_ecoff_stab):
+	Add calls to listing routines to produce combined source/assembler
+	listings.
+	(obj_ecoff_stab): Create a file pointer if none used yet.
+	(ecoff_frob_file): Set symcount to correct value.
+
+Fri May 14 06:53:33 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* Makefile.in (VERSION): Bump to version 2.1, in preparation for
+	release.
+
+	* config/obj-aout.h (H_GET_HEADER_SIZE, H_SET_SYMBOL_TABLE_SIZE):
+	Define in terms of constants, not C structure sizes.
+
+	* config/tc-rs6000.c, config/tc-rs6000.h: Delete empty files.
+
+Thu May 13 17:01:55 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/obj-aout.c (obj_header_append): Don't define if it's
+	defined as a macro.
+	* config/obj-hp300.h (obj_header_append): Define it as a macro.
+	* config/obj-hp300.c (hp300_header_append): New function.
+
+	* Makefile.in (distclean): Don't bother cleaning up doc files;
+	they aren't going to be in this directory.
+
 Thu May 13 07:51:35 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/obj-ecoff.c (ecoff_build_symbols): Handle absolute
+	symbols.
 
 	* tc.h (TC_COFF_SIZEMACHDEP): Don't define here.
 	* config/tc-sh.h (TC_COFF_SIZEMACHDEP): Define here instead.
