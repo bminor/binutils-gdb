@@ -14306,8 +14306,6 @@ There is no convenient way to generate a list of all available hosts.
 There are many other options available as well, but they are generally
 needed for special purposes only.
 
-@node GNU Free Documentation License
-@appendix GNU Free Documentation License
 @include fdl.texi
 
 @node Index
