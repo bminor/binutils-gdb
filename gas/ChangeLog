@@ -1,5 +1,12 @@
 2005-03-08  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.c (emit_one_bundle): Track last slot user insn was
+	emitted to. Add more precise diagnostics for non-fitting insns based
+	on that. Eliminate now superfluous special casing of MLX. Clear out
+	slot information when dropping an insn.
+
+2005-03-08  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (parse_section_name): Rename to...
 	(cross_section): In addition to separating the name from the rest of
 	the arguments, also carry out the operation.

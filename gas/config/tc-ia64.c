@@ -6459,7 +6459,7 @@ emit_one_bundle ()
   bfd_vma insn[3] = { -1, -1, -1 };
   struct ia64_opcode *idesc;
   int end_of_insn_group = 0, user_template = -1;
-  int n, i, j, first, curr;
+  int n, i, j, first, curr, last_slot;
   unw_rec_list *ptr, *last_ptr, *end_ptr;
   bfd_vma t0 = 0, t1 = 0;
   struct label_fix *lfix;
@@ -6511,6 +6511,7 @@ emit_one_bundle ()
   curr = first;
   idesc = md.slot[curr].idesc;
   end_of_insn_group = 0;
+  last_slot = -1;
   for (i = 0; i < 3 && md.num_slots_in_use > 0; ++i)
     {
       /* If we have unwind records, we may need to update some now.  */
@@ -6776,27 +6777,7 @@ emit_one_bundle ()
 	}
 
       if (insn_unit != required_unit)
-	{
-	  if (required_unit == IA64_UNIT_L
-	      && insn_unit == IA64_UNIT_I
-	      && !(idesc->flags & IA64_OPCODE_X_IN_MLX))
-	    {
-	      /* we got ourselves an MLX template but the current
-		 instruction isn't an X-unit, or an I-unit instruction
-		 that can go into the X slot of an MLX template.  Duh.  */
-	      if (md.num_slots_in_use >= NUM_SLOTS)
-		{
-		  as_bad_where (md.slot[curr].src_file,
-				md.slot[curr].src_line,
-				"`%s' can't go in X slot of "
-				"MLX template", idesc->name);
-		  /* drop this insn so we don't livelock:  */
-		  --md.num_slots_in_use;
-		}
-	      break;
-	    }
-	  continue;		/* try next slot */
-	}
+	continue;		/* Try next slot.  */
 
       if (debug_type == DEBUG_DWARF2 || md.slot[curr].loc_directive_seen)
 	{
@@ -6830,6 +6811,7 @@ emit_one_bundle ()
 	  ++i;
 	}
       --md.num_slots_in_use;
+      last_slot = i;
 
       /* now is a good time to fix up the labels for this insn:  */
       for (lfix = md.slot[curr].label_fixups; lfix; lfix = lfix->next)
@@ -6874,10 +6856,35 @@ emit_one_bundle ()
     {
       if (md.num_slots_in_use > 0)
 	{
-	  as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
-			"`%s' does not fit into %s template",
-			idesc->name, ia64_templ_desc[template].name);
-	  --md.num_slots_in_use;
+	  if (last_slot >= 2)
+	    as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
+			  "`%s' does not fit into bundle", idesc->name);
+	  else if (last_slot < 0)
+	    {
+	      as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
+			    "`%s' does not fit into %s template",
+			    idesc->name, ia64_templ_desc[template].name);
+	      /* Drop first insn so we don't livelock.  */
+	      --md.num_slots_in_use;
+	      know (curr == first);
+	      ia64_free_opcode (md.slot[curr].idesc);
+	      memset (md.slot + curr, 0, sizeof (md.slot[curr]));
+	      md.slot[curr].user_template = -1;
+	    }
+	  else
+	    {
+	      const char *where;
+
+	      if (template == 2)
+		where = "X slot";
+	      else if (last_slot == 0)
+		where = "slots 2 or 3";
+	      else
+		where = "slot 3";
+	      as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
+			    "`%s' can't go in %s of %s template",
+			    idesc->name, where, ia64_templ_desc[template].name);
+	    }
 	}
       else
 	as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
