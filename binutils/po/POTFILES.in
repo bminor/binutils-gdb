@@ -2,6 +2,8 @@ addr2line.c
 ar.c
 arsup.c
 arsup.h
+binemul.c
+binemul.h
 bucomm.c
 bucomm.h
 budbg.h
@@ -14,6 +16,7 @@ debug.h
 dlltool.c
 dlltool.h
 dllwrap.c
+emul_vanilla.c
 filemode.c
 ieee.c
 ieee.c
