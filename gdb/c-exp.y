@@ -1,5 +1,5 @@
 /* YACC parser for C expressions, for GDB.
-   Copyright (C) 1986, 1989, 1990, 1991, 1993, 1994
+   Copyright (C) 1986, 1989, 1990, 1991, 1993, 1994, 1996
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -604,15 +604,14 @@ qualified_name:	typebase COLONCOLON name
 			    error ("`%s' is not defined as an aggregate type.",
 				   TYPE_NAME (type));
 
-			  if (!STREQ (type_name_no_tag (type), $4.ptr))
-			    error ("invalid destructor `%s::~%s'",
-				   type_name_no_tag (type), $4.ptr);
-
 			  tmp_token.ptr = (char*) alloca ($4.length + 2);
 			  tmp_token.length = $4.length + 1;
 			  tmp_token.ptr[0] = '~';
 			  memcpy (tmp_token.ptr+1, $4.ptr, $4.length);
 			  tmp_token.ptr[tmp_token.length] = 0;
+
+			  /* Check for valid destructor name.  */
+			  destructor_name_p (tmp_token.ptr, type);
 			  write_exp_elt_opcode (OP_SCOPE);
 			  write_exp_elt_type (type);
 			  write_exp_string (tmp_token);

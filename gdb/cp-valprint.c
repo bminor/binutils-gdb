@@ -87,6 +87,8 @@ cp_print_class_method (valaddr, type, stream)
 	      QUIT;
 	      if (TYPE_FN_FIELD_VOFFSET (f, j) == offset)
 		{
+		  if (TYPE_FN_FIELD_STUB (f, j))
+		    check_stub_method (domain, i, j);
 		  kind = "virtual ";
 		  goto common;
 		}
@@ -121,21 +123,19 @@ cp_print_class_method (valaddr, type, stream)
   common:
   if (i < len)
     {
+      char *demangled_name;
+
       fprintf_filtered (stream, "&");
-      c_type_print_varspec_prefix (TYPE_FN_FIELD_TYPE (f, j), stream, 0, 0);
-      fprintf_unfiltered (stream, kind);
-      if (TYPE_FN_FIELD_PHYSNAME (f, j)[0] == '_'
-	  && is_cplus_marker (TYPE_FN_FIELD_PHYSNAME (f, j)[1]))
-	{
-	  cp_type_print_method_args (TYPE_FN_FIELD_ARGS (f, j) + 1, "~",
-				     TYPE_FN_FIELDLIST_NAME (domain, i),
-				     0, stream);
-	}
+      fprintf_filtered (stream, kind);
+      demangled_name = cplus_demangle (TYPE_FN_FIELD_PHYSNAME (f, j),
+				       DMGL_ANSI | DMGL_PARAMS);
+      if (demangled_name == NULL)
+	fprintf_filtered (stream, "<badly mangled name %s>",
+			  TYPE_FN_FIELD_PHYSNAME (f, j));
       else
 	{
-	  cp_type_print_method_args (TYPE_FN_FIELD_ARGS (f, j), "",
-				     TYPE_FN_FIELDLIST_NAME (domain, i),
-				     0, stream);
+	  fputs_filtered (demangled_name, stream);
+	  free (demangled_name);
 	}
     }
   else

@@ -1,5 +1,5 @@
 /* Internal type definitions for GDB.
-   Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1993, 1994, 1996 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
 This file is part of GDB.
@@ -303,11 +303,14 @@ struct type
 
     } *fields;
 
-  /* For types with virtual functions, VPTR_BASETYPE is the base class which
-     defined the virtual function table pointer.  
+  /* For types with virtual functions (TYPE_CODE_STRUCT), VPTR_BASETYPE
+     is the base class which defined the virtual function table pointer.  
 
-     For types that are pointer to member types, VPTR_BASETYPE
-     is the type that this pointer is a member of.
+     For types that are pointer to member types (TYPE_CODE_MEMBER),
+     VPTR_BASETYPE is the type that this pointer is a member of.
+
+     For method types (TYPE_CODE_METHOD), VPTR_BASETYPE is the aggregate
+     type that contains the method.
 
      Unused otherwise.  */
 
@@ -327,7 +330,11 @@ struct type
   union type_specific
     {
 
-      /* ARG_TYPES is for TYPE_CODE_METHOD and TYPE_CODE_FUNC.  */
+      /* ARG_TYPES is for TYPE_CODE_METHOD.
+	 Contains the type of each argument, ending with a void type
+	 after the last argument for normal member functions or a NULL
+	 pointer after the last argument for functions with variable
+	 arguments.  */
 
       struct type **arg_types;
 
@@ -433,16 +440,9 @@ struct cplus_struct_type
 
 	  char *physname;
 
-	  /* The return value of the method */
+	  /* The type of the method.  */
 
 	  struct type *type;
-
-	  /* The argument list.  Only valid if is_stub is clear.  Contains
-	     the type of each argument, including `this', and ending with
-	     a NULL pointer after the last argument.  Should not contain
-	     a `this' pointer for static member functions.  */
-
-	  struct type **args;
 
 	  /* For virtual functions.
 	     First baseclass that defines this virtual function.   */
@@ -774,6 +774,8 @@ lookup_fundamental_type PARAMS ((struct objfile *, int));
 
 extern void
 fill_in_vptr_fieldno PARAMS ((struct type *));
+
+extern int get_destructor_fn_field PARAMS ((struct type *, int *, int *));
 
 extern int get_discrete_bounds PARAMS ((struct type*, LONGEST*, LONGEST*));
 

@@ -1,5 +1,5 @@
 /* Perform non-arithmetic operations on values, for GDB.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -1648,7 +1648,7 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
 		    error ("Internal error: could not find physical static variable named %s",
 			   phys_name);
 		v = value_at (TYPE_FIELD_TYPE (type, i),
-			      (CORE_ADDR)SYMBOL_BLOCK_VALUE (sym));
+			      SYMBOL_VALUE_ADDRESS (sym));
 	      }
 	    else
 	      v = value_primitive_field (arg1, offset, i, type);
@@ -1922,11 +1922,19 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
     {
       if (!args[1])
 	{
-	  /* destructors are a special case.  */
-	  v = value_fn_field (NULL, TYPE_FN_FIELDLIST1 (t, 0),
-			      TYPE_FN_FIELDLIST_LENGTH (t, 0), 0, 0);
-	  if (!v) error("could not find destructor function named %s.", name);
-	  else return v;
+	  /* Destructors are a special case.  */
+	  int m_index, f_index;
+
+	  v = NULL;
+	  if (get_destructor_fn_field (t, &m_index, &f_index))
+	    {
+	      v = value_fn_field (NULL, TYPE_FN_FIELDLIST1 (t, m_index),
+				  f_index, NULL, 0);
+	    }
+	  if (v == NULL)
+	    error ("could not find destructor function named %s.", name);
+	  else
+	    return v;
 	}
       else
 	{
@@ -2005,7 +2013,11 @@ check_field_in (type, name)
 
   /* Destructors are a special case.  */
   if (destructor_name_p (name, type))
-    return 1;
+    {
+      int m_index, f_index;
+
+      return get_destructor_fn_field (type, &m_index, &f_index);
+    }
 
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; --i)
     {
@@ -2092,7 +2104,7 @@ value_struct_elt_for_reference (domain, offset, curtype, name, intype)
 		error ("Internal error: could not find physical static variable named %s",
 		       phys_name);
 	      return value_at (SYMBOL_TYPE (sym),
-			       (CORE_ADDR)SYMBOL_BLOCK_VALUE (sym));
+			       SYMBOL_VALUE_ADDRESS (sym));
 	    }
 	  if (TYPE_FIELD_PACKED (t, i))
 	    error ("pointers to bitfield members not allowed");

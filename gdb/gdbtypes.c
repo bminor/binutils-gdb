@@ -1,5 +1,5 @@
 /* Support routines for manipulating internal types for GDB.
-   Copyright (C) 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
 This file is part of GDB.
@@ -877,6 +877,35 @@ fill_in_vptr_fieldno (type)
 	    }
 	}
     }
+}
+
+/* Find the method and field indices for the destructor in class type T.
+   Return 1 if the destructor was found, otherwise, return 0.  */
+
+int
+get_destructor_fn_field (t, method_indexp, field_indexp)
+     struct type *t;
+     int *method_indexp;
+     int *field_indexp;
+{
+  int i;
+
+  for (i = 0; i < TYPE_NFN_FIELDS (t); i++)
+    {
+      int j;
+      struct fn_field *f = TYPE_FN_FIELDLIST1 (t, i);
+
+      for (j = 0; j < TYPE_FN_FIELDLIST_LENGTH (t, i); j++)
+	{
+	  if (DESTRUCTOR_PREFIX_P (TYPE_FN_FIELD_PHYSNAME (f, j)))
+	    {
+	      *method_indexp = i;
+	      *field_indexp = j;
+	      return 1;
+	    }
+	}
+    }
+  return 0;
 }
 
 /* Added by Bryan Boreham, Kewill, Sun Sep 17 18:07:17 1989.

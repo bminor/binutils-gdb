@@ -1,3 +1,39 @@
+Sat Dec 14 00:43:57 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* c-exp.y (qualified_name):  Replace explicit check for valid
+	destructor name with call to destructor_name_p.
+
+	* c-lang.h, c-typeprint.c (cp_type_print_method_args):  Removed,
+	no longer needed.
+
+	* c-typeprint.c (c_type_print_varspec_prefix, c_type_print_base):
+	Replace remaining fprintf_unfiltered calls with their filtered variant.
+	(c_type_print_base):  Do not print return type for destructors from
+	template classes.
+	Replace cp_type_print_method_args with cplus_demangle call to get
+	consistent type output for stubbed and unstubbed methods.
+
+	* cp-valprint.c (cp_print_class_method):  Replace
+	cp_type_print_method_args with cplus_demangle call to get consistent
+	type output for stubbed and unstubbed methods.
+
+	* gdbtypes.c, gdbtypes.h (get_destructor_fn_field):  New function
+	to find the destructor field indices for a type.
+
+	* gdbtypes.h (struct type):  Clarify comments for vptr_basetype
+	and arg_types fields.
+	(struct fn_field):  Remove args field, no longer used.
+
+	* symtab.c (decode_line_1), valops.c (value_struct_elt,
+	check_field_in):  Use get_destructor_fn_field to find the destructor
+	field indices instead of assuming that the compiler passes the member
+	function fields in a specific order.
+
+	* symtab.c (find_methods):  Pass NULL instead of SYMBOL_BLOCK_VALUE
+	to lookup_symbol.
+	(list_symbol):  Replace cp_type_print_method_args with cplus_demangle
+	call in zapped out code and explain why this code is zapped out.
+
 Thu Dec 12 13:29:14 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/powerpc/ppc{,le}-sim.mt (SIM): Add the simulator common

@@ -1,5 +1,5 @@
 /* Symbol table lookup for the GNU debugger, GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -77,7 +77,7 @@ list_symbols PARAMS ((char *, int, int, int));
 static void
 output_source_filename PARAMS ((char *, int *));
 
-static char *
+char *
 operator_chars PARAMS ((char *, char **));
 
 static int find_line_common PARAMS ((struct linetable *, int, int *));
@@ -1551,7 +1551,7 @@ find_function_start_sal (sym, funfirstline)
    some legitimate operator text, return a pointer to the
    beginning of the substring of the operator text.
    Otherwise, return "".  */
-static char *
+char *
 operator_chars (p, end)
      char *p;
      char **end;
@@ -1717,19 +1717,12 @@ find_methods (t, name, sym_arr)
 		if (DESTRUCTOR_PREFIX_P (phys_name))
 		  continue;
 
-		/* FIXME: Why are we looking this up in the
-		   SYMBOL_BLOCK_VALUE (sym_class)?  It is intended as a hook
-		   for nested types?  If so, it should probably hook to the
-		   type, not the symbol.  mipsread.c is the only symbol
-		   reader which sets the SYMBOL_BLOCK_VALUE for types, and
-		   this is not documented in symtab.h.  -26Aug93.  */
-
 		sym_arr[i1] = lookup_symbol (phys_name,
-					     SYMBOL_BLOCK_VALUE (sym_class),
-					     VAR_NAMESPACE,
+					     NULL, VAR_NAMESPACE,
 					     (int *) NULL,
 					     (struct symtab **) NULL);
-		if (sym_arr[i1]) i1++;
+		if (sym_arr[i1])
+		  i1++;
 		else
 		  {
 		    fputs_filtered("(Cannot find method ", gdb_stdout);
@@ -2029,25 +2022,22 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	      sym_arr = (struct symbol **) alloca(total_number_of_methods (t)
 						  * sizeof(struct symbol *));
 
-	      /* Cfront objects don't have fieldlists.  */
-	      if (destructor_name_p (copy, t) && TYPE_FN_FIELDLISTS (t) != NULL)
+	      if (destructor_name_p (copy, t))
 		{
-		  /* destructors are a special case.  */
-		  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, 0);
-		  int len = TYPE_FN_FIELDLIST_LENGTH (t, 0) - 1;
-		  /* gcc 1.x puts destructor in last field,
-		     gcc 2.x puts destructor in first field.  */
-		  char *phys_name = TYPE_FN_FIELD_PHYSNAME (f, len);
-		  if (!DESTRUCTOR_PREFIX_P (phys_name))
+		  /* Destructors are a special case.  */
+		  int m_index, f_index;
+
+		  if (get_destructor_fn_field (t, &m_index, &f_index))
 		    {
-		      phys_name = TYPE_FN_FIELD_PHYSNAME (f, 0);
-		      if (!DESTRUCTOR_PREFIX_P (phys_name))
-			phys_name = "";
+		      struct fn_field *f = TYPE_FN_FIELDLIST1 (t, m_index);
+
+		      sym_arr[i1] =
+			lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, f_index),
+				       NULL, VAR_NAMESPACE, (int *) NULL,
+				       (struct symtab **)NULL);
+		      if (sym_arr[i1])
+			i1++;
 		    }
-		  sym_arr[i1] =
-		    lookup_symbol (phys_name, SYMBOL_BLOCK_VALUE (sym_class),
-				   VAR_NAMESPACE, 0, (struct symtab **)NULL);
-		  if (sym_arr[i1]) i1++;
 		}
 	      else
 		i1 = find_methods (t, copy, sym_arr);
@@ -2848,15 +2838,26 @@ list_symbols (regexp, class, bpt, from_tty)
 		      }
 		    else
 		      {
-# if 0  /* FIXME, why is this zapped out? */
-			char buf[1024];
+# if 0
+/* Tiemann says: "info methods was never implemented."  */
+			char *demangled_name;
 			c_type_print_base (TYPE_FN_FIELD_TYPE(t, i),
 					   gdb_stdout, 0, 0); 
 			c_type_print_varspec_prefix (TYPE_FN_FIELD_TYPE(t, i),
 						     gdb_stdout, 0); 
-			sprintf (buf, " %s::", type_name_no_tag (t));
-			cp_type_print_method_args (TYPE_FN_FIELD_ARGS (t, i),
-						   buf, name, gdb_stdout);
+			if (TYPE_FN_FIELD_STUB (t, i))
+			  check_stub_method (TYPE_DOMAIN_TYPE (type), j, i);
+			demangled_name =
+			  cplus_demangle (TYPE_FN_FIELD_PHYSNAME (t, i),
+					  DMGL_ANSI | DMGL_PARAMS);
+			if (demangled_name == NULL)
+			  fprintf_filtered (stream, "<badly mangled name %s>",
+					    TYPE_FN_FIELD_PHYSNAME (t, i));
+			else
+			  {
+			    fputs_filtered (demangled_name, stream);
+			    free (demangled_name);
+			  }
 # endif
 		      }
 		  }
