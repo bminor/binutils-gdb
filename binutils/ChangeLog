@@ -1,3 +1,33 @@
+Wed Jul 12 10:40:23 1995  H.J. Lu  <hjl@nynexst.com>
+
+	* objcopy.c (simple_copy): Preserve errno on failure.
+	(smart_rename): Print error mesage if simple_copy fails.
+
+Tue Jul 11 13:10:52 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* sysdump.c: re-indented file.  
+	(module): read blocks sequentially instead of trying to parse
+	them, as that would require changing the parser recognize the
+	difference between a DPSstart and DPSend block.
+	(getone): Add break's between switch blocks as appropriate.
+	(object_body_list): parse blocks according to sysroff spec.
+
+Mon Jul 10 12:37:25 1995  J.T. Conklin  <jtc@poseidon.cygnus.com>
+
+	* sysroff.info: re-indented file, prior formatting was confusing
+	because it was indentation did not reflect nesting of conditional
+	records.  Change "space size within segment" record in hd record
+	from bit to byte.
+
+	* sysinfo.y (cond_it_field): Use xcalloc instead of calloc.
+
+	* srconv.c (wr_cs): Reformatted cs header array, tag each byte
+	with a comment describing the field.
+	(wr_unit_info): Use SEEK_SET macro instead of constant 0.
+	(main): Use FOPEN_WB macro instead of literal "wb".
+	* sysroff.info: Remove fdl (dfl) field from cs block.  Compare
+	ptr->type with ED_TYPE_CONST instead of constant 2 in ed block.
+
 Tue Jul  4 14:48:42 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* nm.c (size_forward): Check yf against yn, not xn.
@@ -76,7 +106,7 @@ Mon Jun 19 09:06:49 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 	* dlltool.c: Change names of generated files. .*.s-> -*.s
 
 	* objdump.c (dump_section_stabs):  Check for names
-	which are supersets of selected names. binutils/7240.
+	which are supersets of selected names.
 
 Wed Jun 14 19:43:52 1995  Doug Evans  <dje@canuck.cygnus.com>
 
@@ -90,7 +120,7 @@ Wed Jun 14 13:27:22 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 Mon Jun 12 11:27:54 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* sysdump.c: Include sysdep.h
-	(main): Open input with FOPEN_RB.  binutils/7137
+	(main): Open input with FOPEN_RB.
 
 Fri Jun  9 17:26:11 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 

@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -1283,6 +1283,7 @@ simple_copy (from, to)
      char *from, *to;
 {
   int fromfd, tofd, nread;
+  int saved;
   char buf[COPY_BUF];
 
   fromfd = open (from, O_RDONLY);
@@ -1291,22 +1292,30 @@ simple_copy (from, to)
   tofd = open (to, O_WRONLY | O_CREAT | O_TRUNC);
   if (tofd < 0)
     {
+      saved = errno;
       close (fromfd);
+      errno = saved;
       return -1;
     }
   while ((nread = read (fromfd, buf, sizeof buf)) > 0)
     {
       if (write (tofd, buf, nread) != nread)
 	{
+	  saved = errno;
 	  close (fromfd);
 	  close (tofd);
+	  errno = saved;
 	  return -1;
 	}
     }
+  saved = errno;
   close (fromfd);
   close (tofd);
   if (nread < 0)
-    return -1;
+    {
+      errno = saved;
+      return -1;
+    }
   return 0;
 }
 
@@ -1348,7 +1357,7 @@ smart_rename (from, to)
 	{
 	  /* We have to clean up here. */
 	  int saved = errno;
-	  fprintf (stderr, "%s: `%s': ", program_name, to);
+	  fprintf (stderr, "%s: %s: ", program_name, to);
 	  errno = saved;
 	  perror ("rename");
 	  unlink (from);
@@ -1357,8 +1366,14 @@ smart_rename (from, to)
   else
     {
       ret = simple_copy (from, to);
-      if (ret == 0)
-	unlink (from);
+      if (ret != 0)
+	{
+	  int saved = errno;
+	  fprintf (stderr, "%s: %s: ", program_name, to);
+	  errno = saved;
+	  perror ("simple_copy");
+	}
+      unlink (from);
     }
   return ret;
 }
