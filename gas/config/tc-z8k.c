@@ -25,7 +25,7 @@
 
 #include <stdio.h>
 #define DEFINE_TABLE
-#include "disasm/z8kopcode.h"
+#include "../opcodes/z8k-opc.h"
 
 #include "as.h"
 #include "bfd.h"
@@ -475,10 +475,10 @@ DEFUN(get_operand,(ptr, mode, dst),
 
 static
 char *
-DEFUN(get_operands,(operand, op_end, operand),
-	opcode_entry_type *opcode AND
-	  char *op_end AND
-	  op_type *operand) 
+DEFUN(get_operands,(opcode, op_end, operand),
+      opcode_entry_type *opcode AND
+      char *op_end AND
+      op_type *operand) 
 {
   char *ptr = op_end;
   switch (opcode->noperands) 
@@ -585,13 +585,13 @@ DEFUN(check_operand,(operand, width, string),
 
 static void 
 DEFUN(newfix,(ptr, type, operand),
-      int byte AND
+      int ptr AND
       int type AND
       op_type *operand)
 {
 
   fix_new(frag_now,
-	  byte,
+	  ptr,
 	  1,
 	  operand->exp.X_add_symbol,
 	  operand->exp.X_subtract_symbol,
@@ -626,7 +626,7 @@ static void
        mode */
     length += 2;	
   }
-  output  = frag_more(this_try->length);
+  output  = frag_more(length);
 memset(buffer, 20, 0);  
   class_ptr = this_try->byte_info;
  top: ;
@@ -641,12 +641,12 @@ memset(buffer, 20, 0);
      case CLASS_ADDRESS:
       /* Direct address, we don't cope with the SS mode right now */
       if (segmented_mode) {
-	newfix(nibble/2, R_DA | R_SEG, da_address);
-	output_ptr += 4;
+	newfix((output_ptr-buffer)/2, R_DA | R_SEG, da_address);
+	output_ptr += 8;
       }
       else {
-	newfix(nibble/2, R_DA, da_address);
-	output_ptr += 2;
+	newfix((output_ptr-buffer)/2, R_DA, da_address);
+	output_ptr += 4;
       }
       da_address = 0;
       break;
@@ -676,17 +676,17 @@ memset(buffer, 20, 0);
        switch (c & ARG_MASK)
        {
 	case ARG_IMM4:
-	 newfix(nibble/2, R_IMM4L, imm_operand);
+	 newfix((output_ptr-buffer)/2, R_IMM4L, imm_operand);
 	 *output_ptr++ = 0;
 	 break;
 
 	case   ARG_IMM8:  
-	 newfix(nibble/2, R_IMM8, imm_operand);
+	 newfix((output_ptr-buffer)/2, R_IMM8, imm_operand);
 	 *output_ptr++ = 0;
 	 *output_ptr++ = 0;
 
 	case   ARG_IMM16:  
-	 newfix(nibble/2, R_IMM16, imm_operand);
+	 newfix((output_ptr-buffer)/2, R_IMM16, imm_operand);
 	 *output_ptr++ = 0;
 	 *output_ptr++ = 0;
 	 *output_ptr++ = 0;
@@ -694,7 +694,7 @@ memset(buffer, 20, 0);
 	 break;
 
 	case   ARG_IMM32:  
-	 newfix(nibble/2, R_IMM32, imm_operand);
+	 newfix((output_ptr-buffer)/2, R_IMM32, imm_operand);
 	 *output_ptr++ = 0;
 	 *output_ptr++ = 0;
 	 *output_ptr++ = 0;
@@ -705,7 +705,6 @@ memset(buffer, 20, 0);
 	 *output_ptr++ = 0;
 	 *output_ptr++ = 0;
 
-	 output_ptr +=8;
 	 break;
 
 	default:
@@ -799,7 +798,7 @@ void
     where[0] = 0x0;
     where[1] = 0x0;
 
-    as_bad("error");
+    as_bad("Can't find opcode to match operands");
     return;
   }
 	
@@ -950,19 +949,31 @@ long val;
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
 	
-  switch(fixP->fx_size) {
-   case 1:
-    *buf++=val;
+  switch(fixP->fx_r_type) {
+   case R_IMM4L:
+    buf[0] = (buf[0] & 0xf0) | ((buf[0] + val) & 0xf);
     break;
-   case 2:
+
+   case R_IMM8:
+    buf[0] += val;
+    break;
+
+   case R_DA:
+   case R_IMM16:
     *buf++=(val>>8);
     *buf++=val;
     break;
-   case 4:
+   case R_IMM32:
     *buf++=(val>>24);
     *buf++=(val>>16);
     *buf++=(val>>8);
     *buf++=val;
+    break;
+   case R_DA | R_SEG:
+    *buf++ = (val>>16);
+    *buf++ = 0x00;
+    *buf++ = (val>>8);
+    *buf++ = val;
     break;
    default:
     abort();
