@@ -1067,8 +1067,8 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	29k-share/udi/udi2go32.c \
 	a29k-tdep.c a68v-nat.c alpha-nat.c alpha-tdep.c \
 	altos-xdep.c arm-convert.s \
-	arm-linux-nat.c arm-tdep.c arm-xdep.c coff-solib.c \
-	convex-tdep.c convex-xdep.c \
+	arm-linux-nat.c arm-linux-tdep.c arm-tdep.c arm-xdep.c \
+	coff-solib.c convex-tdep.c convex-xdep.c \
 	core-sol2.c core-regset.c core-aout.c corelow.c \
 	dcache.c delta68-nat.c dpx2-nat.c dstread.c exec.c fork-child.c \
 	go32-nat.c gould-tdep.c gould-xdep.c h8300-tdep.c h8500-tdep.c \
@@ -1133,6 +1133,9 @@ annotate.o: annotate.c $(defs_h) annotate.h $(value_h) target.h $(gdbtypes_h)
 
 arm-linux-nat.o: arm-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	gdb_string.h
+
+arm-linux-tdep.o: arm-linux-tdep.c $(defs_h) target.h $(value_h) \
+		  $(gdbtypes_h) $(floatformat_h)
 
 arm-tdep.o: arm-tdep.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h) \
 	$(gdbcore_h)

@@ -34,6 +34,8 @@ gdb-0222/gdb/remote-vxsparc.c gdb-0222/gdb/rmt-vxsparc.c
 gdb-0222/gdb/sparclet-rom.c gdb-0222/gdb/splet-rom.c
 gdb-0222/gdb/sparclet-stub.c gdb-0222/gdb/splet-stub.c
 gdb-0222/gdb/i386-linux-tdep.c gdb-0222/gdb/i386linux-tdep.c
+gdb-0222/gdb/arm-linux-tdep.c gdb-0222/gdb/armlin-tdep.c
+gdb-0222/gdb/arm-linux-nat.c gdb-0222/gdb/armlin-nat.c
 gdb-0222/gdb/config/alpha/alpha-osf1.mh gdb-0222/gdb/config/alpha/alphosf1.mh
 gdb-0222/gdb/config/alpha/alpha-osf2.mh gdb-0222/gdb/config/alpha/alphosf2.mh
 gdb-0222/gdb/config/alpha/alpha-osf3.mh gdb-0222/gdb/config/alpha/alphosf3.mh

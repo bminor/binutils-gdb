@@ -1,3 +1,8 @@
+2000-04-05  Scott Bambrough <scottb@netwinder.org>
+
+	* Makefile.in: Add dependency information for arm-linux-tdep.c.
+	* config/djgpp/fnchange.lst: Add arm-linux-tdep.c, arm-linux-nat.c.
+
 2000-04-07  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* sol-thread.c (gdb_ps_addr_t):  New typedef, depends on definition
