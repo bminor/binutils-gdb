@@ -27,7 +27,7 @@ Permission is granted to copy and distribute translations of this manual
 into another language, under the above conditions for modified versions.
 @end ignore
 
-@node Using History Interactively
+@node Using History, Installing GDB, Command Line Editing, Top
 @appendix Using History Interactively
 
 This chapter describes how to use the GNU History Library interactively,

@@ -39,7 +39,7 @@ This text describes GNU's command line editing interface.
 * Readline Init File::		Customizing Readline from a user's view.
 @end menu
 
-@node Introduction and Notation
+@node Introduction and Notation, Readline Interaction, Command Line Editing, Command Line Editing
 @section Introduction to Line Editing
 
 The following paragraphs describe the notation we use to represent
@@ -62,7 +62,7 @@ In addition, several keys have their own names.  Specifically,
 stand for themselves when seen in this text, or in an init file
 (@pxref{Readline Init File}, for more info).
 
-@node Readline Interaction
+@node Readline Interaction, Readline Init File, Introduction and Notation, Command Line Editing
 @section Readline Interaction
 @cindex interaction, readline
 
@@ -84,7 +84,7 @@ regardless of the location of the cursor within the line.
 * Readline Arguments::		Giving numeric arguments to commands.
 @end menu
 
-@node Readline Bare Essentials
+@node Readline Bare Essentials, Readline Movement Commands, Readline Interaction, Readline Interaction
 @subsection Readline Bare Essentials
 
 In order to enter characters into the line, simply type them.  The typed
@@ -121,7 +121,7 @@ Undo the last thing that you did.  You can undo all the way back to an
 empty line.
 @end table
 
-@node Readline Movement Commands
+@node Readline Movement Commands, Readline Killing Commands, Readline Bare Essentials, Readline Interaction
 @subsection Readline Movement Commands
 
 The above table describes the most basic possible keystrokes that you need
@@ -147,7 +147,7 @@ Notice how @key{C-f} moves forward a character, while @key{M-f} moves
 forward a word.  It is a loose convention that control keystrokes
 operate on characters while meta keystrokes operate on words.
 
-@node Readline Killing Commands
+@node Readline Killing Commands, Readline Arguments, Readline Movement Commands, Readline Interaction
 @subsection Readline Killing Commands
 
 @dfn{Killing} text means to delete the text from the line, but to save
@@ -194,7 +194,7 @@ ring is not line specific; the text that you killed on a previously
 typed line is available to be yanked back later, when you are typing
 another line.
 
-@node Readline Arguments
+@node Readline Arguments,, Readline Killing Commands, Readline Interaction
 @subsection Readline Arguments
 
 You can pass numeric arguments to Readline commands.  Sometimes the
@@ -212,7 +212,7 @@ the remainder of the digits, and then the command.  For example, to give
 the @key{C-d} command an argument of 10, you could type @key{M-1 0 C-d}.
 
 
-@node Readline Init File
+@node Readline Init File,, Readline Interaction, Command Line Editing
 @section Readline Init File
 
 Although the Readline library comes with a set of @sc{gnu} Emacs-like
@@ -232,7 +232,7 @@ incorporating any changes that you might have made to it.
 * Readline vi Mode::		Switching to @code{vi} mode in Readline.
 @end menu
 
-@node Readline Init Syntax
+@node Readline Init Syntax, Readline vi Mode, Readline Init File, Readline Init File
 @subsection Readline Init Syntax
 
 There are only four constructs allowed in the @file{~/.inputrc}
@@ -339,7 +339,7 @@ In the above example, @key{C-u} is bound to the function
 @end menu
 
 @need 2000
-@node Commands For Moving
+@node Commands For Moving, Commands For History, Readline Init Syntax, Readline Init Syntax
 @subsubsection Commands For Moving
 
 @ftable @code
@@ -367,7 +367,7 @@ Clear the screen leaving the current line at the top of the screen.
 @end ftable
 
 @need 2000
-@node Commands For History
+@node Commands For History, Commands For Text, Commands For Moving, Readline Init Syntax
 @subsubsection Commands For Manipulating The History
 
 @ftable @code
@@ -399,7 +399,7 @@ the the history as necessary.
 @end ftable
 
 @need 2000
-@node Commands For Text
+@node Commands For Text, Commands For Killing, Commands For History, Readline Init Syntax
 @subsubsection Commands For Changing Text
 
 @ftable @code
@@ -446,7 +446,7 @@ negative argument, do the previous word, but do not move point.
 @end ftable
 
 @need 2000
-@node Commands For Killing
+@node Commands For Killing, Numeric Arguments, Commands For Text, Readline Init Syntax
 @subsubsection Killing And Yanking
 
 @ftable @code
@@ -481,7 +481,7 @@ the prior command is yank or yank-pop.
 @end ftable
 
 @need 2000
-@node Numeric Arguments
+@node Numeric Arguments, Commands For Completion, Commands For Killing, Readline Init Syntax
 @subsubsection Specifying Numeric Arguments
 
 @ftable @code
@@ -496,7 +496,7 @@ Do what @key{C-u} does in @sc{gnu} Emacs.  By default, this is not bound.
 
 
 @need 2000
-@node Commands For Completion
+@node Commands For Completion, Miscellaneous Commands, Numeric Arguments, Readline Init Syntax
 @subsubsection Letting Readline Type For You
 
 @ftable @code
@@ -513,7 +513,7 @@ List the possible completions of the text before point.
 @end ftable
 
 @need 2000
-@node Miscellaneous Commands
+@node Miscellaneous Commands,, Commands For Completion, Readline Init Syntax
 @subsubsection Some Miscellaneous Commands
 
 @ftable @code
@@ -547,7 +547,7 @@ command enough times to get back to the beginning.
 @end ftable
 
 @need 2000
-@node Readline vi Mode
+@node Readline vi Mode,, Readline Init Syntax, Readline Init File
 @subsection Readline @code{vi} Mode
 
 @cindex @code{vi} style command editing

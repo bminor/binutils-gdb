@@ -1,3 +1,50 @@
+Fri Dec  4 15:25:41 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	The following changes were made by Jim Blandy
+ 	<jimb@zwingli.cygnus.com> and David Taylor
+ 	<taylor@texas.cygnus.com> as part of a project to merge in changes
+ 	made by HP; HP did not create ChangeLog entries.
+
+	* config/mp-enable-tui: New file.
+	(TUI_CFLAGS): Search devo's include directory, as long as we're
+ 	totally ruining modularity.
+	(INCLUDE_SRCDIR): New var.
+	(GDB_TUI_SRCDIR): Fix syntax error.
+
+	* configure.in: Check the --enable-tui flag; if it's set, include
+ 	a makefile fragment that #defines TUI and adds the needed #include
+ 	directories.
+	(*-*-hpux*): New host; use sysdep-hpux.h.
+
+	* Makefile.in (.c.o): Check the variable set in the makefile
+	fragment above.
+
+	* display.c (term_goto): declare it.
+	(insert_some_chars): set it.
+	(delete_chars): set it.
+
+	* readline.c: add tui include files surrounded by TUI.
+	(rl_reset): new function, move some of rl_abort functionality to
+ 	here.
+	(rl_abort): call rl_reset.
+	(rl_getc): tui changes.
+	(init_terminal_io): tui changes.
+
+	* readline.h (tui_version, fputc_unfiltered, fputs_unfiltered,
+	tui_tputs): declare if TUI is defined.
+
+	* rltty.c (prepare_terminal_settings): additional comment.
+
+	* signals.c: add tui include files surrounded by TUI.  move #if
+ 	and #endif to column 1 so HP's compiler will accept them.  Remove
+ 	declaration of tuiDoAndReturnToTop since it's declared in tui.h.
+	(rl_handle_sigwinch): call tuiDoAndReturnToTop if TUI defined.
+  	(rl_handle_sigwinch_on_clear): define if TUI defined.
+	(rl_set_signals): if TUI, avoid infinite recursion.
+	(rl_clear_signals): install rl_handle_sigwinch_on_clear.
+
+	* sysdep-hpux.h: New file.
+
 Mon Nov  2 15:26:33 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * configure.in: Check cygwin* instead of cygwin32*.
