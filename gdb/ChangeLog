@@ -1,3 +1,8 @@
+2002-03-21  Tom Rix  <trix@redhat.com>
+
+	* rs6000-nat.c (rs6000_ptrace32): Renamed from ptrace32.
+	(rs6000_ptrace64): Renamed from ptrace64.
+
 2002-03-20  Martin M. Hunt  <hunt@redhat.com>
 
 	* gdbserver/remote-utils.c (remote_open): Don't call
