@@ -1,4 +1,15 @@
 start-sanitize-v850
+Fri Jan  3 11:42:53 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-v850.c (all functions and static variables): Go through
+	and regularize names to be of the form v850_elf_<xxx>.
+	(toplevel): Include <elf/v850.h>.
+	(enum reloc_type): Move to include/elf/v850.h.
+	(v850_elf_check_relocs): For common variables, if the variable is
+	referenced by a R_V850_{SDA,ZDA,TDA} relocation, put the variable
+	into the appropriate section.
+	(elf_backend_check_relocs): Define.
+
 Tue Dec 31 15:15:28 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-v850.c (elf_v850_howto_table): Fix some spacing.
