@@ -1,10 +1,74 @@
+Wed Dec 30 16:07:14 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	* dis-asm.h: change void * to PTR (two places).
+
+Wed Dec  9 10:33:29 1998  David Taylor  <taylor@texas.cygnus.com>
+
+	The following changes were made by Elena Zannoni
+ 	<ezannoni@kwikemart.cygnus.com> and Edith Epstein
+ 	<eepstein@sophia.cygnus.com> as part of a project to merge in
+ 	changes made by HP; HP did not create ChangeLog entries.
+
+	* dis-asm.h (struct disassemble_info): change the type of stream
+	from FILE* to void*, for use with gdb's new type GDB_FILE.
+	(fprintf_ftype): change FILE* parameter type to void*.
+
+	* demangle.h: 
+	(DMGL_EDG): new macro for Kuck and Associates
+	(DMGL_STYLE_MASK): modify to include Kuck and Assoc style
+	(demangling_styles): add new edg_demangling style
+	(EDG_DEMANGLING_STYLE_STRING): new macro
+	(EDG_DEMANGLING): new macro
+	(DMGL_HP): new macro, for HP/aCC compiler.
+	(DMGL_STYLE_MASK): modify to include new HP's style.
+	(demangling_styles): add new hp_demangling value.
+	(HP_DEMANGLING_STYLE_STRING): new macro.
+	(ARM_DEMANGLING): coerce to int.
+	(HP_DEMANGLING): new macro.
+
+	* hp-symtab.h: rewritten, from HP.
+	(quick_procedure): change type of language field to unsigned int
+	(quick_module): change type of language field to unsigned int
+	(struct dntt_type_svar): add field thread_specific.
+	(hp_language): add languages modcal and dmpascal.
+
+Mon Nov 30 15:25:58 1998  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* elf/sh.h (elf_sh_reloc_type): Add R_SH_FIRST_INVALID_RELOC,
+	R_SH_LAST_INVALID_RELOC, R_SH_SWITCH8 and R_SH_max.
+
+Fri Nov 20 13:14:00 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* libiberty.h (basename): Add prototype for FreeBSD.
+
+Sun Nov  8 17:42:25 1998  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* ansidecl.h: Wrap problematic macros with !IN_GCC.
+
+	* demangle.h: Never define PARAMS().
+	* splay-tree.h: Likewise.
+
 Sat Nov  7 18:30:20 1998  Peter Schauer  <peter.schauer@regent.e-technik.tu-muenchen.de>
 
 	* dis-asm.h (print_insn_vax): Declare.
 
+Sat Nov  7 16:04:03 1998  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* demangle.h: Don't include gansidecl.h.
+	* splay-tree.h: Likewise.
+
 1998-10-26 16:03  Ulrich Drepper  <drepper@cygnus.com>
 
 	* bfdlink.h (struct bfd_link_info): Add new field optimize.
+
+Thu Oct 22 19:58:00 1998  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* splay-tree.h: Wrap function pointer parameter declarations in
+	PARAMS() macro.
+
+1998-10-21  Mark Mitchell  <mark@markmitchell.com>
+
+	* splay-tree.h: New file.
 
 Fri Oct  9 00:02:03 1998  Jeffrey A Law  (law@cygnus.com)
 

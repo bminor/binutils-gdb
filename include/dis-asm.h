@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include "bfd.h"
 
-typedef int (*fprintf_ftype) PARAMS((FILE*, const char*, ...));
+typedef int (*fprintf_ftype) PARAMS((PTR, const char*, ...));
 
 enum dis_insn_type {
   dis_noninsn,			/* Not a valid instruction */
@@ -37,7 +37,7 @@ enum dis_insn_type {
 
 typedef struct disassemble_info {
   fprintf_ftype fprintf_func;
-  FILE *stream;
+  PTR stream;
   PTR application_data;
 
   /* Target description.  We could replace this with a pointer to the bfd,
