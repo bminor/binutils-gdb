@@ -1,5 +1,9 @@
 Tue Jul 27 12:07:38 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* stack.c (print_frame_info): Revise comment about `pathological'
+	case (there was a wrong FIXME about text labels; also asm() can
+	trigger this as well as versions of ar which truncate .o names).
+
 	* buildsym.c (start_subfile): If a .c file includes a .C file, set
 	the language of both of them to C++.
 
