@@ -1,6 +1,6 @@
 /* i386.c -- Assemble code for the Intel 80386
    Copyright (C) 1989, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
-   Free Software Foundation.
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -19,12 +19,10 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*
-  Intel 80386 machine specific gas.
-  Written by Eliot Dresselhaus (eliot@mgm.mit.edu).
-  Bugs & suggestions are completely welcome.  This is free software.
-  Please help us make it better.
-  */
+/* Intel 80386 machine specific gas.
+   Written by Eliot Dresselhaus (eliot@mgm.mit.edu).
+   Bugs & suggestions are completely welcome.  This is free software.
+   Please help us make it better.  */
 
 #include <ctype.h>
 
@@ -60,7 +58,7 @@ static int smallest_imm_type PARAMS ((offsetT));
 static offsetT offset_in_range PARAMS ((offsetT, int));
 static int add_prefix PARAMS ((unsigned int));
 static void set_16bit_code_flag PARAMS ((int));
-static void set_16bit_gcc_code_flag PARAMS((int));
+static void set_16bit_gcc_code_flag PARAMS ((int));
 static void set_intel_syntax PARAMS ((int));
 static void set_cpu_arch PARAMS ((int));
 
@@ -70,7 +68,7 @@ static bfd_reloc_code_real_type reloc
 #endif
 
 /* 'md_assemble ()' gathers together information and puts it into a
-   i386_insn. */
+   i386_insn.  */
 
 union i386_op
   {
@@ -81,19 +79,19 @@ union i386_op
 
 struct _i386_insn
   {
-    /* TM holds the template for the insn were currently assembling. */
+    /* TM holds the template for the insn were currently assembling.  */
     template tm;
 
     /* SUFFIX holds the instruction mnemonic suffix if given.
        (e.g. 'l' for 'movl')  */
     char suffix;
 
-    /* OPERANDS gives the number of given operands. */
+    /* OPERANDS gives the number of given operands.  */
     unsigned int operands;
 
     /* REG_OPERANDS, DISP_OPERANDS, MEM_OPERANDS, IMM_OPERANDS give the number
        of given register, displacement, memory operands and immediate
-       operands. */
+       operands.  */
     unsigned int reg_operands, disp_operands, mem_operands, imm_operands;
 
     /* TYPES [i] is the type (see above #defines) which tells us how to
@@ -118,7 +116,7 @@ struct _i386_insn
     unsigned int log2_scale_factor;
 
     /* SEG gives the seg_entries of this insn.  They are zero unless
-       explicit segment overrides are given. */
+       explicit segment overrides are given.  */
     const seg_entry *seg[2];	/* segments for memory operands (if given) */
 
     /* PREFIX holds all the given prefix opcodes (usually null).
@@ -160,7 +158,7 @@ const char comment_chars[] = "#";
    .line and .file directives will appear in the pre-processed output */
 /* Note that input_file.c hand checks for '#' at the beginning of the
    first line of the input file.  This is because the compiler outputs
-   #NO_APP at the beginning of its output. */
+   #NO_APP at the beginning of its output.  */
 /* Also note that comments started like this one will always work if
    '/' isn't otherwise defined.  */
 #if defined (TE_I386AIX) || ((defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) && ! defined (TE_LINUX) && !defined(TE_FreeBSD))
@@ -200,7 +198,7 @@ static char operand_special_chars[] = "%$-+(,)*._~/<>|&^!:[@]";
 /* md_assemble() always leaves the strings it's passed unaltered.  To
    effect this we maintain a stack of saved characters that we've smashed
    with '\0's (indicating end of strings for various sub-fields of the
-   assembler instruction). */
+   assembler instruction).  */
 static char save_stack[32];
 static char *save_stack_p;	/* stack pointer */
 #define END_STRING_AND_SAVE(s) \
@@ -208,34 +206,42 @@ static char *save_stack_p;	/* stack pointer */
 #define RESTORE_END_STRING(s) \
 	do { *(s) = *--save_stack_p; } while (0)
 
-/* The instruction we're assembling. */
+/* The instruction we're assembling.  */
 static i386_insn i;
 
 /* Possible templates for current insn.  */
 static const templates *current_templates;
 
-/* Per instruction expressionS buffers: 2 displacements & 2 immediate max. */
+/* Per instruction expressionS buffers: 2 displacements & 2 immediate max.  */
 static expressionS disp_expressions[2], im_expressions[2];
 
-static int this_operand;	  /* Current operand we are working on.  */
+/* Current operand we are working on.  */
+static int this_operand;
 
-static int flag_16bit_code;	  /* 1 if we're writing 16-bit code,
-				     0 if 32-bit.  */
+/* 1 if we're writing 16-bit code,
+   0 if 32-bit.  */
+static int flag_16bit_code;
 
-static int intel_syntax = 0;	  /* 1 for intel syntax, 0 if att syntax.  */
+/* 1 for intel syntax,
+   0 if att syntax.  */
+static int intel_syntax = 0;
 
-static int allow_naked_reg = 0;   /* 1 if register prefix % not required  */
+/* 1 if register prefix % not required.  */
+static int allow_naked_reg = 0;
 
-static char stackop_size = '\0';  /* Used in 16 bit gcc mode to add an l
-				     suffix to call, ret, enter, leave, push,
-				     and pop instructions so that gcc has the
-				     same stack frame as in 32 bit mode.  */
+/* Used in 16 bit gcc mode to add an l suffix to call, ret, enter,
+   leave, push, and pop instructions so that gcc has the same stack
+   frame as in 32 bit mode.  */
+static char stackop_size = '\0';
 
-static int quiet_warnings = 0;	  /* Non-zero to quieten some warnings. */
+/* Non-zero to quieten some warnings.  */
+static int quiet_warnings = 0;
 
-static const char *cpu_arch_name = NULL; /* cpu name  */
+/* CPU name.  */
+static const char *cpu_arch_name = NULL;
 
-static unsigned int cpu_arch_flags = 0;  /* cpu feature flags  */
+/* CPU feature flags.  */
+static unsigned int cpu_arch_flags = 0;
 
 /* Interface to relax_segment.
    There are 2 relax states for 386 jump insns: one for conditional &
@@ -243,10 +249,10 @@ static unsigned int cpu_arch_flags = 0;  /* cpu feature flags  */
    jumps add different sizes to frags when we're figuring out what
    sort of jump to choose to reach a given label.  */
 
-/* types */
-#define COND_JUMP 1		/* conditional jump */
-#define UNCOND_JUMP 2		/* unconditional jump */
-/* sizes */
+/* Types.  */
+#define COND_JUMP 1		/* Conditional jump.  */
+#define UNCOND_JUMP 2		/* Unconditional jump.  */
+/* Sizes.  */
 #define CODE16	1
 #define SMALL	0
 #define SMALL16 (SMALL|CODE16)
@@ -322,14 +328,13 @@ static const arch_entry cpu_arch[] = {
   {NULL, 0 }
 };
 
-
 void
 i386_align_code (fragP, count)
      fragS *fragP;
      int count;
 {
   /* Various efficient no-op patterns for aligning code labels.  */
-  /* Note: Don't try to assemble the instructions in the comments. */
+  /* Note: Don't try to assemble the instructions in the comments.  */
   /*       0L and 0w are not legal */
   static const char f32_1[] =
     {0x90};					/* nop			*/
@@ -399,14 +404,15 @@ i386_align_code (fragP, count)
     {
       if (flag_16bit_code)
 	{
-	  memcpy(fragP->fr_literal + fragP->fr_fix,
-		 f16_patt[count - 1], count);
-	  if (count > 8) /* adjust jump offset */
+	  memcpy (fragP->fr_literal + fragP->fr_fix,
+		  f16_patt[count - 1], count);
+	  if (count > 8)
+	    /* Adjust jump offset.  */
 	    fragP->fr_literal[fragP->fr_fix + 1] = count - 2;
 	}
       else
-	memcpy(fragP->fr_literal + fragP->fr_fix,
-	       f32_patt[count - 1], count);
+	memcpy (fragP->fr_literal + fragP->fr_fix,
+		f32_patt[count - 1], count);
       fragP->fr_var = count;
     }
 }
@@ -427,7 +433,7 @@ static INLINE unsigned int
 mode_from_disp_size (t)
      unsigned int t;
 {
-  return (t & Disp8) ? 1 : (t & (Disp16|Disp32)) ? 2 : 0;
+  return (t & Disp8) ? 1 : (t & (Disp16 | Disp32)) ? 2 : 0;
 }
 
 static INLINE int
@@ -435,35 +441,35 @@ fits_in_signed_byte (num)
      offsetT num;
 {
   return (num >= -128) && (num <= 127);
-}				/* fits_in_signed_byte() */
+}
 
 static INLINE int
 fits_in_unsigned_byte (num)
      offsetT num;
 {
   return (num & 0xff) == num;
-}				/* fits_in_unsigned_byte() */
+}
 
 static INLINE int
 fits_in_unsigned_word (num)
      offsetT num;
 {
   return (num & 0xffff) == num;
-}				/* fits_in_unsigned_word() */
+}
 
 static INLINE int
 fits_in_signed_word (num)
      offsetT num;
 {
   return (-32768 <= num) && (num <= 32767);
-}				/* fits_in_signed_word() */
+}
 
 static int
 smallest_imm_type (num)
      offsetT num;
 {
   if (cpu_arch_flags != 0
-      && cpu_arch_flags != (Cpu086|Cpu186|Cpu286|Cpu386|Cpu486))
+      && cpu_arch_flags != (Cpu086 | Cpu186 | Cpu286 | Cpu386 | Cpu486))
     {
       /* This code is disabled on the 486 because all the Imm1 forms
 	 in the opcode table are slower on the i486.  They're the
@@ -480,7 +486,7 @@ smallest_imm_type (num)
 	  : (fits_in_signed_word (num) || fits_in_unsigned_word (num))
 	  ? (Imm16 | Imm32)
 	  : (Imm32));
-}				/* smallest_imm_type() */
+}
 
 static offsetT
 offset_in_range (val, size)
@@ -494,14 +500,14 @@ offset_in_range (val, size)
     case 1: mask = ((addressT) 1 <<  8) - 1; break;
     case 2: mask = ((addressT) 1 << 16) - 1; break;
     case 4: mask = ((addressT) 2 << 31) - 1; break;
-    default: abort();
+    default: abort ();
     }
 
   /* If BFD64, sign extend val.  */
-  if ((val & ~ (((addressT) 2 << 31) - 1)) == 0)
+  if ((val & ~(((addressT) 2 << 31) - 1)) == 0)
     val = (val ^ ((addressT) 1 << 31)) - ((addressT) 1 << 31);
 
-  if ((val & ~ mask) != 0 && (val & ~ mask) != ~ mask)
+  if ((val & ~mask) != 0 && (val & ~mask) != ~mask)
     {
       char buf1[40], buf2[40];
 
@@ -597,9 +603,9 @@ set_intel_syntax (syntax_flag)
       char *string = input_line_pointer;
       int e = get_symbol_end ();
 
-      if (strcmp(string, "prefix") == 0)
+      if (strcmp (string, "prefix") == 0)
 	ask_naked_reg = 1;
-      else if (strcmp(string, "noprefix") == 0)
+      else if (strcmp (string, "noprefix") == 0)
 	ask_naked_reg = -1;
       else
 	as_bad (_("bad argument to syntax directive."));
@@ -615,7 +621,8 @@ set_intel_syntax (syntax_flag)
       allow_naked_reg = (intel_syntax
 			 && (bfd_get_symbol_leading_char (stdoutput) != '\0'));
 #else
-      allow_naked_reg = 0; /* conservative default */
+      /* Conservative default.  */
+      allow_naked_reg = 0;
 #endif
     }
   else
@@ -624,9 +631,9 @@ set_intel_syntax (syntax_flag)
 
 static void
 set_cpu_arch (dummy)
-    int dummy ATTRIBUTE_UNUSED;
+     int dummy ATTRIBUTE_UNUSED;
 {
-  SKIP_WHITESPACE();
+  SKIP_WHITESPACE ();
 
   if (! is_end_of_line[(unsigned char) *input_line_pointer])
     {
@@ -679,28 +686,29 @@ const pseudo_typeS md_pseudo_table[] =
   {0, 0, 0}
 };
 
-/* for interface with expression () */
+/* For interface with expression ().  */
 extern char *input_line_pointer;
 
-/* hash table for instruction mnemonic lookup */
+/* Hash table for instruction mnemonic lookup.  */
 static struct hash_control *op_hash;
-/* hash table for register lookup */
+
+/* Hash table for register lookup.  */
 static struct hash_control *reg_hash;
 
-
 void
 md_begin ()
 {
   const char *hash_err;
 
-  /* initialize op_hash hash table */
+  /* Initialize op_hash hash table.  */
   op_hash = hash_new ();
 
   {
     register const template *optab;
     register templates *core_optab;
 
-    optab = i386_optab;		/* setup for loop */
+    /* Setup for loop.  */
+    optab = i386_optab;
     core_optab = (templates *) xmalloc (sizeof (templates));
     core_optab->start = optab;
 
@@ -711,7 +719,7 @@ md_begin ()
 	    || strcmp (optab->name, (optab - 1)->name) != 0)
 	  {
 	    /* different name --> ship out current template list;
-	       add to hash table; & begin anew */
+	       add to hash table; & begin anew.  */
 	    core_optab->end = optab;
 	    hash_err = hash_insert (op_hash,
 				    (optab - 1)->name,
@@ -731,7 +739,7 @@ md_begin ()
       }
   }
 
-  /* initialize reg_hash hash table */
+  /* Initialize reg_hash hash table.  */
   reg_hash = hash_new ();
   {
     register const reg_entry *regtab;
@@ -746,7 +754,7 @@ md_begin ()
       }
   }
 
-  /* fill in lexical tables:  mnemonic_chars, operand_chars.  */
+  /* Fill in lexical tables:  mnemonic_chars, operand_chars.  */
   {
     register int c;
     register char *p;
@@ -811,7 +819,6 @@ i386_print_statistics (file)
   hash_print_statistics (file, "i386 register", reg_hash);
 }
 
-
 #ifdef DEBUG386
 
 /* debugging routines for md_assemble */
@@ -856,8 +863,7 @@ pte (t)
 {
   int i;
   fprintf (stdout, " %d operands ", t->operands);
-  fprintf (stdout, "opcode %x ",
-	   t->base_opcode);
+  fprintf (stdout, "opcode %x ", t->base_opcode);
   if (t->extension_opcode != None)
     fprintf (stdout, "ext %x ", t->extension_opcode);
   if (t->opcode_modifier & D)
@@ -987,7 +993,8 @@ reloc (size, pcrel, other)
      int pcrel;
      bfd_reloc_code_real_type other;
 {
-  if (other != NO_RELOC) return other;
+  if (other != NO_RELOC)
+    return other;
 
   if (pcrel)
     {
@@ -1013,15 +1020,14 @@ reloc (size, pcrel, other)
   return BFD_RELOC_NONE;
 }
 
-/*
- * Here we decide which fixups can be adjusted to make them relative to
- * the beginning of the section instead of the symbol.  Basically we need
- * to make sure that the dynamic relocations are done correctly, so in
- * some cases we force the original symbol to be used.
- */
+/* Here we decide which fixups can be adjusted to make them relative to
+   the beginning of the section instead of the symbol.  Basically we need
+   to make sure that the dynamic relocations are done correctly, so in
+   some cases we force the original symbol to be used.  */
+
 int
 tc_i386_fix_adjustable (fixP)
-     fixS * fixP;
+     fixS *fixP;
 {
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   /* Prevent all adjustments to global symbols, or else dynamic
@@ -1050,14 +1056,13 @@ tc_i386_fix_adjustable (fixP)
 #define BFD_RELOC_386_GOTOFF	0
 #endif
 
-static int
-intel_float_operand PARAMS ((char *mnemonic));
+static int intel_float_operand PARAMS ((char *mnemonic));
 
 static int
 intel_float_operand (mnemonic)
      char *mnemonic;
 {
-  if (mnemonic[0] == 'f' && mnemonic[1] =='i')
+  if (mnemonic[0] == 'f' && mnemonic[1] == 'i')
     return 2;
 
   if (mnemonic[0] == 'f')
@@ -1074,7 +1079,7 @@ void
 md_assemble (line)
      char *line;
 {
-  /* Points to template once we've found it. */
+  /* Points to template once we've found it.  */
   const template *t;
 
   /* Count the size of the instruction generated.  */
@@ -1084,7 +1089,7 @@ md_assemble (line)
 
   char mnemonic[MAX_MNEM_SIZE];
 
-  /* Initialize globals. */
+  /* Initialize globals.  */
   memset (&i, '\0', sizeof (i));
   for (j = 0; j < MAX_OPERANDS; j++)
     i.disp_reloc[j] = NO_RELOC;
@@ -1094,13 +1099,13 @@ md_assemble (line)
 
   /* First parse an instruction mnemonic & call i386_operand for the operands.
      We assume that the scrubber has arranged it so that line[0] is the valid
-     start of a (possibly prefixed) mnemonic. */
+     start of a (possibly prefixed) mnemonic.  */
   {
     char *l = line;
     char *token_start = l;
     char *mnem_p;
 
-    /* Non-zero if we found a prefix only acceptable with string insns. */
+    /* Non-zero if we found a prefix only acceptable with string insns.  */
     const char *expecting_string_instruction = NULL;
 
     while (1)
@@ -1157,8 +1162,7 @@ md_assemble (line)
 	      case 0:
 		return;
 	      case 2:
-		expecting_string_instruction =
-		  current_templates->start->name;
+		expecting_string_instruction = current_templates->start->name;
 		break;
 	      }
 	    /* Skip past PREFIX_SEPARATOR and reset token_start.  */
@@ -1202,12 +1206,12 @@ md_assemble (line)
     /* Check if instruction is supported on specified architecture.  */
     if (cpu_arch_flags != 0)
       {
-	if (current_templates->start->cpu_flags & ~ cpu_arch_flags)
+	if (current_templates->start->cpu_flags & ~cpu_arch_flags)
 	  {
 	    as_warn (_("`%s' is not supported on `%s'"),
 		     current_templates->start->name, cpu_arch_name);
 	  }
-	else if ((Cpu386 & ~ cpu_arch_flags) && !flag_16bit_code)
+	else if ((Cpu386 & ~cpu_arch_flags) && !flag_16bit_code)
 	  {
 	    as_warn (_("use .code16 to ensure correct addressing mode"));
 	  }
@@ -1222,15 +1226,15 @@ md_assemble (line)
 	return;
       }
 
-    /* There may be operands to parse. */
+    /* There may be operands to parse.  */
     if (*l != END_OF_INSN)
       {
 	/* parse operands */
 
-	/* 1 if operand is pending after ','. */
+	/* 1 if operand is pending after ','.  */
 	unsigned int expecting_operand = 0;
 
-	/* Non-zero if operand parens not balanced. */
+	/* Non-zero if operand parens not balanced.  */
 	unsigned int paren_not_balanced;
 
 	do
@@ -1288,7 +1292,7 @@ md_assemble (line)
 		l++;
 	      }
 	    if (l != token_start)
-	      {			/* yes, we've read in another operand */
+	      {			/* Yes, we've read in another operand.  */
 		unsigned int operand_ok;
 		this_operand = i.operands++;
 		if (i.operands > MAX_OPERANDS)
@@ -1297,11 +1301,13 @@ md_assemble (line)
 			    MAX_OPERANDS);
 		    return;
 		  }
-		/* now parse operand adding info to 'i' as we go along */
+		/* Now parse operand adding info to 'i' as we go along.  */
 		END_STRING_AND_SAVE (l);
 
 		if (intel_syntax)
-		  operand_ok = i386_intel_operand (token_start, intel_float_operand (mnemonic));
+		  operand_ok =
+		    i386_intel_operand (token_start,
+					intel_float_operand (mnemonic));
 		else
 		  operand_ok = i386_operand (token_start);
 
@@ -1343,7 +1349,7 @@ md_assemble (line)
 
      Next, we find a template that matches the given insn,
      making sure the overlap of the given operands types is consistent
-     with the template operand types. */
+     with the template operand types.  */
 
 #define MATCH(overlap, given, template) \
   ((overlap & ~JumpAbsolute) \
@@ -1419,7 +1425,7 @@ md_assemble (line)
 	       We can't do this properly yet, ie. excluding InOutPortReg,
 	       but the following works for instructions with immediates.
 	       In any case, we can't set i.suffix yet.  */
-	    for (op = i.operands; --op >= 0; )
+	    for (op = i.operands; --op >= 0;)
 	      if (i.types[op] & Reg)
 		{
 		  if (i.types[op] & Reg8)
@@ -1432,7 +1438,7 @@ md_assemble (line)
 	else if (flag_16bit_code ^ (i.prefix[DATA_PREFIX] != 0))
 	  guess_suffix = WORD_MNEM_SUFFIX;
 
-	for (op = i.operands; --op >= 0; )
+	for (op = i.operands; --op >= 0;)
 	  if ((i.types[op] & Imm)
 	      && i.op[op].imms->X_op == O_constant)
 	    {
@@ -1466,7 +1472,7 @@ md_assemble (line)
 	/* Try to use the smallest displacement type too.  */
 	int op;
 
-	for (op = i.operands; --op >= 0; )
+	for (op = i.operands; --op >= 0;)
 	  if ((i.types[op] & Disp)
 	      && i.op[op].imms->X_op == O_constant)
 	    {
@@ -1478,7 +1484,7 @@ md_assemble (line)
 		     convert to a signed 16 bit number before trying
 		     to see whether it will fit in an even smaller
 		     size.  */
-		  
+
 		  disp = (((disp & 0xffff) ^ 0x8000) - 0x8000);
 		}
 	      if (fits_in_signed_byte (disp))
@@ -1506,7 +1512,7 @@ md_assemble (line)
 	 t < current_templates->end;
 	 t++)
       {
-	/* Must have right number of operands. */
+	/* Must have right number of operands.  */
 	if (i.operands != t->operands)
 	  continue;
 
@@ -1519,7 +1525,8 @@ md_assemble (line)
 	  continue;
 
 	else if (!t->operands)
-	  break;		/* 0 operands always matches */
+	  /* 0 operands always matches.  */
+	  break;
 
 	overlap0 = i.types[0] & t->operand_types[0];
 	switch (t->operands)
@@ -1538,12 +1545,11 @@ md_assemble (line)
 					       overlap1, i.types[1],
 					       t->operand_types[1]))
 	      {
-
-		/* check if other direction is valid ... */
+		/* Check if other direction is valid ...  */
 		if ((t->opcode_modifier & (D|FloatD)) == 0)
 		  continue;
 
-		/* try reversing direction of operands */
+		/* Try reversing direction of operands.  */
 		overlap0 = i.types[0] & t->operand_types[1];
 		overlap1 = i.types[1] & t->operand_types[0];
 		if (!MATCH (overlap0, i.types[0], t->operand_types[1])
@@ -1553,7 +1559,7 @@ md_assemble (line)
 						   overlap1, i.types[1],
 						   t->operand_types[0]))
 		  {
-		    /* does not match either direction */
+		    /* Does not match either direction.  */
 		    continue;
 		  }
 		/* found_reverse_match holds which of D or FloatDR
@@ -1561,7 +1567,7 @@ md_assemble (line)
 		found_reverse_match = t->opcode_modifier & (D|FloatDR);
 		break;
 	      }
-	    /* found a forward 2 operand match here */
+	    /* Found a forward 2 operand match here.  */
 	    if (t->operands == 3)
 	      {
 		/* Here we make use of the fact that there are no
@@ -1577,13 +1583,15 @@ md_assemble (line)
 
 		  continue;
 	      }
-	    /* found either forward/reverse 2 or 3 operand match here:
+	    /* Found either forward/reverse 2 or 3 operand match here:
 	       slip through to break */
 	  }
-	break;			/* we've found a match; break out of loop */
-      }				/* for (t = ... */
+	/* We've found a match; break out of loop.  */
+	break;
+      }				/* for (t = ...  */
     if (t == current_templates->end)
-      {				/* we found no match */
+      {
+	/* We found no match.  */
 	as_bad (_("suffix or operands invalid for `%s'"),
 		current_templates->start->name);
 	return;
@@ -1674,14 +1682,14 @@ md_assemble (line)
     else if (i.reg_operands)
       {
 	/* If there's no instruction mnemonic suffix we try to invent one
-	   based on register operands. */
+	   based on register operands.  */
 	if (!i.suffix)
 	  {
 	    /* We take i.suffix from the last register operand specified,
 	       Destination register type is more significant than source
 	       register type.  */
 	    int op;
-	    for (op = i.operands; --op >= 0; )
+	    for (op = i.operands; --op >= 0;)
 	      if ((i.types[op] & Reg)
 		  && !(i.tm.operand_types[op] & InOutPortReg))
 		{
@@ -1694,15 +1702,15 @@ md_assemble (line)
 	else if (i.suffix == BYTE_MNEM_SUFFIX)
 	  {
 	    int op;
-	    for (op = i.operands; --op >= 0; )
+	    for (op = i.operands; --op >= 0;)
 	      {
 		/* If this is an eight bit register, it's OK.  If it's
 		   the 16 or 32 bit version of an eight bit register,
-		   we will just use the low portion, and that's OK too. */
+		   we will just use the low portion, and that's OK too.  */
 		if (i.types[op] & Reg8)
 		  continue;
 
-		/* movzx and movsx should not generate this warning. */
+		/* movzx and movsx should not generate this warning.  */
 		if (intel_syntax
 		    && (i.tm.base_opcode == 0xfb7
 			|| i.tm.base_opcode == 0xfb6
@@ -1746,11 +1754,12 @@ md_assemble (line)
 	else if (i.suffix == LONG_MNEM_SUFFIX)
 	  {
 	    int op;
-	    for (op = i.operands; --op >= 0; )
+
+	    for (op = i.operands; --op >= 0;)
 	      /* Reject eight bit registers, except where the template
 		 requires them. (eg. movzb)  */
 	      if ((i.types[op] & Reg8) != 0
-		  && (i.tm.operand_types[op] & (Reg16|Reg32|Acc)) != 0)
+		  && (i.tm.operand_types[op] & (Reg16 | Reg32 | Acc)) != 0)
 		{
 		  as_bad (_("`%%%s' not allowed with `%s%c'"),
 			  i.op[op].regs->reg_name,
@@ -1774,7 +1783,7 @@ md_assemble (line)
 	else if (i.suffix == WORD_MNEM_SUFFIX)
 	  {
 	    int op;
-	    for (op = i.operands; --op >= 0; )
+	    for (op = i.operands; --op >= 0;)
 	      /* Reject eight bit registers, except where the template
 		 requires them. (eg. movzb)  */
 	      if ((i.types[op] & Reg8) != 0
@@ -1800,7 +1809,7 @@ md_assemble (line)
 #endif
 	  }
 	else
-	  abort();
+	  abort ();
       }
     else if ((i.tm.opcode_modifier & DefaultSize) && !i.suffix)
       {
@@ -1928,7 +1937,7 @@ md_assemble (line)
 
 	expressionS *exp;
 
-	assert(i.imm_operands == 0 && i.operands <= 2 && 2 < MAX_OPERANDS);
+	assert (i.imm_operands == 0 && i.operands <= 2 && 2 < MAX_OPERANDS);
 
 	exp = &im_expressions[i.imm_operands++];
 	i.op[i.operands].imms = exp;
@@ -1938,7 +1947,7 @@ md_assemble (line)
 	i.tm.extension_opcode = None;
       }
 
-    /* For insns with operands there are more diddles to do to the opcode. */
+    /* For insns with operands there are more diddles to do to the opcode.  */
     if (i.operands)
       {
 	/* Default segment register this instruction will use
@@ -1952,18 +1961,18 @@ md_assemble (line)
 	if (i.tm.opcode_modifier & regKludge)
 	  {
 	    unsigned int first_reg_op = (i.types[0] & Reg) ? 0 : 1;
-	    /* Pretend we saw the extra register operand. */
-	    assert (i.op[first_reg_op+1].regs == 0);
-	    i.op[first_reg_op+1].regs = i.op[first_reg_op].regs;
-	    i.types[first_reg_op+1] = i.types[first_reg_op];
+	    /* Pretend we saw the extra register operand.  */
+	    assert (i.op[first_reg_op + 1].regs == 0);
+	    i.op[first_reg_op + 1].regs = i.op[first_reg_op].regs;
+	    i.types[first_reg_op + 1] = i.types[first_reg_op];
 	    i.reg_operands = 2;
 	  }
 
 	if (i.tm.opcode_modifier & ShortForm)
 	  {
-	    /* The register or float register operand is in operand 0 or 1. */
+	    /* The register or float register operand is in operand 0 or 1.  */
 	    unsigned int op = (i.types[0] & (Reg | FloatReg)) ? 0 : 1;
-	    /* Register goes in low 3 bits of opcode. */
+	    /* Register goes in low 3 bits of opcode.  */
 	    i.tm.base_opcode |= i.op[op].regs->reg_num;
 	    if (!quiet_warnings && (i.tm.opcode_modifier & Ugh) != 0)
 	      {
@@ -1971,14 +1980,14 @@ md_assemble (line)
 		   The first case can be generated by gcc (<= 2.8.1).  */
 		if (i.operands == 2)
 		  {
-		    /* reversed arguments on faddp, fsubp, etc. */
+		    /* Reversed arguments on faddp, fsubp, etc.  */
 		    as_warn (_("translating to `%s %%%s,%%%s'"), i.tm.name,
 			     i.op[1].regs->reg_name,
 			     i.op[0].regs->reg_name);
 		  }
 		else
 		  {
-		    /* extraneous `l' suffix on fp insn */
+		    /* Extraneous `l' suffix on fp insn.  */
 		    as_warn (_("translating to `%s %%%s'"), i.tm.name,
 			     i.op[0].regs->reg_name);
 		  }
@@ -1989,10 +1998,10 @@ md_assemble (line)
 	    /* The opcode is completed (modulo i.tm.extension_opcode which
 	       must be put into the modrm byte).
 	       Now, we make the modrm & index base bytes based on all the
-	       info we've collected. */
+	       info we've collected.  */
 
 	    /* i.reg_operands MUST be the number of real register operands;
-	       implicit registers do not count. */
+	       implicit registers do not count.  */
 	    if (i.reg_operands == 2)
 	      {
 		unsigned int source, dest;
@@ -2023,7 +2032,7 @@ md_assemble (line)
 		  }
 	      }
 	    else
-	      {			/* if it's not 2 reg operands... */
+	      {			/* If it's not 2 reg operands...  */
 		if (i.mem_operands)
 		  {
 		    unsigned int fake_zero_displacement = 0;
@@ -2040,7 +2049,7 @@ md_assemble (line)
 			  fake_zero_displacement = 1;
 			if (! i.index_reg)
 			  {
-			    /* Operand is just <disp> */
+			    /* Operand is just <disp>  */
 			    if (flag_16bit_code ^ (i.prefix[ADDR_PREFIX] != 0))
 			      {
 				i.rm.regmem = NO_BASE_REGISTER_16;
@@ -2054,47 +2063,47 @@ md_assemble (line)
 				i.types[op] |= Disp32;
 			      }
 			  }
-			else /* ! i.base_reg && i.index_reg */
+			else /* ! i.base_reg && i.index_reg  */
 			  {
 			    i.sib.index = i.index_reg->reg_num;
 			    i.sib.base = NO_BASE_REGISTER;
 			    i.sib.scale = i.log2_scale_factor;
 			    i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
 			    i.types[op] &= ~Disp;
-			    i.types[op] |= Disp32;	/* Must be 32 bit */
+			    i.types[op] |= Disp32;	/* Must be 32 bit.  */
 			  }
 		      }
 		    else if (i.base_reg->reg_type & Reg16)
 		      {
 			switch (i.base_reg->reg_num)
 			  {
-			  case 3: /* (%bx) */
+			  case 3: /* (%bx)  */
 			    if (! i.index_reg)
 			      i.rm.regmem = 7;
-			    else /* (%bx,%si) -> 0, or (%bx,%di) -> 1 */
+			    else /* (%bx,%si) -> 0, or (%bx,%di) -> 1  */
 			      i.rm.regmem = i.index_reg->reg_num - 6;
 			    break;
-			  case 5: /* (%bp) */
+			  case 5: /* (%bp)  */
 			    default_seg = &ss;
 			    if (! i.index_reg)
 			      {
 				i.rm.regmem = 6;
 				if ((i.types[op] & Disp) == 0)
 				  {
-				    /* fake (%bp) into 0(%bp) */
+				    /* fake (%bp) into 0(%bp)  */
 				    i.types[op] |= Disp8;
 				    fake_zero_displacement = 1;
 				  }
 			      }
-			    else /* (%bp,%si) -> 2, or (%bp,%di) -> 3 */
+			    else /* (%bp,%si) -> 2, or (%bp,%di) -> 3  */
 			      i.rm.regmem = i.index_reg->reg_num - 6 + 2;
 			    break;
-			  default: /* (%si) -> 4 or (%di) -> 5 */
+			  default: /* (%si) -> 4 or (%di) -> 5  */
 			    i.rm.regmem = i.base_reg->reg_num - 6 + 4;
 			  }
 			i.rm.mode = mode_from_disp_size (i.types[op]);
 		      }
-		    else /* i.base_reg and 32 bit mode */
+		    else /* i.base_reg and 32 bit mode  */
 		      {
 			i.rm.regmem = i.base_reg->reg_num;
 			i.sib.base = i.base_reg->reg_num;
@@ -2139,7 +2148,7 @@ md_assemble (line)
 		    if (fake_zero_displacement)
 		      {
 			/* Fakes a zero displacement assuming that i.types[op]
-			   holds the correct displacement size. */
+			   holds the correct displacement size.  */
 			expressionS *exp;
 
 			assert (i.op[op].disps == 0);
@@ -2156,7 +2165,7 @@ md_assemble (line)
 		   operand (if any) based on i.tm.extension_opcode.
 		   Again, we must be careful to make sure that
 		   segment/control/debug/test/MMX registers are coded
-		   into the i.rm.reg field. */
+		   into the i.rm.reg field.  */
 		if (i.reg_operands)
 		  {
 		    unsigned int op =
@@ -2172,7 +2181,7 @@ md_assemble (line)
 			  ? 1
 			  : 2));
 		    /* If there is an extension opcode to put here, the
-		       register number must be put into the regmem field. */
+		       register number must be put into the regmem field.  */
 		    if (i.tm.extension_opcode != None)
 		      i.rm.regmem = i.op[op].regs->reg_num;
 		    else
@@ -2185,14 +2194,15 @@ md_assemble (line)
 		      i.rm.mode = 3;
 		  }
 
-		/* Fill in i.rm.reg field with extension opcode (if any). */
+		/* Fill in i.rm.reg field with extension opcode (if any).  */
 		if (i.tm.extension_opcode != None)
 		  i.rm.reg = i.tm.extension_opcode;
 	      }
 	  }
 	else if (i.tm.opcode_modifier & (Seg2ShortForm | Seg3ShortForm))
 	  {
-	    if (i.tm.base_opcode == POP_SEG_SHORT && i.op[0].regs->reg_num == 1)
+	    if (i.tm.base_opcode == POP_SEG_SHORT
+		&& i.op[0].regs->reg_num == 1)
 	      {
 		as_bad (_("you can't `pop %%cs'"));
 		return;
@@ -2229,7 +2239,7 @@ md_assemble (line)
       }
   }
 
-  /* Handle conversion of 'int $3' --> special int3 insn. */
+  /* Handle conversion of 'int $3' --> special int3 insn.  */
   if (i.tm.base_opcode == INT_OPCODE && i.op[0].imms->X_add_number == 3)
     {
       i.tm.base_opcode = INT3_OPCODE;
@@ -2246,11 +2256,11 @@ md_assemble (line)
       i.op[0].disps->X_op = O_symbol;
     }
 
-  /* We are ready to output the insn. */
+  /* We are ready to output the insn.  */
   {
     register char *p;
 
-    /* Output jumps. */
+    /* Output jumps.  */
     if (i.tm.opcode_modifier & Jump)
       {
 	int size;
@@ -2346,7 +2356,7 @@ md_assemble (line)
 	  }
 	else
 	  {
-	    /* opcode can be at most two bytes */
+	    /* Opcode can be at most two bytes.  */
 	    insn_size += 2 + size;
 	    p = frag_more (2 + size);
 	    *p++ = (i.tm.base_opcode >> 8) & 0xff;
@@ -2381,7 +2391,8 @@ md_assemble (line)
 	if (i.prefixes != 0 && !intel_syntax)
 	  as_warn (_("skipping prefixes on this instruction"));
 
-	insn_size += prefix + 1 + 2 + size;  /* 1 opcode; 2 segment; offset */
+	/* 1 opcode; 2 segment; offset  */
+	insn_size += prefix + 1 + 2 + size;
 	p = frag_more (prefix + 1 + 2 + size);
 	if (prefix)
 	  *p++ = DATA_PREFIX_OPCODE;
@@ -2409,10 +2420,10 @@ md_assemble (line)
       }
     else
       {
-	/* Output normal instructions here. */
+	/* Output normal instructions here.  */
 	unsigned char *q;
 
-	/* The prefix bytes. */
+	/* The prefix bytes.  */
 	for (q = i.prefix;
 	     q < i.prefix + sizeof (i.prefix) / sizeof (i.prefix[0]);
 	     q++)
@@ -2425,7 +2436,7 @@ md_assemble (line)
 	      }
 	  }
 
-	/* Now the opcode; be careful about word order here! */
+	/* Now the opcode; be careful about word order here!  */
 	if (fits_in_unsigned_byte (i.tm.base_opcode))
 	  {
 	    insn_size += 1;
@@ -2435,12 +2446,12 @@ md_assemble (line)
 	  {
 	    insn_size += 2;
 	    p = frag_more (2);
-	    /* put out high byte first: can't use md_number_to_chars! */
+	    /* Put out high byte first: can't use md_number_to_chars!  */
 	    *p++ = (i.tm.base_opcode >> 8) & 0xff;
 	    *p = i.tm.base_opcode & 0xff;
 	  }
 	else
-	  {			/* opcode is either 3 or 4 bytes */
+	  {			/* Opcode is either 3 or 4 bytes.  */
 	    if (i.tm.base_opcode & 0xff000000)
 	      {
 		insn_size += 4;
@@ -2526,9 +2537,9 @@ md_assemble (line)
 		      }
 		  }
 	      }
-	  }			/* end displacement output */
+	  }			/* End displacement output.  */
 
-	/* output immediate */
+	/* Output immediate.  */
 	if (i.imm_operands)
 	  {
 	    register unsigned int n;
@@ -2556,10 +2567,10 @@ md_assemble (line)
 			md_number_to_chars (p, val, size);
 		      }
 		    else
-		      {		/* not absolute_section */
+		      {		/* Not absolute_section.  */
 			/* Need a 32-bit fixup (don't support 8bit
 			   non-absolute imms).  Try to support other
-			   sizes ... */
+			   sizes ...  */
 #ifdef BFD_ASSEMBLER
 			enum bfd_reloc_code_real reloc_type;
 #else
@@ -2594,7 +2605,7 @@ md_assemble (line)
 		      }
 		  }
 	      }
-	  }			/* end immediate output */
+	  }			/* end immediate output  */
       }
 
 #ifdef DEBUG386
@@ -2602,7 +2613,7 @@ md_assemble (line)
       {
 	pi (line, &i);
       }
-#endif /* DEBUG386 */
+#endif /* DEBUG386  */
   }
 }
 
@@ -2614,7 +2625,7 @@ i386_immediate (imm_start)
 {
   char *save_input_line_pointer;
   segT exp_seg = 0;
-  expressionS * exp;
+  expressionS *exp;
 
   if (i.imm_operands == MAX_IMMEDIATE_OPERANDS)
     {
@@ -2633,12 +2644,10 @@ i386_immediate (imm_start)
 
 #ifndef LEX_AT
   {
-    /*
-     * We can have operands of the form
-     *   <symbol>@GOTOFF+<nnn>
-     * Take the easy way out here and copy everything
-     * into a temporary buffer...
-     */
+    /* We can have operands of the form
+         <symbol>@GOTOFF+<nnn>
+       Take the easy way out here and copy everything
+       into a temporary buffer...  */
     register char *cp;
 
     cp = strchr (input_line_pointer, '@');
@@ -2648,7 +2657,7 @@ i386_immediate (imm_start)
 	int len = 0;
 	int first;
 
-	/* GOT relocations are not supported in 16 bit mode */
+	/* GOT relocations are not supported in 16 bit mode.  */
 	if (flag_16bit_code)
 	  as_bad (_("GOT relocations not supported in 16 bit mode"));
 
@@ -2676,7 +2685,7 @@ i386_immediate (imm_start)
 	/* Replace the relocation token with ' ', so that errors like
 	   foo@GOTOFF1 will be detected.  */
 	first = cp - input_line_pointer;
-	tmpbuf = (char *) alloca (strlen(input_line_pointer));
+	tmpbuf = (char *) alloca (strlen (input_line_pointer));
 	memcpy (tmpbuf, input_line_pointer, first);
 	tmpbuf[first] = ' ';
 	strcpy (tmpbuf + first + 1, cp + 1 + len);
@@ -2695,7 +2704,7 @@ i386_immediate (imm_start)
 
   if (exp->X_op == O_absent || exp->X_op == O_big)
     {
-      /* missing or bad expr becomes absolute 0 */
+      /* Missing or bad expr becomes absolute 0.  */
       as_bad (_("missing or invalid immediate expression `%s' taken as 0"),
 	      imm_start);
       exp->X_op = O_constant;
@@ -2706,14 +2715,15 @@ i386_immediate (imm_start)
 
   if (exp->X_op == O_constant)
     {
-      i.types[this_operand] |= Imm32;	/* Size it properly later.  */
+      /* Size it properly later.  */
+      i.types[this_operand] |= Imm32;
     }
 #if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
-  else if (
+  else if (1
 #ifdef BFD_ASSEMBLER
-	   OUTPUT_FLAVOR == bfd_target_aout_flavour &&
+	   && OUTPUT_FLAVOR == bfd_target_aout_flavour
 #endif
-	   exp_seg != text_section
+	   && exp_seg != text_section
 	   && exp_seg != data_section
 	   && exp_seg != bss_section
 	   && exp_seg != undefined_section
@@ -2846,20 +2856,17 @@ i386_displacement (disp_start, disp_end)
 	 rorl $16,%edx
 	 #NO_APP
 
-	 So here we provide the missing zero.
-      */
+	 So here we provide the missing zero.  */
 
       *displacement_string_end = '0';
     }
 #endif
 #ifndef LEX_AT
   {
-    /*
-     * We can have operands of the form
-     *   <symbol>@GOTOFF+<nnn>
-     * Take the easy way out here and copy everything
-     * into a temporary buffer...
-     */
+    /* We can have operands of the form
+         <symbol>@GOTOFF+<nnn>
+       Take the easy way out here and copy everything
+       into a temporary buffer...  */
     register char *cp;
 
     cp = strchr (input_line_pointer, '@');
@@ -2869,7 +2876,7 @@ i386_displacement (disp_start, disp_end)
 	int len = 0;
 	int first;
 
-	/* GOT relocations are not supported in 16 bit mode */
+	/* GOT relocations are not supported in 16 bit mode.  */
 	if (flag_16bit_code)
 	  as_bad (_("GOT relocations not supported in 16 bit mode"));
 
@@ -2897,7 +2904,7 @@ i386_displacement (disp_start, disp_end)
 	/* Replace the relocation token with ' ', so that errors like
 	   foo@GOTOFF1 will be detected.  */
 	first = cp - input_line_pointer;
-	tmpbuf = (char *) alloca (strlen(input_line_pointer));
+	tmpbuf = (char *) alloca (strlen (input_line_pointer));
 	memcpy (tmpbuf, input_line_pointer, first);
 	tmpbuf[first] = ' ';
 	strcpy (tmpbuf + first + 1, cp + 1 + len);
@@ -2911,7 +2918,7 @@ i386_displacement (disp_start, disp_end)
 #ifdef BFD_ASSEMBLER
   /* We do this to make sure that the section symbol is in
      the symbol table.  We will ultimately change the relocation
-     to be relative to the beginning of the section */
+     to be relative to the beginning of the section.  */
   if (i.disp_reloc[this_operand] == BFD_RELOC_386_GOTOFF)
     {
       if (S_IS_LOCAL(exp->X_add_symbol)
@@ -2936,7 +2943,7 @@ i386_displacement (disp_start, disp_end)
 
   if (exp->X_op == O_absent || exp->X_op == O_big)
     {
-      /* missing or bad expr becomes absolute 0 */
+      /* Missing or bad expr becomes absolute 0.  */
       as_bad (_("missing or invalid displacement expression `%s' taken as 0"),
 	      disp_start);
       exp->X_op = O_constant;
@@ -2982,7 +2989,7 @@ i386_operand_modifier (op_string, got_a_float)
     }
   else if (!strncasecmp (*op_string, "WORD PTR", 8))
     {
-      if (got_a_float == 2)	/* "fi..." */
+      if (got_a_float == 2)	/* "fi..."  */
 	i.suffix = SHORT_MNEM_SUFFIX;
       else
 	i.suffix = WORD_MNEM_SUFFIX;
@@ -2992,7 +2999,7 @@ i386_operand_modifier (op_string, got_a_float)
 
   else if (!strncasecmp (*op_string, "DWORD PTR", 9))
     {
-      if (got_a_float == 1)	/* "f..." */
+      if (got_a_float == 1)	/* "f..."  */
 	i.suffix = SHORT_MNEM_SUFFIX;
       else
 	i.suffix = LONG_MNEM_SUFFIX;
@@ -3055,7 +3062,7 @@ build_displacement_string (initial_disp, op_string)
       return temp_string;
     }
 
-  /* Build the whole displacement string */
+  /* Build the whole displacement string.  */
   if (initial_disp)
     {
       strncpy (temp_string, op_string, end_of_operand_string - op_string);
@@ -3076,7 +3083,7 @@ build_displacement_string (initial_disp, op_string)
       if (is_space_char (*temp_disp))
 	temp_disp++;
 
-      /* Don't consider registers */
+      /* Don't consider registers.  */
       if ( !((*temp_disp == REGISTER_PREFIX || allow_naked_reg)
 	     && parse_register (temp_disp, &end_op)) )
 	{
@@ -3116,7 +3123,7 @@ i386_parse_seg (op_string)
   if (is_space_char (*op_string))
     ++op_string;
 
-  /* Should be one of es, cs, ss, ds fs or gs */
+  /* Should be one of es, cs, ss, ds fs or gs.  */
   switch (*op_string++)
     {
     case 'e':
@@ -3164,8 +3171,8 @@ i386_parse_seg (op_string)
 static int i386_index_check PARAMS((const char *));
 
 /* Make sure the memory operand we've been dealt is valid.
-   Returns 1 on success, 0 on a failure.
-*/
+   Return 1 on success, 0 on a failure.  */
+
 static int
 i386_index_check (operand_string)
      const char *operand_string;
@@ -3176,7 +3183,7 @@ i386_index_check (operand_string)
  tryprefix:
 #endif
   if (flag_16bit_code ^ (i.prefix[ADDR_PREFIX] != 0)
-      /* 16 bit mode checks */
+      /* 16 bit mode checks.  */
       ? ((i.base_reg
 	  && ((i.base_reg->reg_type & (Reg16|BaseIndex))
 	      != (Reg16|BaseIndex)))
@@ -3187,7 +3194,7 @@ i386_index_check (operand_string)
 		       && i.base_reg->reg_num < 6
 		       && i.index_reg->reg_num >= 6
 		       && i.log2_scale_factor == 0))))
-      /* 32 bit mode checks */
+      /* 32 bit mode checks.  */
       : ((i.base_reg
 	  && (i.base_reg->reg_type & Reg32) == 0)
 	 || (i.index_reg
@@ -3203,8 +3210,7 @@ i386_index_check (operand_string)
 	     Disp16 or Disp32 is set.
 	     FIXME.  There doesn't seem to be any real need for separate
 	     Disp16 and Disp32 flags.  The same goes for Imm16 and Imm32.
-	     Removing them would probably clean up the code quite a lot.
-	  */
+	     Removing them would probably clean up the code quite a lot.  */
 	  if (i.types[this_operand] & (Disp16|Disp32))
 	     i.types[this_operand] ^= (Disp16|Disp32);
 	  fudged = 1;
@@ -3255,7 +3261,7 @@ i386_intel_memory_operand (operand_string)
 	}
     }
 
-  /* Look for displacement preceding open bracket */
+  /* Look for displacement preceding open bracket.  */
   if (*op_string != '[')
     {
       char *temp_string;
@@ -3384,7 +3390,7 @@ i386_intel_operand (operand_string, got_a_float)
      char *operand_string;
      int got_a_float;
 {
-  const reg_entry * r;
+  const reg_entry *r;
   char *end_op;
   char *op_string = operand_string;
 
@@ -3470,7 +3476,7 @@ i386_intel_operand (operand_string, got_a_float)
 }
 
 /* Parse OPERAND_STRING into the i386_insn structure I.  Returns non-zero
-   on error. */
+   on error.  */
 
 static int
 i386_operand (operand_string)
@@ -3484,7 +3490,7 @@ i386_operand (operand_string)
     ++op_string;
 
   /* We check for an absolute prefix (differentiating,
-     for example, 'jmp pc_relative_label' from 'jmp *absolute_label'. */
+     for example, 'jmp pc_relative_label' from 'jmp *absolute_label'.  */
   if (*op_string == ABSOLUTE_PREFIX)
     {
       ++op_string;
@@ -3493,7 +3499,7 @@ i386_operand (operand_string)
       i.types[this_operand] |= JumpAbsolute;
     }
 
-  /* Check if operand is a register. */
+  /* Check if operand is a register.  */
   if ((*op_string == REGISTER_PREFIX || allow_naked_reg)
       && (r = parse_register (op_string, &end_op)) != NULL)
     {
@@ -3539,7 +3545,7 @@ i386_operand (operand_string)
 	      as_bad (_("bad memory operand `%s'"), op_string);
 	      return 0;
 	    }
-	  /* Handle case of %es:*foo. */
+	  /* Handle case of %es:*foo.  */
 	  if (*op_string == ABSOLUTE_PREFIX)
 	    {
 	      ++op_string;
@@ -3564,7 +3570,7 @@ i386_operand (operand_string)
       return 0;
     }
   else if (*op_string == IMMEDIATE_PREFIX)
-    {				/* ... or an immediate */
+    {				/* ... or an immediate  */
       ++op_string;
       if (i.types[this_operand] & JumpAbsolute)
 	{
@@ -3578,10 +3584,10 @@ i386_operand (operand_string)
 	   || is_identifier_char (*op_string)
 	   || *op_string == '(' )
     {
-      /* This is a memory reference of some sort. */
+      /* This is a memory reference of some sort.  */
       char *base_string;
 
-      /* Start and end of displacement string expression (if found). */
+      /* Start and end of displacement string expression (if found).  */
       char *displacement_string_start;
       char *displacement_string_end;
 
@@ -3605,7 +3611,7 @@ i386_operand (operand_string)
       if (is_space_char (*base_string))
 	--base_string;
 
-      /* If we only have a displacement, set-up for it to be parsed later. */
+      /* If we only have a displacement, set-up for it to be parsed later.  */
       displacement_string_start = op_string;
       displacement_string_end = base_string + 1;
 
@@ -3614,7 +3620,7 @@ i386_operand (operand_string)
 	  char *temp_string;
 	  unsigned int parens_balanced = 1;
 	  /* We've already checked that the number of left & right ()'s are
-	     equal, so this loop will not be infinite. */
+	     equal, so this loop will not be infinite.  */
 	  do
 	    {
 	      base_string--;
@@ -3679,7 +3685,7 @@ i386_operand (operand_string)
 		      return 0;
 		    }
 
-		  /* Check for scale factor. */
+		  /* Check for scale factor.  */
 		  if (isdigit ((unsigned char) *base_string))
 		    {
 		      if (!i386_scale (base_string))
@@ -3743,14 +3749,14 @@ i386_operand (operand_string)
       i.mem_operands++;
     }
   else
-    {				/* it's not a memory operand; argh! */
+    {				/* It's not a memory operand; argh!  */
       as_bad (_("invalid char %s beginning operand %d `%s'"),
 	      output_invalid (*op_string),
 	      this_operand + 1,
 	      op_string);
       return 0;
     }
-  return 1;			/* normal return */
+  return 1;			/* Normal return.  */
 }
 
 /* md_estimate_size_before_relax()
@@ -3805,8 +3811,10 @@ md_estimate_size_before_relax (fragP, segment)
 
       switch (opcode[0])
 	{
-	case JUMP_PC_RELATIVE:	/* make jmp (0xeb) a dword displacement jump */
-	  opcode[0] = 0xe9;	/* dword disp jmp */
+	case JUMP_PC_RELATIVE:
+	  /* Make jmp (0xeb) a dword displacement jump.  */
+	  /* dword disp jmp  */
+	  opcode[0] = 0xe9;
 	  fragP->fr_fix += size;
 	  fix_new (fragP, old_fr_fix, size,
 		   fragP->fr_symbol,
@@ -3819,7 +3827,8 @@ md_estimate_size_before_relax (fragP, segment)
 	     to the dword-displacement jump 0x0f,0x8N.  */
 	  opcode[1] = opcode[0] + 0x10;
 	  opcode[0] = TWO_BYTE_OPCODE_ESCAPE;
-	  fragP->fr_fix += 1 + size;	/* we've added an opcode byte */
+	  /* We've added an opcode byte.  */
+	  fragP->fr_fix += 1 + size;
 	  fix_new (fragP, old_fr_fix + 1, size,
 		   fragP->fr_symbol,
 		   fragP->fr_offset, 1,
@@ -3829,20 +3838,19 @@ md_estimate_size_before_relax (fragP, segment)
       frag_wane (fragP);
       return fragP->fr_fix - old_fr_fix;
     }
-  return 1; /* Guess a short jump.  */
+  /* Guess a short jump.  */
+  return 1;
 }
 
-/*
- *			md_convert_frag();
- *
- * Called after relax() is finished.
- * In:	Address of frag.
- *	fr_type == rs_machine_dependent.
- *	fr_subtype is what the address relaxed to.
- *
- * Out:	Any fixSs and constants are set up.
- *	Caller will turn frag into a ".space 0".
- */
+/* Called after relax() is finished.
+
+   In:	Address of frag.
+	fr_type == rs_machine_dependent.
+	fr_subtype is what the address relaxed to.
+
+   Out:	Any fixSs and constants are set up.
+	Caller will turn frag into a ".space 0".  */
+
 #ifndef BFD_ASSEMBLER
 void
 md_convert_frag (headers, sec, fragP)
@@ -3866,16 +3874,17 @@ md_convert_frag (abfd, sec, fragP)
 
   opcode = (unsigned char *) fragP->fr_opcode;
 
-  /* Address we want to reach in file space. */
+  /* Address we want to reach in file space.  */
   target_address = S_GET_VALUE (fragP->fr_symbol) + fragP->fr_offset;
-#ifdef BFD_ASSEMBLER /* not needed otherwise? */
+#ifdef BFD_ASSEMBLER
+  /* Not needed otherwise?  */
   target_address += symbol_get_frag (fragP->fr_symbol)->fr_address;
 #endif
 
-  /* Address opcode resides at in file space. */
+  /* Address opcode resides at in file space.  */
   opcode_address = fragP->fr_address + fragP->fr_fix;
 
-  /* Displacement from opcode start to fill into instruction. */
+  /* Displacement from opcode start to fill into instruction.  */
   displacement_from_opcode_start = target_address - opcode_address;
 
   switch (fragP->fr_subtype)
@@ -3884,33 +3893,33 @@ md_convert_frag (abfd, sec, fragP)
     case ENCODE_RELAX_STATE (COND_JUMP, SMALL16):
     case ENCODE_RELAX_STATE (UNCOND_JUMP, SMALL):
     case ENCODE_RELAX_STATE (UNCOND_JUMP, SMALL16):
-      /* don't have to change opcode */
-      extension = 1;		/* 1 opcode + 1 displacement */
+      /* Don't have to change opcode.  */
+      extension = 1;		/* 1 opcode + 1 displacement  */
       where_to_put_displacement = &opcode[1];
       break;
 
     case ENCODE_RELAX_STATE (COND_JUMP, BIG):
-      extension = 5;		/* 2 opcode + 4 displacement */
+      extension = 5;		/* 2 opcode + 4 displacement  */
       opcode[1] = opcode[0] + 0x10;
       opcode[0] = TWO_BYTE_OPCODE_ESCAPE;
       where_to_put_displacement = &opcode[2];
       break;
 
     case ENCODE_RELAX_STATE (UNCOND_JUMP, BIG):
-      extension = 4;		/* 1 opcode + 4 displacement */
+      extension = 4;		/* 1 opcode + 4 displacement  */
       opcode[0] = 0xe9;
       where_to_put_displacement = &opcode[1];
       break;
 
     case ENCODE_RELAX_STATE (COND_JUMP, BIG16):
-      extension = 3;		/* 2 opcode + 2 displacement */
+      extension = 3;		/* 2 opcode + 2 displacement  */
       opcode[1] = opcode[0] + 0x10;
       opcode[0] = TWO_BYTE_OPCODE_ESCAPE;
       where_to_put_displacement = &opcode[2];
       break;
 
     case ENCODE_RELAX_STATE (UNCOND_JUMP, BIG16):
-      extension = 2;		/* 1 opcode + 2 displacement */
+      extension = 2;		/* 1 opcode + 2 displacement  */
       opcode[0] = 0xe9;
       where_to_put_displacement = &opcode[1];
       break;
@@ -3919,17 +3928,21 @@ md_convert_frag (abfd, sec, fragP)
       BAD_CASE (fragP->fr_subtype);
       break;
     }
-  /* now put displacement after opcode */
+  /* Now put displacement after opcode.  */
   md_number_to_chars ((char *) where_to_put_displacement,
 		      (valueT) (displacement_from_opcode_start - extension),
 		      SIZE_FROM_RELAX_STATE (fragP->fr_subtype));
   fragP->fr_fix += extension;
 }
 
+/* Size of byte displacement jmp.  */
+int md_short_jump_size = 2;
 
-int md_short_jump_size = 2;	/* size of byte displacement jmp */
-int md_long_jump_size = 5;	/* size of dword displacement jmp */
-const int md_reloc_size = 8;	/* Size of relocation record */
+/* Size of dword displacement jmp.  */
+int md_long_jump_size = 5;
+
+/* Size of relocation record.  */
+const int md_reloc_size = 8;
 
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
@@ -3941,7 +3954,8 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
   offsetT offset;
 
   offset = to_addr - (from_addr + 2);
-  md_number_to_chars (ptr, (valueT) 0xeb, 1);	/* opcode for byte-disp jump */
+  /* Opcode for byte-disp jump.  */
+  md_number_to_chars (ptr, (valueT) 0xeb, 1);
   md_number_to_chars (ptr + 1, (valueT) offset, 1);
 }
 
@@ -3968,9 +3982,14 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
 
 int
 md_apply_fix3 (fixP, valp, seg)
-     fixS *fixP;		/* The fix we're to put in.  */
-     valueT *valp;		/* Pointer to the value of the bits.  */
-     segT seg ATTRIBUTE_UNUSED;	/* Segment fix is from.  */
+     /* The fix we're to put in.  */
+     fixS *fixP;
+
+     /* Pointer to the value of the bits.  */
+     valueT *valp;
+
+     /* Segment fix is from.  */
+     segT seg ATTRIBUTE_UNUSED;
 {
   register char *p = fixP->fx_where + fixP->fx_frag->fr_literal;
   valueT value = *valp;
@@ -4042,19 +4061,20 @@ md_apply_fix3 (fixP, valp, seg)
     }
 
   /* Fix a few things - the dynamic linker expects certain values here,
-     and we must not dissappoint it. */
+     and we must not dissappoint it.  */
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   if (OUTPUT_FLAVOR == bfd_target_elf_flavour
       && fixP->fx_addsy)
-    switch (fixP->fx_r_type) {
-    case BFD_RELOC_386_PLT32:
-      /* Make the jump instruction point to the address of the operand.  At
-	 runtime we merely add the offset to the actual PLT entry. */
-      value = -4;
-      break;
-    case BFD_RELOC_386_GOTPC:
-/*
- *   This is tough to explain.  We end up with this one if we have
+    switch (fixP->fx_r_type)
+      {
+      case BFD_RELOC_386_PLT32:
+	/* Make the jump instruction point to the address of the operand.  At
+	   runtime we merely add the offset to the actual PLT entry.  */
+	value = -4;
+	break;
+      case BFD_RELOC_386_GOTPC:
+
+/*   This is tough to explain.  We end up with this one if we have
  * operands that look like "_GLOBAL_OFFSET_TABLE_+[.-.L284]".  The goal
  * here is to obtain the absolute address of the GOT, and it is strongly
  * preferable from a performance point of view to avoid using a runtime
@@ -4089,38 +4109,40 @@ md_apply_fix3 (fixP, valp, seg)
  * explicitly mentioned, and I wonder whether it would simplify matters
  * to do it this way.  Who knows.  In earlier versions of the PIC patches,
  * the pcrel_adjust field was used to store the correction, but since the
- * expression is not pcrel, I felt it would be confusing to do it this way.
- */
-      value -= 1;
-      break;
-    case BFD_RELOC_386_GOT32:
-      value = 0; /* Fully resolved at runtime.  No addend.  */
-      break;
-    case BFD_RELOC_386_GOTOFF:
-      break;
+ * expression is not pcrel, I felt it would be confusing to do it this
+ * way.  */
 
-    case BFD_RELOC_VTABLE_INHERIT:
-    case BFD_RELOC_VTABLE_ENTRY:
-      fixP->fx_done = 0;
-      return 1;
+	value -= 1;
+	break;
+      case BFD_RELOC_386_GOT32:
+	value = 0; /* Fully resolved at runtime.  No addend.  */
+	break;
+      case BFD_RELOC_386_GOTOFF:
+	break;
 
-    default:
-      break;
-    }
-#endif /* defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) */
+      case BFD_RELOC_VTABLE_INHERIT:
+      case BFD_RELOC_VTABLE_ENTRY:
+	fixP->fx_done = 0;
+	return 1;
+
+      default:
+	break;
+      }
+#endif /* defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)  */
   *valp = value;
-#endif /* defined (BFD_ASSEMBLER) && !defined (TE_Mach) */
+#endif /* defined (BFD_ASSEMBLER) && !defined (TE_Mach)  */
   md_number_to_chars (p, value, fixP->fx_size);
 
   return 1;
 }
 
-
 #define MAX_LITTLENUMS 6
 
-/* Turn the string pointed to by litP into a floating point constant of type
-   type, and emit the appropriate bytes.  The number of LITTLENUMS emitted
-   is stored in *sizeP .  An error message is returned, or NULL on OK.  */
+/* Turn the string pointed to by litP into a floating point constant
+   of type TYPE, and emit the appropriate bytes.  The number of
+   LITTLENUMS emitted is stored in *SIZEP.  An error message is
+   returned, or NULL on OK.  */
+
 char *
 md_atof (type, litP, sizeP)
      int type;
@@ -4181,7 +4203,6 @@ output_invalid (c)
   return output_invalid_buf;
 }
 
-
 /* REG_STRING starts *before* REGISTER_PREFIX.  */
 
 static const reg_entry *
@@ -4214,7 +4235,7 @@ parse_register (reg_string, end_op)
   r = (const reg_entry *) hash_find (reg_hash, reg_name_given);
 
   /* Handle floating point regs, allowing spaces in the (i) part.  */
-  if (r == i386_regtab /* %st is first entry of table */)
+  if (r == i386_regtab /* %st is first entry of table  */)
     {
       if (is_space_char (*s))
 	++s;
@@ -4235,7 +4256,7 @@ parse_register (reg_string, end_op)
 		  return r;
 		}
 	    }
-	  /* We have "%st(" then garbage */
+	  /* We have "%st(" then garbage.  */
 	  return (const reg_entry *) NULL;
 	}
     }
@@ -4315,14 +4336,14 @@ md_show_usage (stream)
 
 /* Pick the target format to use.  */
 
-const char  *
+const char *
 i386_target_format ()
 {
   switch (OUTPUT_FLAVOR)
     {
 #ifdef OBJ_MAYBE_AOUT
     case bfd_target_aout_flavour:
-     return AOUT_TARGET_FORMAT;
+      return AOUT_TARGET_FORMAT;
 #endif
 #ifdef OBJ_MAYBE_COFF
     case bfd_target_coff_flavour:
@@ -4338,8 +4359,8 @@ i386_target_format ()
     }
 }
 
-#endif /* OBJ_MAYBE_ more than one */
-#endif /* BFD_ASSEMBLER */
+#endif /* OBJ_MAYBE_ more than one  */
+#endif /* BFD_ASSEMBLER  */
 
 symbolS *
 md_undefined_symbol (name)
@@ -4363,6 +4384,7 @@ md_undefined_symbol (name)
 }
 
 /* Round up a section size to the appropriate boundary.  */
+
 valueT
 md_section_align (segment, size)
      segT segment ATTRIBUTE_UNUSED;
@@ -4413,7 +4435,6 @@ s_bss (ignore)
 }
 
 #endif
-
 
 #ifdef BFD_ASSEMBLER
 
@@ -4512,7 +4533,7 @@ tc_gen_reloc (section, fixp)
   return rel;
 }
 
-#else /* ! BFD_ASSEMBLER */
+#else /* ! BFD_ASSEMBLER  */
 
 #if (defined(OBJ_AOUT) | defined(OBJ_BOUT))
 void
@@ -4521,12 +4542,10 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
      fixS *fixP;
      relax_addressT segment_address_in_file;
 {
-  /*
-   * In: length of relocation (or of address) in chars: 1, 2 or 4.
-   * Out: GNU LD relocation length code: 0, 1, or 2.
-   */
+  /* In:  length of relocation (or of address) in chars: 1, 2 or 4.
+     Out: GNU LD relocation length code: 0, 1, or 2.  */
 
-  static const unsigned char nbytes_r_length[] = {42, 0, 1, 42, 2};
+  static const unsigned char nbytes_r_length[] = { 42, 0, 1, 42, 2 };
   long r_symbolnum;
 
   know (fixP->fx_addsy != NULL);
@@ -4548,7 +4567,7 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
 	      | (((fixP->fx_pcrel << 0) & 0x01) & 0x0f));
 }
 
-#endif /* OBJ_AOUT or OBJ_BOUT */
+#endif /* OBJ_AOUT or OBJ_BOUT.  */
 
 #if defined (I386COFF)
 
@@ -4578,8 +4597,6 @@ tc_coff_sizemachdep (frag)
     return 0;
 }
 
-#endif /* I386COFF */
+#endif /* I386COFF  */
 
-#endif /* ! BFD_ASSEMBLER */
-
-/* end of tc-i386.c */
+#endif /* ! BFD_ASSEMBLER  */

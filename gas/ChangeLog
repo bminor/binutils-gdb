@@ -1,3 +1,9 @@
+2000-08-05  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-cris.c: Fix formatting.
+	* config/tc-i386.c: Likewise.
+	* config/tc-sparc.c (sparc_ip): Simplify the code.
+
 2000-08-04  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-cris.c: Rearrange code for readability.

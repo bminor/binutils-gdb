@@ -20,7 +20,7 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the
    Free Software Foundation, 59 Temple Place - Suite 330, Boston,
-   MA 02111-1307, USA.	*/
+   MA 02111-1307, USA.  */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -56,12 +56,12 @@ enum prefix_kind
 /* The prefix for an instruction.  */
 struct cris_prefix
 {
-  enum prefix_kind	   kind;
-  int			   base_reg_number;
-  unsigned int		   opcode;
+  enum prefix_kind kind;
+  int base_reg_number;
+  unsigned int opcode;
 
   /* There might be an expression to be evaluated, like I in [rN+I].  */
-  expressionS		   expr;
+  expressionS expr;
 
   /* If there's an expression, we might need a relocation.  Here's the
      type of what relocation to start relaxaton with.
@@ -70,29 +70,29 @@ struct cris_prefix
   enum bfd_reloc_code_real reloc;
 };
 
-/* The description of the instruction being assembled.	*/
+/* The description of the instruction being assembled.  */
 struct cris_instruction
 {
   /* If CRIS_INSN_NONE, then this insn is of zero length.  */
-  enum cris_insn_kind	     insn_type;
+  enum cris_insn_kind insn_type;
 
   /* If a special register was mentioned, this is its description, else
-     it is NULL. */
+     it is NULL.  */
   const struct cris_spec_reg *spec_reg;
 
-  unsigned int		     opcode;
+  unsigned int opcode;
 
   /* An insn may have at most one expression; theoretically there could be
-     another in its prefix (but I don't see how that could happen). */
-  expressionS		     expr;
+     another in its prefix (but I don't see how that could happen).  */
+  expressionS expr;
 
   /* The expression might need a relocation.  Here's one to start
      relaxation with.  */
-  enum bfd_reloc_code_real   reloc;
+  enum bfd_reloc_code_real reloc;
 
   /* The size in bytes of an immediate expression, or zero in
      nonapplicable.  */
-  int			     imm_oprnd_size;
+  int imm_oprnd_size;
 };
 
 static void cris_process_instruction PARAMS ((char *,
@@ -133,18 +133,17 @@ const char cris_comment_chars[] = ";";
 
 /* This array holds the chars that only start a comment at the beginning of
    a line.  If the line seems to have the form '# 123 filename'
-   .line and .file directives will appear in the pre-processed output */
+   .line and .file directives will appear in the pre-processed output.  */
 /* Note that input_file.c hand-checks for '#' at the beginning of the
    first line of the input file.  This is because the compiler outputs
-   #NO_APP at the beginning of its output. */
-/* Also note that slash-star will always start a comment */
+   #NO_APP at the beginning of its output.  */
+/* Also note that slash-star will always start a comment.  */
 const char line_comment_chars[] = "#";
 const char line_separator_chars[] = "@";
 
 /* Now all floating point support is shut off.  See md_atof.  */
 const char EXP_CHARS[] = "";
 const char FLT_CHARS[] = "";
-
 
 /* For CRIS, we encode the relax_substateTs (in e.g. fr_substate) as:
 		       2		 1		   0
@@ -162,7 +161,7 @@ const char FLT_CHARS[] = "";
       length: byte, word, 10-byte expansion
 
    2. BDAP
-      length: byte, word, dword */
+      length: byte, word, dword  */
 
 #define STATE_CONDITIONAL_BRANCH    (1)
 #define STATE_BASE_PLUS_DISP_PREFIX (2)
@@ -175,15 +174,14 @@ const char FLT_CHARS[] = "";
 #define STATE_UNDF		    (3)
 #define STATE_MAX_LENGTH	    (3)
 
-
 /* These displacements are relative to the adress following the opcode
    word of the instruction.  The first letter is Byte, Word.  The 2nd
    letter is Forward, Backward.  */
 
 #define BRANCH_BF ( 254)
 #define BRANCH_BB (-256)
-#define BRANCH_WF (2+ 32767)
-#define BRANCH_WB (2+-32768)
+#define BRANCH_WF (2 +  32767)
+#define BRANCH_WB (2 + -32768)
 
 #define BDAP_BF	  ( 127)
 #define BDAP_BB	  (-128)
@@ -209,7 +207,7 @@ const relax_typeS md_cris_relax_table[] =
   /* Bcc o (1, 0).  */
   {BRANCH_BF, BRANCH_BB, 0,  ENCODE_RELAX (1, 1)},
 
-  /* Bcc [PC+] (1, 1).	*/
+  /* Bcc [PC+] (1, 1).  */
   {BRANCH_WF, BRANCH_WB, 2,  ENCODE_RELAX (1, 2)},
 
   /* BEXT/BWF, BA, JUMP (external), JUMP (always), Bnot_cc, JUMP (default)
@@ -238,7 +236,6 @@ const relax_typeS md_cris_relax_table[] =
 #undef BDAP_WF
 #undef BDAP_WB
 
-
 /* Target-specific multicharacter options, not const-declared at usage
    in 2.9.1 and CVS of 2000-02-16.  */
 struct option md_longopts[] =
@@ -249,7 +246,6 @@ struct option md_longopts[] =
 /* Not const-declared at usage in 2.9.1.  */
 size_t md_longopts_size = sizeof (md_longopts);
 const char *md_shortopts = "hHN";
-
 
 /* At first glance, this may seems wrong and should be 4 (ba + nop); but
    since a short_jump must skip a *number* of long jumps, it must also be
@@ -264,8 +260,8 @@ const char *md_shortopts = "hHN";
 const int md_short_jump_size = 6;
 const int md_long_jump_size = 6;
 
-
 /* Report output format.  */
+
 const char *
 cris_target_format ()
 {
@@ -295,15 +291,15 @@ cris_target_format ()
    or fr_var contributes to our returned value.
 
    Although it may not be explicit in the frag, pretend
-   fr_var starts with a value.	*/
+   fr_var starts with a value.  */
 
 int
 md_estimate_size_before_relax (fragP, segment_type)
      fragS *fragP;
      /* The segment is either N_DATA or N_TEXT.  */
-     segT    segment_type;
+     segT segment_type;
 {
-  int	old_fr_fix;
+  int old_fr_fix;
 
   old_fr_fix = fragP->fr_fix;
 
@@ -327,7 +323,7 @@ md_estimate_size_before_relax (fragP, segment_type)
 	  fragP->fr_fix += 2 + 2 + 2 + 4;
 	  writep = fragP->fr_literal + old_fr_fix;
 	  gen_cond_branch_32 (fragP->fr_opcode, writep, fragP,
-			      fragP->fr_symbol, (symbolS *)NULL,
+			      fragP->fr_symbol, (symbolS *) NULL,
 			      fragP->fr_offset);
 	  frag_wane (fragP);
 	}
@@ -395,14 +391,14 @@ md_estimate_size_before_relax (fragP, segment_type)
 
 	      /* Modify the byte-offset BDAP into a word or dword offset
 		 BDAP.	Or really, a BDAP rX,8bit into a
-		 BDAP.[wd] rX,[PC+] followed by a and a word or dword.	*/
+		 BDAP.[wd] rX,[PC+] followed by a and a word or dword.  */
 	      (fragP->fr_opcode)[0] = BDAP_PC_LOW + pow2_of_size * 16;
 
 	      /* Keep the register number in the highest four bits.  */
 	      (fragP->fr_opcode)[1] &= 0xF0;
 	      (fragP->fr_opcode)[1] |= BDAP_INCR_HIGH;
 
-	      /* It grew by two or four bytes.	*/
+	      /* It grew by two or four bytes.  */
 	      fragP->fr_fix += 1 << pow2_of_size;
 	      writep = fragP->fr_literal + old_fr_fix;
 	      md_number_to_chars (writep, value, 1 << pow2_of_size);
@@ -417,7 +413,6 @@ md_estimate_size_before_relax (fragP, segment_type)
 
   return fragP->fr_var + (fragP->fr_fix - old_fr_fix);
 }
-
 
 /* Perform post-processing of machine-dependent frags after relaxation.
    Called after relaxation is finished.
@@ -435,7 +430,7 @@ md_convert_frag (abfd, sec, fragP)
      segT sec ATTRIBUTE_UNUSED;
      fragS *fragP;
 {
-  /* Pointer to first byte in variable-sized part of the frag.	*/
+  /* Pointer to first byte in variable-sized part of the frag.  */
   char *var_partp;
 
   /* Pointer to first opcode byte in frag.  */
@@ -476,67 +471,66 @@ md_convert_frag (abfd, sec, fragP)
   address_of_var_part = fragP->fr_address + var_part_offset;
 
   switch (fragP->fr_subtype)
-  {
-  case ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_BYTE):
-    opcodep[0] = branch_disp ((target_address - address_of_var_part));
-    var_part_size = 0;
-    break;
+    {
+    case ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_BYTE):
+      opcodep[0] = branch_disp ((target_address - address_of_var_part));
+      var_part_size = 0;
+      break;
 
-  case ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_WORD):
-    /* We had a quick immediate branch, now turn it into a word one i.e. a
-       PC autoincrement.  */
-    opcodep[0] = BRANCH_PC_LOW;
-    opcodep[1] &= 0xF0;
-    opcodep[1] |= BRANCH_INCR_HIGH;
-    md_number_to_chars (var_partp,
-			(long) (target_address - (address_of_var_part + 2)),
-			2);
-    var_part_size = 2;
-    break;
+    case ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_WORD):
+      /* We had a quick immediate branch, now turn it into a word one i.e. a
+	 PC autoincrement.  */
+      opcodep[0] = BRANCH_PC_LOW;
+      opcodep[1] &= 0xF0;
+      opcodep[1] |= BRANCH_INCR_HIGH;
+      md_number_to_chars (var_partp,
+			  (long) (target_address - (address_of_var_part + 2)),
+			  2);
+      var_part_size = 2;
+      break;
 
-  case ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_DWORD):
-    gen_cond_branch_32 (fragP->fr_opcode, var_partp, fragP,
-			fragP->fr_symbol, (symbolS *)NULL,
-			fragP->fr_offset);
-    /* Ten bytes added: a branch, nop and a jump.  */
-    var_part_size = 2 + 2 + 4 + 2;
-    break;
+    case ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_DWORD):
+      gen_cond_branch_32 (fragP->fr_opcode, var_partp, fragP,
+			  fragP->fr_symbol, (symbolS *) NULL,
+			  fragP->fr_offset);
+      /* Ten bytes added: a branch, nop and a jump.  */
+      var_part_size = 2 + 2 + 4 + 2;
+      break;
 
-  case ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_BYTE):
-    var_partp[0] = target_address - (address_of_var_part + 1);
-    var_part_size = 0;
-    break;
+    case ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_BYTE):
+      var_partp[0] = target_address - (address_of_var_part + 1);
+      var_part_size = 0;
+      break;
 
-  case ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_WORD):
-    /* We had a BDAP 8-bit "quick immediate", now turn it into a 16-bit
-       one that uses PC autoincrement.	*/
-    opcodep[0] = BDAP_PC_LOW + (1 << 4);
-    opcodep[1] &= 0xF0;
-    opcodep[1] |= BDAP_INCR_HIGH;
-    md_number_to_chars (var_partp, (long)(target_address), 2);
-    var_part_size = 2;
-    break;
+    case ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_WORD):
+      /* We had a BDAP 8-bit "quick immediate", now turn it into a 16-bit
+	 one that uses PC autoincrement.  */
+      opcodep[0] = BDAP_PC_LOW + (1 << 4);
+      opcodep[1] &= 0xF0;
+      opcodep[1] |= BDAP_INCR_HIGH;
+      md_number_to_chars (var_partp, (long) (target_address), 2);
+      var_part_size = 2;
+      break;
 
-  case ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_DWORD):
-    /* We had a BDAP 16-bit "word", change the offset to a dword.  */
-    opcodep[0] = BDAP_PC_LOW + (2 << 4);
-    opcodep[1] &= 0xF0;
-    opcodep[1] |= BDAP_INCR_HIGH;
-    if (fragP->fr_symbol == NULL)
-      md_number_to_chars (var_partp, fragP->fr_offset, 4);
-    else
-      fix_new (fragP, var_partp - fragP->fr_literal, 4, fragP->fr_symbol,
-	       fragP->fr_offset, 0, BFD_RELOC_32);
-    var_part_size = 4;
-    break;
+    case ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_DWORD):
+      /* We had a BDAP 16-bit "word", change the offset to a dword.  */
+      opcodep[0] = BDAP_PC_LOW + (2 << 4);
+      opcodep[1] &= 0xF0;
+      opcodep[1] |= BDAP_INCR_HIGH;
+      if (fragP->fr_symbol == NULL)
+	md_number_to_chars (var_partp, fragP->fr_offset, 4);
+      else
+	fix_new (fragP, var_partp - fragP->fr_literal, 4, fragP->fr_symbol,
+		 fragP->fr_offset, 0, BFD_RELOC_32);
+      var_part_size = 4;
+      break;
 
-  default:
-    BAD_CASE (fragP->fr_subtype);
-    break;
-  }
+    default:
+      BAD_CASE (fragP->fr_subtype);
+      break;
+    }
 
   fragP->fr_fix += var_part_size;
-
 }
 
 /* Generate a short jump around a secondary jump table.
@@ -545,7 +539,7 @@ md_convert_frag (abfd, sec, fragP)
    This used to be md_create_short_jump, but is now called from
    md_create_long_jump instead, when sufficient.
    since the sizes of the jumps are the same.  It used to be brittle,
-   making possibilities for creating bad code.	*/
+   making possibilities for creating bad code.  */
 
 static void
 cris_create_short_jump (storep, from_addr, to_addr, fragP, to_symbol)
@@ -562,29 +556,28 @@ cris_create_short_jump (storep, from_addr, to_addr, fragP, to_symbol)
   if (-254 <= distance && distance <= 256)
     {
       /* Create a "short" short jump: "BA distance - 2".  */
-      storep[0] = branch_disp (distance-2);
+      storep[0] = branch_disp (distance - 2);
       storep[1] = BA_QUICK_HIGH;
 
       /* A nop for the delay slot.  */
-      md_number_to_chars (storep+2, NOP_OPCODE, 2);
+      md_number_to_chars (storep + 2, NOP_OPCODE, 2);
 
       /* The extra word should be filled with something sane too.  Make it
 	 a nop to keep disassembly sane.  */
-      md_number_to_chars (storep+4, NOP_OPCODE, 2);
+      md_number_to_chars (storep + 4, NOP_OPCODE, 2);
     }
   else
     {
       /* Make it a "long" short jump: "BA (PC+)".  */
       md_number_to_chars (storep, BA_PC_INCR_OPCODE, 2);
 
-      /* ".WORD distance - 4".	*/
+      /* ".WORD distance - 4".  */
       md_number_to_chars (storep + 2, (long) (distance - 4), 2);
 
       /* A nop for the delay slot.  */
-      md_number_to_chars (storep+4, NOP_OPCODE, 2);
+      md_number_to_chars (storep + 4, NOP_OPCODE, 2);
     }
 }
-
 
 /* Generate a long jump in a secondary jump table.
 
@@ -624,15 +617,15 @@ md_create_long_jump (storep, from_addr, to_addr, fragP, to_symbol)
     }
 }
 
-
 /* Port-specific assembler initialization.  */
+
 void
 md_begin ()
 {
   const char *hashret = NULL;
   int i = 0;
 
-  /* Set up a hash table for the instructions.	*/
+  /* Set up a hash table for the instructions.  */
   op_hash = hash_new ();
   if (op_hash == NULL)
     as_fatal (_("Virtual memory exhausted"));
@@ -644,7 +637,7 @@ md_begin ()
 
       if (hashret != NULL && *hashret != '\0')
 	as_fatal (_("Can't hash `%s': %s\n"), cris_opcodes[i].name,
-		    *hashret == 0 ? _("(unknown reason)") : hashret);
+		  *hashret == 0 ? _("(unknown reason)") : hashret);
       do
 	{
 	  if (cris_opcodes[i].match & cris_opcodes[i].lose)
@@ -652,13 +645,14 @@ md_begin ()
 		      cris_opcodes[i].args);
 
 	  ++i;
-	} while (cris_opcodes[i].name != NULL
-		 && strcmp (cris_opcodes[i].name, name) == 0);
+	}
+      while (cris_opcodes[i].name != NULL
+	     && strcmp (cris_opcodes[i].name, name) == 0);
     }
 }
 
-
 /* Assemble a source line.  */
+
 void
 md_assemble (str)
      char *str;
@@ -698,7 +692,7 @@ md_assemble (str)
 	 no reloc.  */
       if (prefix.reloc != BFD_RELOC_NONE)
 	{
-	  /* Output an absolute mode address. */
+	  /* Output an absolute mode address.  */
 	  p = frag_more (4);
 	  fix_new_exp (frag_now, (p - frag_now->fr_literal), 4,
 		       &prefix.expr, 0, prefix.reloc);
@@ -712,12 +706,12 @@ md_assemble (str)
 	 size of the register to "sp".  */
       if (output_instruction.spec_reg != NULL)
 	{
-	  /* Special register.	*/
+	  /* Special register.  */
 	  opcodep[0] = -output_instruction.spec_reg->reg_size;
 	}
       else
 	{
-	  /* General register.	*/
+	  /* General register.  */
 	  opcodep[0] = -4;
 	}
       opcodep[1] = (REG_SP << 4) + (BDAP_QUICK_OPCODE >> 8);
@@ -735,7 +729,7 @@ md_assemble (str)
   opcodep = frag_more (2);
 
   /* Output the instruction opcode.  */
-  md_number_to_chars (opcodep, (long)(output_instruction.opcode), 2);
+  md_number_to_chars (opcodep, (long) (output_instruction.opcode), 2);
 
   /* Output the symbol-dependent instruction stuff.  */
   if (output_instruction.insn_type == CRIS_INSN_BRANCH)
@@ -756,7 +750,7 @@ md_assemble (str)
 	  || to_seg == now_seg || is_undefined)
 	{
 	  /* If is_undefined, then the expression may BECOME now_seg.  */
-	  length_code = is_undefined ?	STATE_UNDF :  STATE_BYTE;
+	  length_code = is_undefined ? STATE_UNDF : STATE_BYTE;
 
 	  /* Make room for max ten bytes of variable length.  */
 	  frag_var (rs_machine_dependent, 10, 0,
@@ -773,7 +767,7 @@ md_assemble (str)
 	     branch.  */
 	  gen_cond_branch_32 (opcodep, frag_more (10), frag_now,
 			      output_instruction.expr.X_add_symbol,
-			      (symbolS *)NULL,
+			      (symbolS *) NULL,
 			      output_instruction.expr.X_add_number);
 	}
     }
@@ -810,7 +804,7 @@ md_assemble (str)
       else if (output_instruction.reloc != BFD_RELOC_NONE)
 	{
 	  /* An immediate operand that has a relocation and needs to be
-	     processed further. */
+	     processed further.  */
 
 	  /* It is important to use fix_new_exp here and everywhere else
 	     (and not fix_new), as fix_new_exp can handle "difference
@@ -823,23 +817,23 @@ md_assemble (str)
     }
 }
 
-
 /* Low level text-to-bits assembly.  */
+
 static void
 cris_process_instruction (insn_text, out_insnp, prefixp)
      char *insn_text;
-     struct cris_instruction  *out_insnp;
+     struct cris_instruction *out_insnp;
      struct cris_prefix *prefixp;
 {
-  char		     *s;
-  char		     modified_char = 0;
-  const char	     *args;
+  char *s;
+  char modified_char = 0;
+  const char *args;
   struct cris_opcode *instruction;
-  char		     *operands;
-  int		     match = 0;
-  int		     mode;
-  int		     regno;
-  int		     size_bits;
+  char *operands;
+  int match = 0;
+  int mode;
+  int regno;
+  int size_bits;
 
   /* Reset these fields to a harmless state in case we need to return in
      error.  */
@@ -850,10 +844,8 @@ cris_process_instruction (insn_text, out_insnp, prefixp)
 
   /* Find the end of the opcode mnemonic.  We assume (true in 2.9.1)
      that the caller has translated the opcode to lower-case, up to the
-     first non-letter.	*/
-  for (operands = insn_text;
-       islower (*operands);
-       ++operands)
+     first non-letter.  */
+  for (operands = insn_text; islower (*operands); ++operands)
     ;
 
   /* Terminate the opcode after letters, but save the character there if
@@ -864,13 +856,13 @@ cris_process_instruction (insn_text, out_insnp, prefixp)
       break;
 
     case '.':
-      /* Put back the modified character later */
+      /* Put back the modified character later.  */
       modified_char = *operands;
-      /* FALLTHROUGH.  */
+      /* Fall through.  */
 
     case ' ':
-      /* Consume the character after the mnemonic and replace */
-      /* it with '\0'.					      */
+      /* Consume the character after the mnemonic
+	 and replace it with '\0'.  */
       *operands++ = '\0';
       break;
 
@@ -897,16 +889,13 @@ cris_process_instruction (insn_text, out_insnp, prefixp)
       *--operands = modified_char;
     }
 
-
   /* Try to match an opcode table slot.  */
-  for (s = operands;
-       ;
-       )
+  for (s = operands;;)
     {
-      int  imm_expr_found;
+      int imm_expr_found;
 
       /* Initialize *prefixp, perhaps after being modified for a
-	 "near match".	*/
+	 "near match".  */
       prefixp->kind = PREFIX_NONE;
       prefixp->reloc = BFD_RELOC_NONE;
 
@@ -921,9 +910,7 @@ cris_process_instruction (insn_text, out_insnp, prefixp)
 
       /* Build the opcode, checking as we go to make sure that the
 	 operands match.  */
-      for (args = instruction->args;
-	   ;
-	   ++args)
+      for (args = instruction->args;; ++args)
 	{
 	  switch (*args)
 	    {
@@ -947,7 +934,7 @@ cris_process_instruction (insn_text, out_insnp, prefixp)
 
 	    case 'B':
 	      /* This is not really an operand, but causes a "BDAP
-		 -size,SP" prefix to be output, for PUSH instructions.	*/
+		 -size,SP" prefix to be output, for PUSH instructions.  */
 	      prefixp->kind = PREFIX_PUSH;
 	      continue;
 
@@ -1011,8 +998,7 @@ cris_process_instruction (insn_text, out_insnp, prefixp)
 		if (! get_flags (&s, &flags))
 		  break;
 
-		out_insnp->opcode
-		  |= ((flags & 0xf0) << 8) | (flags & 0xf);
+		out_insnp->opcode |= ((flags & 0xf0) << 8) | (flags & 0xf);
 		continue;
 	      }
 
@@ -1106,7 +1092,7 @@ cris_process_instruction (insn_text, out_insnp, prefixp)
 		    break;
 
 		  /* Since 'O' is used with an explicit bdap, we have no
-		     "real" instruction. */
+		     "real" instruction.  */
 		  prefixp->kind = PREFIX_BDAP_IMM;
 		  out_insnp->insn_type = CRIS_INSN_NONE;
 		  continue;
@@ -1139,7 +1125,7 @@ cris_process_instruction (insn_text, out_insnp, prefixp)
 	      /* This character is used in the disassembler to
 		 recognize a prefix instruction to fold into the
 		 addressing mode for the next instruction.  It is
-		 ignored here.	*/
+		 ignored here.  */
 	      continue;
 
 	    case 'R':
@@ -1203,8 +1189,7 @@ cris_process_instruction (insn_text, out_insnp, prefixp)
 		break;
 	      else
 		{
-		  out_insnp->opcode |=
-		    (regno << 12) | (size_bits << 4);
+		  out_insnp->opcode |= (regno << 12) | (size_bits << 4);
 		  continue;
 		}
 
@@ -1312,7 +1297,7 @@ cris_process_instruction (insn_text, out_insnp, prefixp)
 			      || out_insnp->expr.X_add_number > 255))
 			as_bad (_("Immediate value not in 8 bit range: %ld"),
 				out_insnp->expr.X_add_number);
-		      /* FALLTHROUGH.  */
+		      /* Fall through.  */
 		    case 2:
 		      /* FIXME:  We need an indicator in the instruction
 			 table to pass on, to indicate if we need to check
@@ -1343,7 +1328,7 @@ cris_process_instruction (insn_text, out_insnp, prefixp)
 			      || out_insnp->expr.X_add_number > 255))
 			as_bad (_("Immediate value not in 8 bit range: %ld"),
 				out_insnp->expr.X_add_number);
-		      /* FALLTHROUGH.  */
+		      /* Fall through.  */
 		    case 1:
 		      if (out_insnp->expr.X_op == O_constant
 			  && (out_insnp->expr.X_add_number < -32768
@@ -1367,7 +1352,6 @@ cris_process_instruction (insn_text, out_insnp, prefixp)
     }
 }
 
-
 /* Get a B, W, or D size modifier from the string pointed out by *cPP,
    which must point to a '.' in front of the modifier.	On successful
    return, *cPP is advanced to the character following the size
@@ -1390,7 +1374,7 @@ get_bwd_size_modifier (cPP, size_bitsp)
     return 0;
   else
     {
-      /* Consume the '.' */
+      /* Consume the '.'.  */
       (*cPP)++;
 
       switch (**cPP)
@@ -1420,7 +1404,6 @@ get_bwd_size_modifier (cPP, size_bitsp)
     }
 }
 
-
 /* Get a B or W size modifier from the string pointed out by *cPP,
    which must point to a '.' in front of the modifier.	On successful
    return, *cPP is advanced to the character following the size
@@ -1443,7 +1426,7 @@ get_bw_size_modifier (cPP, size_bitsp)
     return 0;
   else
     {
-      /* Consume the '.' */
+      /* Consume the '.'.  */
       (*cPP)++;
 
       switch (**cPP)
@@ -1467,7 +1450,6 @@ get_bw_size_modifier (cPP, size_bitsp)
       return 1;
     }
 }
-
 
 /* Get a general register from the string pointed out by *cPP.	The
    variable *cPP is advanced to the character following the general
@@ -1509,7 +1491,7 @@ get_gen_reg (cPP, regnop)
 
     case 'R':
     case 'r':
-      /* Hopefully r[0-9] or r1[0-5].  Consume 'R' or 'r' */
+      /* Hopefully r[0-9] or r1[0-5].  Consume 'R' or 'r'.  */
       (*cPP)++;
 
       if (isdigit (**cPP))
@@ -1520,13 +1502,13 @@ get_gen_reg (cPP, regnop)
 
 	  if (! isalnum (**cPP))
 	    {
-	      /* No more digits, we're done. */
+	      /* No more digits, we're done.  */
 	      return 1;
 	    }
 	  else
 	    {
 	      /* One more digit.  Consume and add.  */
-	      *regnop = *regnop*10 + (**cPP - '0');
+	      *regnop = *regnop * 10 + (**cPP - '0');
 
 	      /* We need to check for a valid register number; Rn,
 		 0 <= n <= MAX_REG.  */
@@ -1563,7 +1545,6 @@ get_gen_reg (cPP, regnop)
   return 0;
 }
 
-
 /* Get a special register from the string pointed out by *cPP. The
    variable *cPP is advanced to the character following the special
    register name if one is found, and retains its original position
@@ -1588,11 +1569,8 @@ get_spec_reg (cPP, sregpp)
   const struct cris_spec_reg *sregp;
 
   /* Loop over all special registers.  */
-  for (sregp = cris_spec_regs;
-       sregp->name != NULL;
-       sregp++)
+  for (sregp = cris_spec_regs; sregp->name != NULL; sregp++)
     {
-
       /* Start over from beginning of the supposed name.  */
       s1 = *cPP;
       s2 = sregp->name;
@@ -1606,20 +1584,19 @@ get_spec_reg (cPP, sregpp)
 
       /* For a match, we must have consumed the name in the table, and we
 	 must be outside what could be part of a name.	Assume here that a
-	 test for alphanumerics is sufficient for a name test.	*/
+	 test for alphanumerics is sufficient for a name test.  */
       if (*s2 == 0 && ! isalnum (*s1))
 	{
-	  /* We have a match.  Update the pointer and be done.	*/
+	  /* We have a match.  Update the pointer and be done.  */
 	  *cPP = s1;
 	  *sregpp = sregp;
 	  return 1;
 	}
     }
 
-  /* If we got here, we did not find any name.	*/
+  /* If we got here, we did not find any name.  */
   return 0;
 }
-
 
 /* Get an unprefixed or side-effect-prefix operand from the string pointed
    out by *cPP.  The pointer *cPP is advanced to the character following
@@ -1649,12 +1626,12 @@ get_spec_reg (cPP, sregpp)
 static int
 get_autoinc_prefix_or_indir_op (cPP, prefixp, is_autoincp, src_regnop,
 				imm_foundp, imm_exprP)
-     char		 **cPP;
-     struct cris_prefix	 *prefixp;
-     int		 *is_autoincp;
-     int		 *src_regnop;
-     int		 *imm_foundp;
-     expressionS	 *imm_exprP;
+     char **cPP;
+     struct cris_prefix *prefixp;
+     int *is_autoincp;
+     int *src_regnop;
+     int *imm_foundp;
+     expressionS *imm_exprP;
 {
   /* Assume there was no immediate mode expression.  */
   *imm_foundp = 0;
@@ -1763,59 +1740,59 @@ get_autoinc_prefix_or_indir_op (cPP, prefixp, is_autoincp, src_regnop,
 		      /* It wasn't an indirection.  Check if it's a
 			 register.  */
 		      else if (get_gen_reg (cPP, &index_reg_number))
-			  {
-			    int size_bits;
+			{
+			  int size_bits;
 
-			    /* Indexed with assign mode: "[rN+rM.S]".  */
-			    prefixp->kind = PREFIX_BIAP;
-			    prefixp->opcode
-			      = (BIAP_OPCODE + (index_reg_number << 12)
-				 + prefixp->base_reg_number /* << 0 */);
+			  /* Indexed with assign mode: "[rN+rM.S]".  */
+			  prefixp->kind = PREFIX_BIAP;
+			  prefixp->opcode
+			    = (BIAP_OPCODE + (index_reg_number << 12)
+			       + prefixp->base_reg_number /* << 0 */);
 
-			    if (! get_bwd_size_modifier (cPP, &size_bits))
-			      /* Size missing, this isn't a match.  */
-			      return 0;
-			    else
-			      {
-				/* Size found, break out to check the
-				   final ']'.  */
-				prefixp->opcode |= size_bits << 4;
-				break;
-			      }
-			  }
-		      /* Not a register.  Then this must be "[rN+I]".  */
-			else if (cris_get_expression (cPP, &prefixp->expr))
+			  if (! get_bwd_size_modifier (cPP, &size_bits))
+			    /* Size missing, this isn't a match.  */
+			    return 0;
+			  else
 			    {
-			      /* We've got offset with assign mode.  Fill
-				 in the blanks and break out to match the
+			      /* Size found, break out to check the
 				 final ']'.  */
-			      prefixp->kind = PREFIX_BDAP_IMM;
+			      prefixp->opcode |= size_bits << 4;
 			      break;
 			    }
-			  else
-			    /* Neither register nor expression found, so
-			       this can't be a match.  */
-			    return 0;
+			}
+		      /* Not a register.  Then this must be "[rN+I]".  */
+		      else if (cris_get_expression (cPP, &prefixp->expr))
+			{
+			  /* We've got offset with assign mode.  Fill
+			     in the blanks and break out to match the
+			     final ']'.  */
+			  prefixp->kind = PREFIX_BDAP_IMM;
+			  break;
+			}
+		      else
+			/* Neither register nor expression found, so
+			   this can't be a match.  */
+			return 0;
 		    }
-		  /* Not "[rN+" but perhaps "[rN-"? */
+		  /* Not "[rN+" but perhaps "[rN-"?  */
 		  else if (**cPP == '-')
-		      {
-			/* We must have an offset with assign mode.  */
-			if (! cris_get_expression (cPP, &prefixp->expr))
-			  /* No expression, no match.  */
-			  return 0;
-			else
-			  {
-			    /* We've got offset with assign mode.  Fill
-			       in the blanks and break out to match the
-			       final ']'.  */
-			    prefixp->kind = PREFIX_BDAP_IMM;
-			    break;
-			  }
-		      }
-		    else
-		      /* Neither '+' nor '-' after "[rN=rM".  Lose.  */
-		      return 0;
+		    {
+		      /* We must have an offset with assign mode.  */
+		      if (! cris_get_expression (cPP, &prefixp->expr))
+			/* No expression, no match.  */
+			return 0;
+		      else
+			{
+			  /* We've got offset with assign mode.  Fill
+			     in the blanks and break out to match the
+			     final ']'.  */
+			  prefixp->kind = PREFIX_BDAP_IMM;
+			  break;
+			}
+		    }
+		  else
+		    /* Neither '+' nor '-' after "[rN=rM".  Lose.  */
+		    return 0;
 		}
 	    default:
 	      /* Neither ']' nor '+' nor '=' after "[rN".  Lose.  */
@@ -1835,21 +1812,20 @@ get_autoinc_prefix_or_indir_op (cPP, prefixp, is_autoincp, src_regnop,
 	  return 1;
 	}
     }
-  /* No indirection.	Perhaps a constant?  */
+  /* No indirection.  Perhaps a constant?  */
   else if (cris_get_expression (cPP, imm_exprP))
-      {
-	/* Expression found, this is immediate mode.  */
-	prefixp->kind = PREFIX_NONE;
-	*is_autoincp = 1;
-	*src_regnop = REG_PC;
-	*imm_foundp = 1;
-	return 1;
-      }
+    {
+      /* Expression found, this is immediate mode.  */
+      prefixp->kind = PREFIX_NONE;
+      *is_autoincp = 1;
+      *src_regnop = REG_PC;
+      *imm_foundp = 1;
+      return 1;
+    }
 
   /* No luck today.  */
   return 0;
 }
-
 
 /* This function gets an indirect operand in a three-address operand
    combination from the string pointed out by *cPP.  The pointer *cPP is
@@ -1875,179 +1851,178 @@ get_3op_or_dip_prefix_op (cPP, prefixp)
     /* We must have a '[' or it's a clean failure.  */
     return 0;
 
-      /* Eat the first '['.  */
+  /* Eat the first '['.  */
+  (*cPP)++;
+
+  if (**cPP == '[')
+    {
+      /* A second '[', so this must be double-indirect mode.  */
       (*cPP)++;
+      prefixp->kind = PREFIX_DIP;
+      prefixp->opcode = DIP_OPCODE;
 
-      if (**cPP == '[')
+      /* Get the register or fail entirely.  */
+      if (! get_gen_reg (cPP, &reg_number))
+	return 0;
+      else
 	{
-	  /* A second '[', so this must be double-indirect mode.  */
-	  (*cPP)++;
-	  prefixp->kind = PREFIX_DIP;
-	  prefixp->opcode = DIP_OPCODE;
-
-	  /* Get the register or fail entirely.  */
-	  if (! get_gen_reg (cPP, &reg_number))
-	    return 0;
-	  else
+	  prefixp->opcode |= reg_number /* << 0 */ ;
+	  if (**cPP == '+')
 	    {
-	      prefixp->opcode |= reg_number /* << 0 */ ;
+	      /* Since we found a '+', this must be double-indirect
+		 autoincrement mode.  */
+	      (*cPP)++;
+	      prefixp->opcode |= AUTOINCR_BIT << 8;
+	    }
+
+	  /* There's nothing particular to do, if this was a
+	     double-indirect *without* autoincrement.  */
+	}
+
+      /* Check the first ']'.  The second one is checked at the end.  */
+      if (**cPP != ']')
+	return 0;
+
+      /* Eat the first ']', so we'll be looking at a second ']'.  */
+      (*cPP)++;
+    }
+  /* No second '['.  Then we should have a register here, making
+     it "[rN".  */
+  else if (get_gen_reg (cPP, &prefixp->base_reg_number))
+    {
+      /* This must be indexed or offset mode: "[rN+I]" or
+	 "[rN+rM.S]" or "[rN+[rM].S]" or "[rN+[rM+].S]".  */
+      if (**cPP == '+')
+	{
+	  /* Not the first alternative, must be one of the last
+	     three.  */
+	  int index_reg_number;
+
+	  (*cPP)++;
+
+	  if (**cPP == '[')
+	    {
+	      /* This is "[rx+["...  Expect a register next.  */
+	      int size_bits;
+	      (*cPP)++;
+
+	      if (!get_gen_reg (cPP, &index_reg_number))
+		return 0;
+
+	      prefixp->kind = PREFIX_BDAP;
+	      prefixp->opcode
+		= (BDAP_INDIR_OPCODE
+		   + (prefixp->base_reg_number << 12)
+		   + index_reg_number);
+
+	      /* We've seen "[rx+[ry", so check if this is
+		 autoincrement.  */
 	      if (**cPP == '+')
 		{
-		  /* Since we found a '+', this must be double-indirect
-		     autoincrement mode.  */
+		  /* Yep, now at "[rx+[ry+".  */
 		  (*cPP)++;
 		  prefixp->opcode |= AUTOINCR_BIT << 8;
 		}
+	      /* If it wasn't autoincrement, we don't need to
+		 add anything.  */
 
-	      /* There's nothing particular to do, if this was a
-		 double-indirect *without* autoincrement.  */
+	      /* Check a first closing ']': "[rx+[ry]" or
+		 "[rx+[ry+]".  */
+	      if (**cPP != ']')
+		return 0;
+	      (*cPP)++;
+
+	      /* Now expect a size modifier ".S".  */
+	      if (! get_bwd_size_modifier (cPP, &size_bits))
+		return 0;
+
+	      prefixp->opcode |= size_bits << 4;
+
+	      /* Ok, all interesting stuff has been seen:
+		 "[rx+[ry+].S" or "[rx+[ry].S".  We only need to
+		 expect a final ']', which we'll do in a common
+		 closing session.  */
 	    }
+	  /* Seen "[rN+", but not a '[', so check if we have a
+	     register.  */
+	  else if (get_gen_reg (cPP, &index_reg_number))
+	    {
+	      /* This is indexed mode: "[rN+rM.S]" or
+		 "[rN+rM.S+]".  */
+	      int size_bits;
+	      prefixp->kind = PREFIX_BIAP;
+	      prefixp->opcode
+		= (BIAP_OPCODE
+		   | prefixp->base_reg_number /* << 0 */
+		   | (index_reg_number << 12));
 
-	  /* Check the first ']'.  The second one is checked at the end.  */
-	  if (**cPP != ']')
-	    return 0;
-
-	  /* Eat the first ']', so we'll be looking at a second ']'.  */
-	  (*cPP)++;
-	}
-      /* No second '['.  Then we should have a register here, making
-	 it "[rN".  */
-      else if (get_gen_reg (cPP, &prefixp->base_reg_number))
-	  {
-	    /* This must be indexed or offset mode: "[rN+I]" or
-	       "[rN+rM.S]" or "[rN+[rM].S]" or "[rN+[rM+].S]".	*/
-	    if (**cPP == '+')
-	      {
-		/* Not the first alternative, must be one of the last
-		   three.  */
-		int index_reg_number;
-
-		(*cPP)++;
-
-		if (**cPP == '[')
-		  {
-		    /* This is "[rx+["...  Expect a register next.  */
-		    int size_bits;
-		    (*cPP)++;
-
-		    if (!get_gen_reg (cPP, &index_reg_number))
-		      return 0;
-
-		    prefixp->kind = PREFIX_BDAP;
-		    prefixp->opcode
-		      = (BDAP_INDIR_OPCODE
-			 + (prefixp->base_reg_number << 12)
-			 + index_reg_number);
-
-		    /* We've seen "[rx+[ry", so check if this is
-		       autoincrement.  */
-		    if (**cPP == '+')
-		      {
-			/* Yep, now at "[rx+[ry+".  */
-			(*cPP)++;
-			prefixp->opcode |= AUTOINCR_BIT << 8;
-		      }
-		    /* If it wasn't autoincrement, we don't need to
-		       add anything.  */
-
-		    /* Check a first closing ']': "[rx+[ry]" or
-		       "[rx+[ry+]".  */
-		    if (**cPP != ']')
-		      return 0;
-		    (*cPP)++;
-
-		    /* Now expect a size modifier ".S".  */
-		    if (! get_bwd_size_modifier (cPP, &size_bits))
-		      return 0;
-
-		    prefixp->opcode |= size_bits << 4;
-
-		    /* Ok, all interesting stuff has been seen:
-		       "[rx+[ry+].S" or "[rx+[ry].S".  We only need to
-		       expect a final ']', which we'll do in a common
-		       closing session.  */
-		  }
-		/* Seen "[rN+", but not a '[', so check if we have a
-		   register.	*/
-		else if (get_gen_reg (cPP, &index_reg_number))
-		    {
-		      /* This is indexed mode: "[rN+rM.S]" or
-			 "[rN+rM.S+]".	*/
-		      int size_bits;
-		      prefixp->kind = PREFIX_BIAP;
-		      prefixp->opcode
-			= (BIAP_OPCODE
-			   | prefixp->base_reg_number /* << 0 */
-			   | (index_reg_number << 12));
-
-		      /*  */
-		      if (! get_bwd_size_modifier (cPP, &size_bits))
-			/* Missing size, so fail.  */
-			return 0;
-		      else
-			  /* Size found.  Add that piece and drop down to
-			     the common checking of the closing ']'.  */
-			  prefixp->opcode |= size_bits << 4;
-		    }
-		/* Seen "[rN+", but not a '[' or a register, so then
-		   it must be a constant "I".  */
-		  else if (cris_get_expression (cPP, &prefixp->expr))
-		      {
-			/* Expression found, so fill in the bits of offset
-			   mode and drop down to check the closing ']'.  */
-			prefixp->kind = PREFIX_BDAP_IMM;
-		      }
-		    else
-		      /* Nothing valid here: lose.  */
-		      return 0;
-	      }
-	      /* Seen "[rN" but no '+', so check if it's a '-'.  */
-	    else if (**cPP == '-')
-		{
-		  /* Yep, we must have offset mode.  */
-		  if (! cris_get_expression (cPP, &prefixp->expr))
-		    /* No expression, so we lose.  */
-		    return 0;
-		  else
-		    {
-		      /* Expression found to make this offset mode, so
-			 fill those bits and drop down to check the
-			 closing ']'.  */
-		      prefixp->kind = PREFIX_BDAP_IMM;
-		    }
-		}
+	      /*  */
+	      if (! get_bwd_size_modifier (cPP, &size_bits))
+		/* Missing size, so fail.  */
+		return 0;
 	      else
-		{
-		  /* We've seen "[rN", but not '+' or '-'; rather a ']'.
-		     Hmm.  Normally this is a simple indirect mode that we
-		     shouldn't match, but if we expect ']', then we have a
-		     zero offset, so it can be a three-address-operand,
-		     like "[rN],rO,rP", thus offset mode.
+		/* Size found.  Add that piece and drop down to
+		   the common checking of the closing ']'.  */
+		prefixp->opcode |= size_bits << 4;
+	    }
+	  /* Seen "[rN+", but not a '[' or a register, so then
+	     it must be a constant "I".  */
+	  else if (cris_get_expression (cPP, &prefixp->expr))
+	    {
+	      /* Expression found, so fill in the bits of offset
+		 mode and drop down to check the closing ']'.  */
+	      prefixp->kind = PREFIX_BDAP_IMM;
+	    }
+	  else
+	    /* Nothing valid here: lose.  */
+	    return 0;
+	}
+      /* Seen "[rN" but no '+', so check if it's a '-'.  */
+      else if (**cPP == '-')
+	{
+	  /* Yep, we must have offset mode.  */
+	  if (! cris_get_expression (cPP, &prefixp->expr))
+	    /* No expression, so we lose.  */
+	    return 0;
+	  else
+	    {
+	      /* Expression found to make this offset mode, so
+		 fill those bits and drop down to check the
+		 closing ']'.  */
+	      prefixp->kind = PREFIX_BDAP_IMM;
+	    }
+	}
+      else
+	{
+	  /* We've seen "[rN", but not '+' or '-'; rather a ']'.
+	     Hmm.  Normally this is a simple indirect mode that we
+	     shouldn't match, but if we expect ']', then we have a
+	     zero offset, so it can be a three-address-operand,
+	     like "[rN],rO,rP", thus offset mode.
 
-		     Don't eat the ']', that will be done in the closing
-		     ceremony.	*/
-		  prefixp->expr.X_op = O_constant;
-		  prefixp->expr.X_add_number = 0;
-		  prefixp->expr.X_add_symbol = NULL;
-		  prefixp->expr.X_op_symbol = NULL;
-		  prefixp->kind = PREFIX_BDAP_IMM;
-		}
-	  }
-      /* A '[', but no second '[', and no register.  Check if we
-	 have an expression, making this "[I]" for a double-indirect
-	 prefix.	*/
-	else if (cris_get_expression (cPP, &prefixp->expr))
-	      {
-		/* Expression found, the so called absolute mode for a
-		   double-indirect prefix on PC.  */
-		prefixp->kind = PREFIX_DIP;
-		prefixp->opcode
-		  = DIP_OPCODE | (AUTOINCR_BIT << 8) | REG_PC;
-		prefixp->reloc = BFD_RELOC_32;
-	      }
-	    else
-	      /* Neither '[' nor register nor expression.  We lose.  */
-	      return 0;
+	     Don't eat the ']', that will be done in the closing
+	     ceremony.  */
+	  prefixp->expr.X_op = O_constant;
+	  prefixp->expr.X_add_number = 0;
+	  prefixp->expr.X_add_symbol = NULL;
+	  prefixp->expr.X_op_symbol = NULL;
+	  prefixp->kind = PREFIX_BDAP_IMM;
+	}
+    }
+  /* A '[', but no second '[', and no register.  Check if we
+     have an expression, making this "[I]" for a double-indirect
+     prefix.  */
+  else if (cris_get_expression (cPP, &prefixp->expr))
+    {
+      /* Expression found, the so called absolute mode for a
+	 double-indirect prefix on PC.  */
+      prefixp->kind = PREFIX_DIP;
+      prefixp->opcode = DIP_OPCODE | (AUTOINCR_BIT << 8) | REG_PC;
+      prefixp->reloc = BFD_RELOC_32;
+    }
+  else
+    /* Neither '[' nor register nor expression.  We lose.  */
+    return 0;
 
   /* We get here as a closing ceremony to a successful match.  We just
      need to check the closing ']'.  */
@@ -2060,7 +2035,6 @@ get_3op_or_dip_prefix_op (cPP, prefixp)
   return 1;
 }
 
-
 /* Get an expression from the string pointed out by *cPP.
    The pointer *cPP is advanced to the character following the expression
    on a success, or retains its original value otherwise.
@@ -2069,12 +2043,12 @@ get_3op_or_dip_prefix_op (cPP, prefixp)
 
    exprP   Pointer to structure containing the expression.
 
-   Return 1 iff a correct expression is found.	*/
+   Return 1 iff a correct expression is found.  */
 
 static int
 cris_get_expression (cPP, exprP)
-     char	  **cPP;
-     expressionS  *exprP;
+     char **cPP;
+     expressionS *exprP;
 {
   char *saved_input_line_pointer;
   segT exp;
@@ -2098,7 +2072,6 @@ cris_get_expression (cPP, exprP)
   input_line_pointer = saved_input_line_pointer;
   return 1;
 }
-
 
 /* Get a sequence of flag characters from *spp.  The pointer *cPP is
    advanced to the character following the expression.	The flag
@@ -2165,7 +2138,7 @@ get_flags (cPP, flagsp)
 
 	default:
 	  /* We consider this successful if we stop at a comma or
-	     whitespace.  Anything else, and we consider it a failure.	*/
+	     whitespace.  Anything else, and we consider it a failure.  */
 	  if (**cPP != ','
 	      && **cPP != 0
 	      && ! isspace (**cPP))
@@ -2179,7 +2152,6 @@ get_flags (cPP, flagsp)
     }
 }
 
-
 /* Generate code and fixes for a BDAP prefix.
 
    base_regno	Int containing the base register number.
@@ -2188,8 +2160,8 @@ get_flags (cPP, flagsp)
 
 static void
 gen_bdap (base_regno, exprP)
-     int	  base_regno;
-     expressionS  *exprP;
+     int base_regno;
+     expressionS *exprP;
 {
   unsigned int opcode;
   char *opcodep;
@@ -2202,7 +2174,7 @@ gen_bdap (base_regno, exprP)
   if (exprP->X_op == O_constant)
     {
       /* We have an absolute expression that we know the size of right
-	 now. */
+	 now.  */
       long int value;
       int size;
 
@@ -2211,7 +2183,7 @@ gen_bdap (base_regno, exprP)
 	/* Outside range for a "word", make it a dword.  */
 	size = 2;
       else
-	/* Assume "word" size.	*/
+	/* Assume "word" size.  */
 	size = 1;
 
       /* If this is a signed-byte value, we can fit it into the prefix
@@ -2234,11 +2206,10 @@ gen_bdap (base_regno, exprP)
   else
     /* The expression is not defined yet but may become absolute.  We make
        it a relocation to be relaxed.  */
-      frag_var (rs_machine_dependent, 4, 0,
-		ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_UNDF),
-		exprP->X_add_symbol, exprP->X_add_number, opcodep);
+    frag_var (rs_machine_dependent, 4, 0,
+	      ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_UNDF),
+	      exprP->X_add_symbol, exprP->X_add_number, opcodep);
 }
-
 
 /* Encode a branch displacement in the range -256..254 into the form used
    by CRIS conditional branch instructions.
@@ -2258,7 +2229,6 @@ branch_disp (offset)
 
   return disp;
 }
-
 
 /* Generate code and fixes for a 32-bit conditional branch instruction
    created by "extending" an existing 8-bit branch instruction.
@@ -2301,7 +2271,7 @@ gen_cond_branch_32 (opcodep, writep, fragP, add_symP, sub_symP, add_num)
      it's not the optimal extended construct, but we should get this
      rarely enough that it shouldn't matter.  */
 
-  writep[8] = branch_disp (-2-6);
+  writep[8] = branch_disp (-2 - 6);
   writep[9] = opcodep[1];
 
   /* Then, we change the branch to an unconditional branch over the
@@ -2330,7 +2300,7 @@ gen_cond_branch_32 (opcodep, writep, fragP, add_symP, sub_symP, add_num)
     md_number_to_chars (writep + 4, add_num, 4);
   else
     {
-      /* Not absolute, we have to make it a frag for later evaluation.	*/
+      /* Not absolute, we have to make it a frag for later evaluation.  */
       know (sub_symP == 0);
 
       fix_new (fragP, writep + 4 - fragP->fr_literal, 4, add_symP,
@@ -2338,12 +2308,11 @@ gen_cond_branch_32 (opcodep, writep, fragP, add_symP, sub_symP, add_num)
     }
 }
 
-
 /* This *could* be:
 
-   Turn a string in input_line_pointer into a floating point constant of
-   type type, and store the appropriate bytes in *litp.  The number of
-   LITTLENUMS emitted is stored in *sizep.
+   Turn a string in input_line_pointer into a floating point constant
+   of type TYPE, and store the appropriate bytes in *LITP.  The number
+   of LITTLENUMS emitted is stored in *SIZEP.
 
    type	  A character from FLTCHARS that describes what kind of
 	  floating-point number is wanted.
@@ -2363,13 +2332,12 @@ char *
 md_atof (type, litp, sizep)
      char type ATTRIBUTE_UNUSED;
      char *litp ATTRIBUTE_UNUSED;
-     int  *sizep ATTRIBUTE_UNUSED;
+     int *sizep ATTRIBUTE_UNUSED;
 {
   /* FIXME:  Is this function mentioned in the internals.texi manual?  If
      not, add it.  */
   return  _("Bad call to md_atof () - floating point formats are not supported");
 }
-
 
 /* Turn a number as a fixS * into a series of bytes that represents the
    number on the target machine.  The purpose of this procedure is the
@@ -2382,7 +2350,7 @@ md_atof (type, litp, sizep)
 
    n	      The number of bytes in "val" that should be stored.
 
-   fixP	      The fix to be applied to the bit field starting at bufp.	*/
+   fixP	      The fix to be applied to the bit field starting at bufp.  */
 
 static void
 cris_number_to_imm (bufp, val, n, fixP)
@@ -2480,7 +2448,7 @@ cris_number_to_imm (bufp, val, n, fixP)
     case BFD_RELOC_NONE:
       /* May actually happen automatically.  For example at broken
 	 words, if the word turns out not to be broken.
-	 FIXME: When?  Which testcase?	*/
+	 FIXME: When?  Which testcase?  */
       if (! fixP->fx_addsy)
 	md_number_to_chars (bufp, val, n);
       break;
@@ -2503,10 +2471,10 @@ cris_number_to_imm (bufp, val, n, fixP)
     }
 }
 
-
 /* Processes machine-dependent command line options.  Called once for
    each option on the command line that the machine-independent part of
    GAS does not understand.  */
+
 int
 md_parse_option (arg, argp)
      int arg;
@@ -2517,7 +2485,8 @@ md_parse_option (arg, argp)
     case 'H':
     case 'h':
       md_show_usage (stdout);
-      exit (0);	 /* Don't continue */
+      /* Don't continue.  */
+      exit (0);
 
     case 'N':
       warn_for_branch_expansion = 1;
@@ -2525,7 +2494,7 @@ md_parse_option (arg, argp)
 
     default:
       return 0;
-  }
+    }
 }
 
 /* Round up a section size to the appropriate boundary.  */
@@ -2558,7 +2527,6 @@ md_section_align (segment, size)
   return size;
 }
 
-
 /* Generate a machine-dependent relocation.  */
 arelent *
 tc_gen_reloc (section, fixP)
@@ -2590,10 +2558,10 @@ tc_gen_reloc (section, fixP)
   relP->address = fixP->fx_frag->fr_address + fixP->fx_where;
 
   if (fixP->fx_pcrel)
-    /* FIXME: Is this correct?	*/
+    /* FIXME: Is this correct?  */
     relP->addend = fixP->fx_addnumber;
   else
-    /* At least *this one* is correct. */
+    /* At least *this one* is correct.  */
     relP->addend = fixP->fx_offset;
 
   /* This is the standard place for KLUDGEs to work around bugs in
@@ -2621,9 +2589,9 @@ tc_gen_reloc (section, fixP)
   if (OUTPUT_FLAVOR == bfd_target_aout_flavour
       && fixP->fx_addsy && S_IS_WEAK (fixP->fx_addsy)
       && ! bfd_is_und_section (S_GET_SEGMENT (fixP->fx_addsy)))
-  {
-    relP->addend -= S_GET_VALUE (fixP->fx_addsy);
-  }
+    {
+      relP->addend -= S_GET_VALUE (fixP->fx_addsy);
+    }
 
   relP->howto = bfd_reloc_type_lookup (stdoutput, code);
   if (! relP->howto)
@@ -2640,8 +2608,8 @@ tc_gen_reloc (section, fixP)
   return relP;
 }
 
-
 /* Machine-dependent usage-output.  */
+
 void
 md_show_usage (stream)
      FILE *stream;
@@ -2664,9 +2632,8 @@ md_show_usage (stream)
   fprintf (stream, _("Description	: Assembler for the CRIS processor.\n"));
 }
 
-
 /* Apply a fixS (fixup of an instruction or data that we didn't have
-   enough info to complete immediately) to the data in a frag.	*/
+   enough info to complete immediately) to the data in a frag.  */
 
 int
 md_apply_fix (fixP, valP)
@@ -2686,27 +2653,26 @@ md_apply_fix (fixP, valP)
       fixP->fx_done = 1;
     }
   else
-  {
-    /* I took this from tc-arc.c, since we used to not support
-       fx_subsy != NULL.  I'm not totally sure it's TRT.  */
-    if (fixP->fx_subsy != (symbolS *) NULL)
-      {
-	if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
-	  val -= S_GET_VALUE (fixP->fx_subsy);
-	else
-	  {
-	    /* We can't actually support subtracting a symbol.	*/
-	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("expression too complex"));
-	  }
-      }
+    {
+      /* I took this from tc-arc.c, since we used to not support
+	 fx_subsy != NULL.  I'm not totally sure it's TRT.  */
+      if (fixP->fx_subsy != (symbolS *) NULL)
+	{
+	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
+	    val -= S_GET_VALUE (fixP->fx_subsy);
+	  else
+	    {
+	      /* We can't actually support subtracting a symbol.  */
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
+			    _("expression too complex"));
+	    }
+	}
 
-    cris_number_to_imm (buf, val, fixP->fx_size, fixP);
-  }
+      cris_number_to_imm (buf, val, fixP->fx_size, fixP);
+    }
 
   return 1;
 }
-
 
 /* All relocations are relative to the location just after the fixup;
    the address of the fixup plus its size.  */
@@ -2727,15 +2693,13 @@ md_pcrel_from (fixP)
   return fixP->fx_size + addr;
 }
 
-
-/* We have no need to give defaults for symbol-values.	*/
+/* We have no need to give defaults for symbol-values.  */
 symbolS *
 md_undefined_symbol (name)
      char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
-
 
 /* Definition of TC_FORCE_RELOCATION.
    FIXME: Unsure of this.  Can we omit it?  Just copied from tc-i386.c
@@ -2761,7 +2725,7 @@ tc_cris_check_adjusted_broken_word (new_offset, brokwP)
      struct broken_word *brokwP;
 {
   if (new_offset > 32767 || new_offset < -32768)
-    /* We really want a genuine error, not a warning, so make it one. */
+    /* We really want a genuine error, not a warning, so make it one.  */
     as_bad_where (brokwP->frag->fr_file, brokwP->frag->fr_line,
 		  _("Adjusted signed .word (%ld) overflows: `switch'-statement too large."),
 		  (long) new_offset);

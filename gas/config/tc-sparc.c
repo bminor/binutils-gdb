@@ -1420,10 +1420,12 @@ sparc_ip (str, pinsn)
 			    goto error;
 			  }
 			kmask |= mask;
-			while (*s == ' ') { ++s; continue; }
+			while (*s == ' ')
+			  ++s;
 			if (*s == '|' || *s == '+')
 			  ++s;
-			while (*s == ' ') { ++s; continue; }
+			while (*s == ' ')
+			  ++s;
 		      }
 		  }
 		else
