@@ -1,0 +1,159 @@
+# Copyright (C) 1992 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# This file was written by Jeff Law. (law@cs.utah.edu)
+
+if $tracelevel then {
+    strace $tracelevel
+}
+
+set prms_id 0
+set bug_id 0
+
+set binfile "recurse"
+set srcfile $binfile.c
+
+if ![file exists $objdir/$subdir/$binfile] then {
+    perror "$objdir/$subdir/$binfile does not exist."
+    return 0
+}
+
+
+# Start with a fresh gdb.
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load $objdir/$subdir/$binfile
+
+# For now we only run this on PAs running BSD.
+if {[file exists $objdir/$subdir/$binfile] && [istarget "hppa*-*-bsd*"]} then {
+
+    # Preserve the old timeout, and set a new one that should be
+    # sufficient to avoid timing out during this test.
+
+    set timeoutsave $timeout
+    set timeout 60
+
+    if [runto recurse] then {
+	gdb_test "watch b" ".*\[Ww\]atchpoint \[0-9]*: b"
+
+	# Continue until initial set of b.
+	send "cont\n"
+	expect {
+	    -re "Continuing.*Watchpoint.*, b.*Old value = 0.*New value = 10.*$prompt $" { pass "watchpoint hit, first time" }
+	    -re ".*$prompt $" { fail "missed first watchpoint" ; return }
+	    timeout { fail "missed first watchpoint (timeout)" ; return }
+	}
+
+	# Continue inward for a few iterations
+	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=9\[)\]+"
+	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=8\[)\]+"
+	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=7\[)\]+"
+	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=6\[)\]+"
+	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=5\[)\]+"
+
+	# Put a watchpoint on another instance of b
+	gdb_test "watch b" ".*\[Ww\]atchpoint \[0-9]*: b"
+
+	# Continue until initial set of b (second instance).
+	send "cont\n"
+	expect {
+	    -re "Continuing.*Watchpoint.*, b.*Old value = 0.*New value = 5.*$prompt $" { pass "watchpoint hit (second instance)" }
+	    -re ".*$prompt $" {
+		fail "missed watchpoint (second instance)"
+		return
+	    }
+	    timeout {
+		fail "missed watchpoint (second instance) (timeout)"
+		return
+	    }
+	}
+
+	# Continue inward for a few iterations
+	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=4\[)\]+"
+	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=3\[)\]+"
+	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=2\[)\]+"
+	gdb_test "continue" "Breakpoint.* recurse \[(\]+a=1\[)\]+"
+
+	# Continue until second set of b (second instance).
+	send "cont\n"
+	expect {
+	    -re "Continuing.*Watchpoint.*, b.*Old value = 5.*New value = 120.*return.*$prompt $" { pass "watchpoint hit, second time (second instance)" }
+	    -re ".*$prompt $" {
+		fail "missed watchpoint, second time (second instance)"
+		return
+	    }
+	    timeout {
+		fail "missed watchpoint, second time (second instance)(timeout)"
+		return
+	    }
+	}
+
+	# Continue again.  We should have a watchpoint go out of scope now
+	send "cont\n"
+	expect {
+	    -re "Continuing.*Watchpoint.*deleted.*recurse \[(\]+a=6\[)\]+ .*$prompt $" {pass "watchpoint deleted when leaving scope (second instance)" }
+	    -re ".*prompt $" {
+		fail "watchpoint not deleted when leaving scope (second instance)"
+		return
+	    }
+	    timeout {
+		fail "watchpoint not deleted when leaving scope (second instance) (timeout)"
+		return
+	    }
+	}
+
+	# Continue until second set of b (first instance).
+	send "cont\n"
+	expect {
+	    -re "Continuing.*Watchpoint.*b.*Old value = 10.*New value = 3628800.*return.*$prompt $" { pass "watchpoint hit, second time" }
+	    -re ".*$prompt $" {
+		fail "missed watchpoint, second time)"
+		return
+	    }
+	    timeout {
+		fail "missed watchpoint, second time (timeout)"
+		return
+	    }
+	}
+
+	# Continue again.  We should have a watchpoint go out of scope now
+	send "cont\n"
+	expect {
+	    -re "Continuing.*Watchpoint.*deleted.*main \[(\]+\[)\]+ .*$prompt $" {pass "watchpoint deleted when leaving scope" }
+	    -re ".*prompt $" {
+		fail "watchpoint not deleted when leaving scope"
+		return
+	    }
+	    timeout {
+		fail "watchpoint not deleted when leaving scope (timeout)"
+		return
+	    }
+	}
+    }
+
+    # Restore the preserved old timeout value.
+    set timeout $timeoutsave
+}
+
+if [istarget "a29k-*-udi"] then {
+    # FIXME: If PR 2415 is fixed, this is not needed.
+    gdb_target_udi
+}

@@ -1,0 +1,105 @@
+# .Sanitize for gdb/testsuite/gdb.base.
+
+# Each directory to survive its way into a release will need a file
+# like this one called "./.Sanitize".  All keyword lines must exist,
+# and must exist in the order specified by this file.  Each directory
+# in the tree will be processed, top down, in the following order.
+
+# Hash started lines like this one are comments and will be deleted
+# before anything else is done.  Blank lines will also be squashed
+# out.
+
+# The lines between the "Do-first:" line and the "Things-to-keep:"
+# line are executed as a /bin/sh shell script before anything else is
+# done in this directory.
+
+Do-first:
+
+# All files listed between the "Things-to-keep:" line and the
+# "Do-last:" line will be kept.  All other files will be removed.
+# Directories listed in this section will have their own Sanitize
+# called.  Directories not listed will be removed in their entirety
+# with rm -rf.
+
+Things-to-keep:
+
+Makefile.in
+README
+a1-selftest.exp
+a2-run.exp
+bitfields.c
+bitfields.exp
+break.c
+break.exp
+callfuncs.c
+callfuncs.exp
+configure.in
+corefile.exp
+coremaker.c
+crossload.exp
+default.exp
+echo.exp
+exprs.c
+exprs.exp
+funcargs.c
+funcargs.exp
+gdbvars.exp
+help.exp
+i486-elf.u
+i860-elf.u
+interrupt.c
+interrupt.exp
+list.exp
+list0.c
+list0.h
+list1.c
+m68k-aout.u
+m68k-aout2.u
+m68k-elf.u
+mips-ecoff.u
+mips_pro.c
+mips_pro.exp
+nodebug.c
+nodebug.exp
+opaque-info.c
+opaque.exp
+opaque0.c
+opaque1.c
+printcmds.c
+printcmds.exp
+ptype.c
+ptype.exp
+radix.exp
+recurse.c
+recurse.exp
+return.c
+return.exp
+run.c
+scope.exp
+scope0.c
+scope1.c
+setvar.c
+setvar.exp
+signals.c
+signals.exp
+sparc-aout.u
+sparc-elf.u
+t10.c
+term.exp
+twice.c
+twice.exp
+watchpoint.c
+watchpoint.exp
+whatis-info.c
+whatis.c
+whatis.exp
+
+Things-to-lose:
+
+# The lines between the "Do-last:" line and the end of the file
+# are executed as a /bin/sh shell script after everything else is
+# done.
+
+Do-last:
+
+# eof

@@ -1,0 +1,715 @@
+# Copyright (C) 1992 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# This file was written by Fred Fish. (fnf@cygnus.com)
+
+if $tracelevel then {
+    strace $tracelevel
+}
+
+set prms_id 0
+set bug_id 0
+
+set binfile "watchpoint"
+set srcfile $binfile.c
+
+if ![file exists $objdir/$subdir/$binfile] then {
+    perror "$objdir/$subdir/$binfile does not exist."
+    return 0
+}
+
+
+# Prepare for watchpoint tests by setting up two breakpoints and one
+# watchpoint.
+#
+# We use breakpoints at marker functions to get past all the startup code,
+# so we can get to the watchpoints in a reasonable amount of time from a
+# known starting point.
+#
+# For simplicity, so we always know how to reference specific breakpoints or
+# watchpoints by number, we expect a particular ordering and numbering of
+# each in the combined breakpoint/watchpoint table, as follows:
+#
+#	Number		What		Where
+#	1		Breakpoint	marker1()
+#	2		Breakpoint	marker2()
+#	3		Watchpoint	ival3
+
+proc initialize {} {
+    global prompt
+    global hex
+    global decimal
+    global srcfile
+
+    send "break marker1\n"
+    expect {
+	-re "Breakpoint 1 at $hex: file .*$srcfile, line $decimal.*$prompt $" {}
+	-re ".*$prompt $" { fail "set breakpoint at marker1" ; return 0 }
+	timeout { fail "set breakpoint at marker1 (timeout)" ; return 0 }
+    }
+
+    send "break marker2\n"
+    expect {
+	-re "Breakpoint 2 at $hex: file .*$srcfile, line $decimal.*$prompt $" {}
+	-re ".*$prompt $" { fail "set breakpoint at marker2" ; return 0 }
+	timeout { fail "set breakpoint at marker2 (timeout)" ; return 0 }
+    }
+
+    send "info break\n"
+    expect {
+	-re "1\[ \]*breakpoint.*marker1.*\r\n2\[ \]*breakpoint.*marker2.*\r\n$prompt $" { }
+	-re ".*$prompt $" { fail "breakpoints not setup right" ; return 0 }
+	timeout { fail "info break (timeout)" ; return 0 }
+    }
+
+    send "watch ival3\n"
+    expect {
+	-re ".*\[Ww\]atchpoint 3: ival3\r\n$prompt $" { pass "set watchpoint" }
+	-re ".*$prompt $" { fail "set watchpoint on ival3" ; return 0 }
+	timeout { fail "set watchpoint on ival3 (timeout)" ; return 0 }
+    }
+
+    # "info watch" is the same as "info break"
+
+    send "info watch\n"
+    expect {
+	-re "1\[ \]*breakpoint.*marker1.*\r\n2\[ \]*breakpoint.*marker2.*\r\n3\[ \]*.*watchpoint.*ival3\r\n$prompt $" {
+	    pass "watchpoint found in watchpoint/breakpoint table"
+	}
+	-re ".*$prompt $" { fail "watchpoint/breakpoint not set" ; return 0 }
+	timeout { fail "info break (timeout)" ; return 0 }
+    }
+
+    # After installing the watchpoint, we disable it until we are ready
+    # to use it.  This allows the test program to run at full speed until
+    # we get to the first marker function.
+
+    send "disable 3\n"
+    expect {
+	-re "disable 3\r\n$prompt $" { pass "watchpoint disabled" }
+	-re ".*$prompt $" { fail "watchpoint not disabled" ; return 0 }
+	timeout { fail "watchpoint not disabled (timeout)" ; return 0 }
+    }
+
+    return 1
+}
+
+#
+# Test simple watchpoint.
+#
+
+proc test_simple_watchpoint {} {
+    global prompt
+    global hex
+    global decimal
+
+    # Ensure that the watchpoint is disabled when we startup.
+
+    send "disable 3\n"
+    expect {
+	-re "disable 3\r\n$prompt $" { }
+	-re ".*$prompt $" { fail "watchpoint not disabled" ; return 0 }
+	timeout { fail "watchpoint not disabled (timeout)" ; return 0 }
+    }
+
+    # Run until we get to the first marker function.
+
+    send "run\n"
+    expect {
+	-re "The program .* has been started already.* \(y or n\) $" {
+	    send "y\n"
+	    exp_continue
+	}
+	-re "Starting program.*Breakpoint 1, marker1 .*$prompt $" {}
+	-re ".*$prompt $" { fail "run until marker1 function hit" ; return }
+	timeout { fail "run until marker1 function hit (timeout)" ; return }
+    }
+
+    # After reaching the marker function, enable the watchpoint.
+
+    send "enable 3\n"
+    expect {
+	-re "enable 3\r\n$prompt $" { pass "watchpoint enabled" }
+	-re ".*$prompt $" { fail "watchpoint not enabled" ; return }
+	timeout { fail "watchpoint not enabled (timeout)" ; return }
+    }
+
+    gdb_test "break func1" "Breakpoint.*at"
+    gdb_test "set \\\$func1_breakpoint_number = \\\$bpnum" ""
+
+    gdb_test "continue" "Continuing.*Breakpoint \[0-9\]*, func1" \
+	"continue to breakpoint at func1"
+
+    # Continue until the first change, from -1 to 0
+
+    send "cont\n"
+    expect {
+	-re "Continuing.*Watchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count; ival4 = count;.*$prompt $" {
+	    pass "watchpoint hit, first time"
+	}
+	-re "Continuing.*Watchpoint.*ival3.*Old value = -1.*New value = 0.*for .count = 0; count < 4; count\[+)\]+ \{.*$prompt $" {
+	    # setup_xfail "m68*-*-sunos*" 1836
+	    fail "missed first watchpoint"
+	    return
+	}
+	-re "Continuing.*Breakpoint.*func1.*$prompt $" {
+	    setup_xfail "m68*-*-*" 2597
+	    fail "thought it hit breakpoint at func1 twice"
+	    gdb_test "delete \\\$func1_breakpoint_number" ""
+	    gdb_test "continue" "\
+Continuing.*Watchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count;" \
+		"watchpoint hit, first time"
+	}
+	-re ".*$prompt $" { fail "missed first watchpoint" ; return }
+	timeout { fail "run to first watchpoint (timeout)" ; return }
+	eof { fail "run to first watchpoint (eof)" ; return }
+    }
+
+    gdb_test "delete \\\$func1_breakpoint_number" ""
+
+    # Continue until the next change, from 0 to 1.
+    
+    send "cont\n"
+    expect {
+	-re "Continuing.*Watchpoint.*ival3.*Old value = 0.*New value = 1.*ival3 = count; ival4 = count;.*$prompt $"	{
+	    pass "watchpoint hit, second time"
+	}
+	-re ".*$prompt $" { fail "missed second watchpoint" ; return }
+	timeout { fail "run to second watchpoint (timeout)" ; return }
+    }
+    
+    # Continue until the next change, from 1 to 2.
+    
+    send "cont\n"
+    expect {
+	-re "Continuing.*Watchpoint.*ival3.*Old value = 1.*New value = 2.*ival3 = count; ival4 = count;.*$prompt $"	{
+	    pass "watchpoint hit, third time"
+	}
+	-re ".*$prompt $" { fail "missed third watchpoint" ; return }
+	timeout { fail "run to third watchpoint (timeout)" ; return }
+    }
+    
+    # Continue until the next change, from 2 to 3.
+    
+    send "cont\n"
+    expect {
+	-re "Continuing.*Watchpoint.*ival3.*Old value = 2.*New value = 3.*ival3 = count; ival4 = count;.*$prompt $"	{
+	    pass "watchpoint hit, fourth time"
+	}
+	-re ".*$prompt $" { fail "missed fourth watchpoint" ; return }
+	timeout { fail "run to fourth watchpoint (timeout)" ; return }
+    }
+    
+    # Continue until the next change, from 3 to 4.
+    # Note that this one is outside the loop.
+    
+    send "cont\n"
+    expect {
+	-re "Continuing.*Watchpoint.*ival3.*Old value = 3.*New value = 4.*ival3 = count; ival4 = count;.*$prompt $"	{
+	    pass "watchpoint hit, fifth time"
+	}
+	-re ".*$prompt $" { fail "missed fifth watchpoint" ; return }
+	timeout { fail "run to fifth watchpoint (timeout)" ; return }
+    }
+    
+    # Continue until we hit the finishing marker function.
+    # Make sure we hit no more watchpoints.
+    
+    # This used to fail for a29k-amd-udi (PR 2421), but has been fixed.
+    send "cont\n"
+    expect {
+	-re "Continuing.*Breakpoint.*marker2 \(\).*$prompt $" { }
+	-re "Continuing.*Watchpoint.*ival3.*$prompt $" {
+	    fail "hit a disabled watchpoint" ; return
+	}
+	-re ".*$prompt $" { fail "marker2 function missed" ; return }
+	timeout { fail "run to marker2 function (timeout)" ; return }
+    }
+    
+    # Disable the watchpoint so we run at full speed until we exit.
+
+    send "disable 3\n"
+    expect {
+	-re "disable 3\r\n$prompt $" { pass "watchpoint disabled" }
+	-re ".*$prompt $" { fail "watchpoint not disabled" ; return }
+	timeout { fail "watchpoint not disabled (timeout)" ; return }
+    }
+
+    # Run until process exits.
+    
+    send "cont\n"
+    expect {
+	-re "Continuing.*Program exited normally.*$prompt $" { }
+	-re ".*$prompt $" { fail "watchpoints not removed" ; return }
+	timeout { fail "looking for process exit (timeout)" }
+    }
+}
+
+# Test disabling watchpoints.
+
+proc test_disabling_watchpoints {} {
+    global prompt
+    global binfile
+    global srcfile
+    global decimal
+    global hex
+
+    # Ensure that the watchpoint is disabled when we startup.
+
+    send "disable 3\n"
+    expect {
+	-re "disable 3\r\n$prompt $" { }
+	-re ".*$prompt $" { fail "watchpoint not disabled" ; return 0 }
+	timeout { fail "watchpoint not disabled (timeout)" ; return 0 }
+    }
+
+    # Run until we get to the first marker function.
+
+    send "run\n"
+    expect {
+	-re "The program .* has been started already.* \(y or n\) $" {
+	    send "y\n"
+	    exp_continue
+	}
+	-re "Starting program.*Breakpoint 1, marker1 .*$prompt $" {}
+	-re ".*$prompt $" { fail "run until marker1 function hit" ; return }
+	timeout { fail "run until marker1 function hit (timeout)" ; return }
+    }
+
+    # After reaching the marker function, enable the watchpoint.
+
+    send "enable 3\n"
+    expect {
+	-re "enable 3\r\n$prompt $" { pass "watchpoint enabled" }
+	-re ".*$prompt $" { fail "watchpoint not enabled" ; return }
+	timeout { fail "watchpoint not enabled (timeout)" ; return }
+    }
+
+    # Continue until the first change, from -1 to 0
+    # Don't check the old value, because on VxWorks the variable value
+    # will not have been reinitialized.
+    send "cont\n"
+    expect {
+	-re "Continuing.*Watchpoint.*ival3.*Old value = .*New value = 0.*ival3 = count; ival4 = count;.*$prompt $" {
+	    pass "watchpoint hit, first time"
+	}
+	-re "Continuing.*Watchpoint.*ival3.*Old value = .*New value = 0.*for .count = 0; count < 4; count\[+)]+ \{.*$prompt $" {
+	    # setup_xfail "m68*-*-sunos*" 1836
+	    fail "missed first watchpoint"
+	    return
+	}
+	-re ".*$prompt $" { fail "missed first watchpoint" ; return }
+	timeout { fail "run to first watchpoint (timeout)" ; return }
+    }
+    
+    # Continue until the next change, from 0 to 1.
+
+    send "cont\n"
+    expect {
+	-re "Continuing.*Watchpoint.*ival3.*Old value = 0.*New value = 1.*ival3 = count; ival4 = count;.*$prompt $"	{
+	    pass "watchpoint hit, second time"
+	}
+	-re ".*$prompt $" { fail "missed second watchpoint" ; return }
+	timeout { fail "run to second watchpoint (timeout)" ; return }
+    }
+    
+    # Disable the watchpoint but leave breakpoints
+
+    send "disable 3\n"
+    expect {
+	-re "disable 3\r\n$prompt $" { }
+	-re ".*$prompt $" { fail "watchpoint not disabled" ; return 0 }
+	timeout { fail "watchpoint not disabled (timeout)" ; return 0 }
+    }
+
+    # Check watchpoint list, looking for the entry that confirms the
+    # watchpoint is disabled.
+
+    send "info watchpoints\n"
+    expect {
+	-re "3\[ \]*.*watchpoint\[ \]*keep\[ \]*n\[ \]*ival3\r\n.*$prompt $" {
+	    pass "watchpoint disabled in table"
+	}
+	-re ".*$prompt $" {
+	    fail "disabled watchpoint not found in table"
+	}
+	timeout { fail "info watchpoints (timeout)" }
+    }
+
+    # Continue until we hit the finishing marker function.
+    # Make sure we hit no more watchpoints.
+
+    send "cont\n"
+    expect {
+	-re "Continuing.*Breakpoint.*marker2 \[)(\]+.*$prompt $" {
+	    pass "disabled watchpoint skipped"
+	}
+	-re "Continuing.*Watchpoint.*ival3.*$prompt $" {
+	    fail "hit a disabled watchpoint" ; return
+	}
+	-re ".*$prompt $" { fail "marker2 function missed" ; return }
+	timeout { fail "run to marker2 function (timeout)" ; return }
+    }
+    
+    send "cont\n"
+    expect {
+	-re "Continuing.*Program exited normally.*$prompt $" { }
+	-re ".*$prompt $" { fail "watchpoints not removed" ; return }
+	timeout { fail "looking for process exit (timeout)" }
+    }
+}
+
+# Test stepping and other mundane operations with watchpoints enabled
+proc test_stepping {} {
+    global prompt
+
+    if [runto marker1] then {
+	gdb_test "watch ival2" ".*\[Ww\]atchpoint \[0-9\]*: ival2"
+
+	# Well, let's not be too mundane.  It should be a *bit* of a challenge
+	gdb_test "break func2 if 0" "Breakpoint.*at"
+	gdb_test "p \\\$func2_breakpoint_number = \\\$bpnum" "="
+
+	# The HPPA has a problem here.
+	if [ istarget "hppa*-*-*" ] then {
+	    # Don't actually try doing the call, if we do we can't continue.
+	    setup_xfail "*-*-*"
+	    fail "calling function with watchpoint enabled"
+	} else {
+	    # The problem is that GDB confuses stepping through the call
+	    # dummy with hitting the breakpoint at the end of the call dummy.
+	    # Will be fixed once all architectures define 
+	    # CALL_DUMMY_BREAKPOINT_OFFSET.
+	    setup_xfail "*-*-*"
+	    # This doesn't occur if the call dummy starts with a call,
+	    # because we are out of the dummy by the first time the inferior
+	    # stops.
+	    clear_xfail "m68*-*-*"
+	    clear_xfail "i*86*-*-*"
+	    clear_xfail "vax-*-*"
+	    # The following architectures define CALL_DUMMY_BREAKPOINT_OFFSET.
+	    clear_xfail "alpha-*-*"
+	    clear_xfail "mips*-*-*"
+	    clear_xfail "sparc-*-*"
+	    gdb_test "p func1 ()" "= 73" \
+		"calling function with watchpoint enabled"
+	}
+
+	# 
+	# "finish" brings us back to main.
+	# On some targets (e.g. alpha) gdb will stop from the finish in midline
+	# of the marker1 call. This is due to register restoring code on
+	# the alpha and might be caused by stack adjustment instructions
+	# on other targets. In this case we will step once more.
+	#
+	send "finish\n"
+	expect {
+	    -re "Run.*exit from.*marker1.*main.* at" { }
+	    default { fail "finish from marker1" ; return }
+	}
+	expect {
+	    -re "marker1 \[)(\]+;.*$prompt $" {
+		send "step\n"
+		exp_continue
+	    }
+	    -re "func1 \[)(\]+;.*$prompt $" {
+		pass "finish from marker1"
+	    }
+	    -re ".*$prompt $" {
+		fail "finish from marker1"
+	    }
+	    default { fail "finish from marker1" ; return }
+	}
+
+	gdb_test "next" "for \[(\]+count = 0"
+
+	# Now test that "until" works.  It's a bit tricky to test
+	# "until", because compilers don't always arrange the code
+	# exactly the same way, and we might get slightly different
+	# sequences of statements.  But the following should be true
+	# (if not it is a compiler or a debugger bug): The user who
+	# does "until" at every statement of a loop should end up
+	# stepping through the loop once, and the debugger should not
+	# stop for any of the remaining iterations.
+
+	gdb_test "until" "ival1 = count"
+	gdb_test "until" "ival3 = count"
+	send "until\n"
+	expect {
+	    -re "(for \[(\]+count = 0|\}).*$prompt $" {
+		gdb_test "until" "ival1 = count; /. Outside loop ./"
+	    }
+	    -re "ival1 = count; /. Outside loop ./.*$prompt $" {
+		pass "until out of loop"
+	    }
+	    -re ".*$prompt $" {
+		fail "until out of loop"
+	    }
+	    default { fail "until out of loop" ; return }
+	}
+
+	gdb_test "step" "ival2 = count"
+    }
+}
+
+# Test stepping and other mundane operations with watchpoints enabled
+proc test_watchpoint_triggered_in_syscall {} {
+    global prompt
+    global timeout
+
+    set saved_timeout $timeout 
+
+    # Run until we get to the first marker function.
+    set x 0
+    set y 0
+    set testname "Watch buffer passed to read syscall"
+    if [runto marker2] then {
+	gdb_test "watch buf\\\[0\\\]" ".*\[Ww\]atchpoint \[0-9\]*: buf"
+	gdb_test "watch buf\\\[1\\\]" ".*\[Ww\]atchpoint \[0-9\]*: buf"
+	gdb_test "watch buf\\\[2\\\]" ".*\[Ww\]atchpoint \[0-9\]*: buf"
+	gdb_test "watch buf\\\[3\\\]" ".*\[Ww\]atchpoint \[0-9\]*: buf"
+	gdb_test "watch buf\\\[4\\\]" ".*\[Ww\]atchpoint \[0-9\]*: buf"
+	gdb_test "break marker4" ".*Breakpoint.*"
+
+	send "set doread = 1\n"
+	expect {
+	    -re ".*$prompt $" { }
+	    timeout { fail "set doread" ; return }
+	}
+
+	# Sometimes our string never gets to GDB?!? dejagnu bug?  Whatever
+	# the cause we'll set a reasonably short timeout and resend our
+	# string again if we timeout.
+	set timeout 10
+	send "continue\n"
+	send "123\n"
+	expect {
+	    -re ".*Watchpoint.*buf\\\[0\\\].*Old value = 0.*New value = 49\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
+	    -re ".*Watchpoint.*buf\\\[1\\\].*Old value = 0.*New value = 50\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
+	    -re ".*Watchpoint.*buf\\\[2\\\].*Old value = 0.*New value = 51\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
+	    -re ".*Watchpoint.*buf\\\[3\\\].*Old value = 0.*New value = 10\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
+	    -re ".*$prompt $" { }
+	    timeout {
+		set timeout $saved_timeout
+		send "123\n"
+		exp_continue
+	    }
+	}
+
+	# Restore the timeout value.
+        set timeout $saved_timeout
+
+	# Examine the values in buf to see how many watchpoints we
+	# should have printed.
+	send "print buf\[0\]\n"
+	expect {
+	    -re ".*= 49.*$prompt $" { set y [expr $y+1] }
+	    -re ".*= 0" { }
+	    default { fail "bogus value in buf[0]" }
+	    timeout { fail "retrieving contents of buf variable (timeout) }
+	}
+	send "print buf\[1\]\n"
+	expect {
+	    -re ".*= 50.*$prompt $" { set y [expr $y+1] }
+	    -re ".*= 0" { }
+	    default { fail "bogus value in buf[1]" }
+	    timeout { fail "retrieving contents of buf variable (timeout) }
+	}
+	send "print buf\[2\]\n"
+	expect {
+	    -re ".*= 51.*$prompt $" { set y [expr $y+1] }
+	    -re ".*= 0" { }
+	    default { fail "bogus value in buf[2]" }
+	    timeout { fail "retrieving contents of buf variable (timeout) }
+	}
+	send "print buf\[3\]\n"
+	expect {
+	    -re ".*= 10.*$prompt $" { set y [expr $y+1] }
+	    -re ".*= 0" { }
+	    default { fail "bogus value in buf[3]" }
+	    timeout { fail "retrieving contents of buf variable (timeout) }
+	}
+
+	# Did we find what we were looking for?  If not, flunk it.
+	if [expr $x==$y] then { pass $testname } else { fail "$testname: Only triggered $x watchpoints, expected $y."}
+
+	# Continue until we hit the finishing marker function.
+	# Make sure we hit no more watchpoints.
+
+	send "cont\n"
+	expect {
+	    -re "Continuing.*Breakpoint.*marker4 \[)(\]+.*$prompt $" {
+		pass "disabled watchpoint skipped"
+	    }
+	    -re "Continuing.*Watchpoint.*$prompt $" {
+		fail "hit suprious watchpoint" ; return
+	    }
+	    -re ".*$prompt $" { fail "marker4 function missed" ; return }
+	    timeout { fail "run to marker4 function (timeout)" ; return }
+	}
+    
+	# Disable everything so we can finish the program at full speed
+	send "disable\n"
+	expect {
+	    -re ".*$prompt $" { }
+	    timeout { fail "disabling breakpoints (timeout)" }
+	}
+
+	send "cont\n"
+	expect {
+	    -re "Continuing.*Program exited normally.*$prompt $" { }
+	    -re ".*$prompt $" { fail "watchpoints not removed" ; return }
+	    timeout { fail "looking for process exit (timeout)" }
+	}
+    }
+}
+
+# Do a simple test of of watching through a pointer when the pointer
+# itself changes.  Should add some more complicated stuff here.
+
+proc test_complex_watchpoint {} {
+    global prompt
+
+    set testname "Test complex watchpoint"
+    if [runto marker4] then {
+	gdb_test "watch ptr1->val" ".*\[Ww\]atchpoint \[0-9\]*: ptr1->val"
+	gdb_test "break marker5" ".*Breakpoint.*"
+
+	send "cont\n"
+	expect {
+	    -re "Continuing.*Watchpoint.*ptr1->val.*Old value = 1.*New value = 2.*$prompt $" { pass $testname }
+	    default { fail $testname ; return }
+	}
+
+	# Continue until we hit the marker5 function.
+	# Make sure we hit no more watchpoints.
+
+	send "cont\n"
+	expect {
+	    -re "Continuing.*Breakpoint.*marker5 \[)(\]+.*$prompt $" {
+		pass "did not trigger wrong watchpoint"
+	    }
+	    -re "Continuing.*Watchpoint.*$prompt $" {
+		fail "hit wrong watchpoint" ; return
+	    }
+	    -re ".*$prompt $" { fail "marker5 function missed" ; return }
+	    timeout { fail "run to marker5 function (timeout)" ; return }
+	}
+
+	# Disable everything so we can finish the program at full speed
+	send "disable\n"
+	expect {
+	    -re ".*$prompt $" { }
+	    timeout { fail "disabling breakpoints (timeout)" }
+	}
+
+	send "cont\n"
+	expect {
+	    -re "Continuing.*Program exited normally.*$prompt $" { }
+	    -re ".*$prompt $" { fail "watchpoints not removed" ; return }
+	    timeout { fail "looking for process exit (timeout)" }
+	}
+    }
+}
+
+# Start with a fresh gdb.
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load $objdir/$subdir/$binfile
+
+if [initialize] then {
+
+    # Preserve the old timeout, and set a new one that should be
+    # sufficient to step from marker1 to marker2 with watchpoints
+    # set anywhere.
+
+    set timeoutsave $timeout
+    set timeout 60
+
+    test_simple_watchpoint
+
+    # The IDT/sim monitor only has 8 (!) open files, of which it uses
+    # 4 (!).  So we have to make sure one program exits before
+    # starting another one.
+    if [istarget "mips-idt-*"] then {
+	gdb_exit
+	gdb_start
+	gdb_reinitialize_dir $srcdir/$subdir
+	gdb_load $objdir/$subdir/$binfile
+	initialize
+    }
+
+    if [istarget "a29k-*-udi"] then {
+	# FIXME: If PR 2415 is fixed, this is not needed.
+	gdb_target_udi
+	gdb_load $objdir/$subdir/$binfile
+    }
+
+    test_disabling_watchpoints
+
+    # See above.
+    if [istarget "mips-idt-*"] then {
+	gdb_exit
+	gdb_start
+	gdb_reinitialize_dir $srcdir/$subdir
+	gdb_load $objdir/$subdir/$binfile
+	initialize
+    }
+
+    test_stepping
+
+    # See above.
+    if [istarget "mips-idt-*"] then {
+	gdb_exit
+	gdb_start
+	gdb_reinitialize_dir $srcdir/$subdir
+	gdb_load $objdir/$subdir/$binfile
+	initialize
+    }
+
+    # This test hasn't been tested on anything but the PA.
+    if [istarget "hppa*-*-*"] then {
+	test_watchpoint_triggered_in_syscall
+    }
+
+    # See above.
+    if [istarget "mips-idt-*"] then {
+	gdb_exit
+	gdb_start
+	gdb_reinitialize_dir $srcdir/$subdir
+	gdb_load $objdir/$subdir/$binfile
+	initialize
+    }
+
+    # This test hasn't been tested on anything but the PA.
+    if [istarget "hppa*-*-*"] then {
+	test_complex_watchpoint
+    }
+
+    # Restore the preserved old timeout value.
+
+    set timeout $timeoutsave
+}
+
+if [istarget "a29k-*-udi"] then {
+    # FIXME: If PR 2415 is fixed, this is not needed.
+    gdb_target_udi
+}

@@ -1,0 +1,434 @@
+# Copyright (C) 1992 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# This file was written by Fred Fish. (fnf@cygnus.com)
+
+if $tracelevel then {
+	strace $tracelevel
+}
+
+set prms_id 0
+set bug_id 0
+
+set binfile "bitfields"
+set srcfile $binfile.c
+
+if ![file exists $objdir/$subdir/$binfile] then {
+    perror "$objdir/$subdir/$binfile does not exist."
+    return 0
+}
+
+#
+# Test bitfield locating and uniqueness.
+# For each member, set that member to 1 and verify that the member (and only
+# that member) is 1, then reset it back to 0.
+#
+
+proc bitfield_uniqueness {} {
+    global decimal
+    global hex
+    global prompt
+    global srcfile
+    global det_file
+
+    send "break break1\n"
+    expect {
+	-re "Break.* at $hex: file .*$srcfile, line $decimal.\r\n$prompt $" {}
+	timeout { fail "setting breakpoint at break1" ; return }
+    }
+
+    send "run\n"
+    expect {
+	-re "The program .* has been started already.*y or n. $" {
+	    send "y\n"
+	    exp_continue
+	}
+	-re "Starting.*Break.*break1 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
+	timeout { fail "running to break1" ; return }
+    }
+
+    send "print flags\n"
+    expect {
+	-re ".*uc = 1 .*, s1 = 0, u1 = 0, s2 = 0, u2 = 0, s3 = 0, u3 = 0, s9 = 0, u9 = 0, sc = 0 .*$prompt $" {}
+	timeout { fail "bitfield uniqueness (uc)" ; return }
+    }
+
+    send "cont\n"
+    expect {
+	-re "Break.*break1 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
+	timeout { fail "continuing to break1" ; return }
+    }
+    send "print flags\n"
+    # Note that we check for s1 as either 1 or -1, so that failure to
+    # treat it correctly as a signed 1bit field (values 0 or -1) while
+    # printing its value does not cause a spurious failure.  We do the
+    # signedness preservation test later.
+    expect {
+	-re ".*uc = 0 .*, s1 = (1|-1), u1 = 0, s2 = 0, u2 = 0, s3 = 0, u3 = 0, s9 = 0, u9 = 0, sc = 0 .*$prompt $" {}
+	timeout { fail "bitfield uniqueness (s1)" ; return }
+    }
+
+    send "cont\n"
+    expect {
+	-re "Break.*break1 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
+	timeout { fail "continuing to break1" ; return }
+    }
+    send "print flags\n"
+    expect {
+	-re ".*uc = 0 .*, s1 = 0, u1 = 1, s2 = 0, u2 = 0, s3 = 0, u3 = 0, s9 = 0, u9 = 0, sc = 0 .*$prompt $" {}
+	timeout { fail "bitfield uniqueness (u1)" ; return }
+    }
+
+    send "cont\n"
+    expect {
+	-re "Break.*break1 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
+	timeout { fail "continuing to break1" ; return }
+    }
+    send "print flags\n"
+    expect {
+	-re ".*uc = 0 .*, s1 = 0, u1 = 0, s2 = 1, u2 = 0, s3 = 0, u3 = 0, s9 = 0, u9 = 0, sc = 0 .*$prompt $" {}
+	timeout { fail "bitfield uniqueness (s2)" ; return }
+    }
+
+    send "cont\n"
+    expect {
+	-re "Break.*break1 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
+	timeout { fail "continuing to break1" ; return }
+    }
+    send "print flags\n"
+    expect {
+	-re ".*uc = 0 .*, s1 = 0, u1 = 0, s2 = 0, u2 = 1, s3 = 0, u3 = 0, s9 = 0, u9 = 0, sc = 0 .*$prompt $" {}
+	timeout { fail "bitfield uniqueness (u2)" ; return }
+    }
+
+    send "cont\n"
+    expect {
+	-re "Break.*break1 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
+	timeout { fail "continuing to break1" ; return }
+    }
+    send "print flags\n"
+    expect {
+	-re ".*uc = 0 .*, s1 = 0, u1 = 0, s2 = 0, u2 = 0, s3 = 1, u3 = 0, s9 = 0, u9 = 0, sc = 0 .*$prompt $" {}
+	timeout { fail "bitfield uniqueness (s3)" ; return }
+    }
+
+    send "cont\n"
+    expect {
+	-re "Break.*break1 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
+	timeout { fail "continuing to break1" ; return }
+    }
+    send "print flags\n"
+    expect {
+	-re ".*uc = 0 .*, s1 = 0, u1 = 0, s2 = 0, u2 = 0, s3 = 0, u3 = 1, s9 = 0, u9 = 0, sc = 0 .*$prompt $" {}
+	timeout { fail "bitfield uniqueness (u3)" ; return }
+    }
+
+    send "cont\n"
+    expect {
+	-re "Break.*break1 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
+	timeout { fail "continuing to break1" ; return }
+    }
+    send "print flags\n"
+    expect {
+	-re ".*uc = 0 .*, s1 = 0, u1 = 0, s2 = 0, u2 = 0, s3 = 0, u3 = 0, s9 = 1, u9 = 0, sc = 0 .*$prompt $" {}
+	timeout { fail "bitfield uniqueness (s9)" ; return }
+    }
+
+    send "cont\n"
+    expect {
+	-re "Break.*break1 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
+	timeout { fail "continuing to break1" ; return }
+    }
+    send "print flags\n"
+    expect {
+	-re ".*uc = 0 .*, s1 = 0, u1 = 0, s2 = 0, u2 = 0, s3 = 0, u3 = 0, s9 = 0, u9 = 1, sc = 0 .*$prompt $" {}
+	timeout { fail "bitfield uniqueness (u9)" ; return }
+    }
+
+    send "cont\n"
+    expect {
+	-re "Break.*break1 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
+	timeout { fail "continuing to break1" ; return }
+    }
+    send "print flags\n"
+    expect {
+	-re ".*uc = 0 .*, s1 = 0, u1 = 0, s2 = 0, u2 = 0, s3 = 0, u3 = 0, s9 = 0, u9 = 0, sc = 1 .*$prompt $" {}
+	timeout { fail "bitfield uniqueness (sc)" ; return }
+    }
+
+    pass "bitfield locating and uniqueness"
+}
+
+
+#
+# Test bitfield containment.
+# Fill alternating fields with all 1's and verify that none of the bits
+# "bleed over" to the other fields.
+#
+
+proc bitfield_containment {} {
+    global decimal
+    global hex
+    global prompt
+    global srcfile
+    global det_file
+
+    send "delete\n"
+    expect {
+	-re "Delete all breakpoints.*y or n. $" {
+	    send "y\n"
+	    expect {
+		-re "$prompt $" {}
+		timeout { fail "deleting breakpoints" ; return }
+	    }
+	}
+	timeout { fail "deleting breakpoints" ; return }
+    }
+
+    send "break break2\n"
+    expect {
+	-re "Break.* at $hex: file .*$srcfile, line $decimal.\r\n$prompt $" {}
+	timeout { fail "setting breakpoint at break2" ; return }
+    }
+
+    send "run\n"
+    expect {
+	-re "The program .* has been started already.*y or n. $" {
+	    send "y\n"
+	    exp_continue
+	}
+	-re "Starting.*Break.*break2 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
+	timeout { fail "running to break2" ; return }
+    }
+
+    send "print/x flags\n"
+    expect {
+	-re ".*uc = 0xff, s1 = 0x0, u1 = 0x1, s2 = 0x0, u2 = 0x3, s3 = 0x0, u3 = 0x7, s9 = 0x0, u9 = 0x1ff, sc = 0x0.*$prompt $" {}
+	timeout { fail "bitfield containment" ; return }
+    }
+
+    send "cont\n"
+    expect {
+	-re "Break.*break2 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
+	timeout { fail "continuing to break2" ; return }
+    }
+
+    # If program is compiled with Sun CC, then these print out as their
+    # actual sizes; if compiled with gcc, they print out as 0xffffffff
+    # (which strikes me as bogus, but accept it at least for now).
+    send "print/x flags\n"
+    expect {
+	-re ".*uc = 0x0, s1 = 0x(1|f*), u1 = 0x0, s2 = 0x(3|f*), u2 = 0x0, s3 = 0x(7|f*), u3 = 0x0, s9 = 0x(1ff|f*), u9 = 0x0, sc = 0xff.*$prompt $" {}
+	timeout { fail "bitfield containment" ; return }
+    }
+
+    pass "bitfield containment"
+}
+
+#
+# Test unsigned bitfields for unsignedness and range.
+# Fill the unsigned fields with the maximum positive value and verify that
+# the values are printed correctly.
+# FIXME:  Perhaps we should test each bitfield separately so we can
+# report individual failures rather than just pass/nopass.
+
+proc bitfield_unsignedness {} {
+    global decimal
+    global hex
+    global prompt
+    global srcfile
+    global det_file
+
+    send "delete\n"
+    expect {
+	-re "Delete all breakpoints.*y or n. $" {
+	    send "y\n"
+	    expect {
+		-re "$prompt $" {}
+		timeout { fail "deleting breakpoints" ; return }
+	    }
+	}
+	timeout { fail "deleting breakpoints" ; return }
+    }
+
+    send "break break3\n"
+    expect {
+	-re "Break.* at $hex: file .*$srcfile, line $decimal.\r\n$prompt $" {}
+	timeout { fail "setting breakpoint at break3" ; return }
+    }
+
+    send "run\n"
+    expect {
+	-re "The program .* has been started already.*y or n. $" {
+	    send "y\n"
+	    exp_continue
+	}
+	-re "Starting.*Break.*break3 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
+	timeout { fail "running to break3" ; return }
+    }
+
+    send "print flags\n"
+    expect {
+	-re ".*uc = 0 .*, s1 = 0, u1 = 1, s2 = 0, u2 = 3, s3 = 0, u3 = 7, s9 = 0, u9 = 511, sc = 0 .*$prompt $" {}
+	timeout { fail "unsigned bitfield ranges" ; return }
+    }
+
+    pass "unsigned bitfield ranges and unsigned-ness"
+}
+
+#
+# Test signed bitfields for signedness and range.
+# Fill the signed fields with the maximum positive value, then the maximally
+# negative value, then -1, and verify in each case that the values are
+# printed correctly.
+#
+
+proc bitfield_signedness {} {
+    global decimal
+    global hex
+    global prompt
+    global srcfile
+    global det_file
+
+    send "delete\n"
+    expect {
+	-re "Delete all breakpoints.*y or n. $" {
+	    send "y\n"
+	    expect {
+		-re "$prompt $" {}
+		timeout { warning "deleting breakpoints (timedout)" ; return }
+	    }
+	}
+	timeout { warning "deleting breakpoints (timedout)" ; return }
+    }
+
+    send "break break4\n"
+    expect {
+	-re "Break.* at $hex: file .*$srcfile, line $decimal.\r\n$prompt $" {}
+	timeout { fail "setting breakpoint at break4" ; return }
+    }
+
+    send "run\n"
+    expect {
+	-re "The program .* has been started already.*y or n. $" {
+	    send "y\n"
+	    exp_continue
+	}
+	-re "Starting.*Break.*break4 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
+	timeout { fail "running to break4" ; return }
+    }
+
+    send "print flags\n"
+    expect {
+	-re ".*uc = 0 .*, s1 = 0, u1 = 0, s2 = 1, u2 = 0, s3 = 3, u3 = 0, s9 = 255, u9 = 0, sc = 0 .*$prompt $" {}
+	timeout { fail "signed bitfields, max positive values" ; return }
+    }
+
+    send "cont\n"
+    expect {
+	-re "Break.*break4 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
+	timeout { fail "continuing to break4" ; return }
+    }
+
+    # Determine if the target has signed bitfields so we can xfail the
+    # the signed bitfield tests if it doesn't.
+    send "print i\n"
+    expect {
+	-re ".* = -256.*$prompt $" {}
+	-re ".* = 256.*$prompt $" {setup_xfail "*-*-*"}
+	-re ".*$prompt $" { fail "\
+determining signed-ness of bitfields (known bug in sparc gcc 2.4.5)"
+	    return
+	}
+	default { fail "determining signed-ness of bitfields" ; return }
+    }
+    send "print flags\n"
+    expect {
+	-re ".*uc = 0 .*, s1 = -1, u1 = 0, s2 = -2, u2 = 0, s3 = -4, u3 = 0, s9 = -256, u9 = 0, sc = 0 .*$prompt $" {}
+	timeout { fail "signed bitfields, max negative values" ; return }
+    }
+
+    send "cont\n"
+    expect {
+	-re "Break.*break4 \[)(\]+ at .*$srcfile:$decimal.*$prompt $" {}
+	timeout { fail "continuing to break4" ; return }
+    }
+
+    send "print flags\n"
+    expect {
+	-re ".*uc = 0 .*, s1 = -1, u1 = 0, s2 = -1, u2 = 0, s3 = -1, u3 = 0, s9 = -1, u9 = 0, sc = 0 .*$prompt $" {}
+	timeout { fail "signed bitfields with -1" ; return }
+    }
+
+    pass "signed bitfield ranges and signed-ness"
+}
+
+# Start with a fresh gdb.
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load $objdir/$subdir/$binfile
+
+send "set print sevenbit-strings\n" ; expect -re "$prompt $"
+bitfield_uniqueness
+if [istarget "mips-idt-*"] then {
+    # Restart because IDT/SIM runs out of file descriptors.
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load $objdir/$subdir/$binfile
+}
+if [istarget "a29k-*-udi"] then {
+    # FIXME: If PR 2415 is fixed, this is not needed.
+    gdb_target_udi
+    gdb_load $objdir/$subdir/$binfile
+}
+bitfield_containment
+if [istarget "mips-idt-*"] then {
+    # Restart because IDT/SIM runs out of file descriptors.
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load $objdir/$subdir/$binfile
+}
+if [istarget "a29k-*-udi"] then {
+    # FIXME: If PR 2415 is fixed, this is not needed.
+    gdb_target_udi
+    gdb_load $objdir/$subdir/$binfile
+}
+bitfield_unsignedness
+if [istarget "mips-idt-*"] then {
+    # Restart because IDT/SIM runs out of file descriptors.
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load $objdir/$subdir/$binfile
+}
+if [istarget "a29k-*-udi"] then {
+    # FIXME: If PR 2415 is fixed, this is not needed.
+    gdb_target_udi
+    gdb_load $objdir/$subdir/$binfile
+}
+bitfield_signedness
+
+if [istarget "a29k-*-udi"] then {
+    # FIXME: If PR 2415 is fixed, this is not needed.
+    gdb_target_udi
+}

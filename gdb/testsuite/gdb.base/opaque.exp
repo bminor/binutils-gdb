@@ -1,0 +1,367 @@
+# Copyright (C) 1992 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# This file was written by Fred Fish. (fnf@cygnus.com)
+
+if $tracelevel then {
+	strace $tracelevel
+}
+
+set prms_id 0
+set bug_id 0
+
+set binfile "opaque"
+set srcfile $binfile.c
+
+if ![file exists $objdir/$subdir/$binfile] then {
+    perror "$objdir/$subdir/$binfile does not exist."
+    return 0
+}
+
+# Start with a fresh gdb.
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load $objdir/$subdir/$binfile
+
+source gdb.base/opaque-info.exp
+
+#
+# Test basic opaque structure handling (statically).
+# The ordering of the tests is significant.  We first try the things that
+# might fail if gdb fails to connect the uses of opaque structures to
+# the actual opaque structure definition.
+
+# When we start up, gdb sets the file containing main() as the current
+# source file.  The actual structure foo is defined in a different file.
+# A pointer (foop) to an instance of the opaque struct is defined in the same
+# source file as main().  Ensure that gdb correctly "connected" the definition
+# in the other file with the pointer to the opaque struct in the file containing
+# "foop".
+
+# Define a procedure to set up an xfail for all targets that do not support
+# this sort of cross reference.
+# Any target gcc that has a DBX_NO_XREFS definition in its config file will
+# not support it.
+# XCOFF does not seem to support it either.  See the very end of gcc/xcoffout.h.
+# Native alpha ecoff doesn't support it either.
+# I don't think this type of cross reference works for any COFF target
+# either.
+
+proc setup_xfail_on_opaque_pointer {} {
+	global gcc_compiled
+
+	setup_xfail "rs6000-*-*" "a29k-*-udi" "vax-*-*" "i*86-sequent-bsd*"
+	if {!$gcc_compiled} then {
+		setup_xfail "alpha-*-*"
+	}
+}
+
+setup_xfail_on_opaque_pointer
+send "whatis foop\n"
+expect {
+	-re "whatis foop\r
+type = struct foo \[*\]+\r
+$prompt $" { pass "whatis on opaque struct pointer (statically)"}
+	-re ".*$prompt $"	{ fail "whatis on opaque struct *" }
+	timeout 		{ fail "(timeout) whatis on opaque struct *" }
+}
+
+
+# Ensure that we know the form of the structure that foop points to.
+
+setup_xfail_on_opaque_pointer
+send "ptype foop\n"
+expect {
+	-re "ptype foop\r
+type = struct foo \{\r
+    int a;\r
+    int b;\r
+\} \[*\]+\r
+$prompt $" { pass "ptype on opaque struct pointer (statically)" }
+	-re ".*$prompt $"	{ fail "ptype on opaque struct *" }
+	timeout 		{ fail "(timeout) ptype on opaque struct *" }
+}
+
+
+# An instance of the opaque structure (afoo) is defined in a different file.
+# Ensure that we can locate afoo and the structure definition.
+
+send "whatis afoo\n"
+expect {
+	-re "whatis afoo\r
+type = struct foo\r
+$prompt $" { pass "whatis on opaque struct instance (statically)" }
+	-re ".*$prompt $"	{ fail "whatis on opaque struct" }
+	timeout 		{ fail "(timeout) whatis on opaque struct" }
+}
+
+
+# Ensure that we know the form of "afoo".
+
+send "ptype afoo\n"
+expect {
+	-re "ptype afoo\r
+type = struct foo \{\r
+    int a;\r
+    int b;\r
+\}\r
+$prompt $" { pass "ptype on opaque struct instance (statically)" }
+	-re ".*$prompt $"	{ fail "ptype on opaque struct instance" }
+	timeout 		{ fail "(timeout) ptype on opaque struct" }
+}
+
+
+# Ensure that we know what a struct foo looks like.
+
+send "ptype struct foo\n"
+expect {
+	-re "ptype struct foo\r
+type = struct foo \{\r
+    int a;\r
+    int b;\r
+\}\r
+$prompt $" { pass "ptype on opaque struct tagname (statically)" }
+	-re ".*$prompt $"	{ fail "ptype on opaque struct" }
+	timeout 		{ fail "(timeout) ptype on opaque struct" }
+}
+
+
+#
+# Done with static tests, now test dynamic opaque structure handling.
+# We reload the symbol table so we forget about anything we might
+# have learned during the static tests.
+#
+
+if [istarget "mips-idt-*"] then {
+    # Restart because IDT/SIM runs out of file descriptors.
+    gdb_exit
+    gdb_start
+}
+gdb_reinitialize_dir $srcdir/$subdir
+if [istarget "a29k-*-udi"] then {
+    # FIXME: If PR 2415 is fixed, this is not needed.
+    gdb_target_udi
+}
+gdb_load $objdir/$subdir/$binfile
+
+# Set breakpoint on main, where struct foo is incomplete.
+
+send "break main\n"
+expect {
+	-re "Breakpoint.*at.* file .*opaque0.c, line.*$prompt $" {}
+	-re ".*$prompt $"	{ fail "setting breakpoint at main" }
+	timeout 		{ fail "(timeout) setting breakpoint" }
+}
+
+
+# Run until break at main.  Struct foo is opaque in the file containing
+# main().
+
+send "run\n"
+expect {
+	-re "Starting program:.*Breakpoint 1.*$prompt $" {}
+	-re ".*$prompt $"	{ fail "run until main()" }
+	timeout			{ fail "(timeout) run until main()" }
+}
+
+
+# The current source file is now the one containing main().  The structure foo
+# is defined in a different file, but we have a pointer to an instance of
+# the opaque structure in the current file.  Ensure we know it's type.
+
+setup_xfail_on_opaque_pointer
+send "whatis foop\n"
+expect {
+	-re "whatis foop\r
+type = struct foo \[*\]+\r
+$prompt $" { pass "whatis on opaque struct pointer (dynamically)"}
+	-re ".*$prompt $"	{ fail "whatis on opaque struct pointer" }
+	timeout			{ fail "(timeout) whatis on opaque struct ptr" }
+}
+
+
+# Ensure that we know the form of the thing foop points to.
+
+setup_xfail_on_opaque_pointer
+send "ptype foop\n"
+expect {
+	-re "ptype foop\r
+type = struct foo \{\r
+    int a;\r
+    int b;\r
+\} \[*\]+\r
+$prompt $" { pass "ptype on opaque struct pointer (dynamically)" }
+	-re ".*$prompt $"	{ fail "ptype on opaque struct *" }
+	timeout 		{ fail "(timeout) ptype on opaque struct *" }
+}
+
+
+send "whatis afoo\n"
+expect {
+	-re "whatis afoo\r
+type = struct foo\r
+$prompt $" { pass "whatis on opaque struct instance (dynamically)" }
+	-re ".*$prompt $"	{ fail "whatis on opaque struct" }
+	timeout 		{ fail "(timeout) whatis on opaque struct" }
+}
+
+
+# Ensure that we know the form of afoo, an instance of a struct foo.
+
+send "ptype afoo\n"
+expect {
+	-re "ptype afoo\r
+type = struct foo \{\r
+    int a;\r
+    int b;\r
+\}\r
+$prompt $" { pass "ptype on opaque struct instance (dynamically)" }
+	-re ".*$prompt $"	{ fail "ptype on opaque struct instance" }
+	timeout 		{ fail "(timeout) ptype on opaque struct" }
+}
+
+
+# Ensure that we know the form of an explicit struct foo.
+
+send "ptype struct foo\n"
+expect {
+	-re "ptype struct foo\r
+type = struct foo \{\r
+    int a;\r
+    int b;\r
+\}\r
+$prompt $" { pass "ptype on opaque struct tagname (dynamically)" }
+	-re ".*$prompt $"	{ fail "ptype on opaque struct" }
+	timeout 		{ fail "(timeout) ptype on opaque struct" }
+}
+
+
+# Now reload the symbols again so we forget about anything we might
+# have learned reading the symbols during the previous tests.
+
+gdb_reinitialize_dir $srcdir/$subdir
+if [istarget "a29k-*-udi"] then {
+    # FIXME: If PR 2415 is fixed, this is not needed.
+    gdb_target_udi
+}
+gdb_load $objdir/$subdir/$binfile
+
+# Disable the breakoint on main().
+# Set breakpoint on getfoo, where struct foo is complete.
+
+send "disable 1\n"
+expect {
+	-re ".*$prompt $"	{}
+	timeout 		{ fail "(timeout) disabling breakpoint" }
+}
+
+
+send "break getfoo\n"
+expect {
+	-re "Breakpoint.*at.* file .*opaque1\.c, line.*$prompt $" {}
+	-re ".*$prompt $"	{ fail "setting breakpoint at getfoo" }
+	timeout 		{ fail "(timeout) setting breakpoint" }
+}
+
+
+# Run until break at getfoo().  Struct foo is defined here.
+# Retry all the tests we we tried at main() where struct foo was opaque.
+
+send "run\n"
+expect {
+	-re "Starting program:.*Breakpoint.*$prompt $" {}
+	-re ".*$prompt $"	{ fail "run until getfoo()" }
+	timeout			{ fail "(timeout) run until getfoo()" }
+}
+
+
+# Ensure that we know what foop is.
+
+setup_xfail_on_opaque_pointer
+send "whatis foop\n"
+expect {
+	-re "whatis foop\r
+type = struct foo \[*\]+\r
+$prompt $" { pass "whatis on opaque struct pointer (dynamically)"}
+	-re ".*$prompt $"	{ fail "whatis on opaque struct pointer" }
+	timeout			{ fail "(timeout) whatis on opaque struct ptr" }
+}
+
+
+# Ensure that we know the form of the thing foop points to.
+
+setup_xfail_on_opaque_pointer
+send "ptype foop\n"
+expect {
+	-re "ptype foop\r
+type = struct foo \{\r
+    int a;\r
+    int b;\r
+\} \[*\]+\r
+$prompt $" { pass "ptype on opaque struct pointer (dynamically)" }
+	-re ".*$prompt $"	{ fail "ptype on opaque struct *" }
+	timeout 		{ fail "(timeout) ptype on opaque struct *" }
+}
+
+
+send "whatis afoo\n"
+expect {
+	-re "whatis afoo\r
+type = struct foo\r
+$prompt $" { pass "whatis on opaque struct instance (dynamically)" }
+	-re ".*$prompt $"	{ fail "whatis on opaque struct" }
+	timeout 		{ fail "(timeout) whatis on opaque struct" }
+}
+
+
+# Ensure that we know the form of afoo, an instance of a struct foo.
+
+send "ptype afoo\n"
+expect {
+	-re "ptype afoo\r
+type = struct foo \{\r
+    int a;\r
+    int b;\r
+\}\r
+$prompt $" { pass "ptype on opaque struct instance (dynamically)" }
+	-re ".*$prompt $"	{ fail "ptype on opaque struct instance" }
+	timeout 		{ fail "(timeout) ptype on opaque struct" }
+}
+
+
+# Ensure that we know the form of an explicit struct foo.
+
+send "ptype struct foo\n"
+expect {
+	-re "ptype struct foo\r
+type = struct foo \{\r
+    int a;\r
+    int b;\r
+\}\r
+$prompt $" { pass "ptype on opaque struct tagname (dynamically)" }
+	-re ".*$prompt $"	{ fail "ptype on opaque struct" }
+	timeout 		{ fail "(timeout) ptype on opaque struct" }
+}
+
+if [istarget "a29k-*-udi"] then {
+    # FIXME: If PR 2415 is fixed, this is not needed.
+    gdb_target_udi
+}

@@ -1,0 +1,1134 @@
+# Copyright (C) 1992 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# This file was written by Fred Fish. (fnf@cygnus.com)
+
+if $tracelevel then {
+	strace $tracelevel
+}
+
+set prms_id 0
+set bug_id 0
+
+set binfile "scope"
+set srcfile $binfile.c
+
+if ![file exists $objdir/$subdir/$binfile] then {
+    perror "$objdir/$subdir/$binfile does not exist."
+    return 0
+}
+
+# Test locating various things when stopped just inside main, after
+# running init().  To prevent cascading of errors, we report the
+# first one and quit.  If all pass, then we print the pass results.
+
+proc test_at_main {} {
+    global prompt
+    global decimal
+    global det_file
+    global srcdir
+    global subdir
+
+    set passcount 0
+
+    # skip past init.  There may be a call to __main at the start of
+    # main, so the first next may only get us to the init call.
+    send "next\n"
+    expect {
+	-re "$decimal.*foo \[)(\]+;\r\n$prompt $" {}
+	-re "$decimal.*init \[)(\]+;\r\n$prompt $"\
+		{ send "next\n" ; exp_continue }
+	-re "$prompt $" { fail "next over init() in main" ; return }
+	timeout { fail "(timeout) next over init() in main" ; return }
+    }
+
+    # Print scope0.c::filelocal, which is 1
+
+    send "print filelocal\n"
+    expect {
+	-re "\\\$$decimal = 1\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print filelocal" ; return }
+	timeout {
+	    fail "(timeout) print filelocal" ; return
+	}
+    }
+
+    # The RS/6000 does not seem to be handle print 'file'::var.
+    setup_xfail "rs6000-*-*"
+    # This used to work, but is now broken for some reason.
+    setup_xfail "*-*-*"
+    send "print 'scope0.c'::filelocal\n"
+    expect {
+	-re "\\\$$decimal = 1\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope0.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope0.c'::filelocal\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope0.c'::filelocal" ; return }
+	timeout {
+	    fail "(timeout) print 'scope0.c'::filelocal" ; return
+	}
+    }
+
+    # Print scope0.c::filelocal_bss, which is 101
+
+    send "print filelocal_bss\n"
+    expect {
+	-re "\\\$$decimal = 101\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { print filelocal_bss" ; return }
+	timeout {
+	    fail "(timeout) print filelocal_bss" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope0.c'::filelocal_bss\n"
+    expect {
+	-re "\\\$$decimal = 101\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope0.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope0.c'::filelocal_bss\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope0.c'::filelocal_bss" ; return }
+	timeout {
+	    fail "(timeout) print 'scope0.c'::filelocal_bss" ; return
+	}
+    }
+
+    # Print scope0.c::filelocal_ro, which is 201
+
+    send "print filelocal_ro\n"
+    expect {
+	-re "\\\$$decimal = 201\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print filelocal_ro" ; return }
+	timeout {
+	    fail "(timeout) print filelocal_ro" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope0.c'::filelocal_ro\n"
+    expect {
+	-re "\\\$$decimal = 201\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope0.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope0.c'::filelocal_ro\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope0.c'::filelocal_ro" ; return }
+	timeout {
+	    fail "(timeout) print 'scope0.c'::filelocal_ro" ; return
+	}
+    }
+
+    # Print scope1.c::filelocal, which is 2
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::filelocal\n"
+    expect {
+	-re "\\\$$decimal = 2\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::filelocal\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::filelocal" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::filelocal" ; return
+	}
+    }
+
+    # Print scope1.c::filelocal_bss, which is 102
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::filelocal_bss\n"
+    expect {
+	-re "\\\$$decimal = 102\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::filelocal_bss\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::filelocal_bss" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::filelocal_bss" ; return
+	}
+    }
+
+    # Print scope1.c::filelocal_ro, which is 202
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::filelocal_ro\n"
+    expect {
+	-re "\\\$$decimal = 202\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::filelocal_ro\n"
+	    exp_continue
+	}
+	-re "$prompt " {fail "print 'scope1.c'::filelocal_ro" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::filelocal_ro" ; return
+	}
+    }
+
+    # Print scope1.c::foo::funclocal, which is 3
+
+    setup_xfail "mips-*-*" 1843
+    send "print foo::funclocal\n"
+    expect {
+	-re "\\\$$decimal = 3\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print foo::funclocal" ; return }
+	timeout {
+	    fail "(timeout) print foo::funclocal" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::foo::funclocal\n"
+    expect {
+	-re "\\\$$decimal = 3\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::foo::funclocal\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::foo::funclocal" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::foo::funclocal" ; return
+	}
+    }
+
+    # Print scope1.c::foo::funclocal_ro, which is 203
+
+    send "print foo::funclocal_ro\n"
+    expect {
+	-re "\\\$$decimal = 203\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print foo::funclocal_ro" ; return }
+	timeout {
+	    fail "(timeout) print foo::funclocal_ro" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::foo::funclocal_ro\n"
+    expect {
+	-re "\\\$$decimal = 203\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::foo::funclocal_ro\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::foo::funclocal_ro" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::foo::funclocal_ro" ; return
+	}
+    }
+
+    # Print scope1.c::bar::funclocal, which is 4
+
+    send "print bar::funclocal\n"
+    expect {
+	-re "\\\$$decimal = 4\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print bar::funclocal" ; return }
+	timeout {
+	    fail "(timeout) print bar::funclocal" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::bar::funclocal\n"
+    expect {
+	-re "\\\$$decimal = 4\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::bar::funclocal\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::bar::funclocal" ; return }
+	timeout {
+	    fail "print 'scope1.c'::bar::funclocal" ; return
+	}
+    }
+
+    clear_xfail "*-*-*"
+    pass "$passcount correct scope resolutions from main()"
+}
+
+proc test_at_foo {} {
+    global prompt
+    global decimal
+    global det_file
+    global srcdir
+    global subdir
+
+    set passcount 0
+
+    send "next\n"
+    expect {
+	-re ".*bar \[)(\]+;\r\n$prompt $" {}
+	-re "$prompt $" { fail "continue to foo()" ; return }
+	timeout { fail "(timeout) continue to foo()" ; return }
+    }
+
+    # Print scope0.c::filelocal, which is 1
+
+    setup_xfail "rs6000-*-*"
+    # This used to work, but is now broken for some reason.
+    setup_xfail "*-*-*"
+    send "print 'scope0.c'::filelocal\n"
+    expect {
+	-re "\\\$$decimal = 1\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope0.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope0.c'::filelocal\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope0.c'::filelocal" ; return }
+	timeout {
+	    fail "(timeout) print 'scope0.c'::filelocal" ; return
+	}
+    }
+
+   # Print scope0.c::filelocal_bss, which is 101
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope0.c'::filelocal_bss\n"
+    expect {
+	-re "\\\$$decimal = 101\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope0.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope0.c'::filelocal_bss\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope0.c'::filelocal_bss" ; return }
+	timeout {
+	    fail "(timeout) print 'scope0.c'::filelocal_bss" ; return
+	}
+    }
+
+   # Print scope0.c::filelocal_ro, which is 201
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope0.c'::filelocal_ro\n"
+    expect {
+	-re "\\\$$decimal = 201\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope0.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope0.c'::filelocal_ro\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope0.c'::filelocal_ro" ; return }
+	timeout {
+	    fail "(timeout) print 'scope0.c'::filelocal_ro" ; return
+	}
+    }
+
+    # Print scope1.c::filelocal, which is 2
+
+    send "print filelocal\n"
+    expect {
+	-re "\\\$$decimal = 2\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print filelocal" ; return }
+	timeout {
+	    fail "(timeout) print filelocal" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::filelocal\n"
+    expect {
+	-re "\\\$$decimal = 2\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::filelocal\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::filelocal" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::filelocal" ; return
+	}
+    }
+
+    # Print scope1.c::filelocal_bss, which is 102
+
+    send "print filelocal_bss\n"
+    expect {
+	-re "\\\$$decimal = 102\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print filelocal_bss" ; return }
+	timeout {
+	    fail "(timeout) print filelocal_bss" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::filelocal_bss\n"
+    expect {
+	-re "\\\$$decimal = 102\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::filelocal_bss\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::filelocal_bss" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::filelocal_bss" ; return
+	}
+    }
+
+    # Print scope1.c::filelocal_ro, which is 202
+
+    send "print filelocal_ro\n"
+    expect {
+	-re "\\\$$decimal = 202\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print filelocal_ro" ; return }
+	timeout {
+	    fail "(timeout) print filelocal_ro" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::filelocal_ro\n"
+    expect {
+	-re "\\\$$decimal = 202\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::filelocal_ro\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::filelocal_ro" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::filelocal_ro" ; return
+	}
+    }
+
+    # Print scope1.c::foo::funclocal, which is 3
+
+    send "print funclocal\n"
+    expect {
+	-re "\\\$$decimal = 3\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print funclocal" ; return }
+	timeout {
+	    fail "(timeout) print funclocal" ; return
+	}
+    }
+
+    setup_xfail "mips-*-*" 1843
+    send "print foo::funclocal\n"
+    expect {
+	-re "\\\$$decimal = 3\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print foo::funclocal" ; return }
+	timeout {
+	    fail "(timeout) print foo::funclocal" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::foo::funclocal\n"
+    expect {
+	-re "\\\$$decimal = 3\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::foo::funclocal\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::foo::funclocal" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::foo::funclocal" ; return
+	}
+    }
+
+    # Print scope1.c::foo::funclocal_bss, which is 103
+
+    send "print funclocal_bss\n"
+    expect {
+	-re "\\\$$decimal = 103\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print funclocal_bss" ; return }
+	timeout {
+	    fail "(timeout) print funclocal_bss" ; return
+	}
+    }
+
+    send "print foo::funclocal_bss\n"
+    expect {
+	-re "\\\$$decimal = 103\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print foo::funclocal_bss" ; return }
+	timeout {
+	    fail "(timeout) print foo::funclocal_bss" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::foo::funclocal_bss\n"
+    expect {
+	-re "\\\$$decimal = 103\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::foo::funclocal_bss\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::foo::funclocal_bss" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::foo::funclocal_bss" ; return
+	}
+    }
+
+    # Print scope1.c::foo::funclocal_ro, which is 203
+
+    send "print funclocal_ro\n"
+    expect {
+	-re "\\\$$decimal = 203\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print funclocal_ro" ; return }
+	timeout {
+	    fail "(timeout) print funclocal_ro" ; return
+	}
+    }
+
+    send "print foo::funclocal_ro\n"
+    expect {
+	-re "\\\$$decimal = 203\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print foo::funclocal_ro" ; return }
+	timeout {
+	    fail "(timeout) print foo::funclocal_ro" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::foo::funclocal_ro\n"
+    expect {
+	-re "\\\$$decimal = 203\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::foo::funclocal_ro\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::foo::funclocal_ro" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::foo::funclocal_ro" ; return
+	}
+    }
+
+    # Print scope1.c::bar::funclocal, which is 4
+
+    send "print bar::funclocal\n"
+    expect {
+	-re "\\\$$decimal = 4\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print bar::funclocal" ; return }
+	timeout {
+	    fail "(timeout) print bar::funclocal" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::bar::funclocal\n"
+    expect {
+	-re "\\\$$decimal = 4\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::bar::funclocal\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::bar::funclocal" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::bar::funclocal" ; return
+	}
+    }
+
+    clear_xfail "*-*-*"
+    pass "$passcount correct scope resolutions from foo()"
+}
+
+proc test_at_bar {} {
+    global prompt
+    global decimal
+    global det_file
+    global srcdir
+    global subdir
+
+    set passcount 0
+
+    send "next\n"
+    expect {
+	-re ".*$prompt $" {}
+	timeout { fail "next in bar()" ; return }
+    }
+
+    # Print scope0.c::filelocal, which is 1
+
+    setup_xfail "rs6000-*-*"
+    # This used to work, but is now broken for some reason.
+    setup_xfail "*-*-*"
+    send "print 'scope0.c'::filelocal\n"
+    expect {
+	-re "\\\$$decimal = 1\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope0.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope0.c'::filelocal\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope0.c'::filelocal" ; return }
+	timeout {
+	    fail "(timeout) print 'scope0.c'::filelocal" ; return
+	}
+    }
+
+   # Print scope0.c::filelocal_bss, which is 101
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope0.c'::filelocal_bss\n"
+    expect {
+	-re "\\\$$decimal = 101\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope0.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope0.c'::filelocal_bss\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope0.c'::filelocal_bss" ; return }
+	timeout {
+	    fail "(timeout) print 'scope0.c'::filelocal_bss" ; return
+	}
+    }
+
+   # Print scope0.c::filelocal_ro, which is 201
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope0.c'::filelocal_ro\n"
+    expect {
+	-re "\\\$$decimal = 201\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope0.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope0.c'::filelocal_ro\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope0.c'::filelocal_ro" ; return }
+	timeout {
+	    fail "(timeout) print 'scope0.c'::filelocal_ro" ; return
+	}
+    }
+
+    # Print scope1.c::filelocal, which is 2
+
+    send "print filelocal\n"
+    expect {
+	-re "\\\$$decimal = 2\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print filelocal" ; return }
+	timeout {
+	    fail "(timeout) print filelocal" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::filelocal\n"
+    expect {
+	-re "\\\$$decimal = 2\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::filelocal\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::filelocal" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::filelocal" ; return
+	}
+    }
+
+    # Print scope1.c::filelocal_bss, which is 102
+
+    send "print filelocal_bss\n"
+    expect {
+	-re "\\\$$decimal = 102\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print filelocal_bss" ; return }
+	timeout {
+	    fail "(timeout) print filelocal_bss" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::filelocal_bss\n"
+    expect {
+	-re "\\\$$decimal = 102\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::filelocal_bss\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::filelocal_bss" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::filelocal_bss" ; return
+	}
+    }
+
+    # Print scope1.c::filelocal_ro, which is 202
+
+    send "print filelocal_ro\n"
+    expect {
+	-re "\\\$$decimal = 202\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print filelocal_ro" ; return }
+	timeout {
+	    fail "(timeout) print filelocal_ro" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::filelocal_ro\n"
+    expect {
+	-re "\\\$$decimal = 202\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::filelocal_ro\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::filelocal_ro" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::filelocal_ro" ; return
+	}
+    }
+
+    # Print scope1.c::foo::funclocal, which is 3
+
+    setup_xfail "mips-*-*" 1843
+    send "print foo::funclocal\n"
+    expect {
+	-re "\\\$$decimal = 3\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print foo::funclocal" ; return }
+	timeout {
+	    fail "(timeout) print foo::funclocal" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::foo::funclocal\n"
+    expect {
+	-re "\\\$$decimal = 3\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::foo::funclocal\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::foo::funclocal" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::foo::funclocal" ; return
+	}
+    }
+
+    # Print scope1.c::foo::funclocal_bss, which is 103
+
+    send "print foo::funclocal_bss\n"
+    expect {
+	-re "\\\$$decimal = 103\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print foo::funclocal_bss" ; return }
+	timeout {
+	    fail "(timeout) print foo::funclocal_bss" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::foo::funclocal_bss\n"
+    expect {
+	-re "\\\$$decimal = 103\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::foo::funclocal_bss\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::foo::funclocal_bss" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::foo::funclocal_bss" ; return
+	}
+    }
+
+    # Print scope1.c::foo::funclocal_ro, which is 203
+
+    send "print foo::funclocal_ro\n"
+    expect {
+	-re "\\\$$decimal = 203\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print foo::funclocal_ro" ; return }
+	timeout {
+	    fail "(timeout) print foo::funclocal_ro" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::foo::funclocal_ro\n"
+    expect {
+	-re "\\\$$decimal = 203\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::foo::funclocal_ro\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::foo::funclocal_ro" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::foo::funclocal_ro" ; return
+	}
+    }
+
+    # Print scope1.c::bar::funclocal, which is 4
+
+    send "print funclocal\n"
+    expect {
+	-re "\\\$$decimal = 4\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print funclocal" ; return }
+	timeout {
+	    fail "(timeout) print funclocal" ; return
+	}
+    }
+
+    send "print bar::funclocal\n"
+    expect {
+	-re "\\\$$decimal = 4\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print bar::funclocal" ; return }
+	timeout {
+	    fail "(timeout) print bar::funclocal" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::bar::funclocal\n"
+    expect {
+	-re "\\\$$decimal = 4\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::bar::funclocal\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::bar::funclocal" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::bar::funclocal" ; return
+	}
+    }
+
+    # Print scope1.c::bar::funclocal_bss, which is 104
+
+    send "print funclocal_bss\n"
+    expect {
+	-re "\\\$$decimal = 104\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print funclocal_bss" ; return }
+	timeout {
+	    fail "(timeout) print funclocal_bss" ; return
+	}
+    }
+
+    send "print bar::funclocal_bss\n"
+    expect {
+	-re "\\\$$decimal = 104\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "print bar::funclocal_bss" ; return }
+	timeout {
+	    fail "(timeout) print bar::funclocal_bss" ; return
+	}
+    }
+
+    setup_xfail "rs6000-*-*"
+    send "print 'scope1.c'::bar::funclocal_bss\n"
+    expect {
+	-re "\\\$$decimal = 104\r\n$prompt $" { incr passcount }
+	-re "No symbol \"scope1.c\" in current context.*$prompt $" {
+	    send "print '$srcdir/$subdir/scope1.c'::bar::funclocal_bss\n"
+	    exp_continue
+	}
+	-re "$prompt $" { fail "print 'scope1.c'::bar::funclocal_bss" ; return }
+	timeout {
+	    fail "(timeout) print 'scope1.c'::bar::funclocal_bss" ; return
+	}
+    }
+
+    clear_xfail "*-*-*"
+    pass "$passcount correct scope resolutions from bar()"
+}
+
+# FIXME:  This test was originally part of some local scope resolution
+# tests.  It probably belongs somewhere else now.
+
+proc test_at_autovars {} {
+    global prompt
+    global decimal
+    global hex
+    global srcfile
+
+    # Test symbol table lookup with 100 local (auto) variables.
+
+    send "break marker1\n" ; expect -re ".*$prompt $"
+
+    send "cont\n"
+    expect {
+	-re "Break.* marker1 \[)(\]+ at .*:$decimal.*$prompt $" {
+	    send "up\n"
+	    expect {
+		-re ".*$prompt $" {}
+		timeout { fail "up from marker1" ; return }
+	    }
+	}
+	-re "$prompt $" { fail "continue to marker1" ; return }
+	timeout { fail "(timeout) continue to marker1" ; return }
+    }
+
+    set count 0
+    while {$count < 100} {
+	send "print i$count\n"
+	expect {
+	    -re ".* = $count\r\n$prompt $" {}
+	    -re "$prompt $" {
+		fail "bad value for auto variable i$count"; return
+	    }
+	    timeout {
+		fail "(timeout) bad value for auto variable i$count"; return
+	    }
+	}
+	set count [expr $count+1]
+    }
+    clear_xfail "*-*-*"
+    pass "$count auto variables correctly initialized"
+
+    # Test that block variable sorting is not screwing us.
+    gdb_test "frame" "#.*autovars \[(\]+bcd=5, abc=6\[)\]+" "args in correct order"
+}
+
+proc test_at_localscopes {} {
+    global prompt
+    global decimal
+    global hex
+    global srcfile
+
+    set passcount 0
+
+    send "break marker2\n" ; expect -re ".*$prompt $"
+    send "break marker3\n" ; expect -re ".*$prompt $"
+    send "break marker4\n" ; expect -re ".*$prompt $"
+
+    send "cont\n"
+    expect {
+	-re "Break.* marker2 \[)(\]+ at .*:$decimal.*$prompt $" {
+	    send "up\n"
+	    expect {
+		-re ".*$prompt $" {}
+		timeout { fail "up from marker2" ; return }
+	    }
+	}
+	-re "$prompt $" { fail "continue to marker2" ; return }
+	timeout { fail "(timeout) continue to marker2" ; return }
+    }
+
+    # Should be at first (outermost) scope.  Check values.
+
+    send "print localval\n"
+    expect {
+	-re ".* = 10\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "bad value for localval, outer scope" ; return }
+	default { 
+	    fail "(timeout) bad value for localval, outer scope" ; return
+	}
+    }
+    send "print localval1\n"
+    expect {
+	-re ".* = 11\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "bad value for localval1" ; return }
+	timeout { fail "(timeout) bad value for localval1" ; return }
+    }
+    send "print localval2\n"
+    expect {
+	-re "No symbol \"localval2\" in current context.\r\n$prompt $" {
+	    incr passcount
+	}
+	-re "$prompt $" { fail "bad value for localval2" ; return }
+	timeout { fail "(timeout) bad value for localval2" ; return }
+    }
+    send "print localval3\n"
+    expect {
+	-re "No symbol \"localval3\" in current context.\r\n$prompt $" {
+	    incr passcount
+	}
+	-re "$prompt $" { fail "bad value for localval3" ; return }
+	timeout { fail "(timeout) bad value for localval3" ; return }
+    }
+
+    send "cont\n"
+    expect {
+	-re "Break.* marker3 \[)(\]+ at .*:$decimal.*$prompt $" {
+	    send "up\n"
+	    expect {
+		-re ".*$prompt $" {}
+		timeout { fail "up from marker3" ; return }
+	    }
+	}
+	-re "$prompt $" { fail "continue to marker3" ; return }
+	timeout { fail "(timeout) continue to marker3" ; return }
+    }
+
+    # Should be at next (first nested) scope.  Check values.
+
+    send "print localval\n"
+    expect {
+	-re ".* = 20\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { 
+	    fail "bad value for localval, first nested scope" ; return
+	}
+	timeout { 
+	    fail "(timeout) bad value for localval, first nested scope" ; 
+	    return
+	}
+    }
+    send "print localval1\n"
+    expect {
+	-re ".* = 11\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "bad value for localval1" ; return }
+	timeout { fail "(timeout) bad value for localval1" ; return }
+    }
+    send "print localval2\n"
+    expect {
+	-re ".* = 12\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "bad value for localval2" ; return }
+	timeout { fail "(timeout) bad value for localval2" ; return }
+    }
+    send "print localval3\n"
+    expect {
+	-re "No symbol \"localval3\" in current context.\r\n$prompt $" {
+	    incr passcount
+	}
+	-re "$prompt $" { fail "bad value for localval3" ; return }
+	timeout { fail "(timeout) bad value for localval3" ; return }
+    }
+
+    # This test will only fail if the file was compiled by gcc, but
+    # there's no way to check that.
+    setup_xfail "mips-*-*" 1868
+    setup_xfail "a29k-*-udi" 2423
+    send "cont\n"
+    expect {
+	-re "Break.* marker4.*at .*:$decimal.*$prompt $" {
+	    send "up\n"
+	    expect {
+		-re ".*$prompt $" {}
+		timeout { fail "up from marker4" ; return }
+	    }
+	}
+	-re "$prompt $" { fail "continue to marker4" ; return }
+	timeout { fail "(timeout) continue to marker4" ; return }
+    }
+
+    send "print localval\n"
+    expect {
+	-re ".* = 30\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { 
+	    fail "bad value for localval, innermost scope" ; return
+	}
+	timeout { 
+	    fail "(timeout) bad value for localval, innermost scope" ; return 
+	}
+    }
+    send "print localval1\n"
+    expect {
+	-re ".* = 11\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "bad value for localval1" ; return }
+	timeout { fail "(timeout) bad value for localval1" ; return }
+    }
+    send "print localval2\n"
+    expect {
+	-re ".* = 12\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "bad value for localval2" ; return }
+	timeout { fail "(timeout) bad value for localval2" ; return }
+    }
+    send "print localval3\n"
+    expect {
+	-re ".* = 13\r\n$prompt $" { incr passcount }
+	-re "$prompt $" { fail "bad value for localval3" ; return }
+	timeout { fail "(timeout) bad value for localval3" ; return }
+    }
+
+    clear_xfail "*-*-*"
+    pass "$passcount correct scope resolutions from localscopes()"
+}
+
+# Start with a fresh gdb.
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load $objdir/$subdir/$binfile
+
+if [istarget "*-*-vxworks"] {
+    set timeout 120
+}
+
+# Test that variables in various segments print out correctly before
+# the program is run.  
+
+# AIX--sections get mapped to the same address so we can't get the right one.
+setup_xfail "rs6000-*-*"
+
+gdb_test "print 'scope0.c'::filelocal_ro" "= 201"
+
+# gdb currently cannot access bss memory on some targets if the inferior
+# is not running.
+send "print 'scope0.c'::filelocal_bss\n"
+expect {
+    -re "= 0.*$prompt $" {
+	pass "print 'scope0.c'::filelocal_bss"
+    }
+    -re "Cannot access memory.*$prompt $" {
+	setup_xfail "*-*-*"
+	fail "print 'scope0.c'::filelocal_bss"
+    }
+    -re ".*$prompt $" {
+	fail "print 'scope0.c'::filelocal_bss"
+    }
+    default {
+	fail "print 'scope0.c'::filelocal_bss"
+    }
+}
+
+# AIX--sections get mapped to the same address so we can't get the right one.
+setup_xfail "rs6000-*-*"
+
+gdb_test "print 'scope0.c'::filelocal" "= 1"
+
+if [runto main] then { test_at_main }
+if [istarget "mips-idt-*"] then {
+    # Restart because IDT/SIM runs out of file descriptors.
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load $objdir/$subdir/$binfile
+}
+if [istarget "a29k-*-udi"] then {
+    # FIXME: If PR 2415 is fixed, this is not needed.
+    gdb_target_udi
+    gdb_load $objdir/$subdir/$binfile
+}
+if [runto foo] then { test_at_foo }
+if [istarget "mips-idt-*"] then {
+    # Restart because IDT/SIM runs out of file descriptors.
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load $objdir/$subdir/$binfile
+}
+if [istarget "a29k-*-udi"] then {
+    # FIXME: If PR 2415 is fixed, this is not needed.
+    gdb_target_udi
+    gdb_load $objdir/$subdir/$binfile
+}
+if [runto bar] then { test_at_bar }
+if [istarget "mips-idt-*"] then {
+    # Restart because IDT/SIM runs out of file descriptors.
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load $objdir/$subdir/$binfile
+}
+if [istarget "a29k-*-udi"] then {
+    # FIXME: If PR 2415 is fixed, this is not needed.
+    gdb_target_udi
+    gdb_load $objdir/$subdir/$binfile
+}
+if [runto localscopes] then { test_at_localscopes }
+if [istarget "mips-idt-*"] then {
+    # Restart because IDT/SIM runs out of file descriptors.
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load $objdir/$subdir/$binfile
+}
+if [istarget "a29k-*-udi"] then {
+    # FIXME: If PR 2415 is fixed, this is not needed.
+    gdb_target_udi
+    gdb_load $objdir/$subdir/$binfile
+}
+if [runto autovars] then { test_at_autovars }
+
+if [istarget "a29k-*-udi"] then {
+    # FIXME: If PR 2415 is fixed, this is not needed.
+    gdb_target_udi
+}
+
+if [istarget "*-*-vxworks"] {
+    set timeout 120
+}
