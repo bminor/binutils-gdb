@@ -1657,6 +1657,10 @@ expr (rankarg, resultP)
 
   know (rank >= 0);
 
+  /* Save the value of dot for the fixup code.  */
+  if (rank == 0)
+    dot_value = frag_now_fix ();
+
   retval = operand (resultP);
 
   /* operand () gobbles spaces.  */

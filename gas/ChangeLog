@@ -1,3 +1,11 @@
+2002-09-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* write.h (struct fix): Add fx_dot_value.
+	(dot_value): Declare.
+	* write.c (dot_value): New var.
+	(fix_new_internal): Save dot_value as fx_dot_value.
+	* expr.c (expr): Update dot_value.
+
 2002-09-19  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-i386.c (tc_i386_fix_adjustable): Handle

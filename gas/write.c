@@ -111,6 +111,9 @@ int symbol_table_frozen;
 
 symbolS *abs_section_sym;
 
+/* Remember the value of dot when parsing expressions.  */
+addressT dot_value;
+
 void print_fixup PARAMS ((fixS *));
 
 #ifdef BFD_ASSEMBLER
@@ -220,6 +223,7 @@ fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
   fixP->fx_addsy = add_symbol;
   fixP->fx_subsy = sub_symbol;
   fixP->fx_offset = offset;
+  fixP->fx_dot_value = dot_value;
   fixP->fx_pcrel = pcrel;
   fixP->fx_plt = 0;
 #if defined(NEED_FX_R_TYPE) || defined (BFD_ASSEMBLER)
@@ -2656,7 +2660,8 @@ fixup_segment (fixP, this_segment)
 		   && !TC_FORCE_RELOCATION_SUB_LOCAL (fixP))
 	    {
 	      add_number -= S_GET_VALUE (fixP->fx_subsy);
-	      fixP->fx_offset = add_number;
+	      fixP->fx_offset = (add_number + fixP->fx_dot_value
+				 + fixP->fx_frag->fr_address);
 
 	      /* Make it pc-relative.  If the back-end code has not
 		 selected a pc-relative reloc, cancel the adjustment

@@ -105,6 +105,9 @@ struct fix
   /* Absolute number we add in.  */
   valueT fx_offset;
 
+  /* The value of dot when the fixup expression was parsed.  */
+  addressT fx_dot_value;
+
   /* Next fixS in linked list, or NULL.  */
   struct fix *fx_next;
 
@@ -159,6 +162,7 @@ typedef struct fix fixS;
 
 extern int finalize_syms;
 extern symbolS *abs_section_sym;
+extern addressT dot_value;
 
 #ifndef BFD_ASSEMBLER
 extern char *next_object_file_charP;
