@@ -23,7 +23,7 @@
 
 /* App, the assembler pre-processor.  This pre-processor strips out excess
    spaces, turns single-quoted characters into a decimal constant, and turns
-   # <number> <filename> <garbage> into a .line <number>\n.app-file <filename>
+   # <number> <filename> <garbage> into a .line <number>\n.file <filename>
    pair.  This needs better error-handling.
    */
 
@@ -87,15 +87,15 @@ do_scrub_begin ()
       lex[*p] = LEX_IS_SYMBOL_COMPONENT;
     }				/* declare symbol characters */
 
-  for (p = line_comment_chars; *p; p++)
-    {
-      lex[*p] = LEX_IS_LINE_COMMENT_START;
-    }				/* declare line comment chars */
-
   for (p = comment_chars; *p; p++)
     {
       lex[*p] = LEX_IS_COMMENT_START;
     }				/* declare comment chars */
+
+  for (p = line_comment_chars; *p; p++)
+    {
+      lex[*p] = LEX_IS_LINE_COMMENT_START;
+    }				/* declare line comment chars */
 
   for (p = line_separator_chars; *p; p++)
     {
@@ -247,19 +247,19 @@ do_scrub_next_char (get, unget)
 	  4: after putting out a .line, put out digits
 	  5: parsing a string, then go to old-state
 	  6: putting out \ escape in a "d string.
-	  7: After putting out a .app-file, put out string.
-	  8: After putting out a .app-file string, flush until newline.
+	  7: After putting out a .appfile, put out string.
+	  8: After putting out a .appfile string, flush until newline.
 	  9: After seeing symbol char in state 3 (keep 1white after symchar)
+	 10: After seeing whitespace in state 9 (keep white before symchar)
 	  -1: output string in out_string and go to the state in old_state
 	  -2: flush text until a '*' '/' is seen, then go to state old_state
 	  */
 
-  /* I added state 9 because the MIPS ECOFF assembler uses constructs
-     like ``.loc 1 20''.  This was turning into ``.loc 120''.  State 9
-     ensures that a space is never dropped immediately following a
-     character which could appear in a identifier.  It is still
-     dropped following a comma, so this has no effect for most
-     assemblers.  I hope.  Ian Taylor, ian@cygnus.com.  */
+  /* I added states 9 and 10 because the MIPS ECOFF assembler uses
+     constructs like ``.loc 1 20''.  This was turning into ``.loc
+     120''.  States 9 and 10 ensure that a space is never dropped in
+     between characters which could appear in a identifier.  Ian
+     Taylor, ian@cygnus.com.  */
 
   register int ch, ch2 = 0;
 
@@ -308,7 +308,7 @@ do_scrub_next_char (get, unget)
 	  if (ch == '"')
 	    {
 	      (*unget) (ch);
-	      out_string = "\n.app-file ";
+	      out_string = "\n.appfile ";
 	      old_state = 7;
 	      state = -1;
 	      return *out_string++;
@@ -406,7 +406,7 @@ do_scrub_next_char (get, unget)
       return ch;
     }
 
-  /* OK, we are somewhere in states 0 through 4 or 9 */
+  /* OK, we are somewhere in states 0 through 4 or 9 through 10 */
 
   /* flushchar: */
   ch = (*get) ();
@@ -454,12 +454,15 @@ recycle:
 	case 1:
 	  BAD_CASE (state);	/* We can't get here */
 	case 2:
-	case 9:
 	  state = 3;
 	  (*unget) (ch);
 	  return ' ';		/* Sp after opco */
 	case 3:
 	  goto recycle;		/* Sp in operands */
+	case 9:
+	case 10:
+	  state = 10;		/* Sp after symbol char */
+	  goto recycle;
 	default:
 	  BAD_CASE (state);
 	}
@@ -501,12 +504,17 @@ recycle:
 	{
 	  if (ch2 != EOF)
 	    (*unget) (ch2);
+	  if (state == 9 || state == 10)
+	    state = 3;
 	  return ch;
 	}
       break;
 
     case LEX_IS_STRINGQUOTE:
-      old_state = state;
+      if (state == 9 || state == 10)
+	old_state = 3;
+      else
+	old_state = state;
       state = 5;
       return ch;
 #ifndef MRI
@@ -526,8 +534,7 @@ recycle:
       sprintf (out_buf, "%d", (int) (unsigned char) ch);
 
 
-      /* None of these 'x constants for us.  We want 'x'.
-		 */
+      /* None of these 'x constants for us.  We want 'x'.  */
       if ((ch = (*get) ()) != '\'')
 	{
 #ifdef REQUIRE_CHAR_CLOSE_QUOTE
@@ -540,14 +547,19 @@ recycle:
 	{
 	  return out_buf[0];
 	}
-      old_state = state;
+      if (state == 9 || state == 10)
+	old_state = 3;
+      else
+	old_state = state;
       state = -1;
       out_string = out_buf;
       return *out_string++;
 #endif
 #endif
     case LEX_IS_COLON:
-      if (state != 3)
+      if (state == 9 || state == 10)
+	state = 3;
+      else if (state != 3)
 	state = 0;
       return ch;
 
@@ -565,53 +577,58 @@ recycle:
       return ch;
 
     case LEX_IS_LINE_COMMENT_START:
-      if (state != 0)		/* Not at start of line, act normal */
-	goto de_fault;
-
-      /* FIXME-someday: The two character comment stuff was badly
-	 thought out.  On i386, we want '/' as line comment start AND
-	 we want C style comments.  hence this hack.  The whole
-	 lexical process should be reworked.  xoxorich.  */
-
-      if (ch == '/')
+      if (state == 0)		/* Only comment at start of line.  */
 	{
-	  ch2 = (*get) ();
-	  if (ch2 == '*')
+	  /* FIXME-someday: The two character comment stuff was badly
+	     thought out.  On i386, we want '/' as line comment start
+	     AND we want C style comments.  hence this hack.  The
+	     whole lexical process should be reworked.  xoxorich.  */
+	  if (ch == '/')
 	    {
-	      state = -2;
-	      return (do_scrub_next_char (get, unget));
-	    }
-	  else
-	    {
-	      (*unget) (ch2);
-	    }
-	}			/* bad hack */
+	      ch2 = (*get) ();
+	      if (ch2 == '*')
+		{
+		  state = -2;
+		  return (do_scrub_next_char (get, unget));
+		}
+	      else
+		{
+		  (*unget) (ch2);
+		}
+	    }			/* bad hack */
 
-      do
-	ch = (*get) ();
-      while (ch != EOF && IS_WHITESPACE (ch));
-      if (ch == EOF)
-	{
-	  as_warn ("EOF in comment:  Newline inserted");
-	  return '\n';
-	}
-      if (ch < '0' || ch > '9')
-	{
-	  /* Non-numerics:  Eat whole comment line */
-	  while (ch != EOF && !IS_NEWLINE (ch))
+	  do
 	    ch = (*get) ();
+	  while (ch != EOF && IS_WHITESPACE (ch));
 	  if (ch == EOF)
-	    as_warn ("EOF in Comment: Newline inserted");
-	  state = 0;
-	  return '\n';
+	    {
+	      as_warn ("EOF in comment:  Newline inserted");
+	      return '\n';
+	    }
+	  if (ch < '0' || ch > '9')
+	    {
+	      /* Non-numerics:  Eat whole comment line */
+	      while (ch != EOF && !IS_NEWLINE (ch))
+		ch = (*get) ();
+	      if (ch == EOF)
+		as_warn ("EOF in Comment: Newline inserted");
+	      state = 0;
+	      return '\n';
+	    }
+	  /* Numerics begin comment.  Perhaps CPP `# 123 "filename"' */
+	  (*unget) (ch);
+	  old_state = 4;
+	  state = -1;
+	  out_string = ".appline ";
+	  return *out_string++;
 	}
-      /* Numerics begin comment.  Perhaps CPP `# 123 "filename"' */
-      (*unget) (ch);
-      old_state = 4;
-      state = -1;
-      out_string = ".line ";
-      return *out_string++;
 
+      /* We have a line comment character which is not at the start of
+	 a line.  If this is also a normal comment character, fall
+	 through.  Otherwise treat it as a default character.  */
+      if (strchr (comment_chars, ch) == NULL)
+	goto de_fault;
+      /* Fall through.  */
     case LEX_IS_COMMENT_START:
       do
 	ch = (*get) ();
@@ -622,6 +639,15 @@ recycle:
       return '\n';
 
     case LEX_IS_SYMBOL_COMPONENT:
+      if (state == 10)
+	{
+	  /* This is a symbol character following another symbol
+	     character, with whitespace in between.  We skipped the
+	     whitespace earlier, so output it now.  */
+	  (*unget) (ch);
+	  state = 3;
+	  return ' ';
+	}
       if (state == 3)
 	state = 9;
       /* Fall through.  */
@@ -642,6 +668,11 @@ recycle:
 	{
 	  if (lex[ch] != LEX_IS_SYMBOL_COMPONENT)
 	    state = 3;
+	  return ch;
+	}
+      else if (state == 10)
+	{
+	  state = 3;
 	  return ch;
 	}
       else
@@ -674,12 +705,5 @@ as_warn (str)
 }
 
 #endif
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
 
 /* end of app.c */

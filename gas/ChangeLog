@@ -1,3 +1,33 @@
+Thu May 27 11:07:50 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* app.c (do_scrub_begin): Let line_comment_chars override
+	comment_chars.
+	(do_scrub_next_char): If a line comment character is not at the
+	start of a line, treat it as a comment character if it is one.
+	For a CPP line comment use pseudo-op .appline rather than .line.
+	* input-scrub.c (logical_input_line): Make int rather than
+	unsigned.
+	(input_scrub_push, input_scrub_begin): Initialize
+	logical_input_line to -1 rather than 0.
+	(bump_line_counters): Increment logical_input_line.
+	(new_logical_line): If line_number is -2, decrement
+	logical_input_line.
+	(as_where): Use logical_input_line even if it is 0.
+	* read.h (s_app_file prototype): Now takes an int argument.
+	* read.c (potable): Make .appfile call s_app_file with 1.  New
+	.appline pseudo-op calls s_app_line.
+	(s_app_file): If .appfile, call new_logical_line with -2 to
+	account for newline inserted by do_scrub_next_char.  If listing,
+	call listing_source_file.
+	(s_app_line): New function to handle fake pseudo-op .appline.
+	* config/obj-coff.c (obj_pseudo_table): Make .appline call
+	obj_coff_ln.
+	(obj_coff_ln): Added argument to indicate whether .appline.
+	* config/obj-coffbfd.c (obj_pseudo_table): Make .appline call
+	obj_coff_ln.
+	(obj_coff_ln): Added argument to indicate whether .appline.
+	* config/tc-mips.c (s_file): Pass argument to s_app_file.
+
 Tue May 25 11:59:07 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/obj-bout.h (S_GET_VALUE): Removed unnecessary cast.

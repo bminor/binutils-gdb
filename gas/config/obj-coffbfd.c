@@ -142,7 +142,7 @@ static void EXFUN( obj_coff_bss,(void));
 static void EXFUN( obj_coff_ident,(void));
 static void EXFUN (obj_coff_endef, (void));
 static void EXFUN (obj_coff_line, (void));
-static void EXFUN (obj_coff_ln, (void));
+static void EXFUN (obj_coff_ln, (int));
 static void EXFUN (obj_coff_scl, (void));
 static void EXFUN (obj_coff_size, (void));
 static void EXFUN (obj_coff_tag, (void));
@@ -163,6 +163,7 @@ const pseudo_typeS obj_pseudo_table[] =
   {"endef", obj_coff_endef, 0},
   {"line", obj_coff_line, 0},
   {"ln", obj_coff_ln, 0},
+  {"appline", obj_coff_ln, 1},
   {"scl", obj_coff_scl, 0},
   {"size", obj_coff_size, 0},
   {"tag", obj_coff_tag, 0},
@@ -776,11 +777,12 @@ stack_top (st)
  */
 
 static void
-obj_coff_ln ()
+obj_coff_ln (appline)
+     int appline;
 {
   int l;
 
-  if (def_symbol_in_progress != NULL)
+  if (! appline && def_symbol_in_progress != NULL)
     {
       as_warn (".ln pseudo-op inside .def/.endef: ignored.");
       demand_empty_rest_of_line ();
@@ -797,7 +799,9 @@ obj_coff_ln ()
 
     if (listing)
       {
-	listing_source_line (l + line_base - 1);
+	if (! appline)
+	  l += line_base - 1;
+	listing_source_line (l);
       }
 
   }
@@ -1095,7 +1099,7 @@ obj_coff_line ()
 
   if (def_symbol_in_progress == NULL)
     {
-      obj_coff_ln ();
+      obj_coff_ln (0);
       return;
     }				/* if it looks like a stabs style line */
 

@@ -405,11 +405,26 @@ gp_reference (ep)
 {
 #ifdef OBJ_ECOFF
   symbolS *sym;
+  const char *symname;
   const char *segname;
 
   sym = ep->X_add_symbol;
   if (sym == (symbolS *) NULL
       || ep->X_subtract_symbol != (symbolS *) NULL)
+    return 0;
+
+  /* Certain symbols can not be referenced off the GP, although it
+     appears as though they can.  */
+  symname = S_GET_NAME (sym);
+  if (symname != (const char *) NULL
+      && (strcmp (symname, "eprol") == 0
+	  || strcmp (symname, "etext") == 0
+	  || strcmp (symname, "_gp") == 0
+	  || strcmp (symname, "edata") == 0
+	  || strcmp (symname, "_fbss") == 0
+	  || strcmp (symname, "_fdata") == 0
+	  || strcmp (symname, "_ftext") == 0
+	  || strcmp (symname, "end") == 0))
     return 0;
   if (! S_IS_DEFINED (sym)
       && S_GET_VALUE (sym) != 0
@@ -883,13 +898,28 @@ macro (ip)
 	  macro_build (&icnt, &offset_expr, "bgez", "s,p", sreg);
 	  return;
 	}
+      if (sreg == 0)
+	{
+	  macro_build (&icnt, &offset_expr, "blez", "s,p", treg);
+	  return;
+	}
       macro_build (&icnt, NULL, "slt", "d,v,t", AT, sreg, treg);
       macro_build (&icnt, &offset_expr, "beq", "s,t,p", AT, 0);
       break;
 
     case M_BGT_I:
+      /* check for > max integer */
+      if (imm_expr.X_add_number == 0x7fffffff)
+	{
+	do_false:
+	  /* result is always false */
+	  as_warn ("Branch %s is always false (nop)", ip->insn_mo->name);
+	  macro_build (&icnt, NULL, "nop", "", 0);
+	  return;
+	}
       imm_expr.X_add_number++;
       /* FALLTHROUGH */
+
     case M_BGE_I:
       if (imm_expr.X_add_number == 0)
 	{
@@ -901,26 +931,39 @@ macro (ip)
 	  macro_build (&icnt, &offset_expr, "bgtz", "s,p", sreg);
 	  return;
 	}
+      if (imm_expr.X_add_number == 0x80000000)
+	{
+	do_true:
+	  /* result is always true */
+	  as_warn ("Branch %s is always true", ip->insn_mo->name);
+	  macro_build (&icnt, &offset_expr, "b", "p");
+	  return;
+	}
       set_at (&icnt, sreg);
       macro_build (&icnt, &offset_expr, "beq", "s,t,p", AT, 0);
       break;
 
     case M_BGEU:
       if (treg == 0)
+	goto do_true;
+      if (sreg == 0)
 	{
-	  macro_build (&icnt, &offset_expr, "b", "p");
+	  macro_build (&icnt, &offset_expr, "beq", "s,t,p", 0, treg);
 	  return;
 	}
       macro_build (&icnt, NULL, "sltu", "d,v,t", AT, sreg, treg);
       macro_build (&icnt, &offset_expr, "beq", "s,t,p", AT, 0);
       break;
 
+    case M_BGTU_I:
+      if (sreg == 0 || imm_expr.X_add_number == 0xffffffff)
+	goto do_false;
+      imm_expr.X_add_number++;
+      /* FALLTHROUGH */
+
     case M_BGEU_I:
       if (imm_expr.X_add_number == 0)
-	{
-	  macro_build (&icnt, &offset_expr, "b", "p");
-	  return;
-	}
+	goto do_true;
       if (imm_expr.X_add_number == 1)
 	{
 	  macro_build (&icnt, &offset_expr, "bne", "s,t,p", sreg, 0);
@@ -936,6 +979,11 @@ macro (ip)
 	  macro_build (&icnt, &offset_expr, "bgtz", "s,p", sreg);
 	  return;
 	}
+      if (sreg == 0)
+	{
+	  macro_build (&icnt, &offset_expr, "bltz", "s,p", treg);
+	  return;
+	}
       macro_build (&icnt, NULL, "slt", "d,v,t", AT, treg, sreg);
       macro_build (&icnt, &offset_expr, "bne", "s,t,p", AT, 0);
       break;
@@ -946,26 +994,10 @@ macro (ip)
 	  macro_build (&icnt, &offset_expr, "bne", "s,t,p", sreg, 0);
 	  return;
 	}
+      if (sreg == 0)
+	goto do_false;
       macro_build (&icnt, NULL, "sltu", "d,v,t", AT, treg, sreg);
       macro_build (&icnt, &offset_expr, "bne", "s,t,p", AT, 0);
-      break;
-
-    case M_BGTU_I:
-      if (imm_expr.X_add_number == 0)
-	{
-	  macro_build (&icnt, &offset_expr, "bne", "s,t,p", sreg, 0);
-	  return;
-	}
-      if (imm_expr.X_add_number == -1)
-	{
-	  /* NOP */
-	  if (mips_noreorder)
-	    as_warn ("Instruction %s is a nop; deleted", ip->insn_mo->name);
-	  return;
-	}
-      imm_expr.X_add_number++;
-      set_at_unsigned (&icnt, sreg);
-      macro_build (&icnt, &offset_expr, "beq", "s,t,p", AT, 0);
       break;
 
     case M_BLE:
@@ -974,61 +1006,20 @@ macro (ip)
 	  macro_build (&icnt, &offset_expr, "blez", "s,p", sreg);
 	  return;
 	}
+      if (sreg == 0)
+	{
+	  macro_build (&icnt, &offset_expr, "bgez", "s,p", treg);
+	  return;
+	}
       macro_build (&icnt, NULL, "slt", "d,v,t", AT, treg, sreg);
       macro_build (&icnt, &offset_expr, "beq", "s,t,p", AT, 0);
       break;
 
     case M_BLE_I:
-      if (imm_expr.X_add_number == 0)
-	{
-	  macro_build (&icnt, &offset_expr, "blez", "s,p", sreg);
-	  return;
-	}
-      if (imm_expr.X_add_number == -1)
-	{
-	  macro_build (&icnt, &offset_expr, "bltz", "s,p", sreg);
-	  return;
-	}
+      if (imm_expr.X_add_number == 0x7fffffff)
+	goto do_true;
       imm_expr.X_add_number++;
-      set_at (&icnt, sreg);
-      macro_build (&icnt, &offset_expr, "bne", "s,t,p", AT, 0);
-      break;
-
-    case M_BLEU:
-      if (treg == 0)
-	{
-	  macro_build (&icnt, &offset_expr, "beq", "s,t,p", sreg, 0);
-	  return;
-	}
-      macro_build (&icnt, NULL, "sltu", "d,v,t", AT, treg, sreg);
-      macro_build (&icnt, &offset_expr, "beq", "s,t,p", AT, 0);
-      break;
-
-    case M_BLEU_I:
-      if (imm_expr.X_add_number == 0)
-	{
-	  macro_build (&icnt, &offset_expr, "beq", "s,t,p", sreg, 0);
-	  return;
-	}
-      if (imm_expr.X_add_number == -1)
-	{
-	  macro_build (&icnt, &offset_expr, "b", "p");
-	  return;
-	}
-      imm_expr.X_add_number++;
-      set_at_unsigned (&icnt, sreg);
-      macro_build (&icnt, &offset_expr, "bne", "s,t,p", AT, 0);
-      break;
-
-    case M_BLT:
-      if (treg == 0)
-	{
-	  macro_build (&icnt, &offset_expr, "bltz", "s,p", sreg);
-	  return;
-	}
-      macro_build (&icnt, NULL, "slt", "d,v,t", AT, sreg, treg);
-      macro_build (&icnt, &offset_expr, "bne", "s,t,p", AT, 0);
-      break;
+      /* FALLTHROUGH */
 
     case M_BLT_I:
       if (imm_expr.X_add_number == 0)
@@ -1045,32 +1036,60 @@ macro (ip)
       macro_build (&icnt, &offset_expr, "bne", "s,t,p", AT, 0);
       break;
 
-    case M_BLTU:
+    case M_BLEU:
       if (treg == 0)
 	{
-	  /* NOP */
-	  if (mips_noreorder)
-	    as_warn ("Instruction %s is a nop; deleted", ip->insn_mo->name);
+	  macro_build (&icnt, &offset_expr, "beq", "s,t,p", sreg, 0);
 	  return;
 	}
-      macro_build (&icnt, NULL, "sltu", "d,v,t", AT, sreg, treg);
-      macro_build (&icnt, &offset_expr, "bne", "s,t,p", AT, 0);
+      if (sreg == 0)
+	goto do_true;
+      macro_build (&icnt, NULL, "sltu", "d,v,t", AT, treg, sreg);
+      macro_build (&icnt, &offset_expr, "beq", "s,t,p", AT, 0);
       break;
+
+    case M_BLEU_I:
+      if (sreg == 0 || imm_expr.X_add_number == 0xffffffff)
+	goto do_true;
+      imm_expr.X_add_number++;
+      /* FALLTHROUGH */
 
     case M_BLTU_I:
       if (imm_expr.X_add_number == 0)
-	{
-	  /* NOP */
-	  if (mips_noreorder)
-	    as_warn ("Instruction %s is a nop; deleted", ip->insn_mo->name);
-	  return;
-	}
+	goto do_false;
       if (imm_expr.X_add_number == 1)
 	{
 	  macro_build (&icnt, &offset_expr, "beq", "s,t,p", sreg, 0);
 	  return;
 	}
       set_at_unsigned (&icnt, sreg);
+      macro_build (&icnt, &offset_expr, "bne", "s,t,p", AT, 0);
+      break;
+
+    case M_BLT:
+      if (treg == 0)
+	{
+	  macro_build (&icnt, &offset_expr, "bltz", "s,p", sreg);
+	  return;
+	}
+      if (sreg == 0)
+	{
+	  macro_build (&icnt, &offset_expr, "bgtz", "s,p", treg);
+	  return;
+	}
+      macro_build (&icnt, NULL, "slt", "d,v,t", AT, sreg, treg);
+      macro_build (&icnt, &offset_expr, "bne", "s,t,p", AT, 0);
+      break;
+
+    case M_BLTU:
+      if (treg == 0)
+	goto do_false;
+      if (sreg == 0)
+	{
+	  macro_build (&icnt, &offset_expr, "bne", "s,t,p", 0, treg);
+	  return;
+	}
+      macro_build (&icnt, NULL, "sltu", "d,v,t", AT, sreg, treg);
       macro_build (&icnt, &offset_expr, "bne", "s,t,p", AT, 0);
       break;
 
@@ -1318,13 +1337,19 @@ macro (ip)
       break;
 
     case M_L_DOB:
+      /* Even on a big endian machine $fn comes before $fn+1.  We have
+	 to adjust when loading from memory.  */
       save_reorder_condition = mips_noreorder;
       mips_noreorder = 1;
-      macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)", treg, breg);
+      macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)",
+		   byte_order == LITTLE_ENDIAN ? treg : treg + 1,
+		   breg);
       /* unecessary implicit nop */
       mips_noreorder = save_reorder_condition;
       offset_expr.X_add_number += 4;
-      macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)", treg + 1, breg);
+      macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)",
+		   byte_order == LITTLE_ENDIAN ? treg + 1 : treg,
+		   breg);
       return;
 
     case M_L_DAB:
@@ -1356,13 +1381,19 @@ macro (ip)
 	    macro_build (&icnt, NULL, "addu", "d,v,t", AT, AT, breg);
 	  tempreg = AT;
 	}
+      /* Even on a big endian machine $fn comes before $fn+1.  We have
+	 to adjust when loading from memory.  */
       save_reorder_condition = mips_noreorder;
       mips_noreorder = 1;
-      macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)", treg, tempreg);
+      macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)",
+		   byte_order == LITTLE_ENDIAN ? treg : treg + 1,
+		   tempreg);
       /* unecessary implicit nop */
       mips_noreorder = save_reorder_condition;
       offset_expr.X_add_number += 4;
-      macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)", treg + 1, tempreg);
+      macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)",
+		   byte_order == LITTLE_ENDIAN ? treg + 1 : treg,
+		   tempreg);
       if (tempreg == AT)
 	break;
       return;
@@ -1469,9 +1500,15 @@ macro (ip)
       break;
 
     case M_S_DOB:
-      macro_build (&icnt, &offset_expr, "swc1", "T,o(b)", treg, breg);
+      /* Even on a big endian machine $fn comes before $fn+1.  We have
+	 to adjust when storing to memory.  */
+      macro_build (&icnt, &offset_expr, "swc1", "T,o(b)",
+		   byte_order == LITTLE_ENDIAN ? treg : treg + 1,
+		   breg);
       offset_expr.X_add_number += 4;
-      macro_build (&icnt, &offset_expr, "swc1", "T,o(b)", treg + 1, breg);
+      macro_build (&icnt, &offset_expr, "swc1", "T,o(b)",
+		   byte_order == LITTLE_ENDIAN ? treg + 1 : treg,
+		   breg);
       return;
 
     case M_S_DAB:
@@ -1493,9 +1530,15 @@ macro (ip)
 	    macro_build (&icnt, NULL, "addu", "d,v,t", AT, AT, breg);
 	  tempreg = AT;
 	}
-      macro_build (&icnt, &offset_expr, "swc1", "T,o(b)", treg, tempreg);
+      /* Even on a big endian machine $fn comes before $fn+1.  We have
+	 to adjust when storing to memory.  */
+      macro_build (&icnt, &offset_expr, "swc1", "T,o(b)",
+		   byte_order == LITTLE_ENDIAN ? treg : treg + 1,
+		   tempreg);
       offset_expr.X_add_number += 4;
-      macro_build (&icnt, &offset_expr, "swc1", "T,o(b)", treg + 1, tempreg);
+      macro_build (&icnt, &offset_expr, "swc1", "T,o(b)",
+		   byte_order == LITTLE_ENDIAN ? treg + 1 : treg,
+		   tempreg);
       if (tempreg == AT)
 	break;
       return;
@@ -1520,7 +1563,8 @@ macro (ip)
 	}
       if (sreg == 0)
 	{
-	  /* result is always false */
+	  as_warn ("Instruction %s: result is always false",
+	    ip->insn_mo->name);
 	  macro_build (&icnt, NULL, "move", "d,s", dreg, 0);
 	  return;
 	}
@@ -1610,7 +1654,7 @@ macro (ip)
       s = "sltu";
     sle:
       macro_build (&icnt, NULL, s, "d,v,t", dreg, treg, sreg);
-      macro_build (&icnt, &imm_expr, "xori", "t,r,i", dreg, dreg);
+      macro_build (&icnt, &expr1, "xori", "t,r,i", dreg, dreg);
       return;
 
     case M_SLE_I:		/* sreg <= I <==> I >= sreg <==> not (I < sreg) */
@@ -1621,7 +1665,7 @@ macro (ip)
     slei:
       load_register (&icnt, ip, AT, &imm_expr);
       macro_build (&icnt, NULL, s, "d,v,t", dreg, AT, sreg);
-      macro_build (&icnt, &offset_expr, "xori", "t,r,i", dreg, dreg);
+      macro_build (&icnt, &expr1, "xori", "t,r,i", dreg, dreg);
       break;
 
     case M_SLT_I:
@@ -1664,7 +1708,8 @@ macro (ip)
 	}
       if (sreg == 0)
 	{
-	  /* result is always true */
+	  as_warn ("Instruction %s: result is always true",
+	    ip->insn_mo->name);
 	  macro_build (&icnt, &expr1, "addiu", "t,r,j", dreg, 0);
 	  return;
 	}
@@ -3163,7 +3208,7 @@ s_file (x)
   int line;
 
   line = get_number ();
-  s_app_file ();
+  s_app_file (0);
 }
 
 
