@@ -1,3 +1,8 @@
+Mon Mar  2 19:24:08 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* ldlang.c (lang_size_sections): If the default memory region is
+	*default*, see if there is a memory region that could be used.
+
 start-sanitize-d30v
 Thu Feb 26 17:09:53 1998  Michael Meissner  <meissner@cygnus.com>
 
