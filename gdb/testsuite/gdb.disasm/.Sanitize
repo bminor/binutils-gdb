@@ -17,7 +17,7 @@ Do-first:
 
 cygnus_files="am33.s am33.exp"
 
-if ( echo $* | grep keep\-am33 > /dev/null ) ; then
+if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
         keep_these_too="${cygnus_files} ${keep_these_too}"
 else
         lose_these_too="${cygnus_files} ${lose_these_too}"
