@@ -1,5 +1,5 @@
 /* Support for the generic parts of most COFF variants, for BFD.
-   Copyright 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1770,7 +1770,7 @@ coff_set_flags (abfd, magicp, flagsp)
 
 #ifdef SH_ARCH_MAGIC_BIG
     case bfd_arch_sh:
-      if (abfd->xvec->byteorder_big_p)
+      if (bfd_big_endian (abfd))
 	*magicp = SH_ARCH_MAGIC_BIG;
       else
 	*magicp = SH_ARCH_MAGIC_LITTLE;
@@ -1797,7 +1797,7 @@ coff_set_flags (abfd, magicp, flagsp)
 #endif
 #ifdef A29K_MAGIC_BIG
     case bfd_arch_a29k:
-      if (abfd->xvec->byteorder_big_p)
+      if (bfd_big_endian (abfd))
 	*magicp = A29K_MAGIC_BIG;
       else
 	*magicp = A29K_MAGIC_LITTLE;
@@ -2363,7 +2363,7 @@ coff_write_object_contents (abfd)
     internal_f.f_flags |= F_EXEC;
 
   /* FIXME: this is wrong for PPC_PE! */
-  if (!abfd->xvec->byteorder_big_p)
+  if (bfd_little_endian (abfd))
     internal_f.f_flags |= F_AR32WR;
   else
     internal_f.f_flags |= F_AR32W;
@@ -2565,8 +2565,7 @@ coff_write_object_contents (abfd)
       else
 	{
 	  internal_a.o_snentry = 0;
-	  if (internal_a.entry == 0)
-	    internal_a.entry = (bfd_vma) -1;
+	  internal_a.entry = (bfd_vma) -1;
 	}
 
       if (text_sec != NULL)

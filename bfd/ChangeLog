@@ -1,8 +1,18 @@
+Wed Jan  3 15:11:30 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffcode.h (coff_write_object_contents): If we don't know the
+	section of the entry point for an XCOFF executable, always set the
+	entry address to -1.
+
 Tue Jan  2 14:17:15 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf.c (bfd_section_from_shdr): Add support for note sections.
 
 Tue Jan  2 13:10:25 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* bfd-in.h (struct _symbol_info): Add stab_type field.
+	* bfd-in2.h: Rebuild.
+	* aoutx.h (NAME(aout,get_symbol_info)): Set stab_type.
 
 	* elf32-ppc.c: Remove trailing newline from calls to
         _bfd_error_handler.
