@@ -1,3 +1,16 @@
+Thu Jul 16 12:29:51 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	Brought over from egcs:
+
+	Sat Jun 27 22:46:32 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* configure.in (target_subdir): Set to ${target_alias} instead
+	of "libraries".
+
+	Mon Sep  1 16:45:44 1997  Jim Wilson  <wilson@cygnus.com>
+
+	* configure.in (target_subdir): Set to libraries if enable_multilib.
+
 Wed Jul 15 01:00:54 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in ($(CONFIGURE_TARGET_MODULES)): If there are any
