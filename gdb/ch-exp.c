@@ -91,7 +91,7 @@ enum ch_terminal {
   CHARACTER_STRING_LITERAL,
   BIT_STRING_LITERAL,
   TYPENAME,
-  FIELD_NAME,
+  DOT_FIELD_NAME, /* '.' followed by <field name> */
   CASE,
   OF,
   ESAC,
@@ -537,7 +537,7 @@ parse_named_record_element ()
 
   label = PEEK_LVAL ().sval;
   sprintf (buf, "expected a field name here `%s'", lexptr);
-  expect (FIELD_NAME, buf);
+  expect (DOT_FIELD_NAME, buf);
   if (check_token (','))
     parse_named_record_element ();
   else if (check_token (':'))
@@ -555,7 +555,7 @@ static void
 parse_tuple_element (type)
      struct type *type;
 {
-  if (PEEK_TOKEN () == FIELD_NAME)
+  if (PEEK_TOKEN () == DOT_FIELD_NAME)
     {
       /* Parse a labelled structure tuple. */
       parse_named_record_element ();
@@ -845,7 +845,7 @@ parse_primval ()
     {
       switch (PEEK_TOKEN ())
 	{
-	case FIELD_NAME:
+	case DOT_FIELD_NAME:
 	  write_exp_elt_opcode (STRUCTOP_STRUCT);
 	  write_exp_string (PEEK_LVAL ().sval);
 	  write_exp_elt_opcode (STRUCTOP_STRUCT);
@@ -2137,7 +2137,7 @@ ch_lex ()
 	  inputname = match_simple_name_string ();
 	  if (!inputname)
 	    return '.';
-	  return FIELD_NAME;
+	  return DOT_FIELD_NAME;
       }
 
     return (ILLEGAL_TOKEN);

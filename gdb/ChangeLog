@@ -1,3 +1,7 @@
+Tue Oct 21 14:15:26 1997  Per Bothner  <bothner@cygnus.com>
+
+	* ch-exp.c:  Rename FIELD_NAME to DOT_FIELD_NAME (to avoid conflict).
+
 Fri Oct 17 13:22:02 1997  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* infcmd.c: Improve grammar of "set args" help.
