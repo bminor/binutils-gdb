@@ -1049,8 +1049,143 @@ DEFUN(ieee_print_symbol,(ignore_abfd, file,  symbol, how),
 }
 
 
+static boolean
+DEFUN(do_one,(ieee, current_map, location_ptr,s),
+      ieee_data_type *ieee AND
+      ieee_per_section_type *current_map AND
+      uint8e_type *location_ptr AND
+      asection *s)
+{
+  switch (this_byte(ieee))  
+      {
+      case ieee_load_constant_bytes_enum:
+	  {
+	    unsigned int number_of_maus;
+	    unsigned int i;
+	    next_byte(ieee);
+	    number_of_maus = must_parse_int(ieee);
 
-/* Read in all the section data and relocation stuff too */
+	    for (i = 0; i < number_of_maus; i++) {
+	      location_ptr[current_map->pc++]= this_byte(ieee);
+	      next_byte(ieee);
+	    }
+	  }
+	break;
+
+      case ieee_load_with_relocation_enum:
+	  {
+	    boolean loop = true;
+	    next_byte(ieee);
+	    while (loop) 
+		{
+		  switch (this_byte(ieee)) 
+		      {
+		      case ieee_variable_R_enum:
+
+		      case ieee_function_signed_open_b_enum:
+		      case ieee_function_unsigned_open_b_enum:
+		      case ieee_function_either_open_b_enum:
+			  {
+			    unsigned int extra = 4;
+			    boolean pcrel = false;
+
+			    ieee_reloc_type *r = 
+			      (ieee_reloc_type *) bfd_alloc(ieee->abfd,
+							    sizeof(ieee_reloc_type));
+
+			    *(current_map->reloc_tail_ptr) = r;
+			    current_map->reloc_tail_ptr= &r->next;
+			    r->next = (ieee_reloc_type *)NULL;
+			    next_byte(ieee);
+			    parse_expression(ieee,
+					     &r->relent.addend,
+					     &r->relent.section,
+					     &r->symbol,
+					     &pcrel, &extra);
+			    r->relent.address = current_map->pc;
+			    s->reloc_count++;
+			    switch (this_byte(ieee)) {
+			    case ieee_function_signed_close_b_enum:
+			      next_byte(ieee);
+			      break;
+			    case ieee_function_unsigned_close_b_enum:
+			      next_byte(ieee);
+			      break;
+			    case ieee_function_either_close_b_enum:
+			      next_byte(ieee);
+			      break;
+			    default:
+			      break;
+			    }
+			    /* Build a relocation entry for this type */
+			    if (this_byte(ieee) == ieee_comma) {
+			      next_byte(ieee);
+			      /* Fetch number of bytes to pad */
+			      extra = must_parse_int(ieee);
+			    };
+		   
+			    /* If pc rel then stick -ve pc into instruction
+			       and take out of reloc*/
+		    
+			    switch (extra) 
+				{
+				case 0:
+				case 4:
+				  if (pcrel == true) 
+				      {
+					bfd_putlong(ieee->abfd, -current_map->pc, location_ptr +
+						    current_map->pc);
+					r->relent.howto = &rel32_howto;
+					r->relent.addend -= current_map->pc;
+				      }
+				  else 
+				      {
+					bfd_putlong(ieee->abfd, 0, location_ptr +
+						    current_map->pc);
+					r->relent.howto = &abs32_howto;
+				      }
+				  current_map->pc +=4;
+				  break;
+				case 2:
+				  if (pcrel == true) {
+				    bfd_putshort(ieee->abfd, (int)(-current_map->pc),  location_ptr +current_map->pc);
+				    r->relent.addend -= current_map->pc;
+				    r->relent.howto = &rel16_howto;
+				  }
+				  else {
+				    bfd_putshort(ieee->abfd, 0,  location_ptr +current_map->pc);
+				    r->relent.howto = &abs16_howto;
+				  }
+				  current_map->pc +=2;
+				  break;
+
+				default:
+				  BFD_FAIL();
+				  break;
+				}
+			  }
+			break;
+		      default: 
+			  {
+			    bfd_vma this_size ;
+			    if (parse_int(ieee, &this_size) == true) {
+			      unsigned int i;
+			      for (i = 0; i < this_size; i++) {
+				location_ptr[current_map->pc ++] = this_byte(ieee);
+				next_byte(ieee);
+			      }
+			    }
+			    else {
+			      loop = false;
+			    }
+			  }
+		      }
+		}
+	  }
+      }
+}
+
+      /* Read in all the section data and relocation stuff too */
 static boolean 
 DEFUN(ieee_slurp_section_data,(abfd),
       bfd *abfd)
@@ -1081,178 +1216,81 @@ DEFUN(ieee_slurp_section_data,(abfd),
 
   while (true) {
     switch (this_byte(ieee)) 
-      {
-	/* IF we see anything strange then quit */
-      default:
-	return true;
-
-      case ieee_set_current_section_enum:
-	next_byte(ieee);
-	section_number = must_parse_int(ieee);
-	s = ieee->section_table[section_number];
-	current_map = (ieee_per_section_type *) s->used_by_bfd;
-	location_ptr = current_map->data - s->vma;
-	/* The document I have says that Microtec's compilers reset */
-	/* this after a sec section, even though the standard says not */
-	/* to. SO .. */
-	current_map->pc =s->vma;
-	break;
-
-      case ieee_load_constant_bytes_enum:
 	{
-	  unsigned int number_of_maus;
-	  unsigned int i;
+	  /* IF we see anything strange then quit */
+	default:
+	  return true;
+
+	case ieee_set_current_section_enum:
 	  next_byte(ieee);
-	  number_of_maus = must_parse_int(ieee);
+	  section_number = must_parse_int(ieee);
+	  s = ieee->section_table[section_number];
+	  current_map = (ieee_per_section_type *) s->used_by_bfd;
+	  location_ptr = current_map->data - s->vma;
+	  /* The document I have says that Microtec's compilers reset */
+	  /* this after a sec section, even though the standard says not */
+	  /* to. SO .. */
+	  current_map->pc =s->vma;
+	  break;
 
-	  for (i = 0; i < number_of_maus; i++) {
-	    location_ptr[current_map->pc++]= this_byte(ieee);
-	    next_byte(ieee);
-	  }
-	}
-	break;
 
-      case ieee_e2_first_byte_enum:
-	next_byte(ieee);
-	switch (this_byte(ieee))
-	  {
-	  case ieee_set_current_pc_enum & 0xff:
-	    {
-	      bfd_vma value;
-	      asection *dsection;
-	      ieee_symbol_index_type symbol;
-	      unsigned int extra;
-	      boolean pcrel;
-	      next_byte(ieee);
-	      must_parse_int(ieee); /* Thow away section #*/
-	      parse_expression(ieee, &value, &dsection, &symbol,
-			       &pcrel, &extra);
-	      current_map->pc = value;
-	      BFD_ASSERT((unsigned)(value - s->vma) <= s->size);
-	    }
-	    break;
-
-	  case ieee_value_starting_address_enum & 0xff:
-	    /* We've got to the end of the data now - */
-	    return true;
-	  default:
-	    BFD_FAIL();
-	    return true;
-	  }
-	break;
-      case ieee_load_with_relocation_enum:
-	{
-	  boolean loop = true;
+	case ieee_e2_first_byte_enum:
 	  next_byte(ieee);
-	  while (loop) 
-	    {
-	      switch (this_byte(ieee)) 
-		{
-		case ieee_variable_R_enum:
-
-		case ieee_function_signed_open_b_enum:
-		case ieee_function_unsigned_open_b_enum:
-		case ieee_function_either_open_b_enum:
+	  switch (this_byte(ieee))
+	      {
+	      case ieee_set_current_pc_enum & 0xff:
 		  {
-		    unsigned int extra = 4;
-		    boolean pcrel = false;
-
-		    ieee_reloc_type *r = 
-		      (ieee_reloc_type *) bfd_alloc(ieee->abfd,
-						    sizeof(ieee_reloc_type));
-
-		    *(current_map->reloc_tail_ptr) = r;
-		    current_map->reloc_tail_ptr= &r->next;
-		    r->next = (ieee_reloc_type *)NULL;
+		    bfd_vma value;
+		    asection *dsection;
+		    ieee_symbol_index_type symbol;
+		    unsigned int extra;
+		    boolean pcrel;
 		    next_byte(ieee);
-		    parse_expression(ieee,
-				     &r->relent.addend,
-				     &r->relent.section,
-				     &r->symbol,
+		    must_parse_int(ieee); /* Thow away section #*/
+		    parse_expression(ieee, &value, &dsection, &symbol,
 				     &pcrel, &extra);
-		    r->relent.address = current_map->pc;
-		    s->reloc_count++;
-		    switch (this_byte(ieee)) {
-		    case ieee_function_signed_close_b_enum:
-		      next_byte(ieee);
-		      break;
-		    case ieee_function_unsigned_close_b_enum:
-		      next_byte(ieee);
-		      break;
-		    case ieee_function_either_close_b_enum:
-		      next_byte(ieee);
-		      break;
-		    default:
-		      break;
-		    }
-		    /* Build a relocation entry for this type */
-		    if (this_byte(ieee) == ieee_comma) {
-		      next_byte(ieee);
-		      /* Fetch number of bytes to pad */
-		      extra = must_parse_int(ieee);
-		    };
-		   
-		    /* If pc rel then stick -ve pc into instruction
-		       and take out of reloc*/
-		    
-		    switch (extra) 
-			{
-			case 0:
-			case 4:
-			  if (pcrel == true) 
-			      {
-				bfd_putlong(abfd, -current_map->pc, location_ptr +
-					    current_map->pc);
-				r->relent.howto = &rel32_howto;
-				r->relent.addend -= current_map->pc;
-			      }
-			  else 
-			      {
-				bfd_putlong(abfd, 0, location_ptr +
-					    current_map->pc);
-				r->relent.howto = &abs32_howto;
-			      }
-			  current_map->pc +=4;
-			  break;
-			case 2:
-			  if (pcrel == true) {
-			    bfd_putshort(abfd, (int)(-current_map->pc),  location_ptr +current_map->pc);
-			    r->relent.addend -= current_map->pc;
-			    r->relent.howto = &rel16_howto;
-			  }
-			  else {
-			    bfd_putshort(abfd, 0,  location_ptr +current_map->pc);
-			    r->relent.howto = &abs16_howto;
-			  }
-			  current_map->pc +=2;
-			  break;
+		    current_map->pc = value;
+		    BFD_ASSERT((unsigned)(value - s->vma) <= s->size);
+		  }
+		break;
 
-			default:
-			  BFD_FAIL();
-			  break;
-			}
-		  }
-		  break;
-		default: 
-		  {
-		    bfd_vma this_size ;
-		    if (parse_int(ieee, &this_size) == true) {
-		      unsigned int i;
-		      for (i = 0; i < this_size; i++) {
-			location_ptr[current_map->pc ++] = this_byte(ieee);
-			next_byte(ieee);
-		      }
-		    }
-		    else {
-		      loop = false;
-		    }
-		  }
-		}
+	      case ieee_value_starting_address_enum & 0xff:
+		/* We've got to the end of the data now - */
+		return true;
+	      default:
+		BFD_FAIL();
+		return true;
+	      }
+	  break;
+	case ieee_repeat_data_enum:
+	    {
+	      /* Repeat the following LD or LR n times - we do this by
+		 remembering the stream pointer before running it and
+		 resetting it and running it n times 
+		 */
+
+	      unsigned int iterations ;
+	      uint8e_type *start ;
+	      next_byte(ieee);
+	      iterations = must_parse_int(ieee);
+	      start =  ieee->input_p;
+	      while (iterations != 0) {
+		ieee->input_p = start;
+		do_one(ieee, current_map, location_ptr,s);
+		iterations --;
+	      }
+	    }
+	  break;
+	case ieee_load_constant_bytes_enum:
+	case ieee_load_with_relocation_enum:
+	    {
+	      do_one(ieee, current_map, location_ptr,s);
 	    }
 	}
-      }
   }
 }
+
+
 
 
 
