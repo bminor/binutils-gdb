@@ -125,6 +125,8 @@ static subsegT prev_subseg;
 static segT prev_seg;
 
 static void s_dmadata PARAMS ((int));
+static void s_dmadata_implied PARAMS ((int));
+static void s_enddmadata PARAMS ((int));
 static void s_dmapackpke PARAMS ((int));
 static void s_enddirect PARAMS ((int));
 static void s_endgpuif PARAMS ((int));
@@ -135,17 +137,17 @@ static void s_state PARAMS ((int));
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
-  { "dmadata", s_dmadata, 1 },
-  { "dmapackpke", s_dmapackpke, 0 },
-  { "enddirect", s_enddirect, 0 },
-  { "enddmadata", s_dmadata, 0 },
-  { "endgpuif", s_endgpuif, 0 },
-  { "endmpg", s_endmpg, 0 },
-  { "endunpack", s_endunpack, 0 },
-  /* .vu,.gpuif added to simplify debugging */
-  { "vu", s_state, ASM_VU },
-  { "gpuif", s_state, ASM_GPUIF },
-  { NULL, NULL, 0 }
+    { "dmadata", s_dmadata, 0 },
+    { "dmapackpke", s_dmapackpke, 0 },
+    { "enddirect", s_enddirect, 0 },
+    { "enddmadata", s_enddmadata, 0 },
+    { "endgpuif", s_endgpuif, 0 },
+    { "endmpg", s_endmpg, 0 },
+    { "endunpack", s_endunpack, 0 },
+    /* .vu,.gpuif added to simplify debugging */
+    { "vu", s_state, ASM_VU },
+    { "gpuif", s_state, ASM_GPUIF },
+    { NULL, NULL, 0 }
 };
 
 void
@@ -240,16 +242,63 @@ static void
 assemble_dma (str)
      char *str;
 {
-  DVP_INSN insn_buf[4];
-  const dvp_opcode *opcode;
+    DVP_INSN insn_buf[4];
+    int len;				/* Insn's length, in 32 bit words.  */
+    char *f;                            /* Pointer to allocated frag.  */
+    int i;
+    const dvp_opcode *opcode;
 
-  opcode = assemble_one_insn (DVP_DMA,
-			      dma_opcode_lookup_asm (str), dma_operands,
-			      &str, insn_buf);
-  if (opcode == NULL)
-    return;
-  if (! output_dma)
-    return;
+    /*
+    Fill the first two words with PKE NOPs.
+    They may be over-written later if DmaPackPke is on.
+    initialize the remainder with zeros.
+    */
+    insn_buf[ 0] = 0;
+    insn_buf[ 1] = 0;
+    insn_buf[ 2] = 0;
+    insn_buf[ 3] = 0;
+
+    opcode = assemble_one_insn (DVP_DMA,
+        		        dma_opcode_lookup_asm (str), dma_operands,
+			        &str, insn_buf);
+    if( opcode == NULL) return;
+    if( !output_dma) return;
+
+    len = 4;
+    f = frag_more( len * 4);
+
+    /* Write out the PKE / DMA instructions. */
+    for( i = 0; i < len; ++i)
+	md_number_to_chars( f + i * 4, insn_buf[i], 4);
+
+    /* Create any fixups.  */
+    /* FIXME: It might eventually be possible to combine all the various
+       copies of this bit of code.  */
+    for( i = 0; i < fixup_count; ++i)
+    {
+	int op_type, reloc_type, offset;
+	const dvp_operand *operand;
+
+#if 0
+	/*
+	Create a fixup for this operand.
+	At this point we do not use a bfd_reloc_code_real_type for
+	operands residing in the insn, but instead just use the
+	operand index.  This lets us easily handle fixups for any
+	operand type, although that is admittedly not a very exciting
+	feature.  We pick a BFD reloc type in md_apply_fix.
+	*/
+
+	op_type = fixups[i].opindex;
+	offset = fixups[i].offset;
+	reloc_type = encode_fixup_reloc_type (DVP_PKE, op_type);
+	operand = &pke_operands[op_type];
+	fix_new_exp (frag_now, f + offset - frag_now->fr_literal, 4,
+		     &fixups[i].exp,
+		     (operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0,
+		     (bfd_reloc_code_real_type) reloc_type);
+#endif
+    }
 }
 
 /* Subroutine of md_assemble to assemble PKE instructions.  */
@@ -510,7 +559,7 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
       /* Scan the syntax string.  If it doesn't match, try the next one.  */
 
       dvp_opcode_init_parse ();
-      *insn_buf = opcode->value;
+      insn_buf[ opcode->opcode_word] = opcode->value;
       fixup_count = 0;
       past_opcode_p = 0;
       num_suffixes = 0;
@@ -641,6 +690,13 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 		}
 #endif
 
+	      if( operand->flags & DVP_OPERAND_DMA_ILD)
+	      {
+		  s_dmadata_implied( 0);
+		  ++syn;
+		  break;
+	      }
+
 	      /* Is there anything left to parse?
 		 We don't check for this at the top because we want to parse
 		 any trailing fake arguments in the syntax string.  */
@@ -648,35 +704,19 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 	      if (*str == '\0')
 		break;
 
-#if 0
-	      /* Is this the special DMA count operand? */
-	      if( operand->flags & DVP_OPERAND_DMA_COUNT)
-		  dvp_dma_operand_autocount( 0);
-	      if( (operand->flags & DVP_OPERAND_DMA_COUNT) && *str == '*')
-	      {
-		  /* Yes, it is!
-		  Remember that we must compute the length later
-		  when the dma-block label (second operand) is known. */
-		  ++str;
-		  dvp_dma_operand_autocount( 1);
-	      }
-#endif
-
+	      /* Parse the operand.  */
 	      if( operand->flags & DVP_OPERAND_DMA_ILD_AUTOCOUNT)
 	      {
 		  errmsg = 0;
 		  value = parse_dma_ild_autocount( opcode, operand, mods, insn_buf, &str, &errmsg);
 		  if( errmsg) break;
 	      }
-
-	      if( operand->flags & DVP_OPERAND_DMA_PTR_AUTOCOUNT)
+	      else if( operand->flags & DVP_OPERAND_DMA_PTR_AUTOCOUNT)
 	      {
 		  errmsg = 0;
 		  value = parse_dma_ptr_autocount( opcode, operand, mods, insn_buf, &str, &errmsg);
 		  if( errmsg) break;
 	      }
-
-	      /* Parse the operand.  */
 	      else if (operand->parse)
 		{
 		  errmsg = NULL;
@@ -1323,16 +1363,12 @@ insert_operand (cpu, opcode, operand, mods, insn_buf, val, errmsg)
   else
     {
       /* We currently assume a field does not cross a word boundary.  */
-      int shift = ((mods & DVP_MOD_THIS_WORD)
-		   ? (operand->shift & 31)
-		   : operand->shift);
-      DVP_INSN *p = insn_buf + (shift / 32);
       if (operand->bits == 32)
-	*p = val;
+	insn_buf[ operand->word] = val;
       else
 	{
-	  shift = shift % 32;
-	  *p |= ((long) val & ((1 << operand->bits) - 1)) << shift;
+	  long temp = (long) val & ((1 << operand->bits) - 1);
+	  insn_buf[ operand->word] |= temp << operand->shift;
 	}
     }
 }
@@ -1408,80 +1444,90 @@ insert_operand_final (cpu, operand, mods, insn_buf, val, file, line)
   }
 }
 
+static short dmadata_state = 0;
+static const char *dmadata_name;
+
+/* Non-zero if .DmaData was implied by a real (non-pseudo) opcode. */
+static int implied_dmadata_p = 0;
+
 static void
-s_dmadata( type)
-    int type;
+s_dmadata_implied( ignore)
+    int ignore;
 {
-    static short state = 0;
-    static symbolS *label;		/* Points to symbol */
-    char *name;
-    const char *prevName;
-    int temp;
-
-    switch( type )
+    if( dmadata_state != 0 )
     {
-    case 1:				/* .DmaData */
-	if( state != 0 )
-	{
-	    as_bad( "DmaData blocks cannot be nested.");
-	    ignore_rest_of_line();
-	    state = 1;
-	    break;
-	}
-	state = 1;
+	as_bad( "DmaData blocks cannot be nested.");
+    }
+    dmadata_state = 1;
+    dmadata_name = 0;
+}
 
-	SKIP_WHITESPACE();		/* Leading whitespace is part of operand. */
-	name = input_line_pointer;
+static void
+s_dmadata( ignore)
+    int ignore;
+{
+    char *name, c;
 
-	if( !is_name_beginner( *name) )
-	{
-	    as_bad( "invalid identifier for \".DmaData\"");
-	    obstack_1grow( &cond_obstack, 0);
-	    ignore_rest_of_line();
-	    break;
-	}
-	else
-	{
-	    char c;
+    dmadata_name = 0;
 
-	    c = get_symbol_end();
-	    line_label = label = colon( name);	  /* user-defined label */
-	    *input_line_pointer = c;
+    if( dmadata_state != 0 )
+    {
+	as_bad( "DmaData blocks cannot be nested.");
+	ignore_rest_of_line();
+	return;
+    }
+    dmadata_state = 1;
 
-	    demand_empty_rest_of_line();
-	}				/* if a valid identifyer name */
-	break;
+    SKIP_WHITESPACE();			/* Leading whitespace is part of operand. */
+    name = input_line_pointer;
 
-    case 0:				/* .EndDmaData */
-	if( state != 1 )
-	{
-	    as_warn( ".EndDmaData encountered outside a DmaData block -- ignored.");
-	    ignore_rest_of_line();
-	    state = 0;
-	    break;
-	}
-	state = 0;
-	demand_empty_rest_of_line();
+    if( !is_name_beginner( *name) )
+    {
+	as_bad( "invalid identifier for \".DmaData\"");
+	obstack_1grow( &cond_obstack, 0);  /*FIXME what is this for?*/
+	ignore_rest_of_line();
+	return;
+    }
 
-	/*
-	* "label" points to beginning of block
-	* Create a name for the final label like _$<name>
-	*/
-	prevName = label->bsym->name;
-	temp = strlen( prevName) + 1;
+    c = get_symbol_end();
+    line_label = colon( name);	/* user-defined label */
+    dmadata_name = line_label->bsym->name;
+    *input_line_pointer = c;
+
+    demand_empty_rest_of_line();
+}
+
+static void
+s_enddmadata( ignore)
+    int ignore;
+{
+    if( dmadata_state != 1)
+    {
+	as_warn( ".EndDmaData encountered outside a DmaData block -- ignored.");
+	ignore_rest_of_line();
+	dmadata_name = 0;
+    }
+    dmadata_state = 0;
+    demand_empty_rest_of_line();
+
+    /*
+    * "label" points to beginning of block
+    * Create a name for the final label like _$<name>
+    */
+    if( dmadata_name) {
+	int temp;
+	char *name;
+
+	temp = strlen( dmadata_name) + 1;
 	name = xmalloc( temp + 2);
 	name[ 0] = '_';
 	name[ 1] = '$';
-	memcpy( name+2, prevName, temp);    /* copy original name & \0 */
+	memcpy( name+2, dmadata_name, temp);	/* copy original name & \0 */
 	colon( name);
 	free( name);
-	break;
-
-    default:
-	as_assert( __FILE__, __LINE__, 0);
     }
 }
-
+
 static void
 s_dmapackpke( ignore)
     int ignore;
@@ -1493,10 +1539,10 @@ s_dmapackpke( ignore)
     SKIP_WHITESPACE();			/* Leading whitespace is part of operand. */
     switch( *input_line_pointer++ )
     {
-    case 0:
+    case '0':
 	dma_pack_pke_p = 0;
 	break;
-    case 1:
+    case '1':
 	dma_pack_pke_p = 1;
 	break;
     default:
