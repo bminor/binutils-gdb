@@ -1,7 +1,11 @@
+Wed Mar 16 15:28:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Makefile.in (install-only): Fix use of program_transform_name.
+
 Wed Mar 16 07:18:43 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* printcmd.c: Remove "set print fast-symbolic-addr off" command.
-	The which it worked around was fixed on 25 Feb 94 in coffread.c,
+	The bug which it worked around was fixed on 25 Feb 94 in coffread.c,
 	so I'm nuking the command.
 	* symtab.c (find_addr_symbol): Comment out, no longer used.
 
