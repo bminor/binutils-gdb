@@ -1,3 +1,12 @@
+Mon Feb 25 18:40:33 CET 2002  Jan Hubicka  <jh@suse.cz>
+
+	* i386-dis.c (prefix_name): Fix handling of 32bit address prefix
+	in 64bit mode.
+	(print_insn) Likewise.
+	(putop): Fix handling of 'E'
+	(OP_E, OP_OFF): handle 32bit addressing mode in 64bit.
+	(ptr_reg): Likewise.
+
 2002-02-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-dis.c (powerpc_dialect): Handle power4 option.
