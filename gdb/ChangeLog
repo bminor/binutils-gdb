@@ -1,5 +1,8 @@
 2004-06-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.in: Include <sys/param.h> for td_pcb test.
+	* configure: Regenerated.
+
 	* i386nbsd-nat.c: New file.
 	* Makefile.in (ALLDEPFILES): Add i386nbsd-nat.c, i386nbsd-tdep.c,
 	i386obsd-nat.c and i386obsd-tdep.c.

@@ -496,7 +496,8 @@ fi
 
 # See if <sys/proc.h> defines `struct thread' with a td_pcb member.
 AC_CACHE_CHECK([for td_pcb in struct thread], gdb_cv_struct_thread_td_pcb,
-[AC_TRY_COMPILE([#include <sys/proc.h>], [struct thread td; td.td_pcb;],
+[AC_TRY_COMPILE([#include <sys/param.h>
+#include <sys/proc.h>], [struct thread td; td.td_pcb;],
 gdb_cv_struct_thread_td_pcb=yes, gdb_cv_struct_thread_td_pcb=no)])
 if test $gdb_cv_struct_thread_td_pcb = yes; then
   AC_DEFINE(HAVE_STRUCT_THREAD_TD_PCB, 1,
