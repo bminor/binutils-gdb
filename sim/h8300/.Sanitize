@@ -30,6 +30,7 @@ Makefile.in
 configure.in
 h8300.mt
 compile.c
+writecode.c
 run.c
 inst.h
 
