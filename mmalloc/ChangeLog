@@ -1,3 +1,15 @@
+Wed May  3 17:18:13 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* Makefile.in, configure.in: Converted to use autoconf.
+	* configure: New file, generated with autoconf 2.3.
+	* config/{mh-go32, mh-irix, mh-ncr3000, mh-sunos4, 
+	  mh-sysv4}: Removed.
+
+Thu Nov  3 23:55:21 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Makefile.in (install-info): Name destination file correctly,
+	rather than using undefined shell variable.
+
 Fri Oct 28 16:46:58 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mmprivate.h: New file, was mmalloc.h.

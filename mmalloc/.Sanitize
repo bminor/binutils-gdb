@@ -28,7 +28,7 @@ ChangeLog
 Makefile.in
 TODO
 attach.c
-config
+configure
 configure.in
 detach.c
 keys.c
