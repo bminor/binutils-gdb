@@ -38,6 +38,7 @@
 #include "annotate.h"
 #endif
 #include "regcache.h"
+#include "gdb_assert.h"
 
 #include "version.h"
 
@@ -321,6 +322,19 @@ int
 cannot_register_not (int regnum)
 {
   return 0;
+}
+
+/* Legacy version of target_virtual_frame_pointer().  Assumes that
+   there is an FP_REGNUM and that it is the same, cooked or raw.  */
+
+void
+legacy_virtual_frame_pointer (CORE_ADDR pc,
+			      int *frame_regnum,
+			      LONGEST *frame_offset)
+{
+  gdb_assert (FP_REGNUM >= 0);
+  *frame_regnum = FP_REGNUM;
+  *frame_offset = 0;
 }
 
 /* Functions to manipulate the endianness of the target.  */

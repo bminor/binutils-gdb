@@ -1,3 +1,24 @@
+2001-08-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* target.h (TARGET_VIRTUAL_FRAME_POINTER): Delete, multi-arched.
+	* gdbarch.sh (TARGET_VIRTUAL_FRAME_POINTER): Add.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+	* arch-utils.h (legacy_virtual_frame_pointer): Declare.
+	* arch-utils.c: Include "gdb_assert.h".
+	(legacy_virtual_frame_pointer): Define.
+	* Makefile.in (arch-utils.o): Depends on gdb_assert.h.
+
+	* tracepoint.c (encode_actions): Make frame_reg an int.  Make
+	frame_offset a LONGEST.
+	* ax-gdb.c (gen_frame_args_address): Ditto.
+	(gen_frame_locals_address): Ditto.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Initialize
+	virtual_frame_pointer.
+	(mn10300_virtual_frame_pointer): Make static.  Update parameter
+	list to match function signature.
+	* config/mn10300/tm-mn10300.h (TARGET_VIRTUAL_FRAME_POINTER): Delete.
+
 2001-08-10  Keith Seitz  <keiths@redhat.com>
 
 	* gdb-events.sh: Add architecture_changed event.

@@ -122,4 +122,9 @@ void init_frame_pc_default (int fromleaf, struct frame_info *prev);
 
 int cannot_register_not (int regnum);
 
+/* Legacy version of target_virtual_frame_pointer().  Assumes that
+   there is an FP_REGNUM and that it is the same, cooked or raw.  */
+
+extern gdbarch_virtual_frame_pointer_ftype legacy_virtual_frame_pointer;
+
 #endif

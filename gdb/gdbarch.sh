@@ -388,6 +388,10 @@ f::TARGET_READ_FP:CORE_ADDR:read_fp:void:::0:generic_target_read_fp::0
 f::TARGET_WRITE_FP:void:write_fp:CORE_ADDR val:val::0:generic_target_write_fp::0
 f::TARGET_READ_SP:CORE_ADDR:read_sp:void:::0:generic_target_read_sp::0
 f::TARGET_WRITE_SP:void:write_sp:CORE_ADDR val:val::0:generic_target_write_sp::0
+# Function for getting target's idea of a frame pointer.  FIXME: GDB's
+# whole scheme for dealing with "frames" and "frame pointers" needs a
+# serious shakedown.
+f::TARGET_VIRTUAL_FRAME_POINTER:void:virtual_frame_pointer:CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset:pc, frame_regnum, frame_offset::0:legacy_virtual_frame_pointer::0
 #
 M:::void:register_read:int regnum, char *buf:regnum, buf:
 M:::void:register_write:int regnum, char *buf:regnum, buf:

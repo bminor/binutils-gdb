@@ -454,7 +454,8 @@ gen_left_shift (struct agent_expr *ax, int distance)
 static void
 gen_frame_args_address (struct agent_expr *ax)
 {
-  long frame_reg, frame_offset;
+  int frame_reg;
+  LONGEST frame_offset;
 
   TARGET_VIRTUAL_FRAME_POINTER (ax->scope, &frame_reg, &frame_offset);
   ax_reg (ax, frame_reg);
@@ -467,7 +468,8 @@ gen_frame_args_address (struct agent_expr *ax)
 static void
 gen_frame_locals_address (struct agent_expr *ax)
 {
-  long frame_reg, frame_offset;
+  int frame_reg;
+  LONGEST frame_offset;
 
   TARGET_VIRTUAL_FRAME_POINTER (ax->scope, &frame_reg, &frame_offset);
   ax_reg (ax, frame_reg);

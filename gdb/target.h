@@ -1253,12 +1253,4 @@ extern void push_remote_target (char *name, int from_tty);
 /* Blank target vector entries are initialized to target_ignore. */
 void target_ignore (void);
 
-/* Macro for getting target's idea of a frame pointer.
-   FIXME: GDB's whole scheme for dealing with "frames" and
-   "frame pointers" needs a serious shakedown.  */
-#ifndef TARGET_VIRTUAL_FRAME_POINTER
-#define TARGET_VIRTUAL_FRAME_POINTER(ADDR, REGP, OFFP) \
-   do { *(REGP) = FP_REGNUM; *(OFFP) =  0; } while (0)
-#endif /* TARGET_VIRTUAL_FRAME_POINTER */
-
 #endif /* !defined (TARGET_H) */

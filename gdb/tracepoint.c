@@ -1488,7 +1488,8 @@ encode_actions (struct tracepoint *t, char ***tdp_actions,
   struct collection_list *collect;
   struct cmd_list_element *cmd;
   struct agent_expr *aexpr;
-  long frame_reg, frame_offset;
+  int frame_reg;
+  LONGEST frame_offset;
 
 
   clear_collection_list (&tracepoint_list);

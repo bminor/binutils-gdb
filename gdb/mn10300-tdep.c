@@ -844,8 +844,10 @@ mn10300_frame_init_saved_regs (struct frame_info *frame)
    plus any necessary offset to be applied to the register before
    any frame pointer offsets.  */
 
-void
-mn10300_virtual_frame_pointer (CORE_ADDR pc, long *reg, long *offset)
+static void
+mn10300_virtual_frame_pointer (CORE_ADDR pc,
+			       int *reg,
+			       LONGEST *offset)
 {
   struct frame_info *dummy = analyze_dummy_frame (pc, 0);
   /* Set up a dummy frame_info, Analyze the prolog and fill in the
@@ -1073,6 +1075,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, mn10300_dwarf2_reg_to_regnum);
   set_gdbarch_do_registers_info (gdbarch, mn10300_do_registers_info);
   set_gdbarch_fp_regnum (gdbarch, 31);
+  set_gdbarch_virtual_frame_pointer (gdbarch, mn10300_virtual_frame_pointer);
 
   /* Breakpoints.  */
   set_gdbarch_breakpoint_from_pc (gdbarch, mn10300_breakpoint_from_pc);

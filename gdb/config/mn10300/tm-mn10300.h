@@ -73,8 +73,3 @@ enum movm_register_bits {
 };
 
 #define INIT_FRAME_PC		/* Not necessary */
-
-/* Cons up virtual frame pointer for trace */
-extern void mn10300_virtual_frame_pointer (CORE_ADDR, long *, long *);
-#define TARGET_VIRTUAL_FRAME_POINTER(PC, REGP, OFFP) \
-	mn10300_virtual_frame_pointer ((PC), (REGP), (OFFP))

@@ -150,6 +150,7 @@ struct gdbarch
   gdbarch_write_fp_ftype *write_fp;
   gdbarch_read_sp_ftype *read_sp;
   gdbarch_write_sp_ftype *write_sp;
+  gdbarch_virtual_frame_pointer_ftype *virtual_frame_pointer;
   gdbarch_register_read_ftype *register_read;
   gdbarch_register_write_ftype *register_write;
   int num_regs;
@@ -331,6 +332,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  0,
   generic_get_saved_register,
   0,
   0,
@@ -429,6 +431,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->write_fp = generic_target_write_fp;
   gdbarch->read_sp = generic_target_read_sp;
   gdbarch->write_sp = generic_target_write_sp;
+  gdbarch->virtual_frame_pointer = legacy_virtual_frame_pointer;
   gdbarch->num_regs = -1;
   gdbarch->sp_regnum = -1;
   gdbarch->fp_regnum = -1;
@@ -534,6 +537,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of write_fp, invalid_p == 0 */
   /* Skip verify of read_sp, invalid_p == 0 */
   /* Skip verify of write_sp, invalid_p == 0 */
+  /* Skip verify of virtual_frame_pointer, invalid_p == 0 */
   /* Skip verify of register_read, has predicate */
   /* Skip verify of register_write, has predicate */
   if ((GDB_MULTI_ARCH >= 2)
@@ -893,6 +897,13 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: %s # %s\n",
                       "TARGET_WRITE_SP(val)",
                       XSTRING (TARGET_WRITE_SP (val)));
+#endif
+#if defined (TARGET_VIRTUAL_FRAME_POINTER) && GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "TARGET_VIRTUAL_FRAME_POINTER(pc, frame_regnum, frame_offset)",
+                      XSTRING (TARGET_VIRTUAL_FRAME_POINTER (pc, frame_regnum, frame_offset)));
 #endif
 #ifdef NUM_REGS
   fprintf_unfiltered (file,
@@ -1564,6 +1575,13 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: TARGET_WRITE_SP = 0x%08lx\n",
                         (long) current_gdbarch->write_sp
                         /*TARGET_WRITE_SP ()*/);
+#endif
+#ifdef TARGET_VIRTUAL_FRAME_POINTER
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: TARGET_VIRTUAL_FRAME_POINTER = 0x%08lx\n",
+                        (long) current_gdbarch->virtual_frame_pointer
+                        /*TARGET_VIRTUAL_FRAME_POINTER ()*/);
 #endif
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
@@ -2495,6 +2513,24 @@ set_gdbarch_write_sp (struct gdbarch *gdbarch,
                       gdbarch_write_sp_ftype write_sp)
 {
   gdbarch->write_sp = write_sp;
+}
+
+void
+gdbarch_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset)
+{
+  if (gdbarch->virtual_frame_pointer == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_virtual_frame_pointer invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_virtual_frame_pointer called\n");
+  gdbarch->virtual_frame_pointer (pc, frame_regnum, frame_offset);
+}
+
+void
+set_gdbarch_virtual_frame_pointer (struct gdbarch *gdbarch,
+                                   gdbarch_virtual_frame_pointer_ftype virtual_frame_pointer)
+{
+  gdbarch->virtual_frame_pointer = virtual_frame_pointer;
 }
 
 int

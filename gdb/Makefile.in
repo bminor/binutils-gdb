@@ -1487,7 +1487,7 @@ tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
 gdbarch.o: gdbarch.c $(defs_h) $(bfd_h) $(gdbcmd_h)
 
 arch-utils.o: arch-utils.c $(defs_h) $(bfd_h) $(gdbcmd_h) \
-	$(arch_utils_h)
+	$(arch_utils_h) gdb_assert.h
 
 gdbtypes.o: gdbtypes.c $(bfd_h) complaints.h $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h objfiles.h $(symfile_h) $(symtab_h) $(target_h) \

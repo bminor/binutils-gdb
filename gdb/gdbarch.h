@@ -400,6 +400,27 @@ extern void set_gdbarch_write_sp (struct gdbarch *gdbarch, gdbarch_write_sp_ftyp
 #endif
 #endif
 
+/* Function for getting target's idea of a frame pointer.  FIXME: GDB's
+   whole scheme for dealing with "frames" and "frame pointers" needs a
+   serious shakedown. */
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_VIRTUAL_FRAME_POINTER)
+#define TARGET_VIRTUAL_FRAME_POINTER(pc, frame_regnum, frame_offset) (legacy_virtual_frame_pointer (pc, frame_regnum, frame_offset))
+#endif
+
+typedef void (gdbarch_virtual_frame_pointer_ftype) (CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset);
+extern void gdbarch_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset);
+extern void set_gdbarch_virtual_frame_pointer (struct gdbarch *gdbarch, gdbarch_virtual_frame_pointer_ftype *virtual_frame_pointer);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (TARGET_VIRTUAL_FRAME_POINTER)
+#error "Non multi-arch definition of TARGET_VIRTUAL_FRAME_POINTER"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_VIRTUAL_FRAME_POINTER)
+#define TARGET_VIRTUAL_FRAME_POINTER(pc, frame_regnum, frame_offset) (gdbarch_virtual_frame_pointer (current_gdbarch, pc, frame_regnum, frame_offset))
+#endif
+#endif
+
 extern int gdbarch_register_read_p (struct gdbarch *gdbarch);
 
 typedef void (gdbarch_register_read_ftype) (struct gdbarch *gdbarch, int regnum, char *buf);
