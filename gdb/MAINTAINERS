@@ -169,7 +169,7 @@ GNU/Linux m68k		Andreas Schwab		schwab@suse.de
 FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 			David O'Brien		obrien@freebsd.org
 hurd native		Mark Kettenis		kettenis@gnu.org
-NetBSD native & host	Jason Thorpe		thorpej@wasabisystems.com
+NetBSD native & host	Jason Thorpe		thorpej@netbsd.org
 SCO/Unixware		Robert Lipe		rjl@sco.com
 GNU/Linux ARM native	Scott Bambrough		scottb@netwinder.org
 Solaris/x86 native & host (devolved)
@@ -374,7 +374,7 @@ Michael Snyder					msnyder@redhat.com
 Petr Sorfa					petrs@caldera.com
 Ian Lance Taylor				ian@wasabisystems.com
 Gary Thomas					gthomas@redhat.com
-Jason Thorpe					thorpej@wasabisystems.com
+Jason Thorpe					thorpej@netbsd.org
 Tom Tromey					tromey@redhat.com
 D Venkatasubramanian				dvenkat@noida.hcltech.com
 Corinna Vinschen				vinschen@redhat.com
