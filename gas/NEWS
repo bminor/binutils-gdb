@@ -1,9 +1,11 @@
 -*- text -*-
 
+* Added support for sh4a and variants.
+
 * Support for Renesas M32R2 added.
 
-* Limited support for Mapping Symbols as specified in the ARM ELF specification
-  has been added to the arm assembler.
+* Limited support for Mapping Symbols as specified in the ARM ELF
+  specification has been added to the arm assembler.
 
 * On ARM architectures, added a new gas directive ".unreq" that undoes
   definitions created by ".req".

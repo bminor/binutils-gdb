@@ -45,6 +45,15 @@ Align sections to 4 byte boundaries, not 16.
 @item -dsp
 Enable sh-dsp insns, and disable sh3e / sh4 insns.
 
+@item -isa=sh4 | sh4a
+Specify the sh4 or sh4a instruction set.
+@item -isa=dsp
+Enable sh-dsp insns, and disable sh3e / sh4 insns.
+@item -isa=fp
+Enable sh2e, sh3e, sh4, and sh4a insn sets.
+@item -isa=all
+Enable sh1, sh2, sh2e, sh3, sh3e, sh4, sh4a, and sh-dsp insn sets.
+
 @end table
 
 @node SH Syntax

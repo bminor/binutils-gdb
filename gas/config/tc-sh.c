@@ -1400,13 +1400,13 @@ parse_at (char *src, sh_operand_info *op)
 	      || (l0 == 'i' && (l1 == 'x' || l1 == 's')))
 	    {
 	      src += 2;
-	      op->type = A_PMOD_N;
+	      op->type = AX_PMOD_N;
 	    }
 	  else if (   (l0 == 'r' && l1 == '9')
 		   || (l0 == 'i' && l1 == 'y'))
 	    {
 	      src += 2;
-	      op->type = A_PMODY_N;
+	      op->type = AY_PMOD_N;
 	    }
 	  else
 	    op->type = A_INC_N;
@@ -1579,8 +1579,6 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 	    case V_REG_N:
 	    case FPUL_N:
 	    case FPSCR_N:
-	    case A_PMOD_N:
-	    case A_PMODY_N:
 	    case DSP_REG_N:
 	      /* Opcode needs rn */
 	      if (user->type != arg)
@@ -1624,6 +1622,237 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 	      if (user->type != arg - A_REG_M + A_REG_N)
 		goto fail;
 	      reg_m = user->reg;
+	      break;
+
+	    case AS_DEC_N:
+	      if (user->type != A_DEC_N)
+		goto fail;
+	      if (user->reg < 2 || user->reg > 5)
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+	      
+	    case AS_INC_N:
+	      if (user->type != A_INC_N)
+		goto fail;
+	      if (user->reg < 2 || user->reg > 5)
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+	      
+	    case AS_IND_N:
+	      if (user->type != A_IND_N)
+		goto fail;
+	      if (user->reg < 2 || user->reg > 5)
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+	      
+	    case AS_PMOD_N:
+	      if (user->type != AX_PMOD_N)
+		goto fail;
+	      if (user->reg < 2 || user->reg > 5)
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+	      
+	    case AX_INC_N:
+	      if (user->type != A_INC_N)
+		goto fail;
+	      if (user->reg < 4 || user->reg > 5)
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+	      
+	    case AX_IND_N:
+	      if (user->type != A_IND_N)
+		goto fail;
+	      if (user->reg < 4 || user->reg > 5)
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+	      
+	    case AX_PMOD_N:
+	      if (user->type != AX_PMOD_N)
+		goto fail;
+	      if (user->reg < 4 || user->reg > 5)
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+	      
+	    case AXY_INC_N:
+	      if (user->type != A_INC_N)
+		goto fail;
+	      if ((user->reg < 4 || user->reg > 5)
+		  && (user->reg < 0 || user->reg > 1))
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+	      
+	    case AXY_IND_N:
+	      if (user->type != A_IND_N)
+		goto fail;
+	      if ((user->reg < 4 || user->reg > 5)
+		  && (user->reg < 0 || user->reg > 1))
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+	      
+	    case AXY_PMOD_N:
+	      if (user->type != AX_PMOD_N)
+		goto fail;
+	      if ((user->reg < 4 || user->reg > 5)
+		  && (user->reg < 0 || user->reg > 1))
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+	      
+	    case AY_INC_N:
+	      if (user->type != A_INC_N)
+		goto fail;
+	      if (user->reg < 6 || user->reg > 7)
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+	      
+	    case AY_IND_N:
+	      if (user->type != A_IND_N)
+		goto fail;
+	      if (user->reg < 6 || user->reg > 7)
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+	      
+	    case AY_PMOD_N:
+	      if (user->type != AY_PMOD_N)
+		goto fail;
+	      if (user->reg < 6 || user->reg > 7)
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+
+	    case AYX_INC_N:
+	      if (user->type != A_INC_N)
+		goto fail;
+	      if ((user->reg < 6 || user->reg > 7)
+		  && (user->reg < 2 || user->reg > 3))
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+	      
+	    case AYX_IND_N:
+	      if (user->type != A_IND_N)
+		goto fail;
+	      if ((user->reg < 6 || user->reg > 7)
+		  && (user->reg < 2 || user->reg > 3))
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+	      
+	    case AYX_PMOD_N:
+	      if (user->type != AY_PMOD_N)
+		goto fail;
+	      if ((user->reg < 6 || user->reg > 7)
+		  && (user->reg < 2 || user->reg > 3))
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+
+	    case DSP_REG_A_M:
+	      if (user->type != DSP_REG_N)
+		goto fail;
+	      if (user->reg != A_A0_NUM
+		  && user->reg != A_A1_NUM)
+		goto fail;
+	      reg_m = user->reg;
+	      break;
+
+	    case DSP_REG_AX:
+	      if (user->type != DSP_REG_N)
+		goto fail;
+	      switch (user->reg)
+		{
+		case A_A0_NUM:
+		  reg_x = 0;
+		  break;
+		case A_A1_NUM:
+		  reg_x = 2;
+		  break;
+		case A_X0_NUM:
+		  reg_x = 1;
+		  break;
+		case A_X1_NUM:
+		  reg_x = 3;
+		  break;
+		default:
+		  goto fail;
+		}
+	      break;
+
+	    case DSP_REG_XY:
+	      if (user->type != DSP_REG_N)
+		goto fail;
+	      switch (user->reg)
+		{
+		case A_X0_NUM:
+		  reg_x = 0;
+		  break;
+		case A_X1_NUM:
+		  reg_x = 2;
+		  break;
+		case A_Y0_NUM:
+		  reg_x = 1;
+		  break;
+		case A_Y1_NUM:
+		  reg_x = 3;
+		  break;
+		default:
+		  goto fail;
+		}
+	      break;
+
+	    case DSP_REG_AY:
+	      if (user->type != DSP_REG_N)
+		goto fail;
+	      switch (user->reg)
+		{
+		case A_A0_NUM:
+		  reg_y = 0;
+		  break;
+		case A_A1_NUM:
+		  reg_y = 1;
+		  break;
+		case A_Y0_NUM:
+		  reg_y = 2;
+		  break;
+		case A_Y1_NUM:
+		  reg_y = 3;
+		  break;
+		default:
+		  goto fail;
+		}
+	      break;
+
+	    case DSP_REG_YX:
+	      if (user->type != DSP_REG_N)
+		goto fail;
+	      switch (user->reg)
+		{
+		case A_Y0_NUM:
+		  reg_y = 0;
+		  break;
+		case A_Y1_NUM:
+		  reg_y = 1;
+		  break;
+		case A_X0_NUM:
+		  reg_y = 2;
+		  break;
+		case A_X1_NUM:
+		  reg_y = 3;
+		  break;
+		default:
+		  goto fail;
+		}
 	      break;
 
 	    case DSP_REG_X:
@@ -2069,6 +2298,7 @@ assemble_ppi (char *op_end, sh_opcode_info *opcode)
 
       if (opcode->arg[0] != A_END)
 	op_end = get_operands (opcode, op_end, operand);
+    try_another_opcode:
       opcode = get_specific (opcode, operand);
       if (opcode == 0)
 	{
@@ -2099,9 +2329,43 @@ assemble_ppi (char *op_end, sh_opcode_info *opcode)
 	  movy = DDT_BASE;
 	  break;
 
+	case MOVX_NOPY:
+	  if (movx)
+	    as_bad (_("multiple movx specifications"));
+	  if ((reg_n < 4 || reg_n > 5)
+	      && (reg_n < 0 || reg_n > 1))
+	    as_bad (_("invalid movx address register"));
+	  if (movy && movy != DDT_BASE)
+	    as_bad (_("insn cannot be combined with non-nopy"));
+	  movx = ((((reg_n & 1) != 0) << 9)
+		  + (((reg_n & 4) == 0) << 8)
+		  + (reg_x << 6)
+		  + (opcode->nibbles[2] << 4)
+		  + opcode->nibbles[3]
+		  + DDT_BASE);
+	  break;
+
+	case MOVY_NOPX:
+	  if (movy)
+	    as_bad (_("multiple movy specifications"));
+	  if ((reg_n < 6 || reg_n > 7)
+	      && (reg_n < 2 || reg_n > 3))
+	    as_bad (_("invalid movy address register"));
+	  if (movx && movx != DDT_BASE)
+	    as_bad (_("insn cannot be combined with non-nopx"));
+	  movy = ((((reg_n & 1) != 0) << 8)
+		  + (((reg_n & 4) == 0) << 9)
+		  + (reg_y << 6)
+		  + (opcode->nibbles[2] << 4)
+		  + opcode->nibbles[3]
+		  + DDT_BASE);
+	  break;
+
 	case MOVX:
 	  if (movx)
 	    as_bad (_("multiple movx specifications"));
+	  if (movy & 0x2ac)
+	    as_bad (_("previous movy requires nopx"));
 	  if (reg_n < 4 || reg_n > 5)
 	    as_bad (_("invalid movx address register"));
 	  if (opcode->nibbles[2] & 8)
@@ -2123,6 +2387,8 @@ assemble_ppi (char *op_end, sh_opcode_info *opcode)
 	case MOVY:
 	  if (movy)
 	    as_bad (_("multiple movy specifications"));
+	  if (movx & 0x153)
+	    as_bad (_("previous movx requires nopy"));
 	  if (opcode->nibbles[2] & 8)
 	    {
 	      /* Bit 3 in nibbles[2] is intended for bit 4 of the opcode,
@@ -2151,11 +2417,31 @@ assemble_ppi (char *op_end, sh_opcode_info *opcode)
 		     | (operand[0].immediate.X_add_number & 127) << 4
 		     | reg_n);
 	  break;
+	case PPI3NC:
+	  if (cond)
+	    {
+	      opcode++;
+	      goto try_another_opcode;
+	    }
+	  /* Fall through.  */
 	case PPI3:
 	  if (field_b)
 	    as_bad (_("multiple parallel processing specifications"));
 	  field_b = ((opcode->nibbles[2] << 12) + (opcode->nibbles[3] << 8)
 		     + (reg_x << 6) + (reg_y << 4) + reg_n);
+	  switch (opcode->nibbles[4])
+	    {
+	    case HEX_0:
+	    case HEX_XX00:
+	    case HEX_00YY:
+	      break;
+	    case HEX_1:
+	    case HEX_4:
+	      field_b += opcode->nibbles[4] << 4;
+	      break;
+	    default:
+	      abort ();
+	    }
 	  break;
 	case PDC:
 	  if (cond)
@@ -2170,13 +2456,34 @@ assemble_ppi (char *op_end, sh_opcode_info *opcode)
 	  field_b = ((opcode->nibbles[2] << 12) + (opcode->nibbles[3] << 8)
 		     + cond + (reg_x << 6) + (reg_y << 4) + reg_n);
 	  cond = 0;
+	  switch (opcode->nibbles[4])
+	    {
+	    case HEX_0:
+	    case HEX_XX00:
+	    case HEX_00YY:
+	      break;
+	    case HEX_1:
+	    case HEX_4:
+	      field_b += opcode->nibbles[4] << 4;
+	      break;
+	    default:
+	      abort ();
+	    }
 	  break;
 	case PMUL:
 	  if (field_b)
 	    {
-	      if ((field_b & 0xef00) != 0xa100)
+	      if ((field_b & 0xef00) == 0xa100)
+		field_b -= 0x8100;
+	      /* pclr Dz pmuls Se,Sf,Dg */
+	      else if ((field_b & 0xff00) == 0x8d00
+		       && (valid_arch & arch_sh4al_dsp_up))
+		{
+		  valid_arch &= arch_sh4al_dsp_up;
+		  field_b -= 0x8cf0;
+		}
+	      else
 		as_bad (_("insn cannot be combined with pmuls"));
-	      field_b -= 0x8100;
 	      switch (field_b & 0xf)
 		{
 		case A_X0_NUM:
@@ -2192,7 +2499,7 @@ assemble_ppi (char *op_end, sh_opcode_info *opcode)
 		  field_b += 3 - A_A1_NUM;
 		  break;
 		default:
-		  as_bad (_("bad padd / psub pmuls output operand"));
+		  as_bad (_("bad combined pmuls output operand"));
 		}
 		/* Generate warning if the destination register for padd / psub
 		   and pmuls is the same ( only for A0 or A1 ).
@@ -2578,12 +2885,18 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
       break;
 
     case OPTION_DSP:
-      preset_target_arch = arch_sh1_up & ~arch_sh3e_up;
+      preset_target_arch = arch_sh1_up & ~arch_sh2e_up;
       break;
 
     case OPTION_ISA:
       if (strcasecmp (arg, "sh4") == 0)
 	preset_target_arch = arch_sh4;
+      else if (strcasecmp (arg, "sh4a") == 0)
+	preset_target_arch = arch_sh4a;
+      else if (strcasecmp (arg, "dsp") == 0)
+	preset_target_arch = arch_sh1_up & ~arch_sh2e_up;
+      else if (strcasecmp (arg, "fp") == 0)
+	preset_target_arch = arch_sh2e_up;
       else if (strcasecmp (arg, "any") == 0)
 	preset_target_arch = arch_sh1_up;
 #ifdef HAVE_SH64
@@ -2659,13 +2972,23 @@ SH options:\n\
 -big			generate big endian code\n\
 -relax			alter jump instructions for long displacements\n\
 -small			align sections to 4 byte boundaries, not 16\n\
--dsp			enable sh-dsp insns, and disable sh2e/sh3e/sh4 insns.\n"));
+-dsp			enable sh-dsp insns, and disable floating-point ISAs.\n"));
+  fprintf (stream, _("\
+-isa=[sh4\n\
+    | sh4a\n\
+    | dsp		same as '-dsp'\n\
+    | fp\n"
+#ifdef HAVE_SH64
+"\
+    | shmedia		set default instruction set for SH64\n\
+    | SHmedia\n\
+    | shcompact\n\
+    | SHcompact\n"
+#endif
+"\
+    | any]\n"));
 #ifdef HAVE_SH64
   fprintf (stream, _("\
--isa=[shmedia		set default instruction set for SH64\n\
-      | SHmedia\n\
-      | shcompact\n\
-      | SHcompact]\n\
 -abi=[32|64]		set size of expanded SHmedia operands and object\n\
 			file type\n\
 -shcompact-const-crange	emit code-range descriptors for constants in\n\
@@ -3212,7 +3535,7 @@ sh_elf_final_processing (void)
   int val;
 
   /* Set file-specific flags to indicate if this code needs
-     a processor with the sh-dsp / sh3e ISA to execute.  */
+     a processor with the sh-dsp / sh2e ISA to execute.  */
 #ifdef HAVE_SH64
   /* SH5 and above don't know about the valid_arch arch_sh* bits defined
      in sh-opc.h, so check SH64 mode before checking valid_arch.  */
@@ -3231,11 +3554,19 @@ sh_elf_final_processing (void)
   else if (valid_arch & arch_sh3)
     val = EF_SH3;
   else if (valid_arch & arch_sh3_dsp)
-    val = EF_SH_DSP;
+    val = EF_SH3_DSP;
   else if (valid_arch & arch_sh3e)
     val = EF_SH3E;
+  else if (valid_arch & arch_sh4_nofpu)
+    val = EF_SH4_NOFPU;
   else if (valid_arch & arch_sh4)
     val = EF_SH4;
+  else if (valid_arch & arch_sh4a_nofpu)
+    val = EF_SH4A_NOFPU;
+  else if (valid_arch & arch_sh4a)
+    val = EF_SH4A;
+  else if (valid_arch & arch_sh4al_dsp)
+    val = EF_SH4AL_DSP;
   else
     abort ();
 
