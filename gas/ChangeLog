@@ -1,5 +1,10 @@
 1998-12-29  Gavin Romig-Koch  <gavin@cygnus.com>
 
+	* config/tc-mips.c (append_insn): For mips16, insert a nop between
+	a read of HI or LO and an immediatly following branch.
+
+1998-12-29  Gavin Romig-Koch  <gavin@cygnus.com>
+
 	* config/tc-mips.c (md_begin): Another correction to the setting of
 	mips_eabi64.
 

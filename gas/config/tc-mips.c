@@ -1689,6 +1689,16 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_LO)))
 	    nops += 2;
+	  /* Most mips16 branch insns don't have a delay slot.
+	     If a read from LO is immediately followed by a branch
+	     to a write to LO we have a read followed by a write
+	     less than 2 insns away.  We assume the target of
+	     a branch might be a write to LO, and insert a nop
+	     between a read and an immediately following branch. */
+	  else if (mips_opts.mips16
+		   && (mips_optimize == 0
+		       || (pinfo & MIPS16_INSN_BRANCH)))
+	    nops += 1;
 	}
       else if (prev_insn.insn_mo->pinfo & INSN_READ_HI)
 	{
@@ -1701,6 +1711,16 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_HI)))
 	    nops += 2;
+	  /* Most mips16 branch insns don't have a delay slot.
+	     If a read from HI is immediately followed by a branch
+	     to a write to HI we have a read followed by a write
+	     less than 2 insns away.  We assume the target of
+	     a branch might be a write to HI, and insert a nop
+	     between a read and an immediately following branch. */
+	  else if (mips_opts.mips16
+		   && (mips_optimize == 0
+		       || (pinfo & MIPS16_INSN_BRANCH)))
+	    nops += 1;
 	}
 
       /* If the previous instruction was in a noreorder section, then
