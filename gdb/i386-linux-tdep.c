@@ -333,7 +333,7 @@ find_minsym_and_objfile (char *name, struct objfile **objfile_p)
       ALL_OBJFILE_MSYMBOLS (objfile, msym)
 	{
 	  if (DEPRECATED_SYMBOL_NAME (msym)
-	      && STREQ (DEPRECATED_SYMBOL_NAME (msym), name))
+	      && strcmp (DEPRECATED_SYMBOL_NAME (msym), name) == 0)
 	    {
 	      *objfile_p = objfile;
 	      return msym;
