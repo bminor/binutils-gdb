@@ -290,11 +290,6 @@ coff_object_p (abfd)
       bfd_coff_swap_aouthdr_in (abfd, opthdr, (PTR) & internal_a);
     }
 
-  /* Seek past the opt hdr stuff */
-  if (bfd_seek (abfd, (file_ptr) (internal_f.f_opthdr + filhsz), SEEK_SET)
-      != 0)
-    return NULL;
-
   return coff_real_object_p (abfd, nscns, &internal_f,
 			     (internal_f.f_opthdr != 0
 			      ? &internal_a

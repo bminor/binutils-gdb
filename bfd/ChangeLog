@@ -1,3 +1,11 @@
+Sun Jun 22 19:40:57 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-i386.c (i3coff_object_p): If COFF_IMAGE_WITH_PE, hack to
+	handle case where COFF filehdr does not immediately follow PE
+	header.
+	* coffgen.c (coff_object_p): Remove useless seek to current
+	location.
+
 Wed Jun 18 19:03:38 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* linker.c (link_action): Change COMMON_ROW/indr to from CREF to
