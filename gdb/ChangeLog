@@ -11,7 +11,7 @@ Thu Sep 23 10:49:37 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	z8k-tdep.c: Remove all references to ADDR_BITS_SET.
 	* config/m88k/tm-m88k.h: Define TARGET_WRITE_PC.
 
-	* config/m88k/tm-m88k.h: Add definitions for calling functions.
+	* config/m88k/tm-m88k.h, m88k-tdep.c: Add call function stuff.
 
 Thu Sep 23 00:13:06 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 

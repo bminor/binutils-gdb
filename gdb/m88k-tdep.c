@@ -539,7 +539,8 @@ frame_saved_pc (frame)
   return read_next_frame_reg(frame, SRP_REGNUM);
 }
 
-
+#if 0
+/* I believe this is all obsolete call dummy stuff.  */
 static int
 pushed_size (prev_words, v)
      int prev_words;
@@ -745,13 +746,6 @@ push_parameters (return_type, struct_conv, nargs, args)
 }
 
 void
-pop_frame ()
-{
-  error ("Feature not implemented for the m88k yet.");
-  return;
-}
-
-void
 collect_returned_value (rval, value_type, struct_return, nargs, args)
      value *rval;
      struct type *value_type;
@@ -765,46 +759,108 @@ collect_returned_value (rval, value_type, struct_return, nargs, args)
   *rval = value_being_returned (value_type, retbuf, struct_return);
   return;
 }
+#endif /* 0 */
 
-#if 0
-/* Now handled in a machine independent way with CALL_DUMMY_LOCATION.  */
- /* Stuff a breakpoint instruction onto the stack (or elsewhere if the stack
-    is not a good place for it).  Return the address at which the instruction
-    got stuffed, or zero if we were unable to stuff it anywhere.  */
-  
-CORE_ADDR
-push_breakpoint ()
+/*start of lines added by kev*/
+
+#define DUMMY_FRAME_SIZE 192
+
+static void
+write_word (sp, word)
+     CORE_ADDR sp;
+     REGISTER_TYPE word;
 {
-  static char breakpoint_insn[] = BREAKPOINT;
-  extern CORE_ADDR text_end;	/* of inferior */
-  static char readback_buffer[] = BREAKPOINT;
-  int i;
- 
-  /* With a little bit of luck, we can just stash the breakpoint instruction
-     in the word just beyond the end of normal text space.  For systems on
-     which the hardware will not allow us to execute out of the stack segment,
-     we have to hope that we *are* at least allowed to effectively extend the
-     text segment by one word.  If the actual end of user's the text segment
-     happens to fall right at a page boundary this trick may fail.  Note that
-     we check for this by reading after writing, and comparing in order to
-     be sure that the write worked.  */
+  register int len = sizeof (REGISTER_TYPE);
+  char buffer[MAX_REGISTER_RAW_SIZE];
 
-  write_memory (text_end, &breakpoint_insn, 4);
-
-  /* Fill the readback buffer with some garbage which is certain to be
-     unequal to the breakpoint insn.  That way we can tell if the
-     following read doesn't actually succeed.  */
-
-  for (i = 0; i < sizeof (readback_buffer); i++)
-    readback_buffer[i] = ~ readback_buffer[i];	/* Invert the bits */
-
-  /* Now check that the breakpoint insn was successfully installed.  */
-
-  read_memory (text_end, readback_buffer, sizeof (readback_buffer));
-  for (i = 0; i < sizeof (readback_buffer); i++)
-    if (readback_buffer[i] != breakpoint_insn[i])
-      return 0;		/* Failed to install! */
-
-  return text_end;
+  store_unsigned_integer (buffer, len, word);
+  write_memory (sp, buffer, len);
 }
-#endif
+
+void
+m88k_push_dummy_frame()
+{
+  register CORE_ADDR sp = read_register (SP_REGNUM);
+  register int rn;
+  int offset;
+
+  sp -= DUMMY_FRAME_SIZE;	/* allocate a bunch of space */
+
+  for (rn = 0, offset = 0; rn <= SP_REGNUM; rn++, offset+=4)
+    write_word (sp+offset, read_register(rn));
+  
+  write_word (sp+offset, read_register (SXIP_REGNUM));
+  offset += 4;
+
+  write_word (sp+offset, read_register (SNIP_REGNUM));
+  offset += 4;
+
+  write_word (sp+offset, read_register (SFIP_REGNUM));
+  offset += 4;
+
+  write_word (sp+offset, read_register (PSR_REGNUM));
+  offset += 4;
+
+  write_word (sp+offset, read_register (FPSR_REGNUM));
+  offset += 4;
+
+  write_word (sp+offset, read_register (FPCR_REGNUM));
+  offset += 4;
+
+  write_register (SP_REGNUM, sp);
+  write_register (ACTUAL_FP_REGNUM, sp);
+}
+
+void
+pop_frame ()
+{
+  register FRAME frame = get_current_frame ();
+  register CORE_ADDR fp;
+  register int regnum;
+  struct frame_saved_regs fsr;
+  struct frame_info *fi;
+
+  fi = get_frame_info (frame);
+  fp = fi -> frame;
+  get_frame_saved_regs (fi, &fsr);
+
+  if (PC_IN_CALL_DUMMY (read_pc(), read_register(SP_REGNUM), FRAME_FP(fi)))
+    {
+      /* FIXME: I think get_frame_saved_regs should be handling this so
+	 that we can deal with the saved registers properly (e.g. frame
+	 1 is a call dummy, the user types "frame 2" and then "print $ps").  */
+      register CORE_ADDR sp = read_register (ACTUAL_FP_REGNUM);
+      int offset;
+
+      for (regnum = 0, offset = 0; regnum <= SP_REGNUM; regnum++, offset+=4)
+	(void) write_register (regnum, read_memory_integer (sp+offset, 4));
+  
+      write_register (SXIP_REGNUM, read_memory_integer (sp+offset, 4));
+      offset += 4;
+
+      write_register (SNIP_REGNUM, read_memory_integer (sp+offset, 4));
+      offset += 4;
+
+      write_register (SFIP_REGNUM, read_memory_integer (sp+offset, 4));
+      offset += 4;
+
+      write_register (PSR_REGNUM, read_memory_integer (sp+offset, 4));
+      offset += 4;
+
+      write_register (FPSR_REGNUM, read_memory_integer (sp+offset, 4));
+      offset += 4;
+
+      write_register (FPCR_REGNUM, read_memory_integer (sp+offset, 4));
+      offset += 4;
+
+    }
+  else 
+    {
+      for (regnum = FP_REGNUM ; regnum > 0 ; regnum--)
+	  if (fsr.regs[regnum])
+	      write_register (regnum,
+			      read_memory_integer (fsr.regs[regnum], 4));
+      write_pc(frame_saved_pc(frame));
+    }
+  reinit_frame_cache ();
+}
