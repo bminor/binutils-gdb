@@ -1,3 +1,8 @@
+2002-04-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* coffcode.h (coff_compute_section_file_positions): Set
+	section_tail after shuffling section list.
+
 2002-04-24  Christian Groessler <chris@groessler.org>
 
 	* coff-z8k.c (extra_case): Fix R_IMM32 relocations: The
