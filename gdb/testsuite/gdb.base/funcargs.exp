@@ -67,66 +67,37 @@ proc integral_args {} {
 
     # Print each arg as a double check to see if we can print
     # them here as well as with backtrace.
-
-    send "print c\n"
-    expect {
-	-re ".* = 97 'a'\r\n$prompt $" {}
-	-re "$prompt $" { fail "print c" ; return }
-	timeout { fail "(timeout) print c" ; return }
+    if [gdb_test "print c" ".* = 97 'a'" ""] {
+	fail "print c"; return
     }
-    send "print s\n"
-    expect {
-	-re ".* = 1\r\n$prompt $" {}
-	-re "$prompt $" { fail "print s" ; return }
-	timeout { fail "(timeout) print s" ; return }
+    if [gdb_test "print s" ".* = 1" ""] {
+	fail "print s"; return
     }
-    send "print i\n"
-    expect {
-	-re ".* = 2\r\n$prompt $" {}
-	-re "$prompt $" { fail "print i" ; return }
-	timeout { fail "(timeout) print i" ; return }
+    if [gdb_test "print i" ".* = 2" ""] {
+	fail "print i"; return
     }
-    send "print l\n"
-    expect {
-	-re ".* = 3\r\n$prompt $" {}
-	-re "$prompt $" { fail "print l" ; return }
-	timeout { fail "(timeout) print l" ; return }
+    if [gdb_test "print l" ".* = 3" ""] {
+	fail "print l"; return
     }
 
     # Continue; should stop at call0b and print actual arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call0b \[(\]+s=1, i=2, l=3, c=97 'a'\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call0b" ; return }
-	timeout { fail "(timeout) continue to call0b" ; return }
+    if [gdb_test "cont" ".* call0b \[(\]+s=1, i=2, l=3, c=97 'a'\[)\]+ " ""] {
+	fail "continue to call0b"; return 
     }
 
     # Continue; should stop at call0c and print actual arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call0c \[(\]+i=2, l=3, c=97 'a', s=1\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call0c" ; return }
-	timeout { fail "(timeout) continue to call0c" ; return }
+    if [gdb_test "cont" ".* call0c \[(\]+i=2, l=3, c=97 'a', s=1\[)\]+ " ""] {
+	fail "continue to call0c"; return
     }
 
     # Continue; should stop at call0d and print actual arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call0d \[(\]+l=3, c=97 'a', s=1, i=2\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call0d" ; return }
-	timeout { fail "(timeout) continue to call0d" ; return }
+    if [gdb_test "cont" ".* call0d \[(\]+l=3, c=97 'a', s=1, i=2\[)\]+ " ""] {
+	fail "continue to call0d"; return
     }
 
     # Continue; should stop at call0e and print actual arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call0e \[(\]+c1=97 'a', l=3, c2=97 'a', i=2, c3=97 'a', s=1, c4=97 'a', c5=97 'a'\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call0e" ; return }
-	timeout { fail "(timeout) continue to call0e" ; return }
+    if [gdb_test "cont" ".* call0e \[(\]+c1=97 'a', l=3, c2=97 'a', i=2, c3=97 'a', s=1, c4=97 'a', c5=97 'a'\[)\]+ " "" ] {
+	fail "continue to call0e"; return
     }
 
     pass "locate actual args, signed integral types"
@@ -165,66 +136,37 @@ proc unsigned_integral_args {} {
 
     # Print each arg as a double check to see if we can print
     # them here as well as with backtrace.
-
-    send "print uc\n"
-    expect {
-	-re ".* = 98 'b'\r\n$prompt $" {}
-	-re "$prompt $" { fail "print uc" ; return }
-	timeout { fail "(timeout) print uc" ; return }
+    if [gdb_test "print uc" ".* = 98 'b'" ""] {
+	fail "print uc"; return
     }
-    send "print us\n"
-    expect {
-	-re ".* = 6\r\n$prompt $" {}
-	-re "$prompt $" { fail "print us" ; return }
-	timeout { fail "(timeout) print us" ; return }
+    if [gdb_test "print us" ".* = 6" ""] {
+	fail "print us"; return
     }
-    send "print ui\n"
-    expect {
-	-re ".* = 7\r\n$prompt $" {}
-	-re "$prompt $" { fail "print ui" ; return }
-	timeout { fail "(timeout) print ui" ; return }
+    if [gdb_test "print ui" ".* = 7" ""] { 
+	fail "print ui"; return
     }
-    send "print ul\n"
-    expect {
-	-re ".* = 8\r\n$prompt $" {}
-	-re "$prompt $" { fail "print ul" ; return }
-	timeout { fail "(timeout) print ul" ; return }
+    if [gdb_test "print ul" ".* = 8" ""] {
+	fail "print ul"; return
     }
     
     # Continue; should stop at call1b and print actual arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call1b \[(\]+us=6, ui=7, ul=8, uc=98 'b'\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call1b" ; return }
-	timeout { fail "(timeout) continue to call1b" ; return }
+    if [gdb_test "cont" ".* call1b \[(\]+us=6, ui=7, ul=8, uc=98 'b'\[)\]+ " ""] {
+	fail "continue to call1b"; return 
     }
 
     # Continue; should stop at call1c and print actual arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call1c \[(\]+ui=7, ul=8, uc=98 'b', us=6\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call1c" ; return }
-	timeout { fail "(timeout) continue to call1c" ; return }
+    if [gdb_test "cont" ".* call1c \[(\]+ui=7, ul=8, uc=98 'b', us=6\[)\]+ " ""] {
+	fail "continue to call1c"; return 
     }
 
     # Continue; should stop at call1d and print actual arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call1d \[(\]+ul=8, uc=98 'b', us=6, ui=7\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call1d" ; return }
-	timeout { fail "(timeout) continue to call1d" ; return }
+    if [gdb_test "cont" ".* call1d \[(\]+ul=8, uc=98 'b', us=6, ui=7\[)\]+ " ""] {
+	fail "continue to call1d"; return
     }
 
     # Continue; should stop at call1e and print actual arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call1e \[(\]+uc1=98 'b', ul=8, uc2=98 'b', ui=7, uc3=98 'b', us=6, uc4=98 'b', uc5=98 'b'\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call1e" ; return }
-	timeout { fail "(timeout) continue to call1e" ; return }
+    if [gdb_test "cont" ".* call1e \[(\]+uc1=98 'b', ul=8, uc2=98 'b', ui=7, uc3=98 'b', us=6, uc4=98 'b', uc5=98 'b'\[)\]+ " ""] {
+	fail "continue to call1e"; return
     }
 
     pass "locate actual args, unsigned integral types"
@@ -269,125 +211,69 @@ proc float_and_integral_args {} {
 
     # Print each arg as a double check to see if we can print
 
-    send "print c\n"
-    expect {
-	-re ".* = 97 'a'\r\n$prompt $" {}
-	-re "$prompt $" { fail "print c" ; return }
-	timeout { fail "(timeout) print c" ; return }
+    if [gdb_test "print c" ".* = 97 'a'" ""] {
+	fail "print c"; return
     }
-    send "print f1\n"
-    expect {
-	-re ".* = 4\r\n$prompt $" {}
-	-re "$prompt $" { fail "print f1" ; return }
-	timeout { fail "(timeout) print f1" ; return }
+    if [gdb_test "print f1" ".* = 4" ""] {
+	fail "print f1"; return
     }
-    send "print s\n"
-    expect {
-	-re ".* = 1\r\n$prompt $" {}
-	-re "$prompt $" { fail "print s" ; return }
-	timeout { fail "(timeout) print s" ; return }
+    if [gdb_test "print s" ".* = 1" ""] {
+	fail "print s"; return
     }
-    send "print d1\n"
-    expect {
-	-re ".* = 5\r\n$prompt $" {}
-	-re "$prompt $" { fail "print d1" ; return }
-	timeout { fail "(timeout) print d1" ; return }
+    if [gdb_test "print d1" ".* = 5" ""] {
+	fail "print d1"; return
     }
-    send "print i\n"
-    expect {
-	-re ".* = 2\r\n$prompt $" {}
-	-re "$prompt $" { fail "print i" ; return }
-	timeout { fail "(timeout) print i" ; return }
+    if [gdb_test "print i" ".* = 2" ""] {
+	fail "print i"; return
     }
-    send "print f2\n"
-    expect {
-	-re ".* = 4\r\n$prompt $" {}
-	-re "$prompt $" { fail "print f2" ; return }
-	timeout { fail "(timeout) print f2" ; return }
+    if [gdb_test "print f2" ".* = 4" ""] {
+	fail "print f2"; return
     }
-    send "print l\n"
-    expect {
-	-re ".* = 3\r\n$prompt $" {}
-	-re "$prompt $" { fail "print l" ; return }
-	timeout { fail "(timeout) print l" ; return }
+    if [gdb_test "print l" ".* = 3" ""] {
+	fail "print l"; return
     }
-    send "print d2\n"
-    expect {
-	-re ".* = 5\r\n$prompt $" {}
-	-re "$prompt $" { fail "print d2" ; return }
-	timeout { fail "(timeout) print d2" ; return }
+    if [gdb_test "print d2" ".* = 5" ""] {
+	fail "print d2"; return
     }
 
     # Continue; should stop at call2b and print actual arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call2b \[(\]+f1=4, s=1, d1=5, i=2, f2=4, l=3, d2=5, c=97 'a'\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call2b" ; return }
-	timeout { fail "(timeout) continue to call2b" ; return }
+    if [gdb_test "cont" ".* call2b \[(\]+f1=4, s=1, d1=5, i=2, f2=4, l=3, d2=5, c=97 'a'\[)\]+ " ""] {
+	fail "continue to call2b"; return
     }
 
     # Continue; should stop at call2c and print actual arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call2c \[(\]+s=1, d1=5, i=2, f2=4, l=3, d2=5, c=97 'a', f1=4\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call2c" ; return }
-	timeout { fail "(timeout) continue to call2c" ; return }
+    if [gdb_test "cont" ".* call2c \[(\]+s=1, d1=5, i=2, f2=4, l=3, d2=5, c=97 'a', f1=4\[)\]+ " ""] {
+	fail "continue to call2c"; return
     }
 
     # Continue; should stop at call2d and print actual arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call2d \[(\]+d1=5, i=2, f2=4, l=3, d2=5, c=97 'a', f1=4, s=1\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call2d" ; return }
-	timeout { fail "(timeout) continue to call2d" ; return }
+    if [gdb_test "cont" ".* call2d \[(\]+d1=5, i=2, f2=4, l=3, d2=5, c=97 'a', f1=4, s=1\[)\]+ " ""] {
+	fail "continue to call2d"; return
     }
 
     # Continue; should stop at call2e and print actual arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call2e \[(\]+i=2, f2=4, l=3, d2=5, c=97 'a', f1=4, s=1, d1=5\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call2e" ; return }
-	timeout { fail "(timeout) continue to call2e" ; return }
+    if [gdb_test "cont" ".* call2e \[(\]+i=2, f2=4, l=3, d2=5, c=97 'a', f1=4, s=1, d1=5\[)\]+ " ""] {
+	fail "continue to call2e"; return
     }
 
     # Continue; should stop at call2f and print actual arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call2f \[(\]+f2=4, l=3, d2=5, c=97 'a', f1=4, s=1, d1=5, i=2\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call2f" ; return }
-	timeout { fail "(timeout) continue to call2f" ; return }
+    if [gdb_test "cont" ".* call2f \[(\]+f2=4, l=3, d2=5, c=97 'a', f1=4, s=1, d1=5, i=2\[)\]+ " ""] {
+	fail "continue to call2f"; return
     }
 
     # Continue; should stop at call2g and print actual arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call2g \[(\]+l=3, d2=5, c=97 'a', f1=4, s=1, d1=5, i=2, f2=4\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call2g" ; return }
-	timeout { fail "(timeout) continue to call2g" ; return }
+    if [gdb_test "cont" ".* call2g \[(\]+l=3, d2=5, c=97 'a', f1=4, s=1, d1=5, i=2, f2=4\[)\]+ " ""] {
+	fail "continue to call2g"; return
     }
 
     # Continue; should stop at call2h and print actual arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call2h \[(\]+d2=5, c=97 'a', f1=4, s=1, d1=5, i=2, f2=4, l=3\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call2h" ; return }
-	timeout { fail "(timeout) continue to call2h" ; return }
+    if [gdb_test "cont" ".* call2h \[(\]+d2=5, c=97 'a', f1=4, s=1, d1=5, i=2, f2=4, l=3\[)\]+ " ""] {
+	fail "continue to call2h"; return
     }
 
     # Continue; should stop at call2i and print actual arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call2i \[(\]+c1=97 'a', f1=4, c2=97 'a', c3=97 'a', d1=5, c4=97 'a', c5=97 'a', c6=97 'a', f2=4, s=1, c7=97 'a', d2=5\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call2i" ; return }
-	timeout { fail "(timeout) continue to call2i" ; return }
+    if [gdb_test "cont" ".* call2i \[(\]+c1=97 'a', f1=4, c2=97 'a', c3=97 'a', d1=5, c4=97 'a', c5=97 'a', c6=97 'a', f2=4, s=1, c7=97 'a', d2=5\[)\]+ " ""] {
+	fail "continue to call2i"; return
     }
 
     pass "locate actual args, mixed integral and float types"
@@ -425,87 +311,49 @@ proc pointer_args {} {
 	timeout { fail "(timeout) run to call3a" ; return }
     }
 
-    send "print *cp\n"
-    expect {
-	-re ".* = 97 'a'\r\n$prompt $" {}
-	-re "$prompt $" { fail "print *cp" ; return }
-	timeout { fail "(timeout) print *cp" ; return }
+    if [gdb_test "print *cp" ".* = 97 'a'" ""] {
+	fail "print *cp"; return
     }
-    send "print *sp\n"
-    expect {
-	-re ".* = 1\r\n$prompt $" {}
-	-re "$prompt $" { fail "print *sp" ; return }
-	timeout { fail "(timeout) print *sp" ; return }
+    if [gdb_test "print *sp" ".* = 1" ""] {
+	fail "print *sp"; return
     }
-    send "print *ip\n"
-    expect {
-	-re ".* = 2\r\n$prompt $" {}
-	-re "$prompt $" { fail "print *ip" ; return }
-	timeout { fail "(timeout) print *ip" ; return }
+    if [gdb_test "print *ip" ".* = 2" ""] {
+	fail "print *ip"; return
     }
-    send "print *lp\n"
-    expect {
-	-re ".* = 3\r\n$prompt $" {}
-	-re "$prompt $" { fail "print *lp" ; return }
-	timeout { fail "(timeout) print *lp" ; return }
+    if [gdb_test "print *lp" ".* = 3" ""] {
+	fail "print *lp"; return
     }
 
     # Continue; should stop at call3b and print actual arguments.
     # Try dereferencing the arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call3b \[(\]+ucp=$hex \"b\", usp=$hex, uip=$hex, ulp=$hex\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call3b" ; return }
-	timeout { fail "(timeout) continue to call3b" ; return }
+    if [gdb_test "cont" ".* call3b \[(\]+ucp=$hex \"b\", usp=$hex, uip=$hex, ulp=$hex\[)\]+ " ""] {
+	fail "continue to call3b"; return
     }
 
-    send "print *ucp\n"
-    expect {
-	-re ".* = 98 'b'\r\n$prompt $" {}
-	-re "$prompt $" { fail "print *ucp" ; return }
-	timeout { fail "(timeout) print *ucp" ; return }
+    if [gdb_test "print *ucp" ".* = 98 'b'" ""] {
+	fail "print *ucp"; return
     }
-    send "print *usp\n"
-    expect {
-	-re ".* = 6\r\n$prompt $" {}
-	-re "$prompt $" { fail "print *usp" ; return }
-	timeout { fail "(timeout) print *usp" ; return }
+    if [gdb_test "print *usp" ".* = 6" ""] {
+	fail "print *usp"; return
     }
-    send "print *uip\n"
-    expect {
-	-re ".* = 7\r\n$prompt $" {}
-	-re "$prompt $" { fail "print *uip" ; return }
-	timeout { fail "(timeout) print *uip" ; return }
+    if [gdb_test "print *uip" ".* = 7" ""] {
+	fail "print *uip"; return
     }
-    send "print *ulp\n"
-    expect {
-	-re ".* = 8\r\n$prompt $" {}
-	-re "$prompt $" { fail "print *ulp" ; return }
-	timeout { fail "(timeout) print *ulp" ; return }
+    if [gdb_test "print *ulp" ".* = 8" ""] {
+	fail "print *ulp"; return
     }
 
     # Continue; should stop at call3c and print actual arguments.
     # Try dereferencing the arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call3c \[(\]+fp=$hex, dp=$hex\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call3c" ; return }
-	timeout { fail "(timeout) continue to call3c" ; return }
+    if [gdb_test "cont" ".* call3c \[(\]+fp=$hex, dp=$hex\[)\]+ " ""] {
+	fail "continue to call3c"; return
     }
 
-    send "print *fp\n"
-    expect {
-	-re ".* = 4\r\n$prompt $" {}
-	-re "$prompt $" { fail "print *fp" ; return }
-	timeout { fail "(timeout) print *fp" ; return }
+    if [gdb_test "print *fp" ".* = 4" ""] {
+	fail "print *fp"; return
     }
-    send "print *dp\n"
-    expect {
-	-re ".* = 5\r\n$prompt $" {}
-	-re "$prompt $" { fail "print *dp" ; return }
-	timeout { fail "(timeout) print *dp" ; return }
+    if [gdb_test "print *dp" ".* = 5" ""] {
+	fail "print *dp"; return
     }
 
     pass "locate actual args, pointer types"
@@ -542,28 +390,19 @@ proc structs_by_reference {} {
 	timeout { fail "(timeout) run to call4a" ; return }
     }
 
-    send "print *stp\n"
-    expect {
-	-re ".* = \{s1 = 101, s2 = 102\}\r\n$prompt $" {}
-	-re "$prompt $" { fail "print *stp" ; return }
-	timeout { fail "(timeout) print *stp" ; return }
+    if [gdb_test "print *stp" ".* = \{s1 = 101, s2 = 102\}" ""] {
+	fail "print *stp"; return
     }
 
     # Continue; should stop at call4b and print actual arguments.
     # Try dereferencing the arguments.
 
-    send "cont\n"
-    expect {
-	-re ".* call4b \[(\]+unp=$hex\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call4b" ; return }
-	timeout { fail "(timeout) continue to call4b" ; return }
+    if [gdb_test "cont" ".* call4b \[(\]+unp=$hex\[)\]+ " ""] {
+	fail "continue to call4b"; return
     }
 
-    send "print *unp\n"
-    expect {
-	-re ".* = \{u1 = 1, u2 = 1\}\r\n$prompt $" {}
-	-re "$prompt $" { fail "print *unp" ; return }
-	timeout { fail "(timeout) print *unp" ; return }
+    if [gdb_test "print *unp" ".* = \{u1 = 1, u2 = 1\}" ""] {
+	fail "print *unp"; return
     }
 
     pass "locate actual args, structs/unions passed by reference"
@@ -600,28 +439,18 @@ proc structs_by_value {} {
 	timeout { fail "(timeout) run to call5a" ; return }
     }
 
-    send "print st\n"
-    expect {
-	-re ".* = \{s1 = 101, s2 = 102\}\r\n$prompt $" {}
-	-re "$prompt $" { fail "print st" ; return }
-	timeout { fail "(timeout) print st" ; return }
+    if [gdb_test "print st" ".* = \{s1 = 101, s2 = 102\}" ""] {
+	fail "print st"; return
     }
 
     # Continue; should stop at call5b and print actual arguments.
     # Try dereferencing the arguments.
-
-    send "cont\n"
-    expect {
-	-re ".* call5b \[(\]+un=\{u1 = 2, u2 = 2\}\[)\]+ .*$prompt $" {}
-	-re "$prompt $" { fail "continue to call5b" ; return }
-	timeout { fail "(timeout) continue to call5b" ; return }
+    if [gdb_test "cont" ".* call5b \[(\]+un=\{u1 = 2, u2 = 2\}\[)\]+ " ""] {
+	fail "continue to call5b"; return
     }
 
-    send "print un\n"
-    expect {
-	-re ".* = \{u1 = 2, u2 = 2\}\r\n$prompt $" {}
-	-re "$prompt $" { fail "print un" ; return }
-	timeout { fail "(timeout) print un" ; return }
+    if [gdb_test "print un" ".* = \{u1 = 2, u2 = 2\}" ""] {
+	fail "print un"; return
     }
 
     pass "locate actual args, structs/unions passed by value"
