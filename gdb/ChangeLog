@@ -1,6 +1,6 @@
 2001-11-09  Jim Blandy  <jimb@redhat.com>
 
-	* s390-nat.c: (s390_push_arguments): Write a back chain pointer
+	* s390-tdep.c: (s390_push_arguments): Write a back chain pointer
 	into the dummy frame, to help us get backtraces.
 
 	* values.c (value_as_address): If VAL is a function or method,
