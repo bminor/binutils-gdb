@@ -132,6 +132,7 @@ int parsing_defsym = 0;
 #define OPTION_SPARE_DYNAMIC_TAGS	(OPTION_DISCARD_NONE + 1)
 #define OPTION_NO_DEFINE_COMMON		(OPTION_SPARE_DYNAMIC_TAGS + 1)
 #define OPTION_NOSTDLIB			(OPTION_NO_DEFINE_COMMON + 1)
+#define OPTION_NO_OMAGIC		(OPTION_NOSTDLIB + 1)
 
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
@@ -217,6 +218,8 @@ static const struct ld_option ld_options[] =
   { {"omagic", no_argument, NULL, 'N'},
       'N', NULL, N_("Do not page align data, do not make text readonly"),
       EXACTLY_TWO_DASHES },
+  { {"no-omagic", no_argument, NULL, OPTION_NO_OMAGIC},
+      '\0', NULL, N_("Page align data, make text readonly"), EXACTLY_TWO_DASHES },
   { {"output", required_argument, NULL, 'o'},
       'o', N_("FILE"), N_("Set output file name"), EXACTLY_TWO_DASHES },
   { {NULL, required_argument, NULL, '\0'},
@@ -744,6 +747,12 @@ parse_args (argc, argv)
 	  config.text_read_only = false;
 	  config.magic_demand_paged = false;
 	  config.dynamic_link = false;
+	  break;
+	case OPTION_NO_OMAGIC:
+	  config.text_read_only = true;
+	  config.magic_demand_paged = true;
+	  /* NB/ Does not set dynamic_link to true.
+	     Use --call-shared or -Bdynamic for this.  */
 	  break;
 	case 'n':
 	  config.magic_demand_paged = false;

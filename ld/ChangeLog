@@ -1,3 +1,11 @@
+2002-10-23  Nick Clifton  <nickc@redhat.com>
+
+	* lexsup.c (OPTION_NO_OMAGIC): Define.
+	(ld_options): Add "no-omagic" option.
+	(parse_args): Parse --no-omagic.
+	* ld.texinfo: Document --no-omagic.
+	* NEWS: Mention new option.
+
 2002-10-21  Danny Smith  <dannysmith@users.sourceforeg.net>
 
 	* scripttempl/pe.sc (__RUNTIME_PSEUDO_RELOC_LIST__,

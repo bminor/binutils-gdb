@@ -660,8 +660,17 @@ Turn off page alignment of sections, and mark the output as
 @item -N
 @itemx --omagic
 Set the text and data sections to be readable and writable.  Also, do
-not page-align the data segment.  If the output format supports Unix
-style magic numbers, mark the output as @code{OMAGIC}.
+not page-align the data segment, and disable linking against shared
+libraries.  If the output format supports Unix style magic numbers,
+mark the output as @code{OMAGIC}.
+
+@kindex --no-omagic
+@cindex OMAGIC
+@item --no-omagic
+This option negates most of the effects of the @option{-N} option.  It
+sets the text section to be read-only, and forces the data segment to
+be page-aligned.  Note - this option does not enable linking against
+shared libraries.  Use @option{-Bdynamic} for this.
 
 @kindex -o @var{output}
 @kindex --output=@var{output}
