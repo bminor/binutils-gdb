@@ -160,7 +160,6 @@ static          boolean
 DEFUN(make_a_section_from_file,(abfd, hdr),
       bfd            *abfd AND
       struct scnhdr  *hdr)
-
 {
     asection       *return_section;
 
@@ -225,7 +224,7 @@ static          boolean
 DEFUN(coff_mkobject,(abfd),
       bfd            *abfd)
 {
-  set_tdata (abfd, bfd_alloc (abfd,sizeof(coff_data_type)));
+  set_tdata (abfd, bfd_zalloc (abfd,sizeof(coff_data_type)));
   if (coff_data(abfd) == 0) {
     bfd_error = no_memory;
     return false;

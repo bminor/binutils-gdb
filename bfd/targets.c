@@ -26,7 +26,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "libbfd.h"
 
-
+extern bfd_target ecoff_little_vec;
+extern bfd_target ecoff_big_vec;
 extern bfd_target aout_little_vec;
 extern bfd_target aout_big_vec;
 extern bfd_target srec_vec;
@@ -46,6 +47,8 @@ extern bfd_target m88k_bcs_vec;
 #endif /* GNU960 */
 
 #ifndef RESTRICTED
+#define ECOFF_LITTLE_VEC	ecoff_little_vec
+#define ECOFF_BIG_VEC		ecoff_big_vec
 #define ICOFF_LITTLE_VEC	icoff_little_vec
 #define ICOFF_BIG_VEC		icoff_big_vec
 #define B_OUT_VEC_LITTLE_HOST	b_out_vec_little_host
@@ -62,6 +65,14 @@ bfd_target *target_vector[] = {
 #ifdef DEFAULT_VECTOR
 	&DEFAULT_VECTOR,
 #endif /* DEFAULT_VECTOR */
+
+#ifdef ECOFF_LITTLE_VEC
+	&ECOFF_LITTLE_VEC,
+#endif
+
+#ifdef ECOFF_BIG_VEC
+	&ECOFF_BIG_VEC,
+#endif
 
 #ifdef IEEE_VEC
 	&IEEE_VEC,

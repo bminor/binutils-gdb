@@ -1926,4 +1926,3 @@ bfd_target aout_little_vec =
 
   JUMP_TABLE(sunos4)
   };
-

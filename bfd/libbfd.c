@@ -136,21 +136,21 @@ zalloc (size)
    contents (0 for non-archive elements).  For archive entries this is the
    first octet in the file, NOT the beginning of the archive header. */
 
-size_t
+bfd_size_type
 bfd_read (ptr, size, nitems, abfd)
      PTR ptr;
-     size_t size;
-     size_t nitems;
+     bfd_size_type size;
+     bfd_size_type nitems;
      bfd *abfd;
 {
   return fread (ptr, 1, size*nitems, bfd_cache_lookup(abfd));
 }
 
-size_t
+bfd_size_type
 bfd_write (ptr, size, nitems, abfd)
      PTR ptr;
-     size_t size;
-     size_t nitems;
+     bfd_size_type size;
+     bfd_size_type nitems;
      bfd *abfd;
 {
   return fwrite (ptr, 1, size*nitems, bfd_cache_lookup(abfd));
