@@ -529,7 +529,8 @@ pop_subfile ()
 }
 
 
-/* Manage the vector of line numbers for each subfile.  */
+/* Add a linetable entry for line number LINE and address PC to the line
+   vector for SUBFILE.  */
 
 void
 record_line (subfile, line, pc)
