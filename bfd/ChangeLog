@@ -1,5 +1,11 @@
 Thu Nov  9 13:01:31 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aoutx.h (NAME(aout,set_section_contents)): If a section can not
+	be represented, report the name via _bfd_error_handler.
+	(translate_to_native_sym_flags): Likewise.
+	* elf32-mips.c (mips_elf_final_link): Likewise.
+	* oasys.c (oasys_write_sections): Likewise.
+
 	* coffcode.h (coff_set_alignment_hook): Write RS6000COFF_C version
 	which checks for STYP_OVRFLO sections.
 	(coff_compute_section_file_positions): If RS6000COFF_C, handle
