@@ -1,3 +1,92 @@
+2004-02-17  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
+
+	Committed by Jim Blandy  <jimb@redhat.com>.
+	* config/s390/nm-linux.h: Update comments.  Do not include "solib.h".
+	(KERNEL_U_ADDR, REGISTER_U_ADDR, U_REGS_OFFSET): Remove.
+	(FETCH_INFERIOR_REGISTERS): Define.
+	* config/s390/s390.mh (NATDEPFILES): Remove core-aout.o and 
+	core-regset.o.
+	* config/s390/s390x.mt: Remove.
+	* config/s390/tm-s390.h: Remove.
+	* config/s390/tm-linux.h: Do not include "s390/tm-s390.h".
+	(TARGET_ELF64): Remove.
+	(SKIP_TRAMPOLINE_CODE): Do not undefine.
+	* configure.tgt [s390-*-*, s390x-*-*]: Merge into single
+	s390*-*-* case; always set gdb_target to s390.
+	* regformats/reg-s390.dat: Remove control registers.
+	* regformats/reg-s390x.dat: Likewise.
+	* s390-tdep.h: New file.
+	* s390-nat.c: Do not include <asm/processor.h> or <value.h>. 
+	Include "inferior.h" and "s390-tdep.h".
+	Remove private definition of offsetof.
+	(s390_register_u_addr): Remove.
+	(regmap_gregset, regmap_fpregset): Define.
+	(supply_gregset, fill_gregset): Reimplement.
+	(supply_fpregset, fill_fpregset): Likewise.
+	(s390_inferior_tid): New function.
+	(fetch_regs, store_regs, fetch_fpregs, store_fpregs): Likewise.
+	(fetch_inferior_registers, store_inferior_registers): Likewise.
+	* s390-tdep.c: Do not define S390_TDEP.  Include "defs.h" instead
+	of <defs.h>.  Include "reggroups.h", "regset.h", and "s390-tdep.h".
+	Global replace of S390_GP0_REGNUM by S390_R0_REGNUM.
+	Global replace of S390_FP0_REGNUM by S390_F0_REGNUM.
+	(struct gdbarch_tdep): Define.
+	(struct s390_register_info): Define.
+	(s390_register_info): New variable.
+	(s390_register_name): Reimplement.
+	(s390_register_type): New function.
+	(s390_register_raw_size, s390x_register_raw_size): Remove.
+	(s390_cannot_fetch_register): Remove.
+	(s390_register_byte): Remove.
+	(s390_register_virtual_type, s390x_register_virtual_type): Remove.
+	(s390_dwarf_regmap): New variable.
+	(s390_dwarf_reg_to_regnum): New function.
+	(s390_stab_reg_to_regnum): Remove.
+	(s390_pseudo_register_read, s390_pseudo_register_write): New functions.
+	(s390x_pseudo_register_read, s390x_pseudo_register_write): Likewise.
+	(s390_convert_register_p): Likewise.
+	(s390_register_to_value, s390_value_to_register): Likewise.
+	(s390_register_reggroup_p): Likewise.
+	(s390_regmap_gregset, s390x_regmap_gregset, s390_regmap_fpregset,
+	s390_gregset, s390x_gregset, s390_fpregset): New variables.
+	(s390_supply_regset, s390_regset_from_core_section): New functions.
+	(GDB_TARGET_IS_ESAME): Move here from tm-s390.h.
+	(S390_FPR_SIZE): Likewise.
+	(S390_GPR_SIZE): Likewise.  Redefine in terms of GDB_TARGET_IS_ESAME.
+	Global replace of DEPRECATED_REGISTER_SIZE by S390_GPR_SIZE.
+	(S390_NUM_GPRS): Move here from tm-s390.h.
+	(S390_NUM_FPRS): Likewise.
+	(s390_in_function_epilogue_p): New function.
+	(s390_is_sigreturn): Replace S390_PSW_ADDR_SIZE by S390_GPR_SIZE.
+	Replace S390_PC_REGNUM by S390_PSWA_REGNUM.
+	(s390_gdbarch_init): Allocate and set up gdbarch_tdep structure.
+	Replace s390_stab_reg_to_regnum by s390_dwarf_reg_to_regnum.
+	Replace S390_FP_REGNUM by S390_SP_REGNUM.
+	Remove calls to:
+	set_gdbarch_deprecated_max_register_raw_size,
+	set_gdbarch_deprecated_max_register_virtual_size, 
+	set_gdbarch_deprecated_register_byte, 
+	set_gdbarch_cannot_fetch_register,
+	set_gdbarch_cannot_store_register, 
+	set_gdbarch_deprecated_register_size,
+	set_gdbarch_deprecated_register_raw_size,
+	set_gdbarch_deprecated_register_virtual_size,
+	set_gdbarch_deprecated_register_virtual_type,
+	set_gdbarch_deprecated_register_bytes.
+	Add calls to:
+	set_gdbarch_num_pseudo_regs,
+	set_gdbarch_register_type,
+	set_gdbarch_convert_register_p,
+	set_gdbarch_register_to_value,
+	set_gdbarch_value_to_register,
+	set_gdbarch_register_reggroup_p,
+	set_gdbarch_regset_from_core_section,
+	set_gdbarch_pseudo_register_read,
+	set_gdbarch_pseudo_register_write,
+	set_gdbarch_in_function_epilogue_p.
+	* Makefile.in (s390-nat.o, s390-tdep.o): Update dependencies.
+	(s390_tdep_h): New variable.
+
 2004-02-17  Jim Blandy  <jimb@redhat.com>
 
 	* findvar.c (value_from_register): If the type has no length, just

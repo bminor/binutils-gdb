@@ -1,7 +1,9 @@
 /* S390 native-dependent code for GDB, the GNU debugger.
-   Copyright 2001 Free Software Foundation, Inc
+   Copyright 2001, 2003 Free Software Foundation, Inc
+
    Contributed by D.J. Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)
    for IBM Deutschland Entwicklung GmbH, IBM Corporation.
+
    This file is part of GDB.
 
    This program is free software; you can redistribute it and/or modify
@@ -22,51 +24,200 @@
 #include "defs.h"
 #include "tm.h"
 #include "regcache.h"
+#include "inferior.h"
+
+#include "s390-tdep.h"
+
 #include <asm/ptrace.h>
 #include <sys/ptrace.h>
-#include <asm/processor.h>
 #include <asm/types.h>
 #include <sys/procfs.h>
 #include <sys/user.h>
-#include <value.h>
 #include <sys/ucontext.h>
-#ifndef offsetof
-#define offsetof(type,member) ((size_t) &((type *)0)->member)
-#endif
 
 
-int
-s390_register_u_addr (int blockend, int regnum)
-{
-  int retval;
+/* Map registers to gregset/ptrace offsets.
+   These arrays are defined in s390-tdep.c.  */
 
-  if (regnum >= S390_GP0_REGNUM && regnum <= S390_GP_LAST_REGNUM)
-    retval = PT_GPR0 + ((regnum - S390_GP0_REGNUM) * S390_GPR_SIZE);
-  else if (regnum >= S390_PSWM_REGNUM && regnum <= S390_PC_REGNUM)
-    retval = PT_PSWMASK + ((regnum - S390_PSWM_REGNUM) * S390_PSW_MASK_SIZE);
-  else if (regnum == S390_FPC_REGNUM)
-    retval = PT_FPC;
-  else if (regnum >= S390_FP0_REGNUM && regnum <= S390_FPLAST_REGNUM)
-    retval =
-#if CONFIG_ARCH_S390X
-      PT_FPR0
+#ifdef __s390x__
+#define regmap_gregset s390x_regmap_gregset
 #else
-      PT_FPR0_HI
+#define regmap_gregset s390_regmap_gregset
 #endif
-      + ((regnum - S390_FP0_REGNUM) * S390_FPR_SIZE);
-  else if (regnum >= S390_FIRST_ACR && regnum <= S390_LAST_ACR)
-    retval = PT_ACR0 + ((regnum - S390_FIRST_ACR) * S390_ACR_SIZE);
-  else if (regnum >= (S390_FIRST_CR + 9) && regnum <= (S390_FIRST_CR + 11))
-    retval = PT_CR_9 + ((regnum - (S390_FIRST_CR + 9)) * S390_CR_SIZE);
-  else
-    {
-      internal_error (__FILE__, __LINE__,
-                      "s390_register_u_addr invalid regnum regnum=%d",
-                      regnum);
-      retval = 0;
-    }
-  return retval + blockend;
+
+#define regmap_fpregset s390_regmap_fpregset
+
+
+/* Fill GDB's register array with the general-purpose register values
+   in *REGP.  */
+void
+supply_gregset (gregset_t *regp)
+{
+  int i;
+  for (i = 0; i < S390_NUM_REGS; i++)
+    if (regmap_gregset[i] != -1)
+      regcache_raw_supply (current_regcache, i, 
+			   (char *)regp + regmap_gregset[i]);
 }
+
+/* Fill register REGNO (if it is a general-purpose register) in
+   *REGP with the value in GDB's register array.  If REGNO is -1,
+   do this for all registers.  */
+void
+fill_gregset (gregset_t *regp, int regno)
+{
+  int i;
+  for (i = 0; i < S390_NUM_REGS; i++)
+    if (regmap_gregset[i] != -1)
+      if (regno == -1 || regno == i)
+	regcache_raw_collect (current_regcache, i, 
+			      (char *)regp + regmap_gregset[i]);
+}
+
+/* Fill GDB's register array with the floating-point register values
+   in *REGP.  */
+void
+supply_fpregset (fpregset_t *regp)
+{
+  int i;
+  for (i = 0; i < S390_NUM_REGS; i++)
+    if (regmap_fpregset[i] != -1)
+      regcache_raw_supply (current_regcache, i,
+			   ((char *)regp) + regmap_fpregset[i]);
+}
+
+/* Fill register REGNO (if it is a general-purpose register) in
+   *REGP with the value in GDB's register array.  If REGNO is -1,
+   do this for all registers.  */
+void
+fill_fpregset (fpregset_t *regp, int regno)
+{
+  int i;
+  for (i = 0; i < S390_NUM_REGS; i++)
+    if (regmap_fpregset[i] != -1)
+      if (regno == -1 || regno == i)
+        regcache_raw_collect (current_regcache, i, 
+			      ((char *)regp) + regmap_fpregset[i]);
+}
+
+/* Find the TID for the current inferior thread to use with ptrace.  */
+static int
+s390_inferior_tid (void)
+{
+  /* GNU/Linux LWP ID's are process ID's.  */
+  int tid = TIDGET (inferior_ptid);
+  if (tid == 0)
+    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+
+  return tid;
+}
+
+/* Fetch all general-purpose registers from process/thread TID and
+   store their values in GDB's register cache.  */
+static void
+fetch_regs (int tid)
+{
+  gregset_t regs;
+  ptrace_area parea;
+
+  parea.len = sizeof (regs);
+  parea.process_addr = (addr_t) &regs;
+  parea.kernel_addr = offsetof (struct user_regs_struct, psw);
+  if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea) < 0)
+    perror_with_name ("Couldn't get registers");
+
+  supply_gregset (&regs);
+}
+
+/* Store all valid general-purpose registers in GDB's register cache
+   into the process/thread specified by TID.  */
+static void
+store_regs (int tid, int regnum)
+{
+  gregset_t regs;
+  ptrace_area parea;
+
+  parea.len = sizeof (regs);
+  parea.process_addr = (addr_t) &regs;
+  parea.kernel_addr = offsetof (struct user_regs_struct, psw);
+  if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea) < 0)
+    perror_with_name ("Couldn't get registers");
+
+  fill_gregset (&regs, regnum);
+
+  if (ptrace (PTRACE_POKEUSR_AREA, tid, (long) &parea) < 0)
+    perror_with_name ("Couldn't write registers");
+}
+
+/* Fetch all floating-point registers from process/thread TID and store
+   their values in GDB's register cache.  */
+static void
+fetch_fpregs (int tid)
+{
+  fpregset_t fpregs;
+  ptrace_area parea;
+
+  parea.len = sizeof (fpregs);
+  parea.process_addr = (addr_t) &fpregs;
+  parea.kernel_addr = offsetof (struct user_regs_struct, fp_regs);
+  if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea) < 0)
+    perror_with_name ("Couldn't get floating point status");
+
+  supply_fpregset (&fpregs);
+}
+
+/* Store all valid floating-point registers in GDB's register cache
+   into the process/thread specified by TID.  */
+static void
+store_fpregs (int tid, int regnum)
+{
+  fpregset_t fpregs;
+  ptrace_area parea;
+
+  parea.len = sizeof (fpregs);
+  parea.process_addr = (addr_t) &fpregs;
+  parea.kernel_addr = offsetof (struct user_regs_struct, fp_regs);
+  if (ptrace (PTRACE_PEEKUSR_AREA, tid, (long) &parea) < 0)
+    perror_with_name ("Couldn't get floating point status");
+
+  fill_fpregset (&fpregs, regnum);
+
+  if (ptrace (PTRACE_POKEUSR_AREA, tid, (long) &parea) < 0)
+    perror_with_name ("Couldn't write floating point status");
+}
+
+/* Fetch register REGNUM from the child process.  If REGNUM is -1, do
+   this for all registers.  */
+void
+fetch_inferior_registers (int regnum)
+{
+  int tid = s390_inferior_tid ();
+
+  if (regnum == -1 
+      || (regnum < S390_NUM_REGS && regmap_gregset[regnum] != -1))
+    fetch_regs (tid);
+
+  if (regnum == -1 
+      || (regnum < S390_NUM_REGS && regmap_fpregset[regnum] != -1))
+    fetch_fpregs (tid);
+}
+
+/* Store register REGNUM back into the child process.  If REGNUM is
+   -1, do this for all registers.  */
+void
+store_inferior_registers (int regnum)
+{
+  int tid = s390_inferior_tid ();
+
+  if (regnum == -1 
+      || (regnum < S390_NUM_REGS && regmap_gregset[regnum] != -1))
+    store_regs (tid, regnum);
+
+  if (regnum == -1 
+      || (regnum < S390_NUM_REGS && regmap_fpregset[regnum] != -1))
+    store_fpregs (tid, regnum);
+}
+
 
 /* watch_areas are required if you put 2 or more watchpoints on the same 
    address or overlapping areas gdb will call us to delete the watchpoint 
@@ -232,127 +383,3 @@ kernel_u_size (void)
   return sizeof (struct user);
 }
 
-
-#if  (defined (S390_FP0_REGNUM) && defined (HAVE_FPREGSET_T) && defined(HAVE_SYS_PROCFS_H) && defined (HAVE_GREGSET_T))
-void
-supply_gregset (gregset_t * gregsetp)
-{
-  int regi;
-  greg_t *gregp = (greg_t *) gregsetp;
-
-  supply_register (S390_PSWM_REGNUM, (char *) &gregp[S390_PSWM_REGNUM]);
-  supply_register (S390_PC_REGNUM, (char *) &gregp[S390_PC_REGNUM]);
-  for (regi = 0; regi < S390_NUM_GPRS; regi++)
-    supply_register (S390_GP0_REGNUM + regi,
-		     (char *) &gregp[S390_GP0_REGNUM + regi]);
-
-#if defined (CONFIG_ARCH_S390X)
-  /* On the s390x, each element of gregset_t is 8 bytes long, but
-     each access register is still only 32 bits long.  So they're
-     packed two per element.  It's apparently traditional that
-     gregset_t must be an array, so when the registers it provides
-     have different sizes, something has to get strange
-     somewhere.  */
-  {
-    unsigned int *acrs = (unsigned int *) &gregp[S390_FIRST_ACR];
-
-    for (regi = 0; regi < S390_NUM_ACRS; regi++)
-      supply_register (S390_FIRST_ACR + regi, (char *) &acrs[regi]);
-  }
-#else
-  for (regi = 0; regi < S390_NUM_ACRS; regi++)
-    supply_register (S390_FIRST_ACR + regi,
-                     (char *) &gregp[S390_FIRST_ACR + regi]);
-#endif
-
-  /* unfortunately this isn't in gregsetp */
-  for (regi = 0; regi < S390_NUM_CRS; regi++)
-    supply_register (S390_FIRST_CR + regi, NULL);
-}
-
-
-void
-supply_fpregset (fpregset_t * fpregsetp)
-{
-  int regi;
-
-  supply_register (S390_FPC_REGNUM, (char *) &fpregsetp->fpc);
-  for (regi = 0; regi < S390_NUM_FPRS; regi++)
-    supply_register (S390_FP0_REGNUM + regi, (char *) &fpregsetp->fprs[regi]);
-
-}
-
-void
-fill_gregset (gregset_t * gregsetp, int regno)
-{
-  int regi;
-  greg_t *gregp = (greg_t *) gregsetp;
-
-  if (regno < 0) 
-    {
-      regcache_collect (S390_PSWM_REGNUM, &gregp[S390_PSWM_REGNUM]);
-      regcache_collect (S390_PC_REGNUM, &gregp[S390_PC_REGNUM]);
-      for (regi = 0; regi < S390_NUM_GPRS; regi++)
-        regcache_collect (S390_GP0_REGNUM + regi,
-			  &gregp[S390_GP0_REGNUM + regi]);
-#if defined (CONFIG_ARCH_S390X)
-      /* See the comments about the access registers in
-         supply_gregset, above.  */
-      {
-        unsigned int *acrs = (unsigned int *) &gregp[S390_FIRST_ACR];
-        
-        for (regi = 0; regi < S390_NUM_ACRS; regi++)
-          regcache_collect (S390_FIRST_ACR + regi, &acrs[regi]);
-      }
-#else
-      for (regi = 0; regi < S390_NUM_ACRS; regi++)
-        regcache_collect (S390_FIRST_ACR + regi,
-			  &gregp[S390_FIRST_ACR + regi]);
-#endif
-    }
-  else if (regno >= S390_PSWM_REGNUM && regno < S390_FIRST_ACR)
-    regcache_collect (regno, &gregp[regno]);
-  else if (regno >= S390_FIRST_ACR && regno <= S390_LAST_ACR)
-    {
-#if defined (CONFIG_ARCH_S390X)
-      /* See the comments about the access registers in
-         supply_gregset, above.  */
-      unsigned int *acrs = (unsigned int *) &gregp[S390_FIRST_ACR];
-        
-      regcache_collect (regno, &acrs[regno - S390_FIRST_ACR]);
-#else
-      regcache_collect (regno, &gregp[regno]);
-#endif
-    }
-}
-
-/*  Given a pointer to a floating point register set in /proc format
-   (fpregset_t *), update the register specified by REGNO from gdb's idea
-   of the current floating point register set.  If REGNO is -1, update
-   them all. */
-
-void
-fill_fpregset (fpregset_t * fpregsetp, int regno)
-{
-  int regi;
-
-  if (regno < 0) 
-    {
-      regcache_collect (S390_FPC_REGNUM, &fpregsetp->fpc);
-      for (regi = 0; regi < S390_NUM_FPRS; regi++)
-        regcache_collect (S390_FP0_REGNUM + regi, &fpregsetp->fprs[regi]);
-    }
-  else if (regno == S390_FPC_REGNUM)
-    regcache_collect (S390_FPC_REGNUM, &fpregsetp->fpc);
-  else if (regno >= S390_FP0_REGNUM && regno <= S390_FPLAST_REGNUM)
-    regcache_collect (regno, &fpregsetp->fprs[regno - S390_FP0_REGNUM]);
-}
-
-
-#else
-#error "There are a few possibilities here"
-#error "1) You aren't compiling for linux & don't need a core dumps to work."
-#error "2) The header files sys/elf.h sys/user.h sys/ptrace.h & sys/procfs.h"
-#error "libc files are inconsistent with linux/include/asm-s390/"
-#error "3) you didn't do a completely clean build & delete config.cache."
-#endif

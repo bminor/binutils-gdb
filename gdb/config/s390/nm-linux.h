@@ -1,6 +1,6 @@
 /* Native support for GNU/Linux on S390.
 
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    Ported by D.J. Barrow for IBM Deutschland Entwicklung GmbH, IBM
    Corporation.  derived from i390-nmlinux.h
@@ -27,29 +27,16 @@
 
 #include "config/nm-linux.h"
 
-/* This is the amount to subtract from u.u_ar0
-   to get the offset in the core file of the register values.  */
-#define KERNEL_U_ADDR 0x0
 
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-	(addr) = s390_register_u_addr((blockend),(regno));
-extern int s390_register_u_addr (int, int);
+/* ptrace access.  */
 
-/* Return sizeof user struct to callers in less machine dependent routines */
+#define PTRACE_ARG3_TYPE long
+#define PTRACE_XFER_TYPE long
+
+#define FETCH_INFERIOR_REGISTERS
 
 #define KERNEL_U_SIZE kernel_u_size()
 extern int kernel_u_size (void);
-
-#define U_REGS_OFFSET 0
-
-
-/* We define this if link.h is available, because with ELF we use SVR4 style
-   shared libraries. */
-
-#ifdef HAVE_LINK_H
-#define SVR4_SHARED_LIBS
-#include "solib.h"		/* Support for shared libraries. */
-#endif
 
 
 /* WATCHPOINT SPECIFIC STUFF */
@@ -81,8 +68,4 @@ extern int s390_remove_watchpoint (int pid, CORE_ADDR addr, int len);
 	 ((type) == bp_read_watchpoint) || \
          ((type) == bp_access_watchpoint))
 
-
-/* Needed for s390x */
-#define PTRACE_ARG3_TYPE long
-#define PTRACE_XFER_TYPE long
 #endif /* nm_linux.h */
