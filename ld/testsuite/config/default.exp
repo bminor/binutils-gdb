@@ -60,6 +60,17 @@ if {![file isdirectory tmpdir/gas]} then {
 }
 set gcc_gas_flag "-B[pwd]/tmpdir/gas/"
 
+# The mips64-*-linux-gnu compiler defaults to the N32 ABI after
+# installed, but to the O32 ABI in the build tree, because of some
+# specs-file hacks.  Make sure we use an ABI that is compatible with
+# the one we expect.
+if {[istarget mips64*-*-linux*] &&
+    (![board_info [target_info name] exists multilib_flags] ||
+     ![string match "*-mabi" [board_info [target_info name] multilib_flags]])
+   } {
+    append gcc_gas_flag " -mabi=n32"
+}
+
 # load the utility procedures
 load_lib ld-lib.exp
 

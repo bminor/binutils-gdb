@@ -1,3 +1,13 @@
+2003-05-06  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/default.exp (gcc_gas_flags): Force ABI to n32 on
+	mips64-linux.
+	* ld-elf/merge.d: Xfail on mips64*-linux-gnu*.
+	* ld-mips-elf/mips-elf-flags.exp (ldemul): Set to o32-compatible
+	on mips-sgi-irix6*, mips64-linux-gnu and mips64el-linux-gnu.
+	(good_combination, bad_combination): Use it.
+	Add -32 or -mabi=o64 wherever the ABI was formerly implied.
+
 2003-05-06  H.J. Lu <hjl@gnu.org>
 
 	* ld-elfvers/vers.exp (objdump_versionstuff): Support comment
