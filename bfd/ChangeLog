@@ -1,3 +1,12 @@
+Fri Oct 20 13:23:48 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* opncls.c (_bfd_new_bfd): If _bfd_chunksize wasn't preset, use
+	something a little less than the page size.
+
+Thu Oct 19 13:06:09 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-i960.c (coff_i960_adjust_symndx): Clear *adjustedp.
+
 Wed Oct 18 16:20:08 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* coff-i386.c (coff_i386_reloc_type_lookup): New.
