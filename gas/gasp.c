@@ -1362,6 +1362,18 @@ change_base (idx, in, out)
 	      idx++;
 	    }
 	}
+      else if (in->ptr[idx] == '"' || in->ptr[idx] == '\'')
+	{
+	  char tchar = in->ptr[idx];
+	  /* copy entire names through quickly */
+	  sb_add_char (out, in->ptr[idx]);
+	  idx++;
+	  while (idx < in->len && in->ptr[idx] != tchar)
+	    {
+	      sb_add_char (out, in->ptr[idx]);
+	      idx++;
+	    }
+	}
       else
 	{
 	  /* nothing special, just pass it through */
