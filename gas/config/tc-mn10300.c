@@ -1798,6 +1798,45 @@ tc_gen_reloc (seg, fixp)
 
   if (fixp->fx_addsy && fixp->fx_subsy)
     {
+      /* If we got a difference between two symbols, and the
+	 subtracted symbol is in the current section, use a
+	 PC-relative relocation.  If both symbols are in the same
+	 section, the difference would have already been simplified
+	 to a constant.  */
+      if (S_GET_SEGMENT (fixp->fx_subsy) == seg)
+	{
+	  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+	  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
+	  reloc->addend = (reloc->address - S_GET_VALUE (fixp->fx_subsy)
+			   + fixp->fx_offset);
+
+	  switch (fixp->fx_r_type)
+	    {
+	    case BFD_RELOC_8:
+	      reloc->howto = bfd_reloc_type_lookup (stdoutput,
+						    BFD_RELOC_8_PCREL);
+	      return reloc;
+	      
+	    case BFD_RELOC_16:
+	      reloc->howto = bfd_reloc_type_lookup (stdoutput,
+						    BFD_RELOC_16_PCREL);
+	      return reloc;
+
+	    case BFD_RELOC_24:
+	      reloc->howto = bfd_reloc_type_lookup (stdoutput,
+						    BFD_RELOC_24_PCREL);
+	      return reloc;
+
+	    case BFD_RELOC_32:
+	      reloc->howto = bfd_reloc_type_lookup (stdoutput,
+						    BFD_RELOC_32_PCREL);
+	      return reloc;
+
+	    default:
+	      /* Try to compute the absolute value below.  */
+	      break;
+	    }
+	}
 
       if ((S_GET_SEGMENT (fixp->fx_addsy) != S_GET_SEGMENT (fixp->fx_subsy))
 	  || S_GET_SEGMENT (fixp->fx_addsy) == undefined_section)
