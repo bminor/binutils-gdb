@@ -1,3 +1,15 @@
+2004-09-12  Andrew Cagney  <cagney@gnu.org>
+
+	* ppcnbsd-nat.c: Include "inf-ptrace.h".
+	(ppcnbsd_fetch_inferior_registers): Rename fetch_inferior_registers.
+	(ppcnbsd_store_inferior_registers): Rename store_inferior_registers.
+	(_initialize_ppcnbsd_nat): Create and add a NetBSD/PPC ptrace
+	target.
+	* config/powerpc/nbsd.mh (NATDEPFILES): Replace and inftarg.o with
+	inf-ptrace.o and inf-child.o.
+	* inf-ptrace.h, inf-ptrace.c, inf-child.h, inf-child.c: New files.
+	* Makefile.in: Update dependencies.
+	
 2004-09-11  Andrew Cagney  <cagney@gnu.org>
 
 	* language.c (hex_string, hex_string_custom): Move from here ...

@@ -35,6 +35,8 @@
 #include "ppc-tdep.h"
 #include "ppcnbsd-tdep.h"
 
+#include "inf-ptrace.h"
+
 /* Returns true if PT_GETREGS fetches this register.  */
 static int
 getregs_supplies (int regno)
@@ -73,8 +75,8 @@ getfpregs_supplies (int regno)
 	  || regno == tdep->ppc_fpscr_regnum);
 }
 
-void
-fetch_inferior_registers (int regno)
+static void
+ppcnbsd_fetch_inferior_registers (int regno)
 {
   if (regno == -1 || getregs_supplies (regno))
     {
@@ -103,8 +105,8 @@ fetch_inferior_registers (int regno)
     }
 }
 
-void
-store_inferior_registers (int regno)
+static void
+ppcnbsd_store_inferior_registers (int regno)
 {
   if (regno == -1 || getregs_supplies (regno))
     {
@@ -177,6 +179,12 @@ void _initialize_ppcnbsd_nat (void);
 void
 _initialize_ppcnbsd_nat (void)
 {
+  struct target_ops *t;
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (ppcnbsd_supply_pcb);
+  /* Add in local overrides.  */
+  t = inf_ptrace_target ();
+  t->to_fetch_registers = ppcnbsd_fetch_inferior_registers;
+  t->to_store_registers = ppcnbsd_store_inferior_registers;
+  add_target (t);
 }
