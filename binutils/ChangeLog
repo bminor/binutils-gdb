@@ -1,3 +1,11 @@
+Wed Nov  3 16:10:50 1993  Jeffrey Wheat  (cassidy@cygnus.com)
+
+	* Makefile.in: Change RUNTESTFLAGS to RUNTEST_FLAGS
+
+Wed Nov  3 15:09:23 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
+
+	* Makefile.in (distclean): Don't get rid of dvi or info files.
+
 Tue Nov  2 13:29:59 1993  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* objcopy.c (S_ISLNK): Define as 0 if there's no S_IFLNK.
