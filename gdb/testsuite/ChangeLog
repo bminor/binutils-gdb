@@ -1,3 +1,13 @@
+2004-02-01  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/dump.exp: Use runto_main instead of "runto main".
+	* gdb.base/finish.exp: Ditto.
+	* gdb.base/gcore.exp: Ditto.
+	* gdb.base/huge.exp: Ditto.
+	* gdb.base/info-proc.exp: Ditto.
+	* gdb.base/return2.exp: Ditto.
+	* gdb.threads/gcore-thread.exp: Ditto.
+
 2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.threads/thread-specific.exp: Add missing anchor to regexp.
