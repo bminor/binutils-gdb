@@ -1,3 +1,27 @@
+2001-12-09  Elena Zannoni  <ezannoni@redhat.com>
+
+	* config/rs6000/tm-rs6000.h (STAB_REG_TO_REGNUM): Remove
+	definition, it is now multiarched.
+	* ppc-tdep.h (struct gdbarch_tdep): Move from rs6000-tdep.c.  Add
+	fields for special register numbers.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Initialize new tdep special
+	regnum fields.
+	(rs6000_saved_pc_after_call): Use gdbarch_tdep registers fields
+	instead of hardcoded macros.
+	(branch_dest, rs6000_pop_frame, rs6000_fix_call_dummy,
+	ppc_push_return_address, rs6000_frame_saved_pc,
+	frame_get_saved_regs, rs6000_frame_chain,
+	rs6000_store_return_value): Ditto.
+	(rs6000_stab_reg_to_regnum): New function.
+	* ppcnbsd-nat.c (fetch_inferior_registers,
+	store_inferior_registers, fetch_core_registers): Ditto.
+	* ppc-linux-tdep.c (ppc_linux_in_sigtramp,
+	ppc_linux_frame_init_saved_regs): Ditto.
+	* ppc-linux-nat.c (ppc_register_u_addr, supply_gregset,
+	fill_gregset): Ditto.
+	* ppc-bdm.c (bdm_ppc_fetch_registers, bdm_ppc_store_registers):
+	Ditto.
+
 2001-12-08  Fred Fish  <fnf@redhat.com>
 
 	* c-lang.c (c_create_fundamental_type): For FT_CHAR, pass

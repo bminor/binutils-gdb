@@ -82,16 +82,6 @@ struct reg
     unsigned char fpr;		/* whether register is floating-point */
   };
 
-/* Private data that this module attaches to struct gdbarch. */
-
-struct gdbarch_tdep
-  {
-    int wordsize;		/* size in bytes of fixed-point word */
-    int osabi;			/* OS / ABI from ELF header */
-    int *regoff;		/* byte offsets in register arrays */
-    const struct reg *regs;	/* from current variant */
-  };
-
 /* Return the current architecture's gdbarch_tdep structure. */
 
 #define TDEP	gdbarch_tdep (current_gdbarch)
@@ -205,7 +195,7 @@ rs6000_frame_args_address (struct frame_info *fi)
 static CORE_ADDR
 rs6000_saved_pc_after_call (struct frame_info *fi)
 {
-  return read_register (PPC_LR_REGNUM);
+  return read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum);
 }
 
 /* Calculate the destination of a branch/jump.  Return -1 if not a branch.  */
@@ -243,7 +233,7 @@ branch_dest (int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety)
 
       if (ext_op == 16)		/* br conditional register */
 	{
-	  dest = read_register (PPC_LR_REGNUM) & ~3;
+          dest = read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum) & ~3;
 
 	  /* If we are about to return from a signal handler, dest is
 	     something like 0x3c90.  The current frame is a signal handler
@@ -262,13 +252,13 @@ branch_dest (int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety)
 
       else if (ext_op == 528)	/* br cond to count reg */
 	{
-	  dest = read_register (PPC_CTR_REGNUM) & ~3;
+          dest = read_register (gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum) & ~3;
 
 	  /* If we are about to execute a system call, dest is something
 	     like 0x22fc or 0x3b00.  Upon completion the system call
 	     will return to the address in the link register.  */
 	  if (dest < TEXT_SEGMENT_BASE)
-	    dest = read_register (PPC_LR_REGNUM) & ~3;
+            dest = read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum) & ~3;
 	}
       else
 	return -1;
@@ -809,7 +799,7 @@ rs6000_pop_frame (void)
   else
     prev_sp = read_memory_addr (sp, wordsize);
   if (fdata.lr_offset == 0)
-    lr = read_register (PPC_LR_REGNUM);
+     lr = read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum);
   else
     lr = read_memory_addr (prev_sp + fdata.lr_offset, wordsize);
 
@@ -860,7 +850,8 @@ rs6000_fix_call_dummy (char *dummyname, CORE_ADDR pc, CORE_ADDR fun,
   if (rs6000_find_toc_address_hook != NULL)
     {
       CORE_ADDR tocvalue = (*rs6000_find_toc_address_hook) (fun);
-      write_register (PPC_TOC_REGNUM, tocvalue);
+      write_register (gdbarch_tdep (current_gdbarch)->ppc_toc_regnum,
+		      tocvalue);
     }
 }
 
@@ -1083,7 +1074,8 @@ ran_out_of_registers_for_arguments:
 static CORE_ADDR
 ppc_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
-  write_register (PPC_LR_REGNUM, CALL_DUMMY_ADDRESS ());
+  write_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum,
+		  CALL_DUMMY_ADDRESS ());
   return sp;
 }
 
@@ -1297,7 +1289,7 @@ rs6000_frame_saved_pc (struct frame_info *fi)
     }
 
   if (fdata.lr_offset == 0)
-    return read_register (PPC_LR_REGNUM);
+    return read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum);
 
   return read_memory_addr (FRAME_CHAIN (fi) + fdata.lr_offset, wordsize);
 }
@@ -1368,12 +1360,14 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
   /* If != 0, fdatap->cr_offset is the offset from the frame that holds
      the CR.  */
   if (fdatap->cr_offset != 0)
-    fi->saved_regs[PPC_CR_REGNUM] = frame_addr + fdatap->cr_offset;
+    fi->saved_regs[gdbarch_tdep (current_gdbarch)->ppc_cr_regnum] =
+      frame_addr + fdatap->cr_offset;
 
   /* If != 0, fdatap->lr_offset is the offset from the frame that holds
      the LR.  */
   if (fdatap->lr_offset != 0)
-    fi->saved_regs[PPC_LR_REGNUM] = frame_addr + fdatap->lr_offset;
+    fi->saved_regs[gdbarch_tdep (current_gdbarch)->ppc_lr_regnum] =
+      frame_addr + fdatap->lr_offset;
 }
 
 /* Return the address of a frame. This is the inital %sp value when the frame
@@ -1483,7 +1477,7 @@ rs6000_frame_chain (struct frame_info *thisframe)
   else
     fp = read_memory_addr ((thisframe)->frame, wordsize);
 
-  lr = read_register (PPC_LR_REGNUM);
+  lr = read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum);
   if (lr == entry_point_address ())
     if (fp != 0 && (fpp = read_memory_addr (fp, wordsize)) != 0)
       if (PC_IN_CALL_DUMMY (lr, fpp, fpp))
@@ -1614,6 +1608,33 @@ rs6000_register_convert_to_raw (struct type *type, int n,
     memcpy (to, from, REGISTER_RAW_SIZE (n));
 }
 
+/* Convert a dbx stab register number (from `r' declaration) to a gdb
+   REGNUM. */
+static int
+rs6000_stab_reg_to_regnum (int num)
+{
+  int regnum;
+  switch (num)
+    {
+    case 64: 
+      regnum = gdbarch_tdep (current_gdbarch)->ppc_mq_regnum;
+      break;
+    case 65: 
+      regnum = gdbarch_tdep (current_gdbarch)->ppc_lr_regnum;
+      break;
+    case 66: 
+      regnum = gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum;
+      break;
+    case 76: 
+      regnum = gdbarch_tdep (current_gdbarch)->ppc_xer_regnum;
+      break;
+    default: 
+      regnum = num;
+      break;
+    }
+  return regnum;
+}
+
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function.
 
@@ -1645,8 +1666,8 @@ rs6000_store_return_value (struct type *type, char *valbuf)
 			  TYPE_LENGTH (type));
   else
     /* Everything else is returned in GPR3 and up. */
-    write_register_bytes (REGISTER_BYTE (PPC_GP0_REGNUM + 3), valbuf,
-			  TYPE_LENGTH (type));
+    write_register_bytes (REGISTER_BYTE (gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + 3),
+			  valbuf, TYPE_LENGTH (type));
 }
 
 /* Extract from an array REGBUF containing the (raw) register state
@@ -2236,6 +2257,19 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     v = find_variant_by_name (power ? "power" : "powerpc");
   tdep->regs = v->regs;
 
+  tdep->ppc_gp0_regnum = 0;
+  tdep->ppc_gplast_regnum = 31;
+  tdep->ppc_toc_regnum = 2;
+  tdep->ppc_ps_regnum = 65;
+  tdep->ppc_cr_regnum = 66;
+  tdep->ppc_lr_regnum = 67;
+  tdep->ppc_ctr_regnum = 68;
+  tdep->ppc_xer_regnum = 69;
+  if (v->mach == bfd_mach_ppc_601)
+    tdep->ppc_mq_regnum = 124;
+  else
+    tdep->ppc_mq_regnum = 70;
+
   /* Calculate byte offsets in raw register array. */
   tdep->regoff = xmalloc (v->nregs * sizeof (int));
   for (i = off = 0; i < v->nregs; i++)
@@ -2295,6 +2329,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_convertible (gdbarch, rs6000_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch, rs6000_register_convert_to_virtual);
   set_gdbarch_register_convert_to_raw (gdbarch, rs6000_register_convert_to_raw);
+  set_gdbarch_stab_reg_to_regnum (gdbarch, rs6000_stab_reg_to_regnum);
 
   set_gdbarch_extract_return_value (gdbarch, rs6000_extract_return_value);
   

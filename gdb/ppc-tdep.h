@@ -44,16 +44,23 @@ int rs6000_frameless_function_invocation (struct frame_info *);
 void rs6000_frame_init_saved_regs (struct frame_info *);
 CORE_ADDR rs6000_frame_chain (struct frame_info *);
 
-/* Some important register numbers. */
+/* Private data that this module attaches to struct gdbarch. */
 
-#define	PPC_GP0_REGNUM 0		/* GPR register 0 */
-#define	PPC_GPLAST_REGNUM 31		/* GPR register 31 */
-#define	PPC_TOC_REGNUM 2		/* TOC register */
-#define PPC_PS_REGNUM 65		/* Processor (or machine) status (%msr) */
-#define	PPC_CR_REGNUM 66		/* Condition register */
-#define	PPC_LR_REGNUM 67		/* Link register */
-#define	PPC_CTR_REGNUM 68		/* Count register */
-#define	PPC_XER_REGNUM 69		/* Integer exception register */
-#define	PPC_MQ_REGNUM 70		/* Multiply/Divide extension register */
+struct gdbarch_tdep
+  {
+    int wordsize;              /* size in bytes of fixed-point word */
+    int osabi;                 /* OS / ABI from ELF header */
+    int *regoff;               /* byte offsets in register arrays */
+    const struct reg *regs;    /* from current variant */
+    int ppc_gp0_regnum;		/* GPR register 0 */
+    int ppc_gplast_regnum;	/* GPR register 31 */
+    int ppc_toc_regnum;		/* TOC register */
+    int ppc_ps_regnum;	        /* Processor (or machine) status (%msr) */
+    int ppc_cr_regnum;		/* Condition register */
+    int ppc_lr_regnum;		/* Link register */
+    int ppc_ctr_regnum;		/* Count register */
+    int ppc_xer_regnum;		/* Integer exception register */
+    int ppc_mq_regnum;		/* Multiply/Divide extension register */
+};
 
 #endif

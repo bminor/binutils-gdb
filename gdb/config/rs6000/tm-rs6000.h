@@ -86,10 +86,6 @@ extern void aix_process_linenos (void);
 #define	FIRST_UISA_SP_REGNUM 64	/* first special register number */
 #define LAST_UISA_SP_REGNUM  70	/* last special register number */
 
-/* convert a dbx stab register number (from `r' declaration) to a gdb REGNUM */
-
-#define STAB_REG_TO_REGNUM(value)	(value)
-
 /* Define other aspects of the stack frame.  */
 
 #define INIT_FRAME_PC_FIRST(fromleaf, prev) \

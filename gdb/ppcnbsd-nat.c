@@ -49,10 +49,10 @@ fetch_inferior_registers (int regno)
 	  (PTRACE_ARG3_TYPE) & inferior_registers, 0);
   for (i = 0; i < 32; i++)
     RF (i, inferior_registers.fixreg[i]);
-  RF (PPC_LR_REGNUM, inferior_registers.lr);
-  RF (PPC_CR_REGNUM, inferior_registers.cr);
-  RF (PPC_XER_REGNUM, inferior_registers.xer);
-  RF (PPC_CTR_REGNUM, inferior_registers.ctr);
+  RF (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum, inferior_registers.lr);
+  RF (gdbarch_tdep (current_gdbarch)->ppc_cr_regnum, inferior_registers.cr);
+  RF (gdbarch_tdep (current_gdbarch)->ppc_xer_regnum, inferior_registers.xer);
+  RF (gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum, inferior_registers.ctr);
   RF (PC_REGNUM, inferior_registers.pc);
 
 #ifdef PT_GETFPREGS
@@ -76,10 +76,10 @@ store_inferior_registers (int regno)
 
   for (i = 0; i < 32; i++)
     RS (i, inferior_registers.fixreg[i]);
-  RS (PPC_LR_REGNUM, inferior_registers.lr);
-  RS (PPC_CR_REGNUM, inferior_registers.cr);
-  RS (PPC_XER_REGNUM, inferior_registers.xer);
-  RS (PPC_CTR_REGNUM, inferior_registers.ctr);
+  RS (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum, inferior_registers.lr);
+  RS (gdbarch_tdep (current_gdbarch)->ppc_cr_regnum, inferior_registers.cr);
+  RS (gdbarch_tdep (current_gdbarch)->ppc_xer_regnum, inferior_registers.xer);
+  RS (gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum, inferior_registers.ctr);
   RS (PC_REGNUM, inferior_registers.pc);
 
   ptrace (PT_SETREGS, PIDGET (inferior_ptid),
@@ -111,10 +111,10 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   /* Integer registers */
   for (i = 0; i < 32; i++)
     RF (i, core_reg->intreg.fixreg[i]);
-  RF (PPC_LR_REGNUM, core_reg->intreg.lr);
-  RF (PPC_CR_REGNUM, core_reg->intreg.cr);
-  RF (PPC_XER_REGNUM, core_reg->intreg.xer);
-  RF (PPC_CTR_REGNUM, core_reg->intreg.ctr);
+  RF (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum, core_reg->intreg.lr);
+  RF (gdbarch_tdep (current_gdbarch)->ppc_cr_regnum, core_reg->intreg.cr);
+  RF (gdbarch_tdep (current_gdbarch)->ppc_xer_regnum, core_reg->intreg.xer);
+  RF (gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum, core_reg->intreg.ctr);
   RF (PC_REGNUM, core_reg->intreg.pc);
 
 #ifdef PT_FPGETREGS
