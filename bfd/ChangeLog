@@ -1,3 +1,16 @@
+Mon Jun 17 12:49:11 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (mips_elf_relocate_section): Don't create a reloc
+	for R_MIPS_REL32 and R_MIPS_32 relocs if no dynamic sections were
+	created.
+	(mips_elf_check_relocs): Only create .rel.dyn for R_MIPS_REL32 and
+	R_MIPS_32 relocs if creating a shared library.
+
+Thu Jun 13 20:14:51 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* peicode.h (add_data_entry): Use pei_section_data rather than
+	_cooked_size.  Corresponds to May 13 change in coffcode.h.
+
 Thu Jun 13 10:23:40 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* cofflink.c (_bfd_coff_final_link): Handle long section names.
