@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public
    License along with GAS; see the file COPYING.  If not, write
-   to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   to the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* Tag to validate a.out object file format processing */
 #define OBJ_AOUT 1
@@ -24,11 +24,9 @@
 
 #ifdef BFD_ASSEMBLER
 
-#include "../bfd/libaout.h"
+#include "bfd/libaout.h"
 
-#ifndef TARGET_FORMAT
-/* #define TARGET_FORMAT "a.out" / * There is no "a.out" target.  */
-#endif
+#define OUTPUT_FLAVOR bfd_target_aout_flavour
 
 #else /* ! BFD_ASSEMBLER */
 
@@ -78,6 +76,9 @@ extern void obj_aout_frob_file PARAMS ((void));
 
 #else
 
+/* We use the sy_obj field to record whether a symbol is weak.  */
+#define OBJ_SYMFIELD_TYPE char
+
 /*
  *  Macros to extract information from a symbol table entry.
  *  This syntaxic indirection allows independence regarding a.out or coff.
@@ -95,12 +96,12 @@ extern void obj_aout_frob_file PARAMS ((void));
 /* True if a debug special symbol entry */
 #define S_IS_DEBUG(s)		((s)->sy_symbol.n_type & N_STAB)
 /* True if a symbol is local symbol name */
-/* A symbol name whose name begin with ^A is a gas internal pseudo symbol
-   nameless symbols come from .stab directives. */
-#define S_IS_LOCAL(s)		(S_GET_NAME(s) && \
-				 !S_IS_DEBUG(s) && \
-				 (S_GET_NAME(s)[0] == '\001' || \
-				  (S_LOCAL_NAME(s) && !flag_keep_locals)))
+#define S_IS_LOCAL(s) 					\
+  (S_GET_NAME (s) 					\
+   && !S_IS_DEBUG (s) 					\
+   && (strchr (S_GET_NAME (s), '\001') != NULL		\
+       || strchr (S_GET_NAME (s), '\002') != NULL	\
+       || (S_LOCAL_NAME(s) && !flag_keep_locals)))
 /* True if a symbol is not defined in this file */
 #define S_IS_EXTERN(s)		((s)->sy_symbol.n_type & N_EXT)
 /* True if the symbol has been generated because of a .stabd directive */
@@ -119,6 +120,8 @@ extern void obj_aout_frob_file PARAMS ((void));
 #define S_GET_OTHER(s)		((s)->sy_symbol.n_other)
 /* The n_desc expression value */
 #define S_GET_DESC(s)		((s)->sy_symbol.n_desc)
+/* Whether the symbol is weak.  */
+#define S_GET_WEAK(s)		((s)->sy_obj)
 
 /* Modifiers */
 /* Assume that a symbol cannot be simultaneously in more than on segment */
@@ -138,6 +141,9 @@ extern void obj_aout_frob_file PARAMS ((void));
 #define S_SET_OTHER(s,v)	((s)->sy_symbol.n_other = (v))
 /* Set the n_desc expression value */
 #define S_SET_DESC(s,v)		((s)->sy_symbol.n_desc = (v))
+/* Mark the symbol as weak.  This causes n_type to be adjusted when
+   the symbol is written out.  */
+#define S_SET_WEAK(s)		((s)->sy_obj = 1)
 
 /* File header macro and type definition */
 
@@ -218,5 +224,7 @@ void tc_aout_fix_to_chars PARAMS ((char *where, struct fix *fixP, relax_addressT
 #define obj_symbol_new_hook(s)	{;}
 
 #define EMIT_SECTION_SYMBOLS		0
+
+#define AOUT_STABS
 
 /* end of obj-aout.h */

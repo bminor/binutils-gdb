@@ -1,5 +1,8 @@
 Thu Feb  1 15:34:32 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/obj-aout.h (S_IS_LOCAL): Check for \002 as well as \001.
+	* config/obj-bout.h (S_IS_LOCAL): Likewise.
+
 	* configure.in: Make sure we only add m68k-parse.o to
 	${extra_objects} once, no matter how many m68k targets have been
 	enabled.
@@ -25,7 +28,7 @@ Wed Jan 31 14:03:17 1996  Richard Henderson  <rth@tamu.edu>
 
 Wed Jan 31 12:24:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 
-	* config/obj-coff.h (S_IS_LOCAL): Check for \001 as well as \002.
+	* config/obj-coff.h (S_IS_LOCAL): Check for \002 as well as \001.
 
 	* config/tc-mips.c (s_mips_globl): Set BSF_OBJECT if it is not
 	BSF_FUNCTION.

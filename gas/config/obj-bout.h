@@ -186,12 +186,12 @@ struct relocation_info
 /* True if a debug special symbol entry */
 #define S_IS_DEBUG(s)		((s)->sy_symbol.n_type & N_STAB)
 /* True if a symbol is local symbol name */
-/* A symbol name whose name begin with ^A is a gas internal pseudo symbol
-   nameless symbols come from .stab directives. */
-#define S_IS_LOCAL(s)		(S_GET_NAME(s) && \
-				 !S_IS_DEBUG(s) && \
-				 (S_GET_NAME(s)[0] == '\001' || \
-				  (S_LOCAL_NAME(s) && !flag_keep_locals)))
+#define S_IS_LOCAL(s) 					\
+  (S_GET_NAME (s) 					\
+   && !S_IS_DEBUG (s) 					\
+   && (strchr (S_GET_NAME (s), '\001') != NULL		\
+       || strchr (S_GET_NAME (s), '\002') != NULL	\
+       || (S_LOCAL_NAME(s) && !flag_keep_locals)))
 /* True if a symbol is not defined in this file */
 #define S_IS_EXTERN(s)		((s)->sy_symbol.n_type & N_EXT)
 /* True if the symbol has been generated because of a .stabd directive */
