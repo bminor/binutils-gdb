@@ -1,3 +1,10 @@
+Tue Feb 10 15:09:45 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (Makefile): Add target, for dependencies on
+	configure.host and configure.tgt.
+	* configure.host, configure.tgt: Change -linux* to -linux-gnu*.
+	* Makefile.in: Rebuild.
+
 start-sanitize-r5900
 Tue Feb 10 11:52:33 1998  Jeffrey A Law  (law@cygnus.com)
 
