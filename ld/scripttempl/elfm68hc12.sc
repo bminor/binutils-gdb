@@ -326,6 +326,11 @@ SECTIONS
     KEEP (*(.eh_frame))
   } ${RELOCATING+ > ${TEXT_MEMORY}}
 
+  .gcc_except_table ${RELOCATING-0} :
+  {
+    *(.gcc_except_table)
+  } ${RELOCATING+ > ${TEXT_MEMORY}}
+
   .rodata  ${RELOCATING-0} :
   {
     *(.rodata)
