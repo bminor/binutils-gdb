@@ -1,6 +1,6 @@
 2002-12-02  Hans-Peter Nilsson  <hp@axis.com>
 
-	* read.c (emit_expr) [WORKING_DOT_WORD]: Initialize x->use_jump.
+	* read.c (emit_expr) [!WORKING_DOT_WORD]: Initialize x->use_jump.
 
 2002-12-01  Stephane Carrez  <stcarrez@nerim.fr>
 
