@@ -1429,8 +1429,9 @@ function_entry_point:
       /* XCOFF, according to the AIX 3.2 documentation, puts the filename
 	 in cs->c_name.  But xlc 1.3.0.2 has decided to do things the
 	 standard COFF way and put it in the auxent.  We use the auxent if
-	 there is one, otherwise use the name.  Simple enough.  */
-      if (cs->c_naux > 0)
+	 the symbol is ".file" and an auxent exists, otherwise use the symbol
+	 itself.  Simple enough.  */
+      if (!strcmp (cs->c_name, ".file") && cs->c_naux > 0)
 	filestring = coff_getfilename (&main_aux);
       else
 	filestring = cs->c_name;

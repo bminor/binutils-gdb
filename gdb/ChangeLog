@@ -1,3 +1,9 @@
+Tue May 17 16:45:20 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* xcoffread.c (read_xcoff_symtab): For C_FILE symbols, only use
+	the auxent if the symbol's name is ".file".  From David Edelsohn 
+	<c1dje@watson.ibm.com>.
+
 Tue May 17 11:08:22 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* breakpoint.c (breakpoint_1): Fix typo.
