@@ -4,23 +4,11 @@ of these, you should consider sending mail to the same address, to
 find out whether anyone else is working on it.
 
 
-		Known problems in GDB 5.0
-		=========================
+			GDB 5.1 - Fixes
+			===============
 
 Below is a list of problems identified during the GDB 5.0 release
-cycle.  People hope to have these problems fixed in a follow-on
-release.
-
---
-
-The BFD directory requires bug-fixed AUTOMAKE et.al.
-
-AUTOMAKE 1.4 incorrectly set the TEXINPUTS environment variable.  It
-contained the full path to texinfo.tex when it should have only
-contained the directory.  The bug has been fixed in the current
-AUTOMAKE sources.  Automake snapshots can be found in:
-	ftp://sourceware.cygnus.com/pub/gdb/snapshots
-and	ftp://sourceware.cygnus.com/pub/binutils
+cycle.  People hope to have these problems fixed in 5.1.
 
 --
 
@@ -40,17 +28,6 @@ added to the testsuite:
 http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00309.html
 
 Mark
-
---
-
-Revised UDP support (was: Re: [Fwd: [patch] UDP transport support])
-http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00000.html
-
-(Broken) support for GDB's remote protocol across UDP is to be
-included in the follow-on release.
-
-It should be noted that UDP can only work when the [Gg] packet fits in
-a single UDP packet.
 
 --
 
@@ -82,23 +59,133 @@ GDB 5.0 doesn't work on Linux/SPARC
 
 --
 
-		Code Cleanups: Next Release
-		===========================
+parse.c:build_parse() has a buffer overrun.
 
-The following are small cleanups that will hopefully be completed by
-the follow on to 5.0.
+--
+
+Thread support.  Right now, as soon as a thread finishes and exits,
+you're hosed.  This problem is reported once a week or so.
+
+--
+
+Wow, three bug reports for the same problem in one day!  We should
+probably make fixing this a real priority :-).
+
+Anyway, thanks for reporting.
+
+The following patch will fix the problems with setting breakpoints in
+dynamically loaded objects:
+
+   http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00230.html
+
+This patch isn't checked in yet (ping Michael/JimB), but I hope this
+will be in the next GDB release.
+
+There should really be a test in the testsuite for this problem, since
+it keeps coming up :-(.  Any volunteers?
+
+Mark
+
+--
+
+Re: GDB 5.0.1?
+http://sources.redhat.com/ml/gdb/2000-07/msg00038.html
+
+Is the Solaris 8 x86 problem fixed?  When you configure it, configure
+incorrectly determines that I have no curses.h.  This causes mucho
+compilation errors later on.
+
+Simply editing the config.h to define CURSES_H fixes the problem, and
+then the build works fine.
+
+The status for this problem:
+
+Solaris 8 x86 (PIII-560)
+gcc 2.95.2
+
+I had the same problem with several of the snapshots shortly before
+5.0 became official, and 5.0 has the same problem.
+
+I sent some mail in about it long ago, and never saw a reply.
+
+I haven't had time to figure it out myself, especially since I get all
+confused trying to figure out what configure does, I was happy to find
+the workaround.
+
+Mike
+
+--
+
+		GDB 5.1 - New features
+		======================
+
+The following new features should be included in 5.1.
+
+--
+
+Enable MI by default.  Old code can be deleted after 5.1 is out.
+
+--
+
+Pascal (Pierre Muller, David Taylor)
+
+Pierre Muller has contributed patches for adding Pascal Language
+support to GDB.
+
+2 pascal language patches inserted in database
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00521.html
+
+Indent -gnu ?
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00496.html
+
+--
+
+Java (Anthony Green, David Taylor)
+
+Anthony Green has a number of Java patches that did not make it into
+the 5.0 release.  The first two are in cvs now, but the third needs
+some fixing up before it can go in.
+
+Patch: java tests
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00512.html
+
+Patch: java booleans
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00515.html
+
+Patch: handle N_MAIN stab
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00527.html
+
+--
+
+[Comming...]
+
+Modify gdb to work correctly with Pascal.
+
+--
+
+Revised UDP support (was: Re: [Fwd: [patch] UDP transport support])
+http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00000.html
+
+(Broken) support for GDB's remote protocol across UDP is to be
+included in the follow-on release.
+
+It should be noted that UDP can only work when the [Gg] packet fits in
+a single UDP packet.
+
+There is also much debate over the merit of this.
+
+--
+
+		GDB 5.1 - Cleanups
+		==================
+
+The following code cleanups will hopefully be applied to GDB 5.1.
 
 --
 
 Delete macro TARGET_BYTE_ORDER_SELECTABLE.
 
 Patches in the database.
-
---
-
-Purge PARAMS.
-
-Eliminate all uses of PARAMS in GDB's source code.
 
 --
 
@@ -110,13 +197,9 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00467.html
 
 --
 
-Find something better than DEFAULT_BFD_ARCH, DEFAULT_BFD_VEC to
-determine the default isa/byte-order.
+Purge PARAMS.
 
---
-
-Rely on BFD_BIG_ENDIAN and BFD_LITTLE_ENDIAN instead of host dependant
-BIG_ENDIAN and LITTLE_ENDIAN.
+Eliminate all uses of PARAMS in GDB's source code.
 
 --
 
@@ -129,11 +212,94 @@ ADDRESS_TO_PRINTABLE() be used to do the conversion?
 
 --
 
+Compiler warnings.
+
+Eliminate all warnings for at least one host/target for the flags:
+-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs -Wformat -Wparentheses
+-Wpointer-arith -Wuninitialized
+
+--
+
+Follow through `make check' with --enable-shared.
+
+When the srcware tree is configured with --enable-shared, the `expect'
+program won't run properly.  Jim Wilson found out gdb has a local hack
+to set LD_LIBRARY_PATH, but, AFAIK, no other project has been hacked
+similarly.
+
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00845.html
+
+--
+
+		GDB 5.2 - Fixes
+		===============
+
+--
+
+Fix at least one thread bug.
+
+--
+
+		GDB 5.2 - New features
+		======================
+
+--
+
+Objective C/C++ Support.  Bu hopefully sooner...
+
+--
+
+		GDB 5.2 - Cleanups
+		==================
+
+The following cleanups have been identified as part of GDB 5.2.
+
+--
+
+Eliminate more compiler warnings.
+
+--
+
+Restructure gdb directory tree so that it avoids any 8.3 and 14
+filename problems.
+
+--
+
+Convert GDB build process to AUTOMAKE.
+
+See also sub-directory configure below.
+
+The current convention is (kind of) to use $(<header>_h) in all
+dependency lists.  It isn't done in a consistent way.
+
+--
+
 		Code Cleanups: General
 		======================
 
 The following are more general cleanups and fixes.  They are not tied
 to any specific release.
+
+--
+
+The BFD directory requires bug-fixed AUTOMAKE et.al.
+
+AUTOMAKE 1.4 incorrectly set the TEXINPUTS environment variable.  It
+contained the full path to texinfo.tex when it should have only
+contained the directory.  The bug has been fixed in the current
+AUTOMAKE sources.  Automake snapshots can be found in:
+	ftp://sourceware.cygnus.com/pub/gdb/snapshots
+and	ftp://sourceware.cygnus.com/pub/binutils
+
+--
+
+Find something better than DEFAULT_BFD_ARCH, DEFAULT_BFD_VEC to
+determine the default isa/byte-order.
+
+--
+
+Rely on BFD_BIG_ENDIAN and BFD_LITTLE_ENDIAN instead of host dependant
+BIG_ENDIAN and LITTLE_ENDIAN.
 
 --
 
@@ -157,7 +323,6 @@ Elimination of ``(catch_errors_ftype *) func''.
 Like make_cleanup_func it isn't portable.
 http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00791.html
 http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00814.html
-
 
 --
 
@@ -241,6 +406,10 @@ an error status.
 
 --
 
+Add __LINE__ and __FILE__ to internal_error().
+
+--
+
 GDB probably doesn't build on FreeBSD pre 2.2.x
 http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00378.html
 
@@ -278,17 +447,6 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00472.html
 Move floatformat_ia64_ext to libiberty/include floatformat.[ch].
 
 http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00466.html
-
---
-
-Follow through `make check' with --enable-shared.
-
-When the srcware tree is configured with --enable-shared, the `expect'
-program won't run properly.  Jim Wilson found out gdb has a local hack
-to set LD_LIBRARY_PATH, but, AFAIK, no other project has been hacked
-similarly.
-
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00845.html
 
 --
 
@@ -336,10 +494,6 @@ SIM_SIGBREAK and have GDB pass back sim_resume (..., SIGBREAK).
 
 --
 
-parse.c:build_parse() has a buffer overrun.
-
---
-
 			New Features and Fixes
 			======================
 
@@ -373,15 +527,6 @@ No symbol "L" in current context.
 
 --
 
-Convert GDB build process to AUTOMAKE.
-
-See also sub-directory configure below.
-
-The current convention is (kind of) to use $(<header>_h) in all
-dependency lists.  It isn't done in a consistent way.
-
---
-
 Cleanup configury support for optional sub-directories.
 
 Check how GCC handles multiple front ends for an example of how things
@@ -389,11 +534,6 @@ could work.  A tentative first step is to rationalize things so that
 all sub directories are handled in a fashion similar to gdb/mi.
 
 See also automake above.
-
---
-
-Restructure gdb directory tree so that it avoids any 8.3 and 14
-filename problems.
 
 --
 
@@ -420,8 +560,6 @@ http://sourceware.cygnus.com/ml/gdb/2000-04/msg00121.html
 --
 
 Update texinfo.tex to latest?
-
-
 
 --
 
@@ -555,42 +693,6 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00831.html
 			================
 
 New languages come onto the scene all the time.
-
---
-
-Pascal (Pierre Muller, David Taylor)
-
-Pierre Muller has contributed patches for adding Pascal Language
-support to GDB.
-
-2 pascal language patches inserted in database
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00521.html
-
-Indent -gnu ?
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00496.html
-
---
-
-Java (Anthony Green, David Taylor)
-
-Anthony Green has a number of Java patches that did not make it into
-the 5.0 release.  The first two are in cvs now, but the third needs
-some fixing up before it can go in.
-
-Patch: java tests
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00512.html
-
-Patch: java booleans
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00515.html
-
-Patch: handle N_MAIN stab
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00527.html
-
---
-
-[Comming...]
-
-Modify gdb to work correctly with Pascal.
 
 --
 
