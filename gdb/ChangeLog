@@ -1,3 +1,21 @@
+2001-10-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* mips-tdep.c (mips_integer_to_address): New function.
+	(mips_gdbarch_init): Initialize pointer_to_address,
+	address_to_pointer and integer_to_address.
+
+	* config/mips/tm-mips.h (POINTER_TO_ADDRESS): Delete
+	(ADDRESS_TO_POINTER): Delete.
+
+	* d10v-tdep.c (d10v_integer_to_address): New function.
+	(d10v_gdbarch_init): Initialize integer_to_address.
+
+	* values.c (value_as_pointer): Use INTEGER_TO_ADDRESS when
+	available.
+
+	* gdbarch.sh (INTEGER_TO_ADDRESS): New predicate and function.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
 2001-10-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/s390/nm-linux.h: Don't include <signal.h>.

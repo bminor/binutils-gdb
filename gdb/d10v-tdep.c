@@ -419,6 +419,21 @@ d10v_pointer_to_address (struct type *type, void *buf)
     return d10v_make_daddr (addr);
 }
 
+static CORE_ADDR
+d10v_integer_to_address (struct type *type, void *buf)
+{
+  LONGEST val;
+  val = unpack_long (type, buf);
+  if (TYPE_CODE (type) == TYPE_CODE_INT
+      && TYPE_LENGTH (type) <= TYPE_LENGTH (builtin_type_void_data_ptr))
+    /* Convert small integers that would would be directly copied into
+       a pointer variable into an address pointing into data space.  */
+    return d10v_make_daddr (val & 0xffff);
+  else
+    /* The value is too large to fit in a pointer.  Assume this was
+       intentional and that the user in fact specified a raw address.  */
+    return val;
+}
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. 
@@ -1478,6 +1493,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_addr_bit (gdbarch, 32);
   set_gdbarch_address_to_pointer (gdbarch, d10v_address_to_pointer);
   set_gdbarch_pointer_to_address (gdbarch, d10v_pointer_to_address);
+  set_gdbarch_integer_to_address (gdbarch, d10v_integer_to_address);
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_int_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);

@@ -207,6 +207,7 @@ struct gdbarch
   gdbarch_store_pseudo_register_ftype *store_pseudo_register;
   gdbarch_pointer_to_address_ftype *pointer_to_address;
   gdbarch_address_to_pointer_ftype *address_to_pointer;
+  gdbarch_integer_to_address_ftype *integer_to_address;
   gdbarch_return_value_on_stack_ftype *return_value_on_stack;
   gdbarch_extract_return_value_ftype *extract_return_value;
   gdbarch_push_arguments_ftype *push_arguments;
@@ -336,6 +337,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   generic_get_saved_register,
+  0,
   0,
   0,
   0,
@@ -679,6 +681,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of store_pseudo_register, invalid_p == 0 */
   /* Skip verify of pointer_to_address, invalid_p == 0 */
   /* Skip verify of address_to_pointer, invalid_p == 0 */
+  /* Skip verify of integer_to_address, has predicate */
   /* Skip verify of return_value_on_stack, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->extract_return_value == 0))
@@ -1311,6 +1314,17 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: INNER_THAN = 0x%08lx\n",
                         (long) current_gdbarch->inner_than
                         /*INNER_THAN ()*/);
+#endif
+#ifdef INTEGER_TO_ADDRESS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "INTEGER_TO_ADDRESS(type, buf)",
+                      XSTRING (INTEGER_TO_ADDRESS (type, buf)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: INTEGER_TO_ADDRESS = 0x%08lx\n",
+                        (long) current_gdbarch->integer_to_address
+                        /*INTEGER_TO_ADDRESS ()*/);
 #endif
 #ifdef MAX_REGISTER_RAW_SIZE
   fprintf_unfiltered (file,
@@ -3391,6 +3405,30 @@ set_gdbarch_address_to_pointer (struct gdbarch *gdbarch,
                                 gdbarch_address_to_pointer_ftype address_to_pointer)
 {
   gdbarch->address_to_pointer = address_to_pointer;
+}
+
+int
+gdbarch_integer_to_address_p (struct gdbarch *gdbarch)
+{
+  return gdbarch->integer_to_address != 0;
+}
+
+CORE_ADDR
+gdbarch_integer_to_address (struct gdbarch *gdbarch, struct type *type, void *buf)
+{
+  if (gdbarch->integer_to_address == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_integer_to_address invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_integer_to_address called\n");
+  return gdbarch->integer_to_address (type, buf);
+}
+
+void
+set_gdbarch_integer_to_address (struct gdbarch *gdbarch,
+                                gdbarch_integer_to_address_ftype integer_to_address)
+{
+  gdbarch->integer_to_address = integer_to_address;
 }
 
 int

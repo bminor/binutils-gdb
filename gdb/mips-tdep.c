@@ -3950,6 +3950,20 @@ mips_ecoff_reg_to_regnum (int num)
     return num + FP0_REGNUM - 32;
 }
 
+/* Convert an integer into an address.  By first converting the value
+   into a pointer and then extracting it signed, the address is
+   guarenteed to be correctly sign extended.  */
+
+static CORE_ADDR
+mips_integer_to_address (struct type *type, void *buf)
+{
+  char *tmp = alloca (TYPE_LENGTH (builtin_type_void_data_ptr));
+  LONGEST val = unpack_long (type, buf);
+  store_signed_integer (tmp, TYPE_LENGTH (builtin_type_void_data_ptr), val);
+  return extract_signed_integer (tmp,
+				 TYPE_LENGTH (builtin_type_void_data_ptr));
+}
+
 static struct gdbarch *
 mips_gdbarch_init (struct gdbarch_info info,
 		   struct gdbarch_list *arches)
@@ -4259,6 +4273,9 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_skip_prologue (gdbarch, mips_skip_prologue);
   set_gdbarch_saved_pc_after_call (gdbarch, mips_saved_pc_after_call);
 
+  set_gdbarch_pointer_to_address (gdbarch, signed_pointer_to_address);
+  set_gdbarch_address_to_pointer (gdbarch, address_to_signed_pointer);
+  set_gdbarch_integer_to_address (gdbarch, mips_integer_to_address);
   return gdbarch;
 }
 

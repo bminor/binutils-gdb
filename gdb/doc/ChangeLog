@@ -1,3 +1,10 @@
+2001-10-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Default
+	POINTER_TO_ADDRESS functions assume unsigned addresses.
+	(INTEGER_TO_ADDRESS): Document.  Derive pragmatics section from a
+	posting by Jim Blandy.
+
 2001-10-12  Jim Blandy  <jimb@redhat.com>
 
 	* Makefile.in (MAKEHTMLFLAGS): Remove -glossary; the most recent

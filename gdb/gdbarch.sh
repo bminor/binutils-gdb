@@ -472,6 +472,7 @@ f:2:STORE_PSEUDO_REGISTER:void:store_pseudo_register:int regnum:regnum:::0::0
 #
 f:2:POINTER_TO_ADDRESS:CORE_ADDR:pointer_to_address:struct type *type, void *buf:type, buf:::unsigned_pointer_to_address::0
 f:2:ADDRESS_TO_POINTER:void:address_to_pointer:struct type *type, void *buf, CORE_ADDR addr:type, buf, addr:::unsigned_address_to_pointer::0
+F:2:INTEGER_TO_ADDRESS:CORE_ADDR:integer_to_address:struct type *type, void *buf:type, buf
 #
 f:2:RETURN_VALUE_ON_STACK:int:return_value_on_stack:struct type *type:type:::generic_return_value_on_stack_not::0
 f:2:EXTRACT_RETURN_VALUE:void:extract_return_value:struct type *type, char *regbuf, char *valbuf:type, regbuf, valbuf::0:0

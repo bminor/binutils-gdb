@@ -572,35 +572,49 @@ value_as_pointer (value_ptr val)
   return ADDR_BITS_REMOVE (value_as_long (val));
 #else
   COERCE_ARRAY (val);
-  /* In converting VAL to an address (CORE_ADDR), any small integers
-     are first cast to a generic pointer.  The function unpack_long
-     will then correctly convert that pointer into a canonical address
-     (using POINTER_TO_ADDRESS).
 
-     Without the cast, the MIPS gets: 0xa0000000 -> (unsigned int)
-     0xa0000000 -> (LONGEST) 0x00000000a0000000
+  /* Some architectures (e.g. Harvard), map instruction and data
+     addresses onto a single large unified address space.  For
+     instance: An architecture may consider a large integer in the
+     range 0x10000000 .. 0x1000ffff to already represent a data
+     addresses (hence not need a pointer to address conversion) while
+     a small integer would still need to be converted integer to
+     pointer to address.  Just assume such architectures handle all
+     integer conversions in a single function.  */
 
-     With the cast, the MIPS gets: 0xa0000000 -> (unsigned int)
-     0xa0000000 -> (void*) 0xa0000000 -> (LONGEST) 0xffffffffa0000000.
+  /* JimB writes:
 
-     If the user specifies an integer that is larger than the target
-     pointer type, it is assumed that it was intentional and the value
-     is converted directly into an ADDRESS.  This ensures that no
-     information is discarded.
+     I think INTEGER_TO_ADDRESS is a good idea as proposed --- but we
+     must admonish GDB hackers to make sure its behavior matches the
+     compiler's, whenever possible.
 
-     NOTE: The cast operation may eventualy be converted into a TARGET
-     method (see POINTER_TO_ADDRESS() and ADDRESS_TO_POINTER()) so
-     that the TARGET ISA/ABI can apply an arbitrary conversion.
+     In general, I think GDB should evaluate expressions the same way
+     the compiler does.  When the user copies an expression out of
+     their source code and hands it to a `print' command, they should
+     get the same value the compiler would have computed.  Any
+     deviation from this rule can cause major confusion and annoyance,
+     and needs to be justified carefully.  In other words, GDB doesn't
+     really have the freedom to do these conversions in clever and
+     useful ways.
 
-     NOTE: In pure harvard architectures function and data pointers
-     can be different and may require different integer to pointer
-     conversions. */
-  if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_INT
-      && (TYPE_LENGTH (VALUE_TYPE (val))
-	  <= TYPE_LENGTH (builtin_type_void_data_ptr)))
-    {
-      val = value_cast (builtin_type_void_data_ptr, val);
-    }
+     AndrewC pointed out that users aren't complaining about how GDB
+     casts integers to pointers; they are complaining that they can't
+     take an address from a disassembly listing and give it to `x/i'.
+     This is certainly important.
+
+     Adding an architecture method like INTEGER_TO_ADDRESS certainly
+     makes it possible for GDB to "get it right" in all circumstances
+     --- the target has complete control over how things get done, so
+     people can Do The Right Thing for their target without breaking
+     anyone else.  The standard doesn't specify how integers get
+     converted to pointers; usually, the ABI doesn't either, but
+     ABI-specific code is a more reasonable place to handle it.  */
+
+  if (TYPE_CODE (VALUE_TYPE (val)) != TYPE_CODE_PTR
+      && TYPE_CODE (VALUE_TYPE (val)) != TYPE_CODE_REF
+      && INTEGER_TO_ADDRESS_P ())
+    return INTEGER_TO_ADDRESS (VALUE_TYPE (val), VALUE_CONTENTS (val));
+
   return unpack_long (VALUE_TYPE (val), VALUE_CONTENTS (val));
 #endif
 }

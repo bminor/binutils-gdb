@@ -1239,6 +1239,43 @@ extern void set_gdbarch_address_to_pointer (struct gdbarch *gdbarch, gdbarch_add
 #endif
 #endif
 
+#if defined (INTEGER_TO_ADDRESS)
+/* Legacy for systems yet to multi-arch INTEGER_TO_ADDRESS */
+#if !defined (INTEGER_TO_ADDRESS_P)
+#define INTEGER_TO_ADDRESS_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (INTEGER_TO_ADDRESS_P)
+#define INTEGER_TO_ADDRESS_P() (0)
+#endif
+
+extern int gdbarch_integer_to_address_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (INTEGER_TO_ADDRESS_P)
+#error "Non multi-arch definition of INTEGER_TO_ADDRESS"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (INTEGER_TO_ADDRESS_P)
+#define INTEGER_TO_ADDRESS_P() (gdbarch_integer_to_address_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (INTEGER_TO_ADDRESS)
+#define INTEGER_TO_ADDRESS(type, buf) ( (type, buf))
+#endif
+
+typedef CORE_ADDR (gdbarch_integer_to_address_ftype) (struct type *type, void *buf);
+extern CORE_ADDR gdbarch_integer_to_address (struct gdbarch *gdbarch, struct type *type, void *buf);
+extern void set_gdbarch_integer_to_address (struct gdbarch *gdbarch, gdbarch_integer_to_address_ftype *integer_to_address);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (INTEGER_TO_ADDRESS)
+#error "Non multi-arch definition of INTEGER_TO_ADDRESS"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (INTEGER_TO_ADDRESS)
+#define INTEGER_TO_ADDRESS(type, buf) (gdbarch_integer_to_address (current_gdbarch, type, buf))
+#endif
+#endif
+
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (RETURN_VALUE_ON_STACK)
 #define RETURN_VALUE_ON_STACK(type) (generic_return_value_on_stack_not (type))

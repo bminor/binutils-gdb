@@ -2489,7 +2489,7 @@ appropriate way for the current architecture.  If you can, use
 Here are some macros which architectures can define to indicate the
 relationship between pointers and addresses.  These have default
 definitions, appropriate for architectures on which all pointers are
-simple byte addresses.
+simple unsigned byte addresses.
 
 @deftypefn {Target Macro} CORE_ADDR POINTER_TO_ADDRESS (struct type *@var{type}, char *@var{buf})
 Assume that @var{buf} holds a pointer of type @var{type}, in the
@@ -3140,6 +3140,29 @@ should continue to get past the dynamic linker's symbol resolution
 function.  A zero value indicates that it is not important or necessary
 to set a breakpoint to get through the dynamic linker and that single
 stepping will suffice.
+
+@item INTEGER_TO_ADDRESS (@var{type}, @var{buf})
+@findex INTEGER_TO_ADDRESS
+@cindex converting integers to addresses
+Define this when the architecture needs to handle non-pointer to address
+conversions specially.  Converts that value to an address according to
+the current architectures conventions.
+
+@emph{Pragmatics: When the user copies a well defined expression from
+their source code and passes it, as a parameter, to @value{GDBN}'s
+@code{print} command, they should get the same value as would have been
+computed by the target program.  Any deviation from this rule can cause
+major confusion and annoyance, and needs to be justified carefully.  In
+other words, @value{GDBN} doesn't really have the freedom to do these
+conversions in clever and useful ways.  It has, however, been pointed
+out that users aren't complaining about how @value{GDBN} casts integers
+to pointers; they are complaining that they can't take an address from a
+disassembly listing and give it to @code{x/i}.  Adding an architecture
+method like @code{INTEGER_TO_ADDRESS} certainly makes it possible for
+@value{GDBN} to ``get it right'' in all circumstances.}
+
+@xref{Target Architecture Definition, , Pointers Are Not Always
+Addresses}.
 
 @item IS_TRAPPED_INTERNALVAR (@var{name})
 @findex IS_TRAPPED_INTERNALVAR
