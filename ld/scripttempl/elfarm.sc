@@ -131,7 +131,7 @@ SECTIONS
   .rela.plt    ${RELOCATING-0} : { *(.rela.plt)		}
   .init        ${RELOCATING-0} : { KEEP (*(.init))	} =${NOP-0}
   ${DATA_PLT-${PLT}}
-  .text    ${RELOCATING-0} :
+  .text    ${RELOCATING+ 0x8000} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
     *(.text)
@@ -215,6 +215,7 @@ SECTIONS
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
   ${RELOCATING+_end = . ;}
   ${RELOCATING+_bss_end__ = . ;}
+  ${RELOCATING+__bss_end__ = . ;}
   ${RELOCATING+PROVIDE (end = .);}
 
   /* Stabs debugging sections.  */
