@@ -1,3 +1,7 @@
+2003-06-17  Loren James Rittle  <rittle@latour.rsch.comm.mot.com>
+
+	* ld-undefined/undefined.exp (i?86-*-freebsd*): Remove xfail.
+
 2003-06-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlsexetoc.d: Update.

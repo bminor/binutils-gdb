@@ -1,3 +1,8 @@
+2003-06-17  Loren James Rittle  <rittle@latour.rsch.comm.mot.com>
+
+	* configure.host (*-*-freebsd*): Add known path for ld-elf.so.1
+	if not produced by gcc.
+
 2003-06-16  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure.tgt: Add specific case for cris-*-linux-gnu*
