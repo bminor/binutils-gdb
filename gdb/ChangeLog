@@ -1,3 +1,8 @@
+2003-01-31  Adam Fedor  <fedor@gnu.org>
+
+	* infrun.c (handle_inferior_event): Rename 'tmp' to real_stop_pc.
+	Remove duplicate/shadowing variable of same name.
+
 2003-01-30  Jim Blandy  <jimb@redhat.com>
 
 	* symfile.c (find_separate_debug_file): Assert that the objfile's
