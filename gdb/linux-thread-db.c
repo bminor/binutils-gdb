@@ -1230,18 +1230,18 @@ thread_db_pid_to_str (ptid_t ptid)
   return normal_pid_to_str (ptid);
 }
 
-/* Get the address of the thread local variable in OBJFILE which is
-   stored at OFFSET within the thread local storage for thread PTID.  */
+/* Get the address of the thread local variable in load module LM which
+   is stored at OFFSET within the thread local storage for thread PTID.  */
 
 static CORE_ADDR
-thread_db_get_thread_local_address (ptid_t ptid, struct objfile *objfile,
+thread_db_get_thread_local_address (ptid_t ptid,
+				    CORE_ADDR lm,
 				    CORE_ADDR offset)
 {
   if (is_thread (ptid))
     {
       td_err_e err;
       void *address;
-      CORE_ADDR lm;
       struct thread_info *thread_info;
 
       /* glibc doesn't provide the needed interface.  */
@@ -1253,17 +1253,8 @@ thread_db_get_thread_local_address (ptid_t ptid, struct objfile *objfile,
 	  throw_exception (e);
 	}
 
-      /* Get the address of the link map for this objfile.  */
-      lm = svr4_fetch_objfile_link_map (objfile);
-
-      /* Whoops, we couldn't find one. Bail out.  */
-      if (!lm)
-	{
-	  struct exception e
-	    = { RETURN_ERROR, TLS_LOAD_MODULE_NOT_FOUND_ERROR, 0 };
-
-	  throw_exception (e);
-	}
+      /* Caller should have verified that lm != 0.  */
+      gdb_assert (lm != 0);
 
       /* Get info about the thread.  */
       thread_info = find_thread_pid (ptid);
@@ -1302,7 +1293,7 @@ thread_db_get_thread_local_address (ptid_t ptid, struct objfile *objfile,
     }
 
   if (target_beneath->to_get_thread_local_address)
-    return target_beneath->to_get_thread_local_address (ptid, objfile, offset);
+    return target_beneath->to_get_thread_local_address (ptid, lm, offset);
   else
     {
       struct exception e

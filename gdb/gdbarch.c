@@ -203,6 +203,7 @@ struct gdbarch
   CORE_ADDR decr_pc_after_break;
   CORE_ADDR deprecated_function_start_offset;
   gdbarch_remote_translate_xfer_address_ftype *remote_translate_xfer_address;
+  gdbarch_fetch_tls_load_module_address_ftype *fetch_tls_load_module_address;
   CORE_ADDR frame_args_skip;
   gdbarch_unwind_pc_ftype *unwind_pc;
   gdbarch_unwind_sp_ftype *unwind_sp;
@@ -329,6 +330,7 @@ struct gdbarch startup_gdbarch =
   0,  /* decr_pc_after_break */
   0,  /* deprecated_function_start_offset */
   generic_remote_translate_xfer_address,  /* remote_translate_xfer_address */
+  0,  /* fetch_tls_load_module_address */
   0,  /* frame_args_skip */
   0,  /* unwind_pc */
   0,  /* unwind_sp */
@@ -583,6 +585,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of decr_pc_after_break, invalid_p == 0 */
   /* Skip verify of deprecated_function_start_offset, invalid_p == 0 */
   /* Skip verify of remote_translate_xfer_address, invalid_p == 0 */
+  /* Skip verify of fetch_tls_load_module_address, has predicate */
   /* Skip verify of frame_args_skip, invalid_p == 0 */
   /* Skip verify of unwind_pc, has predicate */
   /* Skip verify of unwind_sp, has predicate */
@@ -1090,6 +1093,24 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: fetch_pointer_argument = <0x%lx>\n",
                       (long) current_gdbarch->fetch_pointer_argument);
+#ifdef FETCH_TLS_LOAD_MODULE_ADDRESS_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FETCH_TLS_LOAD_MODULE_ADDRESS_P()",
+                      XSTRING (FETCH_TLS_LOAD_MODULE_ADDRESS_P ()));
+#endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_fetch_tls_load_module_address_p() = %d\n",
+                      gdbarch_fetch_tls_load_module_address_p (current_gdbarch));
+#ifdef FETCH_TLS_LOAD_MODULE_ADDRESS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FETCH_TLS_LOAD_MODULE_ADDRESS(objfile)",
+                      XSTRING (FETCH_TLS_LOAD_MODULE_ADDRESS (objfile)));
+#endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: fetch_tls_load_module_address = <0x%lx>\n",
+                      (long) current_gdbarch->fetch_tls_load_module_address);
 #ifdef TARGET_FLOAT_BIT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_FLOAT_BIT # %s\n",
@@ -3040,6 +3061,30 @@ set_gdbarch_remote_translate_xfer_address (struct gdbarch *gdbarch,
                                            gdbarch_remote_translate_xfer_address_ftype remote_translate_xfer_address)
 {
   gdbarch->remote_translate_xfer_address = remote_translate_xfer_address;
+}
+
+int
+gdbarch_fetch_tls_load_module_address_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->fetch_tls_load_module_address != NULL;
+}
+
+CORE_ADDR
+gdbarch_fetch_tls_load_module_address (struct gdbarch *gdbarch, struct objfile *objfile)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->fetch_tls_load_module_address != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_fetch_tls_load_module_address called\n");
+  return gdbarch->fetch_tls_load_module_address (objfile);
+}
+
+void
+set_gdbarch_fetch_tls_load_module_address (struct gdbarch *gdbarch,
+                                           gdbarch_fetch_tls_load_module_address_ftype fetch_tls_load_module_address)
+{
+  gdbarch->fetch_tls_load_module_address = fetch_tls_load_module_address;
 }
 
 CORE_ADDR

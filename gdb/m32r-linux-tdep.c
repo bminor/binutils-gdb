@@ -419,6 +419,10 @@ m32r_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Core file support.  */
   set_gdbarch_regset_from_core_section
     (gdbarch, m32r_linux_regset_from_core_section);
+
+  /* Enable TLS support.  */
+  set_gdbarch_fetch_tls_load_module_address (gdbarch,
+                                             svr4_fetch_objfile_link_map);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

@@ -1195,6 +1195,10 @@ mips_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_skip_solib_resolver (gdbarch, mips_linux_skip_resolver);
 
   set_gdbarch_software_single_step (gdbarch, mips_software_single_step);
+
+  /* Enable TLS support.  */
+  set_gdbarch_fetch_tls_load_module_address (gdbarch,
+                                             svr4_fetch_objfile_link_map);
 }
 
 void

@@ -188,7 +188,8 @@ dwarf_expr_tls_address (void *baton, CORE_ADDR offset)
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
   volatile CORE_ADDR addr = 0;
 
-  if (target_get_thread_local_address_p ())
+  if (target_get_thread_local_address_p ()
+      && gdbarch_fetch_tls_load_module_address_p (current_gdbarch))
     {
       ptid_t ptid = inferior_ptid;
       struct objfile *objfile = debaton->objfile;
@@ -196,7 +197,21 @@ dwarf_expr_tls_address (void *baton, CORE_ADDR offset)
 
       TRY_CATCH (ex, RETURN_MASK_ALL)
 	{
-	  addr = target_get_thread_local_address (ptid, objfile, offset);
+	  CORE_ADDR lm_addr;
+	  
+	  /* Fetch the load module address for this objfile.  */
+	  lm_addr = gdbarch_fetch_tls_load_module_address (current_gdbarch,
+	                                                   objfile);
+	  /* If it's 0, throw the appropriate exception.  */
+	  if (lm_addr == 0)
+	    {
+	      struct exception e
+		= { RETURN_ERROR, TLS_LOAD_MODULE_NOT_FOUND_ERROR, 0 };
+
+	      throw_exception (e);
+	    }
+
+	  addr = target_get_thread_local_address (ptid, lm_addr, offset);
 	}
       /* If an error occurred, print TLS related messages here.  Otherwise,
          throw the error to some higher catcher.  */

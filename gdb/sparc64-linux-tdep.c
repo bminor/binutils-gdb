@@ -22,6 +22,7 @@
 #include "defs.h"
 #include "gdbarch.h"
 #include "osabi.h"
+#include "solib-svr4.h"
 
 #include "sparc64-tdep.h"
 
@@ -35,6 +36,10 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* ... but doesn't have kernel-assisted single-stepping support.  */
   set_gdbarch_software_single_step (gdbarch, sparc_software_single_step);
+
+  /* Enable TLS support.  */
+  set_gdbarch_fetch_tls_load_module_address (gdbarch,
+                                             svr4_fetch_objfile_link_map);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

@@ -566,6 +566,9 @@ v:=:CORE_ADDR:decr_pc_after_break:::0:::0
 v:=:CORE_ADDR:deprecated_function_start_offset:::0:::0
 
 m::void:remote_translate_xfer_address:struct regcache *regcache, CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len:regcache, gdb_addr, gdb_len, rem_addr, rem_len::generic_remote_translate_xfer_address::0
+
+# Fetch the target specific address used to represent a load module.
+F:=:CORE_ADDR:fetch_tls_load_module_address:struct objfile *objfile:objfile
 #
 v:=:CORE_ADDR:frame_args_skip:::0:::0
 M::CORE_ADDR:unwind_pc:struct frame_info *next_frame:next_frame

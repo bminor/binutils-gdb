@@ -411,7 +411,7 @@ struct target_ops
        thread-local storage hasn't been allocated yet, this function
        may return an error.  */
     CORE_ADDR (*to_get_thread_local_address) (ptid_t ptid,
-					      struct objfile *objfile,
+					      CORE_ADDR load_module_addr,
 					      CORE_ADDR offset);
 
     /* Perform partial transfers on OBJECT.  See target_read_partial

@@ -1,3 +1,34 @@
+2005-03-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdbarch.sh (fetch_tls_load_module_address): New architecture method.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* dwarf2loc.c (dwarf_expr_tls_address): Fetch TLS load module
+	address and pass this address, instead of the objfile address, to
+	target_get_thread_local_address().
+	* linux-thread-db.c (thread_db_get_thread_local_address): Change
+	second parameter from type ``struct objfile *'' to CORE_ADDR.  Do
+	not call svr4_fetch_objfile_link_map() to fetch the load module
+	address.
+	* target.h (struct target_ops): Change second parameter of
+	``to_get_thread_local_address'' from ``struct objfile *'' to
+	``CORE_ADDR''.
+	* alpha-linux-tdep.c (solib-svr4.h): Include.
+	(alpha_linux_init_abi): Register TLS load module fetcher.
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Likewise.
+	* hppa-linux-tdep.c (hppa_linux_init_abi): Likewise.
+	* i386-linux-tdep.c (i386_linux_init_abi): Likewise.
+	* ia64-linux-tdep.c (solib-svr4.h): Include.
+	(ia64_linux_init_abi): Register TLS load module fetcher.
+	* m32r-linux-tdep.c (m32r_linux_init_abi): Likewise.
+	* m68klinux-tdep.c (m68k_linux_init_abi): Likewise.
+	* mips-linux-tdep.c (mips_linux_init_abi): Likewise.
+	* s390-tdep.c (s390_gdbarch_init): Likewise.
+	* sparc-linux-tdep.c (sparc32_linux_init_abi): Likewise.
+	* sparc64-linux-tdep.c (solib-svr4.h): Include.
+	(sparc64_linux_init_abi): Register TLS load module fetcher.
+	* Makefile.in (alpha-linux-tdep.o, ia64-linux-tdep.o)
+	(sparc-linux-tdep.o): Update dependencies.
+
 2005-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* c-valprint.c (c_value_print): Fix up some formatting.  Use

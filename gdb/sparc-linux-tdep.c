@@ -266,6 +266,10 @@ sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
 
   frame_unwind_append_sniffer (gdbarch, sparc32_linux_sigtramp_frame_sniffer);
+
+  /* Enable TLS support.  */
+  set_gdbarch_fetch_tls_load_module_address (gdbarch,
+                                             svr4_fetch_objfile_link_map);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
