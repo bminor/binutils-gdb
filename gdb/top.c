@@ -1642,8 +1642,6 @@ show_commands (char *args, int from_tty)
      than the number of the last command).  Relative to history_base.  */
   int hist_len;
 
-extern HIST_ENTRY *history_get (int);
-
   /* Print out some of the commands from the command history.  */
   /* First determine the length of the history list.  */
   hist_len = history_size;

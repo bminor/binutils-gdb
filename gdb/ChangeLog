@@ -1,5 +1,10 @@
 2001-07-16  Elena Zannoni  <ezannoni@redhat.com>
 
+        * top.c (show_commands): Remove extern decl of history_get, it's
+	already in readline/history.h.
+	
+2001-07-16  Elena Zannoni  <ezannoni@redhat.com>
+
         * top.c (is_complete_command, init_cmd_lists, init_cli_cmds,
         execute_user_command, do_setshow_command, get_prompt, init_proc,
         serial_log_command): Remove extern declarations.  Include
