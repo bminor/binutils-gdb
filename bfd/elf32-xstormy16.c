@@ -840,10 +840,6 @@ xstormy16_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  sym = local_syms + r_symndx;
 	  sec = local_sections [r_symndx];
 	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
-
-	  name = bfd_elf_string_from_elf_section
-	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
-	  name = (name == NULL) ? bfd_section_name (input_bfd, sec) : name;
 	}
       else
 	{
@@ -853,6 +849,16 @@ xstormy16_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h, sec, relocation,
 				   unresolved_reloc, warned);
+	}
+
+      if (h != NULL)
+	name = h->root.root.string;
+      else
+	{
+	  name = (bfd_elf_string_from_elf_section
+		  (input_bfd, symtab_hdr->sh_link, sym->st_name));
+	  if (name == NULL || *name == '\0')
+	    name = bfd_section_name (input_bfd, sec);
 	}
 
       switch (ELF32_R_TYPE (rel->r_info))

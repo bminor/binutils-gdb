@@ -1,3 +1,8 @@
+2004-10-18  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-xstormy16.c (xstormy16_elf_relocate_section): Compute
+	'name' for relocs against both local and global symbols.
+
 2004-10-16  Daniel Jacobowitz  <dan@debian.org>
 
 	* bfd-in2.h: Regenerate.
