@@ -161,8 +161,29 @@ print_frame_info (fi, level, source, args)
   register char *funname = 0;
   enum language funlang = language_unknown;
   int numargs;
+  char buf[MAX_REGISTER_RAW_SIZE];
+  CORE_ADDR sp;
 
-  if (PC_IN_CALL_DUMMY (fi->pc, read_sp (), fi->frame))
+  /* Get the value of SP_REGNUM relative to the frame.  */
+  get_saved_register (buf, (int *)NULL, (CORE_ADDR *)NULL,
+		      FRAME_INFO_ID (fi), SP_REGNUM, (enum lval_type *)NULL);
+  sp = extract_address (buf, REGISTER_RAW_SIZE (SP_REGNUM));
+
+  /* This is not a perfect test, because if a function alloca's some
+     memory, puts some code there, and then jumps into it, then the test
+     will succeed even though there is no call dummy.  A better
+     solution would be to keep track of where the call dummies are.
+     Probably the best way to do that is by setting a breakpoint.c
+     breakpoint at the end of the call dummy (wanted anyway, to clean
+     up wait_for_inferior).  Then we know that the sizeof (CALL_DUMMY)
+     (or some such) bytes before that breakpoint are a call dummy.
+     Only problem I see with this approach is figuring out to get rid
+     of the breakpoint whenever the call dummy vanishes (e.g.
+     return_command, or longjmp out of the called function), which we
+     probably can solve (it's very similar to figuring out when a
+     watchpoint on a local variable goes out of scope if it is being
+     watched via something like a 386 debug register).  */
+  if (PC_IN_CALL_DUMMY (fi->pc, sp, fi->frame))
     {
       /* Do this regardless of SOURCE because we don't have any source
 	 to list for this frame.  */
@@ -181,7 +202,8 @@ print_frame_info (fi, level, source, args)
       return;
     }
 
-  sal = find_pc_line (fi->pc, fi->next != NULL);
+  sal = find_pc_line (fi->pc,
+		      fi->next != NULL && fi->next->signal_handler_caller == 0);
   func = find_pc_function (fi->pc);
   if (func)
     {
@@ -191,13 +213,15 @@ print_frame_info (fi, level, source, args)
 	 is compiled with debugging symbols, and the "foo.o" symbol
 	 that is supposed to tell us where the file with debugging symbols
 	 ends has been truncated by ar because it is longer than 15
-	 characters).
+	 characters).  This also occurs if the user uses asm() to create
+	 a function but not stabs for it (in a file compiled -g).
 
 	 So look in the minimal symbol tables as well, and if it comes
 	 up with a larger address for the function use that instead.
 	 I don't think this can ever cause any problems; there shouldn't
-	 be any minimal symbols in the middle of a function.
-	 FIXME:  (Not necessarily true.  What about text labels) */
+	 be any minimal symbols in the middle of a function; if this is
+	 ever changed many parts of GDB will need to be changed (and we'll
+	 create a find_pc_minimal_function or some such).  */
 
       struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
       if (msymbol != NULL
@@ -417,7 +441,8 @@ frame_info (addr_exp, from_tty)
     error ("Invalid frame specified.");
 
   fi = get_frame_info (frame);
-  sal = find_pc_line (fi->pc, fi->next != NULL);
+  sal = find_pc_line (fi->pc,
+		      fi->next != NULL && fi->next->signal_handler_caller == 0);
   func = get_frame_function (frame);
   s = find_pc_symtab(fi->pc);
   if (func)
