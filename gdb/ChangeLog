@@ -1,4 +1,9 @@
-Mon Jul 21 20:10:16 UTC 2003  Brendan Conoboy  <blc@redhat.com>
+2003-08-08  Elena Zannoni  <ezannoni@redhat.com>
+
+	* symtab.c (lookup_symbol_aux): Make sure that is_a_field_of_this
+	contains something meaningful at all times.
+
+Fri Aug  8 00:28:46 UTC 2003  Brendan Conoboy  <blc@redhat.com>
 
 	* configure.host: Set gdb_host_cpu=arm when host_cpu=xscale.
 

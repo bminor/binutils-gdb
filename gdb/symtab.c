@@ -945,6 +945,14 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
 {
   struct symbol *sym;
 
+  /* Make sure we do something sensible with is_a_field_of_this, since
+     the callers that set this parameter to some non-null value will
+     certainly use it later and expect it to be either 0 or 1.
+     If we don't set it, the contents of is_a_field_of_this are
+     undefined.  */
+  if (is_a_field_of_this != NULL)
+    *is_a_field_of_this = 0;
+
   /* Search specified block and its superiors.  Don't search
      STATIC_BLOCK or GLOBAL_BLOCK.  */
 
@@ -961,7 +969,6 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
     {
       struct value *v = current_language->la_value_of_this (0);
 
-      *is_a_field_of_this = 0;
       if (v && check_field (v, name))
 	{
 	  *is_a_field_of_this = 1;
