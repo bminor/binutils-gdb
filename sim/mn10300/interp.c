@@ -41,6 +41,54 @@
 host_callback *mn10300_callback;
 int mn10300_debug;
 
+
+/* simulation target board.  NULL=default configuration */
+static char* board = NULL;
+
+static DECLARE_OPTION_HANDLER (mn10300_option_handler);
+
+enum {
+  OPTION_BOARD = OPTION_START,
+};
+
+static SIM_RC
+mn10300_option_handler (sd, cpu, opt, arg, is_command)
+     SIM_DESC sd;
+     sim_cpu *cpu;
+     int opt;
+     char *arg;
+     int is_command;
+{
+  int cpu_nr;
+  switch (opt)
+    {
+    case OPTION_BOARD:
+      {
+	if (arg)
+	  {
+	    board = zalloc(strlen(arg) + 1);
+	    strcpy(board, arg);
+	  }
+	return SIM_RC_OK;
+      }
+    }
+  
+  return SIM_RC_OK;
+}
+
+static const OPTION mn10300_options[] = 
+{
+/* start-sanitize-am30 */
+#define BOARD_AM32 "am32"
+  { {"board", required_argument, NULL, OPTION_BOARD},
+     '\0', "none" /* rely on compile-time string concatenation for other options */
+           "|" BOARD_AM32
+    , "Customize simulation for a particular board.", mn10300_option_handler },
+/* end-sanitize-am30 */
+
+  { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
+};
+
 #if WITH_COMMON
 #else
 static void dispatch PARAMS ((uint32, uint32, int));
@@ -262,7 +310,6 @@ compare_simops (arg1, arg2)
     return 1;
   return 0;
 }
-
 
 SIM_DESC
 sim_open (kind, cb, abfd, argv)
@@ -894,10 +941,6 @@ sim_load (sd, prog, abfd, from_tty)
 
 /* For compatibility */
 SIM_DESC simulator;
-/* start-sanitize-am30 */
-/* Until the tree root gets moved somewhere else */
-struct hw *hw;
-/* end-sanitize-am30 */
 
 /* These default values correspond to expected usage for the chip.  */
 
@@ -926,6 +969,7 @@ sim_open (kind, cb, abfd, argv)
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     return 0;
+  sim_add_option_table (sd, NULL, mn10300_options);
 
   /* Allocate core managed memory */
   sim_do_command (sd, "memory region 0,0x100000");
@@ -943,115 +987,113 @@ sim_open (kind, cb, abfd, argv)
     }
 
   /* start-sanitize-am30 */
-  hw = hw_tree_create (sd, "core");
-  hw_tree_parse (hw, "/");
-  if (STATE_VERBOSE_P (sd))
-    hw_tree_parse (hw, "/trace? true");
+  if ( NULL != board
+       && (strcmp(board, BOARD_AM32) == 0 ) )
+       {
+	 /* device support for mn1030002 */
+	 /* interrupt controller */
+
+	 sim_hw_parse (sd, "/mn103int@0x34000100/reg 0x34000100 0x7C 0x34000200 0x8 0x3400280 0x8");
+
+	 /* DEBUG: NMI input's */
+	 sim_hw_parse (sd, "/glue@0x30000000/reg 0x30000000 12");
+	 sim_hw_parse (sd, "/glue@0x30000000 > int0 nmirq /mn103int");
+	 sim_hw_parse (sd, "/glue@0x30000000 > int1 watchdog /mn103int");
+	 sim_hw_parse (sd, "/glue@0x30000000 > int2 syserr /mn103int");
+
+	 /* DEBUG: ACK input */
+	 sim_hw_parse (sd, "/glue@0x30002000/reg 0x30002000 4");
+	 sim_hw_parse (sd, "/glue@0x30002000 > int ack /mn103int");
+	 
+	 /* DEBUG: LEVEL output */
+	 sim_hw_parse (sd, "/glue@0x30004000/reg 0x30004000 8");
+	 sim_hw_parse (sd, "/mn103int > nmi int0 /glue@0x30004000");
+	 sim_hw_parse (sd, "/mn103int > level int1 /glue@0x30004000");
+
+	 /* DEBUG: A bunch of interrupt inputs */
+	 sim_hw_parse (sd, "/glue@0x30006000/reg 0x30006000 32");
+	 sim_hw_parse (sd, "/glue@0x30006000 > int0 irq-0 /mn103int");
+	 sim_hw_parse (sd, "/glue@0x30006000 > int1 irq-1 /mn103int");
+	 sim_hw_parse (sd, "/glue@0x30006000 > int2 irq-2 /mn103int");
+	 sim_hw_parse (sd, "/glue@0x30006000 > int3 irq-3 /mn103int");
+	 sim_hw_parse (sd, "/glue@0x30006000 > int4 irq-4 /mn103int");
+	 sim_hw_parse (sd, "/glue@0x30006000 > int5 irq-5 /mn103int");
+	 sim_hw_parse (sd, "/glue@0x30006000 > int6 irq-6 /mn103int");
+	 sim_hw_parse (sd, "/glue@0x30006000 > int7 irq-7 /mn103int");
+
+	 /* processor interrupt device */
+
+	 /* the device */
+	 sim_hw_parse (sd, "/mn103cpu@0x20000000");
+	 sim_hw_parse (sd, "/mn103cpu@0x20000000/reg 0x20000000 0x42");
+
+	 /* DEBUG: ACK output wired upto a glue device */
+	 sim_hw_parse (sd, "/glue@0x20002000");
+	 sim_hw_parse (sd, "/glue@0x20002000/reg 0x20002000 4");
+	 sim_hw_parse (sd, "/mn103cpu > ack int0 /glue@0x20002000");
+
+	 /* DEBUG: RESET/NMI/LEVEL wired up to a glue device */
+	 sim_hw_parse (sd, "/glue@0x20004000");
+	 sim_hw_parse (sd, "/glue@0x20004000/reg 0x20004000 12");
+	 sim_hw_parse (sd, "/glue@0x20004000 > int0 reset /mn103cpu");
+	 sim_hw_parse (sd, "/glue@0x20004000 > int1 nmi /mn103cpu");
+	 sim_hw_parse (sd, "/glue@0x20004000 > int2 level /mn103cpu");
+
+	 /* REAL: The processor wired up to the real interrupt controller */
+	 sim_hw_parse (sd, "/mn103cpu > ack ack /mn103int");
+	 sim_hw_parse (sd, "/mn103int > level level /mn103cpu");
+	 sim_hw_parse (sd, "/mn103int > nmi nmi /mn103cpu");
 
 
-  /* interrupt controller */
+	 /* PAL */
 
-  hw_tree_parse (hw, "/mn103int@0x34000100/reg 0x34000100 0x68 0x34000200 0x8 0x3400280 0x8");
-  if (STATE_VERBOSE_P (sd))
-    hw_tree_parse (hw, "/mn103int/trace? true");
+	 /* the device */
+	 sim_hw_parse (sd, "/pal@0x31000000");
+	 sim_hw_parse (sd, "/pal@0x31000000/reg 0x31000000 64");
+	 sim_hw_parse (sd, "/pal@0x31000000/poll? true");
 
-  /* DEBUG: NMI input's */
-  hw_tree_parse (hw, "/glue@0x30000000/reg 0x30000000 12");
-  if (STATE_VERBOSE_P (sd))
-    hw_tree_parse (hw, "/glue@0x30000000/trace? true");
-  hw_tree_parse (hw, "/glue@0x30000000 > int0 nmirq /mn103int");
-  hw_tree_parse (hw, "/glue@0x30000000 > int1 watchdog /mn103int");
-  hw_tree_parse (hw, "/glue@0x30000000 > int2 syserr /mn103int");
-
-  /* DEBUG: ACK input */
-  hw_tree_parse (hw, "/glue@0x30002000/reg 0x30002000 4");
-  if (STATE_VERBOSE_P (sd))
-    hw_tree_parse (hw, "/glue@0x30002000/trace? true");
-  hw_tree_parse (hw, "/glue@0x30002000 > int ack /mn103int");
-
-  /* DEBUG: LEVEL output */
-  hw_tree_parse (hw, "/glue@0x30004000/reg 0x30004000 8");
-  if (STATE_VERBOSE_P (sd))
-    hw_tree_parse (hw, "/glue@0x30004000/trace? true");
-  hw_tree_parse (hw, "/mn103int > nmi int0 /glue@0x30004000");
-  hw_tree_parse (hw, "/mn103int > level int1 /glue@0x30004000");
-
-  /* DEBUG: A bunch of interrupt inputs */
-  hw_tree_parse (hw, "/glue@0x30006000/reg 0x30006000 32");
-  if (STATE_VERBOSE_P (sd))
-    hw_tree_parse (hw, "/glue@0x30006000/trace? true");
-  hw_tree_parse (hw, "/glue@0x30006000 > int0 irq-0 /mn103int");
-  hw_tree_parse (hw, "/glue@0x30006000 > int1 irq-1 /mn103int");
-  hw_tree_parse (hw, "/glue@0x30006000 > int2 irq-2 /mn103int");
-  hw_tree_parse (hw, "/glue@0x30006000 > int3 irq-3 /mn103int");
-  hw_tree_parse (hw, "/glue@0x30006000 > int4 irq-4 /mn103int");
-  hw_tree_parse (hw, "/glue@0x30006000 > int5 irq-5 /mn103int");
-  hw_tree_parse (hw, "/glue@0x30006000 > int6 irq-6 /mn103int");
-  hw_tree_parse (hw, "/glue@0x30006000 > int7 irq-7 /mn103int");
+	 /* DEBUG: PAL wired up to a glue device */
+	 sim_hw_parse (sd, "/glue@0x31002000");
+	 sim_hw_parse (sd, "/glue@0x31002000/reg 0x31002000 16");
+	 sim_hw_parse (sd, "/pal@0x31000000 > countdown int0 /glue@0x31002000");
+	 sim_hw_parse (sd, "/pal@0x31000000 > timer int1 /glue@0x31002000");
+	 sim_hw_parse (sd, "/pal@0x31000000 > int int2 /glue@0x31002000");
+	 sim_hw_parse (sd, "/glue@0x31002000 > int0 int3 /glue@0x31002000");
+	 sim_hw_parse (sd, "/glue@0x31002000 > int1 int3 /glue@0x31002000");
+	 sim_hw_parse (sd, "/glue@0x31002000 > int2 int3 /glue@0x31002000");
+	 
+	 /* REAL: The PAL wired up to the real interrupt controller */
+	 sim_hw_parse (sd, "/pal@0x31000000 > countdown irq-0 /mn103int");
+	 sim_hw_parse (sd, "/pal@0x31000000 > timer irq-1 /mn103int");
+	 sim_hw_parse (sd, "/pal@0x31000000 > int irq-2 /mn103int");
+	 
+	 /* 8 and 16 bit timers */
+	 sim_hw_parse (sd, "/mn103tim@0x34001000/reg 0x34001000 36 0x34001080 100");
+  
+	 /* Hook timer interrupts up to interrupt controller */
+	 sim_hw_parse (sd, "/mn103tim > timer-0-underflow timer-0-underflow /mn103int");
+	 sim_hw_parse (sd, "/mn103tim > timer-1-underflow timer-1-underflow /mn103int");
+	 sim_hw_parse (sd, "/mn103tim > timer-2-underflow timer-2-underflow /mn103int");
+	 sim_hw_parse (sd, "/mn103tim > timer-3-underflow timer-3-underflow /mn103int");
+	 sim_hw_parse (sd, "/mn103tim > timer-4-underflow timer-4-underflow /mn103int");
+	 sim_hw_parse (sd, "/mn103tim > timer-5-underflow timer-5-underflow /mn103int");
+	 sim_hw_parse (sd, "/mn103tim > timer-6-underflow timer-6-underflow /mn103int");
+	 sim_hw_parse (sd, "/mn103tim > timer-6-compare-a timer-6-compare-a /mn103int");
+	 sim_hw_parse (sd, "/mn103tim > timer-6-compare-b timer-6-compare-b /mn103int");
 
 
-  /* processor interrupt device */
-
-  /* the device */
-  hw_tree_parse (hw, "/mn103cpu@0x20000000");
-  if (STATE_VERBOSE_P (sd))
-    hw_tree_parse (hw, "/mn103cpu@0x20000000/trace? true");
-  hw_tree_parse (hw, "/mn103cpu@0x20000000/reg 0x20000000 0x42");
-
-  /* DEBUG: ACK output wired upto a glue device */
-  hw_tree_parse (hw, "/glue@0x20002000");
-  if (STATE_VERBOSE_P (sd))
-    hw_tree_parse (hw, "/glue@0x20002000/trace? true");
-  hw_tree_parse (hw, "/glue@0x20002000/reg 0x20002000 4");
-  hw_tree_parse (hw, "/mn103cpu > ack int0 /glue@0x20002000");
-
-  /* DEBUG: RESET/NMI/LEVEL wired up to a glue device */
-  hw_tree_parse (hw, "/glue@0x20004000");
-  if (STATE_VERBOSE_P (sd))
-    hw_tree_parse (hw, "/glue@0x20004000/trace? true");
-  hw_tree_parse (hw, "/glue@0x20004000/reg 0x20004000 12");
-  hw_tree_parse (hw, "/glue@0x20004000 > int0 reset /mn103cpu");
-  hw_tree_parse (hw, "/glue@0x20004000 > int1 nmi /mn103cpu");
-  hw_tree_parse (hw, "/glue@0x20004000 > int2 level /mn103cpu");
-
-  /* REAL: The processor wired up to the real interrupt controller */
-#if 1
-  hw_tree_parse (hw, "/mn103cpu > ack ack /mn103int");
-  hw_tree_parse (hw, "/mn103int > level level /mn103cpu");
-  hw_tree_parse (hw, "/mn103int > nmi nmi /mn103cpu");
-#endif
-
-
-  /* PAL */
-
-  /* the device */
-  hw_tree_parse (hw, "/pal@0x31000000");
-  if (STATE_VERBOSE_P (sd))
-    hw_tree_parse (hw, "/pal@0x31000000/trace? true");
-  hw_tree_parse (hw, "/pal@0x31000000/reg 0x31000000 64");
-
-  /* DEBUG: PAL wired up to a glue device */
-  hw_tree_parse (hw, "/glue@0x31002000");
-  if (STATE_VERBOSE_P (sd))
-    hw_tree_parse (hw, "/glue@0x31002000/trace? true");
-  hw_tree_parse (hw, "/glue@0x31002000/reg 0x31002000 16");
-  hw_tree_parse (hw, "/pal@0x31000000 > countdown int0 /glue@0x31002000");
-  hw_tree_parse (hw, "/pal@0x31000000 > timer int1 /glue@0x31002000");
-  hw_tree_parse (hw, "/pal@0x31000000 > int int2 /glue@0x31002000");
-  hw_tree_parse (hw, "/glue@0x31002000 > int0 int3 /glue@0x31002000");
-  hw_tree_parse (hw, "/glue@0x31002000 > int1 int3 /glue@0x31002000");
-  hw_tree_parse (hw, "/glue@0x31002000 > int2 int3 /glue@0x31002000");
-
-  /* REAL: The PAL wired up to the real interrupt controller */
-  hw_tree_parse (hw, "/pal@0x31000000 > countdown irq-0 /mn103int");
-  hw_tree_parse (hw, "/pal@0x31000000 > timer irq-1 /mn103int");
-  hw_tree_parse (hw, "/pal@0x31000000 > int irq-2 /mn103int");
-
-
-
-  hw_tree_finish (hw);
-  if (STATE_VERBOSE_P (sd))
-    hw_tree_print (hw);
+	 /* Serial devices 0,1,2 */
+	 sim_hw_parse (sd, "/mn103ser@0x34000800/reg 0x34000800 48");
+  
+	 /* Hook serial interrupts up to interrupt controller */
+	 sim_hw_parse (sd, "/mn103ser > serial-0-receive serial-0-receive /mn103int");
+	 sim_hw_parse (sd, "/mn103ser > serial-0-transmit serial-0-transmit /mn103int");
+	 sim_hw_parse (sd, "/mn103ser > serial-1-receive serial-0-receive /mn103int");
+	 sim_hw_parse (sd, "/mn103ser > serial-1-transmit serial-0-transmit /mn103int");
+	 sim_hw_parse (sd, "/mn103ser > serial-2-receive serial-0-receive /mn103int");
+	 sim_hw_parse (sd, "/mn103ser > serial-2-transmit serial-0-transmit /mn103int");
+       }
+  
   /* end-sanitize-am30 */
 
   /* check for/establish the a reference program image */
