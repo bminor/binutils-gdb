@@ -210,8 +210,8 @@ case "${host}" in
   i[3456]86-*-msdosdjgpp*)
     host_makefile_frag="${host_makefile_frag} config/mh-go32"
     ;;
-  *-cygwin32*)
-    host_makefile_frag="${host_makefile_frag} config/mh-cygwin32"
+  *-cygwin*)
+    host_makefile_frag="${host_makefile_frag} config/mh-cygwin"
     ;;
   *-mingw32*)
     host_makefile_frag="${host_makefile_frag} config/mh-mingw32"
@@ -299,8 +299,8 @@ if [ x${shared} = xyes ]; then
     hppa*)
       host_makefile_frag="${host_makefile_frag} config/mh-papic"
       ;;
-    i[3456]86-*-cygwin32*)
-      # We don't want -fPIC on cygwin32.
+    i[3456]86-*-cygwin*)
+      # We don't want -fPIC on Cygwin.
       ;;
     i[3456]86-*)
       host_makefile_frag="${host_makefile_frag} config/mh-x86pic"
@@ -528,7 +528,7 @@ case "${host}" in
 	  configdirs="$configdirs dosrel" ;;
 	i[3456]86-*-mingw32*)
 	  configdirs="$configdirs dosrel" ;;
-	*-cygwin32*)
+	*-cygwin*)
 	  configdirs="$configdirs dosrel" ;;
 esac
 
@@ -561,7 +561,7 @@ case "${host}" in
     # noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr uudecode dejagnu diff guile perl apache inet itcl tix db snavigator gnuserv"
      noconfigdirs="expect dejagnu cvs autoconf automake send-pr gprof rcs guile perl texinfo apache inet libtool"
 	;;
-  *-*-cygwin32)
+  *-*-cygwin*)
      noconfigdirs="autoconf automake send-pr gprof rcs guile perl texinfo apache inet"
     ;;
   *-*-windows*)
@@ -696,15 +696,15 @@ case "${target}" in
          ;;
     esac
     ;;    
-  *-*-cygwin32*)
+  *-*-cygwin*)
     target_configdirs="$target_configdirs target-winsup"
     noconfigdirs="$noconfigdirs target-gperf target-libgloss"
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
 
-    # Can't build gdb for cygwin32 if not native.
+    # Can't build gdb for Cygwin if not native.
     case "${host}" in
-      *-*-cygwin32*) ;; # keep gdb tcl tk expect etc.
+      *-*-cygwin*) ;; # keep gdb tcl tk expect etc.
       *) noconfigdirs="$noconfigdirs gdb tcl tk expect itcl tix libgui db snavigator gnuserv"
 # start-sanitize-ide
          noconfigdirs="$noconfigdirs libide libidetcl vmake jstools"
