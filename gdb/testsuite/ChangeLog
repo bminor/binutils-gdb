@@ -1,3 +1,8 @@
+Sat Jun 18 12:51:34 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* lib/gdb.exp (string_to_regexp): Set a default result.
+	(default_gdb_start): Fix misleading message.
+
 Wed Jun 15 12:10:10 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* config/mt-a29k-udi, config/mt-i960-nindy, config/mt-sparc-aout:
