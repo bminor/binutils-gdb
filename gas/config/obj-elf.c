@@ -101,7 +101,7 @@ obj_elf_section (xxx)
       char *p, oldp;
 
       input_line_pointer++;
-      if (*input_line_pointer != '#')
+      if (*input_line_pointer != '#' && *input_line_pointer != '@')
 	{
 	  as_bad ("unrecognized syntax in .section command");
 	  ignore_rest_of_line ();
@@ -115,6 +115,7 @@ obj_elf_section (xxx)
 
       CHECK ("write", SEC_READONLY, 1);
       CHECK ("alloc", SEC_ALLOC, 0);
+      CHECK ("execinstr", SEC_CODE, 1);
 #undef CHECK
 
       p = input_line_pointer;

@@ -1,3 +1,8 @@
+Mon Jul 12 11:15:34 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* config/obj-elf.c (obj_elf_section): Allow `@' to introduce an
+	attribute name.  Handle `execinstr' attribute.
+
 Mon Jul 12 07:22:28 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/tc-mips.c (mips_ip): Don't warn on 'i' or 'j' mismatch if
