@@ -1,3 +1,23 @@
+start-sanitize-arc
+Thu Apr  6 20:36:55 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* arc.h (arc_get_opcode_mach): Define prototype.
+end-sanitize-arc
+
+Mon Mar 13 21:30:01 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	Mon Feb 27 08:36:39 1995  Bryan Ford  <baford@cs.utah.edu>
+	* i386.h: added missing Data16/Data32 flags to a few instructions.
+
+Wed Mar  8 15:19:53 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips.h (OP_MASK_FR, OP_SH_FR): Define.
+	(OP_MASK_BCC, OP_SH_BCC): Define.
+	(OP_MASK_PREFX, OP_SH_PREFX): Define.
+	(OP_MASK_CCC, OP_SH_CCC): Define.
+	(INSN_READ_FPR_R): Define.
+	(INSN_RFE): Delete.
+
 Wed Mar  8 03:13:23 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* m68k.h (enum m68k_architecture): Deleted.

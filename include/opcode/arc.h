@@ -20,16 +20,26 @@
    The tables currently use bit masks to say whether the instruction or
    whatever is supported by a particular cpu.  This lets us have one entry
    apply to several cpus.
-   There may be more ARCs in the future, beyond the current project.  */
+   There may be more ARCs in the future, beyond the current project.
 
-/* The `base' cpu must be 0 (table entries are omitted for the base cpu).  */
+   This duplicates bfd_mach_arc_xxx.  For now I wish to isolate this from bfd
+   and bfd from this.  Also note that these numbers are bit values as we want
+   to allow for things available on more than one ARC (but not necessarily all
+   ARCs).  */
+
+/* The `base' cpu must be 0 (table entries are omitted for the base cpu).
+   The cpu type is treated independently of endianness.
+   The complete `mach' number includes endianness.  */
 #define ARC_MACH_BASE 0
 #define ARC_MACH_HOST 1
 #define ARC_MACH_GRAPHICS 2
 #define ARC_MACH_AUDIO 4
+#define ARC_MACH_BIG 8
 
 /* Mask of number of bits necessary to record cpu type.  */
-#define ARC_MACH_MASK 7
+#define ARC_MACH_CPU_MASK 7
+/* Mask of number of bits necessary to record cpu type + endianness.  */
+#define ARC_MACH_MASK 15
 
 /* Type to denote an ARC instruction (at least a 32 bit unsigned long).  */
 typedef unsigned long arc_insn;
@@ -41,6 +51,8 @@ struct arc_opcode {
 
 /* Values for `flags'.  */
 
+/* Return CPU number, given flag bits.  */
+#define ARC_OPCODE_CPU(bits) ((bits) & ARC_MACH_CPU_MASK)
 /* Return MACH number, given flag bits.  */
 #define ARC_OPCODE_MACH(bits) ((bits) & ARC_MACH_MASK)
 };
@@ -53,6 +65,8 @@ struct arc_operand_value {
 
 /* Values for `flags'.  */
 
+/* Return CPU number, given flag bits.  */
+#define ARC_OPVAL_CPU(bits) ((bits) & ARC_MACH_CPU_MASK)
 /* Return MACH number, given flag bits.  */
 #define ARC_OPVAL_MACH(bits) ((bits) & ARC_MACH_MASK)
 };
@@ -78,30 +92,37 @@ struct arc_operand {
 
 /* This operand is a relative branch displacement.  The disassembler
    prints these symbolically if possible.  */
-#define ARC_OPERAND_RELATIVE 2
+#define ARC_OPERAND_RELATIVE_BRANCH 2
 
 /* This operand is an absolute branch address.  The disassembler
    prints these symbolically if possible.  */
-#define ARC_OPERAND_ABSOLUTE 4
+#define ARC_OPERAND_ABSOLUTE_BRANCH 4
+
+/* This operand is an address.  The disassembler
+   prints these symbolically if possible.  */
+#define ARC_OPERAND_ADDRESS 8
+
+/* This operand is a long immediate value.  */
+#define ARC_OPERAND_LIMM 0x10
 
 /* This operand takes signed values.  */
-#define ARC_OPERAND_SIGNED 8
+#define ARC_OPERAND_SIGNED 0x20
 
 /* This operand takes signed values, but also accepts a full positive
    range of values.  That is, if bits is 16, it takes any value from
    -0x8000 to 0xffff.  */
-#define ARC_OPERAND_SIGNOPT 0x10
+#define ARC_OPERAND_SIGNOPT 0x40
 
 /* This operand should be regarded as a negative number for the
    purposes of overflow checking (i.e., the normal most negative
    number is disallowed and one more than the normal most positive
    number is allowed).  This flag will only be set for a signed
    operand.  */
-#define ARC_OPERAND_NEGATIVE 0x20
+#define ARC_OPERAND_NEGATIVE 0x80
 
 /* This operand doesn't really exist.  The program uses these operands
    in special ways.  */
-#define ARC_OPERAND_FAKE 0x40
+#define ARC_OPERAND_FAKE 0x100
 
 /* Modifier values.  */
 /* A dot is required before a suffix.  Eg: .le  */
@@ -176,6 +197,8 @@ struct arc_operand {
    These should be passed to arc_init_opcode_tables.
    At present, all there is is the cpu type.  */
 
+/* CPU number, given value passed to `arc_init_opcode_tables'.  */
+#define ARC_HAVE_CPU(bits) ((bits) & ARC_MACH_CPU_MASK)
 /* MACH number, given value passed to `arc_init_opcode_tables'.  */
 #define ARC_HAVE_MACH(bits) ((bits) & ARC_MACH_MASK)
 
@@ -207,6 +230,7 @@ extern const int arc_reg_names_count;
 extern unsigned char arc_operand_map[];
 
 /* Utility fns in arc-opc.c.  */
+int arc_get_opcode_mach PARAMS ((int, int));
 /* `arc_opcode_init_tables' must be called before `arc_xxx_supported'.  */
 void arc_opcode_init_tables PARAMS ((int));
 void arc_opcode_init_insert PARAMS ((void));
