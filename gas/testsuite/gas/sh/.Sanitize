@@ -23,10 +23,10 @@ Do-first:
 # with rm -rf.
 
 Things-to-keep:
-
-Things-to-lose:
 basic.exp
 fp.s
+
+Things-to-lose:
 
 Do-last:
 
