@@ -1,3 +1,8 @@
+1999-09-06  Nick Clifton  <nickc@cygnus.com>
+
+	* elflink.h (elf_gc_record_vtentry): Use bfd_zmalloc and
+	bfd_realloc instead of calloc and realloc.
+
 1999-09-04  Steve Chamberlain  <sac@pobox.com>
 
 	* cpu-pj.c: New file.

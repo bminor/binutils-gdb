@@ -6419,30 +6419,31 @@ elf_gc_record_vtentry (abfd, sec, h, addend)
 
       /* Allocate one extra entry for use as a "done" flag for the
 	 consolidation pass.  */
-      bytes = (size / FILE_ALIGN + 1) * sizeof(boolean);
+      bytes = (size / FILE_ALIGN + 1) * sizeof (boolean);
 
       if (ptr)
 	{
-	  size_t oldbytes;
+	  ptr = bfd_realloc (ptr - 1, bytes);
+	  
+	  if (ptr != NULL)
+	    {
+	      size_t oldbytes;
 
-	  ptr = realloc (ptr-1, bytes);
-	  if (ptr == NULL)
-	    return false;
-
-	  oldbytes = (h->vtable_entries_size/FILE_ALIGN + 1) * sizeof(boolean);
-	  memset (((char *)ptr) + oldbytes, 0, bytes - oldbytes);
+	      oldbytes = (h->vtable_entries_size/FILE_ALIGN + 1) * sizeof (boolean);
+	      memset (((char *)ptr) + oldbytes, 0, bytes - oldbytes);
+	    }
 	}
       else
-	{
-	  ptr = calloc (1, bytes);
-	  if (ptr == NULL)
-	    return false;
-	}
+	ptr = bfd_zmalloc (bytes);
 
+      if (ptr == NULL)
+	return false;
+      
       /* And arrange for that done flag to be at index -1.  */
-      h->vtable_entries_used = ptr+1;
+      h->vtable_entries_used = ptr + 1;
       h->vtable_entries_size = size;
     }
+  
   h->vtable_entries_used[addend / FILE_ALIGN] = true;
 
   return true;
