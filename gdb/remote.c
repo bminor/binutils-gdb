@@ -221,10 +221,6 @@ static int timeout = 2;
 int icache;
 #endif
 
-/* FIXME: This is a hack which lets this file compile.  It should be getting
-   this setting from remote-utils.c.  */
-#define remote_debug (0)
-
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
    remote_open knows that we don't have a file open when the program
    starts.  */
@@ -409,7 +405,7 @@ remote_interrupt (signo)
   /* If this doesn't work, try more severe steps.  */
   signal (signo, remote_interrupt_twice);
   
-  if (remote_debug)
+  if (sr_get_debug ())
     printf ("remote_interrupt called\n");
 
   SERIAL_WRITE (remote_desc, "\003", 1); /* Send a ^C */
@@ -933,7 +929,7 @@ putpkt (buf)
 
   while (1)
     {
-      if (remote_debug)
+      if (sr_get_debug ())
 	{
 	  *p = '\0';
 	  printf ("Sending packet: %s...", buf2);  fflush(stdout);
@@ -949,7 +945,7 @@ putpkt (buf)
 	  switch (ch)
 	    {
 	    case '+':
-	      if (remote_debug)
+	      if (sr_get_debug ())
 		printf("Ack\n");
 	      return;
 	    case SERIAL_TIMEOUT:
@@ -959,7 +955,7 @@ putpkt (buf)
 	    case SERIAL_EOF:
 	      error ("putpkt: EOF while trying to read ACK");
 	    default:
-	      if (remote_debug)
+	      if (sr_get_debug ())
 		printf ("%02X %c ", ch&0xFF, ch);
 	      continue;
 	    }
@@ -1000,7 +996,7 @@ getpkt (buf, forever)
 	  if (forever)
 	    continue;
 	  if (++retries >= MAX_RETRIES)
-	    if (remote_debug) puts_filtered ("Timed out.\n");
+	    if (sr_get_debug ()) puts_filtered ("Timed out.\n");
 	  goto out;
 	}
 
@@ -1018,13 +1014,13 @@ getpkt (buf, forever)
 	  c = readchar ();
 	  if (c == SERIAL_TIMEOUT)
 	    {
-	      if (remote_debug)
+	      if (sr_get_debug ())
 		puts_filtered ("Timeout in mid-packet, retrying\n");
 	      goto whole;		/* Start a new packet, count retries */
 	    } 
 	  if (c == '$')
 	    {
-	      if (remote_debug)
+	      if (sr_get_debug ())
 		puts_filtered ("Saw new packet start in middle of old one\n");
 	      goto whole;		/* Start a new packet, count retries */
 	    }
@@ -1069,7 +1065,7 @@ out:
 
   SERIAL_WRITE (remote_desc, "+", 1);
 
-  if (remote_debug)
+  if (sr_get_debug ())
     fprintf (stderr,"Packet received: %s\n", buf);
 }
 
