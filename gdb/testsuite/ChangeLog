@@ -1,3 +1,7 @@
+2004-06-29  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/bigcore.exp: Skip test on Cygwin.
+
 2004-06-28  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.hp/gdb.base-hp/reg.exp: Accept both old and new gdb output
