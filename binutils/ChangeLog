@@ -1,5 +1,7 @@
 Mon Oct 28 16:58:14 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ieee.c (ieee_array_type): Remember the correct size.
+
 	* ieee.c (ieee_finish_compilation_unit): Permit coalescing ranges
 	that are up to 0x1000 bytes apart, not just 64.
 	(ieee_add_bb11_blocks): Don't bother to emit a BB11 that is less

@@ -49,6 +49,8 @@
 
 struct stab_handle
 {
+  /* The BFD.  */
+  bfd *abfd;
   /* True if this is stabs in sections.  */
   boolean sections;
   /* The symbol table.  */
@@ -77,6 +79,10 @@ struct stab_handle
   struct bincl_file *bincl_stack;
   /* Whether we are inside a function or not.  */
   boolean within_function;
+  /* The address of the end of the function, used if we have seen an
+     N_FUN symbol while in a function.  This is -1 if we have not seen
+     an N_FUN (the normal case).  */
+  bfd_vma function_end;
   /* The depth of block nesting.  */
   int block_depth;
   /* List of pending variable definitions.  */
@@ -346,8 +352,9 @@ warn_stab (p, err)
 
 /*ARGSUSED*/
 PTR
-start_stab (dhandle, sections, syms, symcount)
+start_stab (dhandle, abfd, sections, syms, symcount)
      PTR dhandle;
+     bfd *abfd;
      boolean sections;
      asymbol **syms;
      long symcount;
@@ -356,12 +363,14 @@ start_stab (dhandle, sections, syms, symcount)
 
   ret = (struct stab_handle *) xmalloc (sizeof *ret);
   memset (ret, 0, sizeof *ret);
+  ret->abfd = abfd;
   ret->sections = sections;
   ret->syms = syms;
   ret->symcount = symcount;
   ret->files = 1;
   ret->file_types = (struct stab_types **) xmalloc (sizeof *ret->file_types);
   ret->file_types[0] = NULL;
+  ret->function_end = (bfd_vma) -1;
   return (PTR) ret;
 }
 
@@ -379,9 +388,10 @@ finish_stab (dhandle, handle)
   if (info->within_function)
     {
       if (! stab_emit_pending_vars (dhandle, info)
-	  || ! debug_end_function (dhandle, (bfd_vma) -1))
+	  || ! debug_end_function (dhandle, info->function_end))
 	return false;
       info->within_function = false;
+      info->function_end = (bfd_vma) -1;
     }
 
   for (st = info->tags; st != NULL; st = st->next)
@@ -505,10 +515,18 @@ parse_stab (dhandle, handle, type, desc, value, string)
       /* This always ends a function.  */
       if (info->within_function)
 	{
+	  bfd_vma endval;
+
+	  endval = value;
+	  if (*string != '\0'
+	      && info->function_end != (bfd_vma) -1
+	      && info->function_end < endval)
+	    endval = info->function_end;
 	  if (! stab_emit_pending_vars (dhandle, info)
-	      || ! debug_end_function (dhandle, value))
+	      || ! debug_end_function (dhandle, endval))
 	    return false;
 	  info->within_function = false;
+	  info->function_end = (bfd_vma) -1;
 	}
 
       /* An empty string is emitted by gcc at the end of a compilation
@@ -584,10 +602,40 @@ parse_stab (dhandle, handle, type, desc, value, string)
 	return false;
       break;
 
+    case N_FUN:
+      if (*string == '\0')
+	{
+	  if (info->within_function)
+	    {
+	      /* This always marks the end of a function; we don't
+                 need to worry about info->function_end.  */
+	      if (info->sections)
+		value += info->function_start_offset;
+	      if (! stab_emit_pending_vars (dhandle, info)
+		  || ! debug_end_function (dhandle, value))
+		return false;
+	      info->within_function = false;
+	      info->function_end = (bfd_vma) -1;
+	    }
+	  break;
+	}
+
+      /* A const static symbol in the .text section will have an N_FUN
+         entry.  We need to use these to mark the end of the function,
+         in case we are looking at gcc output before it was changed to
+         always emit an empty N_FUN.  We can't call debug_end_function
+         here, because it might be a local static symbol.  */
+      if (info->within_function
+	  && (info->function_end == (bfd_vma) -1
+	      || value < info->function_end))
+	info->function_end = value;
+
+      /* Fall through.  */
       /* FIXME: gdb checks the string for N_STSYM, N_LCSYM or N_ROSYM
          symbols, and if it does not start with :S, gdb relocates the
          value to the start of the section.  gcc always seems to use
          :S, so we don't worry about this.  */
+      /* Fall through.  */
     default:
       {
 	const char *colon;
@@ -598,9 +646,16 @@ parse_stab (dhandle, handle, type, desc, value, string)
 	  {
 	    if (info->within_function)
 	      {
+		bfd_vma endval;
+
+		endval = value;
+		if (info->function_end != (bfd_vma) -1
+		    && info->function_end < endval)
+		  endval = info->function_end;
 		if (! stab_emit_pending_vars (dhandle, info)
-		    || ! debug_end_function (dhandle, value))
+		    || ! debug_end_function (dhandle, endval))
 		  return false;
+		info->function_end = (bfd_vma) -1;
 	      }
 	    /* For stabs in sections, line numbers and block addresses
                are offsets from the start of the function.  */
@@ -809,6 +864,7 @@ parse_stab_string (dhandle, info, stabtype, desc, value, string)
 
     case 'G':
       {
+	char leading;
 	long c;
 	asymbol **ps;
 
@@ -818,11 +874,14 @@ parse_stab_string (dhandle, info, stabtype, desc, value, string)
 				 (debug_type **) NULL);
 	if (dtype == DEBUG_TYPE_NULL)
 	  return false;
+	leading = bfd_get_symbol_leading_char (info->abfd);
 	for (c = info->symcount, ps = info->syms; c > 0; --c, ++ps)
 	  {
 	    const char *n;
 
 	    n = bfd_asymbol_name (*ps);
+	    if (leading != '\0' && *n == leading)
+	      ++n;
 	    if (*n == *name && strcmp (n, name) == 0)
 	      break;
 	  }
@@ -2532,6 +2591,7 @@ parse_stab_members (dhandle, info, tagname, pp, typenums, retp)
       do
 	{
 	  debug_type type;
+	  boolean stub;
 	  char *argtypes;
 	  enum debug_visibility visibility;
 	  boolean constp, volatilep, staticp;
@@ -2566,6 +2626,11 @@ parse_stab_members (dhandle, info, tagname, pp, typenums, retp)
 	      bad_stab (orig);
 	      return false;
 	    }
+
+	  stub = false;
+	  if (debug_get_type_kind (dhandle, type) == DEBUG_KIND_METHOD
+	      && debug_get_parameter_types (dhandle, type, &varargs) == NULL)
+	    stub = true;
 
 	  argtypes = savestring (*pp, p - *pp);
 	  *pp = p + 1;
@@ -2652,6 +2717,7 @@ parse_stab_members (dhandle, info, tagname, pp, typenums, retp)
 		    if (**pp == ':')
 		      {
 			/* g++ version 1 overloaded methods.  */
+			context = DEBUG_TYPE_NULL;
 		      }
 		    else
 		      {
@@ -2673,6 +2739,8 @@ parse_stab_members (dhandle, info, tagname, pp, typenums, retp)
 	      staticp = true;
 	      voffset = 0;
 	      context = DEBUG_TYPE_NULL;
+	      if (strncmp (argtypes, name, strlen (name)) != 0)
+		stub = true;
 	      break;
 
 	    default:
@@ -2688,15 +2756,12 @@ parse_stab_members (dhandle, info, tagname, pp, typenums, retp)
 	      break;
 	    }
 
-	  /* If this is a method type which is not a stub--that is,
-	     the argument types are fully specified--then the argtypes
-	     string is actually the physical name of the function.
-	     Otherwise, the argtypes string is the mangled from of the
-	     argument types, and the physical name of the function,
-	     and the argument types, must be deduced from it.  */
-
-	  if (debug_get_type_kind (dhandle, type) == DEBUG_KIND_METHOD
-	      && debug_get_parameter_types (dhandle, type, &varargs) != NULL)
+	  /* If the type is not a stub, then the argtypes string is
+             the physical name of the function.  Otherwise the
+             argtypes string is the mangled form of the argument
+             types, and the full type and the physical name must be
+             extracted from them.  */
+	  if (! stub)
 	    physname = argtypes;
 	  else
 	    {
@@ -4209,7 +4274,7 @@ stab_demangle_template (minfo, pp)
 		  done = true;
 		  break;
 		default:
-		  /* Assume it's a uder defined integral type.  */
+		  /* Assume it's a user defined integral type.  */
 		  integralp = true;
 		  done = true;
 		  break;
@@ -4910,7 +4975,20 @@ stab_demangle_fund_type (minfo, pp, ptype)
     case 't':
       if (! stab_demangle_template (minfo, pp))
 	return false;
-      abort ();
+      if (ptype != NULL)
+	{
+	  debug_type t;
+
+	  /* FIXME: I really don't know how a template should be
+             represented in the current type system.  Perhaps the
+             template should be demangled into a string, and the type
+             should be represented as a named type.  However, I don't
+             know what the base type of the named type should be.  */
+	  t = debug_make_void_type (minfo->dhandle);
+	  t = debug_make_pointer_type (minfo->dhandle, t);
+	  t = debug_name_type (minfo->dhandle, "TEMPLATE", t);
+	  *ptype = t;
+	}
       break;
 
     default:
