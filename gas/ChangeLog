@@ -1,3 +1,7 @@
+Wed Jan 24 22:11:03 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* Makefile.in (RUNTEST): Fix reference to $${srcdir}.
+
 Mon Jan 22 09:21:36 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* config/tc-sparc.h (TARGET_FORMAT): Use #ifdef SPARC_ARCH64 instead of
