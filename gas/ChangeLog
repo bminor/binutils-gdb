@@ -1,3 +1,25 @@
+Thu Apr 13 18:18:08 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-m68k.c (md_show_usage): Add 68060 to list.  Split cpu
+	list into three lines.
+
+Thu Apr 13 14:34:36 1995  Torbjorn Granlund  <tege@adder.cygnus.com>
+
+	* tc-m68k.c (m68k_init_after_args): Test for m68360.
+	(md_parse_option): Likewise.
+	(md_show_usage): Mention m68360.
+	* tc-m68k.h (TARGET_WORD_SIZE): Define.
+	(TARGET_ARCH): Define.
+
+	* expr.c (integer_constant): If TARGET_WORD_SIZE is defined,
+	sign-extend appropriately.
+
+Thu Apr 13 11:20:17 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (ppc_elf_validate_fix): Properly use PARAMS to
+	hide prototype from non-ANSI compilers, and don't use ANSI syntax
+	for arguments.
+
 Wed Apr 12 12:20:19 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-config.in (TDEFINES): Put empty definition into
