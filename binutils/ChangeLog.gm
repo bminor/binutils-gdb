@@ -1,0 +1,5 @@
+Sat Feb 26 13:27:07 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-xconfig.in: New file, GM-specific configuration fragment.
+
+

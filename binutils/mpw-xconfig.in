@@ -1,0 +1,3 @@
+# Extra configuration fragment for binutils.
+
+Set archname ARCH_mips
