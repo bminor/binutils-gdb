@@ -37,7 +37,7 @@ mh-go32
 mh-hp300
 mh-hpux
 mh-hpux8
-mh-i386pe
+mh-i386win32
 mh-irix4
 mh-irix5
 mh-linux
