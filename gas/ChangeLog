@@ -1,4 +1,9 @@
 start-sanitize-fr30
+Thu Nov 26 11:23:48 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* config/tc-fr30.c (md_pcrel_from_section): Restore previous calculation
+	of pcrel point.
+
 Tue Nov 24 17:21:52 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-fr30.c (md_pcrel_from_section): Fix calculation of
