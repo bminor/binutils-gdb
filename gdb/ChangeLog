@@ -1,5 +1,8 @@
 2001-05-08  Jim Blandy  <jimb@redhat.com>
 
+	* mn10300-tdep.c (mn10300_gdbarch_init): Put the gdbarch methods
+	in some rational order.
+
 	* mn10300-tdep.c (mn10300_gdbarch_init): Rather than using
 	generic_pc_in_call_dummy, use pc_in_call_dummy_at_entry_point.
 

@@ -990,33 +990,29 @@ mn10300_gdbarch_init (struct gdbarch_info info,
       return NULL; /* keep GCC happy. */
     }
 
-  set_gdbarch_register_size (gdbarch, 4);
-  set_gdbarch_max_register_raw_size (gdbarch, 4);
-  set_gdbarch_register_virtual_type (gdbarch, mn10300_register_virtual_type);
-  set_gdbarch_register_byte (gdbarch, mn10300_register_byte);
-  set_gdbarch_register_virtual_size (gdbarch, mn10300_register_virtual_size);
-  set_gdbarch_register_raw_size (gdbarch, mn10300_register_raw_size);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_register_name (gdbarch, register_name);
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 0);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
-  set_gdbarch_push_arguments (gdbarch, mn10300_push_arguments);
-  set_gdbarch_push_return_address (gdbarch, mn10300_push_return_address);
-  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
-  set_gdbarch_reg_struct_has_addr (gdbarch, mn10300_reg_struct_has_addr);
-  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+  /* Registers.  */
   set_gdbarch_num_regs (gdbarch, num_regs);
-  set_gdbarch_do_registers_info (gdbarch, mn10300_do_registers_info);
-
-  set_gdbarch_fp_regnum (gdbarch, 31);
-  set_gdbarch_max_register_virtual_size (gdbarch, 4);
+  set_gdbarch_register_name (gdbarch, register_name);
+  set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_register_bytes (gdbarch, 
                               num_regs * gdbarch_register_size (gdbarch));
+  set_gdbarch_max_register_raw_size (gdbarch, 4);
+  set_gdbarch_register_raw_size (gdbarch, mn10300_register_raw_size);
+  set_gdbarch_register_byte (gdbarch, mn10300_register_byte);
+  set_gdbarch_max_register_virtual_size (gdbarch, 4);
+  set_gdbarch_register_virtual_size (gdbarch, mn10300_register_virtual_size);
+  set_gdbarch_register_virtual_type (gdbarch, mn10300_register_virtual_type);
+  set_gdbarch_do_registers_info (gdbarch, mn10300_do_registers_info);
+  set_gdbarch_fp_regnum (gdbarch, 31);
+
+  /* Breakpoints.  */
   set_gdbarch_breakpoint_from_pc (gdbarch, mn10300_breakpoint_from_pc);
   set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
+
+  /* Stack unwinding.  */
+  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
   set_gdbarch_saved_pc_after_call (gdbarch, mn10300_saved_pc_after_call);
@@ -1036,6 +1032,11 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   /* That's right, we're using the stack pointer as our frame pointer.  */
   set_gdbarch_read_fp (gdbarch, generic_target_read_sp);
+
+  /* Calling functions in the inferior from GDB.  */
+  set_gdbarch_call_dummy_p (gdbarch, 1);
+  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 0);
+  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_words (gdbarch, mn10300_call_dummy_words);
@@ -1045,7 +1046,12 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
+  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
+  set_gdbarch_push_arguments (gdbarch, mn10300_push_arguments);
+  set_gdbarch_reg_struct_has_addr (gdbarch, mn10300_reg_struct_has_addr);
+  set_gdbarch_push_return_address (gdbarch, mn10300_push_return_address);
+  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_use_struct_convention (gdbarch, mn10300_use_struct_convention);
 
   tdep->am33_mode = am33_mode;
