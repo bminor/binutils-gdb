@@ -1,3 +1,7 @@
+2001-02-26  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (x86_64_elf_howto_table): Fix order of entries.
+
 2001-02-21  David Mosberger  <davidm@hpl.hp.com>
 
 	* cpu-ia64-opc.c (elf64_ia64_operands}: Fix typo: error string for
