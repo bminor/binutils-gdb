@@ -1,3 +1,8 @@
+Thu Jan 28 11:08:16 1999  Catherine Moore  <clm@cygnus.com>
+
+       * elflink.h (elf_link_output_sym):  Zero syms which are
+       part of sections which have been excluded.
+
 Wed Jan 27 13:35:35 1999  Stan Cox  <scox@cygnus.com>
 
 	* coff-arm.c (_bfd_coff_arm_set_private_flags): Changed F_PIC

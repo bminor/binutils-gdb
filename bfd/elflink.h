@@ -4325,6 +4325,8 @@ elf_link_output_sym (finfo, name, elfsym, input_sec)
 
   if (name == (const char *) NULL || *name == '\0')
     elfsym->st_name = 0;
+  else if (input_sec->flags & SEC_EXCLUDE)
+    elfsym->st_name = 0;
   else
     {
       elfsym->st_name = (unsigned long) _bfd_stringtab_add (finfo->symstrtab,
