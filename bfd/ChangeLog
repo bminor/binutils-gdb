@@ -1,5 +1,38 @@
 Mon Oct 24 15:33:16 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	Change S-record backend to use multiple sections to handle gaps in
+	file.
+	* srec.c (srec_data_list_struct): Move field next from last place
+	to first.  Change type of data to bfd_byte *.
+	(struct srec_symbol): Define.
+	(tdata_type): Remove done_symbol_read, count, strings, symbol_idx,
+	string_size, string_idx.  Change type of symbols to struct
+	srec_symbol *.  Add symtail and csymbols.
+	(low, high): Remove.
+	(size_symbols, fillup_symbols, size_srec, fillup): Remove.
+	(white, skipwhite, pass_over, object_p): Remove.
+	(srec_mkobject): Call srec_init.  Adjust tdata initialization for
+	field changes.
+	(srec_get_byte, srec_bad_byte): New static functions.
+	(srec_new_symbol, srec_scan): New static functions.
+	(srec_object_p): Change type of b to bfd_byte.  Explicitly set
+	wrong_format error.  Call srec_mkobject and srec_scan instead of
+	object_p.
+	(symbolsrec_object_p): Likewise.  Also, change b to be only two
+	bytes.
+	(srec_read_section): New static function.
+	(srec_get_section_contents): Call srec_read_section rather than
+	pass_over.  Handle zero length section correctly.
+	(set_set_arch_mach): Change from function to macro.
+	(srec_set_section_contents): Change data to bfd_byte *.
+	(srec_write_record): Change data, end and src to bfd_byte *.
+	(srec_write_header): Change buffer and dst to bfd_byte *.
+	(srec_write_section): Change location to bfd_byte *.
+	(srec_write_terminator): Change buffer to bfd_byte *.
+	(srec_get_symtab_upper_bound): Don't call
+	srec_get_section_contents.
+	(srec_get_symtab): Rewrite.
+
 	* ecoff.c (ecoff_set_symbol_info): Set udata.i to 0, not NULL.
 
 Fri Oct 21 16:43:13 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
