@@ -69,14 +69,27 @@ static char *bkpt_names[] = {
 };
 #endif
 
+/* Symbols which are used to locate the base of the link map structures. */
+
+static char *debug_base_symbols[] = {
+#ifdef SVR4_SHARED_LIBS
+  "_r_debug",	/* Most SVR4 systems, Solaris 2.1, 2.2 */
+  "r_debug",	/* Solaris 2.3 */
+#else
+  "_DYNAMIC",	/* SunOS */
+#endif
+  NULL
+};
+
 /* local data declarations */
 
 #ifndef SVR4_SHARED_LIBS
 
-#define DEBUG_BASE "_DYNAMIC"
 #define LM_ADDR(so) ((so) -> lm.lm_addr)
 #define LM_NEXT(so) ((so) -> lm.lm_next)
 #define LM_NAME(so) ((so) -> lm.lm_name)
+/* Test for first link map entry; first entry is a shared library. */
+#define IGNORE_FIRST_LINK_MAP_ENTRY(x) (0)
 static struct link_dynamic dynamic_copy;
 static struct link_dynamic_2 ld_2_copy;
 static struct ld_debug debug_copy;
@@ -85,10 +98,11 @@ static CORE_ADDR flag_addr;
 
 #else	/* SVR4_SHARED_LIBS */
 
-#define DEBUG_BASE "_r_debug"
 #define LM_ADDR(so) ((so) -> lm.l_addr)
 #define LM_NEXT(so) ((so) -> lm.l_next)
 #define LM_NAME(so) ((so) -> lm.l_name)
+/* Test for first link map entry; first entry is the exec-file. */
+#define IGNORE_FIRST_LINK_MAP_ENTRY(x) ((x).l_prev == NULL)
 static struct r_debug debug_copy;
 char shadow_contents[BREAKPOINT_MAX];	/* Stash old bkpt addr contents */
 
@@ -222,7 +236,7 @@ solib_map_sections (so)
     {
       close (scratch_chan);
       error ("Could not open `%s' as an executable file: %s",
-	     scratch_pathname, bfd_errmsg (bfd_error));
+	     scratch_pathname, bfd_errmsg (bfd_get_error ()));
     }
   /* Leave bfd open, core_xfer_memory and "info files" need it.  */
   so -> abfd = abfd;
@@ -231,12 +245,12 @@ solib_map_sections (so)
   if (!bfd_check_format (abfd, bfd_object))
     {
       error ("\"%s\": not in executable format: %s.",
-	     scratch_pathname, bfd_errmsg (bfd_error));
+	     scratch_pathname, bfd_errmsg (bfd_get_error ()));
     }
   if (build_section_table (abfd, &so -> sections, &so -> sections_end))
     {
       error ("Can't find the file sections in `%s': %s", 
-	     bfd_get_filename (exec_bfd), bfd_errmsg (bfd_error));
+	     bfd_get_filename (exec_bfd), bfd_errmsg (bfd_get_error ()));
     }
 
   for (p = so -> sections; p < so -> sections_end; p++)
@@ -421,7 +435,7 @@ DESCRIPTION
 	an open file descriptor for the file mapped to that space, and the
 	base address of that mapped space.
 
-	Our job is to find the symbol DEBUG_BASE in the file that this
+	Our job is to find the debug base symbol in the file that this
 	fd is open on, if it exists, and if so, initialize the dynamic
 	linker structure base address debug_base.
 
@@ -437,6 +451,7 @@ look_for_base (fd, baseaddr)
 {
   bfd *interp_bfd;
   CORE_ADDR address;
+  char **symbolp;
 
   /* If the fd is -1, then there is no file that corresponds to this
      mapped memory segment, so skip it.  Also, if the fd corresponds
@@ -461,10 +476,18 @@ look_for_base (fd, baseaddr)
       return (0);
     }
 
-  /* Now try to find our DEBUG_BASE symbol in this file, which we at
+  /* Now try to find our debug base symbol in this file, which we at
      least know to be a valid ELF executable or shared library. */
 
-  if ((address = bfd_lookup_symbol (interp_bfd, DEBUG_BASE)) == 0)
+  for (symbolp = debug_base_symbols; *symbolp != NULL; symbolp++)
+    {
+      address = bfd_lookup_symbol (interp_bfd, *symbolp);
+      if (address != 0)
+	{
+	  break;
+	}
+    }
+  if (address == 0)
     {
       bfd_close (interp_bfd);
       return (0);
@@ -505,10 +528,9 @@ DESCRIPTION
 	inferior executable has been linked dynamically, there is a single
 	address somewhere in the inferior's data space which is the key to
 	locating all of the dynamic linker's runtime structures.  This
-	address is the value of the symbol defined by the macro DEBUG_BASE.
-	The job of this function is to find and return that address, or to
-	return 0 if there is no such address (the executable is statically
-	linked for example).
+	address is the value of the debug base symbol.  The job of this
+	function is to find and return that address, or to return 0 if there
+	is no such address (the executable is statically linked for example).
 
 	For SunOS, the job is almost trivial, since the dynamic linker and
 	all of it's structures are statically linked to the executable at
@@ -521,10 +543,10 @@ DESCRIPTION
 	The SVR4 version is much more complicated because the dynamic linker
 	and it's structures are located in the shared C library, which gets
 	run as the executable's "interpreter" by the kernel.  We have to go
-	to a lot more work to discover the address of DEBUG_BASE.  Because
-	of this complexity, we cache the value we find and return that value
-	on subsequent invocations.  Note there is no copy in the executable
-	symbol tables.
+	to a lot more work to discover the address of the debug base symbol.
+	Because of this complexity, we cache the value we find and return that
+	value on subsequent invocations.  Note there is no copy in the
+	executable symbol tables.
 
 	Note that we can assume nothing about the process state at the time
 	we need to find this address.  We may be stopped on the first instruc-
@@ -542,17 +564,22 @@ locate_base ()
 
   struct minimal_symbol *msymbol;
   CORE_ADDR address = 0;
+  char **symbolp;
 
-  /* For SunOS, we want to limit the search for DEBUG_BASE to the executable
-     being debugged, since there is a duplicate named symbol in the shared
-     library.  We don't want the shared library versions. */
+  /* For SunOS, we want to limit the search for the debug base symbol to the
+     executable being debugged, since there is a duplicate named symbol in the
+     shared library.  We don't want the shared library versions. */
 
-  msymbol = lookup_minimal_symbol (DEBUG_BASE, symfile_objfile);
-  if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
+  for (symbolp = debug_base_symbols; *symbolp != NULL; symbolp++)
     {
-      address = SYMBOL_VALUE_ADDRESS (msymbol);
+      msymbol = lookup_minimal_symbol (*symbolp, symfile_objfile);
+      if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
+	{
+	  address = SYMBOL_VALUE_ADDRESS (msymbol);
+	  return (address);
+	}
     }
-  return (address);
+  return (0);
 
 #else	/* SVR4_SHARED_LIBS */
 
@@ -709,14 +736,23 @@ find_solib (so_list_ptr)
       so_list_next = new;
       read_memory ((CORE_ADDR) lm, (char *) &(new -> lm),
 		   sizeof (struct link_map));
-      /* For the SVR4 version, there is one entry that has no name
-	 (for the inferior executable) since it is not a shared object. */
-      if (LM_NAME (new) != 0)
+      /* For SVR4 versions, the first entry in the link map is for the
+	 inferior executable, so we must ignore it.  For some versions of
+	 SVR4, it has no name.  For others (Solaris 2.3 for example), it
+	 does have a name, so we can no longer use a missing name to
+	 decide when to ignore it. */
+      if (!IGNORE_FIRST_LINK_MAP_ENTRY (new -> lm))
 	{
-	  if (!target_read_string((CORE_ADDR) LM_NAME (new), new -> so_name,
-		      MAX_PATH_SIZE - 1))
-	      error ("find_solib: Can't read pathname for load map\n");
-	  new -> so_name[MAX_PATH_SIZE - 1] = 0;
+	  int errcode;
+	  char *buffer;
+	  target_read_string ((CORE_ADDR) LM_NAME (new), &buffer,
+			      MAX_PATH_SIZE - 1, &errcode);
+	  if (errcode != 0)
+	    error ("find_solib: Can't read pathname for load map: %s\n",
+		   safe_strerror (errcode));
+	  strncpy (new -> so_name, buffer, MAX_PATH_SIZE - 1);
+	  new -> so_name[MAX_PATH_SIZE - 1] = '\0';
+	  free (buffer);
 	  solib_map_sections (new);
 	}      
     }
@@ -900,6 +936,8 @@ info_sharedlibrary_command (ignore, from_tty)
 		     "Shared Object Library");
 	      header_done++;
 	    }
+	  /* FIXME-32x64: need print_address_numeric with field width or
+	     some such.  */
 	  printf_unfiltered ("%-12s",
 		  local_hex_string_custom ((unsigned long) LM_ADDR (so),
 					   "08l"));
@@ -1265,13 +1303,13 @@ solib_create_inferior_hook()
 
   clear_proceed_status ();
   stop_soon_quietly = 1;
-  stop_signal = 0;
+  stop_signal = TARGET_SIGNAL_0;
   do
     {
       target_resume (-1, 0, stop_signal);
       wait_for_inferior ();
     }
-  while (stop_signal != SIGTRAP);
+  while (stop_signal != TARGET_SIGNAL_TRAP);
   stop_soon_quietly = 0;
   
   /* We are now either at the "mapping complete" breakpoint (or somewhere

@@ -359,8 +359,7 @@ target_detach PARAMS ((char *, int));
 #define	target_prepare_to_store()	\
 	(*current_target->to_prepare_to_store) ()
 
-extern int
-target_read_string PARAMS ((CORE_ADDR, char *, int));
+extern int target_read_string PARAMS ((CORE_ADDR, char **, int, int *));
 
 extern int
 target_read_memory PARAMS ((CORE_ADDR, char *, int));

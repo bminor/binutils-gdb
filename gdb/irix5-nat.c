@@ -524,6 +524,9 @@ find_solib (so_list_ptr)
     }
   if ((so_list_next == NULL) && (lm != NULL))
     {
+      int errcode;
+      char *buffer;
+
       /* Get next link map structure from inferior image and build a local
 	 abbreviated load_map structure */
       new = (struct so_list *) xmalloc (sizeof (struct so_list));
@@ -544,6 +547,10 @@ find_solib (so_list_ptr)
 		   sizeof (struct obj_list));
       read_memory ((CORE_ADDR) new->ll.data, (char *) &(new -> lm),
 		   sizeof (struct obj));
+      target_read_string (new->lm.o_path, &buffer, INT_MAX, &errcode);
+      if (errcode != 0)
+	memory_error (errcode, new->lm.o_path);
+      new->lm.o_path = buffer;
       solib_map_sections (new);
     }
   return (so_list_next);
@@ -797,10 +804,11 @@ clear_solib()
       else
 	/* This happens for the executable on SVR4.  */
 	bfd_filename = NULL;
-      
+
       next = so_list_head -> next;
       if (bfd_filename)
 	free ((PTR)bfd_filename);
+      free (so_list_head->lm.o_path);
       free ((PTR)so_list_head);
       so_list_head = next;
     }

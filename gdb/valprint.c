@@ -710,6 +710,13 @@ value_print_array_elements (val, stream, format, pretty)
     byte, otherwise printing proceeds (including null bytes) until either
     print_max or LEN characters have been printed, whichever is smaller. */
 
+/* FIXME: All callers supply LEN of zero.  Supplying a non-zero LEN is
+   pointless, this routine just then becomes a convoluted version of
+   target_read_memory_partial.  Removing all the LEN stuff would simplify
+   this routine enormously.
+
+   FIXME: Use target_read_string.  */
+
 int
 val_print_string (addr, len, stream)
     CORE_ADDR addr;
