@@ -832,6 +832,8 @@ static int print_errors = 1;
    %r26 - %r23 have %arg0 - %arg3 as synonyms
    %r28 - %r29 have %ret0 - %ret1 as synonyms
    %r30 has %sp as a synonym
+   %r27 has %dp as a synonym
+   %r2  has %rp as a synonym
 
    Almost every control register has a synonym; they are not listed
    here for brevity.  
@@ -869,6 +871,7 @@ static const struct pd_reg pre_defined_registers[] =
   {"%cr31", 31},
   {"%cr8", 8},
   {"%cr9", 9},
+  {"%dp", 27},
   {"%eiem", 15},
   {"%eirr", 23},
   {"%fr0", 0},
@@ -1028,6 +1031,7 @@ static const struct pd_reg pre_defined_registers[] =
   {"%rctr", 0},
   {"%ret0", 28},
   {"%ret1", 29},
+  {"%rp", 2},
   {"%sar", 11},
   {"%sp", 30},
   {"%sr0", 0},
@@ -3395,8 +3399,17 @@ pa_parse_number (s, result)
 	      num = *p - '0' + 28;
 	      p++;
 	    }
+	  else if (*p == 'p')
+	    {
+	      num = 2;
+	      p++;
+	    }
 	  else if (!isdigit (*p))
-	    as_bad ("Undefined register: '%s'. ASSUMING 0", name);
+	    {
+	      if (print_errors)
+		as_bad ("Undefined register: '%s'.", name);
+	      num = -1;
+	    }
 	  else
 	    {
 	      do
@@ -3419,9 +3432,8 @@ pa_parse_number (s, result)
 	  else
 	    {
 	      if (print_errors)
-		as_bad ("Undefined register: '%s'. ASSUMING 0", name);
-	      else
-		num = -1;
+		as_bad ("Undefined register: '%s'.", name);
+	      num = -1;
 	    }
 	  *p = c;
 	}
@@ -3458,17 +3470,24 @@ pa_parse_number (s, result)
 	  else
 	    {
 	      if (print_errors)
-		as_bad ("Non-absolute constant: '%s'. ASSUMING 0", name);
-	      else
-		num = -1;
+		as_bad ("Non-absolute symbol: '%s'.", name);
+	      num = -1;
 	    }
 	}
       else
 	{
-	  if (print_errors)
-	    as_bad ("Undefined absolute constant: '%s'. ASSUMING 0", name);
+	  /* There is where we'd come for an undefined symbol
+	     or for an empty string.  For an empty string we
+	     will return zero.  That's a concession made for
+	     compatability with the braindamaged HP assemblers.  */
+	  if (*p == 0)
+	    num = 0;
 	  else
-	    num = -1;
+	    {
+	      if (print_errors)
+		as_bad ("Undefined absolute constant: '%s'.", name);
+	      num = -1;
+	    }
 	}
       *p = c;
 

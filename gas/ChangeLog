@@ -6,6 +6,14 @@ Tue Nov  2 18:04:11 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 Tue Nov  2 15:07:07 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* tc-hppa.c: Add %dp and %rp as synonyms for %r27 and %r2 in the
+	predefined register table.
+	(pa_parse_number): Handle %rp in common register shortcut code.
+	Consistently set return value to -1 for an error.  Clean up error
+	messages and only print them when "print_errors" is true.  Handle
+	empty string case like the HP assembler -- assume a value of
+	zero.
+ 
 	* config/ho-hpux.h: Do not include ho-sysv.h.  Instead include
 	standard hpux include files to pick up various function decls.
 
