@@ -32,7 +32,7 @@ proc sim_compile { source dest type options } {
     regsub "\[\r\n\]*$" "$result" "" result
     regsub "^\[\r\n\]*" "$result" "" result
     if { $result != "" } {
-	clone_output "sim compile failed, $result"
+	clone_output "sim compile output: $result"
     }
     return $result
 }
