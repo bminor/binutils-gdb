@@ -1,5 +1,10 @@
 2002-11-11  Christopher Faylor  <cgf@redhat.com>
 
+	* MAINTAINERS: Reinstate DJ Delorie as COFF maintainer.  Drop COFF from
+	cgf maintainership.
+
+2002-11-11  Christopher Faylor  <cgf@redhat.com>
+
 	* MAINTAINERS: Replace DJ Delorie as PE/COFF maintainer.
 
 2002-11-07  Nick Clifton  <nickc@redhat.com>
