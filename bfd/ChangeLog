@@ -5,8 +5,8 @@
 	
 2000-07-03  Nick Clifton  <nickc@redhat.com>
 
-	(IS_EXTERNAL): New macro: Return true if the symbol is an external
-	symbol.
+	* cofflink.c (IS_EXTERNAL): New macro: Return true if the symbol
+	is an external symbol.
 	(IS_WEAK_EXTERNAL): New macro: Return true if the symbol is a weak
 	external symbol.
 	
