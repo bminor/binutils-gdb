@@ -4,7 +4,11 @@
 #define NO_STDARG
 #endif /* not __STDC__ */
 
+#ifndef __GNUC__
+#ifndef __STDC__
 #include <memory.h>
+#endif
+#endif
 
 #include <ctype.h>
 #include <string.h>
