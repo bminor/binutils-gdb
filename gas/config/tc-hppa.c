@@ -1312,8 +1312,16 @@ fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
   hppa_fix->fx_r_format = r_format;
   hppa_fix->fx_arg_reloc = arg_reloc;
   if (unwind_desc)
-    bcopy (unwind_desc, hppa_fix->fx_unwind, 8);
+    {
+      bcopy (unwind_desc, hppa_fix->fx_unwind, 8);
 
+      /* If necessary call BFD backend function to attach the
+	 unwind bits to the target dependent parts of a BFD symbol.
+	 Yuk.  */
+#ifdef obj_attach_unwind_info
+      obj_attach_unwind_info (add_symbol->bsym, unwind_desc);
+#endif
+    }
 }
 
 /* Parse a .byte, .word, .long expression for the HPPA.  Called by
@@ -3097,6 +3105,14 @@ md_apply_fix_1 (fixP, val)
   long new_val, result;
   unsigned int w1, w2, w;
 
+  /* SOM uses R_HPPA_ENTRY and R_HPPA_EXIT relocations which can 
+     never be "applied".  They must always be emitted.  */
+#ifdef OBJ_SOM
+  if (fixP->fx_r_type == R_HPPA_ENTRY
+      || fixP->fx_r_type == R_HPPA_EXIT)
+    return;
+#endif
+
   /* There should have been an HPPA specific fixup associated
      with the GAS fixup.  */
   if (hppa_fixP)
@@ -3205,6 +3221,8 @@ md_apply_fix_1 (fixP, val)
 
 	case 32:
 #ifdef OBJ_ELF
+	  /* These are ELF specific relocations.  ELF unfortunately
+	     handles unwinds in a completely different manner.  */
 	  if (hppa_fixP->fx_r_type == R_HPPA_UNWIND_ENTRY
 	      || hppa_fixP->fx_r_type == R_HPPA_UNWIND_ENTRIES)
 	    result = fixP->fx_addnumber;
@@ -4248,8 +4266,11 @@ is_same_frag (frag1, frag2)
     return (FALSE);
 }
 
-/* Build an entry in the UNWIND subspace from the given 
-   function attributes in CALL_INFO.  */
+#ifdef OBJ_ELF
+/* Build an entry in the UNWIND subspace from the given function 
+   attributes in CALL_INFO.  This is not needed for SOM as using
+   R_ENTRY and R_EXIT relocations allow the linker to handle building
+   of the unwind spaces.  */
    
 static void
 pa_build_unwind_subspace (call_info)
@@ -4348,6 +4369,7 @@ pa_build_unwind_subspace (call_info)
   /* Return back to the original segment/subsegment.  */
   subseg_set (save_seg, save_subseg);
 }
+#endif
 
 /* Process a .CALLINFO pseudo-op.  This information is used later
    to build unwind descriptors and maybe one day to support
@@ -4618,8 +4640,6 @@ static void
 pa_entry (unused)
      int unused;
 {
-  char *where;
-
   if (!within_procedure)
     as_bad ("Misplaced .entry. Ignored.");
   else
@@ -4631,11 +4651,30 @@ pa_entry (unused)
     }
   demand_empty_rest_of_line ();
   within_entry_exit = TRUE;
-  where = frag_more (0);
 
   /* Go back to the last symbol and turn on the BSF_FUNCTION flag.
      It will not be on if no .EXPORT pseudo-op exists (static function).  */
   last_call_info->start_symbol->bsym->flags |= BSF_FUNCTION;
+
+#ifdef OBJ_SOM
+  /* SOM defers building of unwind descriptors until the link phase.
+     The assembler is responsible for creating an R_ENTRY relocation
+     to mark the beginning of a region and hold the unwind bits, and
+     for creating an R_EXIT relocation to mark the end of the region.
+
+     FIXME.  ELF should be using the same conventions!  The problem
+     is an unwind requires too much relocation space.  Hmmm.  Maybe
+     if we split the unwind bits up between the relocations which
+     denote the entry and exit points.  */
+  {
+    char *where = frag_more (0);
+ 
+    fix_new_hppa (frag_now, where - frag_now->fr_literal, 0, 
+		  last_call_info->start_symbol, (offsetT) 0, NULL,
+		  0, R_HPPA_ENTRY, e_fsel, 0, 0,
+		  &last_call_info->ci_unwind.descriptor);
+  }
+#endif
 
   return;
 }
@@ -4679,6 +4718,7 @@ process_exit ()
 
   where = frag_more (0);
 
+#ifdef OBJ_ELF
   /* ELF does not have EXIT relocations.  All we do is create a
      temporary symbol marking the end of the function.  */
   {
@@ -4723,6 +4763,21 @@ process_exit ()
      table.  */
   last_call_info->end_frag = frag_now;
   pa_build_unwind_subspace (last_call_info);
+#else
+  /* SOM defers building of unwind descriptors until the link phase.
+     The assembler is responsible for creating an R_ENTRY relocation
+     to mark the beginning of a region and hold the unwind bits, and
+     for creating an R_EXIT relocation to mark the end of the region.
+
+     FIXME.  ELF should be using the same conventions!  The problem
+     is an unwind requires too much relocation space.  Hmmm.  Maybe
+     if we split the unwind bits up between the relocations which
+     denote the entry and exit points.  */
+  fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
+		last_call_info->start_symbol, (offsetT) 0,
+		NULL, 0, R_HPPA_EXIT, e_fsel, 0, 0, NULL);
+#endif
+
   exit_processing_complete = TRUE;
 }
 
