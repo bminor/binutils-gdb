@@ -197,6 +197,10 @@ struct monitor_ops
 
 #define MO_SREC_ACK_ROTATE 0x80000
 
+/* If set, then remove useless address bits from memory addresses.  */
+
+#define MO_ADDR_BITS_REMOVE 0x100000
+
 #define SREC_SIZE 160
 
 extern void monitor_open PARAMS ((char *args, struct monitor_ops *ops,

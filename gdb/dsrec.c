@@ -82,9 +82,12 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
      is no data, so len is 0.  */
 
   reclen = maxrecsize;
-  make_srec (srec, 0, NULL, NULL, 0, &reclen, flags);
+  make_srec (srec, 0, NULL, (asection *)1, 0, &reclen, flags);
   if (remote_debug)
-    fprintf_unfiltered (gdb_stderr, "%.*s\\r\n", reclen-1, srec);
+    {
+      srec[reclen] = '\0';
+      puts_debug ("sent -->", srec, "<--");
+    }
   SERIAL_WRITE (desc, srec, reclen);
 
   for (s = abfd->sections; s; s = s->next)
@@ -93,8 +96,7 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
 	int numbytes;
 	bfd_vma addr = bfd_get_section_vma (abfd, s) + load_offset;
 	bfd_size_type size = bfd_get_section_size_before_reloc (s);
-	char * section_name = bfd_get_section_name (abfd, s);
-
+	char * section_name = (char *)bfd_get_section_name (abfd, s);
 	printf_filtered ("%s\t: 0x%08x .. 0x%08x  ",
 			 section_name, (int) addr, (int) addr + size);
 	gdb_flush (gdb_stdout);
@@ -108,7 +110,10 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
 				  i, &reclen, flags);
 
 	    if (remote_debug)
-	      fprintf_unfiltered (gdb_stderr, "%.*s\\r\n", reclen-1, srec);
+	      {
+		srec[reclen] = '\0';
+		puts_debug ("sent -->", srec, "<--");
+	      }
 
 	    /* Repeatedly send the S-record until a good
 	       acknowledgement is sent back.  */
@@ -145,11 +150,16 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
   make_srec (srec, abfd->start_address, NULL, NULL, 0, &reclen, flags);
 
   if (remote_debug)
-    fprintf_unfiltered (gdb_stderr, "%.*s\\r\n", reclen-1, srec);
+    {
+      srec[reclen] = '\0';
+      puts_debug ("sent -->", srec, "<--");
+    }
+
   SERIAL_WRITE (desc, srec, reclen);
 
   /* Some monitors need these to wake up properly.  (Which ones? -sts)  */
   SERIAL_WRITE (desc, "\r\r", 2);
+  puts_debug ("sent -->", "\r\r", "<---");
 
   SERIAL_FLUSH_INPUT (desc);
 
@@ -215,6 +225,7 @@ make_srec (srec, targ_addr, abfd, sect, sectoff, maxrecsize, flags)
   const static char hextab[] = "0123456789ABCDEF";
   const static char data_code_table[] = "123";
   const static char term_code_table[] = "987";
+  const static char header_code_table[] = "000";
   const static char *formats[] = { "S%c%02X%04X",
 				   "S%c%02X%06X",
 				   "S%c%02X%08X" };
@@ -226,8 +237,8 @@ make_srec (srec, targ_addr, abfd, sect, sectoff, maxrecsize, flags)
 
   if (sect)
     {
-      tmp = flags;		/* Data record */
-      code_table = data_code_table;
+      tmp = flags;		/* Data or header record */
+      code_table = abfd ? data_code_table : header_code_table;
       binbuf = alloca (*maxrecsize/2);
     }
   else
@@ -249,7 +260,7 @@ make_srec (srec, targ_addr, abfd, sect, sectoff, maxrecsize, flags)
   /* Now that we know the address size, we can figure out how much
      data this record can hold.  */
 
-  if (sect)
+  if (sect && abfd)
     {
       payload_size = (*maxrecsize - (1 + 1 + 2 + addr_size * 2 + 2)) / 2;
       payload_size = min (payload_size, sect->_raw_size - sectoff);
@@ -257,7 +268,7 @@ make_srec (srec, targ_addr, abfd, sect, sectoff, maxrecsize, flags)
       bfd_get_section_contents (abfd, sect, binbuf, sectoff, payload_size);
     }
   else
-    payload_size = 0;		/* Term packets have no payload */
+    payload_size = 0;		/* Term or header packets have no payload */
 
   /* Output the header.  */
 

@@ -1,3 +1,24 @@
+Mon Dec 29 21:25:34 1997  Mark Alexander  <marka@cygnus.com>
+
+	* dve3900-rom.c: New file to support Densan DVE-R3900/20 board.
+	* monitor.c (monitor_debug): Move to utils.c, rename to puts_debug.
+	(monitor_write_memory, monitor_read_memory, monitor_insert_breakpoint,
+	monitor_remove_breakpoint): Remove useless address bits if current
+	monitor has MO_ADDR_BITS_REMOVE flag.
+	* monitor.h (MO_ADDR_BITS_REMOVE): Define.
+	* utils.c (puts_debug): Formerly monitor_debug from monitor.c;
+	move here and make public.  Add better support for carriage returns.
+	* defs.h (puts_debug): Declare.
+	* dsrec.c (load_srec): Use puts_debug to print remotedebug information.
+	Output header record correctly.
+	(make_srec): Output a header record instead of a termination record
+	if sect is non-NULL (value is ignored), but abfd is NULL.
+	* config/mips/tm-tx39.h (DEFAULT_MIPS_TYPE): Remove definition.
+	(REGISTER_NAMES): Define to add R3900-specific registers.
+	* config/mips/tm-tx39l.h: Ditto.
+	* config/mips/tx39.mt (TDEPFILES): Add dve3900-rom.o and support files.
+	* config/mips/tx39l.mt: Ditto.
+
 Wed Dec 24 12:48:48 1997  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* dsrec.c: Cosmetic improvements.

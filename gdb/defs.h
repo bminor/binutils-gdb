@@ -118,7 +118,7 @@ enum command_class
   all_classes = -2, all_commands = -1,
   /* Classes of commands */
   no_class = -1, class_run = 0, class_vars, class_stack,
-  class_files, class_support, class_info, class_breakpoint,
+  class_files, class_support, class_info, class_breakpoint, class_trace,
   class_alias, class_obscure, class_user, class_maintenance,
   class_pseudo
 };
@@ -308,6 +308,8 @@ extern int putchar_unfiltered PARAMS ((int c));
 extern void puts_filtered PARAMS ((const char *));
 
 extern void puts_unfiltered PARAMS ((const char *));
+
+extern void puts_debug PARAMS ((char *prefix, char *string, char *suffix));
 
 extern void vprintf_filtered PARAMS ((const char *, va_list))
      ATTR_FORMAT(printf, 1, 0);
@@ -771,7 +773,7 @@ extern void set_architecture_from_file PARAMS ((bfd *));
 /* Notify target of a change to the selected architecture. Zero return
    status indicates that the target did not like the change. */
 extern int (*target_architecture_hook) PARAMS ((const bfd_arch_info_type *ap)); 
-extern void set_architecture PARAMS ((char *arg, int from_tty));
+extern void set_architecture_from_arch_mach PARAMS ((enum bfd_architecture arch, unsigned long mach));
 
 /* Number of bits in a char or unsigned char for the target machine.
    Just like CHAR_BIT in <limits.h> but describes the target machine.  */

@@ -74,6 +74,7 @@ set_width_command PARAMS ((char *, int, struct cmd_list_element *));
 
 static struct cleanup *cleanup_chain; /* cleaned up after a failed command */
 static struct cleanup *final_cleanup_chain; /* cleaned up when gdb exits */
+static struct cleanup *run_cleanup_chain; /* cleaned up on each 'run' */
 
 /* Nonzero if we have job control. */
 
@@ -146,6 +147,13 @@ make_final_cleanup (function, arg)
     return make_my_cleanup (&final_cleanup_chain, function, arg);
 }
 struct cleanup *
+make_run_cleanup (function, arg)
+     void (*function) PARAMS ((PTR));
+     PTR arg;
+{
+    return make_my_cleanup (&run_cleanup_chain, function, arg);
+}
+struct cleanup *
 make_my_cleanup (pmy_chain, function, arg)
      struct cleanup **pmy_chain;
      void (*function) PARAMS ((PTR));
@@ -178,6 +186,13 @@ do_final_cleanups (old_chain)
      register struct cleanup *old_chain;
 {
     do_my_cleanups (&final_cleanup_chain, old_chain);
+}
+
+void
+do_run_cleanups (old_chain)
+     register struct cleanup *old_chain;
+{
+    do_my_cleanups (&run_cleanup_chain, old_chain);
 }
 
 void
@@ -378,7 +393,6 @@ NORETURN void
 #ifdef ANSI_PROTOTYPES
 error (const char *string, ...)
 #else
-void
 error (va_alist)
      va_dcl
 #endif
@@ -677,12 +691,6 @@ request_quit (signo)
      for System V-style signals.  So just always do it, rather than worrying
      about USG defines and stuff like that.  */
   signal (signo, request_quit);
-
-/* start-sanitize-gm */
-#ifdef GENERAL_MAGIC
-  target_kill ();
-#endif /* GENERAL_MAGIC */
-/* end-sanitize-gm */
 
 #ifdef REQUEST_QUIT
   REQUEST_QUIT;
@@ -1560,6 +1568,80 @@ fputc_unfiltered (c, stream)
 }
 
 
+/* puts_debug is like fputs_unfiltered, except it prints special
+   characters in printable fashion.  */
+
+void
+puts_debug (prefix, string, suffix)
+     char *prefix;
+     char *string;
+     char *suffix;
+{
+  int ch;
+
+  /* Print prefix and suffix after each line.  */
+  static int new_line = 1;
+  static int carriage_return = 0;
+  static char *prev_prefix = "";
+  static char *prev_suffix = "";
+
+  if (*string == '\n')
+    carriage_return = 0;
+
+  /* If the prefix is changing, print the previous suffix, a new line,
+     and the new prefix.  */
+  if ((carriage_return || (strcmp(prev_prefix, prefix) != 0)) && !new_line)
+    {
+      fputs_unfiltered (prev_suffix, gdb_stderr);
+      fputs_unfiltered ("\n", gdb_stderr);
+      fputs_unfiltered (prefix, gdb_stderr);
+    }
+
+  /* Print prefix if we printed a newline during the previous call.  */
+  if (new_line)
+    {
+      new_line = 0;
+      fputs_unfiltered (prefix, gdb_stderr);
+    }
+
+  prev_prefix = prefix;
+  prev_suffix = suffix;
+
+  /* Output characters in a printable format.  */
+  while ((ch = *string++) != '\0')
+    {
+      switch (ch)
+        {
+	default:
+	  if (isprint (ch))
+	    fputc_unfiltered (ch, gdb_stderr);
+
+	  else
+	    fprintf_unfiltered (gdb_stderr, "\\%03o", ch);
+	  break;
+
+	case '\\': fputs_unfiltered ("\\\\",  gdb_stderr);	break;
+	case '\b': fputs_unfiltered ("\\b",   gdb_stderr);	break;
+	case '\f': fputs_unfiltered ("\\f",   gdb_stderr);	break;
+	case '\n': new_line = 1;
+		   fputs_unfiltered ("\\n",   gdb_stderr);	break;
+	case '\r': fputs_unfiltered ("\\r",   gdb_stderr);	break;
+	case '\t': fputs_unfiltered ("\\t",   gdb_stderr);	break;
+	case '\v': fputs_unfiltered ("\\v",   gdb_stderr);	break;
+        }
+
+      carriage_return = ch == '\r';
+    }
+
+  /* Print suffix if we printed a newline.  */
+  if (new_line)
+    {
+      fputs_unfiltered (suffix, gdb_stderr);
+      fputs_unfiltered ("\n", gdb_stderr);
+    }
+}
+
+
 /* Print a variable number of ARGS using format FORMAT.  If this
    information is going to put the amount written (since the last call
    to REINITIALIZE_MORE_FILTER or the last page break) over the page size,
@@ -1875,6 +1957,9 @@ fprintf_symbol_filtered (stream, name, lang, arg_mode)
 	    {
 	    case language_cplus:
 	      demangled = cplus_demangle (name, arg_mode);
+	      break;
+	    case language_java:
+	      demangled = cplus_demangle (name, arg_mode | DMGL_JAVA);
 	      break;
 	    case language_chill:
 	      demangled = chill_demangle (name);
