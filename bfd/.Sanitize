@@ -50,6 +50,7 @@ bout.c
 cache.c
 coffcode.h
 config
+config.sub
 configure
 configure.in
 core.c
@@ -127,7 +128,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.15  1991/08/22 07:20:49  gnu
+# Revision 1.16  1991/08/22 07:31:21  gnu
+# New config.sub
+#
+# Revision 1.15  1991/08/22  07:20:49  gnu
 # Improve our Sanity.
 #
 # Revision 1.14  1991/08/17  00:17:00  steve
