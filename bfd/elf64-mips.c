@@ -622,7 +622,7 @@ static reloc_howto_type mips_elf64_howto_table_rel[] =
 
   /* Protected jump conversion.  This is an optimization hint.  No
      relocation is required for correctness.  */
-  HOWTO (R_MIPS_JALR,	        /* type */
+  HOWTO (R_MIPS_JALR,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
@@ -630,7 +630,7 @@ static reloc_howto_type mips_elf64_howto_table_rel[] =
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 _bfd_mips_elf_generic_reloc,	/* special_function */
-	 "R_MIPS_JALR",	        /* name */
+	 "R_MIPS_JALR",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x00000000,		/* dst_mask */
@@ -1138,7 +1138,7 @@ static reloc_howto_type mips_elf64_howto_table_rela[] =
 
   /* Protected jump conversion.  This is an optimization hint.  No
      relocation is required for correctness.  */
-  HOWTO (R_MIPS_JALR,	        /* type */
+  HOWTO (R_MIPS_JALR,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
@@ -1146,7 +1146,7 @@ static reloc_howto_type mips_elf64_howto_table_rela[] =
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 _bfd_mips_elf_generic_reloc,	/* special_function */
-	 "R_MIPS_JALR",	        /* name */
+	 "R_MIPS_JALR",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x00000000,		/* dst_mask */
@@ -1185,7 +1185,7 @@ static reloc_howto_type elf_mips16_gprel_howto =
 	 "R_MIPS16_GPREL",	/* name */
 	 TRUE,			/* partial_inplace */
 	 0x07ff001f,		/* src_mask */
-	 0x07ff001f,	        /* dst_mask */
+	 0x07ff001f,		/* dst_mask */
 	 FALSE);		/* pcrel_offset */
 
 /* GNU extension to record C++ vtable hierarchy */
@@ -1604,10 +1604,10 @@ mips_elf64_gprel32_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
       output_bfd = symbol->section->output_section->owner;
     }
 
-    ret = mips_elf64_final_gp (output_bfd, symbol, relocatable,
-			       error_message, &gp);
-    if (ret != bfd_reloc_ok)
-      return ret;
+  ret = mips_elf64_final_gp (output_bfd, symbol, relocatable,
+			     error_message, &gp);
+  if (ret != bfd_reloc_ok)
+    return ret;
 
   if (bfd_is_com_section (symbol->section))
     relocation = 0;
@@ -2116,7 +2116,7 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
 		    case RSS_GP0:
 		    case RSS_LOC:
 		      /* FIXME: I think these need to be handled using
-                         special howto structures.  */
+			 special howto structures.  */
 		      BFD_ASSERT (0);
 		      break;
 
@@ -2652,8 +2652,8 @@ const struct elf_size_info mips_elf64_size_info =
   sizeof (Elf64_External_Sym),
   sizeof (Elf64_External_Dyn),
   sizeof (Elf_External_Note),
-  4,            /* hash-table entry size */
-  3,            /* internal relocations per external relocations */
+  4,		/* hash-table entry size */
+  3,		/* internal relocations per external relocations */
   64,		/* arch_size */
   3,		/* log_file_align */
   ELFCLASS64,
@@ -2801,10 +2801,10 @@ extern bfd_boolean bfd_elf64_archive_write_armap
 
 #undef ELF_MAXPAGESIZE
 
-#define TARGET_LITTLE_SYM               bfd_elf64_tradlittlemips_vec
-#define TARGET_LITTLE_NAME              "elf64-tradlittlemips"
-#define TARGET_BIG_SYM                  bfd_elf64_tradbigmips_vec
-#define TARGET_BIG_NAME                 "elf64-tradbigmips"
+#define TARGET_LITTLE_SYM		bfd_elf64_tradlittlemips_vec
+#define TARGET_LITTLE_NAME		"elf64-tradlittlemips"
+#define TARGET_BIG_SYM			bfd_elf64_tradbigmips_vec
+#define TARGET_BIG_NAME			"elf64-tradbigmips"
 
 /* The SVR4 MIPS ABI says that this should be 0x10000, and Linux uses
    page sizes of up to that limit, so we need to respect it.  */
