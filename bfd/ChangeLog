@@ -1,3 +1,10 @@
+Thu Oct 23 14:09:33 1997  Richard Henderson  <rth@cygnus.com>
+
+	* elf64-sparc.c (sparc64_elf_howto_table): Add UA64 & UA16.
+	(sparc64_elf_check_relocs): Handle them.
+	(sparc64_elf_relocate_section): Likewise.  Before emitting a dyn reloc,
+	check alignment and transmute R_SPARC_x<->R_SPARC_UAx.
+
 Thu Oct 23 00:53:14 1997  Richard Henderson  <rth@dot.cygnus.com>
 
 	* configure.in (sparc*-*-linux*): Use trad-core and ...

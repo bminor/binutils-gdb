@@ -121,7 +121,9 @@ static reloc_howto_type sparc64_elf_howto_table[] =
   HOWTO(R_SPARC_H44,      22,2,22,false,0,complain_overflow_unsigned,bfd_elf_generic_reloc,  "R_SPARC_H44",     false,0,0x003fffff,false),
   HOWTO(R_SPARC_M44,      12,2,10,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_M44",     false,0,0x000003ff,false),
   HOWTO(R_SPARC_L44,       0,2,13,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_L44",     false,0,0x00000fff,false),
-  HOWTO(R_SPARC_REGISTER,  0,4, 0,false,0,complain_overflow_bitfield,sparc_elf_notsup_reloc, "R_SPARC_REGISTER",false,0,MINUS_ONE, false)
+  HOWTO(R_SPARC_REGISTER,  0,4, 0,false,0,complain_overflow_bitfield,sparc_elf_notsup_reloc, "R_SPARC_REGISTER",false,0,MINUS_ONE, false),
+  HOWTO(R_SPARC_UA64,        0,4,64,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_UA64",      false,0,MINUS_ONE, true),
+  HOWTO(R_SPARC_UA16,        0,1,16,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_UA16",      false,0,0x0000ffff,true)
 };
 
 struct elf_reloc_map {
@@ -883,6 +885,8 @@ sparc64_elf_check_relocs (abfd, info, sec, relocs)
 	case R_SPARC_H44:
 	case R_SPARC_M44:
 	case R_SPARC_L44:
+	case R_SPARC_UA64:
+	case R_SPARC_UA16:
 	  /* When creating a shared object, we must copy these relocs
 	     into the output file.  We create a reloc section in
 	     dynobj and make room for the reloc. 
@@ -1495,6 +1499,8 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		case R_SPARC_H44:
 		case R_SPARC_M44:
 		case R_SPARC_L44:
+		case R_SPARC_UA64:
+		case R_SPARC_UA16:
 		  if (info->shared
 		      && ((!info->symbolic && h->dynindx != -1)
 			  || !(h->elf_link_hash_flags
@@ -1580,6 +1586,8 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    case R_SPARC_H44:
 	    case R_SPARC_M44:
 	    case R_SPARC_L44:
+	    case R_SPARC_UA64:
+	    case R_SPARC_UA16:
 	      {
 		Elf_Internal_Rela outrel;
 		boolean skip;
@@ -1624,6 +1632,30 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		outrel.r_offset += (input_section->output_section->vma
 				    + input_section->output_offset);
+
+		/* Optimize unaligned reloc usage now that we know where
+		   it finally resides.  */
+		switch (r_type)
+		  {
+		  case R_SPARC_16:
+		    if (outrel.r_offset & 1) r_type = R_SPARC_UA16;
+		    break;
+		  case R_SPARC_UA16:
+		    if (!(outrel.r_offset & 1)) r_type = R_SPARC_16;
+		    break;
+		  case R_SPARC_32:
+		    if (outrel.r_offset & 3) r_type = R_SPARC_UA32;
+		    break;
+		  case R_SPARC_UA32:
+		    if (!(outrel.r_offset & 3)) r_type = R_SPARC_32;
+		    break;
+		  case R_SPARC_64:
+		    if (outrel.r_offset & 7) r_type = R_SPARC_UA64;
+		    break;
+		  case R_SPARC_UA64:
+		    if (!(outrel.r_offset & 7)) r_type = R_SPARC_64;
+		    break;
+		  }
 
 		if (skip)
 		  memset (&outrel, 0, sizeof outrel);
