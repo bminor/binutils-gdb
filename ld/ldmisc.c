@@ -50,7 +50,8 @@ static const char *demangle PARAMS ((const char *string,
  %X no object output, fail return
  %V hex bfd_vma
  %v hex bfd_vma, no leading zeros
- %C Clever filename:linenumber 
+ %C clever filename:linenumber with function
+ %D like %C, but no function name
  %R info about a relent
  %s arbitrary string, like printf
  %d integer, like printf
@@ -208,6 +209,7 @@ vfinfo(fp, fmt, arg)
 	break;
 	
        case 'C':
+       case 'D':
 	/* Clever filename:linenumber with function name if possible,
 	   or section name as a last resort.  The arguments are a BFD,
 	   a section, and an offset.  */
@@ -254,9 +256,12 @@ vfinfo(fp, fmt, arg)
 	      if (filename == (char *) NULL)
 		filename = abfd->filename;
 
-	      if (functionname != (char *)NULL) 
-		fprintf (fp, "%s:%u: %s", filename, linenumber,
-			 demangle (functionname, 1));
+	      if (functionname != NULL && fmt[-1] == 'C')
+		{
+		  fprintf (fp, "%s: In function `%s':\n", filename,
+			   demangle (functionname, 1));
+		  fprintf (fp, "%s:%u", filename, linenumber);
+		}
 	      else if (linenumber != 0) 
 		fprintf (fp, "%s:%u", filename, linenumber);
 	      else

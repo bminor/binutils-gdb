@@ -1,5 +1,13 @@
 Wed Sep 14 12:48:09 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* ldmisc.c (vfinfo): Handle %D as %C, but never print the function
+	name.  For %C, print the function name on a separate line, to keep
+	the length of error messages under control.
+	* ldmain.c (multiple_definition): Use %D for ``first defined
+	here.''
+	(undefined_symbol): Use %D for ``more undefined references
+	follow''.
+
 	* ldmisc.c (multiple_warn): Remove; no longer used.
 	* ldmisc.h (multiple_warn): Don't declare.
 

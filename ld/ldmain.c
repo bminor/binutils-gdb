@@ -163,6 +163,7 @@ main (argc, argv)
   config.dynamic_link = false;
   command_line.force_common_definition = false;
   command_line.interpreter = NULL;
+  command_line.rpath = NULL;
 
   link_info.callbacks = &link_callbacks;
   link_info.relocateable = false;
@@ -604,7 +605,7 @@ multiple_definition (info, name, obfd, osec, oval, nbfd, nsec, nval)
   einfo ("%X%C: multiple definition of `%T'\n",
 	 nbfd, nsec, nval, name);
   if (obfd != (bfd *) NULL)
-    einfo ("%C: first defined here\n", obfd, osec, oval);
+    einfo ("%D: first defined here\n", obfd, osec, oval);
   return true;
 }
 
@@ -798,7 +799,7 @@ undefined_symbol (info, name, abfd, section, address)
     einfo ("%X%C: undefined reference to `%T'\n",
 	   abfd, section, address, name);
   else if (error_count == MAX_ERRORS_IN_A_ROW)
-    einfo ("%C: more undefined references to `%T' follow\n",
+    einfo ("%D: more undefined references to `%T' follow\n",
 	   abfd, section, address, name);
 
   return true;
@@ -880,7 +881,7 @@ notice_ysym (info, name, abfd, section, value)
      bfd_vma value;
 {
   einfo ("%B: %s %s\n", abfd,
-	 section != &bfd_und_section ? "definition of" : "reference to",
+	 bfd_is_und_section (section) ? "reference to" : "definition of",
 	 name);
   return true;
 }
