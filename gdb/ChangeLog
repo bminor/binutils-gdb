@@ -5,6 +5,7 @@
 	From Debashis Mahata <debashis.mahata@wipro.com>:
 	(read_struct_fields): Deal with Sun C compiler erroneous stab
 	output for structs and unions.
+        Fix PR gdb/269.
 
 2002-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
