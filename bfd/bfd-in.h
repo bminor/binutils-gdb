@@ -89,6 +89,8 @@ typedef struct _bfd bfd;
 #ifndef TRUE_FALSE_ALREADY_DEFINED
 typedef enum bfd_boolean {false, true} boolean;
 #define BFD_TRUE_FALSE
+#define bfd_false false
+#define bfd_true true
 #else
 typedef enum bfd_boolean {bfd_false, bfd_true} boolean;
 #endif

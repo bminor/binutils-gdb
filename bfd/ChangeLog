@@ -4,6 +4,10 @@ Fri Jun  9 12:20:28 1995  Steve Chamberlain  <sac@rtl.cygnus.com>
 
 Fri Jun  9 12:49:00 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* bfd-in.h (bfd_true, bfd_false): Define these to true and false
+	if TRUE_FALSE_ALREADY_DEFINED is not defined.
+	* bfd-in2.h: Rebuilt.
+
 	* bfd-in.h: (TRUE_FALSE_ALREADY_DEFINED): Define this if
 	compiling with g++-2.6 or later.
 	(bfd_set_section_vma): Use bfd_true and bfd_false rather than
