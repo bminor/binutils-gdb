@@ -36,6 +36,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 void d30v_frame_find_saved_regs PARAMS ((struct frame_info *fi,
 					 struct frame_saved_regs *fsr));
 static void d30v_pop_dummy_frame PARAMS ((struct frame_info *fi));
+static void d30v_print_flags PARAMS ((void));
+static void print_flags_command PARAMS ((char *, int));
 
 /* Discard from the stack the innermost frame, restoring all saved
    registers.  */
@@ -435,12 +437,45 @@ d30v_print_register (regnum, tabular)
     }
 }
 
+static void
+d30v_print_flags ()
+{
+  long psw = read_register (PSW_REGNUM);
+  printf_filtered ("flags #1");
+  printf_filtered ("   (sm) %d", (psw & PSW_SM) != 0);
+  printf_filtered ("   (ea) %d", (psw & PSW_EA) != 0);
+  printf_filtered ("   (db) %d", (psw & PSW_DB) != 0);
+  printf_filtered ("   (ds) %d", (psw & PSW_DS) != 0);
+  printf_filtered ("   (ie) %d", (psw & PSW_IE) != 0);
+  printf_filtered ("   (rp) %d", (psw & PSW_RP) != 0);
+  printf_filtered ("   (md) %d\n", (psw & PSW_MD) != 0);
+
+  printf_filtered ("flags #2");
+  printf_filtered ("   (f0) %d", (psw & PSW_F0) != 0);
+  printf_filtered ("   (f1) %d", (psw & PSW_F1) != 0);
+  printf_filtered ("   (f2) %d", (psw & PSW_F2) != 0);
+  printf_filtered ("   (f3) %d", (psw & PSW_F3) != 0);
+  printf_filtered ("    (s) %d", (psw & PSW_S) != 0);
+  printf_filtered ("    (v) %d", (psw & PSW_V) != 0);
+  printf_filtered ("   (va) %d", (psw & PSW_VA) != 0);
+  printf_filtered ("    (c) %d\n", (psw & PSW_C) != 0);
+}
+
+static void
+print_flags_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  d30v_print_flags ();
+}
+
 void
 d30v_do_registers_info (regnum, fpregs)
      int regnum;
      int fpregs;
 {
   long long num1, num2;
+  long psw;
 
   if (regnum != -1)
     {
@@ -506,6 +541,7 @@ d30v_do_registers_info (regnum, fpregs)
   d30v_print_register (INT_M_REGNUM, 1);
   printf_filtered ("\n");
 
+  d30v_print_flags ();
   for (regnum = 0; regnum <= 63;)
     {
       int i;
@@ -994,6 +1030,8 @@ _initialize_d30v_tdep ()
 
   target_resume_hook = d30v_eva_prepare_to_trace;
   target_wait_loop_hook = d30v_eva_get_trace_data;
+
+  add_info ("flags", print_flags_command, "Print d30v flags.");
 
   add_com ("trace", class_support, trace_command,
 	   "Enable tracing of instruction execution.");

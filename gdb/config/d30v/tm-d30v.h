@@ -95,8 +95,23 @@ extern CORE_ADDR d30v_skip_prologue ();
 #define CREGS_START	66
 
 #define PSW_REGNUM 	(CREGS_START + 0) /* psw, bpsw, or dpsw??? */
-#define    PSW_SM 0x80000000	/* Stack mode: 0 == interrupt (SPI),
-					       1 == user (SPU) */
+#define    PSW_SM (((unsigned long)0x80000000) >> 0)	/* Stack mode: 0/SPI */
+							/*	       1/SPU */
+#define     PSW_EA (((unsigned long)0x80000000) >> 2)	/* Execution status */
+#define     PSW_DB (((unsigned long)0x80000000) >> 3)	/* Debug mode */
+#define     PSW_DS (((unsigned long)0x80000000) >> 4)	/* Debug EIT status */
+#define     PSW_IE (((unsigned long)0x80000000) >> 5)	/* Interrupt enable */
+#define     PSW_RP (((unsigned long)0x80000000) >> 6)	/* Repeat enable */
+#define     PSW_MD (((unsigned long)0x80000000) >> 7)	/* Modulo enable */
+#define     PSW_F0 (((unsigned long)0x80000000) >> 17)	/* F0 flag */
+#define     PSW_F1 (((unsigned long)0x80000000) >> 19)	/* F1 flag */
+#define     PSW_F2 (((unsigned long)0x80000000) >> 21)	/* F2 flag */
+#define     PSW_F3 (((unsigned long)0x80000000) >> 23)	/* F3 flag */
+#define     PSW_S  (((unsigned long)0x80000000) >> 25)	/* Saturation flag */
+#define     PSW_V  (((unsigned long)0x80000000) >> 27)	/* Overflow flag */
+#define     PSW_VA (((unsigned long)0x80000000) >> 29)	/* Accum. overflow */
+#define     PSW_C  (((unsigned long)0x80000000) >> 31)	/* Carry/Borrow flag */
+
 #define BPSW_REGNUM	(CREGS_START + 1) /* Backup PSW (on interrupt) */
 #define PC_REGNUM 	(CREGS_START + 2) /* pc, bpc, or dpc??? */
 #define BPC_REGNUM 	(CREGS_START + 3) /* Backup PC (on interrupt) */
