@@ -22,6 +22,5 @@
 #define TM_NBSD_H
 
 #include "powerpc/tm-ppc-eabi.h"
-#include "tm-nbsd.h"
 
 #endif /* TM_NBSD_H */

@@ -1,3 +1,72 @@
+2002-05-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (armnbsd-tdep.o): Add solib-svr4.h and
+	nbsd-tdep.h to dependency list.
+	* configure.host (arm*-*-netbsdelf*, arm*-*-netbsd*,
+	i[3456]86-*-netbsdaout*, i[3456]86-*-netbsd*, m68*-*-netbsd*,
+	ns32k-*-netbsd*, sparc-*-netbsdaout*, sparc-*-netbsd*): Use
+	nbsdaout.mh and nbsdelf.mh consistently.
+	* configure.tgt (i[3456]86-*-netbsd*, m68*-*-netbsd*,
+	ns32k-*-netbsd*, sparc-*-netbsdelf*, sparc-*-netbsd*) Use
+	nbsdaout.mt and nbsdelf.mh consistently.
+	* armnbsd-tdep.c: Include nbsd-tdep.h and solib-svr4.h. 
+	(arm_netbsd_elf_init_abi): Use set_solib_svr4_fetch_link_map_offsets
+	to set nbsd_ilp32_solib_svr4_fetch_link_map_offsets.
+	* config/nm-nbsd.h: Garbage-collect SVR4_SHARED_LIBS.  Move
+	a.out shared library stuff from here...
+	* config/nm-nbsdaout.h: ...to here.
+	* config/tm-nbsd.h: Remove.
+	* config/alpha/nm-nbsd.h (SVR4_SHARED_LIBS): Remove.
+	* config/arm/nbsd.mh: Remove.
+	* config/arm/nbsd.mt (TDEPFILES): Remove solib-sunos.o, add
+	nbsd-tdep.o.
+	* config/arm/nbsdaout.mh: New file. 
+	* config/arm/nbsdelf.mh: New file.
+	* config/arm/nm-nbsdaout.h: New file.
+	* config/i386/nbsd.mh: Remove.
+	* config/i386/nbsd.mt: Remove.
+	* config/i386/nbsdaout.mh: New file.
+	* config/i386/nbsdaout.mt: New file.
+	* config/i386/nbsdelf.mh (NAT_FILE): Use nm-nbsd.h.
+	* config/i386/nbsdelf.mt (TM_FILE): Use tm-nbsd.h.
+	* config/i386/nm-nbsd.h (REGISTER_U_ADDR, 
+	i386_register_u_addr): Remove.
+	* config/i386/nm-nbsdaout.h: New file.
+	* config/i386/nm-nbsdelf.h: Remove.
+	* config/i386/tm-nbsd.h: Don't include config/tm-nbsd.h.
+	(USE_STRUCT_CONVENTION): Remove.
+	* config/i386/tm-nbsdaout.h: New file.
+	* config/i386/tm-nbsdelf.h: Remove.
+	* config/m68k/nbsd.mh: Remove.
+	* config/m68k/nbsd.mt: Remove.
+	* config/m68k/nbsdaout.mh: New file.
+	* config/m68k/nbsdaout.mt: New file. 
+	* config/m68k/nm-nbsd.h: Use config/nm-nbsd.h.
+	* config/m68k/nm-nbsdaout.h: New file.
+	* config/m68k/tm-nbsd.h: Don't include config/tm-nbsd.h.
+	(IN_SOLIB_CALL_TRAMPOLINE): Define.
+	* config/ns32k/nbsd.mh: Remove.
+	* config/ns32k/nbsd.mt: Remove. 
+	* config/ns32k/nbsdaout.mh: New file.
+	* config/ns32k/nbsdaout.mt: New file.
+	* config/ns32k/nm-nbsd.h: Include config/nm-nbsd.h. 
+	* config/ns32k/nm-nbsdaout.h: New file.
+	* config/ns32k/tm-nbsd.h: Don't include config/tm-nbsd.h.  
+	(IN_SOLIB_CALL_TRAMPOLINE): Define.
+	* config/powerpc/nm-nbsd.h: Include config/nm-nbsd.h.
+	(SVR4_SHARED_LIBS): Remove.
+	* config/powerpc/tm-nbsd.h: Dont' include config/tm-nbsd.h.
+	* config/sparc/nbsd.mh: Remove.
+	* config/sparc/nbsd.mt: Remove.
+	* config/sparc/nbsdaout.mh: New file.
+	* config/sparc/nbsdaout.mt: New file.
+	* config/sparc/nbsdelf.mh (NAT_FILE): Use nm-nbsd.h.
+	* config/sparc/nbsdelf.mt: New file.
+	* config/sparc/nm-nbsdaout.h: New file.   
+	* config/sparc/nm-nbsdelf.h: Remove.
+	* config/sparc/tm-nbsd.h: Don't include config/tm-nbsd.h.
+	* config/sparc/tm-nbsdaout.h: New file.
+
 2002-05-21  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.in (ALLDEPFILES): Add mipsnbsd-nat.c and

@@ -1,6 +1,5 @@
-/* Native-dependent definitions for Intel 386 running NetBSD, for GDB.
-   Copyright 1986, 1987, 1989, 1992, 1994, 2000
-   Free Software Foundation, Inc.
+/* Native-dependent definitions for ARM running NetBSD, for GDB.
+   Copyright 1986, 1987, 1989, 1992, 1994, 1999 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,10 +18,12 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef NM_NBSDELF_H
-#define NM_NBSDELF_H
+#ifndef NM_NBSDAOUT_H
+#define NM_NBSDAOUT_H
 
-#define SVR4_SHARED_LIBS
-#include "i386/nm-nbsd.h"
+#include "arm/nm-nbsd.h"
 
-#endif /* NM_NBSDELF_H */
+/* Get generic NetBSD a.out native definitions. */
+#include "config/nm-nbsdaout.h"
+
+#endif /* NM_NBSDAOUT_H */

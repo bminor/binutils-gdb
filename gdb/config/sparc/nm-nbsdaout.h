@@ -1,5 +1,5 @@
-/* Macro definitions for i386 running under NetBSD.
-   Copyright 2000 Free Software Foundation, Inc.
+/* Native-dependent definitions for Sparc running NetBSD a.out, for GDB.
+   Copyright 1999 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,11 +18,13 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef TM_NBSDELF_H
-#define TM_NBSDELF_H
+#ifndef NM_NBSDAOUT_H
+#define NM_NBSDAOUT_H
 
-#include "i386/tm-nbsd.h"
+#include "sparc/nm-nbsd.h"
 
-#undef USE_STRUCT_CONVENTION
+/* Get generic NetBSD a.out native definitions. */
 
-#endif /* TM_NBSD_H */
+#include "config/nm-nbsdaout.h"
+
+#endif /* NM_NBSDAOUT_H */

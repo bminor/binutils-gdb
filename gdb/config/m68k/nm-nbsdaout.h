@@ -1,5 +1,5 @@
-/* Macro definitions for Sparc running under NetBSD.
-   Copyright 1994 Free Software Foundation, Inc.
+/* Native-dependent definitions for Motorola m68k running NetBSD, for GDB.
+   Copyright 1996, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,9 +18,12 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef TM_NBSD_H
-#define TM_NBSD_H
+#ifndef NM_NBSDAOUT_H
+#define NM_NBSDAOUT_H
 
-#include "sparc/tm-sparc.h"
+#include "m68k/nm-nbsd.h"
 
-#endif /* TM_NBSD_H */
+/* Get generic NetBSD a.out native definitions. */
+#include "config/nm-nbsdaout.h"
+
+#endif /* NM_NBSDAOUT_H */

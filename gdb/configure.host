@@ -38,7 +38,8 @@ alpha*-*-freebsd*)	gdb_host=fbsd ;;
 alpha*-*-netbsd*)	gdb_host=nbsd ;;
 
 arm*-*-linux*)		gdb_host=linux ;;
-arm*-*-netbsd*)		gdb_host=nbsd ;;
+arm*-*-netbsdelf*)	gdb_host=nbsdelf ;;
+arm*-*-netbsd*)		gdb_host=nbsdaout ;;
 arm*-*-*)		gdb_host=arm ;;
 
 hppa*-*-bsd*)		gdb_host=hppabsd ;;
@@ -58,8 +59,8 @@ i[3456]86-*-bsd*)	gdb_host=i386bsd ;;
 i[3456]86-*-dgux*)	gdb_host=i386dgux ;;
 i[3456]86-*-freebsd*)	gdb_host=fbsd ;;
 i[3456]86-*-netbsdelf*)	gdb_host=nbsdelf ;;
-i[3456]86-*-netbsdaout*) gdb_host=nbsd ;;
-i[3456]86-*-netbsd*)	gdb_host=nbsd ;;
+i[3456]86-*-netbsdaout*) gdb_host=nbsdaout ;;
+i[3456]86-*-netbsd*)	gdb_host=nbsdaout ;;
 i[3456]86-*-go32*)	gdb_host=go32 ;;
 i[3456]86-*-msdosdjgpp*) gdb_host=go32 ;;
 i[3456]86-*-linux*)	gdb_host=linux ;;
@@ -98,7 +99,7 @@ m68*-hp-bsd*)		gdb_host=hp300bsd ;;
 m68*-hp-hpux*)		gdb_host=hp300hpux ;;
 m68*-*-linux*)		gdb_host=linux ;;
 m68*-*-lynxos*)		gdb_host=m68klynx ;;
-m68*-*-netbsd*)		gdb_host=nbsd ;;
+m68*-*-netbsd*)		gdb_host=nbsdaout ;;
 m68*-*-sysv4*)		gdb_host=m68kv4 ;;
 m68*-motorola-*)	gdb_host=delta68 ;;
 m68*-sun-sunos3*)	gdb_host=sun3os3 ;;
@@ -126,7 +127,7 @@ mips-*-riscos*)		gdb_host=riscos ;;
 
 none-*-*)		gdb_host=none ;;
 
-ns32k-*-netbsd*)	gdb_host=nbsd ;;
+ns32k-*-netbsd*)	gdb_host=nbsdaout ;;
 
 powerpc-*-aix*)		gdb_host=aix ;;
 powerpc-*-linux*)	gdb_host=linux ;;
@@ -143,8 +144,8 @@ sh*-*-netbsdelf*)	gdb_host=nbsd ;;
 sparc-*-linux*)		gdb_host=linux ;;
 sparc-*-lynxos*)	gdb_host=sparclynx ;;
 sparc-*-netbsdelf*)	gdb_host=nbsdelf ;;
-sparc-*-netbsdaout*)	gdb_host=nbsd ;;
-sparc-*-netbsd*)	gdb_host=nbsd ;;
+sparc-*-netbsdaout*)	gdb_host=nbsdaout ;;
+sparc-*-netbsd*)	gdb_host=nbsdaout ;;
 sparc-*-solaris2*)	gdb_host=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_host=sun4os4 ;;
 sparc-*-sunos5*)	gdb_host=sun4sol2 ;;

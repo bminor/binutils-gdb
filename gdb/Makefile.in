@@ -1297,7 +1297,8 @@ arm-tdep.o: arm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcmd_h) \
 armnbsd-nat.o: armnbsd-nat.c $(defs_h) $(arm_tdep_h) $(inferior_h) \
 	$(regcache_h) $(gdbcore_h)
 
-armnbsd-tdep.o: armnbsd-tdep.c $(defs_h) $(arm_tdep_h)
+armnbsd-tdep.o: armnbsd-tdep.c $(defs_h) $(arm_tdep_h) solib-svr4.h \
+	nbsd-tdep.h
 
 avr-tdep.o: avr-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 	$(symfile_h) $(regcache_h) $(arch_utils_h)

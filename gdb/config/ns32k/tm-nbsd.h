@@ -19,6 +19,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#ifndef TM_NBSD_H
+#define TM_NBSD_H
+
 /* Override number of expected traps from sysv. */
 #define START_INFERIOR_TRAPS_EXPECTED 2
 
@@ -26,9 +29,9 @@
 
 #include "ns32k/tm-umax.h"
 
-/* Generic NetBSD definitions.  */
-
-#include "tm-nbsd.h"
+/* Return non-zero if we are in a shared library trampoline code stub. */
+#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
+  (name && !strcmp(name, "_DYNAMIC"))
 
 /* Saved Pc.  Get it from sigcontext if within sigtramp.  */
 
@@ -78,3 +81,5 @@
 #define REGISTER_BYTE(N) (((N) < LP0_REGNUM? (N)\
 			   : ((N) - LP0_REGNUM) & 1? (N) - 1 \
 			   : ((N) - LP0_REGNUM + FP0_REGNUM)) * 4)
+
+#endif /* TM_NBSD_H */

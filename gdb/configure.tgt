@@ -93,7 +93,7 @@ i[3456]86-*-aix*)	gdb_target=i386aix ;;
 i[3456]86-*-bsd*)	gdb_target=i386bsd ;;
 i[3456]86-*-freebsd*)	gdb_target=fbsd ;;
 i[3456]86-*-netbsdelf*)	gdb_target=nbsdelf ;;
-i[3456]86-*-netbsd*)	gdb_target=nbsd ;;
+i[3456]86-*-netbsd*)	gdb_target=nbsdaout ;;
 i[3456]86-*-os9k)	gdb_target=i386os9k ;;
 i[3456]86-*-go32*)	gdb_target=i386aout ;;
 i[3456]86-*-msdosdjgpp*) gdb_target=go32 ;;
@@ -157,7 +157,7 @@ m68*-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
 			;;
 m68*-*-lynxos*)		gdb_target=m68klynx ;;
-m68*-*-netbsd*)		gdb_target=nbsd ;;
+m68*-*-netbsd*)		gdb_target=nbsdaout ;;
 m68*-*-os68k*)		gdb_target=os68k ;;
 m68*-*-sunos3*)		gdb_target=sun3os3 ;;
 m68*-*-sunos4*)		gdb_target=sun3os4 ;;
@@ -213,7 +213,7 @@ mn10300-*-*)		gdb_target=mn10300 ;;
 
 none-*-*)		gdb_target=none ;;
 
-ns32k-*-netbsd*)	gdb_target=nbsd ;;
+ns32k-*-netbsd*)	gdb_target=nbsdaout ;;
 
 powerpc-*-netbsd*)	gdb_target=nbsd ;;
 powerpc-*-aix*)		gdb_target=aix ;;
@@ -259,7 +259,8 @@ sparc-*-coff*)		gdb_target=sparc-em ;;
 sparc-*-elf*)		gdb_target=sparc-em ;;
 sparc-*-linux*)		gdb_target=linux ;;
 sparc-*-lynxos*)	gdb_target=sparclynx ;;
-sparc-*-netbsd*)	gdb_target=nbsd ;;
+sparc-*-netbsdelf*)	gdb_target=nbsdelf ;;
+sparc-*-netbsd*)	gdb_target=nbsdaout ;;
 sparc-*-solaris2*)	gdb_target=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_target=sun4os4 ;;
 sparc-*-sunos5*)	gdb_target=sun4sol2 ;;

@@ -1,5 +1,5 @@
-/* Native-dependent definitions for Sparc running NetBSD ELF, for GDB.
-   Copyright 1999 Free Software Foundation, Inc.
+/* Macro definitions for Sparc running under NetBSD.
+   Copyright 1994, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,10 +18,13 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef NM_NBSDELF_H
-#define NM_NBSDELF_H
+#ifndef TM_NBSDAOUT_H
+#define TM_NBSDAOUT_H
 
-#define SVR4_SHARED_LIBS
-#include "sparc/nm-nbsd.h"
+#include "sparc/tm-nbsd.h"
 
-#endif
+/* Return non-zero if we are in a shared library trampoline code stub. */
+#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
+  (name && !strcmp(name, "_DYNAMIC"))
+
+#endif /* TM_NBSDAOUT_H */

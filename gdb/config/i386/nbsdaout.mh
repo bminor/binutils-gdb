@@ -3,4 +3,4 @@ NATDEPFILES= fork-child.o infptrace.o inftarg.o i386bsd-nat.o \
 	solib.o solib-sunos.o
 
 XM_FILE= xm-nbsd.h
-NAT_FILE= nm-nbsd.h
+NAT_FILE= nm-nbsdaout.h

@@ -1,6 +1,5 @@
-/* Target machine sub-description for NetBSD.
-   This is included by other tm-*.h files to specify NetBSD-specific stuff.
-   Copyright 1993, 1994 Free Software Foundation, Inc.
+/* Macro definitions for i386 running under NetBSD.
+   Copyright 2000, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,11 +18,17 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef SVR4_SHARED_LIBS
+#ifndef TM_NBSDAOUT_H
+#define TM_NBSDAOUT_H
+
+#include "i386/tm-nbsd.h"
 
 /* Return non-zero if we are in a shared library trampoline code stub. */
-
 #define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
   (name && !strcmp(name, "_DYNAMIC"))
 
-#endif /* !SVR4_SHARED_LIBS */
+extern use_struct_convention_fn i386nbsd_aout_use_struct_convention;
+#define USE_STRUCT_CONVENTION(gcc_p, type) \
+        i386nbsd_aout_use_struct_convention(gcc_p, type)
+
+#endif /* TM_NBSDAOUT_H */
