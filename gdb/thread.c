@@ -296,7 +296,7 @@ load_infrun_state (ptid_t ptid,
 		   struct breakpoint **through_sigtramp_breakpoint,
 		   CORE_ADDR *step_range_start, 
 		   CORE_ADDR *step_range_end,
-		   CORE_ADDR *step_frame_address, 
+		   struct frame_id *step_frame_id, 
 		   int *handling_longjmp,
 		   int *another_trap, 
 		   int *stepping_through_solib_after_catch,
@@ -322,7 +322,7 @@ load_infrun_state (ptid_t ptid,
   *through_sigtramp_breakpoint = tp->through_sigtramp_breakpoint;
   *step_range_start = tp->step_range_start;
   *step_range_end = tp->step_range_end;
-  *step_frame_address = tp->step_frame_address;
+  *step_frame_id = tp->step_frame_id;
   *handling_longjmp = tp->handling_longjmp;
   *another_trap = tp->another_trap;
   *stepping_through_solib_after_catch = tp->stepping_through_solib_after_catch;
@@ -345,7 +345,7 @@ save_infrun_state (ptid_t ptid,
 		   struct breakpoint *through_sigtramp_breakpoint,
 		   CORE_ADDR step_range_start, 
 		   CORE_ADDR step_range_end,
-		   CORE_ADDR step_frame_address, 
+		   const struct frame_id *step_frame_id, 
 		   int handling_longjmp,
 		   int another_trap, 
 		   int stepping_through_solib_after_catch,
@@ -371,7 +371,7 @@ save_infrun_state (ptid_t ptid,
   tp->through_sigtramp_breakpoint = through_sigtramp_breakpoint;
   tp->step_range_start = step_range_start;
   tp->step_range_end = step_range_end;
-  tp->step_frame_address = step_frame_address;
+  tp->step_frame_id = (*step_frame_id);
   tp->handling_longjmp = handling_longjmp;
   tp->another_trap = another_trap;
   tp->stepping_through_solib_after_catch = stepping_through_solib_after_catch;

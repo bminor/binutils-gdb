@@ -182,7 +182,7 @@ CORE_ADDR step_range_end;	/* Exclusive */
    This is how we know when we step into a subroutine call,
    and how to set the frame for the breakpoint used to step out.  */
 
-CORE_ADDR step_frame_address;
+struct frame_id step_frame_id;
 
 /* Our notion of the current stack pointer.  */
 
@@ -627,7 +627,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
 	  frame = get_current_frame ();
 	  if (!frame)		/* Avoid coredump here.  Why tho? */
 	    error ("No current frame");
-	  step_frame_address = get_frame_base (frame);
+	  step_frame_id = get_frame_id (frame);
 	  step_sp = read_sp ();
 
 	  if (!single_inst)
@@ -742,7 +742,7 @@ step_once (int skip_subroutines, int single_inst, int count)
       frame = get_current_frame ();
       if (!frame)		/* Avoid coredump here.  Why tho? */
 	error ("No current frame");
-      step_frame_address = get_frame_base (frame);
+      step_frame_id = get_frame_id (frame);
       step_sp = read_sp ();
 
       if (!single_inst)
@@ -1105,7 +1105,7 @@ until_next_command (int from_tty)
     }
 
   step_over_calls = STEP_OVER_ALL;
-  step_frame_address = get_frame_base (frame);
+  step_frame_id = get_frame_id (frame);
   step_sp = read_sp ();
 
   step_multi = 0;		/* Only one call to proceed */

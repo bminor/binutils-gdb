@@ -32,6 +32,9 @@ struct regcache;
 /* For enum target_signal.  */
 #include "target.h"
 
+/* For struct frame_id.  */
+#include "frame.h"
+
 /* Structure in which to save the status of the inferior.  Create/Save
    through "save_inferior_status", restore through
    "restore_inferior_status".
@@ -369,7 +372,7 @@ extern CORE_ADDR step_range_end;	/* Exclusive */
    This is how we know when we step into a subroutine call,
    and how to set the frame for the breakpoint used to step out.  */
 
-extern CORE_ADDR step_frame_address;
+extern struct frame_id step_frame_id;
 
 /* Our notion of the current stack pointer.  */
 

@@ -28,6 +28,9 @@
 /* For bpstat */
 #include "breakpoint.h"
 
+/* For struct frame_id.  */
+#include "frame.h"
+
 struct thread_info
 {
   struct thread_info *next;
@@ -43,7 +46,7 @@ struct thread_info
   struct breakpoint *through_sigtramp_breakpoint;
   CORE_ADDR step_range_start;
   CORE_ADDR step_range_end;
-  CORE_ADDR step_frame_address;
+  struct frame_id step_frame_id;
   CORE_ADDR step_sp;
   int current_line;
   struct symtab *current_symtab;
@@ -118,7 +121,7 @@ extern void save_infrun_state (ptid_t ptid,
 			       struct breakpoint *through_sigtramp_breakpoint,
 			       CORE_ADDR step_range_start,
 			       CORE_ADDR step_range_end,
-			       CORE_ADDR step_frame_address,
+			       const struct frame_id *step_frame_id,
 			       int       handling_longjmp,
 			       int       another_trap,
 			       int       stepping_through_solib_after_catch,
@@ -139,7 +142,7 @@ extern void load_infrun_state (ptid_t ptid,
 			       struct breakpoint **through_sigtramp_breakpoint,
 			       CORE_ADDR *step_range_start,
 			       CORE_ADDR *step_range_end,
-			       CORE_ADDR *step_frame_address,
+			       struct frame_id *step_frame_id,
 			       int       *handling_longjmp,
 			       int       *another_trap,
 			       int       *stepping_through_solib_affter_catch,

@@ -822,7 +822,7 @@ clear_proceed_status (void)
   trap_expected = 0;
   step_range_start = 0;
   step_range_end = 0;
-  step_frame_address = 0;
+  step_frame_id = null_frame_id;
   step_over_calls = STEP_OVER_UNDEBUGGABLE;
   stop_after_trap = 0;
   stop_soon_quietly = 0;
@@ -1291,7 +1291,7 @@ context_switch (struct execution_control_state *ecs)
 			 prev_func_start, prev_func_name,
 			 trap_expected, step_resume_breakpoint,
 			 through_sigtramp_breakpoint, step_range_start,
-			 step_range_end, step_frame_address,
+			 step_range_end, &step_frame_id,
 			 ecs->handling_longjmp, ecs->another_trap,
 			 ecs->stepping_through_solib_after_catch,
 			 ecs->stepping_through_solib_catchpoints,
@@ -1303,7 +1303,7 @@ context_switch (struct execution_control_state *ecs)
 			 &prev_func_start, &prev_func_name,
 			 &trap_expected, &step_resume_breakpoint,
 			 &through_sigtramp_breakpoint, &step_range_start,
-			 &step_range_end, &step_frame_address,
+			 &step_range_end, &step_frame_id,
 			 &ecs->handling_longjmp, &ecs->another_trap,
 			 &ecs->stepping_through_solib_after_catch,
 			 &ecs->stepping_through_solib_catchpoints,
@@ -2255,8 +2255,8 @@ process_event_stop_test:
 #if 0
 	/* FIXME - Need to implement nested temporary breakpoints */
 	if (step_over_calls
-	    && (INNER_THAN (get_frame_base (get_current_frame ()),
-			    step_frame_address)))
+	    && (frame_id_inner (get_frame_id (get_current_frame ()),
+				step_frame_id)))
 	  {
 	    ecs->another_trap = 1;
 	    keep_going (ecs);
@@ -2567,9 +2567,9 @@ process_event_stop_test:
 
 
       {
-	CORE_ADDR current_frame = get_frame_base (get_current_frame ());
+	struct frame_id current_frame = get_frame_id (get_current_frame ());
 
-	if (INNER_THAN (current_frame, step_frame_address))
+	if (frame_id_inner (current_frame, step_frame_id))
 	  {
 	    /* We have just taken a signal; go until we are back to
 	       the point where we took it and one more.  */
@@ -2589,8 +2589,7 @@ process_event_stop_test:
 	    sr_sal.line = 0;
 	    sr_sal.pc = prev_pc;
 	    /* We could probably be setting the frame to
-	       step_frame_address; I don't think anyone thought to
-	       try it.  */
+	       step_frame_id; I don't think anyone thought to try it.  */
 	    check_for_old_step_resume_breakpoint ();
 	    step_resume_breakpoint =
 	      set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
@@ -2664,17 +2663,17 @@ process_event_stop_test:
 	  /* We're doing a "next".  */
 
 	  if (PC_IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
-	      && INNER_THAN (step_frame_address, read_sp ()))
+	      && frame_id_inner (step_frame_id,
+				 frame_id_build (read_sp (), 0)))
 	    /* We stepped out of a signal handler, and into its
 	       calling trampoline.  This is misdetected as a
 	       subroutine call, but stepping over the signal
-	       trampoline isn't such a bad idea.  In order to do
-	       that, we have to ignore the value in
-	       step_frame_address, since that doesn't represent the
-	       frame that'll reach when we return from the signal
-	       trampoline.  Otherwise we'll probably continue to the
-	       end of the program.  */
-	    step_frame_address = 0;
+	       trampoline isn't such a bad idea.  In order to do that,
+	       we have to ignore the value in step_frame_id, since
+	       that doesn't represent the frame that'll reach when we
+	       return from the signal trampoline.  Otherwise we'll
+	       probably continue to the end of the program.  */
+	    step_frame_id = null_frame_id;
 
 	  step_over_function (ecs);
 	  keep_going (ecs);
@@ -2838,17 +2837,17 @@ process_event_stop_test:
     }
   step_range_start = ecs->sal.pc;
   step_range_end = ecs->sal.end;
-  step_frame_address = get_frame_base (get_current_frame ());
+  step_frame_id = get_frame_id (get_current_frame ());
   ecs->current_line = ecs->sal.line;
   ecs->current_symtab = ecs->sal.symtab;
 
-  /* In the case where we just stepped out of a function into the middle
-     of a line of the caller, continue stepping, but step_frame_address
-     must be modified to current frame */
+  /* In the case where we just stepped out of a function into the
+     middle of a line of the caller, continue stepping, but
+     step_frame_id must be modified to current frame */
   {
-    CORE_ADDR current_frame = get_frame_base (get_current_frame ());
-    if (!(INNER_THAN (current_frame, step_frame_address)))
-      step_frame_address = current_frame;
+    struct frame_id current_frame = get_frame_id (get_current_frame ());
+    if (!(frame_id_inner (current_frame, step_frame_id)))
+      step_frame_id = current_frame;
   }
 
   keep_going (ecs);
@@ -2971,7 +2970,7 @@ step_into_function (struct execution_control_state *ecs)
    of the call.
 
    To do this, we set the step_resume bp's frame to our current
-   caller's frame (step_frame_address, which is set by the "next" or
+   caller's frame (step_frame_id, which is set by the "next" or
    "until" command, before execution begins).  */
 
 static void
@@ -2987,8 +2986,11 @@ step_over_function (struct execution_control_state *ecs)
   step_resume_breakpoint =
     set_momentary_breakpoint (sr_sal, get_current_frame (), bp_step_resume);
 
-  if (step_frame_address && !IN_SOLIB_DYNSYM_RESOLVE_CODE (sr_sal.pc))
-    step_resume_breakpoint->frame = step_frame_address;
+  if (frame_id_p (step_frame_id)
+      && !IN_SOLIB_DYNSYM_RESOLVE_CODE (sr_sal.pc))
+    /* FIXME: cagney/2002-12-01: Someone should modify the breakpoint
+       code so that it uses a frame ID, instead of a frame address.  */
+    step_resume_breakpoint->frame = step_frame_id.base;
 
   if (breakpoints_inserted)
     insert_breakpoints ();
@@ -3352,8 +3354,12 @@ normal_stop (void)
 	  switch (bpstat_ret)
 	    {
 	    case PRINT_UNKNOWN:
+	      /* FIXME: cagney/2002-12-01: Given that a frame ID does
+		 (or should) carry around the function and does (or
+		 should) use that when doing a frame comparison.  */
 	      if (stop_step
-		  && step_frame_address == get_frame_base (get_current_frame ())
+		  && frame_id_eq (step_frame_id,
+				  get_frame_id (get_current_frame ()))
 		  && step_start_function == find_pc_function (stop_pc))
 		source_flag = SRC_LINE;	/* finished step, just print source line */
 	      else
@@ -3791,7 +3797,7 @@ struct inferior_status
   int trap_expected;
   CORE_ADDR step_range_start;
   CORE_ADDR step_range_end;
-  CORE_ADDR step_frame_address;
+  struct frame_id step_frame_id;
   enum step_over_calls_kind step_over_calls;
   CORE_ADDR step_resume_break_address;
   int stop_after_trap;
@@ -3838,7 +3844,7 @@ save_inferior_status (int restore_stack_info)
   inf_status->trap_expected = trap_expected;
   inf_status->step_range_start = step_range_start;
   inf_status->step_range_end = step_range_end;
-  inf_status->step_frame_address = step_frame_address;
+  inf_status->step_frame_id = step_frame_id;
   inf_status->step_over_calls = step_over_calls;
   inf_status->stop_after_trap = stop_after_trap;
   inf_status->stop_soon_quietly = stop_soon_quietly;
@@ -3868,8 +3874,8 @@ restore_selected_frame (void *args)
 
   frame = frame_find_by_id (*fid);
 
-  /* If inf_status->selected_frame_address is NULL, there was no
-     previously selected frame.  */
+  /* If inf_status->selected_frame_id is NULL, there was no previously
+     selected frame.  */
   if (frame == NULL)
     {
       warning ("Unable to restore previously selected frame.\n");
@@ -3892,7 +3898,7 @@ restore_inferior_status (struct inferior_status *inf_status)
   trap_expected = inf_status->trap_expected;
   step_range_start = inf_status->step_range_start;
   step_range_end = inf_status->step_range_end;
-  step_frame_address = inf_status->step_frame_address;
+  step_frame_id = inf_status->step_frame_id;
   step_over_calls = inf_status->step_over_calls;
   stop_after_trap = inf_status->stop_after_trap;
   stop_soon_quietly = inf_status->stop_soon_quietly;

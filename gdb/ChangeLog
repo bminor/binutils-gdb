@@ -1,3 +1,22 @@
+2002-12-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbthread.h: Include "frame.h".
+	(struct thread_info): Replace step_frame_address with
+	step_frame_id.
+	* inferior.h: Include "frame.h".
+	(step_frame_id): Replace external variable step_frame_address.
+	* gdbthread.h (save_infrun_state): Replace step_frame_address
+	parameter with step_frame_id parameter.
+	(load_infrun_state): Ditto.
+	* Makefile.in (gdbthread_h, inferior_h): Add $(frame_h).
+	* infcmd.c (step_frame_id, step_1, step_once): Update.
+	* thread.c (load_infrun_state, save_infrun_state): Update.
+	* infrun.c (clear_proceed_status, save_inferior_status): Update.
+	(handle_inferior_event, step_over_function): Update.
+	(normal_stop, context_switch, restore_inferior_status): Update.
+	(struct inferior_status): Replace step_frame_address with
+	step_frame_id.
+
 2002-12-05  David Carlton  <carlton@math.stanford.edu>
 
 	* dwarf2read.c (dwarf2_add_field): Treat a field that is a
