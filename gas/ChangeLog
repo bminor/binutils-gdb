@@ -1,5 +1,16 @@
 Mon Dec  9 17:09:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (RELAX_MIPS16_ENCODE): Add small and ext
+	arguments, and store them.  Adjust other RELAX_MIPS16 macros.
+	(RELAX_MIPS16_USER_SMALL): Define.
+	(RELAX_MIPS16_USER_EXT): Define.
+	(mips16_small, mips16_ext): New static variables.
+	(append_insn): Pass mips16_small and mips16_ext to
+	RELAX_MIPS16_ENCODE.
+	(mips16_ip): Set mips16_small and mips16_ext.
+	(mips16_immed): Don't check mips16_autoextend.
+	(mips16_extended_frag): Check USER_SMALL and USER_EXT.
+
 	* write.c (write_relocs): Print an error for an out of range
 	fixup, rather than calling abort.
 

@@ -453,23 +453,29 @@ static const int mips16_to_32_reg_map[] =
    use the high bit of the subtype field to distinguish these cases.
 
    The information we store for this type of relaxation is simply the
-   argument code found in the opcode file for this relocation.  That
-   tells us the size of the value, and how it should be stored.  We
-   also store whether the fragment is considered to be extended or
+   argument code found in the opcode file for this relocation, and
+   whether the user explicitly requested a small or extended form.
+   That tells us the size of the value, and how it should be stored.
+   We also store whether the fragment is considered to be extended or
    not.  We also store whether this is known to be a branch to a
    different section, whether we have tried to relax this frag yet,
    and whether we have ever extended a PC relative fragment because of
    a shift count.  */
-#define RELAX_MIPS16_ENCODE(type) \
-  (0x80000000 | ((type) & 0xff))
+#define RELAX_MIPS16_ENCODE(type, small, ext)	\
+  (0x80000000					\
+   | ((type) & 0xff)				\
+   | ((small) ? 0x100 : 0)			\
+   | ((ext) ? 0x200 : 0))
 #define RELAX_MIPS16_P(i) (((i) & 0x80000000) != 0)
 #define RELAX_MIPS16_TYPE(i) ((i) & 0xff)
-#define RELAX_MIPS16_EXTENDED(i) (((i) & 0x100) != 0)
-#define RELAX_MIPS16_MARK_EXTENDED(i) ((i) | 0x100)
-#define RELAX_MIPS16_CLEAR_EXTENDED(i) ((i) &~ 0x100)
-#define RELAX_MIPS16_LONG_BRANCH(i) (((i) & 0x200) != 0)
-#define RELAX_MIPS16_MARK_LONG_BRANCH(i) ((i) | 0x200)
-#define RELAX_MIPS16_CLEAR_LONG_BRANCH(i) ((i) &~ 0x200)
+#define RELAX_MIPS16_USER_SMALL(i) (((i) & 0x100) != 0)
+#define RELAX_MIPS16_USER_EXT(i) (((i) & 0x200) != 0)
+#define RELAX_MIPS16_EXTENDED(i) (((i) & 0x400) != 0)
+#define RELAX_MIPS16_MARK_EXTENDED(i) ((i) | 0x400)
+#define RELAX_MIPS16_CLEAR_EXTENDED(i) ((i) &~ 0x400)
+#define RELAX_MIPS16_LONG_BRANCH(i) (((i) & 0x800) != 0)
+#define RELAX_MIPS16_MARK_LONG_BRANCH(i) ((i) | 0x800)
+#define RELAX_MIPS16_CLEAR_LONG_BRANCH(i) ((i) &~ 0x800)
 
 /* Prototypes for static functions.  */
 
@@ -647,6 +653,10 @@ static bfd_reloc_code_real_type offset_reloc;
 /* This is set by mips_ip if imm_reloc is an unmatched HI16_S reloc.  */
 
 static boolean imm_unmatched_hi;
+
+/* These are set by mips16_ip if an explicit extension is used.  */
+
+static boolean mips16_small, mips16_ext;
 
 /*
  * This function is called once, at assembler startup time.  It should
@@ -1356,7 +1366,8 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
       /* We need to set up a variant frag.  */
       assert (mips16 && address_expr != NULL);
       f = frag_var (rs_machine_dependent, 4, 0,
-		    RELAX_MIPS16_ENCODE (reloc_type - BFD_RELOC_UNUSED),
+		    RELAX_MIPS16_ENCODE (reloc_type - BFD_RELOC_UNUSED,
+					 mips16_small, mips16_ext),
 		    make_expr_symbol (address_expr), (long) 0,
 		    (char *) NULL);
     }
@@ -6628,7 +6639,9 @@ mips_ip (str, ip)
 /* This routine assembles an instruction into its binary format when
    assembling for the mips16.  As a side effect, it sets one of the
    global variables imm_reloc or offset_reloc to the type of
-   relocation to do if one of the operands is an address expression.  */
+   relocation to do if one of the operands is an address expression.
+   It also sets mips16_small and mips16_ext if the user explicitly
+   requested a small or extended instruction.  */
 
 static void
 mips16_ip (str, ip)
@@ -6636,7 +6649,6 @@ mips16_ip (str, ip)
      struct mips_cl_insn *ip;
 {
   char *s;
-  boolean small, ext;
   const char *args;
   struct mips_opcode *insn;
   char *argsstart;
@@ -6646,8 +6658,8 @@ mips16_ip (str, ip)
 
   insn_error = NULL;
 
-  small = false;
-  ext = false;
+  mips16_small = false;
+  mips16_ext = false;
 
   for (s = str; islower (*s); ++s)
     ;
@@ -6664,14 +6676,14 @@ mips16_ip (str, ip)
       if (s[1] == 't' && s[2] == ' ')
 	{
 	  *s = '\0';
-	  small = true;
+	  mips16_small = true;
 	  s += 3;
 	  break;
 	}
       else if (s[1] == 'e' && s[2] == ' ')
 	{
 	  *s = '\0';
-	  ext = true;
+	  mips16_ext = true;
 	  s += 3;
 	  break;
 	}
@@ -6680,6 +6692,9 @@ mips16_ip (str, ip)
       insn_error = "unknown opcode";
       return;
     }
+
+  if (! mips16_autoextend && ! mips16_ext)
+    mips16_small = true;
 
   if ((insn = (struct mips_opcode *) hash_find (mips16_op_hash, str)) == NULL)
     {
@@ -6723,9 +6738,9 @@ mips16_ip (str, ip)
 		    {
 		      mips16_immed ((char *) NULL, 0,
 				    imm_reloc - BFD_RELOC_UNUSED,
-				    imm_expr.X_add_number, true, small, ext,
-				    &ip->insn_opcode, &ip->use_extend,
-				    &ip->extend);
+				    imm_expr.X_add_number, true, mips16_small,
+				    mips16_ext, &ip->insn_opcode,
+				    &ip->use_extend, &ip->extend);
 		      imm_expr.X_op = O_absent;
 		      imm_reloc = BFD_RELOC_UNUSED;
 		    }
@@ -7196,7 +7211,7 @@ mips16_immed (file, line, type, val, warn, small, ext, insn, use_extend,
 
   if (warn && ext && ! needext)
     as_warn_where (file, line, "extended operand requested but not required");
-  if ((small || ! mips16_autoextend) && needext)
+  if (small && needext)
     as_bad_where (file, line, "invalid unextended operand value");
 
   if (small || (! ext && ! needext))
@@ -9010,6 +9025,11 @@ mips16_extended_frag (fragp, sec, stretch)
   offsetT val;
   int mintiny, maxtiny;
   segT symsec;
+
+  if (RELAX_MIPS16_USER_SMALL (fragp->fr_subtype))
+    return 0;
+  if (RELAX_MIPS16_USER_EXT (fragp->fr_subtype))
+    return 1;
 
   type = RELAX_MIPS16_TYPE (fragp->fr_subtype);
   op = mips16_immed_operands;
