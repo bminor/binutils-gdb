@@ -1,5 +1,14 @@
 Tue Sep 14 13:31:04 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/obj-elf.c (obj_elf_data, obj_elf_text): New functions;
+	set previous_section and previous_subsection and then call s_data
+	and s_text, respectively.
+	(obj_pseudo_table): Add data and text.
+	(obj_elf_section): Add SEC_LOAD to default initialization of
+	flags.  Treat .rodata1 like .rodata.  Set SEC_LOAD as well as
+	SEC_ALLOC for "alloc" string.  Don't bother trying to find the
+	section; just use subseg_new.
+
 	* read.c (change_to_section): Removed.  This is now done by
 	subseg_new.
 	(get_stab_string_offset): Rearranged somewhat.  Create the section
