@@ -1390,7 +1390,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	boolean        overflow = false;
 	bfd_vma        upper_insn = bfd_get_16 (input_bfd, hit_data);
 	bfd_vma        lower_insn = bfd_get_16 (input_bfd, hit_data + 2);
-	bfd_signed_vma reloc_signed_max = (1 << (howto->bitsize - 1)) - 1;
+	bfd_signed_vma reloc_signed_max = ((1 << (howto->bitsize - 1)) - 1) >> howto->rightshift;
 	bfd_signed_vma reloc_signed_min = ~ reloc_signed_max;
 	bfd_vma        check;
 	bfd_signed_vma signed_check;
