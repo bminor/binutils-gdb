@@ -118,7 +118,8 @@ List printable strings from files
 Discard symbols
 
 @item c++filt
-Demangle encoded C++ symbols
+Demangle encoded C++ symbols (on MS-DOS, this program is named
+@code{cxxfilt})
 
 @item addr2line
 Convert addresses into file names and line numbers
@@ -145,6 +146,7 @@ Create the files needed to build and use Dynamic Link Libraries
 * strings::                     List printable strings from files
 * strip::                       Discard symbols
 * c++filt::			Filter to demangle encoded C++ symbols
+* cxxfilt: c++filt.             MS-DOS name for c++filt
 * addr2line::			Convert addresses to file and line
 * nlmconv::                     Converts object code into an NLM
 * windres::			Manipulate Windows resources
@@ -1707,7 +1709,7 @@ Verbose output: list all object files modified.  In the case of
 archives, @samp{strip -v} lists all members of the archive.
 @end table
 
-@node c++filt
+@node c++filt, addr2line, strip, Top
 @chapter c++filt
 
 @kindex c++filt
@@ -1721,13 +1723,17 @@ c++filt [ -_ | --strip-underscores ]
         [ --help ]  [ --version ]  [ @var{symbol}@dots{} ]
 @end smallexample
 
+@kindex cxxfilt
 The C++ and Java languages provides function overloading, which means
 that you can write many functions with the same name (providing each
 takes parameters of different types).  All C++ and Java function names
 are encoded into a low-level assembly label (this process is known as
-@dfn{mangling}). The @code{c++filt} program does the inverse mapping: it
-decodes (@dfn{demangles}) low-level names into user-level names so that
-the linker can keep these overloaded functions from clashing.
+@dfn{mangling}). The @code{c++filt}
+@footnote{MS-DOS does not allow @kbd{+} characters in file names, so on
+MS-DOS this program is named @code{cxxfilt}.}
+program does the inverse mapping: it decodes (@dfn{demangles}) low-level
+names into user-level names so that the linker can keep these overloaded
+functions from clashing.
 
 Every alphanumeric word (consisting of letters, digits, underscores,
 dollars, or periods) seen in the input is a potential label.  If the

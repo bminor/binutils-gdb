@@ -1,5 +1,8 @@
 1999-08-08  Ian Lance Taylor  <ian@zembu.com>
 
+	From Eli Zaretskii <eliz@gnu.org>:
+	* binutils.texi: Document cxxfilt as MS-DOS name for c++filt.
+
 	* configure.in: Define and substitute DEMANGLER_NAME.
 	* Makefile.am (DEMANGLER_PROG): Set to cxxfilt.
 	(man_MANS): Use DEMANGLER_NAME rather than DEMANGLER_PROG.
