@@ -1,3 +1,13 @@
+1999-09-04  Steve Chamberlain  <sac@pobox.com>
+
+	* configure.tgt (pjl-*-*, pj-*-*): New targets.
+	* emulparams/pjelf.sh: New file.
+	* emulparams/pjlelf.sh: New file.
+	* scripttempl/pj.sc: New file.	
+	* Makefile.am (ALL_EMULATIONS): Add epjelf.o and epjlelf.o.
+	(epjelf.o, epjlelf.o): New targets.
+	* Makefile.in: Rebuild.
+
 Fri Sep  3 20:17:08 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* emulparams/elf64hppa.sh (MAXPAGESIZE): Define.
