@@ -303,7 +303,7 @@ do-info do-check do-dvi do-install-info do-clean do-mostlyclean do-distclean do-
 	rootme=`pwd`; export rootme; \
 	srcroot=`cd $(srcdir); pwd`; export srcroot; \
 	for i in $(SUBDIRS); do \
-	  if [ -f ./$$i/localenv ] || [ -f ./$$i/Makefile ]; then \
+	  if [ -f ./$$i/Makefile ]; then \
 	    case $$i in \
 	    $(TARGET_LIBS) ) \
 	      for flag in $(EXTRA_TARGET_FLAGS); do \

@@ -1,5 +1,8 @@
 Wed Mar 10 07:12:48 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* Makefile.in (do-info): Removed obsolete check for existence of
+	localenv file.
+
 	* Makefile.in (MAKEOVERRIDES): Define to be empty.
 
 Wed Mar 10 03:11:56 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
