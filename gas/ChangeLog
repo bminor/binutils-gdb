@@ -1,3 +1,9 @@
+Mon Nov 18 15:26:55 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10300.c (mn10300_insert_operand): Provide prototype
+	via PARAMS.
+	(check_operand): Likewise.
+
 start-sanitize-d10v
 Mon Nov 18 15:22:28 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 

@@ -54,9 +54,13 @@ const char FLT_CHARS[] = "dD";
 
 
 /* local functions */
-static unsigned long mn10300
-  PARAMS ((unsigned long insn, const struct mn10300_operand *operand,
-	   offsetT val, char *file, unsigned int line));
+static void mn10300_insert_operand PARAMS ((unsigned long *, unsigned long *,
+					    const struct mn10300_operand *,
+					    offsetT, char *, unsigned,
+					    unsigned));
+static unsigned long check_operand PARAMS ((unsigned long,
+					    const struct mn10300_operand *,
+					    offsetT));
 static int reg_name_search PARAMS ((const struct reg_name *, int, const char *));
 static boolean register_name PARAMS ((expressionS *expressionP));
 static boolean system_register_name PARAMS ((expressionS *expressionP));
@@ -858,7 +862,10 @@ mn10300_insert_operand (insnp, extensionp, operand, val, file, line, shift)
      unsigned int line;
      unsigned int shift;
 {
-  if (operand->bits != 32)
+  /* No need to check 32bit operands for a bit.  Note that
+     MN10300_OPERAND_SPLIT is an implicit 32bit operand.  */
+  if (operand->bits != 32
+      && (operand->flags & MN10300_OPERAND_SPLIT) == 0)
     {
       long min, max;
       offsetT test;
@@ -893,8 +900,9 @@ mn10300_insert_operand (insnp, extensionp, operand, val, file, line, shift)
 
   if ((operand->flags & MN10300_OPERAND_SPLIT) != 0)
     {
-      *insnp |= (val >> 16) & 0xffff;
-      *extensionp |= (val & 0xffff) << operand->shift;
+      *insnp |= (val >> 32 - operand->bits) & ((1 << operand->bits) - 1);
+      *extensionp |= ((val & ((1 << (32 - operand->bits)) - 1))
+		      << operand->shift);
     }
   else if ((operand->flags & MN10300_OPERAND_EXTENDED) == 0)
     {
@@ -922,7 +930,10 @@ check_operand (insn, operand, val)
      const struct mn10300_operand *operand;
      offsetT val;
 {
-  if (operand->bits != 32)
+  /* No need to check 32bit operands for a bit.  Note that
+     MN10300_OPERAND_SPLIT is an implicit 32bit operand.  */
+  if (operand->bits != 32
+      && (operand->flags & MN10300_OPERAND_SPLIT) == 0)
     {
       long min, max;
       offsetT test;
