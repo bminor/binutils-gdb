@@ -1,3 +1,11 @@
+2001-07-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (DEP_FLAGS): Define, add -DOBJ_MAYBE_ELF.
+	(DEP1, DEPTC, DEPOBJ, DEP2): Use it.
+	Update dependencies with "make dep-am".
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2001-07-23  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-alpha.h: Fix formatting.

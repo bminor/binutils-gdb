@@ -459,6 +459,9 @@ INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config -I$(INCDIR)
 # in a subdirectory.
 DEP_INCLUDES = -D_GNU_SOURCE -I.. -I$${srcdir} -I../../bfd -I$${srcdir}/config -I$${srcdir}/../include -I$${srcdir}/.. -I$${srcdir}/../bfd -I$${srcdir}/../intl -I../../intl -DLOCALEDIR="\"$(prefix)/share/locale\""
 
+DEP_FLAGS = -DBFD_ASSEMBLER -DOBJ_MAYBE_ELF \
+	-I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES)
+
 # How to link with both our special library facilities
 # and the system's installed libraries.
 
@@ -787,7 +790,7 @@ DEP1: $(CFILES) $(MULTI_CFILES)
 	echo '' > targ-env.h; \
 	echo '' > itbl-cpu.h; \
 	echo '' > itbl-parse.h; \
-	$(MKDEP) -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) $? > DEP
+	$(MKDEP) $(DEP_FLAGS) $? > DEP
 	mv -f DEPDIR/DEP $@
 
 # Work out the special dependencies for the tc-*.c files.
@@ -808,7 +811,7 @@ DEPTC: $(TARGET_CPU_CFILES)
 	      echo '#include "opcodes/'"$${c}"'-desc.h"' > cgen-desc.h; \
 	      rm -f dummy.c; \
 	      cp $${srcdir}/config/tc-$${c}.c dummy.c; \
-	      $(MKDEP) -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) dummy.c | \
+	      $(MKDEP) $(DEP_FLAGS) dummy.c | \
 	        sed -e "s/dummy.o: dummy.c/DEPTC_$${c}_$${o} =/" >> ../DEPTCA; \
 	      rm -f dummy.c; \
 	    else true; fi; \
@@ -846,7 +849,7 @@ DEPOBJ: $(OBJ_FORMAT_CFILES)
 	      echo '' > itbl-parse.h; \
 	      rm -f dummy.c; \
 	      cp $${srcdir}/config/obj-$${o}.c dummy.c; \
-	      $(MKDEP) -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) dummy.c | \
+	      $(MKDEP) $(DEP_FLAGS) dummy.c | \
 	        sed -e "s/dummy.o: dummy.c/DEPOBJ_$${c}_$${o} =/" >> ../DEPOBJA; \
 	      rm -f dummy.c; \
 	    else true; fi; \
@@ -881,7 +884,7 @@ DEP2: $(TARGET_CPU_HFILES) $(OBJ_FORMAT_HFILES)
 	    if [ x$${valid} = xyes ]; then \
 	      echo '#include "tc-'"$${c}"'.h"' > targ-cpu.h; \
 	      echo '#include "obj-'"$${o}"'.h"' > dummy.c; \
-	      $(MKDEP) -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) dummy.c | \
+	      $(MKDEP) $(DEP_FLAGS) dummy.c | \
 	        sed -e "s/dummy.o: dummy.c/DEP_$${c}_$${o} =/" >> ../DEP2A; \
 	    else true; fi; \
 	  done; \
@@ -958,13 +961,13 @@ DEPTC_arc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-arc.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
   struc-symbol.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/arc.h \
   $(srcdir)/../opcodes/arc-ext.h $(INCDIR)/elf/arc.h \
-  $(INCDIR)/elf/reloc-macros.h
+  $(INCDIR)/elf/reloc-macros.h dwarf2dbg.h
 DEPTC_arc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-arc.h struc-symbol.h \
   subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/arc.h \
   $(srcdir)/../opcodes/arc-ext.h $(INCDIR)/elf/arc.h \
-  $(INCDIR)/elf/reloc-macros.h
+  $(INCDIR)/elf/reloc-macros.h dwarf2dbg.h
 DEPTC_arm_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-arm.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h
 DEPTC_arm_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-arm.h \
@@ -1102,19 +1105,19 @@ DEPTC_m68hc11_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/obstack.h $(INCDIR)/opcode/m68hc11.h dwarf2dbg.h
 DEPTC_m68k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-m68k.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h \
-  subsegs.h $(INCDIR)/opcode/m68k.h $(srcdir)/config/m68k-parse.h
+  subsegs.h dwarf2dbg.h $(INCDIR)/opcode/m68k.h $(srcdir)/config/m68k-parse.h
 DEPTC_m68k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m68k.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/m68k.h $(INCDIR)/coff/external.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h \
-  subsegs.h $(INCDIR)/opcode/m68k.h $(srcdir)/config/m68k-parse.h
+  subsegs.h dwarf2dbg.h $(INCDIR)/opcode/m68k.h $(srcdir)/config/m68k-parse.h
 DEPTC_m68k_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m68k.h $(INCDIR)/obstack.h \
-  subsegs.h $(INCDIR)/opcode/m68k.h $(srcdir)/config/m68k-parse.h \
+  subsegs.h dwarf2dbg.h $(INCDIR)/opcode/m68k.h $(srcdir)/config/m68k-parse.h \
   $(INCDIR)/elf/m68k.h $(INCDIR)/elf/reloc-macros.h
 DEPTC_m68k_hp300 = $(srcdir)/config/obj-hp300.h $(srcdir)/config/obj-aout.h \
   $(srcdir)/config/tc-m68k.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/obstack.h subsegs.h $(INCDIR)/opcode/m68k.h \
+  $(INCDIR)/obstack.h subsegs.h dwarf2dbg.h $(INCDIR)/opcode/m68k.h \
   $(srcdir)/config/m68k-parse.h
 DEPTC_m88k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m88k.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/m88k.h $(INCDIR)/coff/external.h \
@@ -1209,9 +1212,8 @@ DEPTC_pj_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-pj.h $(INCDIR)/opcode/pj.h
 DEPTC_ppc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-ppc.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/rs6000.h $(INCDIR)/coff/external.h \
-  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h \
-  $(INCDIR)/opcode/ppc.h
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/rs6000.h $(BFDDIR)/libcoff.h \
+  $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/ppc.h
 DEPTC_ppc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ppc.h subsegs.h \
@@ -1577,9 +1579,8 @@ DEPOBJ_pj_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-pj.h subsegs.h \
   $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
 DEPOBJ_ppc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-ppc.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/rs6000.h $(INCDIR)/coff/external.h \
-  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h \
-  subsegs.h
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/rs6000.h $(BFDDIR)/libcoff.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h subsegs.h
 DEPOBJ_ppc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ppc.h subsegs.h \
@@ -1870,8 +1871,8 @@ DEP_pj_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-pj.h
 DEP_ppc_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-ppc.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/rs6000.h $(INCDIR)/coff/external.h \
-  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/rs6000.h $(BFDDIR)/libcoff.h \
+  $(INCDIR)/bfdlink.h
 DEP_ppc_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ppc.h
