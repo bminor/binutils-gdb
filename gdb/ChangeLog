@@ -1,3 +1,8 @@
+Tue Feb  2 20:47:42 1993  John Gilmore  (gnu@cygnus.com)
+
+	* breakpoint.c (breakpoint_re_set_one):  Handle watchpoints when
+	re-evaluating symbol pointers.
+
 Tue Feb  2 16:10:31 1993  Fred Fish  (fnf@cygnus.com)
 
 	* c-exp.y (lcurly, rcurly):  New nonterminals.
@@ -985,7 +990,6 @@ Thu Dec 17 00:44:57 1992  John Gilmore  (gnu@cygnus.com)
 	* coffread.c (EXTERNAL_NAME):  New macro for removing possible
 	leading character from names.
 	(read_coff_symtab):  Use BFD's FILE *, don't open a second one.
-	(read_coff_symtab):  Complain() about .bb/.eb mismatch, don't error().
 	(process_coff_symbol, coff_read_struct_type, coff_read_enum_type):
 	Replace NAMES_HAVE_UNDERSCORE with EXTERNAL_NAME.
 
@@ -1005,6 +1009,9 @@ Thu Dec 17 00:44:57 1992  John Gilmore  (gnu@cygnus.com)
 	(Target Conditionals):  Remove all of the above.
 
 	* xm-rs6000.h (MEM_FNS_DECLARED):  Update comments.
+
+	* coffread.c (read_coff_symtab, C_BLOCK):  Use complain() rather
+	than error() for .bb/.eb.  Bug found by Eddie Fung, <efung@cs.uq.oz.au>.
 
 Tue Dec 15 10:05:56 1992  Ian Lance Taylor  (ian@cygnus.com)
 
@@ -1051,7 +1058,7 @@ Tue Dec 15 02:01:00 1992  John Gilmore  (gnu@cygnus.com)
 
 	* remote.c:  Avoid printf_filtered line limit.  Suggested by
 	Robert R. Henry, <rrh@tera.com>.
-	* infcmd.c (environment_info):  Ditto, but it was my idea.
+	* infcmd.c (environment_info):  Ditto, for Don Allen <allen@think.com>.
 
 	* main.c (main):  Accept --silent as well as --quiet.  Change +help
 	to --help.  Suggested by Karl Berry, <karl@cs.umb.edu>.
