@@ -1987,6 +1987,10 @@ coff_write_object_contents (abfd)
 #undef __A_MAGIC_SET__
 #endif
   }
+
+  /* FIXME: Does anybody ever set this to another value?  */
+  internal_a.vstamp = 0;
+
   /* Now should write relocs, strings, syms */
   obj_sym_filepos (abfd) = sym_base;
 

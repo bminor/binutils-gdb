@@ -1,5 +1,8 @@
 Wed Sep 20 12:03:26 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffcode.h (coff_write_object_contents): Clear the vstamp field
+	in the a.out header.
+
 	* aoutx.h (NAME(aout,swap_ext_reloc_out)): Don't set r_extern for
 	a reloc against a local symbol, even if it's not a section.
 
