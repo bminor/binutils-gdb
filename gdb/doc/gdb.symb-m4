@@ -1,7 +1,7 @@
 _dnl__								-*- Texinfo -*-
 _dnl__ Copyright (c) 1988 1989 1990 1991 Free Software Foundation, Inc.
 _dnl__ This file is part of the source for the GDB manual.
-_dnl__ $Id$
+@c M4 FRAGMENT: $Id$
 @node Symbols, Altering, Data, Top
 @chapter Examining the Symbol Table
 
@@ -48,7 +48,7 @@ differs from @code{whatis} by printing a detailed description, instead of just
 the name of the type.  For example, if your program declares a variable
 as
 @example
-struct complex {double real; double imag;} v;
+struct complex @{double real; double imag;@} v;
 @end example
 @noindent
 compare the output of the two commands:
@@ -56,10 +56,10 @@ compare the output of the two commands:
 (_GDBP__) whatis v
 type = struct complex
 (_GDBP__) ptype v
-type = struct complex {
+type = struct complex @{
     double real;
     double imag;
-}
+@}
 @end example
 
 @item info types @var{regexp}
