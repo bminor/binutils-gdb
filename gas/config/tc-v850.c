@@ -29,12 +29,16 @@
 
 /* Temporarily holds the reloc in a cons expression.  */
 static bfd_reloc_code_real_type hold_cons_reloc;
+
+/* Set to TRUE if we want to be pedantic about signed overflows.  */
+static boolean warn_signed_overflows = FALSE;
+
 
 /* Structure to hold information about predefined registers.  */
 struct reg_name
 {
-  const char *name;
-  int value;
+  const char * name;
+  int          value;
 };
 
 /* Generic assembler global variables which must be defined by all targets. */
@@ -758,7 +762,7 @@ md_show_usage (stream)
   FILE *stream;
 {
   fprintf (stream, "V850 options:\n");
-  fprintf (stream, "\tnone at present\n");
+  fprintf (stream, "\t-wsigned_overflow  Warn if signed immediate values overflow\n");
 } 
 
 int
@@ -766,6 +770,12 @@ md_parse_option (c, arg)
      int    c;
      char * arg;
 {
+  if (c == 'w' && strcmp (arg, "signed_overflow") == 0)
+    {
+      warn_signed_overflows = TRUE;
+      return 1;
+    }
+
   return 0;
 }
 
@@ -1321,7 +1331,7 @@ md_assemble (str)
 		  /* We need to generate a fixup for this expression.  */
 		  if (fc >= MAX_INSN_FIXUPS)
 		    as_fatal ("too many fixups");
-		  
+
 		  fixups[ fc ].exp     = ex;
 		  fixups[ fc ].opindex = * opindex_ptr;
 		  fixups[ fc ].reloc   = BFD_RELOC_UNUSED;
@@ -1451,11 +1461,13 @@ md_assemble (str)
 	}
       else
 	{
-	  fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
+	  fix_new_exp (
+		       frag_now,
+		       f - frag_now->fr_literal, 4,
 		       & fixups[i].exp,
 		       1 /* FIXME: V850_OPERAND_RELATIVE ??? */,
-		       ((bfd_reloc_code_real_type)
-			(fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
+		       (bfd_reloc_code_real_type) (fixups[i].opindex + (int) BFD_RELOC_UNUSED)
+		       );
 	}
     }
 
@@ -1582,8 +1594,6 @@ md_apply_fix3 (fixp, valuep, seg)
 	fixp->fx_r_type = BFD_RELOC_V850_22_PCREL;
       else if (operand->bits == 9)
 	fixp->fx_r_type = BFD_RELOC_V850_9_PCREL;
-      else if (operand->bits == 16)
-	fixp->fx_r_type = BFD_RELOC_V850_16_PCREL;
       else
 	{
 	  as_bad_where(fixp->fx_file, fixp->fx_line,
@@ -1626,7 +1636,11 @@ v850_insert_operand (insn, operand, val, file, line)
 
       if ((operand->flags & V850_OPERAND_SIGNED) != 0)
         {
-	  max = (1 << (operand->bits - 1)) - 1;
+	  if (! warn_signed_overflows)
+	    max = (1 << operand->bits) - 1;
+	  else
+	    max = (1 << (operand->bits - 1)) - 1;
+	  
           min = - (1 << (operand->bits - 1));
         }
       else
