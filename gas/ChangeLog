@@ -1,3 +1,8 @@
+2003-09-16  Ralf Corsepius  <corsepiu@faw.uni-ulm.de>
+
+	* configure.in: Handle arm-*-rtems* and thumb-*rtems*.
+	* configure: Regenerate.
+
 2003-09-14  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (HAVE_64BIT_ADDRESS_CONSTANTS): Remove.
@@ -1627,7 +1632,7 @@
 2003-03-25  Stan Cox   <scox@redhat.com>
 	    Nick Clifton  <nickc@redhat.com>
 
-	Contribute support for Intel's iWMMXt chip - an	ARM variant:
+	Contribute support for Intel's iWMMXt chip - an ARM variant:
 
 	* config/tc-arm.c: (ARM_CEXT_IWMMXT, ARM_ARCH_IWMMXT, WR_PREFIX,
 	WC_PREFIX, REG_TYPE_IWMMXT): New constants.
