@@ -1,3 +1,8 @@
+Tue Oct 26 16:58:36 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/obj-elf.c (obj_elf_init_stab_section): Align .stab
+	section to a longword boundary.
+
 Tue Oct 26 10:24:31 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* Makefile.in (CHECKFLAGS): Pass down RUNTESTFLAGS.

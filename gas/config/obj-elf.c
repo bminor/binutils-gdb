@@ -93,6 +93,7 @@ obj_elf_common (ignore)
   char *p;
   int temp, size;
   symbolS *symbolP;
+  int have_align;
 
   name = input_line_pointer;
   c = get_symbol_end ();
@@ -133,20 +134,25 @@ obj_elf_common (ignore)
     }
   know (symbolP->sy_frag == &zero_address_frag);
   if (*input_line_pointer != ',')
+    have_align = 0;
+  else
     {
-      as_bad ("Expected comma after common length");
-      ignore_rest_of_line ();
-      return;
+      have_align = 1;
+      input_line_pointer++;
+      SKIP_WHITESPACE ();
     }
-  input_line_pointer++;
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer != '"')
+  if (! have_align || *input_line_pointer != '"')
     {
-      temp = get_absolute_expression ();
-      if (temp < 0)
+      if (! have_align)
+	temp = 0;
+      else
 	{
-	  temp = 0;
-	  as_warn ("Common alignment negative; 0 assumed");
+	  temp = get_absolute_expression ();
+	  if (temp < 0)
+	    {
+	      temp = 0;
+	      as_warn ("Common alignment negative; 0 assumed");
+	    }
 	}
       if (symbolP->local)
 	{
@@ -280,33 +286,56 @@ obj_elf_weak (ignore)
 static segT previous_section;
 static int previous_subsection;
 
+/* Handle the .section pseudo-op.  This code supports two different
+   syntaxes.  
+
+   The first is found on Solaris, and looks like
+       .section ".sec1",#alloc,#execinstr,#write
+   Here the names after '#' are the SHF_* flags to turn on for the
+   section.  I'm not sure how it determines the SHT_* type (BFD
+   doesn't really give us control over the type, anyhow).
+
+   The second format is found on UnixWare, and probably most SVR4
+   machines, and looks like
+       .section .sec1,"a",@progbits
+   The quoted string may contain any combination of a, w, x, and
+   represents the SHF_* flags to turn on for the section.  The string
+   beginning with '@' can be progbits or nobits.  There should be
+   other possibilities, but I don't know what they are.  In any case,
+   BFD doesn't really let us set the section type.  */
+
 void
 obj_elf_section (xxx)
      int xxx;
 {
   char *string;
-  asection *sec;
   int new_sec;
+  segT sec;
+  flagword flags;
 
-  /* Initialize this with inclusive-or of all flags that can be cleared
-     by attributes, but not set by them.  Also include flags that won't
-     get set properly in the assembler, but which the user/compiler
-     shouldn't be expected to set.  */
-  flagword flags = SEC_READONLY | SEC_ALLOC | SEC_RELOC | SEC_LOAD;
-  /* Initialize this with the default flags to be used if none are
-     specified.  */
-  flagword default_flags = 0;
-
-  SKIP_WHITESPACE ();
   /* Get name of section.  */
+  SKIP_WHITESPACE ();
   if (*input_line_pointer == '"')
-    string = demand_copy_C_string (&xxx);
+    {
+      string = demand_copy_C_string (&xxx);
+      if (string == NULL)
+	{
+	  ignore_rest_of_line ();
+	  return;
+	}
+    }
   else
     {
       char *p = input_line_pointer;
       char c;
       while (0 == strchr ("\n\t,; ", *p))
 	p++;
+      if (p == input_line_pointer)
+	{
+	  as_warn ("Missing section name");
+	  ignore_rest_of_line ();
+	  return;
+	}
       c = *p;
       *p = 0;
       string = xmalloc ((unsigned long) (p - input_line_pointer + 1));
@@ -314,83 +343,154 @@ obj_elf_section (xxx)
       *p = c;
       input_line_pointer = p;
     }
-  if (!strcmp (string, ".rodata")
-      || !strcmp (string, ".rodata1"))
-    default_flags = SEC_ALLOC | SEC_READONLY | SEC_RELOC | SEC_LOAD;
-  else if (!strcmp (string, ".init")
-	   || !strcmp (string, ".fini"))
-    default_flags = SEC_ALLOC | SEC_READONLY | SEC_RELOC | SEC_CODE | SEC_LOAD;
 
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer != ',')
-    flags = default_flags;
-  while (*input_line_pointer == ',')
-    {
-      flagword bit;
-      unsigned int len;
-      int inv;
-      char *p, oldp;
-
-      input_line_pointer++;
-
-      /* Under i386-svr4, gcc emits a string here.  I don't know what this
-	 string is supposed to signify or how to handle it.  Ignore it for
-	 now, unless it becomes a problem.  */
-      if (*input_line_pointer == '"')
-	{
-	  demand_copy_C_string (&xxx);
-	  SKIP_WHITESPACE ();
-	  continue;
-	}
-
-      if (*input_line_pointer != '#' && *input_line_pointer != '@')
-	{
-	  as_bad ("unrecognized syntax in .section command");
-	  ignore_rest_of_line ();
-	  break;
-	}
-      input_line_pointer++;
-
-#define CHECK(X,BIT,NEG)	\
-      if (!strncmp(X,input_line_pointer,len = sizeof(X) - 1)) { \
-	bit = BIT; inv = NEG; goto match; }
-
-      CHECK ("write", SEC_READONLY, 1);
-      CHECK ("alloc", SEC_ALLOC | SEC_LOAD, 0);
-      CHECK ("execinstr", SEC_CODE, 1);
-      CHECK ("progbits", SEC_ALLOC | SEC_LOAD, 1);
-#undef CHECK
-
-      p = input_line_pointer;
-      while (!is_end_of_line[(unsigned char) *p] && *p != 0 && *p != ',')
-	p++;
-      *p = 0;
-      oldp = *p;
-      as_bad ("unrecognized section attribute `%s' ignored",
-	      input_line_pointer);
-      *p = oldp;
-      continue;
-
-    match:
-      if (inv)
-	flags &= ~bit;
-      else
-	flags |= bit;
-      input_line_pointer += len;
-    }
-  demand_empty_rest_of_line ();
-
-  /* If the C string wasn't valid, `string' could be null.  */
-  if (!string)
-    return;
-
+  /* Switch to the section, creating it if necessary.  */
   previous_section = now_seg;
   previous_subsection = now_subseg;
 
   new_sec = bfd_get_section_by_name (stdoutput, string) == NULL;
   sec = subseg_new (string, 0);
-  if (new_sec)
-    bfd_set_section_flags (stdoutput, sec, flags);
+
+  /* If this section already existed, we don't bother to change the
+     flag values.  */
+  if (! new_sec)
+    {
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+      ++input_line_pointer;
+      return;
+    }
+
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+      /* No flags given.  Guess at some useful defaults.  */
+      if (strcmp (string, ".data") == 0
+	  || strcmp (string, ".data1") == 0
+	  || strcmp (string, ".sdata") == 0
+	  || strcmp (string, ".rodata") == 0
+	  || strcmp (string, ".rodata1") == 0)
+	flags = SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_RELOC | SEC_DATA;
+      else if (strcmp (string, ".text") == 0
+	       || strcmp (string, ".init") == 0
+	       || strcmp (string, ".fini") == 0)
+	flags = SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_RELOC | SEC_CODE;
+      else if (strcmp (string, ".bss") == 0
+	       || strcmp (string, ".sbss") == 0)
+	flags = SEC_ALLOC;
+      else
+	flags = SEC_RELOC;
+    }
+  else
+    {
+      /* Skip the comma.  */
+      ++input_line_pointer;
+
+      SKIP_WHITESPACE ();
+      if (*input_line_pointer == '"')
+	{
+	  /* Pick up a string with a combination of a, w, x.  */
+	  flags = SEC_READONLY | SEC_RELOC;
+	  ++input_line_pointer;
+	  while (*input_line_pointer != '"')
+	    {
+	      switch (*input_line_pointer)
+		{
+		case 'a':
+		  flags |= SEC_ALLOC | SEC_LOAD;
+		  break;
+		case 'w':
+		  flags &=~ SEC_READONLY;
+		  break;
+		case 'x':
+		  flags |= SEC_CODE;
+		  break;
+		default:
+		  as_warn ("Bad .section directive: want a,w,x in string");
+		  ignore_rest_of_line ();
+		  return;
+		}
+	      ++input_line_pointer;
+	    }
+
+	  /* Skip the closing quote.  */
+	  ++input_line_pointer;
+
+	  SKIP_WHITESPACE ();
+	  if (*input_line_pointer == ',')
+	    {
+	      ++input_line_pointer;
+	      SKIP_WHITESPACE ();
+	      if (*input_line_pointer == '@')
+		{
+		  ++input_line_pointer;
+		  if (strncmp (input_line_pointer, "progbits",
+			       sizeof "progbits" - 1) == 0)
+		    {
+		      flags |= SEC_ALLOC | SEC_LOAD;
+		      input_line_pointer += sizeof "progbits" - 1;
+		    }
+		  else if (strncmp (input_line_pointer, "nobits",
+				    sizeof "nobits" - 1) == 0)
+		    {
+		      flags &=~ SEC_LOAD;
+		      input_line_pointer += sizeof "nobits" - 1;
+		    }
+		  else
+		    {
+		      as_warn ("Unrecognized section type");
+		      ignore_rest_of_line ();
+		    }
+		}
+	    }
+	}
+      else
+	{
+	  flags = SEC_READONLY | SEC_RELOC;
+	  do
+	    {
+	      SKIP_WHITESPACE ();
+	      if (*input_line_pointer != '#')
+		{
+		  as_warn ("Bad .section directive");
+		  ignore_rest_of_line ();
+		  return;
+		}
+	      ++input_line_pointer;
+	      if (strncmp (input_line_pointer, "write",
+			   sizeof "write" - 1) == 0)
+		{
+		  flags &=~ SEC_READONLY;
+		  input_line_pointer += sizeof "write" - 1;
+		}
+	      else if (strncmp (input_line_pointer, "alloc",
+				sizeof "alloc" - 1) == 0)
+		{
+		  flags |= SEC_ALLOC | SEC_LOAD;
+		  input_line_pointer += sizeof "alloc" - 1;
+		}
+	      else if (strncmp (input_line_pointer, "execinstr",
+				sizeof "execinstr" - 1) == 0)
+		{
+		  flags |= SEC_CODE;
+		  input_line_pointer += sizeof "execinstr" - 1;
+		}
+	      else
+		{
+		  as_warn ("Unrecognized section attribute");
+		  ignore_rest_of_line ();
+		  return;
+		}
+	      SKIP_WHITESPACE ();
+	    }
+	  while (*input_line_pointer++ == ',');
+	  --input_line_pointer;
+	}
+    }
+
+  bfd_set_section_flags (stdoutput, sec, flags);
+
+  demand_empty_rest_of_line ();
 }
 
 /* Change to the .data section.  */
@@ -704,7 +804,8 @@ obj_elf_ident (ignore)
     {
       char *p;
       comment_section = subseg_new (".comment", 0);
-      bfd_set_section_flags (stdoutput, comment_section, SEC_HAS_CONTENTS);
+      bfd_set_section_flags (stdoutput, comment_section,
+			     SEC_READONLY | SEC_HAS_CONTENTS);
       p = frag_more (1);
       *p = 0;
     }
@@ -720,17 +821,16 @@ void
 obj_elf_init_stab_section (seg)
      segT seg;
 {
-  extern char *logical_input_file, *physical_input_file;
+  char *file;
   char *p;
-  const char *file;
   unsigned int stroff;
 
+  /* Force the section to align to a longword boundary.  Without this,
+     UnixWare ar crashes.  */
+  bfd_set_section_alignment (stdoutput, seg, 2);
+
   p = frag_more (12);
-  file = logical_input_file;
-  if (file == NULL)
-    file = physical_input_file;
-  if (file == NULL)
-    file = "UNKNOWN";
+  as_where (&file, (unsigned int *) NULL);
   stroff = get_stab_string_offset (file, segment_name (seg));
   know (stroff == 1);
   md_number_to_chars (p, stroff, 4);
