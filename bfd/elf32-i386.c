@@ -725,6 +725,13 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 		 this reloc.  */
 	      if (dynobj == NULL)
 		htab->root.dynobj = dynobj = abfd;
+
+	      if (h != NULL && h->dynindx == -1)
+		{
+		  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+		    return false;
+		}
+
 	      if (sreloc == NULL)
 		{
 		  const char *name;
@@ -1195,7 +1202,9 @@ allocate_plt_and_got_and_discard_relocs (h, inf)
       || (!info->shared
 	  && (h->dynindx == -1
 	      || (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) != 0
-	      || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0)))
+	      || ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
+		  && h->root.type != bfd_link_hash_undefweak
+		  && h->root.type != bfd_link_hash_undefined))))
     {
       struct elf_i386_link_hash_entry *eh;
       struct elf_i386_dyn_relocs *c;
@@ -1694,8 +1703,10 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		  && h != NULL
 		  && h->dynindx != -1
 		  && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
-		  && (h->elf_link_hash_flags
-		      & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
+		  && ((h->elf_link_hash_flags
+		       & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+		      || h->root.type == bfd_link_hash_undefweak
+		      || h->root.type == bfd_link_hash_undefined)))
 	    {
 	      Elf_Internal_Rel outrel;
 	      boolean skip, relocate;

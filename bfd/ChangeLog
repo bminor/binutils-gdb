@@ -1,5 +1,11 @@
 2001-06-25  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-i386.c (elf_i386_check_relocs <R_386_32, R_386_PC32>):
+	Ensure syms are dynamic if we might be emitting a reloc.
+	(allocate_plt_and_got_and_discard_relocs): Don't discard relocs
+	for undefweak or undefined syms..
+	(elf_i386_relocate_section <R_386_32, R_386_PC32>): .. and emit.
+
 	* elf32-i386.c (allocate_plt_and_got_and_discard_relocs): Discard
 	relocs without ELF_LINK_HASH_DEF_DYNAMIC set.
 	(elf_i386_relocate_section <R_386_32, R_386_PC32>): Remove
