@@ -161,11 +161,13 @@ static symbolS *vif_data_end;
    This value is kept absolute, for simplicity.  */
 static symbolS *mpgloc_sym;
 
-/* Handle of the current .vuoverlay.foo section.  */
+/* Handle of the current vu overlay section.  */
 static segT vuoverlay_section;
 
-/* The .overlay section is a table mapping lma's to vma's.  */
+/* The overlay table section is a table mapping lma's to vma's.  */
 static segT vuoverlay_table_section;
+/* String table to record section names in the overlay table.  */
+static segT vuoverlay_string_section;
 
 /* Table to map vu space labels to their overlay sections.
    Labels in vu space are first put in the ABS section to simplify
@@ -319,7 +321,14 @@ md_begin ()
     /* Must preserve the current seg/subseg.  It is the initial one.  */
     segT orig_seg = now_seg;
     subsegT orig_subseg = now_subseg;
-    vuoverlay_table_section = subseg_new (VUOVERLAY_TABLE_SECTION_NAME, 0);
+
+    vuoverlay_table_section = subseg_new (SHNAME_DVP_OVERLAY_TABLE, 0);
+    record_alignment (now_seg, 3);
+    vuoverlay_string_section = subseg_new (SHNAME_DVP_OVERLAY_STRTAB, 0);
+    /* Ensure first byte in executable is zero.  So what if we waste
+       a few bytes.  */
+    FRAG_APPEND_1_CHAR (0);
+
     subseg_set (orig_seg, orig_subseg);
   }
 
@@ -2269,10 +2278,10 @@ vuoverlay_section_name (addr)
   for (fileno = 0; *file; ++file)
     fileno = (fileno << 1) + *file;
   if (addr->sy_value.X_op == O_constant)
-    asprintf (&section_name, "%s.0x%x.%u.%u.%d", VUOVERLAY_SECTION_PREFIX,
+    asprintf (&section_name, "%s.0x%x.%u.%u.%d", SHNAME_DVP_OVERLAY_PREFIX,
 	      (int) S_GET_VALUE (addr), fileno, lineno, counter);
   else
-    asprintf (&section_name, "%s.unknvma.%u.%u.%d", VUOVERLAY_SECTION_PREFIX,
+    asprintf (&section_name, "%s.unknvma.%u.%u.%d", SHNAME_DVP_OVERLAY_PREFIX,
 	      fileno, lineno, counter);
   ++counter;
   return section_name;
@@ -2293,7 +2302,7 @@ create_vuoverlay_section (section_name, addr, start_label, end_label)
   segT orig_seg = now_seg;
   subsegT orig_subseg = now_subseg;
 
-  /* Create and get handle of .vuoverlay section.  All vu symbols go here.
+  /* Create and get handle of a vu overlay section.  All vu symbols go here.
      The section name must be unique in the entire executable.
      We achieve this by encoding the source file name and file number.  Ick.
      ??? A cleaner way would be if mpg took a new argument that named the
@@ -2329,10 +2338,28 @@ create_vuoverlay_section (section_name, addr, start_label, end_label)
   /* Add an entry to the vu overlay table.  */
   if (start_label)
     {
-      /* FIXME: should be a service routine to do these.  */
       expressionS exp;
+      const char *p;
+      symbolS * name_label;
+
+      /* Put the section name in the overlay string table.  */
+
+      subseg_set (vuoverlay_string_section, 0);
+      name_label = create_colon_label (0, LOCAL_LABEL_PREFIX,
+				       unique_name ("secstr"));
+      /* FIXME: should be a utility to do this.  */
+      for (p = section_name; *p; ++p)
+	FRAG_APPEND_1_CHAR (*p);
+      FRAG_APPEND_1_CHAR (0);
 
       subseg_set (vuoverlay_table_section, 0);
+
+      /* FIXME: should be a utility to do these.  */
+      /* Offset into string table.  */
+      exp.X_op = O_symbol;
+      exp.X_add_symbol = name_label;
+      exp.X_add_number = 0;
+      emit_expr (&exp, 8);
 
       /* The section's lma.  */
       exp.X_op = O_symbol;
