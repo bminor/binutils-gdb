@@ -158,14 +158,39 @@
  # file (thedll.o) and an imports file (thedll.a).
  # (You may have to use -S to tell dlltool where to find the assembler).
  
-   ./dlltool --def thedll.def --output-exp thedll.o --output-lib thedll.a
+   dlltool --def thedll.def --output-exp thedll.o --output-lib thedll.a
 
- # Build the dll with the library with file1.o, file2.o and the export table
+ # Build the dll with the library and the export table
+ 
    ld -o thedll.dll thedll.o thedll.in
 
  # Link the executable with the import library
+ 
    gcc -o themain.exe themain.o thedll.a
 
+ This example can be extended if relocations are needed in the DLL:
+
+ # Compile up the parts of the dll and the program
+
+   gcc -c file1.c file2.c themain.c
+
+ # Run this tool over the DLL's .def file and generate an imports file.
+ 
+   dlltool --def thedll.def --output-lib thedll.lib
+
+ # Link the executable with the import library and generate a base file
+ # at the same time
+ 
+   gcc -o themain.exe themain.o thedll.lib -Wl,--base-file -Wl,themain.base
+
+ # Run this tool over the DLL's .def file and generate an exports file
+ # which includes the relocations from the base file.
+ 
+   dlltool --def thedll.def --base-file themain.base --output-exp thedll.exp
+
+ # Build the dll with file1.o, file2.o and the export table
+ 
+   ld -o thedll.dll thedll.exp file1.o file2.o
  */
 
 /* .idata section description
