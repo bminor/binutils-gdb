@@ -1,3 +1,8 @@
+Tue Aug 11 10:01:12 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* emulparms/mn10200.sh (MAX_PAGESIZE): Define to 1.
+	* emulparms/mn10300.sh (MAX_PAGESIZE): Define to 1.
+
 start-sanitize-armelf
 Sun Aug  9 20:31:27 1998  Catherine Moore  <clm@cygnus.com>
 
