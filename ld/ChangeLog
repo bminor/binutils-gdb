@@ -1,3 +1,8 @@
+Tue Nov 28 12:14:53 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lexsup.c (parse_args): Set config.dynamic_link to false for -N
+	and -n.
+
 Mon Nov 27 13:12:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Rebuild with autoconf 2.7.
