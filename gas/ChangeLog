@@ -1,5 +1,9 @@
 2000-10-18  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
+	* config/tc-m68k.c: Fix the previous misapplied patch.
+
+2000-10-18  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
         * config/tc-m68k.h (RELAX_RELOC_*): New definitions for both
         BFD_ASSEMBLER and !BFD_ASSEMBLER.
         * config/tc-m68k.c (md_convert_frag_1): Use them instead of
