@@ -140,6 +140,17 @@ proc gdb_load { arg } {
     global timeout
     global last_gdb_file;
 
+    if [target_info exists gdb_download_size] {
+	send_gdb "set download-write-size [target_info gdb_download_size]\n";
+	gdb_expect 30 {
+	    -re "$gdb_prompt $" { }
+	    default {
+		perror "Setting download-write-size for target failed";
+		return -1;
+	    }
+	}
+    }
+
     if { $arg == "" } {
 	if [info exists last_gdb_file] {
 	    set arg $last_gdb_file;
@@ -221,8 +232,14 @@ proc gdb_load { arg } {
 	    } else {
 		set command "load $farg\n";
 	    }
+	    if [target_info exists gdb_load_timeout] {
+		set loadtimeout [target_info gdb_load_timeout]
+	    } else {
+		set loadtimeout 1600
+	    }
+
 	    send_gdb $command;
-	    gdb_expect 1600 {
+	    gdb_expect $loadtimeout {
 		-re "\[Ff\]ailed.*$gdb_prompt $" {
 		    verbose "load failed";
 		}
