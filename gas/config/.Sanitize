@@ -86,6 +86,8 @@ tc-i960.h
 tc-m68851.h
 tc-m68k.c
 tc-m68k.h
+tc-m68kmote.c
+tc-m68kmote.h
 tc-mips.c
 tc-mips.h
 tc-ns32k.c
@@ -126,7 +128,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.12  1991/12/12 03:34:31  sac
+# Revision 1.13  1992/02/11 00:51:52  sac
+# New files for MRI syntax assembler
+#
+# Revision 1.12  1991/12/12  03:34:31  sac
 # renamed obj-coff-bfd to obj-coffbfd
 #
 # Revision 1.11  1991/11/27  22:28:57  sac
