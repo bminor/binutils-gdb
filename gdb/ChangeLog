@@ -1,3 +1,19 @@
+2000-12-07  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* config/sh/tm-sh.h (struct gdbarch_tdep): Rename fields
+ 	{FP15,DR14,FV12}_REGNUM to {FP,DR,FV}_LAST_REGNUM.
+	* sh-tdep.c (sh_sh3e_register_virtual_type,
+ 	sh_sh4_register_virtual_type, sh_do_registers_info,
+ 	sh_gdbarch_init, sh_sh4_register_byte, sh_sh4_register_raw_size,
+ 	sh_sh4_register_convertible, sh_sh4_register_convert_to_virtual,
+ 	sh_sh4_register_convert_to_raw, sh_fetch_pseudo_register,
+ 	sh_store_pseudo_register, sh_do_pseudo_register): Ditto.
+
+	* sh-tdep.c (sh_gdbarch_init): Use a function pointer to set the
+ 	disassembly print function.
+	(_initialize_sh_tdep): Initialize tm_print_insn using the function
+ 	pointer.
+
 2000-12-07  Mark Kettenis  <kettenis@gnu.org>
 
 	From Richard Henderson <rth@twiddle.net>:

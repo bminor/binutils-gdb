@@ -112,7 +112,7 @@ static void sh_do_register (int regnum);
 static void sh_print_register (int regnum);
 
 void (*sh_show_regs) (void);
-
+int (*print_sh_insn) (bfd_vma, disassemble_info*);
 
 /* Define other aspects of the stack frame.
    we keep a copy of the worked out return pc lying around, since it
@@ -1404,10 +1404,10 @@ static int
 sh_sh4_register_byte (int reg_nr)
 {
   if (reg_nr >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
-      && reg_nr <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM)
+      && reg_nr <= gdbarch_tdep (current_gdbarch)->DR_LAST_REGNUM)
     return (dr_reg_base_num (reg_nr) * 4);
   else if  (reg_nr >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM 
-	    && reg_nr <= gdbarch_tdep (current_gdbarch)->FV12_REGNUM)
+	    && reg_nr <= gdbarch_tdep (current_gdbarch)->FV_LAST_REGNUM)
     return (fv_reg_base_num (reg_nr) * 4);
   else
     return (reg_nr * 4);
@@ -1425,10 +1425,10 @@ static int
 sh_sh4_register_raw_size (int reg_nr)
 {
   if (reg_nr >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
-      && reg_nr <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM)
+      && reg_nr <= gdbarch_tdep (current_gdbarch)->DR_LAST_REGNUM)
     return 8;
   else if  (reg_nr >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM 
-	    && reg_nr <= gdbarch_tdep (current_gdbarch)->FV12_REGNUM)
+	    && reg_nr <= gdbarch_tdep (current_gdbarch)->FV_LAST_REGNUM)
     return 16;
   else
     return 4;
@@ -1449,7 +1449,7 @@ static struct type *
 sh_sh3e_register_virtual_type (int reg_nr)
 {
   if ((reg_nr >= FP0_REGNUM
-       && (reg_nr <= gdbarch_tdep (current_gdbarch)->FP15_REGNUM)) 
+       && (reg_nr <= gdbarch_tdep (current_gdbarch)->FP_LAST_REGNUM)) 
       || (reg_nr == gdbarch_tdep (current_gdbarch)->FPUL_REGNUM))
     return builtin_type_float;
   else
@@ -1460,14 +1460,14 @@ static struct type *
 sh_sh4_register_virtual_type (int reg_nr)
 {
   if ((reg_nr >= FP0_REGNUM
-       && (reg_nr <= gdbarch_tdep (current_gdbarch)->FP15_REGNUM)) 
+       && (reg_nr <= gdbarch_tdep (current_gdbarch)->FP_LAST_REGNUM)) 
       || (reg_nr == gdbarch_tdep (current_gdbarch)->FPUL_REGNUM))
     return builtin_type_float;
   else if (reg_nr >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
-	   && reg_nr <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM)
+	   && reg_nr <= gdbarch_tdep (current_gdbarch)->DR_LAST_REGNUM)
     return builtin_type_double;
   else if  (reg_nr >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM 
-	   && reg_nr <= gdbarch_tdep (current_gdbarch)->FV12_REGNUM)
+	   && reg_nr <= gdbarch_tdep (current_gdbarch)->FV_LAST_REGNUM)
     return sh_sh4_build_float_register_type (3);
   else
     return builtin_type_int;
@@ -1519,7 +1519,7 @@ sh_sh4_register_convertible (int nr)
 {
   if (TARGET_BYTE_ORDER == LITTLE_ENDIAN)
     return (gdbarch_tdep (current_gdbarch)->DR0_REGNUM <= nr
-	    && nr <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM);
+	    && nr <= gdbarch_tdep (current_gdbarch)->DR_LAST_REGNUM);
   else 
     return 0;
 }
@@ -1529,7 +1529,7 @@ sh_sh4_register_convert_to_virtual (int regnum, struct type *type,
                                   char *from, char *to)
 {
   if (regnum >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
-      && regnum <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM)
+      && regnum <= gdbarch_tdep (current_gdbarch)->DR_LAST_REGNUM)
     {
       DOUBLEST val;
       floatformat_to_doublest (&floatformat_ieee_double_littlebyte_bigword, from, &val);
@@ -1544,7 +1544,7 @@ sh_sh4_register_convert_to_raw (struct type *type, int regnum,
                               char *from, char *to)
 {
   if (regnum >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
-      && regnum <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM)
+      && regnum <= gdbarch_tdep (current_gdbarch)->DR_LAST_REGNUM)
     {
       DOUBLEST val = extract_floating (from, TYPE_LENGTH(type));
       floatformat_from_doublest (&floatformat_ieee_double_littlebyte_bigword, &val, to);
@@ -1561,7 +1561,7 @@ sh_fetch_pseudo_register (int reg_nr)
   if (!register_cached (reg_nr))
     {
       if (reg_nr >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
-	  && reg_nr <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM)
+	  && reg_nr <= gdbarch_tdep (current_gdbarch)->DR_LAST_REGNUM)
         {
 	  base_regnum = dr_reg_base_num (reg_nr);
 
@@ -1571,7 +1571,7 @@ sh_fetch_pseudo_register (int reg_nr)
               target_fetch_registers (base_regnum + portion);
         }
       else if (reg_nr >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM 
-	       && reg_nr <= gdbarch_tdep (current_gdbarch)->FV12_REGNUM)
+	       && reg_nr <= gdbarch_tdep (current_gdbarch)->FV_LAST_REGNUM)
         {
 	  base_regnum = fv_reg_base_num (reg_nr);
 
@@ -1591,7 +1591,7 @@ sh_store_pseudo_register (int reg_nr)
   int base_regnum, portion;
 
   if (reg_nr >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM
-      && reg_nr <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM)
+      && reg_nr <= gdbarch_tdep (current_gdbarch)->DR_LAST_REGNUM)
     {
       base_regnum = dr_reg_base_num (reg_nr);
 
@@ -1603,7 +1603,7 @@ sh_store_pseudo_register (int reg_nr)
 	}
     }
   else if (reg_nr >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM
-	   && reg_nr <= gdbarch_tdep (current_gdbarch)->FV12_REGNUM)
+	   && reg_nr <= gdbarch_tdep (current_gdbarch)->FV_LAST_REGNUM)
     {
       base_regnum = fv_reg_base_num (reg_nr);
 
@@ -1668,7 +1668,7 @@ sh_do_pseudo_register (int regnum)
 	   regnum < gdbarch_tdep (current_gdbarch)->FV0_REGNUM)
     do_dr_register_info (regnum);
   else if (regnum >= gdbarch_tdep (current_gdbarch)->FV0_REGNUM &&
-	   regnum <= gdbarch_tdep (current_gdbarch)->FV12_REGNUM)
+	   regnum <= gdbarch_tdep (current_gdbarch)->FV_LAST_REGNUM)
     do_fv_register_info (regnum);
 }
 
@@ -1782,7 +1782,7 @@ sh_do_registers_info (int regnum, int fpregs)
 		  regnum ++;
 		}
 	      else
-		regnum += (gdbarch_tdep (current_gdbarch)->FP15_REGNUM - FP0_REGNUM);	/* skip FP regs */
+		regnum += (gdbarch_tdep (current_gdbarch)->FP_LAST_REGNUM - FP0_REGNUM);	/* skip FP regs */
 	    }
 	  else
 	    {
@@ -1872,7 +1872,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->FPUL_REGNUM = -1;
   tdep->FPSCR_REGNUM = -1;
   tdep->DSR_REGNUM = -1;
-  tdep->FP15_REGNUM = -1;
+  tdep->FP_LAST_REGNUM = -1;
   tdep->A0G_REGNUM = -1;
   tdep->A0_REGNUM = -1;
   tdep->A1G_REGNUM = -1;
@@ -1889,13 +1889,14 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->SSR_REGNUM = -1;
   tdep->SPC_REGNUM = -1;
   tdep->DR0_REGNUM = -1;
-  tdep->DR14_REGNUM = -1;
+  tdep->DR_LAST_REGNUM = -1;
   tdep->FV0_REGNUM = -1;
-  tdep->FV12_REGNUM = -1;
+  tdep->FV_LAST_REGNUM = -1;
   set_gdbarch_fp0_regnum (gdbarch, -1);
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
   set_gdbarch_max_register_raw_size (gdbarch, 4);
   set_gdbarch_max_register_virtual_size (gdbarch, 4);
+  print_sh_insn = gdb_print_insn_sh;
 
   switch (info.bfd_arch_info->mach)
     {
@@ -1967,7 +1968,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_fp0_regnum (gdbarch, 25);
       tdep->FPUL_REGNUM = 23;
       tdep->FPSCR_REGNUM = 24;
-      tdep->FP15_REGNUM = 40;
+      tdep->FP_LAST_REGNUM = 40;
       tdep->SSR_REGNUM = 41;
       tdep->SPC_REGNUM = 42;
       break;
@@ -2015,13 +2016,13 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_convertible (gdbarch, sh_sh4_register_convertible);
       tdep->FPUL_REGNUM = 23;
       tdep->FPSCR_REGNUM = 24;
-      tdep->FP15_REGNUM = 40;
+      tdep->FP_LAST_REGNUM = 40;
       tdep->SSR_REGNUM = 41;
       tdep->SPC_REGNUM = 42;
       tdep->DR0_REGNUM = 59;
-      tdep->DR14_REGNUM = 66;
+      tdep->DR_LAST_REGNUM = 66;
       tdep->FV0_REGNUM = 67;
-      tdep->FV12_REGNUM = 70;
+      tdep->FV_LAST_REGNUM = 70;
       break;
     default:
       sh_register_name = sh_generic_register_name;
@@ -2117,7 +2118,7 @@ _initialize_sh_tdep (void)
   struct cmd_list_element *c;
   
   register_gdbarch_init (bfd_arch_sh, sh_gdbarch_init);
-  tm_print_insn = gdb_print_insn_sh;
+  tm_print_insn = print_sh_insn;
 
   add_com ("regs", class_vars, sh_show_regs_command, "Print all registers");
 }

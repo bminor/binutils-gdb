@@ -28,7 +28,7 @@ struct gdbarch_tdep
     int FPUL_REGNUM;  /*                       sh3e, sh4 */
     int FPSCR_REGNUM; /*                       sh3e, sh4 */
     int DSR_REGNUM;   /* sh-dsp,      sh3-dsp            */
-    int FP15_REGNUM;  /*                       sh3e, sh4 */
+    int FP_LAST_REGNUM; /*                     sh3e, sh4 */
     int A0G_REGNUM;   /* sh-dsp,      sh3-dsp            */
     int A0_REGNUM;    /* sh-dsp,      sh3-dsp            */
     int A1G_REGNUM;   /* sh-dsp,      sh3-dsp            */
@@ -45,9 +45,9 @@ struct gdbarch_tdep
     int RS_REGNUM;    /* sh-dsp,      sh3-dsp            */
     int RE_REGNUM;    /* sh-dsp,      sh3-dsp            */
     int DR0_REGNUM;   /*                             sh4 */
-    int DR14_REGNUM;  /*                             sh4 */
+    int DR_LAST_REGNUM; /*                           sh4 */
     int FV0_REGNUM;   /*                             sh4 */
-    int FV12_REGNUM;  /*                             sh4 */
+    int FV_LAST_REGNUM; /*                           sh4 */
   };
 
 /* Registers common to all the SH variants. */
