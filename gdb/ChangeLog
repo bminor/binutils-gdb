@@ -1,3 +1,21 @@
+Tue May 19 19:38:10 1992  John Gilmore  (gnu at cygnus.com)
+
+	88K changes inspired by Ted Lemon (uunet!lupine!mellon)
+
+	* tm-m88k.h, tm-umax.h:  Avoid sizeof() in REGISTER_xxx macros,
+	since they define the target, not the host.
+	* m88k-pinsn.c:  Fix typo.
+
+Thu May 14 01:16:48 1992  John Gilmore  (gnu at cygnus.com)
+
+	* valarith.c (value_zerop):  -0.0 is still zero.
+	* eval.c (evaluate_subexp):  Avoid NaN anomalies in float compares.
+	Patches by Paul Eggert <eggert@twinsun.com>.
+
+Mon May 18 13:53:51 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* alldeps.mak, depend:  re-make to account for ser-*.c.
+
 Sun May 17 16:51:20 1992  Fred Fish  (fnf@cygnus.com)
 
 	* inflow.c (new_tty):  Temporarily ignore SIGTTOU when
@@ -27,6 +45,7 @@ Wed May 13 18:28:20 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	of a register to bcopy, rather than the host's sizeof(CORE_ADDR).
 
 Tue May 12 17:44:39 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
 	Changes to support GDB running on DOS using GO32 and H8 support
 
 	* defs.h: if xm.h doesn't define FOPEN_RB, include "fopen-same.h",
@@ -47,7 +66,6 @@ Tue May 12 17:44:39 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	open a source file in the root directory with DOS.
 	* values.c (value_as_pointer): remove bogus address bits from
 	long. (unpack_long): unpack into unsigned long/short if pointer.
-
 
 Tue May 12 14:15:48 1992  Stu Grossman  (grossman at cygnus.com)
 

@@ -340,8 +340,8 @@ void sprint_address (addr, buffer)
 	if (!fs) {
 	    msymbol = lookup_minimal_symbol_by_pc (addr);
 
-	    if (i == NULL) return;/* If nothing comes through, don't
-				   print anything symbolic */
+	    if (msymbol == NULL) return;  /* If nothing comes through, don't
+					     print anything symbolic */
 
 	    name = msymbol -> name;
 	    name_location = msymbol -> address;

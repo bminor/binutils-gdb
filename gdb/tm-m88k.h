@@ -236,34 +236,34 @@ extern CORE_ADDR skip_prologue ();
 
 #define SHIFT_INST_REGS
 
+/* Number of bytes of storage in the actual machine representation
+   for register N.  */
+
+#define REGISTER_RAW_SIZE(N) 4
+
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
 
-#define REGISTER_BYTES (NUM_REGS * sizeof(REGISTER_TYPE))
+#define REGISTER_BYTES (NUM_REGS * REGISTER_RAW_SIZE(0))
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
-#define REGISTER_BYTE(N) ((N)*sizeof(REGISTER_TYPE))
-
-/* Number of bytes of storage in the actual machine representation
-   for register N.  */
-
-#define REGISTER_RAW_SIZE(N) (sizeof(REGISTER_TYPE))
+#define REGISTER_BYTE(N) ((N)*REGISTER_RAW_SIZE(0))
 
 /* Number of bytes of storage in the program's representation
    for register N. */
 
-#define REGISTER_VIRTUAL_SIZE(N) (sizeof(REGISTER_TYPE))
+#define REGISTER_VIRTUAL_SIZE(N) (REGISTER_RAW_SIZE(N))
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
-#define MAX_REGISTER_RAW_SIZE (sizeof(REGISTER_TYPE))
+#define MAX_REGISTER_RAW_SIZE (REGISTER_RAW_SIZE(0))
 
 /* Largest value REGISTER_VIRTUAL_SIZE can have.
 /* Are FPS1, FPS2, FPR "virtual" regisers? */
 
-#define MAX_REGISTER_VIRTUAL_SIZE (sizeof(REGISTER_TYPE))
+#define MAX_REGISTER_VIRTUAL_SIZE (REGISTER_RAW_SIZE(0))
 
 /* Nonzero if register N requires conversion
    from raw format to virtual format.  */
@@ -273,12 +273,14 @@ extern CORE_ADDR skip_prologue ();
 /* Convert data from raw format for register REGNUM
    to virtual format for register REGNUM.  */
 
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) {bcopy ((FROM), (TO), (sizeof(REGISTER_TYPE)));}
+#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
+  {bcopy ((FROM), (TO), REGISTER_RAW_SIZE (REGNUM));}
 
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 
-#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO) {bcopy ((FROM), (TO), (sizeof(REGISTER_TYPE)));}
+#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)
+  {bcopy ((FROM), (TO), REGISTER_RAW_SIZE (REGNUM));}
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
@@ -297,7 +299,7 @@ extern CORE_ADDR skip_prologue ();
    of type TYPE, given in virtual format.  */
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  write_register_bytes (2*sizeof(void*), (VALBUF), TYPE_LENGTH (TYPE))
+  write_register_bytes (2*REGISTER_RAW_SIZE(0), (VALBUF), TYPE_LENGTH (TYPE))
 
 /* In COFF, if PCC says a parameter is a short or a char, do not
    change it to int (it seems the convention is to change it). */

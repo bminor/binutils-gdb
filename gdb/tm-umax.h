@@ -113,6 +113,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
+#define	R0_REGNUM 0		/* General register 0 */
 #define FP0_REGNUM 8		/* Floating point register 0 */
 #define SP_REGNUM 16		/* Contains address of top of stack */
 #define AP_REGNUM FP_REGNUM
@@ -124,7 +125,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
-#define REGISTER_BYTES ((NUM_REGS - 4) * sizeof (int) + 4 * sizeof (double))
+#define REGISTER_BYTES \
+  ((NUM_REGS - 4) * REGISTER_RAW_SIZE(R0_REGNUM) \
+   + 4            * REGISTER_RAW_SIZE(LP0_REGNUM))
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
