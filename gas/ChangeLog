@@ -1,3 +1,8 @@
+2000-06-13  Ulf Carlsson  <ulfc@engr.sgi.com>
+
+	* macro.c (getstring): Make it possible to escape the quote
+	character.
+
 Tue Jun 13 20:58:28 2000  Catherine Moore <clm@redhat.com>
 
 	* config/tc-hppa.c (pa_export): Weak symbols can be global.

@@ -304,13 +304,24 @@ getstring (idx, in, acc)
       else if (in->ptr[idx] == '"' || in->ptr[idx] == '\'')
 	{
 	  char tchar = in->ptr[idx];
+	  int escaped = 0;
 	  idx++;
 	  while (idx < in->len)
 	    {
+	      if (in->ptr[idx-1] == '\\')
+		escaped ^= 1;
+	      else
+		escaped = 0;
+
 	      if (macro_alternate && in->ptr[idx] == '!')
 		{
 		  idx++  ;
 		  sb_add_char (acc, in->ptr[idx++]);
+		}
+	      else if (escaped && in->ptr[idx] == tchar)
+		{
+		  sb_add_char (acc, tchar);
+		  idx++;
 		}
 	      else
 		{
