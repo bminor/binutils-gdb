@@ -34,16 +34,22 @@ Things-to-keep:
 ChangeLog
 alpha.h
 arc.h
+arm.h
 common.h
+d10v.h
 dwarf.h
 dwarf2.h
 external.h
 hppa.h
+i386.h
 internal.h
 m32r.h
+m68k.h
 mips.h
+mn10200.h
 mn10300.h
 ppc.h
+sh.h
 sparc.h
 v850.h
 
