@@ -1,5 +1,22 @@
 2002-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* elf32-mips.c: Remove superfluous definitions copied from
+	elfxx-mips.c.
+	(bfd_elf32_bigmips_vec,bfd_elf32_littlemips_vec): Use the
+	SGIish vectors to check the special case.
+	(mips_elf_hi16_reloc): Fix comment.
+	(mips_elf_got16_reloc): Likewise.
+	(_bfd_mips_elf32_gprel16_reloc): Likewise.
+	(elf_reloc_map): Code cleanup.
+	(mips_reloc_map): Add comment.
+	(bfd_elf23_bfd_reloc_type_lookup): Code cleanup.
+	(mips_elf32_rtype_to_howto): Likewise.
+	(mips_elf32_discard_info): Likewise.
+	(elf32_mips_irix_compat): Invert logic: Only SGIish vectors
+	lead to IRIX compatibility now.
+
+2002-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* elfxx-mips.c: Call it IRIX, not Irix in comments.
 
 2002-05-13  Jason Thorpe  <thorpej@wasabisystems.com>

@@ -89,163 +89,19 @@ static boolean elf32_mips_write_section
 static irix_compat_t elf32_mips_irix_compat
   PARAMS ((bfd *));
 
-extern const bfd_target bfd_elf32_tradbigmips_vec;
-extern const bfd_target bfd_elf32_tradlittlemips_vec;
+extern const bfd_target bfd_elf32_bigmips_vec;
+extern const bfd_target bfd_elf32_littlemips_vec;
 
 /* Nonzero if ABFD is using the N32 ABI.  */
-
 #define ABI_N32_P(abfd) \
   ((elf_elfheader (abfd)->e_flags & EF_MIPS_ABI2) != 0)
-
-/* Nonzero if ABFD is using the 64-bit ABI. */
-#define ABI_64_P(abfd) \
-  ((elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS64) != 0)
-
-#define NEWABI_P(abfd) (ABI_N32_P (abfd) || ABI_64_P (abfd))
 
 /* Whether we are trying to be compatible with IRIX at all.  */
 #define SGI_COMPAT(abfd) \
   (elf32_mips_irix_compat (abfd) != ict_none)
 
-/* The size of an external REL relocation.  */
-#define MIPS_ELF_REL_SIZE(abfd) \
-  (get_elf_backend_data (abfd)->s->sizeof_rel)
-
 /* The number of local .got entries we reserve.  */
 #define MIPS_RESERVED_GOTNO (2)
-
-#if 0
-/* We no longer try to identify particular sections for the .dynsym
-   section.  When we do, we wind up crashing if there are other random
-   sections with relocations.  */
-
-/* Names of sections which appear in the .dynsym section in an Irix 5
-   executable.  */
-
-static const char * const mips_elf_dynsym_sec_names[] =
-{
-  ".text",
-  ".init",
-  ".fini",
-  ".data",
-  ".rodata",
-  ".sdata",
-  ".sbss",
-  ".bss",
-  NULL
-};
-
-#define SIZEOF_MIPS_DYNSYM_SECNAMES \
-  (sizeof mips_elf_dynsym_sec_names / sizeof mips_elf_dynsym_sec_names[0])
-
-/* The number of entries in mips_elf_dynsym_sec_names which go in the
-   text segment.  */
-
-#define MIPS_TEXT_DYNSYM_SECNO (3)
-
-#endif /* 0 */
-
-/* The names of the runtime procedure table symbols used on Irix 5.  */
-
-static const char * const mips_elf_dynsym_rtproc_names[] =
-{
-  "_procedure_table",
-  "_procedure_string_table",
-  "_procedure_table_size",
-  NULL
-};
-
-/* These structures are used to generate the .compact_rel section on
-   Irix 5.  */
-
-typedef struct
-{
-  unsigned long id1;		/* Always one?  */
-  unsigned long num;		/* Number of compact relocation entries.  */
-  unsigned long id2;		/* Always two?  */
-  unsigned long offset;		/* The file offset of the first relocation.  */
-  unsigned long reserved0;	/* Zero?  */
-  unsigned long reserved1;	/* Zero?  */
-} Elf32_compact_rel;
-
-typedef struct
-{
-  bfd_byte id1[4];
-  bfd_byte num[4];
-  bfd_byte id2[4];
-  bfd_byte offset[4];
-  bfd_byte reserved0[4];
-  bfd_byte reserved1[4];
-} Elf32_External_compact_rel;
-
-typedef struct
-{
-  unsigned int ctype : 1;	/* 1: long 0: short format. See below.  */
-  unsigned int rtype : 4;	/* Relocation types. See below.  */
-  unsigned int dist2to : 8;
-  unsigned int relvaddr : 19;	/* (VADDR - vaddr of the previous entry)/ 4 */
-  unsigned long konst;		/* KONST field. See below.  */
-  unsigned long vaddr;		/* VADDR to be relocated.  */
-} Elf32_crinfo;
-
-typedef struct
-{
-  unsigned int ctype : 1;	/* 1: long 0: short format. See below.  */
-  unsigned int rtype : 4;	/* Relocation types. See below.  */
-  unsigned int dist2to : 8;
-  unsigned int relvaddr : 19;	/* (VADDR - vaddr of the previous entry)/ 4 */
-  unsigned long konst;		/* KONST field. See below.  */
-} Elf32_crinfo2;
-
-typedef struct
-{
-  bfd_byte info[4];
-  bfd_byte konst[4];
-  bfd_byte vaddr[4];
-} Elf32_External_crinfo;
-
-typedef struct
-{
-  bfd_byte info[4];
-  bfd_byte konst[4];
-} Elf32_External_crinfo2;
-
-/* These are the constants used to swap the bitfields in a crinfo.  */
-
-#define CRINFO_CTYPE (0x1)
-#define CRINFO_CTYPE_SH (31)
-#define CRINFO_RTYPE (0xf)
-#define CRINFO_RTYPE_SH (27)
-#define CRINFO_DIST2TO (0xff)
-#define CRINFO_DIST2TO_SH (19)
-#define CRINFO_RELVADDR (0x7ffff)
-#define CRINFO_RELVADDR_SH (0)
-
-/* A compact relocation info has long (3 words) or short (2 words)
-   formats.  A short format doesn't have VADDR field and relvaddr
-   fields contains ((VADDR - vaddr of the previous entry) >> 2).  */
-#define CRF_MIPS_LONG			1
-#define CRF_MIPS_SHORT			0
-
-/* There are 4 types of compact relocation at least. The value KONST
-   has different meaning for each type:
-
-   (type)		(konst)
-   CT_MIPS_REL32	Address in data
-   CT_MIPS_WORD		Address in word (XXX)
-   CT_MIPS_GPHI_LO	GP - vaddr
-   CT_MIPS_JMPAD	Address to jump
-   */
-
-#define CRT_MIPS_REL32			0xa
-#define CRT_MIPS_WORD			0xb
-#define CRT_MIPS_GPHI_LO		0xc
-#define CRT_MIPS_JMPAD			0xd
-
-#define mips_elf_set_cr_format(x,format)	((x).ctype = (format))
-#define mips_elf_set_cr_type(x,type)		((x).rtype = (type))
-#define mips_elf_set_cr_dist2to(x,v)		((x).dist2to = (v))
-#define mips_elf_set_cr_relvaddr(x,d)		((x).relvaddr = (d)<<2)
 
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value
    from smaller values.  Start with zero, widen, *then* decrement.  */
@@ -904,7 +760,7 @@ mips_elf_hi16_reloc (abfd, reloc_entry, symbol, data, input_section,
   bfd_vma relocation;
   struct mips_hi16 *n;
 
-  /* If we're relocating, and this an external symbol, we don't want
+  /* If we're relocating, and this is an external symbol, we don't want
      to change anything.  */
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
@@ -1099,7 +955,7 @@ mips_elf_got16_reloc (abfd, reloc_entry, symbol, data, input_section,
      bfd *output_bfd;
      char **error_message;
 {
-  /* If we're relocating, and this an external symbol, we don't want
+  /* If we're relocating, and this is an external symbol, we don't want
      to change anything.  */
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
@@ -1264,8 +1120,8 @@ _bfd_mips_elf32_gprel16_reloc (abfd, reloc_entry, symbol, data, input_section,
 					data, gp);
 }
 
-/* Do a R_MIPS_GPREL32 relocation.  Is this 32 bit value the offset
-   from the gp register? XXX */
+/* Do a R_MIPS_GPREL32 relocation.  This is a 32 bit value which must
+   become the offset from the gp register.  */
 
 static bfd_reloc_status_type gprel32_with_gp PARAMS ((bfd *, asymbol *,
 						      arelent *, asection *,
@@ -1531,8 +1387,8 @@ mips16_gprel_reloc (abfd, reloc_entry, symbol, data, input_section,
 /* A mapping from BFD reloc types to MIPS ELF reloc types.  */
 
 struct elf_reloc_map {
-  bfd_reloc_code_real_type bfd_reloc_val;
-  enum elf_mips_reloc_type elf_reloc_val;
+  bfd_reloc_code_real_type bfd_val;
+  enum elf_mips_reloc_type elf_val;
 };
 
 static const struct elf_reloc_map mips_reloc_map[] =
@@ -1540,6 +1396,7 @@ static const struct elf_reloc_map mips_reloc_map[] =
   { BFD_RELOC_NONE, R_MIPS_NONE, },
   { BFD_RELOC_16, R_MIPS_16 },
   { BFD_RELOC_32, R_MIPS_32 },
+  /* There is no BFD reloc for R_MIPS_REL32.  */
   { BFD_RELOC_64, R_MIPS_64 },
   { BFD_RELOC_MIPS_JMP, R_MIPS_26 },
   { BFD_RELOC_HI16_S, R_MIPS_HI16 },
@@ -1568,11 +1425,13 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
      bfd_reloc_code_real_type code;
 {
   unsigned int i;
+  reloc_howto_type *howto_table = elf_mips_howto_table_rel;
 
-  for (i = 0; i < sizeof (mips_reloc_map) / sizeof (struct elf_reloc_map); i++)
+  for (i = 0; i < sizeof (mips_reloc_map) / sizeof (struct elf_reloc_map);
+       i++)
     {
-      if (mips_reloc_map[i].bfd_reloc_val == code)
-	return &elf_mips_howto_table_rel[(int) mips_reloc_map[i].elf_reloc_val];
+      if (mips_reloc_map[i].bfd_val == code)
+	return &howto_table[(int) mips_reloc_map[i].elf_val];
     }
 
   switch (code)
@@ -1586,7 +1445,7 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 	 Select the right relocation (R_MIPS_32 or R_MIPS_64) based on the
 	 size of addresses on this architecture.  */
       if (bfd_arch_bits_per_address (abfd) == 32)
-	return &elf_mips_howto_table_rel[(int) R_MIPS_32];
+	return &howto_table[(int) R_MIPS_32];
       else
 	return &elf_mips_ctor64_howto;
 
@@ -1622,32 +1481,22 @@ mips_elf32_rtype_to_howto (r_type, rela_p)
     {
     case R_MIPS16_26:
       return &elf_mips16_jump_howto;
-      break;
     case R_MIPS16_GPREL:
       return &elf_mips16_gprel_howto;
-      break;
     case R_MIPS_GNU_VTINHERIT:
       return &elf_mips_gnu_vtinherit_howto;
-      break;
     case R_MIPS_GNU_VTENTRY:
       return &elf_mips_gnu_vtentry_howto;
-      break;
     case R_MIPS_GNU_REL_HI16:
       return &elf_mips_gnu_rel_hi16;
-      break;
     case R_MIPS_GNU_REL_LO16:
       return &elf_mips_gnu_rel_lo16;
-      break;
     case R_MIPS_GNU_REL16_S2:
       return &elf_mips_gnu_rel16_s2;
-      break;
     case R_MIPS_PC64:
       return &elf_mips_gnu_pcrel64;
-      break;
     case R_MIPS_PC32:
       return &elf_mips_gnu_pcrel32;
-      break;
-
     default:
       BFD_ASSERT (r_type < (unsigned int) R_MIPS_max);
       return &elf_mips_howto_table_rel[r_type];
@@ -1822,7 +1671,6 @@ elf32_mips_discard_info (abfd, cookie, info)
      struct bfd_link_info *info;
 {
   asection *o;
-  struct elf_backend_data *bed = get_elf_backend_data (abfd);
   boolean ret = false;
   unsigned char *tdata;
   size_t i, skip;
@@ -1852,8 +1700,7 @@ elf32_mips_discard_info (abfd, cookie, info)
     }
 
   cookie->rel = cookie->rels;
-  cookie->relend =
-    cookie->rels + o->reloc_count * bed->s->int_rels_per_ext_rel;
+  cookie->relend = cookie->rels + o->reloc_count;
 
   for (i = 0, skip = 0; i < o->_raw_size; i ++)
     {
@@ -1927,11 +1774,11 @@ static irix_compat_t
 elf32_mips_irix_compat (abfd)
      bfd *abfd;
 {
-  if ((abfd->xvec == &bfd_elf32_tradbigmips_vec)
-      || (abfd->xvec == &bfd_elf32_tradlittlemips_vec))
-    return ict_none;
-  else
+  if ((abfd->xvec == &bfd_elf32_bigmips_vec)
+      || (abfd->xvec == &bfd_elf32_littlemips_vec))
     return ict_irix5;
+  else
+    return ict_none;
 }
 
 /* Given a data section and an in-memory embedded reloc section, store
