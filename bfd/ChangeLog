@@ -1,3 +1,14 @@
+Wed Sep  4 00:44:52 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	Allow GDB to patch object files.
+
+	* aoutf1.h (sunos_core_file_p):  Set SEC_HAS_CONTENTS on all sections.
+	* trad-core.h (trad_unix_core_file_p):  Ditto.
+	* aoutx.h (aout_set_section_contents):  On first output, check
+	abfd->direction and complain if erroneous.
+
+	* Makefile.in:  Add crude dependencies.
+
 Tue Sep  3 13:46:19 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* config/* aoutx.h configure* shortened all the h/tmake-xxxx

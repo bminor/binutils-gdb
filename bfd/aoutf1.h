@@ -305,7 +305,7 @@ struct internal_sunos_core {
 static void
 DEFUN(swapcore_sun3,(abfd, ext, intcore),
       bfd *abfd AND
-      char *ext;
+      char *ext AND
       struct internal_sunos_core *intcore)
 {
   struct external_exec exec_bytes;
@@ -336,7 +336,7 @@ DEFUN(swapcore_sun3,(abfd, ext, intcore),
 static void
 DEFUN(swapcore_sparc,(abfd, ext, intcore),
       bfd *abfd AND
-      char *ext;
+      char *ext AND
       struct internal_sunos_core *intcore)
 {
   struct external_sparc_core *extcore = (struct external_sparc_core *)ext;
@@ -483,10 +483,10 @@ DEFUN(sunos4_core_file_p,(abfd),
   core_regsec (abfd)->name = ".reg";
   core_reg2sec (abfd)->name = ".reg2";
 
-  core_stacksec (abfd)->flags = SEC_ALLOC + SEC_LOAD;
-  core_datasec (abfd)->flags = SEC_ALLOC + SEC_LOAD;
-  core_regsec (abfd)->flags = SEC_ALLOC;
-  core_reg2sec (abfd)->flags = SEC_ALLOC;
+  core_stacksec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
+  core_datasec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
+  core_regsec (abfd)->flags = SEC_ALLOC + SEC_HAS_CONTENTS;
+  core_reg2sec (abfd)->flags = SEC_ALLOC + SEC_HAS_CONTENTS;
 
   core_stacksec (abfd)->size = core->c_ssize;
   core_datasec (abfd)->size = core->c_dsize;
