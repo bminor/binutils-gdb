@@ -1,3 +1,16 @@
+2002-06-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-fbsd.h [!SVR4_SHARED_LIBS]
+	(IN_SOLIB_CALL_TRAMPOLINE): Remove define.
+	* config/i386/tm-nbsdaout.h (IN_SOLIB_CALL_TRAMPOLINE): Remove
+	define.
+	* i386bsd-tdep.c: Include "arch-utils.h".
+	(i386bsd_aout_in_solib_call_trampoline): New function.
+	(i386bsd_init_abi): Set in_solib_call_trampoline to
+	i386bsd_aout_in_solib_call_trampoline.
+	(i386nbsdelf_init_abi, i386fbsd_init_abi): Set
+	in_solib_call_trampoline to generic_in_solib_call_trampoline.
+
 2002-06-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* macrotab.h: Do not include "obstack.h" or "bcache.h".

@@ -23,8 +23,4 @@
 
 #include "i386/tm-nbsd.h"
 
-/* Return non-zero if we are in a shared library trampoline code stub. */
-#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
-  (name && !strcmp(name, "_DYNAMIC"))
-
 #endif /* TM_NBSDAOUT_H */

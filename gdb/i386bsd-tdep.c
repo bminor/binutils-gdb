@@ -19,6 +19,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "frame.h"
 #include "gdbcore.h"
 #include "regcache.h"
@@ -98,6 +99,16 @@ i386bsd_sigtramp_end (CORE_ADDR pc)
 }
 
 
+/* Support for shared libraries.  */
+
+/* Return non-zero if we are in a shared library trampoline code stub.  */
+
+int
+i386bsd_aout_in_solib_call_trampoline (CORE_ADDR pc, char *name)
+{
+  return (name && !strcmp (name, "_DYNAMIC"));
+}
+
 /* Traditional BSD (4.3 BSD, still used for BSDI and 386BSD).  */
 
 /* From <machine/signal.h>.  */
@@ -109,6 +120,10 @@ i386bsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   set_gdbarch_pc_in_sigtramp (gdbarch, i386bsd_pc_in_sigtramp);
+
+  /* Assume SunOS-style shared libraries.  */
+  set_gdbarch_in_solib_call_trampoline (gdbarch,
+					i386bsd_aout_in_solib_call_trampoline);
 
   tdep->jb_pc_offset = 0;
 
@@ -155,6 +170,10 @@ i386nbsdelf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* But ELF-based.  */
   i386_elf_init_abi (info, gdbarch);
 
+  /* NetBSD ELF uses SVR4-style shared libraries.  */
+  set_gdbarch_in_solib_call_trampoline (gdbarch,
+					generic_in_solib_call_trampoline);
+
   /* NetBSD ELF uses -fpcc-struct-return by default.  */
   tdep->struct_return = pcc_struct_return;
 
@@ -193,6 +212,10 @@ i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Except that it uses ELF.  */
   i386_elf_init_abi (info, gdbarch);
+
+  /* FreeBSD ELF uses SVR4-style shared libraries.  */
+  set_gdbarch_in_solib_call_trampoline (gdbarch,
+					generic_in_solib_call_trampoline);
 }
 
 /* FreeBSD 4.0-RELEASE or later.  */
