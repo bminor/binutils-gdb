@@ -1,3 +1,11 @@
+2002-08-18  Aidan Skinner <aidan@velvet.net>
+
+        * ada-lang.c: run through gdb_indent.sh
+        * ada-lang.h: run through gdb_indent.sh
+        * ada-tasks.c: run through gdb_indent.sh
+        * ada-typeprint.c: run through gdb_indent.sh
+        * ada-valprint.c: run through gdb_indent.sh
+
 2002-08-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* osabi.c (gdbarch_init_osabi): Don't complain about an unknown
