@@ -1,3 +1,8 @@
+2001-12-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure.in (sim_fpu): Don't add sim-bits.o.
+	* configure: Re-generate.
+
 2001-12-15  matthew green  <mrg@redhat.com>
 
 	* main.c: Include "defs.h", "bfd.h", "callback.h" and "remote-sim.h".
