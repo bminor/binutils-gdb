@@ -1,4 +1,4 @@
 	.data
 	.hidden foo
 	.global foo
-	.word foo
+	.long foo
