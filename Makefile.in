@@ -139,10 +139,10 @@ NM_FOR_TARGET = ` \
 
 XTRAFLAGS = ` \
   if [ -f $${rootme}/gcc/Makefile ] ; then \
-    if [ "$(host_cpu)-$(host_vendor)-$(host_os)" = "$(target_cpu)-$(target_vendor)-$(target_os)" ] ; then \
-      echo -I$${rootme}/gcc/include ; \
+    if [ -f $${rootme}/newlib/Makefile ] ; then \
+      echo -I$${rootme}/newlib/targ-include -I$${srcroot}/newlib/libc/include -I$${rootme}/gcc/include -nostdinc ; \
     else \
-      echo -I$${rootme}/gcc/include -I$${rootme}/newlib/targ-include -I$${srcroot}/newlib/libc/include -nostdinc ; \
+      echo -I$${rootme}/gcc/include ; \
     fi ; \
   else \
      echo ; \

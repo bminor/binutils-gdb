@@ -1,3 +1,8 @@
+Thu Oct  8 15:07:22 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (XTRAFLAGS): include newlib directories if
+	newlib/Makefile exists, rather than if host != target.
+
 Mon Oct  5 03:00:09 1992  Mark Eichin  (eichin at tweedledumber.cygnus.com)
 
 	* config.sub: recognize sparclite-wrs-vxworks.
