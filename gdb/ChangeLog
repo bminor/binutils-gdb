@@ -1,3 +1,17 @@
+2003-02-19  Raoul Gough  <RaoulGough@yahoo.co.uk>
+
+	* coff-pe-read.c: New file - support reading of minimal symbols from a
+	portable executable using the export table.
+	* coff-pe-read.h: New file.
+	* coffread.c: Include coff-pe-read.h.
+	(coff_symtab_read): Call read_pe_exported_syms iff no recognized
+	debugging symbols found.
+	* Makefile.in (SFILES): Add coff-pe-read.o.
+	(coff_pe_read_h): Define.
+	(COMMON_OBS): Add coff-pe-read.o.
+	(coffread.o): Add coff_pe_read_h dependency.
+	(coff-pe-read.o): New target.
+
 2003-02-19  David Carlton  <carlton@math.stanford.edu>
 
 	* Makefile.in (SFILES): Add block.c.

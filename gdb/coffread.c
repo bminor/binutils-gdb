@@ -46,6 +46,8 @@
 #include "gdb_assert.h"
 #include "block.h"
 
+#include "coff-pe-read.h"
+
 extern void _initialize_coffread (void);
 
 struct coff_symfile_info
@@ -1085,6 +1087,13 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	  process_coff_symbol (cs, &main_aux, objfile);
 	  break;
 	}
+    }
+
+  if ((nsyms == 0) && (pe_file))
+    {
+      /* We've got no debugging symbols, but it's is a portable
+	 executable, so try to read the export table */
+      read_pe_exported_syms (objfile);
     }
 
   if (last_source_file)

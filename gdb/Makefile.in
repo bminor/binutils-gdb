@@ -244,7 +244,6 @@ LIB_INSTALL_DIR = $(libdir)
 LIB_RUNTIME_DIR = $(libdir)
 TCL = @TCL_CC_SEARCH_FLAGS@ @TCL_BUILD_LIB_SPEC@
 TCL_CFLAGS = @TCLHDIR@
-TCL_DEPS = @TCL_DEPS@
 GDBTKLIBS = @GDBTKLIBS@
 # Extra flags that the GDBTK files need:
 GDBTK_CFLAGS = @GDBTK_CFLAGS@
@@ -252,17 +251,14 @@ GDBTK_CFLAGS = @GDBTK_CFLAGS@
 # Where is the TK library?  Typically in ../tk.
 TK = @TK_BUILD_LIB_SPEC@
 TK_CFLAGS = @TKHDIR@ @TK_BUILD_INCLUDES@
-TK_DEPS = @TK_DEPS@
 
 # Where is Itcl?  Typically in ../itcl/itcl.
 ITCL_CFLAGS = @ITCLHDIR@
 ITCL = @ITCLLIB@
-ITCL_DEPS = @ITCL_DEPS@ 
 
 # Where is Itk?  Typically in ../itcl/itk.
 ITK_CFLAGS = @ITKHDIR@
 ITK = @ITKLIB@
-ITK_DEPS = @ITK_DEPS@ 
 
 X11_CFLAGS = @TK_XINCLUDES@
 X11_LDFLAGS =
@@ -513,7 +509,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	ax-general.c ax-gdb.c \
 	bcache.c block.c blockframe.c breakpoint.c buildsym.c builtin-regs.c \
 	c-exp.y c-lang.c c-typeprint.c c-valprint.c \
-	charset.c cli-out.c coffread.c complaints.c completer.c corefile.c \
+	charset.c cli-out.c coffread.c coff-pe-read.c \
+	complaints.c completer.c corefile.c \
 	cp-abi.c cp-support.c cp-valprint.c \
 	dbxread.c demangle.c disasm.c doublest.c \
 	dummy-frame.c dwarfread.c dwarf2read.c \
@@ -615,6 +612,7 @@ call_cmds_h = call-cmds.h
 ch_lang_h = ch-lang.h
 cli_out_h = cli-out.h
 coff_solib_h = coff-solib.h
+coff_pe_read_h = coff-pe-read.h
 command_h = command.h
 complaints_h = complaints.h
 completer_h = completer.h
@@ -837,7 +835,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	kod.o kod-cisco.o \
 	gdb-events.o \
 	exec.o bcache.o objfiles.o minsyms.o maint.o demangle.o \
-	dbxread.o coffread.o elfread.o \
+	dbxread.o coffread.o coff-pe-read.o elfread.o \
 	dwarfread.o dwarf2read.o mipsread.o stabsread.o corefile.o \
 	c-lang.o f-lang.o \
 	ui-out.o cli-out.o \
@@ -1570,7 +1568,9 @@ coffread.o: coffread.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(demangle_h) \
 	$(breakpoint_h) $(bfd_h) $(gdb_obstack_h) $(gdb_string_h) \
 	$(coff_internal_h) $(libcoff_h) $(symfile_h) $(objfiles_h) \
 	$(buildsym_h) $(gdb_stabs_h) $(stabsread_h) $(complaints_h) \
-	$(target_h) $(gdb_assert_h) $(block_h)
+	$(target_h) $(gdb_assert_h) $(block_h) $(coff_pe_read_h)
+coff-pe-read.o: coff-pe-read.c $(bfd_h) $(defs_h) $(symtab_h) \
+	$(gdbtypes_h) $(symfile_h) $(objfiles_h) $(coff_pe_read_h)
 complaints.o: complaints.c $(defs_h) $(complaints_h) $(gdb_assert_h) \
 	$(command_h) $(gdbcmd_h)
 completer.o: completer.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
