@@ -270,25 +270,41 @@ void save_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
   tp->another_trap = another_trap;
 }
 
+/* Return true if TP is an active thread. */
+static int
+thread_alive (tp)
+     struct thread_info *tp;
+{
+  if (tp->pid == -1)
+    return 0;
+  if (! target_thread_alive (tp->pid))
+    {
+      tp->pid = -1;	/* Mark it as dead */
+      return 0;
+    }
+  return 1;
+}
+
 static void
 prune_threads ()
 {
-  struct thread_info *tp, *tpprev;
+  struct thread_info *tp, *tpprev, *next;
 
   tpprev = 0;
-
-  for (tp = thread_list; tp; tp = tp->next)
-    if (tp->pid == -1)
-      {
- 	if (tpprev)
-	  tpprev->next = tp->next;
- 	else
-	  thread_list = NULL;
-
-	free (tp);
-      }
-    else
-      tpprev = tp;
+  for (tp = thread_list; tp; tp = next)
+    {
+      next = tp->next;
+      if (!thread_alive (tp))
+	{
+	  if (tpprev)
+	    tpprev->next = next;
+	  else
+	    thread_list  = next;
+	  free (tp);
+	}
+      else
+	tpprev = tp;
+    }
 }
 
 /* Print information about currently known threads */
@@ -305,14 +321,9 @@ info_threads_command (arg, from_tty)
      selected_frame.  */
   if (!target_has_stack) error ("No stack.");
 
+  prune_threads ();
   for (tp = thread_list; tp; tp = tp->next)
     {
-      if (! target_thread_alive (tp->pid))
- 	{
-	  tp->pid = -1;	/* Mark it as dead */
-	  continue;
- 	}
-
       if (tp->pid == current_pid)
 	printf_filtered ("* ");
       else
@@ -325,7 +336,6 @@ info_threads_command (arg, from_tty)
     }
 
   switch_to_thread (current_pid);
-  prune_threads ();
 }
 
 /* Switch from one thread to another. */
@@ -375,12 +385,13 @@ thread_apply_all_command (cmd, from_tty)
   old_chain = make_cleanup (restore_current_thread, inferior_pid);
 
   for (tp = thread_list; tp; tp = tp->next)
-    {
-      switch_to_thread (tp->pid);
-      printf_filtered ("\nThread %d (%s):\n", tp->num,
-		       target_pid_to_str (inferior_pid));
-      execute_command (cmd, from_tty);
-    }
+    if (thread_alive (tp))
+      {
+	switch_to_thread (tp->pid);
+	printf_filtered ("\nThread %d (%s):\n", tp->num,
+			 target_pid_to_str (inferior_pid));
+	execute_command (cmd, from_tty);
+      }
 }
 
 static void
@@ -434,15 +445,16 @@ thread_apply_command (tidlist, from_tty)
 	  tp = find_thread_id (start);
 
 	  if (!tp)
+	    warning ("Unknown thread %d.", start);
+	  else if (!thread_alive (tp))
+	    warning ("Thread %d has terminated.", start);
+	  else
 	    {
-	      warning ("Unknown thread %d.", start);
-	      continue;
+	      switch_to_thread (tp->pid);
+	      printf_filtered ("\nThread %d (%s):\n", tp->num,
+			       target_pid_to_str (inferior_pid));
+	      execute_command (cmd, from_tty);
 	    }
-
-	  switch_to_thread (tp->pid);
-	  printf_filtered ("\nThread %d (%s):\n", tp->num,
-			   target_pid_to_str (inferior_pid));
-	  execute_command (cmd, from_tty);
 	}
     }
 }
@@ -469,6 +481,9 @@ see the IDs of currently known threads.");
   if (!tp)
     error ("Thread ID %d not known.  Use the \"info threads\" command to\n\
 see the IDs of currently known threads.", num);
+
+  if (!thread_alive (tp))
+    error ("Thread ID %d has terminated.\n", num);
 
   switch_to_thread (tp->pid);
 

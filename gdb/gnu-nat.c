@@ -1,5 +1,5 @@
 /* Interface GDB to the GNU Hurd
-   Copyright (C) 1992, 1995, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1995, 1996, 1997 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -88,26 +88,26 @@ extern struct target_ops gnu_ops;
 extern char *strerror();
 
 int inf_update_procs (struct inf *inf);
-static struct inf *make_inf ();
-static void inf_clear_wait (struct inf *inf);
-static void inf_cleanup (struct inf *inf);
-static void inf_startup (struct inf *inf, int pid, task_t task);
-static int inf_update_suspends (struct inf *inf);
-static void inf_set_task (struct inf *inf, task_t port);
-static void inf_validate_procs (struct inf *inf);
-static void inf_steal_exc_ports (struct inf *inf);
-static void inf_restore_exc_ports (struct inf *inf);
-static struct proc *inf_tid_to_proc (struct inf *inf, int tid);
-static inline void inf_set_threads_resume_sc (struct inf *inf, 
-					      struct proc *run_thread, 
-					      int run_others);
-static inline int inf_set_threads_resume_sc_for_signal_thread (struct inf *inf);
-static inline void inf_suspend (struct inf *inf);
-static inline void inf_resume (struct inf *inf);
-static void inf_set_step_thread (struct inf *inf, struct proc *proc);
-static void inf_detach (struct inf *inf);
-static void inf_attach (struct inf *inf, int pid);
-static void inf_signal (struct inf *inf, enum target_signal sig);
+struct inf *make_inf ();
+void inf_clear_wait (struct inf *inf);
+void inf_cleanup (struct inf *inf);
+void inf_startup (struct inf *inf, int pid);
+int inf_update_suspends (struct inf *inf);
+void inf_set_pid (struct inf *inf, pid_t pid);
+void inf_validate_procs (struct inf *inf);
+void inf_steal_exc_ports (struct inf *inf);
+void inf_restore_exc_ports (struct inf *inf);
+struct proc *inf_tid_to_proc (struct inf *inf, int tid);
+inline void inf_set_threads_resume_sc (struct inf *inf, 
+				       struct proc *run_thread, 
+				       int run_others);
+inline int inf_set_threads_resume_sc_for_signal_thread (struct inf *inf);
+inline void inf_suspend (struct inf *inf);
+inline void inf_resume (struct inf *inf);
+void inf_set_step_thread (struct inf *inf, struct proc *proc);
+void inf_detach (struct inf *inf);
+void inf_attach (struct inf *inf, int pid);
+void inf_signal (struct inf *inf, enum target_signal sig);
 
 #define inf_debug(_inf, msg, args...) \
   do { struct inf *__inf = (_inf); \
@@ -115,15 +115,15 @@ static void inf_signal (struct inf *inf, enum target_signal sig);
 
 void proc_abort (struct proc *proc, int force);
 thread_state_t proc_get_state (struct proc *proc, int force);
-static struct proc *make_proc (struct inf *inf, mach_port_t port, int tid);
-static struct proc *_proc_free (struct proc *proc);
-static int proc_update_sc (struct proc *proc);
-static error_t proc_get_exception_port (struct proc *proc, mach_port_t *port);
-static error_t proc_set_exception_port (struct proc *proc, mach_port_t port);
+struct proc *make_proc (struct inf *inf, mach_port_t port, int tid);
+struct proc *_proc_free (struct proc *proc);
+int proc_update_sc (struct proc *proc);
+error_t proc_get_exception_port (struct proc *proc, mach_port_t *port);
+error_t proc_set_exception_port (struct proc *proc, mach_port_t port);
 static mach_port_t _proc_get_exc_port (struct proc *proc);
-static void proc_steal_exc_port (struct proc *proc, mach_port_t exc_port);
-static void proc_restore_exc_port (struct proc *proc);
-static int proc_trace (struct proc *proc, int set);
+void proc_steal_exc_port (struct proc *proc, mach_port_t exc_port);
+void proc_restore_exc_port (struct proc *proc);
+int proc_trace (struct proc *proc, int set);
 char *proc_string (struct proc *proc);
 
 /* Evaluate RPC_EXPR in a scope with the variables MSGPORT and REFPORT bound
@@ -248,7 +248,7 @@ int __proc_pid (struct proc *proc)
 
 /* Update PROC's real suspend count to match it's desired one.  Returns true
    if we think PROC is now in a runnable state.  */
-static int
+int
 proc_update_sc (struct proc *proc)
 {
   int running;
@@ -378,7 +378,7 @@ proc_get_state (struct proc *proc, int will_modify)
 }
 
 /* Set PORT to PROC's exception port.  */
-static error_t
+error_t
 proc_get_exception_port (struct proc *proc, mach_port_t *port)
 {
   if (proc_is_task (proc))
@@ -388,7 +388,7 @@ proc_get_exception_port (struct proc *proc, mach_port_t *port)
 }
 
 /* Set PROC's exception port to PORT.  */
-static error_t
+error_t
 proc_set_exception_port (struct proc *proc, mach_port_t port)
 {
   proc_debug (proc, "setting exception port: %d", port);
@@ -421,7 +421,7 @@ _proc_get_exc_port (struct proc *proc)
 
 /* Replace PROC's exception port with EXC_PORT, unless it's already been
    done.  Stash away any existing exception port so we can restore it later. */
-static void
+void
 proc_steal_exc_port (struct proc *proc, mach_port_t exc_port)
 {
   mach_port_t cur_exc_port = _proc_get_exc_port (proc);
@@ -464,7 +464,7 @@ proc_steal_exc_port (struct proc *proc, mach_port_t exc_port)
 /* If we previously replaced PROC's exception port, put back what we
    found there at the time, unless *our* exception port has since been
    overwritten, in which case who knows what's going on.  */
-static void
+void
 proc_restore_exc_port (struct proc *proc)
 {
   mach_port_t cur_exc_port = _proc_get_exc_port (proc);
@@ -493,7 +493,7 @@ proc_restore_exc_port (struct proc *proc)
 
 /* Turns hardware tracing in PROC on or off when SET is true or false,
    respectively.  Returns true on success.  */
-static int
+int
 proc_trace (struct proc *proc, int set)
 {
   thread_state_t state = proc_get_state (proc, 1);
@@ -583,7 +583,7 @@ make_proc (struct inf *inf, mach_port_t port, int tid)
 
 /* Frees PROC and any resources it uses, and returns the value of PROC's 
    next field.  */
-static struct proc *
+struct proc *
 _proc_free (struct proc *proc)
 {
   struct inf *inf = proc->inf;
@@ -652,7 +652,7 @@ struct inf *make_inf ()
 }
 
 /* clear INF's target wait status.  */
-static void
+void
 inf_clear_wait (struct inf *inf)
 {
   inf_debug (inf, "clearing wait");
@@ -671,14 +671,14 @@ inf_clear_wait (struct inf *inf)
     }
 }
 
-static void
+void
 inf_cleanup (struct inf *inf)
 {
   inf_debug (inf, "cleanup");
 
   inf_clear_wait (inf);
 
-  inf_set_task (inf, MACH_PORT_NULL);
+  inf_set_pid (inf, -1);
   inf->pid = 0;
   inf->traced = 0;
   inf->no_wait = 0;
@@ -693,12 +693,12 @@ inf_cleanup (struct inf *inf)
     }
 }
 
-static void
-inf_startup (struct inf *inf, int pid, task_t task)
+void
+inf_startup (struct inf *inf, int pid)
 {
   error_t err;
 
-  inf_debug (inf, "startup: pid = %d, task = %d", pid, task);
+  inf_debug (inf, "startup: pid = %d", pid);
 
   inf_cleanup (inf);
 
@@ -711,11 +711,44 @@ inf_startup (struct inf *inf, int pid, task_t task)
   /* Make a send right for it, so we can easily copy it for other people.  */
   mach_port_insert_right (mach_task_self (), inf->event_port,
 			  inf->event_port, MACH_MSG_TYPE_MAKE_SEND);
+  inf_set_pid (inf, pid);
+}
+
+/* close current process, if any, and attach INF to process PORT */
+void 
+inf_set_pid (struct inf *inf, pid_t pid)
+{
+  task_t task_port;
+  struct proc *task = inf->task;
+
+  inf_debug (inf, "setting pid: %d", pid);
+
+  if (pid < 0)
+    task_port = MACH_PORT_NULL;
+  else
+    {
+      error_t err = proc_pid2task (proc_server, pid, &task_port);
+      if (err)
+	error ("Error getting task for pid %d: %s", pid, strerror (err));
+    }
+
+  inf_debug (inf, "setting task: %d", task_port);
 
   if (inf->pause_sc)
-    task_suspend (task);
+    task_suspend (task_port);
 
-  inf_set_task (inf, task); 
+  if (task && task->port != task_port)
+    {
+      inf->task = 0;
+      inf_validate_procs (inf);	/* Trash all the threads. */
+      _proc_free (task);	/* And the task. */
+    }
+
+  if (task_port != MACH_PORT_NULL)
+    {
+      inf->task = make_proc (inf, task_port, PROC_TID_TASK);
+      inf->threads_up_to_date = 0;
+    }
 
   if (inf->task)
     {
@@ -723,28 +756,8 @@ inf_startup (struct inf *inf, int pid, task_t task)
       if (inf->pause_sc)
 	inf->task->sc = inf->task->cur_sc = 1; /* Reflect task_suspend above */
     }
-}
-
-/* close current process, if any, and attach INF to process PORT */
-static void 
-inf_set_task (struct inf *inf, mach_port_t port)
-{
-  struct proc *task = inf->task;
-
-  inf_debug (inf, "setting task: %d", port);
-
-  if (task && task->port != port)
-    {
-      inf->task = 0;
-      inf_validate_procs (inf);	/* Trash all the threads. */
-      _proc_free (task);	/* And the task. */
-    }
-
-  if (port != MACH_PORT_NULL)
-    {
-      inf->task = make_proc (inf, port, PROC_TID_TASK);
-      inf->threads_up_to_date = 0;
-    }
+  else
+    inf->pid = -1;
 }
 
 /* Validates INF's stopped field from the actual proc server state.  */
@@ -801,7 +814,7 @@ inf_validate_task_sc (struct inf *inf)
 /* Turns tracing for INF on or off, depending on ON, unless it already is.
    If INF is running, the resume_sc count of INF's threads will be modified,
    and the signal thread will briefly be run to change the trace state.  */
-static void
+void
 inf_set_traced (struct inf *inf, int on)
 {
   if (on != inf->traced)
@@ -832,7 +845,7 @@ inf_set_traced (struct inf *inf, int on)
 /* Makes all the real suspend count deltas of all the procs in INF match the
    desired values.  Careful to always do thread/task suspend counts in the
    safe order.  Returns true if at least one thread is thought to be running.*/
-static int
+int
 inf_update_suspends (struct inf *inf)
 {
   struct proc *task = inf->task;
@@ -886,8 +899,7 @@ struct proc *
 inf_tid_to_thread (struct inf *inf, int tid)
 {
   struct proc *thread = inf->threads;
-  if (tid == inf->pid)	/* main thread */
-    return thread;
+
   while (thread)
     if (thread->tid == tid)
       return thread;
@@ -897,7 +909,7 @@ inf_tid_to_thread (struct inf *inf, int tid)
 }
 
 /* Converts a thread port to a struct proc.  */
-static struct proc *
+struct proc *
 inf_port_to_thread (struct inf *inf, mach_port_t port)
 {
   struct proc *thread = inf->threads;
@@ -910,7 +922,7 @@ inf_port_to_thread (struct inf *inf, mach_port_t port)
 }
 
 /* Make INF's list of threads be consistent with reality of TASK.  */
-static void
+void
 inf_validate_procs (struct inf *inf)
 {
   int i;
@@ -988,23 +1000,11 @@ inf_validate_procs (struct inf *inf)
       else
 	/* THREADS[I] is a thread we don't know about yet!  */
 	{
-#if 0
 	  thread = make_proc (inf, threads[i], next_thread_id++);
-#else
-	  thread = make_proc (inf, threads[i], threads[i]);
-#endif
 	  (last ? last->next : inf->threads) = thread;
 	  last = thread;
 	  proc_debug (thread, "new thread: %d", threads[i]);
-#if 1 /* try leaving this out, see what happens */
 	  add_thread (thread->tid); /* Tell GDB's generic thread code.  */
-#if 0	/* seems to cause kernel exceptions??? */
-	  target_terminal_ours_for_output ();	/* allow debugger I/O */
-	  printf_filtered ("[gnu-nat: New %s]\n", 
-			   target_pid_to_str (thread->tid));
-	  target_terminal_inferior ();	/* give it back */
-#endif
-#endif
 	}
 
     vm_deallocate(mach_task_self(),
@@ -1026,7 +1026,7 @@ inf_update_procs (struct inf *inf)
 /* Sets the resume_sc of each thread in inf.  That of RUN_THREAD is set to 0,
    and others are set to their run_sc if RUN_OTHERS is true, and otherwise
    their pause_sc.  */
-static inline void 
+inline void 
 inf_set_threads_resume_sc (struct inf *inf,
 			   struct proc *run_thread, int run_others)
 {
@@ -1043,7 +1043,7 @@ inf_set_threads_resume_sc (struct inf *inf,
 
 /* Cause INF to continue execution immediately; individual threads may still
    be suspended (but their suspend counts will be updated).  */
-static inline void
+inline void
 inf_resume (struct inf *inf)
 {
   struct proc *thread;
@@ -1068,7 +1068,7 @@ inf_resume (struct inf *inf)
 
 /* Cause INF to stop execution immediately; individual threads may still
    be running.  */
-static inline void
+inline void
 inf_suspend (struct inf *inf)
 {
   struct proc *thread;
@@ -1087,7 +1087,7 @@ inf_suspend (struct inf *inf)
 /* INF has one thread PROC that is in single-stepping mode.  This function
    changes it to be PROC, changing any old step_thread to be a normal one.  A
    PROC of 0 clears any existing value.  */
-static void
+void
 inf_set_step_thread (struct inf *inf, struct proc *thread)
 {
   assert (!thread || proc_is_thread (thread));
@@ -1112,7 +1112,7 @@ inf_set_step_thread (struct inf *inf, struct proc *thread)
 /* Set up the thread resume_sc's so that only the signal thread is running
    (plus whatever other thread are set to always run).  Returns true if we
    did so, or false if we can't find a signal thread.  */
-static inline int
+inline int
 inf_set_threads_resume_sc_for_signal_thread (struct inf *inf)
 {
   if (inf->signal_thread)
@@ -1133,7 +1133,7 @@ inf_update_signal_thread (struct inf *inf)
 }
 
 /* Detachs from INF's inferior task, letting it run once again...  */
-static void
+void
 inf_detach (struct inf *inf)
 {
   struct proc *task = inf->task;
@@ -1168,22 +1168,15 @@ inf_detach (struct inf *inf)
 
 /* Attaches INF to the process with process id PID, returning it in a suspended
    state suitable for debugging.  */
-static void
+void
 inf_attach (struct inf *inf, int pid)
 {
-  error_t err;
-  task_t task;
-
   inf_debug (inf, "attaching: %d", pid);
-
-  err = proc_pid2task (proc_server, pid, &task);
-  if (err)
-    error ("Error getting task for pid %d: %s", pid, strerror (err));
 
   if (inf->pid)
     inf_detach (inf);
 
-  inf_startup (inf, pid, task);
+  inf_startup (inf, pid);
 }
 
 /* Makes sure that we've got our exception ports entrenched in the process. */
@@ -1217,7 +1210,7 @@ void inf_restore_exc_ports (struct inf *inf)
 /* Deliver signal SIG to INF.  If INF is stopped, delivering a signal, even
    signal 0, will continue it.  INF is assumed to be in a paused state, and
    the resume_sc's of INF's threads may be affected.  */
-static void
+void
 inf_signal (struct inf *inf, enum target_signal sig)
 {
   error_t err = 0;
@@ -1377,6 +1370,12 @@ gnu_wait (int tid, struct target_waitstatus *status)
   /* Re-suspend the task.  */
   inf_suspend (inf);
 
+  if (!inf->task && inf->pending_execs)
+    /* When doing an exec, it's possible that the old task wasn't reused
+       (e.g., setuid execs).  So if the task seems to have disappeared,
+       attempt to refetch it, as the pid should still be the same.  */
+    inf_set_pid (inf, inf->pid);
+
   if (err == EMACH_RCV_INTERRUPTED)
     inf_debug (inf, "interrupted");
   else if (err)
@@ -1425,17 +1424,24 @@ gnu_wait (int tid, struct target_waitstatus *status)
 	/* Ah hah!  A SIGTRAP from the inferior while starting up probably
 	   means we've succesfully completed an exec!  */
 	{
-#if 0	/* do we need this? */
 	  if (--inf->pending_execs == 0)
 	    /* We're done!  */
 	    {
+#if 0	/* do we need this? */
 	      prune_threads (1);	/* Get rid of the old shell threads */
 	      renumber_threads (0); /* Give our threads reasonable names. */
-	    }
 #endif
+	    }
 	  inf_debug (inf, "pending exec completed, pending_execs => %d",
 		     inf->pending_execs);
 	}
+      else if (kind == TARGET_WAITKIND_STOPPED)
+	/* It's possible that this signal is because of a crashed process
+	   being handled by the hurd crash server; in this case, the process
+	   will have an extra task suspend, which we need to know about.
+	   Since the code in inf_resume that normally checks for this is
+	   disabled while INF->pending_execs, we do the check here instead.  */
+	inf_validate_task_sc (inf);
     }
 
   if (inf->wait.suppress)
@@ -1569,7 +1575,7 @@ S_exception_raise_request (mach_port_t port, mach_port_t reply_port,
 
 /* Fill in INF's wait field after a task has died without giving us more
    detailed information.  */
-static void
+void
 inf_task_died_status (struct inf *inf)
 {
   warning ("Pid %d died with unknown exit status, using SIGKILL.", inf->pid);
@@ -1853,7 +1859,7 @@ gnu_kill_inferior ()
     {
       proc_debug (task, "terminating...");
       task_terminate (task->port);
-      inf_set_task (current_inferior, MACH_PORT_NULL);
+      inf_set_pid (current_inferior, -1);
     }
   target_mourn_inferior ();
 }
@@ -2006,9 +2012,7 @@ gnu_attach (args, from_tty)
      time the user does a continue.  */
   inf_validate_stopped (inf);
 
-#if 0 /* Do we need this?  Actually I can see where it 
-	 might be helpful here, but it's just cosmetic.
-	 Let's come back to it later.  XXX Fix me. */
+#if 0 /* Do we need this? */
   renumber_threads (0);		/* Give our threads reasonable names. */
 #endif
 }
@@ -2389,13 +2393,7 @@ char *proc_string (struct proc *proc)
     sprintf (tid_str, "process %d", proc->inf->pid);
   else
     sprintf (tid_str, "thread %d.%d",
-	     proc->inf->pid,
-#if 0
-	     pid_to_thread_id (proc->tid)
-#else
-	     proc->tid
-#endif
-);
+	     proc->inf->pid, pid_to_thread_id (proc->tid));
   return tid_str;
 }
 
