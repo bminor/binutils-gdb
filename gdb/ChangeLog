@@ -1,3 +1,11 @@
+2001-04-13  Fernando Nasser  <fnasser@redhat.com>
+
+	From  Adam Mirowski  <Adam.Mirowski@Sun.COM>
+	Fixed Insight on Solaris. It was not possible to debug a process
+	because of EINTR "errors".
+	* procfs.c: (procfs_wait): if proc_wait_for_stop() fails
+	with EINTR, retry the call.
+
 2001-04-12  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-aix5.c (enum maptype): Delete.

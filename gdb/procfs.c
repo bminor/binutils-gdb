@@ -3959,6 +3959,8 @@ wait_again:
 	      /* FIXME: might I not just use waitpid?
 		 Or try find_procinfo to see if I know about this child? */
 	    }
+	  else if (errno == EINTR)
+	    goto wait_again;
 	  else
 	    {
 	      /* Unknown error from wait_for_stop. */
