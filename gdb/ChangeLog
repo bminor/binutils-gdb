@@ -1,3 +1,10 @@
+2003-02-19  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_extract_return_value): Remove function.
+	(avr_store_return_value): Remove function.
+	(avr_extract_struct_value_address): Remove function.
+	(avr_gdbarch_init): Remove set_gdbarch_deprecated_*() calls.
+
 2003-02-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* rs6000-tdep.c: Include "gdb_assert.h".

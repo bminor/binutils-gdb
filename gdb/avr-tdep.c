@@ -892,69 +892,12 @@ avr_saved_pc_after_call (struct frame_info *frame)
   return (m2 | (m1 << 8)) * 2;
 }
 
-/* Figure out where in REGBUF the called function has left its return value.
-   Copy that into VALBUF. */
-
-static void
-avr_extract_return_value (struct type *type, char *regbuf, char *valbuf)
-{
-  int wordsize, len;
-
-  wordsize = 2;
-
-  len = TYPE_LENGTH (type);
-
-  switch (len)
-    {
-    case 1:			/* (char) */
-    case 2:			/* (short), (int) */
-      memcpy (valbuf, regbuf + REGISTER_BYTE (24), 2);
-      break;
-    case 4:			/* (long), (float) */
-      memcpy (valbuf, regbuf + REGISTER_BYTE (22), 4);
-      break;
-    case 8:			/* (double) (doesn't seem to happen, which is good,
-				   because this almost certainly isn't right.  */
-      error ("I don't know how a double is returned.");
-      break;
-    }
-}
-
 /* Returns the return address for a dummy. */
 
 static CORE_ADDR
 avr_call_dummy_address (void)
 {
   return entry_point_address ();
-}
-
-/* Place the appropriate value in the appropriate registers.
-   Primarily used by the RETURN command.  */
-
-static void
-avr_store_return_value (struct type *type, char *valbuf)
-{
-  int wordsize, len, regval;
-
-  wordsize = 2;
-
-  len = TYPE_LENGTH (type);
-  switch (len)
-    {
-    case 1:			/* char */
-    case 2:			/* short, int */
-      regval = extract_address (valbuf, len);
-      write_register (0, regval);
-      break;
-    case 4:			/* long, float */
-      regval = extract_address (valbuf, len);
-      write_register (0, regval >> 16);
-      write_register (1, regval & 0xffff);
-      break;
-    case 8:			/* presumeably double, but doesn't seem to happen */
-      error ("I don't know how to return a double.");
-      break;
-    }
 }
 
 /* Setup the return address for a dummy frame, as called by
@@ -1065,17 +1008,6 @@ static void
 avr_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   write_register (0, addr);
-}
-
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value,
-   as a CORE_ADDR (or an expression that can be used as one). */
-
-static CORE_ADDR
-avr_extract_struct_value_address (char *regbuf)
-{
-  return (extract_address ((regbuf) + REGISTER_BYTE (0),
-			   REGISTER_RAW_SIZE (0)) | AVR_SMEM_START);
 }
 
 /* Setup the function arguments for calling a function in the inferior.
@@ -1248,23 +1180,17 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_address_to_pointer (gdbarch, avr_address_to_pointer);
   set_gdbarch_pointer_to_address (gdbarch, avr_pointer_to_address);
-  set_gdbarch_deprecated_extract_return_value (gdbarch, avr_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, avr_push_arguments);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, avr_push_return_address);
   set_gdbarch_pop_frame (gdbarch, avr_pop_frame);
 
-  set_gdbarch_deprecated_store_return_value (gdbarch, avr_store_return_value);
-
   set_gdbarch_use_struct_convention (gdbarch, generic_use_struct_convention);
   set_gdbarch_store_struct_return (gdbarch, avr_store_struct_return);
-  set_gdbarch_deprecated_extract_struct_value_address
-    (gdbarch, avr_extract_struct_value_address);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, avr_scan_prologue);
   set_gdbarch_init_extra_frame_info (gdbarch, avr_init_extra_frame_info);
   set_gdbarch_skip_prologue (gdbarch, avr_skip_prologue);
-/*    set_gdbarch_prologue_frameless_p (gdbarch, avr_prologue_frameless_p); */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
