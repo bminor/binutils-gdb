@@ -1,5 +1,5 @@
 /* COFF specific linker code.
-   Copyright 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -2423,6 +2423,14 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
       if (howto == NULL)
 	return false;
 
+      /* If we are doing a relocateable link, then we can just ignore
+         a PC relative reloc that is pcrel_offset.  It will already
+         have the correct value.  */
+      if (info->relocateable
+	  && howto->pc_relative
+	  && howto->pcrel_offset)
+	continue;
+
       val = 0;
 
       if (h == NULL)
@@ -2497,10 +2505,10 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 	  break;
 	case bfd_reloc_outofrange:
 	  (*_bfd_error_handler)
-	    ("%s: bad reloc address in section `%s' at address 0x%lx",
+	    ("%s: bad reloc address 0x%lx in section `%s'",
 	     bfd_get_filename (input_bfd),
-	     bfd_get_section_name (input_bfd, input_section),
-	     (unsigned long) rel->r_vaddr);
+	     (unsigned long) rel->r_vaddr,
+	     bfd_get_section_name (input_bfd, input_section));
 	  return false;
 	case bfd_reloc_overflow:
 	  {

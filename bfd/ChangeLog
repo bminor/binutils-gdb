@@ -1,5 +1,12 @@
 Mon Feb  3 11:54:06 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* cofflink.c (_bfd_coff_generic_relocate_section): If doing a
+	relocateable link, just skip pc_relative pcrel_offset relocs.
+	* coff-arm.c (coff_arm_rtype_to_howto): Return a different howto
+	structure for an ARM26 reloc which can be resolved.
+	(coff_arm_adjust_symndx): Only convert ARM26 to ARM26D if the
+	reloc can be resolved.
+
 	* coff-h8300.c (h8300_reloc16_extra_cases): Correct off by one
 	error in overflow check for R_RELBYTE.
 
