@@ -1,3 +1,8 @@
+2004-08-05  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* libunwind-frame.c (LIBUNWIND_SO): Change to be of form:
+	libunwind-xxxx.so" where xxxx is UNW_TARGET.
+
 2004-08-05  Andrew Cagney  <cagney@gnu.org>
 
 	* config/xm-sysv4.h: Delete file.
@@ -672,6 +677,7 @@
 
 	* Makefile.in (CONFIG_CLEAN): Delete duplicate definition.
 
+>>>>>>> 1.6211
 2004-07-28  Andrew Cagney  <cagney@gnu.org>
 
 	* PROBLEMS: Mention threads/1650.
