@@ -1,3 +1,9 @@
+Tue Nov 11 13:33:15 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-h8300.c: Include "subsegs.h".
+	(tc_reloc_mangle): Handle references to symbols which are not
+	being output, so that references to `.' work.
+
 Mon Nov 10 13:43:33 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c (m68k_ip): Call add_fix when needed for '_'
