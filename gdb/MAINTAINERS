@@ -101,7 +101,8 @@ the native maintainer when resolving ABI issues.
 	mips		--target=mips-elf ,-Werror
 			Maintenance only
 
-	mn10300		Deleted
+	mn10300		--target=mn10300-elf
+			Michael Snyder		msnyder@redhat.com
 
 	ns32k		Deleted
 

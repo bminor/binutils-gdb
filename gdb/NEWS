@@ -3,6 +3,9 @@
 
 *** Changes since GDB 6.3
 
+* New support for Matsushita MN10300 w/sim added
+(Work in progress).  mn10300-elf.
+
 * REMOVED configurations and files
 
 VxWorks and the XDR protocol			*-*-vxworks
