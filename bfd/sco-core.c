@@ -249,6 +249,9 @@ sco_core_file_matches_executable_p  (core_bfd, exec_bfd)
 	(bfd *, struct sec *))) bfd_void
 #define sco_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
 #define sco_bfd_relax_section bfd_generic_relax_section
+#define sco_bfd_seclet_link \
+  ((boolean (*) PARAMS ((bfd *, PTR, boolean))) bfd_false)
+
 /* If somebody calls any byte-swapping routines, shoot them.  */
 void
 swap_abort()

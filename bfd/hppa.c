@@ -615,6 +615,7 @@ hppa_core_file_matches_executable_p  (core_bfd, exec_bfd)
 #define hppa_bfd_get_relocated_section_contents \
  bfd_generic_get_relocated_section_contents
 #define hppa_bfd_relax_section bfd_generic_relax_section
+#define hppa_bfd_seclet_link bfd_generic_seclet_link
 
 bfd_target hppa_vec =
 {

@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 960 b.out binaries.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -268,17 +268,22 @@ b_out_write_object_contents (abfd)
 #define PCREL13_MASK 0x1fff
 /* Magic to turn callx into calljx */
 static bfd_reloc_status_type 
-DEFUN (calljx_callback, (abfd, reloc_entry,  src, dst, input_section),
+DEFUN (calljx_callback, (abfd, reloc_entry,  src, dst, input_section, seclet),
        bfd *abfd AND
        arelent *reloc_entry AND
        PTR src AND
        PTR dst AND
-
-       asection *input_section)
+       asection *input_section AND
+       bfd_seclet_type *seclet)
 {
   int  word = bfd_get_32(abfd, src);
   asymbol *symbol_in = *(reloc_entry->sym_ptr_ptr);
   aout_symbol_type  *symbol = aout_symbol(symbol_in);
+
+  if (symbol_in->section == &bfd_und_section)
+  {
+    bfd_error_vector.undefined_symbol(reloc_entry, seclet);
+  }
 
   if (IS_CALLNAME(symbol->other)) 
   {
@@ -304,18 +309,25 @@ DEFUN (calljx_callback, (abfd, reloc_entry,  src, dst, input_section),
 
 /* Magic to turn call into callj */
 static bfd_reloc_status_type 
-DEFUN (callj_callback, (abfd, reloc_entry,  data, srcidx,dstidx, input_section),
+DEFUN (callj_callback, (abfd, reloc_entry,  data, srcidx,dstidx,
+			input_section, seclet),
        bfd *abfd AND
        arelent *reloc_entry AND
        PTR data AND
        unsigned int srcidx AND
        unsigned int dstidx AND
-       asection *input_section )
+       asection *input_section AND
+       bfd_seclet_type *seclet)
 {
   int  word = bfd_get_32(abfd, (bfd_byte *) data + srcidx);
   asymbol *symbol_in = *(reloc_entry->sym_ptr_ptr);
 
   aout_symbol_type  *symbol = aout_symbol(symbol_in);
+
+  if (symbol_in->section == &bfd_und_section)
+  {
+    bfd_error_vector.undefined_symbol(reloc_entry, seclet);
+  }
 
   if (IS_OTHER(symbol->other)) 
   {
@@ -690,12 +702,14 @@ b_out_squirt_out_relocs (abfd, section)
     arelent *g = *generic;
     unsigned char *raw = (unsigned char *)natptr;
     asymbol *sym = *(g->sym_ptr_ptr);
-      
+
     asection *output_section = sym->section->output_section;
+
     bfd_h_put_32(abfd, g->address, raw);  
     /* Find a type in the output format which matches the input howto - 
      * at the moment we assume input format == output format FIXME!!
      */
+    r_idx = 0;
     /* FIXME:  Need callj stuff here, and to check the howto entries to
        be sure they are real for this architecture.  */
     if (g->howto== &howto_reloc_callj) 
@@ -714,12 +728,26 @@ b_out_squirt_out_relocs (abfd, section)
     {
       raw[7] = len_2 + incode_mask;
     }
+    else if (g->howto >= howto_align_table
+	     && g->howto <= (howto_align_table
+			    + sizeof (howto_align_table) / sizeof (howto_align_table[0])
+			    - 1))
+      {
+	/* symnum == -2; extern_mask not set, pcrel_mask set */
+	r_idx = -2;
+	r_extern = 0;
+	raw[7] = (pcrel_mask
+		  | ((g->howto - howto_align_table) << 1));
+      }
     else {
       raw[7] = len_2;
     }
-    if (output_section == &bfd_com_section 
-	|| output_section == &bfd_abs_section
-	|| output_section == &bfd_und_section) 
+
+    if (r_idx != 0)
+      /* already mucked with r_extern, r_idx */;
+    else if (output_section == &bfd_com_section 
+	     || output_section == &bfd_abs_section
+	     || output_section == &bfd_und_section) 
     {
 
       if (bfd_abs_section.symbol == sym)
@@ -1073,11 +1101,14 @@ DEFUN(b_out_relax_section,(abfd, i, symbols),
 
 #endif
 static bfd_byte *
-DEFUN(b_out_get_relocated_section_contents,(in_abfd, seclet, data),
+DEFUN(b_out_get_relocated_section_contents,(in_abfd,
+					    seclet,
+					    data,
+					    relocateable),
       bfd *in_abfd AND
       bfd_seclet_type *seclet AND
-      bfd_byte *data)
-
+      bfd_byte *data AND
+      boolean relocateable)
 {
   /* Get enough memory to hold the stuff */
   bfd *input_bfd = seclet->u.indirect.section->owner;
@@ -1086,6 +1117,11 @@ DEFUN(b_out_get_relocated_section_contents,(in_abfd, seclet, data),
 						       input_section);
   arelent **reloc_vector = (arelent **)alloca(reloc_size);
   
+  /* If producing relocateable output, don't bother to relax.  */
+  if (relocateable)
+    return bfd_generic_get_relocated_section_contents (in_abfd, seclet,
+						       data, relocateable);
+
   /* read in the section */
   bfd_get_section_contents(input_bfd,
 			   input_section,
@@ -1140,7 +1176,8 @@ DEFUN(b_out_get_relocated_section_contents,(in_abfd, seclet, data),
 	switch (reloc->howto->type) 
 	{
 	 case ABS32CODE:
-	  calljx_callback(in_abfd, reloc, src_address + data, dst_address+data, input_section);
+	  calljx_callback(in_abfd, reloc, src_address + data, dst_address+data,
+			  input_section, seclet);
 	  src_address+=4;
 	  dst_address+=4;
 	  break;
@@ -1150,7 +1187,8 @@ DEFUN(b_out_get_relocated_section_contents,(in_abfd, seclet, data),
 	  dst_address+=4;
 	  break;
 	 case CALLJ:
-	  callj_callback(in_abfd, reloc ,data,src_address,dst_address,input_section);
+	  callj_callback(in_abfd, reloc ,data,src_address,dst_address,
+			 input_section, seclet);
 	  src_address+=4;
 	  dst_address+=4;
 	  break;
@@ -1161,7 +1199,8 @@ DEFUN(b_out_get_relocated_section_contents,(in_abfd, seclet, data),
 	 case ABS32CODE_SHRUNK: 
 	  /* This used to be a callx, but we've found out that a
 	     callj will reach, so do the right thing */
-	  callj_callback(in_abfd, reloc,data,src_address+4, dst_address,input_section);
+	  callj_callback(in_abfd, reloc,data,src_address+4, dst_address,
+			 input_section, seclet);
 
 	  dst_address+=4;
 	  src_address+=8;
@@ -1170,6 +1209,10 @@ DEFUN(b_out_get_relocated_section_contents,(in_abfd, seclet, data),
 	 {
 	   long int word = bfd_get_32(in_abfd, data+src_address);
 	   asymbol *symbol = *(reloc->sym_ptr_ptr);
+	   if (symbol->section == &bfd_und_section)
+	   {
+	     bfd_error_vector.undefined_symbol(reloc, seclet);
+	   }
 	   word = (word & ~BAL_MASK) |
 	    (((word & BAL_MASK) +
 	      symbol->section->output_offset +
@@ -1189,6 +1232,10 @@ DEFUN(b_out_get_relocated_section_contents,(in_abfd, seclet, data),
 	 {
 	   long int word = bfd_get_32(in_abfd, data+src_address);
 	   asymbol *symbol = *(reloc->sym_ptr_ptr);
+	   if (symbol->section == &bfd_und_section)
+	   {
+	     bfd_error_vector.undefined_symbol(reloc, seclet);
+	   }
 	   word = (word & ~PCREL13_MASK) |
 	    (((word & PCREL13_MASK) +
 	      symbol->section->output_offset +
@@ -1244,6 +1291,7 @@ DEFUN(b_out_get_relocated_section_contents,(in_abfd, seclet, data),
 
 #define aout_32_bfd_get_relocated_section_contents  b_out_get_relocated_section_contents
 #define aout_32_bfd_relax_section                   b_out_relax_section
+#define aout_32_bfd_seclet_link			    bfd_generic_seclet_link
 
 bfd_target b_out_vec_big_host =
 {
@@ -1270,7 +1318,6 @@ bfd_target b_out_vec_big_host =
    _bfd_write_archive_contents, bfd_false},
 
   JUMP_TABLE(aout_32),
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* COFF stuff?! */
   b_out_reloc_type_lookup,
 };
 
@@ -1299,6 +1346,5 @@ _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs 
     {bfd_false, b_out_write_object_contents,	/* bfd_write_contents */
        _bfd_write_archive_contents, bfd_false},
   JUMP_TABLE(aout_32),
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* COFF stuff?! */
   b_out_reloc_type_lookup,
 };

@@ -1,3 +1,25 @@
+Mon Jan 11 18:32:22 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* targets.c (bfd_target): Added relocateable argument to
+	_bfd_get_relocated_section_contents.  Added _bfd_seclet_link
+	target vector for linker use.
+	* bfd.c (bfd_seclet_link): New macro.
+	* bfd-in.h (JUMP_TABLE): Added _bfd_seclet_link.
+	* seclet.c (rel, seclet_dump_seclet): Added relocateable argument
+	and boolean return value.  Made static.
+	(bfd_generic_seclet_link): Renamed from seclet_dump.  Added
+	relocateable argument.
+	* reloc.c (bfd_generic_get_relocated_section_contents): Added
+	relocateable argument (if relocateable, saves relocs).
+	* bout.c (b_out_get_relocated_section_contents),
+	reloc16.c (bfd_coff_reloc16_get_relocated_section_contents): Added
+	relocateable argument (if relocateable, just calls
+	bfd_generic_get_relocated_section_contents).
+	* libcoff-in.h (bfd_coff_reloc16_get_value): Added relocateable
+	argument to prototype.
+	* All targets: Set new _bfd_seclet_link vector to
+	bfd_generic_seclet_link.
+
 Sat Jan  9 21:29:32 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* coffgen.c:  #include seclet.h.

@@ -2221,3 +2221,4 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table = {
 			(void (*) PARAMS ((bfd *, struct sec *))) bfd_void
 #define coff_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
 #define coff_bfd_relax_section		bfd_generic_relax_section
+#define coff_bfd_seclet_link		bfd_generic_seclet_link

@@ -1302,6 +1302,7 @@ static CONST bfd_coff_backend_data bfd_ecoff_std_swap_table = {
 			(void (*) PARAMS ((bfd *, struct sec *))) bfd_void
 #define ecoff_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
 #define ecoff_bfd_relax_section		bfd_generic_relax_section
+#define ecoff_bfd_seclet_link		bfd_generic_seclet_link
 
 bfd_target ecoff_little_vec =
 {

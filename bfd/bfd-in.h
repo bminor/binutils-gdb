@@ -143,9 +143,12 @@ typedef int symtype;		/* Who knows, yet? */
 #define bfd_get_section(x) ((x)->section)
 #define bfd_get_output_section(x) ((x)->section->output_section)
 #define bfd_set_section(x,y) ((x)->section) = (y)
-#define bfd_asymbol_base(x) ((x)->section?((x)->section->vma):0)
+#define bfd_asymbol_base(x) ((x)->section->vma)
 #define bfd_asymbol_value(x) (bfd_asymbol_base(x) + x->value)
 #define bfd_asymbol_name(x) ((x)->name)
+/*Perhaps future: #define bfd_asymbol_bfd(x) ((x)->section->owner)*/
+#define bfd_asymbol_bfd(x) ((x)->the_bfd)
+#define bfd_asymbol_flavour(x) (bfd_asymbol_bfd(x)->xvec->flavour)
 
 /* This is a type pun with struct ranlib on purpose! */
 typedef struct carsym {
@@ -284,15 +287,10 @@ CAT(NAME,_bfd_debug_info_start),\
 CAT(NAME,_bfd_debug_info_end),\
 CAT(NAME,_bfd_debug_info_accumulate),\
 CAT(NAME,_bfd_get_relocated_section_contents),\
-CAT(NAME,_bfd_relax_section)
+CAT(NAME,_bfd_relax_section),\
+CAT(NAME,_bfd_seclet_link)
 
-#define COFF_SWAP_TABLE \
- coff_swap_aux_in, coff_swap_sym_in, coff_swap_lineno_in, \
- coff_swap_aux_out, coff_swap_sym_out, \
- coff_swap_lineno_out, coff_swap_reloc_out, \
- coff_swap_filehdr_out, coff_swap_aouthdr_out, \
- coff_swap_scnhdr_out
-
+#define COFF_SWAP_TABLE (PTR) &bfd_coff_std_swap_table
 
 
 /* User program access to BFD facilities */
