@@ -267,16 +267,16 @@ sort_pst_symbols (struct partial_symtab *pst)
    may be part of a larger string and we are only saving a substring. */
 
 char *
-obsavestring (char *ptr, int size, struct obstack *obstackp)
+obsavestring (const char *ptr, int size, struct obstack *obstackp)
 {
   register char *p = (char *) obstack_alloc (obstackp, size + 1);
   /* Open-coded memcpy--saves function call time.  These strings are usually
      short.  FIXME: Is this really still true with a compiler that can
      inline memcpy? */
   {
-    register char *p1 = ptr;
+    register const char *p1 = ptr;
     register char *p2 = p;
-    char *end = ptr + size;
+    const char *end = ptr + size;
     while (p1 != end)
       *p2++ = *p1++;
   }

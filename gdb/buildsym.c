@@ -30,7 +30,7 @@
 #include "bfd.h"
 #include "gdb_obstack.h"
 #include "symtab.h"
-#include "symfile.h"		/* Needed for "struct complaint" */
+#include "symfile.h"		/* Needed for "struct complaint", obsavestring */
 #include "objfiles.h"
 #include "gdbtypes.h"
 #include "complaints.h"
@@ -43,6 +43,7 @@
 #include "demangle.h"		/* Needed by SYMBOL_INIT_DEMANGLED_NAME.  */
 #include "dictionary.h"
 #include "gdb_assert.h"
+#include "cp-support.h"
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */
 #define	EXTERN
 /**/
@@ -234,7 +235,6 @@ finish_block (struct symbol *symbol, struct pending **listhead,
   register struct block *block;
   register struct pending_block *pblock;
   struct pending_block *opblock;
-  register int j;
 
   /* Initialize the block's dictionary.  */
 
@@ -266,9 +266,9 @@ finish_block (struct symbol *symbol, struct pending **listhead,
   if (symbol)
     {
       struct type *ftype = SYMBOL_TYPE (symbol);
+      struct dict_iterator iter;
       SYMBOL_BLOCK_VALUE (symbol) = block;
       BLOCK_FUNCTION (block) = symbol;
-      struct dict_iterator iter;
 
       if (TYPE_NFIELDS (ftype) <= 0)
 	{
@@ -348,6 +348,36 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		    }
 		}
 	    }
+	}
+
+      /* If we're in the C++ case, make sure that we add 'using'
+	 directives for all of the namespaces in which this function
+	 lives.  Also, make sure that the name was originally mangled:
+	 if not, there certainly isn't any namespace information to
+	 worry about!  (Also, if not, the gdb_assert will fail.)  */
+      if (SYMBOL_LANGUAGE (symbol) == language_cplus
+	  && SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL)
+	{
+	  const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
+	  const char *next;
+
+	  for (next = cp_find_first_component (name);
+	       *next == ':';
+	       /* The '+ 2' is to skip the '::'.  */
+	       next = cp_find_first_component (next + 2))
+	    {
+	      const char *namespace_name
+		= obsavestring (name, next - name,
+				&objfile->symbol_obstack);
+	      BLOCK_USING (block)
+		= cp_add_using ("", namespace_name, BLOCK_USING (block),
+				&objfile->symbol_obstack);
+	    }
+
+	  /* FIMXE: carlton/2002-10-09: Until I understand the
+	     possible pitfalls of demangled names a lot better, I want
+	     to make sure I'm not running into surprises.  */
+	  gdb_assert (*next == '\0');
 	}
     }
   else

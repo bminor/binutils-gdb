@@ -405,7 +405,9 @@ struct block
     struct
     {
       /* Contains information about what using directives or other
-	 similar features are added by this block.  */
+	 similar features are added by this block.  This should always
+	 be NULL for global blocks: if there are using directives that
+	 affect an entire file, put it in the static block.  */
       struct using_data_node *using;
     }
     cplus_specific;

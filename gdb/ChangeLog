@@ -1,3 +1,37 @@
+2002-10-09  David Carlton  <carlton@math.stanford.edu>
+
+	* cp-support.c: Comment out cp_find_last_component and
+	cp_locate_arguments.
+	Add comments warning about pitfals involving demangled names.
+	* buildsym.c (finish_block): Grab the namespace names from the
+	front instead of from the back.
+	* Makefile.in (cp-support.o): Depend on gdb_assert_h.
+	* cp-support.c: #include "gdb_assert.h"
+	* cp-support.h: Declare cp_find_first_component.
+	* cp-support.c (cp_find_first_component): New function.
+	* buildsym.c (finish_block): Don't add namespace using stuff
+	unless there's a demangled name to work with.
+	(finish_block): Delete unused variable 'j'.
+	(finish_block): Move declaration of iter earlier to pacify GCC.
+
+2002-10-08  David Carlton  <carlton@math.stanford.edu>
+
+	* symfile.c (obsavestring): Make first argument a const char *.
+	* symfile.h: Add opaque declaration for 'struct obstack'.
+	Make obsavestring take a const char * as its first argument.
+	* Makefile.in (cp-support.o): Correct dependencies.
+	* cp-support.h: Declare cp_add_using.
+	* cp-support.c: #include "gdb_obstack.h"
+	(cp_add_using): New function.
+	* Makefile.in (buildsym.o): Depend on $(cp_support_h).
+	* buildsym.c (finish_block): Add 'using' directives for
+	functions.
+	#include "cp-support.h"
+	* cp-support.h: Add function declarations.
+	* cp-support.c (cp_locate_arguments): New function.
+	(cp_find_last_component): New function.
+	* symtab.h (struct block): Add comment.
+
 2002-10-07  David Carlton  <carlton@math.stanford.edu>
 
 	* buildsym.c (finish_block): Initialize BLOCK_USING to NULL.
