@@ -60,8 +60,8 @@ is_operator_name (const char *name)
   return (*current_cp_abi.is_operator_name) (name);
 }
 
-value_ptr
-value_virtual_fn_field (value_ptr * arg1p, struct fn_field * f, int j,
+struct value *
+value_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 			struct type * type, int offset)
 {
   if ((current_cp_abi.virtual_fn_field) == NULL)
@@ -69,7 +69,7 @@ value_virtual_fn_field (value_ptr * arg1p, struct fn_field * f, int j,
   return (*current_cp_abi.virtual_fn_field) (arg1p, f, j, type, offset);
 }
 struct type *
-value_rtti_type (value_ptr v, int *full, int *top, int *using_enc)
+value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
 {
   if ((current_cp_abi.rtti_type) == NULL)
     return NULL;

@@ -25,6 +25,8 @@
 #ifndef CP_ABI_H_
 #define CP_ABI_H_ 1
 
+struct value;
+
 /* The functions here that attempt to determine what sort of thing a
    mangled name refers to may well be revised in the future.  It would
    certainly be cleaner to carry this information explicitly in GDB's
@@ -99,9 +101,9 @@ extern int is_operator_name (const char *name);
    TYPE is the base type of *VALUEP whose method we're invoking ---
    this is the type containing F.  OFFSET is the offset of that base
    type within *VALUEP.  */
-extern value_ptr value_virtual_fn_field (value_ptr *valuep,
-					 struct fn_field *f, int j,
-					 struct type *type, int offset);
+extern struct value *value_virtual_fn_field (struct value **valuep,
+					     struct fn_field *f, int j,
+					     struct type *type, int offset);
 
 
 /* Try to find the run-time type of VALUE, using C++ run-time type
@@ -142,9 +144,9 @@ struct cp_abi_ops
   enum dtor_kinds (*is_destructor_name) (const char *name);
   int (*is_vtable_name) (const char *name);
   int (*is_operator_name) (const char *name);
-  value_ptr (*virtual_fn_field) (value_ptr * arg1p, struct fn_field * f,
-				 int j, struct type * type, int offset);
-  struct type *(*rtti_type) (value_ptr v, int *full, int *top,
+  struct value *(*virtual_fn_field) (struct value **arg1p, struct fn_field * f,
+				     int j, struct type * type, int offset);
+  struct type *(*rtti_type) (struct value *v, int *full, int *top,
 			     int *using_enc);
 };
 

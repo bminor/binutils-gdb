@@ -80,16 +80,16 @@ hpacc_is_vtable_name (const char *name)
    J is an index into F which provides the desired virtual function.
 
    TYPE is the type in which F is located.  */
-static value_ptr
-hpacc_virtual_fn_field (value_ptr * arg1p, struct fn_field * f, int j,
+static struct value *
+hpacc_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 			struct type * type, int offset)
 {
-  value_ptr arg1 = *arg1p;
+  struct value *arg1 = *arg1p;
   struct type *type1 = check_typedef (VALUE_TYPE (arg1));
 
   /* Deal with HP/Taligent runtime model for virtual functions */
-  value_ptr vp;
-  value_ptr argp;		/* arg1 cast to base */
+  struct value *vp;
+  struct value *argp;		/* arg1 cast to base */
   CORE_ADDR coreptr;		/* pointer to target address */
   int class_index;		/* which class segment pointer to use */
   struct type *ftype = TYPE_FN_FIELD_TYPE (f, j);	/* method type */
@@ -175,12 +175,12 @@ hpacc_virtual_fn_field (value_ptr * arg1p, struct fn_field * f, int j,
 
 
 static struct type *
-hpacc_value_rtti_type (value_ptr v, int *full, int *top, int *using_enc)
+hpacc_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
 {
   struct type *known_type;
   struct type *rtti_type;
   CORE_ADDR coreptr;
-  value_ptr vp;
+  struct value *vp;
   int using_enclosing = 0;
   long top_offset = 0;
   char rtti_type_name[256];

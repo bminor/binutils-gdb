@@ -82,11 +82,11 @@ gnuv2_is_operator_name (const char *name)
    J is an index into F which provides the desired virtual function.
 
    TYPE is the type in which F is located.  */
-static value_ptr
-gnuv2_virtual_fn_field (value_ptr * arg1p, struct fn_field * f, int j,
+static struct value *
+gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 			struct type * type, int offset)
 {
-  value_ptr arg1 = *arg1p;
+  struct value *arg1 = *arg1p;
   struct type *type1 = check_typedef (VALUE_TYPE (arg1));
 
 
@@ -95,8 +95,10 @@ gnuv2_virtual_fn_field (value_ptr * arg1p, struct fn_field * f, int j,
      with a strange type, so cast it to type `pointer to long' (which
      should serve just fine as a function type).  Then, index into
      the table, and convert final value to appropriate function type.  */
-  value_ptr entry, vfn, vtbl;
-  value_ptr vi = value_from_longest (builtin_type_int,
+  struct value *entry;
+  struct value *vfn;
+  struct value *vtbl;
+  struct value *vi = value_from_longest (builtin_type_int,
 				     (LONGEST) TYPE_FN_FIELD_VOFFSET (f, j));
   struct type *fcontext = TYPE_FN_FIELD_FCONTEXT (f, j);
   struct type *context;
@@ -110,7 +112,7 @@ gnuv2_virtual_fn_field (value_ptr * arg1p, struct fn_field * f, int j,
   /* Now context is a pointer to the basetype containing the vtbl.  */
   if (TYPE_TARGET_TYPE (context) != type1)
     {
-      value_ptr tmp = value_cast (context, value_addr (arg1));
+      struct value *tmp = value_cast (context, value_addr (arg1));
       arg1 = value_ind (tmp);
       type1 = check_typedef (VALUE_TYPE (arg1));
     }
@@ -179,12 +181,12 @@ gnuv2_virtual_fn_field (value_ptr * arg1p, struct fn_field * f, int j,
 
 
 struct type *
-gnuv2_value_rtti_type (value_ptr v, int *full, int *top, int *using_enc)
+gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
 {
   struct type *known_type;
   struct type *rtti_type;
   CORE_ADDR coreptr;
-  value_ptr vp;
+  struct value *vp;
   int using_enclosing = 0;
   long top_offset = 0;
   char rtti_type_name[256];
@@ -246,7 +248,7 @@ gnuv2_value_rtti_type (value_ptr v, int *full, int *top, int *using_enc)
   */
   if (VALUE_ENCLOSING_TYPE(v) != VALUE_TYPE(v))
     {
-      value_ptr tempval;
+      struct value *tempval;
       int bitpos = TYPE_BASECLASS_BITPOS (known_type,
                                           TYPE_VPTR_FIELDNO (known_type));
       tempval=value_field (v, TYPE_VPTR_FIELDNO(known_type));

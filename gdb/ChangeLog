@@ -4,6 +4,7 @@
 	value_ptr with ``struct value *''.
 	* wrapper.c: Replace value_ptr with ``struct value *''.
 	* breakpoint.h, breakpoint.c: Ditto.
+	* cp-abi.h, hpacc-abi.c, gnu-v2-abi.c, cp-abi.c: Ditto.
 
 2001-10-20  Andrew Cagney  <ac131313@redhat.com>
 
