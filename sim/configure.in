@@ -65,11 +65,11 @@ case "${target}" in
 # OBSOLETE 	extra_subdirs="${extra_subdirs} igen"
 # OBSOLETE 	;;
 # OBSOLETE   fr30-*-*)		sim_target=fr30 ;;
-  h8300*-*-*)		
-	sim_target=h8300 
+  frv-*-*)		sim_target=frv
 	extra_subdirs="${extra_subdirs} testsuite"
 	;;
-  frv-*-*)		sim_target=frv
+  h8300*-*-*)		
+	sim_target=h8300 
 	extra_subdirs="${extra_subdirs} testsuite"
 	;;
   h8500-*-*)		sim_target=h8500 ;;
