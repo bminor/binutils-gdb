@@ -1,10 +1,17 @@
-Thu Sep  7 12:50:49 1995  steve chamberlain  <sac@slash.cygnus.com>
+Thu Sep 12 12:50:49 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* scripttemp/pe.sc:  Allow both spellings of .ctors/.dtors.
 	Start .text section on the right boundary. Always align
 	stabs.
 
 Tue Sep 12 12:24:17 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldmain.c (struct warning_callback_info): Define.
+	(warning_callback): Add new parameter symbol.  Call
+	warning_find_reloc to try to find the section and VMA.
+	(warning_find_reloc): New static function.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):
+	Pass NULL as symbol parameter to warning callback.
 
 	* ld.texinfo: Clarify -L option.
 
