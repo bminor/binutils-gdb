@@ -1,5 +1,11 @@
 2002-08-06  Kevin Buettner  <kevinb@redhat.com>
 
+	* frame.c (find_saved_register): Break out of loop once saved
+	register address is found.  Don't mention sparc in loop comment
+	anymore.
+
+2002-08-06  Kevin Buettner  <kevinb@redhat.com>
+
 	* mips-tdep.c (mips_gdbarch_init): For the N32 ABI, set
 	mips_default_saved_regsize to 8.
 
