@@ -450,10 +450,13 @@ tags: TAGS
 
 gdb.tar.Z: force_update
 	./configure none
+	rm -f alldeps.mak
 	$(MAKE) alldeps.mak
 	./configure none
+	rm -f depend
 	$(MAKE) depend
 	./configure none
+	$(MAKE) gdb.info
 	$(MAKE) gdb-$(VERSION).tar.Z
 
 gdb-$(VERSION).tar.Z: ${TARFILES} ${TARDIRS}
