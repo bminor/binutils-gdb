@@ -86,6 +86,7 @@ struct reg
     unsigned char sz32;		/* size on 32-bit arch, 0 if nonextant */
     unsigned char sz64;		/* size on 64-bit arch, 0 if nonextant */
     unsigned char fpr;		/* whether register is floating-point */
+    unsigned char pseudo;       /* whether register is pseudo */
   };
 
 /* Breakpoint shadows for the single step instructions will be kept here. */
@@ -2043,33 +2044,36 @@ rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
 
 /* Return a struct reg defining register NAME that's 32 bits on 32-bit systems
    and 64 bits on 64-bit systems. */
-#define R(name)		{ STR(name), 4, 8, 0 }
+#define R(name)		{ STR(name), 4, 8, 0, 0 }
 
 /* Return a struct reg defining register NAME that's 32 bits on all
    systems. */
-#define R4(name)	{ STR(name), 4, 4, 0 }
+#define R4(name)	{ STR(name), 4, 4, 0, 0 }
 
 /* Return a struct reg defining register NAME that's 64 bits on all
    systems. */
-#define R8(name)	{ STR(name), 8, 8, 0 }
+#define R8(name)	{ STR(name), 8, 8, 0, 0 }
 
 /* Return a struct reg defining register NAME that's 128 bits on all
    systems. */
-#define R16(name)       { STR(name), 16, 16, 0 }
+#define R16(name)       { STR(name), 16, 16, 0, 0 }
 
 /* Return a struct reg defining floating-point register NAME. */
-#define F(name)		{ STR(name), 8, 8, 1 }
+#define F(name)		{ STR(name), 8, 8, 1, 0 }
+
+/* Return a struct reg defining a pseudo register NAME. */
+#define P(name)		{ STR(name), 4, 8, 0, 1}
 
 /* Return a struct reg defining register NAME that's 32 bits on 32-bit
    systems and that doesn't exist on 64-bit systems. */
-#define R32(name)	{ STR(name), 4, 0, 0 }
+#define R32(name)	{ STR(name), 4, 0, 0, 0 }
 
 /* Return a struct reg defining register NAME that's 64 bits on 64-bit
    systems and that doesn't exist on 32-bit systems. */
-#define R64(name)	{ STR(name), 0, 8, 0 }
+#define R64(name)	{ STR(name), 0, 8, 0, 0 }
 
 /* Return a struct reg placeholder for a register that doesn't exist. */
-#define R0		{ 0, 0, 0, 0 }
+#define R0		{ 0, 0, 0, 0, 0 }
 
 /* UISA registers common across all architectures, including POWER.  */
 
@@ -2311,13 +2315,47 @@ struct variant
     /* bfd_arch_info.mach corresponding to variant. */
     unsigned long mach;
 
+    /* Number of real registers.  */
+    int nregs;
+
+    /* Number of pseudo registers.  */
+    int npregs;
+
+    /* Number of total registers (the sum of nregs and npregs).  */
+    int num_tot_regs;
+
     /* Table of register names; registers[R] is the name of the register
        number R.  */
-    int nregs;
     const struct reg *regs;
   };
 
-#define num_registers(list) (sizeof (list) / sizeof((list)[0]))
+#define tot_num_registers(list) (sizeof (list) / sizeof((list)[0]))
+
+static int
+num_registers (const struct reg *reg_list, int num_tot_regs)
+{
+  int i;
+  int nregs = 0;
+
+  for (i = 0; i < num_tot_regs; i++)
+    if (!reg_list[i].pseudo)
+      nregs++;
+       
+  return nregs;
+}
+
+static int
+num_pseudo_registers (const struct reg *reg_list, int num_tot_regs)
+{
+  int i;
+  int npregs = 0;
+
+  for (i = 0; i < num_tot_regs; i++)
+    if (reg_list[i].pseudo)
+      npregs ++; 
+
+  return npregs;
+}
 
 
 /* Information in this table comes from the following web sites:
@@ -2330,59 +2368,95 @@ struct variant
    If you add entries to this table, please be sure to allow the new
    value as an argument to the --with-cpu flag, in configure.in.  */
 
-static const struct variant variants[] =
+static struct variant variants[] =
 {
+
   {"powerpc", "PowerPC user-level", bfd_arch_powerpc,
-   bfd_mach_ppc, num_registers (registers_powerpc), registers_powerpc},
+   bfd_mach_ppc, -1, -1, tot_num_registers (registers_powerpc),
+   registers_powerpc},
   {"power", "POWER user-level", bfd_arch_rs6000,
-   bfd_mach_rs6k, num_registers (registers_power), registers_power},
+   bfd_mach_rs6k, -1, -1, tot_num_registers (registers_power),
+   registers_power},
   {"403", "IBM PowerPC 403", bfd_arch_powerpc,
-   bfd_mach_ppc_403, num_registers (registers_403), registers_403},
+   bfd_mach_ppc_403, -1, -1, tot_num_registers (registers_403),
+   registers_403},
   {"601", "Motorola PowerPC 601", bfd_arch_powerpc,
-   bfd_mach_ppc_601, num_registers (registers_601), registers_601},
+   bfd_mach_ppc_601, -1, -1, tot_num_registers (registers_601),
+   registers_601},
   {"602", "Motorola PowerPC 602", bfd_arch_powerpc,
-   bfd_mach_ppc_602, num_registers (registers_602), registers_602},
+   bfd_mach_ppc_602, -1, -1, tot_num_registers (registers_602),
+   registers_602},
   {"603", "Motorola/IBM PowerPC 603 or 603e", bfd_arch_powerpc,
-   bfd_mach_ppc_603, num_registers (registers_603), registers_603},
+   bfd_mach_ppc_603, -1, -1, tot_num_registers (registers_603),
+   registers_603},
   {"604", "Motorola PowerPC 604 or 604e", bfd_arch_powerpc,
-   604, num_registers (registers_604), registers_604},
+   604, -1, -1, tot_num_registers (registers_604),
+   registers_604},
   {"403GC", "IBM PowerPC 403GC", bfd_arch_powerpc,
-   bfd_mach_ppc_403gc, num_registers (registers_403GC), registers_403GC},
+   bfd_mach_ppc_403gc, -1, -1, tot_num_registers (registers_403GC),
+   registers_403GC},
   {"505", "Motorola PowerPC 505", bfd_arch_powerpc,
-   bfd_mach_ppc_505, num_registers (registers_505), registers_505},
+   bfd_mach_ppc_505, -1, -1, tot_num_registers (registers_505),
+   registers_505},
   {"860", "Motorola PowerPC 860 or 850", bfd_arch_powerpc,
-   bfd_mach_ppc_860, num_registers (registers_860), registers_860},
+   bfd_mach_ppc_860, -1, -1, tot_num_registers (registers_860),
+   registers_860},
   {"750", "Motorola/IBM PowerPC 750 or 740", bfd_arch_powerpc,
-   bfd_mach_ppc_750, num_registers (registers_750), registers_750},
+   bfd_mach_ppc_750, -1, -1, tot_num_registers (registers_750),
+   registers_750},
   {"7400", "Motorola/IBM PowerPC 7400 (G4)", bfd_arch_powerpc,
-   bfd_mach_ppc_7400, num_registers (registers_7400), registers_7400},
+   bfd_mach_ppc_7400, -1, -1, tot_num_registers (registers_7400),
+   registers_7400},
 
   /* 64-bit */
   {"powerpc64", "PowerPC 64-bit user-level", bfd_arch_powerpc,
-   bfd_mach_ppc64, num_registers (registers_powerpc), registers_powerpc},
+   bfd_mach_ppc64, -1, -1, tot_num_registers (registers_powerpc),
+   registers_powerpc},
   {"620", "Motorola PowerPC 620", bfd_arch_powerpc,
-   bfd_mach_ppc_620, num_registers (registers_powerpc), registers_powerpc},
+   bfd_mach_ppc_620, -1, -1, tot_num_registers (registers_powerpc),
+   registers_powerpc},
   {"630", "Motorola PowerPC 630", bfd_arch_powerpc,
-   bfd_mach_ppc_630, num_registers (registers_powerpc), registers_powerpc},
+   bfd_mach_ppc_630, -1, -1, tot_num_registers (registers_powerpc),
+   registers_powerpc},
   {"a35", "PowerPC A35", bfd_arch_powerpc,
-   bfd_mach_ppc_a35, num_registers (registers_powerpc), registers_powerpc},
+   bfd_mach_ppc_a35, -1, -1, tot_num_registers (registers_powerpc),
+   registers_powerpc},
   {"rs64ii", "PowerPC rs64ii", bfd_arch_powerpc,
-   bfd_mach_ppc_rs64ii, num_registers (registers_powerpc), registers_powerpc},
+   bfd_mach_ppc_rs64ii, -1, -1, tot_num_registers (registers_powerpc),
+   registers_powerpc},
   {"rs64iii", "PowerPC rs64iii", bfd_arch_powerpc,
-   bfd_mach_ppc_rs64iii, num_registers (registers_powerpc), registers_powerpc},
+   bfd_mach_ppc_rs64iii, -1, -1, tot_num_registers (registers_powerpc),
+   registers_powerpc},
 
   /* FIXME: I haven't checked the register sets of the following. */
   {"rs1", "IBM POWER RS1", bfd_arch_rs6000,
-   bfd_mach_rs6k_rs1, num_registers (registers_power), registers_power},
+   bfd_mach_rs6k_rs1, -1, -1, tot_num_registers (registers_power),
+   registers_power},
   {"rsc", "IBM POWER RSC", bfd_arch_rs6000,
-   bfd_mach_rs6k_rsc, num_registers (registers_power), registers_power},
+   bfd_mach_rs6k_rsc, -1, -1, tot_num_registers (registers_power),
+   registers_power},
   {"rs2", "IBM POWER RS2", bfd_arch_rs6000,
-   bfd_mach_rs6k_rs2, num_registers (registers_power), registers_power},
+   bfd_mach_rs6k_rs2, -1, -1, tot_num_registers (registers_power),
+   registers_power},
 
-  {0, 0, 0, 0}
+  {0, 0, 0, 0, 0, 0, 0, 0}
 };
 
-#undef num_registers
+/* Initialize the number of registers and pseudo registers in each variant. */
+
+static void
+init_variants (void)
+{
+  struct variant *v;
+
+  for (v = variants; v->name; v++)
+    {
+      if (v->nregs == -1)
+        v->nregs = num_registers (v->regs, v->num_tot_regs);
+      if (v->npregs == -1)
+        v->npregs = num_pseudo_registers (v->regs, v->num_tot_regs);
+    }  
+}
 
 /* Return the variant corresponding to architecture ARCH and machine number
    MACH.  If no such variant exists, return null. */
@@ -2504,6 +2578,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch = gdbarch_alloc (&info, tdep);
   power = arch == bfd_arch_rs6000;
 
+  /* Initialize the number of real and pseudo registers in each variant.  */
+  init_variants ();
+
   /* Choose variant. */
   v = find_variant_by_arch (arch, mach);
   if (!v)
@@ -2553,8 +2630,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     tdep->lr_frame_offset = 8;
 
   /* Calculate byte offsets in raw register array.  */
-  tdep->regoff = xmalloc (v->nregs * sizeof (int));
-  for (i = off = 0; i < v->nregs; i++)
+  tdep->regoff = xmalloc (v->num_tot_regs * sizeof (int));
+  for (i = off = 0; i < v->num_tot_regs; i++)
     {
       tdep->regoff[i] = off;
       off += regsize (v->regs + i, wordsize);

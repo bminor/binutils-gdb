@@ -1,3 +1,21 @@
+2002-08-19  Elena Zannoni  <ezannoni@redhat.com>
+
+	* rs6000-tdep.c (struct reg): Add field to indicate a pseudo
+	register.
+	(P): New macro to define a register as a pseudo register.
+	(R, R4, R8, R16, FR32, R64, R0): Updated.
+	(struct variant): Add new fields for number of pseudo registers
+	and number of total registers.
+	(tot_num_registers): New macro replacing....
+	(num_registers): ...deleted macro.
+	(num_registers): New function.
+	(num_pseudo_registers): New function.
+	(variants): Update all variants to intialize new fields correctly.
+	Postpone initialization of number of pseudo regs and real regs.
+	(init_variants): New function.
+	(rs6000_gdbarch_init): Initialize variants.  Update calculation of
+	registers offsets.
+
 2002-08-19  David Carlton  <carlton@math.stanford.edu>
 
 	* valops.c (search_struct_field): Change error message to treat
