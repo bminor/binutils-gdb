@@ -4341,7 +4341,7 @@ _bfd_mips_elf_final_link (abfd, info)
      generic size_dynamic_sections renumbered them out from under us.
      Rather than trying somehow to prevent the renumbering, just do
      the sort again.  */
-  if (elf_hash_table (info)->dynobj)
+  if (elf_hash_table (info)->dynamic_sections_created)
     {
       bfd *dynobj;
       asection *got;
