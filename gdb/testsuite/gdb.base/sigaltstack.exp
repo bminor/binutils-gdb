@@ -89,7 +89,7 @@ proc finish_test { pattern msg } {
 	    setup_kfail "i?86-*-linux*" gdb/1736
 	    fail "$msg (could not set breakpoint)"
 	}
-	-re "$pattern" {
+	-re "$pattern.*${gdb_prompt} $" {
 	    pass $msg
 	}
     }
