@@ -115,7 +115,7 @@ proc do_function_calls {} {
     gdb_test "p t_float_values2(0.0,0.0)" " = 0"
 
     # Although PR 5318 mentions SunOS specifically, this seems
-    # to be a generic problem on all platforms except r6000.
+    # to be a generic problem on quite a few platforms.
     if $prototypes then {
 	setup_xfail "*-*-*" 5318
 	clear_xfail "rs6000-*-*"
@@ -196,8 +196,7 @@ proc do_function_calls {} {
     setup_xfail "i*86-*-*"
     gdb_test "p t_structs_d(struct_val1)" "= 9.87.*" \
 	"call inferior func with struct - returns double"
-    if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix*" }
-    gdb_test "p t_structs_a(struct_val1)" "= \"foo\"" \
+    gdb_test "p t_structs_a(struct_val1)" "= (.unsigned char .. )?\"foo\"" \
 	"call inferior func with struct - returns char *"
 
 }

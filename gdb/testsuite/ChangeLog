@@ -1,3 +1,11 @@
+Sat Sep  2 00:17:31 1995  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/callfuncs.exp (do_function_calls):  Remove 
+	mips-sgi-irix* xfail for
+	"call inferior func with struct - returns char *"
+	and fix test so that an optional (unsigned char *) cast is
+ 	accepted in the result.
+
 Fri Sep  1 13:42:01 1995  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/funcargs.exp (float_and_integral_args):  Remove
