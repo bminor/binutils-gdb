@@ -1,5 +1,5 @@
 /* Native support for GNU/Linux.
-   Copyright 1999, 2000
+   Copyright 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -19,32 +19,37 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* Linux is svr4ish but not that much */
+/* Linux is SVR4-ish but its /proc file system isn't.  */
 #undef USE_PROC_FS
 
-/* Tell gdb that we can attach and detach other processes */
+/* Tell GDB that we can attach and detach other processes.  */
 #define ATTACH_DETACH
 
-/* We define this if link.h is available, because with ELF we use SVR4 style
-   shared libraries. */
+/* We define this if link.h is available, because with ELF we use SVR4
+   style shared libraries.  */
 
 #ifdef HAVE_LINK_H
 #define SVR4_SHARED_LIBS
-#include "solib.h"             /* Support for shared libraries. */
+#include "solib.h"             /* Support for shared libraries.  */
 #endif
+
 
-/* Support for the glibc linuxthreads package. */
+/* FIXME: kettenis/2001-07-11: Stuff on this page is obsolete, and
+   only used by the (unmaintained) sparc and m68k ports.  */
+
+/* Support for the glibc LinuxThreads package.  */
 
 struct objfile;
 
-/* Hook to look at new objfiles (shared libraries) */
+/* Hook to look at new objfiles (shared libraries).  */
 extern void linuxthreads_new_objfile (struct objfile *objfile);
 
-/* Method to print a human-readable thread description */
+/* Method to print a human-readable thread description.  */
 extern char *linuxthreads_pid_to_str (ptid_t ptid);
 
 extern int linuxthreads_prepare_to_proceed (int step);
 #define PREPARE_TO_PROCEED(select_it) linuxthreads_prepare_to_proceed (1)
+
 
 /* Defined to make stepping-over-breakpoints be thread-atomic.  */
 #define USE_THREAD_STEP_NEEDED 1

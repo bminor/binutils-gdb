@@ -1,5 +1,7 @@
 2001-07-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/nm-linux.h: Fix comments.
+
 	* thread-db.c (enable_thread_event_reporting): Correct warning
 	message about getting thread death breakpoint.
 	Reported by John S Kallal <jskallal@home.com>.
