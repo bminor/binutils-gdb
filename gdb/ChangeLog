@@ -1,5 +1,9 @@
 Wed Jan 26 10:57:21 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* parse.c (write_exp_msymbol): Use new type msymbol_addr_type instead
+	of builtin_type_long.  It is necessary to get a type which is
+	TARGET_PTR_BIT bits in size; builtin_type_long might not be big enough.
+
 	Fix many sins which will come up in 32 bit x 64 bit GDB, and
 	various miscellaneous things discovered in the process:
 	* printcmd.c, defs.h (print_address_numeric): New function.
