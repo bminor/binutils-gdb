@@ -1,3 +1,8 @@
+2004-07-16  Andrew Cagney  <cagney@redhat.com>
+
+	* lib/insight-support.exp: Delete file.
+	* lib/java.exp (java_init): Fix copyright.
+
 2004-07-08  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.java/jmain.exp: Fix expected line number for main to
