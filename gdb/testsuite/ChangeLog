@@ -205,6 +205,10 @@
 	* gdb.c++/userdef.exp: Test overloaded operators properly.
 	Remove xfails.
 
+2002-02-14  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/gcore.exp: Relax recognition of function breakpoint.
+
 2002-02-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/a2-run.exp: Check for a remote target properly.
