@@ -1,3 +1,10 @@
+start-sanitize-d30v
+Wed Apr 16 12:43:32 1997  Martin Hunt  <hunt@cygnus.com>
+
+	* elf32-d30v.c (elf_d30v_howto_table): Changed size of
+	R_D30V_32_NORMAL to 2 (4 bytes).
+
+end-sanitize-d30v	
 Wed Apr 16 14:02:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Set .rela.bss size
