@@ -1,5 +1,8 @@
 Thu Dec  5 03:34:21 1991  John Gilmore  (gnu at cygnus.com)
 
+	* coredep.c (fetch_core_registers):  Fencepost error.  Fixed by
+	Jay Lepreau <lepreau@cs.utah.edu>.
+
 	* inflow.c:  Remember whether GDB has a terminal.  Avoid switching
 	terminals back and forth if we don't have one.
 

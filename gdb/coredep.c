@@ -82,7 +82,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 	supply_register (regno, core_reg_sect + addr);
       }
     }
-  if (bad_reg > 0)
+  if (bad_reg >= 0)
     {
       error ("Register %s not found in core file.", reg_names[bad_reg]);
     }
