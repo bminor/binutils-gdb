@@ -13,7 +13,7 @@ Mon Sep 27 18:29:18 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 	* config/i386-lynx.mt: Replaced i386lynx_vec with i386lynx_aout_vec
 	and i386lynx_coff_vec.
 	* config/m68k-lynx.mt: New file.
-	* config/i386lynx.h: Added definition of cfree as free (from Eichin).
+	* hosts/i386lynx.h: Added definition of cfree as free (from Eichin).
 	* hosts/m68klynx.h: New file.
 
 Mon Sep 27 18:00:41 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
