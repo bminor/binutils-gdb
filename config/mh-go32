@@ -11,13 +11,14 @@ RANLIB=i386-go32-ranlib
 AR=i386-go32-ar
 GCC_FOR_TARGET=${target}-gcc
 CC_FOR_TARGET=${target_alias}-gcc
+AS_FOR_TARGET=${target_alias}-as
 AR_FOR_TARGET=${target_alias}-ar
 RANLIB_FOR_TARGET=${target_alias}-ranlib
 HOST_PREFIX=cross
 HOST_PREFIX_1=cross
 MAKEINFOFLAGS=--no-split
 
-INSTALL_LAST=install-dosrel
+INSTALL_LAST=$(INSTALL_LAST_REAL)
 
 
 
