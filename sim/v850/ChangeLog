@@ -1,5 +1,11 @@
 Thu Aug 29 13:53:29 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* v850_sim.h (struct _state): Remove "psw" field.  Add
+	"sregs" field.
+	(PSW): Remove bogus definition.
+	* simops.c: Change condition code handling to use the psw
+	register within the sregs array.  Handle "ldsr" and "stsr".
+
 	* simops.c: Handle "satadd", "satsub", "satsubi", "satsubr".
 
 	* interp.c (do_format_5): Get operands correctly and

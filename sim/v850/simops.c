@@ -26,7 +26,7 @@ OP_580 ()
 
   temp = (State.regs[OP[0]] << 23) >> 23;
   op0 = temp;
-  psw = State.psw;
+  psw = State.sregs[5];
   
   if ((psw & PSW_OV) != 0)
     State.pc += op0;
@@ -43,7 +43,7 @@ OP_581 ()
 
   temp = (State.regs[OP[0]] << 23) >> 23;
   op0 = temp;
-  psw = State.psw;
+  psw = State.sregs[5];
   
   if ((psw & PSW_CY) != 0)
     State.pc += op0;
@@ -60,7 +60,7 @@ OP_582 ()
 
   temp = (State.regs[OP[0]] << 23) >> 23;
   op0 = temp;
-  psw = State.psw;
+  psw = State.sregs[5];
   
   if ((psw & PSW_Z) != 0)
     State.pc += op0;
@@ -77,7 +77,7 @@ OP_583 ()
 
   temp = (State.regs[OP[0]] << 23) >> 23;
   op0 = temp;
-  psw = State.psw;
+  psw = State.sregs[5];
   
   if ((((psw & PSW_CY) != 0) | ((psw & PSW_Z) != 0)) != 0)
     State.pc += op0;
@@ -94,7 +94,7 @@ OP_584 ()
 
   temp = (State.regs[OP[0]] << 23) >> 23;
   op0 = temp;
-  psw = State.psw;
+  psw = State.sregs[5];
   
   if ((psw & PSW_S) != 0)
     State.pc += op0;
@@ -123,7 +123,7 @@ OP_586 ()
 
   temp = (State.regs[OP[0]] << 23) >> 23;
   op0 = temp;
-  psw = State.psw;
+  psw = State.sregs[5];
   
   if ((((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0)) != 0)
     State.pc += op0;
@@ -140,7 +140,7 @@ OP_587 ()
 
   temp = (State.regs[OP[0]] << 23) >> 23;
   op0 = temp;
-  psw = State.psw;
+  psw = State.sregs[5];
   
   if ((((psw & PSW_Z) != 0)
        || (((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0))) != 0)
@@ -158,7 +158,7 @@ OP_588 ()
 
   temp = (State.regs[OP[0]] << 23) >> 23;
   op0 = temp;
-  psw = State.psw;
+  psw = State.sregs[5];
   
   if ((psw & PSW_OV) == 0)
     State.pc += op0;
@@ -175,7 +175,7 @@ OP_589 ()
 
   temp = (State.regs[OP[0]] << 23) >> 23;
   op0 = temp;
-  psw = State.psw;
+  psw = State.sregs[5];
   
   if ((psw & PSW_CY) == 0)
     State.pc += op0;
@@ -192,7 +192,7 @@ OP_58A ()
 
   temp = (State.regs[OP[0]] << 23) >> 23;
   op0 = temp;
-  psw = State.psw;
+  psw = State.sregs[5];
   
   if ((psw & PSW_Z) == 0)
     State.pc += op0;
@@ -209,7 +209,7 @@ OP_58B ()
 
   temp = (State.regs[OP[0]] << 23) >> 23;
   op0 = temp;
-  psw = State.psw;
+  psw = State.sregs[5];
   
   if ((((psw & PSW_CY) != 0) | ((psw & PSW_Z) != 0)) == 0)
     State.pc += op0;
@@ -226,7 +226,7 @@ OP_58C ()
 
   temp = (State.regs[OP[0]] << 23) >> 23;
   op0 = temp;
-  psw = State.psw;
+  psw = State.sregs[5];
   
   if ((psw & PSW_S) == 0)
     State.pc += op0;
@@ -243,7 +243,7 @@ OP_58D ()
 
   temp = (State.regs[OP[0]] << 23) >> 23;
   op0 = temp;
-  psw = State.psw;
+  psw = State.sregs[5];
   
   if ((psw & PSW_SAT) != 0)
     State.pc += op0;
@@ -260,7 +260,7 @@ OP_58E ()
 
   temp = (State.regs[OP[0]] << 23) >> 23;
   op0 = temp;
-  psw = State.psw;
+  psw = State.sregs[5];
   
   if ((((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0)) == 0)
     State.pc += op0;
@@ -277,7 +277,7 @@ OP_58F ()
 
   temp = (State.regs[OP[0]] << 23) >> 23;
   op0 = temp;
-  psw = State.psw;
+  psw = State.sregs[5];
   
   if ((((psw & PSW_Z) != 0)
        || (((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0))) == 0)
@@ -333,9 +333,9 @@ OP_1C0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
-		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		     | (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
 }
 
 /* add sign_extend(imm5), reg */
@@ -361,8 +361,8 @@ OP_240 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
 }
 
@@ -389,8 +389,8 @@ OP_600 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[2]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
 }
 
@@ -414,8 +414,8 @@ OP_1A0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
 }
 
@@ -439,8 +439,8 @@ OP_180 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
 }
 
@@ -508,8 +508,8 @@ OP_40 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (ov ? PSW_OV : 0));
 }
 
@@ -532,8 +532,8 @@ OP_1E0 ()
 	&& (op1 & 0x80000000) != (result & 0x80000000));
 
   /* Set condition codes.  */
-  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
 }
 
@@ -559,8 +559,8 @@ OP_260 ()
 	&& (op1 & 0x80000000) != (result & 0x80000000));
 
   /* Set condition codes.  */
-  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
 }
 
@@ -573,7 +573,7 @@ OP_7E0 ()
   unsigned int op0, psw, result;
 
   op0 = OP[0] & 0xf;
-  psw = State.psw;
+  psw = State.sregs[5];
 
   switch (op0)
     {
@@ -653,8 +653,8 @@ OP_C0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
 		| (sat ? PSW_SAT : 0));
 
@@ -690,8 +690,8 @@ OP_220 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
 		| (sat ? PSW_SAT : 0));
 
@@ -723,8 +723,8 @@ OP_A0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
 		| (sat ? PSW_SAT : 0));
 
@@ -759,8 +759,8 @@ OP_660 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
 		| (sat ? PSW_SAT : 0));
 
@@ -791,8 +791,8 @@ OP_80 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
 		| (sat ? PSW_SAT : 0));
 
@@ -819,8 +819,8 @@ OP_160 ()
   s = (result & 0x80000000);
 
   /* Store the condition codes.  */
-  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
 }
 
 void
@@ -915,8 +915,8 @@ OP_2A0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
 }
 
@@ -937,8 +937,8 @@ OP_A007E0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0));
 }
 
@@ -959,8 +959,8 @@ OP_2C0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0));
 }
 
@@ -981,8 +981,8 @@ OP_C007E0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0));
 }
 
@@ -1003,8 +1003,8 @@ OP_280 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0));
 }
 
@@ -1025,8 +1025,8 @@ OP_8007E0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
 		| (cy ? PSW_CY : 0));
 }
 
@@ -1057,8 +1057,8 @@ OP_100 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
 }
 
 /* ori zero_extend(imm16), reg, reg */
@@ -1077,8 +1077,8 @@ OP_680 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[2]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
 }
 
 /* and reg, reg */
@@ -1098,8 +1098,8 @@ OP_140 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
 }
 
 /* andi zero_extend(imm16), reg, reg */
@@ -1117,8 +1117,8 @@ OP_6C0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[2]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.psw |= (z ? PSW_Z : 0);
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.sregs[5] |= (z ? PSW_Z : 0);
 }
 
 /* xor reg, reg */
@@ -1138,8 +1138,8 @@ OP_120 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
 }
 
 /* xori zero_extend(imm16), reg, reg */
@@ -1158,8 +1158,8 @@ OP_6A0 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[2]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
 }
 
 /* not reg1, reg2 */
@@ -1178,8 +1178,8 @@ OP_20 ()
 
   /* Store the result and condition codes.  */
   State.regs[OP[1]] = result;
-  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
-  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
+  State.sregs[5] &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.sregs[5] |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
 }
 
 void
@@ -1201,14 +1201,14 @@ OP_501 ()
 void
 OP_16007E0 ()
 {
-  State.psw |= PSW_ID;
+  State.sregs[5] |= PSW_ID;
 }
 
 /* ei */
 void
 OP_16087E0 ()
 {
-  State.psw &= ~PSW_ID;
+  State.sregs[5] &= ~PSW_ID;
 }
 
 /* halt, not supported */
@@ -1232,18 +1232,24 @@ OP_10007E0 ()
   abort ();
 }
 
-/* ldsr, not supported */
+/* ldsr, reg,reg */
 void
 OP_2007E0 ()
 {
-  abort ();
+  unsigned int op0;
+
+  op0 = State.regs[OP[0]];
+  State.sregs[OP[1]] = op0;
 }
 
 /* stsr, not supported */
 void
 OP_4007E0 ()
 {
-  abort ();
+  unsigned int op0;
+
+  op0 = State.sregs[OP[1]];
+  State.regs[OP[0]] = op0;
 }
 
 void

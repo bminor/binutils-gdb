@@ -27,8 +27,8 @@ struct simops
 struct _state
 {
   reg_t regs[32];		/* general-purpose registers */
+  reg_t sregs[32];		/* system regsiters, including psw */
   reg_t pc;
-  reg_t psw;
   uint8 *imem;
   uint8 *dmem;
   int   exception;
@@ -38,7 +38,6 @@ extern uint16 OP[4];
 extern struct simops Simops[];
 
 #define PC	(State.pc)
-#define PSW	(State.psw)
 
 #define PSW_NP 0x80
 #define PSW_EP 0x40
