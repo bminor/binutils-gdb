@@ -60,7 +60,7 @@ Things-to-lose:
 
 Do-last:
 
-cygnus_files="c-m32r.texi as.texinfo"
+cygnus_files="c-m32r.texi c-mips.texi as.texinfo"
 if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
 	for i in $cygnus_files ; do
 		if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
@@ -77,6 +77,174 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-cygnus/,/end-\sanitize\-cygnus/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+r5900_files="c-mips.texi"
+if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
+	for i in $r5900_files ; do
+		if test ! -d $i && (grep sanitize-r5900 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping r5900 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-r5900 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"r5900\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-r5900/,/end\-sanitize\-r5900/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+tx19_files="c-mips.texi"
+if ( echo $* | grep keep\-tx19 > /dev/null ) ; then
+	for i in $tx19_files ; do
+		if test ! -d $i && (grep sanitize-tx19 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping tx19 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-tx19 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"tx19\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-tx19/,/end\-sanitize\-tx19/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+tx49_files="c-mips.texi"
+if ( echo $* | grep keep\-tx49 > /dev/null ) ; then
+	for i in $tx49_files ; do
+		if test ! -d $i && (grep sanitize-tx49 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping tx49 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-tx49 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"tx49\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-tx49/,/end\-sanitize\-tx49/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+tx59_files="c-mips.texi"
+if ( echo $* | grep keep\-tx59 > /dev/null ) ; then
+	for i in $tx59_files ; do
+		if test ! -d $i && (grep sanitize-tx59 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping tx59 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-tx59 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"tx59\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-tx59/,/end\-sanitize\-tx59/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+vr4xxx_files="c-mips.texi"
+if ( echo $* | grep keep\-vr4xxx > /dev/null ) ; then
+	for i in $vr4xxx_files ; do
+		if test ! -d $i && (grep sanitize-vr4xxx $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping vr4xxx stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $vr4xxx_files ; do
+		if test -r $i && (grep sanitize-vr4xxx $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"vr4xxx\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-vr4xxx/,/end\-sanitize\-vr4xxx/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+vr4320_files="c-mips.texi"
+if ( echo $* | grep keep\-vr4320 > /dev/null ) ; then
+	for i in $vr4320_files ; do
+		if test ! -d $i && (grep sanitize-vr4320 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping vr4320 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $vr4320_files ; do
+		if test -r $i && (grep sanitize-vr4320 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"vr4320\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-vr4320/,/end\-sanitize\-vr4320/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
