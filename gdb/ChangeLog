@@ -1,3 +1,10 @@
+2004-01-21  Eli Zaretskii  <eliz@gnu.org>
+
+	* utils.c (init_page_info): Move declarations of `rows' and
+	`cols' before the __GO32__-specific code.  Move the closing brace
+	outside the #ifdef __GO32__..#endif block.
+	[__GO32__]: Use `rows' and `cols' to avoid compiler warnings.
+
 2004-01-21  Paul Brook  <paul@codesourcery.com>
 
 	* infrun.c (handle_inferior_event): Check stop_stack_dummy if handling

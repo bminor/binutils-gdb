@@ -1582,12 +1582,14 @@ init_page_info (void)
   if (!tui_get_command_dimension (&chars_per_line, &lines_per_page))
 #endif
     {
-#if defined(__GO32__)
-      lines_per_page = ScreenRows ();
-      chars_per_line = ScreenCols ();
-#else
       int rows, cols;
 
+#if defined(__GO32__)
+      rows = ScreenRows ();
+      cols = ScreenCols ();
+      lines_per_page = rows;
+      chars_per_line = cols;
+#else
       /* Make sure Readline has initialized its terminal settings.  */
       rl_reset_terminal (NULL);
 
@@ -1613,8 +1615,8 @@ init_page_info (void)
       /* If the output is not a terminal, don't paginate it.  */
       if (!ui_file_isatty (gdb_stdout))
 	lines_per_page = UINT_MAX;
-    }
 #endif
+    }
 
   set_screen_size ();
   set_width ();
