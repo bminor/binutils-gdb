@@ -472,7 +472,7 @@ ns32k-*-netbsd* | ns32k-pc532-lites*) targ_emul=ns32knbsd ;;
 openrisc-*-*)		targ_emul=elf32openrisc ;;
 or32-*-coff)		targ_emul=or32 ;;
 or32-*-elf)		targ_emul=or32elf ;;
-or32-*-rtems)           targ_emul=or32 ;;
+or32-*-rtems*)          targ_emul=or32elf ;;
 pdp11-*-*)		targ_emul=pdp11 ;;
 pjl*-*-*)	        targ_emul=pjlelf ; targ_extra_emuls="elf_i386" ;;
 pj*-*-*)	        targ_emul=pjelf ;;

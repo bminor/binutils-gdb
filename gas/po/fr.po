@@ -1,17 +1,18 @@
 # Messages français pour GNU concernant gas.
-# Copyright © 2001 Free Software Foundation, Inc.
+# Copyright © 2004 Free Software Foundation, Inc.
 # Michel Robitaille <robitail@IRO.UMontreal.CA>, traducteur depuis/since 1996.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU gas 2.14rel030712\n"
 "POT-Creation-Date: 2003-07-11 13:57+0930\n"
-"PO-Revision-Date: 2003-08-05 08:00-0500\n"
+"PO-Revision-Date: 2004-05-10 08:00-0500\n"
 "Last-Translator: Michel Robitaille <robitail@IRO.UMontreal.CA>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8-bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: app.c:474 app.c:488
 msgid "end of file in comment"
@@ -906,7 +907,7 @@ msgstr "ERREUR d'E/S lors de l'écriture du fichier objet VMS"
 
 #: config/obj-vms.c:1292
 #, c-format
-msgid "Couldn't find source file \"%s\", dUmMy=%%X%x"
+msgid "Couldn't find source file \"%s\", status=%%X%x"
 msgstr "Ne peut repérer le fichier source « %s », état=%%X%x"
 
 #: config/obj-vms.c:1790 config/obj-vms.c:2967
