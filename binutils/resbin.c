@@ -667,8 +667,8 @@ bin_to_res_string (data, length, big_endian)
 	    s[j] = get_16 (big_endian, data + 2 + j * 2);
 	}
 
-      data += 2 + slen;
-      length -= 2 + slen;
+      data += 2 + 2 * slen;
+      length -= 2 + 2 * slen;
     }
 
   r = (struct res_resource *) res_alloc (sizeof *r);
