@@ -799,12 +799,16 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	      fx = fx->next;
 	    }
 	}
-      else if (opcode1->op->flags_used & (FLAG_JMP | FLAG_JSR)
-	       && ((opcode1->op->flags_used & FLAG_DELAY) == 0)
-	       && ((opcode1->ecc == ECC_AL) || ! Optimizing))
+      else if ((opcode1->op->flags_used & (FLAG_JMP | FLAG_JSR)
+		&& ((opcode1->op->flags_used & FLAG_DELAY) == 0)
+		&& ((opcode1->ecc == ECC_AL) || ! Optimizing))
+	       || opcode1->op->flags_used & FLAG_RP)
 	{
 	  /* We must emit (non-delayed) branch type instructions
 	     on their own with nothing in the right container.  */
+	  /* We must treat repeat instructions likewise, since the
+	     following instruction has to be separate from the repeat
+	     in order to be repeated.  */
 	  write_1_short (opcode1, insn1, fx->next, false);
 	  return 1;
 	}
