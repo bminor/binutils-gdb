@@ -1,3 +1,7 @@
+2004-01-02  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* top.c (print_gdb_version): Update year to 2004.
+
 2004-01-02  Mark Mitchell  <mark@codesourcery.com>
 
 	* MAINTAINERS: Add myself to the write-after-approval category.
