@@ -32,6 +32,7 @@ h-dgux.h
 h-hp9000.h
 h-i386v.h
 h-rs6000.h
+h-rtbsd.h
 h-sun3.h
 h-sun4.h
 h-tahoebsd.h
@@ -46,7 +47,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.1  1991/05/23 16:56:36  rich
+# Revision 1.2  1991/07/24 00:59:57  gnu
+# Add h-rtbsd.h.
+#
+# Revision 1.1  1991/05/23  16:56:36  rich
 # Initial revision
 #
 #
