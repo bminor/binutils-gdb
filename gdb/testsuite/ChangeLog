@@ -1,3 +1,11 @@
+2000-11-06  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* gdb.base/callfuncs.c (main):  Moved to end of file, call
+	t_double_values to initialize the FPU before inferior calls are made.
+	* gdb.base/callfuncs.exp:  Test for register preservation after calling
+	inferior functions.  Add tests for continuining, finishing and
+	returning from a stop in a call dummy.
+
 2000-10-24  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdb.base/commands.exp: Break up long lines, and re-indent.

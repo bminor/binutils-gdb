@@ -237,6 +237,24 @@ proc do_function_calls {} {
     	"call inferior func with struct - returns char *"
 }
 
+# Procedure to get current content of all registers.
+global all_registers_content
+set all_registers_content ""
+proc do_get_all_registers { } {
+    global gdb_prompt
+    global expect_out
+    global all_registers_content
+
+    set all_registers_content ""
+    send_gdb "info all-registers\n"
+    gdb_expect {
+	-re "info all-registers\r\n(.*)$gdb_prompt $" {
+	    set all_registers_content $expect_out(1,string)
+	}
+	default {}
+    }
+}
+
 # Start with a fresh gdb.
 
 gdb_exit
@@ -271,7 +289,80 @@ if { $hp_aCC_compiler } {
     }
 }
 
+# Make sure that malloc gets called and that the floating point unit
+# is initialized via a call to t_double_values.
+gdb_test "next" "t_double_values\\(double_val1, double_val2\\);.*"
 gdb_test "next" "t_structs_c\\(struct_val1\\);.*"
+
+# Save all register contents.
+do_get_all_registers
+set old_reg_content $all_registers_content
+
+# Perform function calls.
 do_function_calls
+
+# Check if all registers still have the same value.
+do_get_all_registers
+set new_reg_content $all_registers_content
+if ![string compare $old_reg_content $new_reg_content] then {
+    pass "gdb function calls preserve register contents"
+} else {
+    set old_reg_content $all_registers_content
+    fail "gdb function calls preserve register contents"
+}
+
+# Set breakpoint at a function we will call from gdb.
+gdb_breakpoint add
+
+# Call function (causing a breakpoint hit in the call dummy) and do a continue,
+# make sure we are back at main and still have the same register contents.
+gdb_test "print add(4,5)" "The program being debugged stopped while.*" ""
+gdb_test "continue" "Continuing.*" "continue from call dummy breakpoint"
+if ![gdb_test "bt 2" \
+	      "#0  main.*" \
+	      "bt after continuing from call dummy breakpoint"] then {
+    do_get_all_registers
+    set new_reg_content $all_registers_content
+    if ![string compare $old_reg_content $new_reg_content] then {
+	pass "continue after stop in call dummy preserves register contents"
+    } else {
+	fail "continue after stop in call dummy preserves register contents"
+    }
+}
+
+# Call function (causing a breakpoint hit in the call dummy) and do a finish,
+# make sure we are back at main and still have the same register contents.
+gdb_test "print add(4,5)" "The program being debugged stopped while.*" ""
+gdb_test "finish" \
+	 "Value returned is.* = 9" \
+	 "finish from call dummy breakpoint returns correct value"
+if ![gdb_test "bt 2" \
+	      "#0  main.*" \
+	      "bt after finishing from call dummy breakpoint"] then {
+    do_get_all_registers
+    set new_reg_content $all_registers_content
+    if ![string compare $old_reg_content $new_reg_content] then {
+	pass "finish after stop in call dummy preserves register contents"
+    } else {
+	fail "finish after stop in call dummy preserves register contents"
+    }
+}
+
+# Call function (causing a breakpoint hit in the call dummy) and do a return
+# with a value, make sure we are back at main with the same register contents.
+gdb_test "print add(4,5)" "The program being debugged stopped while.*" ""
+if ![gdb_test "return 7" \
+	      "#0  main.*" \
+	      "back at main after return from call dummy breakpoint" \
+	      "Make add return now. .y or n.*" \
+	      "y"] then {
+    do_get_all_registers
+    set new_reg_content $all_registers_content
+    if ![string compare $old_reg_content $new_reg_content] then {
+	pass "return after stop in call dummy preserves register contents"
+    } else {
+	fail "return after stop in call dummy preserves register contents"
+    }
+}
 
 return 0
