@@ -1,5 +1,12 @@
 1999-08-19  Nick Clifton  <nickc@cygnus.com>
 
+	* coff-mcore.c (mcore_emit_base_file_entry): New function:  Emit
+	relocations into the base file.
+	(coff_mcore_relocate_section): Call mcore_emit_base_file_entry if
+	we are building a base file.
+
+1999-08-19  Nick Clifton  <nickc@cygnus.com>
+
 	* elf32-arm.h (arm_add_to_rel): New function.  Add a value to
 	a REL style reloc.
 	(elf32_arm_relocate_section): Use arm_add_to_rel to increment

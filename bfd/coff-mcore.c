@@ -1,5 +1,5 @@
 /* BFD back-end for Motorolla MCore COFF/PE
-   Copyright 1999 Free Software Foundation, Inc.
+   Copyright (C) 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -246,6 +246,25 @@ coff_mcore_link_hash_table_create (abfd)
   ret->thunk_size = 0;
 
   return & ret->root.root;
+}
+
+/* Add an entry to the base file.  */
+static void
+mcore_emit_base_file_entry (info, output_bfd, input_section, reloc_offset)
+      struct bfd_link_info * info;
+      bfd *                  output_bfd;
+      asection *             input_section;
+      bfd_vma                reloc_offset;
+{
+  bfd_vma addr = reloc_offset
+                 - input_section->vma
+                 + input_section->output_offset
+                 + input_section->output_section->vma;
+
+  if (coff_data (output_bfd)->pe)
+     addr -= pe_data (output_bfd)->pe_opthdr.ImageBase;
+  
+  fwrite (&addr, 1, sizeof (addr), (FILE *) info->base_file);
 }
 
 /*ARGSUSED*/
@@ -512,6 +531,13 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 	}
       
+      if (info->base_file)
+	{
+	  /* Emit a reloc if the backend thinks it needs it.  */
+	  if (sym && pe_data (output_bfd)->in_reloc_p (output_bfd, howto))
+            mcore_emit_base_file_entry (info, output_bfd, input_section, rel->r_vaddr);
+	}
+  
       switch (rstat)
 	{
 	default:
