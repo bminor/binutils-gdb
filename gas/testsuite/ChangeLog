@@ -1,9 +1,24 @@
+2000-03-29  Nick Clifton <nickc@cygnus.com
+
+	* gas/arm/thumb.s: Add test of bal instruction.
+
 2000-03-27  Alan Modra  <alan@linuxcare.com.au>
 
 	* gas/ieee-fp/x930509a.exp (dotest): Fix test for
 	LISTING_WORD_SIZE==1.
 	* gas/all/gas.exp (do_930509a): Same here.
 	* gas/all/cond.d: And here.
+
+2000-03-16  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/arm/arm.exp: Run branch.s test.
+	Run tests if target is strongarm.
+
+	* gas/arm/branch.s: New test.  Make sure that assembler can handle
+	same-section branch relocations properly.
+
+	* gas/arm/branch.d: New file.  Expected output from assembling
+	branch.s.
 
 2000-03-10  Geoffrey Keating  <geoffk@cygnus.com>
 

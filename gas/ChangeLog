@@ -1,3 +1,7 @@
+2000-03-29  Nick Clifton <nickc@cygnus.com
+
+	* config/tc-arm.c (tinsns): Add "bal" instruction pattern.
+
 2000-03-28  Alan Modra  <alan@linuxcare.com.au>
 
 	* listing.c (LISTING_LHS_WIDTH): Default depends on

@@ -808,6 +808,7 @@ static CONST struct thumb_opcode tinsns[] =
   {"blt",	0xdbfe,		2,	ARM_THUMB, do_t_branch9},
   {"bgt",	0xdcfe,		2,	ARM_THUMB, do_t_branch9},
   {"ble",	0xddfe,		2,	ARM_THUMB, do_t_branch9},
+  {"bal",	0xdefe,		2,	ARM_THUMB, do_t_branch9},
   {"bic",	0x4380,		2,	ARM_THUMB, do_t_arit},
   {"bl",	0xf7fffffe,	4,	ARM_THUMB, do_t_branch23},
   {"bx",	0x4700,		2,	ARM_THUMB, do_t_bx},
