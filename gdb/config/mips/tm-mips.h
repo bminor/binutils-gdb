@@ -161,38 +161,10 @@ extern void mips_do_registers_info (int, int);
 
 #define REGISTER_BYTE(N) ((N) * MIPS_REGSIZE)
 
-/* Covert between the RAW and VIRTUAL registers.
-
-   Some MIPS (SR, FSR, FIR) have a `raw' size of MIPS_REGSIZE but are
-   really 32 bit registers.  This is a legacy of the 64 bit MIPS GDB
-   protocol which transfers 64 bits for 32 bit registers. */
-
-extern int mips_register_convertible (int reg_nr);
-#define REGISTER_CONVERTIBLE(N) (mips_register_convertible ((N)))
-     
-
-void mips_register_convert_to_virtual (int reg_nr, struct type *virtual_type,
-				       char *raw_buf, char *virt_buf);
-#define REGISTER_CONVERT_TO_VIRTUAL(N,VIRTUAL_TYPE,RAW_BUF,VIRT_BUF) \
-  mips_register_convert_to_virtual (N,VIRTUAL_TYPE,RAW_BUF,VIRT_BUF)
-
-void mips_register_convert_to_raw (struct type *virtual_type, int reg_nr,
-				   char *virt_buf, char *raw_buf);
-#define REGISTER_CONVERT_TO_RAW(VIRTUAL_TYPE,N,VIRT_BUF,RAW_BUF) \
-  mips_register_convert_to_raw (VIRTUAL_TYPE,N,VIRT_BUF,RAW_BUF)
-
 /* Number of bytes of storage in the program's representation
    for register N. */
 
 #define REGISTER_VIRTUAL_SIZE(N) TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (N))
-
-/* Largest value REGISTER_RAW_SIZE can have.  */
-
-#define MAX_REGISTER_RAW_SIZE 8
-
-/* Largest value REGISTER_VIRTUAL_SIZE can have.  */
-
-#define MAX_REGISTER_VIRTUAL_SIZE 8
 
 /* Return the GDB type object for the "standard" data type of data in
    register N.  */

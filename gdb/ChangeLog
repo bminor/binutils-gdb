@@ -1,3 +1,12 @@
+2002-08-15  Michael Snyder  <msnyder@redhat.com>
+
+	* config/mips/tm-mips.h (REGISTER_CONVERT_TO_VIRTUAL, 
+	REGISTER_CONVERT_TO_RAW, REGISTER_CONVERTIBLE, 
+	MAX_REGISTER_RAW_SIZE, MAX_REGISTER_VIRTUAL_SIZE): Delete.
+	* mips-tdep.c (mips_gdbarch_init): Set the above in the gdbarch.
+	(mips_register_convertible, mips_register_convert_to_virtual,
+	mips_register_convert_to_raw): Make static.
+
 2002-08-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* infcmd.c (vector_info): New function.

@@ -439,7 +439,7 @@ mips_register_raw_size (int reg_nr)
 /* Convert between RAW and VIRTUAL registers.  The RAW register size
    defines the remote-gdb packet. */
 
-int
+static int
 mips_register_convertible (int reg_nr)
 {
   if (mips64_transfers_32bit_regs_p)
@@ -448,7 +448,7 @@ mips_register_convertible (int reg_nr)
     return (REGISTER_RAW_SIZE (reg_nr) > REGISTER_VIRTUAL_SIZE (reg_nr));
 }
 
-void
+static void
 mips_register_convert_to_virtual (int n, struct type *virtual_type,
 				  char *raw_buf, char *virt_buf)
 {
@@ -462,7 +462,7 @@ mips_register_convert_to_virtual (int n, struct type *virtual_type,
 	    TYPE_LENGTH (virtual_type));
 }
 
-void
+static void
 mips_register_convert_to_raw (struct type *virtual_type, int n,
 			      char *virt_buf, char *raw_buf)
 {
@@ -4981,6 +4981,8 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_double_bit (gdbarch, 64);
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_register_raw_size (gdbarch, mips_register_raw_size);
+  set_gdbarch_max_register_raw_size (gdbarch, 8);
+  set_gdbarch_max_register_virtual_size (gdbarch, 8);
   tdep->found_abi = found_abi;
   tdep->mips_abi = mips_abi;
 
@@ -5204,6 +5206,11 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (mips_call_dummy_words));
   set_gdbarch_push_return_address (gdbarch, mips_push_return_address);
   set_gdbarch_register_convertible (gdbarch, generic_register_convertible_not);
+  set_gdbarch_register_convert_to_virtual (gdbarch, 
+					   mips_register_convert_to_virtual);
+  set_gdbarch_register_convert_to_raw (gdbarch, 
+				       mips_register_convert_to_raw);
+
   set_gdbarch_coerce_float_to_double (gdbarch, mips_coerce_float_to_double);
 
   set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
