@@ -1,3 +1,8 @@
+Fri Mar 20 17:41:07 1998  Jim Lemke <jlemke@cygnus.com>
+
+	* t-dma.c: Created file of DMAC unit tests.
+	* sky.ld: Created file to load tests at a lower addr.
+
 Tue Mar 17 15:41:07 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* c_gen.pl: Added file from Toronto's /build directory.

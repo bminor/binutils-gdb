@@ -76,6 +76,7 @@ C_GEN = perl $(srcdir)/c_gen.pl
 .SUFFIXES: .trc .c .run .ok .vif0out .vif0ok .vif0expect .vif1out .vif1ok .vif1expect .uu
 
 TESTS = \
+	t-dma.ok \
 	t-pke1.vif0ok \
 	t-pke2.vif1ok \
 	t-pke3.ok \
@@ -139,11 +140,11 @@ sanity:
 	touch $@
 
 # Rules for building all the tests
-
+ 
 .trc.c:
 	$(C_GEN) $< $@
 .c.run:
-	$(GCC_FOR_TARGET) -Tr5900.ld -o $@ $<
+	$(GCC_FOR_TARGET) -T$(srcdir)/sky.ld -o $@ $<
 .uu.run:
 	uudecode $< > $@
 .run.vif0out:
