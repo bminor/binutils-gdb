@@ -1877,7 +1877,7 @@ coff_print_symbol (abfd, filep, symbol, how)
 		      if (auxp->u.auxent.x_scn.x_checksum != 0
 			  || auxp->u.auxent.x_scn.x_associated != 0
 			  || auxp->u.auxent.x_scn.x_comdat != 0)
-			fprintf (file, "checksum 0x%lx assoc %d comdat %d",
+			fprintf (file, " checksum 0x%lx assoc %d comdat %d",
 				 auxp->u.auxent.x_scn.x_checksum,
 				 auxp->u.auxent.x_scn.x_associated,
 				 auxp->u.auxent.x_scn.x_comdat);

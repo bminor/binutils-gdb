@@ -1,5 +1,27 @@
 Fri Mar 29 12:44:36 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* section.c (SEC_LINK_ONCE): Define.
+	(SEC_LINK_DUPLICATES): Define.
+	(SEC_LINK_DUPLICATES_DISCARD): Define.
+	(SEC_LINK_DUPLICATES_ONE_ONLY): Define.
+	(SEC_LINK_DUPLICATES_SAME_SIZE): Define.
+	(SEC_LINK_DUPLICATES_SAME_CONTENTS): Define.
+	* bfd-in2.h: Rebuild.
+	* coffcode.h (sec_to_styp_flags): If COFF_WITH_PE, turn
+	SEC_LINK_ONCE into IMAGE_SCN_LNK_COMDAT.
+	(styp_to_sec_flags): If COFF_WITH_PE, turn IMAGE_SCN_LNK_REMOVE
+	into SEC_EXCLUDE.  If IMAGE_SCN_LNK_COMDAT is set, set
+	SEC_LINK_ONCE, and look through the symbol table for the setting
+	for SEC_LINK_DUPLICATES.
+	(coff_write_object_contents): If COFF_WITH_PE, if SEC_LINK_ONCE is
+	set for a section, find the section symbol in the symbol table,
+	and set the aux entry based on SEC_LINK_DUPLICATES.
+	* coffgen.c (coff_print_symbol): Add a space before "checksum".
+	* coff-arm.c (armcoff_big_vec): If COFF_WITH_PE is defined, add
+	SEC_LINK_ONCE and SEC_LINK_DUPLICATES to section_flags.
+	* coff-i386.c (i386coff_vec): Likewise.
+	* coff-ppc.c (TARGET_LITTLE_SYM, TARGET_BIG_SYM): Likewise.
+
 	* VERSION: Bump to 2.6.1.
 	* Makefile.in (stamp-h): Depend upon VERSION.
 

@@ -3191,7 +3191,13 @@ TARGET_LITTLE_SYM =
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT),
   
+#ifndef COFF_WITH_PE
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+#else
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
+   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES),
+#endif
+
   0,				/* leading char */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen??? FIXMEmgo */
@@ -3238,7 +3244,13 @@ TARGET_BIG_SYM =
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT),
 
+#ifndef COFF_WITH_PE
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+#else
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
+   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES),
+#endif
+
   0,				/* leading char */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen??? FIXMEmgo */

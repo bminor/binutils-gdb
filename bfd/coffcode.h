@@ -414,6 +414,11 @@ sec_to_styp_flags (sec_name, sec_flags)
     styp_flags |= STYP_NOLOAD;
 #endif
 
+#ifdef COFF_WITH_PE
+  if (sec_flags & SEC_LINK_ONCE)
+    styp_flags |= IMAGE_SCN_LNK_COMDAT;
+#endif
+
   return (styp_flags);
 }
 /*
@@ -541,6 +546,96 @@ styp_to_sec_flags (abfd, hdr, name)
       sec_flags = (SEC_LOAD | SEC_ALLOC);
     }
 #endif /* STYP_SDATA */
+
+#ifdef COFF_WITH_PE
+  if (styp_flags & IMAGE_SCN_LNK_REMOVE)
+    sec_flags |= SEC_EXCLUDE;
+
+  if (styp_flags & IMAGE_SCN_LNK_COMDAT)
+    {
+      sec_flags |= SEC_LINK_ONCE;
+
+      /* Unfortunately, the PE format stores essential information in
+         the symbol table, of all places.  We need to extract that
+         information now, so that objdump and the linker will know how
+         to handle the section without worrying about the symbols.  We
+         can't call slurp_symtab, because the linker doesn't want the
+         swapped symbols.  */
+
+      if (_bfd_coff_get_external_symbols (abfd))
+	{
+	  bfd_byte *esym, *esymend;
+
+	  esym = (bfd_byte *) obj_coff_external_syms (abfd);
+	  esymend = esym + obj_raw_syment_count (abfd) * SYMESZ;
+
+	  while (esym < esymend)
+	    {
+	      struct internal_syment isym;
+
+	      bfd_coff_swap_sym_in (abfd, (PTR) esym, (PTR) &isym);
+
+	      if (sizeof (internal_s->s_name) > SYMNMLEN)
+		{
+		  /* This case implies that the matching symbol name
+                     will be in the string table.  */
+		  abort ();
+		}
+
+	      if (isym.n_sclass == C_STAT
+		  && isym.n_type == T_NULL
+		  && isym.n_numaux == 1
+		  && isym._n._n_n._n_zeroes != 0)
+		{
+		  char buf[SYMNMLEN + 1];
+
+		  memcpy (buf, isym._n._n_name, SYMNMLEN);
+		  buf[SYMNMLEN] = '\0';
+
+		  if (strcmp (name, buf) == 0)
+		    {
+		      union internal_auxent aux;
+
+		      /* This is the section symbol.  */
+
+		      bfd_coff_swap_aux_in (abfd, (PTR) (esym + SYMESZ),
+					    isym.n_type, isym.n_sclass,
+					    0, isym.n_numaux, (PTR) &aux);
+
+		      switch (aux.x_scn.x_comdat)
+			{
+			case IMAGE_COMDAT_SELECT_NODUPLICATES:
+			  sec_flags |= SEC_LINK_DUPLICATES_ONE_ONLY;
+			  break;
+
+			default:
+			case IMAGE_COMDAT_SELECT_ANY:
+			  sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
+			  break;
+
+			case IMAGE_COMDAT_SELECT_SAME_SIZE:
+			  sec_flags |= SEC_LINK_DUPLICATES_SAME_SIZE;
+			  break;
+
+			case IMAGE_COMDAT_SELECT_EXACT_MATCH:
+			  sec_flags |= SEC_LINK_DUPLICATES_SAME_CONTENTS;
+			  break;
+
+			case IMAGE_COMDAT_SELECT_ASSOCIATIVE:
+			  /* FIXME: This is not currently implemented.  */
+			  sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
+			  break;
+			}
+
+		      break;
+		    }
+		}
+
+	      esym += (isym.n_numaux + 1) * SYMESZ;
+	    }
+	}
+    }
+#endif
 
   return (sec_flags);
 }
@@ -2361,6 +2456,63 @@ coff_write_object_contents (abfd)
 	      || bfd_write ((PTR) (&buff), 1, SCNHSZ, abfd) != SCNHSZ)
 	    return false;
 	}
+
+#ifdef COFF_WITH_PE
+      /* PE stores COMDAT section information in the symbol table.  If
+         this section is supposed to have some COMDAT info, track down
+         the symbol in the symbol table and modify it.  */
+      if ((current->flags & SEC_LINK_ONCE) != 0)
+	{
+	  unsigned int i, count;
+	  asymbol **psym;
+
+	  count = bfd_get_symcount (abfd);
+	  for (i = 0, psym = abfd->outsymbols; i < count; i++, psym++)
+	    {
+	      coff_symbol_type *csym;
+	      combined_entry_type *aux;
+
+	      if (strcmp ((*psym)->name, current->name) != 0)
+		continue;
+
+	      csym = coff_symbol_from (abfd, *psym);
+	      if (csym == NULL
+		  || csym->native == NULL
+		  || csym->native->u.syment.n_numaux < 1
+		  || csym->native->u.syment.n_sclass != C_STAT
+		  || csym->native->u.syment.n_type != T_NULL)
+		continue;
+
+	      /* Here *PSYM is the section symbol for CURRENT.  */
+
+	      /* We don't touch the x_checksum field.  The
+                 x_associated field is not currently supported.  */
+
+	      aux = csym->native + 1;
+	      switch (current->flags & SEC_LINK_DUPLICATES)
+		{
+		case SEC_LINK_DUPLICATES_DISCARD:
+		  aux->u.auxent.x_scn.x_comdat = IMAGE_COMDAT_SELECT_ANY;
+		  break;
+
+		case SEC_LINK_DUPLICATES_ONE_ONLY:
+		  aux->u.auxent.x_scn.x_comdat =
+		    IMAGE_COMDAT_SELECT_NODUPLICATES;
+		  break;
+
+		case SEC_LINK_DUPLICATES_SAME_SIZE:
+		  aux->u.auxent.x_scn.x_comdat =
+		    IMAGE_COMDAT_SELECT_SAME_SIZE;
+		  break;
+
+		case SEC_LINK_DUPLICATES_SAME_CONTENTS:
+		  aux->u.auxent.x_scn.x_comdat =
+		    IMAGE_COMDAT_SELECT_EXACT_MATCH;
+		  break;
+		}
+	    }
+	}
+#endif /* COFF_WITH_PE */
     }
 
 #ifdef RS6000COFF_C
@@ -3055,15 +3207,14 @@ coff_slurp_symbol_table (abfd)
 		dst->symbol.flags = BSF_DEBUGGING;
 	      else
 		dst->symbol.flags = BSF_LOCAL;
-	      /*
-	  Base the value as an index from the base of the section, if
-	  there is one
-	  */
+
+	      /* Base the value as an index from the base of the
+		 section, if there is one.  */
 	      if (dst->symbol.section)
-		dst->symbol.value = (src->u.syment.n_value) -
-		  dst->symbol.section->vma;
+		dst->symbol.value = (src->u.syment.n_value
+				     - dst->symbol.section->vma);
 	      else
-		dst->symbol.value = (src->u.syment.n_value);
+		dst->symbol.value = src->u.syment.n_value;
 	      break;
 
 	    case C_MOS:	/* member of structure	 */
@@ -3154,13 +3305,13 @@ coff_slurp_symbol_table (abfd)
 #endif
 
 	    case C_BLOCK:	/* ".bb" or ".eb"		 */
-	    case C_FCN:	/* ".bf" or ".ef"		 */
+	    case C_FCN:		/* ".bf" or ".ef"		 */
 	    case C_EFCN:	/* physical end of function	 */
 	      dst->symbol.flags = BSF_LOCAL;
-	      /*
-	  Base the value as an index from the base of the section
-	  */
-	      dst->symbol.value = (src->u.syment.n_value) - dst->symbol.section->vma;
+	      /* Base the value as an index from the base of the
+		 section.  */
+	      dst->symbol.value = (src->u.syment.n_value
+				   - dst->symbol.section->vma);
 	      break;
 
 	    case C_NULL:
