@@ -78,6 +78,15 @@
 # based on the target of the assembler being built.  If always has
 # empty "as_flags" and "objdump_flags."
 
+# mips_arch_init
+#
+# This function initializes the architecture data array ("mips_arches")
+# to be empty.
+proc mips_arch_init {} {
+    global mips_arches
+    array unset mips_arches
+}
+
 # mips_arch_create ARCH GPRSIZE EXTENDS PROPS AS_FLAGS OBJDUMP_FLAGS \
 #		   (optional:) DEFAULT_FOR_TARGETS
 #
@@ -334,6 +343,7 @@ proc run_list_test_arches { name opts arch_list } {
 # Note that several targets pick default CPU based on ABI.  We
 # can't easily handle that; do NOT list those targets as defaulting
 # to any architecture.
+mips_arch_init
 mips_arch_create mips1 	32	{}	{} \
 			{ -march=mips1 -mtune=mips1 } { -mmips:3000 }
 mips_arch_create mips2 	32	mips1	{ gpr_ilocks } \
