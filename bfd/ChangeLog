@@ -1,3 +1,9 @@
+2001-02-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-sparc.c (elf32_sparc_finish_dynamic_symbol): Don't make PLT
+	entries that could serve as a definition for a weak symbol.
+	* elf64-sparc.c (sparc64_elf_finish_dynamic_symbol): Likewise.
+
 2001-02-18  David O'Brien  <obrien@FreeBSD>
 
 	* configure.in: Recognize FreeBSD/arm, FreeBSD/PowerPC, and treat
