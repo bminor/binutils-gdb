@@ -1,3 +1,9 @@
+2004-04-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/obj-elf.c (get_section): New function.
+	(obj_elf_change_section): Support multiple sections with same
+	name.
+
 2004-04-30  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (create_register_alias): Fix typo checking for

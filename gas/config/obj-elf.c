@@ -469,6 +469,34 @@ struct section_stack
 
 static struct section_stack *section_stack;
 
+struct section_group
+{
+  const char *name;
+  const char *group_name;
+  asection *section;
+};
+
+static void
+get_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
+{
+  struct section_group *group = inf;
+  const char *group_name = elf_group_name (sec);
+  
+  /* Check if we have found the section we are looking for.  */
+  if (group->section)
+    return;
+
+  if ((sec->name == group->name
+       || (sec->name != NULL
+	   && group->name != NULL
+	   && strcmp (sec->name, group->name) == 0))
+      && (group_name == group->group_name
+	  || (group_name != NULL
+	      && group->group_name != NULL
+	      && strcmp (group_name, group->group_name) == 0)))
+    group->section = sec;
+}
+
 /* Handle the .section pseudo-op.  This code supports two different
    syntaxes.
 
@@ -496,10 +524,10 @@ obj_elf_change_section (const char *name,
 			int linkonce,
 			int push)
 {
-  asection *old_sec;
   segT sec;
   flagword flags;
   const struct bfd_elf_special_section *ssect;
+  struct section_group group;
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
@@ -520,8 +548,19 @@ obj_elf_change_section (const char *name,
   previous_section = now_seg;
   previous_subsection = now_subseg;
 
-  old_sec = bfd_get_section_by_name (stdoutput, name);
-  sec = subseg_new (name, 0);
+  group.name = name;
+  group.group_name = group_name;
+  group.section = NULL;
+  bfd_map_over_sections (stdoutput, get_section, &group);
+
+  if (group.section)
+    {
+      sec = group.section;
+      subseg_set (sec, 0);
+    }
+  else
+    sec = subseg_force_new (name, 0);
+
   ssect = _bfd_elf_get_sec_type_attr (stdoutput, name);
 
   if (ssect != NULL)
@@ -532,7 +571,7 @@ obj_elf_change_section (const char *name,
 	type = ssect->type;
       else if (type != ssect->type)
 	{
-	  if (old_sec == NULL
+	  if (group.section == NULL
 	      /* FIXME: gcc, as of 2002-10-22, will emit
 
 		 .section .init_array,"aw",@progbits
@@ -556,7 +595,7 @@ obj_elf_change_section (const char *name,
 	    }
 	}
 
-      if (old_sec == NULL && (attr & ~ssect->attr) != 0)
+      if (group.section == NULL && (attr & ~ssect->attr) != 0)
 	{
 	  /* As a GNU extension, we permit a .note section to be
 	     allocatable.  If the linker sees an allocatable .note
@@ -582,12 +621,13 @@ obj_elf_change_section (const char *name,
 	    override = TRUE;
 	  else
 	    {
-	      as_warn (_("setting incorrect section attributes for %s"),
-		       name);
+	      if (group_name == NULL)
+		as_warn (_("setting incorrect section attributes for %s"),
+			 name);
 	      override = TRUE;
 	    }
 	}
-      if (!override && old_sec == NULL)
+      if (!override && group.section == NULL)
 	attr |= ssect->attr;
     }
 
@@ -609,7 +649,10 @@ obj_elf_change_section (const char *name,
   flags = md_elf_section_flags (flags, attr, type);
 #endif
 
-  if (old_sec == NULL)
+  if (linkonce)
+    flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
+
+  if (group.section == NULL)
     {
       symbolS *secsym;
 
@@ -617,8 +660,6 @@ obj_elf_change_section (const char *name,
       if (type == SHT_NOBITS)
 	seg_info (sec)->bss = 1;
 
-      if (linkonce)
-	flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
       bfd_set_section_flags (stdoutput, sec, flags);
       if (flags & SEC_MERGE)
 	sec->entsize = entsize;
@@ -636,18 +677,15 @@ obj_elf_change_section (const char *name,
       /* If section attributes are specified the second time we see a
 	 particular section, then check that they are the same as we
 	 saw the first time.  */
-      if (((old_sec->flags ^ flags)
+      if (((group.section->flags ^ flags)
 	   & (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
 	      | SEC_EXCLUDE | SEC_SORT_ENTRIES | SEC_MERGE | SEC_STRINGS
 	      | SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD
 	      | SEC_THREAD_LOCAL)))
 	as_warn (_("ignoring changed section attributes for %s"), name);
-      if ((flags & SEC_MERGE) && old_sec->entsize != (unsigned) entsize)
+      if ((flags & SEC_MERGE)
+	  && group.section->entsize != (unsigned) entsize)
 	as_warn (_("ignoring changed section entity size for %s"), name);
-      if ((attr & SHF_GROUP) != 0
-	  && (elf_group_name (old_sec) == NULL
-	      || strcmp (elf_group_name (old_sec), group_name) != 0))
-	as_warn (_("ignoring new section group for %s"), name);
     }
 
 #ifdef md_elf_section_change_hook

@@ -1,3 +1,13 @@
+2004-04-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/elf/elf.exp: Remove group1, add group1a and group1b for
+	section group.
+
+	* gas/elf/group1a.d: New file.
+	* gas/elf/group1b.d: Likewise.
+
+	* gas/elf/group1.e: Removed.
+
 2004-04-30  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/reg-alias.s: New file: Test case sensitive register
