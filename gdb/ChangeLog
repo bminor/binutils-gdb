@@ -1,5 +1,8 @@
 Thu Apr 29 00:03:59 1993  Fred Fish  (fnf@cygnus.com)
 
+	* infptrace.c:  Add missing close paren to test for
+	FIVE_ARG_PTRACE defined.
+
 	* defs.h (CC_HAS_LONG_LONG):  Set up to define CC_HAS_LONG_LONG
 	when compiling with gcc, but disable it for now.  See comment.
 	* defs.h (LONGEST):  Define as either "long" or "long long"
