@@ -548,7 +548,6 @@ if test `set . $formats ; shift ; echo $#` -gt 1 ; then
       hp300)	AC_DEFINE(OBJ_MAYBE_HP300, 1,   [HP300 support?])   ;;
       ieee)	AC_DEFINE(OBJ_MAYBE_IEEE, 1,    [IEEE support?])    ;;
       som)	AC_DEFINE(OBJ_MAYBE_SOM, 1,     [SOM support?])     ;;
-      vms)	AC_DEFINE(OBJ_MAYBE_VMS, 1,     [VMS support?])     ;;
     esac
     extra_objects="$extra_objects obj-$fmt.o"
   done

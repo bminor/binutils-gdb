@@ -23,6 +23,9 @@
 /* Default architecture. */
 #undef DEFAULT_ARCH
 
+/* Default CRIS architecture. */
+#undef DEFAULT_CRIS_ARCH
+
 /* Default emulation. */
 #undef DEFAULT_EMULATION
 
@@ -219,9 +222,6 @@
 /* SOM support? */
 #undef OBJ_MAYBE_SOM
 
-/* VMS support? */
-#undef OBJ_MAYBE_VMS
-
 /* Name of package */
 #undef PACKAGE
 
@@ -292,6 +292,10 @@
 
 /* Version number of package */
 #undef VERSION
+
+/* Define to 1 if your processor stores words with the most significant byte
+   first (like Motorola and SPARC, unlike Intel and VAX). */
+#undef WORDS_BIGENDIAN
 
 /* Define to 1 if `lex' declares `yytext' as a `char *' by default, not a
    `char[]'. */

@@ -3,6 +3,9 @@ $! This file sets things up to build gas on a VMS system to generate object
 $! files for a VMS system.  We do not use the configure script, since we
 $! do not have /bin/sh to execute it.
 $!
+$! Note: Only this script contains vax-vms and alpha-vms support, but vax-vms
+$! is no longer supported.
+$!
 $!
 $ gas_host="vms"
 $ arch_indx = 1 + ((f$getsyi("CPU").ge.128).and.1)	! vax==1, alpha==2
