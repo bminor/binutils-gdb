@@ -1222,6 +1222,35 @@ if (NESI (OPRND (sr), 0)) {
 #undef OPRND
 }
 
+/* Perform divh: divh $dr,$sr.  */
+CIA
+SEM_FN_NAME (m32rx,divh) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
+{
+  insn_t insn = SEM_INSN (sem_arg);
+#define OPRND(f) par_exec->operands.fmt_21_div.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  CIA new_pc = CPU (h_pc) + 4;
+  EXTRACT_FMT_21_DIV_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
+  EXTRACT_FMT_21_DIV_CODE
+
+if (NESI (OPRND (sr), 0)) {
+  CPU (h_gr[f_r1]) = DIVSI (EXTHISI (TRUNCSIHI (OPRND (dr))), OPRND (sr));
+  TRACE_RESULT (current_cpu, "dr", 'x', CPU (h_gr[f_r1]));
+}
+
+#if WITH_PROFILE_MODEL_P
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      m32rx_model_mark_get_h_gr (current_cpu, abuf);
+      m32rx_model_mark_set_h_gr (current_cpu, abuf);
+      m32rx_model_profile_insn (current_cpu, abuf);
+    }
+#endif
+
+  return new_pc;
+#undef OPRND
+}
+
 /* Perform jc: jc $sr.  */
 CIA
 SEM_FN_NAME (m32rx,jc) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
@@ -1291,7 +1320,7 @@ SEM_FN_NAME (m32rx,jl) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec
   EXTRACT_FMT_23_JL_CODE
 
 do {
-  USI temp1;SI temp0;
+  SI temp1;SI temp0;
   temp0 = ADDSI (ANDSI (OPRND (pc), -4), 4);
   temp1 = OPRND (sr);
   CPU (h_gr[14]) = temp0;
@@ -2164,32 +2193,23 @@ SEM_FN_NAME (m32rx,not) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exe
 #undef OPRND
 }
 
-/* Perform rac-a: rac $accs.  */
+/* Perform rac-d: rac $accd.  */
 CIA
-SEM_FN_NAME (m32rx,rac_a) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
+SEM_FN_NAME (m32rx,rac_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_42_rac_a.f
+#define OPRND(f) par_exec->operands.fmt_42_rac_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 2;
-  EXTRACT_FMT_42_RAC_A_VARS /* f-op1 f-r1 f-op2 f-accs f-op3 */
-  EXTRACT_FMT_42_RAC_A_CODE
+  EXTRACT_FMT_42_RAC_D_VARS /* f-op1 f-accd f-bits67 f-op2 f-accs f-bit14 f-imm1 */
+  EXTRACT_FMT_42_RAC_D_CODE
 
 do {
   DI tmp_tmp1;
-  tmp_tmp1 = ANDDI (OPRND (accs), MAKEDI (16777215, 0xffffffff));
-if (ANDIFSI (GEDI (tmp_tmp1, MAKEDI (16383, 0xffff8000)), LEDI (tmp_tmp1, MAKEDI (8388607, 0xffffffff)))) {
-  tmp_tmp1 = MAKEDI (16383, 0xffff8000);
-} else {
-if (ANDIFSI (GEDI (tmp_tmp1, MAKEDI (8388608, 0)), LEDI (tmp_tmp1, MAKEDI (16760832, 0)))) {
-  tmp_tmp1 = MAKEDI (16760832, 0);
-} else {
-  tmp_tmp1 = ANDDI (ADDDI (OPRND (accs), MAKEDI (0, 16384)), MAKEDI (16777215, 0xffff8000));
-}
-}
-  tmp_tmp1 = SLLDI (tmp_tmp1, 1);
-m32rx_h_accums_set (current_cpu, f_accs, SRADI (SLLDI (tmp_tmp1, 7), 7));
-  TRACE_RESULT (current_cpu, "accs", 'D', m32rx_h_accums_get (current_cpu, f_accs));
+  tmp_tmp1 = SLLDI (OPRND (accum), 1);
+  tmp_tmp1 = ADDDI (tmp_tmp1, MAKEDI (0, 32768));
+m32rx_h_accums_set (current_cpu, f_accd, (GTDI (tmp_tmp1, MAKEDI (32767, 0xffff0000))) ? (MAKEDI (32767, 0xffff0000)) : (LTDI (tmp_tmp1, MAKEDI (0xffff8000, 0))) ? (MAKEDI (0xffff8000, 0)) : (ANDDI (tmp_tmp1, MAKEDI (0xffffffff, 0xffff0000))));
+  TRACE_RESULT (current_cpu, "accd", 'D', m32rx_h_accums_get (current_cpu, f_accd));
 } while (0);
 
 #if WITH_PROFILE_MODEL_P
@@ -2203,32 +2223,143 @@ m32rx_h_accums_set (current_cpu, f_accs, SRADI (SLLDI (tmp_tmp1, 7), 7));
 #undef OPRND
 }
 
-/* Perform rach-a: rach $accs.  */
+/* Perform rac-ds: rac $accd,$accs.  */
 CIA
-SEM_FN_NAME (m32rx,rach_a) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
+SEM_FN_NAME (m32rx,rac_ds) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_42_rac_a.f
+#define OPRND(f) par_exec->operands.fmt_43_rac_ds.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 2;
-  EXTRACT_FMT_42_RAC_A_VARS /* f-op1 f-r1 f-op2 f-accs f-op3 */
-  EXTRACT_FMT_42_RAC_A_CODE
+  EXTRACT_FMT_43_RAC_DS_VARS /* f-op1 f-accd f-bits67 f-op2 f-accs f-bit14 f-imm1 */
+  EXTRACT_FMT_43_RAC_DS_CODE
 
 do {
   DI tmp_tmp1;
-  tmp_tmp1 = ANDDI (OPRND (accs), MAKEDI (16777215, 0xffffffff));
-if (ANDIFSI (GEDI (tmp_tmp1, MAKEDI (16383, 0x80000000)), LEDI (tmp_tmp1, MAKEDI (8388607, 0xffffffff)))) {
-  tmp_tmp1 = MAKEDI (16383, 0x80000000);
-} else {
-if (ANDIFSI (GEDI (tmp_tmp1, MAKEDI (8388608, 0)), LEDI (tmp_tmp1, MAKEDI (16760832, 0)))) {
-  tmp_tmp1 = MAKEDI (16760832, 0);
-} else {
-  tmp_tmp1 = ANDDI (ADDDI (OPRND (accs), MAKEDI (0, 1073741824)), MAKEDI (0xffffffff, 0x80000000));
+  tmp_tmp1 = SLLDI (OPRND (accs), 1);
+  tmp_tmp1 = ADDDI (tmp_tmp1, MAKEDI (0, 32768));
+m32rx_h_accums_set (current_cpu, f_accd, (GTDI (tmp_tmp1, MAKEDI (32767, 0xffff0000))) ? (MAKEDI (32767, 0xffff0000)) : (LTDI (tmp_tmp1, MAKEDI (0xffff8000, 0))) ? (MAKEDI (0xffff8000, 0)) : (ANDDI (tmp_tmp1, MAKEDI (0xffffffff, 0xffff0000))));
+  TRACE_RESULT (current_cpu, "accd", 'D', m32rx_h_accums_get (current_cpu, f_accd));
+} while (0);
+
+#if WITH_PROFILE_MODEL_P
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      m32rx_model_profile_insn (current_cpu, abuf);
+    }
+#endif
+
+  return new_pc;
+#undef OPRND
 }
+
+/* Perform rac-dsi: rac $accd,$accs,#$imm1.  */
+CIA
+SEM_FN_NAME (m32rx,rac_dsi) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
+{
+  insn_t insn = SEM_INSN (sem_arg);
+#define OPRND(f) par_exec->operands.fmt_44_rac_dsi.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  CIA new_pc = CPU (h_pc) + 2;
+  EXTRACT_FMT_44_RAC_DSI_VARS /* f-op1 f-accd f-bits67 f-op2 f-accs f-bit14 f-imm1 */
+  EXTRACT_FMT_44_RAC_DSI_CODE
+
+do {
+  DI tmp_tmp1;
+  tmp_tmp1 = SLLDI (OPRND (accs), OPRND (imm1));
+  tmp_tmp1 = ADDDI (tmp_tmp1, MAKEDI (0, 32768));
+m32rx_h_accums_set (current_cpu, f_accd, (GTDI (tmp_tmp1, MAKEDI (32767, 0xffff0000))) ? (MAKEDI (32767, 0xffff0000)) : (LTDI (tmp_tmp1, MAKEDI (0xffff8000, 0))) ? (MAKEDI (0xffff8000, 0)) : (ANDDI (tmp_tmp1, MAKEDI (0xffffffff, 0xffff0000))));
+  TRACE_RESULT (current_cpu, "accd", 'D', m32rx_h_accums_get (current_cpu, f_accd));
+} while (0);
+
+#if WITH_PROFILE_MODEL_P
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      m32rx_model_profile_insn (current_cpu, abuf);
+    }
+#endif
+
+  return new_pc;
+#undef OPRND
 }
-  tmp_tmp1 = SLLDI (tmp_tmp1, 1);
-m32rx_h_accums_set (current_cpu, f_accs, SRADI (SLLDI (tmp_tmp1, 7), 7));
-  TRACE_RESULT (current_cpu, "accs", 'D', m32rx_h_accums_get (current_cpu, f_accs));
+
+/* Perform rach-d: rach $accd.  */
+CIA
+SEM_FN_NAME (m32rx,rach_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
+{
+  insn_t insn = SEM_INSN (sem_arg);
+#define OPRND(f) par_exec->operands.fmt_42_rac_d.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  CIA new_pc = CPU (h_pc) + 2;
+  EXTRACT_FMT_42_RAC_D_VARS /* f-op1 f-accd f-bits67 f-op2 f-accs f-bit14 f-imm1 */
+  EXTRACT_FMT_42_RAC_D_CODE
+
+do {
+  DI tmp_tmp1;
+  tmp_tmp1 = SLLDI (OPRND (accum), 1);
+  tmp_tmp1 = ADDDI (tmp_tmp1, MAKEDI (0, 0x80000000));
+m32rx_h_accums_set (current_cpu, f_accd, (GTDI (tmp_tmp1, MAKEDI (32767, 0))) ? (MAKEDI (32767, 0)) : (LTDI (tmp_tmp1, MAKEDI (0xffff8000, 0))) ? (MAKEDI (0xffff8000, 0)) : (ANDDI (tmp_tmp1, MAKEDI (0xffffffff, 0))));
+  TRACE_RESULT (current_cpu, "accd", 'D', m32rx_h_accums_get (current_cpu, f_accd));
+} while (0);
+
+#if WITH_PROFILE_MODEL_P
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      m32rx_model_profile_insn (current_cpu, abuf);
+    }
+#endif
+
+  return new_pc;
+#undef OPRND
+}
+
+/* Perform rach-ds: rach $accd,$accs.  */
+CIA
+SEM_FN_NAME (m32rx,rach_ds) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
+{
+  insn_t insn = SEM_INSN (sem_arg);
+#define OPRND(f) par_exec->operands.fmt_43_rac_ds.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  CIA new_pc = CPU (h_pc) + 2;
+  EXTRACT_FMT_43_RAC_DS_VARS /* f-op1 f-accd f-bits67 f-op2 f-accs f-bit14 f-imm1 */
+  EXTRACT_FMT_43_RAC_DS_CODE
+
+do {
+  DI tmp_tmp1;
+  tmp_tmp1 = SLLDI (OPRND (accs), 1);
+  tmp_tmp1 = ADDDI (tmp_tmp1, MAKEDI (0, 0x80000000));
+m32rx_h_accums_set (current_cpu, f_accd, (GTDI (tmp_tmp1, MAKEDI (32767, 0))) ? (MAKEDI (32767, 0)) : (LTDI (tmp_tmp1, MAKEDI (0xffff8000, 0))) ? (MAKEDI (0xffff8000, 0)) : (ANDDI (tmp_tmp1, MAKEDI (0xffffffff, 0))));
+  TRACE_RESULT (current_cpu, "accd", 'D', m32rx_h_accums_get (current_cpu, f_accd));
+} while (0);
+
+#if WITH_PROFILE_MODEL_P
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      m32rx_model_profile_insn (current_cpu, abuf);
+    }
+#endif
+
+  return new_pc;
+#undef OPRND
+}
+
+/* Perform rach-dsi: rach $accd,$accs,#$imm1.  */
+CIA
+SEM_FN_NAME (m32rx,rach_dsi) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
+{
+  insn_t insn = SEM_INSN (sem_arg);
+#define OPRND(f) par_exec->operands.fmt_44_rac_dsi.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  CIA new_pc = CPU (h_pc) + 2;
+  EXTRACT_FMT_44_RAC_DSI_VARS /* f-op1 f-accd f-bits67 f-op2 f-accs f-bit14 f-imm1 */
+  EXTRACT_FMT_44_RAC_DSI_CODE
+
+do {
+  DI tmp_tmp1;
+  tmp_tmp1 = SLLDI (OPRND (accs), OPRND (imm1));
+  tmp_tmp1 = ADDDI (tmp_tmp1, MAKEDI (0, 0x80000000));
+m32rx_h_accums_set (current_cpu, f_accd, (GTDI (tmp_tmp1, MAKEDI (32767, 0))) ? (MAKEDI (32767, 0)) : (LTDI (tmp_tmp1, MAKEDI (0xffff8000, 0))) ? (MAKEDI (0xffff8000, 0)) : (ANDDI (tmp_tmp1, MAKEDI (0xffffffff, 0))));
+  TRACE_RESULT (current_cpu, "accd", 'D', m32rx_h_accums_get (current_cpu, f_accd));
 } while (0);
 
 #if WITH_PROFILE_MODEL_P
@@ -2247,12 +2378,12 @@ CIA
 SEM_FN_NAME (m32rx,rte) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_43_rte.f
+#define OPRND(f) par_exec->operands.fmt_45_rte.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 2;
   int taken_p = 0;
-  EXTRACT_FMT_43_RTE_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_43_RTE_CODE
+  EXTRACT_FMT_45_RTE_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_45_RTE_CODE
 
 do {
   CPU (h_sm) = OPRND (h_bsm_0);
@@ -2281,11 +2412,11 @@ CIA
 SEM_FN_NAME (m32rx,seth) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_44_seth.f
+#define OPRND(f) par_exec->operands.fmt_46_seth.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 4;
-  EXTRACT_FMT_44_SETH_VARS /* f-op1 f-r1 f-op2 f-r2 f-hi16 */
-  EXTRACT_FMT_44_SETH_CODE
+  EXTRACT_FMT_46_SETH_VARS /* f-op1 f-r1 f-op2 f-r2 f-hi16 */
+  EXTRACT_FMT_46_SETH_CODE
 
   CPU (h_gr[f_r1]) = SLLSI (OPRND (hi16), 16);
   TRACE_RESULT (current_cpu, "dr", 'x', CPU (h_gr[f_r1]));
@@ -2361,11 +2492,11 @@ CIA
 SEM_FN_NAME (m32rx,slli) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_45_slli.f
+#define OPRND(f) par_exec->operands.fmt_47_slli.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 2;
-  EXTRACT_FMT_45_SLLI_VARS /* f-op1 f-r1 f-shift-op2 f-uimm5 */
-  EXTRACT_FMT_45_SLLI_CODE
+  EXTRACT_FMT_47_SLLI_VARS /* f-op1 f-r1 f-shift-op2 f-uimm5 */
+  EXTRACT_FMT_47_SLLI_CODE
 
   CPU (h_gr[f_r1]) = SLLSI (OPRND (dr), OPRND (uimm5));
   TRACE_RESULT (current_cpu, "dr", 'x', CPU (h_gr[f_r1]));
@@ -2442,11 +2573,11 @@ CIA
 SEM_FN_NAME (m32rx,srai) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_45_slli.f
+#define OPRND(f) par_exec->operands.fmt_47_slli.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 2;
-  EXTRACT_FMT_45_SLLI_VARS /* f-op1 f-r1 f-shift-op2 f-uimm5 */
-  EXTRACT_FMT_45_SLLI_CODE
+  EXTRACT_FMT_47_SLLI_VARS /* f-op1 f-r1 f-shift-op2 f-uimm5 */
+  EXTRACT_FMT_47_SLLI_CODE
 
   CPU (h_gr[f_r1]) = SRASI (OPRND (dr), OPRND (uimm5));
   TRACE_RESULT (current_cpu, "dr", 'x', CPU (h_gr[f_r1]));
@@ -2523,11 +2654,11 @@ CIA
 SEM_FN_NAME (m32rx,srli) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_45_slli.f
+#define OPRND(f) par_exec->operands.fmt_47_slli.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 2;
-  EXTRACT_FMT_45_SLLI_VARS /* f-op1 f-r1 f-shift-op2 f-uimm5 */
-  EXTRACT_FMT_45_SLLI_CODE
+  EXTRACT_FMT_47_SLLI_VARS /* f-op1 f-r1 f-shift-op2 f-uimm5 */
+  EXTRACT_FMT_47_SLLI_CODE
 
   CPU (h_gr[f_r1]) = SRLSI (OPRND (dr), OPRND (uimm5));
   TRACE_RESULT (current_cpu, "dr", 'x', CPU (h_gr[f_r1]));
@@ -2576,11 +2707,11 @@ CIA
 SEM_FN_NAME (m32rx,st_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_46_st_d.f
+#define OPRND(f) par_exec->operands.fmt_48_st_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 4;
-  EXTRACT_FMT_46_ST_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
-  EXTRACT_FMT_46_ST_D_CODE
+  EXTRACT_FMT_48_ST_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
+  EXTRACT_FMT_48_ST_D_CODE
 
 SETMEMSI (current_cpu, ADDSI (OPRND (src2), OPRND (slo16)), OPRND (src1));
   TRACE_RESULT (current_cpu, "h-memory-add-WI-src2-slo16", 'x', GETMEMSI (current_cpu, ADDSI (OPRND (src2), OPRND (slo16))));
@@ -2628,11 +2759,11 @@ CIA
 SEM_FN_NAME (m32rx,stb_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_46_st_d.f
+#define OPRND(f) par_exec->operands.fmt_48_st_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 4;
-  EXTRACT_FMT_46_ST_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
-  EXTRACT_FMT_46_ST_D_CODE
+  EXTRACT_FMT_48_ST_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
+  EXTRACT_FMT_48_ST_D_CODE
 
 SETMEMQI (current_cpu, ADDSI (OPRND (src2), OPRND (slo16)), OPRND (src1));
   TRACE_RESULT (current_cpu, "h-memory-add-WI-src2-slo16", 'x', GETMEMQI (current_cpu, ADDSI (OPRND (src2), OPRND (slo16))));
@@ -2680,11 +2811,11 @@ CIA
 SEM_FN_NAME (m32rx,sth_d) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_46_st_d.f
+#define OPRND(f) par_exec->operands.fmt_48_st_d.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 4;
-  EXTRACT_FMT_46_ST_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
-  EXTRACT_FMT_46_ST_D_CODE
+  EXTRACT_FMT_48_ST_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
+  EXTRACT_FMT_48_ST_D_CODE
 
 SETMEMHI (current_cpu, ADDSI (OPRND (src2), OPRND (slo16)), OPRND (src1));
   TRACE_RESULT (current_cpu, "h-memory-add-WI-src2-slo16", 'x', GETMEMHI (current_cpu, ADDSI (OPRND (src2), OPRND (slo16))));
@@ -2861,12 +2992,12 @@ CIA
 SEM_FN_NAME (m32rx,trap) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_47_trap.f
+#define OPRND(f) par_exec->operands.fmt_49_trap.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 2;
   int taken_p = 0;
-  EXTRACT_FMT_47_TRAP_VARS /* f-op1 f-r1 f-op2 f-uimm4 */
-  EXTRACT_FMT_47_TRAP_CODE
+  EXTRACT_FMT_49_TRAP_VARS /* f-op1 f-r1 f-op2 f-uimm4 */
+  EXTRACT_FMT_49_TRAP_CODE
 
 do_trap (current_cpu, OPRND (uimm4));
 
@@ -2911,11 +3042,11 @@ CIA
 SEM_FN_NAME (m32rx,satb) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_48_satb.f
+#define OPRND(f) par_exec->operands.fmt_50_satb.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 4;
-  EXTRACT_FMT_48_SATB_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
-  EXTRACT_FMT_48_SATB_CODE
+  EXTRACT_FMT_50_SATB_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
+  EXTRACT_FMT_50_SATB_CODE
 
   CPU (h_gr[f_r1]) = (GESI (OPRND (src2), 127)) ? (127) : (LESI (OPRND (src2), -128)) ? (-128) : (OPRND (src2));
   TRACE_RESULT (current_cpu, "dr", 'x', CPU (h_gr[f_r1]));
@@ -2938,11 +3069,11 @@ CIA
 SEM_FN_NAME (m32rx,sath) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_48_satb.f
+#define OPRND(f) par_exec->operands.fmt_50_satb.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 4;
-  EXTRACT_FMT_48_SATB_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
-  EXTRACT_FMT_48_SATB_CODE
+  EXTRACT_FMT_50_SATB_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
+  EXTRACT_FMT_50_SATB_CODE
 
   CPU (h_gr[f_r1]) = (GESI (OPRND (src2), 32767)) ? (32767) : (LESI (OPRND (src2), -32768)) ? (-32768) : (OPRND (src2));
   TRACE_RESULT (current_cpu, "dr", 'x', CPU (h_gr[f_r1]));
@@ -2965,11 +3096,11 @@ CIA
 SEM_FN_NAME (m32rx,sat) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_49_sat.f
+#define OPRND(f) par_exec->operands.fmt_51_sat.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 4;
-  EXTRACT_FMT_49_SAT_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
-  EXTRACT_FMT_49_SAT_CODE
+  EXTRACT_FMT_51_SAT_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
+  EXTRACT_FMT_51_SAT_CODE
 
   CPU (h_gr[f_r1]) = (OPRND (condbit)) ? ((LTSI (OPRND (src2), 0)) ? (2147483647) : (0x80000000)) : (OPRND (src2));
   TRACE_RESULT (current_cpu, "dr", 'x', CPU (h_gr[f_r1]));
@@ -3018,11 +3149,11 @@ CIA
 SEM_FN_NAME (m32rx,sadd) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_50_sadd.f
+#define OPRND(f) par_exec->operands.fmt_52_sadd.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 2;
-  EXTRACT_FMT_50_SADD_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_50_SADD_CODE
+  EXTRACT_FMT_52_SADD_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_52_SADD_CODE
 
 m32rx_h_accums_set (current_cpu, 0, ADDDI (SRADI (OPRND (h_accums_1), 16), OPRND (h_accums_0)));
   TRACE_RESULT (current_cpu, "h-accums-0", 'D', m32rx_h_accums_get (current_cpu, 0));
@@ -3043,11 +3174,11 @@ CIA
 SEM_FN_NAME (m32rx,macwu1) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_51_macwu1.f
+#define OPRND(f) par_exec->operands.fmt_53_macwu1.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 2;
-  EXTRACT_FMT_51_MACWU1_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_51_MACWU1_CODE
+  EXTRACT_FMT_53_MACWU1_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_53_MACWU1_CODE
 
 m32rx_h_accums_set (current_cpu, 1, SRADI (SLLDI (ADDDI (OPRND (h_accums_1), MULDI (EXTSIDI (OPRND (src1)), EXTSIDI (ANDSI (OPRND (src2), 65535)))), 8), 8));
   TRACE_RESULT (current_cpu, "h-accums-1", 'D', m32rx_h_accums_get (current_cpu, 1));
@@ -3069,11 +3200,11 @@ CIA
 SEM_FN_NAME (m32rx,msblo) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_52_msblo.f
+#define OPRND(f) par_exec->operands.fmt_54_msblo.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 2;
-  EXTRACT_FMT_52_MSBLO_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_52_MSBLO_CODE
+  EXTRACT_FMT_54_MSBLO_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_54_MSBLO_CODE
 
   CPU (h_accum) = SRADI (SLLDI (SUBDI (OPRND (accum), SRADI (SLLDI (MULDI (EXTHIDI (TRUNCSIHI (OPRND (src1))), EXTHIDI (TRUNCSIHI (OPRND (src2)))), 32), 16)), 8), 8);
   TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
@@ -3116,16 +3247,16 @@ m32rx_h_accums_set (current_cpu, 1, SRADI (SLLDI (MULDI (EXTSIDI (OPRND (src1)),
 #undef OPRND
 }
 
-/* Perform machl1: machl1 $src1,$src2.  */
+/* Perform maclh1: maclh1 $src1,$src2.  */
 CIA
-SEM_FN_NAME (m32rx,machl1) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
+SEM_FN_NAME (m32rx,maclh1) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_51_macwu1.f
+#define OPRND(f) par_exec->operands.fmt_53_macwu1.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 2;
-  EXTRACT_FMT_51_MACWU1_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_51_MACWU1_CODE
+  EXTRACT_FMT_53_MACWU1_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_53_MACWU1_CODE
 
 m32rx_h_accums_set (current_cpu, 1, SRADI (SLLDI (ADDDI (OPRND (h_accums_1), SRADI (SLLDI (MULDI (EXTSIDI (SRASI (OPRND (src1), 16)), EXTHIDI (TRUNCSIHI (OPRND (src2)))), 32), 16)), 8), 8));
   TRACE_RESULT (current_cpu, "h-accums-1", 'D', m32rx_h_accums_get (current_cpu, 1));
@@ -3147,11 +3278,11 @@ CIA
 SEM_FN_NAME (m32rx,sc) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_53_sc.f
+#define OPRND(f) par_exec->operands.fmt_55_sc.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 2;
-  EXTRACT_FMT_53_SC_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_53_SC_CODE
+  EXTRACT_FMT_55_SC_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_55_SC_CODE
 
 if (OPRND (condbit)) {
   CPU (h_abort) = 1;
@@ -3174,11 +3305,11 @@ CIA
 SEM_FN_NAME (m32rx,snc) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
   insn_t insn = SEM_INSN (sem_arg);
-#define OPRND(f) par_exec->operands.fmt_53_sc.f
+#define OPRND(f) par_exec->operands.fmt_55_sc.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   CIA new_pc = CPU (h_pc) + 2;
-  EXTRACT_FMT_53_SC_VARS /* f-op1 f-r1 f-op2 f-r2 */
-  EXTRACT_FMT_53_SC_CODE
+  EXTRACT_FMT_55_SC_VARS /* f-op1 f-r1 f-op2 f-r2 */
+  EXTRACT_FMT_55_SC_CODE
 
 if (NOTBI (OPRND (condbit))) {
   CPU (h_abort) = 1;

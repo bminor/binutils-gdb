@@ -950,6 +950,32 @@ if (NESI (* FLD (f_r2), 0)) {
 #undef FLD
 }
 
+/* Perform divh: divh $dr,$sr.  */
+CIA
+SEM_FN_NAME (m32r,divh) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.fmt_18_div.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  CIA new_pc = SEM_NEXT_PC (sem_arg);
+
+if (NESI (* FLD (f_r2), 0)) {
+* FLD (f_r1) = DIVSI (EXTHISI (TRUNCSIHI (* FLD (f_r1))), * FLD (f_r2));
+  TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
+}
+
+#if WITH_PROFILE_MODEL_P
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      m32r_model_mark_get_h_gr (current_cpu, abuf);
+      m32r_model_mark_set_h_gr (current_cpu, abuf);
+      m32r_model_profile_insn (current_cpu, abuf);
+    }
+#endif
+
+  return new_pc;
+#undef FLD
+}
+
 /* Perform jl: jl $sr.  */
 CIA
 SEM_FN_NAME (m32r,jl) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -960,7 +986,7 @@ SEM_FN_NAME (m32r,jl) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   int taken_p = 0;
 
 do {
-  USI temp1;SI temp0;
+  SI temp1;SI temp0;
   temp0 = ADDSI (ANDSI (CPU (h_pc), -4), 4);
   temp1 = * FLD (f_r2);
   CPU (h_gr[14]) = temp0;
@@ -1841,18 +1867,9 @@ SEM_FN_NAME (m32r,rac) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 do {
   DI tmp_tmp1;
-  tmp_tmp1 = ANDDI (CPU (h_accum), MAKEDI (16777215, 0xffffffff));
-if (ANDIFSI (GEDI (tmp_tmp1, MAKEDI (16383, 0xffff8000)), LEDI (tmp_tmp1, MAKEDI (8388607, 0xffffffff)))) {
-  tmp_tmp1 = MAKEDI (16383, 0xffff8000);
-} else {
-if (ANDIFSI (GEDI (tmp_tmp1, MAKEDI (8388608, 0)), LEDI (tmp_tmp1, MAKEDI (16760832, 0)))) {
-  tmp_tmp1 = MAKEDI (16760832, 0);
-} else {
-  tmp_tmp1 = ANDDI (ADDDI (CPU (h_accum), MAKEDI (0, 16384)), MAKEDI (16777215, 0xffff8000));
-}
-}
-  tmp_tmp1 = SLLDI (tmp_tmp1, 1);
-  CPU (h_accum) = SRADI (SLLDI (tmp_tmp1, 7), 7);
+  tmp_tmp1 = SLLDI (CPU (h_accum), 1);
+  tmp_tmp1 = ADDDI (tmp_tmp1, MAKEDI (0, 32768));
+  CPU (h_accum) = (GTDI (tmp_tmp1, MAKEDI (32767, 0xffff0000))) ? (MAKEDI (32767, 0xffff0000)) : (LTDI (tmp_tmp1, MAKEDI (0xffff8000, 0))) ? (MAKEDI (0xffff8000, 0)) : (ANDDI (tmp_tmp1, MAKEDI (0xffffffff, 0xffff0000)));
   TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
 } while (0);
 
@@ -2496,10 +2513,7 @@ do_unlock (current_cpu, * FLD (f_r1), * FLD (f_r2));
 #undef FLD
 }
 
-/* FIXME: Add "no return" attribute to illegal insn handlers.
-   They all call longjmp.  */
-
-PCADDR
+CIA
 SEM_FN_NAME (m32r,illegal) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
   sim_engine_illegal_insn (current_cpu, NULL_CIA /*FIXME*/);

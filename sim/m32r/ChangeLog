@@ -1,3 +1,23 @@
+Wed Feb 11 18:52:40 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* decode.c, decode.h, sem.c, sem-switch.c, model.c: Regenerate.
+start-sanitize-m32rx
+	* cpux.c, decodex.c, decodex.h, readx.c, semx.c, modelx.c: Regenerate.
+end-sanitize-m32rx
+
+Mon Feb  9 19:41:54 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* decode.c, sem.c: Regenerate.
+start-sanitize-m32rx
+	* cpux.h, decodex.c, readx.c, semx.c: Regenerate.
+	* m32rx.c (m32rx_h_accums_set): New function.
+	(m32rx_model_mark_[gs]et_h_gr): New function.
+	* mloopx.in: Rewrite.
+	* Makefile.in (mloopx.o): Build with -parallel.
+	* sim-main.h (_sim_cpu): Delete member `par_exec'.
+	* tconfig.in (WITH_SEM_SWITCH_FULL): Define as 0 for m32rx.
+end-sanitize-m32rx
+
 Thu Feb  5 12:44:31 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* Makefile.in (m32r.o): Depend on cpu.h

@@ -40,6 +40,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define EX(fn) 0
 #endif
 
+#ifdef HAVE_PARALLEL_EXEC
+#ifdef __GNUC__
+#define READ(n) 0
+#else
+#define READ(n) XCONCAT3 (READ,_,n)
+#endif
+#endif
+
 #if WITH_SEM_SWITCH_FULL
 #define FULL(fn) 0
 #else
@@ -62,127 +70,134 @@ with this program; if not, write to the Free Software Foundation, Inc.,
    prepend m32rx_, so simplify things by handling it here.  */
 #define decode_illegal m32rx_decode_illegal
 
-static DECODE decode_add = { M32R_INSN_ADD, & m32r_cgen_insn_table_entries[M32R_INSN_ADD], EX (fmt_0_add), FULL (add), FAST (add) };
-static DECODE decode_add3 = { M32R_INSN_ADD3, & m32r_cgen_insn_table_entries[M32R_INSN_ADD3], EX (fmt_1_add3), FULL (add3), FAST (add3) };
-static DECODE decode_and = { M32R_INSN_AND, & m32r_cgen_insn_table_entries[M32R_INSN_AND], EX (fmt_0_add), FULL (and), FAST (and) };
-static DECODE decode_and3 = { M32R_INSN_AND3, & m32r_cgen_insn_table_entries[M32R_INSN_AND3], EX (fmt_2_and3), FULL (and3), FAST (and3) };
-static DECODE decode_or = { M32R_INSN_OR, & m32r_cgen_insn_table_entries[M32R_INSN_OR], EX (fmt_0_add), FULL (or), FAST (or) };
-static DECODE decode_or3 = { M32R_INSN_OR3, & m32r_cgen_insn_table_entries[M32R_INSN_OR3], EX (fmt_3_or3), FULL (or3), FAST (or3) };
-static DECODE decode_xor = { M32R_INSN_XOR, & m32r_cgen_insn_table_entries[M32R_INSN_XOR], EX (fmt_0_add), FULL (xor), FAST (xor) };
-static DECODE decode_xor3 = { M32R_INSN_XOR3, & m32r_cgen_insn_table_entries[M32R_INSN_XOR3], EX (fmt_2_and3), FULL (xor3), FAST (xor3) };
-static DECODE decode_addi = { M32R_INSN_ADDI, & m32r_cgen_insn_table_entries[M32R_INSN_ADDI], EX (fmt_4_addi), FULL (addi), FAST (addi) };
-static DECODE decode_addv = { M32R_INSN_ADDV, & m32r_cgen_insn_table_entries[M32R_INSN_ADDV], EX (fmt_0_add), FULL (addv), FAST (addv) };
-static DECODE decode_addv3 = { M32R_INSN_ADDV3, & m32r_cgen_insn_table_entries[M32R_INSN_ADDV3], EX (fmt_5_addv3), FULL (addv3), FAST (addv3) };
-static DECODE decode_addx = { M32R_INSN_ADDX, & m32r_cgen_insn_table_entries[M32R_INSN_ADDX], EX (fmt_6_addx), FULL (addx), FAST (addx) };
-static DECODE decode_bc8 = { M32R_INSN_BC8, & m32r_cgen_insn_table_entries[M32R_INSN_BC8], EX (fmt_7_bc8), FULL (bc8), FAST (bc8) };
-static DECODE decode_bc24 = { M32R_INSN_BC24, & m32r_cgen_insn_table_entries[M32R_INSN_BC24], EX (fmt_8_bc24), FULL (bc24), FAST (bc24) };
-static DECODE decode_beq = { M32R_INSN_BEQ, & m32r_cgen_insn_table_entries[M32R_INSN_BEQ], EX (fmt_9_beq), FULL (beq), FAST (beq) };
-static DECODE decode_beqz = { M32R_INSN_BEQZ, & m32r_cgen_insn_table_entries[M32R_INSN_BEQZ], EX (fmt_10_beqz), FULL (beqz), FAST (beqz) };
-static DECODE decode_bgez = { M32R_INSN_BGEZ, & m32r_cgen_insn_table_entries[M32R_INSN_BGEZ], EX (fmt_10_beqz), FULL (bgez), FAST (bgez) };
-static DECODE decode_bgtz = { M32R_INSN_BGTZ, & m32r_cgen_insn_table_entries[M32R_INSN_BGTZ], EX (fmt_10_beqz), FULL (bgtz), FAST (bgtz) };
-static DECODE decode_blez = { M32R_INSN_BLEZ, & m32r_cgen_insn_table_entries[M32R_INSN_BLEZ], EX (fmt_10_beqz), FULL (blez), FAST (blez) };
-static DECODE decode_bltz = { M32R_INSN_BLTZ, & m32r_cgen_insn_table_entries[M32R_INSN_BLTZ], EX (fmt_10_beqz), FULL (bltz), FAST (bltz) };
-static DECODE decode_bnez = { M32R_INSN_BNEZ, & m32r_cgen_insn_table_entries[M32R_INSN_BNEZ], EX (fmt_10_beqz), FULL (bnez), FAST (bnez) };
-static DECODE decode_bl8 = { M32R_INSN_BL8, & m32r_cgen_insn_table_entries[M32R_INSN_BL8], EX (fmt_11_bl8), FULL (bl8), FAST (bl8) };
-static DECODE decode_bl24 = { M32R_INSN_BL24, & m32r_cgen_insn_table_entries[M32R_INSN_BL24], EX (fmt_12_bl24), FULL (bl24), FAST (bl24) };
-static DECODE decode_bcl8 = { M32R_INSN_BCL8, & m32r_cgen_insn_table_entries[M32R_INSN_BCL8], EX (fmt_13_bcl8), FULL (bcl8), FAST (bcl8) };
-static DECODE decode_bcl24 = { M32R_INSN_BCL24, & m32r_cgen_insn_table_entries[M32R_INSN_BCL24], EX (fmt_14_bcl24), FULL (bcl24), FAST (bcl24) };
-static DECODE decode_bnc8 = { M32R_INSN_BNC8, & m32r_cgen_insn_table_entries[M32R_INSN_BNC8], EX (fmt_7_bc8), FULL (bnc8), FAST (bnc8) };
-static DECODE decode_bnc24 = { M32R_INSN_BNC24, & m32r_cgen_insn_table_entries[M32R_INSN_BNC24], EX (fmt_8_bc24), FULL (bnc24), FAST (bnc24) };
-static DECODE decode_bne = { M32R_INSN_BNE, & m32r_cgen_insn_table_entries[M32R_INSN_BNE], EX (fmt_9_beq), FULL (bne), FAST (bne) };
-static DECODE decode_bra8 = { M32R_INSN_BRA8, & m32r_cgen_insn_table_entries[M32R_INSN_BRA8], EX (fmt_15_bra8), FULL (bra8), FAST (bra8) };
-static DECODE decode_bra24 = { M32R_INSN_BRA24, & m32r_cgen_insn_table_entries[M32R_INSN_BRA24], EX (fmt_16_bra24), FULL (bra24), FAST (bra24) };
-static DECODE decode_bncl8 = { M32R_INSN_BNCL8, & m32r_cgen_insn_table_entries[M32R_INSN_BNCL8], EX (fmt_13_bcl8), FULL (bncl8), FAST (bncl8) };
-static DECODE decode_bncl24 = { M32R_INSN_BNCL24, & m32r_cgen_insn_table_entries[M32R_INSN_BNCL24], EX (fmt_14_bcl24), FULL (bncl24), FAST (bncl24) };
-static DECODE decode_cmp = { M32R_INSN_CMP, & m32r_cgen_insn_table_entries[M32R_INSN_CMP], EX (fmt_17_cmp), FULL (cmp), FAST (cmp) };
-static DECODE decode_cmpi = { M32R_INSN_CMPI, & m32r_cgen_insn_table_entries[M32R_INSN_CMPI], EX (fmt_18_cmpi), FULL (cmpi), FAST (cmpi) };
-static DECODE decode_cmpu = { M32R_INSN_CMPU, & m32r_cgen_insn_table_entries[M32R_INSN_CMPU], EX (fmt_17_cmp), FULL (cmpu), FAST (cmpu) };
-static DECODE decode_cmpui = { M32R_INSN_CMPUI, & m32r_cgen_insn_table_entries[M32R_INSN_CMPUI], EX (fmt_19_cmpui), FULL (cmpui), FAST (cmpui) };
-static DECODE decode_cmpeq = { M32R_INSN_CMPEQ, & m32r_cgen_insn_table_entries[M32R_INSN_CMPEQ], EX (fmt_17_cmp), FULL (cmpeq), FAST (cmpeq) };
-static DECODE decode_cmpz = { M32R_INSN_CMPZ, & m32r_cgen_insn_table_entries[M32R_INSN_CMPZ], EX (fmt_20_cmpz), FULL (cmpz), FAST (cmpz) };
-static DECODE decode_div = { M32R_INSN_DIV, & m32r_cgen_insn_table_entries[M32R_INSN_DIV], EX (fmt_21_div), FULL (div), FAST (div) };
-static DECODE decode_divu = { M32R_INSN_DIVU, & m32r_cgen_insn_table_entries[M32R_INSN_DIVU], EX (fmt_21_div), FULL (divu), FAST (divu) };
-static DECODE decode_rem = { M32R_INSN_REM, & m32r_cgen_insn_table_entries[M32R_INSN_REM], EX (fmt_21_div), FULL (rem), FAST (rem) };
-static DECODE decode_remu = { M32R_INSN_REMU, & m32r_cgen_insn_table_entries[M32R_INSN_REMU], EX (fmt_21_div), FULL (remu), FAST (remu) };
-static DECODE decode_jc = { M32R_INSN_JC, & m32r_cgen_insn_table_entries[M32R_INSN_JC], EX (fmt_22_jc), FULL (jc), FAST (jc) };
-static DECODE decode_jnc = { M32R_INSN_JNC, & m32r_cgen_insn_table_entries[M32R_INSN_JNC], EX (fmt_22_jc), FULL (jnc), FAST (jnc) };
-static DECODE decode_jl = { M32R_INSN_JL, & m32r_cgen_insn_table_entries[M32R_INSN_JL], EX (fmt_23_jl), FULL (jl), FAST (jl) };
-static DECODE decode_jmp = { M32R_INSN_JMP, & m32r_cgen_insn_table_entries[M32R_INSN_JMP], EX (fmt_24_jmp), FULL (jmp), FAST (jmp) };
-static DECODE decode_ld = { M32R_INSN_LD, & m32r_cgen_insn_table_entries[M32R_INSN_LD], EX (fmt_25_ld), FULL (ld), FAST (ld) };
-static DECODE decode_ld_d = { M32R_INSN_LD_D, & m32r_cgen_insn_table_entries[M32R_INSN_LD_D], EX (fmt_26_ld_d), FULL (ld_d), FAST (ld_d) };
-static DECODE decode_ldb = { M32R_INSN_LDB, & m32r_cgen_insn_table_entries[M32R_INSN_LDB], EX (fmt_27_ldb), FULL (ldb), FAST (ldb) };
-static DECODE decode_ldb_d = { M32R_INSN_LDB_D, & m32r_cgen_insn_table_entries[M32R_INSN_LDB_D], EX (fmt_28_ldb_d), FULL (ldb_d), FAST (ldb_d) };
-static DECODE decode_ldh = { M32R_INSN_LDH, & m32r_cgen_insn_table_entries[M32R_INSN_LDH], EX (fmt_29_ldh), FULL (ldh), FAST (ldh) };
-static DECODE decode_ldh_d = { M32R_INSN_LDH_D, & m32r_cgen_insn_table_entries[M32R_INSN_LDH_D], EX (fmt_30_ldh_d), FULL (ldh_d), FAST (ldh_d) };
-static DECODE decode_ldub = { M32R_INSN_LDUB, & m32r_cgen_insn_table_entries[M32R_INSN_LDUB], EX (fmt_27_ldb), FULL (ldub), FAST (ldub) };
-static DECODE decode_ldub_d = { M32R_INSN_LDUB_D, & m32r_cgen_insn_table_entries[M32R_INSN_LDUB_D], EX (fmt_28_ldb_d), FULL (ldub_d), FAST (ldub_d) };
-static DECODE decode_lduh = { M32R_INSN_LDUH, & m32r_cgen_insn_table_entries[M32R_INSN_LDUH], EX (fmt_29_ldh), FULL (lduh), FAST (lduh) };
-static DECODE decode_lduh_d = { M32R_INSN_LDUH_D, & m32r_cgen_insn_table_entries[M32R_INSN_LDUH_D], EX (fmt_30_ldh_d), FULL (lduh_d), FAST (lduh_d) };
-static DECODE decode_ld_plus = { M32R_INSN_LD_PLUS, & m32r_cgen_insn_table_entries[M32R_INSN_LD_PLUS], EX (fmt_25_ld), FULL (ld_plus), FAST (ld_plus) };
-static DECODE decode_ld24 = { M32R_INSN_LD24, & m32r_cgen_insn_table_entries[M32R_INSN_LD24], EX (fmt_31_ld24), FULL (ld24), FAST (ld24) };
-static DECODE decode_ldi8 = { M32R_INSN_LDI8, & m32r_cgen_insn_table_entries[M32R_INSN_LDI8], EX (fmt_32_ldi8), FULL (ldi8), FAST (ldi8) };
-static DECODE decode_ldi16 = { M32R_INSN_LDI16, & m32r_cgen_insn_table_entries[M32R_INSN_LDI16], EX (fmt_33_ldi16), FULL (ldi16), FAST (ldi16) };
-static DECODE decode_lock = { M32R_INSN_LOCK, & m32r_cgen_insn_table_entries[M32R_INSN_LOCK], EX (fmt_0_add), FULL (lock), FAST (lock) };
-static DECODE decode_machi_a = { M32R_INSN_MACHI_A, & m32r_cgen_insn_table_entries[M32R_INSN_MACHI_A], EX (fmt_34_machi_a), FULL (machi_a), FAST (machi_a) };
-static DECODE decode_maclo_a = { M32R_INSN_MACLO_A, & m32r_cgen_insn_table_entries[M32R_INSN_MACLO_A], EX (fmt_34_machi_a), FULL (maclo_a), FAST (maclo_a) };
-static DECODE decode_mul = { M32R_INSN_MUL, & m32r_cgen_insn_table_entries[M32R_INSN_MUL], EX (fmt_0_add), FULL (mul), FAST (mul) };
-static DECODE decode_mulhi_a = { M32R_INSN_MULHI_A, & m32r_cgen_insn_table_entries[M32R_INSN_MULHI_A], EX (fmt_35_mulhi_a), FULL (mulhi_a), FAST (mulhi_a) };
-static DECODE decode_mullo_a = { M32R_INSN_MULLO_A, & m32r_cgen_insn_table_entries[M32R_INSN_MULLO_A], EX (fmt_35_mulhi_a), FULL (mullo_a), FAST (mullo_a) };
-static DECODE decode_mv = { M32R_INSN_MV, & m32r_cgen_insn_table_entries[M32R_INSN_MV], EX (fmt_36_mv), FULL (mv), FAST (mv) };
-static DECODE decode_mvfachi_a = { M32R_INSN_MVFACHI_A, & m32r_cgen_insn_table_entries[M32R_INSN_MVFACHI_A], EX (fmt_37_mvfachi_a), FULL (mvfachi_a), FAST (mvfachi_a) };
-static DECODE decode_mvfaclo_a = { M32R_INSN_MVFACLO_A, & m32r_cgen_insn_table_entries[M32R_INSN_MVFACLO_A], EX (fmt_37_mvfachi_a), FULL (mvfaclo_a), FAST (mvfaclo_a) };
-static DECODE decode_mvfacmi_a = { M32R_INSN_MVFACMI_A, & m32r_cgen_insn_table_entries[M32R_INSN_MVFACMI_A], EX (fmt_37_mvfachi_a), FULL (mvfacmi_a), FAST (mvfacmi_a) };
-static DECODE decode_mvfc = { M32R_INSN_MVFC, & m32r_cgen_insn_table_entries[M32R_INSN_MVFC], EX (fmt_38_mvfc), FULL (mvfc), FAST (mvfc) };
-static DECODE decode_mvtachi_a = { M32R_INSN_MVTACHI_A, & m32r_cgen_insn_table_entries[M32R_INSN_MVTACHI_A], EX (fmt_39_mvtachi_a), FULL (mvtachi_a), FAST (mvtachi_a) };
-static DECODE decode_mvtaclo_a = { M32R_INSN_MVTACLO_A, & m32r_cgen_insn_table_entries[M32R_INSN_MVTACLO_A], EX (fmt_39_mvtachi_a), FULL (mvtaclo_a), FAST (mvtaclo_a) };
-static DECODE decode_mvtc = { M32R_INSN_MVTC, & m32r_cgen_insn_table_entries[M32R_INSN_MVTC], EX (fmt_40_mvtc), FULL (mvtc), FAST (mvtc) };
-static DECODE decode_neg = { M32R_INSN_NEG, & m32r_cgen_insn_table_entries[M32R_INSN_NEG], EX (fmt_36_mv), FULL (neg), FAST (neg) };
-static DECODE decode_nop = { M32R_INSN_NOP, & m32r_cgen_insn_table_entries[M32R_INSN_NOP], EX (fmt_41_nop), FULL (nop), FAST (nop) };
-static DECODE decode_not = { M32R_INSN_NOT, & m32r_cgen_insn_table_entries[M32R_INSN_NOT], EX (fmt_36_mv), FULL (not), FAST (not) };
-static DECODE decode_rac_a = { M32R_INSN_RAC_A, & m32r_cgen_insn_table_entries[M32R_INSN_RAC_A], EX (fmt_42_rac_a), FULL (rac_a), FAST (rac_a) };
-static DECODE decode_rach_a = { M32R_INSN_RACH_A, & m32r_cgen_insn_table_entries[M32R_INSN_RACH_A], EX (fmt_42_rac_a), FULL (rach_a), FAST (rach_a) };
-static DECODE decode_rte = { M32R_INSN_RTE, & m32r_cgen_insn_table_entries[M32R_INSN_RTE], EX (fmt_43_rte), FULL (rte), FAST (rte) };
-static DECODE decode_seth = { M32R_INSN_SETH, & m32r_cgen_insn_table_entries[M32R_INSN_SETH], EX (fmt_44_seth), FULL (seth), FAST (seth) };
-static DECODE decode_sll = { M32R_INSN_SLL, & m32r_cgen_insn_table_entries[M32R_INSN_SLL], EX (fmt_0_add), FULL (sll), FAST (sll) };
-static DECODE decode_sll3 = { M32R_INSN_SLL3, & m32r_cgen_insn_table_entries[M32R_INSN_SLL3], EX (fmt_5_addv3), FULL (sll3), FAST (sll3) };
-static DECODE decode_slli = { M32R_INSN_SLLI, & m32r_cgen_insn_table_entries[M32R_INSN_SLLI], EX (fmt_45_slli), FULL (slli), FAST (slli) };
-static DECODE decode_sra = { M32R_INSN_SRA, & m32r_cgen_insn_table_entries[M32R_INSN_SRA], EX (fmt_0_add), FULL (sra), FAST (sra) };
-static DECODE decode_sra3 = { M32R_INSN_SRA3, & m32r_cgen_insn_table_entries[M32R_INSN_SRA3], EX (fmt_5_addv3), FULL (sra3), FAST (sra3) };
-static DECODE decode_srai = { M32R_INSN_SRAI, & m32r_cgen_insn_table_entries[M32R_INSN_SRAI], EX (fmt_45_slli), FULL (srai), FAST (srai) };
-static DECODE decode_srl = { M32R_INSN_SRL, & m32r_cgen_insn_table_entries[M32R_INSN_SRL], EX (fmt_0_add), FULL (srl), FAST (srl) };
-static DECODE decode_srl3 = { M32R_INSN_SRL3, & m32r_cgen_insn_table_entries[M32R_INSN_SRL3], EX (fmt_5_addv3), FULL (srl3), FAST (srl3) };
-static DECODE decode_srli = { M32R_INSN_SRLI, & m32r_cgen_insn_table_entries[M32R_INSN_SRLI], EX (fmt_45_slli), FULL (srli), FAST (srli) };
-static DECODE decode_st = { M32R_INSN_ST, & m32r_cgen_insn_table_entries[M32R_INSN_ST], EX (fmt_17_cmp), FULL (st), FAST (st) };
-static DECODE decode_st_d = { M32R_INSN_ST_D, & m32r_cgen_insn_table_entries[M32R_INSN_ST_D], EX (fmt_46_st_d), FULL (st_d), FAST (st_d) };
-static DECODE decode_stb = { M32R_INSN_STB, & m32r_cgen_insn_table_entries[M32R_INSN_STB], EX (fmt_17_cmp), FULL (stb), FAST (stb) };
-static DECODE decode_stb_d = { M32R_INSN_STB_D, & m32r_cgen_insn_table_entries[M32R_INSN_STB_D], EX (fmt_46_st_d), FULL (stb_d), FAST (stb_d) };
-static DECODE decode_sth = { M32R_INSN_STH, & m32r_cgen_insn_table_entries[M32R_INSN_STH], EX (fmt_17_cmp), FULL (sth), FAST (sth) };
-static DECODE decode_sth_d = { M32R_INSN_STH_D, & m32r_cgen_insn_table_entries[M32R_INSN_STH_D], EX (fmt_46_st_d), FULL (sth_d), FAST (sth_d) };
-static DECODE decode_st_plus = { M32R_INSN_ST_PLUS, & m32r_cgen_insn_table_entries[M32R_INSN_ST_PLUS], EX (fmt_17_cmp), FULL (st_plus), FAST (st_plus) };
-static DECODE decode_st_minus = { M32R_INSN_ST_MINUS, & m32r_cgen_insn_table_entries[M32R_INSN_ST_MINUS], EX (fmt_17_cmp), FULL (st_minus), FAST (st_minus) };
-static DECODE decode_sub = { M32R_INSN_SUB, & m32r_cgen_insn_table_entries[M32R_INSN_SUB], EX (fmt_0_add), FULL (sub), FAST (sub) };
-static DECODE decode_subv = { M32R_INSN_SUBV, & m32r_cgen_insn_table_entries[M32R_INSN_SUBV], EX (fmt_0_add), FULL (subv), FAST (subv) };
-static DECODE decode_subx = { M32R_INSN_SUBX, & m32r_cgen_insn_table_entries[M32R_INSN_SUBX], EX (fmt_6_addx), FULL (subx), FAST (subx) };
-static DECODE decode_trap = { M32R_INSN_TRAP, & m32r_cgen_insn_table_entries[M32R_INSN_TRAP], EX (fmt_47_trap), FULL (trap), FAST (trap) };
-static DECODE decode_unlock = { M32R_INSN_UNLOCK, & m32r_cgen_insn_table_entries[M32R_INSN_UNLOCK], EX (fmt_17_cmp), FULL (unlock), FAST (unlock) };
-static DECODE decode_satb = { M32R_INSN_SATB, & m32r_cgen_insn_table_entries[M32R_INSN_SATB], EX (fmt_48_satb), FULL (satb), FAST (satb) };
-static DECODE decode_sath = { M32R_INSN_SATH, & m32r_cgen_insn_table_entries[M32R_INSN_SATH], EX (fmt_48_satb), FULL (sath), FAST (sath) };
-static DECODE decode_sat = { M32R_INSN_SAT, & m32r_cgen_insn_table_entries[M32R_INSN_SAT], EX (fmt_49_sat), FULL (sat), FAST (sat) };
-static DECODE decode_pcmpbz = { M32R_INSN_PCMPBZ, & m32r_cgen_insn_table_entries[M32R_INSN_PCMPBZ], EX (fmt_20_cmpz), FULL (pcmpbz), FAST (pcmpbz) };
-static DECODE decode_sadd = { M32R_INSN_SADD, & m32r_cgen_insn_table_entries[M32R_INSN_SADD], EX (fmt_50_sadd), FULL (sadd), FAST (sadd) };
-static DECODE decode_macwu1 = { M32R_INSN_MACWU1, & m32r_cgen_insn_table_entries[M32R_INSN_MACWU1], EX (fmt_51_macwu1), FULL (macwu1), FAST (macwu1) };
-static DECODE decode_msblo = { M32R_INSN_MSBLO, & m32r_cgen_insn_table_entries[M32R_INSN_MSBLO], EX (fmt_52_msblo), FULL (msblo), FAST (msblo) };
-static DECODE decode_mulwu1 = { M32R_INSN_MULWU1, & m32r_cgen_insn_table_entries[M32R_INSN_MULWU1], EX (fmt_17_cmp), FULL (mulwu1), FAST (mulwu1) };
-static DECODE decode_machl1 = { M32R_INSN_MACHL1, & m32r_cgen_insn_table_entries[M32R_INSN_MACHL1], EX (fmt_51_macwu1), FULL (machl1), FAST (machl1) };
-static DECODE decode_sc = { M32R_INSN_SC, & m32r_cgen_insn_table_entries[M32R_INSN_SC], EX (fmt_53_sc), FULL (sc), FAST (sc) };
-static DECODE decode_snc = { M32R_INSN_SNC, & m32r_cgen_insn_table_entries[M32R_INSN_SNC], EX (fmt_53_sc), FULL (snc), FAST (snc) };
+#define ITAB(n) m32r_cgen_insn_table_entries[n]
+
+static DECODE decode_add = { M32R_INSN_ADD, & ITAB (M32R_INSN_ADD), EX (fmt_0_add), READ (FMT_0_ADD), FULL (add), FAST (add) };
+static DECODE decode_add3 = { M32R_INSN_ADD3, & ITAB (M32R_INSN_ADD3), EX (fmt_1_add3), READ (FMT_1_ADD3), FULL (add3), FAST (add3) };
+static DECODE decode_and = { M32R_INSN_AND, & ITAB (M32R_INSN_AND), EX (fmt_0_add), READ (FMT_0_ADD), FULL (and), FAST (and) };
+static DECODE decode_and3 = { M32R_INSN_AND3, & ITAB (M32R_INSN_AND3), EX (fmt_2_and3), READ (FMT_2_AND3), FULL (and3), FAST (and3) };
+static DECODE decode_or = { M32R_INSN_OR, & ITAB (M32R_INSN_OR), EX (fmt_0_add), READ (FMT_0_ADD), FULL (or), FAST (or) };
+static DECODE decode_or3 = { M32R_INSN_OR3, & ITAB (M32R_INSN_OR3), EX (fmt_3_or3), READ (FMT_3_OR3), FULL (or3), FAST (or3) };
+static DECODE decode_xor = { M32R_INSN_XOR, & ITAB (M32R_INSN_XOR), EX (fmt_0_add), READ (FMT_0_ADD), FULL (xor), FAST (xor) };
+static DECODE decode_xor3 = { M32R_INSN_XOR3, & ITAB (M32R_INSN_XOR3), EX (fmt_2_and3), READ (FMT_2_AND3), FULL (xor3), FAST (xor3) };
+static DECODE decode_addi = { M32R_INSN_ADDI, & ITAB (M32R_INSN_ADDI), EX (fmt_4_addi), READ (FMT_4_ADDI), FULL (addi), FAST (addi) };
+static DECODE decode_addv = { M32R_INSN_ADDV, & ITAB (M32R_INSN_ADDV), EX (fmt_0_add), READ (FMT_0_ADD), FULL (addv), FAST (addv) };
+static DECODE decode_addv3 = { M32R_INSN_ADDV3, & ITAB (M32R_INSN_ADDV3), EX (fmt_5_addv3), READ (FMT_5_ADDV3), FULL (addv3), FAST (addv3) };
+static DECODE decode_addx = { M32R_INSN_ADDX, & ITAB (M32R_INSN_ADDX), EX (fmt_6_addx), READ (FMT_6_ADDX), FULL (addx), FAST (addx) };
+static DECODE decode_bc8 = { M32R_INSN_BC8, & ITAB (M32R_INSN_BC8), EX (fmt_7_bc8), READ (FMT_7_BC8), FULL (bc8), FAST (bc8) };
+static DECODE decode_bc24 = { M32R_INSN_BC24, & ITAB (M32R_INSN_BC24), EX (fmt_8_bc24), READ (FMT_8_BC24), FULL (bc24), FAST (bc24) };
+static DECODE decode_beq = { M32R_INSN_BEQ, & ITAB (M32R_INSN_BEQ), EX (fmt_9_beq), READ (FMT_9_BEQ), FULL (beq), FAST (beq) };
+static DECODE decode_beqz = { M32R_INSN_BEQZ, & ITAB (M32R_INSN_BEQZ), EX (fmt_10_beqz), READ (FMT_10_BEQZ), FULL (beqz), FAST (beqz) };
+static DECODE decode_bgez = { M32R_INSN_BGEZ, & ITAB (M32R_INSN_BGEZ), EX (fmt_10_beqz), READ (FMT_10_BEQZ), FULL (bgez), FAST (bgez) };
+static DECODE decode_bgtz = { M32R_INSN_BGTZ, & ITAB (M32R_INSN_BGTZ), EX (fmt_10_beqz), READ (FMT_10_BEQZ), FULL (bgtz), FAST (bgtz) };
+static DECODE decode_blez = { M32R_INSN_BLEZ, & ITAB (M32R_INSN_BLEZ), EX (fmt_10_beqz), READ (FMT_10_BEQZ), FULL (blez), FAST (blez) };
+static DECODE decode_bltz = { M32R_INSN_BLTZ, & ITAB (M32R_INSN_BLTZ), EX (fmt_10_beqz), READ (FMT_10_BEQZ), FULL (bltz), FAST (bltz) };
+static DECODE decode_bnez = { M32R_INSN_BNEZ, & ITAB (M32R_INSN_BNEZ), EX (fmt_10_beqz), READ (FMT_10_BEQZ), FULL (bnez), FAST (bnez) };
+static DECODE decode_bl8 = { M32R_INSN_BL8, & ITAB (M32R_INSN_BL8), EX (fmt_11_bl8), READ (FMT_11_BL8), FULL (bl8), FAST (bl8) };
+static DECODE decode_bl24 = { M32R_INSN_BL24, & ITAB (M32R_INSN_BL24), EX (fmt_12_bl24), READ (FMT_12_BL24), FULL (bl24), FAST (bl24) };
+static DECODE decode_bcl8 = { M32R_INSN_BCL8, & ITAB (M32R_INSN_BCL8), EX (fmt_13_bcl8), READ (FMT_13_BCL8), FULL (bcl8), FAST (bcl8) };
+static DECODE decode_bcl24 = { M32R_INSN_BCL24, & ITAB (M32R_INSN_BCL24), EX (fmt_14_bcl24), READ (FMT_14_BCL24), FULL (bcl24), FAST (bcl24) };
+static DECODE decode_bnc8 = { M32R_INSN_BNC8, & ITAB (M32R_INSN_BNC8), EX (fmt_7_bc8), READ (FMT_7_BC8), FULL (bnc8), FAST (bnc8) };
+static DECODE decode_bnc24 = { M32R_INSN_BNC24, & ITAB (M32R_INSN_BNC24), EX (fmt_8_bc24), READ (FMT_8_BC24), FULL (bnc24), FAST (bnc24) };
+static DECODE decode_bne = { M32R_INSN_BNE, & ITAB (M32R_INSN_BNE), EX (fmt_9_beq), READ (FMT_9_BEQ), FULL (bne), FAST (bne) };
+static DECODE decode_bra8 = { M32R_INSN_BRA8, & ITAB (M32R_INSN_BRA8), EX (fmt_15_bra8), READ (FMT_15_BRA8), FULL (bra8), FAST (bra8) };
+static DECODE decode_bra24 = { M32R_INSN_BRA24, & ITAB (M32R_INSN_BRA24), EX (fmt_16_bra24), READ (FMT_16_BRA24), FULL (bra24), FAST (bra24) };
+static DECODE decode_bncl8 = { M32R_INSN_BNCL8, & ITAB (M32R_INSN_BNCL8), EX (fmt_13_bcl8), READ (FMT_13_BCL8), FULL (bncl8), FAST (bncl8) };
+static DECODE decode_bncl24 = { M32R_INSN_BNCL24, & ITAB (M32R_INSN_BNCL24), EX (fmt_14_bcl24), READ (FMT_14_BCL24), FULL (bncl24), FAST (bncl24) };
+static DECODE decode_cmp = { M32R_INSN_CMP, & ITAB (M32R_INSN_CMP), EX (fmt_17_cmp), READ (FMT_17_CMP), FULL (cmp), FAST (cmp) };
+static DECODE decode_cmpi = { M32R_INSN_CMPI, & ITAB (M32R_INSN_CMPI), EX (fmt_18_cmpi), READ (FMT_18_CMPI), FULL (cmpi), FAST (cmpi) };
+static DECODE decode_cmpu = { M32R_INSN_CMPU, & ITAB (M32R_INSN_CMPU), EX (fmt_17_cmp), READ (FMT_17_CMP), FULL (cmpu), FAST (cmpu) };
+static DECODE decode_cmpui = { M32R_INSN_CMPUI, & ITAB (M32R_INSN_CMPUI), EX (fmt_19_cmpui), READ (FMT_19_CMPUI), FULL (cmpui), FAST (cmpui) };
+static DECODE decode_cmpeq = { M32R_INSN_CMPEQ, & ITAB (M32R_INSN_CMPEQ), EX (fmt_17_cmp), READ (FMT_17_CMP), FULL (cmpeq), FAST (cmpeq) };
+static DECODE decode_cmpz = { M32R_INSN_CMPZ, & ITAB (M32R_INSN_CMPZ), EX (fmt_20_cmpz), READ (FMT_20_CMPZ), FULL (cmpz), FAST (cmpz) };
+static DECODE decode_div = { M32R_INSN_DIV, & ITAB (M32R_INSN_DIV), EX (fmt_21_div), READ (FMT_21_DIV), FULL (div), FAST (div) };
+static DECODE decode_divu = { M32R_INSN_DIVU, & ITAB (M32R_INSN_DIVU), EX (fmt_21_div), READ (FMT_21_DIV), FULL (divu), FAST (divu) };
+static DECODE decode_rem = { M32R_INSN_REM, & ITAB (M32R_INSN_REM), EX (fmt_21_div), READ (FMT_21_DIV), FULL (rem), FAST (rem) };
+static DECODE decode_remu = { M32R_INSN_REMU, & ITAB (M32R_INSN_REMU), EX (fmt_21_div), READ (FMT_21_DIV), FULL (remu), FAST (remu) };
+static DECODE decode_divh = { M32R_INSN_DIVH, & ITAB (M32R_INSN_DIVH), EX (fmt_21_div), READ (FMT_21_DIV), FULL (divh), FAST (divh) };
+static DECODE decode_jc = { M32R_INSN_JC, & ITAB (M32R_INSN_JC), EX (fmt_22_jc), READ (FMT_22_JC), FULL (jc), FAST (jc) };
+static DECODE decode_jnc = { M32R_INSN_JNC, & ITAB (M32R_INSN_JNC), EX (fmt_22_jc), READ (FMT_22_JC), FULL (jnc), FAST (jnc) };
+static DECODE decode_jl = { M32R_INSN_JL, & ITAB (M32R_INSN_JL), EX (fmt_23_jl), READ (FMT_23_JL), FULL (jl), FAST (jl) };
+static DECODE decode_jmp = { M32R_INSN_JMP, & ITAB (M32R_INSN_JMP), EX (fmt_24_jmp), READ (FMT_24_JMP), FULL (jmp), FAST (jmp) };
+static DECODE decode_ld = { M32R_INSN_LD, & ITAB (M32R_INSN_LD), EX (fmt_25_ld), READ (FMT_25_LD), FULL (ld), FAST (ld) };
+static DECODE decode_ld_d = { M32R_INSN_LD_D, & ITAB (M32R_INSN_LD_D), EX (fmt_26_ld_d), READ (FMT_26_LD_D), FULL (ld_d), FAST (ld_d) };
+static DECODE decode_ldb = { M32R_INSN_LDB, & ITAB (M32R_INSN_LDB), EX (fmt_27_ldb), READ (FMT_27_LDB), FULL (ldb), FAST (ldb) };
+static DECODE decode_ldb_d = { M32R_INSN_LDB_D, & ITAB (M32R_INSN_LDB_D), EX (fmt_28_ldb_d), READ (FMT_28_LDB_D), FULL (ldb_d), FAST (ldb_d) };
+static DECODE decode_ldh = { M32R_INSN_LDH, & ITAB (M32R_INSN_LDH), EX (fmt_29_ldh), READ (FMT_29_LDH), FULL (ldh), FAST (ldh) };
+static DECODE decode_ldh_d = { M32R_INSN_LDH_D, & ITAB (M32R_INSN_LDH_D), EX (fmt_30_ldh_d), READ (FMT_30_LDH_D), FULL (ldh_d), FAST (ldh_d) };
+static DECODE decode_ldub = { M32R_INSN_LDUB, & ITAB (M32R_INSN_LDUB), EX (fmt_27_ldb), READ (FMT_27_LDB), FULL (ldub), FAST (ldub) };
+static DECODE decode_ldub_d = { M32R_INSN_LDUB_D, & ITAB (M32R_INSN_LDUB_D), EX (fmt_28_ldb_d), READ (FMT_28_LDB_D), FULL (ldub_d), FAST (ldub_d) };
+static DECODE decode_lduh = { M32R_INSN_LDUH, & ITAB (M32R_INSN_LDUH), EX (fmt_29_ldh), READ (FMT_29_LDH), FULL (lduh), FAST (lduh) };
+static DECODE decode_lduh_d = { M32R_INSN_LDUH_D, & ITAB (M32R_INSN_LDUH_D), EX (fmt_30_ldh_d), READ (FMT_30_LDH_D), FULL (lduh_d), FAST (lduh_d) };
+static DECODE decode_ld_plus = { M32R_INSN_LD_PLUS, & ITAB (M32R_INSN_LD_PLUS), EX (fmt_25_ld), READ (FMT_25_LD), FULL (ld_plus), FAST (ld_plus) };
+static DECODE decode_ld24 = { M32R_INSN_LD24, & ITAB (M32R_INSN_LD24), EX (fmt_31_ld24), READ (FMT_31_LD24), FULL (ld24), FAST (ld24) };
+static DECODE decode_ldi8 = { M32R_INSN_LDI8, & ITAB (M32R_INSN_LDI8), EX (fmt_32_ldi8), READ (FMT_32_LDI8), FULL (ldi8), FAST (ldi8) };
+static DECODE decode_ldi16 = { M32R_INSN_LDI16, & ITAB (M32R_INSN_LDI16), EX (fmt_33_ldi16), READ (FMT_33_LDI16), FULL (ldi16), FAST (ldi16) };
+static DECODE decode_lock = { M32R_INSN_LOCK, & ITAB (M32R_INSN_LOCK), EX (fmt_0_add), READ (FMT_0_ADD), FULL (lock), FAST (lock) };
+static DECODE decode_machi_a = { M32R_INSN_MACHI_A, & ITAB (M32R_INSN_MACHI_A), EX (fmt_34_machi_a), READ (FMT_34_MACHI_A), FULL (machi_a), FAST (machi_a) };
+static DECODE decode_maclo_a = { M32R_INSN_MACLO_A, & ITAB (M32R_INSN_MACLO_A), EX (fmt_34_machi_a), READ (FMT_34_MACHI_A), FULL (maclo_a), FAST (maclo_a) };
+static DECODE decode_mul = { M32R_INSN_MUL, & ITAB (M32R_INSN_MUL), EX (fmt_0_add), READ (FMT_0_ADD), FULL (mul), FAST (mul) };
+static DECODE decode_mulhi_a = { M32R_INSN_MULHI_A, & ITAB (M32R_INSN_MULHI_A), EX (fmt_35_mulhi_a), READ (FMT_35_MULHI_A), FULL (mulhi_a), FAST (mulhi_a) };
+static DECODE decode_mullo_a = { M32R_INSN_MULLO_A, & ITAB (M32R_INSN_MULLO_A), EX (fmt_35_mulhi_a), READ (FMT_35_MULHI_A), FULL (mullo_a), FAST (mullo_a) };
+static DECODE decode_mv = { M32R_INSN_MV, & ITAB (M32R_INSN_MV), EX (fmt_36_mv), READ (FMT_36_MV), FULL (mv), FAST (mv) };
+static DECODE decode_mvfachi_a = { M32R_INSN_MVFACHI_A, & ITAB (M32R_INSN_MVFACHI_A), EX (fmt_37_mvfachi_a), READ (FMT_37_MVFACHI_A), FULL (mvfachi_a), FAST (mvfachi_a) };
+static DECODE decode_mvfaclo_a = { M32R_INSN_MVFACLO_A, & ITAB (M32R_INSN_MVFACLO_A), EX (fmt_37_mvfachi_a), READ (FMT_37_MVFACHI_A), FULL (mvfaclo_a), FAST (mvfaclo_a) };
+static DECODE decode_mvfacmi_a = { M32R_INSN_MVFACMI_A, & ITAB (M32R_INSN_MVFACMI_A), EX (fmt_37_mvfachi_a), READ (FMT_37_MVFACHI_A), FULL (mvfacmi_a), FAST (mvfacmi_a) };
+static DECODE decode_mvfc = { M32R_INSN_MVFC, & ITAB (M32R_INSN_MVFC), EX (fmt_38_mvfc), READ (FMT_38_MVFC), FULL (mvfc), FAST (mvfc) };
+static DECODE decode_mvtachi_a = { M32R_INSN_MVTACHI_A, & ITAB (M32R_INSN_MVTACHI_A), EX (fmt_39_mvtachi_a), READ (FMT_39_MVTACHI_A), FULL (mvtachi_a), FAST (mvtachi_a) };
+static DECODE decode_mvtaclo_a = { M32R_INSN_MVTACLO_A, & ITAB (M32R_INSN_MVTACLO_A), EX (fmt_39_mvtachi_a), READ (FMT_39_MVTACHI_A), FULL (mvtaclo_a), FAST (mvtaclo_a) };
+static DECODE decode_mvtc = { M32R_INSN_MVTC, & ITAB (M32R_INSN_MVTC), EX (fmt_40_mvtc), READ (FMT_40_MVTC), FULL (mvtc), FAST (mvtc) };
+static DECODE decode_neg = { M32R_INSN_NEG, & ITAB (M32R_INSN_NEG), EX (fmt_36_mv), READ (FMT_36_MV), FULL (neg), FAST (neg) };
+static DECODE decode_nop = { M32R_INSN_NOP, & ITAB (M32R_INSN_NOP), EX (fmt_41_nop), READ (FMT_41_NOP), FULL (nop), FAST (nop) };
+static DECODE decode_not = { M32R_INSN_NOT, & ITAB (M32R_INSN_NOT), EX (fmt_36_mv), READ (FMT_36_MV), FULL (not), FAST (not) };
+static DECODE decode_rac_d = { M32R_INSN_RAC_D, & ITAB (M32R_INSN_RAC_D), EX (fmt_42_rac_d), READ (FMT_42_RAC_D), FULL (rac_d), FAST (rac_d) };
+static DECODE decode_rac_ds = { M32R_INSN_RAC_DS, & ITAB (M32R_INSN_RAC_DS), EX (fmt_43_rac_ds), READ (FMT_43_RAC_DS), FULL (rac_ds), FAST (rac_ds) };
+static DECODE decode_rac_dsi = { M32R_INSN_RAC_DSI, & ITAB (M32R_INSN_RAC_DSI), EX (fmt_44_rac_dsi), READ (FMT_44_RAC_DSI), FULL (rac_dsi), FAST (rac_dsi) };
+static DECODE decode_rach_d = { M32R_INSN_RACH_D, & ITAB (M32R_INSN_RACH_D), EX (fmt_42_rac_d), READ (FMT_42_RAC_D), FULL (rach_d), FAST (rach_d) };
+static DECODE decode_rach_ds = { M32R_INSN_RACH_DS, & ITAB (M32R_INSN_RACH_DS), EX (fmt_43_rac_ds), READ (FMT_43_RAC_DS), FULL (rach_ds), FAST (rach_ds) };
+static DECODE decode_rach_dsi = { M32R_INSN_RACH_DSI, & ITAB (M32R_INSN_RACH_DSI), EX (fmt_44_rac_dsi), READ (FMT_44_RAC_DSI), FULL (rach_dsi), FAST (rach_dsi) };
+static DECODE decode_rte = { M32R_INSN_RTE, & ITAB (M32R_INSN_RTE), EX (fmt_45_rte), READ (FMT_45_RTE), FULL (rte), FAST (rte) };
+static DECODE decode_seth = { M32R_INSN_SETH, & ITAB (M32R_INSN_SETH), EX (fmt_46_seth), READ (FMT_46_SETH), FULL (seth), FAST (seth) };
+static DECODE decode_sll = { M32R_INSN_SLL, & ITAB (M32R_INSN_SLL), EX (fmt_0_add), READ (FMT_0_ADD), FULL (sll), FAST (sll) };
+static DECODE decode_sll3 = { M32R_INSN_SLL3, & ITAB (M32R_INSN_SLL3), EX (fmt_5_addv3), READ (FMT_5_ADDV3), FULL (sll3), FAST (sll3) };
+static DECODE decode_slli = { M32R_INSN_SLLI, & ITAB (M32R_INSN_SLLI), EX (fmt_47_slli), READ (FMT_47_SLLI), FULL (slli), FAST (slli) };
+static DECODE decode_sra = { M32R_INSN_SRA, & ITAB (M32R_INSN_SRA), EX (fmt_0_add), READ (FMT_0_ADD), FULL (sra), FAST (sra) };
+static DECODE decode_sra3 = { M32R_INSN_SRA3, & ITAB (M32R_INSN_SRA3), EX (fmt_5_addv3), READ (FMT_5_ADDV3), FULL (sra3), FAST (sra3) };
+static DECODE decode_srai = { M32R_INSN_SRAI, & ITAB (M32R_INSN_SRAI), EX (fmt_47_slli), READ (FMT_47_SLLI), FULL (srai), FAST (srai) };
+static DECODE decode_srl = { M32R_INSN_SRL, & ITAB (M32R_INSN_SRL), EX (fmt_0_add), READ (FMT_0_ADD), FULL (srl), FAST (srl) };
+static DECODE decode_srl3 = { M32R_INSN_SRL3, & ITAB (M32R_INSN_SRL3), EX (fmt_5_addv3), READ (FMT_5_ADDV3), FULL (srl3), FAST (srl3) };
+static DECODE decode_srli = { M32R_INSN_SRLI, & ITAB (M32R_INSN_SRLI), EX (fmt_47_slli), READ (FMT_47_SLLI), FULL (srli), FAST (srli) };
+static DECODE decode_st = { M32R_INSN_ST, & ITAB (M32R_INSN_ST), EX (fmt_17_cmp), READ (FMT_17_CMP), FULL (st), FAST (st) };
+static DECODE decode_st_d = { M32R_INSN_ST_D, & ITAB (M32R_INSN_ST_D), EX (fmt_48_st_d), READ (FMT_48_ST_D), FULL (st_d), FAST (st_d) };
+static DECODE decode_stb = { M32R_INSN_STB, & ITAB (M32R_INSN_STB), EX (fmt_17_cmp), READ (FMT_17_CMP), FULL (stb), FAST (stb) };
+static DECODE decode_stb_d = { M32R_INSN_STB_D, & ITAB (M32R_INSN_STB_D), EX (fmt_48_st_d), READ (FMT_48_ST_D), FULL (stb_d), FAST (stb_d) };
+static DECODE decode_sth = { M32R_INSN_STH, & ITAB (M32R_INSN_STH), EX (fmt_17_cmp), READ (FMT_17_CMP), FULL (sth), FAST (sth) };
+static DECODE decode_sth_d = { M32R_INSN_STH_D, & ITAB (M32R_INSN_STH_D), EX (fmt_48_st_d), READ (FMT_48_ST_D), FULL (sth_d), FAST (sth_d) };
+static DECODE decode_st_plus = { M32R_INSN_ST_PLUS, & ITAB (M32R_INSN_ST_PLUS), EX (fmt_17_cmp), READ (FMT_17_CMP), FULL (st_plus), FAST (st_plus) };
+static DECODE decode_st_minus = { M32R_INSN_ST_MINUS, & ITAB (M32R_INSN_ST_MINUS), EX (fmt_17_cmp), READ (FMT_17_CMP), FULL (st_minus), FAST (st_minus) };
+static DECODE decode_sub = { M32R_INSN_SUB, & ITAB (M32R_INSN_SUB), EX (fmt_0_add), READ (FMT_0_ADD), FULL (sub), FAST (sub) };
+static DECODE decode_subv = { M32R_INSN_SUBV, & ITAB (M32R_INSN_SUBV), EX (fmt_0_add), READ (FMT_0_ADD), FULL (subv), FAST (subv) };
+static DECODE decode_subx = { M32R_INSN_SUBX, & ITAB (M32R_INSN_SUBX), EX (fmt_6_addx), READ (FMT_6_ADDX), FULL (subx), FAST (subx) };
+static DECODE decode_trap = { M32R_INSN_TRAP, & ITAB (M32R_INSN_TRAP), EX (fmt_49_trap), READ (FMT_49_TRAP), FULL (trap), FAST (trap) };
+static DECODE decode_unlock = { M32R_INSN_UNLOCK, & ITAB (M32R_INSN_UNLOCK), EX (fmt_17_cmp), READ (FMT_17_CMP), FULL (unlock), FAST (unlock) };
+static DECODE decode_satb = { M32R_INSN_SATB, & ITAB (M32R_INSN_SATB), EX (fmt_50_satb), READ (FMT_50_SATB), FULL (satb), FAST (satb) };
+static DECODE decode_sath = { M32R_INSN_SATH, & ITAB (M32R_INSN_SATH), EX (fmt_50_satb), READ (FMT_50_SATB), FULL (sath), FAST (sath) };
+static DECODE decode_sat = { M32R_INSN_SAT, & ITAB (M32R_INSN_SAT), EX (fmt_51_sat), READ (FMT_51_SAT), FULL (sat), FAST (sat) };
+static DECODE decode_pcmpbz = { M32R_INSN_PCMPBZ, & ITAB (M32R_INSN_PCMPBZ), EX (fmt_20_cmpz), READ (FMT_20_CMPZ), FULL (pcmpbz), FAST (pcmpbz) };
+static DECODE decode_sadd = { M32R_INSN_SADD, & ITAB (M32R_INSN_SADD), EX (fmt_52_sadd), READ (FMT_52_SADD), FULL (sadd), FAST (sadd) };
+static DECODE decode_macwu1 = { M32R_INSN_MACWU1, & ITAB (M32R_INSN_MACWU1), EX (fmt_53_macwu1), READ (FMT_53_MACWU1), FULL (macwu1), FAST (macwu1) };
+static DECODE decode_msblo = { M32R_INSN_MSBLO, & ITAB (M32R_INSN_MSBLO), EX (fmt_54_msblo), READ (FMT_54_MSBLO), FULL (msblo), FAST (msblo) };
+static DECODE decode_mulwu1 = { M32R_INSN_MULWU1, & ITAB (M32R_INSN_MULWU1), EX (fmt_17_cmp), READ (FMT_17_CMP), FULL (mulwu1), FAST (mulwu1) };
+static DECODE decode_maclh1 = { M32R_INSN_MACLH1, & ITAB (M32R_INSN_MACLH1), EX (fmt_53_macwu1), READ (FMT_53_MACWU1), FULL (maclh1), FAST (maclh1) };
+static DECODE decode_sc = { M32R_INSN_SC, & ITAB (M32R_INSN_SC), EX (fmt_55_sc), READ (FMT_55_SC), FULL (sc), FAST (sc) };
+static DECODE decode_snc = { M32R_INSN_SNC, & ITAB (M32R_INSN_SNC), EX (fmt_55_sc), READ (FMT_55_SC), FULL (snc), FAST (snc) };
+
 DECODE m32rx_decode_illegal = {
-  M32R_INSN_ILLEGAL, & m32r_cgen_insn_table_entries[0],
-  EX (illegal), FULL (illegal),
-  FAST (illegal)
+  M32R_INSN_ILLEGAL, & ITAB (M32R_INSN_ILLEGAL),
+  EX (illegal), FULL (illegal), FAST (illegal)
 };
 
-/* The order must match that of `labels' in sem-switch.c.  */
+/* The order must match that of `labels' in sem-switch.c/read.c.  */
 
 DECODE *m32rx_decode_vars[] = {
   & m32rx_decode_illegal,
@@ -228,6 +243,7 @@ DECODE *m32rx_decode_vars[] = {
   & decode_divu,
   & decode_rem,
   & decode_remu,
+  & decode_divh,
   & decode_jc,
   & decode_jnc,
   & decode_jl,
@@ -263,8 +279,12 @@ DECODE *m32rx_decode_vars[] = {
   & decode_neg,
   & decode_nop,
   & decode_not,
-  & decode_rac_a,
-  & decode_rach_a,
+  & decode_rac_d,
+  & decode_rac_ds,
+  & decode_rac_dsi,
+  & decode_rach_d,
+  & decode_rach_ds,
+  & decode_rach_dsi,
   & decode_rte,
   & decode_seth,
   & decode_sll,
@@ -297,7 +317,7 @@ DECODE *m32rx_decode_vars[] = {
   & decode_macwu1,
   & decode_msblo,
   & decode_mulwu1,
-  & decode_machl1,
+  & decode_maclh1,
   & decode_sc,
   & decode_snc,
   0
@@ -343,7 +363,7 @@ m32rx_decode (current_cpu, pc, insn)
       && default_0, && default_0, && default_0, && default_0, 
       && default_0, && default_0, && default_0, && default_0, 
       && default_0, && default_0, && default_0, && case_0_87, 
-      && default_0, && default_0, && default_0, && default_0, 
+      && case_0_88, && case_0_89, && default_0, && default_0, 
       && default_0, && default_0, && default_0, && case_0_95, 
       && default_0, && default_0, && default_0, && default_0, 
       && default_0, && default_0, && default_0, && default_0, 
@@ -357,7 +377,7 @@ m32rx_decode (current_cpu, pc, insn)
       && default_0, && default_0, && default_0, && default_0, 
       && default_0, && default_0, && default_0, && default_0, 
       && default_0, && default_0, && default_0, && default_0, 
-      && default_0, && default_0, && default_0, && default_0, 
+      && case_0_144, && default_0, && default_0, && default_0, 
       && default_0, && default_0, && default_0, && default_0, 
       && default_0, && default_0, && default_0, && default_0, 
       && default_0, && default_0, && default_0, && default_0, 
@@ -410,8 +430,8 @@ m32rx_decode (current_cpu, pc, insn)
       &decode_addi, &decode_addi, &decode_addi, &decode_addi, 
       &decode_srli, &decode_srli, &decode_srai, &decode_srai, 
       &decode_slli, &decode_slli, &decode_illegal, 0, 
-      &decode_rach_a, &decode_rac_a, &decode_mulwu1, &decode_macwu1, 
-      &decode_machl1, &decode_msblo, &decode_sadd, 0, 
+      0, 0, &decode_mulwu1, &decode_macwu1, 
+      &decode_maclh1, &decode_msblo, &decode_sadd, 0, 
       &decode_ldi8, &decode_ldi8, &decode_ldi8, &decode_ldi8, 
       &decode_ldi8, &decode_ldi8, &decode_ldi8, &decode_ldi8, 
       &decode_ldi8, &decode_ldi8, &decode_ldi8, &decode_ldi8, 
@@ -424,7 +444,7 @@ m32rx_decode (current_cpu, pc, insn)
       &decode_cmpi, &decode_cmpui, &decode_illegal, &decode_illegal, 
       &decode_addv3, &decode_illegal, &decode_add3, &decode_illegal, 
       &decode_and3, &decode_xor3, &decode_or3, &decode_illegal, 
-      &decode_div, &decode_divu, &decode_rem, &decode_remu, 
+      0, &decode_divu, &decode_rem, &decode_remu, 
       &decode_illegal, &decode_illegal, &decode_illegal, &decode_illegal, 
       &decode_srl3, &decode_illegal, &decode_sra3, &decode_illegal, 
       &decode_sll3, &decode_illegal, &decode_illegal, &decode_ldi16, 
@@ -486,6 +506,90 @@ m32rx_decode (current_cpu, pc, insn)
           };
           unsigned int val = (((insn >> 0) & (3 << 0)));
           return insns[val];
+        }
+      CASE (0, 88) :
+        {
+#ifdef __GNUC__
+          static void *labels_0_88[16] = {
+            && case_0_88_0, && case_0_88_1, && case_0_88_2, && case_0_88_3, 
+            && default_0_88, && default_0_88, && default_0_88, && default_0_88, 
+            && default_0_88, && default_0_88, && default_0_88, && default_0_88, 
+            && default_0_88, && default_0_88, && default_0_88, && default_0_88, 
+          };
+#endif
+          static DECODE *insns[16] = {
+            0, 0, 0, 0, 
+            &decode_illegal, &decode_illegal, &decode_illegal, &decode_illegal, 
+            &decode_illegal, &decode_illegal, &decode_illegal, &decode_illegal, 
+            &decode_illegal, &decode_illegal, &decode_illegal, &decode_illegal, 
+          };
+          unsigned int val;
+          val = (((insn >> 6) & (3 << 2)) | ((insn >> 2) & (3 << 0)));
+          DECODE_SWITCH (0_88, val)
+            {
+            CASE (0_88, 0) :
+              {
+                static DECODE *insns[4] = {
+                  &decode_rach_d, &decode_rach_dsi, &decode_illegal, &decode_illegal, 
+                };
+                unsigned int val = (((insn >> 0) & (3 << 0)));
+                return insns[val];
+              }
+            CASE (0_88, 1) : /* fall through */
+            CASE (0_88, 2) : /* fall through */
+            CASE (0_88, 3) :
+              {
+                static DECODE *insns[4] = {
+                  &decode_rach_ds, &decode_rach_dsi, &decode_illegal, &decode_illegal, 
+                };
+                unsigned int val = (((insn >> 0) & (3 << 0)));
+                return insns[val];
+              }
+            DEFAULT (0_88) : return insns[val];
+            }
+          ENDSWITCH (0_88)
+        }
+      CASE (0, 89) :
+        {
+#ifdef __GNUC__
+          static void *labels_0_89[16] = {
+            && case_0_89_0, && case_0_89_1, && case_0_89_2, && case_0_89_3, 
+            && default_0_89, && default_0_89, && default_0_89, && default_0_89, 
+            && default_0_89, && default_0_89, && default_0_89, && default_0_89, 
+            && default_0_89, && default_0_89, && default_0_89, && default_0_89, 
+          };
+#endif
+          static DECODE *insns[16] = {
+            0, 0, 0, 0, 
+            &decode_illegal, &decode_illegal, &decode_illegal, &decode_illegal, 
+            &decode_illegal, &decode_illegal, &decode_illegal, &decode_illegal, 
+            &decode_illegal, &decode_illegal, &decode_illegal, &decode_illegal, 
+          };
+          unsigned int val;
+          val = (((insn >> 6) & (3 << 2)) | ((insn >> 2) & (3 << 0)));
+          DECODE_SWITCH (0_89, val)
+            {
+            CASE (0_89, 0) :
+              {
+                static DECODE *insns[4] = {
+                  &decode_rac_d, &decode_rac_dsi, &decode_illegal, &decode_illegal, 
+                };
+                unsigned int val = (((insn >> 0) & (3 << 0)));
+                return insns[val];
+              }
+            CASE (0_89, 1) : /* fall through */
+            CASE (0_89, 2) : /* fall through */
+            CASE (0_89, 3) :
+              {
+                static DECODE *insns[4] = {
+                  &decode_rac_ds, &decode_rac_dsi, &decode_illegal, &decode_illegal, 
+                };
+                unsigned int val = (((insn >> 0) & (3 << 0)));
+                return insns[val];
+              }
+            DEFAULT (0_89) : return insns[val];
+            }
+          ENDSWITCH (0_89)
         }
       CASE (0, 95) :
         {
@@ -567,6 +671,67 @@ m32rx_decode (current_cpu, pc, insn)
             DEFAULT (0_128) : return insns[val];
             }
           ENDSWITCH (0_128)
+        }
+      CASE (0, 144) :
+        {
+#ifdef __GNUC__
+          static void *labels_0_144[16] = {
+            && case_0_144_0, && default_0_144, && default_0_144, && default_0_144, 
+            && default_0_144, && default_0_144, && default_0_144, && default_0_144, 
+            && default_0_144, && default_0_144, && default_0_144, && default_0_144, 
+            && default_0_144, && default_0_144, && default_0_144, && default_0_144, 
+          };
+#endif
+          static DECODE *insns[16] = {
+            0, &decode_illegal, &decode_illegal, &decode_illegal, 
+            &decode_illegal, &decode_illegal, &decode_illegal, &decode_illegal, 
+            &decode_illegal, &decode_illegal, &decode_illegal, &decode_illegal, 
+            &decode_illegal, &decode_illegal, &decode_illegal, &decode_illegal, 
+          };
+          unsigned int val;
+          /* Must fetch more bits.  */
+          insn = GETIMEMUHI (current_cpu, CPU (h_pc) + 2);
+          val = (((insn >> 12) & (15 << 0)));
+          DECODE_SWITCH (0_144, val)
+            {
+            CASE (0_144, 0) :
+              {
+#ifdef __GNUC__
+                static void *labels_0_144_0[16] = {
+                  && case_0_144_0_0, && default_0_144_0, && default_0_144_0, && default_0_144_0, 
+                  && default_0_144_0, && default_0_144_0, && default_0_144_0, && default_0_144_0, 
+                  && default_0_144_0, && default_0_144_0, && default_0_144_0, && default_0_144_0, 
+                  && default_0_144_0, && default_0_144_0, && default_0_144_0, && default_0_144_0, 
+                };
+#endif
+                static DECODE *insns[16] = {
+                  0, &decode_illegal, &decode_illegal, &decode_illegal, 
+                  &decode_illegal, &decode_illegal, &decode_illegal, &decode_illegal, 
+                  &decode_illegal, &decode_illegal, &decode_illegal, &decode_illegal, 
+                  &decode_illegal, &decode_illegal, &decode_illegal, &decode_illegal, 
+                };
+                unsigned int val;
+                val = (((insn >> 8) & (15 << 0)));
+                DECODE_SWITCH (0_144_0, val)
+                  {
+                  CASE (0_144_0, 0) :
+                    {
+                      static DECODE *insns[16] = {
+                        &decode_div, &decode_divh, &decode_illegal, &decode_illegal, 
+                        &decode_illegal, &decode_illegal, &decode_illegal, &decode_illegal, 
+                        &decode_illegal, &decode_illegal, &decode_illegal, &decode_illegal, 
+                        &decode_illegal, &decode_illegal, &decode_illegal, &decode_illegal, 
+                      };
+                      unsigned int val = (((insn >> 4) & (15 << 0)));
+                      return insns[val];
+                    }
+                  DEFAULT (0_144_0) : return insns[val];
+                  }
+                ENDSWITCH (0_144_0)
+              }
+            DEFAULT (0_144) : return insns[val];
+            }
+          ENDSWITCH (0_144)
         }
       CASE (0, 240) : /* fall through */
       CASE (0, 241) : /* fall through */
