@@ -1,3 +1,12 @@
+start-sanitize-tic80
+Wed Jan 22 20:13:51 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80-opc.c (tic80_opcodes): Expand comment to note that the
+ 	entries are presorted so that entries with the same mnemonic are
+	adjacent to each other in the table.  Sort the entries for each
+	instruction so that this is true.
+	
+end-sanitize-tic80
 Mon Jan 20 12:48:57 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* m68k-dis.c: Include <libiberty.h>.
