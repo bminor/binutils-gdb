@@ -1,3 +1,8 @@
+Fri Jun  4 07:49:01 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c (ecoff_get_debug): Get the offset from the first PDR
+	for the FDR, not from the first PDR in the file.
+
 Thu Jun  3 16:41:10 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* hppa.c (hppa_get_symbol_info):  New func needed for JUMP_TABLE.
