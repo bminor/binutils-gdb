@@ -1,3 +1,6 @@
+2002-02-04  Pierre Muller  <muller@ics.u-strasbg.fr>
+	* win32-nat.c (handle_exception): Handle Ctrl-Break exception.
+
 2002-02-04  Andrew Cagney  <ac131313@redhat.com>
 
 	* cli/cli-decode.c (do_cfunc, set_cmd_cfunc): New functions.

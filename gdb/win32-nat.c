@@ -867,6 +867,12 @@ handle_exception (struct target_waitstatus *ourstatus)
       ourstatus->value.sig = TARGET_SIGNAL_INT;
       last_sig = SIGINT;	/* FIXME - should check pass state */
       break;
+    case DBG_CONTROL_BREAK:
+      DEBUG_EXCEPT (("gdb: Target exception CONTROL_BREAK at 0x%08lx\n",
+       (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
+      ourstatus->value.sig = TARGET_SIGNAL_INT;
+      last_sig = SIGINT;	/* FIXME - should check pass state */
+      break;
     case EXCEPTION_SINGLE_STEP:
       DEBUG_EXCEPT (("gdb: Target exception SINGLE_STEP at 0x%08lx\n",
        (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress));
