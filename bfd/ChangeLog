@@ -1,3 +1,18 @@
+Sat Nov 15 15:36:07 1997  Fred Fish  <fnf@cygnus.com>
+
+	* peicode.h (coff_swap_aouthdr_in): Cast second arg of
+	bfd_h_get_* calls to "bfd_byte *".
+
+Tue Nov 11 10:37:23 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-m10300.c (elf32_mn10300_link_hash_entry): Add new field
+	"movm_stack_size".
+	(mn10300_elf_relax_section): Include stack space for register saves
+	in the imm8 field of a "call" instruction.
+	(compute_function_info): Determine how much stack is allocated by
+	the movm instruction.  Fix typo.
+	(elf32_mn10300_link_hash_newfunc): Initialize movm_stack_size.
+
 Mon Nov 10 14:32:40 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Don't crash if
