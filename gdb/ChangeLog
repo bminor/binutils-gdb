@@ -5,6 +5,8 @@
 
 2002-01-10  Michael Snyder  <msnyder@redhat.com>
 
+	* NEWS: Mention --pid and corefile/proc-id behavior change.
+
 	* Makefile.in: Add rules for gcore.o and linux-proc.o.
 	* gcore.c: Include cli/cli-decode.h instead of command.h.
 

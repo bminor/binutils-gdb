@@ -3,6 +3,23 @@
 
 *** Changes since GDB 5.1:
 
+* New command line option
+
+GDB now accepts --pid or -p followed by a process id.  
+
+* Change in command line behavior -- corefiles vs. process ids.
+
+There is a subtle behavior in the way in which GDB handles 
+command line arguments.  The first non-flag argument is always
+a program to debug, but the second non-flag argument may either
+be a corefile or a process id.  Previously, GDB would attempt to
+open the second argument as a corefile, and if that failed, would
+issue a superfluous error message and then attempt to attach it as
+a process.  Now, if the second argument begins with a non-digit, 
+it will be treated as a corefile.  If it begins with a digit, 
+GDB will attempt to attach it as a process, and if no such process
+is found, will then attempt to open it as a corefile.
+
 * New native configurations
 
 x86 OpenBSD					i[3456]86-*-openbsd*
