@@ -4920,6 +4920,9 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* If none found, then allocate and initialize one.  */
   gdbarch = gdbarch_alloc (&info, NULL);
 
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch, osabi);
+
   return gdbarch;
 }
 

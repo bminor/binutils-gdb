@@ -1377,7 +1377,8 @@ ALLDEPFILES = a68v-nat.c \
 	core-sol2.c core-regset.c core-aout.c corelow.c \
 	dcache.c delta68-nat.c dpx2-nat.c exec.c fork-child.c \
 	go32-nat.c h8300-tdep.c h8500-tdep.c \
-	hp300ux-nat.c hppa-tdep.c hppab-nat.c hppah-nat.c hpread.c \
+	hp300ux-nat.c hppa-tdep.c hppa-hpux-tdep.c \
+	hppab-nat.c hppah-nat.c hpread.c \
 	i386-tdep.c i386b-nat.c i386v-nat.c i386-linux-nat.c \
 	i386v4-nat.c i386ly-tdep.c \
 	i386bsd-nat.c i386bsd-tdep.c i386fbsd-nat.c \
@@ -1759,6 +1760,7 @@ hppa-tdep.o: hppa-tdep.c $(defs_h) $(frame_h) $(bfd_h) $(inferior_h) \
 	$(value_h) $(regcache_h) $(completer_h) $(symtab_h) $(a_out_encap_h) \
 	$(gdb_stat_h) $(gdb_wait_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) \
 	$(symfile_h) $(objfiles_h) $(language_h) $(osabi_h)
+hppa-hpux-tdep.o: hppa-hpux-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h)
 hppab-nat.o: hppab-nat.c $(defs_h) $(inferior_h) $(target_h) $(regcache_h)
 hppah-nat.o: hppah-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 	$(gdb_wait_h) $(regcache_h)
