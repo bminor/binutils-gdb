@@ -1,3 +1,7 @@
+2002-12-10  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* lib/ld-lib.exp (is_elf_format): Match NetBSD ELF targets.
+
 2002-12-03  Nick Clifton  <nickc@redhat.com>
 
 	* ld-powerpc/powerpc.exp (ppcelftests): Add apuinfo merging

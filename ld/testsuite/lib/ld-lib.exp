@@ -344,6 +344,7 @@ proc is_elf_format {} {
 	 && ![istarget *-*-linux*] \
 	 && ![istarget *-*-irix5*] \
 	 && ![istarget *-*-irix6*] \
+	 && ![istarget *-*-netbsd*] \
 	 && ![istarget *-*-solaris2*] } {
 	return 0
     }
@@ -351,6 +352,18 @@ proc is_elf_format {} {
     if { [istarget *-*-linux*aout*] \
 	 || [istarget *-*-linux*oldld*] } {
 	return 0
+    }
+
+    if { ![istarget *-*-netbsdelf*] \
+	 && ([istarget *-*-netbsd*aout*] \
+	     || [istarget *-*-netbsdpe*] \
+	     || [istarget arm*-*-netbsd*] \
+	     || [istarget sparc-*-netbsd*] \
+	     || [istarget i*86-*-netbsd*] \
+	     || [istarget m68*-*-netbsd*] \
+	     || [istarget vax-*-netbsd*] \
+	     || [istarget ns32k-*-netbsd*]) } {
+    	return 0
     }
     return 1
 }
