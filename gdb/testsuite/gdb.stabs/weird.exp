@@ -218,10 +218,10 @@ proc print_weird_var { var } {
 			pass "variable $var printed properly"
 		}
 		-re ".*$gdb_prompt $" {
-			fail "variable $var not printed properly"
+			fail "variable $var printed properly"
 		}
-		timeout { fail "variable $var not printed (timeout)" }
-		eof { fail "(eof) variable $var not printed" }
+		timeout { fail "variable $var printed properly (timeout)" }
+		eof { fail "variable $var printed properly (eof)" }
 	}
 
 	# Make sure that the stabs did get loaded in a sensible way.

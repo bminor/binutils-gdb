@@ -1,3 +1,8 @@
+2001-10-25  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.stabs/weird.exp: Unify ``variable VAR printed properly''
+	messages.
+
 2001-10-21  Andrew Cagney  <ac131313@redhat.com>
 
 	* lib/mi-support.exp (mi_gdb_start): Don't require MI_OUT when
