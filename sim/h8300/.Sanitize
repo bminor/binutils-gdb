@@ -29,12 +29,9 @@ ChangeLog
 Makefile.in
 configure.in
 h8300.mt
-writecode.c
+compile.c
 run.c
-p1.c
-p3.c
-perifs.c
-state.h
+inst.h
 
 Things-to-lose:
 

@@ -35,6 +35,18 @@ main (ac, av)
   char *name = "";
   for (i = 1; i < ac; i++)
     {
+<<<<<<< run.c
+      verbose ++;
+    }
+    else if (strcmp(av[i],"-t") == 0) 
+    {
+      trace = 1;
+    }
+    else if (strcmp(av[i],"-c") == 0) 
+    {
+      sim_csize(atoi(av[i+1]));
+      i++;
+=======
       if (strcmp (av[i], "-v") == 0)
 	{
 	  verbose = 1;
@@ -48,15 +60,55 @@ main (ac, av)
 	{
 	  name = av[i];
 	}
+>>>>>>> 1.4
     }
+<<<<<<< run.c
+    else 
+=======
   if (verbose)
+>>>>>>> 1.4
     {
+<<<<<<< run.c
+      name = av[i];
+=======
       printf ("run %s\n", name);
+>>>>>>> 1.4
     }
+<<<<<<< run.c
+  }
+  if (verbose)
+  {
+    printf("run %s\n", name);
+  }
+  abfd = bfd_openr(name,"coff-h8300");
+=======
   abfd = bfd_openr (name, "coff-h8300");
+>>>>>>> 1.4
 
+<<<<<<< run.c
+  if (abfd) 
+=======
   if (abfd)
+>>>>>>> 1.4
     {
+<<<<<<< run.c
+    if (bfd_check_format(abfd, bfd_object)) 
+    {
+
+      for (s = abfd->sections; s; s=s->next) 
+      {
+	char *buffer = malloc(bfd_section_size(abfd,s));
+	bfd_get_section_contents(abfd, s, buffer, 0, bfd_section_size(abfd,s));
+	sim_write(s->vma, buffer, bfd_section_size(abfd,s));
+      }
+
+      start_address = bfd_get_start_address(abfd);
+      sim_store_register(
+			 9,start_address);
+      sim_resume(0,0);
+	  if (verbose)
+	    sim_info (verbose);
+=======
       if (bfd_check_format (abfd, bfd_object))
 	{
 
@@ -73,9 +125,14 @@ main (ac, av)
 	  sim_resume (0, 0);
 	  if (verbose)
 	    sim_info ();
+>>>>>>> 1.4
 
+<<<<<<< run.c
+      return 0;
+=======
 	  return 0;
 	}
+>>>>>>> 1.4
     }
 
   return 1;
