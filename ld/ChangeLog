@@ -1,3 +1,10 @@
+2001-01-22  Alan Modra  <alan@linuxcare.com.au>
+
+	* Makefile.am (GENSCRIPTS): Pass exec_prefix.
+	* Makefile.in: Regenerate.
+	* genscripts.sh: Use exec_prefix parameter to specify tool lib.
+	Check for null tool_dir.
+
 2001-01-16  Jim Wilson  <wilson@redhat.com>
 
 	* emulparams/elf64_ia64.sh (OTHER_READONLY_SECTIONS): Add IA_64.unwind

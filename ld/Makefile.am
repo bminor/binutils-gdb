@@ -302,7 +302,7 @@ stringify.sed: ${srcdir}/emultempl/$(STRINGIFY)
 
 # These all start with e so 'make clean' can find them.
 
-GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} @host@ @target@ @target_alias@ "@EMULATION_LIBPATH@" "@NATIVE_LIB_DIRS@"
+GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} ${exec_prefix} @host@ @target@ @target_alias@ "@EMULATION_LIBPATH@" "@NATIVE_LIB_DIRS@"
 GEN_DEPENDS = $(srcdir)/genscripts.sh stringify.sed
 @TDIRS@
 
