@@ -1,3 +1,7 @@
+2001-11-13  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.asm/asm-sources.exp: Allow defining linker flags.
+
 2001-11-12  Daniel Jacobowitz  <drow@mvista.com>
 
 	* lib/mi-support.exp (mi_run_to_helper): Move comments

@@ -33,6 +33,7 @@ set bug_id 0
 
 set asm-arch ""
 set asm-flags ""
+set link-flags ""
 
 if [istarget "d10v-*-*"] then {
     set asm-arch d10v
@@ -58,7 +59,7 @@ if {[target_assemble ${src2} asmsrc2.o "${asm-flags}"] != ""} then {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
-if  { [target_link "asmsrc1.o asmsrc2.o" ${binfile} ""] != "" } {
+if  { [target_link "asmsrc1.o asmsrc2.o" ${binfile} "${link-flags}"] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
