@@ -1,3 +1,7 @@
+2004-10-19  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-elf/exclude.exp: Don't run for cris-*-elf.
+
 2004-10-16  Daniel Jacobowitz  <dan@debian.org>
 
 	* ld-elf/exclude1.s, ld-elf/exclude2.s, ld-elf/exclude.exp: New.
