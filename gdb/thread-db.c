@@ -575,7 +575,7 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 
   if (ti_p->ti_state == TD_THR_UNKNOWN ||
       ti_p->ti_state == TD_THR_ZOMBIE)
-    return;/* A zombie thread that's been joined -- do not attach. */
+    return;/* A zombie thread -- do not attach. */
 
   /* Under Linux, we have to attach to each and every thread.  */
 #ifdef ATTACH_LWP
@@ -918,7 +918,7 @@ thread_db_thread_alive (ptid_t ptid)
 
       if (ti.ti_state == TD_THR_UNKNOWN ||
 	  ti.ti_state == TD_THR_ZOMBIE)
-	return 0;	/* A zombie thread that's been joined. */
+	return 0;	/* A zombie thread. */
 
       return 1;
     }
@@ -943,7 +943,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   if (ti.ti_state == TD_THR_UNKNOWN ||
       ti.ti_state == TD_THR_ZOMBIE)
 
-    return 0;	/* A zombie that's been reaped -- ignore. */
+    return 0;	/* A zombie -- ignore. */
 
   ptid = BUILD_THREAD (ti.ti_tid, GET_PID (inferior_ptid));
 

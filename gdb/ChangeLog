@@ -1,3 +1,8 @@
+2001-07-03  Michael Snyder  <msnyder@redhat.com>
+
+	* thread_db (find_new_threads_callback, thread_db_thread_alive, 
+	attach_thread): Update comments.
+
 2001-06-29  Ken Whaley  <ken@believe.com>
 
 	* thread-db.c (attach_thread): Check for TD_THR_ZOMBIE in addition
