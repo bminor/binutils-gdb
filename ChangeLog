@@ -1,7 +1,8 @@
 Fri Jul 17 22:52:49 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* test-build.mk: recurse explicitly with -f test-build.mk when
-	  appropriate.
+	  appropriate.  predicate stage3 and comparison on the existence
+	  of gcc.  That is, if gcc isn't around, we aren't three-staging.
 
 Thu Jul 16 18:33:09 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 

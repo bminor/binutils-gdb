@@ -192,15 +192,19 @@ $(host)-stamp-stage2-configured:
 do3:	$(HOLESDIR) $(host)-stamp-stage3
 
 $(host)-stamp-stage3:
-	if [ -d $(STAGE3DIR) ] ; then \
-		mv $(STAGE3DIR) $(WORKING_DIR) ; \
+	if [ -d $(TREE)/gcc ] ; then \
+		if [ -d $(STAGE3DIR) ] ; then \
+			mv $(STAGE3DIR) $(WORKING_DIR) ; \
+		else \
+			true ; \
+		fi ; \
+		PATH=$(release_root)/H-$(host)/bin:`pwd`/$(HOLESDIR) ; \
+			export PATH ; \
+			SHELL=sh ; export SHELL ; \
+			$(TIME) $(MAKE) -f test-build.mk -w $(STAGE3DIR) host=$(host) $(FLAGS_TO_PASS) ; \
 	else \
 		true ; \
 	fi
-	PATH=$(release_root)/H-$(host)/bin:`pwd`/$(HOLESDIR) ; \
-		export PATH ; \
-		SHELL=sh ; export SHELL ; \
-		$(TIME) $(MAKE) -w $(STAGE3DIR) host=$(host) $(FLAGS_TO_PASS)
 	touch $@
 
 $(STAGE3DIR): $(host)-stamp-stage3-checked
@@ -350,15 +354,23 @@ $(host)-stamp-holes:
 .PHONY: comparison
 comparison:
 ifeq ($(subst rs6000,iris4,$(subst decstation,iris4,$(host))),iris4)
-	for i in `cd $(STAGE3DIR) ; find . -name \*.o -print` ; do \
-		tail +10c $(STAGE2DIR)/$$i > foo1 ; \
-		tail +10c $(STAGE3DIR)/$$i > foo2 ; \
-		cmp foo1 foo2 || echo $$i ; \
-	done
+	if [ -d $(TREE)/gcc ] ; then \
+		for i in `cd $(STAGE3DIR) ; find . -name \*.o -print` ; do \
+			tail +10c $(STAGE2DIR)/$$i > foo1 ; \
+			tail +10c $(STAGE3DIR)/$$i > foo2 ; \
+			cmp foo1 foo2 || echo $$i ; \
+		done ; \
+	else \
+		true ; \
+	fi
 else
-	for i in `cd $(STAGE3DIR) ; find . -name \*.o -print` ; do \
-		cmp $(STAGE2DIR)/$$i $(STAGE3DIR)/$$i ; \
-	done
+	if [ -d $(TREE)/gcc ] ; then \
+		for i in `cd $(STAGE3DIR) ; find . -name \*.o -print` ; do \
+			cmp $(STAGE2DIR)/$$i $(STAGE3DIR)/$$i ; \
+		done ; \
+	else \
+		true ; \
+	fi
 endif
 
 .PHONY: clean
