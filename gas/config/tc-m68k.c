@@ -1,6 +1,6 @@
 /* tc-m68k.c -- Assemble for the m68k family
    Copyright 1987, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -258,12 +258,12 @@ insop (w, opcode)
 {
   int z;
   for (z = the_ins.numo; z > opcode->m_codenum; --z)
-    the_ins.opcode[z]=the_ins.opcode[z-1];
-  for (z = 0;z < the_ins.nrel; z++)
-    the_ins.reloc[z].n+=2;
+    the_ins.opcode[z] = the_ins.opcode[z - 1];
+  for (z = 0; z < the_ins.nrel; z++)
+    the_ins.reloc[z].n += 2;
   for (z = 0; z < the_ins.nfrag; z++)
     the_ins.fragb[z].fragoff++;
-  the_ins.opcode[opcode->m_codenum]=w;
+  the_ins.opcode[opcode->m_codenum] = w;
   the_ins.numo++;
 }
 
@@ -306,10 +306,10 @@ add_frag (add, off, type)
      offsetT off;
      int type;
 {
-  the_ins.fragb[the_ins.nfrag].fragoff=the_ins.numo;
-  the_ins.fragb[the_ins.nfrag].fadd=add;
-  the_ins.fragb[the_ins.nfrag].foff=off;
-  the_ins.fragb[the_ins.nfrag++].fragty=type;
+  the_ins.fragb[the_ins.nfrag].fragoff = the_ins.numo;
+  the_ins.fragb[the_ins.nfrag].fadd = add;
+  the_ins.fragb[the_ins.nfrag].foff = off;
+  the_ins.fragb[the_ins.nfrag++].fragty = type;
 }
 
 #define isvar(ex) \
@@ -1224,7 +1224,7 @@ m68k_ip (instring)
 		    default:
 		      losing++;
 		    }
-                  break;
+		  break;
 
 		case 'n':
 		  switch (opP->mode)
@@ -1234,7 +1234,7 @@ m68k_ip (instring)
 		    default:
 		      losing++;
 		    }
-                  break;
+		  break;
 
 		case 'o':
 		  switch (opP->mode)
@@ -1246,7 +1246,7 @@ m68k_ip (instring)
 		    default:
 		      losing++;
 		    }
-                  break;
+		  break;
 
 		case 'p':
 		  switch (opP->mode)
@@ -1259,12 +1259,12 @@ m68k_ip (instring)
 		      break;
 		    case DISP:
 		      if (opP->reg == PC || opP->reg == ZPC)
-                        losing++;
+			losing++;
 		      break;
 		    default:
 		      losing++;
 		    }
-                  break;
+		  break;
 
 		case 'q':
 		  switch (opP->mode)
@@ -1276,13 +1276,13 @@ m68k_ip (instring)
 		      break;
 		    case DISP:
 		      if (opP->reg == PC || opP->reg == ZPC)
-                        losing++;
+			losing++;
 		      break;
 		    default:
 		      losing++;
 		      break;
 		    }
-                  break;
+		  break;
 
 		case 'v':
 		  switch (opP->mode)
@@ -1295,7 +1295,7 @@ m68k_ip (instring)
 		      break;
 		    case DISP:
 		      if (opP->reg == PC || opP->reg == ZPC)
-                        losing++;
+			losing++;
 		      break;
 		    default:
 		      losing++;
@@ -2275,13 +2275,13 @@ m68k_ip (instring)
                              the frag obstack to make all the bytes
                              contiguous.  */
 			  frag_grow (14);
- 			  nextword += baseo & 0xff;
- 			  addword (nextword);
- 			  add_frag (adds (&opP->disp), offs (&opP->disp),
- 				    TAB (PCINDEX, SZ_UNDEF));
+			  nextword += baseo & 0xff;
+			  addword (nextword);
+			  add_frag (adds (&opP->disp), offs (&opP->disp),
+				    TAB (PCINDEX, SZ_UNDEF));
 
 			  break;
- 			}
+			}
 		    }
 		}
 	      else
@@ -5322,7 +5322,7 @@ opt_list_symbols (arg, on)
   if (on)
     listing |= LISTING_SYMBOLS;
   else
-    listing &=~ LISTING_SYMBOLS;
+    listing &= ~LISTING_SYMBOLS;
 }
 
 /* Handle the MRI REG pseudo-op.  */
@@ -5707,14 +5707,14 @@ parse_mri_control_operand (pcc, leftstart, leftstop, rightstart, rightstop)
       /* We must make sure we don't misinterpret AND/OR at the end of labels!
          if d0 <eq> #FOOAND and d1 <ne> #BAROR then
                         ^^^                 ^^ */
-      if (    (    s == input_line_pointer
-                || *(s-1) == ' '
-                || *(s-1) == '\t')
-           && (    (    strncasecmp (s, "AND", 3) == 0
-                     && (s[3] == '.' || ! is_part_of_name (s[3])))
-                || (    strncasecmp (s, "OR", 2) == 0
-                     && (s[2] == '.' || ! is_part_of_name (s[2])))))
-	      break;
+      if ((s == input_line_pointer
+	   || *(s-1) == ' '
+	   || *(s-1) == '\t')
+	  && ((strncasecmp (s, "AND", 3) == 0
+	       && (s[3] == '.' || ! is_part_of_name (s[3])))
+	      || (strncasecmp (s, "OR", 2) == 0
+		  && (s[2] == '.' || ! is_part_of_name (s[2])))))
+	break;
     }
 
   *rightstart = input_line_pointer;
@@ -5867,7 +5867,9 @@ build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
 	  temp = leftstop;
 	  leftstop = rightstop;
 	  rightstop = temp;
-	} else {
+	}
+      else
+	{
 	  cc = swap_mri_condition (cc);
 	}
     }
@@ -6625,12 +6627,12 @@ s_mri_while (qual)
      This is important when assembling:
        while d0 <ne> 12(a0,d0*2) do
        while d0 <ne> #CONST*20   do */
-  while ( ! (    is_end_of_line[(unsigned char) *s]
-              || (     flag_mri
-                   && *s == '*'
-                   && (    s == input_line_pointer
-                        || *(s-1) == ' '
-                        || *(s-1) == '\t'))))
+  while (! (is_end_of_line[(unsigned char) *s]
+	    || (flag_mri
+		&& *s == '*'
+		&& (s == input_line_pointer
+		    || *(s-1) == ' '
+		    || *(s-1) == '\t'))))
     s++;
   --s;
   while (*s == ' ' || *s == '\t')
@@ -6778,7 +6780,7 @@ md_parse_option (c, arg)
 
     case 'A':
       if (*arg == 'm')
- 	arg++;
+	arg++;
       /* intentional fall-through */
     case 'm':
 
@@ -6919,7 +6921,7 @@ md_show_usage (stream)
   const char *default_cpu = TARGET_CPU;
   int default_arch, i;
 
-  /* Get the canonical name for the default target CPU. */
+  /* Get the canonical name for the default target CPU.  */
   if (*default_cpu == 'm')
     default_cpu++;
   for (i = 0; i < n_archs; i++)
@@ -7137,13 +7139,14 @@ tc_coff_sizemachdep (frag)
 #endif
 #endif
 #ifdef OBJ_ELF
-void m68k_elf_final_processing()
+void
+m68k_elf_final_processing ()
 {
-   /* Set file-specific flags if this is a cpu32 processor */
-   if (cpu_of_arch (current_architecture) & cpu32)
-     elf_elfheader (stdoutput)->e_flags |= EF_CPU32;
-   else if ((cpu_of_arch (current_architecture) & m68000up)
-	    && !(cpu_of_arch (current_architecture) & m68020up))
-     elf_elfheader (stdoutput)->e_flags |= EF_M68000;
+  /* Set file-specific flags if this is a cpu32 processor */
+  if (cpu_of_arch (current_architecture) & cpu32)
+    elf_elfheader (stdoutput)->e_flags |= EF_CPU32;
+  else if ((cpu_of_arch (current_architecture) & m68000up)
+	   && !(cpu_of_arch (current_architecture) & m68020up))
+    elf_elfheader (stdoutput)->e_flags |= EF_M68000;
 }
 #endif
