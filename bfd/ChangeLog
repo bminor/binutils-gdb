@@ -1,3 +1,7 @@
+Fri Jun 21 15:19:59 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (prep_headers): Add bfd_arch_alpha case.
+
 Fri Jun 21 12:35:27 1996  Richard Henderson  <rth@tamu.edu>
 
 	* elf64-alpha.c: New file.
