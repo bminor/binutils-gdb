@@ -58,7 +58,7 @@ static void
 tcomplain PARAMS ((void));
 
 static int
-nomemory PARAMS ((CORE_ADDR, char *, int, int));
+nomemory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
 
 static int
 return_zero PARAMS ((void));
@@ -176,11 +176,12 @@ ignore ()
 
 /* ARGSUSED */
 static int
-nomemory (memaddr, myaddr, len, write)
+nomemory (memaddr, myaddr, len, write, t)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
      int write;
+     struct target_ops *t;
 {
   errno = EIO;		/* Can't read/write this location */
   return 0;		/* No bytes handled */
@@ -1348,7 +1349,7 @@ Shows the entire stack of targets currently in use (including the exec-file,\n\
 core-file, and process, if any), as well as the symbol file name.";
 
 void
-_initialize_targets ()
+initialize_targets ()
 {
   push_target (&dummy_target);
 

@@ -1,3 +1,8 @@
+Mon Jul 25 18:19:24 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* target.c (nomemory):  Fix prototype and routine to take correct
+	args.
+
 Mon Jul 25 15:38:23 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (clean): Remove libgdb-files.
