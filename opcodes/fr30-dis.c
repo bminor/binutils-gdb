@@ -75,7 +75,7 @@ print_register_list (dis_info, value, offset)
 {
   disassemble_info *info = dis_info;
   int mask  = 1;
-  int index;
+  int index = 0;
 
   if (value & mask)
     (*info->fprintf_func) (info->stream, "r%i", index + offset);

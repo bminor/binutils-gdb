@@ -59,6 +59,68 @@ static const char * insert_insn_normal
 /* -- asm.c */
 /* Handle register lists for LDMx and STMx  */
 
+static int
+parse_register_number (strp)
+     const char **strp;
+{
+  int regno;
+  if (**strp < '0' || **strp > '9')
+    return -1; /* error */
+  regno = **strp - '0';
+  ++*strp;
+
+  if (**strp >= '0' && **strp <= '9')
+    {
+      regno = regno * 10 + (**strp - '0');
+      ++*strp;
+    }
+
+  return regno;
+}
+
+static const char *
+parse_register_list (od, strp, opindex, valuep, high_low)
+     CGEN_OPCODE_DESC od;
+     const char **strp;
+     int opindex;
+     unsigned long *valuep;
+     int high_low;
+{
+  int regno;
+  *valuep = 0;
+  while (**strp && **strp != ')')
+    {
+      if (**strp != 'R' && **strp != 'r')
+	break;
+      ++*strp;
+
+      regno = parse_register_number (strp);
+      if (regno == -1)
+	return "Register number is not valid";
+      if (regno > 7 && !high_low)
+	return "Register must be between r0 and r7";
+      if (regno < 8 && high_low)
+	return "Register must be between r8 and r15";
+
+      if (high_low)
+	regno -= 8;
+
+      *valuep |= 1 << regno;
+
+      if (**strp == ',')
+	{
+	  if (*(*strp + 1) == ')')
+	    break;
+	  ++*strp;
+	}
+    }
+
+  if (!*strp || **strp != ')')
+    return "Register list is not valid";
+
+  return NULL;
+}
+
 static const char *
 parse_low_register_list (od, strp, opindex, valuep)
      CGEN_OPCODE_DESC od;
@@ -66,16 +128,7 @@ parse_low_register_list (od, strp, opindex, valuep)
      int opindex;
      unsigned long *valuep;
 {
-  *valuep = 0;
-  while (**strp && **strp != ')')
-    {
-      ++*strp;
-    }
-
-  if (!*strp)
-    return "Register list is not valid";
-
-  return NULL;
+  return parse_register_list (od, strp, opindex, valuep, 0/*low*/);
 }
 
 static const char *
@@ -85,7 +138,7 @@ parse_hi_register_list (od, strp, opindex, valuep)
      int opindex;
      unsigned long *valuep;
 {
-  return parse_low_register_list (od, strp, opindex, valuep);
+  return parse_register_list (od, strp, opindex, valuep, 1/*high*/);
 }
 
 /* -- */
