@@ -1,6 +1,6 @@
 2003-10-31  Dave Brolley  <brolley@redhat.com>
 
-	* frv-sim.h (REGNUM_LR): Removed.
+	* frv-sim.h (LR_REGNUM): Removed.
 	(SPR_REGNUM_MIN,SPR_REGNUM_MAX): New macros.
 	* frv.c (frvbf_fetch_register): Fetch SPR registers based on
 	SPR_REGNUM_MIN and SPR_REGNUM_MAX. Check whether SPRs are implemented.
