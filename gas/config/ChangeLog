@@ -1,3 +1,7 @@
+Mon Sep 28 21:16:51 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* tc-i960.c (get_cdisp): Use NO_RELOC, not 0, in call to fix_new.
+
 Fri Sep 25 18:18:52 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* tc-m68k.h: if M68KCOFF, define DOT_LABEL_PREFIX (to require
