@@ -1,3 +1,8 @@
+Sat Mar  4 16:19:31 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* MAINTAINERS: Add Michael Snyder and Peter Schauer to list of
+ 	``Blanket Write Privs'' maintainers.
+
 Sat Mar  4 15:58:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From Sun 20 Feb 2000 Robert Lipe <robertl at sco dot com>:
