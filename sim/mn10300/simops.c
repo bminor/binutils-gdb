@@ -89,7 +89,7 @@ void OP_F1D0 ()
 /* mov imm8, an */
 void OP_9000 ()
 {
-  State.regs[REG_D0 + ((insn & 0x300) >> 8)] = insn & 0xff;
+  State.regs[REG_A0 + ((insn & 0x300) >> 8)] = insn & 0xff;
 }
 
 /* mov am, an */
@@ -445,7 +445,7 @@ void OP_2C0000 ()
   unsigned long value;
 
   value = SEXT16 (insn & 0xffff);
-  State.regs[REG_A0 + ((insn & 0x30000) >> 16)] = value;
+  State.regs[REG_D0 + ((insn & 0x30000) >> 16)] = value;
 }
 
 /* mov imm32,dn */
