@@ -1,3 +1,10 @@
+start-sanitize-d10v
+Wed Dec 18 15:27:40 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c (md_assemble): Fix bug which caused
+	second instruction in a line to be case sensitize. PR11312
+
+end-sanitize-d10v	
 Wed Dec 18 10:08:46 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10200.c (mn10200_insert_operand): Don't
