@@ -157,7 +157,7 @@ const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dDfF";
 
 extern void float_cons (), cons (), s_globl (), s_line (), s_space (),
-  s_set (), stringer (), s_lcomm ();
+  s_set (), s_lcomm ();
 static void s_file ();
 static void s_bss ();
 

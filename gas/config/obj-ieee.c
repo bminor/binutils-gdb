@@ -477,15 +477,6 @@ void cons ();
 void s_ignore ();
 
 
-/*
- *			stringer()
- *
- * We read 0 or more ',' seperated, double-quoted strings.
- *
- * Caller should have checked need_pass_2 is FALSE because we don't check it.
- */
-
-void stringer ();
 void s_globl ();
 const pseudo_typeS obj_pseudo_table[] =
 {
