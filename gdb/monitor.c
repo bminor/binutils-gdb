@@ -76,7 +76,7 @@ static void monitor_resume PARAMS ((int pid, int step, enum target_signal sig));
 static void monitor_interrupt PARAMS ((int signo));
 static void monitor_interrupt_twice PARAMS ((int signo));
 static void monitor_interrupt_query PARAMS ((void));
-static void monitor_wait_cleanup PARAMS ((int old_timeout));
+static void monitor_wait_cleanup PARAMS ((void *old_timeout));
 
 static int monitor_wait PARAMS ((int pid, struct target_waitstatus *status));
 static void monitor_fetch_registers PARAMS ((int regno));
@@ -120,7 +120,7 @@ static void (*ofunc)();		/* Old SIGINT signal handler */
 
 /* Extra remote debugging for developing a new rom monitor variation */
 #if ! defined(EXTRA_RDEBUG)
-#define EXTRA_RDEBUG 1
+#define EXTRA_RDEBUG 0
 #endif
 #if EXTRA_RDEBUG
 #define RDEBUG(stuff) { if (remote_debug) printf stuff ; }
@@ -175,6 +175,8 @@ fromhex (a)
    Only format specifiers of the form "[0-9]*[a-z]" are recognized.
    If it is a '%s' format, the argument is a string; otherwise the
    argument is assumed to be a long integer.
+
+   %% is also turned into a single %.
 */
   
 static void
@@ -206,6 +208,9 @@ monitor_vsprintf (sndbuf, pattern, args)
 	  /* Fetch the next argument and print it.  */
 	  switch (fmt)
 	    {
+	    case '%':
+	      strcpy (sndbuf, "%");
+	      break;
 	    case 'A':
 	      arg_addr = va_arg (args, CORE_ADDR);
 	      strcpy (sndbuf, paddr_nz (arg_addr));
@@ -600,7 +605,7 @@ compile_pattern (pattern, compiled_pattern, fastmap)
      char *fastmap;
 {
   int tmp;
-  char *val;
+  const char *val;
 
   compiled_pattern->fastmap = fastmap;
 
@@ -902,9 +907,9 @@ Give up (and stop debugging it)? "))
 
 static void
 monitor_wait_cleanup (old_timeout)
-     int old_timeout;
+     void *old_timeout;
 {
-  timeout = old_timeout;
+  timeout = *(int*)old_timeout;
   signal (SIGINT, ofunc);
   in_monitor_wait = 0;
 }
@@ -959,7 +964,7 @@ monitor_wait (pid, status)
   status->kind = TARGET_WAITKIND_EXITED;
   status->value.integer = 0;
 
-  old_chain = make_cleanup (monitor_wait_cleanup, old_timeout);
+  old_chain = make_cleanup (monitor_wait_cleanup, &old_timeout);
   RDEBUG(("MON wait\n"))
 
 #if 0 /* MAINTENANCE_CMDS */
@@ -2100,49 +2105,51 @@ monitor_get_dev_name ()
   return dev_name;
 }
 
-static struct target_ops monitor_ops =
+static struct target_ops monitor_ops ;
+
+static void init_base_monitor_ops(void)
 {
-  NULL,				/* to_shortname */
-  NULL,				/* to_longname */
-  NULL,				/* to_doc */
-  NULL,				/* to_open */
-  monitor_close,		/* to_close */
-  NULL,				/* to_attach */
-  monitor_detach,		/* to_detach */
-  monitor_resume,		/* to_resume */
-  monitor_wait,			/* to_wait */
-  monitor_fetch_registers,	/* to_fetch_registers */
-  monitor_store_registers,	/* to_store_registers */
-  monitor_prepare_to_store,	/* to_prepare_to_store */
-  monitor_xfer_memory,		/* to_xfer_memory */
-  monitor_files_info,		/* to_files_info */
-  monitor_insert_breakpoint,	/* to_insert_breakpoint */
-  monitor_remove_breakpoint,	/* to_remove_breakpoint */
-  0,				/* to_terminal_init */
-  0,				/* to_terminal_inferior */
-  0,				/* to_terminal_ours_for_output */
-  0,				/* to_terminal_ours */
-  0,				/* to_terminal_info */
-  monitor_kill,			/* to_kill */
-  monitor_load,			/* to_load */
-  0,				/* to_lookup_symbol */
-  monitor_create_inferior,	/* to_create_inferior */
-  monitor_mourn_inferior,	/* to_mourn_inferior */
-  0,				/* to_can_run */
-  0, 				/* to_notice_signals */
-  0,				/* to_thread_alive */
-  monitor_stop,			/* to_stop */
-  process_stratum,		/* to_stratum */
-  0,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  0,				/* sections */
-  0,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-};
+  monitor_ops.to_shortname =   NULL;	
+  monitor_ops.to_longname =   NULL;	
+  monitor_ops.to_doc =   NULL;		
+  monitor_ops.to_open =   NULL;		
+  monitor_ops.to_close =   monitor_close;
+  monitor_ops.to_attach =   NULL;		
+  monitor_ops.to_detach =   monitor_detach;	
+  monitor_ops.to_resume =   monitor_resume;	
+  monitor_ops.to_wait  =   monitor_wait;	
+  monitor_ops.to_fetch_registers  =   monitor_fetch_registers;
+  monitor_ops.to_store_registers  =   monitor_store_registers;
+  monitor_ops.to_prepare_to_store =   monitor_prepare_to_store;
+  monitor_ops.to_xfer_memory  =   monitor_xfer_memory;		
+  monitor_ops.to_files_info  =   monitor_files_info;		
+  monitor_ops.to_insert_breakpoint =   monitor_insert_breakpoint;
+  monitor_ops.to_remove_breakpoint =   monitor_remove_breakpoint;
+  monitor_ops.to_terminal_init  =   0;		
+  monitor_ops.to_terminal_inferior =   0;	
+  monitor_ops.to_terminal_ours_for_output =   0;
+  monitor_ops.to_terminal_ours  =   0;		
+  monitor_ops.to_terminal_info  =   0;		
+  monitor_ops.to_kill  =   monitor_kill;	
+  monitor_ops.to_load  =   monitor_load;	
+  monitor_ops.to_lookup_symbol =   0;		
+  monitor_ops.to_create_inferior =   monitor_create_inferior;
+  monitor_ops.to_mourn_inferior =   monitor_mourn_inferior;	
+  monitor_ops.to_can_run  =   0;				
+  monitor_ops.to_notice_signals =   0; 				
+  monitor_ops.to_thread_alive  =   0;				
+  monitor_ops.to_stop  =   monitor_stop;			
+  monitor_ops.to_stratum =   process_stratum;		
+  monitor_ops.DONT_USE =   0;				
+  monitor_ops.to_has_all_memory =   1;			
+  monitor_ops.to_has_memory =   1;			
+  monitor_ops.to_has_stack =   1;			
+  monitor_ops.to_has_registers =   1;			
+  monitor_ops.to_has_execution =   1;			
+  monitor_ops.to_sections =   0;			
+  monitor_ops.to_sections_end =   0;			
+  monitor_ops.to_magic =   OPS_MAGIC ;
+} /* init_monitor_ops */
 
 /* Init the target_ops structure pointed at by OPS */
 
@@ -2158,6 +2165,7 @@ init_monitor_ops (ops)
 void
 _initialize_remote_monitors ()
 {
+  init_base_monitor_ops() ;
   add_show_from_set (add_set_cmd ("hash", no_class, var_boolean,
                                   (char *)&hashmark,
 				  "Set display of activity while downloading a file.\n\

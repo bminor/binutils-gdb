@@ -300,12 +300,11 @@ AC_ARG_ENABLE(build-warnings,
 case "${enableval}" in
   yes)	;;
   no)	build_warnings="-w";;
-dnl  ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-dnl        build_warnings="${build_warnings} ${t}";;
-dnl  *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-dnl        build_warnings="${t} ${build_warnings}";;
-dnl  *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
-  *)	;;
+  ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+        build_warnings="${build_warnings} ${t}";;
+  *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+        build_warnings="${t} ${build_warnings}";;
+  *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac],[build_warnings=""])dnl
 
 if test "x${build_warnings}" != x -a "x$GCC" = xyes

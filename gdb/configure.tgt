@@ -295,33 +295,27 @@ tic80-*-*)		gdb_target=tic80
 vax-*-*)		gdb_target=vax ;;
 
 v850-*-*)		gdb_target=v850
-			case $gdb_host in
-			windows)
-				CONFIG_OBS="${CONFIG_OBS} v850ice.o"
-				LIBS="${LIBS} necmsg.lib" ;;
-			cygwin*)
+			case ${gdb_host}-${enable_gdbtk-no} in
+			cygwin*-yes )
 				CONFIG_OBS="${CONFIG_OBS} v850ice.o" ;;
+			* ) ;;
 			esac
 			;;
 # start-sanitize-v850e
 v850e-*-*)		gdb_target=v850
 			gdb_target_cpu=v850
-			case $gdb_host in
-			windows)
-				CONFIG_OBS="${CONFIG_OBS} v850ice.o"
-				LIBS="${LIBS} v850.lib" ;;
-			cygwin*)
+			case "${gdb_host}-${enable_gdbtk-no}" in
+			cygwin*-yes )
 				CONFIG_OBS="${CONFIG_OBS} v850ice.o" ;;
+			* ) ;;
 			esac
 			;;
 v850ea-*-*)		gdb_target=v850
 			gdb_target_cpu=v850
-			case $gdb_host in
-			windows)
-				CONFIG_OBS="${CONFIG_OBS} v850ice.o"
-				LIBS="${LIBS} v850.lib" ;;
-			cygwin*)
+			case "${gdb_host}-${enable_gdbtk-no}" in
+			cygwin*-yes )
 				CONFIG_OBS="${CONFIG_OBS} v850ice.o" ;;
+			* ) ;;
 			esac
 			;;
 # end-sanitize-v850e

@@ -4623,7 +4623,11 @@ if test "${enable_build_warnings+set}" = set; then
 case "${enableval}" in
   yes)	;;
   no)	build_warnings="-w";;
-  *)	;;
+  ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+        build_warnings="${build_warnings} ${t}";;
+  *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+        build_warnings="${t} ${build_warnings}";;
+  *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
 else
   build_warnings=""
@@ -4893,12 +4897,12 @@ fi
 
 # In the Cygwin environment, we need some additional flags.
 echo $ac_n "checking for cygwin""... $ac_c" 1>&6
-echo "configure:4897: checking for cygwin" >&5
+echo "configure:4901: checking for cygwin" >&5
 if eval "test \"`echo '$''{'gdb_cv_os_cygwin'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4902 "configure"
+#line 4906 "configure"
 #include "confdefs.h"
 
 #ifdef __CYGWIN32__
@@ -4957,7 +4961,7 @@ if test "${with_tclconfig+set}" = set; then
 fi
 
   echo $ac_n "checking for Tcl configuration""... $ac_c" 1>&6
-echo "configure:4961: checking for Tcl configuration" >&5
+echo "configure:4965: checking for Tcl configuration" >&5
   if eval "test \"`echo '$''{'ac_cv_c_tclconfig'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5065,7 +5069,7 @@ if test "${with_tkconfig+set}" = set; then
 fi
 
   echo $ac_n "checking for Tk configuration""... $ac_c" 1>&6
-echo "configure:5069: checking for Tk configuration" >&5
+echo "configure:5073: checking for Tk configuration" >&5
   if eval "test \"`echo '$''{'ac_cv_c_tkconfig'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5161,7 +5165,7 @@ fi
 
 no_tcl=true
 echo $ac_n "checking for Tcl private headers. dir=${configdir}""... $ac_c" 1>&6
-echo "configure:5165: checking for Tcl private headers. dir=${configdir}" >&5
+echo "configure:5169: checking for Tcl private headers. dir=${configdir}" >&5
 # Check whether --with-tclinclude or --without-tclinclude was given.
 if test "${with_tclinclude+set}" = set; then
   withval="$with_tclinclude"
@@ -5227,17 +5231,17 @@ fi
 if test x"${ac_cv_c_tclh}" = x ; then
    ac_safe=`echo "tclInt.h" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for tclInt.h""... $ac_c" 1>&6
-echo "configure:5231: checking for tclInt.h" >&5
+echo "configure:5235: checking for tclInt.h" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5236 "configure"
+#line 5240 "configure"
 #include "confdefs.h"
 #include <tclInt.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:5241: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:5245: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -5297,7 +5301,7 @@ fi
 #
 no_tk=true
 echo $ac_n "checking for Tk private headers""... $ac_c" 1>&6
-echo "configure:5301: checking for Tk private headers" >&5
+echo "configure:5305: checking for Tk private headers" >&5
 # Check whether --with-tkinclude or --without-tkinclude was given.
 if test "${with_tkinclude+set}" = set; then
   withval="$with_tkinclude"
@@ -5363,17 +5367,17 @@ fi
 if test x"${ac_cv_c_tkh}" = x ; then
    ac_safe=`echo "tk.h" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for tk.h""... $ac_c" 1>&6
-echo "configure:5367: checking for tk.h" >&5
+echo "configure:5371: checking for tk.h" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5372 "configure"
+#line 5376 "configure"
 #include "confdefs.h"
 #include <tk.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:5377: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:5381: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -5419,7 +5423,7 @@ fi
 
 	   
 echo $ac_n "checking for Itcl private headers. srcdir=${srcdir}""... $ac_c" 1>&6
-echo "configure:5423: checking for Itcl private headers. srcdir=${srcdir}" >&5
+echo "configure:5427: checking for Itcl private headers. srcdir=${srcdir}" >&5
 if test x"${ac_cv_c_itclh}" = x ; then
   for i in ${srcdir}/../itcl ${srcdir}/../../itcl ${srcdir}/../../../itcl ; do
     if test -f $i/src/itcl.h ; then
@@ -5442,7 +5446,7 @@ fi
 
 	   
 echo $ac_n "checking for Tix private headers. srcdir=${srcdir}""... $ac_c" 1>&6
-echo "configure:5446: checking for Tix private headers. srcdir=${srcdir}" >&5
+echo "configure:5450: checking for Tix private headers. srcdir=${srcdir}" >&5
 if test x"${ac_cv_c_tixh}" = x ; then
   for i in ${srcdir}/../tix ${srcdir}/../../tix ${srcdir}/../../../tix ; do
     if test -f $i/generic/tix.h ; then
@@ -5536,7 +5540,7 @@ fi
 # Uses ac_ vars as temps to allow command line to override cache and checks.
 # --without-x overrides everything else, but does not touch the cache.
 echo $ac_n "checking for X""... $ac_c" 1>&6
-echo "configure:5540: checking for X" >&5
+echo "configure:5544: checking for X" >&5
 
 # Check whether --with-x or --without-x was given.
 if test "${with_x+set}" = set; then
@@ -5598,12 +5602,12 @@ if test "$ac_x_includes" = NO; then
 
   # First, try using that file with no special directory specified.
 cat > conftest.$ac_ext <<EOF
-#line 5602 "configure"
+#line 5606 "configure"
 #include "confdefs.h"
 #include <$x_direct_test_include>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:5607: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:5611: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -5672,14 +5676,14 @@ if test "$ac_x_libraries" = NO; then
   ac_save_LIBS="$LIBS"
   LIBS="-l$x_direct_test_library $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 5676 "configure"
+#line 5680 "configure"
 #include "confdefs.h"
 
 int main() {
 ${x_direct_test_function}()
 ; return 0; }
 EOF
-if { (eval echo configure:5683: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:5687: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   LIBS="$ac_save_LIBS"
 # We can link X programs with no special library path.
@@ -5942,7 +5946,7 @@ links="${links} nm.h"
 fi
 # start-sanitize-gdbtk
 echo $ac_n "checking whether ln -s works""... $ac_c" 1>&6
-echo "configure:5946: checking whether ln -s works" >&5
+echo "configure:5950: checking whether ln -s works" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_LN_S'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5977,19 +5981,19 @@ fi
 
 
 echo $ac_n "checking for Cygwin environment""... $ac_c" 1>&6
-echo "configure:5981: checking for Cygwin environment" >&5
+echo "configure:5985: checking for Cygwin environment" >&5
 if eval "test \"`echo '$''{'am_cv_cygwin'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5986 "configure"
+#line 5990 "configure"
 #include "confdefs.h"
 
 int main() {
 return __CYGWIN32__;
 ; return 0; }
 EOF
-if { (eval echo configure:5993: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5997: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   am_cv_cygwin=yes
 else
@@ -6006,19 +6010,19 @@ echo "$ac_t""$am_cv_cygwin" 1>&6
 CYGWIN=
 test "$am_cv_cygwin" = yes && CYGWIN=yes
 echo $ac_n "checking for Mingw32 environment""... $ac_c" 1>&6
-echo "configure:6010: checking for Mingw32 environment" >&5
+echo "configure:6014: checking for Mingw32 environment" >&5
 if eval "test \"`echo '$''{'am_cv_mingw32'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 6015 "configure"
+#line 6019 "configure"
 #include "confdefs.h"
 
 int main() {
 return __MINGW32__;
 ; return 0; }
 EOF
-if { (eval echo configure:6022: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:6026: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   am_cv_mingw32=yes
 else
@@ -6037,7 +6041,7 @@ test "$am_cv_mingw32" = yes && MINGW32=yes
 
 
 echo $ac_n "checking for executable suffix""... $ac_c" 1>&6
-echo "configure:6041: checking for executable suffix" >&5
+echo "configure:6045: checking for executable suffix" >&5
 if eval "test \"`echo '$''{'am_cv_exeext'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else

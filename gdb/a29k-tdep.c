@@ -427,7 +427,7 @@ init_frame_info (innermost_frame, frame)
       /* Dummy frames always use a memory frame pointer.  */
       frame->saved_msp = 
 	read_register_stack_integer (frame->frame + DUMMY_FRAME_RSIZE - 4, 4);
-      frame->flags |= (TRANSPARENT|MFP_USED);
+      frame->flags |= (TRANSPARENT_FRAME|MFP_USED);
       return;
     }
     
@@ -460,7 +460,7 @@ init_frame_info (innermost_frame, frame)
 	  frame->saved_msp = 0;
 	  frame->rsize = 0;
 	  frame->msize = 0;
-	  frame->flags = TRANSPARENT;
+	  frame->flags = TRANSPARENT_FRAME;
 	  return;
 	}
       else
@@ -486,7 +486,7 @@ init_frame_info (innermost_frame, frame)
   if (mfp_used)
   	frame->flags |= MFP_USED;
   if (trans)
-  	frame->flags |= TRANSPARENT;
+  	frame->flags |= TRANSPARENT_FRAME;
   if (innermost_frame)
     {
       frame->saved_msp = read_register (MSP_REGNUM) + msize;

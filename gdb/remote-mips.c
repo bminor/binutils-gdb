@@ -1560,7 +1560,7 @@ device is attached to the target board (e.g., /dev/ttya).\n"
      optional local TFTP name.  */
   if ((argv = buildargv (name)) == NULL)
     nomem(0);
-  make_cleanup (freeargv, (char *) argv);
+  make_cleanup ((make_cleanup_func) freeargv, argv);
 
   serial_port_name = strsave (argv[0]);
   if (argv[1])				/* remote TFTP name specified? */

@@ -79,6 +79,6 @@ bool_t xdr_ldtabl (xdrs,objp)
     ldtabl *objp;
 
     {
-    return (xdr_array (xdrs, (char *) &objp->tbl_ent, (UINT *) &objp->tbl_size, 
+    return (xdr_array (xdrs, (char **) &objp->tbl_ent, (UINT *) &objp->tbl_size, 
 	    MAXTBLSZ, sizeof(ldfile), xdr_ldfile));
     }

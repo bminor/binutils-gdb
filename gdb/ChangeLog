@@ -1,3 +1,32 @@
+Wed Nov 25 00:13:06 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* vx-share/xdr_ld.c (xdr_ldtabl): Cast second arg to char**
+ 	instead of char*.
+
+	* configure.tgt (v850): Only build v850ice when cygwin and gui.
+	* configure.in: Add parameter to --enable-build-warnings.
+	* configure: Re-build.
+
+	* c-exp.y (parse_number): Rewrite shift to pacify GCC.
+
+	* config/i960/tm-i960.h (BREAKPOINT): Delete definition - simply
+ 	wrong.
+
+	* monitor.c (compile_pattern): Make val const char*.
+	(monitor_wait_cleanup): Make old_timeout void*, pointing at
+ 	old_timeout.
+	(monitor_wait): Update.
+
+	* remote-udi.c, remote-sim.c, remote-e7000.c, hppa-tdep.c,
+ 	remote-mips.c, sparcl-tdep.c, xcoffread.c: Cast parameters passed
+ 	to make_cleanup to use the new make_cleanup_func typedef.
+
+	* alpha-tdep.c (MASK): Use LONGEST to avoid arithmetic overflow.
+
+	* config/a29k/tm-a29k.h (TRANSPARENT): Rename macro to
+ 	TRANSPARENT_FRAME. Avoid name-space clash.
+	* a29k-tdep.c (init_frame_info): Update.
+
 Wed Nov 25 20:37:00 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mem-break.c (memory_insert_breakpoint,

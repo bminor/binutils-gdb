@@ -478,7 +478,7 @@ gdbsim_create_inferior (exec_file, args, env)
       strcat (arg_buf, " ");
       strcat (arg_buf, args);
       argv = buildargv (arg_buf);
-      make_cleanup (freeargv, (char *) argv);
+      make_cleanup ((make_cleanup_func) freeargv, argv);
     }
   else
     argv = NULL;
@@ -560,7 +560,7 @@ gdbsim_open (args, from_tty)
   argv = buildargv (arg_buf);
   if (argv == NULL)
     error ("Insufficient memory available to allocate simulator arg list.");
-  make_cleanup (freeargv, (char *) argv);
+  make_cleanup ((make_cleanup_func) freeargv, argv);
 
   init_callbacks ();
   gdbsim_desc = sim_open (SIM_OPEN_DEBUG, &gdb_callback, exec_bfd, argv);

@@ -1809,7 +1809,7 @@ xcoff_psymtab_to_symtab_1 (pst)
       /* Init stuff necessary for reading in symbols.  */
       stabsread_init ();
       buildsym_init ();
-      old_chain = make_cleanup (really_free_pendings, 0);
+      old_chain = make_cleanup ((make_cleanup_func) really_free_pendings, 0);
 
       read_xcoff_symtab (pst);
       sort_symtab_syms (pst->symtab);
@@ -2725,10 +2725,10 @@ xcoff_initial_scan (objfile, section_offsets, mainline)
     init_psymbol_list (objfile, num_symbols);
 
   free_pending_blocks ();
-  back_to = make_cleanup (really_free_pendings, 0);
+  back_to = make_cleanup ((make_cleanup_func) really_free_pendings, 0);
 
   init_minimal_symbol_collection ();
-  make_cleanup (discard_minimal_symbols, 0);
+  make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
 
   /* Now that the symbol table data of the executable file are all in core,
      process them and define symbols accordingly.  */

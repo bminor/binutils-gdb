@@ -52,7 +52,7 @@ CORE_ADDR skip_prologue ();
    the new frame is not set up until the new function executes
    some instructions.  */
 
-#define SAVED_PC_AFTER_CALL(frame) ((frame->flags & TRANSPARENT) \
+#define SAVED_PC_AFTER_CALL(frame) ((frame->flags & TRANSPARENT_FRAME) \
 				    ? read_register (TPC_REGNUM) \
 				    : read_register (LR0_REGNUM))
 
@@ -428,8 +428,8 @@ long read_register_stack_integer ();
   unsigned char flags;
 
 /* Bits for flags in EXTRA_FRAME_INFO */
-#define TRANSPARENT	0x1		/* This is a transparent frame */
-#define MFP_USED	0x2		/* A memory frame pointer is used */
+#define TRANSPARENT_FRAME	0x1	/* This is a transparent frame */
+#define MFP_USED		0x2	/* A memory frame pointer is used */
 
 /* Because INIT_FRAME_PC gets passed fromleaf, that's where we init
    not only ->pc and ->frame, but all the extra stuff, when called from
@@ -466,7 +466,7 @@ void init_frame_pc ();
    : (thisframe)->frame + (thisframe)->rsize)
 
 /* Determine if the frame has a 'previous' and back-traceable frame. */
-#define FRAME_IS_UNCHAINED(frame)	((frame)->flags & TRANSPARENT)
+#define FRAME_IS_UNCHAINED(frame)	((frame)->flags & TRANSPARENT_FRAME)
 
 /* Find the previous frame of a transparent routine.
  * For now lets not try and trace through a transparent routine (we might 

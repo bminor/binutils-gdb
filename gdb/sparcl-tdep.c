@@ -480,7 +480,7 @@ or: target sparclite udp host");
     {
       remote_desc = open_tty (p);
 
-      old_chain = make_cleanup (close_tty, 0);
+      old_chain = make_cleanup ((make_cleanup_func) close_tty, 0);
 
       c = send_resp (remote_desc, 0x00);
 
@@ -613,7 +613,7 @@ download (target_name, args, from_tty, write_routine, start_routine)
       perror_with_name (filename);
       return;
     }
-  old_chain = make_cleanup (bfd_close, pbfd);
+  old_chain = make_cleanup ((make_cleanup_func) bfd_close, pbfd);
 
   if (!bfd_check_format (pbfd, bfd_object)) 
     error ("\"%s\" is not an object file: %s", filename,

@@ -1092,7 +1092,7 @@ download(load_arg_string, from_tty)
     error ("Must specify at least a file name with the load command");
 
   filename = tilde_expand (filename);
-  make_cleanup (free, filename);
+  make_cleanup ((make_cleanup_func) free, filename);
 
   while (token = strtok (NULL, " \t"))
     {
@@ -1146,7 +1146,7 @@ download(load_arg_string, from_tty)
   /* FIXME: should be checking for errors from bfd_close (for one thing,
      on error it does not free all the storage associated with the
      bfd).  */
-  make_cleanup (bfd_close, pbfd);
+  make_cleanup ((make_cleanup_func) bfd_close, pbfd);
 
   QUIT;
   immediate_quit++;

@@ -1008,7 +1008,7 @@ alpha_push_dummy_frame()
    */
 
 /* MASK(i,j) == (1<<i) + (1<<(i+1)) + ... + (1<<j)). Assume i<=j<31. */
-#define MASK(i,j) (((1L << ((j)+1)) - 1) ^ ((1L << (i)) - 1))
+#define MASK(i,j) ((((LONGEST)1 << ((j)+1)) - 1) ^ (((LONGEST)1 << (i)) - 1))
 #define GEN_REG_SAVE_MASK (MASK(0,8) | MASK(16,29))
 #define GEN_REG_SAVE_COUNT 24
 #define FLOAT_REG_SAVE_MASK (MASK(0,1) | MASK(10,30))
