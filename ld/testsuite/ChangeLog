@@ -1,3 +1,8 @@
+2004-02-23  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-scripts/provide.exp: New.
+	* ld-scripts/provide-{1,2,3}.{s,t,d}.exp: New.
+
 2004-02-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-scripts/data.t: Set ".other" address so location doesn't

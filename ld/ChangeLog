@@ -1,3 +1,20 @@
+2004-02-23  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ldlang.h (struct lang_output_section_state): Change processed
+	field's type.
+	* ldexp.c (check, invalid): Remove.
+	(fold_name): Move valid_p assignments. Create undefined symbol
+	when needed. Directly exampine section's processd flag.
+	* ldlang.c (lang_output_section_statement_lookup): Adjust
+	processed field init.
+	(lang_size_sections_1): Allow LOADADDR when determining section's
+	VMA. Adjust error message. Fold data statement's expr.
+	(lang_size_sections): Correctly increment lang_statement_iteration.
+
+2004-02-23  Alan Modra <amodra@bigpond.net.au>
+
+	* ldexp.c (fold_tree): Follow indirect symbols.
+	
 2004-02-20  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ldgram.y (exp): Add two operand ALIGN.
