@@ -11,7 +11,7 @@ ENTRY(_mainCRTStartup)
 
 SECTIONS
 {
-  .text ${RELOCATING+ 0x401000} : 
+  .text  0x401000 : 
 	{
 	    ${RELOCATING+ *(.init);}
 	    *(.text)

@@ -1,3 +1,13 @@
+Wed Aug 16 11:38:59 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* scripttempl/armpe.sc: Always start code at 0x401000, even
+	if -r.
+	* ldwrite.c (strdup): New extern declaration.
+	* ldgram.y (atype): New rule to clarify type parsing. 
+	* ldlang.c (init_os): Remove commented out code.
+	(lang_size_sections): Set SEC_ALLOC and SEC_LOAD bits
+	unless told not to by the link script.
+
 Wed Aug 16 11:45:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (lang_set_startof): New static function.
