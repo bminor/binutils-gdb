@@ -1514,7 +1514,13 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 	      indx = ((esym - (bfd_byte *) obj_coff_external_syms (input_bfd))
 		      / isymesz);
 	      h = obj_coff_sym_hashes (input_bfd)[indx];
-	      BFD_ASSERT (h != NULL);
+	      if (h == NULL)
+		{
+		  /* This can happen if there were errors earlier in
+                     the link.  */
+		  bfd_set_error (bfd_error_bad_value);
+		  return false;
+		}
 	      h->indx = output_index;
 	    }
 

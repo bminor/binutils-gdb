@@ -1,3 +1,8 @@
+Wed Oct  2 12:02:02 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cofflink.c (_bfd_coff_link_input_bfd): Don't crash if there is
+	no hash table entry for a global symbol.
+
 Tue Oct  1 16:14:22 1996  Joel Sherrill  <joel@oarcorp.com>
 
 	* config.bfd (mips*-*-rtems*): New target, like mips*-*-elf*.
