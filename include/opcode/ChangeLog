@@ -1,3 +1,7 @@
+Wed Dec 18 10:06:31 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10200.h (MN10200_OPERAND_NOCHECK): Define.
+
 Sat Dec 14 10:48:31 1996  Fred Fish  <fnf@ninemoons.com>
 
 	* mn10200.h: Fix comment, mn10200_operand not powerpc_operand.
