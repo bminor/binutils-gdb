@@ -35,84 +35,55 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ld-emul.h"
 #include "ldlex.h"
 
-/* EXPORTS */
-
-extern char  *default_target;
-
-extern unsigned int undefined_global_sym_count;
-
-static CONST  char *startup_file;
-static lang_input_statement_type *first_file;
-lang_statement_list_type statement_list;
-lang_statement_list_type *stat_ptr = &statement_list;
-lang_statement_list_type lang_output_section_statement;
-lang_statement_list_type input_file_chain;
-lang_statement_list_type file_chain;
-extern char *current_file;
-static boolean placed_commons = false;
-
-boolean lang_float_flag;
-
-static lang_output_section_statement_type *default_common_section;
-
-
 /* FORWARDS */
 PROTO(static void, print_statements,(void));
 PROTO(static void, print_statement,(lang_statement_union_type *,
 				     lang_output_section_statement_type *));
 
 
-
+/* LOCALS */
+static CONST  char *startup_file;
+static lang_statement_list_type input_file_chain;
+static boolean placed_commons = false;
+static lang_output_section_statement_type *default_common_section;
+static boolean map_option_f;
+static bfd_vma print_dot;
+static lang_input_statement_type *first_file;
+static lang_statement_list_type lang_output_section_statement;
+static CONST char *current_target;
+static CONST char *output_target;
+static size_t longest_section_name = 8;
+static asection common_section;
+static section_userdata_type common_section_userdata;
+static lang_statement_list_type statement_list;
 /* EXPORTS */
+
+lang_statement_list_type *stat_ptr = &statement_list;
+lang_input_statement_type *script_file = 0;
+boolean option_longmap = false;
+lang_statement_list_type file_chain = {0};
+CONST char *entry_symbol = 0;
+size_t largest_section = 0;
 boolean lang_has_input_file = false;
+lang_output_section_statement_type *create_object_symbols = 0;
+boolean had_output_filename = false;
+boolean lang_float_flag = false;
+/* IMPORTS */
+extern char  *default_target;
 
-
+extern unsigned int undefined_global_sym_count;
+extern char *current_file;
 extern bfd *output_bfd;
-size_t largest_section;
-
-
 extern enum bfd_architecture ldfile_output_architecture;
 extern unsigned long ldfile_output_machine;
 extern char *ldfile_output_machine_name;
-
-
 extern ldsym_type *symbol_head;
-
-bfd_vma print_dot;
-unsigned int commons_pending;
-
-
-
-
+extern unsigned int commons_pending;
 extern args_type command_line;
 extern ld_config_type config;
-
-CONST char *entry_symbol;
-
-
-
-lang_output_section_statement_type *create_object_symbols;
-
 extern boolean had_script;
-static boolean map_option_f;
-
-
-boolean had_output_filename = false;
 extern boolean write_map;
 
-
-
-
-/* LOCALS */
-static CONST char *current_target;
-static CONST char *output_target;
-size_t longest_section_name = 8;
-
-
-lang_input_statement_type *script_file;
-
-section_userdata_type common_section_userdata;
-asection common_section;
 
 #ifdef __STDC__
 #define cat(a,b) a##b
@@ -126,7 +97,7 @@ asection common_section;
 
 #define outside_symbol_address(q) ((q)->value +   outside_section_address(q->section))
 
-boolean option_longmap = false;
+
 
 /*----------------------------------------------------------------------
   lang_for_each_statement walks the parse tree and calls the provided

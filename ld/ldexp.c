@@ -375,144 +375,153 @@ bfd_vma *dotp;
   }
   else {
     switch (tree->type.node_class) 
-      {
-      case etree_value:
-	result = new_rel(tree->value.value, current_section);
-	break;
-      case etree_unary:
-	result = exp_fold_tree(tree->unary.child,
-			       current_section,
-			       allocation_done, dot, dotp);
-	if (result.valid == true)
-	  {
-	    switch(tree->type.node_code) 
-	      {
-	      case ALIGN_K:
-		if (allocation_done != lang_first_phase_enum) {
-		  result = new_rel_from_section(ALIGN(dot,
-						      result.value) ,
-						current_section);
-
-		}
-		else {
-		  result.valid = false;
-		}
-		break;
-	      case '-':
-		result.value = -result.value;
-		break;
-	      case NEXT:
-		result.valid = false;
-		break;
-	      default:
-		FAIL();
-	      }
-	  }
-
-	break;
-      case etree_trinary:
-
-	result = exp_fold_tree(tree->trinary.cond,
-			       current_section,
-			       allocation_done, dot, dotp);
-	if (result.valid) {
-	  result = exp_fold_tree(result.value ?
-				 tree->trinary.lhs:tree->trinary.rhs,
+	{
+	case etree_value:
+	  result = new_rel(tree->value.value, current_section);
+	  break;
+	case etree_unary:
+	  result = exp_fold_tree(tree->unary.child,
 				 current_section,
 				 allocation_done, dot, dotp);
-	}
+	  if (result.valid == true)
+	      {
+		switch(tree->type.node_code) 
+		    {
+		    case ALIGN_K:
+		      if (allocation_done != lang_first_phase_enum) {
+			result = new_rel_from_section(ALIGN(dot,
+							    result.value) ,
+						      current_section);
 
-	break;
-      case etree_binary:
-	result = fold_binary(tree, current_section, allocation_done,
-			     dot, dotp);
-	break;
-      case etree_assign:
-	if (tree->assign.dst[0] == '.' && tree->assign.dst[1] == 0) {
-	  /* Assignment to dot can only be done during allocation */
-	  if (allocation_done == lang_allocating_phase_enum) {
-	    result = exp_fold_tree(tree->assign.src,
+		      }
+		      else {
+			result.valid = false;
+		      }
+		      break;
+		    case '~':
+		      make_abs(&result);
+		      result.value = ~result.value;
+		      break;
+		    case '!':
+		      make_abs(&result);
+		      result.value = !result.value;
+		      break;
+		    case '-':
+		      make_abs(&result);
+		      result.value = -result.value;
+		      break;
+		    case NEXT:
+		      result.valid = false;
+		      break;
+		    default:
+		      FAIL();
+		    }
+	      }
+
+	  break;
+	case etree_trinary:
+
+	  result = exp_fold_tree(tree->trinary.cond,
+				 current_section,
+				 allocation_done, dot, dotp);
+	  if (result.valid) {
+	    result = exp_fold_tree(result.value ?
+				   tree->trinary.lhs:tree->trinary.rhs,
 				   current_section,
-				   lang_allocating_phase_enum, dot, dotp);
-	    if (result.valid == false) {
-	      info("%F%S invalid assignment to location counter\n");
-	    }
-	    else {
-	      if (current_section ==
-		  (lang_output_section_statement_type  *)NULL) {
-		info("%F%S assignment to location counter invalid outside of SECTION\n");
+				   allocation_done, dot, dotp);
+	  }
+
+	  break;
+	case etree_binary:
+	  result = fold_binary(tree, current_section, allocation_done,
+			       dot, dotp);
+	  break;
+	case etree_assign:
+	  if (tree->assign.dst[0] == '.' && tree->assign.dst[1] == 0) {
+	    /* Assignment to dot can only be done during allocation */
+	    if (allocation_done == lang_allocating_phase_enum) {
+	      result = exp_fold_tree(tree->assign.src,
+				     current_section,
+				     lang_allocating_phase_enum, dot, dotp);
+	      if (result.valid == false) {
+		info("%F%S invalid assignment to location counter\n");
 	      }
 	      else {
-		unsigned long nextdot =result.value +
-		  current_section->bfd_section->vma;
-		if (nextdot < dot) {
-		  info("%F%S cannot move location counter backwards");
+		if (current_section ==
+		    (lang_output_section_statement_type  *)NULL) {
+		  info("%F%S assignment to location counter invalid outside of SECTION\n");
 		}
 		else {
-		 *dotp = nextdot; 
+		  unsigned long nextdot =result.value +
+		    current_section->bfd_section->vma;
+		  if (nextdot < dot) {
+		    info("%F%S cannot move location counter backwards");
+		  }
+		  else {
+		    *dotp = nextdot; 
+		  }
 		}
 	      }
 	    }
 	  }
-	}
-	else {
-	  ldsym_type *sy = ldsym_get(tree->assign.dst);
+	  else {
+	    ldsym_type *sy = ldsym_get(tree->assign.dst);
 
-	  /* If this symbol has just been created then we'll place it into 
-	   * a section of our choice
-	   */
-	  result = exp_fold_tree(tree->assign.src,
-				 current_section, allocation_done,
-				 dot, dotp);
-	  if (result.valid)
-	    {
-	      asymbol *def;
-	      asymbol **def_ptr = (asymbol **)ldmalloc(sizeof(asymbol **));
-	      /* Add this definition to script file */
-	      def = (asymbol *)bfd_make_empty_symbol(script_file->the_bfd);
-	      *def_ptr = def;
+	    /* If this symbol has just been created then we'll place it into 
+	     * a section of our choice
+	     */
+	    result = exp_fold_tree(tree->assign.src,
+				   current_section, allocation_done,
+				   dot, dotp);
+	    if (result.valid)
+		{
+		  asymbol *def;
+		  asymbol **def_ptr = (asymbol **)ldmalloc(sizeof(asymbol **));
+		  /* Add this definition to script file */
+		  def = (asymbol *)bfd_make_empty_symbol(script_file->the_bfd);
+		  *def_ptr = def;
 
 
-	      def->value = result.value;
-	      if (result.section !=
-		  (lang_output_section_statement_type  *)NULL) {
-		if (current_section !=
-		    (lang_output_section_statement_type *)NULL) {
+		  def->value = result.value;
+		  if (result.section !=
+		      (lang_output_section_statement_type  *)NULL) {
+		    if (current_section !=
+			(lang_output_section_statement_type *)NULL) {
 		  
-		  def->section = result.section->bfd_section;
-		  def->flags = BSF_GLOBAL | BSF_EXPORT;
+		      def->section = result.section->bfd_section;
+		      def->flags = BSF_GLOBAL | BSF_EXPORT;
+		    }
+		    else {
+		      /* Force to absolute */
+		      def->value += result.section->bfd_section->vma;
+		      def->section = (asection *)NULL;
+		      def->flags = BSF_GLOBAL | BSF_EXPORT | BSF_ABSOLUTE;
+		    }
+
+
+		  }
+		  else {
+		    def->section = (asection *)NULL;
+		    def->flags = BSF_GLOBAL | BSF_EXPORT | BSF_ABSOLUTE;
+		  }
+
+
+		  def->udata = (PTR)NULL;
+		  def->name = sy->name;
+		  Q_enter_global_ref(def_ptr);
 		}
-		else {
-		  /* Force to absolute */
-		  def->value += result.section->bfd_section->vma;
-		  def->section = (asection *)NULL;
-		  def->flags = BSF_GLOBAL | BSF_EXPORT | BSF_ABSOLUTE;
-		}
 
-
-	      }
-	      else {
-		def->section = (asection *)NULL;
-		def->flags = BSF_GLOBAL | BSF_EXPORT | BSF_ABSOLUTE;
-	      }
-
-
-	      def->udata = (PTR)NULL;
-	      def->name = sy->name;
-	      Q_enter_global_ref(def_ptr);
-	    }
-
-	}
+	  }
 
   
-	break;
-      case etree_name:
-	result = fold_name(tree, current_section, allocation_done, dot);
-	break;
-      default:
-	info("%F%S Need more of these %d",tree->type.node_class );
+	  break;
+	case etree_name:
+	  result = fold_name(tree, current_section, allocation_done, dot);
+	  break;
+	default:
+	  info("%F%S Need more of these %d",tree->type.node_class );
 
-      }
+	}
   }
 
   return result;
