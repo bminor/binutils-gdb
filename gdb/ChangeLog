@@ -1,5 +1,8 @@
 Mon Nov 28 14:53:21 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
+	* config/a29k/tm-a29k.h (setup_arbitrary_frame): Replace
+	FRAME_ADDR with CORE_ADDR in prototype.
+
 	* top.c (command_line_input): If annotation suffix is NULL,
 	replace it with an empty string.
 	(read_next_line): Pass "command" as annotation suffix to
