@@ -1,3 +1,13 @@
+2002-02-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* doc/c-ppc.texi (PowerPC-Opts): Add -mpower4, -maltivec and -m7400.
+	Remove references to chip manufacturers.
+	* config/tc-ppc.c (md_parse_option): Handle -mpower4 option.
+	Correct comments.
+	(md_show_usage): Remove references to chip manufacturers.  Mention
+	-mpower4.
+	(md_begin): Test power4 opcode flag bits.
+
 2002-02-22  David Mosberger  <davidm@hpl.hp.com>
 
 	* config/tc-ia64.c (dot_restore): Issue error message of epilogue
