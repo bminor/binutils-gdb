@@ -87,12 +87,11 @@ extern PTR bfd_zmalloc PARAMS ((size_t));
 
 extern bfd_error_handler_type _bfd_error_handler;
 
-/* These routines allocate and free things on the BFD's obstack.  */
+/* These routines allocate and free things on the BFD's objalloc.  */
 
-PTR	bfd_alloc PARAMS ((bfd *abfd, size_t size));
-PTR	bfd_zalloc PARAMS ((bfd *abfd, size_t size));
-
-#define	bfd_release(x,y) (void) obstack_free(&(x->memory),y)
+extern PTR bfd_alloc PARAMS ((bfd *, size_t));
+extern PTR bfd_zalloc PARAMS ((bfd *, size_t));
+extern void bfd_release PARAMS ((bfd *, PTR));
 
 bfd *	_bfd_create_empty_archive_element_shell PARAMS ((bfd *obfd));
 bfd *	_bfd_look_for_bfd_in_cache PARAMS ((bfd *arch_bfd, file_ptr index));
@@ -430,7 +429,7 @@ extern boolean _bfd_link_section_stabs
 /* Write out the .stab section when linking stabs in sections.  */
 
 extern boolean _bfd_write_section_stabs
-  PARAMS ((bfd *, asection *, PTR *, bfd_byte *));
+  PARAMS ((bfd *, PTR *, asection *, PTR *, bfd_byte *));
 
 /* Write out the .stabstr string table when linking stabs in sections.  */
 

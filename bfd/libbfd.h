@@ -429,7 +429,7 @@ extern boolean _bfd_link_section_stabs
 /* Write out the .stab section when linking stabs in sections.  */
 
 extern boolean _bfd_write_section_stabs
-  PARAMS ((bfd *, asection *, PTR *, bfd_byte *));
+  PARAMS ((bfd *, PTR *, asection *, PTR *, bfd_byte *));
 
 /* Write out the .stabstr string table when linking stabs in sections.  */
 

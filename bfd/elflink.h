@@ -4545,9 +4545,9 @@ elf_link_input_bfd (finfo, input_bfd)
 	}
       else
 	{
-	  if (! _bfd_write_section_stabs (output_bfd, o,
-					  &elf_section_data (o)->stab_info,
-					  contents))
+	  if (! (_bfd_write_section_stabs
+		 (output_bfd, &elf_hash_table (finfo->info)->stab_info,
+		  o, &elf_section_data (o)->stab_info, contents)))
 	    return false;
 	}
     }

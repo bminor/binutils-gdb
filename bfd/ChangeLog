@@ -1,3 +1,12 @@
+Tue Mar 25 14:35:37 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* stabs.c (_bfd_link_section_stabs): Copy over the first header
+	symbol.  Check for memory allocation failure of *psinfo.
+	(_bfd_write_section_stabs): Add psinfo parameter.  Change all
+	callers.  Set the value of the header symbol.
+	* libbfd-in.h (_bfd_write_section_stabs): Update declaration.
+	* libbfd.h: Rebuild.
+
 start-sanitize-tic80
 Mon Mar 24 20:07:29 1997  Fred Fish  <fnf@cygnus.com>
 
