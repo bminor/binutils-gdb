@@ -1,3 +1,9 @@
+Mon Apr 26 07:13:32 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* rs6000-tdep.c (branch_dest): Deal with stepping through system call.
+
+	* symtab.h, xcoffread.c: Revise linetable sorting comments.
+
 Sun Apr 25 02:32:16 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* valops.c (value_cast): A cast might also change the object

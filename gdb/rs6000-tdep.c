@@ -106,8 +106,15 @@ branch_dest (opcode, instr, pc, safety)
 	  dest = read_register (LR_REGNUM) & ~3;
 
 	else if (ext_op == 528)			/* br cond to count reg */
-	  dest = read_register (CTR_REGNUM) & ~3;
+	  {
+	    dest = read_register (CTR_REGNUM) & ~3;
 
+	    /* If we are about to execute a system call, dest is something
+	       like 0x22fc or 0x3b00.  Upon completion the system call
+	       will return to the address in the link register.  */
+	    if (dest < TEXT_SEGMENT_BASE)
+	      dest = read_register (LR_REGNUM) & ~3;
+	  }
 	else return -1; 
 	break;
 	
