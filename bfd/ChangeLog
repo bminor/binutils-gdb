@@ -1,3 +1,9 @@
+1999-08-03  Ian Lance Taylor  <ian@zembu.com>
+
+	* acinclude.m4 (BFD_CC_FOR_BUILD): Change to use conftest, and to
+	look for generated file correctly.
+	* aclocal.m4, configure: Rebuild.
+
 1999-08-02  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (_bfd_mips_elf_relocate_section): Handle R_MIPS_26
