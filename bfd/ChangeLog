@@ -1,4 +1,9 @@
+Tue Jun  8 12:08:27 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* cpu-i960.c, cpu-h8300.c (compatible): Make static.
+
 Tue Jun  8 14:27:56 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
+
 
 	* news.h, config/news.mh: New files.
 
