@@ -1,3 +1,8 @@
+1999-11-08  Andrew Haley  <aph@cygnus.com>
+
+	* app.c (do_scrub_chars): When in State 10, treat backslash
+	characters in the same way as as symbol characters.
+
 1999-11-07  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-alpha.c (alpha_align): Check, don't assert, that

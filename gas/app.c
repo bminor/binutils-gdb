@@ -1227,6 +1227,23 @@ do_scrub_chars (get, tostart, tolen)
 	    }
 	  else if (state == 10)
 	    {
+	      if (ch == '\\')
+		{
+		  /* Special handling for backslash: a backslash may
+		     be the beginning of a formal parameter (of a
+		     macro) following another symbol character, with
+		     whitespace in between.  If that is the case, we
+		     output a space before the parameter.  Strictly
+		     speaking, correct handling depends upon what the
+		     macro parameter expands into; if the parameter
+		     expands into something which does not start with
+		     an operand character, then we don't want to keep
+		     the space.  We don't have enough information to
+		     make the right choice, so here we are making the
+		     choice which is more likely to be correct.  */
+		  PUT (' ');
+		}
+
 	      state = 3;
 	    }
 	  PUT (ch);
