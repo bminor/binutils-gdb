@@ -71,14 +71,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    (single sub-space version)
    :		addil LR'lt_ptr+ltoff,%dp	; get procedure entry point
    :		ldw RR'lt_ptr+ltoff(%r1),%r21
-   :            bv %r0(%r21)
+   :		bv %r0(%r21)
    :		ldw RR'lt_ptr+ltoff+4(%r1),%r19	; get new dlt value.
 
    Import stub to call shared library routine from shared library
    (single sub-space version)
    :		addil LR'ltoff,%r19		; get procedure entry point
    :		ldw RR'ltoff(%r1),%r21
-   :            bv %r0(%r21)
+   :		bv %r0(%r21)
    :		ldw RR'ltoff+4(%r1),%r19	; get new dlt value.
 
    Import stub to call shared library routine from normal object file
@@ -375,9 +375,6 @@ static bfd_reloc_status_type final_link_relocate
 static boolean elf32_hppa_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *,
 	   bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
-
-static int hppa_unwind_entry_compare
-  PARAMS ((const PTR, const PTR));
 
 static boolean elf32_hppa_finish_dynamic_symbol
   PARAMS ((bfd *, struct bfd_link_info *,
@@ -1934,7 +1931,7 @@ elf32_hppa_adjust_dynamic_symbol (info, h)
     }
 
   /* If we didn't find any dynamic relocs in read-only sections, then
-     we'll be keeping the dynamic relocs and avoiding the copy reloc.  */ 
+     we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
   if (p == NULL)
     {
       h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
@@ -3283,37 +3280,13 @@ elf32_hppa_final_link (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-  asection *s;
-
   /* Invoke the regular ELF linker to do all the work.  */
   if (!bfd_elf32_bfd_final_link (abfd, info))
     return false;
 
   /* If we're producing a final executable, sort the contents of the
-     unwind section.  Magic section names, but this is much safer than
-     having elf32_hppa_relocate_section remember where SEGREL32 relocs
-     occurred.  Consider what happens if someone inept creates a
-     linker script that puts unwind information in .text.  */
-  s = bfd_get_section_by_name (abfd, ".PARISC.unwind");
-  if (s != NULL)
-    {
-      bfd_size_type size;
-      char *contents;
-
-      size = s->_raw_size;
-      contents = bfd_malloc (size);
-      if (contents == NULL)
-	return false;
-
-      if (! bfd_get_section_contents (abfd, s, contents, (file_ptr) 0, size))
-	return false;
-
-      qsort (contents, (size_t) (size / 16), 16, hppa_unwind_entry_compare);
-
-      if (! bfd_set_section_contents (abfd, s, contents, (file_ptr) 0, size))
-	return false;
-    }
-  return true;
+     unwind section. */
+  return elf_hppa_sort_unwind (abfd);
 }
 
 /* Record the lowest address for the data and text segments.  */
@@ -4122,32 +4095,6 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
     }
 
   return true;
-}
-
-/* Comparison function for qsort to sort unwind section during a
-   final link.  */
-
-static int
-hppa_unwind_entry_compare (a, b)
-     const PTR a;
-     const PTR b;
-{
-  const bfd_byte *ap, *bp;
-  unsigned long av, bv;
-
-  ap = (const bfd_byte *) a;
-  av = (unsigned long) ap[0] << 24;
-  av |= (unsigned long) ap[1] << 16;
-  av |= (unsigned long) ap[2] << 8;
-  av |= (unsigned long) ap[3];
-
-  bp = (const bfd_byte *) b;
-  bv = (unsigned long) bp[0] << 24;
-  bv |= (unsigned long) bp[1] << 16;
-  bv |= (unsigned long) bp[2] << 8;
-  bv |= (unsigned long) bp[3];
-
-  return av < bv ? -1 : av > bv ? 1 : 0;
 }
 
 /* Finish up dynamic symbol handling.  We set the contents of various
