@@ -2947,9 +2947,7 @@ write_object_file ()
 
   H_SET_STRING_SIZE (&headers, string_byte_count);
 
-  /* @@ Try this unconditionally for now.  Let me know if you encounter
-     cases that don't work.  -- Ken  */
-#if 1 /* !defined(TC_H8300) && !defined(TC_Z8K) */
+#if !defined(TC_H8300) && !defined(TC_Z8K)
   for (i = SEG_E0; i < SEG_UNKNOWN; i++)
     {
       fixup_mdeps (segment_info[i].frchainP->frch_root, &headers, i);
@@ -2989,6 +2987,10 @@ write_object_file ()
 #endif
 #ifdef TC_COFF_SET_MACHINE
   TC_COFF_SET_MACHINE (&headers);
+#endif
+
+#ifndef COFF_FLAGS
+#define COFF_FLAGS 0
 #endif
 
 #ifdef KEEP_RELOC_INFO
