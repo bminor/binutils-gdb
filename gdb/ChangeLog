@@ -1,6 +1,12 @@
 2002-04-12  Kevin Buettner  <kevinb@redhat.com>
 
 	From Jimi X <jimix@watson.ibm.com>:
+	* rs6000-tdep.c (rs6000_gdbarch_init): Use rs6000_* methods for
+	64-bit SysV ABI.
+
+2002-04-12  Kevin Buettner  <kevinb@redhat.com>
+
+	From Jimi X <jimix@watson.ibm.com>:
 	* rs6000-tdep.c (rs6000_gdbarch_init): Compute ``wordsize'' from
 	bfd info.
 

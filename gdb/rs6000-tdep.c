@@ -2658,7 +2658,14 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_extract_return_value (gdbarch, rs6000_extract_return_value);
   
-  if (sysv_abi)
+  /* Note: kevinb/2002-04-12: I'm not convinced that rs6000_push_arguments()
+     is correct for the SysV ABI when the wordsize is 8, but I'm also
+     fairly certain that ppc_sysv_abi_push_arguments() will give even
+     worse results since it only works for 32-bit code.  So, for the moment,
+     we're better off calling rs6000_push_arguments() since it works for
+     64-bit code.  At some point in the future, this matter needs to be
+     revisited.  */
+  if (sysv_abi && wordsize == 4)
     set_gdbarch_push_arguments (gdbarch, ppc_sysv_abi_push_arguments);
   else
     set_gdbarch_push_arguments (gdbarch, rs6000_push_arguments);
@@ -2699,7 +2706,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
-  if (osabi == ELFOSABI_LINUX)
+  /* Note: kevinb/2002-04-12: See note above regarding *_push_arguments().
+     The same remarks hold for the methods below.  */
+  if (osabi == ELFOSABI_LINUX && wordsize == 4)
     {
       set_gdbarch_frameless_function_invocation (gdbarch,
 	ppc_linux_frameless_function_invocation);
