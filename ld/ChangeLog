@@ -3,6 +3,7 @@ Fri Jun  5 15:55:26 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Set vma to 0
 	for .DVP.overlay.*.
+	* configure.tgt (dvp-*-*): Set targ_emul=elf32l5900.
 
 end-sanitize-sky
 Fri Jun  5 18:19:59 1998  Ian Lance Taylor  <ian@cygnus.com>
