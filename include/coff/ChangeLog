@@ -1,3 +1,24 @@
+Wed Mar 27 17:29:42 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* arm.h (union external_auxent): Add x_checksum, x_associated, and
+	x_comdat fields to x_scn struct.
+	* i386.h (union external_auxent): Likewise.
+	* powerpc.h (union external_auxent): Likewise.
+	* internal.h (union internal_auxent): Likewise.
+
+Thu Mar 21 16:25:57 1996  David Mosberger-Tang  <davidm@azstarnet.com>
+
+	* ecoff.h (struct ecoff_find_line): Add caching fields.
+
+Thu Mar 14 15:22:44 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* internal.h (R_MEM_INDIRECT): New reloc for the h8300.
+ 
+Fri Feb  9 10:44:11 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aux-coff.h: Rename from aux.h, to avoid problems on hapless DOS
+	systems which think that aux is a com port.
+
 Mon Feb  5 18:35:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i960.h (F_I960HX): Define.
@@ -169,12 +190,10 @@ Wed Nov 23 22:43:38 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 	* sh.h (SH_ARCH_MAGIC_BIG, SH_ARCH_MAGIC_LITTLE): New.
 	(SHBADMAG): Changed to suit.
 
-start-sanitize-i960xl
 Tue Jul 26 17:46:08 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
-	* i960.h (F_I960XL): New macro.
+	* i960.h (F_I960JX): New macro.
 
-end-sanitize-i960xl
 Wed Jul  6 00:48:57 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* alpha.h:  Add definitions for alpha file header flags, encoding
