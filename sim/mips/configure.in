@@ -91,6 +91,23 @@ esac
 SIM_AC_OPTION_FLOAT($mips_fpu)
 
 
+#
+# Select the sim generator & architecture
+#
+sim_gen=NO
+case "${target}" in
+# start-sanitize-r5900
+#  mips64r59*-*-*)       sim_gen=IGEN ;;
+# end-sanitize-r5900
+# start-sanitize-vr5400
+#  mips64vr54*-*-*)      sim_gen=IGEN ;;
+# end-sanitize-vr5400
+#  mips16*-*-*)          sim_gen=M16 ;;
+  *)                    sim_gen=NO ;;
+esac
+AC_SUBST(sim_gen)
+
+
 AC_CHECK_HEADERS(string.h strings.h stdlib.h stdlib.h)
 AC_CHECK_LIB(m, fabs)
 AC_CHECK_FUNCS(aint anint sqrt)

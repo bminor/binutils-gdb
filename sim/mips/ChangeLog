@@ -1,3 +1,18 @@
+Fri Oct 24 17:41:49 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (sim_gen): Dependent on target, select type of
+ 	generator.  Always select old style generator.
+
+	configure: Re-generate.
+
+	Makefile.in (tmp-igen, tmp-m16, clean-m16, clean-igen): New
+ 	targets.
+	(SIM_M16_CFLAGS, SIM_M16_ALL, SIM_M16_OBJ, BUILT_SRC_FROM_M16,
+ 	SIM_IGEN_CFLAGS, SIM_IGEN_ALL, SIM_IGEN_OBJ, BUILT_SRC_FROM_IGEN,
+ 	IGEN_TRACE, IGEN_INSN, IGEN_DC): Define
+	(SIM_EXTRA_CFLAGS, SIM_EXTRA_ALL, SIM_OBJS): Add member
+ 	SIM_@sim_gen@_*, set by autoconf.
+	
 Wed Oct 22 12:52:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-main.h (NULLIFY_NEXT_INSTRUCTION, DELAY_SLOT): Define.
