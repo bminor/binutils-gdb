@@ -3997,6 +3997,7 @@ process_version_sections (file)
 	    for (cnt = 0; cnt < total; cnt += 4)
 	      {
 		int j, nn;
+		int check_def, check_need;
 		char * name;
 
 		printf ("  %03x:", cnt);
@@ -4016,111 +4017,20 @@ process_version_sections (file)
 		      nn = printf ("%4x%c", data [cnt + j] & 0x7fff,
 				   data [cnt + j] & 0x8000 ? 'h' : ' ');
 
-		      if (symbols [cnt + j].st_shndx < SHN_LORESERVE
-			  && section_headers[symbols [cnt + j].st_shndx].sh_type
-			  == SHT_NOBITS)
+		      check_def = 1;
+		      check_need = 1;
+		      if (symbols [cnt + j].st_shndx >= SHN_LORESERVE
+			  || section_headers[symbols [cnt + j].st_shndx].sh_type
+			  != SHT_NOBITS)
 			{
-			  /* We must test both.  */
-			  Elf_Internal_Verneed     ivn;
-			  unsigned long            offset;
-
-			  offset = version_info [DT_VERSIONTAGIDX (DT_VERNEED)]
-			    - loadaddr;
-
-			  do
-			    {
-			      Elf_External_Verneed   evn;
-			      Elf_External_Vernaux   evna;
-			      Elf_Internal_Vernaux   ivna;
-			      unsigned long          vna_off;
-
-			      GET_DATA (offset, evn, "version need");
-
-			      ivn.vn_aux  = BYTE_GET (evn.vn_aux);
-			      ivn.vn_next = BYTE_GET (evn.vn_next);
-
-			      vna_off = offset + ivn.vn_aux;
-
-			      do
-				{
-				  GET_DATA (vna_off, evna,
-					    "version need aux (1)");
-
-				  ivna.vna_next  = BYTE_GET (evna.vna_next);
-				  ivna.vna_other = BYTE_GET (evna.vna_other);
-
-				  vna_off += ivna.vna_next;
-				}
-			      while (ivna.vna_other != data [cnt + j]
-				     && ivna.vna_next != 0);
-
-			      if (ivna.vna_other == data [cnt + j])
-				{
-				  ivna.vna_name = BYTE_GET (evna.vna_name);
-
-				  name = strtab + ivna.vna_name;
-				  nn += printf ("(%s%-*s",
-						name,
-						12 - (int) strlen (name),
-						")");
-				  break;
-				}
-			      else if (ivn.vn_next == 0)
-				{
-				  if (data [cnt + j] != 0x8001)
-				    {
-				      Elf_Internal_Verdef  ivd;
-				      Elf_External_Verdef  evd;
-
-				      offset = version_info
-					[DT_VERSIONTAGIDX (DT_VERDEF)]
-					- loadaddr;
-
-				      do
-					{
-					  GET_DATA (offset, evd,
-						    "version definition");
-
-					  ivd.vd_next = BYTE_GET (evd.vd_next);
-					  ivd.vd_ndx  = BYTE_GET (evd.vd_ndx);
-
-					  offset += ivd.vd_next;
-					}
-				      while (ivd.vd_ndx
-					     != (data [cnt + j] & 0x7fff)
-					     && ivd.vd_next != 0);
-
-				      if (ivd.vd_ndx
-					  == (data [cnt + j] & 0x7fff))
-					{
-					  Elf_External_Verdaux  evda;
-					  Elf_Internal_Verdaux  ivda;
-
-					  ivd.vd_aux = BYTE_GET (evd.vd_aux);
-
-					  GET_DATA (offset + ivd.vd_aux, evda,
-						    "version definition aux");
-
-					  ivda.vda_name =
-					    BYTE_GET (evda.vda_name);
-
-					  name = strtab + ivda.vda_name;
-					  nn +=
-					    printf ("(%s%-*s",
-						    name,
-						    12 - (int) strlen (name),
-						    ")");
-					}
-				    }
-
-				  break;
-				}
-			      else
-				offset += ivn.vn_next;
-			    }
-			  while (ivn.vn_next);
+			  if (symbols [cnt + j].st_shndx == SHN_UNDEF)
+			    check_def = 0;
+			  else
+			    check_need = 0;
 			}
-		      else if (symbols [cnt + j].st_shndx == SHN_UNDEF)
+
+		      if (check_need
+			  && version_info [DT_VERSIONTAGIDX (DT_VERNEED)])
 			{
 			  Elf_Internal_Verneed     ivn;
 			  unsigned long            offset;
@@ -4164,6 +4074,7 @@ process_version_sections (file)
 						name,
 						12 - (int) strlen (name),
 						")");
+				  check_def = 0;
 				  break;
 				}
 
@@ -4171,7 +4082,9 @@ process_version_sections (file)
 			    }
 			  while (ivn.vn_next);
 			}
-		      else if (data [cnt + j] != 0x8001)
+
+		      if (check_def && data [cnt + j] != 0x8001
+			  && version_info [DT_VERSIONTAGIDX (DT_VERDEF)])
 			{
 			  Elf_Internal_Verdef  ivd;
 			  Elf_External_Verdef  evd;
@@ -4548,7 +4461,8 @@ process_symbol_table (file)
 
 		  if ((vers_data & 0x8000) || vers_data > 1)
 		    {
-		      if (is_nobits || ! check_def)
+		      if (version_info [DT_VERSIONTAGIDX (DT_VERNEED)]
+			  && (is_nobits || ! check_def))
 			{
 			  Elf_External_Verneed  evn;
 			  Elf_Internal_Verneed  ivn;
@@ -4606,7 +4520,8 @@ process_symbol_table (file)
 
 		      if (check_def)
 			{
-			  if (vers_data != 0x8001)
+			  if (vers_data != 0x8001
+			      && version_info [DT_VERSIONTAGIDX (DT_VERDEF)])
 			    {
 			      Elf_Internal_Verdef     ivd;
 			      Elf_Internal_Verdaux    ivda;
