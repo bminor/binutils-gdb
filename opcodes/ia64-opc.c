@@ -346,7 +346,8 @@ opcode_verify (opcode, place, type)
 /* Find an instruction entry in the ia64_dis_names array that matches
    opcode OPCODE and is of type TYPE.  Returns either a positive index
    into the array, or a negative value if an entry for OPCODE could
-   not be found.  */
+   not be found.  Checks all matches and returns the one with the highest
+   priority. */
 
 static int
 locate_opcode_ent (opcode, type)
@@ -357,6 +358,8 @@ locate_opcode_ent (opcode, type)
   int bitpos[41];
   int op_ptr[41];
   int currstatenum = 0;
+  short found_disent = -1;
+  short found_priority = -1;
 
   currtest[currstatenum] = 0;
   op_ptr[currstatenum] = 0;
@@ -463,6 +466,7 @@ locate_opcode_ent (opcode, type)
       if ((next_op >= 0) && (next_op & 32768))
 	{
 	  short disent = next_op & 32767;
+          short priority = -1;
 
 	  if (next_op > 65535)
 	    {
@@ -475,7 +479,10 @@ locate_opcode_ent (opcode, type)
 	    {
 	      int place = ia64_dis_names[disent].insn_index;
 
-	      if (opcode_verify (opcode, place, type))
+              priority = ia64_dis_names[disent].priority;
+
+	      if (opcode_verify (opcode, place, type) 
+                  && priority > found_priority)
 		{
 		  break;
 		}
@@ -491,13 +498,12 @@ locate_opcode_ent (opcode, type)
 
 	  if (disent >= 0)
 	    {
-	      return disent;
+              found_disent = disent;
+              found_priority = priority;
 	    }
-	  else
-	    {
-	      /* Failed to match; try the next test in this state. */
-	      next_op = -2;
-	    }
+          /* Try the next test in this state, regardless of whether a match
+             was found. */
+          next_op = -2;
 	}
 
       /* next_op == -1 is "back up to the previous state".
@@ -509,7 +515,7 @@ locate_opcode_ent (opcode, type)
 	  currstatenum--;
 	  if (currstatenum < 0)
 	    {
-	      return -1;
+              return found_disent;
 	    }
 	}
       else if (next_op >= 0)

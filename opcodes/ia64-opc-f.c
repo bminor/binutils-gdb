@@ -113,9 +113,9 @@ struct ia64_opcode ia64_opcodes_f[] =
 
     {"mov",		f, OpXbX6 (0, 0, 0x10), {F1, F3}, PSEUDO | F2_EQ_F3},
     {"fabs",		f, OpXbX6F2 (0, 0, 0x10, 0), {F1, F3}, PSEUDO},
-    {"fmerge.s",	f, OpXbX6   (0, 0, 0x10), {F1, F2, F3}},
     {"fneg",		f, OpXbX6   (0, 0, 0x11), {F1, F3}, PSEUDO | F2_EQ_F3},
     {"fnegabs",		f, OpXbX6F2 (0, 0, 0x11, 0), {F1, F3}, PSEUDO},
+    {"fmerge.s",	f, OpXbX6   (0, 0, 0x10), {F1, F2, F3}},
     {"fmerge.ns",	f, OpXbX6   (0, 0, 0x11), {F1, F2, F3}},
 
     {"fmerge.se",	f, OpXbX6 (0, 0, 0x12), {F1, F2, F3}},
@@ -249,9 +249,9 @@ struct ia64_opcode ia64_opcodes_f[] =
     {"fpcmp.ord.s3",	f, OpXbX6Sf (1, 0, 0x37, 3), {F1, F2, F3}},
 
     {"fpabs",		f, OpXbX6F2 (1, 0, 0x10, 0), {F1, F3}, PSEUDO},
-    {"fpmerge.s",	f, OpXbX6   (1, 0, 0x10), {F1, F2, F3}},
     {"fpneg",		f, OpXbX6   (1, 0, 0x11), {F1, F3}, PSEUDO | F2_EQ_F3},
     {"fpnegabs",	f, OpXbX6F2 (1, 0, 0x11, 0), {F1, F3}, PSEUDO},
+    {"fpmerge.s",	f, OpXbX6   (1, 0, 0x10), {F1, F2, F3}},
     {"fpmerge.ns",	f, OpXbX6   (1, 0, 0x11), {F1, F2, F3}},
     {"fpmerge.se",	f, OpXbX6 (1, 0, 0x12), {F1, F2, F3}},
 
@@ -450,8 +450,8 @@ struct ia64_opcode ia64_opcodes_f[] =
     {"fma.s1",		f, OpXaSf (0x8, 0, 1), {F1, F3, F4, F2}},
     {"fma.s2",		f, OpXaSf (0x8, 0, 2), {F1, F3, F4, F2}},
     {"fma.s3",		f, OpXaSf (0x8, 0, 3), {F1, F3, F4, F2}},
-    {"fma.s.s0",	f, OpXaSf (0x8, 1, 0), {F1, F3, F4, F2}, PSEUDO},
-    {"fma.s",		f, OpXaSf (0x8, 1, 0), {F1, F3, F4, F2}},
+    {"fma.s.s0",	f, OpXaSf (0x8, 1, 0), {F1, F3, F4, F2}},
+    {"fma.s",		f, OpXaSf (0x8, 1, 0), {F1, F3, F4, F2}, PSEUDO},
     {"fma.s.s1",	f, OpXaSf (0x8, 1, 1), {F1, F3, F4, F2}},
     {"fma.s.s2",	f, OpXaSf (0x8, 1, 2), {F1, F3, F4, F2}},
     {"fma.s.s3",	f, OpXaSf (0x8, 1, 3), {F1, F3, F4, F2}},
@@ -529,6 +529,12 @@ struct ia64_opcode ia64_opcodes_f[] =
     {"fpms.s1",		f, OpXaSf (0xb, 1, 1), {F1, F3, F4, F2}},
     {"fpms.s2",		f, OpXaSf (0xb, 1, 2), {F1, F3, F4, F2}},
     {"fpms.s3",		f, OpXaSf (0xb, 1, 3), {F1, F3, F4, F2}},
+
+    {"fpsub.s0",        f, OpXaSfF4 (0xb, 1, 0, 1), {F1, F3, F2}, PSEUDO},
+    {"fpsub",		f, OpXaSfF4 (0xb, 1, 0, 1), {F1, F3, F2}, PSEUDO},
+    {"fpsub.s1",	f, OpXaSfF4 (0xb, 1, 1, 1), {F1, F3, F2}, PSEUDO},
+    {"fpsub.s2",	f, OpXaSfF4 (0xb, 1, 2, 1), {F1, F3, F2}, PSEUDO},
+    {"fpsub.s3",	f, OpXaSfF4 (0xb, 1, 3, 1), {F1, F3, F2}, PSEUDO},
 
     {"fnmpy.s0",	f, OpXaSfF2 (0xc, 0, 0, 0), {F1, F3, F4}, PSEUDO},
     {"fnmpy",		f, OpXaSfF2 (0xc, 0, 0, 0), {F1, F3, F4}, PSEUDO},

@@ -140,6 +140,9 @@ struct ia64_dis_names
      for this instruction encoding.  Which one to use is determined by
      the instruction type and other factors (see opcode_verify ()).  */
   unsigned int next_flag : 1;
+
+  /* The disassembly priority of this entry among instructions. */
+  unsigned short priority;
 };
 
 #endif

@@ -1,3 +1,20 @@
+2000-04-22  Timothy Wall  <twall@cygnus.com>
+
+	* ia64-gen.c (general): Add an ordered table of primary
+	opcode names, as well as priority fields to disassembly data
+	structures to enforce a preferred disassembly format based on the
+	ordering of the opcode tables.
+	(load_insn_classes): Show a useful message if IC tables are missing.
+	(load_depfile): Ditto.
+	* ia64-asmtab.h (struct ia64_dis_names ): Add priority flag to
+	distinguish preferred disassembly.
+	* ia64-opc-f.c: Reorder some insn for preferred disassembly
+	format.  Fix incorrect flag on fma.s/fma.s.s0.
+	* ia64-opc.c: Scan *all* disassembly matches and use the one with
+	the highest priority.
+	* ia64-opc-b.c: Use more abbreviations.
+	* ia64-asmtab.c: Regenerate.
+	
 Fri Apr 21 16:03:39 2000  Jason Eckhardt  <jle@cygnus.com>
 
 	* hppa-dis.c (extract_16): New function.

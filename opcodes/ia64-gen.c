@@ -68,7 +68,12 @@ struct main_entry
   struct completer_entry *completers;
   /* Next entry in the chain. */
   struct main_entry *next;
-} *maintable;
+  /* Index in the  main table. */
+  int main_index;
+} *maintable, **ordered_table;
+int otlen = 0;
+int ottotlen = 0;
+int opcode_count = 0;
 
 /* The set of possible completers for an opcode. */
 struct completer_entry
@@ -104,8 +109,11 @@ struct completer_entry
      list).  This field is filled in by compute_completer_bits (). */
   ia64_insn mask;
 
-  /* Index into the opcode dependency list, or -1 if none */
+  /* Index into the opcode dependency list, or -1 if none. */
   int dependencies;
+
+  /* Remember the order encountered in the opcode tables.  */
+  int order;
 };
 
 /* One entry in the disassembler name table. */
@@ -116,6 +124,9 @@ struct disent
 
   /* The index into the main_table[] array. */
   int insn;
+
+  /* The disassmbly priority of this entry. */
+  int priority;
 
   /* The completer_index value for this entry. */
   int completer_index;
@@ -135,7 +146,7 @@ struct disent
 struct bittree
 {
   struct disent *disent;
-  struct bittree *bits[3];
+  struct bittree *bits[3]; /* 0, 1, and X (don't care) */
   int bits_to_skip;
   int skip_flag;
 } *bittree;
@@ -502,6 +513,11 @@ load_insn_classes()
   FILE *fp = fopen("ia64-ic.tbl", "r");
   char buf[2048];
 
+  if (fp == NULL){
+    fprintf (stderr, "Can't find ia64-ic.tbl for reading\n");
+    exit(1);
+  }
+
   /* discard first line */
   fgets (buf, sizeof(buf), fp);
 
@@ -706,6 +722,11 @@ load_depfile (const char *filename, enum ia64_dependency_mode mode)
 {
   FILE *fp = fopen(filename, "r");
   char buf[1024];
+
+  if (fp == NULL){
+    fprintf (stderr, "Can't find %s for reading\n", filename);
+    exit(1);
+  }
 
   fgets(buf, sizeof(buf), fp);
   while (!feof(fp))
@@ -1577,9 +1598,10 @@ make_bittree_entry ()
 }
 
 struct disent *
-add_dis_table_ent (which, insn, completer_index)
+add_dis_table_ent (which, insn, order, completer_index)
      struct disent *which;
      int insn;
+     int order;
      int completer_index;
 {
   int ci = 0;
@@ -1606,6 +1628,8 @@ add_dis_table_ent (which, insn, completer_index)
   ent->nextcnt = 0;
   ent->nexte = NULL;
   ent->insn = insn;
+  ent->priority = order;
+
   while (completer_index != 1)
     {
       ci = (ci << 1) | (completer_index & 1);
@@ -1630,12 +1654,14 @@ finish_distable ()
 }
 
 void
-insert_bit_table_ent (curr_ent, bit, opcode, mask, opcodenum, completer_index)
+insert_bit_table_ent (curr_ent, bit, opcode, mask, 
+                      opcodenum, order, completer_index)
      struct bittree *curr_ent;
      int bit;
      ia64_insn opcode; 
      ia64_insn mask;
      int opcodenum;
+     int order;
      int completer_index;
 {
   ia64_insn m;
@@ -1644,7 +1670,8 @@ insert_bit_table_ent (curr_ent, bit, opcode, mask, opcodenum, completer_index)
 
   if (bit == -1)
     {
-      struct disent *nent = add_dis_table_ent (curr_ent->disent, opcodenum,
+      struct disent *nent = add_dis_table_ent (curr_ent->disent, 
+                                               opcodenum, order,
 					       completer_index);
       curr_ent->disent = nent;
       return;
@@ -1666,13 +1693,13 @@ insert_bit_table_ent (curr_ent, bit, opcode, mask, opcodenum, completer_index)
       next = make_bittree_entry ();
       curr_ent->bits[b] = next;
     }
-  insert_bit_table_ent (next, bit - 1, opcode, mask, opcodenum,
+  insert_bit_table_ent (next, bit - 1, opcode, mask, opcodenum, order,
 			completer_index);
 }
 
 void
 add_dis_entry (first, opcode, mask, opcodenum, ent, completer_index)
-     int first;
+     struct bittree *first;
      ia64_insn opcode;
      ia64_insn mask;
      int opcodenum;
@@ -1690,7 +1717,8 @@ add_dis_entry (first, opcode, mask, opcodenum, ent, completer_index)
 		     (completer_index << 1) | 1);
       if (ent->is_terminal)
 	{
-	  insert_bit_table_ent (bittree, 40, newopcode, mask, opcodenum, 
+	  insert_bit_table_ent (bittree, 40, newopcode, mask, 
+                                opcodenum, opcode_count - ent->order - 1, 
 				(completer_index << 1) | 1);
 	}
       completer_index <<= 1;
@@ -2035,9 +2063,9 @@ print_dis_table ()
 
       while (ent != NULL)
 	{
-	  printf ("{ 0x%x, %d, %d },\n", ent->completer_index,
-		  ent->insn,
-		  (ent->nexte != NULL ? 1 : 0));
+	  printf ("{ 0x%x, %d, %d, %d },\n", ent->completer_index,
+		  ent->insn, (ent->nexte != NULL ? 1 : 0),
+                  ent->priority);
 	  ent = ent->nexte;
 	}
       cent = cent->next_ent;
@@ -2048,21 +2076,21 @@ print_dis_table ()
 void
 generate_disassembler ()
 {
-  int mainnum = 0;
-  struct main_entry *ptr = maintable;
+  int i;
 
   bittree = make_bittree_entry ();
 
-  while (ptr != NULL)
+  for (i=0; i < otlen;i++)
     {
+      struct main_entry *ptr = ordered_table[i];
+
       if (ptr->opcode->type != IA64_TYPE_DYN)
 	{
 	  add_dis_entry (bittree,
-			 ptr->opcode->opcode, ptr->opcode->mask, mainnum,
+			 ptr->opcode->opcode, ptr->opcode->mask, 
+                         ptr->main_index,
 			 ptr->completers, 1);
 	}
-      mainnum++;
-      ptr = ptr->next;
     }
 
   compact_distree (bittree);
@@ -2123,7 +2151,8 @@ completer_entries_eq (ent1, ent2)
 	  || ent1->bits != ent2->bits
 	  || ent1->mask != ent2->mask
 	  || ent1->is_terminal != ent2->is_terminal
-          || ent1->dependencies != ent2->dependencies)
+          || ent1->dependencies != ent2->dependencies
+          || ent1->order != ent2->order)
 	{
 	  return 0;
 	}
@@ -2448,9 +2477,10 @@ insert_opcode_dependencies (opc, cmp)
 }
 
 void
-insert_completer_entry (opc, tabent)
+insert_completer_entry (opc, tabent, order)
      struct ia64_opcode *opc;
      struct main_entry *tabent;
+     int order;
 {
   struct completer_entry **ptr = &tabent->completers;
   struct completer_entry *parent = NULL;
@@ -2485,10 +2515,6 @@ insert_completer_entry (opc, tabent)
 	  if (cmpres == 0)
 	    {
 	      need_new_ent = 0;
-	      break;
-	    }
-	  else if (cmpres < 0)
-	    {
 	      break;
 	    }
 	  else
@@ -2526,6 +2552,7 @@ insert_completer_entry (opc, tabent)
   (*ptr)->bits = opc->opcode;
 
   (*ptr)->dependencies = insert_opcode_dependencies (opc, *ptr);
+  (*ptr)->order = order;
 }
 
 void
@@ -2622,7 +2649,8 @@ add_opcode_entry (opc)
   name = insert_string (prefix);
 
   /* Walk the list of opcode table entries.  If it's a new
-     instruction, allocate and fill in a new entry.  */
+     instruction, allocate and fill in a new entry.  Note 
+     the main table is alphabetical by opcode name. */
 
   while (*place != NULL)
     {
@@ -2647,14 +2675,23 @@ add_opcode_entry (opc)
       nent->next = *place;
       nent->completers = 0;
       *place = nent;
+
+      if (otlen == ottotlen)
+        {
+          ottotlen += 20;
+          ordered_table = (struct main_entry **)
+            xrealloc (ordered_table, sizeof (struct main_entry *) * ottotlen);
+        }
+      ordered_table[otlen++] = nent;
     }
-  insert_completer_entry (opc, *place);
+  insert_completer_entry (opc, *place, opcode_count++);
 }
 
 void
 print_main_table ()
 {
   struct main_entry *ptr = maintable;
+  int index = 0;
 
   printf ("static const struct ia64_main_table\nmain_table[] = {\n");
   while (ptr != NULL)
@@ -2672,6 +2709,8 @@ print_main_table ()
 	      ptr->opcode->operands[4],
 	      ptr->opcode->flags,
 	      ptr->completers->num);
+
+      ptr->main_index = index++;
 
       ptr = ptr->next;
     }
