@@ -1,3 +1,8 @@
+2002-09-17  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elf64-mips.c (define elf_backend_ignore_discarded_relocs): Remove
+	duplicate define.
+
 2002-09-16  Bruno Haible  <bruno@clisp.org>
 
 	* elf32-i386.c: Don't defined ELF_ARCH etc. if this file is included

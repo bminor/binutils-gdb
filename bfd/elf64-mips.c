@@ -2689,8 +2689,6 @@ const struct elf_size_info mips_elf64_size_info =
 #define elf_backend_may_use_rela_p	1
 #define elf_backend_default_use_rela_p	1
 
-#define elf_backend_ignore_discarded_relocs \
-					_bfd_mips_elf_ignore_discarded_relocs
 #define elf_backend_write_section	_bfd_mips_elf_write_section
 
 /* We don't set bfd_elf64_bfd_is_local_label_name because the 32-bit
