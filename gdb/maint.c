@@ -573,7 +573,7 @@ If a SOURCE file is specified, dump only that file's partial symbols.",
          "Deprecate a command.  Note that this is just in here so the \n\
 testsuite can check the comamnd deprecator. You probably shouldn't use this,\n\
 rather you should use the C function deprecate_cmd().  If you decide you \n\
-want to use it: maintenance deprecate 'commandname' \"replacement\". The \n\ 
+want to use it: maintenance deprecate 'commandname' \"replacement\". The \n\
 replacement is optional.", &maintenancelist);
 
   add_cmd ("undeprecate", class_maintenance, maintenance_undeprecate,
