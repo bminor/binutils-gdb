@@ -1,3 +1,9 @@
+Mon Feb  9 13:14:12 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config/a29k-udi.mt, config/i960/vxworks960.mt (REMOTE_OBS):
+ 	Remove redefinition.
+	* config/i960/tm-i960.h (BREAKPOINT): Define.
+
 Mon Feb  9 15:35:38 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (init.c): Ignore errors when making init.c.  Seems
