@@ -67,6 +67,7 @@ This document describes the GNU stabs debugging format in a.out files.
 @menu
 * Overview::                    Overview of stabs
 * Program structure::           Encoding of the structure of the program
+* Constants::			Constants
 * Simple types::
 * Example::                     A comprehensive example in C 
 * Variables::
@@ -156,17 +157,17 @@ of the current file location.  Otherwise the value field often
 contains a relocatable address, frame pointer offset, or register
 number, that maps to the source code element described by the stab.
 
-The real key to decoding the meaning of a stab is the number in its type
-field.  Each possible type number defines a different stab type.  The
-stab type further defines the exact interpretation of, and possible
-values for, any remaining @code{"@var{string}"}, @var{desc}, or
+The number in the type field gives some basic information about what
+type of stab this is (or whether it @emph{is} a stab, as opposed to an
+ordinary symbol).  Each possible type number defines a different stab
+type.  The stab type further defines the exact interpretation of, and
+possible values for, any remaining @code{"@var{string}"}, @var{desc}, or
 @var{value} fields present in the stab.  Table A (@pxref{Stab
-types,,Table A: Symbol types from stabs}) lists in numeric order
-the possible type field values for stab directives.  The reference
-section that follows Table A describes the meaning of the fields for
-each stab type in detail.  The examples that follow this overview
-introduce the stab types in terms of the source code elements they
-describe.
+types,,Table A: Symbol types from stabs}) lists in numeric order the
+possible type field values for stab directives.  The reference section
+that follows Table A describes the meaning of the fields for each stab
+type in detail.  The examples that follow this overview introduce the
+stab types in terms of the source code elements they describe.
 
 For @code{.stabs} the @code{"@var{string}"} field holds the meat of the
 debugging information.  The generally unstructured nature of this field
@@ -182,6 +183,11 @@ The overall format is of the @code{"@var{string}"} field is:
 @end example
 
 @var{name} is the name of the symbol represented by the stab.
+@var{name} can be omitted, which means the stab represents an unnamed
+object.  For example, @code{":t10=*2"} defines type 10 as a pointer to
+type 2, but does not give the type a name.  Omitting the @var{name}
+field is supported by AIX dbx and GDB after about version 4.8, but not
+other debuggers.
 
 The @var{symbol_descriptor} following the @samp{:} is an alphabetic
 character that tells more specifically what kind of symbol the stab
@@ -189,6 +195,9 @@ represents. If the @var{symbol_descriptor} is omitted, but type
 information follows, then the stab represents a local variable.  For a
 list of symbol_descriptors, see @ref{Symbol descriptors,,Table C: Symbol
 descriptors}.
+
+The @samp{c} symbol descriptor is an exception in that it is not
+followed by type information.  @xref{Constants}.
 
 Type information is either a @var{type_number}, or a
 @samp{@var{type_number}=}.  The @var{type_number} alone is a type
@@ -208,13 +217,36 @@ This is described more thoroughly in the section on types.  @xref{Type
 Descriptors,,Table D: Type Descriptors}, for a list of
 @var{type_descriptor} values.
 
+There is an AIX extension for type attributes.  Following the @samp{=}
+is any number of type attributes.  Each one starts with @samp{@@} and
+ends with @samp{;}.  Debuggers, including AIX's dbx, skip any type
+attributes they do not recognize.  The attributes are:
+
+@table @code
+@item a@var{boundary}
+@var{boundary} is an integer specifying the alignment.  I assume that
+applies to all variables of this type.
+
+@item s@var{size}
+Size in bits of a variabe of this type.
+
+@item p@var{integer}
+Pointer class (for checking).  Not sure what this means, or how
+@var{integer} is interpreted.
+
+@item P
+Indicate this is a packed type, meaning that structure fields or array
+elements are placed more closely in memory, to save memory at the
+expense of speed.
+@end table
+
 All this can make the @code{"@var{string}"} field quite long.  All
 versions of GDB, and some versions of DBX, can handle arbitrarily long
 strings.  But many versions of DBX cretinously limit the strings to
 about 80 characters, so compilers which must work with such DBX's need
 to split the @code{.stabs} directive into several @code{.stabs}
 directives.  Each stab duplicates exactly all but the
-@code{"@var{string}"} field.  The @code{"@var{string}"} field of the
+@code{"@var{string}"} field.  The @code{"@var{string}"} field of 
 every stab except the last is marked as continued with a
 double-backslash at the end.  Removing the backslashes and concatenating
 the @code{"@var{string}"} fields of each stab produces the original,
@@ -363,26 +395,45 @@ address for the start of that source line.
 @end example
 
 @node Procedures
-@section Procedures 
+@section Procedures
 
-@table @strong
-@item Directive:
-@code{.stabs}
-@item Type:
-@code{N_FUN}
-@item Symbol Descriptors:
-@code{f} (local), @code{F} (global)
-@end table
+All of the following stabs use the @samp{N_FUN} symbol type.
 
-Procedures are described by the @code{N_FUN} stab type.  The symbol
-descriptor for a procedure is @samp{F} if the procedure is globally
-scoped and @samp{f} if the procedure is static (locally scoped).
+A function is represented by a @samp{F} symbol descriptor for a global
+(extern) function, and @samp{f} for a static (local) function.  The next
+@samp{N_SLINE} symbol can be used to find the line number of the start
+of the function.  The value field is the address of the start of the
+function.  The type information of the stab represents the return type
+of the function; thus @samp{foo:f5} means that foo is a function
+returning type 5.
 
-The @code{N_FUN} stab representing a procedure is located immediately
-following the code of the procedure.  The @code{N_FUN} stab is in turn
-directly followed by a group of other stabs describing elements of the
-procedure.  These other stabs describe the procedure's parameters, its
-block local variables and its block structure. 
+The AIX documentation also defines symbol descriptor @samp{J} as an
+internal function.  I assume this means a function nested within another
+function.  It also says Symbol descriptor @samp{m} is a module in
+Modula-2 or extended Pascal.
+
+Procedures (functions which do not return values) are represented as
+functions returning the void type in C.  I don't see why this couldn't
+be used for all languages (inventing a void type for this purpose if
+necessary), but the AIX documentation defines @samp{I}, @samp{P}, and
+@samp{Q} for internal, global, and static procedures, respectively.
+These symbol descriptors are unusual in that they are not followed by
+type information.
+
+After the symbol descriptor and the type information, there is
+optionally a comma, followed by the name of the procedure, followed by a
+comma, followed by a name specifying the scope.  The first name is local
+to the scope specified.  I assume then that the name of the symbol
+(before the @samp{:}), if specified, is some sort of global name.  I
+assume the name specifying the scope is the name of a function
+specifying that scope.  This feature is an AIX extension, and this
+information is based on the manual; I haven't actually tried it.
+
+The stab representing a procedure is located immediately following the
+code of the procedure.  This stab is in turn directly followed by a
+group of other stabs describing elements of the procedure.  These other
+stabs describe the procedure's parameters, its block local variables and
+its block structure.
 
 @example
 48      ret
@@ -454,6 +505,61 @@ represents the procedure itself.  The @code{N_LBRAC} uses the
 51 .stabn 192,0,0,LBB2
 52 .stabn 224,0,0,LBE2
 @end example
+
+@node Constants
+@chapter Constants
+
+The @samp{c} symbol descriptor indicates that this stab represents a
+constant.  This symbol descriptor is an exception to the general rule
+that symbol descriptors are followed by type information.  Instead, it
+is followed by @samp{=} and one of the following:
+
+@table @code
+@item b@var{value}
+Boolean constant.  @var{value} is a numeric value; I assume it is 0 for
+false or 1 for true.
+
+@item c@var{value}
+Character constant.  @var{value} is the numeric value of the constant.
+
+@item e@var{type-information},@var{value}
+Enumeration constant.  @var{type-information} is the type of the
+constant, as it would appear after a symbol descriptor
+(@pxref{Overview}).  @var{value} is the numeric value of the constant.
+
+@item i@var{value}
+Integer constant.  @var{value} is the numeric value.
+
+@item r@var{value}
+Real constant.  @var{value} is the real value, which can be @samp{INF}
+(optionally preceded by a sign) for infinity, @samp{QNAN} for a quiet
+NaN (not-a-number), or @samp{SNAN} for a signalling NaN.  If it is a
+normal number the format is that accepted by the C library function
+@code{atof}.
+
+@item s@var{string}
+String constant.  @var{string} is a string enclosed in either @samp{'}
+(in which case @samp{'} characters within the string are represented as
+@samp{\'} or @samp{"} (in which case @samp{"} characters within the
+string are represented as @samp{\"}).
+
+@item S@var{type-information},@var{elements},@var{bits},@var{pattern}
+Set constant.  @var{type-information} is the type of the constant, as it
+would appear after a symbol descriptor (@pxref{Overview}).
+@var{elements} is the number of elements in the set (is this just the
+number of bits set in @var{pattern}?  Or redundant with the type?  I
+don't get it), @var{bits} is the number of bits in the constant (meaning
+it specifies the length of @var{pattern}, I think), and @var{pattern} is
+a hexadecimal representation of the set.  AIX documentation refers to a
+limit of 32 bytes, but I see no reason why this limit should exist.
+@end table
+
+The boolean, character, string, and set constants are not supported by
+GDB 4.9, but it will ignore them.  GDB 4.8 and earlier gave an error
+message and refused to read symbols from the file containing the
+constants.
+
+This information is followed by @samp{;}.
 
 @node Simple types
 @chapter Simple types
@@ -848,43 +954,27 @@ in the @code{N_GSYM} stab.  The debugger gets this information from the
 external symbol for the global variable.
 
 @node Register variables
-@section Global register variables 
+@section Register variables 
 
-@table @strong
-@item Directive:
-@code{.stabs}
-@item Type:
-@code{N_RSYM}
-@item Symbol Descriptor:
-@code{r}
-@end table
+Register variables have their own stab type, @code{N_RSYM}, and their
+own symbol descriptor, @code{r}.  The stab's value field contains the
+number of the register where the variable data will be stored.
 
-The following source line defines a global variable, @code{g_bar}, which is
-explicitly allocated in global register @code{%g5}.  
+The value is the register number.
 
-@example
-2  register int g_bar asm ("%g5");
-@end example
+AIX defines a separate symbol descriptor @samp{d} for floating point
+registers.  This seems incredibly stupid--why not just just give
+floating point registers different register numbers.
 
-Register variables have their own stab type, @code{N_RSYM}, and their own
-symbol descriptor, @code{r}.  The stab's value field contains the number of
-the register where the variable data will be stored.  Since the
-variable was not initialized in this compilation unit, the stab is
-emited at the end of the object file, with the stabs for other
-uninitialized globals (@code{bcc}).
+If the register is explicitly allocated to a global variable, but not
+initialized, as in
 
 @example
-@exdent @code{N_RSYM} (64): register variable
-
-.stabs "@var{name}:
-        @var{descriptor}
-        @var{type-ref}",
-       N_RSYM, NIL, NIL,
-       @var{register}
- 
-133 .stabs "g_bar:r1",64,0,0,5
+register int g_bar asm ("%g5");
 @end example
 
+the stab may be emitted at the end of the object file, with
+the other bss symbols.
 
 @node Initialized statics
 @section Initialized static variables 
@@ -1006,6 +1096,12 @@ same thing, the difference is that @samp{P} is a GNU invention and
 handle either one.  Symbol type @samp{C_RPSYM} is used with @samp{R} and
 @samp{N_RSYM} is used with @samp{P}.
 
+AIX, according to the documentation, uses @samp{D} for a parameter
+passed in a floating point register.  This strikes me as incredibly
+bogus---why doesn't it just use @samp{R} with a register number which
+indicates that it's a floating point register.  I haven't verified
+whether the system actually does what the documentation indicates.
+
 There is at least one case where GCC uses a @samp{p}/@samp{r} pair
 rather than @samp{P}; this is where the argument is passed in the
 argument list and then loaded into a register.
@@ -1017,9 +1113,12 @@ sparc, this is also true of a @samp{p}/@samp{r} pair (using Sun cc) or a
 register, @samp{r} is used.  And, to top it all off, on the hppa it
 might be a structure which was passed on the stack and loaded into a
 register and for which there is a @samp{p}/@samp{r} pair!  I believe
-that symbol descriptor @samp{i} is supposed to deal with this case, but
-I don't know details or what compilers or debuggers use it, if any (not
-GDB or GCC).
+that symbol descriptor @samp{i} is supposed to deal with this case, (it
+is said to mean "value parameter by reference, indirect access", I don't
+know the source for this information) but I don't know details or what
+compilers or debuggers use it, if any (not GDB or GCC).  It is not clear
+to me whether this case needs to be dealt with differently than
+parameters passed by reference (see below).
 
 There is another case similar to an argument in a register, which is an
 argument which is actually stored as a local variable.  Sometimes this
@@ -1038,15 +1137,30 @@ symbol is an offset relative to the local variables for that function,
 not relative to the arguments (on some machines those are the same
 thing, but not on all).
 
-The following are said to go with @samp{N_PSYM}:
+If the parameter is passed by reference (e.g. Pascal VAR parameters),
+then type symbol descriptor is @samp{v} if it is in the argument list,
+or @samp{a} if it in a register.  Other than the fact that these contain
+the address of the parameter other than the parameter itself, they are
+identical to @samp{p} and @samp{R}, respectively.  I believe @samp{a} is
+an AIX invention; @samp{v} is supported by all stabs-using systems as
+far as I know.
+
+@c Is this paragraph correct?  It is based on piecing together patchy
+@c information and some guesswork
+Conformant arrays refer to a feature of Modula-2, and perhaps other
+languages, in which the size of an array parameter is not known to the
+called function until run-time.  Such parameters have two stabs, a
+@samp{x} for the array itself, and a @samp{C}, which represents the size
+of the array.  The value of the @samp{x} stab is the offset in the
+argument list where the address of the array is stored (it this right?
+it is a guess); the value of the @samp{C} stab is the offset in the
+argument list where the size of the array (in elements? in bytes?) is
+stored.
+
+The following are also said to go with @samp{N_PSYM}:
 
 @example
 "name" -> "param_name:#type"
-                     # -> p  (value parameter)
-                       -> i  (value parameter by reference, indirect access)
-                       -> v  (variable parameter by reference)
-                       -> C  (read-only parameter, conformant array bound)
-                       -> x  (conformant array value parameter)
                        -> pP (<<??>>)
                        -> pF (<<??>>)
                        -> X  (function result variable)
@@ -2464,11 +2578,23 @@ n_type  n_type  name      used to describe
 @item (empty)
 Local variable, @xref{Automatic variables}.
 
+@item a
+Parameter passed by reference in register, @xref{Parameters}.
+
+@item c
+Constant, @xref{Constants}.
+
 @item C
-@xref{Parameters}.
+Conformant array bound, @xref{Parameters}.
+
+@item d
+Floating point register variable, @xref{Register variables}.
+
+@item D
+Parameter in floating point register, @xref{Parameters}.
 
 @item f
-Local function, @xref{Procedures}.
+Static function, @xref{Procedures}.
 
 @item F
 Global function, @xref{Procedures}.
@@ -2478,6 +2604,18 @@ Global variable, @xref{Global Variables}.
 
 @item i
 @xref{Parameters}.
+
+@item I
+Internal (nested) procedure, @xref{Procedures}.
+
+@item J
+Internal (nested) function, @xref{Procedures}.
+
+@item L
+Label name (documented by AIX, no further information known).
+
+@item m
+Module, @xref{Procedures}.
 
 @item p
 Argument list parameter @xref{Parameters}.
@@ -2489,7 +2627,13 @@ Argument list parameter @xref{Parameters}.
 @xref{Parameters}.
 
 @item P
-@itemx R
+Global Procedure (AIX), @xref{Procedures}.
+Register parameter (GNU), @xref{Parameters}.
+
+@item Q
+Static Procedure, @xref{Procedures}.
+
+@item R
 Register parameter @xref{Parameters}.
 
 @item r
@@ -2512,6 +2656,9 @@ Call by reference, @xref{Parameters}.
 Static procedure scope variable @xref{Initialized statics},
 @xref{Un-initialized statics}.
 
+@item x
+Conformant array, @xref{Parameters}.
+
 @item X
 Function return variable, @xref{Parameters}.
 @end table
@@ -2519,19 +2666,36 @@ Function return variable, @xref{Parameters}.
 @node Type Descriptors
 @section Table D: Type Descriptors 
 
-@example
-descriptor      meaning                         
--------------------------------------
-(empty)         type reference                  
-   a            array type                      
-   e            enumeration type                
-   f            function type                   
-   r            range type                      
-   s            structure type          
-   u            union specifications            
-   *            pointer type                    
-@end example
+@table @code
+@item (digits)
+Type reference, @xref{Overview}.
 
+@item *
+Pointer type.
+
+@item @@
+Type Attributes (AIX), @xref{Overview}.
+Some C++ thing (GNU).
+
+@item a
+Array type.
+
+@item e
+Enumeration type.
+
+@item f
+Function type.
+
+@item r
+Range type.
+
+@item s
+Structure type.
+
+@item u
+Union specifications.
+
+@end table
 
 @node Expanded reference
 @appendix Expanded reference by stab type.
@@ -2624,13 +2788,10 @@ Only the "name" field is significant.  The location of the symbol is
 obtained from the corresponding extern symbol. 
 
 @node N_FUN
-@section 36 - 0x24 - N_FUN        
-Function name or text segment variable for C.
+@section 36 - 0x24 - N_FUN
 
-@display
-.stabs "name", N_FUN, NIL, desc, value
-@end display
-
+Function name (@pxref{Procedures}) or text segment variable
+(@pxref{Variables}).
 @example
 @exdent @emph{For functions:}
 "name" -> "proc_name:#return_type"
@@ -3082,6 +3243,9 @@ dbx?
 @appendix Differences between GNU stabs in a.out and GNU stabs in xcoff
 
 @c FIXME: Merge *all* these into the main body of the document.
+@c Progress report: I have merged all the information from the
+@c "dbx stabstring grammar" section of the AIX documentation into
+@c the main body of this document, except the types.
 (The AIX/RS6000 native object file format is xcoff with stabs).  This
 appendix only covers those differences which are not covered in the main
 body of this document.
