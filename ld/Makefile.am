@@ -210,7 +210,8 @@ ALL_EMULATIONS = \
 ALL_64_EMULATIONS = \
 	eelf64_sparc.o \
 	eelf64alpha.o \
-	eelf64bmip.o
+	eelf64bmip.o \
+	eelf64hppa.o
 
 ALL_EMUL_EXTRA_OFILES = \
 	pe-dll.o \
@@ -387,6 +388,9 @@ eelf32ppclinux.c: $(srcdir)/emulparams/elf32ppclinux.sh \
 eelf64alpha.c: $(srcdir)/emulparams/elf64alpha.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64alpha "$(tdir_elf64alpha)"
+eelf64hppa.c: $(srcdir)/emulparams/elf64hppa.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64hppa "$(tdir_elf64hppa)"
 eelf64_sparc.c: $(srcdir)/emulparams/elf64_sparc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_sparc "$(tdir_elf64_sparc)"
