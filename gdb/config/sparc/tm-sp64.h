@@ -24,10 +24,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "sparc/tm-sparc.h"
 
-/* Stack has strict alignment.  */
+/* Stack must be aligned on 128-bit boundaries when synthesizing
+   function calls. */
 
 #undef  STACK_ALIGN
-#define STACK_ALIGN(ADDR) (((ADDR)+15)&-16)
+#define STACK_ALIGN(ADDR) (((ADDR) + 15 ) & -16)
 
 /* Number of machine registers.  */
 

@@ -106,9 +106,10 @@ extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
 
 #define INNER_THAN <
 
-/* Stack has strict alignment.  */
+/* Stack must be aligned on 64-bit boundaries when synthesizing
+   function calls. */
 
-#define STACK_ALIGN(ADDR) (((ADDR)+7)&-8)
+#define STACK_ALIGN(ADDR) (((ADDR) + 7) & -8)
 
 /* Sequence of bytes for breakpoint instruction (ta 1). */
 

@@ -1,3 +1,28 @@
+Sun Aug 25 00:09:47 1996  Fred Fish  <fnf@rtl.cygnus.com>
+
+	* rs6000-tdep.c: Fix typo in comment.
+	* valops.c (call_function_by_hand): Set using_gcc to 2
+	for code compiled without -g, per comment in code.
+	* config/a29k/tm-a29k.h (STACK_ALIGN): Add comment.
+	* config/sparc/tm-sparc.h (STACK_ALIGN): Add comment.
+	* config/sparc/tm-sp64.h (STACK_ALIGN): Add comment.
+	* config/pyr/tm-pyr.h (STACK_ALIGN): Add comment.
+	* config/m88k/tm-m88k.h (STACK_ALIGN): Add comment.
+	* config/pa/tm-hppa.h (PUSH_ARGUMENTS): Enclose args in ()'s.
+	(STACK_ALIGN): Add comment, move to be with other associated
+ 	macros, and document.
+	* config/mips/tm-mips.h (PUSH_ARGUMENTS): Enclose args in ()'s.
+	(STACK_ALIGN): Remove completely, handled by PUSH_ARGUMENTS.
+	* config/alpha/tm-alpha.h (PUSH_ARGUMENTS): Enclose args in ()'s.
+	* config/rs6000/tm-rs6000.h (STACK_ALIGN): Remove completely,
+	handled by PUSH_ARGUMENTS.
+	(PUSH_ARGUMENTS): Enclose args in ()'s.
+	
+Fri Aug 23 13:55:05 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* infrun.c (wait_for_inferior):  Try to reenable shared library
+	breakpoints even if auto_solib_load is not set.
+
 Fri Aug 23 00:44:57 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdbtk.c (gdbtk_init): Check for a DISPLAY env variable and

@@ -339,12 +339,12 @@ extern void mips_find_saved_regs PARAMS ((struct frame_info *));
 
 /* Things needed for making the inferior call functions.  */
 
-/* Stack has strict alignment. However, use PUSH_ARGUMENTS
-   to take care of it. */
-/*#define STACK_ALIGN(addr)	(((addr)+3)&~3)*/
+/* Stack must be aligned on 32-bit boundaries when synthesizing
+   function calls.  We don't need STACK_ALIGN, PUSH_ARGUMENTS will
+   handle it. */
 
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
-    sp = mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
+    sp = mips_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr))
 extern CORE_ADDR
 mips_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));
 

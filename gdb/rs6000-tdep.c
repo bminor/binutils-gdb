@@ -683,7 +683,7 @@ rs6000_fix_call_dummy (dummyname, pc, fun, nargs, args, type, gcc_p)
    stack.
 
    If the function is returning a structure, then the return address is passed
-   in r3, then the first 7 words of the parametes can be passed in registers,
+   in r3, then the first 7 words of the parameters can be passed in registers,
    starting from r4. */
 
 CORE_ADDR
