@@ -34,6 +34,11 @@ AC_SUBST(DLLTOOL)
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
 AC_CANONICAL_SYSTEM
 
+dnl gdb doesn't use gettext, but bfd does.  We call this to ensure we
+dnl link with the correct libraries.
+ALL_LINGUAS=
+CY_GNU_GETTEXT
+
 dnl List of object files added by configure.
 
 CONFIG_OBS=

@@ -41,6 +41,9 @@ man9dir = $(mandir)/man9
 infodir = @infodir@
 includedir = @includedir@
 
+# This can be referenced by `INTLDEPS' as computed by CY_GNU_GETTEXT.
+top_builddir = .
+
 SHELL = @SHELL@
 EXEEXT = # @EXEEXT@ # This isn't getting substituted in correctly :-(
 
@@ -107,7 +110,8 @@ READLINE_CFLAGS = -I$(READLINE_SRC)
 
 # Where is the INTL library?  Typically in ../intl.
 INTL_DIR = ../intl
-INTL = $(INTL_DIR)/libintl.a
+INTL = @INTLLIBS@
+INTL_DEPS = @INTLDEPS@
 INTL_SRC = $(srcdir)/$(INTL_DIR)
 INTL_CFLAGS = -I$(INTL_DIR) -I$(INTL_SRC)
 
@@ -247,7 +251,7 @@ CLIBS = $(SIM) $(BFD) $(READLINE) $(OPCODES) $(INTL) $(LIBIBERTY) \
 	$(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) @LIBS@ \
 	$(MMALLOC) $(LIBIBERTY) $(WIN32LIBS)
 CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
-	$(OPCODES) $(MMALLOC) $(INTL) $(LIBIBERTY) @CONFIG_DEPS@
+	$(OPCODES) $(MMALLOC) $(INTL_DEPS) $(LIBIBERTY) @CONFIG_DEPS@
 
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
