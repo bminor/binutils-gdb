@@ -1,3 +1,14 @@
+2003-10-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (lang_vers_match): Check "symbol" instead of
+	"wildcard" and "pattern". Fix a typo.
+	(lang_finalize_version_expr_head): Likewise.
+	(lang_register_vers_node): Likewise.
+	(realsymbol): New function.
+	(lang_new_vers_pattern): Set "symbol" and remove "wildcard".
+
+	* ldlex.l (V_IDENTIFIER): Allow '\\'.
+
 2003-10-24  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/m68hc1xelf.em (before_allocation): Add missing second

@@ -2059,16 +2059,14 @@ NAME(bfd_elf,size_dynamic_sections) (bfd *output_bfd,
       /* Make all global versions with definiton.  */
       for (t = verdefs; t != NULL; t = t->next)
 	for (d = t->globals.list; d != NULL; d = d->next)
-	  /* FIXME: Shouldn't this be !d->symver && d->wildcard == 0
-	     instead?  */
-	  if (!d->symver && strchr (d->pattern, '*') == NULL)
+	  if (!d->symver && d->symbol)
 	    {
 	      const char *verstr, *name;
 	      size_t namelen, verlen, newlen;
 	      char *newname, *p;
 	      struct elf_link_hash_entry *newh;
 
-	      name = d->pattern;
+	      name = d->symbol;
 	      namelen = strlen (name);
 	      verstr = t->name;
 	      verlen = strlen (verstr);
