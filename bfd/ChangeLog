@@ -1,3 +1,8 @@
+1999-12-27  Nick Clifton  <nickc@cygnus.com>
+
+	* peicode.h (pe_bfd_object_p): Only define for PE format
+	targets. 
+
 1999-12-17  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-i386.c (i3coff_object_p): Delete.

@@ -362,6 +362,7 @@ pe_bfd_copy_private_bfd_data (ibfd, obfd)
 
 #define coff_get_symbol_info _bfd_pe_get_symbol_info
 
+#ifdef COFF_IMAGE_WITH_PE
 static const bfd_target *
 pe_bfd_object_p (abfd)
      bfd * abfd;
@@ -390,7 +391,8 @@ pe_bfd_object_p (abfd)
   
   if (signature == 0xffff0000)
     {
-      _bfd_error_handler (_("%s: Import Library Format archives are not currently supported"),
+      _bfd_error_handler (
+_("%s: Import Library Format archives are not currently supported"),
 			  bfd_get_filename (abfd));
       bfd_set_error (bfd_error_wrong_format);
 	
@@ -442,3 +444,4 @@ pe_bfd_object_p (abfd)
 }
 
 #define coff_object_p pe_bfd_object_p
+#endif
