@@ -1,3 +1,12 @@
+2002-06-18  Joel Brobecker  <brobecker@gnat.com>
+	* alpha-tdep.c (heuristic_proc_desc): Compute the size of the  
+	current frame using only the first stack size adjustment. All
+	subsequent size adjustments are not considered to be part of
+	the "static" part of the current frame.
+	Compute the address of the saved registers relative to the
+	Frame Pointer ($fp) instead of the Stack Pointer if $fp is
+	in use in this frame.
+
 2002-06-18  Don Howard  <dhoward@redhat.com>
  
         * valops.c (value_ind): Use value_at_lazy() when dereferencing
