@@ -26,7 +26,10 @@ static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void mn10200_info_to_howto
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
-
+static boolean mn10200_elf_relax_delete_bytes
+  PARAMS ((bfd *, asection *, bfd_vma, int));
+static boolean mn10200_elf_symbol_address_p
+  PARAMS ((bfd *, asection *, Elf32_External_Sym *, bfd_vma));
 
 /* We have to use RELA instructions since md_apply_fix3 in the assembler
    does absolutely nothing.  */
@@ -230,7 +233,6 @@ mn10200_elf_final_link_relocate (howto, input_bfd, output_bfd,
      asection *sym_sec;
      int is_local;
 {
-  unsigned long insn;
   unsigned long r_type = howto->type;
   bfd_byte *hit_data = contents + offset;
 
@@ -482,6 +484,771 @@ mn10200_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
+/* This function handles relaxing for the mn10200.
+
+   There's quite a few relaxing opportunites available on the mn10200:
+
+	* jsr:24 -> jsr:16 					   2 bytes
+
+	* jmp:24 -> jmp:16					   2 bytes
+	- jmp:16 -> bra:8					   1 byte
+
+		- If the previous instruction is a conditional branch
+		around the jump/bra, we may be able to reverse its condition
+		and change its target to the jump's target.  The jump/bra
+		can then be deleted.				   1 byte
+
+	- mov abs24 -> mov abs16	2 byte savings
+
+	- Most instructions which accept imm24 can relax to imm16  2 bytes
+	- Most instructions which accept imm16 can relax to imm8   1 byte
+
+	- Most instructions which accept d24 can relax to d16	   2 bytes
+	- Most instructions which accept d16 can relax to d8	   1 byte
+
+   
+  A '*' indicates a case this code can handle.  */
+
+
+static boolean 
+mn10200_elf_relax_section (abfd, sec, link_info, again)
+     bfd *abfd;
+     asection *sec;
+     struct bfd_link_info *link_info;
+     boolean *again;
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Rela *internal_relocs;
+  Elf_Internal_Rela *free_relocs = NULL;
+  Elf_Internal_Rela *irel, *irelend;
+  bfd_byte *contents = NULL;
+  bfd_byte *free_contents = NULL;
+  Elf32_External_Sym *extsyms = NULL;
+  Elf32_External_Sym *free_extsyms = NULL;
+
+  /* Assume nothing changes.  */
+  *again = false;
+
+  /* We don't have to do anything for a relocateable link, if
+     this section does not have relocs, or if this is not a
+     code section.  */
+  if (link_info->relocateable
+      || (sec->flags & SEC_RELOC) == 0
+      || sec->reloc_count == 0
+      || (sec->flags & SEC_CODE) == 0)
+    return true;
+
+  /* If this is the first time we have been called for this section,
+     initialize the cooked size.  */
+  if (sec->_cooked_size == 0)
+    sec->_cooked_size = sec->_raw_size;
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+
+  /* Get a copy of the native relocations.  */
+  internal_relocs = (_bfd_elf32_link_read_relocs
+		     (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
+		      link_info->keep_memory));
+  if (internal_relocs == NULL)
+    goto error_return;
+  if (! link_info->keep_memory)
+    free_relocs = internal_relocs;
+
+  /* Walk through them looking for relaxing opportunities.  */
+  irelend = internal_relocs + sec->reloc_count;
+  for (irel = internal_relocs; irel < irelend; irel++)
+    {
+      bfd_vma symval;
+
+      /* If this isn't something that can be relaxed, then ignore
+	 this reloc.  */
+      if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10200_NONE
+	  || ELF32_R_TYPE (irel->r_info) == (int) R_MN10200_8
+	  || ELF32_R_TYPE (irel->r_info) == (int) R_MN10200_MAX)
+	continue;
+
+      /* Get the section contents if we haven't done so already.  */
+      if (contents == NULL)
+	{
+	  /* Get cached copy if it exists.  */
+	  if (elf_section_data (sec)->this_hdr.contents != NULL)
+	    contents = elf_section_data (sec)->this_hdr.contents;
+	  else
+	    {
+	      /* Go get them off disk.  */
+	      contents = (bfd_byte *) bfd_malloc (sec->_raw_size);
+	      if (contents == NULL)
+		goto error_return;
+	      free_contents = contents;
+
+	      if (! bfd_get_section_contents (abfd, sec, contents,
+					      (file_ptr) 0, sec->_raw_size))
+		goto error_return;
+	    }
+	}
+
+      /* Read the local symbols if we haven't done so already.  */
+      if (extsyms == NULL)
+	{
+	  /* Get cached copy if it exists.  */
+	  if (symtab_hdr->contents != NULL)
+	    extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
+	  else
+	    {
+	      /* Go get them off disk.  */
+	      extsyms = ((Elf32_External_Sym *)
+			 bfd_malloc (symtab_hdr->sh_info
+				     * sizeof (Elf32_External_Sym)));
+	      if (extsyms == NULL)
+		goto error_return;
+	      free_extsyms = extsyms;
+	      if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
+		  || (bfd_read (extsyms, sizeof (Elf32_External_Sym),
+				symtab_hdr->sh_info, abfd)
+		      != (symtab_hdr->sh_info * sizeof (Elf32_External_Sym))))
+		goto error_return;
+	    }
+	}
+
+      /* Get the value of the symbol referred to by the reloc.  */
+      if (ELF32_R_SYM (irel->r_info) < symtab_hdr->sh_info)
+	{
+	  Elf_Internal_Sym isym;
+
+	  /* A local symbol.  */
+	  bfd_elf32_swap_symbol_in (abfd,
+				    extsyms + ELF32_R_SYM (irel->r_info),
+				    &isym);
+
+#if 0
+	  if (isym.st_shndx != _bfd_elf_section_from_bfd_section (abfd, sec))
+	    {
+	      ((*_bfd_error_handler)
+	       ("%s: 0x%lx: warning: symbol in unexpected section",
+		bfd_get_filename (abfd), (unsigned long) 0));
+	      continue;
+	    }
+#endif
+
+	  symval = (isym.st_value
+		    + sec->output_section->vma
+		    + sec->output_offset);
+	}
+      else
+	{
+	  unsigned long indx;
+	  struct elf_link_hash_entry *h;
+
+	  /* An external symbol.  */
+	  indx = ELF32_R_SYM (irel->r_info) - symtab_hdr->sh_info;
+	  h = elf_sym_hashes (abfd)[indx];
+	  BFD_ASSERT (h != NULL);
+	  if (h->root.type != bfd_link_hash_defined
+	      && h->root.type != bfd_link_hash_defweak)
+	    {
+	      /* This appears to be a reference to an undefined
+                 symbol.  Just ignore it--it will be caught by the
+                 regular reloc processing.  */
+	      continue;
+	    }
+
+	  symval = (h->root.u.def.value
+		    + h->root.u.def.section->output_section->vma
+		    + h->root.u.def.section->output_offset);
+	}
+
+      /* For simplicity of coding, we are going to modify the section
+	 contents, the section relocs, and the BFD symbol table.  We
+	 must tell the rest of the code not to free up this
+	 information.  It would be possible to instead create a table
+	 of changes which have to be made, as is done in coff-mips.c;
+	 that would be more work, but would require less memory when
+	 the linker is run.  */
+
+
+      /* Try to turn a 24bit pc-relative branch/call into a 16bit pc-relative
+	 branch/call.  */
+      if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10200_PCREL24)
+	{
+	  bfd_vma value = symval;
+
+	  /* Deal with pc-relative gunk.  */
+	  value -= (sec->output_section->vma + sec->output_offset);
+	  value -= irel->r_offset;
+	  value += irel->r_addend;
+
+	  /* See if the value will fit in 16 bits, note the high value is
+	     0x7fff + 2 as the target will be two bytes closer if we are
+	     able to relax.  */
+	  if ((long)value < 0x8001 && (long)value > -0x8000)
+	    {
+	      unsigned char code;
+
+	      /* Get the opcode.  */
+	      code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+
+	      if (code != 0xe0 && code != 0xe1)
+		continue;
+
+	      /* Note that we've changed the relocs, section contents, etc.  */
+	      elf_section_data (sec)->relocs = internal_relocs;
+	      free_relocs = NULL;
+
+	      elf_section_data (sec)->this_hdr.contents = contents;
+	      free_contents = NULL;
+
+	      symtab_hdr->contents = (bfd_byte *) extsyms;
+	      free_extsyms = NULL;
+
+	      /* Fix the opcode.  */
+	      if (code == 0xe0)
+		bfd_put_8 (abfd, 0xfc, contents + irel->r_offset - 2);
+	      else if (code == 0xe1)
+		bfd_put_8 (abfd, 0xfd, contents + irel->r_offset - 2);
+
+	      /* Fix the relocation's type.  */
+	      irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+					   R_MN10200_PCREL16);
+
+	      /* The opcode got shorter too, so we have to fix the
+		 addend and offset too!  */
+	      irel->r_addend -= 1;
+	      irel->r_offset -= 1;
+
+	      /* Delete two bytes of data.  */
+	      if (!mn10200_elf_relax_delete_bytes (abfd, sec,
+						   irel->r_offset + 1, 2))
+		goto error_return;
+
+	      /* That will change things, so, we should relax again.
+		 Note that this is not required, and it may be slow.  */
+	      *again = true;
+	    }
+	}
+
+      /* Try to turn a 16bit pc-relative branch into a 8bit pc-relative
+	 branch.  */
+      if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10200_PCREL16)
+	{
+	  bfd_vma value = symval;
+
+	  /* Deal with pc-relative gunk.  */
+	  value -= (sec->output_section->vma + sec->output_offset);
+	  value -= irel->r_offset;
+	  value += irel->r_addend;
+
+	  /* See if the value will fit in 8 bits, note the high value is
+	     0x7f + 1 as the target will be one bytes closer if we are
+	     able to relax.  */
+	  if ((long)value < 0x80 && (long)value > -0x80)
+	    {
+	      unsigned char code;
+
+	      /* Get the opcode.  */
+	      code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+
+	      if (code != 0xfc)
+		continue;
+
+	      /* Note that we've changed the relocs, section contents, etc.  */
+	      elf_section_data (sec)->relocs = internal_relocs;
+	      free_relocs = NULL;
+
+	      elf_section_data (sec)->this_hdr.contents = contents;
+	      free_contents = NULL;
+
+	      symtab_hdr->contents = (bfd_byte *) extsyms;
+	      free_extsyms = NULL;
+
+	      /* Fix the opcode.  */
+	      bfd_put_8 (abfd, 0xea, contents + irel->r_offset - 1);
+
+	      /* Fix the relocation's type.  */
+	      irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+					   R_MN10200_PCREL8);
+
+	      /* Delete one byte of data.  */
+	      if (!mn10200_elf_relax_delete_bytes (abfd, sec,
+						   irel->r_offset + 1, 1))
+		goto error_return;
+
+	      /* That will change things, so, we should relax again.
+		 Note that this is not required, and it may be slow.  */
+	      *again = true;
+	    }
+	}
+
+      /* Try to eliminate an unconditional 8 bit pc-relative branch
+	 which immediately follows a conditional 8 bit pc-relative
+	 branch around the unconditional branch.
+
+	    original:		new:
+	    bCC lab1		bCC' lab2
+	    bra lab2
+	   lab1:	       lab1:
+
+
+	 This happens when the bCC can't reach lab2 at assembly time,
+	 but due to other relaxations it can reach at link time.  */
+      if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10200_PCREL8)
+	{
+	  Elf_Internal_Rela *nrel;
+	  bfd_vma value = symval;
+	  unsigned char code;
+
+	  /* Deal with pc-relative gunk.  */
+	  value -= (sec->output_section->vma + sec->output_offset);
+	  value -= irel->r_offset;
+	  value += irel->r_addend;
+
+	  /* Do nothing if this reloc is the last byte in the section.  */
+	  if (irel->r_offset == sec->_cooked_size)
+	    continue;
+
+	  /* See if the next instruction is an unconditional pc-relative
+	     branch, more often than not this test will fail, so we
+	     test it first to speed things up.  */
+	  code = bfd_get_8 (abfd, contents + irel->r_offset + 1);
+	  if (code != 0xea)
+	    continue;
+
+	  /* Also make sure the next relocation applies to the next
+	     instruction and that it's a pc-relative 8 bit branch.  */
+	  nrel = irel + 1;
+	  if (nrel == irelend
+	      || irel->r_offset + 2 != nrel->r_offset
+	      || ELF32_R_TYPE (nrel->r_info) != (int) R_MN10200_PCREL8)
+	    continue;
+
+	  /* Make sure our destination immediately follows the
+	     unconditional branch.  */
+	  if (symval != (sec->output_section->vma + sec->output_offset
+			 + irel->r_offset + 3))
+	    continue;
+
+	  /* Now make sure we are a conditional branch.  This may not
+	     be necessary, but why take the chance. 
+
+	     Note these checks assume that R_MN10200_PCREL8 relocs
+	     only occur on bCC and bCCx insns.  If they occured
+	     elsewhere, we'd need to know the start of this insn
+	     for this check to be accurate.  */
+	  code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+	  if (code != 0xe0 && code != 0xe1 && code != 0xe2
+	      && code != 0xe3 && code != 0xe4 && code != 0xe5
+	      && code != 0xe6 && code != 0xe7 && code != 0xe8
+	      && code != 0xe9 && code != 0xec && code != 0xed
+	      && code != 0xee && code != 0xef && code != 0xfc
+	      && code != 0xfd && code != 0xfe && code != 0xff)
+	    continue;
+
+	  /* We also have to be sure there is no symbol/label
+	     at the unconditional branch.  */
+	  if (mn10200_elf_symbol_address_p (abfd, sec, extsyms,
+					    irel->r_offset + 1))
+	    continue;
+
+	  /* Note that we've changed the relocs, section contents, etc.  */
+	  elf_section_data (sec)->relocs = internal_relocs;
+	  free_relocs = NULL;
+
+	  elf_section_data (sec)->this_hdr.contents = contents;
+	  free_contents = NULL;
+
+	  symtab_hdr->contents = (bfd_byte *) extsyms;
+	  free_extsyms = NULL;
+
+	  /* Reverse the condition of the first branch.  */
+	  switch (code)
+	    {
+	      case 0xfc:
+		code = 0xfd;
+		break;
+	      case 0xfd:
+		code = 0xfc;
+		break;
+	      case 0xfe:
+		code = 0xff;
+		break;
+	      case 0xff:
+		code = 0xfe;
+		break;
+	      case 0xe8:
+		code = 0xe9;
+		break;
+	      case 0xe9:
+		code = 0xe8;
+		break;
+	      case 0xe0:
+		code = 0xe2;
+		break;
+	      case 0xe2:
+		code = 0xe0;
+		break;
+	      case 0xe3:
+		code = 0xe1;
+		break;
+	      case 0xe1:
+		code = 0xe3;
+		break;
+	      case 0xe4:
+		code = 0xe6;
+		break;
+	      case 0xe6:
+		code = 0xe4;
+		break;
+	      case 0xe7:
+		code = 0xe5;
+		break;
+	      case 0xe5:
+		code = 0xe7;
+		break;
+	      case 0xec:
+		code = 0xed;
+		break;
+	      case 0xed:
+		code = 0xec;
+		break;
+	      case 0xee:
+		code = 0xef;
+		break;
+	      case 0xef:
+		code = 0xee;
+		break;
+	    }
+	  bfd_put_8 (abfd, code, contents + irel->r_offset - 1);
+	  
+	  /* Set the reloc type and symbol for the first branch
+	     from the second branch.  */
+	  irel->r_info = nrel->r_info;
+
+	  /* Make the reloc for the second branch a null reloc.  */
+	  nrel->r_info = ELF32_R_INFO (ELF32_R_SYM (nrel->r_info),
+				       R_MN10200_NONE);
+
+	  /* Delete two bytes of data.  */
+	  if (!mn10200_elf_relax_delete_bytes (abfd, sec,
+					       irel->r_offset + 1, 2))
+	    goto error_return;
+
+printf("yahoo\n");
+	  /* That will change things, so, we should relax again.
+	     Note that this is not required, and it may be slow.  */
+	  *again = true;
+	}
+
+    }
+
+  if (free_relocs != NULL)
+    {
+      free (free_relocs);
+      free_relocs = NULL;
+    }
+
+  if (free_contents != NULL)
+    {
+      if (! link_info->keep_memory)
+	free (free_contents);
+      else
+	{
+	  /* Cache the section contents for elf_link_input_bfd.  */
+	  elf_section_data (sec)->this_hdr.contents = contents;
+	}
+      free_contents = NULL;
+    }
+
+  if (free_extsyms != NULL)
+    {
+      if (! link_info->keep_memory)
+	free (free_extsyms);
+      else
+	{
+	  /* Cache the symbols for elf_link_input_bfd.  */
+	  symtab_hdr->contents = extsyms;
+	}
+      free_extsyms = NULL;
+    }
+
+  return true;
+
+ error_return:
+  if (free_relocs != NULL)
+    free (free_relocs);
+  if (free_contents != NULL)
+    free (free_contents);
+  if (free_extsyms != NULL)
+    free (free_extsyms);
+  return false;
+}
+
+/* Delete some bytes from a section while relaxing.  */
+
+static boolean
+mn10200_elf_relax_delete_bytes (abfd, sec, addr, count)
+     bfd *abfd;
+     asection *sec;
+     bfd_vma addr;
+     int count;
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  Elf32_External_Sym *extsyms;
+  int shndx;
+  bfd_byte *contents;
+  Elf_Internal_Rela *irel, *irelend;
+  Elf_Internal_Rela *irelalign;
+  bfd_vma toaddr;
+  Elf32_External_Sym *esym, *esymend;
+  struct elf_link_hash_entry **sym_hash, **sym_hash_end;
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
+
+  shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
+
+  contents = elf_section_data (sec)->this_hdr.contents;
+
+  /* The deletion must stop at the next ALIGN reloc for an aligment
+     power larger than the number of bytes we are deleting.  */
+
+  irelalign = NULL;
+  toaddr = sec->_cooked_size;
+
+  irel = elf_section_data (sec)->relocs;
+  irelend = irel + sec->reloc_count;
+
+  /* Actually delete the bytes.  */
+  memmove (contents + addr, contents + addr + count, toaddr - addr - count);
+  sec->_cooked_size -= count;
+
+  /* Adjust all the relocs.  */
+  for (irel = elf_section_data (sec)->relocs; irel < irelend; irel++)
+    {
+      /* Get the new reloc address.  */
+      if ((irel->r_offset > addr
+	   && irel->r_offset < toaddr))
+	irel->r_offset -= count;
+    }
+
+  /* Adjust all the symbols.  */
+  esym = extsyms;
+  esymend = esym + symtab_hdr->sh_info;
+  for (; esym < esymend; esym++)
+    {
+      Elf_Internal_Sym isym;
+
+      bfd_elf32_swap_symbol_in (abfd, esym, &isym);
+
+      if (isym.st_shndx == shndx
+	  && isym.st_value > addr
+	  && isym.st_value < toaddr)
+	{
+	  isym.st_value -= count;
+	  bfd_elf32_swap_symbol_out (abfd, &isym, esym);
+	}
+    }
+
+  sym_hash = elf_sym_hashes (abfd);
+  sym_hash_end = (sym_hash
+		  + (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
+		     - symtab_hdr->sh_info));
+  for (; sym_hash < sym_hash_end; sym_hash++)
+    {
+      if (((*sym_hash)->root.type == bfd_link_hash_defined
+	   || (*sym_hash)->root.type == bfd_link_hash_defweak)
+	  && (*sym_hash)->root.u.def.section == sec
+	  && (*sym_hash)->root.u.def.value > addr
+	  && (*sym_hash)->root.u.def.value < toaddr)
+	{
+	  (*sym_hash)->root.u.def.value -= count;
+	}
+    }
+
+  return true;
+}
+
+/* Return true if a symbol exists at the given address, else return
+   false.  */
+static boolean
+mn10200_elf_symbol_address_p (abfd, sec, extsyms, addr)
+     bfd *abfd;
+     asection *sec;
+     Elf32_External_Sym *extsyms;
+     bfd_vma addr;
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  int shndx;
+  Elf32_External_Sym *esym, *esymend;
+  struct elf_link_hash_entry **sym_hash, **sym_hash_end;
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
+
+  /* Examine all the symbols.  */
+  esym = extsyms;
+  esymend = esym + symtab_hdr->sh_info;
+  for (; esym < esymend; esym++)
+    {
+      Elf_Internal_Sym isym;
+
+      bfd_elf32_swap_symbol_in (abfd, esym, &isym);
+
+      if (isym.st_shndx == shndx
+	  && isym.st_value == addr)
+	return true;
+    }
+
+  sym_hash = elf_sym_hashes (abfd);
+  sym_hash_end = (sym_hash
+		  + (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
+		     - symtab_hdr->sh_info));
+  for (; sym_hash < sym_hash_end; sym_hash++)
+    {
+      if (((*sym_hash)->root.type == bfd_link_hash_defined
+	   || (*sym_hash)->root.type == bfd_link_hash_defweak)
+	  && (*sym_hash)->root.u.def.section == sec
+	  && (*sym_hash)->root.u.def.value == addr)
+	return true;
+    }
+  return false;
+}
+
+/* This is a version of bfd_generic_get_relocated_section_contents
+   which uses mn10200_elf_relocate_section.  */
+
+static bfd_byte *
+mn10200_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
+					    data, relocateable, symbols)
+     bfd *output_bfd;
+     struct bfd_link_info *link_info;
+     struct bfd_link_order *link_order;
+     bfd_byte *data;
+     boolean relocateable;
+     asymbol **symbols;
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  asection *input_section = link_order->u.indirect.section;
+  bfd *input_bfd = input_section->owner;
+  asection **sections = NULL;
+  Elf_Internal_Rela *internal_relocs = NULL;
+  Elf32_External_Sym *external_syms = NULL;
+  Elf_Internal_Sym *internal_syms = NULL;
+
+  /* We only need to handle the case of relaxing, or of having a
+     particular set of section contents, specially.  */
+  if (relocateable
+      || elf_section_data (input_section)->this_hdr.contents == NULL)
+    return bfd_generic_get_relocated_section_contents (output_bfd, link_info,
+						       link_order, data,
+						       relocateable,
+						       symbols);
+
+  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+
+  memcpy (data, elf_section_data (input_section)->this_hdr.contents,
+	  input_section->_raw_size);
+
+  if ((input_section->flags & SEC_RELOC) != 0
+      && input_section->reloc_count > 0)
+    {
+      Elf_Internal_Sym *isymp;
+      asection **secpp;
+      Elf32_External_Sym *esym, *esymend;
+
+      if (symtab_hdr->contents != NULL)
+	external_syms = (Elf32_External_Sym *) symtab_hdr->contents;
+      else
+	{
+	  external_syms = ((Elf32_External_Sym *)
+			   bfd_malloc (symtab_hdr->sh_info
+				       * sizeof (Elf32_External_Sym)));
+	  if (external_syms == NULL && symtab_hdr->sh_info > 0)
+	    goto error_return;
+	  if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
+	      || (bfd_read (external_syms, sizeof (Elf32_External_Sym),
+			    symtab_hdr->sh_info, input_bfd)
+		  != (symtab_hdr->sh_info * sizeof (Elf32_External_Sym))))
+	    goto error_return;
+	}
+
+      internal_relocs = (_bfd_elf32_link_read_relocs
+			 (input_bfd, input_section, (PTR) NULL,
+			  (Elf_Internal_Rela *) NULL, false));
+      if (internal_relocs == NULL)
+	goto error_return;
+
+      internal_syms = ((Elf_Internal_Sym *)
+		       bfd_malloc (symtab_hdr->sh_info
+				   * sizeof (Elf_Internal_Sym)));
+      if (internal_syms == NULL && symtab_hdr->sh_info > 0)
+	goto error_return;
+
+      sections = (asection **) bfd_malloc (symtab_hdr->sh_info
+					   * sizeof (asection *));
+      if (sections == NULL && symtab_hdr->sh_info > 0)
+	goto error_return;
+
+      isymp = internal_syms;
+      secpp = sections;
+      esym = external_syms;
+      esymend = esym + symtab_hdr->sh_info;
+      for (; esym < esymend; ++esym, ++isymp, ++secpp)
+	{
+	  asection *isec;
+
+	  bfd_elf32_swap_symbol_in (input_bfd, esym, isymp);
+
+	  if (isymp->st_shndx == SHN_UNDEF)
+	    isec = bfd_und_section_ptr;
+	  else if (isymp->st_shndx > 0 && isymp->st_shndx < SHN_LORESERVE)
+	    isec = bfd_section_from_elf_index (input_bfd, isymp->st_shndx);
+	  else if (isymp->st_shndx == SHN_ABS)
+	    isec = bfd_abs_section_ptr;
+	  else if (isymp->st_shndx == SHN_COMMON)
+	    isec = bfd_com_section_ptr;
+	  else
+	    {
+	      /* Who knows?  */
+	      isec = NULL;
+	    }
+
+	  *secpp = isec;
+	}
+
+      if (! mn10200_elf_relocate_section (output_bfd, link_info, input_bfd,
+				     input_section, data, internal_relocs,
+				     internal_syms, sections))
+	goto error_return;
+
+      if (sections != NULL)
+	free (sections);
+      sections = NULL;
+      if (internal_syms != NULL)
+	free (internal_syms);
+      internal_syms = NULL;
+      if (external_syms != NULL && symtab_hdr->contents == NULL)
+	free (external_syms);
+      external_syms = NULL;
+      if (internal_relocs != elf_section_data (input_section)->relocs)
+	free (internal_relocs);
+      internal_relocs = NULL;
+    }
+
+  return data;
+
+ error_return:
+  if (internal_relocs != NULL
+      && internal_relocs != elf_section_data (input_section)->relocs)
+    free (internal_relocs);
+  if (external_syms != NULL && symtab_hdr->contents == NULL)
+    free (external_syms);
+  if (internal_syms != NULL)
+    free (internal_syms);
+  if (sections != NULL)
+    free (sections);
+  return NULL;
+}
+
+
 #define TARGET_LITTLE_SYM	bfd_elf32_mn10200_vec
 #define TARGET_LITTLE_NAME	"elf32-mn10200"
 #define ELF_ARCH		bfd_arch_mn10200
@@ -491,6 +1258,9 @@ mn10200_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 #define elf_info_to_howto	mn10200_info_to_howto
 #define elf_info_to_howto_rel	0
 #define elf_backend_relocate_section mn10200_elf_relocate_section
+#define bfd_elf32_bfd_relax_section	mn10200_elf_relax_section
+#define bfd_elf32_bfd_get_relocated_section_contents \
+				mn10200_elf_get_relocated_section_contents
 
 #define elf_symbol_leading_char '_'
 
