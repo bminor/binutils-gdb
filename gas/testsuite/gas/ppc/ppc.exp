@@ -26,7 +26,8 @@ if { [istarget powerpc64*-*-*] || [istarget *-*-elf64*]} then {
 }
 
 if { [istarget powerpc*-*-*] } then {
-   run_dump_test "simpshft"
+    run_dump_test "simpshft"
+    run_dump_test "machine"
 
     if { [istarget powerpc-*-*aix*] } then {
 	run_dump_test "altivec_xcoff"

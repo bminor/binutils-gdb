@@ -1,3 +1,9 @@
+2003-11-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/ppc/machine.s: New.
+	* gas/ppc/machine.d: New.
+	* gas/ppc/ppc.exp: Run it.
+
 2003-11-18  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* gas/mips/lca-svr4pic.d: New test for the "lca" macro.
