@@ -2069,7 +2069,12 @@ get_frame_type (struct frame_info *frame)
   if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES
       && deprecated_frame_in_dummy (frame))
     return DUMMY_FRAME;
-  if (frame->unwind == NULL)
+
+  /* Some legacy code, e.g, mips_init_extra_frame_info() wants
+     to determine the frame's type prior to it being completely
+     initialized.  Don't attempt to lazily initialize ->unwind for
+     legacy code.  It will be initialized in legacy_get_prev_frame().  */
+  if (frame->unwind == NULL && !legacy_frame_p (current_gdbarch))
     {
       /* Initialize the frame's unwinder because it is that which
          provides the frame's type.  */

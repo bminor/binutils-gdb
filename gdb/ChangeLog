@@ -1,3 +1,8 @@
+2003-05-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* frame.c (get_frame_type): Don't attempt to lazily initialize
+	frame's unwinder for legacy frames.
+
 2003-05-07  Andrew Cagney  <cagney@redhat.com>
 
 	* ia64-tdep.c (ia64_remote_translate_xfer_address): Add "gdbarch"
