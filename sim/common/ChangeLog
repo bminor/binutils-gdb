@@ -80,7 +80,6 @@ Mon Nov 17 14:15:31 1997  Doug Evans  <devans@seba.cygnus.com>
 	* callback.c: #include string.h or strings.h.
 	#include sys/types.h and sys/stat.h.
 	(cb_init_syscall_map,cb_init_errno_map,cb_init_open_map): Declare.
-	(enosys): New function.
 	(os_get_errno,os_open): Update.
 	(os_stat,os_fstat): New functions.
 	(os_init): Initialize syscall_map, errno_map, open_map.
