@@ -1821,8 +1821,11 @@ get_machine_flags (e_flags, e_machine)
 	    case E_MIPS_MACH_3900: strcat (buf, ", 3900"); break;
 	    case E_MIPS_MACH_4010: strcat (buf, ", 4010"); break;
 	    case E_MIPS_MACH_4100: strcat (buf, ", 4100"); break;
-	    case E_MIPS_MACH_4650: strcat (buf, ", 4650"); break;
 	    case E_MIPS_MACH_4111: strcat (buf, ", 4111"); break;
+	    case E_MIPS_MACH_4120: strcat (buf, ", 4120"); break;
+	    case E_MIPS_MACH_4650: strcat (buf, ", 4650"); break;
+	    case E_MIPS_MACH_5400: strcat (buf, ", 5400"); break;
+	    case E_MIPS_MACH_5500: strcat (buf, ", 5500"); break;
 	    case E_MIPS_MACH_SB1:  strcat (buf, ", sb1");  break;
 	    case 0:
 	    /* We simply ignore the field in this case to avoid confusion:
