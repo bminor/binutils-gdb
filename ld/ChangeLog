@@ -1,3 +1,10 @@
+Wed Nov  1 11:41:56 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/aix.em: Include ldgram.h.
+	(gld${EMULATION_NAME}_parse_args): Handle -pD and -pT, as used on
+	AIX 4.1.
+	* Makefile.in ($(EMULATION_OFILES)): Depend upon ldgram.h.
+
 Tue Oct 31 18:22:24 1995  David Mosberger-Tang  <davidm@azstarnet.com>
 
 	* configure.host (alpha-*-linux*): New host.

@@ -42,6 +42,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ldexp.h"
 #include "ldlang.h"
 #include "ldctor.h"
+#include "ldgram.h"
 
 static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
 static int gld${EMULATION_NAME}_parse_args PARAMS ((int, char **));
@@ -132,7 +133,9 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 #define OPTION_MODTYPE (OPTION_MAXSTACK + 1)
 #define OPTION_NOAUTOIMP (OPTION_MODTYPE + 1)
 #define OPTION_NOSTRCMPCT (OPTION_NOAUTOIMP + 1)
-#define OPTION_STRCMPCT (OPTION_NOSTRCMPCT + 1)
+#define OPTION_PD (OPTION_NOSTRCMPCT + 1)
+#define OPTION_PT (OPTION_PD + 1)
+#define OPTION_STRCMPCT (OPTION_PT + 1)
 
   static struct option longopts[] = {
     {"basis", no_argument, NULL, OPTION_IGNORE},
@@ -163,6 +166,8 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     {"bnostrcmpct", no_argument, NULL, OPTION_NOSTRCMPCT},
     {"bnotextro", no_argument, &textro, 0},
     {"bnro", no_argument, &textro, 0},
+    {"bpD", required_argument, NULL, OPTION_PD},
+    {"bpT", required_argument, NULL, OPTION_PT},
     {"bro", no_argument, &textro, 1},
     {"bS", required_argument, NULL, OPTION_MAXSTACK},
     {"bso", no_argument, NULL, OPTION_AUTOIMP},
@@ -322,6 +327,51 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 
     case OPTION_NOSTRCMPCT:
       config.traditional_format = true;
+      break;
+
+    case OPTION_PD:
+      /* This sets the page that the .data section is supposed to
+         start on.  The offset within the page should still be the
+         offset within the file, so we need to build an appropriate
+         expression.  */
+      val = strtoul (optarg, &end, 0);
+      if (*end != '\0')
+	einfo ("%P: warning: ignoring invalid -pD number %s\n", optarg);
+      else
+	{
+	  etree_type *t;
+
+	  t = exp_binop ('+',
+			 exp_intop (val),
+			 exp_binop ('&',
+				    exp_nameop (NAME, "."),
+				    exp_intop (0xfff)));
+	  t = exp_binop ('&',
+			 exp_binop ('+', t, exp_intop (7)),
+			 exp_intop (~ (bfd_vma) 7));
+	  lang_section_start (".data", t);
+	}
+      break;
+
+    case OPTION_PT:
+      /* This set the page that the .text section is supposed to start
+         on.  The offset within the page should still be the offset
+         within the file.  */
+      val = strtoul (optarg, &end, 0);
+      if (*end != '\0')
+	einfo ("%P: warning: ignoring invalid -pT number %s\n", optarg);
+      else
+	{
+	  etree_type *t;
+
+	  t = exp_binop ('+',
+			 exp_intop (val),
+			 exp_nameop (SIZEOF_HEADERS, NULL));
+	  t = exp_binop ('&',
+			 exp_binop ('+', t, exp_intop (7)),
+			 exp_intop (~ (bfd_vma) 7));
+	  lang_section_start (".text", t);
+	}
       break;
 
     case OPTION_STRCMPCT:

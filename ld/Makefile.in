@@ -517,7 +517,7 @@ $(LD_PROG): $(OFILES) $(BFDLIB) $(LIBIBERTY)
 # The generated emulation files mostly have the same dependencies.
 $(EMULATION_OFILES): ../bfd/bfd.h sysdep.h config.h $(INCDIR)/bfdlink.h \
   ld.h ldmain.h ldemul.h ldfile.h ldmisc.h ldexp.h ldlang.h \
-  ldctor.h ldexp.h ldlang.h
+  ldctor.h ldexp.h ldlang.h ldgram.h
 
 # These targets are for the dejagnu testsuites. The file site.exp 
 # contains global variables that all the testsuites will use.
