@@ -151,16 +151,16 @@ i386_fpc_regnum_p (int regnum)
   return (I387_FCTRL_REGNUM <= regnum && regnum < I387_XMM0_REGNUM);
 }
 
-/* Return the name of register REG.  */
+/* Return the name of register REGNUM.  */
 
 const char *
-i386_register_name (int reg)
+i386_register_name (int regnum)
 {
-  if (i386_mmx_regnum_p (current_gdbarch, reg))
-    return i386_mmx_names[reg - I387_MM0_REGNUM];
+  if (i386_mmx_regnum_p (current_gdbarch, regnum))
+    return i386_mmx_names[regnum - I387_MM0_REGNUM];
 
-  if (reg >= 0 && reg < i386_num_register_names)
-    return i386_register_names[reg];
+  if (regnum >= 0 && regnum < i386_num_register_names)
+    return i386_register_names[regnum];
 
   return NULL;
 }

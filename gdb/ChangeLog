@@ -1,5 +1,7 @@
 2004-09-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_register_name): Rename regno to regnum.
+
 	* config/pa/hpux1020.mh (MH_CFLAGS): Remove -D__HP_CURSES.
 	* config/pa/hpux11.mh (MH_CFLAGS): Likewise.
 	* config/pa/hpux11w.mh (MH_CFLAGS): Likewise.
