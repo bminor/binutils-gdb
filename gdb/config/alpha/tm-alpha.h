@@ -1,6 +1,6 @@
 /* Definitions to make GDB run on an Alpha box under OSF1.  This is
    also used by the Alpha/Netware and Alpha/Linux targets.
-   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000
+   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -73,11 +73,12 @@ extern CORE_ADDR alpha_saved_pc_after_call (struct frame_info *);
 
 /* Are we currently handling a signal ?  */
 
-#define IN_SIGTRAMP(pc, name)	((name) && STREQ ("__sigtramp", (name)))
+#define IN_SIGTRAMP(pc, name) alpha_osf_in_sigtramp ((pc), (name))
+extern int alpha_osf_in_sigtramp (CORE_ADDR, char *);
 
 /* Stack grows downward.  */
 
-#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
+#define INNER_THAN(lhs,rhs) core_addr_lessthan ((lhs), (rhs))
 
 #define BREAKPOINT {0x80, 0, 0, 0}	/* call_pal bpt */
 
@@ -129,9 +130,12 @@ extern char *alpha_register_name (int);
 #define FP_REGNUM 65		/* Virtual frame pointer */
 
 #define CANNOT_FETCH_REGISTER(regno) \
-  ((regno) == FP_REGNUM || (regno) == ZERO_REGNUM)
+  alpha_cannot_fetch_register ((regno))
+extern int alpha_cannot_fetch_register (int);
+
 #define CANNOT_STORE_REGISTER(regno) \
-  ((regno) == FP_REGNUM || (regno) == ZERO_REGNUM)
+  alpha_cannot_store_register ((regno))
+extern int alpha_cannot_store_register (int);
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
@@ -169,7 +173,8 @@ extern char *alpha_register_name (int);
    memory format is an integer with 4 bytes or less, as the representation
    of integers in floating point registers is different. */
 
-#define REGISTER_CONVERTIBLE(N) ((N) >= FP0_REGNUM && (N) < FP0_REGNUM + 31)
+#define REGISTER_CONVERTIBLE(N) alpha_register_convertible ((N))
+extern int alpha_register_convertible (int);
 
 /* Convert data from raw format for register REGNUM in buffer FROM
    to virtual format with type TYPE in buffer TO.  */
@@ -228,7 +233,9 @@ extern void alpha_store_return_value (struct type *, char *);
 		    REGISTER_RAW_SIZE (V0_REGNUM)))
 
 /* Structures are returned by ref in extra arg0 */
-#define USE_STRUCT_CONVENTION(gcc_p, type)	1
+#define USE_STRUCT_CONVENTION(gcc_p, type) \
+  alpha_use_struct_convention ((gcc_p), (type))
+extern int alpha_use_struct_convention (int, struct type *);
 
 
 /* Describe the pointer in each stack frame to the previous stack frame
@@ -237,7 +244,7 @@ extern void alpha_store_return_value (struct type *, char *);
 /* FRAME_CHAIN takes a frame's nominal address
    and produces the frame's chain-pointer. */
 
-#define FRAME_CHAIN(thisframe) (CORE_ADDR) alpha_frame_chain (thisframe)
+#define FRAME_CHAIN(thisframe) alpha_frame_chain (thisframe)
 extern CORE_ADDR alpha_frame_chain (struct frame_info *);
 
 /* Define other aspects of the stack frame.  */

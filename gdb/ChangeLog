@@ -1,3 +1,19 @@
+2002-01-18  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* alpha-tdep.c (alpha_osf_in_sigtramp): New function.
+	(alpha_cannot_fetch_register): Ditto.
+	(alpha_cannot_store_register): Ditto.
+	(alpha_register_convertible): Ditto.
+	(alpha_use_struct_convention): Ditto.
+	* config/alpha/tm-alpha.h: Update copyright years.
+	(IN_SIGTRAMP): Use alpha_osf_in_sigtramp.
+	(INNER_THAN): Use core_addr_lessthan.
+	(CANNOT_FETCH_REGISTER): Use alpha_cannot_fetch_register.
+	(CANNOT_STORE_REGISTER): Use alpha_cannot_store_register.
+	(REGISTER_CONVERTIBLE): Use alpha_register_convertible.
+	(USE_STRUCT_CONVENTION): Use alpha_use_struct_convention.
+	(FRAME_CHAIN): Remove unnecessary cast.
+
 2002-01-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* NEWS: Document that testsuite/gdb.hp/gdb.threads-hp/ is

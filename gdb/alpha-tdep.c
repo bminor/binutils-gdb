@@ -144,6 +144,11 @@ struct linked_proc_info
   }
  *linked_proc_desc_table = NULL;
 
+int
+alpha_osf_in_sigtramp (CORE_ADDR pc, char *func_name)
+{
+  return (func_name != NULL && STREQ ("__sigtramp", func_name));
+}
 
 /* Under GNU/Linux, signal handler invocations can be identified by the
    designated code sequence that is used to return from a signal
@@ -282,6 +287,24 @@ alpha_register_name (int regno)
   if (regno >= (sizeof(register_names) / sizeof(*register_names)))
     return (NULL);
   return (register_names[regno]);
+}
+
+int
+alpha_cannot_fetch_register (int regno)
+{
+  return (regno == FP_REGNUM || regno == ZERO_REGNUM);
+}
+
+int
+alpha_cannot_store_register (int regno)
+{
+  return (regno == FP_REGNUM || regno == ZERO_REGNUM);
+}
+
+int
+alpha_register_convertible (int regno)
+{
+  return (regno >= FP0_REGNUM && regno <= FP0_REGNUM + 31);
 }
 
 
@@ -1408,6 +1431,13 @@ alpha_call_dummy_address (void)
     return 0;
   else
     return SYMBOL_VALUE_ADDRESS (sym) + 4;
+}
+
+int
+alpha_use_struct_convention (int gcc_p, struct type *type)
+{
+  /* Structures are returned by ref in extra arg0.  */
+  return 1;
 }
 
 /* alpha_software_single_step() is called just before we want to resume
