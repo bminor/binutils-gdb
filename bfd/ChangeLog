@@ -1,3 +1,8 @@
+2001-10-06  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* dwarf2.c (comp_unit_find_nearest_line): Check for end of
+	compilation unit.
+
 2001-08-29  Joel Sherrill <joel@OARcorp.com>
 
 	* config.bfd (i[3456]86-*-rtems*, m68*-*-rtems*): Change 
