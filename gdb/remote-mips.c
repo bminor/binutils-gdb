@@ -71,7 +71,7 @@ static void mips_open PARAMS ((char *name, int from_tty));
 
 static void pmon_open PARAMS ((char *name, int from_tty));
 
-static void cairo_open PARAMS ((char *name, int from_tty));
+static void ddb_open PARAMS ((char *name, int from_tty));
 
 static void mips_close PARAMS ((int quitting));
 
@@ -135,7 +135,7 @@ static void common_open PARAMS ((struct target_ops *ops, char *name,
 /* Forward declarations.  */
 extern struct target_ops mips_ops;
 extern struct target_ops pmon_ops;
-extern struct target_ops cairo_ops;
+extern struct target_ops ddb_ops;
 
 /* The MIPS remote debugging interface is built on top of a simple
    packet protocol.  Each packet is organized as follows:
@@ -276,7 +276,7 @@ enum mips_monitor_type {
   MON_IDT,
   /* PMON monitor being used: */
   MON_PMON,   /* 3.0.83 [COGENT,EB,FP,NET] Algorithmics Ltd. Nov  9 1995 17:19:50 */
-  MON_CAIRO,  /* 2.7.473 [Cairo ,EL,FP,NET] Risq Modular Systems,  Thu Jun 6 09:28:40 PDT 1996 */
+  MON_DDB,  /* 2.7.473 [DDBVR4300,EL,FP,NET] Risq Modular Systems,  Thu Jun 6 09:28:40 PDT 1996 */
   /* Last and unused value, for sizing vectors, etc. */
   MON_LAST
 };
@@ -1158,7 +1158,7 @@ mips_enter_debug ()
   mips_send_seq = 0;
   mips_receive_seq = 0;
 
-  if (mips_monitor == MON_PMON || mips_monitor == MON_CAIRO)
+  if (mips_monitor == MON_PMON || mips_monitor == MON_DDB)
     mips_send_command ("debug\015", 0);
   else /* assume IDT monitor by default */
     mips_send_command ("db tty0\015", 0);
@@ -1169,7 +1169,7 @@ mips_enter_debug ()
      mips_receive_header will eat up a reasonable number of characters
      whilst looking for the SYN, however this avoids the "garbage"
      being displayed to the user. */
-  if (mips_monitor == MON_PMON || mips_monitor == MON_CAIRO)
+  if (mips_monitor == MON_PMON || mips_monitor == MON_DDB)
     mips_expect ("\015");
   
   {
@@ -1185,9 +1185,9 @@ mips_exit_debug ()
 {
   int err;
 
-  if (mips_monitor == MON_CAIRO)
+  if (mips_monitor == MON_DDB)
     {
-      /* The Cairo version of PMON exits immediately, so we do not get
+      /* The Ddb version of PMON exits immediately, so we do not get
          a reply to this command: */
       mips_request ('x', (unsigned int) 0, (unsigned int) 0, NULL,
 		mips_receive_wait, NULL);
@@ -1202,7 +1202,7 @@ mips_exit_debug ()
   if (mips_monitor == MON_PMON && !mips_expect ("Exiting remote debug mode"))
     return -1;
     
-  if (mips_monitor == MON_CAIRO)
+  if (mips_monitor == MON_DDB)
     {
       if (!mips_expect ("\012"))
         return -1;
@@ -1245,7 +1245,7 @@ mips_initialize ()
 
   /* Force the system into the monitor.  After this we *should* be at
      the mips_monitor_prompt.  */
-  if (mips_monitor == MON_PMON || mips_monitor == MON_CAIRO)
+  if (mips_monitor == MON_PMON || mips_monitor == MON_DDB)
     j = 0; /* start by checking if we are already at the prompt */
   else
     j = 1; /* start by sending a break */
@@ -1265,7 +1265,7 @@ mips_initialize ()
 	  break;
 	case 3:			/* Then, try escaping from download */
 	  {
-            if (mips_monitor == MON_PMON || mips_monitor == MON_CAIRO)
+            if (mips_monitor == MON_PMON || mips_monitor == MON_DDB)
               {
                 char tbuff[7];
 
@@ -1314,7 +1314,7 @@ mips_initialize ()
 	break;
     }
 
-  if (mips_monitor == MON_PMON || mips_monitor == MON_CAIRO)
+  if (mips_monitor == MON_PMON || mips_monitor == MON_DDB)
     {
       /* Ensure the correct target state: */
       mips_send_command ("set regsize 64\015", -1);
@@ -1432,15 +1432,15 @@ pmon_open (name, from_tty)
 }
 
 static void
-cairo_open (name, from_tty)
+ddb_open (name, from_tty)
      char *name;
      int from_tty;
 {
   /* The PMON monitor has a prompt different from the default
      "TARGET_MONITOR_PROMPT": */
   mips_monitor_prompt = "NEC010>";
-  mips_monitor = MON_CAIRO;
-  common_open (&cairo_ops, name, from_tty);
+  mips_monitor = MON_DDB;
+  common_open (&ddb_ops, name, from_tty);
 }
 
 /* Close a connection to the remote board.  */
@@ -1664,7 +1664,7 @@ pmon_wait (pid, status)
      seems to be caused by a check on the number of arguments, and the
      command length, within the monitor causing it to echo the command
      as a bad packet. */
-  if (mips_monitor != MON_CAIRO)
+  if (mips_monitor != MON_DDB)
     {
       mips_exit_debug ();
       mips_enter_debug ();
@@ -1751,7 +1751,7 @@ mips_fetch_registers (regno)
       /* Unfortunately the PMON version in the Vr4300 board has been
          compiled without the 64bit register access commands. This
          means we cannot get hold of the full register width. */
-      if (mips_monitor == MON_CAIRO)
+      if (mips_monitor == MON_DDB)
         val = (unsigned)mips_request ('t', (unsigned int) mips_map_regno (regno),
                             (unsigned int) 0, &err, mips_receive_wait, NULL);
       else
@@ -2339,9 +2339,9 @@ common_breakpoint (cmd, addr, mask, flags)
 
   if (rerrflg != 0)
     {
-      /* Cairo returns "0x0 b 0x16 0x0\000", whereas
+      /* Ddb returns "0x0 b 0x16 0x0\000", whereas
          Cogent returns "0x0 b 0xffffffff 0x16\000": */
-      if (mips_monitor == MON_CAIRO)
+      if (mips_monitor == MON_DDB)
         rresponse = rerrflg;
       if (rresponse != 22) /* invalid argument */
 	fprintf_unfiltered (stderr, "common_breakpoint (0x%x):  Got error: 0x%x\n",
@@ -2897,7 +2897,7 @@ mips_load (file, from_tty)
   if (mips_exit_debug ())
     error ("mips_load:  Couldn't get into monitor mode.");
 
-  if (mips_monitor == MON_PMON || mips_monitor == MON_CAIRO)
+  if (mips_monitor == MON_PMON || mips_monitor == MON_DDB)
    pmon_load_fast (file);
   else
    mips_load_srec (file);
@@ -2905,9 +2905,9 @@ mips_load (file, from_tty)
   mips_initialize ();
 
   /* Finally, make the PC point at the start address */
-  if (mips_monitor == MON_CAIRO)
+  if (mips_monitor == MON_DDB)
     {
-      /* Work around problem where CAIRO monitor does not update the
+      /* Work around problem where DDB monitor does not update the
          PC after a load. The following ensures that the write_pc()
          WILL update the PC value: */
       register_valid[PC_REGNUM] = 0;
@@ -2981,8 +2981,8 @@ struct target_ops pmon_ops =
   "pmon",			/* to_shortname */
   "Remote MIPS debugging over serial line",	/* to_longname */
   "\
-Debug a board using the PMON MIPS remote debugging protocol over a serial\n\
-line. The argument is the device it is connected to or, if it contains a\n\
+Debug a board using the PMON MIPS remote debugging protocol over a serial line.\n\
+The argument is the device it is connected to or, if it contains a\n\
 colon, HOST:PORT to access a board over a network",  /* to_doc */
   pmon_open,			/* to_open */
   mips_close,			/* to_close */
@@ -3026,15 +3026,15 @@ colon, HOST:PORT to access a board over a network",  /* to_doc */
 /* Another alternative target vector. This is a PMON system, but with
    a different monitor prompt, aswell as some other operational
    differences: */
-struct target_ops cairo_ops =
+struct target_ops ddb_ops =
 {
-  "cairo",			/* to_shortname */
+  "ddb",			/* to_shortname */
   "Remote MIPS debugging over serial line",	/* to_longname */
   "\
-Debug a board using the PMON MIPS remote debugging protocol over a serial\n\
-line. The argument is the device it is connected to or, if it contains a\n\
+Debug a board using the DDBVR4300 (PMON) MIPS remote debugging protocol over a serial line.\n\
+The argument is the device it is connected to or, if it contains a\n\
 colon, HOST:PORT to access a board over a network",  /* to_doc */
-  cairo_open,			/* to_open */
+  ddb_open,			/* to_open */
   mips_close,			/* to_close */
   NULL,				/* to_attach */
   mips_detach,			/* to_detach */
@@ -3078,7 +3078,7 @@ _initialize_remote_mips ()
 {
   add_target (&mips_ops);
   add_target (&pmon_ops);
-  add_target (&cairo_ops);
+  add_target (&ddb_ops);
 
   add_show_from_set (
     add_set_cmd ("timeout", no_class, var_zinteger,

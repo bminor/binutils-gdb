@@ -1,3 +1,9 @@
+Wed Oct  9 18:02:48 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote-mips.c: Use the correct name everywhere (DDB) for NEC's
+ 	VR4300 target.
+	(ddb_ops, pmon_ops): Fix the documentation strings.
+
 Wed Oct  9 07:42:44 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* Makefile.in (init.c):  Retro HPUX grep lacks -h option.  Strip
@@ -223,13 +229,13 @@ Tue Sep 17 12:09:00 1996  Dawn Perchik <dawn@critters.cygnus.com>
 
 Tue Sep 17 10:56:52 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
-	* remote-mips.c (pmon_wait): CAIRO PMON does not require forced
+	* remote-mips.c (pmon_wait): DDB PMON does not require forced
  	re-entry back into debug mode.
 
 Mon Sep 16 14:32:58 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* remote-mips.c (mips_load): Ensure that the PC is explicitly
- 	loaded after a load to a CAIRO PMON system.
+ 	loaded after a load to a DDB PMON system.
  	
 Fri Sep 13 12:02:39 1996  Fred Fish  <fnf@cygnus.com>
 
@@ -372,9 +378,9 @@ Wed Sep  4 06:49:35 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 
 Fri Aug 30 15:07:14 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
-	* remote-mips.c: Provide support for CAIRO target board.
-	(cairo_open, cairo_ops): Added.
-	(mips_monitor_type): MON_CAIRO Added.
+	* remote-mips.c: Provide support for DDBVR4300 target board.
+	(ddb_open, ddb_ops): Added.
+	(mips_monitor_type): MON_DDB Added.
 	(mips_enter_debug, mips_exit_debug, mips_initialize,
  	mips_fetch_registers, common_breakpoint, mips_load,
  	_initialize_remote_mips): Updated.
