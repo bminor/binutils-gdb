@@ -1,4 +1,7 @@
-Wed Feb 28 11:30:55 1996  Jeffrey A Law  (law@cygnus.com)
+Wed Feb 28 15:38:56 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* write.c (fix_new_exp): Don't use #elif.  Some compilers
+	don't handle it.
 
 	* config/tc-hppa.c (selector_table): Add "n", "nl", and "nlr" to
 	the selector table.
