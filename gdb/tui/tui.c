@@ -37,6 +37,7 @@
 #include "tuiLayout.h"
 #include "tuiIO.h"
 #include "tuiRegs.h"
+#include "tuiStack.h"
 #include "tuiWin.h"
 #include "readline/readline.h"
 #include "target.h"
@@ -76,6 +77,91 @@ tui_switch_mode (void)
   return 0;
 }
 
+/* Change the TUI layout to show a next layout.
+   This function is bound to CTRL-X 2.  It is intended to provide
+   a functionality close to the Emacs split-window command.  We always
+   show two windows (src+asm), (src+regs) or (asm+regs).  */
+static int
+tui_change_windows (void)
+{
+  if (!tui_active)
+    tui_switch_mode ();
+
+  if (tui_active)
+    {
+      TuiLayoutType new_layout;
+      TuiRegisterDisplayType regs_type = TUI_UNDEFINED_REGS;
+
+      new_layout = currentLayout ();
+
+      /* Select a new layout to have a rolling layout behavior
+	 with always two windows (except when undefined).  */
+      switch (new_layout)
+	{
+	case SRC_COMMAND:
+	  new_layout = SRC_DISASSEM_COMMAND;
+	  break;
+
+	case DISASSEM_COMMAND:
+	  new_layout = SRC_DISASSEM_COMMAND;
+	  break;
+
+	case SRC_DATA_COMMAND:
+	  new_layout = SRC_DISASSEM_COMMAND;
+	  break;
+
+	case SRC_DISASSEM_COMMAND:
+	  new_layout = DISASSEM_DATA_COMMAND;
+	  break;
+	  
+	case DISASSEM_DATA_COMMAND:
+	  new_layout = SRC_DATA_COMMAND;
+	  break;
+
+	default:
+	  new_layout = SRC_COMMAND;
+	  break;
+	}
+      tuiSetLayout (new_layout, regs_type);
+    }
+  return 0;
+}
+
+
+/* Delete the second TUI window to only show one.  */
+static int
+tui_delete_other_windows (void)
+{
+  if (!tui_active)
+    tui_switch_mode ();
+
+  if (tui_active)
+    {
+      TuiLayoutType new_layout;
+      TuiRegisterDisplayType regs_type = TUI_UNDEFINED_REGS;
+
+      new_layout = currentLayout ();
+
+      /* Kill one window.  */
+      switch (new_layout)
+	{
+	case SRC_COMMAND:
+	case SRC_DATA_COMMAND:
+	case SRC_DISASSEM_COMMAND:
+	default:
+	  new_layout = SRC_COMMAND;
+	  break;
+
+	case DISASSEM_COMMAND:
+	case DISASSEM_DATA_COMMAND:
+	  new_layout = DISASSEM_COMMAND;
+	  break;
+	}
+      tuiSetLayout (new_layout, regs_type);
+    }
+  return 0;
+}
+
 /* Initialize readline and configure the keymap for the switching
    key shortcut.  */
 void
@@ -87,6 +173,8 @@ tui_initialize_readline ()
   rl_bind_key_in_map ('a', tui_switch_mode, emacs_ctlx_keymap);
   rl_bind_key_in_map ('A', tui_switch_mode, emacs_ctlx_keymap);
   rl_bind_key_in_map (CTRL ('A'), tui_switch_mode, emacs_ctlx_keymap);
+  rl_bind_key_in_map ('1', tui_delete_other_windows, emacs_ctlx_keymap);
+  rl_bind_key_in_map ('2', tui_change_windows, emacs_ctlx_keymap);
 }
 
 /* Enter in the tui mode (curses).
@@ -108,8 +196,8 @@ tui_enable (void)
 
       w = initscr ();
   
-      cbreak();
-      noecho();
+      cbreak ();
+      noecho ();
       /*timeout (1);*/
       nodelay(w, FALSE);
       nl();
@@ -122,6 +210,7 @@ tui_enable (void)
       tuiSetLocatorContent (0);
       showLayout (SRC_COMMAND);
       tuiSetWinFocusTo (srcWin);
+      keypad (cmdWin->generic.handle, TRUE);
       wrefresh (cmdWin->generic.handle);
       tui_finish_init = 0;
     }
@@ -136,6 +225,8 @@ tui_enable (void)
   /* Install the TUI specific hooks.  */
   tui_install_hooks ();
 
+  tui_update_variables ();
+  
   tui_setup_io (1);
 
   tui_version = 1;
@@ -213,23 +304,6 @@ strcat_to_buf (char *buf, int buflen, char *itemToAdd)
       else
 	strncat (buf, itemToAdd, (buflen - strlen (buf)));
     }
-
-  return;
-}				/* strcat_to_buf */
-
-/* VARARGS */
-void
-strcat_to_buf_with_fmt (char *buf, int bufLen, char *format, ...)
-{
-  char *linebuffer;
-  struct cleanup *old_cleanups;
-  va_list args;
-  va_start (args, format);
-  vasprintf (&linebuffer, format, args);
-  old_cleanups = make_cleanup (xfree, linebuffer);
-  strcat_to_buf (buf, bufLen, linebuffer);
-  do_cleanups (old_cleanups);
-  va_end (args);
 }
 
 #if 0

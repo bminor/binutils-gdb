@@ -1,5 +1,26 @@
 2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* tui.c (tui_change_windows): New function.
+	(tui_delete_other_windows): New function.
+	(tui_initialize_readline): Bind them to C-X 1 and C-X 2.
+	(tui_enable): Enable the keypad; call tui_update_variables.
+	(strcat_to_buf_with_fmt): Remove.
+
+2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+        * tui.h: Remove old declarations, add the new ones.
+        * tui.c (tui_switch_mode): New function.
+        (tui_initialize_readline): New function.
+        (tui_enable): New function.
+        (tui_disable): New function.
+        (tuiGetLowDisassemblyAddress): Use CORE_ADDR, cleanup.
+        (tui_vSelectSourceSymtab): Remove.
+        (tuiInitWindows): Remove.
+        (_initialize_tui): Remove.
+        (_tuiReset): Keep but put arround #if 0.
+
+2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
         * tuiIO.h: Remove old declarations and add the new ones.
         * tuiIO.c: New management for curses and gdb terminal interactions.
         (tui_tputs): Remove.
