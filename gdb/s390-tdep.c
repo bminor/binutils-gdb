@@ -1135,22 +1135,6 @@ s390_write_fp (CORE_ADDR val)
 }
 
 
-void
-s390_push_dummy_frame ()
-{
-  CORE_ADDR orig_sp = read_register (S390_SP_REGNUM), new_sp;
-  void *saved_regs = alloca (REGISTER_BYTES);
-
-  new_sp = (orig_sp - (REGISTER_BYTES + S390_GPR_SIZE));
-  read_register_bytes (0, (char *) saved_regs, REGISTER_BYTES);
-  /* Use saved copy instead of orig_sp as this will have the correct endianness */
-  write_memory (new_sp, (char *) saved_regs + REGISTER_BYTE (S390_SP_REGNUM),
-		S390_GPR_SIZE);
-  write_memory (new_sp + S390_GPR_SIZE, (char *) &saved_regs, REGISTER_BYTES);
-  write_register (S390_SP_REGNUM, new_sp);
-}
-
-
 static void
 s390_pop_frame_regular (struct frame_info *frame)
 {
