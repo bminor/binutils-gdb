@@ -1,3 +1,7 @@
+2005-03-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* scripttempl/elf.sc (SBSS): Don't provide sbss start and end syms.
+
 2005-03-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc32elf.em (gld${EMULATION_NAME}_after_allocation): New

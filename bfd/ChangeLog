@@ -1,3 +1,9 @@
+2005-03-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_add_symbol_hook): Make htab->sbss
+	SEC_LINKER_CREATED.  Attach to dynobj.
+	(ppc_elf_size_dynamic_sections): Strip htab->sbss if zero size.
+
 2005-03-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (struct elf_linker_section): Remove sym_hash and

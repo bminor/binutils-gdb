@@ -2381,11 +2381,14 @@ ppc_elf_add_symbol_hook (bfd *abfd,
       htab = ppc_elf_hash_table (info);
       if (htab->sbss == NULL)
 	{
-	  flagword flags = SEC_IS_COMMON;
+	  flagword flags = SEC_IS_COMMON | SEC_LINKER_CREATED;
 
-	  htab->sbss = bfd_make_section_anyway (abfd, ".sbss");
+	  if (!htab->elf.dynobj)
+	    htab->elf.dynobj = abfd;
+
+	  htab->sbss = bfd_make_section_anyway (htab->elf.dynobj, ".sbss");
 	  if (htab->sbss == NULL
-	      || ! bfd_set_section_flags (abfd, htab->sbss, flags))
+	      || ! bfd_set_section_flags (htab->elf.dynobj, htab->sbss, flags))
 	    return FALSE;
 	}
 
@@ -4053,7 +4056,8 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	continue;
 
       if (s == htab->plt
-	  || s == htab->got)
+	  || s == htab->got
+	  || s == htab->sbss)
 	{
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
@@ -4098,6 +4102,9 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  _bfd_strip_section_from_output (info, s);
 	  continue;
 	}
+
+      if (s == htab->sbss)
+	continue;
 
       /* Allocate memory for the section contents.  */
       s->contents = bfd_zalloc (htab->elf.dynobj, s->size);

@@ -1,3 +1,10 @@
+2005-03-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tlsexe32.r: Update.
+	* ld-powerpc/tlsso32.d: Update.
+	* ld-powerpc/tlsso32.g: Update.
+	* ld-powerpc/tlsso32.r: Update.
+
 2005-03-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlsexe.r: Update.
