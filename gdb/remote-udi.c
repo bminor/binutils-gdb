@@ -238,6 +238,11 @@ udi_open (name, from_tty)
 
   target_preopen(from_tty);
 
+  entry.Offset = 0;
+
+  for (cnt = 0; cnt < BKPT_TABLE_SIZE; cnt++)
+    bkpt_table[cnt].Type = 0;
+
   if (udi_config_id)
     free (udi_config_id);
 
@@ -391,6 +396,7 @@ udi_attach (args, from_tty)
   UDISizeT	Size = 4;
   UDICount	CountDone;
   UDIBool	HostEndian = 0;
+  UDIError	err;
 
   if (udi_session_id < 0)
       error ("UDI connection not opened yet, use the 'target udi' command.\n");
@@ -401,7 +407,7 @@ udi_attach (args, from_tty)
   UDIStop();
   From.Space = 11;
   From.Offset = UDI29KSpecialRegs;
-  if(UDIRead(From, &PC_adds, Count, Size, &CountDone, HostEndian))
+  if (err = UDIRead(From, &PC_adds, Count, Size, &CountDone, HostEndian))
     error ("UDIRead failed in udi_attach");
   printf ("Remote process is now halted, pc1 = 0x%x.\n", PC_adds);
 }
@@ -612,6 +618,7 @@ int	regno;
   UDISizeT	Size = 4;
   UDICount	CountDone;
   UDIBool	HostEndian = 0;
+  UDIError	err;
   int		i;
 
   if (regno >= 0)  {
@@ -625,7 +632,7 @@ int	regno;
   From.Offset = 1;
   To = (UDIUInt32 *)&registers[4 * GR1_REGNUM];
   Count = 1;
-  if (UDIRead(From, To, Count, Size, &CountDone, HostEndian))
+  if (err = UDIRead(From, To, Count, Size, &CountDone, HostEndian))
     error("UDIRead() failed in udi_fetch_registers");
 
   register_valid[GR1_REGNUM] = 1;
@@ -638,7 +645,7 @@ int	regno;
   From.Offset = 64;
   To = (UDIUInt32 *)&registers[4 * GR64_REGNUM];
   Count = 32;
-  if (UDIRead(From, To, Count, Size, &CountDone, HostEndian))
+  if (err = UDIRead(From, To, Count, Size, &CountDone, HostEndian))
     error("UDIRead() failed in udi_fetch_registers");
 
   for (i = GR64_REGNUM; i < GR64_REGNUM + 32; i++)
@@ -652,7 +659,7 @@ int	regno;
   From.Offset = 96;
   To = (UDIUInt32 *)&registers[4 * GR96_REGNUM];
   Count = 32;
-  if (UDIRead(From, To, Count, Size, &CountDone, HostEndian))
+  if (err = UDIRead(From, To, Count, Size, &CountDone, HostEndian))
     error("UDIRead() failed in udi_fetch_registers");
 
   for (i = GR96_REGNUM; i < GR96_REGNUM + 32; i++)
@@ -664,7 +671,7 @@ int	regno;
   From.Offset = 0;
   To = (UDIUInt32 *)&registers[4 * LR0_REGNUM];
   Count = 128;
-  if (UDIRead(From, To, Count, Size, &CountDone, HostEndian))
+  if (err = UDIRead(From, To, Count, Size, &CountDone, HostEndian))
     error("UDIRead() failed in udi_fetch_registers");
 
   for (i = LR0_REGNUM; i < LR0_REGNUM + 128; i++)
@@ -676,7 +683,7 @@ int	regno;
   From.Offset = 0;
   To = (UDIUInt32 *)&registers[4 * SR_REGNUM(0)];
   Count = 15;
-  if (UDIRead(From, To, Count, Size, &CountDone, HostEndian))
+  if (err = UDIRead(From, To, Count, Size, &CountDone, HostEndian))
     error("UDIRead() failed in udi_fetch_registers");
 
   for (i = SR_REGNUM(0); i < SR_REGNUM(0) + 15; i++)
@@ -693,7 +700,7 @@ int	regno;
     From.Offset = 128;
     To = (UDIUInt32 *)&registers[4 * SR_REGNUM(128)];
     Count = 135-128 + 1;
-    if (UDIRead(From, To, Count, Size, &CountDone, HostEndian))
+    if (err = UDIRead(From, To, Count, Size, &CountDone, HostEndian))
       error("UDIRead() failed in udi_fetch_registers");
 
     for (i = SR_REGNUM(128); i < SR_REGNUM(128) + 135-128+1; i++)
@@ -1158,30 +1165,40 @@ download(load_arg_string, from_tty)
 	  else			/* BSS */
 	    {
 	      UDIResource From;
-	      char zero = 0;
+	      unsigned long zero = 0;
 
 	      /* Write a zero byte at the vma */
 	      err = UDIWrite ((UDIHostMemPtr)&zero,	/* From */
 			      To,			/* To */
 			      (UDICount)1,		/* Count */
-			      (UDISizeT)1,		/* Size */
+			      (UDISizeT)4,		/* Size */
 			      &Count,			/* CountDone */
 			      (UDIBool)0);		/* HostEndian */
 	      if (err)
 		error ("UDIWrite failed, error = %d", err);
 
 	      From = To;
-	      To.Offset++;
+	      To.Offset+=4;
 
 	      /* Now, duplicate it for the length of the BSS */
 	      err = UDICopy (From,			/* From */
 			     To,			/* To */
-			     (UDICount)section_size - 1, /* Count */
-			     (UDISizeT)1,		/* Size */
+			     (UDICount)(section_size/4 - 1), /* Count */
+			     (UDISizeT)4,		/* Size */
 			     &Count,			/* CountDone */
 			     (UDIBool)1);		/* Direction */
 	      if (err)
-		error ("UDICopy failed, error = %d", err);
+		{
+		  char message[100];
+		  int xerr;
+
+		  xerr = UDIGetErrorMsg(err, 100, message, &Count);
+		  if (!xerr)
+		    fprintf (stderr, "Error is %s\n", message);
+		  else
+		    fprintf (stderr, "xerr is %d\n", xerr);
+		  error ("UDICopy failed, error = %d", err);
+		}
 	    }
 
 	}
@@ -1259,6 +1276,7 @@ udi_read_inferior_memory(memaddr, myaddr, len)
   UDISizeT	Size = 1;
   UDICount	CountDone = 0;
   UDIBool	HostEndian = 0;
+  UDIError	err;
   
   From.Space = udi_memory_space(memaddr);	
   To = (UDIUInt32*)myaddr;
@@ -1267,8 +1285,8 @@ udi_read_inferior_memory(memaddr, myaddr, len)
   {	Count = len - nread;
 	if (Count > MAXDATA) Count = MAXDATA;
   	From.Offset = memaddr + nread;
-        if(UDIRead(From, To, Count, Size, &CountDone, HostEndian))
-    	{  error("UDIWrite() failed in udi_read_inferrior_memory");
+        if(err = UDIRead(From, To, Count, Size, &CountDone, HostEndian))
+    	{  error("UDIRead() failed in udi_read_inferrior_memory");
 	   break;	
 	}
 	else
@@ -1302,6 +1320,7 @@ fetch_register (regno)
   UDISizeT	Size = 4;
   UDICount	CountDone;
   UDIBool	HostEndian = 0;
+  UDIError	err;
   int  		result;
 
   if (regno == GR1_REGNUM)
@@ -1342,7 +1361,7 @@ fetch_register (regno)
       From.Offset = regnum_to_srnum(regno); 
     }
 
-  if (UDIRead(From, &To, Count, Size, &CountDone, HostEndian))
+  if (err = UDIRead(From, &To, Count, Size, &CountDone, HostEndian))
     error("UDIRead() failed in udi_fetch_registers");
 
   supply_register(regno, (char *) &To);

@@ -173,6 +173,7 @@ CORE_ADDR step_range_end; /* Exclusive */
 FRAME_ADDR step_frame_address;
 
 /* 1 means step over all subroutine calls.
+   0 means don't step over calls (used by stepi).
    -1 means step over calls to undebuggable functions.  */
 
 int step_over_calls;
@@ -235,8 +236,12 @@ Start it from the beginning? "))
 
   if (from_tty)
     {
-      printf_filtered ("Starting program: %s %s\n",
-	      exec_file? exec_file: "", inferior_args);
+      puts_filtered("Starting program: ");
+      if (exec_file)
+	puts_filtered(exec_file);
+      puts_filtered(" ");
+      puts_filtered(inferior_args);
+      puts_filtered("\n");
       fflush (stdout);
     }
 
@@ -773,7 +778,9 @@ set_environment_command (arg, from_tty)
 
       /* Take the smaller of the two.  If there was space before the
 	 "=", they will be the same right now. */
-      p = arg + min (p - arg, val - arg);
+
+      if (val < p)
+	p = val - 1;
     }
   else if (val != 0 && p == 0)
     p = val;
@@ -837,8 +844,9 @@ path_info (args, from_tty)
      char *args;
      int from_tty;
 {
-  printf_filtered ("Executable and object file path: %s\n", 
-      get_in_environ (inferior_environ, path_var_name));
+  puts_filtered ("Executable and object file path: ");
+  puts_filtered (get_in_environ (inferior_environ, path_var_name));
+  puts_filtered ("\n");
 }
 
 /* Add zero or more directories to the front of the execution path.  */
@@ -922,7 +930,7 @@ do_registers_info (regnum, fpregs)
 	  continue;
 	}
       
-      target_convert_to_virtual (i, raw_buffer, virtual_buffer);
+      REGISTER_CONVERT_TO_VIRTUAL (i, raw_buffer, virtual_buffer);
 
       /* If virtual format is floating, print it that way, and in raw hex.  */
       if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT
@@ -977,30 +985,40 @@ registers_info (addr_exp, fpregs)
      int fpregs;
 {
   int regnum;
+  register char *end;
 
   if (!target_has_registers)
     error ("The program has no registers now.");
 
-  if (addr_exp)
+  if (!addr_exp)
     {
-      if (*addr_exp >= '0' && *addr_exp <= '9')
-	regnum = atoi (addr_exp);
-      else
-	{
-	  register char *p = addr_exp;
-	  if (p[0] == '$')
-	    p++;
-	  for (regnum = 0; regnum < NUM_REGS; regnum++)
-	    if (!strcmp (p, reg_names[regnum]))
-	      break;
-	  if (regnum == NUM_REGS)
-	    error ("%s: invalid register name.", addr_exp);
-	}
+      DO_REGISTERS_INFO(-1, fpregs);
+      return;
     }
-  else
-    regnum = -1;
 
-  DO_REGISTERS_INFO(regnum, fpregs);
+  do
+    {      
+      if (addr_exp[0] == '$')
+	addr_exp++;
+      end = addr_exp;
+      while (*end != '\0' && *end != ' ' && *end != '\t')
+	++end;
+      for (regnum = 0; regnum < NUM_REGS; regnum++)
+	if (!strncmp (addr_exp, reg_names[regnum], end - addr_exp)
+	    && strlen (reg_names[regnum]) == end - addr_exp)
+	  goto found;
+      if (*addr_exp >= '0' && *addr_exp <= '9')
+	regnum = atoi (addr_exp);		/* Take a number */
+      if (regnum >= NUM_REGS)		/* Bad name, or bad number */
+	error ("%.*s: invalid register", end - addr_exp, addr_exp);
+
+found:
+      DO_REGISTERS_INFO(regnum, fpregs);
+
+      addr_exp = end;
+      while (*addr_exp == ' ' || *addr_exp == '\t')
+	++addr_exp;
+    } while (*addr_exp != '\0');
 }
 
 static void
@@ -1030,19 +1048,49 @@ nofp_registers_info (addr_exp, from_tty)
  */
 
 /*
- * attach_command --
- * takes a program started up outside of gdb and ``attaches'' to it.
- * This stops it cold in its tracks and allows us to start tracing it.
- * For this to work, we must be able to send the process a
- * signal and we must have the same effective uid as the program.
- */
+   attach_command --
+   takes a program started up outside of gdb and ``attaches'' to it.
+   This stops it cold in its tracks and allows us to start debugging it.
+   and wait for the trace-trap that results from attaching.  */
+
 void
 attach_command (args, from_tty)
      char *args;
      int from_tty;
 {
   dont_repeat ();			/* Not for the faint of heart */
+
+  if (target_has_execution)
+    {
+      if (query ("A program is being debugged already.  Kill it? "))
+	target_kill ();
+      else
+	error ("Inferior not killed.");
+    }
+
   target_attach (args, from_tty);
+
+  /* Set up the "saved terminal modes" of the inferior
+     based on what modes we are starting it with.  */
+  target_terminal_init ();
+
+  /* Install inferior's terminal modes.  */
+  target_terminal_inferior ();
+
+  /* Set up execution context to know that we should return from
+     wait_for_inferior as soon as the target reports a stop.  */
+  init_wait_for_inferior ();
+  clear_proceed_status ();
+  stop_soon_quietly = 1;
+
+  wait_for_inferior ();
+
+#ifdef SOLIB_ADD
+  /* Add shared library symbols from the newly attached process, if any.  */
+  SOLIB_ADD ((char *)0, from_tty, (struct target_ops *)0);
+#endif
+
+  normal_stop ();
 }
 
 /*
@@ -1078,8 +1126,6 @@ float_info (addr_exp, from_tty)
 #endif
 }
 
-struct cmd_list_element *unsetlist = NULL;
-
 /* ARGSUSED */
 static void
 unset_command (args, from_tty)

@@ -462,6 +462,8 @@ UDIBool		Terminate;
      	    sprintf(dfe_errmsg, "DFE-ipc WARNING: socket shutdown failed");
 	    return UDIErrorIPCInternal;
         }
+	else
+	  session[Session].soc_con_p->in_use = 0;
 
     udrs->udr_op = UDR_DECODE;		/* receive all "out" parameters */
     udr_UDIError(udrs, &dfe_errno);	/* get any TIP error */
@@ -501,6 +503,8 @@ UDIInt32	Signal;
      	    sprintf(dfe_errmsg, "DFE-ipc WARNING: socket shutdown failed");
 	    return UDIErrorIPCInternal;
         }
+	else
+	  session[Session].soc_con_p->in_use = 0;
 
     udrs->udr_op = UDR_DECODE;		/* receive all "out" parameters */
     udr_UDIError(udrs, &dfe_errno);	/* get any TIP error */
