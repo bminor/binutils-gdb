@@ -3,6 +3,17 @@
 #$Id$
 
 srcdir = .
+destdir = /usr/local
+
+version=`$(srcdir)/../gcc$(subdir)/gcc -dumpversion`
+prefix = $(destdir)
+bindir = $(prefix)/bin
+libdir = $(prefix)/lib
+libsubdir = $(libdir)/gcc/$(target)/$(version)
+
+INSTALL = install -c
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_FILE = $(INSTALL)
 
 ## Configuration options
 # These should be all you need set before compiling
@@ -27,7 +38,7 @@ PROGS = $(SIZE_PROG) $(COPY_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRIP_
 #CC=gcc
 BASEDIR = $(srcdir)/..
 # Let rich do this for now:
-LIBDIR  = $(srcdir)/../bfd
+LIBDIR  = $(srcdir)/../bfd$(subdir)
 
 #__dgux__#DEFINES=-DHOST_SYS=DGUX_SYS
 
@@ -129,10 +140,9 @@ realclean: clean
 	-rm -f $(PROGS) TAGS
 
 install: $(PROGS)
-	for prog in $(PROGS); do \
-		rm -f $G960BASE/bin/$$prog-new; cp $$prog $$G960BASE/bin/$$prog-new ; \
+	for i in $(PROGS) ; do \
+		$(INSTALL_PROGRAM) $$i $(destdir)/bin/$$i ; \
 	done
-
 
 bucomm.o: bucomm.c
 version.o: version.c
@@ -190,7 +200,11 @@ make:
 #
 
 Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
-	(cd $(srcdir) ; ./configure -host=$(host) $(target))
+	(cd $(srcdir) ; \
+		./configure +norecurse \
+		+destdir=$(destdir) \
+		`if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
+		$(host) +target=$(target))
 
 ### Local Variables: ***
 ### mode:fundamental ***

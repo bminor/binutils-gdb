@@ -31,7 +31,6 @@ CSEARCH = -I$(INCDIR)
 #CDEFINES = # -DHOST_SYS=AIX_SYS # -DCOFF_TIMESTAMP -DANSI_LIBRARIES
 
 #### host and target dependent Makefile fragments come in here.
-
 ###
 
 TARG = libbfd.a
@@ -135,9 +134,7 @@ roll:
 .force:
 FORCE:
 
-# 'G960BASE' will be defined at invocation
 install:
-	make ${TARG} OPT=-O
 
 # Target to uncomment host-specific lines in this makefile.  Such lines must
 # have the following string beginning in column 1: #__<hostname>__#
@@ -163,5 +160,7 @@ make:
 
 Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 	(cd $(srcdir) ; \
-		./configure `if [ "$(srcdir)" != "." ] ; then echo +f; fi` -host=$(host) $(target))
-
+		./configure +norecurse \
+		+destdir=$(destdir) \
+		`if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
+		$(host) +target=$(target))

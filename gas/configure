@@ -713,7 +713,7 @@ exit 0
 
 #
 # $Log$
-# Revision 1.6  1991/04/15 23:55:43  rich
+# Revision 1.7  1991/04/16 00:04:08  rich
 # Now handles multiple hosts and targets.
 #
 # Revision 1.5  1991/04/15  23:43:44  rich
