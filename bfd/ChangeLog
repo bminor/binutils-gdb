@@ -1,5 +1,10 @@
 Fri Oct  4 13:49:01 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coff-m68k.c (coff_rtype_to_howto): Define if not defined.
+	(m68kcoff_rtype_to_howto): New static function.
+	* cf-m68klynx.c (coff_m68k_lynx_rtype_to_howto): Add the section
+	VMA to the addend for a PC relative reloc.
+
 	* dep-in.sed: Rework backslash loop a bit to avoid bug in sed on
 	HP/UX 10.20.
 	* Makefile.in: Rebuild dependencies.
