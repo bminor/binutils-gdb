@@ -56,7 +56,7 @@ keep_these_too="${keep_these_too} .cvsignore CYGNUS autoconf
 	pagas patch prms rcs readline sed send-pr shellutils sim textutils
 	texinfo tgas utils uudecode wdiff xiberty
 	configure.bat makeall.bat winsup
-	ctax gls goonix guile guile-docs libguile slib perl
+	guile perl
 	mpw-README mpw-configure mpw-config.in mpw-build.in"
 
 lose_these_too="${lose_these_too} testsuite"
