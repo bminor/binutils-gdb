@@ -412,6 +412,8 @@ styles:
 	  /* empty */
 	| styles CAPTION QUOTEDSTRING
 	  {
+	    dialog.style |= WS_CAPTION;
+	    style |= WS_CAPTION;
 	    unicode_from_ascii ((int *) NULL, &dialog.caption, $3);
 	  }
 	| styles CLASS id

@@ -1,5 +1,9 @@
 2002-04-09  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* binutils-all/windres/capstyle.rc: New test case: Set default
+	style for captions.
+	* binutils-all/windres/capstyle.rsd: Expected output.
+
 	* binutils-all/windres/deflang.rc: New test case: Check default
 	language.
 	* binutils-all/windres/deflang.rsd: Expected output.

@@ -4,6 +4,7 @@
 	are quoted.
 	Fix typo in BEDIT warning.
 	Don't add default dialog style when explicit style specified.
+	Add WS_CAPTION dialog style if CAPTION is specified.
 
 	* rclex.l (handle_quotes): "\xhex" encoding in strings corrected.
 	(handle_quotes) "\a" escape (used for right justified key
