@@ -20,12 +20,22 @@
 #ifndef _ELF_D10V_H
 #define _ELF_D10V_H
 
-#define R_D10V_NONE		0
-#define R_D10V_10_PCREL_R	1
-#define R_D10V_10_PCREL_L	2
-#define R_D10V_16		3
-#define R_D10V_18		4
-#define R_D10V_18_PCREL		5
-#define R_D10V_32		6
+/* Unless otherwise told we define an enum with the relocation entries.  */
+#ifndef START_RELOC_NUMBERS
+# define START_RELOC_NUMBERS(name)   enum name {
+# define RELOC_NUMBER(name, number)  name = number ,
+# define END_RELOC_NUMBERS           };
+#endif
+
+/* Relocation types.  */
+START_RELOC_NUMBERS (elf_d10v_reloc_type)
+  RELOC_NUMBER (R_D10V_NONE, 0)
+  RELOC_NUMBER (R_D10V_10_PCREL_R, 1)
+  RELOC_NUMBER (R_D10V_10_PCREL_L, 2)
+  RELOC_NUMBER (R_D10V_16, 3)
+  RELOC_NUMBER (R_D10V_18, 4)
+  RELOC_NUMBER (R_D10V_18_PCREL, 5)
+  RELOC_NUMBER (R_D10V_32, 6)
+END_RELOC_NUMBERS
 
 #endif

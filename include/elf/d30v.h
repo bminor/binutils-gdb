@@ -20,18 +20,28 @@
 #ifndef _ELF_D30V_H
 #define _ELF_D30V_H
 
-#define R_D30V_NONE		0
-#define R_D30V_6		1
-#define R_D30V_9_PCREL		2
-#define R_D30V_9_PCREL_R	3
-#define R_D30V_15		4
-#define R_D30V_15_PCREL		5
-#define R_D30V_15_PCREL_R	6
-#define R_D30V_21		7
-#define R_D30V_21_PCREL		8
-#define R_D30V_21_PCREL_R	9
-#define R_D30V_32		10
-#define R_D30V_32_PCREL		11
-#define R_D30V_32_NORMAL	12
+/* Unless otherwise told we define an enum with the relocation entries.  */
+#ifndef START_RELOC_NUMBERS
+# define START_RELOC_NUMBERS(name)   enum name {
+# define RELOC_NUMBER(name, number)  name = number ,
+# define END_RELOC_NUMBERS           };
+#endif
+
+/* Relocations.  */
+START_RELOC_NUMBERS (elf_d30v_reloc_type)
+  RELOC_NUMBER (R_D30V_NONE, 0)
+  RELOC_NUMBER (R_D30V_6, 1)
+  RELOC_NUMBER (R_D30V_9_PCREL, 2)
+  RELOC_NUMBER (R_D30V_9_PCREL_R, 3)
+  RELOC_NUMBER (R_D30V_15, 4)
+  RELOC_NUMBER (R_D30V_15_PCREL, 5)
+  RELOC_NUMBER (R_D30V_15_PCREL_R, 6)
+  RELOC_NUMBER (R_D30V_21, 7)
+  RELOC_NUMBER (R_D30V_21_PCREL, 8)
+  RELOC_NUMBER (R_D30V_21_PCREL_R, 9)
+  RELOC_NUMBER (R_D30V_32, 10)
+  RELOC_NUMBER (R_D30V_32_PCREL, 11)
+  RELOC_NUMBER (R_D30V_32_NORMAL, 12)
+END_RELOC_NUMBERS
 
 #endif

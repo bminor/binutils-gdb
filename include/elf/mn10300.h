@@ -22,7 +22,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef _ELF_MN10300_H
 #define _ELF_MN10300_H
 
-/* Relocations.  Keep this list sorted wrt the numeric value.  */
+/* Unless otherwise told we define an enum with the relocation entries.  */
+#ifndef START_RELOC_NUMBERS
+# define START_RELOC_NUMBERS(name)   enum name {
+# define RELOC_NUMBER(name, number)  name = number ,
+# define END_RELOC_NUMBERS           };
+#endif
+
+/* Relocations.  */
 START_RELOC_NUMBERS (elf_mn10300_reloc_type)
   RELOC_NUMBER (R_MN10300_NONE, 0)
   RELOC_NUMBER (R_MN10300_32, 1)
@@ -33,6 +40,7 @@ START_RELOC_NUMBERS (elf_mn10300_reloc_type)
   RELOC_NUMBER (R_MN10300_PCREL8, 6)
   RELOC_NUMBER (R_MN10300_GNU_VTINHERIT, 7)
   RELOC_NUMBER (R_MN10300_GNU_VTENTRY, 8)
+  RELOC_NUMBER (R_MN10300_MAX, 9)
 END_RELOC_NUMBERS
 
 /* Machine variant if we know it.  This field was invented at Cygnus,

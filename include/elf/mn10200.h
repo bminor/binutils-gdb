@@ -22,14 +22,23 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef _ELF_MN10200_H
 #define _ELF_MN10200_H
 
+/* Unless otherwise told we define an enum with the relocation entries.  */
+#ifndef START_RELOC_NUMBERS
+# define START_RELOC_NUMBERS(name)   enum name {
+# define RELOC_NUMBER(name, number)  name = number ,
+# define END_RELOC_NUMBERS           };
+#endif
+
 /* Relocations.  */
-#define R_MN10200_NONE		0
-#define R_MN10200_32		1
-#define R_MN10200_16		2
-#define R_MN10200_8		3
-#define R_MN10200_24		4
-#define R_MN10200_PCREL8	5
-#define R_MN10200_PCREL16	6
-#define R_MN10200_PCREL24	7
+START_RELOC_NUMBERS (elf_mn10200_reloc_type)
+  RELOC_NUMBER (R_MN10200_NONE, 0)
+  RELOC_NUMBER (R_MN10200_32, 1)
+  RELOC_NUMBER (R_MN10200_16, 2)
+  RELOC_NUMBER (R_MN10200_8, 3)
+  RELOC_NUMBER (R_MN10200_24, 4)
+  RELOC_NUMBER (R_MN10200_PCREL8, 5)
+  RELOC_NUMBER (R_MN10200_PCREL16, 6)
+  RELOC_NUMBER (R_MN10200_PCREL24, 7)
+END_RELOC_NUMBERS
 
 #endif /* _ELF_MN10200_H */

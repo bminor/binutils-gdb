@@ -27,6 +27,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef _ELF_PPC_H
 #define _ELF_PPC_H
 
+/* Unless otherwise told we define an enum with the relocation entries.  */
+#ifndef START_RELOC_NUMBERS
+# define START_RELOC_NUMBERS(name)   enum name {
+# define RELOC_NUMBER(name, number)  name = number ,
+# define END_RELOC_NUMBERS           };
+#endif
+
 /* Relocations.  */
 START_RELOC_NUMBERS (elf_ppc_reloc_type)
   RELOC_NUMBER (R_PPC_NONE, 0)
