@@ -21,6 +21,8 @@
 #ifndef SOURCE_H
 #define SOURCE_H
 
+struct symtab;
+
 /* Open a source file given a symtab S.  Returns a file descriptor or
    negative number for error.  */
 extern int open_source_file (struct symtab *s);

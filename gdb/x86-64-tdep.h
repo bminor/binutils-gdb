@@ -23,6 +23,9 @@
 #ifndef X86_64_TDEP_H
 #define X86_64_TDEP_H
 
+struct gdbarch;
+struct frame_info;
+
 #include "i386-tdep.h"
 
 extern int x86_64_num_regs;

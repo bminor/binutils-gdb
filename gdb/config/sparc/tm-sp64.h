@@ -23,6 +23,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+struct type;
+
 #define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
 
 #ifndef GDB_TARGET_IS_SPARC64

@@ -25,7 +25,9 @@
 #define SYMTAB_H 1
 
 /* Opaque declarations.  */
-
+struct ui_file;
+struct frame_info;
+struct symbol;
 struct obstack;
 struct objfile;
 struct block;

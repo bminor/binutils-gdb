@@ -19,6 +19,10 @@
 #if !defined (CLI_SCRIPT_H)
 #define CLI_SCRIPT_H 1
 
+struct ui_file;
+struct command_line;
+struct cmd_list_element;
+
 /* Exported to cli/cli-cmds.c */
 
 extern void script_from_file (FILE *stream, char *file);

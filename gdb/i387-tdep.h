@@ -21,6 +21,10 @@
 #ifndef I387_TDEP_H
 #define I387_TDEP_H
 
+struct gdbarch;
+struct ui_file;
+struct frame_info;
+
 /* Print out the i387 floating point state.  */
 
 extern void i387_print_float_info (struct gdbarch *gdbarch,

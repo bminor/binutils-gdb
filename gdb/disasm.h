@@ -21,6 +21,8 @@
 #ifndef DISASM_H
 #define DISASM_H
 
+struct ui_out;
+
 extern void gdb_disassembly (struct ui_out *uiout,
 			     char *file_string,
 			     int line_num,

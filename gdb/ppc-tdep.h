@@ -22,6 +22,7 @@
 #ifndef PPC_TDEP_H
 #define PPC_TDEP_H
 
+struct gdbarch;
 struct frame_info;
 struct value;
 

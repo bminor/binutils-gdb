@@ -24,6 +24,10 @@
 #if !defined (INFERIOR_H)
 #define INFERIOR_H 1
 
+struct target_waitstatus;
+struct frame_info;
+struct ui_file;
+struct type;
 struct gdbarch;
 struct regcache;
 

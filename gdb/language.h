@@ -30,6 +30,8 @@
 struct value;
 struct objfile;
 struct expression;
+struct ui_file;
+
 /* enum exp_opcode;     ANSI's `wisdom' didn't include forward enum decls. */
 
 /* This used to be included to configure GDB for one or more specific

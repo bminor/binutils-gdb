@@ -25,6 +25,10 @@
 #ifndef GDBTHREAD_H
 #define GDBTHREAD_H
 
+struct breakpoint;
+struct frame_id;
+struct symtab;
+
 /* For bpstat */
 #include "breakpoint.h"
 

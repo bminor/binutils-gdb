@@ -18,6 +18,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+struct frame_info;
+
 #include "regcache.h"
 
 /* Define BPT_VECTOR if it is different than the default.

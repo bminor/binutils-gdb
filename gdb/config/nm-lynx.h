@@ -23,6 +23,8 @@
 #ifndef NM_LYNX_H
 #define NM_LYNX_H
 
+struct target_waitstatus;
+
 #include <sys/conf.h>
 #include <sys/kernel.h>
 /* sys/kernel.h should define this, but doesn't always, sigh. */

@@ -21,6 +21,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+struct frame_info;
+
 #define GDB_MULTI_ARCH 1
 
 /* Minimum possible text address in AIX */

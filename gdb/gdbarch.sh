@@ -807,6 +807,8 @@ cat <<EOF
 #include "symfile.h"		/* For entry_point_address().  */
 #endif
 
+struct floatformat;
+struct ui_file;
 struct frame_info;
 struct value;
 struct objfile;

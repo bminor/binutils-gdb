@@ -24,6 +24,8 @@
 #ifndef DOUBLEST_H
 #define DOUBLEST_H
 
+struct type;
+
 /* Setup definitions for host and target floating point formats.  We need to
    consider the format for `float', `double', and `long double' for both target
    and host.  We need to do this so that we know what kind of conversions need

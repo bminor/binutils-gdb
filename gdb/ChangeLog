@@ -1,3 +1,22 @@
+2003-04-12  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh: Add missing opaque declarations.
+	* gdbarch.h: Regnerate.
+	* symtab.h: Add missing opaque declarations.
+	* value.h, target.h, symfile.h, stabsread.h: Ditto.
+	* x86-64-tdep.h, xmodem.h, monitor.h, typeprint.h: Ditto.
+	* srec.h, solib-svr4.h, source.h, inferior.h: Ditto.
+	* ser-unix.h, serial.h, remote-utils.h, gdbcore.h: Ditto.
+	* ppc-tdep.h, ocd.h, mips-tdep.h, gdbtypes.h: Ditto.
+	* buildsym.h, builtin-regs.h, linespec.h, language.h: Ditto.
+	* i387-tdep.h, gdbthread.h, event-top.h, gdb.h: Ditto.
+	* dwarf2cfi.h, doublest.h, disasm.h, cp-abi.h: Ditto.
+	* cli-out.h, c-lang.h, ax-gdb.h, arch-utils.h: Ditto.
+	* ada-lang.h, config/nm-lynx.h, config/nm-linux.h: Ditto.
+	* config/sparc/tm-sp64.h, config/rs6000/tm-rs6000.h: Ditto.
+	* config/pa/tm-hppah.h, config/m68k/tm-delta68.h: Ditto.
+	* cli/cli-setshow.h, cli/cli-script.h: Ditto.
+
 2003-04-11  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (get_frame_id): Return this frame's "id".

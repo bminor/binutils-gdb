@@ -22,6 +22,9 @@
 #if !defined (BUILDSYM_H)
 #define BUILDSYM_H 1
 
+struct objfile;
+struct symbol;
+
 /* This module provides definitions used for creating and adding to
    the symbol table.  These routines are called from various symbol-
    file-reading routines.
