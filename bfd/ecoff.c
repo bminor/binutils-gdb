@@ -140,6 +140,7 @@ ecoff_mkobject_hook (abfd, filehdr, aouthdr)
 
 /* This is a hook needed by SCO COFF, but we have nothing to do.  */
 
+/*ARGSUSED*/
 asection *
 ecoff_make_section_hook (abfd, name)
      bfd *abfd;
@@ -328,6 +329,7 @@ ecoff_sec_to_styp_flags (name, flags)
 
 /* Get the BFD flags to use for a section.  */
 
+/*ARGSUSED*/
 flagword
 ecoff_styp_to_sec_flags (abfd, hdr)
      bfd *abfd;
@@ -1527,6 +1529,7 @@ ecoff_type_to_string (abfd, aux_ptr, indx, bigendian)
 
 /* Return information about ECOFF symbol SYMBOL in RET.  */
 
+/*ARGSUSED*/
 void
 ecoff_get_symbol_info (abfd, symbol, ret)
      bfd *abfd;			/* Ignored.  */
@@ -1870,6 +1873,7 @@ ecoff_canonicalize_reloc (abfd, section, relptr, symbols)
    and return the name of the source file and the line nearest to the
    wanted location.  */
 
+/*ARGSUSED*/
 boolean
 ecoff_find_nearest_line (abfd,
 			 section,
@@ -2219,6 +2223,7 @@ ecoff_set_arch_mach (abfd, arch, machine)
 /* Get the size of the section headers.  We do not output the .reginfo
    section.  */
 
+/*ARGSUSED*/
 int
 ecoff_sizeof_headers (abfd, reloc)
      bfd *abfd;
@@ -2418,7 +2423,6 @@ ecoff_write_object_contents (abfd)
   HDRR * const symhdr = &debug->symbolic_header;
   asection *current;
   unsigned int count;
-  file_ptr scn_base;
   file_ptr reloc_base;
   file_ptr sym_base;
   unsigned long reloc_size;
@@ -2437,10 +2441,6 @@ ecoff_write_object_contents (abfd)
   if(abfd->output_has_begun == false)
     ecoff_compute_section_file_positions(abfd);
 
-  if (abfd->sections != (asection *) NULL)
-    scn_base = abfd->sections->filepos;
-  else
-    scn_base = 0;
   reloc_base = ecoff_data (abfd)->reloc_filepos;
 
   count = 1;
@@ -3125,7 +3125,7 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
     return false;
 
   bfd_h_put_32 (abfd, (bfd_vma) hashsize, temp);
-  if (bfd_write (temp, 1, 4, abfd) != 4)
+  if (bfd_write ((PTR) temp, 1, 4, abfd) != 4)
     return false;
   
   hashtable = (bfd_byte *) bfd_zalloc (abfd, symdefsize);
@@ -3174,14 +3174,14 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
 		    (PTR) (hashtable + hash * 8 + 4));
     }
 
-  if (bfd_write (hashtable, 1, symdefsize, abfd) != symdefsize)
+  if (bfd_write ((PTR) hashtable, 1, symdefsize, abfd) != symdefsize)
     return false;
 
   bfd_release (abfd, hashtable);
 
   /* Now write the strings.  */
   bfd_h_put_32 (abfd, (bfd_vma) stringsize, temp);
-  if (bfd_write (temp, 1, 4, abfd) != 4)
+  if (bfd_write ((PTR) temp, 1, 4, abfd) != 4)
     return false;
   for (i = 0; i < orl_count; i++)
     {
@@ -3196,7 +3196,7 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
      bug-compatible for DECstation ar we use a null.  */
   if (padit)
     {
-      if (bfd_write ("\0", 1, 1, abfd) != 1)
+      if (bfd_write ("", 1, 1, abfd) != 1)
 	return false;
     }
 

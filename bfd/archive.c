@@ -208,8 +208,8 @@ DESCRIPTION
 	information, returning that symbol's (internal) index into the
 	symbol table.
 
-	Supply BFD_NO_MORE_SYMBOLS as the @var{previous} entry to get
-	the first one; returns BFD_NO_MORE_SYMBOLS when you're already
+	Supply <<BFD_NO_MORE_SYMBOLS>> as the @var{previous} entry to get
+	the first one; returns <<BFD_NO_MORE_SYMBOLS>> when you've already
 	got the last one.
 
 	A <<carsym>> is a canonical archive symbol.  The only
@@ -310,7 +310,8 @@ add_bfd_to_cache (arch_bfd, filepos, new_elt)
   else {
     struct ar_cache *current = bfd_ardata (arch_bfd)->cache;
 
-    for (; current->next != NULL; current = current->next);
+    while (current->next != NULL)
+      current = current->next;
     current->next = new_cache;
   }
     
@@ -672,8 +673,8 @@ DEFUN (do_slurp_bsd_armap, (abfd),
       return false;
   }
     
-  ardata->symdef_count =
-      bfd_h_get_32(abfd, (PTR)raw_armap) / sizeof (struct symdef);
+  ardata->symdef_count = (bfd_h_get_32 (abfd, (bfd_byte *) raw_armap)
+			  / sizeof (struct symdef));
     
   if (ardata->symdef_count * sizeof (struct symdef)
       > parsed_size - sizeof (*raw_armap)) {
@@ -689,8 +690,10 @@ DEFUN (do_slurp_bsd_armap, (abfd),
   
   for (;counter < ardata->symdef_count; counter++) {
       struct symdef *sym = ((struct symdef *) rbase) + counter;
-      sym->s.name = bfd_h_get_32(abfd, (PTR)(&(sym->s.string_offset))) + stringbase;
-      sym->file_offset = bfd_h_get_32(abfd, (PTR)( &(sym->file_offset)));
+      sym->s.name = (bfd_h_get_32 (abfd, (bfd_byte *) (&sym->s.string_offset))
+		     + stringbase);
+      sym->file_offset = bfd_h_get_32 (abfd,
+				       (bfd_byte *) (&(sym->file_offset)));
   }
   
   ardata->first_file_filepos = bfd_tell (abfd);
@@ -781,7 +784,7 @@ DEFUN (do_slurp_coff_armap, (abfd),
       rawptr = raw_armap + i;
       carsyms->file_offset = swap((PTR)rawptr);
       carsyms->name = stringbase;
-      while (*stringbase++) ;
+      stringbase += strlen (stringbase) + 1;
       carsyms++;
   }
   *stringbase = 0;
@@ -1140,9 +1143,8 @@ DEFUN(bfd_ar_hdr_from_filesystem, (abfd,filename),
   hdr = (struct ar_hdr *) (((char *) ared) + sizeof (struct areltdata));
 
   /* ar headers are space padded, not null padded! */
-  temp = (char *) hdr;
-  temp1 = temp + sizeof (struct ar_hdr) - 2;
-  for (; temp < temp1; *(temp++) = ' ');
+  memset (hdr, ' ', sizeof (struct ar_hdr));
+
   strncpy (hdr->ar_fmag, ARFMAG, 2);
   
   /* Goddamned sprintf doesn't permit MAXIMUM field lengths */
@@ -1617,7 +1619,7 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   /* The spec sez this should be a newline.  But in order to be
      bug-compatible for sun's ar we use a null. */
   if (padit)
-   bfd_write("\0",1,1,arch);
+   bfd_write("",1,1,arch);
 
   return true;
 }
@@ -1766,7 +1768,7 @@ coff_write_armap (arch, elength, map, symbol_count, stridx)
     /* The spec sez this should be a newline.  But in order to be
        bug-compatible for arc960 we use a null. */
     if (padit)
-     bfd_write("\0",1,1,arch);
+     bfd_write("",1,1,arch);
 
     return true;
 }

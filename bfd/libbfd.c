@@ -32,6 +32,7 @@ DESCRIPTION
 	completeness.
 */
 
+/*ARGSUSED*/
 boolean
 DEFUN(_bfd_dummy_new_section_hook,(ignore, ignore_newsect),
       bfd *ignore AND
@@ -40,6 +41,7 @@ DEFUN(_bfd_dummy_new_section_hook,(ignore, ignore_newsect),
   return true;
 }
 
+/*ARGSUSED*/
 boolean
 DEFUN(bfd_false ,(ignore),
       bfd *ignore)
@@ -47,6 +49,7 @@ DEFUN(bfd_false ,(ignore),
   return false;
 }
 
+/*ARGSUSED*/
 boolean
 DEFUN(bfd_true,(ignore),
       bfd *ignore)
@@ -54,6 +57,7 @@ DEFUN(bfd_true,(ignore),
   return true;
 }
 
+/*ARGSUSED*/
 PTR
 DEFUN(bfd_nullvoidptr,(ignore),
       bfd *ignore)
@@ -61,6 +65,7 @@ DEFUN(bfd_nullvoidptr,(ignore),
   return (PTR)NULL;
 }
 
+/*ARGSUSED*/
 int 
 DEFUN(bfd_0,(ignore),
       bfd *ignore)
@@ -68,6 +73,7 @@ DEFUN(bfd_0,(ignore),
   return 0;
 }
 
+/*ARGSUSED*/
 unsigned int 
 DEFUN(bfd_0u,(ignore),
       bfd *ignore)
@@ -75,12 +81,14 @@ DEFUN(bfd_0u,(ignore),
    return 0;
 }
 
+/*ARGSUSED*/
 void 
 DEFUN(bfd_void,(ignore),
       bfd *ignore)
 {
 }
 
+/*ARGSUSED*/
 boolean
 DEFUN(_bfd_dummy_core_file_matches_executable_p,(ignore_core_bfd, ignore_exec_bfd),
       bfd *ignore_core_bfd AND
@@ -92,6 +100,7 @@ DEFUN(_bfd_dummy_core_file_matches_executable_p,(ignore_core_bfd, ignore_exec_bf
 
 /* of course you can't initialize a function to be the same as another, grr */
 
+/*ARGSUSED*/
 char *
 DEFUN(_bfd_dummy_core_file_failing_command,(ignore_abfd),
       bfd *ignore_abfd)
@@ -99,6 +108,7 @@ DEFUN(_bfd_dummy_core_file_failing_command,(ignore_abfd),
   return (char *)NULL;
 }
 
+/*ARGSUSED*/
 int
 DEFUN(_bfd_dummy_core_file_failing_signal,(ignore_abfd),
      bfd *ignore_abfd)
@@ -106,6 +116,7 @@ DEFUN(_bfd_dummy_core_file_failing_signal,(ignore_abfd),
   return 0;
 }
 
+/*ARGSUSED*/
 bfd_target *
 DEFUN(_bfd_dummy_target,(ignore_abfd),
      bfd *ignore_abfd)

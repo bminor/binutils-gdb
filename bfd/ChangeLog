@@ -1,3 +1,34 @@
+Fri Dec 31 16:23:43 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Minor cleanups suggested by CodeCenter.
+	* aoutx.h, coffgen.c, ecoff.c, ecofflink.c, elf.c, libbfd.c,
+	linker.c, reloc.c, section.c, srec.c: Added /*ARGSUSED*/ as
+	appropriate.
+	* aoutx.h (struct external_exec): Removed unnecessary declaration.
+	(NAME(aout,some_aout_object_p)): Set some tdata pointers to NULL.
+	(adjust_z_magic): Removed useless variable data_vma.
+	(stringtab_init): Initialize hash_zero.
+	(add_to_stringtab): Removed unused fourth argument.
+	(NAME(aout,swap_std_reloc_out)): Removed useless variable
+	r_addend.
+	(aout_link_input_section): Added some casts.
+	* archive.c (get_extended_arelt_filename, do_slurp_coff_armap,
+	bfd_ar_hdr_from_filesystem, bsd_write_armap, coff_write_armap):
+	Minor code rewriting to make it more C like.
+	(do_slurp_bsd_armap): Added some casts.
+	* ecoff.c (ecoff_write_object_contents): Removed useless variable
+	scn_base.
+	(ecoff_write_armap): Added some casts.  Use "" rather than "\0".
+	* ecofflink.c (bfd_ecoff_write_debug): Added a cast.
+	* libaout.h (struct internal_exec): Removed unnecessary
+	declaration.
+	* linker.c (_bfd_generic_indirect_link_order): Added a cast.
+	* opncls.c (new_bfd): Removed a cast.
+	* reloc.c (bfd_generic_get_relocated_section_contents): Added
+	some casts.
+	* srec.c (internal_srec_write_object_contents): Removed useless
+	variable bytes_written.
+
 Fri Dec 31 11:46:13 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* i386mach3.c (N_TXTADDR): Don't define after all.

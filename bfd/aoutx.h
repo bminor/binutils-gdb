@@ -128,7 +128,6 @@ DESCRIPTION
 #include <ansidecl.h>
 #include "bfdlink.h"
 
-struct external_exec;
 #include "libaout.h"
 #include "libbfd.h"
 #include "aout/aout64.h"
@@ -408,6 +407,10 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
 
   /* The default symbol entry size is that of traditional Unix. */
   obj_symbol_entry_size (abfd) = EXTERNAL_NLIST_SIZE;
+
+  obj_aout_external_syms (abfd) = NULL;
+  obj_aout_external_strings (abfd) = NULL;
+  obj_aout_sym_hashes (abfd) = NULL;
 
   /* Create the sections.  This is raunchy, but bfd_close wants to reclaim
      them.  */
@@ -737,7 +740,6 @@ adjust_z_magic (abfd, execp)
   file_ptr text_end;
   CONST struct aout_backend_data *abdp;
   int ztih;			/* Nonzero if text includes exec header.  */
-  bfd_vma data_vma;
   
   abdp = aout_backend_info (abfd);
 
@@ -769,7 +771,6 @@ adjust_z_magic (abfd, execp)
       vma = obj_textsec(abfd)->vma + obj_textsec(abfd)->_raw_size;
       obj_datasec(abfd)->vma = BFD_ALIGN (vma, adata(abfd).segment_size);
     }
-  data_vma = obj_datasec(abfd)->vma;
   if (abdp && abdp->zmagic_mapped_contiguous)
     {
       text_pad = (obj_datasec(abfd)->vma
@@ -1585,6 +1586,7 @@ stringtab_init (tab)
 {
   tab->strings = 0;
   tab->output_order = 0;
+  tab->hash_zero = 0;
   tab->end = &tab->output_order;
 
   /* Initial string table length includes size of length field.  */
@@ -1628,11 +1630,10 @@ log2 (num)
    entry into the string table should be irrelevant -- it just has to
    return a valid index.  */
 static bfd_size_type
-add_to_stringtab (abfd, str, tab, check)
+add_to_stringtab (abfd, str, tab)
      bfd *abfd;
      CONST char *str;
      struct stringtab_data *tab;
-     int check;
 {
   struct stringtab_entry **ep;
   register struct stringtab_entry *entry;
@@ -1916,7 +1917,6 @@ DEFUN(NAME(aout,swap_std_reloc_out),(abfd, g, natptr),
   unsigned int r_length;
   int r_pcrel;
   int r_baserel, r_jmptable, r_relative;
-  unsigned int r_addend;
   asection *output_section = sym->section->output_section;
 
   PUT_WORD(abfd, g->address, natptr->r_address);
@@ -1929,7 +1929,10 @@ DEFUN(NAME(aout,swap_std_reloc_out),(abfd, g, natptr),
   r_jmptable = 0;
   r_relative = 0;
 
+#if 0
+  /* For a standard reloc, the addend is in the object file.  */
   r_addend = g->addend + (*(g->sym_ptr_ptr))->section->output_section->vma;
+#endif
 
   /* name was clobbered by aout_write_syms to be symbol index */
 
@@ -2401,6 +2404,8 @@ DEFUN(NAME(aout,get_symtab_upper_bound),(abfd),
 
   return (bfd_get_symcount (abfd)+1) * (sizeof (aout_symbol_type *));
 }
+
+/*ARGSUSED*/
  alent *
 DEFUN(NAME(aout,get_lineno),(ignore_abfd, ignore_symbol),
       bfd *ignore_abfd AND
@@ -2409,6 +2414,7 @@ DEFUN(NAME(aout,get_lineno),(ignore_abfd, ignore_symbol),
 return (alent *)NULL;
 }
 
+/*ARGSUSED*/
 void
 DEFUN(NAME(aout,get_symbol_info),(ignore_abfd, symbol, ret),
       bfd *ignore_abfd AND
@@ -2435,6 +2441,7 @@ DEFUN(NAME(aout,get_symbol_info),(ignore_abfd, symbol, ret),
     }
 }
 
+/*ARGSUSED*/
 void
 DEFUN(NAME(aout,print_symbol),(ignore_abfd, afile, symbol, how),
       bfd *ignore_abfd AND
@@ -2588,6 +2595,7 @@ DEFUN(NAME(aout,find_nearest_line),(abfd,
 
 }
 
+/*ARGSUSED*/
 int
 DEFUN(NAME(aout,sizeof_headers),(abfd, execable),
       bfd *abfd AND
@@ -2971,7 +2979,6 @@ aout_link_add_symbols (abfd, info)
     copy = false;
   else
     copy = true;
-
 
   /* We keep a list of the linker hash table entries that correspond
      to particular symbols.  We could just look them up in the hash
@@ -3718,7 +3725,7 @@ aout_link_input_section (finfo, input_bfd, input_section, reloff_ptr,
   /* Get the section contents.  */
   input_size = bfd_section_size (input_bfd, input_section);
   contents = (bfd_byte *) alloca (input_size);
-  if (! bfd_get_section_contents (input_bfd, input_section, contents,
+  if (! bfd_get_section_contents (input_bfd, input_section, (PTR) contents,
 				  (file_ptr) 0, input_size))
     return false;
 
@@ -3747,7 +3754,8 @@ aout_link_input_section (finfo, input_bfd, input_section, reloff_ptr,
   /* Write out the section contents.  */
   if (! bfd_set_section_contents (finfo->output_bfd,
 				  input_section->output_section,
-				  contents, input_section->output_offset,
+				  (PTR) contents,
+				  input_section->output_offset,
 				  input_size))
     return false;
 

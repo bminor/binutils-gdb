@@ -44,10 +44,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define BYTES_IN_WORD 4
 #endif /* ARCH_SIZE==32 */
 
-/* Declare these types at file level, since they are used in parameter
-   lists, which have wierd scope.  */
+/* Declare at file level, since it isused in parameter lists, which
+   have weird scope.  */
 struct external_exec;
-struct internal_exec;
 
 /* Back-end information for various a.out targets.  */
 struct aout_backend_data
