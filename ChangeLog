@@ -1,5 +1,8 @@
 Wed Oct  2 22:27:52 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* configure.in: Add lots of stuff to noconfigdirs for
+	the mn10x00 targets.
+
 	* config.sub, configure.in: Add mn10x00 support.
 
 Wed Oct  2 15:52:36 1996  Klaus Kaempf  <kkaempf@progis.de>
