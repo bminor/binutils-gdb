@@ -476,7 +476,7 @@ extern const bfd_target nlm32_i386_vec;
 extern const bfd_target nlm32_sparc_vec;
 extern const bfd_target nlm32_alpha_vec;
 extern const bfd_target nlm32_powerpc_vec;
-extern const bfd_target ns32knetbsd_vec;
+extern const bfd_target pc532netbsd_vec;
 extern const bfd_target oasys_vec;
 extern const bfd_target pc532machaout_vec;
 extern const bfd_target riscix_vec;
@@ -494,6 +494,9 @@ extern const bfd_target z8kcoff_vec;
 /* srec is always included.  */
 extern const bfd_target srec_vec;
 extern const bfd_target symbolsrec_vec;
+
+/* binary is always included.  */
+extern const bfd_target binary_vec;
 
 /* All of the xvecs for core files.  */
 extern const bfd_target aix386_core_vec;
@@ -611,7 +614,7 @@ const bfd_target * const bfd_target_vector[] = {
 #ifdef BFD64
 	&nlm32_alpha_vec,
 #endif
-	&ns32knetbsd_vec,
+	&pc532netbsd_vec,
 #if 0
 	/* We have no oasys tools anymore, so we can't test any of this
 	   anymore. If you want to test the stuff yourself, go ahead...
@@ -643,6 +646,9 @@ const bfd_target * const bfd_target_vector[] = {
 /* Always support S-records, for convenience.  */
 	&srec_vec,
 	&symbolsrec_vec,
+
+/* Likewise for binary output.  */
+	&binary_vec,
 
 /* Add any required traditional-core-file-handler.  */
 

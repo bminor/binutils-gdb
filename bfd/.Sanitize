@@ -53,6 +53,7 @@ archures.c
 bfd-in.h
 bfd-in2.h
 bfd.c
+binary.c
 bout.c
 cache.c
 cf-i386lynx.c

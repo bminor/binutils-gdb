@@ -44,7 +44,7 @@ docdir = doc
 
 SHELL = /bin/sh
 
-INSTALL = install -c
+INSTALL = `cd $(srcdir)/..; pwd`/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 
@@ -86,7 +86,7 @@ BFD_LIBS = \
 	archive.o archures.o bfd.o cache.o coffgen.o core.o \
 	format.o init.o libbfd.o opncls.o reloc.o \
 	section.o syms.o targets.o hash.o linker.o \
-	elf.o srec.o
+	elf.o srec.o binary.o
 
 # This list is alphabetized to make it easier to keep in sync
 # with the decls and initializer in archures.c.
@@ -175,6 +175,7 @@ BFD32_BACKENDS = \
 	pc532-mach.o \
 	reloc16.o \
 	sparclynx.o \
+	sparcnetbsd.o \
 	stab-syms.o \
 	sunos.o
 
@@ -232,7 +233,7 @@ ALL_CFLAGS=$(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES)
 # C source files that correspond to .o's.
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 archures.c coff-i386.c coff-go32.c aout64.c aout32.c sunos.c demo64.c \
-	 coff-i960.c srec.c tekhex.c oasys.c ieee.c aout0.c \
+	 coff-i960.c srec.c binary.c tekhex.c oasys.c ieee.c aout0.c \
 	 ecoff.c ecofflink.c coff-m68k.c coff-u68k.c coff-apollo.c \
 	 coff-a29k.c coff-rs6000.c coff-sparc.c coffgen.c format.c \
 	 section.c core.c syms.c stab-syms.c reloc.c init.c \
@@ -251,7 +252,8 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 hp300bsd.c hp300hpux.c \
 	 i386lynx.c cf-i386lynx.c m68klynx.c cf-m68klynx.c \
 	 sparclynx.c cf-sparclynx.c aix386-core.c hpux-core.c \
-	 irix-core.c lynx-core.c osf-core.c hash.c linker.c cofflink.c
+	 irix-core.c lynx-core.c osf-core.c hash.c linker.c cofflink.c \
+	 ns32knetbsd.c sparcnetbsd.c
 
 HFILES = aout-target.h aoutf1.h aoutx.h coffcode.h \
 	 coffswap.h ecoffswap.h elf32-hppa.h elf32-target.h elf64-target.h \
@@ -758,5 +760,11 @@ hash.o: hash.c
 linker.o: linker.c $(INCDIR)/bfdlink.h genlink.h
 cofflink.o: cofflink.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
   libcoff.h
+ns32knetbsd.o: ns32knetbsd.c netbsd.h libaout.h $(INCDIR)/bfdlink.h \
+  aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
+sparcnetbsd.o: sparcnetbsd.c netbsd.h libaout.h $(INCDIR)/bfdlink.h \
+  aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY

@@ -1,5 +1,14 @@
 Tue Oct 18 12:56:43 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* aout-target.h (MY_bfd_copy_private_section_data): Only copy
+	subformat to another bfd_target_aout_flavour file.
+
+	* binary.c: New file for raw binary output format.
+	* Makefile.in (BFD_LIBS): Add binary.o.
+	(CFILES): Add binary.c.
+	* targets.c (binary_vec): Declare.
+	(bfd_target_vector): Include binary_vec.
+
 	* srec.c (tdata_type): Add field tail.
 	(srec_mkobject): Initialize tail.
 	(srec_set_section_contents): Sort S record list by address.
