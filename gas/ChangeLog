@@ -1,3 +1,12 @@
+Mon Jun 16 13:59:18 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* symbols.c (copy_symbol_attributes): Copy BSF_OBJECT flag.
+	* config/obj-elf.h (OBJ_COPY_SYMBOL_ATTRIBUTES): Copy size
+	expression.
+
+	* config/obj-multi.h (OBJ_COPY_SYMBOL_ATTRIBUTES): Define instead
+	of obj_copy_symbol_attributes.
+
 Mon Jun 16 12:45:56 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i386.c (i386_operand): Use alloca rather than a fixed
