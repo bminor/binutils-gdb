@@ -1,3 +1,8 @@
+Tue May 27 19:42:03 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* cofflink.c (_bfd_coff_final_link): Initialize global_to_static
+ 	member.
+
 Tue May 27 14:34:08 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-arm.c (coff_arm_bfd_set_private_flags): Make global.  It is
