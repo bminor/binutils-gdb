@@ -1,3 +1,11 @@
+Mon Dec  9 17:09:42 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* write.c (write_relocs): Print an error for an out of range
+	fixup, rather than calling abort.
+
+	* as.c (main): Unlink the output file if there are errors while
+	generating the fixups.
+
 Fri Dec  6 18:48:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (mips16_extended_frag): Don't call
