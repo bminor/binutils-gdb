@@ -192,7 +192,7 @@ XTRAFLAGS = ` \
      echo ; \
   fi`
 
-PRMS = all-prms
+PRMS = install-prms
 
 #### host and target specific makefile fragments come in here.
 ###
@@ -291,8 +291,8 @@ GCC_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_GCC_FLAGS)
 # The first rule in the file had better be this one.  Don't put any above it.
 all:	$(ALL)
 
-.PHONY: all check dvi info install-info install-info-dirs
-.PHONY: do-info do-check do-dvi do-install-info
+.PHONY: all check installcheck dvi info install-info install-info-dirs
+.PHONY: do-info do-check do-installcheck do-dvi do-install-info
 .PHONY: do-clean do-mostlyclean do-distclean do-realclean
 .NOEXPORT:
 MAKEOVERRIDES=
@@ -304,7 +304,7 @@ MAKEOVERRIDES=
 # This target ensures that $(BASE_FLAGS_TO_PASS) appears only once,
 # because it is so large that it can easily overflow the command line
 # length limit on some systems.
-do-info do-check do-dvi do-install-info do-clean do-mostlyclean do-distclean do-realclean:
+do-info do-check do-installcheck do-dvi do-install-info do-clean do-mostlyclean do-distclean do-realclean:
 	@target=`echo $@ | sed -e 's/^do-//'`; \
 	rootme=`pwd`; export rootme; \
 	srcroot=`cd $(srcdir); pwd`; export srcroot; \
@@ -339,6 +339,7 @@ do-info do-check do-dvi do-install-info do-clean do-mostlyclean do-distclean do-
 
 info: do-info
 check: do-check
+installcheck: do-installcheck
 dvi: do-dvi
 
 install-info: install-info-dirs do-install-info dir.info
