@@ -197,13 +197,15 @@ pke_attach(SIM_DESC sd, struct pke_device* me)
   }
 }
 
+
 /* Read PKE Pseudo-PC into buf in target order */
 int
 read_pke_pc (struct pke_device *me, void *buf)
 {
-  *((int *) buf) = H2T_4( me->fifo_pc );
+  *((int *) buf) = H2T_4( (me->fifo_pc << 2) | me->qw_pc );
   return 4;
 }
+
 
 /* Read PKE reg into buf in target order */
 int
@@ -415,6 +417,8 @@ write_pke_reg (struct pke_device *me, int reg_num, const void *buf)
 
   return 4;
 }
+
+
 /* Handle a PKE write; return no. of bytes written */
 
 int

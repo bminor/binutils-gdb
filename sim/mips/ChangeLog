@@ -1,4 +1,13 @@
 start-sanitize-sky
+Thu Apr  9 16:38:23 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* r5900.igen (LQC,SQC): Adapted code to DOUBLEWORD accesses
+	instead of QUADWORD.
+
+	* sim-main.h: Removed attempt at allowing 128-bit access.
+
+end-sanitize-sky
+start-sanitize-sky
 	Wed Apr  8 18:12:13 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* Makefile.in (SIM_SKY_OBJS): Added sky-vudis.o.
