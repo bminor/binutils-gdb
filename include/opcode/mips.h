@@ -234,7 +234,7 @@ start-sanitize-cygnus
    see also "k" above
 end-sanitize-cygnus
 start-sanitize-r5900
-   "0" ???
+   "0" vu0 immediate for viaddi
    "1" vu0 fp reg position 1
    "2" vu0 fp reg position 2
    "3" vu0 fp reg position 3
@@ -252,7 +252,7 @@ start-sanitize-r5900
    "Q" vu0 Q register
    "X" vu0 R register
    "U" vu0 ACC register
-   "O" ???
+   "O" Immediate operand for vcallms instruction.
 end-sanitize-r5900
 
    Macro instructions:
@@ -350,6 +350,8 @@ end-sanitize-r5900
 #define FP_D			    0x20000000
 /* Instruction is part of the tx39's integer multiply family.    */
 #define INSN_MULT                   0x40000000
+/* Instruction synchronize shared memory.  */
+#define INSN_SYNC		    0x80000000
 
 /* Instruction is actually a macro.  It should be ignored by the
    disassembler, and requires special treatment by the assembler.  */

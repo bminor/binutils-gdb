@@ -1,3 +1,11 @@
+start-sanitize-sky
+Wed Dec  9 15:44:14 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	Thu Nov 19 16:39:45 EST 1998 Frank Ch. Eigler <fche@cygnus.com>
+
+	* mips.h (INSN_SYNC): New flag.
+
+end-sanitize-sky
 Wed Dec  9 10:38:48 1998  David Taylor  <taylor@texas.cygnus.com>
 
 	The following is part of a change made by Edith Epstein
